@@ -34,8 +34,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Coordinate basis-change for `chartCoeff` -/
-
 /-- The basis-change identity for `chartCoeff` between two chart bases on the
 overlap of the two chart sources. If the basis vectors transform via
 `v^β_j = ∑ k, T_{kj} v^α_k` with `T = transitionMatrix α β x`, then the
@@ -58,7 +56,6 @@ lemma chartCoeff_pullback
         ∑ k, transitionMatrix (I := I) α β x k j •
           chartBasisVecFiber (I := I) α k x :=
     fun j => chartBasisVecFiber_pullback (I := I) α β hα hβ j
-  -- Substitute `hbasis` into `hβ_recompose` to express `X x` in `α`-basis.
   have hexpand :
       X x = ∑ k : Fin (Module.finrank ℝ E),
               (∑ j, transitionMatrix (I := I) α β x k j *
@@ -83,7 +80,6 @@ lemma chartCoeff_pullback
     refine Finset.sum_congr rfl ?_
     intro k _
     rw [Finset.sum_smul]
-  -- Linear independence of the chart-basis family identifies the coefficients.
   have hli := chartBasisFamily_linearIndependent (I := I) α hα
   rw [Fintype.linearIndependent_iff] at hli
   set f : Fin (Module.finrank ℝ E) → ℝ := fun k =>

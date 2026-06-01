@@ -94,13 +94,6 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## Multi-indexed application of B.2.c.iii
-
-The earlier file produces `S_k_ext` and `V` from `g, r, s, α, T₀, k, b₀`, with
-the resulting `EqOn` statement for one fixed multi-index pair `(Idx, Jdx)`.
-Inspection of its proof shows that the same `S_k_ext` and `V` work for *every*
-multi-index pair `p`. We package this strengthened conclusion. -/
-
 /-- The earlier file's headline applied uniformly across all component
 multi-index pairs `p`: the same `S_k_ext` and `V` discharge the `EqOn`
 statement for every `p`. -/
@@ -126,9 +119,6 @@ private theorem chartPushedRaw_eqOn_covDerivComponentEuclid_uniform
           (covDerivComponentEuclid (I := I) (M := M) g r s α T₀ k Idx Jdx)
           V := by
   classical
-  -- Reproduce the construction from the earlier file directly, so that the
-  -- universal `Idx, Jdx`-quantification falls out from one invocation of
-  -- B.2.c.i.
   letI _h_top : TopologicalSpace
       (TotalSpace (TensorRSModel r s ℝ E)
         (fun x : M => TensorRSSpace r s I x)) :=
@@ -136,17 +126,12 @@ private theorem chartPushedRaw_eqOn_covDerivComponentEuclid_uniform
   letI _h_fib : FiberBundle (TensorRSModel r s ℝ E)
       (fun x : M => TensorRSSpace r s I x) :=
     tensorRSBundle_fiber r s
-  -- Step 1: invoke B.2.c.i once.
   obtain ⟨S_k_ext, U, hU_open, hb₀_U, hU_sub_good, hU_eq⟩ :=
     covApply_covRS_chartBasis_globalSmoothExtension
       (I := I) (M := M) g r s α T₀ k (b₀ := b₀) hb₀
-  -- Step 2: build the Euclidean-side neighbourhood `V` from `U`.
-  -- We rebuild the same construction as in the earlier file (the helper
-  -- definitions there are private), inlined here.
   set V : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
     chartTargetEuclid (I := I) (M := M) α ∩
       {y | (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈ U} with hV_def
-  -- Openness of `V`.
   have hchartT_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have hcont_te : Continuous
@@ -173,7 +158,6 @@ private theorem chartPushedRaw_eqOn_covDerivComponentEuclid_uniform
     hcont_extsymm.comp hcont_te.continuousOn hmap_target
   have hV_open : IsOpen V := hcont_comp.isOpen_inter_preimage hchartT_open hU_open
   have hV_sub : V ⊆ chartTargetEuclid (I := I) (M := M) α := fun y hy => hy.1
-  -- Membership of `toEuclidean ((extChartAt I α) b₀)` in `V`.
   have hb₀_good : b₀ ∈ chartLeviCivitaGoodSet (I := I) α := hU_sub_good hb₀_U
   have hb₀_src : b₀ ∈ (extChartAt I α).source :=
     chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hb₀_good
@@ -187,13 +171,11 @@ private theorem chartPushedRaw_eqOn_covDerivComponentEuclid_uniform
     rw [(toEuclidean (E := E)).symm_apply_apply, (extChartAt I α).left_inv hb₀_src]
     exact hb₀_U
   refine ⟨S_k_ext, V, hV_open, hV_sub, hb₀_V, ?_⟩
-  -- Step 3: uniform EqOn over (Idx, Jdx).
   intro Idx Jdx y hy
   have hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α := hy.1
   set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
   have hb_U : b ∈ U := hy.2
   have hb_good : b ∈ chartLeviCivitaGoodSet (I := I) α := hU_sub_good hb_U
-  -- Same proof skeleton as the earlier file.
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy_target]
   rw [covDerivComponentEuclid_def]
   congr 1
@@ -216,12 +198,6 @@ private theorem chartPushedRaw_eqOn_covDerivComponentEuclid_uniform
   exact tensorCovDerivAt_eq_chartTensorRSCovariantDerivative
     (I := I) (M := M) g r s T₀ α k (b := b) hb_good
 
-/-! ## Packaging the smooth section as `SmoothCcTensor`
-
-The downstream consumer needs a `SmoothCcTensor` to feed into
-`covDerivComponentEuclid`. `[CompactSpace M]` makes compact support automatic.
--/
-
 /-- Package a globally smooth `(r, s)`-tensor section as a `SmoothCcTensor`,
 using the ambient `[CompactSpace M]` to supply compact support. -/
 private def packageAsCcExp
@@ -237,9 +213,6 @@ private lemma packageAsCcExp_toSection
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
                 fun b : M => TensorRSSpace r s I b⟯) :
     (packageAsCcExp (I := I) (M := M) g r s S).toSection = S := rfl
-
-/-! ## Identifying `tensorChartComponentRaw` of `S_k_packed` with the inner
-expression of B.2.c.iii -/
 
 /-- The raw chart-α `(Idx, Jdx)` scalar component of `S_k_packed`, evaluated
 on `M`, equals — by the definitions of `tensorChartComponentRaw` and
@@ -262,9 +235,6 @@ private lemma tensorChartComponentRaw_packageAsCcExp_eq
             b ((S_k_ext : Π b' : M, TensorRSSpace r s I b') b)) := by
   funext b
   rfl
-
-/-! ## On `V`: the chart-pushed raw of `S_k_packed` equals
-`covDerivComponentEuclid` of `T₀` -/
 
 /-- **Bridge to `chartPushedRaw (tensorChartComponentRaw)`.** Combine
 `chartPushedRaw_eqOn_covDerivComponentEuclid_uniform` with
@@ -302,12 +272,6 @@ private lemma chartPushedRaw_tensorChartComponentRaw_S_k_packed_eqOn
   rw [tensorChartComponentRaw_packageAsCcExp_eq]
   exact h
 
-/-! ## Equality of Fréchet derivatives on `V`
-
-If two functions agree on the open subset `V` of the chart target, their
-Fréchet derivatives agree at every point of `V`. Consequently their
-Euclidean partials agree on `V`. -/
-
 /-- The `n`-th Euclidean partial of two functions agreeing on the open set
 `V ⊆ chartTargetEuclid α` is the same on `V`. -/
 private lemma euclidPartial_eqOn_of_eqOn_open
@@ -324,13 +288,6 @@ private lemma euclidPartial_eqOn_of_eqOn_open
     Filter.EventuallyEq.fderiv_eq hVeq
   rw [euclidPartial_def, euclidPartial_def, hfderiv]
 
-/-! ## Smoothness of `covDerivComponentEuclid` of `T₀` on the Euclidean chart
-target
-
-`covDerivComponentEuclid g r s α T₀ k Idx Jdx` is `C^∞` on the Euclidean chart
-target by `covDerivComponentEuclid_contDiffOn`. Its `n`-th Euclidean partial
-is therefore also `C^∞` there. -/
-
 /-- The `n`-th Euclidean partial of `covDerivComponentEuclid g r s α T₀ k Idx
 Jdx` is `C^∞` on the Euclidean chart target. -/
 private lemma euclidPartial_covDerivComponentEuclid_T₀_contDiffOn
@@ -344,14 +301,10 @@ private lemma euclidPartial_covDerivComponentEuclid_T₀_contDiffOn
         (covDerivComponentEuclid (I := I) (M := M) g r s α T₀ k Idx Jdx))
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- `covDerivComponentEuclid` is `C^∞` on the chart target.
   have hcd : ContDiffOn ℝ ∞
       (covDerivComponentEuclid (I := I) (M := M) g r s α T₀ k Idx Jdx)
       (chartTargetEuclid (I := I) (M := M) α) :=
     covDerivComponentEuclid_contDiffOn (I := I) (M := M) g r s α T₀ k Idx Jdx
-  -- Hence so is its `n`-th Euclidean partial. We reuse the strategy of the
-  -- chart-target `euclidPartial_contDiffOn` helper from the earlier file, here
-  -- spelled out locally for the closed development.
   have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have hfderiv : ContDiffOn ℝ ∞
@@ -383,18 +336,6 @@ private lemma euclidPartial_covDerivComponentEuclid_T₀_contDiffOn
   refine hcomp.congr (fun z _ => ?_)
   rfl
 
-/-! ## The first-derivative formula on `V`
-
-Applying `covDerivComponent_eq_euclidPartial_add_lowerOrder` to the
-`SmoothCcTensor` `T₀` at chart-coordinate index `k` yields, on the chart
-target,
-```
-covDerivComponentEuclid g r s α T₀ k p.1 p.2 y =
-  euclidPartial k (chartPushedRaw … (raw T₀^p)) y
-    + covDerivLowerOrderTerm g r s T₀ α k p.1 p.2 y.
-```
-We record this as an `EqOn` statement (specialised to the chart target). -/
-
 /-- The first-derivative formula in functional form, specialised to `T₀` and
 the chart-coordinate index `k`. -/
 private lemma covDerivComponentEuclid_T₀_eqOn
@@ -410,10 +351,6 @@ private lemma covDerivComponentEuclid_T₀_eqOn
           + covDerivLowerOrderTerm (I := I) (M := M) g r s T₀ α k Idx Jdx y)
       (chartTargetEuclid (I := I) (M := M) α) :=
   covDerivComponentEuclid_eqOn (I := I) (M := M) g r s α T₀ k Idx Jdx
-
-/-! ## The headline expansion
-
-We are now ready to assemble the final expansion. -/
 
 /-- **Expansion of the chart-α first covariant-derivative component of the
 global smooth extension `S_k_ext` in terms of `T₀`'s raw chart components and
@@ -483,11 +420,9 @@ theorem covDerivComponentEuclid_S_k_ext_eq_iteratedFDeriv_T₀_add_lowerOrder
                   (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx))) y
             + Corr_T₀l_LO y + Corr_S_k_LO y) := by
   classical
-  -- Step 1: invoke the uniform `chartPushedRaw_eqOn_covDerivComponentEuclid_uniform`.
   obtain ⟨S_k_ext, V, hV_open, hV_sub, hb₀_V, hVeqOn⟩ :=
     chartPushedRaw_eqOn_covDerivComponentEuclid_uniform
       (I := I) (M := M) g r s α T₀ k (b₀ := b₀) hb₀
-  -- Step 2: define the two correction terms.
   set S_k_packed : SmoothCcTensor g r s :=
     packageAsCcExp (I := I) (M := M) g r s S_k_ext with hS_k_packed_def
   let Corr_T₀l_LO : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
@@ -496,20 +431,12 @@ theorem covDerivComponentEuclid_S_k_ext_eq_iteratedFDeriv_T₀_add_lowerOrder
   let Corr_S_k_LO : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
     covDerivLowerOrderTerm (I := I) (M := M) g r s S_k_packed α l Idx Jdx
   refine ⟨S_k_ext, V, Corr_T₀l_LO, Corr_S_k_LO, hV_open, hV_sub, hb₀_V, ?_, ?_, ?_⟩
-  · -- `Corr_T₀l_LO` is `C^∞` on the chart target. The
-    -- `covDerivLowerOrderTerm` for `T₀` is `C^∞` there
-    -- (`covDerivComponent_lowerOrder_contDiffOn`), and the same
-    -- `euclidPartial_contDiffOn_chartTarget`-style argument as in
-    -- `CovDerivComponentSecondFormula.lean` then makes its `l`-Euclidean
-    -- partial `C^∞`.
-    have hLO_T₀ : ContDiffOn ℝ ∞
+  · have hLO_T₀ : ContDiffOn ℝ ∞
         (covDerivLowerOrderTerm (I := I) (M := M) g r s T₀ α k Idx Jdx)
         (chartTargetEuclid (I := I) (M := M) α) :=
       covDerivComponent_lowerOrder_contDiffOn (I := I) (M := M) g r s T₀ α k Idx Jdx
         (fun Idx' Jdx' => chartPushedRaw_tensorChartComponentRaw_contDiffOn
           (I := I) (M := M) g r s T₀ α Idx' Jdx')
-    -- The Euclidean partial of a `C^∞` function on an open set is `C^∞`. We
-    -- spell out the argument once more here.
     have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
       chartTargetEuclid_isOpen (I := I) (M := M) α
     have hfderiv : ContDiffOn ℝ ∞
@@ -540,17 +467,12 @@ theorem covDerivComponentEuclid_S_k_ext_eq_iteratedFDeriv_T₀_add_lowerOrder
         (EuclideanSpace.single l 1)).contDiff.comp_contDiffOn hfderiv
     refine hcomp.congr (fun z _ => ?_)
     rfl
-  · -- `Corr_S_k_LO` is `C^∞` on the chart target. The raw chart components of
-    -- `S_k_packed` are `C^∞` (since its underlying section is globally
-    -- smooth), so `covDerivComponent_lowerOrder_contDiffOn` applies.
-    exact covDerivComponent_lowerOrder_contDiffOn (I := I) (M := M) g r s
+  · exact covDerivComponent_lowerOrder_contDiffOn (I := I) (M := M) g r s
       S_k_packed α l Idx Jdx
       (fun Idx' Jdx' => chartPushedRaw_tensorChartComponentRaw_contDiffOn
         (I := I) (M := M) g r s S_k_packed α Idx' Jdx')
-  · -- The equality on `V`.
-    intro y hy
+  · intro y hy
     have hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α := hV_sub hy
-    -- Step A: apply B.1 to `S_k_packed` at index `l`.
     have hStepA :
         covDerivComponentEuclid (I := I) (M := M) g r s α S_k_packed l Idx Jdx y =
           euclidPartial (E := E) l
@@ -561,11 +483,6 @@ theorem covDerivComponentEuclid_S_k_ext_eq_iteratedFDeriv_T₀_add_lowerOrder
         S_k_packed l Idx Jdx hy_target
       exact h
     rw [hStepA]
-    -- Step B: rewrite the first summand using B.2.c.iii (uniform form).
-    -- We have, on `V`,
-    -- `chartPushedRaw I α (tensorChartComponentRaw … S_k_packed α Idx Jdx)
-    --   = covDerivComponentEuclid g r s α T₀ k Idx Jdx`,
-    -- so their `l`-Euclidean partials agree on `V`.
     have hChartPushedRaw_eq :
         Set.EqOn
           (chartPushedRaw I α
@@ -583,10 +500,6 @@ theorem covDerivComponentEuclid_S_k_ext_eq_iteratedFDeriv_T₀_add_lowerOrder
       euclidPartial_eqOn_of_eqOn_open (E := E) V hV_open _ _
         hChartPushedRaw_eq l hy
     rw [hPartialEq]
-    -- Step C: `covDerivComponentEuclid g r s α T₀ k Idx Jdx`, viewed as a
-    -- function on the chart target, agrees with `euclidPartial k (chartPushedRaw …)
-    -- + covDerivLowerOrderTerm T₀ k …` on `chartTargetEuclid α`. Hence their
-    -- `l`-Euclidean partials agree at `y`.
     have hT₀_eqOn := covDerivComponentEuclid_T₀_eqOn
       (I := I) (M := M) g r s α T₀ k Idx Jdx
     have hT₀_partial_eq :
@@ -602,8 +515,6 @@ theorem covDerivComponentEuclid_S_k_ext_eq_iteratedFDeriv_T₀_add_lowerOrder
         (chartTargetEuclid (I := I) (M := M) α)
         (chartTargetEuclid_isOpen (I := I) (M := M) α) _ _ hT₀_eqOn l hy_target
     rw [hT₀_partial_eq]
-    -- Step D: split the `l`-Euclidean partial of the sum into the partial of
-    -- each summand. Both factors are `C^∞` (hence differentiable) at `y`.
     have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
       chartTargetEuclid_isOpen (I := I) (M := M) α
     have h1 : ContDiffOn ℝ ∞
@@ -653,9 +564,6 @@ theorem covDerivComponentEuclid_S_k_ext_eq_iteratedFDeriv_T₀_add_lowerOrder
       rw [fderiv_fun_add h1_diff h2_diff]
       rw [ContinuousLinearMap.add_apply]
     rw [hSplit]
-    -- The goal is now the final shape, with the two correction terms named
-    -- `Corr_T₀l_LO y` and `Corr_S_k_LO y` (definitionally — `Corr_T₀l_LO`
-    -- and `Corr_S_k_LO` were introduced via `let`).
 
 end TensorRegularity
 end Laplacian

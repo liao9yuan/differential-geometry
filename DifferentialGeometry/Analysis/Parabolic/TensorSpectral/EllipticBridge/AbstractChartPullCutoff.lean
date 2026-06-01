@@ -88,25 +88,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The closed support of the partition-of-unity weight
-
-The cutoff is keyed on the closed support of the chart-atlas partition-of-unity
-weight at `α`. On a closed manifold this set is compact, and it is contained in
-the chart-`α` source because the chart-atlas partition of unity is subordinate
-to the chart cover. -/
 
 /-- The closed support of the chart-atlas partition-of-unity weight at `α`. -/
 private def pouWeightTsupport (α : M) : Set M :=
@@ -119,17 +106,6 @@ private lemma pouWeightTsupport_isCompact (α : M) :
 private lemma pouWeightTsupport_subset_source (α : M) :
     pouWeightTsupport (I := I) (M := M) α ⊆ (chartAt H α).source :=
   DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α
-
-/-! ## The smooth cutoff function
-
-A fixed smooth cutoff equal to `1` on the closed support of the
-partition-of-unity weight at `α`, with compact support inside the chart-`α`
-source. Since the closed support of the weight is compact and contained in the
-open chart source, a regular locally-compact interpolation produces a compact
-closed neighbourhood `L` between the two; Mathlib's smooth Urysohn lemma for
-manifolds (`exists_contMDiffMap_one_nhds_of_subset_interior`) then yields a
-`[0, 1]`-valued smooth function equal to `1` near the weight support and
-vanishing off `L`. -/
 
 /-- A compact closed neighbourhood of the partition-of-unity weight support,
 contained in the chart-`α` source: the interpolation set on which the cutoff is
@@ -251,14 +227,6 @@ private lemma chartKernelCutoff_tsupport_isCompact (α : M) :
         ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :=
   chartKernelCutoff_hasCompactSupport (I := I) (M := M) α
 
-/-! ## The cutoff-weighted chart-frame scalar component on `M`
-
-The manifold-side cutoff chart-frame scalar component is the chart-kernel cutoff
-times the raw chart-frame scalar component `tensorChartComponentRaw`. It is the
-exact analogue of the partition-of-unity-weighted scalar component
-`tensorChartComponentScalar`, with `chartKernelCutoff α` in place of the
-partition-of-unity weight. -/
-
 /-- The cutoff-weighted raw chart-frame scalar component on `M`: the chart-kernel
 cutoff times the raw chart-frame scalar component. -/
 def cutoffComponentScalar
@@ -327,9 +295,7 @@ lemma cutoffComponentScalar_contMDiff
   classical
   intro x
   by_cases hx_chart : x ∈ (chartAt H α).source
-  · -- Inside the chart source: product of the smooth cutoff and smooth raw
-    -- component.
-    have hcut : ContMDiff I (𝓘(ℝ, ℝ)) ∞
+  · have hcut : ContMDiff I (𝓘(ℝ, ℝ)) ∞
         (fun y : M => ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) :
           M → ℝ) y) :=
       (chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯).contMDiff
@@ -340,8 +306,7 @@ lemma cutoffComponentScalar_contMDiff
       hRaw_on.contMDiffAt
         (IsOpen.mem_nhds (chartAt H α).open_source hx_chart)
     exact (hcut.contMDiffAt).mul hRaw_at
-  · -- Outside the chart source: the function vanishes on an open neighbourhood.
-    have hsupp_sub := cutoffComponentScalar_tsupport_subset_source
+  · have hsupp_sub := cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S α Idx Jdx
     have hx_notin : x ∉ tsupport (cutoffComponentScalar (I := I) (M := M)
         g r s S α Idx Jdx) := fun h => hx_chart (hsupp_sub h)
@@ -374,12 +339,6 @@ lemma cutoffComponentScalar_measurable
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
     Measurable (cutoffComponentScalar (I := I) (M := M) g r s S α Idx Jdx) :=
   (cutoffComponentScalar_continuous (I := I) (M := M) g r s S α Idx Jdx).measurable
-
-/-! ### The cutoff Euclidean chart component as a chart-pushforward
-
-By definition the cutoff Euclidean chart component is the chart-pushforward of
-the manifold-side cutoff scalar field; this routes the chart-pushforward `L²`
-bridge directly to it. -/
 
 lemma cutoffComponentEuclid_eq_chartPushedRaw
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -426,13 +385,11 @@ private lemma cutoffComponentEuclid_contDiffOn
     ContDiffOn ℝ ∞ (cutoffComponentEuclid (I := I) (M := M) g r s S α Idx Jdx)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- The cutoff scalar is `C^∞` on `M`, hence `ContMDiffOn` on the chart source.
   have hcut_extsrc : ContMDiffOn I 𝓘(ℝ) ∞
       (cutoffComponentScalar (I := I) (M := M) g r s S α Idx Jdx)
       ((extChartAt I α).source) :=
     (cutoffComponentScalar_contMDiff (I := I) (M := M)
       g r s S α Idx Jdx).contMDiffOn
-  -- Compose with `(extChartAt I α).symm`, smooth on the chart target.
   have hsymm : ContMDiffOn 𝓘(ℝ, E) I ∞ (extChartAt I α).symm
       (extChartAt I α).target := contMDiffOn_extChartAt_symm (I := I) α
   have hmaps : Set.MapsTo (extChartAt I α).symm (extChartAt I α).target
@@ -447,7 +404,6 @@ private lemma cutoffComponentEuclid_contDiffOn
         (extChartAt I α).symm)
       (extChartAt I α).target :=
     hcomp_E.contDiffOn
-  -- Pre-compose with the linear isometry `toEuclidean.symm`.
   have hcomp_eucl : ContDiffOn ℝ ∞
       (((cutoffComponentScalar (I := I) (M := M) g r s S α Idx Jdx) ∘
           (extChartAt I α).symm) ∘
@@ -459,8 +415,6 @@ private lemma cutoffComponentEuclid_contDiffOn
       have h_eq : (toEuclidean (E := E)).symm (toEuclidean (E := E) w) = w :=
         (toEuclidean (E := E)).symm_apply_apply w
       rw [h_eq]; exact hw_target
-  -- The cutoff Euclidean chart component agrees with this composite on the
-  -- chart target.
   refine hcomp_eucl.congr (fun y hy => ?_)
   rw [cutoffComponentEuclid_apply_of_mem (I := I) (M := M) g r s S α Idx Jdx hy]
   rfl
@@ -474,23 +428,6 @@ private lemma cutoffComponentEuclid_continuousOn
     ContinuousOn (cutoffComponentEuclid (I := I) (M := M) g r s S α Idx Jdx)
       (chartTargetEuclid (I := I) (M := M) α) :=
   (cutoffComponentEuclid_contDiffOn (I := I) (M := M) g r s S α Idx Jdx).continuousOn
-
-/-! ## The chart-frame quadratic-form lower bound on a compact subset of the
-chart source
-
-The chart-frame `(r, s)`-diagonal quadratic form
-`(b, T) ↦ chartTensorInnerPointwise_rs_model g r s α b T T` is jointly
-continuous on `baseSet ×ˢ univ`. Restricted to the compact product of an
-arbitrary compact `K_M ⊆ baseSet` with the unit sphere of the model fibre, the
-extreme-value theorem produces a strictly positive minimum (the form is
-positive-definite at every non-zero tensor on the chart base set). Rescaling
-gives, for every model tensor `T`, the comparison
-`‖T‖² ≤ K · chartTensorInnerPointwise_rs_model g r s α b T T` on `K_M`.
-
-This is the partition-of-unity-support norm comparison of `NormComparison.lean`
-generalised to an arbitrary compact subset of the chart source; the cutoff
-chart component is supported in the compact `tsupport (chartKernelCutoff α)`,
-not in `tsupport (chartAtlasPOU α)`, so the general version is needed. -/
 
 /-- **The chart-frame quadratic-form lower bound on a compact subset of the
 chart base set.** For a compact `K_M` contained in the chart-`α` base set, there
@@ -508,7 +445,6 @@ lemma sq_norm_le_const_mul_chartTensorInner_on_compact
   classical
   haveI : ProperSpace (TensorRSModel r s ℝ E) :=
     FiniteDimensional.proper_real (TensorRSModel r s ℝ E)
-  -- The unit sphere of the model fibre is compact.
   set S_T : Set (TensorRSModel r s ℝ E) :=
     Metric.sphere (0 : TensorRSModel r s ℝ E) 1 with hS_T_def
   have hS_T_compact : IsCompact S_T :=
@@ -521,7 +457,6 @@ lemma sq_norm_le_const_mul_chartTensorInner_on_compact
     have h1 : ‖T‖ = 1 := hS_T_norm T hT
     rw [hT0, norm_zero] at h1
     exact one_ne_zero h1.symm
-  -- The compact product and the jointly-continuous quadratic form.
   set K : Set (M × TensorRSModel r s ℝ E) := K_M ×ˢ S_T with hK_def
   have hK_compact : IsCompact K := hK_M_compact.prod hS_T_compact
   set Q : M × TensorRSModel r s ℝ E → ℝ := fun bT =>
@@ -536,7 +471,6 @@ lemma sq_norm_le_const_mul_chartTensorInner_on_compact
       K ⊆ ((trivializationAt E (TangentSpace I) α).baseSet ×ˢ Set.univ) :=
     fun p hp => ⟨hK_M_sub hp.1, Set.mem_univ _⟩
   have hQ_contOn : ContinuousOn Q K := hQ_contOn_full.mono hK_sub_full
-  -- The fused positive lower bound on `K_M × sphere`.
   obtain ⟨ε, hε_pos, h_lb⟩ :
       ∃ ε : ℝ, 0 < ε ∧
         ∀ b : M, b ∈ K_M → ∀ T : TensorRSModel r s ℝ E, ‖T‖ = 1 →
@@ -561,7 +495,6 @@ lemma sq_norm_le_const_mul_chartTensorInner_on_compact
       have hT_mem : T ∈ S_T := by
         rw [hS_T_def, Metric.mem_sphere, dist_zero_right]; exact hT_norm
       exact absurd ⟨(b, T), ⟨hb, hT_mem⟩⟩ hK_ne
-  -- Rescaling: extend the unit-sphere bound to every model tensor.
   refine ⟨ε⁻¹, le_of_lt (inv_pos.mpr hε_pos), ?_⟩
   intro b hb T
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
@@ -619,15 +552,6 @@ lemma sq_norm_le_const_mul_chartTensorInner_on_compact
           (I := I) (M := M) g r s α b T T / ε from by rw [div_eq_inv_mul]]
     exact (le_div_iff₀ hε_pos).mpr (by linarith [h_mul])
 
-/-! ## The pointwise quadratic bound for the cutoff scalar component
-
-The cutoff scalar component `chartKernelCutoff α · P_IJ(tensorTrivProj S α b)`
-is bounded, pointwise and uniformly in the multi-index, by a constant times the
-bundle-fibre diagonal pairing `tensorInnerPointwise g r s b (S.toFun b)
-(S.toFun b)`. Off the compact support of the cutoff the cutoff scalar component
-vanishes; on it, the trivialization-projection norm comparison applies, and the
-cutoff is `[0, 1]`-valued. -/
-
 /-- On the chart base set, the chart-frame diagonal quadratic form on
 `tensorTrivProj S α b` folds back to the bundle-fibre diagonal pairing on
 `S.toFun b`. -/
@@ -662,8 +586,6 @@ lemma cutoffComponentScalar_sq_le_const_mul_tensorInner
           C * tensorInnerPointwise (I := I) (M := M) g r s b
             (S.toFun b) (S.toFun b) := by
   classical
-  -- The chart-frame quadratic-form lower bound on the (compact) support of the
-  -- cutoff, which lies inside the chart base set.
   have hKC_compact : IsCompact
       (tsupport ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) :
         M → ℝ)) :=
@@ -676,7 +598,6 @@ lemma cutoffComponentScalar_sq_le_const_mul_tensorInner
   obtain ⟨K, hK_nn, h_norm⟩ :=
     sq_norm_le_const_mul_chartTensorInner_on_compact
       (I := I) (M := M) (E := E) g r s α hKC_compact hKC_sub
-  -- The uniform-in-multi-index operator-norm bound on the chart projections.
   set C_proj : ℝ := chartComponentProjectionUniformBound (E := E) r s
   have hC_proj_nn : 0 ≤ C_proj :=
     chartComponentProjectionUniformBound_nonneg (E := E) r s
@@ -694,10 +615,8 @@ lemma cutoffComponentScalar_sq_le_const_mul_tensorInner
   have hsc_eq : cutoffComponentScalar (I := I) (M := M)
       g r s S α Idx Jdx b = χ b * P_IJ T := rfl
   by_cases hb : b ∈ tsupport χ
-  · -- Inside the cutoff support: the trivialization-projection norm comparison.
-    have hχ_abs_le_one : |χ b| ≤ 1 :=
+  · have hχ_abs_le_one : |χ b| ≤ 1 :=
       chartKernelCutoff_abs_le_one (I := I) (M := M) α b
-    -- `|P_IJ T| ≤ C_proj · ‖T‖`.
     have h_proj_le : ‖P_IJ T‖ ≤ C_proj * ‖T‖ :=
       (ContinuousLinearMap.le_opNorm _ _).trans
         (mul_le_mul_of_nonneg_right
@@ -712,8 +631,6 @@ lemma cutoffComponentScalar_sq_le_const_mul_tensorInner
         ring
       have h_lhs : ‖P_IJ T‖ * ‖P_IJ T‖ = ‖P_IJ T‖ ^ 2 := by rw [sq]
       linarith [hsq, h_lhs.symm.le, h_rhs.symm.le, h_lhs.le, h_rhs.le]
-    -- `‖T‖² ≤ K · chartTensorInner` on the cutoff support, folded to the bundle
-    -- diagonal value.
     have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
       hKC_sub hb
     have h_triv_sq_le : ‖T‖ ^ 2 ≤ K *
@@ -729,7 +646,6 @@ lemma cutoffComponentScalar_sq_le_const_mul_tensorInner
               (S.toFun b) (S.toFun b)) :=
       h_proj_sq_le.trans
         (mul_le_mul_of_nonneg_left h_triv_sq_le hC_proj_sq_nn)
-    -- `χ b² ≤ 1`.
     have h_χ_sq_le_one : χ b ^ 2 ≤ 1 := by
       rw [show χ b ^ 2 = |χ b| ^ 2 from by rw [sq_abs]]
       have h := mul_le_mul hχ_abs_le_one hχ_abs_le_one (abs_nonneg _)
@@ -755,8 +671,7 @@ lemma cutoffComponentScalar_sq_le_const_mul_tensorInner
             tensorInnerPointwise (I := I) (M := M) g r s b
               (S.toFun b) (S.toFun b) := by ring
     linarith [h_factored, h_rhs_rearr.le, h_rhs_rearr.symm.le]
-  · -- Outside the cutoff support: `χ b = 0`, so the cutoff scalar vanishes.
-    have hχ_zero : χ b = 0 := by
+  · have hχ_zero : χ b = 0 := by
       by_contra hne
       exact hb (subset_tsupport _ hne)
     rw [hsc_eq, hχ_zero, zero_mul]
@@ -774,12 +689,6 @@ lemma cutoffComponentScalar_sq_le_const_mul_tensorInner
       linarith [heq.le, heq.symm.le]
     rw [show (0 : ℝ) ^ 2 = 0 from by ring]
     exact h_RHS_nn
-
-/-! ## The integrated `L²` bound for the cutoff scalar component
-
-Integrating the pointwise quadratic bound against the Riemannian volume measure
-bounds `(eLpNorm (cutoffComponentScalar …) 2)²` by a constant times
-`tensorL2Inner g r s S.toFun S.toFun = ‖S‖²`. -/
 
 private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq
     {β : Type*} [MeasurableSpace β] (μ : Measure β) (f : β → ℝ) :
@@ -844,7 +753,6 @@ private lemma cutoffComponentScalar_eLpNorm_le_uniform
   set f : M → ℝ := cutoffComponentScalar (I := I) (M := M) g r s S α Idx Jdx
     with hf_def
   set μ : Measure M := riemannianVolumeMeasure (I := I) (M := M) g with hμ_def
-  -- The bundle-fibre diagonal pairing is Bochner-integrable.
   have h_inner_int :
       Integrable (fun b : M => tensorInnerPointwise (I := I) (M := M) g r s b
         (S.toFun b) (S.toFun b)) μ :=
@@ -859,7 +767,6 @@ private lemma cutoffComponentScalar_eLpNorm_le_uniform
         (tensorL2Norm (I := I) (M := M) g r s S.toFun) ^ 2 := by
     unfold tensorL2Norm
     rw [sq, Real.mul_self_sqrt h_inner_nn]
-  -- The `eLpNorm` square bound, before taking square roots.
   have h_sq_bound :
       (eLpNorm f 2 μ) ^ 2 ≤
         ENNReal.ofReal (C *
@@ -896,7 +803,6 @@ private lemma cutoffComponentScalar_eLpNorm_le_uniform
         (S.toFun b) (S.toFun b) ∂μ =
         C * tensorL2Inner (I := I) (M := M) g r s S.toFun S.toFun from by
       unfold tensorL2Inner; rw [integral_const_mul]] at h_lint_le
-  -- Take square roots and rearrange the constant.
   have h_total_nn : 0 ≤ C *
       tensorL2Inner (I := I) (M := M) g r s S.toFun S.toFun :=
     mul_nonneg hC_nn h_inner_nn
@@ -911,14 +817,6 @@ private lemma cutoffComponentScalar_eLpNorm_le_uniform
       Real.sqrt_mul_self (tensorL2Norm_nonneg (I := I) (M := M) g r s S.toFun)]
   rw [h_sqrt_factor, ENNReal.ofReal_mul (Real.sqrt_nonneg _)] at h_eLp
   exact h_eLp
-
-/-! ## The uniform Euclidean `L²` bound for the cutoff Euclidean chart component
-
-Chaining the chart-pushforward `L²` bridge — against the chart image of the
-compact support of the chart-kernel cutoff — with the manifold-side integrated
-`L²` bound yields a uniform Euclidean `L²` bound for the cutoff Euclidean chart
-component. The chart kernel may be empty; then the cutoff Euclidean chart
-component is identically zero and the bound is immediate. -/
 
 /-- The chart image of the compact support of the chart-kernel cutoff: the
 compact kernel in which every cutoff Euclidean chart component is supported. -/
@@ -958,7 +856,6 @@ lemma cutoffComponentScalar_chartImage_subset_kernel
       cutoffChartKernel (I := I) (M := M) α := by
   classical
   refine Set.image_mono ?_
-  -- The cutoff scalar support sits inside the cutoff support.
   unfold cutoffComponentScalar
   exact tsupport_smul_subset_left
     (f := fun x : M => ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) :
@@ -1056,22 +953,13 @@ private lemma cutoffComponentEuclid_memLp
   obtain ⟨C, hC_nn, h_bound⟩ :=
     cutoffComponentEuclid_eLpNorm_le_uniform (I := I) (M := M) g r s α
   refine ⟨?_, ?_⟩
-  · -- Strong measurability: continuous on the chart target, which carries the
-    -- restricted volume measure.
-    rw [chartL2Measure]
+  · rw [chartL2Measure]
     exact ContinuousOn.aestronglyMeasurable
       (cutoffComponentEuclid_continuousOn (I := I) (M := M) g r s S α Idx Jdx)
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
         (I := I) (M := M) α).measurableSet
   · refine lt_of_le_of_lt (h_bound S Idx Jdx) ?_
     exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top ENNReal.ofReal_lt_top
-
-/-! ## Linearity of the cutoff Euclidean chart component in the tensor section
-
-The raw chart-frame scalar component is `ℝ`-linear in the section (the
-trivialization projection and the chart-frame component projection are
-continuous-linear); multiplying by the fixed cutoff and chart-pushing preserve
-`ℝ`-linearity. -/
 
 private lemma cutoffComponentScalar_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1149,11 +1037,6 @@ lemma cutoffComponentEuclid_smul
       cutoffComponentEuclid_apply_of_notMem
         (I := I) (M := M) g r s S α Idx Jdx hy, smul_zero]
 
-/-! ## The cutoff chart-component `L²` class of a smooth section
-
-The `L²` class `⟦cutoffComponentEuclid g r s S α P₀⟧`, as an element of
-`Lp ℝ 2 (chartL2Measure α)`, with linearity in the smooth section. -/
-
 /-- The `L²` class of the cutoff Euclidean chart component of a smooth section. -/
 private def cutoffComponentLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1208,11 +1091,6 @@ private lemma cutoffComponentLp_smul
   rw [cutoffComponentEuclid_smul (I := I) (M := M) g r s c S α Idx Jdx]
   refine ((cutoffComponentLp_coeFn (I := I) (M := M)
     g r s S α Idx Jdx).const_smul c).symm.trans (Lp.coeFn_smul c _).symm
-
-/-! ## The bounded `ℝ`-linear map `SmoothCcTensor → Lp`
-
-The cutoff chart-component `L²` class assembles into a `ℝ`-linear map; the
-uniform `L²` bound makes it a continuous linear map. -/
 
 /-- The `ℝ`-linear map sending a smooth section to the `L²` class of its cutoff
 Euclidean chart component at `(α, P₀)`. -/
@@ -1285,15 +1163,6 @@ private def cutoffComponentLpCLM
     cutoffComponentLpCLM (I := I) (M := M) g r s α P₀ S =
       cutoffComponentLp (I := I) (M := M) g r s S α P₀.1 P₀.2 := rfl
 
-/-! ## The cutoff Euclidean chart component of an abstract `L²` element
-
-The cutoff Euclidean chart component of an abstract element `u : TensorL2 r s g`
-is the continuous linear extension of the cutoff chart-component `L²` map along
-the dense embedding `SmoothCcTensor g r s ↪ TensorL2 r s g`. The codomain
-`Lp ℝ 2 (chartL2Measure α)` is a complete normed space, so the extension exists
-and is the unique continuous linear map agreeing with the cutoff chart-component
-`L²` map on smooth sections. -/
-
 /-- The canonical embedding `SmoothCcTensor g r s →L[ℝ] TensorL2 r s g`. -/
 private def smoothToTensorL2Cutoff (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     SmoothCcTensor g r s →L[ℝ] TensorL2 r s g :=
@@ -1363,12 +1232,6 @@ def tensorL2ChartComponentCutoffCLM
     tensorL2ChartComponentCutoffCLM (I := I) (M := M) g r s α P₀ u =
       tensorL2ChartComponentCutoff (I := I) (M := M) g r s u α P₀ := rfl
 
-/-! ## Compatibility on smooth sections
-
-On a smooth compactly-supported tensor section the cutoff Euclidean chart
-component recovers the `L²` class of the concrete cutoff Euclidean chart
-component `cutoffComponentEuclid g r s S α P₀`. -/
-
 /-- **Compatibility on smooth sections.** For a smooth compactly-supported
 section `S`, the cutoff chart component of its image `(S : TensorL2 r s g)`
 equals the `L²` class of the concrete cutoff Euclidean chart component
@@ -1412,23 +1275,6 @@ lemma tensorL2ChartComponentCutoff_smoothToTensorL2_coeFn
     g r s S α P₀]
   exact MemLp.coeFn_toLp _
 
-/-! ## The chart-pull headline
-
-For a smooth section `Sg` supported inside the closed support of the
-partition-of-unity weight at `α` — equivalently, where the chart-kernel cutoff
-equals `1` — the global `L²` inner product of an abstract `L²` element `u`
-against `Sg` is a single-chart Euclidean integral coupling the cutoff Euclidean
-chart components of `u` to the raw Euclidean chart components of `Sg`.
-
-The proof is a density argument. Both sides are continuous in `u`; on the dense
-range of the smooth-section embedding the abstract element is `(T : TensorL2)`,
-where the global pairing reduces — via the raw concrete two-section chart-pull
-`tensorL2Inner_chartSupported_chart_pull` — to a chart-Euclidean integral of the
-raw Euclidean chart components. Because the chart-kernel cutoff equals `1`
-wherever `Sg` is supported, replacing the raw chart component of `T` by the
-cutoff one leaves the integrand unchanged; `DenseRange.equalizer` then concludes.
--/
-
 /-- On the chart target the cutoff Euclidean chart component of a smooth section
 is the chart-pushed chart-kernel cutoff times the raw Euclidean chart component
 `tensorComponentEuclid`. -/
@@ -1465,10 +1311,8 @@ private lemma cutoff_chartPull_integrand_eq_raw
           tensorComponentEuclid (I := I) (M := M) g r s T α Q y := by
   classical
   set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
-  -- The chart-pushed chart-kernel cutoff at `y`.
   set χb : ℝ := ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b
     with hχb_def
-  -- Rewrite the cutoff chart component as `χb • raw chart component`.
   have h_lhs_eq :
       (∑ P : CompIdx E r s, ∑ Q : CompIdx E r s,
         covChartMetricGram (I := I) (M := M) g r s α P Q y *
@@ -1482,17 +1326,12 @@ private lemma cutoff_chartPull_integrand_eq_raw
     rw [cutoffComponentEuclid_eq_cutoff_mul_tensorComponentEuclid
       (I := I) (M := M) g r s T α P hy]
   rw [h_lhs_eq]
-  -- It suffices to swap the index roles and discharge the cutoff factor.
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl (fun P _ => Finset.sum_congr rfl (fun Q _ => ?_))
-  -- `Gram (Q, P) = Gram (P, Q)`.
   rw [covChartMetricGram_symm (I := I) (M := M) g r s α Q P y]
-  -- Either `Sg`'s raw chart component at `P` is `0`, or `b ∈ tsupport Sg.toFun`
-  -- and the cutoff factor is `1`.
   by_cases hSg_zero : tensorComponentEuclid (I := I) (M := M) g r s Sg α P y = 0
   · rw [hSg_zero]; ring
-  · -- `tensorComponentEuclid g r s Sg α P y ≠ 0` forces `b` into `tsupport Sg`.
-    have hb_supp : b ∈ tsupport Sg.toFun := by
+  · have hb_supp : b ∈ tsupport Sg.toFun := by
       have hraw_ne :
           tensorChartComponentRaw (I := I) (M := M) g r s Sg α P.1 P.2 b ≠ 0 := by
         intro hzero
@@ -1501,18 +1340,9 @@ private lemma cutoff_chartPull_integrand_eq_raw
             g r s Sg α P hy, ← hb_def, hzero])
       exact tensorChartComponentRaw_tsupport_subset
         (I := I) (M := M) g r s Sg α P.1 P.2 (subset_tsupport _ hraw_ne)
-    -- On `tsupport Sg ⊆ tsupport (chartAtlasPOU α)` the cutoff equals `1`.
     have hχb_one : χb = 1 :=
       chartKernelCutoff_eqOn_one (I := I) (M := M) α (hSg hb_supp)
     rw [hχb_one]; ring
-
-/-! ### The chart coefficient pairing `Sg` against the cutoff chart component
-
-The chart-pull integral, as a function of the abstract `L²` element `u`, factors
-through the cutoff chart-component continuous linear map followed by `L²` inner
-products against fixed `L²` chart coefficients. For a chart-supported section
-`Sg` each chart coefficient is continuous with compact support inside the chart
-target, hence in `L²`. -/
 
 /-- The chart coefficient pairing `Sg` against the `P`-th cutoff chart
 component: `∑_Q densityOnEuclid g α y · covChartMetricGram g r s α P Q y ·
@@ -1697,8 +1527,6 @@ private lemma continuous_chartPullCoeffCutoff_pairing
   exact (innerSL ℝ
     (chartPullCoeffCutoffLp (I := I) (M := M) g r s α Sg P hSg)).continuous
 
-/-! ### The chart-pull integral as a finite sum of `L²` pairings -/
-
 /-- The cutoff chart-pull integrand, summed only over `Q`, is the cutoff chart
 coefficient times the cutoff chart component: a `Finset.mul_sum` rearrangement. -/
 private lemma cutoff_chartPull_integrand_eq_coeff_mul
@@ -1789,8 +1617,6 @@ private lemma cutoff_chartPull_integral_eq_sum_inner
   refine Finset.sum_congr rfl (fun P _ => ?_)
   rw [inner_chartPullCoeffCutoffLp_eq_integral (I := I) (M := M) g r s α Sg P hSg]
 
-/-! ### The headline -/
-
 /-- The left-hand side of the headline, `u ↦ ⟪u, (Sg : TensorL2)⟫`, is
 continuous. -/
 private lemma continuous_cutoff_lhs
@@ -1834,25 +1660,18 @@ private lemma cutoff_headline_on_smooth
             tensorL2ChartComponentCutoff (I := I) (M := M) g r s
               (T : TensorL2 r s g) α P⟫_ℝ : ℝ) := by
   classical
-  -- The `L²` inner product on the completion of two coerced smooth sections is
-  -- the concrete `L²` pairing, symmetrised so `Sg` is the first argument.
   rw [show (⟪((T : TensorL2 r s g)), (Sg : TensorL2 r s g)⟫_ℝ : ℝ) =
       (⟪T, Sg⟫_ℝ : ℝ) from UniformSpace.Completion.inner_coe _ _,
     SmoothCcTensor.inner_def,
     tensorL2Inner_symm (I := I) (M := M) g r s T.toFun Sg.toFun]
-  -- The raw concrete two-section chart-pull of `⟨Sg, T⟩`.
   rw [tensorL2Inner_chartSupported_chart_pull (I := I) (M := M) g r s
     Sg T α hSg_chart]
-  -- Rewrite the integrand: replace the raw chart components of `T` by the
-  -- cutoff chart components (the cutoff equals `1` wherever `Sg` is supported).
   have hctE_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) α).measurableSet
   rw [setIntegral_congr_fun hctE_meas (fun y hy => by
     rw [← (cutoff_chartPull_integrand_eq_raw (I := I) (M := M) g r s α Sg T
       hSg_pou hy)])]
-  -- Rewrite, a.e., the concrete cutoff chart component of `T` as the cutoff
-  -- chart component of `T`'s `L²` class.
   have h_ae :
       (fun y : EuclN => densityOnEuclid (I := I) g α y *
         (∑ P : CompIdx E r s, ∑ Q : CompIdx E r s,
@@ -1891,7 +1710,6 @@ private lemma cutoff_headline_on_smooth
     refine Finset.sum_congr rfl (fun P _ => Finset.sum_congr rfl (fun Q _ => ?_))
     rw [hy P]
   rw [MeasureTheory.integral_congr_ae h_ae]
-  -- The cutoff chart-pull integral is the finite sum of `L²` pairings.
   exact cutoff_chartPull_integral_eq_sum_inner (I := I) (M := M) g r s α Sg
     (T : TensorL2 r s g) hSg_chart
 
@@ -1967,20 +1785,14 @@ theorem tensorL2Inner_cutoff_chartKernelSupported_pull
               tensorComponentEuclid (I := I) (M := M) g r s Sg α Q y)
         ∂(volume : Measure EuclN) := by
   classical
-  -- `Sg` is chart-supported: its support sits inside the closed support of the
-  -- partition-of-unity weight, which is subordinate to the chart cover.
   have hSg_chart : tsupport Sg.toFun ⊆ (chartAt H α).source :=
     hSg.trans (DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate
       I M α)
-  -- Evaluate the function-level identity at `u`.
   have hu := congrFun
     (cutoff_headline_fun_eq (I := I) (M := M) g r s α Sg hSg hSg_chart) u
   rw [hu]
-  -- Rewrite the finite sum of `L²` pairings back as the chart-pull integral.
   exact (cutoff_chartPull_integral_eq_sum_inner (I := I) (M := M) g r s α Sg u
     hSg_chart).symm
-
-/-! ## Sanity tests -/
 
 section ElaborationTests
 

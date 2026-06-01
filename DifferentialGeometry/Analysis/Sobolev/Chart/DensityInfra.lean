@@ -41,14 +41,10 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Single-chart pullback of a Euclidean function -/
 
 variable (I) in
 /-- The chart-α pullback of `ψ : EuclN → ℝ`: it is `ψ ∘ toEuclidean ∘ extChartAt I α`
@@ -127,8 +123,6 @@ lemma support_chartPullback_subset_chartAt_source (α : M)
   apply hx
   exact chartPullback_apply_of_notMem (I := I) (M := M) α ψ hx_off
 
-/-! ## Support / compactness lemmas for `ρ_α · u` -/
-
 omit [IsManifold I ∞ M] in
 /-- For any `u : M → ℝ`, the (closed) support of `(ρ_α · u : M → ℝ)` is
 contained in the (closed) support of `ρ_α`. -/
@@ -167,15 +161,12 @@ lemma hasCompactSupport_chartAtlasPOU_mul
     HasCompactSupport (fun x : M =>
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) x *
           u x) := by
-  -- tsupport (ρ_α · u) ⊆ tsupport ρ_α; the latter is closed in compact M, hence compact.
   have h_subset := tsupport_pou_mul_subset_tsupport_pou (I := I) (M := M)
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u
   have h_compact : IsCompact (tsupport
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : M → ℝ)) :=
     (isClosed_tsupport _).isCompact
   exact h_compact.of_isClosed_subset (isClosed_tsupport _) h_subset
-
-/-! ## Algebraic identity: chartPushed of chartPullback at chart α -/
 
 /-- For `y` in `chartTargetEuclid α`, the chart-pushed value of the chart-α
 pullback of `ψ` is `ρ_α(z) · ψ(y)`, where `z = symm_α(toEuclidean.symm y)`.
@@ -194,9 +185,7 @@ lemma chartPushed_chartPullback_apply_of_mem
       ψ y := by
   classical
   unfold chartPushed
-  -- The argument: z := symm_α y; need chart-α-source membership of z.
   set z : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hz_def
-  -- y ∈ chartTargetEuclid α means toEuclidean.symm y ∈ extChartAt α target.
   have hsymm_target : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
     rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
     exact hy
@@ -207,11 +196,9 @@ lemma chartPushed_chartPullback_apply_of_mem
       (I := I) (M := M)] at hz_source
     exact hz_source
   rw [chartPullback_apply_of_mem (I := I) (M := M) α ψ hz_chartAt_source]
-  -- Now we need: extChartAt I α z = toEuclidean.symm y, by right-inv on target.
   have hz_inv : (extChartAt I α) z = (toEuclidean (E := E)).symm y :=
     (extChartAt I α).right_inv hsymm_target
   rw [hz_inv]
-  -- Now: toEuclidean ((toEuclidean.symm y)) = y.
   rw [(toEuclidean (E := E)).apply_symm_apply y]
 
 end Chart

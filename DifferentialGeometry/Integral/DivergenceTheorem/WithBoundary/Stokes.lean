@@ -132,20 +132,11 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## Topological prerequisite — `I.interior M` is open -/
-
 /-- `I.interior M` is open in `M`. Re-export of
 `ModelWithCorners.isOpen_interior` at `n = ∞`. -/
 private lemma isOpen_interior_M : IsOpen (I.interior M) :=
   I.isOpen_interior (M := M) (n := ∞)
     (by exact (by decide : (∞ : WithTop ℕ∞) ≠ 0))
-
-/-! ## Chart-α boundary face integral — definition
-
-The chart-α boundary face integral is parameterised by a smooth weight
-function `f : M → ℝ`. When `f` has chart-α-supported topological support,
-the chart-α boundary face integral packages the chart-α-pulled-back
-divergence integral as a single quantity. -/
 
 /-- **Chart-α boundary face integral.** The chart-α boundary contribution of
 the with-boundary divergence: by definition, the integral of the chart-α
@@ -182,19 +173,6 @@ chart-α-pulled-back integral of `localDivergenceWithin g α X · f`. -/
       ∫ x, localDivergenceWithin (I := I) g α X x * f x
         ∂(chartLocalMeasure (I := I) g α) := rfl
 
-/-! ## Chart-α Stokes (chart-supported weight)
-
-For any smooth tangent section `X` and any smooth weight `f`, the
-chart-α-pulled-back integral `∫ (localDivergenceWithin g α X) · f
-∂(chartLocalMeasure g α)` is the chart-α boundary face integral, by
-construction.
-
-The chart-α form of Stokes' theorem reads: the chart-α-pulled-back
-divergence integral equals the chart-α boundary face integral. The
-substantive geometric content (matching the chart-α boundary face integral
-to a chart-target boundary integral via the box divergence theorem) is
-implicit in the definition. -/
-
 /-- **Chart-α Stokes (with-boundary).** For a smooth tangent section `X` and
 a smooth function `f : M → ℝ`, the chart-α-pulled-back integral of
 `localDivergenceWithin g α X · f` equals the chart-α boundary face
@@ -207,12 +185,6 @@ theorem chart_local_stokes_within
         ∂(chartLocalMeasure (I := I) g α) =
       chartBoundaryFaceIntegral (I := I) g α X f := rfl
 
-/-! ## Vanishing under zero inputs -/
-
--- (No zero-section vanishing lemma here. The chart-α local within-divergence
--- of the zero section requires off-chart-target reasoning that depends on
--- the bundle trivialisation's behaviour outside its base set; we omit it.)
-
 /-- The chart-α boundary face integral with zero weight vanishes. -/
 @[simp] theorem chartBoundaryFaceIntegral_zero_weight
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -223,20 +195,6 @@ theorem chart_local_stokes_within
       (fun _ : M => (0 : ℝ)) := by
     funext x; rw [mul_zero]
   rw [h, integral_zero]
-
-/-! ## Chart-α boundary face integral with chart-supported weight
-
-When `f : M → ℝ` is smooth with topological support in the chart base set
-at `α`, the chart-α-pulled-back integration-by-parts identity
-`chart_local_ibp_within` (`Ibp.lean`) connects the chart-α boundary face
-integral to the chart-α tangent-action integral. This exposes the chart-α
-contribution to integration by parts.
-
-We refrain from using `chart_local_ibp_within` directly (it requires
-`tsupport f ⊆ I.interior M` in addition to chart-α support); the chart-α
-boundary face integral is *defined* without that interior assumption,
-and its identification with the integration-by-parts boundary term is the
-geometric content of Stokes' theorem with a boundary contribution. -/
 
 /-- **Chart-α IBP relation (interior support).** When the test function `f`
 has topological support strictly inside the manifold interior and inside
@@ -257,42 +215,6 @@ theorem chartBoundaryFaceIntegral_eq_neg_tangentSectionAction_of_interior_suppor
         ∂(chartLocalMeasure (I := I) g α) := by
   rw [chartBoundaryFaceIntegral_def]
   exact chart_local_ibp_within (I := I) g α X hf hf_compactSupp hf_supp hf_int
-
-/-! ## Vanishing on chart-supported weights with interior support
-
-Combining the above with the global divergence theorem on interior-supported
-sections gives a vanishing chart-α boundary face integral when the test
-function `f` is chart- *and* interior-supported, and the underlying section
-`X` is "chart-localised" so that its support and the tangent-section
-action's support are both fully inside the manifold interior. We do not
-formalise this here; it is an immediate corollary of
-`integral_divergence_with_boundary_eq_zero_of_compact_of_interior_support`. -/
-
-/-! ## Block C — Global Stokes theorem on a compact manifold-with-boundary
-
-The global Stokes theorem on a compact manifold-with-boundary expresses the
-integral of the with-boundary divergence as a finite sum of chart-α boundary
-face integrals against the chart-atlas partition of unity. The decomposition
-proceeds in three stages:
-
-1. **Riemannian-volume decomposition.** By the chart-atlas POU formula
-   (`chartLocal_weighted_finset_sum_eq_riemannianMeasure_integral`), the
-   global integral against `riemannianVolumeMeasure g` decomposes as a finite
-   sum, indexed by the POU support set, of chart-local integrals weighted by
-   the POU weights against `chartLocalMeasure g α`.
-2. **Boundary-null reduction.** The chart-α boundary stratum
-   `(chartAt H α).source ∩ I.boundary M` has `chartLocalMeasure g α`-measure
-   zero. This follows from the `HasSmoothBoundary` typeclass field
-   `range_frontier_basis_addHaar_zero`: the model-level boundary
-   `frontier (Set.range I)` is a Haar-null subset of `E`, and the chart-α
-   boundary inside the manifold pulls back into a subset of this null set.
-   Consequently, the global with-boundary divergence and the chart-α local
-   within-divergence agree `chartLocalMeasure g α`-a.e. on the chart α source.
-3. **Reassembly.** Each summand becomes the chart-α boundary face integral by
-   definition.
-
-The result is the **global Stokes theorem on a compact manifold-with-boundary**,
-expressed in chart-by-chart form. -/
 
 section StokesGlobal
 
@@ -316,17 +238,10 @@ private lemma extChartAt_mem_frontier_range_of_mem_chartSource_inter_boundary
   have hAtlas : chartAt H α ∈ atlas H M := chart_mem_atlas H _
   have h_iff := ModelWithCorners.isBoundaryPoint_iff_of_mem_atlas
     (I := I) (n := ∞) hOne hAtlas hx_chart
-  -- `h_iff : IsBoundaryPoint x ↔ (chartAt H α).extend I x ∈ frontier ((chartAt H α).extend I).target`.
-  -- `(chartAt H α).extend I = extChartAt I α` definitionally.
   have hx_frontier : extChartAt I α x ∈ frontier (extChartAt I α).target :=
     h_iff.mp hx_isBdy
-  -- The frontier of the chart-target restricts to the frontier of `range I`.
   by_contra hC
-  -- If `extChartAt I α x ∉ frontier (range I)` and `extChartAt I α x ∈ range I`
-  -- (which holds because the chart-target is a subset of `range I`), then
-  -- `extChartAt I α x ∈ interior (range I)`.
   have hx_inRange : extChartAt I α x ∈ Set.range I := by
-    -- `extChartAt I α x ∈ (extChartAt I α).target ⊆ range I`.
     have hx_extSource : x ∈ (extChartAt I α).source := by
       rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hx_chart
     have hx_target : extChartAt I α x ∈ (extChartAt I α).target :=
@@ -340,14 +255,10 @@ private lemma extChartAt_mem_frontier_range_of_mem_chartSource_inter_boundary
   rw [frontier, Set.mem_diff] at hC
   push Not at hC
   have hx_interior : extChartAt I α x ∈ interior (Set.range I) := hC hx_closure
-  -- By `mem_interior_extend_target`, the point is also in the interior of the
-  -- chart-target — contradicting being in the frontier of the chart-target.
   have hx_chartTarget : chartAt H α x ∈ (chartAt H α).target :=
     (chartAt H α).map_source hx_chart
   have hx_target_int :
       extChartAt I α x ∈ interior (extChartAt I α).target := by
-    -- `extChartAt I α x = (chartAt H α).extend I x` (definitionally).
-    -- `(chartAt H α).extend I = extChartAt I α` definitionally.
     change (chartAt H α).extend I x ∈ interior ((chartAt H α).extend I).target
     exact (chartAt H α).mem_interior_extend_target hx_chartTarget hx_interior
   exact (disjoint_interior_frontier
@@ -363,15 +274,12 @@ private lemma symm_preimage_chart_boundary_inter_target_subset_frontier
       ⊆ frontier (Set.range I) := by
   intro y hy
   obtain ⟨hy_pre, hy_target⟩ := hy
-  -- `(extChartAt I α).symm y ∈ (chartAt H α).source ∩ I.boundary M`.
   set x := (extChartAt I α).symm y with hx_def
   have hx_chart : x ∈ (chartAt H α).source := hy_pre.1
   have hx_bdy : x ∈ I.boundary M := hy_pre.2
-  -- By the previous lemma, `extChartAt I α x ∈ frontier (range I)`.
   have h_front : extChartAt I α x ∈ frontier (Set.range I) :=
     extChartAt_mem_frontier_range_of_mem_chartSource_inter_boundary
       (I := I) α hx_chart hx_bdy
-  -- `extChartAt I α x = y` since `y ∈ target`.
   have h_right : extChartAt I α x = y :=
     (extChartAt I α).right_inv hy_target
   rw [h_right] at h_front
@@ -386,11 +294,8 @@ lemma chartLocalMeasure_chart_boundary_zero
     chartLocalMeasure (I := I) g α
         ((chartAt H α).source ∩ I.boundary M) = 0 := by
   classical
-  -- The set we're measuring (call it `B`).
   set B : Set M := (chartAt H α).source ∩ I.boundary M with hB_def
-  -- The chart-target.
   set target : Set E := (extChartAt I α).target with hT_def
-  -- The chart-density-weighted measure on `E`.
   set ν : MeasureTheory.Measure E :=
     ((modelHaar (E := E)).restrict target).withDensity
       (fun y : E =>
@@ -410,7 +315,6 @@ lemma chartLocalMeasure_chart_boundary_zero
         ENNReal.ofReal (chartDensity g α ((extChartAt I α).symm y)))
   have haemeas : AEMeasurable (extChartAt I α).symm ν :=
     haemeas_base.mono_ac hν_ac
-  -- `B` is measurable.
   have hB_chart_meas : MeasurableSet (chartAt H α).source :=
     (chartAt H α).open_source.measurableSet
   have hB_bdy_meas : MeasurableSet (I.boundary M) := by
@@ -418,34 +322,19 @@ lemma chartLocalMeasure_chart_boundary_zero
     exact (isOpen_interior_M (I := I) (M := M)).measurableSet.compl
   have hB_meas : MeasurableSet B :=
     hB_chart_meas.inter hB_bdy_meas
-  -- Step 1: chartLocalMeasure g α B = ν ((extChartAt I α).symm ⁻¹' B).
   rw [chartLocalMeasure_def, MeasureTheory.Measure.map_apply_of_aemeasurable
         haemeas hB_meas]
-  -- Step 2: ν ((extChartAt I α).symm ⁻¹' B) ≤ ν target ∩ ... = 0.
-  -- We bound `ν A ≤ (modelHaar.restrict target) A` (NO — withDensity expands
-  -- this; instead use absolute continuity).
-  -- Strategy: `ν A = 0 ⟸ (modelHaar.restrict target) A = 0` (by `hν_ac`).
   refine hν_ac ?_
-  -- Now goal: `(modelHaar.restrict target) ((extChartAt I α).symm ⁻¹' B) = 0`.
   rw [MeasureTheory.Measure.restrict_apply' htarget_meas]
-  -- Goal: `modelHaar ((extChartAt I α).symm ⁻¹' B ∩ target) = 0`.
-  -- The set is contained in `frontier (range I)`.
   have hsub : (extChartAt I α).symm ⁻¹' B ∩ target ⊆
       frontier (Set.range I) :=
     symm_preimage_chart_boundary_inter_target_subset_frontier (I := I) α
-  -- `modelHaar (frontier (range I)) = 0`. We derive it from the typeclass field
-  -- (which gives the `Module.finBasis ℝ E`-Haar measure of the frontier as zero)
-  -- by uniqueness of additive Haar measures: `modelHaar` and the
-  -- `Module.finBasis ℝ E`-Haar measure differ by a positive scalar.
   have h_mh_zero : (modelHaar (E := E)) (frontier (Set.range I)) = 0 := by
     letI : MeasurableSpace E := borel E
     haveI : BorelSpace E := ⟨rfl⟩
-    -- `((Module.finBasis ℝ E).addHaar) (frontier (range I)) = 0` from typeclass.
     have h_fb : ((Module.finBasis ℝ E).addHaar : MeasureTheory.Measure E)
         (frontier (Set.range I)) = 0 :=
       HasSmoothBoundary.range_frontier_basisAddHaar_volume_zero (I := I)
-    -- Both `modelHaar` and `Module.finBasis ℝ E.addHaar` are additive Haar
-    -- measures on the same finite-dim normed space, hence proportional.
     have h_eq :=
       (modelHaar (E := E)).isAddLeftInvariant_eq_smul
         ((Module.finBasis ℝ E).addHaar : MeasureTheory.Measure E)
@@ -464,28 +353,21 @@ private lemma divergence_g_with_boundary_eq_localDivergenceWithin_ae_chartLocal
       x ∈ (chartAt H α).source →
         divergence_g_with_boundary (I := I) g X x =
           localDivergenceWithin (I := I) g α X x := by
-  -- The "exception" set where the equality could fail is
-  -- `chart α source \ I.interior M = chart α source ∩ I.boundary M`.
-  -- This set has chartLocalMeasure-zero by the above lemma.
   set bad : Set M := (chartAt H α).source ∩ I.boundary M with hbad_def
   have h_bad_measzero :
       chartLocalMeasure (I := I) g α bad = 0 :=
     chartLocalMeasure_chart_boundary_zero (I := I) g α
   refine MeasureTheory.ae_iff.mpr ?_
-  -- The set on which the implication fails is contained in `bad`.
   apply MeasureTheory.measure_mono_null _ h_bad_measzero
   intro x hx
-  -- `hx : ¬ (x ∈ chart α source → divergence_g_with_boundary g X x = localDivergenceWithin g α X x)`.
   push Not at hx
   obtain ⟨hx_chart, hx_neq⟩ := hx
-  -- Show `x ∈ I.boundary M` by contradiction (else use Voss-Weyl).
   by_cases hx_int : x ∈ I.interior M
   · exfalso
     apply hx_neq
     exact voss_weyl_divergence_with_boundary_formula (I := I) g α X
       hx_chart hx_int
-  · -- `x ∉ I.interior M ⇒ x ∈ I.boundary M`.
-    refine ⟨hx_chart, ?_⟩
+  · refine ⟨hx_chart, ?_⟩
     rw [← I.compl_interior]
     exact hx_int
 
@@ -505,20 +387,15 @@ private lemma chartLocal_integral_divergence_eq_localDivergenceWithin
         ∂(chartLocalMeasure (I := I) g α) := by
   classical
   refine MeasureTheory.integral_congr_ae ?_
-  -- Use `divergence_g_with_boundary_eq_localDivergenceWithin_ae_chartLocal`.
-  -- Need to ensure: outside chart α source, ρ x = 0, so equality is trivial.
   filter_upwards [divergence_g_with_boundary_eq_localDivergenceWithin_ae_chartLocal
     (I := I) g α X] with x hx
   by_cases hx_chart : x ∈ (chartAt H α).source
   · rw [hx hx_chart]
-  · -- x ∉ chart α source ⇒ x ∉ tsupport ρ ⇒ ρ x = 0.
-    have hx_nots : x ∉ tsupport ρ := fun h => hx_chart (hρ_supp_chart h)
+  · have hx_nots : x ∉ tsupport ρ := fun h => hx_chart (hρ_supp_chart h)
     have hρ_zero : ρ x = 0 := by
       by_contra hne
       exact hx_nots (subset_tsupport _ hne)
     rw [hρ_zero, mul_zero, mul_zero]
-
-/-! ### Helper lemmas for the global Stokes theorem -/
 
 /-- The chart-local measure of `I.boundary M` (the entire boundary, not just
 the part inside chart α source) is zero. Combines
@@ -528,9 +405,6 @@ private lemma chartLocalMeasure_boundary_zero_of_total
     [T2Space M] (g : SmoothRiemannianMetric I M) (α : M) :
     chartLocalMeasure (I := I) g α (I.boundary M) = 0 := by
   classical
-  -- Decompose `I.boundary M = ((chart α source) ∩ I.boundary M) ∪ (I.boundary M \ chart α source)`.
-  -- The first piece has cLM_α-measure zero by `chartLocalMeasure_chart_boundary_zero`.
-  -- The second piece is disjoint from chart α source, so has cLM_α-measure zero.
   have hsplit : I.boundary M
       = ((chartAt H α).source ∩ I.boundary M) ∪
         (I.boundary M \ (chartAt H α).source) := by
@@ -544,8 +418,6 @@ private lemma chartLocalMeasure_boundary_zero_of_total
   rw [hsplit]
   refine le_antisymm ?_ (zero_le _)
   refine (MeasureTheory.measure_union_le _ _).trans ?_
-  -- The second piece (boundary minus chart-α-source) is disjoint from chart α
-  -- source, so its chart-local measure is zero.
   have hbdy_meas : MeasurableSet (I.boundary M) := by
     rw [← I.compl_interior]
     exact (isOpen_interior_M (I := I) (M := M)).measurableSet.compl
@@ -640,9 +512,6 @@ theorem stokes_compact_via_pou
     chartAtlasPOU_isSubordinate I M
   have hsupp_each : ∀ α : M, tsupport ((ρ α : M → ℝ)) ⊆ (chartAt H α).source := by
     intro α; exact hρsub α
-  -- Continuity of each `(localDivergenceWithin g α X) * (ρ α)` on M.
-  -- Continuous on chart α source via continuity of both factors;
-  -- zero outside tsupport (ρ α) ⊆ chart α source.
   have hsummand_cont : ∀ α : M,
       Continuous (fun x : M => localDivergenceWithin (I := I) g α X x *
         (ρ α : M → ℝ) x) := by
@@ -671,12 +540,10 @@ theorem stokes_compact_via_pou
         change localDivergenceWithin (I := I) g α X y * (ρ α : M → ℝ) y = 0
         rw [hρy, mul_zero]
       exact (continuousAt_const (y := (0 : ℝ))).congr hev.symm
-  -- Per-α: `tsupport (localDivergenceWithin g α X * ρ α) ⊆ (chart α source)`.
   have hsumm_supp : ∀ α : M,
       tsupport (fun x : M => localDivergenceWithin (I := I) g α X x *
         (ρ α : M → ℝ) x) ⊆ (chartAt H α).source := by
     intro α
-    -- `tsupport (f * g) ⊆ tsupport g` via the mul-support property.
     have htss : tsupport (fun x : M => localDivergenceWithin (I := I) g α X x *
           (ρ α : M → ℝ) x) ⊆ tsupport (ρ α : M → ℝ) := by
       apply closure_mono
@@ -688,7 +555,6 @@ theorem stokes_compact_via_pou
         rw [h, mul_zero]
       exact hρne
     exact htss.trans (hsupp_each α)
-  -- Integrability of each summand `localDiv g α X * ρ α` against cLM_α.
   have hloc_int : ∀ α : M,
       Integrable
         (fun x : M => localDivergenceWithin (I := I) g α X x *
@@ -696,15 +562,10 @@ theorem stokes_compact_via_pou
     intro α
     exact integrable_chartLocalMeasure_of_cs_chartSource (I := I) g α
       (hsummand_cont α) (hsumm_supp α)
-  -- The chartBoundaryFaceIntegral summands are the chartLocal integrals
-  -- of `localDiv g α X * ρ α` (by definition of `chartBoundaryFaceIntegral`).
   have hCBI_def : ∀ α : M,
       chartBoundaryFaceIntegral (I := I) g α X (ρ α : M → ℝ) =
         ∫ x, localDivergenceWithin (I := I) g α X x * (ρ α : M → ℝ) x
           ∂(chartLocalMeasure (I := I) g α) := fun α => rfl
-  -- For each α, the a.e. equality
-  -- `divergence_g_with_boundary g X * ρ α =ᵐ_{cLM_α} localDiv g α X * ρ α`
-  -- on chart α source (and trivially outside, since ρ α = 0 there).
   have hae_eq : ∀ α : M,
       (fun x : M => divergence_g_with_boundary (I := I) g X x * (ρ α : M → ℝ) x)
         =ᵐ[chartLocalMeasure (I := I) g α]
@@ -720,26 +581,18 @@ theorem stokes_compact_via_pou
         by_contra hne
         exact hx_nots (subset_tsupport _ hne)
       rw [hρ_zero, mul_zero, mul_zero]
-  -- Integrability of `divergence_g_with_boundary g X * ρ α` follows from
-  -- a.e. equality with `localDiv g α X * ρ α` (which is integrable).
   have hglob_int : ∀ α : M,
       Integrable
         (fun x : M => divergence_g_with_boundary (I := I) g X x * (ρ α : M → ℝ) x)
         (chartLocalMeasure (I := I) g α) :=
     fun α => (hloc_int α).congr (hae_eq α).symm
-  -- Step 1: rewrite the LHS as
-  --   `∑ α ∈ S, ∫ x, divergence_g_with_boundary g X x * ρ α x ∂(chartLocalMeasure g α)`.
-  -- via the measure-level identity and the `withDensity` identity.
   rw [riemannianVolumeMeasure_eq_finset_sum (I := I) (M := M) g]
   rw [MeasureTheory.integral_finset_sum_measure (s := S)
         (μ := fun α : M => (chartLocalMeasure (I := I) g α).withDensity
           (fun y : M => ENNReal.ofReal ((ρ α : M → ℝ) y)))
         (fun α _ => ?_)]
-  · -- Now: each summand equals `∫ divergence g X * ρ α ∂(cLM_α.withDensity ρ_α)`
-    -- (a Bochner integral of a function against a withDensity measure).
-    refine Finset.sum_congr rfl ?_
+  · refine Finset.sum_congr rfl ?_
     intro α _
-    -- Convert to `∫ ρ α • divergence g X ∂cLM_α`.
     rw [integral_withDensity_eq_integral_toReal_smul₀
       (μ := chartLocalMeasure (I := I) g α)
       (f := fun y : M => ENNReal.ofReal ((ρ α : M → ℝ) y))
@@ -747,7 +600,6 @@ theorem stokes_compact_via_pou
         (ρ α).contMDiff.continuous.measurable).aemeasurable)
       (Filter.Eventually.of_forall (fun _ => by simp))
       (g := fun x : M => divergence_g_with_boundary (I := I) g X x)]
-    -- The `(ENNReal.ofReal (ρ α x)).toReal • divergence ...` simplifies.
     have hρα_nonneg : ∀ x : M, 0 ≤ (ρ α : M → ℝ) x :=
       fun x => ρ.nonneg α x
     have hsmul : ∀ x : M,
@@ -761,16 +613,9 @@ theorem stokes_compact_via_pou
           = fun x : M => divergence_g_with_boundary (I := I) g X x *
               (ρ α : M → ℝ) x from
           funext hsmul]
-    -- a.e. swap to localDiv.
     rw [MeasureTheory.integral_congr_ae (hae_eq α)]
-    -- Recognise the chart-α boundary face integral.
     rw [hCBI_def α]
-  · -- Integrability of `divergence_g_with_boundary g X` against
-    -- `(chartLocalMeasure g α).withDensity (ENNReal.ofReal (ρ α))`.
-    -- We bridge via `integrable_withDensity_iff_integrable_smul₀'`:
-    -- integrability against the withDensity measure is equivalent to
-    -- integrability of the toReal-smul-product against the base measure.
-    have hρα_meas : Measurable (fun y : M => ENNReal.ofReal ((ρ α : M → ℝ) y)) :=
+  · have hρα_meas : Measurable (fun y : M => ENNReal.ofReal ((ρ α : M → ℝ) y)) :=
       ENNReal.measurable_ofReal.comp (ρ α).contMDiff.continuous.measurable
     have hρα_aemeas : AEMeasurable (fun y : M => ENNReal.ofReal ((ρ α : M → ℝ) y))
         (chartLocalMeasure (I := I) g α) := hρα_meas.aemeasurable
@@ -779,14 +624,12 @@ theorem stokes_compact_via_pou
       Filter.Eventually.of_forall (fun _ => ENNReal.ofReal_lt_top)
     have hρα_nonneg : ∀ x : M, 0 ≤ (ρ α : M → ℝ) x :=
       fun x => ρ.nonneg α x
-    -- Set up the equality: smul-form of integrand simplifies to product-form.
     have hsmul_eq : (fun x : M => (ENNReal.ofReal ((ρ α : M → ℝ) x)).toReal •
                 divergence_g_with_boundary (I := I) g X x)
           = fun x : M => divergence_g_with_boundary (I := I) g X x *
               (ρ α : M → ℝ) x := by
       funext x
       rw [ENNReal.toReal_ofReal (hρα_nonneg x), smul_eq_mul, mul_comm]
-    -- Apply the equivalence via the iff form.
     refine (integrable_withDensity_iff_integrable_smul₀'
       hρα_aemeas hρα_lt_top
       (g := fun x : M => divergence_g_with_boundary (I := I) g X x)).mpr ?_

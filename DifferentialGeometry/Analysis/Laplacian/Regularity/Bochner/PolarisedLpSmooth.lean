@@ -73,16 +73,12 @@ open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul
 open DifferentialGeometry.Analysis.Laplacian.HessianPairingChart
 open DifferentialGeometry.Analysis.Laplacian.BochnerPolarised
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Smoothness witnesses for `(φ + v)` and `(φ - v)` -/
 
 /-- For smooth `φ, v ∈ C^∞⟮I, M; ℝ⟯`, the sum `φ + v` is smooth. -/
 lemma contMDiff_phi_add_v
@@ -96,13 +92,6 @@ lemma contMDiff_phi_sub_v
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun y : M => (φ : M → ℝ) y - (v : M → ℝ) y) :=
   φ.contMDiff.sub v.contMDiff
 
-/-! ## Smoothness witness for `g(∇φ, ∇v)` as a function
-
-The function `b ↦ g.inner b (∇φ b) (∇v b)` is smooth on a closed Riemannian
-manifold for smooth `φ, v`. This is `contMDiff_g_inner_of_smooth_sections`
-applied to the smooth gradient sections `grad_g g φ.contMDiff` and
-`grad_g g v.contMDiff`. -/
-
 /-- The smooth scalar `g.inner b (∇φ b) (∇v b)` is `C^∞` on `M`. -/
 lemma contMDiff_g_inner_grad_phi_grad_v
     (g : SmoothRiemannianMetric I M) (φ v : C^∞⟮I, M; ℝ⟯) :
@@ -114,8 +103,6 @@ lemma contMDiff_g_inner_grad_phi_grad_v
   refine h.congr ?_
   intro b
   rw [grad_g_apply, grad_g_apply]
-
-/-! ## The polarised Bochner identity at the pointwise level (specialised) -/
 
 /-- Specialisation of `bochner_polarised_pointwise` using smoothness witnesses
 constructed from `φ` and `v`. -/
@@ -137,8 +124,6 @@ theorem bochner_polarised_pointwise_smoothCase
     (contMDiff_phi_add_v (I := I) (M := M) φ v)
     (contMDiff_phi_sub_v (I := I) (M := M) φ v)
     (contMDiff_g_inner_grad_phi_grad_v (I := I) (M := M) g φ v) x
-
-/-! ## The polarised Bochner identity at the pointwise level, `(1 - Δ_g)`-form -/
 
 /-- `(1 - Δ_g)`-form of the polarised Bochner identity, specialised to smooth `(φ, v)`. -/
 theorem bochner_polarised_pointwise_oneSubLap_smoothCase
@@ -166,12 +151,6 @@ theorem bochner_polarised_pointwise_oneSubLap_smoothCase
     (contMDiff_phi_sub_v (I := I) (M := M) φ v)
     (contMDiff_g_inner_grad_phi_grad_v (I := I) (M := M) g φ v) x
 
-/-! ## Relation to `gradInnerSmoothBundle.oneSubLapClassical`
-
-The smooth scalar `gradInnerSmoothBundle g φ v` has toFun `b ↦ g.inner b (∇φ b) (∇v b)`.
-Its `oneSubLapClassical` is `(gradInnerSmoothBundle g φ v).toFun - Δ_g(.).toFun`,
-which by the pointwise polarised identity equals the polarised expression. -/
-
 /-- The smooth scalar `gradInnerSmoothBundle g φ v` has the explicit pointwise
 form `b ↦ g.inner b (∇φ b) (∇v b)`. -/
 lemma gradInnerSmoothBundle_toFun
@@ -189,10 +168,7 @@ lemma Δ_g_gradInnerSmoothBundle_eq_contMDiff_g_inner
     Δ_g (I := I) g (gradInnerSmoothBundle (I := I) (M := M) g φ v).smooth x =
       Δ_g (I := I) g (contMDiff_g_inner_grad_phi_grad_v
         (I := I) (M := M) g φ ⟨v.toFun, v.smooth⟩) x := by
-  -- (gradInnerSmoothBundle g φ v).toFun is `b ↦ g.inner b (∇φ b) (∇v.toFun b)`.
-  -- The two smoothness witnesses are for the same function.
   apply Δ_g_congr_func
-  -- Goal: ContMDiff witness for the same underlying function.
 
 end BochnerPolarisedLpSmooth
 end Laplacian

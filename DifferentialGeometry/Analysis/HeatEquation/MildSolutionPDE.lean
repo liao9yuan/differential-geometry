@@ -69,20 +69,12 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Laplacian
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## Continuity of the scalar mode coefficient
-
-The map `s ↦ ⟪b_i, f s⟫_ℝ` is continuous whenever `f` is continuous (it is
-the composition with the continuous linear functional `innerSL ℝ (b_i)`),
-hence interval-integrable on every closed interval. -/
 
 /-- Continuity of the scalar coefficient `s ↦ ⟪b_i, f s⟫_ℝ`. -/
 private lemma continuous_inner_basis_apply
@@ -94,7 +86,6 @@ private lemma continuous_inner_basis_apply
   set b := resolventHilbertEigenbasisSigma (I := I) (M := M) g
   have h_innerCLM := (innerSL (𝕜 := ℝ)
       (E := Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) (b i)).continuous
-  -- ⟪b i, f s⟫_ℝ = (innerSL ℝ (b i)) (f s).
   have h_eq : (fun s : ℝ => ⟪b i, f s⟫_ℝ) =
       (fun s : ℝ => (innerSL (𝕜 := ℝ)
         (E := Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) (b i)) (f s)) := by
@@ -114,8 +105,6 @@ private lemma intervalIntegrable_inner_basis_apply
         ⟪resolventHilbertEigenbasisSigma (I := I) (M := M) g i, f s⟫_ℝ)
       MeasureTheory.volume a b' :=
   (continuous_inner_basis_apply (I := I) (M := M) g hf i).intervalIntegrable a b'
-
-/-! ## Headline 1: the explicit spectral coefficient formula -/
 
 /-- **Headline 1.** For continuous `f : ℝ → Lp ℝ 2 μ_g`, `u_0 ∈ Lp`, `t ≥ 0`,
 and any spectral basis index `i`, the inner product of the Duhamel mild
@@ -137,29 +126,22 @@ theorem mildSolution_inner_basis
           ⟪resolventHilbertEigenbasisSigma (I := I) (M := M) g i, f s⟫_ℝ := by
   set b := resolventHilbertEigenbasisSigma (I := I) (M := M) g
   set lam_i : ℝ := EigenIdx.lambda (I := I) (M := M) i with hlam_def
-  -- Step 1: unfold mildSolution and distribute the inner product.
   unfold mildSolution
   rw [inner_add_right]
   congr 1
-  · -- Homogeneous part: ⟨b_i, heatSemigroup g t u_0⟩ = exp(-lam_i t) * ⟨b_i, u_0⟩.
-    -- Use self-adjointness: ⟨b_i, H_t u_0⟩ = ⟨H_t b_i, u_0⟩, then heatSemigroup_apply_basis.
-    have h_self := heatSemigroup_isSelfAdjoint (I := I) (M := M) g ht
+  · have h_self := heatSemigroup_isSelfAdjoint (I := I) (M := M) g ht
     have h_sym : (heatSemigroup (I := I) (M := M) g t :
         (Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) →ₗ[ℝ] _).IsSymmetric :=
       ((ContinuousLinearMap.isSelfAdjoint_iff_isSymmetric
         (A := heatSemigroup (I := I) (M := M) g t)).mp h_self)
-    -- ⟨b_i, H_t u_0⟩ = ⟨H_t b_i, u_0⟩.
     have h_swap : ⟪b i, heatSemigroup (I := I) (M := M) g t u_0⟫_ℝ =
         ⟪heatSemigroup (I := I) (M := M) g t (b i), u_0⟫_ℝ := by
       have h := h_sym.apply_clm (b i) u_0
-      -- IsSymmetric.apply_clm: ⟪T x, y⟫ = ⟪x, T y⟫.
       exact h.symm
     rw [h_swap]
-    -- heatSemigroup g t (b i) = exp(-lam_i t) • b i (via resolventEigenbasisSigma).
     have h_basis_apply :
         heatSemigroup (I := I) (M := M) g t (b i) =
           Real.exp (-lam_i * t) • b i := by
-      -- resolventEigenbasisSigma_eq_resolventEigenbasisVec then resolventHilbertEigenbasisSigma_apply.
       have h_eq : resolventEigenbasisSigma (I := I) (M := M) g i = b i := by
         rw [show b i = resolventHilbertEigenbasisSigma (I := I) (M := M) g i from rfl,
           (resolventEigenbasisSigma_eq_resolventEigenbasisVec (I := I) (M := M) g i),
@@ -169,30 +151,22 @@ theorem mildSolution_inner_basis
       exact h
     rw [h_basis_apply]
     rw [real_inner_smul_left]
-  · -- Inhomogeneous part:
-    -- ⟨b_i, ∫_0^t H_{t-s} (f s) ds⟩ = ∫_0^t ⟨b_i, H_{t-s} (f s)⟩ ds
-    --                              = ∫_0^t exp(-lam_i (t-s)) * ⟨b_i, f s⟩ ds.
-    -- First commute innerSL with the interval integral.
-    set φ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) →L[ℝ] ℝ :=
+  · set φ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) →L[ℝ] ℝ :=
       innerSL (𝕜 := ℝ)
         (E := Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) (b i) with hφ_def
-    -- Interval-integrability of s ↦ H_{t-s} (f s).
     have h_int := heatSemigroup_apply_f_continuous (I := I) (M := M) g hf t
     have h_uIcc : Set.uIcc (0 : ℝ) t = Set.Icc 0 t := Set.uIcc_of_le ht
     rw [← h_uIcc] at h_int
     have h_intInt : IntervalIntegrable
         (fun s : ℝ => heatSemigroup (I := I) (M := M) g (t - s) (f s))
         MeasureTheory.volume 0 t := h_int.intervalIntegrable
-    -- Apply commutation: ⟨b_i, ∫ f⟩ = (innerSL b_i)(∫ f) = ∫ (innerSL b_i) f.
     have h_comm := ContinuousLinearMap.intervalIntegral_comp_comm
       (μ := MeasureTheory.volume) (a := (0 : ℝ)) (b := t)
       φ h_intInt
-    -- innerSL b_i (heatSemigroup g (t-s) (f s)) = ⟨b_i, heatSemigroup g (t-s) (f s)⟩.
     have h_phi_apply : ∀ s,
         φ (heatSemigroup (I := I) (M := M) g (t - s) (f s)) =
           ⟪b i, heatSemigroup (I := I) (M := M) g (t - s) (f s)⟫_ℝ := by
       intro s; rfl
-    -- Substitute φ.
     change ⟪b i, ∫ s in (0 : ℝ)..t,
         heatSemigroup (I := I) (M := M) g (t - s) (f s)⟫_ℝ = _
     rw [show ⟪b i, ∫ s in (0 : ℝ)..t,
@@ -200,15 +174,12 @@ theorem mildSolution_inner_basis
           φ (∫ s in (0 : ℝ)..t,
             heatSemigroup (I := I) (M := M) g (t - s) (f s)) from rfl]
     rw [← h_comm]
-    -- Now: ∫ (innerSL b_i) (H_{t-s} (f s)) ds = ∫ exp(-lam_i (t-s)) * ⟨b_i, f s⟩ ds.
-    -- For each s ∈ [0, t], use self-adjointness + basis evaluation.
     have h_pointwise : ∀ s ∈ Set.Icc (0 : ℝ) t,
         φ (heatSemigroup (I := I) (M := M) g (t - s) (f s)) =
           Real.exp (-lam_i * (t - s)) * ⟪b i, f s⟫_ℝ := by
       intro s hs
       have hts_nn : 0 ≤ t - s := sub_nonneg.mpr hs.2
       rw [h_phi_apply]
-      -- ⟨b_i, H_{t-s} (f s)⟩ = ⟨H_{t-s} b_i, f s⟩ = exp(-lam_i (t-s)) * ⟨b_i, f s⟩.
       have h_self := heatSemigroup_isSelfAdjoint (I := I) (M := M) g hts_nn
       have h_sym : (heatSemigroup (I := I) (M := M) g (t - s) :
           (Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) →ₗ[ℝ] _).IsSymmetric :=
@@ -218,7 +189,6 @@ theorem mildSolution_inner_basis
           ⟪heatSemigroup (I := I) (M := M) g (t - s) (b i), f s⟫_ℝ :=
         (h_sym.apply_clm (b i) (f s)).symm
       rw [h_swap]
-      -- heatSemigroup g (t-s) (b i) = exp(-lam_i (t-s)) • b i.
       have h_basis_apply :
           heatSemigroup (I := I) (M := M) g (t - s) (b i) =
             Real.exp (-lam_i * (t - s)) • b i := by
@@ -230,24 +200,10 @@ theorem mildSolution_inner_basis
         rw [h_eq] at h
         exact h
       rw [h_basis_apply, real_inner_smul_left]
-    -- Apply congruence of interval integrals.
     apply intervalIntegral.integral_congr
     intro s hs
     rw [Set.uIcc_of_le ht] at hs
     exact h_pointwise s hs
-
-/-! ## Auxiliary algebra for the derivative computation
-
-For the derivative of the inhomogeneous contribution we use the identity
-
-  `exp(-λ (t-s)) = exp(-λ t) * exp(λ s)`,
-
-so
-
-  `∫_0^t exp(-λ (t-s)) * h(s) ds = exp(-λ t) * ∫_0^t exp(λ s) * h(s) ds`.
-
-The factored form lets us apply the product rule + the fundamental theorem
-of calculus to obtain `c_2'(t) = -λ c_2(t) + h(t)`. -/
 
 /-- Algebraic identity: `exp(-lam (t-s)) = exp(-lam t) * exp(lam s)`. -/
 private lemma exp_factor (lam : ℝ) (t s : ℝ) :
@@ -263,16 +219,12 @@ private lemma duhamel_inner_factor
       MeasureTheory.volume 0 t) :
     ∫ s in (0 : ℝ)..t, Real.exp (-lam * (t - s)) * h s =
       Real.exp (-lam * t) * ∫ s in (0 : ℝ)..t, Real.exp (lam * s) * h s := by
-  -- Pointwise: exp(-lam (t-s)) * h(s) = exp(-lam t) * (exp(lam s) * h s).
   have h_eq : (fun s : ℝ => Real.exp (-lam * (t - s)) * h s) =
       (fun s : ℝ => Real.exp (-lam * t) * (Real.exp (lam * s) * h s)) := by
     funext s
     rw [exp_factor lam t s]; ring
   rw [h_eq]
-  -- Pull out the constant.
   rw [intervalIntegral.integral_const_mul]
-
-/-! ## Headline 2: the per-mode parabolic ODE -/
 
 /-- **Headline 2.** For continuous `f`, `t > 0`, and any spectral basis index
 `i`, the scalar mode `α_i(s) := ⟪b_i, mildSolution g u_0 f s⟫_ℝ` satisfies
@@ -298,25 +250,17 @@ theorem hasDerivAt_mildSolution_inner_basis
   set b := resolventHilbertEigenbasisSigma (I := I) (M := M) g with hb_def
   set lam_i : ℝ := EigenIdx.lambda (I := I) (M := M) i with hlam_def
   set c_u : ℝ := ⟪b i, u_0⟫_ℝ with hcu_def
-  -- Define h(s) := ⟨b_i, f s⟩.
   set hf_scalar : ℝ → ℝ := fun s => ⟪b i, f s⟫_ℝ with hhf_def
   have hf_scalar_cont : Continuous hf_scalar :=
     continuous_inner_basis_apply (I := I) (M := M) g hf i
-  -- Define c_1(s) = exp(-lam_i s) * c_u.
   set c1 : ℝ → ℝ := fun s => Real.exp (-lam_i * s) * c_u with hc1_def
-  -- Define G(s) = ∫_0^s exp(lam_i r) * hf_scalar(r) dr.
   set G : ℝ → ℝ := fun s => ∫ r in (0 : ℝ)..s, Real.exp (lam_i * r) * hf_scalar r with hG_def
-  -- Define c_2(s) = exp(-lam_i s) * G(s).
   set c2 : ℝ → ℝ := fun s => Real.exp (-lam_i * s) * G s with hc2_def
-  -- Headline 1: α_i(s) = c_1(s) + c_2(s) for s ≥ 0.
   have h_split : ∀ s, 0 ≤ s →
       ⟪b i, mildSolution (I := I) (M := M) g u_0 f s⟫_ℝ = c1 s + c2 s := by
     intro s hs
     have h_form := mildSolution_inner_basis (I := I) (M := M) g u_0 hf hs i
-    -- h_form : ⟨b_i, mild s⟩ = exp(-lam_i s) * c_u + ∫_0^s exp(-lam_i (s-r)) * ⟨b_i, f r⟩ dr.
     rw [h_form]
-    -- Now: ∫_0^s exp(-lam_i (s-r)) * hf_scalar(r) dr = exp(-lam_i s) * G(s).
-    -- Apply the factoring lemma.
     have h_int_factor : IntervalIntegrable
         (fun r => Real.exp (lam_i * r) * hf_scalar r)
         MeasureTheory.volume 0 s := by
@@ -326,29 +270,22 @@ theorem hasDerivAt_mildSolution_inner_basis
           (continuous_const.mul continuous_id)).mul hf_scalar_cont)
       exact h_cont_factor.intervalIntegrable _ _
     have h_factored := duhamel_inner_factor (t := s) lam_i hf_scalar h_int_factor
-    -- Substitute.
     change Real.exp (-lam_i * s) * c_u +
       ∫ r in (0 : ℝ)..s, Real.exp (-lam_i * (s - r)) * hf_scalar r =
       c1 s + c2 s
     rw [h_factored]
-  -- Derivative of c_1: c_1'(t) = -lam_i * exp(-lam_i t) * c_u.
   have h_c1_deriv : HasDerivAt c1 (-lam_i * Real.exp (-lam_i * t) * c_u) t := by
-    -- Step 1: derivative of exp(-lam_i t) is -lam_i * exp(-lam_i t).
     have h_lin : HasDerivAt (fun s : ℝ => -lam_i * s) (-lam_i) t := by
       have := (hasDerivAt_id (𝕜 := ℝ) t).const_mul (-lam_i)
       simpa using this
     have h_exp : HasDerivAt (fun s : ℝ => Real.exp (-lam_i * s))
         (Real.exp (-lam_i * t) * (-lam_i)) t := h_lin.exp
-    -- Step 2: multiply by constant c_u.
     have h_mul := h_exp.mul_const c_u
-    -- Derivative is (exp(-lam_i t) * (-lam_i)) * c_u = -lam_i * exp(-lam_i t) * c_u.
     have h_eq : Real.exp (-lam_i * t) * (-lam_i) * c_u = -lam_i * Real.exp (-lam_i * t) * c_u := by
       ring
     rw [h_eq] at h_mul
     exact h_mul
-  -- Derivative of G at t: G'(t) = exp(lam_i t) * hf_scalar(t) by FTC.
   have h_G_deriv : HasDerivAt G (Real.exp (lam_i * t) * hf_scalar t) t := by
-    -- Apply intervalIntegral.integral_hasDerivAt_right.
     have h_cont_integrand : Continuous
         (fun r : ℝ => Real.exp (lam_i * r) * hf_scalar r) :=
       ((Real.continuous_exp.comp
@@ -363,7 +300,6 @@ theorem hasDerivAt_mildSolution_inner_basis
       h_cont_integrand.aestronglyMeasurable.stronglyMeasurableAtFilter
     have h_at_t := h_cont_integrand.continuousAt (x := t)
     exact intervalIntegral.integral_hasDerivAt_right h_intInt h_meas h_at_t
-  -- Derivative of exp(-lam_i t) at t: -lam_i * exp(-lam_i t).
   have h_exp_neg_deriv : HasDerivAt (fun s : ℝ => Real.exp (-lam_i * s))
       (-lam_i * Real.exp (-lam_i * t)) t := by
     have h_lin : HasDerivAt (fun s : ℝ => -lam_i * s) (-lam_i) t := by
@@ -374,21 +310,15 @@ theorem hasDerivAt_mildSolution_inner_basis
     have h_eq : Real.exp (-lam_i * t) * (-lam_i) = -lam_i * Real.exp (-lam_i * t) := by ring
     rw [h_eq] at h_exp
     exact h_exp
-  -- Derivative of c_2 = exp(-lam_i t) * G:
-  -- c_2'(t) = (-lam_i * exp(-lam_i t)) * G(t) + exp(-lam_i t) * (exp(lam_i t) * hf_scalar(t))
-  --        = -lam_i * c_2(t) + hf_scalar(t).
   have h_c2_deriv_raw : HasDerivAt c2
       ((-lam_i * Real.exp (-lam_i * t)) * G t +
         Real.exp (-lam_i * t) * (Real.exp (lam_i * t) * hf_scalar t)) t :=
     h_exp_neg_deriv.mul h_G_deriv
-  -- Simplify exp(-lam_i t) * exp(lam_i t) = 1.
   have h_exp_cancel : Real.exp (-lam_i * t) * Real.exp (lam_i * t) = 1 := by
     rw [← Real.exp_add]
     have h_sum : -lam_i * t + lam_i * t = 0 := by ring
     rw [h_sum, Real.exp_zero]
-  -- c_2(t) = exp(-lam_i t) * G(t).
   have h_c2_value : c2 t = Real.exp (-lam_i * t) * G t := rfl
-  -- Derivative target after simplification.
   have h_c2_deriv : HasDerivAt c2 (-lam_i * c2 t + hf_scalar t) t := by
     have h_target_eq :
         (-lam_i * Real.exp (-lam_i * t)) * G t +
@@ -401,30 +331,21 @@ theorem hasDerivAt_mildSolution_inner_basis
       ring
     rw [← h_target_eq]
     exact h_c2_deriv_raw
-  -- c_1(t) = exp(-lam_i t) * c_u.
   have h_c1_value : c1 t = Real.exp (-lam_i * t) * c_u := rfl
-  -- Derivative of c_1 in form -lam_i * c_1(t).
   have h_c1_deriv' : HasDerivAt c1 (-lam_i * c1 t) t := by
     have h_target_eq : -lam_i * Real.exp (-lam_i * t) * c_u = -lam_i * c1 t := by
       rw [h_c1_value]; ring
     rw [← h_target_eq]
     exact h_c1_deriv
-  -- Sum: (c_1 + c_2)'(t) = -lam_i * c_1(t) + (-lam_i * c_2(t) + hf_scalar t)
-  --                     = -lam_i * (c_1(t) + c_2(t)) + hf_scalar t.
   have h_sum_deriv : HasDerivAt (fun s => c1 s + c2 s)
       (-lam_i * c1 t + (-lam_i * c2 t + hf_scalar t)) t :=
     h_c1_deriv'.add h_c2_deriv
-  -- Rewrite the target derivative.
   have h_target_eq : -lam_i * c1 t + (-lam_i * c2 t + hf_scalar t) =
       -lam_i * (c1 t + c2 t) + hf_scalar t := by ring
   rw [h_target_eq] at h_sum_deriv
-  -- Use h_split to identify c_1(t) + c_2(t) = ⟨b_i, mildSolution g u_0 f t⟩.
   have h_at_t : c1 t + c2 t = ⟪b i, mildSolution (I := I) (M := M) g u_0 f t⟫_ℝ :=
     (h_split t ht.le).symm
   rw [h_at_t] at h_sum_deriv
-  -- Transfer from (fun s => c1 s + c2 s) to (fun s => ⟪b i, mildSolution s⟫_ℝ)
-  -- via congruence on a neighborhood of t (specifically, on s ≥ 0).
-  -- Since t > 0, an open neighborhood of t lies in (0, ∞), where h_split applies.
   have h_pos_nhds : Set.Ioi (0 : ℝ) ∈ 𝓝 t := Ioi_mem_nhds ht
   have h_eventually_eq :
       (fun s : ℝ =>

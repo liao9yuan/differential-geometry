@@ -73,16 +73,12 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Laplacian
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## Headline: existence of a lift in every iterated Laplacian domain -/
 
 /-- **Headline.** For a closed Riemannian manifold `(M, g)`, any `t > 0`, any
 initial datum `u_0 ∈ Lp ℝ 2 μ_g`, and any `k : ℕ`, the heat-evolved `Lp`
@@ -102,12 +98,6 @@ theorem heatSemigroup_in_laplacianDomainPow
         H1ComplToLp (I := I) (M := M) g u_h =
           heatSemigroup (I := I) (M := M) g t u_0 :=
   heatSemigroup_mem_laplacianDomainPow_all (I := I) (M := M) g ht u_0 k
-
-/-! ## Canonical witness via `Classical.choose`
-
-We package the headline existence statement as a definition via
-`Classical.choose`, exposing the canonical lift `heatSemigroupSpectralLift`
-together with its specification lemmas. -/
 
 /-- The canonical `Classical.choose`-based lift of `heatSemigroup g t u_0` to
 `H1Compl g`, selected so as to lie in `laplacianDomainPow g k`.
@@ -145,16 +135,6 @@ theorem H1ComplToLp_heatSemigroupSpectralLift
   (heatSemigroup_in_laplacianDomainPow
     (I := I) (M := M) g ht u_0 k).choose_spec.2
 
-/-! ## Explicit-form lift via `oneMinusLapHeat`
-
-For convenience and downstream use, we also expose an explicit-form lift
-constructed directly from `oneMinusLapHeat`. This is the construction used in
-the proof of `heatSemigroup_mem_laplacianDomainPow_all`; we provide it as a
-named definition with `simp`-friendly specifications so that downstream
-consumers may use it directly (e.g., when needing an explicit dependence on
-`u_0` rather than `Classical.choose`).
--/
-
 /-- The explicit-form spectral lift of `heatSemigroup g t u_0` into the
 `(k+1)`-th iterated Laplacian domain:
 
@@ -191,10 +171,6 @@ theorem H1ComplToLp_heatSemigroupExplicitLift
         (heatSemigroupExplicitLift (I := I) (M := M) g k t u_0) =
       heatSemigroup (I := I) (M := M) g t u_0 := by
   unfold heatSemigroupExplicitLift
-  -- H1ComplToLp (resolvent (iteratedResolventL2 k (oneMinusLapHeat (k+1) t u_0)))
-  --   = resolventL2 (iteratedResolventL2 k (oneMinusLapHeat (k+1) t u_0))   [resolventL2_apply]
-  --   = iteratedResolventL2 (k+1) (oneMinusLapHeat (k+1) t u_0)            [iteratedResolventL2_succ_apply]
-  --   = heatSemigroup t u_0                                                [iteratedResolventL2_oneMinusLapHeat_apply]
   rw [show H1ComplToLp (I := I) (M := M) g
         (resolvent (I := I) (M := M) g
           (iteratedResolventL2 (I := I) (M := M) g k
@@ -211,12 +187,6 @@ theorem H1ComplToLp_heatSemigroupExplicitLift
     (iteratedResolventL2_succ_apply (I := I) (M := M) g k _).symm]
   exact iteratedResolventL2_oneMinusLapHeat_apply (I := I) (M := M) g (k + 1) ht u_0
 
-/-! ## Existence with the explicit witness packaged for downstream use
-
-For some downstream code it is convenient to have the existence statement
-parameterised by the `succ`-indexed form `k + 1`, with the explicit witness
-visible in the proof term. -/
-
 /-- **Existence with the explicit witness**, packaged at index `k + 1` so the
 witness is visible in `laplacianDomainPow g (k + 1)`. -/
 theorem heatSemigroup_in_laplacianDomainPow_succ_explicit
@@ -229,8 +199,6 @@ theorem heatSemigroup_in_laplacianDomainPow_succ_explicit
   ⟨heatSemigroupExplicitLift (I := I) (M := M) g k t u_0,
     heatSemigroupExplicitLift_mem (I := I) (M := M) g k t u_0,
     H1ComplToLp_heatSemigroupExplicitLift (I := I) (M := M) g k ht u_0⟩
-
-/-! ## Sanity tests -/
 
 example (g : SmoothRiemannianMetric I M) {t : ℝ} (ht : 0 < t)
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) (k : ℕ) :

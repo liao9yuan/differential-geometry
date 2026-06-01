@@ -68,8 +68,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-! ## Leaf-2: the per-component pointwise bound -/
-
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 /-- **Pointwise bound on a single raw chart-frame scalar component.**
@@ -95,21 +93,16 @@ theorem tensorChartComponentRaw_abs_le_riemannianFibreNorm
   classical
   letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 s I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 s
-  -- Unconditional uniform op-norm bound on the chart-`α` forward trivialisation over `K`.
   obtain ⟨Cop, hCop_pos, hCop_bound⟩ :=
     tensorRSChartFiberToModel_opNorm_isBounded_on_compact_unconditional
       (I := I) (M := M) g_bg 0 s α hK hKsub
-  -- The uniform projection operator-norm bound.
   set Cproj : ℝ := chartComponentProjectionUniformBound (E := E) 0 s with hCproj_def
   have hCproj_nn : 0 ≤ Cproj := chartComponentProjectionUniformBound_nonneg (E := E) 0 s
   refine ⟨Cproj * Cop, mul_nonneg hCproj_nn (le_of_lt hCop_pos), ?_⟩
   intro T b hb Jdx
-  -- Abbreviate the trivialisation fibre.
   set v : TensorRSModel 0 s ℝ E :=
     tensorTrivProj (I := I) (M := M) g_bg 0 s T α b with hv_def
-  -- The raw component is the projection of the trivialisation fibre.
   rw [tensorChartComponentRaw_def]
-  -- `|P_IJ v| ≤ ‖P_IJ‖ · ‖v‖ ≤ Cproj · ‖v‖`.
   have h_proj_le :
       |tensorChartComponentProjection (E := E) 0 s
           (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) Jdx v| ≤
@@ -122,11 +115,9 @@ theorem tensorChartComponentRaw_abs_le_riemannianFibreNorm
       ‖tensorChartComponentProjection (E := E) 0 s
           (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) Jdx‖ ≤ Cproj :=
     tensorChartComponentProjection_norm_le_uniform (E := E) 0 s _ Jdx
-  -- `‖v‖ ≤ Cop · ‖T.toSection b‖`.
   have h_v_le : ‖v‖ ≤ Cop * ‖T.toSection b‖ := by
     rw [hv_def]
     exact hCop_bound b hb (T.toSection b)
-  -- Chain the bounds.
   calc |tensorChartComponentProjection (E := E) 0 s
             (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) Jdx v|
       ≤ ‖tensorChartComponentProjection (E := E) 0 s
@@ -136,8 +127,6 @@ theorem tensorChartComponentRaw_abs_le_riemannianFibreNorm
     _ ≤ Cproj * (Cop * ‖T.toSection b‖) :=
         mul_le_mul_of_nonneg_left h_v_le hCproj_nn
     _ = Cproj * Cop * ‖T.toSection b‖ := by ring
-
-/-! ## Leaf-3: the dictionary `ccTensorBilin = raw chart-frame component` -/
 
 /-- The rank-`0` chart-frame basis element `chartFrameBasisModel α x 0 (![] : Fin 0 → _)`
 is the unit `(0, 0)`-tensor `constOfIsEmpty 1`.  Both are `0`-ary continuous multilinear
@@ -166,14 +155,10 @@ theorem ccTensorBilin_chartBasisVecFiber_eq_tensorChartComponentRaw
         (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E)))
         ![l, b] x := by
   classical
-  -- Unfold the right-hand side to the chart-frame closed form.
   rw [tensorChartComponentRaw_eq_chartFrame (I := I) (M := M) g_bg 0 2 S α hx
     (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b]]
-  -- The `(0,0)`-tensor input is the unit `constOfIsEmpty 1`.
   rw [chartFrameBasisModel_zero_eq_constOfIsEmpty (I := I) (M := M) α x]
-  -- The left-hand side: `ccTensorBilin = ccTensorModel ![·,·] = ccTensorMultilinear ![·,·]`.
   rw [ccTensorBilin_apply, ccTensorModel, ccTensorMultilinear_apply]
-  -- `Tensor0SSpace.toModel` is the identity on the underlying carrier.
   change (Tensor0SBundle.Tensor0SSpace.toModel
       (S.toSection x (ContinuousMultilinearMap.constOfIsEmpty ℝ
         (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))))
@@ -183,7 +168,6 @@ theorem ccTensorBilin_chartBasisVecFiber_eq_tensorChartComponentRaw
       (fun j : Fin 2 => chartBasisVecFiber (I := I) α (![l, b] j) x)
   rw [Tensor0SBundle.Tensor0SSpace.toModel,
     Tensor0SBundle.tensor0SSpace_continuousLinearEquiv_apply]
-  -- The two tuples agree pointwise.
   congr 1
   funext j
   fin_cases j <;> rfl
@@ -216,13 +200,6 @@ theorem reprDiffChartCompOnE_eq_symm_tensorChartComponentRaw
   rw [ccTensorBilin_chartBasisVecFiber_eq_tensorChartComponentRaw (I := I) g_bg S α hy l b,
     ccTensorBilin_chartBasisVecFiber_eq_tensorChartComponentRaw (I := I) g_bg S α hy b l]
 
-/-! ## Leaf-4: coordinate translation between E-side and Euclidean-side partials
-
-The covariant-gradient component formula `tensorChartComponentRaw_covGrad` is stated with the
-`EuclideanSpace`-side `euclidPartial` of the chart-pushed raw component.  The target conjuncts
-use the `E`-side `partialDeriv`.  The two are interchanged by the chain rule through the
-linear isometry `toEuclidean : E ≃ₗᵢ EuclideanSpace ℝ (Fin n)`. -/
-
 /-- **Chain-rule translation of `partialDeriv` to `euclidPartial`.**  For any scalar
 `f : E → ℝ` and any direction `a`, the `E`-side partial derivative `partialDeriv a f y` equals
 the `EuclideanSpace`-side partial `euclidPartial a (f ∘ toEuclidean.symm) (toEuclidean y)`. -/
@@ -231,15 +208,12 @@ theorem partialDeriv_eq_euclidPartial_comp_toEuclidean
     partialDeriv (E := E) a f y =
       euclidPartial (E := E) a (f ∘ (toEuclidean (E := E)).symm) (toEuclidean (E := E) y) := by
   rw [euclidPartial_def, partialDeriv]
-  -- Chain rule through the linear isometry `toEuclidean.symm`.
   rw [(toEuclidean (E := E)).symm.comp_right_fderiv
     (f := f) (x := toEuclidean (E := E) y)]
   rw [ContinuousLinearMap.comp_apply]
-  -- `toEuclidean.symm (single a 1) = chartModelBasis E a`.
   rw [show (toEuclidean (E := E)).symm.toContinuousLinearMap
       (EuclideanSpace.single a (1 : ℝ)) = (chartModelBasis E) a from by
     rw [chartModelBasis_apply]; rfl]
-  -- `toEuclidean.symm (toEuclidean y) = y`.
   rw [show (toEuclidean (E := E)).symm (toEuclidean (E := E) y) = y from by simp]
 
 /-- The `E`-side partial derivative function `partialDeriv a f`, pulled back through
@@ -268,8 +242,6 @@ theorem partialDeriv2_eq_euclidPartial2_comp_toEuclidean
   rw [partialDeriv_eq_euclidPartial_comp_toEuclidean (E := E) c (partialDeriv (E := E) a f) y]
   rw [partialDeriv_comp_toEuclidean_symm_eq_euclidPartial (E := E) a f]
 
-/-! ## Leaf-4: the chart-pushed realized component as a symmetrized raw chart push -/
-
 /-- On the Euclidean chart target, the `toEuclidean.symm`-pull of the realized-difference
 chart-frame component function `reprDiffChartCompOnE g_bg hu₁ hu₂ α l b` equals the
 symmetrized chart-push of the raw chart components of `S = realizableRepr hu₁ −
@@ -295,25 +267,14 @@ theorem reprDiffChartCompOnE_comp_toEuclidean_symm_eqOn
   intro y' hy'
   set S : SmoothCcTensor g_bg 0 2 :=
     realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂ with hS_def
-  -- `b₀ := symm (toEuclidean.symm y')` lies in the chart source.
   have hb_src : (extChartAt I α).symm ((toEuclidean (E := E)).symm y') ∈ (chartAt H α).source :=
     symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy'
-  -- Beta-reduce the right-hand side lambda.
   simp only []
-  -- LHS is the symmetrized raw component at the chart preimage (leaf-3).
   rw [Function.comp_apply,
     reprDiffChartCompOnE_eq_symm_tensorChartComponentRaw (I := I) g_bg hu₁ hu₂ α l b
       (y := (toEuclidean (E := E)).symm y') hb_src]
-  -- RHS: `chartPushedRaw` of each raw component at `y'` is the raw component at the preimage.
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy',
     chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy']
-
-/-! ## Leaf-4: the covariant-gradient inversion of the chart-pushed raw component
-
-The chart-component formula `tensorChartComponentRaw_covGrad` reads, in `EuclideanSpace`
-coordinates, the raw component of `covGrad S` as `euclidPartial (chart-push of raw comp of S)
-+ Christoffel correction`.  Rearranged, the `EuclideanSpace`-side partial of the chart-pushed
-raw component of `S` is the raw component of `covGrad S` minus the correction. -/
 
 /-- **First-order covariant-gradient inversion (`s = 2`, `r = 0`).**  For `y' ∈
 chartTargetEuclid α`, the `EuclideanSpace`-side partial of the chart-pushed raw `(0,2)`-component
@@ -335,20 +296,14 @@ theorem euclidPartial_chartPushedRaw_eq_covGrad_sub_lowerOrder
         - covDerivLowerOrderTerm (I := I) (M := M) g_bg 0 2 S α a
             (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b] y' := by
   classical
-  -- `vecTail ![a, l, b] = ![l, b]` and `![a, l, b] 0 = a`.
   have hJ0 : (![a, l, b] : Fin 3 → Fin (Module.finrank ℝ E)) 0 = a := rfl
   have hJtail : Matrix.vecTail (![a, l, b] : Fin 3 → Fin (Module.finrank ℝ E)) = ![l, b] := by
     funext j; fin_cases j <;> rfl
-  -- Apply the chart-component formula at `Jdx := ![a, l, b]`.
   have hform := tensorChartComponentRaw_covGrad (I := I) (M := M) g_bg 0 2 S α
     (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![a, l, b] hy'
   rw [hJ0, hJtail] at hform
-  -- `hform : raw(covGrad S) = euclidPartial a (chartPush raw_{![l,b]}) + lowerOrder`.
-  -- Rearrange to isolate the euclidPartial term.
   rw [hform]
   ring
-
-/-! ## Leaf-4: differentiability bookkeeping in Euclidean coordinates -/
 
 /-- The chart-push of a raw chart component is differentiable at every point of the
 (open) Euclidean chart target. -/
@@ -373,8 +328,6 @@ theorem toEuclidean_mem_chartTargetEuclid_of_mem_interior
     (α : M) {y : E} (hy : y ∈ interior ((extChartAt I α).target : Set E)) :
     toEuclidean (E := E) y ∈ chartTargetEuclid (I := I) (M := M) α :=
   ⟨y, interior_subset hy, rfl⟩
-
-/-! ## Leaf-4: the first chart-coordinate partial of the realized component -/
 
 /-- **The first chart partial of the realized-difference component, as covariant-gradient
 components minus Christoffel corrections.**  For `y` in the chart-target interior, the
@@ -416,7 +369,6 @@ theorem partialDeriv_reprDiffChartCompOnE_eq_covGrad_sub_lowerOrder
     toEuclidean_mem_chartTargetEuclid_of_mem_interior (I := I) (M := M) α hy
   have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- Abbreviate the two chart-pushed raw components.
   set Flb : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
     chartPushedRaw I α
       (tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 S α
@@ -425,11 +377,9 @@ theorem partialDeriv_reprDiffChartCompOnE_eq_covGrad_sub_lowerOrder
     chartPushedRaw I α
       (tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 S α
         (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l]) with hFbl_def
-  -- Step 1: translate the E-side partial to the Euclidean side.
   rw [partialDeriv_eq_euclidPartial_comp_toEuclidean (E := E) a
     (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b) y]
   rw [← hys_def]
-  -- Step 2: on a neighbourhood of `ys`, the pulled component equals the symmetrized push.
   have hevt : (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b ∘ (toEuclidean (E := E)).symm)
       =ᶠ[nhds ys] (fun y' => (1 / 2 : ℝ) * (Flb y' + Fbl y')) := by
     refine Filter.eventuallyEq_iff_exists_mem.mpr
@@ -438,7 +388,6 @@ theorem partialDeriv_reprDiffChartCompOnE_eq_covGrad_sub_lowerOrder
     have h := reprDiffChartCompOnE_comp_toEuclidean_symm_eqOn (I := I) g_bg hu₁ hu₂ α l b hz
     rw [hFlb_def, hFbl_def]
     exact h
-  -- Step 3: differentiate the symmetrized push by linearity.
   rw [euclidPartial_def, hevt.fderiv_eq]
   have hdiff_lb : DifferentiableAt ℝ Flb ys :=
     chartPushedRaw_tensorChartComponentRaw_differentiableAt (I := I) g_bg 2 S α ![l, b] hys_mem
@@ -450,7 +399,6 @@ theorem partialDeriv_reprDiffChartCompOnE_eq_covGrad_sub_lowerOrder
   rw [fderiv_const_smul (hdiff_lb.add hdiff_bl),
     fderiv_add hdiff_lb hdiff_bl]
   simp only [ContinuousLinearMap.smul_apply, ContinuousLinearMap.add_apply, smul_eq_mul]
-  -- Step 4: convert each fderiv-term back to a euclidPartial and apply the inversion.
   rw [show fderiv ℝ Flb ys (EuclideanSpace.single a 1) = euclidPartial (E := E) a Flb ys from rfl,
     show fderiv ℝ Fbl ys (EuclideanSpace.single a 1) = euclidPartial (E := E) a Fbl ys from rfl]
   rw [hFlb_def, hFbl_def, hys_def,
@@ -459,8 +407,6 @@ theorem partialDeriv_reprDiffChartCompOnE_eq_covGrad_sub_lowerOrder
     euclidPartial_chartPushedRaw_eq_covGrad_sub_lowerOrder (I := I) g_bg S α a b l
       (by rw [← hys_def]; exact hys_mem)]
   rw [show (toEuclidean (E := E)).symm ys = y from by rw [hys_def]; simp]
-
-/-! ## Leaf-4: uniform bound on the lower-order Christoffel correction term -/
 
 /-- The chart preimage map `y' ↦ (extChartAt I α).symm (toEuclidean.symm y')` sends a compact
 subset of the Euclidean chart target to a compact subset of the chart source. -/
@@ -472,8 +418,7 @@ theorem chartPreimage_image_isCompact_subset_chartSource
         (chartAt H α).source := by
   classical
   constructor
-  · -- Continuity of the chart-preimage map on `K_eucl`.
-    have hcont_toE : Continuous (fun y' : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
+  · have hcont_toE : Continuous (fun y' : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
         (toEuclidean (E := E)).symm y') := (toEuclidean (E := E)).symm.continuous
     have hcont_symm : ContinuousOn (extChartAt I α).symm (extChartAt I α).target :=
       continuousOn_extChartAt_symm α
@@ -516,14 +461,10 @@ theorem covDerivLowerOrderTerm_abs_le_riemannianFibreNorm
   classical
   letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 s I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 s
-  -- The compact image of `K_eucl` under the chart-preimage map, inside the chart source.
   obtain ⟨hImg_cpt, hImg_sub⟩ :=
     chartPreimage_image_isCompact_subset_chartSource (I := I) (M := M) α hK hKsub
-  -- Leaf-2 over the compact image.
   obtain ⟨Craw, hCraw_nn, hCraw_bd⟩ :=
     tensorChartComponentRaw_abs_le_riemannianFibreNorm (I := I) g_bg s α hImg_cpt hImg_sub
-  -- Uniform sup-bound on each coefficient over the compact `K_eucl`, indexed over the full
-  -- finite parameter family `(m, Idx', Jdx, Jdx')` (recall `Idx = ![]` for `r = 0`).
   have h_coeff_bound : ∀ (mIJ : (Fin (Module.finrank ℝ E)) ×
         ((Fin 0 → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)) ×
           (Fin s → Fin (Module.finrank ℝ E)))),
@@ -543,27 +484,22 @@ theorem covDerivLowerOrderTerm_abs_le_riemannianFibreNorm
     have := hCc y' hy'
     rw [Real.norm_eq_abs] at this
     exact this.trans (le_max_left _ _)
-  -- Choose the per-parameter coefficient constants and take their finite supremum.
   choose Cc hCc_nn hCc_bd using h_coeff_bound
   set Ccoeff : ℝ := (Finset.univ.sup' Finset.univ_nonempty Cc) with hCcoeff_def
   have hCcoeff_ge : ∀ q, Cc q ≤ Ccoeff := fun q => Finset.le_sup' Cc (Finset.mem_univ q)
   have hCcoeff_nn : 0 ≤ Ccoeff :=
     le_trans (hCc_nn (Classical.arbitrary _)) (hCcoeff_ge (Classical.arbitrary _))
-  -- The total constant.
   set Npairs : ℝ := (Fintype.card ((Fin 0 → Fin (Module.finrank ℝ E)) ×
       (Fin s → Fin (Module.finrank ℝ E))) : ℝ) with hNpairs_def
   have hNpairs_nn : 0 ≤ Npairs := by rw [hNpairs_def]; positivity
   refine ⟨Npairs * (Ccoeff * Craw), by positivity, ?_⟩
   intro T m Jdx y' hy'
   set b₀ : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y') with hb₀_def
-  -- `b₀` lies in the compact image, hence in the chart source.
   have hb₀_img : b₀ ∈ (fun y'' => (extChartAt I α).symm ((toEuclidean (E := E)).symm y'')) ''
       K_eucl := ⟨y', hy', rfl⟩
   set N : ℝ := ‖T.toSection b₀‖ with hN_def
   have hN_nn : 0 ≤ N := norm_nonneg _
-  -- Triangle inequality over the multi-index pairs.
   rw [covDerivLowerOrderTerm_def]
-  -- Per-summand bound: each term is bounded by `Ccoeff * (Craw * N)`.
   have h_term : ∀ p : (Fin 0 → Fin (Module.finrank ℝ E)) ×
         (Fin s → Fin (Module.finrank ℝ E)),
       |covDerivLowerOrderCoeff (I := I) (M := M) g_bg 0 s α m
@@ -581,14 +517,11 @@ theorem covDerivLowerOrderTerm_abs_le_riemannianFibreNorm
         Craw * N := by
       rw [hp1]; exact hCraw_bd T b₀ hb₀_img p.2
     exact mul_le_mul h_coeff h_raw (abs_nonneg _) hCcoeff_nn
-  -- Assemble: triangle inequality + per-summand bound + constant sum.
   refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
   refine (Finset.sum_le_sum (fun p _ => h_term p)).trans ?_
   rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ, ← hNpairs_def]
   ring_nf
   rfl
-
-/-! ## Leaf-5: the chart-preimage image of a compact set in `E` -/
 
 /-- The chart-preimage `(extChartAt I α).symm '' K` of a compact `K ⊆ interior (extChartAt I
 α).target` is compact and contained in the chart source. -/
@@ -610,8 +543,6 @@ theorem extChartAt_symm_image_isCompact_subset_chartSource
       (extChartAt I α).map_target (hKtgt hy_mem)
     rwa [extChartAt_source] at hsrc
 
-/-! ## Leaf-4: `euclidPartial` congruence on an open set -/
-
 /-- If two functions agree on an open set `U`, their first `euclidPartial`s agree on `U`. -/
 theorem euclidPartial_congr_of_eqOn_isOpen
     (a : Fin (Module.finrank ℝ E))
@@ -622,8 +553,6 @@ theorem euclidPartial_congr_of_eqOn_isOpen
   intro z hz
   rw [euclidPartial_def, euclidPartial_def]
   rw [(heq.eventuallyEq_of_mem (hU.mem_nhds hz)).fderiv_eq]
-
-/-! ## Leaf-4: generalized first-order covariant-gradient inversion (any `s`, `r = 0`) -/
 
 /-- **First-order covariant-gradient inversion (general `s`, `r = 0`).**  For `y' ∈
 chartTargetEuclid α`, the `EuclideanSpace`-side partial of the chart-pushed raw `(0,s)`-component
@@ -675,10 +604,8 @@ theorem covDerivComponentEuclid_eqOn_rawComponent_covGrad
   classical
   intro y' hy'
   simp only []
-  -- `covDerivComponentEuclid = euclidPartial m (chartPush raw) + LO` on the chart target.
   rw [covDerivComponentEuclid_eqOn (I := I) (M := M) g_bg 0 s α T m
     (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) Jdx hy']
-  -- The raw covariant-gradient component is the same sum.
   have hJ0 : (Fin.cons m Jdx : Fin (s + 1) → Fin (Module.finrank ℝ E)) 0 = m := by
     rw [Fin.cons_zero]
   have hJtail : Matrix.vecTail (Fin.cons m Jdx : Fin (s + 1) → Fin (Module.finrank ℝ E)) = Jdx := by
@@ -687,17 +614,6 @@ theorem covDerivComponentEuclid_eqOn_rawComponent_covGrad
     (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) (Fin.cons m Jdx) hy'
   rw [hJ0, hJtail] at hform
   rw [hform]
-
-/-! ## Leaf-4: the second-order chart-push bound (conjunct 3 core)
-
-The iterated `EuclideanSpace` partial of the chart-pushed raw `(0,2)`-component of `S` is
-bounded, on a compact subset of the chart target, by a constant times the iterated
-covariant-gradient jet sum.  The decomposition uses the explicit second covariant-derivative
-component formula `covDerivComponent_second_eq_iteratedFDeriv_add_lowerOrder`, whose three
-contribution families (the `∂_c` of the wrapped covariant-derivative component, the
-value-coefficient sum, and the gradient-coefficient sum) are each bounded via the
-first-order covariant-gradient inversion, the per-component bound, the lower-order bound, and
-the uniform sup-bounds of the `C^∞` second-order correction coefficients. -/
 
 set_option maxHeartbeats 3200000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
@@ -750,7 +666,6 @@ theorem euclidPartial_covDerivComponentEuclid_abs_le
   set b₀ : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y') with hb₀_def
   have hb₀_img : b₀ ∈ (fun y'' => (extChartAt I α).symm ((toEuclidean (E := E)).symm y'')) ''
       K_eucl := ⟨y', hy', rfl⟩
-  -- On the chart target `covDerivComponentEuclid = chartPush (raw of covGrad S)`.
   have hbridge : Set.EqOn
       (covDerivComponentEuclid (I := I) (M := M) g_bg 0 2 α S a
         (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) Jdx)
@@ -879,7 +794,6 @@ theorem euclidPartial2_chartPushedRaw_abs_le_aux
   set N1 : ℝ := ‖(covGrad (I := I) (M := M) g_bg 0 2 S).toSection b₀‖ with hN1_def
   set Npairs : ℝ := (Fintype.card ((Fin 0 → Fin (Module.finrank ℝ E)) ×
       (Fin 2 → Fin (Module.finrank ℝ E))) : ℝ) with hNpairs_def
-  -- The explicit second-order decomposition.  Abbreviate the giant subterms.
   set A : ℝ := euclidPartial (E := E) c
       (covDerivComponentEuclid (I := I) (M := M) g_bg 0 2 α S a
         (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) Jdx) y' with hA_def
@@ -902,7 +816,6 @@ theorem euclidPartial2_chartPushedRaw_abs_le_aux
               (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) Jdx))) y' = A - (Bsum + Dsum) := by
     linarith [hform]
   rw [h_target]
-  -- (1) `|A| ≤ Craw4 N2 + CLO3 N1` via helper (i).
   have h_dc : |A| ≤ Craw4 * ‖(covGrad (I := I) (M := M) g_bg 0 3
           (covGrad (I := I) (M := M) g_bg 0 2 S)).toSection b₀‖ + CLO3 * N1 := by
     rw [hA_def, hN1_def]
@@ -910,7 +823,6 @@ theorem euclidPartial2_chartPushedRaw_abs_le_aux
       hCLO3_bd S c a Jdx hy'
   have hN0_nn : 0 ≤ N0 := norm_nonneg _
   have hN1_nn : 0 ≤ N1 := norm_nonneg _
-  -- (2) value-coefficient sum: `|Bsum| ≤ Npairs (Cval Craw2) N0`.
   have h_val_term : ∀ p : (Fin 0 → Fin (Module.finrank ℝ E)) ×
         (Fin 2 → Fin (Module.finrank ℝ E)),
       |secondCovDerivLO_valueCoeff (I := I) (M := M) g_bg 0 2 α a c
@@ -928,7 +840,6 @@ theorem euclidPartial2_chartPushedRaw_abs_le_aux
     refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
     refine (Finset.sum_le_sum (fun p _ => h_val_term p)).trans ?_
     rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ, ← hNpairs_def]; ring_nf; rfl
-  -- (3) gradient-coefficient sum: `|Dsum| ≤ Npairs (Cgrd (Craw3+CLO2)) (N1+N0)`.
   have h_grad_term : ∀ p : (Fin 0 → Fin (Module.finrank ℝ E)) ×
         (Fin 2 → Fin (Module.finrank ℝ E)),
       |secondCovDerivLO_gradCoeff (I := I) (M := M) g_bg 0 2 α a
@@ -964,11 +875,8 @@ theorem euclidPartial2_chartPushedRaw_abs_le_aux
     refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
     refine (Finset.sum_le_sum (fun p _ => h_grad_term p)).trans ?_
     rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ, ← hNpairs_def]; ring_nf; rfl
-  -- Assemble.
   refine (abs_sub _ _).trans ?_
   exact add_le_add h_dc ((abs_add_le _ _).trans (add_le_add h_val_sum h_grad_sum))
-
-/-! ## Leaf-5: each iterated-covariant-gradient fibre norm is a jet-sum summand -/
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
@@ -1022,7 +930,6 @@ theorem secondCovDerivLO_valueCoeff_uniform_bound
   refine ⟨Finset.univ.sup' Finset.univ_nonempty Cv,
     le_trans (hCv_nn (Classical.arbitrary _)) (Finset.le_sup' Cv (Finset.mem_univ _)),
     fun a c p1 Jdx p2 z hz => ?_⟩
-  -- For `p1 : Fin 0 → _`, `p1 = ![]`; the bound is indexed by `(a, c, p1, Jdx, p2)`.
   have hp1 : p1 = (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) := Subsingleton.elim _ _
   subst hp1
   exact (hCv_bd (a, c, _, Jdx, p2) z hz).trans (Finset.le_sup' Cv (Finset.mem_univ _))
@@ -1130,13 +1037,11 @@ theorem euclidPartial2_chartPushedRaw_abs_le_jetSum
     rw [hN2_def, hR_def]
     exact iteratedCovGrad_norm_le_jetSum (I := I) g_bg S b₀ 2 (by norm_num)
   have hR_nn : 0 ≤ R := le_trans hN0_nn hN0_le
-  -- Apply the parametrized second-order bound.
   have haux := euclidPartial2_chartPushedRaw_abs_le_aux (I := I) g_bg α hKsub
     Craw4 hCraw4_bd Craw3 hCraw3_nn hCraw3_bd Craw2 hCraw2_bd CLO3 hCLO3_bd CLO2 hCLO2_nn hCLO2_bd
     Cval hCval_nn hCval_bd Cgrd hCgrd_nn hCgrd_bd S c a Jdx hy'
   rw [← hN0_def, ← hN1_def, ← hN2_def] at haux
   refine haux.trans ?_
-  -- Collect into `C * R` using `Nj ≤ R`.
   have hb3 : Npairs * (Cval * Craw2) * N0 ≤ Npairs * (Cval * Craw2) * R :=
     mul_le_mul_of_nonneg_left hN0_le (by positivity)
   have hb4 : Npairs * (Cgrd * (Craw3 + CLO2)) * (N1 + N0) ≤
@@ -1151,8 +1056,6 @@ theorem euclidPartial2_chartPushedRaw_abs_le_jetSum
         add_le_add (add_le_add hb1 hb2) (add_le_add hb3 hb4)
     _ = (Craw4 + CLO3 + Npairs * (Cval * Craw2) + 2 * (Npairs * (Cgrd * (Craw3 + CLO2)))) * R := by
         ring
-
-/-! ## Leaf-5: the zeroth-order (conjunct 1) bound -/
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
@@ -1185,11 +1088,9 @@ theorem reprDiffChartCompOnE_abs_le_riemannianFibreNorm
   set b₀ : M := (extChartAt I α).symm y with hb₀_def
   have hb₀_src : b₀ ∈ (chartAt H α).source := hImg_sub ⟨y, hy, rfl⟩
   have hb₀_img : b₀ ∈ (extChartAt I α).symm '' K := ⟨y, hy, rfl⟩
-  -- Leaf-3: the realized component is the symmetrized raw component.
   rw [reprDiffChartCompOnE_eq_symm_tensorChartComponentRaw (I := I) g_bg hu₁ hu₂ α l b hb₀_src]
   set N : ℝ := ‖S.toSection b₀‖ with hN_def
   have hN_nn : 0 ≤ N := norm_nonneg _
-  -- Bound each raw component via leaf-2.
   have h_lb : |tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 S α
       (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b] b₀| ≤ Craw * N :=
     hCraw_bd S b₀ hb₀_img ![l, b]
@@ -1212,8 +1113,6 @@ theorem reprDiffChartCompOnE_abs_le_riemannianFibreNorm
         exact (abs_add_le _ _).trans (add_le_add h_lb h_bl)
     _ = Craw * N := by ring
 
-/-! ## Leaf-5: the first-order (conjunct 2) bound -/
-
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 /-- **Conjunct 2 of the covariant-gradient jet bound.**  On a compact `K ⊆ interior (extChartAt
@@ -1233,13 +1132,10 @@ theorem partialDeriv_reprDiffChartCompOnE_abs_le
   classical
   set S : SmoothCcTensor g_bg 0 2 :=
     realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂ with hS_def
-  -- Compact chart-preimage and chart-target images.
   obtain ⟨hImg_cpt, hImg_sub⟩ :=
     extChartAt_symm_image_isCompact_subset_chartSource (I := I) (M := M) α hK hKsub
-  -- Leaf-2 for the (0,3)-tensor `covGrad S` (the raw covariant-gradient component).
   obtain ⟨Craw1, hCraw1_nn, hCraw1_bd⟩ :=
     tensorChartComponentRaw_abs_le_riemannianFibreNorm (I := I) g_bg 3 α hImg_cpt hImg_sub
-  -- The lower-order term bound (over the Euclidean image of `K`).
   have hKe_cpt : IsCompact (toEuclidean (E := E) '' K) := hK.image toEuclidean.continuous
   have hKe_sub : toEuclidean (E := E) '' K ⊆ chartTargetEuclid (I := I) (M := M) α := by
     intro z hz
@@ -1260,10 +1156,8 @@ theorem partialDeriv_reprDiffChartCompOnE_abs_le
   set N0 : ℝ := ‖S.toSection b₀‖ with hN0_def
   have hN1_nn : 0 ≤ N1 := norm_nonneg _
   have hN0_nn : 0 ≤ N0 := norm_nonneg _
-  -- The two jet terms (j=0 and j=1) are summands of the jet sum at `b₀`.
   set R : ℝ := iteratedCovGradJetSum (I := I) g_bg S b₀ with hR_def
   have hR_nn : 0 ≤ R := iteratedCovGradJetSum_nonneg (I := I) g_bg S b₀
-  -- The jet sum's summand family (with the `0 (2+j)` Riemannian instance per `j`).
   have hsummand_nn : ∀ i ∈ Finset.range 3,
       0 ≤ (letI : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 (2 + i) I bb) :=
             Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 (2 + i)
@@ -1275,17 +1169,13 @@ theorem partialDeriv_reprDiffChartCompOnE_abs_le
   have hN0_le : N0 ≤ R := by
     have h := Finset.single_le_sum hsummand_nn (Finset.mem_range.mpr (by norm_num : (0 : ℕ) < 3))
     rw [hR_def, iteratedCovGradJetSum]
-    -- `N0 = ‖S.toSection b₀‖ = ‖(iteratedCovGrad g 0 2 0 S).toSection b₀‖`.
     exact h
   have hN1_le : N1 ≤ R := by
     have h := Finset.single_le_sum hsummand_nn (Finset.mem_range.mpr (by norm_num : (1 : ℕ) < 3))
     rw [hR_def, iteratedCovGradJetSum]
-    -- `N1 = ‖(covGrad g 0 2 S).toSection b₀‖ = ‖(iteratedCovGrad g 0 2 1 S).toSection b₀‖`.
     exact h
-  -- L4a: the first chart partial as covariant-gradient components minus corrections.
   rw [partialDeriv_reprDiffChartCompOnE_eq_covGrad_sub_lowerOrder (I := I) g_bg hu₁ hu₂ α a l b
     (hKsub hy)]
-  -- Bound each raw covariant-gradient component (leaf-2, s = 3).
   have h_raw_alb : |tensorChartComponentRaw (I := I) (M := M) g_bg 0 (2 + 1)
       (covGrad (I := I) (M := M) g_bg 0 2 S) α
       (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![a, l, b] b₀| ≤ Craw1 * N1 :=
@@ -1294,7 +1184,6 @@ theorem partialDeriv_reprDiffChartCompOnE_abs_le
       (covGrad (I := I) (M := M) g_bg 0 2 S) α
       (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![a, b, l] b₀| ≤ Craw1 * N1 :=
     hCraw1_bd (covGrad (I := I) (M := M) g_bg 0 2 S) b₀ hb₀_img ![a, b, l]
-  -- Bound each lower-order term.  Its base point `symm(toEucl.symm(toEucl y)) = symm y = b₀`.
   have hbase_eq : (extChartAt I α).symm ((toEuclidean (E := E)).symm (toEuclidean (E := E) y)) =
       b₀ := by rw [hb₀_def]; simp
   have h_lo_lb : |covDerivLowerOrderTerm (I := I) (M := M) g_bg 0 2 S α a
@@ -1307,7 +1196,6 @@ theorem partialDeriv_reprDiffChartCompOnE_abs_le
       CLO * N0 := by
     have := hCLO_bd S a ![b, l] (toEuclidean (E := E) y) ⟨y, hy, rfl⟩
     rwa [hbase_eq] at this
-  -- Assemble: `½(|raw - lo| + |raw - lo|) ≤ ½(2 Craw1 N1 + 2 CLO N0) = Craw1 N1 + CLO N0`.
   rw [abs_mul]
   have h12 : |(1 / 2 : ℝ)| = (1 / 2 : ℝ) := by norm_num
   rw [h12]
@@ -1335,8 +1223,6 @@ theorem partialDeriv_reprDiffChartCompOnE_abs_le
     _ = Craw1 * N1 + CLO * N0 := by ring
     _ ≤ (Craw1 + CLO) * R := by nlinarith [hCraw1_nn, hCLO_nn, hN1_nn, hN0_nn, hN1_le, hN0_le, hR_nn]
 
-/-! ## Leaf-5: the second-order (conjunct 3) bound -/
-
 set_option maxHeartbeats 1600000 in
 /-- **Conjunct 3 of the covariant-gradient jet bound.**  On a compact `K ⊆ interior (extChartAt
 I α).target`, the iterated chart partial of the realized-difference chart-frame component is
@@ -1356,14 +1242,12 @@ theorem partialDeriv2_reprDiffChartCompOnE_abs_le
   classical
   set S : SmoothCcTensor g_bg 0 2 :=
     realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂ with hS_def
-  -- `toEuclidean '' K` is compact and inside the Euclidean chart target.
   have hKe_cpt : IsCompact (toEuclidean (E := E) '' K) := hK.image toEuclidean.continuous
   have hKe_sub : toEuclidean (E := E) '' K ⊆ chartTargetEuclid (I := I) (M := M) α := by
     intro z hz
     obtain ⟨y, hy_mem, hy_eq⟩ := hz
     rw [← hy_eq]
     exact toEuclidean_mem_chartTargetEuclid_of_mem_interior (I := I) (M := M) α (hKsub hy_mem)
-  -- The second-order chart-push bound over `toEuclidean '' K`.
   obtain ⟨C2, hC2_nn, hC2_bd⟩ :=
     euclidPartial2_chartPushedRaw_abs_le_jetSum (I := I) g_bg α hKe_cpt hKe_sub
   have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
@@ -1374,7 +1258,6 @@ theorem partialDeriv2_reprDiffChartCompOnE_abs_le
   have hys_mem : ys ∈ chartTargetEuclid (I := I) (M := M) α :=
     toEuclidean_mem_chartTargetEuclid_of_mem_interior (I := I) (M := M) α (hKsub hy)
   have hys_imK : ys ∈ toEuclidean (E := E) '' K := ⟨y, hy, rfl⟩
-  -- Abbreviate the two chart-pushed raw components.
   set Flb : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
     chartPushedRaw I α
       (tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 S α
@@ -1383,17 +1266,14 @@ theorem partialDeriv2_reprDiffChartCompOnE_abs_le
     chartPushedRaw I α
       (tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 S α
         (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l]) with hFbl_def
-  -- Step 1: translate the iterated E-side partial to the iterated Euclidean partial.
   rw [partialDeriv2_eq_euclidPartial2_comp_toEuclidean (E := E) c a
     (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b) y, ← hys_def]
-  -- Step 2: on the open chart target, the pulled component equals the symmetrized push.
   have heqOn : Set.EqOn
       (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b ∘ (toEuclidean (E := E)).symm)
       (fun z => (1 / 2 : ℝ) * (Flb z + Fbl z))
       (chartTargetEuclid (I := I) (M := M) α) := by
     rw [hFlb_def, hFbl_def]
     exact reprDiffChartCompOnE_comp_toEuclidean_symm_eqOn (I := I) g_bg hu₁ hu₂ α l b
-  -- Inner first-order congruence on the open set, then outer.
   have hinner : Set.EqOn
       (euclidPartial (E := E) a
         (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b ∘ (toEuclidean (E := E)).symm))
@@ -1401,13 +1281,10 @@ theorem partialDeriv2_reprDiffChartCompOnE_abs_le
       (chartTargetEuclid (I := I) (M := M) α) :=
     euclidPartial_congr_of_eqOn_isOpen (E := E) a hopen heqOn
   rw [(euclidPartial_congr_of_eqOn_isOpen (E := E) c hopen hinner) hys_mem]
-  -- Step 3: linearity of the inner partial, then the outer partial.
   have hdiff_lb : DifferentiableAt ℝ Flb ys :=
     chartPushedRaw_tensorChartComponentRaw_differentiableAt (I := I) g_bg 2 S α ![l, b] hys_mem
   have hdiff_bl : DifferentiableAt ℝ Fbl ys :=
     chartPushedRaw_tensorChartComponentRaw_differentiableAt (I := I) g_bg 2 S α ![b, l] hys_mem
-  -- The inner partial of `½(Flb + Fbl)` equals `½(euclidPartial a Flb + euclidPartial a Fbl)`
-  -- on the open set; differentiate the outer once more by linearity.
   have hinner_eq : Set.EqOn
       (euclidPartial (E := E) a (fun z => (1 / 2 : ℝ) * (Flb z + Fbl z)))
       (fun z => (1 / 2 : ℝ) * (euclidPartial (E := E) a Flb z + euclidPartial (E := E) a Fbl z))
@@ -1425,7 +1302,6 @@ theorem partialDeriv2_reprDiffChartCompOnE_abs_le
     rw [show fderiv ℝ Flb z (EuclideanSpace.single a 1) = euclidPartial (E := E) a Flb z from rfl,
       show fderiv ℝ Fbl z (EuclideanSpace.single a 1) = euclidPartial (E := E) a Fbl z from rfl]
   rw [(euclidPartial_congr_of_eqOn_isOpen (E := E) c hopen hinner_eq) hys_mem]
-  -- Outer partial of the constant-scalar multiple of a sum.
   have hda_lb : DifferentiableAt ℝ (euclidPartial (E := E) a Flb) ys := by
     have hcd : ContDiffOn ℝ ∞ (euclidPartial (E := E) a Flb)
         (chartTargetEuclid (I := I) (M := M) α) := by
@@ -1451,7 +1327,6 @@ theorem partialDeriv2_reprDiffChartCompOnE_abs_le
       euclidPartial (E := E) c (euclidPartial (E := E) a Flb) ys from rfl,
     show fderiv ℝ (euclidPartial (E := E) a Fbl) ys (EuclideanSpace.single c 1) =
       euclidPartial (E := E) c (euclidPartial (E := E) a Fbl) ys from rfl]
-  -- Step 4: bound each iterated chart-push partial by the jet sum.
   set R : ℝ := iteratedCovGradJetSum (I := I) g_bg S
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm ys)) with hR_def
   have hR_nn : 0 ≤ R := iteratedCovGradJetSum_nonneg (I := I) g_bg S _
@@ -1468,8 +1343,6 @@ theorem partialDeriv2_reprDiffChartCompOnE_abs_le
       ≤ (1 / 2 : ℝ) * (C2 * R + C2 * R) :=
         mul_le_mul_of_nonneg_left ((abs_add_le _ _).trans (add_le_add h_lb h_bl)) (by norm_num)
     _ = C2 * R := by ring
-
-/-! ## Leaf-5: the assembled pointwise covariant-gradient jet input -/
 
 set_option maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
@@ -1511,7 +1384,6 @@ theorem hcovgrad_jet_bound_holds
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 2
   set S : SmoothCcTensor g_bg 0 2 :=
     realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂ with hS_def
-  -- Conjunct 1 (in fibre-norm form), conjunct 2, conjunct 3 (in jet-sum form).
   obtain ⟨C0, hC0_nn, hC0_bd⟩ :=
     reprDiffChartCompOnE_abs_le_riemannianFibreNorm (I := I) g_bg hu₁ hu₂ α hK hKsub
   obtain ⟨C1, hC1_nn, hC1_bd⟩ :=
@@ -1522,39 +1394,26 @@ theorem hcovgrad_jet_bound_holds
   intro y hy l b
   set R : ℝ := iteratedCovGradJetSum (I := I) g_bg S ((extChartAt I α).symm y) with hR_def
   have hR_nn : 0 ≤ R := iteratedCovGradJetSum_nonneg (I := I) g_bg S _
-  -- `‖S.toSection (symm y)‖ ≤ R` (the `j = 0` jet term).
   have h0_jet : ‖S.toSection ((extChartAt I α).symm y)‖ ≤ R := by
     rw [hR_def]
     exact iteratedCovGrad_norm_le_jetSum (I := I) g_bg S ((extChartAt I α).symm y) 0 (by norm_num)
   refine ⟨?_, ?_, ?_⟩
-  · -- Conjunct 1.
-    calc |reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b y|
+  · calc |reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b y|
         ≤ C0 * ‖S.toSection ((extChartAt I α).symm y)‖ := hC0_bd y hy l b
       _ ≤ C0 * R := mul_le_mul_of_nonneg_left h0_jet hC0_nn
       _ ≤ max C0 (max C1 C2) * R :=
           mul_le_mul_of_nonneg_right (le_max_left _ _) hR_nn
-  · -- Conjunct 2.
-    intro a
+  · intro a
     calc |partialDeriv (E := E) a (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b) y|
         ≤ C1 * R := hC1_bd y hy l b a
       _ ≤ max C0 (max C1 C2) * R :=
           mul_le_mul_of_nonneg_right ((le_max_left _ _).trans (le_max_right _ _)) hR_nn
-  · -- Conjunct 3.
-    intro c a
+  · intro c a
     calc |partialDeriv (E := E) c
             (partialDeriv (E := E) a (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b)) y|
         ≤ C2 * R := hC2_bd y hy l b c a
       _ ≤ max C0 (max C1 C2) * R :=
           mul_le_mul_of_nonneg_right ((le_max_right _ _).trans (le_max_right _ _)) hR_nn
-
-/-! ## The unconditional chart `2`-jet bound
-
-Feeding the discharged pointwise covariant-gradient jet input into the headline algebraic
-reduction `chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum`, and then into the
-`C²` Sobolev embedding via `chartMetricJet2DiffSup_realizeMetricAt_le_toHs`, yields the
-**unconditional** chart `2`-jet bound: the analytic input `hcovgrad_jet_bound` is no longer a
-hypothesis, only the compactness of `K` (a genuine, mathematically necessary hypothesis: the
-trivialization op-norm is unbounded toward the chart-target boundary). -/
 
 set_option maxHeartbeats 1600000 in
 /-- **Unconditional chart `2`-jet seminorm bound by the intrinsic `H^{2k}` norm.**

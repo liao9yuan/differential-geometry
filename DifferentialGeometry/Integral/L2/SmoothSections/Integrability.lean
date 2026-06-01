@@ -93,12 +93,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 namespace SmoothCcTensor
 
-/-! ## Compact-support closure of pointwise inner products
-
-These two lemmas record that the pointwise diagonal and cross inner
-products of compactly-supported sections inherit the compact-support
-property, vanishing wherever the underlying section is zero. -/
-
 set_option linter.unusedSectionVars false in
 /-- The underlying map of a `SmoothCcTensor` has compact support. -/
 theorem hasCompactSupport_toFun
@@ -141,8 +135,6 @@ theorem hasCompactSupport_inner_cross
   change tensorInnerPointwise (I := I) (M := M) g r s x (S.toFun x) (T.toFun x) = 0
   rw [hSx_zero]
   exact tensorInnerPointwise_zero_left (I := I) (M := M) g r s x (T.toFun x)
-
-/-! ## Auxiliary lemmas (preserved from existing scaffolding) -/
 
 set_option linter.unusedSectionVars false in
 private lemma rs_baseSet_eq_chart_source (α : M) (r s : ℕ) :
@@ -306,8 +298,6 @@ private lemma inner_cross_eq_zero_off_S_support
   rw [hSx_zero]
   exact tensorInnerPointwise_zero_left (I := I) (M := M) g r s x (T.toFun x)
 
-/-! ## Continuity of the pointwise inner product on smooth sections -/
-
 set_option linter.unusedSectionVars false in
 /-- Continuity of the pointwise inner product on smooth `(r, s)`-tensor
 sections, applied diagonally. Combines the chart-local
@@ -349,8 +339,6 @@ theorem continuous_inner_cross
       TensorMetricLowering.continuous_loweredCompose
         (I := I) (M := M) g r s T.toSection α)
 
-/-! ## AE-strong measurability of the pointwise inner product -/
-
 set_option linter.unusedSectionVars false in
 /-- The diagonal pointwise inner product `b ↦ ⟨S(b), S(b)⟩_{g(b)}` is
 almost-everywhere strongly measurable with respect to the Riemannian
@@ -377,8 +365,6 @@ theorem aestronglyMeasurable_inner_cross
         (S.toFun x) (T.toFun x))
       (riemannianVolumeMeasure (I := I) (M := M) g) :=
   (continuous_inner_cross (I := I) (M := M) S T).aestronglyMeasurable
-
-/-! ## Bochner-integrability of the pointwise inner product -/
 
 set_option linter.unusedSectionVars false in
 /-- The cross pointwise inner product `b ↦ ⟨S(b), T(b)⟩_{g(b)}` is

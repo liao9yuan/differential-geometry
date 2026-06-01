@@ -69,8 +69,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -79,12 +77,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## Bridge: from chart-pushed POU `MemWkp 4 2` to manifold witness
-
-The bridge is direct: a `ChartH4NonSmoothPOUWitness` is by definition a
-record carrying the `MemWkp 4 2` membership of the chart-pushed POU
-function. Given that membership, the witness is immediate. -/
 
 /-- **Direct bridge: from `MemWkp 4 2` of the chart-pushed POU function
 to the manifold-level `H⁴` witness.** Given an explicit `MemWkp 4 2`
@@ -101,33 +93,6 @@ theorem chartH4NonSmoothPOUWitness_of_memWkp_four
     ChartH4NonSmoothPOUWitness (I := I) (M := M) g u α :=
   ChartH4NonSmoothPOUWitness.mk' (g := g) h
 
-/-! ## Headline: chart-local `H⁴` of POU-cut chart-pushed function as
-the construction target.
-
-The downstream consumer constructs the per-chart `MemWkp 4 2` of the
-chart-pushed POU function `chartPushed POU α (H1ComplToLp u_h).coeFn`
-via a chart-side bootstrap chain:
-
-1. From `chartH2NonSmoothPOUWitness_of_laplacianDomain` applied to `u_h`
-   and to `w_h` (the `H1Compl`-side lift of the `Lp` preimage of `u_h`
-   under the resolvent), we have `MemWkp 2 2` for both POU-cut chart-pushed
-   functions of `u_h.coeFn` and `(preimage u_h).coeFn`.
-2. The chart-bilinear identity (from `chartBilinearH1ComplData_of_laplacianDomain`)
-   couples these in a uniformly elliptic divergence-form variational
-   identity on the chart target.
-3. Differentiating the identity once and applying the chart-local
-   Nirenberg uniform difference-quotient bound (with appropriate
-   chart-side residual `MemW1p` discharge) gives `MemWkp 3 2` for the
-   chart-pulled `u_chart`.
-4. Differentiating again gives `MemWkp 4 2`.
-5. Transferring back to the chart-pushed POU function (via the
-   ae-equality on the chart target and the chart-side support
-   construction) gives the final `MemWkp 4 2` of the chart-pushed POU
-   function.
-
-The bridge `chartH4NonSmoothPOUWitness_of_memWkp_four` records the
-final step. -/
-
 /-- **Existence-of-witness form.** A `ChartH4NonSmoothPOUWitness` for a
 manifold function `u : M → ℝ` at a chart point `α : M` is equivalent to
 the existence of a `MemWkp 4 2` proof for the POU-cut chart-pushed
@@ -143,14 +108,6 @@ theorem chartH4NonSmoothPOUWitness_iff_memWkp_four
         (I := I) (M := M) α) :=
   ⟨fun h => h.memWkp_four,
    fun h => chartH4NonSmoothPOUWitness_of_memWkp_four g (u := u) (α := α) h⟩
-
-/-! ## Composition with the H⁴ chart-Sobolev headline
-
-The witness-based H⁴ headline `laplacianDomainPow_memWkpChart_four` is
-discharged once a family of `ChartH4NonSmoothPOUWitness` records is
-constructed. The discharge of the residual chart-side bridge from the
-chart-bilinear iterated regularity (`ChartH4NonSmooth`) to the
-chart-pushed POU `MemWkp 4 2` is the remaining infrastructure piece. -/
 
 /-- **The bridge consumed as a hypothesis.** A formal statement of the
 chart-side bridge from chart-local `H⁴` regularity of a manifold function

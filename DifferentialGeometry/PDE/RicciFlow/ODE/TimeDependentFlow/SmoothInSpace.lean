@@ -44,13 +44,10 @@ theorem time_dependent_vf_flow_smooth_in_space
         I.symm (flow (I ((chartAt H x) x)) t) ∈ (chartAt H x).target)) :
     ∀ t : ℝ, 0 < t → t < T → ContMDiff I I ∞ (Φ t) := by
   intro t ht_pos ht_lt
-  -- Global smoothness = pointwise smoothness at every `x`.
   apply chart_glue_smooth_of_chart_local_smooth
   intro x
-  -- Extract chart-local data at `x`.
   obtain ⟨ρ, hρ_pos, flow, hflow_smooth, hΦ_eq, hflow_target⟩ := hLocal x
   have ht_mem : t ∈ Set.Ioo (0 : ℝ) T := ⟨ht_pos, ht_lt⟩
-  -- Apply the chart-coord-to-manifold lift.
   exact manifold_contMDiffAt_of_chart_smooth_flow
     (α := x) (T := T) (hT := hT) (r' := ρ) (hr' := hρ_pos)
     (flow := flow) (ρ := ρ) (hρ := hρ_pos) (hρ_le := le_refl ρ)

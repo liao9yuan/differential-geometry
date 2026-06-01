@@ -97,21 +97,12 @@ open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Smooth twice-Leibniz cross-coefficients
-
-The mixed `(l₁, l₂)`-partial Frechet derivative of the smooth coefficient
-fields `weightedInvGramOnEuclid g α i j` and `densityOnEuclid g α` on
-`chartTargetEuclid α`. These functions arise as Leibniz cross-terms in the
-twice-differentiated variational identity. -/
 
 /-- The mixed `(l₁, l₂)`-partial Frechet derivative of
 `weightedInvGramOnEuclid g α i j`, evaluated against the `l₂`-th unit
@@ -130,8 +121,6 @@ def densitySecondDerivOnEuclid (g : SmoothRiemannianMetric I M) (α : M)
   (fderiv ℝ (densityDerivOnEuclid (I := I) g α l₁) y)
     (EuclideanSpace.single l₂ 1)
 
-/-! ## Smoothness of the twice-Leibniz cross-coefficients -/
-
 /-- The mixed `(l₁, l₂)`-partial Frechet derivative of
 `weightedInvGramOnEuclid g α i j` is smooth on `chartTargetEuclid α`. -/
 lemma weightedInvGramSecondDerivOnEuclid_contDiffOn
@@ -140,7 +129,6 @@ lemma weightedInvGramSecondDerivOnEuclid_contDiffOn
     (i j l₁ l₂ : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞ (weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂)
       (chartTargetEuclid (I := I) (M := M) α) := by
-  -- The once-differentiated coefficient is `C^∞` on the open chart-target.
   have h_smooth :
       ContDiffOn ℝ ∞ (weightedInvGramDerivOnEuclid (I := I) g α i j l₁)
         (chartTargetEuclid (I := I) (M := M) α) :=
@@ -254,8 +242,6 @@ lemma densitySecondDerivOnEuclid_bounded_on_compact
   refine ⟨|densitySecondDerivOnEuclid (I := I) g α l₁ l₂ y_max|, ?_⟩
   intro y hy
   exact h_max hy
-
-/-! ## The twice-differentiated chart-bilinear data structure -/
 
 /-- Packaged data describing the *twice-differentiated* chart-bilinear
 identity on `chartTargetEuclid α` obtained by formally differentiating a
@@ -435,11 +421,9 @@ structure DiffTwiceChartBilinearH1ComplData
       (∫ y in chartTargetEuclid (I := I) (M := M) α,
         densityOnEuclid (I := I) g α y * u_chart_second_deriv y * ψ y
         ∂(volume : Measure EuclN)) =
-      -- Principal RHS: the twice-differentiated `f_chart` term.
       (∫ y in chartTargetEuclid (I := I) (M := M) α,
         densityOnEuclid (I := I) g α y * f_chart_deriv2 y * ψ y
         ∂(volume : Measure EuclN)) -
-      -- Once-Leibniz layer (∂_{l₂} applied to principal once-diff'd block):
       (∫ y in chartTargetEuclid (I := I) (M := M) α,
         (∑ i : Fin (Module.finrank ℝ E),
           ∑ j : Fin (Module.finrank ℝ E),
@@ -455,8 +439,6 @@ structure DiffTwiceChartBilinearH1ComplData
         densityDerivOnEuclid (I := I) g α direction2 y *
           f_chart_deriv2 y * ψ y
         ∂(volume : Measure EuclN)) -
-      -- Once-Leibniz layer (∂_{l₂} applied to the once-diff'd weight matrix
-      -- block, hitting base.weak_partial):
       (∫ y in chartTargetEuclid (I := I) (M := M) α,
         (∑ i : Fin (Module.finrank ℝ E),
           ∑ j : Fin (Module.finrank ℝ E),
@@ -464,8 +446,6 @@ structure DiffTwiceChartBilinearH1ComplData
               weak_partial_deriv2 i y *
               (fderiv ℝ ψ y) (EuclideanSpace.single j 1))
         ∂(volume : Measure EuclN)) -
-      -- Twice-Leibniz layer (∂_{l₂} of weightedInvGramDeriv (·,l₁) hits
-      -- base.weak_partial):
       (∫ y in chartTargetEuclid (I := I) (M := M) α,
         (∑ i : Fin (Module.finrank ℝ E),
           ∑ j : Fin (Module.finrank ℝ E),
@@ -474,32 +454,24 @@ structure DiffTwiceChartBilinearH1ComplData
               base1.base.weak_partial i y *
               (fderiv ℝ ψ y) (EuclideanSpace.single j 1))
         ∂(volume : Measure EuclN)) -
-      -- Twice-Leibniz layer (∂_{l₂} of densityDeriv (·,l₁) hits base.u_chart):
       (∫ y in chartTargetEuclid (I := I) (M := M) α,
         densitySecondDerivOnEuclid (I := I) g α
             base1.direction direction2 y *
           base1.base.u_chart y * ψ y
         ∂(volume : Measure EuclN)) -
-      -- Once-Leibniz layer (∂_{l₂} of base.u_chart paired with
-      -- densityDeriv (·,l₁)):
       (∫ y in chartTargetEuclid (I := I) (M := M) α,
         densityDerivOnEuclid (I := I) g α base1.direction y *
           base1.base.weak_partial direction2 y * ψ y
         ∂(volume : Measure EuclN)) +
-      -- Twice-Leibniz layer (∂_{l₂} of densityDeriv (·,l₁) hits base.f_chart):
       (∫ y in chartTargetEuclid (I := I) (M := M) α,
         densitySecondDerivOnEuclid (I := I) g α
             base1.direction direction2 y *
           base1.base.f_chart y * ψ y
         ∂(volume : Measure EuclN)) +
-      -- Once-Leibniz layer (∂_{l₂} of base.f_chart paired with
-      -- densityDeriv (·,l₁)):
       (∫ y in chartTargetEuclid (I := I) (M := M) α,
         densityDerivOnEuclid (I := I) g α base1.direction y *
           f_chart_deriv2 y * ψ y
         ∂(volume : Measure EuclN))
-
-/-! ## Basic projection helpers -/
 
 /-- The base once-differentiated data of a `DiffTwiceChartBilinearH1ComplData`. -/
 abbrev base1Data
@@ -521,8 +493,6 @@ abbrev direction1
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : DiffTwiceChartBilinearH1ComplData (I := I) (M := M) g α) :
     Fin (Module.finrank ℝ E) := D.base1.direction
-
-/-! ## Headline ergonomics theorem -/
 
 /-- Headline form of the twice-differentiated chart-bilinear identity for
 a twice-differentiated `H1Compl` element: given the data `D`, the
@@ -599,8 +569,6 @@ theorem twice_differentiated_chart_bilinear_identity
       ∂(volume : Measure EuclN)) :=
   D.twice_differentiated_variational_identity ψ hψ hψ_cs hψ_supp
 
-/-! ## Pulling the base identities through -/
-
 /-- A `DiffTwiceChartBilinearH1ComplData` carries the *once-differentiated*
 identity intact via its `.base1` field. -/
 theorem differentiated_chart_bilinear_identity_via_base1
@@ -664,19 +632,6 @@ theorem base_chart_bilinear_identity_via_base1
       ∂(volume : Measure EuclN) :=
   D.base1.base.variational_identity ψ hψ hψ_cs hψ_supp
 
-/-! ## Connecting the twice-differentiated weak partials to the
-once-differentiated structure
-
-In the canonical construction, both `u_chart_second_deriv` and
-`u_chart_deriv2` are equal to `chosenWeakPartial' 2 direction2 base1.u_chart_deriv`
-(and similarly for the `weak_partial_*` fields). The two equal copies are
-recorded as separate fields to keep the variational identity readable; both
-satisfy `HasWeakPartialDeriv` against `base1.u_chart_deriv`. The lemma below
-captures the formal statement that the canonical second weak partial of
-`base1.base.u_chart` (the chart-pull of `u_h.coeFn`) equals
-`u_chart_second_deriv` once it is a weak partial of `base1.u_chart_deriv`,
-which itself is a weak partial of `base1.base.u_chart`. -/
-
 /-- `u_chart_second_deriv` is a weak `direction2`-partial of
 `base1.u_chart_deriv`, which is in turn a weak `direction1`-partial of
 `base1.base.u_chart`. Thus, formally, `u_chart_second_deriv` is a "mixed"
@@ -711,21 +666,6 @@ theorem weak_partial_second_deriv_isMixedWeakPartial
       (chartTargetEuclid (I := I) (M := M) α) :=
   ⟨D.weak_partial_second_deriv_isWeakPartial i,
    D.base1.weak_partial_deriv_isWeakPartial i⟩
-
-/-! ## Hypothesis-bearing constructor from `u_h ∈ laplacianDomainPow g 2`
-
-For `u_h ∈ laplacianDomainPow g 2` together with a base once-differentiated
-`DiffChartBilinearH1ComplData` `D₁`, this constructor packages the canonical
-twice-differentiated structure given:
-
-* The canonical chosen weak `direction2`-partials of
-  `D₁.u_chart_deriv`, `D₁.f_chart_deriv`, `D₁.weak_partial_deriv i` are
-  given as `MemW1p 2` witnesses on `chartTargetEuclid α`. The chosen
-  partials are then automatically weak partials and locally `MemLp 2`.
-
-* The twice-differentiated variational identity is accepted as the residual
-  analytic hypothesis. The identity records the formal integrated Leibniz
-  expansion as above. -/
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
@@ -1010,21 +950,6 @@ noncomputable def diffTwiceChartBilinearH1ComplData_of_diff
         (I := I) (M := M) (h_wpDeriv_memW1p i) l₂) hK hKin
   twice_differentiated_variational_identity := h_identity
 
-/-! ## Constructor from `u_h ∈ laplacianDomainPow g 2`
-
-Building on `diffChartBilinearH1ComplData_of_laplacianDomainPow_two` (the
-once-differentiated constructor from `u_h ∈ laplacianDomainPow g 2`), the
-twice-differentiated data structure is constructed canonically by passing the
-once-differentiated data as `base1` and supplying:
-
-* `MemW1p 2` witnesses for each of `D₁.u_chart_deriv`, `D₁.f_chart_deriv`,
-  `D₁.weak_partial_deriv i` (the analytic ingredients for `H³` regularity);
-* the twice-differentiated variational identity (the analytic content
-  of differentiating the chart-bilinear identity twice).
-
-These hypotheses are the natural inputs whose discharge constitutes the
-chart-side `H⁴` bootstrap. -/
-
 /-- **Hypothesis-bearing constructor from `u_h ∈ laplacianDomainPow g 2`.**
 
 Takes `u_h ∈ laplacianDomainPow g 2`, a first direction `l₁` for the
@@ -1041,7 +966,6 @@ noncomputable def diffTwiceChartBilinearH1ComplData_of_laplacianDomainPow_two
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
     (l₁ l₂ : Fin (Module.finrank ℝ E))
-    -- Once-differentiated residuals:
     (h_base_f_chart_memW1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
       (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
         (laplacianDomainPow_succ_subset_laplacianDomain
@@ -1089,8 +1013,6 @@ noncomputable def diffTwiceChartBilinearH1ComplData_of_laplacianDomainPow_two
               (laplacianDomainPow_succ_subset_laplacianDomain
                 (I := I) (M := M) g 1 hu_h)).f_chart y * ψ y
           ∂(volume : Measure EuclN)))
-    -- Twice-differentiated residuals (`MemW1p 2` on the chart target for each
-    -- once-differentiated scalar field; identity ψ-tested):
     (h_uDeriv_memW1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
       (diffChartBilinearH1ComplData_of_laplacianDomainPow_two
         (I := I) (M := M) g α hu_h l₁

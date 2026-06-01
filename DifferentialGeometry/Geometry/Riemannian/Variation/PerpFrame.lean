@@ -556,20 +556,16 @@ theorem exists_parallel_orthonormal_perp_frame_along_geodesic
       (∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i,
         g.inner (γ t) ((e i).toFun t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) = 0) := by
   classical
-  -- The base point, velocity, and the bilinear form `B := g.inner (γ 0)`.
   set u₀ : E := (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ) : E) with hu₀_def
   set B : E →L[ℝ] E →L[ℝ] ℝ := g.inner (γ 0) with hB_def
   have hBsymm : ∀ x y : E, B x y = B y x := fun x y => g.symm (γ 0) x y
   have hBpos : ∀ x : E, x ≠ 0 → 0 < B x x := fun x hx => g.pos (γ 0) x hx
   have h0mem : (0 : ℝ) ∈ Set.Icc (0 : ℝ) L := ⟨le_refl _, hL.le⟩
-  -- `u₀` is `B`-unit, hence nonzero, and the functional `B u₀` is nonzero.
   have hu₀_unit : B u₀ u₀ = 1 := hUnit 0 h0mem
   have hu₀_ne : u₀ ≠ 0 := by
     intro h; rw [h] at hu₀_unit; simp at hu₀_unit
-  -- The `g`-orthogonal complement of `u₀`: the kernel of the functional `B u₀`.
   set φ : E →ₗ[ℝ] ℝ := (B u₀).toLinearMap with hφ_def
   set W : Submodule ℝ E := LinearMap.ker φ with hW_def
-  -- `φ` is surjective (since `φ u₀ = 1 ≠ 0`), so `finrank W = finrank E - 1`.
   have hφ_u₀ : φ u₀ = 1 := hu₀_unit
   have hφ_surj : Function.Surjective φ := by
     intro c
@@ -583,31 +579,26 @@ theorem exists_parallel_orthonormal_perp_frame_along_geodesic
     rw [hfr_range] at hsum
     have : Module.finrank ℝ ↥W = Module.finrank ℝ ↥(LinearMap.ker φ) := rfl
     rw [this]; omega
-  -- A basis of `W`, indexed by `Fin (finrank E - 1)`.
   letI : Module.Finite ℝ ↥W := inferInstance
   set bW : Module.Basis (Fin (Module.finrank ℝ E - 1)) ℝ ↥W :=
     Module.finBasisOfFinrankEq ℝ ↥W hfinrankW with hbW_def
-  -- The basis vectors as a `B`-linearly-independent family of `E`-vectors in `W`.
   set vfam : Fin (Module.finrank ℝ E - 1) → E := fun i => (bW i : E) with hvfam_def
   have hvfam_mem : ∀ i, vfam i ∈ W := fun i => (bW i).2
   have hvfam_LI : LinearIndependent ℝ vfam := by
     have hbWLI : LinearIndependent ℝ (fun i => bW i) := bW.linearIndependent
     have := hbWLI.map' (W.subtype) (Submodule.ker_subtype W)
     exact this
-  -- The `B`-orthonormal Gram–Schmidt seed of the perpendicular subspace.
   set seed : Fin (Module.finrank ℝ E - 1) → E :=
     fun i => PerpFrameAux.bGramSchmidt B vfam i with hseed_def
   have hseed_ON : ∀ i j, B (seed i) (seed j) = if i = j then 1 else 0 :=
     fun i j => PerpFrameAux.bGramSchmidt_orthonormal B hBsymm hBpos vfam hvfam_LI i j
   have hseed_mem : ∀ i, seed i ∈ W :=
     fun i => PerpFrameAux.bGramSchmidt_mem B vfam W hvfam_mem i
-  -- Each seed vector is `g`-orthogonal to `u₀` (it lies in `W = ker (B u₀)`).
   have hseed_perp : ∀ i, B (seed i) u₀ = 0 := by
     intro i
     have hker : φ (seed i) = 0 := (LinearMap.mem_ker).mp (hseed_mem i)
     have : B u₀ (seed i) = 0 := hker
     rw [hBsymm (seed i) u₀]; exact this
-  -- Parallel-transport each seed vector along `γ` over `Icc 0 L`.
   have htransport : ∀ i, ∃ V : ∀ t, TangentSpace I (γ t),
       V 0 = seed i ∧
       (∀ t ∈ Set.Icc (0 : ℝ) L, DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t) ∧
@@ -616,32 +607,25 @@ theorem exists_parallel_orthonormal_perp_frame_along_geodesic
     exact DifferentialGeometry.Geometry.Riemannian.Variation.exists_parallel_transport_on_Icc
       (I := I) g γ hγ hL (seed i)
   choose Vfun hV0 hVdiff hVpar using htransport
-  -- The frame: each transported section, wrapped as a `SectionAlongCurve`.
   refine ⟨fun i => ⟨fun t => Vfun i t⟩, ?_, ?_, ?_, ?_⟩
-  · -- Chart-representation differentiability (from the global transport).
-    intro i t ht; exact hVdiff i t ht
-  · -- Parallelism: intrinsic covariant derivative vanishes (from the transport).
-    intro i t ht; exact hVpar i t ht
-  · -- `g`-orthonormality: transport is a `g`-isometry, seed is `g`-orthonormal.
-    intro t ht i j
+  · intro i t ht; exact hVdiff i t ht
+  · intro i t ht; exact hVpar i t ht
+  · intro t ht i j
     have hconst :=
       DifferentialGeometry.Geometry.Riemannian.Variation.parallel_transport_preserves_inner_product
         (I := I) g γ hγ hL.le (Vfun i) (Vfun j)
         (hVdiff i) (hVdiff j) (hVpar i) (hVpar j) t ht
-    -- `g.inner (γ t) (Vi t) (Vj t) = g.inner (γ 0) (seed i) (seed j) = B (seed i)(seed j)`.
     rw [show ((fun i => (⟨fun t => Vfun i t⟩ : SectionAlongCurve I M γ)) i).toFun t = Vfun i t
         from rfl,
       show ((fun i => (⟨fun t => Vfun i t⟩ : SectionAlongCurve I M γ)) j).toFun t = Vfun j t
         from rfl]
     rw [hconst, hV0 i, hV0 j]
     exact hseed_ON i j
-  · -- `g`-perpendicularity to the velocity (from `perp_to_velocity_preserved_of_parallel`).
-    intro t ht i
+  · intro t ht i
     have hperp :=
       perp_to_velocity_preserved_of_parallel (I := I) g γ hγ hgeo hL (Vfun i)
         (hVdiff i) (hVpar i)
         (by
-          -- `g.inner (γ 0) (Vi 0) (dγ_0 1) = B (seed i) u₀ = 0`.
           rw [hV0 i]
           exact hseed_perp i)
         t ht
@@ -680,8 +664,6 @@ theorem parallel_on_frame_perp_to_geodesic
           if i = j then 1 else 0) ∧
       (∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i,
         g.inner (γ t) ((e i).toFun t) (uPrime t) = 0) := by
-  -- Feed the proven frame's `hUnit` (phrased on `mfderiv γ t 1`) by rewriting
-  -- the supplied unit-speed hypothesis through `huPrimeEq`.
   have hUnit' : ∀ t ∈ Set.Icc (0 : ℝ) L,
       g.inner (γ t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E)
         (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) = 1 := by
@@ -690,8 +672,6 @@ theorem parallel_on_frame_perp_to_geodesic
   obtain ⟨e, hdiff, hpar, hON, hperp⟩ :=
     exists_parallel_orthonormal_perp_frame_along_geodesic (I := I) g γ hγ hgeo hL hUnit'
   refine ⟨e, hdiff, hpar, hON, ?_⟩
-  -- Transfer the perpendicularity clause: the proven frame is `g`-orthogonal to
-  -- `mfderiv γ t 1`; rewrite to `uPrime t` via `huPrimeEq`.
   intro t ht i
   have := hperp t ht i
   rwa [huPrimeEq t ht] at this
@@ -707,35 +687,12 @@ theorem chartCovDerivAlong_movingFoot_eq_zero_of_isParallelChart_centered
       (fun τ => deriv (AlongCurve.chartCurve (I := I) (γ t) γ) τ) X s)
     (ht : t ∈ s) :
     chartCovDerivAlong (I := I) g (γ t) γ X t = 0 := by
-  -- The parallel-transport ODE at `t` gives the time-derivative of `X`.
   have hd := hX.hasDerivAt ht
-  -- Extract `deriv X t` from `HasDerivAt`.
   have hderiv := hd.deriv
-  -- Unfold the covariant-derivative formula and substitute.
   rw [chartCovDerivAlong_def, hderiv]
   abel
 
 end PerpFrame
-
-/-! ## Globally-smooth parallel orthonormal perpendicular frame
-
-The previous `exists_parallel_orthonormal_perp_frame_along_geodesic` produces a frame whose
-members are *chart-differentiable* and parallel on `Icc 0 L`; it makes no claim
-about bundle-`C^∞` regularity, and indeed the bare parallel-transport sections
-are constructed by chart-gluing and are not even defined as bundle-smooth fields.
-
-The Bonnet–Myers length-bound contradiction additionally needs each frame vector
-`e i` to be a **globally bundle-`C^∞`** section `t ↦ ⟨γ t, (e i) t⟩` on all of
-`ℝ` (so that the sinusoidal test field `sin(πt/L) • e i` — supported on `[0, L]`
-but extended by `0` — is itself globally smooth).  This is achieved by:
-
-* transporting each orthonormal seed vector along `γ` with the *smooth* transport
-  `parallelTransport_section_contMDiffOn_Ioo`, which yields a section that is
-  bundle-`C^∞` on an open neighbourhood `Ioo (-δ) (L + δ)` of `Icc 0 L`; then
-* multiplying by a smooth cut-off `χ` equal to `1` on `Icc 0 L` and supported in
-  `Ioo (-δ) (L + δ)`, giving a globally-defined section that equals the transport
-  on `Icc 0 L` (so all four frame identities survive) and is globally `C^∞`
-  (`0` off the cut-off support, `χ • V` on the open smooth window). -/
 
 section SmoothPerpFrame
 
@@ -786,7 +743,6 @@ complement of the support. -/
 theorem exists_cutoff_one_on_Icc_supported_Ioo {L δ : ℝ} (hδ : 0 < δ) :
     ∃ χ : ℝ → ℝ, ContDiff ℝ (∞ : WithTop ℕ∞) χ ∧ Set.EqOn χ 1 (Set.Icc 0 L) ∧
       tsupport χ ⊆ Set.Ioo (-δ : ℝ) (L + δ) ∧ ∀ x, χ x ∈ Set.Icc (0 : ℝ) 1 := by
-  -- Vanish already outside the half-window `Ioo (-δ/2) (L + δ/2)`.
   have hδ2 : (0 : ℝ) < δ / 2 := by linarith
   have hclosed_t : IsClosed (Set.Icc (0 : ℝ) L) := isClosed_Icc
   have hclosed_s : IsClosed ((Set.Ioo (-(δ / 2) : ℝ) (L + δ / 2))ᶜ) :=
@@ -802,9 +758,7 @@ theorem exists_cutoff_one_on_Icc_supported_Ioo {L δ : ℝ} (hδ : 0 < δ) :
   · have hcd : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (f : ℝ → ℝ) := by
       rw [← contMDiff_iff_contDiff]; exact f.contMDiff
     exact hcd
-  · -- `tsupport f = closure (support f) ⊆ closure (Ioo (-δ/2) (L+δ/2))
-    --   = Icc (-δ/2) (L+δ/2) ⊆ Ioo (-δ) (L+δ)`.
-    have hsupp : Function.support (f : ℝ → ℝ) ⊆ Set.Ioo (-(δ / 2) : ℝ) (L + δ / 2) := by
+  · have hsupp : Function.support (f : ℝ → ℝ) ⊆ Set.Ioo (-(δ / 2) : ℝ) (L + δ / 2) := by
       intro x hx
       by_contra hxc
       exact hx (hf0 hxc)
@@ -1021,7 +975,6 @@ theorem velocity_chartRepAt_differentiableAt
     have hfun : (chartCurve (I := I) α γ) = ((extChartAt I α) ∘ γ) := rfl
     rw [hfun]
     exact contMDiffOn_iff_contDiffOn.mp h_comp_mdiff
-  -- `urep` agrees with `deriv (chartCurve α γ)` on `U`, hence near `t`.
   have hurep_eqOn : Set.EqOn urep (deriv (chartCurve (I := I) α γ)) U := by
     intro s hs
     have hs' : γ s ∈ (chartAt H α).source := hs
@@ -1031,7 +984,6 @@ theorem velocity_chartRepAt_differentiableAt
     rfl
   have hurep_eq : urep =ᶠ[𝓝 t] deriv (chartCurve (I := I) α γ) :=
     hurep_eqOn.eventuallyEq_of_mem hU_nhds
-  -- `deriv (chartCurve α γ)` is `C^∞` on `U`, hence differentiable at `t`.
   have hderiv_u_cdiffOn :
       ContDiffOn ℝ ∞ (deriv (chartCurve (I := I) α γ)) U :=
     hu_cdiffOn.deriv_of_isOpen hU_open (by exact_mod_cast (le_refl (∞ : WithTop ℕ∞)))
@@ -1082,17 +1034,14 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
           (γ t) ((e i).toFun t))) := by
   classical
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
-  -- The base point, velocity, and the bilinear form `B := g.inner (γ 0)`.
   set u₀ : E := (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ) : E) with hu₀_def
   set B : E →L[ℝ] E →L[ℝ] ℝ := g.inner (γ 0) with hB_def
   have hBsymm : ∀ x y : E, B x y = B y x := fun x y => g.symm (γ 0) x y
   have hBpos : ∀ x : E, x ≠ 0 → 0 < B x x := fun x hx => g.pos (γ 0) x hx
   have h0mem : (0 : ℝ) ∈ Set.Icc (0 : ℝ) L := ⟨le_refl _, hL.le⟩
-  -- `u₀` is `B`-unit, hence nonzero.
   have hu₀_unit : B u₀ u₀ = 1 := hUnit0
   have hu₀_ne : u₀ ≠ 0 := by
     intro h; rw [h] at hu₀_unit; simp at hu₀_unit
-  -- The `g`-orthogonal complement of `u₀`: the kernel of the functional `B u₀`.
   set φ : E →ₗ[ℝ] ℝ := (B u₀).toLinearMap with hφ_def
   set W : Submodule ℝ E := LinearMap.ker φ with hW_def
   have hφ_u₀ : φ u₀ = 1 := hu₀_unit
@@ -1108,7 +1057,6 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
     rw [hfr_range] at hsum
     have : Module.finrank ℝ ↥W = Module.finrank ℝ ↥(LinearMap.ker φ) := rfl
     rw [this]; omega
-  -- A basis of `W`, indexed by `Fin (finrank E - 1)`.
   letI : Module.Finite ℝ ↥W := inferInstance
   set bW : Module.Basis (Fin (Module.finrank ℝ E - 1)) ℝ ↥W :=
     Module.finBasisOfFinrankEq ℝ ↥W hfinrankW with hbW_def
@@ -1118,7 +1066,6 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
     have hbWLI : LinearIndependent ℝ (fun i => bW i) := bW.linearIndependent
     have := hbWLI.map' (W.subtype) (Submodule.ker_subtype W)
     exact this
-  -- The `B`-orthonormal Gram–Schmidt seed of the perpendicular subspace.
   set seed : Fin (Module.finrank ℝ E - 1) → E :=
     fun i => PerpFrameAux.bGramSchmidt B vfam i with hseed_def
   have hseed_ON : ∀ i j, B (seed i) (seed j) = if i = j then 1 else 0 :=
@@ -1130,8 +1077,6 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
     have hker : φ (seed i) = 0 := (LinearMap.mem_ker).mp (hseed_mem i)
     have : B u₀ (seed i) = 0 := hker
     rw [hBsymm (seed i) u₀]; exact this
-  -- Smoothly parallel-transport each seed vector along `γ` on an open
-  -- neighbourhood of `Icc 0 L`, producing a bundle-smooth section there.
   have htransport : ∀ i, ∃ (δ : ℝ) (_ : 0 < δ) (V : ∀ t, TangentSpace I (γ t)),
       V 0 = seed i ∧
       (∀ t ∈ Set.Ioo (-δ) (L + δ), DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t) ∧
@@ -1141,18 +1086,14 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
         (Set.Ioo (-δ) (L + δ)) :=
     fun i => parallelTransport_section_contMDiffOn_Ioo (I := I) g γ hγ hL (seed i)
   choose δ hδ_pos Vfun hV0 hVdiff_Ioo hVpar_Ioo hVbundle_Ioo using htransport
-  -- For each `i`, a smooth cut-off `χ i` equal to `1` on `Icc 0 L` and supported
-  -- in `Ioo (-δ i) (L + δ i)`; the cut-off section `e i := χ i • V i`.
   have hcutoff : ∀ i, ∃ χ : ℝ → ℝ, ContDiff ℝ (∞ : WithTop ℕ∞) χ ∧
       Set.EqOn χ 1 (Set.Icc 0 L) ∧
       tsupport χ ⊆ Set.Ioo (-(δ i)) (L + δ i) ∧ ∀ x, χ x ∈ Set.Icc (0 : ℝ) 1 :=
     fun i => exists_cutoff_one_on_Icc_supported_Ioo (hδ_pos i)
   choose χ hχ_cd hχ_one hχ_tsupp hχ_Icc using hcutoff
-  -- On `Icc 0 L`, `χ i = 1`, so `(e i).toFun = Vfun i`.
   have he_eq_on : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L, χ i t • Vfun i t = Vfun i t := by
     intro i t ht
     rw [hχ_one i ht]; simp
-  -- The diff/parallelism hypotheses on `Icc 0 L` (from the open-neighbourhood data).
   have hsub : ∀ i, Set.Icc (0 : ℝ) L ⊆ Set.Ioo (-(δ i)) (L + δ i) := by
     intro i t ht
     exact ⟨by linarith [ht.1, hδ_pos i], by linarith [ht.2, hδ_pos i]⟩
@@ -1162,17 +1103,12 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
   have hVpar : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
       covDerivAlong (I := I) g γ (Vfun i) t = 0 :=
     fun i t ht => hVpar_Ioo i t (hsub i ht)
-  -- The cut-off section's chart representation is the `χ`-scaling of the
-  -- transport's: `chartRepAt γ (χ•V) t = (fun s => χ i s • chartRepAt γ V t s)`,
-  -- because the chart coordinate is fibrewise-linear.
   have hchartRep_smul : ∀ i (t : ℝ),
       chartRepAt (I := I) γ (fun s => χ i s • Vfun i s) t =
         fun s => χ i s • chartRepAt (I := I) γ (Vfun i) t s := by
     intro i t
     funext s
     rw [chartRepAt_apply, chartRepAt_apply, map_smul]
-  -- On `Icc 0 L`, `χ i` attains its global maximum (it equals `1` there and is
-  -- `≤ 1` everywhere), so its derivative vanishes on `Icc 0 L`.
   have hχ_deriv_zero : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L, deriv (χ i) t = 0 := by
     intro i t ht
     have hmax : IsLocalMax (χ i) t := by
@@ -1182,9 +1118,6 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
         exact (hχ_Icc i s).2
       exact Filter.Eventually.of_forall hle
     exact hmax.deriv_eq_zero
-  -- Unit-speed propagation: the velocity field is parallel on `Icc 0 L`
-  -- (geodesic), and its chart representation is differentiable, so its `g`-norm
-  -- is constant; pinned to `1` at `t = 0` by `hUnit0`.
   have hvel_par : ∀ t ∈ Set.Icc (0 : ℝ) L,
       covDerivAlong (I := I) g γ
         (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E)) t = 0 := by
@@ -1205,26 +1138,18 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
         (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E))
         hvel_diff hvel_diff hvel_par hvel_par t ht
     rw [hconst]; exact hUnit0
-  -- The frame.
   refine ⟨fun i => ⟨fun t => χ i t • Vfun i t⟩, ?_, ?_, ?_, ?_, ?_⟩
-  · -- Chart-representation differentiability on `Icc 0 L`.
-    intro i t ht
+  · intro i t ht
     change DifferentiableAt ℝ (chartRepAt (I := I) γ (fun s => χ i s • Vfun i s) t) t
     rw [hchartRep_smul i t]
     exact (((hχ_cd i).differentiable (by simp)).differentiableAt).smul (hVdiff i t ht)
-  · -- Parallelism on `Icc 0 L`.  By the Leibniz rule
-    -- `covDerivAlong (χ • V) t = (deriv χ t) • V t + χ t • covDerivAlong V t`;
-    -- here `deriv χ t = 0`, `χ t = 1`, `covDerivAlong V t = 0`, so the result is `0`.
-    intro i t ht
+  · intro i t ht
     change covDerivAlong (I := I) g γ (fun s => χ i s • Vfun i s) t = 0
     rw [covDerivAlong_smulFun (I := I) g γ (χ i) (Vfun i) t
       (((hχ_cd i).differentiable (by simp)).differentiableAt) (hVdiff i t ht)]
     rw [hχ_deriv_zero i t ht, hχ_one i ht, hVpar i t ht]
     simp
-  · -- `g`-orthonormality on `Icc 0 L`: on `Icc 0 L`, `e i = Vfun i`, and parallel
-    -- transport preserves the `g`-inner product, so it equals the seed's
-    -- `B`-orthonormality.
-    intro t ht i j
+  · intro t ht i j
     change g.inner (γ t) (χ i t • Vfun i t) (χ j t • Vfun j t) = if i = j then 1 else 0
     have hχi : χ i t = 1 := by have := hχ_one i ht; simpa using this
     have hχj : χ j t = 1 := by have := hχ_one j ht; simpa using this
@@ -1234,9 +1159,7 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
         (Vfun i) (Vfun j) (hVdiff i) (hVdiff j) (hVpar i) (hVpar j) t ht
     rw [hconst, hV0 i, hV0 j]
     exact hseed_ON i j
-  · -- `g`-perpendicularity to the velocity on `Icc 0 L`: on `Icc 0 L`, `e i =
-    -- Vfun i`, and perpendicularity to the (parallel) velocity is preserved.
-    intro t ht i
+  · intro t ht i
     change g.inner (γ t) (χ i t • Vfun i t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) = 0
     have hχi : χ i t = 1 := by have := hχ_one i ht; simpa using this
     rw [hχi, one_smul]
@@ -1246,33 +1169,20 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
         (by rw [hV0 i]; exact hseed_perp i)
         t ht
     exact hperp
-  · -- Global bundle-`C^∞` of `t ↦ ⟨γ t, χ i t • Vfun i t⟩`.
-    intro i
-    -- The transport is bundle-`C^∞` on the open window `Ioo (-δ i) (L + δ i)`.
-    -- The cut-off `χ i` is globally `C^∞`, supported in that window.  The product
-    -- is globally `C^∞`: `0` off the support (closed in the window's complement),
-    -- and `χ i • Vfun i` on the window.
+  · intro i
     set Ω : Set ℝ := Set.Ioo (-(δ i)) (L + δ i) with hΩ_def
     have hΩ_open : IsOpen Ω := isOpen_Ioo
-    -- The (closed) support of `χ i` is compactly contained in the (open) window `Ω`.
     have hsupp_sub : tsupport (χ i) ⊆ Ω := hχ_tsupp i
-    -- Bundle-smoothness, proved pointwise via the two-region split.
     intro t₀
     by_cases ht₀ : t₀ ∈ Ω
-    · -- Interior of the window: the product equals `χ i • (transport)`, which is
-      -- bundle-smooth by the cut-off-of-bundle-field lemma, restricted to `Ω`.
-      have hχ_smooth : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞) (χ i) := by
+    · have hχ_smooth : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞) (χ i) := by
         rw [contMDiff_iff_contDiff]; exact hχ_cd i
-      -- On `Ω`, the bundle field `t ↦ ⟨γ t, χ i t • Vfun i t⟩` is smooth at `t₀`.
       have hbundleAt : ContMDiffWithinAt 𝓘(ℝ, ℝ) I.tangent ∞
           (fun t => TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
             (γ t) (χ i t • Vfun i t)) Ω t₀ := by
-        -- Apply the cut-off lemma to the `Ω`-restricted smooth transport.  Since
-        -- `Ω` is open and `t₀ ∈ Ω`, we transfer to `ContMDiffWithinAt`.
         have htransportAt : ContMDiffWithinAt 𝓘(ℝ, ℝ) I.tangent ∞
             (fun t => TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
               (γ t) (Vfun i t)) Ω t₀ := hVbundle_Ioo i t₀ ht₀
-        -- Fibrewise-linear cut-off, at the level of `ContMDiffWithinAt`.
         rw [Bundle.contMDiffWithinAt_totalSpace] at htransportAt ⊢
         refine ⟨htransportAt.1, ?_⟩
         have hVfib := htransportAt.2
@@ -1301,16 +1211,10 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
               (trivializationAt E (TangentSpace I) (γ t₀)).apply_eq_prod_continuousLinearEquivAt
                 ℝ (γ t₀) hmem]
           exact map_smul _ _ _
-      -- Since `Ω` is open and `t₀ ∈ Ω`, `ContMDiffWithinAt Ω` upgrades to
-      -- `ContMDiffAt`.
       exact (hbundleAt.contMDiffAt (hΩ_open.mem_nhds ht₀))
-    · -- Outside the window: `χ i = 0` on a neighbourhood of `t₀` (the open
-      -- complement of `tsupport (χ i)`), so the product section is `⟨γ t, 0⟩`
-      -- there, hence smooth (the zero section is smooth).
-      have ht₀_notsupp : t₀ ∉ tsupport (χ i) := fun h => ht₀ (hsupp_sub h)
+    · have ht₀_notsupp : t₀ ∉ tsupport (χ i) := fun h => ht₀ (hsupp_sub h)
       have hcompl_open : IsOpen (tsupport (χ i))ᶜ := (isClosed_tsupport (χ i)).isOpen_compl
       have hcompl_nhds : (tsupport (χ i))ᶜ ∈ 𝓝 t₀ := hcompl_open.mem_nhds ht₀_notsupp
-      -- On this neighbourhood, `χ i t = 0`, so the section is the zero section.
       have hzero_eq : (fun t => TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
             (γ t) (χ i t • Vfun i t))
           =ᶠ[𝓝 t₀]
@@ -1319,7 +1223,6 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
         have hχt : χ i t = 0 := image_eq_zero_of_notMem_tsupport ht
         rw [hχt, zero_smul]
       refine ContMDiffAt.congr_of_eventuallyEq ?_ hzero_eq
-      -- The zero section is bundle-smooth: `t ↦ ⟨γ t, 0⟩ = zeroSection ∘ γ`.
       have hzs : ContMDiffAt 𝓘(ℝ, ℝ) I.tangent ∞
           (fun t => TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) 0) t₀ := by
         have := (Bundle.contMDiffAt_zeroSection (F := E) ℝ

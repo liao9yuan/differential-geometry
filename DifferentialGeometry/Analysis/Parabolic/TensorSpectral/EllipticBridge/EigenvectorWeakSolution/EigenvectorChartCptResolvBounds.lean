@@ -97,26 +97,12 @@ open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## A scalar inequality: `μ · μ⁻¹^eN ≤ μ⁻¹^eN`
-
-The rescale multiplies the eigenvector chart-component bound `CN · μ⁻¹^eN` by
-`‖μ‖ = μ` (positivity), yielding `CN · μ · μ⁻¹^eN`. Since `μ ∈ (0, 1]`, the
-factor `μ` is at most `1` and at most `μ⁻¹`, so
-`μ · μ⁻¹^eN = μ⁻¹^(eN - 1) ≤ μ⁻¹^eN` for `eN ≥ 1`, and `μ · 1 = μ ≤ 1` for
-`eN = 0`. In both cases the exponent stays at `eN`. -/
 
 omit [CompleteSpace E] in
 /-- `μ · μ⁻¹^eN ≤ μ⁻¹^eN` whenever `0 < μ ≤ 1`. -/
@@ -128,16 +114,6 @@ private lemma mu_mul_inv_pow_le_inv_pow
   have h : μ * μ⁻¹ ^ eN ≤ 1 * μ⁻¹ ^ eN :=
     mul_le_mul_of_nonneg_right hμ_le_one hμ_inv_pow_nn
   simpa using h
-
-/-! ## Chart-locality-free twins
-
-The declarations below are keyed on the intrinsic compact-operator eigenbasis,
-with no chart-selection hypothesis. Each proves its statement using
-`tensorResolventEigenbasisVec
-(tensorResolventL2_isCompactOperator g r s)` together with the
-intrinsic atlas-free operators `eigenvectorChartComponentFun_unconditional` and
-`eigenvectorResolvent`. `[CompleteSpace E]` is a section
-hypothesis throughout. -/
 
 section Unconditional
 
@@ -217,7 +193,6 @@ theorem eigenvector_chartComponent_perK_from_uniform_β_unconditional
                 (tensorResolventL2_isCompactOperator (I := I) (M := M)
                   g r s) i‖ := by
   intro K' hK' i
-  -- `wkpNorm K' ≤ wkpNorm N` by monotonicity in the regularity order.
   have h_mono : wkpNorm (d := Module.finrank ℝ E) K' 2
         (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
           g r s i α P₀)
@@ -279,7 +254,6 @@ private lemma resolvent_chartComponent_coe_ae_eq
       (fun y => i.fst.val *
         eigenvectorChartComponentFun_unconditional (I := I) (M := M)
           g r s i β Q y) := by
-  -- The Lp identity transferred to coeFn.
   have h_smul := Lp.coeFn_smul i.fst.val
     (tensorL2ChartComponent (I := I) (M := M) g r s
       (tensorResolventEigenbasisVec (I := I) (M := M)
@@ -318,7 +292,6 @@ private lemma eigenvectorChartComponentFun_memWkp_of_resolv
   classical
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) β with hΩ_def
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) β
-  -- Scale the resolvent regularity by `(i.fst.val)⁻¹`.
   have h_scaled : MemWkp (d := Module.finrank ℝ E) K' 2
       (fun y => (i.fst.val)⁻¹ *
         ((tensorL2ChartComponent (I := I) (M := M) g r s
@@ -328,7 +301,6 @@ private lemma eigenvectorChartComponentFun_memWkp_of_resolv
             EuclN → ℝ) y) Ω :=
     MemWkp.const_smul (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_resolv (i.fst.val)⁻¹
-  -- The inverse rescale: `eigenvector chart cpt =ᵐ (i.fst.val)⁻¹ * resolvent chart cpt`.
   have h_ae : (fun y => (i.fst.val)⁻¹ *
         ((tensorL2ChartComponent (I := I) (M := M) g r s
             (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
@@ -344,7 +316,6 @@ private lemma eigenvectorChartComponentFun_memWkp_of_resolv
     filter_upwards [h_resc] with y hy
     rw [hy]
     field_simp
-  -- Transfer `MemWkp` through the a.e. equality.
   exact (MemWkp_congr_ae (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae).mp h_scaled
 
@@ -393,12 +364,10 @@ theorem eigenvector_resolventHigh_perK_from_uniform_β_unconditional
   intro K' hK' i β Q
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) β with hΩ_def
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) β
-  -- The resolvent eigenvalue lies in `(0, 1]`.
   have hμ_pos : 0 < i.fst.val := eigenval_pos_local
     (I := I) (M := M) g r s i
   have hμ_le_one : i.fst.val ≤ 1 := eigenval_le_one_local
     (I := I) (M := M) g r s i
-  -- The resolvent chart-component regularity at order `K' + 1`.
   have h_resolv_mem : MemWkp (d := Module.finrank ℝ E) (K' + 1) 2
       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
           (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
@@ -406,16 +375,13 @@ theorem eigenvector_resolventHigh_perK_from_uniform_β_unconditional
           β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
       Ω :=
     h_pou_resolv i K' β Q hK'
-  -- Derived regularity for the eigenvector chart component at order `K' + 1`.
   have h_eig_mem : MemWkp (d := Module.finrank ℝ E) (K' + 1) 2
       (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
         g r s i β Q) Ω :=
     eigenvectorChartComponentFun_memWkp_of_resolv
       (I := I) (M := M) g r s i β Q (K' + 1) h_resolv_mem
-  -- The rescale identity at the coeFn level.
   have h_ae := resolvent_chartComponent_coe_ae_eq
     (I := I) (M := M) g r s i β Q
-  -- Rewrite the `wkpNorm` through the a.e. equality.
   have h_norm_eq : wkpNorm (d := Module.finrank ℝ E) (K' + 1) 2
       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
           (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
@@ -427,7 +393,6 @@ theorem eigenvector_resolventHigh_perK_from_uniform_β_unconditional
             g r s i β Q y) Ω :=
     wkpNorm_congr_ae (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae
-  -- Factor the scalar out of the eigenvector-side norm.
   have h_smul_eq : wkpNorm (d := Module.finrank ℝ E) (K' + 1) 2
       (fun y => i.fst.val *
         eigenvectorChartComponentFun_unconditional (I := I) (M := M)
@@ -438,7 +403,6 @@ theorem eigenvector_resolventHigh_perK_from_uniform_β_unconditional
             g r s i β Q) Ω :=
     wkpNorm_const_smul (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_eig_mem i.fst.val
-  -- The Headline-1 bound at `(β, Q)` at order `K' + 1 ≤ N`.
   have h_eig_bd : wkpNorm (d := Module.finrank ℝ E) (K' + 1) 2
       (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
         g r s i β Q) Ω
@@ -449,13 +413,10 @@ theorem eigenvector_resolventHigh_perK_from_uniform_β_unconditional
               g r s) i‖ :=
     eigenvector_chartComponent_perK_from_uniform_β_unconditional
       (I := I) (M := M) g r s N CN hCN_nn eN hCN_bd β Q (K' + 1) hK' i
-  -- Combine.
   rw [h_norm_eq, h_smul_eq]
-  -- `‖i.fst.val‖ₑ = ENNReal.ofReal i.fst.val` (since `0 ≤ i.fst.val`).
   have h_norm_eq_val : ‖i.fst.val‖ₑ = ENNReal.ofReal i.fst.val := by
     rw [Real.enorm_eq_ofReal hμ_pos.le]
   rw [h_norm_eq_val]
-  -- The rescaled eigenvector-side bound after multiplying by `μ`.
   have h_step1 :
       ENNReal.ofReal i.fst.val *
         wkpNorm (d := Module.finrank ℝ E) (K' + 1) 2
@@ -468,7 +429,6 @@ theorem eigenvector_resolventHigh_perK_from_uniform_β_unconditional
                 (tensorResolventL2_isCompactOperator (I := I) (M := M)
                   g r s) i‖) :=
     mul_le_mul_of_nonneg_left h_eig_bd (zero_le _)
-  -- Repackage the right-hand side and absorb the `μ` factor.
   have h_mul_assoc :
       ENNReal.ofReal i.fst.val *
         (ENNReal.ofReal (CN * (i.fst.val)⁻¹ ^ eN) *
@@ -570,12 +530,10 @@ theorem eigenvector_resolventLow_perK_from_uniform_β_unconditional
   intro K' hK' i β Q
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) β with hΩ_def
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) β
-  -- The resolvent eigenvalue lies in `(0, 1]`.
   have hμ_pos : 0 < i.fst.val := eigenval_pos_local
     (I := I) (M := M) g r s i
   have hμ_le_one : i.fst.val ≤ 1 := eigenval_le_one_local
     (I := I) (M := M) g r s i
-  -- The resolvent chart-component regularity at order `K'`.
   have h_resolv_mem : MemWkp (d := Module.finrank ℝ E) K' 2
       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
           (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
@@ -583,16 +541,13 @@ theorem eigenvector_resolventLow_perK_from_uniform_β_unconditional
           β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
       Ω :=
     h_pou_resolv i K' β Q hK'
-  -- Derived regularity for the eigenvector chart component at order `K'`.
   have h_eig_mem : MemWkp (d := Module.finrank ℝ E) K' 2
       (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
         g r s i β Q) Ω :=
     eigenvectorChartComponentFun_memWkp_of_resolv
       (I := I) (M := M) g r s i β Q K' h_resolv_mem
-  -- The rescale identity at the coeFn level.
   have h_ae := resolvent_chartComponent_coe_ae_eq
     (I := I) (M := M) g r s i β Q
-  -- Rewrite the `wkpNorm` through the a.e. equality.
   have h_norm_eq : wkpNorm (d := Module.finrank ℝ E) K' 2
       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
           (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
@@ -604,7 +559,6 @@ theorem eigenvector_resolventLow_perK_from_uniform_β_unconditional
             g r s i β Q y) Ω :=
     wkpNorm_congr_ae (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae
-  -- Factor the scalar out of the eigenvector-side norm.
   have h_smul_eq : wkpNorm (d := Module.finrank ℝ E) K' 2
       (fun y => i.fst.val *
         eigenvectorChartComponentFun_unconditional (I := I) (M := M)
@@ -615,7 +569,6 @@ theorem eigenvector_resolventLow_perK_from_uniform_β_unconditional
             g r s i β Q) Ω :=
     wkpNorm_const_smul (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_eig_mem i.fst.val
-  -- The Headline-1 bound at `(β, Q)` at order `K' ≤ N`.
   have h_eig_bd : wkpNorm (d := Module.finrank ℝ E) K' 2
       (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
         g r s i β Q) Ω
@@ -626,7 +579,6 @@ theorem eigenvector_resolventLow_perK_from_uniform_β_unconditional
               g r s) i‖ :=
     eigenvector_chartComponent_perK_from_uniform_β_unconditional
       (I := I) (M := M) g r s N CN hCN_nn eN hCN_bd β Q K' hK' i
-  -- Combine.
   rw [h_norm_eq, h_smul_eq]
   have h_norm_eq_val : ‖i.fst.val‖ₑ = ENNReal.ofReal i.fst.val := by
     rw [Real.enorm_eq_ofReal hμ_pos.le]

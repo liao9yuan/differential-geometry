@@ -117,14 +117,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The abstract chart-frame scalar component and its summand split
-
-The abstract chart-`α`-frame scalar component of the Ricci–DeTurck right-hand side is
-`deTurckRicciRHS g_bg g x (chartFrameVec α i x) (chartFrameVec α j x)`.  Unfolding
-`deTurckRicciRHS = -2 • ricciTensor + lieDerivMetricClm` and evaluating the CLM
-operations pointwise gives the summand split into the abstract Ricci frame component and
-the abstract Lie frame component — a genuine, model-norm-free scalar identity. -/
-
 set_option linter.unusedSectionVars false in
 /-- **Abstract summand split of the chart-frame scalar right-hand-side component.**
 Unfolding `deTurckRicciRHS = -2 • ricciTensor + lieDerivMetricClm` and evaluating the
@@ -193,16 +185,6 @@ theorem abstractRHSFrameComponent_diff_eq
     abstractRHSFrameComponent_eq_ricci_add_lie (I := I) g_bg g₂ α x i j]
   ring
 
-/-! ## The abstract Lie summand bridges unconditionally to the chart matrix
-
-The DeTurck Lie (gauge) summand is `𝓛_{W(g)} g` with `W(g) = deTurckVF g g_bg`.  Its
-chart-`α`-frame evaluation `lieDerivMetric g W x (chartFrameVec α i x) (chartFrameVec α j x)`
-equals the chart Lie-derivative matrix `chartLieDerivMetricMatrix g W α i j x` on the good
-set `chartLeviCivitaGoodSet α`.  This is the proved, hypothesis-free identity
-`chartLieDerivMetricMatrix_eq_lieDerivMetric_chartFrame` (a consequence of the Cartan
-formula, which applies the Levi-Civita connection a single time), so the abstract Lie
-summand carries no curvature and bridges unconditionally even at off-centre chart points. -/
-
 set_option linter.unusedSectionVars false in
 /-- **Unconditional chart bridge for the abstract Lie summand.**  On
 `chartLeviCivitaGoodSet α`, the abstract Lie pairing of `g` and the DeTurck vector field
@@ -226,25 +208,6 @@ theorem abstractLieFrameComponent_eq_chartMatrix
     (smoothRiemannianMetricToInfty (I := I) g)
     (deTurckVF (I := I) (smoothRiemannianMetricToInfty (I := I) g)
       (smoothRiemannianMetricToInfty (I := I) g_bg)) α i j x hx).symm
-
-/-! ## The abstract Ricci summand: unconditional reduction to chart-at-`x` entries
-
-The abstract Ricci tensor `ricciTensor g x` is the trace of the curvature endomorphism of
-`LeviCivita g`, i.e. the Levi-Civita connection applied twice.  The basis-coordinate
-identification of the abstract Riemann operator with the chart-Christoffel Riemann tensor
-(`chartRiemannBasisIdentity g x`) is **unconditionally true**
-(`Integral.Connection.chartRiemannBasisIdentity_holds`), so the swap-form basis expansion
-`ricciTensor g x v w = ∑ i k, v^k · w^i · Rc_{i,k}(x, ϕ_x x)` against the **chart-at-`x`**
-Ricci entries holds with no hypothesis (`ricciTensor_eq_chartRicciSwap` below).
-
-That expansion is stated at the intrinsic chart-at-`x`, against the canonical model basis.
-It is **not** stated at an arbitrary chart `α` evaluated off-centre: bridging the chart-`α`
-frame components of the abstract Ricci tensor at off-centre points to the chart-`α` Ricci
-entries `chartRicciTensor g α i j (extChartAt I α x)` — the entries bounded by the committed
-atom `exists_chartRicciTensor_lipschitz_on_compact` — requires a genuine change-of-chart /
-change-of-frame step (a chart-`α` off-centre Riemann basis identity).  That step is the
-**named gap** for the headline bound; the hypothesis-bearing statement is kept below for the
-record, the unconditional twin sits beside it. -/
 
 /-- **The abstract Ricci frame component reduces to a basis-coordinate chart-`x` Ricci sum
 under the deferred basis identity.**  Specialising
@@ -271,15 +234,6 @@ theorem abstractRicciFrameComponent_eq_chartRicciSwap_of_basisIdentity
   ricciTensor_eq_chartRicciSwap_of_basis_identity (I := I)
     (smoothRiemannianMetricToInfty (I := I) g) x h
     (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x)
-
-/-! ## Unconditional discharge of the basis identity
-
-`chartRiemannBasisIdentity_holds` (in `Integral.Connection.ChartBridge.RiemannBasisIdentity`)
-proves `chartRiemannBasisIdentity g x` unconditionally for every smooth Riemannian metric
-`g` on a closed manifold and every point `x`. We use it to supply the `h` argument of each
-hypothesis-bearing bridge lemma internally, producing unconditional twins that drop the
-basis-identity hypothesis entirely. These are the genuine, axiom-free statements that the
-former predicate `chartRiemannBasisIdentity` only conditionally exposed. -/
 
 /-- **Unconditional trilinear Riemann bridge** (twin of
 `riemannOp_eq_chartRiemannCLM_apply_of_basis_identity`). This is exactly the unconditional
@@ -358,18 +312,6 @@ theorem abstractRicciFrameComponent_eq_chartRicciSwap
     (chartRiemannBasisIdentity_holds (I := I)
       (smoothRiemannianMetricToInfty (I := I) g) x)
 
-/-! ## The off-centre chart-`α` Ricci frame identity (change-of-coordinates step)
-
-The change-of-coordinates step bridging the abstract Ricci frame component at an
-off-centre point `x` to the chart-`α` off-centre Ricci entry
-`chartRicciTensor g α p q (ϕ_α x)` is now discharged unconditionally on
-`chartLeviCivitaGoodSet α` by
-`Integral.Connection.ricciTensor_chartBasisVec_alpha_eq`.  This is the genuine off-centre
-twin of the centred basis identity, established via a chart-`α` off-centre second covariant
-derivative, off-centre Lie-bracket vanishing, and a Levi-Civita trace against the chart-`α`
-frame.  We restate it here in the abstract-layer `chartFrameVec` / `smoothRiemannianMetricToInfty`
-typing. -/
-
 set_option linter.unusedSectionVars false in
 /-- **Off-centre chart-`α` Ricci frame identity (unconditional, on the chart-`α` good set).**
 For `x ∈ chartLeviCivitaGoodSet α`, the abstract Ricci tensor evaluated on the chart-`α`
@@ -391,29 +333,6 @@ theorem abstractRicciFrameComponent_eq_chartRicciAlpha
   exact ricciTensor_chartBasisVec_alpha_eq (I := I)
     (smoothRiemannianMetricToInfty (I := I) g) α p q hx
 
-/-! ## The chart-carrier target and the remaining off-centre gap
-
-The pieces in hand for the headline abstract right-hand-side `2`-jet bound are now all
-unconditional: the summand split (`abstractRHSFrameComponent_diff_eq`), the Lie bridge
-(`abstractLieFrameComponent_eq_chartMatrix`), the abstract-Ricci reduction
-(`abstractRicciFrameComponent_eq_chartRicciSwap`), and the committed chart-carrier atom
-(`chartCarrierRHSComp_diff_abs_le_jet2`).
-
-The single remaining obstruction is purely a change-of-coordinates step.  The abstract
-Ricci reduction produces a sum of **chart-at-`x`** Ricci entries
-`chartRicciTensor g x p q (extChartAt I x x)` (evaluated at the chart-`x` centre), whereas
-the chart-carrier atom bounds **chart-`α`** entries `chartRicciTensor g α i j y` off-centre
-at `y ∈ K`.  Identifying these two — equivalently, proving the chart-`α` off-centre Riemann
-basis identity
-`ricciTensor g x (chartFrameVec α p x) (chartFrameVec α q x)
-   = chartRicciTensor g α p q (extChartAt I α x)`
-on `chartLeviCivitaGoodSet α` — is genuine new infrastructure (a chart-`α` off-centre twin
-of `Integral.Connection.ChartBridge.RiemannBasisIdentity`'s
-`LeviCivita_chartBasisVec_secondCovDeriv` and `riemannOp_chartBasis_eq_chartRiemannCLM_basis`,
-together with a chart-`α` off-centre directional-derivative engine and chart-`α` off-centre
-Lie-bracket vanishing).  It is therefore left as the named gap; the headline bound is not
-assembled here. -/
-
 set_option linter.unusedSectionVars false in
 /-- **Chart-Christoffel carrier `2`-jet bound for the right-hand-side difference (the
 committed-atom assembly).**  This is the already-proved
@@ -430,14 +349,6 @@ theorem chartCarrierRHSComp_diff_abs_le_jet2
           chartDeTurckRHSComp (I := I) g_bg g₂ α i j y| ≤
         C * chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y :=
   exists_chartDeTurckRHSComp_lipschitz_on_compact (I := I) g_bg g₁ g₂ α hK hKsub
-
-/-! ## The abstract chart-frame RHS component equals the chart-Christoffel carrier
-
-With the abstract-Ricci off-centre identity (`abstractRicciFrameComponent_eq_chartRicciAlpha`)
-and the abstract-Lie chart bridge (`abstractLieFrameComponent_eq_chartMatrix`) followed by the
-Cartan-formula Lie matrix bridge (`chartLieDerivMetricMatrix_deTurckVF_eq_chartLieDeTurckComp`),
-the abstract chart-`α`-frame scalar right-hand-side component at an off-centre good-set point `x`
-equals the chart-Christoffel carrier `chartDeTurckRHSComp g_bg g α i j (ϕ_α x)`. -/
 
 set_option linter.unusedSectionVars false in
 /-- **The abstract chart-frame RHS component equals the chart-Christoffel carrier on the
@@ -456,18 +367,12 @@ theorem abstractRHSFrameComponent_eq_chartCarrier
     deTurckRicciRHS (I := I) g_bg g x
         (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x) =
       chartDeTurckRHSComp (I := I) g_bg g α i j (extChartAt I α x) := by
-  -- Split the abstract component into the abstract Ricci and abstract Lie summands.
   rw [abstractRHSFrameComponent_eq_ricci_add_lie (I := I) g_bg g α x i j]
-  -- Reduce the abstract Ricci summand to the off-centre chart-`α` Ricci entry.
   rw [abstractRicciFrameComponent_eq_chartRicciAlpha (I := I) g α i j hx]
-  -- Reduce the abstract Lie summand to the chart Lie-derivative matrix, then to the
-  -- textbook Christoffel Lie carrier.
   rw [abstractLieFrameComponent_eq_chartMatrix (I := I) g_bg g α i j x hx]
   rw [DeTurckCoefficients.chartLieDerivMetricMatrix_deTurckVF_eq_chartLieDeTurckComp
     (I := I) (smoothRiemannianMetricToInfty (I := I) g)
     (smoothRiemannianMetricToInfty (I := I) g_bg) α i j hx]
-  -- Assemble into the chart carrier `-2 · Rc + 𝓛`.  The metric-alias coercion
-  -- `smoothRiemannianMetricToInfty g = g` is a definitional identity.
   rw [chartDeTurckRHSComp_def]
   rfl
 
@@ -487,14 +392,6 @@ theorem abstractRHSFrameComponent_diff_eq_chartCarrier_diff
     abstractRHSFrameComponent_eq_chartCarrier (I := I) g_bg g₁ α i j hx,
     abstractRHSFrameComponent_eq_chartCarrier (I := I) g_bg g₂ α i j hx]
 
-/-! ## The headline abstract right-hand-side `2`-jet bound
-
-Combining the good-set carrier identity with the committed chart-carrier `2`-jet bound,
-the abstract chart-`α`-frame scalar right-hand-side difference, measured on the chart-`α`
-pushforward frame, is bounded by the chart `2`-jet seminorm of the metric difference,
-uniformly over a compact subset `K` of the chart-target interior.  The bound is stated at
-the chart point `y = ϕ_α x` for the unique good-set preimage `x = (ϕ_α)⁻¹ y`. -/
-
 set_option linter.unusedSectionVars false in
 /-- A point of the chart-target interior pulls back into the chart-`α` Levi-Civita good
 set, with the chart round-trip recovered. -/
@@ -508,8 +405,7 @@ private lemma symm_mem_chartLeviCivitaGoodSet_of_interior
   have hround : extChartAt I α ((extChartAt I α).symm y) = y :=
     (extChartAt I α).right_inv hy_target
   refine ⟨mem_chartLeviCivitaGoodSet_iff.mpr ⟨hsrc, ?_, ?_⟩, hround⟩
-  · -- The trivialization base set equals the chart source.
-    rw [TangentBundle.trivializationAt_baseSet]
+  · rw [TangentBundle.trivializationAt_baseSet]
     rw [extChartAt_source] at hsrc; exact hsrc
   · rw [hround]; exact hy
 
@@ -541,18 +437,14 @@ theorem abstractRHSFrameComponent_diff_abs_le_jet2
           (chartFrameVec (I := I) α i ((extChartAt I α).symm y))
           (chartFrameVec (I := I) α j ((extChartAt I α).symm y))| ≤
         C * chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y := by
-  -- The committed chart-carrier `2`-jet bound over `K`.
   obtain ⟨C, hC_pos, hC⟩ :=
     chartCarrierRHSComp_diff_abs_le_jet2 (I := I) g_bg g₁ g₂ α hK hKsub
   refine ⟨C, hC_pos, ?_⟩
   intro y hy i j
-  -- The good-set preimage of `y` and the chart round-trip.
   obtain ⟨hx_good, hround⟩ :=
     symm_mem_chartLeviCivitaGoodSet_of_interior (I := I) α (hKsub hy)
-  -- Rewrite the abstract frame difference as the chart-carrier difference at `ϕ_α (symm y) = y`.
   rw [abstractRHSFrameComponent_diff_eq_chartCarrier_diff (I := I) g_bg g₁ g₂ α i j hx_good,
     hround]
-  -- Apply the chart-carrier `2`-jet bound.
   exact hC y hy i j
 
 end IntrinsicSpectral

@@ -54,8 +54,6 @@ namespace ODE
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-/-! ## Definitions -/
-
 /-- The variational ODE along `α` (interval form).  Given a time-dependent vector field
 `f : ℝ → E → E`, a reference curve `α : ℝ → E`, an initial variation `δ : E` at time `t₀ : ℝ`,
 and a candidate curve `y : ℝ → E`, the predicate `IsVariationalSolutionOn f α δ t₀ y s` asserts
@@ -72,8 +70,6 @@ def IsVariationalSolution
     (f : ℝ → E → E) (α : ℝ → E) (δ : E) (t₀ : ℝ) (y : ℝ → E) : Prop :=
   y t₀ = δ ∧
     ∀ t : ℝ, HasDerivAt y ((fderiv ℝ (f t) (α t)) (y t)) t
-
-/-! ## Elementary lemmas about the definitions -/
 
 namespace IsVariationalSolutionOn
 
@@ -120,14 +116,6 @@ lemma continuous (hy : IsVariationalSolution f α δ t₀ y) : Continuous y :=
 
 end IsVariationalSolution
 
-/-! ## Continuity of the linearization along a curve
-
-We assume `f` is `C^1` jointly in `(t, x)` on a product `s ×ˢ u` with `s` and `u` open and
-`α` mapping `s` into `u`.  Under these hypotheses the linearization
-`A t := fderiv ℝ (f t) (α t)` is a continuous map `s → (E →L[ℝ] E)`.  This drives the
-Picard–Lindelöf step and the uniqueness proofs.
--/
-
 section Linearization
 
 variable {f : ℝ → E → E} {α : ℝ → E} {s : Set ℝ} {u : Set E}
@@ -140,7 +128,6 @@ lemma fderiv_eq_comp_inr {f : ℝ → E → E} {p : ℝ × E}
       = (fderiv ℝ (uncurry f) p).comp (ContinuousLinearMap.inr ℝ ℝ E) := by
   have hfd_joint : HasFDerivAt (uncurry f) (fderiv ℝ (uncurry f) p) p :=
     hdiff_joint.hasFDerivAt
-  -- The function `y ↦ (p.1, y) : E → ℝ × E` has Fréchet derivative `inr`.
   have hg : HasFDerivAt (fun y : E => ((p.1 : ℝ), y))
       (ContinuousLinearMap.inr ℝ ℝ E) p.2 := by
     have h1 : HasFDerivAt (fun _ : E => (p.1 : ℝ)) (0 : E →L[ℝ] ℝ) p.2 :=
@@ -148,16 +135,12 @@ lemma fderiv_eq_comp_inr {f : ℝ → E → E} {p : ℝ × E}
     have h2 : HasFDerivAt (fun y : E => y) (ContinuousLinearMap.id ℝ E) p.2 :=
       hasFDerivAt_id _
     have h3 := h1.prodMk h2
-    -- The derivative is the canonical injection.
     have : (0 : E →L[ℝ] ℝ).prod (ContinuousLinearMap.id ℝ E)
         = ContinuousLinearMap.inr ℝ ℝ E := by
       ext y <;> simp
     rw [this] at h3
     exact h3
-  -- The inner function `y ↦ (p.1, y)` maps `p.2` to `p`.
   have hp_eq : ((p.1 : ℝ), p.2) = p := by ext <;> rfl
-  -- Apply chain rule.  `hg : HasFDerivAt (·) inr p.2`, `hfd_joint : HasFDerivAt (uncurry f) _ p`
-  -- and `(fun y => (p.1, y)) p.2 = p`.  Rewrite `hfd_joint` to have its base at the right form.
   have hfd_joint' :
       HasFDerivAt (uncurry f) (fderiv ℝ (uncurry f) p)
         ((fun y : E => ((p.1 : ℝ), y)) p.2) := by
@@ -168,7 +151,6 @@ lemma fderiv_eq_comp_inr {f : ℝ → E → E} {p : ℝ × E}
       HasFDerivAt ((uncurry f) ∘ (fun y : E => ((p.1 : ℝ), y)))
         ((fderiv ℝ (uncurry f) p).comp (ContinuousLinearMap.inr ℝ ℝ E)) p.2 :=
     HasFDerivAt.comp p.2 hfd_joint' hg
-  -- `(uncurry f) ∘ (fun y => (p.1, y)) = f p.1` definitionally.
   have huncurry_eq : (uncurry f) ∘ (fun y : E => ((p.1 : ℝ), y)) = f p.1 := by
     funext y; rfl
   rw [huncurry_eq] at hcomp_raw
@@ -180,11 +162,9 @@ lemma continuousOn_partialFDeriv_uncurry
     (hf : ContDiffOn ℝ 1 (uncurry f) (s ×ˢ u)) (hs : IsOpen s) (hu : IsOpen u) :
     ContinuousOn (fun p : ℝ × E => fderiv ℝ (f p.1) p.2) (s ×ˢ u) := by
   have hprod_open : IsOpen (s ×ˢ u) := hs.prod hu
-  -- The joint Fréchet derivative is continuous on the open product.
   have hf_full :
       ContinuousOn (fun p : ℝ × E => fderiv ℝ (uncurry f) p) (s ×ˢ u) :=
     hf.continuousOn_fderiv_of_isOpen hprod_open le_rfl
-  -- The partial derivative is `D_x f (t, x) = (D f (t, x)) ∘ inr`.
   have hpartial_eq :
       EqOn (fun p : ℝ × E => fderiv ℝ (f p.1) p.2)
         (fun p : ℝ × E =>
@@ -195,8 +175,6 @@ lemma continuousOn_partialFDeriv_uncurry
       have hdiff_joint : DifferentiableAt ℝ (uncurry f) p :=
         ((hf.contDiffAt hp_open).differentiableAt one_ne_zero)
       exact fderiv_eq_comp_inr hdiff_joint
-  -- The right-hand side is continuous as a post-composition map.
-  -- `M ↦ M.comp inr` is a continuous linear map.
   have hcomp_cont :
       ContinuousOn (fun p : ℝ × E =>
         (fderiv ℝ (uncurry f) p).comp (ContinuousLinearMap.inr ℝ ℝ E)) (s ×ˢ u) := by
@@ -204,7 +182,6 @@ lemma continuousOn_partialFDeriv_uncurry
         (fun M : (ℝ × E) →L[ℝ] E => M.comp (ContinuousLinearMap.inr ℝ ℝ E)) := by
       exact Continuous.clm_comp_const continuous_id (ContinuousLinearMap.inr ℝ ℝ E)
     exact hpostL.comp_continuousOn hf_full
-  -- Conclude by congruence.
   exact hcomp_cont.congr hpartial_eq
 
 /-- Continuity of the linearization `t ↦ fderiv ℝ (f t) (α t)` along a continuous reference curve
@@ -241,13 +218,6 @@ lemma exists_bound_fderiv_along_curve_Icc {tmin tmax : ℝ}
 
 end Linearization
 
-/-! ## Uniqueness on an open interval
-
-The variational ODE is linear in `y`, with continuous coefficient `A t = fderiv ℝ (f t) (α t)`.
-Once `A` is bounded on a compact subinterval, Gronwall (`ODE_solution_unique_of_mem_Ioo`)
-yields pointwise uniqueness of solutions sharing an initial condition.
--/
-
 section Uniqueness
 
 variable {f : ℝ → E → E} {α : ℝ → E} {δ : E} {t₀ : ℝ}
@@ -263,8 +233,6 @@ theorem IsVariationalSolutionOn.unique_Ioo {a b : ℝ} (ht₀ : t₀ ∈ Ioo a b
   intro t ht
   set A : ℝ → E →L[ℝ] E := fun t => fderiv ℝ (f t) (α t) with hA_def
   let v : ℝ → E → E := fun t y => (A t) y
-  -- Pick a closed sub-interval `[a', b']` of `Ioo a b` containing both `t` and `t₀`.
-  -- We choose `a' := (a + min t t₀) / 2`, `b' := (b + max t t₀) / 2`.
   set a' := (a + min t t₀) / 2 with ha'
   set b' := (b + max t t₀) / 2 with hb'
   have hmin_lt : a < min t t₀ := lt_min ht.1 ht₀.1
@@ -283,7 +251,6 @@ theorem IsVariationalSolutionOn.unique_Ioo {a b : ℝ} (ht₀ : t₀ ∈ Ioo a b
     ⟨lt_of_lt_of_le ha'_lt_min hmin_le_t, lt_of_le_of_lt ht_le_max hmax_lt_b'⟩
   have ht₀_mem' : t₀ ∈ Ioo a' b' :=
     ⟨lt_of_lt_of_le ha'_lt_min hmin_le_t₀, lt_of_le_of_lt ht₀_le_max hmax_lt_b'⟩
-  -- Norm bound for `A` on `Icc a' b'`.
   have hab_le : a' ≤ b' := le_of_lt (lt_trans ha'_lt_min (lt_of_le_of_lt hmin_le_t
     (lt_of_lt_of_le ht_mem'.2 (le_refl _))))
   have hIcc_sub : Icc a' b' ⊆ Ioo a b := fun s hs =>
@@ -298,13 +265,11 @@ theorem IsVariationalSolutionOn.unique_Ioo {a b : ℝ} (ht₀ : t₀ ∈ Ioo a b
     exact ⟨‖A τ₁‖, norm_nonneg _, fun τ hτ => hτ₁_max hτ⟩
   obtain ⟨M, hM_nn, hMbd⟩ := hbd
   let K : ℝ≥0 := ⟨M, hM_nn⟩
-  -- Each `v τ` is `K`-Lipschitz on `univ` for `τ ∈ Ioo a' b'`.
   have hv_lip : ∀ τ ∈ Ioo a' b', LipschitzOnWith K (v τ) univ := by
     intro τ hτ
     have hlip : LipschitzWith K (A τ) :=
       (A τ).lipschitzWith_of_opNorm_le (hMbd τ (Ioo_subset_Icc_self hτ))
     exact (LipschitzWith.lipschitzOnWith (s := (univ : Set E)) hlip)
-  -- Inside `Ioo a' b'`, `IsVariationalSolutionOn` gives `HasDerivAt`.
   have hy₁_d : ∀ τ ∈ Ioo a' b',
       HasDerivAt y₁ ((A τ) (y₁ τ)) τ := by
     intro τ hτ
@@ -320,14 +285,6 @@ theorem IsVariationalSolutionOn.unique_Ioo {a b : ℝ} (ht₀ : t₀ ∈ Ioo a b
     (by rw [h₁.1, h₂.1])) ht_mem'
 
 end Uniqueness
-
-/-! ## Local existence
-
-We invoke `IsPicardLindelof.exists_eq_forall_mem_Icc_hasDerivWithinAt` for the *linear*
-time-dependent vector field `v t y := (fderiv ℝ (f t) (α t)) y`.  Because `v` is continuous in
-`t` and `‖v t‖`-Lipschitz in `y`, with `‖v t‖ ≤ M` on a compact time subinterval, we can fit
-the assumptions of Picard–Lindelöf by shrinking the time interval to size `≤ 1 / (M(‖δ‖+1))`.
--/
 
 section Existence
 
@@ -346,7 +303,6 @@ theorem exists_isVariationalSolutionOn_Ioo_local
       ∃ y : ℝ → E, IsVariationalSolutionOn f α δ t₀ y (Ioo (t₀ - ε) (t₀ + ε)) := by
   have hA_cont : ContinuousOn (fun t => fderiv ℝ (f t) (α t)) s :=
     continuousOn_fderiv_along_curve hf hs hu hα hmem
-  -- Shrink `s` to a symmetric closed interval around `t₀`.
   rcases Metric.mem_nhds_iff.mp (hs.mem_nhds ht₀) with ⟨ε₀, hε₀, hball⟩
   set ε := ε₀ / 2 with hε_def
   have hε : 0 < ε := by positivity
@@ -358,18 +314,14 @@ theorem exists_isVariationalSolutionOn_Ioo_local
     · linarith [hτ.1, hε_lt]
     · linarith [hτ.2, hε_lt]
   have hIcc_sub_s : Icc (t₀ - ε) (t₀ + ε) ⊆ s := hIcc_sub_ball.trans hball
-  -- Norm bound of `A` on this closed interval.
   obtain ⟨M, hM_nn, hMbd⟩ :=
     exists_bound_fderiv_along_curve_Icc hf hs hu hα hmem hIcc_sub_s
-  -- Build the linear vector field.
   set A : ℝ → E →L[ℝ] E := fun t => fderiv ℝ (f t) (α t) with hA_def
   set v : ℝ → E → E := fun t y => (A t) y with hv_def
-  -- Choose Picard–Lindelöf parameters.
   set r : ℝ := ‖δ‖ with hr_def
   have hr_nn : 0 ≤ r := norm_nonneg _
   set a : ℝ := r + 1 with ha_def
   have ha_pos : 0 < a := by linarith
-  -- Choose `ε' ≤ min ε, 1 / (M·a + 1)` so that `M·a·ε' ≤ 1 = a - r`.
   set ε' : ℝ := min ε (1 / (M * a + 1)) with hε'_def
   have hε' : 0 < ε' := by
     apply lt_min hε
@@ -387,20 +339,17 @@ theorem exists_isVariationalSolutionOn_Ioo_local
     have h4 : M * a / (M * a + 1) ≤ 1 := by
       rw [div_le_one hMa1_pos]; linarith
     linarith
-  -- Re-express in terms of `tmin = t₀ - ε'`, `tmax = t₀ + ε'`.
   let tmin : ℝ := t₀ - ε'
   let tmax : ℝ := t₀ + ε'
   have htmin_le_tmax : tmin ≤ tmax := by
     change t₀ - ε' ≤ t₀ + ε'; linarith
   let t₀Icc : Icc tmin tmax := ⟨t₀, by exact ⟨by change t₀ - ε' ≤ t₀; linarith,
     by change t₀ ≤ t₀ + ε'; linarith⟩⟩
-  -- Containment of the time-interval in the closed ε-interval.
   have hIcc_sub_eps : Icc tmin tmax ⊆ Icc (t₀ - ε) (t₀ + ε) := by
     intro τ hτ
     refine ⟨?_, ?_⟩
     · exact le_trans (by change t₀ - ε ≤ t₀ - ε'; linarith) hτ.1
     · exact le_trans hτ.2 (by change t₀ + ε' ≤ t₀ + ε; linarith)
-  -- The Picard–Lindelöf data.
   let aN : ℝ≥0 := ⟨a, le_of_lt ha_pos⟩
   let rN : ℝ≥0 := ⟨r, hr_nn⟩
   let LN : ℝ≥0 := ⟨M * a, mul_nonneg hM_nn (le_of_lt ha_pos)⟩
@@ -411,20 +360,17 @@ theorem exists_isVariationalSolutionOn_Ioo_local
       continuousOn := ?_,
       norm_le := ?_,
       mul_max_le := ?_ }
-    -- Lipschitz in `x`.
     · intro τ hτ
       have hτ_eps : τ ∈ Icc (t₀ - ε) (t₀ + ε) := hIcc_sub_eps hτ
       have hlip : LipschitzWith KN (A τ) :=
         (A τ).lipschitzWith_of_opNorm_le (hMbd τ hτ_eps)
       exact LipschitzWith.lipschitzOnWith (s := closedBall (0 : E) aN) hlip
-    -- Continuous in `t` for fixed `y`.
     · intro y _
       have hsub : Icc tmin tmax ⊆ s := hIcc_sub_eps.trans hIcc_sub_s
       have hA_cont' : ContinuousOn A (Icc tmin tmax) := hA_cont.mono hsub
       have happly : Continuous (fun B : E →L[ℝ] E => B y) :=
         (ContinuousLinearMap.apply ℝ E y).continuous
       exact happly.comp_continuousOn hA_cont'
-    -- Bound on `‖v τ y‖` for `y ∈ closedBall 0 a`.
     · intro τ hτ y hy
       have hτ_eps : τ ∈ Icc (t₀ - ε) (t₀ + ε) := hIcc_sub_eps hτ
       have hA_norm : ‖A τ‖ ≤ M := hMbd τ hτ_eps
@@ -434,7 +380,6 @@ theorem exists_isVariationalSolutionOn_Ioo_local
       calc ‖v τ y‖ = ‖(A τ) y‖ := rfl
         _ ≤ ‖A τ‖ * ‖y‖ := (A τ).le_opNorm y
         _ ≤ M * a := mul_le_mul hA_norm hy_norm (norm_nonneg _) hM_nn
-    -- The constraint `L * max(tmax - t₀, t₀ - tmin) ≤ a - r`.
     · change (LN : ℝ) * max (tmax - t₀) (t₀ - tmin) ≤ (aN : ℝ) - (rN : ℝ)
       have hmax_eq : max (tmax - t₀) (t₀ - tmin) = ε' := by
         have h1 : tmax - t₀ = ε' := by change (t₀ + ε') - t₀ = ε'; ring
@@ -445,41 +390,29 @@ theorem exists_isVariationalSolutionOn_Ioo_local
       rw [hLrhs]
       change M * a * ε' ≤ 1
       exact hMa_eps'
-  -- Initial point `δ ∈ closedBall 0 r`.
   have hδ_mem : δ ∈ closedBall (0 : E) rN := by
     rw [mem_closedBall_zero_iff]
     change ‖δ‖ ≤ r
     rfl
-  -- Apply Picard–Lindelöf to obtain a curve `y` on `Icc tmin tmax`.
   obtain ⟨y, hy_init, hy_deriv⟩ :=
     hpl.exists_eq_forall_mem_Icc_hasDerivWithinAt hδ_mem
   refine ⟨ε', hε', ?_, y, hy_init, ?_⟩
-  · -- `Ioo (t₀ - ε') (t₀ + ε') ⊆ s`.
-    intro τ hτ
+  · intro τ hτ
     apply hIcc_sub_s
     refine ⟨le_of_lt ?_, le_of_lt ?_⟩
     · exact lt_of_le_of_lt (by change t₀ - ε ≤ t₀ - ε'; linarith) hτ.1
     · exact lt_of_lt_of_le hτ.2 (by change t₀ + ε' ≤ t₀ + ε; linarith)
-  · -- Convert `HasDerivWithinAt y _ (Icc tmin tmax) τ` to `HasDerivWithinAt y _ (Ioo …) τ`.
-    intro τ hτ
+  · intro τ hτ
     have hτ_Icc : τ ∈ Icc tmin tmax :=
       ⟨le_of_lt hτ.1, le_of_lt hτ.2⟩
     have hd := hy_deriv τ hτ_Icc
     have hsub_set : Ioo (t₀ - ε') (t₀ + ε') ⊆ Icc tmin tmax :=
       Ioo_subset_Icc_self
     have hd' := hd.mono hsub_set
-    -- `Ioo (t₀ - ε') (t₀ + ε') ∈ 𝓝 τ`, so within = at.
     have hτ_open : Ioo (t₀ - ε') (t₀ + ε') ∈ 𝓝 τ := isOpen_Ioo.mem_nhds hτ
     exact (hd'.hasDerivAt hτ_open).hasDerivWithinAt
 
 end Existence
-
-/-! ## Linearity in the variation `δ`
-
-The variational ODE is linear in `y`.  Hence a real linear combination of solutions with
-initial values `δ₁` and `δ₂` is itself a solution with initial value the corresponding linear
-combination of `δ₁` and `δ₂`.
--/
 
 section Linearity
 

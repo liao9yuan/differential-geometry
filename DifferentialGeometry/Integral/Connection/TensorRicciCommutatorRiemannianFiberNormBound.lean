@@ -98,15 +98,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## The per-point frame scalar witness
-
-The canonical witness `riemannianFiberNormSq_le_pointwise_witness` provides, for
-each base point `b` and tensor `S`, a nonnegative `Ab` (the ambient `E`-norm
-sum of the `g`-orthonormal frame used internally by `riemannianFiberNormSq`)
-such that `riemannianFiberNormSq g 0 2 b S ≤ ‖S‖² · Ab²`. For the curvature
-application we only need `Ab` to depend on `b` (not on the tensor it bounds);
-the witness scalar is extracted below. -/
-
 /-- The explicit nonnegative frame scalar appearing in the canonical pointwise
 bound for `riemannianFiberNormSq` of a `(0, 2)`-tensor `S` at `b`. It is the
 ambient-norm sum of the internal `g`-orthonormal frame, made into a function of
@@ -129,17 +120,9 @@ lemma riemannianFiberNormSq_le_frameScalar_sq
       ‖S‖ ^ 2 * riemannianFrameScalar (I := I) (M := M) g b S ^ 2 := by
   have h := (riemannianFiberNormSq_le_pointwise_witness
     (I := I) (M := M) g 0 2 b S).choose_spec.2
-  -- `h : riemannianFiberNormSq … ≤ ‖S‖² · (metricInnerOpNorm^(2·0) · Ab^(0+2))`.
   refine h.trans (le_of_eq ?_)
   unfold riemannianFrameScalar
   simp only [Nat.mul_zero, pow_zero, one_mul, Nat.zero_add]
-
-/-! ## The headline pointwise curvature bound (fully closed, diamond-free)
-
-Specialising the canonical bound at the fully applied curvature value
-`riemannOp (tensorCov g 0 2) x v w T`. Both factors on the right —
-the model norm of the (fully applied) curvature value and the frame scalar —
-are diamond-free. -/
 
 /-- **Pointwise fiber-norm bound for the tensor curvature operator.** For any
 point `x` of a smooth Riemannian manifold, any tangent vectors `v, w` and any
@@ -166,13 +149,6 @@ theorem riemannianFiberNormSq_riemannOp_tensorCov_le_witness
           (riemannOp (tensorCov (I := I) g 0 2) x v w T) ^ 2 :=
   riemannianFiberNormSq_le_frameScalar_sq (I := I) (M := M) g x
     (riemannOp (tensorCov (I := I) g 0 2) x v w T)
-
-/-! ## The per-point bounding scalar for fixed smooth fields
-
-For fixed (vector / tensor) fields `X, Y, T`, the curvature term at `x` is
-`riemannOp (tensorCov g 0 2) x (X x) (Y x) (T x)`. Its intrinsic fiber norm is
-controlled pointwise by the explicit nonnegative scalar
-`curvatureFiberNormBoundSq`. -/
 
 /-- The explicit per-point bounding scalar for the intrinsic fiber norm of the
 curvature term applied to the fields `X, Y, T` at `x`:
@@ -206,16 +182,6 @@ theorem riemannianFiberNormSq_riemannOp_tensorCov_le_curvatureFiberNormBoundSq
   riemannianFiberNormSq_riemannOp_tensorCov_le_witness (I := I) (M := M) g x
     (X x) (Y x) (T x)
 
-/-! ## The uniform bound on a closed manifold
-
-When the explicit per-point bounding scalar `curvatureFiberNormBoundSq` is
-bounded above over `M` (its `BddAbove` is the standard metric-coercivity fact on
-a compact manifold, here exposed as an explicit hypothesis), the intrinsic fiber
-norm of the curvature term is uniformly bounded by a single nonnegative constant
-`K`. This is the form the order-`2` Gårding estimate absorbs: the curvature
-contribution is controlled by `K` times a lower-order quantity, with `K`
-independent of the base point. -/
-
 /-- **Uniform fiber-norm bound for the tensor curvature operator on a closed
 manifold.** Let `g` be a smooth Riemannian metric on a closed manifold `M`, and
 fix (vector / tensor) fields `X, Y, T`. If the explicit per-point bounding scalar
@@ -240,20 +206,15 @@ theorem exists_bound_riemannianFiberNormSq_riemannOp_tensorCov
       riemannianFiberNormSq (I := I) (M := M) g 0 2 x
         (riemannOp (tensorCov (I := I) g 0 2) x (X x) (Y x) (T x)) ≤ K := by
   classical
-  -- Take `K` to be the supremum of the explicit per-point bounds.
   set f : M → ℝ := fun x => curvatureFiberNormBoundSq (I := I) (M := M) g X Y T x
     with hf_def
   set K : ℝ := sSup (Set.range f) with hK_def
-  -- `K` is an upper bound for the range (the range is `BddAbove`).
   have h_le_K : ∀ x : M, f x ≤ K := by
     intro x
     exact le_csSup hbdd (Set.mem_range_self x)
   refine ⟨K, ?_, ?_⟩
-  · -- `0 ≤ K`. If `M` is empty the range is empty and `sSup ∅ = 0`; otherwise any
-    -- value `f x₀ ≥ 0` is `≤ K`.
-    rcases isEmpty_or_nonempty M with hM | hM
-    · -- Empty `M`: `Set.range f = ∅`, hence `K = sSup ∅ = 0`.
-      have hrange : Set.range f = (∅ : Set ℝ) := by
+  · rcases isEmpty_or_nonempty M with hM | hM
+    · have hrange : Set.range f = (∅ : Set ℝ) := by
         rw [Set.range_eq_empty_iff]; exact hM
       rw [hK_def, hrange, Real.sSup_empty]
     · obtain ⟨x₀⟩ := hM

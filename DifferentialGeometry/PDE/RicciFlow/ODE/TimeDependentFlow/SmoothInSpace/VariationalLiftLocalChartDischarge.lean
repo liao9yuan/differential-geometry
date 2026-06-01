@@ -84,13 +84,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless]
 
-/-! ## (A) The fixed precomposition: the chart reading of the time-`t` map
-
-The consumer's chart-coordinate flow is the time-`t` centred Picard flow `ΦE` precomposed with
-the *fixed* chart reading `precomp z := extChartAt I α (Φ_fam t ((extChartAt I α).symm z))` of the
-time-`t` diffeomorphism `Φ_fam t`.  This reading is smooth near the chart centre and fixes the
-orbit chart point `extChartAt I α x` of `x`'s image to `extChartAt I α (Φ_fam t x) = φ α`. -/
-
 /-- The chart reading of the time-`t` map `Φ_fam t`, as a map of model-space coordinates:
 `precompMap Φ_fam t α z := extChartAt I α (Φ_fam t ((extChartAt I α).symm z))`. -/
 def precompMap (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (α : M) (z : E) : E :=
@@ -115,17 +108,6 @@ theorem precompMap_chartPoint
   unfold precompMap
   rw [(extChartAt I α).left_inv hx_src]
 
-/-! ## (B) `hagree` from the cocycle realisation
-
-The cocycle realisation `hrealΨ` reads, for `(s, y)` near `(t, x)`,
-
-  `Φ_fam s y = (extChartAt I α).symm (ΦE (extChartAt I α (Φ_fam t y), s))`,
-
-with `ΦE (extChartAt I α (Φ_fam t y), s)` confined to the chart target.  Applying
-`extChartAt I α` and cancelling on the chart target gives the producer's chart-conjugation, with
-the precomposition `precompMap Φ_fam t α (extChartAt I α y) = extChartAt I α (Φ_fam t y)` folded
-in. -/
-
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 /-- **`hagree` from the local-near-`t` cocycle realisation.**
 
@@ -144,26 +126,9 @@ theorem hagree_of_cocycle_realisation
   filter_upwards [hrealΨ] with s hs
   filter_upwards [hs, hsrc_nhds] with y hy hysrc
   obtain ⟨hpt, htgt⟩ := hy
-  -- Read the point-level equality through `extChartAt I α` and cancel on the chart target.
   rw [hpt, (extChartAt I α).right_inv htgt]
-  -- Fold in the precomposition `precompMap … (extChartAt I α y) = extChartAt I α (Φ_fam t y)`.
   unfold Φ_euclLocal
   rw [precompMap_chartPoint (I := I) Φ_fam t α y hysrc]
-
-/-! ## (C) The Euclidean variational ODE for the precomposed flow
-
-The chart-coordinate flow `Φ_euclLocal ΦE Φ_fam t α z s = ΦE (precompMap z, s)` is the time-`t`
-centred Picard flow `ΦE` precomposed with the *fixed* (`s`-independent) reading `precompMap`.
-Its spatial Fréchet derivative therefore factors as
-
-  `fderiv ℝ (fun z => Φ_euclLocal … z s) z₀
-     = (fderiv ℝ (fun w => ΦE (w, s)) (precompMap z₀)).comp (fderiv ℝ precompMap z₀)`,
-
-a *fixed* continuous-linear post-composition `· ∘L (fderiv precompMap z₀)` of the Picard-flow
-spatial Fréchet derivative.  The Picard operator-valued variational ODE
-`IsLocalFlow.hasDerivAt_partial_spatial_fderiv` supplies the `HasDerivAt` of the Picard factor;
-the fixed post-composition transfers it.  Because `ΦE` is centred at the interior time `t`, no
-whole-orbit confinement is needed. -/
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
@@ -228,11 +193,9 @@ theorem heucl_precomp
         (fderiv ℝ (precompMap (I := I) Φ_fam t α) (extChartAt I α x))) t := by
   set z₀ : E := extChartAt I α x with hz₀
   set w₀ : E := precompMap (I := I) Φ_fam t α z₀ with hw₀
-  -- The Picard operator-valued variational ODE at the interior chart coordinate `w₀`.
   have hPicard : HasDerivAt (fun s : ℝ => fderiv ℝ (fun w => ΦE (w, s)) w₀)
       ((fderiv ℝ (f t) (ΦE (w₀, t))).comp (fderiv ℝ (fun w => ΦE (w, t)) w₀)) t :=
     IsLocalFlow.hasDerivAt_partial_spatial_fderiv hΦE hf hUopen hΦsmooth hzsU hz ht
-  -- Post-compose (on the right) with the fixed precomposition derivative.
   have hpost : HasDerivAt
       (fun s : ℝ => (fderiv ℝ (fun w => ΦE (w, s)) w₀).comp
         (fderiv ℝ (precompMap (I := I) Φ_fam t α) z₀))
@@ -240,7 +203,6 @@ theorem heucl_precomp
         (fderiv ℝ (precompMap (I := I) Φ_fam t α) z₀)) t :=
     hasDerivAt_clm_comp_right_local hPicard
       (fderiv ℝ (precompMap (I := I) Φ_fam t α) z₀)
-  -- Near `t`, the precomposed-flow spatial fderiv equals this post-composed curve.
   have hev : (fun s : ℝ => fderiv ℝ
         (fun z => Φ_euclLocal (I := I) ΦE Φ_fam t α z s) z₀)
       =ᶠ[𝓝 t] (fun s : ℝ => (fderiv ℝ (fun w => ΦE (w, s)) w₀).comp
@@ -248,13 +210,6 @@ theorem heucl_precomp
     filter_upwards [hΦsmooth_time] with s hsd
     exact spatial_fderiv_precomp_factor (I := I) Φ_fam α t s ΦE z₀ hsd hprecomp_smooth
   exact hpost.congr_of_eventuallyEq hev
-
-/-! ## (D) Differentiability of the fixed precomposition
-
-`precompMap Φ_fam t α = extChartAt I α ∘ Φ_fam t ∘ (extChartAt I α).symm` is differentiable at the
-chart point of a source point `x`, because each factor is smooth: `(extChartAt I α).symm` is
-smooth on the chart target, `Φ_fam t` is a diffeomorphism, and `extChartAt I α` is smooth on the
-chart source.  This is the fixed smooth-structure datum the spatial-fderiv factorisation needs. -/
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 /-- **`precompMap` is differentiable at the chart point of a source point.**
@@ -269,22 +224,16 @@ theorem precompMap_differentiableAt
     (hΦtx_src : (Φ_fam t : M → M) x ∈ (chartAt H α).source) :
     DifferentiableAt ℝ (precompMap (I := I) Φ_fam t α) (extChartAt I α x) := by
   set z₀ : E := extChartAt I α x with hz₀
-  -- `range I = univ` (boundaryless model), so within-range data is full data.
   have hrange : (range I) = (univ : Set E) := I.range_eq_univ
-  -- `(extChartAt I α).symm` is `MDifferentiableWithinAt 𝓘(ℝ,E) I … (range I)` at `z₀`.
   have htgt : z₀ ∈ (extChartAt I α).target := by
     rw [hz₀]; exact (extChartAt I α).map_source hx_src
   have hsymm : MDifferentiableWithinAt 𝓘(ℝ, E) I (extChartAt I α).symm (range I) z₀ :=
     mdifferentiableWithinAt_extChartAt_symm htgt
-  -- `(extChartAt I α).symm z₀ = x`.
   have hround : (extChartAt I α).symm z₀ = x := (extChartAt I α).left_inv hx_src
-  -- `Φ_fam t` is `MDifferentiableAt I I` at `x` (a diffeomorphism is `C^∞`).
   have hΦt : MDifferentiableAt I I (Φ_fam t : M → M) x :=
     (Φ_fam t).contMDiff.mdifferentiable (by simp) x
-  -- `extChartAt I α` is `MDifferentiableAt I 𝓘(ℝ,E)` at `Φ_fam t x` (in the chart source of `α`).
   have hext : MDifferentiableAt I 𝓘(ℝ, E) (extChartAt I α) ((Φ_fam t : M → M) x) :=
     mdifferentiableAt_extChartAt hΦtx_src
-  -- Chain: `precompMap = extChartAt I α ∘ Φ_fam t ∘ (extChartAt I α).symm` within `range I`.
   have hcomp1 : MDifferentiableWithinAt 𝓘(ℝ, E) I
       ((Φ_fam t : M → M) ∘ (extChartAt I α).symm) (range I) z₀ :=
     (hround ▸ hΦt).comp_mdifferentiableWithinAt z₀ hsymm
@@ -293,28 +242,11 @@ theorem precompMap_differentiableAt
     have hpt : ((Φ_fam t : M → M) ∘ (extChartAt I α).symm) z₀ = (Φ_fam t : M → M) x := by
       simp only [Function.comp_apply, hround]
     exact (hpt ▸ hext).comp_mdifferentiableWithinAt z₀ hcomp1
-  -- `precompMap = extChartAt I α ∘ Φ_fam t ∘ (extChartAt I α).symm` (definitional).
   have hmdW : MDifferentiableWithinAt 𝓘(ℝ, E) 𝓘(ℝ, E)
       (precompMap (I := I) Φ_fam t α) (range I) z₀ := hcomp2
-  -- Upgrade within-`range I` to full, since `range I = univ ∈ 𝓝 z₀`.
   have hmd : MDifferentiableAt 𝓘(ℝ, E) 𝓘(ℝ, E) (precompMap (I := I) Φ_fam t α) z₀ :=
     hmdW.mdifferentiableAt (by rw [hrange]; exact univ_mem)
   rwa [mdifferentiableAt_iff_differentiableAt] at hmd
-
-/-! ## (E) The discharge: `RawVariationalIdentityFlat` from the local-near-`t` cocycle data
-
-Composing the producers above with the consumer `rawVariationalIdentityFlat_of_chart_realisation`,
-the flat per-slot variational identity for the concrete flow follows from:
-
-* the time-`t` centred chart-`α` Picard flow `ΦE` and its joint `C^∞` smoothness (the gap-II
-  parabolic-regularity output, centred at the *interior* time `t`);
-* the local-near-`t` cocycle realisation `hrealΨ`;
-* the chart-coordinate orbit velocity `hc_eucl` of `ΦE` through `φ α`;
-* the moving-trivialisation chart jet `hGfd`; and
-* orbit continuity `hcontAt`.
-
-No whole-orbit confinement: `ΦE` is centred at `t`, so `ΦE(·, t) = id`, and the realisation only
-constrains the orbit for `s` near `t`. -/
 
 /-- **`RawVariationalIdentityFlat` for the concrete flow at an interior time, from the
 local-near-`t` cocycle data.**
@@ -372,18 +304,13 @@ theorem rawVariationalIdentityFlat_of_localGeometricFlow
   set α : M := Φ_fam t x with hα
   set z₀ : E := extChartAt I α x with hz₀
   set w₀ : E := precompMap (I := I) Φ_fam t α z₀ with hw₀
-  -- `x` lies in the chart source of `α` as an `extChartAt` source membership.
   have hx_src' : x ∈ (extChartAt I α).source := by rwa [extChartAt_source]
-  -- The consumer's chart-coordinate flow.
   set Φ_eucl : E → ℝ → E := Φ_euclLocal (I := I) ΦE Φ_fam t α with hΦeucl
-  -- (0) `precompMap` is differentiable at `z₀` (fixed smooth-structure factor).
-  -- At `α = Φ_fam t x`, the time-`t` image of `x` is `α`, in its own chart source.
   have hΦtx_src : (Φ_fam t : M → M) x ∈ (chartAt H α).source := by
     rw [show (Φ_fam t : M → M) x = α from rfl]
     exact mem_chart_source H α
   have hprecomp_diff : DifferentiableAt ℝ (precompMap (I := I) Φ_fam t α) z₀ :=
     precompMap_differentiableAt (I := I) Φ_fam t α x hx_src' hΦtx_src
-  -- (1) `hΦsmooth_time`: per-time differentiability of the Picard slice at `w₀` near `t`.
   have hΦsmooth_time : ∀ᶠ s : ℝ in 𝓝 t,
       DifferentiableAt ℝ (fun w => ΦE (w, s)) w₀ := by
     filter_upwards [hUtime] with s hsU
@@ -391,14 +318,12 @@ theorem rawVariationalIdentityFlat_of_localGeometricFlow
     have hincl : ContDiffAt ℝ ∞ (fun w : E => (w, s)) w₀ :=
       contDiffAt_id.prodMk contDiffAt_const
     exact (hΦE_at.comp w₀ hincl).differentiableAt (by simp)
-  -- (2) `heucl` for the precomposed flow.
   have heucl : HasDerivAt
       (fun s : ℝ => fderiv ℝ (fun z => Φ_eucl z s) z₀)
       (((fderiv ℝ (f t) (ΦE (w₀, t))).comp (fderiv ℝ (fun w => ΦE (w, t)) w₀)).comp
         (fderiv ℝ (precompMap (I := I) Φ_fam t α) z₀)) t :=
     heucl_precomp (I := I) hΦE hf hUopen hΦsmooth Φ_fam α x hprecomp_diff hzsU hz ht
       hΦsmooth_time
-  -- (3) `heucl_diff`: per-time spatial differentiability of `Φ_eucl` at `z₀` near `t`.
   have heucl_diff : ∀ᶠ s : ℝ in 𝓝 t,
       DifferentiableAt ℝ (fun z => Φ_eucl z s) z₀ := by
     filter_upwards [hΦsmooth_time] with s hsd
@@ -406,14 +331,12 @@ theorem rawVariationalIdentityFlat_of_localGeometricFlow
         = (fun w => ΦE (w, s)) ∘ (precompMap (I := I) Φ_fam t α) := rfl
     rw [hcomp]
     exact hsd.comp z₀ hprecomp_diff
-  -- (4) `hagree` from the cocycle realisation.
   have hsrc_nhds : ∀ᶠ y : M in 𝓝 x, y ∈ (extChartAt I α).source :=
     Filter.eventually_iff.mpr ((isOpen_extChartAt_source α).mem_nhds hx_src')
   have hagree : ∀ᶠ s : ℝ in 𝓝 t,
       (fun y => extChartAt I α ((Φ_fam s : M → M) y))
         =ᶠ[𝓝 x] (fun y => Φ_eucl (extChartAt I α y) s) :=
     hagree_of_cocycle_realisation (I := I) Φ_fam α x t ΦE hrealΨ hsrc_nhds
-  -- (5) The target-chart orbit velocity `hc` from the realisation through `x`.
   have hreal_orbit : ∀ᶠ s : ℝ in 𝓝 t,
       extChartAt I α ((Φ_fam s : M → M) x) = ΦE (w₀, s) := by
     have hself : ∀ᶠ s : ℝ in 𝓝 t,
@@ -421,43 +344,20 @@ theorem rawVariationalIdentityFlat_of_localGeometricFlow
       filter_upwards [hagree] with s hs
       exact hs.self_of_nhds
     filter_upwards [hself] with s hs
-    -- `Φ_eucl (extChartAt I α x) s = ΦE (w₀, s)` definitionally.
     simpa [hΦeucl, Φ_euclLocal, hz₀, hw₀] using hs
   have hc : HasDerivAt
       (fun s : ℝ => extChartAt I α ((Φ_fam s : M → M) x)) velChart t := by
     refine hc_eucl.congr_of_eventuallyEq ?_
     filter_upwards [hreal_orbit] with s hs
-    -- `hc_eucl` is for `s ↦ ΦE (w₀, s)`; rewrite to the orbit chart reading.
     simpa [hz₀, hw₀] using hs
-  -- (6) The moving-trivialisation orbit jet `hg` from `hGfd` and `hc`.
   have hg : HasDerivAt
       (fun s : ℝ => chartMovingTriv (I := I) α (extChartAt I α ((Φ_fam s : M → M) x)))
       (G' velChart) t :=
     chartMovingTriv_orbit_hasDerivAt_of_chartJet (I := I) Φ_fam α x t hGfd hc
-  -- (7) Route into the consumer discharge.
   exact rawVariationalIdentityFlat_of_chart_realisation (I := I) Φ_fam x t v
     Φ_eucl hx_src heucl heucl_diff hagree hg hcontAt
 
 end LocalChartDischarge
-
-/-! ## (F) Producing the gap-II data from the bare field's joint smoothness
-
-The two genuine inputs of `rawVariationalIdentityFlat_of_localGeometricFlow` — the time-`t`
-centred chart-`α` Picard flow `ΦE` (with its joint smoothness) and the local-near-`t` cocycle
-realisation `hrealΨ` — are both *produced* here from the legitimate parabolic-regularity (gap-II)
-data: the joint `C^∞` smoothness of the bare field `X` (`hX`) and the bare-flow ODE of `Φ_fam`
-near the interior time `t`.
-
-The strengthened smooth-dependence headline
-`h3_local_flow_chartIsLocalFlow_and_realisation` (at `t₀ := t`, `p₀ := α := Φ_fam t x`) supplies
-the chart Picard flow `ΦE` and a manifold flow `Φ` (its chart-symm reading) that solves the bare
-ODE on a two-sided window `Ioo (t - T) (t + T) ×ˢ U`.  The two-sided integral-curve uniqueness
-`bare_integral_flow_eqOn_of_jointC1` then identifies, for `y` near `x` (where `Φ_fam t y ∈ U`),
-the orbit `s ↦ Φ_fam s y` with the cocycle continuation `s ↦ Φ (Φ_fam t y) s` on the *uniform*
-window `Ioo (t - T) (t + T)` (both solve the same bare ODE and agree at `s = t`, since
-`Φ (Φ_fam t y) t = Φ_fam t y`).  Reading this through the chart `α` gives the cocycle realisation
-`hrealΨ`.  No whole-orbit confinement: the window is centred at the interior time `t` and the
-realisation only constrains the orbit for `s` near `t`. -/
 
 section RealisationProducer
 
@@ -516,24 +416,17 @@ theorem exists_chartPicard_and_cocycle_realisation
               ∈ (extChartAt I (Φ_fam t x)).target) := by
   classical
   set α : M := Φ_fam t x with hα
-  -- The strengthened smooth-dependence headline at the interior `(t, α)`, exposing `ΦE`.
   obtain ⟨U, hU_open, hp₀_U, T, hT_pos, Φ, f, x₀, r, ε, ΦE, hf, hx₀eq, hr_pos, hε_pos, hflow,
       ⟨ρE, TE, hρE_pos, hTE_pos, hΦE_smooth⟩, hΦinit, hΦreal, hΦconf, hΦsmoothOn, hΦbare⟩ :=
     h3_local_flow_chartIsLocalFlow_and_realisation (I := I) X hX t α
-  -- Abbreviations.
   set z₀ : E := extChartAt I α x with hz₀
   set w₀ : E := precompMap (I := I) Φ_fam t α z₀ with hw₀
-  -- `extChartAt I α α = x₀` (the chart centre), and `w₀ = extChartAt I α (Φ_fam t x) = x₀`.
   have hαα : extChartAt I α α = x₀ := hx₀eq.symm
-  -- `x ∈ source of α` (chart round-trip), so `precompMap … z₀ = extChartAt I α (Φ_fam t x)`.
   have hx_src' : x ∈ (extChartAt I α).source := by
     rw [extChartAt_source]; exact hx_src
-  -- `precompMap … z₀ = extChartAt I α (Φ_fam t x) = extChartAt I α α = x₀` (since `α = Φ_fam t x`).
   have hw₀_eq : w₀ = x₀ := by
     rw [hw₀, precompMap_chartPoint (I := I) Φ_fam t α x hx_src']
-    -- `(Φ_fam t : M → M) x = α` definitionally, so the chart point is `extChartAt I α α = x₀`.
     rw [show (Φ_fam t : M → M) x = α from rfl, hαα]
-  -- (membership data) `w₀ = x₀ ∈ ball x₀ ρE ⊆ ball x₀ r`, and `t ∈ Ioo (t - TE) (t + TE)`.
   set Ubox : Set (E × ℝ) := Metric.ball x₀ ρE ×ˢ Set.Ioo (t - TE) (t + TE) with hUbox
   have hUbox_open : IsOpen Ubox := (Metric.isOpen_ball).prod isOpen_Ioo
   have hw₀_ballρE : w₀ ∈ Metric.ball x₀ ρE := by rw [hw₀_eq]; exact Metric.mem_ball_self hρE_pos
@@ -544,8 +437,6 @@ theorem exists_chartPicard_and_cocycle_realisation
     exact hopen.mem_nhds hwtU
   refine ⟨x₀, r, ε, ΦE, f, Ubox, hf, hflow, hUbox_open, hΦE_smooth, hwtU, hw₀_ballr,
     ⟨by linarith, by linarith⟩, hUtime, ?_⟩
-  -- (cocycle realisation) For `y` near `x` (so `Φ_fam t y ∈ U` and `y ∈ W`), the two-sided
-  -- uniqueness identifies `Φ_fam · y` with the chart-flow continuation `Φ (Φ_fam t y) ·`.
   set T' : ℝ := min T T₀ with hT'
   have hT'_pos : 0 < T' := lt_min hT_pos hT₀
   have hT'_le_T : T' ≤ T := min_le_left _ _
@@ -554,59 +445,39 @@ theorem exists_chartPicard_and_cocycle_realisation
     Set.Ioo_subset_Ioo (by linarith) (by linarith)
   have hsub_T₀ : Set.Ioo (t - T') (t + T') ⊆ Set.Ioo (t - T₀) (t + T₀) :=
     Set.Ioo_subset_Ioo (by linarith) (by linarith)
-  -- `y` near `x`: `Φ_fam t y ∈ U` (continuity + `Φ_fam t x = α ∈ U`) and `y ∈ W`.
   have hyU : ∀ᶠ y : M in 𝓝 x, (Φ_fam t : M → M) y ∈ U := by
     have : (Φ_fam t : M → M) x ∈ U := by rw [show (Φ_fam t : M → M) x = α from rfl]; exact hp₀_U
     exact hcontAt_orbit.eventually_mem (hU_open.mem_nhds this)
   have hyW : ∀ᶠ y : M in 𝓝 x, y ∈ W := hW.mem_nhds hxW
-  -- For each such `y`, the cocycle equality `Φ_fam s y = Φ (Φ_fam t y) s` on `Ioo (t-T') (t+T')`.
   have hcocycle : ∀ᶠ y : M in 𝓝 x, ∀ s ∈ Set.Ioo (t - T') (t + T'),
       (Φ_fam s : M → M) y = Φ ((Φ_fam t : M → M) y) s := by
     filter_upwards [hyU, hyW] with y hyU hyW
     have ht_mem' : t ∈ Set.Ioo (t - T') (t + T') := ⟨by linarith, by linarith⟩
-    -- The `Φ_fam` orbit through `y` solves the bare ODE on `Ioo (t - T') (t + T')`.
     have hode_fam : ∀ s ∈ Set.Ioo (t - T') (t + T'),
         HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => (Φ_fam u : M → M) y)
           (Set.Ioo (t - T') (t + T')) s
           ((1 : ℝ →L[ℝ] ℝ).smulRight (X s ((Φ_fam s : M → M) y))) := by
       intro s hs
       exact (hΦfam_ode y hyW s (hsub_T₀ hs)).mono hsub_T₀
-    -- The chart-flow continuation `Φ (Φ_fam t y) ·` solves the bare ODE on `Ioo (t - T') (t + T')`.
     have hode_chart : ∀ s ∈ Set.Ioo (t - T') (t + T'),
         HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => Φ ((Φ_fam t : M → M) y) u)
           (Set.Ioo (t - T') (t + T')) s
           ((1 : ℝ →L[ℝ] ℝ).smulRight (X s (Φ ((Φ_fam t : M → M) y) s))) := by
       intro s hs
       exact (hΦbare ((Φ_fam t : M → M) y) hyU s (hsub_T hs)).hasMFDerivWithinAt
-    -- Agreement at `t`: `Φ (Φ_fam t y) t = Φ_fam t y` (chart-flow initial value).
     have hstart : (Φ_fam t : M → M) y = Φ ((Φ_fam t : M → M) y) t :=
       (hΦinit ((Φ_fam t : M → M) y) hyU).symm
-    -- Two-sided integral-curve uniqueness.
     exact bare_integral_flow_eqOn_of_jointC1 X hXauto
       (fun u p => (Φ_fam u : M → M) p) (fun u p => Φ p u) y ((Φ_fam t : M → M) y)
       ht_mem' hode_fam hode_chart hstart
-  -- Convert the per-`y` cocycle into the `∀ᶠ s, ∀ᶠ y` realisation, with chart-target confinement.
   have hwindow : Set.Ioo (t - T') (t + T') ∈ 𝓝 t := isOpen_Ioo.mem_nhds ⟨by linarith, by linarith⟩
   filter_upwards [hwindow] with s hs
   filter_upwards [hcocycle, hyU, hyW] with y hyc hyU hyW
-  -- `Φ_fam s y = Φ (Φ_fam t y) s = (extChartAt I α).symm (ΦE (extChartAt I α (Φ_fam t y), s))`.
   have hpt : (Φ_fam s : M → M) y
       = (extChartAt I α).symm (ΦE (extChartAt I α ((Φ_fam t : M → M) y), s)) := by
     rw [hyc s hs, hΦreal ((Φ_fam t : M → M) y) hyU s]
   refine ⟨hpt, ?_⟩
-  -- Confinement: the chart value lies in the chart target, directly from H3's `hΦconf`.
   exact hΦconf ((Φ_fam t : M → M) y) hyU s (hsub_T hs)
-
-/-! ## (G) End-to-end headline: `RawVariationalIdentityFlat` from the bare field's joint smoothness
-
-Composing the gap-II producer `exists_chartPicard_and_cocycle_realisation` (which manufactures the
-time-`t` centred chart Picard flow `ΦE` and the local-near-`t` cocycle realisation from the bare
-field's joint `C^∞` smoothness and the bare-flow ODE near `t`) with the discharge
-`rawVariationalIdentityFlat_of_localGeometricFlow`, the flat per-slot variational identity for the
-concrete flow follows from the field-smoothness data alone, together with the residual
-smooth-structure side data the consumer requires (the chart-coordinate orbit velocity `hc_eucl`,
-the moving-trivialisation chart jet `hGfd`, and orbit continuity `hcontAt`).  The produced
-realisation constrains the orbit only near the interior time `t`. -/
 
 /-- **`RawVariationalIdentityFlat` for the concrete flow at an interior time, from the bare
 field's joint smoothness.**
@@ -650,11 +521,9 @@ theorem rawVariationalIdentityFlat_of_jointSmoothBareField
             (1 : E →L[ℝ] E) (1 : E →L[ℝ] E)) (G' velChart))
         (P'.comp (trivToE (I := I) (Φ_fam t x) x)) := by
   classical
-  -- Produce the time-`t` centred chart Picard flow and the cocycle realisation (gap-II → datum).
   obtain ⟨x₀, r, ε, ΦE, f, U, hf, hΦE, hUopen, hΦsmooth, hzsU, hz, ht, hUtime, hrealΨ⟩ :=
     exists_chartPicard_and_cocycle_realisation (I := I) X hX hXauto Φ_fam t x
       hx_src hT₀ hW hxW hΦfam_ode hcontAt_orbit
-  -- The chart-coordinate orbit velocity `hc_eucl` of `ΦE` through `w₀` at `t`, from joint smoothness.
   set w₀ : E := precompMap (I := I) Φ_fam t (Φ_fam t x) (extChartAt I (Φ_fam t x) x) with hw₀
   have hslice_diff : DifferentiableAt ℝ (fun s : ℝ => ΦE (w₀, s)) t := by
     have hΦE_at : ContDiffAt ℝ ∞ ΦE (w₀, t) := hΦsmooth.contDiffAt (hUopen.mem_nhds hzsU)
@@ -664,7 +533,6 @@ theorem rawVariationalIdentityFlat_of_jointSmoothBareField
   set velChart : E := deriv (fun s : ℝ => ΦE (w₀, s)) t with hvel
   have hc_eucl : HasDerivAt (fun s : ℝ => ΦE (w₀, s)) velChart t :=
     hslice_diff.hasDerivAt
-  -- Route into the moving-chart-local discharge.
   refine ⟨ΦE, velChart, ((fderiv ℝ (f t) (ΦE (w₀, t))).comp
       (fderiv ℝ (fun w => ΦE (w, t)) w₀)).comp
         (fderiv ℝ (precompMap (I := I) Φ_fam t (Φ_fam t x)) (extChartAt I (Φ_fam t x) x)),

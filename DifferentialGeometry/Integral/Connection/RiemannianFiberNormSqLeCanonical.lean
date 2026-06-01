@@ -44,8 +44,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Auxiliary scalar quantities -/
-
 /-- The sum of `E`-norms-squared of the `g`-orthonormal basis vectors used inside
 `riemannianFiberNormSq` at the base point `b`. Concretely, it is
 `∑ i, ‖e i‖²` for `e` the `stdOrthonormalBasis` of `(TangentSpace I b, g.inner b)`,
@@ -116,18 +114,6 @@ lemma orthoBasisSumNormSq_le_pointwiseBoundScalar
   have h2 : 0 ≤ metricInnerOpNorm (I := I) (M := M) g b := norm_nonneg _
   linarith
 
-/-! ## Pointwise summand bound
-
-For a tensor `T : TensorRSSpace r s I b` and any tangent vectors
-`e : Fin n → TangentSpace I b`, each summand `fiberNormSqSummand g b r s T n e K J`
-is bounded by `‖T‖² · ‖g.inner b‖^(2r) · (∏ ‖e (K k)‖²) · (∏ ‖e (J k)‖²)`,
-where the `‖e (K k)‖`, `‖e (J k)‖` use the canonical `E`-norm coming from
-`TangentSpace I b = E`. The bound combines:
-* the operator-norm bound for `T` as a CLM `Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b`,
-* the operator-norm bound for `T(ω^K)` as a CMM on `(TangentSpace I b)^s`,
-* the operator-norm bound for the covariant `ω^K` built from `mkPiAlgebra` and the
-  single-factor CLMs `g.inner b (e (K k))`. -/
-
 /-- Bound on the operator norm of a single-factor metric covector `g.inner b v`. -/
 private lemma metric_inner_apply_opNorm_le
     (g : SmoothRiemannianMetric I M) (b : M) (v : TangentSpace I b) :
@@ -186,7 +172,6 @@ lemma fiberNormSqSummand_le_pointwise_bound
   set TomegaK : Tensor0SSpace s I b :=
     (T : Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b) omegaK with hTomega_def
   set val : ℝ := TomegaK (fun k => e (J k)) with hval_def
-  -- |val| ≤ ‖Tω‖ * ∏ ‖e (J k)‖.
   have h_eval : |val| ≤ ‖TomegaK‖ * ∏ k : Fin s, ‖e (J k)‖ := by
     have h := (TomegaK :
         ContinuousMultilinearMap ℝ (fun _ : Fin s => TangentSpace I b) ℝ).le_opNorm
@@ -194,12 +179,10 @@ lemma fiberNormSqSummand_le_pointwise_bound
     have hnorm_eq : ‖TomegaK (fun k => e (J k))‖ = |TomegaK (fun k => e (J k))| := rfl
     rw [hnorm_eq] at h
     exact h
-  -- ‖Tω‖ ≤ ‖T‖ * ‖ω‖.
   have h_T_apply : ‖TomegaK‖ ≤ ‖T‖ * ‖omegaK‖ := by
     have := tensorRSSpace_norm_apply_le (𝕜 := ℝ) (E := E) (I := I) (M := M)
       (r := r) (s := s) (b := b) T omegaK
     simpa [hTomega_def] using this
-  -- ‖ω‖ ≤ ‖g.inner b‖^r * ∏ ‖e (K k)‖.
   have h_omega_le : ‖omegaK‖ ≤ metricInnerOpNorm (I := I) (M := M) g b ^ r *
       ∏ k : Fin r, ‖e (K k)‖ := by
     simpa [homega_def] using
@@ -211,7 +194,6 @@ lemma fiberNormSqSummand_le_pointwise_bound
     Finset.prod_nonneg (fun _ _ => norm_nonneg _)
   have h_prod_J_nn : 0 ≤ ∏ k : Fin s, ‖e (J k)‖ :=
     Finset.prod_nonneg (fun _ _ => norm_nonneg _)
-  -- ‖Tω‖ ≤ ‖T‖ * (‖g.inner b‖^r * ∏ ‖e_K‖).
   have h_T_omega_le : ‖TomegaK‖ ≤ ‖T‖ *
       (metricInnerOpNorm (I := I) (M := M) g b ^ r * ∏ k : Fin r, ‖e (K k)‖) :=
     h_T_apply.trans (mul_le_mul_of_nonneg_left h_omega_le hT_nn)
@@ -264,8 +246,6 @@ lemma fiberNormSqSummand_le_pointwise_bound
     simp [hval_def, hTomega_def, homega_def]
   rw [h_target_eq]
   exact h_sq.trans (le_of_eq hRHS_alg)
-
-/-! ## Summed bound on `riemannianFiberNormSq` -/
 
 /-- The "ambient" sum of squared `E`-norms of a tangent-vector family on a finite index
 set. Each vector `e i` is taken with its canonical `E`-norm via `TangentSpace I b = E`. -/
@@ -325,7 +305,6 @@ lemma riemannianFiberNormSq_sum_le_pointwise
     refine Finset.sum_le_sum (fun K _ => ?_)
     exact Finset.sum_le_sum (fun J _ => hbound K J)
   refine h_sum_bound.trans ?_
-  -- Pull constants out of the double sum.
   have hfactor :
       (∑ K : Fin r → Fin n, ∑ J : Fin s → Fin n,
           ‖T‖ ^ 2 *
@@ -336,7 +315,6 @@ lemma riemannianFiberNormSq_sum_le_pointwise
           (metricInnerOpNorm (I := I) (M := M) g b ^ (2 * r) *
             ((∑ K : Fin r → Fin n, ∏ k : Fin r, ‖e (K k)‖ ^ 2) *
               ∑ J : Fin s → Fin n, ∏ k : Fin s, ‖e (J k)‖ ^ 2)) := by
-    -- First, factor out ‖T‖²:
     have step1 :
         (∑ K : Fin r → Fin n, ∑ J : Fin s → Fin n,
             ‖T‖ ^ 2 *
@@ -353,7 +331,6 @@ lemma riemannianFiberNormSq_sum_le_pointwise
       rw [Finset.mul_sum]
     rw [step1]
     refine congrArg (HMul.hMul _) ?_
-    -- Factor out ‖g.inner b‖^(2r):
     have step2 :
         (∑ K : Fin r → Fin n, ∑ J : Fin s → Fin n,
             metricInnerOpNorm (I := I) (M := M) g b ^ (2 * r) *
@@ -368,17 +345,12 @@ lemma riemannianFiberNormSq_sum_le_pointwise
       rw [Finset.mul_sum]
     rw [step2]
     refine congrArg (HMul.hMul _) ?_
-    -- ∑_K ∑_J (∏ ‖e_K‖² * ∏ ‖e_J‖²) = (∑_K ∏ ‖e_K‖²) * (∑_J ∏ ‖e_J‖²).
     rw [Finset.sum_mul_sum]
   rw [hfactor]
   rw [sum_prod_norm_sq_eq_pow (b := b) n e r,
       sum_prod_norm_sq_eq_pow (b := b) n e s]
-  -- (∑ ‖e i‖²)^r * (∑ ‖e i‖²)^s = (ambientFrameNormSq)^(r+s).
   unfold ambientFrameNormSq
   rw [pow_add]
-  -- Both sides are equal now.
-
-/-! ## Direct expression of `riemannianFiberNormSq` via `fiberNormSqSummand` -/
 
 /-- Witness: there exists a `Fin n → TangentSpace I b` family `e` (with
 `n = Module.finrank ℝ (TangentSpace I b)`) such that
@@ -396,7 +368,6 @@ lemma riemannianFiberNormSq_eq_sum_witness
         ∑ K : Fin r → Fin n, ∑ J : Fin s → Fin n,
           fiberNormSqSummand (I := I) (M := M) g b r s T n e K J := by
   classical
-  -- Build the same `letI`-scoped instances as in `riemannianFiberNormSq`.
   let cd : InnerProductSpace.Core ℝ (TangentSpace I b) := g.toRiemannianMetric.toCore b
   have hc : ContinuousAt (fun v : TangentSpace I b => cd.inner v v) 0 :=
     g.toRiemannianMetric.continuousAt b
@@ -410,18 +381,7 @@ lemma riemannianFiberNormSq_eq_sum_witness
   let n : ℕ := Module.finrank ℝ (TangentSpace I b)
   let e : OrthonormalBasis (Fin n) ℝ (TangentSpace I b) := stdOrthonormalBasis ℝ _
   refine ⟨n, fun i => e i, rfl, ?_⟩
-  -- The unfolding is the definition of `riemannianFiberNormSq`.
   rfl
-
-/-! ## Pointwise bound on `riemannianFiberNormSq`
-
-Combining the witness with the summand bound, we get a pointwise bound
-
-  `riemannianFiberNormSq g r s b T ≤ ‖T‖² · ‖g.inner b‖^(2r) · A(b)^(r+s)`
-
-where `A(b) = ambientFrameNormSq b n e` for the g-orthonormal basis chosen inside
-`riemannianFiberNormSq`'s definition. The next step bounds `A(b)` uniformly on
-a compact set via a metric-coercivity argument. -/
 
 /-- The pointwise bound for `riemannianFiberNormSq`. The `A(b)` is the sum of squared
 `E`-norms of the (g-orthonormal) basis used inside `riemannianFiberNormSq`. -/
@@ -443,8 +403,6 @@ lemma riemannianFiberNormSq_le_pointwise_witness
 end Connection
 end Integral
 end DifferentialGeometry
-
-/-! ## Sanity check: axioms used. -/
 
 open DifferentialGeometry.Integral.Connection in
 #print axioms pointwiseBoundScalar_one_le

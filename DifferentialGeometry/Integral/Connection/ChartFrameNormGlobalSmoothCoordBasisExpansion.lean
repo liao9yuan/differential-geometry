@@ -57,8 +57,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Definition: the coordinate-basis matrix -/
-
 /-- The Gram-Schmidt coefficient matrix expressing the chart-α orthonormal frame
 `chartFrameNormGlobalSmooth g α i` in the chart-α coordinate basis
 `chartBasisVecFiber α k`. The `(i, k)`-th entry is the `k`-th coordinate of
@@ -88,8 +86,6 @@ private lemma chartFrameNormGlobalSmoothCoordMatrix_of_mem
   unfold chartFrameNormGlobalSmoothCoordMatrix
   rw [dif_pos hb]
 
-/-! ## Expansion of the orthonormal frame in the coordinate basis -/
-
 /-- **Expansion of the chart-α orthonormal frame in the chart-α coordinate
 basis** at a chart-α Levi-Civita good-set point. -/
 theorem chartFrameNormGlobalSmooth_eq_coordMatrix_sum
@@ -105,11 +101,8 @@ theorem chartFrameNormGlobalSmooth_eq_coordMatrix_sum
   classical
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
-  -- Apply Basis.sum_repr to the chart-α basis at b.
   have hsum := (chartBasisFamily (I := I) α hb_base).sum_repr
       ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b)
-  -- hsum : ∑ k, (basis.repr v) k • basis k = v
-  -- Rewrite basis k = chartBasisVecFiber α k b and the repr via the matrix.
   have hcoerce : ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i :
         Π b : M, TangentSpace I b) b)
       = (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b := rfl
@@ -119,15 +112,6 @@ theorem chartFrameNormGlobalSmooth_eq_coordMatrix_sum
   intro k _
   rw [chartFrameNormGlobalSmoothCoordMatrix_of_mem (I := I) (M := M) g α i k hb_base]
   rw [chartBasisFamily_apply (I := I) α hb_base k]
-
-/-! ## Linear-algebra interlude: the basis-expansion sums
-
-The proof of the inverse-Gram identity proceeds by expanding both arguments
-of the orthonormal-frame inner product
-`g.inner b (B_i b) (B_j b)` against the chart-α coordinate basis
-`chartBasisVecFiber α k b`, and identifying the resulting matrix identity
-`C^T G C = I` with `C C^T = G^{-1}`.
--/
 
 section LinearAlgebra
 
@@ -160,7 +144,6 @@ private lemma chartFrameNormGlobalSmooth_eq_coord_sum_of_mem
   have h :=
     chartFrameNormGlobalSmooth_eq_coordMatrix_sum
       (I := I) (M := M) g α i (b := b) hb
-  -- The headline rewrote the LHS using the coercion (= .toFun); restore.
   have hcoerce : ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i :
         Π b : M, TangentSpace I b) b)
       = (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b := rfl
@@ -181,19 +164,14 @@ private lemma gram_expand_coordBasis
           coordMatrix (I := I) (M := M) g α (b := b) j l *
             chartGramMatrix (I := I) g α b k l := by
   classical
-  -- Expand both arguments via the coordinate-basis sum.
   rw [chartFrameNormGlobalSmooth_eq_coord_sum_of_mem (I := I) (M := M) g α i hb]
   rw [chartFrameNormGlobalSmooth_eq_coord_sum_of_mem (I := I) (M := M) g α j hb]
-  -- Now expand the bilinear form `g.inner b`.
   set v : Fin (Module.finrank ℝ E) → TangentSpace I b :=
     fun k => chartBasisVecFiber (I := I) α k b with hv_def
   set a : Fin (Module.finrank ℝ E) → ℝ :=
     fun k => coordMatrix (I := I) (M := M) g α (b := b) i k with ha_def
   set c : Fin (Module.finrank ℝ E) → ℝ :=
     fun l => coordMatrix (I := I) (M := M) g α (b := b) j l with hc_def
-  -- Want: g.inner b (∑ k, a k • v k) (∑ l, c l • v l)
-  --      = ∑ k ∑ l, a k * c l * g.inner b (v k) (v l)
-  -- which is a standard bilinear expansion.
   have hL :
       g.inner b (∑ k, a k • v k) =
         ∑ k, a k • g.inner b (v k) := by
@@ -205,9 +183,7 @@ private lemma gram_expand_coordBasis
   rw [ContinuousLinearMap.sum_apply]
   refine Finset.sum_congr rfl ?_
   intro k _
-  -- (a k • g.inner b (v k)) (∑ l, c l • v l)
   rw [ContinuousLinearMap.smul_apply, smul_eq_mul]
-  -- a k * (g.inner b (v k)) (∑ l, c l • v l)
   have hR :
       g.inner b (v k) (∑ l, c l • v l) =
         ∑ l, c l * g.inner b (v k) (v l) := by
@@ -218,8 +194,6 @@ private lemma gram_expand_coordBasis
   rw [hR, Finset.mul_sum]
   refine Finset.sum_congr rfl ?_
   intro l _
-  -- a k * (c l * g.inner b (v k) (v l))
-  -- versus a k * c l * chartGramMatrix g α b k l
   rw [chartGramMatrix_apply]
   ring
 
@@ -236,9 +210,6 @@ private lemma orthonormal_matrix_form_at
       (1 : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ) := by
   classical
   ext i j
-  -- Compute (C * G * Cᵀ) i j and match to δ_{ij}.
-  -- By `gram_expand_coordBasis`, the RHS double sum equals `g.inner b (B_i b) (B_j b)`,
-  -- and by orthonormality this equals δ_{ij}.
   have hbpouGood :
       b ∈ tsupport (fun x : M =>
             ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
@@ -246,13 +217,9 @@ private lemma orthonormal_matrix_form_at
   have horth :=
     chartFrameNormGlobalSmooth_orthonormal_on_pouTsupportGoodSet
       (I := I) (M := M) g α (b := b) hbpouGood i j
-  -- horth : g.inner b (B_i b) (B_j b) = if i = j then 1 else 0
   have hexp := gram_expand_coordBasis (I := I) (M := M) g α (b := b) hb i j
   rw [horth] at hexp
-  -- hexp: (if i = j then 1 else 0) = ∑ k ∑ l, C_{ik} * C_{jl} * G_{kl}
-  -- Goal: (C * G * Cᵀ) i j = (1 : Matrix _ _ _) i j
   rw [Matrix.mul_apply]
-  -- Goal: ∑ k₀, (C * G) i k₀ * (Cᵀ) k₀ j = (1 : Matrix _ _ _) i j
   have h_inner : ∀ k₀ : Fin (Module.finrank ℝ E),
       (coordMatrix (I := I) (M := M) g α (b := b) *
           chartGramMatrix (I := I) g α b) i k₀ *
@@ -276,9 +243,6 @@ private lemma orthonormal_matrix_form_at
       (if i = j then (1 : ℝ) else 0) from by
     rw [Matrix.one_apply]]
   rw [hexp]
-  -- LHS double sum: ∑ k₀ ∑ l₀, C_{i l₀} * G_{l₀ k₀} * C_{j k₀}
-  -- RHS double sum: ∑ k ∑ l, C_{ik} * C_{jl} * G_{kl}
-  -- Swap LHS sum order and relabel.
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl ?_
   intro l₀ _
@@ -299,32 +263,24 @@ private lemma orthonormal_matrix_inverse_at
   classical
   have hAGA := orthonormal_matrix_form_at (I := I) (M := M) g α
       (b := b) hb_pou hb
-  -- A G Aᵀ = 1 means A * (G * Aᵀ) = 1, so A⁻¹ = G * Aᵀ.
-  -- Then (G * Aᵀ) * A = A⁻¹ * A = 1, so G * (Aᵀ * A) = 1, so Aᵀ * A = G⁻¹.
   set A : Matrix (Fin (Module.finrank ℝ E))
       (Fin (Module.finrank ℝ E)) ℝ :=
     coordMatrix (I := I) (M := M) g α (b := b)
   set G : Matrix (Fin (Module.finrank ℝ E))
       (Fin (Module.finrank ℝ E)) ℝ := chartGramMatrix (I := I) g α b
-  -- hAGA : A * G * A.transpose = 1.
   have hAGA_right : A * (G * A.transpose) = 1 := by
     rw [← Matrix.mul_assoc]; exact hAGA
   have hG_At_eq_invA : G * A.transpose = A⁻¹ :=
     (Matrix.inv_eq_right_inv hAGA_right).symm
-  -- Use `mul_eq_one_comm` to flip multiplication order in the matrix ring.
   have hA_left_inv : (G * A.transpose) * A = 1 :=
     mul_eq_one_comm.mp hAGA_right
   rw [Matrix.mul_assoc] at hA_left_inv
-  -- hA_left_inv : G * (A.transpose * A) = 1, hence A.transpose * A = G⁻¹.
   have hAt_eq_Ginv : A.transpose * A = G⁻¹ :=
     (Matrix.inv_eq_right_inv hA_left_inv).symm
-  -- chartInvGramMatrix g α b = (chartGramMatrix g α b)⁻¹ by definition.
   unfold chartInvGramMatrix
   exact hAt_eq_Ginv
 
 end LinearAlgebra
-
-/-! ## Headline: orthonormality identity for the coordinate matrix -/
 
 /-- **Orthonormality identity for the coordinate matrix.**
 At a base point `b` lying in the chart-α partition-of-unity tsupport
@@ -351,13 +307,10 @@ theorem chartFrameNormGlobalSmoothCoordMatrix_orthonormality
   classical
   have h := orthonormal_matrix_inverse_at (I := I) (M := M) g α
       (b := b) hb_pou hb
-  -- h : Cᵀ * C = G⁻¹ = chartInvGramMatrix g α b.
-  -- Evaluate (Cᵀ * C) k l:
   have heval : ((coordMatrix (I := I) (M := M) g α (b := b)).transpose *
       coordMatrix (I := I) (M := M) g α (b := b)) k l =
         chartInvGramMatrix (I := I) g α b k l := by
     rw [h]
-  -- (Cᵀ * C) k l = ∑ i, Cᵀ k i * C i l = ∑ i, C i k * C i l.
   rw [Matrix.mul_apply] at heval
   rw [show (∑ i,
         (coordMatrix (I := I) (M := M) g α (b := b)).transpose k i *
@@ -368,7 +321,6 @@ theorem chartFrameNormGlobalSmoothCoordMatrix_orthonormality
     refine Finset.sum_congr rfl ?_
     intro i _
     rw [Matrix.transpose_apply]] at heval
-  -- Unfold coordMatrix to chartFrameNormGlobalSmoothCoordMatrix.
   simp only [coordMatrix_apply] at heval
   exact heval
 

@@ -84,12 +84,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -99,23 +93,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
-
-/-! ## The chart-locality-free tensor Sobolev membership
-
-The chart-component a.e.-identity transports the arbitrary-order interior
-regularity of the eigenvector chart component to the chart components of the
-smooth representative; aggregating over the canonical finite chart cover via
-`MemWtwokTwo_of_forall_finset_memWkp` yields the tensor Sobolev membership.
-
-The development is keyed onto the intrinsic compact-operator eigenbasis
-`tensorResolventEigenbasisVec`, with no uniform-Sobolev hypothesis. It
-consumes the chart-locality-free smooth representative
-`eigenvectorSmooth` (whose `L²` class is
-`tensorResolventEigenbasisVec … i` via
-`eigenvectorSmooth_toL2`) and the chart-locality-free
-arbitrary-order interior regularity
-`eigenvector_chartComponent_memWkp_arbitrary` of the intrinsic
-eigenvector chart component `eigenvectorChartComponentFun`. -/
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- The chart component of the chart-locality-free smooth representative agrees
@@ -132,10 +109,6 @@ theorem eigenvectorSmooth_tensorChartComp_aeEq_chartComponentFun
           (chartTargetEuclid (I := I) (M := M) α)]
       eigenvectorChartComponentFun (I := I) (M := M) g r s i α
         (Idx, Jdx) := by
-  -- `tensorChartComp` is definitionally `tensorChartComponent`. On the smooth
-  -- section `eigenvectorSmooth`, the weighted Euclidean chart
-  -- component agrees a.e. (on `chartL2Measure α = volume.restrict
-  -- (chartTargetEuclid α)`) with the canonical chart component of its `L²` class.
   have h_smooth_ae :
       ((tensorL2ChartComponent (I := I) (M := M) g r s
           ((eigenvectorSmooth (I := I) (M := M) g r s i :
@@ -147,8 +120,6 @@ theorem eigenvectorSmooth_tensorChartComp_aeEq_chartComponentFun
         (Idx, Jdx).1 (Idx, Jdx).2 :=
     tensorL2ChartComponent_smoothToTensorL2_coeFn (I := I) (M := M) g r s
       (eigenvectorSmooth (I := I) (M := M) g r s i) α (Idx, Jdx)
-  -- Identify the `L²` class of the smooth representative with the intrinsic
-  -- resolvent eigenvector.
   have h_toL2 :
       (eigenvectorSmooth (I := I) (M := M) g r s i :
           TensorL2 r s g) =
@@ -156,8 +127,6 @@ theorem eigenvectorSmooth_tensorChartComp_aeEq_chartComponentFun
           (tensorResolventL2_isCompactOperator (I := I) (M := M)
             g r s) i :=
     eigenvectorSmooth_toL2 (I := I) (M := M) g r s i
-  -- The intrinsic eigenvector chart component is, by definition, the canonical
-  -- chart component of the intrinsic resolvent eigenvector.
   have h_fun_def :
       eigenvectorChartComponentFun (I := I) (M := M) g r s i α
           (Idx, Jdx) =
@@ -167,9 +136,6 @@ theorem eigenvectorSmooth_tensorChartComp_aeEq_chartComponentFun
                 g r s) i) α
             (Idx, Jdx) :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) := rfl
-  -- `chartL2Measure α` is definitionally `volume.restrict (chartTargetEuclid α)`.
-  -- Rewrite the a.e.-identity and orient it from `tensorChartComp` to the
-  -- eigenvector chart component.
   have h_oriented :
       tensorChartComponent (I := I) (M := M) g r s
           (eigenvectorSmooth (I := I) (M := M) g r s i) α
@@ -192,12 +158,9 @@ theorem tensorEigenvector_memWtwokTwo
     (i : TensorEigenIdx (I := I) (M := M) g r s) (k : ℕ) :
     MemWtwokTwo (I := I) (M := M) g k
       (eigenvectorSmooth (I := I) (M := M) g r s i) := by
-  -- Reduce to chart-local `MemWkp (2 * k) 2` over the canonical finite cover.
   refine MemWtwokTwo_of_forall_finset_memWkp (I := I) (M := M) g k
     (eigenvectorSmooth (I := I) (M := M) g r s i)
     (fun α _hα Idx Jdx => ?_)
-  -- The arbitrary-order interior regularity of the intrinsic eigenvector chart
-  -- component at order `2 * k`.
   have h_fun_memWkp :
       MemWkp (d := Module.finrank ℝ E) (2 * k) 2
         (eigenvectorChartComponentFun (I := I) (M := M) g r s i α
@@ -205,8 +168,6 @@ theorem tensorEigenvector_memWtwokTwo
         (chartTargetEuclid (I := I) (M := M) α) :=
     eigenvector_chartComponent_memWkp_arbitrary (I := I) (M := M)
       g r s i (2 * k) α (Idx, Jdx)
-  -- The chart component of the smooth representative agrees a.e. with the
-  -- intrinsic eigenvector chart component on the chart target.
   have h_ae :
       tensorChartComp (I := I) (M := M) g r s
           (eigenvectorSmooth (I := I) (M := M) g r s i) α Idx Jdx
@@ -216,7 +177,6 @@ theorem tensorEigenvector_memWtwokTwo
         (Idx, Jdx) :=
     eigenvectorSmooth_tensorChartComp_aeEq_chartComponentFun
       (I := I) (M := M) g r s i α Idx Jdx
-  -- Transport the order-`(2 * k)` membership across the a.e.-identity.
   exact (MemWkp_congr_ae (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     (chartTargetEuclid_isOpen (I := I) (M := M) α) h_ae).mpr h_fun_memWkp

@@ -71,19 +71,12 @@ open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianFinal
 open DifferentialGeometry.Analysis.Laplacian.BochnerPolarisedLpFull
 open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianSmoothFull
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## The smooth-case regularity theorem with the cleaner hypothesis pair
-
-The Hessian bridge hypothesis in `GradInnerLaplacianSmoothFull` is
-discharged via `HessianBridgeSmoothLp` under the two cleaner hypotheses. -/
 
 /-- **Smooth-case regularity theorem, resolvent-of-candidate form, conditional
 on Christoffel discharge and per-chart transferability.** -/
@@ -103,8 +96,6 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_smooth_of_christoffe
     (hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_connector
       (I := I) (M := M) g φ v h_transfer h_discharge)
 
-/-! ## The image-membership form -/
-
 /-- **Smooth-case conclusion (image-membership form) via the unconditional
 candidate, conditional on Christoffel discharge and per-chart transferability.** -/
 theorem smoothCase_full_unconditional_of_christoffel_discharge
@@ -120,8 +111,6 @@ theorem smoothCase_full_unconditional_of_christoffel_discharge
     (hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_connector
       (I := I) (M := M) g φ v h_transfer h_discharge)
 
-/-! ## The iterated-closure form -/
-
 /-- **Smooth-case iterated-closure form via the unconditional candidate,
 conditional on Christoffel discharge and per-chart transferability.** -/
 theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_unconditional_of_christoffel_discharge
@@ -135,8 +124,6 @@ theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_unconditiona
     (I := I) (M := M) g φ v
     (hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_connector
       (I := I) (M := M) g φ v h_transfer h_discharge)
-
-/-! ## Headline compact restatement -/
 
 /-- **Compact restatement.** The smooth-case variational identity holds
 for the unconditional candidate, conditional on Christoffel discharge and
@@ -154,13 +141,6 @@ theorem smoothCase_variational_identity_unconditional_of_christoffel_discharge
               (I := I) (M := M) g v))) :=
   gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_smooth_of_christoffel_discharge
     (I := I) (M := M) g φ v h_transfer h_discharge
-
-/-! ## Theorems conditional only on the Christoffel discharge
-
-Since per-chart ae-transferability is discharged unconditionally in
-`HessianBridgeSmoothLp.perChartAeTransferableSmoothCase_holds`, the
-smooth-case regularity theorems can be restated to require only the
-Christoffel discharge hypothesis. -/
 
 /-- **Smooth-case regularity theorem, resolvent-of-candidate form, conditional
 only on the Christoffel discharge.** Per-chart ae-transferability is discharged

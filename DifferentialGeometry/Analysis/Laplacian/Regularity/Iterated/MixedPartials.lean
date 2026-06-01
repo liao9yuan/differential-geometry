@@ -113,8 +113,6 @@ open DifferentialGeometry.Analysis.Laplacian.ChosenThirdMixedPartialChartPushed
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -123,8 +121,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Polymorphic chosen `m`-fold mixed weak partial -/
 
 /-- The canonical chosen `m`-fold mixed weak partial of the chart-pushed POU
 representative of `H1ComplToLp g u_h` in the directions encoded by
@@ -169,8 +165,6 @@ theorem chosenMthMixedPartialChartPushedU_succ
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
           (I := I) (M := M) α) := rfl
 
-/-! ## Compatibility with the hard-coded `m = 1, 2, 3` versions -/
-
 /-- The `m = 1` instance: for any `idx : Fin 1 → Fin n`, the chosen first
 mixed partial agrees on the nose with `chartPushedChosenFirstPartial g α u_h
 (idx 0)`. -/
@@ -180,13 +174,8 @@ theorem chosenMthMixedPartialChartPushedU_one_eq_chosenFirstPartial
     (idx : Fin 1 → Fin (Module.finrank ℝ E)) :
     chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h 1 idx =
       chartPushedChosenFirstPartial (I := I) (M := M) g α u_h (idx 0) := by
-  -- `chosenMthMixedPartialChartPushedU _ _ _ 1 idx`
-  -- = `chosenWeakPartial' 2 (idx (Fin.last 0)) (chartPushed POU α _) Ω`
-  -- with `Fin.last 0 = 0`, so this matches `chartPushedChosenFirstPartial _ (idx 0)`.
   rw [chosenMthMixedPartialChartPushedU_succ]
-  -- At this point: chosenWeakPartial' 2 (idx (Fin.last 0)) (m=0 expression) Ω.
   rw [chosenMthMixedPartialChartPushedU_zero]
-  -- `Fin.last 0 = 0` and `chartPushedChosenFirstPartial` unfolds to the same shape.
   unfold chartPushedChosenFirstPartial
   rfl
 
@@ -201,23 +190,17 @@ theorem chosenMthMixedPartialChartPushedU_two_eq_chosenSecondPartialChartPushedU
     (h_idx_0 : idx 0 = i) (h_idx_1 : idx 1 = l) :
     chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h 2 idx =
       chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l := by
-  -- Unfold one step: outermost direction is `idx (Fin.last 1) = idx 1 = l`.
   rw [chosenMthMixedPartialChartPushedU_succ]
-  -- Inner is `chosenMthMixedPartialChartPushedU _ _ _ 1 (Fin.init idx)`.
   rw [chosenMthMixedPartialChartPushedU_succ]
-  -- Innermost is the chart-pushed parent.
   rw [chosenMthMixedPartialChartPushedU_zero]
-  -- `Fin.last 1 = 1`, hence `idx (Fin.last 1) = idx 1 = l`.
   have h_last_1 : idx (Fin.last 1) = l := by
     have : (Fin.last 1 : Fin 2) = 1 := rfl
     rw [this, h_idx_1]
-  -- `Fin.init idx (Fin.last 0)` = `Fin.init idx 0` = `idx 0 = i`.
   have h_inner_last : (Fin.init idx) (Fin.last 0) = i := by
     have h0 : (Fin.last 0 : Fin 1) = 0 := rfl
     rw [h0]
     simp [Fin.init, h_idx_0]
   rw [h_last_1, h_inner_last]
-  -- Both sides are now the same nested `chosenWeakPartial'` expression.
   rfl
 
 /-- The `m = 3` instance: for any `idx : Fin 3 → Fin n` with `idx 0 = i`,
@@ -231,13 +214,11 @@ theorem chosenMthMixedPartialChartPushedU_three_eq_chosenThirdMixedPartialChartP
     (h_idx_0 : idx 0 = i) (h_idx_1 : idx 1 = l) (h_idx_2 : idx 2 = j) :
     chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h 3 idx =
       chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l j := by
-  -- Unfold one step: outermost direction is `idx (Fin.last 2) = idx 2 = j`.
   rw [chosenMthMixedPartialChartPushedU_succ]
   have h_last_2 : idx (Fin.last 2) = j := by
     have : (Fin.last 2 : Fin 3) = 2 := rfl
     rw [this, h_idx_2]
   rw [h_last_2]
-  -- The inner is the `m = 2` chosen mixed partial on `Fin.init idx`.
   have h_init_0 : (Fin.init idx) 0 = i := by
     simp [Fin.init, h_idx_0]
   have h_init_1 : (Fin.init idx) 1 = l := by
@@ -245,18 +226,8 @@ theorem chosenMthMixedPartialChartPushedU_three_eq_chosenThirdMixedPartialChartP
   have h_inner_eq := chosenMthMixedPartialChartPushedU_two_eq_chosenSecondPartialChartPushedU
     (I := I) (M := M) g α u_h i l (Fin.init idx) h_init_0 h_init_1
   rw [h_inner_eq]
-  -- And the third-mixed partial unfolds to precisely the `chosenWeakPartial'`
-  -- of the second mixed partial in direction `j`.
   unfold chosenThirdMixedPartialChartPushedU
   rfl
-
-/-! ## Polymorphic regularity bridge
-
-The structural lemma below is the engine of the whole module: chart-`H^{k+m}`
-of the chart-pushed parent implies chart-`H^k` of every `m`-mixed partial,
-for arbitrary `m, k : ℕ`. The proof is induction on `m`, repeatedly
-applying `MemWkp.chosenWeakPartial_mem` to peel off one derivative per
-step. -/
 
 /-- **Polymorphic regularity bridge.** From chart-`H^{k+m}` of the canonical
 chart-pushed POU representative of `u_h.coeFn` on the chart target, every
@@ -283,12 +254,10 @@ theorem chosenMthMixedPartialChartPushedU_memWkp_of_chartPushed_memWkp
             (I := I) (M := M) α) := by
   induction m with
   | zero =>
-      -- `k + 0 = k` and the m=0 mixed partial is the chart-pushed parent.
       intro k h_parent _idx
       simpa [chosenMthMixedPartialChartPushedU_zero] using h_parent
   | succ m ih =>
       intro k h_parent idx
-      -- Rewrite `k + (m + 1)` as `(k + 1) + m` on the parent hypothesis.
       have h_parent' :
           DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
             (d := Module.finrank ℝ E) ((k + 1) + m) 2
@@ -300,7 +269,6 @@ theorem chosenMthMixedPartialChartPushedU_memWkp_of_chartPushed_memWkp
         have h_eq : (k + 1) + m = k + (m + 1) := by ring
         rw [h_eq]
         exact h_parent
-      -- Inductive hypothesis with one fewer derivative.
       have h_inner :
           DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
             (d := Module.finrank ℝ E) (k + 1) 2
@@ -309,13 +277,9 @@ theorem chosenMthMixedPartialChartPushedU_memWkp_of_chartPushed_memWkp
             (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
               (I := I) (M := M) α) :=
         ih (k + 1) h_parent' (Fin.init idx)
-      -- Peel off one weak partial in the direction `idx (Fin.last m)`.
       have h_step := h_inner.chosenWeakPartial_mem (idx (Fin.last m))
-      -- Rewrite via `chosenMthMixedPartialChartPushedU_succ`.
       rw [chosenMthMixedPartialChartPushedU_succ]
       exact h_step
-
-/-! ## Concrete-`k` corollaries -/
 
 /-- **`k = 0` corollary.** From chart-`H^m` of the chart-pushed parent, every
 `m`-fold chosen mixed weak partial is `MemLp 2` on the chart target. -/
@@ -337,7 +301,6 @@ theorem chosenMthMixedPartialChartPushedU_memLp_two
       ((volume : Measure EuclN).restrict
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
           (I := I) (M := M) α)) := by
-  -- Apply the polymorphic bridge with `k = 0`.
   have h_parent' :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) (0 + m) 2
@@ -350,7 +313,6 @@ theorem chosenMthMixedPartialChartPushedU_memLp_two
   have h_memWkp_0 :=
     chosenMthMixedPartialChartPushedU_memWkp_of_chartPushed_memWkp
       (I := I) (M := M) g α u_h m 0 h_parent' idx
-  -- `MemWkp 0 2 _ _ ↔ MemLp 2 _ (volume.restrict _)` definitionally.
   exact h_memWkp_0
 
 /-- **`k = 1` corollary.** From chart-`H^{m+1}` of the chart-pushed parent,
@@ -374,7 +336,6 @@ theorem chosenMthMixedPartialChartPushedU_memW1p_two
         (I := I) (M := M) g α u_h m idx)
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := by
-  -- Apply the polymorphic bridge with `k = 1`.
   have h_parent' :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) (1 + m) 2

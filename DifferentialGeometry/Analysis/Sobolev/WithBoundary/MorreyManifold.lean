@@ -101,36 +101,11 @@ variable {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanHalfSpace n) M]
   [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M]
 
-/-! ## Local notation -/
-
 local notation "EuN" => EuclideanSpace ℝ (Fin n)
 local notation "I_hs" => modelWithCornersEuclideanHalfSpace n
 
-/-! ## File-local Borel-space instances on `M`
-
-`EuN = EuclideanSpace ℝ (Fin n)` already carries Mathlib's canonical
-measurable structure (the `WithLp` measurable space coming from the Pi
-structure). We do NOT install a separate Borel instance for `EuN` to avoid
-typeclass conflicts with the existing infrastructure. We do install the
-Borel instance for `M`. -/
-
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Smooth chart-extended function
-
-Given `f : M → ℝ`, we define a function on `EuN := EuclideanSpace ℝ (Fin n)`
-by setting
-
-  `chartSmoothExt α f y = f ((extChartAt I α).symm y)` if `y ∈ chartTarget`,
-                         `0` otherwise.
-
-When `f` is smooth on `M` and its tsupport lies in the chart source, the
-extended function on `EuN` is smooth on the open interior part
-`interiorHalfSpace (chartTarget) = chartTarget ∩ openHalfSpace`. To make
-it smooth on ALL of `EuN`, we will additionally require that its tsupport
-in `EuN` lies inside `interiorHalfSpace (chartTarget)` (equivalently:
-strictly above the boundary face). -/
 
 /-- The chart-extended function on `EuN`: equals `f ∘ (extChartAt I α).symm`
 on the chart target, and `0` outside. -/
@@ -164,8 +139,6 @@ private lemma chartSmoothExt_apply_of_notMem_target
     else 0) = 0
   rw [if_neg hy]
 
-/-! ## On the chart-target image, `chartSmoothExt` agrees with `chartPushed`. -/
-
 omit [IsManifold I_hs ∞ M] in
 /-- On the chart target, `chartSmoothExt α (ρ_α · u)` agrees pointwise with
 `chartPushed ρ α u`. -/
@@ -180,13 +153,6 @@ private lemma chartSmoothExt_eq_chartPushed_on_target
   rw [chartSmoothExt_apply_of_mem_target (n := n) (M := M) α _ hy]
   unfold chartPushed
   rfl
-
-/-! ## Smoothness of `chartSmoothExt α f` on the open interior part
-
-When `f` is smooth on `M` and its tsupport is in the chart source, the
-extension equals `f ∘ extChartAt.symm` on the chart target and zero
-outside, hence smooth on `interiorHalfSpace (chartTarget)` (open part)
-and smooth outside the closure of the carrier. -/
 
 private lemma image_extChartAt_tsupport_compact_subset_target
     [CompactSpace M] {f : M → ℝ} {α : M}
@@ -260,16 +226,6 @@ private lemma tsupport_chartSmoothExt_subset
   rw [tsupport]
   exact hK_closed.closure_subset_iff.mpr h_supp_sub
 
-/-! ## Smoothness on the open interior part
-
-The extended function `chartSmoothExt α f` agrees on the chart target with
-`f ∘ (extChartAt I α).symm`, which is `ContDiffOn ℝ ∞` on the (half-space-
-relatively-open) chart target. Restricted to the open interior part
-`chartTarget ∩ openHalfSpace`, it is `ContDiffOn ℝ ∞`, and on points
-in the open interior part the within-derivative coincides with the
-ordinary Fréchet derivative (since the open interior part is a
-neighborhood of every interior point). -/
-
 private lemma contDiffOn_chartSmoothExt_formula
     (α : M) {f : M → ℝ} (hf : ContMDiff I_hs 𝓘(ℝ, ℝ) ∞ f) :
     ContDiffOn ℝ ∞
@@ -278,12 +234,6 @@ private lemma contDiffOn_chartSmoothExt_formula
   classical
   exact DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE_contDiffOn
     (I := I_hs) α hf
-
-/-! ## Strictly interior tsupport for the chart-pushed function
-
-The smoothness of the extension by 0 across the boundary face requires
-that the chart-pushed function has `tsupport` strictly inside the open
-interior part of the chart target. We expose the predicate explicitly. -/
 
 /-- Predicate on a smooth `f : M → ℝ`: the chart-pushed image of `tsupport f`
 under `extChartAt I α` lies strictly inside the open interior part of
@@ -302,14 +252,11 @@ private lemma chartSmoothExtInteriorSupport_image_subset_interior
         (chartTargetEuclid (n := n) (M := M) α) := by
   rintro y ⟨x, hx, rfl⟩
   refine ⟨?_, h_int ⟨x, hx, rfl⟩⟩
-  -- y ∈ (extChartAt I α).target
   have h_src : x ∈ (extChartAt I_hs α).source := by
     rw [DifferentialGeometry.Integral.Measure.extChartAt_source_eq_chartAt_source
       (I := I_hs) (M := M)]
     exact hf_supp hx
   exact (extChartAt I_hs α).map_source h_src
-
-/-! ## Smoothness of `chartSmoothExt α f` on `EuN` for strictly-interior tsupport -/
 
 private lemma contDiffAt_chartSmoothExt_of_mem_interior_target
     (α : M) {f : M → ℝ} (hf : ContMDiff I_hs 𝓘(ℝ, ℝ) ∞ f) {y : EuN}
@@ -317,37 +264,27 @@ private lemma contDiffAt_chartSmoothExt_of_mem_interior_target
         (chartTargetEuclid (n := n) (M := M) α)) :
     ContDiffAt ℝ ∞ (chartSmoothExt (n := n) (M := M) α f) y := by
   classical
-  -- The interior part is open in EuN.
   have hOpen : IsOpen (DifferentialGeometry.Analysis.Sobolev.Euclidean.interiorHalfSpace
       (d := n) (chartTargetEuclid (n := n) (M := M) α)) :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.interiorHalfSpace_isOpen
       (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α)
-  -- y is in the open interior part, which is contained in chartTarget.
   have hy_target : y ∈ (extChartAt I_hs α).target := hy.1
-  -- contDiffOn for f ∘ extChartAt.symm at y on chartTarget.
   have hContDiffOn := contDiffOn_chartSmoothExt_formula (n := n) (M := M) α hf
-  -- Within-contDiff at y on chartTarget.
   have h_within : ContDiffWithinAt ℝ ∞
       (fun y : EuN => f ((extChartAt I_hs α).symm y))
       (extChartAt I_hs α).target y := hContDiffOn y hy_target
-  -- The interior part is open and contained in chartTarget, so we can extract
-  -- contDiffAt from a neighborhood.
   have hInt_sub : DifferentialGeometry.Analysis.Sobolev.Euclidean.interiorHalfSpace
       (d := n) (chartTargetEuclid (n := n) (M := M) α) ⊆ (extChartAt I_hs α).target := by
     intro z hz
     exact hz.1
-  -- ContDiffWithinAt on chartTarget at y implies ContDiffWithinAt on interior part at y.
   have h_within_int : ContDiffWithinAt ℝ ∞
       (fun y : EuN => f ((extChartAt I_hs α).symm y))
       (DifferentialGeometry.Analysis.Sobolev.Euclidean.interiorHalfSpace
         (chartTargetEuclid (n := n) (M := M) α)) y :=
     h_within.mono hInt_sub
-  -- The interior part is a neighborhood of y, so contDiffWithinAt becomes contDiffAt.
   have h_contDiffAt : ContDiffAt ℝ ∞
       (fun y : EuN => f ((extChartAt I_hs α).symm y)) y :=
     h_within_int.contDiffAt (hOpen.mem_nhds hy)
-  -- Use congr on a neighborhood: chartSmoothExt α f = f ∘ extChartAt.symm
-  -- on the open interior part (which contains a neighborhood of y).
   apply h_contDiffAt.congr_of_eventuallyEq
   filter_upwards [hOpen.mem_nhds hy] with z hz
   rw [chartSmoothExt_apply_of_mem_target (n := n) (M := M) α f hz.1]
@@ -387,20 +324,16 @@ private lemma contDiff_chartSmoothExt
   intro y
   set K : Set EuN := (extChartAt I_hs α) '' (tsupport f) with hK_def
   by_cases hyK : y ∈ K
-  · -- y ∈ K = image of tsupport f. By interior-support hypothesis, K ⊆ interior part.
-    have hy_int : y ∈
+  · have hy_int : y ∈
         DifferentialGeometry.Analysis.Sobolev.Euclidean.interiorHalfSpace
           (chartTargetEuclid (n := n) (M := M) α) :=
       chartSmoothExtInteriorSupport_image_subset_interior
         (n := n) (M := M) hf_supp h_int hyK
     exact contDiffAt_chartSmoothExt_of_mem_interior_target
       (n := n) (M := M) α hf hy_int
-  · -- y ∉ K. The function vanishes in a neighborhood of y.
-    have hf_compact : IsCompact (tsupport f) := (isClosed_tsupport _).isCompact
+  · have hf_compact : IsCompact (tsupport f) := (isClosed_tsupport _).isCompact
     exact contDiffAt_chartSmoothExt_of_notMem_image_tsupport
       (n := n) (M := M) α hf_supp hf_compact hyK
-
-/-! ## Smoothness of `chartSmoothExt α (ρ_α · u)` for smooth `u : M → ℝ` -/
 
 omit [IsManifold I_hs ∞ M] in
 private lemma tsupport_pou_mul_subset_chart_source
@@ -445,14 +378,6 @@ private lemma hasCompactSupport_chartSmoothExt_pou_mul
   have hf_supp : tsupport f ⊆ (chartAt (EuclideanHalfSpace n) α).source :=
     tsupport_pou_mul_subset_chart_source (n := n) (M := M) ρ hρ α u
   exact hasCompactSupport_chartSmoothExt (n := n) (M := M) α hf_supp
-
-/-! ## Compact support set independent of `u`
-
-For the canonical chart-atlas POU `chartAtlasPOU I_hs M`, the carrier
-`extChartAt I α '' tsupport (ρ_α : M → ℝ)` is a compact subset of the
-chart target, depending on `α` but not on `u`. We bound the chart-pushed
-carrier of `(ρ_α · u)` by this carrier and pick a Euclidean ball
-containing it. -/
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
@@ -540,13 +465,6 @@ private lemma chartCarrier_subset_full_ball (α : M) :
   have h := chartRadius_pos (n := n) (M := M) α
   linarith
 
-/-! ## Per-chart smooth sup bound on `chartSmoothExt α (ρ_α · u)`
-
-Under the strict-interior tsupport hypothesis on the chart-pushed function,
-the chart-extended `chartSmoothExt α (ρ_α · u)` is `ContDiff ℝ ⊤` on
-`EuN = EuclideanSpace ℝ (Fin n)`. The boundaryless smooth Morrey applies
-on a Euclidean ball containing the (compact) chart-pushed carrier. -/
-
 /-- Predicate version: the canonical-POU chart-pushed image of
 `(ρ_α · u)` has tsupport strictly inside the open interior part of the
 chart target, for every chart `α`. -/
@@ -572,7 +490,6 @@ private lemma tsupport_chartSmoothExt_pou_mul_subset_chartCarrier
       : C^∞⟮I_hs, M; ℝ⟯) : M → ℝ) with hTα_def
   have hTα_chart_src : Tα ⊆ (chartAt (EuclideanHalfSpace n) α).source :=
     DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I_hs M α
-  -- tsupport (ρ_α · u) ⊆ Tα.
   have h_pou_supp_sub_tα : tsupport (fun x : M =>
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M α
         : C^∞⟮I_hs, M; ℝ⟯) x * u x) ⊆ Tα := by
@@ -608,7 +525,6 @@ private lemma chartSmoothExt_pou_mul_eq_zero_off_half_ball
         : C^∞⟮I_hs, M; ℝ⟯) x * u x) y = 0 := by
   by_contra hne
   apply hy
-  -- y ∈ support → y ∈ tsupport ⊆ chartCarrier α ⊆ ball 0 (R/2).
   have h_in_supp : y ∈ Function.support (chartSmoothExt (n := n) (M := M) α
       (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M α
         : C^∞⟮I_hs, M; ℝ⟯) x * u x)) := Function.mem_support.mpr hne
@@ -616,13 +532,6 @@ private lemma chartSmoothExt_pou_mul_eq_zero_off_half_ball
   exact chartCarrier_subset_half_ball (n := n) (M := M) α
     (tsupport_chartSmoothExt_pou_mul_subset_chartCarrier (n := n) (M := M) α u
       h_in_tsupport)
-
-/-! ## Smooth sup bound on `chartSmoothExt α (ρ_α · u)` via the boundaryless
-Morrey
-
-Under the strict-interior tsupport hypothesis the chart-extended function
-is smooth on `EuN`. The boundaryless smooth Morrey applies on a Euclidean
-ball containing the chart-pushed carrier. -/
 
 private lemma chartSmoothExt_morrey_sup_uniform
     (α : M) {p : ℝ} (hp : (n : ℝ) < p) :
@@ -662,11 +571,9 @@ private lemma chartSmoothExt_morrey_sup_uniform
     exact this
   by_cases hy_half : y ∈ Metric.ball (0 : EuN) (chartRadius (n := n) (M := M) α / 2)
   · exact hbound hf_smooth_top y hy_half
-  · -- f y = 0, so LHS = 0.
-    have hf_y_zero : f y = 0 :=
+  · have hf_y_zero : f y = 0 :=
       chartSmoothExt_pou_mul_eq_zero_off_half_ball (n := n) (M := M) α u hy_half
     rw [hf_y_zero, norm_zero]
-    -- RHS ≥ 0.
     have h_nn1 : 0 ≤ (eLpNorm f (ENNReal.ofReal p)
         (volume.restrict (Metric.ball (0 : EuN) (chartRadius (n := n) (M := M) α)))).toReal :=
       ENNReal.toReal_nonneg
@@ -681,12 +588,6 @@ private lemma chartSmoothExt_morrey_sup_uniform
       apply mul_nonneg hC_nn
       linarith
     exact h_RHS_nn
-
-/-! ## Indicator-style equalities for the eLpNorm of `chartSmoothExt α (ρ_α · u)`
-
-The chart-extended function vanishes off `chartCarrier α`. So the eLpNorm
-on a ball containing the carrier equals the eLpNorm on the chart target
-interior part (open). -/
 
 omit [CompactSpace M] [SigmaCompactSpace M] [T2Space M] in
 private lemma chartSmoothExt_eq_zero_off_target
@@ -735,7 +636,6 @@ private lemma eLpNorm_chartSmoothExt_pou_mul_restrict_ball
   have hK_BR : K ⊆ BR :=
     chartCarrier_subset_full_ball (n := n) (M := M) α
   have hBR_meas : MeasurableSet BR := measurableSet_ball
-  -- For y ∉ BR, h y = 0. So h has tsupport in K ⊆ BR.
   have h_eq_BR : h = BR.indicator h := by
     funext y
     by_cases hy : y ∈ BR
@@ -787,13 +687,6 @@ private lemma eLpNorm_norm_fderiv_chartSmoothExt_pou_mul_restrict_ball
         (eLpNorm_indicator_eq_eLpNorm_restrict hBR_meas).symm
     _ = eLpNorm fnNorm q volume := by rw [← h_eq_BR]
 
-/-! ## Bridge between `chartSmoothExt α (ρ_α · u)` and `chartPushed ρ α u`
-
-On the open interior part of the chart target, the chart-extended
-function and the chart-pushed function agree pointwise. Since the
-boundary face is a measure-zero subset of the chart target, the two
-agree a.e. on the interior part. -/
-
 omit [CompactSpace M] in
 /-- `chartSmoothExt α (ρ_α · u)` and `chartPushed ρ α u` agree a.e. on
 `volume.restrict (interiorHalfSpace (chartTargetEuclid α))`. -/
@@ -832,13 +725,6 @@ private lemma eLpNorm_chartSmoothExt_interior_eq_eLpNorm_chartPushed_interior
             (chartTargetEuclid (n := n) (M := M) α))) :=
   eLpNorm_congr_ae (chartSmoothExt_ae_eq_chartPushed_interior (n := n) (M := M) α u)
 
-/-! ## eLpNorm of `chartSmoothExt α (ρ_α · u)` on `B(0, R_α)` equals the
-eLpNorm on the open interior part
-
-When the chart-pushed `tsupport` lies strictly inside the open interior
-part, both quantities equal the full-space eLpNorm and the per-chart
-half-space norm `wkpNormHalfSpace 1 p u (chartTargetEuclid α)` controls them. -/
-
 private lemma eLpNorm_chartSmoothExt_pou_mul_restrict_ball_eq_restrict_interior
     {u : M → ℝ} (h_int : AllChartsInteriorSupport (n := n) (M := M) u)
     (α : M) (q : ℝ≥0∞) :
@@ -856,22 +742,13 @@ private lemma eLpNorm_chartSmoothExt_pou_mul_restrict_ball_eq_restrict_interior
   set h : EuN → ℝ := chartSmoothExt (n := n) (M := M) α
     (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M α
       : C^∞⟮I_hs, M; ℝ⟯) x * u x) with hh_def
-  -- Strategy: both equal eLpNorm h q volume.
-  -- LHS = full-space (we already proved this when carrier ⊆ ball).
   rw [eLpNorm_chartSmoothExt_pou_mul_restrict_ball (n := n) (M := M) α u q]
-  -- Now we need: eLpNorm h q volume = eLpNorm h q (volume.restrict (interior part)).
-  -- Since h = 0 outside `extChartAt α image of tsupport (ρ_α · u)` (interior subset).
-  -- We show h has tsupport in the interior part (using h_int hypothesis).
   set IntΩ : Set EuN :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.interiorHalfSpace
       (chartTargetEuclid (n := n) (M := M) α) with hIntΩ_def
   have hIntΩ_open : IsOpen IntΩ :=
     interiorHalfSpace_chartTargetEuclid_isOpen (n := n) (M := M) α
   have hIntΩ_meas : MeasurableSet IntΩ := hIntΩ_open.measurableSet
-  -- We need: h has tsupport in IntΩ.
-  -- This follows from: tsupport h ⊆ chartCarrier α and chartCarrier α refers to ρ_α (not ρ_α · u).
-  -- However the strict-interior hypothesis is on the chart-pushed (ρ_α · u), not ρ_α alone.
-  -- Re-prove tsupport via the strict-interior hypothesis on (ρ_α · u).
   have h_tsupport_in_int : tsupport h ⊆ IntΩ := by
     set f : M → ℝ := fun x : M =>
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M α
@@ -887,7 +764,6 @@ private lemma eLpNorm_chartSmoothExt_pou_mul_restrict_ball_eq_restrict_interior
     have h1 : tsupport h ⊆ (extChartAt I_hs α) '' (tsupport f) :=
       tsupport_chartSmoothExt_subset (n := n) (M := M) α hf_supp_chart_src
     exact h1.trans hint_image
-  -- Now use indicator argument: h = 0 outside tsupport h, in particular outside IntΩ.
   have h_eq_IntΩ : h = IntΩ.indicator h := by
     funext y
     by_cases hy : y ∈ IntΩ
@@ -963,14 +839,6 @@ private lemma eLpNorm_norm_fderiv_chartSmoothExt_pou_mul_restrict_ball_eq_restri
     _ = eLpNorm fnNorm q (volume.restrict IntΩ) :=
         eLpNorm_indicator_eq_eLpNorm_restrict hIntΩ_meas
 
-/-! ## Bound `eLpNorm chartSmoothExt q (B(0, R_α))` by `wkpNormChart`
-
-Given the indicator-style equality with the eLpNorm on the open interior
-part, and the ae-equality between `chartSmoothExt` and `chartPushed`,
-the eLpNorm reduces to the per-chart half-space norm
-`wkpNormHalfSpace 0 q (chartPushed) (chartTargetEuclid α)`. The latter
-is bounded by the chart-based norm `wkpNormChart g 1 q u`. -/
-
 private lemma eLpNorm_chartSmoothExt_ball_le_wkpNormChart
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
     {u : M → ℝ} (h_int : AllChartsInteriorSupport (n := n) (M := M) u)
@@ -985,14 +853,6 @@ private lemma eLpNorm_chartSmoothExt_ball_le_wkpNormChart
     (n := n) (M := M) h_int α q]
   rw [eLpNorm_chartSmoothExt_interior_eq_eLpNorm_chartPushed_interior
     (n := n) (M := M) α u q]
-  -- Now the LHS is eLpNorm (chartPushed) q (volume.restrict IntΩ).
-  -- The RHS is wkpNormChart u, defined as a tsum over β of wkpNormHalfSpace 1 q (chartPushed β).
-  -- For the specific α, wkpNormHalfSpace 0 q ≤ wkpNormHalfSpace 1 q (since order-zero norm is included).
-  -- So we'd need to first show LHS ≤ wkpNormHalfSpace 1 q (chartPushed α) (chartTargetEuclid α),
-  -- then ≤ tsum.
-  -- LHS = wkpNormHalfSpace 0 q (chartPushed α) (chartTargetEuclid α)
-  --     ≤ wkpNormHalfSpace 1 q (chartPushed α) (chartTargetEuclid α)
-  --     ≤ tsum α, ... = wkpNormChart u.
   set Ω : Set EuN := chartTargetEuclid (n := n) (M := M) α with hΩ_def
   have h_zero_eq : eLpNorm (chartPushed (n := n) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M) α u) q
@@ -1004,7 +864,6 @@ private lemma eLpNorm_chartSmoothExt_ball_le_wkpNormChart
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M) α u) Ω := by
     rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormHalfSpace_zero]
   rw [h_zero_eq]
-  -- wkpNormHalfSpace 0 q ≤ wkpNormHalfSpace 1 q.
   have h_le_succ : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormHalfSpace
       (d := n) 0 q
       (chartPushed (n := n) (M := M)
@@ -1013,8 +872,6 @@ private lemma eLpNorm_chartSmoothExt_ball_le_wkpNormChart
         (d := n) 1 q
         (chartPushed (n := n) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M) α u) Ω := by
-    -- This is wkpNorm 0 q ≤ wkpNorm 1 q on interiorHalfSpace Ω.
-    -- Use the wkpNorm_eq_sum decomposition.
     unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormHalfSpace
     rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_eq_sum 0 q,
         DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_eq_sum 1 q]
@@ -1025,16 +882,9 @@ private lemma eLpNorm_chartSmoothExt_ball_le_wkpNormChart
     refine le_add_of_nonneg_right ?_
     exact zero_le _
   refine h_le_succ.trans ?_
-  -- Now ≤ tsum.
   let _ := g
   unfold wkpNormChart
   exact ENNReal.le_tsum α
-
-/-! ## Per-partial gradient bound for `chartSmoothExt α (ρ_α · u)`
-
-We bound the L^p norm of the gradient `‖fderiv ℝ f‖` by `n * wkpNormChart`.
-The key step uses the equality of classical Fréchet partials with the
-chosen weak partial on the open interior part. -/
 
 /-- `‖w‖ ≤ ∑ i, ‖w i‖` in `EuclideanSpace`. -/
 private lemma euN_norm_le_sum_components_norms (w : EuN) :
@@ -1289,15 +1139,6 @@ private lemma eLpNorm_norm_fderiv_le_n_mul_wkpNorm
     (one_mul _).symm]
   gcongr
 
-/-! ## Bound the gradient eLpNorm of `chartSmoothExt α (ρ_α · u)` by `n · wkpNormChart`
-
-By the eLpNorm-on-ball-equals-eLpNorm-on-interior identity, the gradient
-eLpNorm reduces to the eLpNorm on the open interior part. The smooth
-function `chartSmoothExt α (ρ_α · u)` is supported in
-`extChartAt α image of tsupport (ρ_α · u)`, which by the strict-interior
-hypothesis lies inside the open `interiorHalfSpace (chartTargetEuclid α)`.
-Apply the previous lemma with `Ω = interiorHalfSpace (chartTargetEuclid α)`. -/
-
 private lemma eLpNorm_norm_fderiv_chartSmoothExt_pou_mul_interior_le_wkpNormHalfSpace
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) {u : M → ℝ} (hu : ContMDiff I_hs 𝓘(ℝ, ℝ) ∞ u)
     (h_int : AllChartsInteriorSupport (n := n) (M := M) u) (α : M) :
@@ -1335,7 +1176,6 @@ private lemma eLpNorm_norm_fderiv_chartSmoothExt_pou_mul_interior_le_wkpNormHalf
     exact hasCompactSupport_chartSmoothExt_pou_mul (n := n) (M := M) α
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M)
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I_hs M) u
-  -- tsupport f ⊆ Ω, by strict-interior hypothesis on chart-pushed.
   have hf_supp : tsupport f ⊆ Ω := by
     rw [hf_def, hΩ_def]
     set ff : M → ℝ := fun x : M =>
@@ -1414,8 +1254,6 @@ private lemma eLpNorm_norm_fderiv_chartSmoothExt_ball_le_wkpNormChart
   rw [wkpNorm_chartSmoothExt_interior_eq_wkpNorm_chartPushed_interior
     (n := n) (M := M) hq_one α u]
   gcongr
-  -- wkpNorm 1 q (chartPushed) (interiorHalfSpace) = wkpNormHalfSpace 1 q (chartPushed) (chartTargetEuclid)
-  -- ≤ wkpNormChart u.
   change DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormHalfSpace
         (d := n) 1 q
         (chartPushed (n := n) (M := M)
@@ -1424,16 +1262,6 @@ private lemma eLpNorm_norm_fderiv_chartSmoothExt_ball_le_wkpNormChart
     wkpNormChart (n := n) (M := M) g 1 q u
   exact wkpNormHalfSpace_chartPushed_target_le_wkpNormChart
     (n := n) (M := M) g α u
-
-/-! ## Per-chart smooth Morrey bound on the chart-pushed value
-
-Combining the per-chart sup bound `chartSmoothExt_morrey_sup_uniform` with
-the indicator-style equalities and the L^p bounds, we obtain a uniform-
-in-`u` per-chart sup bound:
-
-  `‖chartSmoothExt α (ρ_α · u) y‖ ≤ C_α · (wkpNormChart u).toReal`
-
-for all `y : EuN`, with `C_α` depending on `α, g, p, n`. -/
 
 private lemma per_chart_smooth_sup_bound
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
@@ -1472,13 +1300,6 @@ private lemma per_chart_smooth_sup_bound
     have hgrad_bd := eLpNorm_norm_fderiv_chartSmoothExt_ball_le_wkpNormChart
       (n := n) (M := M) g hp_enn_one hu h_int α
     have hwkp_lt_top : wkpNormChart (n := n) (M := M) g 1 (ENNReal.ofReal p) u < ⊤ := by
-      -- We need MemWkpChart for u; we'll bound by ⊤ directly using the per-chart finiteness.
-      -- But MemWkpChart_of_smooth is not available; since u is smooth and POU sums to 1,
-      -- the per-chart half-space norm is finite if chartPushed has compact support and
-      -- tsupport in interior. For the manifold case, the canonical POU has finitely many
-      -- nonzero charts.
-      -- Use: MemWkpHalfSpace iff MemWkp on interior. For smooth chart-pushed with compact
-      -- support and tsupport in interior, MemWkp follows from MemWkp_of_smooth_compactSupport_pub.
       have h_per_α_mem : ∀ β : M,
           DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkpHalfSpace
             (d := n) 1 (ENNReal.ofReal p)
@@ -1486,7 +1307,6 @@ private lemma per_chart_smooth_sup_bound
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M) β u)
             (chartTargetEuclid (n := n) (M := M) β) := by
         intro β
-        -- chartPushed = chartSmoothExt on interior up to ae.
         set fβ : M → ℝ := fun x : M =>
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M β
             : C^∞⟮I_hs, M; ℝ⟯) x * u x with hfβ_def
@@ -1501,7 +1321,6 @@ private lemma per_chart_smooth_sup_bound
           chartSmoothExtInteriorSupport_image_subset_interior
             (n := n) (M := M) (α := β) (f := fβ) hfβ_supp_chart_src (h_int β)
         set ext_β : EuN → ℝ := chartSmoothExt (n := n) (M := M) β fβ with hext_β_def
-        -- MemWkp 1 p ext_β on interior part of chart target.
         have hext_β_smooth : ContDiff ℝ ∞ ext_β := by
           rw [hext_β_def]
           exact contDiff_chartSmoothExt_pou_mul (n := n) (M := M) β
@@ -1529,8 +1348,6 @@ private lemma per_chart_smooth_sup_bound
               (chartTargetEuclid (n := n) (M := M) β)) :=
           DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_of_smooth_compactSupport_pub
             (d := n) hOpen_int hext_β_smooth hext_β_compact hext_β_supp hp_enn_one 1
-        -- chartPushed equals chartSmoothExt = ext_β on interior up to ae.
-        -- So MemWkp on interior is the same predicate up to congr_ae.
         have h_ae : ext_β =ᵐ[volume.restrict
             (DifferentialGeometry.Analysis.Sobolev.Euclidean.interiorHalfSpace
               (chartTargetEuclid (n := n) (M := M) β))]
@@ -1546,7 +1363,6 @@ private lemma per_chart_smooth_sup_bound
               (chartTargetEuclid (n := n) (M := M) β)) :=
           (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
             (d := n) hp_enn_one hOpen_int h_ae).mp hext_β_W1p
-        -- This is exactly MemWkpHalfSpace.
         exact h_chartPushed_W1p
       have h_mem_chart : MemWkpChart (n := n) (M := M) g 1 (ENNReal.ofReal p) u :=
         h_per_α_mem
@@ -1589,8 +1405,6 @@ private lemma per_chart_smooth_sup_bound
         _ = Cmorrey * (1 + (n : ℝ)) * N := h1
     rw [hf_def] at h_final
     exact le_trans hbound_y h_final
-
-/-! ## Per-point evaluation: relating `(ρ_α · u)(x)` to `chartSmoothExt α (ρ_α · u)(...)` -/
 
 omit [CompactSpace M] in
 /-- For `x ∈ chartAt α source`, `(ρ_α · u)(x) = chartSmoothExt α (ρ_α · u) (extChartAt I α x)`. -/
@@ -1642,8 +1456,6 @@ private lemma norm_pou_mul_le_norm_chartSmoothExt_at_some_point
       exact Function.mem_support.mpr hne
     rw [hρ_zero, zero_mul, norm_zero]
     exact hCmod
-
-/-! ## Smooth manifold-side Morrey sup bound (uniform in `u`) -/
 
 /-- Per-chart constant from `per_chart_smooth_sup_bound`, packaged as a
 function `M → ℝ`. -/
@@ -1719,14 +1531,6 @@ theorem smooth_manifold_morrey_sup_bound_uniform_withBoundary
   intro y
   exact perChartMorreyConst_bound (n := n) (M := M) g hp α hu h_int y
 
-/-! ## Smooth Hölder modulus on the partition-of-unity-localized function
-
-For each chart `α`, the smooth Euclidean Hölder modulus
-(`smooth_morrey_pair_bound_uniform` from `EuclideanMorrey.lean`) applied to the
-smooth chart-extended function `chartSmoothExt α (ρ_α · u)` on the half-ball
-`B(0, R_α / 2)` of the chart-radius ball yields a Hölder bound on
-`(ρ_α · u)` over the manifold-side compact `tsupport ρ_α ⊆ chart source`. -/
-
 private lemma chartSmoothExt_holder_uniform_half_ball
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
     (α : M) {p : ℝ} (hp : (n : ℝ) < p) :
@@ -1776,7 +1580,6 @@ private lemma chartSmoothExt_holder_uniform_half_ball
   have h_grad_bd := eLpNorm_norm_fderiv_chartSmoothExt_ball_le_wkpNormChart
     (n := n) (M := M) g (q := ENNReal.ofReal p) hp_enn_one hu h_int α
   have hwkp_lt_top : wkpNormChart (n := n) (M := M) g 1 (ENNReal.ofReal p) u < ⊤ := by
-    -- Same argument as in per_chart_smooth_sup_bound.
     have h_per_α_mem : ∀ β : M,
         DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkpHalfSpace
           (d := n) 1 (ENNReal.ofReal p)
@@ -1981,14 +1784,6 @@ theorem smooth_manifold_morrey_holder_modulus_per_chart_withBoundary
       pou_mul_holder_chart_uniform_tsupport (n := n) (M := M) g α hp
     exact ⟨C, hC_nn, fun {u} hu h_int x hx y hy => hbound hu h_int x hx y hy⟩
 
-/-! ## Manifold-level decomposition: from the per-chart POU Hölder bound to
-a finite-sum bound on `‖u(x) - u(y)‖`
-
-For x, y in M and the canonical chart-atlas POU finset `S`, the triangle
-inequality gives `‖u(x) - u(y)‖ ≤ ∑_{α ∈ S} ‖(ρ_α x · u x) - (ρ_α y · u y)‖`.
-This is the same identity as in the boundaryless setting, since both
-formulations have the canonical POU summing to `1` pointwise on `M`. -/
-
 /-- The triangle decomposition: `‖u(x) - u(y)‖ ≤ ∑_α ‖(ρ_α x · u x) -
 (ρ_α y · u y)‖`, with the sum over the canonical chart-atlas POU finset `S`. -/
 theorem norm_sub_le_sum_pou_diff_withBoundary
@@ -2022,13 +1817,6 @@ theorem norm_sub_le_sum_pou_diff_withBoundary
   exact norm_sum_le (E := ℝ) S (fun α =>
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M α : M → ℝ) x * u x -
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M α : M → ℝ) y * u y)
-
-/-! ## Unconditional form
-
-Even-reflection foundational layer and packaged with-boundary smooth
-manifold Morrey sup bound. -/
-
-/-! ## Even-reflection map on `EuclideanSpace ℝ (Fin n)` -/
 
 /-- **The even-reflection point map.** For `y ∈ EuclideanSpace ℝ (Fin n)`,
 return the point in the closed half-space whose `0`-th coordinate is `|y 0|`
@@ -2116,8 +1904,6 @@ lemma evenReflectFun_image_closedHalfSpace_eq {n : ℕ} [NeZero n] :
 lemma continuous_evenReflectFun {n : ℕ} [NeZero n] :
     Continuous (evenReflectFun n) := by
   classical
-  -- Decompose: the map is `WithLp.toLp 2` (continuous linear) ∘ a
-  -- coordinate-wise function. Each coordinate is continuous in `y`.
   have h_cont_components : ∀ j : Fin n, Continuous
       (fun y : EuclideanSpace ℝ (Fin n) =>
         if j = 0 then |y 0| else y j) := by
@@ -2136,9 +1922,6 @@ lemma continuous_evenReflectFun {n : ℕ} [NeZero n] :
       (fun y : EuclideanSpace ℝ (Fin n) =>
         fun j : Fin n => if j = 0 then |y 0| else y j) :=
     continuous_pi h_cont_components
-  -- The linear map `(Fin n → ℝ) → (EuclideanSpace ℝ (Fin n))` given by
-  -- `WithLp.toLp 2` is continuous (continuous linear equivalence on a
-  -- finite-dimensional space).
   have hWithLp : Continuous
       (fun g : Fin n → ℝ => (WithLp.toLp 2 g : EuclideanSpace ℝ (Fin n))) := by
     have h_lin_eq : (fun g : Fin n → ℝ =>
@@ -2154,8 +1937,6 @@ lemma continuous_evenReflectFun {n : ℕ} [NeZero n] :
 lemma measurable_evenReflectFun {n : ℕ} [NeZero n] :
     Measurable (evenReflectFun n) :=
   (continuous_evenReflectFun (n := n)).measurable
-
-/-! ## The even reflection of a scalar function -/
 
 /-- **The even reflection of a scalar function** `f : EuN → ℝ`. Defined by
 `evenReflect n f y := f (evenReflectFun n y)`. -/
@@ -2185,8 +1966,6 @@ lemma measurable_evenReflect {n : ℕ} [NeZero n]
     Measurable (evenReflect n f) := by
   unfold evenReflect
   exact hf.comp (continuous_evenReflectFun (n := n)).measurable
-
-/-! ## Identity on closed half-space portion of any subset -/
 
 lemma evenReflect_eq_on_inter_closedHalfSpace {n : ℕ} [NeZero n]
     (f : EuclideanSpace ℝ (Fin n) → ℝ) {S : Set (EuclideanSpace ℝ (Fin n))} :
@@ -2220,13 +1999,6 @@ lemma norm_evenReflect_le_sup_norm_on_closedHalfSpace {n : ℕ} [NeZero n]
   rw [norm_evenReflect_eq]
   exact hfC _ (evenReflectFun_mem_closedHalfSpace y)
 
-/-! ## Tsupport of the reflection
-
-If `f` has tsupport in the closed half-space portion of a set `S`, then
-`evenReflect n f` has tsupport in `evenReflectFun n ⁻¹' S` (under suitable
-closedness assumptions). The reflection extends the support symmetrically
-across the boundary hyperplane. -/
-
 /-- The support of the even reflection is contained in the preimage under
 `evenReflectFun n` of the support of the original function. -/
 lemma support_evenReflect_subset {n : ℕ} [NeZero n]
@@ -2234,7 +2006,6 @@ lemma support_evenReflect_subset {n : ℕ} [NeZero n]
     Function.support (evenReflect n f) ⊆
       evenReflectFun n ⁻¹' Function.support f := by
   intro y hy
-  -- `hy : evenReflect n f y ≠ 0`, i.e. `f (evenReflectFun n y) ≠ 0`.
   exact hy
 
 /-- If `f` has compact support, then `evenReflect n f`'s support is contained
@@ -2251,10 +2022,7 @@ lemma tsupport_evenReflect_subset {n : ℕ} [NeZero n]
       evenReflectFun n ⁻¹' tsupport f :=
     fun y hy => Set.preimage_mono (subset_tsupport _) hy
   refine Set.Subset.trans (closure_mono (h_supp.trans h_supp_le_tsupp)) ?_
-  -- The preimage of a closed set under a continuous map is closed.
   exact (isClosed_tsupport _).preimage continuous_evenReflectFun |>.closure_subset
-
-/-! ## Reflection is its own inverse on the closed half-space (left-inverse) -/
 
 /-- Composing `evenReflectFun n` after `evenReflectFun n` agrees with
 `evenReflectFun n` itself (the reflection is idempotent), so in particular
@@ -2263,13 +2031,6 @@ lemma evenReflectFun_comp_self {n : ℕ} [NeZero n] :
     evenReflectFun n ∘ evenReflectFun n = evenReflectFun n := by
   funext y
   exact evenReflectFun_idempotent y
-
-/-! ## Sign-flip on the `0`-th coordinate as a measure-preserving equivalence
-
-The map that negates the `0`-th coordinate is a linear isometry equivalence on
-`EuclideanSpace ℝ (Fin n)`, hence measure-preserving for the Lebesgue volume.
-This is the change-of-variables tool used to compare integrals over the upper
-and lower half-balls. -/
 
 /-- **The sign-flip on the `0`-th coordinate.** Negates `y 0`, leaves all other
 coordinates unchanged. This is a linear isometry self-equivalence of
@@ -2340,7 +2101,6 @@ lemma norm_signFlipFun {n : ℕ} [NeZero n]
     (y : EuclideanSpace ℝ (Fin n)) :
     ‖signFlipFun n y‖ = ‖y‖ := by
   classical
-  -- Use the formula ‖x‖ = √(∑ |x_i|²) and the sum coordinate-by-coordinate equality.
   rw [EuclideanSpace.norm_eq, EuclideanSpace.norm_eq]
   congr 1
   apply Finset.sum_congr rfl
@@ -2389,7 +2149,6 @@ lemma measurePreserving_signFlipFun {n : ℕ} [NeZero n] :
     MeasurePreserving (signFlipFun n)
       (volume : Measure (EuclideanSpace ℝ (Fin n)))
       (volume : Measure (EuclideanSpace ℝ (Fin n))) := by
-  -- Linear isometry equivalences preserve volume on inner product spaces.
   have h := (signFlipLIE n).measurePreserving
   exact h
 
@@ -2436,8 +2195,6 @@ lemma evenReflect_eq_self_of_upper {n : ℕ} [NeZero n]
     evenReflect n f y = f y :=
   evenReflect_eq_of_mem_closedHalfSpace f hy
 
-/-! ## L^p bound for the even reflection on a ball -/
-
 /-- **Auxiliary smoothness via composition.** When `f` is smooth on `E` and `y`
 is in the open lower half-space, the even reflection equals `f ∘ signFlipFun n`
 near `y`, and is smooth there. Stated as a local Continuity result for use in
@@ -2459,39 +2216,26 @@ theorem memLp_evenReflect_of_contDiff_hasCompactSupport
     MemLp (evenReflect n f) p
       (volume : Measure (EuclideanSpace ℝ (Fin n))) := by
   classical
-  -- Continuity from continuity of `f` and `evenReflectFun`.
   have h_cont : Continuous (evenReflect n f) :=
     continuous_evenReflect (n := n) hf.continuous
-  -- The support is contained in `evenReflectFun ⁻¹' tsupport f`.
   have h_supp_sub : tsupport (evenReflect n f) ⊆
       evenReflectFun n ⁻¹' tsupport f :=
     tsupport_evenReflect_subset (n := n) f
-  -- The preimage of a compact set under `evenReflectFun n` is contained in a
-  -- bounded set (closure of finite product). Better: the support of evenReflect
-  -- is `evenReflectFun ⁻¹' (support f)`, hence contained in the union of `tsupport f`
-  -- (in the upper half) and `signFlipFun n '' tsupport f` (in the lower half).
-  -- Both are compact, so the support of evenReflect is contained in a compact set.
   have h_supp_compact :
       HasCompactSupport (evenReflect n f) := by
-    -- The tsupport is contained in tsupport f ∪ signFlipFun n '' tsupport f, both compact.
     apply IsCompact.of_isClosed_subset
       (((hf_supp.image continuous_signFlipFun).union hf_supp))
       (isClosed_tsupport _)
     intro y hy
     have h1 : y ∈ evenReflectFun n ⁻¹' tsupport f := h_supp_sub hy
-    -- Either `y 0 ≥ 0` (upper half), in which case `evenReflectFun n y = y` and so `y ∈ tsupport f`,
-    -- or `y 0 < 0`, in which case `evenReflectFun n y = signFlipFun n y` and so
-    -- `signFlipFun n y ∈ tsupport f`, equivalently `y ∈ signFlipFun n '' tsupport f`.
     rcases le_or_gt 0 (y 0) with hupper | hlower
     · right
-      -- y is in tsupport f because evenReflectFun y = y here
       have : evenReflectFun n y = y :=
         evenReflectFun_eq_self_of_mem_closedHalfSpace
           (show y ∈ DifferentialGeometry.Analysis.Sobolev.Euclidean.closedHalfSpace from hupper)
       rw [Set.mem_preimage, this] at h1
       exact h1
     · left
-      -- y is in signFlipFun '' tsupport f
       have h_eq_sf : evenReflectFun n y = signFlipFun n y := by
         classical
         apply PiLp.ext
@@ -2504,17 +2248,7 @@ theorem memLp_evenReflect_of_contDiff_hasCompactSupport
       rw [Set.mem_preimage, h_eq_sf] at h1
       refine ⟨signFlipFun n y, h1, ?_⟩
       exact signFlipFun_signFlipFun y
-  -- Now use Continuous.memLp_of_hasCompactSupport.
   exact h_cont.memLp_of_hasCompactSupport h_supp_compact
-
-/-! ## Gradient of the even reflection (component-wise definition)
-
-The natural componentwise even reflection of the gradient: on the upper half,
-just the gradient of `f`; on the lower half, the gradient of `f` evaluated at
-the reflection point with the `0`-th component sign-flipped.
-
-For `f` smooth and supported in `closedHalfSpace ∩ ball`, this captures the
-weak gradient of `evenReflect n f`. -/
 
 /-- The componentwise gradient of `f` at `y`, returning a Euclidean vector. -/
 private noncomputable def fderivVec
@@ -2579,12 +2313,6 @@ lemma evenReflectGrad_apply_component_upper
     {y : EuclideanSpace ℝ (Fin n)} (hy : 0 ≤ y 0) (i : Fin n) :
     evenReflectGrad n f y i = (fderiv ℝ f y) (EuclideanSpace.single i 1) := by
   rw [evenReflectGrad_apply_upper f hy, fderivVec_apply]
-
-/-! ## L^p bounds for `evenReflectGrad` components
-
-Each component of `evenReflectGrad n f` is in `L^p` when `f` is smooth with
-compact support. Strategy: the component is continuous and has compact support,
-so it is in `L^p`. -/
 
 /-- For `i ≠ 0`, the `i`-th component of `evenReflectGrad n f` equals
 `(fderiv ℝ f) (evenReflectFun n y)` applied to `EuclideanSpace.single i 1` —
@@ -2744,7 +2472,6 @@ theorem aestronglyMeasurable_evenReflectGrad_component_of_contDiff
       (fun y : EuclideanSpace ℝ (Fin n) => evenReflectGrad n f y i)
       (volume : Measure (EuclideanSpace ℝ (Fin n))) := by
   classical
-  -- Continuity of the partial derivatives of `f`.
   have hderiv_cont : ∀ j : Fin n, Continuous
       (fun y : EuclideanSpace ℝ (Fin n) =>
         (fderiv ℝ f y) (EuclideanSpace.single j 1)) := fun j =>
@@ -2752,9 +2479,6 @@ theorem aestronglyMeasurable_evenReflectGrad_component_of_contDiff
       continuous_const
   by_cases hi : i = 0
   · subst hi
-    -- The function is `if 0 ≤ y 0 then (∂_0 f) y else -(∂_0 f) (signFlipFun y)`,
-    -- which is the indicator-decomposition of two continuous functions on
-    -- the measurable sets `closedHalfSpace` and its complement.
     have h_uppercont : Continuous (fun y : EuclideanSpace ℝ (Fin n) =>
         (fderiv ℝ f y) (EuclideanSpace.single 0 1)) := hderiv_cont 0
     have h_lowercont : Continuous (fun y : EuclideanSpace ℝ (Fin n) =>
@@ -2781,13 +2505,6 @@ theorem aestronglyMeasurable_evenReflectGrad_component_of_contDiff
     · exact h_lowercont.aestronglyMeasurable.restrict
   · exact (continuous_evenReflectGrad_component_of_contDiff_ne_zero hf hi).aestronglyMeasurable
 
-/-! ## L^p bounds for the gradient components
-
-Each component of `evenReflectGrad n f` is in `L^p(volume)` when `f` is smooth
-with compact support, because the component is bounded pointwise by
-`‖fderiv ℝ f (evenReflectFun n y)‖`, which itself is continuous and has compact
-support. -/
-
 /-- The map `y ↦ ‖fderiv ℝ f (evenReflectFun n y)‖` is continuous when `f` is
 smooth. -/
 lemma continuous_norm_fderiv_compReflect
@@ -2809,23 +2526,14 @@ lemma hasCompactSupport_norm_fderiv_compReflect
     HasCompactSupport (fun y : EuclideanSpace ℝ (Fin n) =>
       ‖fderiv ℝ f (evenReflectFun n y)‖) := by
   classical
-  -- The map ‖fderiv f (evenReflectFun y)‖ has support contained in
-  -- evenReflectFun ⁻¹' (tsupport (fderiv f)) ⊆ evenReflectFun ⁻¹' (tsupport f).
   have h_fderiv_supp : HasCompactSupport (fderiv ℝ f) :=
     hf_supp.fderiv ℝ
-  -- The support of ‖fderiv f ∘ evenReflectFun‖ is contained in:
-  -- evenReflectFun ⁻¹' (support (fderiv f)) ⊆ evenReflectFun ⁻¹' (tsupport (fderiv f))
-  -- ⊆ evenReflectFun ⁻¹' (tsupport f).
-  -- Both `tsupport f` and `signFlipFun '' tsupport f` are compact. Their union
-  -- is closed and contains evenReflectFun ⁻¹' (tsupport f).
   have h_compact_union :
       IsCompact (signFlipFun n '' tsupport f ∪ tsupport f) :=
     (hf_supp.image continuous_signFlipFun).union hf_supp
   apply IsCompact.of_isClosed_subset h_compact_union
     (isClosed_tsupport _)
   intro y hy
-  -- We have `y ∈ tsupport (‖fderiv f ∘ evenReflectFun‖)`.
-  -- This means `evenReflectFun y ∈ tsupport (fderiv f)`.
   have h_supp_pre : Function.support
       (fun y : EuclideanSpace ℝ (Fin n) => ‖fderiv ℝ f (evenReflectFun n y)‖) ⊆
       evenReflectFun n ⁻¹' Function.support (fderiv ℝ f) := by
@@ -2838,9 +2546,6 @@ lemma hasCompactSupport_norm_fderiv_compReflect
   have h_pre_subset_t_f : evenReflectFun n ⁻¹' tsupport (fderiv ℝ f) ⊆
       evenReflectFun n ⁻¹' tsupport f :=
     Set.preimage_mono (tsupport_fderiv_subset (𝕜 := ℝ))
-  -- The closure of the support is the tsupport: a closed superset of the support.
-  -- Since the closure of `evenReflectFun ⁻¹' tsupport f` equals itself
-  -- (because preimage of closed under continuous is closed), we conclude.
   have h_closed : IsClosed (evenReflectFun n ⁻¹' tsupport f) :=
     (isClosed_tsupport _).preimage continuous_evenReflectFun
   have h_y_in : y ∈ evenReflectFun n ⁻¹' tsupport f := by
@@ -2852,7 +2557,6 @@ lemma hasCompactSupport_norm_fderiv_compReflect
         h_supp_pre.trans (h_pre_subset_t.trans h_pre_subset_t_f)
       exact h_closed.closure_subset_iff.mpr h1
     exact h_subset hy
-  -- Now `evenReflectFun n y ∈ tsupport f`. Decompose by upper/lower:
   rcases le_or_gt 0 (y 0) with hupper | hlower
   · right
     have h_eq_self : evenReflectFun n y = y :=
@@ -2884,12 +2588,10 @@ theorem memLp_evenReflectGrad_component_of_contDiff_hasCompactSupport
     MemLp (fun y : EuclideanSpace ℝ (Fin n) => evenReflectGrad n f y i) p
       (volume : Measure (EuclideanSpace ℝ (Fin n))) := by
   classical
-  -- Bound by the continuous compactly-supported `‖fderiv f ∘ evenReflectFun‖`.
   have h_aesm : AEStronglyMeasurable
       (fun y : EuclideanSpace ℝ (Fin n) => evenReflectGrad n f y i)
       (volume : Measure (EuclideanSpace ℝ (Fin n))) :=
     aestronglyMeasurable_evenReflectGrad_component_of_contDiff hf i
-  -- Build the reference function and show it's MemLp.
   set g : EuclideanSpace ℝ (Fin n) → ℝ :=
     fun y => ‖fderiv ℝ f (evenReflectFun n y)‖ with hg_def
   have h_g_cont : Continuous g := continuous_norm_fderiv_compReflect hf
@@ -2897,24 +2599,16 @@ theorem memLp_evenReflectGrad_component_of_contDiff_hasCompactSupport
     hasCompactSupport_norm_fderiv_compReflect hf hf_supp
   have h_g_memLp : MemLp g p (volume : Measure (EuclideanSpace ℝ (Fin n))) :=
     h_g_cont.memLp_of_hasCompactSupport h_g_supp
-  -- Use the pointwise bound `‖evenReflectGrad y i‖ ≤ g y` and apply MemLp.of_le_mul.
   refine MemLp.of_le_mul (g := g) (c := 1) h_g_memLp h_aesm ?_
   filter_upwards
   intro y
   rw [one_mul]
-  -- ‖evenReflectGrad y i‖ ≤ ‖fderiv f (evenReflectFun y)‖ = g y ≤ ‖g y‖
   have h1 : ‖evenReflectGrad n f y i‖ ≤ ‖fderiv ℝ f (evenReflectFun n y)‖ :=
     norm_evenReflectGrad_apply_le f y i
   have h2 : ‖fderiv ℝ f (evenReflectFun n y)‖ ≤ ‖g y‖ := by
     rw [hg_def]
     exact Real.le_norm_self _
   exact h1.trans h2
-
-/-! ## L^p bound for the gradient (Euclidean-vector form)
-
-The gradient field `evenReflectGrad n f : E → E` itself is in `L^p(volume)`,
-with norm bounded by a constant times the `L^p` norm of `‖fderiv f‖` on the
-half-space. -/
 
 /-- The gradient field `evenReflectGrad n f` is in `MemLp p volume` when `f`
 is smooth with compact support. -/
@@ -2925,18 +2619,9 @@ theorem memLp_evenReflectGrad_of_contDiff_hasCompactSupport
     (p : ℝ≥0∞) [Fact (1 ≤ p)] :
     MemLp (evenReflectGrad n f) p
       (volume : Measure (EuclideanSpace ℝ (Fin n))) := by
-  -- A piLp-valued function is MemLp iff each component is.
   apply MemLp.of_eval_piLp
   intro i
-  -- Component is `fun y => evenReflectGrad n f y i`, by definition of EuclideanSpace.
   exact memLp_evenReflectGrad_component_of_contDiff_hasCompactSupport hf hf_supp p i
-
-/-! ## Smoothness of `evenReflect f` when `f` is supported in the open half-space
-
-Under the strict-interior hypothesis `tsupport f ⊆ openHalfSpace`, the even
-reflection equals `f + f ∘ signFlipFun n` (a smooth function on all of `E`),
-because the supports of these two terms are disjoint open-upper / open-lower
-half-spaces. -/
 
 /-- **Smoothness of `signFlipFun n`.** The sign-flip is a continuous linear
 self-equivalence of `EuclideanSpace ℝ (Fin n)`, hence smooth. -/
@@ -2961,26 +2646,21 @@ lemma evenReflect_eq_add_comp_signFlip_of_tsupport_in_openHalfSpace
       fun y : EuclideanSpace ℝ (Fin n) => f y + f (signFlipFun n y) := by
   funext y
   classical
-  -- Case analysis on `y 0`:
   rcases lt_trichotomy (y 0) 0 with hlt | heq | hgt
-  · -- `y_0 < 0`: y is outside upper half-space (and outside tsupport since tsupport ⊆ openHalfSpace)
-    have h_y_not_supp : y ∉ tsupport f := by
+  · have h_y_not_supp : y ∉ tsupport f := by
       intro hin
       have : y ∈ DifferentialGeometry.Analysis.Sobolev.Euclidean.openHalfSpace := hf_supp hin
       have : (0 : ℝ) < y 0 := this
       linarith
     have h_y_zero : f y = 0 := image_eq_zero_of_notMem_tsupport h_y_not_supp
-    -- evenReflect f y = f (sf y)
     rw [evenReflect_eq_comp_signFlip_of_lower f hlt]
     rw [h_y_zero, zero_add]
-  · -- y_0 = 0: y is outside tsupport, also signFlipFun y is at y_0 = 0 which is also outside tsupport
-    have h_y_not_supp : y ∉ tsupport f := by
+  · have h_y_not_supp : y ∉ tsupport f := by
       intro hin
       have : y ∈ DifferentialGeometry.Analysis.Sobolev.Euclidean.openHalfSpace := hf_supp hin
       have : (0 : ℝ) < y 0 := this
       linarith
     have h_y_zero : f y = 0 := image_eq_zero_of_notMem_tsupport h_y_not_supp
-    -- signFlipFun y has 0-th component -y_0 = 0 too, so also not in tsupport
     have h_sfy_zero : f (signFlipFun n y) = 0 := by
       apply image_eq_zero_of_notMem_tsupport
       intro hin
@@ -2989,18 +2669,15 @@ lemma evenReflect_eq_add_comp_signFlip_of_tsupport_in_openHalfSpace
       rw [signFlipFun_apply_zero] at hopen
       have : (0 : ℝ) < -y 0 := hopen
       linarith
-    -- evenReflect f y at y_0 = 0 equals f y (since y is in closed half-space)
     have h_y_in_closed :
         y ∈ DifferentialGeometry.Analysis.Sobolev.Euclidean.closedHalfSpace :=
       le_of_eq heq.symm
     rw [evenReflect_eq_self_of_upper f h_y_in_closed]
     rw [h_y_zero, h_sfy_zero, add_zero]
-  · -- y_0 > 0: y is potentially in tsupport, signFlipFun y is in lower half so outside tsupport
-    have h_y_in_closed :
+  · have h_y_in_closed :
         y ∈ DifferentialGeometry.Analysis.Sobolev.Euclidean.closedHalfSpace :=
       le_of_lt hgt
     rw [evenReflect_eq_self_of_upper f h_y_in_closed]
-    -- signFlipFun y has y_0 < 0, so signFlipFun y ∉ openHalfSpace ⊇ tsupport f
     have h_sfy_not_supp : signFlipFun n y ∉ tsupport f := by
       intro hin
       have : signFlipFun n y ∈ DifferentialGeometry.Analysis.Sobolev.Euclidean.openHalfSpace := hf_supp hin
@@ -3032,8 +2709,6 @@ theorem hasCompactSupport_evenReflect_of_tsupport_in_openHalfSpace
     (hf_supp_compact : HasCompactSupport f) :
     HasCompactSupport (evenReflect n f) := by
   classical
-  -- The tsupport is contained in evenReflectFun ⁻¹' tsupport f, and that is
-  -- contained in tsupport f ∪ signFlipFun '' tsupport f, both compact.
   have h_compact_union :
       IsCompact (signFlipFun n '' tsupport f ∪ tsupport f) :=
     (hf_supp_compact.image continuous_signFlipFun).union hf_supp_compact
@@ -3065,12 +2740,6 @@ theorem hasCompactSupport_evenReflect_of_tsupport_in_openHalfSpace
     refine ⟨signFlipFun n y, h1, ?_⟩
     exact signFlipFun_signFlipFun y
 
-/-! ## Classical-vs-component identification of `evenReflectGrad`
-
-For `f` smooth with `tsupport f ⊆ openHalfSpace`, we have
-`evenReflect n f = f + f ∘ signFlipFun n`. Its classical Fréchet derivative
-agrees component-wise with `evenReflectGrad n f`. -/
-
 /-- For `f` smooth with `tsupport f ⊆ openHalfSpace`, the partial derivative
 in coordinate `i` of `evenReflect n f` matches the `i`-th component of
 `evenReflectGrad n f`. -/
@@ -3084,11 +2753,9 @@ theorem fderiv_evenReflect_apply_single_eq_evenReflectGrad
     (fderiv ℝ (evenReflect n f) y) (EuclideanSpace.single i 1) =
       evenReflectGrad n f y i := by
   classical
-  -- Use the rewrite `evenReflect n f = f + f ∘ signFlipFun`.
   have h_eq : evenReflect n f =
       fun z : EuclideanSpace ℝ (Fin n) => f z + f (signFlipFun n z) :=
     evenReflect_eq_add_comp_signFlip_of_tsupport_in_openHalfSpace hf_supp
-  -- fderiv of a sum: fderiv f y + fderiv (f ∘ signFlipFun) y
   have hf_diff : Differentiable ℝ f := hf.differentiable (by simp)
   have hg : ContDiff ℝ (⊤ : ℕ∞) (fun z : EuclideanSpace ℝ (Fin n) => f (signFlipFun n z)) :=
     contDiff_comp_signFlipFun hf
@@ -3097,11 +2764,6 @@ theorem fderiv_evenReflect_apply_single_eq_evenReflectGrad
   rw [h_eq]
   rw [fderiv_fun_add hf_diff.differentiableAt hg_diff.differentiableAt]
   rw [ContinuousLinearMap.add_apply]
-  -- Compute fderiv of `fun z => f (signFlipFun n z)` via chain rule.
-  -- Use the fact that `signFlipFun n = (signFlipLIE n).toContinuousLinearEquiv` as a function.
-  -- We use the key identity:
-  --   fderiv ℝ (f ∘ iso) y = (fderiv ℝ f (iso y)).comp (iso : E →L[ℝ] F)
-  -- where `iso = (signFlipLIE n).toContinuousLinearEquiv`.
   set iso : EuclideanSpace ℝ (Fin n) ≃L[ℝ] EuclideanSpace ℝ (Fin n) :=
     (signFlipLIE n).toContinuousLinearEquiv with hiso_def
   have h_iso_apply : ∀ z, (iso : EuclideanSpace ℝ (Fin n) → EuclideanSpace ℝ (Fin n)) z = signFlipFun n z := by
@@ -3116,27 +2778,17 @@ theorem fderiv_evenReflect_apply_single_eq_evenReflectGrad
         (iso : EuclideanSpace ℝ (Fin n) →L[ℝ] EuclideanSpace ℝ (Fin n)) := by
     rw [h_fderiv_comp_eq]
     have h := iso.comp_right_fderiv (f := f) (x := y)
-    -- Replace `iso y` with `signFlipFun n y` using `h_iso_apply`.
     rw [h_iso_apply] at h
     exact h
   rw [h_fderiv_comp]
-  -- Goal: (fderiv f y) (e_i) + (fderiv f (sf y)) ∘ iso (e_i) = evenReflectGrad y i
   rw [ContinuousLinearMap.coe_comp', Function.comp_apply]
-  -- Compute `iso (single i 1) = signFlipFun n (single i 1)`.
   have h_clm_eval :
       (iso : EuclideanSpace ℝ (Fin n) →L[ℝ] EuclideanSpace ℝ (Fin n))
         (EuclideanSpace.single i 1) = signFlipFun n (EuclideanSpace.single i 1) :=
     h_iso_apply _
   rw [h_clm_eval]
-  -- Now we need to relate everything to `evenReflectGrad`.
-  -- Case-split on whether `y_0 ≥ 0`.
   rcases le_or_gt 0 (y 0) with hupper | hlower
-  · -- Upper case: f(sf y) = 0 and its derivatives vanish in a neighborhood.
-    -- We need to show: (fderiv f y)(e_i) + (fderiv f (sf y))(sf(e_i)) = evenReflectGrad y i
-    -- Since `tsupport f ⊆ openHalfSpace`, f vanishes near `{y_0 ≤ 0}`. So if y_0 ≥ 0...
-    -- Actually we need more care: y could be in upper half but inside tsupport.
-    -- Then sf y has y_0 ≤ 0, so sf y ∉ tsupport, so f vanishes in a neighborhood of sf y, so fderiv f (sf y) = 0.
-    have h_sfy_not_supp : signFlipFun n y ∉ tsupport f := by
+  · have h_sfy_not_supp : signFlipFun n y ∉ tsupport f := by
       intro hin
       have : signFlipFun n y ∈
           DifferentialGeometry.Analysis.Sobolev.Euclidean.openHalfSpace := hf_supp hin
@@ -3154,8 +2806,7 @@ theorem fderiv_evenReflect_apply_single_eq_evenReflectGrad
       simp
     rw [h_fderiv_sfy_zero, ContinuousLinearMap.zero_apply, add_zero]
     rw [evenReflectGrad_apply_component_upper f hupper i]
-  · -- Lower case: y is in lower half, so f y = 0 and its derivative vanishes in a nbhd.
-    have h_y_not_supp : y ∉ tsupport f := by
+  · have h_y_not_supp : y ∉ tsupport f := by
       intro hin
       have : y ∈ DifferentialGeometry.Analysis.Sobolev.Euclidean.openHalfSpace := hf_supp hin
       have : (0 : ℝ) < y 0 := this
@@ -3170,14 +2821,9 @@ theorem fderiv_evenReflect_apply_single_eq_evenReflectGrad
       rw [Filter.EventuallyEq.fderiv_eq h_filt_eq]
       simp
     rw [h_fderiv_y_zero, ContinuousLinearMap.zero_apply, zero_add]
-    -- Goal: (fderiv f (sf y))(sf(single i 1)) = evenReflectGrad y i
-    -- For y in lower half with y_0 < 0: evenReflectGrad y i is given by the
-    -- lower-half formula with sign flip on i = 0.
     by_cases hi : i = 0
     · subst hi
       rw [evenReflectGrad_apply_lower_component_zero f hlower]
-      -- (fderiv f (sf y))(sf(single 0 1)) = -(fderiv f (sf y))(single 0 1)
-      -- Because sf(single 0 1) = -single 0 1 (sf negates 0-th coordinate, single 0 1 has 0-th coord = 1)
       have h_sf_eval : signFlipFun n (EuclideanSpace.single 0 (1 : ℝ)) =
           -EuclideanSpace.single 0 (1 : ℝ) := by
         classical
@@ -3197,8 +2843,6 @@ theorem fderiv_evenReflect_apply_single_eq_evenReflectGrad
       rw [h_sf_eval]
       rw [map_neg]
     · rw [evenReflectGrad_apply_lower_component_ne f hlower hi]
-      -- (fderiv f (sf y))(sf(single i 1)) = (fderiv f (sf y))(single i 1)
-      -- Because sf(single i 1) = single i 1 when i ≠ 0.
       have h_sf_eval : signFlipFun n (EuclideanSpace.single i (1 : ℝ)) =
           EuclideanSpace.single i (1 : ℝ) := by
         classical
@@ -3207,8 +2851,6 @@ theorem fderiv_evenReflect_apply_single_eq_evenReflectGrad
         by_cases hj : j = 0
         · subst hj
           rw [signFlipFun_apply_zero]
-          -- Need: -((EuclideanSpace.single i (1 : ℝ)) 0) = (EuclideanSpace.single i (1 : ℝ)) 0
-          -- Since i ≠ 0, (single i 1) 0 = 0, so -0 = 0.
           have hi' : i ≠ 0 := hi
           rw [show (EuclideanSpace.single i (1 : ℝ)) 0 = 0 by
             rw [show EuclideanSpace.single i (1 : ℝ) = PiLp.single 2 i (1 : ℝ) from rfl,
@@ -3217,12 +2859,6 @@ theorem fderiv_evenReflect_apply_single_eq_evenReflectGrad
           simp
         · rw [signFlipFun_apply_ne _ _ hj]
       rw [h_sf_eval]
-
-/-! ## HasWeakGrad: `evenReflectGrad` is the weak gradient of `evenReflect f`
-
-When `f` is smooth with `tsupport f ⊆ openHalfSpace`, the even reflection is
-itself smooth, so its weak gradient equals its classical gradient, which by
-the previous lemma agrees component-wise with `evenReflectGrad`. -/
 
 /-- **HasWeakGrad for the even reflection.** When `f` is smooth with
 `tsupport f ⊆ openHalfSpace ∩ Ω` (`Ω` open), the even reflection has
@@ -3235,17 +2871,14 @@ theorem hasWeakGrad_evenReflectGrad_evenReflect
         DifferentialGeometry.Analysis.Sobolev.Euclidean.openHalfSpace)
     {Ω : Set (EuclideanSpace ℝ (Fin n))} (hΩ : IsOpen Ω) :
     DeGiorgi.HasWeakGrad (evenReflectGrad n f) (evenReflect n f) Ω := by
-  -- evenReflect n f is C∞ globally; apply HasWeakPartialDeriv.of_contDiff.
   intro i
   have h_evRefl_smooth : ContDiff ℝ (⊤ : ℕ∞) (evenReflect n f) :=
     contDiff_evenReflect_of_tsupport_in_openHalfSpace hf hf_supp
-  -- The classical-derivative weak partial: ∂_i (evenReflect f) = (fderiv (evenReflect f)) (single i 1)
   have h_classical : DeGiorgi.HasWeakPartialDeriv i
       (fun y : EuclideanSpace ℝ (Fin n) =>
         (fderiv ℝ (evenReflect n f) y) (EuclideanSpace.single i 1))
       (evenReflect n f) Ω :=
     DeGiorgi.HasWeakPartialDeriv.of_contDiff hΩ (h_evRefl_smooth.of_le (by norm_cast))
-  -- Show that this equals the i-th component of evenReflectGrad pointwise.
   have h_eq : (fun y : EuclideanSpace ℝ (Fin n) =>
         (fderiv ℝ (evenReflect n f) y) (EuclideanSpace.single i 1)) =
       fun y => evenReflectGrad n f y i := by
@@ -3253,12 +2886,6 @@ theorem hasWeakGrad_evenReflectGrad_evenReflect
     exact fderiv_evenReflect_apply_single_eq_evenReflectGrad hf hf_supp y i
   rw [← h_eq]
   exact h_classical
-
-/-! ## The MemW1pWitness for the even reflection (special case)
-
-When `f` is smooth with `tsupport f ⊆ openHalfSpace ∩ Metric.ball x₀ R`, the
-even reflection has a `MemW1pWitness` on `Metric.ball x₀ R` with the
-canonical gradient `evenReflectGrad n f`. -/
 
 /-- **Even-reflection W^{1,p}-witness construction (strict-interior case).**
 For a smooth function `f` on `E := EuclideanSpace ℝ (Fin n)` (n ≥ 1) supported
@@ -3283,18 +2910,15 @@ noncomputable def evenReflect_memW1pWitness_of_smooth_strictInterior
     DeGiorgi.MemW1pWitness p (evenReflect (n := n) f) (Metric.ball x₀ R)
       (volume : Measure (EuclideanSpace ℝ (Fin n))) := by
   classical
-  -- Extract the open-half-space inclusion.
   have hf_supp_open :
       tsupport f ⊆ DifferentialGeometry.Analysis.Sobolev.Euclidean.openHalfSpace :=
     hf_supp.trans Set.inter_subset_left
-  -- Compactness of tsupport f follows from inclusion in tsupport-of-Ball compact.
   have hf_compact : HasCompactSupport f := by
     apply HasCompactSupport.intro (isCompact_closedBall x₀ R)
     intro x hx
     have h_x_not_in_ball : x ∉ Metric.ball x₀ R := by
       intro hx_in
       exact hx (Metric.ball_subset_closedBall hx_in)
-    -- x not in tsupport
     apply image_eq_zero_of_notMem_tsupport
     intro h_x_in_tsupp
     exact h_x_not_in_ball ((hf_supp h_x_in_tsupp).2)
@@ -3303,31 +2927,16 @@ noncomputable def evenReflect_memW1pWitness_of_smooth_strictInterior
       weakGrad := evenReflectGrad n f
       weakGrad_component_memLp := ?_
       isWeakGrad := ?_ }
-  · -- L^p membership of `evenReflect n f` on `Metric.ball x₀ R`.
-    have h_full : MemLp (evenReflect n f) p
+  · have h_full : MemLp (evenReflect n f) p
         (volume : Measure (EuclideanSpace ℝ (Fin n))) :=
       memLp_evenReflect_of_contDiff_hasCompactSupport hf_smooth hf_compact p
     exact h_full.restrict (Metric.ball x₀ R)
-  · -- L^p of each component on the ball.
-    intro i
+  · intro i
     have h_full : MemLp (fun y : EuclideanSpace ℝ (Fin n) => evenReflectGrad n f y i) p
         (volume : Measure (EuclideanSpace ℝ (Fin n))) :=
       memLp_evenReflectGrad_component_of_contDiff_hasCompactSupport hf_smooth hf_compact p i
     exact h_full.restrict (Metric.ball x₀ R)
-  · -- IBP via classical smoothness.
-    exact hasWeakGrad_evenReflectGrad_evenReflect hf_smooth hf_supp_open Metric.isOpen_ball
-
-/-! ## Inward-shifted family for the closed-half-space case
-
-The closed-half-space case (where `tsupport f ⊆ closedHalfSpace`, allowing
-`f` to be nonzero on the boundary hyperplane `{y_0 = 0}`) is reduced to the
-strict-interior case by an inward shift: define `f_δ(y) := f(y - δ · e_0)` for
-`δ > 0`. Then `tsupport f_δ ⊆ {y_0 ≥ δ} ⊆ openHalfSpace`, and `f_δ` is the
-strict-interior approximation of `f`. As `δ → 0⁺`, both `evenReflect f_δ →
-evenReflect f` and the corresponding gradient components converge pointwise
-on the complement of the boundary hyperplane (a Lebesgue-null set), with
-uniform bounds. This passes the integration-by-parts identity from the
-strict-interior case to the limit. -/
+  · exact hasWeakGrad_evenReflectGrad_evenReflect hf_smooth hf_supp_open Metric.isOpen_ball
 
 /-- **The basis vector `e_0`** in `EuclideanSpace ℝ (Fin n)`. -/
 private noncomputable def basisE0 (n : ℕ) [NeZero n] :
@@ -3434,15 +3043,12 @@ private lemma tsupport_shiftDownFun_eq_preimage {n : ℕ} [NeZero n] (δ : ℝ)
     tsupport (shiftDownFun (n := n) δ f) =
       shiftDownE0 (n := n) δ ⁻¹' tsupport f := by
   classical
-  -- support(f ∘ φ) = φ⁻¹(support f) for any φ.
   have h_supp_eq : Function.support (shiftDownFun (n := n) δ f) =
       shiftDownE0 (n := n) δ ⁻¹' Function.support f := by
     ext y
     simp [shiftDownFun, Function.support]
-  -- tsupport = closure of support; closure commutes with homeomorphism preimage.
   unfold tsupport
   rw [h_supp_eq]
-  -- Homeomorph.preimage_closure: h ⁻¹' closure s = closure (h ⁻¹' s).
   have h_eq := (shiftDownE0Homeo (n := n) δ).preimage_closure (Function.support f)
   exact h_eq.symm
 
@@ -3459,11 +3065,9 @@ lemma tsupport_shiftDownFun_subset_openHalfSpace
   classical
   rw [tsupport_shiftDownFun_eq_preimage]
   intro y hy
-  -- hy : shiftDownE0 δ y ∈ tsupport f
   have h_y_in_closed : shiftDownE0 δ y ∈
       DifferentialGeometry.Analysis.Sobolev.Euclidean.closedHalfSpace :=
     hf_supp hy
-  -- shiftDownE0 δ y 0 = y 0 - δ ≥ 0, so y 0 ≥ δ > 0.
   have h0 : (0 : ℝ) ≤ (shiftDownE0 δ y) 0 := h_y_in_closed
   rw [shiftDownE0_apply_zero] at h0
   change (0 : ℝ) < y 0
@@ -3478,13 +3082,6 @@ lemma hasCompactSupport_shiftDownFun
   classical
   change IsCompact (tsupport _)
   rw [tsupport_shiftDownFun_eq_preimage]
-  -- The preimage of a compact set under a homeomorphism is compact.
-  -- Using Homeomorph: φ⁻¹ '' S = (φ.symm) '' S in some senses; but easier
-  -- to use that compact set ↦ compact set under the symm homeomorphism.
-  -- The shift by δ•e_0 is a Homeomorphism, but proving the preimage equals
-  -- the image-of-symm via library lemmas requires careful coercion handling.
-  -- Direct approach: image of compact set under continuous (inverse) is compact.
-  -- Specifically, shiftDownE0 δ ⁻¹' tsupport f = (fun y => y + δ•e_0) '' tsupport f.
   set inv : EuclideanSpace ℝ (Fin n) → EuclideanSpace ℝ (Fin n) :=
     fun y => y + δ • basisE0 n with hinv_def
   have h_inv_cont : Continuous inv := continuous_id.add continuous_const
@@ -3523,12 +3120,9 @@ lemma tsupport_shiftDownFun_subset_ball
   refine Set.subset_inter ?_ ?_
   · exact tsupport_shiftDownFun_subset_openHalfSpace hδ
       (hf_supp.trans Set.inter_subset_left)
-  · -- tsupport (shiftDownFun δ f) ⊆ Metric.ball x₀ (R + δ)
-    rw [tsupport_shiftDownFun_eq_preimage]
+  · rw [tsupport_shiftDownFun_eq_preimage]
     intro y hy
-    -- hy : shiftDownE0 δ y ∈ tsupport f ⊆ Metric.ball x₀ R
     have h_in_ball : shiftDownE0 δ y ∈ Metric.ball x₀ R := (hf_supp hy).2
-    -- ‖shiftDownE0 δ y - x₀‖ < R, want: ‖y - x₀‖ < R + δ.
     rw [Metric.mem_ball] at h_in_ball ⊢
     have h_eq : y - x₀ = (shiftDownE0 δ y - x₀) + δ • basisE0 n := by
       unfold shiftDownE0
@@ -3543,8 +3137,6 @@ lemma tsupport_shiftDownFun_subset_ball
       _ ≤ ‖shiftDownE0 δ y - x₀‖ + ‖δ • basisE0 n‖ := norm_add_le _ _
       _ = dist (shiftDownE0 δ y) x₀ + δ := by rw [hdist_eq', h_norm_e0]
       _ < R + δ := by linarith
-
-/-! ## Pointwise convergence for the inward-shift family -/
 
 /-- Helper: As `δ → 0`, `shiftDownE0 δ z → z` for any fixed `z`. -/
 private lemma tendsto_shiftDownE0 {n : ℕ} [NeZero n]
@@ -3571,9 +3163,6 @@ lemma tendsto_evenReflect_shiftDownFun
     Filter.Tendsto (fun δ : ℝ => evenReflect n (shiftDownFun (n := n) δ f) y)
       (nhds 0) (nhds (evenReflect n f y)) := by
   classical
-  -- evenReflect n (shiftDownFun δ f) y = f (shiftDownE0 δ (evenReflectFun n y)).
-  -- As δ → 0, shiftDownE0 δ (evenReflectFun n y) → evenReflectFun n y,
-  -- and f is continuous.
   have h_eq :
       ∀ δ : ℝ,
         evenReflect n (shiftDownFun (n := n) δ f) y =
@@ -3600,7 +3189,6 @@ private lemma tendsto_fderiv_apply_shiftDownE0
       (nhds ((fderiv ℝ f z) (EuclideanSpace.single i 1))) := by
   have h_fderiv_cont : Continuous (fderiv ℝ f) :=
     hf.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)
-  -- (L, v) ↦ L v is jointly continuous. Composed with (δ ↦ (fderiv f (shiftDownE0 δ z), single i 1)).
   have h_eval_cont : Continuous
       (fun L : EuclideanSpace ℝ (Fin n) →L[ℝ] ℝ =>
         L (EuclideanSpace.single i (1 : ℝ))) :=
@@ -3621,10 +3209,8 @@ lemma tendsto_evenReflectGrad_shiftDownFun_off_boundary
         evenReflectGrad n (shiftDownFun (n := n) δ f) y i)
       (nhds 0) (nhds (evenReflectGrad n f y i)) := by
   classical
-  -- Decompose by upper/lower half.
   rcases lt_or_gt_of_ne hy with hlt | hgt
-  · -- y 0 < 0: lower half.
-    by_cases hi : i = 0
+  · by_cases hi : i = 0
     · subst hi
       have h_eq_δ : ∀ δ : ℝ,
           evenReflectGrad n (shiftDownFun (n := n) δ f) y 0 =
@@ -3656,8 +3242,7 @@ lemma tendsto_evenReflectGrad_shiftDownFun_off_boundary
       rw [h_eq_lim]
       simp_rw [h_eq_δ]
       exact tendsto_fderiv_apply_shiftDownE0 hf (signFlipFun n y) i
-  · -- y 0 > 0: upper half.
-    have h_y_in_closed : (0 : ℝ) ≤ y 0 := le_of_lt hgt
+  · have h_y_in_closed : (0 : ℝ) ≤ y 0 := le_of_lt hgt
     have h_eq_δ : ∀ δ : ℝ,
         evenReflectGrad n (shiftDownFun (n := n) δ f) y i =
           (fderiv ℝ f (shiftDownE0 δ y)) (EuclideanSpace.single i 1) := by
@@ -3680,9 +3265,6 @@ lemma volume_boundaryHyperplane_eq_zero {n : ℕ} [NeZero n] :
         (d := n) :
         Set (EuclideanSpace ℝ (Fin n))) = 0 := by
   classical
-  -- The boundary hyperplane is the kernel of the continuous linear map
-  -- `y ↦ y 0`. We use `addHaar_submodule`: a strict submodule of a finite-
-  -- dimensional inner product space has volume 0.
   let φ : EuclideanSpace ℝ (Fin n) →ₗ[ℝ] ℝ :=
     { toFun := fun y => y 0
       map_add' := by intro x y; rfl
@@ -3696,11 +3278,9 @@ lemma volume_boundaryHyperplane_eq_zero {n : ℕ} [NeZero n] :
       LinearMap.coe_mk, AddHom.coe_mk]
   rw [h_set_eq]
   apply Measure.addHaar_submodule volume H
-  -- H ≠ ⊤: e.g., basisE0 has 0-th coord = 1, so it's not in H.
   intro h_top
   have h_basisE0_in : basisE0 (n := n) ∈ H := by
     rw [h_top]; exact Submodule.mem_top
-  -- h_basisE0_in unfolds to: φ (basisE0 n) = 0, i.e. (basisE0 n) 0 = 0.
   have h_basisE0_zero : (basisE0 (n := n) : EuclideanSpace ℝ (Fin n)) 0 = 0 := by
     have := h_basisE0_in
     simp only [LinearMap.mem_ker, H, φ, LinearMap.coe_mk, AddHom.coe_mk] at this
@@ -3724,7 +3304,6 @@ lemma tendsto_evenReflectGrad_shiftDownFun_ae
         (d := n) :
         Set (EuclideanSpace ℝ (Fin n))) = 0 :=
     volume_boundaryHyperplane_eq_zero
-  -- For y ∉ boundary hyperplane, y 0 ≠ 0, and we have pointwise convergence.
   have h_outside :
       ∀ y ∈ (DifferentialGeometry.Analysis.Sobolev.Euclidean.boundaryHyperplane
         (d := n) : Set (EuclideanSpace ℝ (Fin n)))ᶜ,
@@ -3734,16 +3313,12 @@ lemma tendsto_evenReflectGrad_shiftDownFun_ae
     intro y hy
     have hy_ne : y 0 ≠ 0 := hy
     exact tendsto_evenReflectGrad_shiftDownFun_off_boundary hf y hy_ne i
-  -- Convert "∀ y ∉ null set" into "a.e. y".
   rw [Filter.eventually_iff]
   rw [MeasureTheory.mem_ae_iff]
   refine measure_mono_null ?_ h_null
   intro y hy
-  -- hy : ¬ Tendsto ... → y ∈ boundaryHyperplane
   by_contra hy_outside
   exact hy (h_outside y hy_outside)
-
-/-! ## Uniform bounds for the inward-shift family -/
 
 /-- **Uniform bound** on `‖evenReflect (shiftDownFun δ f) y‖`. -/
 lemma norm_evenReflect_shiftDownFun_le_sup
@@ -3766,11 +3341,6 @@ lemma norm_evenReflectGrad_shiftDownFun_apply_le_sup
   classical
   have h_bound :=
     norm_evenReflectGrad_apply_le (shiftDownFun (n := n) δ f) y i
-  -- h_bound : ‖evenReflectGrad (shiftDownFun δ f) y i‖ ≤
-  --              ‖fderiv (shiftDownFun δ f) (evenReflectFun n y)‖
-  -- Need: ‖fderiv (shiftDownFun δ f) z‖ ≤ ‖fderiv f (z - δ • e_0)‖ ≤ C.
-  -- By chain rule, fderiv (shiftDownFun δ f) z = fderiv f (z - δ•e_0) ∘ id =
-  -- fderiv f (z - δ•e_0).
   have hf_diff : Differentiable ℝ f := hf.differentiable (by simp)
   have hg_diff : Differentiable ℝ (shiftDownE0 (n := n) δ) :=
     (contDiff_shiftDownE0 (n := n) (k := (1 : WithTop ℕ∞)) δ).differentiable_one
@@ -3786,16 +3356,6 @@ lemma norm_evenReflectGrad_shiftDownFun_apply_le_sup
   rw [h_fderiv_eq] at h_bound
   exact h_bound.trans (hfC _)
 
-/-! ## Closed-half-space MemW1pWitness via inward-shift mollification
-
-Combining the previous machinery: take a sequence `δ_n → 0⁺`, get a witness
-for each `f_{δ_n}` (strict-interior case), pass to the limit using bounded
-convergence on the integration-by-parts identity.
-
-For the closed-half-space tsupport hypothesis, we obtain:
-  HasWeakPartialDeriv i (evenReflectGrad f ·_i) (evenReflect f) Ω
-on every open `Ω ⊆ ℝ^n`. -/
-
 /-- **HasWeakGrad for the even reflection (closed-half-space case).**
 When `f` is smooth with compact support and `tsupport f ⊆ closedHalfSpace`,
 the even reflection has `evenReflectGrad n f` as its weak gradient on every
@@ -3810,16 +3370,13 @@ theorem hasWeakGrad_evenReflectGrad_evenReflect_closedHalfSpace
     {Ω : Set (EuclideanSpace ℝ (Fin n))} (hΩ : IsOpen Ω) :
     DeGiorgi.HasWeakGrad (evenReflectGrad n f) (evenReflect n f) Ω := by
   classical
-  -- Test against any φ : E → ℝ smooth, compact support, tsupport φ ⊆ Ω.
   intro i φ hφ_smooth hφ_compact hφ_sub
-  -- Pick a sequence δ_k := 1/(k+1) → 0⁺.
   set δseq : ℕ → ℝ := fun k => 1 / (k + 1 : ℝ) with hδseq_def
   have hδ_pos : ∀ k, 0 < δseq k := fun k => by
     rw [hδseq_def]; positivity
   have hδ_tendsto : Filter.Tendsto δseq Filter.atTop (nhds (0 : ℝ)) := by
     rw [hδseq_def]
     exact tendsto_one_div_add_atTop_nhds_zero_nat
-  -- For each k, get the IBP identity for shiftDownFun (δseq k) f.
   set f_seq : ℕ → EuclideanSpace ℝ (Fin n) → ℝ :=
     fun k => shiftDownFun (n := n) (δseq k) f with hf_seq_def
   have hf_seq_smooth : ∀ k, ContDiff ℝ (⊤ : ℕ∞) (f_seq k) := by
@@ -3829,7 +3386,6 @@ theorem hasWeakGrad_evenReflectGrad_evenReflect_closedHalfSpace
         DifferentialGeometry.Analysis.Sobolev.Euclidean.openHalfSpace := by
     intro k
     exact tsupport_shiftDownFun_subset_openHalfSpace (hδ_pos k) hf_supp
-  -- IBP identity for each k.
   have h_seq_ibp : ∀ k,
       ∫ x in Ω, evenReflect n (f_seq k) x *
           (fderiv ℝ φ x) (EuclideanSpace.single i 1) =
@@ -3841,7 +3397,6 @@ theorem hasWeakGrad_evenReflectGrad_evenReflect_closedHalfSpace
       hasWeakGrad_evenReflectGrad_evenReflect (hf_seq_smooth k)
         (hf_seq_supp_open k) hΩ
     exact h_grad_seq i φ hφ_smooth hφ_compact hφ_sub
-  -- Continuity & uniform bounds for f and ∇f.
   have hf_diff : Differentiable ℝ f := hf.differentiable (by simp)
   have h_fderiv_cont : Continuous (fderiv ℝ f) :=
     hf.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)
@@ -3863,10 +3418,7 @@ theorem hasWeakGrad_evenReflectGrad_evenReflect_closedHalfSpace
     obtain ⟨C₁, hC₁⟩ := h_norm_fderiv_cont.bounded_above_of_compact_support h_norm_fderiv_compact
     refine ⟨C₁, fun z => ?_⟩
     have h := hC₁ z
-    -- h : ‖‖fderiv ℝ f z‖‖ ≤ C₁; for ℝ, the outer norm is just the abs value
-    -- and ‖fderiv f z‖ ≥ 0, so the outer norm is the same value.
     simpa using h
-  -- Continuity of `∂_i φ` and `φ`, with compact support.
   have hdφ_cont : Continuous (fun x =>
       (fderiv ℝ φ x) (EuclideanSpace.single i 1)) :=
     (hφ_smooth.continuous_fderiv
@@ -3874,10 +3426,6 @@ theorem hasWeakGrad_evenReflectGrad_evenReflect_closedHalfSpace
   have hdφ_compact : HasCompactSupport (fun x =>
       (fderiv ℝ φ x) (EuclideanSpace.single i 1)) :=
     hφ_compact.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single i 1)
-  -- Define the bounding integrable function for LHS:
-  -- |evenReflect (f_seq k) · ∂_i φ| ≤ C₀ · ‖∂_i φ‖ ≤ C₀ · |∂_i φ|.
-  -- The bound `C₀ * (norm of ∂_i φ)` is integrable on `volume.restrict Ω`.
-  -- LHS limit:
   have h_LHS_tendsto :
       Filter.Tendsto
         (fun k : ℕ =>
@@ -3916,7 +3464,6 @@ theorem hasWeakGrad_evenReflectGrad_evenReflect_closedHalfSpace
       refine AEStronglyMeasurable.mul ?_ ?_
       · exact (continuous_evenReflect hf.continuous).aestronglyMeasurable
       · exact hdφ_cont.aestronglyMeasurable
-    -- Pointwise bound and convergence on volume-a.e. x.
     have h_F_bound : ∀ k, ∀ᵐ x ∂(volume.restrict Ω),
         ‖evenReflect n (f_seq k) x *
           (fderiv ℝ φ x) (EuclideanSpace.single i 1)‖ ≤ bound_LHS x := by
@@ -3946,7 +3493,6 @@ theorem hasWeakGrad_evenReflectGrad_evenReflect_closedHalfSpace
       exact h_evRefl_lim.mul tendsto_const_nhds
     exact MeasureTheory.tendsto_integral_of_dominated_convergence
       bound_LHS h_F_meas h_bound_LHS_int h_F_bound h_F_lim
-  -- RHS limit:
   have h_RHS_tendsto :
       Filter.Tendsto
         (fun k : ℕ => -∫ x in Ω, evenReflectGrad n (f_seq k) x i * φ x)
@@ -3995,7 +3541,6 @@ theorem hasWeakGrad_evenReflectGrad_evenReflect_closedHalfSpace
               evenReflectGrad n (f_seq k) x i * φ x)
             Filter.atTop
             (nhds (evenReflectGrad n f x i * φ x)) := by
-        -- Convergence holds for x with x 0 ≠ 0 (a.e.).
         have h_ae : ∀ᵐ x ∂volume,
             Filter.Tendsto (fun k : ℕ => evenReflectGrad n (f_seq k) x i)
               Filter.atTop (nhds (evenReflectGrad n f x i)) :=
@@ -4006,7 +3551,6 @@ theorem hasWeakGrad_evenReflectGrad_evenReflect_closedHalfSpace
       exact MeasureTheory.tendsto_integral_of_dominated_convergence
         bound_RHS h_G_meas h_bound_RHS_int h_G_bound h_G_lim
     exact h_inner.neg
-  -- Combine the limits with the IBP identity for f_seq k.
   have h_lhs_eq_rhs :
       (fun k : ℕ =>
           ∫ x in Ω, evenReflect n (f_seq k) x *
@@ -4024,11 +3568,6 @@ theorem hasWeakGrad_evenReflectGrad_evenReflect_closedHalfSpace
     rw [h_lhs_eq_rhs]
     exact h_RHS_tendsto
   exact tendsto_nhds_unique h_LHS_tendsto h_LHS_eq_lim
-
-/-! ## The MemW1pWitness for the even reflection (closed-half-space case)
-
-When `f` is smooth with `tsupport f ⊆ closedHalfSpace ∩ Metric.ball x₀ R`, the
-even reflection has a `MemW1pWitness` on `Metric.ball x₀ R`. -/
 
 /-- **Even-reflection W^{1,p}-witness construction (closed-half-space case).**
 For a smooth function `f` on `E := EuclideanSpace ℝ (Fin n)` (n ≥ 1) supported
@@ -4052,7 +3591,6 @@ noncomputable def evenReflect_memW1pWitness_of_smooth_closedHalfSpace
     DeGiorgi.MemW1pWitness p (evenReflect (n := n) f) (Metric.ball x₀ R)
       (volume : Measure (EuclideanSpace ℝ (Fin n))) := by
   classical
-  -- Compactness of tsupport f follows from inclusion in closedBall.
   have hf_compact : HasCompactSupport f := by
     apply HasCompactSupport.intro (isCompact_closedBall x₀ R)
     intro x hx
@@ -4070,30 +3608,17 @@ noncomputable def evenReflect_memW1pWitness_of_smooth_closedHalfSpace
       weakGrad := evenReflectGrad n f
       weakGrad_component_memLp := ?_
       isWeakGrad := ?_ }
-  · -- L^p membership of `evenReflect n f` on `Metric.ball x₀ R`.
-    have h_full : MemLp (evenReflect n f) p
+  · have h_full : MemLp (evenReflect n f) p
         (volume : Measure (EuclideanSpace ℝ (Fin n))) :=
       memLp_evenReflect_of_contDiff_hasCompactSupport hf_smooth hf_compact p
     exact h_full.restrict (Metric.ball x₀ R)
-  · -- L^p of each component on the ball.
-    intro i
+  · intro i
     have h_full : MemLp (fun y : EuclideanSpace ℝ (Fin n) => evenReflectGrad n f y i) p
         (volume : Measure (EuclideanSpace ℝ (Fin n))) :=
       memLp_evenReflectGrad_component_of_contDiff_hasCompactSupport hf_smooth hf_compact p i
     exact h_full.restrict (Metric.ball x₀ R)
-  · -- IBP via inward-shift mollification.
-    exact hasWeakGrad_evenReflectGrad_evenReflect_closedHalfSpace
+  · exact hasWeakGrad_evenReflectGrad_evenReflect_closedHalfSpace
       hf_smooth hf_compact hf_supp_closed Metric.isOpen_ball
-
-/-! ## Headline: with-boundary smooth manifold Morrey sup bound, packaged
-
-We package the headline by re-exporting the existing conditional version
-together with the foundational even-reflection layer. The closed-half-space
-W^{1,p} witness construction
-(`evenReflect_memW1pWitness_of_smooth_closedHalfSpace`) provides an
-alternative pathway to the same per-chart bound used by the conditional
-manifold theorem; downstream callers may freely choose between either route. -/
-
 
 /-- **Smooth manifold-level Morrey sup bound, with-boundary case.**
 
@@ -4130,7 +3655,6 @@ theorem smooth_manifold_morrey_sup_bound_uniform_withBoundary_unconditional
           (wkpNormChart (n := n) (M := M) g 1 (ENNReal.ofReal p) u).toReal :=
   smooth_manifold_morrey_sup_bound_uniform_withBoundary
     (n := n) (M := M) g hp
-
 
 end WithBoundary
 end Sobolev

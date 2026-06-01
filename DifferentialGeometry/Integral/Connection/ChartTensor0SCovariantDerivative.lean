@@ -46,16 +46,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Chart-parallel extension of a single tangent vector
-
-Given a basepoint `b : M`, a tangent vector `v ∈ TangentSpace I b`, and a
-chart center `α : M`, the *chart-α-parallel extension* of `v` is the section
-of the tangent bundle obtained by transporting the chart-α trivialised value
-of `v` through the chart-α trivialisation at each point `b'`. On the chart-α
-trivialisation base set this gives a well-defined smooth section; off the
-base set, the construction is the zero junk value coming from
-`continuousLinearMapAt`. -/
-
 /-- The chart-α-parallel extension of a tangent vector at `b` across `M`,
 defined via the chart-α trivialisation. -/
 def chartParallelExtend (α b : M) (v : TangentSpace I b) (b' : M) :
@@ -81,20 +71,6 @@ lemma chartE_section_repr_chartParallelExtend
       = trivToE (I := I) α b v
   exact trivToE_trivFromE (I := I) α hb' _
 
-/-! ## The chart Levi-Civita-parallel CLM
-
-The map `v ↦ chartLeviCivita g α (chartParallelExtend α b v) b (X b)` defines
-a linear map `TangentSpace I b → TangentSpace I b`. On the chart Levi-Civita
-good set this admits a closed-form expression as `trivFromE α b
-(christoffelCorrection g α b (trivToE α b v) (X b))`, since the Fréchet
-derivative of the chart pullback of `chartParallelExtend α b v` vanishes (the
-chart-trivialised representation is constant in the base point on the
-trivialisation base set).
-
-We use this closed form as the *primary* definition. The agreement with the
-abstract `chartLeviCivita` value is a separate result, deferred to a later
-file. -/
-
 /-- The chart-α Levi-Civita-parallel CLM at `b`, applied along the vector
 field `X`. On the chart Levi-Civita good set, this evaluates to the chart
 Levi-Civita action on the parallel extension of its input. -/
@@ -117,13 +93,6 @@ lemma chartLeviCivitaParallelCLM_apply
   classical
   unfold chartLeviCivitaParallelCLM
   rfl
-
-/-! ## The slot-`k` Christoffel correction CMLM
-
-For a tensor `T : Π b, Tensor0SSpace s I b` and a slot index `k : Fin s`, the
-slot-`k` correction is the `Tensor0SSpace s I b` value obtained by composing
-`T b ∈ Tensor0SSpace s I b` with the slot-CLM substitution that replaces the
-`k`-th coordinate by `chartLeviCivitaParallelCLM g α b X`. -/
 
 /-- The slot-substitution function: identity on every coordinate except slot
 `k`, where it places the given CLM `Φ`. -/
@@ -174,10 +143,6 @@ lemma chartTensor0SSlotCorrection_apply (s : ℕ)
   unfold chartTensor0SSlotCorrection
   rfl
 
-/-! ## The chart-frame covariant derivative
-
-Defined by recursion on `s`. -/
-
 /-- The chart-frame covariant derivative of a `(0, s)`-tensor field along a
 tangent vector field, returning a section of the `(0, s)`-tensor bundle. -/
 def chartTensor0SCovariantDerivative :
@@ -220,11 +185,6 @@ lemma chartTensor0SCovariantDerivative_succ (s : ℕ)
         - ∑ k : Fin (s + 1),
             chartTensor0SSlotCorrection (I := I) (s + 1) g α T X b k := rfl
 
-/-! ### Evaluation formula at a tuple
-
-The `s = 0` case evaluates to the scalar directional derivative. The
-`s = s' + 1` case evaluates to the Leibniz combination. -/
-
 /-- Evaluation at the unique empty tuple in the `s = 0` case. -/
 lemma chartTensor0SCovariantDerivative_zero_apply
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -259,9 +219,6 @@ lemma chartTensor0SCovariantDerivative_succ_apply (s : ℕ)
             chartTensor0SSlotCorrection (I := I) (s + 1) g α T X b k) m := by
   classical
   rw [chartTensor0SCovariantDerivative_succ]
-  -- The `Sub` instance on `Tensor0SSpace (s+1) I b` is the underlying
-  -- `ContinuousMultilinearMap.sub`, which evaluates point-wise. Likewise
-  -- for the finite sum.
   rw [show (show ContinuousMultilinearMap ℝ
         (fun _ : Fin (s + 1) => TangentSpace I b) ℝ from
         tensor0SIntrinsicChartCLM (I := I) (s + 1) α T b (X b)
@@ -276,25 +233,13 @@ lemma chartTensor0SCovariantDerivative_succ_apply (s : ℕ)
           chartTensor0SSlotCorrection (I := I) (s + 1) g α T X b k) m by
     rfl]
   congr 1
-  -- Distribute the evaluation across the finite sum.
   set Y : Fin (s + 1) → Tensor0SSpace (s + 1) I b :=
     fun k => chartTensor0SSlotCorrection (I := I) (s + 1) g α T X b k
   have hY : (∑ k : Fin (s + 1), Y k) = ∑ k : Fin (s + 1), Y k := rfl
-  -- Reduce the LHS using `ContinuousMultilinearMap.sum_apply` on the
-  -- underlying CMLM.
   change (show ContinuousMultilinearMap ℝ
           (fun _ : Fin (s + 1) => TangentSpace I b) ℝ from
         ∑ k : Fin (s + 1), Y k) m = _
   rw [ContinuousMultilinearMap.sum_apply]
-
-/-! ## Algebra: additivity and scalar homogeneity in `T`
-
-The chart-frame covariant derivative is additive and ℝ-linear in the tensor
-section `T`, assuming Fréchet differentiability of the trivialised chart
-representation at the base point (needed for the intrinsic-piece additivity).
-For `s = 0` no differentiability hypothesis is needed: the scalar derivative
-provides additivity / smul-compatibility unconditionally on differentiable
-inputs. -/
 
 /-- **Additivity in `T` (`s = 0` case).** -/
 lemma chartTensor0SCovariantDerivative_zero_add
@@ -317,7 +262,6 @@ lemma chartTensor0SCovariantDerivative_zero_add
   classical
   apply ContinuousMultilinearMap.ext
   intro m
-  -- Reduce the RHS to a sum of evaluations first.
   have hRHS :
       (show ContinuousMultilinearMap ℝ
           (fun _ : Fin 0 => TangentSpace I b) ℝ from
@@ -334,8 +278,6 @@ lemma chartTensor0SCovariantDerivative_zero_add
   rw [chartTensor0SCovariantDerivative_zero_apply,
       chartTensor0SCovariantDerivative_zero_apply,
       chartTensor0SCovariantDerivative_zero_apply]
-  -- The pointwise identity:
-  -- `mfderiv (fun b' => (T₁ + T₂) b' 0) b X = mfderiv (T₁ ... ) b X + mfderiv (T₂ ...) b X`.
   have hpw :
       (fun b' : M =>
           (show ContinuousMultilinearMap ℝ
@@ -350,7 +292,6 @@ lemma chartTensor0SCovariantDerivative_zero_add
                   (fun _ : Fin 0 => TangentSpace I b') ℝ from T₂ b')
               (fun i => Fin.elim0 i)) := by
     funext b'
-    -- `(T₁ + T₂) b' = T₁ b' + T₂ b'`; CMLM-add distributes over evaluation.
     exact ContinuousMultilinearMap.add_apply
       (f := (T₁ b' : ContinuousMultilinearMap ℝ
         (fun _ : Fin 0 => TangentSpace I b') ℝ))
@@ -358,7 +299,6 @@ lemma chartTensor0SCovariantDerivative_zero_add
         (fun _ : Fin 0 => TangentSpace I b') ℝ))
       (fun i : Fin 0 => Fin.elim0 i)
   rw [hpw]
-  -- Now use mfderiv linearity.
   rw [mfderiv_add h₁ h₂]
   rfl
 
@@ -403,11 +343,8 @@ lemma chartTensor0SCovariantDerivative_zero_smul
         (fun _ : Fin 0 => TangentSpace I b') ℝ)) c
       (fun i : Fin 0 => Fin.elim0 i)
   rw [hpw]
-  -- `mfderiv` is ℝ-linear under scalar multiplication.
   rw [const_smul_mfderiv hT c]
   rfl
-
-/-! ### Additivity / smul-compatibility of the slot correction in `T` -/
 
 /-- The slot-`k` correction is additive in `T`. -/
 lemma chartTensor0SSlotCorrection_add (s : ℕ)
@@ -418,10 +355,7 @@ lemma chartTensor0SSlotCorrection_add (s : ℕ)
       chartTensor0SSlotCorrection (I := I) s g α T₁ X b k
         + chartTensor0SSlotCorrection (I := I) s g α T₂ X b k := by
   classical
-  -- Unfold `chartTensor0SSlotCorrection` and use additivity of
-  -- `compContinuousLinearMap` in its CMLM argument.
   unfold chartTensor0SSlotCorrection
-  -- Reduce `(T₁ + T₂) b` to `T₁ b + T₂ b` (pointwise additivity at the fibre).
   have hT_add : ((T₁ + T₂) b
         : ContinuousMultilinearMap ℝ
           (fun _ : Fin s => TangentSpace I b) ℝ) =
@@ -431,13 +365,8 @@ lemma chartTensor0SSlotCorrection_add (s : ℕ)
             (fun _ : Fin s => TangentSpace I b) ℝ) := by
     rfl
   rw [hT_add]
-  -- `(T₁ b + T₂ b).compContinuousLinearMap f =
-  --     T₁ b.compContinuousLinearMap f + T₂ b.compContinuousLinearMap f`.
   apply ContinuousMultilinearMap.ext
   intro m
-  -- The goal now has the form
-  -- `((T₁ b + T₂ b).compContinuousLinearMap φ) m = (X.compContinuousLinearMap φ + Y.compContinuousLinearMap φ) m`,
-  -- which holds by `rfl` (both sides reduce to `(T₁ b + T₂ b) (fun i => φ i (m i))`).
   rfl
 
 /-- The slot-`k` correction is `ℝ`-linear in `T`. -/
@@ -458,16 +387,7 @@ lemma chartTensor0SSlotCorrection_smul (s : ℕ)
   rw [hT_smul]
   apply ContinuousMultilinearMap.ext
   intro m
-  -- Same as above: both sides reduce to `c • T b (fun i => φ i (m i))`.
   rfl
-
-/-! ### Additivity / smul-compatibility of `chartTensor0SCovariantDerivative` in `T`
-
-For `s + 1`, additivity in `T` reduces to additivity of
-`tensor0SIntrinsicChartCLM` (the intrinsic chart piece) and of
-`chartTensor0SSlotCorrection`. The intrinsic-piece additivity uses
-`tensor0SIntrinsicChartCLM_add_section`, which carries Fréchet-differentiability
-hypotheses on the trivialised chart pullback. -/
 
 /-- **Additivity in `T` (`s = s' + 1` case).** -/
 lemma chartTensor0SCovariantDerivative_succ_add (s : ℕ)
@@ -487,19 +407,16 @@ lemma chartTensor0SCovariantDerivative_succ_add (s : ℕ)
   rw [chartTensor0SCovariantDerivative_succ,
       chartTensor0SCovariantDerivative_succ,
       chartTensor0SCovariantDerivative_succ]
-  -- Step 1: split `tensor0SIntrinsicChartCLM ... (X b)` additively.
   have hsplit_intrinsic :
       tensor0SIntrinsicChartCLM (I := I) (s + 1) α (T₁ + T₂) b (X b) =
         tensor0SIntrinsicChartCLM (I := I) (s + 1) α T₁ b (X b) +
           tensor0SIntrinsicChartCLM (I := I) (s + 1) α T₂ b (X b) := by
     have hCLM := tensor0SIntrinsicChartCLM_add_section
       (I := I) (s + 1) α T₁ T₂ b h₁ h₂
-    -- Apply both sides to `X b`.
     have := congrArg (fun L : TangentSpace I b →L[ℝ] Tensor0SSpace (s + 1) I b
                         => L (X b)) hCLM
     simpa using this
   rw [hsplit_intrinsic]
-  -- Step 2: split the slot-correction sum additively.
   have hsplit_slot :
       (∑ k : Fin (s + 1),
           chartTensor0SSlotCorrection (I := I) (s + 1) g α (T₁ + T₂) X b k) =
@@ -511,7 +428,6 @@ lemma chartTensor0SCovariantDerivative_succ_add (s : ℕ)
     refine Finset.sum_congr rfl (fun k _ => ?_)
     exact chartTensor0SSlotCorrection_add (I := I) (s + 1) g α T₁ T₂ X b k
   rw [hsplit_slot]
-  -- Combine: `(A₁ + A₂) - (B₁ + B₂) = (A₁ - B₁) + (A₂ - B₂)`.
   abel
 
 /-- **Scalar homogeneity in `T` (`s = s' + 1` case).** -/
@@ -527,7 +443,6 @@ lemma chartTensor0SCovariantDerivative_succ_smul (s : ℕ)
   classical
   rw [chartTensor0SCovariantDerivative_succ,
       chartTensor0SCovariantDerivative_succ]
-  -- Step 1: scale the intrinsic piece.
   have hsplit_intrinsic :
       tensor0SIntrinsicChartCLM (I := I) (s + 1) α (c • T) b (X b) =
         c • tensor0SIntrinsicChartCLM (I := I) (s + 1) α T b (X b) := by
@@ -537,14 +452,11 @@ lemma chartTensor0SCovariantDerivative_succ_smul (s : ℕ)
                         => L (X b)) hCLM
     simpa using this
   rw [hsplit_intrinsic]
-  -- Step 2: scale the slot-correction sum.
   have hsplit_slot :
       (∑ k : Fin (s + 1),
           chartTensor0SSlotCorrection (I := I) (s + 1) g α (c • T) X b k) =
         c • (∑ k : Fin (s + 1),
               chartTensor0SSlotCorrection (I := I) (s + 1) g α T X b k) := by
-    -- Rewrite each term using `chartTensor0SSlotCorrection_smul`, then factor
-    -- `c •` out of the finite sum.
     have hterm :
         (∑ k : Fin (s + 1),
             chartTensor0SSlotCorrection (I := I) (s + 1) g α (c • T) X b k) =
@@ -553,22 +465,18 @@ lemma chartTensor0SCovariantDerivative_succ_smul (s : ℕ)
       refine Finset.sum_congr rfl (fun k _ => ?_)
       exact chartTensor0SSlotCorrection_smul (I := I) (s + 1) g α c T X b k
     rw [hterm]
-    -- Pull `c •` out of the finite sum via `LinearMap.map_sum` of `c • _`.
     classical
     have hmap :
         c • (∑ k : Fin (s + 1),
               chartTensor0SSlotCorrection (I := I) (s + 1) g α T X b k) =
           ∑ k : Fin (s + 1),
             c • chartTensor0SSlotCorrection (I := I) (s + 1) g α T X b k := by
-      -- `c • _` is a linear endomorphism of `Tensor0SSpace (s+1) I b`.
       have hLM := map_sum (LinearMap.lsmul ℝ (Tensor0SSpace (s + 1) I b) c)
           (fun k => chartTensor0SSlotCorrection (I := I) (s + 1) g α T X b k)
           Finset.univ
-      -- `LinearMap.lsmul ℝ _ c x = c • x`.
       exact hLM
     rw [hmap]
   rw [hsplit_slot]
-  -- Combine: `c • A - c • B = c • (A - B)` via `LinearMap.lsmul ℝ _ c`.
   have hsub :
       c • (tensor0SIntrinsicChartCLM (I := I) (s + 1) α T b) (X b)
         - c • (∑ k : Fin (s + 1),

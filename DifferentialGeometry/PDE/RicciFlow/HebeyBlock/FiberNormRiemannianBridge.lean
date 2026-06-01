@@ -69,8 +69,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## Trivialization = toModel at chart center -/
-
 set_option linter.unusedSectionVars false in
 /-- At the chart center `b₀`, the forward trivialization of the `(r,s)`-tensor
 bundle equals `TensorRSSpace.toModel` as CLMs. This follows from the locality
@@ -104,8 +102,6 @@ theorem symmL_toModel_eq_self_at_chartCenter
   exact Trivialization.symmL_continuousLinearMapAt
       (trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) b₀) h_mem T
-
-/-! ## Per-point norm bounds -/
 
 set_option linter.unusedSectionVars false in
 set_option synthInstance.maxHeartbeats 800000 in
@@ -166,8 +162,6 @@ end PDE
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
 
 open DifferentialGeometry.PDE.RicciFlow.HebeyBlock in
 #print axioms triv_eq_toModel_at_chartCenter

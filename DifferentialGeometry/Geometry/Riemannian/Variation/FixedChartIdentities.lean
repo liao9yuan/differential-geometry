@@ -406,7 +406,6 @@ lemma hasDerivAt_chartChristoffelContraction
   rw [hval]
   exact h123
 
-
 end FixedChartCurvatureHelpers
 
 namespace Aux2
@@ -501,7 +500,6 @@ lemma hasDerivAt_slice_snd (F : ℝ → ℝ → E) (s t : ℝ)
   have hFeq : (fun v : ℝ => F s v) = (fun v : ℝ => G (s, v)) := rfl
   rw [hFeq]
   simpa [ContinuousLinearMap.inr] using this
-
 
 /-- HasDerivAt for the first-partial-fderiv section. -/
 lemma hasDerivAt_partial_fst (F : ℝ → ℝ → E) (s t : ℝ)
@@ -607,7 +605,6 @@ lemma innerW_eq (g : SmoothRiemannianMetric I M) (α : M) (f : ℝ → ℝ → M
   rw [chartCovDerivAlong_def]
   rfl
 
-
 /-- HasDerivAt of the inner covariant derivative section, with the value left as
 the sum of the partial-second-derivative term and the Christoffel Leibniz term. -/
 lemma hasDerivAt_innerW
@@ -652,7 +649,6 @@ lemma hasDerivAt_innerW
   have hterm2 := hasDerivAt_chartChristoffelContraction (I := I) g α hP hQ hR hΓ'
   exact hterm1.add hterm2
 
-
 /-- The chart-covariant double derivative `∇_s ∇_t Y` (fixed chart `α`), as a
 concrete `E`-value: `deriv W s + Γ(D₁, W s, y₀)`. -/
 lemma nabla_s_nabla_t_eq
@@ -667,7 +663,6 @@ lemma nabla_s_nabla_t_eq
             (extChartAt I α (f s t)) := by
   rw [chartCovDerivAlong_def]
   rfl
-
 
 /-- Mirror of `hasDerivAt_innerW`: inner cov-deriv along `u ↦ f u v` differentiated in `v`. -/
 lemma hasDerivAt_innerW'
@@ -761,7 +756,6 @@ lemma fderiv_eq_sum_partialDeriv (u : E → ℝ) (y v : E) :
   rw [map_smul, smul_eq_mul]
   rfl
 
-
 lemma chartCoord_basis (b s : Fin (Module.finrank ℝ E)) :
     chartCoord (E := E) s (chartModelBasis E b) = if b = s then 1 else 0 := by
   rw [chartCoord]; exact (chartModelBasis E).repr_self_apply b s
@@ -794,7 +788,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boun
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M]
 
-
 /-- The `l`-th chart coordinate of the Christoffel contraction. -/
 lemma chartCoord_chartChristoffelContraction
     (g : SmoothRiemannianMetric I M) (x : M) (v w y : E) (l : Fin (Module.finrank ℝ E)) :
@@ -807,7 +800,6 @@ lemma chartCoord_chartChristoffelContraction
   rw [Aux5.chartCoord_sum_smul_basis (E := E)
       (fun l => ∑ i, ∑ j, chartChristoffel (I := I) g x i j l y *
         chartCoord (E := E) i v * chartCoord (E := E) j w) l]
-
 
 /-- `partialDeriv` is insensitive to the symmetric swap of the lower Christoffel
 indices. -/
@@ -965,26 +957,20 @@ lemma curvPart_eq_chartRiemannCLM
       ring
     rw [hRHS']
     congr 1
-    · -- first term.  LHS ∑_i∑_j∑_d, target ∑_I∑_J∑_K with (I,J,K)=(j,d,i).
-      rw [Finset.sum_comm]   -- ∑_j ∑_i ∑_d
+    · rw [Finset.sum_comm]
       refine Finset.sum_congr rfl fun j _ => ?_
-      rw [Finset.sum_comm]   -- ∑_d ∑_i
+      rw [Finset.sum_comm]
       refine Finset.sum_congr rfl fun d _ => ?_
       refine Finset.sum_congr rfl fun i _ => ?_
-      -- LHS summand (over i,j,d) here with (I=j, J=d, K=i):
-      --   d₁ d ∂_d Γ(i,j,l) d₂ i yc j  =  yc j · d₁ d · d₂ i · ∂_d Γ(j,i,l)
       rw [partialDeriv_chartChristoffel_symm (I := I) g x i j l d]
       ring
-    · -- second term.  LHS ∑_i∑_j∑_d, target ∑_I∑_J∑_K with (I,J,K)=(j,i,d).
-      rw [Finset.sum_comm]   -- ∑_j ∑_i ∑_d
+    · rw [Finset.sum_comm]
       refine Finset.sum_congr rfl fun j _ => ?_
       refine Finset.sum_congr rfl fun i _ => ?_
       refine Finset.sum_congr rfl fun d _ => ?_
       rw [partialDeriv_chartChristoffel_symm (I := I) g x i j l d]
       ring
-  · -- ΓΓ part.
-    -- Flatten AA₁ and AA₂ coefficients into quadruple sums.
-    have hAA1c : (∑ i, ∑ j, chartChristoffel (I := I) g x i j l y₀ * d₁ i *
+  · have hAA1c : (∑ i, ∑ j, chartChristoffel (I := I) g x i j l y₀ * d₁ i *
             (∑ p, ∑ q, chartChristoffel (I := I) g x p q j y₀ * d₂ p * yc q))
         = ∑ i, ∑ j, ∑ p, ∑ q,
             chartChristoffel (I := I) g x i j l y₀ * d₁ i *
@@ -1009,7 +995,6 @@ lemma curvPart_eq_chartRiemannCLM
       refine Finset.sum_congr rfl fun q _ => ?_
       ring
     rw [hAA1c, hAA2c]
-    -- Split B_ΓΓ into its two m-sub-terms.
     have hBsplit : (∑ i, ∑ j, ∑ k, yc i * d₁ j * d₂ k *
           (∑ m, (chartChristoffel (I := I) g x j m l y₀ *
                 chartChristoffel (I := I) g x i k m y₀
@@ -1031,8 +1016,6 @@ lemma curvPart_eq_chartRiemannCLM
       refine Finset.sum_congr rfl fun m _ => ?_
       ring
     rw [hBsplit]
-    -- Match AA₁ ↦ B_first, AA₂ ↦ B_second by collapsing to product sums and a
-    -- coordinate-permutation reindexing.
     have hcollapse : ∀ F : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
           Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ,
         (∑ a, ∑ b, ∑ c, ∑ d, F a b c d)
@@ -1042,8 +1025,7 @@ lemma curvPart_eq_chartRiemannCLM
       intro F
       simp only [Fintype.sum_prod_type]
     congr 1
-    · -- AA₁ = B_first.  Reindex via the permutation (i,j,p,q) ↦ (q,i,p,j).
-      rw [hcollapse (fun i j p q => chartChristoffel (I := I) g x i j l y₀ * d₁ i *
+    · rw [hcollapse (fun i j p q => chartChristoffel (I := I) g x i j l y₀ * d₁ i *
           chartChristoffel (I := I) g x p q j y₀ * d₂ p * yc q)]
       rw [hcollapse (fun i j k m => yc i * d₁ j * d₂ k *
           (chartChristoffel (I := I) g x j m l y₀ * chartChristoffel (I := I) g x i k m y₀))]
@@ -1058,8 +1040,7 @@ lemma curvPart_eq_chartRiemannCLM
         dsimp only
         rw [chartChristoffel_symm (I := I) g x w.2.1 w.2.2 w.1.2 y₀]
         ring
-    · -- AA₂ = B_second.  Reindex via (i,j,p,q) ↦ (q,p,i,j) for B-second (I,J,K,m)=(q,p,i,j).
-      rw [hcollapse (fun i j p q => chartChristoffel (I := I) g x i j l y₀ * d₂ i *
+    · rw [hcollapse (fun i j p q => chartChristoffel (I := I) g x i j l y₀ * d₂ i *
           chartChristoffel (I := I) g x p q j y₀ * d₁ p * yc q)]
       rw [hcollapse (fun i j k m => yc i * d₁ j * d₂ k *
           (chartChristoffel (I := I) g x k m l y₀ * chartChristoffel (I := I) g x i j m y₀))]
@@ -1112,19 +1093,15 @@ lemma commutator_eq_chartRiemannCLM
   classical
   set α : M := f s t with hα
   set y₀ : E := extChartAt I α (f s t) with hy₀
-  -- Γ differentiable at y₀.
   have hΓ : ∀ i j k : Fin (Module.finrank ℝ E),
       DifferentiableAt ℝ (chartChristoffel (I := I) g α i j k) y₀ := by
     intro i j k
     have := Aux3.chartChristoffel_differentiableAt_self (I := I) g α i j k
     rwa [show extChartAt I α α = y₀ from by rw [hy₀, hα]] at this
-  -- The two double covariant derivatives.
   rw [nabla_s_nabla_t_eq (I := I) g α f Y s t,
       nabla_t_nabla_s_eq (I := I) g α f Y s t]
-  -- Substitute deriv-of-innerW values.
   rw [(hasDerivAt_innerW (I := I) g α f Y s t hF hY hΓ).deriv,
       (hasDerivAt_innerW' (I := I) g α f Y s t hF hY hΓ).deriv]
-  -- Express the inner values Ws, Wt at the base via `innerW_eq`.
   have hWs : chartCovDerivAlong (I := I) g α (fun v : ℝ => f s v) (fun v : ℝ => Y s v) t
       = fderiv ℝ (fun v : ℝ => Y s v) t (1 : ℝ)
         + chartChristoffelContraction (I := I) g α
@@ -1136,18 +1113,15 @@ lemma commutator_eq_chartRiemannCLM
             (fderiv ℝ (fun u : ℝ => extChartAt I α (f u t)) s (1 : ℝ)) (Y s t) y₀ := by
     rw [chartCovDerivAlong_def]; rfl
   rw [hWs, hWt]
-  -- Notation for the joint partials at the base.
   set G : ℝ × ℝ → E := fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2) with hG
   set D₁ : E := fderiv ℝ G (s, t) (1, 0) with hD₁
   set D₂ : E := fderiv ℝ G (s, t) (0, 1) with hD₂
   set Yv : E := Y s t with hYv
-  -- Identify slice partials with joint partials.
   have hGdiff : DifferentiableAt ℝ G (s, t) := hF.differentiableAt two_ne_zero
   have hpf₁ : fderiv ℝ (fun u : ℝ => extChartAt I α (f u t)) s (1 : ℝ) = D₁ :=
     Aux2.partial_fst_apply_one (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) s t hGdiff
   have hpf₂ : fderiv ℝ (fun v : ℝ => extChartAt I α (f s v)) t (1 : ℝ) = D₂ :=
     Aux2.partial_snd_apply_one (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) s t hGdiff
-  -- Schwarz symmetry for `G` and `Y`.
   have hSchwarzF : fderiv ℝ (fderiv ℝ G) (s, t) (1, 0) (0, 1)
       = fderiv ℝ (fderiv ℝ G) (s, t) (0, 1) (1, 0) := by
     have hsymm : IsSymmSndFDerivAt ℝ G (s, t) := by
@@ -1160,21 +1134,16 @@ lemma commutator_eq_chartRiemannCLM
       refine ContDiffAt.isSymmSndFDerivAt hY ?_
       rw [minSmoothness_of_isRCLikeNormedField]
     exact hsymm (1, 0) (0, 1)
-  -- Convert the RHS chart-Riemann CLM to the curvature expression.
   simp only [hpf₁, hpf₂]
   rw [← curvPart_eq_chartRiemannCLM (I := I) g α D₁ D₂ Yv]
-  -- Rewrite all slice partials and Schwarz terms.
   simp only [hSchwarzF]
-  -- Fold `extChartAt I α α` back to `y₀`.
   rw [← hy₀]
-  -- Expand the two outer contractions over the inner sums.
   rw [ChartChristoffel.contraction_add_right (g := g) (α := α) (y := y₀) D₁
         (fderiv ℝ (fun v : ℝ => Y s v) t (1 : ℝ))
         (chartChristoffelContraction (I := I) g α D₂ Yv y₀),
       ChartChristoffel.contraction_add_right (g := g) (α := α) (y := y₀) D₂
         (fderiv ℝ (fun u : ℝ => Y u t) s (1 : ℝ))
         (chartChristoffelContraction (I := I) g α D₁ Yv y₀)]
-  -- Identify the remaining slice partials of `Y`.
   have hYpf₁ : fderiv ℝ (fun u : ℝ => Y u t) s (1 : ℝ)
       = fderiv ℝ (fun p : ℝ × ℝ => Y p.1 p.2) (s, t) (1, 0) :=
     Aux2.partial_fst_apply_one (fun p : ℝ × ℝ => Y p.1 p.2) s t (hY.differentiableAt two_ne_zero)
@@ -1182,14 +1151,10 @@ lemma commutator_eq_chartRiemannCLM
       = fderiv ℝ (fun p : ℝ × ℝ => Y p.1 p.2) (s, t) (0, 1) :=
     Aux2.partial_snd_apply_one (fun p : ℝ × ℝ => Y p.1 p.2) s t (hY.differentiableAt two_ne_zero)
   rw [hYpf₁, hYpf₂, hSchwarzY]
-  -- coefficient-level identity.  Split each master sum into ∂Γ part + two
-  -- Christoffel contractions, recognise the contractions, and cancel.
-  -- Abbreviations for the second-derivative-of-Y mixed partials.
   set mY : E := fderiv ℝ (fderiv ℝ (fun p : ℝ × ℝ => Y p.1 p.2)) (s, t) (0, 1) (1, 0) with hmY
   set mF : E := fderiv ℝ (fderiv ℝ G) (s, t) (0, 1) (1, 0) with hmF
   set DY₁ : E := fderiv ℝ (fun p : ℝ × ℝ => Y p.1 p.2) (s, t) (1, 0) with hDY₁
   set DY₂ : E := fderiv ℝ (fun p : ℝ × ℝ => Y p.1 p.2) (s, t) (0, 1) with hDY₂
-  -- Split the `st` master sum.
   have hsplit_st : (∑ k : Fin (Module.finrank ℝ E),
         (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
           ((fderiv ℝ (chartChristoffel (I := I) g α i j k) y₀ D₁) *
@@ -1230,7 +1195,6 @@ lemma commutator_eq_chartRiemannCLM
     rw [← add_smul, ← add_smul]
     congr 1
     simp only [Finset.sum_add_distrib]
-  -- Combine the two ∂Γ parts into the single RHS ∂Γ difference.
   have hdGcomb : (∑ k, (∑ i, ∑ j,
           (fderiv ℝ (chartChristoffel (I := I) g α i j k) y₀ D₁) *
             chartCoord (E := E) i D₂ * chartCoord (E := E) j Yv) • chartModelBasis E k)
@@ -1251,7 +1215,6 @@ lemma commutator_eq_chartRiemannCLM
     rw [← Finset.sum_sub_distrib]
   rw [hsplit_st, hsplit_ts]
   rw [← hdGcomb]
-  -- now everything cancels by linear algebra (abel).
   abel_nf
 
 end Aux7
@@ -1292,7 +1255,6 @@ theorem chartCovDerivAlong_commutator_eq_riemannOp_on_variation
       (I := I) g (f s t)
       (DifferentialGeometry.Integral.Connection.chartRiemannBasisIdentity_LeviCivita
         (I := I) g (f s t))]
-
 
 end Variation
 end Riemannian

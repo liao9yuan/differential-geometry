@@ -115,9 +115,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Step 1: smoothness regularity of `repr T ∘ symm` and the
-discharge of the `fderiv (repr T ∘ symm)` differentiability hypothesis -/
-
 /-- Smoothness on the chart-target image of the chart-`α` Levi-Civita good set
 of the chart-pulled representation of a `SmoothCcTensor`. -/
 private lemma reprT_contDiffOn_goodSet
@@ -249,9 +246,6 @@ private lemma fderiv_reprT_differentiableAt_goodSet
     (hfd_cd.differentiableOn hne) (extChartAt I α b) hx_mem
   exact hwithin.differentiableAt (hU_open.mem_nhds hx_mem)
 
-/-! ## Step 2: uniform bound on `‖B b‖` over the partition-of-unity tsupport
-for `B := chartFrameNormGlobalSmooth g α i` -/
-
 /-- For a globally smooth tangent vector section `B`, the chart-pulled
 trivialised vector `trivToE α b (B b) = chartE_section_repr α B.toFun b` has
 a uniform norm bound over the chart-`α` partition-of-unity tsupport. -/
@@ -262,25 +256,20 @@ private lemma trivToE_B_norm_bound
           ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
         ‖trivToE (I := I) α b (B.toFun b)‖ ≤ C := by
   classical
-  -- Smoothness of B on the chart-α good set.
   have hB_total : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => TotalSpace.mk' E
         (E := fun y : M => TangentSpace I y) x (B.toFun x)) := B.contMDiff
   have hB_on : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
       (T% (B.toFun : Π x : M, TangentSpace I x))
       (chartLeviCivitaGoodSet (I := I) α) := hB_total.contMDiffOn
-  -- Smoothness of `b ↦ chartE_section_repr α B.toFun b` on the good set,
-  -- which equals `b ↦ trivToE α b (B.toFun b)` by definition.
   have hu_cd_good : ContMDiffOn I 𝓘(ℝ, E) ∞
       (fun b : M => chartE_section_repr (I := I) α B.toFun b)
       (chartLeviCivitaGoodSet (I := I) α) :=
     chartE_section_repr_contMDiffOn_goodSet (I := I) (M := M) α hB_on
-  -- The function is continuous on the good set.
   have hu_cont : ContinuousOn
       (fun b : M => trivToE (I := I) α b (B.toFun b))
       (chartLeviCivitaGoodSet (I := I) α) :=
     hu_cd_good.continuousOn
-  -- POU tsupport is contained in the chart source = good set.
   have hPOU_subset_src : tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆ (chartAt H α).source :=
     (chartAtlasPOU_isSubordinate I M) α
@@ -292,12 +281,9 @@ private lemma trivToE_B_norm_bound
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
       chartLeviCivitaGoodSet (I := I) α := by
     rw [h_good_eq_source]; exact hPOU_subset_src
-  -- Compact POU tsupport.
   have hKcompact : IsCompact (tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
     (isClosed_tsupport _).isCompact
-  -- Apply bdd_above on a compact set with a continuous function (restricted
-  -- to the POU tsupport via the inclusion).
   have hu_cont_K : ContinuousOn
       (fun b : M => trivToE (I := I) α b (B.toFun b))
       (tsupport (fun x : M =>

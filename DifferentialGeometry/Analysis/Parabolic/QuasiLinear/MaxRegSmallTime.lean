@@ -86,14 +86,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 variable {a : ℝ} {T : ℝ}
 
-/-! ## The subcritical Nemytskii operator `L²([0,T]; H^{a+1}) → L²([0,T]; Hᵃ)`
-
-For a Lipschitz nonlinearity `N : H^{a+1} → Hᵃ`, pointwise composition with `N`
-sends a time-`L²` field at scale `a + 1` to a time-`L²` field at scale `a`, with
-the same Lipschitz constant.  The construction mirrors `nemytskii` of
-`MaxRegFixedPoint` (which is hardcoded to the critical source scale `a + 2`); the
-only change is the source exponent. -/
-
 section Nemytskii
 
 variable {L : ℝ≥0}
@@ -196,14 +188,6 @@ theorem nemytskiiHa1_lipschitzWith (hN : LipschitzWith L N) :
 
 end Nemytskii
 
-/-! ## The `H^{a+1}`-field contraction estimate with `√T`-decay
-
-For a fixed initial datum the homogeneous part of the `H^{a+1}`-view Duhamel
-field cancels in a difference, leaving the `H^{a+1}`-view maximal-regularity
-solution field of the difference of the forcings.  The one-derivative-gain bound
-`maximalRegularitySolFieldHa1_norm_le` (`‖·‖ ≤ 2√T‖·‖`) then controls it by the
-`L²([0,T]; Hᵃ)` distance — with a constant that **vanishes as `T → 0`**. -/
-
 /-- Chart-locality-free version of `maxRegDuhamelSolFieldHa1_sub`. -/
 theorem maxRegDuhamelSolFieldHa1_sub (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -232,8 +216,6 @@ theorem maxRegDuhamelSolFieldHa1_dist_le (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact := h_compact) (a := a) hT hT1 u₀ gforce gforce']
   exact maximalRegularitySolFieldHa1_norm_le (I := I) (M := M)
     (h_compact := h_compact) (a := a) hT hT1 (gforce - gforce')
-
-/-! ## The subcritical forcing-space fixed-point map -/
 
 section FixedPoint
 
@@ -301,8 +283,6 @@ theorem quasilinearDuhamelMapHa1_dist_le (hT : 0 < T) (hT1 : T ≤ 1)
         mul_le_mul_of_nonneg_left hfield L.coe_nonneg
     _ = (L : ℝ) * (2 * Real.sqrt T) * dist gforce gforce' := by ring
 
-/-! ## The small time horizon and the contraction -/
-
 /-- **The explicit small time horizon** `T_L = min 1 (1/(4(L+1)²))`.  It is
 positive for every Lipschitz constant `L`, satisfies `T_L ≤ 1`, and is small
 enough that `L·2√T_L < 1` (`smallTime_contraction_const_lt_one`). -/
@@ -327,23 +307,19 @@ theorem smallTime_contraction_const_lt_one {L : ℝ≥0} {T : ℝ}
     (L : ℝ) * (2 * Real.sqrt T) < 1 := by
   have hLnn : (0 : ℝ) ≤ (L : ℝ) := L.coe_nonneg
   have hLp1_pos : (0 : ℝ) < (L : ℝ) + 1 := by linarith
-  -- `T ≤ 1/(4(L+1)²)`.
   have hTbd : T ≤ 1 / (4 * ((L : ℝ) + 1) ^ 2) :=
     le_trans hTL (min_le_right _ _)
-  -- `√T ≤ 1/(2(L+1))`.
   have hden_pos : (0 : ℝ) < 2 * ((L : ℝ) + 1) := by linarith
   have hsqrtT_le : Real.sqrt T ≤ 1 / (2 * ((L : ℝ) + 1)) := by
     rw [show (1 : ℝ) / (2 * ((L : ℝ) + 1)) =
       Real.sqrt ((1 / (2 * ((L : ℝ) + 1))) ^ 2) from
         (Real.sqrt_sq (by positivity)).symm]
     refine Real.sqrt_le_sqrt (le_trans hTbd ?_)
-    -- `1/(4(L+1)²) = (1/(2(L+1)))²`.
     have heq : (1 : ℝ) / (4 * ((L : ℝ) + 1) ^ 2) =
         (1 / (2 * ((L : ℝ) + 1))) ^ 2 := by
       rw [div_pow, one_pow, mul_pow]
       norm_num
     rw [heq]
-  -- `L·2√T ≤ L/(L+1) < 1`.
   have hsqrtT_nn : 0 ≤ Real.sqrt T := Real.sqrt_nonneg _
   calc (L : ℝ) * (2 * Real.sqrt T)
       = 2 * (L : ℝ) * Real.sqrt T := by ring
@@ -378,8 +354,6 @@ theorem quasilinearDuhamelMapHa1_contracting (hT : 0 < T)
     simpa only [NNReal.coe_mk] using h
 
 end FixedPoint
-
-/-! ## Small-time strong existence -/
 
 /-- **Chart-locality-free small-time strong existence**, parameterized on
 resolvent compactness `h_compact`.  Identical to

@@ -121,32 +121,12 @@ open DifferentialGeometry.Analysis.Laplacian.RicciPairingCLM
 open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianFinal
 open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianSmoothFull
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Density-extension hypotheses
-
-For the density extension of the smooth-case regularity result to
-non-smooth `u_h ∈ laplacianDomainPow g 2`, we expose the following
-hypotheses:
-
-* `h_smooth_seq : ℕ → SmoothScalar g` — a sequence of smooth scalars.
-* `h_smooth_mem : ∀ n, smoothToH1Compl (h_smooth_seq n) ∈ laplacianDomainPow g 2` —
-  automatic via `smoothToH1Compl_mem_laplacianDomainPow_two`.
-* `h_conv_H1Compl : Tendsto (fun n => smoothToH1Compl (h_smooth_seq n)) atTop (𝓝 u_h)` —
-  H¹Compl convergence of the approximators.
-* `h_conv_candidate : Tendsto (fun n => gradInnerLaplacianCandidateUnconditional g φ
-    (smoothToH1Compl_mem_laplacianDomainPow_two g (h_smooth_seq n))) atTop
-    (𝓝 (gradInnerLaplacianCandidateUnconditional g φ hu_h))` — `Lp`-class
-  convergence of the candidates.
-* `h_smooth_identity : ∀ n, smoothCandidate_identification_target g φ (h_smooth_seq n)` —
-  the smooth-case identification holds for each approximator. -/
 
 /-- **Density-extension regularity theorem, hypothesis-bearing**. Given
 the density-extension hypotheses, the regularity identity holds for
@@ -174,25 +154,14 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_via_density
           (gradInnerLaplacianCandidateUnconditional
             (I := I) (M := M) g φ hu_h)) := by
   classical
-  -- Both LHS and RHS as functions of `u_h` are H¹Compl-continuous.
-  -- LHS: gradInnerCLM g φ : H1Compl → Lp (CLM, hence continuous).
-  -- RHS: H1ComplToLp ∘ resolvent ∘ (Bochner candidate construction) :
-  --   for the convergence to extend, we use the convergence
-  --   gradInnerLaplacianCandidateUnconditional ... → gradInnerLaplacianCandidateUnconditional g φ hu_h (in Lp),
-  --   compose with resolvent (continuous Lp → H¹Compl),
-  --   compose with H1ComplToLp (continuous H¹Compl → Lp).
-  -- On the smooth-approximation subsequence, the identity holds by smoothCase_via_candidate_identification.
 
-  -- Step 1: convergence of LHS.
   have h_LHS_conv : Tendsto
       (fun n => gradInnerCLM (I := I) (M := M) g φ
         (smoothToH1Compl (I := I) (M := M) g (h_smooth_seq n)))
       atTop (𝓝 (gradInnerCLM (I := I) (M := M) g φ u_h)) := by
-    -- gradInnerCLM g φ is a continuous map H¹Compl → Lp.
     exact ((gradInnerCLM (I := I) (M := M) g φ).continuous.tendsto _).comp
       h_conv_H1Compl
 
-  -- Step 2: convergence of RHS.
   have h_RHS_conv : Tendsto
       (fun n => H1ComplToLp (I := I) (M := M) g
         (resolvent (I := I) (M := M) g
@@ -203,8 +172,6 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_via_density
         (resolvent (I := I) (M := M) g
           (gradInnerLaplacianCandidateUnconditional
             (I := I) (M := M) g φ hu_h)))) := by
-    -- Compose: candidate (Lp-valued) -> resolvent (H¹Compl-valued) -> H1ComplToLp (Lp-valued).
-    -- Both resolvent and H1ComplToLp are continuous.
     have h_resolvent_cont :
         Continuous (resolvent (I := I) (M := M) g) :=
       (resolvent (I := I) (M := M) g).continuous
@@ -217,7 +184,6 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_via_density
       h_H1ComplToLp_cont.comp h_resolvent_cont
     exact (h_composition_cont.tendsto _).comp h_conv_candidate
 
-  -- Step 3: on the smooth-approximation sequence, the identity holds.
   have h_smooth_eq : ∀ n,
       gradInnerCLM (I := I) (M := M) g φ
         (smoothToH1Compl (I := I) (M := M) g (h_smooth_seq n)) =
@@ -229,9 +195,6 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_via_density
     smoothCase_via_candidate_identification
       (I := I) (M := M) g φ (h_smooth_seq n) (h_smooth_identity n)
 
-  -- Step 4: pass to the limit.
-  -- LHS_seq → LHS, RHS_seq → RHS, and LHS_seq = RHS_seq for all n.
-  -- Hence LHS = RHS by uniqueness of limits.
   have h_seq_eq : (fun n => gradInnerCLM (I := I) (M := M) g φ
         (smoothToH1Compl (I := I) (M := M) g (h_smooth_seq n))) =
       (fun n => H1ComplToLp (I := I) (M := M) g
@@ -242,11 +205,7 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_via_density
     funext n
     exact h_smooth_eq n
 
-  -- Rewrite LHS_seq → RHS_seq direction:
   rw [h_seq_eq] at h_LHS_conv
-  -- Now h_LHS_conv: RHS_seq → LHS.
-  -- And h_RHS_conv: RHS_seq → RHS.
-  -- Uniqueness of limits: LHS = RHS.
   exact tendsto_nhds_unique h_LHS_conv h_RHS_conv
 
 /-- **Density-extension regularity theorem, image-membership form**. -/
@@ -274,11 +233,9 @@ theorem gradInnerCLM_mem_image_laplacianDomain_via_density
   refine ⟨resolvent (I := I) (M := M) g
     (gradInnerLaplacianCandidateUnconditional (I := I) (M := M) g φ hu_h),
     ?_, ?_⟩
-  · -- The resolvent image is in laplacianDomain.
-    exact (laplacianDomain_mem_iff (I := I) (M := M) g).mpr
+  · exact (laplacianDomain_mem_iff (I := I) (M := M) g).mpr
       ⟨gradInnerLaplacianCandidateUnconditional (I := I) (M := M) g φ hu_h, rfl⟩
-  · -- The H1ComplToLp identity is the variational identity.
-    exact (gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_via_density
+  · exact (gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_via_density
       (I := I) (M := M) g φ hu_h h_smooth_seq h_conv_H1Compl
       h_conv_candidate h_smooth_identity).symm
 
@@ -308,13 +265,6 @@ theorem smoothMulH1Compl_mem_pow_two_via_density
   exact gradInnerCLM_mem_image_laplacianDomain_via_density
     (I := I) (M := M) g φ hu_h h_smooth_seq h_conv_H1Compl
     h_conv_candidate h_smooth_identity
-
-/-! ## Convenience form: H¹Compl-continuity of the candidate's gradInner pieces
-
-For the density extension, the convergence of the Bochner candidate
-relies on convergence of each summand. We expose the H¹Compl-continuity
-of the gradInnerCLM, ricciPairingCLM pieces here, leaving the Hessian
-piece's continuity as the residual hypothesis. -/
 
 /-- The composition `n ↦ gradInnerCLM g φ (smoothToH1Compl (h_smooth_seq n))`
 converges in `Lp` when `smoothToH1Compl (h_smooth_seq n) → u_h` in `H¹Compl`. -/

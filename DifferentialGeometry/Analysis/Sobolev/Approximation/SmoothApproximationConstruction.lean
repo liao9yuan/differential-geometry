@@ -57,9 +57,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Auxiliary: sup-norm bound for a continuous function with compact
-support -/
-
 omit [NeZero d] in
 /-- A continuous function with compact support on `E` admits a nonneg
 sup-norm bound. -/
@@ -82,9 +79,6 @@ private lemma memLp_two_restrict_of_continuous_compactSupport
     h_cont.memLp_of_hasCompactSupport (μ := (volume : Measure E)) h_cs
   exact hMemLp_volume.restrict S
 
-/-! ## Sup-norm bound on the first partial of a smooth compactly-supported
-function -/
-
 omit [NeZero d] in
 /-- Each component of the gradient of a smooth compactly-supported function
 is continuous with compact support, hence sup-bounded. -/
@@ -95,7 +89,6 @@ private lemma exists_grad_component_bound
       ∀ j : Fin d, ∀ x : E,
         |(fderiv ℝ u x) (EuclideanSpace.single j 1)| ≤ N := by
   classical
-  -- For each j, the j-th partial is continuous and compactly supported.
   have h_each : ∀ j : Fin d, ∃ N_j : ℝ, 0 ≤ N_j ∧
       ∀ x : E, |(fderiv ℝ u x) (EuclideanSpace.single j 1)| ≤ N_j := by
     intro j
@@ -106,7 +99,6 @@ private lemma exists_grad_component_bound
         (fun x : E => (fderiv ℝ u x) (EuclideanSpace.single j 1)) :=
       hu_cs.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single j 1)
     exact exists_abs_bound_of_continuous_compactSupport h_cont h_cs
-  -- Take the maximum over `Fin d`.
   let N_fun : Fin d → ℝ := fun j => Classical.choose (h_each j)
   have hN_fun_nn : ∀ j, 0 ≤ N_fun j := fun j =>
     (Classical.choose_spec (h_each j)).1
@@ -122,8 +114,6 @@ private lemma exists_grad_component_bound
     intro k _
     exact hN_fun_nn k
   exact (hN_fun_le j x).trans hsingle
-
-/-! ## Public construction theorem -/
 
 /-- **Construction of `SmoothApproximation` from a smooth weak solution.**
 
@@ -158,24 +148,19 @@ theorem exists_smoothApproximation_of_smooth_compactSupport
         B.bilin u φ = ∫ x in Ω, f x * φ x) :
     Nonempty (SmoothApproximation B u f) := by
   classical
-  -- Sup-norm bound on `u`.
   obtain ⟨M_u, hM_u_nn, hM_u_le⟩ :=
     exists_abs_bound_of_continuous_compactSupport
       (h_cont := hu_smooth.continuous) (h_cs := hu_cs)
-  -- Componentwise sup-norm bound on `∇u`.
   obtain ⟨N_grad, hN_grad_nn, hN_grad_le⟩ :=
     exists_grad_component_bound (u := u) hu_smooth hu_cs
-  -- Sup-norm bound on `f`.
   obtain ⟨M_f, hM_f_nn, hM_f_le⟩ :=
     exists_abs_bound_of_continuous_compactSupport
       (h_cont := hf_cont) (h_cs := hf_cs)
-  -- The master `data_bound`: combined squared sup-norms.
   set D : ℝ := M_u ^ 2 + (Fintype.card (Fin d) : ℝ) * N_grad ^ 2 + M_f ^ 2
     with hD_def
   have hD_nn : 0 ≤ D := by
     refine add_nonneg (add_nonneg (sq_nonneg _) ?_) (sq_nonneg _)
     exact mul_nonneg (by exact_mod_cast Nat.zero_le _) (sq_nonneg _)
-  -- Continuity of `u`, `f`, and each gradient component.
   have hu_cont : Continuous u := hu_smooth.continuous
   have h_grad_cont : ∀ j : Fin d, Continuous
       (fun x : E => (fderiv ℝ u x) (EuclideanSpace.single j 1)) := by
@@ -185,7 +170,6 @@ theorem exists_smoothApproximation_of_smooth_compactSupport
       (fun x : E => (fderiv ℝ u x) (EuclideanSpace.single j 1)) := by
     intro j
     exact hu_cs.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single j 1)
-  -- Build the structure with the constant sequence.
   refine ⟨{
     u_seq := fun _ => u
     f_seq := fun _ => f
@@ -202,13 +186,10 @@ theorem exists_smoothApproximation_of_smooth_compactSupport
     data_bound_nn := hD_nn
     data_integrated_bound := ?_
   }⟩
-  · -- Smooth-weak-solution clause expanded.
-    refine ⟨hu_smooth, ?_⟩
+  · refine ⟨hu_smooth, ?_⟩
     intro φ hφ_smooth hφ_cs hφ_supp
     exact h_weak φ hφ_smooth hφ_cs hφ_supp
-  · -- Integrated energy bound on a precompact open `Ω'`.
-    intro Ω' hΩ'_open hΩ'_cc
-    -- Volume of `Ω'` is finite.
+  · intro Ω' hΩ'_open hΩ'_cc
     have h_volume_lt_top : volume Ω' < ⊤ :=
       lt_of_le_of_lt (measure_mono subset_closure) hΩ'_cc.measure_lt_top
     set V : ℝ := (volume Ω').toReal with hV_def
@@ -217,20 +198,16 @@ theorem exists_smoothApproximation_of_smooth_compactSupport
       refine ⟨?_⟩
       rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter]
       exact h_volume_lt_top
-    -- Integrals of constant functions on `Ω'` are `c · V`.
     have h_const_int : ∀ c : ℝ,
         ∫ _x in Ω', c ∂(volume : Measure E) = c * V := by
       intro c
       rw [setIntegral_const, smul_eq_mul, mul_comm, hV_def]
       rfl
     refine ⟨V, hV_nn, fun _ => ?_⟩
-    -- Each piece is bounded pointwise; integrate.
-    -- ∫ ∑_j (∂_j u)² ≤ d · N_grad² · V
     have h_grad_each_int : ∀ j : Fin d,
         ∫ y in Ω', ((fderiv ℝ u y) (EuclideanSpace.single j 1)) ^ 2
             ∂(volume : Measure E) ≤ N_grad ^ 2 * V := by
       intro j
-      -- (∂_j u y)² ≤ N_grad² pointwise.
       have h_pt : ∀ y : E,
           ((fderiv ℝ u y) (EuclideanSpace.single j 1)) ^ 2 ≤ N_grad ^ 2 := by
         intro y
@@ -238,7 +215,6 @@ theorem exists_smoothApproximation_of_smooth_compactSupport
         rw [show ((fderiv ℝ u y) (EuclideanSpace.single j 1)) ^ 2 =
               |(fderiv ℝ u y) (EuclideanSpace.single j 1)| ^ 2 from (sq_abs _).symm]
         exact pow_le_pow_left₀ (abs_nonneg _) h_abs 2
-      -- Integrability of (∂_j u)² on Ω': bounded by N_grad², integrable as constant.
       have h_int_lhs : Integrable
           (fun y : E => ((fderiv ℝ u y) (EuclideanSpace.single j 1)) ^ 2)
           (volume.restrict Ω') := by
@@ -262,7 +238,6 @@ theorem exists_smoothApproximation_of_smooth_compactSupport
         refine Filter.Eventually.of_forall ?_; exact h_pt
       rw [h_const_int (N_grad ^ 2)] at h_le_int
       exact h_le_int
-    -- ∫ u² ≤ M_u² · V
     have h_u_sq_int : ∫ y in Ω', (u y) ^ 2 ∂(volume : Measure E) ≤ M_u ^ 2 * V := by
       have h_pt : ∀ y : E, (u y) ^ 2 ≤ M_u ^ 2 := by
         intro y
@@ -289,7 +264,6 @@ theorem exists_smoothApproximation_of_smooth_compactSupport
         refine Filter.Eventually.of_forall ?_; exact h_pt
       rw [h_const_int (M_u ^ 2)] at h_le_int
       exact h_le_int
-    -- ∫ f² ≤ M_f² · V
     have h_f_sq_int : ∫ y in Ω', (f y) ^ 2 ∂(volume : Measure E) ≤ M_f ^ 2 * V := by
       have h_pt : ∀ y : E, (f y) ^ 2 ≤ M_f ^ 2 := by
         intro y
@@ -316,13 +290,11 @@ theorem exists_smoothApproximation_of_smooth_compactSupport
         refine Filter.Eventually.of_forall ?_; exact h_pt
       rw [h_const_int (M_f ^ 2)] at h_le_int
       exact h_le_int
-    -- ∫ ∑_j (∂_j u)² ≤ d · N_grad² · V via summing the per-j bounds.
     have h_grad_sum_int :
         ∫ y in Ω', ∑ j : Fin d,
             ((fderiv ℝ u y) (EuclideanSpace.single j 1)) ^ 2
           ∂(volume : Measure E) ≤
           (Fintype.card (Fin d) : ℝ) * N_grad ^ 2 * V := by
-      -- Move sum outside the integral.
       have h_sum_swap :
           ∫ y in Ω', ∑ j : Fin d,
               ((fderiv ℝ u y) (EuclideanSpace.single j 1)) ^ 2
@@ -350,7 +322,6 @@ theorem exists_smoothApproximation_of_smooth_compactSupport
         rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
         exact h_pt y
       rw [h_sum_swap]
-      -- Sum of per-j bounds.
       have h_sum_le :
           ∑ j : Fin d, ∫ y in Ω',
               ((fderiv ℝ u y) (EuclideanSpace.single j 1)) ^ 2
@@ -364,8 +335,6 @@ theorem exists_smoothApproximation_of_smooth_compactSupport
         ring
       rw [h_const_sum] at h_sum_le
       exact h_sum_le
-    -- Combine: total ≤ V · D.
-    -- D = M_u² + d · N_grad² + M_f²; total ≤ d·N_grad²·V + M_u²·V + M_f²·V = V·D.
     have h_combined :
         (∫ y in Ω',
             ∑ j : Fin d,

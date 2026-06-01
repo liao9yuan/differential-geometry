@@ -117,31 +117,12 @@ open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
 open DifferentialGeometry.Analysis.Laplacian.ChartMeasureEquiv
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The metric-sharp basis decomposition of the gradient
-
-The gradient vector field `gradFun g ζ` of a smooth scalar `ζ` decomposes, on
-the fixed model-fibre basis `chartModelBasis E`, as the inverse-Gram-weighted
-combination
-
-  `gradFun g ζ x = ∑ⱼ (∑ᵢ (G(x)⁻¹)ᵢⱼ · ∂ᵢζ) • eⱼ`,
-
-where `∂ᵢζ = extDerivFun ζ x eᵢ` and `G(x) = gramMatrixAt g x` is the Gram
-matrix of `g(x)` on the basis. This is the explicit form of the metric sharp of
-the differential `dζ`: the unique tangent vector whose metric inner product with
-every test vector recovers `dζ`. -/
 
 /-- Scalar form of `extDerivFun`: applied to an `ℝ`-valued function and a
 tangent vector, it is exactly the manifold-Fréchet derivative — the cast
@@ -181,39 +162,29 @@ private lemma gradFun_eq_gramInv_sum
             extDerivFun (I := I) (ζ : M → ℝ) x ((chartModelBasis E) i)) •
           (chartModelBasis E) j := by
   classical
-  -- Abbreviate the right-hand side and the inverse Gram matrix.
   set Ginv := (gramMatrixAt (I := I) (M := M) g x)⁻¹ with hGinv
   set rhs : TangentSpace I x :=
     ∑ j : Fin (Module.finrank ℝ E),
       (∑ i : Fin (Module.finrank ℝ E),
         Ginv i j * extDerivFun (I := I) (ζ : M → ℝ) x ((chartModelBasis E) i)) •
         (chartModelBasis E) j with hrhs
-  -- It suffices to show `rhs` and `gradFun g ζ x` have the same metric flat
-  -- functional, since the metric flat map is injective.
   refine (metricFlatLinear_injective (I := I) g x ?_).symm
-  -- Two linear functionals agree iff they agree on every basis vector.
   refine (chartModelBasis E).ext ?_
   intro k
-  -- The flat functional of `gradFun g ζ x` on `eₖ` is `∂ₖζ`.
   have hgrad_k : metricFlatLinear (I := I) g x
       (gradFun (I := I) g (ζ : M → ℝ) x) ((chartModelBasis E) k) =
         extDerivFun (I := I) (ζ : M → ℝ) x ((chartModelBasis E) k) := by
     rw [metricFlatLinear_apply, extDerivFun_apply_scalar]
     exact inner_gradFun (I := I) g (ζ : M → ℝ) x ((chartModelBasis E) k)
-  -- The flat functional of `rhs` on `eₖ` expands to an inverse-Gram-weighted
-  -- double sum over the Gram entries.
   have hrhs_k : metricFlatLinear (I := I) g x rhs ((chartModelBasis E) k) =
       ∑ j : Fin (Module.finrank ℝ E),
         (∑ i : Fin (Module.finrank ℝ E),
           Ginv i j * extDerivFun (I := I) (ζ : M → ℝ) x ((chartModelBasis E) i)) *
           gramMatrixAt (I := I) (M := M) g x j k := by
     rw [metricFlatLinear_apply, hrhs]
-    -- The metric inner product of a sum against `eₖ` is the sum of inner
-    -- products; each summand pulls out the scalar weight.
     rw [map_sum, ContinuousLinearMap.sum_apply]
     refine Finset.sum_congr rfl (fun j _ => ?_)
     rw [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul, gramMatrixAt_apply]
-  -- The inner Gram contraction is the `(i, k)` entry of `G(x)⁻¹ · G(x) = 1`.
   have hgram : ∀ i : Fin (Module.finrank ℝ E),
       (∑ j : Fin (Module.finrank ℝ E),
         Ginv i j * gramMatrixAt (I := I) (M := M) g x j k) =
@@ -224,7 +195,6 @@ private lemma gradFun_eq_gramInv_sum
     rw [Matrix.mul_apply] at hentry
     rw [hGinv]
     exact hentry
-  -- Chain the two functional evaluations through the Gram telescoping.
   calc metricFlatLinear (I := I) g x rhs ((chartModelBasis E) k)
       = ∑ j : Fin (Module.finrank ℝ E),
           (∑ i : Fin (Module.finrank ℝ E),
@@ -235,7 +205,6 @@ private lemma gradFun_eq_gramInv_sum
           ∑ i : Fin (Module.finrank ℝ E),
             extDerivFun (I := I) (ζ : M → ℝ) x ((chartModelBasis E) i) *
               (Ginv i j * gramMatrixAt (I := I) (M := M) g x j k) := by
-        -- Distribute the Gram factor `Gⱼₖ` into the inner `i`-sum.
         refine Finset.sum_congr rfl (fun j _ => ?_)
         rw [Finset.sum_mul]
         refine Finset.sum_congr rfl (fun i _ => ?_)
@@ -244,7 +213,6 @@ private lemma gradFun_eq_gramInv_sum
           extDerivFun (I := I) (ζ : M → ℝ) x ((chartModelBasis E) i) *
             (∑ j : Fin (Module.finrank ℝ E),
               Ginv i j * gramMatrixAt (I := I) (M := M) g x j k) := by
-        -- Commute the two summations and pull the differentiation factor out.
         rw [Finset.sum_comm]
         refine Finset.sum_congr rfl (fun i _ => ?_)
         rw [Finset.mul_sum]
@@ -255,7 +223,6 @@ private lemma gradFun_eq_gramInv_sum
         refine Finset.sum_congr rfl (fun i _ => ?_)
         rw [hgram i]
     _ = extDerivFun (I := I) (ζ : M → ℝ) x ((chartModelBasis E) k) := by
-        -- Only the `i = k` summand survives, with Gram weight `1`.
         rw [Finset.sum_eq_single k]
         · rw [Matrix.one_apply_eq, mul_one]
         · intro i _ hik
@@ -265,16 +232,6 @@ private lemma gradFun_eq_gramInv_sum
     _ = metricFlatLinear (I := I) g x
           (gradFun (I := I) g (ζ : M → ℝ) x) ((chartModelBasis E) k) :=
         hgrad_k.symm
-
-/-! ## The covariant-gradient-bundle section of a tensor section
-
-The pointwise directional covariant derivative `tensorCovDerivAt g r s S x v`,
-as a function of the direction `v`, is a continuous linear map from a tangent
-vector to an `(r, s)`-tensor — an element of the covariant-gradient bundle fibre
-`TangentSpace I x →L[ℝ] TensorRSSpace r s I x`. As a function of the base point
-it is a `C^∞` section of that hom bundle; this is the `contMDiff` field of the
-`ContMDiffCovariantDerivative` instance carried by the bundled `(r, s)`-tensor
-covariant derivative. -/
 
 /-- The covariant-gradient-bundle section of a smooth compactly-supported
 `(r, s)`-tensor section `S`: the continuous-linear-map–valued function sending a
@@ -311,9 +268,6 @@ private lemma covDerivHomSection_contMDiff
           TotalSpace (E →L[ℝ] TensorRSModel r s ℝ E)
             fun y : M => TangentSpace I y →L[ℝ] TensorRSSpace r s I y)) := by
   classical
-  -- The bundled `(r, s)`-tensor covariant derivative is `C^∞` as a covariant
-  -- derivative; its `contMDiff` field, applied to the smooth section
-  -- `S.toSection`, gives smoothness of the hom-bundle section on `Set.univ`.
   set covLC := tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)
     with hcovLC
   haveI hcovLC_inst : CovariantDerivative.ContMDiffCovariantDerivative covLC ∞ :=
@@ -326,16 +280,6 @@ private lemma covDerivHomSection_contMDiff
       (S.toSection.contMDiff.contMDiffOn)
   rw [← contMDiffOn_univ]
   exact hop
-
-/-! ## The covariant derivative along a smooth vector field
-
-`covDerivAlong g r s S V` is the smooth `(r, s)`-tensor section whose underlying
-section value at `x` is the directional covariant derivative
-`tensorCovDerivAt g r s S x (V x)` of `S` along the tangent vector `V x`.
-Smoothness is `clm_bundle_apply`: the covariant-gradient-bundle section of `S`
-(a smooth `Hom(TM, T^{(r,s)})` section) applied to the smooth vector section
-`V`. Compact support is inherited from `S`: the directional covariant derivative
-vanishes off `tsupport S.toFun`. -/
 
 /-- The smoothness of the directional-covariant-derivative section
 `x ↦ tensorCovDerivAt g r s S x (V x)`, as a `C^∞` section of the
@@ -352,8 +296,6 @@ private lemma covDerivAlong_section_contMDiff
         (⟨x, tensorCovDerivAt (I := I) (M := M) g r s S x (V x)⟩ :
           TotalSpace (TensorRSModel r s ℝ E)
             fun y : M => TensorRSSpace r s I y)) := by
-  -- `clm_bundle_apply`: the smooth hom-bundle section `covDerivHomSection S`
-  -- applied to the smooth vector section `V`.
   have hϕ := covDerivHomSection_contMDiff (I := I) (M := M) g r s S
   have hv : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => (⟨x, V x⟩ :
@@ -492,14 +434,6 @@ lemma covDerivAlong_tsupport_subset
     tensorCovDerivAt_eq_zero_off_tsupport (I := I) (M := M) g r s S hxnot (V x),
     TensorRSSpace.toModel_zero]
 
-/-! ## The covariant derivative along the gradient of a scalar
-
-`covDerivAlongGrad g r s S ζ` is the covariant derivative of `S` along the
-gradient vector field `gradFun g ζ` of the smooth scalar `ζ`. Because the
-gradient field vanishes wherever `ζ` is locally constant, the resulting tensor
-field is supported inside the closed support of `ζ` — the support hypothesis
-required by the rank-`(r, s)` chart-pull. -/
-
 /-- **The covariant derivative along the gradient of a scalar.** The covariant
 derivative of a smooth compactly-supported `(r, s)`-tensor section `S` along the
 gradient vector field of the smooth scalar `ζ`, as a smooth compactly-supported
@@ -554,13 +488,9 @@ lemma covDerivAlongGrad_tsupport_subset
     (S : SmoothCcTensor g r s) (ζ : C^∞⟮I, M; ℝ⟯) :
     tsupport (covDerivAlongGrad (I := I) (M := M) g r s S ζ).toFun ⊆
       tsupport ((ζ : C^∞⟮I, M; ℝ⟯) : M → ℝ) := by
-  -- `tsupport ζ` is closed, so it suffices that the support of the field sits
-  -- inside it.
   refine closure_minimal ?_ (isClosed_tsupport _)
   intro x hx
   rw [Function.mem_support] at hx
-  -- Off the closed support of `ζ` the gradient field vanishes; the directional
-  -- covariant derivative is then the zero tensor.
   by_contra hxnot
   refine hx ?_
   have hgrad_zero : gradFun (I := I) g (ζ : M → ℝ) x = (0 : TangentSpace I x) := by
@@ -570,25 +500,6 @@ lemma covDerivAlongGrad_tsupport_subset
   rw [covDerivAlongGrad_toFun_apply, hgrad_zero,
     tensorCovDerivAt_zero_dir (I := I) (M := M) g r s S x,
     TensorRSSpace.toModel_zero]
-
-/-! ## The pointwise recast of the cross-right term at rank `(r, s)`
-
-The cross-right term `tensorCovDerivCrossRight g r s ζ w S` of the covariant
-Leibniz rule is, by its explicit form `tensorCovDerivCrossRight_def`, an
-inverse-Gram-weighted double sum
-
-  `∑ᵢ ∑ⱼ (G⁻¹)ᵢⱼ · (∂ᵢζ · ⟨w, ∇ⱼS⟩)`,
-
-with the approximant `w` *undifferentiated*. Pushing the inverse-Gram weight and
-the differentiation factor `∂ᵢζ` into the second argument of the `(r, s)`-tensor
-pointwise inner product `⟨w, ·⟩` — which is `ℝ`-bilinear — collapses the double
-sum to a single pointwise inner product
-
-  `tensorInnerPointwise g r s x (w.toFun x) (covDerivAlongGrad g r s S ζ).toFun x`,
-
-since the inverse-Gram-weighted combination of the basis-directional covariant
-derivatives `∑ᵢ ∑ⱼ (G⁻¹)ᵢⱼ · ∂ᵢζ • ∇ⱼS` is exactly the directional covariant
-derivative along the metric sharp `gradFun g ζ x` of `dζ`. -/
 
 /-- The rank-`(r, s)` pointwise tensor inner product against a fixed first
 argument `A`, packaged as an additive group homomorphism in the second
@@ -619,7 +530,6 @@ private lemma tensorInnerPointwise_sum_sum_right
         ∑ j : Fin (Module.finrank ℝ E),
           tensorInnerPointwise (I := I) (M := M) g r s x A (T i j) := by
   classical
-  -- Both summations pass through the additive hom by `map_sum`.
   have h := map_sum (tensorInnerPointwiseRightHom (I := I) (M := M) g r s x A)
     (fun i => ∑ j : Fin (Module.finrank ℝ E), T i j) Finset.univ
   rw [show tensorInnerPointwise (I := I) (M := M) g r s x A
@@ -650,16 +560,11 @@ private lemma gramInv_sum_covDeriv_eq_covDerivAlongGrad
                 ((chartModelBasis E) j)) =
       (covDerivAlongGrad (I := I) (M := M) g r s S ζ).toFun x := by
   classical
-  -- The directional covariant derivative of `S` at `x`, as the bundled
-  -- continuous linear map `E →L[ℝ] TensorRSSpace r s I x`.
   set D : TangentSpace I x →L[ℝ] TensorRSSpace r s I x :=
     tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)
       (fun y : M => S.toSection y) x with hD
-  -- The fibre-to-model coercion, as the bundled continuous linear equivalence.
   set toM : TensorRSSpace r s I x ≃L[ℝ] TensorRSModel r s ℝ E :=
     tensorRSSpace_continuousLinearEquiv (I := I) r s x with htoM
-  -- `tensorCovDerivAt` is `D` applied; `toFun` of `covDerivAlongGrad` is the
-  -- model coercion of `D (gradFun g ζ x)`.
   have hcov : ∀ v : E,
       tensorCovDerivAt (I := I) (M := M) g r s S x v = D v := fun v => rfl
   have hgoal_rhs :
@@ -668,7 +573,6 @@ private lemma gramInv_sum_covDeriv_eq_covDerivAlongGrad
     rw [covDerivAlongGrad_toFun_apply, hcov]
     rfl
   rw [hgoal_rhs]
-  -- `toModel (∇ⱼS)` is `toM (D eⱼ)`.
   have htoModel_cov : ∀ j : Fin (Module.finrank ℝ E),
       TensorRSSpace.toModel
         (tensorCovDerivAt (I := I) (M := M) g r s S x ((chartModelBasis E) j)) =
@@ -676,9 +580,6 @@ private lemma gramInv_sum_covDeriv_eq_covDerivAlongGrad
     intro j
     rw [hcov]
     rfl
-  -- Push the model coercion `toM` and the directional CLM `D` through the two
-  -- summations and the scalar weights, then collapse the single direction via
-  -- the metric-sharp basis decomposition.
   have hlhs :
       ∑ i : Fin (Module.finrank ℝ E),
           ∑ j : Fin (Module.finrank ℝ E),
@@ -714,7 +615,6 @@ private lemma gramInv_sum_covDeriv_eq_covDerivAlongGrad
                 extDerivFun (I := I) (ζ : M → ℝ) x ((chartModelBasis E) i)) •
               (chartModelBasis E) j)) := by
           refine Finset.sum_congr rfl (fun j _ => ?_)
-          -- Pull the scalar weight `∑ᵢ ...` through `D` and `toM`.
           rw [map_smul D, map_smul toM, Finset.sum_smul]
       _ = toM (D (∑ j : Fin (Module.finrank ℝ E),
             (∑ i : Fin (Module.finrank ℝ E),
@@ -723,8 +623,6 @@ private lemma gramInv_sum_covDeriv_eq_covDerivAlongGrad
               (chartModelBasis E) j)) := by
           rw [map_sum D, map_sum toM]
   rw [hlhs]
-  -- The single direction is the gradient of `ζ` by the metric-sharp basis
-  -- decomposition.
   rw [← gradFun_eq_gramInv_sum (I := I) g ζ x]
 
 /-- **The pointwise recast of the cross-right term at rank `(r, s)`.** For a
@@ -751,24 +649,12 @@ theorem tensorCovDerivCrossRight_eq_tensorInnerPointwise_grad
         ((covDerivAlongGrad (I := I) (M := M) g r s S ζ).toFun x) := by
   classical
   rw [tensorCovDerivCrossRight_def]
-  -- Replace the underlying tensor field of `covDerivAlongGrad g r s S ζ` by the
-  -- inverse-Gram-weighted double sum of basis-directional covariant derivatives.
   rw [← gramInv_sum_covDeriv_eq_covDerivAlongGrad (I := I) (M := M) g r s ζ S x]
-  -- The pointwise inner product against `w` distributes over the double sum.
   rw [tensorInnerPointwise_sum_sum_right]
   refine Finset.sum_congr rfl (fun i _ => ?_)
   refine Finset.sum_congr rfl (fun j _ => ?_)
-  -- Per summand: pull the scalar weight `(G⁻¹)ᵢⱼ · ∂ᵢζ` out of the second
-  -- argument of the `ℝ`-bilinear pointwise inner product.
   rw [tensorInnerPointwise_smul_right]
   ring
-
-/-! ## The cross-right integral as a rank-`(r, s)` abstract `L²` pairing
-
-Integrating the pointwise recast against the Riemannian volume measure: the
-cross-right integral `∫ tensorCovDerivCrossRight g r s ζ w S` equals the integral
-of the pointwise tensor inner product of the two smooth sections `w` and
-`covDerivAlongGrad g r s S ζ`, which is their metric `L²` inner product. -/
 
 /-- **The cross-right integral as a rank-`(r, s)` abstract `L²` pairing.** For a
 smooth scalar `ζ`, a smooth compactly-supported `(r, s)`-tensor section `w`, and
@@ -790,28 +676,14 @@ theorem tensorCovDerivCrossRight_integral_eq_innerLow
       ⟪(w : TensorL2 r s g),
         ((covDerivAlongGrad (I := I) (M := M) g r s S ζ :
           SmoothCcTensor g r s) : TensorL2 r s g)⟫_ℝ := by
-  -- The `L²` inner product of two coercions of smooth sections is the
-  -- pre-Hilbert `L²` inner product, the integral of the pointwise inner product.
   rw [UniformSpace.Completion.inner_coe,
     SmoothCcTensor.inner_def w
       (covDerivAlongGrad (I := I) (M := M) g r s S ζ),
     tensorL2Inner]
-  -- The two integrands agree pointwise by the cross-right recast.
   refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall ?_)
   intro x
   exact tensorCovDerivCrossRight_eq_tensorInnerPointwise_grad
     (I := I) (M := M) g r s ζ w S x
-
-/-! ## The cross-right integral as a single-chart Euclidean integral
-
-Chart-pulling the rank-`(r, s)` abstract `L²` pairing — via
-`tensorL2Inner_cutoff_chartKernelSupported_pull`, with the covariant derivative
-along the gradient of the chart-atlas partition-of-unity weight `chartAtlasPOU
-I M α` as the chart-supported concrete section — expresses the cross-right
-integral as a single-chart Euclidean integral coupling the cutoff Euclidean
-chart components `tensorL2ChartComponentCutoff` of the abstract `L²` element
-`(w : TensorL2 r s g)` to the raw Euclidean chart components of
-`covDerivAlongGrad g r s S (chartAtlasPOU I M α)`. -/
 
 /-- **The cross-right integral as a single-chart Euclidean integral.** For a
 chart center `α : M`, a smooth compactly-supported `(r, s)`-tensor section `w`,
@@ -843,32 +715,13 @@ theorem tensorCovDerivCrossRight_integral_eq_chartPull
                 (covDerivAlongGrad (I := I) (M := M) g r s S
                   (chartAtlasPOU I M α)) α Q y)
         ∂(volume : Measure EuclN) := by
-  -- Rewrite the cross-right integral as the rank-`(r, s)` abstract `L²` pairing.
   rw [tensorCovDerivCrossRight_integral_eq_innerLow (I := I) (M := M) g r s
     (chartAtlasPOU I M α) w S]
-  -- Apply the cutoff chart-pull at rank `(r, s)`; the covariant derivative along
-  -- the gradient is supported inside the closed support of the chart-atlas
-  -- partition-of-unity weight.
   exact tensorL2Inner_cutoff_chartKernelSupported_pull (I := I) (M := M)
     g r s α (w : TensorL2 r s g)
     (covDerivAlongGrad (I := I) (M := M) g r s S (chartAtlasPOU I M α))
     (covDerivAlongGrad_tsupport_subset (I := I) (M := M) g r s S
       (chartAtlasPOU I M α))
-
-/-! ## The chart-locality-free cross-right `L²`-limit objects
-
-The eigenvector resolvent and its canonical smooth approximating sequence have
-chart-locality-free twins in the companion files (`SmoothApprox.lean`,
-`EigenvectorChartComponentL2.lean`). The covariant-derivative-along-gradient
-infrastructure carries no chart-locality datum, so it is reused verbatim; the
-results below re-key onto `eigenvectorResolvent` and
-`eigenvectorSmoothApprox`.
-
-The cutoff Euclidean chart component `tensorL2ChartComponentCutoff` is the
-coercion of the continuous linear map `tensorL2ChartComponentCutoffCLM`, so it is
-a continuous `ℝ`-linear function of its abstract `L²` argument; applied to the
-convergent `L²`-coercions of the approximants it produces the `n → ∞` limit
-objects. -/
 
 /-- **The `n → ∞` abstract `L²` limit of the approximant `L²`-coercion
 (chart-locality-free).** For an eigenbasis index `i`, the `L²`-coercions
@@ -885,7 +738,6 @@ theorem tensorL2_eigenvectorSmoothApprox_tendsto
       atTop
       (𝓝 (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
         (eigenvectorResolvent (I := I) (M := M) g r s i))) := by
-  -- Compose the `H¹`-convergence with the continuous `H¹`-to-`L²` inclusion.
   have h_clm :=
     ((TensorH1ComplToTensorL2 (I := I) (M := M) g r s).continuous.tendsto _).comp
       (eigenvectorSmoothApprox_tendsto (I := I) (M := M) g r s i)
@@ -929,8 +781,6 @@ theorem crossRightComponent_tendsto
       atTop
       (𝓝 (crossRightLimitComponent (I := I) (M := M)
         g r s i α P)) := by
-  -- Apply the cutoff chart-component continuous linear map to the abstract `L²`
-  -- convergence of the approximant `L²`-coercions.
   have h_clm :=
     ((tensorL2ChartComponentCutoffCLM (I := I) (M := M) g r s
         α P).continuous.tendsto _).comp
@@ -980,8 +830,6 @@ theorem tensorCovDerivCrossRight_integral_tendsto
     (chartAtlasPOU I M α)
     (eigenvectorSmoothApprox (I := I) (M := M) g r s i n).toCcTensor S,
     real_inner_comm]
-
-/-! ## Sanity tests -/
 
 section ElaborationTests
 

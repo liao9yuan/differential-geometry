@@ -81,8 +81,6 @@ open DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaLp
 open DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaChristoffelDischarge
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -91,20 +89,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Per-chart ae-transferability (unconditional discharge)
-
-For smooth `φ` and `v`, the per-chart LapDom contribution ae-equals the
-POU-weighted chart-α Euclidean pairing pulled back to `M`. This is the
-manifold-side ae version of the chart-target ae bridge
-`hessPairingChartLocal_smoothCase_aeEq_smoothEuclidPairing`.
-
-The discharge uses:
-- `hessPairingChartLocal_smoothCase_aeEq_smoothEuclidPairing` (chart-target ae).
-- `riemannianVolumeMeasure_pullback_null` (pullback of null sets has zero `μ_g`-measure).
-- `hessPairingMChartContribution_eq_on_source` and
-  `hessPairingMChartContribution_zero_off_source` (pointwise unfoldings).
-- Subordination of POU to chart sources. -/
 
 /-- **Per-chart ae-transferability (unconditional).** For smooth `φ` and `v`,
 the chart contribution function (LapDom side, weighted by POU) ae-equals the
@@ -119,43 +103,31 @@ theorem perChartAeTransferable_smoothCase
         smoothEuclidHessianPairingChart (I := I) (M := M) g α φ v
           ((toEuclidean (E := E)) (extChartAt I α x))) := by
   classical
-  -- The chart-target ae-equality: hessPairingChartLocal =ᵐ smoothEuclidHessianPairingChart
-  -- on (volume.restrict chartTargetEuclid α).
   have h_chart_ae := hessPairingChartLocal_smoothCase_aeEq_smoothEuclidPairing
     (I := I) (M := M) g α φ v
-  -- The "bad set" on the chart target side: where the two functions disagree.
   set badSet : Set EuclN :=
     { y : EuclN |
         hessPairingChartLocal (I := I) (M := M) g α φ
             (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) v) y ≠
           smoothEuclidHessianPairingChart (I := I) (M := M) g α φ v y } with hbadSet_def
-  -- The chart-target ae statement says badSet has measure 0 under vol.restrict chartTarget.
   have h_bad_null : ((volume : Measure EuclN).restrict
       (chartTargetEuclid (I := I) (M := M) α)) badSet = 0 := h_chart_ae
-  -- Convert to a measurable null superset N ⊇ badSet with vol(N ∩ chartTarget) = 0.
   obtain ⟨N, h_bad_sub_N, hN_meas, hN_null_restricted⟩ :=
     exists_measurable_superset_of_null h_bad_null
   have hN_null : (volume : Measure EuclN)
       (N ∩ chartTargetEuclid (I := I) (M := M) α) = 0 := by
     rw [MeasureTheory.Measure.restrict_apply hN_meas] at hN_null_restricted
     exact hN_null_restricted
-  -- Pullback the null set to M via the chart map.
   have hpre_null := riemannianVolumeMeasure_pullback_null
     (I := I) (M := M) g α hN_meas hN_null
-  -- The bad set on M is contained in the pullback set.
-  -- ae-equality: outside the bad set on M, the chart contribution = POU-weighted Euclidean pairing.
   rw [Filter.EventuallyEq, MeasureTheory.ae_iff]
   refine MeasureTheory.measure_mono_null ?_ hpre_null
   intro x hx
   simp only [Set.mem_setOf_eq] at hx
-  -- Either x ∈ chart α source or not.
   by_cases hx_src : x ∈ (chartAt H α).source
-  · -- x ∈ chart α source: the equation reduces to ae-equality of chart-local functions.
-    refine ⟨hx_src, ?_⟩
+  · refine ⟨hx_src, ?_⟩
     simp only [Set.mem_setOf_eq]
-    -- Show: toE(extChartAt α x) ∈ N. Suppose not; then the two chart functions agree at this y.
     by_contra h_not_in_N
-    -- y := toE(extChartAt α x) ∉ N and y ∈ chartTargetEuclid α.
     have h_y_in_target :
         (toEuclidean (E := E)) ((extChartAt I α) x) ∈
           chartTargetEuclid (I := I) (M := M) α := by
@@ -163,7 +135,6 @@ theorem perChartAeTransferable_smoothCase
       have h_src_ext : x ∈ (extChartAt I α).source := by
         rwa [extChartAt_source_eq_chartAt_source]
       exact (extChartAt I α).map_source h_src_ext
-    -- y ∉ badSet, so the chart-local pairings agree at y.
     have h_y_not_bad :
         (toEuclidean (E := E)) ((extChartAt I α) x) ∉ badSet := fun hyb =>
       h_not_in_N (h_bad_sub_N hyb)
@@ -175,18 +146,14 @@ theorem perChartAeTransferable_smoothCase
             ((toEuclidean (E := E)) ((extChartAt I α) x)) := by
       by_contra hne
       exact h_y_not_bad hne
-    -- Now hx says the chart contribution at x ≠ the POU-weighted Euclidean pairing at x.
     apply hx
     rw [hessPairingMChartContribution_eq_on_source (I := I) (M := M) g φ α
       (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) v) hx_src]
     rw [h_chart_agree]
-  · -- x ∉ chart α source: both sides equal 0.
-    exfalso
+  · exfalso
     apply hx
-    -- LHS = 0: chart contribution vanishes off the chart source.
     rw [hessPairingMChartContribution_zero_off_source (I := I) (M := M) g φ α
       (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) v) hx_src]
-    -- RHS = 0: POU(α)(x) = 0 since x ∉ tsupport(POU α) (POU subordinate to chart α source).
     have h_pou_subord :
         tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) ⊆
           (chartAt H α).source :=
@@ -197,12 +164,6 @@ theorem perChartAeTransferable_smoothCase
       image_eq_zero_of_notMem_tsupport hx_notsupp
     rw [hρ_zero]
     ring
-
-/-! ## Per-chart ae-transferability hypothesis (kept for connector compatibility)
-
-We retain the original `perChartAeTransferableSmoothCase` predicate for
-back-compatibility with the conditional pipeline. It is now an automatic
-consequence of `perChartAeTransferable_smoothCase`. -/
 
 /-- **Per-chart ae-transferability hypothesis (legacy form).** For smooth `φ`
 and `v`, the chart contribution function (LapDom side, weighted by POU)
@@ -239,13 +200,6 @@ theorem perChartAeTransferableSmoothCase_holds
   intro α _hα
   exact perChartAeTransferable_smoothCase (I := I) (M := M) g φ v α
 
-/-! ## Step 1: assemble per-chart ae-equalities into a global ae-equality
-
-Given the per-chart ae-transferability hypothesis, we sum over the chart
-atlas POU finset to obtain a manifold-side ae equality between the LapDom
-global pairing function and the POU-weighted sum of chart-α Euclidean
-pairings. -/
-
 /-- **Global ae-equality from per-chart ae-equalities.** Given the per-chart
 ae-transferability hypothesis, the LapDom global pairing function `hessPairingMOnLapDom`
 ae-equals the POU-weighted sum of chart-α Euclidean pairings on the chart-α
@@ -261,9 +215,6 @@ theorem hessPairingMOnLapDom_aeEq_pou_weighted_euclid_pairing_smoothCase_of_tran
           smoothEuclidHessianPairingChart (I := I) (M := M) g α φ v
             ((toEuclidean (E := E)) (extChartAt I α x))) := by
   classical
-  -- Build per-α ae-equalities, then assemble via Finset summation.
-  -- The bad set for each α has μ_g-measure 0. The union over a finite finset still has
-  -- μ_g-measure 0, hence the sum ae-equality holds.
   have h_union_null :
       (riemannianVolumeMeasure (I := I) (M := M) g)
         (⋃ α ∈ chartAtlasPOU_finset (I := I) (M := M),
@@ -280,8 +231,6 @@ theorem hessPairingMOnLapDom_aeEq_pou_weighted_euclid_pairing_smoothCase_of_tran
     have h_ae := h_transfer α hα
     rw [Filter.EventuallyEq, MeasureTheory.ae_iff] at h_ae
     exact h_ae
-  -- Build the ae-statement: at every x outside the union of bad sets, each α gives the
-  -- per-α identity, so summing gives the desired identity.
   have h_all_ae : ∀ᵐ x ∂(riemannianVolumeMeasure (I := I) (M := M) g),
       ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
         hessPairingMChartContribution (I := I) (M := M) g φ α
@@ -296,7 +245,6 @@ theorem hessPairingMOnLapDom_aeEq_pou_weighted_euclid_pairing_smoothCase_of_tran
     obtain ⟨α, hα_in_finset, hα_ne⟩ := hx
     simp only [Set.mem_iUnion]
     exact ⟨α, hα_in_finset, hα_ne⟩
-  -- Use h_all_ae to deduce the global ae equality.
   filter_upwards [h_all_ae] with x h_x_per_chart
   rw [hessPairingMOnLapDom_def
     (I := I) (M := M) g φ
@@ -304,13 +252,6 @@ theorem hessPairingMOnLapDom_aeEq_pou_weighted_euclid_pairing_smoothCase_of_tran
   apply Finset.sum_congr rfl
   intro α hα
   exact h_x_per_chart α hα
-
-/-! ## Step 2: combine with the Christoffel discharge
-
-The Christoffel discharge identifies the POU-weighted Euclidean pairing with
-the chart-invariant smooth pairing pointwise. Combined with the per-chart
-ae-transferability, the LapDom global pairing function ae-equals the chart-
-invariant smooth pairing. -/
 
 /-- **Global ae-equality from both hypotheses.** Given both the per-chart
 ae-transferability and the Christoffel discharge, the LapDom global pairing
@@ -327,8 +268,6 @@ theorem hessPairingMOnLapDom_aeEq_hessPairingChart_smoothCase_of_both
   classical
   have h_step1 := hessPairingMOnLapDom_aeEq_pou_weighted_euclid_pairing_smoothCase_of_transferable
     (I := I) (M := M) g φ v h_transfer
-  -- Step 2: the POU-weighted Euclidean pairing equals hessPairingChart pointwise everywhere,
-  -- which is stronger than ae.
   have h_pointwise : ∀ x : M,
       (∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
         (chartAtlasPOU I M α : M → ℝ) x *
@@ -338,15 +277,9 @@ theorem hessPairingMOnLapDom_aeEq_hessPairingChart_smoothCase_of_both
         (smoothScalarToContMDiffMap (I := I) (g := g) v) x :=
     pou_weighted_euclid_pairing_eq_hessPairingChart_pointwise_of_discharge
       (I := I) (M := M) g φ v h_discharge
-  -- Combine.
   filter_upwards [h_step1] with x hx_eq1
   rw [hx_eq1]
   exact h_pointwise x
-
-/-! ## Step 3: lift to Lp class equality
-
-Using `hessPairingLpOnLapDom_eq_hessPairingSmoothLp_of_globalHypothesis` from
-`HessianBridge`, the manifold-side ae-equality lifts to an Lp class equality. -/
 
 /-- **Headline Lp class bridge, conditional on both hypotheses.** For smooth
 `φ` and `v`, given the per-chart ae-transferability and the Christoffel
@@ -363,8 +296,6 @@ theorem hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_of_both
     (hessPairingMOnLapDom_aeEq_hessPairingChart_smoothCase_of_both
       (I := I) (M := M) g φ v h_transfer h_discharge)
 
-/-! ## Step 4: connector form using the membership-proof variant -/
-
 /-- **Connector form of the headline bridge** using the membership-proof variant
 expected by `BochnerPolarisedLpFull.lean`. -/
 theorem hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_connector
@@ -379,12 +310,6 @@ theorem hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_connector
       hessPairingSmoothLp (I := I) (M := M) g φ v :=
   hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_of_both
     (I := I) (M := M) g φ v h_transfer h_discharge
-
-/-! ## Step 5: variant theorems requiring only Christoffel discharge
-
-Since `perChartAeTransferableSmoothCase` is now an unconditional consequence
-(via `perChartAeTransferableSmoothCase_holds`), all the theorems above can
-be stated in a form that depends **only** on the Christoffel discharge. -/
 
 /-- **Global ae-equality from per-chart unconditional transferability.** This
 is the unconditional version of `hessPairingMOnLapDom_aeEq_pou_weighted_euclid_pairing_smoothCase_of_transferable`,

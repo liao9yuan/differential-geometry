@@ -56,20 +56,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## A non-negative supremum bound for `|φ|` on a compact manifold
-
-A smooth function on a compact manifold has a finite, non-negative
-sup-bound on its absolute value, by continuity and compactness. We
-package this as `phiSupBound g φ`. -/
 
 /-- Existence of a non-negative real bound for `|φ x|` on `M`. -/
 private lemma exists_phiSupBound
@@ -104,24 +96,15 @@ lemma abs_phi_le_phiSupBound
   (Classical.choose_spec
     (exists_phiSupBound (I := I) (M := M) g φ)).2 x
 
-/-! ## `MemLp` for the pointwise product `φ · f`
-
-For every `f ∈ Lp ℝ 2 μ_g` and bounded `φ`, the pointwise product is in
-`Lp 2`. The proof uses `MemLp.of_le_mul` with the constant
-`C := phiSupBound g φ`. -/
-
 /-- The pointwise product `x ↦ φ x · f x` is `MemLp 2`. -/
 lemma memLp_phi_mul_lp
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
     MemLp (fun x : M => (φ : M → ℝ) x * (f : M → ℝ) x) 2
       (riemannianVolumeMeasure (I := I) (M := M) g) := by
-  -- `φ : M → ℝ` is continuous and bounded by `phiSupBound g φ`.
-  -- `f : M → ℝ` is a representative of `f ∈ Lp 2`.
   have hf_memLp : MemLp (f : M → ℝ) 2
       (riemannianVolumeMeasure (I := I) (M := M) g) := Lp.memLp f
   set C : ℝ := phiSupBound (I := I) (M := M) g φ with hC_def
-  -- Strong measurability: φ is continuous, and `f` is `AEStronglyMeasurable`.
   have hφ_cont : Continuous (φ : M → ℝ) := φ.contMDiff.continuous
   have hφ_aesm : AEStronglyMeasurable (φ : M → ℝ)
       (riemannianVolumeMeasure (I := I) (M := M) g) := hφ_cont.aestronglyMeasurable
@@ -129,7 +112,6 @@ lemma memLp_phi_mul_lp
       (fun x : M => (φ : M → ℝ) x * (f : M → ℝ) x)
       (riemannianVolumeMeasure (I := I) (M := M) g) :=
     hφ_aesm.mul hf_memLp.1
-  -- Pointwise: `‖φ x · f x‖ = |φ x| · |f x| ≤ C · ‖f x‖`.
   have hpt : ∀ x : M, ‖(φ : M → ℝ) x * (f : M → ℝ) x‖ ≤
       C * ‖(f : M → ℝ) x‖ := by
     intro x
@@ -141,8 +123,6 @@ lemma memLp_phi_mul_lp
       (abs_phi_le_phiSupBound (I := I) (M := M) g φ x)
       (norm_nonneg _)
   exact hf_memLp.of_le_mul hprod_aesm (Filter.Eventually.of_forall hpt)
-
-/-! ## The pointwise multiplication on `Lp` -/
 
 /-- The pointwise product `x ↦ φ x · f x` packaged as an element of
 `Lp ℝ 2 μ_g`. -/
@@ -162,8 +142,6 @@ lemma smoothMulLpFun_coeFn
       (fun x : M => (φ : M → ℝ) x * (f : M → ℝ) x) :=
   MemLp.coeFn_toLp _
 
-/-! ## Linearity in `f` -/
-
 /-- Additivity of `smoothMulLpFun` in the second argument. -/
 theorem smoothMulLpFun_add
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
@@ -172,7 +150,6 @@ theorem smoothMulLpFun_add
       smoothMulLpFun (I := I) (M := M) g φ f₁ +
         smoothMulLpFun (I := I) (M := M) g φ f₂ := by
   apply MeasureTheory.Lp.ext
-  -- Pointwise: φ x · (f₁ + f₂) x = φ x · f₁ x + φ x · f₂ x.
   have h_lhs := smoothMulLpFun_coeFn (I := I) (M := M) g φ (f₁ + f₂)
   have h_f₁ := smoothMulLpFun_coeFn (I := I) (M := M) g φ f₁
   have h_f₂ := smoothMulLpFun_coeFn (I := I) (M := M) g φ f₂
@@ -184,11 +161,7 @@ theorem smoothMulLpFun_add
   refine EventuallyEq.symm ?_
   filter_upwards [h_sum_coe, h_f₁, h_f₂, h_arg_sum]
     with x hx_sum hx_f₁ hx_f₂ hx_arg
-  -- `hx_sum : (smoothMulLpFun φ f₁ + smoothMulLpFun φ f₂) x =
-  --           smoothMulLpFun φ f₁ x + smoothMulLpFun φ f₂ x`.
-  -- Rewrite each summand using `hx_f₁ / hx_f₂`.
   rw [hx_sum, Pi.add_apply, hx_f₁, hx_f₂]
-  -- `hx_arg : (f₁ + f₂) x = (↑↑f₁ + ↑↑f₂) x`.
   rw [hx_arg, Pi.add_apply, mul_add]
 
 /-- Homogeneity of `smoothMulLpFun` in the second argument. -/
@@ -212,8 +185,6 @@ theorem smoothMulLpFun_smul
   rw [hx_arg, Pi.smul_apply, smul_eq_mul, smul_eq_mul]
   ring
 
-/-! ## Linearity packaging -/
-
 /-- The multiplication map `f ↦ φ · f` packaged as a linear map. -/
 noncomputable def smoothMulLpLin
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
@@ -229,10 +200,6 @@ noncomputable def smoothMulLpLin
     smoothMulLpLin (I := I) (M := M) g φ f =
       smoothMulLpFun (I := I) (M := M) g φ f := rfl
 
-/-! ## Operator-norm bound
-
-For every `f ∈ Lp 2`, `‖φ · f‖_{L²} ≤ phiSupBound g φ · ‖f‖_{L²}`. -/
-
 /-- `eLpNorm` bound: `eLpNorm (φ · f) 2 ≤ ofReal (phiSupBound g φ) · eLpNorm f 2`. -/
 private lemma eLpNorm_smoothMulLp_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
@@ -242,7 +209,6 @@ private lemma eLpNorm_smoothMulLp_le
       ENNReal.ofReal (phiSupBound (I := I) (M := M) g φ) *
         eLpNorm (f : M → ℝ) 2
           (riemannianVolumeMeasure (I := I) (M := M) g) := by
-  -- Use `eLpNorm_le_mul_eLpNorm_of_ae_le_mul` with `c := phiSupBound g φ`.
   refine eLpNorm_le_mul_eLpNorm_of_ae_le_mul (c := phiSupBound (I := I) (M := M) g φ)
     (Filter.Eventually.of_forall ?_) 2
   intro x
@@ -260,34 +226,26 @@ theorem norm_smoothMulLpFun_le
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
     ‖smoothMulLpFun (I := I) (M := M) g φ f‖ ≤
       phiSupBound (I := I) (M := M) g φ * ‖f‖ := by
-  -- Strategy: compute `‖toLp _ ‖ = (eLpNorm _ 2 _).toReal` and bound.
   have h_norm_eq : ‖smoothMulLpFun (I := I) (M := M) g φ f‖ =
       (eLpNorm (fun x : M => (φ : M → ℝ) x * (f : M → ℝ) x) 2
           (riemannianVolumeMeasure (I := I) (M := M) g)).toReal := by
-    -- `MemLp.toLp` puts the `eLpNorm` of the function into the norm of the class.
     rw [show smoothMulLpFun (I := I) (M := M) g φ f =
         (memLp_phi_mul_lp (I := I) (M := M) g φ f).toLp _ from rfl]
     exact Lp.norm_toLp _ _
   rw [h_norm_eq]
-  -- The `Lp` norm of `f` is `(eLpNorm f 2 μ).toReal`.
   have h_f_norm : ‖f‖ = (eLpNorm (f : M → ℝ) 2
       (riemannianVolumeMeasure (I := I) (M := M) g)).toReal :=
     Lp.norm_def f
   rw [h_f_norm]
-  -- Use the `eLpNorm` bound.
   have h_le := eLpNorm_smoothMulLp_le (I := I) (M := M) g φ f
-  -- `eLpNorm f 2 μ < ⊤` because `f ∈ Lp 2 μ`.
   have h_f_lt : eLpNorm (f : M → ℝ) 2
       (riemannianVolumeMeasure (I := I) (M := M) g) < ⊤ :=
     (Lp.memLp f).2
   have h_C_nn : 0 ≤ phiSupBound (I := I) (M := M) g φ :=
     phiSupBound_nonneg (I := I) (M := M) g φ
-  -- `(a * b).toReal = a.toReal * b.toReal` when both are finite.
-  -- `(ofReal C).toReal = C` when `0 ≤ C`.
   have h_finite_ofReal : (ENNReal.ofReal (phiSupBound (I := I) (M := M) g φ)).toReal =
       phiSupBound (I := I) (M := M) g φ :=
     ENNReal.toReal_ofReal h_C_nn
-  -- The product `ofReal C * eLpNorm f 2 < ⊤` since both factors are finite.
   have h_prod_lt :
       ENNReal.ofReal (phiSupBound (I := I) (M := M) g φ) *
         eLpNorm (f : M → ℝ) 2
@@ -297,12 +255,9 @@ theorem norm_smoothMulLpFun_le
       eLpNorm (fun x : M => (φ : M → ℝ) x * (f : M → ℝ) x) 2
           (riemannianVolumeMeasure (I := I) (M := M) g) < ⊤ :=
     lt_of_le_of_lt h_le h_prod_lt
-  -- `toReal_mono` gives the inequality between `toReal`s.
   have h_le_real := ENNReal.toReal_mono h_prod_lt.ne h_le
   rw [ENNReal.toReal_mul, h_finite_ofReal] at h_le_real
   exact h_le_real
-
-/-! ## Existence form of the operator-norm bound -/
 
 /-- There exists a non-negative `C`, bounding `|φ|` pointwise, with
 `‖smoothMulLpFun g φ f‖ ≤ C · ‖f‖` for every `f`. -/
@@ -315,8 +270,6 @@ theorem smoothMulLpFun_norm_le
     phiSupBound_nonneg (I := I) (M := M) g φ,
     abs_phi_le_phiSupBound (I := I) (M := M) g φ,
     norm_smoothMulLpFun_le (I := I) (M := M) g φ⟩
-
-/-! ## The continuous linear multiplication operator -/
 
 /-- The multiplication operator `f ↦ φ · f`, packaged as a continuous
 linear map `Lp ℝ 2 μ_g →L[ℝ] Lp ℝ 2 μ_g`. The operator norm is at most
@@ -335,8 +288,6 @@ noncomputable def smoothMulLp
     smoothMulLp (I := I) (M := M) g φ f =
       smoothMulLpFun (I := I) (M := M) g φ f := rfl
 
-/-! ## Operator-norm bound for the CLM -/
-
 /-- Existence of a non-negative `C` with `|φ x| ≤ C` for every `x ∈ M`,
 and `‖smoothMulLp g φ‖ ≤ C`. -/
 theorem smoothMulLp_norm_le
@@ -346,12 +297,9 @@ theorem smoothMulLp_norm_le
   refine ⟨phiSupBound (I := I) (M := M) g φ,
     phiSupBound_nonneg (I := I) (M := M) g φ,
     abs_phi_le_phiSupBound (I := I) (M := M) g φ, ?_⟩
-  -- The operator norm of `LinearMap.mkContinuous` is at most the bound.
   exact LinearMap.mkContinuous_norm_le (smoothMulLpLin (I := I) (M := M) g φ)
     (phiSupBound_nonneg (I := I) (M := M) g φ)
     (fun f => norm_smoothMulLpFun_le (I := I) (M := M) g φ f)
-
-/-! ## Coefficient/value formula -/
 
 /-- A.e. unfolding identity: the coefficient function of
 `smoothMulLp g φ f` equals the pointwise product `φ · f`. -/

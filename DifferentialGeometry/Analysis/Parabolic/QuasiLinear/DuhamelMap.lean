@@ -49,16 +49,6 @@ noncomputable def duhamel (S : BoundedC0Semigroup X) (u₀ : X)
     (F : ℝ → X) (t : ℝ) : X :=
   S t u₀ + ∫ τ in (0 : ℝ)..t, S (t - τ) (F τ)
 
-/-! ## The clipped Duhamel kernel
-
-The Duhamel integrand `(t, τ) ↦ S (t - τ) (F τ)` is not jointly
-continuous on `ℝ × ℝ`: the semigroup `S` is only constrained for
-non-negative time, so the integrand may jump along `t = τ`. Clipping the
-time argument to `[0, ∞)` via `max 0 (t - τ)` repairs joint continuity,
-and on the relevant domain `τ ∈ [0, t]` with `t ≥ 0` one has
-`max 0 (t - τ) = t - τ`, so the clipped and raw integrands have the same
-interval integral. -/
-
 /-- The clipped Duhamel kernel `S (max 0 (t - τ)) (F τ)`. Jointly
 continuous in `(t, τ)`, and equal to the Duhamel integrand on
 `τ ∈ [0, t]` for `t ≥ 0`. -/
@@ -72,22 +62,17 @@ semigroup action is jointly continuous there. -/
 private lemma continuous_duhamelKernelClipped (S : BoundedC0Semigroup X)
     {F : ℝ → X} (hF : Continuous F) :
     Continuous (Function.uncurry (duhamelKernelClipped S F)) := by
-  -- `(t, τ) ↦ (max 0 (t - τ), F τ)` is continuous.
   have h_inner : Continuous
       (fun p : ℝ × ℝ => (max 0 (p.1 - p.2), F p.2)) := by
     refine Continuous.prodMk ?_ (hF.comp continuous_snd)
     exact continuous_const.max (continuous_fst.sub continuous_snd)
-  -- Its image lies in `Ici 0 ×ˢ univ`.
   have h_maps : ∀ p : ℝ × ℝ,
       (max 0 (p.1 - p.2), F p.2) ∈ Set.Ici (0 : ℝ) ×ˢ Set.univ := by
     intro p
     exact ⟨Set.mem_Ici.mpr (le_max_left _ _), Set.mem_univ _⟩
-  -- Compose with the jointly continuous semigroup action.
   have h_comp :=
     (S.continuousOn_uncurry).comp_continuous h_inner h_maps
   exact h_comp
-
-/-! ## Initial condition -/
 
 /-- At `t = 0` the Duhamel mild solution recovers the initial datum:
 `duhamel S u₀ F 0 = u₀`. -/
@@ -97,8 +82,6 @@ theorem duhamel_zero (S : BoundedC0Semigroup X) (u₀ : X) (F : ℝ → X) :
   rw [intervalIntegral.integral_same, add_zero]
   rw [S.apply_zero]
   rfl
-
-/-! ## Integrability of the Duhamel integrand -/
 
 /-- The Duhamel integrand `τ ↦ S (t - τ) (F τ)` is interval-integrable on
 `[0, t]` whenever `F` is continuous and `t ≥ 0`.
@@ -110,7 +93,6 @@ theorem duhamel_integrable (S : BoundedC0Semigroup X) {F : ℝ → X}
     (hF : Continuous F) {t : ℝ} (ht : 0 ≤ t) :
     IntervalIntegrable (fun τ => S (t - τ) (F τ))
       MeasureTheory.volume 0 t := by
-  -- The clipped kernel is continuous, hence interval-integrable.
   have h_clip_cont :
       Continuous (fun τ : ℝ => duhamelKernelClipped S F t τ) :=
     (continuous_duhamelKernelClipped S hF).comp
@@ -119,7 +101,6 @@ theorem duhamel_integrable (S : BoundedC0Semigroup X) {F : ℝ → X}
       IntervalIntegrable (fun τ : ℝ => duhamelKernelClipped S F t τ)
         MeasureTheory.volume 0 t :=
     h_clip_cont.intervalIntegrable 0 t
-  -- The raw integrand agrees with the clipped one on `Ι 0 t = (0, t]`.
   refine h_clip_ii.congr ?_
   intro τ hτ
   rw [Set.uIoc_of_le ht] at hτ
@@ -127,13 +108,6 @@ theorem duhamel_integrable (S : BoundedC0Semigroup X) {F : ℝ → X}
   change duhamelKernelClipped S F t τ = S (t - τ) (F τ)
   unfold duhamelKernelClipped
   rw [max_eq_right h_nn]
-
-/-! ## Continuity on `[0, ∞)`
-
-The proof replaces the raw Duhamel integrand by the clipped kernel on
-`t ≥ 0` (where the two agree), so that Mathlib's parametric
-interval-integral continuity result applies to the jointly continuous
-clipped kernel. -/
 
 /-- The Duhamel mild solution `duhamel S u₀ F` is continuous on
 `[0, ∞)`.
@@ -146,10 +120,8 @@ raw map by the clipped one on a neighbourhood within `[0, ∞)`. -/
 theorem duhamel_continuousOn (S : BoundedC0Semigroup X) (u₀ : X)
     {F : ℝ → X} (hF : Continuous F) :
     ContinuousOn (duhamel S u₀ F) (Set.Ici 0) := by
-  -- Homogeneous term: `t ↦ S t u₀` is `ContinuousOn (Ici 0)`.
   have h_first_cont : ContinuousOn (fun t : ℝ => S t u₀) (Set.Ici 0) :=
     S.continuousOn_apply u₀
-  -- On `t ≥ 0` the Duhamel map equals the clipped representation.
   have h_clip_eq : ∀ t : ℝ, 0 ≤ t →
       duhamel S u₀ F t =
         S t u₀ +
@@ -164,8 +136,6 @@ theorem duhamel_continuousOn (S : BoundedC0Semigroup X) (u₀ : X)
     change S (t - τ) (F τ) = duhamelKernelClipped S F t τ
     unfold duhamelKernelClipped
     rw [max_eq_right h_nn]
-  -- The clipped integral term is continuous (parametric interval integral
-  -- of a jointly continuous integrand).
   have h_int_cont :
       Continuous (fun t : ℝ =>
         ∫ τ in (0 : ℝ)..t, duhamelKernelClipped S F t τ) :=
@@ -174,7 +144,6 @@ theorem duhamel_continuousOn (S : BoundedC0Semigroup X) (u₀ : X)
       (continuous_duhamelKernelClipped S hF) continuous_id
   intro t₀ ht₀
   have h_t₀_nn : 0 ≤ t₀ := Set.mem_Ici.mp ht₀
-  -- Continuity of the clipped form at `t₀`.
   have h_clipped_cont : ContinuousWithinAt
       (fun t : ℝ =>
         S t u₀ +
@@ -187,7 +156,6 @@ theorem duhamel_continuousOn (S : BoundedC0Semigroup X) (u₀ : X)
         (Set.Ici 0) t₀ :=
       h_int_cont.continuousWithinAt
     exact h1.add h2
-  -- Transfer to the raw Duhamel map via eventual equality on `Ici 0`.
   apply h_clipped_cont.congr_of_eventuallyEq
   · rw [Filter.eventuallyEq_iff_exists_mem]
     refine ⟨Set.Ici (0 : ℝ), self_mem_nhdsWithin, ?_⟩

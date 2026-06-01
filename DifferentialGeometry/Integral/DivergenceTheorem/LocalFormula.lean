@@ -87,15 +87,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Chart-basis component functions
-
-Given a base point `α : M` and a smooth tangent section `X`, the chart-basis
-component functions `chartCoeff g α X i : M → ℝ` are obtained by applying the
-trivialization at `α` to `X` and extracting model-basis coordinates. They are
-defined on all of `M` (with a junk value off the trivialization base set) but
-are mathematically meaningful only on
-`(trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source`. -/
-
 /-- The `i`-th chart-basis component of a smooth tangent section `X` in the
 trivialization at `α`. On the trivialization base set, this satisfies
 `X x = ∑ i, chartCoeff α X i x • chartBasisVecFiber α i x`; off the base set
@@ -122,21 +113,14 @@ lemma chartCoeff_recompose (α : M)
   classical
   set T : Bundle.Trivialization E (π E (TangentSpace I : M → Type _)) :=
     trivializationAt E (TangentSpace I) α
-  -- Express `X x ∈ TangentSpace I x` via the trivialization's
-  -- continuous linear equivalence at `x`.
   set L : TangentSpace I x ≃L[ℝ] E := T.continuousLinearEquivAt ℝ x hx
-  -- We have `L (X x) = (T ⟨x, X x⟩).2`.
   have hL : L (X x) = (T ⟨x, X x⟩).2 := rfl
-  -- And `L.symm v = T.symm x v`.
   have hLsymm : ∀ v : E, L.symm v = T.symm x v := fun _ => rfl
-  -- Decompose `(T ⟨x, X x⟩).2` in the model basis.
   set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E
   have hdecomp : (T ⟨x, X x⟩).2 =
       ∑ i, b.repr ((T ⟨x, X x⟩).2) i • b i := by
     have := (Module.Basis.sum_repr b ((T ⟨x, X x⟩).2))
-    -- `sum_repr : ∑ i, repr v i • b i = v`
     exact this.symm
-  -- Apply `L.symm` to both sides.
   have hX : X x = L.symm ((T ⟨x, X x⟩).2) := by
     rw [← hL, L.symm_apply_apply]
   rw [hX, hdecomp, map_sum]
@@ -158,25 +142,17 @@ lemma chartCoeff_contMDiffOn (α : M)
   classical
   set T : Bundle.Trivialization E (π E (TangentSpace I : M → Type _)) :=
     trivializationAt E (TangentSpace I) α
-  -- The map `x ↦ (T ⟨x, X x⟩).2 = L_x (X x)` is smooth on `T.baseSet` because
-  -- it is the second component of the trivialization applied to a smooth
-  -- section, on the base set.
   have hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% fun x : M => X x) := X.contMDiff
-  -- Use the trivialization's compatibility with smooth sections.
   have hiff :=
     T.contMDiffOn_section_baseSet_iff (IB := I) (n := ∞) (s := fun x : M => X x)
   have hsection : ContMDiffOn I 𝓘(ℝ, E) ∞
       (fun x : M => (T ⟨x, X x⟩).2) T.baseSet := hiff.mp hX.contMDiffOn
-  -- Now extract the `i`-th model-basis coordinate, which is a continuous
-  -- linear functional on `E`, hence smooth (every linear map on a
-  -- finite-dimensional normed space is continuous).
   set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E
   set Lcoord : E →L[ℝ] ℝ := (b.coord i).toContinuousLinearMap
   have hLcoord_contDiff : ContDiff ℝ ∞ (Lcoord : E → ℝ) := Lcoord.contDiff
   have hcomp : ContMDiffOn I 𝓘(ℝ) ∞
       ((Lcoord : E → ℝ) ∘ (fun x : M => (T ⟨x, X x⟩).2)) T.baseSet :=
     hLcoord_contDiff.contMDiff.comp_contMDiffOn hsection
-  -- Identify the composite with `chartCoeff α X i`.
   have heq : (Lcoord : E → ℝ) ∘ (fun x : M => (T ⟨x, X x⟩).2)
       = chartCoeff (I := I) α X i := by
     funext x
@@ -186,29 +162,6 @@ lemma chartCoeff_contMDiffOn (α : M)
     rw [Module.Basis.coord_apply]
   rw [← heq]
   exact hcomp
-
-/-! ## The chart-local Voss–Weyl divergence
-
-The chart-local Voss–Weyl divergence in the chart at `α : M` is given by
-$$\operatorname{div}^{(\alpha)}_g(X)(x)
-    = \frac{1}{\sqrt{\det G_\alpha(x)}}
-        \sum_i \partial_i\bigl(\xi^i(\varphi_\alpha(x)) \cdot
-            \sqrt{\det G_\alpha((\varphi_\alpha)^{-1}\circ \mathrm{id})}\bigr).$$
-Concretely, working through the chart identification, we define the per-chart
-functions
-
-* `chartCoeffOnE g α X i : E → ℝ` — the chart-basis component pulled back to
-  the chart target;
-* `chartDensityOnE g α : E → ℝ` — the chart density pulled back to the chart
-  target;
-
-and the partial derivatives are then ordinary Fréchet partial derivatives in
-`E`. We use the model-space basis `chartModelBasis E` and write
-`partialDeriv y i u := fderiv ℝ u y (chartModelBasis E i)`.
-
-For the chart-invariance argument we will need only the value of the chart
-formula at `x` in the chart at `x` itself; smoothness on the chart base set is
-proved chart-locally. -/
 
 /-- The chart-basis component pulled back through the inverse extended chart at
 `α`, viewed as a function on the chart target `(extChartAt I α).target ⊆ E`. -/
@@ -249,15 +202,6 @@ def localDivergence (g : SmoothRiemannianMetric I M)
             (extChartAt I α x))
         / chartDensity (I := I) g α x := rfl
 
-/-! ## Smoothness of the chart-pulled-back component and density
-
-The chart-pulled-back functions `chartCoeffOnE α X i` and `chartDensityOnE g α`
-are `C^∞` on the chart target `(extChartAt I α).target ⊆ E`. In each case the
-proof composes the smoothness of the base function (already established on the
-trivialization base set, equivalently the chart source) with the smoothness of
-the chart-inverse map `(extChartAt I α).symm` from the chart target into the
-chart source. -/
-
 /-- The chart-inverse map `(extChartAt I α).symm` sends every point of the chart
 target into the trivialization base set at `α`. -/
 private lemma extChartAt_symm_mapsTo_baseSet (α : M) :
@@ -277,23 +221,18 @@ lemma chartCoeffOnE_contDiffOn (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (i : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞ (chartCoeffOnE (I := I) α X i) (extChartAt I α).target := by
-  -- Smoothness of `chartCoeff α X i` on the trivialization base set.
   have hbase : ContMDiffOn I 𝓘(ℝ) ∞ (chartCoeff (I := I) α X i)
       (trivializationAt E (TangentSpace I) α).baseSet :=
     chartCoeff_contMDiffOn (I := I) α X i
-  -- Smoothness of `(extChartAt I α).symm` on the chart target.
   have hsymm : ContMDiffOn 𝓘(ℝ, E) I ∞ (extChartAt I α).symm
       (extChartAt I α).target := contMDiffOn_extChartAt_symm (I := I) α
-  -- Subset condition for composition.
   have hsubset : (extChartAt I α).target ⊆
       (extChartAt I α).symm ⁻¹'
         (trivializationAt E (TangentSpace I) α).baseSet :=
     fun y hy => extChartAt_symm_mapsTo_baseSet (I := I) α hy
-  -- Compose to get manifold-smoothness on the chart target.
   have hcomp : ContMDiffOn 𝓘(ℝ, E) 𝓘(ℝ) ∞
       ((chartCoeff (I := I) α X i) ∘ (extChartAt I α).symm)
       (extChartAt I α).target := hbase.comp hsymm hsubset
-  -- Convert from manifold-smoothness on `E` to ordinary smoothness.
   exact hcomp.contDiffOn
 
 /-- The chart-pulled-back density `chartDensityOnE g α` is `C^∞` on the chart
@@ -329,32 +268,18 @@ lemma chartCoeffOnE_mul_chartDensityOnE_contDiffOn
   (chartCoeffOnE_contDiffOn (I := I) α X i).mul
     (chartDensityOnE_contDiffOn (I := I) g α)
 
-/-! ## Smoothness of the partial-derivative functional
-
-On the interior of the chart target — an open subset of the model space `E` —
-the partial derivative `partialDeriv i u` of a `C^∞` function `u` is itself
-`C^∞`. The proof uses `ContDiffOn.fderiv_of_isOpen` for smoothness of
-`fderiv ℝ u`, then `ContDiffOn.clm_apply` to extract the basis-vector
-component. -/
-
 /-- The partial derivative `y ↦ partialDeriv i u y` is `C^∞` on the interior of
 any set on which `u` itself is `C^∞`. -/
 private lemma partialDeriv_contDiffOn_interior
     (i : Fin (Module.finrank ℝ E)) {u : E → ℝ} {s : Set E}
     (hu : ContDiffOn ℝ ∞ u s) :
     ContDiffOn ℝ ∞ (partialDeriv (E := E) i u) (interior s) := by
-  -- `u` is `C^∞` on the open set `interior s`.
   have hu_int : ContDiffOn ℝ ∞ u (interior s) := hu.mono interior_subset
-  -- Smoothness of `fderiv ℝ u` on the open set `interior s`. The hypothesis
-  -- `m + 1 ≤ n` with `m = n = ∞` is `∞ + 1 ≤ ∞`, which by
-  -- `ENat.coe_top_add_one : ∞ + 1 = ∞` reduces to `∞ ≤ ∞`.
   have hfderiv : ContDiffOn ℝ ∞ (fderiv ℝ u) (interior s) :=
     hu_int.fderiv_of_isOpen isOpen_interior
       (by rw [ENat.coe_top_add_one])
-  -- Constant function `y ↦ basis i` is smooth.
   have hconst : ContDiffOn ℝ ∞ (fun _ : E => (chartModelBasis E) i)
       (interior s) := contDiffOn_const
-  -- Apply `ContDiffOn.clm_apply`.
   exact hfderiv.clm_apply hconst
 
 /-- For a smooth tangent section `X` and base point `α`, the partial derivative
@@ -374,20 +299,6 @@ lemma partialDeriv_chartCoeffOnE_mul_chartDensityOnE_contDiffOn
   partialDeriv_contDiffOn_interior i
     (chartCoeffOnE_mul_chartDensityOnE_contDiffOn (I := I) g α X i)
 
-/-! ## Smoothness of the chart-local Voss–Weyl divergence
-
-The chart-local divergence is built from three smooth ingredients:
-the partial-derivative functional applied to the smooth integrand of part B,
-composed with the chart map `extChartAt I α`; the chart density, which is
-strictly positive on the chart base set; and a finite sum / division step.
-
-The natural smoothness domain is the chart base set restricted to where the
-chart map lands in the interior of the chart target — namely
-`(extChartAt I α).source ∩ (extChartAt I α) ⁻¹' interior (extChartAt I α).target`.
-Under `[I.Boundaryless]` (where the chart target is open in `E`), the interior
-coincides with the target itself and this restricted domain reduces to the full
-chart base set. -/
-
 /-- The smoothness domain we use for the chart-local Voss–Weyl divergence: the
 points in the chart base set whose image under the chart map lies in the
 interior of the chart target. -/
@@ -399,8 +310,6 @@ private lemma localDivergenceDomain_subset_baseSet (α : M) :
     localDivergenceDomain (I := I) α ⊆
       (trivializationAt E (TangentSpace I) α).baseSet := by
   intro x hx
-  -- `(trivializationAt …).baseSet = (chartAt H α).source = (extChartAt I α).source`
-  -- by `trivializationAt_baseSet_eq_chartAt_source` and `extChartAt_source_eq_chartAt_source`.
   rw [trivializationAt_baseSet_eq_chartAt_source (I := I)]
   rw [← extChartAt_source_eq_chartAt_source (I := I)]
   exact hx.1
@@ -419,7 +328,6 @@ private lemma localDivergence_summand_contMDiffOn
               chartDensityOnE (I := I) g α y)
           (extChartAt I α x))
       (localDivergenceDomain (I := I) α) := by
-  -- Smoothness of the partial-derivative functional on the interior of the target.
   have hpartial : ContDiffOn ℝ ∞
       (fun y : E =>
         partialDeriv (E := E) i
@@ -428,7 +336,6 @@ private lemma localDivergence_summand_contMDiffOn
               chartDensityOnE (I := I) g α z) y)
       (interior (extChartAt I α).target) :=
     partialDeriv_chartCoeffOnE_mul_chartDensityOnE_contDiffOn (I := I) g α X i
-  -- Lift to manifold-smoothness on the same set.
   have hpartialM : ContMDiffOn 𝓘(ℝ, E) 𝓘(ℝ) ∞
       (fun y : E =>
         partialDeriv (E := E) i
@@ -436,11 +343,8 @@ private lemma localDivergence_summand_contMDiffOn
             chartCoeffOnE (I := I) α X i z *
               chartDensityOnE (I := I) g α z) y)
       (interior (extChartAt I α).target) := hpartial.contMDiffOn
-  -- Smoothness of `extChartAt I α` on the chart source.
   have hchart : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I α : M → E)
       (chartAt H α).source := contMDiffOn_extChartAt
-  -- Restrict `hchart` to the smoothness domain via
-  -- `(extChartAt I α).source = (chartAt H α).source`.
   have hchart' : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I α : M → E)
       (localDivergenceDomain (I := I) α) := by
     refine hchart.mono ?_
@@ -448,7 +352,6 @@ private lemma localDivergence_summand_contMDiffOn
     have h1 : x ∈ (extChartAt I α).source := hx.1
     rw [extChartAt_source_eq_chartAt_source (I := I)] at h1
     exact h1
-  -- Composition: the smoothness domain maps into `interior (target)` by definition.
   have hsubset : localDivergenceDomain (I := I) α ⊆
       (extChartAt I α : M → E) ⁻¹' interior (extChartAt I α).target :=
     fun _ hx => hx.2
@@ -480,7 +383,6 @@ theorem localDivergence_contMDiffOn
     ContMDiffOn I 𝓘(ℝ) ∞ (localDivergence (I := I) g α X)
       ((extChartAt I α).source ∩
         (extChartAt I α) ⁻¹' interior (extChartAt I α).target) := by
-  -- Numerator: finite sum of `localDivergence_summand_contMDiffOn`.
   have hnum : ContMDiffOn I 𝓘(ℝ) ∞
       (fun x : M =>
         ∑ i : Fin (Module.finrank ℝ E),
@@ -492,19 +394,12 @@ theorem localDivergence_contMDiffOn
       (localDivergenceDomain (I := I) α) :=
     contMDiffOn_finset_sum
       (fun i _ => localDivergence_summand_contMDiffOn (I := I) g α X i)
-  -- Denominator: chart density, smooth and nonvanishing on the domain.
   have hden :
       ContMDiffOn I 𝓘(ℝ) ∞ (chartDensity (I := I) g α)
         (localDivergenceDomain (I := I) α) :=
     chartDensity_contMDiffOn_localDivergenceDomain (I := I) g α
-  -- Quotient is smooth on the domain.
   exact hnum.div₀ hden
     (chartDensity_ne_zero_on_localDivergenceDomain (I := I) g α)
-
-/-! ## Global divergence
-
-The global divergence `divergence_g g X : M → ℝ` is defined as the chart-local
-Voss–Weyl divergence in the chart at `x` itself, evaluated at `x`. -/
 
 /-- The global divergence of a smooth tangent section `X` with respect to a
 smooth Riemannian metric `g`. By definition, it evaluates at `x` to the

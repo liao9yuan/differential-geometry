@@ -45,16 +45,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## Definition of the L²-side tensor resolvent -/
 
 /-- The L²-side resolvent operator of the variational tensor Laplacian:
 `(1 - Δ_∇)⁻¹` viewed as a continuous linear endomorphism of
@@ -70,14 +66,6 @@ noncomputable def tensorResolventL2 (g : SmoothRiemannianMetric I M) (r s : ℕ)
       TensorH1ComplToTensorL2 (I := I) (M := M) g r s
         (tensorResolvent (I := I) (M := M) g r s f) := rfl
 
-/-! ## Self-adjointness of `tensorResolventL2`
-
-The proof reduces to symmetry of the H¹ inner product. For `f, h ∈ TensorL2 r s g`,
-the variational identity gives
-`⟨TensorH1ComplToTensorL2 v, f⟩_{L²} = ⟨tensorResolvent f, v⟩_{H¹}` for every
-`v ∈ TensorH1Compl g r s`. Setting `v = tensorResolvent h` and using symmetry of
-the H¹ inner product yields the self-adjointness identity. -/
-
 /-- The defining inner-product identity used in the self-adjointness proof:
 for `f, h ∈ TensorL2 r s g`,
 `⟨tensorResolventL2 f, h⟩_{L²}
@@ -88,18 +76,9 @@ private lemma inner_tensorResolventL2_eq_inner_tensorResolvent
     ⟪tensorResolventL2 (I := I) (M := M) g r s f, h⟫_ℝ =
       ⟪tensorResolvent (I := I) (M := M) g r s f,
         tensorResolvent (I := I) (M := M) g r s h⟫_ℝ := by
-  -- ⟨tensorResolventL2 f, h⟩_{L²}
-  --   = ⟨TensorH1ComplToTensorL2 (tensorResolvent f), h⟩_{L²}        [by definition]
-  --   = ⟨tensorResolvent h, tensorResolvent f⟩_{H¹}                  [by variational identity, swapping]
-  --   = ⟨tensorResolvent f, tensorResolvent h⟩_{H¹}                  [by symmetry of inner product].
   rw [tensorResolventL2_apply]
-  -- The variational identity:
-  -- ⟨tensorResolvent g r s h, v⟩_{H¹}
-  --   = ⟨TensorH1ComplToTensorL2 v, h⟩_{L²}.
   have hvar := tensorResolvent_inner_eq_lpFunctional (I := I) (M := M) g r s h
     (tensorResolvent (I := I) (M := M) g r s f)
-  -- hvar : ⟨tensorResolvent g r s h, tensorResolvent g r s f⟩_{H¹}
-  --      = ⟨TensorH1ComplToTensorL2 (tensorResolvent g r s f), h⟩_{L²}
   rw [← hvar]
   exact real_inner_comm _ _
 
@@ -113,12 +92,6 @@ theorem tensorResolventL2_symm
     (f h : TensorL2 r s g) :
     ⟪tensorResolventL2 (I := I) (M := M) g r s f, h⟫_ℝ =
       ⟪f, tensorResolventL2 (I := I) (M := M) g r s h⟫_ℝ := by
-  -- LHS = ⟨tensorResolvent f, tensorResolvent h⟩_{H¹}
-  --                              [by inner_tensorResolventL2_eq_inner_tensorResolvent]
-  -- RHS = ⟨tensorResolventL2 h, f⟩_{L²} (swapped)   [by real_inner_comm]
-  --     = ⟨tensorResolvent h, tensorResolvent f⟩_{H¹}
-  --                              [by inner_tensorResolventL2_eq_inner_tensorResolvent]
-  --     = ⟨tensorResolvent f, tensorResolvent h⟩_{H¹}   [by real_inner_comm].
   rw [inner_tensorResolventL2_eq_inner_tensorResolvent (I := I) (M := M) g r s f h]
   rw [show ⟪f, tensorResolventL2 (I := I) (M := M) g r s h⟫_ℝ =
       ⟪tensorResolventL2 (I := I) (M := M) g r s h, f⟫_ℝ from real_inner_comm _ _]
@@ -129,12 +102,9 @@ theorem tensorResolventL2_symm
 theorem tensorResolventL2_isSelfAdjoint
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     IsSelfAdjoint (tensorResolventL2 (I := I) (M := M) g r s) := by
-  -- Reduce to symmetry of the underlying linear map.
   rw [ContinuousLinearMap.isSelfAdjoint_iff_isSymmetric]
   intro f h
   exact tensorResolventL2_symm (I := I) (M := M) g r s f h
-
-/-! ## Sanity tests -/
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     TensorL2 r s g →L[ℝ] TensorL2 r s g :=

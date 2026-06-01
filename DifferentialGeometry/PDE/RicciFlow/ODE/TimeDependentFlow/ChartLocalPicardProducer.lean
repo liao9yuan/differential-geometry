@@ -71,12 +71,6 @@ noncomputable def chartLocalPicardData_of_regular
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hReg : ChartCoordPicardRegular X) (α : M) :
     ChartLocalPicardData X α :=
-  -- Genuine chart-coordinate ODE existence via Picard–Lindelöf. The result is
-  -- an existential `∃ T, 0 < T ∧ ∃ r', 0 < r' ∧ ∃ flow, (flow_spec)`; we
-  -- extract its data via `Exists.choose` (a single `obtain` would illegally
-  -- eliminate the `Prop`-valued `Exists` into the data-valued
-  -- `ChartLocalPicardData`), then repackage into the structure. The `flow_spec`
-  -- field is *exactly* the chosen existential's body on `closedBall _ r'`.
   let h := time_dependent_vf_chart_local_picard_with_lipschitz X α
     hReg.1 (hReg.2 α)
   { T := h.choose

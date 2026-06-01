@@ -99,9 +99,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Identification: the M-side chart-α raw component factors through the
-representation -/
-
 /-- `tensorChartComponentRaw g r s S α Idx Jdx` equals the composition of the
 fixed bounded linear functional `tensorChartComponentProjection r s Idx Jdx`
 with the chart-α-trivialised representation
@@ -139,8 +136,6 @@ private lemma chartComponentRaw_symm_eq_proj_comp_repr_symm
   simp only [Function.comp_apply]
   rw [chartComponentRaw_eq_proj_comp_repr (I := I) (M := M) g r s S α Idx Jdx]
 
-/-! ## ContDiffAt of the chart-pulled representation -/
-
 /-- The chart-pulled chart-α-trivialised representation of any
 `SmoothCcTensor g r s` is `ContDiffAt ℝ ∞` at the chart-coord image of every
 chart-source point. -/
@@ -153,7 +148,6 @@ private lemma tensorRepr_chart_pulled_contDiffAt_inf
           (fun y : M => S.toSection y) ∘ (extChartAt I α).symm)
       (extChartAt I α b) := by
   classical
-  -- Smoothness on the chart source via the trivialization-as-CLM identity.
   have hsmooth_total :
       ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
         (fun x : M =>
@@ -190,7 +184,6 @@ private lemma tensorRepr_chart_pulled_contDiffAt_inf
         (fun y : M => TensorRSSpace r s I y) α).linearMapAt ℝ x
         (S.toSection x) = _
     rw [Bundle.Trivialization.linearMapAt_apply, if_pos hx_base]
-  -- Compose with `symm` to get smoothness on chart target.
   have hsymm : ContMDiffOn 𝓘(ℝ, E) I ∞ (extChartAt I α).symm
       (extChartAt I α).target := contMDiffOn_extChartAt_symm (I := I) α
   have hmaps : Set.MapsTo (extChartAt I α).symm (extChartAt I α).target
@@ -204,7 +197,6 @@ private lemma tensorRepr_chart_pulled_contDiffAt_inf
           (fun y : M => S.toSection y) ∘ (extChartAt I α).symm)
       (extChartAt I α).target :=
     hcm_on_source.comp hsymm hmaps
-  -- Promote to `ContDiffOn` and then `ContDiffAt`.
   have hb_src : b ∈ (extChartAt I α).source := by
     rw [extChartAt_source]; exact hb_chart
   have hb_target : extChartAt I α b ∈ (extChartAt I α).target :=
@@ -236,8 +228,6 @@ private lemma tensorRepr_chart_pulled_contDiffAt_two
     WithTop.coe_le_coe.mpr (le_top : (2 : ℕ∞) ≤ ⊤)
   exact h.of_le h2_le
 
-/-! ## Order-2 iteratedFDeriv composition with `tensorChartComponentProjection` -/
-
 /-- The order-2 iterated Fréchet derivative of the chart-pulled raw chart-α
 component function factors through the chart-α-trivialised representation
 via the fixed bounded linear functional `tensorChartComponentProjection`. -/
@@ -257,11 +247,8 @@ private lemma iteratedFDeriv_two_chartComponentRaw_symm_eq_compCMM
             (fun y : M => S.toSection y) ∘ (extChartAt I α).symm)
         (extChartAt I α b)) := by
   classical
-  -- Rewrite LHS as iteratedFDeriv of (proj ∘ repr ∘ symm).
   rw [chartComponentRaw_symm_eq_proj_comp_repr_symm
     (I := I) (M := M) g r s S α Idx Jdx]
-  -- Apply ContinuousLinearMap.iteratedFDeriv_comp_left with g := proj,
-  -- f := repr ∘ symm.
   have hcd : ContDiffAt ℝ 2
       (tensorRSChartE_section_repr (I := I) r s α
           (fun y : M => S.toSection y) ∘ (extChartAt I α).symm)
@@ -293,8 +280,6 @@ private lemma norm_iteratedFDeriv_two_chartComponentRaw_symm_le
     (I := I) (M := M) g r s S α Idx Jdx hb_chart]
   exact ContinuousLinearMap.norm_compContinuousMultilinearMap_le _ _
 
-/-! ## Uniform bound on `‖proj_IJ‖` over all `(IJ)` -/
-
 /-- The maximum, over all multi-index pairs `(Idx, Jdx)`, of the operator
 norm of the chart-frame component projection. -/
 private noncomputable def projectionNormMax (r s : ℕ) : ℝ :=
@@ -321,8 +306,6 @@ private lemma projection_norm_le_projectionNormMax (r s : ℕ)
       ‖tensorChartComponentProjection (E := E) r s p.1 p.2‖)
     (fun _ _ => norm_nonneg _) (Finset.mem_univ (Idx, Jdx))
   exact h
-
-/-! ## Headline: order-2 squared bound by the order-2 representation -/
 
 /-- **Headline (bridging form).** For a smooth Riemannian manifold `(M, g)`,
 ranks `r, s : ℕ`, a chart centre `α : M`, and any smooth compactly-supported
@@ -362,14 +345,11 @@ theorem iteratedFDeriv_two_rawTensorConnLap_chartComponentRaw_norm_sq_le_rawRepr
   have hK_nn : 0 ≤ K := sq_nonneg _
   refine ⟨K, hK_nn, ?_⟩
   intro T b hb_chart Idx Jdx
-  -- Apply the projection-composition norm bound to S := raw T.
   set S : SmoothCcTensor g r s := rawTensorConnLapSmooth (I := I) g r s T with hS_def
   have h_norm_le := norm_iteratedFDeriv_two_chartComponentRaw_symm_le
     (I := I) (M := M) g r s S α Idx Jdx hb_chart
-  -- Bound ‖proj_IJ‖ ≤ Kp.
   have h_proj_le : ‖tensorChartComponentProjection (E := E) r s Idx Jdx‖ ≤ Kp :=
     projection_norm_le_projectionNormMax (E := E) r s Idx Jdx
-  -- Squaring step.
   set R : ℝ :=
     ‖iteratedFDeriv ℝ 2
       ((tensorRSChartE_section_repr (I := I) r s α
@@ -378,13 +358,11 @@ theorem iteratedFDeriv_two_rawTensorConnLap_chartComponentRaw_norm_sq_le_rawRepr
   have hR_nn : 0 ≤ R := norm_nonneg _
   have h_proj_nn : 0 ≤ ‖tensorChartComponentProjection (E := E) r s Idx Jdx‖ :=
     norm_nonneg _
-  -- LHS-norm ≤ ‖proj‖ * R.
   have h_lhs_le : ‖iteratedFDeriv ℝ 2
       ((tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) ∘
         (extChartAt I α).symm)
       (extChartAt I α b)‖ ≤
       ‖tensorChartComponentProjection (E := E) r s Idx Jdx‖ * R := h_norm_le
-  -- Square: LHS² ≤ (‖proj‖ * R)² ≤ (Kp * R)² = Kp² * R² = K * R².
   have h_lhs_nn : 0 ≤ ‖iteratedFDeriv ℝ 2
       ((tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) ∘
         (extChartAt I α).symm)
@@ -398,17 +376,14 @@ theorem iteratedFDeriv_two_rawTensorConnLap_chartComponentRaw_norm_sq_le_rawRepr
       (extChartAt I α b)‖ ^ 2 ≤
       (‖tensorChartComponentProjection (E := E) r s Idx Jdx‖ * R) ^ 2 :=
     pow_le_pow_left₀ h_lhs_nn h_lhs_le 2
-  -- (‖proj‖ * R)² ≤ (Kp * R)².
   have h_proj_R_le : ‖tensorChartComponentProjection (E := E) r s Idx Jdx‖ * R ≤
       Kp * R :=
     mul_le_mul_of_nonneg_right h_proj_le hR_nn
   have h_step2 : (‖tensorChartComponentProjection (E := E) r s Idx Jdx‖ * R) ^ 2 ≤
       (Kp * R) ^ 2 :=
     pow_le_pow_left₀ h_rhs_chain_nn h_proj_R_le 2
-  -- (Kp * R)² = Kp² * R² = K * R².
   have h_eq_K : (Kp * R) ^ 2 = K * R ^ 2 := by
     rw [hK_def]; ring
-  -- Chain.
   have h_chain : (‖iteratedFDeriv ℝ 2
       ((tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) ∘
         (extChartAt I α).symm)

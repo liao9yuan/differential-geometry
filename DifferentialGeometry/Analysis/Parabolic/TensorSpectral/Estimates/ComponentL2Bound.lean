@@ -63,17 +63,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Finiteness of the `L²` norm of the chart-frame scalar component
-
-The scalar component is globally smooth and compactly supported on `M`.
-Combined with the finite measure (compact `M`), its `L²` norm is finite. -/
 
 /-- The `L²` norm of the chart-frame scalar component is finite. -/
 theorem tensorChartComponentScalar_eLpNorm_two_lt_top
@@ -99,14 +92,6 @@ theorem tensorChartComponentScalar_eLpNorm_two_lt_top
   exact (hcont.memLp_of_hasCompactSupport
       (μ := riemannianVolumeMeasure (I := I) (M := M) g) (p := 2) hcc).eLpNorm_lt_top
 
-/-! ## Existential `L²` bound
-
-The `L²` norm of the chart-frame scalar component is bounded by
-`ENNReal.ofReal C * (ENNReal.ofReal (tensorL2Norm S) + 1)` for some finite
-non-negative `C`. The constant may depend on all the inputs
-`(g, α, r, s, Idx, Jdx, S)`. The `+ 1` shift packages the boundary case
-`tensorL2Norm = 0` together with the generic case. -/
-
 /-- **Existential `L²` bound** (per-section form): for each `S`, there is
 a non-negative real constant `C` such that the `L²` norm of the
 chart-frame scalar component is bounded by `ENNReal.ofReal C` times
@@ -123,28 +108,22 @@ theorem tensorChartComponentScalar_eLpNorm_le_per_section
         ENNReal.ofReal C *
           (ENNReal.ofReal (tensorL2Norm (I := I) (M := M) g r s S.toFun) + 1) := by
   classical
-  -- LHS is finite.
   have hlt :=
     tensorChartComponentScalar_eLpNorm_two_lt_top
       (I := I) (M := M) g r s S α Idx Jdx
   have hne : eLpNorm (tensorChartComponentScalar (I := I) (M := M)
         g r s S α Idx Jdx) 2
       (riemannianVolumeMeasure (I := I) (M := M) g) ≠ ⊤ := hlt.ne
-  -- Convert LHS to a real number `a := LHS.toReal`.
   set a : ℝ := (eLpNorm
       (tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx) 2
       (riemannianVolumeMeasure (I := I) (M := M) g)).toReal with ha_def
   have ha_nn : 0 ≤ a := ENNReal.toReal_nonneg
-  -- Take `C := a + 1`.
   refine ⟨a + 1, by linarith, ?_⟩
-  -- Rewrite LHS as `ENNReal.ofReal a`.
   have h_lhs_eq : eLpNorm
         (tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx) 2
       (riemannianVolumeMeasure (I := I) (M := M) g) = ENNReal.ofReal a := by
     rw [ha_def, ENNReal.ofReal_toReal hne]
   rw [h_lhs_eq]
-  -- It suffices to bound `ENNReal.ofReal a ≤ ENNReal.ofReal (a + 1) * 1`,
-  -- then use monotonicity in the second factor.
   have h1 : ENNReal.ofReal a ≤ ENNReal.ofReal (a + 1) := by
     apply ENNReal.ofReal_le_ofReal; linarith
   have h_one_le :

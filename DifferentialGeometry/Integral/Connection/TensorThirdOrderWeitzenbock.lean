@@ -72,13 +72,6 @@ namespace Connection
 open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle
 
-/-! ## Part 1: the first-order per-direction commutator in `covApply` form
-
-For an arbitrary vector bundle `V` with a covariant derivative `cov`, the section-level
-Riemann formula `riemannSec` immediately gives the rearrangement of the outer covariant
-derivative when the inner direction is swapped. We record it in `covApply` form, since the
-higher-order assembly applies `cov.toFun` to the once-derived sections. -/
-
 section General
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
@@ -119,14 +112,6 @@ theorem covApply_outer_swap_eq_riemannSec
 
 end General
 
-/-! ## Part 2: smoothness of the iterated `covApply` sections
-
-For the second- and third-order commutators we need to apply `cov.toFun` to once- and
-twice-differentiated sections. This requires those sections to be smooth, which follows from
-`covApply_contMDiffOn` (smoothness is preserved because `(∞ : WithTop ℕ∞) + 1 = ∞`). The
-following helpers package the iterated smoothness for a bundle-generic `C^∞` covariant
-derivative. -/
-
 section IteratedSmooth
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
@@ -156,7 +141,6 @@ theorem covApply_contMDiff
     ContMDiff I (I.prod 𝓘(ℝ, F)) ∞ (T% (covApply cov X T)) := by
   rw [← contMDiffOn_univ]
   refine covApply_contMDiffOn (cov := cov) hX ?_
-  -- `C^∞` upgrades to `C^{∞+1}` since `∞ + 1 = ∞`.
   rw [show ((∞ : WithTop ℕ∞) + 1) = (∞ : WithTop ℕ∞) from by rw [ENat.coe_top_add_one]]
   exact hT
 
@@ -214,7 +198,6 @@ theorem riemannSec_contMDiff
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y))
     (hT : ContMDiff I (I.prod 𝓘(ℝ, F)) ∞ (T% T)) :
     ContMDiff I (I.prod 𝓘(ℝ, F)) ∞ (T% (fun b : M => riemannSec cov X Y T b)) := by
-  -- `riemannSec` is the difference of three smooth iterated-`covApply` sections.
   have hbr : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (VectorField.mlieBracket I X Y)) :=
     mlieBracket_contMDiff (I := I) hX hY
   have h1 := covApply_covApply_contMDiff (cov := cov) hX hY hT
@@ -225,16 +208,9 @@ theorem riemannSec_contMDiff
         covApply cov Y (covApply cov X T) -
         covApply cov (VectorField.mlieBracket I X Y) T)) :=
     (h1.sub_section h2).sub_section h3
-  -- `riemannSec` equals this difference via definitional unfolding.
   refine hresult.congr ?_
   intro b
   rfl
-
-/-! ## Part 3: the section-level first-order commutator
-
-The first-order atom `covApply_outer_swap_eq_riemannSec` holds at every base point, so it
-upgrades to an equality of sections. This is the form we differentiate (apply `cov.toFun`)
-in the second-order commutator, and it requires no further smoothness. -/
 
 /-- **Section-level first-order commutator.** As dependent functions,
 $$
@@ -252,14 +228,6 @@ theorem covApply_covApply_eq_section
   funext b
   simp only [Pi.add_apply, covApply_apply]
   exact covApply_outer_swap_eq_riemannSec cov X Y T b
-
-/-! ## Part 4: the second-order block outer commutator
-
-We now commute one extra covariant direction `W` past a `(B, B)`-second-derivative block.
-This is the genuinely-new pointwise input: applying the section-level first-order commutator
-twice (once on the inner section, once after reordering) and the section additivity of the
-covariant derivative, we obtain the third covariant derivative `∇_B ∇_B ∇_W T` written in
-terms of `∇_W ∇_B ∇_B T` plus an explicit collection of curvature and bracket terms. -/
 
 /-- **Second-order block outer commutator.** For a `C^∞` covariant derivative `cov`, smooth
 vector fields `B, W` and a smooth section `T`, the third covariant derivative
@@ -302,7 +270,6 @@ theorem secondCovDeriv_swap_outer
         + cov.toFun (covApply cov (VectorField.mlieBracket I B W) T) x (B x)
         + cov.toFun (fun b : M => riemannSec cov B W T b) x (B x) := by
   classical
-  -- Differentiability witnesses at `x` for the three summands of the inner section identity.
   have hbr : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (VectorField.mlieBracket I B W)) :=
     mlieBracket_contMDiff (I := I) hB hW
   have hWBT : MDiffAt (T% (covApply cov W (covApply cov B T))) x :=
@@ -311,18 +278,15 @@ theorem secondCovDeriv_swap_outer
     (covApply_contMDiff (cov := cov) hbr hT x).mdifferentiableAt (by simp)
   have hRsec : MDiffAt (T% (fun b : M => riemannSec cov B W T b)) x :=
     (riemannSec_contMDiff (cov := cov) hB hW hT x).mdifferentiableAt (by simp)
-  -- The inner section `∇_B(∇_W T)` equals the three-fold sum.
   have hinner : covApply cov B (covApply cov W T) =
       covApply cov W (covApply cov B T)
         + covApply cov (VectorField.mlieBracket I B W) T
         + (fun b : M => riemannSec cov B W T b) :=
     covApply_covApply_eq_section cov B W T
-  -- Differentiability of the partial sum `∇_W(∇_B T) + ∇_{[B,W]}T`.
   have hsum12 : MDiffAt (T% (covApply cov W (covApply cov B T)
       + covApply cov (VectorField.mlieBracket I B W) T)) x :=
     (((covApply_covApply_contMDiff (cov := cov) hW hB hT).add_section
         (covApply_contMDiff (cov := cov) hbr hT)) x).mdifferentiableAt (by simp)
-  -- Distribute `cov.toFun` over the three-fold sum by covariant-derivative additivity.
   have hadd_full : cov.toFun (covApply cov B (covApply cov W T)) x =
       cov.toFun (covApply cov W (covApply cov B T)) x
         + cov.toFun (covApply cov (VectorField.mlieBracket I B W) T) x
@@ -330,10 +294,8 @@ theorem secondCovDeriv_swap_outer
     rw [hinner]
     rw [cov.isCovariantDerivativeOnUniv.add hsum12 hRsec]
     rw [cov.isCovariantDerivativeOnUniv.add hWBT hbrT]
-  -- Evaluate the CLM identity at `B x`.
   have hat := congrFun (congrArg DFunLike.coe hadd_full) (B x)
   simp only [ContinuousLinearMap.add_apply] at hat
-  -- The `∇_W(∇_B T)` leading term is itself commuted by the first-order atom.
   have hWBatom :
       cov.toFun (covApply cov W (covApply cov B T)) x (B x) =
         cov.toFun (covApply cov B (covApply cov B T)) x (W x)
@@ -343,14 +305,6 @@ theorem secondCovDeriv_swap_outer
   rw [hat, hWBatom]
 
 end IteratedSmooth
-
-/-! ## Part 5: the explicit curvature field and the frame-trace commutator
-
-We now specialise to the `(r, s)`-tensor bundle with `cov := tensorCov g r s`, and collect the
-per-direction curvature contributions of `secondCovDeriv_swap_outer` into an explicit field
-`Tensor3rdCurv`, summed over the `g_x`-orthonormal frame. The frame-trace commutator then
-states that the frame trace of the third covariant derivative `∑ᵢ ∇_{Bᵢ} ∇_{Bᵢ} ∇_W T`
-equals `∑ᵢ ∇_W ∇_{Bᵢ} ∇_{Bᵢ} T` plus `Tensor3rdCurv`. -/
 
 section TensorBundle
 
@@ -486,7 +440,6 @@ theorem frame_trace_thirdCovDeriv_swap
   classical
   rw [Tensor3rdCurv_def, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl (fun i _ => ?_)
-  -- The per-direction commutator `secondCovDeriv_swap_outer` along `B_i` and `W`.
   have hB : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (smoothOrthoFrame (I := I) g x i)) :=
     smoothOrthoFrame_smooth (I := I) g x i
   have hstep := secondCovDeriv_swap_outer (cov := tensorCov (I := I) g r s)

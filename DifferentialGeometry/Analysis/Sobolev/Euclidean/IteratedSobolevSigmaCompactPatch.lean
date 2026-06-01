@@ -55,8 +55,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## σ-compact exhaustion of an open subset of Euclidean space -/
-
 /-- An open subset of Euclidean space admits a monotone sequence of open
 precompact subsets with closures lying inside it, whose union is the whole
 set. -/
@@ -160,8 +158,6 @@ lemma exists_monotone_precompact_open_exhaustion
   exact ⟨Ω_seq, hΩ_seq_open, hΩ_seq_closure_compact,
     hΩ_seq_closure_in_Ω, hΩ_seq_mono, hΩ_seq_union⟩
 
-/-! ## Global combinator of ae-coherent local data -/
-
 /-- A global `Nat.find`-based combinator of functions across a monotone
 exhaustion. For `x` in the union of `Ω_seq`, the value is `g_seq m x` for the
 smallest `m` with `x ∈ Ω_seq m`. Outside the union, the value is 0. -/
@@ -234,8 +230,6 @@ lemma patchedFunction_ae_eq_on_each
       rw [ae_restrict_union_eq]
       exact ⟨h_ae_on_left, h_ae_on_right⟩
 
-/-! ## Patching ae-coherent local data with a uniform bound -/
-
 /-- Given a monotone sequence of open sets `Ω_seq n` with union `Ω`, and a
 sequence of functions `g_seq n` that is `Lp` on `Ω_seq n` and ae-coherent
 across overlaps (i.e. `g_seq n =ᵐ g_seq m` on the smaller set for `m ≤ n`),
@@ -263,9 +257,7 @@ lemma exists_global_of_ae_coherent_monotone
   refine ⟨patchedFunction Ω_seq g_seq, ?_, ?_⟩
   · exact fun n =>
       patchedFunction_ae_eq_on_each hΩ_seq_open hΩ_seq_mono hg_seq_ae_coherent n
-  · -- Show `MemLp (patchedFunction Ω_seq g_seq) p (volume.restrict Ω)`.
-    obtain ⟨C, hC_lt_top, hC_bound⟩ := h_eLpNorm_bound
-    -- `patchedFunction` is `AEStronglyMeasurable` on each `Ω_seq n`, hence on `Ω`.
+  · obtain ⟨C, hC_lt_top, hC_bound⟩ := h_eLpNorm_bound
     have h_g_aem_on_each : ∀ n,
         AEStronglyMeasurable (patchedFunction Ω_seq g_seq)
           (volume.restrict (Ω_seq n)) := fun n =>
@@ -276,8 +268,6 @@ lemma exists_global_of_ae_coherent_monotone
         (volume.restrict Ω) := by
       rw [← hΩ_seq_union]
       exact aestronglyMeasurable_iUnion_iff.mpr h_g_aem_on_each
-    -- Pointwise: indicators of `Ω_seq n` applied to `patchedFunction` converge
-    -- to the indicator of `Ω` applied to `patchedFunction`.
     set g : E → ℝ := patchedFunction Ω_seq g_seq with hg_def
     have h_indicator_tendsto : ∀ᵐ x : E ∂(volume.restrict Ω),
         Filter.Tendsto (fun n => (Ω_seq n).indicator g x)
@@ -293,8 +283,7 @@ lemma exists_global_of_ae_coherent_monotone
           filter_upwards [h_eventually] with n hxn
           exact (Set.indicator_of_mem hxn _).symm
         exact (tendsto_const_nhds (x := g x)).congr' h_eq_eventually
-      · -- For `x ∉ ⋃ Ω_seq n`, the indicators are all 0, and `g x = 0`.
-        have h_all_not : ∀ n, x ∉ Ω_seq n := fun n hxn => hx_in ⟨n, hxn⟩
+      · have h_all_not : ∀ n, x ∉ Ω_seq n := fun n hxn => hx_in ⟨n, hxn⟩
         have h_const_zero : ∀ n, (Ω_seq n).indicator g x = 0 := fun n =>
           Set.indicator_of_notMem (h_all_not n) _
         have h_g_zero : g x = 0 := by
@@ -304,13 +293,10 @@ lemma exists_global_of_ae_coherent_monotone
         rw [h_g_zero]
         refine tendsto_const_nhds.congr (fun n => ?_)
         exact (h_const_zero n).symm
-    -- The indicators have eLpNorm ≤ C.
     have h_indicator_bound : ∀ n,
         eLpNorm ((Ω_seq n).indicator g) p (volume.restrict Ω) ≤ C := by
       intro n
       have hΩ_seq_n_meas : MeasurableSet (Ω_seq n) := (hΩ_seq_open n).measurableSet
-      -- `eLpNorm ((Ω_seq n).indicator g) p (volume.restrict Ω) =
-      --   eLpNorm g p (volume.restrict (Ω_seq n))`
       have h_eq : eLpNorm ((Ω_seq n).indicator g) p (volume.restrict Ω) =
           eLpNorm g p (volume.restrict (Ω_seq n)) := by
         rw [eLpNorm_indicator_eq_eLpNorm_restrict hΩ_seq_n_meas]
@@ -326,13 +312,11 @@ lemma exists_global_of_ae_coherent_monotone
           hg_seq_ae_coherent n
       rw [eLpNorm_congr_ae h_ae]
       exact hC_bound n
-    -- `(Ω_seq n).indicator g` is `AEStronglyMeasurable (volume.restrict Ω)`.
     have h_indicator_aem : ∀ n,
         AEStronglyMeasurable ((Ω_seq n).indicator g) (volume.restrict Ω) := by
       intro n
       refine AEStronglyMeasurable.indicator ?_ (hΩ_seq_open n).measurableSet
       exact h_g_aem_Ω
-    -- Apply `eLpNorm_le_of_ae_tendsto`.
     have h_eLpNorm_g_le_C : eLpNorm g p (volume.restrict Ω) ≤ C := by
       have h_bound_eventually : ∀ᶠ n in Filter.atTop,
           eLpNorm ((Ω_seq n).indicator g) p (volume.restrict Ω) ≤ C :=
@@ -341,20 +325,6 @@ lemma exists_global_of_ae_coherent_monotone
         (u := Filter.atTop) (f := fun n => (Ω_seq n).indicator g) (g := g)
         h_bound_eventually h_indicator_aem h_indicator_tendsto
     exact ⟨h_g_aem_Ω, lt_of_le_of_lt h_eLpNorm_g_le_C hC_lt_top⟩
-
-/-! ## σ-compact patching theorem for `MemWkp`
-
-The headline-form theorem is **not provable from local hypotheses alone**:
-
-Counterexample. With `d = 1`, `p = 2`, `Ω = (0, 1)`, and `u(x) = x^(-0.2)`,
-we have `u ∈ L^2(Ω)` and `u ∈ W^{1,2}(Ω')` for every `Ω' ⊆⊆ Ω` (since `u` is
-smooth on `Ω'`), but the classical derivative `u'(x) = -0.2 · x^(-1.2)` is
-not in `L^2(Ω)`, so `u ∉ W^{1,2}(Ω)`.
-
-The base case `k = 0` of the headline theorem holds trivially (the conclusion
-is the global `L^p` hypothesis itself); higher orders require an additional
-uniform `L^p`-bound hypothesis on the iterated weak partials (or a structural
-hypothesis like compactness of `Ω`). -/
 
 /-- **σ-compact patching for `MemWkp`** (base case `k = 0`). For `k = 0`,
 `MemWkp 0 p u Ω = MemLp u p (volume.restrict Ω)`, so the conclusion is

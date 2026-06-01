@@ -82,25 +82,20 @@ private lemma tensorRSIntrinsicChartCLM_pointwise_opNorm_le_factors
     tensorRSChartE_section_repr (I := I) r s α T ∘ (extChartAt I α).symm with hF_def
   set p : E := extChartAt I α b with hp_def
   set D : TensorRSModel r s ℝ E := fderiv ℝ F p (trivToE (I := I) α b X) with hD_def
-  -- Step 1: rewrite using the pointwise formula.
   have h_apply :
       tensorRSIntrinsicChartCLM (I := I) r s α T b X =
         tensorRSChartFiberFromModel (I := I) r s α b D := by
     rw [tensorRSIntrinsicChartCLM_apply (I := I) r s α T b X]
   rw [h_apply]
-  -- Step 2: apply the fibre right-inverse pointwise op-norm bound.
   have h_fib_le : ‖tensorRSChartFiberFromModel (I := I) r s α b D‖ ≤ C_fib * ‖D‖ :=
     hC_fib D
-  -- Step 3: bound `‖D‖` by `‖fderiv ℝ F p‖ * ‖trivToE α b X‖`.
   have h_D_le_fderiv :
       ‖D‖ ≤ ‖fderiv ℝ F p‖ * ‖trivToE (I := I) α b X‖ := by
     rw [hD_def]
     exact (fderiv ℝ F p).le_opNorm (trivToE (I := I) α b X)
-  -- Step 4: bound `‖trivToE α b X‖ ≤ ‖trivToE α b‖ * ‖X‖`.
   have h_trivToE_le :
       ‖trivToE (I := I) α b X‖ ≤ ‖trivToE (I := I) α b‖ * ‖X‖ :=
     (trivToE (I := I) α b).le_opNorm X
-  -- `‖trivToE α b‖ = ‖chartJ α b‖` definitionally.
   have h_triv_J :
       ‖trivToE (I := I) α b‖ = ‖chartJ (I := I) (M := M) α b‖ := rfl
   have h_X_nn : 0 ≤ ‖X‖ := norm_nonneg _
@@ -108,19 +103,16 @@ private lemma tensorRSIntrinsicChartCLM_pointwise_opNorm_le_factors
     refine h_trivToE_le.trans ?_
     rw [h_triv_J]
     exact mul_le_mul_of_nonneg_right hC_J h_X_nn
-  -- Step 5: combine `‖D‖ ≤ ‖fderiv ℝ F p‖ * (C_J * ‖X‖)`.
   set N : ℝ := ‖fderiv ℝ F p‖ with hN_def
   have hN_nn : 0 ≤ N := norm_nonneg _
   have h_trivToE_nn : 0 ≤ ‖trivToE (I := I) α b X‖ := norm_nonneg _
   have h_D_le :
       ‖D‖ ≤ N * (C_J * ‖X‖) :=
     h_D_le_fderiv.trans (mul_le_mul_of_nonneg_left h_trivToE_le_CJ hN_nn)
-  -- Step 6: combine with the fibre bound.
   have h_D_nn : 0 ≤ ‖D‖ := norm_nonneg _
   have h_main_step :
       ‖tensorRSChartFiberFromModel (I := I) r s α b D‖ ≤ C_fib * (N * (C_J * ‖X‖)) :=
     h_fib_le.trans (mul_le_mul_of_nonneg_left h_D_le hC_fib_nn)
-  -- Step 7: rearrange `C_fib * (N * (C_J * ‖X‖)) = C_fib * C_J * N * ‖X‖`.
   have h_rearrange :
       C_fib * (N * (C_J * ‖X‖)) = C_fib * C_J * N * ‖X‖ := by ring
   rw [h_rearrange] at h_main_step

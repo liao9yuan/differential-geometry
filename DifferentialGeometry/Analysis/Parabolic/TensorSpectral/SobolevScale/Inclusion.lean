@@ -63,14 +63,10 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Monotonicity of the Sobolev weight in the exponent -/
 
 /-- The Sobolev weight `(1 + λᵢ)^σ` is monotone in the exponent: for
 `τ ≤ σ` the base `1 + λᵢ ≥ 1` gives `(1 + λᵢ)^τ ≤ (1 + λᵢ)^σ`. -/
@@ -81,12 +77,6 @@ lemma tensorSobolevWeight_mono {g : SmoothRiemannianMetric I M} {r s : ℕ}
   unfold tensorSobolevWeight
   exact Real.rpow_le_rpow_of_exponent_le
     (one_le_one_add_lambda (I := I) (M := M) i) hτσ
-
-/-! ## The continuous inclusion `Hˢ → Hᵗ` for `τ ≤ σ`
-
-The inclusion is the identity on coordinate families. Well-definedness
-is exactly weight monotonicity: if `∑ᵢ (1+λᵢ)^σ cᵢ² < ∞` and `τ ≤ σ`,
-then `(1+λᵢ)^τ ≤ (1+λᵢ)^σ` gives `∑ᵢ (1+λᵢ)^τ cᵢ² < ∞`. -/
 
 namespace tensorHs
 
@@ -144,7 +134,6 @@ lemma inclusionFun_smul {τ σ : ℝ} (hτσ : τ ≤ σ) (c : ℝ)
 lemma norm_inclusionFun_le {τ σ : ℝ} (hτσ : τ ≤ σ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
     ‖inclusionFun (I := I) (M := M) hτσ T‖ ≤ ‖T‖ := by
-  -- Compare squared norms `∑ wᵗ cᵢ² ≤ ∑ wˢ cᵢ²` by weight monotonicity.
   have h_t_sq : ‖inclusionFun (I := I) (M := M) hτσ T‖ ^ 2 =
       ∑' i, tensorSobolevWeight (I := I) (M := M) i τ * (T.coeff i) ^ 2 := by
     have h := norm_sq_eq_tsum (I := I) (M := M)
@@ -242,8 +231,6 @@ theorem tensorHsInclusion_injective {g : SmoothRiemannianMetric I M}
   have h := congrArg (fun U => tensorHs.coeff U i) hST
   simpa only [tensorHsInclusion_coeff] using h
 
-/-! ## Functoriality of the inclusion -/
-
 /-- The inclusion at the reflexive exponent `σ ≤ σ` is the identity
 continuous linear map. -/
 @[simp] theorem tensorHsInclusion_refl {g : SmoothRiemannianMetric I M}
@@ -287,12 +274,6 @@ theorem tensorHsInclusion_trans_apply {g : SmoothRiemannianMetric I M}
   ext i
   simp only [tensorHsInclusion_coeff_apply]
 
-/-! ## The submodule of finitely-supported elements
-
-A coordinate family with finite support is weighted-square-summable for
-every exponent (see `tensorHsOfFiniteSupport`). The set of such
-elements is a linear subspace of `Hˢ`, and below it is shown dense. -/
-
 namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ : ℝ}
@@ -334,14 +315,6 @@ def finiteSupportSubmodule (σ : ℝ) :
 
 end tensorHs
 
-/-! ## Density of finitely-supported eigenvectors in `Hˢ`
-
-Every `T ∈ Hˢ` is the unconditional sum of its spectral basis
-components `(coeff i T) • bᵢ`. The proof transports the canonical
-finitely-supported `ℓ²` approximations (`lp.hasSum_single`) along the
-diagonal rescaling isometric equivalence `rescaleEquivL2`. Density of
-the finitely-supported submodule is then immediate. -/
-
 namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ : ℝ}
@@ -377,13 +350,9 @@ theorem hasSum_smul_basisVec
     HasSum (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
       T.coeff i • tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ i) T := by
   classical
-  -- Transport `HasSum` along the continuous-linear-equiv `rescaleEquivL2`:
-  -- it suffices to prove the `HasSum` of the *image* family in `ℓ²`.
   rw [← ContinuousLinearEquiv.hasSum'
     (e := (rescaleEquivL2 (I := I) (M := M)
       (σ := σ)).toContinuousLinearEquiv)]
-  -- The image of `(coeff i T) • bᵢ` is the canonical `ℓ²` unit family,
-  -- whose sum is `rescaleEquivL2 T` by `lp.hasSum_single`.
   have h_l2 : HasSum
       (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
         lp.single 2 i
@@ -411,13 +380,10 @@ theorem mem_closure_finiteSupportSubmodule
       (finiteSupportSubmodule (I := I) (M := M) (g := g) (r := r) (s := s) σ :
         Set (tensorHs (I := I) (M := M) g r s σ)) := by
   classical
-  -- `T` is the limit of finite partial sums of `T.coeff i • bᵢ`, each
-  -- of which has finite support, hence lies in the submodule.
   refine mem_closure_of_tendsto
     (hasSum_smul_basisVec (I := I) (M := M) T) ?_
   refine Filter.Eventually.of_forall (fun u => ?_)
   refine Submodule.sum_mem _ (fun i _ => ?_)
-  -- `T.coeff i • bᵢ` has support contained in `{i}`.
   refine Submodule.smul_mem _ _ ?_
   rw [mem_finiteSupportSubmodule]
   refine Set.Finite.subset (Set.finite_singleton i) ?_
@@ -469,20 +435,15 @@ theorem tensorHsBasisVec_span_dense {g : SmoothRiemannianMetric I M}
       (Set.range (tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ)) :
       Set (tensorHs (I := I) (M := M) g r s σ)) := by
   classical
-  -- The span of the basis vectors equals the finitely-supported
-  -- submodule, which is dense.
   refine tensorHsFiniteSupportSubmodule_dense (I := I) (M := M) (g := g) (r := r) (s := s)
     |>.mono ?_
   intro T hT
-  -- `T` finitely supported ⇒ `T = ∑_{i ∈ s} (coeff i) • bᵢ` over its
-  -- (finite) support `s`, hence in the span.
   rw [SetLike.mem_coe, tensorHs.mem_finiteSupportSubmodule] at hT
   classical
   have h_eq : T = ∑ i ∈ hT.toFinset,
       T.coeff i • tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ i := by
     refine tensorHs.ext ?_
     funext j
-    -- Read off the `j`-th coordinate of the finite sum.
     have h_sum : (∑ i ∈ hT.toFinset,
           T.coeff i • tensorHsBasisVec (I := I) (M := M) σ i).coeff j =
         ∑ i ∈ hT.toFinset,
@@ -495,13 +456,11 @@ theorem tensorHsBasisVec_span_dense {g : SmoothRiemannianMetric I M}
           simp only [tensorHs.smul_coeff, tensorHsBasisVec_coeff,
             mul_ite, mul_one, mul_zero]
     rw [h_sum]
-    -- The summand vanishes except at `i = j`, where it is `T.coeff j`.
     rw [Finset.sum_eq_single j]
     · simp
     · intro i _ hij
       simp [Ne.symm hij]
     · intro hj
-      -- `j ∉ support` forces `T.coeff j = 0`.
       have hzero : T.coeff j = 0 := by
         by_contra hne
         exact hj (hT.mem_toFinset.mpr (Function.mem_support.mpr hne))
@@ -509,8 +468,6 @@ theorem tensorHsBasisVec_span_dense {g : SmoothRiemannianMetric I M}
   rw [h_eq]
   refine Submodule.sum_mem _ (fun i _ => ?_)
   exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨i, rfl⟩)
-
-/-! ## Sanity tests -/
 
 example {g : SmoothRiemannianMetric I M} {r s : ℕ} {τ σ : ℝ}
     (hτσ : τ ≤ σ) :

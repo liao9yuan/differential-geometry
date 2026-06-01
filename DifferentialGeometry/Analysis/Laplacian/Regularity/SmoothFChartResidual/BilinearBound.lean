@@ -95,8 +95,6 @@ open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual
 open DifferentialGeometry.Analysis.Laplacian.GradInnerCLMChartFormula
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -105,13 +103,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## The smooth strict cutoff lifted to a `SmoothScalar` multiplier
-
-For `v : SmoothScalar g`, define `etaTimesV α v : M → ℝ` as
-`chartStrictCutoff α · v.toFun`. This is the smooth replacement of `v.toFun`
-that equals `v.toFun` on `tsupport ρ_α` and has tsupport in
-`(chartAt H α).source`. -/
 
 /-- The pointwise product `chartStrictCutoff α · v.toFun` as a function on
 `M`. -/
@@ -159,13 +150,6 @@ lemma tsupport_etaTimesV_subset (α : M) (v : M → ℝ) :
       (isClosed_tsupport _)
   exact h_tsupp_subset.trans (chartStrictCutoff_tsupport_subset (I := I) (M := M) α)
 
-/-! ## File-local manifold-side smooth representative of the Leibniz residual
-
-We redefine the smooth manifold representative `smoothRep g α v : M → ℝ` of
-`fHLeibnizResidualLp g α (smoothToH1Compl v)` locally, since the original
-in `DiffChartBilinearH1ComplResidualMemW1p.lean` is `private`. This is the
-function `-2 g(∇ρα, ∇v) - Δρα · v` on `M`. -/
-
 /-- The smooth manifold representative of `fHLeibnizResidualLp g α
 (smoothToH1Compl v)`: the explicit pointwise function `-2 g(∇ρα, ∇v) - Δρα · v`. -/
 noncomputable def smoothRep
@@ -184,12 +168,6 @@ private lemma smoothRep_apply (g : SmoothRiemannianMetric I M) (α : M)
         (gradFun (I := I) g v.toFun x)) -
       (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x * v.toFun x := rfl
 
-/-! ## The η_α replacement identity on the manifold
-
-The crucial pointwise identity: on `M`, the smooth Leibniz residual
-representative `smoothRep g α v` equals the same expression
-with `v.toFun` replaced by `chartStrictCutoff α · v.toFun`. -/
-
 /-- For any `x : M`, if `x ∉ tsupport (chartAtlasPOU I M α)`, then
 `smoothRep g α v x = 0`. -/
 private lemma smoothRep_eq_zero_off_tsupport_chartAtlasPOU
@@ -197,7 +175,6 @@ private lemma smoothRep_eq_zero_off_tsupport_chartAtlasPOU
     (hx : x ∉ tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :
     smoothRep (I := I) (M := M) g α v x = 0 := by
   classical
-  -- Local zero argument: on a neighborhood of x, ρα ≡ 0, so ∇ρα = 0 and Δρα = 0.
   have h_open : IsOpen
       (tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ))ᶜ :=
     (isClosed_tsupport _).isOpen_compl
@@ -228,7 +205,6 @@ private lemma smoothRep_eq_zero_off_tsupport_chartAtlasPOU
       exact h_g
     exact DifferentialGeometry.Integral.DivergenceTheorem.divergence_g_zero_of_eventuallyEq_zero
       (I := I) g _ h_grad_ev
-  -- Substitute into the formula.
   rw [smoothRep_apply, h_grad_zero, h_lap_zero]
   simp
 
@@ -240,12 +216,10 @@ private lemma gradFun_eq_gradFun_etaTimesV_of_eventuallyOne
       (fun _ : M => (1 : ℝ))) :
     gradFun (I := I) g (etaTimesV (I := I) (M := M) α v) x =
       gradFun (I := I) g v x := by
-  -- On the neighborhood, etaTimesV α v ≡ 1 · v = v.
   have h_eq : etaTimesV (I := I) (M := M) α v =ᶠ[𝓝 x] v := by
     filter_upwards [h_one] with y hy
     change chartStrictCutoff (I := I) (M := M) α y * v y = v y
     rw [hy]; ring
-  -- mfderiv depends only on the local function near x.
   have h_mfderiv : mfderiv I 𝓘(ℝ, ℝ) (etaTimesV (I := I) (M := M) α v) x =
       mfderiv I 𝓘(ℝ, ℝ) v x := Filter.EventuallyEq.mfderiv_eq h_eq
   unfold gradFun
@@ -276,8 +250,7 @@ private lemma smoothRep_eq_etaTimesV
       etaTimesV (I := I) (M := M) α v.toFun x := by
   classical
   by_cases hx_supp : x ∈ tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)
-  · -- Inside the support of POU: η_α ≡ 1 on an open neighborhood.
-    have h_one : chartStrictCutoff (I := I) (M := M) α =ᶠ[𝓝 x]
+  · have h_one : chartStrictCutoff (I := I) (M := M) α =ᶠ[𝓝 x]
         (fun _ : M => (1 : ℝ)) :=
       (chartStrictCutoff_eventually_one_nhdsSet_tsupport_chartAtlasPOU
         (I := I) (M := M) α).filter_mono (nhds_le_nhdsSet hx_supp)
@@ -286,12 +259,10 @@ private lemma smoothRep_eq_etaTimesV
     have h_eta_v : etaTimesV (I := I) (M := M) α v.toFun x = v.toFun x :=
       etaTimesV_eq_of_eventuallyOne (I := I) (M := M) α h_one
     rw [smoothRep_apply, ← h_grad, ← h_eta_v]
-  · -- Outside the support of POU: both sides are 0.
-    have hLHS : smoothRep (I := I) (M := M) g α v x = 0 :=
+  · have hLHS : smoothRep (I := I) (M := M) g α v x = 0 :=
       smoothRep_eq_zero_off_tsupport_chartAtlasPOU
         (I := I) (M := M) g α v hx_supp
     rw [hLHS]
-    -- RHS: gradFun ρα x = 0 and Δρα x = 0.
     have h_open : IsOpen
         (tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ))ᶜ :=
       (isClosed_tsupport _).isOpen_compl
@@ -322,14 +293,6 @@ private lemma smoothRep_eq_etaTimesV
         (I := I) g _ h_grad_ev
     rw [h_grad_zero, h_lap_zero]
     simp
-
-/-! ## Function-level identity on `M`
-
-The functional identity `fHLeibnizResidualSmoothRep g α v = F_grad - F_lap` on
-`M`, where
-* `F_grad x := 2 g(∇ρα x, ∇(η_α · v) x)`,
-* `F_lap x := Δρα x · (η_α · v) x`,
-both with tsupport in `(chartAt H α).source`. -/
 
 /-- The gradient-inner-product piece `2 g(∇ρα, ∇(η_α · v))` as a function on `M`. -/
 noncomputable def gradInnerPiece
@@ -367,14 +330,11 @@ lemma smoothRep_eq_pieces
   rw [smoothRep_eq_etaTimesV (I := I) (M := M) g α v x]
   rfl
 
-/-! ## Smoothness and support of the two pieces -/
-
 lemma gradInnerPiece_smooth (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞
       (gradInnerPiece (I := I) (M := M) g α v.toFun) := by
   unfold gradInnerPiece
-  -- Two parts of the product: 2 ∈ C^∞, and g.inner of two smooth tangent sections.
   have hα_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
     (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff
@@ -416,7 +376,6 @@ private lemma tsupport_gradInnerPiece_subset
     intro x hx
     by_contra hxoff
     apply hx
-    -- x ∉ tsupport ρα: gradFun ρα x = 0.
     have h_open : IsOpen
         (tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ))ᶜ :=
       (isClosed_tsupport _).isOpen_compl
@@ -462,13 +421,6 @@ lemma tsupport_lapPiece_subset_source
   (tsupport_lapPiece_subset (I := I) (M := M) g α v).trans
     (tsupport_etaTimesV_subset (I := I) (M := M) α v)
 
-/-! ## Chart formula on `chartTargetEuclid α` for the gradient piece
-
-For smooth `v : SmoothScalar g`, the chart-pushed-raw `gradInnerPiece g α v.toFun`
-agrees on `chartTargetEuclid α` with `2 · chartFormulaRhsSmooth g α ρα (etaTimesV α v.toFun)`,
-which is the smooth chart-coordinate sum
-`Σ_{ij} G⁻¹_{ij}(y) · ∂_i ρ̃α(y) · ∂_j (η̃·v)(y) · 2`. -/
-
 /-- Pointwise on `chartTargetEuclid α`, the chart-pushed-raw `gradInnerPiece` is
 twice the chart formula RHS evaluated at `(ρα, etaTimesV α v.toFun)`. -/
 private lemma chartPushedRaw_gradInnerPiece_eq_rhs
@@ -484,8 +436,6 @@ private lemma chartPushedRaw_gradInnerPiece_eq_rhs
     (gradInnerPiece (I := I) (M := M) g α v.toFun) hy]
   rw [gradInnerPiece_apply]
   rw [etaTimesVScalar_toFun]
-  -- Convert the inner expression to chartFormulaRhsSmooth (which equals the
-  -- chart-formula sum) using the chart formula.
   have h_inner_eq :
       g.inner ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
         (gradFun (I := I) g
@@ -502,14 +452,6 @@ private lemma chartPushedRaw_gradInnerPiece_eq_rhs
       (etaTimesVScalar (I := I) (M := M) g α v) hy
     simpa using this
   rw [h_inner_eq]
-
-/-! ## Chart-pushed-raw factorisation of `lapPiece`
-
-The chart-pushed-raw `lapPiece` factors as
-`smoothExtensionScalar α (b · Δρα)(y) · chartPushedRaw α (η · v)(y)`
-on `chartTargetEuclid α`, where `b` is the manifold-side chart cutoff equal to
-`1` on `tsupport ρ_α`. This factorisation expresses the chart-pushed-raw
-product as a smooth-coefficient times the chart-pushed-raw of `η · v`. -/
 
 /-- The chart-pushed-raw `lapPiece` agrees on `chartTargetEuclid α` with the
 product of `smoothExtensionScalar α (b · Δρα)` and `chartPushedRaw α (η · v)`,
@@ -528,14 +470,12 @@ lemma chartPushedRaw_lapPiece_factor
         chartPushedRaw (I := I) (M := M) α
           (etaTimesV (I := I) (M := M) α v) y := by
   classical
-  -- LHS at y on chartTarget: lapPiece(symm(y)).
   set x : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hx_def
   have hLHS : chartPushedRaw (I := I) (M := M) α
       (lapPiece (I := I) (M := M) g α v) y =
       lapPiece (I := I) (M := M) g α v x := by
     rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α
       (lapPiece (I := I) (M := M) g α v) hy]
-  -- RHS factors:
   have hRHS_smooth : smoothExtensionScalar (I := I) (M := M) α
       (fun x => b x * (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x) y =
       b x * (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x := by
@@ -554,17 +494,9 @@ lemma chartPushedRaw_lapPiece_factor
     rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α
       (etaTimesV (I := I) (M := M) α v) hy]
   rw [hLHS, hRHS_smooth, hRHS_etav]
-  -- Goal:
-  --   Δρα x · (η x · v x) = (b x · Δρα x) · (η x · v x).
-  -- True when b x · Δρα x = Δρα x, i.e. when either Δρα x = 0 or b x = 1.
-  -- If Δρα x ≠ 0, then x ∈ support(Δρα). We don't directly have support
-  -- (Δρα) ⊆ tsupport(ρα), so we reduce via tsupport-of-Δρα analysis.
   by_cases h_lap_zero : (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x = 0
-  · -- Δρα x = 0 → both sides are zero.
-    rw [lapPiece_apply, h_lap_zero]; ring
-  · -- Δρα x ≠ 0 → x ∈ tsupport(Δρα). We have tsupport(Δρα) ⊆ tsupport(ρα),
-    -- so x ∈ tsupport(ρα), hence b x = 1.
-    have h_supp_Δρα : Function.support
+  · rw [lapPiece_apply, h_lap_zero]; ring
+  · have h_supp_Δρα : Function.support
         ((laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ)) ⊆
         tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) := by
       intro z hz
@@ -601,12 +533,6 @@ lemma chartPushedRaw_lapPiece_factor
     have h_bx : b x = 1 := hb_one x hx_tsupp
     rw [lapPiece_apply, h_bx]
     ring
-
-/-! ## Manifold-side smooth coefficient for the `(i, j)`-th chart formula term
-
-For each `(i, j)`, define `coefIJ_M g α i j : M → ℝ` as the manifold-side smooth
-function that pulls back to `G⁻¹_{ij}(y) · ∂_i ρ̃α(y)` (times the cutoff) on
-`chartTargetEuclid α`. -/
 
 /-- The manifold-side coefficient `(chartStrictCutoff α · chartInvGramMatrix g α · ∂_i ρ̃α)`
 for the `(i, j)`-th chart formula term. -/
@@ -647,17 +573,13 @@ private lemma coefIJ_M_smooth
     (i j : Fin (Module.finrank ℝ E)) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (coefIJ_M (I := I) (M := M) g α i j) := by
   classical
-  -- Strategy: smoothness at every point.
   intro x₀
   by_cases hx_src : x₀ ∈ (chartAt H α).source
-  · -- On chart α source, all factors are smooth.
-    have h_chart_src_open : IsOpen ((chartAt H α).source) :=
+  · have h_chart_src_open : IsOpen ((chartAt H α).source) :=
       (chartAt H α).open_source
-    -- chartStrictCutoff α is smooth globally.
     have h_cut_smooth : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
         (chartStrictCutoff (I := I) (M := M) α) x₀ :=
       (chartStrictCutoff_contMDiff (I := I) (M := M) α).contMDiffAt
-    -- chartInvGramMatrix g α (·) i j is ContMDiffOn on chart base set = chart α source.
     have hbase : x₀ ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
       rw [trivializationAt_baseSet_eq_chartAt_source]; exact hx_src
     have h_invGram_on : ContMDiffOn I 𝓘(ℝ) ∞
@@ -671,11 +593,6 @@ private lemma coefIJ_M_smooth
       have h := (h_invGram_on x₀ hbase).contMDiffAt
         (h_base_open.mem_nhds hbase)
       exact h
-    -- The partialDeriv factor on chart source.
-    -- partialDeriv i (scalarOnE α ρα) (extChartAt I α x):
-    -- scalarOnE α ρα = ρα ∘ symm is ContDiffOn ∞ on (extChartAt I α).target.
-    -- Hence its fderiv is ContDiffOn ∞ on the open target.
-    -- Composed with extChartAt I α (smooth on source), we get smoothness on source.
     have hα_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
       (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff
@@ -685,7 +602,6 @@ private lemma coefIJ_M_smooth
         (extChartAt I α).target :=
       DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE_contDiffOn
         (I := I) α hα_smooth
-    -- The partial deriv of scalarOnE α ρα is ContDiffOn ∞ on the open target.
     have h_target_open : IsOpen ((extChartAt I α).target) :=
       isOpen_extChartAt_target (I := I) α
     have h_partial_contDiffOn : ContDiffOn ℝ ∞
@@ -703,7 +619,6 @@ private lemma coefIJ_M_smooth
           rw [show ((⊤ : ℕ∞) : WithTop ℕ∞) + 1 = ((⊤ : ℕ∞) : WithTop ℕ∞) from by simp]
         exact h_scalarOnE_contDiffOn.fderiv_of_isOpen h_target_open h_le
       exact h_fderiv_smooth.clm_apply contDiffOn_const
-    -- The composition with extChartAt I α (smooth on source mapping to target).
     have hx_target : extChartAt I α x₀ ∈ (extChartAt I α).target := by
       have hx_ext_src : x₀ ∈ (extChartAt I α).source := by
         rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hx_src
@@ -715,7 +630,6 @@ private lemma coefIJ_M_smooth
         (extChartAt I α x₀) := by
       have h_within := h_partial_contDiffOn (extChartAt I α x₀) hx_target
       exact h_within.contDiffAt (h_target_open.mem_nhds hx_target)
-    -- Compose with extChartAt I α (smooth at x₀ on chart source).
     have h_extChart_contMDiff : ContMDiffAt I 𝓘(ℝ, E) ∞
         (extChartAt I α) x₀ := by
       have h_open_src : IsOpen ((chartAt H α).source) := (chartAt H α).open_source
@@ -736,9 +650,7 @@ private lemma coefIJ_M_smooth
       exact h_partial_at_E_mDiff.comp _ h_extChart_contMDiff
     unfold coefIJ_M
     exact (h_cut_smooth.mul h_invGram_at).mul h_partial_at
-  · -- Outside chart α source: use that chartStrictCutoff α ≡ 0 in a neighborhood,
-    -- hence coefIJ_M ≡ 0 in a neighborhood, hence smooth.
-    have hx_compl : x₀ ∈ ((chartAt H α).source)ᶜ := hx_src
+  · have hx_compl : x₀ ∈ ((chartAt H α).source)ᶜ := hx_src
     have h_ev_zero : ∀ᶠ x in 𝓝 x₀,
         chartStrictCutoff (I := I) (M := M) α x = 0 := by
       have h_ev_nhdsSet :=
@@ -749,9 +661,6 @@ private lemma coefIJ_M_smooth
       filter_upwards [h_ev_zero] with x hx
       exact coefIJ_M_eq_zero_off_tsupport_chartStrictCutoff (I := I) (M := M)
         g α i j hx
-    -- coefIJ_M ≡ 0 in a neighborhood of x₀ → ContMDiffAt.
-    -- The function coefIJ_M is locally 0, so by congr_of_eventuallyEq from
-    -- the constant 0, it is smooth at x₀.
     have h_const : ContMDiffAt I 𝓘(ℝ, ℝ) ∞ (fun _ : M => (0 : ℝ)) x₀ :=
       contMDiffAt_const
     have h_evEq : coefIJ_M (I := I) (M := M) g α i j =ᶠ[𝓝 x₀]
@@ -796,10 +705,6 @@ private lemma chartPushedRaw_coefIJ_M_apply
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α
     (coefIJ_M (I := I) (M := M) g α i j) hy]
   unfold coefIJ_M
-  -- Note: partialDeriv (E := E) i (scalarOnE α ρα) (extChartAt I α x_y) =
-  --       partialDeriv (E := E) i (scalarOnE α ρα) ((toEuclidean.symm y))
-  -- because x_y := (extChartAt I α).symm ((toEuclidean.symm y))
-  -- and `extChartAt I α (extChartAt I α).symm y' = y'` on target.
   have h_tgt : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
     rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy; exact hy
   have h_φx_eq : extChartAt I α ((extChartAt I α).symm
@@ -807,25 +712,8 @@ private lemma chartPushedRaw_coefIJ_M_apply
       (toEuclidean (E := E)).symm y :=
     (extChartAt I α).right_inv h_tgt
   rw [h_φx_eq]
-  -- Now identify partialDeriv with partialDerivOnEuclid.
   unfold partialDerivOnEuclid invGramOnEuclid
   rfl
-
-/-! ## Bound for the `lapPiece` chart-pushed-raw `W^{1,2}` norm
-
-For `v : SmoothScalar g`, we show there exists `C_lap = C_lap(g, α)` such that
-```
-wkpNorm 1 2 (chartPushedRaw α (lapPiece g α v.toFun)) chartTargetEuclid α
-  ≤ ENNReal.ofReal C_lap *
-    wkpNorm 1 2 (chartPushedRaw α (etaTimesV α v.toFun)) chartTargetEuclid α.
-```
-
-Strategy:
-1. The pointwise factorisation
-   `chartPushedRaw α lapPiece = smoothExt α (b · Δρα) · chartPushedRaw α (η · v)`
-   on `chartTargetEuclid α`.
-2. The smooth Euclidean extension has uniformly bounded iterated derivatives,
-   so the Euclidean quantitative Leibniz bound applies. -/
 
 private lemma wkpNorm_chartPushedRaw_lapPiece_le_etaTimesV_aux
     (g : SmoothRiemannianMetric I M) (α : M) :
@@ -842,10 +730,8 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le_etaTimesV_aux
             (etaTimesV (I := I) (M := M) α v.toFun))
           (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- Obtain the chart cutoff b_α.
   obtain ⟨b, hb_smooth, _, hb_one_on_tsupp, hb_supp⟩ :=
     exists_chart_cutoff_M (I := I) (M := M) α
-  -- Define Λ := smoothExt α (b · Δρα).
   set bΔρα : M → ℝ := fun x : M =>
     b x * (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x with hbΔρα_def
   have hbΔρα_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ bΔρα :=
@@ -858,17 +744,14 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le_etaTimesV_aux
     exact (tsupport_smul_subset_left (f := b)
       (g := ((laplacianOfChartPOU (I := I) (M := M) g α : C^∞⟮I, M; ℝ⟯) : M → ℝ))).trans
       hb_supp
-  -- Get uniform iteratedFDeriv bound on Λ.
   obtain ⟨C, hC_nn, hC_bound⟩ :=
     smoothExtensionScalar_iteratedFDeriv_bound (I := I) (M := M) α
       hbΔρα_smooth hbΔρα_supp 1
-  -- Set Λ explicitly.
   set Λ : EuclN → ℝ := smoothExtensionScalar (I := I) (M := M) α bΔρα with hΛ_def
   have hΛ_smooth : ContDiff ℝ (⊤ : ℕ∞) Λ :=
     contDiff_smoothExtensionScalar (I := I) (M := M) α hbΔρα_smooth hbΔρα_supp
   have hΛ_bound : ∀ j ≤ 1, ∀ y ∈ chartTargetEuclid (I := I) (M := M) α,
       ‖iteratedFDeriv ℝ j Λ y‖ ≤ C := fun j hj y _ => hC_bound j hj y
-  -- Apply Euclidean quantitative Leibniz bound at k=1.
   obtain ⟨K, hK_pos, hK_bound⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_smul_smooth_bounded_le
       (d := Module.finrank ℝ E) 1 (p := 2) (by norm_num) (by norm_num)
@@ -876,7 +759,6 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le_etaTimesV_aux
       hΛ_smooth hC_nn hΛ_bound
   refine ⟨K, hK_pos, ?_⟩
   intro v
-  -- The pointwise factorisation on chartTarget.
   have h_factor : (fun y : EuclN => chartPushedRaw (I := I) (M := M) α
         (lapPiece (I := I) (M := M) g α v.toFun) y) =ᵐ[
         volume.restrict (chartTargetEuclid (I := I) (M := M) α)]
@@ -887,7 +769,6 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le_etaTimesV_aux
     refine Filter.Eventually.of_forall (fun y hy => ?_)
     exact chartPushedRaw_lapPiece_factor (I := I) (M := M) g α v.toFun
       hb_one_on_tsupp hy
-  -- The wkpNorm is invariant under a.e. equality.
   have h_norm_eq :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) 1 2
@@ -903,13 +784,11 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le_etaTimesV_aux
       (d := Module.finrank ℝ E) (by norm_num)
       (chartTargetEuclid_isOpen (I := I) (M := M) α) h_factor
   rw [h_norm_eq]
-  -- Apply the per-α quantitative bound. We need chartPushedRaw α (η · v) ∈ MemWkp 1 2.
   have hH_W12 : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 1 2
       (chartPushedRaw (I := I) (M := M) α
         (etaTimesV (I := I) (M := M) α v.toFun))
       (chartTargetEuclid (I := I) (M := M) α) := by
-    -- The η · v.toFun is smooth on M with tsupport in chart α source, so chartPushedRaw is in MemW1p.
     have h_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞
         (etaTimesV (I := I) (M := M) α v.toFun) :=
       etaTimesV_smooth (I := I) (M := M) α v.smooth
@@ -924,22 +803,6 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le_etaTimesV_aux
         (I := I) (M := M) (α := α) h_smooth h_supp 2
     exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p).mpr h_w1p
   exact hK_bound hH_W12
-
-/-! ## Manifold-side smooth coefficient for the chart-formula `gradInnerPiece` decomposition
-
-For each `i : Fin n`, define `gradInnerCoefI_M g α i : M → ℝ` by
-`x ↦ chartStrictCutoff α x · gradChartCoeff g α ρα i x`. This is smooth on `M`
-with `tsupport ⊆ chartStrictCutoff α tsupport ⊆ chartAt H α .source`. On the
-chart-α source, we have the manifold-side identity
-
-```
-gradInnerPiece g α v.toFun x =
-  2 · ∑_i (gradChartCoeff g α ρα i x) ·
-    partialDeriv i (scalarOnE α (η · v.toFun)) (extChart x).
-```
-
-After cutoff, this becomes a sum of products of smooth M-side coefficients
-times chart-pulled partials of `η · v.toFun`. -/
 
 /-- The `i`-th chart-α coefficient for the gradient inner product `g(∇ρα, ∇·)`,
 multiplied by the strict cutoff. Smooth on `M` with `tsupport` in chart α source. -/
@@ -975,9 +838,7 @@ lemma gradInnerCoefI_M_smooth
   classical
   intro x₀
   by_cases hx_src : x₀ ∈ (chartAt H α).source
-  · -- On chart α source, the gradChartCoeff is smooth (per Geometry/Gradient.lean's
-    -- gradChartCoeff_contMDiffOn).
-    have h_chart_src_open : IsOpen ((chartAt H α).source) :=
+  · have h_chart_src_open : IsOpen ((chartAt H α).source) :=
       (chartAt H α).open_source
     have h_cut_smooth : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
         (chartStrictCutoff (I := I) (M := M) α) x₀ :=
@@ -989,22 +850,15 @@ lemma gradInnerCoefI_M_smooth
     have hα_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
       (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff
-    -- gradChartCoeff g α ρα i is ContMDiffOn (chart base set).
     have h_coeff_on : ContMDiffOn I 𝓘(ℝ) ∞
         (gradChartCoeff (I := I) g α
           ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) i)
         (trivializationAt E (TangentSpace I) α).baseSet := by
-      -- gradChartCoeff is sum over j of chartInvGramMatrix · partialDeriv-of-scalarOnE.
-      -- chartInvGramMatrix entries are smooth on base set.
-      -- partialDeriv of scalarOnE α ρα at extChart x is smooth on chart source.
       unfold gradChartCoeff
       refine contMDiffOn_finset_sum (fun j _ => ?_)
       refine ContMDiffOn.mul ?_ ?_
       · exact chartInvGramMatrix_entry_contMDiffOn (I := I) g α i j
-      · -- ContMDiffOn x ↦ partialDeriv j (scalarOnE α ρα) (extChart x) on base set.
-        -- This is a composition: first extChart x (smooth on chart α source ⊇ base set),
-        -- then partialDeriv j (scalarOnE α ρα) (·) (smooth on chart target).
-        have h_extChartOn_M : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I α)
+      · have h_extChartOn_M : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I α)
             (chartAt H α).source :=
           contMDiffOn_extChartAt (I := I) (x := α)
         have h_extChartOn : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I α)
@@ -1036,7 +890,6 @@ lemma gradInnerCoefI_M_smooth
               rw [show ((⊤ : ℕ∞) : WithTop ℕ∞) + 1 = ((⊤ : ℕ∞) : WithTop ℕ∞) from by simp]
             exact h_scalar_target.fderiv_of_isOpen h_target_open h_le
           exact h_fderiv_smooth.clm_apply contDiffOn_const
-        -- Convert to ContMDiffOn at the M level.
         have h_partial_M_E : ContMDiffOn 𝓘(ℝ, E) 𝓘(ℝ) ∞
             (fun y : E => partialDeriv (E := E) j
               (scalarOnE (I := I) α
@@ -1055,9 +908,7 @@ lemma gradInnerCoefI_M_smooth
         exact h_partial_M_E.comp h_extChartOn h_maps
     exact h_cut_smooth.mul ((h_coeff_on x₀ hbase).contMDiffAt
       (h_base_open.mem_nhds hbase))
-  · -- Outside chart α source: chartStrictCutoff α ≡ 0 in a neighborhood, so
-    -- gradInnerCoefI_M is locally 0, hence smooth.
-    have hx_compl : x₀ ∈ ((chartAt H α).source)ᶜ := hx_src
+  · have hx_compl : x₀ ∈ ((chartAt H α).source)ᶜ := hx_src
     have h_ev_zero : ∀ᶠ x in 𝓝 x₀,
         chartStrictCutoff (I := I) (M := M) α x = 0 := by
       have h_ev_nhdsSet :=
@@ -1089,13 +940,6 @@ lemma tsupport_gradInnerCoefI_M_subset
     closure_minimal (h_supp_subset.trans (subset_tsupport _))
       (isClosed_tsupport _)
   exact h_tsupp_subset.trans (chartStrictCutoff_tsupport_subset (I := I) (M := M) α)
-
-/-! ## Chart-pushed-raw `gradInnerPiece` factorisation
-
-Pointwise identity on `chartTargetEuclid α`:
-`chartPushedRaw α (gradInnerPiece g α v.toFun) y =
-  2 · ∑_i (smoothExtensionScalar α (gradInnerCoefI_M g α i))(y) ·
-        partialDerivOnEuclid α i (etaTimesV α v.toFun) y`. -/
 
 /-- The smooth Euclidean coefficient `Λ_i` := `smoothExtensionScalar α (gradInnerCoefI_M g α i)`.
 This is `ContDiff ℝ ∞` on `EuclN` with compact support contained in
@@ -1145,11 +989,6 @@ private lemma Λgrad_iteratedFDeriv_bound
     (gradInnerCoefI_M_smooth (I := I) (M := M) g α i)
     (tsupport_gradInnerCoefI_M_subset (I := I) (M := M) g α i) 1
 
-/-! ## Chart formula for the chart-pushed-raw of `gradInnerPiece`
-
-The chart-pushed-raw of `gradInnerPiece` has a pointwise sum expansion on
-`chartTargetEuclid α`. -/
-
 /-- Pointwise identity: on `chartTargetEuclid α`,
 `chartPushedRaw α (gradInnerPiece g α v.toFun) y =
   2 · ∑_i Λgrad g α i y · partialDerivOnEuclid α i (η · v.toFun) y`. -/
@@ -1163,15 +1002,10 @@ lemma chartPushedRaw_gradInnerPiece_eq_sum
           partialDerivOnEuclid (I := I) (M := M) α i
             (etaTimesV (I := I) (M := M) α v.toFun) y := by
   classical
-  -- Step 1: chartPushedRaw α (gradInnerPiece) at y in chartTarget evaluates at the
-  -- chart-pulled point.
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α
     (gradInnerPiece (I := I) (M := M) g α v.toFun) hy]
   set x : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hx_def
-  -- Step 2: gradInnerPiece x = 2 g(∇ρα, ∇(η · v))(x).
   rw [gradInnerPiece_apply]
-  -- Step 3: Use the chart-α formula for g(∇ρα, ∇·) on chart source.
-  -- This requires x ∈ chart α source.
   have h_tgt : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
     rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy; exact hy
   have hx_src : x ∈ (chartAt H α).source := by
@@ -1187,25 +1021,9 @@ lemma chartPushedRaw_gradInnerPiece_eq_sum
   have hηv_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (etaTimesV (I := I) (M := M) α v.toFun) :=
     etaTimesV_smooth (I := I) (M := M) α v.smooth
-  -- Apply chart formula step 1: gradInner = ∑_{ij} G⁻¹_{ij} ∂_i ρα · ∂_j (η·v).
-  -- But we want a SINGLE sum decomposition: gradInner = ∑_i gradChartCoeff ρα i x ·
-  --                                                    ∂_i(scalarOnE α (η · v))(extChart x).
-  -- This is from `gradFun = ∑_i gradChartCoeff i · chartBasisVecFiber i`, applied via
-  -- inner product with ∇(η · v) and the chart-basis-vec-fiber action.
   have hα_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
     (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff
-  -- We use: g.inner x (gradFun g ρα x) (gradFun g (η·v) x) = ∑_i gradChartCoeff ρα i x ·
-  --          mfderiv (η·v) x (chartBasisVecFiber i x).
-  -- And mfderiv (η·v) x (chartBasisVecFiber i x) = partialDeriv i (scalarOnE α (η·v)) (φ x).
-  -- (Note we ALREADY have the chart-formula in `gradInner_eq_invGramMatrix_partials_smooth`
-  -- in ChartBilinearSmooth.lean. We could use a single sum decomposition for cleanness.)
-  -- For our purposes, expand g(∇ρα, ∇·) via the gradFun chart-local decomposition
-  -- and inner_gradFun:
-  -- g.inner x (gradFun ρα x) (∇u x) = mfderiv u x (gradFun ρα x).
-  -- gradFun ρα x = ∑_i gradChartCoeff ρα i x • chartBasisVecFiber i x (on chart source).
-  -- So mfderiv u x (gradFun ρα x) = ∑_i gradChartCoeff ρα i x · mfderiv u x (chartBasisVecFiber i x)
-  --                            = ∑_i gradChartCoeff ρα i x · partialDeriv i (scalarOnE α u) (extChart x).
   have hgradFun_decomp : gradFun (I := I) g
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x =
       ∑ i : Fin (Module.finrank ℝ E),
@@ -1225,7 +1043,6 @@ lemma chartPushedRaw_gradInnerPiece_eq_sum
         (scalarOnE (I := I) α (etaTimesV (I := I) (M := M) α v.toFun))
         (extChartAt I α x) := fun i =>
     mfderiv_chartBasisVecFiber (I := I) (α := α) hηv_smooth hx_src hx_int i
-  -- Compute g.inner x (gradFun ρα x) (gradFun (η·v) x) = mfderiv (η·v) x (gradFun ρα x).
   have h_inner_eq :
       g.inner x (gradFun (I := I) g
           ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
@@ -1237,8 +1054,6 @@ lemma chartPushedRaw_gradInnerPiece_eq_sum
     exact inner_gradFun (I := I) g
       (etaTimesV (I := I) (M := M) α v.toFun) x _
   rw [h_inner_eq, hgradFun_decomp]
-  -- Compute mfderiv applied to a sum of scaled vectors via linearity.
-  -- We set the CLM to ℝ explicitly to avoid TangentSpace-vs-ℝ confusion.
   set L : TangentSpace I x →L[ℝ] ℝ :=
     mfderiv I 𝓘(ℝ, ℝ) (etaTimesV (I := I) (M := M) α v.toFun) x with hL_def
   have h_mfderiv_sum : L
@@ -1254,8 +1069,6 @@ lemma chartPushedRaw_gradInnerPiece_eq_sum
     refine Finset.sum_congr rfl ?_
     intro i _
     rw [map_smul, smul_eq_mul]
-  -- Goal: 2 * L (∑ ...) = 2 * ∑ ...
-  -- Rewrite the L (∑ ...) using h_mfderiv_sum.
   have h_LHS_eq : (2 : ℝ) * L
       (∑ i : Fin (Module.finrank ℝ E),
         gradChartCoeff (I := I) g α
@@ -1266,7 +1079,6 @@ lemma chartPushedRaw_gradInnerPiece_eq_sum
             ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) i x *
           L (chartBasisVecFiber (I := I) α i x) := by
     rw [h_mfderiv_sum]
-  -- Use h_mfderiv_apply to rewrite each `L (chartBasisVecFiber ...)`.
   have h_mfderiv_apply_L : ∀ i : Fin (Module.finrank ℝ E),
       L (chartBasisVecFiber (I := I) α i x) =
       partialDeriv (E := E) i
@@ -1275,13 +1087,9 @@ lemma chartPushedRaw_gradInnerPiece_eq_sum
     intro i
     rw [hL_def]
     exact h_mfderiv_apply i
-  -- The goal mentions `mfderiv` rather than `L`. Convert.
   change (2 : ℝ) * L _ = _
   rw [h_LHS_eq]
   simp_rw [h_mfderiv_apply_L]
-  -- We need to match coefficients:
-  -- gradChartCoeff ρα i x = Λgrad g α i y (at y on chartTarget, x = extChart.symm(...))?
-  -- Actually Λgrad y = chartStrictCutoff α x · gradChartCoeff ρα i x.
   have hΛ_apply : ∀ i : Fin (Module.finrank ℝ E),
       Λgrad (I := I) (M := M) g α i y =
         chartStrictCutoff (I := I) (M := M) α x *
@@ -1302,14 +1110,6 @@ lemma chartPushedRaw_gradInnerPiece_eq_sum
       rw [hx_def]; exact (extChartAt I α).right_inv h_tgt
     rw [hφx_eq]; rfl
   simp_rw [hΛ_apply, h_partialDerivOnEuclid_apply]
-    -- Now goal: -((2:ℝ) · ∑_i gradCoeff · mfderiv-applied) = 2 · ∑_i (cutoff · gradCoeff) · partial.
-  -- The cutoff factor: at x = extChart.symm(symm_E y), what is chartStrictCutoff α x?
-  -- For y in chartTarget, x ∈ chart α source, but x may or may not be in tsupport(ρα).
-  -- If x ∉ support(gradChartCoeff ρα i): the i-th coefficient is 0, so the equation is 0 = 0
-  -- for that i.
-  -- If x ∈ support(gradChartCoeff ρα i) ⊆ support(dρα) ⊆ tsupport(ρα): chartStrictCutoff α x = 1.
-  -- Use: gradChartCoeff i x ≠ 0 → x ∈ tsupport(ρα) → chartStrictCutoff α x = 1.
-  -- Express via a `by_cases` on each summand.
   have h_sum_eq :
       ∑ i : Fin (Module.finrank ℝ E),
         gradChartCoeff (I := I) g α
@@ -1330,16 +1130,7 @@ lemma chartPushedRaw_gradInnerPiece_eq_sum
     by_cases h_grad_zero : gradChartCoeff (I := I) g α
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) i x = 0
     · rw [h_grad_zero]; ring
-    · -- gradChartCoeff i x ≠ 0 → x ∈ support(dρα). For chart-α formula on chart source,
-      -- gradChartCoeff i x = Σ_j G⁻¹_{ij}(x) · ∂_j(scalarOnE α ρα)(extChart x).
-      -- Nonzero implies some j with ∂_j(scalarOnE α ρα)(extChart x) ≠ 0.
-      -- This implies that mfderiv ρα x ≠ 0 (the j-th partial of pulled-back).
-      -- But strictly we need x ∈ tsupport(ρα): we proceed differently.
-      -- Use mfderiv ρα x = sum of partials × chartBasisDualFiber, and mfderiv = 0
-      -- outside support(dρα) ⊆ tsupport(ρα).
-      -- Simpler argument: outside tsupport(ρα), ρα ≡ 0 in a nhd, so all partials of
-      -- scalarOnE α ρα ∘ extChart at x are 0, hence gradChartCoeff i x = 0.
-      have hx_supp : x ∈ tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) := by
+    · have hx_supp : x ∈ tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) := by
         by_contra hx_off
         apply h_grad_zero
         have h_open : IsOpen
@@ -1350,19 +1141,11 @@ lemma chartPushedRaw_gradInnerPiece_eq_sum
           filter_upwards [h_open.mem_nhds hx_off] with z hz
           by_contra hne
           exact hz (subset_tsupport _ hne)
-        -- Show gradChartCoeff = 0 from local zero.
-        -- gradChartCoeff i x = Σ_j G⁻¹_{ij} · ∂_j(scalarOnE α ρα)(extChart x).
-        -- We need partialDeriv j (scalarOnE α ρα) (extChart x) = 0 for all j.
         unfold gradChartCoeff
         refine Finset.sum_eq_zero (fun j _ => ?_)
-        -- partialDeriv j (scalarOnE α ρα) (extChart x) = 0 when ρα ≡ 0 near x.
         have h_scalar_ev : scalarOnE (I := I) α
             ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) =ᶠ[𝓝 (extChartAt I α x)]
             (fun _ : E => (0 : ℝ)) := by
-          -- This requires h_ev (M-side eventual zero) → scalarOnE α ρα locally 0 at φ x.
-          -- Take z near extChart x in chart α target. Then symm z is near x in chart α source.
-          -- If z is close enough, symm z is in the open set where ρα ≡ 0.
-          -- Hence scalarOnE α ρα z = ρα(symm z) = 0.
           have h_target_open : IsOpen ((extChartAt I α).target) :=
             isOpen_extChartAt_target (I := I) α
           have h_open_target : (extChartAt I α).target ∈ 𝓝 (extChartAt I α x) := by
@@ -1380,12 +1163,10 @@ lemma chartPushedRaw_gradInnerPiece_eq_sum
               (extChartAt I α) ((extChartAt I α).symm z) = z := by
             filter_upwards [h_open_target] with z hz
             exact (extChartAt I α).right_inv hz
-          -- Pull back the ev.zero through symm.
           have h_symm_x : (extChartAt I α).symm (extChartAt I α x) = x := by
             have h_ext_src : x ∈ (extChartAt I α).source := by
               rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hx_src
             exact (extChartAt I α).left_inv h_ext_src
-          -- For z near φ x in target, symm z is near x in M.
           have h_ev_through_symm : ∀ᶠ z in 𝓝 (extChartAt I α x),
               ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)
                 ((extChartAt I α).symm z) = 0 := by
@@ -1404,37 +1185,12 @@ lemma chartPushedRaw_gradInnerPiece_eq_sum
           rw [Filter.EventuallyEq.fderiv_eq h_scalar_ev]
           simp
         rw [h_partial_zero]; ring
-      -- Now hx_supp : x ∈ tsupport(ρα). So chartStrictCutoff α x = 1.
       have h_cut : chartStrictCutoff (I := I) (M := M) α x = 1 :=
         chartStrictCutoff_eq_one_on_tsupport_chartAtlasPOU (I := I) (M := M) α hx_supp
       rw [h_cut]; ring
-  -- Apply h_sum_eq to finish.
   rw [h_sum_eq]
 
-/-! ## Chart-direction partial bound: comparing the chart-model-basis partial of
-`u` (pushed to `EuclN` via `toEuclidean ∘ extChartAt`) with the standard
-Euclidean weak partials of `chartPushedRaw α u`
-
-For smooth `u : M → ℝ` whose `tsupport` lies in a single chart `α`, this section
-exhibits a quantitative comparison
-
-```
-wkpNorm k p (partialDerivOnEuclid α i u) (chartTargetEuclid α)
-  ≤ ENNReal.ofReal C * wkpNorm (k+1) p (chartPushedRaw α u) (chartTargetEuclid α)
-```
-
-The argument identifies, on the chart-target, the function
-`partialDerivOnEuclid α i u` with the classical Euclidean partial of
-`chartPushedRaw α u` in the direction `EuclideanSpace.single i 1`, then invokes
-the existing succ-norm bound for chosen weak partials. -/
-
 section ChartDirectionPartialBound
-
-/-! ### Smoothness of `chartPushedRaw` globally, for smooth tsupport-in-chart `u`
-
-For a smooth `u : M → ℝ` with `tsupport u ⊆ (chartAt H α).source`, the chart-
-pulled raw `chartPushedRaw I α u : EuclN → ℝ` is `ContDiff ℝ ∞` globally with
-compact support inside `chartTargetEuclid α`. -/
 
 /-- The toEuclidean image of the extChartAt image of `tsupport u`, used as the
 compact carrier of `chartPushedRaw I α u`. -/
@@ -1559,13 +1315,6 @@ lemma chartPushedRaw_contDiff
     exact chartPushedRaw_eq_zero_off_euclSupp (I := I) (M := M)
       (α := α) (u := u) hz
 
-/-! ### Chain-rule pointwise identity
-
-For `y ∈ chartTargetEuclid α`, the chart-α `i`-th model-basis partial of `u`
-evaluated at `y` (i.e. `partialDerivOnEuclid α i u y`) equals the classical
-Euclidean fderiv of `chartPushedRaw I α u` at `y` applied to the
-`i`-th standard Euclidean basis vector. -/
-
 /-- Pointwise on `chartTargetEuclid α`,
 `partialDerivOnEuclid α i u y = fderiv ℝ (chartPushedRaw I α u) y (e_i)`,
 where `e_i = EuclideanSpace.single i 1`. -/
@@ -1579,7 +1328,6 @@ private lemma partialDerivOnEuclid_eq_fderiv_chartPushedRaw_apply_single
       fderiv ℝ (chartPushedRaw (I := I) (M := M) α u) y
         (EuclideanSpace.single i (1 : ℝ)) := by
   classical
-  -- The chartPushedRaw is locally `scalarOnE α u ∘ toEuclidean.symm`.
   have hΩ_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have hΩ_nhds : chartTargetEuclid (I := I) (M := M) α ∈ 𝓝 y :=
@@ -1591,13 +1339,11 @@ private lemma partialDerivOnEuclid_eq_fderiv_chartPushedRaw_apply_single
   have h_target_nhds : (extChartAt I α).target ∈ 𝓝
       ((toEuclidean (E := E)).symm y) :=
     h_target_open.mem_nhds hsymm_target
-  -- chartPushedRaw α u =ᶠ[𝓝 y] scalarOnE α u ∘ toEuclidean.symm.
   have h_eqf : (chartPushedRaw (I := I) (M := M) α u) =ᶠ[𝓝 y]
       (fun z : EuclN => scalarOnE (I := I) α u ((toEuclidean (E := E)).symm z)) := by
     filter_upwards [hΩ_nhds] with z hz
     rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α u hz]
     rfl
-  -- scalarOnE α u is C^∞ at (toEuclidean.symm y).
   have h_scalar_contDiffOn : ContDiffOn ℝ ∞ (scalarOnE (I := I) α u)
       (extChartAt I α).target :=
     DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE_contDiffOn
@@ -1611,7 +1357,6 @@ private lemma partialDerivOnEuclid_eq_fderiv_chartPushedRaw_apply_single
   have h_TE_symm_diffAt : DifferentiableAt ℝ
       (fun z : EuclN => (toEuclidean (E := E)).symm z) y :=
     ((toEuclidean (E := E)).symm).differentiable.differentiableAt
-  -- fderiv of the composition.
   have h_comp_fderiv :
       fderiv ℝ (fun z : EuclN => scalarOnE (I := I) α u
           ((toEuclidean (E := E)).symm z)) y =
@@ -1623,7 +1368,6 @@ private lemma partialDerivOnEuclid_eq_fderiv_chartPushedRaw_apply_single
       fderiv ℝ (fun z : EuclN => (toEuclidean (E := E)).symm z) y =
         ((toEuclidean (E := E)).symm : EuclN →L[ℝ] E) :=
     ((toEuclidean (E := E)).symm).fderiv
-  -- Combine to get fderiv of chartPushedRaw.
   have h_fderiv_chartPushedRaw :
       fderiv ℝ (chartPushedRaw (I := I) (M := M) α u) y =
         (fderiv ℝ (scalarOnE (I := I) α u)
@@ -1631,9 +1375,6 @@ private lemma partialDerivOnEuclid_eq_fderiv_chartPushedRaw_apply_single
           ((toEuclidean (E := E)).symm : EuclN →L[ℝ] E) := by
     rw [h_eqf.fderiv_eq, h_comp_fderiv, h_TE_symm_fderiv]
   rw [h_fderiv_chartPushedRaw]
-  -- Now apply both sides to `EuclideanSpace.single i 1`.
-  -- fderiv ℝ (scalarOnE α u) (φ_y) (toEuclidean.symm (single i 1))
-  -- = partialDeriv (E := E) i (scalarOnE α u) (φ_y)  (by chartModelBasis_apply).
   have h_basis : (toEuclidean (E := E)).symm (EuclideanSpace.single i (1 : ℝ))
       = chartModelBasis E i := by
     rw [chartModelBasis_apply]
@@ -1644,15 +1385,6 @@ private lemma partialDerivOnEuclid_eq_fderiv_chartPushedRaw_apply_single
       ((toEuclidean (E := E)).symm (EuclideanSpace.single i (1 : ℝ)))
   rw [h_basis]
   rfl
-
-/-! ### A.e. identification of `partialDerivOnEuclid α i u` with the chosen
-weak partial of `chartPushedRaw I α u` on the chart target.
-
-`chartPushedRaw I α u` is smooth globally with compact support in
-`chartTargetEuclid α`. The classical fderiv `fderiv ℝ (chartPushedRaw I α u) y
-(EuclideanSpace.single i 1)` is a weak `i`-th partial on `chartTargetEuclid α`,
-and so is the chosen weak partial `chosenWeakPartial' p i (chartPushedRaw I α u)
-(chartTargetEuclid α)`. By uniqueness of weak partials, they agree a.e. -/
 
 lemma partialDerivOnEuclid_ae_eq_chosenWeakPartial
     {α : M} (i : Fin (Module.finrank ℝ E))
@@ -1680,7 +1412,6 @@ lemma partialDerivOnEuclid_ae_eq_chosenWeakPartial
   have hΛ_tsupp_in_Ω : tsupport Λ ⊆ Ω :=
     tsupport_chartPushedRaw_subset_chartTargetEuclid (I := I) (M := M)
       (α := α) (u := u) hu_supp
-  -- Λ ∈ MemWkp 1 p Ω.
   have hΛ_W1 : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 1 p Λ Ω :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_of_smooth_compactSupport
@@ -1689,11 +1420,9 @@ lemma partialDerivOnEuclid_ae_eq_chosenWeakPartial
   have hΛ_W1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) p Λ Ω :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p.mp
       hΛ_W1
-  -- chosenWeakPartial' p i Λ Ω =ᵐ classical partial.
   have h_chosen_ae :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial_smooth_ae_eq
       (d := Module.finrank ℝ E) hp_one hΩ_open hΛ_smoothTop hΛ_W1p i
-  -- partialDerivOnEuclid α i u y = classical partial of Λ at y, pointwise on Ω.
   have h_pointwise : ∀ y ∈ Ω,
       partialDerivOnEuclid (I := I) (M := M) α i u y =
         (fderiv ℝ Λ y) (EuclideanSpace.single i (1 : ℝ)) := fun y hy =>
@@ -1707,10 +1436,7 @@ lemma partialDerivOnEuclid_ae_eq_chosenWeakPartial
     refine Filter.Eventually.of_forall ?_
     intro y hy
     exact h_pointwise y hy
-  -- Chain: partialDerivOnEuclid =ᵐ classical partial =ᵐ chosenWeakPartial'.
   exact h_pointwise_ae.trans h_chosen_ae.symm
-
-/-! ### Headline lemma -/
 
 /-- For smooth `u : M → ℝ` with `tsupport u ⊆ (chartAt H α).source`, the chart-α
 `i`-th model-basis partial pushed to `EuclN` satisfies a chart-Sobolev bound by
@@ -1736,30 +1462,20 @@ theorem wkpNorm_partialDerivOnEuclid_le_wkpNorm_chartPushedRaw_succ
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   have hΩ_open : IsOpen Ω :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- A.e. identification with the chosen weak partial.
   have h_ae := partialDerivOnEuclid_ae_eq_chosenWeakPartial (I := I) (M := M)
     (α := α) (i := i) (u := u) hu_smooth hu_supp (p := p) hp_one
-  -- Use wkpNorm_congr_ae to swap.
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_congr_ae
         (d := Module.finrank ℝ E) hp_one hΩ_open h_ae]
-  -- Apply the succ-bound for chosen weak partials.
   have h_bound :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_chosenWeakPartial_le_wkpNorm_succ
       (d := Module.finrank ℝ E) k (p := p) (Ω := Ω) hΩ_open
       (chartPushedRaw (I := I) (M := M) α u) i
-  -- 1 * x = x: produce ENNReal.ofReal 1 = 1 to match.
   have h_one : ENNReal.ofReal (1 : ℝ) = (1 : ℝ≥0∞) := by
     simp
   rw [h_one, one_mul]
   exact h_bound
 
 end ChartDirectionPartialBound
-
-/-! ## Headline bilinear bound assembly
-
-For smooth `v : SmoothScalar g`, the smooth chart-pulled Leibniz residual
-`smoothFChartResidual g α v` satisfies a quantitative `W^{1,2}`-bound on
-`chartTargetEuclid α` in terms of the chart-based `W^{2,2}`-norm of `v.toFun`. -/
 
 section HeadlineAssembly
 
@@ -1778,7 +1494,6 @@ lemma tsupport_smoothRep_subset_source
     tsupport (smoothRep (I := I) (M := M) g α v) ⊆ (chartAt H α).source := by
   classical
   have h_eq := smoothRep_eq_pieces (I := I) (M := M) g α v
-  -- tsupport(f - g) ⊆ tsupport f ∪ tsupport g.
   have h_supp_sub : Function.support (smoothRep (I := I) (M := M) g α v) ⊆
       tsupport (gradInnerPiece (I := I) (M := M) g α v.toFun) ∪
         tsupport (lapPiece (I := I) (M := M) g α v.toFun) := by
@@ -1822,22 +1537,13 @@ lemma smoothFChartResidual_ae_eq_chartPushedRaw_smoothRep
       chartPushedRaw (I := I) (M := M) α
         (smoothRep (I := I) (M := M) g α v) := by
   classical
-  -- Strategy mirrors `memW1p_fChartResidual_smoothToH1Compl`:
-  -- 1. fHLeibnizResidualLp.coeFn =ᵐ fHLeibnizResidualSmoothRep on μ_g
-  -- 2. chartPushedRawLpFromLp.coeFn =ᵐ chartPushedRaw α (Lp.coeFn) on weighted.restrict chartTarget
-  -- 3. chartPushedRaw_aeEq_of_aeEq combines steps 1, 2
-  -- 4. fHLeibnizResidualSmoothRep = smoothRep (textually identical)
-  -- 5. Transfer to volume via absolute continuity
   unfold DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
   unfold DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fChartResidual
-  -- Step 1: Lp coeFn ae-equality
   have h_lp_ae := DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualMemW1p.fHLeibnizResidualLp_smoothToH1Compl_coeFn_ae
     (I := I) (M := M) g α v
-  -- Step 2: chartPushedRawLpFromLp_coeFn
   have h_fChart_ae := chartPushedRawLpFromLp_coeFn (I := I) (M := M) g α
     (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp
       (I := I) (M := M) g α (smoothToH1Compl (I := I) (M := M) g v))
-  -- Step 3: combine via chartPushedRaw_aeEq_of_aeEq
   have h_lp_meas : Measurable
       ((DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp
           (I := I) (M := M) g α (smoothToH1Compl (I := I) (M := M) g v) :
@@ -1845,8 +1551,6 @@ lemma smoothFChartResidual_ae_eq_chartPushedRaw_smoothRep
     (Lp.stronglyMeasurable _).measurable
   have h_rep_meas : Measurable (smoothRep (I := I) (M := M) g α v) :=
     (smoothRep_contMDiff (I := I) (M := M) g α v).continuous.measurable
-  -- h_lp_ae uses fHLeibnizResidualSmoothRep; convert to smoothRep
-  -- since they're identical functions, ae-equality holds pointwise.
   have h_smoothRep_eq_fHRep :
       DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualMemW1p.fHLeibnizResidualSmoothRep
         (I := I) (M := M) g α v = smoothRep (I := I) (M := M) g α v := by
@@ -1867,7 +1571,6 @@ lemma smoothFChartResidual_ae_eq_chartPushedRaw_smoothRep
         chartPushedRaw (I := I) (M := M) α
           (smoothRep (I := I) (M := M) g α v) :=
     h_fChart_ae.trans h_chartPushed_lp_ae
-  -- Step 5: transfer to volume.restrict via absolute continuity.
   have h_vol_abs_weighted : (volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α) ≪
       (chartPulledWeightedMeasure (I := I) g α).restrict
@@ -1939,8 +1642,6 @@ lemma chartPushedRaw_smoothRep_eq
         chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy]
     ring
 
-/-! ### Membership of `chartPushedRaw α (η · v.toFun)` in `MemWkp 2 2` -/
-
 /-- For smooth `v : SmoothScalar g`, the chart-pushed-raw of `etaTimesV α v.toFun`
 is in `MemWkp 2 2 chartTargetEuclid α`. -/
 private lemma memWkp_chartPushedRaw_etaTimesV
@@ -1956,7 +1657,6 @@ private lemma memWkp_chartPushedRaw_etaTimesV
   have hηv_supp : tsupport (etaTimesV (I := I) (M := M) α v.toFun) ⊆
       (chartAt H α).source :=
     tsupport_etaTimesV_subset (I := I) (M := M) α v.toFun
-  -- chartPushedRaw α (η · v) is ContDiff with compact support inside chartTargetEuclid α.
   have hCP_smooth : ContDiff ℝ ∞
       (chartPushedRaw (I := I) (M := M) α
         (etaTimesV (I := I) (M := M) α v.toFun)) :=
@@ -2032,7 +1732,6 @@ private lemma wkpNorm_chartPushedRaw_etaTimesV_le
   intro v
   have h_v_MemWkpChart : MemWkpChart (I := I) (M := M) g 2 2 v.toFun :=
     memWkpChart_of_contMDiff_k (I := I) (M := M) g (by norm_num) 2 v.smooth
-  -- etaTimesV = chartStrictCutoff · v.toFun pointwise.
   have h_funext : etaTimesV (I := I) (M := M) α v.toFun =
       fun x : M => chartStrictCutoff (I := I) (M := M) α x * v.toFun x := by
     funext x; rfl
@@ -2054,11 +1753,6 @@ private lemma wkpNorm_partialDerivOnEuclid_etaTimesV_le
         ENNReal.ofReal C * wkpNormChart (I := I) (M := M) g 2 2
           (fun x : M => v.toFun x) := by
   classical
-  -- Combine the partial-derivative bound and the strict-cutoff multiplication bound.
-  -- Partial-derivative bound at k=1, p=2: ∃ C_p > 0, for smooth η · v with tsupport in chart source,
-  --   wkpNorm 1 2 (partialDerivOnEuclid α i (η · v)) ≤ C_p · wkpNorm 2 2 (chartPushedRaw α (η · v)).
-  -- The C_p depends on i but is uniform (in fact = 1 from the proof).
-  -- We need a single C across all i. We'll build a finite max.
   have h_per_i_partial : ∀ i : Fin (Module.finrank ℝ E), ∃ C_p : ℝ, 0 < C_p ∧
       ∀ {u : M → ℝ}, ContMDiff I 𝓘(ℝ, ℝ) ∞ u → tsupport u ⊆ (chartAt H α).source →
         DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
@@ -2086,13 +1780,10 @@ private lemma wkpNorm_partialDerivOnEuclid_etaTimesV_le
             (chartPushedRaw (I := I) (M := M) α u)
             (chartTargetEuclid (I := I) (M := M) α) := fun i =>
     (h_per_i_partial i).choose_spec.2
-  -- Combine with the strict-cutoff multiplication bound.
   obtain ⟨C_strict, hC_strict_pos, hC_strict_bound⟩ :=
     wkpNorm_chartPushedRaw_etaTimesV_le (I := I) (M := M) g α
-  -- Max over i.
   by_cases h_fin_zero : Module.finrank ℝ E = 0
-  · -- Vacuous: NeZero (Module.finrank ℝ E) instance contradicts this.
-    exact absurd h_fin_zero (NeZero.ne _)
+  · exact absurd h_fin_zero (NeZero.ne _)
   have h_fin_pos : 0 < Module.finrank ℝ E := Nat.pos_of_ne_zero h_fin_zero
   haveI h_nonempty : Nonempty (Fin (Module.finrank ℝ E)) := ⟨⟨0, h_fin_pos⟩⟩
   set Cmax : ℝ := Finset.univ.sup' (Finset.univ_nonempty (α := Fin _)) Cp
@@ -2109,11 +1800,8 @@ private lemma wkpNorm_partialDerivOnEuclid_etaTimesV_le
   have hηv_supp : tsupport (etaTimesV (I := I) (M := M) α v.toFun) ⊆
       (chartAt H α).source :=
     tsupport_etaTimesV_subset (I := I) (M := M) α v.toFun
-  -- Partial-derivative bound for i:
   have h_partial_bound := hCp_bound i hηv_smooth hηv_supp
-  -- Strict-cutoff multiplication bound:
   have h_strict_bound := hC_strict_bound v
-  -- Chain:
   calc DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) 1 2
         (partialDerivOnEuclid (I := I) (M := M) α i
@@ -2138,8 +1826,6 @@ private lemma wkpNorm_partialDerivOnEuclid_etaTimesV_le
             rw [hC_total_def]
             exact mul_le_mul_of_nonneg_right (hCmax_ge i) hC_strict_pos.le
 
-/-! ### Bound for the `gradInnerPiece` chart-pushed-raw `W^{1,2}` norm -/
-
 /-- For smooth `v : SmoothScalar g`, the chart-pushed-raw `gradInnerPiece` is bounded
 in `W^{1,2}` on `chartTargetEuclid α` by a constant times `wkpNormChart g 2 2 v.toFun`.
 
@@ -2158,7 +1844,6 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
       ENNReal.ofReal C * wkpNormChart (I := I) (M := M) g 2 2
         (fun x : M => v.toFun x) := by
   classical
-  -- Per-i constants for smooth-mul:
   have h_per_i_smul : ∀ i : Fin (Module.finrank ℝ E), ∃ K : ℝ, 0 < K ∧
       ∀ {u : EuclN → ℝ},
         DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
@@ -2196,10 +1881,8 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
             (d := Module.finrank ℝ E) 1 2 u
             (chartTargetEuclid (I := I) (M := M) α) := fun i =>
     (h_per_i_smul i).choose_spec.2
-  -- Constant for partial bounds:
   obtain ⟨C_partial, hC_partial_pos, hC_partial_bound⟩ :=
     wkpNorm_partialDerivOnEuclid_etaTimesV_le (I := I) (M := M) g α
-  -- Build the final constant.
   set sumK : ℝ := ∑ i : Fin (Module.finrank ℝ E), K i with hsumK_def
   have hsumK_nn : 0 ≤ sumK :=
     Finset.sum_nonneg (fun i _ => (hK_pos i).le)
@@ -2208,7 +1891,6 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
     rw [hCfinal_def]; linarith [mul_nonneg hsumK_nn hC_partial_pos.le]
   refine ⟨Cfinal, h_Cfinal_pos, ?_⟩
   intro v
-  -- Pointwise identity on chartTarget.
   have h_pointwise : ∀ y ∈ chartTargetEuclid (I := I) (M := M) α,
       chartPushedRaw (I := I) (M := M) α
           (gradInnerPiece (I := I) (M := M) g α v.toFun) y =
@@ -2228,12 +1910,9 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
       (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet).mpr ?_
     refine Filter.Eventually.of_forall ?_
     intro y hy; exact h_pointwise y hy
-  -- Use wkpNorm_congr_ae.
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_congr_ae
         (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
         (chartTargetEuclid_isOpen (I := I) (M := M) α) h_ae]
-  -- Goal: wkpNorm 1 2 (fun y => 2 · ∑ i, Λgrad_i · ∂_i) ≤ Cfinal · wkpNormChart 2 2 v.toFun
-  -- Step 1: Each summand is in MemWkp 1 2.
   have h_partial_mem : ∀ i : Fin (Module.finrank ℝ E),
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) 1 2
@@ -2257,7 +1936,6 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
       (Λgrad_contDiff (I := I) (M := M) g α i)
       (fun j hj y _ => hC_Λ_bound j hj y)
       (h_partial_mem i)
-  -- Membership of the sum, proven inline by Finset.induction.
   have h_sum_mem_gen : ∀ (S : Finset (Fin (Module.finrank ℝ E))),
       (∀ ε ∈ S, DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) 1 2
@@ -2311,7 +1989,6 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
               (etaTimesV (I := I) (M := M) α v.toFun) y)
         (chartTargetEuclid (I := I) (M := M) α) :=
     h_sum_mem_gen Finset.univ (fun i _ => h_summand_mem i)
-  -- Pull out the 2 (using wkpNorm_const_smul).
   have h_const2 :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) 1 2
@@ -2332,7 +2009,6 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
       (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
       (chartTargetEuclid_isOpen (I := I) (M := M) α) h_sum_mem (2 : ℝ)
   rw [h_const2]
-  -- Apply triangle inequality for sum (proved inline by Finset.induction).
   have h_triangle :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) 1 2
@@ -2348,7 +2024,6 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
             partialDerivOnEuclid (I := I) (M := M) α i
               (etaTimesV (I := I) (M := M) α v.toFun) y)
           (chartTargetEuclid (I := I) (M := M) α) := by
-    -- Induction over the (univ) Finset.
     have h_gen : ∀ (T : Finset (Fin (Module.finrank ℝ E))),
         (∀ i ∈ T, DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
           (d := Module.finrank ℝ E) 1 2
@@ -2397,8 +2072,6 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
                   partialDerivOnEuclid (I := I) (M := M) α ε
                     (etaTimesV (I := I) (M := M) α v.toFun) y)
               (chartTargetEuclid (I := I) (M := M) α) := by
-            -- Use the existing chart-level lemma with Finset M, applied via a
-            -- general induction. Easier: build it inline.
             have h_sum_mem_T : ∀ (S : Finset (Fin (Module.finrank ℝ E))),
                 (∀ ε ∈ S, DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
                   (d := Module.finrank ℝ E) 1 2
@@ -2444,7 +2117,6 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
                     (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
                     (chartTargetEuclid_isOpen (I := I) (M := M) α) hf_δ hsum
             exact h_sum_mem_T T hf_T_mem
-          -- Triangle for insert:
           have h_eq : (fun y : EuclN => ∑ ε ∈ insert γ T,
               Λgrad (I := I) (M := M) g α ε y *
                 partialDerivOnEuclid (I := I) (M := M) α ε
@@ -2469,10 +2141,7 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
   have h_two_norm : ‖(2 : ℝ)‖ₑ = ENNReal.ofReal 2 := by
     rw [Real.enorm_eq_ofReal (by norm_num : (0 : ℝ) ≤ 2)]
   rw [h_two_norm]
-  -- Combine via mul_le_mul:
   refine le_trans (mul_le_mul_of_nonneg_left h_triangle (zero_le _)) ?_
-  -- The RHS is now 2 * ∑ i, wkpNorm 1 2 (Λgrad_i · ∂_i).
-  -- Bound each summand by K_i · wkpNorm 1 2 ∂_i ≤ K_i · C_partial · wkpNormChart.
   have h_each_bound : ∀ i : Fin (Module.finrank ℝ E),
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) 1 2
@@ -2503,7 +2172,6 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
       _ = ENNReal.ofReal (K i * C_partial) *
               wkpNormChart (I := I) (M := M) g 2 2 v.toFun := by
             rw [← mul_assoc, ENNReal.ofReal_mul (hK_pos i).le]
-  -- Sum the per-i bounds.
   have h_sum_bound : ∑ i : Fin (Module.finrank ℝ E),
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) 1 2
@@ -2516,7 +2184,6 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
           wkpNormChart (I := I) (M := M) g 2 2 v.toFun :=
     Finset.sum_le_sum (fun i _ => h_each_bound i)
   refine le_trans (mul_le_mul_of_nonneg_left h_sum_bound (zero_le _)) ?_
-  -- Simplify: ∑ i, ENNReal.ofReal (K i * C_partial) * wkpNormChart = (∑ i, K i * C_partial) * wkpNormChart
   rw [← Finset.sum_mul]
   rw [show ∑ i : Fin (Module.finrank ℝ E), ENNReal.ofReal (K i * C_partial) =
       ENNReal.ofReal (∑ i : Fin (Module.finrank ℝ E), K i * C_partial) from by
@@ -2531,9 +2198,6 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
   refine ENNReal.ofReal_le_ofReal ?_
   rw [hCfinal_def]; linarith [mul_nonneg hsumK_nn hC_partial_pos.le]
 
-/-! ### Bound for the `lapPiece` chart-pushed-raw `W^{1,2}` norm in terms of
-`wkpNormChart` -/
-
 /-- For smooth `v : SmoothScalar g`, the chart-pushed-raw `lapPiece` is bounded
 in `W^{1,2}` on `chartTargetEuclid α` by a constant times `wkpNormChart g 2 2 v.toFun`. -/
 private lemma wkpNorm_chartPushedRaw_lapPiece_le
@@ -2547,10 +2211,8 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le
       ENNReal.ofReal C * wkpNormChart (I := I) (M := M) g 2 2
         (fun x : M => v.toFun x) := by
   classical
-  -- Step 1: lapPiece bound in terms of chartPushedRaw α (η · v) (W^{1,2}).
   obtain ⟨C_lap, hC_lap_pos, hC_lap_bound⟩ :=
     wkpNorm_chartPushedRaw_lapPiece_le_etaTimesV_aux (I := I) (M := M) g α
-  -- Step 2: chartPushedRaw α (η · v) W^{2,2} ≤ C_strict · wkpNormChart 2 2 v.
   obtain ⟨C_strict, hC_strict_pos, hC_strict_bound⟩ :=
     wkpNorm_chartPushedRaw_etaTimesV_le (I := I) (M := M) g α
   set Cfinal : ℝ := C_lap * C_strict with hCfinal_def
@@ -2559,7 +2221,6 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le
   intro v
   have h_step1 := hC_lap_bound v
   have h_step2 := hC_strict_bound v
-  -- Need: wkpNorm 1 2 (chartPushedRaw α (η · v)) ≤ wkpNorm 2 2 (chartPushedRaw α (η · v)).
   have h_mono : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
       (d := Module.finrank ℝ E) 1 2
       (chartPushedRaw (I := I) (M := M) α
@@ -2600,8 +2261,6 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le
             wkpNormChart (I := I) (M := M) g 2 2 v.toFun := by
           rw [hCfinal_def]
 
-/-! ### Headline assembly -/
-
 /-- **Headline bilinear bound**: For a closed Riemannian manifold `(M, g)` and a
 chart-atlas index `α : M`, the smooth chart-pulled Leibniz residual
 `smoothFChartResidual g α v` satisfies a quantitative `W^{1,2}` bound on
@@ -2622,14 +2281,11 @@ theorem wkpNorm_smoothFChartResidual_le_wkpNormChart
     wkpNorm_chartPushedRaw_lapPiece_le (I := I) (M := M) g α
   refine ⟨C_grad + C_lap, by linarith, ?_⟩
   intro v
-  -- Step 1: smoothFChartResidual =ᵐ chartPushedRaw α (smoothRep g α v).
   have h_ae := smoothFChartResidual_ae_eq_chartPushedRaw_smoothRep
     (I := I) (M := M) g α v
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_congr_ae
         (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
         (chartTargetEuclid_isOpen (I := I) (M := M) α) h_ae]
-  -- Step 2: chartPushedRaw α (smoothRep) = -chartPushedRaw α gradInnerPiece -
-  --   chartPushedRaw α lapPiece pointwise.
   have h_ptwise : chartPushedRaw (I := I) (M := M) α
         (smoothRep (I := I) (M := M) g α v) =
       fun y => -chartPushedRaw (I := I) (M := M) α
@@ -2639,9 +2295,6 @@ theorem wkpNorm_smoothFChartResidual_le_wkpNormChart
     funext y
     exact chartPushedRaw_smoothRep_eq (I := I) (M := M) g α v y
   rw [h_ptwise]
-  -- Step 3: Triangle: wkpNorm 1 2 (-A - B) ≤ wkpNorm 1 2 (-A) + wkpNorm 1 2 (-B).
-  -- Rewrite -A - B = (-1) * A + (-1) * B and use triangle + const_smul.
-  -- Memberships:
   have hP_grad : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 1 2
       (chartPushedRaw (I := I) (M := M) α
@@ -2666,7 +2319,6 @@ theorem wkpNorm_smoothFChartResidual_le_wkpNormChart
         (lapPiece_smooth (I := I) (M := M) g α v)
         (tsupport_lapPiece_subset_source (I := I) (M := M) g α v.toFun) 2
     exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p).mpr h_w1p
-  -- Rewrite: fun y => -A y - B y = fun y => (-A y) + (-B y).
   have h_rewrite : (fun y : EuclN => -chartPushedRaw (I := I) (M := M) α
           (gradInnerPiece (I := I) (M := M) g α v.toFun) y -
         chartPushedRaw (I := I) (M := M) α
@@ -2677,7 +2329,6 @@ theorem wkpNorm_smoothFChartResidual_le_wkpNormChart
           (lapPiece (I := I) (M := M) g α v.toFun) y)) := by
     funext y; ring
   rw [h_rewrite]
-  -- Memberships for -A and -B:
   have hP_negA : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 1 2
       (fun y => (-1 : ℝ) * chartPushedRaw (I := I) (M := M) α
@@ -2694,13 +2345,11 @@ theorem wkpNorm_smoothFChartResidual_le_wkpNormChart
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.const_smul
       (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
       (chartTargetEuclid_isOpen (I := I) (M := M) α) hP_lap (-1 : ℝ)
-  -- Triangle: wkpNorm 1 2 (-A + -B) ≤ wkpNorm 1 2 (-A) + wkpNorm 1 2 (-B).
   have h_triangle :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_add_le
       (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
       (chartTargetEuclid_isOpen (I := I) (M := M) α) hP_negA hP_negB
   refine le_trans h_triangle ?_
-  -- wkpNorm 1 2 ((-1) * A) = ‖-1‖ * wkpNorm 1 2 A = wkpNorm 1 2 A.
   have h_neg_norm_grad :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) 1 2
@@ -2738,7 +2387,6 @@ theorem wkpNorm_smoothFChartResidual_le_wkpNormChart
       simp
     rw [this, one_mul]
   rw [h_neg_norm_grad, h_neg_norm_lap]
-  -- Apply piecewise bounds:
   calc DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) 1 2
         (chartPushedRaw (I := I) (M := M) α

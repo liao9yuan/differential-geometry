@@ -73,8 +73,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
-/-! ## The boundary inclusion as a smooth map -/
-
 /-- The inclusion of the boundary submanifold into the ambient manifold,
 realised as `Subtype.val`. -/
 def boundaryInclusion (I : ModelWithCorners ℝ E H) (M : Type*)
@@ -193,8 +191,6 @@ theorem boundaryInclusion_contMDiff
       BoundaryManifold.isEmpty_of_isEmpty_boundaryH (I := I)
     exact (IsEmpty.false x).elim
 
-/-! ## The fiberwise differential of the inclusion -/
-
 variable [hI : HasSmoothBoundary E H I] [IsManifold I ∞ M]
 
 /-- The differential of the boundary inclusion at a boundary point `x`, as a
@@ -259,8 +255,6 @@ private lemma dincl_eq_fderiv_Phi (x : BoundaryManifold I M)
     rfl
   rw [Filter.EventuallyEq.fderiv_eq h_eq]
 
-/-! ## Injectivity of the inclusion's differential -/
-
 /-- The Fréchet derivative of the chart-local form `Phi` is injective at every
 point, by the coordinate-compatibility identity `projE ∘ Phi = id`. -/
 private lemma fderiv_Phi_injective (e : hI.boundaryE) :
@@ -299,8 +293,6 @@ lemma dincl_injective (x : BoundaryManifold I M) :
     haveI : IsEmpty (BoundaryManifold I M) :=
       BoundaryManifold.isEmpty_of_isEmpty_boundaryH (I := I)
     exact (IsEmpty.false x).elim
-
-/-! ## The fiberwise pull-back inner product -/
 
 /-- The metric `g.inner y`, for any `y : M`, viewed as a CLM
 `E →L[ℝ] E →L[ℝ] ℝ`. The cast is explicit to avoid triggering instance-resolution
@@ -347,8 +339,6 @@ lemma inducedMetricInner_pos
   apply hv
   have h_zero : (dincl x) (0 : hI.boundaryE) = 0 := map_zero _
   exact dincl_injective (I := I) (M := M) x (h0.trans h_zero.symm)
-
-/-! ## Bornology bound on the unit ellipsoid -/
 
 /-- A continuous positive-definite bilinear form on a finite-dimensional real
 normed space is *coercive*: there exists `c > 0` with
@@ -437,13 +427,6 @@ lemma inducedMetricInner_isVonNBounded
               Real.sqrt_sq h_norm_nn]
     _ ≤ Real.sqrt (1 / c) := Real.sqrt_le_sqrt h_v_sq_le
 
-/-! ## Smoothness of the chart-local pull-back form
-
-We establish smoothness of the chart-local representation
-`inducedMetricInnerLocal` of the pull-back inner product, viewed as a function
-from `boundaryE` into `boundaryE →L[ℝ] boundaryE →L[ℝ] ℝ`. This is the
-chart-local content used to assemble the bundle-section smoothness. -/
-
 /-- The chart-local form of the pull-back inner product, computed via the
 boundary chart at `x₀` and the ambient chart at `x₀.val`. -/
 private noncomputable def inducedMetricInnerLocal
@@ -468,14 +451,6 @@ private lemma fderiv_Phi_contDiff :
     ContDiff ℝ ∞ (fun e : hI.boundaryE => fderiv ℝ (Phi I) e) :=
   (Phi_contDiff I).fderiv_right (m := ∞) le_rfl
 
-/-! ### Smoothness of the bundle section
-
-We prove `inducedMetricInner_contMDiff`, the key smoothness statement for the
-bilinear-form Hom-bundle section. The proof is structured around a generic
-helper lemma `bilinearComp_section_contMDiffAt` which captures the smoothness
-of a chart-trivialised bilinear-form pullback through smooth-in-coordinates
-linear maps. -/
-
 /-- **Helper:** smoothness of a bilinear-form pullback at a point, in
 chart-trivialised form. Given:
   * a smooth ambient bilinear-form section `ψ`,
@@ -494,8 +469,6 @@ private lemma bilinearComp_smooth_at
     (hL : ContMDiffAt Ib 𝓘(ℝ, Fb' →L[ℝ] Fa) ∞ L b₀) :
     ContMDiffAt Ib 𝓘(ℝ, Fb' →L[ℝ] Fb' →L[ℝ] ℝ) ∞
       (fun b => (ψ b).bilinearComp (L b) (L b)) b₀ := by
-  -- `bilinearComp f g h = ((f.comp g).flip.comp h).flip`.
-  -- We chain `clm_comp` smoothness: comp is bilinear, hence smooth in two args.
   have h1 : ContMDiffAt Ib 𝓘(ℝ, Fb' →L[ℝ] Fa →L[ℝ] ℝ) ∞
       (fun b => (ψ b).comp (L b)) b₀ := hψ.clm_comp hL
   have h_flip_isom : ContDiff ℝ ∞ (ContinuousLinearMap.flip :
@@ -570,13 +543,11 @@ private lemma gInnerCharted_eval
       g.inner b
         ((trivializationAt E (TangentSpace I) x₀).symm b v)
         ((trivializationAt E (TangentSpace I) x₀).symm b w) := by
-  -- Unfold `gInnerCharted` to reveal the trivialization second-component.
   change ((trivializationAt (E →L[ℝ] E →L[ℝ] ℝ)
     (fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) x₀)
       ⟨b, g.inner b⟩).2 v w = _
   rw [hom_trivializationAt_apply]
   rw [inCoordinates_apply_eq₂ (𝕜 := ℝ) hb hb (Set.mem_univ _)]
-  -- For trivial bundle, `linearMapAt = id` (acts as identity on ℝ).
   change (trivializationAt ℝ (Bundle.Trivial M ℝ) x₀).linearMapAt ℝ b _ = _
   change (Bundle.Trivial.trivialization M ℝ).linearMapAt ℝ b _ = _
   rw [Bundle.Trivial.linearMapAt_trivialization (𝕜 := ℝ) (B := M) (F := ℝ) b]
@@ -603,8 +574,6 @@ private lemma inducedMetricInner_chart_eval
       ((trivializationAt E (TangentSpace I) (x₀ : M)).continuousLinearMapAt ℝ (b : M)
         (dincl b ((trivializationAt hI.boundaryE
           (TangentSpace hI.boundaryI) x₀).symm b w))) := by
-  -- Apply the inCoordinates formula for the bilinear-form Hom-bundle on
-  -- `BoundaryManifold I M`.
   rw [hom_trivializationAt_apply]
   rw [inCoordinates_apply_eq₂ (𝕜 := ℝ) hb_bdy hb_bdy (Set.mem_univ _)]
   change (trivializationAt ℝ (Bundle.Trivial (BoundaryManifold I M) ℝ) x₀).linearMapAt ℝ b _ = _
@@ -613,8 +582,6 @@ private lemma inducedMetricInner_chart_eval
   change inducedMetricInner g b _ _ = _
   rw [inducedMetricInner_apply]
   rw [gInnerCharted_eval g (x₀ : M) (b : M) hb_ambient]
-  -- After the rewrite, on the RHS we have `g.inner b.val (symm (clmAt _ )) (symm (clmAt _))`.
-  -- We need `symm (clmAt u) = u`. Convert via `symmL_apply` and `symmL_continuousLinearMapAt`.
   have hM_v : (trivializationAt E (TangentSpace I) (x₀ : M)).symm (b : M)
         ((trivializationAt E (TangentSpace I) (x₀ : M)).continuousLinearMapAt ℝ (b : M)
           (dincl b ((trivializationAt hI.boundaryE
@@ -624,8 +591,6 @@ private lemma inducedMetricInner_chart_eval
     have := (trivializationAt E (TangentSpace I) (x₀ : M)).symmL_continuousLinearMapAt
       (R := ℝ) hb_ambient (dincl b ((trivializationAt hI.boundaryE
         (TangentSpace hI.boundaryI) x₀).symm b v))
-    -- `symmL b u = symm b u` (by `symmL_apply` simp).
-    -- So `symmL b (clmAt b u) = u` becomes `symm b (clmAt b u) = u`.
     simpa using this
   have hM_w : (trivializationAt E (TangentSpace I) (x₀ : M)).symm (b : M)
         ((trivializationAt E (TangentSpace I) (x₀ : M)).continuousLinearMapAt ℝ (b : M)
@@ -651,25 +616,17 @@ private lemma dincl_chart_conjugated_contMDiffAt
           ((dincl b).comp
             ((trivializationAt hI.boundaryE
                 (TangentSpace hI.boundaryI) x₀).symmL ℝ b))) x₀ := by
-  -- This equals `inTangentCoordinates boundaryI I id (boundaryInclusion I M) (mfderiv ...) x₀`,
-  -- evaluated at `b`. By `ContMDiffAt.mfderiv_const`, the latter is `ContMDiffAt`.
   have h_inclusion_at : ContMDiffAt hI.boundaryI I ∞ (boundaryInclusion I M) x₀ :=
     boundaryInclusion_contMDiff.contMDiffAt
   have h_mfderiv : ContMDiffAt hI.boundaryI 𝓘(ℝ, hI.boundaryE →L[ℝ] E) ∞
       (inTangentCoordinates hI.boundaryI I id (boundaryInclusion I M)
         (mfderiv hI.boundaryI I (boundaryInclusion I M)) x₀) x₀ := by
-    -- We use `mfderiv_const` with `m + 1 ≤ n` where `n = ∞`.
-    -- Since `∞ + 1 = ∞`, the inequality `∞ + 1 ≤ ∞` is true.
     have h_top_add : (∞ : WithTop ℕ∞) + 1 ≤ ∞ := by
       have h_eq : (∞ : WithTop ℕ∞) + 1 = (∞ : WithTop ℕ∞) := by
         change ((⊤ : ℕ∞) : WithTop ℕ∞) + 1 = ((⊤ : ℕ∞) : WithTop ℕ∞)
         rfl
       rw [h_eq]
     exact h_inclusion_at.mfderiv_const h_top_add
-  -- Show that `inTangentCoordinates ... x₀ b` agrees with the chart-conjugated form
-  -- on a neighbourhood of `x₀`. We use `inTangentCoordinates_eq_mfderiv_comp` and
-  -- `TangentBundle.continuousLinearMapAt_trivializationAt`,
-  -- `TangentBundle.symmL_trivializationAt`.
   have h_nhds : ∀ᶠ b in 𝓝 x₀,
       inTangentCoordinates hI.boundaryI I id (boundaryInclusion I M)
         (mfderiv hI.boundaryI I (boundaryInclusion I M)) x₀ b
@@ -677,7 +634,6 @@ private lemma dincl_chart_conjugated_contMDiffAt
         ((dincl b).comp
           ((trivializationAt hI.boundaryE
               (TangentSpace hI.boundaryI) x₀).symmL ℝ b)) := by
-    -- For `b` in a neighbourhood of `x₀`, both `b` and `x₀` are in respective chart sources.
     have h_nhds_amb : ∀ᶠ b : BoundaryManifold I M in 𝓝 x₀,
         (b : M) ∈ (chartAt H (x₀ : M)).source := by
       have h_open : IsOpen ((chartAt H (x₀ : M)).source) := (chartAt H (x₀ : M)).open_source
@@ -691,14 +647,11 @@ private lemma dincl_chart_conjugated_contMDiffAt
         b ∈ (chartAt hI.boundaryH x₀).source := by
       exact (chartAt hI.boundaryH x₀).open_source.mem_nhds (mem_chart_source _ _)
     filter_upwards [h_nhds_amb, h_nhds_bdy] with b h_amb h_bdy
-    -- Apply `inTangentCoordinates_eq_mfderiv_comp` (using boundaryInclusion x₀ = x₀.val).
     have h_inT := inTangentCoordinates_eq_mfderiv_comp
       (I := hI.boundaryI) (I' := I) (𝕜 := ℝ)
       (f := id) (g := boundaryInclusion I M)
       (ϕ := mfderiv hI.boundaryI I (boundaryInclusion I M)) (x₀ := x₀) (x := b)
       (hx := h_bdy) (hy := h_amb)
-    -- The mfderiv (extChartAt I x₀.val) (boundaryInclusion b) and its symm form match
-    -- `continuousLinearMapAt` and `symmL` of the trivialisations.
     have h_clmAt_eq : (trivializationAt E (TangentSpace I) (x₀ : M)).continuousLinearMapAt ℝ (b : M)
         = mfderiv I 𝓘(ℝ, E) (extChartAt I (x₀ : M)) (b : M) :=
       TangentBundle.continuousLinearMapAt_trivializationAt h_amb
@@ -707,17 +660,12 @@ private lemma dincl_chart_conjugated_contMDiffAt
             (Set.range hI.boundaryI) (extChartAt hI.boundaryI x₀ b) :=
       TangentBundle.symmL_trivializationAt h_bdy
     rw [h_inT]
-    -- The goal has `mfderiv (extChartAt I (boundaryInclusion x₀)) (boundaryInclusion b)` and
-    -- `mfderivWithin (range hI.boundaryI) ...`. These match `clmAt` and `symmL` after rewriting.
     change _ = ((trivializationAt E (TangentSpace I) (x₀ : M)).continuousLinearMapAt ℝ (b : M)).comp
         ((dincl b).comp ((trivializationAt hI.boundaryE
               (TangentSpace hI.boundaryI) x₀).symmL ℝ b))
     rw [h_clmAt_eq, h_symmL_eq]
-    -- Both sides are now compositions of mfderivs.
     rfl
   exact h_mfderiv.congr_of_eventuallyEq h_nhds
-
-/-! ### Bundle smoothness of the pull-back inner product -/
 
 /-- The bundle section `b ↦ TotalSpace.mk' b (inducedMetricInner g b)` is `C^∞`. -/
 theorem inducedMetricInner_contMDiff
@@ -732,17 +680,8 @@ theorem inducedMetricInner_contMDiff
   by_cases hN : Nonempty hI.boundaryH
   · haveI := hN
     intro x₀
-    -- Reduce to chart-trivialised form via `contMDiffAt_section_iff`.
     rw [(trivializationAt _ _ x₀).contMDiffAt_section_iff
       (FiberBundle.mem_baseSet_trivializationAt' x₀)]
-    -- Now the goal is smoothness of the chart-trivialised form, viewed as a
-    -- function `BoundaryManifold I M → boundaryE →L boundaryE →L ℝ`.
-    -- We show this matches a smooth bilinearComp on a neighborhood of `x₀`,
-    -- using `inducedMetricInner_chart_eval` for the identification.
-    -- The smooth pieces are:
-    -- - `b ↦ gInnerCharted x₀.val b.val` smooth (via `gInnerCharted_along_inclusion_contMDiffAt`).
-    -- - `b ↦ L_b := clmAt_M^x₀.val_b.val ∘ dincl b ∘ symmL_bdy^x₀_b` smooth (via `dincl_chart_conjugated_contMDiffAt`).
-    -- - bilinearComp combines them.
     have h_gInner_at : ContMDiffAt hI.boundaryI 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) ∞
         (fun b : BoundaryManifold I M =>
           gInnerCharted (I := I) (M := M) g (x₀ : M) (b : M)) x₀ :=
@@ -754,7 +693,6 @@ theorem inducedMetricInner_contMDiff
               ((trivializationAt hI.boundaryE
                   (TangentSpace hI.boundaryI) x₀).symmL ℝ b))) x₀ :=
       dincl_chart_conjugated_contMDiffAt x₀
-    -- Apply `bilinearComp_smooth_at`.
     have h_bilinearComp : ContMDiffAt hI.boundaryI 𝓘(ℝ, hI.boundaryE →L[ℝ] hI.boundaryE →L[ℝ] ℝ) ∞
         (fun b : BoundaryManifold I M =>
           (gInnerCharted (I := I) (M := M) g (x₀ : M) (b : M)).bilinearComp
@@ -767,9 +705,7 @@ theorem inducedMetricInner_contMDiff
                 ((trivializationAt hI.boundaryE
                     (TangentSpace hI.boundaryI) x₀).symmL ℝ b)))) x₀ :=
       bilinearComp_smooth_at h_gInner_at h_L_at
-    -- Show the chart-trivialised form agrees with this on a neighbourhood of `x₀`.
     refine h_bilinearComp.congr_of_eventuallyEq ?_
-    -- Find a neighbourhood of `x₀` where both `b` is in the appropriate base sets.
     have h_nhds_amb : ∀ᶠ b : BoundaryManifold I M in 𝓝 x₀,
         (b : M) ∈ (trivializationAt E (TangentSpace I) (x₀ : M)).baseSet := by
       have h_open : IsOpen ((trivializationAt E (TangentSpace I) (x₀ : M)).baseSet) :=
@@ -789,19 +725,14 @@ theorem inducedMetricInner_contMDiff
         FiberBundle.mem_baseSet_trivializationAt' x₀
       exact h_open.mem_nhds h_x₀_in
     filter_upwards [h_nhds_amb, h_nhds_bdy] with b hb_amb hb_bdy
-    -- Use the explicit formula `inducedMetricInner_chart_eval` to identify.
     refine ContinuousLinearMap.ext fun v => ContinuousLinearMap.ext fun w => ?_
     rw [ContinuousLinearMap.bilinearComp_apply]
-    -- LHS: `(triv ⟨b, inducedMetricInner g b⟩).2 v w`.
-    -- RHS: `gInnerCharted x₀.val b.val (clmAt v') (clmAt w')` where `v' = dincl b (symm v)` etc.
     rw [inducedMetricInner_chart_eval g x₀ b hb_amb hb_bdy v w]
     rfl
   · haveI : IsEmpty hI.boundaryH := not_nonempty_iff.mp hN
     haveI : IsEmpty (BoundaryManifold I M) :=
       BoundaryManifold.isEmpty_of_isEmpty_boundaryH (I := I)
     intro x; exact (IsEmpty.false x).elim
-
-/-! ### Assembly of the boundary metric -/
 
 /-- The induced Riemannian metric on the boundary of `M`, obtained by pulling
 back `g` through the smooth boundary inclusion. -/

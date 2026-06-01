@@ -67,8 +67,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## Compactness of the partition-of-unity `tsupport` on a compact manifold -/
-
 /-- The `tsupport` of the chart-atlas partition-of-unity weight at `α` is
 compact (closed in a compact ambient space). -/
 private lemma chartAtlasPOU_tsupport_isCompact (α : M) :
@@ -83,25 +81,6 @@ private lemma chartAtlasPOU_tsupport_subset_chartSource (α : M) :
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
       (chartAt H α).source :=
   chartAtlasPOU_isSubordinate (I := I) (M := M) α
-
-/-! ## Headline: naked fiber-norm gradient bound (per-`k` sum form, `H¹`)
-
-This statement removes the canonical `tensorRSSpace_normedAddCommGroup`
-norm instance via `attribute [-instance]`, so the `‖·‖` on
-`TensorRSSpace r s I b` resolves to the g-induced norm from the
-`Bundle.RiemannianBundle` instance installed via `letI` in the
-conclusion. This matches the norm convention used by the unconditional
-uniform op-norm bound
-`tensorRSChartFiberToModel_opNorm_isBounded_on_compact_unconditional`.
-
-Compared with `g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport_h1`,
-the trivialisation-applied norms `‖triv.continuousLinearMapAt ℝ b X‖²` on
-the per-`k` covariant-derivative and Christoffel-correction atoms are
-replaced by the naked fiber norms `‖X‖²` on each atom, exposing the
-decomposition structure in the shape required by the intrinsic G1↔G3
-bridge `intrinsicG1G3BridgePouTsupport`. The constants `A, B` depend on
-`g`, `α`, and `(r, s)` but are independent of the smooth section, the
-multi-indices, and the base point `b`. -/
 
 set_option synthInstance.maxHeartbeats 800000 in
 attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
@@ -151,12 +130,9 @@ theorem g_inner_gradFun_le_pou_weighted_fiber_norm_atoms_on_pouTsupport_h1
   classical
   letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
-  -- Constants from the existing triv-wrapped per-α bound.
   obtain ⟨A₀, B₀, hA₀_nn, hB₀_nn, hbound₀⟩ :=
     g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport_h1
       (I := I) (M := M) g r s α
-  -- Uniform op-norm bound on the chart-`α` forward trivialisation CLM over
-  -- the compact `tsupport ρ_α`.
   have hK_cpt :
       IsCompact (tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
@@ -177,9 +153,7 @@ theorem g_inner_gradFun_le_pou_weighted_fiber_norm_atoms_on_pouTsupport_h1
   have hB_nn : 0 ≤ B := by rw [hB_def]; exact mul_nonneg hB₀_nn hCop_sq_nn
   refine ⟨A, B, hA_nn, hB_nn, ?_⟩
   intro S Idx Jdx b hb
-  -- Apply the existing triv-wrapped per-α bound at `b`.
   have h₀ := hbound₀ S Idx Jdx b hb
-  -- Per-`k` atom abbreviations (triv-wrapped, used in `h₀`'s RHS).
   set Tcov_triv : Fin (Module.finrank ℝ E) → ℝ := fun k =>
     ‖(trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
@@ -199,7 +173,6 @@ theorem g_inner_gradFun_le_pou_weighted_fiber_norm_atoms_on_pouTsupport_h1
               (fun b' => S.toCcTensor.toSection b')
               (chartBasisVecFiber (I := I) α k) b l))‖ ^ 2
     with hTchr_triv_def
-  -- Per-`k` atom abbreviations (naked fiber-norm, target RHS).
   set Tcov_fib : Fin (Module.finrank ℝ E) → ℝ := fun k =>
     ‖chartTensorRSCovariantDerivative (I := I) r s g α
         (fun b' => S.toCcTensor.toSection b')
@@ -223,7 +196,6 @@ theorem g_inner_gradFun_le_pou_weighted_fiber_norm_atoms_on_pouTsupport_h1
     with hTcov_sum_fib_def
   set Tchr_sum_fib : ℝ := ∑ k : Fin (Module.finrank ℝ E), Tchr_fib k
     with hTchr_sum_fib_def
-  -- Non-negativity facts.
   have hTcov_triv_nn : ∀ k, 0 ≤ Tcov_triv k := fun k => by
     rw [hTcov_triv_def]; exact sq_nonneg _
   have hTchr_triv_nn : ∀ k, 0 ≤ Tchr_triv k := fun k => by
@@ -238,7 +210,6 @@ theorem g_inner_gradFun_le_pou_weighted_fiber_norm_atoms_on_pouTsupport_h1
     Finset.sum_nonneg (fun k _ => hTchr_fib_nn k)
   have h_sum_fib_nn : 0 ≤ Tcov_sum_fib + Tchr_sum_fib := by
     exact add_nonneg hTcov_sum_fib_nn hTchr_sum_fib_nn
-  -- Per-`k` op-norm bound: `‖triv X‖² ≤ Cop² · ‖X‖²`.
   have h_per_k_cov : ∀ k : Fin (Module.finrank ℝ E),
       Tcov_triv k ≤ Cop ^ 2 * Tcov_fib k := by
     intro k
@@ -303,7 +274,6 @@ theorem g_inner_gradFun_le_pou_weighted_fiber_norm_atoms_on_pouTsupport_h1
             TensorRSModel r s ℝ E)‖ ^ 2 := by rw [sq]
     have h_rhs_eq : (Cop * ‖Y‖) * (Cop * ‖Y‖) = Cop ^ 2 * ‖Y‖ ^ 2 := by ring
     linarith [h_sq, h_lhs_eq.le, h_lhs_eq.symm.le, h_rhs_eq.le, h_rhs_eq.symm.le]
-  -- Summed bounds on the per-`k` atoms.
   have h_Tcov_sum_le : Tcov_sum_triv ≤ Cop ^ 2 * Tcov_sum_fib := by
     rw [hTcov_sum_triv_def, hTcov_sum_fib_def]
     rw [Finset.mul_sum]
@@ -312,7 +282,6 @@ theorem g_inner_gradFun_le_pou_weighted_fiber_norm_atoms_on_pouTsupport_h1
     rw [hTchr_sum_triv_def, hTchr_sum_fib_def]
     rw [Finset.mul_sum]
     exact Finset.sum_le_sum (fun k _ => h_per_k_chr k)
-  -- Combine: `Tcov_sum_triv + Tchr_sum_triv ≤ Cop² · (Tcov_sum_fib + Tchr_sum_fib)`.
   have h_atoms_sum_le :
       Tcov_sum_triv + Tchr_sum_triv ≤
         Cop ^ 2 * (Tcov_sum_fib + Tchr_sum_fib) := by
@@ -320,7 +289,6 @@ theorem g_inner_gradFun_le_pou_weighted_fiber_norm_atoms_on_pouTsupport_h1
     have h_eq : Cop ^ 2 * Tcov_sum_fib + Cop ^ 2 * Tchr_sum_fib =
         Cop ^ 2 * (Tcov_sum_fib + Tchr_sum_fib) := by ring
     linarith
-  -- Multiply by the non-negative `B₀ · ρ_α(b)²` factor.
   set ρ_sq : ℝ := (((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b) ^ 2
     with hρ_sq_def
   have hρ_sq_nn : 0 ≤ ρ_sq := sq_nonneg _
@@ -329,7 +297,6 @@ theorem g_inner_gradFun_le_pou_weighted_fiber_norm_atoms_on_pouTsupport_h1
         g r s S.toCcTensor α Idx Jdx) (extChartAt I α b)) ^ 2
     with hraw_sq_def
   have hraw_sq_nn : 0 ≤ raw_sq := sq_nonneg _
-  -- Repackage `h₀` using the atom abbreviations.
   have h₀' :
       g.inner b
           (gradFun (I := I) g
@@ -342,7 +309,6 @@ theorem g_inner_gradFun_le_pou_weighted_fiber_norm_atoms_on_pouTsupport_h1
     rw [hraw_sq_def, hρ_sq_def, hTcov_sum_triv_def, hTchr_sum_triv_def,
         hTcov_triv_def, hTchr_triv_def]
     exact h₀
-  -- Bound the triv-sum atom by the fiber-sum atom times `Cop²`.
   have hB₀ρsq_nn : 0 ≤ B₀ * ρ_sq := mul_nonneg hB₀_nn hρ_sq_nn
   have h_triv_to_fib :
       B₀ * ρ_sq * (Tcov_sum_triv + Tchr_sum_triv) ≤
@@ -352,7 +318,6 @@ theorem g_inner_gradFun_le_pou_weighted_fiber_norm_atoms_on_pouTsupport_h1
       B₀ * ρ_sq * (Cop ^ 2 * (Tcov_sum_fib + Tchr_sum_fib)) =
         B * ρ_sq * (Tcov_sum_fib + Tchr_sum_fib) := by
     rw [hB_def]; ring
-  -- Conclude the headline inequality.
   have h_final :
       g.inner b
           (gradFun (I := I) g
@@ -375,7 +340,6 @@ theorem g_inner_gradFun_le_pou_weighted_fiber_norm_atoms_on_pouTsupport_h1
           linarith [h_triv_to_fib]
       _ = A * raw_sq + B * ρ_sq * (Tcov_sum_fib + Tchr_sum_fib) := by
           rw [hA_def, h_RHS_rearrange]
-  -- Unfold abbreviations to match the headline statement form.
   rw [hraw_sq_def, hρ_sq_def, hTcov_sum_fib_def, hTchr_sum_fib_def,
       hTcov_fib_def, hTchr_fib_def] at h_final
   exact h_final
@@ -386,8 +350,6 @@ end PDE
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
 
 open DifferentialGeometry.PDE.RicciFlow.HebeyBlock in
 #print axioms g_inner_gradFun_le_pou_weighted_fiber_norm_atoms_on_pouTsupport_h1

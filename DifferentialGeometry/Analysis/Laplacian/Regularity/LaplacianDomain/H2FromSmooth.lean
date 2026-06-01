@@ -82,25 +82,12 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 open DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeAssembly
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Headline manifold-level non-smooth `H²` regularity, single-step form
-
-The headline below is the natural target of the chart-bilinear non-smooth
-weak-solution machinery: it states that for `u_h ∈ laplacianDomain g`, the
-canonical function representative `(H1ComplToLp u_h).coeFn` lies in the
-chart-based Sobolev space `MemWkpChart g 2 2`, with a finite chart-based norm.
-
-The proof is supplied as a wrapper around the canonical form
-`memWkpChart_two_of_laplacianDomain_canonical`, consuming the per-chart
-`ChartH2NonSmoothPOUWitness g (lpRep g u_h) α` witnesses. -/
 
 /-- **Manifold-level non-smooth `H²` regularity for `laplacianDomain g`,
 single-step form.**
@@ -138,19 +125,14 @@ theorem laplacianDomain_memWkpChart_two
       (I := I) (M := M) g 2 2
       (((H1ComplToLp (I := I) (M := M) g u_h :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ)) < ⊤ := by
-  -- The canonical function representative `laplacianDomain.lpRep g u_h` is
-  -- definitionally equal to `((H1ComplToLp u_h) : M → ℝ)`.
   change DifferentialGeometry.Analysis.Sobolev.Chart.MemWkpChart
     (I := I) (M := M) g 2 2
     (laplacianDomain.lpRep (I := I) (M := M) g u_h) ∧
     DifferentialGeometry.Analysis.Sobolev.Chart.wkpNormChart
       (I := I) (M := M) g 2 2
       (laplacianDomain.lpRep (I := I) (M := M) g u_h) < ⊤
-  -- The witness is supplied for `laplacianDomain.lpRep g u_h` because the
-  -- latter is defined to equal `((H1ComplToLp u_h) : M → ℝ)` by `rfl`.
   have h_witness' : ∀ α : M, ChartH2NonSmoothPOUWitness (I := I) (M := M) g
       (laplacianDomain.lpRep (I := I) (M := M) g u_h) α := h_witness
-  -- Apply the canonical form.
   exact memWkpChart_two_of_laplacianDomain_canonical (I := I) (M := M) g u_h hu_h h_witness'
 
 /-- **Existential form: existence of a function representative with
@@ -200,11 +182,6 @@ theorem laplacianDomain_memWkpChart_two_bridgeData
   exact memWkpChart_two_of_laplacianDomain_bridgeData (I := I) (M := M) g u_h hu_h
     (((H1ComplToLp (I := I) (M := M) g u_h :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ)) h_bridge
-
-/-! ## Implied `MemWkpChart g 1 2` membership
-
-The `MemWkpChart g 2 2` headline implies `MemWkpChart g 1 2` by downward
-monotonicity in `k`. We provide a direct corollary for ergonomics. -/
 
 /-- The chart-based `W^{1,2}` membership implied by `MemWkpChart g 2 2`. -/
 theorem laplacianDomain_memWkpChart_one

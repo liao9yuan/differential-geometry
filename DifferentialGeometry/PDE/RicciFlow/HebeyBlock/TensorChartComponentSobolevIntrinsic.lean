@@ -49,14 +49,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Per-`α` `wkpNormChart` existence statement (chart-locality-free) -/
 
 /-- Chart-locality-free per-`α` existence of a chart-Sobolev `W^{1,2}` constant.
 The gradient `L²` input is sourced from the intrinsic `α`-uniform gradient
@@ -108,8 +104,6 @@ private lemma perAlphaSobolevConstant_intrinsic_bound
     (exists_perAlphaSobolevConstant
       (I := I) (M := M) g r s α)).2 S Idx Jdx
 
-/-! ## Vanishing of `wkpNormChart` on inactive centres (chart-locality-free) -/
-
 /-- On a chart base point `α` that is **not** active (its partition-of-unity
 weight is identically zero), the chart-Sobolev `W^{1,2}` norm of the chart-frame
 scalar component vanishes. Re-derived directly from the public active-finset
@@ -133,8 +127,6 @@ private lemma wkpNormChart_tensorChartComponentScalar_eq_zero_of_inactive_intrin
       (I := I) (M := M) g r s α h_zero S Idx Jdx
   rw [h_scalar_zero]
   exact wkpNormChart_zero_fun (I := I) (M := M) g (by norm_num : (1 : ℝ≥0∞) ≤ 2)
-
-/-! ## Total active constant (chart-locality-free) -/
 
 private noncomputable def totalActiveSobolevConstant
     (g : SmoothRiemannianMetric I M) (r s : ℕ) : ℝ :=
@@ -170,8 +162,6 @@ private lemma perAlphaSobolevConstant_le_totalActiveSobolevConstant
     Finset.sum_nonneg (fun β _ =>
       perAlphaSobolevConstant_intrinsic_nonneg (I := I) (M := M) g r s β)
   linarith
-
-/-! ## Headline -/
 
 /-- **Intrinsic headline (unconditional uniform chart-Sobolev `W^{1,2}` bound).**
 For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, there is a

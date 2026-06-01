@@ -90,8 +90,6 @@ open DifferentialGeometry.Analysis.Laplacian.DifferentiatedVariationalIdentity
 open DifferentialGeometry.Analysis.Laplacian.FChartEffDef
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -100,8 +98,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Schwarz commutativity of canonical mixed second weak partials -/
 
 /-- Smoothness of an applied-Frechet partial of a smooth function. -/
 private lemma contDiff_fderiv_apply_single
@@ -493,8 +489,6 @@ theorem chosenSecondPartialChartPushedU_swap_ae
   simp [hd_def] at this
   linarith
 
-/-! ## Data field definitions -/
-
 /-- The chart-side `u_chart`: chart-pushed weak `l`-partial coercion of `u_h`. -/
 private noncomputable def derived_u_chart
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -522,8 +516,6 @@ private noncomputable def derived_weak_partial
     (_hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
     (i : Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
   chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l
-
-/-! ## Field 4: weak `i`-partial of `derived_u_chart` -/
 
 /-- Each `derived_weak_partial i` is a weak `i`-partial of `derived_u_chart`
 on `chartTargetEuclid α`. -/
@@ -569,8 +561,6 @@ private lemma derived_weak_partial_isWeakPartial
   rw [h_integral_eq] at h_id_bridge
   exact h_id_bridge
 
-/-! ## Field 1: `derived_u_chart` is `MemLp 2` on the weighted measure -/
-
 /-- `derived_u_chart` lies in `MemLp 2` of the chart-pulled weighted measure
 restricted to `chartTargetEuclid α`. Because `derived_u_chart` is by
 definition `base.weak_partial l` and the base is the `coeFn` of the
@@ -591,8 +581,6 @@ private lemma derived_u_chart_memLp_weighted
       (I := I) (M := M) g 1 hu_h) l]
   exact Lp.memLp _
 
-/-! ## Field 2: `derived_f_chart` is `MemLp 2` on the weighted measure -/
-
 /-- `derived_f_chart = fChartEff` lies in `MemLp 2` of the chart-pulled
 weighted measure restricted to `chartTargetEuclid α`. Directly from
 `fChartEff_memLp_two_weighted`. -/
@@ -607,8 +595,6 @@ private lemma derived_f_chart_memLp_weighted
   unfold derived_f_chart
   exact fChartEff_memLp_two_weighted (I := I) (M := M)
     (g := g) (α := α) (l := l) (u_h := u_h) (hu_h := hu_h)
-
-/-! ## Field 3: locally `MemLp 2` of `derived_weak_partial` -/
 
 /-- Each `derived_weak_partial i` is locally `MemLp 2` (w.r.t. plain volume)
 on every compact subset of `chartTargetEuclid α`. Directly from
@@ -626,20 +612,6 @@ private lemma derived_weak_partial_locally_memLp
   unfold derived_weak_partial
   exact chosenSecondPartialChartPushedU_locally_memLp
     (I := I) (M := M) g α hu_h i l hK_compact hK_in
-
-/-! ## Constructor: hypothesis-bearing form
-
-The full `derivedChartBilinearH1ComplData g α l hu_h h_var_id` constructor
-takes the variational identity in the once-differentiated chart-bilinear form
-as an explicit hypothesis. The unconditional discharge of this hypothesis is
-the subject of a separate companion module that combines
-`differentiated_variational_identity_holds` (the unconditional differentiated
-identity with the per-pair principal cross term), `cross_derivative_term_ibp`
-(the cross-derivative integration by parts), and the indicator structure of
-`fChartEff` via the ae-vanishing of each chart-pulled factor of the effective
-numerator outside `chartImagePOUTsupport α`.
-
-The five other fields are discharged unconditionally here. -/
 
 /-- The once-differentiated chart-bilinear data as a
 `ChartBilinearH1ComplData g α` instance, taking the variational identity as a

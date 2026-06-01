@@ -90,13 +90,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [I.Boundaryless]
 
-/-! ## Uniform-bound helpers on a compact subset of the chart-target interior
-
-A continuous real function on the interior of the chart target is uniformly
-bounded on a compact subset; for a finite family of such functions a single
-uniform bound exists.  (These mirror the private helpers in the committed
-Christoffel perturbation leaf, recreated here at file scope.) -/
-
 /-- A function that is `C^∞` on the (open) chart-target interior is uniformly
 bounded in absolute value on a compact subset `K`. -/
 private lemma exists_bound_of_contDiffOn_int
@@ -132,8 +125,6 @@ private lemma exists_uniform_bound_family
   · intro y hy i
     exact (hC_bd i y hy).trans (Finset.le_sup' C (Finset.mem_univ i))
 
-/-! ## Smoothness of the building blocks on the chart-target interior -/
-
 /-- The chart Christoffel symbol is `C^∞` on the chart-target interior. -/
 private lemma chartChristoffel_contDiffOn_int
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -163,8 +154,6 @@ private lemma partial_chartDeTurckVFComp_contDiffOn_int
   unfold partialDeriv
   exact hfderiv.clm_apply contDiffOn_const
 
-/-! ## Differentiability of the building blocks at chart-target interior points -/
-
 /-- The chart Christoffel symbol is differentiable at an interior point. -/
 private lemma chartChristoffel_differentiableAt_int
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -182,13 +171,6 @@ private lemma chartInvGramOnE_differentiableAt_int'
   (((chartInvGramOnE_contDiffOn (I := I) g α a b).mono interior_subset).contDiffAt
     (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
-/-! ## Leibniz expansion of `∂_m W^k`
-
-`W^k(g) = ∑_{a,b} G^{ab}(g) · (Γ^k_{ab}(g) − Γ^k_{ab}(g_bg))`, so
-
-`∂_m W^k(g)(y) = ∑_{a,b} [ (∂_m G^{ab}) · (Γ^k_{ab}(g) − Γ^k_{ab}(g_bg))
-                          + G^{ab} · (∂_m Γ^k_{ab}(g) − ∂_m Γ^k_{ab}(g_bg)) ]`. -/
-
 /-- **Leibniz expansion of `∂_m W^k`.** On the chart-target interior, the first
 partial of the chart DeTurck-VF component is the product-rule expansion of its
 defining double sum. -/
@@ -205,7 +187,6 @@ theorem partialDeriv_chartDeTurckVFComp_eq
             (partialDeriv (E := E) m (chartChristoffel (I := I) g α a b k) y -
               partialDeriv (E := E) m (chartChristoffel (I := I) g_bg α a b k) y)) := by
   classical
-  -- Rewrite `chartDeTurckVFComp` as the explicit double sum as a function of `z`.
   have heq : chartDeTurckVFComp (I := I) g g_bg α k =
       fun z : E => ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         chartInvGramOnE (I := I) g α a b z *
@@ -218,7 +199,6 @@ theorem partialDeriv_chartDeTurckVFComp_eq
             chartInvGramOnE (I := I) g α a b z *
               (chartChristoffel (I := I) g α a b k z -
                 chartChristoffel (I := I) g_bg α a b k z)) y from by rw [heq]]
-  -- Differentiability of each summand at `y`.
   have hsummand_diff : ∀ a b : Fin (Module.finrank ℝ E),
       DifferentiableAt ℝ
         (fun z : E => chartInvGramOnE (I := I) g α a b z *
@@ -228,7 +208,6 @@ theorem partialDeriv_chartDeTurckVFComp_eq
     exact (chartInvGramOnE_differentiableAt_int' (I := I) g α a b hy).mul
       ((chartChristoffel_differentiableAt_int (I := I) g α a b k hy).sub
         (chartChristoffel_differentiableAt_int (I := I) g_bg α a b k hy))
-  -- Differentiability of the inner `b`-sums.
   have hinner_diff : ∀ a : Fin (Module.finrank ℝ E),
       DifferentiableAt ℝ
         (fun z : E => ∑ b : Fin (Module.finrank ℝ E),
@@ -236,7 +215,6 @@ theorem partialDeriv_chartDeTurckVFComp_eq
             (chartChristoffel (I := I) g α a b k z -
               chartChristoffel (I := I) g_bg α a b k z)) y :=
     fun a => DifferentiableAt.fun_sum (fun b _ => hsummand_diff a b)
-  -- Differentiate the outer `a`-sum.
   rw [partialDeriv_sum (i := m) Finset.univ
       (fun a => fun z : E => ∑ b : Fin (Module.finrank ℝ E),
         chartInvGramOnE (I := I) g α a b z *
@@ -244,33 +222,22 @@ theorem partialDeriv_chartDeTurckVFComp_eq
             chartChristoffel (I := I) g_bg α a b k z))
       (fun a _ => hinner_diff a)]
   refine Finset.sum_congr rfl (fun a _ => ?_)
-  -- Differentiate the inner `b`-sum.
   rw [partialDeriv_sum (i := m) Finset.univ
       (fun b => fun z : E => chartInvGramOnE (I := I) g α a b z *
         (chartChristoffel (I := I) g α a b k z -
           chartChristoffel (I := I) g_bg α a b k z))
       (fun b _ => hsummand_diff a b)]
   refine Finset.sum_congr rfl (fun b _ => ?_)
-  -- Product rule on the summand.
   rw [partialDeriv_mul (i := m) (chartInvGramOnE (I := I) g α a b)
       (fun z : E => chartChristoffel (I := I) g α a b k z -
         chartChristoffel (I := I) g_bg α a b k z)
       (chartInvGramOnE_differentiableAt_int' (I := I) g α a b hy)
       ((chartChristoffel_differentiableAt_int (I := I) g α a b k hy).sub
         (chartChristoffel_differentiableAt_int (I := I) g_bg α a b k hy))]
-  -- Differentiate the Christoffel difference inside the second product.
   rw [partialDeriv_sub (i := m) (chartChristoffel (I := I) g α a b k)
       (chartChristoffel (I := I) g_bg α a b k)
       (chartChristoffel_differentiableAt_int (I := I) g α a b k hy)
       (chartChristoffel_differentiableAt_int (I := I) g_bg α a b k hy)]
-
-/-! ## Uniform bounds on the building blocks over `K`
-
-Each ingredient — the chart Christoffel symbol, its first partial, the chart
-Christoffel difference `Γ(g) − Γ(g_bg)`, the inverse-Gram entries and their first
-partials, the chart Gram entries and their first partials, the DeTurck-VF
-component `W^k` and its first partial — is `C^∞` on the chart-target interior,
-hence uniformly bounded on a compact subset `K`. -/
 
 /-- Uniform bound on the chart Christoffel symbols over `K`. -/
 private lemma exists_chartChristoffel_bound_on_compact
@@ -479,17 +446,6 @@ private lemma exists_partial_chartDeTurckVFComp_bound_on_compact
     (fun p => partial_chartDeTurckVFComp_contDiffOn_int (I := I) g g_bg α p.1 p.2) hK hKsub
   exact ⟨C, hC_nn, fun y hy m k => hC y hy (m, k)⟩
 
-/-! ## Per-point Lipschitz bound for the DeTurck-VF component `W^k`
-
-`W^k(g)(y) = ∑_{a,b} G^{ab}(g)(y) (Γ^k_{ab}(g)(y) − Γ^k_{ab}(g_bg)(y))`.  The
-`g₁ − g₂` difference splits, per summand, as
-
-`(G₁^{ab} − G₂^{ab})(Γ(g₁) − Γ(g_bg)) + G₂^{ab}((Γ(g₁) − Γ(g_bg)) − (Γ(g₂) − Γ(g_bg)))`,
-
-and the second bracket simplifies to `Γ(g₁) − Γ(g₂)`.  The first factor difference
-is controlled by the `0`-jet (`Cinv · chartGramDiffSup ≤ Cinv · jet1`) and the
-Christoffel difference by `CΓ · jet1`; the rest are uniform constants. -/
-
 /-- **Per-point Lipschitz bound for `W^k`.**  With the inverse-Gram `0`-jet
 Lipschitz bound `Cinv · chartGramDiffSup`, the Christoffel difference Lipschitz
 bound `CΓ · jet1`, a uniform Christoffel-difference bound `P` for `g₁`, and a
@@ -522,7 +478,6 @@ theorem chartDeTurckVFComp_sub_abs_le
   set gd : ℝ := chartGramDiffSup (I := I) (M := M) g₁ g₂ α ((extChartAt I α).symm y) with hgd
   have hgd_le : gd ≤ jet1 := chartGramDiffSup_le_jet1 (I := I) (M := M) g₁ g₂ α y
   have hgd_nn : 0 ≤ gd := chartGramDiffSup_nonneg _ _ _ _
-  -- Termwise (double sum) bound by `(Cinv·P + M_b·CΓ)·jet1`.
   have hterm : ∀ a : Fin (Module.finrank ℝ E),
       |(∑ b : Fin (Module.finrank ℝ E), chartInvGramOnE (I := I) g₁ α a b y *
             (chartChristoffel (I := I) g₁ α a b k y -
@@ -536,8 +491,7 @@ theorem chartDeTurckVFComp_sub_abs_le
     refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
     refine le_trans (Finset.sum_le_sum (g := fun _ : Fin (Module.finrank ℝ E) =>
       (Cinv * P + M_b * CΓ) * jet1) (fun b _ => ?_)) ?_
-    · -- Per `b` summand. Split `A₁B₁ − A₂B₂ = (A₁−A₂)B₁ + A₂(B₁−B₂)`.
-      set A₁ : ℝ := chartInvGramOnE (I := I) g₁ α a b y with hA1
+    · set A₁ : ℝ := chartInvGramOnE (I := I) g₁ α a b y with hA1
       set A₂ : ℝ := chartInvGramOnE (I := I) g₂ α a b y with hA2
       set B₁ : ℝ := chartChristoffel (I := I) g₁ α a b k y -
         chartChristoffel (I := I) g_bg α a b k y with hB1
@@ -546,7 +500,6 @@ theorem chartDeTurckVFComp_sub_abs_le
       have hsplit : A₁ * B₁ - A₂ * B₂ = (A₁ - A₂) * B₁ + A₂ * (B₁ - B₂) := by ring
       rw [hsplit]
       refine (abs_add_le _ _).trans ?_
-      -- First piece: |(A₁−A₂)·B₁| ≤ (Cinv·gd)·P ≤ Cinv·P·jet1.
       have h1 : |(A₁ - A₂) * B₁| ≤ Cinv * P * jet1 := by
         rw [abs_mul]
         calc |A₁ - A₂| * |B₁|
@@ -555,7 +508,6 @@ theorem chartDeTurckVFComp_sub_abs_le
           _ = Cinv * P * gd := by ring
           _ ≤ Cinv * P * jet1 :=
               mul_le_mul_of_nonneg_left hgd_le (mul_nonneg hCinv_nn hP_nn)
-      -- Second piece: B₁ − B₂ = Γ(g₁) − Γ(g₂); |A₂·(B₁−B₂)| ≤ M_b·(CΓ·jet1).
       have hbdiff : B₁ - B₂ =
           chartChristoffel (I := I) g₁ α a b k y - chartChristoffel (I := I) g₂ α a b k y := by
         rw [hB1, hB2]; ring
@@ -569,7 +521,6 @@ theorem chartDeTurckVFComp_sub_abs_le
           ≤ Cinv * P * jet1 + M_b * CΓ * jet1 := add_le_add h1 h2
         _ = (Cinv * P + M_b * CΓ) * jet1 := by ring
     · simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, le_refl]
-  -- Outer sum over `a`.
   refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
   refine le_trans (Finset.sum_le_sum (g := fun _ : Fin (Module.finrank ℝ E) =>
     (Module.finrank ℝ E : ℝ) * ((Cinv * P + M_b * CΓ) * jet1)) (fun a _ => hterm a)) ?_
@@ -577,12 +528,6 @@ theorem chartDeTurckVFComp_sub_abs_le
   rw [show (Module.finrank ℝ E : ℝ) ^ 2 * (Cinv * P + M_b * CΓ) * jet1 =
         (Module.finrank ℝ E : ℝ) *
           ((Module.finrank ℝ E : ℝ) * ((Cinv * P + M_b * CΓ) * jet1)) by ring]
-
-/-! ## Manifold-side compact bookkeeping
-
-The manifold image `K' := symm '' K` of a compact subset `K` of the chart-target
-interior is compact and contained in the chart source — the context in which the
-inverse-Gram and Christoffel perturbation atoms are stated. -/
 
 /-- The manifold image of a compact subset of the chart-target interior is a
 compact subset of the chart source. -/
@@ -598,8 +543,6 @@ private lemma symm_image_compact_subset_source
   have hsource : (extChartAt I α).symm z ∈ (extChartAt I α).source :=
     (extChartAt I α).map_target (hKsub_target hzK)
   rwa [extChartAt_source_eq_chartAt_source (I := I)] at hsource
-
-/-! ## Uniform-over-compact `W^k` headline -/
 
 /-- **Uniform Lipschitz dependence of the chart DeTurck-VF components `W^k` on the
 chart `1`-jet of the metric difference, over a compact subset of the chart-target
@@ -624,16 +567,12 @@ theorem exists_chartDeTurckVFComp_lipschitz_on_compact
         C * chartMetricJet1DiffSup (I := I) (M := M) g₁ g₂ α y := by
   classical
   obtain ⟨hK'_compact, hK'_sub⟩ := symm_image_compact_subset_source (I := I) α hK hKsub
-  -- Inverse-Gram perturbation constant on `K'`.
   obtain ⟨Cinv, hCinv_pos, hCinv⟩ :=
     exists_chartInvGramMatrix_lipschitz_on_compact (I := I) (M := M) g₁ g₂ α hK'_compact hK'_sub
-  -- Christoffel perturbation constant on `K`.
   obtain ⟨CΓ, hCΓ_pos, hCΓ⟩ :=
     exists_chartChristoffel_lipschitz_on_compact (I := I) (M := M) g₁ g₂ α hK hKsub
-  -- Uniform Christoffel-difference bound `P` for `g₁` over `K`.
   obtain ⟨P, hP_nn, hP⟩ :=
     exists_chartChristoffel_diff_bound_on_compact (I := I) g₁ g_bg α hK hKsub
-  -- Uniform inverse-Gram entry bound `M_b` for `g₂` over `K`.
   obtain ⟨M_b, hMb_nn, hMb⟩ := exists_invGramOnE_bound_on_compact (I := I) g₂ α hK hKsub
   refine ⟨(Module.finrank ℝ E : ℝ) ^ 2 * (Cinv * P + M_b * CΓ) + 1, ?_, ?_⟩
   · have hnn : 0 ≤ (Module.finrank ℝ E : ℝ) ^ 2 * (Cinv * P + M_b * CΓ) := by
@@ -644,7 +583,6 @@ theorem exists_chartDeTurckVFComp_lipschitz_on_compact
     linarith
   intro y hy k
   have hxy_mem : (extChartAt I α).symm y ∈ (extChartAt I α).symm '' K := ⟨y, hy, rfl⟩
-  -- Per-point inverse-Gram Lipschitz at `x_y`, through `chartInvGramOnE`.
   have hCinv' : ∀ a b : Fin (Module.finrank ℝ E),
       |chartInvGramOnE (I := I) g₁ α a b y - chartInvGramOnE (I := I) g₂ α a b y| ≤
         Cinv * chartGramDiffSup (I := I) (M := M) g₁ g₂ α ((extChartAt I α).symm y) := by
@@ -658,13 +596,6 @@ theorem exists_chartDeTurckVFComp_lipschitz_on_compact
     chartMetricJet1DiffSup_nonneg _ _ _ _
   refine h_pt.trans ?_
   exact mul_le_mul_of_nonneg_right (by linarith) hjet1_nn
-
-/-! ## Per-point Lipschitz bound for the DeTurck-VF component derivative `∂_m W^k`
-
-By the Leibniz expansion `partialDeriv_chartDeTurckVFComp_eq`, the `g₁ − g₂`
-difference of `∂_m W^k` splits, per `(a, b)`, into a `∂G`-group and a `∂Γ`-group;
-each is a difference of products controlled by the relevant jet seminorm
-(`≤ chartMetricJet2DiffSup`). -/
 
 /-- **Per-point Lipschitz bound for `∂_m W^k`.**  On the chart-target interior,
 with the inverse-Gram-partial Lipschitz bound `Cd · jet1`, the inverse-Gram `0`-jet
@@ -726,7 +657,6 @@ theorem partialDeriv_chartDeTurckVFComp_sub_abs_le
   have hgd_le2 : gd ≤ jet2 :=
     le_trans (chartGramDiffSup_le_jet1 (I := I) (M := M) g₁ g₂ α y) hjet1_le
   set C0 : ℝ := Cd * P + D * CΓ + Cinv * R + M_b * CdΓ with hC0_def
-  -- Termwise (double sum) bound by `C0 · jet2`.
   have hterm : ∀ a : Fin (Module.finrank ℝ E),
       |(∑ b : Fin (Module.finrank ℝ E),
             (partialDeriv (E := E) m (chartInvGramOnE (I := I) g₁ α a b) y *
@@ -748,9 +678,7 @@ theorem partialDeriv_chartDeTurckVFComp_sub_abs_le
     refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
     refine le_trans (Finset.sum_le_sum (g := fun _ : Fin (Module.finrank ℝ E) =>
       C0 * jet2) (fun b _ => ?_)) ?_
-    · -- Per `b` summand: a `∂G`-group difference plus a `∂Γ`-group difference.
-      -- Names.
-      set dG₁ : ℝ := partialDeriv (E := E) m (chartInvGramOnE (I := I) g₁ α a b) y with hdG1
+    · set dG₁ : ℝ := partialDeriv (E := E) m (chartInvGramOnE (I := I) g₁ α a b) y with hdG1
       set dG₂ : ℝ := partialDeriv (E := E) m (chartInvGramOnE (I := I) g₂ α a b) y with hdG2
       set G₁ : ℝ := chartInvGramOnE (I := I) g₁ α a b y with hG1
       set G₂ : ℝ := chartInvGramOnE (I := I) g₂ α a b y with hG2
@@ -762,28 +690,24 @@ theorem partialDeriv_chartDeTurckVFComp_sub_abs_le
         partialDeriv (E := E) m (chartChristoffel (I := I) g_bg α a b k) y with hdΓd1
       set dΓd₂ : ℝ := partialDeriv (E := E) m (chartChristoffel (I := I) g₂ α a b k) y -
         partialDeriv (E := E) m (chartChristoffel (I := I) g_bg α a b k) y with hdΓd2
-      -- Split the difference of two products in each group.
       have hsplit :
           (dG₁ * Γd₁ + G₁ * dΓd₁) - (dG₂ * Γd₂ + G₂ * dΓd₂) =
             ((dG₁ - dG₂) * Γd₁ + dG₂ * (Γd₁ - Γd₂)) +
               ((G₁ - G₂) * dΓd₁ + G₂ * (dΓd₁ - dΓd₂)) := by ring
       rw [hsplit]
       refine (abs_add_le _ _).trans ?_
-      -- ∂G-group.
       have hgroupA : |(dG₁ - dG₂) * Γd₁ + dG₂ * (Γd₁ - Γd₂)| ≤
           Cd * P * jet2 + D * CΓ * jet2 := by
         refine (abs_add_le _ _).trans ?_
         refine add_le_add ?_ ?_
-        · -- |(dG₁−dG₂)·Γd₁| ≤ (Cd·jet1)·P ≤ Cd·P·jet2.
-          rw [abs_mul]
+        · rw [abs_mul]
           have hΓd1_le : |Γd₁| ≤ P := hP a b k
           calc |dG₁ - dG₂| * |Γd₁|
               ≤ (Cd * jet1) * P := mul_le_mul (hCd a b) hΓd1_le (abs_nonneg _)
                   (mul_nonneg hCd_nn hjet1_nn)
             _ = Cd * P * jet1 := by ring
             _ ≤ Cd * P * jet2 := mul_le_mul_of_nonneg_left hjet1_le (mul_nonneg hCd_nn hP_nn)
-        · -- Γd₁ − Γd₂ = Γ(g₁) − Γ(g₂); |dG₂·(Γd₁−Γd₂)| ≤ D·(CΓ·jet1) ≤ D·CΓ·jet2.
-          rw [abs_mul]
+        · rw [abs_mul]
           have hΓdiff : Γd₁ - Γd₂ =
               chartChristoffel (I := I) g₁ α a b k y -
                 chartChristoffel (I := I) g₂ α a b k y := by rw [hΓd1, hΓd2]; ring
@@ -793,13 +717,11 @@ theorem partialDeriv_chartDeTurckVFComp_sub_abs_le
                 exact mul_le_mul (hD a b) (hCΓ a b k) (abs_nonneg _) hD_nn
             _ = D * CΓ * jet1 := by ring
             _ ≤ D * CΓ * jet2 := mul_le_mul_of_nonneg_left hjet1_le (mul_nonneg hD_nn hCΓ_nn)
-      -- ∂Γ-group.
       have hgroupB : |(G₁ - G₂) * dΓd₁ + G₂ * (dΓd₁ - dΓd₂)| ≤
           Cinv * R * jet2 + M_b * CdΓ * jet2 := by
         refine (abs_add_le _ _).trans ?_
         refine add_le_add ?_ ?_
-        · -- |(G₁−G₂)·dΓd₁| ≤ (Cinv·gd)·R ≤ Cinv·R·jet2.
-          rw [abs_mul]
+        · rw [abs_mul]
           have hG_le : |G₁ - G₂| ≤ Cinv * gd := hCinv a b
           have hdΓd1_le : |dΓd₁| ≤ R := hR a b k
           calc |G₁ - G₂| * |dΓd₁|
@@ -807,8 +729,7 @@ theorem partialDeriv_chartDeTurckVFComp_sub_abs_le
                   (mul_nonneg hCinv_nn hgd_nn)
             _ = Cinv * R * gd := by ring
             _ ≤ Cinv * R * jet2 := mul_le_mul_of_nonneg_left hgd_le2 (mul_nonneg hCinv_nn hR_nn)
-        · -- dΓd₁ − dΓd₂ = ∂Γ(g₁) − ∂Γ(g₂); |G₂·(dΓd₁−dΓd₂)| ≤ M_b·(CdΓ·jet2).
-          rw [abs_mul]
+        · rw [abs_mul]
           have hdΓdiff : dΓd₁ - dΓd₂ =
               partialDeriv (E := E) m (chartChristoffel (I := I) g₁ α a b k) y -
                 partialDeriv (E := E) m (chartChristoffel (I := I) g₂ α a b k) y := by
@@ -824,15 +745,12 @@ theorem partialDeriv_chartDeTurckVFComp_sub_abs_le
             add_le_add hgroupA hgroupB
         _ = C0 * jet2 := by rw [hC0_def]; ring
     · simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, le_refl]
-  -- Outer sum over `a`.
   refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
   refine le_trans (Finset.sum_le_sum (g := fun _ : Fin (Module.finrank ℝ E) =>
     (Module.finrank ℝ E : ℝ) * (C0 * jet2)) (fun a _ => hterm a)) ?_
   simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
   rw [show (Module.finrank ℝ E : ℝ) ^ 2 * C0 * jet2 =
         (Module.finrank ℝ E : ℝ) * ((Module.finrank ℝ E : ℝ) * (C0 * jet2)) by ring]
-
-/-! ## Uniform-over-compact `∂_m W^k` headline -/
 
 /-- **Uniform Lipschitz dependence of the chart DeTurck-VF component derivatives
 `∂_m W^k` on the chart `2`-jet of the metric difference, over a compact subset of
@@ -857,14 +775,12 @@ theorem exists_partialDeriv_chartDeTurckVFComp_lipschitz_on_compact
         C * chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y := by
   classical
   obtain ⟨hK'_compact, hK'_sub⟩ := symm_image_compact_subset_source (I := I) α hK hKsub
-  -- Perturbation constants.
   obtain ⟨Cinv, hCinv_pos, hCinv⟩ :=
     exists_chartInvGramMatrix_lipschitz_on_compact (I := I) (M := M) g₁ g₂ α hK'_compact hK'_sub
   obtain ⟨CΓ, hCΓ_pos, hCΓ⟩ :=
     exists_chartChristoffel_lipschitz_on_compact (I := I) (M := M) g₁ g₂ α hK hKsub
   obtain ⟨CdΓ, hCdΓ_pos, hCdΓ⟩ :=
     exists_chartChristoffelDeriv_lipschitz_on_compact (I := I) (M := M) g₁ g₂ α m hK hKsub
-  -- Uniform bounds.
   obtain ⟨Mb1, hMb1_nn, hMb1⟩ := exists_invGramOnE_bound_on_compact (I := I) g₁ α hK hKsub
   obtain ⟨Mb2, hMb2_nn, hMb2⟩ := exists_invGramOnE_bound_on_compact (I := I) g₂ α hK hKsub
   set M_b : ℝ := max Mb1 Mb2 with hMb_def
@@ -875,7 +791,6 @@ theorem exists_partialDeriv_chartDeTurckVFComp_lipschitz_on_compact
   obtain ⟨D, hD_nn, hD⟩ := exists_partial_invGramOnE_bound_on_compact (I := I) g₂ α hK hKsub
   obtain ⟨R, hR_nn, hR⟩ :=
     exists_partial_chartChristoffel_diff_bound_on_compact (I := I) g₁ g_bg α hK hKsub
-  -- The inverse-Gram-partial Lipschitz constant.
   set Cd : ℝ := (Module.finrank ℝ E : ℝ) ^ 2 * (2 * Cinv * M_b * Q + M_b ^ 2) with hCd_def
   have hCd_nn : 0 ≤ Cd := by
     refine mul_nonneg (by positivity) ?_
@@ -893,18 +808,15 @@ theorem exists_partialDeriv_chartDeTurckVFComp_lipschitz_on_compact
   intro y hy k
   have hy_int : y ∈ interior (extChartAt I α).target := hKsub hy
   have hxy_mem : (extChartAt I α).symm y ∈ (extChartAt I α).symm '' K := ⟨y, hy, rfl⟩
-  -- Per-point inverse-Gram Lipschitz at `x_y`.
   have hCinv' : ∀ a b : Fin (Module.finrank ℝ E),
       |chartInvGramOnE (I := I) g₁ α a b y - chartInvGramOnE (I := I) g₂ α a b y| ≤
         Cinv * chartGramDiffSup (I := I) (M := M) g₁ g₂ α ((extChartAt I α).symm y) := by
     intro a b
     simpa only [chartInvGramOnE_def] using hCinv ((extChartAt I α).symm y) hxy_mem a b
-  -- Promote the per-metric inverse-Gram entry bounds to the common `M_b`.
   have hMb1' : ∀ a b, |chartInvGramOnE (I := I) g₁ α a b y| ≤ M_b :=
     fun a b => (hMb1 y hy a b).trans (le_max_left _ _)
   have hMb2' : ∀ a b, |chartInvGramOnE (I := I) g₂ α a b y| ≤ M_b :=
     fun a b => (hMb2 y hy a b).trans (le_max_right _ _)
-  -- The inverse-Gram-partial Lipschitz bound (`hCd`).
   have hCd : ∀ a b : Fin (Module.finrank ℝ E),
       |partialDeriv (E := E) m (chartInvGramOnE (I := I) g₁ α a b) y -
           partialDeriv (E := E) m (chartInvGramOnE (I := I) g₂ α a b) y| ≤
@@ -912,7 +824,6 @@ theorem exists_partialDeriv_chartDeTurckVFComp_lipschitz_on_compact
     intro a b
     exact partialDeriv_chartInvGramOnE_sub_abs_le (I := I) (M := M) g₁ g₂ α hy_int
       hMb_nn hQ_nn hCinv_pos.le hMb1' hMb2' (fun mm aa bb => hQ y hy mm aa bb) hCinv' m a b
-  -- Apply the per-point bound.
   have h_pt := partialDeriv_chartDeTurckVFComp_sub_abs_le (I := I) (M := M) g₁ g₂ g_bg α hy_int
     hCd_nn hCinv_pos.le hCΓ_pos.le hMb_nn hP_nn hD_nn hR_nn m k
     hCd hCinv' (fun a b kk => hCΓ y hy a b kk) (fun a b kk => hCdΓ y hy a b kk)
@@ -924,15 +835,6 @@ theorem exists_partialDeriv_chartDeTurckVFComp_lipschitz_on_compact
   refine mul_le_mul_of_nonneg_right ?_ hjet2_nn
   rw [← hC0_def]
   linarith
-
-/-! ## The chart-frame DeTurck Lie (gauge) summand component
-
-The chart-`α` `(i, j)` component of the DeTurck Lie (gauge) summand
-`(𝓛_{W(g)} g)_{ij}`, with the DeTurck vector-field components
-`W^k(g) = chartDeTurckVFComp g g_bg α k`, in the classical coordinate form
-`∑_k W^k ∂_k G_{ij} + ∑_k G_{kj} ∂_i W^k + ∑_k G_{ik} ∂_j W^k`.  This is the
-chart-formula version of `chartLieDerivMetricMatrix` specialised to the DeTurck
-vector field, expressed entirely through chart-coordinate building blocks. -/
 
 /-- The chart-`α` `(i, j)` component of the DeTurck Lie (gauge) summand
 `(𝓛_{W(g)} g)_{ij}` at the chart point `y ∈ E`, with the DeTurck vector-field
@@ -962,13 +864,6 @@ def chartLieDeTurckComp (g g_bg : SmoothRiemannianMetric I M) (α : M)
       + (∑ k : Fin (Module.finrank ℝ E),
           chartGramOnE (I := I) g α i k y *
             partialDeriv (E := E) j (chartDeTurckVFComp (I := I) g g_bg α k) y) := rfl
-
-/-! ## Per-group difference bounds for the Lie summand
-
-Each of the three groups (convective, two deformation) is a finite sum of products
-of a `1`-jet object (`W^k` or `G_{ij}`) with another (`∂G_{ij}` or `∂W^k`); the
-`g₁ − g₂` difference of each product is majorised by `A₁B₁ − A₂B₂` and bounded by a
-uniform constant times the `2`-jet seminorm. -/
 
 /-- A finite-sum difference of products `∑_k A^k₁ B^k₁ − ∑_k A^k₂ B^k₂`, with each
 factor difference bounded by a jet seminorm and each factor uniformly bounded, is
@@ -1036,8 +931,6 @@ private lemma exists_partialDeriv_chartDeTurckVFComp_lipschitz_alldir
     refine mul_le_mul_of_nonneg_right (Finset.le_sup' C (Finset.mem_univ m)) ?_
     exact chartMetricJet2DiffSup_nonneg _ _ _ _
 
-/-! ## Uniform-over-compact Lie-summand headline -/
-
 /-- **Uniform Lipschitz dependence of the chart-frame DeTurck Lie (gauge) summand
 on the chart `2`-jet of the metric difference, over a compact subset of the
 chart-target interior.**
@@ -1068,15 +961,11 @@ theorem exists_chartLieDeTurckComp_lipschitz_on_compact
           chartLieDeTurckComp (I := I) g₂ g_bg α i j y| ≤
         C * chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y := by
   classical
-  -- W^k Lipschitz constant (against the 1-jet seminorm) and uniform W bound for g₂.
   obtain ⟨Cw, hCw_pos, hCw⟩ :=
     exists_chartDeTurckVFComp_lipschitz_on_compact (I := I) (M := M) g₁ g₂ g_bg α hK hKsub
   obtain ⟨U, hU_nn, hU⟩ := exists_chartDeTurckVFComp_bound_on_compact (I := I) g₂ g_bg α hK hKsub
-  -- Uniform metric-partial bound for g₁, uniform Gram bound for g₂.
   obtain ⟨Q, hQ_nn, hQ⟩ := exists_partial_gramOnE_bound_on_compact (I := I) g₁ α hK hKsub
   obtain ⟨Gb, hGb_nn, hGb⟩ := exists_gramOnE_bound_on_compact (I := I) g₂ α hK hKsub
-  -- Direction-uniform `∂_m W^k` Lipschitz constant (against the 2-jet seminorm)
-  -- and direction-uniform `∂W` bound for `g₁`.
   obtain ⟨Cdw, hCdw_pos, hCdw⟩ :=
     exists_partialDeriv_chartDeTurckVFComp_lipschitz_alldir (I := I) (M := M) g₁ g₂ g_bg α hK hKsub
   obtain ⟨V, hV_nn, hV⟩ :=
@@ -1100,14 +989,12 @@ theorem exists_chartLieDeTurckComp_lipschitz_on_compact
       chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y :=
     chartMetricJet1DiffSup_le_jet2 (I := I) (M := M) g₁ g₂ α y
   set jet2 : ℝ := chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y with hjet2_def
-  -- W^k difference bound against jet2 (promoting from jet1).
   have hCw2 : ∀ k : Fin (Module.finrank ℝ E),
       |chartDeTurckVFComp (I := I) g₁ g_bg α k y -
           chartDeTurckVFComp (I := I) g₂ g_bg α k y| ≤ Cw * jet2 := by
     intro k
     refine (hCw y hy k).trans ?_
     exact mul_le_mul_of_nonneg_left hjet1_le hCw_pos.le
-  -- The ∂G difference bound (∂_k G₁_{ij} − ∂_k G₂_{ij}) against jet2 (Cb = 1).
   have hG_partial_diff : ∀ k : Fin (Module.finrank ℝ E),
       |partialDeriv (E := E) k (chartGramOnE (I := I) g₁ α i j) y -
           partialDeriv (E := E) k (chartGramOnE (I := I) g₂ α i j) y| ≤ 1 * jet2 := by
@@ -1116,7 +1003,6 @@ theorem exists_chartLieDeTurckComp_lipschitz_on_compact
     refine (partialDeriv_chartGramOnE_sub_abs_le_partialDiffSup (I := I) (M := M)
       g₁ g₂ α y k i j).trans ?_
     exact (chartGramPartialDiffSup_le_jet1 (I := I) (M := M) g₁ g₂ α y).trans hjet1_le
-  -- The Gram-entry difference bound against jet2 (Cb = 1), for both `(k, j)` and `(i, k)`.
   have hGram_diff : ∀ a b : Fin (Module.finrank ℝ E),
       |chartGramOnE (I := I) g₁ α a b y - chartGramOnE (I := I) g₂ α a b y| ≤ 1 * jet2 := by
     intro a b
@@ -1124,9 +1010,7 @@ theorem exists_chartLieDeTurckComp_lipschitz_on_compact
     refine (chartGramMatrix_sub_entry_abs_le_gramDiffSup (I := I) (M := M)
       g₁ g₂ α ((extChartAt I α).symm y) a b).trans ?_
     exact (chartGramDiffSup_le_jet1 (I := I) (M := M) g₁ g₂ α y).trans hjet1_le
-  -- Bound the three groups by `sum_prod_sub_abs_le`.
   rw [chartLieDeTurckComp_def, chartLieDeTurckComp_def]
-  -- Group C (convective).
   have hgroupC :
       |(∑ k, chartDeTurckVFComp (I := I) g₁ g_bg α k y *
             partialDeriv (E := E) k (chartGramOnE (I := I) g₁ α i j) y) -
@@ -1140,7 +1024,6 @@ theorem exists_chartLieDeTurckComp_lipschitz_on_compact
       (B₂ := fun k => partialDeriv (E := E) k (chartGramOnE (I := I) g₂ α i j) y)
       hjet2_nn hCw_pos.le hU_nn hCw2 hG_partial_diff
       (fun k => hU y hy k) (fun k => hQ y hy k i j)
-  -- Group D1 (deformation `(k, j)` × `∂_i W^k`).
   have hgroupD1 :
       |(∑ k, chartGramOnE (I := I) g₁ α k j y *
             partialDeriv (E := E) i (chartDeTurckVFComp (I := I) g₁ g_bg α k) y) -
@@ -1154,7 +1037,6 @@ theorem exists_chartLieDeTurckComp_lipschitz_on_compact
       (B₂ := fun k => partialDeriv (E := E) i (chartDeTurckVFComp (I := I) g₂ g_bg α k) y)
       hjet2_nn (by norm_num) hGb_nn (fun k => hGram_diff k j)
       (fun k => hCdw y hy i k) (fun k => hGb y hy k j) (fun k => hV y hy i k)
-  -- Group D2 (deformation `(i, k)` × `∂_j W^k`).
   have hgroupD2 :
       |(∑ k, chartGramOnE (I := I) g₁ α i k y *
             partialDeriv (E := E) j (chartDeTurckVFComp (I := I) g₁ g_bg α k) y) -
@@ -1168,7 +1050,6 @@ theorem exists_chartLieDeTurckComp_lipschitz_on_compact
       (B₂ := fun k => partialDeriv (E := E) j (chartDeTurckVFComp (I := I) g₂ g_bg α k) y)
       hjet2_nn (by norm_num) hGb_nn (fun k => hGram_diff i k)
       (fun k => hCdw y hy j k) (fun k => hGb y hy i k) (fun k => hV y hy j k)
-  -- Combine the three groups.
   have habc :
       |((∑ k, chartDeTurckVFComp (I := I) g₁ g_bg α k y *
               partialDeriv (E := E) k (chartGramOnE (I := I) g₁ α i j) y)
@@ -1213,7 +1094,6 @@ theorem exists_chartLieDeTurckComp_lipschitz_on_compact
     exact (abs_add_le _ _).trans
       (add_le_add ((abs_add_le _ _).trans (add_le_add hgroupC hgroupD1)) hgroupD2)
   refine habc.trans ?_
-  -- The three group contributions sum to the headline constant times `jet2`.
   rw [show (n * ((Cw * Q + U * 1) * jet2) + n * ((1 * V + Gb * Cdw) * jet2)) +
         n * ((1 * V + Gb * Cdw) * jet2) =
       (n * ((Cw * Q + U * 1) + (1 * V + Gb * Cdw) + (1 * V + Gb * Cdw))) * jet2 by ring]

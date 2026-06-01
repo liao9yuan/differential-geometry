@@ -87,16 +87,12 @@ open DifferentialGeometry.Analysis.Laplacian.ManifoldH2NonSmooth
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Auxiliary lemmas for the per-chart witness construction -/
 
 /-- A `r`-thickening of a non-empty set is contained in the strict
 `r'`-thickening for any `r' > r`. Sometimes we need this when we want
@@ -118,13 +114,6 @@ private lemma self_subset_thickening_of_pos
     K ⊆ Metric.thickening r K :=
   Metric.self_subset_thickening hr_pos K
 
-/-! ## Per-chart auxiliary computation: the chartPushed function vanishes a.e. on
-chartTargetEuclid α off `chartImagePOUTsupport α`.
-
-This is the key bridge that lets us extend by zero from the precompact
-subdomain `Ω''` (which contains `K_α := chartImagePOUTsupport α`) up to
-`chartTargetEuclid α`. -/
-
 /-- The chart-pushed POU function vanishes on `chartTargetEuclid α` outside
 `chartImagePOUTsupport α`. This is a re-statement of
 `chartPushed_eq_zero_off_chartImagePOUTsupport` in our notation. -/
@@ -137,12 +126,6 @@ private lemma chartPushed_pou_zero_off_KApha
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u y = 0 := by
   intro y hy hy_off
   exact chartPushed_eq_zero_off_chartImagePOUTsupport (I := I) (M := M) α u hy hy_off
-
-/-! ## Headline per-chart witness construction
-
-The headline below builds the per-chart `MemWkp 2 2` witness from
-`u_h ∈ laplacianDomain g`, with all geometric parameters chosen internally.
--/
 
 set_option linter.unusedVariables false in
 /-- **Per-chart unconditional `MemWkp 2 2` witness for `laplacianDomain g`.**
@@ -165,38 +148,29 @@ theorem chartH2NonSmoothPOUWitness_of_laplacianDomain
       (((H1ComplToLp (I := I) (M := M) g u_h :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ)) α := by
   classical
-  -- Set up the canonical representative `u : M → ℝ`.
   set u : M → ℝ := ((H1ComplToLp (I := I) (M := M) g u_h :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) with hu_def
-  -- Set up the chart-bilinear data structure.
   set D := chartBilinearH1ComplData_of_laplacianDomain
     (I := I) (M := M) g α hu_h with hD_def
-  -- The compact set `K_α := chartImagePOUTsupport α` inside the chart target
-  -- where the chart-pushed function lives.
   set K_α : Set EuclN := chartImagePOUTsupport (I := I) (M := M) α with hK_α_def
   have hK_α_compact : IsCompact K_α :=
     chartImagePOUTsupport_isCompact (I := I) (M := M) α
   have hK_α_in_chart : K_α ⊆ chartTargetEuclid (I := I) (M := M) α :=
     chartImagePOUTsupport_subset_target (I := I) (M := M) α
-  -- The chart target is open.
   have h_chart_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) α
-  -- Step 1: pick R_α > 0 such that cthickening R_α K_α ⊆ chartTargetEuclid α.
   obtain ⟨R_α, hR_α_pos, hR_α_subset⟩ :=
     hK_α_compact.exists_cthickening_subset_open h_chart_open hK_α_in_chart
-  -- Step 2: define the geometric scales.
   set ε : ℝ := R_α / 16 with hε_def
   have hε_pos : 0 < ε := by positivity
   set R₀ : ℝ := ε with hR₀_def
   have hR₀_pos : 0 < R₀ := hε_pos
-  -- Ω'' := thickening (2ε) K_α (open). K_α ⊆ Ω'', closure Ω'' ⊆ cthickening (2ε) K_α.
   set Ω'' : Set EuclN := Metric.thickening (2 * ε) K_α with hΩ''_def
   have hΩ''_open : IsOpen Ω'' := Metric.isOpen_thickening
   have h_two_ε_pos : 0 < 2 * ε := by positivity
   have hK_α_in_Ω'' : K_α ⊆ Ω'' :=
     self_subset_thickening_of_pos h_two_ε_pos K_α
-  -- closure Ω'' ⊆ cthickening (2ε) K_α ⊆ cthickening R_α K_α ⊆ chart target.
   have h_closureΩ''_sub : closure Ω'' ⊆ Metric.cthickening (2 * ε) K_α := by
     refine closure_minimal (Metric.thickening_subset_cthickening _ _)
       Metric.isClosed_cthickening
@@ -209,9 +183,6 @@ theorem chartH2NonSmoothPOUWitness_of_laplacianDomain
     h_closureΩ''_sub.trans h_cthick_two_ε_in_chart
   have hΩ''_compact_closure : IsCompact (closure Ω'') :=
     hK_α_compact.cthickening.of_isClosed_subset isClosed_closure h_closureΩ''_sub
-  -- Step 3: the "room" hypothesis: cthickening R₀ (closure Ω'') ⊆ chart target.
-  -- closure Ω'' ⊆ cthickening (2ε) K_α; cthickening R₀ (closure Ω'') ⊆ cthickening R₀ (cthickening (2ε) K_α)
-  --   ⊆ cthickening (R₀ + 2ε) K_α = cthickening (3ε) K_α ⊆ cthickening R_α K_α (since 3ε ≤ R_α).
   have h_room : Metric.cthickening R₀ (closure Ω'') ⊆
       chartTargetEuclid (I := I) (M := M) α := by
     have h1 : Metric.cthickening R₀ (closure Ω'') ⊆
@@ -228,13 +199,11 @@ theorem chartH2NonSmoothPOUWitness_of_laplacianDomain
         change R_α / 16 + 2 * (R_α / 16) ≤ R_α; linarith
       exact Metric.cthickening_mono hle K_α
     exact ((h1.trans h2).trans h3).trans hR_α_subset
-  -- Step 4: Ω' := thickening (8ε) K_α (open, larger). K_α ⊆ Ω', closure Ω' ⊆ cthickening (8ε) K_α.
   set Ω' : Set EuclN := Metric.thickening (8 * ε) K_α with hΩ'_def
   have hΩ'_open : IsOpen Ω' := Metric.isOpen_thickening
   have h_eight_ε_pos : 0 < 8 * ε := by positivity
   have hK_α_in_Ω' : K_α ⊆ Ω' :=
     self_subset_thickening_of_pos h_eight_ε_pos K_α
-  -- closure Ω' ⊆ cthickening (8ε) K_α ⊆ cthickening R_α K_α (since 8ε = R_α / 2 ≤ R_α).
   have h_closureΩ'_sub : closure Ω' ⊆ Metric.cthickening (8 * ε) K_α := by
     refine closure_minimal (Metric.thickening_subset_cthickening _ _)
       Metric.isClosed_cthickening
@@ -247,7 +216,6 @@ theorem chartH2NonSmoothPOUWitness_of_laplacianDomain
     h_closureΩ'_sub.trans h_cthick_eight_ε_in_chart
   have hΩ'_compact_closure : IsCompact (closure Ω') :=
     hK_α_compact.cthickening.of_isClosed_subset isClosed_closure h_closureΩ'_sub
-  -- closure Ω'' ⊆ Ω' (since closure Ω'' ⊆ cthickening (2ε) K_α ⊆ thickening (3ε) K_α ⊆ thickening (8ε) K_α).
   have h_cthick_two_ε_sub_thick_three_ε :
       Metric.cthickening (2 * ε) K_α ⊆ Metric.thickening (3 * ε) K_α :=
     Metric.cthickening_subset_thickening' (by positivity) (by linarith) K_α
@@ -255,53 +223,34 @@ theorem chartH2NonSmoothPOUWitness_of_laplacianDomain
       Metric.thickening (3 * ε) K_α ⊆ Ω' := by
     rw [hΩ'_def]
     exact thickening_mono_of_lt (by linarith) K_α
-  -- Step 5: build the smooth cutoff η with `tsupport η ⊆ cthickening (4ε) K_α` and `η ≡ 1` on
-  -- `cthickening (3ε) K_α`. The cthickening (3ε) ⊆ thickening (4ε) ⊆ cthickening (4ε) ⊆ thickening (8ε).
-  -- We use `exists_smooth_cutoff_with_neighborhood` with `K := cthickening (3ε) K_α` (compact)
-  -- and `Ω := Metric.thickening (5 * ε) K_α` (which is open).
   set K_η : Set EuclN := Metric.cthickening (3 * ε) K_α with hK_η_def
   have hK_η_compact : IsCompact K_η := hK_α_compact.cthickening
   set Ω_η : Set EuclN := Metric.thickening (5 * ε) K_α with hΩ_η_def
   have hΩ_η_open : IsOpen Ω_η := Metric.isOpen_thickening
   have hK_η_in_Ω_η : K_η ⊆ Ω_η := by
-    -- cthickening (3ε) K_α ⊆ thickening (5ε) K_α.
     refine Metric.cthickening_subset_thickening' (by positivity) (by linarith) K_α
   obtain ⟨δ_η, η, hδ_η_pos, hδ_η_sub_Ωη, hη_smooth, hη_supp, hη_range,
       hη_one_on_cthick_K_η, hη_tsupp_in_Ω_η⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.exists_smooth_cutoff_with_neighborhood
       (d := Module.finrank ℝ E) hK_η_compact hΩ_η_open hK_η_in_Ω_η
-  -- Gradient bound for η.
   obtain ⟨N, hN_pos, h_fderiv_eta⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Chart.exists_grad_bound_of_compactSupport_smooth
       hη_smooth hη_supp
   have hN_nn : 0 ≤ N := hN_pos.le
-  -- η ≡ 1 on Ω'': we have Ω'' ⊆ cthickening (2ε) K_α ⊆ cthickening (3ε) K_α =? Actually,
-  -- the cthickening δ_η K_η is where η = 1; we need η = 1 on Ω''. Ω'' ⊆ cthickening (2ε) K_α
-  --   ⊆ cthickening (3ε) K_α = K_η.
-  -- We need η = 1 on Ω''. We have hη_one_on_cthick_K_η: η = 1 on cthickening δ_η K_η.
-  -- Since K_η ⊆ cthickening δ_η K_η (by self_subset_cthickening for δ_η > 0), and Ω'' ⊆ K_η,
-  -- we get η = 1 on Ω''.
   have hη_one_on_K_η : ∀ x ∈ K_η, η x = 1 := by
     intro x hx
     apply hη_one_on_cthick_K_η
     exact Metric.self_subset_cthickening _ hx
-  -- Ω'' ⊆ K_η: Ω'' = thickening (2ε) K_α ⊆ cthickening (2ε) K_α ⊆ cthickening (3ε) K_α = K_η.
   have hΩ''_sub_K_η : Ω'' ⊆ K_η := by
     intro y hy
-    -- y ∈ thickening (2ε) K_α ⊆ cthickening (2ε) K_α ⊆ cthickening (3ε) K_α.
     have h1 : y ∈ Metric.cthickening (2 * ε) K_α :=
       Metric.thickening_subset_cthickening _ _ hy
     refine Metric.cthickening_mono (by linarith : (2 * ε) ≤ 3 * ε) K_α h1
   have hη_one_on_Ω'' : ∀ x ∈ Ω'', η x = 1 := fun x hx => hη_one_on_K_η x (hΩ''_sub_K_η hx)
-  -- Step 6: tsupport η ⊆ Ω': we have tsupport η ⊆ Ω_η = thickening (5ε) K_α ⊆ thickening (8ε) K_α = Ω'.
   have hη_in_Ω' : tsupport η ⊆ Ω' := by
     refine hη_tsupp_in_Ω_η.trans ?_
     rw [hΩ_η_def, hΩ'_def]
     exact thickening_mono_of_lt (by linarith) K_α
-  -- Step 7: For |h| ≤ R₀, cthickening |h| (tsupport η) ⊆ Ω'.
-  -- We have tsupport η ⊆ Ω_η = thickening (5ε) K_α ⊆ cthickening (5ε) K_α.
-  -- cthickening |h| (tsupport η) ⊆ cthickening |h| (cthickening (5ε) K_α) ⊆ cthickening (|h| + 5ε) K_α.
-  -- For |h| ≤ R₀ = ε, this is ⊆ cthickening (6ε) K_α ⊆ thickening (8ε) K_α = Ω' (since 6ε < 8ε).
   have hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
       Metric.cthickening |h| (tsupport η) ⊆ Ω' := by
     intro h hh
@@ -309,10 +258,8 @@ theorem chartH2NonSmoothPOUWitness_of_laplacianDomain
       refine hη_tsupp_in_Ω_η.trans ?_
       rw [hΩ_η_def]
       exact Metric.thickening_subset_cthickening _ _
-    -- |h| could be 0; handle by case.
     by_cases h_abs : |h| ≤ 0
-    · -- |h| ≤ 0 implies |h| = 0; cthickening 0 K = closure K (= K if K closed).
-      have hh_zero : |h| = 0 := le_antisymm h_abs (abs_nonneg _)
+    · have hh_zero : |h| = 0 := le_antisymm h_abs (abs_nonneg _)
       have hcth_zero : Metric.cthickening |h| (tsupport η) = tsupport η := by
         rw [hh_zero, Metric.cthickening_zero]
         exact (isClosed_tsupport η).closure_eq
@@ -336,35 +283,21 @@ theorem chartH2NonSmoothPOUWitness_of_laplacianDomain
         rw [hΩ'_def]
         exact Metric.cthickening_subset_thickening' (by linarith) h_le K_α
       exact (h1.trans h2).trans h3
-  -- Step 8: Apply the unconditional uniform difference-quotient bound.
   obtain ⟨M_bound, hM_nn, h_uniform_bd⟩ :=
     chartBilinearH1Compl_uniform_diffQuot_bound_of_data
       (I := I) (M := M) (g := g) (α := α) D
       hη_smooth hη_supp hη_range hN_nn h_fderiv_eta
       hΩ'_open h_closureΩ'_in_chart hΩ'_compact_closure
       hη_in_Ω' hR₀_pos hh_supp_in_Ω' hη_one_on_Ω'' hΩ''_open.measurableSet
-  -- Step 9: Apply h2_chart_loc_of_uniform_bound with h₀ := R₀, Ω''.
   have h_h2 :=
     h2_chart_loc_of_uniform_bound
       (I := I) (M := M) (g := g) (α := α) D
       hΩ''_open hΩ''_compact_closure hR₀_pos h_room
       hM_nn h_uniform_bd
-  -- h_h2 gives weak second partials g_ik on Ω''.
-  -- Step 10: Build MemWkp 2 2 of chartPushed POU α u on chartTargetEuclid α.
-  -- We use the indicator construction `v := Ω''.indicator (chartPushed POU α u)`.
-  -- v has tsupport ⊆ K_α ⊆ Ω''; v ∈ MemWkp 2 2 (volume.restrict Ω''); extend to chartTargetEuclid α.
   refine ChartH2NonSmoothPOUWitness.mk' ?_
-  -- The goal is `MemWkp 2 2 (chartPushed POU α u) (chartTargetEuclid α)`.
-  -- Strategy:
-  --   (a) Define v := Ω''.indicator (chartPushed POU α u).
-  --   (b) Show v =ᵐ chartPushed POU α u on vol.restrict (chartTargetEuclid α).
-  --   (c) Show MemWkp 2 2 v Ω''.
-  --   (d) Extend v from Ω'' to chartTargetEuclid α by zero (MemWkp.extend_zero).
-  --   (e) Transfer via congr_ae back to chartPushed POU α u.
   set f : EuclN → ℝ := chartPushed (I := I) (M := M)
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u with hf_def
   set v : EuclN → ℝ := Ω''.indicator f with hv_def
-  -- (b) v =ᵐ f on vol.restrict (chartTargetEuclid α).
   have h_chart_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     h_chart_open.measurableSet
   have hΩ''_meas : MeasurableSet Ω'' := hΩ''_open.measurableSet
@@ -376,15 +309,8 @@ theorem chartH2NonSmoothPOUWitness_of_laplacianDomain
       rw [Set.indicator_of_mem hyΩ]
     · rw [hv_def]
       rw [Set.indicator_of_notMem hyΩ]
-      -- y ∈ chartTargetEuclid α \ Ω''; need f y = 0.
-      -- Since Ω'' ⊇ K_α, y ∉ Ω'' implies y ∉ K_α.
       have hy_off_K_α : y ∉ K_α := fun hyK => hyΩ (hK_α_in_Ω'' hyK)
       exact (chartPushed_pou_zero_off_KApha (I := I) (M := M) α u y hy hy_off_K_α).symm
-  -- (c) MemWkp 2 2 v Ω''.
-  -- v has tsupport ⊆ closure (support v). Support v ⊆ Ω''. By chartPushed_pou_zero_off_KApha
-  -- applied for y ∈ Ω'', y ∉ K_α (with Ω'' ⊆ chartTargetEuclid α), we get f y = 0, so v y = 0.
-  -- Hence support v ⊆ K_α.
-  -- We show tsupport v ⊆ K_α.
   have hΩ''_in_chart : Ω'' ⊆ chartTargetEuclid (I := I) (M := M) α :=
     fun y hy => h_closureΩ''_in_chart (subset_closure hy)
   have h_supp_v_sub_K_α : Function.support v ⊆ K_α := by
@@ -403,41 +329,19 @@ theorem chartH2NonSmoothPOUWitness_of_laplacianDomain
   have hv_compactSupport : HasCompactSupport v :=
     hK_α_compact.of_isClosed_subset (isClosed_tsupport _) h_tsupp_v_sub_K_α
   have h_tsupp_v_sub_Ω'' : tsupport v ⊆ Ω'' := h_tsupp_v_sub_K_α.trans hK_α_in_Ω''
-  -- Build MemWkp 2 2 v Ω''.
-  -- (c.1) MemLp v 2 (volume.restrict Ω'').
-  -- The chart-pushed function f is ae-equal to D.u_chart on
-  -- weighted.restrict chartTarget, so f is MemLp 2 (vol.restrict K) for any compact K ⊆ chartTarget.
-  -- For our v: v = Ω''.indicator f, and f is MemLp 2 on compact subsets, so v is MemLp 2.
-  -- Cleaner: v is bounded by f pointwise, and f ∈ L²(weighted.restrict chartTarget).
-  -- Since density bounded below on closure Ω'' (compact ⊆ chart target), f ∈ L²(vol.restrict closure Ω'').
-  -- Restrict to Ω'' ⊆ closure Ω'': f ∈ L²(vol.restrict Ω''). Then v = Ω''.indicator f ∈ L²(vol.restrict Ω'').
-  -- Use the chart-bilinear bridge: D.u_chart =ᵐ f on weighted.restrict chartTarget,
-  -- and we have D.u_chart_memLp_weighted.
-  -- Since vol.restrict (compact subset of chartTarget) is dominated by C * weighted.restrict chartTarget,
-  -- D.u_chart ∈ MemLp 2 (vol.restrict closure Ω'').
   have h_uChart_memLp_vol_closureΩ'' :
       MemLp D.u_chart 2 (volume.restrict (closure Ω'')) :=
     memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure (I := I) (M := M)
       D.u_chart_memLp_weighted hΩ''_compact_closure
       hΩ''_compact_closure.isClosed.measurableSet h_closureΩ''_in_chart
-  -- Restrict to Ω''.
   have h_uChart_memLp_vol_Ω'' :
       MemLp D.u_chart 2 (volume.restrict Ω'') :=
     h_uChart_memLp_vol_closureΩ''.mono_measure
       (Measure.restrict_mono subset_closure le_rfl)
-  -- D.u_chart =ᵐ f on volume.restrict (chartTargetEuclid α) (from chartPushedLpFromLp_coeFn + density bridge).
-  -- But more directly, we have this on weighted.restrict, and need vol.restrict.
-  -- We use the lemma proven in the constructor `chartBilinearH1ComplData_of_laplacianDomain.weak_partial_isWeakPartial`.
-  -- Specifically: D.u_chart =ᵐ chartPushed POU α u_h on vol.restrict (chartTargetEuclid α).
-  -- This is the h_coeFn_vol from that lemma. Let me restate it here.
   have h_uChart_ae_f :
       D.u_chart =ᵐ[volume.restrict (chartTargetEuclid (I := I) (M := M) α)] f := by
-    -- D.u_chart = chartPushedLpFromLp.coeFn (by chartBilinearH1ComplData_of_laplacianDomain_u_chart_def).
-    -- chartPushedLpFromLp.coeFn =ᵐ chartPushed POU α u on weighted.restrict chartTarget.
-    -- We need it on vol.restrict chartTarget. Use the fact that vol.restrict chartTarget ≪ weighted.restrict chartTarget.
     have h_coeFn := DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentityIntegralForm.chartPushedLpFromLp_coeFn
       (I := I) (M := M) g α (H1ComplToLp (I := I) (M := M) g u_h)
-    -- We need volume.restrict chartTarget ≪ weighted.restrict chartTarget.
     have h_v_abs_w :
         (volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α) ≪
@@ -474,22 +378,14 @@ theorem chartH2NonSmoothPOUWitness_of_laplacianDomain
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
           ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) :=
       h_v_abs_w.ae_le h_coeFn
-    -- D.u_chart = chartPushedLpFromLp.coeFn (by rfl from the def).
     change ((chartPushedLpFromLp (I := I) (M := M) g α
           (H1ComplToLp (I := I) (M := M) g u_h)) : EuclN → ℝ) =ᵐ[_] f
     exact h_coeFn_vol
-  -- v = Ω''.indicator f =ᵐ Ω''.indicator D.u_chart on vol.restrict chart target.
-  -- But we actually want MemLp v 2 (vol.restrict Ω'').
-  -- v = Ω''.indicator f. On Ω'', v = f. We have D.u_chart =ᵐ f on vol.restrict chart target.
-  -- So on vol.restrict Ω'' (⊆ vol.restrict chart target), D.u_chart =ᵐ f, hence D.u_chart =ᵐ v.
   have h_uChart_ae_v_Ω'' : D.u_chart =ᵐ[volume.restrict Ω''] v := by
-    -- On Ω'', v = f, and D.u_chart =ᵐ f.
     have h_sub : Ω'' ⊆ chartTargetEuclid (I := I) (M := M) α := hΩ''_in_chart
     have h_uChart_ae_f_Ω'' : D.u_chart =ᵐ[volume.restrict Ω''] f :=
       h_uChart_ae_f.filter_mono (MeasureTheory.ae_mono
         (Measure.restrict_mono h_sub le_rfl))
-    -- We need: D.u_chart =ᵐ[volume.restrict Ω''] v.
-    -- Use ae_restrict and pointwise reasoning.
     refine h_uChart_ae_f_Ω''.mp ?_
     refine (ae_restrict_iff' hΩ''_meas).mpr ?_
     refine Filter.Eventually.of_forall ?_
@@ -498,55 +394,26 @@ theorem chartH2NonSmoothPOUWitness_of_laplacianDomain
     exact heq
   have hv_memLp_Ω'' : MemLp v 2 (volume.restrict Ω'') :=
     (MeasureTheory.memLp_congr_ae h_uChart_ae_v_Ω'').mp h_uChart_memLp_vol_Ω''
-  -- (c.2) Weak first partials of v on Ω''.
-  -- v has tsupport ⊆ Ω''. The weak partials of v are characterized via integration by parts.
-  -- Since D.weak_partial i is a weak partial of D.u_chart on chartTargetEuclid α,
-  -- and D.u_chart =ᵐ v on vol.restrict Ω'' (and v = 0 outside Ω''), we expect
-  -- Ω''.indicator (D.weak_partial i) to be a weak partial of v on Ω''.
-  -- But D.weak_partial_locally_memLp guarantees L²-ness on compact subsets.
-  -- For the second-order partials, we have g_ik on Ω'' from h_h2.
-  -- Let's structurally build MemWkp 2 2 v Ω''.
-  -- A weak partial of v on Ω'' is a weak partial of D.u_chart restricted to Ω''
-  -- (since v = D.u_chart on Ω'' and 0 outside).
-  -- Actually let me approach this differently: build MemWkp 2 2 D.u_chart Ω''
-  -- since D.weak_partial is more accessible.
-  -- Then by ae-equality v =ᵐ D.u_chart on Ω'', MemWkp 2 2 v Ω''.
-  -- But D.u_chart might not have compact support inside Ω''. To use MemWkp.extend_zero,
-  -- we need a function with tsupport ⊆ Ω''. v has this property; D.u_chart doesn't.
-  -- So we work with v.
-  -- Plan:
-  -- (i) Show MemW1p 2 v Ω''. The weak partial is `Ω''.indicator (D.weak_partial i)` (= w_i below).
-  -- (ii) For each i, show MemW1p 2 w_i Ω''. The weak partial is `g_ik` (from h_h2).
-  -- Then MemWkp 2 2 v Ω'' follows.
-  -- After that, MemWkp.extend_zero v Ω'' → chartTargetEuclid α with hu_supp = h_tsupp_v_sub_Ω''.
-  -- Then by ae-equality, MemWkp 2 2 (chartPushed POU α u) (chartTargetEuclid α).
-  -- Helper: D.weak_partial i is a weak partial of v on Ω''.
   have h_dwp_weak_v_Ω'' : ∀ i, DeGiorgi.HasWeakPartialDeriv
       (d := Module.finrank ℝ E) i (D.weak_partial i) v Ω'' := by
     intro i
-    -- D.weak_partial i is a weak partial of D.u_chart on chartTargetEuclid α.
     have h_dwp_uChart : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
         (D.weak_partial i) D.u_chart (chartTargetEuclid (I := I) (M := M) α) :=
       D.weak_partial_isWeakPartial i
-    -- Restrict to Ω''.
     have h_dwp_uChart_Ω'' : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
         (D.weak_partial i) D.u_chart Ω'' :=
       DeGiorgi.HasWeakPartialDeriv.restrict hΩ''_open hΩ''_in_chart h_dwp_uChart
-    -- v =ᵐ D.u_chart on vol.restrict Ω''. By hasWeakPartialDeriv_congr_ae.
     exact DifferentialGeometry.Analysis.Sobolev.Euclidean.hasWeakPartialDeriv_congr_ae
       (d := Module.finrank ℝ E) hΩ''_open i h_uChart_ae_v_Ω'' h_dwp_uChart_Ω''
-  -- Show MemLp (D.weak_partial i) 2 (volume.restrict Ω'').
   have h_dwp_memLp_Ω'' : ∀ i, MemLp (D.weak_partial i) 2 (volume.restrict Ω'') := by
     intro i
     have h := D.weak_partial_locally_memLp i (closure Ω'') hΩ''_compact_closure
       h_closureΩ''_in_chart
     exact h.mono_measure (Measure.restrict_mono subset_closure le_rfl)
-  -- MemW1p 2 v Ω''.
   have hv_memW1p_Ω'' : DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 v Ω'' := by
     refine ⟨hv_memLp_Ω'', ?_⟩
     intro i
     exact ⟨D.weak_partial i, h_dwp_memLp_Ω'' i, h_dwp_weak_v_Ω'' i⟩
-  -- For each i, MemW1p 2 (D.weak_partial i) Ω'' with weak partial g_ik from h_h2.
   have hwp_i_memW1p_Ω'' : ∀ i,
       DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 (D.weak_partial i) Ω'' := by
     intro i
@@ -554,27 +421,17 @@ theorem chartH2NonSmoothPOUWitness_of_laplacianDomain
     intro k
     obtain ⟨g_ik, hg_ik_memLp, hg_ik_partial, _hg_ik_norm⟩ := h_h2 i k
     exact ⟨g_ik, hg_ik_memLp, hg_ik_partial⟩
-  -- Now MemWkp 2 2 v Ω''.
   have hv_memWkp_two_Ω'' :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) 2 2 v Ω'' := by
-    -- MemWkp 2 2 v Ω'' ↔ MemW1p 2 v Ω'' ∧ ∀ i, MemWkp 1 2 (chosenWeakPartial' 2 i v Ω'') Ω''
-    -- We have MemW1p 2 v Ω''.
-    -- MemWkp 1 2 = MemW1p 2.
     refine ⟨hv_memW1p_Ω'', ?_⟩
     intro i
-    -- Goal: MemWkp 1 2 (chosenWeakPartial' 2 i v Ω'') Ω'' = MemW1p 2 (chosenWeakPartial' 2 i v Ω'') Ω''.
-    -- chosenWeakPartial' 2 i v Ω'' is a weak partial of v on Ω''.
-    -- By uniqueness (modulo ae), it agrees ae with D.weak_partial i.
-    -- Since MemW1p 2 is invariant under ae-equality, MemW1p 2 (D.weak_partial i) Ω''
-    -- implies MemW1p 2 (chosenWeakPartial' 2 i v Ω'') Ω''.
     have h_chosen_partial : DeGiorgi.HasWeakPartialDeriv
         (d := Module.finrank ℝ E) i
         (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
           2 i v Ω'') v Ω'' :=
       DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_isWeakPartial_of_mem
         hv_memW1p_Ω'' i
-    -- Uniqueness: chosenWeakPartial' =ᵐ D.weak_partial i on vol.restrict Ω''.
     have h_chosen_loc : MeasureTheory.LocallyIntegrable
         (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
           2 i v Ω'') (volume.restrict Ω'') :=
@@ -587,11 +444,9 @@ theorem chartH2NonSmoothPOUWitness_of_laplacianDomain
         2 i v Ω'' =ᵐ[volume.restrict Ω''] D.weak_partial i :=
       DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ''_open h_chosen_partial
         (h_dwp_weak_v_Ω'' i) h_chosen_loc h_dwp_loc
-    -- MemWkp 1 2 ↔ MemW1p 2.
     rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p]
     exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemW1p_congr_ae hΩ''_open
       h_ae.symm).mp (hwp_i_memW1p_Ω'' i)
-  -- (d) MemWkp.extend_zero v from Ω'' to chartTargetEuclid α.
   have hv_memWkp_two_chart :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) 2 2 v (chartTargetEuclid (I := I) (M := M) α) :=
@@ -599,17 +454,9 @@ theorem chartH2NonSmoothPOUWitness_of_laplacianDomain
       (k := 2) (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2) (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)
       hΩ''_open h_chart_open hΩ''_in_chart hv_memWkp_two_Ω'' h_tsupp_v_sub_Ω''
       hv_compactSupport
-  -- (e) Transfer to f via ae-equality.
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
     (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_chart_open
     h_v_eq_f_ae).mp hv_memWkp_two_chart
-
-/-! ## Headline manifold-level unconditional `H²` regularity for `laplacianDomain g`
-
-The headline theorem packages the manifold-level non-smooth `H²` regularity
-statement, unconditionally: it consumes only `u_h ∈ laplacianDomain g` and
-produces `MemWkpChart g 2 2 u` with a finite chart-based norm, where
-`u := (H1ComplToLp u_h).coeFn` is the canonical function representative. -/
 
 /-- **Manifold-level non-smooth `H²` regularity for `laplacianDomain g`,
 unconditional form.**

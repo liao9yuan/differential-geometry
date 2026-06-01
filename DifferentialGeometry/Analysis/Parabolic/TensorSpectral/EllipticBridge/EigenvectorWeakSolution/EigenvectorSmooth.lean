@@ -104,24 +104,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Chart round-trip helpers
-
-For a point `x` of the chart-`α` source, the chart Euclidean image
-`toEuclidean (extChartAt I α x)` lies in the Euclidean chart target, and the
-inverse pull-back `(extChartAt I α).symm (toEuclidean.symm ·)` recovers `x`. -/
 
 /-- For a point `x` of the chart-`α` source, the chart Euclidean image lies in
 the Euclidean chart target. -/
@@ -143,15 +131,6 @@ lemma symm_toEuclidean_symm_toEuclidean_extChartAt
   rw [(toEuclidean (E := E)).symm_apply_apply]
   exact (extChartAt I α).left_inv
     (by rw [extChartAt_source (I := I)]; exact hx)
-
-/-! ## Chart-locality-free smooth representative
-
-The declarations below build the smooth compactly-supported representative of the
-eigenvector, re-keyed onto the intrinsic compact-operator eigenbasis, via the
-chart-locality-free existence theorem
-`eigenvectorChartComponent_exists_smooth_representative` (itself
-keyed on `eigenvectorChartComponentFun`), so they hold unconditionally
-on a general closed manifold. -/
 
 section Unconditional
 

@@ -69,16 +69,12 @@ open DifferentialGeometry.Analysis.Laplacian.ChartLocalLaplacian
 open DifferentialGeometry.Analysis.Laplacian.ChartMeasureEquiv
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The chart-pulled weighted measure -/
 
 /-- The chart-pulled weighted measure on `EuclideanSpace ℝ (Fin n)`:
 `volume` weighted by `densityOnEuclid g α`. This is the natural Euclidean
@@ -94,8 +90,6 @@ def chartPulledWeightedMeasure (g : SmoothRiemannianMetric I M) (α : M) :
     Measure EuclN :=
   (volume : Measure EuclN).withDensity
     (fun y => ENNReal.ofReal (densityOnEuclid (I := I) g α y))
-
-/-! ## Packaged data for the non-smooth chart-bilinear identity -/
 
 /-- Data describing a non-smooth chart-bilinear identity on
 `chartTargetEuclid α`. The hypotheses encode:
@@ -181,8 +175,6 @@ structure ChartBilinearH1ComplData
         densityOnEuclid (I := I) g α y * f_chart y * ψ y
         ∂(volume : Measure EuclN)
 
-/-! ## Headline ergonomics theorem -/
-
 /-- Headline form of the chart-bilinear identity for a non-smooth element of
 `H1Compl g`: given the data `D`, the variational identity
 ```
@@ -214,13 +206,6 @@ theorem chart_bilinear_identity_h1Compl
       ∂(volume : Measure EuclN) :=
   D.variational_identity ψ hψ hψ_cs hψ_supp
 
-/-! ## Conversion: weighted `MemLp` to plain `MemLp` on precompact subdomains
-
-On any precompact open `Ω` with `closure Ω ⊆ chartTargetEuclid α`, the
-density `densityOnEuclid g α` is bounded above and below by positive
-constants. Consequently, weighted `MemLp 2` on `chartTargetEuclid α` implies
-plain `MemLp 2` on `Ω` (and the reverse implication holds too on `Ω`). -/
-
 /-- The density `densityOnEuclid g α` is bounded above and below by positive
 constants on any compact subset of `chartTargetEuclid α`. -/
 lemma densityOnEuclid_bounded_on_compact
@@ -236,17 +221,13 @@ lemma densityOnEuclid_bounded_on_compact
     intro y hy
     rw [hK_empty] at hy
     exact absurd hy (Set.notMem_empty y)
-  -- Density is continuous on chartTargetEuclid α (open).
   have h_dens_contOn : ContinuousOn (densityOnEuclid (I := I) g α)
       (chartTargetEuclid (I := I) (M := M) α) :=
     (densityOnEuclid_contDiffOn (I := I) g α).continuousOn
-  -- Restrict to K (continuous on K).
   have h_dens_contOn_K : ContinuousOn (densityOnEuclid (I := I) g α) K :=
     h_dens_contOn.mono hK_in
-  -- Density is positive on K (since K ⊆ chartTargetEuclid α).
   have h_dens_pos : ∀ y ∈ K, 0 < densityOnEuclid (I := I) g α y :=
     fun y hy => densityOnEuclid_pos (I := I) g α (hK_in hy)
-  -- Continuous strictly positive function on a non-empty compact has a positive infimum.
   have h_K_ne : K.Nonempty := Set.nonempty_iff_ne_empty.mpr hK_empty
   obtain ⟨y_min, hy_min, h_min_eq⟩ := hK.exists_isMinOn h_K_ne h_dens_contOn_K
   obtain ⟨y_max, hy_max, h_max_eq⟩ := hK.exists_isMaxOn h_K_ne h_dens_contOn_K
@@ -254,10 +235,7 @@ lemma densityOnEuclid_bounded_on_compact
   set c_max : ℝ := densityOnEuclid (I := I) g α y_max with hcmax_def
   have hc_min_pos : 0 < c_min := h_dens_pos y_min hy_min
   have hc_min_le_max : c_min ≤ c_max := by
-    -- IsMinOn yields y_min minimum: density y_min ≤ density y for y ∈ K.
-    -- Apply at y_max ∈ K.
     have h := h_min_eq hy_max
-    -- h : densityOnEuclid g α y_min ≤ densityOnEuclid g α y_max
     exact h
   refine ⟨c_min, c_max, hc_min_pos, hc_min_le_max, ?_⟩
   intro y hy
@@ -295,39 +273,20 @@ lemma volume_restrict_compact_le_chartPulledWeightedMeasure
   obtain ⟨c_min, _c_max, hc_min_pos, _hc_le, h_bd⟩ :=
     densityOnEuclid_bounded_on_compact (I := I) (M := M) g α hK_compact hK_in
   refine ⟨1 / c_min, by positivity, ?_⟩
-  -- Strategy: bound `volume.restrict K (A) = vol(A∩K)` by
-  -- `(1/c_min) · ∫_{A∩K} density d(vol) ≤ (1/c_min) · μ_w(A ∩ chartTarget)`.
-  -- We compare measures by evaluating on measurable sets.
   refine Measure.le_iff.2 ?_
   intro A hA
-  -- LHS: vol.restrict K (A) = vol (A ∩ K).
   rw [Measure.restrict_apply hA]
-  -- RHS: ENNReal.ofReal (1/c_min) • (chartPulledWeightedMeasure.restrict chartTarget) (A)
-  --    = ENNReal.ofReal (1/c_min) · chartPulledWeightedMeasure (A ∩ chartTarget)
-  --    = ENNReal.ofReal (1/c_min) · (vol.withDensity (ENNReal.ofReal density)) (A ∩ chartTarget)
-  --    = ENNReal.ofReal (1/c_min) · ∫⁻ y in (A∩chartTarget), ENNReal.ofReal density(y) ∂vol.
   rw [Measure.smul_apply, Measure.restrict_apply hA]
-  -- Density of weighted measure: chartPulledWeightedMeasure A' = ∫⁻ y in A', ENNReal.ofReal density(y) ∂vol.
   unfold chartPulledWeightedMeasure
   rw [withDensity_apply _ (hA.inter (chartTargetEuclid_isOpen
     (I := I) (M := M) α).measurableSet)]
-  -- Goal: vol(A ∩ K) ≤ ENNReal.ofReal (1/c_min) ·
-  --       ∫⁻ y in (A ∩ chartTarget), ENNReal.ofReal density(y) ∂vol.
-  -- Since K ⊆ chartTarget, A ∩ K ⊆ A ∩ chartTarget.
-  -- Bound RHS-integrand below: density ≥ c_min on K.
-  -- So ∫⁻ y in (A ∩ chartTarget) ≥ ∫⁻ y in (A ∩ K) ≥ c_min · vol(A∩K).
-  -- Then (1/c_min) · ∫⁻ ... ≥ vol(A∩K).
   have h_subset : A ∩ K ⊆ A ∩ chartTargetEuclid (I := I) (M := M) α :=
     Set.inter_subset_inter_right A hK_in
-  -- ∫⁻ y in (A ∩ chartTarget), ENNReal.ofReal density(y) ∂vol ≥
-  -- ∫⁻ y in (A ∩ K), ENNReal.ofReal density(y) ∂vol (by domain monotonicity).
   have h_setmono :
       ∫⁻ y in A ∩ K, ENNReal.ofReal (densityOnEuclid (I := I) g α y) ∂(volume : Measure EuclN) ≤
       ∫⁻ y in A ∩ chartTargetEuclid (I := I) (M := M) α,
         ENNReal.ofReal (densityOnEuclid (I := I) g α y) ∂(volume : Measure EuclN) := by
     apply MeasureTheory.lintegral_mono_set h_subset
-  -- ∫⁻ y in (A ∩ K), ENNReal.ofReal density(y) ∂vol ≥
-  -- ∫⁻ y in (A ∩ K), ENNReal.ofReal c_min ∂vol = ENNReal.ofReal c_min · vol(A∩K).
   have h_pointwise_bd :
       ∫⁻ y in A ∩ K, ENNReal.ofReal c_min ∂(volume : Measure EuclN) ≤
       ∫⁻ y in A ∩ K, ENNReal.ofReal (densityOnEuclid (I := I) g α y) ∂(volume : Measure EuclN) := by
@@ -340,9 +299,6 @@ lemma volume_restrict_compact_le_chartPulledWeightedMeasure
       ∫⁻ _y in A ∩ K, ENNReal.ofReal c_min ∂(volume : Measure EuclN) =
       ENNReal.ofReal c_min * (volume : Measure EuclN) (A ∩ K) := by
     rw [MeasureTheory.setLIntegral_const]
-  -- Combine: vol(A∩K) = (1/c_min) · c_min · vol(A∩K)
-  --        ≤ (1/c_min) · ∫⁻ y in (A∩K), density y dvol
-  --        ≤ (1/c_min) · ∫⁻ y in (A∩chartTarget), density y dvol.
   have h_step1 : (volume : Measure EuclN) (A ∩ K) =
       ENNReal.ofReal (1 / c_min) *
         (ENNReal.ofReal c_min * (volume : Measure EuclN) (A ∩ K)) := by
@@ -350,9 +306,6 @@ lemma volume_restrict_compact_le_chartPulledWeightedMeasure
     rw [show (1 / c_min) * c_min = 1 from by field_simp]
     rw [ENNReal.ofReal_one, one_mul]
   rw [h_step1]
-  -- Goal:
-  --   ENNReal.ofReal (1/c_min) · (ENNReal.ofReal c_min · vol(A∩K))
-  --   ≤ ENNReal.ofReal (1/c_min) · ∫⁻ y in (A ∩ chartTarget), ENNReal.ofReal density y ∂vol.
   rw [smul_eq_mul]
   gcongr
   exact le_trans (le_of_eq h_const_eval.symm) (h_pointwise_bd.trans h_setmono)
@@ -370,7 +323,6 @@ lemma memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure
     (hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α) :
     MemLp w 2 ((volume : Measure EuclN).restrict K) := by
   classical
-  -- Apply the dominating-measure bound, then use `MemLp.of_measure_le_smul`.
   obtain ⟨c, _hc_pos, h_le⟩ :=
     volume_restrict_compact_le_chartPulledWeightedMeasure (I := I) (M := M)
       α hK_compact hK_meas hK_in

@@ -94,31 +94,12 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## `HasWeakPartialDeriv` is stable under almost-everywhere equality and
-`ℝ`-scaling
-
-`DeGiorgi.HasWeakPartialDeriv` is defined by a family of integral identities
-tested against smooth compactly-supported functions. Two pre-existing files of
-this campaign hand us the chart component and the chart partial of an
-approximant in two presentations: the concrete `C^∞` chart-coordinate scalar
-field (and its concrete `chosenWeakPartial'`), and the almost-everywhere-equal
-`L²` function classes that flow through the `Lp`-norm convergences. The two
-helper lemmas below bridge them — `HasWeakPartialDeriv` is unchanged by
-replacing either argument with an almost-everywhere-equal function, and is
-`ℝ`-homogeneous (a common scalar passes through both arguments at once). -/
 
 /-- `HasWeakPartialDeriv` only depends on its function arguments up to
 almost-everywhere equality with respect to `volume.restrict Ω`. -/
@@ -129,7 +110,6 @@ private lemma hasWeakPartialDeriv_congr_ae
     (h : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k g f Ω) :
     DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k g' f' Ω := by
   intro φ hφ hφ_supp hφ_sub
-  -- The two integrands change by an almost-everywhere-equal factor.
   have h_lhs :
       ∫ x in Ω, f' x * (fderiv ℝ φ x) (EuclideanSpace.single k 1) =
         ∫ x in Ω, f x * (fderiv ℝ φ x) (EuclideanSpace.single k 1) := by
@@ -153,7 +133,6 @@ private lemma hasWeakPartialDeriv_const_smul
       (fun x => c • g x) (fun x => c • f x) Ω := by
   intro φ hφ hφ_supp hφ_sub
   have h_base := h φ hφ hφ_supp hφ_sub
-  -- Pull the scalar out of both sides of the tested identity.
   have h_lhs :
       ∫ x in Ω, (c • f x) * (fderiv ℝ φ x) (EuclideanSpace.single k 1) =
         c * ∫ x in Ω, f x * (fderiv ℝ φ x) (EuclideanSpace.single k 1) := by
@@ -166,18 +145,6 @@ private lemma hasWeakPartialDeriv_const_smul
     refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
     simp only [smul_eq_mul]; ring
   rw [h_lhs, h_rhs, h_base, mul_neg]
-
-/-! ## Chart-locality-free results
-
-The chart locality enters only through the eigenvector and its canonical smooth
-approximating sequence; both have chart-locality-free presentations in the
-companion files (`SmoothApprox.lean`, `EigenvectorChartComponentL2.lean`,
-`EigenvectorChartPartialL2.lean`). The eigenvector itself is re-keyed onto
-`tensorResolventEigenbasisVec` at the unconditional compactness witness
-`tensorResolventL2_isCompactOperator`; `[CompleteSpace E]` comes from
-`FiniteDimensional.complete`. The two stability helpers
-(`hasWeakPartialDeriv_congr_ae`, `hasWeakPartialDeriv_const_smul`) are
-chart-locality-free, so they feed these results verbatim. -/
 
 /-- **The weak `k`-th chart partial of an eigenvector chart component
 (chart-locality-free).** The coercion-to-function of the `Lp ℝ 2 (chartL2Measure
@@ -214,10 +181,8 @@ lemma eigenvectorChartPartialLp_approx_coeFn
               g r s i n).toCcTensor α P₀.1 P₀.2)
           (chartTargetEuclid (I := I) (M := M) α) y := by
   classical
-  -- Rewrite the `Lp` class via the concrete characterisation of the approximant.
   rw [eigenvectorChartPartialLp_approx_eq (I := I) (M := M)
     g r s i α P₀ k n]
-  -- `coeFn` of a scalar multiple is the scalar multiple of `coeFn`.
   refine (Lp.coeFn_smul (i.fst.val)⁻¹
     ((chosenWeakPartial'_tensorChartComponent_memLp (I := I) (M := M) g r s
       (eigenvectorSmoothApprox (I := I) (M := M) g r s i n)
@@ -227,7 +192,6 @@ lemma eigenvectorChartPartialLp_approx_coeFn
           (eigenvectorSmoothApprox (I := I) (M := M)
             g r s i n).toCcTensor α P₀.1 P₀.2)
         (chartTargetEuclid (I := I) (M := M) α)))).trans ?_
-  -- The unscaled `L²` class agrees almost everywhere with the concrete partial.
   exact (MemLp.coeFn_toLp _).const_smul (i.fst.val)⁻¹
 
 /-- For each `n`, the coercion-to-function of the `n`-th approximant chart
@@ -253,7 +217,6 @@ private lemma eigenvectorChartWeakPartial_approx_hasWeakPartialDeriv
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- The chart component of the smooth approximant lies in `W^{1,2}`.
   have h_w1p :
       DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
         (tensorChartComponent (I := I) (M := M) g r s
@@ -263,7 +226,6 @@ private lemma eigenvectorChartWeakPartial_approx_hasWeakPartialDeriv
     tensorChartComponent_memW1p (I := I) (M := M) g r s
       (eigenvectorSmoothApprox (I := I) (M := M) g r s i n)
       α P₀.1 P₀.2
-  -- Hence its `chosenWeakPartial'` is a genuine weak `k`-th chart partial.
   have h_weak :
       DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
         (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
@@ -276,7 +238,6 @@ private lemma eigenvectorChartWeakPartial_approx_hasWeakPartialDeriv
             g r s i n).toCcTensor α P₀.1 P₀.2)
         (chartTargetEuclid (I := I) (M := M) α) :=
     chosenWeakPartial'_isWeakPartial_of_mem h_w1p k
-  -- Scaling by `μ⁻¹` keeps it a weak partial.
   have h_weak_smul :
       DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
         (fun y => (i.fst.val)⁻¹ •
@@ -291,7 +252,6 @@ private lemma eigenvectorChartWeakPartial_approx_hasWeakPartialDeriv
               g r s i n).toCcTensor α P₀.1 P₀.2 y)
         (chartTargetEuclid (I := I) (M := M) α) :=
     hasWeakPartialDeriv_const_smul (i.fst.val)⁻¹ h_weak
-  -- Transfer both arguments to the `Lp`-class presentation.
   refine hasWeakPartialDeriv_congr_ae ?_ ?_ h_weak_smul
   · exact (eigenvectorChartComponentL2_approx_coeFn (I := I) (M := M)
       g r s i α P₀ n).symm
@@ -390,7 +350,6 @@ theorem eigenvectorChartWeakPartial_hasWeakPartialDeriv
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
   letI : CompleteSpace E := FiniteDimensional.complete ℝ E
-  -- The Euclidean chart target is open.
   have hΩ_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   set uApprox : ℕ → EuclN → ℝ := fun n =>
@@ -420,7 +379,6 @@ theorem eigenvectorChartWeakPartial_hasWeakPartialDeriv
         g r s i α P₀ k :
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
     with hgLim_def
-  -- `MemLp 2` for the four families.
   have hu_n_memLp : ∀ n, MemLp (uApprox n) 2
       ((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
@@ -443,7 +401,6 @@ theorem eigenvectorChartWeakPartial_hasWeakPartialDeriv
         (chartTargetEuclid (I := I) (M := M) α)) := by
     simp only [hgLim_def]
     exact Lp.memLp _
-  -- Per-approximant genuine weak chart partial.
   have h_weak : ∀ n,
       DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
         (gApprox n) (uApprox n) (chartTargetEuclid (I := I) (M := M) α) := by
@@ -451,7 +408,6 @@ theorem eigenvectorChartWeakPartial_hasWeakPartialDeriv
     simp only [hgApprox_def, huApprox_def]
     exact eigenvectorChartWeakPartial_approx_hasWeakPartialDeriv
       (I := I) (M := M) g r s i α P₀ k n
-  -- `eLpNorm`-convergence of the chart components.
   have h_u_tendsto :
       Filter.Tendsto
         (fun n => eLpNorm (fun x => uApprox n x - uLim x) 2
@@ -462,7 +418,6 @@ theorem eigenvectorChartWeakPartial_hasWeakPartialDeriv
       (I := I) (M := M) g r s i α P₀
     simp only [huApprox_def, huLim_def]
     exact h
-  -- `eLpNorm`-convergence of the chart partials.
   have h_g_tendsto :
       Filter.Tendsto
         (fun n => eLpNorm (fun x => gApprox n x - gLim x) 2
@@ -473,7 +428,6 @@ theorem eigenvectorChartWeakPartial_hasWeakPartialDeriv
       (I := I) (M := M) g r s i α P₀ k
     simp only [hgApprox_def, hgLim_def]
     exact h
-  -- Assemble via the `L²`-closure theorem.
   have h_closure :
       DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k gLim uLim
         (chartTargetEuclid (I := I) (M := M) α) :=
@@ -500,13 +454,11 @@ theorem eigenvectorChartWeakPartial_locally_memLp
       ((volume : Measure EuclN).restrict K) := by
   classical
   let _ := hK
-  -- The coercion-to-function is in `MemLp 2` of the chart's `L²` measure.
   have h_memLp : MemLp (eigenvectorChartWeakPartial (I := I) (M := M)
       g r s i α P₀ k) 2
       (chartL2Measure (I := I) (M := M) α) := by
     rw [eigenvectorChartWeakPartial]
     exact Lp.memLp _
-  -- Restricting to a subset of the chart target is a smaller measure.
   have h_le : (volume : Measure EuclN).restrict K ≤
       chartL2Measure (I := I) (M := M) α := by
     rw [chartL2Measure]

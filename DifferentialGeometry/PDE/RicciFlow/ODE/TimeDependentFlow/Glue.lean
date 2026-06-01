@@ -69,26 +69,19 @@ theorem time_dependent_vf_global_flow_glue
             ∀ s : ℝ,
               Φ s x = (chartAt H α).symm
                 (I.symm ((hper α).flow (I ((chartAt H α) x)) s)) := by
-  -- Step 1: extract the uniform horizon, finite cover, and per-α flows from
-  -- the chart-cover uniform-existence theorem.
   obtain ⟨T, hT_pos, S, hCoverEq, flow, hflow⟩ :=
     time_dependent_vf_uniform_existence_time_on_closed_mfd X hper
-  -- Step 2: every `x : M` lies in `(hper α).U` for some `α ∈ S`
-  -- (from the cover equality).
   have hMem : ∀ x : M, ∃ α ∈ S, x ∈ (hper α).U := by
     intro x
     have hx : x ∈ (⋃ α ∈ S, (hper α).U) := by
       rw [hCoverEq]; exact Set.mem_univ x
     rcases Set.mem_iUnion₂.mp hx with ⟨α, hαS, hxU⟩
     exact ⟨α, hαS, hxU⟩
-  -- Choose `αRep x ∈ S` with `x ∈ (hper (αRep x)).U` for every `x`.
   classical
   let αRep : M → M := fun x => (hMem x).choose
   have hαRep_S : ∀ x : M, αRep x ∈ S := fun x => (hMem x).choose_spec.1
   have hαRep_U : ∀ x : M, x ∈ (hper (αRep x)).U :=
     fun x => (hMem x).choose_spec.2
-  -- Membership in `(hper α).U` implies the chart-coord image of `x` is in the
-  -- closed ball of radius `(hper α).r`.
   have hxChart_closedBall :
       ∀ x : M, I ((chartAt H (αRep x)) x) ∈
         Metric.closedBall (I ((chartAt H (αRep x)) (αRep x))) (hper (αRep x)).r := by
@@ -102,50 +95,29 @@ theorem time_dependent_vf_global_flow_glue
         exact hxU.2
       exact this
     exact Metric.ball_subset_closedBall hball
-  -- Membership in `(hper α).U` also implies `x ∈ (chartAt H α).source`.
   have hxChart_source : ∀ x : M, x ∈ (chartAt H (αRep x)).source := by
     intro x
     have hxU := hαRep_U x
     unfold ChartLocalPicardData.U at hxU
     exact hxU.1
-  -- Step 3: define the global flow `Φ s x` as the chart-α-coord pull-back
-  -- evaluated at the chart-coord image of `x`, then pulled back through
-  -- `(chartAt H (αRep x)).symm ∘ I.symm`. For the initial-condition proof
-  -- we need to recognise `(hper (αRep x)).flow` from the uniform-existence
-  -- output: `flow α y` agrees with `(hper α).flow y` on the relevant ball
-  -- by construction (see `UniformExistence.lean`: `flow := fun α => (hper α).flow`
-  -- in the non-empty cover branch). We can extract this agreement from
-  -- `flow_spec.1` applied to `y = I (chart x)` and the chart-coord
-  -- right-inverse identity, but it is simpler to bypass the abstract `flow`
-  -- entirely and define `Φ` directly through `(hper α).flow`.
   let Φ : ℝ → M → M := fun s x =>
     (chartAt H (αRep x)).symm
       (I.symm ((hper (αRep x)).flow (I ((chartAt H (αRep x)) x)) s))
-  -- Step 4: prove `Φ 0 x = x` for every `x : M`.
   have hΦ_init : ∀ x : M, Φ 0 x = x := by
     intro x
-    -- Apply `(hper (αRep x)).flow_spec.1` at `y = I ((chartAt H (αRep x)) x)`:
-    -- this requires `y ∈ Metric.closedBall (I (chart α α)) (hper α).r`,
-    -- which is `hxChart_closedBall x`.
     obtain ⟨hinit, _⟩ :=
       (hper (αRep x)).flow_spec (I ((chartAt H (αRep x)) x)) (hxChart_closedBall x)
-    -- `hinit : (hper (αRep x)).flow (I ((chartAt H (αRep x)) x)) 0 =
-    --   I ((chartAt H (αRep x)) x)`.
     change (chartAt H (αRep x)).symm
         (I.symm ((hper (αRep x)).flow (I ((chartAt H (αRep x)) x)) 0)) = x
     rw [hinit]
-    -- Now goal: `(chart αRep x).symm (I.symm (I ((chart αRep x) x))) = x`.
     have hI_left : I.symm (I ((chartAt H (αRep x)) x)) = (chartAt H (αRep x)) x :=
       I.left_inv ((chartAt H (αRep x)) x)
     rw [hI_left]
     exact (chartAt H (αRep x)).left_inv (hxChart_source x)
-  -- Step 5: expose the representation identity at the chosen representative.
   refine ⟨T, hT_pos, S, hCoverEq, Φ, hΦ_init, ?_⟩
   intro x
   refine ⟨αRep x, hαRep_S x, hαRep_U x, ?_⟩
   intro s
-  -- `Φ s x = (chart αRep x).symm (I.symm ((hper (αRep x)).flow (I (chart x)) s))`
-  -- holds by definition of `Φ`.
   rfl
 
 end DifferentialGeometry.PDE.RicciFlow.ODE

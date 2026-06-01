@@ -40,8 +40,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## Smoothness of finite sums of chart-pullbacks -/
-
 /-- A finite sum of smooth chart-pullbacks is smooth on `M`, provided each
 summand has smooth Euclidean data with compact support inside the
 corresponding chart target. -/
@@ -84,8 +82,6 @@ theorem contMDiff_finset_sum_chartPullback
       rw [h_eq]
       exact h_smooth_i.add ih'
 
-/-! ## Algebraic identities about `chartPushed` -/
-
 omit [IsManifold I ∞ M] in
 /-- `chartPushed` is linear in the underlying scalar field: for any sum
 `∑ i ∈ S, f i x`, `chartPushed ρ α (Σ_i f_i)` equals the pointwise sum of
@@ -114,8 +110,6 @@ lemma chartPushed_sub
   unfold chartPushed
   ring
 
-/-! ## `MemWkpChart` is closed under finite sums -/
-
 /-- `MemWkpChart` is closed under finite sums (as a Finset sum). -/
 theorem MemWkpChart_finset_sum
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
@@ -141,8 +135,6 @@ theorem MemWkpChart_finset_sum
         rw [Finset.sum_insert hiS]
       rw [h_eq]
       exact MemWkpChart_add (I := I) (M := M) g hp hi ih'
-
-/-! ## `wkpNormChart` triangle inequality for finite sums -/
 
 /-- The chart-based norm of a finite sum is bounded by the sum of chart-based
 norms. -/
@@ -177,8 +169,6 @@ theorem wkpNormChart_finset_sum_le
       gcongr
       exact ih hS_mem
 
-/-! ## Compact support of `chartPushed (ρ α) u` on a closed manifold -/
-
 /-- On a compact manifold with the canonical chart-atlas POU, the chart-pushed
 function `chartPushed (chartAtlasPOU I M) α u` vanishes on `chartTargetEuclid α`
 outside the compact set `toEuclidean '' ((extChartAt I α) '' tsupport (ρ_α))`. -/
@@ -193,8 +183,6 @@ theorem chartPushed_eq_zero_off_compact
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u y = 0 :=
   DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed_support_subset_compact_in_target
     (I := I) (M := M) α u y hy_target hy_off
-
-/-! ## `wkpNormChart` finite-set form on compact `M` -/
 
 /-- On a compact manifold, the chart-based norm equals a finite sum over the
 set `chartAtlasPOU_finset` (the indices where the partition-of-unity
@@ -219,7 +207,6 @@ theorem wkpNormChart_eq_finset_sum
       (chartPushed (I := I) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
       (chartTargetEuclid (I := I) (M := M) α) with hf_def
-  -- For α with empty ρ_α support, f α = 0.
   have hf_zero_off : ∀ α : M, α ∉
       DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset
         (I := I) (M := M) → f α = 0 := by
@@ -245,7 +232,6 @@ theorem wkpNormChart_eq_finset_sum
     exact DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_zero_fun_zero
       (d := Module.finrank ℝ E) hp
       (chartTargetEuclid_isOpen (I := I) (M := M) α)
-  -- Now the tsum equals the finset sum.
   rw [tsum_eq_sum hf_zero_off]
 
 end Chart

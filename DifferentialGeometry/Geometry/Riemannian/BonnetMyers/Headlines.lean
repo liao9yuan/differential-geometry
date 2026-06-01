@@ -305,7 +305,6 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
           (Set.Icc (0 : ℝ) L) :=
         hTanη.comp hLiftη.continuousOn hMapsη
       exact hCompη.congr (fun t _ => rfl)
-    -- The `(0,2)`-metric tensor section `t ↦ ⟨η t, g.inner (η t)⟩` is continuous.
     have hgSecη : ContinuousOn
         (fun t : ℝ => (TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
           (E := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -316,8 +315,6 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
             (E := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
             b (g.inner b))) := g.contMDiff.continuous
       exact hgCont.comp_continuousOn hη_C1.continuousOn
-    -- Applying the metric to the velocity twice gives a continuous scalar
-    -- (within-velocity form).
     have hScalarTotalη : ContinuousOn
         (fun t : ℝ => (TotalSpace.mk' ℝ (E := fun _ : M => ℝ)
           (η t)
@@ -336,7 +333,6 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
           (fun p : TotalSpace ℝ (fun _ : M => ℝ) => p.2) :=
         continuous_snd.comp ((Bundle.Trivial.homeomorphProd M ℝ).continuous)
       exact hproj.comp_continuousOn hScalarTotalη
-    -- Integrability of the within-velocity speed (`√` of the continuous scalar).
     have hIntWη : MeasureTheory.IntegrableOn
         (fun t : ℝ => Real.sqrt
           (g.inner (η t)
@@ -344,7 +340,6 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
             (mfderivWithin 𝓘(ℝ, ℝ) I η (Set.Icc (0 : ℝ) L) t (1 : ℝ))))
         (Set.Icc 0 L) MeasureTheory.volume :=
       (Real.continuous_sqrt.comp_continuousOn hScalarWη).integrableOn_Icc
-    -- Transfer to the `mfderiv` form by a.e.-equality on the interior `Ioo 0 L`.
     have hη_int :
         MeasureTheory.IntegrableOn
           (fun t : ℝ => Real.sqrt
@@ -360,11 +355,6 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
       filter_upwards [hIoo_ae] with t ht
       have hmem : Set.Icc (0 : ℝ) L ∈ nhds t := Icc_mem_nhds ht.1 ht.2
       rw [mfderivWithin_of_mem_nhds hmem]
-    -- Step E. `pathELength I η 0 L = ofReal (arcLength g η 0 L)`, proved inline
-    -- in the active `RiemannianBundle` norm: `pathELength` is the lintegral of
-    -- the velocity enorm, which `hη_enorm` rewrites to `ofReal (√(g.inner …))`,
-    -- and the lintegral of `ofReal ∘ (speed)` equals `ofReal` of the Bochner
-    -- integral (= `arcLength`) by `ofReal_integral_eq_lintegral_ofReal`.
     have hη_pathLen :
         Manifold.pathELength I η 0 L
           = ENNReal.ofReal
@@ -429,14 +419,11 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
           DifferentialGeometry.Geometry.Riemannian.Variation.arcLength (I := I) g η 0 L
             = ∫ t in (0 : ℝ)..L, F t := rfl
       rw [h_arcLength, h_intInterval, h_Icc_Ioc]
-    -- Step F. Apply `riemannianEDist_le_pathELength` to η.
     have hdist_le_pathLen :
         Manifold.riemannianEDist I (η 0) (η L)
           ≤ Manifold.pathELength I η 0 L :=
       Manifold.riemannianEDist_le_pathELength (I := I) (γ := η)
         (a := 0) (b := L) hη_C1 rfl rfl hL_nn
-    -- Step G. Identify endpoints `η 0 = γ 0`, `η L = γ L` and combine
-    -- with Step B to obtain `ofReal L ≤ pathELength η 0 L`.
     have hL_le_pathLen :
         ENNReal.ofReal L ≤ Manifold.pathELength I η 0 L := by
       have hrewrite : Manifold.riemannianEDist I (γ 0) (γ L)
@@ -446,7 +433,6 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
       calc
         ENNReal.ofReal L = Manifold.riemannianEDist I (γ 0) (γ L) := hdist_eq.symm
         _ ≤ Manifold.pathELength I η 0 L := hrewrite
-    -- Step H. Chain with `hη_pathLen` and unpack `ofReal_le_ofReal_iff`.
     have hL_le_arcLength :
         L ≤ DifferentialGeometry.Geometry.Riemannian.Variation.arcLength
             (I := I) g η 0 L := by
@@ -457,44 +443,21 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
                   (I := I) g η 0 L) := by
         rw [← hη_pathLen]; exact hL_le_pathLen
       exact (ENNReal.ofReal_le_ofReal_iff hη_arcLength_nn).mp hofReal_le
-    -- Step I. Conclude using Step A.
     rw [hγ_arcLength]
     exact hL_le_arcLength
-  -- Apply the length-bound contradiction assembly to bound `L = r > 0` by
-  -- `π / √K`. The goal `r ≤ π / √K` then follows directly (`L = r`).
   have hL_le : L ≤ Real.pi / Real.sqrt K := by
-      -- The intrinsic geodesic has parameter length `L = r > 0`; invoke the
-      -- contradiction assembly to bound `L`.
-      -- The assembly consumes a parallel orthonormal frame of `(uPrime)`'s
-      -- perpendicular subspace together with auxiliary regularity data
-      -- (differentiability and parallelism of each frame vector, frame
-      -- orthonormality, perpendicularity to `uPrime`, global bundle-smoothness
-      -- of the sinusoidal test fields, and interval-integrability of the
-      -- relevant integrands). The frame is the smooth parallel perpendicular
-      -- frame produced by `exists_parallel_perp_frame`.
-      -- (i) the `mfderiv` realisation of `uPrime` — definitionally true.
       have huPrimeEq :
           ∀ t ∈ Set.Icc (0 : ℝ) L,
             (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) = uPrime t := by
         intro t _ht; rfl
-      -- (iii) smooth parallel orthonormal perpendicular frame `e` along `γ`.
-      -- Orthonormal seed of the `g`-perpendicular complement of the velocity at
-      -- `γ 0`, smoothly parallel-transported along `γ`, then cut off by a smooth
-      -- bump equal to `1` on `Icc 0 L`.
       obtain ⟨e, heDiff, hParallel, hON, hPerp_mfderiv, hEbundle⟩ :=
         DifferentialGeometry.Geometry.Riemannian.exists_parallel_perp_frame
           (I := I) g γ hγ_smooth hL_pos hγ_geoOn hUnit0
-      -- Re-source the perpendicularity to the `uPrime` form (definitionally
-      -- equal to `mfderiv γ t 1`).
       have hPerp :
           ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i,
             g.inner (γ t) ((e i).toFun t) (uPrime t) = 0 := by
         intro t ht i
         exact hPerp_mfderiv t ht i
-      -- (iv) interval-integrability of each index-form integrand.
-      -- Follows from continuity of all the building blocks (sin · e i,
-      -- its derivative, the chart Christoffels, and γ itself) on the
-      -- compact interval. Recorded as a structural gap.
       have hIntegrandSum :
           ∀ i : Fin (Module.finrank ℝ E - 1),
             IntervalIntegrable
@@ -506,24 +469,11 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
               MeasureTheory.volume 0 L :=
         DifferentialGeometry.Geometry.Riemannian.Variation.indexFormIntegrand_intervalIntegrable
           (I := I) g γ L hL_pos hγ_C1 hγ_geoOn hγ_unit_mfderiv e heDiff hParallel hON hPerp
-      -- (v) interval-integrability of `t ↦ Ric(γ t)(uPrime t)(uPrime t)`.
-      -- The Ricci tensor is a smooth `(0,2)`-tensor bundle section
-      -- (`ricciTensor_contMDiff`); pulled back along the `C¹` curve `γ` it
-      -- is a continuous CLM-bundle section. Applying it (via the Mathlib
-      -- `ContinuousOn.clm_bundle_apply₂` bridge) to the within-velocity
-      -- vector section — whose total-space continuity on the compact
-      -- interval is the `tangentMapWithin` continuity of `γ` — yields a
-      -- continuous scalar on `Icc 0 L`, hence interval-integrable. We
-      -- prove integrability for the `mfderivWithin` form and transfer to
-      -- the `mfderiv` form by a.e.-equality on the co-null interior
-      -- `Ioo 0 L` (where `mfderivWithin = mfderiv`).
       have hRicIntegrable :
           IntervalIntegrable
             (fun t : ℝ => ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t))
             MeasureTheory.volume 0 L := by
         have hL_nn' : (0 : ℝ) ≤ L := le_of_lt hL_pos
-        -- (A) Total-space continuity of the within-velocity section on `Icc 0 L`.
-        -- `Icc 0 L` has the unique-mdiff property as a subset of the model `ℝ`.
         have hUnique : UniqueMDiffOn 𝓘(ℝ, ℝ) (Set.Icc (0 : ℝ) L) := by
           intro u hu
           rw [uniqueMDiffWithinAt_iff_uniqueDiffWithinAt]
@@ -554,7 +504,6 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
               (Set.Icc (0 : ℝ) L) :=
             hTan.comp hLift.continuousOn hMaps
           exact hComp.congr (fun t _ => rfl)
-        -- (B) Continuity of the Ricci `(0,2)`-tensor section pulled back along `γ`.
         have hRicSec : ContinuousOn
             (fun t : ℝ => (TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
               (E := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -566,7 +515,6 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
                 b (ricciTensor (I := I) g b))) :=
             (ricciTensor_contMDiff (I := I) g).continuous
           exact (hRicCont.comp_continuousOn hγ_C1.continuousOn)
-        -- (C) Apply the bundle bilinear-application bridge.
         have hScalarTotal : ContinuousOn
             (fun t : ℝ => (TotalSpace.mk' ℝ (E := fun _ : M => ℝ)
               (γ t)
@@ -576,7 +524,6 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
             (Set.Icc (0 : ℝ) L) :=
           ContinuousOn.clm_bundle_apply₂ (F₁ := E) (F₂ := E) (F₃ := ℝ)
             (b := γ) hRicSec hVW hVW
-        -- (D) Extract the scalar continuity from the trivial-bundle total space.
         have hScalarW : ContinuousOn
             (fun t : ℝ => ricciTensor (I := I) g (γ t)
               (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ))
@@ -587,7 +534,6 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
             continuous_snd.comp
               ((Bundle.Trivial.homeomorphProd M ℝ).continuous)
           exact hproj.comp_continuousOn hScalarTotal
-        -- (E) Integrability of the within-velocity Ricci integrand on `Icc 0 L`.
         have hIntW : IntervalIntegrable
             (fun t : ℝ => ricciTensor (I := I) g (γ t)
               (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ))
@@ -595,7 +541,6 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
             MeasureTheory.volume 0 L := by
           apply ContinuousOn.intervalIntegrable
           rwa [Set.uIcc_of_le hL_nn']
-        -- (F) Transfer to the `mfderiv = uPrime` form by a.e.-equality on `Ioo 0 L`.
         refine hIntW.congr_ae ?_
         have hIoo_ae : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.uIoc (0 : ℝ) L)),
             t ∈ Set.Ioo (0 : ℝ) L := by
@@ -608,10 +553,6 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
             (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ))
           = ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t)
         rw [mfderivWithin_of_mem_nhds hmem]
-      -- (vi) global bundle-smoothness of each sinusoidal test field
-      -- `t ↦ ⟨γ t, sin(π t / L) • (e i) t⟩`. The scalar `sin(π · / L)` is
-      -- smooth, and `t ↦ ⟨γ t, (e i) t⟩` is globally bundle-`C^∞` (`hEbundle`),
-      -- so their fibrewise product is smooth (`contMDiff_smul_bundleField`).
       have hVbundle :
           ∀ i : Fin (Module.finrank ℝ E - 1),
             ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞
@@ -628,15 +569,11 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
         have hprod :=
           DifferentialGeometry.Geometry.Riemannian.Variation.contMDiff_smul_bundleField
             (I := I) hγ_smooth hχ_smooth (hEbundle i)
-        -- `(smulFun χ (e i)).toFun t = χ t • (e i).toFun t` definitionally.
         exact hprod
       exact bonnet_myers_length_le_of_ricci_bound (I := I) g γ hL_pos hEnorm
         hγ_smooth hγ_C1 hγ_geoOn _hK _hdim hRic' uPrime huPrimeEq hγ_unit
         e heDiff hParallel hON hPerp hIntegrandSum hRicIntegrable hγ_min hVbundle
-  -- Conclude: the goal is `r ≤ π / √K`, and `L = r`, so `hL_le` closes it.
   exact hL_le
-
-/-! ## Headline 1: diameter bound -/
 
 set_option linter.deprecated false in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
@@ -668,8 +605,6 @@ theorem bonnet_myers_diameter_of_ricci_bound
   intro x _ y _
   exact bonnet_myers_pairwise_edist_le_of_ricci_bound (E := E) g _hdim _hK _hRic hEnorm x y
 
-/-! ## Compactness sub-leaf: `univ` is compact -/
-
 set_option linter.deprecated false in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -694,31 +629,20 @@ theorem isCompact_univ
     (hEnorm : ∀ (xb : M) (v : TangentSpace I xb),
         ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner xb v v))) :
     IsCompact (Set.univ : Set M) := by
-  -- Pick a base point from `Nonempty M` (provided by `ConnectedSpace M`).
   let p : M := Classical.arbitrary M
-  -- The radius `R := π / √K` is non-negative (since `K > 0`).
   set R : ℝ := Real.pi / Real.sqrt K with hR_def
   have hR_nn : 0 ≤ R := by
     have hpi_nn : (0 : ℝ) ≤ Real.pi := Real.pi_nonneg
     have hsqrt_nn : (0 : ℝ) ≤ Real.sqrt K := Real.sqrt_nonneg K
     exact div_nonneg hpi_nn hsqrt_nn
-  -- Diameter bound from the proved sibling headline.
   have hdiam : EMetric.diam (Set.univ : Set M) ≤ ENNReal.ofReal R :=
     bonnet_myers_diameter_of_ricci_bound (E := E) g _hdim _hK _hRic hEnorm
-  -- Exponential surjectivity on the closed ball of radius `R`.  The closed-ball
-  -- metric here is the one fixed at the surjectivity lemma's elaboration; we let
-  -- its type flow rather than re-annotating, so it matches the image-compactness
-  -- lemma's closed ball verbatim.
   have hsurj :=
     DifferentialGeometry.Geometry.Riemannian.HopfRinow.expMap_surjective_on_closedBall_of_ediam_le
       (I := I) g p hR_nn hdiam
-  -- The image of the closed ball under `expMap` is compact.
   have himg :=
     isCompact_image_closedBall_under_expMap (I := I) (E := E) g p hR_nn
-  -- `univ` is closed; together with the compact superset, it is compact.
   exact himg.of_isClosed_subset isClosed_univ hsurj
-
-/-! ## Headline 2: compactness -/
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -745,8 +669,6 @@ theorem bonnet_myers_compactSpace_of_ricci_bound
         ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner xb v v))) :
     CompactSpace M :=
   isCompact_univ_iff.mp (isCompact_univ (E := E) g _hdim _hK _hRic hEnorm)
-
-/-! ## Headline 3: finite fundamental group -/
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -784,55 +706,32 @@ theorem bonnet_myers_finite_fundamentalGroup_of_ricci_bound
         ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner xb v v)))
     (x : M) :
     Finite (FundamentalGroup M x) := by
-  -- `[Inhabited M]` is a signature hypothesis (needed for the universal-cover
-  -- infrastructure and for stating the cover's tangent-bundle separation).
-  -- The universal cover and its projection.
   set UC := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M
   set p :
       DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M :=
     DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.proj
-  -- The projection is a covering map: provided by the universal-cover infrastructure.
   have hcov :
       IsCoveringMap
         (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.proj :
           DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M) :=
     DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.UniversalCover.proj_isCoveringMap
-  -- `PathConnectedSpace M`: from `[ConnectedSpace M]` + `[LocPathConnectedSpace M]`.
   haveI hpcM : PathConnectedSpace M :=
     PathConnectedSpace.of_locPathConnectedSpace
-  -- Lifted Riemannian metric on the universal cover.  Introduced as a transparent
-  -- `let` (not `set`) so that the lifted-bundle fibre instances reduce
-  -- definitionally to `(liftedMetric g).inner` for the principled completeness API.
   let gLift :
       SmoothRiemannianMetric I
         (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
     DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.liftedMetric
       (I := I) g
-  -- Bundled Riemannian-bundle structure on the tangent bundle of the universal cover.
-  -- Installed as a transparent `letI` (not `haveI`) so that the derived fibre
-  -- `NormedAddCommGroup` / `InnerProductSpace` instances reduce definitionally to
-  -- the lifted metric `gLift.inner`, which the principled completeness API needs.
   letI hRB :
       Bundle.RiemannianBundle
         (fun (xt :
             DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) ↦
           TangentSpace I xt) :=
     ⟨gLift.toRiemannianMetric⟩
-  -- `SecondCountableTopology H` from finite-dimensional model space `E`.
   haveI hSCH : SecondCountableTopology H :=
     ModelWithCorners.secondCountableTopology I
-  -- `SecondCountableTopology M` from chart cover + σ-compactness.
   haveI hSCM : SecondCountableTopology M :=
     ChartedSpace.secondCountable_of_sigmaCompact H M
-  -- Compactness of the lifted manifold. This consumes the lifted instances and the
-  -- Ricci-bound pullback (`ricciBoundedBelow_liftedMetric_of_base`), and the
-  -- still-sorry `CompleteSpace` of the universal cover. We package the latter as a
-  -- local instance to mirror the upstream skeleton, then apply the proved compactness
-  -- headline (Headline 2) to the lifted data.
-  -- Ricci pullback to the universal cover. The two `chartRiemannBasisIdentity`
-  -- hypotheses are propagated through the chart-Riemann CLM bridge, and are
-  -- isolated as named residual gaps pending the deferred-deep predicate
-  -- discharge in `Integral/Connection/ChartBridge/Riemann.lean`.
   have hBasisLift : ∀ x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M,
       DifferentialGeometry.Integral.Connection.chartRiemannBasisIdentity
         (I := I) gLift x' :=
@@ -849,86 +748,49 @@ theorem bonnet_myers_finite_fundamentalGroup_of_ricci_bound
       RicciBoundedBelow (I := I) gLift (((Module.finrank ℝ E : ℝ) - 1) * K) :=
     DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.ricciBoundedBelow_liftedMetric_of_base
       (I := I) (g := g) _hRic hBasisLift hBasisBase
-  -- The universal cover is a regular topological space (Hausdorff + locally
-  -- compact ⇒ regular); this discharges the `[RegularSpace (UC M)]` hypothesis
-  -- of the principled lifted pseudo-emetric API.
   haveI hRegUC :
       RegularSpace
         (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
     DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.uc_regularSpace
       (M := M) I
-  -- The bundle norm — square-root inner-product identity on the cover fibres,
-  -- with respect to the lifted Riemannian-bundle structure `⟨gLift.toRiemannianMetric⟩`
-  -- installed above (`hRB`). The fibre inner product is `gLift.inner` by the
-  -- `RiemannianMetric.toCore` construction, so `‖v‖ₑ = ofReal (√ ⟪v, v⟫) =
-  -- ofReal (√ gLift.inner x' v v)`.
   have hEnormCover :
       ∀ (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
         (v : TangentSpace I x'),
         ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (gLift.inner x' v v)) := by
     intro x' v
     rw [← ofReal_norm_eq_enorm, norm_eq_sqrt_real_inner]
-    -- The fibre inner product on `TangentSpace I x'` is, by the lifted
-    -- Riemannian-bundle instance `hRB = ⟨gLift.toRiemannianMetric⟩`, the lifted
-    -- metric `gLift.inner x'`.  The two sides agree definitionally through the
-    -- `RiemannianMetric.toCore` inner product.
     have hinner : (inner ℝ v v : ℝ) = gLift.inner x' v v := rfl
     rw [hinner]
-  -- Install the principled lifted pseudo-emetric structure on the universal
-  -- cover, whose underlying topology is the manifold topology and whose
-  -- `edist` is `riemannianEDist I`.
   letI hUCem :
       PseudoEMetricSpace
         (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
     DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.uc_pseudoEMetricSpace
       (I := I) (M := M) gLift
-  -- The cover is a Riemannian manifold for this structure (`edist = riemannianEDist`).
   haveI hRiemUC :
       IsRiemannianManifold I
         (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
     DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.isRiemannianManifold
       (I := I) (M := M) gLift
-  -- Completeness of the universal cover, principled (axiom-clean): every Cauchy
-  -- sequence for the lifted extended metric converges, by `1`-Lipschitz
-  -- projection to the complete base `M` and lifting the limit through the
-  -- covering map.
   haveI hCompUC :
       CompleteSpace
         (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
     DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.completeSpace_of_complete
       (I := I) (M := M) g hEnormBase hEnormCover
-  -- The lifted tangent bundle is a continuous Riemannian bundle: the fibre inner
-  -- product is, by the installed `hRB = ⟨gLift.toRiemannianMetric⟩`, the lifted
-  -- metric `gLift.inner`, which depends continuously on the base point
-  -- (`gLift.contMDiff.continuous`).
   haveI hCRBcover :
       IsContinuousRiemannianBundle E
         (fun (x' :
             DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) ↦
           TangentSpace I x') :=
     ⟨gLift.inner, gLift.contMDiff.continuous, fun _ _ _ => rfl⟩
-  -- The tangent bundle of the lifted manifold is Hausdorff (it is a smooth vector
-  -- bundle over a Hausdorff finite-dimensional manifold).
   haveI hT2TanCover :
       T2Space (TangentBundle I
         (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)) :=
     inferInstance
-  -- Apply Headline 2 (`bonnet_myers_compactSpace_of_ricci_bound`) to the lifted Riemannian manifold.
-  -- `bonnet_myers_compactSpace_of_ricci_bound`'s `hEnorm` hypothesis is in the active lifted
-  -- `RiemannianBundle` enorm (`hRB`), for which the enorm identity is the
-  -- already-proven `hEnormCover`.
   haveI hCompactUC :
       CompactSpace
         (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
     bonnet_myers_compactSpace_of_ricci_bound (E := E) gLift _hdim _hK hRicLift (by
-      -- Cross-instance norm-diamond reconciliation: the `bonnet_myers_compactSpace_of_ricci_bound`
-      -- enorm hypothesis is in the project `Tensor0SBundle` enorm, while
-      -- `hEnormCover` provides the same identity for the lifted
-      -- `RiemannianBundle` enorm `hRB`. The two enorms agree pointwise (both
-      -- the square-root of `gLift.inner`); the explicit bridge is a residual
-      -- tangent-bundle norm-diamond gap.
       sorry)
-  -- The fibre of the covering map over `x` is finite (compact + discrete).
   haveI hFinFibre :
       Finite
         ((DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.proj :
@@ -936,7 +798,6 @@ theorem bonnet_myers_finite_fundamentalGroup_of_ricci_bound
           ⁻¹' {x}) :=
     DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.isCoveringMap_fibre_finite_of_compact
       hcov x
-  -- Pick a base lift `e' ∈ proj⁻¹{x}` via path-connectedness of `M`.
   obtain ⟨γ⟩ := PathConnectedSpace.joined (default : M) x
   let e' :
       ((DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.proj :
@@ -951,7 +812,6 @@ theorem bonnet_myers_finite_fundamentalGroup_of_ricci_bound
                 DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M))
             = x
         rfl⟩
-  -- Fibre ↔ fundamental group bijection (from the universal-cover infrastructure).
   have hEquiv :
       ((DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.proj :
           DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M)
@@ -959,7 +819,6 @@ theorem bonnet_myers_finite_fundamentalGroup_of_ricci_bound
         ≃ FundamentalGroup M x :=
     DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.fibreEquivFundamentalGroup
       hcov x e'
-  -- Transport finiteness across the bijection.
   exact Finite.of_equiv _ hEquiv
 
 end BonnetMyers

@@ -64,14 +64,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## The Ricci–DeTurck operator
-
-`deTurckOp g g'` packages the right-hand side `−2 Rc(g) + 𝓛_{W(g,g')} g` of the
-Ricci–DeTurck flow into a single pointwise bilinear form.  At each point `x` the two
-constituent bilinear forms — the scalar multiple `(-2) • ricciFun g x` of the Ricci
-tensor and the metric Lie derivative `lieDerivMetric g (deTurckVF g g') x` — are added
-in the `ℝ`-module of linear maps `TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ`. -/
-
 /-- The **Ricci–DeTurck operator** of an evolving metric `g` against a background metric
 `g'`, as a bundled `(0,2)`-tensor field (`pointwiseBilin I`).
 
@@ -114,13 +106,6 @@ along the DeTurck vector field. -/
   rw [deTurckOp_def, LinearMap.add_apply, LinearMap.add_apply,
     LinearMap.smul_apply, LinearMap.smul_apply, smul_eq_mul]
 
-/-! ## The operator against a metric and itself
-
-When the background metric `g'` coincides with the evolving metric `g`, the DeTurck
-vector field `deTurckVF g g` is the zero section (`deTurckVF_self`), so its metric Lie
-derivative `lieDerivMetric g 0` vanishes (`lieDerivMetric_zero`); the operator therefore
-reduces to the bare Ricci-flow right-hand side `−2 Rc(g)`. -/
-
 /-- **The Ricci–DeTurck operator against a metric and itself reduces to `−2 Rc(g)`.**
 
 When the background metric equals the evolving metric, the DeTurck vector field
@@ -143,13 +128,6 @@ Applied to two tangent vectors, the operator returns `−2` times the Ricci tens
   rw [deTurckOp_apply, deTurckVF_self (I := I) g, lieDerivMetric_zero (I := I) g]
   simp
 
-/-! ## Symmetry of the Ricci–DeTurck operator
-
-`deTurckOp g g'` is a *symmetric* `(0,2)`-tensor: this is the genuine symmetry of the
-Ricci–DeTurck flow right-hand side.  Both constituents are symmetric — the Ricci tensor
-by `ricciFun_isPointwiseSymm_of_boundaryless` and the metric Lie derivative by `lieDerivMetric_isPointwiseSymm` —
-and a scalar multiple and a sum of symmetric bilinear forms are symmetric. -/
-
 /-- **Symmetry of the Ricci–DeTurck operator as a `(0,2)`-tensor:**
 `𝓓(g, g')(v, w) = 𝓓(g, g')(w, v)`.
 
@@ -163,20 +141,6 @@ theorem deTurckOp_isPointwiseSymm [I.Boundaryless]
   rw [deTurckOp_apply, deTurckOp_apply]
   rw [ricciFun_isPointwiseSymm_of_boundaryless (I := I) g x v w,
     lieDerivMetric_isPointwiseSymm (I := I) g (deTurckVF (I := I) g g') x v w]
-
-/-! ## The chart-component formula
-
-In any chart, the components of `deTurckOp g g'` are `−2` times the chart Ricci
-components plus the chart Lie-derivative components.  The canonical chart-independent
-component evaluates the operator on the canonical model-basis vectors `e_i, e_j` in the
-chart at the evaluation point; it equals the explicit textbook coordinate combination
-$$
-  \bigl(\mathcal D(g, g')\bigr)_{ij}
-    \;=\; -2\,\operatorname{Rc}(g)_{ij} \;+\; (\mathcal L_W g)_{ij},
-$$
-with the Ricci component `chartRicciTensor` and the Lie-derivative component
-`lieDerivMetricMatrix`.  This explicit form is the input later linearization steps
-consume. -/
 
 /-- The **canonical chart component** `(𝓓(g, g'))_{ij}` of the Ricci–DeTurck operator at
 `x`: by definition `−2` times the chart Ricci component plus the chart Lie-derivative
@@ -252,28 +216,6 @@ theorem chartDeTurckOpMatrix_symm [I.Boundaryless]
   rw [chartDeTurckOpMatrix_def, chartDeTurckOpMatrix_def,
     lieDerivMetricMatrix_symm (I := I) g (deTurckVF (I := I) g g') i j,
     chartRicciTensor_symm_of_boundaryless (I := I) g x i j (mem_chart_source H x)]
-
-/-! ## Smoothness of the chart components
-
-Each chart component `chartDeTurckOpMatrix g g' i j` is a sum of `−2` times the
-chart-coordinate Ricci component and the canonical metric Lie-derivative component along
-the DeTurck vector field.  The Lie-derivative component is `C^∞` on the chart source:
-the chart-`x` representative `chartLieDerivMetricMatrix g W x i j` is smooth by
-`chartLieDerivMetricMatrix_contMDiffOn`, and the canonical component
-`lieDerivMetricMatrix g W i j` is the chart-at-the-point specialisation, *not* the
-chart-`x` representative for a fixed chart — so the smoothness of the canonical metric
-Lie-derivative component, and likewise of the chart Ricci component
-`chartRicciTensor g x i j (extChartAt I x x)`, is genuinely a statement about how the
-chart varies with the basepoint.
-
-The chart-coordinate Ricci tensor `chartRicciTensor` does not yet carry a
-chart-source smoothness lemma in the curvature development; we therefore expose the
-smoothness of the Ricci–DeTurck chart component in *hypothesis-bearing* form — a
-downstream client supplies the chart-source smoothness of the canonical Ricci component
-and of the canonical metric Lie-derivative component, and the smoothness of the
-operator component follows by linearity.  This parallels the hypothesis-bearing forms
-used throughout the curvature development (e.g. `ricciFun_symm_of_chartRicciTensor_symm`,
-where the chart-level fact is supplied externally). -/
 
 /-- **Smoothness of the Ricci–DeTurck operator chart components, hypothesis-bearing
 form.**  Given the chart-source smoothness of the canonical Ricci component

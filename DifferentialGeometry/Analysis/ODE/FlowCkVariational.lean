@@ -79,18 +79,6 @@ namespace Flow
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
-/-! ## The augmented vector field on `E × (E →L[ℝ] E)`
-
-For a time-dependent vector field `f : ℝ → E → E` we define the *augmented* vector field
-`augVF f : ℝ → (E × (E →L[ℝ] E)) → (E × (E →L[ℝ] E))` whose orbits are pairs `(x(t), Z(t))`
-where `x(t)` solves the original ODE and `Z(t)` solves the linear ODE
-`Z'(t) = (fderiv ℝ (f t) (x(t))) ∘ Z(t)`.  Concretely:
-```
-augVF f t (x, Z) := (f t x, (fderiv ℝ (f t) x).comp Z)
-```
-The second component is the time-derivative of `Y(x, t) ∘ Z` viewed as a curve in
-`E →L[ℝ] E` (post-composition with the constant `Z`). -/
-
 section AugVFDefinition
 
 /-- The **augmented vector field** for the linear-ODE coupling.  This is the
@@ -105,13 +93,6 @@ lemma augVF_apply (f : ℝ → E → E) (t : ℝ) (x : E) (Z : E →L[ℝ] E) :
     augVF f t (x, Z) = (f t x, ((fderiv ℝ (f t) x).comp Z)) := rfl
 
 end AugVFDefinition
-
-/-! ## Partial Fréchet derivative smoothness
-
-If `uncurry f` is `C^{k+1}` on `Set.univ`, then `fderiv ℝ (uncurry f) : ℝ × E → ((ℝ × E) →L[ℝ] E)`
-is `C^k`.  Composing with `inr : E →L[ℝ] ℝ × E` (which is a continuous linear map)
-gives the partial Fréchet derivative `(t, x) ↦ fderiv ℝ (f t) x`, which is therefore
-also `C^k`. -/
 
 section PartialFDerivSmoothness
 
@@ -137,26 +118,20 @@ on `Set.univ`. -/
 theorem contDiffOn_partial_fderiv_of_succ
     {k : ℕ∞} (hf_succ : ContDiffOn ℝ (k + 1) (uncurry f) (Set.univ : Set (ℝ × E))) :
     ContDiffOn ℝ k (fun p : ℝ × E => fderiv ℝ (f p.1) p.2) (Set.univ : Set (ℝ × E)) := by
-  -- `fderiv ℝ (uncurry f) : ℝ × E → ((ℝ × E) →L[ℝ] E)` is `C^k` on the open `Set.univ`.
   have hfderiv_Ck : ContDiffOn ℝ k (fderiv ℝ (uncurry f)) (Set.univ : Set (ℝ × E)) := by
     have h : ContDiffOn ℝ k (fderiv ℝ (uncurry f)) (Set.univ : Set (ℝ × E)) :=
       hf_succ.fderiv_of_isOpen isOpen_univ le_rfl
     exact h
-  -- Post-compose with the bounded linear map `R ↦ R.comp inr`.
-  -- `M ↦ M.comp inr : ((ℝ × E) →L[ℝ] E) → (E →L[ℝ] E)` is itself a continuous linear map.
   set postL : ((ℝ × E) →L[ℝ] E) →L[ℝ] (E →L[ℝ] E) :=
     (ContinuousLinearMap.compL ℝ E (ℝ × E) E).flip
       (ContinuousLinearMap.inr ℝ ℝ E) with hpostL_def
   have hpostL_apply : ∀ R : (ℝ × E) →L[ℝ] E,
       postL R = R.comp (ContinuousLinearMap.inr ℝ ℝ E) := by
     intro R
-    -- `compL` is the composition map `M ↦ N ↦ M ∘ N` ; `.flip` swaps; apply with `inr`.
     rfl
-  -- The composition `postL ∘ fderiv (uncurry f)` is `C^k`.
   have hcomp_Ck : ContDiffOn ℝ k
       (fun p : ℝ × E => postL (fderiv ℝ (uncurry f) p)) (Set.univ : Set (ℝ × E)) :=
     hfderiv_Ck.continuousLinearMap_comp postL
-  -- And this composition equals the partial Fréchet derivative pointwise on `univ`.
   have heq : ∀ p ∈ (Set.univ : Set (ℝ × E)),
       fderiv ℝ (f p.1) p.2 = postL (fderiv ℝ (uncurry f) p) := by
     intro p _
@@ -174,15 +149,6 @@ theorem contDiffOn_partial_fderiv_of_succ
 
 end PartialFDerivSmoothness
 
-/-! ## Smoothness of the augmented vector field
-
-The augmented vector field `augVF f` is jointly `C^k` whenever `uncurry f` is jointly
-`C^{k+1}`.  The first component `f t x` inherits the regularity of `f` directly.  The
-second component `(fderiv ℝ (f t) x).comp Z` factors through the bounded bilinear
-composition `((·) ∘ (·)) : (E →L[ℝ] E) × (E →L[ℝ] E) → (E →L[ℝ] E)` applied to the
-pair `(fderiv ℝ (f t) x, Z)`; the first factor is `C^k` by
-`contDiffOn_partial_fderiv_of_succ`, and the second is the projection. -/
-
 section AugVFSmoothness
 
 variable {f : ℝ → E → E}
@@ -193,8 +159,6 @@ theorem augVF_uncurry_contDiff
     {k : ℕ∞} (hf_succ : ContDiffOn ℝ (k + 1) (uncurry f) (Set.univ : Set (ℝ × E))) :
     ContDiffOn ℝ k (uncurry (augVF f))
       (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) := by
-  -- First-component smoothness.  `(t, (x, Z)) ↦ f t x` is `C^{k+1}` (hence `C^k`) via the
-  -- canonical projection.
   set proj1 : ℝ × (E × (E →L[ℝ] E)) → ℝ × E := fun q => (q.1, q.2.1) with hproj1_def
   have hproj1_Ck : ContDiffOn ℝ k proj1 (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) := by
     refine ContDiffOn.prodMk ?_ ?_
@@ -213,10 +177,7 @@ theorem augVF_uncurry_contDiff
     funext q; rfl
   have hC1 : ContDiffOn ℝ k (fun q : ℝ × (E × (E →L[ℝ] E)) => f q.1 q.2.1)
       (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) := by rw [heq1]; exact hcomp1
-  -- Second-component smoothness.  We factor `(t, (x, Z)) ↦ (fderiv ℝ (f t) x).comp Z` as
-  -- `(t, (x, Z)) ↦ (fderiv ℝ (f t) x, Z) ↦ A.comp Z`.
   have hpartial_Ck := contDiffOn_partial_fderiv_of_succ hf_succ
-  -- `(t, (x, Z)) ↦ fderiv ℝ (f t) x` is `C^k` by composition with `proj1`.
   have hA_Ck : ContDiffOn ℝ k (fun q : ℝ × (E × (E →L[ℝ] E)) =>
       fderiv ℝ (f q.1) q.2.1) (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) := by
     have hcomp := hpartial_Ck.comp hproj1_Ck hmaps1
@@ -224,17 +185,13 @@ theorem augVF_uncurry_contDiff
         = (fun q : ℝ × (E × (E →L[ℝ] E)) => fderiv ℝ (f q.1) q.2.1) := by
       funext q; rfl
     rw [← heq]; exact hcomp
-  -- `(t, (x, Z)) ↦ Z` is `C^∞`.
   have hZ_Ck : ContDiffOn ℝ k (fun q : ℝ × (E × (E →L[ℝ] E)) => q.2.2)
       (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) :=
     (contDiff_snd.comp contDiff_snd).contDiffOn
-  -- Pair them: `(t, (x, Z)) ↦ (fderiv ℝ (f t) x, Z)`.
   have hpair_Ck : ContDiffOn ℝ k
       (fun q : ℝ × (E × (E →L[ℝ] E)) =>
         ((fderiv ℝ (f q.1) q.2.1, q.2.2) : (E →L[ℝ] E) × (E →L[ℝ] E)))
       (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) := hA_Ck.prodMk hZ_Ck
-  -- The composition `(A, Z) ↦ A.comp Z` is a bounded bilinear map, hence smooth on every
-  -- finite order.
   have hbilin_smooth : ContDiff ℝ (k : ℕ∞)
       (fun p : (E →L[ℝ] E) × (E →L[ℝ] E) => p.1.comp p.2) :=
     (isBoundedBilinearMap_comp (𝕜 := ℝ) (E := E) (F := E) (G := E)).contDiff
@@ -260,11 +217,9 @@ theorem augVF_uncurry_contDiff
   have hC2 : ContDiffOn ℝ k (fun q : ℝ × (E × (E →L[ℝ] E)) =>
       (fderiv ℝ (f q.1) q.2.1).comp q.2.2)
       (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) := by rw [heq2] at hC2_pre; exact hC2_pre
-  -- Combine: `uncurry (augVF f)` is the pair `(C1, C2)`.
   have hpair_final : ContDiffOn ℝ k
       (fun q : ℝ × (E × (E →L[ℝ] E)) => (f q.1 q.2.1, (fderiv ℝ (f q.1) q.2.1).comp q.2.2))
       (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) := hC1.prodMk hC2
-  -- And this pair equals `uncurry (augVF f)`.
   have heq_final : (fun q : ℝ × (E × (E →L[ℝ] E)) =>
       (f q.1 q.2.1, (fderiv ℝ (f q.1) q.2.1).comp q.2.2))
       = uncurry (augVF f) := by
@@ -285,20 +240,6 @@ theorem augVF_uncurry_continuousOn_of_C1
 
 end AugVFSmoothness
 
-/-! ## Nesting / bound data for the flow regularity recursion
-
-The variational-flow inductive step (`contDiffOn_flow_succ_via_augFlow`) consumes a large
-block of geometric bookkeeping: a uniform bound `M` on the linearization
-`(x, τ) ↦ ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩)‖` over a closed ball of initial conditions and a
-closed time interval, nested radii `ρ < ρ_mid < ρ_out` inside the flow ball, and nested
-times `T < T_mid < T_out` inside the flow's time domain with `M · T_mid < 1`.
-
-This section *derives* all of this data from the bare `IsLocalFlow` hypothesis together
-with joint `C^1` regularity of `f`, in finite dimensions (where closed balls are compact).
-The single genuine extra requirement is that `t₀` lie strictly inside the flow's time
-domain `Ioo tmin tmax` (a two-sided time neighbourhood is impossible at a boundary time)
-and that the flow ball be non-degenerate (`0 < r`). -/
-
 section NestingData
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
@@ -312,17 +253,14 @@ theorem continuousOn_fderiv_along_flow_joint
     {ρ : ℝ} (hρ : ρ ≤ (r : ℝ)) :
     ContinuousOn (fun p : E × ℝ => fderiv ℝ (f p.2) (Φ p))
       ((closedBall x₀ ρ) ×ˢ (Icc tmin tmax)) := by
-  -- The partial Fréchet derivative `(τ, x) ↦ fderiv ℝ (f τ) x` is continuous on `univ`.
   have hpartial : ContinuousOn (fun p : ℝ × E => fderiv ℝ (f p.1) p.2)
       (Set.univ : Set (ℝ × E)) := by
     have h := continuousOn_partialFDeriv_uncurry (f := f)
       (s := (Set.univ : Set ℝ)) (u := (Set.univ : Set E))
       (by rwa [Set.univ_prod_univ]) isOpen_univ isOpen_univ
     rwa [Set.univ_prod_univ] at h
-  -- `Φ` is continuous on the (sub-)ball × time interval.
   have hΦcont : ContinuousOn Φ ((closedBall x₀ ρ) ×ˢ Icc tmin tmax) :=
     hΦ.continuousOn.mono (Set.prod_mono (closedBall_subset_closedBall hρ) (le_refl _))
-  -- `(x, τ) ↦ (τ, Φ ⟨x, τ⟩)` is continuous into `univ`.
   have hmap : ContinuousOn (fun p : E × ℝ => (p.2, Φ p))
       ((closedBall x₀ ρ) ×ˢ Icc tmin tmax) :=
     (continuousOn_snd).prodMk hΦcont
@@ -342,7 +280,6 @@ theorem exists_norm_fderiv_le_along_flow_joint
     ∃ M : ℝ, 0 ≤ M ∧ ∀ x ∈ closedBall x₀ ρ, ∀ τ ∈ Icc tmin tmax,
       ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩)‖ ≤ M := by
   have hcont := continuousOn_fderiv_along_flow_joint hΦ hf hρ
-  -- The norm is continuous on the compact product.
   have hcontN : ContinuousOn (fun p : E × ℝ => ‖fderiv ℝ (f p.2) (Φ p)‖)
       ((closedBall x₀ ρ) ×ˢ (Icc tmin tmax)) := continuous_norm.comp_continuousOn hcont
   have hcompact : IsCompact ((closedBall x₀ ρ) ×ˢ (Icc tmin tmax)) :=
@@ -363,8 +300,6 @@ theorem exists_lipschitzOnWith_closedBall_of_C1
     (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
     (x₀ : E) (ρ : ℝ) (a b : ℝ) (hab : a ≤ b) :
     ∃ K : ℝ≥0, ∀ t ∈ Icc a b, LipschitzOnWith K (f t) (closedBall x₀ ρ) := by
-  -- The partial Fréchet derivative is continuous on `univ`, hence bounded on the compact
-  -- product `Icc a b ×ˢ closedBall x₀ ρ`.
   have hpartial : ContinuousOn (fun p : ℝ × E => fderiv ℝ (f p.1) p.2)
       (Set.univ : Set (ℝ × E)) := by
     have h := continuousOn_partialFDeriv_uncurry (f := f)
@@ -376,7 +311,6 @@ theorem exists_lipschitzOnWith_closedBall_of_C1
     (continuous_norm.comp_continuousOn (hpartial.mono (subset_univ _)))
   have hcompact : IsCompact ((Icc a b) ×ˢ (closedBall x₀ ρ)) :=
     isCompact_Icc.prod (isCompact_closedBall x₀ ρ)
-  -- Differentiability of `f t` at every point (from `C^1` of `uncurry f`).
   have hdiff : ∀ t : ℝ, ∀ x : E, DifferentiableAt ℝ (f t) x := by
     intro t x
     have hDiff_joint : DifferentiableAt ℝ (uncurry f) (t, x) :=
@@ -425,7 +359,6 @@ theorem exists_flow_nesting_data
       Icc (t₀ - T_out) (t₀ + T_out) ⊆ Icc tmin tmax ∧
       (∀ x ∈ closedBall x₀ (ρ_out : ℝ), ∀ τ ∈ Icc (t₀ - T_out) (t₀ + T_out),
         ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩)‖ ≤ M) := by
-  -- Radii: ρ = r/8 < ρ_mid = r/4 < ρ_out = r/2 ≤ r ; r' = r/2 with ρ_mid + r' = 3r/4 ≤ r.
   let ρ_out : ℝ≥0 := r / 2
   let ρ_mid : ℝ≥0 := r / 4
   let ρ : ℝ≥0 := r / 8
@@ -440,19 +373,16 @@ theorem exists_flow_nesting_data
   have hρρ' : (ρ_mid : ℝ) + (r' : ℝ) ≤ (r : ℝ) := by rw [hρ_mid_coe, hr'_coe]; linarith
   have hρ_out_le_r : (ρ_out : ℝ) ≤ (r : ℝ) := by rw [hρ_out_coe]; linarith
   have hr'_pos : 0 < (r' : ℝ) := by rw [hr'_coe]; linarith
-  -- Outer time radius T_out = d/2 where d = min(t₀ - tmin, tmax - t₀) > 0.
   set d : ℝ := min (t₀ - tmin) (tmax - t₀) with hd_def
   have hd_pos : 0 < d := lt_min (by linarith [ht₀.1]) (by linarith [ht₀.2])
   set T_out : ℝ := d / 2 with hT_out_def
   have hT_out_pos : 0 < T_out := by rw [hT_out_def]; linarith
-  -- The closed time interval is inside `Icc tmin tmax`.
   have hsub : Icc (t₀ - T_out) (t₀ + T_out) ⊆ Icc tmin tmax := by
     apply Icc_subset_Icc
     · have : d ≤ t₀ - tmin := min_le_left _ _
       rw [hT_out_def]; linarith
     · have : d ≤ tmax - t₀ := min_le_right _ _
       rw [hT_out_def]; linarith
-  -- The bound `M` over `closedBall x₀ ρ_out × Icc tmin tmax`, restricted to the inner times.
   obtain ⟨M, hM_nonneg, hM_bd⟩ :=
     exists_norm_fderiv_le_along_flow_joint hΦ hf (ρ := (ρ_out : ℝ))
       (NNReal.coe_nonneg ρ_out) hρ_out_le_r
@@ -460,7 +390,6 @@ theorem exists_flow_nesting_data
       ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩)‖ ≤ M := by
     intro x hx τ hτ
     exact hM_bd x hx τ (hsub hτ)
-  -- Inner times: T_mid = min(T_out/2, 1/(2(M+1))), T = T_mid/2.
   set T_mid : ℝ := min (T_out / 2) (1 / (2 * (M + 1))) with hT_mid_def
   have hM1_pos : 0 < 2 * (M + 1) := by linarith
   have hT_mid_pos : 0 < T_mid := lt_min (by linarith) (by positivity)
@@ -470,7 +399,6 @@ theorem exists_flow_nesting_data
   set T : ℝ := T_mid / 2 with hT_def
   have hT_pos : 0 < T := by rw [hT_def]; linarith
   have hT_lt_mid : T < T_mid := by rw [hT_def]; linarith
-  -- `M * T_mid < 1`.
   have hMT_mid : M * T_mid < 1 := by
     have hle : T_mid ≤ 1 / (2 * (M + 1)) := min_le_right _ _
     have hM_T_mid : M * T_mid ≤ M * (1 / (2 * (M + 1))) := by
@@ -484,26 +412,6 @@ theorem exists_flow_nesting_data
     hsub, hA_bd⟩
 
 end NestingData
-
-/-! ## The variational-flow projection predicate
-
-The bridge between "augmented flow `aΦ` is jointly `C^k`" and "the variational linear
-map is jointly `C^k`" is captured by an explicit projection identity: for every
-`(x, t)` in the relevant open neighbourhood, taking the *second* component of
-`aΦ ⟨(x, id), t⟩` equals `variationalLinearMapAt(x, t)`.
-
-The argument that the second component of the augmented flow is exactly the variational
-linear map requires a uniqueness theorem for the linear ODE on `E →L[ℝ] E` —
-specifically, that the curve `t ↦ aΦ ⟨(x, id), t⟩.2` is the unique solution of
-`Z'(t) = (fderiv ℝ (f t) (Φ ⟨x, t⟩)) ∘ Z(t)` with `Z(t₀) = id`, and that this unique
-solution agrees pointwise with the application `δ ↦ variationalSolutionFun(x, δ, t)`
-via linearity.
-
-We package the projection identity as a `Prop`-level predicate, and the abstract
-inductive theorem consumes it as a hypothesis.  Discharging this predicate at level
-`k` reduces precisely to: existence of a joint `C^k` flow of the augmented system on
-the required neighbourhood, together with the variational identification of its
-second component. -/
 
 section ProjectionPredicate
 
@@ -539,20 +447,6 @@ lemma IsVariationalFlowProjection.of_le {hΦ : IsLocalFlow f t₀ x₀ r tmin tm
   exact hY.contDiffOn.of_le hjk'
 
 end ProjectionPredicate
-
-/-! ## The recursive `C^k` flow theorem
-
-Given a single variational-flow projection at level `k`, the flow is jointly `C^{k+1}`
-on the required open neighbourhood.  This is a direct application of
-`contDiffOn_flow_succ_of_spatial_smooth` (from `FlowCk.lean`) plus an induction on `k`
-to upgrade the conclusion to `C^{k+1}`.  We work with `k : ℕ` so that the induction is
-clean.
-
-The hypothesis is structured to consume a *sequence* of projections — at every level
-`j < k+1` — each of which is jointly `C^j` and agrees with `fderiv ℝ Φ` via the
-coproduct.  In practice, all the candidate projections are the same function (the
-unique variational linear map), so a single hypothesis at the highest level `j = k`
-provides them all.  We expose both flavours below. -/
 
 section RecursiveFlow
 
@@ -637,8 +531,6 @@ theorem contDiffOn_flow_of_isVariationalFlowProjection_top
     {Y : E × ℝ → (E →L[ℝ] E)}
     (hY : IsVariationalFlowProjection hΦ T ρ Y ((k - 1 : ℕ) : ℕ∞)) :
     ContDiffOn ℝ (k : ℕ∞) Φ ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)) := by
-  -- Use the sequence formulation, with `Y_seq j := Y` for every `j`.  Each `Y` is
-  -- a `IsVariationalFlowProjection` at level `j ≤ k - 1`, by mono.
   set Y_seq : ℕ → E × ℝ → (E →L[ℝ] E) := fun _ => Y with hY_seq_def
   refine contDiffOn_flow_of_isVariationalFlowProjection_seq hΦ hT hT_lt_mid hT_mid_lt_out hM
     hMT_mid hsub hr' hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd k hf_Ck Y_seq ?_
@@ -649,20 +541,6 @@ theorem contDiffOn_flow_of_isVariationalFlowProjection_top
   exact hY.of_le hj_le
 
 end RecursiveFlow
-
-/-! ## Regularity-independent coproduct identity for `fderiv ℝ Φ`
-
-The `fderiv_eq` clause of `IsVariationalFlowProjection` — that `fderiv ℝ Φ` splits as the
-coproduct of a spatial piece and the time piece — is a *regularity-independent* statement:
-it follows from the joint Fréchet-derivative formula `hasFDerivAt_flow_jointly_at`, which
-requires only `C^1` of `f`.  We package it once here, with the spatial piece realised as
-the spatial restriction `(fderiv ℝ Φ q).comp (inl ℝ E ℝ)` of the joint derivative, so that
-it is a clean total function on `E × ℝ`.
-
-This piece is the half of `IsVariationalFlowProjection` that *can* be discharged from the
-existing infrastructure.  The other half — joint `C^k` smoothness of the spatial piece, i.e.
-smooth parameter-dependence of the variational linear ODE — is the genuine remaining
-mathematical content and is not provided by this lemma. -/
 
 section FderivCoprodIdentity
 
@@ -717,11 +595,9 @@ theorem fderiv_flow_eq_coprod_spatialPiece
     mem_closedBall.mpr (le_of_lt (lt_trans hq_x hρ_lt_mid))
   have hq_t_mid : t ∈ Ioo (t₀ - T_mid) (t₀ + T_mid) :=
     ⟨by linarith [hq_t.1], by linarith [hq_t.2]⟩
-  -- The joint Fréchet derivative at `(x, t)`.
   have hfd_at := hasFDerivAt_flow_jointly_at hΦ hf_C1 hT_mid_pos hM hMT_mid hsub_mid hr' hρρ'
     hA_bd_mid hx_cb_mid hq_t_mid
   have hfd_eq := hfd_at.fderiv
-  -- Decompose the coproduct via its spatial/time restrictions.
   set Lsp : E →L[ℝ] E :=
     variationalLinearMapAt (f := f) (α := fun s => Φ ⟨x, s⟩) (t₀ := t₀)
       hT_mid_pos hM hMT_mid
@@ -731,39 +607,13 @@ theorem fderiv_flow_eq_coprod_spatialPiece
       (fun τ hτ => hA_bd_mid x hx_cb_mid τ hτ) (Ioo_subset_Icc_self hq_t_mid) with hLsp_def
   set Lti : ℝ →L[ℝ] E :=
     (ContinuousLinearMap.id ℝ ℝ).smulRight (f t (Φ ⟨x, t⟩)) with hLti_def
-  -- The time piece equals `Lti` by definition.
   have hti_eq : timePieceFn f Φ (x, t) = Lti := rfl
-  -- The spatial piece equals `Lsp`: it is the `inl`-restriction of the coproduct.
   have hsp_eq : spatialPieceFn Φ (x, t) = Lsp := by
     rw [spatialPieceFn_apply, hfd_eq]
     exact ContinuousLinearMap.coprod_comp_inl Lsp Lti
   rw [hsp_eq, hti_eq, hfd_eq]
 
 end FderivCoprodIdentity
-
-/-! ## The `k = 2` specialization via V.2.c.2 on the augmented system
-
-For `k = 2`, the variational-flow projection at level `1` reduces to *joint continuity*
-of the variational linear map.  This is already proved in `FlowC1Continuous.lean` (in
-the `continuousOn_fderiv_flow_of_isLocalFlow` proof), where the spatial piece of
-`fderiv ℝ Φ` is shown to be jointly continuous on the strictly-interior neighbourhood.
-
-But continuity is not enough at level `1`: we need `C^1`.  The `C^1` claim is the
-target of the next layer of recursion: applying V.2.c.2 (`contDiffOn_flow_of_isLocalFlow`)
-to the *augmented system* `augVF f` on `E × (E →L[ℝ] E)`.  V.2.c.2 requires the
-augmented vector field to be jointly `C^1`, which is satisfied when `uncurry f` is
-jointly `C^2` (`augVF_uncurry_contDiff` at level `k = 1`).
-
-The application of V.2.c.2 to the augmented system requires the augmented system to
-have a `IsLocalFlow` in its own right.  Since the augmented vector field is jointly
-`C^1` on `Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))`, V.2.b.1's
-`exists_isLocalFlow_of_contDiffOn_univ` (in `FlowC1.lean`) produces a local flow of the
-augmented system around any base point `((x₀, id), t₀)`.
-
-The remaining step — identifying the second component of the augmented flow with the
-variational linear map — uses uniqueness of the linear ODE for the variational
-solution, applied pointwise in `δ`.  This identification is captured by the
-`IsVariationalFlowProjection` predicate above. -/
 
 section LevelTwo
 
@@ -809,7 +659,6 @@ theorem contDiffOn_flow_of_isLocalFlow_C2_of_isVariationalFlowProjection
     {Y : E × ℝ → (E →L[ℝ] E)}
     (hY : IsVariationalFlowProjection hΦ T ρ Y 1) :
     ContDiffOn ℝ 2 Φ ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)) := by
-  -- First get `C^1` of `Φ` via V.2.c.2.
   have hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)) := by
     have h_le : ((1 : ℕ∞) : WithTop ℕ∞) ≤ ((2 : ℕ∞) : WithTop ℕ∞) := by
       exact_mod_cast (by decide : (1 : ℕ∞) ≤ 2)
@@ -817,49 +666,14 @@ theorem contDiffOn_flow_of_isLocalFlow_C2_of_isVariationalFlowProjection
   have hΦ_C1 : ContDiffOn ℝ 1 Φ ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)) :=
     contDiffOn_flow_of_isLocalFlow hΦ hf_C1 hT hT_lt_mid hT_mid_lt_out hM hMT_mid hsub hr'
       hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd
-  -- Now apply the recursive step at `k = 1`.
   have hf_succ : ContDiffOn ℝ ((1 : ℕ∞) + 1) (uncurry f) (Set.univ : Set (ℝ × E)) := by
     simpa using hf_C2
   have h_step := contDiffOn_flow_succ_of_isVariationalFlowProjection hΦ hT hT_lt_mid
     hT_mid_lt_out hM hMT_mid hsub hr' hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd
     (k := (1 : ℕ∞)) hf_succ hΦ_C1 hY
-  -- `(1 : ℕ∞) + 1 = 2`.
   simpa using h_step
 
 end LevelTwo
-
-/-! ## Pointwise variational identification of the augmented-flow second component
-
-The connecting lemma between an `aΦ` (any candidate for the augmented flow) and the
-variational linear map is: at every initial point `(x, id)` and time `t`, the second
-component of `aΦ ⟨(x, id), t⟩` *equals* `variationalLinearMapAt(x, t)`.
-
-This identification is a uniqueness statement for the variational-style linear ODE on
-`E →L[ℝ] E`.  It is mathematically subtle because the augmented flow is given by
-Picard–Lindelöf on a *closed ball* centered at `(x₀, id)` in the product norm, and the
-variational linear map is the operator-norm closure of solutions on a closed ball of
-`E` (per-`δ`).  Reconciling the two requires a pointwise-in-`δ` argument:
-
-* Apply the augmented flow's second component to a fixed `δ ∈ E`: `(aΦ ⟨(x, id), t⟩).2 δ
-  : E`.
-* Show that as a function of `t`, this satisfies the variational ODE with initial
-  variation `δ`.
-* By the uniqueness lemma `IsVariationalSolutionOn.unique_Icc` (from
-  `FlowC1Bridge.lean`), it agrees with `variationalSolutionFun(x, δ, t)`.
-* Hence the operator `(aΦ ⟨(x, id), t⟩).2` agrees pointwise (and hence as a CLM, since
-  both are CLMs on `E`) with `variationalLinearMapAt(x, t)`.
-
-The technical work for this identification — propagating the second-component
-derivative through the augmented ODE, exchanging the application to `δ` with the
-time-derivative, and recognising the resulting curve as a variational solution —
-mirrors the existing `variationalSolution` infrastructure but on the larger space.
-
-We expose the *structural* result: a function `aΦ` that satisfies the augmented flow
-ODE in the second component (in the sense that `t ↦ aΦ ⟨(x, id), t⟩.2 δ` solves the
-variational ODE for each `δ`) gives a variational-flow projection of `Φ`.  The
-verification of the second-component-ODE hypothesis is the natural way to plug in any
-specific construction of the augmented flow (Picard–Lindelöf, ODE shooting, fixed
-point on a function space, ...). -/
 
 section AugFlowProjection
 
@@ -888,7 +702,6 @@ theorem contDiffOn_fromAugFlow
     (haΦ : ContDiffOn ℝ k aΦ Ω)
     (hmap : MapsTo (fun q : E × ℝ => ((q.1, ContinuousLinearMap.id ℝ E), q.2)) U Ω) :
     ContDiffOn ℝ k (fromAugFlow aΦ) U := by
-  -- The embedding `(x, t) ↦ ((x, id), t)` is `C^∞`.
   have h_embed_smooth : ContDiff ℝ (k : ℕ∞)
       (fun q : E × ℝ => ((q.1, ContinuousLinearMap.id ℝ E), q.2) :
         E × ℝ → (E × (E →L[ℝ] E)) × ℝ) := by
@@ -899,11 +712,9 @@ theorem contDiffOn_fromAugFlow
       (fun q : E × ℝ => ((q.1, ContinuousLinearMap.id ℝ E), q.2) :
         E × ℝ → (E × (E →L[ℝ] E)) × ℝ) U :=
     h_embed_smooth.contDiffOn
-  -- Composition.
   have hcomp : ContDiffOn ℝ k (aΦ ∘ (fun q : E × ℝ =>
       ((q.1, ContinuousLinearMap.id ℝ E), q.2))) U :=
     haΦ.comp h_embed_Ck hmap
-  -- Take the second component.
   have hsnd_smooth : ContDiff ℝ (k : ℕ∞)
       (fun p : E × (E →L[ℝ] E) => p.2) := contDiff_snd
   have hsnd_Ck : ContDiffOn ℝ k (fun p : E × (E →L[ℝ] E) => p.2)
@@ -915,7 +726,6 @@ theorem contDiffOn_fromAugFlow
       ((fun p : E × (E →L[ℝ] E) => p.2) ∘ (aΦ ∘ (fun q : E × ℝ =>
         ((q.1, ContinuousLinearMap.id ℝ E), q.2)))) U :=
     hsnd_Ck.comp hcomp hmaps
-  -- The composition equals `fromAugFlow aΦ`.
   have heq : ((fun p : E × (E →L[ℝ] E) => p.2) ∘ (aΦ ∘ (fun q : E × ℝ =>
         ((q.1, ContinuousLinearMap.id ℝ E), q.2))))
       = fromAugFlow aΦ := by
@@ -925,27 +735,6 @@ theorem contDiffOn_fromAugFlow
   exact hfinal
 
 end AugFlowProjection
-
-/-! ## Wrapping everything: the abstract unconditional `C^k` theorem
-
-We now provide the cleanest abstract packaging of "from an augmented-flow input, the
-ordinary flow is `C^{k+1}` jointly".
-
-The input is a candidate `aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)` together with:
-
-* a `ContDiffOn ℝ k` smoothness assertion on `aΦ` on an open neighbourhood;
-* a pointwise variational identification of `(aΦ ⟨(x, id), t⟩).2` with the spatial
-  partial Fréchet derivative of `Φ` (via the coproduct identity for `fderiv ℝ Φ`).
-
-The conclusion is `ContDiffOn ℝ (k+1) Φ U` on the strictly-interior open neighbourhood.
-
-Discharging the second hypothesis — variational identification — concretely requires
-the uniqueness lemma for the linear ODE on `E →L[ℝ] E`.  When the underlying `aΦ` is
-the Picard–Lindelöf flow of the augmented vector field `augVF f`, uniqueness follows
-from `ODE_solution_unique_of_mem_Ioo` (Mathlib) applied at every fixed `δ ∈ E`.  We do
-not embed that pointwise argument into the public signature here; it is left to the
-caller, where any specific construction of the augmented flow can supply the
-identification directly. -/
 
 section UnconditionalAbstract
 
@@ -986,29 +775,14 @@ theorem contDiffOn_flow_succ_of_augFlow_candidate
     (h_fderiv_eq : ∀ q ∈ ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)),
       fderiv ℝ Φ q = (fromAugFlow aΦ q).coprod (timePieceFn f Φ q)) :
     ContDiffOn ℝ (k + 1) Φ ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)) := by
-  -- Build the variational-flow projection from `aΦ`.
   have hY_Ck : ContDiffOn ℝ k (fromAugFlow aΦ)
       ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)) := contDiffOn_fromAugFlow haΦ_Ck hmap
   have hY : IsVariationalFlowProjection hΦ T ρ (fromAugFlow aΦ) k :=
     { contDiffOn := hY_Ck, fderiv_eq := h_fderiv_eq }
-  -- Plug into the recursive step.
   exact contDiffOn_flow_succ_of_isVariationalFlowProjection hΦ hT hT_lt_mid hT_mid_lt_out hM
     hMT_mid hsub hr' hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd hf_succ hΦ_Ck hY
 
 end UnconditionalAbstract
-
-/-! ## Aggregated public headline (general `k : ℕ`, parametrised by augmented-flow data)
-
-The cleanest public form of the `C^k` flow theorem in this file consumes:
-
-* the standard `IsLocalFlow` and `ContDiffOn` hypotheses on `f`;
-* a *sequence* of augmented-flow candidates, one per level, each jointly `C^j` on its
-  open neighbourhood with the variational identification at level `j`.
-
-This is precisely the `Lsp_seq` interface from `FlowCk.lean`, restated through the
-augmented-flow lens.  For practical use, this is the public theorem to call: it
-factors out all the inductive machinery, and the user supplies only the
-parametric-ODE-smoothness data of the augmented system. -/
 
 section AggregatedPublic
 
@@ -1045,7 +819,6 @@ theorem contDiffOn_flow_of_augFlow_seq
       ∀ q ∈ ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)),
       fderiv ℝ Φ q = (fromAugFlow (aΦ_seq j) q).coprod (timePieceFn f Φ q)) :
     ContDiffOn ℝ (k : ℕ∞) Φ ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)) := by
-  -- Build the `Y_seq` by projection and supply it to the sequence theorem.
   set Y_seq : ℕ → E × ℝ → (E →L[ℝ] E) := fun j => fromAugFlow (aΦ_seq j) with hY_seq_def
   refine contDiffOn_flow_of_isVariationalFlowProjection_seq hΦ hT hT_lt_mid hT_mid_lt_out hM
     hMT_mid hsub hr' hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd k hf_Ck Y_seq ?_
@@ -1055,19 +828,6 @@ theorem contDiffOn_flow_of_augFlow_seq
     fderiv_eq := h_fderiv_eq_seq j hj }
 
 end AggregatedPublic
-
-/-! ## Operator-valued variational solutions and the identification lemma
-
-We now provide the pointwise variational identification connecting an operator-valued
-curve that satisfies the linear ODE on `E →L[ℝ] E` with the per-`δ` variational
-linear map.
-
-Concretely: if `Z : ℝ → E →L[ℝ] E` is differentiable in `t` on `Icc (t₀ - T) (t₀ + T)`
-with `Z(t₀) = id` and the operator-valued ODE `Z'(t) = A(t) ∘ Z(t)` where
-`A(t) := fderiv ℝ (f t) (α t)`, then for every `δ ∈ E`, the curve `t ↦ Z(t) δ` is a
-variational solution along `α` with initial variation `δ`.  Uniqueness on the closed
-interval then identifies `Z(t) δ = variationalLinearMapAt(...) δ`, hence
-`Z(t) = variationalLinearMapAt(...)` as CLMs by extensionality. -/
 
 section OperatorVariational
 
@@ -1079,14 +839,11 @@ ordinary derivative `Z'(t) δ : E`. -/
 lemma hasDerivWithinAt_apply {Z Z' : ℝ → (E →L[ℝ] E)} {s : Set ℝ} {t : ℝ} {δ : E}
     (hZ : HasDerivWithinAt Z (Z' t) s t) :
     HasDerivWithinAt (fun τ => Z τ δ) ((Z' t) δ) s t := by
-  -- Apply the continuous linear map `apply δ : (E →L[ℝ] E) →L[ℝ] E` to `hZ`.
   set applyδ : (E →L[ℝ] E) →L[ℝ] E := ContinuousLinearMap.apply ℝ E δ
   have happ : HasFDerivAt applyδ applyδ (Z t) := applyδ.hasFDerivAt
   have hZ_fd : HasFDerivWithinAt Z
       (ContinuousLinearMap.toSpanSingleton ℝ (Z' t)) s t := hZ.hasFDerivWithinAt
   have happ_fd := happ.comp_hasFDerivWithinAt t hZ_fd
-  -- The composition has Fréchet derivative `applyδ.comp (toSpanSingleton (Z' t))`,
-  -- which equals `toSpanSingleton ((Z' t) δ)`.
   have heq : applyδ.comp (ContinuousLinearMap.toSpanSingleton ℝ (Z' t))
       = ContinuousLinearMap.toSpanSingleton ℝ ((Z' t) δ) := by
     apply ContinuousLinearMap.ext
@@ -1094,7 +851,6 @@ lemma hasDerivWithinAt_apply {Z Z' : ℝ → (E →L[ℝ] E)} {s : Set ℝ} {t :
     simp [applyδ, ContinuousLinearMap.toSpanSingleton_apply,
       ContinuousLinearMap.apply_apply, ContinuousLinearMap.comp_apply]
   rw [heq] at happ_fd
-  -- Convert the Fréchet derivative back to the directional derivative.
   rw [hasDerivWithinAt_iff_hasFDerivWithinAt]
   exact happ_fd
 
@@ -1117,15 +873,12 @@ theorem isVariationalSolutionOn_apply
     (δ : E) :
     IsVariationalSolutionOn f α δ t₀ (fun s => Z s δ) (Icc (t₀ - T) (t₀ + T)) := by
   refine ⟨?_, ?_⟩
-  · -- Initial value: `Z(t₀) δ = id δ = δ`.
-    have : Z t₀ δ = ContinuousLinearMap.id ℝ E δ := by rw [hZ_init]
+  · have : Z t₀ δ = ContinuousLinearMap.id ℝ E δ := by rw [hZ_init]
     simpa using this
   · intro t ht
     have hZ_d := hZ_deriv t ht
     have happ := hasDerivWithinAt_apply (Z := Z)
       (Z' := fun s => (fderiv ℝ (f s) (α s)).comp (Z s)) (δ := δ) hZ_d
-    -- The derivative we get is `((fderiv ℝ (f t) (α t)).comp (Z t)) δ`, which equals
-    -- `(fderiv ℝ (f t) (α t)) (Z t δ)` by `comp_apply`.
     have hsimp : ((fderiv ℝ (f t) (α t)).comp (Z t)) δ
         = (fderiv ℝ (f t) (α t)) (Z t δ) := by rfl
     rw [hsimp] at happ
@@ -1153,7 +906,6 @@ theorem Z_eq_variationalLinearMapAt
         (Icc (t₀ - T) (t₀ + T)) t)
     {t : ℝ} (ht : t ∈ Icc (t₀ - T) (t₀ + T)) :
     Z t = variationalLinearMapAt (f := f) (α := α) (t₀ := t₀) hT hM hMT hA_cont hA_bd ht := by
-  -- Extensionality: show pointwise equality for every `δ`.
   apply ContinuousLinearMap.ext
   intro δ
   have h_Z_sol := isVariationalSolutionOn_apply (T := T) (Z := Z) hZ_init hZ_deriv δ
@@ -1166,14 +918,6 @@ theorem Z_eq_variationalLinearMapAt
   exact (variationalLinearMapAt_apply hT hM hMT hA_cont hA_bd ht δ).symm
 
 end OperatorVariational
-
-/-! ## Putting it all together: the augmented-flow-based projection lemma
-
-Given an `IsLocalFlow` for the augmented vector field `augVF f`, the second component
-of its orbit starting at `(x, id)` is, on the time interval `Icc (t₀ - T) (t₀ + T)`,
-*exactly* the variational linear map.  This is the cleanest concrete way to discharge
-the spatial-piece smoothness hypothesis at any level for which the augmented flow's
-smoothness is available. -/
 
 section AugFlowVariationalIdentification
 
@@ -1205,41 +949,30 @@ theorem augFlow_snd_eq_variationalLinearMapAt
       = variationalLinearMapAt (f := f)
           (α := fun s => (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), s⟩).1) (t₀ := t₀)
           hT hM hMT hA_cont hA_bd ht := by
-  -- The augmented orbit starting at `(x, id)`.
   set p : E × (E →L[ℝ] E) := (x, ContinuousLinearMap.id ℝ E) with hp_def
   set orbit : ℝ → E × (E →L[ℝ] E) := fun s => aΦ ⟨p, s⟩ with horbit_def
-  -- The second component of the orbit.
   set Z : ℝ → E →L[ℝ] E := fun s => (orbit s).2 with hZ_def
-  -- The central orbit (first component).
   set α : ℝ → E := fun s => (orbit s).1 with hα_def
-  -- Initial value: at `t₀`, `orbit t₀ = p = (x, id)`, so `Z t₀ = id`.
   have hZ_init : Z t₀ = ContinuousLinearMap.id ℝ E := by
     have h_init : orbit t₀ = p := haΦ.apply_initial p hx
     change (orbit t₀).2 = ContinuousLinearMap.id ℝ E
     rw [h_init]
-  -- The orbit satisfies the augmented ODE on `Icc tmin' tmax'`.
   have h_orbit_deriv : ∀ s ∈ Icc tmin' tmax',
       HasDerivWithinAt orbit (augVF f s (orbit s)) (Icc tmin' tmax') s :=
     fun s hs => haΦ.hasDerivWithinAt p hx s hs
-  -- Specialise to `Icc (t₀ - T) (t₀ + T)` via mono.
   have h_orbit_deriv' : ∀ s ∈ Icc (t₀ - T) (t₀ + T),
       HasDerivWithinAt orbit (augVF f s (orbit s)) (Icc (t₀ - T) (t₀ + T)) s := by
     intro s hs
     exact (h_orbit_deriv s (hsub hs)).mono hsub
-  -- Project to the second component.  `Z(s) = orbit(s).2`, so `Z'(s)` is the second
-  -- component of `(orbit s)'`, which equals the second component of `augVF f s (orbit s)`.
-  -- The second component of `augVF f s (orbit s)` is `(fderiv ℝ (f s) α(s)).comp Z(s)`.
   have hZ_deriv : ∀ s ∈ Icc (t₀ - T) (t₀ + T),
       HasDerivWithinAt Z ((fderiv ℝ (f s) (α s)).comp (Z s))
         (Icc (t₀ - T) (t₀ + T)) s := by
     intro s hs
     have h := h_orbit_deriv' s hs
-    -- Apply the continuous linear map `snd` to `h`'s Fréchet form, then convert back.
     set sndCLM : (E × (E →L[ℝ] E)) →L[ℝ] (E →L[ℝ] E) :=
       ContinuousLinearMap.snd ℝ E (E →L[ℝ] E)
     have h_fd := h.hasFDerivWithinAt
     have h_snd_at := (sndCLM.hasFDerivAt).comp_hasFDerivWithinAt s h_fd
-    -- `h_snd_at` has derivative `sndCLM.comp (toSpanSingleton ℝ (orbit')) = toSpanSingleton ℝ (orbit').2`.
     have heq : sndCLM.comp (ContinuousLinearMap.toSpanSingleton ℝ (augVF f s (orbit s)))
         = ContinuousLinearMap.toSpanSingleton ℝ ((augVF f s (orbit s)).2) := by
       apply ContinuousLinearMap.ext
@@ -1252,37 +985,11 @@ theorem augFlow_snd_eq_variationalLinearMapAt
     have h_aug_snd : (augVF f s (orbit s)).2
         = (fderiv ℝ (f s) (α s)).comp (Z s) := rfl
     rw [h_aug_snd] at h_snd_at
-    -- Convert HasFDerivWithinAt back to HasDerivWithinAt.
     rw [hasDerivWithinAt_iff_hasFDerivWithinAt]
     exact h_snd_at
   exact Z_eq_variationalLinearMapAt hT hM hMT hA_cont hA_bd hZ_init hZ_deriv ht
 
 end AugFlowVariationalIdentification
-
-/-! ## Orbit uniqueness: the augmented flow's first component is the original flow
-
-The first component of `augVF f` is just `f`: `(augVF f t p).1 = f t p.1`.  Hence the first
-component `t ↦ (aΦ ⟨(x, id), t⟩).1` of an augmented orbit solves the *original* ODE
-`y'(t) = f t (y(t))` with the same initial value `x` at `t₀` as the original orbit
-`t ↦ Φ ⟨x, t⟩`.  By ODE uniqueness (Picard–Lindelöf / Grönwall, here through
-`ODE_solution_unique_of_mem_Ioo`), the two orbits coincide on the common time interval.
-
-This identification is the analytic content needed to recognise the variational linear map
-of the *augmented* flow's central orbit as the variational linear map of the *original*
-flow's orbit, so that `augFlow_snd_eq_variationalLinearMapAt` identifies
-`(aΦ ⟨(x, id), t⟩).2` with the spatial piece of `fderiv ℝ Φ`. -/
-
-/-! ## Uniform time-shrink orbit containment
-
-The set-localized orbit-uniqueness lemma below needs the two orbits to stay inside a fixed
-closed ball `closedBall x₀ ρ_b` on the operating time interval.  This containment is *not*
-automatic on the whole flow domain: it holds only on a short enough time interval.  We prove
-it by a uniform (in the initial condition) time-shrink: the orbit map is jointly continuous
-on the compact product `closedBall x₀ ρ₀ ×ˢ Icc tmin tmax`, hence uniformly continuous
-(Heine–Cantor); comparing `Ψ(x, t)` with `Ψ(x, t₀) = x` at the *same* `x` (so the spatial
-distance is zero) gives a single time-radius `T_c`, valid for all `x` in a slightly smaller
-ball, that keeps `Ψ(x, t)` within `ρ_b` of `x₀`.  Finite-dimensionality is used only through
-compactness of closed balls. -/
 
 section UniformContainment
 
@@ -1416,15 +1123,11 @@ theorem augFlow_fst_eq_flow
     (hy₂_mem : ∀ t ∈ Ioo a b, Φ ⟨x, t⟩ ∈ closedBall c ρ_b) :
     ∀ t ∈ Ioo a b, (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), t⟩).1 = Φ ⟨x, t⟩ := by
   set p : E × (E →L[ℝ] E) := (x, ContinuousLinearMap.id ℝ E) with hp_def
-  -- The two candidate orbits for the original ODE.
   set y₁ : ℝ → E := fun s => (aΦ ⟨p, s⟩).1 with hy₁_def
   set y₂ : ℝ → E := fun s => Φ ⟨x, s⟩ with hy₂_def
-  -- `y₁` solves `y' = f t y`: it is the first component of the augmented orbit.
   have hy₁_deriv : ∀ t ∈ Ioo a b, HasDerivAt y₁ (f t (y₁ t)) t := by
     intro t ht
-    -- The augmented orbit has the augmented-ODE derivative on `Icc tmin' tmax'`.
     have h_orbit := haΦ.hasDerivWithinAt p hxp t (ha_sub' ht)
-    -- Project to the first component via the CLM `fst`.
     set fstCLM : (E × (E →L[ℝ] E)) →L[ℝ] E := ContinuousLinearMap.fst ℝ E (E →L[ℝ] E)
     have h_fd := h_orbit.hasFDerivWithinAt
     have h_fst_at := (fstCLM.hasFDerivAt).comp_hasFDerivWithinAt t h_fd
@@ -1439,18 +1142,14 @@ theorem augFlow_fst_eq_flow
     rw [heq] at h_fst_at
     have h_aug_fst : (augVF f t (aΦ ⟨p, t⟩)).1 = f t (y₁ t) := rfl
     rw [h_aug_fst] at h_fst_at
-    -- `h_fst_at : HasFDerivWithinAt (fstCLM ∘ fun s => aΦ ⟨p, s⟩) (toSpanSingleton (f t (y₁ t))) …`.
-    -- The composed function is definitionally `y₁`, so this is `HasDerivWithinAt y₁ …`.
     have h_within : HasDerivWithinAt y₁ (f t (y₁ t)) (Icc tmin' tmax') t := by
       rw [hasDerivWithinAt_iff_hasFDerivWithinAt]
       exact h_fst_at
     exact (h_within.mono ha_sub').hasDerivAt (isOpen_Ioo.mem_nhds ht)
-  -- `y₂` solves `y' = f t y`: it is the original orbit.
   have hy₂_deriv : ∀ t ∈ Ioo a b, HasDerivAt y₂ (f t (y₂ t)) t := by
     intro t ht
     have h_within := hΦ.hasDerivWithinAt x hx t (ha_sub ht)
     exact (h_within.mono ha_sub).hasDerivAt (isOpen_Ioo.mem_nhds ht)
-  -- Initial values agree at `t₀`: both equal `x`.
   have hinit : y₁ t₀ = y₂ t₀ := by
     have h1 : y₁ t₀ = x := by
       change (aΦ ⟨p, t₀⟩).1 = x
@@ -1462,14 +1161,6 @@ theorem augFlow_fst_eq_flow
   exact orbit_unique_Ioo ht₀ hLip hy₁_deriv hy₂_deriv hy₁_mem hy₂_mem hinit
 
 end OrbitUniqueness
-
-/-! ## Invariance of the variational linear map under agreement of the central orbit
-
-`variationalLinearMapAt` along a central orbit `α` depends on `α` only through the values
-`α t` for `t ∈ Icc (t₀ - T) (t₀ + T)` (through the linearization `fderiv ℝ (f t) (α t)`).
-Two orbits that agree on the closed interval therefore give the *same* variational linear
-map at every interior time.  This is the bridge that lets `augFlow_fst_eq_flow` transport
-the augmented flow's variational identification onto the original flow's orbit. -/
 
 section VariationalLinearMapCongr
 
@@ -1502,30 +1193,18 @@ theorem variationalLinearMapAt_congr_central
     {t : ℝ} (ht : t ∈ Icc (t₀ - T) (t₀ + T)) :
     variationalLinearMapAt (f := f) (α := α₁) (t₀ := t₀) hT hM hMT hA_cont₁ hA_bd₁ ht
       = variationalLinearMapAt (f := f) (α := α₂) (t₀ := t₀) hT hM hMT hA_cont₂ hA_bd₂ ht := by
-  -- Pointwise equality for every `δ`.
   apply ContinuousLinearMap.ext
   intro δ
-  -- The two variational solutions agree by uniqueness along `α₂` (after transporting the
-  -- `α₁`-solution).
   have h₁ := variationalSolutionFun_isSolution hT hM hMT hA_cont₁ hA_bd₁ δ
   have h₂ := variationalSolutionFun_isSolution hT hM hMT hA_cont₂ hA_bd₂ δ
-  -- Transport `h₁` (a solution along `α₁`) to a solution along `α₂`.
   have h₁' : IsVariationalSolutionOn f α₂ δ t₀
       (variationalSolutionFun hT hM hMT hA_cont₁ hA_bd₁ δ) (Icc (t₀ - T) (t₀ + T)) :=
     IsVariationalSolutionOn.congr_central hαeq h₁
-  -- Both are solutions along `α₂`; uniqueness gives agreement.
   have h_eq := IsVariationalSolutionOn.unique_Icc hT hA_cont₂ h₁' h₂
   rw [variationalLinearMapAt_apply, variationalLinearMapAt_apply]
   exact h_eq ht
 
 end VariationalLinearMapCongr
-
-/-! ## The spatial piece is the variational linear map along the orbit
-
-Refining `fderiv_flow_eq_coprod_spatialPiece`, we expose directly that, at every interior
-point `(x, t)`, the spatial piece of `fderiv ℝ Φ` *equals* the variational linear map along
-the orbit `Φ ⟨x, ·⟩`, evaluated at time `t`.  This is the half-step needed to match it with
-the augmented flow's second component. -/
 
 section SpatialPieceVariational
 
@@ -1557,19 +1236,6 @@ theorem spatialPieceFn_eq_variationalLinearMapAt
   exact ContinuousLinearMap.coprod_comp_inl _ _
 
 end SpatialPieceVariational
-
-/-! ## Pointwise identification: spatial piece equals the augmented-flow projection
-
-Combining the four analytic pieces — the spatial-piece/variational-map equality, the
-augmented-flow second-component identification, the orbit-uniqueness, and the
-variational-map congruence — we obtain, at every interior point `(x, t)`,
-`spatialPieceFn Φ (x, t) = fromAugFlow aΦ (x, t)`, provided `aΦ` is a local flow of the
-augmented vector field `augVF f` whose closed domain covers the orbit data.
-
-The augmented flow `aΦ` is a *genuine* datum (constructed by Picard–Lindelöf via
-`exists_isLocalFlow_of_contDiffOn_univ` for the `C^k` field `augVF f`); supplying it is not
-a packaging of the conclusion — its type `IsLocalFlow (augVF f) …` is unrelated to the
-`ContDiffOn` conclusion. -/
 
 section SpatialPieceAugFlow
 
@@ -1611,20 +1277,16 @@ theorem spatialPieceFn_eq_fromAugFlow
     (hy₂_mem : ∀ s ∈ Ioo (t₀ - T') (t₀ + T'), Φ ⟨x, s⟩ ∈ closedBall x₀ ρ_b)
     {t : ℝ} (ht : t ∈ Ioo (t₀ - T) (t₀ + T)) :
     spatialPieceFn Φ (x, t) = fromAugFlow aΦ (x, t) := by
-  -- Auxiliary memberships.
   have hx_le : dist x x₀ ≤ (ρ : ℝ) := by rw [mem_closedBall] at hx; exact hx
   have hx_r : x ∈ closedBall x₀ (r : ℝ) :=
     mem_closedBall.mpr (by linarith [r'.coe_nonneg])
-  -- `(x, id) ∈ closedBall (x₀, id) R`.
   have hxp : (x, ContinuousLinearMap.id ℝ E) ∈ closedBall (x₀, ContinuousLinearMap.id ℝ E) (R : ℝ) := by
     rw [mem_closedBall, Prod.dist_eq]
     simp only [dist_self, max_eq_left (dist_nonneg)]
     calc dist x x₀ ≤ (ρ : ℝ) := hx_le
       _ ≤ (R : ℝ) := hρR
-  -- Central orbits.
   set α₁ : ℝ → E := fun s => Φ ⟨x, s⟩ with hα₁_def
   set α₂ : ℝ → E := fun s => (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), s⟩).1 with hα₂_def
-  -- Orbit uniqueness on the larger open interval, restricted to the closed interval.
   have ht₀_O : t₀ ∈ Ioo (t₀ - T') (t₀ + T') := ⟨by linarith, by linarith⟩
   have h_orbit_eq : ∀ s ∈ Ioo (t₀ - T') (t₀ + T'), α₂ s = α₁ s :=
     augFlow_fst_eq_flow hΦ haΦ ht₀_O hsubO hsubO' hLip hx_r hxp hy₁_mem hy₂_mem
@@ -1633,16 +1295,13 @@ theorem spatialPieceFn_eq_fromAugFlow
     have hs_O : s ∈ Ioo (t₀ - T') (t₀ + T') :=
       ⟨by linarith [hs.1], by linarith [hs.2]⟩
     exact h_orbit_eq s hs_O
-  -- Step 1: spatial piece equals variational map along `α₁`.
   have h_sp := spatialPieceFn_eq_variationalLinearMapAt hΦ hf_C1 hT hM hMT hsub hr' hρρ' hA_bd hx ht
-  -- Continuity / bound data along `α₁` (= the recentred-orbit data).
   set hA_cont₁ : ContinuousOn (fun s => fderiv ℝ (f s) (α₁ s)) (Icc (t₀ - T) (t₀ + T)) :=
     (((hΦ.restrict_center_of_norm_le (x₁ := x) (r' := r') (by
         rw [mem_closedBall] at hx; linarith)).continuousOn_fderiv_along_orbit hf_C1 x
       (Metric.mem_closedBall_self (by exact_mod_cast (le_of_lt hr')))).mono hsub) with hA_cont₁_def
   set hA_bd₁ : ∀ s ∈ Icc (t₀ - T) (t₀ + T), ‖fderiv ℝ (f s) (α₁ s)‖ ≤ M :=
     (fun τ hτ => hA_bd x hx τ hτ) with hA_bd₁_def
-  -- Continuity / bound data along `α₂` (transported from `α₁` via `hαeq`).
   have hA_cont₂ : ContinuousOn (fun s => fderiv ℝ (f s) (α₂ s)) (Icc (t₀ - T) (t₀ + T)) := by
     apply hA_cont₁.congr
     intro s hs
@@ -1653,33 +1312,15 @@ theorem spatialPieceFn_eq_fromAugFlow
     change ‖fderiv ℝ (f s) (α₂ s)‖ ≤ M
     rw [hαeq hs]
     exact hA_bd₁ s hs
-  -- Step 2: augmented-flow second component equals variational map along `α₂`.
   have h_aug := augFlow_snd_eq_variationalLinearMapAt haΦ hT hM hMT hsub'
     hxp hA_cont₂ hA_bd₂ (Ioo_subset_Icc_self ht)
-  -- Step 3: the two variational maps agree (same orbit on the interval).
   have h_congr := variationalLinearMapAt_congr_central hT hM hMT hαeq
     hA_cont₂ hA_bd₂ hA_cont₁ hA_bd₁ (Ioo_subset_Icc_self ht)
-  -- Assemble.
   rw [fromAugFlow_apply]
   rw [h_sp]
-  -- `h_sp` rewrote `spatialPieceFn Φ (x, t)` to the variational map along `α₁`.
-  -- `h_aug` says `(aΦ ⟨(x, id), t⟩).2 = variationalLinearMapAt(α₂)`.
-  -- `h_congr` says `variationalLinearMapAt(α₂) = variationalLinearMapAt(α₁)`.
   rw [h_aug, h_congr]
 
 end SpatialPieceAugFlow
-
-/-! ## Joint `C^k` smoothness of the variational linear map
-
-Putting the pointwise identification together with `contDiffOn_fromAugFlow`, we obtain the
-headline: the spatial piece `spatialPieceFn Φ` (the variational linear map) is jointly `C^k`
-on the strictly-interior open neighbourhood, provided a *jointly `C^k`* local flow `aΦ` of
-the augmented vector field `augVF f` is available on a neighbourhood covering the orbit data.
-
-The augmented flow `aΦ` and its `C^k` regularity are the genuine datum delivered by the
-strong induction: `augVF f` is `C^k` whenever `f` is `C^{k+1}` (`augVF_uncurry_contDiff`),
-and the inductive hypothesis — the flow of a `C^k` field is `C^k` — applied to `augVF f`
-produces a `C^k` flow `aΦ`. -/
 
 section VariationalLinearMapSmooth
 
@@ -1717,10 +1358,8 @@ theorem contDiffOn_variationalLinearMap
     (hA_bd : ∀ x ∈ closedBall x₀ (ρ : ℝ), ∀ τ ∈ Icc (t₀ - T) (t₀ + T),
       ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩)‖ ≤ M) :
     ContDiffOn ℝ k (spatialPieceFn Φ) ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)) := by
-  -- `fromAugFlow aΦ` is `C^k` on the neighbourhood.
   have h_fromAug_Ck : ContDiffOn ℝ k (fromAugFlow aΦ)
       ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)) := contDiffOn_fromAugFlow haΦ_Ck hmap
-  -- `spatialPieceFn Φ` agrees with `fromAugFlow aΦ` on the neighbourhood.
   have h_eq : ∀ q ∈ ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)),
       spatialPieceFn Φ q = fromAugFlow aΦ q := by
     intro q hq
@@ -1771,7 +1410,6 @@ theorem contDiffOn_flow_succ_via_augFlow
       ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩)‖ ≤ M)
     (hΦ_Ck : ContDiffOn ℝ k Φ ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T))) :
     ContDiffOn ℝ (k + 1) Φ ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)) := by
-  -- `f` is `C^1`.
   have hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)) := by
     have h_le : ((1 : ℕ∞) : WithTop ℕ∞) ≤ ((k + 1 : ℕ∞) : WithTop ℕ∞) := by
       have : (1 : ℕ∞) ≤ k + 1 := by
@@ -1780,7 +1418,6 @@ theorem contDiffOn_flow_succ_via_augFlow
       exact_mod_cast this
     have h := hf_succ.of_le h_le
     simpa using h
-  -- Inner-interval facts.
   have hT_pos : 0 < T := hT
   have hsub_T : Icc (t₀ - T) (t₀ + T) ⊆ Icc (t₀ - T_out) (t₀ + T_out) :=
     Icc_subset_Icc (by linarith) (by linarith)
@@ -1788,43 +1425,27 @@ theorem contDiffOn_flow_succ_via_augFlow
   have hsubO_tmax : Ioo (t₀ - T') (t₀ + T') ⊆ Icc tmin tmax := by
     intro s hs
     exact hsub (Icc_subset_Icc (by linarith [hs.1]) (by linarith [hs.2]) (Ioo_subset_Icc_self hs))
-  -- `M * T < 1`.
   have hMT : M * T < 1 := lt_of_le_of_lt (by nlinarith [hM, le_of_lt hT_lt_mid]) hMT_mid
-  -- `hA_bd` restricted to the inner ball / inner interval (along orbits of `Φ`).
   have hA_bd_inner : ∀ x ∈ closedBall x₀ (ρ : ℝ), ∀ τ ∈ Icc (t₀ - T) (t₀ + T),
       ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩)‖ ≤ M := by
     intro x hx τ hτ
     refine hA_bd x ?_ τ (hsub_T hτ)
     exact closedBall_subset_closedBall
       (le_trans (le_of_lt hρ_lt_mid) (le_of_lt hρ_mid_lt_out)) hx
-  -- `ρ + r' ≤ r` (from `ρ < ρ_mid` and `ρ_mid + r' ≤ r`).
   have hρρ'_inner : (ρ : ℝ) + (r' : ℝ) ≤ (r : ℝ) := by
     have := hρ_lt_mid; linarith
-  -- Spatial-piece smoothness via the augmented flow.
   have hLsp_Ck : ContDiffOn ℝ k (spatialPieceFn Φ)
       ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)) :=
     contDiffOn_variationalLinearMap hΦ haΦ hf_C1 haΦ_Ck hT hM hMT hT_lt' hsub_T_tmax hsub'
       hsubO_tmax hsubO' hLip hr' hρρ'_inner hρR hmap hcontain₁ hcontain₂ hA_bd_inner
-  -- Coproduct identity for the spatial piece.
   have hLsp_eq : ∀ q ∈ ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)),
       fderiv ℝ Φ q = (spatialPieceFn Φ q).coprod (timePieceFn f Φ q) :=
     fderiv_flow_eq_coprod_spatialPiece hΦ hf_C1 hT hT_lt_mid hT_mid_lt_out hM hMT_mid hsub hr'
       hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd
-  -- Plug into the recursive flow step.
   exact contDiffOn_flow_succ_of_spatial_smooth hΦ hT hT_lt_mid hT_mid_lt_out hM hMT_mid hsub hr'
     hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd hf_succ hΦ_Ck hLsp_Ck hLsp_eq
 
 end VariationalLinearMapSmooth
-
-/-! ## Unconditional `C^1` flow regularity (existence form)
-
-Combining the nesting/bound-data derivation (`exists_flow_nesting_data`) with the
-unconditional `C^1` flow theorem (`exists_contDiffOn_flow_of_contDiff`), we obtain the
-fully unconditional `C^1` local-flow regularity statement in finite dimensions: from a bare
-local flow `Φ` of a jointly `C^1` field, with `t₀` strictly interior in the flow's time
-domain and a non-degenerate flow ball, the flow is jointly `C^1` on an open neighbourhood of
-`(x₀, t₀)`.  No bound, nesting, or Lipschitz data is required as input — it is all produced
-internally from compactness of closed balls. -/
 
 section UnconditionalC1
 
@@ -1849,14 +1470,6 @@ theorem exists_contDiffOn_flow_C1 [FiniteDimensional ℝ E]
     hsub hr' hρ_pos hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd
 
 end UnconditionalC1
-
-/-! ## Neighbourhood-reconciliation helpers for the `C^k` recursion
-
-The `C^k → C^{k+1}` driver below must reconcile several neighbourhoods of `(x₀, t₀)`:
-the strictly-interior flow box, the augmented flow's domain `Ω`, the prior-regularity
-neighbourhood, the orbit-containment box, and the Lipschitz ball.  These helpers extract
-basic product neighbourhoods and capped nesting data so that one common box fits inside all
-of them. -/
 
 section NeighbourhoodReconciliation
 
@@ -2004,19 +1617,6 @@ theorem continuousOn_augFlow_fst
 
 end NeighbourhoodReconciliation
 
-/-! ## The `C^k → C^{k+1}` flow-regularity driver
-
-The single inductive workhorse: given a local flow `Φ` of a `C^{k+1}` field, a `C^k`
-augmented flow `aΦ` of `augVF f` on an open neighbourhood `Ω`, and the prior-level
-regularity of `Φ` (`C^k` on *some* open neighbourhood of `(x₀, t₀)`), the flow `Φ` is `C^{k+1}`
-on an open neighbourhood of `(x₀, t₀)`.
-
-All neighbourhood bookkeeping — fitting one common box inside the flow domains, `Ω`, the
-prior-regularity neighbourhood, the Lipschitz ball, and the two orbit-containment boxes — is
-discharged internally, using only finite-dimensionality (through compactness of closed balls)
-and the genuine non-degeneracy data (`t₀` strictly interior in both time domains, positive
-flow radii). -/
-
 section CkDriver
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
@@ -2147,25 +1747,6 @@ theorem exists_contDiffOn_flow_succ_driver
 
 end CkDriver
 
-/-! ## The unconditional `C^n` flow-existence headline (strong induction)
-
-The strong induction on the regularity order `n : ℕ` closes the recursion.  The inductive
-predicate `FlowCkPred n` is *universe-polymorphic over the carrier space*: it asserts the
-`C^n` flow-existence statement for **every** finite-dimensional complete normed space `E'` in
-a fixed universe.  This polymorphism is essential, because the `n → n + 1` step applies the
-inductive hypothesis to the *augmented* vector field `augVF g`, which lives on the larger
-space `E' × (E' →L[ℝ] E')` (also finite-dimensional, since `[FiniteDimensional ℝ E']` gives
-`[FiniteDimensional ℝ (E' × (E' →L[ℝ] E'))]` by instance resolution).
-
-* **Base** `n = 1`: `exists_contDiffOn_flow_C1`.
-* **Step** `n → n + 1` (for `n ≥ 1`): build the augmented flow `aΨ` of `augVF g` via the
-  Picard–Lindelöf existence theorem (`exists_isLocalFlow_of_contDiffOn_univ`), apply the
-  inductive hypothesis to `augVF g` (getting `aΨ` jointly `C^n`) and to `g` itself (getting
-  the prior-level regularity of `Ψ`), then feed `exists_contDiffOn_flow_succ_driver`.
-
-The headline `exists_contDiffOn_flow_Cnat` specialises to the original space `E`; the `C^2`
-corollary `exists_contDiffOn_flow_C2` is the form consumed downstream. -/
-
 section CkInduction
 
 universe u
@@ -2196,11 +1777,9 @@ and the `C^k → C^{k+1}` driver. -/
 theorem flowCkPred_step {n : ℕ} (hn : 1 ≤ n) (IH : FlowCkPred.{u} n) :
     FlowCkPred.{u} (n + 1) := by
   intro E' _ _ _ _ g t₀ x₀ r tmin tmax Ψ hΨ hg ht₀ hr
-  -- `g` is `C^{n+1}`; reshape the index `↑(n+1) = ↑n + 1`.
   have hg_succ : ContDiffOn ℝ ((n : ℕ∞) + 1) (uncurry g) (Set.univ : Set (ℝ × E')) := by
     rw [ContDiffOn] at hg ⊢
     convert hg using 2
-  -- `augVF g` is `C^n`, hence `C^1` (since `n ≥ 1`).
   have h_augVF_Cn : ContDiffOn ℝ (n : ℕ∞) (uncurry (augVF g))
       (Set.univ : Set (ℝ × (E' × (E' →L[ℝ] E')))) :=
     augVF_uncurry_contDiff (k := (n : ℕ∞)) hg_succ
@@ -2210,25 +1789,20 @@ theorem flowCkPred_step {n : ℕ} (hn : 1 ≤ n) (IH : FlowCkPred.{u} n) :
       have : (1 : ℕ∞) ≤ (n : ℕ∞) := by exact_mod_cast hn
       exact_mod_cast this
     simpa using h_augVF_Cn.of_le h_le
-  -- Construct the augmented flow `aΨ` of `augVF g` centred at `(x₀, id)`.
   obtain ⟨R, ε, hR_pos, hε_pos, aΨ, haΨ⟩ :=
     exists_isLocalFlow_of_contDiffOn_univ (augVF g) h_augVF_C1 t₀
       (x₀, ContinuousLinearMap.id ℝ E')
   have ht₀_aug : t₀ ∈ Ioo (t₀ - ε) (t₀ + ε) := ⟨by linarith, by linarith⟩
-  -- Inductive hypothesis on the augmented space: `aΨ` is jointly `C^n` on an open `Ω`.
   obtain ⟨Ω, hΩ_open, hΩ_mem, haΨ_Cn⟩ := IH haΨ h_augVF_Cn ht₀_aug hR_pos
-  -- Inductive hypothesis on the original space: prior-level regularity of `Ψ`.
   have hg_Cn : ContDiffOn ℝ (n : ℕ∞) (uncurry g) (Set.univ : Set (ℝ × E')) := by
     have h_le : ((n : ℕ∞) : WithTop ℕ∞) ≤ (((n + 1 : ℕ) : ℕ∞) : WithTop ℕ∞) := by
       have : (n : ℕ∞) ≤ ((n + 1 : ℕ) : ℕ∞) := by exact_mod_cast Nat.le_succ n
       exact_mod_cast this
     exact hg.of_le h_le
   have hΨ_prev := IH hΨ hg_Cn ht₀ hr
-  -- Drive `Ψ` from `C^n` to `C^{n+1}`.
   obtain ⟨U, hU_open, hU_mem, hU_C⟩ := exists_contDiffOn_flow_succ_driver hΨ haΨ ht₀_aug hR_pos
     haΨ_Cn hΩ_open hΩ_mem hg_succ ht₀ hr hΨ_prev
   refine ⟨U, hU_open, hU_mem, ?_⟩
-  -- Reshape the conclusion index `↑n + 1 = ↑(n+1)`.
   rw [ContDiffOn] at hU_C ⊢
   convert hU_C using 2
 
@@ -2275,28 +1849,6 @@ theorem exists_contDiffOn_flow_C2
     exists_contDiffOn_flow_Cnat hΦ (n := 2) (by norm_num) (by exact_mod_cast hf) ht₀ hr
   exact ⟨U, hU1, hU2, by exact_mod_cast hU3⟩
 
-/-! ## Uniform-radius all-orders (`C^∞`) flow regularity
-
-The per-order headline `exists_contDiffOn_flow_Cnat` produces, at order `n`, an open
-neighbourhood `U_n` **whose radius depends on `n`** (the augmented-flow recursion caps the
-flow box to fit inside the prior-order regularity neighbourhood, so the ball shrinks as `n`
-grows).  Consequently it cannot deliver `ContDiffOn ℝ ∞ Φ` on a single fixed domain.
-
-The fixed-domain engine `contDiffOn_flow_of_spatial_smooth_seq`, by contrast, takes the box
-radius `(ρ, T)` as an **input** and returns `ContDiffOn ℝ (k : ℕ∞) Φ` on that *same* box for
-any finite `k`.  Its only order-dependent hypothesis is the joint `C^j` smoothness of the
-canonical spatial piece `spatialPieceFn Φ` (the spatial restriction of `fderiv ℝ Φ`) on the
-fixed box, for each level `j < k`; the coproduct identity for `fderiv ℝ Φ` is
-order-independent (`fderiv_flow_eq_coprod_spatialPiece`, needing only `C^1` of `f`).
-
-Therefore, supplying the spatial-piece smoothness at **all** finite orders on one fixed box
-upgrades the conclusion to `ContDiffOn ℝ ∞ Φ` on that same box.  The all-orders spatial-piece
-hypothesis is the genuine "smooth dependence on parameters of the variational linear ODE"
-content; it is *not* a repackaging of the conclusion (it concerns `spatialPieceFn Φ`, a
-different function, and at each finite order is one regularity level below the conclusion).
-This mirrors the conditional finite-order headline
-`contDiffOn_flow_of_isLocalFlow_of_contDiff_general`. -/
-
 omit [FiniteDimensional ℝ E] in
 /-- **Uniform-radius all-orders (`C^∞`) flow regularity on a fixed box.**
 
@@ -2326,7 +1878,6 @@ theorem contDiffOn_flow_infty_of_spatial_smooth_all
       ContDiffOn ℝ (j : ℕ∞) (spatialPieceFn Φ)
         ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T))) :
     ContDiffOn ℝ ∞ Φ ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)) := by
-  -- The coproduct identity for `fderiv ℝ Φ` is order-independent (needs only `C^1` of `f`).
   have hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)) := by
     have h_le : ((1 : ℕ∞) : WithTop ℕ∞) ≤ ∞ := by exact_mod_cast (le_top : (1 : ℕ∞) ≤ (⊤ : ℕ∞))
     simpa using hf_Cinfty.of_le h_le
@@ -2334,14 +1885,11 @@ theorem contDiffOn_flow_infty_of_spatial_smooth_all
       fderiv ℝ Φ q = (spatialPieceFn Φ q).coprod (timePieceFn f Φ q) :=
     fderiv_flow_eq_coprod_spatialPiece hΦ hf_C1 hT hT_lt_mid hT_mid_lt_out hM hMT_mid hsub hr'
       hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd
-  -- Reduce `C^∞` to "`C^k` for every finite `k`" and run the fixed-domain engine per `k`.
   rw [contDiffOn_infty]
   intro k
-  -- `f` is `C^k` (from `C^∞`).
   have hf_Ck : ContDiffOn ℝ (k : ℕ∞) (uncurry f) (Set.univ : Set (ℝ × E)) := by
     have h_le : ((k : ℕ∞) : WithTop ℕ∞) ≤ ∞ := by exact_mod_cast (le_top : (k : ℕ∞) ≤ (⊤ : ℕ∞))
     exact hf_Cinfty.of_le h_le
-  -- Apply the fixed-domain engine on the SAME box, with `Lsp_seq j := spatialPieceFn Φ`.
   exact contDiffOn_flow_of_spatial_smooth_seq hΦ hT hT_lt_mid hT_mid_lt_out hM hMT_mid hsub hr'
     hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd k hf_Ck (fun _ => spatialPieceFn Φ)
     (fun j _ => hLsp_smooth j) (fun _ _ => hLsp_eq)
@@ -2374,7 +1922,6 @@ theorem exists_contDiffOn_flow_Cinfty
   obtain ⟨T_out, T_mid, T, M, ρ_out, ρ_mid, ρ, r',
     hT, hT_lt_mid, hT_mid_lt_out, hM, hMT_mid, hr', hρ_pos, hρ_lt_mid, hρ_mid_lt_out,
     hρρ', hρ_out_le_r, hsub, hA_bd⟩ := exists_flow_nesting_data hΦ hf_C1 ht₀ hr
-  -- The fixed box sits inside the local-flow domain box (for the spatial-piece hypothesis).
   have h_ρ_r : (ρ : ℝ) ≤ (r : ℝ) :=
     le_trans (le_of_lt hρ_lt_mid) (le_trans (le_of_lt hρ_mid_lt_out) hρ_out_le_r)
   have h_T_out : Icc (t₀ - T) (t₀ + T) ⊆ Icc (t₀ - T_out) (t₀ + T_out) :=

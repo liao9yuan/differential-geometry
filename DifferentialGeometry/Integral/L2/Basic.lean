@@ -60,22 +60,10 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Canonical measurable-space and Borel-space instances on `E` and `M`
-
-These file-local instances equip `E` and `M` with the Borel σ-algebra induced by
-their topology. They match the instances installed in the `Measure` subdirectory,
-and are declared `local` so they do not escape into external typeclass search. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Measurability
-
-A continuous map into a second-countable Banach space is almost-everywhere strongly
-measurable with respect to any measure. Smooth maps are continuous, so the smooth
-variant reduces to the continuous one. -/
 
 /-- A continuous function from a smooth manifold `M` into a second-countable normed
 space `F` is almost-everywhere strongly measurable against any Borel measure on `M`. -/
@@ -104,11 +92,6 @@ theorem aestronglyMeasurable_of_contMDiff_of_nat
     (μ : MeasureTheory.Measure M) :
     MeasureTheory.AEStronglyMeasurable f μ :=
   aestronglyMeasurable_of_continuous (M := M) hf.continuous μ
-
-/-! ## Integrability against the Riemannian volume measure
-
-Standard criteria: continuous + compact support, smooth + compact support, and the
-automatic-compact-support case on a closed manifold. -/
 
 /-- A continuous compactly-supported function is integrable against the Riemannian
 volume measure. Uses local finiteness on compacts of the volume measure. -/
@@ -154,8 +137,6 @@ theorem integrable_of_contMDiff_compactSpace
     {f : M → F} (hf : ContMDiff I 𝓘(ℝ, F) ∞ f) :
     MeasureTheory.Integrable f (riemannianVolumeMeasure (I := I) (M := M) g) :=
   integrable_of_continuous_compactSpace (I := I) (M := M) g hf.continuous
-
-/-! ## Linearity of the Bochner integral against the Riemannian volume measure -/
 
 /-- Additivity of the Bochner integral against the Riemannian volume measure. -/
 theorem integral_add_of_riemannianVolume
@@ -235,8 +216,6 @@ theorem integral_congr_ae_of_riemannianVolume
     ∫ x, f x ∂(riemannianVolumeMeasure (I := I) (M := M) g)
       = ∫ x, f' x ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
   MeasureTheory.integral_congr_ae h
-
-/-! ## Non-negative integral wrappers -/
 
 /-- Additivity of the lower Lebesgue integral against the Riemannian volume
 measure, when the left summand is measurable. -/

@@ -158,7 +158,6 @@ theorem flowFamily_pushforward_contMDiff
         (Diffeomorph.pushforward (Φ_fam s) Y x)) := by
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
   set Φ := Φ_fam s with hΦ
-  -- Rewrite the total-space section using `pushforward = mpullback ∘ symm`.
   have hfun_eq := flowFamily_pushforward_eq_mpullback_symm (I := I) Φ Y
   have hfun_total :
       (fun z : M => (TotalSpace.mk' E z (Diffeomorph.pushforward Φ Y z) : TangentBundle I M))
@@ -167,7 +166,6 @@ theorem flowFamily_pushforward_contMDiff
     funext z; congr 1
     exact congrFun hfun_eq z
   rw [hfun_total]
-  -- The inverse diffeomorphism is smooth with everywhere-invertible differential.
   have hΦsymm_smooth : ContMDiff I I (∞ : WithTop ℕ∞) (⇑Φ.symm) := Φ.symm.contMDiff
   have hinv : ∀ x, (mfderiv I I (⇑Φ.symm) x).IsInvertible := by
     intro x
@@ -267,22 +265,17 @@ theorem flowFamily_regularity_package
     (hbare : ∀ s : ℝ, 0 < s → s < T → ∀ x : M,
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => Φ_fam u x) (Ici 0) s
         ((1 : ℝ →L[ℝ] ℝ).smulRight (X s (Φ_fam s x)))) :
-    -- (1) spatial smoothness at each fixed time
     (∀ s : ℝ, ContMDiff I I ∞ (Φ_fam s : M → M)) ∧
-    -- (2) pushforward smoothness at each fixed time (the `hPush_smooth` shape)
     (∀ (s : ℝ) (Y : ∀ x : M, TangentSpace I x),
       ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
         (fun x : M => TotalSpace.mk' E (E := TangentSpace I) x (Y x)) →
       ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
         (fun x : M => TotalSpace.mk' E (E := TangentSpace I) x
           (Diffeomorph.pushforward (Φ_fam s) Y x))) ∧
-    -- (3) existence of the moving differential
     (∀ (s : ℝ) (x : M), MDifferentiableAt I I (Φ_fam s : M → M) x) ∧
-    -- (4) per-point time regularity (bare flow)
     (∀ s : ℝ, 0 < s → s < T → ∀ x : M,
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => Φ_fam u x) (Ici 0) s
         ((1 : ℝ →L[ℝ] ℝ).smulRight (X s (Φ_fam s x)))) ∧
-    -- (5) per-point time continuity
     (∀ s : ℝ, 0 < s → s < T → ∀ x : M,
       ContinuousWithinAt (fun u : ℝ => Φ_fam u x) (Ici 0) s) :=
   ⟨fun s => flowFamily_contMDiff_fixed_time Φ_fam s,

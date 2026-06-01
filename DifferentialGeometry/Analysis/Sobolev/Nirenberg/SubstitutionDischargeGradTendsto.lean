@@ -70,16 +70,12 @@ open DifferentialGeometry.Analysis.Sobolev.NirenbergStandardTest
 open DifferentialGeometry.Analysis.Sobolev.NirenbergDiffQuotTestFunction
 open DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Stage A. Smoothness and the classical fderiv of the test function -/
 
 /-- For smooth `u`, `(fderiv (standardNirenbergTest k h η u) y)(e_j)` agrees
 with the explicit `D_{-h}^k`-expression. This is just
@@ -102,8 +98,6 @@ private lemma fderiv_standardNirenbergTest_apply
               (d := Module.finrank ℝ E) k h
               (fun z : EuclN =>
                 (fderiv ℝ u z) (EuclideanSpace.single j 1)) y) x := by
-  -- `standardNirenbergTest` and `NirenbergTestFunction.nirenbergTestFunction`
-  -- (TestFunction.lean) have the same definition: `D_{-h}^k(η² · D_h^k u)`.
   have h_eq :
       standardNirenbergTest (d := Module.finrank ℝ E) k h η u =
       NirenbergTestFunction.nirenbergTestFunction
@@ -115,8 +109,6 @@ private lemma fderiv_standardNirenbergTest_apply
   rw [h_eq]
   exact NirenbergTestFunction.fderiv_nirenbergTestFunction_apply
     (d := Module.finrank ℝ E) hη hu k j hh x
-
-/-! ## Stage B. Algebraic decomposition into vanishing pieces -/
 
 /-- The pointwise residue term (χ - 1) · D.u_chart vanishes when multiplied
 by `2η · ∂_j η` after applying `diffQuot k h`, because at every point
@@ -139,17 +131,14 @@ private lemma diffQuot_chi_sub_one_uChart_vanishes
           (fun y => (χ y - 1) * D.u_chart y) z) =
     fun _ => (0 : ℝ) := by
   funext z
-  -- Either the η-factor is zero, or we are in `K_0`.
   by_cases hη_factor : 2 * η z * ((fderiv ℝ η z) (EuclideanSpace.single j 1)) = 0
   · rw [hη_factor, zero_mul]
-  -- Then η z ≠ 0, hence z ∈ tsupport η ⊆ K_0.
   have hη_z_ne : η z ≠ 0 := by
     intro hz
     apply hη_factor
     rw [hz]; ring
   have hz_in_supp : z ∈ tsupport η := subset_tsupport η hη_z_ne
   have hz_in_K0 : z ∈ K_0 := hη_supp_in_K_0 hz_in_supp
-  -- z and z + h • e_k both lie in cthickening |h| K_0.
   have hz_in_cthick : z ∈ Metric.cthickening |h| K_0 :=
     Metric.self_subset_cthickening _ hz_in_K0
   have hz_shift_in_cthick : z + h • EuclideanSpace.single k 1 ∈
@@ -160,14 +149,12 @@ private lemma diffQuot_chi_sub_one_uChart_vanishes
   have hχz : χ z = 1 := hχ_one z hz_in_cthick
   have hχz_shift : χ (z + h • EuclideanSpace.single k 1) = 1 :=
     hχ_one _ hz_shift_in_cthick
-  -- Thus (χ - 1)(z) = 0 and (χ - 1)(z + h e_k) = 0, and the diffQuot vanishes.
   by_cases hh : h = 0
   · subst hh
     rw [DifferentialGeometry.Analysis.Sobolev.diffQuot_zero_h]
     exact mul_zero _
   · rw [DifferentialGeometry.Analysis.Sobolev.diffQuot_apply_of_ne
       (d := Module.finrank ℝ E) k hh _ z]
-    -- inner: ((χ - 1) D.u_chart)(z + h e_k) - ((χ - 1) D.u_chart)(z) = 0 - 0 = 0
     have h1 : (χ z - 1) * D.u_chart z = 0 := by rw [hχz]; ring
     have h2 : (χ (z + h • EuclideanSpace.single k 1) - 1) *
         D.u_chart (z + h • EuclideanSpace.single k 1) = 0 := by
@@ -204,7 +191,6 @@ private lemma diffQuot_dx_chi_uChart_vanishes
             (χ y - 1) * D.weak_partial j y) z) =
     fun _ => (0 : ℝ) := by
   funext z
-  -- Either η²(z) = 0, or z ∈ tsupport η ⊆ K_0.
   by_cases hη_sq_zero : (η z)^2 = 0
   · rw [hη_sq_zero, zero_mul]
   have hη_z_ne : η z ≠ 0 := by
@@ -213,7 +199,6 @@ private lemma diffQuot_dx_chi_uChart_vanishes
     rw [hz]; ring
   have hz_in_supp : z ∈ tsupport η := subset_tsupport η hη_z_ne
   have hz_in_K0 : z ∈ K_0 := hη_supp_in_K_0 hz_in_supp
-  -- z and z + h e_k both lie in cthickening |h| K_0.
   have hz_in_cthick : z ∈ Metric.cthickening |h| K_0 :=
     Metric.self_subset_cthickening _ hz_in_K0
   have hz_shift_in_cthick : z + h • EuclideanSpace.single k 1 ∈
@@ -221,18 +206,15 @@ private lemma diffQuot_dx_chi_uChart_vanishes
     refine Metric.mem_cthickening_of_dist_le _ z |h| K_0 hz_in_K0 ?_
     rw [dist_eq_norm, add_sub_cancel_left, norm_smul]
     simp [Real.norm_eq_abs]
-  -- χ values:
   have hχz : χ z = 1 := hχ_one z hz_in_cthick
   have hχz_shift : χ (z + h • EuclideanSpace.single k 1) = 1 :=
     hχ_one _ hz_shift_in_cthick
-  -- ∂_j χ values: zero at both z and z + h e_k by hypothesis.
   have hdχz : (fderiv ℝ χ z) (EuclideanSpace.single j 1) = 0 :=
     hχ_dx_zero z hz_in_cthick j
   have hdχz_shift :
       (fderiv ℝ χ (z + h • EuclideanSpace.single k 1))
         (EuclideanSpace.single j 1) = 0 :=
     hχ_dx_zero _ hz_shift_in_cthick j
-  -- Now the inner integrand vanishes at both z and z + h e_k.
   by_cases hh : h = 0
   · subst hh
     rw [DifferentialGeometry.Analysis.Sobolev.diffQuot_zero_h]
@@ -259,8 +241,6 @@ private lemma diffQuot_dx_chi_uChart_vanishes
           ((fderiv ℝ χ z) (EuclideanSpace.single j 1) * D.u_chart z +
             (χ z - 1) * D.weak_partial j z)) / h) = 0
     rw [h1, h2, sub_zero, zero_div, mul_zero]
-
-/-! ## Stage C. L² Minkowski bound for the difference quotient -/
 
 /-- Translation invariance of `eLpNorm` on Euclidean space. -/
 private lemma eLpNorm_translate_eq_local
@@ -362,7 +342,6 @@ private lemma eLpNorm_mul_bounded
   have h_pow_eq : ∀ a : ℝ≥0∞, a ^ (2 : ℝ) = a ^ (2 : ℕ) := by
     intro a
     rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) from by norm_num, ENNReal.rpow_natCast]
-  -- Pointwise bound: ‖f x · g x‖ₑ² ≤ ofReal(M²) · ‖g x‖ₑ².
   have h_pt_enorm : ∀ x : EuclN,
       (‖f x * g x‖ₑ : ℝ≥0∞)^(2 : ℕ) ≤
         ENNReal.ofReal (M^2) * (‖g x‖ₑ : ℝ≥0∞)^(2 : ℕ) := by
@@ -392,7 +371,6 @@ private lemma eLpNorm_mul_bounded
       ENNReal.ofReal (M^2 * (g x)^2) from
       (ENNReal.ofReal_mul hM2_nn).symm]
     exact ENNReal.ofReal_le_ofReal h_real
-  -- Integrate.
   have h_lint_le :
       ∫⁻ x : EuclN, (‖f x * g x‖ₑ : ℝ≥0∞)^(2 : ℕ)
           ∂(volume : Measure EuclN) ≤
@@ -407,7 +385,6 @@ private lemma eLpNorm_mul_bounded
             ∫⁻ x : EuclN, (‖g x‖ₑ : ℝ≥0∞)^(2 : ℕ) := by
           rw [lintegral_const_mul']
           exact ENNReal.ofReal_ne_top
-  -- Convert to eLpNorm form.
   rw [eLpNorm_eq_lintegral_rpow_enorm_toReal h2_ne_zero h2_ne_top,
     eLpNorm_eq_lintegral_rpow_enorm_toReal h2_ne_zero h2_ne_top, h2_toReal]
   have h_lhs_pow_eq :
@@ -426,7 +403,6 @@ private lemma eLpNorm_mul_bounded
     filter_upwards with x using h_pow_eq _
   rw [h_lhs_pow_eq, h_rhs_pow_eq]
   refine le_trans (ENNReal.rpow_le_rpow h_lint_le (by norm_num : (0 : ℝ) ≤ 1/2)) ?_
-  -- (ofReal(M²) · I)^(1/2) = ofReal(M) · I^(1/2).
   have hM2_nn : 0 ≤ M^2 := sq_nonneg _
   have h_mul_rpow :
       (ENNReal.ofReal (M^2) *
@@ -435,7 +411,6 @@ private lemma eLpNorm_mul_bounded
           (∫⁻ x : EuclN, (‖g x‖ₑ : ℝ≥0∞) ^ (2 : ℕ)) ^ ((1 : ℝ) / 2) := by
     rw [ENNReal.mul_rpow_of_nonneg _ _ (by norm_num : (0 : ℝ) ≤ 1/2)]
   rw [h_mul_rpow]
-  -- (ofReal(M²))^(1/2) = ofReal(M).
   have h_sqrt_M2 :
       (ENNReal.ofReal (M^2)) ^ ((1 : ℝ) / 2) = ENNReal.ofReal M := by
     have h_M2_to_pow :
@@ -447,8 +422,6 @@ private lemma eLpNorm_mul_bounded
     have h_calc : ((2 : ℕ) : ℝ) * (1 / 2) = 1 := by norm_num
     rw [h_calc, ENNReal.rpow_one]
   rw [h_sqrt_M2]
-
-/-! ## Stage D. Headline gradient L²-convergence theorem -/
 
 /-- **Headline gradient L² convergence.** Given a smooth approximating
 sequence `u_seq n → χ · D.u_chart` in `L²` whose classical partials
@@ -514,10 +487,6 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
   classical
   let _ := hu_seq_cs
   let _ := hK_0_compact
-  -- Step 1: Replace `(fderiv (standardNirenbergTest k h η (u_seq n))) e_j`
-  -- with the classical expansion via `fderiv_standardNirenbergTest_apply`.
-  -- The smooth fderiv is `D_{-h}^k F_n` where
-  --   F_n(z) := 2η ∂_j η · D_h^k u_seq n + η² · D_h^k(∂_j u_seq n).
   set F_n : ℕ → EuclN → ℝ := fun n z =>
     2 * η z * ((fderiv ℝ η z) (EuclideanSpace.single j 1)) *
       DifferentialGeometry.Analysis.Sobolev.diffQuot
@@ -527,7 +496,6 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
         (d := Module.finrank ℝ E) k h
         (fun z' => (fderiv ℝ (u_seq n) z') (EuclideanSpace.single j 1)) z
     with hF_n_def
-  -- The classical fderiv expansion.
   have h_fderiv_expansion : ∀ n y,
       (fderiv ℝ (standardNirenbergTest (d := Module.finrank ℝ E)
         k h η (u_seq n)) y) (EuclideanSpace.single j 1) =
@@ -536,9 +504,6 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
     intro n y
     exact fderiv_standardNirenbergTest_apply (j := j) hη (hu_seq_smooth n)
       k hh y
-  -- Define the explicit target
-  --   B(z) := η²(z) · D_h^k(D.weak_partial j) z
-  --         + 2η(z) ∂_j η(z) · D_h^k(D.u_chart) z.
   set B : EuclN → ℝ := fun z =>
     (η z)^2 *
       DifferentialGeometry.Analysis.Sobolev.diffQuot
@@ -547,7 +512,6 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
       DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h D.u_chart z
     with hB_def
-  -- After expansion, the difference inside eLpNorm is `D_{-h}^k(F_n - B)`.
   have h_diff_eq : ∀ n y,
       ((fderiv ℝ (standardNirenbergTest (d := Module.finrank ℝ E)
         k h η (u_seq n)) y) (EuclideanSpace.single j 1) -
@@ -560,13 +524,6 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
     rw [DifferentialGeometry.Analysis.Sobolev.diffQuot_sub
       (d := Module.finrank ℝ E) k (-h)]
     rfl
-  -- Step 2: Compute F_n - B = TERM_A_n + TERM_B_n + TERM_C + TERM_D.
-  -- TERM_A_n: 2η ∂_j η · D_h^k(u_seq n - χ · D.u_chart).
-  -- TERM_B_n: η² · D_h^k(∂_j u_seq n - g_j_χu),
-  --          g_j_χu := (∂_j χ) D.u_chart + χ · D.weak_partial j.
-  -- TERM_C: 2η ∂_j η · D_h^k((χ - 1) · D.u_chart).
-  -- TERM_D: η² · D_h^k((∂_j χ) · D.u_chart + (χ - 1) · D.weak_partial j).
-  -- Lemmas: TERM_C ≡ 0 and TERM_D ≡ 0 (by hypotheses).
   set TERM_A_n : ℕ → EuclN → ℝ := fun n z =>
     2 * η z * (fderiv ℝ η z) (EuclideanSpace.single j 1) *
       DifferentialGeometry.Analysis.Sobolev.diffQuot
@@ -582,12 +539,10 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
             ((fderiv ℝ χ y) (EuclideanSpace.single j 1) * D.u_chart y +
               χ y * D.weak_partial j y)) z
     with hTerm_B_def
-  -- Pointwise equality F_n - B = TERM_A_n + TERM_B_n.
   have h_F_minus_B_eq : ∀ n,
       F_n n - B = TERM_A_n n + TERM_B_n n := by
     intro n
     funext z
-    -- Get the residual identities at z.
     have hTerm_C_eq :=
       diffQuot_chi_sub_one_uChart_vanishes (I := I) (M := M) D
         (k := k) (j := j) (h := h)
@@ -598,7 +553,6 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
         (K_0 := K_0) (η := η) (χ := χ) hχ_one hχ_dx_zero hη_supp_in_K_0
     have hTerm_C_z := congrFun hTerm_C_eq z
     have hTerm_D_z := congrFun hTerm_D_eq z
-    -- Diff quot subtractive identities.
     have hsub_uchart :
         DifferentialGeometry.Analysis.Sobolev.diffQuot
           (d := Module.finrank ℝ E) k h
@@ -683,7 +637,6 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
         ring
       rw [h_eq, DifferentialGeometry.Analysis.Sobolev.diffQuot_sub]
       rfl
-    -- Define abbreviations.
     set α_z : ℝ := 2 * η z * (fderiv ℝ η z) (EuclideanSpace.single j 1)
     set β_z : ℝ := (η z)^2
     set Du : ℝ := DifferentialGeometry.Analysis.Sobolev.diffQuot
@@ -703,7 +656,6 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
             χ y * D.weak_partial j y) z
     set Dwp : ℝ := DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h (D.weak_partial j) z
-    -- The diffQuot of (u_seq - χ · D.u_chart) at z is Du - Dχu (via hsub_uchart).
     have hDsub_uchart : DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h
         (fun y => u_seq n y - χ y * D.u_chart y) z = Du - Dχu := hsub_uchart
@@ -721,7 +673,6 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
         (fun y =>
           (fderiv ℝ χ y) (EuclideanSpace.single j 1) * D.u_chart y +
             (χ y - 1) * D.weak_partial j y) z = Dg - Dwp := hsub_g_weak
-    -- Convert the residual lemmas to algebraic form.
     have hC_simplified : α_z * (Dχu - Du0) = 0 := by
       have := hTerm_C_z
       rw [hDsub_chi] at this
@@ -730,12 +681,7 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
       have := hTerm_D_z
       rw [hDsub_gw] at this
       exact this
-    -- Now establish the algebraic equality.
-    -- F_n n - B = α_z · Du + β_z · DDu - (β_z · Dwp + α_z · Du0).
-    -- TERM_A_n + TERM_B_n = α_z · (Du - Dχu) + β_z · (DDu - Dg).
-    -- LHS - RHS = α_z · (Dχu - Du0) + β_z · (Dg - Dwp) = 0 (by hC, hD).
     change F_n n z - B z = TERM_A_n n z + TERM_B_n n z
-    -- Unfold all the set-bindings.
     change (2 * η z * (fderiv ℝ η z) (EuclideanSpace.single j 1) *
           DifferentialGeometry.Analysis.Sobolev.diffQuot
             (d := Module.finrank ℝ E) k h (u_seq n) z +
@@ -760,22 +706,13 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
             (fderiv ℝ (u_seq n) y) (EuclideanSpace.single j 1) -
               ((fderiv ℝ χ y) (EuclideanSpace.single j 1) * D.u_chart y +
                 χ y * D.weak_partial j y)) z
-    -- Substitute via subtractive identities.
     rw [hDsub_uchart, hDsub_grad]
-    -- Goal: α_z * Du + β_z * DDu - (β_z * Dwp + α_z * Du0) =
-    --       α_z * (Du - Dχu) + β_z * (DDu - Dg).
-    -- Equivalent to: α_z * (Dχu - Du0) + β_z * (Dg - Dwp) = 0,
-    -- which follows from hC_simplified and hD_simplified.
     linarith
-  -- Step 3: Bound `‖diffQuot k (-h) (TERM_A_n n + TERM_B_n n)‖_{L²(univ)}` via Minkowski
-  -- and the bound `‖f · g‖_{L²} ≤ M · ‖g‖_{L²}` for bounded `f`.
-  -- Get bounds on η and ∂_j η from compact support / continuity.
   have hη_cont : Continuous η := hη.continuous
   have hη_partial_cont : Continuous
       (fun y : EuclN => (fderiv ℝ η y) (EuclideanSpace.single j 1)) :=
     (hη.continuous_fderiv (by decide : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)).clm_apply
       continuous_const
-  -- Bound M_η on |η|.
   obtain ⟨M_η, hM_η_nn, hM_η_bd⟩ : ∃ M : ℝ, 0 ≤ M ∧ ∀ x, |η x| ≤ M := by
     by_cases hSupp_empty : (tsupport η).Nonempty
     · obtain ⟨xMax, _hxMax_in, hxMax_max⟩ :=
@@ -792,7 +729,6 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
       · exact absurd ⟨x, hx⟩ hSupp_empty
       · have hηx : η x = 0 := image_eq_zero_of_notMem_tsupport hx
         rw [hηx, abs_zero]
-  -- Bound M_dη on |∂_j η|.
   have h_partial_η_supp : HasCompactSupport
       (fun y : EuclN => (fderiv ℝ η y) (EuclideanSpace.single j 1)) :=
     hη_supp.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single j 1)
@@ -827,7 +763,6 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
             (f := fun y : EuclN => (fderiv ℝ η y) (EuclideanSpace.single j 1)) hx
         rw [show (fderiv ℝ η x) (EuclideanSpace.single j 1) = 0 from hdηx,
           abs_zero]
-  -- Combined bound for |2η ∂_j η|.
   have hM_2ηdη_nn : 0 ≤ 2 * M_η * M_dη := by positivity
   have hM_2ηdη_bd : ∀ x, |2 * η x * (fderiv ℝ η x) (EuclideanSpace.single j 1)|
       ≤ 2 * M_η * M_dη := by
@@ -839,7 +774,6 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
     apply mul_le_mul_of_nonneg_left _ (by norm_num : (0 : ℝ) ≤ 2)
     rw [abs_mul]
     exact mul_le_mul (hM_η_bd x) (hM_dη_bd x) (abs_nonneg _) hM_η_nn
-  -- Similarly for |η²|: bounded by M_η².
   have hM_η_sq_nn : 0 ≤ M_η^2 := sq_nonneg _
   have hM_η_sq_bd : ∀ x, |(η x)^2| ≤ M_η^2 := by
     intro x
@@ -847,7 +781,6 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
     have h_abs_abs : |(|η x|)| = |η x| := abs_of_nonneg (abs_nonneg _)
     rw [h_abs_abs]
     exact pow_le_pow_left₀ (abs_nonneg _) (hM_η_bd x) 2
-  -- Step 4: AEStronglyMeasurability of u_seq n - χ · D.u_chart and its partial diff.
   have h_χu_lp : MemLp (fun x => χ x * D.u_chart x) 2
       (volume : Measure EuclN) :=
     SubstitutionDischargeSmoothApprox.cutoff_uChart_memLp_two_univ
@@ -884,7 +817,6 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
         (by decide : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)).clm_apply continuous_const
     exact h_partial_useq_cont.aestronglyMeasurable.sub
       (h_g_χu_lp j).aestronglyMeasurable
-  -- AEStronglyMeasurability of TERM_A_n + TERM_B_n.
   have h_A_aesm : ∀ n,
       AEStronglyMeasurable (TERM_A_n n) (volume : Measure EuclN) := by
     intro n
@@ -905,7 +837,6 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
       DifferentialGeometry.Analysis.Sobolev.aestronglyMeasurable_diffQuot
         (d := Module.finrank ℝ E) k h (h_diff_grad_aesm n)
     exact h_η_sq_cont.aestronglyMeasurable.mul h_dq_aesm
-  -- Step 5: L² bound for TERM_A_n.
   have h_A_bound : ∀ n,
       eLpNorm (TERM_A_n n) 2 (volume : Measure EuclN) ≤
         ENNReal.ofReal (2 * M_η * M_dη) *
@@ -951,7 +882,6 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
             ((2 / ENNReal.ofReal |h|) *
               eLpNorm (fun y => u_seq n y - χ y * D.u_chart y) 2
                 (volume : Measure EuclN)) := by gcongr
-  -- L² bound for TERM_B_n.
   have h_B_bound : ∀ n,
       eLpNorm (TERM_B_n n) 2 (volume : Measure EuclN) ≤
         ENNReal.ofReal (M_η^2) *
@@ -1016,9 +946,6 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
                   ((fderiv ℝ χ y) (EuclideanSpace.single j 1) * D.u_chart y +
                     χ y * D.weak_partial j y)) 2
                 (volume : Measure EuclN)) := by gcongr
-  -- Step 6: Bound on `D_{-h}^k(F_n - B)` using triangle + Minkowski for outer diffQuot.
-  -- ‖D_{-h}^k(F_n - B)‖_{L²(univ)} ≤ (2/|h|) ‖F_n - B‖_{L²(univ)}
-  --                                ≤ (2/|h|) (‖TERM_A_n‖ + ‖TERM_B_n‖).
   have h_F_minus_B_aesm : ∀ n,
       AEStronglyMeasurable (F_n n - B) (volume : Measure EuclN) := by
     intro n
@@ -1045,8 +972,6 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
     rw [h_F_minus_B_eq n]
     exact eLpNorm_add_le (h_A_aesm n) (h_B_aesm n)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2)
-  -- Step 7: Convergence of the bound.
-  -- Convergence of TERM_A_n L² norm.
   have habs_h_pos : 0 < |h| := abs_pos.mpr hh
   have h_const_2η_ne_top : ENNReal.ofReal (2 * M_η * M_dη) *
       (2 / ENNReal.ofReal |h|) ≠ ⊤ := by
@@ -1123,13 +1048,11 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
     · refine Filter.Eventually.of_forall (fun n => ?_)
       exact zero_le _
     · refine Filter.Eventually.of_forall h_B_bound
-  -- Sum tendsto.
   have h_AB_tendsto :
       Tendsto (fun n => eLpNorm (TERM_A_n n) 2 (volume : Measure EuclN) +
         eLpNorm (TERM_B_n n) 2 (volume : Measure EuclN)) atTop (𝓝 0) := by
     have := h_A_tendsto.add h_B_tendsto
     simpa using this
-  -- Multiplied by (2/|h|) tendsto.
   have h_const_outer_ne_top : (2 / ENNReal.ofReal |h|) ≠ ⊤ :=
     ENNReal.div_ne_top ENNReal.ofNat_ne_top
       (ENNReal.ofReal_pos.mpr habs_h_pos).ne'
@@ -1140,7 +1063,6 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
     have h := ENNReal.Tendsto.const_mul (a := (2 / ENNReal.ofReal |h|))
       h_AB_tendsto (Or.inr h_const_outer_ne_top)
     simpa using h
-  -- The outer eLpNorm tendsto.
   have h_outer_tendsto :
       Tendsto (fun n => eLpNorm (DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k (-h) (F_n n - B)) 2
@@ -1161,7 +1083,6 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
                 eLpNorm (TERM_B_n n) 2 (volume : Measure EuclN)) := by
               gcongr
               exact h_FB_bound n
-  -- Step 8: Restrict to cthickening |h| K_0.
   have h_restrict_tendsto :
       Tendsto (fun n => eLpNorm (DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k (-h) (F_n n - B)) 2
@@ -1176,9 +1097,6 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
         (DifferentialGeometry.Analysis.Sobolev.diffQuot
           (d := Module.finrank ℝ E) k (-h) (F_n n - B))
         Measure.restrict_le_self
-  -- Step 9: Convert restrict tendsto into the goal.
-  -- The goal's expression `(fderiv ...) y - diffQuot k (-h) (fun z => ...) y` equals
-  -- `diffQuot k (-h) (F_n n - B) y` by `h_diff_eq`.
   have h_goal_eq : ∀ n,
       (fun y =>
         (fderiv ℝ (standardNirenbergTest (d := Module.finrank ℝ E)
@@ -1197,7 +1115,6 @@ theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
     intro n
     funext y
     exact h_diff_eq n y
-  -- Replace fun ...  with the diffQuot form to apply restrict_tendsto.
   rw [show (fun n => eLpNorm
         (fun y =>
           (fderiv ℝ (standardNirenbergTest (d := Module.finrank ℝ E)

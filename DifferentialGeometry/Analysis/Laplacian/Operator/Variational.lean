@@ -46,16 +46,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## The bilinear form B = inner on H1Compl -/
 
 /-- The bilinear form `B(u, v) := ⟨u, v⟩_{H1Compl}` packaged as a continuous
 bilinear map `H1Compl g →L[ℝ] H1Compl g →L[ℝ] ℝ`. This is the inner product
@@ -73,14 +69,11 @@ lemma H1ComplBilin_isCoercive (g : SmoothRiemannianMetric I M) :
     IsCoercive (H1ComplBilin (I := I) (M := M) g) := by
   refine ⟨1, zero_lt_one, ?_⟩
   intro u
-  -- `1 * ‖u‖ * ‖u‖ ≤ ⟨u, u⟩_ℝ = ‖u‖²`.
   rw [one_mul]
   rw [show H1ComplBilin (I := I) (M := M) g u u = ⟪u, u⟫_ℝ from rfl]
   rw [real_inner_self_eq_norm_sq]
   ring_nf
   exact le_refl _
-
-/-! ## The linear functional `L_f : H1Compl g →L[ℝ] ℝ` for `f ∈ Lp ℝ 2 μ_g` -/
 
 /-- The map `f ↦ L_f : Lp ℝ 2 μ_g →L[ℝ] (H1Compl g →L[ℝ] ℝ)` is continuous and
 linear, where `L_f(v) := ⟨H1ComplToLp v, f⟩_{Lp ℝ 2}`.
@@ -90,11 +83,6 @@ Constructed as the composition
 noncomputable def lpFunctionalCLM (g : SmoothRiemannianMetric I M) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) →L[ℝ]
       (H1Compl g →L[ℝ] ℝ) :=
-  -- `applyL := compL ℝ (H1Compl g) Lp ℝ` :
-  --   `(Lp →L ℝ) →L (H1Compl →L Lp) →L (H1Compl →L ℝ)`.
-  -- Apply `applyL` to the second slot `H1ComplToLp` to get
-  --   `applyL.flip (H1ComplToLp) : (Lp →L ℝ) →L (H1Compl →L ℝ)`.
-  -- Then compose with `(innerSL ℝ : Lp →L Lp →L ℝ) : Lp →L (Lp →L ℝ)`.
   let applyL : (Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) →L[ℝ] ℝ) →L[ℝ]
       (H1Compl g →L[ℝ]
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) →L[ℝ]
@@ -110,14 +98,10 @@ noncomputable def lpFunctionalCLM (g : SmoothRiemannianMetric I M) :
     (v : H1Compl g) :
     lpFunctionalCLM (I := I) (M := M) g f v =
       ⟪H1ComplToLp (I := I) (M := M) g v, f⟫_ℝ := by
-  -- The construction yields `⟨f, H1ComplToLp v⟩`, which equals
-  -- `⟨H1ComplToLp v, f⟩` by symmetry of the real inner product.
   change (innerSL ℝ f) (H1ComplToLp (I := I) (M := M) g v) =
     ⟪H1ComplToLp (I := I) (M := M) g v, f⟫_ℝ
   rw [innerSL_apply_apply]
   exact real_inner_comm (H1ComplToLp (I := I) (M := M) g v) f
-
-/-! ## The Lax-Milgram resolvent `(1 - Δ_g)⁻¹ : Lp ℝ 2 → H1Compl` -/
 
 /-- The Lax-Milgram operator associated with the bilinear form `B = inner` on
 `H1Compl g`. By the Riesz isomorphism on the Hilbert space `H1Compl g`, this
@@ -140,23 +124,17 @@ recovered via `InnerProductSpace.toDual`. We work through `LinearMap`-level
 constructions to avoid the conjugate-linear `ₛₗᵢ⋆` typing of the dual map. -/
 noncomputable def H1ComplRieszRepr (g : SmoothRiemannianMetric I M) :
     (H1Compl g →L[ℝ] ℝ) →L[ℝ] H1Compl g :=
-  -- `(toDual ℝ V).symm` is conjugate-linear at the level of `ₛₗᵢ`, but for ℝ the
-  -- conjugate is the identity, so it descends to a genuine linear map. We
-  -- reconstruct the CLM through `LinearMap.mkContinuous` using its norm bound.
   LinearMap.mkContinuous
     { toFun := fun φ => (InnerProductSpace.toDual ℝ (H1Compl g)).symm φ
       map_add' := fun φ ψ => by
-        -- `(toDual ℝ V).symm` is additive (it is a linear isometry equiv).
         exact (InnerProductSpace.toDual ℝ (H1Compl g)).symm.map_add φ ψ
       map_smul' := fun c φ => by
-        -- For ℝ: `starRingEnd ℝ = id`, so the conjugate-linear map is genuinely linear.
         change (InnerProductSpace.toDual ℝ (H1Compl g)).symm (c • φ) =
           c • (InnerProductSpace.toDual ℝ (H1Compl g)).symm φ
         rw [LinearIsometryEquiv.map_smulₛₗ
           (InnerProductSpace.toDual ℝ (H1Compl g)).symm c φ]
         rfl }
     1 (fun φ => by
-      -- Norm bound: `‖toDual.symm φ‖ = ‖φ‖`.
       change ‖(InnerProductSpace.toDual ℝ (H1Compl g)).symm φ‖ ≤ 1 * ‖φ‖
       rw [one_mul]
       exact le_of_eq ((InnerProductSpace.toDual ℝ (H1Compl g)).symm.norm_map φ))
@@ -165,7 +143,6 @@ noncomputable def H1ComplRieszRepr (g : SmoothRiemannianMetric I M) :
 lemma H1ComplRieszRepr_inner (g : SmoothRiemannianMetric I M)
     (φ : H1Compl g →L[ℝ] ℝ) (w : H1Compl g) :
     ⟪H1ComplRieszRepr (I := I) (M := M) g φ, w⟫_ℝ = φ w := by
-  -- By Riesz: `⟨(toDual ℝ E).symm φ, w⟩ = φ w`.
   change ⟪(InnerProductSpace.toDual ℝ (H1Compl g)).symm φ, w⟫_ℝ = φ w
   exact InnerProductSpace.toDual_symm_apply (𝕜 := ℝ) (E := H1Compl g) (x := w) (y := φ)
 
@@ -206,8 +183,6 @@ theorem resolvent_bilin_eq_lpFunctional
       ⟪H1ComplToLp (I := I) (M := M) g v, f⟫_ℝ := by
   rw [H1ComplBilin_apply]
   exact resolvent_inner_eq_lpFunctional (I := I) (M := M) g f v
-
-/-! ## Sanity tests -/
 
 example (g : SmoothRiemannianMetric I M) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) →L[ℝ] H1Compl g :=

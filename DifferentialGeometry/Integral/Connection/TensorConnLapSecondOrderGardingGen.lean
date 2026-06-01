@@ -90,14 +90,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The generalized intrinsic order-`2` covariant Gårding `L²` estimate -/
 
 set_option linter.unusedSectionVars false in
 /-- **Generalized intrinsic order-`2` covariant Gårding `L²` estimate.** For a smooth
@@ -147,7 +143,6 @@ theorem secondCovGrad_l2NormSq_le_rawConnLap_gen
             (rawTensorConnLapSmooth (I := I) g 0 2 T).toFun ^ 2 +
           tensorL2Norm (I := I) (M := M) g 0 2 T.toFun ^ 2) := by
   classical
-  -- Abbreviations for the five `L²` norms appearing in the estimate (all first power).
   set S : SmoothCcTensor g 0 3 := covGrad (I := I) (M := M) g 0 2 T with hS_def
   set nGrad : ℝ := tensorL2Norm (I := I) (M := M) g 0 3 S.toFun with hnGrad_def
   set nLap : ℝ := tensorL2Norm (I := I) (M := M) g 0 2
@@ -156,13 +151,11 @@ theorem secondCovGrad_l2NormSq_le_rawConnLap_gen
   set nCurv : ℝ := tensorL2Norm (I := I) (M := M) g 0 3 Curv.toFun with hnCurv_def
   set nHess : ℝ := tensorL2Norm (I := I) (M := M) g 0 (3 + 1)
     (covGrad (I := I) (M := M) g 0 3 S).toFun with hnHess_def
-  -- Non-negativity of all five norms.
   have hnGrad_nn : 0 ≤ nGrad := tensorL2Norm_nonneg (I := I) (M := M) g 0 3 _
   have hnLap_nn : 0 ≤ nLap := tensorL2Norm_nonneg (I := I) (M := M) g 0 2 _
   have hnT_nn : 0 ≤ nT := tensorL2Norm_nonneg (I := I) (M := M) g 0 2 _
   have hnCurv_nn : 0 ≤ nCurv := tensorL2Norm_nonneg (I := I) (M := M) g 0 3 _
   have hnHess_nn : 0 ≤ nHess := tensorL2Norm_nonneg (I := I) (M := M) g 0 (3 + 1) _
-  -- Step 1: the diagonal `(0, 3)` Green identity `‖∇²T‖² = − ⟨Δ_∇(∇T), ∇T⟩`.
   have hgreen :
       nHess ^ 2 =
         - tensorL2Inner (I := I) (M := M) g 0 3
@@ -172,7 +165,6 @@ theorem secondCovGrad_l2NormSq_le_rawConnLap_gen
       (covGrad (I := I) (M := M) g 0 3 S)]
     rw [hS_def]
     exact covGrad_two_l2Inner_self_eq_neg_rawConnLap_three_inner (I := I) (M := M) g T
-  -- Step 2: the cross-pairing split `⟨Δ_∇(∇T), ∇T⟩ = − ‖Δ_∇T‖² + ⟨Curv, ∇T⟩`.
   have hsplit :
       tensorL2Inner (I := I) (M := M) g 0 3
           (rawTensorConnLapSmooth (I := I) g 0 3 S).toFun S.toFun =
@@ -180,53 +172,38 @@ theorem secondCovGrad_l2NormSq_le_rawConnLap_gen
           tensorL2Inner (I := I) (M := M) g 0 3 Curv.toFun S.toFun := by
     rw [hS_def, hnLap_def]
     exact rawConnLap_three_l2Inner_covGrad_eq (I := I) (M := M) g T Curv hcomm
-  -- Combine: `‖∇²T‖² = ‖Δ_∇T‖² − ⟨Curv, ∇T⟩`.
   have hcombined :
       nHess ^ 2 =
         nLap ^ 2 - tensorL2Inner (I := I) (M := M) g 0 3 Curv.toFun S.toFun := by
     rw [hgreen, hsplit]; ring
-  -- Step 3: Cauchy–Schwarz on the curvature cross term `⟨Curv, ∇T⟩`.
   have hcs := abs_tensorL2Inner_le (I := I) (M := M) g 0 3 Curv.toFun S.toFun
     (SmoothCcTensor.memL2_toFun (I := I) (M := M) Curv)
     (SmoothCcTensor.memL2_toFun (I := I) (M := M) S)
     (SmoothCcTensor.integrable_inner_cross (I := I) (M := M) Curv S)
-  -- `− ⟨Curv, ∇T⟩ ≤ |⟨Curv, ∇T⟩| ≤ ‖Curv‖ · ‖∇T‖`.
   have hcross_le :
       - tensorL2Inner (I := I) (M := M) g 0 3 Curv.toFun S.toFun ≤ nCurv * nGrad := by
     rw [hnCurv_def, hnGrad_def]
     exact le_trans (neg_le_abs _) hcs
-  -- Step 4: the curvature `L²` bound `‖Curv‖ ≤ C₀ · (‖T‖ + ‖∇T‖ + ‖∇²T‖)`.
   have hcurv' : nCurv ≤ C₀ * (nT + nGrad + nHess) := by
     rw [hnCurv_def, hnT_def, hnGrad_def, hnHess_def, hS_def]
     exact hcurv
-  -- Hence `‖∇²T‖² ≤ ‖Δ_∇T‖² + C₀ · (‖T‖ + ‖∇T‖ + ‖∇²T‖) · ‖∇T‖`.
   have hstep1 :
       nHess ^ 2 ≤ nLap ^ 2 + C₀ * (nT + nGrad + nHess) * nGrad := by
     rw [hcombined]
     have hprod : nCurv * nGrad ≤ C₀ * (nT + nGrad + nHess) * nGrad :=
       mul_le_mul_of_nonneg_right hcurv' hnGrad_nn
     linarith [hcross_le, hprod]
-  -- Step 5: the order-`1` covariant gradient control `‖∇T‖² ≤ ‖Δ_∇T‖ · ‖T‖`.
   have horder1 : nGrad ^ 2 ≤ nLap * nT := by
     rw [hnGrad_def, hS_def, hnLap_def, hnT_def]
     exact covGrad_l2NormSq_le_rawConnLap_mul_self (I := I) (M := M) g T
-  -- All `_def`-driven rewrites are complete; make the five norm abbreviations opaque so
-  -- the closing arithmetic does not attempt to unfold the underlying `tensorL2Norm`
-  -- expressions during atom matching.
   clear_value nGrad nLap nT nCurv nHess
-  -- Auxiliary Young inequalities.
-  -- (a) `‖Δ_∇T‖ · ‖T‖ ≤ ½(‖Δ_∇T‖² + ‖T‖²)`, so `‖∇T‖² ≤ ½(‖Δ_∇T‖² + ‖T‖²)`.
   have hgrad_sq_le : nGrad ^ 2 ≤ (nLap ^ 2 + nT ^ 2) / 2 := by
     have hy : nLap * nT ≤ (nLap ^ 2 + nT ^ 2) / 2 := by nlinarith [sq_nonneg (nLap - nT)]
     linarith [horder1, hy]
-  -- (b) Young on the `‖∇²T‖ · ‖∇T‖` cross term: `C₀ ‖∇²T‖ ‖∇T‖ ≤ ½‖∇²T‖² + ½C₀²‖∇T‖²`.
   have hyoung_hess : C₀ * nHess * nGrad ≤ nHess ^ 2 / 2 + C₀ ^ 2 * nGrad ^ 2 / 2 := by
     nlinarith [sq_nonneg (nHess - C₀ * nGrad), hC₀]
-  -- (c) `‖T‖ · ‖∇T‖ ≤ ½(‖T‖² + ‖∇T‖²)`.
   have hyoung_TG : nT * nGrad ≤ (nT ^ 2 + nGrad ^ 2) / 2 := by
     nlinarith [sq_nonneg (nT - nGrad)]
-  -- Expand the curvature cross term contribution and absorb `½‖∇²T‖²`.
-  -- `C₀ (‖T‖+‖∇T‖+‖∇²T‖) ‖∇T‖ = C₀ ‖T‖‖∇T‖ + C₀ ‖∇T‖² + C₀ ‖∇²T‖‖∇T‖`.
   have hstep2 :
       nHess ^ 2 ≤ nLap ^ 2 + nHess ^ 2 / 2 +
         C₀ * (nT * nGrad) + C₀ * nGrad ^ 2 + C₀ ^ 2 * nGrad ^ 2 / 2 := by
@@ -235,26 +212,15 @@ theorem secondCovGrad_l2NormSq_le_rawConnLap_gen
     have hbound := hstep1
     rw [hexpand] at hbound
     linarith [hbound, hyoung_hess]
-  -- Multiply through by `2` to clear the absorbed half, then bound every term by
-  -- `C · (‖Δ_∇T‖² + ‖T‖²)` using `hgrad_sq_le` and `hyoung_TG`.
-  -- `‖∇²T‖² ≤ 2‖Δ_∇T‖² + 2C₀‖T‖‖∇T‖ + 2C₀‖∇T‖² + C₀²‖∇T‖²`.
   have hstep3 :
       nHess ^ 2 ≤ 2 * nLap ^ 2 + 2 * C₀ * (nT * nGrad)
         + 2 * C₀ * nGrad ^ 2 + C₀ ^ 2 * nGrad ^ 2 := by
     linarith [hstep2]
-  -- Now bound `nT * nGrad`, `nGrad²` by `(nLap² + nT²)`:
-  -- `nT * nGrad ≤ ½(nT² + nGrad²) ≤ ½ nT² + ¼(nLap² + nT²) = ¼ nLap² + ¾ nT²`.
   have hTG_bound : nT * nGrad ≤ nLap ^ 2 / 4 + 3 * nT ^ 2 / 4 := by
     have h1 : nT * nGrad ≤ (nT ^ 2 + nGrad ^ 2) / 2 := hyoung_TG
     linarith [h1, hgrad_sq_le]
-  -- Assemble: each remaining term is bounded by a multiple of `(nLap² + nT²)`.
-  -- `2C₀ nGrad² ≤ C₀(nLap² + nT²)`, `C₀² nGrad² ≤ ½C₀²(nLap² + nT²)`,
-  -- `2C₀ nT nGrad ≤ 2C₀(¼nLap² + ¾nT²) = ½C₀ nLap² + 3/2 C₀ nT²`.
-  -- Each remaining term bounded in fully-expanded *monomial* form, so the final
-  -- assembly is a pure `linarith` over the monomial atoms `nLap², nT², C₀·nLap², …`.
   have hgrad_term1 : 2 * C₀ * nGrad ^ 2 ≤ C₀ * nLap ^ 2 + C₀ * nT ^ 2 := by
     have h := mul_le_mul_of_nonneg_left hgrad_sq_le hC₀
-    -- `C₀ · nGrad² ≤ C₀ · ((nLap²+nT²)/2)`.
     have he : C₀ * ((nLap ^ 2 + nT ^ 2) / 2) = (C₀ * nLap ^ 2 + C₀ * nT ^ 2) / 2 := by ring
     rw [he] at h
     linarith [h]
@@ -266,15 +232,10 @@ theorem secondCovGrad_l2NormSq_le_rawConnLap_gen
     linarith [h]
   have hTG_term : 2 * C₀ * (nT * nGrad) ≤ C₀ * nLap ^ 2 / 2 + 3 * C₀ * nT ^ 2 / 2 := by
     have h := mul_le_mul_of_nonneg_left hTG_bound hC₀
-    -- `C₀ · (nT·nGrad) ≤ C₀ · (nLap²/4 + 3nT²/4)`.
     have he : C₀ * (nLap ^ 2 / 4 + 3 * nT ^ 2 / 4) = C₀ * nLap ^ 2 / 4 + 3 * C₀ * nT ^ 2 / 4 := by
       ring
     rw [he] at h
     linarith [h]
-  -- Final assembly. Substituting the three monomial term bounds into `hstep3` gives
-  --   nHess² ≤ (2 + 3C₀/2 + C₀²/2) nLap² + (5C₀/2 + C₀²/2) nT².
-  -- The target `(2 + 3C₀ + 2C₀²)(nLap² + nT²)` dominates this since the per-coefficient
-  -- slacks `(3C₀/2 + 3C₀²/2) nLap²` and `(C₀/2 + 3C₀²/2) nT²` are nonnegative.
   have hslack_lap : 0 ≤ (3 * C₀ / 2 + 3 * C₀ ^ 2 / 2) * nLap ^ 2 := by
     apply mul_nonneg
     · nlinarith [hC₀, sq_nonneg C₀]
@@ -283,11 +244,9 @@ theorem secondCovGrad_l2NormSq_le_rawConnLap_gen
     apply mul_nonneg
     · nlinarith [hC₀, sq_nonneg C₀]
     · positivity
-  -- Expand the target's product so `linarith` sees only monomials.
   have htarget_eq : (2 + 3 * C₀ + 2 * C₀ ^ 2) * (nLap ^ 2 + nT ^ 2) =
       2 * nLap ^ 2 + 2 * nT ^ 2 + 3 * C₀ * nLap ^ 2 + 3 * C₀ * nT ^ 2
         + 2 * C₀ ^ 2 * nLap ^ 2 + 2 * C₀ ^ 2 * nT ^ 2 := by ring
-  -- Expand the two product slacks into monomials.
   have hslack_lap' : 0 ≤ 3 * C₀ * nLap ^ 2 / 2 + 3 * C₀ ^ 2 * nLap ^ 2 / 2 := by
     have he : (3 * C₀ / 2 + 3 * C₀ ^ 2 / 2) * nLap ^ 2 =
         3 * C₀ * nLap ^ 2 / 2 + 3 * C₀ ^ 2 * nLap ^ 2 / 2 := by ring
@@ -297,7 +256,6 @@ theorem secondCovGrad_l2NormSq_le_rawConnLap_gen
         C₀ * nT ^ 2 / 2 + 3 * C₀ ^ 2 * nT ^ 2 / 2 := by ring
     rw [he] at hslack_T; exact hslack_T
   rw [htarget_eq]
-  -- The residual `2 nT²` of the target over the substituted bound is nonnegative.
   linarith [hstep3, hgrad_term1, hgrad_term2, hTG_term, hslack_lap', hslack_T',
     sq_nonneg nT]
 

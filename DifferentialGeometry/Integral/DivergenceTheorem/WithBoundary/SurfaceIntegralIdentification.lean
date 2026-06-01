@@ -71,20 +71,12 @@ namespace WithBoundary
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## File-local Borel-space instances
-
-Match the convention in the surrounding files: `M` carries its canonical
-Borel σ-algebra, and likewise the boundary submanifold. Declared `local` to
-avoid leaking into callers. -/
-
 private local instance instMeasurableSpaceM
     {M : Type*} [TopologicalSpace M] : MeasurableSpace M := borel M
 
 private local instance instBorelSpaceM
     {M : Type*} [TopologicalSpace M] :
     @BorelSpace M _ (borel M) := letI : MeasurableSpace M := borel M; ⟨rfl⟩
-
-/-! ## Per-chart identification predicate -/
 
 /-- The per-chart identification predicate: the chart-α boundary face integral
 of `X` against a smooth weight `f : M → ℝ` equals the surface integral of
@@ -127,14 +119,6 @@ def chartFaceIntegralEqualsSurfaceIntegralOnChart
         ∂(surfaceMeasure
             (I := modelWithCornersEuclideanHalfSpace n) (M := M) g)
 
-/-! ## Global assembly
-
-Granted the per-chart identifications, the global identification
-`boundaryFaceSum g X = ∫_{∂M} g.inner ⋯ dS` follows by summing the per-chart
-identities over `α ∈ chartAtlasPOU_finset` and applying the
-partition-of-unity sum-to-one identity to collapse the weighted integrand to
-the unweighted one. -/
-
 section GlobalAssembly
 
 variable {n : ℕ} [NeZero n]
@@ -143,22 +127,11 @@ variable {M : Type*} [TopologicalSpace M]
   [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M]
   [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-! ### Topological prerequisites
-
-The boundary submanifold of a compact ambient manifold is itself compact
-(closed subspace of a compact space). The surface measure, being the
-Riemannian volume measure of the induced metric on the boundary submanifold,
-is then a finite measure on a compact space — used for integrability bounds
-on continuous integrands. -/
-
 omit [T2Space M] [SigmaCompactSpace M] in
 /-- The boundary submanifold of a compact ambient manifold is compact. -/
 private lemma compactSpace_boundaryManifold :
     CompactSpace
       (BoundaryManifold (modelWithCornersEuclideanHalfSpace n) M) := by
-  -- `BoundaryManifold I M = {x : M // x ∈ I.boundary M}`. The boundary is
-  -- closed in a smooth manifold, hence as a subtype it inherits compactness
-  -- from the ambient compact manifold.
   have h_one : (∞ : WithTop ℕ∞) ≠ 0 := by
     intro h
     exact ENat.top_ne_zero
@@ -171,7 +144,6 @@ private lemma compactSpace_boundaryManifold :
   have h_compact :
       IsCompact ((modelWithCornersEuclideanHalfSpace n).boundary M) :=
     h_closed.isCompact
-  -- `BoundaryManifold I M = ↥(I.boundary M)` (definitionally a subtype).
   have h_compact_subtype :
       CompactSpace
         (((modelWithCornersEuclideanHalfSpace n).boundary M) : Set M) :=
@@ -190,14 +162,6 @@ private lemma surfaceMeasure_isFiniteMeasure
     surfaceMeasure_isFiniteMeasureOnCompacts
       (I := modelWithCornersEuclideanHalfSpace n) (M := M) g
   exact CompactSpace.isFiniteMeasure
-
-/-! ### Per-summand integrability bound
-
-For each `α : M`, the weighted integrand
-`b ↦ ((chartAtlasPOU I M) α) b.val * g.inner b.val (outwardNormal g b) (X b.val)`
-is integrable, given the integrability of the unweighted integrand and the
-boundedness of `(chartAtlasPOU I M) α` (a partition of unity weight, bounded
-above by `1`). This is `Integrable.bdd_mul` with the bound `‖ρ α‖ ≤ 1`. -/
 
 omit [CompactSpace M] in
 private lemma weighted_integrand_integrable
@@ -226,11 +190,9 @@ private lemma weighted_integrand_integrable
             (X b.val))
       (surfaceMeasure
         (I := modelWithCornersEuclideanHalfSpace n) (M := M) g) := by
-  -- Use `Integrable.bdd_mul` with bound `1` for `ρ α`.
   set ρ : SmoothPartitionOfUnity M (modelWithCornersEuclideanHalfSpace n) M
       (univ : Set M) :=
     chartAtlasPOU (modelWithCornersEuclideanHalfSpace n) M
-  -- Strong measurability of `ρ α ∘ val` via continuity.
   have h_meas_pou : AEStronglyMeasurable
       (fun b : BoundaryManifold (modelWithCornersEuclideanHalfSpace n) M =>
         (ρ α : M → ℝ) b.val)
@@ -242,7 +204,6 @@ private lemma weighted_integrand_integrable
           (fun b : BoundaryManifold (modelWithCornersEuclideanHalfSpace n) M =>
             (b.val : M)) := continuous_subtype_val
     exact (h_pou_cont.comp h_val_cont).aestronglyMeasurable
-  -- Boundedness: `‖ρ α b.val‖ ≤ 1`.
   have h_bound : ∀ᵐ b
       ∂(surfaceMeasure
         (I := modelWithCornersEuclideanHalfSpace n) (M := M) g),
@@ -253,20 +214,6 @@ private lemma weighted_integrand_integrable
     rw [Real.norm_eq_abs, abs_of_nonneg h_nn]
     exact h_le
   exact h_int.bdd_mul h_meas_pou h_bound
-
-/-! ### Partition-of-unity sum collapse
-
-At any boundary point `b : BoundaryManifold I M`, the partition-of-unity
-weights `(ρ α) b.val` summed over the chart-atlas POU support set `S` collapse
-to `1`. This relies on:
-
-* `(ρ α)` being zero outside the finite support set `S` (by
-  `chartAtlasPOU_weight_zero_of_notMem`);
-* the partition-of-unity sum-to-one identity (by
-  `SmoothPartitionOfUnity.sum_eq_one`, applied at the universal subordinate
-  set);
-* the conversion `finsum_eq_sum_of_support_subset`.
--/
 
 private lemma chartAtlasPOU_finset_sum_eq_one_at_val
     (b : BoundaryManifold (modelWithCornersEuclideanHalfSpace n) M) :
@@ -280,13 +227,9 @@ private lemma chartAtlasPOU_finset_sum_eq_one_at_val
     chartAtlasPOU (modelWithCornersEuclideanHalfSpace n) M with hρ_def
   set S : Finset M := chartAtlasPOU_finset
       (I := modelWithCornersEuclideanHalfSpace n) (M := M) with hS_def
-  -- The pointwise function `α ↦ (ρ α) b.val` has support in `S`.
   have h_supp_subset :
       Function.support (fun α : M => (ρ α : M → ℝ) b.val) ⊆ (S : Set M) := by
     intro α hα
-    -- `α ∈ support f ↔ f α ≠ 0`. Need `α ∈ S`.
-    -- If `α ∉ S`, then `(ρ α)` is identically zero by
-    -- `chartAtlasPOU_weight_zero_of_notMem`, contradicting `(ρ α) b.val ≠ 0`.
     by_contra hαS
     have hzero :
         ((chartAtlasPOU (modelWithCornersEuclideanHalfSpace n) M) α : M → ℝ)
@@ -294,20 +237,13 @@ private lemma chartAtlasPOU_finset_sum_eq_one_at_val
       chartAtlasPOU_weight_zero_of_notMem
         (I := modelWithCornersEuclideanHalfSpace n) (M := M) hαS b.val
     exact hα hzero
-  -- Convert finsum ↦ Finset sum on support set.
   have h_finsum_eq_sum :
       (∑ᶠ α : M, (ρ α : M → ℝ) b.val) =
         ∑ α ∈ S, (ρ α : M → ℝ) b.val :=
     finsum_eq_sum_of_support_subset _ h_supp_subset
-  -- Use POU sum-to-one at `b.val ∈ univ`.
   have h_sum_one : (∑ᶠ α : M, (ρ α : M → ℝ) b.val) = 1 :=
     ρ.sum_eq_one (Set.mem_univ b.val)
   rw [← h_finsum_eq_sum]; exact h_sum_one
-
-/-! ### Sum-of-integrals to integral-of-sum
-
-The standard linearity step: given the per-summand integrability, swap
-`∑_α ∫ … = ∫ ∑_α …`. -/
 
 private lemma sum_integral_eq_integral_sum_pou
     (g : SmoothRiemannianMetric (modelWithCornersEuclideanHalfSpace n) M)
@@ -348,17 +284,11 @@ private lemma sum_integral_eq_integral_sum_pou
           ∂(surfaceMeasure
             (I := modelWithCornersEuclideanHalfSpace n) (M := M) g) := by
   classical
-  -- Step 1: pull `∑ α ∈ S, ρ α (b.val) * Φ b` into `(∑ α ρ α b.val) * Φ b`.
-  -- Step 2: apply `integral_finset_sum` with per-α integrability.
   set S : Finset M := chartAtlasPOU_finset
       (I := modelWithCornersEuclideanHalfSpace n) (M := M)
   have h_per :=
     fun α : M =>
       weighted_integrand_integrable (n := n) (M := M) g X h_int α
-  -- `integral_finset_sum` gives: `∫ ∑_α f_α b dμ = ∑_α ∫ f_α b dμ` (forward).
-  -- We need the reverse direction: `∑_α ∫ f_α b dμ = ∫ ∑_α f_α b dμ`.
-  -- Then identify `∑_α (ρ α b.val * Φ b) = (∑_α ρ α b.val) * Φ b` via
-  -- `Finset.sum_mul`.
   have h_swap :
       ∫ b, (∑ α ∈ S,
             ((chartAtlasPOU (modelWithCornersEuclideanHalfSpace n) M) α :
@@ -384,13 +314,8 @@ private lemma sum_integral_eq_integral_sum_pou
     integral_finset_sum (s := S)
       (fun α _ => h_per α)
   rw [← h_swap]
-  -- Now identify `∑_α (ρ α b.val * Φ b) = (∑_α ρ α b.val) * Φ b`.
   refine integral_congr_ae (Filter.Eventually.of_forall (fun b => ?_))
-  -- `∑ α ∈ S, ρ α b.val * Φ b = (∑ α ∈ S, ρ α b.val) * Φ b`.
-  -- The lambda wraps the goal; simp only with `Finset.sum_mul` works.
   simp only [Finset.sum_mul]
-
-/-! ### The main global theorem -/
 
 /-- **Global identification of the boundary face sum with the intrinsic
 surface integral**, assuming the per-chart matching for the chart-atlas POU.
@@ -447,13 +372,9 @@ theorem boundaryFaceSum_eq_surface_integral_of_chartIdentification
         ∂(surfaceMeasure
           (I := modelWithCornersEuclideanHalfSpace n) (M := M) g) := by
   classical
-  -- Set up the partition-of-unity, the Finset, and the integrand.
   set S : Finset M := chartAtlasPOU_finset
       (I := modelWithCornersEuclideanHalfSpace n) (M := M) with hS_def
-  -- `boundaryFaceSum g X = ∑ α ∈ S, chartBoundaryFaceIntegral g α X (ρ α)`.
   rw [boundaryFaceSum_def]
-  -- Per-chart: identify each `chartBoundaryFaceIntegral g α X (ρ α)` with
-  -- the surface integral of `(ρ α) ∘ val * Φ`.
   have h_sum_chart :
       ∑ α ∈ S,
           chartBoundaryFaceIntegral
@@ -473,12 +394,9 @@ theorem boundaryFaceSum_eq_surface_integral_of_chartIdentification
             ∂(surfaceMeasure
               (I := modelWithCornersEuclideanHalfSpace n) (M := M) g) := by
     refine Finset.sum_congr rfl (fun α hα => ?_)
-    -- `chartFaceIntegralEqualsSurfaceIntegralOnChart` unfolds to the equality.
     exact h_chart α hα
   rw [h_sum_chart]
-  -- Sum-of-integrals = integral-of-sum.
   rw [sum_integral_eq_integral_sum_pou (n := n) (M := M) g X h_int]
-  -- Collapse the POU sum to `1`.
   refine integral_congr_ae (Filter.Eventually.of_forall (fun b => ?_))
   change (∑ α ∈ chartAtlasPOU_finset
               (I := modelWithCornersEuclideanHalfSpace n) (M := M),

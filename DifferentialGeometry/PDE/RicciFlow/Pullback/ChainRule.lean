@@ -43,7 +43,6 @@ theorem pullback_metric_evaluation_formula
     (x : M) (v w : TangentSpace I x) :
     (Diffeomorph.pullbackMetric g Φ).inner x v w
       = g.inner (Φ x) (mfderiv I I Φ x v) (mfderiv I I Φ x w) := by
-  -- Unfold `pullbackMetric` to expose `pullbackInner`.
   change Diffeomorph.pullbackInner g Φ x v w
       = g.inner (Φ x) (mfderiv I I Φ x v) (mfderiv I I Φ x w)
   unfold Diffeomorph.pullbackInner
@@ -67,7 +66,6 @@ theorem mfderiv_time_derivative_along_flow
     (h_eq : V =ᶠ[nhds t] fun s => mfderiv I I (Φ_fam s : M → M) x v)
     (h_deriv : HasDerivAt V V' t) :
     HasDerivAt (fun s => mfderiv I I (Φ_fam s : M → M) x v) V' t :=
-  -- Transport the derivative across the eventual equality of curves.
   h_deriv.congr_of_eventuallyEq h_eq.symm
 
 /-- **Decomposition of the time-derivative of the pullback inner product.**
@@ -90,29 +88,21 @@ theorem pullback_metric_derivative_decomposition
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
     (t : ℝ) (x : M) (v w : TangentSpace I x)
-    -- Derivative of the metric family at `(t, Φ_fam t x)` applied to the
-    -- pushforwards of `v, w` — the intrinsic-time piece.
     (G' : ℝ)
     (h_G : HasDerivAt
       (fun s : ℝ => (g_fam s).inner (Φ_fam t x)
         (mfderiv I I (Φ_fam t : M → M) x v) (mfderiv I I (Φ_fam t : M → M) x w))
       G' t)
-    -- Derivative of the inner product in the "first-slot pushforward" direction.
     (A' : ℝ)
     (h_A : HasDerivAt
       (fun s : ℝ => (g_fam t).inner (Φ_fam t x)
         (mfderiv I I (Φ_fam s : M → M) x v) (mfderiv I I (Φ_fam t : M → M) x w))
       A' t)
-    -- Derivative of the inner product in the "second-slot pushforward" direction.
     (B' : ℝ)
     (h_B : HasDerivAt
       (fun s : ℝ => (g_fam t).inner (Φ_fam t x)
         (mfderiv I I (Φ_fam t : M → M) x v) (mfderiv I I (Φ_fam s : M → M) x w))
       B' t)
-    -- The full evaluation-form scalar derivative — assembled by the three-slot
-    -- product/chain rule from the consumer's joint smoothness, and supplied
-    -- here as a single witness on the genuine evaluation form (varying all
-    -- three slots in `s` simultaneously).
     (h_total_eval : HasDerivAt
       (fun s : ℝ => (g_fam s).inner (Φ_fam s x)
         (mfderiv I I (Φ_fam s : M → M) x v)
@@ -121,15 +111,6 @@ theorem pullback_metric_derivative_decomposition
     HasDerivAt
       (fun s : ℝ => (Diffeomorph.pullbackMetric (g_fam s) (Φ_fam s)).inner x v w)
       (G' + A' + B') t := by
-  -- The component derivatives `h_G`, `h_A`, `h_B` are exposed in the signature
-  -- to document the product/chain-rule decomposition and provide downstream
-  -- consumers with the per-slot witnesses they may need to extract a
-  -- Lie-derivative piece. The conclusion on the bundled form is derived from
-  -- the evaluation-form witness `h_total_eval` via the transport primitive
-  -- `pullbackMetric_inner_hasDerivAt_of_eval`.
-  --
-  -- We discharge the unused-variable lints by reading the per-slot witnesses
-  -- explicitly (no logical use), then apply the transport.
   let _ := h_G; let _ := h_A; let _ := h_B
   exact pullbackMetric_inner_hasDerivAt_of_eval g_fam Φ_fam x v w h_total_eval
 
@@ -160,7 +141,6 @@ theorem combine_pullback_derivative_pieces
     HasDerivAt
       (fun s : ℝ => (Diffeomorph.pullbackMetric (g_fam s) (Φ_fam s)).inner x v w)
       (G' + L') t :=
-  -- Transport the evaluation-form derivative to the bundled-form derivative.
   pullbackMetric_inner_hasDerivAt_of_eval g_fam Φ_fam x v w h_chain_eval
 
 /-- **Time-derivative chain rule for the pullback metric (scalar form).**
@@ -194,8 +174,6 @@ theorem pullback_time_derivative_chain_rule
     HasDerivAt
       (fun s : ℝ => (Diffeomorph.pullbackMetric (g_fam s) (Φ_fam s)).inner x v w)
       (G' + L') t :=
-  -- Chain through `combine_pullback_derivative_pieces` which performs the
-  -- transport from evaluation form to bundled form.
   combine_pullback_derivative_pieces g_fam Φ_fam t x v w G' L' h_chain_eval
 
 end DifferentialGeometry.PDE.RicciFlow.Pullback

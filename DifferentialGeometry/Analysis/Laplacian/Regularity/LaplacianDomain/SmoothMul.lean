@@ -67,8 +67,6 @@ open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalLimitGene
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-! ## The hypothesis-free residual CLM -/
-
 /-- The CLM realisation of the residual part of `fHLeibniz`, depending only
 on `u_h` (no `laplacianDomain` membership hypothesis). This is the `Lp` class
 combination `-2 • gradInnerCLM ρα u_h - smoothMulLp Δρα (H1ComplToLp u_h)`,
@@ -111,15 +109,6 @@ theorem fHLeibnizResidualCLM_smoothToH1Compl
   rw [fHLeibnizResidualCLM_apply]
   rw [H1ComplToLp_smoothToH1Compl]
   rw [gradInnerCLM_smoothToH1Compl]
-
-/-! ## The `H1Compl`-side analogue of `ρα · u_h` for `u_h ∈ laplacianDomain g`
-
-For `u_h ∈ laplacianDomain g`, define `phiMulU_h α u_h hu_h := resolvent g
-(fHLeibniz g α u_h hu_h)`. This is the element of `laplacianDomain g`
-(by construction) representing the H¹ class of `ρα · u_h`. The smooth-case
-identification `phiMulU_h α (smoothToH1Compl v) _ = smoothToH1Compl (ρα · v)`
-is the anchor for the (future) density argument extending the
-multiplication to all of `H1Compl g`. -/
 
 /-- The H¹Compl-side analogue of `ρα · u_h`, constructed via the resolvent of
 the Leibniz-compensated right-hand side `fHLeibniz`. -/
@@ -164,8 +153,6 @@ theorem phiMulU_h_smoothToH1Compl
       smoothToH1Compl (I := I) (M := M) g
         (pouScalar (I := I) (M := M) α v) := by
   unfold phiMulU_h
-  -- Show that `fHLeibniz g α (smoothToH1Compl v) _ = smoothToLp ((pouScalar α v).oneSubLapClassical)`
-  -- as Lp classes, then apply the smooth bridge for the resolvent.
   have h_lp_eq :
       fHLeibniz (I := I) (M := M) g α
           (smoothToH1Compl (I := I) (M := M) g v)

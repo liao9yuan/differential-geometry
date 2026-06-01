@@ -69,8 +69,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -83,15 +81,6 @@ variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 open DifferentialGeometry.Analysis.Laplacian.H1ComplToLpChartBridge
 open DifferentialGeometry.Analysis.Laplacian.ChartPushedWeakPartialOnVolume
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
-
-/-! ## Conversion bridge: `MemLp 2` of the chart-pushed function from
-chart-pulled weighted measure to volume on the chart target
-
-The chart-pushed function `chartPushed POU α u` is supported in the compact
-set `chartImagePOUTsupport α ⊆ chartTargetEuclid α`. On this compact set, the
-chart-pulled weighted measure is comparable to plain Lebesgue volume (the
-density is bounded above and below by positive constants). Therefore
-`MemLp 2` against either measure is equivalent on the chart-target restriction. -/
 
 /-- The chart-pushed function of a measurable `Lp 2` class function is in
 `MemLp 2 (volume.restrict K)` for any compact subset `K` of the chart target.
@@ -117,14 +106,6 @@ private lemma chartPushed_lp_class_locally_memLp_volume
   exact memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure
     h_memLp_w hK_compact hK_compact.isClosed.measurableSet hK_in
 
-/-! ## `k = 0` case: `MemWkpChart g 0 2` is the chart-target `MemLp 2` property
-
-For any `Lp ℝ 2 μ_g` class, the chart-pushed `(ρ_α · u) ∘ ι_α^{-1}` is in
-`Lp 2` on `chartTargetEuclid α` because the chart-pushed function vanishes
-outside `chartImagePOUTsupport α` (compact ⊆ chartTarget), and on this
-compact set the chart-pulled weighted measure is comparable to plain
-Lebesgue volume. -/
-
 /-- The chart-pushed function of any `Lp ℝ 2 μ_g` class is `MemLp 2`-locally
 in each chart target. This is the chart-Sobolev `k = 0` regularity.
 
@@ -139,10 +120,6 @@ theorem memWkpChart_zero_of_lp
     MemWkpChart (I := I) (M := M) g 0 2 ((u_lp : M → ℝ)) := by
   intro α
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_zero]
-  -- The chart-pushed function vanishes outside `chartImagePOUTsupport α`, which
-  -- is a compact subset of `chartTargetEuclid α`. By `chartPushed_lp_class_locally_memLp_volume`,
-  -- it is in MemLp 2 (volume.restrict K). Extend to MemLp 2 (volume.restrict chartTarget)
-  -- using the vanishing outside K.
   set K : Set EuclN := chartImagePOUTsupport (I := I) (M := M) α with hK_def
   have hK_compact : IsCompact K :=
     chartImagePOUTsupport_isCompact (I := I) (M := M) α
@@ -155,9 +132,6 @@ theorem memWkpChart_zero_of_lp
       ((volume : Measure EuclN).restrict K) :=
     chartPushed_lp_class_locally_memLp_volume (I := I) (M := M) g α u_lp
       hK_compact hK_in_target
-  -- Now extend to volume.restrict chartTarget using that the chart-pushed vanishes outside K.
-  -- We use that f = K.indicator f a.e. on volume.restrict chartTarget, and that
-  -- the indicator version is MemLp on the whole space (because MemLp on K + zero off K).
   set f : EuclN → ℝ := chartPushed (I := I) (M := M)
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α ((u_lp : M → ℝ))
     with hf_def
@@ -166,18 +140,15 @@ theorem memWkpChart_zero_of_lp
       (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_measurableSet
       (I := I) (M := M) α
-  -- f vanishes pointwise outside K on chartTarget.
   have h_zero_off : ∀ y ∈ chartTargetEuclid (I := I) (M := M) α, y ∉ K → f y = 0 :=
     fun y hy hy_off => chartPushed_eq_zero_off_chartImagePOUTsupport
       (I := I) (M := M) α ((u_lp : M → ℝ)) hy hy_off
-  -- f equals K.indicator f pointwise on chartTarget (because outside K, both sides are 0).
   have h_pointwise_eq : ∀ y ∈ chartTargetEuclid (I := I) (M := M) α,
       f y = Set.indicator K f y := by
     intro y hy
     by_cases hyK : y ∈ K
     · rw [Set.indicator_of_mem hyK]
     · rw [Set.indicator_of_notMem hyK, h_zero_off y hy hyK]
-  -- The K-indicator of f is MemLp on the whole space (and hence on volume.restrict chartTarget).
   have h_ind_memLp_global : MemLp (Set.indicator K f) 2 (volume : Measure EuclN) := by
     rw [MeasureTheory.memLp_indicator_iff_restrict hK_meas]
     exact h_memLp_K
@@ -185,20 +156,12 @@ theorem memWkpChart_zero_of_lp
       ((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)) :=
     h_ind_memLp_global.restrict _
-  -- f =ᵐ[volume.restrict chartTarget] K.indicator f.
   have h_ae_eq : (fun y => f y) =ᵐ[(volume : Measure EuclN).restrict
       (chartTargetEuclid (I := I) (M := M) α)]
       (fun y => Set.indicator K f y) :=
     (MeasureTheory.ae_restrict_iff' h_chart_meas).mpr
       (Filter.Eventually.of_forall (fun y hy => h_pointwise_eq y hy))
-  -- Now transfer MemLp via ae_eq.
   exact h_ind_memLp_chartTarget.ae_eq h_ae_eq.symm
-
-/-! ## Headline iterated regularity, polymorphic in `k`
-
-The statement is polymorphic in `k : ℕ`, but the proof only handles
-`k = 0` and `k = 1` cases at this stage (the higher-order bootstrap is
-substantial additional infrastructure). -/
 
 /-- **Iterated `H^{2k}` regularity for `laplacianDomainPow g k`** — the
 unified headline.
@@ -235,16 +198,9 @@ theorem iteratedH2Regularity_one
       (I := I) (M := M) g 2 2
       ((H1ComplToLp (I := I) (M := M) g u_h :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) < ⊤ := by
-  -- u_h ∈ laplacianDomainPow g 1 = laplacianDomain g.
   rw [laplacianDomainPow_one] at hu_h
   exact LaplacianDomainPerChartWitness.laplacianDomain_memWkpChart_two_unconditional
     (I := I) (M := M) g hu_h
-
-/-! ## Combined headline polymorphic in `k ≤ 1`
-
-The combined headline expresses the iterated regularity at the boundary
-between trivial and single-step `H²`. For arbitrary higher `k`, additional
-chart-bilinear infrastructure for differentiated equations is required. -/
 
 /-- **Iterated `H^{2k}` regularity for `laplacianDomainPow g k`** at the
 `k = 0` and `k = 1` boundary.
@@ -261,12 +217,9 @@ theorem laplacianDomainPow_memWkpChart_two_k_le_one
       (I := I) (M := M) g (2 * k) 2
       ((H1ComplToLp (I := I) (M := M) g u_h :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) := by
-  -- Case split on k ≤ 1.
   interval_cases k
-  · -- k = 0: trivial Lp membership.
-    simpa using iteratedH2Regularity_zero (I := I) (M := M) g u_h
-  · -- k = 1: single-step C result.
-    have h_one : 2 * 1 = 2 := by norm_num
+  · simpa using iteratedH2Regularity_zero (I := I) (M := M) g u_h
+  · have h_one : 2 * 1 = 2 := by norm_num
     rw [h_one]
     exact (iteratedH2Regularity_one (I := I) (M := M) g hu_h).1
 

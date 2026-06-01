@@ -90,8 +90,6 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -100,8 +98,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Weakened polymorphic Schwarz reduction -/
 
 /-- Helper: `Fin.init` of a `Fin.cons` equals `Fin.cons` of `Fin.init`. -/
 private lemma fin_init_cons_aux {α : Type*} {m : ℕ}
@@ -230,7 +226,6 @@ theorem chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMix
               (chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h
                 m (Fin.init dirs)) Ω := by
         rw [chosenMthMixedPartialChartPushedU_succ]
-      -- IH input: MemWkp (m+1) 2 parent. Have MemWkp ((m+1)+1) 2 = MemWkp (m+2) 2.
       have h_parent_for_ih :
           MemWkp (d := Module.finrank ℝ E) (m + 1) 2
             (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α
@@ -251,9 +246,6 @@ theorem chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMix
                 m (Fin.init dirs)) Ω) Ω :=
         chosenWeakPartial'_ae_congr (d := Module.finrank ℝ E)
           (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ih (dirs (Fin.last m))
-      -- chosenMthMixed m (Fin.init dirs) ∈ MemWkp 2 2 via bridge with k=2.
-      -- Bridge needs MemWkp (2+m) 2 parent = MemWkp (m+2) 2 parent.
-      -- We have MemWkp (m+2) 2 directly (= MemWkp ((m+1)+1) 2 in the hypothesis).
       have h_inner_memWkp_2_2 :
           MemWkp (d := Module.finrank ℝ E) 2 2
             (chosenMthMixedPartialChartPushedU (I := I) (M := M)
@@ -303,9 +295,6 @@ theorem chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMix
               (chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h
                 (m + 1) dirs) Ω := h_final
 
-/-! ## Local `MemLp 2` of the canonical weak partial via the weakened
-Schwarz reduction -/
-
 /-- **Local `MemLp 2` of `chosenWeakPartial' 2 i (chosenMthMixed m dirs)`
 under chart-`H^{m+1}` parent.**
 
@@ -338,14 +327,12 @@ private lemma iterated_weak_partial_locally_memLp_weak
   classical
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- Step 1: chosenMthMixed (m+1) (Fin.cons i dirs) ∈ MemLp 2 (vol.restrict Ω).
   have h_cons_memLp_global :
       MemLp (chosenMthMixedPartialChartPushedU
         (I := I) (M := M) g α u_h (m + 1) (Fin.cons i dirs)) 2
         ((volume : Measure EuclN).restrict Ω) :=
     chosenMthMixedPartialChartPushedU_memLp_two (I := I) (M := M)
       g α u_h (m + 1) h_parent_m_plus_1 (Fin.cons i dirs)
-  -- Step 2: weakened Schwarz reduction.
   have h_schwarz :
       chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h (m + 1)
           (Fin.cons i dirs) =ᵐ[(volume : Measure EuclN).restrict Ω]
@@ -354,13 +341,11 @@ private lemma iterated_weak_partial_locally_memLp_weak
         Ω :=
     chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMixed_ae_weak
       (I := I) (M := M) g α u_h m dirs i h_parent_m_plus_1
-  -- Step 3: transfer MemLp 2 via ae-equality.
   have h_chosen_memLp_global :
       MemLp (chosenWeakPartial' (d := Module.finrank ℝ E) 2 i
         (chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h m dirs) Ω) 2
         ((volume : Measure EuclN).restrict Ω) :=
     (memLp_congr_ae h_schwarz).mp h_cons_memLp_global
-  -- Step 4: restrict to K.
   have hK_meas : MeasurableSet K := hK_compact.isClosed.measurableSet
   have h_eq : ((volume : Measure EuclN).restrict Ω).restrict K =
       (volume : Measure EuclN).restrict K := by
@@ -369,8 +354,6 @@ private lemma iterated_weak_partial_locally_memLp_weak
     exact Set.inter_eq_self_of_subset_left hK_in
   rw [← h_eq]
   exact h_chosen_memLp_global.restrict K
-
-/-! ## Weakened iterated chart-bilinear data bundle -/
 
 /-- The chart-side `u_chart` for the weakened iterated data:
 `chosenMthMixedPartialChartPushedU g α u_h m dirs`. -/
@@ -419,7 +402,6 @@ noncomputable def iteratedChartBilinearH1ComplData_weak
           (chartTargetEuclid (I := I) (M := M) α) :=
       MemWkp.le_of_le (by omega) h_chart_H_m_plus_1
     unfold iterated_u_chart_weak
-    -- Use the now-public helper from IteratedNirenbergInterior.
     exact chosenMthMixedPartialChartPushedU_memLp_weighted
       (I := I) (M := M) g α u_h m h_parent_m h_chart_H_m_plus_1 D_m.directions
   f_chart_memLp_weighted := D_m.fChartEff_memLp_weighted
@@ -486,8 +468,6 @@ noncomputable def iteratedChartBilinearH1ComplData_weak
     rw [h_principal_eq] at h_in
     exact h_in
 
-/-! ## Headline: weakened polymorphic Nirenberg interior `MemWkp 2 2` -/
-
 set_option linter.unusedVariables false in
 /-- **Weakened polymorphic Nirenberg interior `MemWkp 2 2`.**
 
@@ -518,7 +498,6 @@ theorem iteratedDerivedChartBilinear_memWkp_two_two_interior_weakened
         (chosenMthMixedPartialChartPushedU
           (I := I) (M := M) g α u_h m D_m.directions) Ω'' := by
   classical
-  -- The packaged weakened iterated data.
   set D : ChartBilinearH1ComplData (I := I) (M := M) g α :=
     iteratedChartBilinearH1ComplData_weak (I := I) (M := M) g α D_m
       h_chart_H_m_plus_1

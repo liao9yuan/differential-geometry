@@ -76,21 +76,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## (a) The negative Cartan identity
-
-For any smooth metric `g`, smooth vector field `X`, base point `y`, and pair of
-tangent vectors `(p, q) ∈ (T_y M)²`, the Cartan formula
-`cartan_formula_for_lie_deriv_metric` gives
-
-  `lieDerivMetric g X y p q = g(∇^g_p X, q) + g(p, ∇^g_q X)`.
-
-Negating both sides yields the bilinear identity
-
-  `-lieDerivMetric g X y p q = -g(∇^g_p X, q) + -g(p, ∇^g_q X)`,
-
-which is the identity used to convert the per-slot pushforward-variation values
-into the negative Lie derivative. -/
-
 /-- **Negative Cartan formula for the metric Lie derivative.**
 
 The negated bilinear form `-(𝓛_X g)(p, q)` decomposes as the sum of the two
@@ -108,19 +93,6 @@ theorem neg_lieDerivMetric_eq_neg_killing_sum
           (X : ∀ x : M, TangentSpace I x) y q)) := by
   rw [cartan_formula_for_lie_deriv_metric (I := I) g X y p q]
   ring
-
-/-! ## (b) Value-level Cartan-cancellation primitive
-
-The substantive Cartan-cancellation algebra: given two real values `A'` and
-`B'` propositionally identified with the two negated Killing-pieces, their sum
-equals the negated Lie derivative.
-
-The per-slot value identities are the genuine variational ODE content (each
-identifies the time-derivative of one pushforward slot with the negative
-covariant derivative of `X` along that pushforward, as supplied by the
-manifold-derivative variational identity for time-dependent flows). The
-present primitive takes these value identities as input and packages the
-Cartan-cancellation algebra on top. -/
 
 /-- **Value-level Cartan-cancellation primitive.**
 
@@ -192,21 +164,6 @@ theorem cartan_cancellation_value_identity
     (lie_deriv_metric_neg_eq_pushforward_variation_sum (I := I) g X y p q
       A' B' h_A_value h_B_value)
 
-/-! ## (c) Derivative-level Cartan-cancellation primitive
-
-Given per-slot `HasDerivAt` witnesses on the two single-slot pushforward
-variation curves of a time-parametrised diffeomorphism family `Φ_fam`, with
-per-slot variation values identified with the negated Killing-pieces, and an
-assembled total `HasDerivAt` on the combined two-slot pushforward variation
-curve, conclude that the total derivative value equals
-`-lieDerivMetric g X (Φ_fam t x) (dΦ v) (dΦ w)`.
-
-The per-slot derivative + per-slot value identification is the genuine
-variational ODE content — the present primitive does not re-prove that the
-slot-wise pushforward variation equals the covariant derivative; that is the
-variational chain rule applied to `∂_s Φ_fam = -X ∘ Φ_fam` at the level of
-manifold derivatives. -/
-
 /-- **Derivative-level Cartan-cancellation witness.**
 
 Given a smooth metric `g`, a smooth vector field `X`, a smooth flow
@@ -243,8 +200,6 @@ theorem cartan_cancellation_derivative_witness
     (t : ℝ) (x : M)
     (v w : TangentSpace I x)
     (Lpush A' B' : ℝ)
-    -- Per-slot variation derivative witnesses (variational chain rule output
-    -- on each pushforward slot).
     (h_A : HasDerivAt
       (fun s : ℝ => g.inner (Φ_fam t x)
         (mfderiv I I (Φ_fam s : M → M) x v)
@@ -255,8 +210,6 @@ theorem cartan_cancellation_derivative_witness
         (mfderiv I I (Φ_fam t : M → M) x v)
         (mfderiv I I (Φ_fam s : M → M) x w))
       B' t)
-    -- Per-slot value identifications: each pushforward variation value equals
-    -- the negative covariant derivative of `X` along that pushforward.
     (h_A_value : A' = -g.inner (Φ_fam t x)
       ((LeviCivita (I := I) g) (X : ∀ x : M, TangentSpace I x) (Φ_fam t x)
         (mfderiv I I (Φ_fam t : M → M) x v))
@@ -265,14 +218,11 @@ theorem cartan_cancellation_derivative_witness
       (mfderiv I I (Φ_fam t : M → M) x v)
       ((LeviCivita (I := I) g) (X : ∀ x : M, TangentSpace I x) (Φ_fam t x)
         (mfderiv I I (Φ_fam t : M → M) x w)))
-    -- Total two-slot pushforward variation derivative witness (additive
-    -- assembly of `h_A + h_B`).
     (h_total : HasDerivAt
       (fun s : ℝ => g.inner (Φ_fam t x)
         (mfderiv I I (Φ_fam s : M → M) x v)
         (mfderiv I I (Φ_fam s : M → M) x w))
       Lpush t)
-    -- Additive sum identification.
     (h_sum : Lpush = A' + B') :
     HasDerivAt
       (fun s : ℝ => g.inner (Φ_fam t x)
@@ -281,12 +231,7 @@ theorem cartan_cancellation_derivative_witness
       (-lieDerivMetric (I := I) g X (Φ_fam t x)
         (mfderiv I I (Φ_fam t : M → M) x v)
         (mfderiv I I (Φ_fam t : M → M) x w)) t := by
-  -- The per-slot derivative witnesses are recorded in the signature to document
-  -- the variational chain-rule decomposition; they participate in the
-  -- consumer-side assembly that produced `h_total`. We discharge the
-  -- unused-variable lints by reading them explicitly (no logical use).
   let _ := h_A; let _ := h_B
-  -- Substantive value identification via the Cartan-cancellation packaging.
   have hL : Lpush = -lieDerivMetric (I := I) g X (Φ_fam t x)
       (mfderiv I I (Φ_fam t : M → M) x v)
       (mfderiv I I (Φ_fam t : M → M) x w) :=
@@ -294,17 +239,8 @@ theorem cartan_cancellation_derivative_witness
       (mfderiv I I (Φ_fam t : M → M) x v)
       (mfderiv I I (Φ_fam t : M → M) x w)
       A' B' Lpush h_A_value h_B_value h_sum
-  -- Transport the `HasDerivAt` via the value identification.
   convert h_total using 1
   exact hL.symm
-
-/-! ## (d) The consumer-facing identity matching `h_cartan_cancellation`
-
-This is the headline propositional identity required by
-`EvaluationFormWitness.h_cartan_cancellation`. It is supplied with the
-per-slot value identities (the variational ODE content) and outputs the
-cancellation identity in the exact shape consumed by
-`deTurck_pullback_eval_form_derivative_witness`. -/
 
 /-- **Cartan-Lie cancellation identity** in the exact shape required by
 `EvaluationFormWitness.h_cartan_cancellation`.

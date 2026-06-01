@@ -59,25 +59,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## Headline (1): smoothing property of the heat semigroup
-
-For `t > 0`, given the iterated regularity hypothesis at every order, the
-`Lp` element `heatSemigroup g t u_0` is a.e.-equal to a smooth function of
-class `C^∞`.
-
-The hypothesis `h_iterated_regularity` captures the elliptic-regularity
-output supplied by the chart-bilinear Nirenberg machinery and inductive
-elliptic regularity. The chart-Sobolev `W^{∞,2} ↪ C^∞` step is provided
-unconditionally by `sobolev_smooth_representative_of_memWkpChart_forall`. -/
 
 /-- **Headline (1): smoothing property of the heat semigroup**.
 
@@ -99,25 +86,21 @@ theorem heatSemigroup_smooth_representative
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) =ᵐ[
           riemannianVolumeMeasure (I := I) (M := M) g] u_smooth := by
   classical
-  -- The coercion `(heatSemigroup g t u_0 : Lp _) : M → ℝ` is AEStronglyMeasurable.
   have hu_coe_aesm :
       AEStronglyMeasurable
         ((heatSemigroup (I := I) (M := M) g t u_0 :
           Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ)
         (riemannianVolumeMeasure (I := I) (M := M) g) :=
     Lp.aestronglyMeasurable _
-  -- Extract a strictly Measurable representative `u_meas` via `mk`.
   let u_meas : M → ℝ := hu_coe_aesm.mk _
   have hu_meas_strong : StronglyMeasurable u_meas :=
     hu_coe_aesm.stronglyMeasurable_mk
   have hu_meas_meas : Measurable u_meas := hu_meas_strong.measurable
-  -- `(heatSemigroup ...).coeFn =ᵐ u_meas`.
   have hu_coe_ae_meas :
       ((heatSemigroup (I := I) (M := M) g t u_0 :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) =ᵐ[
         riemannianVolumeMeasure (I := I) (M := M) g] u_meas :=
     hu_coe_aesm.ae_eq_mk
-  -- Step 1: build a Borel null set `N ⊆ M` covering the disagreement locus.
   have h_S_null : (riemannianVolumeMeasure (I := I) (M := M) g)
       {x : M | ((heatSemigroup (I := I) (M := M) g t u_0 :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) x ≠
@@ -126,11 +109,9 @@ theorem heatSemigroup_smooth_representative
     rwa [Filter.EventuallyEq, MeasureTheory.ae_iff] at this
   obtain ⟨N, hSN, hN_meas, hN_null⟩ :=
     MeasureTheory.exists_measurable_superset_of_null h_S_null
-  -- Step 2: define the Measurable indicator function `d := N.indicator (const 1)`.
   let d : M → ℝ := N.indicator (fun _ : M => (1 : ℝ))
   have hd_meas : Measurable d :=
     measurable_const.indicator hN_meas
-  -- `d =ᵐ[μ_g] 0` because `μ_g N = 0`.
   have hd_ae_zero : d =ᵐ[riemannianVolumeMeasure (I := I) (M := M) g]
       (fun _ : M => (0 : ℝ)) := by
     rw [Filter.EventuallyEq, MeasureTheory.ae_iff]
@@ -139,7 +120,6 @@ theorem heatSemigroup_smooth_representative
     by_contra hxN
     apply hx
     exact Set.indicator_of_notMem hxN _
-  -- Step 3: transfer to chart-pushed level via the public theorem.
   have h_chartPushed_d_ae_zero : ∀ α : M,
       DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α d =ᵐ[
         (volume : Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict
@@ -150,7 +130,6 @@ theorem heatSemigroup_smooth_representative
     have h :=
       DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_aeEq_of_ae_eq_riemannianMeasure
         (I := I) (M := M) g α hd_meas measurable_const hd_ae_zero
-    -- `chartPushedRaw I α (fun _ : M => (0 : ℝ)) = const 0`.
     have h_raw_zero :
         DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α
             (fun _ : M => (0 : ℝ)) =
@@ -161,7 +140,6 @@ theorem heatSemigroup_smooth_representative
       split_ifs <;> rfl
     rw [h_raw_zero] at h
     exact h
-  -- Step 4: deduce `chartPushed ρ α coeFn =ᵐ chartPushed ρ α u_meas` (chart-by-chart).
   have h_chartTargetMeas : ∀ α : M, MeasurableSet
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := fun α =>
@@ -178,13 +156,11 @@ theorem heatSemigroup_smooth_representative
     rw [Filter.EventuallyEq, MeasureTheory.ae_restrict_iff' (h_chartTargetMeas α)] at h
     rw [Filter.EventuallyEq, MeasureTheory.ae_restrict_iff' (h_chartTargetMeas α)]
     filter_upwards [h] with y hy hy_in
-    -- `chartPushedRaw I α d y = 0` on `y ∈ chartTargetEuclid α`.
     have hd_y :
         d ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) = 0 := by
       rw [DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_apply_of_mem
         (I := I) (M := M) α d hy_in] at hy
       exact hy hy_in
-    -- `d (xα(y)) = 0` means `xα(y) ∉ N`, so `xα(y) ∉ S`, so `coeFn = u_meas` there.
     have h_notN : (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∉ N := by
       intro h_mem
       apply (by norm_num : (1 : ℝ) ≠ 0)
@@ -201,10 +177,8 @@ theorem heatSemigroup_smooth_representative
         u_meas ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := by
       by_contra hne
       exact h_notS hne
-    -- Conclude pointwise equality of `chartPushed` images at y.
     unfold DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
     rw [h_eq]
-  -- Step 5: transfer `MemWkpChart` via `MemWkpChart_congr_chartPushed_ae`.
   have h_iter_meas : ∀ k : ℕ,
       DifferentialGeometry.Analysis.Sobolev.Chart.MemWkpChart
         (I := I) (M := M) g (2 * k) 2 u_meas := by
@@ -213,19 +187,11 @@ theorem heatSemigroup_smooth_representative
       (I := I) (M := M) g (k := 2 * k) (p := 2)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_pushed_aeEq).mp
       (h_iterated_regularity k)
-  -- Step 6: apply the unconditional smooth representative theorem to `u_meas`.
   obtain ⟨u_smooth, h_smooth, h_smooth_ae_meas⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Chart.sobolev_smooth_representative_of_memWkpChart_forall
       (I := I) (M := M) g (u := u_meas) hu_meas_meas h_iter_meas
   refine ⟨u_smooth, h_smooth, ?_⟩
   exact hu_coe_ae_meas.trans h_smooth_ae_meas.symm
-
-/-! ## Headline (2): time-smoothness
-
-The map `t ↦ heatSemigroup g t u_0` is `C^∞` on `(0, ∞)` as a map into `Lp`.
-This part follows directly from the existing operator-norm smoothness result
-`contDiffOn_heatSemigroup_Ioi`, post-composed with the continuous-linear
-evaluation `L ↦ L u_0`. -/
 
 /-- **Headline (2): time-smoothness of the heat semigroup**.
 
@@ -253,12 +219,6 @@ theorem heatSemigroup_contMDiff_in_time
       (Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) u_0
   have h_eval_smooth : ContDiff ℝ ∞ evalAt := evalAt.contDiff
   exact h_eval_smooth.contDiffOn.comp h_op (Set.mapsTo_univ _ _)
-
-/-! ## Headline (3): combined endpoint
-
-We combine (1) and (2) for the convenient statement: for every `t > 0` the
-heat-evolved function has a smooth representative, and the time-dependence
-is smooth into `Lp`. -/
 
 /-- **Headline (3): combined space-time endpoint of the heat semigroup smoothing**.
 

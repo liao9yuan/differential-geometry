@@ -84,20 +84,8 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.Pullback
 
-/-! ## (A) The basepoint bridge (`∇g = 0` read on the chart)
-
-The bridge lemma needs the tangent-bundle charted space underlying the `T%`
-section-differentiability notation `MDiffAt (T% X)`, which requires a *standalone*
-`[NormedSpace ℝ E]`.  It is therefore stated in a section declaring **both** `[NormedSpace ℝ E]`
-and `[InnerProductSpace ℝ E]` (matching `chartLeviCivitaInnerCLM_basepoint_eq_rawFderiv_add_corrections`).
-Its conclusion is an `E`-equation, so it crosses cleanly into the inner-product-only world of the
-pairing assembly (B): there it is the genuinely-paired channel by which the metric `Γ` enters. -/
-
 section Bridge
 
--- Both `[NormedSpace ℝ E]` (for the tangent-bundle charted space underlying the `T%`
--- section-differentiability notation `MDiffAt (T% X)`) and `[InnerProductSpace ℝ E]` are
--- declared, matching the `chartLeviCivitaInnerCLM_basepoint_eq_rawFderiv_add_corrections` section.
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -114,13 +102,11 @@ at `α`, which is the identity on the base set (which contains `α`).  Routed th
 theorem trivFromE_basepoint (α : M) (v : TangentSpace I α) :
     trivFromE (I := I) α α v = v := by
   classical
-  -- `trivFromE α α = symmL α α = coordChange (achart α) (achart α) α`.
   have hcore : trivFromE (I := I) α α
       = (tangentBundleCore I M).coordChange (achart H α) (achart H α) α :=
     TangentBundle.symmL_trivializationAt_eq_core (I := I) (M := M)
       (b₀ := α) (b := α) (mem_chart_source H α)
   rw [hcore]
-  -- `coordChange (achart α) (achart α) α = id` on the base set (which contains `α`).
   exact (tangentBundleCore I M).coordChange_self (achart H α) α
     (by rw [tangentBundleCore_baseSet]; exact mem_chart_source H α) v
 
@@ -162,30 +148,16 @@ theorem leviCivita_basepoint_eq_rawFderiv_add_corrections
         + christoffelCorrection (I := I) g α α
             (chartE_section_repr (I := I) α X α) w := by
   classical
-  -- The bundled covariant value is the inverse-trivialised inner CLM at the basepoint.
   have hbridge :
       trivFromE (I := I) α α (chartLeviCivitaInnerCLM (I := I) g α X α w)
         = (LeviCivita (I := I) g) X α w :=
     trivFromE_innerCLM_eq_leviCivita_at_orbit (I := I) g X α w hα hX
-  -- At the basepoint the inverse trivialisation is the identity.
   rw [trivFromE_basepoint (I := I) α (chartLeviCivitaInnerCLM (I := I) g α X α w)] at hbridge
-  -- The inner CLM decomposes into raw flat `fderiv` + `D²φ` + metric Christoffel.
   rw [← hbridge]
   exact chartLeviCivitaInnerCLM_basepoint_eq_rawFderiv_add_corrections (I := I) g α X w
     hRdiff hCdiff
 
 end Bridge
-
-/-! ## (B) The paired pairing assembly (inner-product world)
-
-Stated in an `[InnerProductSpace ℝ E]`-only section (no standalone `[NormedSpace ℝ E]`), so the
-producers' factor jets `T'v, P'v, … : E →L[ℝ] E` and `RawVariationalIdentityFlat`,
-`metricTransportResidual` all live over the *same* `InnerProductSpace.toNormedSpace` module
-instance — avoiding the two-`NormedSpace` diamond.  The basepoint bridge enters here as the two
-`E`-equation hypotheses `hbridge_v`/`hbridge_w` (`∇_u X = F(u) + Γ(u)`), discharged by the
-combined-instance lemma `leviCivita_basepoint_eq_rawFderiv_add_corrections` at any call site that
-has the `T%` differentiability datum — exactly the channel by which the metric `Γ` enters, and
-only paired. -/
 
 section MainPairing
 
@@ -292,22 +264,18 @@ theorem variational_flow_flat_paired_residual_hasDerivAt
           (mfderiv I I (Φ_fam t : M → M) x w)
         + metricTransportResidual (I := I) g X Φ_fam t x v w) t := by
   classical
-  -- Abbreviations, all typed `TangentSpace I α` (= `E` definitionally) so `g.inner α`'s
-  -- additive instance matches throughout (avoiding the `TangentSpace I α = E` diamond).
   set α := Φ_fam t x with hα_def
   set dΦv : TangentSpace I α := mfderiv I I (Φ_fam t : M → M) x v with hdΦv
   set dΦw : TangentSpace I α := mfderiv I I (Φ_fam t : M → M) x w with hdΦw
   set Vflat : TangentSpace I α := T'v dΦv + P'v v with hVflat
   set Wflat : TangentSpace I α := T'w dΦw + P'w w with hWflat
   set Xα : E := chartE_section_repr (I := I) α (X : ∀ y : M, TangentSpace I y) α with hXα
-  -- The bundled covariant values and the basepoint metric Christoffel corrections.
   set nablaV : TangentSpace I α :=
     (LeviCivita (I := I) g) (X : ∀ y : M, TangentSpace I y) α dΦv with hnablaV
   set nablaW : TangentSpace I α :=
     (LeviCivita (I := I) g) (X : ∀ y : M, TangentSpace I y) α dΦw with hnablaW
   set Cv : TangentSpace I α := christoffelCorrection (I := I) g α α Xα dΦv with hCv
   set Cw : TangentSpace I α := christoffelCorrection (I := I) g α α Xα dΦw with hCw
-  -- The metric-free trivialised flat (Lie-type) derivative `F(·)` per slot.
   set Fv : TangentSpace I α :=
     fderiv ℝ (chartRawRepr (I := I) α (X : ∀ y : M, TangentSpace I y))
         (extChartAt I α α) dΦv
@@ -316,33 +284,20 @@ theorem variational_flow_flat_paired_residual_hasDerivAt
     fderiv ℝ (chartRawRepr (I := I) α (X : ∀ y : M, TangentSpace I y))
         (extChartAt I α α) dΦw
       + movingTrivCorrection (I := I) α (X : ∀ y : M, TangentSpace I y) dΦw with hFw
-  -- (1) Flat-value identities (metric-free): after `set Vflat`/`set Wflat` and `set Fv`/`set Fw`,
-  -- the inputs fold to `Vflat = -Fv`, `Wflat = -Fw`.  These assert only that the orbit-pushforward
-  -- flat derivative is the negative trivialised flat (Lie-type) derivative `-F(·)`; no metric.
   have hVflat_eq : Vflat = -Fv := hflatval_v
   have hWflat_eq : Wflat = -Fw := hflatval_w
-  -- (2) Basepoint bridge (`∇g = 0`), abbreviated: `nablaV = Fv + Cv`, `nablaW = Fw + Cw`.
   have hbr_v : nablaV = Fv + Cv := hbridge_v
   have hbr_w : nablaW = Fw + Cw := hbridge_w
-  -- (3) Combining (1) and (2): `Vflat = -nablaV + Cv`, `Wflat = -nablaW + Cw` — the metric `Γ`
-  -- (`Cv`/`Cw`) now sits *paired* with the bundled covariant value, exactly the input shape the
-  -- covariant pairing consumes.  The metric-free factor jets `Fv`/`Fw` have been folded into the
-  -- difference `nablaV - Cv`, so no per-slot `D²φ = Γ` survives.
   have hcorr_v' : Vflat = -nablaV + Cv := by
     rw [hVflat_eq, hbr_v]; abel
   have hcorr_w' : Wflat = -nablaW + Cw := by
     rw [hWflat_eq, hbr_w]; abel
-  -- (4) The genuine derivative of the frozen-metric moving-pushforward inner product is the
-  -- flat product rule against the fixed bilinear form `g.inner α`.
   have h_total :=
     variational_flow_inner_total_derivative (I := I) g Φ_fam t x v w Vflat Wflat hv_flat hw_flat
-  -- (5) Identify the product-rule value `g_α(Vflat, dΦw) + g_α(dΦv, Wflat)` with
-  -- `-lieDerivMetric + metricTransportResidual`.  Metric `Γ` enters only PAIRED via (2)/(3).
   have hval :
       g.inner α Vflat dΦw + g.inner α dΦv Wflat
         = -lieDerivMetric (I := I) g X α dΦv dΦw
           + metricTransportResidual (I := I) g X Φ_fam t x v w := by
-    -- Slot-1: `g_α(Vflat, dΦw) = -g_α(∇V, dΦw) + g_α(Cv, dΦw)`.
     have hbil1 : (g.inner α) (-nablaV + Cv)
         = -(g.inner α) nablaV + (g.inner α) Cv := by
       rw [ContinuousLinearMap.map_add (g.inner α) _ _,
@@ -351,24 +306,20 @@ theorem variational_flow_flat_paired_residual_hasDerivAt
         = -g.inner α nablaV dΦw + g.inner α Cv dΦw := by
       rw [hcorr_v', hbil1, ContinuousLinearMap.add_apply,
         ContinuousLinearMap.neg_apply]
-    -- Slot-2: `g_α(dΦv, Wflat) = -g_α(dΦv, ∇W) + g_α(dΦv, Cw)`.
     have hslot2 : g.inner α dΦv Wflat
         = -g.inner α dΦv nablaW + g.inner α dΦv Cw := by
       rw [hcorr_w', ContinuousLinearMap.map_add (g.inner α dΦv) _ _,
         ContinuousLinearMap.map_neg (g.inner α dΦv) _]
-    -- The covariant pieces assemble to `-lieDerivMetric` (Cartan).
     have hcartan :
         -g.inner α nablaV dΦw + -g.inner α dΦv nablaW
           = -lieDerivMetric (I := I) g X α dΦv dΦw := by
       rw [hnablaV, hnablaW]
       exact (neg_lieDerivMetric_eq_neg_killing_sum (I := I) g X α dΦv dΦw).symm
-    -- The metric Christoffel pieces survive PAIRED as `metricTransportResidual`.
     have hres : g.inner α Cv dΦw + g.inner α dΦv Cw
         = metricTransportResidual (I := I) g X Φ_fam t x v w := by
       rw [metricTransportResidual, hCv, hCw, hXα]
     rw [hslot1, hslot2, ← hcartan, ← hres]
     ring
-  -- Transport the derivative value.
   rwa [hval] at h_total
 
 end MainPairing

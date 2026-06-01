@@ -51,14 +51,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Laplacian.Spectral
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The extended heat semigroup -/
 
 /-- The scalar heat semigroup `e^{t Δ_g}` on the spectral Sobolev space
 `scalarHs g σ`, extended to all real times `t`. For `t > 0` this is the
@@ -100,8 +96,6 @@ theorem heatSemigroupHsExt_of_nonpos {g : SmoothRiemannianMetric I M}
   have : ¬ 0 < t := not_lt.mpr ht
   simp [this]
 
-/-! ## The semigroup law on `t ≥ 0` -/
-
 /-- **Semigroup law on the non-negative half-line.** For `t, s ≥ 0`,
 `e^{(t+s) Δ_g} = e^{t Δ_g} ∘ e^{s Δ_g}` on the spectral Sobolev space
 `scalarHs g σ`. -/
@@ -111,21 +105,16 @@ theorem heatSemigroupHsExt_add {g : SmoothRiemannianMetric I M} {σ : ℝ}
       (heatSemigroupHsExt (I := I) (M := M) g σ t).comp
         (heatSemigroupHsExt (I := I) (M := M) g σ s) := by
   rcases eq_or_lt_of_le ht with ht_eq | ht_pos
-  · -- `t = 0`: LHS = `heatSemigroupHsExt g σ s`, RHS = `id ∘ heatSemigroupHsExt g σ s`.
-    subst ht_eq
+  · subst ht_eq
     simp [heatSemigroupHsExt_zero]
   · rcases eq_or_lt_of_le hs with hs_eq | hs_pos
-    · -- `s = 0`: symmetric case.
-      subst hs_eq
+    · subst hs_eq
       simp [heatSemigroupHsExt_zero]
-    · -- Both `t, s > 0`: use the semigroup law from `heatSemigroupHs_add`.
-      have hts : 0 < t + s := by linarith
+    · have hts : 0 < t + s := by linarith
       rw [heatSemigroupHsExt_of_pos (I := I) (M := M) (g := g) (σ := σ) hts,
           heatSemigroupHsExt_of_pos (I := I) (M := M) (g := g) (σ := σ) ht_pos,
           heatSemigroupHsExt_of_pos (I := I) (M := M) (g := g) (σ := σ) hs_pos]
       exact heatSemigroupHs_add (I := I) (M := M) (g := g) ht_pos hs_pos (a := σ)
-
-/-! ## The contraction estimate on `t ≥ 0` -/
 
 /-- **Contraction on the non-negative half-line.** For `t ≥ 0`,
 `‖e^{t Δ_g}‖_{Hˢ → Hˢ} ≤ 1`. -/
@@ -133,15 +122,11 @@ theorem heatSemigroupHsExt_opNorm_le_one {g : SmoothRiemannianMetric I M}
     {σ : ℝ} {t : ℝ} (ht : 0 ≤ t) :
     ‖heatSemigroupHsExt (I := I) (M := M) g σ t‖ ≤ 1 := by
   rcases eq_or_lt_of_le ht with ht_eq | ht_pos
-  · -- `t = 0`: the operator is the identity, `‖id‖ ≤ 1`.
-    subst ht_eq
+  · subst ht_eq
     rw [heatSemigroupHsExt_zero]
     exact ContinuousLinearMap.norm_id_le
-  · -- `t > 0`: apply the contraction bound for `heatSemigroupHs`.
-    rw [heatSemigroupHsExt_of_pos (I := I) (M := M) (g := g) (σ := σ) ht_pos]
+  · rw [heatSemigroupHsExt_of_pos (I := I) (M := M) (g := g) (σ := σ) ht_pos]
     exact heatSemigroupHs_opNorm_le_one (I := I) (M := M) (g := g) ht_pos
-
-/-! ## The coordinate formula on `t ≥ 0` -/
 
 /-- **Coordinate formula on the non-negative half-line.** For `t ≥ 0`,
 `(e^{t Δ_g} T).coeff i = exp(−λᵢ t) · T.coeff i`. -/
@@ -151,13 +136,11 @@ theorem heatSemigroupHsExt_coeff {g : SmoothRiemannianMetric I M} {σ : ℝ}
     (heatSemigroupHsExt (I := I) (M := M) g σ t T).coeff i =
       Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t) * T.coeff i := by
   rcases eq_or_lt_of_le ht with ht_eq | ht_pos
-  · -- `t = 0`: identity, and `exp(0) = 1`.
-    subst ht_eq
+  · subst ht_eq
     rw [heatSemigroupHsExt_zero]
     change T.coeff i = _
     rw [mul_zero, Real.exp_zero, one_mul]
-  · -- `t > 0`: use the coordinate formula for `heatSemigroupHs`.
-    rw [heatSemigroupHsExt_of_pos (I := I) (M := M) (g := g) (σ := σ) ht_pos]
+  · rw [heatSemigroupHsExt_of_pos (I := I) (M := M) (g := g) (σ := σ) ht_pos]
     exact heatSemigroupHs_coeff (I := I) (M := M) (g := g) ht_pos T i
 
 end Hs

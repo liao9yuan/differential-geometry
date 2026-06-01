@@ -82,22 +82,12 @@ open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Smooth Leibniz cross-coefficients
-
-The `l`-partial Frechet derivative of the smooth coefficients
-`weightedInvGramOnEuclid g α i j` and `densityOnEuclid g α` on
-`chartTargetEuclid α`. These functions arise as the Leibniz cross-terms when
-the variational identity is formally differentiated.
--/
 
 /-- The `l`-partial Frechet derivative of `weightedInvGramOnEuclid g α i j`,
 evaluated against the `l`-th Euclidean unit vector. Smooth on
@@ -114,8 +104,6 @@ def densityDerivOnEuclid (g : SmoothRiemannianMetric I M) (α : M)
     (l : Fin (Module.finrank ℝ E)) (y : EuclN) : ℝ :=
   (fderiv ℝ (densityOnEuclid (I := I) g α) y) (EuclideanSpace.single l 1)
 
-/-! ## Smoothness of the Leibniz cross-coefficients -/
-
 /-- The `l`-partial Frechet derivative of `weightedInvGramOnEuclid g α i j` is
 smooth on `chartTargetEuclid α`. -/
 lemma weightedInvGramDerivOnEuclid_contDiffOn
@@ -124,12 +112,10 @@ lemma weightedInvGramDerivOnEuclid_contDiffOn
     (i j l : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞ (weightedInvGramDerivOnEuclid (I := I) g α i j l)
       (chartTargetEuclid (I := I) (M := M) α) := by
-  -- The coefficient `weightedInvGramOnEuclid` is `C^∞` on the open chart-target.
   have h_smooth :
       ContDiffOn ℝ ∞ (weightedInvGramOnEuclid (I := I) g α i j)
         (chartTargetEuclid (I := I) (M := M) α) :=
     weightedInvGramOnEuclid_contDiffOn (I := I) g α i j
-  -- Its Frechet derivative is also `C^∞` on the open set.
   have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have h_fderiv :
@@ -137,7 +123,6 @@ lemma weightedInvGramDerivOnEuclid_contDiffOn
         (weightedInvGramOnEuclid (I := I) g α i j) y)
         (chartTargetEuclid (I := I) (M := M) α) :=
     ((contDiffOn_infty_iff_fderiv_of_isOpen h_open).1 h_smooth).2
-  -- Apply the smooth linear evaluation map `L ↦ L(v)`.
   have h_eval : ContDiff ℝ ∞
       (fun (L : EuclN →L[ℝ] ℝ) => L (EuclideanSpace.single l 1)) :=
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single l (1 : ℝ))).contDiff
@@ -239,8 +224,6 @@ lemma densityDerivOnEuclid_bounded_on_compact
   refine ⟨|densityDerivOnEuclid (I := I) g α l y_max|, ?_⟩
   intro y hy
   exact h_max hy
-
-/-! ## The differentiated chart-bilinear data structure -/
 
 /-- Packaged data describing the *differentiated* chart-bilinear identity on
 `chartTargetEuclid α` obtained by formally differentiating a base
@@ -370,8 +353,6 @@ structure DiffChartBilinearH1ComplData
           base.f_chart y * ψ y
         ∂(volume : Measure EuclN))
 
-/-! ## Headline ergonomics theorem -/
-
 /-- Headline form of the differentiated chart-bilinear identity for a
 differentiated `H1Compl` element: given the data `D`, the differentiated
 variational identity holds for every smooth test function `ψ` with
@@ -414,8 +395,6 @@ theorem differentiated_chart_bilinear_identity
       ∂(volume : Measure EuclN)) :=
   D.differentiated_variational_identity ψ hψ hψ_cs hψ_supp
 
-/-! ## Basic projection helpers -/
-
 /-- The base data of a `DiffChartBilinearH1ComplData`. -/
 abbrev base
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -429,8 +408,6 @@ abbrev direction
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : DiffChartBilinearH1ComplData (I := I) (M := M) g α) :
     Fin (Module.finrank ℝ E) := D.direction
-
-/-! ## Pulling the base variational identity through -/
 
 /-- A `DiffChartBilinearH1ComplData` carries the *base* variational identity
 intact via its `.base` field. This is a convenience re-export for callers that

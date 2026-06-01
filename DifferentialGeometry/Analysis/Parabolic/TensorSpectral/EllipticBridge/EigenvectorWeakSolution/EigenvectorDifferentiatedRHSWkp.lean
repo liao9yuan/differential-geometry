@@ -90,25 +90,12 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
   hiding chartTargetEuclid chartTargetEuclid_isOpen
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Local abbreviations for the chart target and the partition-of-unity kernel
-
-`Ωα α` is the open Euclidean chart target; `Kα α` is the compact
-partition-of-unity kernel `chartPouKernel α`, a closed subset of `Ωα α`. The
-factors of the differentiated numerator are `MemWkp K 2` on `Ωα α` and ae-zero
-on `Ωα α \ Kα α`. -/
 
 /-- The compact partition-of-unity kernel `chartPouKernel α`, a closed subset of
 the open chart target. -/
@@ -136,22 +123,6 @@ set_option linter.unusedSectionVars false in
 private lemma Ωα_isOpen (α : M) : IsOpen (Ωα (I := I) (M := M) α) :=
   chartTargetEuclid_isOpen (I := I) (M := M) α
 
-/-! ## `MemWkp` for "smooth coefficient × `MemWkp K 2` factor" with ae-vanishing
-
-The workhorse lemma. Given a coefficient smooth on the open chart target, a
-factor in `MemWkp K 2` on the chart target that ae-vanishes off the compact
-partition-of-unity kernel `Kα`, the product lies in `MemWkp K 2` on the chart
-target.
-
-The proof cuts the coefficient off to a globally smooth, compactly supported
-representative `χ · coef`: a smooth cutoff `χ` equal to `1` on a closed
-thickening of `Kα` and supported in the chart target. The product `χ · coef` is
-globally smooth (smooth on `tsupport χ ⊆ Ωα`, identically zero off `tsupport χ`)
-and compactly supported. Its iterated derivatives up to order `K` are uniformly
-bounded, so `MemWkp.smul_smooth_bounded` keeps `MemWkp K 2`. Finally
-`(χ · coef) · factor =ᵐ coef · factor` on `volume.restrict Ωα`: on the thickening
-`χ = 1`; off `Kα` the factor ae-vanishes. -/
-
 private lemma memWkp_coef_mul_factor
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -164,14 +135,11 @@ private lemma memWkp_coef_mul_factor
     MemWkp (d := Module.finrank ℝ E) K 2
       (fun y => coef y * factor y) (Ωα (I := I) (M := M) α) := by
   classical
-  -- A smooth cutoff `χ` equal to `1` on `cthickening δ Kα`, supported in `Ωα`.
   obtain ⟨δ, χ, hδ_pos, hδ_in, hχ_smooth, hχ_cs, _hχ_range, hχ_one, hχ_tsupp⟩ :=
     exists_smooth_cutoff_with_neighborhood (d := Module.finrank ℝ E)
       (Kα_compact (I := I) (M := M) α)
       (Ωα_isOpen (I := I) (M := M) α)
       (Kα_subset_Ωα (I := I) (M := M) α)
-  -- `χ · coef` is globally smooth: smooth on `tsupport χ ⊆ Ωα`, identically zero
-  -- (hence smooth) on the open complement of `tsupport χ`.
   have hχ_coef_smooth : ContDiff ℝ (⊤ : ℕ∞) (fun y => χ y * coef y) := by
     have h_open_chart : IsOpen (Ωα (I := I) (M := M) α) :=
       Ωα_isOpen (I := I) (M := M) α
@@ -190,18 +158,15 @@ private lemma memWkp_coef_mul_factor
       exact contDiffAt_const.congr_of_eventuallyEq h_eq_zero
   have hχ_coef_cs : HasCompactSupport (fun y => χ y * coef y) :=
     HasCompactSupport.mul_right hχ_cs
-  -- Uniform bound on the iterated derivatives of `χ · coef` up to order `K`.
   obtain ⟨C, _hC_nn, hC_bd⟩ :=
     exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
       (d := Module.finrank ℝ E) hχ_coef_smooth hχ_coef_cs K
-  -- `(χ · coef) · factor ∈ MemWkp K 2` via `MemWkp.smul_smooth_bounded`.
   have h_prod_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
       (fun y => (χ y * coef y) * factor y) (Ωα (I := I) (M := M) α) :=
     MemWkp.smul_smooth_bounded (d := Module.finrank ℝ E) K
       (by norm_num : (1 : ℝ≥0∞) ≤ 2)
       (Ωα_isOpen (I := I) (M := M) α) hχ_coef_smooth
       (fun j _hj y _hy => hC_bd y j _hj) hfactor_memWkp
-  -- `(χ · coef) · factor =ᵃᵉ coef · factor` on `volume.restrict Ωα`.
   set Cδ : Set EuclN := Metric.cthickening δ (Kα (I := I) (M := M) α)
     with hCδ_def
   have hCδ_in_target : Cδ ⊆ Ωα (I := I) (M := M) α := hδ_in
@@ -213,7 +178,6 @@ private lemma memWkp_coef_mul_factor
       (Ωα_isOpen (I := I) (M := M) α).measurableSet
     have hCδ_closed : IsClosed Cδ := Metric.isClosed_cthickening
     have hCδ_meas : MeasurableSet Cδ := hCδ_closed.measurableSet
-    -- On `Cδ ⊆ Ω`: `χ = 1`, so `(χ · coef) · factor = coef · factor`.
     have h_eq_on_Cδ : (fun y => (χ y * coef y) * factor y)
         =ᵐ[(volume : Measure EuclN).restrict Cδ]
         (fun y => coef y * factor y) := by
@@ -222,7 +186,6 @@ private lemma memWkp_coef_mul_factor
       have hχy : χ y = 1 := hχ_one y hy
       change (χ y * coef y) * factor y = coef y * factor y
       rw [hχy]; ring
-    -- On `Ω \ Cδ ⊆ Ω \ Kα`: `factor` ae-vanishes.
     have hKα_in_Cδ : Kα (I := I) (M := M) α ⊆ Cδ :=
       Metric.self_subset_cthickening _
     have h_diff_sub : Ω \ Cδ ⊆ Ω \ Kα (I := I) (M := M) α := fun y hy =>
@@ -263,16 +226,9 @@ private lemma memWkp_coef_mul_factor
       rw [← h_cover]
     rw [hΩ_restrict_eq, MeasureTheory.Measure.restrict_union h_disj h_diff_meas]
     exact (MeasureTheory.ae_add_measure_iff).mpr ⟨h_eq_on_inter, h_eq_on_diff⟩
-  -- Transfer `MemWkp K 2` through the ae-equality.
   exact (MemWkp_congr_ae (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) (Ωα_isOpen (I := I) (M := M) α) h_ae_eq).mp
     h_prod_memWkp
-
-/-! ## Helper: closure of `MemWkp K 2` under finite sums (universal index)
-
-The differentiated numerator's layers A and B are finite double sums. The helper
-below propagates `MemWkp K 2` through a finite sum indexed by an arbitrary
-`Finset`. -/
 
 private lemma memWkp_finset_sum
     {α : M} {K : ℕ} {ι : Type*} (s : Finset ι)
@@ -299,12 +255,6 @@ private lemma memWkp_finset_sum
       exact MemWkp.add (d := Module.finrank ℝ E)
         (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_open hi hsum
 
-/-! ## Layer D: `(∂_{lₙ} c) · fChartEffPrev`
-
-Layer D multiplies the smooth `densityDerivOnEuclid` coefficient by the
-level-`m` differentiated right-hand side `fChartEffPrev`, which is `MemWkp K 2`
-(by inductive hypothesis) and ae-zero off the kernel. -/
-
 private lemma layer_D_memWkp
     (g : SmoothRiemannianMetric I M) (α : M) (K : ℕ)
     (lₙ : Fin (Module.finrank ℝ E))
@@ -322,13 +272,6 @@ private lemma layer_D_memWkp
     (densityDerivOnEuclid_contDiffOn (I := I) g α lₙ)
     h_prev_memWkp_K h_prev_ae_zero
 
-/-! ## Layer E: `c · (∂_{lₙ}-weak-partial of fChartEffPrev)`
-
-Layer E multiplies the smooth `densityOnEuclid` coefficient by the chosen weak
-`lₙ`-partial of `fChartEffPrev`. The factor is `MemWkp K 2` by
-`MemWkp.chosenWeakPartial_mem` (from `MemWkp (K + 1) 2` of `fChartEffPrev`) and
-ae-zero off the kernel by `chosenWeakPartial'_ae_zero_off_chartPouKernel_of_ae_zero`. -/
-
 private lemma layer_E_memWkp
     (g : SmoothRiemannianMetric I M) (α : M) (K : ℕ)
     (lₙ : Fin (Module.finrank ℝ E))
@@ -345,27 +288,17 @@ private lemma layer_E_memWkp
         chosenWeakPartial' (d := Module.finrank ℝ E) 2 lₙ
           fChartEffPrev (Ωα (I := I) (M := M) α) y)
       (Ωα (I := I) (M := M) α) := by
-  -- The chosen weak `lₙ`-partial of `fChartEffPrev` is `MemWkp K 2`.
   have h_factor_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
       (chosenWeakPartial' (d := Module.finrank ℝ E) 2 lₙ
         fChartEffPrev (Ωα (I := I) (M := M) α))
       (Ωα (I := I) (M := M) α) :=
     h_prev_memWkp_succ.chosenWeakPartial_mem lₙ
-  -- The chosen weak `lₙ`-partial ae-vanishes off `Kα`.
   have h_factor_ae_zero :=
     chosenWeakPartial'_ae_zero_off_chartPouKernel_of_ae_zero
       (I := I) (M := M) α h_prev_ae_zero lₙ
   exact memWkp_coef_mul_factor (I := I) (M := M) α K
     (densityOnEuclid_contDiffOn (I := I) g α)
     h_factor_memWkp h_factor_ae_zero
-
-/-! ## `numerator / density` lies in `MemWkp K 2` on the chart target
-
-The chart-density-divided numerator `numerator / densityOnEuclid g α` is
-rewritten as `(1 / densityOnEuclid g α) · numerator` and handed to the workhorse
-`memWkp_coef_mul_factor`: the reciprocal `1 / densityOnEuclid g α` is `C^∞` on
-the chart target (smoothness and strict positivity of the density), and the
-numerator is `MemWkp K 2` and ae-zero off the kernel. -/
 
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
@@ -378,21 +311,6 @@ private lemma one_div_densityOnEuclid_contDiffOn
       (Ωα (I := I) (M := M) α) :=
   contDiffOn_const.div (densityOnEuclid_contDiffOn (I := I) g α)
     (fun _ hy => (densityOnEuclid_pos (I := I) g α hy).ne')
-
-/-! ## Chart-locality-free differentiated-numerator regularity
-
-The differentiated-numerator regularity is keyed on the chart-locality-free
-eigenbasis vector, re-keyed onto the intrinsic compactness witness
-`tensorResolventEigenbasisVec (tensorResolventL2_isCompactOperator g r s) i`.
-The iterated mixed weak partials are taken in their chart-locality-free form
-`eigenvectorChartIteratedPartial`, the chart component as
-`eigenvectorChartComponentFun`, the numerator as
-`eigenvectorChartRHSDiffNumerator`, and the polymorphic regularity
-/ off-kernel ae-vanishing bridges as their committed unconditional twins. The
-layer-D and layer-E helpers carry no chart-selection data and are reused
-directly. -/
-
-/-! ### ae-vanishing of the iterated mixed partials off the kernel, restated -/
 
 /-- The iterated mixed weak partials of the chart-locality-free eigenvector chart
 component are ae-zero on `Ωα α \ Kα α`. -/
@@ -408,8 +326,6 @@ private lemma iteratedPartial_ae_zero_off_Kα_unconditional
       (fun _ : EuclN => (0 : ℝ)) :=
   eigenvectorChartIteratedPartial_ae_zero_off_chartPouKernel
     (I := I) (M := M) g r s i α P₀ m l
-
-/-! ### Layer A (chart-locality-free) -/
 
 private lemma layer_A_pair_memWkp_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -516,8 +432,6 @@ private lemma layer_A_memWkp_unconditional
           g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)) y)
     (fun a _ha => h_inner a)
 
-/-! ### Layer B (chart-locality-free) -/
-
 private lemma layer_B_pair_memWkp_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -617,8 +531,6 @@ private lemma layer_B_memWkp_unconditional
           (Ωα (I := I) (M := M) α) y)
     (fun a _ha => h_inner a)
 
-/-! ### Layer C (chart-locality-free) -/
-
 private lemma layer_C_memWkp_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -654,8 +566,6 @@ private lemma layer_C_memWkp_unconditional
     (I := I) (M := M) g r s i α P₀ m (Fin.init l)
   exact memWkp_coef_mul_factor (I := I) (M := M) α K h_coef_smooth
     h_factor_memWkp h_factor_ae_zero
-
-/-! ### Aggregate: the chart-locality-free differentiated numerator is `MemWkp K 2` -/
 
 /-- **The chart-locality-free level-`m` differentiated numerator is `MemWkp K 2`
 on the chart target.** Re-keyed onto the intrinsic compactness witness, the
@@ -742,8 +652,6 @@ lemma eigenvectorChartRHSDiffNumerator_memWkp
     rfl
   rw [← h_eq]
   exact h_step4
-
-/-! ### `numerator / density` lies in `MemWkp K 2` (chart-locality-free) -/
 
 /-- **The chart-locality-free differentiated numerator ae-vanishes off the
 partition-of-unity kernel.** -/
@@ -950,8 +858,6 @@ lemma eigenvectorChartRHSDiffNumerator_div_density_ae_zero_off_chartPouKernel
       g r s i α P₀ m l fChartEffPrev y /
     densityOnEuclid (I := I) g α y = 0
   rw [hy]; simp
-
-/-! ## Sanity tests -/
 
 section ElaborationTests
 

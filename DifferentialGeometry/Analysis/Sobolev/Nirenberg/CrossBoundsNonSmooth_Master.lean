@@ -264,17 +264,7 @@ theorem nirenberg_master_inequality_after_young_nonsmooth_quantitative
           ∫ x in Ω', (u x)^2 ∂(volume : Measure E) +
           ∫ x in Ω', (f x)^2 ∂(volume : Measure E)) := by
   classical
-  -- Strategy: choose ε := λ/8 in the four absorbing-term bounds
-  -- (cross_1, cross_2, c_term, f_term). cross_3 doesn't have an
-  -- absorbing piece. Sum:
-  -- λ · I ≤ |C1| + |C2| + |C3| + |R| + |Q|
-  --       ≤ (ε I + C1' G) + (ε I + C2' G) + C3' G +
-  --         (ε I + Cc' (G + U)) + (ε I + Cf' (G + F))
-  --       = 4ε · I + (C1' + C2' + C3' + Cc' + Cf') · G + Cc' · U + Cf' · F
-  -- With ε = λ/8: 4ε = λ/2.
-  -- Set C := max(C1' + C2' + C3' + Cc' + Cf', max Cc' Cf').
   have hε_eff_pos₀ : (0 : ℝ) < B.lam / 8 := div_pos B.hlam_pos (by norm_num)
-  -- Apply the five quantitative non-smooth bounds with ε := λ/8.
   have hC1 := cross_1_bound_nonsmooth_quantitative (d := d) B hu_l2 hg_l2
     h_weakPartial hη hη_supp hη_range hN h_fderiv_eta hΩ' hΩ'_closure hΩ'_compact
     hh_supp_in_Ω' k h_FK_diffQuot_u_bound (B.lam / 8) hε_eff_pos₀
@@ -288,10 +278,6 @@ theorem nirenberg_master_inequality_after_young_nonsmooth_quantitative
     h_weakPartial hη hη_supp hη_range hN h_fderiv_eta hΩ' hΩ'_closure hΩ'_compact
     hη_in_Ω' hh_supp_in_Ω' k (B.lam / 8) hε_eff_pos₀ h_v_test_sq_bound
     h_FK_diffQuot_u_bound
-  -- Derive the sum-form `v_test²` bound (needed by `f_term_bound_nonsmooth`)
-  -- from the single-index form (`h_v_test_sq_bound`). The sum form has the
-  -- weaker upper bound since `(D_h^k g_k)² ≤ ∑_i (D_h^k g_i)²`, so the
-  -- single-index hypothesis trivially implies the sum-form hypothesis.
   have h_v_test_sq_bound_sum : ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
       ∫ x, (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
             k h η u x)^2 ∂(volume : Measure E) ≤
@@ -367,7 +353,6 @@ theorem nirenberg_master_inequality_after_young_nonsmooth_quantitative
               (DifferentialGeometry.Analysis.Sobolev.diffQuot k h (g i) x)^2
             ∂(volume : Measure E) :=
       integral_mono h_integrable_single h_integrable_sum h_pointwise
-    -- Multiply by 2 and combine.
     have h_two_int_le :
         2 * ∫ x, (η x)^2 * (DifferentialGeometry.Analysis.Sobolev.diffQuot k h (g k) x)^2
             ∂(volume : Measure E) ≤
@@ -380,9 +365,6 @@ theorem nirenberg_master_inequality_after_young_nonsmooth_quantitative
     h_weakPartial hη hη_supp hη_range hN h_fderiv_eta hΩ' hΩ'_closure hΩ'_compact
     hη_in_Ω' hh_supp_in_Ω' k h_FK_diffQuot_u_bound h_v_test_sq_bound_sum
     (B.lam / 8) hε_eff_pos₀
-  -- Abbreviate the absorbing parameter and the coefficient suprema, so that
-  -- the five quantitative bounds and the headline goal share the same
-  -- explicit constants.
   set ε_eff : ℝ := B.lam / 8 with hε_eff_def
   set Λ : ℝ := Classical.choose
     (SmoothEllipticBilinearForm.bounded_a_on_compact (d := d) B hΩ'_compact)
@@ -398,7 +380,6 @@ theorem nirenberg_master_inequality_after_young_nonsmooth_quantitative
     rw [hd_real]; exact_mod_cast Fintype.card_pos
   have hε_eff_pos : 0 < ε_eff := hε_eff_pos₀
   have hε'_pos : 0 < ε_eff / d_real := div_pos hε_eff_pos hd_pos
-  -- The five explicit constants.
   set C1 : ℝ := (1 / (ε_eff / d_real)) * Λ^2 * N^2 * d_real^2 with hC1_def
   set C2 : ℝ := (M^2 / (4 * (ε_eff / d_real))) * d_real^2 with hC2_def
   set C3 : ℝ := 2 * M * N * d_real^2 with hC3_def
@@ -439,14 +420,12 @@ theorem nirenberg_master_inequality_after_young_nonsmooth_quantitative
     refine le_max_of_le_left ?_
     refine mul_nonneg ?_ (sq_nonneg _)
     exact mul_nonneg (by linarith) hε_eff_pos.le
-  -- The final constant.
   set C : ℝ := max (C1 + C2 + C3 + Cc + Cf) (max Cc Cf) with hC_def
   have hC_nn : 0 ≤ C := by
     rw [hC_def]
     refine le_max_of_le_left ?_
     refine add_nonneg (add_nonneg (add_nonneg (add_nonneg hC1_nn hC2_nn) hC3_nn) hCc_nn) hCf_nn
   intro h hh hh_le
-  -- Set up notation for the integrals.
   set I : ℝ := ∫ x, (η x)^2 *
       ∑ i : Fin d, DifferentialGeometry.Analysis.Sobolev.diffQuot k h (g i) x ^ 2
     ∂(volume : Measure E) with hI_def
@@ -463,37 +442,16 @@ theorem nirenberg_master_inequality_after_young_nonsmooth_quantitative
     (fun x => Finset.sum_nonneg (fun i _ => sq_nonneg _))
   have hU_nn : 0 ≤ U := integral_nonneg (fun x => sq_nonneg _)
   have hF_nn : 0 ≤ F := integral_nonneg (fun x => sq_nonneg _)
-  -- Apply the non-smooth master inequality.
   have h_master := h_master_nonsmooth hh hh_le
-  -- h_master: B.lam * I ≤ |C1_sum| + |C2_sum| + |C3_sum| + |R| + |Q|.
-  -- Substitute the specific bounds.
   have hC1_h := hC1 hh hh_le
   have hC2_h := hC2 hh hh_le
   have hC3_h := hC3 hh hh_le
   have hCc_h := hCc hh hh_le
   have hCf_h := hCf hh hh_le
-  -- Combine: λ · I ≤ |C1| + |C2| + |C3| + |R| + |Q|
-  --              ≤ (ε_eff · I + C1 · G) + (ε_eff · I + C2 · G) + (C3 · G) +
-  --                (ε_eff · I + Cc · (G + U)) + (ε_eff · I + Cf · (G + F))
-  --              = 4 ε_eff · I + (C1 + C2 + C3 + Cc + Cf) · G + Cc · U + Cf · F
-  --              = (λ/2) · I + (...) · G + Cc · U + Cf · F
-  --              ≤ (λ/2) · I + C · (G + U + F).
   have h_4ε_eq : 4 * ε_eff = B.lam / 2 := by
     rw [hε_eff_def]; ring
   have h_combine : B.lam * I ≤
       4 * ε_eff * I + (C1 + C2 + C3 + Cc + Cf) * G + Cc * U + Cf * F := by
-    -- Sum up the cross-term and data-term bounds.
-    -- |R| (f-term, from master) is the C_f bound; |Q| (c-term) is the C_c bound.
-    -- Specifically, from the master inequality:
-    -- λ I ≤ |C1_sum| + |C2_sum| + |C3_sum| + |R| + |Q|
-    -- where R = ∫_Ω f · v_test and Q = ∫_Ω c u v_test.
-    -- The bounds give:
-    -- |C1_sum| ≤ ε_eff · I + C1 · G
-    -- |C2_sum| ≤ ε_eff · I + C2 · G
-    -- |C3_sum| ≤ C3 · G
-    -- |Q| ≤ ε_eff · I + Cc · (G + U)
-    -- |R| ≤ ε_eff · I + Cf · (G + F)
-    -- Sum: ≤ 4 ε_eff · I + (C1 + C2 + C3 + Cc + Cf) · G + Cc · U + Cf · F.
     have h_sum_bound :
         |∑ i : Fin d, ∑ j : Fin d, ∫ x, 2 *
               DifferentialGeometry.Analysis.Sobolev.translate k h
@@ -570,15 +528,11 @@ theorem nirenberg_master_inequality_after_young_nonsmooth_quantitative
             ∂(volume : Measure E)| ≤ C3 * G := by
         rw [← abs_neg]; exact h3
       linarith
-    -- λ I ≤ sum bound.
     refine h_master.trans (h_sum_bound.trans ?_)
-    -- Sum bound = 4 ε_eff I + (C1+C2+C3+Cc+Cf) G + Cc U + Cf F.
     have hCc_distrib : Cc * (G + U) = Cc * G + Cc * U := by ring
     have hCf_distrib : Cf * (G + F) = Cf * G + Cf * F := by ring
     linarith [hCc_distrib, hCf_distrib]
-  -- 4 ε_eff = λ/2; combine with bounds.
   rw [show (4 * ε_eff * I) = (B.lam / 2) * I from by rw [h_4ε_eq]] at h_combine
-  -- Now combine: (λ/2) I + (C1+...+Cf) G + Cc U + Cf F ≤ (λ/2) I + C (G + U + F).
   have hC_grad_le : C1 + C2 + C3 + Cc + Cf ≤ C := le_max_left _ _
   have hC_Cc_le : Cc ≤ C := le_trans (le_max_left _ _) (le_max_right _ _)
   have hC_Cf_le : Cf ≤ C := le_trans (le_max_right _ _) (le_max_right _ _)
@@ -589,14 +543,10 @@ theorem nirenberg_master_inequality_after_young_nonsmooth_quantitative
   have h_step3 : Cf * F ≤ C * F :=
     mul_le_mul_of_nonneg_right hC_Cf_le hF_nn
   have h_C_dist : C * (G + U + F) = C * G + C * U + C * F := by ring
-  -- The headline constant `nirenbergMasterYoungConstant` is, by definition,
-  -- exactly the assembled constant `C`.
   have h_const_eq : nirenbergMasterYoungConstant (d := d) B N hΩ'_compact k = C :=
     rfl
   rw [h_const_eq]
   linarith
-
-/-! ## Absorbed corollary: explicit `(λ/2) · I ≤ C · (G + U + F)` -/
 
 set_option linter.unusedVariables false in
 /-- **Quantitative absorbed form of `nirenberg_master_inequality_after_young_nonsmooth`.**
@@ -688,16 +638,11 @@ theorem nirenberg_master_inequality_absorbed_nonsmooth_quantitative
     h_master_nonsmooth
   intro h hh hh_le
   have h_main := hC hh hh_le
-  -- h_main: λ · I ≤ (λ/2) · I + C · (G + U + F).
-  -- Subtracting (λ/2) · I gives: (λ/2) · I ≤ C · (G + U + F).
-  -- (Note: we use λ - λ/2 = λ/2, valid since the inequality is on ℝ.)
   set I : ℝ := ∫ x, (η x)^2 *
       ∑ i : Fin d, DifferentialGeometry.Analysis.Sobolev.diffQuot k h (g i) x ^ 2
     ∂(volume : Measure E) with hI_def
   have h_lam_split : B.lam * I - (B.lam / 2) * I = (B.lam / 2) * I := by ring
   linarith [h_main]
-
-/-! ## Localised corollary: bound on `D_h^k g_i` over `{η = 1}` -/
 
 set_option linter.unusedVariables false in
 /-- **Quantitative localised non-smooth absorbing inequality.**
@@ -795,17 +740,11 @@ theorem nirenberg_diffQuot_g_localL2_bound_quantitative
     h_master_nonsmooth
   intro h hh hh_le
   have h_main := hC hh hh_le
-  -- The key observation: ∫_{Ω''} ∑_i (D_h^k g_i)² ≤ ∫ η² · ∑_i (D_h^k g_i)²
-  -- because η = 1 on Ω''.
   set sumSq : E → ℝ := fun x : E => ∑ i : Fin d,
     DifferentialGeometry.Analysis.Sobolev.diffQuot k h (g i) x ^ 2
     with hsumSq_def
   have h_sumSq_nn : ∀ x : E, 0 ≤ sumSq x := by
     intro x; exact Finset.sum_nonneg (fun i _ => sq_nonneg _)
-  -- ∫_{Ω''} sumSq = ∫ Ω''.indicator sumSq.
-  -- Pointwise: Ω''.indicator sumSq x ≤ η² x · sumSq x.
-  --   On Ω'': indicator = sumSq, η² · sumSq = 1 · sumSq = sumSq. So equal.
-  --   Off Ω'': indicator = 0, η² · sumSq ≥ 0. So 0 ≤ η² · sumSq.
   have h_pointwise : ∀ x : E,
       Ω''.indicator sumSq x ≤ (η x)^2 * sumSq x := by
     intro x
@@ -814,7 +753,6 @@ theorem nirenberg_diffQuot_g_localL2_bound_quantitative
       rw [hη_one_on_Ω'' x hx, one_pow, one_mul]
     · rw [Set.indicator_of_notMem hx]
       exact mul_nonneg (sq_nonneg _) (h_sumSq_nn x)
-  -- Integrability infrastructure for indicator and η²·sumSq.
   have h_eta_sq_sumSq_int : Integrable (fun x : E => (η x)^2 * sumSq x)
       (volume : Measure E) := by
     have h_per_i : ∀ i : Fin d, Integrable (fun x : E =>
@@ -843,7 +781,6 @@ theorem nirenberg_diffQuot_g_localL2_bound_quantitative
       (volume : Measure E) := by
     refine h_eta_sq_sumSq_int.mono' ?_ ?_
     · refine AEStronglyMeasurable.indicator ?_ hΩ''_meas
-      -- sumSq is AE strongly measurable since each diffQuot k h (g i) is.
       have h_per_i_aesm : ∀ i : Fin d, AEStronglyMeasurable
           (fun x : E => (DifferentialGeometry.Analysis.Sobolev.diffQuot k h (g i) x)^2)
           (volume : Measure E) := by
@@ -872,23 +809,18 @@ theorem nirenberg_diffQuot_g_localL2_bound_quantitative
         Set.indicator_nonneg (fun y _ => h_sumSq_nn y) x
       rw [abs_of_nonneg h_indicator_nn]
       exact h_pointwise x
-  -- Compare integrals.
   have h_int_le : ∫ x, Ω''.indicator sumSq x ∂(volume : Measure E) ≤
       ∫ x, (η x)^2 * sumSq x ∂(volume : Measure E) :=
     integral_mono h_indicator_int h_eta_sq_sumSq_int h_pointwise
-  -- Convert indicator integral to set integral.
   have h_indicator_eq : ∫ x, Ω''.indicator sumSq x ∂(volume : Measure E) =
       ∫ x in Ω'', sumSq x ∂(volume : Measure E) :=
     MeasureTheory.integral_indicator hΩ''_meas
   rw [h_indicator_eq] at h_int_le
-  -- Now: (λ/2) · ∫_{Ω''} sumSq ≤ (λ/2) · ∫ η² · sumSq ≤ C · (G + U + F).
   have h_lam_half_nn : 0 ≤ B.lam / 2 := by linarith [B.hlam_pos]
   have h_step1 : (B.lam / 2) * ∫ x in Ω'', sumSq x ∂(volume : Measure E) ≤
       (B.lam / 2) * ∫ x, (η x)^2 * sumSq x ∂(volume : Measure E) :=
     mul_le_mul_of_nonneg_left h_int_le h_lam_half_nn
   exact h_step1.trans h_main
-
-/-! ## Existential packaging of the master-chain headlines -/
 
 set_option linter.unusedVariables false in
 /-- **Non-smooth analogue of `nirenberg_master_inequality_after_young`.**

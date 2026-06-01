@@ -58,8 +58,6 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -67,8 +65,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 section
 variable [NeZero (Module.finrank ℝ E)]
-
-/-! ## Step 1: εδ-Cauchy condition derived from a Mathlib `CauchySeq` -/
 
 /-- A Mathlib `CauchySeq` of `WkpChart` elements yields the εδ-Cauchy condition
 in `wkpNormChart` (ENNReal-valued). -/
@@ -106,8 +102,6 @@ theorem wkpNormChart_cauchy_of_seminormCauchySeq
       (fun x => wkpChartFun (f m) x - wkpChartFun (f n) x) ≠ ⊤ := h_lt_top.ne
   rw [← ENNReal.ofReal_toReal h_ne_top]
   exact ENNReal.ofReal_le_ofReal hdist.le
-
-/-! ## Step 2: Chart-by-chart Cauchy on each chart target -/
 
 /-- For each chart `α`, the chart-pushed sequence is `wkpNorm`-Cauchy on
 `chartTargetEuclid α`. -/
@@ -167,8 +161,6 @@ theorem chartPushed_cauchy_of_wkpNormChart_cauchy
     ENNReal.le_tsum α
   exact le_trans h_summand_le_tsum h_le
 
-/-! ## Step 3: Euclidean Banach completeness application — per-chart Sobolev limit -/
-
 /-- For each chart `α`, the chart-pushed sequence has a `wkpNorm`-limit which
 is itself in `MemWkp k p` of the chart target. -/
 theorem exists_chart_limit
@@ -208,8 +200,6 @@ theorem exists_chart_limit
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.exists_limit_of_wkpNorm_cauchy
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     k p hp_one hp_top h_chart_mem h_chart_cauchy
-
-/-! ## Step 4: Choice of per-chart limits -/
 
 /-- A choice of per-chart Euclidean Sobolev limit for a given Cauchy sequence. -/
 noncomputable def chartLimit
@@ -268,8 +258,6 @@ lemma chartLimit_tendsto
       atTop (𝓝 0) :=
   (exists_chart_limit (I := I) (M := M) g hp_one hp_top h_cauchy α).choose_spec.2
 
-/-! ## Step 5: Manifold pre-limit candidate -/
-
 /-- The candidate manifold limit, defined as the finite POU-pulled-back sum of
 the per-chart Euclidean Sobolev limits. The sum is over `chartAtlasPOU_finset`,
 a finite set on a compact manifold. -/
@@ -287,8 +275,6 @@ noncomputable def manifoldLimitFun
     ∑ β ∈ DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset (I := I) (M := M),
       pullbackToManifold (I := I) β
         (chartLimit (I := I) (M := M) hp_one hp_top h_cauchy β) x
-
-/-! ## Step 6: Per-iterate POU sum decomposition -/
 
 /-- The per-iterate POU decomposition: on a compact manifold, `wkpChartFun u(x)`
 equals the finite sum of the chart-β-pushed-and-pulled-back contributions over
@@ -308,7 +294,6 @@ lemma wkpChartFun_eq_finset_sum_pullback
               (wkpChartFun u)) x := by
   classical
   funext x
-  -- Per-summand: pullback β (chartPushed β u) (x) = ρ_β(x) · u(x).
   have h_eq : ∀ β ∈ DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset
         (I := I) (M := M),
       pullbackToManifold (I := I) β
@@ -321,8 +306,7 @@ lemma wkpChartFun_eq_finset_sum_pullback
     classical
     by_cases hxβ : x ∈ (chartAt H β).source
     · exact pullbackToManifold_chartPushed_apply_of_mem (I := I) β (wkpChartFun u) hxβ
-    · -- Off chart-β source: ρ_β x = 0 (subordination), so RHS is 0; LHS is also 0.
-      rw [pullbackToManifold_apply_of_notMem (I := I) (α := β) _ hxβ]
+    · rw [pullbackToManifold_apply_of_notMem (I := I) (α := β) _ hxβ]
       have h_subord :=
         DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate (I := I) (M := M)
       have h_tsupp : tsupport ((DifferentialGeometry.Integral.Measure.chartAtlasPOU
@@ -333,7 +317,6 @@ lemma wkpChartFun_eq_finset_sum_pullback
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M β : M → ℝ) x = 0 :=
         image_eq_zero_of_notMem_tsupport h_x_notin
       rw [h_rho_zero]; ring
-  -- Sum the equalities and use Σ_β ρ_β = 1.
   rw [Finset.sum_congr rfl h_eq]
   have h_factor :
       ∑ β ∈ DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset

@@ -58,14 +58,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open Tensor0SNabla
 open Tensor0SPartialEval
 
-/-! ## Pointwise reductions for the right-hand side
-
-For the inductive step we need to express the bundled
-`tensor0SCovariantDerivative I M (s + 1) (LeviCivita g) T b (X b)` evaluated
-at a `Fin.cons v m` tuple as the `Psi`-difference of two values evaluated at
-`m`. The decomposition uses the curry-iso round trip and the
-`homBundleCovariantDerivativeFun_apply` formula. -/
-
 /-- Round-trip of the un-curry inverse applied to a `Fin.cons` tuple equals
 the CLM-then-CMLM evaluation. This is a thin packaging of
 `tensor0S_curry_apply_eval`. -/
@@ -79,38 +71,21 @@ private lemma tensor0S_curry_symm_apply_cons (s : ℕ) {b : M}
       (show ContinuousMultilinearMap ℝ
           (fun _ : Fin s => TangentSpace I b) ℝ from Φ v) m := by
   classical
-  -- The model-space evaluation identity `tensor0S_curry_apply_eval`, applied
-  -- to `(tensor0S_curry s b).symm Φ` and round-tripped through `tensor0S_curry`,
-  -- yields the claim.
   set P : Tensor0SSpace (s + 1) I b :=
     (tensor0S_curry (I := I) (M := M) s b).symm Φ
   have hroundtrip :
       tensor0S_curry (I := I) (M := M) s b P = Φ :=
     (tensor0S_curry (I := I) (M := M) s b).apply_symm_apply Φ
-  -- Use `tensor0S_curry_apply_eval` (model-space) at `(v, m)`.
   have hev := TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
     (T := P) (v0 := v) (vs := m)
-  -- Rewriting `tensor0S_curry s b P` to `Φ` in `hev` gives the claim.
-  -- Both sides are scalars in `ℝ` (the `Tensor0SSpace.toModel` carriers are
-  -- the identity), so the rewrite is direct.
   have : (show ContinuousMultilinearMap ℝ
         (fun _ : Fin s => TangentSpace I b) ℝ from
       tensor0S_curry (I := I) (M := M) s b P v) m =
       (show ContinuousMultilinearMap ℝ
           (fun _ : Fin (s + 1) => TangentSpace I b) ℝ from P)
         (Fin.cons v m) := hev.symm
-  -- Substitute the round-trip.
   rw [hroundtrip] at this
   exact this.symm
-
-/-! ## Levi-Civita on the chart-parallel extension agrees with the chart
-parallel CLM
-
-On the chart-Levi-Civita good set, the bundled Levi-Civita applied to a
-chart-parallel-extended vector `chartParallelExtend α b v` at `b` along the
-direction `X b` reduces to `chartLeviCivitaParallelCLM g α b X v`, by
-applying the chart-overlap identity followed by the symmetric form of the
-chart Levi-Civita parallel identity. -/
 
 /-- **`LeviCivita` on a chart-parallel-extended vector.** For `b` in the
 chart-α Levi-Civita good set, the bundled Levi-Civita derivative of
@@ -125,32 +100,15 @@ private lemma LeviCivita_chartParallelExtend_eq_parallelCLM
       (chartParallelExtend (I := I) α b v) b (X b) =
       chartLeviCivitaParallelCLM (I := I) g α b X v := by
   classical
-  -- Step 1: chart-overlap formula for `LeviCivita`, which requires
-  -- `MDiffAt (T% chartParallelExtend α b v) b`.
   have hY_at :
       MDifferentiableAt I (I.prod 𝓘(ℝ, E))
         (fun b' : M => TotalSpace.mk' E
           (E := fun x : M => TangentSpace I x) b'
           (chartParallelExtend (I := I) α b v b')) b :=
     chartParallelExtend_mdifferentiableAt (I := I) α hb v
-  -- Apply the chart-overlap identity.
   rw [LeviCivita_chart_apply (I := I) g α hb hY_at (X b)]
-  -- Step 2: identify the chart-Levi-Civita action on the parallel extension
-  -- with the closed-form `chartLeviCivitaParallelCLM` value.
   rw [chartLeviCivita_chartParallelExtend_symm (I := I) g α hb v X]
-  -- Goal: matches `chartLeviCivitaParallelCLM_apply` definitionally.
   rw [chartLeviCivitaParallelCLM_apply (I := I) g α b X v]
-
-/-! ## Differentiability of the partial-evaluation pointwise function
-
-To apply the inductive hypothesis to the partial-eval section, we need the
-`TensorSectionMDiffAt` predicate for it. This is exactly the `aux` lemma
-`TensorSectionMDiffAt_partialEval` from the existing succ file. -/
-
-/-! ## The auxiliary headline statement
-
-We prove the agreement in its raw-function form first, by induction on `s`.
-The smooth-section headline follows as a thin corollary. -/
 
 /-- **Auxiliary induction theorem.** For a `(0, s + 1)`-tensor section `T`
 with pointwise-differentiable total-space form at `b`, and a tangent vector
@@ -172,31 +130,21 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
   intro s
   induction s with
   | zero =>
-    -- Base case: `s = 0`, rank 1.
     intro T X b hb hT_at hX_at
-    -- We prove the equality of `(0, 1)`-tensor fibre values by CMLM
-    -- extensionality. Every `m : Fin 1 → TangentSpace I b` decomposes as
-    -- `Fin.cons (m 0) Fin.tail` with `Fin.tail m = Fin.elim0` up to
-    -- subsingleton.
     apply ContinuousMultilinearMap.ext
     intro m
     set v : TangentSpace I b := m 0 with hv_def
-    -- Use `Fin.cons_self_tail` to rewrite `m` as `Fin.cons v (Fin.tail m)`.
     have hm_decomp : m = Fin.cons v (Fin.tail m) := by
       rw [hv_def]; exact (Fin.cons_self_tail m).symm
     have htail : (Fin.tail m : Fin 0 → TangentSpace I b) =
         (fun i : Fin 0 => Fin.elim0 i) := by
       funext i; exact i.elim0
-    -- Set `m₀ : Fin 0 → TangentSpace I b` to the unique empty tuple.
     set m₀ : Fin 0 → TangentSpace I b := fun i => Fin.elim0 i with hm0_def
     have hm_eq : m = Fin.cons v m₀ := by
       rw [hm_decomp, htail]
-    -- LHS evaluation via `chartTensor0SCovariantDerivative_succ_apply`.
     rw [hm_eq]
     rw [chartTensor0SCovariantDerivative_succ_apply (I := I) 0 g α T X b
         (Fin.cons v m₀)]
-    -- RHS: unfold the bundled cov via `tensor0SCovariantDerivative_succ_eq`
-    -- then `tensor0SCovariantDerivative_succ_apply`.
     rw [tensor0SCovariantDerivative_succ_eq I M (s := 0)
         (cov := LeviCivita (I := I) g)]
     rw [tensor0SCovariantDerivative_succ_apply I M
@@ -204,7 +152,6 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
         (cov_TM := LeviCivita (I := I) g)
         (cov_s := tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g))
         T b (X b)]
-    -- Evaluate the un-curry inverse at `Fin.cons v m₀`.
     rw [tensor0S_curry_symm_apply_cons (I := I) (M := M) 0
         (Φ := HomConnection.homBundleCovariantDerivativeFun I M
           (Tensor0SModel 0 ℝ E)
@@ -213,15 +160,11 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
           (tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g))
           (curriedSection I M T) b (X b))
         v m₀]
-    -- Apply the Psi formula via `homBundleCovariantDerivativeFun_apply`,
-    -- with `Y := chartParallelExtend α b v` (Y b = v on the base set) and
-    -- `V_field := X` (the differentiation direction).
     have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
       chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
     have hYb_eq : chartParallelExtend (I := I) α b v b = v := by
       unfold chartParallelExtend
       exact trivFromE_trivToE (I := I) α hb_base v
-    -- `MDiff` hypotheses for `homBundleCovariantDerivativeFun_apply`.
     have hτ_at :
         MDifferentiableAt I (I.prod 𝓘(ℝ, E →L[ℝ] Tensor0SModel 0 ℝ E))
           (fun y : M => TotalSpace.mk' (E →L[ℝ] Tensor0SModel 0 ℝ E)
@@ -234,7 +177,6 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
             (E := fun x : M => TangentSpace I x) y
             (chartParallelExtend (I := I) α b v y)) b :=
       chartParallelExtend_mdifferentiableAt (I := I) α hb v
-    -- Apply the Psi formula at `(X b, v)`, using `Y b = v`.
     have hPsi := HomConnection.homBundleCovariantDerivativeFun_apply
       (I := I) (M := M) (F := Tensor0SModel 0 ℝ E)
       (V := fun x : M => Tensor0SSpace 0 I x)
@@ -244,11 +186,7 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
       (x := b) hτ_at
       (V_field := X) (Y := chartParallelExtend (I := I) α b v)
       hX_at hY_at
-    -- `hPsi : homBundleCovariantDerivativeFun ... (X b) (chartParallelExtend α b v b) = Psi ...`.
-    -- Convert `chartParallelExtend α b v b` to `v` using `hYb_eq`.
     rw [hYb_eq] at hPsi
-    -- Rewrite the private `Psi` (the RHS of `hPsi`) to its explicit
-    -- subtraction form. The reduction is definitional.
     have hPsi_explicit :
         (HomConnection.homBundleCovariantDerivativeFun I M
             (Tensor0SModel 0 ℝ E)
@@ -264,7 +202,6 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
               (X b)) :
           Tensor0SSpace 0 I b) := hPsi
     rw [hPsi_explicit]
-    -- The pairing `τ y (Y y)` equals `tensor0SPartialEval T Y y`.
     have hpair_eq :
         (fun y : M => (curriedSection I M T) y
             (chartParallelExtend (I := I) α b v y)) =
@@ -272,7 +209,6 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
       funext y
       rfl
     rw [hpair_eq]
-    -- Distribute the CMLM evaluation across subtraction on the RHS.
     rw [show ((show ContinuousMultilinearMap ℝ
             (fun _ : Fin 0 => TangentSpace I b) ℝ from
           (tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g))
@@ -292,7 +228,6 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
             ((LeviCivita (I := I) g)
               (chartParallelExtend (I := I) α b v) b (X b))) m₀ from
       ContinuousMultilinearMap.sub_apply _ _ _]
-    -- LHS: rewrite the chart-frame slot-correction sum at slot 0.
     have hslot_sum :
         (∑ k : Fin (0 + 1),
             chartTensor0SSlotCorrection (I := I) (0 + 1) g α T X b k) =
@@ -307,10 +242,8 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
             (fun _ : Fin (0 + 1) => TangentSpace I b) ℝ from
           chartTensor0SSlotCorrection (I := I) (0 + 1) g α T X b 0)
             (Fin.cons v m₀) from by simp]
-    -- Slot-0 evaluation in terms of the public `localSlotCLM`.
     rw [chartTensor0SSlotCorrection_apply_localSlotCLM (I := I) (0 + 1) g α
         T X b 0 (Fin.cons v m₀)]
-    -- Reduce `localSlotCLM ... 0 Φ i (Fin.cons v m₀ i)` to `Fin.cons (Φ v) m₀ i`.
     have hSlot0_tuple :
         (fun i : Fin (0 + 1) =>
             localSlotCLM (I := I) (0 + 1) (0 : Fin (0 + 1))
@@ -322,11 +255,6 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
       refine Fin.cases ?_ ?_ i
       · simp [Fin.cons_zero, localSlotCLM]
       · intro k; exact k.elim0
-    -- LHS now has the form `intrinsic_at_cons(v, m₀) - T b (Fin.cons (Φ v) m₀)`.
-    -- RHS Psi splits into two CMLM-evaluated pieces. We identify the second
-    -- piece with `T b (Fin.cons (Φ v) m₀)` via the chart-Levi-Civita parallel
-    -- identity and the curry-eval rewrite, and the first piece with the
-    -- intrinsic CLM via the rank-0 agreement and the rank-0 mfderiv bridge.
     have h_cov_TM_eq : (LeviCivita (I := I) g).toFun
         (chartParallelExtend (I := I) α b v) b (X b) =
         chartLeviCivitaParallelCLM (I := I) g α b X v :=
@@ -350,14 +278,11 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
       exact (TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
         (T := T b)
         (v0 := chartLeviCivitaParallelCLM (I := I) g α b X v) (vs := m₀)).symm
-    -- LHS: intrinsic - slot_0. Rewrite the slot-0 piece via `hSlot0_tuple`
-    -- and `h_curry_eval_slot0`; identify the cov_TM piece via `h_cov_TM_eq`.
     rw [hSlot0_tuple]
     rw [h_curry_eval_slot0]
     rw [show (LeviCivita (I := I) g) (chartParallelExtend (I := I) α b v) b
             (X b) = chartLeviCivitaParallelCLM (I := I) g α b X v from
       h_cov_TM_eq]
-    -- Apply rank-0 agreement on the partial-eval section.
     have hRank0 :=
       chartTensor0SCovariantDerivative_eq_abstract_zero (I := I) g α
         (tensor0SPartialEval I M T (chartParallelExtend (I := I) α b v))
@@ -366,8 +291,6 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
     rw [chartTensor0SCovariantDerivative_zero_apply (I := I) g α
         (tensor0SPartialEval I M T (chartParallelExtend (I := I) α b v))
         X b m₀]
-    -- Bridge the rank-0 mfderiv to the rank-0 intrinsic CLM, then chain via
-    -- the curry-factor identity to recover the rank-1 intrinsic at `Fin.cons v m₀`.
     have hPartialEval_at :
         TensorSectionMDiffAt (I := I) 0
           (tensor0SPartialEval I M T (chartParallelExtend (I := I) α b v)) b :=
@@ -393,9 +316,7 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
     rw [hCons_eq] at hCurryFactor
     rw [hCurryFactor]
   | succ s ih =>
-    -- Inductive step: `s ↦ s + 1`. Rank `(s + 1) + 1 = s + 2`.
     intro T X b hb hT_at hX_at
-    -- Same CMLM-extensionality scheme.
     apply ContinuousMultilinearMap.ext
     intro m
     set v : TangentSpace I b := m 0 with hv_def
@@ -404,10 +325,8 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
     set mt : Fin (s + 1) → TangentSpace I b := Fin.tail m with hmt_def
     have hm_eq : m = Fin.cons v mt := hm_decomp
     rw [hm_eq]
-    -- LHS via `chartTensor0SCovariantDerivative_succ_apply`.
     rw [chartTensor0SCovariantDerivative_succ_apply (I := I) (s + 1) g α T X b
         (Fin.cons v mt)]
-    -- RHS via `tensor0SCovariantDerivative_succ_eq` then `_succ_apply`.
     rw [tensor0SCovariantDerivative_succ_eq I M (s := s + 1)
         (cov := LeviCivita (I := I) g)]
     rw [tensor0SCovariantDerivative_succ_apply I M
@@ -416,7 +335,6 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
         (cov_s := tensor0SCovariantDerivative I M (s + 1)
           (LeviCivita (I := I) g))
         T b (X b)]
-    -- Round-trip through the un-curry inverse at `Fin.cons v mt`.
     rw [tensor0S_curry_symm_apply_cons (I := I) (M := M) (s + 1)
         (Φ := HomConnection.homBundleCovariantDerivativeFun I M
           (Tensor0SModel (s + 1) ℝ E)
@@ -425,8 +343,6 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
           (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
           (curriedSection I M T) b (X b))
         v mt]
-    -- Apply Psi via `homBundleCovariantDerivativeFun_apply` with
-    -- `Y := chartParallelExtend α b v`, `V_field := X`.
     have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
       chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
     have hYb_eq : chartParallelExtend (I := I) α b v b = v := by
@@ -457,8 +373,6 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
       (V_field := X) (Y := chartParallelExtend (I := I) α b v)
       hX_at hY_at
     rw [hYb_eq] at hPsi
-    -- Rewrite the private `Psi` (the RHS of `hPsi`) to its explicit
-    -- subtraction form. The reduction is definitional.
     have hPsi_explicit :
         (HomConnection.homBundleCovariantDerivativeFun I M
             (Tensor0SModel (s + 1) ℝ E)
@@ -474,7 +388,6 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
               (X b)) :
           Tensor0SSpace (s + 1) I b) := hPsi
     rw [hPsi_explicit]
-    -- Pairing: `b' ↦ τ b' (Y b') = partialEval T Y b'`.
     have hpair_eq :
         (fun y : M => (curriedSection I M T) y
             (chartParallelExtend (I := I) α b v y)) =
@@ -482,7 +395,6 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
       funext y
       rfl
     rw [hpair_eq]
-    -- Distribute the CMLM evaluation across subtraction on the RHS.
     rw [show ((show ContinuousMultilinearMap ℝ
             (fun _ : Fin (s + 1) => TangentSpace I b) ℝ from
           (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
@@ -502,9 +414,6 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
             ((LeviCivita (I := I) g)
               (chartParallelExtend (I := I) α b v) b (X b))) mt from
       ContinuousMultilinearMap.sub_apply _ _ _]
-    -- LHS slot-sum: distribute the CMLM evaluation across the finite sum.
-    -- We split slot-0 from slots k+1 manually.
-    -- Use `Fin.sum_univ_succ` on `∑ k : Fin (s + 2), …`.
     rw [show ∑ k : Fin (s + 1 + 1),
             (show ContinuousMultilinearMap ℝ
                 (fun _ : Fin (s + 1 + 1) => TangentSpace I b) ℝ from
@@ -520,10 +429,8 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
               chartTensor0SSlotCorrection (I := I) (s + 1 + 1) g α T X b
                 k.succ) (Fin.cons v mt) from
       Fin.sum_univ_succ _]
-    -- Slot 0 evaluation in terms of the public `localSlotCLM`.
     rw [chartTensor0SSlotCorrection_apply_localSlotCLM (I := I) (s + 1 + 1) g α
         T X b 0 (Fin.cons v mt)]
-    -- Reduce the slot-0 substitution tuple to `Fin.cons (Φ v) mt`.
     have hSlot0_tuple :
         (fun i : Fin (s + 1 + 1) =>
             localSlotCLM (I := I) (s + 1 + 1) (0 : Fin (s + 1 + 1))
@@ -538,8 +445,6 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
         have hne : (k.succ : Fin (s + 1 + 1)) ≠ 0 := Fin.succ_ne_zero k
         simp [hne, localSlotCLM]
     rw [hSlot0_tuple]
-    -- Slots `k.succ` reduce to slot-`k` corrections of the partial-eval at `mt`,
-    -- via `chartTensor0SSlotCorrection_succ_eq_partialEval_of_mem`.
     have hSlotSucc_sum :
         (∑ k : Fin (s + 1),
             (show ContinuousMultilinearMap ℝ
@@ -556,32 +461,21 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
       exact chartTensor0SSlotCorrection_succ_eq_partialEval_of_mem (I := I)
         g (s := s + 1) α T X (b := b) hb_base v k mt
     rw [hSlotSucc_sum]
-    -- Now apply IH to the partial-eval section (rank s + 1).
     have hPartialEval_at :
         TensorSectionMDiffAt (I := I) (s + 1)
           (tensor0SPartialEval I M T (chartParallelExtend (I := I) α b v)) b :=
       TensorSectionMDiffAt_partialEval (I := I) (s + 1) α T hb hT_at v
-    -- IH: chartTensor0SCovariantDerivative (s+1) (partialEval) X b =
-    --     tensor0SCovariantDerivative I M (s+1) (LeviCivita g) (partialEval) b X b.
     have hIH := ih (tensor0SPartialEval I M T
         (chartParallelExtend (I := I) α b v))
       X hb hPartialEval_at hX_at
-    -- Apply IH on the cov-side (RHS first piece): rewrite
-    -- `tensor0SCovariantDerivative I M (s+1) (LeviCivita g) (partialEval) b X b`
-    -- to `chartTensor0SCovariantDerivative (s+1) g α (partialEval) X b`.
     rw [← hIH]
-    -- The chart-frame cov on partial-eval (rank s + 1), evaluated at `mt`,
-    -- is `intrinsic_partialEval at mt - ∑ k, slot_k_partialEval at mt` (a
-    -- CMLM evaluation that splits).
     rw [chartTensor0SCovariantDerivative_succ_apply (I := I) s g α
         (tensor0SPartialEval I M T (chartParallelExtend (I := I) α b v))
         X b mt]
-    -- The cov_TM piece on RHS: `(LeviCivita g) Y b (X b) = Φ v` on the good set.
     have h_cov_TM_eq :
         (LeviCivita (I := I) g) (chartParallelExtend (I := I) α b v) b (X b) =
           chartLeviCivitaParallelCLM (I := I) g α b X v :=
       LeviCivita_chartParallelExtend_eq_parallelCLM (I := I) g α hb v X
-    -- Apply the curry-factor identity for the intrinsic piece.
     have hT_pull :
         DifferentiableAt ℝ
           (tensor0SChartE_section_repr (I := I) (s + 1 + 1) α T ∘
@@ -591,15 +485,12 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
     have hCurryFactor :=
       tensor0SIntrinsicChartCLM_factor_via_partialEval
         (I := I) (s + 1) α T hb v hT_pull X mt
-    -- Reduce `Fin.cons (chartParallelExtend ... b) mt` to `Fin.cons v mt`.
     have hCons_eq :
         (Fin.cons (chartParallelExtend (I := I) α b v b) mt
           : Fin (s + 1 + 1) → TangentSpace I b) =
           Fin.cons v mt := by
       rw [hYb_eq]
     rw [hCons_eq] at hCurryFactor
-    -- The slot-0 term `T b (Fin.cons (Φ v) mt)` must match the second Psi
-    -- piece, written as `(curriedSection T b (cov_TM Y b X)) mt`.
     have h_curry_eval_slot0 :
         (show ContinuousMultilinearMap ℝ
             (fun _ : Fin (s + 1 + 1) => TangentSpace I b) ℝ from T b)
@@ -622,13 +513,7 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ_aux
     rw [h_curry_eval_slot0]
     rw [h_cov_TM_eq]
     rw [hCurryFactor]
-    -- The two arithmetic expressions coincide by `abel`.
     abel
-
-/-! ## Headline theorem (smooth-section form)
-
-The smooth-section form is the direct corollary, extracting pointwise
-differentiability from the `Cₛ^∞` smoothness data. -/
 
 /-- **Headline agreement.** For a smooth Riemannian manifold `(M, g)`, a
 chart center `α : M`, a smooth `(0, s + 1)`-tensor section `T`, a smooth
@@ -657,7 +542,6 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ
   letI _h_fib : FiberBundle (Tensor0SModel (s + 1) ℝ E)
       (fun x : M => Tensor0SSpace (s + 1) I x) :=
     tensor0SBundle_fiber (s + 1)
-  -- Extract pointwise differentiability from the `Cₛ^∞` smoothness data.
   have hT_at : TensorSectionMDiffAt (I := I) (s + 1) T.toFun b := by
     unfold TensorSectionMDiffAt
     exact T.contMDiff.contMDiffAt.mdifferentiableAt (by simp)

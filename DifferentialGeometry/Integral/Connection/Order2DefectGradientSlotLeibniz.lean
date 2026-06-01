@@ -101,24 +101,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Total-space smoothness of the per-summand second covariant derivative section
-
-The per-summand section of the frame-frozen diagonal trace is
-```
-y ↦ tensorSecondCovDeriv g r s Bᵢ Bᵢ T y
-  = cov.toFun (covApply cov Bᵢ T) y (Bᵢ y) − cov.toFun T y ((LeviCivita g).toFun Bᵢ y (Bᵢ y)),
-```
-with `cov := tensorCov g r s`. Both summands are smooth sections: the first is the iterated
-directional derivative `covApply cov Bᵢ (covApply cov Bᵢ T)` and the second is the
-Christoffel-correction `covApply cov (∇_{Bᵢ} Bᵢ) T`, where `∇_{Bᵢ} Bᵢ := covApply (LeviCivita g) Bᵢ
-Bᵢ` is a smooth tangent field. We assemble both from `covApplyRS_contMDiff`. -/
 
 /-- **Smoothness of the iterated directional covariant derivative `∇_{Bᵢ} ∇_{Bᵢ} T`.** For a smooth
 tangent field `B` and smooth `(r, s)`-tensor section `T`, the twice-directionally-derived section
@@ -136,11 +122,8 @@ theorem covApply_covApply_section_contMDiff
         (E := fun z : M => TensorRSSpace r s I z) y
         ((tensorCov (I := I) g r s).toFun
           (covApply (tensorCov (I := I) g r s) B T) y (B y))) := by
-  -- The inner section `covApply cov B T` is smooth.
   have hInner := covApplyRS_contMDiff (I := I) g r s hT hB
-  -- The outer `covApply cov B (covApply cov B T)` is smooth; it is definitionally the goal.
   have hOuter := covApplyRS_contMDiff (I := I) g r s hInner hB
-  -- `covApply cov B (covApply cov B T) y = cov.toFun (covApply cov B T) y (B y)`.
   exact hOuter
 
 /-- **Smoothness of the Christoffel-correction section `∇_{(∇_{Bᵢ} Bᵢ)} T`.** For a smooth tangent
@@ -160,17 +143,14 @@ theorem covApply_christoffel_section_contMDiff
         (E := fun z : M => TensorRSSpace r s I z) y
         ((tensorCov (I := I) g r s).toFun T y
           ((LeviCivita (I := I) g).toFun B y (B y)))) := by
-  -- The tangent field `∇_B B := covApply (LeviCivita g) B B` is smooth.
   have hChristoffel : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun y : M => TotalSpace.mk' E (E := TangentSpace I) y
         ((LeviCivita (I := I) g).toFun B y (B y))) := by
-    -- `covApply (LeviCivita g) B B y = (LeviCivita g).toFun B y (B y)`.
     have hBplus : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1) (T% B) := by
       rw [show ((∞ : WithTop ℕ∞) + 1) = ∞ from rfl]; exact hB
     have hOn := covApply_contMDiffOn (cov := LeviCivita (I := I) g) hB hBplus
     intro b
     exact hOn.contMDiffAt (Filter.univ_mem)
-  -- `cov.toFun T y (∇_B B y) = covApply cov (∇_B B) T y`, smooth by `covApplyRS_contMDiff`.
   exact covApplyRS_contMDiff (I := I) g r s hT hChristoffel
 
 /-- **Total-space smoothness of the per-summand second covariant derivative section.** For a smooth
@@ -192,9 +172,7 @@ theorem tensorSecondCovDeriv_section_contMDiff
         (tensorSecondCovDeriv (I := I) g r s B B T y)) := by
   have hFirst := covApply_covApply_section_contMDiff (I := I) g r s hT hB
   have hSecond := covApply_christoffel_section_contMDiff (I := I) g r s hT hB
-  -- The per-summand section is `hFirst − hSecond`; `tensorSecondCovDeriv_def` is definitional.
   have hSub := hFirst.sub_section hSecond
-  -- The two total-space sections agree pointwise (by `tensorSecondCovDeriv_def`, which is `rfl`).
   have hpt : (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun z : M => TensorRSSpace r s I z) y
         (tensorSecondCovDeriv (I := I) g r s B B T y)) =
@@ -225,7 +203,6 @@ theorem frozenFrameTrace_section_contMDiff
         (E := fun z : M => TensorRSSpace r s I z) y
         (frozenFrameTrace (I := I) g r s T x y)) := by
   classical
-  -- Each summand is smooth.
   have hsummand : ∀ i : Fin (Module.finrank ℝ E),
       ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
         (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
@@ -234,13 +211,11 @@ theorem frozenFrameTrace_section_contMDiff
             (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i) T y)) :=
     fun i => tensorSecondCovDeriv_section_contMDiff (I := I) g r s hT
       (smoothOrthoFrame_smooth (I := I) g x i)
-  -- The frame-frozen trace is the finite sum of the summands.
   have hsum := ContMDiff.sum_section (s := (Finset.univ : Finset (Fin (Module.finrank ℝ E))))
     (t := fun i (y : M) =>
       tensorSecondCovDeriv (I := I) g r s
         (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i) T y)
     (fun i _ => hsummand i)
-  -- The frozen-frame section is pointwise the finite sum (by `frozenFrameTrace_def`).
   have hpt : (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun z : M => TensorRSSpace r s I z) y
         (frozenFrameTrace (I := I) g r s T x y)) =
@@ -252,14 +227,6 @@ theorem frozenFrameTrace_section_contMDiff
     funext y; rw [frozenFrameTrace_def]
   rw [hpt]
   exact hsum
-
-/-! ## The gradient-slot Leibniz intertwining: covariant-additivity through the fixed frame
-
-The directional covariant derivative `cov.toFun` of a finite sum of sections distributes over the
-sum, when each summand is differentiable at the point (`IsCovariantDerivativeOn.add`, iterated by
-`Finset` induction). Because the frame `Bᵢ := smoothOrthoFrame g x i` is *fixed* in `i` (it does not
-depend on the point of evaluation in the way the moving frame does), the outer covariant derivative
-of the frame-frozen diagonal trace passes through the sum with no moving-frame derivative. -/
 
 /-- **The covariant derivative distributes over a finite sum of differentiable sections.** For the
 bundled `(r, s)`-tensor covariant derivative `cov := tensorCov g r s` and a family `σ i` of sections,
@@ -281,25 +248,21 @@ theorem tensorCov_toFun_finset_sum
   set cov := tensorCov (I := I) g r s with hcov_def
   induction t using Finset.induction with
   | empty =>
-    -- The covariant derivative of the zero section vanishes.
     rw [Finset.sum_empty]
     rw [show (fun y : M => ∑ _i ∈ (∅ : Finset ι), σ _i y) =
         (0 : Π b : M, TensorRSSpace r s I b) from by
       funext y; rw [Finset.sum_empty]; rfl]
     exact cov.isCovariantDerivativeOnUniv.zero (x := x) (mem_univ x)
   | insert a t' ha ih =>
-    -- Differentiability of the partial sum over `t'`.
     have hpartial : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
         (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
           (E := fun z : M => TensorRSSpace r s I z) y (∑ i ∈ t', σ i y)) x :=
       MDifferentiableAt.sum_section (s := t')
         (t := fun i (y : M) => σ i y) (fun i => hσ i)
-    -- `cov (σ a + ∑_{t'} σ) x = cov (σ a) x + cov (∑_{t'} σ) x`.
     have hadd := cov.isCovariantDerivativeOnUniv.add
       (σ := (fun y => σ a y : Π b : M, TensorRSSpace r s I b))
       (σ' := (fun y => ∑ i ∈ t', σ i y : Π b : M, TensorRSSpace r s I b))
       (hσ a) hpartial (mem_univ x)
-    -- The inserted sum section is the pointwise `Pi.add` of `σ a` and the partial sum.
     have hsection : (fun y : M => ∑ i ∈ insert a t', σ i y) =
         ((fun y => σ a y : Π b : M, TensorRSSpace r s I b) +
           (fun y => ∑ i ∈ t', σ i y : Π b : M, TensorRSSpace r s I b)) := by
@@ -331,14 +294,12 @@ theorem covDeriv_frozenFrameTrace_eq_sum
           (fun y : M => tensorSecondCovDeriv (I := I) g r s
             (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i) T y) x v := by
   classical
-  -- Rewrite the frozen-frame section as the explicit finite sum of the per-summand sections.
   have hfrozen : (fun y : M => frozenFrameTrace (I := I) g r s T x y) =
       (fun y : M => ∑ i : Fin (Module.finrank ℝ E),
         tensorSecondCovDeriv (I := I) g r s
           (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i) T y) := by
     funext y; rw [frozenFrameTrace_def]
   rw [hfrozen]
-  -- Per-summand differentiability at `x` (for every frame index).
   have hσ : ∀ i : Fin (Module.finrank ℝ E),
       MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
         (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
@@ -347,17 +308,10 @@ theorem covDeriv_frozenFrameTrace_eq_sum
             (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i) T y)) x :=
     fun i => (tensorSecondCovDeriv_section_contMDiff (I := I) g r s hT
       (smoothOrthoFrame_smooth (I := I) g x i)).mdifferentiable (by norm_num) x
-  -- Distribute `cov.toFun` over the finite sum, then evaluate at `v`.
   rw [tensorCov_toFun_finset_sum (I := I) g r s Finset.univ
     (fun i (y : M) => tensorSecondCovDeriv (I := I) g r s
       (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i) T y) hσ]
   rw [ContinuousLinearMap.sum_apply]
-
-/-! ## The headline gradient-slot Leibniz commutation
-
-Chaining the frame-independence bridge (the rough Laplacian agrees with the frame-frozen trace near
-`x`, `rawTensorConnLap_eventuallyEq_frozenFrameTrace`) with the covariant-additivity form, the
-directional covariant derivative of the rough Laplacian itself passes through the fixed frame sum. -/
 
 /-- **The gradient-slot Leibniz commutation.** The directional `(r, s)`-tensor covariant derivative
 of the rough Laplacian `Δ_∇ T` at `x` equals the fixed-frame sum of the covariant derivatives of the
@@ -387,11 +341,9 @@ theorem covDeriv_rawConnLap_eq_frozenFrameTrace_sum
           (fun y : M => tensorSecondCovDeriv (I := I) g r s
             (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i) T y) x v := by
   classical
-  -- The two sections `Δ_∇ T` and `frozenFrameTrace x ·` agree near `x`.
   have hagree : ∀ᶠ y in 𝓝 x, rawTensorConnLap (I := I) g r s T y =
       frozenFrameTrace (I := I) g r s T x y :=
     rawTensorConnLap_eventuallyEq_frozenFrameTrace (I := I) g r s T hT x
-  -- Differentiability of both sections at `x`.
   have hLap : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
       (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun z : M => TensorRSSpace r s I z) y (rawTensorConnLap (I := I) g r s T y)) x :=
@@ -400,28 +352,16 @@ theorem covDeriv_rawConnLap_eq_frozenFrameTrace_sum
       (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun z : M => TensorRSSpace r s I z) y (frozenFrameTrace (I := I) g r s T x y)) x :=
     (frozenFrameTrace_section_contMDiff (I := I) g r s hT x).mdifferentiable (by norm_num) x
-  -- Transport the covariant derivative from `Δ_∇ T` to `frozenFrameTrace x ·`.
   have hcongr := tensorRSCovariantDerivative_congr_of_eventuallyEq (I := I) g r s
     (σ := fun y : M => rawTensorConnLap (I := I) g r s T y)
     (σ' := fun y : M => frozenFrameTrace (I := I) g r s T x y)
     hagree hLap hFrozen
-  -- Apply both sides at `v`, then distribute through the fixed frame sum.
   rw [show (tensorCov (I := I) g r s).toFun
         (fun y : M => rawTensorConnLap (I := I) g r s T y) x v =
       ((tensorCov (I := I) g r s).toFun
         (fun y : M => rawTensorConnLap (I := I) g r s T y) x) v from rfl]
   rw [hcongr]
   exact covDeriv_frozenFrameTrace_eq_sum (I := I) g r s hT x v
-
-/-! ## The `(0, s + 1)`-tensor lift: the covariant gradient of the rough Laplacian as a frame sum
-
-The directional gradient-slot Leibniz commutation lifts to a genuine `(0, s + 1)`-tensor identity:
-the covariant gradient `∇(Δ_∇ T)` of the rough Laplacian — the fibrewise covariant-gradient bundle
-equivalence `covGradBundleEquiv` applied to the directional-covariant-derivative continuous-linear
-map — equals the fixed-frame sum of the covariant gradients of the per-summand second covariant
-derivatives. Because `covGradBundleEquiv` is a continuous *linear* equivalence, it commutes with the
-finite frame sum (`map_sum`); the per-direction equality of the directional maps is the
-covariant-additivity form `covDeriv_rawConnLap_eq_frozenFrameTrace_sum`. -/
 
 /-- **The directional covariant derivative of `Δ_∇ T` as a sum of continuous-linear maps.** The
 continuous-linear map `v ↦ ∇_v (Δ_∇ T) (x)` (the directional covariant derivative of the rough
@@ -479,22 +419,6 @@ theorem covGradBundleEquiv_covDeriv_rawConnLap_eq_sum
   rw [covDerivMap_rawConnLap_eq_frozenFrameTrace_sum (I := I) g r s hT x]
   exact map_sum (covGradBundleEquiv (I := I) (M := M) r s x) _ _
 
-/-! ## The defect as a fixed-frame sum of per-summand third-order differences
-
-Specialising the `(0, s + 1)`-tensor lift to `r = 0`, `s = 2`, `T = T₀`, the gradient piece
-`∇(Δ_∇ T₀)` of the canonical defect equals the fixed-frame sum of the per-summand covariant
-gradients `∇(∇²_{Bᵢ, Bᵢ} T₀)`, identified through `covGrad_toSection_apply`. Combined with the
-frame-trace reading of the rough-Laplacian piece (`rawTensorConnLap_gradTensor_toSection_eq_frame_
-trace`, `Order2DefectOffDiagPerDir.lean`), the canonical defect
-`covGradRoughLapCurv g T₀ = Δ_∇(∇T₀) − ∇(Δ_∇ T₀)` becomes a *fixed-frame* sum of per-summand
-third-order differences
-```
-∑ᵢ [ ∇²_{Bᵢ, Bᵢ}(∇T₀)(x) − ∇(∇²_{Bᵢ, Bᵢ} T₀)(x) ],
-```
-each of which is the gradient-slot reordering of the three covariant derivative slots — the genuine
-off-diagonal Riemann curvature, controlled by `secondCovDeriv_gradTensor_antisymm_eq_riemannOp` and
-`frame_offDiag_curvature_sum_fiberNormSq_le`. No moving-frame derivative survives. -/
-
 /-- **The gradient piece of the defect as a fixed-frame sum of per-summand covariant gradients.** The
 covariant gradient `∇(Δ_∇ T₀)` of the rough Laplacian (the section of `covGrad g 0 2 (Δ_∇ T₀)`)
 equals, at `x`, the fixed-frame sum of the covariant gradients of the per-summand second covariant
@@ -517,19 +441,15 @@ theorem covGrad_rawConnLap_toSection_eq_frame_sum
             (fun y : M => tensorSecondCovDeriv (I := I) g 0 2
               (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i)
               (fun z : M => T₀.toSection z) y) x) := by
-  -- Smoothness of the underlying `T₀` section (total-space form).
   have hT : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 2 ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (TensorRSModel 0 2 ℝ E)
         (E := fun z : M => TensorRSSpace 0 2 I z) y (T₀.toSection y)) :=
     T₀.toSection.contMDiff
-  -- The covariant gradient reads through `covGradBundleEquiv` of the directional map of `Δ_∇ T₀`.
   rw [covGrad_toSection_apply (I := I) (M := M) g 0 2
     (rawTensorConnLapSmooth (I := I) g 0 2 T₀) x]
-  -- Rewrite the inner directional map's section `Δ_∇ T₀` to the raw `rawTensorConnLap`.
   rw [show (fun y : M => (rawTensorConnLapSmooth (I := I) g 0 2 T₀).toSection y) =
       (fun y : M => rawTensorConnLap (I := I) g 0 2 (fun z : M => T₀.toSection z) y) from by
     funext y; rw [rawTensorConnLapSmooth_toSection_apply]]
-  -- `tensorRSCovariantDerivative I M 0 2 (LeviCivita g) = tensorCov g 0 2` by definition.
   exact covGradBundleEquiv_covDeriv_rawConnLap_eq_sum (I := I) g 0 2 hT x
 
 /-- **The canonical defect as a fixed-frame sum of per-summand third-order differences.** The
@@ -561,13 +481,9 @@ theorem covGradRoughLapCurv_toSection_eq_frame_sum
                 (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i)
                 (fun z : M => T₀.toSection z) y) x)) := by
   classical
-  -- Split the defect into the rough-Laplacian piece and the gradient piece.
   rw [covGradRoughLapCurv_toSection_eq_sub (I := I) (M := M) g T₀ x]
-  -- Rough-Laplacian piece: the frame trace of the second covariant derivative of `∇T₀`.
   rw [rawTensorConnLap_gradTensor_toSection_eq_frame_trace (I := I) (M := M) g T₀ x]
-  -- Gradient piece: the fixed-frame sum of per-summand covariant gradients.
   rw [covGrad_rawConnLap_toSection_eq_frame_sum (I := I) (M := M) g T₀ x]
-  -- Combine the two frame sums into a single frame sum of differences.
   rw [← Finset.sum_sub_distrib]
 
 end Connection

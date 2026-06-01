@@ -63,8 +63,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Centre identities for the chart-Jacobian factors -/
-
 /-- The chart-`b` Jacobian factor at the centre is the identity. -/
 lemma chartJ_self (b : M) :
     (trivializationAt E (TangentSpace I) b).continuousLinearMapAt ℝ b =
@@ -83,8 +81,6 @@ lemma chartJinv_self (b : M) :
   ext v
   exact (tangentBundleCore I M).coordChange_self (achart H b) b
     (by rw [tangentBundleCore_baseSet, coe_achart]; exact mem_chart_source H b) v
-
-/-! ## Pointwise wrapped continuity at the centre -/
 
 /-- The wrapped chart-inverse-Jacobian CLM
 `b ↦ (triv b₀).clmAt b ∘L (triv α).symmL b` is operator-norm continuous at the

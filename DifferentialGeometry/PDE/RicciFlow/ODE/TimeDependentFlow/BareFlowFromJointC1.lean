@@ -56,8 +56,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [BoundarylessManifold I M] [T2Space M]
 
-/-! ### The clean separable joint-`C¹` predicate -/
-
 /--
 **Joint `C¹` regularity of the autonomised field.**
 
@@ -80,8 +78,6 @@ def AutonomizedFieldJointC1 (X : ℝ → ∀ x : M, TangentSpace I x) : Prop :=
         (⟨p, autonomizedFlowVF X p⟩ : TangentBundle (𝓘(ℝ, ℝ).prod I) (ℝ × M)))
       p
 
-/-! ### Bare local integral flow from the predicate -/
-
 /--
 **Bare local integral flow from joint `C¹`.** A direct re-export of
 `time_dependent_vf_local_integral_flow_bare` with the joint-`C¹` regularity input
@@ -98,8 +94,6 @@ theorem time_dependent_vf_bare_local_flow_of_jointC1 [CompleteSpace E]
         HasMFDerivWithinAt 𝓘(ℝ, ℝ) I γ (Ici 0) t
           ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t))) :=
   time_dependent_vf_local_integral_flow_bare X hX x
-
-/-! ### The autonomisation lift of a bare integral curve -/
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M]
   [T2Space M] in
@@ -119,13 +113,10 @@ theorem autonomizedLift_hasMFDerivWithinAt (X : ℝ → ∀ x : M, TangentSpace 
       ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t)))) :
     HasMFDerivWithinAt 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod I) (fun u : ℝ => (u, γ u)) s t
       ((1 : ℝ →L[ℝ] ℝ).smulRight (autonomizedFlowVF X (t, γ t))) := by
-  -- The time component `u ↦ u` is the identity, with derivative `id ℝ ℝ`.
   have hfst : HasMFDerivWithinAt 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun u : ℝ => u) s t
       (ContinuousLinearMap.id ℝ (TangentSpace 𝓘(ℝ, ℝ) t)) :=
     hasMFDerivWithinAt_id s t
-  -- The product curve `u ↦ (u, γ u)` has product derivative.
   have hprod := hfst.prodMk hγ
-  -- Identify the product CLM with `(1).smulRight (autonomizedFlowVF X (t, γ t))`.
   have hCLM :
       ((1 : ℝ →L[ℝ] ℝ).smulRight (autonomizedFlowVF X (t, γ t)))
         = (ContinuousLinearMap.id ℝ (TangentSpace 𝓘(ℝ, ℝ) t)).prod
@@ -157,8 +148,6 @@ theorem autonomizedLift_isMIntegralCurveOn_of_bareFlow
   intro t ht
   exact autonomizedLift_hasMFDerivWithinAt X (fun u : ℝ => Φ u x) s t (hflow t ht)
 
-/-! ### Uniqueness of the bare flow -/
-
 /--
 **Uniqueness of the bare integral flow.** Suppose two curves `s ↦ Φ s x` and
 `s ↦ Φ' s x` both satisfy the bare flow equation of `X` on an open interval
@@ -184,32 +173,25 @@ theorem bare_integral_flow_eqOn_of_jointC1 [CompleteSpace E]
         ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ' t x'))))
     (hstart : Φ t₀ x = Φ' t₀ x') :
     ∀ t ∈ Ioo a b, Φ t x = Φ' t x' := by
-  -- Lift both curves to `ℝ × M`.
   have hc : IsMIntegralCurveOn (fun u : ℝ => (u, Φ u x)) (autonomizedFlowVF X)
       (Ioo a b) :=
     autonomizedLift_isMIntegralCurveOn_of_bareFlow X Φ x (Ioo a b) hflow
   have hc' : IsMIntegralCurveOn (fun u : ℝ => (u, Φ' u x')) (autonomizedFlowVF X)
       (Ioo a b) :=
     autonomizedLift_isMIntegralCurveOn_of_bareFlow X Φ' x' (Ioo a b) hflow'
-  -- The autonomised field is `C¹` as a tangent-bundle section on `ℝ × M`.
   have hv : ContMDiff (𝓘(ℝ, ℝ).prod I)
       ((𝓘(ℝ, ℝ).prod I).prod 𝓘(ℝ, ℝ × E)) 1
       (fun p : ℝ × M =>
         (⟨p, autonomizedFlowVF X p⟩ : TangentBundle (𝓘(ℝ, ℝ).prod I) (ℝ × M))) :=
     fun p => hX p
-  -- The two lifts agree at `t₀`.
   have hstartlift : (fun u : ℝ => (u, Φ u x)) t₀ = (fun u : ℝ => (u, Φ' u x')) t₀ := by
     simp only
     rw [hstart]
-  -- Apply Mathlib uniqueness on the boundaryless product manifold.
   have heq : EqOn (fun u : ℝ => (u, Φ u x)) (fun u : ℝ => (u, Φ' u x')) (Ioo a b) :=
     isMIntegralCurveOn_Ioo_eqOn_of_contMDiff_boundaryless ht₀ hv hc hc' hstartlift
-  -- Project onto the second coordinate.
   intro t ht
   have := heq ht
   simpa using congrArg Prod.snd this
-
-/-! ### Existence and uniqueness of the bare local flow, together -/
 
 /--
 **Bare local integral flow with uniqueness, from joint `C¹`.**
@@ -248,15 +230,11 @@ theorem time_dependent_vf_bare_local_flow_exists_unique_of_jointC1 [CompleteSpac
     time_dependent_vf_local_integral_flow_bare X hX x
   refine ⟨ε, hε, γ, hγ0, hγflow, ?_⟩
   intro γ' hγ'0 hγ'two hγtwo t ht
-  -- `0 ∈ Ioo (-ε) ε`, and the two curves agree there.
   have h0mem : (0 : ℝ) ∈ Ioo (-ε) ε := by constructor <;> simp [hε]
   have hstart : γ 0 = γ' 0 := by rw [hγ0, hγ'0]
-  -- Apply the bare-flow uniqueness with `Φ u _ := γ u`, `Φ' u _ := γ' u`.
   exact bare_integral_flow_eqOn_of_jointC1 (a := -ε) (b := ε) (t₀ := 0)
     X hX (fun u : ℝ => fun _ : M => γ u) (fun u : ℝ => fun _ : M => γ' u) x x
     h0mem hγtwo hγ'two hstart t ht
-
-/-! ### The diffeomorphism family carrying the genuine bare flow -/
 
 variable [CompactSpace M] [SigmaCompactSpace M]
 

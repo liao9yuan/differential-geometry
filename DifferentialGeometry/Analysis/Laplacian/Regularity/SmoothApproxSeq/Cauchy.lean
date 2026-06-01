@@ -62,8 +62,6 @@ open DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound
 open DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualLinearity
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -72,8 +70,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## The smooth-scalar difference -/
 
 /-- For two smooth scalars `v₁ v₂ : SmoothScalar g`, their pointwise
 difference packaged as a `SmoothScalar g`. On a closed manifold, the
@@ -88,8 +84,6 @@ private lemma smoothScalarSub_toFun
     {g : SmoothRiemannianMetric I M}
     (v₁ v₂ : SmoothScalar g) :
     (smoothScalarSub v₁ v₂).toFun = fun x => v₁.toFun x - v₂.toFun x := rfl
-
-/-! ## Cauchy property of `smoothFChartResidual` along `smoothApproxSeq` -/
 
 /-- **Chart-target W^{1,2}-Cauchy property of `smoothFChartResidual` along the
 smooth approximator sequence `smoothApproxSeq`**.
@@ -123,12 +117,8 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy
         (chartTargetEuclid (I := I) (M := M) α) ≤ ENNReal.ofReal ε := by
   classical
   intro ε hε
-  -- Obtain the bilinear bound constant `C` for `smoothFChartResidual`.
   obtain ⟨C, hC_pos, hC_bound⟩ :=
     wkpNorm_smoothFChartResidual_le_wkpNormChart (I := I) (M := M) g α
-  -- We aim to choose `N` such that for `m, n ≥ N`, the bilinear bound times
-  -- the chart-W^{2,2} Cauchy diameter `1/(m+1) + 1/(n+1)` is at most `ε`.
-  -- Sufficient: `C * (2/(N+1)) ≤ ε`, i.e. `1/(N+1) ≤ ε/(2C)`.
   have hε_C_pos : 0 < ε / (2 * C) := by positivity
   obtain ⟨N0, hN0_real⟩ := exists_nat_gt (1 / (ε / (2 * C)) - 1)
   have hN1_pos : (0 : ℝ) < (N0 : ℝ) + 1 := by
@@ -143,21 +133,14 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy
     linarith
   refine ⟨N0, ?_⟩
   intro m n hm hn
-  -- Define the difference smooth scalar.
   set vm : SmoothScalar g := smoothApproxSeq (I := I) (M := M) g hu_h m with hvm_def
   set vn : SmoothScalar g := smoothApproxSeq (I := I) (M := M) g hu_h n with hvn_def
   set vdiff : SmoothScalar g := smoothScalarSub vm vn with hvdiff_def
   have hvdiff_toFun :
       vdiff.toFun = fun x => vm.toFun x - vn.toFun x :=
     smoothScalarSub_toFun vm vn
-  -- Step 1: by a.e. linearity, `smoothFChartResidual g α vdiff` is a.e. equal
-  -- to the pointwise difference `smoothFChartResidual g α vm - smoothFChartResidual g α vn`
-  -- on `volume.restrict (chartTargetEuclid α)`.
   have h_ae_sub :=
     smoothFChartResidual_ae_sub (I := I) (M := M) g α vm vn vdiff hvdiff_toFun
-  -- Step 2: by `wkpNorm_congr_ae` on the open set `chartTargetEuclid α`,
-  -- the chart-target W^{1,2} norm of the pointwise difference equals the
-  -- chart-target W^{1,2} norm of `smoothFChartResidual g α vdiff`.
   have h_wkp_eq :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) 1 2
@@ -177,18 +160,13 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy
       (chartTargetEuclid_isOpen (I := I) (M := M) α) ?_
     exact h_ae_sub.symm
   rw [h_wkp_eq]
-  -- Step 3: apply the bilinear bound to `vdiff`.
   have h_bilinear := hC_bound vdiff
-  -- h_bilinear : wkpNorm 1 2 (smoothFChartResidual g α vdiff) chartTarget
-  --              ≤ ENNReal.ofReal C * wkpNormChart g 2 2 vdiff.toFun
-  -- Step 4: bound `wkpNormChart g 2 2 vdiff.toFun` by `1/(m+1) + 1/(n+1)`.
   have h_chartW22_cauchy :
       wkpNormChart (I := I) (M := M) g 2 2 vdiff.toFun ≤
         ENNReal.ofReal ((1 : ℝ) / ((m : ℝ) + 1)) +
           ENNReal.ofReal ((1 : ℝ) / ((n : ℝ) + 1)) := by
     rw [hvdiff_toFun]
     exact smoothApproxSeq_wkpNormChart_diff_le (I := I) (M := M) g hu_h m n
-  -- Step 5: chain h_bilinear with h_chartW22_cauchy.
   have h_step :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) 1 2
@@ -201,8 +179,6 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy
     refine h_bilinear.trans ?_
     exact mul_le_mul_of_nonneg_left h_chartW22_cauchy (zero_le _)
   refine h_step.trans ?_
-  -- Step 6: Each of `1/(m+1)`, `1/(n+1)` is ≤ `1/(N0+1)` by monotonicity,
-  -- and `C * (2/(N0+1)) ≤ ε`.
   have hN0m : (N0 : ℝ) ≤ (m : ℝ) := by exact_mod_cast hm
   have hN0n : (N0 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
   have hm1_pos : (0 : ℝ) < (m : ℝ) + 1 := by linarith
@@ -213,7 +189,6 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy
   have hn_inv_le : (1 : ℝ) / ((n : ℝ) + 1) ≤ (1 : ℝ) / ((N0 : ℝ) + 1) := by
     apply div_le_div_of_nonneg_left zero_le_one hN1_pos
     linarith
-  -- Lift to ENNReal.ofReal.
   have hm_ofReal_le :
       ENNReal.ofReal ((1 : ℝ) / ((m : ℝ) + 1)) ≤
         ENNReal.ofReal ((1 : ℝ) / ((N0 : ℝ) + 1)) :=
@@ -222,7 +197,6 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy
       ENNReal.ofReal ((1 : ℝ) / ((n : ℝ) + 1)) ≤
         ENNReal.ofReal ((1 : ℝ) / ((N0 : ℝ) + 1)) :=
     ENNReal.ofReal_le_ofReal hn_inv_le
-  -- Combine via the bilinear constant.
   have hsum_le :
       ENNReal.ofReal ((1 : ℝ) / ((m : ℝ) + 1)) +
         ENNReal.ofReal ((1 : ℝ) / ((n : ℝ) + 1)) ≤
@@ -238,8 +212,6 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy
           ENNReal.ofReal ((1 : ℝ) / ((N0 : ℝ) + 1))) :=
     mul_le_mul_of_nonneg_left hsum_le (zero_le _)
   refine hC_step.trans ?_
-  -- Final step: ENNReal.ofReal C * 2 * ofReal(1/(N0+1)) ≤ ofReal ε.
-  -- Rewrite 2 copies of ofReal(1/(N0+1)) as ofReal(2/(N0+1)).
   have hN0_inv_pos : (0 : ℝ) ≤ (1 : ℝ) / ((N0 : ℝ) + 1) := by positivity
   have h_add :
       ENNReal.ofReal ((1 : ℝ) / ((N0 : ℝ) + 1)) +
@@ -249,22 +221,18 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy
         ((1 : ℝ) / ((N0 : ℝ) + 1)) + ((1 : ℝ) / ((N0 : ℝ) + 1)) by ring,
       ENNReal.ofReal_add hN0_inv_pos hN0_inv_pos]
   rw [h_add]
-  -- Now: ENNReal.ofReal C * ENNReal.ofReal (2 / (N0+1)) = ENNReal.ofReal (C * (2 / (N0+1))).
   have hprod_eq :
       ENNReal.ofReal C * ENNReal.ofReal (2 * ((1 : ℝ) / ((N0 : ℝ) + 1))) =
       ENNReal.ofReal (C * (2 * ((1 : ℝ) / ((N0 : ℝ) + 1)))) := by
     rw [← ENNReal.ofReal_mul hC_pos.le]
   rw [hprod_eq]
-  -- Reduce to ofReal: C * 2 * (1/(N0+1)) ≤ ε.
   refine ENNReal.ofReal_le_ofReal ?_
-  -- 1/(N0+1) ≤ ε / (2 * C)  ⇒  C * (2 * (1/(N0+1))) ≤ C * (2 * (ε / (2C))) = ε.
   have h_step_real :
       C * (2 * ((1 : ℝ) / ((N0 : ℝ) + 1))) ≤
       C * (2 * (ε / (2 * C))) := by
     apply mul_le_mul_of_nonneg_left _ hC_pos.le
     apply mul_le_mul_of_nonneg_left hN0_inv_real (by norm_num : (0 : ℝ) ≤ 2)
   refine h_step_real.trans ?_
-  -- C * (2 * (ε / (2C))) = ε.
   have h_simp : C * (2 * (ε / (2 * C))) = ε := by
     field_simp
   rw [h_simp]

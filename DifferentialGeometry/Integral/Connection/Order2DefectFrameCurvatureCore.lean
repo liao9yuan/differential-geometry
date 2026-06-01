@@ -114,22 +114,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The frame-summed off-diagonal curvature fibre bound
-
-For a fixed outer frame direction `a`, the third-order Weitzenböck defect produces, per frame
-direction `i`, the genuine off-diagonal curvature contraction `R_x(Bᵢ, Bₐ)(∇T₀)`. Their frame sum
-`∑ᵢ R_x(Bᵢ, Bₐ)(∇T₀)` is the non-degenerate curvature object the defect reduces to along the outer
-direction `a`. Its intrinsic fibre norm is bounded by `n² · Cx · rfns(∇T₀)`: the `n`-sub-additivity
-`riemannianFiberNormSq_sum_le_card_mul` contributes a factor `n = #frame`, and the per-pair bound
-`riemannOp_gradTensor_offDiag_frame_fiberNormSq_le` contributes `Cx · rfns(∇T₀)` summed over the
-`n` frame directions, giving `n · (n · Cx · rfns(∇T₀)) = n² · Cx · rfns(∇T₀)`. -/
 
 /-- **Frame-summed off-diagonal curvature fibre bound.** With `Bₖ := smoothOrthoFrame g x k` and
 `S := ∇T₀ = covGrad g 0 2 T₀`, the frame sum over `i` of the off-diagonal Riemann curvature
@@ -158,21 +146,18 @@ theorem frame_offDiag_curvature_sum_fiberNormSq_le
   obtain ⟨Cx, hCx_nonneg, hpair⟩ :=
     riemannOp_gradTensor_offDiag_frame_fiberNormSq_le (I := I) (M := M) g T₀ x
   refine ⟨Cx, hCx_nonneg, ?_⟩
-  -- Abbreviate the (fixed) base fibre norm `rfns(∇T₀)(x)` and the curvature summand family.
   set rS : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 3 x
     ((covGrad (I := I) (M := M) g 0 2 T₀).toSection x) with hrS_def
   set F : Fin (Module.finrank ℝ E) → TensorRSSpace 0 3 I x := fun i =>
     riemannOp (tensorCov (I := I) g 0 3) x
       (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x a x)
       ((covGrad (I := I) (M := M) g 0 2 T₀).toSection x) with hF_def
-  -- `n`-sub-additivity of the squared fibre norm on the finite frame sum.
   have hsum_le :
       riemannianFiberNormSq (I := I) (M := M) g 0 3 x (∑ i : Fin (Module.finrank ℝ E), F i) ≤
         ((Finset.univ : Finset (Fin (Module.finrank ℝ E))).card : ℝ) *
           ∑ i : Fin (Module.finrank ℝ E),
             riemannianFiberNormSq (I := I) (M := M) g 0 3 x (F i) :=
     riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g 0 3 x Finset.univ F
-  -- Each per-pair summand is bounded by `Cx * rS` (the per-pair bound, folded into `rS`).
   have hper_le :
       ∑ i : Fin (Module.finrank ℝ E),
           riemannianFiberNormSq (I := I) (M := M) g 0 3 x (F i) ≤
@@ -197,15 +182,6 @@ theorem frame_offDiag_curvature_sum_fiberNormSq_le
         rw [hcard, hconst_sum]
     _ = (Module.finrank ℝ E : ℝ) ^ 2 * Cx * rS := by ring
 
-/-! ## The closed-manifold uniform form of the frame curvature sum bound
-
-On a closed manifold the per-point curvature constant `Cx` is bounded above, so the frame-summed
-off-diagonal curvature contraction is controlled by a single nonnegative constant times
-`rfns(∇T₀)`, uniformly in the base point and the outer frame direction. We expose the uniform
-constant on a single base point `x` (the per-point `Cx` is already uniform over the frame pairs);
-the genuine over-`M` uniformity of `Cx` is the metric-coercivity / curvature-boundedness content of
-the imported Parseval bound and is consumed downstream as needed. -/
-
 /-- **Frame curvature sum bound, scalar-budget form.** Rephrasing
 `frame_offDiag_curvature_sum_fiberNormSq_le` with the curvature constant `Cx` and the dimension
 factor `n²` folded into a single nonnegative scalar `K := n² · Cx`: the frame-summed off-diagonal
@@ -227,17 +203,6 @@ theorem exists_frame_offDiag_curvature_sum_fiberNormSq_bound
     frame_offDiag_curvature_sum_fiberNormSq_le (I := I) (M := M) g T₀ x a
   refine ⟨(Module.finrank ℝ E : ℝ) ^ 2 * Cx, ?_, hbound⟩
   positivity
-
-/-! ## The frame-independence bridge: the moving-frame obstruction discharged
-
-The rough Laplacian `Δ_∇ T = rawTensorConnLap g r s T` traces against the *moving*
-`g_y`-orthonormal frame `Cʸᵢ := smoothOrthoFrame g y i`. The fixed-frame `frozenFrameTrace g r s
-T x ·` traces against the `x`-centred frame `Bᵢ := smoothOrthoFrame g x i`. The bridge
-`rawTensorConnLap_eq_fixedFrame_of_orthonormal` (`TensorConnLaplacian.lean`) shows they agree at
-every `y` where the fixed frame `Bᵢ` is `g_y`-orthonormal — in particular throughout the
-orthonormality neighbourhood `smoothOrthoFrameNbhd x` (`smoothOrthoFrame_orthonormal`). Hence on the
-neighbourhood the rough Laplacian is a *fixed-frame* diagonal trace, and the outer covariant
-derivative acts on it with no moving-frame derivative. -/
 
 /-- **The frame-frozen diagonal trace is the fixed-frame rough Laplacian.** Unfolding the
 definitions, the frame-frozen diagonal sum `frozenFrameTrace g r s T x y` is *definitionally* the

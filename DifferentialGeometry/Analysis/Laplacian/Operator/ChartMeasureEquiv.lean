@@ -91,19 +91,12 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-Match the convention in surrounding files: install Borel σ-algebras locally
-without leaking global instances. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Model-space form: integral against `modelHaar` on the chart target -/
 
 /-- **Chart-pulled volume identity (model-space form).**
 
@@ -129,12 +122,10 @@ theorem integral_riemannianVolumeMeasure_eq_modelHaar_chartTarget
           f ((extChartAt I α).symm y)
         ∂(modelHaar (E := E)) := by
   classical
-  -- Step 1: replace `μ_g` by the chart-local measure at `α`.
   have h_step1 :=
     integral_riemannianVolumeMeasure_eq_chartLocal_of_support_in_chart
       (I := I) (M := M) g α hf_cont hf_supp
   rw [h_step1]
-  -- Step 2: unfold the chart-local Bochner integral via `integral_chartLocalMeasure`.
   exact integral_chartLocalMeasure (I := I) (M := M) g α f hf_cont.measurable
 
 /-- **Chart-pulled volume identity (model-space form, indicator variant).**
@@ -157,11 +148,8 @@ theorem integral_riemannianVolumeMeasure_eq_modelHaar_chartTarget_indicator
   classical
   rw [integral_riemannianVolumeMeasure_eq_modelHaar_chartTarget
     (I := I) (M := M) g α hf_cont hf_supp]
-  -- Convert the `setIntegral` over `target` to an `integral` over all of `E`
-  -- by pre-multiplying with `Set.indicator target 1`.
   have htgt_meas : MeasurableSet (extChartAt I α).target :=
     measurableSet_extChartAt_target (I := I) α
-  -- First, rewrite `setIntegral` as `∫ y, target.indicator (fun y' => density(y') * f(y')) y dμ`.
   rw [show
       (∫ y in (extChartAt I α).target,
           chartDensity g α ((extChartAt I α).symm y) *
@@ -173,30 +161,12 @@ theorem integral_riemannianVolumeMeasure_eq_modelHaar_chartTarget_indicator
                   f ((extChartAt I α).symm y')) y
             ∂(modelHaar (E := E)) from
         (MeasureTheory.integral_indicator htgt_meas).symm]
-  -- Then rewrite `target.indicator (fun y' => density y' * f y') y =
-  -- density y * f y * target.indicator 1 y` pointwise.
   refine MeasureTheory.integral_congr_ae
     (Filter.Eventually.of_forall (fun y => ?_))
   simp only
   by_cases hy : y ∈ (extChartAt I α).target
   · rw [Set.indicator_of_mem hy, Set.indicator_of_mem hy, mul_one]
   · rw [Set.indicator_of_notMem hy, Set.indicator_of_notMem hy, mul_zero]
-
-/-! ## Euclidean form: integral against `Measure.map toEuclidean modelHaar`
-
-The Euclidean form transports `modelHaar` along the linear isomorphism
-`toEuclidean : E ≃L[ℝ] EuclideanSpace ℝ (Fin n)` and stays in the project's
-standard Euclidean space coordinates, where `densityOnEuclid` and
-`chartTargetEuclid α` (both from `MetricExtension.lean`) are the natural
-chart-pulled objects.
-
-By choosing `Measure.map toEuclidean modelHaar` as the reference measure on
-`EuclideanSpace`, we avoid introducing any external scaling constant: the
-identity is a direct chart-pull-back without further factors. The standard
-Lebesgue volume on `EuclideanSpace ℝ (Fin n)` differs from this pushforward
-by a positive multiplicative constant (`Measure.addHaarScalarFactor`), which
-is the same Haar-uniqueness factor that already appears in the chart-bridge
-literature in this codebase. -/
 
 /-- The canonical `MeasurableEquiv` underlying `toEuclidean`, used for
 applying `MeasureTheory.integral_map_equiv` below. -/
@@ -264,16 +234,12 @@ theorem integral_riemannianVolumeMeasure_eq_euclidean_chartTarget
         ∂(MeasureTheory.Measure.map (toEuclidean : E → EuclN)
             (modelHaar (E := E))) := by
   classical
-  -- Step 1: rewrite via the model-space form.
   rw [integral_riemannianVolumeMeasure_eq_modelHaar_chartTarget
     (I := I) (M := M) g α hf_cont hf_supp]
-  -- Step 2: rewrite both sides as `integral` over the full space using
-  -- `setIntegral_eq_integral_of_indicator` / equivalently `integral_indicator`.
   have htarget_meas : MeasurableSet (extChartAt I α).target :=
     measurableSet_extChartAt_target (I := I) α
   have hctE_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_measurableSet (I := I) (M := M) α
-  -- LHS as full integral with target.indicator.
   rw [show
       (∫ y in (extChartAt I α).target,
           chartDensity g α ((extChartAt I α).symm y) *
@@ -285,7 +251,6 @@ theorem integral_riemannianVolumeMeasure_eq_euclidean_chartTarget
                   f ((extChartAt I α).symm y')) y
             ∂(modelHaar (E := E)) from
         (MeasureTheory.integral_indicator htarget_meas).symm]
-  -- RHS as full integral with chartTargetEuclid.indicator.
   rw [show
       (∫ y in chartTargetEuclid (I := I) (M := M) α,
           densityOnEuclid (I := I) g α y *
@@ -300,7 +265,6 @@ theorem integral_riemannianVolumeMeasure_eq_euclidean_chartTarget
             ∂(MeasureTheory.Measure.map (toEuclidean : E → EuclN)
                 (modelHaar (E := E))) from
         (MeasureTheory.integral_indicator hctE_meas).symm]
-  -- Apply `integral_map_equiv` to push the right-hand integral back to `E`.
   rw [show
       (∫ y',
           (chartTargetEuclid (I := I) (M := M) α).indicator
@@ -316,18 +280,14 @@ theorem integral_riemannianVolumeMeasure_eq_euclidean_chartTarget
                 f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y'')))
             (toEuclideanMeasurableEquiv (E := E) y)
           ∂(modelHaar (E := E)) from ?_]
-  · -- Now both integrals are over `E` w.r.t. `modelHaar`. Compare integrands.
-    refine MeasureTheory.integral_congr_ae
+  · refine MeasureTheory.integral_congr_ae
       (Filter.Eventually.of_forall (fun y => ?_))
     simp only
     by_cases hy : y ∈ (extChartAt I α).target
-    · -- On `target`: both indicators apply, and the integrands match by
-      -- `densityOnEuclid_def` since `toEuclidean.symm (toEuclidean y) = y`.
-      have hctE_y : toEuclideanMeasurableEquiv (E := E) y ∈
+    · have hctE_y : toEuclideanMeasurableEquiv (E := E) y ∈
           chartTargetEuclid (I := I) (M := M) α :=
         (toEuclidean_mem_chartTargetEuclid_iff (I := I) (M := M) α y).mpr hy
       rw [Set.indicator_of_mem hy, Set.indicator_of_mem hctE_y]
-      -- Compare values.
       have h_symm_apply :
           (toEuclidean (E := E)).symm (toEuclidean y) = y :=
         (toEuclidean (E := E)).symm_apply_apply y
@@ -337,21 +297,18 @@ theorem integral_riemannianVolumeMeasure_eq_euclidean_chartTarget
           f ((extChartAt I α).symm
             ((toEuclidean (E := E)).symm (toEuclidean y)))
       rw [h_symm_apply]
-      -- `densityOnEuclid g α (toEuclidean y) = chartDensity g α (symm y)`.
       change chartDensity g α ((extChartAt I α).symm y) *
           f ((extChartAt I α).symm y) =
         chartDensity g α ((extChartAt I α).symm
             ((toEuclidean (E := E)).symm (toEuclidean y))) *
           f ((extChartAt I α).symm y)
       rw [h_symm_apply]
-    · -- Off `target`: both indicators give `0`.
-      have hctE_off : toEuclideanMeasurableEquiv (E := E) y ∉
+    · have hctE_off : toEuclideanMeasurableEquiv (E := E) y ∉
           chartTargetEuclid (I := I) (M := M) α := by
         intro hcontra
         exact hy ((toEuclidean_mem_chartTargetEuclid_iff (I := I) (M := M) α y).mp hcontra)
       rw [Set.indicator_of_notMem hy, Set.indicator_of_notMem hctE_off]
-  · -- The `integral_map_equiv` step.
-    exact MeasureTheory.integral_map_equiv
+  · exact MeasureTheory.integral_map_equiv
       (μ := modelHaar (E := E))
       (e := toEuclideanMeasurableEquiv (E := E))
       (f := fun y'' : EuclN =>
@@ -385,7 +342,6 @@ theorem integral_riemannianVolumeMeasure_eq_euclidean_chartTarget_indicator
     (I := I) (M := M) g α hf_cont hf_supp]
   have hctE_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_measurableSet (I := I) (M := M) α
-  -- Expand the setIntegral as an indicator-form integral.
   rw [show
       (∫ y in chartTargetEuclid (I := I) (M := M) α,
           densityOnEuclid (I := I) g α y *
@@ -400,7 +356,6 @@ theorem integral_riemannianVolumeMeasure_eq_euclidean_chartTarget_indicator
           ∂(MeasureTheory.Measure.map (toEuclidean : E → EuclN)
               (modelHaar (E := E))) from
         (MeasureTheory.integral_indicator hctE_meas).symm]
-  -- Pointwise: `S.indicator (fun y' => g y' * h y') y = (g y * h y) * S.indicator 1 y`.
   refine MeasureTheory.integral_congr_ae
     (Filter.Eventually.of_forall (fun y => ?_))
   simp only

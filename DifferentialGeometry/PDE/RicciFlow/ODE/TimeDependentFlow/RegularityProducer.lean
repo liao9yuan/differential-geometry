@@ -111,10 +111,8 @@ theorem exists_uniform_chart_lipschitz_of_spatialC1
         LipschitzOnWith (Real.toNNReal K)
           (fun y : E => (X t ((chartAt H α).symm (I.symm y)) : E))
           (Metric.ball (I ((chartAt H α) α)) r') := by
-  -- Abbreviations.
   set c : E := I ((chartAt H α) α) with hc_def
   set Box : Set (ℝ × E) := Set.Icc (0 : ℝ) L ×ˢ Metric.closedBall c r with hBox
-  -- The box is compact and nonempty.
   have hBoxCompact : IsCompact Box := by
     rw [hBox]
     exact (isCompact_Icc).prod (isCompact_closedBall c r)
@@ -122,30 +120,22 @@ theorem exists_uniform_chart_lipschitz_of_spatialC1
     refine ⟨(0, c), ?_⟩
     rw [hBox]
     exact ⟨⟨le_refl 0, hL.le⟩, Metric.mem_closedBall_self hr.le⟩
-  -- `(t, y) ↦ ‖Df t y‖` is continuous on the box.
   have hNormCont : ContinuousOn (fun p : ℝ × E => ‖Function.uncurry Df p‖) Box :=
     hDerCont.norm
-  -- Extreme value theorem: the norm attains a maximum on the box.
   obtain ⟨pmax, hpmaxMem, hpmaxMax⟩ :=
     hBoxCompact.exists_isMaxOn hBoxNonempty hNormCont
   set K : ℝ := ‖Function.uncurry Df pmax‖ with hK_def
   have hK_nonneg : 0 ≤ K := by rw [hK_def]; exact norm_nonneg _
-  -- The maximum bounds the norm of `Df t y` at every box point.
   have hKbound : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ y ∈ Metric.closedBall c r,
       ‖Df t y‖ ≤ K := by
     intro t ht y hy
     have hmem : (t, y) ∈ Box := by rw [hBox]; exact ⟨ht, hy⟩
     have := hpmaxMax hmem
-    -- `this : (fun p => ‖uncurry Df p‖) (t, y) ≤ (fun p => ‖uncurry Df p‖) pmax`.
     simpa [Function.uncurry, hK_def] using this
-  -- Package the output: horizon `L`, constant `K`, radius `r`.
   refine ⟨L, K, r, hL, hr, hK_nonneg, ?_⟩
   intro t ht
-  -- Open ball is convex; we apply the mean-value Lipschitz estimate there.
   have hconv : Convex ℝ (Metric.ball c r) := convex_ball c r
-  -- The NNReal Lipschitz constant.
   have hKcoe : (Real.toNNReal K : ℝ) = K := Real.coe_toNNReal K hK_nonneg
-  -- The derivative on the open ball (restricting from the closed ball).
   have hder_open : ∀ y ∈ Metric.ball c r,
       HasFDerivWithinAt
         (fun z : E => (X t ((chartAt H α).symm (I.symm z)) : E))
@@ -154,7 +144,6 @@ theorem exists_uniform_chart_lipschitz_of_spatialC1
     have hy_closed : y ∈ Metric.closedBall c r :=
       Metric.ball_subset_closedBall hy
     exact (hHasDeriv t ht y hy_closed).mono Metric.ball_subset_closedBall
-  -- The uniform bound on the open ball.
   have hbound_open : ∀ y ∈ Metric.ball c r,
       ‖Df t y‖₊ ≤ Real.toNNReal K := by
     intro y hy
@@ -163,7 +152,6 @@ theorem exists_uniform_chart_lipschitz_of_spatialC1
     have hnorm := hKbound t ht y hy_closed
     rw [← NNReal.coe_le_coe, coe_nnnorm, hKcoe]
     exact hnorm
-  -- Apply the mean-value Lipschitz estimate.
   exact hconv.lipschitzOnWith_of_nnnorm_hasFDerivWithin_le hder_open hbound_open
 
 /--
@@ -205,17 +193,14 @@ theorem chartCoordSpatialC1_neg
   obtain ⟨L, r, Df, hL, hr, hHasDeriv, hDerCont⟩ := hC1 α
   refine ⟨L, r, fun t y => -(Df t y), hL, hr, ?_, ?_⟩
   · intro t ht y hy
-    -- The chart pushforward of `-X` is the negation of that of `X`.
     have hbase := hHasDeriv t ht y hy
-    -- `(fun z => (-X t (...) : E)) = fun z => -(X t (...) : E)`.
     have hfun :
         (fun z : E => ((-X t ((chartAt H α).symm (I.symm z))) : E))
           = fun z : E => -((X t ((chartAt H α).symm (I.symm z)) : E)) := by
       funext z; rfl
     rw [hfun]
     exact hbase.neg
-  · -- `Function.uncurry (fun t y => -(Df t y)) = fun p => -(Function.uncurry Df p)`.
-    have hfun :
+  · have hfun :
         (Function.uncurry (fun t y => -(Df t y)))
           = fun p : ℝ × E => -(Function.uncurry Df p) := by
       funext p; rfl
@@ -250,21 +235,17 @@ noncomputable def chartLocalPicardData_of_spatialC1
     (hC1 : ChartCoordSpatialC1 (I := I) X) :
     (∀ α : M, ChartLocalPicardData X α) ×
       (∀ α : M, ChartLocalPicardData (fun t x => -(X t x)) α) := by
-  -- Regularity predicate for `X`.
   have hReg : ChartCoordPicardRegular (I := I) X :=
     chartCoordPicardRegular_of_spatialC1 X hCont hC1
-  -- Continuity of `-X` on `ℝ × M`: negation is continuous.
   have hContNeg :
       ContinuousOn (Function.uncurry (fun t x => -(X t x)))
         (Set.univ : Set (ℝ × M)) := by
-    -- `Function.uncurry (fun t x => -X t x) = fun p => -(Function.uncurry X p)`.
     have hfun :
         (Function.uncurry (fun t x => -(X t x)))
           = fun p : ℝ × M => -(Function.uncurry (fun t x => X t x) p) := by
       funext p; rfl
     rw [hfun]
     exact hCont.neg
-  -- Regularity predicate for `-X`.
   have hRegNeg : ChartCoordPicardRegular (I := I) (fun t x => -(X t x)) :=
     chartCoordPicardRegular_of_spatialC1 (fun t x => -(X t x)) hContNeg
       (chartCoordSpatialC1_neg X hC1)

@@ -105,25 +105,12 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Positivity of the resolvent eigenvalue
-
-The eigenbasis vector `tensorResolventEigenbasisVec h_atlas i` is a unit vector
-of the orthonormal eigenbasis of the resolvent eigenspace at `μ := i.fst.val`;
-since it is non-zero, `μ` lies in the resolvent's unit interval `(0, 1]`, hence
-is strictly positive. -/
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- **Chart-locality-free positivity of the resolvent eigenvalue.** Chart-
@@ -153,14 +140,6 @@ private lemma eigenvalue_pos
       rw [h_zero, norm_zero] at h_norm
       exact one_ne_zero h_norm.symm)).1
 
-/-! ## A coerced-`Lp`-class `eLpNorm` evaluation helper
-
-Each gradient-order atom is an `Lp ℝ 2 (chartL2Measure α)` class. The reference
-measure of the headline, `volume.restrict (chartTargetEuclid α)`, is
-definitionally `chartL2Measure α`; the `eLpNorm` of the coercion-to-function of
-the `Lp` class against that measure is finite, hence equals `ENNReal.ofReal` of
-the `Lp` norm of the class. -/
-
 omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 /-- For an `Lp ℝ 2 (chartL2Measure α)` class `w`, the `eLpNorm` of its
@@ -172,39 +151,11 @@ private lemma eLpNorm_lpClass_eq_ofReal_norm
         ((volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α))
       = ENNReal.ofReal ‖w‖ := by
-  -- `chartL2Measure α = volume.restrict (chartTargetEuclid α)` definitionally,
-  -- and the `eLpNorm` of the coercion of an `Lp` class is the class's `eLpNorm`.
   have h_eq : eLpNorm ((w : EuclN → ℝ)) 2
       ((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)) =
       eLpNorm ((w : EuclN → ℝ)) 2 (chartL2Measure (I := I) (M := M) α) := rfl
   rw [h_eq, Lp.norm_def, ENNReal.ofReal_toReal (Lp.eLpNorm_ne_top w)]
-
-/-! ## The cross-left limit atom: the cutoff chart component of the covariant
-gradient
-
-`crossLeftLimitComponent g r s h_atlas i α P` is, by definition, the cutoff
-Euclidean chart component `tensorL2ChartComponentCutoff g r (s + 1)` of the
-completion-extended covariant gradient `tensorCovGradL2Compl g r s` applied to
-`eigenvectorResolvent g r s h_atlas i`. The cutoff chart component is the value
-of the continuous linear map `tensorL2ChartComponentCutoffCLM g r (s + 1) α P`,
-so its chart `L²` norm is at most the operator norm of that map — a
-chart-geometric quantity — times the metric `L²` norm of the covariant gradient.
-The gradient-energy identity `tensorCovGradL2Compl_eigenvectorResolvent_l2Norm_le`
-then supplies the `√μ`-weighted bound. -/
-
-/-! ## The chart-partial limit atom: a `μ`-rescale of the chart partial
-
-`partialLpLimit g r s h_atlas i α P k` is, by definition, `μ` times the candidate
-weak `k`-th chart partial `eigenvectorChartPartialLp g r s h_atlas i α P k`,
-which is itself `μ⁻¹` times the value of the canonical chart-partial continuous
-linear map `eigenvectorChartPartialCLM g r s α P k` on the eigenvector resolvent.
-The two scalar factors cancel, exhibiting `partialLpLimit` as the bare value of
-the chart-partial continuous linear map on the eigenvector resolvent. Its chart
-`L²` norm is therefore bounded by the operator norm of that map — a
-chart-geometric quantity — times the `H¹` norm of `eigenvectorResolvent`; the
-energy identity `eigenvectorResolvent_h1Norm_le` supplies the `√μ`-weighted
-bound. -/
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- **The chart-partial limit atom as a CLM value (chart-locality-free).** Chart-
@@ -221,7 +172,6 @@ private lemma partialLpLimit_eq_clm
     partialLpLimit (I := I) (M := M) g r s i α P k =
       eigenvectorChartPartialCLM (I := I) (M := M) g r s α P k
         (eigenvectorResolvent (I := I) (M := M) g r s i) := by
-  -- `partialLpLimit = μ • (μ⁻¹ • CLM (eigenvectorResolvent_…))`.
   rw [partialLpLimit, eigenvectorChartPartialLp,
     smul_smul,
     mul_inv_cancel₀ (eigenvalue_pos (I := I) (M := M) g r s i).ne',
@@ -281,14 +231,11 @@ theorem partialLpLimit_eLpNorm_le
               (tensorResolventL2_isCompactOperator (I := I) (M := M)
                 g r s) i‖ := by
   classical
-  -- The constant: the operator norm of the canonical chart-partial CLM.
   refine ⟨‖eigenvectorChartPartialCLM (I := I) (M := M) g r s α P k‖,
     norm_nonneg (eigenvectorChartPartialCLM (I := I) (M := M) g r s α P k),
     fun i => ?_⟩
-  -- The `eLpNorm` over the chart target is `ofReal` of the `Lp` norm of the atom.
   rw [eLpNorm_lpClass_eq_ofReal_norm (I := I) (M := M) α
     (partialLpLimit (I := I) (M := M) g r s i α P k)]
-  -- The chart `L²` norm of the atom is bounded by `‖CLM‖ · √μ · ‖φ‖`.
   have h_bound :
       ‖partialLpLimit (I := I) (M := M) g r s i α P k‖ ≤
         ‖eigenvectorChartPartialCLM (I := I) (M := M) g r s α P k‖ *
@@ -316,7 +263,6 @@ theorem partialLpLimit_eLpNorm_le
             (tensorResolventL2_isCompactOperator (I := I) (M := M)
               g r s) i‖ := by
           ring
-  -- Lift the real bound to `ℝ≥0∞` and split the product factor.
   have h_factor_nn :
       0 ≤ ‖eigenvectorChartPartialCLM (I := I) (M := M) g r s α P k‖ *
         Real.sqrt (i.fst.val) :=
@@ -325,18 +271,6 @@ theorem partialLpLimit_eLpNorm_le
       (Real.sqrt_nonneg _)
   rw [← ENNReal.ofReal_mul h_factor_nn]
   exact ENNReal.ofReal_le_ofReal h_bound
-
-/-! ## The cutoff chart-partial limit atom: a `μ`-rescale of the cutoff chart
-partial
-
-`cutoffPartialLpLimit g r s h_atlas i α P k` is, by definition, `μ` times the
-candidate weak `k`-th cutoff chart partial `eigenvectorCutoffChartPartialLp g r s
-h_atlas i α P k`, which is itself `μ⁻¹` times the value of the canonical cutoff
-chart-partial continuous linear map `eigenvectorCutoffChartPartialCLM g r s α P
-k` on the eigenvector resolvent. As with `partialLpLimit` the two scalar factors
-cancel, exhibiting `cutoffPartialLpLimit` as the bare value of the cutoff
-chart-partial continuous linear map on the eigenvector resolvent; the operator
-norm of that map and the energy identity supply the `√μ`-weighted bound. -/
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- **The cutoff chart-partial limit atom as a CLM value (chart-locality-free).**
@@ -354,7 +288,6 @@ private lemma cutoffPartialLpLimit_eq_clm
     cutoffPartialLpLimit (I := I) (M := M) g r s i α P k =
       eigenvectorCutoffChartPartialCLM (I := I) (M := M) g r s α P k
         (eigenvectorResolvent (I := I) (M := M) g r s i) := by
-  -- `cutoffPartialLpLimit = μ • (μ⁻¹ • CLM (eigenvectorResolvent_…))`.
   rw [cutoffPartialLpLimit,
     eigenvectorCutoffChartPartialLp, smul_smul,
     mul_inv_cancel₀ (eigenvalue_pos (I := I) (M := M) g r s i).ne',
@@ -417,15 +350,12 @@ theorem cutoffPartialLpLimit_eLpNorm_le
               (tensorResolventL2_isCompactOperator (I := I) (M := M)
                 g r s) i‖ := by
   classical
-  -- The constant: the operator norm of the canonical cutoff chart-partial CLM.
   refine ⟨‖eigenvectorCutoffChartPartialCLM (I := I) (M := M) g r s α P k‖,
     norm_nonneg (eigenvectorCutoffChartPartialCLM (I := I) (M := M)
       g r s α P k),
     fun i => ?_⟩
-  -- The `eLpNorm` over the chart target is `ofReal` of the `Lp` norm of the atom.
   rw [eLpNorm_lpClass_eq_ofReal_norm (I := I) (M := M) α
     (cutoffPartialLpLimit (I := I) (M := M) g r s i α P k)]
-  -- The chart `L²` norm of the atom is bounded by `‖CLM‖ · √μ · ‖φ‖`.
   have h_bound :
       ‖cutoffPartialLpLimit (I := I) (M := M) g r s i α P k‖ ≤
         ‖eigenvectorCutoffChartPartialCLM (I := I) (M := M) g r s α P k‖ *
@@ -457,7 +387,6 @@ theorem cutoffPartialLpLimit_eLpNorm_le
             (tensorResolventL2_isCompactOperator (I := I) (M := M)
               g r s) i‖ := by
           ring
-  -- Lift the real bound to `ℝ≥0∞` and split the product factor.
   have h_factor_nn :
       0 ≤ ‖eigenvectorCutoffChartPartialCLM (I := I) (M := M)
           g r s α P k‖ * Real.sqrt (i.fst.val) :=
@@ -467,8 +396,6 @@ theorem cutoffPartialLpLimit_eLpNorm_le
       (Real.sqrt_nonneg _)
   rw [← ENNReal.ofReal_mul h_factor_nn]
   exact ENNReal.ofReal_le_ofReal h_bound
-
-/-! ## Sanity tests -/
 
 section ElaborationTest
 

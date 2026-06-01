@@ -32,8 +32,6 @@ namespace Parabolic
 variable {ι : Type*} {X : Type*} [NormedAddCommGroup X]
   [InnerProductSpace ℝ X] [CompleteSpace X]
 
-/-! ## Strong continuity at `t = 0+` -/
-
 /-- Strong continuity at `t = 0+`: as `t → 0+`, `S(t) v → v`. -/
 theorem abstractSpectralSemigroup_continuous_at_zero (b : HilbertBasis ι ℝ X)
     {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i) (v : X) :
@@ -42,9 +40,7 @@ theorem abstractSpectralSemigroup_continuous_at_zero (b : HilbertBasis ι ℝ X)
       (𝓝[Set.Ici (0 : ℝ)] 0) (𝓝 v) := by
   rw [Metric.tendsto_nhds]
   intro ε hε
-  -- Square-summability of the basis Fourier coefficients.
   have h_summable_sq := summable_basis_coeff_sq' b v
-  -- Choose a finite head whose complementary tail of `∑ ⟪b i, v⟫²` is `< ε²/16`.
   have hε16_pos : (0 : ℝ) < ε ^ 2 / 16 := by positivity
   obtain ⟨T_fin, hT_fin⟩ : ∃ T_fin : Finset ι,
       ∑' i : { i : ι // i ∉ T_fin },
@@ -68,7 +64,6 @@ theorem abstractSpectralSemigroup_continuous_at_zero (b : HilbertBasis ι ℝ X)
         ∑' i : { i : ι // i ∉ T_fin }, (⟪b (i : ι), v⟫_ℝ) ^ 2 := by
       apply tsum_nonneg; intro i; exact sq_nonneg _
     rwa [abs_of_nonneg h_tail_nn] at hT_T
-  -- Head sum: as `t → 0`, each summand → 0.
   have h_head_tendsto : Tendsto (fun t : ℝ =>
       ∑ i ∈ T_fin,
         (heatCoeff lam t i - 1) ^ 2 * (⟪b i, v⟫_ℝ) ^ 2) (𝓝 (0 : ℝ)) (𝓝 0) := by
@@ -99,7 +94,6 @@ theorem abstractSpectralSemigroup_continuous_at_zero (b : HilbertBasis ι ℝ X)
   rw [Metric.tendsto_nhds] at h_head_tendsto
   obtain ⟨δ, hδ_pos, hδ⟩ := Metric.eventually_nhds_iff_ball.mp
     (h_head_tendsto (ε ^ 2 / 4) (by positivity))
-  -- Restrict to `t ∈ [0, δ)`.
   rw [Filter.eventually_iff_exists_mem]
   refine ⟨{t : ℝ | 0 ≤ t ∧ t < δ}, ?_, ?_⟩
   · rw [mem_nhdsWithin_iff_exists_mem_nhds_inter]
@@ -139,7 +133,6 @@ theorem abstractSpectralSemigroup_continuous_at_zero (b : HilbertBasis ι ℝ X)
     funext i; rw [mul_smul]
   rw [h_sum_eq]
   set f : ι → ℝ := fun i => (heatCoeff lam t i - 1) * ⟪b i, v⟫_ℝ
-  -- Pointwise bound `(f i)² ≤ 4 ⟪b i, v⟫²`.
   have h_f_sq_le : ∀ i, (f i) ^ 2 ≤ 4 * (⟪b i, v⟫_ℝ) ^ 2 := by
     intro i
     have h_pos : 0 < heatCoeff lam t i := Real.exp_pos _
@@ -159,13 +152,11 @@ theorem abstractSpectralSemigroup_continuous_at_zero (b : HilbertBasis ι ℝ X)
   have h_norm_sq_eq := orthonormal_norm_sq_eq_tsum_sq b f h_summable_f_sq
   change ‖∑' i, f i • b i‖ ^ 2 < ε ^ 2
   rw [h_norm_sq_eq]
-  -- Split tsum head + tail.
   have h_split : ∑' i : ι, (f i) ^ 2 =
       (∑ i ∈ T_fin, (f i) ^ 2) +
       ∑' i : { i : ι // i ∉ T_fin }, (f (i : ι)) ^ 2 :=
     (h_summable_f_sq.sum_add_tsum_subtype_compl T_fin).symm
   rw [h_split]
-  -- Head bound `< ε²/4`.
   have h_head_bound : ∑ i ∈ T_fin, (f i) ^ 2 < ε ^ 2 / 4 := by
     have h_in_ball : t ∈ Metric.ball (0 : ℝ) δ := by
       rw [Metric.mem_ball, dist_zero_right, Real.norm_eq_abs, abs_of_nonneg ht_nn]
@@ -185,7 +176,6 @@ theorem abstractSpectralSemigroup_continuous_at_zero (b : HilbertBasis ι ℝ X)
     have h_nn : 0 ≤ ∑ i ∈ T_fin, (f i) ^ 2 := by
       apply Finset.sum_nonneg; intros; exact sq_nonneg _
     rwa [abs_of_nonneg h_nn] at h_dist
-  -- Tail bound `≤ 4 * tail < ε²/4`.
   have h_tail_bound :
       ∑' i : { i : ι // i ∉ T_fin }, (f (i : ι)) ^ 2 < ε ^ 2 / 4 := by
     have h_tail_le :
@@ -202,8 +192,6 @@ theorem abstractSpectralSemigroup_continuous_at_zero (b : HilbertBasis ι ℝ X)
     have h_eq : 4 * (ε ^ 2 / 16) = ε ^ 2 / 4 := by ring
     linarith [h_tail_le, h_lt, h_eq]
   linarith [h_head_bound, h_tail_bound]
-
-/-! ## Contractive comparison -/
 
 /-- For `t, t₀ ≥ 0`, `‖S(t)v − S(t₀)v‖ ≤ ‖S(|t − t₀|)v − v‖`. -/
 private lemma norm_abstractSpectralSemigroup_sub_le_diff (b : HilbertBasis ι ℝ X)
@@ -280,8 +268,6 @@ private lemma norm_abstractSpectralSemigroup_sub_le_diff (b : HilbertBasis ι �
           rw [one_mul, h_norm_swap]
       _ = ‖abstractSpectralSemigroup b hlam |t - t₀| v - v‖ := by rw [h_abs]
 
-/-! ## Two-sided strong continuity at `t > 0` -/
-
 /-- Strong continuity at every interior nonneg time `t > 0`. -/
 private theorem abstractSpectralSemigroup_continuous_at_pos (b : HilbertBasis ι ℝ X)
     {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i) {t : ℝ} (ht : 0 < t) (v : X) :
@@ -332,8 +318,6 @@ private theorem abstractSpectralSemigroup_continuous_at_pos (b : HilbertBasis ι
   have h_added := h_diff_to_zero.add (tendsto_const_nhds
     (x := abstractSpectralSemigroup b hlam t v))
   simpa using h_added
-
-/-! ## Property 4: `ContinuousOn` on `[0, ∞)` -/
 
 /-- Strong continuity of the abstract spectral heat semigroup on `[0, ∞)`. -/
 theorem abstractSpectralSemigroup_continuousOn (b : HilbertBasis ι ℝ X)

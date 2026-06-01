@@ -88,8 +88,6 @@ theorem chartFiberCoord_fiberScale
   classical
   have hbase : q.proj ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [TangentBundle.trivializationAt_baseSet]; exact hq
-  -- `chartFiberCoord α p = (continuousLinearMapAt ℝ p.proj) p.snd` for `p` over
-  -- the base set; this map is `ℝ`-linear in the fibre vector.
   have hcoe : ∀ w : E,
       ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ q.proj) w =
         (trivializationAt E (TangentSpace I) α
@@ -99,13 +97,11 @@ theorem chartFiberCoord_fiberScale
       (trivializationAt E (TangentSpace I) α).coe_linearMapAt_of_mem (R := ℝ) hbase
     change ((trivializationAt E (TangentSpace I) α).linearMapAt ℝ q.proj) w = _
     exact congrFun hcoe' w
-  -- LHS fibre coord.
   have hL : chartFiberCoord (I := I) α
       (⟨q.proj, c • q.snd⟩ : TangentBundle I M) =
       ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ q.proj)
         (c • q.snd) := by
     rw [chartFiberCoord_def]; exact (hcoe (c • q.snd)).symm
-  -- RHS fibre coord (note `q = ⟨q.proj, q.snd⟩` by `TotalSpace` eta).
   have hR : chartFiberCoord (I := I) α q =
       ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ q.proj)
         q.snd := by
@@ -138,22 +134,13 @@ theorem hasDerivWithinAt_chartPhaseVF_at_zero_section_within
       S t := by
   classical
   set q₀ : TangentBundle I M := (⟨α, (0 : E)⟩ : TangentBundle I M) with hq₀_def
-  -- `f t ∈` chart-of-`TM`-at-`⟨α,0⟩` source.
   have hf_chsrc : f t ∈ (chartAt (ModelProd H E) q₀).source :=
     (mem_chartAt_modelProd_zero_source_iff (I := I) α (f t)).mpr hsrc
-  -- Mirror the within-version of `IsMIntegralCurveOn.hasDerivWithinAt`,
-  -- with the running chart base replaced by the fixed `q₀`.
   rw [hasDerivWithinAt_iff_hasFDerivWithinAt, ← hasMFDerivWithinAt_iff_hasFDerivWithinAt]
   apply (HasMFDerivWithinAt.comp t
     (hasMFDerivWithinAt_extChartAt (I := I.tangent) hf_chsrc) (hf t ht)
     (Set.subset_preimage_image _ _)).congr_mfderiv
-  -- The composed CLM equals the target `(1).smulRight (chartPhaseVF …)`.
-  -- Identify the two CLMs through the `comp`/`smulRight`/`toSpanSingleton`
-  -- algebra, reducing to the fibre-vector equality supplied by
-  -- `tangentCoordChange_tangent_geodesicVF`.
   rw [mfderiv_chartAt_eq_tangentCoordChange hf_chsrc, hq₀_def]
-  -- It remains to identify the two CLMs `ℝ →L (E × E)`.  Both are determined by
-  -- their value at `1`; the LHS gives `tcc (V (f t))`, the RHS `chartPhaseVF …`.
   have hval :
       (tangentCoordChange I.tangent (f t) (⟨α, (0 : E)⟩ : TangentBundle I M) (f t))
           (geodesicVectorFieldChart (I := I) g α (f t)) =
@@ -619,8 +606,7 @@ theorem scaledTangentLift_transport
   have hLcont : ContinuousWithinAt L {s : ℝ | c * s + d ∈ S} s₀ :=
     rescaledLift_continuousWithinAt (I := I) g α hf c d hs₀'
   by_cases hsrc : (f (c * s₀ + d)).proj ∈ (chartAt H α).source
-  · -- In-chart: forward derivative + reverse reconstruction at `⟨α,0⟩`.
-    have hdin := inchart_rescaledLift_chartPhase (I := I) g α hf c d hs₀' hsrc
+  · have hdin := inchart_rescaledLift_chartPhase (I := I) g α hf c d hs₀' hsrc
     have hLsrc : (L s₀).proj ∈ (chartAt H α).source := hsrc
     have hrev := hasMFDerivWithinAt_of_chartPhase_at_zero_section (I := I) α (c := L) (s₀ := s₀)
       (w := chartPhaseVF (I := I) g α
@@ -634,8 +620,7 @@ theorem scaledTangentLift_transport
           tangentCoordChange_zero_section_geodesicVF (I := I) g α (L s₀) hLsrc]
     rw [heq]
     exact hrev
-  · -- Off-chart: spray vanishes; own-base reverse reconstruction gives zero.
-    have hdoff := offchart_rescaledLift_chartDeriv_self (I := I) g α hf c d hs₀' hsrc
+  · have hdoff := offchart_rescaledLift_chartDeriv_self (I := I) g α hf c d hs₀' hsrc
     have hrev := hasMFDerivWithinAt_of_chartDeriv_self (I := I) (c := L) (s₀ := s₀) (w := 0)
       hLcont hdoff
     have hVzero : geodesicVectorFieldChart (I := I) g α (L s₀) = 0 :=
@@ -646,21 +631,6 @@ theorem scaledTangentLift_transport
       exact hVzero
     rw [heq]
     exact hrev
-
-/-! ## Affine reparametrisation invariance of `pathELength`
-
-For an affine reparametrisation `s ↦ c * s + d` with `c > 0`, the
-`pathELength` of the composed curve over `Icc ((a - d) / c) ((b - d) / c)`
-equals the `pathELength` of the original curve over `Icc a b`. This is a
-direct corollary of Mathlib's `pathELength_comp_of_monotoneOn` applied to
-the strictly increasing affine map `s ↦ c * s + d`.
-
-The lemma is stated in the `Manifold` namespace's `pathELength`. The
-typeclass requirement `[∀ x, ENormSMulClass ℝ (TangentSpace I x)]` for
-the underlying Mathlib reparametrisation lemma is supplied by the
-`RiemannianBundle` instance through the chain
-`RiemannianBundle ⟶ NormedAddCommGroup ⟶ NormSMulClass ⟶ ENormSMulClass`.
--/
 
 section AffinePathELengthReparam
 
@@ -677,9 +647,7 @@ theorem pathELength_comp_affineHomeo
     (hγ : MDifferentiableOn 𝓘(ℝ, ℝ) I γ (Set.Icc a b)) :
     pathELength I (fun s : ℝ => γ (c * s + d)) ((a - d) / c) ((b - d) / c)
       = pathELength I γ a b := by
-  -- The reparametrisation `f s = c * s + d`.
   set f : ℝ → ℝ := fun s : ℝ => c * s + d with hf_def
-  -- Image of the endpoints: `f ((a - d) / c) = a`, `f ((b - d) / c) = b`.
   have hc_ne : c ≠ 0 := ne_of_gt hc
   have hfa : f ((a - d) / c) = a := by
     simp only [hf_def]
@@ -689,38 +657,28 @@ theorem pathELength_comp_affineHomeo
     simp only [hf_def]
     rw [mul_div_cancel₀ _ hc_ne]
     ring
-  -- The new lower endpoint is `≤` the new upper endpoint.
   have hab' : (a - d) / c ≤ (b - d) / c := by
     rw [div_le_div_iff_of_pos_right hc]
     linarith
-  -- `f` is monotone on `Icc ((a - d) / c) ((b - d) / c)` (it is monotone
-  -- on `ℝ`, hence on any subset).
   have hf_mono : MonotoneOn f (Set.Icc ((a - d) / c) ((b - d) / c)) := by
     intro x _ y _ hxy
     simp only [hf_def]
     have : c * x ≤ c * y := mul_le_mul_of_nonneg_left hxy hc.le
     linarith
-  -- `f` is differentiable everywhere, hence on `Icc ((a - d) / c) ((b - d) / c)`.
   have hf_diff : DifferentiableOn ℝ f (Set.Icc ((a - d) / c) ((b - d) / c)) := by
     intro x _
-    -- `f x = c * x + d` is differentiable; convert from `Differentiable`.
     have hdiff : Differentiable ℝ f := by
       simp only [hf_def]
       exact ((differentiable_const c).mul differentiable_id).add (differentiable_const d)
     exact (hdiff x).differentiableWithinAt
-  -- The hypothesis `MDiff[Icc (f a') (f b')] γ` becomes `MDifferentiableOn`
-  -- on `Icc a b` after rewriting via `hfa`/`hfb`.
   have hγ' : MDifferentiableOn 𝓘(ℝ, ℝ) I γ
       (Set.Icc (f ((a - d) / c)) (f ((b - d) / c))) := by
     rw [hfa, hfb]; exact hγ
-  -- Apply Mathlib's `pathELength_comp_of_monotoneOn`.
   have hmain :
       pathELength I (γ ∘ f) ((a - d) / c) ((b - d) / c)
         = pathELength I γ (f ((a - d) / c)) (f ((b - d) / c)) :=
     pathELength_comp_of_monotoneOn (I := I) (γ := γ) hab' hf_mono hf_diff hγ'
-  -- Rewrite the endpoints.
   rw [hfa, hfb] at hmain
-  -- The composition `γ ∘ f` is `fun s => γ (c * s + d)` by definition of `f`.
   exact hmain
 
 end AffinePathELengthReparam

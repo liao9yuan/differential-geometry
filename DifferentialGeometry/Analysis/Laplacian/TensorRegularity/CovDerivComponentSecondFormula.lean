@@ -92,14 +92,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## A `ContDiffOn`-stability lemma for the Euclidean partial derivative
-
-If `u` is `C^∞` on the open Euclidean chart target, its `n`-th Euclidean
-partial derivative is again `C^∞` there: on the open set the Fréchet derivative
-coincides with the within-derivative, which is `C^∞` by
-`contDiffOn_succ_iff_fderivWithin`, and evaluation at a fixed basis vector is
-continuous linear. -/
-
 /-- The `n`-th chart-Euclidean partial derivative of a function `C^∞` on the
 Euclidean chart target is again `C^∞` on the Euclidean chart target. -/
 private lemma euclidPartial_contDiffOn_chartTarget'
@@ -130,16 +122,6 @@ private lemma euclidPartial_contDiffOn_chartTarget'
       (EuclideanSpace.single n 1)).contDiff.comp_contDiffOn hfderiv
   refine hcomp.congr (fun z _ => ?_)
   rfl
-
-/-! ## The wrapped raw chart component of the first covariant derivative,
-viewed as a function on the Euclidean chart target
-
-The headline of `CovDerivComponentFormula.lean` equates the wrapped
-`(Idx, Jdx)`-raw chart component of the chart-coordinate covariant derivative
-`chartTensorRSCovariantDerivative … (chartBasisVecFiber α m)`, evaluated at
-`b := (extChartAt I α).symm (toEuclidean.symm y)`, to
-`∂_m raw_α^{Idx,Jdx}(y) + covDerivLowerOrderTerm(y)`. To differentiate this
-identity in `y` we record the LHS as an explicit function of `y`. -/
 
 /-- The wrapped `(Idx, Jdx)`-raw chart component of the chart-coordinate
 covariant derivative `chartTensorRSCovariantDerivative … (chartBasisVecFiber α
@@ -178,12 +160,6 @@ lemma covDerivComponentEuclid_def
             (chartBasisVecFiber (I := I) α m)
             ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))) := rfl
 
-/-! ## The first-derivative formula in functional form
-
-The chart-α 1st-derivative headline
-`covDerivComponent_eq_euclidPartial_add_lowerOrder` rewritten as an identity
-between *functions* on `chartTargetEuclid α`. -/
-
 /-- **The first-derivative formula in functional form.** As functions on
 `chartTargetEuclid α`, `covDerivComponentEuclid g r s S α m Idx Jdx` agrees
 with `euclidPartial m (chartPushedRaw I α (tensorChartComponentRaw …))
@@ -206,13 +182,6 @@ lemma covDerivComponentEuclid_eqOn
   exact covDerivComponent_eq_euclidPartial_add_lowerOrder
     (I := I) (M := M) g r s S α m Idx Jdx hy
 
-/-! ## Smoothness of `covDerivComponentEuclid` on the Euclidean chart target
-
-By `covDerivComponentEuclid_eqOn`, on the open Euclidean chart target the
-function `covDerivComponentEuclid` agrees with the sum of a `C^∞` Euclidean
-partial of a chart-pushed raw component and a `C^∞` lower-order correction
-term. -/
-
 /-- **The wrapped covariant-derivative chart-component is `C^∞` on the
 Euclidean chart target.** Equal on that open set to the sum
 `euclidPartial m (chartPushedRaw …) + covDerivLowerOrderTerm`, both `C^∞`. -/
@@ -226,34 +195,21 @@ theorem covDerivComponentEuclid_contDiffOn
       (covDerivComponentEuclid (I := I) (M := M) g r s α S m Idx Jdx)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- The partial of the chart-pushed raw component is `C^∞`.
   have h1 : ContDiffOn ℝ ∞
       (euclidPartial (E := E) m
         (chartPushedRaw I α
           (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx)))
       (chartTargetEuclid (I := I) (M := M) α) :=
     euclidPartial_chartPushedRaw_contDiffOn (I := I) (M := M) g r s S α m Idx Jdx
-  -- The lower-order term is `C^∞`.
   have h2 : ContDiffOn ℝ ∞
       (covDerivLowerOrderTerm (I := I) (M := M) g r s S α m Idx Jdx)
       (chartTargetEuclid (I := I) (M := M) α) :=
     covDerivComponent_lowerOrder_contDiffOn (I := I) (M := M) g r s S α m Idx Jdx
       (fun Idx' Jdx' => chartPushedRaw_tensorChartComponentRaw_contDiffOn
         (I := I) (M := M) g r s S α Idx' Jdx')
-  -- The sum is `C^∞`.
   have hsum := h1.add h2
-  -- Transfer back via `covDerivComponentEuclid_eqOn`.
   refine hsum.congr (fun y hy => ?_)
   exact covDerivComponentEuclid_eqOn (I := I) (M := M) g r s α S m Idx Jdx hy
-
-/-! ## The chart-pushed raw component as a chart-target function
-
-For the Leibniz expansion of the lower-order term `LO = ∑ coeff · raw`, we
-isolate the raw factor as a function on the Euclidean chart target:
-`rawComponentEuclid g r s S α p y := tensorChartComponentRaw … (extChartAt^-1
-(toEuclidean^-1 y))`. On the chart target this coincides pointwise with the
-chart-pushed raw component `chartPushedRaw I α (tensorChartComponentRaw …) y`,
-hence is `C^∞` there. -/
 
 /-- The raw chart-α component `tensorChartComponentRaw g r s S α Idx Jdx` pulled
 back to a function on the Euclidean model space through
@@ -328,12 +284,6 @@ lemma euclidPartial_rawComponentEuclid_contDiffOn
   euclidPartial_contDiffOn_chartTarget' (I := I) (M := M) α n
     (rawComponentEuclid_contDiffOn (I := I) (M := M) g r s α S Idx Jdx)
 
-/-! ## Equivalence of `euclidPartial` on the chart target
-
-On the open Euclidean chart target, `rawComponentEuclid` and `chartPushedRaw
-I α (tensorChartComponentRaw …)` agree pointwise, so their Euclidean partials
-agree there too: the Fréchet derivative is local. -/
-
 /-- On the Euclidean chart target, the `n`-th Euclidean partial of
 `rawComponentEuclid` equals that of `chartPushedRaw I α (tensorChartComponentRaw
 …)`. -/
@@ -358,7 +308,6 @@ lemma euclidPartial_rawComponentEuclid_eqOn
         (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx))
       (chartTargetEuclid (I := I) (M := M) α) :=
     rawComponentEuclid_eqOn_chartPushed (I := I) (M := M) g r s α S Idx Jdx
-  -- Fréchet derivatives of pointwise-equal functions agree on open sets.
   have hfderiv : fderiv ℝ
       (rawComponentEuclid (I := I) (M := M) g r s α S Idx Jdx) y =
     fderiv ℝ
@@ -367,15 +316,6 @@ lemma euclidPartial_rawComponentEuclid_eqOn
     Filter.EventuallyEq.fderiv_eq
       (heq.eventuallyEq_of_mem (hopen.mem_nhds hy))
   rw [euclidPartial_def, euclidPartial_def, hfderiv]
-
-/-! ## The lower-order coefficient family `LO = ∑ coeff · raw` as a chart-target
-function
-
-The lower-order term `covDerivLowerOrderTerm` is, by construction, the finite
-sum over component multi-index pairs `(Idx', Jdx')` of
-`covDerivLowerOrderCoeff(y) · raw_α^{Idx',Jdx'}(symm y)`. The summand is the
-product of two factors that are `C^∞` on the chart target: the coefficient,
-and `rawComponentEuclid`. -/
 
 /-- The `(p₁, p₂)`-summand of the lower-order term as a function on the
 Euclidean model space: `covDerivLowerOrderCoeff … y · rawComponentEuclid …
@@ -438,19 +378,6 @@ lemma covDerivLowerOrderTerm_eq_sum_lowerOrderSummand
   rw [covDerivLowerOrderTerm_def]
   rfl
 
-/-! ## The second-derivative lower-order coefficient families
-
-The `n`-th Euclidean partial of the lower-order summand `coeff · raw` is, by
-the Leibniz rule, `(∂_n coeff) · raw + coeff · (∂_n raw)`. We name the two
-resulting coefficients:
-
-* `secondCovDerivLO_gradCoeff` — the un-differentiated `covDerivLowerOrderCoeff`
-  (multiplying `∂_n rawComponentEuclid`);
-* `secondCovDerivLO_valueCoeff` — the `n`-th Euclidean partial of
-  `covDerivLowerOrderCoeff` (multiplying `rawComponentEuclid`).
-
-Both are `C^∞` on the Euclidean chart target. -/
-
 /-- The smooth coefficient multiplying `∂_n raw_α^{Idx',Jdx'}` in the second-
 derivative formula: just the original `covDerivLowerOrderCoeff`. -/
 noncomputable def secondCovDerivLO_gradCoeff
@@ -497,12 +424,6 @@ theorem secondCovDerivLO_valueCoeff_contDiffOn
   euclidPartial_contDiffOn_chartTarget' (I := I) (M := M) α n
     (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M) g r s α m Idx Idx' Jdx Jdx')
 
-/-! ## The Leibniz expansion of the `n`-th Euclidean partial of one summand
-
-For a multi-index pair `p = (Idx', Jdx')`, the `n`-th Euclidean partial of the
-summand `coeff_p · rawComponentEuclid_p` is `(∂_n coeff_p) · raw_p + coeff_p ·
-(∂_n raw_p)` at any chart-target point. -/
-
 /-- The Leibniz rule for the lower-order summand at a chart-target point. -/
 lemma euclidPartial_lowerOrderSummand_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -534,7 +455,6 @@ lemma euclidPartial_lowerOrderSummand_apply
       (rawComponentEuclid (I := I) (M := M) g r s α S p.1 p.2)
       (chartTargetEuclid (I := I) (M := M) α) :=
     rawComponentEuclid_contDiffOn (I := I) (M := M) g r s α S p.1 p.2
-  -- Differentiability at `y` from `ContDiffOn` on the open set containing `y`.
   have hcoeff_diff : DifferentiableAt ℝ
       (covDerivLowerOrderCoeff (I := I) (M := M) g r s α m Idx p.1 Jdx p.2) y := by
     have h : DifferentiableOn ℝ
@@ -549,7 +469,6 @@ lemma euclidPartial_lowerOrderSummand_apply
         (chartTargetEuclid (I := I) (M := M) α) :=
       hraw.differentiableOn (by norm_cast)
     exact (h.differentiableAt (hopen.mem_nhds hy))
-  -- Apply Leibniz.
   have hleib := euclidPartial_mul (E := E) n hcoeff_diff hraw_diff
   rw [show lowerOrderSummand (I := I) (M := M) g r s α S m Idx Jdx p =
       (fun z =>
@@ -558,15 +477,6 @@ lemma euclidPartial_lowerOrderSummand_apply
   rw [hleib]
   unfold secondCovDerivLO_valueCoeff secondCovDerivLO_gradCoeff
   ring
-
-/-! ## The headline: the `n`-th Euclidean partial of `covDerivComponentEuclid`
-
-By `covDerivComponentEuclid_eqOn`, on the open chart target
-`covDerivComponentEuclid` equals `euclidPartial m (chartPushedRaw …) +
-covDerivLowerOrderTerm`. The Fréchet derivative is local on open sets:
-`covDerivComponentEuclid`'s Fréchet derivative at any chart-target point
-coincides with that of the sum. Computing the Fréchet derivative summand-wise
-through the Leibniz rule then yields the headline. -/
 
 /-- The `n`-th Euclidean partial of `covDerivComponentEuclid` at a chart-target
 point equals the `n`-th Euclidean partial of `euclidPartial m (chartPushedRaw
@@ -660,7 +570,6 @@ private lemma euclidPartial_sum_split
         (chartTargetEuclid (I := I) (M := M) α) :=
       h2.differentiableOn (by norm_cast)
     exact (hd.differentiableAt (hopen.mem_nhds hy))
-  -- Use `fderiv_fun_add` and unfold `euclidPartial`.
   rw [euclidPartial_def, euclidPartial_def, euclidPartial_def]
   rw [fderiv_fun_add h1_diff h2_diff]
   rw [ContinuousLinearMap.add_apply]
@@ -685,7 +594,6 @@ private lemma euclidPartial_covDerivLowerOrderTerm_eq_sum
   classical
   have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- First convert `covDerivLowerOrderTerm` to a finite sum on the chart target.
   have heq : EqOn (covDerivLowerOrderTerm (I := I) (M := M) g r s S α m Idx Jdx)
       (fun z =>
         ∑ p : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -695,7 +603,6 @@ private lemma euclidPartial_covDerivLowerOrderTerm_eq_sum
     intro z _
     exact covDerivLowerOrderTerm_eq_sum_lowerOrderSummand
       (I := I) (M := M) g r s α S m Idx Jdx z
-  -- Fréchet-derivative equality on open sets.
   have hfderiv : fderiv ℝ
       (covDerivLowerOrderTerm (I := I) (M := M) g r s S α m Idx Jdx) y =
     fderiv ℝ
@@ -705,7 +612,6 @@ private lemma euclidPartial_covDerivLowerOrderTerm_eq_sum
           lowerOrderSummand (I := I) (M := M) g r s α S m Idx Jdx p z) y :=
     Filter.EventuallyEq.fderiv_eq
       (heq.eventuallyEq_of_mem (hopen.mem_nhds hy))
-  -- Each summand is differentiable at `y`.
   have hsummand_diff : ∀ p : (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin s → Fin (Module.finrank ℝ E)),
       DifferentiableAt ℝ (lowerOrderSummand (I := I) (M := M) g r s α S m Idx Jdx p) y := by
@@ -716,7 +622,6 @@ private lemma euclidPartial_covDerivLowerOrderTerm_eq_sum
         (chartTargetEuclid (I := I) (M := M) α) :=
       h.differentiableOn (by norm_cast)
     exact hd.differentiableAt (hopen.mem_nhds hy)
-  -- Use `fderiv_finset_sum`.
   have hfsum :
       fderiv ℝ
         (fun z =>
@@ -728,7 +633,6 @@ private lemma euclidPartial_covDerivLowerOrderTerm_eq_sum
           fderiv ℝ (lowerOrderSummand (I := I) (M := M) g r s α S m Idx Jdx p) y :=
     fderiv_fun_sum (fun p _ => hsummand_diff p)
   rw [euclidPartial_def, hfderiv, hfsum]
-  -- The CLM-evaluation distributes through finite sums.
   rw [show (∑ p : (Fin r → Fin (Module.finrank ℝ E)) ×
             (Fin s → Fin (Module.finrank ℝ E)),
           fderiv ℝ (lowerOrderSummand (I := I) (M := M) g r s α S m Idx Jdx p) y)
@@ -739,12 +643,6 @@ private lemma euclidPartial_covDerivLowerOrderTerm_eq_sum
           (EuclideanSpace.single n 1) by
     rw [ContinuousLinearMap.sum_apply]]
   rfl
-
-/-! ## The headline second-derivative formula
-
-The `n`-th Euclidean partial of `covDerivComponentEuclid` decomposes into the
-mixed second partial of the chart-pushed raw, plus a finite sum, over
-multi-index pairs, of `(∂_n coeff_p) · raw_p + coeff_p · (∂_n raw_p)`. -/
 
 /-- **The chart-coordinate second covariant-derivative component formula.**
 For `y ∈ chartTargetEuclid α`, the `n`-th Euclidean partial of the function
@@ -791,16 +689,11 @@ theorem covDerivComponent_second_eq_iteratedFDeriv_add_lowerOrder
               euclidPartial (E := E) n
                 (rawComponentEuclid (I := I) (M := M) g r s α S p.1 p.2) y) := by
   classical
-  -- Step 1: Replace the LHS using the equality on the chart target.
   rw [euclidPartial_covDerivComponentEuclid_eq (I := I) (M := M)
     g r s α S m n Idx Jdx hy]
-  -- Step 2: Distribute the `∂_n` across the sum `∂_m chartPushedRaw + LO`.
   rw [euclidPartial_sum_split (I := I) (M := M) g r s α S m n Idx Jdx hy]
-  -- Step 3: Reduce the `∂_n LO` to a finite sum of `∂_n` summands.
   rw [euclidPartial_covDerivLowerOrderTerm_eq_sum (I := I) (M := M)
     g r s α S m n Idx Jdx hy]
-  -- Step 4: Expand each summand's `∂_n` via Leibniz, and split the sum
-  -- into the value-coefficient and gradient-coefficient parts.
   rw [show
       (∑ p : (Fin r → Fin (Module.finrank ℝ E)) ×
               (Fin s → Fin (Module.finrank ℝ E)),
@@ -820,15 +713,6 @@ theorem covDerivComponent_second_eq_iteratedFDeriv_add_lowerOrder
       g r s α S m n Idx Jdx p hy]
   rw [Finset.sum_add_distrib]
   ring
-
-/-! ## Existential form for downstream consumers
-
-The downstream regularity bootstrap consumes the formula as an existential
-statement: "there exist `C^∞` coefficients `(Coeff_2nd, Coeff_1n, Coeff_1m,
-Coeff_0_first, Coeff_0_second)` such that the formula's RHS equals the
-chart-coordinate-coefficient expansion". The `secondCovDerivLO_*` coefficients
-naturally produce such an instantiation when the formula is integrated over a
-finite multi-index family. -/
 
 /-- **Existential form of the chart-coordinate second covariant-derivative
 component formula.** For each chart-target point `y`, there exist `C^∞`

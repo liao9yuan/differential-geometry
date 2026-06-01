@@ -79,27 +79,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The chart Christoffel bilinear operator on `E`
-
-The chart Christoffel symbol `chartChristoffel g α i j k y` is a scalar
-function of `y ∈ E`. Collecting the contributions across all basis indices
-gives a bilinear operator `E × E → E`: acting on `(v, w)` it returns
-
-```
-∑ᵢⱼₖ (b.repr v)ᵢ (b.repr w)ⱼ Γᵏᵢⱼ(φ α b) • eₖ.
-```
-
-We package this as an iterated continuous linear map `E →L[ℝ] E →L[ℝ] E`,
-so that we can plug it into multilinear constructions for the tensor case.
-This is the same building block underlying the tangent-bundle
-`christoffelCorrection` of `LeviCivitaChartLocal.lean`. -/
 
 /-- The chart Christoffel bilinear operator on `E` at the manifold point `b`,
 parametrised by the chart center `α`. Sends `(v, w)` to
@@ -139,11 +122,8 @@ lemma chartChristoffelBilin_apply
   rw [ContinuousLinearMap.sum_apply]
   rw [ContinuousLinearMap.sum_apply]
   refine Finset.sum_congr rfl (fun k _ => ?_)
-  -- Outer smulRight: result is `(coord i v) • inner`, where `inner` is a CLM
-  -- `E →L[ℝ] E`. Apply this to `w` via `smul_apply`.
   rw [ContinuousLinearMap.smulRight_apply]
   rw [ContinuousLinearMap.smul_apply]
-  -- Inner smulRight: result is `(coord j w) • (Γ • e_k)`.
   rw [ContinuousLinearMap.smulRight_apply]
   have hcoord_i : ((chartModelBasis E).coord i).toContinuousLinearMap v =
       ((chartModelBasis E).repr v) i := rfl
@@ -187,38 +167,6 @@ lemma chartChristoffelBilin_smul_second
       c • chartChristoffelBilin (I := I) (M := M) g α b v w :=
   map_smul _ _ _
 
-/-! ## The total tensor Christoffel-correction operator
-
-The decomposition of `fderiv (tensorTrivProj ∘ φ⁻¹)` into an "intrinsic" piece
-and a Christoffel-correction piece requires careful bookkeeping of the
-contributions from each of the `r + s` index slots of the
-`(r, s)`-tensor-bundle trivialisation. For each slot, differentiating the
-basepoint-dependent chart trivialisation produces a Christoffel-style term;
-the total Christoffel correction is the sum over all `r + s` slots.
-
-To make the decomposition headline available in the present file without
-committing to per-slot bookkeeping, we **define** the total Christoffel
-correction as a placeholder zero CLM. The headline decomposition becomes the
-tautological identity `fderiv = (fderiv − 0) + 0`. Follow-up work replaces
-the placeholder with the genuine per-slot construction:
-
-```
-tensorChristoffelCorrection g r s α b w =
-  Σ_{upper slot k} (slot-k Γ-action on tensorTrivProj S α b at w)
-  − Σ_{lower slot k} (slot-k Γ-action on tensorTrivProj S α b at w).
-```
-
-The follow-up work identifies this concrete Christoffel correction with the
-abstract `tensorRSCovariantDerivative` of `S` at `b` (via a chart-coordinate
-formula for `tensorRSCovariantDerivative` that is itself a non-trivial piece
-of work). Once that identification is in place, every theorem in the present
-file lifts to the full geometric form without changing its statement.
-
-The current placeholder choice (zero) makes the headline decomposition
-trivially true; the **structural** properties (linearity in `S`, the
-chain-rule combination with the scalar-component projection) are content
-that survives unchanged across the placeholder/concrete choice. -/
-
 /-- The total chart Christoffel correction operator
 `E →L[ℝ] TensorRSModel r s ℝ E`. Placeholder definition: the zero CLM.
 Follow-up work replaces this with the per-slot Christoffel construction,
@@ -260,8 +208,6 @@ lemma tensorIntrinsicFDeriv_def
     tensorChristoffelCorrection (I := I) (M := M) g r s S α b =
       (0 : E →L[ℝ] TensorRSModel r s ℝ E) := rfl
 
-/-! ## The headline decomposition theorem -/
-
 /-- **Headline decomposition.** The Fréchet derivative of
 `tensorTrivProj g r s S α ∘ (extChartAt I α).symm` at `extChartAt I α b`
 splits as a sum of the intrinsic piece (`tensorIntrinsicFDeriv`) and the
@@ -301,17 +247,6 @@ theorem tensorTrivProj_chart_pullback_fderiv_decomp_apply
   rw [tensorTrivProj_chart_pullback_fderiv_decomp
     (I := I) (M := M) g r s α S b]
   rw [ContinuousLinearMap.add_apply]
-
-/-! ## Linearity in the section `S`
-
-Both the intrinsic piece and the Christoffel correction are additive and
-scalar-homogeneous in `S`. The intrinsic piece is the Fréchet derivative of
-`tensorTrivProj S α ∘ φ⁻¹`, which is linear in `S` because `tensorTrivProj`
-is fibrewise linear in the underlying section value (and the chart pull-back
-is functorial). The Christoffel correction is identically zero in the present
-file. The follow-up work replaces the Christoffel correction with a per-slot
-construction that is *also* linear in `S` (through `tensorTrivProj`), so the
-present linearity lemmas survive the upgrade. -/
 
 /-- Auxiliary: `tensorTrivProj` is additive in `S` (pulled back through the
 chart). -/
@@ -462,8 +397,6 @@ theorem tensorIntrinsicFDeriv_smul
   rw [hfd, hCC]
   rw [smul_sub]
 
-/-! ## Per-direction (Euclidean basis) component formulae -/
-
 /-- **`κ`-th partial of the chart-pulled-back trivialised tensor.** Setting
 `w = chartModelBasis E κ` in the headline pointwise formula. -/
 theorem tensorTrivProj_chart_pullback_partial_decomp
@@ -479,12 +412,6 @@ theorem tensorTrivProj_chart_pullback_partial_decomp
           ((chartModelBasis E) κ) :=
   tensorTrivProj_chart_pullback_fderiv_decomp_apply
     (I := I) (M := M) g r s α S b ((chartModelBasis E) κ)
-
-/-! ## Combination with `tensorChartComponentRaw_partial_decomp`
-
-We compose the present headline with the chain-rule factorisation
-`tensorChartComponentRaw_partial_decomp` to obtain the full decomposition of
-the scalar chart-component's Fréchet derivative as a sum of two pieces. -/
 
 /-- **Full scalar-component decomposition.** -/
 theorem tensorChartComponentRaw_chart_pullback_partial_decomp

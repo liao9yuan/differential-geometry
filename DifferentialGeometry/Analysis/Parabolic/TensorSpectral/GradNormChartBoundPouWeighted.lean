@@ -134,7 +134,6 @@ theorem g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport
     with hC_proj_def
   have hC_proj_nn : 0 ≤ C_proj :=
     chartComponentProjectionUniformBound_nonneg (E := E) r s
-  -- Two constants: `A` for the raw²-term, `B` for the ρ²-weighted atoms.
   set A : ℝ := 2 * M_Ginv * M_dρ with hA_def
   set B : ℝ := 4 * M_Ginv * C_proj ^ 2 with hB_def
   have hA_nn : 0 ≤ A := by
@@ -156,7 +155,6 @@ theorem g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport
       (tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx) b :=
     ((tensorChartComponentScalar_contMDiff (I := I) (M := M)
         g r s S α Idx Jdx).contMDiffAt).mdifferentiableAt (by simp)
-  -- Per-k atoms.
   set Tcov : Fin (Module.finrank ℝ E) → ℝ := fun k =>
     ‖(trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
@@ -184,7 +182,6 @@ theorem g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport
     Finset.sum_nonneg (fun k _ => hTcov_nn k)
   have hTchr_sum_nn : 0 ≤ Tchr_sum :=
     Finset.sum_nonneg (fun k _ => hTchr_nn k)
-  -- Pullback values at `z` of `raw` and `ρ_α`.
   set raw_z : ℝ := scalarOnE (I := I) α
       (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) z
     with hraw_z_def
@@ -192,11 +189,9 @@ theorem g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport
   set ρ_z : ℝ := scalarOnE (I := I) α
       (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) z
     with hρ_z_def
-  -- `ρ_z = ρ_α(b)` on the chart source (b ∈ source via the POU tsupport).
   have hρ_z_eq_b : ρ_z = ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b := by
     rw [hρ_z_def, hz_def]
     exact scalarOnE_extChartAt (I := I) α _ hb_extSrc
-  -- Chart-gradient pointwise bound: `g.inner ≤ l1Sum α b · ∑_k (∂_k ũ)²`.
   have h_step_grad3 :
       g.inner b
         (gradFun (I := I) g
@@ -216,7 +211,6 @@ theorem g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport
     exact this
   have h_l1Sum_le : chartInvGramMatrix_l1Sum (I := I) (M := M) g α b ≤ M_Ginv :=
     hM_Ginv_le b hb
-  -- Leibniz: `∂_k ũ_z = ∂_k ρ̃_z · raw_z + ρ_z · ∂_k raw̃_z`.
   have h_leibniz : ∀ k : Fin (Module.finrank ℝ E),
       partialDeriv (E := E) k (scalarOnE (I := I) α
           (tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx)) z =
@@ -232,7 +226,6 @@ theorem g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport
       (I := I) (M := M) g r s S α Idx Jdx hb_chart_src k
     rw [hraw_z_def, hρ_z_def, hz_def]
     exact h
-  -- Per-`k` squared inequality `(a+b)² ≤ 2 a² + 2 b²`.
   have h_sq_le : ∀ k : Fin (Module.finrank ℝ E),
       (partialDeriv (E := E) k (scalarOnE (I := I) α
           (tensorChartComponentScalar (I := I) (M := M)
@@ -270,7 +263,6 @@ theorem g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport
           (tensorChartComponentRaw (I := I) (M := M)
             g r s S α Idx Jdx)) z) ^ 2 := by ring
     linarith [h_tri, h_eq1.le, h_eq1.symm.le, h_eq2.le, h_eq2.symm.le]
-  -- Summed: ∑_k (∂_k ũ)² ≤ 2 raw² · Sρ + 2 ρ² · Sraw.
   set Sρ : ℝ := ∑ k : Fin (Module.finrank ℝ E),
     (partialDeriv (E := E) k (scalarOnE (I := I) α
       (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) z) ^ 2
@@ -285,7 +277,6 @@ theorem g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport
   have hSρ_le_M_dρ : Sρ ≤ M_dρ := by
     rw [hSρ_def, hz_def]
     exact hM_dρ_le b hb
-  -- Sum the per-k inequality (KEEPING ρ_z² on the Sraw term).
   have h_sum_sq_le :
       ∑ k : Fin (Module.finrank ℝ E),
         (partialDeriv (E := E) k (scalarOnE (I := I) α
@@ -311,7 +302,6 @@ theorem g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport
       ring
     rw [hRHS_eq]
     exact Finset.sum_le_sum (fun k _ => h_sq_le k)
-  -- Use only `Sρ ≤ M_dρ`; KEEP `ρ_z²` factor on the Sraw term.
   have h_sum_sq_le' :
       ∑ k : Fin (Module.finrank ℝ E),
         (partialDeriv (E := E) k (scalarOnE (I := I) α
@@ -322,7 +312,6 @@ theorem g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport
       have hcoef_nn : 0 ≤ 2 * raw_z ^ 2 := by positivity
       exact mul_le_mul_of_nonneg_left hSρ_le_M_dρ hcoef_nn
     linarith
-  -- Two-term split for each `(∂_k raw̃)²`.
   have h_twoTerm_per_k : ∀ k : Fin (Module.finrank ℝ E),
       (partialDeriv (E := E) k (scalarOnE (I := I) α
           (tensorChartComponentRaw (I := I) (M := M)
@@ -387,7 +376,6 @@ theorem g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport
     have h2 : 2 * Pnorm_sq * Tchr_sum ≤ 2 * C_proj ^ 2 * Tchr_sum :=
       mul_le_mul_of_nonneg_right h_2P_le hTchr_sum_nn
     linarith
-  -- Now bound `2 ρ_z² · Sraw` by `4 ρ_z² · C_proj² · (Tcov_sum + Tchr_sum)`.
   have hρ_z_sq_nn : 0 ≤ ρ_z ^ 2 := sq_nonneg _
   have h_2ρSraw_le :
       2 * ρ_z ^ 2 * Sraw ≤
@@ -401,7 +389,6 @@ theorem g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport
     have h_arith :
         ρ_z ^ 2 * (2 * Sraw) = 2 * ρ_z ^ 2 * Sraw := by ring
     linarith [h_step, h_arith.le, h_arith.symm.le]
-  -- Sum-sq bound (preserving ρ²).
   have h_sum_sq_final :
       ∑ k : Fin (Module.finrank ℝ E),
         (partialDeriv (E := E) k (scalarOnE (I := I) α
@@ -411,7 +398,6 @@ theorem g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport
         ρ_z ^ 2 * (4 * C_proj ^ 2 * Tcov_sum + 4 * C_proj ^ 2 * Tchr_sum) := by
     refine h_sum_sq_le'.trans ?_
     linarith
-  -- Multiply by `chartInvGramMatrix_l1Sum α b ≤ M_Ginv`.
   have h_l1Sum_nn : 0 ≤ chartInvGramMatrix_l1Sum (I := I) (M := M) g α b := by
     unfold chartInvGramMatrix_l1Sum
     exact Finset.sum_nonneg (fun _ _ => abs_nonneg _)
@@ -451,7 +437,6 @@ theorem g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport
             (4 * C_proj ^ 2 * Tcov_sum + 4 * C_proj ^ 2 * Tchr_sum)) :=
       mul_le_mul_of_nonneg_left h_sum_sq_final hM_Ginv_nn
     linarith
-  -- Rewrite `ρ_z = ρ_α b` and rearrange.
   have hρ_z_pow : ρ_z ^ 2 =
       (((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b) ^ 2 := by
     rw [hρ_z_eq_b]
@@ -532,8 +517,6 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
 
 section Sanity
 #print axioms

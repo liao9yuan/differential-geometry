@@ -78,19 +78,12 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-Match the convention in surrounding files: install Borel σ-algebras locally
-without leaking global instances. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Pull-back of the metric data through the chart and `toEuclidean` -/
 
 /-- The chart `α` target image transferred to `EuclideanSpace ℝ (Fin n)` via
 the canonical linear isomorphism `toEuclidean`. -/
@@ -141,18 +134,12 @@ def weightedInvGramOnEuclid (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : EuclN) : ℝ :=
   densityOnEuclid (I := I) g α y * invGramOnEuclid (I := I) g α i j y
 
-/-! ## Smoothness of the chart-pulled quantities on `chartTargetEuclid α` -/
-
 /-- `(extChartAt I α).symm ∘ toEuclidean.symm` is smooth on
 `chartTargetEuclid α` as a manifold map into `M`. -/
 lemma contMDiffOn_chart_symm (α : M) :
     ContMDiffOn 𝓘(ℝ, EuclN) I ∞
       (fun y : EuclN => (extChartAt I α).symm ((toEuclidean (E := E)).symm y))
       (chartTargetEuclid (I := I) (M := M) α) := by
-  -- The composition factors as
-  --   chartTargetEuclid α --(toEuclidean.symm)--> (extChartAt I α).target
-  --                       --((extChartAt I α).symm)--> M.
-  -- Both pieces are smooth on the right sets.
   have h_inner_contDiff : ContDiff ℝ (⊤ : ℕ∞)
       (fun y : EuclN => (toEuclidean (E := E)).symm y) :=
     (toEuclidean (E := E)).symm.contDiff
@@ -162,7 +149,6 @@ lemma contMDiffOn_chart_symm (α : M) :
   have h_outer : ContMDiffOn 𝓘(ℝ, E) I ∞
       (extChartAt I α).symm (extChartAt I α).target :=
     contMDiffOn_extChartAt_symm (I := I) α
-  -- Compose: pull-back of source set is `chartTargetEuclid α` itself.
   have h_maps : MapsTo (fun y : EuclN => (toEuclidean (E := E)).symm y)
       (chartTargetEuclid (I := I) (M := M) α) (extChartAt I α).target := by
     intro y hy
@@ -258,8 +244,6 @@ lemma weightedInvGramOnEuclid_contDiffOn
   exact (densityOnEuclid_contDiffOn (I := I) g α).mul
     (invGramOnEuclid_contDiffOn (I := I) g α i j)
 
-/-! ## Symmetry of the volume-weighted inverse Gram matrix -/
-
 /-- The chart-pulled inverse Gram matrix is symmetric on the chart base set. -/
 lemma invGramOnEuclid_symm_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -275,7 +259,6 @@ lemma invGramOnEuclid_symm_of_mem
   have h_base : x ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     change x ∈ (chartAt H α).source
     rwa [extChartAt_source_eq_chartAt_source (I := I)] at h_src
-  -- Hermitian → inverse is Hermitian.
   have hHerm : (chartGramMatrix (I := I) g α x).IsHermitian :=
     chartGramMatrix_isHermitian (I := I) g α x
   have hHermInv : (chartInvGramMatrix (I := I) g α x).IsHermitian := by
@@ -283,9 +266,7 @@ lemma invGramOnEuclid_symm_of_mem
     exact hHerm.inv
   change chartInvGramMatrix (I := I) g α x i j =
     chartInvGramMatrix (I := I) g α x j i
-  -- IsHermitian over ℝ means symmetric.
   have h_apply := hHermInv.apply i j
-  -- h_apply : star (chartInvGramMatrix g α x j i) = chartInvGramMatrix g α x i j
   rw [star_trivial] at h_apply
   exact h_apply.symm
 
@@ -298,14 +279,6 @@ lemma weightedInvGramOnEuclid_symm_of_mem
       weightedInvGramOnEuclid (I := I) g α j i y := by
   unfold weightedInvGramOnEuclid
   rw [invGramOnEuclid_symm_of_mem (I := I) g α i j hy]
-
-/-! ## Positivity and lower-eigenvalue bound for the weighted inverse Gram
-
-The matrix `√det G · G⁻¹` is symmetric and positive-definite on the chart
-base set. On a compact subset of the chart-target, the smallest eigenvalue
-(equivalently the infimum of the Rayleigh quotient on the unit sphere) is
-strictly positive.
--/
 
 /-- The chart-pulled volume density is strictly positive on the chart-target
 image. -/
@@ -338,13 +311,11 @@ lemma invGramOnEuclid_posDef
   have h_base : x ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     change x ∈ (chartAt H α).source
     rwa [extChartAt_source_eq_chartAt_source (I := I)] at h_src
-  -- `chartInvGramMatrix g α x` is positive-definite on the base set.
   have hG : (chartGramMatrix (I := I) g α x).PosDef :=
     chartGramMatrix_posDef (I := I) g α h_base
   have hGinv : (chartInvGramMatrix (I := I) g α x).PosDef := by
     unfold chartInvGramMatrix
     exact hG.inv
-  -- The matrix-of presentation equals `chartInvGramMatrix g α x`.
   have hmat_eq : (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
       invGramOnEuclid (I := I) g α i j y)) =
       chartInvGramMatrix (I := I) g α x := by
@@ -381,7 +352,6 @@ lemma weighted_quadForm_pos_of_mem
     change weightedInvGramOnEuclid (I := I) g α i j y =
       densityOnEuclid (I := I) g α y * invGramOnEuclid (I := I) g α i j y
     rfl
-  -- Use the identity ⟪ξ, matMulE (c • Ainv) ξ⟫ = c * ⟪ξ, matMulE Ainv ξ⟫.
   have h_smul_quad : ⟪ξ, DeGiorgi.matMulE Acoeff ξ⟫_ℝ =
       densityOnEuclid (I := I) g α y * ⟪ξ, DeGiorgi.matMulE Ainv ξ⟫_ℝ := by
     rw [hA_eq]
@@ -394,7 +364,6 @@ lemma weighted_quadForm_pos_of_mem
       rfl
     rw [h_mul]
     rw [inner_smul_right]
-  -- The quadratic form for `Ainv` is positive (positive-definiteness).
   have h_quad_pos : 0 < ⟪ξ, DeGiorgi.matMulE Ainv ξ⟫_ℝ := by
     have h_form : ⟪ξ, DeGiorgi.matMulE Ainv ξ⟫_ℝ =
         Ainv.mulVec ξ.ofLp ⬝ᵥ ξ.ofLp := by
@@ -420,8 +389,6 @@ lemma weighted_quadForm_pos_of_mem
   rw [h_smul_quad]
   exact mul_pos h_dens_pos h_quad_pos
 
-/-! ## Compactness-based uniform Rayleigh-quotient lower bound -/
-
 /-- The continuous map `(y, ξ) ↦ ⟪ξ, A(y) ξ⟫` for `A := Matrix.of weightedInvGram`.
 This is the integrand of the Rayleigh quotient. -/
 private def rayleighInt
@@ -438,7 +405,6 @@ private lemma rayleighInt_eq_sum
         weightedInvGramOnEuclid (I := I) g α i j y * (ξ.ofLp i) * (ξ.ofLp j) := by
   classical
   unfold rayleighInt
-  -- ⟪ξ, matMulE A ξ⟫ = (matMulE A ξ).ofLp ⬝ᵥ star ξ.ofLp = (A.mulVec ξ.ofLp) ⬝ᵥ ξ.ofLp.
   have h_inner : ⟪ξ, DeGiorgi.matMulE
       (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
         weightedInvGramOnEuclid (I := I) g α i j y)) ξ⟫_ℝ =
@@ -450,11 +416,9 @@ private lemma rayleighInt_eq_sum
       funext i; exact star_trivial _
     rw [hstar]
   rw [h_inner]
-  -- Expand `mulVec ⬝ᵥ ξ.ofLp = ∑ i, (∑ j, A i j * ξ.ofLp j) * ξ.ofLp i`.
   simp only [dotProduct, Matrix.mulVec, Matrix.of_apply]
   refine Finset.sum_congr rfl ?_
   intro i _
-  -- Goal: (∑ j, A i j * ξ.ofLp j) * ξ.ofLp i = ∑ j, A i j * ξ.ofLp i * ξ.ofLp j
   rw [Finset.sum_mul]
   refine Finset.sum_congr rfl ?_
   intro j _
@@ -468,7 +432,6 @@ private lemma rayleighInt_continuousOn
         rayleighInt (I := I) g α p.1 p.2)
       ((chartTargetEuclid (I := I) (M := M) α) ×ˢ (Set.univ : Set EuclN)) := by
   classical
-  -- Express via `rayleighInt_eq_sum` then verify continuity of each summand.
   have h_eq : (fun p : EuclN × EuclN =>
       rayleighInt (I := I) g α p.1 p.2) =
       (fun p : EuclN × EuclN =>
@@ -583,7 +546,6 @@ lemma exists_unif_lower_bound_on_compact
         exact hη_norm
       have h_yη : (y, η) ∈ K ×ˢ S := ⟨hyK, hη_in_S⟩
       have h_bound : lamK ≤ rayleighInt (I := I) g α y η := hlamK_le (y, η) h_yη
-      -- Convert the goal to the rayleighInt form.
       change lamK * ‖ξ‖ ^ 2 ≤ rayleighInt (I := I) g α y ξ
       have h_scale : rayleighInt (I := I) g α y ξ =
           ‖ξ‖ ^ 2 * rayleighInt (I := I) g α y η := by
@@ -594,7 +556,6 @@ lemma exists_unif_lower_bound_on_compact
           rw [show ‖ξ‖ * (1 / ‖ξ‖) = 1 from by field_simp]
           rw [one_smul]
         conv_lhs => rw [hξ_eq_norm_smul]
-        -- Use `matMulE` linearity: matMulE A (c • ξ) = c • matMulE A ξ.
         have h_matMulE_smul :
             DeGiorgi.matMulE (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
               weightedInvGramOnEuclid (I := I) g α i j y)) (‖ξ‖ • η) =
@@ -617,8 +578,7 @@ lemma exists_unif_lower_bound_on_compact
       calc lamK * ‖ξ‖ ^ 2 = ‖ξ‖ ^ 2 * lamK := by ring
         _ ≤ ‖ξ‖ ^ 2 * rayleighInt (I := I) g α y η :=
             mul_le_mul_of_nonneg_left h_bound h_norm_sq_nn
-  · -- `K × S` is empty.
-    rw [Set.not_nonempty_iff_eq_empty] at hKne
+  · rw [Set.not_nonempty_iff_eq_empty] at hKne
     have hK_empty : K = ∅ := by
       by_contra h_ne
       have h_K_ne : K.Nonempty := Set.nonempty_iff_ne_empty.mpr h_ne
@@ -638,13 +598,6 @@ lemma exists_unif_lower_bound_on_compact
     intro y hy ξ
     rw [hK_empty] at hy
     exact hy.elim
-
-/-! ## Building the global smooth extension
-
-We pick a smooth cutoff `χ`, then define the global matrix `extendedMatrix`
-that interpolates between the volume-weighted inverse Gram (on `K`) and the
-identity matrix (outside a slightly larger compact). The corresponding
-`SmoothEllipticBilinearForm` has `c := 0`. -/
 
 /-- The Kronecker-delta entry of the identity matrix on `Fin n`. -/
 private def kronDelta (i j : Fin (Module.finrank ℝ E)) : ℝ := if i = j then 1 else 0
@@ -691,7 +644,6 @@ lemma extendedMatrix_symm_off_tsupport
     extendedMatrix (I := I) g α χ i j y =
       extendedMatrix (I := I) g α χ j i y := by
   have hχ_zero : χ y = 0 := image_eq_zero_of_notMem_tsupport hy
-  -- Both sides equal kronDelta i j = kronDelta j i.
   have h_lhs : extendedMatrix (I := I) g α χ i j y = kronDelta (E := E) i j := by
     unfold extendedMatrix
     rw [hχ_zero]; ring
@@ -712,14 +664,6 @@ lemma extendedMatrix_symm
   · exact extendedMatrix_symm_of_mem (I := I) g α χ i j (hχ_supp hy)
   · exact extendedMatrix_symm_off_tsupport (I := I) g α i j hy
 
-/-! ## Smoothness of the extended matrix
-
-We use `contDiff_of_contDiffOn_union_of_isOpen` with two open sets that cover
-`EuclN`: the chart-target image (where the chart-pulled stuff is smooth) and
-the complement of `tsupport χ` (where the cutoff vanishes, leaving the
-identity matrix).
--/
-
 lemma extendedMatrix_contDiff
     (g : SmoothRiemannianMetric I M) (α : M) [I.Boundaryless]
     {χ : EuclN → ℝ} (hχ_smooth : ContDiff ℝ (⊤ : ℕ∞) χ)
@@ -737,7 +681,6 @@ lemma extendedMatrix_contDiff
     by_cases hy : y ∈ tsupport χ
     · exact Or.inl (hχ_supp hy)
     · exact Or.inr hy
-  -- Smoothness on s.
   have hf_on_s : ContDiffOn ℝ (⊤ : ℕ∞) f s := by
     change ContDiffOn ℝ (⊤ : ℕ∞) (fun y =>
       χ y * weightedInvGramOnEuclid (I := I) g α i j y +
@@ -748,7 +691,6 @@ lemma extendedMatrix_contDiff
     · have h_one_minus_chi : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclN => 1 - χ y) s :=
         (contDiffOn_const.sub hχ_smooth.contDiffOn)
       exact h_one_minus_chi.mul contDiffOn_const
-  -- Smoothness on t: f y = kronDelta i j (constant) on t.
   have hf_on_t : ContDiffOn ℝ (⊤ : ℕ∞) f t := by
     have hf_eq_const : ∀ y ∈ t, f y = kronDelta (E := E) i j := by
       intro y hy
@@ -762,8 +704,6 @@ lemma extendedMatrix_contDiff
       contDiffOn_const
     exact h_const_smooth.congr (fun y hy => hf_eq_const y hy)
   exact contDiff_of_contDiffOn_union_of_isOpen hf_on_s hf_on_t hcov hs_open ht_open
-
-/-! ## Coercivity of the extended matrix -/
 
 /-- Decomposition of the Rayleigh quotient of the extended matrix into a
 χ-weighted weighted-inverse-Gram piece plus a (1 - χ)-weighted identity
@@ -779,7 +719,6 @@ lemma extendedMatrix_quad_decomp
           weightedInvGramOnEuclid (I := I) g α i j y)) ξ⟫_ℝ +
       (1 - χ y) * ‖ξ‖ ^ 2 := by
   classical
-  -- Express both sides as sums.
   have h_ext : ⟪ξ, DeGiorgi.matMulE
       (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
         extendedMatrix (I := I) g α χ i j y)) ξ⟫_ℝ =
@@ -819,15 +758,10 @@ lemma extendedMatrix_quad_decomp
     intro i _
     rw [Real.norm_eq_abs, sq_abs]
   rw [h_ext, h_w, h_norm_sq]
-  -- LHS: ∑ i j, (χ * weight + (1 - χ) * kronDelta) * ξ i * ξ j.
-  -- RHS: χ * ∑ i j, weight * ξ i * ξ j + (1 - χ) * ∑ i, (ξ i)^2.
-  -- Show these are equal by expanding extendedMatrix and splitting.
   rw [Finset.mul_sum]
   rw [show (1 - χ y) * ∑ i : Fin (Module.finrank ℝ E), (ξ.ofLp i) ^ 2 =
       ∑ i : Fin (Module.finrank ℝ E), (1 - χ y) * (ξ.ofLp i) ^ 2 from
         (Finset.mul_sum _ _ _)]
-  -- The RHS becomes: ∑ i, χ * (∑ j, w i j * ξ i * ξ j) + ∑ i, (1 - χ) * (ξ i)^2
-  -- Combine into one sum.
   rw [show (∑ i : Fin (Module.finrank ℝ E),
         χ y * ∑ j : Fin (Module.finrank ℝ E),
           weightedInvGramOnEuclid (I := I) g α i j y * ξ.ofLp i * ξ.ofLp j) +
@@ -839,9 +773,6 @@ lemma extendedMatrix_quad_decomp
         (Finset.sum_add_distrib).symm]
   refine Finset.sum_congr rfl ?_
   intro i _
-  -- Goal:
-  -- ∑ j, (χ * weight i j + (1 - χ) * kron i j) * ξ.ofLp i * ξ.ofLp j
-  -- = χ * (∑ j, weight i j * ξ.ofLp i * ξ.ofLp j) + (1 - χ) * (ξ.ofLp i)^2
   unfold extendedMatrix
   rw [show ∑ j : Fin (Module.finrank ℝ E),
         (χ y * weightedInvGramOnEuclid (I := I) g α i j y +
@@ -859,9 +790,7 @@ lemma extendedMatrix_quad_decomp
     refine Finset.sum_congr rfl ?_
     intro j _
     ring
-  · -- ∑ j, (1 - χ) * kron i j * ξ.ofLp i * ξ.ofLp j = (1 - χ) * (ξ.ofLp i)^2.
-    -- Only j = i contributes.
-    rw [Finset.sum_eq_single i]
+  · rw [Finset.sum_eq_single i]
     · rw [kronDelta_self]
       ring
     · intro j _ hji
@@ -901,17 +830,12 @@ lemma extendedMatrix_coercive_on_chart
   have h_one_minus_chi_nn : 0 ≤ 1 - χ y := by linarith
   have h_decomp := extendedMatrix_quad_decomp (I := I) g α χ y ξ
   rw [h_decomp]
-  -- Bound: (χ y * weightQuadForm + (1 - χ y) * ‖ξ‖²) ≥ min(1, lamK) * ‖ξ‖².
   have h_unif_ξ := h_unif ξ
   have h_first : χ y * (lamK * ‖ξ‖ ^ 2) ≤
       χ y * ⟪ξ, DeGiorgi.matMulE
         (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
           weightedInvGramOnEuclid (I := I) g α i j y)) ξ⟫_ℝ :=
     mul_le_mul_of_nonneg_left h_unif_ξ hχ_nn
-  -- Combine:
-  -- LHS_combined = χ * (lamK * ‖ξ‖²) + (1 - χ) * ‖ξ‖² ≤ χ * weight + (1 - χ) * ‖ξ‖².
-  -- And LHS_combined = (χ * lamK + (1 - χ)) * ‖ξ‖².
-  -- We need: min(1, lamK) * ‖ξ‖² ≤ (χ * lamK + (1 - χ)) * ‖ξ‖².
   have h_norm_sq_nn : 0 ≤ ‖ξ‖ ^ 2 := sq_nonneg _
   have h_min_le : min (1 : ℝ) lamK ≤ χ y * lamK + (1 - χ y) := by
     have h_min_le_lamK : min (1 : ℝ) lamK ≤ lamK := min_le_right _ _
@@ -995,8 +919,7 @@ lemma extendedMatrix_coercive
       (χ := χ) hχ_range (y := y) hy_target hlamK_pos h_unif_y ξ
     rw [h_min_eq] at h
     exact h
-  · -- Off `tsupport χ`, the matrix is the identity.
-    have h_eq : ⟪ξ, DeGiorgi.matMulE
+  · have h_eq : ⟪ξ, DeGiorgi.matMulE
         (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
           extendedMatrix (I := I) g α χ i j y)) ξ⟫_ℝ = ‖ξ‖ ^ 2 := by
       have h_mat_eq : (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
@@ -1011,8 +934,6 @@ lemma extendedMatrix_coercive
     have : lamK * ‖ξ‖ ^ 2 ≤ 1 * ‖ξ‖ ^ 2 :=
       mul_le_mul_of_nonneg_right hlamK_le h_norm_sq_nn
     linarith
-
-/-! ## Main public theorem -/
 
 /-- **Smooth global extension of the chart-pulled volume-weighted inverse Gram
 matrix.**
@@ -1052,7 +973,6 @@ theorem exists_smooth_metric_extension
         B.a y i j = weightedInvGramOnEuclid (I := I) g α i j y) ∧
       B.c = (fun _ : EuclN => (0 : ℝ)) := by
   classical
-  -- Step 1: pick a smaller compact set `K' ⊇ K` with `K' ⊆ chartTargetEuclid α`.
   have hO : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   obtain ⟨δ, δ_pos, hδ_subset⟩ := hK.exists_cthickening_subset_open hO hK_target
@@ -1069,7 +989,6 @@ theorem exists_smooth_metric_extension
     hK'_compact.of_isClosed_subset isClosed_closure h_closure_Ω'_in_K'
   have h_closure_in_chart : closure Ω' ⊆ chartTargetEuclid (I := I) (M := M) α :=
     h_closure_Ω'_in_K'.trans h_K'_in_chart
-  -- Step 2: pick a smooth cutoff χ.
   obtain ⟨χ, hχ_smooth, hχ_supp, hχ_range, hχ_one, hχ_tsupp⟩ :=
     SmoothEllipticBilinearForm.exists_cutoff
       (d := Module.finrank ℝ E)
@@ -1079,10 +998,8 @@ theorem exists_smooth_metric_extension
     have h1 : y ∈ Ω' := hχ_tsupp hy
     exact (h_Ω'_in_K'.trans h_K'_in_chart) h1
   have hχ_tsupp_compact : IsCompact (tsupport χ) := hχ_supp
-  -- Step 3: get uniform Rayleigh-quotient bound on tsupport χ.
   obtain ⟨lamK0, hlamK0_pos, hlamK0_bound⟩ :=
     exists_unif_lower_bound_on_compact (I := I) g α hχ_tsupp_compact hχ_tsupp_chart
-  -- Step 4: take lamK := min(1, lamK0).
   set lamK : ℝ := min 1 lamK0 with hlamK_def
   have hlamK_pos : 0 < lamK := lt_min one_pos hlamK0_pos
   have hlamK_le_one : lamK ≤ 1 := min_le_left _ _
@@ -1098,7 +1015,6 @@ theorem exists_smooth_metric_extension
     have h_le : lamK * ‖ξ‖ ^ 2 ≤ lamK0 * ‖ξ‖ ^ 2 :=
       mul_le_mul_of_nonneg_right hlamK_le_lamK0 h_norm_sq_nn
     linarith
-  -- Step 5: build the smooth elliptic bilinear form data.
   let aFun : EuclN → Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
     fun y => Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
       extendedMatrix (I := I) g α χ i j y)
@@ -1124,7 +1040,6 @@ theorem exists_smooth_metric_extension
     exact extendedMatrix_coercive (I := I) g α
       (χ := χ) hχ_range hχ_tsupp_chart hlamK_pos hlamK_le_one
       hlamK0_bound_for_lamK y ξ
-  -- Step 6: assemble the SmoothEllipticBilinearForm.
   let B : SmoothEllipticBilinearForm (Module.finrank ℝ E) (Set.univ : Set EuclN) :=
     { a := aFun
       c := fun _ => 0
@@ -1136,7 +1051,6 @@ theorem exists_smooth_metric_extension
       hlam_pos := hlamK_pos
       hlam_le_capLam := le_max_left _ _
       coercive := h_a_coercive }
-  -- Step 7: agreement on K.
   have h_agree : ∀ y ∈ K, ∀ i j : Fin (Module.finrank ℝ E),
       B.a y i j = weightedInvGramOnEuclid (I := I) g α i j y := by
     intro y hy i j

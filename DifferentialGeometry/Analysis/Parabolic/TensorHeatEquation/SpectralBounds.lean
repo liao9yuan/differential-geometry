@@ -46,16 +46,10 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Pointwise spectral bound
-
-`λ^k · exp(-λ t) ≤ (k/t)^k · exp(-k)` for `λ ≥ 0`, `t > 0`. -/
 
 /-- The constant `(k/t)^k · exp(-k)`, the global max of `λ ↦ λ^k e^{-λt}` on
 `[0, ∞)` for `k ≥ 1` and `t > 0`. -/
@@ -143,15 +137,6 @@ private lemma tensor_lambda_pow_mul_exp_sq_le
       tensorHeatPowerCoeffBound k t :=
     tensor_lambda_pow_mul_exp_le k ht hlam
   exact pow_le_pow_left₀ h_lhs_nn h_le 2
-
-/-! ## Removed locally-constant-chart-gated spectral-power machinery
-
-The spectral-power construction `tensorHeatPower` and its supporting
-lemmas were gated by a locally-constant-chart atlas predicate that is
-mathematically false on normal closed manifolds (e.g. the sphere), so the
-gated declarations were vacuous and have been removed. The predicate-free
-pointwise bounds (`tensorHeatPowerCoeffBound`, `tensor_lambda_pow_mul_exp_le`,
-`tensor_lambda_pow_mul_exp_sq_le`) are retained above. -/
 
 end TensorHeatEquation
 end Parabolic

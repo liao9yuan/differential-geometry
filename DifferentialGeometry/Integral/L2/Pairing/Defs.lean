@@ -51,17 +51,10 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Canonical measurable-space and Borel-space instances on `E` and `M`
-
-File-local Borel structures, matching the other files in this directory.
-Declared `local` so they do not leak into external typeclass search. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Global `L²` pairing on mixed `(r, s)`-tensor section fields -/
 
 /-- The global `L²` inner product on mixed `(r, s)`-tensor section fields,
 realised as functions `M → TensorRSModel r s ℝ E`, against the canonical
@@ -72,15 +65,6 @@ noncomputable def tensorL2Inner
     (S T : M → TensorRSModel r s ℝ E) : ℝ :=
   ∫ x, tensorInnerPointwise (I := I) (M := M) g r s x (S x) (T x)
     ∂(riemannianVolumeMeasure (I := I) (M := M) g)
-
-/-! ## Membership in the (candidate) `L²` space
-
-A mixed tensor section field is a member of the candidate `L²` space when
-its pointwise diagonal pairing is Bochner-integrable against the
-Riemannian volume measure. This is equivalent to having finite `L²` norm.
-
-The predicate is `Prop`-valued and provides the natural integrability
-hypothesis used in linearity / Cauchy–Schwarz statements. -/
 
 /-- `MemL2 g r s S` says that the diagonal pointwise pairing
 `x ↦ ⟨S(x), S(x)⟩_{g(x)}` is Bochner-integrable against the Riemannian
@@ -122,8 +106,6 @@ theorem MemL2.zero
   rw [hzero]
   exact MeasureTheory.integrable_zero M ℝ
     (riemannianVolumeMeasure (I := I) (M := M) g)
-
-/-! ## Global `L²` norm -/
 
 /-- The global metric-induced `L²` norm on a mixed `(r, s)`-tensor section
 field, defined as the square root of the diagonal `L²` inner product. -/

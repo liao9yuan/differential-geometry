@@ -41,20 +41,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Pointwise inner product on the `(0, s)`-tensor fiber
-
-The `(0, s)`-tensor fiber at a point is the fixed normed space
-`Tensor0SModel s ℝ E = ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ`.
-We equip it with a family of `ℝ`-valued bilinear pairings indexed by
-`x : M`, defined recursively in `s`:
-
-* at `s = 0`, multilinear maps on an empty tuple are canonically identified
-  with scalars; the pointwise inner product is multiplication;
-* at `s + 1`, a multilinear map on `s + 1` copies of `E` curries into a
-  continuous linear map `E → (0, s)-tensor fiber`; we pair the
-  `E`-inputs via the Gram-matrix inverse of `g(x)` and the resulting
-  `s`-tensor outputs via the inductive definition. -/
-
 /-- The pointwise inner product on `(0, s)`-tensors induced by `g(x)`,
 defined by recursion on `s`.
 
@@ -93,16 +79,6 @@ lemma tensorInnerPointwise_0s_succ
             (S.curryLeft ((chartModelBasis E) i))
             (T.curryLeft ((chartModelBasis E) j)) := rfl
 
-/-! ## Mixed `(r, s)` pointwise inner product
-
-The mixed `(r, s)`-tensor fiber is
-`TensorRSModel r s ℝ E = Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E`.
-
-A mixed tensor is made into a covariant `(0, r + s)`-tensor by applying the
-metric to each of its `r` upper slots; the resulting pointwise inner
-product is the composition of this lowering map with the covariant-tensor
-inner product at arity `r + s`. -/
-
 /-- The pointwise inner product on mixed `(r, s)`-tensors induced by `g(x)`:
 lower both tensors to covariant `(0, r + s)`-tensors via the metric and
 take the covariant pointwise inner product of the results. -/
@@ -112,8 +88,6 @@ noncomputable def tensorInnerPointwise
   tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
     (lowerAllUpperIndices (I := I) (M := M) g r s x S)
     (lowerAllUpperIndices (I := I) (M := M) g r s x T)
-
-/-! ## Pointwise metric-induced norm on mixed `(r, s)`-tensors -/
 
 /-- The pointwise metric-induced norm on a mixed `(r, s)`-tensor at `x`,
 defined as the square root of the diagonal pointwise inner product. -/

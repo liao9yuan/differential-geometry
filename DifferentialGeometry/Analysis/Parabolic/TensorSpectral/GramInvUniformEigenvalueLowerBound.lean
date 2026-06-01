@@ -61,8 +61,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Compactness of the unit sphere in `Fin n → ℝ` -/
-
 /-- The unit sphere `{ξ | ∑ ξ_i^2 = 1}` in `Fin n → ℝ` is compact (closed and
 bounded in a finite-dimensional space). -/
 private lemma sphere_isCompact :
@@ -94,8 +92,6 @@ private lemma sphere_isCompact :
     exact habs
   exact (isCompact_iff_isClosed_bounded.mpr ⟨hclosed, hbdd⟩)
 
-/-! ## Headline result: uniform lower bound on the inverse chart-frame Gram -/
-
 /-- **Uniform Rayleigh-quotient lower bound for the chart-frame inverse Gram
 matrix on an arbitrary compact subset `Kα` of the chart base set.**
 
@@ -123,13 +119,11 @@ theorem exists_chartInvGramMatrix_quadForm_lower_bound_on_compact
               ∑ j : Fin (Module.finrank ℝ E),
                 chartInvGramMatrix (I := I) g α b i j * ξ i * ξ j := by
   classical
-  -- Rayleigh quadratic form `Q(b, ξ) := ξᵀ chartInvGram(b) ξ`.
   set Q : M × (Fin (Module.finrank ℝ E) → ℝ) → ℝ := fun p =>
     ∑ i : Fin (Module.finrank ℝ E),
       ∑ j : Fin (Module.finrank ℝ E),
         chartInvGramMatrix (I := I) g α p.1 i j * p.2 i * p.2 j
     with hQ_def
-  -- Positive-definiteness at every base-set point.
   have hQ_pos_baseSet : ∀ b ∈ (trivializationAt E (TangentSpace I) α).baseSet,
       ∀ ξ : Fin (Module.finrank ℝ E) → ℝ, ξ ≠ 0 →
         0 < ∑ i : Fin (Module.finrank ℝ E),
@@ -155,7 +149,6 @@ theorem exists_chartInvGramMatrix_quadForm_lower_bound_on_compact
       refine Finset.sum_congr rfl (fun j _ => ?_)
       ring
     rw [← hexp]; exact hdot_pos
-  -- Continuity of Q on baseSet × univ.
   have hQ_cont : ContinuousOn Q
       ((trivializationAt E (TangentSpace I) α).baseSet ×ˢ
         (Set.univ : Set (Fin (Module.finrank ℝ E) → ℝ))) := by
@@ -168,7 +161,6 @@ theorem exists_chartInvGramMatrix_quadForm_lower_bound_on_compact
         exact hentry.comp continuous_fst.continuousOn (fun p hp => hp.1)
       · exact ((continuous_apply i).comp continuous_snd).continuousOn
     · exact ((continuous_apply j).comp continuous_snd).continuousOn
-  -- Compact `Kα × Sph`.
   set Sph : Set (Fin (Module.finrank ℝ E) → ℝ) :=
     {ξ | ∑ i : Fin (Module.finrank ℝ E), ξ i ^ 2 = 1} with hSph_def
   have hSph_compact : IsCompact Sph := sphere_isCompact (E := E)
@@ -197,8 +189,7 @@ theorem exists_chartInvGramMatrix_quadForm_lower_bound_on_compact
     refine ⟨Q p₀, hp₀_pos, ?_⟩
     intro b hb ξ
     by_cases hξ_eq : (∑ i : Fin (Module.finrank ℝ E), ξ i ^ 2) = 0
-    · -- ξ = 0 case: trivial.
-      have hξzero : ∀ i, ξ i = 0 := by
+    · have hξzero : ∀ i, ξ i = 0 := by
         intro i
         have hle : ξ i ^ 2 ≤ ∑ j : Fin (Module.finrank ℝ E), ξ j ^ 2 := by
           refine Finset.single_le_sum (s := Finset.univ)
@@ -215,8 +206,7 @@ theorem exists_chartInvGramMatrix_quadForm_lower_bound_on_compact
         refine Finset.sum_eq_zero (fun j _ => ?_)
         rw [hξzero i, mul_zero, zero_mul]
       rw [hξ_eq, mul_zero, hQzero]
-    · -- ξ ≠ 0 case: normalize and rescale.
-      have hξ_pos : 0 < ∑ i : Fin (Module.finrank ℝ E), ξ i ^ 2 :=
+    · have hξ_pos : 0 < ∑ i : Fin (Module.finrank ℝ E), ξ i ^ 2 :=
         lt_of_le_of_ne (Finset.sum_nonneg (fun i _ => sq_nonneg _))
           (Ne.symm hξ_eq)
       set r : ℝ := Real.sqrt (∑ i : Fin (Module.finrank ℝ E), ξ i ^ 2)
@@ -238,7 +228,6 @@ theorem exists_chartInvGramMatrix_quadForm_lower_bound_on_compact
         exact div_self (ne_of_gt hξ_pos)
       have hbη_mem : (b, η) ∈ K := ⟨hb, hη_sph⟩
       have hmin_le_bη : Q p₀ ≤ Q (b, η) := hp₀_min hbη_mem
-      -- Rescaling: Q(b, ξ) = r² ⋅ Q(b, η).
       have hQscale :
           (∑ i : Fin (Module.finrank ℝ E),
             ∑ j : Fin (Module.finrank ℝ E),
@@ -263,18 +252,11 @@ theorem exists_chartInvGramMatrix_quadForm_lower_bound_on_compact
       rw [← hQη]
       rw [← hr_sq, mul_comm]
       exact mul_le_mul_of_nonneg_left hmin_le_bη (sq_nonneg r)
-  · -- K empty: vacuous when ξ ≠ 0; for ξ = 0 we directly verify.
-    refine ⟨1, one_pos, ?_⟩
+  · refine ⟨1, one_pos, ?_⟩
     intro b hb ξ
-    -- If `Kα = ∅`, the hypothesis `b ∈ Kα` is empty, so this branch is vacuous.
-    -- Otherwise `Kα ≠ ∅`. To finish we either need `Sph` nonempty (which it
-    -- is when `n ≥ 1`) for contradiction with `hK_ne`, or to handle `ξ = 0`
-    -- and `ξ ≠ 0` directly. We split on whether `Kα` is empty.
     by_cases hKα_ne : Kα.Nonempty
-    · -- Need Sph nonempty for contradiction.
-      by_cases hn : Nonempty (Fin (Module.finrank ℝ E))
-      · -- Construct a sphere member.
-        haveI : Nonempty (Fin (Module.finrank ℝ E)) := hn
+    · by_cases hn : Nonempty (Fin (Module.finrank ℝ E))
+      · haveI : Nonempty (Fin (Module.finrank ℝ E)) := hn
         set i₀ : Fin (Module.finrank ℝ E) := Classical.arbitrary _
         set e₀ : Fin (Module.finrank ℝ E) → ℝ :=
           (Pi.single i₀ (1 : ℝ) : Fin (Module.finrank ℝ E) → ℝ) with he₀_def
@@ -289,8 +271,7 @@ theorem exists_chartInvGramMatrix_quadForm_lower_bound_on_compact
             exact absurd (Finset.mem_univ _) h
         obtain ⟨b₀, hb₀⟩ := hKα_ne
         exact absurd ⟨(b₀, e₀), ⟨hb₀, h0⟩⟩ hK_ne
-      · -- `Fin (finrank ℝ E)` is empty. Both sides of the inequality reduce to 0.
-        have hempty : ¬ Nonempty (Fin (Module.finrank ℝ E)) := hn
+      · have hempty : ¬ Nonempty (Fin (Module.finrank ℝ E)) := hn
         have hsum_empty : ∀ f : Fin (Module.finrank ℝ E) → ℝ,
             ∑ i : Fin (Module.finrank ℝ E), f i = 0 := by
           intro f
@@ -300,8 +281,7 @@ theorem exists_chartInvGramMatrix_quadForm_lower_bound_on_compact
         rw [hsum_empty]
         rw [mul_zero]
         exact le_of_eq (hsum_empty _).symm
-    · -- Kα is empty, so the hypothesis `b ∈ Kα` is impossible.
-      exact absurd ⟨b, hb⟩ hKα_ne
+    · exact absurd ⟨b, hb⟩ hKα_ne
 
 /-- **Uniform Rayleigh-quotient lower bound for the chart-frame inverse Gram
 matrix on the compact closed support of the chart-atlas partition-of-unity

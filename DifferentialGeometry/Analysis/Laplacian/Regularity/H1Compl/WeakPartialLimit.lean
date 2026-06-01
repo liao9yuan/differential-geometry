@@ -57,8 +57,6 @@ open DifferentialGeometry.Analysis.Laplacian.H1ComplGradientLipschitzBound
 open DifferentialGeometry.Analysis.Laplacian.H1ComplToLpChartBridge
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -67,13 +65,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## Lipschitz hypothesis structure
-
-For a chart `α : M` and a coordinate direction `j`, a witness of the
-Lipschitz property of the chart-pushed-partial map is a real constant `C ≥ 0`
-together with a proof that `‖chartPushedPartialLpLin g α j v‖ ≤ C · ‖v‖`
-for every `v : SmoothScalar g`. -/
 
 /-- Lipschitz-witness data for the chart-pushed-partial map. The constant
 `C` and the bound express the H¹-pre-norm continuity of the linear map
@@ -88,8 +79,6 @@ structure ChartPushedPartialLipschitz
   /-- The bound on the chart-pushed-partial Lp norm. -/
   bound : ∀ v : SmoothScalar g,
     ‖chartPushedPartialLpLin (I := I) (M := M) g α j v‖ ≤ C * ‖v‖
-
-/-! ## Promotion to a continuous linear map -/
 
 /-- The chart-pushed-partial linear map promoted to a continuous linear
 map via the Lipschitz hypothesis. -/
@@ -110,8 +99,6 @@ noncomputable def chartPushedPartialCLM
     (v : SmoothScalar g) :
     chartPushedPartialCLM (I := I) (M := M) g α j hLip v =
       chartPushedPartialLpLin (I := I) (M := M) g α j v := rfl
-
-/-! ## Extension along the dense uniform-inducing embedding -/
 
 /-- `smoothToH1Compl` has dense range. -/
 private lemma denseRange_smoothToH1Compl_local
@@ -160,8 +147,6 @@ noncomputable def H1ComplPartialCLM
     (e := smoothToH1Compl (I := I) (M := M) g)
     (denseRange_smoothToH1Compl_local (I := I) (M := M) g)
     (isUniformInducing_smoothToH1Compl_local (I := I) (M := M) g) v
-
-/-! ## The chart-pushed weak partial -/
 
 /-- For `u_h : H1Compl g` and chart point `α`, the chart-pushed weak partial
 is the L²-limit of the chart-pushed classical partials of any smooth

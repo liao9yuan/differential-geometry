@@ -98,8 +98,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Decomposition of the chart-pushed lift -/
-
 section ChartPushedDecomp
 
 /-- The first component of the chart-pushed lift coincides with the
@@ -128,8 +126,6 @@ lemma chartPushLift_fst_eq_chartLocalCurve
 
 end ChartPushedDecomp
 
-/-! ## Self-evaluation of the chart-pushed phase-space vector field -/
-
 section ChartPushVFSelf
 
 /-- At the base time `t = t₀`, the chart-pushed phase-space vector field
@@ -147,8 +143,6 @@ lemma chartPushVF_self
     (v := geodesicVectorFieldChart (I := I) g α (f t₀)) hsrc
 
 end ChartPushVFSelf
-
-/-! ## Construction of a chart-centred lift at any base time -/
 
 section ChartCenteredLift
 
@@ -177,8 +171,6 @@ lemma exists_chartCenteredLift_at
 
 end ChartCenteredLift
 
-/-! ## First-derivative clauses of `HasGeodesicEquationAt` -/
-
 section FirstDerivative
 
 variable [I.Boundaryless] [CompleteSpace E]
@@ -200,7 +192,6 @@ theorem hasDerivAt_chartLocalCurve_of_chartCentered
     (g := g) (α := γ t₀) (t₀ := t₀) (f := f) hf
   have hpush_t₀ : HasDerivAt (chartPushLift (I := I) f t₀)
       (chartPushVF (I := I) g (γ t₀) f t₀ t₀) t₀ := hpush.self_of_nhds
-  -- Take the first component: compose with `Prod.fst : E × E → E` (a CLM).
   have hfst_clm : HasFDerivAt (Prod.fst : E × E → E)
       (ContinuousLinearMap.fst ℝ E E) (chartPushLift (I := I) f t₀ t₀) :=
     hasFDerivAt_fst
@@ -250,26 +241,6 @@ theorem eventually_hasDerivAt_chartLocalCurve_of_chartCentered
 
 end FirstDerivative
 
-/-! ## Conditional headline: from the autonomous phase identity
-
-The full bridge `IsGeodesicAt → HasGeodesicEquationAt` follows once the
-chart-pushed VF is identified with the autonomous chart-coordinate
-phase-space VF on a neighbourhood of the base time, i.e.
-
-```
-chartPushVF g (γ t₀) f t₀ s = chartPhaseVF g (γ t₀) (chartPushLift f t₀ s)
-```
-
-eventually as `s → t₀`. This identity captures the "geodesic ODE in
-chart coordinates" in autonomous form. Below we package the
-chart-centred bridge as a theorem that *takes the identity as a
-hypothesis*; the unconditional version requires proving the identity
-itself, which lives in a separate follow-up.
-
-The advantage of this packaging: every clause of `HasGeodesicEquationAt`
-is derived here, so the follow-up reduces to proving the single
-phase identity. -/
-
 section ConditionalHeadline
 
 variable [I.Boundaryless] [CompleteSpace E]
@@ -295,39 +266,25 @@ theorem hasGeodesicEquationAt_of_chartCentered_of_phase_identity
     HasGeodesicEquationAt (I := I) g γ t₀ := by
   classical
   set β : M := γ t₀ with hβ_def
-  -- Get the chart-pushed eventually-derivative formula.
   have hpush := chartPushLift_eventually_hasDerivAt (I := I)
     (g := g) (α := β) (t₀ := t₀) (f := f) hf
-  -- Combine with the phase identity: `Φ' s = chartPhaseVF g β (Φ s)` eventually.
   have hphase_push : ∀ᶠ s in nhds t₀, HasDerivAt (chartPushLift (I := I) f t₀)
       (chartPhaseVF (I := I) g β (chartPushLift (I := I) f t₀ s)) s := by
     filter_upwards [hpush, hphase] with s hs hs_eq
     rw [← hs_eq]; exact hs
-  -- Define u(s) := (Φ s).1, w(s) := (Φ s).2. The phase identity gives:
-  --   u'(s) = w(s)
-  --   w'(s) = -Γ_β(w(s), w(s)) u(s)
-  -- At s = t₀, set v := w(t₀), a := w'(t₀) = -Γ_β(v, v) u(t₀).
   set u : ℝ → E := fun s => (chartPushLift (I := I) f t₀ s).1 with hu_def
   set w : ℝ → E := fun s => (chartPushLift (I := I) f t₀ s).2 with hw_def
-  -- Identify u with chartLocalCurve γ t₀.
   have hu_eq : u = chartLocalCurve (I := I) γ t₀ := by
     funext s
     change (chartPushLift (I := I) f t₀ s).1 = chartLocalCurve (I := I) γ t₀ s
     rw [chartPushLift_fst_eq_chartLocalCurve (I := I) hproj t₀ s,
       chartLocalCurve_def]
-  -- Velocity v := w t₀.
   set v : E := w t₀ with hv_def
-  -- Acceleration a := -Γ_β(v, v) (u t₀).
   set a : E := - chartChristoffelContraction (I := I) g β v v (u t₀) with ha_def
-  -- u t₀ = extChartAt I β β = extChartAt I (γ t₀) (γ t₀).
   have hu_t₀ : u t₀ = extChartAt I β (γ t₀) := by
     rw [hu_eq, chartLocalCurve_def]
   refine ⟨v, a, ?_, ?_, ?_, ?_⟩
-  · -- First derivative: HasDerivAt (chartLocalCurve γ t₀) v t₀.
-    -- From hphase_push at t₀: HasDerivAt Φ (chartPhaseVF g β (Φ t₀)) t₀.
-    -- The first component: HasDerivAt u ((chartPhaseVF g β (Φ t₀)).1) t₀.
-    -- (chartPhaseVF g β z).1 = z.2 by definition.
-    have hphase_t₀ : HasDerivAt (chartPushLift (I := I) f t₀)
+  · have hphase_t₀ : HasDerivAt (chartPushLift (I := I) f t₀)
         (chartPhaseVF (I := I) g β (chartPushLift (I := I) f t₀ t₀)) t₀ :=
       hphase_push.self_of_nhds
     have hfst_clm : HasFDerivAt (Prod.fst : E × E → E)
@@ -336,15 +293,13 @@ theorem hasGeodesicEquationAt_of_chartCentered_of_phase_identity
     have hu_deriv : HasDerivAt u
         ((chartPhaseVF (I := I) g β (chartPushLift (I := I) f t₀ t₀)).1) t₀ :=
       hfst_clm.comp_hasDerivAt t₀ hphase_t₀
-    -- The first component of `chartPhaseVF g β z` is `z.2`.
     have hPhVF : (chartPhaseVF (I := I) g β
         (chartPushLift (I := I) f t₀ t₀)).1 = w t₀ := by
       change (chartPushLift (I := I) f t₀ t₀).2 = w t₀
       rfl
     rw [hPhVF, ← hv_def, hu_eq] at hu_deriv
     exact hu_deriv
-  · -- Eventually: chartLocalCurve has HasDerivAt at every nearby s.
-    filter_upwards [hphase_push] with s hs
+  · filter_upwards [hphase_push] with s hs
     have hfst_clm : HasFDerivAt (Prod.fst : E × E → E)
         (ContinuousLinearMap.fst ℝ E E) (chartPushLift (I := I) f t₀ s) :=
       hasFDerivAt_fst
@@ -357,20 +312,10 @@ theorem hasGeodesicEquationAt_of_chartCentered_of_phase_identity
       rfl
     rw [hPhVF] at hu_deriv
     rw [hu_eq] at hu_deriv
-    -- hu_deriv : HasDerivAt (chartLocalCurve γ t₀) (w s) s.
-    -- We want: HasDerivAt (chartLocalCurve γ t₀) (deriv (chartLocalCurve γ t₀) s) s.
-    -- These agree because `w s = deriv (chartLocalCurve γ t₀) s`.
     have : deriv (chartLocalCurve (I := I) γ t₀) s = w s := hu_deriv.deriv
     rw [this]
     exact hu_deriv
-  · -- Second derivative: HasDerivAt (s ↦ deriv (chartLocalCurve γ t₀) s) a t₀.
-    -- We have eventually `deriv (chartLocalCurve γ t₀) s = w s`. So it suffices
-    -- to show `HasDerivAt w a t₀`.
-    -- Approach: `w s = (Φ s).2`. Apply `Prod.snd` (a CLM) to the chart-pushed
-    -- HasDerivAt. The derivative of `w` at t₀ is the second component of the
-    -- chart-pushed VF at t₀, which by the phase identity equals
-    -- `(chartPhaseVF g β (Φ t₀)).2 = -Γ_β(v, v) u(t₀) = a`.
-    have heventually_eq : (fun s => deriv (chartLocalCurve (I := I) γ t₀) s) =ᶠ[𝓝 t₀] w := by
+  · have heventually_eq : (fun s => deriv (chartLocalCurve (I := I) γ t₀) s) =ᶠ[𝓝 t₀] w := by
       filter_upwards [hphase_push] with s hs
       have hfst_clm : HasFDerivAt (Prod.fst : E × E → E)
           (ContinuousLinearMap.fst ℝ E E) (chartPushLift (I := I) f t₀ s) :=
@@ -385,8 +330,6 @@ theorem hasGeodesicEquationAt_of_chartCentered_of_phase_identity
       rw [hPhVF] at hu_deriv
       rw [hu_eq] at hu_deriv
       exact hu_deriv.deriv
-    -- Use congr_of_eventuallyEq to transfer HasDerivAt from w to `deriv …`.
-    -- Compute HasDerivAt w a t₀.
     have hphase_t₀ : HasDerivAt (chartPushLift (I := I) f t₀)
         (chartPhaseVF (I := I) g β (chartPushLift (I := I) f t₀ t₀)) t₀ :=
       hphase_push.self_of_nhds
@@ -396,7 +339,6 @@ theorem hasGeodesicEquationAt_of_chartCentered_of_phase_identity
     have hw_deriv : HasDerivAt w
         ((chartPhaseVF (I := I) g β (chartPushLift (I := I) f t₀ t₀)).2) t₀ :=
       hsnd_clm.comp_hasDerivAt t₀ hphase_t₀
-    -- `(chartPhaseVF g β z).2 = -Γ_β(z.2, z.2) z.1` by definition.
     have hPhVF_snd : (chartPhaseVF (I := I) g β
         (chartPushLift (I := I) f t₀ t₀)).2 = a := by
       change -chartChristoffelContraction (I := I) g β
@@ -405,32 +347,15 @@ theorem hasGeodesicEquationAt_of_chartCentered_of_phase_identity
           (chartPushLift (I := I) f t₀ t₀).1 = a
       rw [ha_def, hv_def, hw_def, hu_def]
     rw [hPhVF_snd] at hw_deriv
-    -- Transfer via congr_of_eventuallyEq.
     exact hw_deriv.congr_of_eventuallyEq heventually_eq
-  · -- Algebraic identity: `a + Γ_β(v, v) (extChartAt I β β) = 0`.
-    -- a = -Γ_β(v, v) u(t₀) and u(t₀) = extChartAt I β (γ t₀) = extChartAt I β β.
-    rw [hu_t₀] at ha_def
+  · rw [hu_t₀] at ha_def
     rw [ha_def]
-    -- The goal: -Γ_β(v, v)(extChartAt I β β) + Γ_β(v, v)(extChartAt I β β) = 0
-    -- — but wait, the goal uses `γ t₀` not `β`. They're defeq via hβ_def.
     change -chartChristoffelContraction (I := I) g β v v (extChartAt I β β) +
       chartChristoffelContraction (I := I) g (γ t₀) v v
         (extChartAt I (γ t₀) (γ t₀)) = 0
     rw [← hβ_def]; abel
 
 end ConditionalHeadline
-
-/-! ## Unconditional chart-centred bridge
-
-We now discharge the autonomous phase-space identity hypothesis of
-`hasGeodesicEquationAt_of_chartCentered_of_phase_identity`. The key
-ingredient is `chartPushVF_eq_chartPhaseVF_at`
-(`Exponential/ChartPushVFEq.lean`), which gives the pointwise identity
-`chartPushVF g α f t₀ s = chartPhaseVF g α (chartPushLift f t₀ s)`
-whenever `(f t₀).proj = α` and `(f s).proj ∈ (chartAt H α).source`. The
-chart-source condition holds on a neighbourhood of `t₀` because `f` is
-continuous at `t₀` (as an integral curve) and `(f t₀).proj = γ t₀`
-lies in the chart source at `γ t₀`. -/
 
 section UnconditionalChartCentered
 
@@ -453,9 +378,7 @@ theorem chartPushVF_eventually_eq_chartPhaseVF_of_chartCentered
       chartPushVF (I := I) g (γ t₀) f t₀ s =
         chartPhaseVF (I := I) g (γ t₀) (chartPushLift (I := I) f t₀ s) := by
   classical
-  -- The pointwise alignment hypothesis `(f t₀).proj = γ t₀`.
   have hft₀_proj : (f t₀).proj = γ t₀ := hproj t₀
-  -- Eventually `(f s).proj ∈ (chartAt H (γ t₀)).source`.
   have hπ_cont : Continuous
       (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
     FiberBundle.continuous_proj E (TangentSpace I)
@@ -474,7 +397,6 @@ theorem chartPushVF_eventually_eq_chartPhaseVF_of_chartCentered
     rw [hft₀_proj]
     exact hα_nhds
   filter_upwards [hsrc_nhds] with s hs
-  -- `chartPushVF_eq_chartPhaseVF_at` discharges the equality pointwise.
   exact chartPushVF_eq_chartPhaseVF_at (I := I) g (γ t₀)
     (f := f) (t₀ := t₀) hft₀_proj s hs
 
@@ -535,33 +457,13 @@ theorem IsGeodesicAt.hasGeodesicEquationAt_chartCentered
     (hγ : IsGeodesicAt (I := I) g γ t₀)
     (hα : (hγ.choose) = γ t₀) :
     HasGeodesicEquationAt (I := I) g γ t₀ := by
-  -- Unpack the existential structure of `IsGeodesicAt`.
   obtain ⟨hproj, _hα_src, hf⟩ := hγ.choose_spec.choose_spec
-  -- `hγ.choose = α`, the witness basepoint. After `hα`, it equals `γ t₀`.
-  -- Rewrite the chart-fixed VF in `hf` accordingly.
   set f : ℝ → TangentBundle I M := hγ.choose_spec.choose with hf_def
-  -- `hf : IsMIntegralCurveAt f (geodesicVectorFieldChart g hγ.choose) t₀`,
-  -- and `hα` lets us replace `hγ.choose` by `γ t₀`.
   rw [hα] at hf
   exact hasGeodesicEquationAt_of_chartCentered
     (g := g) (γ := γ) (t₀ := t₀) (f := f) hproj hf
 
 end UnconditionalChartCentered
-
-/-! ## Cross-VF reduction: from arbitrary chart basepoint to `γ(t₀)`
-
-We now handle the general case of `IsGeodesicAt → HasGeodesicEquationAt`,
-in which the witness chart basepoint `α : M` need not coincide with
-`γ(t₀)`. The strategy is to construct a **chart-`γ(t₀)`-centred** lift
-`f₁` via Picard–Lindelöf at the tangent-bundle point `f t₀`, then bridge
-this chart-centred witness into `HasGeodesicEquationAt`, and finally
-transfer along the local equality `γ =ᶠ[𝓝 t₀] projectCurve f₁` derived
-from manifold-level integral-curve uniqueness on `TM`.
-
-The transfer hinges on a `HasGeodesicEquationAt.congr_of_eventuallyEq_at`
-lemma: the predicate `HasGeodesicEquationAt g γ t₀` is a local property
-of `γ` at `t₀` — it only references `γ` through `chartLocalCurve γ t₀`,
-which equals `extChartAt I (γ t₀) ∘ γ`. -/
 
 section CrossVFReduction
 
@@ -583,8 +485,6 @@ theorem HasGeodesicEquationAt.congr_of_eventuallyEq_at
     (h : HasGeodesicEquationAt (I := I) g γ' t₀) :
     HasGeodesicEquationAt (I := I) g γ t₀ := by
   classical
-  -- chartLocalCurve γ t₀ s = extChartAt I (γ t₀) (γ s). Replace γ by γ' via heq, and
-  -- γ t₀ by γ' t₀ via hγt₀.
   have hcurve_eq : chartLocalCurve (I := I) γ t₀ =ᶠ[𝓝 t₀]
       chartLocalCurve (I := I) γ' t₀ := by
     filter_upwards [heq] with s hs
@@ -592,32 +492,22 @@ theorem HasGeodesicEquationAt.congr_of_eventuallyEq_at
     rw [hγt₀, hs]
   obtain ⟨v, a, hv, hev, ha, halg⟩ := h
   refine ⟨v, a, ?_, ?_, ?_, ?_⟩
-  · -- HasDerivAt (chartLocalCurve γ t₀) v t₀. Transfer via congr_of_eventuallyEq.
-    -- hv : HasDerivAt (chartLocalCurve γ' t₀) v t₀.
-    -- Need eventually-eq in the form γ t₀-side =ᶠ γ' t₀-side: that's hcurve_eq.
-    exact hv.congr_of_eventuallyEq hcurve_eq
-  · -- Eventually clause.
-    have hev_eq_nhds : ∀ᶠ s in 𝓝 t₀,
+  · exact hv.congr_of_eventuallyEq hcurve_eq
+  · have hev_eq_nhds : ∀ᶠ s in 𝓝 t₀,
         chartLocalCurve (I := I) γ t₀ =ᶠ[𝓝 s] chartLocalCurve (I := I) γ' t₀ :=
       hcurve_eq.eventually_nhds
     filter_upwards [hev, hev_eq_nhds] with s hs hs_nhds
-    -- hs : HasDerivAt (chartLocalCurve γ' t₀) (deriv (chartLocalCurve γ' t₀) s) s.
-    -- hs_nhds : chartLocalCurve γ t₀ =ᶠ[𝓝 s] chartLocalCurve γ' t₀.
     have hderiv_eq : deriv (chartLocalCurve (I := I) γ t₀) s =
         deriv (chartLocalCurve (I := I) γ' t₀) s :=
       Filter.EventuallyEq.deriv_eq hs_nhds
     rw [hderiv_eq]
     exact hs.congr_of_eventuallyEq hs_nhds
-  · -- HasDerivAt (s ↦ deriv (chartLocalCurve γ t₀) s) a t₀.
-    -- ha : HasDerivAt (s ↦ deriv (chartLocalCurve γ' t₀) s) a t₀.
-    -- Need eventually-eq: (s ↦ deriv γ t₀ s) =ᶠ (s ↦ deriv γ' t₀ s).
-    have hderiv_eventually : (fun s => deriv (chartLocalCurve (I := I) γ t₀) s) =ᶠ[𝓝 t₀]
+  · have hderiv_eventually : (fun s => deriv (chartLocalCurve (I := I) γ t₀) s) =ᶠ[𝓝 t₀]
         (fun s => deriv (chartLocalCurve (I := I) γ' t₀) s) := by
       filter_upwards [hcurve_eq.eventually_nhds] with s hs_nhds
       exact Filter.EventuallyEq.deriv_eq hs_nhds
     exact ha.congr_of_eventuallyEq hderiv_eventually
-  · -- Algebraic identity. Both sides use γ t₀, which equals γ' t₀ by hγt₀.
-    rw [hγt₀]
+  · rw [hγt₀]
     exact halg
 
 /-- **Construction of a chart-`γ(t₀)`-centred lift agreeing with the
@@ -635,13 +525,9 @@ lemma exists_chartCenteredLift_at_lift_eq
     ∃ f₁ : ℝ → TangentBundle I M,
       f₁ t₀ = f t₀ ∧
       IsMIntegralCurveAt f₁ (geodesicVectorFieldChart (I := I) g (γ t₀)) t₀ := by
-  -- Use exists_chartCenteredLift_at at point γ t₀ with velocity
-  -- ((f t₀).snd : TangentSpace I (f t₀).proj = E = TangentSpace I (γ t₀) by defeq).
-  -- TangentSpace I p reduces to E definitionally.
   obtain ⟨f₁, hf₁_init, hf₁⟩ :=
     exists_chartCenteredLift_at (I := I) g (γ t₀) ((f t₀).snd : E) t₀
   refine ⟨f₁, ?_, hf₁⟩
-  -- hf₁_init : f₁ t₀ = ⟨γ t₀, (f t₀).snd⟩. Need: f₁ t₀ = f t₀.
   rw [hf₁_init, ← hproj_t₀]
 
 /-- **`IsGeodesicAt → HasGeodesicEquationAt`, conditional on cross-VF
@@ -671,20 +557,15 @@ theorem IsGeodesicAt.hasGeodesicEquationAt_of_chartCentered_lift_eventuallyEq
     (hcross : γ =ᶠ[𝓝 t₀] projectCurve (I := I) f₁) :
     HasGeodesicEquationAt (I := I) g γ t₀ := by
   classical
-  -- f₁'s projection is γ_alt := projectCurve f₁.
   set γ_alt : ℝ → M := projectCurve (I := I) f₁ with hγ_alt_def
-  -- γ_alt t₀ = (f₁ t₀).proj = γ t₀.
   have hγ_alt_t₀ : γ_alt t₀ = γ t₀ := hf₁_proj_t₀
   have hproj_alt : ∀ t, (f₁ t).proj = γ_alt t := fun t => rfl
-  -- hf₁ uses chart basepoint γ t₀; rewrite to γ_alt t₀ (defeq).
   have hf₁_alt : IsMIntegralCurveAt f₁
       (geodesicVectorFieldChart (I := I) g (γ_alt t₀)) t₀ := by
     rw [hγ_alt_t₀]; exact hf₁
-  -- Apply the chart-centred bridge to γ_alt.
   have h_alt : HasGeodesicEquationAt (I := I) g γ_alt t₀ :=
     hasGeodesicEquationAt_of_chartCentered (I := I) (g := g) (γ := γ_alt)
       (t₀ := t₀) (f := f₁) hproj_alt hf₁_alt
-  -- Transfer to γ via the eventually-equality.
   exact HasGeodesicEquationAt.congr_of_eventuallyEq_at (I := I) (g := g)
     (γ := γ) (γ' := γ_alt) (t₀ := t₀) hγ_alt_t₀.symm hcross h_alt
 

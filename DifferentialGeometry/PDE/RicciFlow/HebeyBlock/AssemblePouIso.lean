@@ -65,49 +65,18 @@ theorem assemble_pou_h1_iso_intrinsic_h1
             (tensorPouSobolevHsNorm (I := I) (M := M) g 1 T).toReal ∧
           (tensorPouSobolevHsNorm (I := I) (M := M) g 1 T).toReal ≤
             C * (tensorPouSobolevNorm (I := I) (M := M) g 1 T).toReal := by
-  -- Step 1: extract the `k = 1` two-sided comparison via
-  -- `iterated_nabla_vs_iterated_partial_equivalence_H1` at `k = 1`. This
-  -- yields constants `c₁ ≤ C₁` matching the chart-frame Hilbert-Schmidt
-  -- aggregation of `∇^k T` against the operator-norm chart-Sobolev
-  -- aggregation. The underlying primitive is now axiom-clean
-  -- (substantive `k = 0` via `fibrewise_gram_twist_estimate`; substantive
-  -- `k ≥ 1` via combining the two one-sided uniform bounds from
-  -- `nabla_tensor_iterated_Hk_formula` and `uniform_chart_bounds_from_compactness`).
   obtain ⟨c₁, C₁, hc₁_pos, hc₁_le_C₁, h₁⟩ :=
     iterated_nabla_vs_iterated_partial_equivalence_H1
       (I := I) (M := M) g r s 1
-  -- Step 2: extract the `k = 0` two-sided comparison via
-  -- `pou_weighted_norm_equals_chart_component_norm_up_to_constant`,
-  -- which has been substantively proven at `k = 0` (`c = C = 1`).
   obtain ⟨c₀, C₀, hc₀_pos, hc₀_le_C₀, h₀⟩ :=
     pou_weighted_norm_equals_chart_component_norm_up_to_constant
       (I := I) (M := M) g r s
-  -- Step 3: package both pairs of constants into a single pair
-  -- `(c, C) := (min c₀ c₁, max C₀ C₁)` via
-  -- `uniform_chart_bounds_from_compactness` absorbing every chart-by-chart
-  -- dependence into a single absolute constant valid simultaneously for the
-  -- `k = 0` and `k = 1` chart-aggregated norms. Positivity of `c` follows
-  -- from positivity of both `c₀` and `c₁`, and the ordering
-  -- `c ≤ C` follows from `c₀ ≤ C₀`, `c₁ ≤ C₁`, and `min ≤ max`.
   refine ⟨min c₀ c₁, max C₀ C₁, lt_min hc₀_pos hc₁_pos, ?_, ?_⟩
   · exact (min_le_right c₀ c₁).trans (hc₁_le_C₁.trans (le_max_right C₀ C₁))
   · intro T
-    -- The `H^1` two-sided comparison is delivered directly by the
-    -- `k = 1` instance of `iterated_nabla_vs_iterated_partial_equivalence_H1`
-    -- against the chart-Sobolev operator-norm aggregation. The `k = 0`
-    -- instance from `pou_weighted_norm_equals_chart_component_norm_up_to_constant`
-    -- and the chart-by-chart uniform absorption from
-    -- `uniform_chart_bounds_from_compactness` together justify that the
-    -- absolute constants `c, C` collapse `c₀, c₁, C₀, C₁` into the
-    -- single pair `(min c₀ c₁, max C₀ C₁)` by replacing each
-    -- chart-aggregated piece by the corresponding absolute bound.
     obtain ⟨h_low, h_up⟩ := h₁ T
     refine ⟨?_, ?_⟩
-    · -- Lower bound:
-      --   `min c₀ c₁ · ‖T‖_{op,1} ≤ c₁ · ‖T‖_{op,1} ≤ ‖T‖_{HS,1}`.
-      -- Non-negativity of the operator-norm chart-Sobolev norm follows from
-      -- `ENNReal.toReal_nonneg`.
-      have h_norm_op_nn :
+    · have h_norm_op_nn :
           (0 : ℝ) ≤ (tensorPouSobolevNorm (I := I) (M := M) g 1 T).toReal :=
         ENNReal.toReal_nonneg
       calc
@@ -115,9 +84,7 @@ theorem assemble_pou_h1_iso_intrinsic_h1
             ≤ c₁ * (tensorPouSobolevNorm (I := I) (M := M) g 1 T).toReal := by
               exact mul_le_mul_of_nonneg_right (min_le_right c₀ c₁) h_norm_op_nn
         _ ≤ (tensorPouSobolevHsNorm (I := I) (M := M) g 1 T).toReal := h_low
-    · -- Upper bound:
-      --   `‖T‖_{HS,1} ≤ C₁ · ‖T‖_{op,1} ≤ max C₀ C₁ · ‖T‖_{op,1}`.
-      have h_norm_op_nn :
+    · have h_norm_op_nn :
           (0 : ℝ) ≤ (tensorPouSobolevNorm (I := I) (M := M) g 1 T).toReal :=
         ENNReal.toReal_nonneg
       calc

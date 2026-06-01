@@ -84,29 +84,12 @@ open DifferentialGeometry.Analysis.Laplacian.RicciPairingCLM
 open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianFinal
 open DifferentialGeometry.Analysis.Laplacian.BochnerPolarisedLpFull
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## The smooth-case regularity theorem in resolvent-of-candidate form
-
-For smooth `v` with `u_h := smoothToH1Compl v` and
-`hu_h := smoothToH1Compl_mem_laplacianDomainPow_two g v`, the variational
-identity
-
-```
-gradInnerCLM g φ (smoothToH1Compl v) =
-  H1ComplToLp(resolvent g (gradInnerLaplacianCandidateUnconditional g φ hu_h))
-```
-
-follows from `smoothCase_via_candidate_identification` once the
-smooth-case candidate identification is discharged. The latter is provided
-by `smoothCandidate_identification_target_of_hessHypothesis`. -/
 
 /-- **The smooth-case regularity theorem, resolvent-of-candidate form,
 conditional on the Hessian-bridge hypothesis.** For smooth `v`, the
@@ -132,8 +115,6 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_smooth_of_hessHypoth
     (smoothCandidate_identification_target_of_hessHypothesis
       (I := I) (M := M) g φ v h_hess)
 
-/-! ## The smooth-case image-membership form via the unconditional candidate -/
-
 /-- **The smooth-case conclusion via the unconditional candidate's
 resolvent, conditional on the Hessian-bridge hypothesis**. For smooth `v`,
 `gradInnerCLM g φ (smoothToH1Compl v)` lies in `H1ComplToLp ''
@@ -157,8 +138,6 @@ theorem smoothCase_full_unconditional_of_hessHypothesis
     (smoothCandidate_identification_target_of_hessHypothesis
       (I := I) (M := M) g φ v h_hess)
 
-/-! ## The iterated-closure form of the smooth-case conclusion -/
-
 /-- **Smooth-case iterated closure via the unconditional candidate**.
 For smooth `v`, `smoothMulH1Compl g φ (smoothToH1Compl v) ∈
 laplacianDomainPow g 2`, with the witness construction going through the
@@ -181,18 +160,6 @@ theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_via_candidat
     (smoothToH1Compl_mem_laplacianDomainPow_two (I := I) (M := M) g v)
     (gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_smooth_of_hessHypothesis
       (I := I) (M := M) g φ v h_hess)
-
-/-! ## Headline regularity theorem packagings
-
-The full regularity theorem in the smooth case is delivered in three
-equivalent forms:
-
-* **Resolvent-of-candidate form**: the canonical formulation.
-* **Image membership form**: as a set-theoretic statement.
-* **Iterated closure form**: in the language of `laplacianDomainPow`.
-
-All three are equivalent (via the existing equivalence theorems) and
-conditional on the same Hessian-bridge hypothesis. -/
 
 /-- Compact restatement: the smooth-case variational identity holds for
 the unconditional candidate, conditional on the Hessian bridge. -/

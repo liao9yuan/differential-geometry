@@ -47,20 +47,6 @@ variable
   (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
-/-! ### The bundled `(r, s)`-tensor covariant derivative
-
-Specialization of the generic Hom-bundle covariant derivative
-(`HomConnectionGen.homBundleCovariantDerivativeGen`) to `U = Tensor0SSpace r` and
-`V = Tensor0SSpace s`.
-
-The two ingredient covariant derivatives are:
-
-* `Tensor0SNabla.tensor0SCovariantDerivative I M r cov` on the `(0,r)`-tensor bundle.
-* `Tensor0SNabla.tensor0SCovariantDerivative I M s cov` on the `(0,s)`-tensor bundle.
-
-Both come with `ContMDiffCovariantDerivative ∞` instances established in
-`Tensor0SNabla.lean`. -/
-
 /-- The `(r, s)`-tensor bundle covariant derivative obtained by specializing the generic
 Hom-bundle covariant derivative `homBundleCovariantDerivativeGen` to
 `U = Tensor0SSpace r` (source) and `V = Tensor0SSpace s` (target). -/
@@ -87,8 +73,6 @@ noncomputable instance tensorRSCovariantDerivative_contMDiff (r s : ℕ)
     (Tensor0SModel s ℝ E) (fun x : M => Tensor0SSpace s I x)
     (Tensor0SNabla.tensor0SCovariantDerivative I M r cov)
     (Tensor0SNabla.tensor0SCovariantDerivative I M s cov)
-
-/-! ### Pointwise apply lemma -/
 
 /-- Pointwise characterization of `tensorRSCovariantDerivative`. For a smooth `(r,s)`-tensor
 section `τ` and a smooth `(0,r)`-tensor section `w`, the value of the covariant derivative
@@ -152,19 +136,12 @@ theorem tensorRSCovariantDerivative_apply_of_mdifferentiableAt (r s : ℕ)
           x (V_field x) -
       (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from τ x)
         (Tensor0SNabla.tensor0SCovariantDerivative I M r cov w x (V_field x)) := by
-  -- `tensorRSCovariantDerivative` is `homBundleCovariantDerivativeGen` specialised
-  -- to source `Tensor0SSpace r` and target `Tensor0SSpace s`.
   exact HomConnectionGen.homBundleCovariantDerivativeGen_apply_of_mdifferentiableAt
     I M (Tensor0SModel r ℝ E) (fun y : M => Tensor0SSpace r I y)
     (Tensor0SModel s ℝ E) (fun y : M => Tensor0SSpace s I y)
     (Tensor0SNabla.tensor0SCovariantDerivative I M r cov)
     (Tensor0SNabla.tensor0SCovariantDerivative I M s cov)
     τ hτ hV hw
-
-/-! ### Compile-time sanity checks
-
-Given a `C^∞` covariant derivative on `TM`, the specialization produces a `C^∞`
-covariant derivative on the `(r,s)`-tensor bundle for a range of `(r,s)` pairs. -/
 
 example
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))

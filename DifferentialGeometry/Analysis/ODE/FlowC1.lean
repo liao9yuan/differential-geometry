@@ -49,12 +49,6 @@ namespace Flow
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
-/-! ## Local Picard–Lindelöf flow
-
-We start by packaging the local flow produced by Picard–Lindelöf as a predicate, then provide a
-constructor from joint `C^1` regularity of `f`.
--/
-
 /-- A *local flow* of the time-dependent vector field `f` is a map `Φ : E × ℝ → E` defined on
 `closedBall x₀ r ×ˢ Icc tmin tmax` such that, for every initial point `x ∈ closedBall x₀ r`,
 
@@ -88,12 +82,6 @@ lemma orbit_continuousOn (h : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
 
 end IsLocalFlow
 
-/-! ### Constructor from joint $C^1$ regularity
-
-Given joint `C^1` regularity of `f` on all of `ℝ × E` and any base point `(t₀, x₀)`, we obtain a
-local flow by invoking the Mathlib Picard–Lindelöf flow theorem
-`IsPicardLindelof.exists_forall_mem_closedBall_eq_hasDerivWithinAt_continuousOn`. -/
-
 /-- Build the Picard–Lindelöf data for the time-dependent vector field `f` near `(t₀, x₀)`
 under the assumption that `f` is jointly `C^1` on `Set.univ`. -/
 lemma exists_isPicardLindelof_of_contDiffOn_univ
@@ -102,29 +90,24 @@ lemma exists_isPicardLindelof_of_contDiffOn_univ
     ∃ (ε : ℝ) (hε : 0 < ε) (a r L K : ℝ≥0) (_ : 0 < r),
       IsPicardLindelof f (tmin := t₀ - ε) (tmax := t₀ + ε)
         ⟨t₀, by simp [le_of_lt hε]⟩ x₀ a r L K := by
-  -- Extract a closed ball around `(t₀, x₀)` on which `uncurry f` is Lipschitz.
   have hcd_at : ContDiffAt ℝ 1 (uncurry f) (t₀, x₀) :=
     hf.contDiffAt (IsOpen.mem_nhds isOpen_univ (mem_univ _))
   obtain ⟨K₀, sNhd, hsNhd, hl⟩ := hcd_at.exists_lipschitzOnWith
   obtain ⟨ρ, hρ_pos, hρ_sub⟩ := Metric.mem_nhds_iff.mp hsNhd
-  -- Bound on `‖f‖`.
   set Lf := K₀ * ρ + ‖uncurry f (t₀, x₀)‖ + 1 with hLf_def
   have hLf_pos : 0 < Lf := by positivity
   have hLf_nn : 0 ≤ Lf := le_of_lt hLf_pos
-  -- Spatial / temporal radius.
   set a₀ : ℝ := ρ / 4 with ha₀_def
   have ha₀_pos : 0 < a₀ := by positivity
   have ha₀_nn : 0 ≤ a₀ := le_of_lt ha₀_pos
   have ha₀_le_half : a₀ ≤ ρ / 2 := by
     rw [ha₀_def]; linarith
-  -- For any `(t, x)` with `dist (t, x) (t₀, x₀) ≤ a₀`, we have `(t,x) ∈ Metric.ball ((t₀,x₀)) ρ`.
   have hpair_in_sNhd :
       ∀ (p : ℝ × E), dist p (t₀, x₀) ≤ ρ / 2 → p ∈ sNhd := by
     intro p hp
     apply hρ_sub
     rw [Metric.mem_ball]
     linarith
-  -- Norm bound on `uncurry f`.
   have hb_uncurry : ∀ (p : ℝ × E), dist p (t₀, x₀) ≤ ρ / 2 → ‖uncurry f p‖ ≤ Lf := by
     intro p hp
     have hp_in : p ∈ sNhd := hpair_in_sNhd p hp
@@ -137,7 +120,6 @@ lemma exists_isPicardLindelof_of_contDiffOn_univ
           exact hl.norm_sub_le hp_in h_base
       _ ≤ K₀ * ρ + ‖uncurry f (t₀, x₀)‖ := by gcongr; linarith
       _ ≤ Lf := le_add_of_nonneg_right zero_le_one
-  -- Spatial / temporal ball containment.
   have hpair_in_iff :
       ∀ (t : ℝ) (x : E), t ∈ Icc (t₀ - a₀) (t₀ + a₀) → dist x x₀ ≤ a₀ →
         dist ((t, x) : ℝ × E) (t₀, x₀) ≤ ρ / 2 := by
@@ -148,11 +130,9 @@ lemma exists_isPicardLindelof_of_contDiffOn_univ
       exact ⟨by linarith [ht.1], by linarith [ht.2]⟩
     have hmx : max (dist t t₀) (dist x x₀) ≤ a₀ := max_le htd hx
     linarith
-  -- Define the NNReal parameters.
   let aN : ℝ≥0 := ⟨a₀, ha₀_nn⟩
   let rN : ℝ≥0 := ⟨a₀ / 2, by positivity⟩
   let LN : ℝ≥0 := ⟨Lf, hLf_nn⟩
-  -- Norm bound for `f` on the spatial ball.
   have hb' : ∀ t ∈ Icc (t₀ - a₀) (t₀ + a₀), ∀ x ∈ closedBall x₀ aN, ‖f t x‖ ≤ Lf := by
     intro t ht x hx
     have hx' : dist x x₀ ≤ a₀ := by
@@ -160,7 +140,6 @@ lemma exists_isPicardLindelof_of_contDiffOn_univ
       simpa [aN] using this
     have h_dist : dist ((t, x) : ℝ × E) (t₀, x₀) ≤ ρ / 2 := hpair_in_iff t x ht hx'
     exact hb_uncurry (t, x) h_dist
-  -- Lipschitz constant `K₀` in `x` on the spatial ball.
   have hLip : ∀ t ∈ Icc (t₀ - a₀) (t₀ + a₀),
       LipschitzOnWith K₀ (f t) (closedBall x₀ aN) := by
     intro t ht
@@ -181,10 +160,8 @@ lemma exists_isPicardLindelof_of_contDiffOn_univ
     have hdle : dist (uncurry f (t, x)) (uncurry f (t, y)) ≤ K₀ * dist ((t, x) : ℝ × E) (t, y) :=
       hl.dist_le_mul _ hpx_in _ hpy_in
     rw [hdist] at hdle
-    -- `dist (f t x) (f t y) = dist (uncurry f (t,x)) (uncurry f (t,y))`.
     change dist (uncurry f (t, x)) (uncurry f (t, y)) ≤ K₀ * dist x y
     exact hdle
-  -- Continuous in `t` for fixed `x` on the spatial ball.
   have hcontT : ∀ x ∈ closedBall x₀ aN,
       ContinuousOn (fun t => f t x) (Icc (t₀ - a₀) (t₀ + a₀)) := by
     intro x hx
@@ -197,7 +174,6 @@ lemma exists_isPicardLindelof_of_contDiffOn_univ
     have hmaps : MapsTo (fun t : ℝ => (t, x)) (Icc (t₀ - a₀) (t₀ + a₀))
         (Set.univ : Set (ℝ × E)) := fun _ _ => mem_univ _
     exact h_cont.comp hcomp hmaps
-  -- Choose `ε`.
   set ε := min a₀ (a₀ / (2 * (Lf + 1))) with hε_def
   have hε_pos : 0 < ε := by
     apply lt_min ha₀_pos
@@ -220,8 +196,7 @@ lemma exists_isPicardLindelof_of_contDiffOn_univ
     intro t ht
     refine ⟨by linarith [ht.1, hε_le_a], by linarith [ht.2, hε_le_a]⟩
   refine ⟨ε, hε_pos, aN, rN, LN, K₀, ?_, ?_⟩
-  · -- 0 < rN
-    change (0 : ℝ) < a₀ / 2
+  · change (0 : ℝ) < a₀ / 2
     positivity
   refine
   { lipschitzOnWith := ?_,
@@ -234,8 +209,7 @@ lemma exists_isPicardLindelof_of_contDiffOn_univ
     exact (hcontT x hx).mono hsub_t
   · intro t ht x hx
     exact hb' t (hsub_t ht) x hx
-  · -- L · max (tmax - t₀, t₀ - tmin) ≤ a - r
-    change (LN : ℝ) * max ((t₀ + ε) - t₀) (t₀ - (t₀ - ε)) ≤ (aN : ℝ) - (rN : ℝ)
+  · change (LN : ℝ) * max ((t₀ + ε) - t₀) (t₀ - (t₀ - ε)) ≤ (aN : ℝ) - (rN : ℝ)
     have hmax : max ((t₀ + ε) - t₀) (t₀ - (t₀ - ε)) = ε := by
       have h1 : (t₀ + ε) - t₀ = ε := by ring
       have h2 : t₀ - (t₀ - ε) = ε := by ring
@@ -257,11 +231,8 @@ theorem exists_isLocalFlow_of_contDiffOn_univ
     ∃ (r : ℝ≥0) (ε : ℝ) (_ : 0 < r) (_ : 0 < ε) (Φ : E × ℝ → E),
       IsLocalFlow f t₀ x₀ r (t₀ - ε) (t₀ + ε) Φ := by
   obtain ⟨ε, hε, a, r, _, _, hr, hpl⟩ := exists_isPicardLindelof_of_contDiffOn_univ f hf t₀ x₀
-  -- Use the lipschitz version of PL flow, which gives both Lipschitz dependence and (via uncurry)
-  -- joint continuity.
   obtain ⟨Φlip, hΦ₁, L', hΦ_lip⟩ :=
     hpl.exists_forall_mem_closedBall_eq_hasDerivWithinAt_lipschitzOnWith
-  -- Reformulate as Φ : E × ℝ → E.
   set Φ : E × ℝ → E := uncurry Φlip with hΦ_def
   have hΦ_cont : ContinuousOn Φ (closedBall x₀ r ×ˢ Icc (t₀ - ε) (t₀ + ε)) := by
     apply continuousOn_prod_of_continuousOn_lipschitzOnWith _ L' _ hΦ_lip
@@ -275,12 +246,6 @@ theorem exists_isLocalFlow_of_contDiffOn_univ
     continuousOn := hΦ_cont,
     exists_lipschitz := ⟨L', hΦ_lip⟩ }
 
-/-! ## Continuity of the linearization along an orbit
-
-For any local flow `Φ` of a jointly `C^1` field `f`, the linearization `t ↦ fderiv ℝ (f t)
-(Φ ⟨x, t⟩)` is continuous on the time interval.  This sets up the variational ODE along an
-orbit. -/
-
 namespace IsLocalFlow
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
@@ -291,7 +256,6 @@ lemma continuousOn_fderiv_along_orbit
     (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
     (x : E) (hx : x ∈ closedBall x₀ r) :
     ContinuousOn (fun t => fderiv ℝ (f t) (Φ ⟨x, t⟩)) (Icc tmin tmax) := by
-  -- `fun p : ℝ × E => fderiv ℝ (f p.1) p.2` is continuous on `univ`.
   have hpartial : ContinuousOn (fun p : ℝ × E => fderiv ℝ (f p.1) p.2)
       (Set.univ : Set (ℝ × E)) := by
     have h := continuousOn_partialFDeriv_uncurry (f := f)
@@ -327,7 +291,6 @@ theorem exists_variationalSolutionOn_Ioo_along_orbit
     ∃ ε' : ℝ, 0 < ε' ∧ Ioo (t₀ - ε') (t₀ + ε') ⊆ Ioo tmin tmax ∧
       ∃ y : ℝ → E, IsVariationalSolutionOn f (fun s => Φ ⟨x, s⟩) δ t₀ y
         (Ioo (t₀ - ε') (t₀ + ε')) := by
-  -- Apply V.1's local existence with `s := Ioo tmin tmax`, `u := Set.univ`.
   have hcontα : ContinuousOn (fun s : ℝ => Φ ⟨x, s⟩) (Ioo tmin tmax) :=
     (hflow.orbit_continuousOn x hx).mono Ioo_subset_Icc_self
   have hf_open : ContDiffOn ℝ 1 (uncurry f)

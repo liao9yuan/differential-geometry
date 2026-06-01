@@ -39,8 +39,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Main statement: existence of a `wkpNormHalfSpace` limit -/
-
 /-- **Cauchy completeness** of the iterated Euclidean Dirichlet half-space
 Sobolev space `W^{k,p}_0(Ω)`: every Cauchy sequence with respect to the
 `wkpNormHalfSpace` semi-distance has a limit in `MemWkpHalfSpace k p`, with
@@ -62,25 +60,16 @@ theorem MemWkpHalfSpace.exists_limit_of_wkpNormHalfSpace_cauchy
       Filter.Tendsto
         (fun n => wkpNormHalfSpace (d := d) k p (fun x => u n x - u_lim x) Ω)
         Filter.atTop (𝓝 0) := by
-  -- The half-space predicate / norm are *definitionally* the boundaryless
-  -- predicate / norm on `interiorHalfSpace Ω`, which is open in `E` because
-  -- `Ω` is half-space-friendly. So the boundaryless completeness theorem
-  -- transfers verbatim.
   have hΩ_open : IsOpen (interiorHalfSpace (d := d) Ω) :=
     interiorHalfSpace_isOpen hΩ
-  -- Translate the assumptions from half-space form to plain `MemWkp` /
-  -- `wkpNorm` on `interiorHalfSpace Ω`.
   have hu_mem' : ∀ n, MemWkp (d := d) k p (u n) (interiorHalfSpace Ω) := hu_mem
   have hu_cauchy' : ∀ ε > 0, ∃ N, ∀ m n, N ≤ m → N ≤ n →
       wkpNorm (d := d) k p (fun x => u m x - u n x)
         (interiorHalfSpace Ω) ≤ ENNReal.ofReal ε := hu_cauchy
-  -- Apply the boundaryless completeness theorem.
   obtain ⟨u_lim, hu_lim_mem, h_tendsto⟩ :=
     MemWkp.exists_limit_of_wkpNorm_cauchy hΩ_open k p hp_one hp_top
       hu_mem' hu_cauchy'
-  -- Re-package back in half-space form.
   refine ⟨u_lim, hu_lim_mem, ?_⟩
-  -- The half-space norm equals the boundaryless norm on `interiorHalfSpace Ω`.
   exact h_tendsto
 
 end Euclidean

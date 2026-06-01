@@ -63,12 +63,6 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -76,26 +70,11 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## The explicit-norm bound
-
-The headline quantitative lemma: the `eLpNorm` of the `C^∞`-coefficient product
-`c * w` is bounded by an explicit nonnegative constant — the sup of the
-coefficient over the compact support set — times the `eLpNorm` of `w`. -/
-
 section ExplicitNormBound
 
--- The `eLpNorm` estimate is established by a pointwise almost-everywhere
--- domination; the completeness / compactness / boundarylessness instances enter
--- only through the *type* of the chart-pulled weighted measure and play no role
--- in the proof term.
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
--- The headline signature deliberately mirrors that of the qualitative companion
--- `memLp_weighted_contDiffOn_mul`; the measurability hypothesis `hK_meas` and
--- the membership hypothesis `hw` are part of that shared API contract, even
--- though the `eLpNorm` estimate — established by pointwise domination — does not
--- consume them.
 set_option linter.unusedVariables false
 
 /-- **Explicit-norm bound for a `C^∞`-coefficient weighted-`L²` product.** Let
@@ -150,9 +129,6 @@ theorem eLpNorm_weighted_contDiffOn_mul_le
   set μw : Measure EuclN :=
     (chartPulledWeightedMeasure (I := I) g α).restrict
       (chartTargetEuclid (I := I) (M := M) α) with hμw_def
-  -- The `C^∞` coefficient is bounded on the compact `K` by a nonnegative `C`.
-  -- This is the same sup constant extracted — and discarded — by the qualitative
-  -- companion `memLp_weighted_contDiffOn_mul`.
   have hcontOn_K : ContinuousOn c K := hc.continuousOn.mono hK_in
   have hbdd : ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ K, ‖c y‖ ≤ C := by
     by_cases hK_empty : K = ∅
@@ -162,26 +138,18 @@ theorem eLpNorm_weighted_contDiffOn_mul_le
         fun y hy => (hC₀ ⟨y, hy, rfl⟩).trans (le_max_left _ _)⟩
   obtain ⟨C, hC_nn, hC_bd⟩ := hbdd
   refine ⟨C, hC_nn, ?_⟩
-  -- Pointwise almost-everywhere norm domination `‖c · w‖ ≤ ‖C • w‖`.
-  -- On `K` the bound `‖c y‖ ≤ C` forces it; off `K`, `w` vanishes a.e., so both
-  -- sides vanish.
   have h_dom : ∀ᵐ y ∂μw, ‖c y * w y‖ ≤ ‖(C : ℝ) • w y‖ := by
     filter_upwards [hw_zero] with y hy
     by_cases hyK : y ∈ K
-    · -- On `K`: factor the norms and use `‖c y‖ ≤ C` with `C ≥ 0`.
-      have hlhs : ‖c y * w y‖ = ‖c y‖ * ‖w y‖ := norm_mul _ _
+    · have hlhs : ‖c y * w y‖ = ‖c y‖ * ‖w y‖ := norm_mul _ _
       have hrhs : ‖(C : ℝ) • w y‖ = C * ‖w y‖ := by
         rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg hC_nn]
       rw [hlhs, hrhs]
       exact mul_le_mul_of_nonneg_right (hC_bd y hyK) (norm_nonneg _)
-    · -- Off `K`: `w y = 0` almost everywhere, so both sides are `0`.
-      rw [hy hyK, mul_zero, smul_zero, norm_zero]
-  -- Monotonicity of `eLpNorm` under the a.e. norm domination.
+    · rw [hy hyK, mul_zero, smul_zero, norm_zero]
   have h_mono :
       eLpNorm (fun y => c y * w y) 2 μw ≤ eLpNorm (fun y => (C : ℝ) • w y) 2 μw :=
     eLpNorm_mono_ae (μ := μw) h_dom
-  -- Homogeneity of `eLpNorm` under scalar multiplication, with `‖C‖ₑ` rewritten
-  -- to `ENNReal.ofReal C` (valid since `C ≥ 0`).
   have h_smul :
       eLpNorm (fun y => (C : ℝ) • w y) 2 μw
         = ENNReal.ofReal C * eLpNorm w 2 μw := by
@@ -235,8 +203,6 @@ theorem eLpNorm_weighted_contDiffOn_mul_le_uniform
   set μw : Measure EuclN :=
     (chartPulledWeightedMeasure (I := I) g α).restrict
       (chartTargetEuclid (I := I) (M := M) α) with hμw_def
-  -- The `C^∞` coefficient is bounded on the compact `K` by a nonnegative `C`;
-  -- this sup constant does not depend on `w`.
   have hcontOn_K : ContinuousOn c K := hc.continuousOn.mono hK_in
   have hbdd : ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ K, ‖c y‖ ≤ C := by
     by_cases hK_empty : K = ∅
@@ -246,7 +212,6 @@ theorem eLpNorm_weighted_contDiffOn_mul_le_uniform
         fun y hy => (hC₀ ⟨y, hy, rfl⟩).trans (le_max_left _ _)⟩
   obtain ⟨C, hC_nn, hC_bd⟩ := hbdd
   refine ⟨C, hC_nn, fun w hw hw_zero => ?_⟩
-  -- Pointwise almost-everywhere norm domination `‖c · w‖ ≤ ‖C • w‖`.
   have h_dom : ∀ᵐ y ∂μw, ‖c y * w y‖ ≤ ‖(C : ℝ) • w y‖ := by
     filter_upwards [hw_zero] with y hy
     by_cases hyK : y ∈ K
@@ -256,11 +221,9 @@ theorem eLpNorm_weighted_contDiffOn_mul_le_uniform
       rw [hlhs, hrhs]
       exact mul_le_mul_of_nonneg_right (hC_bd y hyK) (norm_nonneg _)
     · rw [hy hyK, mul_zero, smul_zero, norm_zero]
-  -- Monotonicity of `eLpNorm` under the a.e. norm domination.
   have h_mono :
       eLpNorm (fun y => c y * w y) 2 μw ≤ eLpNorm (fun y => (C : ℝ) • w y) 2 μw :=
     eLpNorm_mono_ae (μ := μw) h_dom
-  -- Homogeneity of `eLpNorm` under scalar multiplication.
   have h_smul :
       eLpNorm (fun y => (C : ℝ) • w y) 2 μw
         = ENNReal.ofReal C * eLpNorm w 2 μw := by
@@ -273,8 +236,6 @@ theorem eLpNorm_weighted_contDiffOn_mul_le_uniform
     _ = ENNReal.ofReal C * eLpNorm w 2 μw := h_smul
 
 end ExplicitNormBound
-
-/-! ## Sanity test -/
 
 section ElaborationTest
 

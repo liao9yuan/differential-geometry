@@ -62,8 +62,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Local Young inequality (private re-derivation) -/
-
 /-- Young's inequality for nonnegative absolute values. Re-derivation
 since the upstream version is `private`. -/
 private lemma two_abs_mul_le_eps_sq_add_fterm (a b ε : ℝ) (hε : 0 < ε) :
@@ -85,8 +83,6 @@ private lemma two_abs_mul_le_eps_sq_add_fterm (a b ε : ℝ) (hε : 0 < ε) :
   calc 2 * |a| * |b| = 2 * u * v := huv.symm
     _ ≤ u^2 + v^2 := two_mul_le_add_sq u v
     _ = ε * a^2 + (1/ε) * b^2 := by rw [hu_sq, hv_sq]
-
-/-! ## Support and integrability of the test function in the non-smooth setting -/
 
 omit [NeZero d] in
 /-- Support reduction: the smooth-case `nirenbergTestFunction` (defined
@@ -154,15 +150,12 @@ private lemma memLp_v_test_nonsmooth_fterm
   have h_inner : MemLp (fun x : E => (η x)^2 * diffQuot k h u x) 2
       (volume : Measure E) :=
     memLp_eta_sq_diffQuot_u_fterm (d := d) hu_l2 hη hη_supp k h
-  -- v_test = D_{-h}^k (η² · D_h^k u). diffQuot preserves L².
   have h_eq :
       DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
         k h η u =
       diffQuot k (-h) (fun x : E => (η x)^2 * diffQuot k h u x) := rfl
   rw [h_eq]
   exact memLp_diffQuot_two k (-h) h_inner
-
-/-! ## Pointwise Young inequality for `f · v_test` -/
 
 omit [NeZero d] in
 /-- Pointwise Young inequality `|f · v_test| ≤ (ε/2) v_test² + (1/(2ε)) f²`. -/
@@ -188,8 +181,6 @@ private lemma pointwise_half_sum_f_v_test
   simp only [one_mul, div_one] at h_y
   have h_abs : |f x * v_test x| = |f x| * |v_test x| := abs_mul _ _
   linarith
-
-/-! ## Headline non-smooth f-term bound -/
 
 set_option linter.unusedVariables false in
 /-- **Quantitative non-smooth `f`-term bound.**
@@ -246,8 +237,6 @@ theorem f_term_bound_nonsmooth_quantitative
             ∂(volume : Measure E) +
           ∫ x in Ω', (f x)^2 ∂(volume : Measure E)) := by
   classical
-  -- Strategy: same as smooth f_term_bound but with `g i` in place of `∂_i u`.
-  -- C := max(4εN², 1/(2ε)).
   set C : ℝ := max (4 * ε * N^2) (1 / (2 * ε)) with hC_def
   have hC_nn : 0 ≤ C := by
     rw [hC_def]
@@ -265,16 +254,13 @@ theorem f_term_bound_nonsmooth_quantitative
     hasCompactSupport_v_test_nonsmooth_fterm (d := d) hη_supp k h
   have h_v_test_memLp : MemLp v_test 2 (volume : Measure E) :=
     memLp_v_test_nonsmooth_fterm (d := d) hu_l2 hη hη_supp k h
-  -- Step 1: ∫_Ω f v_test = ∫_{Ω'} f v_test (using v_test = 0 outside Ω' ⊆ Ω).
   have h_v_test_zero_outside : ∀ x ∉ Ω, v_test x = 0 := fun x hx =>
     image_eq_zero_of_notMem_tsupport (fun hy => hx (hΩ'_closure (subset_closure (h_v_test_supp hy))))
   have h_v_test_zero_outside_Ω' : ∀ x ∉ Ω', v_test x = 0 := fun x hx =>
     image_eq_zero_of_notMem_tsupport (fun hy => hx (h_v_test_supp hy))
-  -- f is in L²(Ω').
   have hf_memLp : MemLp f 2 (volume.restrict Ω') := hf_l2_loc hΩ'_compact
   have hf_sq_int_Ω' : IntegrableOn (fun x : E => (f x)^2) Ω' volume :=
     hf_memLp.integrable_sq
-  -- Step 2: rewrite ∫_Ω f v_test = ∫_{Ω'} f v_test.
   have h_int_E : ∫ x in Ω, f x * v_test x ∂(volume : Measure E) =
       ∫ x in Ω', f x * v_test x ∂(volume : Measure E) := by
     have h_eq_zero_Ω : ∀ x, x ∉ Ω → f x * v_test x = 0 := by
@@ -284,12 +270,9 @@ theorem f_term_bound_nonsmooth_quantitative
     rw [setIntegral_eq_integral_of_forall_compl_eq_zero h_eq_zero_Ω,
       ← setIntegral_eq_integral_of_forall_compl_eq_zero h_eq_zero_Ω']
   rw [h_int_E]
-  -- Step 3: pointwise Young + integrate over Ω'.
   have h_pointwise : ∀ x : E,
       |f x * v_test x| ≤ (ε/2) * (v_test x)^2 + (1/(2*ε)) * (f x)^2 :=
     pointwise_young_f_v_test (d := d) f v_test hε
-  -- Integrability infrastructure.
-  -- v_test² is integrable on E (v_test ∈ L² ⇒ v_test² ∈ L¹).
   have h_v_test_sq_int_E : Integrable (fun x : E => (v_test x)^2)
       (volume : Measure E) := by
     have h_norm_sq_int : Integrable
@@ -314,7 +297,6 @@ theorem f_term_bound_nonsmooth_quantitative
   have h_v_test_sq_int_Ω' : IntegrableOn (fun x : E => (v_test x)^2) Ω' volume :=
     h_v_test_sq_int_E.integrableOn
   have h_f_v_int_Ω' : IntegrableOn (fun x : E => f x * v_test x) Ω' volume := by
-    -- |fv| ≤ (1/2)(f² + v_test²), so |fv| is integrable on Ω'.
     have h_pointwise_abs : ∀ x : E,
         |f x * v_test x| ≤ (1/2) * ((f x)^2 + (v_test x)^2) :=
       pointwise_half_sum_f_v_test (d := d) f v_test
@@ -346,7 +328,6 @@ theorem f_term_bound_nonsmooth_quantitative
   refine (h_step1.trans h_step2).trans ?_
   rw [integral_add (h_v_test_sq_int_Ω'.const_mul (ε/2)) (hf_sq_int_Ω'.const_mul (1/(2*ε)))]
   rw [integral_const_mul, integral_const_mul]
-  -- ∫_{Ω'} v² ≤ ∫_E v².
   have h_v_test_sq_Ω'_le_E :
       ∫ x in Ω', (v_test x)^2 ∂(volume : Measure E) ≤
       ∫ x, (v_test x)^2 ∂(volume : Measure E) := by
@@ -358,7 +339,6 @@ theorem f_term_bound_nonsmooth_quantitative
       exact (setIntegral_eq_integral_of_forall_compl_eq_zero h_eq_zero).symm
     rw [h_v_test_sq_eq]
   have h_v_test_bound := h_v_test_l2_bound hh hh_le
-  -- Now combine.
   have h_v_sq_le_8N_2I :
       ∫ x in Ω', (v_test x)^2 ∂(volume : Measure E) ≤
         8 * N^2 *
@@ -386,9 +366,6 @@ theorem f_term_bound_nonsmooth_quantitative
       ε * ∫ x, (η x)^2 *
           ∑ i : Fin d, (diffQuot k h (g i) x)^2
         ∂(volume : Measure E) := by
-    -- (ε/2) · ‖v_test‖² ≤ (ε/2) · (8N² ∫_{tsupport η} (D_h^k u)² + 2 I')
-    --    = 4εN² ∫_{tsupport η} (D_h^k u)² + ε · I'
-    --    ≤ 4εN² ∫_{Ω'} ∑_i g_i² + ε · I'.
     have h_step_a := mul_le_mul_of_nonneg_left h_v_sq_le_8N_2I (by linarith : 0 ≤ ε/2)
     have h_step_b : (ε/2) * (8 * N^2 *
             ∫ x in tsupport η, (diffQuot k h u x)^2 ∂(volume : Measure E) +

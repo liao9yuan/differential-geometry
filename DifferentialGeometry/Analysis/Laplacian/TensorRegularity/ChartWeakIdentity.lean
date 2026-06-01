@@ -86,28 +86,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-Match the convention in the surrounding chart-local Laplacian files: install
-the Borel σ-algebras locally, without leaking global instances onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Chart-pull of the global `H^1` Dirichlet integral
-
-The pointwise `H^1` Dirichlet integrand `tensorCovDerivPointwiseInner g r s S T`
-is continuous (`tensorCovDerivPointwiseInner_continuous`) and vanishes wherever
-the first section vanishes (`tensorCovDerivPointwiseInner_tsupport_subset_left`).
-Hence whenever the first section is supported inside the chart source, the
-integrand itself is chart-supported, and the chart-pulled volume identity
-`integral_riemannianVolumeMeasure_eq_euclidean_chartTarget` applies. The
-chart-coordinate decomposition `tensorCovDerivPointwiseInner_chart_eq` rewrites
-the chart-pulled integrand into `covPrincipalIntegrand + covLowerOrderIntegrand`
-on the Euclidean chart target. -/
 
 /-- **Chart-pull of the tensor `H^1` Dirichlet integral.** For smooth compactly
 supported `(r, s)`-tensor sections `S`, `T` with the topological support of `S`
@@ -135,35 +117,20 @@ theorem tensorCovDerivPointwiseInner_integral_chart_pull
             EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))
             (modelHaar (E := E))) := by
   classical
-  -- The integrand is continuous on `M`.
   have hcont : Continuous
       (tensorCovDerivPointwiseInner (I := I) (M := M) g r s S T) :=
     tensorCovDerivPointwiseInner_continuous (I := I) (M := M) g r s S T
-  -- The integrand is chart-supported: it vanishes off `tsupport S.toFun`, which
-  -- the hypothesis places inside the chart source.
   have hsupp : tsupport
       (tensorCovDerivPointwiseInner (I := I) (M := M) g r s S T) ⊆
       (chartAt H α).source :=
     (tensorCovDerivPointwiseInner_tsupport_subset_left
       (I := I) (M := M) g r s S T).trans hS_supp
-  -- Pull the global integral to the Euclidean chart target.
   rw [integral_riemannianVolumeMeasure_eq_euclidean_chartTarget
     (I := I) (M := M) g α hcont hsupp]
-  -- The Euclidean chart target is open, hence measurable.
   have hctE_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
-  -- On the chart target rewrite the chart-pulled integrand by the
-  -- principal / lower-order decomposition.
   refine setIntegral_congr_fun hctE_meas (fun y hy => ?_)
   rw [tensorCovDerivPointwiseInner_chart_eq (I := I) (M := M) g r s S T α hy]
-
-/-! ## Smoothness of the Euclidean push-forward of the scalar bump
-
-The scalar bump `χ`, smooth on the chart source `(chartAt H α).source`, has a
-Euclidean push-forward `chartPushedRaw I α χ` that is `C^∞` on the Euclidean
-chart target: on the target it is the composition of `χ` with the smooth
-inverse chart map and the linear isometry `toEuclidean.symm`. This mirrors the
-push-forward smoothness of the raw chart components. -/
 
 /-- The Euclidean push-forward `chartPushedRaw I α χ` of a scalar bump `χ` that
 is smooth on the chart source is `ContDiffOn ℝ ∞` on the Euclidean chart
@@ -174,10 +141,8 @@ theorem chartPushedRaw_bump_contDiffOn
     ContDiffOn ℝ ∞ (chartPushedRaw I α χ)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- The bump is `C^∞` on `(extChartAt I α).source = (chartAt H α).source`.
   have hχ_extsrc : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ χ (extChartAt I α).source := by
     rw [extChartAt_source]; exact hχs
-  -- Compose with `(extChartAt I α).symm`: smooth on the chart target.
   have hsymm : ContMDiffOn 𝓘(ℝ, E) I ∞ (extChartAt I α).symm
       (extChartAt I α).target := contMDiffOn_extChartAt_symm (I := I) α
   have hmaps : Set.MapsTo (extChartAt I α).symm (extChartAt I α).target
@@ -188,7 +153,6 @@ theorem chartPushedRaw_bump_contDiffOn
   have hcontDiff_E : ContDiffOn ℝ ∞
       (χ ∘ (extChartAt I α).symm) (extChartAt I α).target :=
     hcomp_E.contDiffOn
-  -- Pre-compose with the linear isometry `toEuclidean.symm`.
   have hcomp_eucl : ContDiffOn ℝ ∞
       ((χ ∘ (extChartAt I α).symm) ∘
         (toEuclidean.symm :
@@ -199,17 +163,8 @@ theorem chartPushedRaw_bump_contDiffOn
     · intro y hy
       rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
       exact hy
-  -- On the chart target `chartPushedRaw` is this composition.
   refine hcomp_eucl.congr (fun z hz => ?_)
   exact chartPushedRaw_apply_of_mem (I := I) (M := M) α χ hz
-
-/-! ## A chart-target Leibniz rule for the Euclidean partial derivative
-
-The chart-Euclidean partial derivative `euclidPartial l u y = fderiv ℝ u y
-(EuclideanSpace.single l 1)` is computed from the Fréchet derivative; the
-Leibniz / product rule `fderiv_fun_mul` for the Fréchet derivative of a product
-of two functions differentiable at `y` therefore yields the corresponding
-product rule for `euclidPartial`. -/
 
 /-- **Leibniz rule for the Euclidean partial derivative.** For functions `f`,
 `h : EuclideanSpace ℝ (Fin n) → ℝ` both differentiable at `y`, the `l`-th
@@ -222,21 +177,11 @@ lemma euclidPartial_mul
     (hf : DifferentiableAt ℝ f y) (hh : DifferentiableAt ℝ h y) :
     euclidPartial (E := E) l (fun z => f z * h z) y =
       euclidPartial (E := E) l f y * h y + f y * euclidPartial (E := E) l h y := by
-  -- Unfold `euclidPartial` to the Fréchet derivative and apply `fderiv_fun_mul`.
   rw [euclidPartial_def, euclidPartial_def, euclidPartial_def,
     fderiv_fun_mul hf hh]
-  -- Evaluate the sum of continuous linear maps at the basis vector.
   rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
     ContinuousLinearMap.smul_apply, smul_eq_mul, smul_eq_mul]
   ring
-
-/-! ## A chart-target smoothness rule for the Euclidean partial derivative
-
-If a scalar function `u` is `C^∞` on the open Euclidean chart target, its `l`-th
-chart-Euclidean partial derivative is again `C^∞` there: on the open set the
-Fréchet derivative coincides with the within-derivative, which is `C^∞` by
-`contDiffOn_succ_iff_fderivWithin`, and evaluation at a fixed basis vector is a
-continuous linear map. -/
 
 /-- The `l`-th chart-Euclidean partial derivative of a function `C^∞` on the
 Euclidean chart target is again `C^∞` on the Euclidean chart target. -/
@@ -249,7 +194,6 @@ private lemma euclidPartial_contDiffOn_chartTarget
   classical
   have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- The Fréchet derivative of `u` is `C^∞` on the open chart target.
   have hfderiv : ContDiffOn ℝ ∞ (fun z => fderiv ℝ u z)
       (chartTargetEuclid (I := I) (M := M) α) := by
     have hsucc : ContDiffOn ℝ ((∞ : WithTop ℕ∞) + 1) u
@@ -261,7 +205,6 @@ private lemma euclidPartial_contDiffOn_chartTarget
       ((contDiffOn_succ_iff_fderivWithin hopen.uniqueDiffOn).mp hsucc).2.2
     refine hfw.congr (fun z hz => ?_)
     exact (fderivWithin_of_isOpen (f := u) (𝕜 := ℝ) hopen hz).symm
-  -- Evaluation at `single l 1` is a continuous linear map; compose.
   have hcomp : ContDiffOn ℝ ∞
       ((fun L : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) →L[ℝ] ℝ =>
           L (EuclideanSpace.single l 1)) ∘ (fun z => fderiv ℝ u z))
@@ -270,17 +213,6 @@ private lemma euclidPartial_contDiffOn_chartTarget
       (EuclideanSpace.single l 1)).contDiff.comp_contDiffOn hfderiv
   refine hcomp.congr (fun z _ => ?_)
   rfl
-
-/-! ## The chart component of the rotated test section as a chart-target function
-
-The headline component identity `rotatedTestSection_chartComp` evaluates the raw
-chart component of `rotatedTestSection g r s α P₀ χ` at the chart-source preimage
-of a chart-target point. Composing it through the Euclidean push-forward
-`chartPushedRaw` records the corresponding identity of *functions* on the open
-Euclidean chart target: the push-forward of the rotated test section's raw chart
-component agrees there with the product of the inverse-Gram entry
-`covChartMetricGramInv g r s α · Q P₀` and the chart-pushed bump
-`chartPushedRaw I α χ`. -/
 
 /-- The inverse-Gram column entry `covChartMetricGramInv g r s α · Q P₀` as a
 function on the Euclidean chart target. -/
@@ -318,27 +250,9 @@ lemma chartPushedRaw_rotatedTestSection_eqOn
         chartPushedRaw I α χ y)
       (chartTargetEuclid (I := I) (M := M) α) := by
   intro y hy
-  -- On the chart target the push-forward is the raw component at the preimage.
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy]
-  -- The headline component identity for the rotated test section.
   rw [rotatedTestSection_chartComp (I := I) (M := M) g r s α P₀ hχs hχt Q hy]
   rfl
-
-/-! ## The first-order rotation remainder
-
-When the inverse-Gram-rotated test section is substituted into the second slot
-of the component-coupled principal part `covPrincipalIntegrand`, the chart
-component of the rotated test section is the product
-`covChartMetricGramInv g r s α · Q P₀ · chartPushedRaw I α χ`. The chart-Euclidean
-partial derivative `∂_l` of this product splits, by the Leibniz rule, into a
-term where `∂_l` falls on the chart-pushed bump and a term where it falls on the
-inverse-Gram coefficient. The first term collapses cleanly through the Gram /
-inverse-Gram contraction; the second term is genuine and is collected here as
-the **rotation remainder**.
-
-It pairs the chart-Euclidean partial `∂_k` of the raw chart component of `S`
-against `(∂_l covChartMetricGramInv) · χ̃` — first-order in `S`, with `C^∞`
-coefficients. -/
 
 /-- **The first-order rotation remainder of the rotated principal part.** The
 contributions to the rotated principal part `covPrincipalIntegrand g r s S
@@ -395,16 +309,6 @@ lemma covPrincipalRotationRemainder_def
                       (gramInvEntry (I := I) (M := M) g r s α Q P₀) y *
                     chartPushedRaw I α χ y) := rfl
 
-/-! ## Smoothness of the rotation remainder
-
-Every constituent of the rotation remainder is `C^∞` on the Euclidean chart
-target: the chart-frame tensor-metric Gram `covChartMetricGram` and the
-un-weighted inverse Gram `chartInvGramEuclid` are `C^∞`; the chart-Euclidean
-partial of the raw chart component push-forward of `S` is `C^∞`; the inverse-Gram
-column entry `gramInvEntry` is `C^∞` and so is its chart-Euclidean partial; and
-the chart-pushed bump `chartPushedRaw I α χ` is `C^∞`. A finite sum and product
-of `C^∞` functions is `C^∞`. -/
-
 /-- **The first-order rotation remainder is `C^∞` on the Euclidean chart
 target.** A finite sum and product of `C^∞` functions: the prefactors
 `covChartMetricGram` and `chartInvGramEuclid`, the chart-Euclidean partials of
@@ -420,11 +324,9 @@ theorem covPrincipalRotationRemainder_contDiffOn
       (covPrincipalRotationRemainder (I := I) (M := M) g r s S α P₀ χ hχs hχt)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- The chart-pushed bump is `C^∞` on the chart target.
   have hbump : ContDiffOn ℝ ∞ (chartPushedRaw I α χ)
       (chartTargetEuclid (I := I) (M := M) α) :=
     chartPushedRaw_bump_contDiffOn (I := I) (M := M) α hχs
-  -- The `(P, Q)`-summand is `C^∞`.
   have hsummand : ∀ P Q : CompIdx E r s,
       ContDiffOn ℝ ∞
         (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
@@ -441,12 +343,10 @@ theorem covPrincipalRotationRemainder_contDiffOn
                     chartPushedRaw I α χ y))
         (chartTargetEuclid (I := I) (M := M) α) := by
     intro P Q
-    -- The chart-frame tensor-metric Gram prefactor is `C^∞`.
     have hgram : ContDiffOn ℝ ∞
         (covChartMetricGram (I := I) (M := M) g r s α P Q)
         (chartTargetEuclid (I := I) (M := M) α) :=
       covChartMetricGram_contDiffOn (I := I) (M := M) g r s α P Q
-    -- The chart-Euclidean partial of the raw-component push-forward of `S`.
     have hSpartial : ∀ k : Fin (Module.finrank ℝ E),
         ContDiffOn ℝ ∞
           (euclidPartial (E := E) k
@@ -456,7 +356,6 @@ theorem covPrincipalRotationRemainder_contDiffOn
           (chartTargetEuclid (I := I) (M := M) α) := fun k =>
       euclidPartial_chartPushedRaw_contDiffOn (I := I) (M := M)
         g r s S α k P.1 P.2
-    -- The chart-Euclidean partial of the inverse-Gram column entry.
     have hGinvPartial : ∀ l : Fin (Module.finrank ℝ E),
         ContDiffOn ℝ ∞
           (euclidPartial (E := E) l
@@ -464,7 +363,6 @@ theorem covPrincipalRotationRemainder_contDiffOn
           (chartTargetEuclid (I := I) (M := M) α) := fun l =>
       euclidPartial_contDiffOn_chartTarget (I := I) (M := M) α l
         (gramInvEntry_contDiffOn (I := I) (M := M) g r s α Q P₀)
-    -- The inner `(k, l)`-summand is `C^∞`.
     have hinner : ∀ k l : Fin (Module.finrank ℝ E),
         ContDiffOn ℝ ∞
           (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
@@ -483,7 +381,6 @@ theorem covPrincipalRotationRemainder_contDiffOn
         chartInvGramEuclid_contDiffOn (I := I) (M := M) g α k l
       exact ((hGinv.mul (hSpartial k)).mul
         ((hGinvPartial l).mul hbump))
-    -- A finite sum of `C^∞` functions is `C^∞`.
     have hklsum : ContDiffOn ℝ ∞
         (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
           ∑ k : Fin (Module.finrank ℝ E),
@@ -499,8 +396,6 @@ theorem covPrincipalRotationRemainder_contDiffOn
         (chartTargetEuclid (I := I) (M := M) α) :=
       ContDiffOn.sum (fun k _ => ContDiffOn.sum (fun l _ => hinner k l))
     exact hgram.mul hklsum
-  -- A finite sum of `C^∞` functions is `C^∞`; the rotation remainder is,
-  -- definitionally, exactly this finite sum.
   have hsum : ContDiffOn ℝ ∞
       (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
         ∑ P : CompIdx E r s,
@@ -519,30 +414,6 @@ theorem covPrincipalRotationRemainder_contDiffOn
       (chartTargetEuclid (I := I) (M := M) α) :=
     ContDiffOn.sum (fun P _ => ContDiffOn.sum (fun Q _ => hsummand P Q))
   exact hsum
-
-/-! ## The rotated principal collapse
-
-The component-coupled principal part `covPrincipalIntegrand` evaluated at the
-rotated test section is collapsed in four steps.
-
-1. On the open chart target the Euclidean push-forward of the rotated test
-   section's raw chart component is the product `covChartMetricGramInv · Q P₀ ·
-   chartPushedRaw I α χ` (`chartPushedRaw_rotatedTestSection_eqOn`); since the
-   chart-Euclidean partial derivative `∂_l` is a local operation, it agrees with
-   the partial of that product on the open chart target.
-
-2. The Leibniz rule `euclidPartial_mul` splits `∂_l (covChartMetricGramInv · Q P₀
-   · χ̃)` into `(∂_l covChartMetricGramInv · Q P₀) · χ̃` and `covChartMetricGramInv
-   · Q P₀ · (∂_l χ̃)`.
-
-3. The summand factorises; the only `Q`-dependence of the second Leibniz piece
-   is `covChartMetricGram P Q · covChartMetricGramInv Q P₀`, which contracts —
-   over `Q` — to the Kronecker delta `[P = P₀]` by
-   `covChartMetricGram_mul_inv_collapse`.
-
-4. The `[P = P₀]` delta collapses the outer `P`-sum to the single `P₀`-term: the
-   scalar elliptic principal integrand `∑_{k,l} g^{kl} · ∂_k(S_{P₀}) · ∂_l χ̃`.
-   The first Leibniz piece is the rotation remainder. -/
 
 /-- On the open Euclidean chart target the chart-Euclidean partial derivative of
 the Euclidean push-forward of the rotated test section's raw chart component
@@ -570,19 +441,15 @@ lemma euclidPartial_chartPushedRaw_rotatedTestSection_eqOn
   classical
   have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- `C^∞`-ness of the two factors of the product.
   have hGinv : ContDiffOn ℝ ∞ (gramInvEntry (I := I) (M := M) g r s α Q P₀)
       (chartTargetEuclid (I := I) (M := M) α) :=
     gramInvEntry_contDiffOn (I := I) (M := M) g r s α Q P₀
   have hbump : ContDiffOn ℝ ∞ (chartPushedRaw I α χ)
       (chartTargetEuclid (I := I) (M := M) α) :=
     chartPushedRaw_bump_contDiffOn (I := I) (M := M) α hχs
-  -- The push-forward of the rotated test section's raw component is the product.
   have heqOn := chartPushedRaw_rotatedTestSection_eqOn (I := I) (M := M)
     g r s α P₀ hχs hχt Q
   intro y hy
-  -- `∂_l` agrees with `∂_l` of the product, since on the open chart target
-  -- the two functions coincide.
   have hpartial_eq : euclidPartial (E := E) l
         (chartPushedRaw I α
           (tensorChartComponentRaw (I := I) (M := M) g r s
@@ -592,14 +459,11 @@ lemma euclidPartial_chartPushedRaw_rotatedTestSection_eqOn
         (fun z => gramInvEntry (I := I) (M := M) g r s α Q P₀ z *
           chartPushedRaw I α χ z) y := by
     rw [euclidPartial_def, euclidPartial_def]
-    -- The Fréchet derivatives agree, since the functions agree on an open
-    -- neighbourhood of `y`.
     have hfderiv_eq :=
       Filter.EventuallyEq.fderiv_eq (𝕜 := ℝ) (x := y)
         (Filter.eventuallyEq_of_mem (hopen.mem_nhds hy) heqOn)
     rw [hfderiv_eq]
   rw [hpartial_eq]
-  -- The Leibniz rule for the chart-Euclidean partial derivative of the product.
   have hGinv_diff : DifferentiableAt ℝ
       (gramInvEntry (I := I) (M := M) g r s α Q P₀) y :=
     (hGinv.differentiableOn (by simp)).differentiableAt
@@ -639,10 +503,7 @@ theorem covPrincipalIntegrand_rotated_collapse
             euclidPartial (E := E) l (chartPushedRaw I α χ) y) +
         covPrincipalRotationRemainder (I := I) (M := M) g r s S α P₀ χ hχs hχt y := by
   classical
-  -- Unfold the principal part and the rotation remainder.
   rw [covPrincipalIntegrand_def, covPrincipalRotationRemainder_def]
-  -- Step 1+2: rewrite the `∂_l` of the rotated test section's chart component
-  -- by the Leibniz split, valid at `y` in the chart target.
   have hleibniz : ∀ Q : CompIdx E r s, ∀ l : Fin (Module.finrank ℝ E),
       euclidPartial (E := E) l
           (chartPushedRaw I α
@@ -656,7 +517,6 @@ theorem covPrincipalIntegrand_rotated_collapse
           euclidPartial (E := E) l (chartPushedRaw I α χ) y := fun Q l =>
     euclidPartial_chartPushedRaw_rotatedTestSection_eqOn (I := I) (M := M)
       g r s α P₀ hχs hχt Q l hy
-  -- Abbreviations for the recurring `(k, l)`-sums.
   set bumpSum :
       (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin s → Fin (Module.finrank ℝ E)) → ℝ :=
@@ -685,8 +545,6 @@ theorem covPrincipalIntegrand_rotated_collapse
             (euclidPartial (E := E) l
                 (gramInvEntry (I := I) (M := M) g r s α Q P₀) y *
               chartPushedRaw I α χ y) with hremSum_def
-  -- Step 1+2+3: rewrite the `(P, Q)` double sum of the principal part as a
-  -- `bumpSum` group (weighted by `covG · gramInvEntry`) plus the `remSum` group.
   have hLHS :
       (∑ P : CompIdx E r s,
         ∑ Q : CompIdx E r s,
@@ -715,7 +573,6 @@ theorem covPrincipalIntegrand_rotated_collapse
     refine Finset.sum_congr rfl (fun P _ => ?_)
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl (fun Q _ => ?_)
-    -- Substitute the Leibniz split into the inner `(k, l)`-sum.
     have hinner :
         (∑ k : Fin (Module.finrank ℝ E),
           ∑ l : Fin (Module.finrank ℝ E),
@@ -741,18 +598,14 @@ theorem covPrincipalIntegrand_rotated_collapse
     rw [hinner, mul_add]
     ring
   rw [hLHS]
-  -- Step 3+4: the `bumpSum`-group's `Q`-collapse factor contracts to the
-  -- Kronecker delta, collapsing the outer `P`-sum to the single `P₀`-term.
   have hcollapse : ∀ P : CompIdx E r s,
       (∑ Q : CompIdx E r s,
         covChartMetricGram (I := I) (M := M) g r s α P Q y *
           gramInvEntry (I := I) (M := M) g r s α Q P₀ y * bumpSum P) =
         (if P = P₀ then (1 : ℝ) else 0) * bumpSum P := by
     intro P
-    -- Factor `bumpSum P` (constant in `Q`) out of the `Q`-sum.
     rw [← Finset.sum_mul]
     congr 1
-    -- `gramInvEntry g r s α Q P₀ y = covChartMetricGramInv g r s α y Q P₀`.
     have hrw : ∀ Q : CompIdx E r s,
         covChartMetricGram (I := I) (M := M) g r s α P Q y *
             gramInvEntry (I := I) (M := M) g r s α Q P₀ y =
@@ -760,7 +613,6 @@ theorem covPrincipalIntegrand_rotated_collapse
             covChartMetricGramInv (I := I) (M := M) g r s α y Q P₀ := fun Q => rfl
     rw [Finset.sum_congr rfl (fun Q _ => hrw Q)]
     exact covChartMetricGram_mul_inv_collapse (I := I) (M := M) g r s α hy P P₀
-  -- The `bumpSum` group collapses to the single-component `P₀`-term.
   have hbump_collapse :
       (∑ P : CompIdx E r s,
         ∑ Q : CompIdx E r s,
@@ -782,17 +634,6 @@ theorem covPrincipalIntegrand_rotated_collapse
     · intro hP₀
       exact absurd (Finset.mem_univ P₀) hP₀
   rw [hbump_collapse]
-
-/-! ## The density-weighted inverse-Gram pairing as a `principalIntegrand`
-
-The principal coefficient matrix of the principal-part elliptic bilinear form
-`tensorPrincipalForm g α hK hK_target` agrees on the compact chart-interior set
-`K` with the volume-weighted inverse Gram matrix `weightedInvGramEuclid g α`
-(`= √(det g) · gᵏˡ`). Since `weightedInvGramEuclid` is, definitionally, the
-product of the chart density `densityOnEuclid` and the un-weighted inverse Gram
-`chartInvGramEuclid`, the density-weighted inverse-Gram pairing
-`densityOnEuclid · ∑ g^{kl} ∂_k u ∂_l φ` is exactly the `principalIntegrand` of
-`tensorPrincipalForm`. -/
 
 /-- The volume-weighted inverse Gram entry `weightedInvGramEuclid g α k l`
 factorises as the chart density `densityOnEuclid g α` times the un-weighted
@@ -828,16 +669,12 @@ theorem weightedInvGram_principalIntegrand_eq
       (tensorPrincipalForm (I := I) (M := M) g α hK hK_target).principalIntegrand
         u φ y := by
   classical
-  -- Unfold the form's `principalIntegrand` and pull the density factor inside.
   rw [SmoothEllipticBilinearForm.principalIntegrand, Finset.mul_sum]
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl (fun l _ => ?_)
-  -- On `K` the form's coefficient is the volume-weighted inverse Gram entry.
   rw [tensorPrincipalForm_a_eq_weightedInvGramEuclid
     (I := I) (M := M) g α hK hK_target hy k l]
-  -- Factorise the weighted inverse Gram entry and match the partial-derivative
-  -- conventions (`euclidPartial · = fderiv · (single · 1)`).
   rw [weightedInvGramEuclid_eq_density_mul_invGram (I := I) (M := M) g α k l y,
     euclidPartial_def, euclidPartial_def]
   ring

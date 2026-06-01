@@ -69,8 +69,6 @@ open DifferentialGeometry.Analysis.Laplacian.H1ComplToLpChartBridge
 open DifferentialGeometry.Analysis.Laplacian.H1ComplWeakPartialLimit
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -79,12 +77,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## Globally measurable extension of `(extChartAt I α).symm`
-
-For a chart `α : M`, the inverse chart `(extChartAt I α).symm` is continuous
-on its target but undefined elsewhere. We extend it to a globally Borel-measurable
-function from `E` to `M` by extending it to a constant outside the target. -/
 
 /-- A globally Borel-measurable extension of `(extChartAt I α).symm` taking a
 fixed default value (here `α : M`) outside the chart target. -/
@@ -114,8 +106,6 @@ private lemma extChartAtSymmExt_measurable (α : M) :
     continuousOn_const
     (DifferentialGeometry.Integral.Measure.measurableSet_extChartAt_target
       (I := I) (M := M) α)
-
-/-! ## Density lower bound on a compact subset of the chart target -/
 
 /-- Existence of a positive lower bound on the chart-pulled density over a
 compact subset of the chart target. -/
@@ -189,8 +179,6 @@ private lemma volume_restrict_le_smul_chartPulledWeightedMeasure_on_compact
           ∫⁻ y in A ∩ K, ENNReal.ofReal (densityOnEuclid (I := I) g α y)
             ∂(volume : Measure EuclN) := by gcongr
 
-/-! ## Chart-weighted L² → plain L² on compact subsets -/
-
 /-- The L² norm of a function against the plain volume restricted to a
 compact subset of the chart target is bounded by a constant times the L²
 norm against the chart-pulled weighted measure restricted to the entire
@@ -245,8 +233,6 @@ theorem eLpNorm_volume_restrict_le_eLpNorm_chartPulledWeighted_compact
   rw [h_pow_eq, smul_eq_mul]
   exact mul_le_mul' (le_refl _) h_mono_target
 
-/-! ## Smooth-case agreement -/
-
 theorem chartPushedWeakPartialLp_smoothToH1Compl_eq_partial
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))
@@ -263,8 +249,6 @@ theorem chartPushedWeakPartialLp_smoothToH1Compl_eq_partial
   rw [h_identity]
   unfold chartPushedPartialLp
   exact MeasureTheory.MemLp.coeFn_toLp _
-
-/-! ## MemLp 2 on volume-restricted compact subsets -/
 
 private lemma memLp_of_chartPulledWeighted_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -309,8 +293,6 @@ theorem chartPushedWeakPartialLp_locally_memLp
   exact memLp_of_chartPulledWeighted_on_compact (I := I) (M := M) g α
     hK_compact hK_in hf_strong.aestronglyMeasurable hf_memLp_weighted
 
-/-! ## Sequential approximation in `H1Compl g` -/
-
 private lemma exists_smoothApprox_seq
     (g : SmoothRiemannianMetric I M) (u_h : H1Compl g) :
     ∃ v : ℕ → SmoothScalar g,
@@ -335,8 +317,6 @@ private lemma exists_smoothApprox_seq
     funext n; exact hv n
   rw [h_eq]
   exact hxs_tendsto
-
-/-! ## L²-convergence of the smooth-approximation chart-pushed sequences -/
 
 private lemma chartPushed_lp_tendsto_of_smoothApprox
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -425,10 +405,6 @@ private lemma chartPushed_lp_tendsto_of_smoothApprox
     have h_smooth_coeFn : ((smoothToLp (I := I) (M := M) g (v n)) : M → ℝ) =ᵐ[
         riemannianVolumeMeasure (I := I) (M := M) g] (v n).toFun :=
       MeasureTheory.MemLp.coeFn_toLp (v n).memLp_two
-    -- The crucial chain:
-    --   ⇑(a - b) =ᵐ ⇑a - ⇑b   (h_sub_coeFn, Pi-sub form)
-    --              =ᵐ v.toFun - ⇑b  (using h_smooth_coeFn for ⇑a)
-    --              = v.toFun - u_lim  (⇑b = u_lim by definition)
     have h_step1 : (fun x => ((smoothToLp (I := I) (M := M) g (v n)) : M → ℝ) x -
         ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) x) =ᵐ[
         riemannianVolumeMeasure (I := I) (M := M) g]
@@ -438,16 +414,12 @@ private lemma chartPushed_lp_tendsto_of_smoothApprox
         ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) x =
         (v n).toFun x - u_lim x
       rw [hx]
-    -- Combine: ⇑(a - b) =ᵐ ⇑a - ⇑b =ᵐ v.toFun - u_lim.
-    -- Convert h_sub_coeFn to function form for trans:
     have h_pi_form : (((smoothToLp (I := I) (M := M) g (v n) -
             H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)) =ᵐ[
         riemannianVolumeMeasure (I := I) (M := M) g]
         fun x => ((smoothToLp (I := I) (M := M) g (v n)) : M → ℝ) x -
           ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) x := by
       filter_upwards [h_sub_coeFn] with x hx
-      -- The goal has already been simp-normalized to point-wise sub.
-      -- `hx` is the Pi-sub form. Apply Pi.sub_apply directly via rfl.
       rfl
     exact h_pi_form.trans h_step1
   have h_diff_tendsto :
@@ -523,7 +495,6 @@ private lemma chartPushedWeakPartial_lp_tendsto_of_smoothApprox
     simpa using (continuous_norm.tendsto (0 :
       Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)))).comp h_sub
-  -- Same approach as in chartPushed_lp_tendsto_of_smoothApprox.
   have h_eLpNorm_eq : ∀ n,
       eLpNorm (((chartPushedPartialLp (I := I) (M := M) g α j (v n)
             (chartPushedPartial_memLp (I := I) (M := M) g α j (v n)) -
@@ -603,7 +574,6 @@ private lemma chartPushedWeakPartial_lp_tendsto_of_smoothApprox
           chartPushedPartial (I := I) (M := M) g α j (v n) := by
       unfold chartPushedPartialLp
       exact MeasureTheory.MemLp.coeFn_toLp _
-    -- Trans: ⇑(a - b) =ᵐ ⇑a - ⇑b =ᵐ chartPushedPartial v n - ⇑b.
     have h_step1 : (fun y => ((chartPushedPartialLp (I := I) (M := M) g α j (v n)
             (chartPushedPartial_memLp (I := I) (M := M) g α j (v n))
            ) : EuclN → ℝ) y -
@@ -642,7 +612,6 @@ private lemma chartPushedWeakPartial_lp_tendsto_of_smoothApprox
               (chartPushedPartialLipschitz_canonical (I := I) (M := M) g α j) u_h
            ) : EuclN → ℝ) y := by
       filter_upwards [h_sub_coeFn] with y hy
-      -- The goal has already been simp-normalized to point-wise sub.
       rfl
     exact h_pi_form.trans h_step1
   have h_eLpNorm_funeq : ∀ n,
@@ -679,32 +648,6 @@ private lemma chartPushedWeakPartial_lp_tendsto_of_smoothApprox
     funext h_eLpNorm_funeq
   rw [← h_funeq2]; exact h_lp_eLpNorm_tendsto
 
-/-! ## DeGiorgi weak partial property on compactly-contained open subsets
-
-The strategy:
-
-1. Smooth `v_n` approximate `u_h` in `H1Compl g`.
-2. For each `n`, the classical chart-pushed Fréchet partial of `v_n` is a
-   `DeGiorgi.HasWeakPartialDeriv` weak partial of `chartPushed POU α v_n.toFun`,
-   via `HasWeakPartialDeriv.of_contDiff` applied to the smooth function
-   `chartPushed POU α v_n.toFun`.
-
-   This step requires noting that the classical `fderiv` of `chartPushed POU α
-   v_n.toFun` is `chartPushedPartial g α j v_n`, by the definition of the
-   latter.
-
-   The function `chartPushed POU α v_n.toFun` is smooth in a neighborhood of
-   the chart target (where it agrees with the smooth extension
-   `smoothChartExt`), but only continuous globally on `EuclN`. The needed
-   smoothness is on an open superset of `K`. Since `K ⊆ chartTargetEuclid α`
-   is compact and `chartTargetEuclid α` is open, we can equivalently work on
-   the open chart target itself, where `chartPushed POU α v_n.toFun` agrees
-   pointwise with `smoothChartExt g α v_n` (which is smooth globally).
-3. Convert the `L²(weighted, chartTarget)` convergences to
-   `L²(vol, Ω)` convergences using `eLpNorm_volume_restrict_le_eLpNorm_chartPulledWeighted_compact`.
-4. Apply `hasWeakPartialDeriv_of_tendsto_eLpNorm`.
--/
-
 /-- Smooth chart-pushed function agrees with `smoothChartExt` on the chart
 target. -/
 private lemma chartPushed_eqOn_chartTarget_smoothChartExt
@@ -736,26 +679,16 @@ private lemma hasWeakPartialDeriv_chartPushedPartial_smooth
       (chartPushedPartial (I := I) (M := M) g α j v)
       (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α v.toFun) Ω := by
   classical
-  -- chartPushed POU α v.toFun agrees on chartTarget α with smoothChartExt g α v,
-  -- which is smooth globally.
-  -- We apply HasWeakPartialDeriv.of_contDiff with f := smoothChartExt g α v
-  -- on Ω, getting the weak partial = classical partial of smoothChartExt.
-  -- On Ω, smoothChartExt agrees with chartPushed; the partials agree too.
   intro φ hφ_smooth hφ_supp hφ_sub
-  -- The test integral identity: ∫_Ω chartPushed v * fderiv φ (e_j) = -∫_Ω chartPushedPartial v * φ.
-  -- We rewrite both sides using EqOn chartPushed = smoothChartExt on chartTarget ⊇ Ω.
   have h_chartTarget_eqOn := chartPushed_eqOn_chartTarget_smoothChartExt (I := I) (M := M) g α v
   have h_eq_on : Set.EqOn (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α v.toFun)
       (smoothChartExt (I := I) (M := M) g α v) Ω :=
     h_chartTarget_eqOn.mono hΩ_in
-  -- chartPushedPartial g α j v = smoothChartExtPartial g α j v on Ω (as functions of y).
   have h_partial_eq_on : Set.EqOn (chartPushedPartial (I := I) (M := M) g α j v)
       (smoothChartExtPartial (I := I) (M := M) g α j v) Ω := by
     intro y hy
-    -- Same as chartPushedPartial_eq_smoothChartExtPartial_on_target, restricted to Ω.
     exact chartPushedPartial_eq_smoothChartExtPartial_on_target
       (I := I) (M := M) g α j v (hΩ_in hy)
-  -- Use HasWeakPartialDeriv.of_contDiff for smoothChartExt.
   have h_smooth_contDiff : ContDiff ℝ ∞ (smoothChartExt (I := I) (M := M) g α v) :=
     smoothChartExt_contDiff (I := I) (M := M) g α v
   have h_smooth_C1 : ContDiff ℝ 1 (smoothChartExt (I := I) (M := M) g α v) :=
@@ -766,14 +699,7 @@ private lemma hasWeakPartialDeriv_chartPushedPartial_smooth
           (EuclideanSpace.single j 1))
         (smoothChartExt (I := I) (M := M) g α v) Ω :=
     DeGiorgi.HasWeakPartialDeriv.of_contDiff hΩ_open h_smooth_C1
-  -- The fderiv form is the same as smoothChartExtPartial. Use the
-  -- weak-partial identity for smoothChartExt then convert.
   have h_identity := h_weak_smooth φ hφ_smooth hφ_supp hφ_sub
-  -- h_identity: ∫_Ω smoothChartExt v · fderiv φ (e_j) = -∫_Ω smoothChartExtPartial v · φ.
-  -- The fderiv form on the right is `fun y => (fderiv ℝ ... y) (EuclideanSpace.single j 1)`,
-  -- which equals `smoothChartExtPartial g α j v` definitionally.
-  -- The goal: ∫_Ω chartPushed v · fderiv φ (e_j) = -∫_Ω chartPushedPartial v · φ.
-  -- Rewrite both integrands using h_eq_on, h_partial_eq_on.
   have h_LHS_eq :
       ∫ x in Ω, chartPushed (I := I) (M := M) (chartAtlasPOU I M) α v.toFun x *
           (fderiv ℝ φ x) (EuclideanSpace.single j 1) =
@@ -790,12 +716,10 @@ private lemma hasWeakPartialDeriv_chartPushedPartial_smooth
     intro x hx
     simp only
     rw [h_partial_eq_on hx]
-  -- Now stitch together.
   change ∫ x in Ω, chartPushed (I := I) (M := M) (chartAtlasPOU I M) α v.toFun x *
         (fderiv ℝ φ x) (EuclideanSpace.single j 1) =
       -∫ x in Ω, chartPushedPartial (I := I) (M := M) g α j v x * φ x
   rw [h_LHS_eq, h_RHS_eq]
-  -- The smoothChartExtPartial definitionally equals the fderiv form.
   unfold smoothChartExtPartial
   exact h_identity
 
@@ -817,10 +741,8 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact
       (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α
         ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)) Ω := by
   classical
-  -- Step 1: smooth approximating sequence v_n.
   obtain ⟨v, h_tendsto⟩ :=
     exists_smoothApprox_seq (I := I) (M := M) g u_h
-  -- Step 2: conversion constant.
   obtain ⟨C_vol, _hC_vol_pos, hC_vol_bd⟩ :=
     eLpNorm_volume_restrict_le_eLpNorm_chartPulledWeighted_compact
       (I := I) (M := M) g α hK_compact hK_in
@@ -833,13 +755,11 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact
           eLpNorm f 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
             (chartTargetEuclid (I := I) (M := M) α)) := fun f =>
     (eLpNorm_mono_measure f h_vol_Ω_le_K).trans (hC_vol_bd f)
-  -- Step 3: weighted-side eLpNorm convergences.
   have h_func_tendsto :=
     chartPushed_lp_tendsto_of_smoothApprox (I := I) (M := M) g α h_tendsto
   have h_partial_tendsto :=
     chartPushedWeakPartial_lp_tendsto_of_smoothApprox
       (I := I) (M := M) g α j h_tendsto
-  -- Step 4: convert to vol.restrict Ω convergences via squeeze.
   have h_func_tendsto_vol :
       Tendsto (fun n => eLpNorm
         (fun y =>
@@ -848,7 +768,6 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact
               ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) y) 2
         ((volume : Measure EuclN).restrict Ω))
       atTop (𝓝 0) := by
-    -- Squeeze: 0 ≤ eLpNorm_vol_Ω ≤ C * eLpNorm_weighted_chartTarget → 0.
     have h_const_mul_tendsto :
         Tendsto (fun n => ENNReal.ofReal C_vol *
           eLpNorm
@@ -891,13 +810,6 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact
     exact tendsto_of_tendsto_of_tendsto_of_le_of_le
       tendsto_const_nhds h_const_mul_tendsto
       (fun _ => zero_le _) (fun n => hC_vol_Ω _)
-  -- Step 5: MemLp witnesses for the sequence and limit.
-  -- We need MemLp 2 of vol.restrict Ω for:
-  --   * u_n = chartPushed POU α (v_n).toFun  [smooth, compactly supported continuous]
-  --   * u_lim = chartPushed POU α u_lim    [via conversion lemma]
-  --   * g_n = chartPushedPartial g α j v_n   [continuous, compactly supported via smoothChartExtPartial agreement]
-  --   * g_lim = chartPushedWeakPartialLp _ u_h coeFn  [via conversion lemma]
-  -- Approach: package MemLp 2 (chart-weighted, chartTarget) + AEStronglyMeasurable.
   set u_n_chart : ℕ → EuclN → ℝ := fun n =>
     chartPushed (I := I) (M := M) (chartAtlasPOU I M) α (v n).toFun
     with hu_n_chart_def
@@ -913,7 +825,6 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact
       (chartPushedPartialLipschitz_canonical (I := I) (M := M) g α j) u_h
      ) : EuclN → ℝ)
     with hg_lim_chart_def
-  -- AEStronglyMeasurable / MemLp of (chart-weighted on chartTarget):
   have hu_n_aestrong_w : ∀ n,
       AEStronglyMeasurable (u_n_chart n)
         ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -952,30 +863,12 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact
         ((chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α)) :=
     MeasureTheory.Lp.memLp _
-  -- Now convert MemLp from chart-weighted on chartTarget to vol on Ω.
-  -- For AEStronglyMeasurable on vol.restrict Ω we use Lp.stronglyMeasurable
-  -- when available, and for the chart-pushed functions a measurability argument.
-  -- chartPushed POU α u is AEStronglyMeasurable against vol.restrict Ω
-  -- via agreement (a.e. on chartTarget α) with a globally-measurable substitute
-  -- using extChartAtSymmExt.
   have hu_n_aestrong : ∀ n,
       AEStronglyMeasurable (u_n_chart n) ((volume : Measure EuclN).restrict Ω) := by
     intro n
-    -- u_n_chart n is continuous as a product of two continuous functions composed
-    -- with continuous (extChartSymm ∘ toE.symm). On chartTarget the symm chart is
-    -- continuous; off chartTarget POU α evaluates to 0. So chartPushed has
-    -- measurability via Lp memLp / AEStronglyMeasurable.
-    -- For our purposes: the chartPushed.memLp_chartPulledWeighted gives
-    -- AEStronglyMeasurable against weighted, so we lift to vol.restrict Ω via
-    -- measurable-set domination.
     have h_w : AEStronglyMeasurable (u_n_chart n)
         ((chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α)) := (hu_n_memLp_w n).1
-    -- vol.restrict Ω ≤ ofReal C • weighted.restrict chartTarget, so any
-    -- AEStronglyMeasurable against the latter is also against the former.
-    -- More directly: chartPushed POU α u for any measurable u, is itself
-    -- a.e. equal to the globally measurable version using extChartAtSymmExt.
-    -- The agreement holds on chartTarget (in particular on Ω ⊆ K ⊆ chartTarget).
     set ψ : EuclN → ℝ := fun y =>
         ((chartAtlasPOU I M α : M → ℝ)
           (extChartAtSymmExt (I := I) (M := M) α ((toEuclidean (E := E)).symm y))) *
@@ -1010,8 +903,6 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact
     exact hψ_meas.aestronglyMeasurable.congr h_aeEq.symm
   have hu_lim_aestrong :
       AEStronglyMeasurable u_lim_chart ((volume : Measure EuclN).restrict Ω) := by
-    -- Same approach with u_lim. The function on M is the Lp.coeFn of
-    -- (H1ComplToLp u_h), which is measurable.
     set u_lim_M : M → ℝ := ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)
       with hu_lim_M_def
     have hu_lim_M_meas : Measurable u_lim_M :=
@@ -1048,16 +939,9 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact
       refine Filter.Eventually.of_forall (fun y hy => ?_)
       exact (h_ψ_eq y (hK_in (hΩ_in_K hy))).symm
     exact hψ_meas.aestronglyMeasurable.congr h_aeEq.symm
-  -- For g_n and g_lim we have AEStronglyMeasurable on chartTarget (from MemLp).
-  -- We need to lift to vol.restrict Ω. Strategy: use measurability of g_n
-  -- (which is a fderiv-application, hence measurable), and Lp.stronglyMeasurable
-  -- for g_lim.
   have hg_n_aestrong : ∀ n,
       AEStronglyMeasurable (g_n_chart n) ((volume : Measure EuclN).restrict Ω) := by
     intro n
-    -- chartPushedPartial g α j v_n agrees a.e. (vol-everywhere on chartTarget)
-    -- with smoothChartExtPartial g α j v_n, which is continuous (hence StronglyMeasurable).
-    -- For vol.restrict Ω, use AEStronglyMeasurable.congr on the smoothChartExtPartial.
     have h_smooth_strong : StronglyMeasurable
         (smoothChartExtPartial (I := I) (M := M) g α j (v n)) :=
       (smoothChartExtPartial_continuous (I := I) (M := M) g α j (v n)).stronglyMeasurable
@@ -1071,7 +955,6 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact
   have hg_lim_aestrong :
       AEStronglyMeasurable g_lim_chart ((volume : Measure EuclN).restrict Ω) :=
     (Lp.stronglyMeasurable _).aestronglyMeasurable
-  -- MemLp on vol.restrict Ω for u_n_chart, u_lim_chart, g_n_chart, g_lim_chart.
   have hu_n_memLp : ∀ n, MemLp (u_n_chart n) 2 ((volume : Measure EuclN).restrict Ω) := by
     intro n
     refine ⟨hu_n_aestrong n, ?_⟩
@@ -1090,7 +973,6 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact
     refine ⟨hg_lim_aestrong, ?_⟩
     refine lt_of_le_of_lt (hC_vol_Ω _) ?_
     exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top hg_lim_memLp_w.2
-  -- Step 6: HasWeakPartialDeriv for each n, on Ω (since Ω is open).
   have h_weak_n : ∀ n,
       DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) j
         (g_n_chart n) (u_n_chart n) Ω := by
@@ -1101,7 +983,6 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_compact
     refine hasWeakPartialDeriv_chartPushedPartial_smooth
       (I := I) (M := M) g α j (v n) hΩ_open ?_
     exact hΩ_in_K.trans hK_in
-  -- Step 7: assemble.
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.hasWeakPartialDeriv_of_tendsto_eLpNorm
     (d := Module.finrank ℝ E)
     (p := 2) (by norm_num) (by norm_num) hΩ_open j

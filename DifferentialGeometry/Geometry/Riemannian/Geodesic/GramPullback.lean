@@ -50,8 +50,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpa
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Matrix view of `chartTransitionAt` in the canonical basis -/
-
 /-- The `(i, a)`-entry of the chart-transition Fréchet derivative
 `chartTransitionAt α β x : E →L[ℝ] E` in the canonical model-space basis
 `chartModelBasis E`. With `J := chartTransitionAt α β x` and `eₖ` the
@@ -67,14 +65,6 @@ def chartTransitionAtEntry (α β : M) (x : E)
       (chartModelBasis E).repr
         (chartTransitionAt (I := I) α β x
           ((chartModelBasis E) a)) i := rfl
-
-/-! ## Bridge between `chartTransitionAt` and `tangentCoordChange`
-
-In the boundaryless setting, the Fréchet derivative `fderiv` agrees with the
-within-range-`I` Fréchet derivative `fderivWithin (range I)`, because
-`range I = univ`. Combined with `tangentCoordChange_def`, this identifies
-`chartTransitionAt α β (extChartAt I α p)` with `tangentCoordChange I α β p`
-whenever `p` is in the overlap of the two chart sources. -/
 
 omit [IsManifold I ∞ M] in
 private lemma fderivWithin_range_I_eq_fderiv [I.Boundaryless]
@@ -96,20 +86,6 @@ lemma tangentCoordChange_eq_chartTransitionAt [I.Boundaryless]
   exact fderivWithin_range_I_eq_fderiv (I := I)
     (extChartAt I β ∘ (extChartAt I α).symm) (extChartAt I α p)
 
-/-! ## Gram-matrix pullback under chart transition: standard direction
-
-The standard transformation law for a `(0, 2)`-covariant metric tensor under
-chart change, expressed in the chart-α picture at `x` in terms of the chart-β
-picture at `T x = chartTransitionMap α β x`.
-
-Concretely:
-`G_α(x)_{ij} = ∑ a b, J^a_i * J^b_j * G_β(T x)_{ab}`,
-where `J^a_i = chartTransitionAtEntry α β x a i = ((DT_{αβ})(x))^a_i` is the
-`(a, i)`-entry of the chart-α-to-chart-β Jacobian.
-
-Hypothesis: `x` is the chart-α image of a manifold point `p` lying in
-both chart sources. -/
-
 theorem chartGramOnE_eq_sum_chartTransition [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α β : M) (x : E)
     (hx : x ∈ (extChartAt I α) ''
@@ -122,7 +98,6 @@ theorem chartGramOnE_eq_sum_chartTransition [I.Boundaryless]
         chartTransitionAtEntry (I := I) α β x b j *
         chartGramOnE (I := I) g β a b (chartTransitionMap (I := I) α β x) := by
   classical
-  -- Unpack hypothesis: x = extChartAt I α p, with p in both chart sources.
   obtain ⟨p, ⟨hp_α_src, hp_β_src⟩, hp_eq⟩ := hx
   have hp_ext_α : p ∈ (extChartAt I α).source := by
     rw [extChartAt_source (I := I)]; exact hp_α_src
@@ -131,16 +106,13 @@ theorem chartGramOnE_eq_sum_chartTransition [I.Boundaryless]
   have hx_eq : extChartAt I α p = x := hp_eq
   have hp_symm : (extChartAt I α).symm x = p := by
     rw [← hx_eq, (extChartAt I α).left_inv hp_ext_α]
-  -- chartTransitionMap α β x = extChartAt I β p.
   have h_tβ : chartTransitionMap (I := I) α β x = extChartAt I β p := by
     change extChartAt I β ((extChartAt I α).symm x) = extChartAt I β p
     rw [hp_symm]
-  -- Trivialization base-set conditions.
   have hp_triv_α : p ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     change p ∈ (chartAt H α).source; exact hp_α_src
   have hp_triv_β : p ∈ (trivializationAt E (TangentSpace I) β).baseSet := by
     change p ∈ (chartAt H β).source; exact hp_β_src
-  -- Translate chartGramOnE to chartGramMatrix at the manifold point p.
   have h_lhs :
       chartGramOnE (I := I) g α i j x =
         chartGramMatrix g α p i j := by
@@ -156,8 +128,6 @@ theorem chartGramOnE_eq_sum_chartTransition [I.Boundaryless]
         ((extChartAt I β).symm (chartTransitionMap (I := I) α β x)) a b =
       chartGramMatrix g β p a b
     rw [h_tβ, (extChartAt I β).left_inv hp_ext_β]
-  -- Apply the existing pullback formula and bridge transitionMatrix to
-  -- chartTransitionAtEntry via tangentCoordChange_eq_chartTransitionAt.
   rw [h_lhs]
   rw [chartGramMatrix_pullback_eq_sum (I := I) g β α
         hp_triv_β hp_triv_α i j]
@@ -174,15 +144,6 @@ theorem chartGramOnE_eq_sum_chartTransition [I.Boundaryless]
   · rw [transitionMatrix_apply]
     rw [tangentCoordChange_eq_chartTransitionAt (I := I) α β p]
     simp only [chartTransitionAtEntry_def, hx_eq]
-
-/-! ## Gram-matrix pullback under chart transition: inverse direction
-
-The reverse direction, obtained by symmetry (swap roles of α and β and use
-the inverse chart-transition `T_{βα}` at the point `T x`).
-
-`G_β(T x)_{ab} = ∑ i, ∑ j, K^i_a * K^j_b * G_α(x)_{ij}`,
-where `K^i_a = chartTransitionAtEntry β α (T x) i a` is the
-`(i, a)`-entry of the chart-β-to-chart-α Jacobian evaluated at `T x`. -/
 
 theorem chartGramOnE_pullback_under_chartTransition [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α β : M) (x : E)

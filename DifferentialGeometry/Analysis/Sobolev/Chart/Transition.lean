@@ -44,8 +44,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## Pointwise inverse identity for chart transitions -/
-
 /-- On `chartOverlapEuclid γ α`, the iterated chart transition agrees with the
 identity. This is `chartTransitionEuclid_left_inv` packaged as a function-level
 identity. -/
@@ -73,8 +71,6 @@ private lemma chartTransitionEuclid_comp_eventuallyEq_id
   intro z hz
   exact chartTransitionEuclid_left_inv (I := I) (M := M) γ α hz
 
-/-! ## Differentiability of the chart-transition map -/
-
 /-- On the open overlap, `T_γα` is differentiable. -/
 private lemma chartTransitionEuclid_differentiableAt_of_mem
     [I.Boundaryless]
@@ -97,8 +93,6 @@ private lemma chartTransitionEuclid_differentiableAt_of_mem
     h_diffOn y hy
   exact h_diffWithin.differentiableAt (h_open.mem_nhds hy)
 
-/-! ## Determinant of `fderiv` of the chart-transition map is nonzero -/
-
 /-- On the chart overlap, the determinant of the differential of
 `chartTransitionEuclid γ α` is nonzero. The proof uses the chain rule applied
 to `T_αγ ∘ T_γα = id` on the open overlap. -/
@@ -108,11 +102,9 @@ private lemma chartTransitionEuclid_det_fderiv_ne_zero
     (hy : y ∈ chartOverlapEuclid (I := I) (M := M) γ α) :
     (fderiv ℝ (chartTransitionEuclid (I := I) (M := M) γ α) y).det ≠ 0 := by
   classical
-  -- T_γα y ∈ chartOverlapEuclid α γ.
   have h_T_in : chartTransitionEuclid (I := I) (M := M) γ α y ∈
       chartOverlapEuclid (I := I) (M := M) α γ :=
     chartTransitionEuclid_mapsTo_overlap (I := I) (M := M) γ α hy
-  -- Differentiability of T_γα at y, T_αγ at T_γα y.
   have h_diff_T_γα : DifferentiableAt ℝ
       (chartTransitionEuclid (I := I) (M := M) γ α) y :=
     chartTransitionEuclid_differentiableAt_of_mem (I := I) (M := M) γ α hy
@@ -120,7 +112,6 @@ private lemma chartTransitionEuclid_det_fderiv_ne_zero
       (chartTransitionEuclid (I := I) (M := M) α γ)
       (chartTransitionEuclid (I := I) (M := M) γ α y) :=
     chartTransitionEuclid_differentiableAt_of_mem (I := I) (M := M) α γ h_T_in
-  -- Chain rule: fderiv (T_αγ ∘ T_γα) y = (fderiv T_αγ).comp (fderiv T_γα).
   have h_fderiv_comp :
       fderiv ℝ (fun z => chartTransitionEuclid (I := I) (M := M) α γ
           (chartTransitionEuclid (I := I) (M := M) γ α z)) y =
@@ -128,26 +119,22 @@ private lemma chartTransitionEuclid_det_fderiv_ne_zero
             (chartTransitionEuclid (I := I) (M := M) γ α y)).comp
           (fderiv ℝ (chartTransitionEuclid (I := I) (M := M) γ α) y) :=
     fderiv_comp y h_diff_T_αγ h_diff_T_γα
-  -- The composition is locally equal to id.
   have h_evt : (fun z => chartTransitionEuclid (I := I) (M := M) α γ
         (chartTransitionEuclid (I := I) (M := M) γ α z))
       =ᶠ[𝓝 y] (fun z : EuclN => z) :=
     chartTransitionEuclid_comp_eventuallyEq_id (I := I) (M := M) γ α hy
-  -- So fderiv (T_αγ ∘ T_γα) y = fderiv id y = id_clm.
   have h_fderiv_id :
       fderiv ℝ (fun z => chartTransitionEuclid (I := I) (M := M) α γ
           (chartTransitionEuclid (I := I) (M := M) γ α z)) y =
         ContinuousLinearMap.id ℝ EuclN := by
     rw [h_evt.fderiv_eq]
     exact fderiv_id'
-  -- Combining: (fderiv T_αγ ...).comp (fderiv T_γα y) = id_clm.
   have h_comp_eq :
       (fderiv ℝ (chartTransitionEuclid (I := I) (M := M) α γ)
           (chartTransitionEuclid (I := I) (M := M) γ α y)).comp
         (fderiv ℝ (chartTransitionEuclid (I := I) (M := M) γ α) y) =
       ContinuousLinearMap.id ℝ EuclN := by
     rw [← h_fderiv_comp]; exact h_fderiv_id
-  -- Take det: det T_αγ' * det T_γα' = 1.
   have h_det_comp : (fderiv ℝ (chartTransitionEuclid (I := I) (M := M) α γ)
           (chartTransitionEuclid (I := I) (M := M) γ α y)).det *
       (fderiv ℝ (chartTransitionEuclid (I := I) (M := M) γ α) y).det = 1 := by
@@ -179,7 +166,6 @@ private lemma chartTransitionEuclid_det_fderiv_ne_zero
             ((fderiv ℝ (chartTransitionEuclid (I := I) (M := M) γ α) y) :
                 EuclN →ₗ[ℝ] EuclN) :=
       LinearMap.det_comp _ _
-    -- Apply: take det of both sides of h_comp_eq.
     have hcomp_det :
         LinearMap.det
           (((fderiv ℝ (chartTransitionEuclid (I := I) (M := M) α γ)
@@ -189,17 +175,13 @@ private lemma chartTransitionEuclid_det_fderiv_ne_zero
           LinearMap.det ((ContinuousLinearMap.id ℝ EuclN) : EuclN →ₗ[ℝ] EuclN) := by
       rw [h_comp_eq]
     rw [h_lin, h_det_comp_lin, h_det_id] at hcomp_det
-    -- Use definitional equality of ContinuousLinearMap.det.
     change (fderiv ℝ (chartTransitionEuclid (I := I) (M := M) α γ)
         (chartTransitionEuclid (I := I) (M := M) γ α y)).det *
         (fderiv ℝ (chartTransitionEuclid (I := I) (M := M) γ α) y).det = 1
     exact hcomp_det
-  -- Hence det T_γα' ≠ 0.
   intro h_zero
   rw [h_zero, mul_zero] at h_det_comp
   exact zero_ne_one h_det_comp
-
-/-! ## Continuity of the determinant -/
 
 /-- The function `y ↦ |det (fderiv T_γα y)|` is continuous on the chart overlap. -/
 private lemma abs_det_fderiv_chartTransitionEuclid_continuousOn
@@ -218,13 +200,10 @@ private lemma abs_det_fderiv_chartTransitionEuclid_continuousOn
       (chartOverlapEuclid (I := I) (M := M) γ α) :=
     h_smooth.continuousOn_fderiv_of_isOpen h_open
       (by exact_mod_cast (le_top : (1 : ℕ∞) ≤ ⊤))
-  -- The map A ↦ A.det is continuous on End of finite-dim space.
   have h_cont_det : Continuous (fun A : EuclN →L[ℝ] EuclN => A.det) :=
     ContinuousLinearMap.continuous_det
   have h_cont_abs : Continuous (fun r : ℝ => |r|) := continuous_abs
   exact (h_cont_abs.comp h_cont_det).continuousOn.comp h_cont_fderiv (Set.mapsTo_univ _ _)
-
-/-! ## Continuity of the chart-transition on a compact subset of the overlap -/
 
 /-- The chart transition is continuous on the overlap. -/
 private lemma chartTransitionEuclid_continuousOn_overlap
@@ -233,8 +212,6 @@ private lemma chartTransitionEuclid_continuousOn_overlap
     ContinuousOn (chartTransitionEuclid (I := I) (M := M) γ α)
       (chartOverlapEuclid (I := I) (M := M) γ α) :=
   (chartTransitionEuclid_contDiffOn_overlap (I := I) (M := M) γ α).continuousOn
-
-/-! ## Headline theorem -/
 
 /-- For two charts on a closed manifold and a compact subset `K` contained in
 both chart sources, there exists a smooth bounded diffeomorphism with
@@ -258,45 +235,34 @@ theorem chartTransition_smoothDiffeoBoundedAtOrder
           Φ.toFun ((toEuclidean ∘ extChartAt I γ) x) =
             (toEuclidean ∘ extChartAt I α) x := by
   classical
-  -- Setup notations.
   set K_E_γ : Set EuclN :=
     (fun x : M => (toEuclidean (E := E)) (extChartAt I γ x)) '' K with hKEγ_def
   set K_E_α : Set EuclN :=
     (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) '' K with hKEα_def
-  -- K_E_γ is compact and contained in the open overlap.
   have hKEγ_compact : IsCompact K_E_γ :=
     kEuclid_compact (I := I) (M := M) γ hK_compact hK_γ
   have hKEγ_subset_overlap_γα : K_E_γ ⊆ chartOverlapEuclid (I := I) (M := M) γ α :=
     kEuclid_subset_overlap (I := I) (M := M) γ α hK_γ hK_α
   have hOverlap_γα_open : IsOpen (chartOverlapEuclid (I := I) (M := M) γ α) :=
     chartOverlapEuclid_isOpen (I := I) (M := M) γ α
-  -- K_E_α is compact and contained in chartOverlapEuclid α γ.
   have hKEα_compact : IsCompact K_E_α :=
     kEuclid_compact (I := I) (M := M) α hK_compact hK_α
   have hKEα_subset_overlap_αγ : K_E_α ⊆ chartOverlapEuclid (I := I) (M := M) α γ :=
     kEuclid_subset_overlap (I := I) (M := M) α γ hK_α hK_γ
   have hOverlap_αγ_open : IsOpen (chartOverlapEuclid (I := I) (M := M) α γ) :=
     chartOverlapEuclid_isOpen (I := I) (M := M) α γ
-  -- Step 1: Use the smooth-cutoff lemma on (K_E_γ, overlap_γα) to obtain
-  -- η_γ smooth, compactly supported, with tsupport ⊆ overlap_γα and η_γ ≡ 1
-  -- on cthickening δ_γ K_E_γ.
   obtain ⟨δ_γ, η_γ, hδ_γ_pos, hδγ_subset, hη_γ_smooth, hη_γ_cpt, hη_γ_range,
       hη_γ_one, hη_γ_supp⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.exists_smooth_cutoff_with_neighborhood
       (d := Module.finrank ℝ E)
       hKEγ_compact hOverlap_γα_open hKEγ_subset_overlap_γα
-  -- Step 2: Set Ω_γα := thickening (δ_γ / 2) K_E_γ. Open, contains K_E_γ,
-  -- closure is contained in cthickening (δ_γ/2) K_E_γ ⊆ cthickening δ_γ K_E_γ
-  -- ⊆ overlap_γα (and η_γ ≡ 1 on it).
   have hδ_γ_half_pos : 0 < δ_γ / 2 := by linarith
   set Ω_γα : Set EuclN := Metric.thickening (δ_γ / 2) K_E_γ with hΩγα_def
   have hΩγα_open : IsOpen Ω_γα := Metric.isOpen_thickening
   have hKEγ_subset_Ωγα : K_E_γ ⊆ Ω_γα := Metric.self_subset_thickening hδ_γ_half_pos K_E_γ
-  -- closure Ω_γα ⊆ cthickening (δ_γ / 2) K_E_γ.
   have hΩγα_closure_subset_cthick_half :
       closure Ω_γα ⊆ Metric.cthickening (δ_γ / 2) K_E_γ :=
     Metric.closure_thickening_subset_cthickening (δ_γ / 2) K_E_γ
-  -- cthickening (δ_γ / 2) ⊆ cthickening δ_γ.
   have hcthick_half_subset_full :
       Metric.cthickening (δ_γ / 2) K_E_γ ⊆ Metric.cthickening δ_γ K_E_γ :=
     Metric.cthickening_mono (by linarith : δ_γ / 2 ≤ δ_γ) K_E_γ
@@ -305,25 +271,19 @@ theorem chartTransition_smoothDiffeoBoundedAtOrder
     hΩγα_closure_subset_cthick_half.trans hcthick_half_subset_full
   have hΩγα_closure_subset_overlap : closure Ω_γα ⊆ chartOverlapEuclid (I := I) (M := M) γ α :=
     hΩγα_closure_subset_cthick.trans hδγ_subset
-  -- closure Ω_γα is compact (by IsCompact.cthickening).
   have hcthick_compact : IsCompact (Metric.cthickening (δ_γ / 2) K_E_γ) :=
     hKEγ_compact.cthickening
   have hΩγα_closure_compact : IsCompact (closure Ω_γα) :=
     hcthick_compact.of_isClosed_subset isClosed_closure hΩγα_closure_subset_cthick_half
-  -- Ω_γα ⊆ {y | η_γ y = 1} (since Ω_γα ⊆ cthickening (δ_γ/2) ⊆ cthickening δ_γ).
   have hΩγα_subset_cthick : Ω_γα ⊆ Metric.cthickening δ_γ K_E_γ := by
     refine subset_trans (Metric.thickening_subset_cthickening (δ_γ / 2) K_E_γ) ?_
     exact hcthick_half_subset_full
-  -- Step 3: Set c_γ := chartCenterEuclid α (the constant for cutoff-extending T_γα).
   set c_γ : EuclN := chartCenterEuclid (I := I) (M := M) α with hcγ_def
-  -- T̃_γα := chartTransitionExtended γ α η_γ c_γ.
   set T_γα : EuclN → EuclN :=
     chartTransitionExtended (I := I) (M := M) γ α η_γ c_γ with hTγα_def
-  -- Globally smooth.
   have hT_γα_smooth : ContDiff ℝ (⊤ : ℕ∞) T_γα :=
     chartTransitionExtended_contDiff (I := I) (M := M) γ α
       hη_γ_smooth hη_γ_supp c_γ
-  -- T_γα = chartTransitionEuclid γ α on Ω_γα (where η_γ ≡ 1).
   have hT_γα_eq_on_Ωγα : ∀ y ∈ Ω_γα,
       T_γα y = chartTransitionEuclid (I := I) (M := M) γ α y := by
     intro y hy
@@ -331,14 +291,12 @@ theorem chartTransition_smoothDiffeoBoundedAtOrder
     have hηy : η_γ y = 1 := hη_γ_one y hy_cthick
     exact chartTransitionExtended_eq_chartTransition_on_eta_eq_one
       (I := I) (M := M) γ α c_γ hηy
-  -- Step 4: Define Ω_αγ := T_γα '' Ω_γα = chartTransitionEuclid γ α '' Ω_γα.
   have hT_γα_image_eq :
       T_γα '' Ω_γα = (chartTransitionEuclid (I := I) (M := M) γ α) '' Ω_γα := by
     apply Set.image_congr
     exact hT_γα_eq_on_Ωγα
   set Ω_αγ : Set EuclN :=
     (chartTransitionEuclid (I := I) (M := M) γ α) '' Ω_γα with hΩαγ_def
-  -- Show Ω_αγ ⊆ overlap_αγ.
   have hΩαγ_subset_overlap_αγ : Ω_αγ ⊆ chartOverlapEuclid (I := I) (M := M) α γ := by
     intro z hz
     rcases hz with ⟨y, hy_Ωγα, hyz⟩
@@ -347,8 +305,6 @@ theorem chartTransition_smoothDiffeoBoundedAtOrder
       exact hΩγα_closure_subset_overlap this
     rw [← hyz]
     exact chartTransitionEuclid_mapsTo_overlap (I := I) (M := M) γ α hy_overlap
-  -- Show Ω_αγ is open. We use: Ω_αγ = (T_αγ ⁻¹' Ω_γα) ∩ overlap_αγ, with
-  -- T_αγ continuous on the overlap.
   have hΩαγ_eq_preimage :
       Ω_αγ = (chartTransitionEuclid (I := I) (M := M) α γ ⁻¹' Ω_γα) ∩
               chartOverlapEuclid (I := I) (M := M) α γ := by
@@ -363,7 +319,6 @@ theorem chartTransition_smoothDiffeoBoundedAtOrder
         rw [← hyz]
         exact chartTransitionEuclid_mapsTo_overlap (I := I) (M := M) γ α hy_overlap
       refine ⟨?_, hz_overlap⟩
-      -- T_αγ z = y by left-inverse on overlap.
       have h_inv : chartTransitionEuclid (I := I) (M := M) α γ z = y := by
         rw [← hyz]
         exact chartTransitionEuclid_left_inv (I := I) (M := M) γ α hy_overlap
@@ -371,13 +326,11 @@ theorem chartTransition_smoothDiffeoBoundedAtOrder
       exact hy_Ωγα
     · rintro ⟨hz_pre, hz_overlap⟩
       simp only [Set.mem_preimage] at hz_pre
-      -- z ∈ overlap_αγ, T_αγ z ∈ Ω_γα ⊆ overlap_γα.
       have h_T_αγ_z_overlap : chartTransitionEuclid (I := I) (M := M) α γ z ∈
           chartOverlapEuclid (I := I) (M := M) γ α := by
         have : chartTransitionEuclid (I := I) (M := M) α γ z ∈ closure Ω_γα :=
           subset_closure hz_pre
         exact hΩγα_closure_subset_overlap this
-      -- We want z = T_γα (T_αγ z).
       have h_left_inv :
           chartTransitionEuclid (I := I) (M := M) γ α
             (chartTransitionEuclid (I := I) (M := M) α γ z) = z :=
@@ -391,48 +344,37 @@ theorem chartTransition_smoothDiffeoBoundedAtOrder
     rw [hΩαγ_eq_preimage]
     rw [Set.inter_comm]
     exact hT_αγ_continuousOn.isOpen_inter_preimage hOverlap_αγ_open hΩγα_open
-  -- Step 5: Build the cutoff η_α for the inverse map. We need a compact
-  -- superset of Ω_αγ inside overlap_αγ.
-  -- closure Ω_αγ ⊆ T_γα '' (closure Ω_γα) (continuous map of closure within closed image).
-  -- More directly: closure Ω_αγ ⊆ chart-α image of closure Ω_γα (a compact set).
   set L_αγ : Set EuclN :=
     (chartTransitionEuclid (I := I) (M := M) γ α) '' (closure Ω_γα) with hLαγ_def
-  -- L_αγ is compact (continuous image of compact).
   have hL_αγ_compact : IsCompact L_αγ :=
     hΩγα_closure_compact.image_of_continuousOn
       ((chartTransitionEuclid_continuousOn_overlap (I := I) (M := M) γ α).mono
         hΩγα_closure_subset_overlap)
-  -- L_αγ ⊆ overlap_αγ.
   have hL_αγ_subset_overlap_αγ : L_αγ ⊆ chartOverlapEuclid (I := I) (M := M) α γ := by
     intro z hz
     rcases hz with ⟨y, hy_cl, hyz⟩
     rw [← hyz]
     exact chartTransitionEuclid_mapsTo_overlap (I := I) (M := M) γ α
       (hΩγα_closure_subset_overlap hy_cl)
-  -- Ω_αγ ⊆ L_αγ.
   have hΩαγ_subset_Lαγ : Ω_αγ ⊆ L_αγ := by
     intro z hz
     rcases hz with ⟨y, hy_Ωγα, hyz⟩
     refine ⟨y, subset_closure hy_Ωγα, hyz⟩
-  -- Step 6: Smooth cutoff η_α for the compact L_αγ inside open overlap_αγ.
   obtain ⟨δ_α, η_α, hδ_α_pos, hδα_subset, hη_α_smooth, hη_α_cpt, hη_α_range,
       hη_α_one, hη_α_supp⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.exists_smooth_cutoff_with_neighborhood
       (d := Module.finrank ℝ E)
       hL_αγ_compact hOverlap_αγ_open hL_αγ_subset_overlap_αγ
-  -- η_α ≡ 1 on cthickening δ_α L_αγ ⊇ L_αγ ⊇ Ω_αγ.
   have hL_αγ_subset_cthick_α : L_αγ ⊆ Metric.cthickening δ_α L_αγ :=
     Metric.self_subset_cthickening L_αγ
   have hΩαγ_subset_cthick_α : Ω_αγ ⊆ Metric.cthickening δ_α L_αγ :=
     hΩαγ_subset_Lαγ.trans hL_αγ_subset_cthick_α
-  -- Step 7: Define T̃_αγ := chartTransitionExtended α γ η_α c_α.
   set c_α : EuclN := chartCenterEuclid (I := I) (M := M) γ with hcα_def
   set T_αγ : EuclN → EuclN :=
     chartTransitionExtended (I := I) (M := M) α γ η_α c_α with hTαγ_def
   have hT_αγ_smooth : ContDiff ℝ (⊤ : ℕ∞) T_αγ :=
     chartTransitionExtended_contDiff (I := I) (M := M) α γ
       hη_α_smooth hη_α_supp c_α
-  -- T_αγ = chartTransitionEuclid α γ on Ω_αγ (where η_α ≡ 1).
   have hT_αγ_eq_on_Ωαγ : ∀ z ∈ Ω_αγ,
       T_αγ z = chartTransitionEuclid (I := I) (M := M) α γ z := by
     intro z hz
@@ -440,15 +382,12 @@ theorem chartTransition_smoothDiffeoBoundedAtOrder
     have hηz : η_α z = 1 := hη_α_one z hz_cthick
     exact chartTransitionExtended_eq_chartTransition_on_eta_eq_one
       (I := I) (M := M) α γ c_α hηz
-  -- Step 8: BijOn T_γα Ω_γα Ω_αγ.
   have hBijOn_T_γα : Set.BijOn T_γα Ω_γα Ω_αγ := by
     refine ⟨?_, ?_, ?_⟩
-    · -- mapsTo
-      intro y hy
+    · intro y hy
       rw [hT_γα_eq_on_Ωγα y hy]
       exact ⟨y, hy, rfl⟩
-    · -- injOn
-      intro y₁ hy₁ y₂ hy₂ heq
+    · intro y₁ hy₁ y₂ hy₂ heq
       rw [hT_γα_eq_on_Ωγα y₁ hy₁, hT_γα_eq_on_Ωγα y₂ hy₂] at heq
       have hy₁_overlap : y₁ ∈ chartOverlapEuclid (I := I) (M := M) γ α :=
         hΩγα_closure_subset_overlap (subset_closure hy₁)
@@ -456,17 +395,13 @@ theorem chartTransition_smoothDiffeoBoundedAtOrder
         hΩγα_closure_subset_overlap (subset_closure hy₂)
       exact chartTransitionEuclid_injOn_overlap (I := I) (M := M) γ α
         hy₁_overlap hy₂_overlap heq
-    · -- surjOn
-      intro z hz
+    · intro z hz
       rcases hz with ⟨y, hy_Ωγα, hyz⟩
       refine ⟨y, hy_Ωγα, ?_⟩
       rw [hT_γα_eq_on_Ωγα y hy_Ωγα]; exact hyz
-  -- Step 9: BijOn T_αγ Ω_αγ Ω_γα.
   have hBijOn_T_αγ : Set.BijOn T_αγ Ω_αγ Ω_γα := by
     refine ⟨?_, ?_, ?_⟩
-    · -- mapsTo: T_αγ z = T_αγ_chart z = (T_αγ_chart) z; for z ∈ Ω_αγ ⊆ overlap_αγ,
-      -- T_αγ_chart maps to overlap_γα. We need to land in Ω_γα.
-      intro z hz
+    · intro z hz
       rw [hT_αγ_eq_on_Ωαγ z hz]
       rcases hz with ⟨y, hy_Ωγα, hyz⟩
       have hy_overlap : y ∈ chartOverlapEuclid (I := I) (M := M) γ α :=
@@ -475,8 +410,7 @@ theorem chartTransition_smoothDiffeoBoundedAtOrder
         rw [← hyz]
         exact chartTransitionEuclid_left_inv (I := I) (M := M) γ α hy_overlap
       rw [h_inv]; exact hy_Ωγα
-    · -- injOn
-      intro z₁ hz₁ z₂ hz₂ heq
+    · intro z₁ hz₁ z₂ hz₂ heq
       rw [hT_αγ_eq_on_Ωαγ z₁ hz₁, hT_αγ_eq_on_Ωαγ z₂ hz₂] at heq
       have hz₁_overlap : z₁ ∈ chartOverlapEuclid (I := I) (M := M) α γ :=
         hΩαγ_subset_overlap_αγ hz₁
@@ -484,19 +418,15 @@ theorem chartTransition_smoothDiffeoBoundedAtOrder
         hΩαγ_subset_overlap_αγ hz₂
       exact chartTransitionEuclid_injOn_overlap (I := I) (M := M) α γ
         hz₁_overlap hz₂_overlap heq
-    · -- surjOn
-      intro y hy_Ωγα
+    · intro y hy_Ωγα
       have hy_overlap : y ∈ chartOverlapEuclid (I := I) (M := M) γ α :=
         hΩγα_closure_subset_overlap (subset_closure hy_Ωγα)
       refine ⟨chartTransitionEuclid (I := I) (M := M) γ α y, ?_, ?_⟩
-      · -- z := T_γα_chart y ∈ Ω_αγ
-        exact ⟨y, hy_Ωγα, rfl⟩
-      · -- T_αγ z = y
-        have h_z_in_Ωαγ : chartTransitionEuclid (I := I) (M := M) γ α y ∈ Ω_αγ :=
+      · exact ⟨y, hy_Ωγα, rfl⟩
+      · have h_z_in_Ωαγ : chartTransitionEuclid (I := I) (M := M) γ α y ∈ Ω_αγ :=
           ⟨y, hy_Ωγα, rfl⟩
         rw [hT_αγ_eq_on_Ωαγ _ h_z_in_Ωαγ]
         exact chartTransitionEuclid_left_inv (I := I) (M := M) γ α hy_overlap
-  -- Step 10: LeftInvOn and RightInvOn.
   have hLeft_inv : Set.LeftInvOn T_αγ T_γα Ω_γα := by
     intro y hy
     rw [hT_γα_eq_on_Ωγα y hy]
@@ -513,21 +443,18 @@ theorem chartTransition_smoothDiffeoBoundedAtOrder
     have hy_overlap : y ∈ chartOverlapEuclid (I := I) (M := M) γ α :=
       hΩγα_closure_subset_overlap (subset_closure hy_Ωγα)
     rw [hT_αγ_eq_on_Ωαγ _ hz_orig]
-    -- Now T_γα (T_αγ_chart z) where T_αγ_chart z = y; T_γα y = z (already in form).
     have h_T_αγ_z_eq_y : chartTransitionEuclid (I := I) (M := M) α γ z = y := by
       rw [← hyz]
       exact chartTransitionEuclid_left_inv (I := I) (M := M) γ α hy_overlap
     rw [h_T_αγ_z_eq_y]
     rw [hT_γα_eq_on_Ωγα y hy_Ωγα]
     exact hyz
-  -- Step 11: Per-order derivative bounds for T_γα and T_αγ.
   obtain ⟨B_γ, hBγ_pos, hBγ_bound⟩ :=
     chartTransitionExtended_iter_deriv_bound (I := I) (M := M) γ α
       hη_γ_smooth hη_γ_cpt hη_γ_supp c_γ kmax
   obtain ⟨B_α, hBα_pos, hBα_bound⟩ :=
     chartTransitionExtended_iter_deriv_bound (I := I) (M := M) α γ
       hη_α_smooth hη_α_cpt hη_α_supp c_α kmax
-  -- Combined bound: B := max B_γ B_α.
   set B : ℝ := max B_γ B_α with hB_def
   have hB_pos : 0 < B := lt_of_lt_of_le hBγ_pos (le_max_left _ _)
   have hB_γ_bound : ∀ i, i ≤ kmax → ∀ x : EuclN,
@@ -538,30 +465,17 @@ theorem chartTransition_smoothDiffeoBoundedAtOrder
       ‖iteratedFDeriv ℝ i T_αγ x‖ ≤ B := by
     intro i hi x
     exact (hBα_bound i hi x).trans (le_max_right _ _)
-  -- Step 12: Jacobian lower bound. We need: ∃ J > 0, ∀ y ∈ Ω_γα,
-  -- J ≤ |det (fderiv ℝ T_γα y)|.
-  -- For y ∈ Ω_γα, T_γα y = chartTransitionEuclid γ α y in a neighbourhood
-  -- (since η_γ ≡ 1 on cthickening δ_γ K_E_γ ⊇ Ω_γα, an open neighbourhood
-  -- of y ∈ Ω_γα ⊆ thickening (δ_γ/2) K_E_γ).
-  -- So fderiv T_γα y = fderiv (chartTransitionEuclid γ α) y on Ω_γα.
-  -- We then use that the latter has nonzero det on the overlap, plus
-  -- continuity + compactness of closure Ω_γα.
-  -- Step 12a: η_γ ≡ 1 on the open set thickening δ_γ K_E_γ.
   have hη_γ_eq_one_on_thick : ∀ y ∈ Metric.thickening δ_γ K_E_γ, η_γ y = 1 := by
     intro y hy
     have hy_cthick : y ∈ Metric.cthickening δ_γ K_E_γ :=
       Metric.thickening_subset_cthickening δ_γ K_E_γ hy
     exact hη_γ_one y hy_cthick
-  -- Step 12b: For y ∈ Ω_γα, T_γα is eventually equal to chartTransitionEuclid γ α
-  -- in 𝓝 y, since y ∈ Ω_γα ⊆ thickening δ_γ K_E_γ (open) where η_γ ≡ 1.
   have hΩγα_subset_thick_γ : Ω_γα ⊆ Metric.thickening δ_γ K_E_γ := by
-    -- Ω_γα = thickening (δ_γ / 2) K_E_γ ⊆ thickening δ_γ K_E_γ (monotonicity).
     refine subset_trans ?_ (Metric.thickening_mono (by linarith : δ_γ / 2 ≤ δ_γ) K_E_γ)
     rfl
   have hT_γα_fderiv_eq : ∀ y ∈ Ω_γα,
       fderiv ℝ T_γα y = fderiv ℝ (chartTransitionEuclid (I := I) (M := M) γ α) y := by
     intro y hy
-    -- Eventually-equal, via the open thickening.
     have h_evt : T_γα =ᶠ[𝓝 y] (chartTransitionEuclid (I := I) (M := M) γ α) := by
       have h_open_thick : IsOpen (Metric.thickening δ_γ K_E_γ) := Metric.isOpen_thickening
       have hy_thick : y ∈ Metric.thickening δ_γ K_E_γ := hΩγα_subset_thick_γ hy
@@ -571,11 +485,6 @@ theorem chartTransition_smoothDiffeoBoundedAtOrder
       exact chartTransitionExtended_eq_chartTransition_on_eta_eq_one
         (I := I) (M := M) γ α c_γ hηy'
     exact h_evt.fderiv_eq
-  -- Step 12c: |det (fderiv T_γα y)| > 0 for y ∈ closure Ω_γα.
-  -- Continuity + compactness of closure Ω_γα ⇒ positive infimum.
-  -- Note: closure Ω_γα ⊆ chartOverlapEuclid γ α, on which the chart-transition
-  -- has nonzero det.
-  -- We need: |det (fderiv (chartTransitionEuclid γ α) y)| > 0 on closure Ω_γα.
   have h_abs_det_pos_on_overlap : ∀ y ∈ chartOverlapEuclid (I := I) (M := M) γ α,
       0 < |(fderiv ℝ (chartTransitionEuclid (I := I) (M := M) γ α) y).det| := by
     intro y hy
@@ -592,11 +501,8 @@ theorem chartTransition_smoothDiffeoBoundedAtOrder
       0 < |(fderiv ℝ (chartTransitionEuclid (I := I) (M := M) γ α) y).det| := by
     intro y hy
     exact h_abs_det_pos_on_overlap y (hΩγα_closure_subset_overlap hy)
-  -- Special case: closure Ω_γα might be empty (if K is empty).
   by_cases hK_E_γ_empty : Ω_γα = ∅
-  · -- Then any positive J works for the (vacuous) hypothesis.
-    -- We construct the structure with an arbitrary positive Jacobian bound.
-    refine ⟨Ω_γα, Ω_αγ, hΩγα_open, hΩαγ_open, ?_, ?_⟩
+  · refine ⟨Ω_γα, Ω_αγ, hΩγα_open, hΩαγ_open, ?_, ?_⟩
     · intro z hz
       rcases hz with ⟨x, hx, hxz⟩
       simp only [Function.comp_apply] at hxz
@@ -604,7 +510,6 @@ theorem chartTransition_smoothDiffeoBoundedAtOrder
       have : (toEuclidean (E := E)) (extChartAt I γ x) ∈ Ω_γα := hKEγ_subset_Ωγα hx_in
       rw [hxz] at this
       exact this
-    -- Build the structure.
     refine ⟨{
       toFun := T_γα,
       invFun := T_αγ,
@@ -632,9 +537,7 @@ theorem chartTransition_smoothDiffeoBoundedAtOrder
         hKEγ_subset_Ωγα hx_in_KEγ
       rw [hK_E_γ_empty] at hx_in_Ωγα
       exact (Set.notMem_empty _ hx_in_Ωγα).elim
-  -- The general case: Ω_γα is nonempty.
-  · -- Get nonempty closure Ω_γα.
-    have hΩγα_nonempty : Ω_γα.Nonempty := Set.nonempty_iff_ne_empty.mpr hK_E_γ_empty
+  · have hΩγα_nonempty : Ω_γα.Nonempty := Set.nonempty_iff_ne_empty.mpr hK_E_γ_empty
     have hclosure_nonempty : (closure Ω_γα).Nonempty := hΩγα_nonempty.mono subset_closure
     obtain ⟨y₀, hy₀_cl, hy₀_min⟩ :=
       hΩγα_closure_compact.exists_isMinOn hclosure_nonempty h_abs_det_continuousOn
@@ -649,7 +552,6 @@ theorem chartTransition_smoothDiffeoBoundedAtOrder
       intro y hy
       rw [hT_γα_fderiv_eq y hy]
       exact hJ_lower y hy
-    -- Now assemble.
     refine ⟨Ω_γα, Ω_αγ, hΩγα_open, hΩαγ_open, ?_, ?_⟩
     · intro z hz
       rcases hz with ⟨x, hx, hxz⟩
@@ -681,9 +583,6 @@ theorem chartTransition_smoothDiffeoBoundedAtOrder
     have hx_in_KEγ : (toEuclidean (E := E)) (extChartAt I γ x) ∈ K_E_γ := ⟨x, hx, rfl⟩
     have hx_in_Ωγα : (toEuclidean (E := E)) (extChartAt I γ x) ∈ Ω_γα :=
       hKEγ_subset_Ωγα hx_in_KEγ
-    -- T_γα applied to this point:
-    -- T_γα (toEuclidean (extChartAt I γ x)) = chartTransitionEuclid γ α (toEuclidean (extChartAt I γ x))
-    --                                       = toEuclidean (extChartAt I α x).
     rw [hT_γα_eq_on_Ωγα _ hx_in_Ωγα]
     exact chartTransitionEuclid_eq_chartα_image (I := I) (M := M) γ α (hK_γ hx)
 

@@ -77,12 +77,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Bilinearity / Cauchy–Schwarz of the fibre norm through the bridge
-
-We re-express `riemannianFiberNormSq` through the bridge as a diagonal value of the pointwise
-inner product `tensorInnerPointwise`, and lift the inner-product algebra (symmetry,
-bilinearity, non-negativity, Cauchy–Schwarz) to the squared fibre norm. -/
-
 /-- The squared fibre norm of a sum, expanded by bilinearity of the underlying pointwise inner
 product through the bridge:
 `rfns(a + b) = rfns(a) + 2 ⟨a, b⟩ + rfns(b)`, where `⟨a, b⟩` is the pointwise inner product of
@@ -125,7 +119,6 @@ theorem riemannianFiberNormSq_add_le
     (x := x) a with ham
   set bm := TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := r) (s := s)
     (x := x) b with hbm
-  -- The cross term is bounded by the geometric-mean / AM–GM consequence of Cauchy–Schwarz.
   have haa : riemannianFiberNormSq (I := I) (M := M) g r s x a =
       tensorInnerPointwise (I := I) (M := M) g r s x am am := by
     rw [ham]; exact riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x a
@@ -136,7 +129,6 @@ theorem riemannianFiberNormSq_add_le
   set A : ℝ := riemannianFiberNormSq (I := I) (M := M) g r s x a with hA
   set B : ℝ := riemannianFiberNormSq (I := I) (M := M) g r s x b with hB
   set C : ℝ := tensorInnerPointwise (I := I) (M := M) g r s x am bm with hC
-  -- `C² ≤ A · B`, hence `2 C ≤ A + B`, hence `A + 2 C + B ≤ 2 A + 2 B`.
   have hA_nn : 0 ≤ A := by rw [hA]; exact riemannianFiberNormSq_nonneg (I := I) (M := M) g r s x a
   have hB_nn : 0 ≤ B := by rw [hB]; exact riemannianFiberNormSq_nonneg (I := I) (M := M) g r s x b
   have hCS : C ^ 2 ≤ A * B := by
@@ -152,7 +144,6 @@ theorem riemannianFiberNormSq_sub_le
       2 * riemannianFiberNormSq (I := I) (M := M) g r s x a +
         2 * riemannianFiberNormSq (I := I) (M := M) g r s x b := by
   classical
-  -- `a - b = a + (-b)`, and `rfns(-b) = rfns(b)` (the norm is even).
   have hneg : riemannianFiberNormSq (I := I) (M := M) g r s x (-b) =
       riemannianFiberNormSq (I := I) (M := M) g r s x b := by
     rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x (-b),
@@ -170,13 +161,6 @@ theorem riemannianFiberNormSq_sub_le
         riemannianFiberNormSq_add_le (I := I) (M := M) g r s x a (-b)
     _ = 2 * riemannianFiberNormSq (I := I) (M := M) g r s x a +
           2 * riemannianFiberNormSq (I := I) (M := M) g r s x b := by rw [hneg]
-
-/-! ## Finite-sum sub-additivity of the squared fibre norm
-
-A finite indexed sum of tensors has squared fibre norm at most the number of summands times
-the sum of their squared fibre norms. The proof is the standard quadratic-form bound
-`‖∑ Fᵢ‖² ≤ n · ∑ ‖Fᵢ‖²` for an inner-product norm, established here by induction through the
-`2`-sub-additivity `riemannianFiberNormSq_add_le`. -/
 
 /-- Bilinearity of `tensorInnerPointwise` in the left argument over a *plain* finite sum
 (without scalar coefficients), proved by direct induction from the two-term additivity. This
@@ -218,7 +202,6 @@ lemma riemannianFiberNormSq_sum_eq_double_sum
             (x := x) (F j)) := by
   classical
   rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s' x (∑ i ∈ s, F i)]
-  -- `toModel (∑ F i) = ∑ toModel (F i)` (`toModel` is a continuous linear equiv).
   have hsum_model : TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := r) (s := s')
       (x := x) (∑ i ∈ s, F i) =
       ∑ i ∈ s, TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := r) (s := s')
@@ -241,7 +224,6 @@ theorem riemannianFiberNormSq_sum_le_card_mul
       (s.card : ℝ) * ∑ i ∈ s, riemannianFiberNormSq (I := I) (M := M) g r s' x (F i) := by
   classical
   rw [riemannianFiberNormSq_sum_eq_double_sum (I := I) (M := M) g r s' x s F]
-  -- Per-pair AM–GM bound on the cross inner product.
   set fm : ι → TensorRSModel r s' ℝ E := fun i =>
     TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := r) (s := s') (x := x) (F i)
     with hfm
@@ -267,14 +249,12 @@ theorem riemannianFiberNormSq_sum_le_card_mul
       riemannianFiberNormSq_nonneg (I := I) (M := M) g r s' x (F j)
     nlinarith [hsq, hi_nn, hj_nn, sq_nonneg (riemannianFiberNormSq (I := I) (M := M) g r s' x (F i)
       - riemannianFiberNormSq (I := I) (M := M) g r s' x (F j)), sq_nonneg bij]
-  -- Bound the double sum.
   calc (∑ i ∈ s, ∑ j ∈ s, tensorInnerPointwise (I := I) (M := M) g r s' x (fm i) (fm j))
       ≤ ∑ i ∈ s, ∑ j ∈ s, (1 / 2 : ℝ) *
           (riemannianFiberNormSq (I := I) (M := M) g r s' x (F i) +
             riemannianFiberNormSq (I := I) (M := M) g r s' x (F j)) := by
         refine Finset.sum_le_sum (fun i hi => Finset.sum_le_sum (fun j hj => hpair i hi j hj))
     _ = (s.card : ℝ) * ∑ i ∈ s, riemannianFiberNormSq (I := I) (M := M) g r s' x (F i) := by
-        -- `∑ᵢ∑ⱼ ½(Aᵢ + Aⱼ) = ½(∑ᵢ |s| Aᵢ + ∑ᵢ ∑ⱼ Aⱼ) = ½(|s|·∑A + |s|·∑A) = |s|·∑A`.
         rw [show (∑ i ∈ s, ∑ j ∈ s, (1 / 2 : ℝ) *
               (riemannianFiberNormSq (I := I) (M := M) g r s' x (F i) +
                 riemannianFiberNormSq (I := I) (M := M) g r s' x (F j))) =

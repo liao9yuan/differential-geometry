@@ -83,27 +83,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## A measure-theoretic gluing helper
-
-The transport operator's underlying map is built from a function that is
-pointwise zero off an open neighbourhood `Ω` of the chart-image of a fixed
-compact support set, and on which the chart transition agrees with a bounded
-diffeomorphism. The following helper lifts an a.e.-equality known on
-`volume.restrict Ω` to an a.e.-equality on the full chart-target measure, using
-that the two functions additionally agree everywhere off `Ω`. -/
 
 /-- If two functions agree almost everywhere with respect to `μ.restrict s` and
 agree everywhere off the measurable set `s`, then they agree almost everywhere
@@ -125,11 +110,6 @@ private lemma ae_eq_of_ae_eq_restrict_of_eqOn_compl
   rw [MeasureTheory.Measure.restrict_apply₀'] at h_restrict
   · rwa [h_inter]
   · exact hs.nullMeasurableSet
-
-/-! ## The transport coefficient on `M`
-
-The transport coefficient is the product of the two chart-kernel cutoffs and
-the smooth transition coefficient of the tensor transformation law. -/
 
 set_option linter.unusedVariables false in
 /-- **The chart-transition transport coefficient on `M`.** For ranks `(r, s)`,
@@ -178,12 +158,6 @@ private lemma transportCoeffManifold_eq_zero_of_cutoffβ_zero
     (hx : ((chartKernelCutoff (I := I) (M := M) β : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 0) :
     transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q x = 0 := by
   rw [transportCoeffManifold_apply, hx]; ring
-
-/-! ### Support of the transport coefficient
-
-The transport coefficient vanishes off the closed support of either chart-kernel
-cutoff, so its topological support lies inside the compact intersection of the
-two cutoff supports, which is contained in both chart sources. -/
 
 /-- The compact set in which the transport coefficient is supported: the
 intersection of the closed supports of the chart-`α` and chart-`β` kernel
@@ -260,13 +234,6 @@ lemma tsupport_transportCoeffManifold_subset_sourceβ
   (tsupport_transportCoeffManifold_subset (I := I) (M := M) g r s β α P₀ Q).trans
     (transportSupportSet_subset_sourceβ (I := I) (M := M) α β)
 
-/-! ### Global smoothness of the transport coefficient
-
-On the open chart overlap all three factors are `C^∞`; off the closed support
-of the chart-`α` kernel cutoff the product vanishes. Every point of `M` lies in
-one of these two open sets, so a gluing argument upgrades smoothness to all of
-`M`. -/
-
 /-- **The transport coefficient is globally `C^∞` on `M`.** -/
 theorem contMDiff_transportCoeffManifold
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
@@ -276,8 +243,7 @@ theorem contMDiff_transportCoeffManifold
   classical
   intro x
   by_cases hx_overlap : x ∈ (chartAt H β).source ∩ (chartAt H α).source
-  · -- On the open chart overlap all three factors are smooth.
-    have hcutα : ContMDiffAt I (𝓘(ℝ, ℝ)) ∞
+  · have hcutα : ContMDiffAt I (𝓘(ℝ, ℝ)) ∞
         (fun y : M => ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) :
           M → ℝ) y) x :=
       ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯).contMDiff).contMDiffAt
@@ -298,9 +264,7 @@ theorem contMDiff_transportCoeffManifold
       have := (hcutα.mul hcutβ).mul hcoeff_at
       simpa [transportCoeffManifold] using this
     exact hprod
-  · -- Off the closed support of the transport coefficient the function
-    -- vanishes on an open neighbourhood.
-    have hsupp_sub := tsupport_transportCoeffManifold_subset
+  · have hsupp_sub := tsupport_transportCoeffManifold_subset
       (I := I) (M := M) g r s β α P₀ Q
     have hx_notin : x ∉ tsupport (transportCoeffManifold
         (I := I) (M := M) g r s β α P₀ Q) := by
@@ -327,11 +291,6 @@ private lemma continuous_transportCoeffManifold
     Continuous (transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q) :=
   (contMDiff_transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q).continuous
 
-/-! ### Boundedness of the transport coefficient
-
-A continuous function with compact support on `M` is globally bounded; we record
-the bound in the form needed by the `L²` estimate. -/
-
 /-- **The transport coefficient is globally bounded.** There is a non-negative
 constant bounding `|transportCoeffManifold g r s β α P₀ Q x|` for all `x`. -/
 theorem exists_bound_transportCoeffManifold
@@ -346,11 +305,6 @@ theorem exists_bound_transportCoeffManifold
   have hx := hC x
   rw [Real.norm_eq_abs] at hx
   exact hx.trans (le_max_left _ _)
-
-/-! ## The chart-α pushforward of the transport coefficient
-
-The transport operator multiplies an `L²` function by the chart-`α`
-pushforward of the transport coefficient. -/
 
 /-- The chart-`α` Euclidean pushforward of the transport coefficient. -/
 private def transportCoeffPushed
@@ -375,15 +329,6 @@ private lemma exists_bound_transportCoeffPushed
     exact hC _
   · rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy, abs_zero]
     exact hC_nn
-
-/-! ## The realising bounded chart-transition diffeomorphism
-
-The chart transition `chartTransitionEuclid α β` agrees, on an open neighbourhood
-`Ω_αβ` of the chart-`α` image of the transport support, with a bounded smooth
-diffeomorphism `Φ`. The transport coefficient is supported inside that image, so
-the transport operator's integrand is unchanged by replacing the chart
-transition with `Φ.toFun`. This packages the data produced by the strict
-chart-transition diffeomorphism constructor. -/
 
 /-- A bundle of the chart-transition diffeomorphism data tailored to the
 transport support set: an open neighbourhood `Ω_αβ` of the chart-`α` image of
@@ -430,16 +375,12 @@ private lemma exists_transportDiffeoData
     Φ := Φ
     hΦ_eq := hΦ_eq
     hsupp_subset := ?_ }⟩
-  -- The transport coefficient pushforward is supported inside the chart-α image
-  -- of `transportSupportSet`, which sits inside `Ωαβ`.
   intro y hy
-  -- `y` lies in the chart-α target (else the pushforward vanishes).
   by_cases hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α
   · set z : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hz_def
     have hsymm_target : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
       rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy_target
       exact hy_target
-    -- `transportCoeffManifold` is nonzero at `z`, so `z ∈ transportSupportSet`.
     have hcoeff_ne : transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q z ≠ 0 := by
       intro h0
       apply hy
@@ -448,8 +389,6 @@ private lemma exists_transportDiffeoData
     have hz_supp : z ∈ transportSupportSet (I := I) (M := M) α β :=
       tsupport_transportCoeffManifold_subset (I := I) (M := M) g r s β α P₀ Q
         (subset_tsupport _ (Function.mem_support.mpr hcoeff_ne))
-    -- The chart-α image of `z` is `y`; it lies in the chart-α image of the
-    -- compact support, hence in `Ωαβ`.
     have hy_eq_image : (toEuclidean (E := E)) (extChartAt I α z) = y := by
       rw [hz_def, (extChartAt I α).right_inv hsymm_target]
       exact (toEuclidean (E := E)).apply_symm_apply y
@@ -461,13 +400,6 @@ private lemma exists_transportDiffeoData
   · exact absurd
       (by unfold transportCoeffPushed
           exact chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy_target) hy
-
-/-! ## The transported `L²` function of a class
-
-For an `L²` class `f` on the chart-`β` Euclidean target, the underlying
-transported function is `transportCoeffPushed · (f ∘ chartTransitionEuclid α β)`.
-It is `MemLp 2` of the chart-`α` Euclidean reference measure, with an explicit
-norm bound, and it depends `ℝ`-linearly on `f`. -/
 
 /-- The underlying transported function: the chart-`α` pushforward of the
 transport coefficient times the chart-`β` `L²` function composed with the chart
@@ -588,7 +520,6 @@ private lemma aestronglyMeasurable_transportFun
   rw [aestronglyMeasurable_indicator_iff
     (Ωαβ_measurableSet (I := I) (M := M) g r s β α P₀ Q D),
     chartL2Measure_restrict_Ωαβ (I := I) (M := M) g r s β α P₀ Q D]
-  -- On `volume.restrict Ωαβ`: product of the bounded coefficient and `f ∘ Φ.toFun`.
   have h_coeff : AEStronglyMeasurable
       (transportCoeffPushed (I := I) (M := M) g r s β α P₀ Q)
       ((volume : Measure EuclN).restrict D.Ωαβ) := by
@@ -605,13 +536,6 @@ private lemma aestronglyMeasurable_transportFun
       ((volume : Measure EuclN).restrict D.Ωαβ) :=
     h_f_meas.comp_quasiMeasurePreserving D.Φ.toFun_quasiMeasurePreserving
   exact h_coeff.mul h_comp
-
-/-! ## The `L²` change-of-variables bound for the transported function
-
-The transported function vanishes off `Ω_αβ`; there it equals the
-transport-coefficient-weighted composition with the bounded diffeomorphism
-`Φ.toFun`. Combining the global bound of the transport coefficient with the
-change-of-variables bound for `Φ` yields a uniform `L²` bound. -/
 
 /-- **Uniform `L²` bound for the transported function.** There is a non-negative
 constant `K` such that for every `L²` class `f` on the chart-`β` target the
@@ -637,7 +561,6 @@ private lemma exists_eLpNorm_transportFun_bound
     have h_inv_nn : (0 : ℝ) ≤ 1 / D.Φ.jacobian_lower_bound := by positivity
     exact Real.rpow_nonneg h_inv_nn _
   refine ⟨C * Kchg, mul_nonneg hC_nn hKchg_nn, fun f => ?_⟩
-  -- Step 1: bound `eLpNorm transportFun` by `C · eLpNorm (indicator (f ∘ Φ.toFun))`.
   have h_pointwise : ∀ y, ‖transportFun (I := I) (M := M) g r s β α P₀ Q f y‖ ≤
       ‖(C • D.Ωαβ.indicator (fun y => (f : EuclN → ℝ) (D.Φ.toFun y))) y‖ := by
     intro y
@@ -659,7 +582,6 @@ private lemma exists_eLpNorm_transportFun_bound
         (C : ℝ) • D.Ωαβ.indicator (fun y => (f : EuclN → ℝ) (D.Φ.toFun y)) from rfl]
     refine (eLpNorm_const_smul_le).trans ?_
     rw [Real.enorm_eq_ofReal_abs, abs_of_nonneg hC_nn]
-  -- Step 2: identify the indicator `eLpNorm` with the restricted-measure `eLpNorm`.
   have h_indic : eLpNorm
       (D.Ωαβ.indicator (fun y => (f : EuclN → ℝ) (D.Φ.toFun y))) 2
         (chartL2Measure (I := I) (M := M) α) =
@@ -668,7 +590,6 @@ private lemma exists_eLpNorm_transportFun_bound
     rw [eLpNorm_indicator_eq_eLpNorm_restrict
       (Ωαβ_measurableSet (I := I) (M := M) g r s β α P₀ Q D),
       chartL2Measure_restrict_Ωαβ (I := I) (M := M) g r s β α P₀ Q D]
-  -- Step 3: change-of-variables bound for `Φ` over `Ωαβ`.
   have h_chg : eLpNorm (fun y => (f : EuclN → ℝ) (D.Φ.toFun y)) 2
       ((volume : Measure EuclN).restrict D.Ωαβ) ≤
         ENNReal.ofReal Kchg *
@@ -676,7 +597,6 @@ private lemma exists_eLpNorm_transportFun_bound
     rw [hKchg_def]
     exact D.Φ.eLpNorm_comp_toFun_le_const (by norm_num) (by norm_num)
       D.hΩαβ_open (f : EuclN → ℝ)
-  -- Step 4: pass from `Ωβα` to the full chart-β target.
   have h_mono : eLpNorm (f : EuclN → ℝ) 2
       ((volume : Measure EuclN).restrict D.Ωβα) ≤
         eLpNorm (f : EuclN → ℝ) 2 (chartL2Measure (I := I) (M := M) β) := by
@@ -684,7 +604,6 @@ private lemma exists_eLpNorm_transportFun_bound
         chartL2Measure (I := I) (M := M) β :=
       Measure.restrict_mono D.hΩβα_subset_target le_rfl
     exact eLpNorm_mono_measure _ h_le
-  -- Assemble.
   calc eLpNorm (transportFun (I := I) (M := M) g r s β α P₀ Q f) 2
         (chartL2Measure (I := I) (M := M) α)
       ≤ ENNReal.ofReal C *
@@ -721,15 +640,6 @@ private lemma memLp_transportFun
   refine ENNReal.mul_lt_top ENNReal.ofReal_lt_top ?_
   exact (Lp.memLp f).2
 
-/-! ## Dependence of the transported function on the `L²` representative
-
-The transported function depends on the chart-`β` `L²` function only through its
-a.e.-equivalence class: two functions agreeing almost everywhere produce
-transported functions agreeing almost everywhere. The argument composes the
-chart-`β` a.e.-equality with the quasi-measure-preserving diffeomorphism on the
-support region, then lifts the equality off the support region — where both
-transported functions vanish — to the full chart-`α` measure. -/
-
 /-- **The transported function respects a.e.-equality of the chart-`β` `L²`
 function.** If two functions `u₁`, `u₂` agree almost everywhere with respect to
 the chart-`β` reference measure, then the transport-coefficient-weighted
@@ -750,20 +660,16 @@ private lemma transportFun_aux_ae_eq
   set Ωαβ := D.Ωαβ with hΩαβ_def
   have hΩαβ_meas : MeasurableSet Ωαβ :=
     Ωαβ_measurableSet (I := I) (M := M) g r s β α P₀ Q D
-  -- Restrict the chart-β a.e.-equality to `Ωβα`.
   have huv_Ωβα : u₁ =ᵐ[(volume : Measure EuclN).restrict D.Ωβα] u₂ :=
     huv.filter_mono
       (ae_mono (Measure.restrict_mono D.hΩβα_subset_target le_rfl))
-  -- Compose with the quasi-measure-preserving diffeomorphism.
   have h_comp_Ωαβ : (fun y => u₁ (D.Φ.toFun y)) =ᵐ[
       (volume : Measure EuclN).restrict Ωαβ]
         fun y => u₂ (D.Φ.toFun y) :=
     D.Φ.toFun_quasiMeasurePreserving.ae_eq huv_Ωβα
-  -- The chart-α reference measure restricted to `Ωαβ` is `volume.restrict Ωαβ`.
   have h_meas_eq : (chartL2Measure (I := I) (M := M) α).restrict Ωαβ =
       (volume : Measure EuclN).restrict Ωαβ :=
     chartL2Measure_restrict_Ωαβ (I := I) (M := M) g r s β α P₀ Q D
-  -- The transport functions agree a.e. on `Ωαβ` w.r.t. the chart-α measure.
   have h_restrict : (fun y => transportCoeffPushed
       (I := I) (M := M) g r s β α P₀ Q y *
         u₁ (chartTransitionEuclid (I := I) (M := M) α β y)) =ᵐ[
@@ -771,14 +677,12 @@ private lemma transportFun_aux_ae_eq
         fun y => transportCoeffPushed (I := I) (M := M) g r s β α P₀ Q y *
           u₂ (chartTransitionEuclid (I := I) (M := M) α β y) := by
     rw [h_meas_eq]
-    -- Pull the chart transition back to `Φ.toFun` on `Ωαβ`, apply `h_comp_Ωαβ`.
     have h_self : ∀ᵐ y ∂((volume : Measure EuclN).restrict Ωαβ), y ∈ Ωαβ :=
       self_mem_ae_restrict hΩαβ_meas
     filter_upwards [h_comp_Ωαβ, h_self] with y hy_eq hy_mem
     have hΦ : chartTransitionEuclid (I := I) (M := M) α β y = D.Φ.toFun y :=
       (D.hΦ_eq y hy_mem).symm
     rw [hΦ, hy_eq]
-  -- Lift the equality to the full chart-α measure: off `Ωαβ` both sides vanish.
   refine ae_eq_of_ae_eq_restrict_of_eqOn_compl hΩαβ_meas h_restrict ?_
   intro y hy
   have hcoeff : transportCoeffPushed (I := I) (M := M) g r s β α P₀ Q y = 0 := by
@@ -799,12 +703,6 @@ private lemma transportFun_ae_eq_of_coeFn_ae_eq
         chartL2Measure (I := I) (M := M) α]
       transportFun (I := I) (M := M) g r s β α P₀ Q f₂ :=
   transportFun_aux_ae_eq (I := I) (M := M) g r s β α P₀ Q D h
-
-/-! ## The transported `L²` class
-
-The `L²` class of the transported function. It is additive and `ℝ`-homogeneous
-in the chart-`β` `L²` class, and carries the uniform `L²` bound, so it assembles
-into a continuous linear map. -/
 
 /-- The `L²` class of the transported function. -/
 private def transportLp
@@ -838,8 +736,6 @@ private lemma transportLp_add
   classical
   apply Lp.ext
   refine (transportLp_coeFn (I := I) (M := M) g r s β α P₀ Q D (f₁ + f₂)).trans ?_
-  -- The transported function of the sum is a.e. the sum of transported
-  -- functions: replace the representative of `f₁ + f₂` by `f₁.coeFn + f₂.coeFn`.
   have h_sum : transportFun (I := I) (M := M) g r s β α P₀ Q (f₁ + f₂) =ᵐ[
       chartL2Measure (I := I) (M := M) α]
         fun y => transportCoeffPushed (I := I) (M := M) g r s β α P₀ Q y *
@@ -951,24 +847,12 @@ private lemma transportLpLin_norm_le
   refine h_toReal_le.trans ?_
   rw [ENNReal.toReal_mul, ENNReal.toReal_ofReal hK_nn, h_f_norm]
 
-/-! ## The realising diffeomorphism data, fixed
-
-A canonical choice of the chart-transition diffeomorphism data, used to
-construct the transport operator. The operator itself does not depend on the
-choice; the choice only enters the boundedness proof. -/
-
 /-- A fixed canonical choice of the chart-transition diffeomorphism data. -/
 private def transportDiffeoData
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
     TransportDiffeoData (I := I) (M := M) g r s β α P₀ Q :=
   (exists_transportDiffeoData (I := I) (M := M) g r s β α P₀ Q).some
-
-/-! ## The transport operator
-
-The bounded chart-transition transport operator: the `(P₀, Q)`-entry of the
-`(r, s)`-tensor transformation law, transporting a chart-`β` `L²` component into
-a contribution to a chart-`α` component. -/
 
 /-- **The chart-transition transport operator.** For a closed Riemannian
 manifold `(M, g)`, ranks `(r, s)`, chart base points `β`, `α` and a pair of
@@ -1045,14 +929,6 @@ theorem chartTransitionTransportCLM_coeFn_aeEq
   funext y
   rfl
 
-/-! ## Compatibility with the chart component of a smooth section
-
-On the canonical chart component of a smooth section, the transport operator
-produces the chart-`α` pushforward of the transport-coefficient-weighted
-partition-of-unity component centred at `β`. This is the identity that drives
-the downstream density argument expressing a cutoff-weighted chart component as
-a finite sum of transported partition-of-unity-weighted components. -/
-
 /-- The transported function of the concrete chart component of a smooth
 section equals — pointwise everywhere — the chart-`α` pushforward of the
 transport-coefficient-weighted partition-of-unity component centred at `β`.
@@ -1076,8 +952,7 @@ private lemma transportFun_tensorChartComponent_eq
   classical
   funext y
   by_cases hy : y ∈ chartTargetEuclid (I := I) (M := M) α
-  · -- On the chart-α target.
-    set z : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hz_def
+  · set z : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hz_def
     have hsymm_target : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
       rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
       exact hy
@@ -1095,26 +970,21 @@ private lemma transportFun_tensorChartComponent_eq
     rw [h_rhs, h_coeff_push]
     by_cases hcoeff : transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q z = 0
     · rw [hcoeff, zero_mul, zero_mul]
-    · -- The transport coefficient is nonzero at `z`: `z` lies in both sources.
-      have hz_supp : z ∈ transportSupportSet (I := I) (M := M) α β :=
+    · have hz_supp : z ∈ transportSupportSet (I := I) (M := M) α β :=
         tsupport_transportCoeffManifold_subset (I := I) (M := M) g r s β α P₀ Q
           (subset_tsupport _ (Function.mem_support.mpr hcoeff))
       have hz_chartα : z ∈ (chartAt H α).source :=
         transportSupportSet_subset_sourceα (I := I) (M := M) α β hz_supp
       have hz_chartβ : z ∈ (chartAt H β).source :=
         transportSupportSet_subset_sourceβ (I := I) (M := M) α β hz_supp
-      -- The chart-α Euclidean coordinate of `z` is `y`.
       have hy_eq_image : (toEuclidean (E := E)) (extChartAt I α z) = y := by
         rw [hz_def, (extChartAt I α).right_inv hsymm_target]
         exact (toEuclidean (E := E)).apply_symm_apply y
-      -- The chart transition carries the chart-α coordinate of `z` to the
-      -- chart-β coordinate of `z`.
       have hT_eq : chartTransitionEuclid (I := I) (M := M) α β y =
           (toEuclidean (E := E)) (extChartAt I β z) := by
         rw [← hy_eq_image]
         exact chartTransitionEuclid_eq_chartα_image (I := I) (M := M) α β hz_chartα
       rw [hT_eq, tensorChartComponent_def]
-      -- The chart-β coordinate of `z` lies in the chart-β target.
       have hz_extβ_src : z ∈ (extChartAt I β).source := by
         rw [extChartAt_source (I := I)]; exact hz_chartβ
       have h_imageβ_mem :
@@ -1123,11 +993,9 @@ private lemma transportFun_tensorChartComponent_eq
         refine ⟨extChartAt I β z, ?_, rfl⟩
         exact (extChartAt I β).map_source hz_extβ_src
       rw [chartPushedRaw_apply_of_mem (I := I) (M := M) β _ h_imageβ_mem]
-      -- Round-trip: the chart-β symm of the chart-β coordinate of `z` is `z`.
       rw [(toEuclidean (E := E)).symm_apply_apply,
         (extChartAt I β).left_inv hz_extβ_src]
-  · -- Off the chart-α target both sides vanish.
-    have h_lhs : transportCoeffPushed (I := I) (M := M) g r s β α P₀ Q y = 0 := by
+  · have h_lhs : transportCoeffPushed (I := I) (M := M) g r s β α P₀ Q y = 0 := by
       unfold transportCoeffPushed
       exact chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy
     rw [h_lhs, zero_mul,
@@ -1158,12 +1026,9 @@ theorem chartTransitionTransportCLM_coeFn_smooth
         (fun x => transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q x *
           tensorChartComponentPou (I := I) (M := M) g r s S β Q.1 Q.2 x) := by
   classical
-  -- The transport operator value agrees a.e. with the transported function.
   refine (chartTransitionTransportCLM_coeFn (I := I) (M := M) g r s β α P₀ Q
     (tensorL2ChartComponent (I := I) (M := M) g r s
       (S : TensorL2 r s g) β Q)).trans ?_
-  -- Replace the `L²` representative of the canonical chart component by the
-  -- concrete Euclidean chart component of the smooth section.
   have h_comp : transportFun (I := I) (M := M) g r s β α P₀ Q
       (tensorL2ChartComponent (I := I) (M := M) g r s
         (S : TensorL2 r s g) β Q) =ᵐ[chartL2Measure (I := I) (M := M) α]
@@ -1175,8 +1040,6 @@ theorem chartTransitionTransportCLM_coeFn_smooth
       (tensorL2ChartComponent_smoothToTensorL2_coeFn
         (I := I) (M := M) g r s S β Q)
   refine h_comp.trans ?_
-  -- The transported concrete chart component equals — everywhere — the
-  -- chart-α pushforward of the transport-coefficient-weighted component.
   rw [transportFun_tensorChartComponent_eq (I := I) (M := M) g r s β α S P₀ Q]
 
 end TensorSpectral

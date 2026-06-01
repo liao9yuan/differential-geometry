@@ -143,18 +143,14 @@ theorem rawVariationalIdentityFlat_of_orbitODE_factors
     (hT : HasDerivAt (chartCloseTriv (I := I) Φ_fam (Φ_fam t x) x) T' t)
     (hP : HasDerivAt (chartCloseFderiv (I := I) Φ_fam (Φ_fam t x) x) P' t) :
     RawVariationalIdentityFlat (I := I) Φ_fam t x v T' P' := by
-  -- The product-rule operator ODE for `chartCloseDop` (metric-free).
   have hDchart := chartCloseDop_hasDerivAt_clm_comp (I := I) Φ_fam (Φ_fam t x) x t hT hP
-  -- Compose with the fixed evaluation-at-`v` continuous-linear functional.
   have hEvalv :
       HasDerivAt (fun s : ℝ => chartCloseDop (I := I) Φ_fam (Φ_fam t x) x s v)
         ((T'.comp (chartCloseFderiv (I := I) Φ_fam (Φ_fam t x) x t)
             + (chartCloseTriv (I := I) Φ_fam (Φ_fam t x) x t).comp P') v) t := by
     have := (ContinuousLinearMap.apply ℝ E v).hasFDerivAt.comp_hasDerivAt t hDchart
     simpa using this
-  -- Rewrite the applied product-rule value at the basepoint as `T' (dΦv) + P' v`.
   rw [chartCloseDop_deriv_basepoint_apply (I := I) Φ_fam t x v T' P'] at hEvalv
-  -- Transfer to the orbit pushforward curve via the eventual reduction.
   exact (rawVariationalIdentityFlat_iff_flat_value (I := I) Φ_fam t x v T' P' hcontAt).2 hEvalv
 
 end FlatIdentity

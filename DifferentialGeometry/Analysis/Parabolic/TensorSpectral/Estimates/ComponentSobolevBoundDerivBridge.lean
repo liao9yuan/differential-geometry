@@ -66,29 +66,13 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## Local abbreviation -/
-
 private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] := EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Smooth-input weak / classical partial bridge
-
-For a smooth `u : M → ℝ` on a closed Riemannian manifold, the chart-pushed
-function `chartPushed (chartAtlasPOU I M) α u` lies in
-`MemW1p 2` of `chartTargetEuclid α` (by `MemWkpChart_of_contMDiff` at order
-`1`, exponent `2`). The chosen weak partial admits a classical
-representative on the chart target.
-
-Below we identify this representative as the classical Frechet partial of
-any pointwise-equal smooth extension to all of `EuclN E`. The chart-pushed
-function itself is smooth on the open chart target image. -/
 
 /-- For smooth `u : M → ℝ`, the chart-pushed image is the multiplication of
 the partition-of-unity weight (chart-pushed) and the function (chart-pushed),
@@ -113,8 +97,6 @@ theorem chartPushed_memW1p_two_of_contMDiff
     DeGiorgi.MemW1p (p := (2 : ℝ≥0∞))
       (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α u)
       (chartTargetEuclid (I := I) (M := M) α) := by
-  -- `MemWkpChart_of_contMDiff` gives `MemWkpChart g 1 2 u`, which unfolds to
-  -- `MemWkp 1 2 (chartPushed ...)`; rewriting to `MemW1p` is direct.
   have hp : (1 : ℝ≥0∞) ≤ 2 := by norm_num
   have h := DifferentialGeometry.Analysis.Sobolev.Equivalence.MemWkpChart_of_contMDiff
     (I := I) (M := M) g hp hu α
@@ -154,13 +136,6 @@ theorem eLpNorm_chosenWeakPartial'_chartPushed_lt_top_of_contMDiff
       (⊤ : ℝ≥0∞) :=
   (chosenWeakPartial'_chartPushed_memLp_two_of_contMDiff
     (I := I) (M := M) g α hu k).eLpNorm_lt_top
-
-/-! ## Tensor scalar component specialisation
-
-Specialising the smooth-input bridge to the manifold-side scalar field
-`tensorChartComponentScalar g r s S α Idx Jdx`, which is globally smooth
-and compactly supported on `M`, gives the L^2 finiteness of the chosen
-weak partials in the iterated Sobolev predicate. -/
 
 /-- The chart-pushed image of `tensorChartComponentScalar g r s S α Idx Jdx`
 lies in `DeGiorgi.MemW1p 2` of `chartTargetEuclid β` for any chart `β : M`. -/
@@ -202,14 +177,6 @@ theorem eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_lt_top
     (tensorChartComponentScalar_contMDiff
       (I := I) (M := M) g r s S α Idx Jdx) k
 
-/-! ## Per-section eLpNorm bounds packaged with the `(‖S‖₊ + 1)` envelope
-
-Matching the per-section bound style of `ComponentSobolevBound`, we expose
-existential `L^2` bounds for the chosen weak partials. The constant
-depends on `S` (and on `r, s, α, β, Idx, Jdx, k`); a uniform-in-`S` form
-requires the Christoffel decomposition, which is provided in
-follow-up modules. -/
-
 /-- Per-section `L^2` bound for the chosen weak partial of the chart-pushed
 component scalar, with the `(‖S‖₊ + 1)` envelope to absorb the boundary
 case `‖S‖ = 0`. -/
@@ -230,7 +197,6 @@ theorem eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le_per
           (volume.restrict (chartTargetEuclid (I := I) (M := M) β)) ≤
         ENNReal.ofReal C * (‖S‖₊ + 1) := by
   classical
-  -- Set the LHS as `a`.
   have hfin :=
     eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_lt_top
       (I := I) (M := M) g r s S.toCcTensor α β Idx Jdx k
@@ -264,7 +230,6 @@ theorem eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le_per
     rw [ha_def]
     exact (ENNReal.ofReal_toReal h_lhs_ne_top).symm
   rw [h_lhs_eq]
-  -- ENNReal.ofReal a ≤ ENNReal.ofReal (a + 1) ≤ ENNReal.ofReal (a + 1) * (‖S‖₊ + 1).
   have h1 : ENNReal.ofReal a ≤ ENNReal.ofReal (a + 1) := by
     apply ENNReal.ofReal_le_ofReal; linarith
   have h2 : ENNReal.ofReal (a + 1) ≤ ENNReal.ofReal (a + 1) * (‖S‖₊ + 1) := by
@@ -296,15 +261,6 @@ theorem eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le
   eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le_per_section
     (I := I) (M := M) g r s S α β Idx Jdx k
 
-/-! ## Sum-over-directions per-section L^2 bound for `wkpNorm`'s first-order
-piece
-
-The `wkpNorm 1 2` of a function decomposes as the `L^2` norm of the
-function plus the sum over directions of the `L^2` norms of the iterated
-weak partials of order one. Each summand is finite by the previous
-results; the total is therefore finite, and we package the bound in the
-same `(‖S‖₊ + 1)`-envelope style. -/
-
 /-- Sum over directions of the `eLpNorm` of the chosen weak partial of the
 chart-pushed component scalar, bounded by a per-section constant times
 `(‖S‖₊ + 1)`. -/
@@ -325,7 +281,6 @@ theorem sum_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le
             (volume.restrict (chartTargetEuclid (I := I) (M := M) β)) ≤
         ENNReal.ofReal C * (‖S‖₊ + 1) := by
   classical
-  -- Choose constants for each `k`.
   have hper : ∀ k : Fin (Module.finrank ℝ E),
       ∃ C : ℝ, 0 ≤ C ∧
         eLpNorm
@@ -340,9 +295,7 @@ theorem sum_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le
     eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le_per_section
       (I := I) (M := M) g r s S α β Idx Jdx k
   choose Ck hCk_nn hCk_le using hper
-  -- Total constant is the sum.
   refine ⟨∑ k : Fin (Module.finrank ℝ E), Ck k, Finset.sum_nonneg (fun k _ => hCk_nn k), ?_⟩
-  -- Bound each summand and combine.
   have hSum_le : ∑ k : Fin (Module.finrank ℝ E),
         eLpNorm
             (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
@@ -356,7 +309,6 @@ theorem sum_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le
         ENNReal.ofReal (Ck k) * (‖S‖₊ + 1) :=
     Finset.sum_le_sum (fun k _ => hCk_le k)
   refine hSum_le.trans ?_
-  -- Pull out the common `(‖S‖₊ + 1)` factor.
   rw [show ∑ k : Fin (Module.finrank ℝ E),
         ENNReal.ofReal (Ck k) * (‖S‖₊ + 1) =
       (∑ k : Fin (Module.finrank ℝ E),
@@ -364,19 +316,11 @@ theorem sum_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le
     (Finset.sum_mul (s := Finset.univ)
       (f := fun k : Fin (Module.finrank ℝ E) => (ENNReal.ofReal (Ck k)))
       (a := (‖S‖₊ + 1))).symm]
-  -- Bound the ofReal sum by the ofReal of the real sum.
   have hENN :
       ∑ k : Fin (Module.finrank ℝ E), ENNReal.ofReal (Ck k) ≤
         ENNReal.ofReal (∑ k : Fin (Module.finrank ℝ E), Ck k) := by
     rw [ENNReal.ofReal_sum_of_nonneg (fun k _ => hCk_nn k)]
   exact mul_le_mul_of_nonneg_right hENN (by exact zero_le _)
-
-/-! ## Closed-form: the `wkpNorm` for order one as direct first-order sum
-
-The iterated `wkpNorm 1 2` evaluates to the `L^2` norm at order zero plus
-the sum-over-directions of the order-one chosen weak partials. We expose
-this decomposition for the chart-pushed image of
-`tensorChartComponentScalar`. -/
 
 /-- Decomposition of `wkpNorm 1 2` of a generic Euclidean function as the
 `L^2` of the function plus the sum-over-directions of the `L^2` norms of
@@ -394,11 +338,9 @@ theorem wkpNorm_one_two_decomposition
             (volume.restrict Ω) := by
   classical
   unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
-  -- The wkpNorm at order 1 is the sum over `j ∈ {0, 1}` and over `α : Fin j → Fin d`.
   rw [show Finset.range (1 + 1) = {0, 1} from rfl]
   rw [Finset.sum_insert (by simp)]
   rw [Finset.sum_singleton]
-  -- Order-zero sum: unique `α : Fin 0 → Fin d`.
   have h0 :
       ∑ α : Fin 0 → Fin (Module.finrank ℝ E),
         eLpNorm
@@ -417,9 +359,7 @@ theorem wkpNorm_one_two_decomposition
           (d := Module.finrank ℝ E) 2 0 α u Ω) 2 (volume.restrict Ω))]
     simp [DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial_zero]
   rw [h0]
-  -- Order-one sum: rewrite the iterate as the first chosen partial.
   congr 1
-  -- Index the order-one sum by `α : Fin 1 → Fin d`, reindexed by `α 0`.
   refine Finset.sum_bij (fun (α : Fin 1 → Fin (Module.finrank ℝ E))
       (_ : α ∈ (Finset.univ : Finset (Fin 1 → Fin (Module.finrank ℝ E)))) =>
       α 0) ?_ ?_ ?_ ?_
@@ -435,16 +375,7 @@ theorem wkpNorm_one_two_decomposition
     rfl
   · intro α _
     rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial_succ]
-    -- iterWeakPartial 0 _ (chosenWeakPartial' 2 (α 0) u Ω) Ω
-    -- = chosenWeakPartial' 2 (α 0) u Ω.
     simp [DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial_zero]
-
-/-! ## Headline existential `wkpNorm` bound on the chart-pushed component
-
-Combining the smoothness-based finiteness with the per-direction bound and
-the `wkpNorm` decomposition, we get a per-section bound on the
-`wkpNorm 1 2` of the chart-pushed image of
-`tensorChartComponentScalar`. -/
 
 /-- Per-section `wkpNorm 1 2` bound on the chart-pushed image of the
 manifold-side component scalar. -/
@@ -467,7 +398,6 @@ theorem wkpNorm_chartPushed_tensorChartComponentScalar_le_per_section
       (tensorChartComponentScalar (I := I) (M := M)
         g r s S.toCcTensor α Idx Jdx) with hu_def
   set Ω : Set (EuclN E) := chartTargetEuclid (I := I) (M := M) β with hΩ_def
-  -- Order-zero L^2 bound: u is smooth and chart-pushed, hence in L^2(Ω).
   have hMW1p : DeGiorgi.MemW1p (p := (2 : ℝ≥0∞)) u Ω := by
     rw [hu_def, hΩ_def]
     exact chartPushed_tensorChartComponentScalar_memW1p_two
@@ -477,16 +407,12 @@ theorem wkpNorm_chartPushed_tensorChartComponentScalar_le_per_section
   have ha₀_nn : 0 ≤ a₀ := ENNReal.toReal_nonneg
   have ha₀_eq : eLpNorm u 2 (volume.restrict Ω) = ENNReal.ofReal a₀ := by
     rw [ha₀_def]; exact (ENNReal.ofReal_toReal hML.eLpNorm_lt_top.ne).symm
-  -- Order-one sum bound.
   obtain ⟨C₁, hC₁_nn, hC₁_le⟩ :=
     sum_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le_per_section
       (I := I) (M := M) g r s S α β Idx Jdx
-  -- The total bound `C := a₀ + 1 + C₁`.
   refine ⟨a₀ + 1 + C₁, by linarith, ?_⟩
-  -- Decompose the wkpNorm and bound term by term.
   rw [wkpNorm_one_two_decomposition (E := E) u Ω]
   rw [ha₀_eq]
-  -- ENNReal.ofReal a₀ ≤ ENNReal.ofReal (a₀ + 1) ≤ ENNReal.ofReal (a₀ + 1) * (‖S‖₊ + 1).
   have h_zero_bd : ENNReal.ofReal a₀ ≤
       ENNReal.ofReal (a₀ + 1) * (‖S‖₊ + 1) := by
     have h1 : ENNReal.ofReal a₀ ≤ ENNReal.ofReal (a₀ + 1) := by
@@ -507,7 +433,6 @@ theorem wkpNorm_chartPushed_tensorChartComponentScalar_le_per_section
       ENNReal.ofReal C₁ * (‖S‖₊ + 1) := by
     rw [hu_def, hΩ_def]
     exact hC₁_le
-  -- Sum the two bounds.
   refine (add_le_add h_zero_bd h_one_bd).trans ?_
   rw [show ENNReal.ofReal (a₀ + 1) * (‖S‖₊ + 1) +
         ENNReal.ofReal C₁ * (‖S‖₊ + 1) =

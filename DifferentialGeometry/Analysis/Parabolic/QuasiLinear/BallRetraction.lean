@@ -61,37 +61,25 @@ theorem ballRetraction_eq_self_of_mem {R : ℝ} {x : X} (hx : ‖x‖ ≤ R) :
 /-- The radial retraction onto a closed ball is `1`-Lipschitz. -/
 theorem lipschitzWith_ballRetraction {R : ℝ} (hR : 0 ≤ R) :
     LipschitzWith 1 (ballRetraction (X := X) R) := by
-  -- Reduce to `‖f x - f y‖ ≤ ‖x - y‖`.
   refine LipschitzWith.of_dist_le_mul fun x y => ?_
   rw [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm]
-  -- It suffices to compare squared norms, both nonnegative.
   rw [← Real.sqrt_sq (norm_nonneg _), ← Real.sqrt_sq (norm_nonneg (x - y))]
   refine Real.sqrt_le_sqrt ?_
-  -- Abbreviations for the two scaling factors, both in `[0,1]`.
   set a : ℝ := min 1 (R / ‖x‖) with ha
   set b : ℝ := min 1 (R / ‖y‖) with hb
   have ha0 : 0 ≤ a := ballRetraction_factor_nonneg hR x
   have hb0 : 0 ≤ b := ballRetraction_factor_nonneg hR y
   have ha1 : a ≤ 1 := min_le_left _ _
   have hb1 : b ≤ 1 := min_le_left _ _
-  -- `a‖x‖ = min ‖x‖ R` and `b‖y‖ = min ‖y‖ R`.
   have hax : a * ‖x‖ = min ‖x‖ R := ballRetraction_factor_mul_norm hR x
   have hby : b * ‖y‖ = min ‖y‖ R := ballRetraction_factor_mul_norm hR y
-  -- Expand both squared norms via the real polarisation identity.
   rw [ballRetraction, ballRetraction, ← ha, ← hb, norm_sub_sq_real, norm_sub_sq_real,
     norm_smul, norm_smul, Real.norm_eq_abs, Real.norm_eq_abs,
     abs_of_nonneg ha0, abs_of_nonneg hb0, real_inner_smul_left, real_inner_smul_right]
-  -- After expansion the goal is:
-  --   (a‖x‖)^2 - 2 (a (b ⟪x,y⟫)) + (b‖y‖)^2 ≤ ‖x‖^2 - 2 ⟪x,y⟫ + ‖y‖^2.
-  -- Name the norms and inner product, recording the needed nonnegativity / bounds.
   have hp0 : 0 ≤ ‖x‖ := norm_nonneg x
   have hq0 : 0 ≤ ‖y‖ := norm_nonneg y
-  -- Cauchy–Schwarz: ⟪x,y⟫ ≤ ‖x‖‖y‖.
   have hcs : ⟪x, y⟫_ℝ ≤ ‖x‖ * ‖y‖ := real_inner_le_norm x y
-  -- `1 - a*b ≥ 0` since `a,b ∈ [0,1]`.
   have hab : 0 ≤ 1 - a * b := by nlinarith [mul_le_one₀ ha1 hb0 hb1]
-  -- `(a‖x‖ - b‖y‖)^2 = (min ‖x‖ R - min ‖y‖ R)^2 ≤ (‖x‖ - ‖y‖)^2`,
-  -- because `t ↦ min t R` is `1`-Lipschitz.
   have hmin : (a * ‖x‖ - b * ‖y‖) ^ 2 ≤ (‖x‖ - ‖y‖) ^ 2 := by
     rw [hax, hby]
     have hlip : LipschitzWith 1 (fun t : ℝ => min t R) := (LipschitzWith.id).min_const R
@@ -101,7 +89,5 @@ theorem lipschitzWith_ballRetraction {R : ℝ} (hR : 0 ≤ R) :
     nlinarith [abs_nonneg (min ‖x‖ R - min ‖y‖ R), abs_nonneg (‖x‖ - ‖y‖),
       sq_abs (min ‖x‖ R - min ‖y‖ R), sq_abs (‖x‖ - ‖y‖),
       mul_self_le_mul_self (abs_nonneg (min ‖x‖ R - min ‖y‖ R)) h1]
-  -- Combine: the squared-norm difference reduces to
-  --   (‖x‖-‖y‖)^2 - (a‖x‖-b‖y‖)^2 + 2(1-ab)(‖x‖‖y‖ - ⟪x,y⟫) ≥ 0.
   nlinarith [hmin, hab, hcs, mul_nonneg hp0 hq0,
     mul_nonneg hab (sub_nonneg.2 hcs)]

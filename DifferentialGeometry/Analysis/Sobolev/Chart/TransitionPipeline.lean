@@ -62,8 +62,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## Smoothness of `chartPullback` on `M` -/
-
 /--
 The compact set in `M` carrying the support of `chartPullback I α ψ`, when
 `ψ` has compact tsupport contained in `chartTargetEuclid α`. This is the image
@@ -226,14 +224,6 @@ theorem chartPullback_contMDiff
     intro y hy
     exact h_zero_on hy
 
-/-! ## Chart-transition map and its overlap region in chart-Euclidean coordinates
-
-This section provides the basic infrastructure used by the per-pair chart
-transition `SmoothDiffeoBoundedAtOrder` constructor: the chart-transition
-function, smoothness on the open overlap, and the cutoff-extension of the
-chart-transition map.
--/
-
 /-- The (Euclidean-side) chart-transition map from chart `γ` to chart `α`:
 literal composition `toEuclidean ∘ extChartAt I α ∘ (extChartAt I γ).symm ∘
 toEuclidean.symm`. Defined globally as a function `EuclN → EuclN` (using
@@ -317,8 +307,6 @@ lemma chartTransitionExtended_eq_chartTransition_on_eta_eq_one
   rw [hy_eta]
   simp
 
-/-! ### Overlap region in chart-Euclidean coordinates -/
-
 /-- The "overlap" open set in chart-γ Euclidean coordinates: the toEuclidean image
 of `extChartAt I γ '' ((chartAt H γ).source ∩ (chartAt H α).source)`. -/
 def chartOverlapEuclid (γ α : M) : Set EuclN :=
@@ -347,36 +335,28 @@ lemma chartOverlapEuclid_isOpen
     (γ α : M) :
     IsOpen (chartOverlapEuclid (I := I) (M := M) γ α) := by
   unfold chartOverlapEuclid
-  -- Step 1: (chartAt H γ).source ∩ (chartAt H α).source is open and ⊆ chart-γ source.
   have h_open_M : IsOpen ((chartAt H γ).source ∩ (chartAt H α).source) :=
     (chartAt H γ).open_source.inter (chartAt H α).open_source
-  -- Step 2: chart-γ image of this is open in H (using OpenPartialHomeomorph).
   have h_subset_source :
       (chartAt H γ).source ∩ (chartAt H α).source ⊆ (chartAt H γ).source := by
     intro x hx; exact hx.1
   have h_image_chart_open : IsOpen ((chartAt H γ) ''
       ((chartAt H γ).source ∩ (chartAt H α).source)) :=
     (chartAt H γ).isOpen_image_of_subset_source h_open_M h_subset_source
-  -- Step 3: relate extChartAt to chartAt + I via image_image.
-  -- extChartAt I γ x = I (chartAt H γ x) (definitionally), so
-  -- extChartAt I γ '' S = I '' (chartAt H γ '' S).
   have h_extChart_eq :
       (extChartAt I γ) '' ((chartAt H γ).source ∩ (chartAt H α).source) =
         I '' ((chartAt H γ) '' ((chartAt H γ).source ∩ (chartAt H α).source)) := by
     rw [Set.image_image]
     rfl
   rw [h_extChart_eq]
-  -- Step 4: I is a homeomorphism (boundaryless), maps open to open.
   have h_I_image : IsOpen (I '' ((chartAt H γ) '' ((chartAt H γ).source ∩ (chartAt H α).source))) := by
     have hI_homeo : Continuous (I.toHomeomorph.symm : E → H) ∧
         Function.Surjective (I.toHomeomorph.symm) ∧ True := by
       refine ⟨I.toHomeomorph.symm.continuous, I.toHomeomorph.symm.surjective, trivial⟩
-    -- Use the fact that I.toHomeomorph is a homeomorphism, hence open.
     have : (I.toHomeomorph : H → E) =
         (I : H → E) := rfl
     rw [show (I : H → E) = ((I.toHomeomorph : H → E)) from rfl]
     exact I.toHomeomorph.isOpenMap _ h_image_chart_open
-  -- Step 5: toEuclidean (CLE) maps open to open.
   exact (toEuclidean (E := E)).toHomeomorph.isOpenMap _ h_I_image
 
 omit [IsManifold I ∞ M] in
@@ -415,8 +395,6 @@ lemma kEuclid_compact
       (hcont_extChart x hx) (Set.mapsTo_univ _ _)
   exact hcomp.mono hK_γ
 
-/-! ### Smoothness of the chart-transition map on the overlap -/
-
 /-- Smoothness of the chart-transition map `T_γα` on `chartOverlapEuclid γ α`. -/
 lemma chartTransitionEuclid_contDiffOn_overlap
     [I.Boundaryless]
@@ -424,29 +402,23 @@ lemma chartTransitionEuclid_contDiffOn_overlap
     ContDiffOn ℝ (⊤ : ℕ∞) (chartTransitionEuclid (I := I) (M := M) γ α)
       (chartOverlapEuclid (I := I) (M := M) γ α) := by
   classical
-  -- Setup: define the overlap_E set in E (before applying toEuclidean).
   set S_M : Set M := (chartAt H γ).source ∩ (chartAt H α).source with hS_M_def
   set S_E : Set E := (extChartAt I γ) '' S_M with hS_E_def
-  -- Step 1: Mathlib's contDiffOn_ext_coord_change gives smoothness on the
-  -- coordinate-change source.
   have h_ext_coord :
       ContDiffOn ℝ (⊤ : ℕ∞) (extChartAt I α ∘ (extChartAt I γ).symm)
         ((extChartAt I γ).symm ≫ extChartAt I α).source :=
     contDiffOn_ext_coord_change (I := I) (n := ∞) α γ
-  -- Step 2: S_E ⊆ ((extChartAt I γ).symm ≫ extChartAt I α).source.
   have hS_E_subset_coord_source :
       S_E ⊆ ((extChartAt I γ).symm ≫ extChartAt I α).source := by
     intro z hz
     rcases hz with ⟨x, hx_in, hxz⟩
     rcases hx_in with ⟨hx_γ, hx_α⟩
     refine ⟨?_, ?_⟩
-    · -- z ∈ (extChartAt I γ).symm.source = (extChartAt I γ).target.
-      have hx_extγ_src : x ∈ (extChartAt I γ).source := by
+    · have hx_extγ_src : x ∈ (extChartAt I γ).source := by
         rw [extChartAt_source (I := I)]; exact hx_γ
       rw [← hxz]
       exact (extChartAt I γ).map_source hx_extγ_src
-    · -- (extChartAt I γ).symm z ∈ (extChartAt I α).source.
-      have hx_extγ_src : x ∈ (extChartAt I γ).source := by
+    · have hx_extγ_src : x ∈ (extChartAt I γ).source := by
         rw [extChartAt_source (I := I)]; exact hx_γ
       have h_lr : (extChartAt I γ).symm (extChartAt I γ x) = x :=
         (extChartAt I γ).left_inv hx_extγ_src
@@ -456,14 +428,12 @@ lemma chartTransitionEuclid_contDiffOn_overlap
   have h_ext_coord_S : ContDiffOn ℝ (⊤ : ℕ∞)
       (extChartAt I α ∘ (extChartAt I γ).symm) S_E :=
     h_ext_coord.mono hS_E_subset_coord_source
-  -- Step 3: pre-compose with toEuclidean.symm.
   have htoE_symm_contDiff : ContDiff ℝ (⊤ : ℕ∞)
       ((toEuclidean (E := E)).symm : EuclN → E) :=
     (toEuclidean (E := E)).symm.contDiff
   have htoE_contDiff : ContDiff ℝ (⊤ : ℕ∞)
       ((toEuclidean : E ≃L[ℝ] EuclN) : E → EuclN) :=
     (toEuclidean : E ≃L[ℝ] EuclN).contDiff
-  -- The preimage of S_E under toEuclidean.symm is chartOverlapEuclid γ α.
   have hsymm_image_eq :
       ((toEuclidean (E := E)).symm) ⁻¹' S_E =
         chartOverlapEuclid (I := I) (M := M) γ α := by
@@ -475,7 +445,6 @@ lemma chartTransitionEuclid_contDiffOn_overlap
     have h_symm : (toEuclidean (E := E)).symm y = z := by
       rw [← hzy, (toEuclidean (E := E)).symm_apply_apply]
     rw [h_symm]; exact hz_in
-  -- mapsTo for the composition.
   have hmapsTo : Set.MapsTo ((toEuclidean (E := E)).symm)
       (chartOverlapEuclid (I := I) (M := M) γ α) S_E := by
     intro y hy
@@ -486,7 +455,6 @@ lemma chartTransitionEuclid_contDiffOn_overlap
           ((toEuclidean (E := E)).symm y))
       (chartOverlapEuclid (I := I) (M := M) γ α) :=
     h_ext_coord_S.comp htoE_symm_contDiff.contDiffOn hmapsTo
-  -- Step 4: post-compose with toEuclidean.
   have h_step3 : ContDiffOn ℝ (⊤ : ℕ∞)
       (fun y => (toEuclidean (E := E))
         ((extChartAt I α ∘ (extChartAt I γ).symm)
@@ -494,8 +462,6 @@ lemma chartTransitionEuclid_contDiffOn_overlap
       (chartOverlapEuclid (I := I) (M := M) γ α) :=
     htoE_contDiff.comp_contDiffOn h_step2
   exact h_step3
-
-/-! ### Global smoothness of the cutoff-extended map -/
 
 /-- The function `η y • (T_γα y - c)`, used as the variable part of the cutoff-extended
 chart-transition map. It vanishes outside `tsupport η`, and on `chartOverlapEuclid γ α`
@@ -567,8 +533,7 @@ lemma chartTransitionExtensionSubC_contDiff
   rw [contDiff_iff_contDiffAt]
   intro y
   by_cases hy_supp : y ∈ tsupport η
-  · -- y ∈ tsupport η ⊆ overlap; use overlap smoothness.
-    have hy_overlap : y ∈ chartOverlapEuclid (I := I) (M := M) γ α := hη_supp hy_supp
+  · have hy_overlap : y ∈ chartOverlapEuclid (I := I) (M := M) γ α := hη_supp hy_supp
     have h_overlap_open : IsOpen (chartOverlapEuclid (I := I) (M := M) γ α) :=
       chartOverlapEuclid_isOpen (I := I) (M := M) γ α
     have h_smooth_on : ContDiffOn ℝ (⊤ : ℕ∞)
@@ -577,8 +542,7 @@ lemma chartTransitionExtensionSubC_contDiff
       chartTransitionExtensionSubC_contDiffOn_overlap (I := I) (M := M) γ α
         hη_smooth c
     exact h_smooth_on.contDiffAt (h_overlap_open.mem_nhds hy_overlap)
-  · -- y ∉ tsupport η: use that the function is 0 on the open complement.
-    have h_open : IsOpen ((tsupport η)ᶜ) := (isClosed_tsupport _).isOpen_compl
+  · have h_open : IsOpen ((tsupport η)ᶜ) := (isClosed_tsupport _).isOpen_compl
     have hy_in : y ∈ ((tsupport η)ᶜ) := hy_supp
     have h_smooth_on : ContDiffOn ℝ (⊤ : ℕ∞)
         (chartTransitionExtensionSubC (I := I) (M := M) γ α η c)
@@ -595,7 +559,6 @@ lemma chartTransitionExtended_contDiff
     (hη_supp : tsupport η ⊆ chartOverlapEuclid (I := I) (M := M) γ α)
     (c : EuclN) :
     ContDiff ℝ (⊤ : ℕ∞) (chartTransitionExtended (I := I) (M := M) γ α η c) := by
-  -- T̃_γα = c + (η * (T_γα - c)).
   have h_eq : chartTransitionExtended (I := I) (M := M) γ α η c =
       fun y => c + chartTransitionExtensionSubC (I := I) (M := M) γ α η c y := by
     funext y
@@ -660,8 +623,6 @@ lemma chartTransitionExtended_iter_deriv_bound
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.iter_deriv_bound_of_eq_const_offCompactSupport_atOrder
     (d := Module.finrank ℝ E) hT_smooth hT_diff_cpt kmax
 
-/-! ### Bijection properties of the chart-transition map -/
-
 omit [IsManifold I ∞ M] in
 /-- For `y ∈ chartOverlapEuclid γ α`, `T_γα y ∈ chartOverlapEuclid α γ`. -/
 lemma chartTransitionEuclid_mapsTo_overlap
@@ -670,16 +631,12 @@ lemma chartTransitionEuclid_mapsTo_overlap
     (hy : y ∈ chartOverlapEuclid (I := I) (M := M) γ α) :
     chartTransitionEuclid (I := I) (M := M) γ α y ∈
       chartOverlapEuclid (I := I) (M := M) α γ := by
-  -- y ∈ overlap_γα ⇒ y = toEuclidean(extChartAt I γ x) for x ∈ source γ ∩ source α.
   rcases hy with ⟨z, ⟨x, hx_in, hxz⟩, hzy⟩
-  -- T_γα y = toEuclidean(extChartAt I α x) by the formula.
   have h_T_eq : chartTransitionEuclid (I := I) (M := M) γ α y =
       (toEuclidean (E := E)) (extChartAt I α x) := by
     rw [← hzy, ← hxz]
-    -- y = toEuclidean (extChartAt I γ x). Apply formula.
     exact chartTransitionEuclid_eq_chartα_image (I := I) (M := M) γ α hx_in.1
   rw [h_T_eq]
-  -- Now: toEuclidean(extChartAt I α x) ∈ overlap_αγ.
   refine ⟨extChartAt I α x, ?_, rfl⟩
   refine ⟨x, ⟨hx_in.2, hx_in.1⟩, rfl⟩
 
@@ -692,18 +649,14 @@ lemma chartTransitionEuclid_left_inv
     (hy : y ∈ chartOverlapEuclid (I := I) (M := M) γ α) :
     chartTransitionEuclid (I := I) (M := M) α γ
       (chartTransitionEuclid (I := I) (M := M) γ α y) = y := by
-  -- y ∈ overlap_γα ⇒ y = toEuclidean(extChartAt I γ x) for x ∈ source γ ∩ source α.
   rcases hy with ⟨z, ⟨x, hx_in, hxz⟩, hzy⟩
-  -- Step 1: y = toEuclidean(extChartAt I γ x).
   have hy_eq : y = (toEuclidean (E := E)) (extChartAt I γ x) := by
     rw [← hzy, ← hxz]
-  -- Step 2: T_γα y = toEuclidean(extChartAt I α x).
   have h_T1 : chartTransitionEuclid (I := I) (M := M) γ α y =
       (toEuclidean (E := E)) (extChartAt I α x) := by
     rw [hy_eq]
     exact chartTransitionEuclid_eq_chartα_image (I := I) (M := M) γ α hx_in.1
   rw [h_T1]
-  -- Step 3: T_αγ (toEuclidean(extChartAt I α x)) = toEuclidean(extChartAt I γ x) = y.
   have h_T2 : chartTransitionEuclid (I := I) (M := M) α γ
       ((toEuclidean (E := E)) (extChartAt I α x)) =
       (toEuclidean (E := E)) (extChartAt I γ x) :=
@@ -731,15 +684,11 @@ lemma chartTransitionEuclid_surjOn_overlap
       (chartOverlapEuclid (I := I) (M := M) γ α)
       (chartOverlapEuclid (I := I) (M := M) α γ) := by
   intro z hz
-  -- z ∈ overlap_αγ ⇒ z = toEuclidean(extChartAt I α x) for x ∈ source α ∩ source γ.
   rcases hz with ⟨w, ⟨x, hx_in, hxw⟩, hwz⟩
-  -- Take y := toEuclidean(extChartAt I γ x). Then y ∈ overlap_γα and T_γα y = z.
   refine ⟨(toEuclidean (E := E)) (extChartAt I γ x), ?_, ?_⟩
-  · -- y ∈ overlap_γα.
-    refine ⟨extChartAt I γ x, ?_, rfl⟩
+  · refine ⟨extChartAt I γ x, ?_, rfl⟩
     refine ⟨x, ⟨hx_in.2, hx_in.1⟩, rfl⟩
-  · -- T_γα y = z.
-    rw [chartTransitionEuclid_eq_chartα_image (I := I) (M := M) γ α hx_in.2]
+  · rw [chartTransitionEuclid_eq_chartα_image (I := I) (M := M) γ α hx_in.2]
     rw [← hwz, ← hxw]
 
 omit [IsManifold I ∞ M] in

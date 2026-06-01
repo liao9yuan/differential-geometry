@@ -1,30 +1,3 @@
-/-
-The genuine open conjugating-flow smooth-dependence inputs of the Hamilton–DeTurck
-short-time-existence construction, isolated into two faithful labeled nodes.
-
-Both nodes are PINNED to the GENUINE conjugating flow by the orbit-ODE hypothesis
-`hΦode` (the backward bare-orbit equation `∂_s Φ_fam = -deTurckVF (g_DT s) g_bg ∘ Φ_fam`
-on the interior `Ioo 0 T`). They are therefore TRUE statements about that specific flow,
-not about an arbitrary diffeomorphism family.
-
-* `conjugating_flow_flat_data` bundles the flat variational data of the conjugating flow:
-  the per-slot raw flat variational identity with its factor jets `T'`/`P'`
-  (`flat_raw_variational_identity` over the flow's chart-ODE jet data), the
-  Christoffel-correction equation (`flat_christoffel_correction_eqn`), the base-point-motion
-  datum (`basepoint_motion_datum`), and the three-piece additive chain rule
-  (`deTurck_pullback_h_total_eval`).
-
-* `conjugating_flow_t0_continuity_data` bundles the `t = 0`-endpoint continuity data: the
-  `Ico 0 T` continuity of the pulled-back inner product (`gfam_inner_continuous_on`) and the
-  right-continuity at `0` of `-2 Ric` of the pulled-back metric (`ricci_gfam_continuous_on`).
-
-These are the classical-analytic smooth-dependence-on-initial-conditions inputs of the
-conjugating flow (two-sided window ODE, autonomized-field joint `C¹`, chart moving-trivialization
-jets, joint `(t,x)` chart-Gram smoothness, total-space pushforward continuity up to the
-`C⁰`-at-`0` boundary).  Their on-disk providers are proven and faithful, but each still needs
-this open conjugating-flow smooth-in-IC data, with no on-disk producer; we isolate that open
-content here as faithful labeled `sorry`s for a later dedicated fill effort.
--/
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.FlatVariationalData
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.BasepointMotion
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeAssembly.EvalFormChainRule
@@ -74,11 +47,6 @@ for a dedicated fill effort. -/
 theorem conjugating_flow_flat_data
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
-    -- The DeTurck–Ricci PDE pin on `g_DT` (the exact shape carried by the on-disk producers
-    -- `total_eval_three_piece_chain_rule` / `deTurck_pullback_h_total_eval`): on `Ico 0 T` the
-    -- pointwise inner product of `g_DT` evolves by the DeTurck–Ricci RHS `deTurckRicciRHS`.
-    -- This is the genuine PDE constraint that makes the three-piece chain-rule conjunct
-    -- (`h_total_eval`) TRUE; it pins `g_DT` to the parabolic flow rather than leaving it free.
     (hDT_deriv : ∀ s ∈ Set.Ico (0 : ℝ) T, ∀ y : M, ∀ a b : TangentSpace I y,
       HasDerivWithinAt (fun u : ℝ => (g_DT u).inner y a b)
         (deTurckRicciRHS (I := I) g_bg (g_DT s) y a b) (Set.Ici 0) s)
@@ -168,14 +136,6 @@ theorem conjugating_flow_orbit_pushforward_continuity_data
         (Set.Ici (0 : ℝ)) t
         ((1 : ℝ →L[ℝ] ℝ).smulRight
           (-(deTurckVF (I := I) (g_DT t) g_bg ((Φ_fam t : M → M) x)))))
-    -- GENUINE interior-time smooth-dependence input: the DeTurck velocity field
-    -- `q ↦ ⟨q.2, deTurckVF (g_DT q.1) g_bg q.2⟩` is jointly `C∞` on the interior `Ioo 0 T ×ˢ univ`
-    -- (the `h_reg` output of `deturck_ricci_flow_parabolic_short_time_existence`).  By closed-manifold Hartman
-    -- smooth-dependence-on-initial-conditions the flow map of this field is jointly `C∞` in
-    -- `(t, x)` on the interior, hence its moving spatial Jacobian
-    -- `s ↦ (mfderiv I I (Φ_fam s) y u : E)` is continuous at every interior time.  This is the
-    -- genuine open content that `hΦode` alone does not pin (it fixes only the basepoint's
-    -- time-derivative, not the Jacobian's time-regularity); it makes conjunct 2 TRUE.
     (hfield_reg : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
         : TangentBundle I M))
@@ -220,39 +180,20 @@ theorem conjugating_flow_t0_continuity_data
         (Set.Ici (0 : ℝ)) t
         ((1 : ℝ →L[ℝ] ℝ).smulRight
           (-(deTurckVF (I := I) (g_DT t) g_bg ((Φ_fam t : M → M) x)))))
-    -- The flow endpoint is the identity (`hΦ0`) and the DeTurck initial datum is the
-    -- background metric (`hDT_init`).  These two pins determine the `t = 0` endpoint of the
-    -- pulled-back family `g_fam 0 = (Φ_fam 0)^* (g_DT 0) = id^* g_bg = g_bg`, so the two
-    -- continuity conjuncts are TRUE at the genuine flow rather than at an arbitrary endpoint.
     (hΦ0 : Φ_fam 0 = _root_.Diffeomorph.refl I M ∞)
     (hDT_init : g_DT 0 = g_bg)
-    -- GENUINE `g_DT` chart-Gram regularity up to `t = 0`, in the exact two shapes the two
-    -- providers `gfam_inner_continuous_on` / `ricci_gfam_continuous_on` consume.  The Ricci
-    -- conjunct is a SECOND-order spatial quantity of `g_DT`, so it needs the joint `k ≤ 2`
-    -- chart-jet continuity (`hC2`), not merely the `k = 0` value continuity; both are GENUINE
-    -- `C⁰`/`C²`-up-to-`0` outputs of the smooth-initial-data DeTurck parabolic solution, and
-    -- constrain only the internal `g_DT`, not `g_bg`/the headline.
-    --
-    -- `hg_joint`: the `k = 0` chart-Gram value continuity up to `t = 0` (on `Icc 0 T ×ˢ univ`),
-    -- the input of `gfam_inner_continuous_on`.
     (hg_joint : ∀ (α : M) (i j : Fin (Module.finrank ℝ E)),
       ContinuousOn
         (fun q : ℝ × M =>
           Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j
             (extChartAt I α q.2))
         (Set.Icc 0 T ×ˢ Set.univ))
-    -- `hC2`: the joint `k ≤ 2` chart-jet continuity up to `t = 0`, on `Icc 0 T ×ˢ goodSet`,
-    -- the GENUINE second-order-in-space regularity input of `ricci_gfam_continuous_on`.
     (hC2 : ∀ (α : M) (i j : Fin (Module.finrank ℝ E)) (k : ℕ), k ≤ 2 →
       ContinuousOn
         (fun q : ℝ × M => iteratedFDeriv ℝ k
           (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j)
           (extChartAt I α q.2))
         (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α))
-    -- WHOLE-`Ico 0 T` orbit and total-space pushforward continuity of the conjugating flow
-    -- (the genuine forward-flow smooth-dependence-on-IC continuity outputs, continuous up to the
-    -- `C⁰`-at-`0` boundary on the whole half-open window), which both providers consume.  These
-    -- pin `Φ_fam` to be continuous in time up to `0` (orbit and moving Jacobian / bundle datum).
     (hΦ_orbit : ∀ y : M,
       ContinuousOn (fun s : ℝ => (Φ_fam s : M → M) y) (Set.Ico 0 T))
     (hΦ_total : ∀ (y : M) (u : TangentSpace I y),
@@ -267,16 +208,11 @@ theorem conjugating_flow_t0_continuity_data
         (fun s : ℝ => (-2 : ℝ) *
           DifferentialGeometry.Integral.Connection.ricciTensor (I := I)
             (Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s)) x v w) (Set.Ioi 0) 0 := by
-  -- Conjunct 1 is exactly `gfam_inner_continuous_on` on `Ico 0 T`.
   refine ⟨gfam_inner_continuous_on (I := I) g_DT T hT Φ_fam x v w hg_joint hΦ_orbit hΦ_total, ?_⟩
-  -- Conjunct 2: `ricci_gfam_continuous_on` gives the `Ico 0 T` continuity of the pullback Ricci
-  -- tensor; restrict to the right-neighbourhood `Ioi 0` of `0` and scale by `-2`.
   have hric : ContinuousOn
       (fun s : ℝ => ricciTensor (I := I)
         (Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s)) x v w) (Set.Ico 0 T) :=
     ricci_gfam_continuous_on (I := I) g_DT T hT Φ_fam x v w hC2 hΦ_orbit hΦ_total
-  -- Right-continuity at `0` along `Ioo 0 T`, then upgraded to along `Ioi 0` via
-  -- `Ioo 0 T ∈ 𝓝[Ioi 0] 0`.
   have h0mem : (0 : ℝ) ∈ Set.Ico (0 : ℝ) T := ⟨le_rfl, hT⟩
   have hcwa_Ioo : ContinuousWithinAt
       (fun s : ℝ => ricciTensor (I := I)

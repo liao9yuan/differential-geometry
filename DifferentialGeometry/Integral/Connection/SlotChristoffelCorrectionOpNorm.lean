@@ -70,8 +70,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
-/-! ## Pointwise factor bound for `tensorSlotSubstCLM` -/
-
 /-- Pointwise upper bound on `tensorSlotSubstCLM` in the model fibre norm.
 The argument proceeds in three steps:
 
@@ -87,7 +85,6 @@ lemma tensorSlotSubstCLM_apply_norm_le (n : ℕ) (b : M)
     ‖tensorSlotSubstCLM (I := I) n b Φ x‖ ≤
       (∏ i : Fin n, ‖Φ i‖) * ‖x‖ := by
   classical
-  -- Step 1: rewrite via the model-fibre carrier.
   have hsubst_eq :
       tensorSlotSubstCLM (I := I) n b Φ x =
         (tensor0SSpace_continuousLinearEquiv (I := I) (M := M) n b).symm
@@ -108,10 +105,8 @@ lemma tensorSlotSubstCLM_apply_norm_le (n : ℕ) (b : M)
     rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
     rfl
   rw [hsubst_eq]
-  -- Step 2: CLE.symm preserves the norm.
   rw [tensor0SSpace_continuousLinearEquiv_symm_norm_apply (𝕜 := ℝ) (E := E)
       (I := I) (M := M) n b _]
-  -- Step 3: bound `compCLML Φ` via its operator norm.
   have hopBound :
       ‖ContinuousMultilinearMap.compContinuousLinearMapL
           (𝕜 := ℝ) (E := fun _ : Fin n => E) (F := ℝ) Φ‖ ≤
@@ -139,8 +134,6 @@ lemma tensorSlotSubstCLM_apply_norm_le (n : ℕ) (b : M)
   rw [tensor0SSpace_continuousLinearEquiv_norm_apply (𝕜 := ℝ) (E := E)
       (I := I) (M := M) n b x] at hCLM_le'
   exact hCLM_le'
-
-/-! ## Slot-substitution product bound -/
 
 /-- Per-slot bound on `tangentSlotCLM`'s factors: identity at non-substituted
 slots (`≤ 1`), the substituted CLM at the substituted slot (`= ‖Φ‖`). -/
@@ -172,23 +165,6 @@ lemma tangentSlotCLM_prod_norm_le (n : ℕ) (b : M)
   refine Finset.prod_le_prod ?_ ?_
   · intro i _; exact norm_nonneg _
   · intro i _; exact tangentSlotCLM_factor_norm_le (I := I) n b k Φ i
-
-/-! ## Operator-norm bound for the slot-substitution CLM itself
-
-The pointwise bound `‖tensorSlotSubstCLM n b Φ x‖ ≤ (∏ ‖Φ i‖) * ‖x‖` lifts
-to an operator-norm bound on `tensorSlotSubstCLM n b Φ`, viewed as an
-element of `TensorRSSpace n n I b` via the definitional identification
-`TensorRSSpace n n I b = Tensor0SSpace n I b →L[ℝ] Tensor0SSpace n I b`. We
-use the `TensorRSSpace`-norm formulation so that the bound is compatible
-with `tensorRSSpace_opNorm_le_bound` and the rest of the slot-correction
-machinery, which operate at the `TensorRSSpace` level rather than the
-carrier `→L[ℝ]` level (the carrier does not directly admit a `Norm`
-synthesis because `Tensor0SSpace` carries the bundle topology, only
-propositionally equal to the norm topology).
-
-The composite op-norm `‖tensorSlotSubstCLM n b (tangentSlotCLM n k Φ)‖` —
-the form actually appearing inside `chartTensorRSInputSlotCorrection` and
-`chartTensorRSOutputSlotCorrection` — is then bounded by `(max ‖Φ‖ 1) ^ n`. -/
 
 /-- `tensorSlotSubstCLM n b Φ` viewed as an element of `TensorRSSpace n n I b`.
 
@@ -225,8 +201,6 @@ theorem tensorSlotSubstCLM_opNorm_le (n : ℕ) (b : M)
     (tensorSlotSubstCLMRS (I := I) n b Φ)
     (slotSubstCLM_factor_prod_nonneg (I := I) (M := M) n Φ) ?_
   intro x
-  -- The CLM-application norm bound reduces to `tensorSlotSubstCLM_apply_norm_le`
-  -- via the definitional identification on `tensorSlotSubstCLMRS`.
   exact tensorSlotSubstCLM_apply_norm_le (I := I) n b Φ x
 
 /-- **Composite op-norm bound for the slot CLM used in the slot Christoffel
@@ -277,15 +251,6 @@ theorem tensorSlotSubstCLM_outputSlotChartCLM_opNorm_le (s : ℕ)
       (max ‖chartLeviCivitaParallelCLM (I := I) g α b X‖ 1) ^ s :=
   tensorSlotSubstCLM_tangentSlotCLM_opNorm_le (I := I) s b l _
 
-/-! ## Headline op-norm bound — input slot
-
-`chartTensorRSInputSlotCorrection r s g α T X b k` is, on the carrier
-`Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b`, the composition
-`T b ∘L tensorSlotSubstCLM r b (tangentSlotCLM r k Φ)` where
-`Φ := chartLeviCivitaParallelCLM g α b X`. We bound it via
-`‖(T b)(substCLM Ψ x)‖ ≤ ‖T b‖ · (∏ ‖Ψ i‖) · ‖x‖`
-and absorb the product into `(max ‖Φ‖ 1) ^ r`. -/
-
 /-- **Headline.** Op-norm bound for the `k`-th input-slot Christoffel
 correction, by a Christoffel factor `(max ‖chartLeviCivitaParallelCLM g α b X‖ 1) ^ r`
 times the fibre norm `‖T b‖`. -/
@@ -312,7 +277,6 @@ theorem chartTensorRSInputSlotCorrection_opNorm_le (r s : ℕ)
   refine tensorRSSpace_opNorm_le_bound (𝕜 := ℝ) (E := E) (I := I) (M := M)
     (chartTensorRSInputSlotCorrection (I := I) r s g α T X b k) hRHS_nn ?_
   intro x
-  -- Unfold the input slot correction as `(T b).comp (substCLM r b Ψ)` applied at `x`.
   have hcomp : (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from
       chartTensorRSInputSlotCorrection (I := I) r s g α T X b k) x =
       (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b)
@@ -323,13 +287,11 @@ theorem chartTensorRSInputSlotCorrection_opNorm_le (r s : ℕ)
         (tensorSlotSubstCLM (I := I) r b Ψ x)
     rw [ContinuousLinearMap.comp_apply]
   rw [hcomp]
-  -- ‖(T b) (substCLM Ψ x)‖ ≤ ‖T b‖ * ‖substCLM Ψ x‖.
   have hT_apply :
       ‖(show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b)
           (tensorSlotSubstCLM (I := I) r b Ψ x)‖ ≤
         ‖T b‖ * ‖tensorSlotSubstCLM (I := I) r b Ψ x‖ :=
     tensorRSSpace_norm_apply_le (𝕜 := ℝ) (E := E) (I := I) (M := M) (T b) _
-  -- ‖substCLM Ψ x‖ ≤ (∏ ‖Ψ i‖) * ‖x‖.
   have hsubst :
       ‖tensorSlotSubstCLM (I := I) r b Ψ x‖ ≤
         (∏ i : Fin r, ‖Ψ i‖) * ‖x‖ :=
@@ -360,12 +322,6 @@ theorem chartTensorRSInputSlotCorrection_opNorm_le (r s : ℕ)
   rw [h_rearrange] at hChain2
   exact hChain2
 
-/-! ## Headline op-norm bound — output slot
-
-Dual to the input case: the correction factorises as
-`tensorSlotSubstCLM s b (tangentSlotCLM s l Φ) ∘L T b`, so
-`‖substCLM Ψ ((T b) x)‖ ≤ (∏ ‖Ψ i‖) · ‖T b‖ · ‖x‖`. -/
-
 /-- **Headline.** Op-norm bound for the `l`-th output-slot Christoffel
 correction, by a Christoffel factor `(max ‖chartLeviCivitaParallelCLM g α b X‖ 1) ^ s`
 times the fibre norm `‖T b‖`. -/
@@ -392,7 +348,6 @@ theorem chartTensorRSOutputSlotCorrection_opNorm_le (r s : ℕ)
   refine tensorRSSpace_opNorm_le_bound (𝕜 := ℝ) (E := E) (I := I) (M := M)
     (chartTensorRSOutputSlotCorrection (I := I) r s g α T X b l) hRHS_nn ?_
   intro x
-  -- Unfold the output slot correction as `(substCLM s b Ψ).comp (T b)` at `x`.
   have hcomp : (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from
       chartTensorRSOutputSlotCorrection (I := I) r s g α T X b l) x =
       tensorSlotSubstCLM (I := I) s b Ψ
@@ -403,14 +358,12 @@ theorem chartTensorRSOutputSlotCorrection_opNorm_le (r s : ℕ)
         ((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b) x)
     rw [ContinuousLinearMap.comp_apply]
   rw [hcomp]
-  -- ‖substCLM Ψ (T b x)‖ ≤ (∏ ‖Ψ i‖) * ‖T b x‖.
   have hsubst :
       ‖tensorSlotSubstCLM (I := I) s b Ψ
           ((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b) x)‖ ≤
         (∏ i : Fin s, ‖Ψ i‖) *
           ‖(show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b) x‖ :=
     tensorSlotSubstCLM_apply_norm_le (I := I) s b Ψ _
-  -- ‖(T b) x‖ ≤ ‖T b‖ * ‖x‖.
   have hT_apply :
       ‖(show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b) x‖ ≤
         ‖T b‖ * ‖x‖ :=

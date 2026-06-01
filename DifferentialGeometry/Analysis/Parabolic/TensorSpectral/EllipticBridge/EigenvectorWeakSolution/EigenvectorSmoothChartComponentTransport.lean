@@ -96,25 +96,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## A measure-theoretic gluing helper
-
-The two sides of the headline agree everywhere off the chart overlap
-`chartOverlapEuclid β γ` and almost everywhere on it; the following helper
-combines the two facts into an almost-everywhere identity on the full chart
-`L²` measure. -/
 
 /-- If two functions agree almost everywhere with respect to `μ.restrict s` and
 agree everywhere off the measurable set `s`, then they agree almost everywhere
@@ -137,12 +124,6 @@ private lemma ae_eq_of_ae_eq_restrict_of_eqOn_compl
   · rwa [h_inter]
   · exact hs.nullMeasurableSet
 
-/-! ## The chart-overlap membership characterisation
-
-For a point `y` of the Euclidean chart target of `β`, membership in the chart
-overlap `chartOverlapEuclid β γ` is equivalent to the chart-`β` inverse image
-of `y` lying in the chart-`γ` source. -/
-
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
@@ -156,11 +137,9 @@ lemma mem_chartOverlapEuclid_iff_of_mem_chartTargetEuclid
       (extChartAt I β).symm ((toEuclidean (E := E)).symm y) ∈
         (chartAt H γ).source := by
   classical
-  -- `z` is the chart-`β` inverse image of `y`; it lies in the chart-`β` source.
   set z : M := (extChartAt I β).symm ((toEuclidean (E := E)).symm y) with hz_def
   have hz_srcβ : z ∈ (chartAt H β).source :=
     symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) β hy
-  -- `y` is the chart-`β` Euclidean image of `z`.
   have hsymm_target : (toEuclidean (E := E)).symm y ∈ (extChartAt I β).target := by
     rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
     exact hy
@@ -168,9 +147,7 @@ lemma mem_chartOverlapEuclid_iff_of_mem_chartTargetEuclid
     rw [hz_def, (extChartAt I β).right_inv hsymm_target]
     exact (toEuclidean (E := E)).apply_symm_apply y
   constructor
-  · -- Overlap membership exhibits `y` as the chart-`β` image of an overlap
-    -- point; injectivity of the chart on its source pins that point to `z`.
-    rintro ⟨w, ⟨x, hx_in, hxw⟩, hwy⟩
+  · rintro ⟨w, ⟨x, hx_in, hxw⟩, hwy⟩
     have hx_eq_z : x = z := by
       have hx_srcβ : x ∈ (extChartAt I β).source := by
         rw [extChartAt_source (I := I)]; exact hx_in.1
@@ -178,15 +155,8 @@ lemma mem_chartOverlapEuclid_iff_of_mem_chartTargetEuclid
         (extChartAt I β).left_inv hx_srcβ]
     rw [hx_eq_z] at hx_in
     exact hx_in.2
-  · -- Conversely, `z` lies in both sources, and `y` is its chart-`β` image.
-    intro hz_srcγ
+  · intro hz_srcγ
     exact ⟨extChartAt I β z, ⟨z, ⟨hz_srcβ, hz_srcγ⟩, rfl⟩, hy_eq⟩
-
-/-! ## The chart-kernel cutoff pushed to the Euclidean chart target
-
-The chart-`γ` kernel cutoff `chartKernelCutoff γ`, pushed to the Euclidean
-chart target of `γ`. On the partition-of-unity kernel `chartPouKernel γ` it is
-identically `1`. -/
 
 /-- The chart-`γ` kernel cutoff `chartKernelCutoff γ`, pushed to the Euclidean
 chart target of `γ`. -/
@@ -203,24 +173,18 @@ private lemma chartKernelCutoffPushed_eq_one_on_chartPouKernel
     (hy : y ∈ chartPouKernel (I := I) (M := M) γ) :
     chartKernelCutoffPushed (I := I) (M := M) γ y = 1 := by
   classical
-  -- `y` is the chart-`γ` Euclidean image of a point `w` of the closed support
-  -- of the partition-of-unity weight.
   rw [chartPouKernel] at hy
   obtain ⟨v, ⟨w, hw_supp, hwv⟩, hvy⟩ := hy
-  -- The partition of unity is subordinate to the chart sources.
   have hw_srcγ : w ∈ (chartAt H γ).source :=
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M) γ hw_supp
   have hw_extsrc : w ∈ (extChartAt I γ).source := by
     rw [extChartAt_source (I := I)]; exact hw_srcγ
-  -- `y` lies in the Euclidean chart target of `γ`.
   have hy_target : y ∈ chartTargetEuclid (I := I) (M := M) γ :=
     chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) γ
       ⟨v, ⟨w, hw_supp, hwv⟩, hvy⟩
-  -- The chart-`γ` inverse image of `y` is `w`.
   have hsymm : (extChartAt I γ).symm ((toEuclidean (E := E)).symm y) = w := by
     rw [← hvy, ← hwv, (toEuclidean (E := E)).symm_apply_apply,
       (extChartAt I γ).left_inv hw_extsrc]
-  -- Evaluate the pushforward and use that the cutoff is `1` on the kernel.
   unfold chartKernelCutoffPushed
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) γ _ hy_target, hsymm]
   exact chartKernelCutoff_eqOn_one (I := I) (M := M) γ hw_supp
@@ -237,16 +201,6 @@ private lemma chartKernelCutoffPushed_toEuclidean_extChartAt
       (toEuclidean_extChartAt_mem_chartTargetEuclid (I := I) (M := M) γ hz),
     symm_toEuclidean_symm_toEuclidean_extChartAt (I := I) (M := M) γ hz]
 
-/-! ## Chart-locality-free transport-term reconciliation
-
-The eigenvector chart component is keyed on the intrinsic-compactness
-eigenvector `tensorResolventEigenbasisVec
-(tensorResolventL2_isCompactOperator g r s) i`, consuming the
-`_unconditional` / `_ofCompact` sibling objects. The chart-geometry helpers
-`mem_chartOverlapEuclid_iff_of_mem_chartTargetEuclid` and
-`chartKernelCutoffPushed*` carry no chart-selection witness and are reused
-directly. -/
-
 /-- The eigenvector chart-`γ` `Q`-component (intrinsic-compactness keying)
 equals, almost everywhere on the Lebesgue volume restricted to the Euclidean
 chart target of `γ`, the pushed chart-`γ` kernel cutoff times itself. -/
@@ -261,10 +215,8 @@ private lemma eigenvectorChartComponentFun_ae_eq_chartKernelCutoffPushed_mul
         eigenvectorChartComponentFun (I := I) (M := M)
           g r s i γ Q y) := by
   classical
-  -- The partition-of-unity kernel is measurable.
   have hK_meas : MeasurableSet (chartPouKernel (I := I) (M := M) γ) :=
     chartPouKernel_measurableSet (I := I) (M := M) γ
-  -- On the kernel: the pushed cutoff is `1`, so the product is the component.
   have h_on_K : ∀ᵐ y ∂((volume : Measure EuclN).restrict
       (chartTargetEuclid (I := I) (M := M) γ)),
       y ∈ chartPouKernel (I := I) (M := M) γ →
@@ -275,8 +227,6 @@ private lemma eigenvectorChartComponentFun_ae_eq_chartKernelCutoffPushed_mul
     refine Filter.Eventually.of_forall (fun y hy => ?_)
     rw [chartKernelCutoffPushed_eq_one_on_chartPouKernel (I := I) (M := M) γ hy,
       one_mul]
-  -- Off the kernel: the component vanishes almost everywhere, so the product
-  -- (the cutoff times zero) agrees with it.
   have h_off_raw :=
     eigenvectorChartComponentFun_ae_zero_off_chartPouKernel
       (I := I) (M := M) g r s i γ Q
@@ -309,7 +259,6 @@ private lemma eigenvectorChartComponentFun_ae_eq_chartKernelCutoffPushed_mul
     have hy_zero : eigenvectorChartComponentFun (I := I) (M := M)
         g r s i γ Q y = 0 := hy hy_off
     rw [hy_zero, mul_zero]
-  -- Combine the on-kernel and off-kernel facts.
   filter_upwards [h_on_K, h_off_K] with y hy_on hy_off
   by_cases hy_mem : y ∈ chartPouKernel (I := I) (M := M) γ
   · exact hy_on hy_mem
@@ -330,8 +279,6 @@ private lemma chosenComp_comp_chartTransition_ae_eq
       (fun y => eigenvectorChartComponentFun (I := I) (M := M)
         g r s i γ Q
         (chartTransitionEuclid (I := I) (M := M) β γ y)) := by
-  -- The chosen-representative agreement holds on the Euclidean chart target of
-  -- `γ`; restrict it to the chart overlap and transport across the transition.
   have h_target := chosenComp_ae_eq (I := I) (M := M) g r s i γ Q
   have h_overlap :
       chosenComp (I := I) (M := M) g r s i γ Q
@@ -360,8 +307,6 @@ private lemma eigenvectorChartComponentFun_comp_chartTransition_ae_eq_cutoff_mul
         eigenvectorChartComponentFun (I := I) (M := M)
           g r s i γ Q
           (chartTransitionEuclid (I := I) (M := M) β γ y)) := by
-  -- The kernel-cutoff factorisation holds on the Euclidean chart target of `γ`;
-  -- restrict it to the chart overlap and transport across the transition.
   have h_target :=
     eigenvectorChartComponentFun_ae_eq_chartKernelCutoffPushed_mul
       (I := I) (M := M) g r s i γ Q
@@ -422,9 +367,6 @@ theorem eigenvectorSmoothChart_transport_term_aeEq
                 g r s) i) γ Q) :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) := by
   classical
-  -- Abbreviations: the common pushed partition-of-unity weight `W`, the
-  -- smooth-section transformation-law factor `A`, the transport operator
-  -- output `B`, and the explicit underlying-function form `RHS` of `B`.
   set W : EuclN → ℝ := fun y => chartPushedRaw I β
     (fun x => ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) y with hW_def
   set A : EuclN → ℝ := fun y => chartPushedRaw I β
@@ -446,27 +388,19 @@ theorem eigenvectorSmoothChart_transport_term_aeEq
         (transportCoeffManifold (I := I) (M := M) g r s γ β P₀ Q) y *
       eigenvectorChartComponentFun (I := I) (M := M) g r s i γ Q
         (chartTransitionEuclid (I := I) (M := M) β γ y) with hRHS_def
-  -- Step 1: `B` unfolds, almost everywhere, into the explicit form `RHS`.
   have hB_eq : B =ᵐ[chartL2Measure (I := I) (M := M) β] RHS := by
     have h := chartTransitionTransportCLM_coeFn_aeEq (I := I) (M := M) g r s γ β
       P₀ Q (tensorL2ChartComponent (I := I) (M := M) g r s
         (tensorResolventEigenbasisVec (I := I) (M := M)
           (tensorResolventL2_isCompactOperator (I := I) (M := M)
             g r s) i) γ Q)
-    -- The abstract-component coercion is, by definition, the eigenvector
-    -- chart-`γ` component function.
     exact h.trans (Filter.EventuallyEq.of_eq rfl)
-  -- Step 2: the headline goal reduces to `W · A =ᵐ W · RHS`.
   have h_goal : (fun y => W y * A y)
       =ᵐ[chartL2Measure (I := I) (M := M) β] (fun y => W y * RHS y) := by
-    -- The chart overlap of `β` and `γ` is open, hence measurable.
     have hΩ_open : IsOpen (chartOverlapEuclid (I := I) (M := M) β γ) :=
       chartOverlapEuclid_isOpen (I := I) (M := M) β γ
     have hΩ_meas : MeasurableSet (chartOverlapEuclid (I := I) (M := M) β γ) :=
       hΩ_open.measurableSet
-    -- The chart `L²` measure restricted to the chart overlap is the plain
-    -- Lebesgue volume restricted to the overlap (the overlap sits inside the
-    -- chart target).
     have h_restrict_eq :
         (chartL2Measure (I := I) (M := M) β).restrict
           (chartOverlapEuclid (I := I) (M := M) β γ) =
@@ -475,14 +409,11 @@ theorem eigenvectorSmoothChart_transport_term_aeEq
       rw [chartL2Measure, Measure.restrict_restrict hΩ_meas,
         Set.inter_eq_left.mpr
           (chartOverlapEuclid_subset_chartTarget (I := I) (M := M) β γ)]
-    -- The on-overlap almost-everywhere identity.
     have h_on_overlap : (fun y => W y * A y)
         =ᵐ[(chartL2Measure (I := I) (M := M) β).restrict
             (chartOverlapEuclid (I := I) (M := M) β γ)]
         (fun y => W y * RHS y) := by
       rw [h_restrict_eq]
-      -- Almost-everywhere membership in the overlap, and the two transported
-      -- chart-`γ` identities.
       have h_mem : ∀ᵐ y ∂((volume : Measure EuclN).restrict
           (chartOverlapEuclid (I := I) (M := M) β γ)),
           y ∈ chartOverlapEuclid (I := I) (M := M) β γ :=
@@ -493,7 +424,6 @@ theorem eigenvectorSmoothChart_transport_term_aeEq
         eigenvectorChartComponentFun_comp_chartTransition_ae_eq_cutoff_mul
           (I := I) (M := M) g r s i β γ Q
       filter_upwards [h_mem, h_cc, h_kc] with y hy_mem hy_cc hy_kc
-      -- The chart-`β` inverse image `z` of `y` lies in both chart sources.
       have hy_target : y ∈ chartTargetEuclid (I := I) (M := M) β :=
         chartOverlapEuclid_subset_chartTarget (I := I) (M := M) β γ hy_mem
       set z : M := (extChartAt I β).symm ((toEuclidean (E := E)).symm y)
@@ -503,9 +433,7 @@ theorem eigenvectorSmoothChart_transport_term_aeEq
       have hz_srcγ : z ∈ (chartAt H γ).source :=
         (mem_chartOverlapEuclid_iff_of_mem_chartTargetEuclid
           (I := I) (M := M) β γ hy_target).mp hy_mem
-      -- The chart-`γ` Euclidean image of `z`.
       set zγ : EuclN := (toEuclidean (E := E)) (extChartAt I γ z) with hzγ_def
-      -- `y` is the chart-`β` Euclidean image of `z`.
       have hsymm_target : (toEuclidean (E := E)).symm y ∈
           (extChartAt I β).target := by
         rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy_target
@@ -513,12 +441,9 @@ theorem eigenvectorSmoothChart_transport_term_aeEq
       have hy_eq : (toEuclidean (E := E)) (extChartAt I β z) = y := by
         rw [hz_def, (extChartAt I β).right_inv hsymm_target]
         exact (toEuclidean (E := E)).apply_symm_apply y
-      -- The chart transition carries `y` to the chart-`γ` image of `z`.
       have hT_eq : chartTransitionEuclid (I := I) (M := M) β γ y = zγ := by
         rw [← hy_eq, hzγ_def]
         exact chartTransitionEuclid_eq_chartα_image (I := I) (M := M) β γ hz_srcβ
-      -- Unfold `A y` on the chart target: the transformation-law term, in
-      -- which the raw chart-`γ` component is the chosen smooth representative.
       have hA_y : A y =
           transitionCoeff (E := E) (I := I) (M := M) r s γ β P₀ Q z *
             chosenComp (I := I) (M := M) g r s i γ Q zγ := by
@@ -534,8 +459,6 @@ theorem eigenvectorSmoothChart_transport_term_aeEq
         rw [symm_toEuclidean_symm_toEuclidean_extChartAt
           (I := I) (M := M) γ hz_srcγ] at h_raw
         rw [h_raw, hzγ_def]
-      -- Unfold `RHS y` on the chart target: the transport coefficient at `z`
-      -- times the eigenvector chart-`γ` component at `zγ`.
       have hRHS_y : RHS y =
           (((chartKernelCutoff (I := I) (M := M) β :
                 C^∞⟮I, M; ℝ⟯) : M → ℝ) z *
@@ -548,27 +471,19 @@ theorem eigenvectorSmoothChart_transport_term_aeEq
         simp only
         rw [chartPushedRaw_apply_of_mem (I := I) (M := M) β _ hy_target,
           ← hz_def, transportCoeffManifold_apply, hT_eq]
-      -- The pushed chart-`γ` kernel cutoff at `zγ` is `chartKernelCutoff γ z`.
       have h_cutγ : chartKernelCutoffPushed (I := I) (M := M) γ zγ =
           ((chartKernelCutoff (I := I) (M := M) γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) z := by
         rw [hzγ_def]
         exact chartKernelCutoffPushed_toEuclidean_extChartAt
           (I := I) (M := M) γ hz_srcγ
-      -- Rewrite the two transported chart-`γ` identities at the point `y`.
       rw [hT_eq] at hy_cc hy_kc
       rw [h_cutγ] at hy_kc
-      -- `Eγ` is the eigenvector chart-`γ` component at `zγ`.
       set Eγ : ℝ := eigenvectorChartComponentFun (I := I) (M := M)
         g r s i γ Q zγ with hEγ_def
-      -- Replace the chosen representative by the eigenvector component.
       rw [hA_y, hy_cc, hRHS_y]
-      -- The kernel-cutoff factorisation: `Eγ = chartKernelCutoff γ z · Eγ`.
-      -- Case split on whether the common pushed weight `W y` vanishes.
       by_cases hWy : W y = 0
       · rw [hWy, zero_mul, zero_mul]
-      · -- `W y ≠ 0` forces `z ∈ tsupport (chartAtlasPOU β)`, where the
-        -- chart-`β` kernel cutoff is `1`.
-        have hWy_val : W y =
+      · have hWy_val : W y =
             ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) z := by
           rw [hW_def]
           simp only
@@ -584,20 +499,16 @@ theorem eigenvectorSmoothChart_transport_term_aeEq
             C^∞⟮I, M; ℝ⟯) : M → ℝ) z = 1 :=
           chartKernelCutoff_eqOn_one (I := I) (M := M) β hz_pou
         rw [h_cutβ, one_mul]
-        -- `hy_kc : Eγ = chartKernelCutoff γ z · Eγ`. Substitute one occurrence.
         rw [show transitionCoeff (E := E) (I := I) (M := M) r s γ β P₀ Q z * Eγ =
             transitionCoeff (E := E) (I := I) (M := M) r s γ β P₀ Q z *
               (((chartKernelCutoff (I := I) (M := M) γ :
                   C^∞⟮I, M; ℝ⟯) : M → ℝ) z * Eγ) from by rw [← hy_kc]]
         ring
-    -- The off-overlap everywhere identity: both sides vanish.
     have h_off_overlap : ∀ y, y ∉ chartOverlapEuclid (I := I) (M := M) β γ →
         W y * A y = W y * RHS y := by
       intro y hy_notin
       by_cases hy_target : y ∈ chartTargetEuclid (I := I) (M := M) β
-      · -- Inside the chart target: the chart-`β` inverse image avoids the
-        -- chart-`γ` source, so both transformation-law factors vanish.
-        set z : M := (extChartAt I β).symm ((toEuclidean (E := E)).symm y)
+      · set z : M := (extChartAt I β).symm ((toEuclidean (E := E)).symm y)
           with hz_def
         have hz_notin_srcγ : z ∉ (chartAt H γ).source := by
           intro hz_srcγ
@@ -612,8 +523,6 @@ theorem eigenvectorSmoothChart_transport_term_aeEq
         have hRHS_y : RHS y = 0 := by
           rw [hRHS_def]
           simp only
-          -- Off the chart-`γ` source the chart-`γ` kernel cutoff vanishes, so
-          -- the transport coefficient — hence its pushforward — is zero.
           have h_cutγ_zero : ((chartKernelCutoff (I := I) (M := M) γ :
               C^∞⟮I, M; ℝ⟯) : M → ℝ) z = 0 :=
             image_eq_zero_of_notMem_tsupport (fun h =>
@@ -626,16 +535,13 @@ theorem eigenvectorSmoothChart_transport_term_aeEq
             ring
           rw [h_coeff_zero, zero_mul]
         rw [hA_y, hRHS_y]
-      · -- Outside the chart target the common pushed weight `W` vanishes.
-        have hWy : W y = 0 := by
+      · have hWy : W y = 0 := by
           rw [hW_def]
           simp only
           exact chartPushedRaw_apply_of_notMem (I := I) (M := M) β _ hy_target
         rw [hWy, zero_mul, zero_mul]
-    -- Glue the on-overlap and off-overlap facts.
     exact ae_eq_of_ae_eq_restrict_of_eqOn_compl hΩ_meas h_on_overlap
       h_off_overlap
-  -- Assemble: the headline goal equals `W · A`, and `W · RHS =ᵐ W · B`.
   refine h_goal.trans ?_
   exact (Filter.EventuallyEq.refl _ W).mul hB_eq.symm
 

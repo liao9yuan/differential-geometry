@@ -67,30 +67,13 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## Local abbreviation for the Euclidean ambient space -/
-
 private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] := EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The chart-pushed component factors as a product on the chart target
-
-`tensorChartComponent` is by definition `chartPushedRaw I α` applied to the
-pointwise product `chartAtlasPOU I M α · tensorChartComponentRaw …`. Since
-`chartPushedRaw I α` is, on the chart target, precomposition with
-`(extChartAt I α).symm ∘ toEuclidean.symm`, it distributes over the pointwise
-product there: the chart-pushed component equals the product of the chart-pushed
-partition-of-unity weight and the chart-pushed raw component. -/
 
 /-- On the Euclidean chart target, `tensorChartComponent g r s S α Idx Jdx`
 agrees pointwise with the product of the chart-pushed partition-of-unity weight
@@ -107,10 +90,7 @@ theorem tensorChartComponent_eq_chartPushedRaw_pou_mul_chartPushedRaw_raw_on_tar
         chartPushedRaw I α
           (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) y := by
   classical
-  -- `tensorChartComponent = chartPushedRaw I α (tensorChartComponentPou …)`.
   rw [tensorChartComponent_def (I := I) (M := M) g r s S α Idx Jdx]
-  -- On the chart target, `chartPushedRaw` is `u ∘ symm`, so it distributes
-  -- over the pointwise product defining `tensorChartComponentPou`.
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α
         (tensorChartComponentPou (I := I) (M := M) g r s S α Idx Jdx) hy,
     chartPushedRaw_apply_of_mem (I := I) (M := M) α
@@ -141,14 +121,6 @@ theorem tensorChartComponent_eventuallyEq_chartPushedRaw_pou_mul_chartPushedRaw_
   exact tensorChartComponent_eq_chartPushedRaw_pou_mul_chartPushedRaw_raw_on_target
     (I := I) (M := M) g r s S α Idx Jdx hz
 
-/-! ## Smoothness of the two chart-pushed factors
-
-The chart-pushed partition-of-unity weight `chartPushedRaw I α (chartAtlasPOU …)`
-is `C^∞` on the open chart target: the partition-of-unity weight is `C^∞` on
-`M`, hence in particular on the chart source, so the general push-forward
-smoothness `chartPushedRaw_bump_contDiffOn` applies. The chart-pushed raw
-component is `C^∞` there by `chartPushedRaw_tensorChartComponentRaw_contDiffOn`. -/
-
 /-- The chart-pushed partition-of-unity weight `chartPushedRaw I α (chartAtlasPOU …)`
 is `ContDiffOn ℝ ∞` on the Euclidean chart target. -/
 theorem chartPushedRaw_chartAtlasPOU_contDiffOn (α : M) :
@@ -156,7 +128,6 @@ theorem chartPushedRaw_chartAtlasPOU_contDiffOn (α : M) :
       (chartPushedRaw I α ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ))
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- The partition-of-unity weight is `C^∞` on `M`, hence on the chart source.
   have hPOU_global : ContMDiff I 𝓘(ℝ, ℝ) ∞
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
     (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff
@@ -200,17 +171,6 @@ theorem differentiableAt_chartPushedRaw_tensorChartComponentRaw
       g r s S α Idx Jdx y hy).contDiffAt (hopen.mem_nhds hy)
   exact hcontDiffAt.differentiableAt (by decide)
 
-/-! ## Headline partition-of-unity Leibniz identity
-
-The chart-Euclidean partial derivative `euclidPartial k` of the product of the
-two chart-pushed factors splits, by the Leibniz product rule `euclidPartial_mul`,
-as the partition-of-unity weight times the derivative of the chart-pushed raw
-component, plus the derivative of the partition-of-unity weight times the
-chart-pushed raw component. Since `tensorChartComponent` agrees with this
-product on the open chart target, its derivative agrees with the derivative of
-the product. Rearranging isolates the partition-of-unity-weighted derivative of
-the chart-pushed raw component. -/
-
 /-- **Partition-of-unity Leibniz identity for the chart-Euclidean tensor
 component.** On the open Euclidean chart target,
 
@@ -241,13 +201,11 @@ theorem chartPushedRaw_pou_mul_euclidPartial_eq
                 (tensorChartComponentRaw (I := I) (M := M)
                   g r s S α Idx Jdx) y := by
   classical
-  -- Name the two chart-pushed factors.
   set P : EuclN E → ℝ :=
     chartPushedRaw I α ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) with hP_def
   set R : EuclN E → ℝ :=
     chartPushedRaw I α
       (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) with hR_def
-  -- The component derivative equals the derivative of the product `P · R`.
   have h_component_deriv :
       euclidPartial (E := E) k
           (tensorChartComponent (I := I) (M := M) g r s S α Idx Jdx) y =
@@ -257,7 +215,6 @@ theorem chartPushedRaw_pou_mul_euclidPartial_eq
     exact Filter.EventuallyEq.fderiv_eq
       (tensorChartComponent_eventuallyEq_chartPushedRaw_pou_mul_chartPushedRaw_raw
         (I := I) (M := M) g r s S α Idx Jdx hy)
-  -- The Leibniz product rule for `euclidPartial`.
   have hP_diff : DifferentiableAt ℝ P y :=
     differentiableAt_chartPushedRaw_chartAtlasPOU (I := I) (M := M) α hy
   have hR_diff : DifferentiableAt ℝ R y :=
@@ -268,11 +225,8 @@ theorem chartPushedRaw_pou_mul_euclidPartial_eq
         euclidPartial (E := E) k P y * R y +
           P y * euclidPartial (E := E) k R y :=
     euclidPartial_mul (E := E) k hP_diff hR_diff
-  -- Substitute and rearrange.
   rw [h_component_deriv, h_leibniz]
   ring
-
-/-! ## Sanity check (small `(r, s)`) -/
 
 example (g : SmoothRiemannianMetric I M) (α : M)
     (S : SmoothCcTensor g 1 2)

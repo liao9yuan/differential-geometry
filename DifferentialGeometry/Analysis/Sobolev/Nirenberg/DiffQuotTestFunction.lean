@@ -31,8 +31,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Definition -/
-
 /-- The translated Nirenberg test function
 `v_h(x) := η(x − h e_k)² · (D_h^k u)(x − h e_k)`,
 formed as `translate k (-h) (η² · diffQuot k h u)`. -/
@@ -56,8 +54,6 @@ lemma nirenbergTestFunction_apply_sub
         diffQuot k h u (x - h • EuclideanSpace.single k 1) := by
   simp [nirenbergTestFunction, translate, sub_eq_add_neg, neg_smul]
 
-/-! ## Compact support -/
-
 omit [NeZero d] in
 /-- Support inclusion: if `v_h(x) ≠ 0`, then `x − h e_k ∈ support η`. -/
 theorem nirenbergTestFunction_support_subset
@@ -68,7 +64,6 @@ theorem nirenbergTestFunction_support_subset
   change (η (x + (-h) • EuclideanSpace.single k 1))^2 *
       diffQuot k h u (x + (-h) • EuclideanSpace.single k 1) ≠ 0 at hx
   by_contra hxη
-  -- hxη : x ∉ {x | x + (-h) • e_k ∈ support η}, i.e. η(x - h e_k) = 0.
   have hη_zero : η (x + (-h) • EuclideanSpace.single k 1) = 0 := by
     by_contra hne
     exact hxη hne
@@ -101,24 +96,17 @@ theorem nirenbergTestFunction_hasCompactSupport
     (k : Fin d) (h : ℝ) {η : EuclN → ℝ} (hη_cs : HasCompactSupport η)
     (u : EuclN → ℝ) :
     HasCompactSupport (nirenbergTestFunction k h η u) := by
-  -- The set `S := {x | x + (-h) • e_k ∈ tsupport η}` equals
-  -- `tsupport η + h • e_k` via the homeomorphism `x ↦ x + h • e_k = x - (-h) • e_k`.
-  -- Concretely: `x + (-h) • e_k ∈ K ↔ x ∈ K - (-h) • e_k = K + h • e_k`.
-  -- So `S = (translation by h • e_k)(tsupport η)`.
   set v : EuclN := (-h) • EuclideanSpace.single k 1 with hv_def
   set htrans_homeo : EuclN ≃ₜ EuclN :=
     Homeomorph.addRight v with htrans_def
   have h_sub : tsupport (nirenbergTestFunction k h η u) ⊆
       {x : EuclN | x + v ∈ tsupport η} :=
     nirenbergTestFunction_tsupport_subset (d := d) k h η u
-  -- `{x | x + v ∈ K} = htrans_homeo ⁻¹' K`.
   have h_set_eq :
       {x : EuclN | x + v ∈ tsupport η} = htrans_homeo ⁻¹' (tsupport η) := by
     ext x
     simp [htrans_homeo]
   rw [h_set_eq] at h_sub
-  -- Preimage under the homeomorphism `htrans_homeo` of a compact set is the
-  -- image under the continuous map `htrans_homeo.symm`, hence compact.
   have h_pre_eq :
       htrans_homeo ⁻¹' (tsupport η) = htrans_homeo.symm '' (tsupport η) := by
     ext x
@@ -136,8 +124,6 @@ theorem nirenbergTestFunction_hasCompactSupport
     rw [h_pre_eq]
     exact hη_cs.image htrans_homeo.symm.continuous
   exact h_pre_compact.of_isClosed_subset (isClosed_tsupport _) h_sub
-
-/-! ## Pointwise upper bound and `L²` bound (whole space) -/
 
 omit [NeZero d] in
 /-- Pointwise quartic upper bound on `(v_h(x))²`: with `y = x − h e_k`,
@@ -157,7 +143,6 @@ theorem sq_nirenbergTestFunction_le
     rw [nirenbergTestFunction_apply]
     ring
   rw [h_unfold]
-  -- (η y)^2 ≤ M_η², so ((η y)^2)^2 ≤ (M_η²)^2 = M_η⁴.
   have h_sq_le : (η y)^2 ≤ M_η^2 := by
     have hY := hM_η y
     have h_abs_sq : (η y)^2 = |η y|^2 := by rw [sq_abs]
@@ -207,17 +192,14 @@ private lemma lintegral_translate_diffQuot_sq
   have hMP : MeasurePreserving
       (fun x : EuclN => x + (-h) • EuclideanSpace.single k 1) volume volume :=
     measurePreserving_add_right volume _
-  -- The translation is a homeomorphism, hence a `MeasurableEmbedding`.
   set htrans_homeo : EuclN ≃ₜ EuclN :=
     Homeomorph.addRight ((-h) • EuclideanSpace.single k 1) with htrans_def
   have h_emb : MeasurableEmbedding htrans_homeo :=
     htrans_homeo.measurableEmbedding
-  -- Match the function used by `htrans_homeo`.
   have h_fun_eq : (fun x : EuclN => x + (-h) • EuclideanSpace.single k 1) =
       htrans_homeo := by
     funext x
     simp [htrans_homeo]
-  -- Apply `MeasurePreserving.lintegral_comp_emb`.
   have hMP' : MeasurePreserving htrans_homeo volume volume := by
     rw [← h_fun_eq]; exact hMP
   have h_step : ∫⁻ x : EuclN,
@@ -225,7 +207,6 @@ private lemma lintegral_translate_diffQuot_sq
       ∫⁻ y : EuclN, (‖diffQuot k h u y‖ₑ : ℝ≥0∞) ^ (2 : ℕ) :=
     hMP'.lintegral_comp_emb h_emb
       (fun y : EuclN => (‖diffQuot k h u y‖ₑ : ℝ≥0∞) ^ (2 : ℕ))
-  -- Connect to the original LHS.
   have h_congr : (fun x : EuclN =>
         (‖diffQuot k h u (x + (-h) • EuclideanSpace.single k 1)‖ₑ : ℝ≥0∞)
           ^ (2 : ℕ)) =
@@ -255,8 +236,6 @@ theorem eLpNorm_nirenbergTestFunction_le
   have h_pow_eq : ∀ a : ℝ≥0∞, a ^ (2 : ℝ) = a ^ (2 : ℕ) := by
     intro a
     rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) from by norm_num, ENNReal.rpow_natCast]
-  -- Pointwise enorm bound: `‖v_h x‖² ≤ ofReal(M_η⁴) · ‖D_h^k u (y)‖²`
-  -- (with `y = x - h e_k`).
   have h_pt_enorm : ∀ x : EuclN,
       (‖nirenbergTestFunction k h η u x‖ₑ : ℝ≥0∞)^(2 : ℕ) ≤
         ENNReal.ofReal (M_η^4) *
@@ -285,11 +264,9 @@ theorem eLpNorm_nirenbergTestFunction_le
         (diffQuot k h u (x + (-h) • EuclideanSpace.single k 1))^2) from
         (ENNReal.ofReal_mul hM4_nn).symm]
     exact ENNReal.ofReal_le_ofReal h_real
-  -- Step: rewrite both sides via the lintegral form of eLpNorm.
   rw [eLpNorm_eq_lintegral_rpow_enorm_toReal h2_ne_zero h2_ne_top,
     eLpNorm_eq_lintegral_rpow_enorm_toReal h2_ne_zero h2_ne_top]
   rw [h2_toReal]
-  -- Match `^ (2 : ℝ)` to `^ (2 : ℕ)` in both lintegrals.
   have h_lhs_pow_eq :
       (∫⁻ x : EuclN,
           (‖nirenbergTestFunction k h η u x‖ₑ : ℝ≥0∞) ^ (2 : ℝ)
@@ -307,7 +284,6 @@ theorem eLpNorm_nirenbergTestFunction_le
     refine lintegral_congr_ae ?_
     filter_upwards with y using h_pow_eq _
   rw [h_lhs_pow_eq, h_rhs_pow_eq]
-  -- Bound the LHS lintegral.
   have h_lint_le :
       ∫⁻ x : EuclN, (‖nirenbergTestFunction k h η u x‖ₑ : ℝ≥0∞) ^ (2 : ℕ) ≤
         ENNReal.ofReal (M_η^4) *
@@ -334,10 +310,7 @@ theorem eLpNorm_nirenbergTestFunction_le
     rw [h_const_pull] at h_step
     rw [lintegral_translate_diffQuot_sq (d := d) k h u] at h_step
     exact h_step
-  -- Apply rpow ((1/2)) and rearrange. Note: rpow (a*b) = rpow a * rpow b
-  -- when nonneg exponent; rpow distributes over `*` here.
   refine le_trans (ENNReal.rpow_le_rpow h_lint_le (by norm_num : (0 : ℝ) ≤ 1/2)) ?_
-  -- (M_η⁴ * I)^(1/2) = M_η² * I^(1/2) for the matching real exponent.
   have hM4_nn : 0 ≤ M_η^4 := by positivity
   have h_mul_rpow :
       (ENNReal.ofReal (M_η^4) *
@@ -348,24 +321,19 @@ theorem eLpNorm_nirenbergTestFunction_le
             (‖diffQuot k h u y‖ₑ : ℝ≥0∞) ^ (2 : ℕ)) ^ ((1 : ℝ) / 2) := by
     rw [ENNReal.mul_rpow_of_nonneg _ _ (by norm_num : (0 : ℝ) ≤ 1/2)]
   rw [h_mul_rpow]
-  -- Now show `(ofReal (M_η⁴))^(1/2) = ofReal (M_η²)`.
   have h_sqrt_M4 :
       (ENNReal.ofReal (M_η^4)) ^ ((1 : ℝ) / 2) = ENNReal.ofReal (M_η^2) := by
     have hM2_nn : 0 ≤ M_η^2 := sq_nonneg _
-    -- Use `ENNReal.ofReal_pow`: for r ≥ 0, ofReal (r^n) = (ofReal r)^n.
     have h_M4_to_pow :
         ENNReal.ofReal (M_η^4) = (ENNReal.ofReal (M_η^2)) ^ (2 : ℕ) := by
       rw [show M_η^4 = (M_η^2)^(2 : ℕ) from by ring,
         ENNReal.ofReal_pow hM2_nn 2]
     rw [h_M4_to_pow]
-    -- (a^2)^(1/2) = a^(2 * 1/2) = a^1 = a (provided exponent algebra works).
     rw [← ENNReal.rpow_natCast (ENNReal.ofReal (M_η^2)) 2,
       ← ENNReal.rpow_mul]
     have h_calc : ((2 : ℕ) : ℝ) * (1 / 2) = 1 := by norm_num
     rw [h_calc, ENNReal.rpow_one]
   rw [h_sqrt_M4]
-
-/-! ## Localised `L²` bound on a precompact set -/
 
 omit [NeZero d] in
 /-- A compact subset has finite Lebesgue measure on the whole space. -/
@@ -383,11 +351,8 @@ theorem eLpNorm_nirenbergTestFunction_restrict_le
     eLpNorm (nirenbergTestFunction k h η u) 2 ((volume : Measure EuclN).restrict Ω') ≤
       ENNReal.ofReal (M_η^2) *
         eLpNorm (diffQuot k h u) 2 (volume : Measure EuclN) := by
-  -- Restrict ≤ unrestricted.
   refine le_trans ?_ (eLpNorm_nirenbergTestFunction_le (d := d) k h hM_η_nn hM_η)
   exact eLpNorm_mono_measure _ Measure.restrict_le_self
-
-/-! ## Translation invariance of weak partial derivatives -/
 
 omit [NeZero d] in
 /-- Auxiliary: `tsupport (translate k (-h) φ) ⊆ tsupport φ + h • e_k`,
@@ -397,16 +362,12 @@ private lemma tsupport_translate_subset
     (k : Fin d) (h : ℝ) (φ : EuclN → ℝ) :
     tsupport (translate k (-h) φ) ⊆
       {x | x + (-h) • EuclideanSpace.single k 1 ∈ tsupport φ} := by
-  -- The right-hand side is the preimage of `tsupport φ` under the (continuous)
-  -- map `x ↦ x + (-h) • e_k`, hence closed.
   have htrans_cont : Continuous
       (fun x : EuclN => x + (-h) • EuclideanSpace.single k 1) :=
     continuous_id.add continuous_const
   have h_closed : IsClosed
       {x : EuclN | x + (-h) • EuclideanSpace.single k 1 ∈ tsupport φ} :=
     isClosed_tsupport φ |>.preimage htrans_cont
-  -- support inclusion: `(translate k (-h) φ) x ≠ 0` ⇒ `φ(x + (-h) e_k) ≠ 0`
-  -- ⇒ `x + (-h) e_k ∈ support φ ⊆ tsupport φ`.
   refine closure_minimal ?_ h_closed
   intro x hx
   change φ (x + (-h) • EuclideanSpace.single k 1) ≠ 0 at hx
@@ -427,8 +388,6 @@ omit [NeZero d] in
 private lemma hasCompactSupport_translate (k : Fin d) (h : ℝ) {φ : EuclN → ℝ}
     (hφ_supp : HasCompactSupport φ) :
     HasCompactSupport (translate k h φ) := by
-  -- `translate k h φ = φ ∘ (translation by h • e_k)`.
-  -- Translation is a self-homeomorphism, so compact support transfers.
   let φ_homeo : EuclN ≃ₜ EuclN :=
     Homeomorph.addRight (h • EuclideanSpace.single k 1)
   have h_eq : (translate k h φ) = φ ∘ φ_homeo := by
@@ -484,72 +443,32 @@ theorem hasWeakPartialDeriv_translate
     DeGiorgi.HasWeakPartialDeriv (d := d) j
       (translate k (-h) g) (translate k (-h) f) Set.univ := by
   intro φ hφ_smooth hφ_supp _hφ_sub
-  -- The shifted test function `ψ := translate k h φ`. (Note +h, not -h: this
-  -- is the inverse translation, which is the natural test function.)
   set ψ : EuclN → ℝ := translate k h φ with hψ_def
   have hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ :=
     contDiff_translate (d := d) k h hφ_smooth
   have hψ_cs : HasCompactSupport ψ :=
     hasCompactSupport_translate (d := d) k h hφ_supp
-  -- Apply weak-partial property of `f` to test function `ψ`.
   have h_test :=
     hwp ψ hψ_smooth hψ_cs (tsupport_subset_univ ψ)
-  -- LHS of `h_test`: ∫ f · ∂_j ψ over univ.
-  -- RHS of `h_test`: -∫ g · ψ over univ.
-  -- Now reformulate via change of variables `x ↦ x + (-h) • e_k`.
-  -- We want to show: ∫ (translate k (-h) f) · ∂_j φ = -∫ (translate k (-h) g) · φ.
   rw [setIntegral_univ, setIntegral_univ] at h_test
   rw [setIntegral_univ, setIntegral_univ]
-  -- Substitution: ∫ f(x) · ∂_j ψ(x) dx = ∫ f(x) · (∂_j (translate k h φ))(x) dx.
-  -- Substitute y = x + (-h) e_k: dx = dy, x = y + h e_k.
-  -- f(x) becomes f(y + h e_k) = (translate k h f)(y) — wait we want translate k (-h) f.
-  -- Let me redo: substitute z = x - h e_k = x + (-h) e_k. Then x = z + h e_k.
-  -- dx = dz. f(x) = f(z + h e_k). ψ(x) = (translate k h φ)(x) = φ(x + h e_k) = φ((z + h e_k) + h e_k).
-  -- This isn't matching what I want. Let me redo.
-  --
-  -- Actually a cleaner approach: substitute z = x + h e_k. Then x = z - h e_k = z + (-h) e_k.
-  -- dx = dz. f(x) = f(z + (-h) e_k) = (translate k (-h) f)(z).
-  -- ∂_j ψ(x) = ∂_j (translate k h φ)(x) = ∂_j φ(x + h e_k) = ∂_j φ(z) by `fderiv_translate_apply`.
-  -- So ∫ f · ∂_j ψ dx = ∫ (translate k (-h) f)(z) · (∂_j φ)(z) dz. ✓
-  -- Similarly ∫ g · ψ dx = ∫ (translate k (-h) g)(z) · φ(z) dz. ✓
-  -- This is what we want.
-  --
-  -- Step 1: prove the LHS substitution.
   have h_LHS_subst :
       ∫ x, f x * (fderiv ℝ ψ x) (EuclideanSpace.single j 1)
           ∂(volume : Measure EuclN) =
         ∫ z, translate k (-h) f z *
           (fderiv ℝ φ z) (EuclideanSpace.single j 1)
           ∂(volume : Measure EuclN) := by
-    -- Use translation-invariance of integral: change of variable x = z + h e_k.
     have h_int_eq :=
       integral_add_right_eq_self (μ := (volume : Measure EuclN))
         (f := fun x : EuclN =>
           f x * (fderiv ℝ ψ x) (EuclideanSpace.single j 1))
         ((-h) • EuclideanSpace.single k 1)
-    -- h_int_eq says: ∫ F(x + (-h) e_k) dx = ∫ F(x) dx, equivalently
-    -- ∫ F(z) dz = ∫ F(z + (-h) e_k) dz where z is the new variable.
-    -- We want: ∫ F = ∫ (LHS' substituted form), so use h_int_eq directly.
-    -- LHS = ∫ F(x) dx; we want ∫ F(z + (-h) e_k) dz.
-    -- F(z + (-h) e_k) = f(z + (-h) e_k) * (fderiv ψ (z + (-h) e_k)) (e_j)
-    --                  = (translate k (-h) f)(z) * (fderiv ψ (z + (-h) e_k)) (e_j).
-    -- Now (fderiv ψ (z + (-h) e_k)) (e_j) = (fderiv (translate k h φ) (z + (-h) e_k)) (e_j)
-    --                  = (fderiv φ ((z + (-h) e_k) + h e_k)) (e_j) = (fderiv φ z) (e_j).
-    -- So F(z + (-h) e_k) = (translate k (-h) f)(z) * (fderiv φ z)(e_j). ✓
     rw [← h_int_eq]
     refine integral_congr_ae ?_
     filter_upwards with z
-    -- Pointwise: F(z + (-h) e_k) = (translate k (-h) f)(z) * (fderiv φ z)(e_j).
-    -- The LHS is `f(z + (-h)•e_k) * (fderiv ψ (z + (-h)•e_k)) e_j` by def of integrand
-    -- composition; the (translate k (-h) f) z on the RHS unfolds to `f(z + (-h)•e_k)` def.
     have h_lhs_unfold : translate k (-h) f z =
         f (z + (-h) • EuclideanSpace.single k 1) := rfl
     rw [h_lhs_unfold]
-    -- We need: (fderiv ψ (z + (-h) e_k)) e_j = (fderiv φ z) e_j.
-    -- By fderiv_translate_apply applied to φ at point (z + (-h) e_k):
-    -- (fderiv (translate k h φ) (z + (-h) e_k)) e_j
-    --   = (fderiv φ ((z + (-h) e_k) + h e_k)) e_j
-    --   = (fderiv φ z) e_j.  (canceling.)
     have hψ_eq_translate : ψ = translate k h φ := rfl
     rw [hψ_eq_translate]
     have h_apply :
@@ -562,14 +481,12 @@ theorem hasWeakPartialDeriv_translate
       fderiv_translate_apply (d := d) k j h hφ_smooth
         (z + (-h) • EuclideanSpace.single k 1)
     rw [h_apply]
-    -- Cancel: (z + (-h) • e_k) + h • e_k = z.
     have h_cancel :
         (z + (-h) • EuclideanSpace.single k 1) +
             h • EuclideanSpace.single k 1 = z := by
       rw [add_assoc, ← add_smul]
       simp
     rw [h_cancel]
-  -- Step 2: prove the RHS substitution.
   have h_RHS_subst :
       ∫ x, g x * ψ x ∂(volume : Measure EuclN) =
         ∫ z, translate k (-h) g z * φ z ∂(volume : Measure EuclN) := by
@@ -580,8 +497,6 @@ theorem hasWeakPartialDeriv_translate
     rw [← h_int_eq]
     refine integral_congr_ae ?_
     filter_upwards with z
-    -- (translate k (-h) g) z = g (z + (-h) e_k).
-    -- ψ (z + (-h) e_k) = φ ((z + (-h) e_k) + h e_k) = φ z.
     have h_g_unfold : translate k (-h) g z =
         g (z + (-h) • EuclideanSpace.single k 1) := rfl
     rw [h_g_unfold]
@@ -594,12 +509,9 @@ theorem hasWeakPartialDeriv_translate
         simp
       rw [this]
     rw [h_psi_eq]
-  -- Combine.
   rw [h_LHS_subst] at h_test
   rw [h_RHS_subst] at h_test
   exact h_test
-
-/-! ## Linear-combination lemmas for `HasWeakPartialDeriv` on `Set.univ` -/
 
 omit [NeZero d] in
 /-- Sum rule for weak partials on `Set.univ`. -/
@@ -618,7 +530,6 @@ theorem hasWeakPartialDeriv_add_univ
     DeGiorgi.HasWeakPartialDeriv (d := d) j
       (g₁ + g₂) (f₁ + f₂) Set.univ := by
   intro φ hφ_smooth hφ_supp _hφ_sub
-  -- Test against φ; integrals split additively.
   have hint_partial_φ_locL1 :
       LocallyIntegrable
         (fun x => (fderiv ℝ φ x) (EuclideanSpace.single j 1))
@@ -634,10 +545,8 @@ theorem hasWeakPartialDeriv_add_univ
     exact hφ_smooth.continuous.locallyIntegrable
   have heq1 := h1 φ hφ_smooth hφ_supp (tsupport_subset_univ φ)
   have heq2 := h2 φ hφ_smooth hφ_supp (tsupport_subset_univ φ)
-  -- Convert setIntegral over univ to plain integrals.
   rw [setIntegral_univ, setIntegral_univ] at heq1 heq2
   rw [setIntegral_univ, setIntegral_univ]
-  -- Integrability for splitting integrals.
   have hint_f1_partial : Integrable
       (fun x => f₁ x * (fderiv ℝ φ x) (EuclideanSpace.single j 1))
       (volume : Measure EuclN) := by
@@ -664,7 +573,6 @@ theorem hasWeakPartialDeriv_add_univ
     have h := hg₂_locInt.integrable_smul_right_of_hasCompactSupport
       (hg := hφ_smooth.continuous) (h'g := hφ_supp)
     simpa [Measure.restrict_univ, smul_eq_mul] using h
-  -- Split (f₁+f₂) · ∂_j φ into f₁·∂_j φ + f₂·∂_j φ.
   have h_lhs_split :
       ∫ x, (f₁ + f₂) x * (fderiv ℝ φ x) (EuclideanSpace.single j 1) =
         (∫ x, f₁ x * (fderiv ℝ φ x) (EuclideanSpace.single j 1)) +
@@ -708,7 +616,6 @@ theorem hasWeakPartialDeriv_const_smul_univ
   have heq := h1 φ hφ_smooth hφ_supp (tsupport_subset_univ φ)
   rw [setIntegral_univ, setIntegral_univ] at heq
   rw [setIntegral_univ, setIntegral_univ]
-  -- ∫ (c * f) · ∂_j φ = c · ∫ f · ∂_j φ; -∫ (c * g) · φ = -c · ∫ g · φ.
   have hint_f_partial : Integrable
       (fun x => f x * (fderiv ℝ φ x) (EuclideanSpace.single j 1))
       (volume : Measure EuclN) := by
@@ -739,8 +646,6 @@ theorem hasWeakPartialDeriv_const_smul_univ
       fun x => c * (g x * φ x) := by ext x; ring
     rw [h_eq, integral_const_mul]
   rw [h_rhs_pull]
-  -- Goal: c * I = -(c * J), with heq : I = -J.
-  -- c * I = c * (-J) = -(c * J).
   have : c * (∫ x, f x * (fderiv ℝ φ x) (EuclideanSpace.single j 1)) =
       c * (-(∫ x, g x * φ x)) := by rw [heq]
   rw [this, mul_neg]
@@ -754,8 +659,6 @@ private lemma locallyIntegrable_univ_of_memLp
   rw [Measure.restrict_univ]
   exact hf.locallyIntegrable hp
 
-/-! ## Translation invariance of local integrability -/
-
 omit [NeZero d] in
 /-- Local integrability transfers under translation. -/
 private lemma locallyIntegrable_translate_aux
@@ -768,7 +671,6 @@ private lemma locallyIntegrable_translate_aux
   have hMP : MeasurePreserving
       (fun x : EuclN => x + h • EuclideanSpace.single k 1) volume volume :=
     measurePreserving_add_right volume _
-  -- Translation as a homeomorphism.
   let τ : EuclN ≃ₜ EuclN :=
     Homeomorph.addRight (h • EuclideanSpace.single k 1)
   have hτ_eq : ⇑τ = fun x : EuclN => x + h • EuclideanSpace.single k 1 := rfl
@@ -780,15 +682,10 @@ private lemma locallyIntegrable_translate_aux
   intro x
   obtain ⟨V, hV_mem, hf_int⟩ := hu_locInt (τ x)
   refine ⟨τ ⁻¹' V, ?_, ?_⟩
-  · -- preimage of nbhd under continuous τ is a nbhd
-    exact τ.continuous.continuousAt.preimage_mem_nhds hV_mem
-  · -- IntegrableOn (translate k h u) (τ ⁻¹' V) ↔ IntegrableOn u V via
-    -- `integrableOn_comp_preimage`.
-    have h_eq : translate k h u = u ∘ (τ : EuclN → EuclN) := rfl
+  · exact τ.continuous.continuousAt.preimage_mem_nhds hV_mem
+  · have h_eq : translate k h u = u ∘ (τ : EuclN → EuclN) := rfl
     rw [h_eq]
     exact (hMP_τ.integrableOn_comp_preimage hτ_emb (f := u) (s := V)).mpr hf_int
-
-/-! ## Discrete chain rule for difference quotients of weak partials -/
 
 omit [NeZero d] in
 /-- **Discrete chain rule (`Set.univ`).** If `g_j` is the weak `j`-partial of
@@ -806,13 +703,10 @@ theorem hasWeakPartialDeriv_diffQuot
   by_cases hh : h = 0
   · subst hh
     simp only [diffQuot_zero_h]
-    -- Weak partial of zero is zero.
     intro φ _ _ _
     rw [setIntegral_univ, setIntegral_univ]
     simp
-  · -- diffQuot k h u = (translate k h u - u) / h = h⁻¹ • (translate k h u - u).
-    -- We rewrite this as h⁻¹ * translate k h u + (-h⁻¹) * u.
-    have h_diffQuot_u_eq : diffQuot k h u =
+  · have h_diffQuot_u_eq : diffQuot k h u =
         fun x => h⁻¹ * (translate k h u x) + (-h⁻¹) * u x := by
       funext x
       rw [diffQuot_apply_of_ne (d := d) k hh u x]
@@ -831,10 +725,6 @@ theorem hasWeakPartialDeriv_diffQuot
       field_simp
       ring
     rw [h_diffQuot_u_eq, h_diffQuot_g_eq]
-    -- Apply hasWeakPartialDeriv_translate to get
-    --   `translate k h g_j` is weak partial of `translate k h u`.
-    -- But our `hasWeakPartialDeriv_translate` is in terms of `(-h)`. So we
-    -- substitute `h ↦ -h` to obtain it for `+h`.
     have h_translate :
         DeGiorgi.HasWeakPartialDeriv (d := d) j
           (translate k h g_j) (translate k h u) Set.univ := by
@@ -843,7 +733,6 @@ theorem hasWeakPartialDeriv_diffQuot
       have h_eq_g : translate k h g_j = translate k (-(-h)) g_j := by rw [h_neg_neg]
       rw [h_eq_u, h_eq_g]
       exact hasWeakPartialDeriv_translate (d := d) k j (-h) hwp
-    -- LocallyIntegrable for `translate k h u` and `translate k h g_j`.
     have h_translate_u_locInt :
         LocallyIntegrable (translate k h u)
           ((volume : Measure EuclN).restrict Set.univ) :=
@@ -852,7 +741,6 @@ theorem hasWeakPartialDeriv_diffQuot
         LocallyIntegrable (translate k h g_j)
           ((volume : Measure EuclN).restrict Set.univ) :=
       locallyIntegrable_translate_aux (d := d) k h hg_j_locInt
-    -- Apply add and smul.
     have h_smul_translate :
         DeGiorgi.HasWeakPartialDeriv (d := d) j
           (fun x => h⁻¹ * translate k h g_j x)
@@ -865,7 +753,6 @@ theorem hasWeakPartialDeriv_diffQuot
           (fun x => (-h⁻¹) * u x) Set.univ :=
       hasWeakPartialDeriv_const_smul_univ (d := d) j (-h⁻¹)
         hu_locInt hg_j_locInt hwp
-    -- Local integrability of the smul expressions.
     have h_smul_translate_u_locInt :
         LocallyIntegrable (fun x : EuclN => h⁻¹ * translate k h u x)
           ((volume : Measure EuclN).restrict Set.univ) := by
@@ -898,17 +785,12 @@ theorem hasWeakPartialDeriv_diffQuot
         funext x; rw [Pi.smul_apply, smul_eq_mul]
       rw [h_eq]
       exact hg_j_locInt.smul (-h⁻¹)
-    -- Combine via add.
     have h_add :=
       hasWeakPartialDeriv_add_univ (d := d) j
         h_smul_translate_u_locInt h_smul_orig_u_locInt
         h_smul_translate_g_locInt h_smul_orig_g_locInt
         h_smul_translate h_smul_orig
-    -- Identify (h⁻¹ • τₕ u + (-h⁻¹) • u) with the function form.
-    -- Both `convert` goals are def-eq to the original goal.
     exact h_add
-
-/-! ## Smoothness of `η²` -/
 
 omit [NeZero d] in
 private lemma contDiff_eta_sq {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) :
@@ -923,15 +805,11 @@ private lemma fderiv_eta_sq_apply {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ 
   have hη_diff : Differentiable ℝ η := hη.differentiable (by simp)
   rw [fderiv_fun_pow 2 (hη_diff x)]
   rw [ContinuousLinearMap.smul_apply]
-  -- ((2 : ℕ) • η x ^ (2 - 1)) • (fderiv η x) (single j 1) = 2 * η x * ...
   have h1 : (η x) ^ ((2 : ℕ) - 1) = η x := by norm_num
   rw [h1]
-  -- (2 : ℕ) • η x = 2 * η x.
   have h_two : ((2 : ℕ) • η x) = 2 * η x := by
     rw [two_smul]; ring
   rw [h_two, smul_eq_mul]
-
-/-! ## The product rule for `η² · diffQuot k h u` (`H¹` version) -/
 
 omit [NeZero d] in
 /-- Smooth-times-`H¹` product rule: weak `j`-partial of `η² · D_h^k u` is
@@ -950,15 +828,10 @@ theorem hasWeakPartialDeriv_eta_sq_diffQuot
         ((fderiv ℝ (fun z => (η z)^2) y) (EuclideanSpace.single j 1)) *
           diffQuot k h u y)
       (fun y => (η y)^2 * diffQuot k h u y) Set.univ := by
-  -- `D_h^k g_j` is the weak `j`-partial of `D_h^k u`.
   have h_wp_dq :
       DeGiorgi.HasWeakPartialDeriv (d := d) j
         (diffQuot k h g_j) (diffQuot k h u) Set.univ :=
     hasWeakPartialDeriv_diffQuot (d := d) k j h hu_locInt hg_j_locInt hwp
-  -- Local integrability of `diffQuot k h u` and `diffQuot k h g_j`.
-  -- Both equal `h⁻¹ • (translate k h _ - _)` = h⁻¹ * translate k h _ + (-h⁻¹) * _.
-  -- This is locally integrable since translate of locInt is locInt and linear
-  -- combinations preserve locInt.
   have h_dq_u_locInt :
       LocallyIntegrable (diffQuot k h u)
         ((volume : Measure EuclN).restrict Set.univ) := by
@@ -1029,13 +902,10 @@ theorem hasWeakPartialDeriv_eta_sq_diffQuot
         rw [h_eq_smul]
         exact hg_j_locInt.smul (-h⁻¹)
       exact hmul1.add hmul2
-  -- Apply `HasWeakPartialDeriv.mul_smooth` with smooth scalar `η²`.
   have h_eta_sq_smooth : ContDiff ℝ (⊤ : ℕ∞) (fun y : EuclN => (η y)^2) :=
     hη.pow 2
   exact DeGiorgi.HasWeakPartialDeriv.mul_smooth (Ω := Set.univ) isOpen_univ
     h_wp_dq h_eta_sq_smooth h_dq_u_locInt h_dq_g_locInt
-
-/-! ## Headline theorem: weak partial of `nirenbergTestFunction k h η u` -/
 
 omit [NeZero d] in
 /-- **Headline weak-partial product/chain rule (`fderiv (η²)` form).** Let
@@ -1089,7 +959,6 @@ theorem hasWeakPartialDeriv_nirenbergTestFunction_expanded
   have h_general :=
     hasWeakPartialDeriv_nirenbergTestFunction (d := d) k j h hη
       hu_locInt hg_j_locInt hwp
-  -- Rewrite the integrand using `fderiv_eta_sq_apply`.
   have h_eq :
       (fun y : EuclN =>
         (η y)^2 * diffQuot k h g_j y +
@@ -1103,8 +972,6 @@ theorem hasWeakPartialDeriv_nirenbergTestFunction_expanded
     rw [fderiv_eta_sq_apply (d := d) hη j y]
   rw [h_eq] at h_general
   exact h_general
-
-/-! ## Sanity checks -/
 
 omit [NeZero d] in
 /-- The trivial special case: at `h = 0`, the Nirenberg test function is `0`. -/

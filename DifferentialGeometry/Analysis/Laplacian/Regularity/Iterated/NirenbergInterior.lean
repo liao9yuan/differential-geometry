@@ -101,8 +101,6 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -111,8 +109,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Tuple helpers: `Fin.init` and `Fin.cons` -/
 
 /-- `Fin.init` of a `Fin.cons` equals `Fin.cons` of `Fin.init` (pointwise
 identity, non-dependent statement). This is the key identity allowing the
@@ -125,15 +121,12 @@ private lemma fin_init_cons {α : Type*} {m : ℕ}
   funext j
   induction j using Fin.cases with
   | zero =>
-      -- Fin.init f 0 = f (0.castSucc) = f 0.
       have h1 : (Fin.init (Fin.cons x p : Fin (m + 2) → α)) 0 = x := by
         simp [Fin.init]
       have h2 : (Fin.cons x (Fin.init p) : Fin (m + 1) → α) 0 = x := by
         simp
       rw [h1, h2]
   | succ k =>
-      -- Fin.init f (Fin.succ k) = f (Fin.succ k).castSucc = f (Fin.succ k.castSucc).
-      -- And Fin.cons x p (Fin.succ k.castSucc) = p k.castSucc = Fin.init p k.
       have h1 : (Fin.init (Fin.cons x p : Fin (m + 2) → α)) (Fin.succ k) =
           p k.castSucc := by
         simp [Fin.init, Fin.cons_succ]
@@ -149,8 +142,6 @@ private lemma fin_cons_last_succ {α : Type*} {m : ℕ}
     (x : α) (p : Fin (m + 1) → α) :
     (Fin.cons x p : Fin (m + 2) → α) (Fin.last (m + 1)) = p (Fin.last m) := by
   simp
-
-/-! ## Polymorphic Schwarz reduction -/
 
 /-- **Polymorphic Schwarz reduction.** For any `m : ℕ`, multi-index `dirs : Fin
 m → Fin n`, and direction `i : Fin n`, if the chart-pushed POU representative of
@@ -185,11 +176,6 @@ theorem chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMix
   induction m with
   | zero =>
       intro dirs i _h_parent
-      -- `dirs = Fin.elim0` (only `Fin 0 → _` function), so `Fin.cons i dirs : Fin 1 → _`
-      -- has `Fin.cons i dirs (Fin.last 0) = i` and `Fin.init (Fin.cons i dirs) = Fin.elim0`.
-      -- The LHS unfolds to `chosenWeakPartial' 2 i (chartPushed POU α u_h.coeFn) Ω`,
-      -- which equals `chosenWeakPartial' 2 i (chosenMthMixed 0 dirs) Ω`
-      -- (since chosenMthMixed 0 dirs = chartPushed).
       have h_lhs_eq :
           chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h 1
               (Fin.cons i dirs) =
@@ -198,9 +184,6 @@ theorem chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMix
                 g α u_h 0 dirs)
               (chartTargetEuclid (I := I) (M := M) α) := by
         rw [chosenMthMixedPartialChartPushedU_succ]
-        -- Now match: `Fin.cons i dirs (Fin.last 0) = i` and
-        -- `Fin.init (Fin.cons i dirs) = dirs` (both Fin 0 → _ functions are
-        -- equal extensionally).
         have h_last : (Fin.cons i dirs : Fin 1 → _) (Fin.last 0) = i := rfl
         have h_init : Fin.init (Fin.cons i dirs : Fin 1 → _) = dirs := by
           funext k
@@ -212,27 +195,6 @@ theorem chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMix
       classical
       set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
       have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
-      -- dirs : Fin (m + 1) → Fin n.
-      -- chosenMthMixed (m+2) (Fin.cons i dirs)
-      --   = chosenWeakPartial' 2 ((Fin.cons i dirs) (Fin.last (m+1)))
-      --       (chosenMthMixed (m+1) (Fin.init (Fin.cons i dirs)))
-      --   = chosenWeakPartial' 2 (dirs (Fin.last m))
-      --       (chosenMthMixed (m+1) (Fin.cons i (Fin.init dirs)))
-      -- Apply IH on m with dirs' = Fin.init dirs:
-      --   chosenMthMixed (m+1) (Fin.cons i (Fin.init dirs))
-      --     =ae chosenWeakPartial' 2 i (chosenMthMixed m (Fin.init dirs))
-      -- Propagate ae through outer chosenWeakPartial' 2 (dirs (Fin.last m)):
-      --   chosenMthMixed (m+2) (Fin.cons i dirs)
-      --     =ae chosenWeakPartial' 2 (dirs (Fin.last m))
-      --           (chosenWeakPartial' 2 i (chosenMthMixed m (Fin.init dirs)))
-      -- Apply polymorphic Schwarz at order two on chosenMthMixed m (Fin.init dirs):
-      --   chosenMthMixed m (Fin.init dirs) ∈ MemWkp 2 2 Ω
-      --   (from the bridge applied with k = 2 on chart-H^{m+2} parent),
-      --   then swap (dirs (Fin.last m), i):
-      --   ... =ae chosenWeakPartial' 2 i
-      --        (chosenWeakPartial' 2 (dirs (Fin.last m)) (chosenMthMixed m (Fin.init dirs)))
-      --     = chosenWeakPartial' 2 i (chosenMthMixed (m+1) dirs)  (by def).
-      -- Step 1: unfold the LHS.
       have h_last :
           (Fin.cons i dirs : Fin (m + 2) → Fin (Module.finrank ℝ E))
             (Fin.last (m + 1)) = dirs (Fin.last m) :=
@@ -251,8 +213,6 @@ theorem chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMix
                 (m + 1) (Fin.cons i (Fin.init dirs))) Ω := by
         rw [chosenMthMixedPartialChartPushedU_succ]
         rw [h_last, h_init]
-      -- Step 2: chosenMthMixed (m+1) dirs unfolds outer-direction as
-      --   chosenWeakPartial' 2 (dirs (Fin.last m)) (chosenMthMixed m (Fin.init dirs))
       have h_dirs_unfold :
           chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h
               (m + 1) dirs =
@@ -261,42 +221,14 @@ theorem chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMix
               (chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h
                 m (Fin.init dirs)) Ω := by
         rw [chosenMthMixedPartialChartPushedU_succ]
-      -- Step 3: get chart-H^{m+2} of the parent ⇒ chart-H^{(m-1)+(m+1)}... wait,
-      -- we need IH which requires chart-H^{m+2} parent for the inductive step at
-      -- m. The hypothesis is chart-H^{(m+1)+2} = chart-H^{m+3}. We feed IH with
-      -- chart-H^{m+2} (which is implied by chart-H^{m+3} via monotonicity?).
-      -- Actually, IH at step m needs `MemWkp (m + 2) 2 parent Ω`, which we DO have:
-      --   h_parent : MemWkp ((m+1) + 2) 2 parent Ω = MemWkp (m+3) 2 parent Ω.
-      -- We need MemWkp (m+2) 2 parent Ω. Use MemWkp.mono_natDegree (or the
-      -- existence of a similar API). If not available, derive from MemWkp_succ.
       have h_parent_for_ih :
           MemWkp (d := Module.finrank ℝ E) (m + 2) 2
             (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α
               ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ))
             (chartTargetEuclid (I := I) (M := M) α) := by
-        -- h_parent : MemWkp ((m+1) + 2) 2 = MemWkp (m+3) 2.
-        -- We want MemWkp (m+2) 2.
-        -- MemWkp_succ says MemWkp (k+1) 2 ↔ MemW1p 2 ∧ ∀ i, MemWkp k 2 (chosenWP) — not directly.
-        -- We use that MemWkp k 2 implies MemWkp k' 2 for k' ≤ k. Look for a
-        -- mono lemma.
-        -- Concrete derivation: MemWkp (m+3) 2 ↔ MemW1p 2 ∧ ∀ i, MemWkp (m+2) 2 (chosenWP).
-        -- The MemW1p 2 part is the (m+2)+1 - 1 = m+1-step ... wait we need MemWkp (m+2).
-        -- Alternative: use the structure: MemWkp k 2 unfolds via succ to give us
-        -- weak partials. In particular, MemWkp (m+3) 2 ↦ MemWkp (m+2) 2 by dropping
-        -- one derivative. Use `MemWkp.memW1p` recursively or a chained call.
-        -- Simplest: use that `MemWkp (k+1) 2 u Ω → MemWkp k 2 u Ω` via the
-        -- `MemWkp_succ` direction. Let's invoke `MemWkp.memWkp_of_succ` if exists,
-        -- or derive directly.
-        -- Use that MemWkp_succ: MemWkp (k+1) 2 ↔ MemW1p ∧ (∀ i, MemWkp k 2 _).
-        -- Therefore MemWkp k 2 ↔ MemWkp k 2; no direct reduction. But the
-        -- standard property is that higher chart-H ⊆ lower chart-H.
         exact MemWkp.le_of_le (by omega) h_parent
-      -- Step 4: inductive hypothesis on (Fin.init dirs), with parent chart-H^{m+2}.
       have h_ih :=
         ih (Fin.init dirs) i h_parent_for_ih
-      -- h_ih : chosenMthMixed (m+1) (Fin.cons i (Fin.init dirs)) =ae
-      --        chosenWeakPartial' 2 i (chosenMthMixed m (Fin.init dirs)).
-      -- Step 5: propagate h_ih through the outer chosenWeakPartial' 2 (dirs (Fin.last m)).
       have h_propagate :
           chosenWeakPartial' (d := Module.finrank ℝ E) 2
               (dirs (Fin.last m))
@@ -310,8 +242,6 @@ theorem chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMix
                 m (Fin.init dirs)) Ω) Ω :=
         chosenWeakPartial'_ae_congr (d := Module.finrank ℝ E)
           (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ih (dirs (Fin.last m))
-      -- Step 6: apply polymorphic Schwarz at order two.
-      -- We need chosenMthMixed m (Fin.init dirs) ∈ MemWkp 2 2 Ω. From bridge with k=2.
       have h_inner_memWkp_2_2 :
           MemWkp (d := Module.finrank ℝ E) 2 2
             (chosenMthMixedPartialChartPushedU (I := I) (M := M)
@@ -326,16 +256,9 @@ theorem chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMix
           exact h_parent_for_ih
         exact chosenMthMixedPartialChartPushedU_memWkp_of_chartPushed_memWkp
           (I := I) (M := M) g α u_h m 2 h_parent_2_m (Fin.init dirs)
-      -- Apply Schwarz on the pair (i, dirs (Fin.last m)).
       have h_swap :=
         chosenWeakPartial'_swap_ae_of_memWkp_two
           hΩ_open h_inner_memWkp_2_2 i (dirs (Fin.last m))
-      -- h_swap : chosenWeakPartial' 2 (dirs (Fin.last m))
-      --            (chosenWeakPartial' 2 i (chosenMthMixed m (Fin.init dirs))) Ω =ae
-      --          chosenWeakPartial' 2 i
-      --            (chosenWeakPartial' 2 (dirs (Fin.last m)) (chosenMthMixed m (Fin.init dirs))) Ω.
-      -- Step 7: identify the inner chosenWeakPartial' 2 (dirs (Fin.last m)) ∘ chosenMthMixed m (Fin.init dirs)
-      -- with chosenMthMixed (m+1) dirs (by h_dirs_unfold).
       have h_final :
           chosenWeakPartial' (d := Module.finrank ℝ E) 2 i
               (chosenWeakPartial' (d := Module.finrank ℝ E) 2
@@ -346,7 +269,6 @@ theorem chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMix
               (chosenMthMixedPartialChartPushedU (I := I) (M := M)
                 g α u_h (m + 1) dirs) Ω := by
         rw [← h_dirs_unfold]
-      -- Chain everything.
       calc chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h
               (m + 2) (Fin.cons i dirs)
           = chosenWeakPartial' (d := Module.finrank ℝ E) 2
@@ -368,17 +290,6 @@ theorem chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMix
         _ = chosenWeakPartial' (d := Module.finrank ℝ E) 2 i
               (chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h
                 (m + 1) dirs) Ω := h_final
-
-/-! ## Polymorphic ae-vanishing off `chartImagePOUTsupport α`
-
-For the weighted-MemLp upgrade of `u_chart`, we need the polymorphic version of
-the chosen-second-partial vanishing established for the twice-derived data: the
-`m`-fold chosen mixed weak partial is ae-zero on the chart-target complement of
-`chartImagePOUTsupport α`. The proof is by induction on `m`: at the base, the
-chart-pushed POU representative is ae-zero by construction; at the step,
-weak partials inherit ae-vanishing on an open set where their base function
-vanishes (via the fundamental lemma of the calculus of variations).
--/
 
 /-- Auxiliary: the open set `chartTargetEuclid α \ chartImagePOUTsupport α`. -/
 private lemma chartTarget_diff_chartImagePOUTsupport_isOpen_aux (α : M) :
@@ -563,8 +474,6 @@ lemma chosenMthMixedPartialChartPushedU_ae_zero_off_chartImagePOUTsupport
         chartTarget_diff_chartImagePOUTsupport_isOpen_aux (I := I) (M := M) α
       have hU_sub : U ⊆ Ω :=
         chartTarget_diff_chartImagePOUTsupport_subset_aux (I := I) (M := M) α
-      -- IH gives chosenMthMixed m (Fin.init dirs) is ae zero on U.
-      -- Need: chart-H^{m+1} of parent. We have chart-H^{(m+1)+1} = chart-H^{m+2}.
       have h_parent_for_ih :
           MemWkp (d := Module.finrank ℝ E) (m + 1) 2
             (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α
@@ -572,8 +481,6 @@ lemma chosenMthMixedPartialChartPushedU_ae_zero_off_chartImagePOUTsupport
             (chartTargetEuclid (I := I) (M := M) α) :=
         MemWkp.le_of_le (by omega) h_parent
       have h_ih_zero := ih h_parent_for_ih (Fin.init dirs)
-      -- The chosenMthMixed (m+1) dirs is a weak partial of chosenMthMixed m (Fin.init dirs).
-      -- Get chart-H^{m+1} of chosenMthMixed m (Fin.init dirs) via the bridge with k=1.
       have h_inner_memW1p :
           DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
             (chosenMthMixedPartialChartPushedU (I := I) (M := M)
@@ -591,21 +498,16 @@ lemma chosenMthMixedPartialChartPushedU_ae_zero_off_chartImagePOUTsupport
             (I := I) (M := M) g α u_h m 1 h_parent_1_m (Fin.init dirs)
         rw [MemWkp.one_iff_memW1p] at h_step
         exact h_step
-      -- chosenMthMixed (m+1) dirs is a weak (dirs (Fin.last m))-partial of chosenMthMixed m (Fin.init dirs).
       have h_isWeak :=
         chosenWeakPartial'_isWeakPartial_of_mem h_inner_memW1p
           (dirs (Fin.last m))
-      -- Local integrability on U.
       have h_chosen_memLp :=
         chosenWeakPartial'_memLp_of_mem h_inner_memW1p (dirs (Fin.last m))
       have hw_li := locallyIntegrableOn_of_memLp_two_chartTarget_aux
         (I := I) (M := M) (α := α) (f := _) h_chosen_memLp
-      -- Unfold chosenMthMixed (m+1) dirs to identify with chosenWeakPartial' 2 (dirs (Fin.last m)).
       rw [chosenMthMixedPartialChartPushedU_succ]
       exact weakPartial_ae_zero_off_inline_aux hΩ_open hU_open hU_sub
         (i := dirs (Fin.last m)) h_isWeak hw_li h_ih_zero
-
-/-! ## Weighted-`MemLp` upgrade for `chosenMthMixed m dirs` -/
 
 /-- The chart-pulled weighted measure restricted to a compact subset of the
 chart target is dominated by `c_max • vol.restrict K`. (Local copy.) -/
@@ -666,7 +568,6 @@ lemma chosenMthMixedPartialChartPushedU_memLp_weighted
       2 ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
   classical
-  -- Plain-volume MemLp 2.
   have h_global : MemLp
       (chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h m dirs) 2
       ((volume : Measure EuclN).restrict
@@ -681,11 +582,9 @@ lemma chosenMthMixedPartialChartPushedU_memLp_weighted
   have hK_meas : MeasurableSet K := hK_compact.isClosed.measurableSet
   have hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α :=
     chartImagePOUTsupport_subset_target (I := I) (M := M) α
-  -- ae-zero off K (under vol.restrict (chartTarget \ K)).
   have h_ae_zero_off_K_raw :=
     chosenMthMixedPartialChartPushedU_ae_zero_off_chartImagePOUTsupport
       (I := I) (M := M) g α u_h m h_parent_m_plus_1 dirs
-  -- Repackage as: ae over vol.restrict chartTarget, y ∉ K → … = 0.
   have h_ae_zero_off_K :
       ∀ᵐ y ∂((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)),
@@ -711,7 +610,6 @@ lemma chosenMthMixedPartialChartPushedU_memLp_weighted
     by_cases hy_K : y ∈ K
     · simp [Set.indicator_of_mem hy_K]
     · rw [Set.indicator_of_notMem hy_K, hy hy_K]
-  -- MemLp 2 of u_chart on vol.restrict K.
   have h_global_K : MemLp u_chart 2
       ((volume : Measure EuclN).restrict K) := by
     have h_restrict := h_global.restrict K
@@ -723,7 +621,6 @@ lemma chosenMthMixedPartialChartPushedU_memLp_weighted
       exact Set.inter_eq_self_of_subset_left hK_in
     rw [h_eq] at h_restrict
     exact h_restrict
-  -- Transfer to weighted.restrict K.
   obtain ⟨c, _hc_pos, h_le⟩ :=
     chartPulledWeighted_le_volume_on_compact_aux
       (I := I) (M := M) (g := g) α hK_compact hK_meas hK_in
@@ -731,7 +628,6 @@ lemma chosenMthMixedPartialChartPushedU_memLp_weighted
       ((chartPulledWeightedMeasure (I := I) g α).restrict K) :=
     h_global_K.of_measure_le_smul (c := ENNReal.ofReal c)
       ENNReal.ofReal_ne_top h_le
-  -- Lift to weighted.restrict chartTarget via the indicator structure.
   have h_indicator_memLp_weighted :
       MemLp (K.indicator u_chart) 2
         ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -759,8 +655,6 @@ lemma chosenMthMixedPartialChartPushedU_memLp_weighted
         (chartTargetEuclid (I := I) (M := M) α)] K.indicator u_chart :=
     h_absCont.ae_eq h_u_eq_ind
   exact (memLp_congr_ae h_u_eq_ind_weighted).mpr h_indicator_memLp_weighted
-
-/-! ## Field data for the iterated chart-bilinear instance -/
 
 /-- The chart-side `u_chart` for the iterated data:
 `chosenMthMixedPartialChartPushedU g α u_h m dirs`. -/
@@ -821,7 +715,6 @@ private lemma iterated_weak_partial_locally_memLp
       ((volume : Measure EuclN).restrict K) := by
   classical
   unfold iterated_weak_partial iterated_u_chart
-  -- chosenMthMixed m dirs ∈ MemW1p 2 (chart target) — from chart-H^{m+1}.
   have h_parent_m_plus_1 :
       MemWkp (d := Module.finrank ℝ E) (m + 1) 2
         (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α
@@ -831,7 +724,6 @@ private lemma iterated_weak_partial_locally_memLp
   have h_u_memW1p :=
     chosenMthMixedPartialChartPushedU_memW1p_two
       (I := I) (M := M) g α u_h m h_parent_m_plus_1 dirs
-  -- Global MemLp 2 (vol.restrict chartTarget) of chosenWeakPartial' 2 i.
   have h_global :
       MemLp (chosenWeakPartial' (d := Module.finrank ℝ E) 2 i
         (chosenMthMixedPartialChartPushedU
@@ -840,7 +732,6 @@ private lemma iterated_weak_partial_locally_memLp
         ((volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α)) :=
     chosenWeakPartial'_memLp_of_mem h_u_memW1p i
-  -- Restrict to K.
   have hK_meas : MeasurableSet K := hK_compact.isClosed.measurableSet
   have h_eq : ((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)).restrict K =
@@ -850,8 +741,6 @@ private lemma iterated_weak_partial_locally_memLp
     exact Set.inter_eq_self_of_subset_left hK_in
   rw [← h_eq]
   exact h_global.restrict K
-
-/-! ## The iterated chart-bilinear `ChartBilinearH1ComplData` instance -/
 
 /-- **The iterated chart-bilinear data as a `ChartBilinearH1ComplData g α`
 instance.** Takes an instance of `IteratedDiffChartBilinearData g α u_h m`
@@ -890,7 +779,6 @@ noncomputable def iteratedChartBilinearH1ComplData
   weak_partial :=
     iterated_weak_partial (I := I) (M := M) g α u_h m D_m.directions
   u_chart_memLp_weighted := by
-    -- chart-H^m of parent suffices for plain L²; we have chart-H^{m+1} (more).
     have h_parent_m :
         MemWkp (d := Module.finrank ℝ E) m 2
           (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α
@@ -911,17 +799,10 @@ noncomputable def iteratedChartBilinearH1ComplData
   variational_identity := by
     classical
     intro ψ hψ hψ_cs hψ_supp
-    -- Apply D_m's variational identity.
     have h_in := D_m.m_diff_variational_identity ψ hψ hψ_cs hψ_supp
-    -- D_m's identity LHS principal uses
-    --   chosenMthMixed (m+1) (Fin.cons i D_m.directions)
-    -- and we need it to be
-    --   iterated_weak_partial i = chosenWeakPartial' 2 i (chosenMthMixed m D_m.directions).
-    -- Bridge via the polymorphic Schwarz reduction.
     set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
     have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
     have hΩ_meas : MeasurableSet Ω := hΩ_open.measurableSet
-    -- Schwarz reduction for each i.
     have h_schwarz_ae : ∀ i : Fin (Module.finrank ℝ E),
         chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h (m + 1)
           (Fin.cons i D_m.directions) =ᵐ[
@@ -931,9 +812,6 @@ noncomputable def iteratedChartBilinearH1ComplData
             g α u_h m D_m.directions) Ω := fun i =>
       chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMixed_ae
         (I := I) (M := M) g α u_h m D_m.directions i h_chart_H_m_plus_2
-    -- Show: LHS principal integral via chosenMthMixed (m+1) (Fin.cons i dirs)
-    --   = LHS principal integral via chosenWeakPartial' 2 i (chosenMthMixed m dirs)
-    --   = LHS principal integral via iterated_weak_partial i.
     have h_principal_eq :
         (∫ y in Ω,
           (∑ i : Fin (Module.finrank ℝ E),
@@ -970,12 +848,7 @@ noncomputable def iteratedChartBilinearH1ComplData
       intro j _hj
       rw [hy i]
     rw [h_principal_eq] at h_in
-    -- The u_chart and f_chart parts match definitionally.
-    -- iterated_u_chart = chosenMthMixed m D_m.directions (by def).
-    -- D_m.fChartEff matches f_chart.
     exact h_in
-
-/-! ## Headline interior `MemWkp 2 2` regularity -/
 
 private lemma thickening_mono_of_lt
     {β : Type*} [PseudoEMetricSpace β]
@@ -1025,7 +898,6 @@ theorem iteratedDerivedChartBilinear_memWkp_two_two_interior
         (chosenMthMixedPartialChartPushedU
           (I := I) (M := M) g α u_h m D_m.directions) Ω'' := by
   classical
-  -- The packaged iterated data.
   set D : ChartBilinearH1ComplData (I := I) (M := M) g α :=
     iteratedChartBilinearH1ComplData (I := I) (M := M) g α D_m
       h_chart_H_m_plus_1 h_chart_H_m_plus_2
@@ -1037,15 +909,12 @@ theorem iteratedDerivedChartBilinear_memWkp_two_two_interior
     chartImagePOUTsupport_subset_target (I := I) (M := M) α
   have h_chart_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- Step 1: pick R_α > 0 so that cthickening R_α K_α ⊆ chartTargetEuclid α.
   obtain ⟨R_α, hR_α_pos, hR_α_subset⟩ :=
     hK_α_compact.exists_cthickening_subset_open h_chart_open hK_α_in_chart
-  -- Step 2: geometric scales.
   set ε : ℝ := R_α / 16 with hε_def
   have hε_pos : 0 < ε := by positivity
   set R₀ : ℝ := ε with hR₀_def
   have hR₀_pos : 0 < R₀ := hε_pos
-  -- Ω'' := thickening (2ε) K_α.
   set Ω'' : Set EuclN := Metric.thickening (2 * ε) K_α with hΩ''_def
   have hΩ''_open : IsOpen Ω'' := Metric.isOpen_thickening
   have h_two_ε_pos : 0 < 2 * ε := by positivity
@@ -1080,7 +949,6 @@ theorem iteratedDerivedChartBilinear_memWkp_two_two_interior
         change R_α / 16 + 2 * (R_α / 16) ≤ R_α; linarith
       exact Metric.cthickening_mono hle K_α
     exact ((h1.trans h2).trans h3).trans hR_α_subset
-  -- Step 4: Ω' := thickening (8ε) K_α (open, larger).
   set Ω' : Set EuclN := Metric.thickening (8 * ε) K_α with hΩ'_def
   have hΩ'_open : IsOpen Ω' := Metric.isOpen_thickening
   have h_eight_ε_pos : 0 < 8 * ε := by positivity
@@ -1097,7 +965,6 @@ theorem iteratedDerivedChartBilinear_memWkp_two_two_interior
     h_closureΩ'_sub.trans h_cthick_eight_ε_in_chart
   have hΩ'_compact_closure : IsCompact (closure Ω') :=
     hK_α_compact.cthickening.of_isClosed_subset isClosed_closure h_closureΩ'_sub
-  -- Step 5: build the smooth cutoff η.
   set K_η : Set EuclN := Metric.cthickening (3 * ε) K_α with hK_η_def
   have hK_η_compact : IsCompact K_η := hK_α_compact.cthickening
   set Ω_η : Set EuclN := Metric.thickening (5 * ε) K_α with hΩ_η_def
@@ -1159,20 +1026,17 @@ theorem iteratedDerivedChartBilinear_memWkp_two_two_interior
         rw [hΩ'_def]
         exact Metric.cthickening_subset_thickening' (by linarith) h_le K_α
       exact (h1.trans h2).trans h3
-  -- Step 6: apply the unconditional uniform-in-h diff-quot bound to D.
   obtain ⟨M_bound, hM_nn, h_uniform_bd⟩ :=
     chartBilinearH1Compl_uniform_diffQuot_bound_of_data
       (I := I) (M := M) (g := g) (α := α) D
       hη_smooth hη_supp hη_range hN_nn h_fderiv_eta
       hΩ'_open h_closureΩ'_in_chart hΩ'_compact_closure
       hη_in_Ω' hR₀_pos hh_supp_in_Ω' hη_one_on_Ω'' hΩ''_open.measurableSet
-  -- Step 7: apply h2_chart_loc_of_uniform_bound.
   have h_h2 :=
     h2_chart_loc_of_uniform_bound
       (I := I) (M := M) (g := g) (α := α) D
       hΩ''_open hΩ''_compact_closure hR₀_pos h_room
       hM_nn h_uniform_bd
-  -- Step 8: assemble MemWkp 2 2 D.u_chart Ω''.
   have h_uChart_memLp_vol_closureΩ'' :
       MemLp D.u_chart 2 (volume.restrict (closure Ω'')) :=
     memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure (I := I) (M := M)
@@ -1239,7 +1103,6 @@ theorem iteratedDerivedChartBilinear_memWkp_two_two_interior
     rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p]
     exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemW1p_congr_ae
       hΩ''_open h_ae.symm).mp (h_wp_i_memW1p_Ω'' i)
-  -- D.u_chart unfolds to iterated_u_chart = chosenMthMixed m D_m.directions.
   refine ⟨Ω'', hΩ''_open, hK_α_in_Ω'', hΩ''_compact_closure,
     h_closureΩ''_in_chart, ?_⟩
   exact h_uChart_memWkp_two_Ω''

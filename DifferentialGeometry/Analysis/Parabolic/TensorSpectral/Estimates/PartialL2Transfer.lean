@@ -83,18 +83,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Helper: maxima of finite real families are non-negative upper bounds
-
-For a finite indexed family of non-negative reals, the sum is a uniform
-upper bound. This is the elementary device we use to make the per-section
-constant uniform across the (finite) multi-index family. -/
 
 /-- For a finite indexed family of non-negative reals, the sum dominates
 each element. -/
@@ -111,16 +103,6 @@ private lemma le_sum_of_mem_finset_nonneg
       0 ≤ ∑ j ∈ Finset.univ.erase i, f j :=
     Finset.sum_nonneg (fun j _ => hf_nn j)
   linarith
-
-/-! ## Uniform-in-multi-index constant for the per-section partial bound
-
-The parent per-section bound
-`eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le_per_section`
-chooses a constant `C(Idx, Jdx)` depending on the multi-index pair. By
-summing those constants over the (finite) multi-index Finset we obtain a
-single non-negative constant that dominates every `C(Idx, Jdx)`. This
-constant is therefore uniform in `(Idx, Jdx)` for fixed
-`(g, r, s, S, α, β, k)`. -/
 
 /-- **Uniform-in-multi-index per-section `L^2` bound for the chosen weak
 partial of the chart-pushed scalar component.** For each chart pair
@@ -149,7 +131,6 @@ theorem exists_const_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indices
             (volume.restrict (chartTargetEuclid (I := I) (M := M) β)) ≤
           ENNReal.ofReal C * (‖S‖₊ + 1) := by
   classical
-  -- For each multi-index pair, the parent bound gives a constant `C(IJ)`.
   have hper : ∀ (IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
                       (Fin s → Fin (Module.finrank ℝ E))),
       ∃ C : ℝ, 0 ≤ C ∧
@@ -164,15 +145,12 @@ theorem exists_const_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indices
           ENNReal.ofReal C * (‖S‖₊ + 1) := fun IJ =>
     eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le_per_section
       (I := I) (M := M) g r s S α β IJ.1 IJ.2 k
-  -- Extract the per-pair constants.
   choose CIJ hCIJ_nn hCIJ_le using hper
-  -- The uniform constant is the sum over the finite multi-index Finset.
   set Csum : ℝ := ∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
                           (Fin s → Fin (Module.finrank ℝ E)),
     CIJ IJ with hCsum_def
   refine ⟨Csum, Finset.sum_nonneg (fun IJ _ => hCIJ_nn IJ), ?_⟩
   intro Idx Jdx
-  -- Bound by the (Idx, Jdx)-summand, then upgrade to the sum.
   have hsmd : CIJ (Idx, Jdx) ≤ Csum :=
     le_sum_of_mem_finset_nonneg
       (f := fun IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -185,13 +163,6 @@ theorem exists_const_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indices
         ENNReal.ofReal Csum * (‖S‖₊ + 1) :=
     mul_le_mul_of_nonneg_right h_ofReal_le (by exact zero_le _)
   exact (hCIJ_le (Idx, Jdx)).trans h_envelope_le
-
-/-! ## Sum-over-coordinate-directions uniform-in-multi-index bound
-
-Summing the per-direction bound over `k : Fin (Module.finrank ℝ E)` gives
-the corresponding sum-over-`k` bound with a single non-negative constant
-depending on `(g, r, s, S, α, β)` but uniform across both multi-index
-pairs and coordinate directions. -/
 
 /-- **Uniform-in-multi-index sum-over-coordinate-directions per-section
 `L^2` bound.** For each chart pair `(α, β)`, ranks `(r, s)`, and smooth
@@ -217,7 +188,6 @@ theorem exists_const_sum_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indic
               (volume.restrict (chartTargetEuclid (I := I) (M := M) β)) ≤
           ENNReal.ofReal C * (‖S‖₊ + 1) := by
   classical
-  -- For each direction `k`, get a uniform-in-(Idx, Jdx) constant `Ck`.
   have hper : ∀ k : Fin (Module.finrank ℝ E),
       ∃ C : ℝ, 0 ≤ C ∧
         ∀ (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -234,11 +204,9 @@ theorem exists_const_sum_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indic
     exists_const_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indices
       (I := I) (M := M) g r s S α β k
   choose Ck hCk_nn hCk_le using hper
-  -- The total constant is the sum over `k`.
   set Ctot : ℝ := ∑ k : Fin (Module.finrank ℝ E), Ck k with hCtot_def
   refine ⟨Ctot, Finset.sum_nonneg (fun k _ => hCk_nn k), ?_⟩
   intro Idx Jdx
-  -- Bound each summand and combine.
   have h_sum_le :
       ∑ k : Fin (Module.finrank ℝ E),
         eLpNorm
@@ -253,7 +221,6 @@ theorem exists_const_sum_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indic
           ENNReal.ofReal (Ck k) * (‖S‖₊ + 1) :=
     Finset.sum_le_sum (fun k _ => hCk_le k Idx Jdx)
   refine h_sum_le.trans ?_
-  -- Pull the common envelope `(‖S‖₊ + 1)` out of the sum.
   rw [show
         ∑ k : Fin (Module.finrank ℝ E),
           ENNReal.ofReal (Ck k) * (‖S‖₊ + 1) =
@@ -262,21 +229,11 @@ theorem exists_const_sum_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indic
       (Finset.sum_mul (s := Finset.univ)
         (f := fun k : Fin (Module.finrank ℝ E) => ENNReal.ofReal (Ck k))
         (a := (‖S‖₊ + 1))).symm]
-  -- Bound the ofReal-sum by the ofReal of the real sum.
   have h_ofReal_sum :
       ∑ k : Fin (Module.finrank ℝ E), ENNReal.ofReal (Ck k) ≤
         ENNReal.ofReal (∑ k : Fin (Module.finrank ℝ E), Ck k) := by
     rw [ENNReal.ofReal_sum_of_nonneg (fun k _ => hCk_nn k)]
   exact mul_le_mul_of_nonneg_right h_ofReal_sum (by exact zero_le _)
-
-/-! ## Polished packaged form
-
-The polished packaging combines the per-direction and per-multi-index
-estimates into a single existential statement of the form
-`∃ C, 0 ≤ C ∧ ∀ S Idx Jdx, eLpNorm (chosenWeakPartial' 2 k ...) ≤
-ENNReal.ofReal C * (‖S‖₊ + 1)`, written in the parent-style format
-favoured downstream. The constant is per-coordinate-direction and
-per-section but uniform in `(Idx, Jdx)`. -/
 
 /-- Per-direction packaged form: a single non-negative constant works
 uniformly in `(Idx, Jdx)` for fixed `(g, r, s, S, α, β, k)`. This is the
@@ -321,13 +278,6 @@ theorem exists_const_sum_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indic
             ENNReal.ofReal C * (‖S‖₊ + 1) := fun S =>
   exists_const_sum_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indices
     (I := I) (M := M) g r s S α β
-
-/-! ## Single-chart specialisation `α = β`
-
-The natural specialisation chosen downstream by the spectral pipeline is
-`α = β`: the chart `β` used for pushing equals the chart `α` from which
-the component coordinates are taken. We expose this form as a thin
-wrapper for readability. -/
 
 /-- Single-chart specialisation of the per-direction bound: `α = β`. -/
 theorem exists_const_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indices_single_chart

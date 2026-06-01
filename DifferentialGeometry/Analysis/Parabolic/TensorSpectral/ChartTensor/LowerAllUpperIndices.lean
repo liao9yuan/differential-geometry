@@ -76,8 +76,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## The model-basis coordinate functionals -/
-
 /-- The `i`-th coordinate of a vector `u : E` in the fixed model basis
 `chartModelBasis E`, packaged as a continuous linear map `E →L[ℝ] ℝ`. -/
 def chartCoordCLM (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -90,12 +88,6 @@ lemma chartCoordCLM_apply (i : Fin (Module.finrank ℝ E)) (u : E) :
     chartCoordCLM E i u = (chartModelBasis E).equivFun u i := by
   unfold chartCoordCLM
   rfl
-
-/-! ## The chart-Gram bilinear form on `E × E`
-
-We bundle the chart-Gram bilinear pairing as a continuous bilinear map
-`E →L[ℝ] E →L[ℝ] ℝ`, with the entries of `chartGramMatrix g α b` as
-coefficients in the chosen model basis. -/
 
 /-- The chart-Gram bilinear form on `E × E` at `b`: in the fixed model basis
 `chartModelBasis E`, its matrix entries are `chartGramMatrix g α b j k`. -/
@@ -116,12 +108,6 @@ lemma chartGramBilin_apply
   simp [ContinuousLinearMap.sum_apply, ContinuousLinearMap.smul_apply,
     ContinuousLinearMap.smulRight_apply, smul_eq_mul, mul_assoc]
 
-/-! ## The chart-frame separable `(0, r)`-form
-
-This is the chart-frame analog of `separableFormAt`: the separable `(0, r)`-form
-whose value at `w : Fin r → E` is the product of chart-Gram bilinear pairings
-`∏ k, chartGramBilin g α b (v k) (w k)`. -/
-
 /-- The chart-frame separable `(0, r)`-form built from `r` vectors
 `v : Fin r → E`. At `w : Fin r → E`, its value is
 `∏ k, chartGramBilin g α b (v k) (w k)`. -/
@@ -140,8 +126,6 @@ lemma chartSeparableFormAt_apply
   unfold chartSeparableFormAt
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply,
     ContinuousMultilinearMap.mkPiAlgebra_apply]
-
-/-! ### Multilinearity of `chartSeparableFormAt` in the input vector tuple -/
 
 private lemma chartSeparableFormAt_update_add
     (g : SmoothRiemannianMetric I M) (α b : M) (r : ℕ)
@@ -211,18 +195,6 @@ private lemma chartSeparableFormAt_update_smul
   rw [h_bilin_smul]
   ring
 
-/-! ## The chart-frame upper-index lowering map
-
-This is the chart-frame analog of `lowerAllUpperIndices`: for a mixed model
-tensor `T : TensorRSModel r s ℝ E`, the output is the covariant
-`(0, r + s)`-model tensor obtained by feeding the chart-frame separable
-`(0, r)`-form built from the first `r` slots of the input tuple into `T`,
-and evaluating the resulting `(0, s)`-form on the last `s` slots.
-
-The `b`-dependence enters only through the chart Gram matrix entries inside
-`chartSeparableFormAt`, hence smoothness in `b` will reduce to the existing
-`chartGramMatrix_entry_contMDiffOn` lemma. -/
-
 /-- Underlying scalar function of the chart-frame lowering map. -/
 private def chartLowerAllUpperIndices_modelFn
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α b : M)
@@ -230,13 +202,6 @@ private def chartLowerAllUpperIndices_modelFn
   T (chartSeparableFormAt (I := I) (M := M) g α b r
       (fun i : Fin r => v (Fin.castAdd s i)))
     (fun j : Fin s => v (Fin.natAdd r j))
-
-/-! ### Index-block update helpers (copies of the ones in `DualMetric.lean`)
-
-These describe how `Function.update` on `Fin (r + s)` propagates to either the
-`Fin r` or `Fin s` block. They are exact copies of the corresponding helpers
-in `DualMetric.lean`, repeated here to avoid making those private helpers
-public. -/
 
 private lemma upd_castAdd_first {r s : ℕ} (v : Fin (r + s) → E) (i : Fin r) (c : E) :
     (fun k : Fin r => Function.update v (Fin.castAdd s i) c (Fin.castAdd s k)) =
@@ -299,8 +264,7 @@ private noncomputable def chartLowerAllUpperIndices_modelML
   refine MultilinearMap.mk'
     (fun v => chartLowerAllUpperIndices_modelFn (I := I) (M := M) r s g α b T v)
     (fun v i a c => ?_) (fun v i c a => ?_)
-  · -- additivity
-    refine Fin.addCases ?_ ?_ i
+  · refine Fin.addCases ?_ ?_ i
     · intro i'
       simp only [chartLowerAllUpperIndices_modelFn]
       rw [upd_castAdd_first_noop_last,
@@ -321,8 +285,7 @@ private noncomputable def chartLowerAllUpperIndices_modelML
           upd_natAdd_last,
           upd_natAdd_last]
       rw [ContinuousMultilinearMap.map_update_add]
-  · -- scalar homogeneity
-    refine Fin.addCases ?_ ?_ i
+  · refine Fin.addCases ?_ ?_ i
     · intro i'
       simp only [chartLowerAllUpperIndices_modelFn]
       rw [upd_castAdd_first_noop_last,
@@ -363,12 +326,10 @@ private lemma chartLowerAllUpperIndices_modelML_norm_bound
         ∏ k : Fin (r + s), ‖v k‖ := by
   classical
   rw [chartLowerAllUpperIndices_modelML_apply]
-  -- Split the product over `Fin (r + s)`.
   have hsplit : ∏ j : Fin (r + s), ‖v j‖
       = (∏ i : Fin r, ‖v (Fin.castAdd s i)‖) *
         ∏ j : Fin s, ‖v (Fin.natAdd r j)‖ := by
     rw [Fin.prod_univ_add]
-  -- Bound the chart-frame separable form's operator norm.
   set α' := chartSeparableFormAt (I := I) (M := M) g α b r
       (fun i : Fin r => v (Fin.castAdd s i)) with hα'_def
   have hα'_norm :
@@ -392,7 +353,6 @@ private lemma chartLowerAllUpperIndices_modelML_norm_bound
     intro i _
     exact (chartGramBilin (I := I) (M := M) g α b).le_opNorm
       (v (Fin.castAdd s i))
-  -- Bound `T α' (w)` via opNorm of T and CMLM evaluation.
   have h_step1 :
       ‖T α' (fun j : Fin s => v (Fin.natAdd r j))‖
         ≤ ‖T α'‖ * ∏ j : Fin s, ‖v (Fin.natAdd r j)‖ :=
@@ -469,7 +429,6 @@ lemma chartLowerAllUpperIndices_model_zero
       T (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ))
         (fun j : Fin s => v (Fin.natAdd 0 j)) := by
   rw [chartLowerAllUpperIndices_model_apply]
-  -- At `r = 0`, the separable form is the unique `(0, 0)`-CMLM with value 1.
   have h_empty :
       chartSeparableFormAt (I := I) (M := M) g α b 0
           (fun i : Fin 0 => v (Fin.castAdd s i))
@@ -492,10 +451,6 @@ lemma chartLowerAllUpperIndices_model_succ
           (fun i : Fin (r + 1) => v (Fin.castAdd s i)))
         (fun j : Fin s => v (Fin.natAdd (r + 1) j)) := by
   rw [chartLowerAllUpperIndices_model_apply]
-
-/-! ## Basic algebraic properties in `T`
-
-The chart-frame lowering map is `ℝ`-linear in the mixed tensor argument `T`. -/
 
 lemma chartLowerAllUpperIndices_model_zero_tensor
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α b : M) :
@@ -526,33 +481,6 @@ lemma chartLowerAllUpperIndices_model_smul
   intro v
   simp [chartLowerAllUpperIndices_model_apply,
     ContinuousLinearMap.smul_apply, ContinuousMultilinearMap.smul_apply]
-
-/-! ## Smoothness in the chart base point
-
-We now prove that, for fixed `r`, `s`, `g`, `α`, and `T`, the chart-frame
-lowering map `b ↦ chartLowerAllUpperIndices_model r s g α b T` is smooth on
-the chart base set at `α`, as a function valued in
-`Tensor0SModel (r + s) ℝ E`.
-
-The `b`-dependence in the construction enters only through the chart Gram
-matrix entries inside `chartSeparableFormAt`. The proof has three layers:
-
-1. Reduce `Tensor0SModel (r + s) ℝ E`-valued smoothness to scalar smoothness
-   of every basis-tuple evaluation, via a bridge analogous to the private
-   `contMDiffOn_into_tensor0SModel_of_eval_basis` in
-   `Tensor/Multilinear/MetricLowering.lean`. We replay the bridge locally
-   here (`contMDiffOn_into_tensor0SModel_of_eval_basis_local`).
-2. At each model basis tuple, the scalar evaluation factors as
-   `T (chartSeparableFormAt g α b r v_first) v_last` for fixed model basis
-   tuples `v_first`, `v_last`. We further reduce smoothness of the inner
-   `Tensor0SModel r ℝ E`-valued separable form to scalar smoothness of every
-   basis-tuple evaluation, using the same bridge at arity `r`.
-3. Each such inner scalar evaluation unfolds to a finite product of chart
-   Gram matrix entries via `chartSeparableFormAt_apply`,
-   `chartGramBilin_apply`, and the basis-coordinate identity
-   `Module.Basis.equivFun_self`. Smoothness then follows from
-   `chartGramMatrix_entry_contMDiffOn` and `contMDiffOn_finset_prod`.
--/
 
 section Smoothness
 
@@ -673,7 +601,6 @@ private lemma chartGramBilin_basis_basis
       chartGramMatrix (I := I) g α b i j := by
   classical
   rw [chartGramBilin_apply]
-  -- Sum collapses by `Basis.equivFun_self` to the single (j',k') = (i,j) term.
   have hcollapse :
       ∀ j' : Fin (Module.finrank ℝ E),
         (∑ k : Fin (Module.finrank ℝ E),
@@ -688,7 +615,6 @@ private lemma chartGramBilin_basis_basis
           (chartModelBasis E).equivFun ((chartModelBasis E) i) i = 1 := by
         rw [(chartModelBasis E).equivFun_self]
         simp
-      -- Sum over k collapses to k = j.
       have hk_sum :
           (∑ k : Fin (Module.finrank ℝ E),
               chartGramMatrix (I := I) g α b i k *
@@ -711,8 +637,7 @@ private lemma chartGramBilin_basis_basis
           exact (h (Finset.mem_univ _)).elim
       rw [hk_sum]
       simp
-    · -- j' ≠ i: every term in the inner sum has factor `equivFun (e i) j' = 0`.
-      have hzero :
+    · have hzero :
           (chartModelBasis E).equivFun ((chartModelBasis E) i) j' = 0 := by
         rw [(chartModelBasis E).equivFun_self]
         simp [Ne.symm hj']
@@ -727,7 +652,6 @@ private lemma chartGramBilin_basis_basis
         rw [hzero]; ring
       rw [h_sum_zero]
       simp [hj']
-  -- Substitute via `Finset.sum_congr` then collapse the outer sum.
   have houter :
       (∑ j' : Fin (Module.finrank ℝ E),
           ∑ k : Fin (Module.finrank ℝ E),
@@ -771,7 +695,6 @@ private lemma chartSeparableFormAt_basis_contMDiffOn
       (trivializationAt E (TangentSpace I) α).baseSet := by
   refine contMDiffOn_into_tensor0SModel_of_eval_basis_local _ ?_
   intro ψ
-  -- The scalar evaluation factors as a product of chart Gram entries.
   have heq :
       (fun b : M =>
           chartSeparableFormAt (I := I) (M := M) g α b r
@@ -799,12 +722,10 @@ theorem chartLowerAllUpperIndices_model_contMDiffOn
       (trivializationAt E (TangentSpace I) α).baseSet := by
   refine contMDiffOn_into_tensor0SModel_of_eval_basis_local _ ?_
   intro φ
-  -- Unfold the scalar evaluation via `chartLowerAllUpperIndices_model_apply`.
   set v_first : Fin r → E :=
     fun k => (chartModelBasis E) (φ (Fin.castAdd s k)) with hv_first
   set v_last : Fin s → E :=
     fun j => (chartModelBasis E) (φ (Fin.natAdd r j)) with hv_last
-  -- Step 1: rewrite the scalar function in terms of `v_first` and `v_last`.
   have hrewrite :
       (fun b : M =>
           chartLowerAllUpperIndices_model
@@ -815,10 +736,6 @@ theorem chartLowerAllUpperIndices_model_contMDiffOn
     funext b
     rw [chartLowerAllUpperIndices_model_apply]
   rw [hrewrite]
-  -- Step 2: factor the scalar as `(evalAt v_last) ∘ T ∘ (separableForm)`.
-  -- `T : Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E` is a CLM, and
-  -- `ContinuousMultilinearMap.apply ℝ _ ℝ v_last` is a CLM
-  -- `Tensor0SModel s ℝ E →L[ℝ] ℝ`. The composition is a single CLM.
   let evalLast : Tensor0SModel s ℝ E →L[ℝ] ℝ :=
     ContinuousMultilinearMap.apply ℝ (fun _ : Fin s => E) ℝ v_last
   let composed : Tensor0SModel r ℝ E →L[ℝ] ℝ := evalLast.comp T
@@ -828,8 +745,6 @@ theorem chartLowerAllUpperIndices_model_contMDiffOn
   have hΦ : ContMDiffOn I 𝓘(ℝ, Tensor0SModel r ℝ E) ∞
       (fun b : M => chartSeparableFormAt (I := I) (M := M) g α b r v_first)
       (trivializationAt E (TangentSpace I) α).baseSet := by
-    -- Apply the separable-form smoothness lemma with
-    -- `φ_first = φ ∘ Fin.castAdd s`.
     have :=
       chartSeparableFormAt_basis_contMDiffOn (I := I) (M := M) (r := r) g α
         (fun k : Fin r => φ (Fin.castAdd s k))
@@ -839,7 +754,6 @@ theorem chartLowerAllUpperIndices_model_contMDiffOn
         (chartSeparableFormAt (I := I) (M := M) g α b r v_first))
       (trivializationAt E (TangentSpace I) α).baseSet :=
     composed.contMDiff.comp_contMDiffOn hΦ
-  -- Rewrite via `hcomposed_apply`.
   refine hcomp.congr ?_
   intro b _
   exact hcomposed_apply _

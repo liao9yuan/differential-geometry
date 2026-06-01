@@ -80,20 +80,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The per-eigenvector `ℓ¹` sum as a real Sobolev-weight sum
-
-The per-eigenvector quantitative bound is phrased with the resolvent-eigenvalue
-factor `(i.fst.val)⁻¹ ^ (2k+1)` (a natural-number power of a real). We first
-identify this factor with the spectral Sobolev weight at the *real* exponent
-`(2k+1 : ℝ)`, so that the Cauchy–Schwarz weight algebra
-(`tensorHs.tensorSobolevWeight_add`, `…_neg`) applies. -/
 
 /-- The resolvent factor `(i.fst.val)⁻¹ ^ (2k+1)` equals the spectral Sobolev
 weight `(1 + λᵢ)^{2k+1}` at the real exponent `(2 * k + 1 : ℝ)`. -/
@@ -130,21 +120,16 @@ private lemma garding_l1_sum_le
         tensorSobolevWeight (I := I) (M := M) i (-p)) * ‖T‖ := by
   classical
   set S := hT_fs.toFinset with hS_def
-  -- The Cauchy–Schwarz split factors.
   set f : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s → ℝ :=
     fun i => Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) * |T.coeff i|
     with hf_def
   set d : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s → ℝ :=
     fun i => Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (-p))
     with hd_def
-  -- Each summand `|cᵢ| · (1+λᵢ)^{2k+1}` equals `f i · d i`.
   have hsummand : ∀ i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s,
       |T.coeff i| * (i.fst.val)⁻¹ ^ (2 * k + 1) = f i * d i := by
     intro i
     rw [resolvent_pow_eq_weight (I := I) (M := M) g r s k i, hf_def, hd_def]
-    -- `(1+λ)^{2k+1} = √(1+λ)^σ · √(1+λ)^{-p}` since `σ + (-p) = 2(2k+1)`,
-    -- so `((2k+1)) = (σ + (-p))/2` and the product of square roots is the
-    -- weight at `(2k+1)`.
     have hweight_eq :
         tensorSobolevWeight (I := I) (M := M) i ((2 * k + 1 : ℕ) : ℝ) =
           Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) *
@@ -158,11 +143,9 @@ private lemma garding_l1_sum_le
         Real.sqrt_mul_self (tensorSobolevWeight_nonneg (I := I) (M := M) i _)]
     rw [hweight_eq]; ring
   rw [Finset.sum_congr rfl (fun i _ => hsummand i)]
-  -- Finite Cauchy–Schwarz: `(∑ f·d)² ≤ (∑ f²)(∑ d²)`.
   have hCS : (∑ i ∈ S, f i * d i) ^ 2 ≤
       (∑ i ∈ S, (f i) ^ 2) * ∑ i ∈ S, (d i) ^ 2 :=
     Finset.sum_mul_sq_le_sq_mul_sq S f d
-  -- The high-scale partial sum `∑ f² = ∑ (1+λ)^σ cᵢ² ≤ ‖T‖²`.
   have hfsq : ∑ i ∈ S, (f i) ^ 2 ≤ ‖T‖ ^ 2 := by
     have heq : ∑ i ∈ S, (f i) ^ 2 =
         ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (T.coeff i) ^ 2 := by
@@ -172,7 +155,6 @@ private lemma garding_l1_sum_le
     rw [heq, tensorHs.norm_sq_eq_tsum]
     refine Summable.sum_le_tsum S (fun i _ => ?_) T.weighted_summable
     exact mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i σ) (sq_nonneg _)
-  -- The tail partial sum `∑ d² = ∑ (1+λ)^{-p} ≤ S_tail = ∑'ᵢ (1+λ)^{-p}`.
   have hdsq : ∑ i ∈ S, (d i) ^ 2 ≤
       ∑' i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s,
         tensorSobolevWeight (I := I) (M := M) i (-p) := by
@@ -183,7 +165,6 @@ private lemma garding_l1_sum_le
     rw [heq]
     refine Summable.sum_le_tsum S (fun i _ => ?_) h_tail_summable
     exact tensorSobolevWeight_nonneg (I := I) (M := M) i (-p)
-  -- Combine: `(∑ f·d)² ≤ ‖T‖²·S_tail`, hence `∑ f·d ≤ ‖T‖·√S_tail`.
   set Stail : ℝ :=
     ∑' i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s,
       tensorSobolevWeight (I := I) (M := M) i (-p) with hStail_def
@@ -198,7 +179,6 @@ private lemma garding_l1_sum_le
     have h2 : 0 ≤ Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (-p)) :=
       Real.sqrt_nonneg _
     positivity
-  -- `(∑ f·d)² ≤ ‖T‖²·Stail`.
   have hfsq_nn : 0 ≤ ∑ i ∈ S, (f i) ^ 2 :=
     Finset.sum_nonneg (fun i _ => sq_nonneg _)
   have hbound_sq : (∑ i ∈ S, f i * d i) ^ 2 ≤ ‖T‖ ^ 2 * Stail := by
@@ -207,7 +187,6 @@ private lemma garding_l1_sum_le
       _ ≤ ‖T‖ ^ 2 * Stail := by
           apply mul_le_mul hfsq hdsq (Finset.sum_nonneg (fun i _ => sq_nonneg _))
           exact sq_nonneg _
-  -- Take square roots. `√(‖T‖²·Stail) = ‖T‖·√Stail`.
   have hrhs_eq : Real.sqrt (‖T‖ ^ 2 * Stail) = ‖T‖ * Real.sqrt Stail := by
     rw [Real.sqrt_mul (sq_nonneg _), Real.sqrt_sq (norm_nonneg T)]
   calc ∑ i ∈ S, f i * d i
@@ -215,8 +194,6 @@ private lemma garding_l1_sum_le
     _ ≤ Real.sqrt (‖T‖ ^ 2 * Stail) := Real.sqrt_le_sqrt hbound_sq
     _ = ‖T‖ * Real.sqrt Stail := hrhs_eq
     _ = Real.sqrt Stail * ‖T‖ := by ring
-
-/-! ## The iterated Gårding extension bound from eigenvalue-tail summability -/
 
 /-- **The iterated Gårding extension bound from eigenvalue-tail summability.**
 
@@ -240,9 +217,7 @@ theorem iteratedGardingExtensionBound_of_eigenvalueTailSummable
     (h_tail : EigenvalueTailSummable (I := I) (M := M) g r s) :
     IteratedGardingExtensionBound (I := I) (M := M) g r s := by
   classical
-  -- Extract the single tail-summability witness exponent `p > 0`.
   obtain ⟨p, hp_pos, h_tail_p⟩ := h_tail
-  -- Rewrite the tail family `(1+λ)^{-p}` as the Sobolev weight at `-p`.
   have h_tail_summable :
       Summable (fun i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s =>
         tensorSobolevWeight (I := I) (M := M) i (-p)) := by
@@ -252,29 +227,22 @@ theorem iteratedGardingExtensionBound_of_eigenvalueTailSummable
         (fun i => tensorSobolevWeight (I := I) (M := M) i (-p)) := by
       funext i; rfl
     rwa [h_eq] at h_tail_p
-  -- The fixed finite tail constant `S_tail = ∑'ᵢ (1+λᵢ)^{-p}` and its sqrt.
   set Stail : ℝ :=
     ∑' i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s,
       tensorSobolevWeight (I := I) (M := M) i (-p) with hStail_def
   have hStail_nonneg : 0 ≤ Stail :=
     tsum_nonneg (fun i => tensorSobolevWeight_nonneg (I := I) (M := M) i (-p))
   intro k
-  -- The order-`k` per-eigenvector constant `C₀ ≥ 0`.
   obtain ⟨C₀, hC₀_nn, hC₀_bound⟩ :=
     tensorHsSmoothRepr_wtwokTwoNorm_le_uniform
       (I := I) (M := M) g r s k
-  -- The witness exponent and constant.
   refine ⟨2 * (2 * k + 1 : ℕ) + p, by positivity, C₀ * Real.sqrt Stail,
     mul_nonneg hC₀_nn (Real.sqrt_nonneg _), ?_⟩
   intro T hT_fs
-  -- The smooth representative lies in `W^{2k,2}`, so its tensor norm is finite.
   have h_mem : MemWtwokTwo (I := I) (M := M) g k
       (tensorHsSmoothRepr (I := I) (M := M) T hT_fs) :=
     tensorHsSmoothRepr_memWtwokTwo (I := I) (M := M) T hT_fs k
-  -- The per-eigenvector ENNReal bound.
   have hbd := hC₀_bound T hT_fs
-  -- Both sides of the ENNReal bound are finite; take `.toReal`.
-  -- The RHS `ofReal C₀ * ofReal (∑ …)` is `≠ ⊤`.
   have h_l1_nn : 0 ≤ ∑ i ∈ hT_fs.toFinset,
       |T.coeff i| * (i.fst.val)⁻¹ ^ (2 * k + 1) := by
     refine Finset.sum_nonneg (fun i _ => ?_)
@@ -287,7 +255,6 @@ theorem iteratedGardingExtensionBound_of_eigenvalueTailSummable
           ENNReal.ofReal (∑ i ∈ hT_fs.toFinset,
             |T.coeff i| * (i.fst.val)⁻¹ ^ (2 * k + 1)) ≠ ⊤ := by
     apply ENNReal.mul_ne_top <;> exact ENNReal.ofReal_ne_top
-  -- Convert the ENNReal bound to a real bound on `.toReal`.
   have htoReal :
       (wtwokTwoNorm (I := I) (M := M) g k
         (tensorHsSmoothRepr (I := I) (M := M) T hT_fs)).toReal ≤
@@ -296,10 +263,8 @@ theorem iteratedGardingExtensionBound_of_eigenvalueTailSummable
     have h := ENNReal.toReal_mono hrhs_ne_top hbd
     rwa [ENNReal.toReal_mul, ENNReal.toReal_ofReal hC₀_nn,
       ENNReal.toReal_ofReal h_l1_nn] at h
-  -- Bound the finite `ℓ¹` sum by `√S_tail · ‖T‖` (Cauchy–Schwarz core).
   have hl1 := garding_l1_sum_le (I := I) (M := M) g r s k h_tail_summable
     (σ := 2 * (2 * k + 1 : ℕ) + p) rfl T hT_fs
-  -- Chain the two bounds.
   calc (wtwokTwoNorm (I := I) (M := M) g k
           (tensorHsSmoothRepr (I := I) (M := M) T hT_fs)).toReal
       ≤ C₀ * (∑ i ∈ hT_fs.toFinset,

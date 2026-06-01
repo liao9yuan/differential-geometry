@@ -82,8 +82,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## The rank-generic order-`2` commutator defect -/
-
 /-- **The rank-generic order-`2` commutator defect.** The difference of the rough
 Laplacian of the `(0, s + 1)`-tensor gradient field `∇S` and the covariant gradient
 of the rough Laplacian of `S`, as a smooth compactly-supported `(0, s + 1)`-tensor
@@ -139,15 +137,6 @@ theorem pointwiseTensorCurv_toSection_eq_sub
   rw [hdef, SmoothCcTensor.toSection_sub]
   rfl
 
-/-! ## The two pieces of the defect as fixed-frame sums
-
-The rough-Laplacian piece `Δ_∇(∇S)` is the frame trace of the second covariant
-derivative of the gradient tensor `∇S` (rank `(0, s + 1)`); the gradient piece
-`∇(Δ_∇ S)` is the fixed-frame sum of the covariant gradients of the per-summand
-second covariant derivatives of `S` (the gradient-slot Leibniz commutation, with the
-moving frame discharged). Both are the rank-generic lifts of the rank-`2` pieces of
-`Order2DefectOffDiagPerDir.lean` / `Order2DefectGradientSlotLeibniz.lean`. -/
-
 /-- **Frame-trace reading of the rough-Laplacian piece.** The rough Laplacian of the
 `(0, s + 1)`-tensor gradient field `∇S`, read at `x`, is the frame trace of its
 second covariant derivative over the `g_x`-orthonormal frame `Bᵢ`:
@@ -188,19 +177,15 @@ theorem covGrad_rawConnLap_toSection_eq_frame_sum_gen
             (fun y : M => tensorSecondCovDeriv (I := I) g 0 s
               (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i)
               (fun z : M => S.toSection z) y) x) := by
-  -- Smoothness of the underlying `S` section (total-space form).
   have hS : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
         (E := fun z : M => TensorRSSpace 0 s I z) y (S.toSection y)) :=
     S.toSection.contMDiff
-  -- The covariant gradient reads through `covGradBundleEquiv` of the directional map of `Δ_∇ S`.
   rw [covGrad_toSection_apply (I := I) (M := M) g 0 s
     (rawTensorConnLapSmooth (I := I) g 0 s S) x]
-  -- Rewrite the inner directional map's section `Δ_∇ S` to the raw `rawTensorConnLap`.
   rw [show (fun y : M => (rawTensorConnLapSmooth (I := I) g 0 s S).toSection y) =
       (fun y : M => rawTensorConnLap (I := I) g 0 s (fun z : M => S.toSection z) y) from by
     funext y; rw [rawTensorConnLapSmooth_toSection_apply]]
-  -- `tensorRSCovariantDerivative I M 0 s (LeviCivita g) = tensorCov g 0 s` by definition.
   exact covGradBundleEquiv_covDeriv_rawConnLap_eq_sum (I := I) g 0 s hS x
 
 /-- **Representation (A): the rank-generic defect as a fixed-frame sum of per-summand
@@ -237,14 +222,6 @@ theorem pointwiseTensorCurv_toSection_eq_frame_sum
   rw [rawTensorConnLap_gradTensor_toSection_eq_frame_trace_gen (I := I) (M := M) g s S x]
   rw [covGrad_rawConnLap_toSection_eq_frame_sum_gen (I := I) (M := M) g s S x]
   rw [← Finset.sum_sub_distrib]
-
-/-! ## The pointwise fibre pairing and its Cauchy–Schwarz bound
-
-The downstream curvature cross-term `⟨Curv, ∇S⟩_{L²}` is the integral of the pointwise
-fibre pairing `g_x(Curv S (x), ∇S(x))`, which is the metric-induced pointwise inner product
-`tensorInnerPointwise` of the trivialized model tensors. We record its fibre Cauchy–Schwarz
-bound by the geometric mean of the two intrinsic fibre norms, then assemble the headline
-pointwise pairing bound consumed by the cross-term reduction. -/
 
 /-- **The pointwise fibre pairing of the defect against the gradient field.** At `x`, the
 metric-induced fibre pairing of the order-`2` commutator defect `Curv S (x)` against the
@@ -288,36 +265,17 @@ theorem abs_pointwiseTensorCurvPairing_le
           ((covGrad (I := I) (M := M) g 0 s S).toSection x)) := by
   classical
   rw [pointwiseTensorCurvPairing]
-  -- Fibre Cauchy–Schwarz in `tensorPointwiseNorm` form.
   have hcs := abs_tensorInnerPointwise_le_mul (I := I) (M := M) g 0 (s + 1) x
     (TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := 0) (s := s + 1) (x := x)
       ((pointwiseTensorCurv (I := I) (M := M) g s S).toSection x))
     (TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := 0) (s := s + 1) (x := x)
       ((covGrad (I := I) (M := M) g 0 s S).toSection x))
-  -- Rewrite each `tensorPointwiseNorm` as the sqrt of the intrinsic fibre norm.
   rw [tensorPointwiseNorm, tensorPointwiseNorm,
     ← riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x
       ((pointwiseTensorCurv (I := I) (M := M) g s S).toSection x),
     ← riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x
       ((covGrad (I := I) (M := M) g 0 s S).toSection x)] at hcs
   exact hcs
-
-/-! ## The headline pointwise pairing bound (B)
-
-The genuine third-order tensor Bochner–Weitzenböck content of the defect — both the pure
-Riemann contraction `R(Bᵢ, ·)(∇_{Bᵢ} S)` (controlled by `‖R‖_∞ · rfns(∇S)`) and the genuine
-curvature-derivative contraction `(∇_{Bᵢ} R)(Bᵢ, ·) S` (controlled by `‖∇R‖_∞ · rfns(S)`) —
-is the per-point fibre-norm bound
-
-```
-√(rfns(Curv S)(x)) ≤ K_R · √(rfns(∇S)(x)) + K_dR · √(rfns(S)(x)),
-```
-
-with `K_R, K_dR ≥ 0` the uniform curvature / curvature-derivative sup constants on the closed
-manifold. We expose this per-point fibre-norm bound as the hypothesis the caller supplies
-from the uniform sups (`‖R‖_∞`, `‖∇R‖_∞`) and the curvature representation of `Curv`, and
-deliver the pointwise pairing bound in the exact shape consumed by the curvature cross-term
-reduction. -/
 
 /-- **The headline pointwise pairing bound (B).** Let `K_R, K_dR ≥ 0` and suppose the
 intrinsic fibre norm of the order-`2` commutator defect `Curv S` at `x` satisfies the genuine
@@ -358,26 +316,21 @@ theorem pointwiseTensorCurv_pairing_bound
           Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
             ((covGrad (I := I) (M := M) g 0 s S).toSection x)) := by
   classical
-  -- Abbreviations for the three square-root fibre norms.
   set sqCurv : ℝ := Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
     ((pointwiseTensorCurv (I := I) (M := M) g s S).toSection x)) with hsqCurv
   set sqGrad : ℝ := Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
     ((covGrad (I := I) (M := M) g 0 s S).toSection x)) with hsqGrad
   set sqS : ℝ := Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x))
     with hsqS
-  -- Non-negativity of the square roots.
   have hsqGrad_nn : 0 ≤ sqGrad := Real.sqrt_nonneg _
-  -- `√(rfns(∇S)) · √(rfns(∇S)) = rfns(∇S)`.
   have hgrad_sq : sqGrad * sqGrad =
       riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
         ((covGrad (I := I) (M := M) g 0 s S).toSection x) := by
     rw [hsqGrad]
     exact Real.mul_self_sqrt
       (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x _)
-  -- Fibre Cauchy–Schwarz: `|pairing| ≤ sqCurv · sqGrad`.
   have hcs := abs_pointwiseTensorCurvPairing_le (I := I) (M := M) g s S x
   rw [← hsqCurv, ← hsqGrad] at hcs
-  -- Chain the per-point fibre bound on `sqCurv`.
   calc |pointwiseTensorCurvPairing (I := I) (M := M) g s S x|
       ≤ sqCurv * sqGrad := hcs
     _ ≤ (K_R * sqGrad + K_dR * sqS) * sqGrad :=
@@ -386,16 +339,6 @@ theorem pointwiseTensorCurv_pairing_bound
     _ = K_R * riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
             ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
           K_dR * sqS * sqGrad := by rw [hgrad_sq]
-
-/-! ## The genuine third-order Weitzenböck curvature field (R and ∇R), at arbitrary rank
-
-The directional-`W` reading of the order-`2` commutator defect — the difference of the
-frame-trace third covariant derivative `∑ᵢ ∇_{Bᵢ} ∇_{Bᵢ}(∇_W T)` and its swapped form
-`∑ᵢ ∇_W ∇_{Bᵢ} ∇_{Bᵢ} T` — is the explicit curvature field `Tensor3rdCurv W T x`
-(`frame_trace_thirdCovDeriv_swap`, at arbitrary covariant rank). This file isolates the two
-**genuine** curvature contributions inside `Tensor3rdCurv` — the pure Riemann contraction
-`R(Bᵢ, W)(∇_{Bᵢ} T)` and the curvature-derivative contraction `∇_{Bᵢ}(R(Bᵢ, W) T)` — from the
-two frame-bracket terms, which are the `∇²T`-order discrepancy. -/
 
 /-- **The genuine third-order curvature field (R and ∇R).** The two genuine curvature
 contributions inside `Tensor3rdCurv W T x`, summed over the `g_x`-orthonormal frame
@@ -503,17 +446,6 @@ theorem frame_trace_thirdCovDeriv_defect_eq_genuine_add_bracket
     Tensor3rdCurv_eq_genuine_add_bracket (I := I) g r s W T x]
   abel
 
-/-! ## The genuine-curvature fibre-norm bound (R · rfns(∇T) + ∇R · rfns(T))
-
-The per-summand genuine curvature contribution
-`R(Bᵢ, W)(∇_{Bᵢ} T)(x) + ∇_{Bᵢ}(R(Bᵢ, W) T)(x)` is controlled fibrewise by the pure-curvature
-contribution `rfns(R(Bᵢ, W)(∇_{Bᵢ} T))` — controlled by the curvature sup `‖R‖_∞ · rfns(∇T)` —
-and the curvature-derivative contribution `rfns(∇_{Bᵢ}(R(Bᵢ, W) T))` — controlled by the
-curvature-derivative sup `‖∇R‖_∞ · rfns(T)` together with `‖R‖_∞ · rfns(∇T)` (the Leibniz
-expansion `(∇R) T + R(∇T)`). We expose those two per-point contributions as hypotheses the
-caller supplies from the uniform sups, and bound the fibre norm of the assembled
-genuine-curvature field. -/
-
 /-- **Fibre-norm bound for the genuine third-order curvature field.** Fix `x` and write
 `Bᵢ := smoothOrthoFrame g x i`, `n := Module.finrank ℝ E`. Suppose the two genuine per-summand
 curvature contributions are controlled, for every `i`, by the per-point pure-curvature constant
@@ -550,7 +482,6 @@ theorem riemannianFiberNormSq_tensor3rdCurvGenuine_le
       (2 * (Module.finrank ℝ E : ℝ)) * (Module.finrank ℝ E : ℝ) * (cR + cdR) := by
   classical
   set n : ℕ := Module.finrank ℝ E with hn
-  -- Per-summand genuine curvature contribution.
   set F : Fin n → TensorRSSpace r s I x := fun i =>
     riemannSec (tensorCov (I := I) g r s) (smoothOrthoFrame (I := I) g x i) W
         (covApply (tensorCov (I := I) g r s) (smoothOrthoFrame (I := I) g x i) T) x
@@ -558,14 +489,11 @@ theorem riemannianFiberNormSq_tensor3rdCurvGenuine_le
           (fun b : M => riemannSec (tensorCov (I := I) g r s)
             (smoothOrthoFrame (I := I) g x i) W T b) x
           (smoothOrthoFrame (I := I) g x i x) with hF
-  -- `tensor3rdCurvGenuine = ∑ᵢ F i`.
   have hsum : tensor3rdCurvGenuine (I := I) g r s W T x = ∑ i : Fin n, F i := rfl
   rw [hsum]
-  -- `n`-sub-additivity of the squared fibre norm on the frame sum.
   have hcard := riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g r s x
     (Finset.univ : Finset (Fin n)) F
   rw [Finset.card_univ, Fintype.card_fin] at hcard
-  -- Each per-summand `rfns(F i) ≤ 2 (cR + cdR)`.
   have hper : ∀ i : Fin n,
       riemannianFiberNormSq (I := I) (M := M) g r s x (F i) ≤ 2 * (cR + cdR) := by
     intro i
@@ -592,14 +520,12 @@ theorem riemannianFiberNormSq_tensor3rdCurvGenuine_le
             have := mul_le_mul_of_nonneg_left h2 (by norm_num : (0 : ℝ) ≤ 2)
             linarith
       _ = 2 * (cR + cdR) := by ring
-  -- Sum the per-summand bounds: `∑ᵢ rfns(F i) ≤ n · 2 (cR + cdR)`.
   have hsum_le : ∑ i : Fin n, riemannianFiberNormSq (I := I) (M := M) g r s x (F i) ≤
       (n : ℝ) * (2 * (cR + cdR)) := by
     calc ∑ i : Fin n, riemannianFiberNormSq (I := I) (M := M) g r s x (F i)
         ≤ ∑ _i : Fin n, (2 * (cR + cdR)) := Finset.sum_le_sum (fun i _ => hper i)
       _ = (n : ℝ) * (2 * (cR + cdR)) := by
             rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
-  -- Chain: `rfns(∑ F) ≤ n · ∑ rfns(F) ≤ n · (n · 2 (cR + cdR)) = (2 n) · n · (cR + cdR)`.
   have hn_nn : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
   calc riemannianFiberNormSq (I := I) (M := M) g r s x (∑ i : Fin n, F i)
       ≤ (n : ℝ) * ∑ i : Fin n, riemannianFiberNormSq (I := I) (M := M) g r s x (F i) := hcard

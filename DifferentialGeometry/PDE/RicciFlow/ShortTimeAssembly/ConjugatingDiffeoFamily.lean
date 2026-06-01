@@ -1,9 +1,3 @@
-/-
-The conjugating diffeomorphism family: integrate the negated DeTurck field to a
-smooth family of diffeomorphisms anchored at the identity, carrying the bare
-backward orbit ODE on the interior. Skeleton stub for the short-time-existence
-blueprint (GAP 2, diffeomorphism family).
--/
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists
@@ -98,31 +92,21 @@ theorem conjugating_diffeo_family
           (Set.Ici (0 : ℝ)) s
           ((1 : ℝ →L[ℝ] ℝ).smulRight
             (-(deTurckVF (I := I) (g_DT s) g_bg ((Φ_fam s : M → M) x))))) ∧
-      -- The `t = 0` right-continuity of the orbit and of the moving spatial Jacobian
-      -- (the forward flow's conjuncts 4/5, transported to `Φ_fam`).  These are the
-      -- genuine flow smooth-dependence-on-IC continuity outputs consumed by the
-      -- `t = 0`-endpoint continuity node `conjugating_flow_t0_continuity_data`.
       (∀ x : M,
         ContinuousWithinAt (fun s : ℝ => (Φ_fam s : M → M) x) (Set.Ici (0 : ℝ)) 0) ∧
       (∀ (x : M) (v : TangentSpace I x),
         ContinuousWithinAt (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E))
           (Set.Ici (0 : ℝ)) 0) := by
-  -- The conjugating flow integrates the NEGATED DeTurck field.
   set X_DT : ℝ → ∀ x : M, TangentSpace I x :=
     fun s x => -(deTurckVF (I := I) (g_DT s) g_bg x) with hXDT
-  -- (i) Interior joint-`C∞` of the negated field, from `h_reg` by fibrewise negation.
   have hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X_DT q.1 q.2) : TangentBundle I M))
       (Set.Ioo (0 : ℝ) T_DT ×ˢ Set.univ) :=
     fun q hq => neg_tangentMap_cmdwa
       (fun s x => (deTurckVF (I := I) (g_DT s) g_bg x : TangentSpace I x)) (h_reg q hq)
-  -- (ii) Continuity of the negated field up to `t = 0`, from `h_cont0`.
   have hcont0 : ContinuousOn
       (fun q : ℝ × M => (X_DT q.1 q.2 : TangentSpace I q.2))
       (Set.Icc (0 : ℝ) T_DT ×ˢ Set.univ) := h_cont0.neg
-  -- (iii) Continuity of the spatial Jacobian of the negated field up to `t = 0`.
-  -- `chartRawRepr α (-F) = -(chartRawRepr α F)` (defeq), so its Fréchet derivative is
-  -- the negation of the original (`fderiv_fun_neg`), and `h_grad0` negates pointwise.
   have hgrad0 : ∀ α : M, ContinuousOn
       (fun q : ℝ × M => fderiv ℝ (chartRawRepr (I := I) α (X_DT q.1)) (extChartAt I α q.2))
       (Set.Icc (0 : ℝ) T_DT ×ˢ Set.univ) := by
@@ -139,19 +123,12 @@ theorem conjugating_diffeo_family
       rw [hcr, fderiv_fun_neg]
     rw [hfun]
     exact (h_grad0 α).neg
-  -- Forward (one-sided, from `t = 0`) flow of the negated field on horizon `T_DT`.
-  -- Conjuncts 4/5 (`hΦcont0`/`hΦmfderiv0`) are the `t = 0` right-continuity of the bare
-  -- flow's orbit and moving spatial Jacobian, transported below to `Φ_fam`.
   obtain ⟨Φ, hΦ0, hdiffeo, hflow, hΦcont0, hΦmfderiv0⟩ :=
     forward_flow_existence_onesided_of_jointsmooth_field (I := I) X_DT T_DT hDT hint hcont0 hgrad0
-  -- Package the bare flow as a diffeomorphism family anchored at the identity, with the
-  -- pointwise agreement `Φ_fam t x = Φ t x` on the open interior `(0, T_DT)`.
   obtain ⟨Φ_fam, hfam0, hfameq, hfamode⟩ :=
     time_dependent_vf_bare_flow_family (I := I) X_DT T_DT hDT Φ hΦ0
       (fun t ht htT => hdiffeo t ⟨ht, htT⟩)
       (fun t ht htT x => hflow t ⟨ht, htT⟩ x)
-  -- `Φ_fam` and `Φ` agree as functions on `Ico 0 T_DT`: at `0` both are the identity
-  -- (`hfam0`/`hΦ0`), on the interior both agree pointwise (`hfameq`).
   have hfun_eqOn : ∀ s ∈ Set.Ico (0 : ℝ) T_DT, (Φ_fam s : M → M) = fun y : M => Φ s y := by
     intro s hs
     funext y
@@ -161,8 +138,7 @@ theorem conjugating_diffeo_family
   refine ⟨T_DT, hDT, le_refl _, Φ_fam, hfam0, ?_, ?_, ?_⟩
   · intro x s hs
     exact hfamode s hs.1 hs.2 x
-  · -- Conjunct 4: orbit right-continuity at `0`, transported from `Φ` via `hfun_eqOn`.
-    intro x
+  · intro x
     have heqOn : Set.EqOn (fun s : ℝ => (Φ_fam s : M → M) x) (fun s : ℝ => Φ s x)
         (Set.Ico 0 T_DT) := by
       intro s hs
@@ -171,8 +147,7 @@ theorem conjugating_diffeo_family
     refine (hΦcont0 x).congr_of_eventuallyEq
       (Filter.eventuallyEq_of_mem (Ico_mem_nhdsGE hDT) heqOn) ?_
     rw [hfun_eqOn 0 ⟨le_rfl, hDT⟩]
-  · -- Conjunct 5: moving-spatial-Jacobian right-continuity at `0`, transported from `Φ`.
-    intro x v
+  · intro x v
     have hmfeq : Set.EqOn
         (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E))
         (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E)) (Set.Ico 0 T_DT) := by

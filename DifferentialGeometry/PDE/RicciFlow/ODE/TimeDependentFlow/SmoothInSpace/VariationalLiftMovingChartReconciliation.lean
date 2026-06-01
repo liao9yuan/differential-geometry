@@ -83,15 +83,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## (A) The orbit-level manifold-point reconciliation
-
-The first piece: the target-chart Picard manifold trajectory of the orbit basepoint `x` agrees,
-on a positive horizon `[0, S]`, with the chart-cover orbit `s ↦ Φ_fam s x` (read in `αRep`).
-This is the headline Grönwall uniqueness `chart_cover_flow_unique_on_overlap_chart_alpha_coord`
-specialised to `α₁ := α` (target chart) and `α₂ := αRep`, fed by
-`chart_overlap_chart_alpha_coord_ode`.
--/
-
 /-- **Orbit-level manifold reconciliation: target-chart Picard trajectory = chart-cover orbit.**
 
 Let `α` be the target chart base point and `αRep` the representative (chart-cover) base point of
@@ -160,7 +151,6 @@ theorem orbit_manifold_reconciliation
       (chartAt H α).symm (I.symm ((hper_tgt).flow (I ((chartAt H α) x)) s))
         = (chartAt H αRep).symm
           (I.symm ((hper_rep).flow (I ((chartAt H αRep) x)) s)) := by
-  -- The chart-α-coord ODE for the αRep manifold trajectory, read in the target chart `α`.
   have hu2_ode : ∀ t ∈ Set.Ico (0 : ℝ) S,
       HasDerivWithinAt
         (fun s : ℝ => I ((chartAt H α) ((chartAt H αRep).symm
@@ -172,31 +162,10 @@ theorem orbit_manifold_reconciliation
     chart_overlap_chart_alpha_coord_ode (M := M) (I := I) (E := E)
       X α αRep hper_rep S hS_pos hS_le_rep x hx_rep hcompat
       (fun s hs => hα_in_α_source s (Set.Ico_subset_Icc_self hs))
-  -- Apply the headline Grönwall uniqueness with `α₁ := α`, `α₂ := αRep`.
   exact chart_cover_flow_unique_on_overlap_chart_alpha_coord (M := M) (I := I) (E := E)
     X α αRep hper_tgt hper_rep S r r' K hS_pos hr_lt_r' hS_le_tgt hS_le_rep
     x hx_tgt hx_rep hLip hu1_ball hu2_ball hu2_cont hu2_ode
     hx_rep_pullback_eq_x hα_in_α_source
-
-/-! ## (B) The target-chart realisation and orbit-velocity from a reconciled chart-coordinate flow
-
-The orbit reconciliation of Part (A) re-expresses the orbit `s ↦ Φ_fam s x` in the target
-chart.  Part (B) packages, from a chart-coordinate flow `Φ_eucl : E → ℝ → E` that realises the
-*target*-chart conjugation of `Φ_fam` near `(t, x)` (the genuine reconciled datum that Part (A)
-together with the target-chart Picard flow supplies), the two discharge inputs:
-
-* `hreal` — the spatial chart realisation in the target chart, in the precise shape consumed by
-  `hagree_of_spatial_chart_realisation`; and
-* `hc` — the target-chart orbit velocity, in the precise shape consumed by
-  `chartMovingTriv_orbit_hasDerivAt_of_chartJet`.
-
-Both are read off the *single* reconciled realisation datum
-
-  `Φ_fam s y = (extChartAt I α).symm (Φ_eucl (extChartAt I α y) s)`   (near `(t, x)`),
-
-together with the chart-coordinate velocity `HasDerivAt (fun s => Φ_eucl (extChartAt I α x) s)
-velChart t` of the chart-coordinate flow at the orbit basepoint coordinate.  These are the
-honest separable flow data; `hreal`/`hc` are derived, not assumed. -/
 
 section RealisationVelocity
 
@@ -236,28 +205,6 @@ theorem orbit_velocity_targetChart_of_reconciled
   exact hs
 
 end RealisationVelocity
-
-/-! ## (C) The `∀ᶠ y` target-chart realisation from the representative realisation and the
-per-point Grönwall reconciliation
-
-The discharge's `hreal` is the *spatial* (eventual-in-`y`) realisation in the target chart `α`.
-The chart-cover construction delivers the eventual-in-`y` realisation in the **representative**
-chart `αRep`.  This part bridges the two: at each `y` near `x` (and each `s` near `t ∈ (0, S)`),
-the chart-cover `αRep` realisation `Φ_fam s y = αRep-conjugation` is combined with the per-point
-Grönwall reconciliation `α-conjugation = αRep-conjugation` (the eventual-in-`y` lift of the
-orbit-level Part (A) reconciliation, run per `y`) to produce the *target*-chart realisation
-`Φ_fam s y = α-conjugation` with `Φ_eucl := (hper_tgt).flow` the target-chart Picard flow.
-
-The two inputs are the genuine reconciled flow data:
-
-* `hrep_real` — the chart-cover (αRep) eventual realisation `∀ᶠ s, ∀ᶠ y` (available, the
-  `hLocalFwd`-shape datum of `manifoldFlowFamily_exists`); and
-* `hgronwall` — the per-point Grönwall equality `∀ᶠ y, ∀ s ∈ [0, S]` (the eventual-in-`y` lift of
-  Part (A), tying the target-chart Picard trajectory to the `αRep` one), plus the
-  target-confinement of the target-chart Picard value.
-
-Neither is the operator-valued / scalar `HasDerivAt` discharge conclusion; both are point-level
-manifold realisations / equalities — genuine flow data, not hypothesis-packaging. -/
 
 section EventualRealisation
 
@@ -314,52 +261,24 @@ theorem hreal_targetChart_of_repReal_and_gronwall
       (Φ_fam s : M → M) y
         = (extChartAt I α).symm ((hper_tgt).flow (extChartAt I α y) s)
         ∧ (hper_tgt).flow (extChartAt I α y) s ∈ (extChartAt I α).target := by
-  -- The time-window `[0, S]` is reached eventually near `t` (since `t ∈ Ioo 0 S`).
   have hs_in_Icc : ∀ᶠ s : ℝ in 𝓝 t, s ∈ Set.Icc (0 : ℝ) S := by
     have : Set.Ioo (0 : ℝ) S ∈ 𝓝 t := isOpen_Ioo.mem_nhds ht_mem
     filter_upwards [this] with s hs
     exact Set.Ioo_subset_Icc_self hs
   filter_upwards [hrep_real, hconf, hs_in_Icc] with s hrep_s hconf_s hs_Icc
   filter_upwards [hrep_s, hconf_s, hgronwall] with y hrep_y hconf_y hgronwall_y
-  -- Rewrite `extChartAt I α = I ∘ chartAt H α` and its inverse via the chart-cover form.
   have hcoe : (extChartAt I α) y = I ((chartAt H α) y) := by
     rw [extChartAt_coe]; rfl
   refine ⟨?_, ?_⟩
-  · -- The realisation: `Φ_fam s y = (extChartAt I α).symm ((hper_tgt).flow (extChartAt I α y) s)`.
-    rw [hrep_y, hcoe]
+  · rw [hrep_y, hcoe]
     rw [extChartAt_coe_symm]
-    -- Goal: `(chartAt H αRep).symm (I.symm (rep-flow ...)) =
-    --   ((chartAt H α).symm ∘ I.symm) ((hper_tgt).flow (I (chartAt H α y)) s)`.
     change (chartAt H αRep).symm (I.symm ((hper_rep).flow (I ((chartAt H αRep) y)) s))
       = (chartAt H α).symm (I.symm ((hper_tgt).flow (I ((chartAt H α) y)) s))
     exact (hgronwall_y s hs_Icc).symm
-  · -- The confinement: in the `extChartAt` vocabulary, equals `hconf_y`.
-    rw [hcoe]
+  · rw [hcoe]
     exact hconf_y
 
 end EventualRealisation
-
-/-! ## (D) Composing the reconciliation into the discharge
-
-The headline of this file: feed the moving-chart-reconciled `hreal`/`hc` (Parts B–C) into the
-factor-producer discharge `rawVariationalIdentityFlat_of_chart_realisation`
-(`SmoothInSpace/VariationalLiftFactorDischarge.lean`), producing `RawVariationalIdentityFlat`
-for the concrete chart-cover flow, with `Φ_eucl := (hper_tgt).flow` the target-chart Picard
-flow.
-
-The reconciliation closes the *moving-chart* gap of the discharge: the discharge consumes
-`hagree`/`hg` in the target chart `α := Φ_fam t x`, whereas the chart-cover construction
-delivers the realisation in the representative chart `αRep`.  Part (C) re-expresses the spatial
-realisation into the target chart, Part (B) reads off the target-chart orbit velocity, and the
-moving-trivialisation chart jet (`hGfd`) is supplied — exactly the inputs
-`chartCloseFactors_of_chart_realisation` / `chartMovingTriv_orbit_hasDerivAt_of_chartJet`
-require.
-
-The genuinely Euclidean variational ODE (`heucl`, `heucl_diff`) for `(hper_tgt).flow` is the
-target-chart `IsLocalFlow` datum (supplied at the call site via `heucl_factorODE_of_isLocalFlow`
-on the target-chart Picard flow's `IsLocalFlow` instantiation — `exists_isLocalFlow_contDiffOn_top`
-+ `ChartLocalPicardData.contDiffOn_top` — exactly as `VariationalLiftLocalFlow` does); it is an
-operator-valued `HasDerivAt` on the model space, never the discharge conclusion. -/
 
 section DischargeComposition
 
@@ -424,14 +343,12 @@ theorem rawVariationalIdentityFlat_of_movingChart_reconciliation
           (1 : E →L[ℝ] E) (1 : E →L[ℝ] E)) (G' velChart))
       (D'_eucl.comp (trivToE (I := I) (Φ_fam t x) x)) := by
   classical
-  -- (1) The chart-conjugation `hagree` from the target-chart spatial realisation.
   have hagree :
       ∀ᶠ s : ℝ in 𝓝 t,
         (fun y => extChartAt I (Φ_fam t x) ((Φ_fam s : M → M) y))
           =ᶠ[𝓝 x] (fun y => (hper_tgt).flow (extChartAt I (Φ_fam t x) y) s) :=
     hagree_of_spatial_chart_realisation (I := I) Φ_fam (Φ_fam t x) x t
       (fun z s => (hper_tgt).flow z s) hreal
-  -- (2) The target-chart orbit velocity `hc` (Part B), from the orbit realisation in `hreal`.
   have hreal_orbit : ∀ᶠ s : ℝ in 𝓝 t,
       extChartAt I (Φ_fam t x) ((Φ_fam s : M → M) x)
         = (hper_tgt).flow (extChartAt I (Φ_fam t x) x) s := by
@@ -442,12 +359,10 @@ theorem rawVariationalIdentityFlat_of_movingChart_reconciliation
       (fun s : ℝ => extChartAt I (Φ_fam t x) ((Φ_fam s : M → M) x)) velChart t :=
     orbit_velocity_targetChart_of_reconciled (I := I) Φ_fam (Φ_fam t x) x t
       (fun z s => (hper_tgt).flow z s) hreal_orbit hc_eucl
-  -- (3) The moving-trivialisation orbit jet `hg`, from the chart jet `hGfd` and the velocity `hc`.
   have hg : HasDerivAt
       (fun s : ℝ => chartMovingTriv (I := I) (Φ_fam t x)
         (extChartAt I (Φ_fam t x) ((Φ_fam s : M → M) x))) (G' velChart) t :=
     chartMovingTriv_orbit_hasDerivAt_of_chartJet (I := I) Φ_fam (Φ_fam t x) x t hGfd hc
-  -- (4) Route into the discharge `rawVariationalIdentityFlat_of_chart_realisation`.
   exact rawVariationalIdentityFlat_of_chart_realisation (I := I) Φ_fam x t v
     (fun z s => (hper_tgt).flow z s) hx_src heucl heucl_diff hagree hg hcontAt
 
@@ -484,7 +399,6 @@ theorem variational_flow_flat_paired_residual_of_movingChart_reconciliation
     (hGfd : HasFDerivAt (fun z => chartMovingTriv (I := I) (Φ_fam t x) z) G'
       (extChartAt I (Φ_fam t x) ((Φ_fam t : M → M) x)))
     (hcontAt : ContinuousAt (fun s : ℝ => (Φ_fam s : M → M) x) t)
-    -- slot `v`
     (hreal_v : ∀ᶠ s : ℝ in 𝓝 t, ∀ᶠ y : M in 𝓝 x,
       (Φ_fam s : M → M) y
           = (extChartAt I (Φ_fam t x)).symm
@@ -498,7 +412,6 @@ theorem variational_flow_flat_paired_residual_of_movingChart_reconciliation
         (extChartAt I (Φ_fam t x) x)) D'_eucl_v t)
     (heucl_diff_v : ∀ᶠ s : ℝ in 𝓝 t,
       DifferentiableAt ℝ (fun z => (hper_tgt).flow z s) (extChartAt I (Φ_fam t x) x))
-    -- slot `w`
     (hreal_w : ∀ᶠ s : ℝ in 𝓝 t, ∀ᶠ y : M in 𝓝 x,
       (Φ_fam s : M → M) y
           = (extChartAt I (Φ_fam t x)).symm
@@ -512,7 +425,6 @@ theorem variational_flow_flat_paired_residual_of_movingChart_reconciliation
         (extChartAt I (Φ_fam t x) x)) D'_eucl_w t)
     (heucl_diff_w : ∀ᶠ s : ℝ in 𝓝 t,
       DifferentiableAt ℝ (fun z => (hper_tgt).flow z s) (extChartAt I (Φ_fam t x) x))
-    -- basepoint bridge / flat-value data
     (hα : (Φ_fam t x) ∈ chartLeviCivitaGoodSet (I := I) (Φ_fam t x))
     (hRdiff : DifferentiableAt ℝ
       (chartRawRepr (I := I) (Φ_fam t x) (X : ∀ y : M, TangentSpace I y))
@@ -552,14 +464,12 @@ theorem variational_flow_flat_paired_residual_of_movingChart_reconciliation
           (mfderiv I I (Φ_fam t : M → M) x v)
           (mfderiv I I (Φ_fam t : M → M) x w)
         + metricTransportResidual (I := I) g X Φ_fam t x v w) t := by
-  -- Produce the two slot `RawVariationalIdentityFlat` data via the moving-chart reconciliation.
   have hv_flat := rawVariationalIdentityFlat_of_movingChart_reconciliation (I := I)
     (fun _s y => (X : ∀ y : M, TangentSpace I y) y) Φ_fam t x v hper_tgt
     hx_src hreal_v hc_eucl_v hGfd heucl_v heucl_diff_v hcontAt
   have hw_flat := rawVariationalIdentityFlat_of_movingChart_reconciliation (I := I)
     (fun _s y => (X : ∀ y : M, TangentSpace I y) y) Φ_fam t x w hper_tgt
     hx_src hreal_w hc_eucl_w hGfd heucl_w heucl_diff_w hcontAt
-  -- Route the two flat data into the discharge's paired-residual headline.
   exact variational_flow_flat_paired_residual_of_chart_realisation (I := I) g X Φ_fam t x v w
     _ _ _ _ hv_flat hw_flat hα hRdiff hCdiff hflatval_v hflatval_w
 

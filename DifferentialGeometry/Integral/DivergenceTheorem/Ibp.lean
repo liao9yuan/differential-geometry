@@ -51,22 +51,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## File-local Borel-space instances
-
-These match the convention in the `Measure` files: `E` and `M` carry their
-canonical Borel σ-algebras. Declared `local` to avoid leaking into callers. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Tooling: chart-target image of `tsupport φ`
-
-We will need the image of `tsupport φ` under the chart map. When `tsupport φ`
-is compact and contained in the chart source, this image is a compact subset
-of the chart target, supplying a uniform bound for the supports of the
-chart-pulled-back integrands. -/
 
 /-- The image of `tsupport φ` under the chart map. We will use this set as a
 compact "barrier" that contains the supports of all the chart-pulled-back
@@ -80,7 +68,6 @@ private lemma chartImageOfTsupport_isCompact
     (hφ_supp : tsupport φ ⊆ (chartAt H α).source) :
     IsCompact (chartImageOfTsupport (I := I) α φ) := by
   unfold chartImageOfTsupport
-  -- ContinuousOn (extChartAt I α) (tsupport φ).
   have hcontOn : ContinuousOn (extChartAt I α) (tsupport φ) := by
     refine (continuousOn_extChartAt (I := I) α).mono ?_
     intro x hx
@@ -107,13 +94,6 @@ private lemma chartImageOfTsupport_isClosed
     (hφ_supp : tsupport φ ⊆ (chartAt H α).source) :
     IsClosed (chartImageOfTsupport (I := I) α φ) :=
   (chartImageOfTsupport_isCompact (I := I) α hφ_compactSupp hφ_supp).isClosed
-
-/-! ## Chart-pulled-back integrand of the Voss–Weyl chart formula
-
-For the chart-local IBP step we need a version of the integrand
-`X^i_α · ρ_α` defined on all of `E` (extended by zero outside the chart
-target) so that we can apply Mathlib's Euclidean integration-by-parts
-(`integral_mul_fderiv_eq_neg_fderiv_mul_of_integrable`). -/
 
 /-- The chart-pulled-back integrand `X^i_α · ρ_α`, extended by zero outside
 the chart target, viewed as a function `E → ℝ`. -/
@@ -193,12 +173,6 @@ private lemma phiOnE_contDiffOn_target [I.Boundaryless]
   intro y hy
   exact phiOnE_eq_scalarOnE_on_target (I := I) α φ hy
 
-/-! ## Smoothness on `E` of the chart-pulled-back functions with bounded support
-
-The key step: under `[I.Boundaryless]`, both `vwIntegrandOnE` and `phiOnE α φ`
-become `C^∞` on the whole of `E` provided their support is contained in a
-compact subset of the (open) chart target. -/
-
 /-- If the function `f : E → ℝ` is `C^∞` on the open set `U` and identically
 zero outside a closed set `K ⊆ U`, then `f` is `C^∞` on all of `E`. We split
 `E = U ∪ (Kᶜ)` where the cover is open: on `U`, `f` is `C^∞`; on `Kᶜ`, `f` is
@@ -209,21 +183,15 @@ private lemma contDiff_of_smooth_on_open_zero_outside
     (hf_smooth : ContDiffOn ℝ ∞ f U)
     (hf_zero : ∀ y, y ∉ K → f y = 0) :
     ContDiff ℝ ∞ f := by
-  -- Build smoothness from the local statements.
   rw [contDiff_iff_contDiffAt]
   intro y
   by_cases hy : y ∈ U
-  · -- On U (open), f is smooth.
-    exact (hf_smooth.contDiffWithinAt hy).contDiffAt (hU.mem_nhds hy)
-  · -- y ∉ U ⇒ y ∉ K (since K ⊆ U).
-    have hyK : y ∉ K := fun h => hy (hKU h)
-    -- Kᶜ is open; on Kᶜ, f is identically zero, hence smooth.
+  · exact (hf_smooth.contDiffWithinAt hy).contDiffAt (hU.mem_nhds hy)
+  · have hyK : y ∉ K := fun h => hy (hKU h)
     have hKc_open : IsOpen Kᶜ := hK.isOpen_compl
     have hf_zero_on : Kᶜ ∈ 𝓝 y := hKc_open.mem_nhds hyK
     have hzero_at : ContDiffAt ℝ ∞ (fun _ : E => (0 : ℝ)) y :=
       (contDiff_const).contDiffAt
-    -- We want `ContDiffAt ℝ ∞ f y`. Use `congr_of_eventuallyEq` with `f₁ := f`,
-    -- `f := fun _ => 0`, and `hg : f =ᶠ[𝓝 y] (fun _ => 0)`.
     refine hzero_at.congr_of_eventuallyEq ?_
     filter_upwards [hf_zero_on] with z hz
     exact hf_zero z hz
@@ -236,13 +204,11 @@ private lemma phiOnE_support_subset_chartImage
   intro y hy
   rw [Function.mem_support] at hy
   by_cases hyT : y ∈ (extChartAt I α).target
-  · -- `phiOnE α φ y = φ (symm y) ≠ 0`, so `symm y ∈ support φ ⊆ tsupport φ`.
-    rw [phiOnE_apply_of_mem (I := I) α φ hyT] at hy
+  · rw [phiOnE_apply_of_mem (I := I) α φ hyT] at hy
     refine ⟨(extChartAt I α).symm y, ?_, ?_⟩
     · exact subset_tsupport _ hy
     · exact (extChartAt I α).right_inv hyT
-  · -- `phiOnE α φ y = 0`, contradicts `hy`.
-    rw [phiOnE_apply_of_notMem (I := I) α φ hyT] at hy
+  · rw [phiOnE_apply_of_notMem (I := I) α φ hyT] at hy
     exact (hy rfl).elim
 
 /-- `tsupport (phiOnE α φ)` ⊆ `chartImageOfTsupport α φ` (a closed bound). -/
@@ -251,7 +217,6 @@ private lemma phiOnE_tsupport_subset_chartImage
     (hφ_compactSupp : HasCompactSupport φ)
     (hφ_supp : tsupport φ ⊆ (chartAt H α).source) :
     tsupport (phiOnE (I := I) α φ) ⊆ chartImageOfTsupport (I := I) α φ := by
-  -- tsupport = closure of support.
   refine closure_minimal (phiOnE_support_subset_chartImage (I := I) α φ) ?_
   exact chartImageOfTsupport_isClosed (I := I) α hφ_compactSupp hφ_supp
 
@@ -267,8 +232,7 @@ private lemma phiOnE_hasCompactSupport [I.Boundaryless]
     (chartImageOfTsupport_isCompact (I := I) α hφ_compactSupp hφ_supp) ?_
   intro y hy
   by_cases hyT : y ∈ (extChartAt I α).target
-  · -- y ∈ target but y ∉ chartImage. Then symm y is not in tsupport φ, so φ(symm y) = 0.
-    rw [phiOnE_apply_of_mem (I := I) α φ hyT]
+  · rw [phiOnE_apply_of_mem (I := I) α φ hyT]
     by_contra hne
     have : (extChartAt I α).symm y ∈ tsupport φ := subset_tsupport _ hne
     have : y ∈ chartImageOfTsupport (I := I) α φ :=
@@ -291,19 +255,13 @@ private lemma phiOnE_contDiff [I.Boundaryless]
   · exact phiOnE_contDiffOn_target (I := I) α hφ
   · intro y hy
     by_cases hyT : y ∈ (extChartAt I α).target
-    · -- y ∈ target but y ∉ chartImage. Then symm y is not in tsupport φ, so φ(symm y) = 0.
-      rw [phiOnE_apply_of_mem (I := I) α φ hyT]
+    · rw [phiOnE_apply_of_mem (I := I) α φ hyT]
       by_contra hne
       have : (extChartAt I α).symm y ∈ tsupport φ := subset_tsupport _ hne
       have : y ∈ chartImageOfTsupport (I := I) α φ :=
         ⟨(extChartAt I α).symm y, this, (extChartAt I α).right_inv hyT⟩
       exact hy this
     · exact phiOnE_apply_of_notMem (I := I) α φ hyT
-
-/-! ## Differentiability of `vwIntegrandOnE` on the chart target
-
-`vwIntegrandOnE` is `C^∞` on the chart target (an open set), hence
-differentiable at every point of `tsupport (phiOnE α φ) ⊆ target`. -/
 
 /-- `vwIntegrandOnE` is differentiable at every point of the chart target. -/
 private lemma vwIntegrandOnE_differentiableOn_target [I.Boundaryless]
@@ -319,14 +277,6 @@ private lemma vwIntegrandOnE_differentiableOn_target [I.Boundaryless]
     vwIntegrandOnE_contDiffOn_target (I := I) g α X i y hy
   exact ((h_at.contDiffAt (hOpen.mem_nhds hy)).differentiableAt (by simp))
 
-/-! ## Per-index integration-by-parts on the chart target
-
-For each index `i`, applying Mathlib's
-`integral_mul_fderiv_eq_neg_fderiv_mul_of_integrable` to `vwIntegrandOnE g α X i`
-and `phiOnE α φ` with the `i`-th model basis vector. The integrand of the LHS
-is then `vwIntegrandOnE · partialDeriv i (phiOnE α φ)`, and the integrand of
-the RHS is `partialDeriv i (vwIntegrandOnE) · phiOnE α φ`. -/
-
 /-- The pointwise `fderiv` of `phiOnE α φ` agrees with the pointwise `fderiv`
 of `scalarOnE α φ` on the open chart target. (This is `EventuallyEq.fderiv_eq`
 after restricting to the target.) -/
@@ -335,7 +285,6 @@ private lemma fderiv_phiOnE_eq_fderiv_scalarOnE [I.Boundaryless]
     {y : E} (hy : y ∈ (extChartAt I α).target) :
     fderiv ℝ (phiOnE (I := I) α φ) y =
       fderiv ℝ (scalarOnE (I := I) α φ) y := by
-  -- Both functions agree on a neighborhood of `y` (the chart target).
   have hOpen : IsOpen (extChartAt I α).target := isOpen_extChartAt_target (I := I) α
   have h_eq : phiOnE (I := I) α φ =ᶠ[𝓝 y] scalarOnE (I := I) α φ := by
     filter_upwards [hOpen.mem_nhds hy] with z hz
@@ -359,19 +308,11 @@ private theorem ibp_per_index [I.Boundaryless]
             ((chartModelBasis E) i) *
           phiOnE (I := I) α φ y
         ∂(modelHaar (E := E)) := by
-  -- Apply Mathlib's `integral_mul_fderiv_eq_neg_fderiv_mul_of_integrable`.
-  -- Set `f := vwIntegrandOnE g α X i`, `g := phiOnE α φ`,
-  -- `v := (chartModelBasis E) i`, `μ := modelHaar`.
-  -- The `phiOnE` function is `C^∞` everywhere.
   have hphi_smooth : ContDiff ℝ ∞ (phiOnE (I := I) α φ) :=
     phiOnE_contDiff (I := I) α hφ hφ_compactSupp hφ_supp
   have hphi_compactSupp : HasCompactSupport (phiOnE (I := I) α φ) :=
     phiOnE_hasCompactSupport (I := I) α hφ_compactSupp hφ_supp
-  -- The `vwIntegrandOnE` function is `C^∞` on the open chart target. By
-  -- `differentiableOn`, it's differentiable at each target point.
   have hvw_diff_on_target := vwIntegrandOnE_differentiableOn_target (I := I) g α X i
-  -- `tsupport (phiOnE α φ) ⊆ chart target` ⇒ `vwIntegrandOnE` is differentiable
-  -- on `tsupport (phiOnE α φ)`.
   have hphi_tsupp_in_target : tsupport (phiOnE (I := I) α φ) ⊆
       (extChartAt I α).target := by
     refine (phiOnE_tsupport_subset_chartImage (I := I) α hφ_compactSupp hφ_supp).trans ?_
@@ -379,33 +320,19 @@ private theorem ibp_per_index [I.Boundaryless]
   have hvw_diff_tsupp_phi : ∀ y ∈ tsupport (phiOnE (I := I) α φ),
       DifferentiableAt ℝ (vwIntegrandOnE (I := I) g α X i) y :=
     fun y hy => hvw_diff_on_target y (hphi_tsupp_in_target hy)
-  -- `phiOnE α φ` is differentiable everywhere (since `C^∞`).
   have hphi_diff : ∀ y, DifferentiableAt ℝ (phiOnE (I := I) α φ) y :=
     fun y => hphi_smooth.differentiable (by simp) |>.differentiableAt
   have hphi_diff_tsupp_vw : ∀ y ∈ tsupport (vwIntegrandOnE (I := I) g α X i),
       DifferentiableAt ℝ (phiOnE (I := I) α φ) y :=
     fun y _ => hphi_diff y
-  -- Integrability: all three integrands have compact support.
-  -- Continuity of each integrand:
   have hvw_cont : ContinuousOn (vwIntegrandOnE (I := I) g α X i)
       (extChartAt I α).target :=
     (vwIntegrandOnE_contDiffOn_target (I := I) g α X i).continuousOn
-  -- The product `vwIntegrandOnE * phiOnE` has compact support (in `tsupport phiOnE`).
-  -- Both factors are continuous on `tsupport phiOnE`:
   have hphi_cont : Continuous (phiOnE (I := I) α φ) := hphi_smooth.continuous
   have hvw_cont_on_tsupp : ContinuousOn (vwIntegrandOnE (I := I) g α X i)
       (tsupport (phiOnE (I := I) α φ)) :=
     hvw_cont.mono hphi_tsupp_in_target
-  -- The product `vwIntegrandOnE * phiOnE` has compact support.
-  -- Integrability follows from compactness of support and finiteness of
-  -- modelHaar on compact sets (`isFiniteMeasureOnCompacts`).
   haveI : IsFiniteMeasureOnCompacts (modelHaar (E := E)) := by infer_instance
-  -- Define the integrands and prove they're continuous everywhere on E.
-  -- The trick: each integrand vanishes outside `tsupport (phiOnE α φ)`
-  -- (a compact subset of `target`), and on `target` (open) is given by
-  -- a smooth product. We use `contDiff_of_smooth_on_open_zero_outside`.
-  --
-  -- Integrand 1: f * g = vwIntegrandOnE * phiOnE.
   have hI1_smooth : ContDiff ℝ ∞
       (fun y => vwIntegrandOnE (I := I) g α X i y * phiOnE (I := I) α φ y) := by
     refine contDiff_of_smooth_on_open_zero_outside (U := (extChartAt I α).target)
@@ -413,11 +340,9 @@ private theorem ibp_per_index [I.Boundaryless]
       (K := chartImageOfTsupport (I := I) α φ)
       (chartImageOfTsupport_isClosed (I := I) α hφ_compactSupp hφ_supp)
       (chartImageOfTsupport_subset_target (I := I) α hφ_supp) ?_ ?_
-    · -- Smoothness on target.
-      exact (vwIntegrandOnE_contDiffOn_target (I := I) g α X i).mul
+    · exact (vwIntegrandOnE_contDiffOn_target (I := I) g α X i).mul
         ((phiOnE_contDiff (I := I) α hφ hφ_compactSupp hφ_supp).contDiffOn)
     · intro y hy
-      -- y ∉ chartImage ⇒ phiOnE α φ y = 0 (by support-bound), so product = 0.
       have hphi_zero : phiOnE (I := I) α φ y = 0 := by
         by_cases hyT : y ∈ (extChartAt I α).target
         · rw [phiOnE_apply_of_mem (I := I) α φ hyT]
@@ -433,8 +358,6 @@ private theorem ibp_per_index [I.Boundaryless]
       (fun y => vwIntegrandOnE (I := I) g α X i y * phiOnE (I := I) α φ y)
       (modelHaar (E := E)) :=
     hI1_smooth.continuous.integrable_of_hasCompactSupport hI1_compactSupp
-  -- Integrand 2: fderiv f · v · g = fderiv(vwIntegrandOnE) v · phiOnE.
-  -- Same strategy: smooth on target, zero outside chartImage, compact support.
   have hI2_smooth : ContDiff ℝ ∞
       (fun y => fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y
             ((chartModelBasis E) i) * phiOnE (I := I) α φ y) := by
@@ -443,9 +366,7 @@ private theorem ibp_per_index [I.Boundaryless]
       (K := chartImageOfTsupport (I := I) α φ)
       (chartImageOfTsupport_isClosed (I := I) α hφ_compactSupp hφ_supp)
       (chartImageOfTsupport_subset_target (I := I) α hφ_supp) ?_ ?_
-    · -- Smoothness on target. `fderiv (vwIntegrandOnE)` is `C^∞` on the
-      -- target (because `vwIntegrandOnE` is `C^∞` on the open target).
-      have hvw_fderiv : ContDiffOn ℝ ∞
+    · have hvw_fderiv : ContDiffOn ℝ ∞
           (fderiv ℝ (vwIntegrandOnE (I := I) g α X i))
           (extChartAt I α).target :=
         (vwIntegrandOnE_contDiffOn_target (I := I) g α X i).fderiv_of_isOpen
@@ -458,7 +379,6 @@ private theorem ibp_per_index [I.Boundaryless]
         hvw_fderiv.clm_apply hbasis_const
       exact hpartial.mul ((phiOnE_contDiff (I := I) α hφ hφ_compactSupp hφ_supp).contDiffOn)
     · intro y hy
-      -- y ∉ chartImage ⇒ phiOnE α φ y = 0, product = 0.
       have hphi_zero : phiOnE (I := I) α φ y = 0 := by
         by_cases hyT : y ∈ (extChartAt I α).target
         · rw [phiOnE_apply_of_mem (I := I) α φ hyT]
@@ -476,8 +396,6 @@ private theorem ibp_per_index [I.Boundaryless]
             ((chartModelBasis E) i) * phiOnE (I := I) α φ y)
       (modelHaar (E := E)) :=
     hI2_smooth.continuous.integrable_of_hasCompactSupport hI2_compactSupp
-  -- Integrand 3: f · fderiv g · v = vwIntegrandOnE · fderiv(phiOnE) v.
-  -- Same strategy.
   have hI3_smooth : ContDiff ℝ ∞
       (fun y => vwIntegrandOnE (I := I) g α X i y *
           fderiv ℝ (phiOnE (I := I) α φ) y ((chartModelBasis E) i)) := by
@@ -486,9 +404,7 @@ private theorem ibp_per_index [I.Boundaryless]
       (K := chartImageOfTsupport (I := I) α φ)
       (chartImageOfTsupport_isClosed (I := I) α hφ_compactSupp hφ_supp)
       (chartImageOfTsupport_subset_target (I := I) α hφ_supp) ?_ ?_
-    · -- Smoothness on target. `fderiv (phiOnE α φ)` is `C^∞` on `E` (since
-      -- `phiOnE α φ` is `C^∞` on `E`); `vwIntegrandOnE` is `C^∞` on target.
-      have hphi_smooth_total : ContDiff ℝ ∞ (phiOnE (I := I) α φ) := hphi_smooth
+    · have hphi_smooth_total : ContDiff ℝ ∞ (phiOnE (I := I) α φ) := hphi_smooth
       have hphi_fderiv_total : ContDiff ℝ ∞ (fderiv ℝ (phiOnE (I := I) α φ)) := by
         have := hphi_smooth_total.fderiv_right (m := ∞) (by rw [ENat.coe_top_add_one])
         exact this
@@ -502,11 +418,6 @@ private theorem ibp_per_index [I.Boundaryless]
         hphi_fderiv.clm_apply hbasis_const
       exact (vwIntegrandOnE_contDiffOn_target (I := I) g α X i).mul hpartial
     · intro y hy
-      -- y ∉ chartImage ⇒ phiOnE α φ y = 0 on a neighborhood ⇒ fderiv (phiOnE) y = 0.
-      -- Specifically: chartImage is closed, y ∉ chartImage ⇒ y ∈ chartImage^c open.
-      -- On chartImage^c, `phiOnE α φ` is 0 (since `support phiOnE ⊆ chartImage`).
-      -- So `phiOnE α φ` is identically zero on a neighborhood of y, hence
-      -- `fderiv (phiOnE α φ) y = 0`. Hence the second factor vanishes.
       have hKc_open : IsOpen (chartImageOfTsupport (I := I) α φ)ᶜ :=
         (chartImageOfTsupport_isClosed (I := I) α hφ_compactSupp hφ_supp).isOpen_compl
       have hphi_zero_on_nhd : phiOnE (I := I) α φ =ᶠ[𝓝 y] (fun _ => (0 : ℝ)) := by
@@ -530,11 +441,9 @@ private theorem ibp_per_index [I.Boundaryless]
   have hI3_compactSupp : HasCompactSupport
       (fun y => vwIntegrandOnE (I := I) g α X i y *
           fderiv ℝ (phiOnE (I := I) α φ) y ((chartModelBasis E) i)) := by
-    -- Compact support is bounded by the chart image of tsupport φ.
     refine HasCompactSupport.intro
       (chartImageOfTsupport_isCompact (I := I) α hφ_compactSupp hφ_supp) ?_
     intro y hy
-    -- Outside chartImage, phiOnE = 0 on a neighborhood ⇒ fderiv (phiOnE) = 0.
     have hKc_open : IsOpen (chartImageOfTsupport (I := I) α φ)ᶜ :=
       (chartImageOfTsupport_isClosed (I := I) α hφ_compactSupp hφ_supp).isOpen_compl
     have hphi_zero_on_nhd : phiOnE (I := I) α φ =ᶠ[𝓝 y] (fun _ => (0 : ℝ)) := by
@@ -560,14 +469,8 @@ private theorem ibp_per_index [I.Boundaryless]
           fderiv ℝ (phiOnE (I := I) α φ) y ((chartModelBasis E) i))
       (modelHaar (E := E)) :=
     hI3_smooth.continuous.integrable_of_hasCompactSupport hI3_compactSupp
-  -- Apply the IBP theorem.
   exact integral_mul_fderiv_eq_neg_fderiv_mul_of_integrable hf'g_int hfg'_int hfg_int
     hvw_diff_tsupp_phi hphi_diff_tsupp_vw
-
-/-! ## Combining: chart-local IBP
-
-We now combine the per-index IBP with the change-of-variables formulas
-`integral_chartLocalMeasure` to obtain the manifold-level chart-local IBP. -/
 
 /-- On the chart target, `partialDeriv i (vwIntegrandOnE g α X i) y` equals
 `partialDeriv i (chartCoeffOnE α X i · chartDensityOnE g α) y` (since the
@@ -581,7 +484,6 @@ private lemma partialDeriv_vwIntegrandOnE_eq_on_target [I.Boundaryless]
       partialDeriv (E := E) i
         (fun z : E => chartCoeffOnE (I := I) α X i z * chartDensityOnE (I := I) g α z) y := by
   unfold partialDeriv
-  -- Use eventuallyEq.
   have hOpen : IsOpen (extChartAt I α).target := isOpen_extChartAt_target (I := I) α
   have h_eq : vwIntegrandOnE (I := I) g α X i =ᶠ[𝓝 y]
       (fun z : E => chartCoeffOnE (I := I) α X i z * chartDensityOnE (I := I) g α z) := by
@@ -599,15 +501,6 @@ private lemma partialDeriv_phiOnE_eq_on_target [I.Boundaryless]
   unfold partialDeriv
   rw [fderiv_phiOnE_eq_fderiv_scalarOnE (I := I) α φ hy]
 
-/-! ### Step A: rewrite the LHS via `integral_chartLocalMeasure`
-
-The LHS of the chart-local IBP is
-`∫_M localDivergence g α X · φ d(chartLocalMeasure α)`. Using
-`integral_chartLocalMeasure` and the formula
-`localDivergence g α X x · ρ_α(x) = ∑_i partialDeriv i (X^i ρ) (φ_α x)`,
-we obtain
-`∫_target ∑_i partialDeriv i (vwIntegrandOnE) y · phiOnE α φ y dy`. -/
-
 /-- The pointwise identity: `localDivergence g α X (symm y) · ρ_α(symm y) = ∑_i partialDeriv i (vwIntegrandOnE) y` for `y ∈ target`. -/
 private lemma localDivergence_mul_chartDensity_chart_target_apply [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -618,7 +511,6 @@ private lemma localDivergence_mul_chartDensity_chart_target_apply [I.Boundaryles
       ∑ i : Fin (Module.finrank ℝ E),
         partialDeriv (E := E) i (vwIntegrandOnE (I := I) g α X i) y := by
   classical
-  -- Unfold `localDivergence` and cancel densities.
   have hsymm : (extChartAt I α) ((extChartAt I α).symm y) = y :=
     (extChartAt I α).right_inv hy
   have hsymmsrc : (extChartAt I α).symm y ∈ (extChartAt I α).source :=
@@ -631,21 +523,11 @@ private lemma localDivergence_mul_chartDensity_chart_target_apply [I.Boundaryles
   have hρ_pos : 0 < chartDensity (I := I) g α ((extChartAt I α).symm y) :=
     chartDensity_pos (I := I) g α hsymmbase
   rw [localDivergence_def]
-  -- LHS: ρ · (∑ ∂_i (X^i ρ) (φ_α (symm y))) / ρ.
   field_simp
   rw [hsymm]
   refine Finset.sum_congr rfl ?_
   intro i _
-  -- Goal: partialDeriv i (chartCoeffOnE α X i · chartDensityOnE g α) y
-  --        = partialDeriv i (vwIntegrandOnE g α X i) y.
   exact (partialDeriv_vwIntegrandOnE_eq_on_target (I := I) g α X i hy).symm
-
-/-! ### Step B: rewrite the RHS via `integral_chartLocalMeasure`
-
-The RHS is `-∫_M tangentSectionAction X φ d(chartLocalMeasure α)`. Using
-`integral_chartLocalMeasure` and the chart-local representation of
-`tangentSectionAction`, we obtain
-`-∫_target ρ_α(symm y) · ∑_i (X^i_α(symm y)) · partialDeriv i (φ ∘ symm) y dy`. -/
 
 /-- The pointwise identity at `symm y`: `tangentSectionAction X φ (symm y) =
 ∑_i chartCoeff α X i (symm y) · partialDeriv i (scalarOnE α φ) y`, for `y ∈ target`
@@ -664,21 +546,11 @@ private lemma tangentSectionAction_chart_target_apply [I.Boundaryless]
   have hsymmchart : (extChartAt I α).symm y ∈ (chartAt H α).source := by
     rw [extChartAt_source_eq_chartAt_source (I := I)] at hsymmsrc
     exact hsymmsrc
-  -- The key fact: under boundaryless, the chart-local representation holds
-  -- for any point in the chart base set.
   have htsa := tangentSectionAction_chartLocal_of_boundaryless (I := I) α X hφ hsymmchart
   rw [htsa]
   refine Finset.sum_congr rfl ?_
   intro i _
   rw [(extChartAt I α).right_inv hy]
-
-/-! ### Measurability lemmas
-
-`localDivergence g α X` is continuous on the chart base set (the chart
-source) by `localDivergence_contMDiffOn` together with the
-boundaryless hypothesis. Outside the chart source, the value is given by the
-defining formula but we will only ever multiply by `φ` with `tsupport ⊆
-source`, so the product vanishes outside the source. We package this. -/
 
 /-- Continuity of `localDivergence g α X` on the chart base set under
 `[I.Boundaryless]`. -/
@@ -690,7 +562,6 @@ lemma localDivergence_continuousOn_baseSet [I.Boundaryless]
       ((extChartAt I α).source ∩
         (extChartAt I α) ⁻¹' interior (extChartAt I α).target) :=
     localDivergence_contMDiffOn (I := I) g α X
-  -- Under boundaryless, the smoothness domain reduces to the chart source.
   have hdomain_eq : (extChartAt I α).source ∩
       (extChartAt I α) ⁻¹' interior (extChartAt I α).target = (chartAt H α).source := by
     ext x
@@ -702,8 +573,7 @@ lemma localDivergence_continuousOn_baseSet [I.Boundaryless]
     · intro hx
       refine ⟨?_, ?_⟩
       · rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hx
-      · -- φ_α x ∈ target, and target = interior target under boundaryless.
-        rw [(isOpen_extChartAt_target (I := I) α).interior_eq]
+      · rw [(isOpen_extChartAt_target (I := I) α).interior_eq]
         have : x ∈ (extChartAt I α).source := by
           rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hx
         exact (extChartAt I α).map_source this
@@ -719,25 +589,15 @@ lemma localDivergence_mul_phi_measurable [I.Boundaryless]
     {φ : M → ℝ} (hφ_cont : Continuous φ)
     (hφ_supp : tsupport φ ⊆ (chartAt H α).source) :
     Measurable (fun x => localDivergence (I := I) g α X x * φ x) := by
-  -- Strategy: rewrite the product as
-  -- `(chartAt H α).source.indicator (localDivergence g α X) · φ` plus the
-  -- value on the complement, but the complement value is 0 since φ = 0 there.
-  -- Equivalently:
-  --   product x = if x ∈ chart source then localDiv x * φ x else 0
-  -- which is measurable as an indicator-times-continuous-times-continuous.
   set s : Set M := (chartAt H α).source
   have hs_open : IsOpen s := (chartAt H α).open_source
   have hs_meas : MeasurableSet s := hs_open.measurableSet
-  -- On `s`, both `localDivergence` and `φ` are continuous, so the product is
-  -- continuous on `s`, hence measurable on `s`.
   have hldiv_cont_s : ContinuousOn (localDivergence (I := I) g α X) s :=
     localDivergence_continuousOn_baseSet (I := I) g α X
   have hφ_cont_s : ContinuousOn φ s := hφ_cont.continuousOn
   have hprod_cont_s : ContinuousOn
       (fun x => localDivergence (I := I) g α X x * φ x) s :=
     hldiv_cont_s.mul hφ_cont_s
-  -- Measurability via piecewise: equal to a continuous function on `s` and
-  -- to `0` on `sᶜ` (since φ = 0 there).
   have h_zero_off : ∀ x ∉ s, localDivergence (I := I) g α X x * φ x = 0 := by
     intro x hx
     have hxsupp : x ∉ tsupport φ := fun h => hx (hφ_supp h)
@@ -745,15 +605,12 @@ lemma localDivergence_mul_phi_measurable [I.Boundaryless]
       by_contra hne
       exact hxsupp (subset_tsupport _ hne)
     rw [this, mul_zero]
-  -- Use `ContinuousOn.measurable_piecewise`. Define `g₂ x := 0` on `sᶜ`.
   classical
   have hzero_cont : ContinuousOn (fun _ : M => (0 : ℝ)) sᶜ := continuousOn_const
   have hpiecewise_meas : Measurable (s.piecewise
       (fun x => localDivergence (I := I) g α X x * φ x)
       (fun _ : M => (0 : ℝ))) :=
     hprod_cont_s.measurable_piecewise hzero_cont hs_meas
-  -- The product equals the piecewise version, since outside `s`, the product
-  -- is also `0` by `h_zero_off`.
   have h_eq : (fun x => localDivergence (I := I) g α X x * φ x) =
       s.piecewise (fun x => localDivergence (I := I) g α X x * φ x)
         (fun _ : M => (0 : ℝ)) := by
@@ -763,11 +620,6 @@ lemma localDivergence_mul_phi_measurable [I.Boundaryless]
     · rw [Set.piecewise_eq_of_notMem _ _ _ hx, h_zero_off x hx]
   rw [h_eq]
   exact hpiecewise_meas
-
-/-! ## Chart-local IBP: putting it all together
-
-We now combine the per-index IBP with the change-of-variables formulas to
-obtain the manifold-level chart-local IBP. -/
 
 /-- Pull the LHS of the IBP back to the chart target. The integrand on the
 target is `(∑_i partialDeriv i (vwIntegrandOnE)) · phiOnE α φ`. -/
@@ -789,7 +641,6 @@ private lemma lhs_chart_target [I.Boundaryless]
   rw [integral_chartLocalMeasure (I := I) g α h hh_meas]
   refine setIntegral_congr_fun (measurableSet_extChartAt_target (I := I) α) ?_
   intro y hy
-  -- Goal: ρ(symm y) · h(symm y) = (∑ ∂_i vw...) · phiOnE α φ y, for y ∈ target.
   have hρ_localDiv :=
     localDivergence_mul_chartDensity_chart_target_apply (I := I) g α X hy
   change chartDensity (I := I) g α ((extChartAt I α).symm y) *
@@ -818,27 +669,17 @@ private lemma rhs_chart_target [I.Boundaryless]
               partialDeriv (E := E) i (scalarOnE (I := I) α φ) y)
         ∂(modelHaar (E := E)) := by
   classical
-  -- The function `tangentSectionAction X φ` is continuous on M (under boundaryless).
-  -- For `integral_chartLocalMeasure` we just need measurability.
   have htsa_cont : Continuous (tangentSectionAction (I := I) X φ) :=
     (tangentSectionAction_contMDiff (I := I) X hφ).continuous
   rw [integral_chartLocalMeasure (I := I) g α (tangentSectionAction (I := I) X φ)
       htsa_cont.measurable]
   refine setIntegral_congr_fun (measurableSet_extChartAt_target (I := I) α) ?_
   intro y hy
-  -- Goal: ρ(symm y) · tangentSectionAction (symm y) = chartDensityOnE g α y · (∑ X^i_α(symm y) · ∂_i φ^* y).
   have htsa_eq := tangentSectionAction_chart_target_apply (I := I) α X hφ hy
-  -- chartDensityOnE g α y = chartDensity g α (symm y) by definition.
   change chartDensity (I := I) g α ((extChartAt I α).symm y) *
       tangentSectionAction (I := I) X φ ((extChartAt I α).symm y) = _
   rw [htsa_eq]
-  -- Now identify: chartCoeffOnE α X i y = chartCoeff α X i (symm y).
-  -- And chartDensityOnE g α y = chartDensity g α (symm y).
   rfl
-
-/-! ### Per-summand integrability
-
-To split the sum-of-integrals, we'll need integrability of each summand. -/
 
 /-- Each summand `∂_i (vwIntegrandOnE) · phiOnE α φ` is `C^∞` on `E` and has
 compact support. -/
@@ -852,8 +693,6 @@ private lemma summand_int [I.Boundaryless]
     Integrable (fun y =>
       partialDeriv (E := E) i (vwIntegrandOnE (I := I) g α X i) y *
         phiOnE (I := I) α φ y) (modelHaar (E := E)) := by
-  -- Same argument as `hf'g_int` in `ibp_per_index`.
-  -- Smooth on target × zero outside chartImage.
   have hphi_smooth : ContDiff ℝ ∞ (phiOnE (I := I) α φ) :=
     phiOnE_contDiff (I := I) α hφ hφ_compactSupp hφ_supp
   have hphi_compactSupp : HasCompactSupport (phiOnE (I := I) α φ) :=
@@ -903,7 +742,6 @@ private lemma summand_int' [I.Boundaryless]
     Integrable (fun y =>
       vwIntegrandOnE (I := I) g α X i y *
         partialDeriv (E := E) i (phiOnE (I := I) α φ) y) (modelHaar (E := E)) := by
-  -- Same argument: smooth on target × zero outside chartImage.
   have hphi_smooth : ContDiff ℝ ∞ (phiOnE (I := I) α φ) :=
     phiOnE_contDiff (I := I) α hφ hφ_compactSupp hφ_supp
   have hI_smooth : ContDiff ℝ ∞
@@ -924,7 +762,6 @@ private lemma summand_int' [I.Boundaryless]
           (extChartAt I α).target := hphi_fderiv.clm_apply hbasis_const
       exact (vwIntegrandOnE_contDiffOn_target (I := I) g α X i).mul hpartial
     · intro y hy
-      -- Outside chartImage, phiOnE = 0 in a neighborhood, so partialDeriv (phiOnE) = 0.
       have hKc_open : IsOpen (chartImageOfTsupport (I := I) α φ)ᶜ :=
         (chartImageOfTsupport_isClosed (I := I) α hφ_compactSupp hφ_supp).isOpen_compl
       have hphi_zero_on_nhd : phiOnE (I := I) α φ =ᶠ[𝓝 y] (fun _ => (0 : ℝ)) := by
@@ -950,7 +787,6 @@ private lemma summand_int' [I.Boundaryless]
     refine HasCompactSupport.intro
       (chartImageOfTsupport_isCompact (I := I) α hφ_compactSupp hφ_supp) ?_
     intro y hy
-    -- Outside chartImage, phiOnE = 0 on a neighborhood ⇒ fderiv (phiOnE) = 0.
     have hKc_open : IsOpen (chartImageOfTsupport (I := I) α φ)ᶜ :=
       (chartImageOfTsupport_isClosed (I := I) α hφ_compactSupp hφ_supp).isOpen_compl
     have hphi_zero_on_nhd : phiOnE (I := I) α φ =ᶠ[𝓝 y] (fun _ => (0 : ℝ)) := by
@@ -982,11 +818,8 @@ theorem chart_local_ibp [I.Boundaryless]
     ∫ x, localDivergence (I := I) g α X x * φ x ∂(chartLocalMeasure (I := I) g α) =
       -∫ x, tangentSectionAction (I := I) X φ x ∂(chartLocalMeasure (I := I) g α) := by
   classical
-  -- Pull both sides back to the chart target.
   rw [lhs_chart_target (I := I) g α X hφ.continuous hφ_supp]
   rw [rhs_chart_target (I := I) g α X hφ]
-  -- Convert LHS over `target` to integral over `E` (since outside target,
-  -- the integrand `(∑ ∂_i vw_i) · phiOnE α φ` is zero).
   have hLHS_to_E :
       ∫ y in (extChartAt I α).target,
         (∑ i : Fin (Module.finrank ℝ E),
@@ -1003,16 +836,10 @@ theorem chart_local_ibp [I.Boundaryless]
           partialDeriv (E := E) i (vwIntegrandOnE (I := I) g α X i) y) *
             phiOnE (I := I) α φ y) ?_
     intro y hy
-    -- y ∉ target ⇒ phiOnE α φ y = 0 ⇒ product = 0.
     have hphi_zero : phiOnE (I := I) α φ y = 0 :=
       phiOnE_apply_of_notMem (I := I) α φ hy
     simp only [hphi_zero, mul_zero]
   rw [hLHS_to_E]
-  -- Convert RHS over `target` to integral over `E` (multiply by chart-target indicator;
-  -- outside target the chartDensityOnE · ∑(...) is undefined or zero, but we extend).
-  -- For our purposes, we keep RHS as integral over target and then transform.
-  -- Sum form: ∫ (∑_i ∂_i vw_i) · phiOnE = ∑_i ∫ ∂_i vw_i · phiOnE
-  -- by linearity of integral over finite sum.
   have h_sum_int :
       ∫ y, (∑ i : Fin (Module.finrank ℝ E),
           partialDeriv (E := E) i (vwIntegrandOnE (I := I) g α X i) y) *
@@ -1033,7 +860,6 @@ theorem chart_local_ibp [I.Boundaryless]
     intro i _
     exact summand_int (I := I) g α X hφ hφ_compactSupp hφ_supp i
   rw [h_sum_int]
-  -- Apply the per-index IBP.
   have h_each : ∀ i : Fin (Module.finrank ℝ E),
       ∫ y, partialDeriv (E := E) i (vwIntegrandOnE (I := I) g α X i) y *
           phiOnE (I := I) α φ y
@@ -1042,12 +868,7 @@ theorem chart_local_ibp [I.Boundaryless]
             partialDeriv (E := E) i (phiOnE (I := I) α φ) y
           ∂(modelHaar (E := E)) := by
     intro i
-    -- Rewrite using `unfold partialDeriv`:
-    -- LHS = ∫ (fderiv ℝ (vw) y (basis i)) · (phiOnE α φ) y dy.
-    -- IBP: equal to - ∫ vwIntegrandOnE y · fderiv ℝ (phiOnE α φ) y (basis i) dy.
-    -- = - ∫ vwIntegrandOnE y · partialDeriv i (phiOnE α φ) y dy.
     have h_ibp := ibp_per_index (I := I) g α X hφ hφ_compactSupp hφ_supp i
-    -- Restate in our conventions.
     change ∫ y, fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y ((chartModelBasis E) i)
         * phiOnE (I := I) α φ y
       ∂(modelHaar (E := E))
@@ -1065,11 +886,6 @@ theorem chart_local_ibp [I.Boundaryless]
               partialDeriv (E := E) i (phiOnE (I := I) α φ) y
             ∂(modelHaar (E := E)) from by
       rw [← Finset.sum_neg_distrib]]
-  -- Now convert: ∑_i ∫ vwIntegrandOnE_i · ∂_i (phiOnE α φ)
-  -- = ∫ ∑_i vwIntegrandOnE_i · ∂_i (phiOnE α φ) (sum-of-integrals back to integral-of-sum)
-  -- = ∫_target ρ · ∑_i X^i · ∂_i (φ ∘ symm) (using vwIntegrandOnE = X^i · ρ on target,
-  --   ∂_i (phiOnE) = ∂_i (φ ∘ symm) on target, and phiOnE = 0 outside chartImage).
-  -- This is the RHS we want.
   have h_sum_back :
       ∑ i : Fin (Module.finrank ℝ E),
         ∫ y, vwIntegrandOnE (I := I) g α X i y *
@@ -1083,7 +899,6 @@ theorem chart_local_ibp [I.Boundaryless]
     intro i _
     exact summand_int' (I := I) g α X hφ hφ_compactSupp hφ_supp i
   rw [h_sum_back]
-  -- Now convert this E-integral to a target-integral.
   have hE_to_target :
       ∫ y, (∑ i : Fin (Module.finrank ℝ E),
           vwIntegrandOnE (I := I) g α X i y *
@@ -1100,18 +915,13 @@ theorem chart_local_ibp [I.Boundaryless]
           vwIntegrandOnE (I := I) g α X i y *
             partialDeriv (E := E) i (phiOnE (I := I) α φ) y) ?_]
     intro y hy
-    -- y ∉ target ⇒ vwIntegrandOnE = 0 ⇒ each summand 0.
     refine Finset.sum_eq_zero ?_
     intro i _
     rw [vwIntegrandOnE_apply_of_notMem (I := I) g α X i hy, zero_mul]
   rw [hE_to_target]
-  -- Identify the integrand on target:
-  -- vwIntegrandOnE i y = chartCoeffOnE α X i y · chartDensityOnE g α y on target.
-  -- partialDeriv i (phiOnE α φ) y = partialDeriv i (scalarOnE α φ) y on target.
   refine congrArg Neg.neg ?_
   refine setIntegral_congr_fun (measurableSet_extChartAt_target (I := I) α) ?_
   intro y hy
-  -- Goal: (∑ i, vwInt i y * partial_i (phiOnE) y) = chartDensityOnE * (∑ i, chartCoeffOnE * partial_i (scalarOnE)).
   change (∑ i : Fin (Module.finrank ℝ E),
       vwIntegrandOnE (I := I) g α X i y *
           partialDeriv (E := E) i (phiOnE (I := I) α φ) y) =

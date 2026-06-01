@@ -81,15 +81,6 @@ open scoped Manifold Topology ContDiff
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 
-/-! ## (a) Part-2 content at the fixed orbit point
-
-The inverse-trivialised chart Levi-Civita inner CLM (flat `fderiv` + Christoffel
-correction), at the fixed orbit point `α := Φ_fam t x`, equals the bundled covariant
-Levi-Civita value.  This isolates Part 2's flat-plus-Christoffel splitting and matches it
-to the global Levi-Civita derivative via the chart-overlap formula.  The standing
-`[NormedSpace ℝ E]` is needed for the tangent-bundle charted-space underlying the `T%`
-section differentiability `MDiffAt (T% X)`. -/
-
 section InnerCLMBridge
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -118,29 +109,17 @@ theorem trivFromE_innerCLM_eq_leviCivita_at_orbit
     (hX : MDiffAt (T% X) α) :
     trivFromE (I := I) α α (chartLeviCivitaInnerCLM (I := I) g α X α d)
       = (LeviCivita (I := I) g) X α d := by
-  -- `chartLeviCivita_apply` rewrites the chart value as `trivFromE` of the flat-plus-
-  -- Christoffel sum; `chartLeviCivitaInnerCLM_apply` exposes the same sum.
   have hchart :
       chartLeviCivita (I := I) g α X α d
         = trivFromE (I := I) α α (chartLeviCivitaInnerCLM (I := I) g α X α d) := by
     rw [chartLeviCivita_apply (I := I) g α X hα d]
     rw [chartLeviCivitaInnerCLM_apply (I := I) g α X α d]
-  -- `LeviCivita_chart_apply` matches the bundled value to the chart value at `α`.
   have hbundled :
       (LeviCivita (I := I) g) X α d = chartLeviCivita (I := I) g α X α d :=
     LeviCivita_chart_apply (I := I) g α hα hX d
   rw [hbundled, hchart]
 
 end InnerCLMBridge
-
-/-! ## (b) The transport combinators producing `RawVariationalIdentity`
-
-These reference the predicate `RawVariationalIdentity`, which is defined over the
-inner-product-space structure on `E`.  To avoid an instance diamond on `E`, this section
-declares only `[InnerProductSpace ℝ E]` (which provides the norm structure); the `T%`
-section-differentiability notation, which requires a standalone `[NormedSpace ℝ E]` for
-the tangent-bundle charted space, is therefore *not* used here — the connection content
-enters through the already-proved value identities, not through `T%`. -/
 
 section Transport
 
@@ -182,13 +161,10 @@ theorem rawVariationalIdentity_of_chartFlow_value
       = -(LeviCivita (I := I) g) (X : ∀ x : M, TangentSpace I x) (Φ_fam t x)
           (mfderiv I I (Φ_fam t : M → M) x v)) :
     RawVariationalIdentity (I := I) g X Φ_fam t x v := by
-  -- Part 1: the transferred manifold-pushforward `HasDerivAt` with the flat value.
   have h1 :=
     hasDerivAt_mfderiv_flow_of_chart (I := I) (Fam := fun s => (Φ_fam s : M → M))
       t x v Q d hDchart hagree
-  -- Rewrite the derivative value into the covariant right-hand side.
   rw [hQval] at h1
-  -- `RawVariationalIdentity` is definitionally this `HasDerivAt`.
   exact h1
 
 /-- **Raw variational identity from the chart-flow data (Part-2 routed form).**
@@ -228,12 +204,10 @@ theorem rawVariationalIdentity_of_chartFlow
             (X : ∀ x : M, TangentSpace I x) (Φ_fam t x)
             (mfderiv I I (Φ_fam t : M → M) x v))) :
     RawVariationalIdentity (I := I) g X Φ_fam t x v := by
-  -- Convert the flat-plus-Christoffel identification into the covariant value identification.
   have hQval : Q (Dchart' d)
       = -(LeviCivita (I := I) g) (X : ∀ x : M, TangentSpace I x) (Φ_fam t x)
           (mfderiv I I (Φ_fam t : M → M) x v) := by
     rw [hQinner, hLC]
-  -- Feed into the minimal transport combinator.
   exact rawVariationalIdentity_of_chartFlow_value (I := I) g X Φ_fam t x v Q d
     hDchart hagree hQval
 

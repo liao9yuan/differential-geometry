@@ -86,8 +86,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -96,12 +94,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## Per-chart `H⁴` witness (POU form)
-
-The per-chart witness is the structural analogue of
-`ChartH2NonSmoothPOUWitness`: it records the `MemWkp 4 2` membership of
-the POU-cut chart-pushed function on the chart-target image. -/
 
 /-- Per-chart `MemWkp 4 2` evidence for the POU-cut chart-pushed function on
 the chart-target image. The structure records the membership and is
@@ -201,13 +193,6 @@ theorem toH2 {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
 
 end ChartH4NonSmoothPOUWitness
 
-/-! ## Manifold-level `H⁴` lift via POU witnesses
-
-From per-chart `MemWkp 4 2` witnesses, the function lies in
-`MemWkpChart g 4 2`. The `MemWkpChart` predicate definitionally unfolds
-to a per-chart `MemWkp 4 2` quantification, so the lift is by direct
-unfolding. -/
-
 /-- **Manifold-level `H⁴` lift via POU.** Given per-chart `MemWkp 4 2`
 evidence for the POU-cut chart-pushed function on every chart-target
 image (under the canonical atlas partition of unity), the manifold
@@ -251,12 +236,6 @@ theorem wkpNormChart_four_lt_top_of_chartPOUWitnesses
     (I := I) (M := M) g (k := 4) (p := 2) (by norm_num)
     (memWkpChart_four_of_chartPOUWitnesses (I := I) (M := M) g h_witness)
 
-/-! ## Headline witness-bearing `H⁴` regularity for `laplacianDomainPow g 2`
-
-The headline theorem packages the per-chart `H⁴` witness-bearing form
-for the canonical function representative `((H1ComplToLp u_h) : M → ℝ)`
-of any `u_h ∈ laplacianDomainPow g 2`. -/
-
 /-- **Witness-bearing `H⁴` regularity for `laplacianDomainPow g 2`.**
 
 For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)`
@@ -285,11 +264,6 @@ theorem laplacianDomainPow_memWkpChart_four
       (I := I) (M := M) g 4 2
       ((H1ComplToLp (I := I) (M := M) g u_h :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) < ⊤ := by
-  -- The membership of u_h in laplacianDomainPow g 2 is not used directly
-  -- in the witness-bearing proof — the witnesses already carry the data —
-  -- but is retained in the signature to clarify the intended downstream
-  -- discharge route via the bootstrap (the bootstrap consumes the
-  -- two-sided H² regularity from laplacianDomainPow_two_h2_plus_rhs_h2).
   let _ := hu_h
   refine ⟨?_, ?_⟩
   · exact memWkpChart_four_of_chartPOUWitnesses (I := I) (M := M) g h_witness
@@ -343,7 +317,6 @@ theorem laplacianDomainPow_memWkpChart_four_two_sided
           ⟨u_h, laplacianDomainPow_succ_subset_laplacianDomain
             (I := I) (M := M) g 1 hu_h⟩ :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ)) α) :
-    -- `H⁴` regularity of `u`:
     (DifferentialGeometry.Analysis.Sobolev.Chart.MemWkpChart
         (I := I) (M := M) g 4 2
         ((H1ComplToLp (I := I) (M := M) g u_h :
@@ -352,7 +325,6 @@ theorem laplacianDomainPow_memWkpChart_four_two_sided
         (I := I) (M := M) g 4 2
         ((H1ComplToLp (I := I) (M := M) g u_h :
           Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) < ⊤) ∧
-    -- `H⁴` regularity of the `Lp` preimage (i.e. `(1 - Δ_g) u_h`):
     (DifferentialGeometry.Analysis.Sobolev.Chart.MemWkpChart
         (I := I) (M := M) g 4 2
         ((laplacianDomain.preimage (I := I) (M := M) g
@@ -368,12 +340,6 @@ theorem laplacianDomainPow_memWkpChart_four_two_sided
   refine ⟨laplacianDomainPow_memWkpChart_four (I := I) (M := M) g hu_h h_witness_u, ?_⟩
   refine ⟨memWkpChart_four_of_chartPOUWitnesses (I := I) (M := M) g h_witness_rhs, ?_⟩
   exact wkpNormChart_four_lt_top_of_chartPOUWitnesses (I := I) (M := M) g h_witness_rhs
-
-/-! ## Downward consistency with the `H²` regularity at `k = 2`
-
-Witness-bearing `H⁴` regularity at the `laplacianDomainPow g 2` level
-implies the existing two-sided `H²` regularity. This is automatic via
-the `toH2` projection on the per-chart witnesses. -/
 
 /-- The `H⁴` witnesses for `u_h ∈ laplacianDomainPow g 2` imply the
 `MemWkpChart g 2 2` membership (downward via `MemWkpChart.le_of_le`).
@@ -409,9 +375,6 @@ theorem laplacianDomainPow_two_h2_via_h4_witnesses
       (I := I) (M := M) g 2 2
       ((H1ComplToLp (I := I) (M := M) g u_h :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) := by
-  -- The existing two-sided H² regularity from
-  -- `laplacianDomainPow_two_h2_plus_rhs_h2` (unconditional!) provides
-  -- this membership directly, independent of the H⁴ witnesses.
   exact (laplacianDomainPow_two_h2_plus_rhs_h2
     (I := I) (M := M) g hu_h).1.1
 

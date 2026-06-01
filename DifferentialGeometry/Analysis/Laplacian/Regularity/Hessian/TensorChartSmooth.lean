@@ -102,8 +102,6 @@ open DifferentialGeometry.Analysis.Laplacian.HessianPairingLapDom
 open DifferentialGeometry.Analysis.Laplacian.HessianBridge
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -112,13 +110,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Section A: chart-α tensor smooth Hess on EuclN
-
-For smooth `v : SmoothScalar g`, we pull the chart-α tensor Hessian
-`chartHessianTensor g α v.toFun k l` back to `EuclideanSpace` via the inverse
-chart and `toEuclidean.symm`. This is the analogue of `chartHessianPhiOnEuclid`
-for `v` (whose `M → ℝ` interpretation is `v.toFun`, smooth on `M`). -/
 
 /-- The chart-α tensor Hessian of the smooth scalar `v.toFun` in coordinate
 directions `(k, l)`, pulled back to `EuclideanSpace`. -/
@@ -134,12 +125,6 @@ noncomputable def chartHessianVOnEuclid
     chartHessianVOnEuclid (I := I) (M := M) g α v k l y =
       chartHessianTensor (I := I) g α v.toFun k l
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := rfl
-
-/-! ## Section B: chart-α Christoffel correction term
-
-The chart-α Christoffel correction sum for `v.toFun` in directions `(k, l)`,
-pulled back to `EuclideanSpace`: `∑ m, Γ^m_{kl,α}(y') · ∂_m v_chart_α(y')`,
-where `y' := (toEuclidean.symm) y`. -/
 
 /-- The chart-α Christoffel correction sum, pulled back to `EuclideanSpace`. -/
 noncomputable def chartPushedChristoffelCorrection
@@ -159,12 +144,6 @@ noncomputable def chartPushedChristoffelCorrection
           partialDeriv (E := E) m (scalarOnE (I := I) α v.toFun)
             ((toEuclidean (E := E)).symm y) := rfl
 
-/-! ## Section C: pointwise decomposition `tensor = plain - christoffel`
-
-The chart-α tensor Hessian of `v.toFun`, evaluated at `(extChartAt α).symm
-(toE.symm y)` for `y ∈ chartTargetEuclid α`, equals the chart-α Euclidean
-iterated partial of `v.toFun` minus the chart-α Christoffel correction. -/
-
 /-- **Pointwise identity** `tensor = plain - christoffel` on
 `chartTargetEuclid α`. -/
 theorem chartHessianVOnEuclid_eq_plain_minus_chris_on_chart_target
@@ -175,7 +154,6 @@ theorem chartHessianVOnEuclid_eq_plain_minus_chris_on_chart_target
       chartIteratedPartialDeriv (I := I) α v.toFun k l ((toEuclidean (E := E)).symm y) -
         chartPushedChristoffelCorrection (I := I) (M := M) g α v k l y := by
   classical
-  -- Unfold and use chart right-inverse.
   rw [chartHessianVOnEuclid_def, chartHessianTensor_def,
     chartPushedChristoffelCorrection_def]
   have hy_target : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target :=
@@ -185,8 +163,6 @@ theorem chartHessianVOnEuclid_eq_plain_minus_chris_on_chart_target
       (toEuclidean (E := E)).symm y :=
     (extChartAt I α).right_inv hy_target
   rw [h_inv]
-
-/-! ## Section D: continuity on `chartTargetEuclid α` -/
 
 /-- Continuity of `chartPushedChristoffelCorrection g α v k l` on `chartTargetEuclid α`. -/
 theorem chartPushedChristoffelCorrection_continuousOn
@@ -286,8 +262,6 @@ theorem chartHessianVOnEuclid_continuousOn
     exact h_smooth_iter.continuousOn.comp h_toE_cont.continuousOn h_maps
   · exact chartPushedChristoffelCorrection_continuousOn (I := I) (M := M) g α v k l
 
-/-! ## Section E: the chart-α tensor smooth Hess pairing function -/
-
 /-- The chart-α tensor smooth Hess pairing function on `EuclideanSpace`:
 `∑_{ijkl} G^{ik}_α(y) G^{jl}_α(y) · H^φ_{ij,α}(y) · H^v_{kl,α}(y)`,
 where `H^v` is the chart-α tensor Hess of `v.toFun`. -/
@@ -316,8 +290,6 @@ noncomputable def smoothTensorPairingChart
                 chartHessianPhiOnEuclid (I := I) (M := M) g α φ i j y *
                 chartHessianVOnEuclid (I := I) (M := M) g α v k l y := rfl
 
-/-! ## Section F: continuity of `smoothTensorPairingChart` on `chartTargetEuclid α` -/
-
 /-- Continuity of `invGramOnEuclid g α i j` on `chartTargetEuclid α`. -/
 private lemma invGramOnEuclid_continuousOn_chartTargetEuclid
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -342,7 +314,6 @@ private lemma invGramOnEuclid_continuousOn_chartTargetEuclid
     h_invGram_cont.comp h_toE_cont.continuousOn h_maps
   refine hcomp.congr ?_
   intro y _hy
-  -- invGramOnEuclid is defined via the chart symm, so the values match.
   rfl
 
 /-- **Continuity of `smoothTensorPairingChart`** on `chartTargetEuclid α`. -/
@@ -374,12 +345,6 @@ theorem smoothTensorPairingChart_continuousOn
       (chartTargetEuclid (I := I) (M := M) α) :=
     chartHessianVOnEuclid_continuousOn (I := I) (M := M) g α v k l
   exact (((h_G_ik.mul h_G_jl).mul h_Hphi).mul h_Hv)
-
-/-! ## Section G: cutoff version (continuous and compactly supported on EuclN)
-
-For Lp 2 membership, we use the cutoff η = chartCutoffα to localize each
-factor. The cutoff is 1 on a neighborhood of `chartImagePOUTsupport α` and
-compactly supported in the chart target. -/
 
 /-- The cutoff-multiplied chart-α tensor Hess of `v`: continuous on `EuclN` and
 compactly supported. -/
@@ -571,12 +536,6 @@ theorem cutoffHessianV_bounded
     have hy_notK : y ∉ Kη := fun hyK => hKη_ne ⟨y, hyK⟩
     rw [h_zero_off y hy_notK, abs_zero]
 
-/-! ## Section H: the cutoff pairing function
-
-The cutoff-multiplied pairing function: each Hess factor is multiplied by the
-cutoff η = chartCutoffα. The G^{ik} factors are also wrapped in `cutoffInvGram`
-for compact support. The result is continuous on `EuclN` with compact support. -/
-
 /-- The cutoff version of the chart-α tensor smooth Hess pairing: each factor
 is replaced by its cutoff counterpart (multiplied by η). Continuous on `EuclN`
 with compact support. -/
@@ -673,11 +632,6 @@ theorem cutoffSmoothTensorPairingChart_memLp_two
     cutoffSmoothTensorPairingChart_hasCompactSupport (I := I) (M := M) g α φ v
   exact h_cont.memLp_of_hasCompactSupport h_supp
 
-/-! ## Section I: ae-equality of the cutoff and original pairings on the support kernel
-
-On the kernel `chartImagePOUTsupport α` (compact ⊂ chart target), η = 1, so the
-cutoff factors equal the originals pointwise. -/
-
 /-- On the support kernel `chartImagePOUTsupport α`, `cutoffHessianV` equals
 `chartHessianVOnEuclid` pointwise. -/
 theorem cutoffHessianV_eq_chartHessianVOnEuclid_on_kernel
@@ -725,16 +679,6 @@ theorem cutoffSmoothTensorPairingChart_eq_on_kernel
   unfold cutoffInvGram cutoffHessianPhiPub cutoffHessianV
   rw [hη_one]
   ring
-
-/-! ## Section J: the chart-α Christoffel correction relation between
-`smoothTensorPairingChart` and the LapDom-side `smoothEuclidHessianPairingChart`
-
-The key relationship: for `y ∈ chartTargetEuclid α`,
-`smoothEuclidHessianPairingChart g α φ v y` (from HessianBridge.lean, using
-the chart-α Euclidean iterated partial of `chartPushed POU α v.toFun`)
-relates to `smoothTensorPairingChart g α φ v y` (using the chart-α tensor
-Hess of `v.toFun`) by an explicit Christoffel-correction sum plus a Leibniz
-cross-term involving the POU. -/
 
 /-- The pointwise difference between the LapDom-side Euclidean pairing
 (using Hess of `POU·v_chart_α`) and the chart-α tensor pairing (using Hess of

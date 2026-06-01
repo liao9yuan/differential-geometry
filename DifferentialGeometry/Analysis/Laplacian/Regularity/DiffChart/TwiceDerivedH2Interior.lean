@@ -73,21 +73,12 @@ open DifferentialGeometry.Analysis.Laplacian.FChartEffTwiceDef
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Auxiliary lemmas
-
-The geometric thickening helpers `thickening_mono_of_lt` and
-`self_subset_thickening_of_pos` are direct copies of the helpers used by the
-per-chart witness flow for the base bilinear data; they are reproduced here
-to keep this module self-contained. -/
 
 /-- A `r`-thickening of a set is contained in the strict `r'`-thickening for
 any `r' > r`. -/
@@ -107,14 +98,6 @@ private lemma self_subset_thickening_of_pos
     {r : ℝ} (hr_pos : 0 < r) (K : Set α) :
     K ⊆ Metric.thickening r K :=
   Metric.self_subset_thickening hr_pos K
-
-/-! ## Headline interior `MemWkp 2 2` regularity for the twice-derived data
-
-The theorem below builds, for each chart `α`, the geometric room (an open
-precompact `Ω''` containing `chartImagePOUTsupport α`) and a proof that the
-chosen second mixed partial of the chart-pushed `u_h` lies in `MemWkp 2 2`
-of `Ω''`. All geometric parameters are chosen internally.
--/
 
 set_option linter.unusedVariables false in
 /-- **Interior `MemWkp 2 2` regularity for the twice-derived chart-bilinear
@@ -162,36 +145,29 @@ theorem twiceDerivedChartBilinear_memWkp_two_two_interior
         (chosenSecondPartialChartPushedU
           (I := I) (M := M) g α u_h l₁ l₂) Ω'' := by
   classical
-  -- The packaged twice-derived data.
   set D : ChartBilinearH1ComplData (I := I) (M := M) g α :=
     twiceDerivedChartBilinearH1ComplData (I := I) (M := M) g α hu_h l₁ l₂
       h_twice_identity
     with hD_def
-  -- The compact set `K_α := chartImagePOUTsupport α` inside the chart target.
   set K_α : Set EuclN := chartImagePOUTsupport (I := I) (M := M) α with hK_α_def
   have hK_α_compact : IsCompact K_α :=
     chartImagePOUTsupport_isCompact (I := I) (M := M) α
   have hK_α_in_chart : K_α ⊆ chartTargetEuclid (I := I) (M := M) α :=
     chartImagePOUTsupport_subset_target (I := I) (M := M) α
-  -- The chart target is open.
   have h_chart_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) α
-  -- Step 1: pick R_α > 0 such that cthickening R_α K_α ⊆ chartTargetEuclid α.
   obtain ⟨R_α, hR_α_pos, hR_α_subset⟩ :=
     hK_α_compact.exists_cthickening_subset_open h_chart_open hK_α_in_chart
-  -- Step 2: define the geometric scales.
   set ε : ℝ := R_α / 16 with hε_def
   have hε_pos : 0 < ε := by positivity
   set R₀ : ℝ := ε with hR₀_def
   have hR₀_pos : 0 < R₀ := hε_pos
-  -- Ω'' := thickening (2ε) K_α (open).
   set Ω'' : Set EuclN := Metric.thickening (2 * ε) K_α with hΩ''_def
   have hΩ''_open : IsOpen Ω'' := Metric.isOpen_thickening
   have h_two_ε_pos : 0 < 2 * ε := by positivity
   have hK_α_in_Ω'' : K_α ⊆ Ω'' :=
     self_subset_thickening_of_pos h_two_ε_pos K_α
-  -- closure Ω'' ⊆ cthickening (2ε) K_α ⊆ cthickening R_α K_α ⊆ chart target.
   have h_closureΩ''_sub : closure Ω'' ⊆ Metric.cthickening (2 * ε) K_α := by
     refine closure_minimal (Metric.thickening_subset_cthickening _ _)
       Metric.isClosed_cthickening
@@ -205,7 +181,6 @@ theorem twiceDerivedChartBilinear_memWkp_two_two_interior
     h_closureΩ''_sub.trans h_cthick_two_ε_in_chart
   have hΩ''_compact_closure : IsCompact (closure Ω'') :=
     hK_α_compact.cthickening.of_isClosed_subset isClosed_closure h_closureΩ''_sub
-  -- Step 3: the "room" hypothesis: cthickening R₀ (closure Ω'') ⊆ chart target.
   have h_room : Metric.cthickening R₀ (closure Ω'') ⊆
       chartTargetEuclid (I := I) (M := M) α := by
     have h1 : Metric.cthickening R₀ (closure Ω'') ⊆
@@ -222,7 +197,6 @@ theorem twiceDerivedChartBilinear_memWkp_two_two_interior
         change R_α / 16 + 2 * (R_α / 16) ≤ R_α; linarith
       exact Metric.cthickening_mono hle K_α
     exact ((h1.trans h2).trans h3).trans hR_α_subset
-  -- Step 4: Ω' := thickening (8ε) K_α (open, larger).
   set Ω' : Set EuclN := Metric.thickening (8 * ε) K_α with hΩ'_def
   have hΩ'_open : IsOpen Ω' := Metric.isOpen_thickening
   have h_eight_ε_pos : 0 < 8 * ε := by positivity
@@ -239,8 +213,6 @@ theorem twiceDerivedChartBilinear_memWkp_two_two_interior
     h_closureΩ'_sub.trans h_cthick_eight_ε_in_chart
   have hΩ'_compact_closure : IsCompact (closure Ω') :=
     hK_α_compact.cthickening.of_isClosed_subset isClosed_closure h_closureΩ'_sub
-  -- Step 5: build the smooth cutoff η ≡ 1 on cthickening (3ε) K_α, with
-  -- tsupport η ⊆ thickening (5ε) K_α.
   set K_η : Set EuclN := Metric.cthickening (3 * ε) K_α with hK_η_def
   have hK_η_compact : IsCompact K_η := hK_α_compact.cthickening
   set Ω_η : Set EuclN := Metric.thickening (5 * ε) K_α with hΩ_η_def
@@ -251,12 +223,10 @@ theorem twiceDerivedChartBilinear_memWkp_two_two_interior
       hη_one_on_cthick_K_η, hη_tsupp_in_Ω_η⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.exists_smooth_cutoff_with_neighborhood
       (d := Module.finrank ℝ E) hK_η_compact hΩ_η_open hK_η_in_Ω_η
-  -- Gradient bound for η.
   obtain ⟨N, hN_pos, h_fderiv_eta⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Chart.exists_grad_bound_of_compactSupport_smooth
       hη_smooth hη_supp
   have hN_nn : 0 ≤ N := hN_pos.le
-  -- η ≡ 1 on Ω'' (since Ω'' ⊆ cthickening (2ε) K_α ⊆ K_η ⊆ cthickening δ_η K_η).
   have hη_one_on_K_η : ∀ x ∈ K_η, η x = 1 := by
     intro x hx
     apply hη_one_on_cthick_K_η
@@ -268,12 +238,10 @@ theorem twiceDerivedChartBilinear_memWkp_two_two_interior
     refine Metric.cthickening_mono (by linarith : (2 * ε) ≤ 3 * ε) K_α h1
   have hη_one_on_Ω'' : ∀ x ∈ Ω'', η x = 1 :=
     fun x hx => hη_one_on_K_η x (hΩ''_sub_K_η hx)
-  -- tsupport η ⊆ Ω' (= thickening (8ε) K_α).
   have hη_in_Ω' : tsupport η ⊆ Ω' := by
     refine hη_tsupp_in_Ω_η.trans ?_
     rw [hΩ_η_def, hΩ'_def]
     exact thickening_mono_of_lt (by linarith) K_α
-  -- For |h| ≤ R₀, cthickening |h| (tsupport η) ⊆ Ω'.
   have hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
       Metric.cthickening |h| (tsupport η) ⊆ Ω' := by
     intro h hh
@@ -306,21 +274,17 @@ theorem twiceDerivedChartBilinear_memWkp_two_two_interior
         rw [hΩ'_def]
         exact Metric.cthickening_subset_thickening' (by linarith) h_le K_α
       exact (h1.trans h2).trans h3
-  -- Step 6: apply the unconditional uniform-in-h diff-quot bound to D.
   obtain ⟨M_bound, hM_nn, h_uniform_bd⟩ :=
     chartBilinearH1Compl_uniform_diffQuot_bound_of_data
       (I := I) (M := M) (g := g) (α := α) D
       hη_smooth hη_supp hη_range hN_nn h_fderiv_eta
       hΩ'_open h_closureΩ'_in_chart hΩ'_compact_closure
       hη_in_Ω' hR₀_pos hh_supp_in_Ω' hη_one_on_Ω'' hΩ''_open.measurableSet
-  -- Step 7: apply h2_chart_loc_of_uniform_bound with h₀ := R₀, Ω''.
   have h_h2 :=
     h2_chart_loc_of_uniform_bound
       (I := I) (M := M) (g := g) (α := α) D
       hΩ''_open hΩ''_compact_closure hR₀_pos h_room
       hM_nn h_uniform_bd
-  -- Step 8: assemble MemWkp 2 2 D.u_chart Ω''.
-  -- D.u_chart ∈ L²(Ω'').
   have h_uChart_memLp_vol_closureΩ'' :
       MemLp D.u_chart 2 (volume.restrict (closure Ω'')) :=
     memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure (I := I) (M := M)
@@ -330,16 +294,12 @@ theorem twiceDerivedChartBilinear_memWkp_two_two_interior
       MemLp D.u_chart 2 (volume.restrict Ω'') :=
     h_uChart_memLp_vol_closureΩ''.mono_measure
       (Measure.restrict_mono subset_closure le_rfl)
-  -- Each D.weak_partial i ∈ L²(Ω'') via the locally-MemLp field, applied to
-  -- the compact subset closure Ω''.
   have h_dwp_memLp_Ω'' :
       ∀ i, MemLp (D.weak_partial i) 2 (volume.restrict Ω'') := by
     intro i
     have h := D.weak_partial_locally_memLp i (closure Ω'') hΩ''_compact_closure
       h_closureΩ''_in_chart
     exact h.mono_measure (Measure.restrict_mono subset_closure le_rfl)
-  -- Each D.weak_partial i is a weak partial of D.u_chart on Ω'' (restrict from
-  -- the chart target).
   have h_dwp_weak_uChart_Ω'' :
       ∀ i, DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
         (D.weak_partial i) D.u_chart Ω'' := by
@@ -351,13 +311,11 @@ theorem twiceDerivedChartBilinear_memWkp_two_two_interior
     have hΩ''_in_chart : Ω'' ⊆ chartTargetEuclid (I := I) (M := M) α :=
       fun y hy => h_closureΩ''_in_chart (subset_closure hy)
     exact DeGiorgi.HasWeakPartialDeriv.restrict hΩ''_open hΩ''_in_chart h_full
-  -- MemW1p 2 D.u_chart Ω''.
   have h_uChart_memW1p_Ω'' :
       DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 D.u_chart Ω'' := by
     refine ⟨h_uChart_memLp_vol_Ω'', ?_⟩
     intro i
     exact ⟨D.weak_partial i, h_dwp_memLp_Ω'' i, h_dwp_weak_uChart_Ω'' i⟩
-  -- For each i, MemW1p 2 (D.weak_partial i) Ω''. The weak partial is g_ik.
   have h_wp_i_memW1p_Ω'' : ∀ i,
       DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 (D.weak_partial i) Ω'' := by
     intro i
@@ -365,21 +323,17 @@ theorem twiceDerivedChartBilinear_memWkp_two_two_interior
     intro k
     obtain ⟨g_ik, hg_ik_memLp, hg_ik_partial, _hg_ik_norm⟩ := h_h2 i k
     exact ⟨g_ik, hg_ik_memLp, hg_ik_partial⟩
-  -- Assemble MemWkp 2 2 D.u_chart Ω''.
   have h_uChart_memWkp_two_Ω'' :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) 2 2 D.u_chart Ω'' := by
-    -- MemWkp 2 2 v Ω'' ↔ MemW1p 2 v Ω'' ∧ ∀ i, MemWkp 1 2 (chosenWeakPartial' 2 i v Ω'') Ω''.
     refine ⟨h_uChart_memW1p_Ω'', ?_⟩
     intro i
-    -- chosenWeakPartial' 2 i D.u_chart Ω'' is a weak partial of D.u_chart on Ω''.
     have h_chosen_partial : DeGiorgi.HasWeakPartialDeriv
         (d := Module.finrank ℝ E) i
         (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
           2 i D.u_chart Ω'') D.u_chart Ω'' :=
       DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_isWeakPartial_of_mem
         h_uChart_memW1p_Ω'' i
-    -- chosenWeakPartial' =ᵐ D.weak_partial i on volume.restrict Ω''.
     have h_chosen_loc : MeasureTheory.LocallyIntegrable
         (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
           2 i D.u_chart Ω'') (volume.restrict Ω'') :=
@@ -394,12 +348,9 @@ theorem twiceDerivedChartBilinear_memWkp_two_two_interior
           2 i D.u_chart Ω'' =ᵐ[volume.restrict Ω''] D.weak_partial i :=
       DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ''_open h_chosen_partial
         (h_dwp_weak_uChart_Ω'' i) h_chosen_loc h_dwp_loc
-    -- MemWkp 1 2 ↔ MemW1p 2.
     rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p]
     exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemW1p_congr_ae
       hΩ''_open h_ae.symm).mp (h_wp_i_memW1p_Ω'' i)
-  -- The `D.u_chart` field of the twice-derived data unfolds to
-  -- `chosenSecondPartialChartPushedU g α u_h l₁ l₂`.
   refine ⟨Ω'', hΩ''_open, hK_α_in_Ω'', hΩ''_compact_closure,
     h_closureΩ''_in_chart, ?_⟩
   exact h_uChart_memWkp_two_Ω''

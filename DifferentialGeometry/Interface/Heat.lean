@@ -39,8 +39,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.HeatEquation
 
-/-! ## Smooth-scalar heat flow -/
-
 /-- One-line adapter: apply the heat semigroup `e^{t Δ_g}` to a smooth real
 scalar `f : M → ℝ`, returning the `Lp ℝ 2 μ_g` representative of the
 evolved function. -/
@@ -85,15 +83,6 @@ theorem heatFlow_norm_le {t : ℝ} (ht : 0 ≤ t) (g : SmoothRiemannianMetric I 
 
 end Interface
 end DifferentialGeometry
-
-/-! ## Re-exports
-
-Pull the heat-semigroup primitives directly into
-`DifferentialGeometry.Interface` so that, after
-`open DifferentialGeometry.Interface`, the names `heatSemigroup`,
-`heatSemigroup_zero`, `heatSemigroup_add`, `heatSemigroup_opNorm_le_one`,
-`heatSemigroup_isSelfAdjoint`, and `heatSemigroup_continuous_at_zero`
-resolve without further qualification. -/
 
 namespace DifferentialGeometry.Interface
 

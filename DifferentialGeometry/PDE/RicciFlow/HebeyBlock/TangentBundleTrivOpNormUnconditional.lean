@@ -35,19 +35,6 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Per-point local op-norm bound
-
-For each `y₀ ∈ M`, we exhibit an open neighbourhood `W_{y₀}` of `y₀`, contained
-in `(trivializationAt E (TangentSpace I) y₀).baseSet ∩
-(trivializationAt E (TangentSpace I) α).baseSet`, and a constant
-`N_{y₀} > 0`, such that for every `b ∈ W_{y₀}`,
-`‖(triv α).continuousLinearMapAt ℝ b‖ ≤ N_{y₀}`.
-
-The factorisation is:
-`(triv α).clmAt b = coordChangeL(y₀→α) ∘L (triv y₀).clmAt b`
-and both factors are locally bounded (the first by continuity, the second by
-`eventually_norm_trivializationAt_lt`). -/
-
 set_option maxHeartbeats 800000 in
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
@@ -68,15 +55,11 @@ private lemma exists_W_and_constant_tangent
     g.toContinuousRiemannianMetric
   letI rb : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
     ⟨cg.toRiemannianMetric⟩
-  -- `(triv y₀).clmAt b` is op-norm bounded in a neighbourhood of `y₀`.
   obtain ⟨C₁, hC₁_pos, hC₁_ev⟩ :=
     eventually_norm_trivializationAt_lt E (fun b : M => TangentSpace I b) y₀
-  -- `b ↦ ‖coordChangeL y₀ α b‖` is continuous on `baseSet y₀ ∩ baseSet α`,
-  -- hence locally bounded near `y₀`.
   set ccF : M → (E →L[ℝ] E) := fun b =>
     (trivializationAt E (TangentSpace I) y₀).coordChangeL ℝ
       (trivializationAt E (TangentSpace I) α) b with hccF_def
-  -- Smoothness of `b ↦ coordChangeL y₀ α b` on the intersection of base sets.
   have h_smooth :
       ContMDiffOn I 𝓘(ℝ, E →L[ℝ] E) ∞ ccF
         ((trivializationAt E (TangentSpace I) y₀).baseSet ∩
@@ -105,12 +88,10 @@ private lemma exists_W_and_constant_tangent
     h_cont.continuousAt (h_open_inter.mem_nhds hy₀_inter)
   have h_norm_continuousAt : ContinuousAt (fun b => ‖ccF b‖) y₀ :=
     continuous_norm.continuousAt.comp h_cc_continuousAt
-  -- Set the threshold C₂ for the coordChange norm: ‖ccF y₀‖ + 1.
   set C₂ : ℝ := ‖ccF y₀‖ + 1 with hC₂_def
   have hC₂_pos : 0 < C₂ := by rw [hC₂_def]; positivity
   have h_cc_ev : ∀ᶠ b in 𝓝 y₀, ‖ccF b‖ < C₂ := by
     exact h_norm_continuousAt (Iio_mem_nhds (by rw [hC₂_def]; linarith))
-  -- Extract open sets from the eventually statements.
   rcases (Filter.eventually_iff_exists_mem.mp hC₁_ev) with ⟨U₁, hU₁_nhd, hU₁_bound⟩
   rcases mem_nhds_iff.mp hU₁_nhd with ⟨V₁, hV₁_sub, hV₁_open, hV₁_mem⟩
   rcases (Filter.eventually_iff_exists_mem.mp h_cc_ev) with ⟨U₂, hU₂_nhd, hU₂_bound⟩
@@ -124,18 +105,14 @@ private lemma exists_W_and_constant_tangent
   refine ⟨C₂ * C₁, by positivity, ?_⟩
   intro b hb
   obtain ⟨⟨⟨hb_V₁, hb_V₂⟩, hb_y₀⟩, hb_α⟩ := hb
-  -- The trivialisation `(triv y₀).clmAt b` op-norm is `< C₁` on V₁.
   have h_clm_norm_le :
       ‖(trivializationAt E (TangentSpace I) y₀).continuousLinearMapAt ℝ b‖ ≤ C₁ :=
     le_of_lt (hU₁_bound b (hV₁_sub hb_V₁))
   have h_cc_norm_le : ‖ccF b‖ ≤ C₂ :=
     le_of_lt (hU₂_bound b (hV₂_sub hb_V₂))
-  -- Factorisation: (triv α).clmAt b T = coordChangeL(y₀→α) ((triv y₀).clmAt b T)
   set ey₀ := trivializationAt E (TangentSpace I) y₀ with hey₀_def
   set eα := trivializationAt E (TangentSpace I) α with heα_def
   have hboth : b ∈ ey₀.baseSet ∩ eα.baseSet := ⟨hb_y₀, hb_α⟩
-  -- Pointwise factorisation:
-  -- `eα.clmAt b T = (coordChangeL(y₀→α) b) (ey₀.clmAt b T)` for each T.
   have h_cc_apply_eq (T : TangentSpace I b) :
       (ey₀.coordChangeL ℝ eα b : E →L[ℝ] E) (ey₀.continuousLinearMapAt ℝ b T) =
       eα.continuousLinearMapAt ℝ b
@@ -153,7 +130,6 @@ private lemma exists_W_and_constant_tangent
       eα.continuousLinearMapAt ℝ b T =
       (ey₀.coordChangeL ℝ eα b : E →L[ℝ] E) (ey₀.continuousLinearMapAt ℝ b T) := by
     rw [h_cc_apply_eq, h_inv]
-  -- Derive the op-norm bound from the pointwise identity.
   have h_norm_T (T : TangentSpace I b) :
       ‖eα.continuousLinearMapAt ℝ b T‖ ≤ C₂ * C₁ * ‖T‖ := by
     rw [h_pointwise T]
@@ -168,8 +144,6 @@ private lemma exists_W_and_constant_tangent
           exact mul_le_mul h_cc_norm_le h1 (norm_nonneg _) (le_of_lt hC₂_pos)
       _ = C₂ * C₁ * ‖T‖ := by ring
   exact ContinuousLinearMap.opNorm_le_bound _ (by positivity) h_norm_T
-
-/-! ## Main theorem -/
 
 set_option maxHeartbeats 800000 in
 set_option synthInstance.maxHeartbeats 400000 in
@@ -192,8 +166,6 @@ theorem chartJ_opNorm_isBounded_on_compact_unconditional
     g.toContinuousRiemannianMetric
   letI rb : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
     ⟨cg.toRiemannianMetric⟩
-  -- For each `y₀ ∈ M`, define `W` to be the open nbhd from the per-point lemma
-  -- when `y₀ ∈ baseSet α`, or `∅` otherwise.
   let W : M → Set M := fun y₀ =>
     if hy : y₀ ∈ (trivializationAt E (TangentSpace I) α).baseSet then
       (exists_W_and_constant_tangent (I := I) (M := M) g α y₀ hy).choose
@@ -223,7 +195,6 @@ theorem chartJ_opNorm_isBounded_on_compact_unconditional
     simp only [N, dif_pos hy]
     exact (exists_W_and_constant_tangent (I := I) (M := M) g α y₀ hy).choose_spec.2.2.choose_spec.2
       b hb
-  -- Finite subcover.
   have h_cover : K ⊆ ⋃ y₀ ∈ K, W y₀ := fun b hb =>
     Set.mem_iUnion₂.mpr ⟨b, hb, hW_mem b (hK_base hb)⟩
   rcases hK.elim_finite_subcover_image (b := K) (c := W)
@@ -240,8 +211,7 @@ theorem chartJ_opNorm_isBounded_on_compact_unconditional
     intro y₀ hy₀; rw [hS'_def] at hy₀
     exact hS_sub (hS_finite.mem_toFinset.mp hy₀)
   by_cases hS_empty : S' = ∅
-  · -- If S' is empty then K is empty, any constant works.
-    refine ⟨0, le_refl _, ?_⟩
+  · refine ⟨0, le_refl _, ?_⟩
     intro b hb
     have : b ∈ ⋃ y₀ ∈ S', W y₀ := hS_cover' hb
     rw [hS_empty] at this; simp at this

@@ -407,11 +407,9 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
           show HasDerivWithinAt Yp
             (- chartChristoffelContractionRightCLM (I := I) g α (uPrime t)
                 (chartCurve (I := I) α γ t) (Yp t)) (Set.Icc t₀ (Tn (n + 1))) t
-          -- Three cases: t < Tn n; t = Tn n; t > Tn n.
           by_cases hT : t ≤ Tn n
           · by_cases hT_strict : t < Tn n
-            · -- t < Tn n: use Y₀.
-              have ht_in : t ∈ Set.Icc t₀ (Tn n) := ⟨ht.1, hT⟩
+            · have ht_in : t ∈ Set.Icc t₀ (Tn n) := ⟨ht.1, hT⟩
               have hY₀_at := hY₀_deriv t ht_in
               have hcongr : ∀ s ∈ Set.Icc t₀ (Tn n), Yp s = Y₀ s := by
                 intro s hs
@@ -419,7 +417,6 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
                 rw [if_pos hs.2]
               have hsmall := hY₀_at.congr hcongr (hcongr t ht_in)
               have hself : Yp t = Y₀ t := hcongr t ht_in
-              -- Lift HasDerivWithinAt from Icc t₀ (Tn n) to Icc t₀ (Tn (n+1)).
               have hopen : Set.Iio (Tn n) ∈ 𝓝 t := isOpen_Iio.mem_nhds hT_strict
               have hmem : Set.Icc t₀ (Tn n) ∈ 𝓝[Set.Icc t₀ (Tn (n + 1))] t := by
                 have hint :
@@ -431,10 +428,8 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
                 exact ⟨hs.1.1, le_of_lt hs.2⟩
               rw [hself]
               exact hsmall.mono_of_mem_nhdsWithin hmem
-            · -- t = Tn n: union argument.
-              push Not at hT_strict
+            · push Not at hT_strict
               have ht_eq : t = Tn n := le_antisymm hT hT_strict
-              -- Left HasDerivWithinAt of Yp on `Icc t₀ (Tn n)` at `Tn n`.
               have hY₀_at_Tn : HasDerivWithinAt Y₀
                   (- chartChristoffelContractionRightCLM (I := I) g α (uPrime (Tn n))
                       (chartCurve (I := I) α γ (Tn n)) (Y₀ (Tn n)))
@@ -449,7 +444,6 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
                       (chartCurve (I := I) α γ (Tn n)) (Y₀ (Tn n)))
                   (Set.Icc t₀ (Tn n)) (Tn n) :=
                 hY₀_at_Tn.congr hcongr_L (hcongr_L (Tn n) ⟨hT_t₀, le_refl _⟩)
-              -- Right HasDerivWithinAt of Yp on `Icc (Tn n) (Tn (n+1))` at `Tn n`.
               have hZ_at_Tn : HasDerivWithinAt Z
                   (- chartChristoffelContractionRightCLM (I := I) g α (uPrime (Tn n))
                       (chartCurve (I := I) α γ (Tn n)) (Z (Tn n)))
@@ -468,7 +462,6 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
                       (chartCurve (I := I) α γ (Tn n)) (Z (Tn n)))
                   (Set.Icc (Tn n) (Tn (n + 1))) (Tn n) :=
                 hZ_at_Tn.congr hcongr_R (hcongr_R (Tn n) ⟨le_refl _, le_of_lt hlt⟩)
-              -- Align values via hZ_init_eq, then union.
               rw [hZ_init_eq] at hYp_R
               have hUeq : Set.Icc t₀ (Tn n) ∪ Set.Icc (Tn n) (Tn (n + 1))
                   = Set.Icc t₀ (Tn (n + 1)) :=
@@ -479,8 +472,7 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
               rw [ht_eq, hYp_self]
               rw [← hUeq]
               exact hYp_L.union hYp_R
-          · -- t > Tn n: use Z derivative.
-            push Not at hT
+          · push Not at hT
             have ht_in_right : t ∈ Set.Icc (Tn n) (Tn (n + 1)) :=
               ⟨le_of_lt hT, ht.2⟩
             have hZ_at := hZ_deriv t ht_in_right
@@ -505,7 +497,6 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
               exact ⟨le_of_lt hs.2, hs.1.2⟩
             rw [hself]
             exact hsmall.mono_of_mem_nhdsWithin hmem
-  -- After N steps, Tn N = b.
   have hTn_N_eq : Tn N = b := by
     have h1 : b ≤ t₀ + (N : ℝ) * h := by
       have : b - a ≤ (N : ℝ) * h := hN
@@ -515,9 +506,6 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
     exact min_eq_left this
   obtain ⟨Y_R, hY_R_init, hY_R_deriv⟩ := rightExist N
   rw [hTn_N_eq] at hY_R_deriv
-  ---------------------------------------------------------------------
-  -- Left extension: build solution on `[Sn N, t₀] = [a, t₀]`.
-  ---------------------------------------------------------------------
   let Sn : ℕ → ℝ := fun n => max a (t₀ - n * h)
   have hSn_zero : Sn 0 = t₀ := by
     show max a (t₀ - (0 : ℕ) * h) = t₀
@@ -552,7 +540,6 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
         rcases le_or_gt a (t₀ - ((n : ℕ) : ℝ) * h) with hge2 | hlt2
         · have hS0 : Sn n = t₀ - ((n : ℕ) : ℝ) * h := max_eq_right hge2
           rw [hS1, hS0]
-          -- hlt : t₀ - ↑(n+1)*h < a;  push_cast on hlt: t₀ - (↑n + 1)*h < a
           have hlt' : t₀ - ((n : ℝ) + 1) * h < a := by rw [← hcast]; exact hlt
           nlinarith [hh_pos]
         · have hS0 : Sn n = a := max_eq_left hlt2.le
@@ -560,7 +547,6 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
     have h2K_nn : 0 ≤ 2 * (K : ℝ) + 2 := h2K2_pos.le
     have := mul_le_mul_of_nonneg_left h_step h2K_nn
     linarith [hh_eq]
-  -- Left inductive predicate.
   have leftExist : ∀ n, ∃ Y : ℝ → E, Y t₀ = v₀ ∧
       ∀ t ∈ Set.Icc (Sn n) t₀, HasDerivWithinAt Y
         (- chartChristoffelContractionRightCLM (I := I) g α (uPrime t)
@@ -595,7 +581,6 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
         rw [← hsame] at ht ⊢
         exact hY₀_deriv t ht
       · have hlt : Sn (n + 1) < Sn n := lt_of_le_of_ne (hSn_mono n) (Ne.symm hsame)
-        -- Solve PL step on `[Sn (n+1), Sn n]` with `t_in := Sn n`, value `Y₀ (Sn n)`.
         have hSn1_a : a ≤ Sn (n + 1) := hSn_ge_a (n + 1)
         have hSn_b : Sn n ≤ b := (hSn_le_t₀ n).trans ht₀_b
         obtain ⟨Z, hZ_deriv, hZ_init⟩ :=
@@ -603,8 +588,7 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
             (le_of_lt hlt) hSn1_a hSn_b (le_of_lt hlt) (le_refl _)
             (hSn_diff_bound n) (Y₀ (Sn n))
         refine ⟨fun t => if t < Sn n then Z t else Y₀ t, ?_, ?_⟩
-        · -- Initial value at t₀: t₀ ≥ Sn n.
-          show (if t₀ < Sn n then Z t₀ else Y₀ t₀) = v₀
+        · show (if t₀ < Sn n then Z t₀ else Y₀ t₀) = v₀
           rw [if_neg (not_lt.mpr (hSn_le_t₀ n))]; exact hY₀_init
         · intro t ht
           set Yp : ℝ → E := fun t => if t < Sn n then Z t else Y₀ t with hYp
@@ -612,8 +596,7 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
             (- chartChristoffelContractionRightCLM (I := I) g α (uPrime t)
                 (chartCurve (I := I) α γ t) (Yp t)) (Set.Icc (Sn (n + 1)) t₀) t
           by_cases hSn_lt : t < Sn n
-          · -- t < Sn n: use Z.
-            have ht_in : t ∈ Set.Icc (Sn (n + 1)) (Sn n) :=
+          · have ht_in : t ∈ Set.Icc (Sn (n + 1)) (Sn n) :=
               ⟨ht.1, le_of_lt hSn_lt⟩
             have hZ_at := hZ_deriv t ht_in
             have hZ_init_eq : Z (Sn n) = Y₀ (Sn n) := hZ_init
@@ -640,9 +623,7 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
             exact hsmall.mono_of_mem_nhdsWithin hmem
           · push Not at hSn_lt
             by_cases hSn_eq : t = Sn n
-            · -- t = Sn n: union argument.
-              -- Left HasDerivWithinAt: Z on `Icc (Sn (n+1)) (Sn n)` at Sn n.
-              have hZ_at_Sn : HasDerivWithinAt Z
+            · have hZ_at_Sn : HasDerivWithinAt Z
                   (- chartChristoffelContractionRightCLM (I := I) g α (uPrime (Sn n))
                       (chartCurve (I := I) α γ (Sn n)) (Z (Sn n)))
                   (Set.Icc (Sn (n + 1)) (Sn n)) (Sn n) :=
@@ -661,7 +642,6 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
                       (chartCurve (I := I) α γ (Sn n)) (Z (Sn n)))
                   (Set.Icc (Sn (n + 1)) (Sn n)) (Sn n) :=
                 hZ_at_Sn.congr hcongr_L (hcongr_L (Sn n) ⟨le_of_lt hlt, le_refl _⟩)
-              -- Right HasDerivWithinAt: Y₀ on `Icc (Sn n) t₀` at Sn n.
               have hY₀_at_Sn : HasDerivWithinAt Y₀
                   (- chartChristoffelContractionRightCLM (I := I) g α (uPrime (Sn n))
                       (chartCurve (I := I) α γ (Sn n)) (Y₀ (Sn n)))
@@ -685,8 +665,7 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
                 rw [if_neg (lt_irrefl _)]
               rw [hSn_eq, hYp_self, ← hUeq]
               exact hYp_L.union hYp_R
-            · -- t > Sn n: use Y₀.
-              have hSn_strict : Sn n < t := lt_of_le_of_ne hSn_lt (Ne.symm hSn_eq)
+            · have hSn_strict : Sn n < t := lt_of_le_of_ne hSn_lt (Ne.symm hSn_eq)
               have ht_in_right : t ∈ Set.Icc (Sn n) t₀ := ⟨le_of_lt hSn_strict, ht.2⟩
               have hY₀_at := hY₀_deriv t ht_in_right
               have hcongr_R : ∀ s ∈ Set.Icc (Sn n) t₀, Yp s = Y₀ s := by
@@ -706,7 +685,6 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
                 exact ⟨le_of_lt hs.2, hs.1.2⟩
               rw [hself]
               exact hsmall.mono_of_mem_nhdsWithin hmem
-  -- After N steps, Sn N = a.
   have hSn_N_eq : Sn N = a := by
     have h1 : t₀ - (N : ℝ) * h ≤ a := by
       have : b - a ≤ (N : ℝ) * h := hN
@@ -716,10 +694,6 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
     exact max_eq_left this
   obtain ⟨Y_L, hY_L_init, hY_L_deriv⟩ := leftExist N
   rw [hSn_N_eq] at hY_L_deriv
-  ---------------------------------------------------------------------
-  -- Combine into Y on [a, b].
-  ---------------------------------------------------------------------
-  -- Unfold helper.
   have h_unfold :
       ∀ (s : ℝ) (Yv : E),
         chartChristoffelContractionRightCLM (I := I) g α (uPrime s)
@@ -729,12 +703,10 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
   refine ⟨fun t => if t ≤ t₀ then Y_L t else Y_R t, ?_, ?_⟩
   · intro t ht
     set Y : ℝ → E := fun t => if t ≤ t₀ then Y_L t else Y_R t with hY
-    -- The goal has chartChristoffelContraction; convert via h_unfold.
     have hLR_eq : Y_L t₀ = Y_R t₀ := by rw [hY_L_init, hY_R_init]
     by_cases ht_t₀ : t ≤ t₀
     · by_cases ht_strict : t < t₀
-      · -- t < t₀: use Y_L.
-        have ht_in : t ∈ Set.Icc a t₀ := ⟨ht.1, ht_t₀⟩
+      · have ht_in : t ∈ Set.Icc a t₀ := ⟨ht.1, ht_t₀⟩
         have hL_at := hY_L_deriv t ht_in
         have hcongr : ∀ s ∈ Set.Icc a t₀, Y s = Y_L s := by
           intro s hs
@@ -753,8 +725,7 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
             (- chartChristoffelContractionRightCLM (I := I) g α (uPrime t)
               (chartCurve (I := I) α γ t) (Y_L t)) from by rw [h_unfold, hself]]
         exact hsmall.mono_of_mem_nhdsWithin hmem
-      · -- t = t₀: union argument.
-        push Not at ht_strict
+      · push Not at ht_strict
         have ht_eq : t = t₀ := le_antisymm ht_t₀ ht_strict
         have hL_at_t₀ : HasDerivWithinAt Y_L
             (- chartChristoffelContractionRightCLM (I := I) g α (uPrime t₀)
@@ -795,8 +766,7 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
           rw [if_pos (le_refl _)]; exact hLR_eq
         rw [ht_eq, ← h_unfold, hY_self, ← hUeq]
         exact hYp_L.union hYp_R
-    · -- t > t₀: use Y_R.
-      push Not at ht_t₀
+    · push Not at ht_t₀
       have ht_in : t ∈ Set.Icc t₀ b := ⟨le_of_lt ht_t₀, ht.2⟩
       have hR_at := hY_R_deriv t ht_in
       have hcongr : ∀ s ∈ Set.Icc t₀ b, Y s = Y_R s := by
@@ -819,8 +789,7 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
           (- chartChristoffelContractionRightCLM (I := I) g α (uPrime t)
             (chartCurve (I := I) α γ t) (Y_R t)) from by rw [h_unfold, hself]]
       exact hsmall.mono_of_mem_nhdsWithin hmem
-  · -- Initial value at t₀.
-    show (if t₀ ≤ t₀ then Y_L t₀ else Y_R t₀) = v₀
+  · show (if t₀ ≤ t₀ then Y_L t₀ else Y_R t₀) = v₀
     rw [if_pos (le_refl _)]; exact hY_L_init
 
 /-- **parallel-local-uniqueness-on-Icc.** On a compact interval
@@ -843,16 +812,11 @@ theorem parallel_local_uniqueness_on_Icc [I.Boundaryless]
     (h_eq : Y₁ t₀ = Y₂ t₀) :
     Set.EqOn Y₁ Y₂ (Set.Icc a b) := by
   classical
-  -- The vector field of the linearised parallel-transport ODE,
-  -- `v t Y = - A(t) Y` where `A(t) := chartChristoffelContractionRightCLM …`.
   set v : ℝ → E → E := fun t Y =>
     - chartChristoffelContractionRightCLM (I := I) g α (uPrime t)
         (chartCurve (I := I) α γ t) Y with hv_def
-  -- A uniform Lipschitz bound `K` on the operator-norm of `A(·)` over `[a, b]`.
   obtain ⟨K, hK⟩ :=
     parallel_lipschitz_bound_on_compact (I := I) g α γ uPrime hab hu hγ hsource
-  -- `v t` is Lipschitz with constant `K` on the whole space, for every
-  -- `t ∈ [a, b]`.
   have hLip : ∀ t ∈ Set.Icc a b,
       LipschitzOnWith K (v t) (Set.univ : Set E) := by
     intro t ht
@@ -868,50 +832,36 @@ theorem parallel_local_uniqueness_on_Icc [I.Boundaryless]
               (uPrime t) (chartCurve (I := I) α γ t)‖₊
           (fun Y => v t Y) := hclm.neg
     exact (hclm_neg.weaken (hK t ht)).lipschitzOnWith
-  -- Re-express both hypotheses `hY₁`, `hY₂` in the standardised form
-  -- `HasDerivWithinAt Y (v t (Y t)) (Icc a b) t`, replacing
-  -- `chartChristoffelContraction` by its CLM-form.
   have hY₁' : ∀ t ∈ Set.Icc a b,
       HasDerivWithinAt Y₁ (v t (Y₁ t)) (Set.Icc a b) t := by
     intro t ht
-    -- The two right-hand sides match by `chartChristoffelContractionRightCLM_apply`
-    -- (a `rfl`-lemma), so the conversion is `rfl`.
     exact hY₁ t ht
   have hY₂' : ∀ t ∈ Set.Icc a b,
       HasDerivWithinAt Y₂ (v t (Y₂ t)) (Set.Icc a b) t := by
     intro t ht
     exact hY₂ t ht
-  -- Continuity of `Y₁`, `Y₂` on `[a, b]` follows from their pointwise
-  -- `HasDerivWithinAt`.
   have hY₁_cont : ContinuousOn Y₁ (Set.Icc a b) :=
     HasDerivWithinAt.continuousOn (f' := fun t => v t (Y₁ t)) hY₁'
   have hY₂_cont : ContinuousOn Y₂ (Set.Icc a b) :=
     HasDerivWithinAt.continuousOn (f' := fun t => v t (Y₂ t)) hY₂'
-  -- We split `[a, b] = [a, t₀] ∪ [t₀, b]` and apply
-  -- `ODE_solution_unique_of_mem_Icc_left` resp. `_right` to each piece.
   rcases ht₀ with ⟨ht₀_a, ht₀_b⟩
-  -- Equality on the right piece `[t₀, b]`.
   have h_right : Set.EqOn Y₁ Y₂ (Set.Icc t₀ b) := by
-    -- Lipschitz on `Ico t₀ b` (subset of `Icc a b`).
     have hLip_r : ∀ t ∈ Set.Ico t₀ b,
         LipschitzOnWith K (v t) (Set.univ : Set E) := by
       intro t ht
       have ht_mem : t ∈ Set.Icc a b :=
         ⟨ht₀_a.trans ht.1, ht.2.le⟩
       exact hLip t ht_mem
-    -- Continuity on `[t₀, b]`.
     have hY₁_cont_r : ContinuousOn Y₁ (Set.Icc t₀ b) :=
       hY₁_cont.mono (Set.Icc_subset_Icc_left ht₀_a)
     have hY₂_cont_r : ContinuousOn Y₂ (Set.Icc t₀ b) :=
       hY₂_cont.mono (Set.Icc_subset_Icc_left ht₀_a)
-    -- Differentiability on `Ico t₀ b` in the form `HasDerivWithinAt _ _ (Ici t) t`.
     have hY₁_diff_r : ∀ t ∈ Set.Ico t₀ b,
         HasDerivWithinAt Y₁ (v t (Y₁ t)) (Set.Ici t) t := by
       intro t ht
       have ht_mem : t ∈ Set.Icc a b :=
         ⟨ht₀_a.trans ht.1, ht.2.le⟩
       have h := hY₁' t ht_mem
-      -- `Icc a b ∈ 𝓝[Ici t] t` because `t ∈ Ico a b`.
       have ht_Ico : t ∈ Set.Ico a b := ⟨ht_mem.1, ht.2⟩
       have hmem : Set.Icc a b ∈ 𝓝[≥] t := Icc_mem_nhdsGE_of_mem ht_Ico
       exact h.mono_of_mem_nhdsWithin hmem
@@ -929,21 +879,17 @@ theorem parallel_local_uniqueness_on_Icc [I.Boundaryless]
       (f := Y₁) (g := Y₂) (a := t₀) (b := b)
       hLip_r hY₁_cont_r hY₁_diff_r (fun _ _ => Set.mem_univ _)
       hY₂_cont_r hY₂_diff_r (fun _ _ => Set.mem_univ _) h_eq
-  -- Equality on the left piece `[a, t₀]`.
   have h_left : Set.EqOn Y₁ Y₂ (Set.Icc a t₀) := by
-    -- Lipschitz on `Ioc a t₀` (subset of `Icc a b`).
     have hLip_l : ∀ t ∈ Set.Ioc a t₀,
         LipschitzOnWith K (v t) (Set.univ : Set E) := by
       intro t ht
       have ht_mem : t ∈ Set.Icc a b :=
         ⟨ht.1.le, ht.2.trans ht₀_b⟩
       exact hLip t ht_mem
-    -- Continuity on `[a, t₀]`.
     have hY₁_cont_l : ContinuousOn Y₁ (Set.Icc a t₀) :=
       hY₁_cont.mono (Set.Icc_subset_Icc_right ht₀_b)
     have hY₂_cont_l : ContinuousOn Y₂ (Set.Icc a t₀) :=
       hY₂_cont.mono (Set.Icc_subset_Icc_right ht₀_b)
-    -- Differentiability on `Ioc a t₀` in the form `HasDerivWithinAt _ _ (Iic t) t`.
     have hY₁_diff_l : ∀ t ∈ Set.Ioc a t₀,
         HasDerivWithinAt Y₁ (v t (Y₁ t)) (Set.Iic t) t := by
       intro t ht
@@ -967,7 +913,6 @@ theorem parallel_local_uniqueness_on_Icc [I.Boundaryless]
       (f := Y₁) (g := Y₂) (a := a) (b := t₀)
       hLip_l hY₁_cont_l hY₁_diff_l (fun _ _ => Set.mem_univ _)
       hY₂_cont_l hY₂_diff_l (fun _ _ => Set.mem_univ _) h_eq
-  -- Combine left and right pieces via `Icc a b = Icc a t₀ ∪ Icc t₀ b`.
   have hunion : Set.Icc a t₀ ∪ Set.Icc t₀ b = Set.Icc a b :=
     Set.Icc_union_Icc_eq_Icc ht₀_a ht₀_b
   intro t ht

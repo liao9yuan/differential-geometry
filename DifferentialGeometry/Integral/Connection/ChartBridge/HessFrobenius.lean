@@ -65,14 +65,6 @@ variable [SigmaCompactSpace M] [T2Space M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Step 1: chart Frobenius equals basis-naive Frobenius of `hessFun` under
-orthonormality
-
-The chart-coordinate metric Frobenius square `chartHessFrobeniusSq g f x = ∑_{ijkl}
-G^{ik}(x, x) G^{jl}(x, x) H_{ij}(x, x) H_{kl}(x, x)` collapses to the basis-naive sum
-of squares `∑_{ij} (H_{ij}(x, x))² = frobeniusSqFun (hessFun g f) x` when
-`G^{ij}(x, x) = δ^{ij}`. This is the chart-coordinate orthonormality condition. -/
-
 /-- **Chart Frobenius equals basis-naive Frobenius of `hessFun` under orthonormality.**
 Conditional on the chart at `x` being `g`-orthonormal at `x` (i.e. the inverse Gram
 matrix at `x` is the identity), the chart Hessian metric Frobenius square equals the
@@ -85,9 +77,6 @@ theorem chartHessFrobeniusSq_eq_frobeniusSqFun_hessFun_of_orthonormal
       frobeniusSqFun (I := I) (M := M) (hessFun (I := I) g f) x := by
   classical
   rw [chartHessFrobeniusSq_def, frobeniusSqFun_hessFun]
-  -- Both sides are sums; rewrite each `chartInvGramMatrix g x x i k` and
-  -- `chartInvGramMatrix g x x j l` using `h_orth`, then collapse the now-redundant
-  -- inner sums over `k` and `l`.
   have hLHS_eq :
       (∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
@@ -111,11 +100,8 @@ theorem chartHessFrobeniusSq_eq_frobeniusSqFun_hessFun_of_orthonormal
     refine Finset.sum_congr rfl (fun l _ => ?_)
     rw [h_orth i k, h_orth j l]
   rw [hLHS_eq]
-  -- Now collapse the (i = k) and (j = l) sums to obtain ∑_{ij} (H_{ij})².
   refine Finset.sum_congr rfl (fun i _ => ?_)
   refine Finset.sum_congr rfl (fun j _ => ?_)
-  -- The inner double sum over (k, l) collapses to the (i, j) term.
-  -- Inner sum over l: collapses by `j = l`.
   have hl : ∀ k : Fin (Module.finrank ℝ E),
       ∑ l : Fin (Module.finrank ℝ E),
         (if i = k then (1 : ℝ) else 0) *
@@ -147,7 +133,6 @@ theorem chartHessFrobeniusSq_eq_frobeniusSqFun_hessFun_of_orthonormal
           chartHessianTensor (I := I) g x f i j x *
           chartHessianTensor (I := I) g x f k j x from
     Finset.sum_congr rfl (fun k _ => hl k)]
-  -- Outer sum over k: collapses by `i = k`.
   rw [Finset.sum_eq_single i]
   · rw [if_pos rfl]
     ring
@@ -157,13 +142,6 @@ theorem chartHessFrobeniusSq_eq_frobeniusSqFun_hessFun_of_orthonormal
     ring
   · intro hi
     exact absurd (Finset.mem_univ i) hi
-
-/-! ## Step 2: bridge to the abstract Hessian carrier
-
-Combining Step 1 with the unconditional matrix-identity packaged on the Frobenius
-norm, `frobeniusSqFun_hessFun_eq_frobeniusSqFun_abstractHessianBilin_of_matrix_identity`,
-gives the desired identification of the chart Hessian metric Frobenius square with the
-basis-naive Frobenius square of the abstract Hessian carrier. -/
 
 /-- **Chart Hessian Frobenius square equals abstract Hessian Frobenius square — under
 orthonormality.** Conditional on the chart at `x` being `g`-orthonormal at `x`, the
@@ -182,36 +160,17 @@ theorem chartHessFrobeniusSq_eq_metric_hessian_norm_sq [I.Boundaryless]
     chartHessFrobeniusSq (I := I) g f x =
       frobeniusSqFun (I := I) (M := M) (abstractHessianBilin (I := I) g f) x := by
   classical
-  -- Step 1: chartHessFrobeniusSq = frobeniusSqFun (hessFun g f) under orthonormality.
   have h1 : chartHessFrobeniusSq (I := I) g f x =
       frobeniusSqFun (I := I) (M := M) (hessFun (I := I) g f) x :=
     chartHessFrobeniusSq_eq_frobeniusSqFun_hessFun_of_orthonormal
       (I := I) g f x h_orth
-  -- Step 2: unconditional matrix identity, packaged on the Frobenius norm.
   have hM : chartHessianMatrixIdentity (I := I) g f x :=
     chartHessianMatrixIdentity_holds (I := I) g hf x
   have h2 : frobeniusSqFun (I := I) (M := M) (hessFun (I := I) g f) x =
       frobeniusSqFun (I := I) (M := M) (abstractHessianBilin (I := I) g f) x :=
     frobeniusSqFun_hessFun_eq_frobeniusSqFun_abstractHessianBilin_of_matrix_identity
       (I := I) g f x hM
-  -- Combine the two equalities.
   exact h1.trans h2
-
-/-! ## Direct chain via the abstract Hessian: Cauchy-Schwarz in metric form
-
-As a packaged consequence, the basis-naive Cauchy-Schwarz inequality on the abstract
-Hessian carrier
-$$
-  \bigl(\operatorname{traceFun}(\operatorname{abstractHessianBilin}\,g\,f)\,x\bigr)^2
-  \le \dim(M) \cdot \operatorname{frobeniusSqFun}(\operatorname{abstractHessianBilin}\,g\,f)\,x
-$$
-transfers directly to the chart-coordinate metric Frobenius square through the bridge
-above. This is the form expected by downstream consumers of the metric Bochner /
-Lichnerowicz dimension-Laplacian inequality.
-
-We do not state the chart-coordinate Cauchy-Schwarz here in full (it would require the
-matching trace identification, which is delivered in
-`Connection.ChartBridge.Laplacian`); we only record the Frobenius bridge. -/
 
 end Connection
 end Integral

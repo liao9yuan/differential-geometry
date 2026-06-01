@@ -89,12 +89,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 variable {a : ℝ} {T : ℝ}
 
-/-! ## The per-mode fundamental theorem of calculus pieces
-
-The structural identity below — that the `H^{a+2}` Duhamel solution-field
-coordinate is the indefinite `Hᵃ`-integral of the carrier's time-derivative
-coordinate — decomposes mode by mode into a homogeneous and a Duhamel piece. -/
-
 /-- **Per-mode FTC for the homogeneous flow.**  The homogeneous-flow coordinate
 `t ↦ e^{−λᵢ t} cᵢ` is the indefinite integral of its derivative coordinate
 `t ↦ −λᵢ e^{−λᵢ t} cᵢ`, started at `cᵢ = u₀.coeff i`:
@@ -111,7 +105,6 @@ theorem homModeCoeff_eq_init_add_integral
         (homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i) s := by
   set lam := TensorEigenIdx.lambda (I := I) (M := M) i with hlam_def
   set c := u₀.coeff i with hc_def
-  -- The two coordinates' continuous representatives.
   have hmode : ⇑(homModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i) =ᵐ[timeMeasure T]
       fun t => Real.exp (-lam * t) * c :=
     TimeSobolev.coeFn_ofContinuousOn _
@@ -120,7 +113,6 @@ theorem homModeCoeff_eq_init_add_integral
     TimeSobolev.coeFn_ofContinuousOn _
   filter_upwards [hmode, ae_restrict_mem (μ := volume) measurableSet_Icc] with t ht htmem
   rw [ht]
-  -- Replace the integrand by its continuous representative, then integrate.
   have hint_congr : (∫ s in (0 : ℝ)..t,
         (homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i) s) =
       ∫ s in (0 : ℝ)..t, -lam * (Real.exp (-lam * s) * c) := by
@@ -131,7 +123,6 @@ theorem homModeCoeff_eq_init_add_integral
     rw [ae_restrict_iff' measurableSet_uIoc] at hae
     filter_upwards [hae] with s hs using hs
   rw [hint_congr]
-  -- `∫₀ᵗ -lam·e^{-lam·s}·c ds = c·(e^{-lam·t} - 1)`, so RHS `= c·e^{-lam·t}`.
   have hF : ∀ s : ℝ, HasDerivAt (fun s => Real.exp (-lam * s) * c)
       (-lam * (Real.exp (-lam * s) * c)) s := by
     intro s
@@ -163,7 +154,6 @@ theorem solModeCoeff_eq_integral (hT : 0 ≤ T)
     (fun t => (solModeCoeff (I := I) (M := M) (a := a) hT f i) t) =ᵐ[timeMeasure T]
       fun t => ∫ s in (0 : ℝ)..t,
         (derivModeCoeff (I := I) (M := M) (a := a) hT f i) s := by
-  -- `solModeCoeff = toFunL2 (mk 0 (derivModeCoeff))`, then unfold `toFunL2 ≈ toFun`.
   have hsol : solModeCoeff (I := I) (M := M) (a := a) hT f i =
       TimeSobolev.timeH1.toFunL2
         (TimeSobolev.timeH1.mk (0 : ℝ)
@@ -173,7 +163,6 @@ theorem solModeCoeff_eq_integral (hT : 0 ≤ T)
         (tensor_lambda_nonneg (I := I) (M := M) i) hT
         (timeModeCoeff (I := I) (M := M) f i)]
   rw [hsol]
-  -- `toFunL2 u ≈ toFun u`, and `toFun (mk 0 v) t = 0 + ∫₀ᵗ v`.
   have hcoe := TimeSobolev.coeFn_ofContinuousOn
     (TimeSobolev.timeH1.mk (0 : ℝ)
       (derivModeCoeff (I := I) (M := M) (a := a) hT f i)).continuousOn_toFun
@@ -193,17 +182,14 @@ theorem maxRegDuhamelMap_deriv_coeff_ae (hT : 0 < T) (hT1 : T ≤ 1)
         =ᵐ[timeMeasure T]
       fun s => (homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i) s +
         (derivModeCoeff (I := I) (M := M) (a := a) hT.le gforce i) s := by
-  -- `carrier.deriv = homDerivField + maxRegDerivField`, by `maxRegDuhamelMap_deriv`.
   have hderiv := maxRegDuhamelMap_deriv (I := I) (M := M) (a := a) (T := T)
     hT hT1 u₀ gforce
-  -- Coordinate of the sum, a.e. via the two timeModeCoeff representatives.
   have hcoe := timeModeCoeff_coeFn (I := I) (M := M)
     (maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce).deriv i
   have hhom := timeModeCoeff_coeFn (I := I) (M := M)
     (maxRegHomogeneousDerivField (I := I) (M := M) a T u₀) i
   have hduh := timeModeCoeff_coeFn (I := I) (M := M)
     (maximalRegularityDerivField (I := I) (M := M) a hT.le gforce) i
-  -- `timeModeCoeff (carrier.deriv) i = homDerivModeCoeff i + derivModeCoeff i`.
   have hsum : timeModeCoeff (I := I) (M := M)
       (maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce).deriv i =
         homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i +
@@ -216,8 +202,6 @@ theorem maxRegDuhamelMap_deriv_coeff_ae (hT : 0 < T) (hT1 : T ≤ 1)
   have haddcoe := Lp.coeFn_add
     (homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i)
     (derivModeCoeff (I := I) (M := M) (a := a) hT.le gforce i)
-  -- Combine: `(carrier.deriv s).coeff i = timeModeCoeff(carrier.deriv) i s
-  --   = ⇑(homDerivModeCoeff i + derivModeCoeff i) s = homDeriv s + deriv s`.
   filter_upwards [hcoe, haddcoe] with s hs1 hs2
   rw [← hs1, hsum, hs2, Pi.add_apply]
 
@@ -239,7 +223,6 @@ theorem maxRegDuhamelSolField_coeff_ae (hT : 0 < T) (hT1 : T ≤ 1)
         =ᵐ[timeMeasure T]
       fun t => u₀.coeff i + ∫ s in (0 : ℝ)..t,
         ((maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce).deriv s).coeff i := by
-  -- LHS a.e. = timeModeCoeff(field) i = homModeCoeff i + solModeCoeff i.
   have hfield_coe := timeModeCoeff_coeFn (I := I) (M := M)
     (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce) i
   have hsplit : timeModeCoeff (I := I) (M := M)
@@ -254,20 +237,15 @@ theorem maxRegDuhamelSolField_coeff_ae (hT : 0 < T) (hT1 : T ≤ 1)
   have haddcoe := Lp.coeFn_add
     (homModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i)
     (solModeCoeff (I := I) (M := M) (a := a) hT.le gforce i)
-  -- The two per-mode FTCs.
   have hA := homModeCoeff_eq_init_add_integral (I := I) (M := M) (a := a) (T := T) u₀ i
   have hB := solModeCoeff_eq_integral (I := I) (M := M) (a := a) hT.le gforce i
-  -- The integrand a.e.-rewrite for the RHS integral.
   have hderiv_coe := maxRegDuhamelMap_deriv_coeff_ae (I := I) (M := M)
     (h_compact := h_compact) (a := a) hT hT1 u₀ gforce i
-  -- Combine.  First, LHS a.e. = homModeCoeff i + solModeCoeff i.
   filter_upwards [hfield_coe, haddcoe, hA, hB,
     ae_restrict_mem (μ := volume) measurableSet_Icc] with t ht1 ht2 htA htB htmem
   rw [← ht1, hsplit, ht2, Pi.add_apply, htA, htB]
-  -- Now combine the two integrals into the single carrier-deriv integral.
   have htmem' : t ∈ Set.Icc (0 : ℝ) T := htmem
   have hh0 : (0 : ℝ) ∈ Set.Icc (0 : ℝ) T := ⟨le_rfl, htmem.1.trans htmem.2⟩
-  -- The two summand integrands are interval integrable.
   have hint_hom : IntervalIntegrable
       (fun s => (homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i) s)
       volume 0 t := by
@@ -283,7 +261,6 @@ theorem maxRegDuhamelSolField_coeff_ae (hT : 0 < T) (hT1 : T ≤ 1)
       (uIcc_subset_Icc hh0 htmem')
     exact this.intervalIntegrable
   rw [add_assoc, ← intervalIntegral.integral_add hint_hom hint_duh]
-  -- The pooled integrand equals the carrier-deriv coordinate a.e. on `uIoc 0 t`.
   have hcongr : (∫ s in (0 : ℝ)..t,
         ((homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i) s +
           (derivModeCoeff (I := I) (M := M) (a := a) hT.le gforce i) s)) =
@@ -297,15 +274,6 @@ theorem maxRegDuhamelSolField_coeff_ae (hT : 0 < T) (hT1 : T ≤ 1)
     filter_upwards [hae] with s hs hsmem
     rw [hs hsmem]
   rw [hcongr]
-
-/-! ## The recentred cross-scale field
-
-We package the **recentred** Duhamel solution `field − ι u₀` as a
-`CrossScaleField`: the top-scale datum is the recentred `H^{a+2}` solution field
-`maxRegDuhamelSolField − const u₀`, and the carrier is the time-`H¹` element
-`mk 0 (carrier.deriv)` with initial value `0`.  Its produced representative is
-`field − ι u₀` (with `repr 0 = 0`), so the sharp energy estimate bounds
-`‖field t − ι u₀‖²` directly. -/
 
 /-- The lower-scale carrier of the recentred field: the time-`H¹` element with
 initial value `0` and time derivative the carrier's derivative. -/
@@ -337,11 +305,9 @@ theorem recentredCarrier_toFun_coeff (hT : 0 < T) (hT1 : T ≤ 1)
         ((maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce).deriv s).coeff i := by
   have h0 : (0 : ℝ) ∈ Set.Icc (0 : ℝ) T := ⟨le_rfl, le_trans ht.1 ht.2⟩
   set lo := recentredCarrier (I := I) (M := M) hT hT1 u₀ gforce with hlo_def
-  -- `lo.deriv = carrier.deriv`: convert the RHS integrand into `lo.deriv`.
   have hderiv : lo.deriv = (maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce).deriv := by
     rw [hlo_def, recentredCarrier, TimeSobolev.timeH1.deriv_mk]
   rw [← hderiv]
-  -- Push the coordinate functional through the Bochner integral.
   have hcomm : ∫ s in (0 : ℝ)..t, (lo.deriv s).coeff i =
       (coeffCLM (I := I) (M := M) (g := g) (r := r) (s := s) (σ := a) i)
         (∫ s in (0 : ℝ)..t, lo.deriv s) := by
@@ -352,7 +318,6 @@ theorem recentredCarrier_toFun_coeff (hT : 0 < T) (hT1 : T ≤ 1)
   have hval : (lo.toFun t).coeff i =
       (coeffCLM (I := I) (M := M) (g := g) (r := r) (s := s) (σ := a) i) (lo.toFun t) := rfl
   rw [hval, TimeSobolev.timeH1.toFun_apply, map_add, hcomm]
-  -- `lo.init = 0`, so the trace term vanishes.
   have hinit : lo.init = (0 : tensorHs (I := I) (M := M) g r s a) := by
     rw [hlo_def, recentredCarrier, TimeSobolev.timeH1.init_mk]
   rw [hinit, map_zero, zero_add]
@@ -373,13 +338,11 @@ theorem recentred_link (hT : 0 < T) (hT1 : T ≤ 1)
   haveI : Countable (TensorEigenIdx (I := I) (M := M) g r s) :=
     MaximalRegularity.countable_tensorEigenIdx (I := I) (M := M)
       (g := g) (r := r) (s := s) h_compact
-  -- a.e.-coordinate matching, mode by mode (countable index ⇒ swap quantifiers).
   have hper : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
       ∀ᵐ t ∂(timeMeasure T),
         (recentredHi (I := I) (M := M) hT hT1 u₀ gforce t).coeff i =
           ((recentredCarrier (I := I) (M := M) hT hT1 u₀ gforce).toFun t).coeff i := by
     intro i
-    -- `hiL2 t .coeff i = (field t).coeff i - u₀.coeff i` a.e.
     have hsub := Lp.coeFn_sub
       (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce)
       (TimeSobolev.const T u₀)
@@ -389,7 +352,6 @@ theorem recentred_link (hT : 0 < T) (hT1 : T ≤ 1)
       (h_compact := h_compact) (a := a) hT hT1 u₀ gforce i
     filter_upwards [hsub, hconst, hstruct,
       ae_restrict_mem (μ := volume) measurableSet_Icc] with t htsub htconst htstruct htmem
-    -- LHS coordinate.
     have hlhs : (recentredHi (I := I) (M := M) hT hT1 u₀ gforce t).coeff i =
         (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce t).coeff i -
           u₀.coeff i := by
@@ -398,7 +360,6 @@ theorem recentred_link (hT : 0 < T) (hT1 : T ≤ 1)
     rw [hlhs, htstruct,
       recentredCarrier_toFun_coeff (I := I) (M := M) hT hT1 u₀ gforce i htmem]
     ring
-  -- Swap to `∀ᵐ t, ∀ i`.
   rw [← MeasureTheory.ae_all_iff] at hper
   filter_upwards [hper] with t ht
   refine tensorHs.ext ?_
@@ -418,13 +379,6 @@ def maxRegRecentredCrossScaleField (hT : 0 < T) (hT1 : T ≤ 1)
   lo := recentredCarrier (I := I) (M := M) hT hT1 u₀ gforce
   link := recentred_link (I := I) (M := M) (h_compact := h_compact) hT hT1 u₀ gforce
 
-/-! ## Identifying the representative with the recentred field
-
-The produced representative of the recentred cross-scale field is, for
-`t ∈ [0,T]`, exactly the recentred `H^{a+1}`-view field `field t − ι u₀`; at
-`t = 0` it vanishes.  Its squared norm is therefore bounded by the energy
-integral with no `repr 0` contribution. -/
-
 /-- The representative of the recentred field vanishes at `t = 0`: its
 coordinates are the carrier coordinates at `0`, which are `lo.init.coeff i = 0`. -/
 theorem recentred_repr_zero (hT : 0 < T) (hT1 : T ≤ 1)
@@ -439,10 +393,8 @@ theorem recentred_repr_zero (hT : 0 < T) (hT1 : T ≤ 1)
   refine tensorHs.ext ?_
   funext i
   rw [u.repr_coeff hT ⟨le_rfl, hT.le⟩ i, tensorHs.zero_coeff]
-  -- `coeffFun i 0 = (lo.toFun 0).coeff i = lo.init.coeff i = 0`.
   change (u.lo.toFun 0).coeff i = 0
   rw [TimeSobolev.timeH1.toFun_zero]
-  -- `u.lo.init = (recentredCarrier).init = 0`.
   change (recentredCarrier (I := I) (M := M) hT hT1 u₀ gforce).init.coeff i = 0
   rw [recentredCarrier, TimeSobolev.timeH1.init_mk, tensorHs.zero_coeff]
 
@@ -465,14 +417,12 @@ theorem recentred_repr_eq_field_sub (hT : 0 < T) (hT1 : T ≤ 1)
       (g := g) (r := r) (s := s) h_compact
   set u := maxRegRecentredCrossScaleField (I := I) (M := M)
     (h_compact := h_compact) hT hT1 u₀ gforce with hu_def
-  -- a.e.-coordinate matching, mode by mode.
   have hper : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
       ∀ᵐ t ∂(timeMeasure T),
         (u.repr t).coeff i =
           (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce t).coeff i -
             u₀.coeff i := by
     intro i
-    -- `(field_{a+1} t).coeff i = (field_{a+2} t).coeff i` (same modes).
     have hHa1 := timeModeCoeff_coeFn (I := I) (M := M)
       (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce) i
     have hHa1mode : timeModeCoeff (I := I) (M := M)
@@ -491,19 +441,16 @@ theorem recentred_repr_eq_field_sub (hT : 0 < T) (hT1 : T ≤ 1)
     have hB := solModeCoeff_eq_integral (I := I) (M := M) (a := a) hT.le gforce i
     filter_upwards [hHa1, haddcoe, hA, hB,
       ae_restrict_mem (μ := volume) measurableSet_Icc] with t htHa1 htadd htA htB htmem
-    -- `(field_{a+1} t).coeff i = homModeCoeff i t + solModeCoeff i t`.
     have hfield : (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce t).coeff i =
         u₀.coeff i + (∫ s in (0 : ℝ)..t,
             (homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i) s) +
           ∫ s in (0 : ℝ)..t, (derivModeCoeff (I := I) (M := M) (a := a) hT.le gforce i) s := by
       rw [← htHa1, hHa1mode, htadd, Pi.add_apply, htA, htB]
-    -- `(repr t).coeff i = coeffFun i t = ∫₀ᵗ (carrier.deriv).coeff i`.
     have hrepr : (u.repr t).coeff i =
         ∫ s in (0 : ℝ)..t,
           ((maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce).deriv s).coeff i := by
       rw [u.repr_coeff hT htmem i]
       exact recentredCarrier_toFun_coeff (I := I) (M := M) hT hT1 u₀ gforce i htmem
-    -- The carrier-deriv integral splits as the two summand integrals.
     have hsplit_int : (∫ s in (0 : ℝ)..t,
           ((maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce).deriv s).coeff i) =
         (∫ s in (0 : ℝ)..t,
@@ -539,14 +486,6 @@ theorem recentred_repr_eq_field_sub (hT : 0 < T) (hT1 : T ≤ 1)
     tensorHsInclusion_coeff_apply]
   rw [← sub_eq_add_neg]
   exact hti
-
-/-! ## `L²`-in-time norm bounds carrying the `√T` decay
-
-The energy integral `∫₀ᵀ 2‖hiL2 s‖·‖lo.deriv s‖` is bounded, by Cauchy–Schwarz
-in time, by `2·‖hiL2‖_{L²(H^{a+2})}·‖lo.deriv‖_{L²(Hᵃ)}`.  The lower factor
-carries the `√T` decay (the homogeneous time-derivative and the truncated
-forcing both vanish in `L²` as `T → 0`), while the upper factor stays bounded for
-`T ≤ 1`. -/
 
 /-- The `i`-th time-mode coordinate of the constant field `const T c` (top scale)
 is the constant scalar field `const T (c.coeff i)`. -/
@@ -647,13 +586,6 @@ theorem timeL2_norm_le_of_ae_bound
       show ((2 : ℝ≥0∞).toReal)⁻¹ = (1 / 2 : ℝ) by norm_num,
       TimeSobolev.toReal_ofReal_rpow_half, ENNReal.toReal_ofReal hC]
 
-/-! ## The truncated forcing is uniformly bounded
-
-The truncated nonlinearity `Ñ_R = N ∘ ρ` is **globally bounded**: the recentred
-retraction `ρ` lands in `closedBall (ι u₀) R`, on which `N` is `L_R`-Lipschitz,
-so `‖Ñ_R(v) − N(ι u₀)‖ ≤ L_R·R` for every `v`.  Consequently the truncated
-forcing `gStar = nemytskiiHa1 Ñ_R (field)` is `√T`-small in `L²([0,T]; Hᵃ)`. -/
-
 /-- The truncated nonlinearity is uniformly bounded:
 `‖truncatedNonlin N (ι u₀) R v‖ ≤ ‖N (ι u₀)‖ + L_R·R` for every `v`. -/
 theorem truncatedNonlin_norm_le {L_R : ℝ≥0} {R : ℝ} (hR : 0 ≤ R)
@@ -663,11 +595,9 @@ theorem truncatedNonlin_norm_le {L_R : ℝ≥0} {R : ℝ} (hR : 0 ≤ R)
     (hN : LipschitzOnWith L_R N (Metric.closedBall u₀' R))
     (v : tensorHs (I := I) (M := M) g r s (a + 1)) :
     ‖truncatedNonlin (I := I) (M := M) N u₀' R v‖ ≤ ‖N u₀'‖ + (L_R : ℝ) * R := by
-  -- `ρ(v) ∈ closedBall u₀' R`, and the centre `u₀'` is in the ball.
   have hρmem : recenteredBallRetraction u₀' R v ∈ Metric.closedBall u₀' R :=
     recenteredBallRetraction_mapsTo (X := _) hR u₀' (Set.mem_univ v)
   have hcentre : u₀' ∈ Metric.closedBall u₀' R := Metric.mem_closedBall_self hR
-  -- `‖N(ρ v) − N u₀'‖ ≤ L_R·dist(ρ v, u₀') ≤ L_R·R`.
   have hdist : dist (recenteredBallRetraction u₀' R v) u₀' ≤ R := by
     rw [← Metric.mem_closedBall]; exact hρmem
   have hlip : ‖N (recenteredBallRetraction u₀' R v) - N u₀'‖ ≤ (L_R : ℝ) * R := by
@@ -701,14 +631,6 @@ theorem nemytskiiHa1_truncated_norm_le {L_R : ℝ≥0} {R : ℝ} (hR : 0 ≤ R)
   rw [ht]
   exact truncatedNonlin_norm_le (I := I) (M := M) hR hN (field t)
 
-/-! ## The recentred field stays in the ball on a short interval
-
-The sharp parabolic trace estimate applied to the recentred field gives, for
-**every** `t ∈ [0,T]`, the bound `‖field t − ι u₀‖² ≤ ∫₀ᵗ 2‖hiL2‖·‖lo.deriv‖`.
-Young's inequality with weight `√T` and the `√T`-decaying `L²`-norm of the
-recentred carrier's derivative bound the right side by `√T·(budget)`, vanishing as
-`T → 0`. -/
-
 /-- **The pointwise recentred-field squared bound.**  For `t ∈ [0,T]`,
 
   `‖repr t‖²_{H^{a+1}} ≤ √T·‖hiL2‖²_{L²(H^{a+2})} + (1/√T)·‖lo.deriv‖²_{L²(Hᵃ)}`,
@@ -730,13 +652,11 @@ theorem recentred_repr_normSq_le (hT : 0 < T) (hT1 : T ≤ 1)
   set u := maxRegRecentredCrossScaleField (I := I) (M := M)
     (h_compact := h_compact) hT hT1 u₀ gforce with hu_def
   have hsqrtT_pos : 0 < Real.sqrt T := Real.sqrt_pos.mpr hT
-  -- The energy estimate (`repr 0 = 0`).
   have henergy := u.normSq_repr_le_init_add_integral hT ht
   rw [recentred_repr_zero (I := I) (M := M) (h_compact := h_compact) hT hT1 u₀ gforce,
     norm_zero] at henergy
   simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, zero_add] at henergy
   refine le_trans henergy ?_
-  -- `∫₀ᵗ 2ab ≤ ∫₀ᵀ 2ab ≤ ∫₀ᵀ (√T a² + (1/√T) b²) = √T ∫ a² + (1/√T) ∫ b²`.
   have hhi_sq : IntegrableOn (fun s => ‖u.hiL2 s‖ ^ 2) (Set.Icc (0 : ℝ) T) volume := by
     have hLp : MemLp (fun s => u.hiL2 s) 2 (timeMeasure T) := Lp.memLp u.hiL2
     have hint := hLp.integrable_norm_rpow (by norm_num) (by norm_num)
@@ -749,7 +669,6 @@ theorem recentred_repr_normSq_le (hT : 0 < T) (hT1 : T ≤ 1)
     have hpow : (fun x => ‖u.lo.deriv x‖ ^ (2 : ℝ≥0∞).toReal) = (fun x => ‖u.lo.deriv x‖ ^ 2) := by
       funext x; rw [show ((2 : ℝ≥0∞).toReal) = (2 : ℝ) by norm_num, Real.rpow_two]
     rw [hpow] at hint; exact hint
-  -- Step 1: `∫₀ᵗ 2ab ≤ ∫_{Icc 0 T} 2ab`.
   have hstep1 : (∫ s in (0 : ℝ)..t, 2 * (‖u.hiL2 s‖ * ‖u.lo.deriv s‖)) ≤
       ∫ s in Set.Icc (0 : ℝ) T, 2 * (‖u.hiL2 s‖ * ‖u.lo.deriv s‖) := by
     rw [intervalIntegral.integral_of_le ht.1]
@@ -757,7 +676,6 @@ theorem recentred_repr_normSq_le (hT : 0 < T) (hT1 : T ≤ 1)
       (ae_of_all _ (fun s => by positivity)) ?_
     exact HasSubset.Subset.eventuallyLE (fun x hx => ⟨le_of_lt hx.1, le_trans hx.2 ht.2⟩)
   refine le_trans hstep1 ?_
-  -- Step 2: Young pointwise then integrate.
   have hyoung : ∀ s, 2 * (‖u.hiL2 s‖ * ‖u.lo.deriv s‖) ≤
       Real.sqrt T * ‖u.hiL2 s‖ ^ 2 + (Real.sqrt T)⁻¹ * ‖u.lo.deriv s‖ ^ 2 := by
     intro s
@@ -777,7 +695,6 @@ theorem recentred_repr_normSq_le (hT : 0 < T) (hT1 : T ≤ 1)
     (hhi_sq.const_mul (Real.sqrt T)).add (hlo_sq.const_mul (Real.sqrt T)⁻¹)
   refine le_trans (setIntegral_mono (u.integrableOn_energyBound) hbound_int
     (fun s => hyoung s)) ?_
-  -- The integral splits and equals `√T‖hiL2‖² + (1/√T)‖lo.deriv‖²`.
   rw [MeasureTheory.integral_add (hhi_sq.const_mul (Real.sqrt T))
       (hlo_sq.const_mul (Real.sqrt T)⁻¹),
     MeasureTheory.integral_const_mul, MeasureTheory.integral_const_mul]
@@ -826,8 +743,6 @@ theorem recentredCarrier_deriv_norm_le (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact := h_compact) hT.le gforce
   linarith [hhom, hduh]
 
-/-! ## The stays-in-ball discharge -/
-
 /-- **The recentred-field sup-in-time bound for a `√T`-small forcing.**  If the
 forcing is `√T`-small, `‖gforce‖ ≤ √T·C`, then for every `t ∈ [0,T]` (with
 `0 < T ≤ 1`),
@@ -850,15 +765,12 @@ theorem recentred_repr_normSq_le_of_smallForcing (hT : 0 < T) (hT1 : T ≤ 1)
   have hsqrtT_le_one : Real.sqrt T ≤ 1 := by
     rw [show (1 : ℝ) = Real.sqrt 1 from (Real.sqrt_one).symm]
     exact Real.sqrt_le_sqrt hT1
-  -- The energy bound.
   have henergy := recentred_repr_normSq_le (I := I) (M := M)
     (h_compact := h_compact) hT hT1 u₀ gforce ht
-  -- The two field-norm bounds, specialised by `‖gforce‖ ≤ √T·C`.
   have hhi := recentredHi_norm_le (I := I) (M := M)
     (h_compact := h_compact) hT hT1 u₀ gforce
   have hderiv := recentredCarrier_deriv_norm_le (I := I) (M := M)
     (h_compact := h_compact) hT hT1 u₀ gforce
-  -- `‖hi‖ ≤ 2√T(‖u₀‖+C)`, `‖deriv‖ ≤ √T(‖u₀‖+2C)`.
   have hhi' : ‖recentredHi (I := I) (M := M) hT hT1 u₀ gforce‖ ≤
       2 * Real.sqrt T * (‖u₀‖ + C) := by
     refine le_trans hhi ?_
@@ -871,7 +783,6 @@ theorem recentred_repr_normSq_le_of_smallForcing (hT : 0 < T) (hT1 : T ≤ 1)
       Real.sqrt T * (‖u₀‖ + 2 * C) := by
     refine le_trans hderiv ?_
     nlinarith [hgforce, Real.sqrt_nonneg T, norm_nonneg u₀, hC]
-  -- Square the field-norm bounds.
   have hhi_sq : ‖recentredHi (I := I) (M := M) hT hT1 u₀ gforce‖ ^ 2 ≤
       (2 * Real.sqrt T * (‖u₀‖ + C)) ^ 2 := by
     have hnn : 0 ≤ 2 * Real.sqrt T * (‖u₀‖ + C) := by positivity
@@ -882,7 +793,6 @@ theorem recentred_repr_normSq_le_of_smallForcing (hT : 0 < T) (hT1 : T ≤ 1)
     nlinarith [hderiv', norm_nonneg ((maxRegDuhamelMap (I := I) (M := M)
       a hT hT1 u₀ gforce).deriv), hnn]
   refine le_trans henergy ?_
-  -- Plug in: `√T·hi² + (1/√T)·deriv² ≤ √T·4T(‖u₀‖+C)² + √T(‖u₀‖+2C)² ≤ √T·K²`.
   have hssq : Real.sqrt T ^ 2 = T := Real.sq_sqrt hT.le
   have hbound1 : Real.sqrt T *
         ‖recentredHi (I := I) (M := M) hT hT1 u₀ gforce‖ ^ 2 ≤
@@ -901,7 +811,6 @@ theorem recentred_repr_normSq_le_of_smallForcing (hT : 0 < T) (hT1 : T ≤ 1)
     have heq : (Real.sqrt T)⁻¹ * T = Real.sqrt T := by
       rw [mul_comm, ← div_eq_mul_inv, Real.div_sqrt]
     rw [← mul_assoc, heq]
-  -- `√T·4T(‖u₀‖+C)² ≤ √T·4(‖u₀‖+C)²` since `T ≤ 1`.
   have hTle : Real.sqrt T * (4 * T * (‖u₀‖ + C) ^ 2) ≤
       Real.sqrt T * (4 * (‖u₀‖ + C) ^ 2) := by
     refine mul_le_mul_of_nonneg_left ?_ hsqrtT_pos.le
@@ -927,18 +836,14 @@ theorem maxRegDuhamelSolFieldHa1_stay (hT : 0 < T) (hT1 : T ≤ 1)
   have hReq := recentred_repr_eq_field_sub (I := I) (M := M)
     (h_compact := h_compact) hT hT1 u₀ gforce
   filter_upwards [hReq, ae_restrict_mem (μ := volume) measurableSet_Icc] with t hteq htmem
-  -- `‖field t − ι u₀‖² = ‖repr t‖² ≤ √T·K² ≤ R²`.
   have hsup := recentred_repr_normSq_le_of_smallForcing (I := I) (M := M)
     (h_compact := h_compact) hT hT1 u₀ gforce hC hgforce (t := t) htmem
   rw [Metric.mem_closedBall, dist_eq_norm, ← hteq]
   have hsq : ‖(maxRegRecentredCrossScaleField (I := I) (M := M)
       (h_compact := h_compact) hT hT1 u₀ gforce).repr t‖ ^ 2 ≤ R ^ 2 :=
     le_trans hsup hhoriz
-  -- `‖x‖ ≤ R` from `‖x‖² ≤ R²` and `0 ≤ R`.
   nlinarith [hsq, norm_nonneg ((maxRegRecentredCrossScaleField (I := I) (M := M)
     (h_compact := h_compact) hT hT1 u₀ gforce).repr t), hR]
-
-/-! ## The fully unconditional locally-Lipschitz small-time cutoff -/
 
 /-- **Unconditional small-time strong existence for a locally Lipschitz
 nonlinearity — no `hstay`.**
@@ -990,34 +895,27 @@ theorem quasilinear_strong_existence_locallyLipschitz_smallTime_stayDischarged_o
               nemytskiiHa1 (I := I) (M := M)
                 (truncatedNonlin_lipschitzWith (I := I) (M := M) hR.le hN)
                 (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce) := by
-  -- Abbreviations.
   set u₀' := tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
     (show (a + 1) ≤ a + 2 by linarith) u₀ with hu₀'
   set C : ℝ := ‖N u₀'‖ + (L_R : ℝ) * R with hC_def
   have hC_nn : 0 ≤ C := by positivity
-  -- The constant `K²` of the sup-bound, and the strictly-positive `K2 + 1`.
   set K2 : ℝ := 4 * (‖u₀‖ + C) ^ 2 + (‖u₀‖ + 2 * C) ^ 2 with hK2_def
   have hK2_nn : 0 ≤ K2 := by positivity
   have hden_pos : 0 < K2 + 1 := by positivity
-  -- The truncated globally-Lipschitz engine (its own positive horizon `T_R`).
   obtain ⟨T_R, hT_R_pos, htrunc⟩ :=
     quasilinear_strong_existence_truncated_smallTime_ofCompact (I := I) (M := M)
       (h_compact := h_compact) (R := R) hR.le u₀ hN
-  -- The horizon: small enough for the truncated engine and for the stay estimate.
   refine ⟨min T_R (min 1 ((R ^ 2 / (K2 + 1)) ^ 2)),
     lt_min hT_R_pos (lt_min one_pos (by positivity)), ?_⟩
   intro T hT hTT₀ hT1
   have hTTR : T ≤ T_R := le_trans hTT₀ (min_le_left _ _)
   have hThoriz : T ≤ (R ^ 2 / (K2 + 1)) ^ 2 :=
     le_trans hTT₀ (le_trans (min_le_right _ _) (min_le_right _ _))
-  -- Run the truncated engine at `T`.
   obtain ⟨u, gforce, hu, hfix, htrace, hderiv⟩ := htrunc (T := T) hT hTTR hT1
-  -- The truncated forcing is `√T`-small.
   have hgforce_small : ‖gforce‖ ≤ Real.sqrt T * C := by
     rw [hfix]
     exact nemytskiiHa1_truncated_norm_le (I := I) (M := M) hR.le hN
       (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce)
-  -- The horizon condition `√T·K² ≤ R²`.
   have hhoriz : Real.sqrt T * K2 ≤ R ^ 2 := by
     have hsqrtT_le : Real.sqrt T ≤ R ^ 2 / (K2 + 1) := by
       rw [show R ^ 2 / (K2 + 1) = Real.sqrt ((R ^ 2 / (K2 + 1)) ^ 2) from
@@ -1031,12 +929,9 @@ theorem quasilinear_strong_existence_locallyLipschitz_smallTime_stayDischarged_o
           refine mul_le_mul_of_nonneg_left ?_ (by positivity)
           rw [div_le_one hden_pos]; linarith
       _ = R ^ 2 := mul_one _
-  -- The stay statement, proved unconditionally.
   have hstay := maxRegDuhamelSolFieldHa1_stay (I := I) (M := M)
     (h_compact := h_compact) hT hT1 u₀ gforce hC_nn hR.le hgforce_small hhoriz
-  -- Assemble: the truncated solution is the genuine solution on the stay event.
   refine ⟨u, gforce, hu, ?_, htrace, hderiv⟩
-  -- `gforce =ᵐ fun t => Ñ_R(field t)` (by `hfix`) `=ᵐ fun t => N(field t)` (on the ball).
   conv_lhs => rw [hfix]
   exact nemytskiiHa1_truncated_eqOn_ball (I := I) (M := M) hR.le hN
     (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce) hstay

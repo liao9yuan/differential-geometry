@@ -29,17 +29,9 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Lebesgue mean of a function on a metric ball -/
-
 /-- The Lebesgue mean (average) of a real-valued function over a metric ball. -/
 def meanLebesgueOnBall (B : Set E) (u : E → ℝ) : ℝ :=
   ⨍ z in B, u z ∂(volume : Measure E)
-
-/-! ## Riesz kernel integrability for the super-critical regime `p > d`
-
-The kernel `‖x‖^α` is integrable over `B(0, R)` whenever `α > -d`. We use this
-with `α = (1 - d) q` for `q = p / (p - 1)` the Hölder conjugate of `p > d`.
--/
 
 /-- The kernel `‖x‖^α` is integrable on `B(0, R)` whenever `α > -d`. -/
 private theorem riesz_kernel_integrable_of_gt_neg_dim
@@ -57,7 +49,6 @@ private theorem riesz_kernel_integrable_of_gt_neg_dim
   have hfin : Module.finrank ℝ E = d := finrank_euclideanSpace_fin
   have h1d : IntegrableOn (fun y : ℝ => y ^ (Module.finrank ℝ E - 1) • g y) (Set.Ioi 0) := by
     rw [hfin]
-    -- For y > 0, y^(d-1) * g(y) = y^(d-1) * y^α * 1_{y < R} = y^(d-1+α) * 1_{y < R}
     set h_ind : ℝ → ℝ := (Set.Ioo (0 : ℝ) R).indicator (fun y => y ^ ((d : ℝ) - 1 + α))
     have heq : Set.EqOn (fun y : ℝ => y ^ (d - 1) • g y) h_ind (Set.Ioi 0) := by
       intro r hr
@@ -108,11 +99,9 @@ private theorem integral_norm_rpow_ball_of_gt_neg_dim
       ↑(Module.finrank ℝ E) • (volume : Measure E).real (Metric.ball 0 1) •
         ∫ y in Set.Ioi (0 : ℝ), y ^ (Module.finrank ℝ E - 1) • f y :=
     MeasureTheory.integral_fun_norm_addHaar (μ := (volume : Measure E)) f
-  -- Compute the radial integral using `intervalIntegral.integral_rpow`.
   have h1d : ∫ y in Set.Ioi (0 : ℝ), y ^ (Module.finrank ℝ E - 1) • f y =
       R ^ ((d : ℝ) + α) / ((d : ℝ) + α) := by
     rw [hfin]
-    -- Rewrite the integrand on Ioi 0 as the indicator of Ioo 0 R times y^((d:ℝ)-1+α).
     have hsupp : ∀ y ∈ Set.Ioi (0 : ℝ), y ^ (d - 1) • f y =
         Set.indicator (Set.Ioo 0 R) (fun y => y ^ ((d : ℝ) - 1 + α)) y := by
       intro y hy
@@ -140,7 +129,6 @@ private theorem integral_norm_rpow_ball_of_gt_neg_dim
     rw [setIntegral_indicator measurableSet_Ioo]
     rw [show Set.Ioi (0 : ℝ) ∩ Set.Ioo 0 R = Set.Ioo 0 R from
       Set.inter_eq_right.mpr Set.Ioo_subset_Ioi_self]
-    -- ∫_{(0,R)} y^((d:ℝ)-1+α) dy
     have hexp_finite : -1 < (d : ℝ) - 1 + α := by linarith
     have hexp_plus_one : ((d : ℝ) - 1 + α) + 1 = (d : ℝ) + α := by ring
     have h_int_Ioo : ∫ y in Set.Ioo 0 R, y ^ ((d : ℝ) - 1 + α) ∂volume =
@@ -153,14 +141,9 @@ private theorem integral_norm_rpow_ball_of_gt_neg_dim
     rw [show (0 : ℝ) ^ ((d : ℝ) + α) = 0 from
       Real.zero_rpow hα_pos.ne']
     ring
-  -- Combine the radial computation with the volume of the unit ball.
   rw [hconv, hrad, h1d, hfin]
-  -- Goal: ↑d • Measure.real volume (ball 0 1) • R^(d+α)/(d+α)
-  --     = d * |B_1| * R^(d+α) / (d+α)
   simp only [Measure.real, nsmul_eq_mul, smul_eq_mul]
   ring
-
-/-! ## Translation invariance for the kernel and means -/
 
 /-- Integral of the translated kernel `‖x - z‖^α` over a translated ball. -/
 private theorem integral_norm_sub_rpow_ball_of_gt_neg_dim
@@ -168,22 +151,16 @@ private theorem integral_norm_sub_rpow_ball_of_gt_neg_dim
     ∫ y in Metric.ball x R, ‖x - y‖ ^ α ∂volume =
       (d : ℝ) * (volume (Metric.ball (0 : E) 1)).toReal *
         R ^ ((d : ℝ) + α) / ((d : ℝ) + α) := by
-  -- Substitute z = y - x, dy = dz, ball x R becomes ball 0 R, ‖x - y‖ = ‖z‖.
   have hmp := measurePreserving_add_right (volume : Measure E) x
   have hemb := (MeasurableEquiv.addRight x : E ≃ᵐ E).measurableEmbedding
   have hpre : ((· + x) ⁻¹' Metric.ball x R) = Metric.ball (0 : E) R := by
     ext z; simp [Metric.mem_ball]
   rw [← hmp.setIntegral_preimage_emb hemb, hpre]
-  -- Now: ∫ z in ball 0 R, ‖x - (z + x)‖^α = ∫ z in ball 0 R, ‖z‖^α
   rw [show (fun z => ‖x - (z + x)‖ ^ α) = (fun z => ‖z‖ ^ α) from by
     funext z; congr 1
     rw [show x - (z + x) = -z from by abel]
     simp]
   exact integral_norm_rpow_ball_of_gt_neg_dim hα hR
-
-/-! ## Translation of integrals on balls
-
-Standard identities for changes of variables `y = x₀ + z` between balls. -/
 
 /-- Translation of a set integral over a ball: the integral over `Metric.ball x₀ R`
 of `f` equals the integral over `Metric.ball 0 R` of `z ↦ f (x₀ + z)`. -/
@@ -192,7 +169,6 @@ private lemma setIntegral_ball_translate {f : E → ℝ} {x₀ : E} {R : ℝ} :
       ∫ z in Metric.ball (0 : E) R, f (x₀ + z) ∂volume := by
   have hmp := measurePreserving_add_left (volume : Measure E) x₀
   have hemb := (MeasurableEquiv.addLeft x₀).measurableEmbedding
-  -- Use measure-preserving translation.
   have h_image : (x₀ + ·) '' Metric.ball (0 : E) R = Metric.ball x₀ R := by
     simp
   have key := hmp.setIntegral_image_emb hemb f (Metric.ball (0 : E) R)
@@ -221,12 +197,6 @@ private lemma average_ball_translate {f : E → ℝ} {x₀ : E} {R : ℝ} :
     rw [h_empty1, h_empty2]
     simp [average]
 
-/-! ## Smooth representation formula on translated balls
-
-For smooth `u` and a ball `B(x₀, R)`, every point `x ∈ B(x₀, R)` satisfies
-`|u(x) - ⨍_{B(x₀, R)} u| ≤ C ∫_{B(x₀, R)} ‖∇u(y)‖ ‖x - y‖^{1-d} dy`.
--/
-
 /-- Smooth representation formula on translated balls, deduced from the
 origin-centred version via translation. -/
 private theorem representation_formula_smooth_translated
@@ -236,7 +206,6 @@ private theorem representation_formula_smooth_translated
     ‖u x - ⨍ y in Metric.ball x₀ R, u y ∂volume‖ ≤
       (2 : ℝ) ^ d / ((d : ℝ) * (volume (Metric.ball (0 : E) 1)).toReal) *
         ∫ y in Metric.ball x₀ R, ‖fderiv ℝ u y‖ * ‖x - y‖ ^ (1 - (d : ℝ)) ∂volume := by
-  -- Define the translated function v(z) = u(x₀ + z); apply the origin-centred bound.
   set v : E → ℝ := fun z => u (x₀ + z) with hv_def
   have hv : ContDiff ℝ (⊤ : ℕ∞) v := hu.comp (contDiff_const.add contDiff_id)
   have hx_t : x - x₀ ∈ Metric.ball (0 : E) R := by
@@ -246,17 +215,13 @@ private theorem representation_formula_smooth_translated
     exact this
   have hkey :=
     DeGiorgi.representation_formula_smooth (d := d) hR (u := v) hv (x - x₀) hx_t
-  -- v (x - x₀) = u x
   have hv_x_t : v (x - x₀) = u x := by simp [v]
   rw [hv_x_t] at hkey
-  -- Means equal: ⨍_{ball 0 R} v = ⨍_{ball x₀ R} u
   have havg_eq : ⨍ z in Metric.ball (0 : E) R, v z ∂volume =
       ⨍ y in Metric.ball x₀ R, u y ∂volume := by
     rw [show (fun z => v z) = (fun z => u (x₀ + z)) from rfl]
     exact (average_ball_translate (f := u) (x₀ := x₀) (R := R)).symm
   rw [havg_eq] at hkey
-  -- Gradient relation: fderiv v z = fderiv u (x₀ + z) ∘ fderiv (z ↦ x₀ + z) z = fderiv u (x₀ + z)
-  -- because the addition map has derivative the identity.
   have hfderiv_v : ∀ z : E, fderiv ℝ v z = fderiv ℝ u (x₀ + z) := by
     intro z
     have hadd_smooth : ContDiff ℝ (⊤ : ℕ∞) (fun w : E => x₀ + w) :=
@@ -276,15 +241,11 @@ private theorem representation_formula_smooth_translated
     rw [fderiv_comp z hu_diff hadd_diff]
     rw [hfd_add]
     rfl
-  -- Translate the gradient integral
-  -- ∫_{ball 0 R} ‖fderiv v y‖ * ‖(x - x₀) - y‖^(1-d) dy
-  -- = ∫_{ball x₀ R} ‖fderiv u y'‖ * ‖x - y'‖^(1-d) dy'  via y' = x₀ + y
   have hgrad_eq :
       ∫ y in Metric.ball (0 : E) R,
         ‖fderiv ℝ v y‖ * ‖(x - x₀) - y‖ ^ (1 - (d : ℝ)) ∂volume =
       ∫ y' in Metric.ball x₀ R,
         ‖fderiv ℝ u y'‖ * ‖x - y'‖ ^ (1 - (d : ℝ)) ∂volume := by
-    -- Use translation y' = x₀ + y
     rw [setIntegral_ball_translate (f := fun y' => ‖fderiv ℝ u y'‖ * ‖x - y'‖ ^ (1 - (d : ℝ)))
       (x₀ := x₀) (R := R)]
     refine setIntegral_congr_fun (μ := (volume : Measure E)) measurableSet_ball ?_
@@ -296,12 +257,6 @@ private theorem representation_formula_smooth_translated
     rw [show x - x₀ - y = x - (x₀ + y) from by abel]
   rw [hgrad_eq] at hkey
   exact hkey
-
-/-! ## Riesz potential Hölder bound for `p > d`
-
-For `p > d` and `q = p / (p - 1)` the Hölder conjugate, the Riesz potential
-`∫_{B(x, ρ)} g(y) ‖x - y‖^{1-d} dy` is bounded by `C · ρ^{1 - d/p} · ‖g‖_{L^p(B(x, ρ))}`.
--/
 
 /-- The kernel `‖x - y‖^α` integrated over the ball `B(z, R)` is bounded by the
 integral over `B(x, R + dist x z)`, which equals an explicit value. -/
@@ -320,11 +275,9 @@ private theorem integral_norm_sub_rpow_ball_at_other_center
     calc dist y x ≤ dist y z + dist z x := dist_triangle y z x
       _ < R + dist z x := by linarith
       _ = R + dist x z := by rw [dist_comm]
-  -- Use monotonicity, then apply integral_norm_sub_rpow_ball_of_gt_neg_dim
   have hd_α_pos : (0 : ℝ) < (d : ℝ) + α := by linarith
   have hint_origin :
       IntegrableOn (fun y : E => ‖x - y‖ ^ α) (Metric.ball x R') volume := by
-    -- Translate: ‖x - y‖^α with y = x + w becomes ‖-w‖^α = ‖w‖^α
     have hmp := measurePreserving_add_right (volume : Measure E) x
     have hemb := (MeasurableEquiv.addRight x : E ≃ᵐ E).measurableEmbedding
     have hpre : ((· + x) ⁻¹' Metric.ball x R') = Metric.ball (0 : E) R' := by
@@ -356,12 +309,9 @@ private theorem integral_norm_sub_rpow_ball_at_other_center
           R' ^ ((d : ℝ) + α) / ((d : ℝ) + α) :=
         integral_norm_sub_rpow_ball_of_gt_neg_dim (d := d) hα hR'_pos x
 
-/-! ## Helper lemmas for measurability and integrability of the kernel -/
-
 /-- The kernel `‖x - y‖^α` is ae-strongly-measurable. -/
 private lemma measurable_norm_sub_rpow (α : ℝ) (x : E) :
     AEStronglyMeasurable (fun y : E => ‖x - y‖ ^ α) (volume : Measure E) := by
-  -- It is continuous on the complement of {x}, which has full measure.
   have hcont_complement : ContinuousOn (fun y : E => ‖x - y‖ ^ α) ({x} : Set E)ᶜ := by
     refine ContinuousOn.rpow_const ?_ ?_
     · exact (continuous_const.sub continuous_id').norm.continuousOn
@@ -372,14 +322,11 @@ private lemma measurable_norm_sub_rpow (α : ℝ) (x : E) :
       intro h
       exact hy (h ▸ rfl)
   have h_open : IsOpen (({x} : Set E)ᶜ) := isClosed_singleton.isOpen_compl
-  -- The function is continuous on the complement of {x}, hence measurable on the complement.
-  -- Since {x} has measure zero, the function is ae-strongly-measurable.
   have h_compl_meas : MeasurableSet (({x} : Set E)ᶜ) := (measurableSet_singleton x).compl
   have h_x_null : (volume : Measure E) {x} = 0 := measure_singleton _
   have h_aesm_compl : AEStronglyMeasurable (fun y : E => ‖x - y‖ ^ α)
       (volume.restrict (({x} : Set E)ᶜ)) :=
     hcont_complement.aestronglyMeasurable h_compl_meas
-  -- Now extend from the complement to the whole space using the fact that {x} is null.
   rw [show (volume : Measure E) = volume.restrict (({x} : Set E)ᶜ) from by
     rw [Measure.restrict_eq_self_of_ae_mem]
     filter_upwards [(compl_mem_ae_iff.mpr h_x_null : ({x} : Set E)ᶜ ∈ ae (volume : Measure E))]
@@ -412,7 +359,6 @@ private theorem riesz_kernel_memLp
     have hpm1_le_p : p - 1 ≤ p := by linarith
     rw [le_div_iff₀ hpm1_pos]
     linarith
-  -- Exponent for L^q: ‖f‖^q = ‖x - y‖^((1-d)q)
   set α : ℝ := (1 - (d : ℝ)) * q with hα_def
   have hα_gt : -(d : ℝ) < α := by
     have h_lhs : -(d : ℝ) * (p - 1) < (1 - (d : ℝ)) * p := by nlinarith [hp]
@@ -421,15 +367,10 @@ private theorem riesz_kernel_memLp
     rw [h_rhs_eq]
     rw [show α = (1 - (d : ℝ)) * p / (p - 1) from by simp [hα_def, hq_def]; ring]
     exact (div_lt_div_iff_of_pos_right hpm1_pos).mpr h_lhs
-  -- Prove via integrability of |f|^q on B(z, R).
-  -- Use memLp_of_integrable_rpow or similar.
   have h_aesm : AEStronglyMeasurable (fun y : E => ‖x - y‖ ^ (1 - (d : ℝ)))
       (volume.restrict (Metric.ball z R)) :=
     (measurable_norm_sub_rpow (1 - (d : ℝ)) x).restrict
-  -- For p > 1 and ENNReal.ofReal q, MemLp = AEStronglyMeasurable + integrability of f^q.
-  -- We use the integrability of ‖x - y‖^α on B(z, R) ⊆ B(x, R + dist(x, z)).
   have hα_int : IntegrableOn (fun y : E => ‖x - y‖ ^ α) (Metric.ball z R) volume := by
-    -- The kernel is integrable on B(x, R + dist(x, z)) by Riesz kernel integrability.
     have hsub : Metric.ball z R ⊆ Metric.ball x (R + dist x z) := by
       intro y hy
       rw [Metric.mem_ball] at hy ⊢
@@ -465,7 +406,6 @@ private theorem riesz_kernel_memLp
       rw [hcomp_eq, hpre]
       exact hint_translated
     exact hint_at_x.mono_set hsub
-  -- Now use that ∫ |f|^q < ∞ to conclude MemLp.
   have h_lintegral_finite :
       ∫⁻ y in Metric.ball z R, ‖‖x - y‖ ^ (1 - (d : ℝ))‖ₑ ^ q ∂volume ≠ ⊤ := by
     have h_lintegral_eq :
@@ -481,9 +421,7 @@ private theorem riesz_kernel_memLp
     rw [← ofReal_integral_eq_lintegral_ofReal hα_int (ae_of_all _ fun y =>
       Real.rpow_nonneg (norm_nonneg _) _)]
     exact ENNReal.ofReal_ne_top
-  -- Use the criterion `memLp` from finite eLpNorm.
   refine ⟨h_aesm, ?_⟩
-  -- Goal: eLpNorm f (ENNReal.ofReal q) μ < ⊤.
   have hq_enn_ne_zero : ENNReal.ofReal q ≠ 0 := by
     rw [Ne, ENNReal.ofReal_eq_zero]
     exact not_le.mpr hq_pos
@@ -492,11 +430,6 @@ private theorem riesz_kernel_memLp
   refine ENNReal.rpow_lt_top_of_nonneg ?_ ?_
   · positivity
   exact h_lintegral_finite
-
-/-! ## Smooth Hölder bound on the difference `u(x) - ⨍ u`
-
-For smooth `u` and `x ∈ B(x₀, R)`, we get a Hölder-type bound:
-`|u(x) - ⨍_{B(x₀, R)} u| ≤ C(d, p, R) · ‖∇u‖_{L^p(B(x₀, R))}`. -/
 
 /-- Continuity of `‖∇u‖` for smooth `u`. -/
 private lemma continuous_norm_fderiv {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) :
@@ -511,27 +444,21 @@ private theorem smooth_grad_memLp_on_ball
     MemLp (fun y : E => ‖fderiv ℝ u y‖) (ENNReal.ofReal p)
       (volume.restrict (Metric.ball x₀ R)) := by
   have hcont : Continuous (fun y : E => ‖fderiv ℝ u y‖) := continuous_norm_fderiv hu
-  -- Use ContinuousOn.memLp on a finite-measure set.
   have hfin : (volume.restrict (Metric.ball x₀ R)) (Set.univ) < ⊤ := by
     rw [Measure.restrict_apply_univ]; exact measure_ball_lt_top
-  -- The closed ball is compact, ‖∇u‖ has a max, so we get an L^∞ bound.
   obtain ⟨M, hM⟩ := IsCompact.exists_bound_of_continuousOn
     (isCompact_closedBall x₀ R) hcont.continuousOn
   have hM_nonneg : 0 ≤ M := by
-    -- M ≥ ‖fderiv u y‖ for any y ∈ closedBall x₀ R, and ‖fderiv u y‖ ≥ 0.
     have h1 : x₀ ∈ Metric.closedBall x₀ R := Metric.mem_closedBall_self hR.le
     exact le_trans (norm_nonneg _) (hM x₀ h1)
-  -- Use boundedness on closed ball + finite measure to conclude L^p.
   haveI : IsFiniteMeasure (volume.restrict (Metric.ball x₀ R)) := by
     refine ⟨?_⟩
     rw [Measure.restrict_apply_univ]
     exact measure_ball_lt_top
   refine MemLp.of_le_mul (g := fun _ : E => (1 : ℝ)) (c := M) ?_ ?_ ?_
-  · -- 1 is in L^p on a finite measure
-    exact memLp_const (1 : ℝ)
+  · exact memLp_const (1 : ℝ)
   · exact hcont.aestronglyMeasurable.restrict
-  · -- Bound: ‖‖fderiv u y‖‖ ≤ M * ‖1‖ ae on B(x₀, R) ⊆ closedBall x₀ R.
-    refine ae_restrict_iff' measurableSet_ball |>.mpr ?_
+  · refine ae_restrict_iff' measurableSet_ball |>.mpr ?_
     filter_upwards with y hy
     have hy' : y ∈ Metric.closedBall x₀ R := Metric.ball_subset_closedBall hy
     rw [Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _), norm_one, mul_one]
@@ -578,15 +505,12 @@ private theorem smooth_pointwise_holder_bound
   have hK_memLp : MemLp (fun y : E => ‖x - y‖ ^ (1 - (d : ℝ))) (ENNReal.ofReal q)
       (volume.restrict (Metric.ball x₀ R)) :=
     riesz_kernel_memLp (d := d) hp hR x
-  -- Use Hölder at the lintegral level.
   set μ : Measure E := volume.restrict (Metric.ball x₀ R) with hμ_def
   have hf_aemeas : AEMeasurable (fun y : E => ENNReal.ofReal (‖fderiv ℝ u y‖)) μ :=
     hf_memLp.aestronglyMeasurable.aemeasurable.ennreal_ofReal
   have hK_aemeas : AEMeasurable (fun y : E => ENNReal.ofReal (‖x - y‖ ^ (1 - (d : ℝ)))) μ :=
     hK_memLp.aestronglyMeasurable.aemeasurable.ennreal_ofReal
   have hHolder := ENNReal.lintegral_mul_le_Lp_mul_Lq (μ := μ) hpq_holder hf_aemeas hK_aemeas
-  -- The product: ENNReal.ofReal (‖∇u‖ · K) = ENNReal.ofReal ‖∇u‖ * ENNReal.ofReal K
-  -- Simplify hHolder.
   have hHolder_simp :
       (∫⁻ y, ENNReal.ofReal (‖fderiv ℝ u y‖ * ‖x - y‖ ^ (1 - (d : ℝ))) ∂μ) ≤
         (∫⁻ y, (ENNReal.ofReal ‖fderiv ℝ u y‖) ^ p ∂μ) ^ (1 / p) *
@@ -601,12 +525,10 @@ private theorem smooth_pointwise_holder_bound
       rw [Pi.mul_apply, ENNReal.ofReal_mul (hf_nonneg y)]
     rw [h_LHS_eq]
     exact hHolder
-  -- ‖∇u‖^p
   have hf_p_eq : ∀ y : E, (ENNReal.ofReal (‖fderiv ℝ u y‖)) ^ p =
       ENNReal.ofReal (‖fderiv ℝ u y‖ ^ p) := by
     intro y
     rw [ENNReal.ofReal_rpow_of_nonneg (norm_nonneg _) hp_pos.le]
-  -- K^q
   have hK_q_eq : ∀ y : E, (ENNReal.ofReal (‖x - y‖ ^ (1 - (d : ℝ)))) ^ q =
       ENNReal.ofReal (‖x - y‖ ^ ((1 - (d : ℝ)) * q)) := by
     intro y
@@ -624,8 +546,6 @@ private theorem smooth_pointwise_holder_bound
     rw [show (∫⁻ a, (ENNReal.ofReal (‖x - a‖ ^ (1 - (d : ℝ)))) ^ q ∂μ) =
         ∫⁻ y, ENNReal.ofReal (‖x - y‖ ^ ((1 - (d : ℝ)) * q)) ∂μ from
       lintegral_congr_ae (Eventually.of_forall hK_q_eq)]
-  -- The integrals.
-  -- ∫ ‖∇u‖^p is finite.
   have hf_p_int : IntegrableOn (fun y => ‖fderiv ℝ u y‖ ^ p) (Metric.ball x₀ R) volume := by
     have h1 := hf_memLp.integrable_norm_rpow
       (by rw [Ne, ENNReal.ofReal_eq_zero]; exact not_le.mpr hp_pos) ENNReal.ofReal_ne_top
@@ -640,7 +560,6 @@ private theorem smooth_pointwise_holder_bound
     rw [hμ_def]
     rw [← ofReal_integral_eq_lintegral_ofReal hf_p_int
       (ae_of_all _ fun y => Real.rpow_nonneg (norm_nonneg _) _)]
-  -- ∫ ‖x-y‖^((1-d)q) is finite.
   set α : ℝ := (1 - (d : ℝ)) * q with hα_def
   have hα_gt : -(d : ℝ) < α := by
     have h_lhs : -(d : ℝ) * (p - 1) < (1 - (d : ℝ)) * p := by nlinarith [hp]
@@ -693,21 +612,16 @@ private theorem smooth_pointwise_holder_bound
     rw [hμ_def]
     rw [← ofReal_integral_eq_lintegral_ofReal hK_alpha_int
       (ae_of_all _ fun y => Real.rpow_nonneg (norm_nonneg _) _)]
-  -- Convert hHolder' to a real-valued bound.
   have hLHS_int : IntegrableOn (fun y : E => ‖fderiv ℝ u y‖ * ‖x - y‖ ^ (1 - (d : ℝ)))
       (Metric.ball x₀ R) volume := by
-    -- Continuous · L^q kernel: handled by smooth bound.
     have hcont_grad := continuous_norm_fderiv hu
     obtain ⟨M, hM⟩ := IsCompact.exists_bound_of_continuousOn
       (isCompact_closedBall x₀ R) hcont_grad.continuousOn
     have hM_nonneg : 0 ≤ M :=
       le_trans (norm_nonneg _) (hM x₀ (Metric.mem_closedBall_self hR.le))
-    -- ‖∇u(y)‖ · ‖x-y‖^{1-d} ≤ M · ‖x-y‖^{1-d} for y ∈ ball x₀ R.
     have hK_int_orig : IntegrableOn (fun y : E => ‖x - y‖ ^ (1 - (d : ℝ)))
         (Metric.ball x₀ R) volume := by
-      -- Use that 1 - d > -d (always), so the kernel is integrable.
       have h_neg_d : -(d : ℝ) < 1 - (d : ℝ) := by linarith
-      -- ball x₀ R ⊆ ball x (R + dist x x₀) and the kernel is integrable there.
       have hsub : Metric.ball x₀ R ⊆ Metric.ball x (R + dist x x₀) := by
         intro y hy
         rw [Metric.mem_ball] at hy ⊢
@@ -773,27 +687,21 @@ private theorem smooth_pointwise_holder_bound
     rw [hμ_def]
     rw [← ofReal_integral_eq_lintegral_ofReal hLHS_int (ae_of_all _ fun y =>
       mul_nonneg (norm_nonneg _) (Real.rpow_nonneg (norm_nonneg _) _))]
-  -- Now the RHS of hHolder' is finite.
   set Iint : ℝ := ∫ y in Metric.ball x₀ R, ‖fderiv ℝ u y‖ ^ p ∂volume with hIint_def
   set Kint : ℝ := ∫ y in Metric.ball x₀ R, ‖x - y‖ ^ α ∂volume with hKint_def
   have hIint_nn : 0 ≤ Iint := setIntegral_nonneg measurableSet_ball
     (fun y _ => Real.rpow_nonneg (norm_nonneg _) _)
   have hKint_nn : 0 ≤ Kint := setIntegral_nonneg measurableSet_ball
     (fun y _ => Real.rpow_nonneg (norm_nonneg _) _)
-  -- Real bound.
   have hReal_bound :
       ∫ y in Metric.ball x₀ R, ‖fderiv ℝ u y‖ * ‖x - y‖ ^ (1 - (d : ℝ)) ∂volume ≤
       Iint ^ (1 / p) * Kint ^ (1 / q) := by
     have hineq := hHolder'
     rw [hLHS_lint, hf_p_lint, hK_alpha_lint] at hineq
-    -- hineq : ENNReal.ofReal LHSint ≤ ENNReal.ofReal Iint ^ (1/p) * ENNReal.ofReal Kint ^ (1/q)
-    -- = ENNReal.ofReal (Iint^{1/p}) * ENNReal.ofReal (Kint^{1/q})
-    -- = ENNReal.ofReal (Iint^{1/p} * Kint^{1/q})
     rw [ENNReal.ofReal_rpow_of_nonneg hIint_nn (by positivity : 0 ≤ (1 / p : ℝ))] at hineq
     rw [ENNReal.ofReal_rpow_of_nonneg hKint_nn (by positivity : 0 ≤ (1 / q : ℝ))] at hineq
     rw [← ENNReal.ofReal_mul (Real.rpow_nonneg hIint_nn _)] at hineq
     rwa [ENNReal.ofReal_le_ofReal_iff (by positivity)] at hineq
-  -- Now combine with hrep.
   refine ⟨C₁ * Kint ^ (1 / q), by positivity, ?_⟩
   calc ‖u x - ⨍ y in Metric.ball x₀ R, u y ∂volume‖
       ≤ C₁ * ∫ y in Metric.ball x₀ R, ‖fderiv ℝ u y‖ * ‖x - y‖ ^ (1 - (d : ℝ)) ∂volume := hrep
@@ -804,7 +712,6 @@ private theorem smooth_pointwise_holder_bound
           (eLpNorm (fun y => ‖fderiv ℝ u y‖) (ENNReal.ofReal p)
             (volume.restrict (Metric.ball x₀ R))).toReal := by
         congr 1
-        -- Iint^{1/p} = (eLpNorm ‖∇u‖ p μ).toReal
         rw [hIint_def]
         rw [eLpNorm_eq_lintegral_rpow_enorm_toReal
           (by rw [Ne, ENNReal.ofReal_eq_zero]; exact not_le.mpr hp_pos)
@@ -828,11 +735,6 @@ private theorem smooth_pointwise_holder_bound
             ((ENNReal.ofReal (∫ y in Metric.ball x₀ R, ‖fderiv ℝ u y‖ ^ p)).toReal) ^ (1 / p) from
             (ENNReal.toReal_rpow _ _).symm]
         rw [ENNReal.toReal_ofReal hIint_nn]
-
-/-! ## Smooth Hölder bound with explicit radius scaling
-
-We extract the explicit `R^{1 - d/p}` scaling from `smooth_pointwise_holder_bound`,
-producing a constant that depends only on `d` and `p`. -/
 
 /-- Explicit value of the smooth Hölder constant, as a function of `d` and `p > d`.
 This is the constant that multiplies `R^{1 - d/p} · ‖∇u‖_{L^p(B(x₀, R))}` in the
@@ -893,7 +795,6 @@ private theorem smooth_pointwise_holder_bound_explicit
   have hq_one : 1 ≤ q := by
     rw [hq_def, le_div_iff₀ hpm1_pos]; linarith
   have hpq_holder : p.HolderConjugate q := Real.HolderConjugate.conjExponent hp_one
-  -- Use the representation formula on B(z, r)
   have hrep := representation_formula_smooth_translated (d := d) hr hu hx
   set α : ℝ := (1 - (d : ℝ)) * q with hα_def
   have hα_gt : -(d : ℝ) < α := by
@@ -904,10 +805,6 @@ private theorem smooth_pointwise_holder_bound_explicit
     rw [show α = (1 - (d : ℝ)) * p / (p - 1) from by simp [hα_def, hq_def]; ring]
     exact (div_lt_div_iff_of_pos_right hpm1_pos).mpr h_lhs
   have hdα_pos : (0 : ℝ) < (d : ℝ) + α := by linarith
-  -- Compute the kernel integral on B(z, r) at center x using the helper.
-  -- ‖x - y‖^α ≤ (r + dist x z)^(d+α) bound, but x ∈ B(z, r) means dist x z < r.
-  -- So ∫ ‖x - y‖^α dy ≤ d · vol_B1 · (r + r)^(d+α) / (d+α) = d · vol_B1 · (2r)^(d+α) / (d+α).
-  -- Use integral_norm_sub_rpow_ball_at_other_center.
   have hKint_le :
       ∫ y in Metric.ball z r, ‖x - y‖ ^ α ∂volume ≤
         (d : ℝ) * (volume (Metric.ball (0 : E) 1)).toReal *
@@ -930,35 +827,17 @@ private theorem smooth_pointwise_holder_bound_explicit
           have hvol_nn : 0 ≤ (volume (Metric.ball (0 : E) 1)).toReal := by positivity
           have hd_nn : 0 ≤ (d : ℝ) := hd_pos.le
           positivity
-  -- Now extract the smooth bound using smooth_pointwise_holder_bound.
   obtain ⟨C, hC_nn, hbound⟩ := smooth_pointwise_holder_bound (d := d) hp hr hu hx
-  -- The constant C produced by smooth_pointwise_holder_bound is C₁ · Kint^(1/q)
-  -- Let's rederive directly to get explicit form.
-  -- We have: |u(x) - mean| ≤ C₁ · ∫ ‖∇u‖ · ‖x-y‖^(1-d) dy (representation)
-  --                       ≤ C₁ · (∫‖∇u‖^p)^(1/p) · (∫‖x-y‖^α)^(1/q) (Hölder)
-  --                       ≤ C₁ · (∫‖∇u‖^p)^(1/p) · (d · vol · (2r)^(d+α) / (d+α))^(1/q)
-  -- And (d+α)/q = 1 - d/p, so (2r)^((d+α)/q) = (2r)^(1-d/p).
-  -- This factors as: smoothHolderConst(d, p) · r^(1-d/p) · (∫‖∇u‖^p)^(1/p)
-  -- where smoothHolderConst absorbs the 2^(1-d/p) factor.
-  -- Use the existing smooth_pointwise_holder_bound and just bound its constant.
-  -- The extracted constant from that theorem is C₁ * Kint^(1/q) where
-  --   C₁ = 2^d / (d * vol_B1)
-  --   Kint = ∫_{B(z, r)} ‖x - y‖^α dy
-  -- Use hKint_le and the structure of the proof.
   set C₁ : ℝ := (2 : ℝ) ^ d / ((d : ℝ) * (volume (Metric.ball (0 : E) 1)).toReal) with hC₁_def
   have hvol_pos : (0 : ℝ) < (volume (Metric.ball (0 : E) 1)).toReal :=
     ENNReal.toReal_pos (measure_ball_pos volume 0 one_pos).ne' measure_ball_lt_top.ne
   have hC₁_pos : 0 < C₁ := by rw [hC₁_def]; positivity
-  -- Rederive the bound directly, using hKint_le.
-  -- Step: representation gives us LHS ≤ C₁ · ∫_B ‖∇u‖ · ‖x-y‖^(1-d) dy.
-  -- Step: Hölder on the integral.
   set Iint : ℝ := ∫ y in Metric.ball z r, ‖fderiv ℝ u y‖ ^ p ∂volume with hIint_def
   set Kint : ℝ := ∫ y in Metric.ball z r, ‖x - y‖ ^ α ∂volume with hKint_def
   have hIint_nn : 0 ≤ Iint := setIntegral_nonneg measurableSet_ball
     (fun y _ => Real.rpow_nonneg (norm_nonneg _) _)
   have hKint_nn : 0 ≤ Kint := setIntegral_nonneg measurableSet_ball
     (fun y _ => Real.rpow_nonneg (norm_nonneg _) _)
-  -- Run the same Hölder argument as in smooth_pointwise_holder_bound.
   have hf_memLp : MemLp (fun y : E => ‖fderiv ℝ u y‖) (ENNReal.ofReal p)
       (volume.restrict (Metric.ball z r)) :=
     smooth_grad_memLp_on_ball (d := d) hp_pos hr hu
@@ -1062,7 +941,6 @@ private theorem smooth_pointwise_holder_bound_explicit
     rw [hμ_def]
     rw [← ofReal_integral_eq_lintegral_ofReal hK_alpha_int
       (ae_of_all _ fun y => Real.rpow_nonneg (norm_nonneg _) _)]
-  -- LHS integrability
   have hLHS_int : IntegrableOn (fun y : E => ‖fderiv ℝ u y‖ * ‖x - y‖ ^ (1 - (d : ℝ)))
       (Metric.ball z r) volume := by
     have hcont_grad := continuous_norm_fderiv hu
@@ -1145,9 +1023,6 @@ private theorem smooth_pointwise_holder_bound_explicit
     rw [ENNReal.ofReal_rpow_of_nonneg hKint_nn (by positivity : 0 ≤ (1 / q : ℝ))] at hineq
     rw [← ENNReal.ofReal_mul (Real.rpow_nonneg hIint_nn _)] at hineq
     rwa [ENNReal.ofReal_le_ofReal_iff (by positivity)] at hineq
-  -- Now Kint ≤ d · vol_B1 · (2r)^(d+α) / (d+α)
-  -- Hence Kint^(1/q) ≤ (d · vol_B1)^(1/q) · (2r)^((d+α)/q) / (d+α)^(1/q)
-  -- And (d+α)/q = 1 - d/p; also 2^(1-d/p) is part of smoothHolderConst.
   set Kbound : ℝ := (d : ℝ) * (volume (Metric.ball (0 : E) 1)).toReal *
         (2 * r) ^ ((d : ℝ) + α) / ((d : ℝ) + α) with hKbound_def
   have hKbound_nn : 0 ≤ Kbound := by
@@ -1156,22 +1031,13 @@ private theorem smooth_pointwise_holder_bound_explicit
   have hKint_le_bound : Kint ≤ Kbound := hKint_le
   have hKint_pow_le : Kint ^ (1 / q) ≤ Kbound ^ (1 / q) := by
     apply Real.rpow_le_rpow hKint_nn hKint_le_bound (by positivity : (0 : ℝ) ≤ 1 / q)
-  -- (d+α)/q = 1 - d/p (algebraic identity)
   have h_dα_q : ((d : ℝ) + α) / q = 1 - (d : ℝ) / p := by
     rw [hα_def, hq_def]
     field_simp
     ring
-  -- (2r)^(d+α) = 2^(d+α) · r^(d+α)
   have h_two_r_rpow : (2 * r : ℝ) ^ ((d : ℝ) + α) =
       (2 : ℝ) ^ ((d : ℝ) + α) * r ^ ((d : ℝ) + α) := by
     rw [Real.mul_rpow (by norm_num : (0 : ℝ) ≤ 2) hr.le]
-  -- Compute Kbound^(1/q):
-  -- = (d · vol)^(1/q) · (2r)^((d+α)/q) / (d+α)^(1/q)
-  -- = (d · vol)^(1/q) · 2^((d+α)/q) · r^((d+α)/q) / (d+α)^(1/q)
-  -- = (d · vol)^(1/q) · 2^(1-d/p) · r^(1-d/p) / (d+α)^(1/q)
-  -- Now smoothHolderConst d p = C₁ * (d · vol · 2^(d+α) / (d+α))^(1/q)
-  -- So smoothHolderConst d p · r^(1-d/p) absorbs the 2^(1-d/p) and (d · vol)^(1/q) / (d+α)^(1/q).
-  -- Pull r out:
   set Kbase : ℝ := (d : ℝ) * (volume (Metric.ball (0 : E) 1)).toReal *
       (2 : ℝ) ^ ((d : ℝ) + α) / ((d : ℝ) + α) with hKbase_def
   have hKbase_nn : 0 ≤ Kbase := by
@@ -1188,11 +1054,9 @@ private theorem smooth_pointwise_holder_bound_explicit
     congr 1
     field_simp
   rw [h_dα_q] at hKbound_pow_eq
-  -- Now smoothHolderConst d p = C₁ · Kbase^(1/q).
   have hsmoothC_eq : smoothHolderConst d p = C₁ * Kbase ^ (1 / q) := by
     unfold smoothHolderConst Kbase C₁ q α
     rfl
-  -- Final calculation: combine hrep, hReal_bound, and hKbound_pow_eq.
   calc ‖u x - ⨍ y in Metric.ball z r, u y ∂volume‖
       ≤ C₁ * ∫ y in Metric.ball z r, ‖fderiv ℝ u y‖ * ‖x - y‖ ^ (1 - (d : ℝ)) ∂volume :=
         hrep
@@ -1235,11 +1099,6 @@ private theorem smooth_pointwise_holder_bound_explicit
             (ENNReal.toReal_rpow _ _).symm]
         rw [ENNReal.toReal_ofReal hIint_nn]
 
-/-! ## Helper: bounding `‖fderiv ψ‖` by sum of components for smooth ψ
-
-For smooth ψ on Euclidean space, `‖fderiv ℝ ψ y‖` agrees with the Euclidean norm
-of its components in the standard basis. We use this to derive `L^p` bounds. -/
-
 private lemma norm_fderiv_eq_norm_partials_local
     {ψ : E → ℝ} (y : E) :
     ‖fderiv ℝ ψ y‖ =
@@ -1280,12 +1139,6 @@ private lemma euclidean_norm_le_sum_norms (v : E) :
   intro i _
   simp
 
-/-! ## Smooth Hölder bound on the unit ball, lifted to `MemW1pWitness`
-
-We prove: for `MemW1pWitness u (B(0, 1))` and `p > d`, the Hölder bound
-`|u(z) - ⨍_{B(0, 1)} u| ≤ C(d, p) · ‖weakGrad‖_{L^p(B(0, 1))}` holds for a.e.
-`z ∈ B(0, 1)`. -/
-
 /-- The smooth Hölder bound on the unit ball, with `‖fderiv ψ‖_{L^p}` replaced by
 the per-component sum `∑ ‖∂_i ψ‖_{L^p}`. -/
 private theorem smooth_holder_bound_unit_ball_components
@@ -1304,16 +1157,13 @@ private theorem smooth_holder_bound_unit_ball_components
   have hp_pos : 0 < p := lt_trans hd_pos hp
   have hp_one : 1 < p := lt_of_le_of_lt hd_one_le hp
   have h1_pow : (1 : ℝ) ^ (1 - (d : ℝ) / p) = 1 := Real.one_rpow _
-  -- Use the explicit smooth bound on the unit ball.
   have hbound := smooth_pointwise_holder_bound_explicit (d := d) hp (z := (0 : E))
     (r := 1) one_pos hψ hz
   rw [h1_pow, mul_one] at hbound
-  -- Bound ‖fderiv ψ‖_{L^p} by sum of components
   have hC_nn : 0 ≤ smoothHolderConst d p := smoothHolderConst_nonneg hp
   have hpp_one : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p := by
     rw [show (1 : ℝ≥0∞) = ENNReal.ofReal 1 from by simp]
     exact ENNReal.ofReal_le_ofReal hp_one.le
-  -- pointwise bound: ‖fderiv ψ y‖ ≤ ∑ ‖(fderiv ψ y) (e_i)‖
   have h_norm_le : ∀ y : E,
       ‖fderiv ℝ ψ y‖ ≤
         ∑ i : Fin d, ‖(fderiv ℝ ψ y) (EuclideanSpace.single i 1)‖ := by
@@ -1324,7 +1174,6 @@ private theorem smooth_holder_bound_unit_ball_components
     refine Finset.sum_congr rfl ?_
     intro i _
     simp
-  -- eLpNorm monotonicity
   have h_eLpNorm_le :
       eLpNorm (fun y => ‖fderiv ℝ ψ y‖) (ENNReal.ofReal p)
           (volume.restrict (Metric.ball (0 : E) 1)) ≤
@@ -1336,7 +1185,6 @@ private theorem smooth_holder_bound_unit_ball_components
     rw [Real.norm_of_nonneg (norm_nonneg _),
       Real.norm_of_nonneg (Finset.sum_nonneg fun i _ => norm_nonneg _)]
     exact h_norm_le y
-  -- Sum bound: eLpNorm of sum ≤ sum of eLpNorms
   have h_sum_eLpNorm_le :
       eLpNorm (fun y => ∑ i : Fin d,
         ‖(fderiv ℝ ψ y) (EuclideanSpace.single i 1)‖) (ENNReal.ofReal p)
@@ -1359,7 +1207,6 @@ private theorem smooth_holder_bound_unit_ball_components
           continuous_const).norm)
       exact hcont.aestronglyMeasurable.restrict
     exact eLpNorm_sum_le (fun i _ => h_aesm i) hpp_one
-  -- Component eLpNorms equal eLpNorms without ‖·‖.
   have h_comp_eq : ∀ i : Fin d,
       eLpNorm (fun y => ‖(fderiv ℝ ψ y) (EuclideanSpace.single i 1)‖) (ENNReal.ofReal p)
         (volume.restrict (Metric.ball (0 : E) 1)) =
@@ -1373,7 +1220,6 @@ private theorem smooth_holder_bound_unit_ball_components
     refine h_eLpNorm_le.trans (h_sum_eLpNorm_le.trans (le_of_eq ?_))
     refine Finset.sum_congr rfl ?_
     intro i _; exact h_comp_eq i
-  -- Take .toReal
   have h_eLpNorm_lt : eLpNorm (fun y => ‖fderiv ℝ ψ y‖) (ENNReal.ofReal p)
       (volume.restrict (Metric.ball (0 : E) 1)) ≠ ⊤ := by
     have h_memLp : MemLp (fun y : E => ‖fderiv ℝ ψ y‖) (ENNReal.ofReal p)
@@ -1386,7 +1232,6 @@ private theorem smooth_holder_bound_unit_ball_components
     refine ne_of_lt ?_
     refine ENNReal.sum_lt_top.mpr ?_
     intro i _
-    -- each component is bounded by the full ‖fderiv‖ norm
     refine lt_of_le_of_lt (b := eLpNorm (fun y => ‖fderiv ℝ ψ y‖) (ENNReal.ofReal p)
         (volume.restrict (Metric.ball (0 : E) 1))) ?_ (lt_of_le_of_ne le_top h_eLpNorm_lt)
     refine eLpNorm_mono ?_
@@ -1399,14 +1244,12 @@ private theorem smooth_holder_bound_unit_ball_components
     rw [hsingle_norm, mul_one] at hbound_pt
     rw [Real.norm_of_nonneg (norm_nonneg _)]
     exact hbound_pt
-  -- Combine
   have h_real_le :
       (eLpNorm (fun y => ‖fderiv ℝ ψ y‖) (ENNReal.ofReal p)
         (volume.restrict (Metric.ball (0 : E) 1))).toReal ≤
       (∑ i : Fin d, eLpNorm (fun y => (fderiv ℝ ψ y) (EuclideanSpace.single i 1))
         (ENNReal.ofReal p) (volume.restrict (Metric.ball (0 : E) 1))).toReal :=
     ENNReal.toReal_mono h_sum_lt h_eLpNorm_total
-  -- Final
   calc ‖ψ z - ⨍ y in Metric.ball (0 : E) 1, ψ y ∂volume‖
       ≤ smoothHolderConst d p *
           (eLpNorm (fun y => ‖fderiv ℝ ψ y‖) (ENNReal.ofReal p)
@@ -1415,11 +1258,6 @@ private theorem smooth_holder_bound_unit_ball_components
           (∑ i : Fin d, eLpNorm (fun y => (fderiv ℝ ψ y) (EuclideanSpace.single i 1))
             (ENNReal.ofReal p) (volume.restrict (Metric.ball (0 : E) 1))).toReal :=
         mul_le_mul_of_nonneg_left h_real_le hC_nn
-
-/-! ## Smooth Hölder bound — pointwise difference (smooth case)
-
-For two smooth functions, the Hölder difference bound is the key ingredient
-for showing uniform Cauchy. -/
 
 /-- For two smooth functions `ψ₁, ψ₂` on the unit ball, the difference
 `ψ₁(z) - ψ₂(z)` is bounded by the mean of the difference plus the Hölder bound. -/
@@ -1442,12 +1280,9 @@ private theorem smooth_pair_holder_bound_unit_ball
     by exact_mod_cast (Nat.one_le_iff_ne_zero.mpr (NeZero.ne d))
   have hp_pos : 0 < p := lt_trans hd_pos hp
   have hp_one : 1 < p := lt_of_le_of_lt hd_one_le hp
-  -- ψ_diff = ψ₁ - ψ₂ is smooth.
   set ψ_diff : E → ℝ := fun y => ψ₁ y - ψ₂ y with hψ_diff_def
   have hψ_diff : ContDiff ℝ (⊤ : ℕ∞) ψ_diff := hψ₁.sub hψ₂
-  -- Apply the smooth bound to ψ_diff
   have hbound := smooth_holder_bound_unit_ball_components (d := d) hp hψ_diff hz
-  -- The mean of the difference equals the difference of the means
   have hψ₁_int : Integrable ψ₁ (volume.restrict (Metric.ball (0 : E) 1)) :=
     (hψ₁.continuous.continuousOn.integrableOn_compact (isCompact_closedBall (0 : E) 1)).mono_set
       ball_subset_closedBall
@@ -1464,8 +1299,6 @@ private theorem smooth_pair_holder_bound_unit_ball
       ⨍ y, ψ₂ y ∂(volume.restrict (Metric.ball (0 : E) 1))
     simp only [average_eq, integral_sub hψ₁_int hψ₂_int, smul_sub]
   rw [hψ_diff_def] at hbound
-  -- ψ_diff(z) - ⨍ ψ_diff = (ψ₁ - ψ₂)(z) - (⨍ψ₁ - ⨍ψ₂)
-  -- So |ψ₁(z) - ψ₂(z)| ≤ |(ψ_diff(z) - ⨍ψ_diff)| + |⨍ψ₁ - ⨍ψ₂|
   have hpt_diff_bound : ‖ψ₁ z - ψ₂ z‖ ≤
       ‖(ψ₁ z - ψ₂ z) - ⨍ y in Metric.ball (0 : E) 1, (ψ₁ y - ψ₂ y) ∂volume‖ +
       ‖⨍ y in Metric.ball (0 : E) 1, ψ₁ y ∂volume -
@@ -1482,8 +1315,6 @@ private theorem smooth_pair_holder_bound_unit_ball
       _ ≤ ‖(ψ₁ z - ψ₂ z) - ⨍ y in Metric.ball (0 : E) 1, (ψ₁ y - ψ₂ y) ∂volume‖ +
           ‖⨍ y in Metric.ball (0 : E) 1, ψ₁ y ∂volume -
             ⨍ y in Metric.ball (0 : E) 1, ψ₂ y ∂volume‖ := norm_add_le _ _
-  -- Bound the first term using hbound, the second is the mean diff.
-  -- The fderiv of ψ_diff equals fderiv ψ₁ - fderiv ψ₂.
   have hfderiv_diff : ∀ y i, (fderiv ℝ ψ_diff y) (EuclideanSpace.single i 1) =
       (fderiv ℝ ψ₁ y) (EuclideanSpace.single i 1) -
       (fderiv ℝ ψ₂ y) (EuclideanSpace.single i 1) := by
@@ -1504,7 +1335,6 @@ private theorem smooth_pair_holder_bound_unit_ball
     refine eLpNorm_congr_ae ?_
     filter_upwards with y
     rw [hfderiv_diff y i]
-  -- Combine
   have hbound_final : ‖ψ_diff z - ⨍ y in Metric.ball (0 : E) 1, ψ_diff y ∂volume‖ ≤
       smoothHolderConst d p *
         (∑ i : Fin d, eLpNorm
@@ -1523,19 +1353,12 @@ private theorem smooth_pair_holder_bound_unit_ball
       exact h_eLpNorm_diff_eq i
     rw [hbound_eq] at hbound
     exact hbound
-  -- Now combine hpt_diff_bound and hbound_final
   have h_first :
       ‖(ψ₁ z - ψ₂ z) - ⨍ y in Metric.ball (0 : E) 1, (ψ₁ y - ψ₂ y) ∂volume‖ =
       ‖ψ_diff z - ⨍ y in Metric.ball (0 : E) 1, ψ_diff y ∂volume‖ := by
     rw [hψ_diff_def]
   rw [h_first] at hpt_diff_bound
   linarith [hpt_diff_bound, hbound_final]
-
-/-! ## Headline smooth Morrey theorems on Euclidean balls
-
-We package the smooth pointwise Hölder estimate into the standard interior
-Morrey form: a Hölder bound for any pair of points in a half-radius interior
-ball, a sup bound on the same interior, and a `HolderOnWith` package. -/
 
 /-- Monotonicity of the gradient `eLpNorm` under inclusion of balls (smooth case). -/
 private lemma smooth_grad_eLpNorm_le_of_ball_subset
@@ -1594,7 +1417,6 @@ private lemma smooth_setIntegral_norm_le_eLpNorm
   have hp_pos : 0 < p := lt_trans zero_lt_one hp_one
   have hu_memLp : MemLp u (ENNReal.ofReal p)
       (volume.restrict (Metric.ball x₀ R)) := smooth_memLp_on_ball hp_pos hR hu
-  -- The L^1 eLpNorm is bounded by the L^p eLpNorm times vol^(1 - 1/p) on a finite measure.
   set μ : Measure E := volume.restrict (Metric.ball x₀ R) with hμ_def
   haveI : IsFiniteMeasure μ := by
     refine ⟨?_⟩
@@ -1605,9 +1427,7 @@ private lemma smooth_setIntegral_norm_le_eLpNorm
     exact ENNReal.ofReal_le_ofReal hp_one.le
   have h_compare := eLpNorm_le_eLpNorm_mul_rpow_measure_univ (μ := μ) (f := u)
     hp_ennreal_le hu_memLp.aestronglyMeasurable
-  -- The right-hand side simplifies.
   have hp_top : (ENNReal.ofReal p).toReal = p := ENNReal.toReal_ofReal hp_pos.le
-  -- The exponent appearing in h_compare equals 1 - 1/p after simplification.
   have h_exp_eq : (1 : ℝ) / (1 : ℝ≥0∞).toReal - 1 / (ENNReal.ofReal p).toReal = 1 - 1 / p := by
     rw [hp_top]
     simp
@@ -1622,7 +1442,6 @@ private lemma smooth_setIntegral_norm_le_eLpNorm
       (ENNReal.rpow_ne_top_of_nonneg hsub_nn' h_finite)
   have h_le_real := ENNReal.toReal_mono h_lt_top h_compare
   rw [ENNReal.toReal_mul, ← ENNReal.toReal_rpow] at h_le_real
-  -- Translate eLpNorm u 1 μ to ∫ ‖u‖.
   have hu_int : Integrable u μ := by
     rw [hμ_def]
     have h_int_compact : IntegrableOn u (Metric.closedBall x₀ R) volume :=
@@ -1674,7 +1493,6 @@ private lemma smooth_norm_average_le
         (eLpNorm u (ENNReal.ofReal p) (volume.restrict (Metric.ball x₀ R))).toReal *
           ((volume (Metric.ball x₀ R)).toReal) ^ (1 - 1 / p) :=
     le_trans h_int_norm h_L1_le
-  -- Multiply both sides by (vol)^{-1}.
   have h_vol_inv_nn : 0 ≤ ((volume (Metric.ball x₀ R)).toReal)⁻¹ :=
     inv_nonneg.mpr ENNReal.toReal_nonneg
   have h_eLp_nn : 0 ≤ (eLpNorm u (ENNReal.ofReal p)
@@ -1685,7 +1503,6 @@ private lemma smooth_norm_average_le
           ((eLpNorm u (ENNReal.ofReal p) (volume.restrict (Metric.ball x₀ R))).toReal *
             ((volume (Metric.ball x₀ R)).toReal) ^ (1 - 1 / p)) :=
     mul_le_mul_of_nonneg_left h_combined h_vol_inv_nn
-  -- Simplify ((vol)^{-1}) * (vol)^(1 - 1/p) = (vol)^(-1/p).
   have h_rpow_collapse :
       ((volume (Metric.ball x₀ R)).toReal)⁻¹ *
         ((volume (Metric.ball x₀ R)).toReal) ^ (1 - 1 / p) =
@@ -1737,7 +1554,6 @@ theorem smooth_morrey_pair_bound
     rw [div_lt_one hp_pos]
     exact hp
   have hC₀_nn : 0 ≤ smoothHolderConst d p := smoothHolderConst_nonneg hp
-  -- The constant: 2 · 2^(1 - d/p) · smoothHolderConst d p.
   set C : ℝ := (2 : ℝ) * (2 : ℝ) ^ (1 - (d : ℝ) / p) * smoothHolderConst d p with hC_def
   have hC_nn : 0 ≤ C := by
     rw [hC_def]
@@ -1749,21 +1565,16 @@ theorem smooth_morrey_pair_bound
   set N : ℝ := (eLpNorm (fun z => ‖fderiv ℝ u z‖) (ENNReal.ofReal p)
     (volume.restrict (Metric.ball x₀ R))).toReal with hN_def
   have hN_nn : 0 ≤ N := ENNReal.toReal_nonneg
-  -- Case split on whether dist x y < R / 2 (small) or ≥ R / 2 (large).
   by_cases h_small : dist x y < R / 2
-  · -- Case 1: dist x y < R/2. Use the midpoint ball.
-    by_cases h_zero : dist x y = 0
-    · -- dist x y = 0 means x = y, so the LHS is zero.
-      have hxy_eq : x = y := dist_eq_zero.mp h_zero
+  · by_cases h_zero : dist x y = 0
+    · have hxy_eq : x = y := dist_eq_zero.mp h_zero
       rw [hxy_eq, sub_self, norm_zero]
       have h_zero_pow : (dist y y) ^ (1 - (d : ℝ) / p) = 0 := by
         rw [dist_self]
         exact Real.zero_rpow h_exp_pos.ne'
       rw [h_zero_pow, mul_zero, zero_mul]
     · have h_dist_pos : 0 < dist x y := lt_of_le_of_ne dist_nonneg (Ne.symm h_zero)
-      -- Midpoint and ball.
       set m : EuclideanSpace ℝ (Fin d) := (1 / 2 : ℝ) • (x + y) with hm_def
-      -- Helpful identities.
       have h_m_minus_x₀ : m - x₀ = (1 / 2 : ℝ) • (x - x₀) + (1 / 2 : ℝ) • (y - x₀) := by
         rw [hm_def]
         rw [smul_add]
@@ -1773,7 +1584,6 @@ theorem smooth_morrey_pair_bound
         nth_rewrite 1 [hx₀_split]
         rw [smul_sub, smul_sub]
         abel
-      -- Distance from m to x₀.
       have h_m_dist : dist m x₀ < R / 2 := by
         have hxR2 : dist x x₀ < R / 2 := by
           rw [Metric.mem_ball] at hx
@@ -1797,7 +1607,6 @@ theorem smooth_morrey_pair_bound
             mul_lt_mul_of_pos_left hyR2 (by norm_num : (0 : ℝ) < 1 / 2)
           linarith
         linarith
-      -- B(m, dist x y) ⊆ B(x₀, R).
       have h_ball_sub : Metric.ball m (dist x y) ⊆ Metric.ball x₀ R := by
         intro z hz
         rw [Metric.mem_ball] at hz ⊢
@@ -1805,7 +1614,6 @@ theorem smooth_morrey_pair_bound
           _ < dist x y + R / 2 := add_lt_add hz h_m_dist
           _ < R / 2 + R / 2 := by linarith
           _ = R := by ring
-      -- x ∈ B(m, dist x y) and y ∈ B(m, dist x y).
       have h_x_minus_m : x - m = (1 / 2 : ℝ) • (x - y) := by
         rw [hm_def, smul_add]
         have hx_split : x = (1 / 2 : ℝ) • x + (1 / 2 : ℝ) • x := by
@@ -1835,7 +1643,6 @@ theorem smooth_morrey_pair_bound
         rw [Metric.mem_ball, h_dx_m]; linarith
       have hy_in : y ∈ Metric.ball m (dist x y) := by
         rw [Metric.mem_ball, h_dy_m]; linarith
-      -- Apply smooth_pointwise_holder_bound_explicit at x and y on B(m, dist x y).
       have h_at_x := smooth_pointwise_holder_bound_explicit (d := d) hp h_dist_pos hu hx_in
       have h_at_y := smooth_pointwise_holder_bound_explicit (d := d) hp h_dist_pos hu hy_in
       set N_small : ℝ := (eLpNorm (fun z => ‖fderiv ℝ u z‖) (ENNReal.ofReal p)
@@ -1848,11 +1655,9 @@ theorem smooth_morrey_pair_bound
           smoothHolderConst d p * dist x y ^ (1 - (d : ℝ) / p) * N_small := h_at_x
       have h_at_y' : ‖u y - Mavg‖ ≤
           smoothHolderConst d p * dist x y ^ (1 - (d : ℝ) / p) * N_small := h_at_y
-      -- |u(x) - u(y)| ≤ |u(x) - Mavg| + |u(y) - Mavg|.
       have h_triangle : ‖u x - u y‖ ≤ ‖u x - Mavg‖ + ‖u y - Mavg‖ := by
         calc ‖u x - u y‖ = ‖(u x - Mavg) - (u y - Mavg)‖ := by ring_nf
           _ ≤ ‖u x - Mavg‖ + ‖u y - Mavg‖ := norm_sub_le _ _
-      -- Bound on N_small times the constants.
       have h_dxy_pow_nn : 0 ≤ dist x y ^ (1 - (d : ℝ) / p) :=
         Real.rpow_nonneg dist_nonneg _
       have h_step1 : ‖u x - u y‖ ≤
@@ -1891,9 +1696,7 @@ theorem smooth_morrey_pair_bound
           linarith
         exact h_factor
       linarith
-  · -- Case 2: dist x y ≥ R / 2.
-    have h_large : R / 2 ≤ dist x y := not_lt.mp h_small
-    -- Use B(x₀, R) directly.
+  · have h_large : R / 2 ≤ dist x y := not_lt.mp h_small
     have hx_R : x ∈ Metric.ball x₀ R := by
       rw [Metric.mem_ball] at hx ⊢
       linarith
@@ -1913,7 +1716,6 @@ theorem smooth_morrey_pair_bound
     have h_R_pow_nn : 0 ≤ R ^ (1 - (d : ℝ) / p) := Real.rpow_nonneg hR.le _
     have h_step1 : ‖u x - u y‖ ≤
         2 * (smoothHolderConst d p * R ^ (1 - (d : ℝ) / p) * N) := by linarith
-    -- R ≤ 2 · dist x y, so R^(1 - d/p) ≤ 2^(1 - d/p) · dist x y ^(1 - d/p).
     have h_R_le_2dxy : R ≤ 2 * dist x y := by linarith
     have h_R_rpow_le : R ^ (1 - (d : ℝ) / p) ≤
         (2 : ℝ) ^ (1 - (d : ℝ) / p) * dist x y ^ (1 - (d : ℝ) / p) := by
@@ -1960,9 +1762,6 @@ theorem smooth_morrey_sup_bound
   have hC₀_nn : 0 ≤ smoothHolderConst d p := smoothHolderConst_nonneg hp
   have hvol_pos : 0 < (volume (Metric.ball x₀ R)).toReal :=
     ENNReal.toReal_pos (measure_ball_pos volume x₀ hR).ne' measure_ball_lt_top.ne
-  -- The two coefficients we need to bound:
-  --   A := smoothHolderConst d p · R^(1 - d/p)  -- gradient term coefficient
-  --   B := (vol B(x₀, R))^(-1/p)               -- average term coefficient
   set A : ℝ := smoothHolderConst d p * R ^ (1 - (d : ℝ) / p) with hA_def
   set Bcoeff : ℝ := ((volume (Metric.ball x₀ R)).toReal) ^ (-(1 / p)) with hBcoeff_def
   have hA_nn : 0 ≤ A := by
@@ -1984,7 +1783,6 @@ theorem smooth_morrey_sup_bound
   have hx_R : x ∈ Metric.ball x₀ R := by
     rw [Metric.mem_ball] at hx ⊢
     linarith
-  -- |u(x)| ≤ |u(x) - ⨍_{B(x₀, R)} u| + |⨍_{B(x₀, R)} u|.
   set Mavg : ℝ := ⨍ z in Metric.ball x₀ R, u z ∂volume with hMavg_def
   have h_diff_bound := smooth_pointwise_holder_bound_explicit (d := d) hp hR hu hx_R
   have h_diff_bound' : ‖u x - Mavg‖ ≤ A * N_grad := by
@@ -2000,7 +1798,6 @@ theorem smooth_morrey_sup_bound
     calc ‖u x‖ = ‖(u x - Mavg) + Mavg‖ := by ring_nf
       _ ≤ ‖u x - Mavg‖ + ‖Mavg‖ := norm_add_le _ _
   have h_combined : ‖u x‖ ≤ A * N_grad + Bcoeff * N_u := by linarith
-  -- A · N_grad + B · N_u ≤ (A + B) · (N_u + N_grad) = C · (N_u + N_grad).
   have h_factor :
       A * N_grad + Bcoeff * N_u ≤ C * (N_u + N_grad) := by
     rw [hC_def]
@@ -2037,12 +1834,6 @@ theorem smooth_morrey_holder_modulus
       C₀ * dist x y ^ (1 - (d : ℝ) / p) * N from by ring]
   exact h
 
-/-! ## Uniform-in-`u` smooth Morrey theorems
-
-The following are stronger versions of `smooth_morrey_pair_bound` and
-`smooth_morrey_sup_bound`: the constant `C` is produced first and depends only
-on `d`, `p`, `R` (and `x₀`), and the bound then holds for every smooth `u`. -/
-
 /-- Uniform-in-`u` smooth pair Hölder bound on the half-radius interior of a
 ball. Strengthens `smooth_morrey_pair_bound` by quantifying the constant `C`
 ahead of `u`. -/
@@ -2076,10 +1867,8 @@ theorem smooth_morrey_pair_bound_uniform
   set N : ℝ := (eLpNorm (fun z => ‖fderiv ℝ u z‖) (ENNReal.ofReal p)
     (volume.restrict (Metric.ball x₀ R))).toReal with hN_def
   have hN_nn : 0 ≤ N := ENNReal.toReal_nonneg
-  -- Case split on whether dist x y < R / 2 (small) or ≥ R / 2 (large).
   by_cases h_small : dist x y < R / 2
-  · -- Case 1: dist x y < R/2. Use the midpoint ball.
-    by_cases h_zero : dist x y = 0
+  · by_cases h_zero : dist x y = 0
     · have hxy_eq : x = y := dist_eq_zero.mp h_zero
       rw [hxy_eq, sub_self, norm_zero]
       have h_zero_pow : (dist y y) ^ (1 - (d : ℝ) / p) = 0 := by
@@ -2312,16 +2101,6 @@ theorem smooth_morrey_sup_bound_uniform
     linarith
   linarith
 
-/-! ## Lift to `MemW1pWitness` input
-
-The smooth Morrey inequalities are now lifted to non-smooth input encoded as
-`DeGiorgi.MemW1pWitness`. The proof uses a smooth cutoff plus the
-`DeGiorgi.exists_smooth_W1p_approx_of_supportedWitness` density theorem.
-
-For technical reasons (the cutoff radius), the headline statements below restrict
-the test points to `Metric.ball x₀ (R / 4)` rather than the half-radius
-`Metric.ball x₀ (R / 2)` of the smooth case. -/
-
 /-- A smooth cutoff `η` adapted to a ball: `η = 1` on `closedBall x₀ (3R/4)` and
 `tsupport η ⊆ closedBall x₀ (7R/8) ⊂ ball x₀ R`, with `η ∈ [0, 1]`. -/
 private theorem exists_smooth_cutoff_ball
@@ -2337,7 +2116,6 @@ private theorem exists_smooth_cutoff_ball
   have hR78_pos : 0 < 7 * R / 8 := by linarith
   have hR_pos : 0 < R := hR
   have hδ_pos : (0 : ℝ) < R / 16 := by linarith
-  -- Use `exists_contMDiff_support_eq_eq_one_iff` between two nested closed sets.
   have hclosed_R34 : IsClosed (Metric.closedBall x₀ (3 * R / 4)) :=
     Metric.isClosed_closedBall
   have hopen_R78 : IsOpen (Metric.thickening (R / 16) (Metric.closedBall x₀ (3 * R / 4))) :=
@@ -2351,9 +2129,6 @@ private theorem exists_smooth_cutoff_ball
       (t := Metric.closedBall x₀ (3 * R / 4))
       hopen_R78 hclosed_R34 hRsub with
     ⟨η, hη_smooth, hη_range, hη_support, hη_one_iff⟩
-  -- The support of η is bounded by `closedBall x₀ (7R/8)`: any y with η y ≠ 0 is
-  -- in `Function.support η = thickening (R/16) (closedBall x₀ (3R/4))`, hence
-  -- inside `closedBall x₀ (3R/4 + R/16) ⊆ closedBall x₀ (7R/8)`.
   have h_support_in_closedBall :
       tsupport η ⊆ Metric.closedBall x₀ (7 * R / 8) := by
     have hRR_le : 3 * R / 4 + R / 16 ≤ 7 * R / 8 := by linarith
@@ -2362,7 +2137,6 @@ private theorem exists_smooth_cutoff_ball
     rw [tsupport, hη_support]
     refine closure_minimal ?_ h_closed
     intro y hy
-    -- y ∈ thickening (R/16) (closedBall x₀ (3R/4)).
     rw [Metric.mem_thickening_iff] at hy
     rcases hy with ⟨z, hz_mem, hyz⟩
     rw [Metric.mem_closedBall] at hz_mem ⊢
@@ -2396,14 +2170,12 @@ private lemma exists_grad_bound_of_smooth_compactSupport
   have h_fderiv_cont : Continuous (fderiv ℝ η) :=
     hη.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)
   have h_grad_compact : HasCompactSupport (fderiv ℝ η) := hη_compact.fderiv (𝕜 := ℝ)
-  -- A continuous, compactly-supported map is bounded on the whole space.
   have h_norm_cont : Continuous (fun x => ‖fderiv ℝ η x‖) := h_fderiv_cont.norm
   have h_norm_compact : HasCompactSupport (fun x => ‖fderiv ℝ η x‖) :=
     h_grad_compact.norm
   obtain ⟨M, hM_nn, hM⟩ : ∃ M : ℝ, 0 ≤ M ∧ ∀ x, ‖fderiv ℝ η x‖ ≤ M := by
     by_cases h_supp : (Function.support fun x => ‖fderiv ℝ η x‖).Nonempty
-    · -- nonempty support: use sup on tsupport (compact ⟹ has max).
-      have h_compact_set : IsCompact (tsupport (fun x => ‖fderiv ℝ η x‖)) :=
+    · have h_compact_set : IsCompact (tsupport (fun x => ‖fderiv ℝ η x‖)) :=
         h_norm_compact
       have h_continuousOn : ContinuousOn (fun x => ‖fderiv ℝ η x‖)
           (tsupport (fun x => ‖fderiv ℝ η x‖)) := h_norm_cont.continuousOn
@@ -2416,13 +2188,11 @@ private lemma exists_grad_bound_of_smooth_compactSupport
       intro x
       by_cases h_in : x ∈ tsupport (fun x => ‖fderiv ℝ η x‖)
       · exact hx_max h_in
-      · -- x ∉ tsupport ⟹ ‖fderiv η x‖ = 0.
-        have h_zero : ‖fderiv ℝ η x‖ = 0 :=
+      · have h_zero : ‖fderiv ℝ η x‖ = 0 :=
           image_eq_zero_of_notMem_tsupport (f := fun x => ‖fderiv ℝ η x‖) h_in
         rw [h_zero]
         exact norm_nonneg _
-    · -- empty support: ‖fderiv η x‖ = 0 for every x.
-      refine ⟨0, le_refl _, ?_⟩
+    · refine ⟨0, le_refl _, ?_⟩
       intro x
       have hx : x ∉ Function.support (fun x => ‖fderiv ℝ η x‖) := by
         intro hx_in
@@ -2483,9 +2253,7 @@ private theorem smooth_pointwise_holder_bound_components
   have hpp_one : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p := by
     rw [show (1 : ℝ≥0∞) = ENNReal.ofReal 1 from by simp]
     exact ENNReal.ofReal_le_ofReal hp_one.le
-  -- Use the explicit smooth bound on the ball.
   have hbound := smooth_pointwise_holder_bound_explicit (d := d) hp hr hu hx
-  -- Bound ‖fderiv u‖_{L^p} by sum of components
   have h_norm_le : ∀ y : E,
       ‖fderiv ℝ u y‖ ≤
         ∑ i : Fin d, ‖(fderiv ℝ u y) (EuclideanSpace.single i 1)‖ := by
@@ -2572,7 +2340,6 @@ private theorem smooth_pointwise_holder_bound_components
       (∑ i : Fin d, eLpNorm (fun y => (fderiv ℝ u y) (EuclideanSpace.single i 1))
         (ENNReal.ofReal p) (volume.restrict (Metric.ball z r))).toReal :=
     ENNReal.toReal_mono h_sum_lt h_eLpNorm_total
-  -- Combine the bounds
   calc ‖u x - ⨍ y in Metric.ball z r, u y ∂volume‖
       ≤ smoothHolderConst d p * r ^ (1 - (d : ℝ) / p) *
           (eLpNorm (fun y => ‖fderiv ℝ u y‖) (ENNReal.ofReal p)
@@ -2582,8 +2349,6 @@ private theorem smooth_pointwise_holder_bound_components
             (ENNReal.ofReal p) (volume.restrict (Metric.ball z r))).toReal := by
         apply mul_le_mul_of_nonneg_left h_real_le
         exact mul_nonneg hC_nn h_r_pow_nn
-
-/-! ## Building a `MemW1pWitness` for `η · u` and applying approximation -/
 
 /-- The `MemW1pWitness` for `η · u` constructed from a `MemW1pWitness` for `u`
 together with a smooth bounded cutoff `η`. Wraps
@@ -2651,18 +2416,9 @@ private theorem exists_smooth_cutoff_approx
           atTop (𝓝 0)) := by
   classical
   have hp_pos : 0 < p := lt_trans zero_lt_one hp
-  -- The witness for η·u.
   let hw' := cutoffWitness (d := d) hp.le hΩ_open hu hη hη_compact hη_range
-  -- tsupport (η · u) ⊆ tsupport η ⊆ K.
   have h_supp_sub : tsupport (fun x => η x * u x) ⊆ K :=
     (tsupport_smul_subset_left' (d := d) (η := η) (u := u)).trans hη_supp
-  -- Each weakGrad component is supported in K (a.e., not pointwise).
-  -- For exists_smooth_W1p_approx_of_supportedWitness, we need pointwise tsupport bound.
-  -- Modify the witness to enforce strict support: extend by zero outside K.
-  -- Use the indicator-modified weakGrad.
-  -- Actually we use the structure-level def:
-  -- weakGrad is defined as η x • hw.weakGrad x + WithLp.toLp 2 (fun i => (fderiv η x) e_i * u x).
-  -- Outside tsupport η ⊆ K, η x = 0 and (fderiv η x) e_i = 0, so weakGrad x = 0 outside K.
   have hgrad_sub : ∀ i : Fin d, tsupport (fun x => hw'.weakGrad x i) ⊆ K := by
     intro i
     have hcl : Function.support (fun x => hw'.weakGrad x i) ⊆ K := by
@@ -2681,8 +2437,6 @@ private theorem exists_smooth_cutoff_approx
           fun h => hx_not_supp (h_supp_fderiv_apply h)
         exact image_eq_zero_of_notMem_tsupport
           (f := fun y => (fderiv ℝ η y) (EuclideanSpace.single i (1 : ℝ))) hxh
-      -- hw'.weakGrad is defined by the formula in mul_smooth_bounded_p:
-      --   weakGrad x = η x • hu.weakGrad x + WithLp.toLp 2 (fun j => (fderiv η x) e_j * u x)
       change (η x • hu.weakGrad x +
           (WithLp.toLp 2 fun j : Fin d =>
             (fderiv ℝ η x) (EuclideanSpace.single j 1) * u x : E)) i = 0
@@ -2693,8 +2447,6 @@ private theorem exists_smooth_cutoff_approx
     hΩ_open hp hw' hK_compact hKΩ h_supp_sub hgrad_sub with
     ⟨φ, hφ_smooth, hφ_compact, hφ_sub, hφ_fun, hφ_grad⟩
   exact ⟨φ, hφ_smooth, hφ_compact, hφ_sub, hφ_fun, hφ_grad⟩
-
-/-! ## Convergence helpers for the limit step -/
 
 /-- L^p convergence on a finite-measure set implies L^1 convergence. -/
 private lemma eLpNorm_one_le_eLpNorm_p_finite_measure
@@ -2760,11 +2512,9 @@ private lemma tendsto_setIntegral_of_eLpNorm_p_to_zero
     exact lt_of_le_of_ne le_top hΩ_finite
   have h_diff_memLp : ∀ n, MemLp (fun x => F n x - g x) (ENNReal.ofReal p)
       (volume.restrict Ω) := fun n => (hF n).sub hg
-  -- L^1 convergence:
   have h_L1 : Tendsto (fun n =>
       eLpNorm (fun x => F n x - g x) 1 (volume.restrict Ω)) atTop (𝓝 0) :=
     tendsto_eLpNorm_one_of_tendsto_eLpNorm_p (d := d) hp h_diff_memLp h
-  -- Translate to ∫⁻ ‖·‖ₑ form.
   have h_lint : Tendsto (fun n =>
       ∫⁻ x, ‖F n x - g x‖ₑ ∂(volume.restrict Ω)) atTop (𝓝 0) := by
     have h_eq : ∀ n,
@@ -2773,7 +2523,6 @@ private lemma tendsto_setIntegral_of_eLpNorm_p_to_zero
       intro n
       rw [eLpNorm_one_eq_lintegral_enorm]
     refine (Filter.tendsto_congr h_eq).mp h_L1
-  -- Apply tendsto_integral_of_L1.
   have hg_int : Integrable g (volume.restrict Ω) := by
     have h_one_le_p : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p := by
       rw [show (1 : ℝ≥0∞) = ENNReal.ofReal 1 from by simp]
@@ -2788,7 +2537,6 @@ private lemma tendsto_setIntegral_of_eLpNorm_p_to_zero
   have h_int_tendsto :=
     MeasureTheory.tendsto_integral_of_L1 (μ := volume.restrict Ω) g hg_int
       (Filter.Eventually.of_forall hF_int) h_lint
-  -- Translate ∫ over volume.restrict Ω = ∫ x in Ω.
   have hF_eq_setInt : ∀ n, ∫ x, F n x ∂(volume.restrict Ω) =
       ∫ x in Ω, F n x ∂volume := fun n => rfl
   have hg_eq_setInt : ∫ x, g x ∂(volume.restrict Ω) = ∫ x in Ω, g x ∂volume := rfl
@@ -2818,7 +2566,6 @@ private lemma tendsto_setAverage_of_eLpNorm_p_to_zero
       atTop
       (𝓝 (((volume (Metric.ball z r)).toReal)⁻¹ * ∫ x in Metric.ball z r, g x ∂volume)) :=
     h_int_tendsto.const_mul _
-  -- ⨍ = (vol)⁻¹ • ∫ = (vol)⁻¹ * ∫.
   have h_avg_eq : ∀ n,
       ⨍ x in Metric.ball z r, F n x ∂volume =
         ((volume (Metric.ball z r)).toReal)⁻¹ * ∫ x in Metric.ball z r, F n x ∂volume := by
@@ -2840,7 +2587,6 @@ private lemma eLpNorm_sub_le_eLpNorm_diff_real
     (hf : MemLp f p μ) (hg : MemLp g p μ) :
     |((eLpNorm f p μ).toReal) - ((eLpNorm g p μ).toReal)| ≤
       ((eLpNorm (fun x => f x - g x) p μ).toReal) := by
-  -- |‖f‖_p - ‖g‖_p| ≤ ‖f - g‖_p (reverse triangle)
   have h1 : eLpNorm f p μ ≤ eLpNorm g p μ + eLpNorm (fun x => f x - g x) p μ := by
     have h_eq : f = (fun x => g x + (f x - g x)) := by funext; ring
     nth_rewrite 1 [h_eq]
@@ -2854,7 +2600,6 @@ private lemma eLpNorm_sub_le_eLpNorm_diff_real
       eLpNorm_add_le hf.aestronglyMeasurable
         ((hg.sub hf).aestronglyMeasurable) hp
     refine h_step.trans ?_
-    -- eLpNorm (fun x => g x - f x) = eLpNorm (fun x => f x - g x) (since (g - f) = -(f - g))
     have h_eLpNorm_eq : eLpNorm (fun x => g x - f x) p μ =
         eLpNorm (fun x => f x - g x) p μ := by
       have h_neg : (fun x => g x - f x) = -(fun x => f x - g x) := by
@@ -2867,7 +2612,6 @@ private lemma eLpNorm_sub_le_eLpNorm_diff_real
   have h_finite_g : eLpNorm g p μ ≠ ⊤ := hg.eLpNorm_ne_top
   have h_finite_diff : eLpNorm (fun x => f x - g x) p μ ≠ ⊤ :=
     (hf.sub hg).eLpNorm_ne_top
-  -- Now go to .toReal
   have h1_real : (eLpNorm f p μ).toReal ≤
       (eLpNorm g p μ).toReal + (eLpNorm (fun x => f x - g x) p μ).toReal := by
     have h_finite_sum : eLpNorm g p μ + eLpNorm (fun x => f x - g x) p μ ≠ ⊤ :=
@@ -2890,18 +2634,15 @@ private lemma tendsto_eLpNorm_toReal_of_diff_tendsto_zero
     (h : Tendsto (fun n => eLpNorm (fun x => F n x - g x) p μ) atTop (𝓝 0)) :
     Tendsto (fun n => (eLpNorm (F n) p μ).toReal) atTop
       (𝓝 ((eLpNorm g p μ).toReal)) := by
-  -- L^p convergence on the ENNReal level transfers to .toReal via continuity.
   have h_diff_real : Tendsto
       (fun n => (eLpNorm (fun x => F n x - g x) p μ).toReal) atTop (𝓝 0) := by
     have h_finite : ∀ n, eLpNorm (fun x => F n x - g x) p μ ≠ ⊤ := fun n =>
       ((hF n).sub hg).eLpNorm_ne_top
     exact (ENNReal.tendsto_toReal_iff h_finite (by simp : (0 : ℝ≥0∞) ≠ ⊤)).mpr (by simpa using h)
-  -- Apply reverse triangle inequality.
   have h_bound : ∀ n,
       |((eLpNorm (F n) p μ).toReal) - ((eLpNorm g p μ).toReal)| ≤
         (eLpNorm (fun x => F n x - g x) p μ).toReal :=
     fun n => eLpNorm_sub_le_eLpNorm_diff_real (d := d) hp (hF n) hg
-  -- Squeeze: |a_n - L| ≤ b_n → 0 implies a_n → L.
   rw [Metric.tendsto_atTop] at h_diff_real
   rw [Metric.tendsto_atTop]
   intro ε hε
@@ -2911,7 +2652,6 @@ private lemma tendsto_eLpNorm_toReal_of_diff_tendsto_zero
   refine lt_of_le_of_lt (h_bound n) ?_
   have hN_n := hN n hn
   rw [Real.dist_eq, sub_zero] at hN_n
-  -- |toReal of nonneg ENNReal| = its value.
   have h_nn : 0 ≤ (eLpNorm (fun x => F n x - g x) p μ).toReal :=
     ENNReal.toReal_nonneg
   rw [abs_of_nonneg h_nn] at hN_n
@@ -2932,11 +2672,9 @@ private theorem smooth_pair_bound_inner
       ‖u x - u y‖ ≤ C * (dist x y) ^ (1 - (d : ℝ) / p) *
         (eLpNorm (fun z => ‖fderiv ℝ u z‖) (ENNReal.ofReal p)
           (volume.restrict (Metric.ball x₀ (3 * R / 4)))).toReal := by
-  -- Apply smooth_morrey_pair_bound with R' = 3R/4 (so the half-radius is 3R/8 ⊃ R/4).
   have hR'_pos : 0 < 3 * R / 4 := by linarith
   obtain ⟨C, hC_nn, hbound⟩ :=
     smooth_morrey_pair_bound (d := d) hp hR'_pos hu (x₀ := x₀)
-  -- x ∈ B(x₀, R/4) ⊆ B(x₀, (3R/4)/2 = 3R/8).
   have hx' : x ∈ Metric.ball x₀ ((3 * R / 4) / 2) := by
     rw [Metric.mem_ball] at hx ⊢
     linarith
@@ -2977,8 +2715,6 @@ private lemma smooth_avg_diff_pointwise_bound
     intro w hw
     show ‖φ w - Mavg‖ ≤ Cval
     exact smooth_pointwise_holder_bound_explicit (d := d) hp hr hφ hw
-  -- Use averaging: |⨍_{B(c, ρ)} φ - Mavg| = |⨍_{B(c, ρ)} (φ - Mavg)| ≤ ⨍_{B(c, ρ)} |φ - Mavg|
-  -- ≤ Cval (since pointwise bound).
   have hvol_finite : (volume (Metric.ball c ρ) : ℝ≥0∞) ≠ ⊤ := measure_ball_lt_top.ne
   haveI : IsFiniteMeasure (volume.restrict (Metric.ball c ρ) : Measure E) := by
     refine ⟨?_⟩; rw [Measure.restrict_apply_univ]; exact lt_of_le_of_ne le_top hvol_finite
@@ -2999,7 +2735,6 @@ private lemma smooth_avg_diff_pointwise_bound
   have hφ_norm_int :
       IntegrableOn (fun w => ‖φ w - Mavg‖) (Metric.ball c ρ) volume :=
     hφ_diff_int.norm
-  -- Compute the difference of averages explicitly.
   have h_avg_diff_eq :
       (⨍ w in Metric.ball c ρ, φ w ∂volume) - Mavg =
         ((volume (Metric.ball c ρ)).toReal)⁻¹ *
@@ -3020,7 +2755,6 @@ private lemma smooth_avg_diff_pointwise_bound
     rw [h_int_split]
     field_simp
   rw [h_avg_diff_eq]
-  -- ‖(vol)⁻¹ * ∫ (φ w - Mavg)‖ ≤ (vol)⁻¹ * ∫ ‖φ w - Mavg‖
   have h_int_norm_bound : |∫ w in Metric.ball c ρ, (φ w - Mavg) ∂volume| ≤
       ∫ w in Metric.ball c ρ, ‖φ w - Mavg‖ ∂volume := by
     rw [show |∫ w in Metric.ball c ρ, (φ w - Mavg) ∂volume| =
@@ -3072,7 +2806,6 @@ private lemma eLpNorm_fderiv_norm_le_sum_components
   have hpp_one : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p := by
     rw [show (1 : ℝ≥0∞) = ENNReal.ofReal 1 from by simp]
     exact ENNReal.ofReal_le_ofReal hp.le
-  -- pointwise: ‖fderiv φ y‖ ≤ ∑_i ‖(fderiv φ y) e_i‖
   have h_norm_le : ∀ y : E,
       ‖fderiv ℝ φ y‖ ≤
         ∑ i : Fin d, ‖(fderiv ℝ φ y) (EuclideanSpace.single i 1)‖ := by
@@ -3083,7 +2816,6 @@ private lemma eLpNorm_fderiv_norm_le_sum_components
     refine Finset.sum_congr rfl ?_
     intro i _
     simp
-  -- eLpNorm monotonicity from pointwise comparison.
   have h_eLpNorm_le :
       eLpNorm (fun y => ‖fderiv ℝ φ y‖) (ENNReal.ofReal p)
           (volume.restrict (Metric.ball z r)) ≤
@@ -3095,7 +2827,6 @@ private lemma eLpNorm_fderiv_norm_le_sum_components
     rw [Real.norm_of_nonneg (norm_nonneg _),
       Real.norm_of_nonneg (Finset.sum_nonneg fun i _ => norm_nonneg _)]
     exact h_norm_le y
-  -- Sum bound.
   have h_aesm : ∀ i : Fin d,
       AEStronglyMeasurable (fun y => ‖(fderiv ℝ φ y) (EuclideanSpace.single i 1)‖)
         (volume.restrict (Metric.ball z r)) := by
@@ -3118,7 +2849,6 @@ private lemma eLpNorm_fderiv_norm_le_sum_components
       ext y; simp [Finset.sum_apply]
     rw [h_eq]
     exact eLpNorm_sum_le (fun i _ => h_aesm i) hpp_one
-  -- Norm of scalar = scalar value (eLpNorm_norm).
   have h_comp_eq : ∀ i : Fin d,
       eLpNorm (fun y => ‖(fderiv ℝ φ y) (EuclideanSpace.single i 1)‖) (ENNReal.ofReal p)
         (volume.restrict (Metric.ball z r)) =
@@ -3143,8 +2873,6 @@ private lemma cutoffWitness_weakGrad_eq_on_open
       hu.weakGrad x i := by
   classical
   intro x hx
-  -- Pointwise: weakGrad(η · u) x = η x • hu.weakGrad x + WithLp.toLp 2 (fun j => (fderiv η x) e_j * u x)
-  -- On U: η x = 1, η is constant 1 on a nbhd of x, so (fderiv η x) e_j = 0.
   have h_eta_eq_one : η =ᶠ[𝓝 x] (fun _ => (1 : ℝ)) := by
     refine eventually_of_mem (hU_open.mem_nhds hx) ?_
     intro y hy
@@ -3156,14 +2884,6 @@ private lemma cutoffWitness_weakGrad_eq_on_open
       (WithLp.toLp 2 fun j : Fin d =>
         (fderiv ℝ η x) (EuclideanSpace.single j 1) * u x : E)) i = hu.weakGrad x i
   simp [h_eta_x, h_fderiv_zero]
-
-/-! ## Headline `MemW1pWitness` Morrey theorems
-
-Note on hypothesis strength: the spec asks for `x, y ∈ Metric.ball x₀ (R / 2)`,
-but the lift via cutoff requires the comparison balls `B(x, dist x y / 2)` to fit
-inside the region where the cutoff `η` equals `1`. The cleanest setup uses
-`x, y ∈ Metric.ball x₀ (R / 4)` (and the comparison balls are then ⊂ B(x₀, 3R/4)
-where `η = 1`). -/
 
 set_option maxHeartbeats 1600000 in
 /-- Mean-value inequality for `W^{1,p}` functions on a Euclidean ball, `p > d`.
@@ -3199,7 +2919,6 @@ theorem mean_value_inequality_W1p
   have hC₀_nn : 0 ≤ smoothHolderConst d p := smoothHolderConst_nonneg hp
   have hvol_pos : (0 : ℝ) < (volume (Metric.ball (0 : EuclideanSpace ℝ (Fin d)) 1)).toReal :=
     ENNReal.toReal_pos (measure_ball_pos volume 0 one_pos).ne' measure_ball_lt_top.ne
-  -- Constant: 2d · smoothHolderConst d p (we add 1 to get strict positivity).
   set C : ℝ := 2 * (d : ℝ) * smoothHolderConst d p + 1 with hC_def
   have hC_pos : 0 < C := by
     rw [hC_def]
@@ -3210,21 +2929,16 @@ theorem mean_value_inequality_W1p
     linarith
   refine ⟨C, hC_pos, ?_⟩
   intro x y hx hy
-  -- Set up cutoff η, witness, and approximation.
   obtain ⟨η, hη_smooth, hη_compact, hη_range, hη_one, hη_supp⟩ :=
     exists_smooth_cutoff_ball (d := d) (x₀ := x₀) hR
-  -- η = 1 on closedBall x₀ (3R/4); supp η ⊆ closedBall x₀ (7R/8) ⊂ ball x₀ R.
   have hsupp_in_ball : tsupport η ⊆ Metric.ball x₀ R := by
     intro z hz
     have hz_close : z ∈ Metric.closedBall x₀ (7 * R / 8) := hη_supp hz
     rw [Metric.mem_closedBall] at hz_close
     rw [Metric.mem_ball]
     linarith
-  -- Cutoff witness for η · u on Ω = ball x₀ R.
   have hΩ_open : IsOpen (Metric.ball x₀ R) := Metric.isOpen_ball
   set hw' := cutoffWitness (d := d) hp_one.le hΩ_open hu hη_smooth hη_compact hη_range
-  -- Approximation sequence φ_n.
-  -- Use K := closedBall x₀ (7R/8), supp η ⊆ K ⊂ ball x₀ R.
   set K : Set (EuclideanSpace ℝ (Fin d)) := Metric.closedBall x₀ (7 * R / 8) with hK_def
   have hK_compact : IsCompact K := isCompact_closedBall x₀ (7 * R / 8)
   have hKΩ : K ⊆ Metric.ball x₀ R := by
@@ -3234,10 +2948,8 @@ theorem mean_value_inequality_W1p
   obtain ⟨φ, hφ_smooth, hφ_compact, hφ_sub, hφ_fun, hφ_grad⟩ :=
     exists_smooth_cutoff_approx (d := d) hp_one hΩ_open hK_compact hKΩ hu
       hη_smooth hη_compact hη_range hη_supp
-  -- Set up midpoint m and small radius ρ.
   by_cases h_xy_eq : x = y
-  · -- x = y: trivial, both sides are 0.
-    subst h_xy_eq
+  · subst h_xy_eq
     have h_means_zero :
         meanLebesgueOnBall (Metric.ball x (dist x x / 2)) u -
             meanLebesgueOnBall (Metric.ball x (dist x x / 2)) u = 0 := sub_self _
@@ -3246,13 +2958,10 @@ theorem mean_value_inequality_W1p
     have h_zero : (dist x x) ^ (1 - (d : ℝ) / p) = 0 := by
       rw [dist_self]; exact h_zero_pow
     rw [h_zero, mul_zero, zero_mul]
-  -- dist x y > 0 case.
   · have h_dist_pos : 0 < dist x y := dist_pos.mpr h_xy_eq
     set ρ : ℝ := dist x y / 2 with hρ_def
     have hρ_pos : 0 < ρ := by rw [hρ_def]; linarith
-    -- Midpoint m.
     set m : EuclideanSpace ℝ (Fin d) := (1 / 2 : ℝ) • (x + y) with hm_def
-    -- Properties: dist(x, m) = dist(y, m) = ρ.
     have h_x_minus_m : x - m = (1 / 2 : ℝ) • (x - y) := by
       rw [hm_def, smul_add]
       have hx_split : x = (1 / 2 : ℝ) • x + (1 / 2 : ℝ) • x := by
@@ -3278,7 +2987,6 @@ theorem mean_value_inequality_W1p
       rw [Real.norm_eq_abs, abs_of_pos (by norm_num : (0 : ℝ) < 1 / 2)]
       rw [show y - x = -(x - y) from by abel, norm_neg]
       rw [← dist_eq_norm, hρ_def]; ring
-    -- dist(m, x₀) ≤ R/4
     have h_m_dist : dist m x₀ < R / 4 := by
       have hxR4 : dist x x₀ < R / 4 := by rw [Metric.mem_ball] at hx; exact hx
       have hyR4 : dist y x₀ < R / 4 := by rw [Metric.mem_ball] at hy; exact hy
@@ -3301,14 +3009,12 @@ theorem mean_value_inequality_W1p
           show ‖y - x₀‖ = dist y x₀ from (dist_eq_norm _ _).symm] at hsum
         exact hsum
       linarith
-    -- dist x y < R/2.
     have h_dist_xy_lt : dist x y < R / 2 := by
       have hxR4 : dist x x₀ < R / 4 := by rw [Metric.mem_ball] at hx; exact hx
       have hyR4 : dist y x₀ < R / 4 := by rw [Metric.mem_ball] at hy; exact hy
       have : dist x y ≤ dist x x₀ + dist x₀ y := dist_triangle x x₀ y
       rw [dist_comm x₀ y] at this
       linarith
-    -- B(m, dist x y) ⊆ B(x₀, 3R/4).
     have h_ball_m_sub : Metric.ball m (dist x y) ⊆ Metric.ball x₀ (3 * R / 4) := by
       intro z hz
       rw [Metric.mem_ball] at hz ⊢
@@ -3316,11 +3022,9 @@ theorem mean_value_inequality_W1p
         _ < dist x y + R / 4 := add_lt_add hz h_m_dist
         _ < R / 2 + R / 4 := by linarith
         _ = 3 * R / 4 := by ring
-    -- B(m, dist x y) ⊆ ball x₀ R (since 3R/4 < R).
     have h_ball_m_sub_full : Metric.ball m (dist x y) ⊆ Metric.ball x₀ R := by
       refine h_ball_m_sub.trans ?_
       intro z hz; rw [Metric.mem_ball] at hz ⊢; linarith
-    -- B(x, ρ) ⊆ B(m, dist x y).
     have h_ball_x_sub_m : Metric.ball x ρ ⊆ Metric.ball m (dist x y) := by
       intro z hz
       rw [Metric.mem_ball] at hz ⊢
@@ -3333,28 +3037,20 @@ theorem mean_value_inequality_W1p
       calc dist z m ≤ dist z y + dist y m := dist_triangle _ _ _
         _ < ρ + ρ := by rw [h_dy_m]; linarith
         _ = dist x y := by rw [hρ_def]; ring
-    -- B(x, ρ), B(y, ρ) ⊆ B(x₀, 3R/4), and B(m, dist x y) ⊆ B(x₀, 3R/4).
     have h_ball_x_sub_full : Metric.ball x ρ ⊆ Metric.ball x₀ (3 * R / 4) :=
       h_ball_x_sub_m.trans h_ball_m_sub
     have h_ball_y_sub_full : Metric.ball y ρ ⊆ Metric.ball x₀ (3 * R / 4) :=
       h_ball_y_sub_m.trans h_ball_m_sub
-    -- η = 1 on B(x₀, 3R/4).
     have h_eta_one_on_ball : ∀ z ∈ Metric.ball x₀ (3 * R / 4), η z = 1 := by
       intro z hz
       apply hη_one
       rw [Metric.mem_ball] at hz
       rw [Metric.mem_closedBall]; linarith
-    -- η · u = u on B(x₀, 3R/4).
     have h_eta_u_eq_u : ∀ z ∈ Metric.ball x₀ (3 * R / 4), η z * u z = u z := by
       intro z hz
       rw [h_eta_one_on_ball z hz, one_mul]
-    -- The smooth bound for each φ_n at x and y.
-    -- ‖fderiv φ_n‖_{p, B(m, dist x y)} ≤ Σ_i ‖(fderiv φ_n) e_i‖_{p, B(m, dist x y)}.
-    -- Apply smooth_avg_diff_pointwise_bound at x and y.
-    -- Bound: |⨍_{B(x, ρ)} φ_n - ⨍_{B(m, dist x y)} φ_n| ≤ smoothHolderConst · (dist x y)^{1-d/p} · ‖∇φ_n‖_{p, B(m, dist x y)}
     have hdistxy_pow_nn : 0 ≤ (dist x y) ^ (1 - (d : ℝ) / p) :=
       Real.rpow_nonneg dist_nonneg _
-    -- For each n, the per-component bound.
     have h_each_n :
         ∀ n,
           ‖meanLebesgueOnBall (Metric.ball x ρ) (φ n) -
@@ -3365,13 +3061,10 @@ theorem mean_value_inequality_W1p
                   (ENNReal.ofReal p)
                   (volume.restrict (Metric.ball x₀ (3 * R / 4)))).toReal := by
       intro n
-      -- bound at x.
       have h_bound_x := smooth_avg_diff_pointwise_bound (d := d) hp h_dist_pos hρ_pos
         h_ball_x_sub_m (hφ_smooth n)
-      -- bound at y.
       have h_bound_y := smooth_avg_diff_pointwise_bound (d := d) hp h_dist_pos hρ_pos
         h_ball_y_sub_m (hφ_smooth n)
-      -- Triangle inequality.
       have h_triangle :
           ‖(⨍ z in Metric.ball x ρ, φ n z ∂volume) -
               (⨍ z in Metric.ball y ρ, φ n z ∂volume)‖ ≤
@@ -3399,7 +3092,6 @@ theorem mean_value_inequality_W1p
               (⨍ z in Metric.ball m (dist x y), φ n z ∂volume))) from by ring,
           norm_neg]
         exact h_bound_y
-      -- Combine.
       have h_combined :
           ‖(⨍ z in Metric.ball x ρ, φ n z ∂volume) -
               (⨍ z in Metric.ball y ρ, φ n z ∂volume)‖ ≤
@@ -3408,7 +3100,6 @@ theorem mean_value_inequality_W1p
                 (volume.restrict (Metric.ball m (dist x y)))).toReal) := by
         have h := h_triangle.trans (add_le_add h_bound_x h_bound_y_sym)
         linarith
-      -- Bound by the eLpNorm on the bigger ball B(x₀, 3R/4).
       have hR'_pos : (0 : ℝ) < 3 * R / 4 := by linarith
       have h_phi_grad_memLp_R34_local :
           MemLp (fun z => ‖fderiv ℝ (φ n) z‖)
@@ -3510,10 +3201,6 @@ theorem mean_value_inequality_W1p
                     (ENNReal.ofReal p)
                     (volume.restrict (Metric.ball x₀ (3 * R / 4)))).toReal := by ring
       exact h_full_bound
-    -- Now take the limit n → ∞.
-    -- LHS: ⨍_{B(x, ρ)} φ_n → ⨍_{B(x, ρ)} u, similarly for y.
-    -- RHS: per-component eLpNorm → per-component eLpNorm of weakGrad u.
-    -- Step 1: Convergence of LHS.
     have h_phi_memLp : ∀ n, MemLp (φ n) (ENNReal.ofReal p)
         (volume.restrict (Metric.ball x₀ R)) := by
       intro n
@@ -3521,11 +3208,9 @@ theorem mean_value_inequality_W1p
         (hφ_compact n)).restrict (Metric.ball x₀ R)
     have h_eta_u_memLp : MemLp (fun z => η z * u z) (ENNReal.ofReal p)
         (volume.restrict (Metric.ball x₀ R)) := hw'.memLp
-    -- φ_n → η · u in L^p on B(x₀, R).
     have h_phi_to_eta_u :
         Tendsto (fun n => eLpNorm (fun z => φ n z - η z * u z)
           (ENNReal.ofReal p) (volume.restrict (Metric.ball x₀ R))) atTop (𝓝 0) := hφ_fun
-    -- Restrict to B(x, ρ).
     have h_phi_memLp_x : ∀ n, MemLp (φ n) (ENNReal.ofReal p)
         (volume.restrict (Metric.ball x ρ)) := fun n =>
       (h_phi_memLp n).mono_measure (Measure.restrict_mono_set _ (h_ball_x_sub_full.trans
@@ -3562,7 +3247,6 @@ theorem mean_value_inequality_W1p
       refine eLpNorm_mono_measure _ ?_
       exact Measure.restrict_mono_set _ (h_ball_y_sub_full.trans
         (by intro z hz; rw [Metric.mem_ball] at hz ⊢; linarith))
-    -- Apply tendsto_setAverage_of_eLpNorm_p_to_zero.
     have h_avg_x_to_eta_u : Tendsto
         (fun n => ⨍ z in Metric.ball x ρ, φ n z ∂volume) atTop
         (𝓝 (⨍ z in Metric.ball x ρ, η z * u z ∂volume)) := by
@@ -3573,7 +3257,6 @@ theorem mean_value_inequality_W1p
         (𝓝 (⨍ z in Metric.ball y ρ, η z * u z ∂volume)) := by
       exact tendsto_setAverage_of_eLpNorm_p_to_zero (d := d) hp_one hρ_pos h_eta_u_memLp_y
         h_phi_memLp_y h_diff_y
-    -- ⨍ η · u = ⨍ u on B(x, ρ) since η = 1.
     have h_avg_x_eq : ⨍ z in Metric.ball x ρ, η z * u z ∂volume =
         ⨍ z in Metric.ball x ρ, u z ∂volume := by
       refine setAverage_congr_fun measurableSet_ball ?_
@@ -3593,24 +3276,17 @@ theorem mean_value_inequality_W1p
           (𝓝 ‖(⨍ z in Metric.ball x ρ, u z ∂volume) -
               (⨍ z in Metric.ball y ρ, u z ∂volume)‖) := by
       refine (h_avg_x_to_eta_u.sub h_avg_y_to_eta_u).norm
-    -- Step 2: Convergence of RHS.
-    -- For each i, eLpNorm((fderiv φ_n) e_i, B(x₀, 3R/4)) → eLpNorm(weakGrad(η·u) i, B(x₀, 3R/4))
-    --   = eLpNorm(weakGrad u i, B(x₀, 3R/4)) (since η = 1 on this ball)
-    --   ≤ eLpNorm(‖weakGrad u‖, B(x₀, R)).
     have h_R34_pos : (0 : ℝ) < 3 * R / 4 := by linarith
     have h_ball_R34_sub : Metric.ball x₀ (3 * R / 4) ⊆ Metric.ball x₀ R := by
       intro z hz; rw [Metric.mem_ball] at hz ⊢; linarith
     have h_R34_open : Metric.ball x₀ (3 * R / 4) = Metric.ball x₀ (3 * R / 4) := rfl
-    -- η = 1 on the open ball B(x₀, 3R/4).
     have h_eta_eq_on : ∀ z ∈ Metric.ball x₀ (3 * R / 4), η z = 1 := h_eta_one_on_ball
     have h_R34_open' : IsOpen (Metric.ball x₀ (3 * R / 4)) := Metric.isOpen_ball
-    -- weakGrad(η · u) = weakGrad u on B(x₀, 3R/4) pointwise.
     have h_weakGrad_eq : ∀ i : Fin d, ∀ z ∈ Metric.ball x₀ (3 * R / 4),
         hw'.weakGrad z i = hu.weakGrad z i := by
       intro i z hz
       exact cutoffWitness_weakGrad_eq_on_open (d := d) hp_one.le hΩ_open hu hη_smooth
         hη_compact hη_range h_R34_open' h_eta_eq_on i z hz
-    -- Per-component eLpNorm of weakGrad(η·u) on B(x₀, 3R/4) = same with weakGrad u.
     have h_eLpNorm_weakGrad_eq : ∀ i : Fin d,
         eLpNorm (fun z => hw'.weakGrad z i) (ENNReal.ofReal p)
           (volume.restrict (Metric.ball x₀ (3 * R / 4))) =
@@ -3620,13 +3296,11 @@ theorem mean_value_inequality_W1p
       refine eLpNorm_congr_ae ?_
       filter_upwards [self_mem_ae_restrict measurableSet_ball] with z hz
       exact h_weakGrad_eq i z hz
-    -- Per-component convergence on the full ball.
     have h_per_comp_full : ∀ i : Fin d, Tendsto
         (fun n => eLpNorm
           (fun z => (fderiv ℝ (φ n) z) (EuclideanSpace.single i 1) - hw'.weakGrad z i)
           (ENNReal.ofReal p) (volume.restrict (Metric.ball x₀ R))) atTop (𝓝 0) :=
       fun i => hφ_grad i
-    -- Restrict to B(x₀, 3R/4).
     have h_per_comp_R34 : ∀ i : Fin d, Tendsto
         (fun n => eLpNorm
           (fun z => (fderiv ℝ (φ n) z) (EuclideanSpace.single i 1) - hw'.weakGrad z i)
@@ -3637,12 +3311,10 @@ theorem mean_value_inequality_W1p
         (Filter.Eventually.of_forall ?_)
       intro n
       exact eLpNorm_mono_measure _ (Measure.restrict_mono_set _ h_ball_R34_sub)
-    -- Component memLp on B(x₀, 3R/4).
     have h_phi_grad_memLp_R34 : ∀ n, ∀ i : Fin d,
         MemLp (fun z => (fderiv ℝ (φ n) z) (EuclideanSpace.single i 1)) (ENNReal.ofReal p)
           (volume.restrict (Metric.ball x₀ (3 * R / 4))) := by
       intro n i
-      -- (fderiv (φ n)) e_i is smooth.
       have h_smooth : ContDiff ℝ (⊤ : ℕ∞)
           (fun z => (fderiv ℝ (φ n) z) (EuclideanSpace.single i 1)) := by
         have hf : ContDiff ℝ (⊤ : ℕ∞) (fderiv ℝ (φ n)) := by
@@ -3659,7 +3331,6 @@ theorem mean_value_inequality_W1p
       intro i
       exact (hw'.weakGrad_component_memLp i).mono_measure
         (Measure.restrict_mono_set _ h_ball_R34_sub)
-    -- Apply tendsto_eLpNorm_toReal_of_diff_tendsto_zero per component.
     have h_per_comp_toReal : ∀ i : Fin d,
         Tendsto (fun n =>
           (eLpNorm (fun z => (fderiv ℝ (φ n) z) (EuclideanSpace.single i 1))
@@ -3671,7 +3342,6 @@ theorem mean_value_inequality_W1p
         (by rw [show (1 : ℝ≥0∞) = ENNReal.ofReal 1 from by simp];
             exact ENNReal.ofReal_le_ofReal hp_one.le)
         (h_w_grad_memLp_R34 i) (fun n => h_phi_grad_memLp_R34 n i) (h_per_comp_R34 i)
-    -- Convert to eLpNorm of weakGrad u (via h_eLpNorm_weakGrad_eq).
     have h_per_comp_toReal_u : ∀ i : Fin d,
         Tendsto (fun n =>
           (eLpNorm (fun z => (fderiv ℝ (φ n) z) (EuclideanSpace.single i 1))
@@ -3682,7 +3352,6 @@ theorem mean_value_inequality_W1p
       have h := h_per_comp_toReal i
       rw [h_eLpNorm_weakGrad_eq i] at h
       exact h
-    -- Sum convergence.
     have h_sum_toReal_tendsto : Tendsto (fun n =>
         (∑ i : Fin d,
           eLpNorm (fun z => (fderiv ℝ (φ n) z) (EuclideanSpace.single i 1))
@@ -3718,7 +3387,6 @@ theorem mean_value_inequality_W1p
       rw [h_target_eq]
       refine (Filter.tendsto_congr h_sum_real_eq).mpr ?_
       exact tendsto_finset_sum _ (fun i _ => h_per_comp_toReal_u i)
-    -- The LHS bound for each n.
     have h_n_bound :
         ∀ n,
           ‖(⨍ z in Metric.ball x ρ, φ n z ∂volume) -
@@ -3732,7 +3400,6 @@ theorem mean_value_inequality_W1p
       change ‖meanLebesgueOnBall (Metric.ball x ρ) (φ n) -
           meanLebesgueOnBall (Metric.ball y ρ) (φ n)‖ ≤ _
       exact h_each_n n
-    -- Take the limit.
     have h_RHS_tendsto :
         Tendsto (fun n => 2 * smoothHolderConst d p * (dist x y) ^ (1 - (d : ℝ) / p) *
             (∑ i : Fin d,
@@ -3744,7 +3411,6 @@ theorem mean_value_inequality_W1p
               eLpNorm (fun z => hu.weakGrad z i) (ENNReal.ofReal p)
                 (volume.restrict (Metric.ball x₀ (3 * R / 4)))).toReal)) :=
       h_sum_toReal_tendsto.const_mul _
-    -- Conclude.
     have h_lim_LHS_le_RHS :
         ‖(⨍ z in Metric.ball x ρ, u z ∂volume) -
             (⨍ z in Metric.ball y ρ, u z ∂volume)‖ ≤
@@ -3754,7 +3420,6 @@ theorem mean_value_inequality_W1p
                 (volume.restrict (Metric.ball x₀ (3 * R / 4)))).toReal :=
       le_of_tendsto_of_tendsto h_lhs_tendsto h_RHS_tendsto
         (Filter.Eventually.of_forall h_n_bound)
-    -- Bound the sum of components by d * eLpNorm(‖weakGrad u‖, B(x₀, R)).
     have h_sum_le :
         (∑ i : Fin d,
           eLpNorm (fun z => hu.weakGrad z i) (ENNReal.ofReal p)
@@ -3777,7 +3442,6 @@ theorem mean_value_inequality_W1p
             (Measure.restrict_mono_set _ h_ball_R34_sub)
         exact this.eLpNorm_ne_top
       rw [h_sum_real_eq]
-      -- Each component eLpNorm bounded by ‖weakGrad u‖ eLpNorm.
       have h_each_le : ∀ i : Fin d,
           (eLpNorm (fun z => hu.weakGrad z i) (ENNReal.ofReal p)
             (volume.restrict (Metric.ball x₀ (3 * R / 4)))).toReal ≤
@@ -3828,7 +3492,6 @@ theorem mean_value_inequality_W1p
           refine h_step1.trans ?_
           exact eLpNorm_mono_measure _ (Measure.restrict_mono_set _ h_ball_R34_sub)
         exact h_eLp_pt
-      -- Sum of d copies.
       calc ∑ i : Fin d,
             (eLpNorm (fun z => hu.weakGrad z i) (ENNReal.ofReal p)
               (volume.restrict (Metric.ball x₀ (3 * R / 4)))).toReal
@@ -3841,7 +3504,6 @@ theorem mean_value_inequality_W1p
                 (volume.restrict (Metric.ball x₀ R))).toReal := by
             rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin]
             ring
-    -- Combine.
     set N := (eLpNorm (fun z => ‖hu.weakGrad z‖) (ENNReal.ofReal p)
       (volume.restrict (Metric.ball x₀ R))).toReal with hN_def
     have hN_nn : 0 ≤ N := ENNReal.toReal_nonneg
@@ -3864,7 +3526,6 @@ theorem mean_value_inequality_W1p
               ((d : ℝ) * N) :=
         mul_le_mul_of_nonneg_left h_sum_le h_const_factor_nn
       exact h_step
-    -- Final: change to spec form.
     have h_eq_form :
         2 * smoothHolderConst d p * (dist x y) ^ (1 - (d : ℝ) / p) * ((d : ℝ) * N) =
         (2 * (d : ℝ) * smoothHolderConst d p) * (dist x y) ^ (1 - (d : ℝ) / p) * N := by ring
@@ -3886,12 +3547,6 @@ theorem mean_value_inequality_W1p
         (⨍ z in Metric.ball y (dist x y / 2), u z ∂volume)‖ ≤
       C * (dist x y) ^ (1 - (d : ℝ) / p) * N
     exact h_final
-
-/-! ## Continuous Hölder representative for `MemW1pWitness`
-
-We construct a continuous representative `ũ` of a `W^{1,p}` function via
-uniform approximation by smooth cutoff approximants and the smooth Morrey
-estimate, with explicit Hölder and sup bounds. -/
 
 /-- Inner smooth cutoff for the Morrey representative construction: `χ = 1` on
 `closedBall x₀ (R/4)` and `tsupport χ ⊆ closedBall x₀ (R/3) ⊂ ball x₀ (3R/8)`. -/
@@ -4081,11 +3736,8 @@ private theorem morrey_representative_of_W1pWitness
     exact ENNReal.ofReal_le_ofReal hp_one.le
   have h_exp_pos : 0 < 1 - (d : ℝ) / p := by
     rw [sub_pos, div_lt_one hp_pos]; exact hp
-  -- ============ SETUP ============
-  -- Outer cutoff η: 1 on closedBall x₀ (3R/4), supp ⊆ closedBall x₀ (7R/8) ⊂ ball x₀ R.
   obtain ⟨η, hη_smooth, hη_compact, hη_range, hη_one, hη_supp⟩ :=
     exists_smooth_cutoff_ball (d := d) (x₀ := x₀) hR
-  -- Inner cutoff χ: 1 on closedBall x₀ (R/4), supp ⊆ closedBall x₀ (R/3).
   obtain ⟨χ, hχ_smooth, hχ_compact, hχ_range, hχ_one, hχ_supp⟩ :=
     exists_smooth_cutoff_inner (d := d) (x₀ := x₀) hR
   have hχ_cont : Continuous χ := hχ_smooth.continuous
@@ -4094,7 +3746,6 @@ private theorem morrey_representative_of_W1pWitness
   have h_R38_pos : (0 : ℝ) < 3 * R / 8 := by linarith
   have h_R3_pos : (0 : ℝ) < R / 3 := by linarith
   have h_R4_pos : (0 : ℝ) < R / 4 := by linarith
-  -- Subsets between balls.
   have h_ball_R34_sub_R : Metric.ball x₀ (3 * R / 4) ⊆ Metric.ball x₀ R := by
     intro z hz; rw [Metric.mem_ball] at hz ⊢; linarith
   have h_closedBall_R3_sub_R38 :
@@ -4119,7 +3770,6 @@ private theorem morrey_representative_of_W1pWitness
     have h_eq : (3 * R / 4) / 2 = 3 * R / 8 := by ring
     rw [h_eq]
     rw [Metric.mem_ball] at hx ⊢; linarith
-  -- Approximation sequence φ_n.
   have hK_compact : IsCompact (Metric.closedBall x₀ (7 * R / 8)) :=
     isCompact_closedBall x₀ (7 * R / 8)
   have hKΩ : Metric.closedBall x₀ (7 * R / 8) ⊆ Metric.ball x₀ R := by
@@ -4127,24 +3777,19 @@ private theorem morrey_representative_of_W1pWitness
   obtain ⟨φ, hφ_smooth, hφ_compact, hφ_sub, hφ_fun, hφ_grad⟩ :=
     exists_smooth_cutoff_approx (d := d) hp_one hΩ_open hK_compact hKΩ hu
       hη_smooth hη_compact hη_range hη_supp
-  -- Cutoff witness for η · u.
   let hw' := cutoffWitness (d := d) hp_one.le hΩ_open hu hη_smooth hη_compact hη_range
-  -- η = 1 properties.
   have h_eta_one_on_R34 : ∀ z ∈ Metric.ball x₀ (3 * R / 4), η z = 1 := fun z hz => by
     apply hη_one
     rw [Metric.mem_ball] at hz; rw [Metric.mem_closedBall]; linarith
   have h_eta_u_eq_u_on_R34 : ∀ z ∈ Metric.ball x₀ (3 * R / 4), η z * u z = u z := fun z hz => by
     rw [h_eta_one_on_R34 z hz, one_mul]
-  -- χ = 1 properties.
   have h_chi_one_on_R4 : ∀ z ∈ Metric.ball x₀ (R / 4), χ z = 1 := fun z hz => by
     apply hχ_one
     rw [Metric.mem_ball] at hz; rw [Metric.mem_closedBall]; linarith
-  -- Smooth bounds.
   obtain ⟨C_sup_smooth, hC_sup_nn, h_sup_bound⟩ :=
     smooth_morrey_sup_bound_uniform (d := d) hp h_R34_pos (x₀ := x₀)
   obtain ⟨C_pair_smooth, hC_pair_nn, h_pair_bound⟩ :=
     smooth_morrey_pair_bound_uniform (d := d) hp h_R34_pos (x₀ := x₀)
-  -- L^p memberships.
   have h_eta_u_memLp_R : MemLp (fun z => η z * u z) (ENNReal.ofReal p)
       (volume.restrict (Metric.ball x₀ R)) := hw'.memLp
   have h_phi_memLp_R : ∀ n, MemLp (φ n) (ENNReal.ofReal p)
@@ -4174,8 +3819,6 @@ private theorem morrey_representative_of_W1pWitness
         (volume.restrict (Metric.ball x₀ (3 * R / 4))) := fun i =>
     (hw'.weakGrad_component_memLp i).mono_measure
       (Measure.restrict_mono_set _ h_ball_R34_sub_R)
-  -- ============ L^p CONVERGENCE ============
-  -- L^p convergence on B(x₀, 3R/4).
   have h_phi_to_eta_u_R34 : Tendsto
       (fun n => eLpNorm (fun z => φ n z - η z * u z) (ENNReal.ofReal p)
         (volume.restrict (Metric.ball x₀ (3 * R / 4)))) atTop (𝓝 0) := by
@@ -4192,7 +3835,6 @@ private theorem morrey_representative_of_W1pWitness
       ((h_phi_memLp_R34 n).sub h_eta_u_memLp_R34).eLpNorm_ne_top
     exact (ENNReal.tendsto_toReal_iff h_finite (by simp : (0 : ℝ≥0∞) ≠ ⊤)).mpr
       (by simpa using h_phi_to_eta_u_R34)
-  -- Per-component gradient L^p convergence on B(x₀, 3R/4).
   have h_phi_grad_to_w_R34 : ∀ i : Fin d, Tendsto
       (fun n => eLpNorm (fun z => (fderiv ℝ (φ n) z) (EuclideanSpace.single i 1)
         - hw'.weakGrad z i) (ENNReal.ofReal p)
@@ -4218,7 +3860,6 @@ private theorem morrey_representative_of_W1pWitness
       ((h_phi_grad_memLp_R34 n i).sub (h_w_grad_memLp_R34 i)).eLpNorm_ne_top
     exact (ENNReal.tendsto_toReal_iff h_finite (by simp : (0 : ℝ≥0∞) ≠ ⊤)).mpr
       (by simpa using h_phi_grad_to_w_R34 i)
-  -- Define a := L^p deviation of φ_n + sum of component deviations.
   set a : ℕ → ℝ := fun n =>
     (eLpNorm (fun z => φ n z - η z * u z) (ENNReal.ofReal p)
       (volume.restrict (Metric.ball x₀ (3 * R / 4)))).toReal +
@@ -4240,7 +3881,6 @@ private theorem morrey_representative_of_W1pWitness
       rw [h_zero_eq]
       exact tendsto_finset_sum _ (fun i _ => h_phi_grad_to_w_R34_real i)
     exact h_phi_to_eta_u_R34_real.add h_sum_to_zero
-  -- ============ UNIFORM CAUCHY ============
   have h_phi_diff_smooth : ∀ n m, ContDiff ℝ (⊤ : ℕ∞) (fun z => φ n z - φ m z) :=
     fun n m => (hφ_smooth n).sub (hφ_smooth m)
   have h_fderiv_sub : ∀ n m z, fderiv ℝ (fun z => φ n z - φ m z) z =
@@ -4248,7 +3888,6 @@ private theorem morrey_representative_of_W1pWitness
     have h1 : DifferentiableAt ℝ (φ n) z := (hφ_smooth n).differentiable (by norm_cast) z
     have h2 : DifferentiableAt ℝ (φ m) z := (hφ_smooth m).differentiable (by norm_cast) z
     exact fderiv_sub h1 h2
-  -- The smooth sup bound on (φ_n - φ_m): ‖φ_n - φ_m‖_∞ ≤ C_sup * (a n + a m) on B(x₀, 3R/8).
   have h_sup_diff_via_a : ∀ n m, ∀ x ∈ Metric.ball x₀ (3 * R / 8),
       ‖φ n x - φ m x‖ ≤ C_sup_smooth * (a n + a m) := by
     intro n m x hx
@@ -4257,10 +3896,8 @@ private theorem morrey_representative_of_W1pWitness
       have : (3 * R / 4) / 2 = 3 * R / 8 := by ring
       rw [this]; exact hx
     have h_bound := h_sup_bound (u := fun z => φ n z - φ m z) h_smooth_diff x h_x_R8
-    -- Bound L^p of φ_n - φ_m by sum of deviations.
     have h_lp_diff := eLpNorm_diff_real_bound (d := d) hpp_one h_eta_u_memLp_R34
       h_phi_memLp_R34 n m
-    -- Bound L^p of ‖∇(φ_n - φ_m)‖ by sum of components, then by sum of deviations.
     have h_grad_le_components_phi_nm :
         (eLpNorm (fun z => ‖fderiv ℝ (fun z => φ n z - φ m z) z‖) (ENNReal.ofReal p)
           (volume.restrict (Metric.ball x₀ (3 * R / 4)))).toReal ≤
@@ -4337,7 +3974,6 @@ private theorem morrey_representative_of_W1pWitness
       intro i _
       exact eLpNorm_diff_real_bound (d := d) hpp_one (h_w_grad_memLp_R34 i)
         (fun n => h_phi_grad_memLp_R34 n i) n m
-    -- Combine.
     have h_combined :
         (eLpNorm (fun z => φ n z - φ m z) (ENNReal.ofReal p)
           (volume.restrict (Metric.ball x₀ (3 * R / 4)))).toReal +
@@ -4354,7 +3990,6 @@ private theorem morrey_representative_of_W1pWitness
       simpa using h_bound
     refine h_target.trans ?_
     exact mul_le_mul_of_nonneg_left h_combined hC_sup_nn
-  -- Uniform Cauchy on closedBall x₀ (R/3).
   have h_uniform_cauchy : ∀ ε > 0, ∃ N, ∀ n ≥ N, ∀ m ≥ N, ∀ x ∈ Metric.closedBall x₀ (R / 3),
       |φ n x - φ m x| < ε := by
     intro ε hε
@@ -4386,8 +4021,6 @@ private theorem morrey_representative_of_W1pWitness
     have h_norm_eq : ‖φ n x - φ m x‖ = |φ n x - φ m x| := rfl
     rw [← h_norm_eq]
     exact h_ineq.trans_lt h_total
-  -- ============ CONSTRUCTION OF ũ ============
-  -- Define g_n := χ · φ_n via classical: as a structure with all properties.
   obtain ⟨h_g_cauchy_pointwise, hg_cont, hg_zero_outside⟩ :
       (∀ x : EuclideanSpace ℝ (Fin d), CauchySeq (fun n => χ x * φ n x)) ×'
       (∀ n, Continuous (fun x => χ x * φ n x)) ×'
@@ -4419,13 +4052,11 @@ private theorem morrey_representative_of_W1pWitness
       have hx_not_supp : x ∉ tsupport χ := fun h => hx (hχ_supp h)
       have hχ_zero : χ x = 0 := image_eq_zero_of_notMem_tsupport hx_not_supp
       rw [hχ_zero, zero_mul]
-  -- The pointwise limit function and its tendsto property.
   have h_g_to_ũ_pre :
       ∀ x : EuclideanSpace ℝ (Fin d),
         Tendsto (fun n => χ x * φ n x) atTop (𝓝 (limUnder atTop (fun n => χ x * φ n x))) := by
     intro x
     exact (h_g_cauchy_pointwise x).tendsto_limUnder
-  -- Uniform Cauchy on Set.univ for the sequence n ↦ (x ↦ χ x * φ n x).
   have h_g_uniform_cauchy :
       UniformCauchySeqOn (fun n x => χ x * φ n x) atTop Set.univ := by
     rw [Metric.uniformCauchySeqOn_iff]
@@ -4445,7 +4076,6 @@ private theorem morrey_representative_of_W1pWitness
         _ < ε := h_phi_lt
     · rw [hg_zero_outside n x hx, hg_zero_outside m x hx, sub_zero, abs_zero]
       exact hε
-  -- ũ is continuous.
   have h_g_to_ũ_uniform : TendstoUniformlyOn (fun n x => χ x * φ n x)
       (fun x => limUnder atTop (fun n => χ x * φ n x)) atTop Set.univ :=
     h_g_uniform_cauchy.tendstoUniformlyOn_of_tendsto (fun x _ => h_g_to_ũ_pre x)
@@ -4453,12 +4083,10 @@ private theorem morrey_representative_of_W1pWitness
       (fun x => limUnder atTop (fun n => χ x * φ n x)) atTop := by
     rw [← tendstoUniformlyOn_univ] at *
     exact h_g_to_ũ_uniform
-  -- Introduce ũ as a name for the limit function.
   set ũ : EuclideanSpace ℝ (Fin d) → ℝ :=
     fun x => limUnder atTop (fun n => χ x * φ n x) with hũ_def
   have hũ_cont : Continuous ũ :=
     h_g_to_ũ_uniformly.continuous (Filter.Frequently.of_forall hg_cont)
-  -- On B(x₀, R/4), χ = 1, so χ · φ_n = φ_n there.
   have h_phi_to_ũ_R4 : ∀ x ∈ Metric.ball x₀ (R / 4),
       Tendsto (fun n => φ n x) atTop
         (𝓝 (limUnder atTop (fun n => χ x * φ n x))) := by
@@ -4467,19 +4095,14 @@ private theorem morrey_representative_of_W1pWitness
       rw [h_chi_one_on_R4 x hx, one_mul]
     have h_pt := h_g_to_ũ_pre x
     have h_fun_eq : (fun n => χ x * φ n x) = (fun n => φ n x) := funext h_g_eq
-    -- Convert: rewrite the source pattern only.
     rw [h_fun_eq] at h_pt
-    -- Now h_pt has goal Tendsto (fun n => φ n x) atTop (𝓝 (limUnder atTop fun n => φ n x)).
-    -- We want target with χ in limUnder; use that limUnder is congruent.
     have h_lim_eq : limUnder atTop (fun n => χ x * φ n x) =
         limUnder atTop (fun n => φ n x) := by
       congr 1
     rw [h_lim_eq]
     exact h_pt
-  -- ============ a.e. EQUALITY ============
   have h_ae_eq : ∀ᵐ z ∂(volume.restrict (Metric.ball x₀ (R / 4))),
       limUnder atTop (fun n => χ z * φ n z) = u z := by
-    -- L^p convergence on B(x₀, R/4).
     have h_phi_to_eta_u_R4 : Tendsto
         (fun n => eLpNorm (fun z => φ n z - η z * u z) (ENNReal.ofReal p)
           (volume.restrict (Metric.ball x₀ (R / 4)))) atTop (𝓝 0) := by
@@ -4488,12 +4111,10 @@ private theorem morrey_representative_of_W1pWitness
         (Filter.Eventually.of_forall ?_)
       intro n
       exact eLpNorm_mono_measure _ (Measure.restrict_mono_set _ h_ball_R4_sub_R34)
-    -- η · u = u on B(x₀, R/4).
     have h_eta_u_eq_u_ae_R4 : (fun z => η z * u z) =ᵐ[volume.restrict (Metric.ball x₀ (R / 4))]
         u := by
       filter_upwards [self_mem_ae_restrict measurableSet_ball] with z hz
       exact h_eta_u_eq_u_on_R34 z (h_ball_R4_sub_R34 hz)
-    -- φ_n → u in L^p on B(x₀, R/4).
     have h_phi_to_u_R4 : Tendsto
         (fun n => eLpNorm (fun z => φ n z - u z) (ENNReal.ofReal p)
           (volume.restrict (Metric.ball x₀ (R / 4)))) atTop (𝓝 0) := by
@@ -4509,7 +4130,6 @@ private theorem morrey_representative_of_W1pWitness
           fun n => eLpNorm (fun z => φ n z - η z * u z) (ENNReal.ofReal p)
             (volume.restrict (Metric.ball x₀ (R / 4))) from funext h_eq]
       exact h_phi_to_eta_u_R4
-    -- L^p mem on B(x₀, R/4).
     have h_phi_memLp_R4 : ∀ n, MemLp (φ n) (ENNReal.ofReal p)
         (volume.restrict (Metric.ball x₀ (R / 4))) := fun n =>
       (h_phi_memLp_R34 n).mono_measure (Measure.restrict_mono_set _ h_ball_R4_sub_R34)
@@ -4519,7 +4139,6 @@ private theorem morrey_representative_of_W1pWitness
           (volume.restrict (Metric.ball x₀ (R / 4))) :=
         h_eta_u_memLp_R34.mono_measure (Measure.restrict_mono_set _ h_ball_R4_sub_R34)
       exact h_eta_u_R4.ae_eq h_eta_u_eq_u_ae_R4
-    -- L^p convergence → in measure.
     have h_p_ne_zero : (ENNReal.ofReal p) ≠ 0 :=
       (ENNReal.ofReal_pos.mpr hp_pos).ne'
     have h_phi_to_u_R4_alt : Tendsto (fun n => eLpNorm (φ n - u) (ENNReal.ofReal p)
@@ -4536,18 +4155,13 @@ private theorem morrey_representative_of_W1pWitness
       tendstoInMeasure_of_tendsto_eLpNorm h_p_ne_zero
         (fun n => (h_phi_memLp_R4 n).aestronglyMeasurable)
         h_u_memLp_R4.aestronglyMeasurable h_phi_to_u_R4_alt
-    -- Subseq converging a.e.
     obtain ⟨ns, hns_strict, h_ae_phi⟩ := h_in_measure.exists_seq_tendsto_ae
-    -- Subseq tends to ũ.
     have h_subseq_to_ũ : ∀ x ∈ Metric.ball x₀ (R / 4),
         Tendsto (fun i => φ (ns i) x) atTop
           (𝓝 (limUnder atTop (fun n => χ x * φ n x))) := fun x hx =>
       (h_phi_to_ũ_R4 x hx).comp hns_strict.tendsto_atTop
-    -- Uniqueness.
     filter_upwards [h_ae_phi, self_mem_ae_restrict measurableSet_ball] with z h_to_u h_z_in
     exact tendsto_nhds_unique (h_subseq_to_ũ z h_z_in) h_to_u
-  -- ============ HOLDER BOUND ============
-  -- weakGrad(η · u) = weakGrad u on B(x₀, 3R/4).
   have h_R34_open : IsOpen (Metric.ball x₀ (3 * R / 4)) := Metric.isOpen_ball
   have h_weakGrad_eq_R34 : ∀ i : Fin d, ∀ z ∈ Metric.ball x₀ (3 * R / 4),
       hw'.weakGrad z i = hu.weakGrad z i := fun i z hz =>
@@ -4561,11 +4175,9 @@ private theorem morrey_representative_of_W1pWitness
     refine eLpNorm_congr_ae ?_
     filter_upwards [self_mem_ae_restrict measurableSet_ball] with z hz
     exact h_weakGrad_eq_R34 i z hz
-  -- N := full ball gradient norm.
   set N : ℝ := (eLpNorm (fun z => ‖hu.weakGrad z‖) (ENNReal.ofReal p)
     (volume.restrict (Metric.ball x₀ R))).toReal with hN_def
   have hN_nn : 0 ≤ N := ENNReal.toReal_nonneg
-  -- Sum of components ≤ d * N.
   have h_sum_weakGrad_le_dN :
       ∑ i : Fin d, (eLpNorm (fun z => hu.weakGrad z i) (ENNReal.ofReal p)
         (volume.restrict (Metric.ball x₀ (3 * R / 4)))).toReal ≤ (d : ℝ) * N := by
@@ -4576,7 +4188,6 @@ private theorem morrey_representative_of_W1pWitness
             (fun i _ => eLpNorm_weakGrad_component_le_norm_real (d := d) hu h_ball_R34_sub_R i)
       _ = (d : ℝ) * N := by
           rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
-  -- Per-component limit.
   have h_phi_grad_real_to_w_u : ∀ i : Fin d, Tendsto
       (fun n => (eLpNorm (fun z => (fderiv ℝ (φ n) z) (EuclideanSpace.single i 1))
         (ENNReal.ofReal p) (volume.restrict (Metric.ball x₀ (3 * R / 4)))).toReal) atTop
@@ -4594,7 +4205,6 @@ private theorem morrey_representative_of_W1pWitness
       (𝓝 (∑ i : Fin d, (eLpNorm (fun z => hu.weakGrad z i) (ENNReal.ofReal p)
         (volume.restrict (Metric.ball x₀ (3 * R / 4)))).toReal)) :=
     tendsto_finset_sum _ (fun i _ => h_phi_grad_real_to_w_u i)
-  -- Bound: ‖∇φ n‖_p ≤ Σ_i ‖∂_i φ n‖_p.
   have h_grad_norm_le_sum_components : ∀ n,
       (eLpNorm (fun z => ‖fderiv ℝ (φ n) z‖) (ENNReal.ofReal p)
         (volume.restrict (Metric.ball x₀ (3 * R / 4)))).toReal ≤
@@ -4603,13 +4213,11 @@ private theorem morrey_representative_of_W1pWitness
           (ENNReal.ofReal p) (volume.restrict (Metric.ball x₀ (3 * R / 4)))).toReal := fun n =>
     eLpNorm_grad_norm_le_sum_components_real (d := d) hp_one (hφ_smooth n)
       (h_phi_grad_memLp_R34 n)
-  -- Smooth Hölder bound for each n on B(x₀, R/4).
   have h_holder_phi_n : ∀ n, ∀ x ∈ Metric.ball x₀ (R / 4), ∀ y ∈ Metric.ball x₀ (R / 4),
       ‖φ n x - φ n y‖ ≤ C_pair_smooth * (dist x y) ^ (1 - (d : ℝ) / p) *
         (eLpNorm (fun z => ‖fderiv ℝ (φ n) z‖) (ENNReal.ofReal p)
           (volume.restrict (Metric.ball x₀ (3 * R / 4)))).toReal := fun n x hx y hy =>
     h_pair_bound (u := φ n) (hφ_smooth n) (h_x_in_R38 x hx) (h_x_in_R38 y hy)
-  -- Take limit: ‖ũ x - ũ y‖ ≤ C_pair * dist^{...} * (lim ‖∇φ n‖_p).
   have h_holder_ũ_pre : ∀ x ∈ Metric.ball x₀ (R / 4), ∀ y ∈ Metric.ball x₀ (R / 4),
       ‖ũ x - ũ y‖ ≤ C_pair_smooth * (dist x y) ^ (1 - (d : ℝ) / p) *
         (∑ i : Fin d, (eLpNorm (fun z => hu.weakGrad z i) (ENNReal.ofReal p)
@@ -4621,7 +4229,6 @@ private theorem morrey_representative_of_W1pWitness
       mul_nonneg hC_pair_nn h_dxy_pow_nn
     have h_lhs_to : Tendsto (fun n => ‖φ n x - φ n y‖) atTop (𝓝 ‖ũ x - ũ y‖) :=
       ((h_phi_to_ũ_R4 x hx).sub (h_phi_to_ũ_R4 y hy)).norm
-    -- The bound for each n:
     have h_n_bound_summed : ∀ n,
         ‖φ n x - φ n y‖ ≤ C_pair_smooth * (dist x y) ^ (1 - (d : ℝ) / p) *
           (∑ i : Fin d, (eLpNorm (fun z => (fderiv ℝ (φ n) z) (EuclideanSpace.single i 1))
@@ -4630,7 +4237,6 @@ private theorem morrey_representative_of_W1pWitness
       have h1 := h_holder_phi_n n x hx y hy
       refine h1.trans ?_
       exact mul_le_mul_of_nonneg_left (h_grad_norm_le_sum_components n) h_factor_nn
-    -- The RHS converges.
     have h_rhs_to : Tendsto
         (fun n => C_pair_smooth * (dist x y) ^ (1 - (d : ℝ) / p) *
           (∑ i : Fin d, (eLpNorm (fun z => (fderiv ℝ (φ n) z) (EuclideanSpace.single i 1))
@@ -4641,7 +4247,6 @@ private theorem morrey_representative_of_W1pWitness
       h_sum_grad_real_to_w_u.const_mul _
     exact le_of_tendsto_of_tendsto h_lhs_to h_rhs_to
       (Filter.Eventually.of_forall h_n_bound_summed)
-  -- Now bound by C_pair * d * dist^{...} * N.
   have h_holder_ũ : ∀ x ∈ Metric.ball x₀ (R / 4), ∀ y ∈ Metric.ball x₀ (R / 4),
       ‖ũ x - ũ y‖ ≤ ((d : ℝ) * C_pair_smooth) * (dist x y) ^ (1 - (d : ℝ) / p) * N := by
     intro x hx y hy
@@ -4657,8 +4262,6 @@ private theorem morrey_representative_of_W1pWitness
         ≤ C_pair_smooth * (dist x y) ^ (1 - (d : ℝ) / p) * ((d : ℝ) * N) :=
           mul_le_mul_of_nonneg_left h_sum_weakGrad_le_dN h_factor_nn
       _ = ((d : ℝ) * C_pair_smooth) * (dist x y) ^ (1 - (d : ℝ) / p) * N := by ring
-  -- ============ SUP BOUND ============
-  -- ‖φ n x‖ ≤ C_sup * (‖φ n‖_p + ‖∇φ n‖_p) on B(x₀, 3R/8).
   have h_sup_phi_n : ∀ n, ∀ x ∈ Metric.ball x₀ (R / 4),
       ‖φ n x‖ ≤ C_sup_smooth * (
         (eLpNorm (φ n) (ENNReal.ofReal p)
@@ -4666,7 +4269,6 @@ private theorem morrey_representative_of_W1pWitness
         (eLpNorm (fun z => ‖fderiv ℝ (φ n) z‖) (ENNReal.ofReal p)
           (volume.restrict (Metric.ball x₀ (3 * R / 4)))).toReal) := fun n x hx =>
     h_sup_bound (u := φ n) (hφ_smooth n) x (h_x_in_R38 x hx)
-  -- Convergence of ‖φ n‖_p → ‖η · u‖_p on B(x₀, 3R/4).
   have h_phi_norm_to_eta_u : Tendsto
       (fun n => (eLpNorm (φ n) (ENNReal.ofReal p)
         (volume.restrict (Metric.ball x₀ (3 * R / 4)))).toReal) atTop
@@ -4674,14 +4276,12 @@ private theorem morrey_representative_of_W1pWitness
         (volume.restrict (Metric.ball x₀ (3 * R / 4)))).toReal)) :=
     tendsto_eLpNorm_toReal_of_diff_tendsto_zero (d := d) hpp_one
       h_eta_u_memLp_R34 h_phi_memLp_R34 h_phi_to_eta_u_R34
-  -- ‖η · u‖_p on B(x₀, 3R/4) = ‖u‖_p there (since η = 1).
   have h_eta_u_eq_u_eLp : eLpNorm (fun z => η z * u z) (ENNReal.ofReal p)
       (volume.restrict (Metric.ball x₀ (3 * R / 4))) =
       eLpNorm u (ENNReal.ofReal p) (volume.restrict (Metric.ball x₀ (3 * R / 4))) := by
     refine eLpNorm_congr_ae ?_
     filter_upwards [self_mem_ae_restrict measurableSet_ball] with z hz
     exact h_eta_u_eq_u_on_R34 z hz
-  -- ‖u‖_p on B(x₀, 3R/4) ≤ ‖u‖_p on B(x₀, R).
   set Nu : ℝ := (eLpNorm u (ENNReal.ofReal p)
     (volume.restrict (Metric.ball x₀ R))).toReal with hNu_def
   have hNu_nn : 0 ≤ Nu := ENNReal.toReal_nonneg
@@ -4691,11 +4291,6 @@ private theorem morrey_representative_of_W1pWitness
       hu.memLp.eLpNorm_ne_top
     refine ENNReal.toReal_mono h_lt ?_
     exact eLpNorm_mono_measure _ (Measure.restrict_mono_set _ h_ball_R34_sub_R)
-  -- Convergence of ‖∇φ n‖_p → Σ_i ‖weakGrad u i‖_p (we already have this via
-  -- h_grad_norm_le_sum_components → sum).
-  -- But for the limit, we need an EQUALITY ish or take a combined limit.
-  -- We use h_sum_grad_real_to_w_u for the gradient norm sum.
-  -- The bound: ‖φ n x‖ ≤ C_sup * (‖φ n‖_p + Σ_i ‖∂_i φ n‖_p) (using h_grad_norm_le_sum_components)
   have h_sup_phi_n_via_components : ∀ n, ∀ x ∈ Metric.ball x₀ (R / 4),
       ‖φ n x‖ ≤ C_sup_smooth * (
         (eLpNorm (φ n) (ENNReal.ofReal p)
@@ -4716,7 +4311,6 @@ private theorem morrey_representative_of_W1pWitness
       have := h_grad_norm_le_sum_components n
       linarith
     exact mul_le_mul_of_nonneg_left h_inner hC_sup_nn
-  -- Take limit.
   have h_sup_ũ_pre : ∀ x ∈ Metric.ball x₀ (R / 4),
       ‖ũ x‖ ≤ C_sup_smooth * (
         (eLpNorm u (ENNReal.ofReal p)
@@ -4748,7 +4342,6 @@ private theorem morrey_representative_of_W1pWitness
       (Filter.Eventually.of_forall h_n_bound)
     rw [h_eta_u_eq_u_eLp] at h_limit_le
     exact h_limit_le
-  -- Convert to the Csup * (Nu + N) form.
   have h_sup_ũ : ∀ x ∈ Metric.ball x₀ (R / 4),
       ‖ũ x‖ ≤ ((d : ℝ) + 1) * C_sup_smooth * (Nu + N) := by
     intro x hx
@@ -4781,7 +4374,6 @@ private theorem morrey_representative_of_W1pWitness
         mul_le_mul_of_nonneg_left h_factor_le hC_sup_nn
       linarith
     exact h_C_left.trans h_C_right
-  -- ============ ASSEMBLE ============
   refine ⟨ũ, (d : ℝ) * C_pair_smooth, ((d : ℝ) + 1) * C_sup_smooth, hũ_cont, ?_, ?_, h_ae_eq, ?_, ?_⟩
   · exact mul_nonneg hd_pos.le hC_pair_nn
   · exact mul_nonneg (by linarith) hC_sup_nn
@@ -4831,8 +4423,6 @@ theorem morrey_sup_bound
     morrey_representative_of_W1pWitness (d := d) hp hR hu
   refine ⟨ũ, Csup, hũ_cont, hC_nn, h_ae, ?_⟩
   intro x hx
-  -- Convert the form (eLpNorm u + eLpNorm grad).toReal to (eLpNorm u).toReal + (eLpNorm grad).toReal
-  -- inside the bound.
   have h_u_finite : eLpNorm u (ENNReal.ofReal p)
       (volume.restrict (Metric.ball x₀ R)) ≠ ⊤ := hu.memLp.eLpNorm_ne_top
   have h_grad_finite : eLpNorm (fun z => ‖hu.weakGrad z‖) (ENNReal.ofReal p)

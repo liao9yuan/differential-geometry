@@ -43,8 +43,6 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -55,8 +53,6 @@ local notation "EuclN" =>
   EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 open DifferentialGeometry.Analysis.Sobolev.Chart
-
-/-! ## Definition: chart-pulled squared model-fiber norm -/
 
 variable (I) in
 /-- Chart-pulled squared norm of the tensor section `S` at chart center `α`.
@@ -120,8 +116,6 @@ lemma tensorTrivProjPushedNormSq_nonneg
   · exact sq_nonneg _
   · exact le_rfl
 
-/-! ## Continuity on the chart target -/
-
 /-- The chart-pulled squared norm is continuous on the chart-target image,
 provided the underlying section is continuous on the chart source. The
 continuity hypothesis is phrased as continuity of the model-fiber image
@@ -136,15 +130,11 @@ theorem tensorTrivProjPushedNormSq_continuousOn_chartTarget
     ContinuousOn (tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- On the chart target, the function equals the continuous composition of
-  -- `‖TensorRSSpace.toModel (S ·)‖^2` with `(extChartAt α).symm ∘ toEuclidean.symm`.
   have hcomp : ContinuousOn
       (fun y : EuclN =>
         ‖TensorRSSpace.toModel
           (S ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))‖ ^ 2)
       (chartTargetEuclid (I := I) (M := M) α) := by
-    -- Step 1: `symm ∘ toEuclidean.symm` is continuous on chartTargetEuclid and
-    -- lands inside `(chartAt H α).source`.
     have hmaps : MapsTo
         (fun y : EuclN =>
           (extChartAt I α).symm ((toEuclidean (E := E)).symm y))
@@ -155,12 +145,9 @@ theorem tensorTrivProjPushedNormSq_continuousOn_chartTarget
     have hcont :=
       continuousOn_symm_toEuclideanSymm (I := I) (M := M) (α := α)
     exact hS.comp hcont hmaps
-  -- Combine with the indicator/zero behaviour outside.
   refine ContinuousOn.congr hcomp ?_
   intro y hy
   exact tensorTrivProjPushedNormSq_apply_of_mem (I := I) (M := M) g r s α S hy
-
-/-! ## Compact support -/
 
 /-- The chart-pulled squared norm vanishes outside the toEuclidean image of
 the chart-source-contained tsupport of the section. -/
@@ -176,12 +163,9 @@ private lemma tensorTrivProjPushedNormSq_eq_zero_off_image_tsupport
     tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S y = 0 := by
   classical
   rw [tensorTrivProjPushedNormSq_apply_of_mem (I := I) (M := M) g r s α S hy_target]
-  -- Argue the point `(extChartAt α).symm (toEuclidean.symm y)` is off `tsupport`
-  -- of the model-fiber-norm-squared function.
   set x : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hx_def
   by_contra hne
   apply hy_off
-  -- Recover the chart-target witness `z := toEuclidean.symm y`.
   obtain ⟨z, hz_target, hzy⟩ := hy_target
   have hsym_eq : (toEuclidean (E := E)).symm y = z := by
     rw [← hzy]; exact (toEuclidean (E := E)).symm_apply_apply z
@@ -207,38 +191,22 @@ theorem tensorTrivProjPushedNormSq_hasCompactSupport
     HasCompactSupport
       (tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S) := by
   classical
-  -- The carrier set in Euclidean space is the toEuclidean image of the
-  -- extChartAt image of the tsupport of `‖toModel (S ·)‖^2`. This set is
-  -- compact (continuous image of a compact set in `M`).
-  -- We use `HasCompactSupport.intro` with this compact set.
   set u : M → ℝ := fun x => ‖TensorRSSpace.toModel (S x)‖ ^ 2 with hu_def
-  -- Image of tsupport `u` under extChartAt is compact and contained in chart target.
   obtain ⟨hcompact_image, hsub_target⟩ :=
     image_extChartAt_tsupport_compact_subset_target
       (I := I) (M := M) (u := u) (α := α) hS_supp
   set K : Set EuclN := toEuclidean '' ((extChartAt I α) '' (tsupport u)) with hK_def
   have hK_compact : IsCompact K :=
     hcompact_image.image (toEuclidean (E := E)).continuous
-  -- Off `K`, the function is zero.
-  -- Use `HasCompactSupport` via `hasCompactSupport_iff_eventuallyEq` or the
-  -- direct closed-support definition.
   refine HasCompactSupport.of_support_subset_isCompact hK_compact ?_
   intro y hy_supp
-  -- `hy_supp : y ∈ support (tensorTrivProjPushedNormSq ...)`.
-  -- Argue by contradiction that `y ∈ K`.
   by_contra hy_notK
   apply hy_supp
-  -- Either `y` is off the chart-target image, in which case the value is zero;
-  -- or `y` is in the chart-target image but off `K`, in which case the value
-  -- is zero by `tensorTrivProjPushedNormSq_eq_zero_off_image_tsupport`.
   by_cases hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α
-  · -- Off `K` (= image of `tsupport u`), the function is zero on chart target.
-    exact tensorTrivProjPushedNormSq_eq_zero_off_image_tsupport
+  · exact tensorTrivProjPushedNormSq_eq_zero_off_image_tsupport
       (I := I) (M := M) g r s α S hy_target hy_notK
   · exact tensorTrivProjPushedNormSq_apply_of_notMem
       (I := I) (M := M) g r s α S hy_target
-
-/-! ## Measurability -/
 
 /-- Auxiliary: the chart-target image `chartTargetEuclid α` is Borel-measurable.
 This is just `chartTargetEuclid_measurableSet` reflected into the current
@@ -257,16 +225,7 @@ theorem tensorTrivProjPushedNormSq_measurable
       Measurable (fun x : M => ‖TensorRSSpace.toModel (S x)‖ ^ 2)) :
     Measurable (tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S) := by
   classical
-  -- Pull back via `(extChartAt α).symm ∘ toEuclidean.symm`, but only on the
-  -- chart target where this composition is meaningful; outside we have zero.
-  -- We use the globalisation trick from MeasureBridge: replace `extChartAt.symm`
-  -- by a globalised version on `E` (constantly `α` off the chart target), and
-  -- use Borel measurability of the resulting composition.
-  -- Define the function on `EuclN` directly via an indicator of `chartTargetEuclid α`.
   set u : M → ℝ := fun x => ‖TensorRSSpace.toModel (S x)‖ ^ 2 with hu_def
-  -- Build a globalised inverse chart on `E`: agrees with `extChartAt.symm` on
-  -- target, equals `α` off target. Then `u ∘ extChartAtSymmGlob` is Borel
-  -- measurable on `E`.
   have hsymm_glob_meas :
       Measurable (fun y : E =>
         ((extChartAt I α).target.piecewise
@@ -276,7 +235,6 @@ theorem tensorTrivProjPushedNormSq_measurable
       (continuousOn_extChartAt_symm (I := I) α) continuousOn_const ?_
     exact DifferentialGeometry.Integral.Measure.measurableSet_extChartAt_target
       (I := I) (M := M) α
-  -- Compose with `u`, then with `toEuclidean.symm`.
   have hu_pull :
       Measurable (fun y : E =>
         u (((extChartAt I α).target.piecewise
@@ -292,7 +250,6 @@ theorem tensorTrivProjPushedNormSq_measurable
               (fun y : E => (extChartAt I α).symm y)
               (fun _ : E => α)) ((toEuclidean (E := E)).symm z))) :=
     hu_pull.comp htoEucl
-  -- The function is the indicator of `chartTargetEuclid α` times this.
   have hindic_meas :
       Measurable ((chartTargetEuclid (I := I) (M := M) α).indicator
         (fun z : EuclN =>
@@ -300,7 +257,6 @@ theorem tensorTrivProjPushedNormSq_measurable
                 (fun y : E => (extChartAt I α).symm y)
                 (fun _ : E => α)) ((toEuclidean (E := E)).symm z)))) :=
     hu_pull'.indicator (chartTargetEuclid_measurableSet' (I := I) (M := M) α)
-  -- Show our function equals this indicator pointwise.
   have heq :
       tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S =
         (chartTargetEuclid (I := I) (M := M) α).indicator
@@ -313,7 +269,6 @@ theorem tensorTrivProjPushedNormSq_measurable
     · rw [tensorTrivProjPushedNormSq_apply_of_mem
             (I := I) (M := M) g r s α S hy]
       rw [Set.indicator_of_mem hy]
-      -- Show piecewise is `extChartAt.symm` on chart target.
       have hy_target : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
         have hpre :
             chartTargetEuclid (I := I) (M := M) α =
@@ -326,8 +281,6 @@ theorem tensorTrivProjPushedNormSq_measurable
       rw [Set.indicator_of_notMem hy]
   rw [heq]
   exact hindic_meas
-
-/-! ## Integrability on the chart target -/
 
 /-- The chart-pulled squared norm is integrable on the chart-target image,
 provided the underlying model-fiber-norm-squared function on `M` is measurable
@@ -352,10 +305,6 @@ theorem tensorTrivProjPushedNormSq_integrableOn
       (chartTargetEuclid (I := I) (M := M) α)
       (volume : MeasureTheory.Measure EuclN) := by
   classical
-  -- Strategy: bound the chart-pulled squared norm by the indicator of a
-  -- compact set `K ⊆ chartTargetEuclid α` on which the function is bounded
-  -- (continuous on the compact set, hence bounded). Outside `K` the function
-  -- is zero, so this gives global integrability.
   have hmeas :
       Measurable (tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S) :=
     tensorTrivProjPushedNormSq_measurable
@@ -379,12 +328,10 @@ theorem tensorTrivProjPushedNormSq_integrableOn
   have hcont_K :
       ContinuousOn (tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S) K :=
     hcont_target.mono hK_sub
-  -- The function is integrable on `K`.
   have hint_K :
       IntegrableOn (tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S) K
         (volume : MeasureTheory.Measure EuclN) :=
     ContinuousOn.integrableOn_compact hK_compact hcont_K
-  -- Outside `K`, the function vanishes.
   have hzero_off_K : ∀ y, y ∉ K →
       tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S y = 0 := by
     intro y hy_notK
@@ -393,8 +340,6 @@ theorem tensorTrivProjPushedNormSq_integrableOn
         (I := I) (M := M) g r s α S hy_target hy_notK
     · exact tensorTrivProjPushedNormSq_apply_of_notMem
         (I := I) (M := M) g r s α S hy_target
-  -- Global integrability follows: on `K^c` the function is zero, so its global
-  -- integral splits into the integral on `K` (finite by hint_K).
   have hf_integrable :
       Integrable (tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S)
         (volume : MeasureTheory.Measure EuclN) := by

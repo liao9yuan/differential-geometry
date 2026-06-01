@@ -110,27 +110,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The Leibniz cross-term multiplier and its kernel support
-
-The partition-of-unity Leibniz cross term carries, as a fixed `T`-independent
-multiplier, the chart-Euclidean partial `euclidPartial k (chartPushedRaw I β
-chartAtlasPOU)` of the chart-pushed partition-of-unity weight. The weight pushes
-forward to a function supported, on the chart target, inside the
-partition-of-unity kernel `chartPouKernel β`; hence the multiplier vanishes off
-that kernel and is bounded on it. -/
 
 /-- The chart-pushed partition-of-unity weight vanishes outside the
 partition-of-unity kernel of the chart. -/
@@ -139,13 +124,8 @@ private lemma chartPushedRaw_chartAtlasPOU_eq_zero_off_chartPouKernel
     chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) y = 0 := by
   classical
   by_cases htar : y ∈ chartTargetEuclid (I := I) (M := M) β
-  · -- On the chart target the value is the weight at the chart preimage; the
-    -- preimage lies outside the closed support of the weight, else `y` would
-    -- itself land in the partition-of-unity kernel.
-    rw [chartPushedRaw_apply_of_mem (I := I) (M := M) β _ htar]
+  · rw [chartPushedRaw_apply_of_mem (I := I) (M := M) β _ htar]
     refine image_eq_zero_of_notMem_tsupport (fun hb => hy ?_)
-    -- `y` is the `toEuclidean`-image of the chart image of the preimage `b`,
-    -- and `b` lies in the closed support of the partition-of-unity weight.
     have hmem : (toEuclidean (E := E)).symm y ∈ (extChartAt I β).target :=
       DifferentialGeometry.Analysis.Laplacian.MetricExtension.toEuclidean_symm_mem_target
         (I := I) (M := M) htar
@@ -153,8 +133,7 @@ private lemma chartPushedRaw_chartAtlasPOU_eq_zero_off_chartPouKernel
       ⟨(extChartAt I β).symm ((toEuclidean (E := E)).symm y), hb, ?_⟩, ?_⟩
     · exact (extChartAt I β).right_inv hmem
     · exact toEuclidean.apply_symm_apply y
-  · -- Off the chart target the chart pushforward is zero outright.
-    exact chartPushedRaw_apply_of_notMem (I := I) (M := M) β _ htar
+  · exact chartPushedRaw_apply_of_notMem (I := I) (M := M) β _ htar
 
 /-- The chart-Euclidean partial of the chart-pushed partition-of-unity weight
 vanishes outside the partition-of-unity kernel of the chart. -/
@@ -165,8 +144,6 @@ private lemma euclidPartial_chartPushedRaw_chartAtlasPOU_eq_zero_off_chartPouKer
         (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) y =
       0 := by
   classical
-  -- The chart-pushed weight is supported in the compact kernel, hence vanishes
-  -- on an open neighbourhood of `y`; so does its Fréchet derivative.
   have hsupp : Function.support
       (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) ⊆
       chartPouKernel (I := I) (M := M) β := by
@@ -202,8 +179,6 @@ private lemma contDiffOn_euclidPartial_chartPushedRaw_chartAtlasPOU
         (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)))
       (chartTargetEuclid (I := I) (M := M) β) := by
   classical
-  -- The chart-pushed weight is `C^∞` on the open chart target; its `k`-th
-  -- partial is the `C^∞` directional Fréchet derivative.
   have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) β) :=
     chartTargetEuclid_isOpen (I := I) (M := M) β
   have hbase : ContDiffOn ℝ ∞
@@ -211,8 +186,6 @@ private lemma contDiffOn_euclidPartial_chartPushedRaw_chartAtlasPOU
       (chartTargetEuclid (I := I) (M := M) β) :=
     chartPushedRaw_chartAtlasPOU_contDiffOn (I := I) (M := M) β
   intro y hy
-  -- `euclidPartial k u = fderiv ℝ u · (single k 1)`; differentiate the smooth
-  -- derivative map and evaluate at the fixed basis direction.
   have hcontDiffAt : ContDiffAt ℝ ∞
       (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) y :=
     (hbase y hy).contDiffAt (hopen.mem_nhds hy)
@@ -241,13 +214,6 @@ private lemma exists_bound_euclidPartial_chartPushedRaw_chartAtlasPOU
           ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) y‖ ≤ C :=
   exists_bound_on_chartPouKernel (I := I) (M := M) β
     (contDiffOn_euclidPartial_chartPushedRaw_chartAtlasPOU (I := I) (M := M) β k)
-
-/-! ## The globally bounded cross-term multiplier
-
-The Leibniz cross-term multiplier is replaced, for `L²` estimates, by its
-indicator restriction to the compact partition-of-unity kernel. Since the
-multiplier already vanishes off that kernel, the indicator restriction agrees
-with the multiplier everywhere, while being globally bounded. -/
 
 /-- The indicator-restricted Leibniz cross-term multiplier: the multiplier cut
 to the compact partition-of-unity kernel. It is globally bounded and agrees with
@@ -296,28 +262,6 @@ private lemma aestronglyMeasurable_crossMultiplier
   aestronglyMeasurable_indicator_mul (I := I) (M := M) β
     (contDiffOn_euclidPartial_chartPushedRaw_chartAtlasPOU (I := I) (M := M) β k)
 
-/-! ## The explicit cross-term `L²`-limit function
-
-The partition-of-unity Leibniz cross term of the `n`-th smooth approximant is
-the cross-term multiplier times the chart-pushed raw chart component of the
-approximant. On the partition-of-unity kernel — where the cross-term multiplier
-is supported — the chart-kernel cutoff equals `1`, so the chart-pushed raw chart
-component coincides there with the cutoff Euclidean chart component. The cutoff
-chart component is a continuous-linear-map image of the abstract `L²` tensor, so
-the cross term converges; multiplying by the fixed bounded multiplier preserves
-`L²`-convergence. The limit is the multiplier times the cutoff chart component
-of the eigenvector. -/
-
-/-! ## The smooth-approximant cross term and its cutoff-component identification
-
-For each smooth approximant `wₙ`, the partition-of-unity Leibniz cross term is
-the cross-term multiplier times the chart-pushed raw chart component of `wₙ`.
-The next lemma identifies the chart-pushed raw chart component, on the
-partition-of-unity kernel where the cross-term multiplier is supported, with the
-cutoff Euclidean chart component of `wₙ` — because the chart-kernel cutoff
-equals `1` on the (image of the) closed support of the partition-of-unity
-weight, which contains the kernel preimage. -/
-
 /-- On the chart target, the cross-term multiplier times the chart-pushed raw
 chart component of a smooth section equals the cross-term multiplier times the
 cutoff Euclidean chart component of that section. The multiplier vanishes off
@@ -340,13 +284,9 @@ private lemma crossMultiplier_mul_chartPushedRaw_eq_cutoffComponent
   classical
   set b : M := (extChartAt I β).symm ((toEuclidean (E := E)).symm y) with hb_def
   by_cases hker : y ∈ chartPouKernel (I := I) (M := M) β
-  · -- On the kernel, the chart preimage lies in the closed support of the
-    -- partition-of-unity weight, where the chart-kernel cutoff equals `1`.
-    have hb_supp : b ∈ tsupport
+  · have hb_supp : b ∈ tsupport
         (fun x : M => ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) := by
       obtain ⟨e, ⟨z, hz_supp, hz_eq⟩, he_eq⟩ := hker
-      -- The closed support of the weight lies in the chart source, so the
-      -- extended chart inverts on it.
       have hz_src : z ∈ (extChartAt I β).source := by
         rw [extChartAt_source]
         exact (DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate
@@ -358,7 +298,6 @@ private lemma crossMultiplier_mul_chartPushedRaw_eq_cutoffComponent
     have hcut_one :
         ((chartKernelCutoff (I := I) (M := M) β : C^∞⟮I, M; ℝ⟯) : M → ℝ) b = 1 :=
       chartKernelCutoff_eqOn_one (I := I) (M := M) β hb_supp
-    -- The chart-pushed raw chart component equals the cutoff chart component.
     have hcomp_eq :
         chartPushedRaw I β
             (tensorChartComponentRaw (I := I) (M := M) g r s S β Idx Jdx) y =
@@ -368,20 +307,8 @@ private lemma crossMultiplier_mul_chartPushedRaw_eq_cutoffComponent
       unfold cutoffComponentScalar
       rw [← hb_def, hcut_one, one_mul]
     rw [hcomp_eq]
-  · -- Off the kernel the cross-term multiplier vanishes.
-    rw [euclidPartial_chartPushedRaw_chartAtlasPOU_eq_zero_off_chartPouKernel
+  · rw [euclidPartial_chartPushedRaw_chartAtlasPOU_eq_zero_off_chartPouKernel
       (I := I) (M := M) β k hker, zero_mul, zero_mul]
-
-/-! ## The Christoffel correction at the partition-of-unity-weighted approximant
-
-The third term of the chart-component decomposition is the chart-pushed
-partition-of-unity weight times the zeroth-order Christoffel correction of the
-smooth approximant. Because `covDerivLowerOrderTerm` is a finite sum of
-`C^∞`-coefficient times raw-chart-component products, and the raw chart
-component of the partition-of-unity-weighted section is the weight times the raw
-chart component (`tensorChartComponentRaw_smul_pou`), that product equals the
-Christoffel correction at the partition-of-unity-weighted approximant — the very
-object whose `L²`-limit is `covGradChristoffelLimit`. -/
 
 /-- On the chart target, the chart-pushed partition-of-unity weight times the
 zeroth-order Christoffel correction of a smooth section equals the Christoffel
@@ -398,29 +325,11 @@ private lemma chartPushedRaw_pou_mul_covDerivLowerOrderTerm_eq
       covDerivLowerOrderTerm (I := I) (M := M) g r s
         (pouSmul (I := I) (M := M) g r s β S) β m Idx Jdx y := by
   classical
-  -- Unfold both Christoffel corrections into their finite sums; the raw chart
-  -- component of the weighted section is the weight times the raw component.
   rw [covDerivLowerOrderTerm_def, covDerivLowerOrderTerm_def,
     chartPushedRaw_apply_of_mem (I := I) (M := M) β _ hy, Finset.mul_sum]
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [tensorChartComponentRaw_smul_pou (I := I) (M := M) g r s β S p.1 p.2]
   ring
-
-/-! ## The chart-locality-free development
-
-The eigenvector resolvent, its canonical smooth approximating sequence, and the
-chart-component limit objects are all keyed on the chart-locality-free eigenbasis
-selector `tensorResolventEigenbasisVec` (via the compact-operator
-witness `tensorResolventL2_isCompactOperator`) together with the
-companion objects `eigenvectorSmoothApprox`,
-`eigenvectorResolvent`, `eigenvectorChartPartialLp`,
-`eigenvectorChartWeakPartial`, and
-`covGradChristoffelLimit`. The cross-term multiplier machinery
-(`crossMultiplier`, its bound, its measurability), the kernel-support
-identification `crossMultiplier_mul_chartPushedRaw_eq_cutoffComponent`, the
-Christoffel tracing identity `chartPushedRaw_pou_mul_covDerivLowerOrderTerm_eq`,
-and all the raw chart-component / partition-of-unity Leibniz lemmas are reused
-directly. `[CompleteSpace E]` is a section hypothesis. -/
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- Chart-locality-free twin of `covGradPouLeibnizCrossLimit`. -/
@@ -450,8 +359,6 @@ theorem covGradPouLeibnizCrossLimit_memLp
       (chartL2Measure (I := I) (M := M) β) := by
   classical
   obtain ⟨C, hC0, hC⟩ := exists_bound_crossMultiplier (I := I) (M := M) β k
-  -- The bounded multiplier times the `L²` cutoff chart component is `L²`; it
-  -- agrees a.e. with the headline cross-term limit (the multipliers coincide).
   refine (memLp_bdd_mul (I := I) (M := M) β hC0 hC
     (aestronglyMeasurable_crossMultiplier (I := I) (M := M) β k)
     (Lp.memLp (tensorL2ChartComponentCutoff (I := I) (M := M) g r s
@@ -486,15 +393,12 @@ private lemma cutoffComponent_smoothApprox_tendsto
             (tensorResolventL2_isCompactOperator (I := I) (M := M)
               g r s) i) β P₀)) := by
   classical
-  -- Apply `TensorH1ComplToTensorL2` to the `H¹`-convergence.
   have h_l2 :=
     ((TensorH1ComplToTensorL2 (I := I) (M := M) g r s).continuous.tendsto _).comp
       (eigenvectorSmoothApprox_tendsto (I := I) (M := M) g r s i)
-  -- Apply the cutoff chart-component continuous linear map.
   have h_clm :=
     ((tensorL2ChartComponentCutoffCLM (I := I) (M := M) g r s β P₀).continuous.tendsto
       _).comp h_l2
-  -- Rewrite the `n`-th term and the limit.
   have h_term : ∀ n : ℕ,
       tensorL2ChartComponentCutoffCLM (I := I) (M := M) g r s β P₀
           (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
@@ -516,7 +420,6 @@ private lemma cutoffComponent_smoothApprox_tendsto
             (tensorResolventEigenbasisVec (I := I) (M := M)
               (tensorResolventL2_isCompactOperator (I := I) (M := M)
                 g r s) i) β P₀ := by
-    -- `TensorH1ComplToTensorL2 (eigenvectorResolvent …) = μ • φ`.
     have hμ_ne : i.fst.val ≠ 0 := i.fst.val_ne_zero
     have h_shadow :
         TensorH1ComplToTensorL2 (I := I) (M := M) g r s
@@ -586,8 +489,6 @@ private lemma crossTermApprox_ae_eq_crossTermCutoff
       =ᵐ[chartL2Measure (I := I) (M := M) β]
       crossTermCutoff (I := I) (M := M) g r s i β P₀ k n := by
   classical
-  -- The cutoff chart component is a.e. the concrete cutoff Euclidean component;
-  -- chart-target membership holds a.e. for the restricted chart `L²` measure.
   have h_coeFn :=
     tensorL2ChartComponentCutoff_smoothToTensorL2_coeFn (I := I) (M := M)
       g r s (eigenvectorSmoothApprox (I := I) (M := M)
@@ -597,7 +498,6 @@ private lemma crossTermApprox_ae_eq_crossTermCutoff
     rw [chartL2Measure]
     exact ae_restrict_mem (chartTargetEuclid_measurableSet (I := I) (M := M) β)
   filter_upwards [h_coeFn, h_mem] with y hy_coe hy
-  -- On the chart target, rewrite both factors into the cutoff chart component.
   unfold crossTermApprox crossTermCutoff
   rw [crossMultiplier_mul_chartPushedRaw_eq_cutoffComponent
     (I := I) (M := M) g r s
@@ -637,14 +537,11 @@ theorem covGradPouLeibnizCrossLimit_tendsto
           g r s i β P₀ k))) := by
   classical
   obtain ⟨C, hC0, hC⟩ := exists_bound_crossMultiplier (I := I) (M := M) β k
-  -- `tendsto_bdd_mul` for the cutoff-chart-component convergence, rescaled by
-  -- the continuous map `μ⁻¹ • ·`.
   have h_smul :=
     (tendsto_bdd_mul (I := I) (M := M) β hC0 hC
       (aestronglyMeasurable_crossMultiplier (I := I) (M := M) β k)
       (cutoffComponent_smoothApprox_tendsto (I := I) (M := M)
         g r s i β P₀)).const_smul (i.fst.val)⁻¹
-  -- The limit `L²` class of `h_smul` equals the headline cross-term limit.
   have h_lim :
       (i.fst.val)⁻¹ •
           (memLp_bdd_mul (I := I) (M := M) β hC0 hC
@@ -666,7 +563,6 @@ theorem covGradPouLeibnizCrossLimit_tendsto
           g r s i β P₀ k).toLp
           (covGradPouLeibnizCrossLimit (I := I) (M := M)
             g r s i β P₀ k) := by
-    -- Pass to `coeFn`: `μ⁻¹ • (multiplier · μ • cutoff φ) = multiplier · cutoff φ`.
     apply Lp.ext
     refine (Lp.coeFn_smul (i.fst.val)⁻¹ _).trans ?_
     refine Filter.EventuallyEq.trans ?_
@@ -684,16 +580,12 @@ theorem covGradPouLeibnizCrossLimit_tendsto
           (tensorResolventEigenbasisVec (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M)
               g r s) i) β P₀)] with y hy_toLp hy_smul
-    -- `μ⁻¹ • (multiplier · (μ • cutoff φ) y) = multiplier · cutoff φ y`.
     rw [Pi.smul_apply, hy_toLp, crossMultiplier_eq (I := I) (M := M) β k y,
       hy_smul, Pi.smul_apply, smul_eq_mul, smul_eq_mul]
     unfold covGradPouLeibnizCrossLimit
     have hμ_ne : i.fst.val ≠ 0 := i.fst.val_ne_zero
     field_simp
   rw [h_lim] at h_smul
-  -- The `n`-th terms agree: the `L²` classes of `crossTermApprox`
-  -- and `crossTermCutoff` coincide by the kernel-support
-  -- identification.
   refine h_smul.congr' (Filter.Eventually.of_forall (fun n => ?_))
   congr 1
   exact (MemLp.toLp_congr _ _
@@ -728,29 +620,21 @@ private lemma covGrad_chartComponent_ae_decompose
   refine (ae_restrict_iff'
     (chartTargetEuclid_measurableSet (I := I) (M := M) β)).mpr ?_
   refine Filter.Eventually.of_forall (fun y hy => ?_)
-  -- Abbreviate the smooth approximant section.
   set S : SmoothCcTensor g r s :=
     (eigenvectorSmoothApprox (I := I) (M := M) g r s i n).toCcTensor
     with hS_def
-  -- The chart component is the chart-pushed weight times the chart-pushed raw
-  -- component of the covariant gradient.
   rw [tensorChartComponent_eq_chartPushedRaw_pou_mul_chartPushedRaw_raw_on_target
     (I := I) (M := M) g r (s + 1) (covGrad (I := I) (M := M) g r s S) β
     Q'.1 Q'.2 hy]
-  -- The raw chart component of `covGrad` is the chart-Euclidean partial plus
-  -- the Christoffel correction (the raw chart-component formula).
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) β
       (tensorChartComponentRaw (I := I) (M := M) g r (s + 1)
         (covGrad (I := I) (M := M) g r s S) β Q'.1 Q'.2) hy,
     tensorChartComponentRaw_covGrad (I := I) (M := M) g r s S β
       Q'.1 Q'.2 hy, mul_add]
-  -- The partition-of-unity Leibniz identity for the principal term.
   rw [chartPushedRaw_pou_mul_euclidPartial_eq (I := I) (M := M) g r s S β
     Q'.1 (Matrix.vecTail Q'.2) (Q'.2 0) hy]
-  -- The Christoffel-correction term is the correction at the weighted section.
   rw [chartPushedRaw_pou_mul_covDerivLowerOrderTerm_eq (I := I) (M := M)
     g r s S β (Q'.2 0) Q'.1 (Matrix.vecTail Q'.2) hy]
-  -- Identify the Leibniz cross term and rearrange.
   simp only [crossTermApprox]
   ring
 
@@ -772,16 +656,12 @@ private lemma principalTerm_tendsto
       (𝓝 (eigenvectorChartPartialLp (I := I) (M := M)
         g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0))) := by
   classical
-  -- The principal term `L²` class equals the `L²` class of the chosen weak
-  -- chart partial; rescale `eigenvectorChartPartialLp_tendsto`.
   refine (eigenvectorChartPartialLp_tendsto (I := I) (M := M)
     g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0)).congr'
     (Filter.Eventually.of_forall (fun n => ?_))
-  -- The `n`-th term of the headline `tendsto`, identified concretely.
   rw [eigenvectorChartPartialLp_approx_eq (I := I) (M := M)
     g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0) n]
   congr 1
-  -- The chosen weak chart partial agrees a.e. with the classical partial.
   exact MemLp.toLp_congr _ _
     (chosenWeakPartial'_tensorChartComponent_ae_eq (I := I) (M := M)
       g r s (eigenvectorSmoothApprox (I := I) (M := M)
@@ -808,8 +688,6 @@ private lemma christoffelTerm_tendsto
         (covGradChristoffelLimit (I := I) (M := M)
           g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0)))) := by
   classical
-  -- `covGradChristoffel_tendsto` is exactly this, with the `n`-th
-  -- `L²` class presented through its own `MemLp` witness.
   refine (covGradChristoffel_tendsto (I := I) (M := M)
     g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0)).congr'
     (Filter.Eventually.of_forall (fun n => ?_))
@@ -835,8 +713,6 @@ private lemma covGrad_chartComponent_tendsto
             (eigenvectorResolvent (I := I) (M := M)
               g r s i)) β Q')) := by
   classical
-  -- Apply the covariant-gradient operator, then the canonical chart-component
-  -- continuous linear map, to the `H¹`-convergence; rescale by `μ⁻¹ • ·`.
   have h1 :=
     ((tensorCovGradL2Compl (I := I) (M := M) g r s).continuous.tendsto _).comp
       (eigenvectorSmoothApprox_tendsto (I := I) (M := M) g r s i)
@@ -845,7 +721,6 @@ private lemma covGrad_chartComponent_tendsto
       _).comp h1
   have h_smul := h2.const_smul (i.fst.val)⁻¹
   simp only [Function.comp_def] at h_smul
-  -- Identify the `n`-th term: the chart component of `covGrad wₙ.toCcTensor`.
   refine h_smul.congr (fun n => ?_)
   rw [tensorL2ChartComponentCLM_apply,
     tensorCovGradL2Compl_smoothToTensorH1Compl_eq_coe (I := I) (M := M)
@@ -879,7 +754,6 @@ theorem eigenvectorCovGrad_pou_chartComponent_ae_eq
           + covGradChristoffelLimit (I := I) (M := M) g r s i β
               (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0) y) := by
   classical
-  -- The three per-term `MemLp` witnesses.
   have hf1 : ∀ n : ℕ, MemLp
       (euclidPartial (E := E) (Q'.2 0)
         (tensorChartComponent (I := I) (M := M) g r s
@@ -909,7 +783,6 @@ theorem eigenvectorCovGrad_pou_chartComponent_ae_eq
       (chartL2Measure (I := I) (M := M) β) := fun n =>
     covDerivLowerOrderTerm_pouSmul_memLp (I := I) (M := M) g r s i β
       (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0) n
-  -- The chart component of `covGrad wₙ.toCcTensor` is `L²`.
   have hfA : ∀ n : ℕ, MemLp
       (tensorChartComponent (I := I) (M := M) g r (s + 1)
         (covGrad (I := I) (M := M) g r s
@@ -920,12 +793,8 @@ theorem eigenvectorCovGrad_pou_chartComponent_ae_eq
       (covGrad (I := I) (M := M) g r s
         (eigenvectorSmoothApprox (I := I) (M := M)
           g r s i n).toCcTensor) β Q'.1 Q'.2
-  -- The `μ⁻¹`-rescaled chart-component `L²` classes converge to the rescaled
-  -- chart component of the resolvent's covariant gradient.
   have h_tendsto_A :=
     covGrad_chartComponent_tendsto (I := I) (M := M) g r s i β Q'
-  -- Identify each `n`-th rescaled chart-component class as the `μ⁻¹`-rescaled
-  -- combination of the three term `L²` classes.
   have h_term : ∀ n : ℕ,
       (i.fst.val)⁻¹ •
           tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
@@ -937,12 +806,9 @@ theorem eigenvectorCovGrad_pou_chartComponent_ae_eq
             (i.fst.val)⁻¹ • (hf2 n).toLp _) +
           (i.fst.val)⁻¹ • (hf3 n).toLp _ := by
     intro n
-    -- Pass to `coeFn`: both sides agree a.e. with `μ⁻¹` times the per-approximant
-    -- chart-component decomposition.
     apply Lp.ext
     have h_decomp := covGrad_chartComponent_ae_decompose (I := I) (M := M)
       g r s i β Q' n
-    -- The left-hand side `coeFn`: `μ⁻¹` times the concrete chart component.
     have h_lhs :
         (((i.fst.val)⁻¹ •
             tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
@@ -968,7 +834,6 @@ theorem eigenvectorCovGrad_pou_chartComponent_ae_eq
             (eigenvectorSmoothApprox (I := I) (M := M)
               g r s i n).toCcTensor) β Q'] with y hy_smul hy_comp
       rw [hy_smul, Pi.smul_apply, hy_comp]
-    -- The right-hand side `coeFn`: `μ⁻¹` times the three-term combination.
     have h_rhs :
         ((((i.fst.val)⁻¹ • (hf1 n).toLp _ -
               (i.fst.val)⁻¹ • (hf2 n).toLp _) +
@@ -1002,7 +867,6 @@ theorem eigenvectorCovGrad_pou_chartComponent_ae_eq
         Pi.smul_apply, Pi.smul_apply, ht1, ht2, ht3]
       simp only [smul_eq_mul]
       ring
-    -- Combine: both sides equal `μ⁻¹` times the decomposition.
     refine h_lhs.trans (Filter.EventuallyEq.trans ?_ h_rhs.symm)
     filter_upwards [h_decomp] with y hy_decomp
     rw [hy_decomp]
@@ -1015,14 +879,12 @@ theorem eigenvectorCovGrad_pou_chartComponent_ae_eq
       (fun n => ((i.fst.val)⁻¹ • (hf1 n).toLp _ -
           (i.fst.val)⁻¹ • (hf2 n).toLp _) +
         (i.fst.val)⁻¹ • (hf3 n).toLp _) from funext h_term] at h_tendsto_A
-  -- The three termwise limits.
   have h_lim1 := principalTerm_tendsto (I := I) (M := M)
     g r s i β Q' hf1
   have h_lim2 := covGradPouLeibnizCrossLimit_tendsto (I := I) (M := M)
     g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0)
   have h_lim3 := christoffelTerm_tendsto (I := I) (M := M)
     g r s i β Q' hf3
-  -- The cross-term `tendsto` `n`-th term is `μ⁻¹ • (hf2 n).toLp`.
   have h_lim2' : Filter.Tendsto
       (fun n => (i.fst.val)⁻¹ • (hf2 n).toLp _) atTop
       (𝓝 ((covGradPouLeibnizCrossLimit_memLp (I := I) (M := M)
@@ -1031,7 +893,6 @@ theorem eigenvectorCovGrad_pou_chartComponent_ae_eq
           g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0)))) := by
     refine h_lim2.congr (fun n => ?_)
     congr 1
-  -- Assemble the limit of the three-term combination.
   have h_lim_sum :
       Filter.Tendsto
         (fun n => ((i.fst.val)⁻¹ • (hf1 n).toLp _ -
@@ -1049,12 +910,9 @@ theorem eigenvectorCovGrad_pou_chartComponent_ae_eq
             (covGradChristoffelLimit (I := I) (M := M)
               g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0)))) :=
     (h_lim1.sub h_lim2').add h_lim3
-  -- Uniqueness of `L²`-limits identifies the two limits.
   have h_eq := tendsto_nhds_unique h_tendsto_A h_lim_sum
-  -- Pass to `coeFn` and identify the right-hand side function.
   apply Lp.ext_iff.mp at h_eq
   refine h_eq.trans ?_
-  -- The right-hand side `L²` class coerces to the headline function.
   have h_w := MemLp.coeFn_toLp (covGradPouLeibnizCrossLimit_memLp
     (I := I) (M := M) g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0))
   have h_c := MemLp.coeFn_toLp (covGradChristoffelLimit_memLp

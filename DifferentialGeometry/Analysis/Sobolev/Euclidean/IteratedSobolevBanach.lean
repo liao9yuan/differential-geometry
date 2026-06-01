@@ -31,8 +31,6 @@ variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Subsequence extraction with summable bound -/
-
 /-- Extract a strictly-monotone subsequence index `φ` such that consecutive
 `wkpNorm` differences along the subsequence are bounded by `1/2^(i+1)`. -/
 private theorem exists_subseq_geom_bound
@@ -43,7 +41,6 @@ private theorem exists_subseq_geom_bound
       ∀ i, wkpNorm (d := d) k p (fun x => u (φ (i + 1)) x - u (φ i) x) Ω ≤
         ENNReal.ofReal ((1 : ℝ) / 2 ^ (i + 1)) := by
   classical
-  -- For each i, choose N_i such that beyond N_i, wkpNorm diff ≤ 1/2^(i+1).
   have h_choose : ∀ i : ℕ, ∃ N, ∀ m n, N ≤ m → N ≤ n →
       wkpNorm (d := d) k p (fun x => u m x - u n x) Ω ≤
         ENNReal.ofReal ((1 : ℝ) / 2 ^ (i + 1)) := by
@@ -55,7 +52,6 @@ private theorem exists_subseq_geom_bound
       wkpNorm (d := d) k p (fun x => u m x - u n x) Ω ≤
         ENNReal.ofReal ((1 : ℝ) / 2 ^ (i + 1)) :=
     fun i => (h_choose i).choose_spec
-  -- Inductive construction: φ 0 := N_seq 0, φ (i+1) := max (N_seq (i+1)) (φ i + 1).
   let φ : ℕ → ℕ := fun i => Nat.rec (N_seq 0)
     (fun i φi => max (N_seq (i + 1)) (φi + 1)) i
   have hφ_zero : φ 0 = N_seq 0 := rfl
@@ -72,15 +68,11 @@ private theorem exists_subseq_geom_bound
     | succ i => rw [hφ_succ]; exact le_max_left _ _
   refine ⟨φ, hφ_strict, ?_⟩
   intro i
-  -- We bound wkpNorm (u (φ (i+1)) - u (φ i)) using hN_spec for i.
-  -- Need N_seq i ≤ φ (i+1) and N_seq i ≤ φ i.
   have h_φi : N_seq i ≤ φ i := hφ_ge_N i
   have h_φi1 : N_seq i ≤ φ (i + 1) := by
     rw [hφ_succ]
     exact le_trans h_φi (le_trans (Nat.le_succ _) (le_max_right _ _))
   exact hN_spec i (φ (i + 1)) (φ i) h_φi1 h_φi
-
-/-! ## Summability and tail bounds for the geometric series -/
 
 /-- The series `(1/2)^i` is summable in `ℝ`. -/
 private lemma summable_geom_pow_two : Summable (fun i : ℕ => (1 : ℝ) / 2 ^ i) := by
@@ -109,8 +101,6 @@ private lemma tsum_ofReal_2_div_pow_ne_top :
   rw [h_eq]
   exact ENNReal.ofReal_ne_top
 
-/-! ## Triangle inequality across telescoping -/
-
 /-- Telescoping triangle inequality for `wkpNorm`: bound the distance between
 two elements of a sequence by the sum of consecutive differences. -/
 private theorem wkpNorm_telescope_sum
@@ -131,7 +121,6 @@ private theorem wkpNorm_telescope_sum
       rw [h_zero_fun]
       rw [wkpNorm_zero_fun_zero (d := d) hp hΩ]
   | succ ℓ ih =>
-      -- Abbreviations to keep terms manageable.
       set L : E → ℝ := fun x => v (n + (ℓ + 1)) x - v n x with hL_def
       set A : E → ℝ := fun x => v (n + ℓ) x - v n x with hA_def
       set C : E → ℝ := fun x => v (n + ℓ + 1) x - v (n + ℓ) x with hC_def
@@ -186,8 +175,6 @@ private theorem wkpNorm_telescope_sum
               wkpNorm (d := d) k p
                 (fun x => v (n + i + 1) x - v (n + i) x) Ω := h_succ_eq
 
-/-! ## Symmetry of `wkpNorm` under negation of the difference -/
-
 /-- `wkpNorm k p (a - b) = wkpNorm k p (b - a)`. -/
 private theorem wkpNorm_sub_comm
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p)
@@ -203,12 +190,9 @@ private theorem wkpNorm_sub_comm
     MemWkp.sub (d := d) hp hΩ hb ha
   rw [h_eq]
   rw [wkpNorm_const_smul (d := d) hp hΩ h_ba (-1)]
-  -- ‖(-1 : ℝ)‖ₑ = 1.
   have h_norm_neg_one : ‖(-1 : ℝ)‖ₑ = 1 := by
     simp
   rw [h_norm_neg_one, one_mul]
-
-/-! ## Geometric tail bound -/
 
 /-- The partial geometric sum closed form: `∑_{i=0}^{ℓ-1} (1/2)^i = 2 - 2 * (1/2)^ℓ`. -/
 private lemma partial_geom_sum_eq (ℓ : ℕ) :
@@ -234,7 +218,6 @@ private lemma partial_geom_sum_lt_two (ℓ : ℕ) :
 private lemma scaled_partial_geom_sum_lt
     (n ℓ : ℕ) :
     ∑ i ∈ Finset.range ℓ, (1 : ℝ) / 2 ^ (n + i + 1) < (1 : ℝ) / 2 ^ n := by
-  -- Σ 1/2^(n+i+1) = (1/2^(n+1)) * Σ (1/2)^i.
   have h_factor : ∀ i : ℕ, (1 : ℝ) / 2 ^ (n + i + 1) =
       (1 / 2 ^ (n + 1)) * ((1 / 2) ^ i) := by
     intro i
@@ -251,7 +234,6 @@ private lemma scaled_partial_geom_sum_lt
   rw [h_sum_eq]
   have h_sum_lt : ∑ i ∈ Finset.range ℓ, ((1 : ℝ) / 2) ^ i < 2 := partial_geom_sum_lt_two ℓ
   have h_pos : (0 : ℝ) < 1 / 2 ^ (n + 1) := by positivity
-  -- (1 / 2^(n+1)) * S < (1 / 2^(n+1)) * 2 = 1 / 2^n.
   calc
     (1 / 2 ^ (n + 1)) * ∑ i ∈ Finset.range ℓ, ((1 : ℝ) / 2) ^ i
         < (1 / 2 ^ (n + 1)) * 2 := by
@@ -273,7 +255,6 @@ private theorem wkpNorm_subseq_lt
     ∀ N n m : ℕ, N ≤ n → N ≤ m →
       wkpNorm (d := d) k p (fun x => u (φ n) x - u (φ m) x) Ω <
         ENNReal.ofReal (2 * (1 : ℝ) / 2 ^ N) := by
-  -- Auxiliary: for any a ≤ b, wkpNorm (u_φb - u_φa) ≤ 1/2^a (strictly less actually).
   have h_aux : ∀ a b : ℕ, a ≤ b →
       wkpNorm (d := d) k p (fun x => u (φ b) x - u (φ a) x) Ω ≤
       ENNReal.ofReal ((1 : ℝ) / 2 ^ a) := by
@@ -301,9 +282,7 @@ private theorem wkpNorm_subseq_lt
       apply ENNReal.ofReal_le_ofReal
       exact (scaled_partial_geom_sum_lt a ℓ).le
     exact le_trans h_telescope (le_trans h_sum_bound h_geom_sum)
-  -- Now the main argument.
   intro N n m hn hm
-  -- Helper: 1/2^a < 2/2^N for a ≥ N.
   have h_strict_real : ∀ a : ℕ, N ≤ a → (1 : ℝ) / 2 ^ a < 2 * (1 : ℝ) / 2 ^ N := by
     intro a hNa
     have h_pow : (2 : ℝ) ^ N ≤ 2 ^ a :=
@@ -312,11 +291,9 @@ private theorem wkpNorm_subseq_lt
     have h3 : 0 < (2 : ℝ) ^ N := by positivity
     have h_div_le : (1 : ℝ) / 2 ^ a ≤ 1 / 2 ^ N := one_div_le_one_div_of_le h3 h_pow
     have h_pos : (0 : ℝ) < 1 / 2 ^ N := by positivity
-    -- 1/2^N < 2 * 1/2^N (since 1 < 2).
     have h_lt : (1 : ℝ) / 2 ^ N < 2 * (1 / 2 ^ N) := by
       have : (1 : ℝ) < 2 := by norm_num
       nlinarith
-    -- 2 * (1/2^N) = (2 * 1) / 2^N = 2 / 2^N.
     have h_eq : (2 : ℝ) * ((1 : ℝ) / 2 ^ N) = 2 * (1 : ℝ) / 2 ^ N := by ring
     rw [h_eq] at h_lt
     linarith
@@ -335,8 +312,6 @@ private theorem wkpNorm_subseq_lt
       rw [ENNReal.ofReal_lt_ofReal_iff (by positivity)]
       exact h_strict_real m hm
     exact lt_of_le_of_lt h_le h_strict
-
-/-! ## Existence of L^p limits along the subsequence -/
 
 /-- For each `(j, β)` with `j ≤ k`, the iterated weak partial of order `j`
 along `β` of the subsequence has an `L^p` limit `v j β`. -/
@@ -366,7 +341,6 @@ private theorem exists_iter_limits_subseq
         (fun x => u (φ n) x - u (φ m) x) Ω < B N :=
     wkpNorm_subseq_lt (d := d) hp_one hΩ hu_mem hφ_strict h_geom
   have hu_φ : ∀ i, MemWkp (d := d) k p (u (φ i)) Ω := fun i => hu_mem (φ i)
-  -- Build v(j, β) using exists_eLpNorm_limit_iterWeakPartial for each j ≤ k.
   have h_each : ∀ (j : ℕ) (β : Fin j → Fin d), j ≤ k → ∃ v_jβ : E → ℝ,
       MemLp v_jβ p (volume.restrict Ω) ∧
       atTop.Tendsto
@@ -380,7 +354,6 @@ private theorem exists_iter_limits_subseq
   refine ⟨fun j β => if hj : j ≤ k then (h_each j β hj).choose else (fun _ : E => (0 : ℝ)),
     ?_, ?_⟩
   · intro j β hj
-    -- (h_each j β hj).choose has the desired property.
     change MemLp (if hj' : j ≤ k then (h_each j β hj').choose else (fun _ : E => (0 : ℝ)))
       p (volume.restrict Ω)
     rw [dif_pos hj]
@@ -393,8 +366,6 @@ private theorem exists_iter_limits_subseq
       atTop (𝓝 0)
     rw [dif_pos hj]
     exact (h_each j β hj).choose_spec.2
-
-/-! ## Subsequence limit is in `MemWkp k p` and gives `wkpNorm` convergence -/
 
 /-- The order-0 limit `v 0 ![]` of the subsequence is in `MemWkp k p`, and the
 subsequence converges to it in `wkpNorm`. -/
@@ -413,17 +384,13 @@ private theorem subseq_limit_memWkp_and_wkpNorm_tendsto
         (fun i => wkpNorm (d := d) k p (fun x => u (φ i) x - u_lim x) Ω)
         atTop (𝓝 0) := by
   classical
-  -- Get the L^p limits via the subsequence-limit structural lemma.
   obtain ⟨v, hv_lp, h_v_tendsto⟩ :=
     exists_iter_limits_subseq (d := d) hp_one hΩ hu_mem hφ_strict h_geom
-  -- Apply MemWkp_of_iter_tendsto_eLpNorm.
   obtain ⟨h_lim_mem, h_lim_iter_ae⟩ :=
     MemWkp_of_iter_tendsto_eLpNorm (d := d) hp_one hp_top hΩ k
       (u_n := fun i => u (φ i)) (fun i => hu_mem (φ i)) v hv_lp h_v_tendsto
   refine ⟨v 0 ![], h_lim_mem, ?_⟩
-  -- wkpNorm = Σ_{j ≤ k} Σ_β eLpNorm (iter sub).
   unfold wkpNorm
-  -- For each (j, β) with j ≤ k, the eLpNorm tends to 0.
   have h_per_pair : ∀ (j : ℕ) (_hj : j ∈ Finset.range (k + 1)) (β : Fin j → Fin d),
       Tendsto
         (fun i => eLpNorm
@@ -435,7 +402,6 @@ private theorem subseq_limit_memWkp_and_wkpNorm_tendsto
     have h_lim_v : MemWkp (d := d) j p (v 0 ![]) Ω := MemWkp.le_of_le hj_le h_lim_mem
     have h_seq_v : ∀ i, MemWkp (d := d) j p (u (φ i)) Ω :=
       fun i => MemWkp.le_of_le hj_le (hu_mem (φ i))
-    -- iterWeakPartial j β (u_{φ i} - v 0 ![]) =ᵐ iter j β u_{φ i} - iter j β (v 0 ![]) =ᵐ iter j β u_{φ i} - v j β.
     have h_iter_sub : ∀ i,
         iterWeakPartial (d := d) p j β (fun x => u (φ i) x - v 0 ![] x) Ω
           =ᵐ[volume.restrict Ω]
@@ -463,7 +429,6 @@ private theorem subseq_limit_memWkp_and_wkpNorm_tendsto
       rw [hx_add]
       rw [hx_smul]
       ring
-    -- iterWeakPartial j β (v 0 ![]) =ᵐ v j β.
     have h_iter_v_ae :
         iterWeakPartial (d := d) p j β (v 0 ![]) Ω =ᵐ[volume.restrict Ω] v j β :=
       h_lim_iter_ae j β hj_le
@@ -492,7 +457,6 @@ private theorem subseq_limit_memWkp_and_wkpNorm_tendsto
       funext i; exact h_norm_eq i
     rw [h_eq_fun]
     exact h_targ
-  -- Inner sum tends to 0.
   have h_inner_tendsto : ∀ j ∈ Finset.range (k + 1),
       Tendsto
         (fun n => ∑ β : Fin j → Fin d,
@@ -511,8 +475,6 @@ private theorem subseq_limit_memWkp_and_wkpNorm_tendsto
     simpa using hsum
   have hfinal := tendsto_finset_sum (Finset.range (k + 1)) h_inner_tendsto
   simpa using hfinal
-
-/-! ## Cauchy + subsequence convergence implies full sequence convergence -/
 
 /-- If `(a_n)` is `wkpNorm`-Cauchy and a subsequence `(a_{φ(n)})` converges to
 `a_lim` in `wkpNorm`, then `(a_n)` itself converges to `a_lim` in `wkpNorm`. -/
@@ -542,9 +504,7 @@ private theorem wkpNorm_tendsto_of_cauchy_of_subseq
   have hε_real_pos : 0 < ε.toReal := ENNReal.toReal_pos hε_pos.ne' hε_ne
   set δ : ℝ := ε.toReal / 2 with hδ_def
   have hδ_pos : 0 < δ := half_pos hε_real_pos
-  -- Cauchy: m, n ≥ N₁ ⇒ wkpNorm ≤ ENNReal.ofReal δ.
   obtain ⟨N₁, hN₁⟩ := hu_cauchy δ hδ_pos
-  -- Subseq tendsto: i ≥ N₂ ⇒ wkpNorm (u_{φ i} - u_lim) ≤ ENNReal.ofReal δ.
   have hδ_ofReal_pos : 0 < ENNReal.ofReal δ := by
     rw [ENNReal.ofReal_pos]; exact hδ_pos
   rw [ENNReal.tendsto_atTop_zero] at h_subseq_tendsto
@@ -585,8 +545,6 @@ private theorem wkpNorm_tendsto_of_cauchy_of_subseq
         ring
     _ = ε := ENNReal.ofReal_toReal hε_ne
 
-/-! ## Main statement: existence of a `wkpNorm` limit -/
-
 /-- **Cauchy completeness** of the iterated Euclidean Sobolev space `W^{k,p}(Ω)`:
 every Cauchy sequence with respect to the `wkpNorm` semi-distance has a limit in
 `MemWkp k p Ω`, with `wkpNorm`-convergence. -/
@@ -604,14 +562,11 @@ theorem MemWkp.exists_limit_of_wkpNorm_cauchy
         (fun n => wkpNorm (d := d) k p (fun x => u n x - u_lim x) Ω)
         Filter.atTop (𝓝 0) := by
   classical
-  -- Step 1: Extract a subsequence with summable consecutive bounds.
   obtain ⟨φ, hφ_strict, h_geom⟩ :=
     exists_subseq_geom_bound (d := d) (k := k) (p := p) (Ω := Ω) (u := u) hu_cauchy
-  -- Step 2: The subsequence has a wkpNorm-limit u_lim ∈ MemWkp k p.
   obtain ⟨u_lim, hu_lim_mem, h_subseq_tendsto⟩ :=
     subseq_limit_memWkp_and_wkpNorm_tendsto (d := d) hp_one hp_top hΩ_open
       hu_mem hφ_strict h_geom
-  -- Step 3: Full sequence converges to u_lim by Cauchy + subseq.
   refine ⟨u_lim, hu_lim_mem, ?_⟩
   exact wkpNorm_tendsto_of_cauchy_of_subseq (d := d) hp_one hΩ_open
     hu_mem hu_lim_mem hu_cauchy hφ_strict h_subseq_tendsto

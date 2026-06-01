@@ -66,21 +66,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The covariant-gradient bundle equivalence reads the directional derivative on the slot-`0`
-curry
-
-For a smooth `(0, 2)`-tensor section `σ`, the `(0, 3)`-tensor `covGradBundleEquiv 0 2 x (Φ)` (with
-`Φ := ∇^{(0,2)RS}_·σ(x)` the directional covariant derivative read as a continuous-linear map of the
-gradient direction), evaluated at the unit `(0, 0)`-tensor and slot-`0`-curried along `v`, is the
-directional covariant derivative `Φ v` applied to the unit. This is the fibrewise evaluation lemma
-`covGradBundleEquiv_apply_eval`, re-read through the slot-`0` curry. -/
 
 /-- **The slot-`0` curry reads the directional derivative off the gradient slot.** For any
 continuous-linear map `Φ : TangentSpace I x →L[ℝ] TensorRSSpace 0 2 I x`, the slot-`0` curry of the
@@ -100,11 +89,9 @@ theorem tensor0S_curry_covGradBundleEquiv_unit
           (unitZeroSec (I := I) (M := M) x)) v =
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from Φ v)
         (unitZeroSec (I := I) (M := M) x) := by
-  -- Reduce to an equality of `(0, 2)`-model tensors, evaluated at every `Fin 2`-tuple.
   apply Tensor0SSpace.toModel_injective
   apply ContinuousMultilinearMap.ext
   intro u
-  -- The slot-`0` curry's model value, evaluated on `u`, is the `(0, 3)` model value on `cons v u`.
   rw [show Tensor0SSpace.toModel
         (tensor0S_curry (I := I) (M := M) 2 x
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from
@@ -119,22 +106,12 @@ theorem tensor0S_curry_covGradBundleEquiv_unit
       ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from
         covGradBundleEquiv (I := I) (M := M) 0 2 x Φ)
         (unitZeroSec (I := I) (M := M) x)) v u)]
-  -- The `(0, 3)` model value on `cons v u` reads the gradient slot `v` off slot `0`.
   rw [covGradBundleEquiv_apply_eval (I := I) (M := M) 0 2 x Φ
     (unitZeroSec (I := I) (M := M) x) (Fin.cons v u)]
-  -- `(cons v u) 0 = v` and `vecTail (cons v u) = u`.
   have hzero : (Fin.cons v u : Fin 3 → TangentSpace I x) 0 = v := by rw [Fin.cons_zero]
   have htail : Matrix.vecTail (Fin.cons v u : Fin 3 → TangentSpace I x) = u := by
     funext k; rw [Matrix.vecTail, Function.comp_apply, Fin.cons_succ]
   rw [hzero, htail]
-
-/-! ## The gradient-slot parallel naturality (unit-evaluated slot-`0` form)
-
-Combining the slot-`0` reading with the unit-evaluation transport
-`tensorRSCovariantDerivative_zeroS_unit_eval` (`Tensor0SRSCovariantDerivativeAgreement.lean`, at
-`s = 2`): the slot-`0` curry of the unit-evaluation of the `(0, 3)`-tensor gradient of a smooth
-`(0, 2)`-tensor section `σ`, read along the gradient direction `v`, is the abstract `(0, 2)`-tensor
-covariant derivative of the unit-evaluated section. -/
 
 /-- **Gradient-slot parallel naturality (unit-evaluated slot-`0` form).** For a smooth `Cₛ^∞`
 `(0, 2)`-tensor section `σ`, the slot-`0` curry of the unit-`(0, 0)`-evaluation of the `(0, 3)`-tensor
@@ -166,10 +143,8 @@ theorem covGradBundleEquiv_tensorCov_unit_curry_eq_abstractCovDeriv
           (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace 2 I y from σ y)
             (unitZeroSec (I := I) (M := M) y))
         x v := by
-  -- Slot-`0` curry reads the gradient direction `v` off the leftmost slot.
   rw [tensor0S_curry_covGradBundleEquiv_unit (I := I) (M := M) x
     (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g) (fun y : M => σ y) x) v]
-  -- Unit-evaluation transport (rank `s = 2`): the parallel unit gives no correction term.
   exact tensorRSCovariantDerivative_zeroS_unit_eval (I := I) (M := M) g 2 σ x v
 
 end Connection

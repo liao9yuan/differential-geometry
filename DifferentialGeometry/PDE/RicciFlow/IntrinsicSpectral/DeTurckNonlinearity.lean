@@ -78,8 +78,6 @@ private theorem rhsDiffGNorm_nonneg
     0 ≤ rhsDiffGNorm (I := I) g_bg g g' g₀ y :=
   Real.sqrt_nonneg _
 
-/-! ### Continuity and `BddAbove` of the Riemannian fibre norm -/
-
 set_option linter.unusedSectionVars false in
 /-- The squared `g₀`-Riemannian fibre norm of the RHS section difference is
 continuous: it is the diagonal pointwise inner product of a smooth tensor
@@ -121,13 +119,6 @@ private theorem bddAbove_gNorm_range (g_bg g g' g₀ : SmoothRiemannianMetric I 
     BddAbove (Set.range (rhsDiffGNorm (I := I) g_bg g g' g₀)) :=
   (isCompact_range (continuous_rhsDiffGNorm (I := I) g_bg g g' g₀)).bddAbove
 
-/-! ### Pointwise relation to the bilinear-form difference
-
-The `g₀`-fibre value of the RHS section difference recovers the bilinear-form
-difference: evaluating the underlying mixed `(0,2)`-tensor at the canonical unit
-`(0,0)`-tensor `constOfIsEmpty 1` and a tangent pair `v` (via the model bridge)
-gives `deTurckRicciRHS g_bg g y v w − deTurckRicciRHS g_bg g' y v w`. -/
-
 set_option linter.unusedSectionVars false in
 private theorem rhsDiffSection_toModel_apply
     (g_bg g g' g₀ : SmoothRiemannianMetric I M) (y : M)
@@ -138,18 +129,13 @@ private theorem rhsDiffSection_toModel_apply
             (fun _ : Fin 0 => TangentSpace I y) (1 : ℝ))) v =
       deTurckRicciRHS (I := I) g_bg g y (v 0) (v 1) -
         deTurckRicciRHS (I := I) g_bg g' y (v 0) (v 1) := by
-  -- The section difference's underlying section is the difference of the two
-  -- RHS sections (the `g₀` re-tag changes no data).
   have h_sec :
       (rhsDiffSection (I := I) g_bg g g' g₀).toSection y =
         (deTurckRHSSection (I := I) g_bg g).toSection y -
           (deTurckRHSSection (I := I) g_bg g').toSection y := rfl
   rw [h_sec]
-  -- Evaluation at the `(0,0)`-tensor distributes over the section subtraction,
-  -- and `Tensor0SSpace.toModel` is additive.
   rw [ContinuousLinearMap.sub_apply, Tensor0SSpace.toModel_sub,
     ContinuousMultilinearMap.sub_apply]
-  -- Reduce each summand by `deTurckRHSSection_toModel_apply`.
   rw [deTurckRHSSection_toModel_apply (I := I) g_bg g y v,
     deTurckRHSSection_toModel_apply (I := I) g_bg g' y v]
 
@@ -190,8 +176,6 @@ theorem deturck_ricci_rhs_nonlinearity_locally_lipschitz
   refine ⟨1, by norm_num, ?_⟩
   intro g g' y
   rw [one_mul]
-  -- The pointwise `g₀`-fibre norm is the value of `rhsDiffGNorm` at `y`; bound it
-  -- by the supremum over the compact manifold via `le_ciSup` (range `BddAbove`).
   change rhsDiffGNorm (I := I) g_bg g g' g₀ y ≤
     ⨆ z : M, rhsDiffGNorm (I := I) g_bg g g' g₀ z
   exact le_ciSup (bddAbove_gNorm_range (I := I) g_bg g g' g₀) y

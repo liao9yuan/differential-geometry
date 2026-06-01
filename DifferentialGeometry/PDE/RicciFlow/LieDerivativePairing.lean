@@ -102,9 +102,7 @@ theorem lieDerivMetric_pairing_contMDiff
     ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun b : M => lieDerivMetric (I := I) g W b (Y b) (Z b)) := by
   classical
-  -- Localise: it suffices to show `ContMDiffAt` at every `b₀ ∈ M`.
   intro b₀
-  -- Trivialisation at `b₀`; its base set equals the chart source.
   set e := trivializationAt E (TangentSpace I : M → Type _) b₀ with he_def
   have h_baseSet_eq :
       (trivializationAt E (TangentSpace I) b₀).baseSet = (chartAt H b₀).source :=
@@ -116,8 +114,6 @@ theorem lieDerivMetric_pairing_contMDiff
     (chartAt H b₀).open_source
   have h_chart_nhd : (chartAt H b₀).source ∈ 𝓝 b₀ :=
     h_chart_open.mem_nhds hb₀_chartSrc
-  -- Step 1.  Smoothness of each chart-component coefficient `chartCoeff b₀ Y i` and
-  -- `chartCoeff b₀ Z j` on the chart source.
   have h_coeffY : ∀ i : Fin (Module.finrank ℝ E),
       ContMDiffOn I 𝓘(ℝ) ∞
         (chartCoeff (I := I) b₀ Y i) (chartAt H b₀).source := by
@@ -130,7 +126,6 @@ theorem lieDerivMetric_pairing_contMDiff
     intro j
     have h := chartCoeff_contMDiffOn (I := I) b₀ Z j
     rwa [h_baseSet_eq] at h
-  -- Step 2.  Smoothness of the chart-frame pairing on the chart source.
   have h_pair :
       ∀ i j : Fin (Module.finrank ℝ E),
         ContMDiffOn I 𝓘(ℝ, ℝ) ∞
@@ -139,9 +134,6 @@ theorem lieDerivMetric_pairing_contMDiff
               (chartFrameVec (I := I) b₀ i b) (chartFrameVec (I := I) b₀ j b))
           (chartAt H b₀).source := fun i j =>
     liederivmetric_chart_component_smooth_in_g_w_input (I := I) g W b₀ i j
-  -- Step 3.  On the chart source, expand `lieDerivMetric g W b (Y b) (Z b)` via the
-  -- decomposition `Y b = ∑_i chartCoeff b₀ Y i b • chartBasisVecFiber b₀ i b` (and
-  -- similarly for `Z b`) and the bilinearity of `lieDerivMetric g W b`.
   have h_decomp : ∀ b ∈ (chartAt H b₀).source,
       lieDerivMetric (I := I) g W b (Y b) (Z b) =
         ∑ i : Fin (Module.finrank ℝ E),
@@ -154,7 +146,6 @@ theorem lieDerivMetric_pairing_contMDiff
     intro b hb_chart
     have hb_baseSet : b ∈ e.baseSet := by
       rw [he_def, h_baseSet_eq]; exact hb_chart
-    -- Decompose `Y b` and `Z b` in the chart-basis frame attached to `b₀`.
     have hY_decomp : Y b =
         ∑ i, chartCoeff (I := I) b₀ Y i b •
           chartBasisVecFiber (I := I) b₀ i b :=
@@ -163,15 +154,10 @@ theorem lieDerivMetric_pairing_contMDiff
         ∑ j, chartCoeff (I := I) b₀ Z j b •
           chartBasisVecFiber (I := I) b₀ j b :=
       chartCoeff_recompose (I := I) b₀ Z hb_baseSet
-    -- Expand the bilinear form by linearity in each slot.  `lieDerivMetric g W b`
-    -- is a `LinearMap.mk₂`, hence linear in `(v, w)`.
     set B : TangentSpace I b →ₗ[ℝ] TangentSpace I b →ₗ[ℝ] ℝ :=
       lieDerivMetric (I := I) g W b with hB_def
-    -- Step 3a.  Expand the left slot using `LinearMap.map_sum` and `LinearMap.map_smul`.
     rw [hY_decomp]
     rw [map_sum]
-    -- `B (∑ i, c i • v i) w = ∑ i, (B (c i • v i)) w = ∑ i, c i • (B (v i) w)`, then
-    -- `c i • r = c i * r` for scalars.
     have h_smul_left : ∀ i,
         B (chartCoeff (I := I) b₀ Y i b •
             chartBasisVecFiber (I := I) b₀ i b) =
@@ -179,7 +165,6 @@ theorem lieDerivMetric_pairing_contMDiff
             B (chartBasisVecFiber (I := I) b₀ i b) := by
       intro i; rw [LinearMap.map_smul]
     simp_rw [h_smul_left, LinearMap.sum_apply, LinearMap.smul_apply, smul_eq_mul]
-    -- Step 3b.  Expand the right slot.
     refine Finset.sum_congr rfl ?_
     intro i _
     rw [hZ_decomp]
@@ -188,11 +173,9 @@ theorem lieDerivMetric_pairing_contMDiff
     rw [Finset.mul_sum]
     refine Finset.sum_congr rfl ?_
     intro j _
-    -- `chartFrameVec α i b = chartBasisVecFiber α i b` definitionally.
     rw [show chartFrameVec (I := I) b₀ i b = chartBasisVecFiber (I := I) b₀ i b from rfl,
         show chartFrameVec (I := I) b₀ j b = chartBasisVecFiber (I := I) b₀ j b from rfl]
     ring
-  -- Step 4.  Smoothness of the sum on the chart source.
   have h_summand_smooth :
       ∀ i j : Fin (Module.finrank ℝ E),
         ContMDiffOn I 𝓘(ℝ, ℝ) ∞
@@ -218,8 +201,6 @@ theorem lieDerivMetric_pairing_contMDiff
         (chartAt H b₀).source := by
     refine contMDiffOn_finset_sum (fun i _ => ?_)
     exact contMDiffOn_finset_sum (fun j _ => h_summand_smooth i j)
-  -- Step 5.  Glue: by `h_decomp`, the pairing equals the sum on the chart source;
-  -- transfer smoothness via `ContMDiffOn.congr` and conclude `ContMDiffAt` at `b₀`.
   have h_pair_on_chart :
       ContMDiffOn I 𝓘(ℝ, ℝ) ∞
         (fun b : M => lieDerivMetric (I := I) g W b (Y b) (Z b))

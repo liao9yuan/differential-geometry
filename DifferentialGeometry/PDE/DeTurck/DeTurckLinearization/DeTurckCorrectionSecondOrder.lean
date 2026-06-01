@@ -74,14 +74,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## Differentiability infrastructure
-
-The Leibniz expansion of the outer chart derivative needs differentiability facts at
-chart-interior points: the chart Gram and inverse-Gram entries are differentiable
-there, and the principal part of the linearized DeTurck vector field is differentiable
-there.  All three are immediate from existing smoothness results; we re-expose them
-here as the non-private lemmas the linearization proofs consume. -/
-
 section Differentiability
 
 /-- The chart Gram entry `g_{ij}` is differentiable at every point in the interior of
@@ -152,21 +144,6 @@ lemma chartLinearizedChristoffelPrincipal_differentiableAt
 
 end Differentiability
 
-/-! ## The second-order part of the linearized DeTurck-correction operator
-
-`chartDeTurckCorrSecondOrderPart` is the second-order-in-`h` part of the linearized
-DeTurck-correction term `D(\mathcal L_W g)_{ij}[h]`.  The convective term and the
-metric factors of the deformation terms each carry at most one chart derivative of
-`h`, so the only `∂²h` terms come from the outer chart derivative applied to the
-principal part `chartLinearizedDeTurckVFPrincipal` of the linearized DeTurck vector
-field.  The definition is the literal chart-derivative combination
-
-$$\sum_k g_{kj}\,\partial_i \bigl[(DW)^k_{\mathrm{principal}}[h]\bigr]
-    + \sum_k g_{ik}\,\partial_j \bigl[(DW)^k_{\mathrm{principal}}[h]\bigr].$$
-
-The Gram factors `g_{kj} = chartGramOnE g α k j` and `g_{ik} = chartGramOnE g α i k`
-are the chart Gram matrix entries pulled back to the chart target. -/
-
 /-- The **second-order-in-`h` part of the linearized DeTurck-correction operator**
 `D(\mathcal L_{W(g, g')} g)_{ij}[h]` in the chart at `α`, in the perturbation
 direction `h`, evaluated at the chart-coordinate point `y ∈ E`:
@@ -207,17 +184,6 @@ def chartDeTurckCorrSecondOrderPart (g g' : SmoothRiemannianMetric I M) (α : M)
               (fun y' => chartLinearizedDeTurckVFPrincipal (I := I) g g' α h k y') y) :=
   rfl
 
-/-! ## The Leibniz expansion of the outer chart derivative
-
-The single technical lemma `partialDeriv_chartLinearizedDeTurckVFPrincipal` expands
-`∂_d[(DW)^k_{\mathrm{principal}}]` by the Leibniz product rule, term by term across
-the `Finset.sum` over the lower pair `(a, b)`.  Recall
-`(DW)^k_{\mathrm{principal}}[h](y') = ∑_{a,b} G^{ab}(y')·(DΓ)^k{}_{ab}[h](y')`.  The
-two branches — `∂_d` hitting the inverse-Gram trace factor `G^{ab}` and `∂_d` hitting
-the principal linearized Christoffel part `(DΓ)^k{}_{ab}[h]` — are kept separate; the
-first carries only one chart derivative of `h`, the second carries a second chart
-derivative of `h`. -/
-
 /-- **Leibniz expansion of the outer chart derivative of the principal part of the
 linearized DeTurck vector field.**  Differentiating
 `(DW)^k_{\mathrm{principal}}[h](y') = ∑_{a,b} G^{ab}(y')·(DΓ)^k{}_{ab}[h](y')` in the
@@ -239,22 +205,17 @@ lemma partialDeriv_chartLinearizedDeTurckVFPrincipal
               (fun y' => chartLinearizedChristoffelPrincipal (I := I) g α h a b k y')
               y) := by
   classical
-  -- Abbreviation for the principal linearized Christoffel part as a function of `y'`.
   set Γ : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → E → ℝ :=
     fun a b y' => chartLinearizedChristoffelPrincipal (I := I) g α h a b k y' with hΓ
-  -- `Γ a b` is differentiable at the interior point `y`.
   have hΓ_diff : ∀ a b : Fin (Module.finrank ℝ E), DifferentiableAt ℝ (Γ a b) y :=
     fun a b => chartLinearizedChristoffelPrincipal_differentiableAt (I := I) g α h a b k hy
-  -- The inverse Gram entry is differentiable at the interior point `y`.
   have hG_diff : ∀ a b : Fin (Module.finrank ℝ E),
       DifferentiableAt ℝ (chartInvGramOnE (I := I) g α a b) y :=
     fun a b => chartInvGramOnE_differentiableAt_interior (I := I) g α a b hy
-  -- Each summand `(a, b) ↦ G^{ab}·(Γ a b)` is differentiable at `y`.
   have hsummand_diff : ∀ a b : Fin (Module.finrank ℝ E),
       DifferentiableAt ℝ
         (fun y' => chartInvGramOnE (I := I) g α a b y' * Γ a b y') y :=
     fun a b => (hG_diff a b).mul (hΓ_diff a b)
-  -- The principal part is the double sum `∑_{a,b} G^{ab}·(Γ a b)`.
   have hrewrite :
       (fun y' => chartLinearizedDeTurckVFPrincipal (I := I) g g' α h k y') =
         fun y' => ∑ a : Fin (Module.finrank ℝ E),
@@ -263,28 +224,17 @@ lemma partialDeriv_chartLinearizedDeTurckVFPrincipal
     funext y'
     rw [chartLinearizedDeTurckVFPrincipal_def]
   rw [hrewrite]
-  -- Distribute the partial derivative across the outer `a`-sum.
   rw [partialDeriv_sum Finset.univ
         (fun a y' => ∑ b : Fin (Module.finrank ℝ E),
           chartInvGramOnE (I := I) g α a b y' * Γ a b y')
         (fun a _ => DifferentiableAt.fun_sum (fun b _ => hsummand_diff a b))]
   refine Finset.sum_congr rfl (fun a _ => ?_)
-  -- Distribute the partial derivative across the inner `b`-sum.
   rw [partialDeriv_sum Finset.univ
         (fun b y' => chartInvGramOnE (I := I) g α a b y' * Γ a b y')
         (fun b _ => hsummand_diff a b)]
   refine Finset.sum_congr rfl (fun b _ => ?_)
-  -- Leibniz product rule on each `(a, b)` summand.
   rw [partialDeriv_mul (chartInvGramOnE (I := I) g α a b) (Γ a b)
         (hG_diff a b) (hΓ_diff a b)]
-
-/-! ## Linearity in the perturbation direction
-
-The second-order part `chartDeTurckCorrSecondOrderPart` is `ℝ`-linear in the
-perturbation `h`: it is additive over a sum of perturbations, homogeneous under a
-real-scalar multiple, and zero on the zero perturbation.  Each follows directly from
-the corresponding `h`-linearity of `chartLinearizedDeTurckVFPrincipal` together with
-the matching `partialDeriv` algebra lemma. -/
 
 /-- The second-order part of the linearized DeTurck-correction operator vanishes on
 the zero perturbation: every principal-part outer derivative is the derivative of the
@@ -296,8 +246,6 @@ zero function. -/
       (0 : ChartMetricPerturbation E) i j y = 0 := by
   classical
   rw [chartDeTurckCorrSecondOrderPart_def]
-  -- The principal part of the zero perturbation is the zero function, so each outer
-  -- chart derivative vanishes.
   have hpd : ∀ (d k : Fin (Module.finrank ℝ E)),
       partialDeriv (E := E) d
         (fun y' => chartLinearizedDeTurckVFPrincipal (I := I) g g' α
@@ -335,8 +283,6 @@ theorem chartDeTurckCorrSecondOrderPart_add
   classical
   rw [chartDeTurckCorrSecondOrderPart_def, chartDeTurckCorrSecondOrderPart_def,
     chartDeTurckCorrSecondOrderPart_def]
-  -- Additivity of the outer derivative of the principal part, via `h`-additivity of
-  -- `chartLinearizedDeTurckVFPrincipal` and additivity of `partialDeriv`.
   have hadd : ∀ (d k : Fin (Module.finrank ℝ E)),
       partialDeriv (E := E) d
           (fun y' => chartLinearizedDeTurckVFPrincipal (I := I) g g' α (h₁ + h₂) k y')
@@ -356,7 +302,6 @@ theorem chartDeTurckCorrSecondOrderPart_add
           (fun y' => chartLinearizedDeTurckVFPrincipal (I := I) g g' α h₂ k y')
           (chartLinearizedDeTurckVFPrincipal_differentiableAt (I := I) g g' α h₁ k hy)
           (chartLinearizedDeTurckVFPrincipal_differentiableAt (I := I) g g' α h₂ k hy)]
-  -- The first `k`-sum splits additively.
   have hsum1 : (∑ k : Fin (Module.finrank ℝ E),
         chartGramOnE (I := I) g α k j y *
           partialDeriv (E := E) i
@@ -373,7 +318,6 @@ theorem chartDeTurckCorrSecondOrderPart_add
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [hadd i k]; ring
-  -- The second `k`-sum splits additively.
   have hsum2 : (∑ k : Fin (Module.finrank ℝ E),
         chartGramOnE (I := I) g α i k y *
           partialDeriv (E := E) j
@@ -404,8 +348,6 @@ theorem chartDeTurckCorrSecondOrderPart_smul
   classical
   rw [chartDeTurckCorrSecondOrderPart_def, chartDeTurckCorrSecondOrderPart_def,
     smul_eq_mul]
-  -- Homogeneity of the outer derivative of the principal part, via `h`-homogeneity of
-  -- `chartLinearizedDeTurckVFPrincipal` and the constant-scalar `partialDeriv` rule.
   have hsmul : ∀ (d k : Fin (Module.finrank ℝ E)),
       partialDeriv (E := E) d
           (fun y' => chartLinearizedDeTurckVFPrincipal (I := I) g g' α (c • h) k y') y =
@@ -420,7 +362,6 @@ theorem chartDeTurckCorrSecondOrderPart_smul
           (fun y' => chartLinearizedDeTurckVFPrincipal (I := I) g g' α h k y')
           (chartLinearizedDeTurckVFPrincipal_differentiableAt (I := I) g g' α h k hy),
       smul_eq_mul]
-  -- The first `k`-sum scales by `c`.
   have hsum1 : (∑ k : Fin (Module.finrank ℝ E),
         chartGramOnE (I := I) g α k j y *
           partialDeriv (E := E) i
@@ -433,7 +374,6 @@ theorem chartDeTurckCorrSecondOrderPart_smul
     rw [Finset.mul_sum]
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [hsmul i k]; ring
-  -- The second `k`-sum scales by `c`.
   have hsum2 : (∑ k : Fin (Module.finrank ℝ E),
         chartGramOnE (I := I) g α i k y *
           partialDeriv (E := E) j

@@ -72,15 +72,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## (a) The abstract model-space core
-
-A trilinear evaluation `s ↦ B s (a s) (b s)` of three differentiable curves into
-the fixed normed spaces `E →L[ℝ] E →L[ℝ] ℝ`, `E`, `E` differentiates by the
-product/chain rule into the sum of the three per-slot derivatives.  This is the
-mathematical heart of the producer; the geometric versions below are obtained by
-unifying `B`, `a`, `b` with the metric-slot / pushforward-slot curves (which are
-typed into `E` via the definitional identification `TangentSpace I _ = E`). -/
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 /-- **Trilinear evaluation chain rule (`HasDerivWithinAt`).**
@@ -100,11 +91,8 @@ theorem trilinear_eval_hasDerivWithinAt
     (hb : HasDerivWithinAt b b' S t) :
     HasDerivWithinAt (fun s : ℝ => B s (a s) (b s))
       ((B' (a t) (b t) + B t a' (b t)) + B t (a t) b') S t := by
-  -- Inner application `s ↦ (B s) (a s)`: derivative `B' (a t) + B t a'`.
   have step1 := hB.clm_apply ha
-  -- Outer application against `b`: derivative `(B' (a t) + B t a') (b t) + (B t (a t)) b'`.
   have step2 := step1.clm_apply hb
-  -- The two derivative expressions agree by `ContinuousLinearMap.add_apply`.
   convert step2 using 1
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -124,21 +112,6 @@ theorem trilinear_eval_hasDerivAt
   have step1 := hB.clm_apply ha
   have step2 := step1.clm_apply hb
   convert step2 using 1
-
-/-! ## (b) The geometric evaluation-form producer
-
-The three slot curves of the pullback evaluation form, typed into the model
-fibre `E` (via `TangentSpace I _ = E`):
-
-* `s ↦ (g_fam s).inner (Φ_fam s x) : E →L[ℝ] E →L[ℝ] ℝ`,
-* `s ↦ mfderiv I I (Φ_fam s) x v : E`,
-* `s ↦ mfderiv I I (Φ_fam s) x w : E`.
-
-Feeding their `HasDerivAt`s to the abstract core produces the evaluation-form
-`HasDerivAt`, with derivative value the explicit three-summand sum.  The slot
-derivatives `B'`, `a'`, `b'` are exactly the genuine smoothness data of the
-inputs (the metric-slot derivative and the two pushforward-slot derivatives);
-nothing is re-assumed. -/
 
 /-- **Pullback evaluation-form producer (`HasDerivAt`, explicit three-summand
 value).**
@@ -211,14 +184,6 @@ theorem pullback_eval_form_hasDerivWithinAt_of_slots
         + ((g_fam t).inner (Φ_fam t x)) (mfderiv I I (Φ_fam t : M → M) x v) b') S t :=
   trilinear_eval_hasDerivWithinAt hB ha hb
 
-/-! ## (c) Packaging the value as `G' + A' + B'` (the `h_total_eval` shape)
-
-`pullback_metric_derivative_decomposition` consumes `h_total_eval` as a witness
-with value the *abstract sum* `G' + A' + B'`, where `G'`, `A'`, `B'` are the
-per-slot derivative values supplied to it.  This wrapper produces exactly that
-shape from the slot derivatives, given the (definitional) identifications of
-`G'`, `A'`, `B'` with the three multivariable-chain-rule summands. -/
-
 /-- **Producer of the `h_total_eval` witness** (value `G' + A' + B'`).
 
 Given the three slot derivatives (`hB`, `ha`, `hb`) and the value
@@ -255,16 +220,8 @@ theorem pullback_eval_form_total_hasDerivAt
         (mfderiv I I (Φ_fam s : M → M) x v)
         (mfderiv I I (Φ_fam s : M → M) x w))
       (G' + A' + B'') t := by
-  -- Substitute the per-slot value identifications and apply the producer.
   rw [hG', hA', hB_val]
   exact pullback_eval_form_hasDerivAt_of_slots g_fam Φ_fam t x v w B' a' b' hB ha hb
-
-/-! ## (d) Packaging the value as `G' + L'` (the `h_chain_eval` shape)
-
-`pullback_time_derivative_chain_rule` / `combine_pullback_derivative_pieces`
-consume `h_chain_eval` with value `G' + L'`, where `G'` is the intrinsic time
-piece and `L'` is the grouped pushforward (Lie-derivative) piece.  This wrapper
-groups the two pushforward summands into a single `L'`. -/
 
 /-- **Producer of the `h_chain_eval` witness** (value `G' + L'`).
 
@@ -301,8 +258,6 @@ theorem pullback_eval_form_chain_hasDerivAt
         (mfderiv I I (Φ_fam s : M → M) x v)
         (mfderiv I I (Φ_fam s : M → M) x w))
       (G' + L') t := by
-  -- The producer yields value `(B' .. + g a' ..) + g .. b'`; regroup it as
-  -- `G' + L'` using the two value identifications and associativity.
   have hkey := pullback_eval_form_hasDerivAt_of_slots g_fam Φ_fam t x v w B' a' b' hB ha hb
   have hval :
       (B' (mfderiv I I (Φ_fam t : M → M) x v) (mfderiv I I (Φ_fam t : M → M) x w)
@@ -311,15 +266,6 @@ theorem pullback_eval_form_chain_hasDerivAt
       = G' + L' := by
     rw [hG', hL']; ring
   rwa [hval] at hkey
-
-/-! ## (e) Full capstone: slot derivatives ⇒ bundled `pullbackMetric` conclusion
-
-Chaining the evaluation-form producer through the transport primitive
-`pullbackMetric_inner_hasDerivAt_of_eval` yields the derivative of the bundled
-`pullbackMetric` inner product directly — the conclusion of
-`pullback_metric_derivative_decomposition` / `pullback_time_derivative_chain_rule`
-— from the slot smoothness data, with no intermediate `h_total_eval` /
-`h_chain_eval` hypothesis. -/
 
 /-- **Full pullback time-derivative chain rule from slot derivatives.**
 
@@ -353,7 +299,6 @@ theorem pullback_metric_chain_rule_of_slots
     HasDerivAt
       (fun s : ℝ => (Diffeomorph.pullbackMetric (g_fam s) (Φ_fam s)).inner x v w)
       (G' + L') t :=
-  -- Produce the evaluation-form witness, then transport to the bundled form.
   pullback_time_derivative_chain_rule g_fam Φ_fam t x v w G' L'
     (pullback_eval_form_chain_hasDerivAt g_fam Φ_fam t x v w B' a' b' G' L'
       hB ha hb hG' hL')

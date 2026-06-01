@@ -78,15 +78,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The chart-trivialised representation of a smooth compactly-supported section
-
-The intrinsic chart Fréchet-derivative CLM `tensorRSIntrinsicChartCLM` is built
-from the chart-`α`-trivialised model-fibre representation
-`tensorRSChartE_section_repr r s α T` of a section `T`. The raw chart-scalar
-component machinery, on the other hand, is built from `tensorTrivProj g r s S α`.
-The two are the same trivialisation-projection expression; on a
-`SmoothCcTensor`'s underlying section they coincide. -/
-
 /-- The chart-`α`-trivialised model-fibre representation of the underlying
 section of a `SmoothCcTensor` coincides with the trivialisation projection
 `tensorTrivProj g r s S α`. Both are
@@ -97,25 +88,6 @@ theorem tensorRSChartE_section_repr_eq_tensorTrivProj
     tensorRSChartE_section_repr (I := I) r s α S.toSection =
       tensorTrivProj (I := I) (M := M) g r s S α :=
   rfl
-
-/-! ## The raw-component projection of the intrinsic chart piece
-
-The intrinsic chart Fréchet-derivative CLM evaluates as
-
-```
-tensorRSIntrinsicChartCLM r s α T b v
-  = tensorRSChartFiberFromModel r s α b
-      (fderiv ℝ (tensorRSChartE_section_repr r s α T ∘ φ⁻¹) (φ b) (trivToE α b v))
-```
-
-(`tensorRSIntrinsicChartCLM_apply`), and `tensorRSChartFiberFromModel` is the
-fibre right-inverse `(trivializationAt …).symmL ℝ b` of the trivialisation. So
-re-trivialising the intrinsic chart value through
-`(trivializationAt …).continuousLinearMapAt ℝ b` recovers exactly the Fréchet
-derivative of the chart-`α`-trivialised representation; projecting that to the
-`(Idx, Jdx)`-component, the chain rule
-(`tensorChartComponentRaw_partial_decomp`) identifies the result with the
-Fréchet derivative of the chart-pulled-back raw scalar component. -/
 
 /-- **Raw-component projection of the intrinsic chart piece.** For `b` in the
 chart source at `α` whose chart image lies in the interior of the chart target,
@@ -142,12 +114,9 @@ theorem tensorRSIntrinsicChartCLM_proj_eq_fderiv_component
           (extChartAt I α).symm)
         (extChartAt I α b) (trivToE (I := I) α b v) := by
   classical
-  -- The tangent-bundle trivialisation base set is the chart source.
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [TangentBundle.trivializationAt_baseSet]
     exact hb_chart
-  -- The `(r, s)`-Hom-bundle base set is the intersection of the `(0, r)` and
-  -- `(0, s)` factor base sets, both of which are the tangent base set.
   have hb_baseRS : b ∈ (trivializationAt (TensorRSModel r s ℝ E)
       (fun y : M => TensorRSSpace r s I y) α).baseSet := by
     change b ∈ ((trivializationAt (Tensor0SModel r ℝ E)
@@ -155,39 +124,14 @@ theorem tensorRSIntrinsicChartCLM_proj_eq_fderiv_component
       ((trivializationAt (Tensor0SModel s ℝ E)
         (fun y : M => Tensor0SSpace s I y) α).baseSet)
     exact ⟨hb_base, hb_base⟩
-  -- Unfold the intrinsic chart Fréchet-derivative CLM.
   rw [tensorRSIntrinsicChartCLM_apply (I := I) r s α S.toSection b v]
-  -- `tensorRSChartFiberFromModel` is the fibre right-inverse `symmL`; composing
-  -- with `continuousLinearMapAt` on the base set is the identity.
   unfold tensorRSChartFiberFromModel
   rw [(trivializationAt (TensorRSModel r s ℝ E)
       (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt_symmL
       (R := ℝ) hb_baseRS]
-  -- The chart-`α`-trivialised representation of `S.toSection` is `tensorTrivProj`.
   rw [tensorRSChartE_section_repr_eq_tensorTrivProj (I := I) (M := M) g r s S α]
-  -- The chain-rule decomposition of the chart-pulled-back raw component.
   rw [tensorChartComponentRaw_partial_decomp (I := I) (M := M) g r s α S
     hb_chart hb_int Idx Jdx (trivToE (I := I) α b v)]
-
-/-! ## The headline: intrinsic chart piece equals the chart partial derivative
-
-Specialising the previous result to the `k`-th chart-coordinate basis vector
-field `chartBasisVecFiber α k` and re-expressing everything on the
-Euclidean chart target identifies the raw-component projection of the
-intrinsic chart piece with the plain chart-Euclidean partial derivative
-`euclidPartial k`.
-
-Two changes of variables enter:
-
-* `trivToE α b (chartBasisVecFiber α k b)` is the `k`-th chart-frame model
-  direction `chartModelBasis E k = toEuclidean.symm (EuclideanSpace.single k 1)`
-  — a round-trip identity through the chart trivialisation;
-* the chart-Euclidean partial derivative `euclidPartial k` of the Euclidean
-  push-forward `chartPushedRaw I α (tensorChartComponentRaw …)` is, near a
-  point of the open chart-Euclidean target, the Fréchet derivative of
-  `tensorChartComponentRaw … ∘ (extChartAt I α).symm ∘ toEuclidean.symm`; the
-  linear isometry `toEuclidean.symm` transports it to the Fréchet derivative on
-  the `E`-side chart target. -/
 
 /-- **The intrinsic chart piece is the chart partial derivative.** Let
 `y` lie in the chart-Euclidean target `chartTargetEuclid α`, and set
@@ -218,47 +162,32 @@ theorem tensorRSIntrinsicChartCLM_component_eq_euclidPartial
         (chartPushedRaw I α
           (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx)) y := by
   classical
-  -- Notation: `b` is the base point, the chart-source preimage of `y`.
   set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
-  -- `toEuclidean.symm y` lies in the `E`-side chart target.
   have hy_pre : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
     rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
     exact hy
-  -- `b` lies in the chart source.
   have hb_chart : b ∈ (chartAt H α).source :=
     symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy
-  -- The chart image of `b` is `toEuclidean.symm y` (chart right-inverse).
   have hphi_b : extChartAt I α b = (toEuclidean (E := E)).symm y := by
     rw [hb_def]
     exact (extChartAt I α).right_inv hy_pre
-  -- The chart image of `b` lies in the interior of the (open) chart target.
   have hb_int :
       extChartAt I α b ∈ interior ((extChartAt I α).target : Set E) := by
     rw [hphi_b, (isOpen_extChartAt_target (I := I) α).interior_eq]
     exact hy_pre
-  -- The tangent-bundle trivialisation base set is the chart source.
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [TangentBundle.trivializationAt_baseSet]
     exact hb_chart
-  -- Step 1: project the intrinsic chart piece via the raw-component formula.
   rw [tensorRSIntrinsicChartCLM_proj_eq_fderiv_component (I := I) (M := M)
     g r s S α Idx Jdx hb_chart hb_int (chartBasisVecFiber (I := I) α k b)]
-  -- Step 2: the chart-trivialisation image of the `k`-th chart-coordinate basis
-  -- vector is the `k`-th chart-frame model direction (round-trip identity).
   have htriv_basis :
       trivToE (I := I) α b (chartBasisVecFiber (I := I) α k b) =
         chartModelBasis E k := by
-    -- `chartBasisVecFiber α k b = trivFromE α b (chartModelBasis E k)` by
-    -- definition; the `trivToE`/`trivFromE` round-trip closes the goal.
     change trivToE (I := I) α b
         (trivFromE (I := I) α b (chartModelBasis E k)) = _
     exact trivToE_trivFromE (I := I) α hb_base (chartModelBasis E k)
   rw [htriv_basis, chartModelBasis_apply, hphi_b]
-  -- Step 3: the chart-Euclidean partial is the Fréchet derivative of the
-  -- Euclidean push-forward of the raw component.
   rw [euclidPartial_def]
-  -- Near `y` the Euclidean push-forward equals the explicit composition; the
-  -- chart-Euclidean target is open, so eventual equality holds.
   have hpushed_eq :
       chartPushedRaw I α
           (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) =ᶠ[𝓝 y]
@@ -270,8 +199,6 @@ theorem tensorRSIntrinsicChartCLM_component_eq_euclidPartial
     exact chartPushedRaw_apply_of_mem (I := I) (M := M) α
       (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) hz
   rw [Filter.EventuallyEq.fderiv_eq hpushed_eq]
-  -- Step 4: the chain rule through the linear isometry `toEuclidean.symm`
-  -- transports the Fréchet derivative to the `E`-side chart target.
   rw [(toEuclidean (E := E)).symm.comp_right_fderiv
     (f := tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx ∘
       (extChartAt I α).symm) (x := y)]

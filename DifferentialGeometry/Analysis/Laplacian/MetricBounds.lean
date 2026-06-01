@@ -40,8 +40,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Pointwise non-negativity and Cauchy–Schwarz -/
-
 /-- Non-negativity of `g.inner x v v`. -/
 lemma metric_inner_self_nonneg
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
@@ -142,8 +140,6 @@ lemma abs_metric_inner_le_sqrt_metric_quadratic
     exact Real.sqrt_le_sqrt h_abs_sq
   rw [hsqrt_mul] at h_le_sqrt
   exact h_le_sqrt
-
-/-! ## Pointwise operator-norm bound -/
 
 /-- Pointwise operator norm of `g.inner x` as a bilinear form on `TangentSpace I x`. -/
 noncomputable def metricInnerOpNorm

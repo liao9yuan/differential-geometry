@@ -94,8 +94,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## The pointwise endomorphism `Z ↦ R(Z, v) w` -/
-
 /-- The pointwise Riemann endomorphism of `T_x M` for fixed `(v, w)`:
 `Z ↦ riemannOp (LeviCivita g) x Z v w`. As a `LinearMap`, this packages the trilinear
 `riemannOp` into a single-argument endomorphism; the trace of this endomorphism is the
@@ -104,7 +102,6 @@ def ricciEndo (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) : TangentSpace I x →ₗ[ℝ] TangentSpace I x where
   toFun Z := riemannOp (LeviCivita (I := I) g) x Z v w
   map_add' Z Z' := by
-    -- riemannOp x is additive in its first slot.
     have h := (riemannOp (LeviCivita (I := I) g) x).map_add Z Z'
     have happ := congrArg
       (fun (φ : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x) =>
@@ -112,7 +109,6 @@ def ricciEndo (g : SmoothRiemannianMetric I M) (x : M)
     set_option linter.unnecessarySimpa false in
     simpa [ContinuousLinearMap.add_apply] using happ
   map_smul' c Z := by
-    -- riemannOp x is ℝ-linear in its first slot.
     have h := (riemannOp (LeviCivita (I := I) g) x).map_smul c Z
     have happ := congrArg
       (fun (φ : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x) =>
@@ -123,13 +119,6 @@ def ricciEndo (g : SmoothRiemannianMetric I M) (x : M)
 @[simp] lemma ricciEndo_apply (g : SmoothRiemannianMetric I M) (x : M)
     (v w Z : TangentSpace I x) :
     ricciEndo (I := I) g x v w Z = riemannOp (LeviCivita (I := I) g) x Z v w := rfl
-
-/-! ## The Ricci tensor as a continuous bilinear form
-
-We package `Ric(v, w) := tr_Z R(Z, v) w` as a `LinearMap.mk₂` bilinear form on
-`T_x M × T_x M → ℝ`, then upgrade to a continuous bilinear form via
-`LinearMap.toContinuousLinearMap₂` (using `T2Space E` and `FiniteDimensional ℝ E`,
-both transferred to `T_x M` via the definitional equality `TangentSpace I x = E`). -/
 
 /-- The pointwise Ricci tensor as a bilinear form `T_x M →ₗ T_x M →ₗ ℝ`. Linearity in
 each slot follows from the linearity of `riemannOp` in its corresponding slot together
@@ -197,13 +186,6 @@ def ricciTensorBilin (g : SmoothRiemannianMetric I M) (x : M) :
       LinearMap.trace ℝ (TangentSpace I x) (ricciEndo (I := I) g x v w) :=
   rfl
 
-/-! ## The bundled Ricci tensor
-
-Using `LinearMap.toContinuousLinearMap` twice (the finite-dimensional automatic-continuity
-construction), we obtain the continuous bilinear form `ricciTensor g x` from
-`ricciTensorBilin g x`: first promote each `ricciTensorBilin g x v : T_x M →ₗ ℝ` to a
-continuous functional, then promote the linear map `v ↦ (above)` to a continuous map. -/
-
 /-- Auxiliary linear map: `v ↦ (ricciTensorBilin g x v).toContinuousLinearMap`, viewed
 as a `LinearMap` from `T_x M` to the continuous-functional space `T_x M →L ℝ`. -/
 private def ricciTensorAuxClm (g : SmoothRiemannianMetric I M) (x : M) :
@@ -251,12 +233,6 @@ theorem ricciTensor_apply (g : SmoothRiemannianMetric I M) (x : M)
   change ricciTensorAuxClm (I := I) g x v w = _
   rw [ricciTensorAuxClm_apply, ricciTensorBilin_apply]
 
-/-! ## Basis expansion of the trace
-
-By `LinearMap.trace_eq_matrix_trace` applied to the canonical model basis
-`chartModelBasis E` (which is also a basis of `T_x M = E`), the trace of
-`ricciEndo g x v w` is the diagonal sum of its matrix coordinates. -/
-
 /-- **Basis expansion of `ricciTensor`.** For the canonical model basis
 `b := chartModelBasis E`, the Ricci tensor at `x` admits the coordinate sum
 `ricciTensor g x v w = ∑ i, b.repr (riemannOp (LeviCivita g) x (b i) v w) i`. -/
@@ -268,8 +244,6 @@ theorem ricciTensor_apply_basisSum (g : SmoothRiemannianMetric I M) (x : M)
           (riemannOp (LeviCivita (I := I) g) x ((chartModelBasis E) i) v w) i := by
   classical
   rw [ricciTensor_apply]
-  -- Use `LinearMap.trace_eq_matrix_trace` with the chart-model basis (which is
-  -- also a basis of `T_x M = E`).
   haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
   rw [LinearMap.trace_eq_matrix_trace ℝ
         (chartModelBasis (TangentSpace I x)) (ricciEndo (I := I) g x v w)]
@@ -279,13 +253,6 @@ theorem ricciTensor_apply_basisSum (g : SmoothRiemannianMetric I M) (x : M)
   simp only [Matrix.diag_apply]
   rw [LinearMap.toMatrix_apply]
   rfl
-
-/-! ## Application formula on smooth sections
-
-`ricciTensor g x (Y x) (Z x)`, evaluated on the values of smooth tangent vector fields
-`Y, Z` at `x`, equals the trace of the endomorphism `W ↦ riemannOp (LeviCivita g) x W (Y x) (Z x)`,
-which by `riemannOp_apply_smooth` rewrites to the section-level Riemann formula on smooth
-tangent vector-field extensions of the basis vectors. -/
 
 /-- **Application formula on smooth sections (definitional form).** For smooth tangent
 vector fields `Y, Z` and a point `x`, the Ricci tensor evaluated at `(Y x, Z x)` equals
@@ -329,20 +296,6 @@ theorem ricciTensor_apply_smooth_basisSum (g : SmoothRiemannianMetric I M)
   rw [show ((chartModelBasis E) i : TangentSpace I x) = B i x from (hBx i).symm,
       riemannOp_apply_smooth (cov := LeviCivita (I := I) g) (hB i) hY hZ]
 
-/-! ## Algebraic skew-trace lemma
-
-For a finite-dimensional real vector space `V` equipped with a non-degenerate symmetric
-bilinear form `B : V → V → ℝ` (encoded as a linear injection `♭ : V → V*` whose
-underlying pairing `(♭ a) b` is symmetric), an endomorphism `F : V → V` is
-`B`-skew-adjoint if `B(F v, w) = -B(v, F w)` for all `v, w`. The trace of any
-`B`-skew-adjoint endomorphism on a real finite-dimensional vector space is zero.
-
-The argument is purely algebraic: skew-adjointness rewrites as
-`♭ ∘ F = - F^t ∘ ♭` where `F^t = LinearMap.dualMap F`. Composing with the inverse `♯`
-of `♭` yields `F = -♯ ∘ F^t ∘ ♭`. Cyclic invariance of the trace
-(`LinearMap.trace_comp_comm'`) plus `LinearMap.trace_transpose'` then gives
-`tr F = -tr F`, hence `tr F = 0`. -/
-
 /-- **Skew-adjoint trace lemma.** Let `V` be a finite-dimensional real vector space,
 let `flat : V →ₗ[ℝ] (V →ₗ[ℝ] ℝ)` be a linear injection (equivalently, a non-degenerate
 bilinear pairing), with the underlying pairing symmetric in the sense
@@ -356,7 +309,6 @@ lemma trace_eq_zero_of_skew_dual
     (hskew : ∀ v w : V, (flat (F v)) w = - (flat v) (F w)) :
     LinearMap.trace ℝ V F = 0 := by
   classical
-  -- `flat` is bijective in finite dimensions: injective ⇒ surjective.
   have hdimEq : Module.finrank ℝ V = Module.finrank ℝ (V →ₗ[ℝ] ℝ) :=
     (Subspace.dual_finrank_eq (K := ℝ) (V := V)).symm
   have hflat_surj : Function.Surjective flat :=
@@ -374,7 +326,6 @@ lemma trace_eq_zero_of_skew_dual
     intro θ
     change flatE (flatE.symm θ) = θ
     exact flatE.right_inv θ
-  -- Skew-adjointness encoded as `flat ∘ₗ F = - F.dualMap ∘ₗ flat`.
   have hskew_op : flat ∘ₗ F = -(F.dualMap ∘ₗ flat) := by
     apply LinearMap.ext
     intro v
@@ -382,33 +333,26 @@ lemma trace_eq_zero_of_skew_dual
     intro w
     change (flat (F v)) w = -(F.dualMap (flat v)) w
     rw [hskew v w, LinearMap.dualMap_apply]
-  -- Hence `F = -sharp ∘ₗ F.dualMap ∘ₗ flat`.
   have hF_decomp : F = -(sharp ∘ₗ F.dualMap ∘ₗ flat) := by
     apply LinearMap.ext
     intro v
-    -- LHS: F v.
-    -- Note: sharp ∘ₗ flat = id, so F v = sharp (flat (F v)).
     have hvalue : F v = sharp (flat (F v)) := by
       have h := congrArg (fun (φ : V →ₗ[ℝ] V) => φ (F v)) hsharp_flat
       simp only [LinearMap.coe_comp, Function.comp_apply, LinearMap.id_apply] at h
       exact h.symm
-    -- Use the skew operator identity to rewrite flat (F v) = -(F.dualMap (flat v)).
     have hskew_val : flat (F v) = -F.dualMap (flat v) := by
       have h := congrArg (fun (φ : V →ₗ[ℝ] V →ₗ[ℝ] ℝ) => φ v) hskew_op
       simp only [LinearMap.coe_comp, Function.comp_apply, LinearMap.neg_apply] at h
       exact h
     rw [hvalue, hskew_val, map_neg]
     rfl
-  -- Compute trace using linearity (`map_neg`).
   have htr_eq : LinearMap.trace ℝ V F =
       -LinearMap.trace ℝ V (sharp ∘ₗ F.dualMap ∘ₗ flat) := by
     have := congrArg (LinearMap.trace ℝ V) hF_decomp
     rw [map_neg] at this
     exact this
-  -- `tr (sharp ∘ F.dualMap ∘ flat) = tr ((F.dualMap ∘ flat) ∘ sharp) = tr (F.dualMap)`.
   have htr_cyc : LinearMap.trace ℝ V (sharp ∘ₗ F.dualMap ∘ₗ flat) =
       LinearMap.trace ℝ (Module.Dual ℝ V) F.dualMap := by
-    -- Use `trace_comp_comm'` to cycle `sharp` to the right.
     have h1 : LinearMap.trace ℝ V (sharp ∘ₗ (F.dualMap ∘ₗ flat)) =
         LinearMap.trace ℝ (Module.Dual ℝ V) ((F.dualMap ∘ₗ flat) ∘ₗ sharp) :=
       LinearMap.trace_comp_comm' (M := V) (N := Module.Dual ℝ V)
@@ -420,26 +364,12 @@ lemma trace_eq_zero_of_skew_dual
       LinearMap.trace ℝ V F := by
     rw [LinearMap.dualMap_def]
     exact LinearMap.trace_transpose' F
-  -- Combine: tr F = -tr F.
   have hself_neg : LinearMap.trace ℝ V F = -LinearMap.trace ℝ V F := by
     calc LinearMap.trace ℝ V F
         = -LinearMap.trace ℝ V (sharp ∘ₗ F.dualMap ∘ₗ flat) := htr_eq
       _ = -LinearMap.trace ℝ (Module.Dual ℝ V) F.dualMap := by rw [htr_cyc]
       _ = -LinearMap.trace ℝ V F := by rw [htr_dualMap]
   linarith
-
-/-! ## Section-level metric skewness of Riemann curvature
-
-For a smooth Riemannian metric `g` on `M` and the Levi-Civita covariant derivative
-`cov := LeviCivita g`, the section-level Riemann curvature operator is metric-skew:
-$$
-  g(R(X, Y) Z, W) + g(Z, R(X, Y) W) = 0,
-$$
-for smooth tangent vector fields `X, Y, Z, W` and at every `x ∈ M`. The argument
-combines metric compatibility (applied iteratively to the iterated covariant
-derivatives that appear in the Riemann formula) with the foundation identity
-`extDerivFun f x [X, Y]_x = X(Y f)(x) - Y(X f)(x)` for the manifold Lie bracket
-acting on a smooth scalar function. -/
 
 section MetricSkewSection
 
@@ -466,17 +396,10 @@ private lemma inner_smooth_scalar
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y))
     (hZ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Z)) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun b => g.inner b (Y b) (Z b)) := by
-  -- Use the (0,2)-tensor pairing smoothness: g is smooth as a (0,2)-tensor section,
-  -- and the bilinear pairing of a smooth (0,2)-tensor on smooth tangent sections is smooth.
   have hg : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun (x : M) => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) b
         (g.inner b)) := g.contMDiff
-  -- `cotangentCov_pairing_contMDiff` chains: g (Y) is a smooth cotangent section,
-  -- then (g (Y))(Z) is a smooth scalar.
-  -- First apply `cotangentCov_pairing_contMDiff` with target = T*M. We need θ = g(·,·).
-  -- Use the standalone fact `tensor02Cov_pairing_contMDiff` — but it is private. We
-  -- replicate using `clm_bundle_apply` directly.
   have hgY : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) ∞
       (fun b : M => TotalSpace.mk' (E →L[ℝ] ℝ)
         (E := fun x : M => TangentSpace I x →L[ℝ] ℝ) b (g.inner b (Y b))) :=
@@ -510,8 +433,6 @@ private lemma metric_compat_one
   classical
   have hmc :=
     (LeviCivita_isMetricCompatible (I := I) g).apply hZ hW (Y x)
-  -- `hmc : (mfderiv I 𝓘(ℝ) f) x (Y x) = g.inner x (cov Z x (Y x)) (W x) + g.inner x (Z x) (cov W x (Y x))`.
-  -- And `extDerivFun = mfderiv` for ℝ-valued functions (the cast is the identity).
   have hext_eq : extDerivFun (I := I) (fun b => g.inner b (Z b) (W b)) x (Y x) =
       (mfderiv I 𝓘(ℝ) (fun b : M => g.inner b (Z b) (W b)) x) (Y x) := rfl
   rw [hext_eq, hmc]
@@ -556,12 +477,10 @@ private lemma metric_compat_two
             (covApply (LeviCivita (I := I) g) Y W) x) := by
   classical
   set cov := LeviCivita (I := I) g with hcov
-  -- Globalize the section-level identity for the inner derivative.
   have hY_glob : MDiff (T% Y) := hY.mdifferentiable (by simp)
   have hZ_glob : MDiff (T% Z) := hZ.mdifferentiable (by simp)
   have hW_glob : MDiff (T% W) := hW.mdifferentiable (by simp)
   have hsec_eq := extDerivFun_inner_eq_globally g hY_glob hZ_glob hW_glob
-  -- Substitute on the LHS via `extDerivFun_congr` (i.e., `mfderiv` of equal functions).
   have hLHS_rw : extDerivFun (I := I)
         (fun b : M => extDerivFun (I := I) (fun b' => g.inner b' (Z b') (W b')) b (Y b))
         x (X x) =
@@ -571,7 +490,6 @@ private lemma metric_compat_two
             g.inner b (Z b) (covApply cov Y W b)) x (X x) := by
     rw [hsec_eq]
   rw [hLHS_rw]
-  -- Apply `extDerivFun` linearity (it's additive in the function via `mfderiv_add`).
   have hsmooth_first : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun b : M => g.inner b (covApply cov Y Z b) (W b)) := by
     have hcovYZ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (covApply cov Y Z)) :=
@@ -586,7 +504,6 @@ private lemma metric_compat_two
     hsmooth_first.mdifferentiable (by simp)
   have hsecond_mdiff : MDiff (fun b : M => g.inner b (Z b) (covApply cov Y W b)) :=
     hsmooth_second.mdifferentiable (by simp)
-  -- Decompose via `extDerivFun_add` (additivity of the exterior-derivative section).
   have hext_add : extDerivFun (I := I)
         (fun b : M =>
           g.inner b (covApply cov Y Z b) (W b) +
@@ -603,12 +520,10 @@ private lemma metric_compat_two
         extDerivFun (I := I) (fun b => g.inner b (covApply cov Y Z b) (W b)) x +
           extDerivFun (I := I) (fun b => g.inner b (Z b) (covApply cov Y W b)) x :=
       extDerivFun_add h1 h2
-    -- Apply both sides at `(X x)` and unfold `(f + g) b = f b + g b`.
     have happ := congrArg (fun (φ : TangentSpace I x →L[ℝ] ℝ) => φ (X x)) hsum
     simp only [ContinuousLinearMap.add_apply] at happ
     convert happ using 2
   rw [hext_add]
-  -- Apply metric compatibility to each piece (with `(covApply cov Y Z, W)` and `(Z, covApply cov Y W)`).
   have hX_at : MDiffAt (T% X) x := (hX x).mdifferentiableAt (by simp)
   have hY_at : MDiffAt (T% Y) x := (hY x).mdifferentiableAt (by simp)
   have hZ_at : MDiffAt (T% Z) x := (hZ x).mdifferentiableAt (by simp)
@@ -617,9 +532,7 @@ private lemma metric_compat_two
     (covApply_smooth_section g hY hZ x).mdifferentiableAt (by simp)
   have hcovYW_at : MDiffAt (T% (covApply cov Y W)) x :=
     (covApply_smooth_section g hY hW x).mdifferentiableAt (by simp)
-  -- First inner derivative.
   have hmc1 := metric_compat_one g hX_at hcovYZ_at hW_at
-  -- Second inner derivative.
   have hmc2 := metric_compat_one g hX_at hZ_at hcovYW_at
   rw [hmc1, hmc2]
   ring
@@ -641,11 +554,8 @@ theorem riemannSec_metric_skew
       g.inner x (Z x) (riemannSec (LeviCivita (I := I) g) X Y W x) = 0 := by
   classical
   set cov := LeviCivita (I := I) g with hcov
-  -- Apply `metric_compat_two` (X, Y, Z, W) and (Y, X, Z, W), and subtract.
   have hxy := metric_compat_two (x := x) g hX hY hZ hW
   have hyx := metric_compat_two (x := x) g hY hX hZ hW
-  -- Foundation: extDerivFun (extDerivFun f · Y ·) x (X x) - extDerivFun (extDerivFun f · X ·) x (Y x)
-  --           = extDerivFun f x [X, Y]_x.
   have hX_at : MDiffAt (T% X) x := (hX x).mdifferentiableAt (by simp)
   have hY_at : MDiffAt (T% Y) x := (hY x).mdifferentiableAt (by simp)
   have hZ_at : MDiffAt (T% Z) x := (hZ x).mdifferentiableAt (by simp)
@@ -669,18 +579,15 @@ theorem riemannSec_metric_skew
         (fun b : M => extDerivFun (I := I) (fun b' => g.inner b' (Z b') (W b')) b (X b))
         x (Y x) :=
     extDerivFun_apply_mlieBracket hX_at hY_at hf_2 hx_int
-  -- Apply metric compatibility to `extDerivFun f x [X,Y]_x`.
   have hbr_mdiff : MDiffAt (T% (VectorField.mlieBracket I X Y)) x := by
     haveI : IsManifold I 2 M := by
       have h_le : (2 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by norm_cast
       exact IsManifold.of_le h_le
     haveI : CompleteSpace E := inferInstance
-    -- The internal `mlieBracket_vectorField` proof requires `IsManifold I (minSmoothness ℝ 2) M`.
     haveI : IsManifold I (minSmoothness ℝ 2 : WithTop ℕ∞) M := by
       have h_eq : (minSmoothness ℝ 2 : WithTop ℕ∞) = (2 : WithTop ℕ∞) := by
         rw [minSmoothness_of_isRCLikeNormedField]
       rw [h_eq]; infer_instance
-    -- Use `ContMDiffAt.mlieBracket_vectorField` with `n := 1`, `m := 0`.
     have h_le_inf : (1 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by norm_cast
     have hX1 : ContMDiffAt I (I.prod 𝓘(ℝ, E)) 1 (T% X) x := (hX x).of_le h_le_inf
     have hY1 : ContMDiffAt I (I.prod 𝓘(ℝ, E)) 1 (T% Y) x := (hY x).of_le h_le_inf
@@ -689,7 +596,6 @@ theorem riemannSec_metric_skew
     haveI : IsManifold I ((1 : ℕ∞) + 1) M := by
       have h_eq : ((1 : ℕ∞) + 1 : WithTop ℕ∞) = (2 : WithTop ℕ∞) := by rfl
       rw [h_eq]; infer_instance
-    -- Use n=2, m=1 so that the resulting smoothness ≥ 1 ⇒ MDifferentiableAt.
     have h_le_inf2 : (2 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by norm_cast
     have hX2 : ContMDiffAt I (I.prod 𝓘(ℝ, E)) 2 (T% X) x := (hX x).of_le h_le_inf2
     have hY2 : ContMDiffAt I (I.prod 𝓘(ℝ, E)) 2 (T% Y) x := (hY x).of_le h_le_inf2
@@ -704,14 +610,6 @@ theorem riemannSec_metric_skew
     exact (hX2.mlieBracket_vectorField (m := 1) (n := 2) hY2 hmin').mdifferentiableAt
       (by decide)
   have hmc_br := metric_compat_one g hbr_mdiff hZ_at hW_at
-  -- Compose: hxy - hyx using hfound and hmc_br.
-  -- This is an equation in extDerivFun. Goal is the metric-skew identity at x.
-  -- Compute LHS - RHS of the foundation in two ways (via metric_compat_two each side):
-  -- LHS_two_xy - LHS_two_yx = (sums via hxy minus sums via hyx)
-  --                         = g((cov_X cov_Y - cov_Y cov_X) Z, W) + g(Z, (cov_X cov_Y - cov_Y cov_X) W)
-  -- And this equals extDerivFun f x [X,Y]_x = g(cov_{[X,Y]} Z, W) + g(Z, cov_{[X,Y]} W).
-  -- Hence g((cov_X cov_Y - cov_Y cov_X - cov_{[X,Y]}) Z, W) + g(Z, (...) W) = 0.
-  -- And the `(cov_X cov_Y - cov_Y cov_X - cov_{[X,Y]})` is `riemannSec` (with sign).
   have hsub : extDerivFun (I := I)
         (fun b : M => extDerivFun (I := I) (fun b' => g.inner b' (Z b') (W b')) b (Y b))
         x (X x) -
@@ -721,9 +619,6 @@ theorem riemannSec_metric_skew
       g.inner x (covApply cov X (covApply cov Y Z) x - covApply cov Y (covApply cov X Z) x) (W x) +
         g.inner x (Z x) (covApply cov X (covApply cov Y W) x - covApply cov Y (covApply cov X W) x) := by
     rw [hxy, hyx]
-    -- Algebraic rearrangement: the four-term sums minus four-term sums collapse.
-    -- (a + b + c + d) - (a' + b + c + d') with appropriate identifications.
-    -- Use `map_sub` on the linear `g.inner x (·) (W x)` and `g.inner x (Z x) (·)`.
     have h1 : g.inner x (covApply cov X (covApply cov Y Z) x - covApply cov Y (covApply cov X Z) x) (W x) =
         g.inner x (covApply cov X (covApply cov Y Z) x) (W x) -
           g.inner x (covApply cov Y (covApply cov X Z) x) (W x) := by
@@ -734,23 +629,16 @@ theorem riemannSec_metric_skew
       rw [map_sub]
     rw [h1, h2]
     ring
-  -- The Lie-bracket scalar derivative.
   have hbr_eq : extDerivFun (I := I) (fun b => g.inner b (Z b) (W b)) x
       (VectorField.mlieBracket I X Y x) =
       g.inner x (covApply cov (VectorField.mlieBracket I X Y) Z x) (W x) +
         g.inner x (Z x) (covApply cov (VectorField.mlieBracket I X Y) W x) := hmc_br
-  -- Combine: hsub says LHS_diff = (RHS); hfound says extDerivFun f x [X,Y] = LHS_diff;
-  -- hbr_eq says extDerivFun f x [X,Y] = (mlieBracket version of metric-compat RHS).
-  -- Hence (RHS) = (mlieBracket version of metric-compat RHS).
   have hkey : g.inner x (covApply cov X (covApply cov Y Z) x - covApply cov Y (covApply cov X Z) x) (W x) +
       g.inner x (Z x) (covApply cov X (covApply cov Y W) x - covApply cov Y (covApply cov X W) x) =
       g.inner x (covApply cov (VectorField.mlieBracket I X Y) Z x) (W x) +
         g.inner x (Z x) (covApply cov (VectorField.mlieBracket I X Y) W x) := by
     have h := hsub.symm.trans (hfound.symm.trans hbr_eq)
     exact h
-  -- Now `riemannSec cov X Y Z x = covApply cov X (covApply cov Y Z) x - covApply cov Y (covApply cov X Z) x
-  --                                - cov.toFun Z x ([X,Y]_x)`.
-  -- And `cov.toFun Z x ([X,Y]_x) = covApply cov (mlieBracket I X Y) Z x` definitionally.
   have hRZ : riemannSec cov X Y Z x =
       covApply cov X (covApply cov Y Z) x - covApply cov Y (covApply cov X Z) x -
         covApply cov (VectorField.mlieBracket I X Y) Z x := by
@@ -760,8 +648,6 @@ theorem riemannSec_metric_skew
         covApply cov (VectorField.mlieBracket I X Y) W x := by
     rfl
   rw [hRZ, hRW]
-  -- Now goal: g(A - B - C, W) + g(Z, D - E - F) = 0 where (A, B) etc encode the iterated covs.
-  -- By `map_sub` (on the linear `g.inner x · (W x)` and `g.inner x (Z x) ·`) and `hkey`, this collapses.
   have h1 : g.inner x (covApply cov X (covApply cov Y Z) x -
             covApply cov Y (covApply cov X Z) x -
             covApply cov (VectorField.mlieBracket I X Y) Z x) (W x) =
@@ -788,11 +674,6 @@ theorem riemannSec_metric_skew
 
 end MetricSkewSection
 
-/-! ## Fiber-level (bundled) metric skewness
-
-The section-level metric skewness lifts to the bundled `riemannOp` via
-`riemannOp_apply_smooth` together with smooth global extensions of fibre vectors. -/
-
 section MetricSkewFiber
 
 variable [CompleteSpace E]
@@ -809,7 +690,6 @@ theorem riemannOp_metric_skew
     g.inner x (riemannOp (LeviCivita (I := I) g) x v w Z) W +
       g.inner x Z (riemannOp (LeviCivita (I := I) g) x v w W) = 0 := by
   classical
-  -- Use smooth global extensions.
   set Xext := smoothExtensionTangent (I := I) x v with hXext
   set Yext := smoothExtensionTangent (I := I) x w with hYext
   set Zext := smoothExtensionTangent (I := I) x Z with hZext
@@ -826,7 +706,6 @@ theorem riemannOp_metric_skew
   have hYx : Yext x = w := smoothExtensionTangent_eq x w
   have hZx : Zext x = Z := smoothExtensionTangent_eq x Z
   have hWx : Wext x = W := smoothExtensionTangent_eq x W
-  -- Apply `riemannOp_apply_smooth` to identify both Riemann terms with section formulas.
   have hRZ : riemannOp (LeviCivita (I := I) g) x v w Z =
       riemannSec (LeviCivita (I := I) g) Xext Yext Zext x := by
     rw [show v = Xext x from hXx.symm, show w = Yext x from hYx.symm,
@@ -838,30 +717,10 @@ theorem riemannOp_metric_skew
         show W = Wext x from hWx.symm,
         riemannOp_apply_smooth (cov := LeviCivita (I := I) g) hX hY hW]
   rw [hRZ, hRW]
-  -- Now apply section-level metric skewness.
   rw [show Z = Zext x from hZx.symm, show W = Wext x from hWx.symm]
   exact riemannSec_metric_skew g hX hY hZ hW
 
 end MetricSkewFiber
-
-/-! ## Symmetry of the Ricci tensor
-
-We now combine the first Bianchi identity, the metric-skew property of the Riemann
-curvature operator, and the algebraic skew-trace lemma to deduce the symmetry of the
-Ricci tensor:
-$$
-  \mathrm{Ric}(v, w) = \mathrm{Ric}(w, v).
-$$
-
-The argument:
-1. The endomorphism `R(v, w) : T_x M → T_x M` defined by `Z ↦ riemannOp (LeviCivita g) x v w Z`
-   is `g`-skew-adjoint (by `riemannOp_metric_skew`); hence its trace is zero
-   (`trace_eq_zero_of_skew_dual`).
-2. By first Bianchi (`riemannSec_first_bianchi_levi_civita`) applied to smooth global
-   extensions and rearranged at the fibre level via `riemannOp`:
-   `R(Z, v) w - R(Z, w) v = -R(v, w) Z`.
-3. Tracing in `Z`: `Ric(v, w) - Ric(w, v) = -tr(R(v, w)) = 0`.
--/
 
 section RicciSymmetry
 
@@ -914,8 +773,6 @@ private lemma gFlat_injective (g : SmoothRiemannianMetric I M) (x : M) :
     Function.Injective (gFlat (I := I) g x) := by
   intro v v' hvv'
   have h := congrArg (fun (φ : TangentSpace I x →ₗ[ℝ] ℝ) => φ (v - v')) hvv'
-  -- h : g.inner x v (v - v') = g.inner x v' (v - v').
-  -- Then g.inner x (v - v') (v - v') = g.inner x v (v - v') - g.inner x v' (v - v') = 0.
   have hlhs : g.inner x v (v - v') = g.inner x v' (v - v') := by
     change (gFlat (I := I) g x v) (v - v') = (gFlat (I := I) g x v') (v - v')
     exact h
@@ -925,7 +782,6 @@ private lemma gFlat_injective (g : SmoothRiemannianMetric I M) (x : M) :
       rfl
     rw [h1, hlhs]
     ring
-  -- By positive-definiteness, this forces v - v' = 0.
   by_contra hne
   have hne' : v - v' ≠ 0 := sub_ne_zero.mpr hne
   have hpos := g.pos x (v - v') hne'
@@ -937,12 +793,8 @@ private lemma riemannOpEndo_trace_eq_zero
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     LinearMap.trace ℝ (TangentSpace I x) (riemannOpEndo (I := I) g x v w) = 0 := by
   classical
-  -- Apply the algebraic skew-trace lemma with `flat := gFlat g x`.
   apply trace_eq_zero_of_skew_dual (gFlat (I := I) g x) (gFlat_injective g x)
   intro Z W
-  -- `(gFlat g x (riemannOpEndo g x v w Z)) W = g.inner x (riemannOp x v w Z) W`.
-  -- And `-(gFlat g x Z) (riemannOpEndo g x v w W) = -g.inner x Z (riemannOp x v w W)`.
-  -- These sum to zero by `riemannOp_metric_skew`.
   change g.inner x (riemannOp (LeviCivita (I := I) g) x v w Z) W =
     -g.inner x Z (riemannOp (LeviCivita (I := I) g) x v w W)
   have hskew := riemannOp_metric_skew (I := I) g x v w Z W
@@ -961,7 +813,6 @@ private lemma riemannOp_first_bianchi_rearranged
       riemannOp (LeviCivita (I := I) g) x Z w v =
       -riemannOp (LeviCivita (I := I) g) x v w Z := by
   classical
-  -- Smooth global extensions for v, w, Z.
   set V := smoothExtensionTangent (I := I) x v with hV_def
   set W := smoothExtensionTangent (I := I) x w with hW_def
   set Zext := smoothExtensionTangent (I := I) x Z with hZ_def
@@ -974,11 +825,9 @@ private lemma riemannOp_first_bianchi_rearranged
   have hVx : V x = v := smoothExtensionTangent_eq x v
   have hWx : W x = w := smoothExtensionTangent_eq x w
   have hZx : Zext x = Z := smoothExtensionTangent_eq x Z
-  -- Apply riemannOp_apply_smooth to each of the three Riemann terms.
   have hZ_at : MDiffAt (T% Zext) x := (hZext x).mdifferentiableAt (by simp)
   have hV_at : MDiffAt (T% V) x := (hV x).mdifferentiableAt (by simp)
   have hW_at : MDiffAt (T% W) x := (hW x).mdifferentiableAt (by simp)
-  -- Smoothness of intermediate covApply sections (needed for the Bianchi hypotheses).
   have hcZV : MDiffAt (T% (covApply (LeviCivita (I := I) g) Zext V)) x :=
     ((covApply_smooth_section g hZext hV) x).mdifferentiableAt (by simp)
   have hcVZ : MDiffAt (T% (covApply (LeviCivita (I := I) g) V Zext)) x :=
@@ -991,7 +840,6 @@ private lemma riemannOp_first_bianchi_rearranged
     ((covApply_smooth_section g hV hW) x).mdifferentiableAt (by simp)
   have hcWV : MDiffAt (T% (covApply (LeviCivita (I := I) g) W V)) x :=
     ((covApply_smooth_section g hW hV) x).mdifferentiableAt (by simp)
-  -- mlieBracket smoothness. We need it for the three pairs (Z,V), (V,W), (W,Z).
   haveI : IsManifold I 2 M := by
     have h_le : (2 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by norm_cast
     exact IsManifold.of_le h_le
@@ -1023,14 +871,12 @@ private lemma riemannOp_first_bianchi_rearranged
   have hbrZV : MDiffAt (T% (VectorField.mlieBracket I Zext V)) x := hmlieBr hZext hV
   have hbrVW : MDiffAt (T% (VectorField.mlieBracket I V W)) x := hmlieBr hV hW
   have hbrWZ : MDiffAt (T% (VectorField.mlieBracket I W Zext)) x := hmlieBr hW hZext
-  -- Smoothness of `Z, V, W` in nbhds of x (for first Bianchi hypotheses).
   have hZ_nhd : ∀ᶠ b in 𝓝 x, MDiffAt (T% Zext) b :=
     Filter.Eventually.of_forall (hZext.mdifferentiable (by simp))
   have hV_nhd : ∀ᶠ b in 𝓝 x, MDiffAt (T% V) b :=
     Filter.Eventually.of_forall (hV.mdifferentiable (by simp))
   have hW_nhd : ∀ᶠ b in 𝓝 x, MDiffAt (T% W) b :=
     Filter.Eventually.of_forall (hW.mdifferentiable (by simp))
-  -- Higher smoothness for Jacobi.
   have h_min2_le : (minSmoothness ℝ 2 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by
     rw [minSmoothness_of_isRCLikeNormedField]
     norm_cast
@@ -1040,12 +886,10 @@ private lemma riemannOp_first_bianchi_rearranged
     (hV x).of_le h_min2_le
   have hW_2 : ContMDiffAt I (I.prod 𝓘(ℝ, E)) (minSmoothness ℝ 2) (T% W) x :=
     (hW x).of_le h_min2_le
-  -- Apply first Bianchi to (Z, V, W).
   have hbianchi := riemannSec_first_bianchi_levi_civita (I := I) g
     (X := Zext) (Y := V) (Z := W) (x := x)
     hZ_at hV_at hW_at hZ_nhd hV_nhd hW_nhd
     hcZV hcVZ hcZW hcWZ hcVW hcWV hbrZV hbrVW hbrWZ hZ_2 hV_2 hW_2
-  -- Convert riemannSec to riemannOp at the basepoint.
   have hRZV : riemannSec (LeviCivita (I := I) g) Zext V W x =
       riemannOp (LeviCivita (I := I) g) x Z v w := by
     rw [show Z = Zext x from hZx.symm, show v = V x from hVx.symm, show w = W x from hWx.symm,
@@ -1059,23 +903,14 @@ private lemma riemannOp_first_bianchi_rearranged
     rw [show w = W x from hWx.symm, show Z = Zext x from hZx.symm, show v = V x from hVx.symm,
         riemannOp_apply_smooth (cov := LeviCivita (I := I) g) hW hZext hV]
   rw [hRZV, hRVW, hRWZ] at hbianchi
-  -- hbianchi: R(Z, v, w) + R(v, w, Z) + R(w, Z, v) = 0.
-  -- Apply riemannOp_swap to move R(w, Z, v) = -R(Z, w, v).
   have hswap := riemannOp_swap (LeviCivita (I := I) g) x w Z v
-  -- hswap: riemannOp x w Z v = -riemannOp x Z w v.
   rw [hswap] at hbianchi
-  -- hbianchi: R(Z,v,w) + R(v,w,Z) + -R(Z,w,v) = 0.
-  -- Goal: R(Z,v,w) - R(Z,w,v) = -R(v,w,Z) (in the additive group T_x M).
-  -- Use `abel` (additive abelian group cancellation).
   set A := riemannOp (LeviCivita (I := I) g) x Z v w with hA
   set B := riemannOp (LeviCivita (I := I) g) x v w Z with hB
   set C := riemannOp (LeviCivita (I := I) g) x Z w v with hC
-  -- hbianchi: A + B + (-C) = 0, i.e., A - C = -B.
   change A - C = -B
-  -- Direct algebraic manipulation in the additive group.
   have hreorg : A + B + -C = (A - C) + B := by abel
   rw [hreorg] at hbianchi
-  -- hbianchi: (A - C) + B = 0. Solve for A - C.
   have hfinal : A - C = -B := by
     have h := add_eq_zero_iff_eq_neg.mp hbianchi
     exact h
@@ -1090,12 +925,7 @@ theorem ricciTensor_symm
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     ricciTensor (I := I) g x v w = ricciTensor (I := I) g x w v := by
   classical
-  -- Express both via `ricciTensor_apply` (trace formula).
   rw [ricciTensor_apply, ricciTensor_apply]
-  -- ricciEndo g x v w = (Z ↦ riemannOp x Z v w).
-  -- Difference: ricciEndo g x v w - ricciEndo g x w v = (Z ↦ R(Z, v) w - R(Z, w) v) = (Z ↦ -R(v,w) Z)
-  --                                                  = -riemannOpEndo g x v w.
-  -- Hence tr(ricciEndo g x v w) - tr(ricciEndo g x w v) = -tr(riemannOpEndo g x v w) = 0.
   have hdiff_eq : ricciEndo (I := I) g x v w - ricciEndo (I := I) g x w v =
       -riemannOpEndo (I := I) g x v w := by
     apply LinearMap.ext
@@ -1103,8 +933,6 @@ theorem ricciTensor_symm
     show (ricciEndo (I := I) g x v w - ricciEndo (I := I) g x w v) Z =
       (-riemannOpEndo (I := I) g x v w) Z
     simp only [LinearMap.sub_apply, ricciEndo_apply, LinearMap.neg_apply, riemannOpEndo_apply]
-    -- (Z↦R(Z, v) w) Z - (Z↦R(Z, w) v) Z = R(Z,v)w - R(Z,w)v = -R(v,w)Z
-    -- by `riemannOp_first_bianchi_rearranged`.
     exact riemannOp_first_bianchi_rearranged g x v w Z
   have htr_diff : LinearMap.trace ℝ (TangentSpace I x) (ricciEndo (I := I) g x v w) -
       LinearMap.trace ℝ (TangentSpace I x) (ricciEndo (I := I) g x w v) =
@@ -1158,31 +986,6 @@ theorem ricciTensor_sub_neg
 
 end RicciSymmetry
 
-/-! ## Smoothness of `ricciTensor` as a `(0, 2)`-tensor section
-
-We prove that `b ↦ ricciTensor g b` is a smooth section of the (0, 2)-tensor bundle. The
-strategy mirrors the smoothness chain used for `tensor02Cov_isContMDiff`:
-
-1. Smoothness of `b ↦ riemannSec (LeviCivita g) X Y Z b` as a smooth tangent section, given
-   smooth global tangent sections `X, Y, Z`. This combines the smoothness of `covApply`
-   (which is the smoothness of a `Hom(TM, TM)`-section applied to a smooth tangent section)
-   and the smoothness of the manifold Lie bracket.
-
-2. **Local trace formula.** At each point `x ∈ M`, with the trivialisation
-   `e := trivializationAt E (TangentSpace I) x`, choose smooth global tangent sections `S_i`
-   that agree with the local frame `e.localFrame (chartModelBasis E)` on a neighbourhood
-   of `x`. The trace of `Z ↦ riemannOp (LeviCivita g) b Z (Y b) (W b)` decomposes (via
-   `LinearMap.trace_eq_matrix_trace` applied to the basis `chartBasisFamily x hb`) as a
-   finite sum of pairings of `riemannSec (LeviCivita g) S_i Y W b` against the dual basis,
-   itself given by the trivialisation's `continuousLinearMapAt`.
-
-3. The scalar `b ↦ ricciTensor g b (Y b) (W b)` is smooth on a neighbourhood of any point,
-   hence smooth globally.
-
-4. By the operator-to-bundle bridge (`cotangentCov_clmSection_smooth_aux`) applied twice,
-   smoothness of the scalar pairings on smooth tangent sections lifts to smoothness of
-   `b ↦ ⟨b, ricciTensor g b⟩` as a section of the (0, 2)-tensor bundle. -/
-
 section RicciSmoothness
 
 variable [CompleteSpace E]
@@ -1199,25 +1002,16 @@ theorem riemannSec_section_smooth
       (T% (fun b : M => riemannSec (LeviCivita (I := I) g) X Y Z b)) := by
   classical
   set cov := LeviCivita (I := I) g with hcov
-  -- riemannSec cov X Y Z b = covApply cov X (covApply cov Y Z) b -
-  --                          covApply cov Y (covApply cov X Z) b -
-  --                          covApply cov (mlieBracket I X Y) Z b
-  -- Each summand is smooth as a tangent section.
-  -- (1) covApply cov Y Z is smooth.
   have hcYZ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (covApply cov Y Z)) :=
     covApply_smooth_section g hY hZ
-  -- (2) covApply cov X Z is smooth.
   have hcXZ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (covApply cov X Z)) :=
     covApply_smooth_section g hX hZ
-  -- (3) covApply cov X (covApply cov Y Z) is smooth.
   have hcXcYZ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (T% (covApply cov X (covApply cov Y Z))) :=
     covApply_smooth_section g hX hcYZ
-  -- (4) covApply cov Y (covApply cov X Z) is smooth.
   have hcYcXZ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (T% (covApply cov Y (covApply cov X Z))) :=
     covApply_smooth_section g hY hcXZ
-  -- (5) mlieBracket I X Y is smooth (using `ContMDiff.mlieBracket_vectorField`).
   haveI : IsManifold I 2 M := by
     have h_le : (2 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by norm_cast
     exact IsManifold.of_le h_le
@@ -1231,11 +1025,7 @@ theorem riemannSec_section_smooth
     have h_le3 : (3 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by norm_cast
     exact IsManifold.of_le h_le3
   have hbrXY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (VectorField.mlieBracket I X Y)) := by
-    -- ContMDiff.mlieBracket_vectorField requires `n + 1 ≤` smoothness on inputs.
     intro b
-    -- Use n=2 → result is C^1 — this is insufficient. We need C^∞.
-    -- We apply `mlieBracket_vectorField` with `m, n : ℕ∞`, using `n := ⊤` and `m := ⊤`
-    -- (since `(⊤ : ℕ∞) + 1 = ⊤`, so `minSmoothness ℝ (m + 1) = ⊤ ≤ n = ⊤`).
     have hn_le : minSmoothness ℝ (((⊤ : ℕ∞) : WithTop ℕ∞) + 1) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞) := by
       rw [minSmoothness_of_isRCLikeNormedField]
       have h_eq : (((⊤ : ℕ∞) : WithTop ℕ∞) + 1) = (((⊤ : ℕ∞) : WithTop ℕ∞)) := by
@@ -1250,11 +1040,9 @@ theorem riemannSec_section_smooth
         rw [ENat.coe_top_add_one]
       rw [h_eq]; infer_instance
     exact hX_inf.mlieBracket_vectorField (m := (⊤ : ℕ∞)) (n := (⊤ : ℕ∞)) hY_inf hn_le
-  -- (6) covApply cov (mlieBracket I X Y) Z is smooth.
   have hcbrZ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (T% (covApply cov (VectorField.mlieBracket I X Y) Z)) :=
     covApply_smooth_section g hbrXY hZ
-  -- Combine: riemannSec is the sum of three smooth tangent sections (with signs).
   have hresult : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (T% (covApply cov X (covApply cov Y Z) -
         covApply cov Y (covApply cov X Z) -
@@ -1263,24 +1051,9 @@ theorem riemannSec_section_smooth
         (T% (covApply cov X (covApply cov Y Z) - covApply cov Y (covApply cov X Z))) :=
       hcXcYZ.sub_section hcYcXZ
     exact h12.sub_section hcbrZ
-  -- riemannSec equals this difference via definitional unfolding.
   refine hresult.congr ?_
   intro b
-  -- Goal: (T% (sub-section)) b = (T% (riemannSec...)) b. Reduces by `rfl`.
   rfl
-
-/-! ### Smoothness of `riemannOp` as a `Hom`-bundle (trilinear CLM) section
-
-The bundled Riemann curvature operator `b ↦ riemannOp (LeviCivita g) b` is a section of
-the four-fold Hom-bundle
-`fun x : M => TangentSpace I x →L TangentSpace I x →L TangentSpace I x →L TangentSpace I x`,
-whose model fibre is `E →L[ℝ] E →L[ℝ] E →L[ℝ] E`. We prove its `C^∞`-smoothness by a
-three-stage descent through the operator-to-bundle bridge
-`cotangentCov_clmSection_smooth_aux`, peeling one tangent-vector slot at each stage. The
-base case — smoothness of `b ↦ riemannOp (LeviCivita g) b (X b) (Y b) (Z b)` as a tangent
-section for smooth tangent fields `X, Y, Z` — is supplied by `riemannOp_apply_smooth`
-(identifying the pointwise value with the section-level Riemann formula) together with
-`riemannSec_section_smooth`. -/
 
 /-- **Smoothness of the Riemann curvature operator as a Hom-bundle section.** For a smooth
 Riemannian metric `g` on `M`, the section
@@ -1297,33 +1070,24 @@ theorem riemannOp_section_contMDiff (g : SmoothRiemannianMetric I M) :
             TangentSpace I x)
         b (riemannOp (LeviCivita (I := I) g) b)) := by
   classical
-  -- Stage 1: peel the X-slot. For each smooth tangent section `X`, the section
-  -- `b ↦ ⟨b, riemannOp (LeviCivita g) b (X b)⟩` of the trilinear Hom-bundle is smooth.
   apply cotangentCov_clmSection_smooth_aux
     (V₂ := fun x : M =>
       TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x)
     (φ := fun x : M => riemannOp (LeviCivita (I := I) g) x)
   intro X
-  -- Stage 2: peel the Y-slot. For each smooth tangent section `Y`, the section
-  -- `b ↦ ⟨b, riemannOp (LeviCivita g) b (X b) (Y b)⟩` of the bilinear Hom-bundle is smooth.
   apply cotangentCov_clmSection_smooth_aux
     (V₂ := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)
     (φ := fun x : M => riemannOp (LeviCivita (I := I) g) x (X x))
   intro Y
-  -- Stage 3: peel the Z-slot. For each smooth tangent section `Z`, the tangent section
-  -- `b ↦ ⟨b, riemannOp (LeviCivita g) b (X b) (Y b) (Z b)⟩` is smooth.
   apply cotangentCov_clmSection_smooth_aux
     (V₂ := fun x : M => TangentSpace I x)
     (φ := fun x : M => riemannOp (LeviCivita (I := I) g) x (X x) (Y x))
   intro Z
-  -- Base case: identify the pointwise value with the section-level Riemann formula and
-  -- conclude by `riemannSec_section_smooth`.
   have hsec : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (T% (fun b : M => riemannSec (LeviCivita (I := I) g) X Y Z b)) :=
     riemannSec_section_smooth g X.contMDiff Y.contMDiff Z.contMDiff
   refine hsec.congr ?_
   intro b
-  -- Goal (from `congr`): `⟨b, riemannOp g b (X b) (Y b) (Z b)⟩ = (T% (riemannSec g X Y Z)) b`.
   change TotalSpace.mk' E (E := TangentSpace I) b
       (riemannOp (LeviCivita (I := I) g) b (X b) (Y b) (Z b)) =
     TotalSpace.mk' E (E := TangentSpace I) b
@@ -1358,7 +1122,6 @@ private lemma trace_eq_chart_sum
   classical
   set e := trivializationAt E (TangentSpace I : M → Type _) x with he
   set basisB := chartBasisFamily (I := I) x hb with hbasisB_def
-  -- Use `LinearMap.trace_eq_matrix_trace` with `basisB`.
   rw [LinearMap.trace_eq_matrix_trace ℝ basisB
       (F : TangentSpace I b →ₗ[ℝ] TangentSpace I b)]
   unfold Matrix.trace
@@ -1366,42 +1129,21 @@ private lemma trace_eq_chart_sum
   intro i _
   simp only [Matrix.diag_apply]
   rw [LinearMap.toMatrix_apply]
-  -- LHS: basisB.repr (F (basisB i)) i.
-  -- basisB i = chartBasisVecFiber x i b (by `chartBasisFamily_apply`).
-  -- basisB.repr v = (chartModelBasis E).repr ((e.continuousLinearEquivAt ℝ b hb) v)
-  --              = (chartModelBasis E).repr (e.continuousLinearMapAt ℝ b v) (on baseSet).
   rw [show basisB i = chartBasisVecFiber (I := I) x i b from
     chartBasisFamily_apply (I := I) x hb i]
-  -- basisB.repr v i = (chartModelBasis E).repr ((e.continuousLinearEquivAt ℝ b hb) v) i.
   change (basisB.repr (F (chartBasisVecFiber (I := I) x i b))) i =
       ((chartModelBasis E).repr
         (e.continuousLinearMapAt ℝ b (F (chartBasisVecFiber (I := I) x i b)))) i
-  -- Unfold basisB.repr.
   rw [hbasisB_def]
   unfold chartBasisFamily
   rw [Module.Basis.map_repr]
   simp only [LinearEquiv.trans_apply]
-  -- Match `e.continuousLinearMapAt ℝ b` with `e.continuousLinearEquivAt ℝ b hb` on baseSet.
   congr 2
   change (e.continuousLinearEquivAt ℝ b hb : TangentSpace I b → E)
       (F (chartBasisVecFiber (I := I) x i b)) =
       (e.continuousLinearMapAt ℝ b : TangentSpace I b → E)
         (F (chartBasisVecFiber (I := I) x i b))
   rw [Trivialization.coe_continuousLinearEquivAt_eq (R := ℝ) e hb]
-
-/-! ### Smoothness of `b ↦ ricciTensor g b (Y b) (W b)` for smooth `Y, W`.
-
-The decomposition uses a smooth local frame: at each point `x`, we have a smooth global
-tangent section `S_i` agreeing with the trivialisation-induced frame on a neighbourhood
-of `x`. Then for `b` in that neighbourhood,
-$$
-  \mathrm{Ric}\,g\,b\,(Y b)\,(W b)
-    = \sum_i \bigl((\mathtt{finBasis}\,\mathbb R\,E).\mathrm{repr}\,
-        (e.\mathtt{continuousLinearMapAt}\,\mathbb R\,b\,
-          (\mathrm{riemannSec}\,(\mathrm{LeviCivita}\,g)\,(S_i)\,Y\,W\,b))\bigr)_i.
-$$
-The right-hand side is smooth in `b` (chain of smooth operations on smooth tangent
-sections). -/
 
 /-- A smooth global tangent section that agrees with the trivialisation-induced frame on a
 neighbourhood of `x`. -/
@@ -1456,12 +1198,9 @@ theorem ricciTensor_pairing_contMDiff
     (hW : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% W)) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun b : M => ricciTensor (I := I) g b (Y b) (W b)) := by
   classical
-  -- Local-to-global smoothness: smoothness is `∀ x, ContMDiffAt`.
   intro x
-  -- Local trivialization at `x`.
   set e := trivializationAt E (TangentSpace I : M → Type _) x with he_def
   have hex : x ∈ e.baseSet := mem_baseSet_trivializationAt E (TangentSpace I) x
-  -- Smooth global frame `S_i` matching `e.localFrame (chartModelBasis E) i` on a nbhd of x.
   set S : Fin (Module.finrank ℝ E) → Cₛ^(⊤ : ℕ∞)⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     localFrameSmoothExtension (I := I) x with hS_def
   have hS_smooth : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -1470,23 +1209,19 @@ theorem ricciTensor_pairing_contMDiff
   have hS_eqOn_nhd : ∀ᶠ b in 𝓝 x, ∀ i,
       S i b = e.localFrame (chartModelBasis E) i b :=
     localFrameSmoothExtension_eqOn_nhd (I := I) x
-  -- Smoothness of each summand.
   have hsec_smooth : ∀ i,
       ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
         (T% (fun b : M => riemannSec (LeviCivita (I := I) g) (S i) Y W b)) := fun i =>
     riemannSec_section_smooth g (hS_smooth i) hY hW
-  -- The summand: `b ↦ ((chartModelBasis E).repr (e.continuousLinearMapAt ℝ b (Z_i b))) i`.
   have hsummand_smooth : ∀ i,
       ContMDiffAt I 𝓘(ℝ, ℝ) ∞
         (fun b : M => ((chartModelBasis E).repr
           (e.continuousLinearMapAt ℝ b (riemannSec (LeviCivita (I := I) g) (S i) Y W b))) i) x := by
     intro i
-    -- The trivialized fibre is smooth at x.
     have h_triv : ContMDiffAt I 𝓘(ℝ, E) ∞
         (fun b : M => (e ⟨b, riemannSec (LeviCivita (I := I) g) (S i) Y W b⟩).2) x := by
       have := (contMDiffAt_section (F := E) (E := TangentSpace I) x).mp ((hsec_smooth i) x)
       simpa [e, trivializationAt] using this
-    -- On `e.baseSet`, `(e ⟨b, ·⟩).2 = e.continuousLinearMapAt ℝ b (·)`.
     have h_eq_nbhd : ∀ᶠ b in 𝓝 x, (e ⟨b, riemannSec (LeviCivita (I := I) g) (S i) Y W b⟩).2 =
         e.continuousLinearMapAt ℝ b (riemannSec (LeviCivita (I := I) g) (S i) Y W b) := by
       filter_upwards [e.open_baseSet.mem_nhds hex] with b hb
@@ -1498,7 +1233,6 @@ theorem ricciTensor_pairing_contMDiff
       apply h_triv.congr_of_eventuallyEq
       filter_upwards [h_eq_nbhd] with b hb
       exact hb.symm
-    -- Compose with the linear functional `finBasisReprAt i : E →L[ℝ] ℝ`.
     have h_clm_smooth : ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, ℝ) ∞ (finBasisReprAt (E := E) i : E → ℝ) :=
       (finBasisReprAt (E := E) i).contMDiff
     have h_comp : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
@@ -1508,51 +1242,27 @@ theorem ricciTensor_pairing_contMDiff
     refine h_comp.congr_of_eventuallyEq ?_
     filter_upwards with b
     exact finBasisReprAt_apply i _
-  -- Trace formula: `ricciTensor g b (Y b) (W b) = ∑ᵢ (summand i) b` on a nbhd of x.
-  -- Using `ricciTensor_apply_basisSum` and the chart-local trace expansion.
   have h_decomp_nhd : ∀ᶠ b in 𝓝 x,
       ricciTensor (I := I) g b (Y b) (W b) =
         ∑ i : Fin (Module.finrank ℝ E),
           ((chartModelBasis E).repr
             (e.continuousLinearMapAt ℝ b (riemannSec (LeviCivita (I := I) g) (S i) Y W b))) i := by
-    -- Use the trace identity: `ricciTensor g b (Y b) (W b) = tr_b (Z ↦ riemannOp _ b Z (Y b) (W b))`.
-    -- Then apply `trace_eq_chart_sum` with `b ∈ e.baseSet` and `F = riemannOp _ b · (Y b) (W b)`.
-    -- The sum then equals `∑ᵢ ((chartModelBasis E).repr (e.continuousLinearMapAt ℝ b
-    --                       (riemannOp _ b (chartBasisVecFiber x i b) (Y b) (W b)))) i`.
-    -- And `riemannOp _ b (S i b) (Y b) (W b) = riemannSec _ (S i) Y W b` for `b` in the nbhd,
-    -- which uses `S i b = chartBasisVecFiber x i b`.
     filter_upwards [e.open_baseSet.mem_nhds hex, hS_eqOn_nhd] with b hb hSb
-    -- Step 1: trace identity.
     have h1 : ricciTensor (I := I) g b (Y b) (W b) =
         LinearMap.trace ℝ (TangentSpace I b)
           (ricciEndo (I := I) g b (Y b) (W b)) := ricciTensor_apply g b (Y b) (W b)
-    -- Step 2: the underlying linear map is exactly `Z ↦ riemannOp _ b Z (Y b) (W b)`,
-    -- which equals `(riemannOpEndo g b (Y b) (W b))`'s nuance (different but compatible).
-    -- Actually `ricciEndo g b v w Z = riemannOp _ b Z v w` (note slot order).
-    -- So `ricciEndo g b v w = (Z ↦ riemannOp _ b Z v w)` as a linear map T_b M → T_b M.
-    -- Apply `trace_eq_chart_sum` with `F` the CLM version.
-    -- The CLM `riemannOpZ : T_b M →L[ℝ] T_b M` defined by `Z ↦ riemannOp _ b Z (Y b) (W b)`.
-    -- It coincides with `riemannOp (LeviCivita g) b` partially applied.
     let F : TangentSpace I b →L[ℝ] TangentSpace I b :=
       (riemannOp (LeviCivita (I := I) g) b).flip (Y b) |>.flip (W b)
-    -- Verify F coincides with ricciEndo:
-    -- `F Z = ((riemannOp _ b).flip (Y b)).flip (W b) Z = ((riemannOp _ b).flip (Y b)) Z (W b)
-    --      = riemannOp _ b Z (Y b) (W b)`.
     have hF_eq : (F : TangentSpace I b →ₗ[ℝ] TangentSpace I b) =
         ricciEndo (I := I) g b (Y b) (W b) := by
       apply LinearMap.ext
       intro Z
       change F Z = riemannOp (LeviCivita (I := I) g) b Z (Y b) (W b)
       rfl
-    -- Apply `trace_eq_chart_sum`.
     rw [h1, ← hF_eq]
     rw [trace_eq_chart_sum (I := I) (x := x) (b := b) hb F]
     refine Finset.sum_congr rfl ?_
     intro i _
-    -- Each summand: `(chartModelBasis E).repr (e.continuousLinearMapAt ℝ b
-    --                  (F (chartBasisVecFiber x i b))) i`.
-    -- Want to rewrite `chartBasisVecFiber x i b` as `S i b`.
-    -- Note: `e.localFrame basis i b = chartBasisVecFiber x i b` on `e.baseSet`.
     have hframe_eq : e.localFrame (chartModelBasis E) i b =
         chartBasisVecFiber (I := I) x i b := by
       rw [Trivialization.localFrame_apply_of_mem_baseSet (hx := hb)]
@@ -1561,7 +1271,6 @@ theorem ricciTensor_pairing_contMDiff
       rfl
     have hSb_i : S i b = chartBasisVecFiber (I := I) x i b := (hSb i).trans hframe_eq
     rw [show chartBasisVecFiber (I := I) x i b = S i b from hSb_i.symm]
-    -- The argument equality: `F (S i b) = riemannSec ... b`.
     have h_F_eq : F (S i b) = riemannOp (LeviCivita (I := I) g) b (S i b) (Y b) (W b) := by
       change ((riemannOp (LeviCivita (I := I) g) b).flip (Y b)).flip (W b) (S i b) =
         riemannOp (LeviCivita (I := I) g) b (S i b) (Y b) (W b)
@@ -1571,7 +1280,6 @@ theorem ricciTensor_pairing_contMDiff
       exact riemannOp_apply_smooth (cov := LeviCivita (I := I) g)
         (hS_smooth i) hY hW
     rw [h_F_eq_riemannSec]
-  -- Conclude by smoothness of the sum and congruence.
   have hsum_smooth : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
       (fun b : M => ∑ i : Fin (Module.finrank ℝ E),
         ((chartModelBasis E).repr
@@ -1582,8 +1290,6 @@ theorem ricciTensor_pairing_contMDiff
   refine hsum_smooth.congr_of_eventuallyEq ?_
   filter_upwards [h_decomp_nhd] with b hb
   exact hb
-
-/-! ### Smoothness of `ricciTensor` as a (0,2)-tensor section -/
 
 /-- The (0,2)-tensor bundle is locally instantiated for the `T%` macro. -/
 local instance ricciTensor02FiberBundle :
@@ -1610,20 +1316,14 @@ theorem ricciTensor_contMDiff (g : SmoothRiemannianMetric I M) :
         (E := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) b
         (ricciTensor (I := I) g b)) := by
   classical
-  -- Two-stage descent via `cotangentCov_clmSection_smooth_aux`.
-  -- Stage 1: For each smooth tangent section `Y`, `b ↦ ⟨b, ricciTensor g b (Y b)⟩` is a
-  -- smooth section of `T*M = Hom(TM, ℝ)`.
   apply cotangentCov_clmSection_smooth_aux
     (V₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
     (φ := fun x : M => ricciTensor (I := I) g x)
   intro Y
-  -- Stage 2: For each smooth tangent section `W`, the scalar `b ↦ ricciTensor g b (Y b) (W b)`
-  -- is smooth.
   apply cotangentCov_clmSection_smooth_aux
     (V₂ := fun _ : M => ℝ)
     (φ := fun x : M => ricciTensor (I := I) g x (Y x))
   intro W
-  -- Reduce to scalar smoothness via `contMDiffAt_section` for the trivial bundle.
   have h_scalar : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun b : M => ricciTensor (I := I) g b (Y b) (W b)) :=
     ricciTensor_pairing_contMDiff g Y.contMDiff W.contMDiff
@@ -1637,14 +1337,6 @@ theorem ricciTensor_contMDiff (g : SmoothRiemannianMetric I M) :
   rfl
 
 end RicciSmoothness
-
-/-! ## Pair (block) symmetry of the Riemann curvature operator
-
-The block symmetry `⟨R(X, Y) Z, W⟩ = ⟨R(Z, W) X, Y⟩` of the Levi-Civita Riemann
-curvature operator. It is the algebraic consequence of the first Bianchi identity
-together with the first-pair antisymmetry (`riemannOp_swap`) and the last-pair
-metric-skewness (`riemannOp_metric_skew`), and controls the sign of the curvature
-term in the second variation of arc length. -/
 
 section PairSymmetry
 
@@ -1673,7 +1365,6 @@ private lemma riemann4_swap34 (g : SmoothRiemannianMetric I M) (x : M)
     riemann4 (I := I) g x a b c d = -riemann4 (I := I) g x a b d c := by
   unfold riemann4
   have hskew := riemannOp_metric_skew (I := I) g x a b c d
-  -- hskew : g⟨R(a,b)c, d⟩ + g⟨c, R(a,b)d⟩ = 0.
   have hsymm : g.inner x c (riemannOp (LeviCivita (I := I) g) x a b d) =
       g.inner x (riemannOp (LeviCivita (I := I) g) x a b d) c :=
     g.symm x c (riemannOp (LeviCivita (I := I) g) x a b d)
@@ -1688,23 +1379,14 @@ private lemma riemann4_bianchi (g : SmoothRiemannianMetric I M) (x : M)
     (a b c e : TangentSpace I x) :
     riemann4 (I := I) g x a b c e + riemann4 (I := I) g x b c a e +
       riemann4 (I := I) g x c a b e = 0 := by
-  -- Cyclic first Bianchi on the operator: R(a,b)c + R(b,c)a + R(c,a)b = 0.
-  -- From `riemannOp_first_bianchi_rearranged g x b c a : R(a,b)c - R(a,c)b = -R(b,c)a`
-  -- and `riemannOp_swap` to rewrite R(a,c)b = -R(c,a)b.
   have hrear := riemannOp_first_bianchi_rearranged (I := I) g x b c a
-  -- hrear : R(a,b)c - R(a,c)b = -R(b,c)a.
   have hswap := riemannOp_swap (LeviCivita (I := I) g) x a c b
-  -- hswap : R(a,c)b = -R(c,a)b.
   rw [hswap] at hrear
-  -- hrear : R(a,b)c - (-R(c,a)b) = -R(b,c)a, i.e. R(a,b)c + R(c,a)b = -R(b,c)a.
   have hcyc : riemannOp (LeviCivita (I := I) g) x a b c +
       riemannOp (LeviCivita (I := I) g) x b c a +
       riemannOp (LeviCivita (I := I) g) x c a b = 0 := by
     have h := hrear
-    -- h : R(a,b)c - -R(c,a)b = -R(b,c)a.
     rw [sub_neg_eq_add] at h
-    -- h : R(a,b)c + R(c,a)b = -R(b,c)a.
-    -- Rearranged to the cyclic sum = 0.
     rw [show riemannOp (LeviCivita (I := I) g) x a b c +
         riemannOp (LeviCivita (I := I) g) x b c a +
         riemannOp (LeviCivita (I := I) g) x c a b =
@@ -1713,7 +1395,6 @@ private lemma riemann4_bianchi (g : SmoothRiemannianMetric I M) (x : M)
         riemannOp (LeviCivita (I := I) g) x b c a from by abel]
     rw [h]
     abel
-  -- Pair against the metric in the fourth slot.
   have hpair : riemann4 (I := I) g x a b c e + riemann4 (I := I) g x b c a e +
       riemann4 (I := I) g x c a b e =
       g.inner x (riemannOp (LeviCivita (I := I) g) x a b c +
@@ -1733,29 +1414,22 @@ each term with the antisymmetries cancels everything except `-2 T(a,b,c,d) + 2 T
 private lemma riemann4_pair_symm (g : SmoothRiemannianMetric I M) (x : M)
     (a b c d : TangentSpace I x) :
     riemann4 (I := I) g x a b c d = riemann4 (I := I) g x c d a b := by
-  -- The four cyclic first Bianchi identities on the cyclic shifts of `(a, c, b, d)`.
   have b1 := riemann4_bianchi (I := I) g x a c b d
-  -- T(a,c,b,d) + T(c,b,a,d) + T(b,a,c,d) = 0.
   have b2 := riemann4_bianchi (I := I) g x c b d a
-  -- T(c,b,d,a) + T(b,d,c,a) + T(d,c,b,a) = 0.
   have b3 := riemann4_bianchi (I := I) g x b d a c
-  -- T(b,d,a,c) + T(d,a,b,c) + T(a,b,d,c) = 0.
   have b4 := riemann4_bianchi (I := I) g x d a c b
-  -- T(d,a,c,b) + T(a,c,d,b) + T(c,d,a,b) = 0.
-  -- First-pair antisymmetries (A1) to canonicalize the first two slots.
-  have a1_cbad := riemann4_swap12 (I := I) g x c b a d   -- T(c,b,a,d) = -T(b,c,a,d).
-  have a1_bacd := riemann4_swap12 (I := I) g x b a c d   -- T(b,a,c,d) = -T(a,b,c,d).
-  have a1_cbda := riemann4_swap12 (I := I) g x c b d a   -- T(c,b,d,a) = -T(b,c,d,a).
-  have a1_dcba := riemann4_swap12 (I := I) g x d c b a   -- T(d,c,b,a) = -T(c,d,b,a).
-  have a1_dabc := riemann4_swap12 (I := I) g x d a b c   -- T(d,a,b,c) = -T(a,d,b,c).
-  have a1_dacb := riemann4_swap12 (I := I) g x d a c b   -- T(d,a,c,b) = -T(a,d,c,b).
-  -- Last-pair antisymmetries (A2) to canonicalize the last two slots.
-  have a2_bcda := riemann4_swap34 (I := I) g x b c d a   -- T(b,c,d,a) = -T(b,c,a,d).
-  have a2_bdca := riemann4_swap34 (I := I) g x b d c a   -- T(b,d,c,a) = -T(b,d,a,c).
-  have a2_cdba := riemann4_swap34 (I := I) g x c d b a   -- T(c,d,b,a) = -T(c,d,a,b).
-  have a2_abdc := riemann4_swap34 (I := I) g x a b d c   -- T(a,b,d,c) = -T(a,b,c,d).
-  have a2_adcb := riemann4_swap34 (I := I) g x a d c b   -- T(a,d,c,b) = -T(a,d,b,c).
-  have a2_acdb := riemann4_swap34 (I := I) g x a c d b   -- T(a,c,d,b) = -T(a,c,b,d).
+  have a1_cbad := riemann4_swap12 (I := I) g x c b a d
+  have a1_bacd := riemann4_swap12 (I := I) g x b a c d
+  have a1_cbda := riemann4_swap12 (I := I) g x c b d a
+  have a1_dcba := riemann4_swap12 (I := I) g x d c b a
+  have a1_dabc := riemann4_swap12 (I := I) g x d a b c
+  have a1_dacb := riemann4_swap12 (I := I) g x d a c b
+  have a2_bcda := riemann4_swap34 (I := I) g x b c d a
+  have a2_bdca := riemann4_swap34 (I := I) g x b d c a
+  have a2_cdba := riemann4_swap34 (I := I) g x c d b a
+  have a2_abdc := riemann4_swap34 (I := I) g x a b d c
+  have a2_adcb := riemann4_swap34 (I := I) g x a d c b
+  have a2_acdb := riemann4_swap34 (I := I) g x a c d b
   linarith
 
 /-- **Pair (block) symmetry of `riemannOp`.** For the Levi-Civita connection of a smooth
@@ -1772,7 +1446,6 @@ theorem riemannOp_inner_pair_symm
     (v w Z W : TangentSpace I x) :
     g.inner x (riemannOp (LeviCivita (I := I) g) x v w Z) W =
       g.inner x (riemannOp (LeviCivita (I := I) g) x Z W v) w := by
-  -- Reduce to the four-tensor `T` and apply block symmetry: T(v, w, Z, W) = T(Z, W, v, w).
   change riemann4 (I := I) g x v w Z W = riemann4 (I := I) g x Z W v w
   exact riemann4_pair_symm (I := I) g x v w Z W
 

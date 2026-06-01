@@ -75,8 +75,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -85,14 +83,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## The chart-side bridge hypothesis
-
-The generic chart-side hypothesis at order `2k`: for every chart point
-`α : M`, the POU-cut chart-pushed function of `u : M → ℝ` lies in
-`MemWkp (2k) 2` of the chart-target image. This is the same shape as
-`ChartSideH4Bridge` (which corresponds to `k = 2`) and uses the same
-canonical atlas partition of unity `chartAtlasPOU I M`. -/
 
 /-- **The chart-side `H^{2k}` bridge hypothesis.** For each chart point
 `α : M`, the POU-cut chart-pushed function of `u : M → ℝ` lies in
@@ -106,8 +96,6 @@ def ChartSideH2kBridge (_g : SmoothRiemannianMetric I M) (k : ℕ) (u : M → �
         (chartAtlasPOU I M) α u)
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α)
-
-/-! ## Direct manifold-level lift of the chart-side bridge -/
 
 /-- **Manifold-level `H^{2k}` lift from the chart-side bridge.** By the
 unfolding of `MemWkpChart`, the chart-side `H^{2k}` bridge for `u : M → ℝ`
@@ -130,14 +118,6 @@ theorem wkpNormChart_2k_lt_top_of_chartSideH2kBridge
   DifferentialGeometry.Analysis.Sobolev.Chart.wkpNormChart_lt_top_of_memWkpChart
     (I := I) (M := M) g (k := 2 * k) (p := 2) (by norm_num)
     (memWkpChart_2k_of_chartSideH2kBridge (I := I) (M := M) g k h_bridge)
-
-/-! ## Headline: bridge-driven `H^{2k}` regularity for `laplacianDomainPow g k`
-
-For `u_h ∈ laplacianDomainPow g k`, the bridge hypothesis on the canonical
-function representative directly yields manifold-level `MemWkpChart g (2k) 2`
-membership and a finite chart-based norm. The membership in
-`laplacianDomainPow g k` is kept in the signature to clarify the intended
-downstream use; the bridge itself already carries the data. -/
 
 /-- **Bridge-driven `H^{2k}` regularity for `laplacianDomainPow g k`.**
 
@@ -169,9 +149,6 @@ theorem laplacianDomainPow_memWkpChart_2k_of_chartSideH2kBridge
       (I := I) (M := M) g (2 * k) 2
       ((H1ComplToLp (I := I) (M := M) g u_h :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) < ⊤ := by
-  -- The hypothesis hu_h is retained in the signature for API symmetry but is
-  -- not used in the bridge-driven proof (the per-chart bridge already carries
-  -- the H^{2k} data of the canonical function representative).
   let _ := hu_h
   refine ⟨?_, ?_⟩
   · exact memWkpChart_2k_of_chartSideH2kBridge (I := I) (M := M) g k h_bridge
@@ -204,16 +181,6 @@ theorem exists_laplacianDomainPow_memWkpChart_2k_of_chartSideH2kBridge
   · exact (laplacianDomainPow_memWkpChart_2k_of_chartSideH2kBridge
       (I := I) (M := M) g k hu_h h_bridge).2
 
-/-! ## Two-sided form for `laplacianDomainPow g (k+1)`
-
-The two-sided form gives `H^{2(k+1)}` regularity simultaneously for the
-canonical function representative of `u_h ∈ laplacianDomainPow g (k+1)`
-and for the canonical function representative of the `Lp` preimage
-`laplacianDomain.preimage u_h` (which represents `(1 - Δ_g) u_h` as an
-`Lp` class). The preimage lies in the range of the iterated `Lp`-side
-resolvent at level `k`, hence corresponds via the canonical lift to an
-element of `laplacianDomainPow g k`. -/
-
 /-- **Two-sided bridge-driven `H^{2(k+1)}` regularity for
 `laplacianDomainPow g (k+1)`.** For `u_h ∈ laplacianDomainPow g (k+1)`,
 given chart-side `H^{2(k+1)}` bridges for BOTH the canonical function
@@ -232,7 +199,6 @@ theorem laplacianDomainPow_memWkpChart_2k_two_sided_of_chartSideBridges
           ⟨u_h, laplacianDomainPow_succ_subset_laplacianDomain
             (I := I) (M := M) g k hu_h⟩ :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ))) :
-    -- `H^{2(k+1)}` regularity of `u`:
     (DifferentialGeometry.Analysis.Sobolev.Chart.MemWkpChart
         (I := I) (M := M) g (2 * (k + 1)) 2
         ((H1ComplToLp (I := I) (M := M) g u_h :
@@ -241,7 +207,6 @@ theorem laplacianDomainPow_memWkpChart_2k_two_sided_of_chartSideBridges
         (I := I) (M := M) g (2 * (k + 1)) 2
         ((H1ComplToLp (I := I) (M := M) g u_h :
           Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) < ⊤) ∧
-    -- `H^{2(k+1)}` regularity of the `Lp` preimage (i.e. `(1 - Δ_g) u_h`):
     (DifferentialGeometry.Analysis.Sobolev.Chart.MemWkpChart
         (I := I) (M := M) g (2 * (k + 1)) 2
         ((laplacianDomain.preimage (I := I) (M := M) g
@@ -261,12 +226,6 @@ theorem laplacianDomainPow_memWkpChart_2k_two_sided_of_chartSideBridges
   exact wkpNormChart_2k_lt_top_of_chartSideH2kBridge
     (I := I) (M := M) g (k + 1) h_bridge_rhs
 
-/-! ## Consistency check at `k = 0`: unconditional from `iteratedH2Regularity_zero`
-
-At `k = 0`, the chart-side bridge is automatically satisfied because
-`MemWkp 0 2` is just `MemLp 2` on each chart target (any `Lp 2` function
-satisfies this). -/
-
 /-- **At `k = 0`, the chart-side `H⁰` bridge for the canonical function
 representative of any `u_h : H1Compl g` is automatic.** -/
 theorem chartSideH2kBridge_zero
@@ -276,10 +235,7 @@ theorem chartSideH2kBridge_zero
       (((H1ComplToLp (I := I) (M := M) g u_h :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ)) := by
   intro α
-  -- 2 * 0 = 0, so we need MemWkp 0 2, which is just MemLp 2 (by MemWkp_zero).
   have h := iteratedH2Regularity_zero (I := I) (M := M) g u_h
-  -- h : MemWkpChart g 0 2 ((H1ComplToLp u_h) : M → ℝ)
-  -- which definitionally unfolds to MemWkp 0 2 of the chart-pushed.
   have h_eq : (2 : ℕ) * 0 = 0 := by norm_num
   rw [h_eq]
   exact h α
@@ -299,23 +255,15 @@ theorem laplacianDomainPow_memWkpChart_2k_of_chartSideH2kBridge_zero
       (I := I) (M := M) g 0 2
       ((H1ComplToLp (I := I) (M := M) g u_h :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) < ⊤ := by
-  -- Membership in laplacianDomainPow g 0 = ⊤ is automatic.
   have hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 0 := by
     rw [laplacianDomainPow_zero]
     exact Submodule.mem_top
   have h_bridge := chartSideH2kBridge_zero (I := I) (M := M) g u_h
-  -- 2 * 0 = 0.
   have h_eq : (2 : ℕ) * 0 = 0 := by norm_num
   have := laplacianDomainPow_memWkpChart_2k_of_chartSideH2kBridge
     (I := I) (M := M) g 0 hu_h h_bridge
   rw [h_eq] at this
   exact this
-
-/-! ## Consistency check at `k = 1`: unconditional from `iteratedH2Regularity_one`
-
-At `k = 1`, the chart-side bridge is automatically satisfied because the
-unconditional single-step `H²` regularity holds for
-`u_h ∈ laplacianDomainPow g 1 = laplacianDomain g`. -/
 
 /-- **At `k = 1`, the chart-side `H²` bridge for the canonical function
 representative of `u_h ∈ laplacianDomainPow g 1` is automatic.** -/
@@ -327,9 +275,7 @@ theorem chartSideH2kBridge_one
       (((H1ComplToLp (I := I) (M := M) g u_h :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ)) := by
   intro α
-  -- 2 * 1 = 2, so we need MemWkp 2 2.
   have h := (iteratedH2Regularity_one (I := I) (M := M) g hu_h).1
-  -- h : MemWkpChart g 2 2 ((H1ComplToLp u_h) : M → ℝ)
   have h_eq : (2 : ℕ) * 1 = 2 := by norm_num
   rw [h_eq]
   exact h α
@@ -352,13 +298,6 @@ theorem laplacianDomainPow_memWkpChart_2k_of_chartSideH2kBridge_one
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) < ⊤ :=
   iteratedH2Regularity_one (I := I) (M := M) g hu_h
 
-/-! ## Consistency check at `k = 2`: equivalent to `ChartSideH4Bridge`
-
-The chart-side `H⁴` bridge in `LaplacianDomainPowH4Bridge.lean` is
-exactly `ChartSideH2kBridge g 2 u`, modulo the `2 * 2 = 4` rewrite. The
-equivalence shows the polymorphic bridge generalises the `H⁴`-specific
-one. -/
-
 /-- **The `H⁴` bridge is equivalent to the `H^{2k}` bridge at `k = 2`.** -/
 theorem chartSideH4Bridge_iff_chartSideH2kBridge_two
     (g : SmoothRiemannianMetric I M) (u : M → ℝ) :
@@ -367,7 +306,6 @@ theorem chartSideH4Bridge_iff_chartSideH2kBridge_two
     ChartSideH2kBridge (I := I) (M := M) g 2 u := by
   unfold DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH4Bridge.ChartSideH4Bridge
     ChartSideH2kBridge
-  -- The two predicates differ only by the literal 4 vs. 2 * 2. Rewrite.
   have h_eq : (2 : ℕ) * 2 = 4 := by norm_num
   rw [h_eq]
 
@@ -411,15 +349,9 @@ theorem laplacianDomainPow_memWkpChart_2k_of_chartSideH4Bridge
     (I := I) (M := M) g h_bridge
   have h := laplacianDomainPow_memWkpChart_2k_of_chartSideH2kBridge
     (I := I) (M := M) g 2 hu_h h_bridge_2k
-  -- 2 * 2 = 4.
   have h_eq : (2 : ℕ) * 2 = 4 := by norm_num
   rw [h_eq] at h
   exact h
-
-/-! ## Downward monotonicity in `k`
-
-The `H^{2k}` bridge implies the `H^{2j}` bridge for `j ≤ k`, by
-downward monotonicity of `MemWkp` in the order. -/
 
 /-- **Downward monotonicity in `k` for the bridge hypothesis.** If the
 chart-side `H^{2k}` bridge holds, then so does the `H^{2j}` bridge for
@@ -441,12 +373,6 @@ theorem chartSideH2kBridge_pred
     (h : ChartSideH2kBridge (I := I) (M := M) g (k + 1) u) :
     ChartSideH2kBridge (I := I) (M := M) g k u :=
   chartSideH2kBridge_le_of_le (I := I) (M := M) g (Nat.le_succ k) h
-
-/-! ## Algebraic closure of the bridge hypothesis
-
-The chart-side bridge hypothesis is closed under addition, scalar
-multiplication, and negation, by the corresponding closure of `MemWkp` in
-Euclidean Sobolev space. -/
 
 /-- **The chart-side bridge is closed under addition.** -/
 theorem chartSideH2kBridge_add
@@ -482,7 +408,6 @@ theorem chartSideH2kBridge_neg
     (hu : ChartSideH2kBridge (I := I) (M := M) g k u) :
     ChartSideH2kBridge (I := I) (M := M) g k (fun x => -u x) := by
   have h := chartSideH2kBridge_const_smul (I := I) (M := M) g k (-1) hu
-  -- (-1) * u x = -u x
   have hEq : (fun x : M => (-1 : ℝ) * u x) = (fun x : M => -u x) := by
     funext x; ring
   rw [hEq] at h
@@ -497,17 +422,10 @@ theorem chartSideH2kBridge_sub
     ChartSideH2kBridge (I := I) (M := M) g k (fun x => u x - v x) := by
   have hneg := chartSideH2kBridge_neg (I := I) (M := M) g k hv
   have h := chartSideH2kBridge_add (I := I) (M := M) g k hu hneg
-  -- u x + -v x = u x - v x
   have hEq : (fun x : M => u x + -v x) = (fun x : M => u x - v x) := by
     funext x; ring
   rw [hEq] at h
   exact h
-
-/-! ## Lifted manifold-level results via `MemWkpChart.le_of_le`
-
-The bridge-driven `MemWkpChart g (2k) 2` membership implies all lower
-orders by downward monotonicity. These corollaries make the downward
-implications explicit at the manifold level. -/
 
 /-- **From the chart-side `H^{2k}` bridge, the manifold-level
 `MemWkpChart g (2j) 2` follows for every `j ≤ k`.** -/
@@ -539,18 +457,6 @@ theorem laplacianDomainPow_memWkpChart_2j_of_chartSideH2kBridge
       ((H1ComplToLp (I := I) (M := M) g u_h :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) :=
   memWkpChart_2j_of_chartSideH2kBridge (I := I) (M := M) g hkj h_bridge
-
-/-! ## Combined unified headline `k ≤ 1` ∨ bridge
-
-The combined headline expresses the iterated regularity:
-
-* For `k ≤ 1`, the membership is unconditional (from
-  `iteratedH2Regularity_zero` and `iteratedH2Regularity_one`).
-* For `k ≥ 2`, the membership requires the chart-side `H^{2k}` bridge.
-
-Two unified statements are provided: a conditional unified form (always
-needs the bridge but the bridge is automatic for `k ≤ 1`), and a clean
-case-split form. -/
 
 /-- **Unified headline: `MemWkpChart g (2k) 2` for `u_h ∈ laplacianDomainPow g k`
 under the chart-side bridge.** The bridge is automatically discharged

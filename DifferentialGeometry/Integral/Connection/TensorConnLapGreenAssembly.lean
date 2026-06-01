@@ -72,15 +72,6 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open Tensor0SNabla TensorRSNabla TensorMetricLowering
 
-/-! ## Auxiliary: partition-of-unity gradient cancellation (minimal typeclasses)
-
-The partition-of-unity gradient cancellation depends only on the smooth-manifold
-and partition-of-unity structure, not on the Riemannian inner product on `E`.
-We prove it in a section with the minimal typeclass block (`[NormedSpace ℝ E]`
-only, no `[InnerProductSpace ℝ E]`) to avoid the `TangentSpace := E` norm-instance
-diamond that the full inner-product block would otherwise trigger during
-elaboration of the `tangentSectionAction` statement. -/
-
 section PouGradientCancellation
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -108,18 +99,14 @@ theorem pou_tangentSectionAction_finset_sum_eq_zero
     (hsum_one : ∀ y : M, ∑ α ∈ S, (ρ α : M → ℝ) y = 1) (x : M) :
     ∑ α ∈ S, tangentSectionAction (I := I) X ((ρ α : M → ℝ)) x = 0 := by
   classical
-  -- Each partition weight is `MDifferentiableAt` at `x`.
   have hMDiff_each : ∀ α ∈ S,
       MDifferentiableAt I 𝓘(ℝ) ((ρ α : M → ℝ)) x :=
     fun α _ => (ρ α).contMDiff.mdifferentiable (by simp) x
-  -- Commute the directional derivative through the finite sum.
   rw [← tangentSectionAction_finset_sum (I := I) X S
     (fun α => ((ρ α : M → ℝ))) x hMDiff_each]
-  -- The summed partition weights equal the constant function `1` near `x`.
   have h_eq_one : (fun y : M => ∑ α ∈ S, (ρ α : M → ℝ) y) =ᶠ[𝓝 x]
       (fun _ : M => (1 : ℝ)) :=
     Filter.Eventually.of_forall hsum_one
-  -- The directional derivative of a function constant near `x` vanishes.
   unfold tangentSectionAction
   have h_fun_eq : (∑ α ∈ S, (fun β => (ρ β : M → ℝ)) α) =
       fun y : M => ∑ α ∈ S, (ρ α : M → ℝ) y := by
@@ -149,10 +136,6 @@ theorem chartAtlasPOU_tangentSectionAction_finset_sum_eq_zero
         tangentSectionAction (I := I) X
           ((chartAtlasPOU I M α : M → ℝ)) x = 0 := by
   classical
-  -- Record the constant-`1` property before abstracting the partition / Finset, so
-  -- that `set` rewrites it together with the goal; this prevents the opaque
-  -- `chartAtlasPOU` / `chartAtlasPOU_finset` `def`s from being unfolded during the
-  -- application of the generic cancellation lemma.
   have hsum_one := chartAtlasPOU_finset_sum_eq_one (I := I) (M := M)
   set ρ : SmoothPartitionOfUnity M I M Set.univ := chartAtlasPOU I M with hρ_def
   set S : Finset M := chartAtlasPOU_finset (I := I) (M := M) with hS_def
@@ -170,33 +153,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The partition-of-unity-weighted second-order combined integration by parts
-
-The per-direction second-order combined integration-by-parts identity
-`integral_secondOrder_combined_eq_zero` is unweighted: it integrates the second-order
-Leibniz expression of a fixed smooth tangent vector field `B` against the bare
-Riemannian volume. For the partition-of-unity assembly we need a *weighted* version,
-where the integrand carries a smooth scalar weight `ρ` (a chart-`α` partition
-function). Integrating by parts with the weighted vector field `ρ · B` produces, in
-addition to the `ρ`-scaled second-order Leibniz expression, the Leibniz weight term
-`⟨∇_B T, v⟩ · B(ρ)`, which is the term that — summed over the partition index `α` —
-cancels through the gradient cancellation
-`chartAtlasPOU_tangentSectionAction_finset_sum_eq_zero`.
-
-The proof applies the scalar integration-by-parts identity
-`integral_tangentSectionAction_eq_neg_integral_smul_divergence` to the *un-lowered*
-inner-product scalar `f := ⟨∇_B T, v⟩` (smooth by `tensorInnerScalar_contMDiff`) and
-the weighted vector field `ρ · B`, then expands the directional derivative of `f`
-along `ρ · B` by linearity of `mfderiv` in the direction (giving `ρ · B(f)`) together
-with the covariant metric-Leibniz rule for `B(f)`, and expands the divergence of
-`ρ · B` by the divergence Leibniz rule `divergence_g_smoothSmul`. -/
 
 /-- The directional derivative of a scalar `f` along the smooth weighted vector
 field `ρ · B` equals `ρ` times the directional derivative along `B`. This is the
@@ -207,11 +167,8 @@ lemma tangentSectionAction_smoothSmul
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (f : M → ℝ) (x : M) :
     tangentSectionAction (I := I) (smoothSmul (I := I) ρ hρ B) f x =
       ρ x * tangentSectionAction (I := I) B f x := by
-  -- `tangentSectionAction (ρ • B) f x = mfderiv f x ((ρ • B) x)
-  --   = mfderiv f x (ρ x • B x) = ρ x • mfderiv f x (B x) = ρ x * tangentSectionAction B f x`.
   rw [tangentSectionAction_def, tangentSectionAction_def]
   rw [smoothSmul_apply]
-  -- `mfderiv f x` is a continuous linear map; it commutes with the scalar smul.
   rw [(mfderiv I 𝓘(ℝ) f x).map_smul (ρ x) (B x)]
   rw [smul_eq_mul]
 
@@ -258,23 +215,17 @@ theorem integral_weighted_secondOrder_combined_eq_neg_weightDeriv
             * tangentSectionAction (I := I) B ρ x
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
   classical
-  -- Abbreviate `W := ∇_B T` (the first directional covariant derivative as a section).
   set W : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯ :=
     covDerivAlongVFSection (I := I) (M := M) g T B with hW_def
-  -- The un-lowered inner-product scalar `f := ⟨W, v⟩ = ⟨∇_B T, v⟩`.
   set f : M → ℝ := tensorInnerScalar (I := I) (M := M) g 0 2 W v with hf_def
   have hf_smooth : ContMDiff I 𝓘(ℝ) ∞ f :=
     tensorInnerScalar_contMDiff (I := I) (M := M) g 0 2 W v
-  -- The weighted vector field `Y := ρ · B`.
   set Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     smoothSmul (I := I) ρ hρ B with hY_def
   have hY_cs : HasCompactSupport (Y : ∀ x, TangentSpace I x) :=
     HasCompactSupport.of_compactSpace _
-  -- The scalar integration-by-parts identity for `f` and `Y`.
   have hIBP := integral_tangentSectionAction_eq_neg_integral_smul_divergence
     (I := I) g hf_smooth Y hY_cs
-  -- Expand the LHS integrand of `hIBP`: `Y(f) = ρ · B(f)` and `B(f)` decomposes by
-  -- the covariant metric-Leibniz rule into the two lowered cross terms.
   have hLHS_pt : ∀ x : M,
       tangentSectionAction (I := I) Y f x =
         ρ x * (tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g x
@@ -290,17 +241,14 @@ theorem integral_weighted_secondOrder_combined_eq_neg_weightDeriv
     intro x
     rw [hY_def, tangentSectionAction_smoothSmul (I := I) ρ hρ B f x]
     congr 1
-    -- `B(f) = ⟨∇_B W, v⟩ + ⟨W, ∇_B v⟩` by the covariant metric-Leibniz rule.
     rw [hf_def]
     have hLeibniz := tangentSectionAction_tensorInnerScalar
       (I := I) (M := M) g 0 2 W v B x
     rw [hLeibniz]
-    -- `loweredCovDerivAt g 0 2 · x (B x) = loweredCovDerivAlongVF g 0 2 · B x`.
     rw [show loweredCovDerivAt (I := I) (M := M) g 0 2 W x (B x) =
           loweredCovDerivAlongVF (I := I) (M := M) g 0 2 W B x from rfl]
     rw [show loweredCovDerivAt (I := I) (M := M) g 0 2 v x (B x) =
           loweredCovDerivAlongVF (I := I) (M := M) g 0 2 v B x from rfl]
-  -- Expand the RHS integrand of `hIBP`: `f · div(Y) = f · (ρ · div B + B(ρ))`.
   have hRHS_pt : ∀ x : M,
       f x * divergence_g (I := I) g Y x =
         ρ x * (f x * divergence_g (I := I) g B x) +
@@ -308,19 +256,13 @@ theorem integral_weighted_secondOrder_combined_eq_neg_weightDeriv
     intro x
     rw [hY_def, divergence_g_smoothSmul (I := I) g ρ hρ B x]
     ring
-  -- Rewrite only the RHS of `hIBP` via the divergence pointwise expansion; the LHS
-  -- `∫ Y(f)` is kept intact and re-bundled with the goal at the end.
   rw [integral_congr_ae (Filter.Eventually.of_forall hRHS_pt)] at hIBP
-  -- The RHS integral splits into the `ρ · (f · div B)` part and the weight-derivative
-  -- part. Both summands are continuous with compact support, hence integrable.
   have hf_cont : Continuous f := hf_smooth.continuous
   have hρ_cont : Continuous ρ := hρ.continuous
   have hdivB_cont : Continuous (divergence_g (I := I) g B) :=
     (divergence_g_contMDiff (I := I) g B).continuous
   have hBρ_cont : Continuous (tangentSectionAction (I := I) B ρ) :=
     (tangentSectionAction_contMDiff (I := I) B hρ).continuous
-  -- `f` has compact support (it is the inner product of compactly-supported things via
-  -- locality of `∇`); on a closed manifold continuity already gives integrability.
   have h_int_a : Integrable
       (fun x : M => ρ x * (f x * divergence_g (I := I) g B x))
       (riemannianVolumeMeasure (I := I) (M := M) g) :=
@@ -334,10 +276,6 @@ theorem integral_weighted_secondOrder_combined_eq_neg_weightDeriv
       (I := I) g (hf_cont.mul hBρ_cont)
       (HasCompactSupport.of_compactSpace _)
   rw [integral_add h_int_a h_int_b, neg_add] at hIBP
-  -- The LHS integral splits into the `ρ · (cross terms)` part and the `ρ · ⟨W,v⟩·div B`
-  -- part. We need to re-bundle the LHS of the goal as the sum of these two integrals
-  -- minus the leftover, matching `hIBP`.
-  -- Goal LHS integrand: `ρ · (cross + ⟨W,v⟩·div B)`. Split it.
   have hgoal_pt : ∀ x : M,
       ρ x * (tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g x
               (Tensor0SSpace.toModel
@@ -355,7 +293,6 @@ theorem integral_weighted_secondOrder_combined_eq_neg_weightDeriv
     intro x
     rw [hLHS_pt x]
     ring
-  -- Rewrite the goal's LHS integrand. The goal's middle term `tensorInnerScalar … = f`.
   rw [show (fun x : M => ρ x * (tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g x
             (Tensor0SSpace.toModel
               (loweredCovDerivAlongVF (I := I) (M := M) g 0 2 W B x))
@@ -371,14 +308,12 @@ theorem integral_weighted_secondOrder_combined_eq_neg_weightDeriv
       (fun x : M => tangentSectionAction (I := I) Y f x +
           ρ x * (f x * divergence_g (I := I) g B x)) from
     funext (fun x => hgoal_pt x)]
-  -- Split the goal's LHS integral.
   have h_int_act : Integrable (tangentSectionAction (I := I) Y f)
       (riemannianVolumeMeasure (I := I) (M := M) g) :=
     Continuous.integrable_of_hasCompactSupport_riemannianVolumeMeasure
       (I := I) g (tangentSectionAction_contMDiff (I := I) Y hf_smooth).continuous
       (HasCompactSupport.of_compactSpace _)
   rw [integral_add h_int_act h_int_a]
-  -- From `hIBP : ∫ Y(f) = -(∫ ρ·(f·divB) + ∫ f·B(ρ))`, conclude.
   rw [hIBP]
   ring
 

@@ -65,10 +65,8 @@ theorem mfderiv_expMapIntrinsic_at_zero
       (0 : E) =
       ContinuousLinearMap.id ℝ E := by
   classical
-  -- The side-condition-free small-velocity agreement radius `ρ`.
   obtain ⟨ρ, hρ_pos, hagree⟩ :=
     exists_expMapIntrinsic_eq_expMap_radius (I := I) g hEnorm p
-  -- The agreement region `{v : √(g_p(v,v)) < ρ}` is open and contains `0`.
   have hcont : Continuous (fun v : E => Real.sqrt (g.inner p (show TangentSpace I p from v)
       (show TangentSpace I p from v))) :=
     continuous_sqrt_gInner_self (I := I) g p
@@ -87,7 +85,6 @@ theorem mfderiv_expMapIntrinsic_at_zero
     show Real.sqrt (g.inner p (show TangentSpace I p from (0 : E))
       (show TangentSpace I p from (0 : E))) < ρ
     rw [h0]; exact hρ_pos
-  -- On `S`, the intrinsic map equals the chart-fixed one.
   have hEvEq :
       (fun v : E => (expMapIntrinsic (I := I) g hEnorm p (show TangentSpace I p from v) : M))
         =ᶠ[𝓝 (0 : E)]
@@ -95,9 +92,7 @@ theorem mfderiv_expMapIntrinsic_at_zero
     refine Filter.eventuallyEq_of_mem (hS_open.mem_nhds hzero_mem) ?_
     intro v hv
     exact hagree hv
-  -- The manifold derivative depends only on the germ near `0`.
   rw [hEvEq.mfderiv_eq]
-  -- The chart-fixed manifold derivative at zero is the identity.
   exact mfderiv_expMap_at_zero (I := I) g p
 
 end Exponential

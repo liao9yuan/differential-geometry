@@ -38,8 +38,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Section 1: Smooth-test pairing -/
-
 omit [NeZero d] in
 /-- For a smooth compactly supported `φ : E → ℝ` and `w : E → ℝ` in
 `L²(volume.restrict Ω)`, the integrand `w · ∂_k φ` is integrable on `Ω`. -/
@@ -49,7 +47,6 @@ theorem integrable_w_partial_phi
     (hφ_supp : HasCompactSupport φ) (k : Fin d) :
     Integrable (fun x => w x * (fderiv ℝ φ x) (EuclideanSpace.single k 1))
       (volume.restrict Ω) := by
-  -- ∂_k φ is continuous and compactly supported, hence in L².
   have h_partial_cont : Continuous
       (fun x : E => (fderiv ℝ φ x) (EuclideanSpace.single k 1)) :=
     (hφ_smooth.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)).clm_apply
@@ -83,7 +80,6 @@ theorem smoothTestPairing_add
     smoothTestPairing Ω w k (φ + ψ) =
       smoothTestPairing Ω w k φ + smoothTestPairing Ω w k ψ := by
   unfold smoothTestPairing
-  -- d(φ + ψ) = dφ + dψ, so ∂_k(φ + ψ) = ∂_k φ + ∂_k ψ.
   have hφ_diff : Differentiable ℝ φ := hφ.differentiable (by simp)
   have hψ_diff : Differentiable ℝ ψ := hψ.differentiable (by simp)
   have h_fderiv_sum : ∀ x : E,
@@ -94,7 +90,6 @@ theorem smoothTestPairing_add
     rw [show φ + ψ = (fun y => φ y + ψ y) from rfl]
     rw [fderiv_fun_add (hφ_diff.differentiableAt) (hψ_diff.differentiableAt)]
     simp
-  -- Combine.
   have h_int_sum : ∀ x : E,
       w x * (fderiv ℝ (φ + ψ) x) (EuclideanSpace.single k 1) =
         w x * (fderiv ℝ φ x) (EuclideanSpace.single k 1) +
@@ -120,7 +115,6 @@ theorem smoothTestPairing_smul
     smoothTestPairing Ω w k (c • φ) = c * smoothTestPairing Ω w k φ := by
   unfold smoothTestPairing
   have hφ_diff : Differentiable ℝ φ := hφ.differentiable (by simp)
-  -- d(c • φ) = c • dφ.
   have h_fderiv_smul : ∀ x : E,
       (fderiv ℝ (c • φ) x) (EuclideanSpace.single k 1) =
         c * (fderiv ℝ φ x) (EuclideanSpace.single k 1) := by

@@ -79,19 +79,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The dual-coordinate continuous multilinear map on `E`
-
-For each multi-index `I : Fin r → Fin n` we build the `(0, r)`-tensor
-`dualCovariantCMM r I` on `E` whose value on a tuple `(v_0, …, v_{r-1})` is
-the product `∏_k coord_{I_k}(v_k)`, where `coord_i` is the `i`-th coordinate
-functional of `chartModelBasis E`. -/
 
 /-- The `(0, r)`-covariant model multilinear map dual to the standard
 chart-frame basis tuple at multi-index `Idx`. -/
@@ -146,12 +137,6 @@ lemma dualCovariantCMM_apply_basis_tuple (r : ℕ)
     refine Finset.prod_eq_zero (Finset.mem_univ k₀) ?_
     exact hzero
 
-/-! ## The dual-projection continuous linear map on `TensorRSModel r s ℝ E`
-
-For each pair of multi-indices `Idx : Fin r → Fin n` and `Jdx : Fin s → Fin n`
-the projection sends `T : TensorRSModel r s ℝ E = CMM r →L[ℝ] CMM s` to the
-scalar `(T (dualCovariantCMM r Idx)) (chartModelBasis E ∘ Jdx)`. -/
-
 /-- The continuous linear functional on `TensorRSModel r s ℝ E` picking out
 the `(Idx, Jdx)`-component in the chart-frame basis. -/
 noncomputable def tensorChartComponentProjection (r s : ℕ)
@@ -171,12 +156,6 @@ noncomputable def tensorChartComponentProjection (r s : ℕ)
     tensorChartComponentProjection (E := E) r s Idx Jdx T =
       T (dualCovariantCMM (E := E) r Idx)
         (fun k : Fin s => chartModelBasis E (Jdx k)) := rfl
-
-/-! ## The basis element of `TensorRSModel r s ℝ E`
-
-The basis element matching the projection above is the rank-one map
-`ω ↦ ω(e_Idx) • dualCovariantCMM s Jdx`. The pair (projection, basis element)
-is biorthogonal. -/
 
 /-- The `(Idx, Jdx)`-th chart-frame basis element of `TensorRSModel r s ℝ E`. -/
 noncomputable def tensorChartBasisElement (r s : ℕ)
@@ -212,9 +191,6 @@ lemma tensorChartComponentProjection_basisElement (r s : ℕ)
     dualCovariantCMM_apply_basis_tuple (E := E) r Idx₁ Idx₂,
     smul_eq_mul]
 
-/-! ## Recovery: every element of `TensorRSModel r s ℝ E` is the finite sum of
-its chart-frame components against the chart-frame basis -/
-
 /-- A continuous multilinear map on `E` of arity `s` is recovered by its
 values on chart-frame basis tuples via the dual coordinate product. -/
 private lemma cmm_eq_sum_basis_coeffs (s : ℕ)
@@ -223,28 +199,20 @@ private lemma cmm_eq_sum_basis_coeffs (s : ℕ)
           f (fun k : Fin s => chartModelBasis E (Jdx k)) •
             dualCovariantCMM (E := E) s Jdx := by
   classical
-  -- Compare both sides as continuous multilinear maps by evaluating on an
-  -- arbitrary tuple `v`.
   ext v
-  -- Expand each `v k` in the `chartModelBasis E` basis.
   have hexpand : ∀ k : Fin s,
       v k = ∑ i : Fin (Module.finrank ℝ E),
               ((chartModelBasis E).coord i) (v k) • chartModelBasis E i := by
     intro k
     have hrep := (chartModelBasis E).sum_repr (v k)
-    -- `Basis.sum_repr` gives ∑_i repr(v k) i • basis i = v k.
-    -- We rewrite repr via coord.
     conv_lhs => rw [← hrep]
     refine Finset.sum_congr rfl ?_
     intro i _
     rw [Module.Basis.coord_apply]
-  -- Use `ContinuousMultilinearMap.map_sum` to expand `f v` as a finite
-  -- sum over multi-indices.
   have h_v_eq : v =
       fun k : Fin s => ∑ i : Fin (Module.finrank ℝ E),
         ((chartModelBasis E).coord i) (v k) • chartModelBasis E i := by
     funext k; exact hexpand k
-  -- Rewrite the LHS of the goal using `h_v_eq` and `map_sum`.
   rw [show f v = f (fun k : Fin s =>
         ∑ i : Fin (Module.finrank ℝ E),
           ((chartModelBasis E).coord i) (v k) • chartModelBasis E i) from
@@ -253,8 +221,6 @@ private lemma cmm_eq_sum_basis_coeffs (s : ℕ)
     (f := f)
     (g := fun (k : Fin s) (i : Fin (Module.finrank ℝ E)) =>
       ((chartModelBasis E).coord i) (v k) • chartModelBasis E i)]
-  -- Now LHS is ∑ Jdx, f (fun k => coord(Jdx k)(v k) • basis(Jdx k)).
-  -- Pull the scalar coefficients out of `f`.
   have h_pull : ∀ Jdx : Fin s → Fin (Module.finrank ℝ E),
       f (fun k : Fin s =>
           ((chartModelBasis E).coord (Jdx k)) (v k) • chartModelBasis E (Jdx k)) =
@@ -264,8 +230,6 @@ private lemma cmm_eq_sum_basis_coeffs (s : ℕ)
     have hpull := f.toMultilinearMap.map_smul_univ
       (c := fun k : Fin s => ((chartModelBasis E).coord (Jdx k)) (v k))
       (m := fun k : Fin s => chartModelBasis E (Jdx k))
-    -- `map_smul_univ` gives `f (∏ smul) = (∏ scalar) • f (vectors)`.
-    -- For ℝ-valued `f` this scalar-mul collapses to multiplication.
     have hpull' :
         f (fun k : Fin s => ((chartModelBasis E).coord (Jdx k)) (v k) •
             chartModelBasis E (Jdx k)) =
@@ -273,8 +237,6 @@ private lemma cmm_eq_sum_basis_coeffs (s : ℕ)
           f (fun k : Fin s => chartModelBasis E (Jdx k)) := hpull
     rw [hpull']
     rfl
-  -- Now the LHS is ∑ Jdx, (∏ coord)(coords(v)) * f(basis Jdx).
-  -- The RHS evaluates the sum of CMMs at v: ∑ Jdx, scalar_Jdx * dualCovariantCMM Jdx v.
   rw [show ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
         f (fun k : Fin s =>
             ((chartModelBasis E).coord (Jdx k)) (v k) • chartModelBasis E (Jdx k)) =
@@ -282,8 +244,6 @@ private lemma cmm_eq_sum_basis_coeffs (s : ℕ)
         (∏ k : Fin s, ((chartModelBasis E).coord (Jdx k)) (v k)) *
           f (fun k : Fin s => chartModelBasis E (Jdx k)) from
     Finset.sum_congr rfl (fun Jdx _ => h_pull Jdx)]
-  -- Now handle the RHS.
-  -- Sum-of-CMMs evaluation: pointwise.
   have h_rhs_eq :
       (∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
           f (fun k : Fin s => chartModelBasis E (Jdx k)) •
@@ -292,7 +252,6 @@ private lemma cmm_eq_sum_basis_coeffs (s : ℕ)
           f (fun k : Fin s => chartModelBasis E (Jdx k)) *
             (∏ k : Fin s, ((chartModelBasis E).coord (Jdx k)) (v k)) := by
     classical
-    -- Sum of CMMs evaluated at v.
     rw [show (∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
             f (fun k : Fin s => chartModelBasis E (Jdx k)) •
               dualCovariantCMM (E := E) s Jdx) v =
@@ -321,14 +280,9 @@ theorem tensorRSModel_eq_sum_basis (r s : ℕ) (T : TensorRSModel r s ℝ E) :
             tensorChartComponentProjection (E := E) r s Idx Jdx T •
               tensorChartBasisElement (E := E) r s Idx Jdx := by
   classical
-  -- Compare both sides as continuous linear maps `CMM r →L[ℝ] CMM s` by
-  -- evaluating on arbitrary `w : CMM r`.
   refine ContinuousLinearMap.ext ?_
   intro w
-  -- Expand `w` in the chart-frame basis of `CMM r`.
   have hw := cmm_eq_sum_basis_coeffs (E := E) r w
-  -- Apply `T` to both sides; linearity of `T` distributes the sum.
-  -- Cache the coefficient: c Idx := w (fun k => basis(Idx k)).
   set c : (Fin r → Fin (Module.finrank ℝ E)) → ℝ := fun Idx =>
     w (fun k : Fin r => chartModelBasis E (Idx k)) with hc_def
   have hw' : w = ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
@@ -341,7 +295,6 @@ theorem tensorRSModel_eq_sum_basis (r s : ℕ) (T : TensorRSModel r s ℝ E) :
     intro Idx _
     rw [map_smul]
   rw [hT]
-  -- Now expand each `T (dualCovariantCMM r Idx)` using the same lemma on `CMM s`.
   have hT_inner : ∀ Idx : Fin r → Fin (Module.finrank ℝ E),
       T (dualCovariantCMM (E := E) r Idx) =
         ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
@@ -349,7 +302,6 @@ theorem tensorRSModel_eq_sum_basis (r s : ℕ) (T : TensorRSModel r s ℝ E) :
               (fun k : Fin s => chartModelBasis E (Jdx k)) •
             dualCovariantCMM (E := E) s Jdx := fun Idx =>
     cmm_eq_sum_basis_coeffs (E := E) s (T (dualCovariantCMM (E := E) r Idx))
-  -- Compare RHS sums after the same expansion.
   have hrhs :
       (∑ Idx : Fin r → Fin (Module.finrank ℝ E),
           ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
@@ -360,7 +312,6 @@ theorem tensorRSModel_eq_sum_basis (r s : ℕ) (T : TensorRSModel r s ℝ E) :
             tensorChartComponentProjection (E := E) r s Idx Jdx T •
               (tensorChartBasisElement (E := E) r s Idx Jdx w) := by
     classical
-    -- ContinuousLinearMap sum acts pointwise.
     rw [ContinuousLinearMap.sum_apply]
     refine Finset.sum_congr rfl ?_
     intro Idx _
@@ -369,7 +320,6 @@ theorem tensorRSModel_eq_sum_basis (r s : ℕ) (T : TensorRSModel r s ℝ E) :
     intro Jdx _
     rfl
   rw [hrhs]
-  -- Manipulate RHS: factor out `w` evaluation, rewrite scalar mult.
   have hrhs_simplified : ∀ Idx : Fin r → Fin (Module.finrank ℝ E),
       (∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
         tensorChartComponentProjection (E := E) r s Idx Jdx T •
@@ -385,15 +335,11 @@ theorem tensorRSModel_eq_sum_basis (r s : ℕ) (T : TensorRSModel r s ℝ E) :
     intro Jdx _
     rw [tensorChartBasisElement_apply, tensorChartComponentProjection_apply,
       smul_smul, smul_smul]
-    -- Goal: (T(α^I)(e_J)) * c(I) • dualCMM_s J = (c(I) * T(α^I)(e_J)) • dualCMM_s J
-    -- Both sides are smul forms; just commute the scalar product.
     congr 1
     exact mul_comm _ _
   refine Finset.sum_congr rfl ?_
   intro Idx _
   rw [hrhs_simplified Idx, ← hT_inner Idx]
-
-/-! ## Norm bound on the basis element of `TensorRSModel r s ℝ E` -/
 
 /-- The chart-frame basis-element-norm constant: an upper bound on the norm of
 `tensorChartBasisElement r s Idx Jdx`. We use the `Finset.sum` of all basis
@@ -420,8 +366,6 @@ lemma tensorChartBasisElement_norm_le (r s : ℕ)
       ‖tensorChartBasisElement (E := E) r s p.1 p.2‖)
     (fun _ _ => norm_nonneg _) (Finset.mem_univ (Idx, Jdx))
   exact h
-
-/-! ## Local trivialization-based scalar component on `M` -/
 
 /-- The trivialization-at-`α` image of `S.toSection x` viewed in the model
 fiber `TensorRSModel r s ℝ E`. On `(chartAt H α).source` this agrees with the
@@ -457,8 +401,6 @@ noncomputable def tensorChartComponentRaw
       tensorChartComponentProjection (E := E) r s Idx Jdx
         (tensorTrivProj (I := I) (M := M) g r s S α x) := rfl
 
-/-! ## POU-weighted scalar component on `M`, then chart-pushed to Euclidean -/
-
 /-- The POU-weighted raw chart-frame scalar component on `M`. -/
 noncomputable def tensorChartComponentPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -489,8 +431,6 @@ noncomputable def tensorChartComponent
       chartPushedRaw (I := I) (M := M) α
         (tensorChartComponentPou (I := I) (M := M) g r s S α Idx Jdx) := rfl
 
-/-! ## Smoothness of the trivialization-projected scalar on the chart source -/
-
 private lemma rs_baseSet_eq_chart_source' (α : M) (r s : ℕ) :
     (trivializationAt (TensorRSModel r s ℝ E)
         (fun x : M => TensorRSSpace r s I x) α).baseSet =
@@ -512,9 +452,6 @@ private lemma tensorTrivProj_contMDiffOn_chart_source
       (tensorTrivProj (I := I) (M := M) g r s S α)
       ((chartAt H α).source) := by
   classical
-  -- The trivialization projection is `triv.continuousLinearMapAt ℝ x (S.toSection x)`,
-  -- which on the base set equals `(triv ⟨x, S.toSection x⟩).2`.
-  -- We show smoothness of the latter and transfer.
   have hbase := rs_baseSet_eq_chart_source' (I := I) (M := M) α r s
   have hsmooth_total :
       ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -524,15 +461,11 @@ private lemma tensorTrivProj_contMDiffOn_chart_source
     (e := trivializationAt (TensorRSModel r s ℝ E)
       (fun x : M => TensorRSSpace r s I x) α)).mp hsmooth_total.contMDiffOn
   rw [hbase] at hrewrite
-  -- `hrewrite` gives smoothness of `(triv ⟨x, S.toSection x⟩).2` on chart source.
-  -- We need smoothness of `triv.continuousLinearMapAt α x (S.toSection x)`.
-  -- These agree on the chart source via `Trivialization.coe_linearMapAt_of_mem`.
   refine ContMDiffOn.congr hrewrite ?_
   intro x hx
   have hx_base : x ∈ (trivializationAt (TensorRSModel r s ℝ E)
       (fun y : M => TensorRSSpace r s I y) α).baseSet := by
     rw [hbase]; exact hx
-  -- continuousLinearMapAt ℝ x = linearMapAt ℝ x = (triv ⟨x, ·⟩).2 on base set.
   unfold tensorTrivProj
   change (trivializationAt (TensorRSModel r s ℝ E)
       (fun y : M => TensorRSSpace r s I y) α).linearMapAt ℝ x (S.toSection x) = _
@@ -548,7 +481,6 @@ lemma tensorChartComponentRaw_contMDiffOn_chart_source
       (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx)
       ((chartAt H α).source) := by
   classical
-  -- Apply the continuous linear projection to the smooth tensor-valued function.
   have hsmooth := tensorTrivProj_contMDiffOn_chart_source
     (I := I) (M := M) g r s S α
   have hCLM :
@@ -556,8 +488,6 @@ lemma tensorChartComponentRaw_contMDiffOn_chart_source
         (tensorChartComponentProjection (E := E) r s Idx Jdx) :=
     (tensorChartComponentProjection (E := E) r s Idx Jdx).contMDiff
   exact hCLM.comp_contMDiffOn hsmooth
-
-/-! ## Compact-support / global smoothness of the POU-weighted scalar -/
 
 /-- The POU-weighted raw scalar component has support inside the chart source. -/
 lemma tensorChartComponentPou_support_subset_chart_source
@@ -596,8 +526,7 @@ theorem tensorChartComponentPou_contMDiff
   classical
   intro x
   by_cases hx_chart : x ∈ (chartAt H α).source
-  · -- Inside the chart source: product of smooth POU and smooth raw component.
-    have hPOU : ContMDiff I (𝓘(ℝ, ℝ)) ∞
+  · have hPOU : ContMDiff I (𝓘(ℝ, ℝ)) ∞
         (fun y : M => (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) y) :=
       (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff
     have hRaw_on := tensorChartComponentRaw_contMDiffOn_chart_source
@@ -607,16 +536,10 @@ theorem tensorChartComponentPou_contMDiff
       hRaw_on.contMDiffAt
         (IsOpen.mem_nhds (chartAt H α).open_source hx_chart)
     exact (hPOU.contMDiffAt).mul hRaw_at
-  · -- Outside the chart source: identically zero on an open neighborhood.
-    -- The support of the POU-weighted component lies inside the chart source
-    -- (a closed set), so off the chart source we can find an open neighborhood
-    -- of `x` where the function vanishes.
-    have hsupp_sub := tensorChartComponentPou_support_subset_chart_source
+  · have hsupp_sub := tensorChartComponentPou_support_subset_chart_source
       (I := I) (M := M) g r s S α Idx Jdx
     have hx_notin : x ∉ tsupport (tensorChartComponentPou (I := I) (M := M)
         g r s S α Idx Jdx) := fun h => hx_chart (hsupp_sub h)
-    -- `x` lies in the complement of `tsupport`, an open set on which the
-    -- function vanishes.
     apply ContMDiffAt.congr_of_eventuallyEq
       (f := fun _ : M => (0 : ℝ)) contMDiffAt_const
     have hopen : IsOpen
@@ -643,8 +566,6 @@ theorem tensorChartComponentPou_hasCompactSupport
     HasCompactSupport (tensorChartComponentPou (I := I) (M := M)
       g r s S α Idx Jdx) := by
   classical
-  -- The support sits inside `tsupport (chartAtlasPOU I M α)`, which is closed
-  -- in `M`. Since `M` is compact, the closed subset is compact.
   have hsub :
       tsupport (tensorChartComponentPou (I := I) (M := M)
         g r s S α Idx Jdx) ⊆
@@ -653,8 +574,6 @@ theorem tensorChartComponentPou_hasCompactSupport
   have htsupp_closed : IsClosed (tsupport (tensorChartComponentPou (I := I) (M := M)
       g r s S α Idx Jdx)) := isClosed_tsupport _
   exact (hcompact.of_isClosed_subset htsupp_closed hsub)
-
-/-! ## Public smoothness and support theorems -/
 
 /-- Each chart-frame scalar component is a smooth function on the chart-target
 Euclidean space. -/
@@ -667,11 +586,6 @@ theorem tensorChartComponent_contMDiff
       (𝓘(ℝ, ℝ)) ∞
       (tensorChartComponent (I := I) (M := M) g r s S α Idx Jdx) := by
   classical
-  -- The chart-pushed function is identically zero off
-  -- `toEuclidean '' (extChartAt I α '' tsupport (POU * raw))`, which is compact
-  -- and contained in the chart target. Inside the chart target the function
-  -- agrees with a globally `ContDiff` formula.
-  -- Set up the carrier set on Euclidean space.
   set f : M → ℝ := tensorChartComponentPou (I := I) (M := M)
     g r s S α Idx Jdx with hf_def
   have hf_smooth : ContMDiff I (𝓘(ℝ, ℝ)) ∞ f :=
@@ -679,7 +593,6 @@ theorem tensorChartComponent_contMDiff
   have hf_supp : tsupport f ⊆ (chartAt H α).source :=
     tensorChartComponentPou_support_subset_chart_source
       (I := I) (M := M) g r s S α Idx Jdx
-  -- Define the closed carrier in Euclidean space.
   set K : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
     (toEuclidean (E := E)) ''
       ((extChartAt I α) '' (tsupport f)) with hK_def
@@ -695,20 +608,16 @@ theorem tensorChartComponent_contMDiff
   have hK_compact : IsCompact K :=
     hK_compact_M.image (toEuclidean (E := E)).continuous
   have hK_closed : IsClosed K := hK_compact.isClosed
-  -- We now establish ContMDiff via ContDiff on Euclidean space.
   rw [contMDiff_iff_contDiff]
   rw [contDiff_iff_contDiffAt]
   intro y
   by_cases hy_target :
       y ∈ DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α
-  · -- Inside the chart target: smoothness via the formula `chartPushedRaw`.
-    -- We have `chartPushedRaw α f y = f ((extChartAt I α).symm (toEuclidean.symm y))`.
-    have hOpen : IsOpen (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
+  · have hOpen : IsOpen (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) :=
       DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
         (I := I) (M := M) α
-    -- Build the formula function and prove its smoothness.
     have hformula_smooth :
         ContDiffOn ℝ ∞
           (fun z : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
@@ -741,17 +650,13 @@ theorem tensorChartComponent_contMDiff
         (fun z : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
           f ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))) y :=
       hwithin.contDiffAt (hOpen.mem_nhds hy_target)
-    -- Transfer to the chart-pushed-raw function via eventual equality.
     refine hformula_at.congr_of_eventuallyEq ?_
     filter_upwards [hOpen.mem_nhds hy_target] with z hz
-    -- On the chart target the chartPushedRaw evaluates to `f ∘ symm ∘ symm`.
     have h_apply :=
       DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_apply_of_mem
         (I := I) (M := M) α f hz
     rw [tensorChartComponent_def, h_apply]
-  · -- Outside the chart target: the function is zero in an open neighborhood.
-    -- We use that off the compact carrier `K` the function is zero.
-    have hcarrier_subset_target :
+  · have hcarrier_subset_target :
         K ⊆ DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
           (I := I) (M := M) α := by
       intro z hz_carrier
@@ -762,18 +667,15 @@ theorem tensorChartComponent_contMDiff
       exact ⟨w, hw_target, hwz⟩
     have hy_off : y ∉ K := fun hy_in =>
       hy_target (hcarrier_subset_target hy_in)
-    -- The complement of K is an open neighborhood of y.
     have hK_compl_open : IsOpen Kᶜ := hK_closed.isOpen_compl
     apply ContDiffAt.congr_of_eventuallyEq
       (f := fun _ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) => (0 : ℝ))
       contDiffAt_const
     filter_upwards [hK_compl_open.mem_nhds hy_off] with z hz
-    -- Show chartPushedRaw α f z = 0 when z ∉ K.
     by_cases hz_target :
         z ∈ DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
           (I := I) (M := M) α
-    · -- z is in chart target but not in K, so f vanishes at the preimage.
-      obtain ⟨w, hw_target, hwz⟩ := hz_target
+    · obtain ⟨w, hw_target, hwz⟩ := hz_target
       have hz_target' :
           z ∈ DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
             (I := I) (M := M) α := ⟨w, hw_target, hwz⟩
@@ -782,9 +684,7 @@ theorem tensorChartComponent_contMDiff
       have h_apply :=
         DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_apply_of_mem
           (I := I) (M := M) α f hz_target'
-      -- Goal: tensorChartComponent ... z = 0
       rw [tensorChartComponent_def, h_apply]
-      -- Goal: f ((extChartAt I α).symm (toEuclidean.symm z)) = 0
       by_contra hne_f
       apply hz
       have hin_supp : (extChartAt I α).symm ((toEuclidean (E := E)).symm z) ∈
@@ -793,8 +693,7 @@ theorem tensorChartComponent_contMDiff
       have hext_right : (extChartAt I α) ((extChartAt I α).symm w) = w :=
         (extChartAt I α).right_inv hw_target
       refine ⟨w, ⟨(extChartAt I α).symm w, hin_supp, hext_right⟩, hwz⟩
-    · -- z not in chart target: chartPushedRaw returns 0.
-      rw [tensorChartComponent_def]
+    · rw [tensorChartComponent_def]
       exact DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_apply_of_notMem
         (I := I) (M := M) α f hz_target
 
@@ -852,8 +751,6 @@ theorem tensorChartComponent_hasCompactSupport
   · rw [tensorChartComponent_def]
     exact DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_apply_of_notMem
       (I := I) (M := M) α f hy_target
-
-/-! ## Linearity in `S` -/
 
 /-- The trivialization-projection is additive in the tensor section. -/
 private lemma tensorTrivProj_add
@@ -1006,11 +903,6 @@ theorem tensorChartComponent_smul
   rw [tensorChartComponentPou_smul (I := I) (M := M) g r s c S α Idx Jdx,
     chartPushedRaw_smul_fn (I := I) (M := M) α]
 
-/-! ## The chart-pushed POU-weighted tensor (model-fiber valued)
-
-This is the tensor-valued companion to `tensorChartComponent`. It coincides
-with the chart-frame component reassembly. -/
-
 /-- The POU-weighted trivialization-projected model-fiber tensor, chart-pushed
 to Euclidean space. -/
 noncomputable def tensorChartPushedRawModel
@@ -1054,8 +946,6 @@ lemma tensorChartPushedRawModel_apply_of_notMem
   unfold tensorChartPushedRawModel
   exact if_neg hy
 
-/-! ## Recovery: chart-pushed tensor as a finite sum of chart-frame components -/
-
 /-- The chart-pushed POU-weighted tensor at every Euclidean point is the
 finite sum of its scalar components against the chart-frame basis. -/
 theorem chartPushedRaw_eq_sum_tensorChartComponent
@@ -1073,12 +963,9 @@ theorem chartPushedRaw_eq_sum_tensorChartComponent
         (I := I) (M := M) α
   · rw [tensorChartPushedRawModel_apply_of_mem
       (I := I) (M := M) g r s S α hy]
-    -- LHS = ρ • tensorTrivProj S α x
     set x : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hx_def
-    -- Apply the basis expansion to `tensorTrivProj g r s S α x`.
     have hexpand := tensorRSModel_eq_sum_basis (E := E) r s
       (tensorTrivProj (I := I) (M := M) g r s S α x)
-    -- Multiply by `(chartAtlasPOU I M α)(x) : ℝ`.
     have hscaled :
         (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) x •
             tensorTrivProj (I := I) (M := M) g r s S α x =
@@ -1105,18 +992,15 @@ theorem chartPushedRaw_eq_sum_tensorChartComponent
       intro Jdx _
       rw [smul_smul]
     rw [hscaled]
-    -- Match the (now equal) outer sum on the RHS.
     refine Finset.sum_congr rfl ?_
     intro Idx _
     refine Finset.sum_congr rfl ?_
     intro Jdx _
-    -- Need: chartPushedRaw α (POU * raw) y = POU(x) * raw(x) when y ∈ chartTarget.
     rw [tensorChartComponent_def]
     rw [DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_apply_of_mem
       (I := I) (M := M) α _ hy]
     rfl
-  · -- LHS = 0; RHS: each summand is `chartPushedRaw α (POU * raw) y = 0`.
-    rw [tensorChartPushedRawModel_apply_of_notMem
+  · rw [tensorChartPushedRawModel_apply_of_notMem
       (I := I) (M := M) g r s S α hy]
     symm
     refine Finset.sum_eq_zero ?_
@@ -1127,8 +1011,6 @@ theorem chartPushedRaw_eq_sum_tensorChartComponent
     rw [DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_apply_of_notMem
       (I := I) (M := M) α _ hy]
     rw [zero_smul]
-
-/-! ## Pointwise norm-squared bound -/
 
 /-- The model-fiber norm-squared of the chart-pushed POU-weighted tensor is
 bounded by a constant (depending only on `r`, `s`) times the sum of squared
@@ -1144,8 +1026,6 @@ theorem chartPushedRaw_norm_sq_le_sum_tensorChartComponent_sq
                     (tensorChartComponent (I := I) (M := M)
                         g r s S α Idx Jdx y)^2 := by
   classical
-  -- The constant: `Ncard * Bnorm²` where `Ncard` is the multi-index count and
-  -- `Bnorm` is the basis-norm constant.
   set V : Finset ((Fin r → Fin (Module.finrank ℝ E)) ×
                   (Fin s → Fin (Module.finrank ℝ E))) := Finset.univ with hV_def
   set Ncard : ℕ := V.card with hN_def
@@ -1154,11 +1034,9 @@ theorem chartPushedRaw_norm_sq_le_sum_tensorChartComponent_sq
   refine ⟨(Ncard : ℝ) * Bnorm ^ 2, ?_, ?_⟩
   · exact mul_nonneg (Nat.cast_nonneg _) (sq_nonneg _)
   intro S y
-  -- For brevity name the component scalar at point `y`.
   set u : (Fin r → Fin (Module.finrank ℝ E)) ×
           (Fin s → Fin (Module.finrank ℝ E)) → ℝ := fun p =>
     tensorChartComponent (I := I) (M := M) g r s S α p.1 p.2 y with hu_def
-  -- Recovery formula: write LHS as ∑_p u(p) • basis(p).
   have hrec :
       tensorChartPushedRawModel (I := I) (M := M) g r s S α y =
         ∑ p ∈ V, u p •
@@ -1173,7 +1051,6 @@ theorem chartPushedRaw_norm_sq_le_sum_tensorChartComponent_sq
             (f := fun p : (Fin r → Fin (Module.finrank ℝ E)) ×
                     (Fin s → Fin (Module.finrank ℝ E)) =>
               u p • tensorChartBasisElement (E := E) r s p.1 p.2)]
-  -- Bound norm of the sum by the sum of |u(p)| · ‖basis(p)‖ ≤ ∑ |u(p)| · Bnorm.
   have h_norm_le : ‖tensorChartPushedRawModel (I := I) (M := M) g r s S α y‖ ≤
       ∑ p ∈ V, |u p| * Bnorm := by
     rw [hrec]
@@ -1183,11 +1060,9 @@ theorem chartPushedRaw_norm_sq_le_sum_tensorChartComponent_sq
     rw [norm_smul, Real.norm_eq_abs]
     exact mul_le_mul_of_nonneg_left
       (tensorChartBasisElement_norm_le (E := E) r s p.1 p.2) (abs_nonneg _)
-  -- Factor Bnorm out of the sum.
   have h_factor : (∑ p ∈ V, |u p| * Bnorm) = (∑ p ∈ V, |u p|) * Bnorm := by
     rw [Finset.sum_mul]
   rw [h_factor] at h_norm_le
-  -- Square both sides.
   have h_lhs_nonneg :
       0 ≤ ‖tensorChartPushedRawModel (I := I) (M := M) g r s S α y‖ := norm_nonneg _
   have h_sum_abs_nonneg : 0 ≤ ∑ p ∈ V, |u p| :=
@@ -1198,9 +1073,6 @@ theorem chartPushedRaw_norm_sq_le_sum_tensorChartComponent_sq
       ((∑ p ∈ V, |u p|) * Bnorm) ^ 2 := by
     have hmul := mul_le_mul h_norm_le h_norm_le h_lhs_nonneg h_rhs_nonneg
     simpa [sq] using hmul
-  -- Cauchy-Schwarz: (∑ |u p|)² ≤ V.card * ∑ |u p|².
-  -- We apply `sum_mul_sq_le_sq_mul_sq` with `f = 1, g = |u|`:
-  --   (∑ 1·|u|)² ≤ (∑ 1²) · (∑ |u|²) = V.card · ∑ u².
   have hCS : (∑ p ∈ V, |u p|) ^ 2 ≤ (Ncard : ℝ) * ∑ p ∈ V, (u p) ^ 2 := by
     have hbase :
         (∑ p ∈ V, (1 : ℝ) * |u p|) ^ 2 ≤
@@ -1217,17 +1089,14 @@ theorem chartPushedRaw_norm_sq_le_sum_tensorChartComponent_sq
       rw [sq_abs]
     rw [h1, h2, h3] at hbase
     exact hbase
-  -- Multiply Cauchy-Schwarz inequality by Bnorm² (nonneg).
   have hBnorm_sq_nonneg : 0 ≤ Bnorm ^ 2 := sq_nonneg _
   have hCS_mul :
       (∑ p ∈ V, |u p|) ^ 2 * Bnorm ^ 2 ≤
         (Ncard : ℝ) * (∑ p ∈ V, (u p) ^ 2) * Bnorm ^ 2 :=
     mul_le_mul_of_nonneg_right hCS hBnorm_sq_nonneg
-  -- Combine: ‖_‖² ≤ (∑|u|)² · Bnorm² ≤ N · ∑u² · Bnorm² = (N·Bnorm²) · ∑u².
   have h_sq_eq : ((∑ p ∈ V, |u p|) * Bnorm) ^ 2 =
       (∑ p ∈ V, |u p|) ^ 2 * Bnorm ^ 2 := by ring
   rw [h_sq_eq] at h_norm_sq
-  -- Combine via transitivity.
   have h_double_sum_eq :
       (∑ p ∈ V, (u p) ^ 2) =
         ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
@@ -1241,7 +1110,6 @@ theorem chartPushedRaw_norm_sq_le_sum_tensorChartComponent_sq
       (t := (Finset.univ : Finset (Fin s → Fin (Module.finrank ℝ E))))
       (f := fun p : (Fin r → Fin (Module.finrank ℝ E)) ×
               (Fin s → Fin (Module.finrank ℝ E)) => (u p) ^ 2)]
-  -- Now rearrange the constant.
   have h_const_eq : (Ncard : ℝ) * (∑ p ∈ V, (u p) ^ 2) * Bnorm ^ 2 =
       ((Ncard : ℝ) * Bnorm ^ 2) *
         ∑ Idx : Fin r → Fin (Module.finrank ℝ E),

@@ -93,27 +93,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The chart-coordinate factorisation of the pointwise tensor inner product
-
-On the Euclidean chart target the pointwise tensor inner product
-`tensorInnerPointwise(Sg(b), T(b))` of two concrete smooth tensor sections, read
-at the chart-source preimage `b` of `y`, expands — by the bundle-fibre component
-expansion `tensorInnerPointwise_toModel_eq_component_sum` — as the finite sum
-over component multi-index pairs of the chart-frame tensor-metric Gram coupling
-the raw Euclidean chart components of `Sg` and `T`. -/
 
 /-- The wrapped raw-component projection of a smooth section's section value is
 its raw chart-frame scalar component. -/
@@ -153,14 +138,10 @@ private lemma tensorInnerPointwise_chart_eq_component_sum
   set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
   have hb_chart : b ∈ (chartAt H α).source :=
     symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy
-  -- Both section values are `toModel` of section values; apply the bundle-fibre
-  -- component expansion.
   rw [show Sg.toFun b = TensorRSSpace.toModel (Sg.toSection b) from rfl]
   rw [show T.toFun b = TensorRSSpace.toModel (T.toSection b) from rfl]
   rw [tensorInnerPointwise_toModel_eq_component_sum (I := I) (M := M)
     g r s α hb_chart (Sg.toSection b) (T.toSection b)]
-  -- Rewrite each term: the Gram-on-basis factor is `covChartMetricGram`, and the
-  -- wrapped projections are the raw chart components.
   refine Finset.sum_congr rfl (fun P _ => Finset.sum_congr rfl (fun Q _ => ?_))
   rw [show chartTensorInnerPointwise_rs_model (I := I) (M := M) g r s α b
         (tensorChartBasisElement (E := E) r s P.1 P.2)
@@ -180,17 +161,6 @@ private lemma tensorInnerPointwise_chart_eq_component_sum
     rw [tensorComponentEuclid_apply_of_mem (I := I) (M := M) g r s T α Q hy,
       hb_def]]
   ring
-
-/-! ## The general concrete two-section chart-pull
-
-The global `L²` pairing of two concrete smooth sections is the Bochner integral
-of their pointwise tensor inner product against the Riemannian volume measure.
-When the first section `Sg` is supported inside the chart-`α` source the
-integrand is continuous and chart-supported, so the chart-pulled volume identity
-`integral_riemannianVolumeMeasure_eq_euclidean_chartTarget` rewrites the global
-integral as a chart-Euclidean integral of `densityOnEuclid g α` times the
-chart-coordinate integrand, which factors by
-`tensorInnerPointwise_chart_eq_component_sum`. -/
 
 /-- The `L²` pairing integrand `x ↦ ⟨Sg(x), T(x)⟩` of two smooth tensor sections
 is continuous on `M`. -/
@@ -217,8 +187,6 @@ private lemma pairingIntegrand_tsupport_subset
   refine (closure_minimal ?_ (isClosed_tsupport Sg.toFun)).trans hSg
   intro x hx
   rw [Function.mem_support] at hx
-  -- Off `tsupport Sg.toFun` the value `Sg.toFun x` is `0`, hence the pointwise
-  -- inner product vanishes.
   by_contra hx_notsupp
   exact hx (by
     rw [image_eq_zero_of_notMem_tsupport hx_notsupp]
@@ -252,11 +220,9 @@ theorem tensorL2Inner_chartSupported_chart_pull
               tensorComponentEuclid (I := I) (M := M) g r s T α Q y)
         ∂(volume : Measure EuclN) := by
   classical
-  -- `tensorL2Inner` is the Bochner integral of the pointwise integrand.
   rw [show tensorL2Inner (I := I) (M := M) g r s Sg.toFun T.toFun =
       ∫ x, tensorInnerPointwise (I := I) (M := M) g r s x (Sg.toFun x) (T.toFun x)
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) from rfl]
-  -- The integrand is continuous and chart-supported.
   have hcont : Continuous
       (fun x : M => tensorInnerPointwise (I := I) (M := M) g r s x
         (Sg.toFun x) (T.toFun x)) :=
@@ -266,31 +232,15 @@ theorem tensorL2Inner_chartSupported_chart_pull
         (Sg.toFun x) (T.toFun x)) ⊆
       (chartAt H α).source :=
     pairingIntegrand_tsupport_subset (I := I) (M := M) g r s Sg T α hSg
-  -- Pull the global integral to the Euclidean chart target.
   rw [integral_riemannianVolumeMeasure_eq_euclidean_chartTarget
     (I := I) (M := M) g α hcont hsupp]
-  -- Rewrite the chart-pull measure as the Euclidean volume.
   rw [map_toEuclidean_modelHaar_eq_volume (E := E)]
-  -- On the chart target rewrite the chart-pulled integrand by the
-  -- chart-coordinate factorisation.
   have hctE_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) α).measurableSet
   refine setIntegral_congr_fun hctE_meas (fun y hy => ?_)
   rw [tensorInnerPointwise_chart_eq_component_sum (I := I) (M := M)
     g r s Sg T α hy]
-
-/-! ## Reassociating the partition-of-unity weight onto the abstract side
-
-Replacing the chart-supported section `Sg` with the partition-of-unity-weighted
-section `pouSmul g r s α Sg` introduces, in the raw chart component of `pouSmul g
-r s α Sg`, exactly the chart-atlas partition-of-unity weight `chartAtlasPOU I M α`.
-On the Euclidean chart target the raw Euclidean chart component of
-`pouSmul g r s α Sg` is the *weighted* Euclidean chart component
-`tensorChartComponent` of `Sg`. Reassociating the pointwise product
-`(weight · rawSg) · rawT = rawSg · (weight · rawT)` moves the partition-of-unity
-weight from `Sg`'s raw chart component onto `T`'s, producing the weighted
-Euclidean chart component of `T`. -/
 
 /-- On the Euclidean chart target the raw Euclidean chart component of the
 partition-of-unity-weighted section `pouSmul g r s α Sg` equals the weighted
@@ -325,12 +275,8 @@ private lemma componentSum_pouSmul_reassoc
           tensorChartComponent (I := I) (M := M) g r s T α Q.1 Q.2 y := by
   classical
   refine Finset.sum_congr rfl (fun P _ => Finset.sum_congr rfl (fun Q _ => ?_))
-  -- The raw Euclidean chart component of `pouSmul g r s α Sg` is the weighted
-  -- chart component of `Sg`, i.e. the chart-pushed partition-of-unity weight
-  -- times the raw chart component of `Sg`.
   rw [tensorComponentEuclid_pouSmul_eq_tensorChartComponent
     (I := I) (M := M) g r s α Sg P]
-  -- Unfold both weighted chart components on the chart target.
   set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
   have hSg_eq : tensorChartComponent (I := I) (M := M) g r s Sg α P.1 P.2 y =
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
@@ -349,17 +295,6 @@ private lemma componentSum_pouSmul_reassoc
   rw [hSg_eq, hT_eq]
   ring
 
-/-! ## The concrete two-section chart-pull through the abstract chart component
-
-Combining the general concrete two-section chart-pull applied to
-`pouSmul g r s α Sg` against `T` with the partition-of-unity reassociation
-expresses the global `L²` pairing of `pouSmul g r s α Sg` against `T` as the
-chart-Euclidean integral coupling the raw chart components of `Sg` to the
-*weighted* chart components of `T`. The weighted chart component
-`tensorChartComponent` of a smooth section is, almost everywhere on the chart
-target, the canonical Euclidean chart component `tensorL2ChartComponent` of its
-`L²` class. -/
-
 /-- The almost-everywhere identity, on the Euclidean chart target, between the
 weighted Euclidean chart component `tensorChartComponent` of a smooth section
 and the canonical Euclidean chart component `tensorL2ChartComponent` of its `L²`
@@ -372,7 +307,6 @@ private lemma tensorChartComponent_aeEq_tensorL2ChartComponent
       ((tensorL2ChartComponent (I := I) (M := M) g r s
           (T : TensorL2 r s g) α Q :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) :=
-  -- `chartL2Measure α` is definitionally `volume.restrict (chartTargetEuclid α)`.
   (tensorL2ChartComponent_smoothToTensorL2_coeFn
     (I := I) (M := M) g r s T α Q).symm
 
@@ -405,7 +339,6 @@ private lemma chartPull_integrand_aeEq_abstract
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
               y)) := by
   classical
-  -- It suffices to rewrite, a.e., each occurrence of `tensorChartComponent T`.
   have hae : ∀ Q : CompIdx E r s,
       tensorChartComponent (I := I) (M := M) g r s T α Q.1 Q.2 =ᵐ[
           (volume : Measure EuclN).restrict
@@ -415,7 +348,6 @@ private lemma chartPull_integrand_aeEq_abstract
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) :=
     fun Q => tensorChartComponent_aeEq_tensorL2ChartComponent
       (I := I) (M := M) g r s T α Q
-  -- Combine the finitely many a.e.-identities.
   have hall : ∀ᵐ y ∂((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)),
       ∀ Q : CompIdx E r s,
@@ -451,30 +383,18 @@ private lemma tensorL2Inner_pouSmul_smooth_chart_pull
                 y)
         ∂(volume : Measure EuclN) := by
   classical
-  -- `pouSmul g r s α Sg` is chart-supported; apply the general concrete chart-pull.
   have hpou_supp : tsupport (pouSmul (I := I) (M := M) g r s α Sg).toFun ⊆
       (chartAt H α).source :=
     pouSmul_tsupport_subset_chartSource (I := I) (M := M) g r s α Sg
   rw [tensorL2Inner_chartSupported_chart_pull (I := I) (M := M) g r s
     (pouSmul (I := I) (M := M) g r s α Sg) T α hpou_supp]
-  -- Reassociate the partition-of-unity weight onto the `T` side.
   have hctE_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) α).measurableSet
   rw [setIntegral_congr_fun hctE_meas (fun y hy => by
     rw [componentSum_pouSmul_reassoc (I := I) (M := M) g r s α Sg T hy])]
-  -- Rewrite, a.e., the weighted chart component of `T` as the canonical
-  -- abstract chart component of `T`'s `L²` class.
   exact MeasureTheory.integral_congr_ae
     (chartPull_integrand_aeEq_abstract (I := I) (M := M) g r s α Sg T)
-
-/-! ## Continuity of the chart-pull integral as a function of the abstract element
-
-The chart-pull integral, as a function of the abstract `L²` element `u`,
-factors through the canonical chart-component continuous linear map
-`tensorL2ChartComponentCLM` followed by an `L²` inner product against a fixed
-`L²` chart coefficient. For a chart-supported section `Sg` the chart coefficient
-is continuous with compact support inside the chart target, hence in `L²`. -/
 
 /-- The chart coefficient pairing the source `Sg` against the `Q`-th canonical
 abstract chart component: `∑_P densityOnEuclid g α y · covChartMetricGram g r s α
@@ -502,7 +422,6 @@ private lemma chartPullCoeff_summand_continuous
         covChartMetricGram (I := I) (M := M) g r s α P Q y *
         tensorComponentEuclid (I := I) (M := M) g r s Sg α P y) := by
   classical
-  -- `ContinuousOn` on the open chart target.
   have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) α
@@ -521,8 +440,6 @@ private lemma chartPullCoeff_summand_continuous
         tensorComponentEuclid (I := I) (M := M) g r s Sg α P y)
       (chartTargetEuclid (I := I) (M := M) α) :=
     (hdensity.mul hgram).mul hcomp
-  -- The topological support sits inside the (compact) support of
-  -- `tensorComponentEuclid g r s Sg α P`, which is inside the chart target.
   have hsupp_subset : tsupport (fun y : EuclN =>
       densityOnEuclid (I := I) g α y *
         covChartMetricGram (I := I) (M := M) g r s α P Q y *
@@ -581,7 +498,6 @@ private lemma chartPullCoeff_hasCompactSupport
     (hSg : tsupport Sg.toFun ⊆ (chartAt H α).source) :
     HasCompactSupport (chartPullCoeff (I := I) (M := M) g r s α Sg Q) := by
   classical
-  -- The barrier set: the finite union of the compact supports of the summands.
   set K : Set EuclN :=
     ⋃ P : CompIdx E r s, tsupport (fun y : EuclN =>
       densityOnEuclid (I := I) g α y *
@@ -593,11 +509,9 @@ private lemma chartPullCoeff_hasCompactSupport
     exact chartPullCoeff_summand_hasCompactSupport
       (I := I) (M := M) g r s α Sg P Q hSg
   refine HasCompactSupport.of_support_subset_isCompact hK_compact ?_
-  -- A point in the support of the finite sum is in the support of some summand.
   intro y hy
   rw [Function.mem_support] at hy
   rw [hK_def, Set.mem_iUnion]
-  -- If `y` were off every summand's support, every summand would vanish at `y`.
   by_contra hy_notin
   simp only [not_exists] at hy_notin
   refine hy ?_
@@ -617,8 +531,6 @@ private lemma chartPullCoeff_memLp
     (hSg : tsupport Sg.toFun ⊆ (chartAt H α).source) :
     MemLp (chartPullCoeff (I := I) (M := M) g r s α Sg Q) 2
       (chartL2Measure (I := I) (M := M) α) := by
-  -- `chartL2Measure α` is `volume.restrict (chartTargetEuclid α)`, which is a
-  -- finite measure on compact sets.
   haveI : IsFiniteMeasureOnCompacts (chartL2Measure (I := I) (M := M) α) := by
     rw [chartL2Measure_eq_volume_restrict (I := I) (M := M) α]
     infer_instance
@@ -645,12 +557,8 @@ private lemma inner_chartPullCoeffLp_eq_integral
       ∫ y, chartPullCoeff (I := I) (M := M) g r s α Sg Q y * (w : EuclN → ℝ) y
         ∂(chartL2Measure (I := I) (M := M) α) := by
   classical
-  -- The real `L²` inner product is the Bochner integral of the pointwise
-  -- product of the coercions.
   rw [MeasureTheory.L2.inner_def]
   refine MeasureTheory.integral_congr_ae ?_
-  -- The coercion of the chart-coefficient `L²` class agrees a.e. with the
-  -- chart coefficient.
   have hcoe : ((chartPullCoeffLp (I := I) (M := M) g r s α Sg Q hSg :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) =ᵐ[
         chartL2Measure (I := I) (M := M) α]
@@ -671,8 +579,6 @@ private lemma continuous_chartPullCoeff_pairing
       (⟪chartPullCoeffLp (I := I) (M := M) g r s α Sg Q hSg,
           tensorL2ChartComponent (I := I) (M := M) g r s u α Q⟫_ℝ : ℝ)) := by
   classical
-  -- The pairing factors as: the canonical chart-component continuous linear
-  -- map, followed by the `L²` inner product against a fixed class.
   have hfun : (fun u : TensorL2 r s g =>
       (⟪chartPullCoeffLp (I := I) (M := M) g r s α Sg Q hSg,
           tensorL2ChartComponent (I := I) (M := M) g r s u α Q⟫_ℝ : ℝ)) =
@@ -685,16 +591,8 @@ private lemma continuous_chartPullCoeff_pairing
   rw [hfun]
   refine Continuous.comp ?_
     (tensorL2ChartComponentCLM (I := I) (M := M) g r s α Q).continuous
-  -- The `L²` inner product against a fixed class is continuous.
   exact (innerSL ℝ
     (chartPullCoeffLp (I := I) (M := M) g r s α Sg Q hSg)).continuous
-
-/-! ## Rewriting the chart-pull integral as a finite sum of `L²` pairings
-
-The chart-pull integral splits, by pulling the finite sum over component
-multi-indices out of the Bochner integral, into a finite sum — over `Q` — of
-`L²` inner products of the chart coefficient `chartPullCoeff g r s α Sg Q`
-against the canonical Euclidean chart component `tensorL2ChartComponent u α Q`. -/
 
 /-- The chart-pull integrand, summed only over `P`, is the chart coefficient
 times the canonical chart component: a `Finset.mul_sum` rearrangement. -/
@@ -712,7 +610,6 @@ private lemma chartPull_integrand_eq_coeff_mul
           ((tensorL2ChartComponent (I := I) (M := M) g r s u α Q :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y := by
   classical
-  -- Expand both sides into a double sum over `(P, Q)`.
   have hlhs : densityOnEuclid (I := I) g α y *
         (∑ P : CompIdx E r s, ∑ Q : CompIdx E r s,
           covChartMetricGram (I := I) (M := M) g r s α P Q y *
@@ -758,7 +655,6 @@ private lemma chartPull_summand_integrable
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
       (chartL2Measure (I := I) (M := M) α) := by
   classical
-  -- The product of two `L²` functions is `L¹`.
   have hcoeff : MemLp (chartPullCoeff (I := I) (M := M) g r s α Sg Q) 2
       (chartL2Measure (I := I) (M := M) α) :=
     chartPullCoeff_memLp (I := I) (M := M) g r s α Sg Q hSg
@@ -792,8 +688,6 @@ private lemma chartPull_integral_eq_sum_inner
         (⟪chartPullCoeffLp (I := I) (M := M) g r s α Sg Q hSg,
             tensorL2ChartComponent (I := I) (M := M) g r s u α Q⟫_ℝ : ℝ) := by
   classical
-  -- Rewrite the integral over `chartTargetEuclid α` against `volume` as the
-  -- integral against `chartL2Measure α`.
   rw [show (∫ y in chartTargetEuclid (I := I) (M := M) α,
         densityOnEuclid (I := I) g α y *
           (∑ P : CompIdx E r s, ∑ Q : CompIdx E r s,
@@ -810,7 +704,6 @@ private lemma chartPull_integral_eq_sum_inner
               ((tensorL2ChartComponent (I := I) (M := M) g r s u α Q :
                   Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
         ∂(chartL2Measure (I := I) (M := M) α) from rfl]
-  -- Rewrite the integrand as a finite sum over `Q`.
   rw [show (fun y : EuclN =>
         densityOnEuclid (I := I) g α y *
           (∑ P : CompIdx E r s, ∑ Q : CompIdx E r s,
@@ -825,19 +718,11 @@ private lemma chartPull_integral_eq_sum_inner
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) from by
     funext y
     exact chartPull_integrand_eq_coeff_mul (I := I) (M := M) g r s α Sg u y]
-  -- Pull the finite sum out of the Bochner integral.
   rw [MeasureTheory.integral_finset_sum (Finset.univ : Finset (CompIdx E r s))
     (fun Q _ => chartPull_summand_integrable
       (I := I) (M := M) g r s α Sg u Q hSg)]
-  -- Each summand is the `L²` inner product of the chart coefficient class.
   refine Finset.sum_congr rfl (fun Q _ => ?_)
   rw [inner_chartPullCoeffLp_eq_integral (I := I) (M := M) g r s α Sg Q hSg]
-
-/-! ## Continuity of both sides of the headline
-
-The left-hand side `u ↦ ⟪(pouSmul g r s α Sg : TensorL2), u⟫` is a continuous
-linear functional. The right-hand side is a finite sum of continuous functions
-(`continuous_chartPullCoeff_pairing`). -/
 
 /-- The left-hand side of the headline, `u ↦ ⟪(pouSmul g r s α Sg : TensorL2),
 u⟫`, is continuous. -/
@@ -863,16 +748,6 @@ private lemma continuous_rhs
   continuous_finset_sum _ (fun Q _ =>
     continuous_chartPullCoeff_pairing (I := I) (M := M) g r s α Sg Q hSg)
 
-/-! ## The headline
-
-Both sides of the headline are continuous functions of the abstract `L²`
-element `u`. On the dense subspace of smooth sections — `u = (T : TensorL2)` —
-they agree, by the concrete two-section chart-pull through the abstract chart
-component (`tensorL2Inner_pouSmul_smooth_chart_pull`) together with the
-identification of the `L²` inner product on the completion with the concrete
-`L²` pairing (`UniformSpace.Completion.inner_coe`, `SmoothCcTensor.inner_def`).
-Two continuous functions agreeing on a dense set are equal. -/
-
 /-- The headline holds on the dense subspace of smooth sections: for
 `u = (T : TensorL2)` the global `L²` inner product of `pouSmul g r s α Sg`
 against `(T : TensorL2)` equals the finite sum of `L²` pairings of the chart
@@ -889,17 +764,12 @@ private lemma headline_on_smooth
             tensorL2ChartComponent (I := I) (M := M) g r s
               (T : TensorL2 r s g) α Q⟫_ℝ : ℝ) := by
   classical
-  -- The `L²` inner product on the completion of two coerced smooth sections is
-  -- the concrete `L²` pairing.
   rw [show (⟪(pouSmul (I := I) (M := M) g r s α Sg : TensorL2 r s g),
         (T : TensorL2 r s g)⟫_ℝ : ℝ) =
       (⟪pouSmul (I := I) (M := M) g r s α Sg, T⟫_ℝ : ℝ) from
     UniformSpace.Completion.inner_coe _ _]
   rw [SmoothCcTensor.inner_def]
-  -- The concrete `L²` pairing is the chart-pull integral through the abstract
-  -- chart component.
   rw [tensorL2Inner_pouSmul_smooth_chart_pull (I := I) (M := M) g r s α Sg T]
-  -- The chart-pull integral is the finite sum of `L²` pairings.
   exact chartPull_integral_eq_sum_inner (I := I) (M := M) g r s α Sg
     (T : TensorL2 r s g) hSg
 
@@ -917,11 +787,9 @@ private lemma headline_fun_eq
           (⟪chartPullCoeffLp (I := I) (M := M) g r s α Sg Q hSg,
               tensorL2ChartComponent (I := I) (M := M) g r s u α Q⟫_ℝ : ℝ)) := by
   classical
-  -- The dense range of the canonical embedding `SmoothCcTensor → TensorL2`.
   have hdense : DenseRange
       ((↑) : SmoothCcTensor g r s → UniformSpace.Completion (SmoothCcTensor g r s)) :=
     UniformSpace.Completion.denseRange_coe
-  -- The two sides are continuous and agree on the dense range.
   refine hdense.equalizer
     (continuous_lhs (I := I) (M := M) g r s α Sg)
     (continuous_rhs (I := I) (M := M) g r s α Sg hSg) ?_
@@ -972,14 +840,10 @@ theorem tensorL2Inner_pouSmul_tensorL2ChartComponent_pull
                   Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
         ∂(volume : Measure EuclN) := by
   classical
-  -- Evaluate the function-level identity at `u`.
   have hfun := headline_fun_eq (I := I) (M := M) g r s α Sg hSg
   have hu := congrFun hfun u
   rw [hu]
-  -- Rewrite the finite sum of `L²` pairings back as the chart-pull integral.
   exact (chartPull_integral_eq_sum_inner (I := I) (M := M) g r s α Sg u hSg).symm
-
-/-! ## Sanity tests -/
 
 section ElaborationTests
 

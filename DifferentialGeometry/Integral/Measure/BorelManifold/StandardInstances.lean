@@ -30,8 +30,6 @@ chart is the identity, satisfies `IsBorelChartedSpace`. -/
 instance chartedSpaceSelf_isBorelChartedSpace (H : Type*) [TopologicalSpace H] :
     IsBorelChartedSpace H H where
   chartAt_range_countable := by
-    -- `chartAt H (x : H) = OpenPartialHomeomorph.refl H` for all `x` on the
-    -- self-charted-space, so the range is contained in the singleton.
     refine (Set.countable_singleton (OpenPartialHomeomorph.refl H)).mono ?_
     rintro c ⟨x, hx⟩
     change chartAt H (M := H) x = c at hx
@@ -41,19 +39,15 @@ instance chartedSpaceSelf_isBorelChartedSpace (H : Type*) [TopologicalSpace H] :
   measurableSet_chartAt_preimage := by
     intro c
     classical
-    -- Either `c = refl` and the level set is `univ`, or `c ≠ refl` and the
-    -- level set is empty.
     by_cases hc : c = OpenPartialHomeomorph.refl H
-    · -- Level set = univ.
-      have h : {x : H | chartAt H (M := H) x = c} = Set.univ := by
+    · have h : {x : H | chartAt H (M := H) x = c} = Set.univ := by
         ext x
         change chartAt H (M := H) x = c ↔ True
         rw [chartAt_self_eq, hc, eq_self_iff_true, iff_true]
         trivial
       rw [h]
       exact @MeasurableSet.univ H (borel H)
-    · -- Level set = ∅.
-      have h : {x : H | chartAt H (M := H) x = c} = ∅ := by
+    · have h : {x : H | chartAt H (M := H) x = c} = ∅ := by
         ext x
         change (chartAt H (M := H) x = c) ↔ False
         rw [chartAt_self_eq, iff_false]

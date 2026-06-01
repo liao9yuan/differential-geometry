@@ -75,9 +75,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Step 1: smoothness of `c(y) = fderiv ℝ F y` on the chart-target image
-of the chart-α Levi-Civita good set, where `F = repr T ∘ symm`. -/
-
 /-- `fderiv ℝ F` is `ContDiffOn ℝ ∞` on the open chart-target image of the
 chart-α Levi-Civita good set, where
 `F = tensorRSChartE_section_repr r s α T.toSection ∘ (extChartAt I α).symm`. -/
@@ -100,9 +97,6 @@ private lemma c_contDiffOn_goodSet
   have h_le : (∞ : WithTop ℕ∞) + 1 ≤ ∞ := by rw [ENat.coe_top_add_one]
   exact hF_cd.fderiv_of_isOpen hU_open h_le
 
-/-! ## Step 2: smoothness of `u(y) = (chartE_section_repr α B ∘ symm) y` on
-the chart-target image of the chart-α Levi-Civita good set. -/
-
 /-- Smoothness on the chart-target image of the chart-α Levi-Civita good set of
 the chart-pulled representation `chartE_section_repr α B ∘ symm`. -/
 private lemma u_contDiffOn_goodSet'
@@ -118,9 +112,6 @@ private lemma u_contDiffOn_goodSet'
       (T% (B.toFun : Π x : M, TangentSpace I x))
       (chartLeviCivitaGoodSet (I := I) α) := hB_total.contMDiffOn
   exact chartE_pullback_contDiffOn_goodSet (I := I) α hB_on
-
-/-! ## Step 3: uniform op-norm bounds for `iteratedFDeriv k u` over POU
-tsupport image, for `k = 0, 1, 2`. -/
 
 /-- Under `[I.Boundaryless]`, the chart-α partition-of-unity tsupport lies in
 the chart-α Levi-Civita good set. -/
@@ -203,7 +194,6 @@ private lemma iteratedFDeriv_u_bound_012
     pouTsupport_isCompact (I := I) (M := M) α
   set U : Set E := (extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α
     with hU_def
-  -- Pull back via extChartAt.
   have hφ_cm : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I α) (chartAt H α).source :=
     contMDiffOn_extChartAt (I := I) (n := ∞) (x := α)
   have hK_sub : K_set ⊆ (chartAt H α).source :=
@@ -214,8 +204,6 @@ private lemma iteratedFDeriv_u_bound_012
     fun b hb => ⟨b, hK_sub_good hb, rfl⟩
   have hφ_cont : ContinuousOn (extChartAt I α) K_set :=
     (hφ_cm.continuousOn).mono hK_sub
-  -- For each k ∈ {0, 1, 2}, the function `b ↦ ‖iteratedFDeriv k u (φ b)‖` is
-  -- continuous on the compact K_set, hence bounded above.
   have h_cont_0 : ContinuousOn (fun b : M => ‖iteratedFDeriv ℝ 0
       (chartE_section_repr (I := I) α B.toFun ∘ (extChartAt I α).symm)
       (extChartAt I α b)‖) K_set :=
@@ -251,8 +239,6 @@ private lemma iteratedFDeriv_u_bound_012
     calc _ ≤ C2 := h
       _ ≤ max (max C0 C1) C2 := le_max_right _ _
       _ ≤ max (max (max C0 C1) C2) 0 := le_max_left _ _
-
-/-! ## Step 4: headline. -/
 
 /-- **Bound on the order-2 iterated Fréchet derivative of the chart-pulled
 intrinsic piece of the first covariant derivative.**
@@ -302,13 +288,7 @@ theorem intrinsic_piece_iteratedFDeriv_two_bound
   letI _h_fib : FiberBundle (TensorRSModel r s ℝ E)
       (fun x : M => TensorRSSpace r s I x) :=
     tensorRSBundle_fiber r s
-  -- Uniform bound on `‖iteratedFDeriv k u‖` for k = 0, 1, 2 over POU tsupport.
   obtain ⟨C, hC_nn, hC_bound⟩ := iteratedFDeriv_u_bound_012 (I := I) (M := M) α B
-  -- The Leibniz expansion at order 2 yields (with C(2,0)=C(2,2)=1, C(2,1)=2):
-  --   ‖iter 2 (c·u)‖ ≤ 1·‖iter 0 c‖·‖iter 2 u‖ + 2·‖iter 1 c‖·‖iter 1 u‖
-  --                  + 1·‖iter 2 c‖·‖iter 0 u‖
-  -- Each ‖iter k c‖ = ‖iter (k+1) F‖. So ≤ C·(‖iter 1 F‖ + 2·‖iter 2 F‖ + ‖iter 3 F‖)
-  -- ≤ 2C · (‖iter 3 F‖ + ‖iter 2 F‖ + ‖fderiv F‖).
   refine ⟨2 * C, by positivity, ?_⟩
   intro T b hb
   set F : E → TensorRSModel r s ℝ E :=
@@ -319,7 +299,6 @@ theorem intrinsic_piece_iteratedFDeriv_two_bound
   set x : E := extChartAt I α b with hx_def
   set U : Set E := (extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α
     with hU_def
-  -- Set up the open set, smoothness hypotheses on c and u over U.
   have hU_open : IsOpen U := chartLeviCivitaGoodSet_image_isOpen (I := I) α
   have hF_cd : ContDiffOn ℝ ∞ F U :=
     R_contDiffOn_goodSet (I := I) (M := M) g r s α T
@@ -330,7 +309,6 @@ theorem intrinsic_piece_iteratedFDeriv_two_bound
   have hb_good : b ∈ chartLeviCivitaGoodSet (I := I) α := hb.2
   have hx_mem : x ∈ U := ⟨b, hb_good, rfl⟩
   have hUniqueDiff : UniqueDiffOn ℝ U := hU_open.uniqueDiffOn
-  -- Apply `norm_iteratedFDerivWithin_clm_apply` with `n = 2`.
   have h_two_le_top : ((2 : ℕ) : WithTop ℕ∞) ≤ ∞ := by
     show ((2 : ℕ) : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞)
     have h1 : ((2 : ℕ) : ℕ∞) ≤ (⊤ : ℕ∞) := le_top
@@ -342,7 +320,6 @@ theorem intrinsic_piece_iteratedFDeriv_two_bound
             ‖iteratedFDerivWithin ℝ i c U x‖ *
             ‖iteratedFDerivWithin ℝ (2 - i) u U x‖ :=
     norm_iteratedFDerivWithin_clm_apply hc_cd hu_cd hUniqueDiff hx_mem h_two_le_top
-  -- Transfer iteratedFDerivWithin to iteratedFDeriv on the open set U at x.
   have h_iter_c : ∀ k : ℕ,
       iteratedFDerivWithin ℝ k c U x = iteratedFDeriv ℝ k c x := by
     intro k; exact iteratedFDerivWithin_of_isOpen k hU_open hx_mem
@@ -353,7 +330,6 @@ theorem intrinsic_piece_iteratedFDeriv_two_bound
       iteratedFDerivWithin ℝ 2 (fun y : E => c y (u y)) U x =
         iteratedFDeriv ℝ 2 (fun y : E => c y (u y)) x :=
     iteratedFDerivWithin_of_isOpen 2 hU_open hx_mem
-  -- Norm version.
   have h_norm_clm :
       ‖iteratedFDerivWithin ℝ 2 (fun y : E => c y (u y)) U x‖ =
         ‖iteratedFDeriv ℝ 2 (fun y : E => c y (u y)) x‖ := by
@@ -364,7 +340,6 @@ theorem intrinsic_piece_iteratedFDeriv_two_bound
   have h_norm_iter_u : ∀ k : ℕ,
       ‖iteratedFDerivWithin ℝ k u U x‖ = ‖iteratedFDeriv ℝ k u x‖ := by
     intro k; rw [h_iter_u k]
-  -- Rewrite the Leibniz bound in terms of global iteratedFDeriv.
   have h_leibniz_global :
       ‖iteratedFDeriv ℝ 2 (fun y : E => c y (u y)) x‖ ≤
         ∑ i ∈ Finset.range (2 + 1),
@@ -376,7 +351,6 @@ theorem intrinsic_piece_iteratedFDeriv_two_bound
     apply Finset.sum_le_sum
     intro i _
     rw [h_norm_iter_c i, h_norm_iter_u (2 - i)]
-  -- Rewrite the goal LHS as `iteratedFDeriv 2 (y ↦ c y (u y)) x`.
   have h_goalLHS_fn : (fun y : E =>
         fderiv ℝ (tensorRSChartE_section_repr (I := I) r s α
             (fun y' : M => T.toSection y') ∘ (extChartAt I α).symm) y
@@ -386,7 +360,6 @@ theorem intrinsic_piece_iteratedFDeriv_two_bound
     funext y
     rfl
   rw [h_goalLHS_fn]
-  -- Expand the sum explicitly (indices 0, 1, 2).
   have h_choose_0 : ((2 : ℕ).choose 0 : ℝ) = 1 := by norm_num
   have h_choose_1 : ((2 : ℕ).choose 1 : ℝ) = 2 := by norm_num
   have h_choose_2 : ((2 : ℕ).choose 2 : ℝ) = 1 := by norm_num
@@ -408,7 +381,6 @@ theorem intrinsic_piece_iteratedFDeriv_two_bound
     rw [h_sub_0, h_sub_1, h_sub_2]
     ring
   rw [h_sum_eq] at h_leibniz_global
-  -- Identify ‖iteratedFDeriv k c x‖ = ‖iteratedFDeriv (k+1) F x‖.
   have h_c0 : ‖iteratedFDeriv ℝ 0 c x‖ = ‖iteratedFDeriv ℝ 1 F x‖ := by
     have := norm_iteratedFDeriv_fderiv (𝕜 := ℝ) (f := F) (x := x) (n := 0)
     convert this
@@ -419,12 +391,10 @@ theorem intrinsic_piece_iteratedFDeriv_two_bound
     have := norm_iteratedFDeriv_fderiv (𝕜 := ℝ) (f := F) (x := x) (n := 2)
     convert this
   rw [h_c0, h_c1, h_c2] at h_leibniz_global
-  -- Identify ‖iteratedFDeriv 1 F x‖ = ‖fderiv ℝ F x‖.
   have h_fderiv_iter :
       ‖iteratedFDeriv ℝ 1 F x‖ = ‖fderiv ℝ F x‖ :=
     norm_iteratedFDeriv_one (𝕜 := ℝ) F (x := x)
   rw [h_fderiv_iter] at h_leibniz_global
-  -- Apply the uniform bounds on iteratedFDeriv k u for k = 0, 1, 2.
   obtain ⟨hu0_le, hu1_le, hu2_le⟩ := hC_bound b hb.1
   set A1 : ℝ := ‖fderiv ℝ F x‖ with hA1_def
   set A2 : ℝ := ‖iteratedFDeriv ℝ 2 F x‖ with hA2_def
@@ -438,13 +408,9 @@ theorem intrinsic_piece_iteratedFDeriv_two_bound
   have hBu0_nn : 0 ≤ Bu0 := norm_nonneg _
   have hBu1_nn : 0 ≤ Bu1 := norm_nonneg _
   have hBu2_nn : 0 ≤ Bu2 := norm_nonneg _
-  -- Rewrite h_leibniz_global with abbreviations.
   have h_leibniz' :
       ‖iteratedFDeriv ℝ 2 (fun y : E => c y (u y)) x‖ ≤
         A1 * Bu2 + (2 : ℝ) * A2 * Bu1 + A3 * Bu0 := h_leibniz_global
-  -- Bound the RHS by 2C * (A3 + A2 + A1).
-  -- A1*Bu2 ≤ A1*C, 2*A2*Bu1 ≤ 2*A2*C, A3*Bu0 ≤ A3*C.
-  -- Sum: A1*C + 2*A2*C + A3*C ≤ 2C*(A1 + A2 + A3) = 2C*(A3 + A2 + A1).
   have h_A1Bu2 : A1 * Bu2 ≤ A1 * C :=
     mul_le_mul_of_nonneg_left hu2_le hA1_nn
   have h_A2Bu1 : A2 * Bu1 ≤ A2 * C :=
@@ -461,15 +427,12 @@ theorem intrinsic_piece_iteratedFDeriv_two_bound
     linarith
   have h_final_le :
       A1 * C + 2 * (A2 * C) + A3 * C ≤ 2 * C * (A3 + A2 + A1) := by
-    -- Step 1: A1*C ≤ 2*A1*C and A3*C ≤ 2*A3*C since A1, A3, C ≥ 0.
     have h_A1C_nn : 0 ≤ A1 * C := mul_nonneg hA1_nn hC_nn
     have h_A3C_nn : 0 ≤ A3 * C := mul_nonneg hA3_nn hC_nn
     have h_A1C_double : A1 * C ≤ 2 * (A1 * C) := by linarith
     have h_A3C_double : A3 * C ≤ 2 * (A3 * C) := by linarith
-    -- Step 2: sum bound.
     have hStep : A1 * C + 2 * (A2 * C) + A3 * C ≤
         2 * (A1 * C) + 2 * (A2 * C) + 2 * (A3 * C) := by linarith
-    -- Step 3: rearrange 2*(A1*C) = 2*C*A1, etc.
     have h_target_eq :
         2 * (A1 * C) + 2 * (A2 * C) + 2 * (A3 * C) =
           2 * C * (A3 + A2 + A1) := by ring

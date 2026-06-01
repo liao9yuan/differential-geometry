@@ -76,26 +76,12 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
   hiding chartTargetEuclid chartTargetEuclid_isOpen
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Chart-locality-free results
-
-The quantitative order-raiser is keyed onto the intrinsic compact-operator
-eigenbasis (`tensorResolventEigenbasisVec` /
-`eigenvectorChartComponentFun` /
-`eigenvectorChartIteratedPartial`), so it holds on every closed
-Riemannian manifold without any chart-locality hypothesis. -/
 
 /-- Chart-locality-free twin of `eigenvectorChartIteratedPartial_wkpNorm_succ_le`. -/
 theorem eigenvectorChartIteratedPartial_wkpNorm_succ_le

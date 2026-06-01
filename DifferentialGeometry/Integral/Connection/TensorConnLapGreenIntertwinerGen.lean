@@ -116,8 +116,6 @@ theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt_gen
     change Tensor0SSpace.toModel (Tensor0SSpace.ofModel
       (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ))) = _
     rw [Tensor0SSpace.toModel_ofModel]
-  -- Step A: the lowered genuine covariant derivative is the `domDomCongr`-transport
-  -- of its evaluation at the unit tensor.
   have hlowerA :
       lowerAllUpperIndices (I := I) (M := M) g 0 s x
           (TensorRSSpace.toModel
@@ -137,7 +135,6 @@ theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt_gen
     congr 1
     exact (Fin.ext (by simp)).symm
   rw [hlowerA]
-  -- Step B: the product rule.
   rw [tensorRSCovariantDerivative_apply (I := I) (M := M) 0 s
     (LeviCivita (I := I) g) S unitSec x v]
   rw [show (Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g)
@@ -147,8 +144,6 @@ theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt_gen
       (LeviCivita (I := I) g) x v]
   rw [map_zero, sub_zero]
   rw [loweredCovDerivAt_def]
-  -- Step C: rewrite the lifted section as the type-transport of the unit-evaluation
-  -- section, then apply covariant-derivative naturality.
   rw [show liftedTensorSection (I := I) (M := M) g 0 s S =
         (fun y : M => cast (congrArg (fun n => Tensor0SSpace n I y) (Nat.zero_add s).symm)
           ((S y : Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y)

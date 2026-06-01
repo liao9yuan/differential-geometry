@@ -42,8 +42,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## The half-space `L²`-Sobolev squared norm and norm -/
-
 /-- The squared `L²`-convention Sobolev norm on a half-space-friendly
 domain `Ω`: the boundaryless `L²`-Sobolev squared norm evaluated on the
 open interior part `interiorHalfSpace Ω`. -/
@@ -75,8 +73,6 @@ theorem wkpNormL2HalfSpace_eq_rpow
   unfold wkpNormL2HalfSpace wkpNormL2SqHalfSpace
   exact wkpNormL2_eq_rpow (d := d) k u (interiorHalfSpace Ω)
 
-/-! ## The half-space `L²`-Sobolev inner product -/
-
 /-- The `L²`-convention Sobolev inner product on a half-space-friendly
 domain `Ω`: the boundaryless `L²`-Sobolev inner product evaluated on the
 open interior part `interiorHalfSpace Ω`. -/
@@ -88,8 +84,6 @@ def wkpInnerL2HalfSpace (k : ℕ) (u v : E → ℝ) (Ω : Set E) : ℝ :=
     wkpInnerL2HalfSpace (d := d) k u v Ω =
       wkpInnerL2 (d := d) k u v (interiorHalfSpace Ω) := rfl
 
-/-! ## Order-zero values -/
-
 /-- `wkpNormL2SqHalfSpace 0 u Ω = (eLpNorm u 2)²` on the interior part. -/
 theorem wkpNormL2SqHalfSpace_zero
     (u : E → ℝ) (Ω : Set E) :
@@ -97,9 +91,6 @@ theorem wkpNormL2SqHalfSpace_zero
       eLpNorm u 2 ((volume : Measure E).restrict (interiorHalfSpace Ω)) ^ (2 : ℕ) := by
   unfold wkpNormL2SqHalfSpace
   exact wkpNormL2Sq_zero (d := d) u (interiorHalfSpace Ω)
-
-/-! ## Closure under arithmetic for `wkpNormL2SqHalfSpace` and
-`wkpNormL2HalfSpace` -/
 
 /-- `wkpNormL2SqHalfSpace k 0 Ω = 0` for half-space-friendly `Ω`. -/
 theorem wkpNormL2SqHalfSpace_zero_fun_zero
@@ -114,8 +105,6 @@ theorem wkpNormL2HalfSpace_zero_fun_zero
     wkpNormL2HalfSpace (d := d) k (fun _ : E => (0 : ℝ)) Ω = 0 := by
   unfold wkpNormL2HalfSpace
   exact wkpNormL2_zero_fun_zero (d := d) (interiorHalfSpace_isOpen hΩ)
-
-/-! ## Finiteness for `MemWkpHalfSpace k 2 u Ω` -/
 
 /-- For `u ∈ W^{k,2}_0(Ω)`, the squared `L²`-Sobolev norm is finite. -/
 theorem wkpNormL2SqHalfSpace_lt_top_of_memWkpHalfSpace
@@ -132,8 +121,6 @@ theorem wkpNormL2HalfSpace_lt_top_of_memWkpHalfSpace
     wkpNormL2HalfSpace (d := d) k u Ω < ∞ := by
   unfold wkpNormL2HalfSpace
   exact wkpNormL2_lt_top_of_memWkp (d := d) h
-
-/-! ## ae-invariance -/
 
 /-- `wkpNormL2SqHalfSpace` is invariant under ae-equality on the interior
 part. -/
@@ -177,8 +164,6 @@ theorem wkpNormL2HalfSpace_congr_ae_of_carrier
   rw [volume_restrict_interiorHalfSpace_eq hΩ] at huv
   exact wkpNormL2HalfSpace_congr_ae (d := d) hΩ huv
 
-/-! ## `wkpNormL2HalfSpace ^ 2 = wkpNormL2SqHalfSpace` -/
-
 /-- Squaring `wkpNormL2HalfSpace` recovers `wkpNormL2SqHalfSpace`. -/
 theorem wkpNormL2HalfSpace_sq_eq_wkpNormL2SqHalfSpace
     (k : ℕ) (u : E → ℝ) (Ω : Set E) :
@@ -186,8 +171,6 @@ theorem wkpNormL2HalfSpace_sq_eq_wkpNormL2SqHalfSpace
       wkpNormL2SqHalfSpace (d := d) k u Ω := by
   unfold wkpNormL2HalfSpace wkpNormL2SqHalfSpace
   exact wkpNormL2_sq_eq_wkpNormL2Sq (d := d) k u (interiorHalfSpace Ω)
-
-/-! ## Triangle inequality for `wkpNormL2HalfSpace` -/
 
 /-- The triangle inequality for `wkpNormL2HalfSpace`. -/
 theorem wkpNormL2HalfSpace_add_le
@@ -219,9 +202,6 @@ theorem wkpNormL2HalfSpace_const_smul
   unfold wkpNormL2HalfSpace
   exact wkpNormL2_const_smul (d := d) (interiorHalfSpace_isOpen hΩ) hu c
 
-/-! ## Norm equivalence between `wkpNormHalfSpace` (linear-sum) and
-`wkpNormL2HalfSpace` (Euclidean) -/
-
 /-- `wkpNormL2HalfSpace ≤ wkpNormHalfSpace` at `p = 2`, the Euclidean
 side dominates the linear-sum side from below. -/
 theorem wkpNormL2HalfSpace_le_wkpNormHalfSpace
@@ -241,8 +221,6 @@ theorem wkpNormHalfSpace_le_sqrt_card_mul_wkpNormL2HalfSpace
         wkpNormL2HalfSpace (d := d) k u Ω := by
   unfold wkpNormL2HalfSpace wkpNormHalfSpace
   exact wkpNorm_le_sqrt_card_mul_wkpNormL2 (d := d) hu
-
-/-! ## Properties of the `L²`-Sobolev half-space inner product -/
 
 /-- The `L²`-Sobolev half-space inner product is symmetric. -/
 theorem wkpInnerL2HalfSpace_comm
@@ -285,8 +263,6 @@ theorem wkpInnerL2HalfSpace_smul_left
   unfold wkpInnerL2HalfSpace
   exact wkpInnerL2_smul_left (d := d) (interiorHalfSpace_isOpen hΩ)
     v hu c
-
-/-! ## Inner-product / squared-norm identities -/
 
 /-- For `u ∈ W^{k,2}_0(Ω)`, the squared `L²`-Sobolev half-space norm
 (real-valued) equals the half-space inner product `⟨u, u⟩`. -/

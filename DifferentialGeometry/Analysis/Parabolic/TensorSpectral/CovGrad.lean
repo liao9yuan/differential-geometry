@@ -86,20 +86,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The covariant-gradient-bundle-valued section
-
-The pointwise directional covariant derivative `tensorCovDerivAt g r s w x v`
-unfolds to the bundled `(r, s)`-tensor covariant derivative
-`tensorRSCovariantDerivative I M r s (LeviCivita g)` applied to the section
-`w.toSection`, evaluated at `x` and `v`. As a continuous-linear-map–valued
-function of `x` it is a smooth section of the covariant-gradient bundle. -/
 
 /-- The covariant-gradient-bundle-valued section of a smooth compactly-supported
 `(r, s)`-tensor section `w`: the continuous-linear-map–valued function sending a
@@ -139,9 +129,6 @@ private lemma covGradGradSection_contMDiff
           TotalSpace (E →L[ℝ] TensorRSModel r s ℝ E)
             fun y : M => TangentSpace I y →L[ℝ] TensorRSSpace r s I y)) := by
   classical
-  -- The bundled `(r, s)`-tensor covariant derivative is `C^∞` as a covariant
-  -- derivative; its `contMDiff` field, applied to the smooth section
-  -- `w.toSection`, gives smoothness of the gradient-bundle section on `Set.univ`.
   set covLC := tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g) with hcovLC
   haveI hcovLC_inst : CovariantDerivative.ContMDiffCovariantDerivative covLC ∞ :=
     inferInstance
@@ -151,25 +138,8 @@ private lemma covGradGradSection_contMDiff
           fun y : M => TangentSpace I y →L[ℝ] TensorRSSpace r s I y)) Set.univ :=
     hcovLC_inst.contMDiff.contMDiff (σ := fun y : M => w.toSection y)
       (w.toSection.contMDiff.contMDiffOn)
-  -- Smoothness on `Set.univ` is global smoothness.
   rw [← contMDiffOn_univ]
   exact hop
-
-/-! ## The smooth `(r, s + 1)`-tensor section underlying the covariant gradient
-
-The underlying map of the section-level covariant gradient sends a base point `x`
-to the `(r, s + 1)`-tensor `covGradBundleEquiv r s x (covGradGradSection g r s w x)`
-— the gradient-bundle fibre value transported fibrewise through the smooth bundle
-equivalence `covGradBundleSmoothEquiv`. Its smoothness, as a section of the
-`(r, s + 1)`-tensor bundle, is established here.
-
-The construction touches the `(r, s + 1)`-tensor bundle structures (model-fibre
-normed structure, total-space topology, fibre / vector-bundle / smooth-bundle
-structure). These are established globally for every index, but instance synthesis
-can fail to locate them at the compound index `s + 1` — the `(r, s)`-tensor model
-fibre is a `def` unfolding to a continuous-linear-map space, and synthesis can
-recurse unproductively. The construction below pins these structures locally via
-`letI` to the established global ones, scoping them over the whole body. -/
 
 /-- The covariant-gradient-bundle-valued section of `w`, transported fibrewise
 through `covGradBundleSmoothEquiv` into the `(r, s + 1)`-tensor bundle, packaged as
@@ -199,9 +169,6 @@ private noncomputable def covGradSmoothSection
   letI : ContMDiffVectorBundle (∞ : WithTop ℕ∞) (TensorRSModel r (s + 1) ℝ E)
       (fun y : M => TensorRSSpace r (s + 1) I y) I :=
     tensorRSBundle_smooth ∞ r (s + 1)
-  -- The total-space map of `covGradBundleSmoothEquiv` is `C^∞` (it is the
-  -- underlying map of a diffeomorphism); compose it with the `C^∞` gradient-bundle
-  -- section `covGradGradSection`.
   have hcomp :
       ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r (s + 1) ℝ E)) ∞
         ((covGradBundleSmoothEquiv (I := I) (M := M) r s).toDiffeomorph ∘
@@ -211,9 +178,6 @@ private noncomputable def covGradSmoothSection
                 fun y : M => TangentSpace I y →L[ℝ] TensorRSSpace r s I y))) :=
     (covGradBundleSmoothEquiv (I := I) (M := M) r s).toDiffeomorph.contMDiff.comp
       (covGradGradSection_contMDiff (I := I) (M := M) g r s w)
-  -- The composite agrees pointwise with the total-space map of the underlying map,
-  -- since the total-space map of `covGradBundleSmoothEquiv` acts fibrewise by
-  -- `covGradBundleEquiv`.
   have hsmooth :
       ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r (s + 1) ℝ E)) ∞
         (fun x : M =>
@@ -254,13 +218,11 @@ private lemma covGradSmoothSection_toModel_eq_zero_off_tsupport
     (w : SmoothCcTensor g r s) {x : M} (hx : x ∉ tsupport w.toFun) :
     TensorRSSpace.toModel
       (covGradSmoothSection (I := I) (M := M) g r s w x) = 0 := by
-  -- The gradient-bundle fibre `covGradGradSection g r s w x` is the zero CLM.
   have hgrad_zero : covGradGradSection (I := I) (M := M) g r s w x = 0 := by
     apply ContinuousLinearMap.ext
     intro v
     rw [ContinuousLinearMap.zero_apply, covGradGradSection_apply]
     exact tensorCovDerivAt_eq_zero_off_tsupport (I := I) (M := M) g r s w hx v
-  -- The fibrewise bundle equivalence sends the zero fibre to the zero fibre.
   rw [covGradSmoothSection_apply, hgrad_zero, map_zero, TensorRSSpace.toModel_zero]
 
 /-- The underlying model-valued map of `covGradSmoothSection g r s w` has compact
@@ -272,17 +234,12 @@ private lemma covGradSmoothSection_hasCompactSupport
       (fun x : M => TensorRSSpace.toModel
         (covGradSmoothSection (I := I) (M := M) g r s w x)) := by
   classical
-  -- The support of the model-valued map sits inside the compact set
-  -- `tsupport w.toFun`.
   refine HasCompactSupport.of_support_subset_isCompact w.hasCompactSupport ?_
   intro x hx
   rw [Function.mem_support] at hx
-  -- A point in the support is not outside `tsupport w.toFun`.
   by_contra hxnot
   exact hx (covGradSmoothSection_toModel_eq_zero_off_tsupport
     (I := I) (M := M) g r s w hxnot)
-
-/-! ## The section-level covariant gradient -/
 
 /-- **The section-level covariant gradient.** The covariant gradient of a smooth
 compactly-supported `(r, s)`-tensor section `w`, as a smooth compactly-supported
@@ -324,8 +281,6 @@ theorem covGrad_toSection_apply
         (tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)
           (fun y : M => w.toSection y) x) := by
   rw [covGrad_toSection, covGradSmoothSection_apply]
-  -- `covGradGradSection g r s w x` is, by definition, the bundled covariant
-  -- derivative of `w.toSection` evaluated at `x`.
   rfl
 
 /-- **Pointwise-evaluation formula, expanded on a tensor and a tuple.**
@@ -349,20 +304,9 @@ theorem covGrad_toSection_apply_eval
           tensorCovDerivAt (I := I) (M := M) g r s w x (v 0)) D)
         (Matrix.vecTail v) := by
   rw [covGrad_toSection_apply]
-  -- The fibrewise gradient-bundle equivalence reads the tangent direction off the
-  -- leftmost slot; `tensorCovDerivAt … x (v 0)` is the bundled covariant
-  -- derivative of `w.toSection`, taken in the direction `v 0`.
   exact covGradBundleEquiv_apply_eval (I := I) (M := M) r s x
     (tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)
       (fun y : M => w.toSection y) x) D v
-
-/-! ## `ℝ`-linearity of the section-level covariant gradient
-
-Linearity follows from the linearity of the directional covariant derivative
-`tensorCovDerivAt` in the section (`tensorCovDerivAt_add`, `tensorCovDerivAt_smul`)
-together with the linearity of the fibrewise bundle equivalence
-`covGradBundleEquiv r s x`. The argument is run at the level of the underlying
-sections; equality of `SmoothCcTensor`s follows by `SmoothCcTensor.ext`. -/
 
 /-- The covariant-gradient-bundle-valued section is additive in the section: this
 is the additivity of the directional covariant derivative. -/
@@ -398,20 +342,14 @@ theorem covGrad_add
     covGrad (I := I) (M := M) g r s (w₁ + w₂) =
       covGrad (I := I) (M := M) g r s w₁ +
         covGrad (I := I) (M := M) g r s w₂ := by
-  -- Compare the two `SmoothCcTensor`s through their underlying section values.
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  -- The underlying section value of a sum is the pointwise sum.
   rw [show ((covGrad (I := I) (M := M) g r s w₁ +
         covGrad (I := I) (M := M) g r s w₂).toSection x) =
       (covGrad (I := I) (M := M) g r s w₁).toSection x +
         (covGrad (I := I) (M := M) g r s w₂).toSection x from rfl]
-  -- Both sides reduce, via the pointwise-evaluation formula, to
-  -- `covGradBundleEquiv` applied to the (additive) covariant-gradient section.
   rw [covGrad_toSection_apply, covGrad_toSection_apply, covGrad_toSection_apply]
-  -- The bundled covariant derivative of `(w₁ + w₂).toSection` is the sum of the
-  -- bundled covariant derivatives; `covGradBundleEquiv r s x` is linear.
   rw [show (tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)
         (fun y : M => (w₁ + w₂).toSection y) x) =
       covGradGradSection (I := I) (M := M) g r s (w₁ + w₂) x from rfl,
@@ -429,19 +367,12 @@ theorem covGrad_smul
     (c : ℝ) (w : SmoothCcTensor g r s) :
     covGrad (I := I) (M := M) g r s (c • w) =
       c • covGrad (I := I) (M := M) g r s w := by
-  -- Compare the two `SmoothCcTensor`s through their underlying section values.
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  -- The underlying section value of a scalar multiple is the pointwise scalar
-  -- multiple.
   rw [show ((c • covGrad (I := I) (M := M) g r s w).toSection x) =
       c • (covGrad (I := I) (M := M) g r s w).toSection x from rfl]
-  -- Both sides reduce, via the pointwise-evaluation formula, to
-  -- `covGradBundleEquiv` applied to the (homogeneous) covariant-gradient section.
   rw [covGrad_toSection_apply, covGrad_toSection_apply]
-  -- The bundled covariant derivative of `(c • w).toSection` is `c` times the
-  -- bundled covariant derivative; `covGradBundleEquiv r s x` is linear.
   rw [show (tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)
         (fun y : M => (c • w).toSection y) x) =
       covGradGradSection (I := I) (M := M) g r s (c • w) x from rfl,

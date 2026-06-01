@@ -68,35 +68,15 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## File-local Borel-space instances
-
-We match the convention in the surrounding files: `E` and `M` carry their
-canonical Borel σ-algebras. Declared `local` to avoid leaking into callers. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## Topological prerequisite: the manifold interior is open -/
-
 /-- `I.interior M` is open in `M`. -/
 private lemma isOpen_interior_M : IsOpen (I.interior M) :=
   I.isOpen_interior (M := M) (n := ∞)
     (by exact (by decide : (∞ : WithTop ℕ∞) ≠ 0))
-
-/-! ## Block A — Smooth-section packaging of the gradient
-
-The intrinsic pointwise gradient `gradFun g f : ∀ x : M, TangentSpace I x` is
-smooth on `I.interior M` (by `gradFun_contMDiffOn_interior`). For an
-interior-supported smooth function `f` (i.e. `tsupport f ⊆ I.interior M`), the
-gradient vanishes outside `tsupport f`. Since `(tsupport f)ᶜ` is open and
-covers everything outside `I.interior M`, the gradient is globally smooth as a
-tangent-bundle section.
-
-We assemble the global smoothness via
-`contMDiff_of_contMDiffOn_union_of_isOpen` applied to the open cover
-`s := I.interior M`, `t := (tsupport f)ᶜ`. -/
 
 /-- The pointwise gradient `gradFun g f` vanishes outside the topological
 support of `f`. Restated from the boundary-agnostic
@@ -121,7 +101,6 @@ private lemma gradFun_total_eq_zeroSection_on_compl_tsupport
     {y : M} (hy : y ∈ (tsupport f)ᶜ) :
     TotalSpace.mk' E y (gradFun (I := I) g f y) =
       (Bundle.zeroSection E (TangentSpace I : M → Type _) y) := by
-  -- `Bundle.zeroSection E (TangentSpace I) y = TotalSpace.mk' E y (0 : TangentSpace I y)`.
   have hzero : gradFun (I := I) g f y = (0 : TangentSpace I y) :=
     gradFun_eq_zero_on_compl_tsupport (I := I) g hy
   rw [hzero]
@@ -174,8 +153,6 @@ def grad_g_with_boundary_section [T2Space M]
     (hf_int : tsupport f ⊆ I.interior M) :
     Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
   ⟨fun x : M => gradFun (I := I) g f x, by
-    -- Smoothness via `contMDiff_of_contMDiffOn_union_of_isOpen` with
-    -- `s := I.interior M` and `t := (tsupport f)ᶜ`.
     have hs_open : IsOpen (I.interior M) := isOpen_interior_M
     have ht_open : IsOpen ((tsupport f)ᶜ) := (isClosed_tsupport _).isOpen_compl
     have hs : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
@@ -207,16 +184,6 @@ gradient `grad_g_with_boundary g f` as a fiber-valued function on `M`. -/
     (grad_g_with_boundary_section (I := I) g hf hf_int :
       Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x =
       grad_g_with_boundary (I := I) g f x := rfl
-
-/-! ## Support and compact-support of the packaged gradient section
-
-The packaged section's support inherits from the function's:
-
-* `support (section) ⊆ tsupport f`;
-* `tsupport (section) ⊆ tsupport f`;
-* if `f` has compact support, so does the section;
-* `tsupport (section) ⊆ I.interior M` whenever `tsupport f ⊆ I.interior M`.
--/
 
 /-- The support of the packaged gradient section is contained in the
 topological support of `f`. -/
@@ -268,8 +235,6 @@ lemma hasCompactSupport_grad_g_with_boundary_section [T2Space M]
   intro x hx
   exact support_grad_g_with_boundary_section_subset (I := I) g hf hf_int hx
 
-/-! ## Block B — The Laplace–Beltrami operator -/
-
 /-- **The Laplace–Beltrami operator on an interior-supported smooth function.**
 Defined as the with-boundary divergence of the packaged gradient section. The
 sign convention is the geometer's: `Δ = div ∘ grad`, so the Laplacian is
@@ -289,11 +254,6 @@ def Δ_g_with_boundary [T2Space M]
       divergence_g_with_boundary (I := I) g
         (grad_g_with_boundary_section (I := I) g hf hf_int) x := rfl
 
-/-! ## Smoothness on the manifold interior
-
-The Laplacian is `C^∞` on the manifold interior, as the with-boundary
-divergence of a smooth tangent section is smooth on the interior. -/
-
 /-- The Laplacian is `C^∞` on `I.interior M`. -/
 theorem Δ_g_with_boundary_contMDiffOn_interior [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -304,12 +264,6 @@ theorem Δ_g_with_boundary_contMDiffOn_interior [T2Space M]
   divergence_g_with_boundary_contMDiffOn_interior (I := I) g
     (grad_g_with_boundary_section (I := I) g hf hf_int)
 
-/-! ## Continuity on `M`
-
-The Laplacian is continuous on the entire manifold: smooth (hence continuous)
-on `I.interior M`, and identically zero on a neighbourhood of every boundary
-point because the packaged gradient section vanishes there. -/
-
 /-- The topological support of the Laplacian is contained in the topological
 support of the underlying function `f`. -/
 lemma tsupport_Δ_g_with_boundary_subset [T2Space M]
@@ -317,7 +271,6 @@ lemma tsupport_Δ_g_with_boundary_subset [T2Space M]
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (hf_int : tsupport f ⊆ I.interior M) :
     tsupport (Δ_g_with_boundary (I := I) g hf hf_int) ⊆ tsupport f := by
-  -- `tsupport (div_g (section)) ⊆ tsupport (section) ⊆ tsupport f`.
   have hsec_supp : tsupport ((grad_g_with_boundary_section (I := I) g hf hf_int :
       Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) : ∀ x, TangentSpace I x) ⊆
         I.interior M :=
@@ -338,23 +291,18 @@ theorem Δ_g_with_boundary_continuous [T2Space M]
     (hf_int : tsupport f ⊆ I.interior M) :
     Continuous (Δ_g_with_boundary (I := I) g hf hf_int) := by
   classical
-  -- The topological support of `Δ_g_with_boundary g hf hf_int` is contained in
-  -- `tsupport f ⊆ I.interior M`.
   have hΔ_supp_int : tsupport (Δ_g_with_boundary (I := I) g hf hf_int) ⊆
       I.interior M :=
     (tsupport_Δ_g_with_boundary_subset (I := I) g hf hf_int).trans hf_int
-  -- Continuity by case analysis on whether `x ∈ tsupport (Δ_g_with_boundary …)`.
   rw [continuous_iff_continuousAt]
   intro x
   by_cases hx_supp : x ∈ tsupport (Δ_g_with_boundary (I := I) g hf hf_int)
-  · -- On `tsupport`: `x ∈ I.interior M`, so use smoothness on the open interior.
-    have hx_int : x ∈ I.interior M := hΔ_supp_int hx_supp
+  · have hx_int : x ∈ I.interior M := hΔ_supp_int hx_supp
     have hcont_int : ContinuousOn (Δ_g_with_boundary (I := I) g hf hf_int)
         (I.interior M) :=
       (Δ_g_with_boundary_contMDiffOn_interior (I := I) g hf hf_int).continuousOn
     exact (hcont_int x hx_int).continuousAt (isOpen_interior_M.mem_nhds hx_int)
-  · -- Off `tsupport`: locally zero, hence continuous.
-    have h_open : IsOpen (tsupport (Δ_g_with_boundary (I := I) g hf hf_int))ᶜ :=
+  · have h_open : IsOpen (tsupport (Δ_g_with_boundary (I := I) g hf hf_int))ᶜ :=
       (isClosed_tsupport _).isOpen_compl
     have hev_zero : (Δ_g_with_boundary (I := I) g hf hf_int) =ᶠ[𝓝 x]
         (fun _ => (0 : ℝ)) := by

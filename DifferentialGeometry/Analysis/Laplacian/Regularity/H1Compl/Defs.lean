@@ -36,8 +36,6 @@ open DifferentialGeometry.Integral.Measure
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-! ## The H¹ Hilbert completion -/
-
 /-- The H¹ Hilbert space of `(M, g)` defined as the Hausdorff completion of
 the pre-Hilbert space of smooth scalars with the Riemannian H¹ inner product.
 
@@ -57,8 +55,6 @@ noncomputable def smoothToH1Compl (g : SmoothRiemannianMetric I M) :
     (f : SmoothScalar g) :
     smoothToH1Compl (I := I) (M := M) g f = (f : H1Compl g) :=
   rfl
-
-/-! ## Sanity tests -/
 
 example (g : SmoothRiemannianMetric I M) : Type _ := H1Compl g
 

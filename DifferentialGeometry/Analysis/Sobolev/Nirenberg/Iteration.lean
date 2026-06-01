@@ -38,8 +38,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Smoothness of repeated partial derivatives -/
-
 omit [NeZero d] in
 /-- The classical `l`-partial of a smooth function `u` is itself smooth. -/
 private lemma contDiff_partial
@@ -63,11 +61,6 @@ private lemma contDiff_partial_partial
         (fun z : E => (fderiv ℝ u z) (EuclideanSpace.single l 1)) y)
           (EuclideanSpace.single i 1)) :=
   contDiff_partial (contDiff_partial hu l) i
-
-/-! ## Integration-of-derivative-equals-zero helper
-
-For a smooth function on `E` with compact support, the integral of any
-of its first partial derivatives over the whole space vanishes. -/
 
 omit [NeZero d] in
 /-- Integral of the partial derivative of a smooth, compactly supported
@@ -148,8 +141,6 @@ private lemma setIntegral_partial_eq_zero_of_compactSupport_subset
     {F : E → ℝ} (hF : ContDiff ℝ (⊤ : ℕ∞) F) (hF_supp : HasCompactSupport F)
     {Ω : Set E} (h_supp_Ω : tsupport F ⊆ Ω) (l : Fin d) :
     ∫ x in Ω, (fderiv ℝ F x) (EuclideanSpace.single l 1) = 0 := by
-  -- The partial of F has support in tsupport F ⊆ Ω, so the Ω-integral
-  -- equals the whole-space integral.
   have h_partial_tsupp : tsupport (fun x : E =>
       (fderiv ℝ F x) (EuclideanSpace.single l 1)) ⊆ Ω :=
     (tsupport_fderiv_apply_subset (𝕜 := ℝ) (EuclideanSpace.single l 1)).trans
@@ -164,8 +155,6 @@ private lemma setIntegral_partial_eq_zero_of_compactSupport_subset
       (fderiv ℝ F y) (EuclideanSpace.single l 1)) hx_notin
   rw [setIntegral_eq_integral_of_forall_compl_eq_zero h_outside_zero]
   exact integral_partial_eq_zero_of_compactSupport hF hF_supp l
-
-/-! ## Pointwise product rule for triple products -/
 
 omit [NeZero d] in
 /-- Product rule for the partial derivative of a triple product of
@@ -235,13 +224,6 @@ private lemma fderiv_binary_mul_apply
   fderiv_binary_mul_apply_diff (ha.differentiable (by simp) x)
     (hb.differentiable (by simp) x) l
 
-/-! ## The principal-integrand differentiation identity (per index pair)
-
-For each `(i, j) : Fin d × Fin d` and smooth `u, ψ` with `tsupport ψ ⊆ Ω`,
-the integrals
-`∫_Ω (∂_l a^{ij})(∂_i u)(∂_j ψ) + ∫_Ω a^{ij}(∂_i ∂_l u)(∂_j ψ) + ∫_Ω a^{ij}(∂_i u)(∂_j ∂_l ψ)`
-sum to zero. -/
-
 /-- The smoothness of the partial-product `a^{ij}(∂_i u)(∂_j ψ)` follows
 from the smoothness of its three factors. -/
 private lemma contDiff_principal_summand
@@ -271,7 +253,6 @@ private lemma hasCompactSupport_principal_summand
   have h_dψ_supp : HasCompactSupport (fun y : E =>
       (fderiv ℝ ψ y) (EuclideanSpace.single j 1)) :=
     hψ_supp.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single j 1)
-  -- Multiplying anything by a compactly supported function gives compact support.
   exact h_dψ_supp.mul_left
 
 /-- The tsupport of `a^{ij}(∂_i u)(∂_j ψ)` is contained in tsupport ψ. -/
@@ -284,14 +265,9 @@ private lemma tsupport_principal_summand_subset_tsupport_ψ
   have h_dψ_tsupp : tsupport (fun y : E =>
       (fderiv ℝ ψ y) (EuclideanSpace.single j 1)) ⊆ tsupport ψ :=
     tsupport_fderiv_apply_subset (𝕜 := ℝ) (EuclideanSpace.single j 1)
-  -- tsupport (f * g) ⊆ tsupport g (by tsupport_mul_subset_right or via direct closure).
-  -- Use closure_mono and support_mul_subset.
   refine subset_trans ?_ h_dψ_tsupp
-  -- tsupport (a · b · c) ⊆ tsupport c.
   refine subset_trans (closure_mono ?_) (subset_refl _)
   intro x hx
-  -- hx : x ∈ support (fun y => a y * b y * c y).
-  -- This means a y * b y * c y ≠ 0, so c y ≠ 0, so y ∈ support c.
   rw [Function.mem_support] at hx ⊢
   intro h0
   apply hx
@@ -361,10 +337,8 @@ private lemma principal_summand_integral_zero
   have hF_tsub : tsupport F ⊆ Ω :=
     (tsupport_principal_summand_subset_tsupport_ψ B (u := u) (ψ := ψ) i j).trans
       hψ_tsub
-  -- Integral of ∂_l F over Ω is zero.
   have hzero := setIntegral_partial_eq_zero_of_compactSupport_subset
     (F := F) (l := l) hF_smooth hF_supp hF_tsub
-  -- Pointwise expansion of ∂_l F.
   have h_pointwise : ∀ x : E,
       (fderiv ℝ F x) (EuclideanSpace.single l 1) =
         (fderiv ℝ (fun y : E => B.a y i j) x) (EuclideanSpace.single l 1) *
@@ -380,7 +354,6 @@ private lemma principal_summand_integral_zero
               (fderiv ℝ ψ y) (EuclideanSpace.single j 1)) x)
               (EuclideanSpace.single l 1) :=
     fun x => principal_summand_partial_decomp B hu hψ i j l x
-  -- Rewrite the integral of ∂_l F using the pointwise expansion.
   have h_int_eq :
       ∫ x in Ω, (fderiv ℝ F x) (EuclideanSpace.single l 1) =
         (∫ x in Ω,
@@ -400,11 +373,6 @@ private lemma principal_summand_integral_zero
     refine Filter.Eventually.of_forall ?_
     intro x; exact h_pointwise x
   rw [h_int_eq] at hzero
-  -- Split the sum-integral into three integrals.
-  -- Need integrability of each summand.
-  -- Each summand is smooth times something compactly supported in tsupport ψ.
-  -- By smoothness and compact support, each summand is integrable.
-  -- We then split via integral_add.
   have h_smooth_T1 : ContDiff ℝ (⊤ : ℕ∞) (fun x : E =>
         (fderiv ℝ (fun y : E => B.a y i j) x) (EuclideanSpace.single l 1) *
             (fderiv ℝ u x) (EuclideanSpace.single i 1) *
@@ -451,12 +419,6 @@ private lemma principal_summand_integral_zero
           (EuclideanSpace.single l 1)) :=
       contDiff_partial (contDiff_partial hψ j) l
     exact (h_a.mul h_du).mul h_dlψ_dψ
-  -- Compact support: each summand T_k is supported in tsupport ψ for k = 1, 3,
-  -- and in tsupport ∂_j ψ ⊆ tsupport ψ for k = 2.
-  -- Actually each summand has factor either ∂_j ψ or ∂_l(∂_j ψ) (compact supp).
-  -- T1 has ∂_j ψ factor → compact support.
-  -- T2 has ∂_j ψ factor → compact support.
-  -- T3 has ∂_l(∂_j ψ) factor → compact support.
   have h_supp_T1 : HasCompactSupport (fun x : E =>
         (fderiv ℝ (fun y : E => B.a y i j) x) (EuclideanSpace.single l 1) *
             (fderiv ℝ u x) (EuclideanSpace.single i 1) *
@@ -512,7 +474,6 @@ private lemma principal_summand_integral_zero
               (EuclideanSpace.single l 1))
       (volume.restrict Ω) :=
     (h_smooth_T3.continuous.integrable_of_hasCompactSupport h_supp_T3).restrict
-  -- Split integral of sum into sum of integrals.
   have hsplit_outer : ∫ x in Ω,
       ((fderiv ℝ (fun y : E => B.a y i j) x) (EuclideanSpace.single l 1) *
           (fderiv ℝ u x) (EuclideanSpace.single i 1) *
@@ -547,12 +508,6 @@ private lemma principal_summand_integral_zero
   rw [integral_add h_int_T1 h_int_T2] at hzero
   exact hzero
 
-/-! ## The zeroth-order differentiation identity
-
-For smooth `u, ψ` with `tsupport ψ ⊆ Ω` and the smooth coefficient `c`,
-the integrals `∫_Ω (∂_l c) u ψ + ∫_Ω c (∂_l u) ψ + ∫_Ω c u (∂_l ψ)` sum
-to zero. -/
-
 /-- For smooth `u, ψ` with `tsupport ψ ⊆ Ω`, the function `c · u · ψ`
 is smooth, has compact support inside `tsupport ψ`, and its partial
 derivative integrates to zero on `Ω`. -/
@@ -570,11 +525,9 @@ private lemma zeroth_summand_integral_zero
   have hF_smooth : ContDiff ℝ (⊤ : ℕ∞) F :=
     (B.smooth_c.mul hu).mul hψ
   have hF_supp : HasCompactSupport F := by
-    -- F = c * u * ψ, and ψ has compact support, so F has compact support.
     exact hψ_supp.mul_left
   have hF_tsub : tsupport F ⊆ Ω := by
     refine subset_trans ?_ hψ_tsub
-    -- tsupport F ⊆ tsupport ψ.
     refine subset_trans (closure_mono ?_) (subset_refl _)
     intro x hx
     rw [Function.mem_support] at hx ⊢
@@ -582,10 +535,8 @@ private lemma zeroth_summand_integral_zero
     apply hx
     change B.c x * u x * ψ x = 0
     rw [h0]; ring
-  -- Integral of ∂_l F over Ω is zero.
   have hzero := setIntegral_partial_eq_zero_of_compactSupport_subset
     (F := F) (l := l) hF_smooth hF_supp hF_tsub
-  -- Pointwise expansion of ∂_l F.
   have h_pointwise : ∀ x : E,
       (fderiv ℝ F x) (EuclideanSpace.single l 1) =
         (fderiv ℝ B.c x) (EuclideanSpace.single l 1) * u x * ψ x +
@@ -602,7 +553,6 @@ private lemma zeroth_summand_integral_zero
     refine Filter.Eventually.of_forall ?_
     intro x; exact h_pointwise x
   rw [h_int_eq] at hzero
-  -- Integrability of each summand.
   have h_smooth_T1 : ContDiff ℝ (⊤ : ℕ∞) (fun x : E =>
         (fderiv ℝ B.c x) (EuclideanSpace.single l 1) * u x * ψ x) := by
     have h_dlc : ContDiff ℝ (⊤ : ℕ∞) (fun x : E =>
@@ -621,7 +571,6 @@ private lemma zeroth_summand_integral_zero
         (fderiv ℝ ψ x) (EuclideanSpace.single l 1)) :=
       contDiff_partial hψ l
     exact (B.smooth_c.mul hu).mul h_dlψ
-  -- Each summand is supported in tsupport ψ → compact support.
   have h_supp_T1 : HasCompactSupport (fun x : E =>
         (fderiv ℝ B.c x) (EuclideanSpace.single l 1) * u x * ψ x) :=
     hψ_supp.mul_left
@@ -646,7 +595,6 @@ private lemma zeroth_summand_integral_zero
         B.c x * u x * (fderiv ℝ ψ x) (EuclideanSpace.single l 1))
       (volume.restrict Ω) :=
     (h_smooth_T3.continuous.integrable_of_hasCompactSupport h_supp_T3).restrict
-  -- Split integral of sum into sum of integrals.
   have hsplit_outer : ∫ x in Ω,
       ((fderiv ℝ B.c x) (EuclideanSpace.single l 1) * u x * ψ x +
         B.c x * (fderiv ℝ u x) (EuclideanSpace.single l 1) * ψ x) +
@@ -660,12 +608,6 @@ private lemma zeroth_summand_integral_zero
   rw [hsplit_outer] at hzero
   rw [integral_add h_int_T1 h_int_T2] at hzero
   exact hzero
-
-/-! ## The perturbed source `f'_l`
-
-Define `f'_l(x) := (∂_l f)(x) - (∂_l c)(x) u(x) +
-∑_{ij} ∂_j[(∂_l a^{ij})(∂_i u)](x)`. This is the smooth source against
-which `∂_l u` is a smooth weak solution of the same bilinear form `B`. -/
 
 /-- The perturbed source for the differentiated equation. Smooth, and
 the source against which `∂_l u` is a smooth weak solution of `B`. -/
@@ -688,7 +630,6 @@ private lemma contDiff_perturbedSource
     (l : Fin d) :
     ContDiff ℝ (⊤ : ℕ∞) (perturbedSource B u f l) := by
   unfold perturbedSource
-  -- Term-by-term smoothness.
   have h_dlf : ContDiff ℝ (⊤ : ℕ∞) (fun x : E =>
       (fderiv ℝ f x) (EuclideanSpace.single l 1)) :=
     contDiff_partial hf l
@@ -703,7 +644,6 @@ private lemma contDiff_perturbedSource
   intro i _
   refine ContDiff.sum ?_
   intro j _
-  -- The function (∂_l a^{ij})(∂_i u) is smooth, so its ∂_j is smooth.
   have h_dla : ContDiff ℝ (⊤ : ℕ∞) (fun y : E =>
       (fderiv ℝ (fun z : E => B.a z i j) y) (EuclideanSpace.single l 1)) :=
     contDiff_partial (B.contDiff_a i j) l
@@ -711,11 +651,6 @@ private lemma contDiff_perturbedSource
       (fderiv ℝ u y) (EuclideanSpace.single i 1)) :=
     contDiff_partial hu i
   exact contDiff_partial (h_dla.mul h_diu) j
-
-/-! ## IBP applications via the published `HasWeakPartialDeriv.of_contDiff`
-
-For smooth `f` on `E` and test `ψ` on `Ω`, integration by parts yields
-`∫_Ω f · (∂_l ψ) = -∫_Ω (∂_l f) · ψ`. -/
 
 omit [NeZero d] in
 /-- IBP for a smooth function against a test function. -/
@@ -727,15 +662,10 @@ private lemma ibp_smooth_against_test
     (l : Fin d) :
     ∫ x in Ω, f x * (fderiv ℝ ψ x) (EuclideanSpace.single l 1) =
       -∫ x in Ω, (fderiv ℝ f x) (EuclideanSpace.single l 1) * ψ x := by
-  -- HasWeakPartialDeriv.of_contDiff says ∂_l f is the weak partial of f.
   have hf_C1 : ContDiff ℝ 1 f := hf.of_le (by norm_cast)
   have h_weak := DeGiorgi.HasWeakPartialDeriv.of_contDiff (d := d) hΩ
     (i := l) (f := f) hf_C1
   exact h_weak ψ hψ hψ_supp hψ_tsub
-
-/-! ## The principal correction IBP
-
-Apply IBP to `(∂_l a^{ij})(∂_i u)` (smooth) against `∂_j ψ` (test). -/
 
 /-- IBP for the smooth function `(∂_l a^{ij})(∂_i u)` against `∂_j ψ`. -/
 private lemma ibp_principal_correction
@@ -752,7 +682,6 @@ private lemma ibp_principal_correction
           (fderiv ℝ (fun z : E => B.a z i j) y) (EuclideanSpace.single l 1) *
             (fderiv ℝ u y) (EuclideanSpace.single i 1)) x)
             (EuclideanSpace.single j 1) * ψ x := by
-  -- Smoothness of g := (∂_l a^{ij})(∂_i u).
   have h_dla : ContDiff ℝ (⊤ : ℕ∞) (fun y : E =>
       (fderiv ℝ (fun z : E => B.a z i j) y) (EuclideanSpace.single l 1)) :=
     contDiff_partial (B.contDiff_a i j) l
@@ -763,8 +692,6 @@ private lemma ibp_principal_correction
       (fderiv ℝ (fun z : E => B.a z i j) y) (EuclideanSpace.single l 1) *
         (fderiv ℝ u y) (EuclideanSpace.single i 1)) := h_dla.mul h_diu
   exact ibp_smooth_against_test (l := j) hg_smooth hΩ hψ hψ_supp hψ_tsub
-
-/-! ## Bilinear identity for `∂_l u` -/
 
 /-- The integrability needed for `B.bilin u v` to split into principal +
 zeroth-order parts: each summand of the bilinear-form integrand on `Ω`
@@ -780,7 +707,6 @@ private lemma bilin_integrand_pieces_integrable
         (fderiv ℝ u x) (EuclideanSpace.single i 1) *
         (fderiv ℝ v x) (EuclideanSpace.single j 1)) (volume.restrict Ω)) := by
   refine ⟨?_, ?_, ?_⟩
-  -- principalIntegrand u v is continuous and supported in tsupport v.
   · have h_cont : Continuous (B.principalIntegrand u v) :=
       B.continuous_principalIntegrand (hu.of_le (by norm_cast)) (hv.of_le (by norm_cast))
     have h_supp : HasCompactSupport (B.principalIntegrand u v) := by
@@ -788,12 +714,8 @@ private lemma bilin_integrand_pieces_integrable
       have h_dv_supp : ∀ j : Fin d, HasCompactSupport (fun x : E =>
           (fderiv ℝ v x) (EuclideanSpace.single j 1)) :=
         fun j => hv_supp.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single j 1)
-      -- The principal integrand is a sum of products, each with ∂_j v factor.
-      -- So each product has compact support; sum of compactly supported
-      -- functions has compact support.
       apply HasCompactSupport.intro' hv_supp (isClosed_tsupport _)
       intro x hx
-      -- x ∉ tsupport v, so v ≡ 0 in a neighborhood, so ∂_j v(x) = 0 for all j.
       have hx_eq : v =ᶠ[𝓝 x] 0 :=
         (isClosed_tsupport (f := v)).isOpen_compl.eventually_mem hx |>.mono
           (fun y hy => image_eq_zero_of_notMem_tsupport hy)
@@ -809,13 +731,11 @@ private lemma bilin_integrand_pieces_integrable
       rw [h_dv_zero j]
       ring
     exact (h_cont.integrable_of_hasCompactSupport h_supp).restrict
-  -- c · u · v continuous and supported in tsupport v.
   · have h_cont : Continuous (fun x => B.c x * u x * v x) :=
       (B.continuous_c.mul hu.continuous).mul hv.continuous
     have h_supp : HasCompactSupport (fun x => B.c x * u x * v x) :=
       hv_supp.mul_left
     exact (h_cont.integrable_of_hasCompactSupport h_supp).restrict
-  -- Each (i, j) summand a^{ij} · ∂_i u · ∂_j v continuous, supported in tsupport v.
   · intro i j
     have h_cont : Continuous (fun x : E =>
         B.a x i j *
@@ -851,9 +771,7 @@ private lemma bilin_decomp
   unfold SmoothEllipticBilinearForm.bilin
   rw [integral_add h_princ_int h_zero_int]
   congr 1
-  -- ∫ B.principalIntegrand u v = ∑_{ij} ∫ a^{ij}(∂_i u)(∂_j v).
   unfold SmoothEllipticBilinearForm.principalIntegrand
-  -- ∫ ∑_i ∑_j a^{ij}(∂_i u)(∂_j v) = ∑_i ∑_j ∫ a^{ij}(∂_i u)(∂_j v).
   rw [integral_finset_sum (s := Finset.univ) (f := fun (i : Fin d) (x : E) =>
       ∑ j : Fin d, B.a x i j *
         (fderiv ℝ u x) (EuclideanSpace.single i 1) *
@@ -867,8 +785,6 @@ private lemma bilin_decomp
         (fderiv ℝ v x) (EuclideanSpace.single j 1))
     (fun j _ => h_summand_int i j)]
 
-/-! ## Symmetry of mixed second partials for smooth functions -/
-
 omit [NeZero d] in
 /-- Symmetry of mixed second partials. For smooth `u`,
 `(fderiv ℝ (∂_i u) x) e_l = (fderiv ℝ (∂_l u) x) e_i`. -/
@@ -880,22 +796,17 @@ private lemma mixed_partial_symm
       (fderiv ℝ (fun y : E =>
         (fderiv ℝ u y) (EuclideanSpace.single l 1)) x)
         (EuclideanSpace.single i 1) := by
-  -- The function `y ↦ (fderiv u y)(e_i)` is `(eval_e_i) ∘ (fderiv u)`.
-  -- The chain rule: fderiv (linear ∘ smooth) x = linear ∘ (fderiv smooth x).
   set f' : E → (E →L[ℝ] ℝ) := fderiv ℝ u with hf'_def
   set f'' : E →L[ℝ] (E →L[ℝ] ℝ) := fderiv ℝ f' x with hf''_def
-  -- HasFDerivAt for u and (fderiv ℝ u).
   have hu_diff : Differentiable ℝ u := hu.differentiable (by simp)
   have hf'_diff : Differentiable ℝ f' :=
     (hu.fderiv_right (m := (⊤ : ℕ∞)) (by simp)).differentiable (by simp)
   have h_hasFDerivAt_u : ∀ y : E, HasFDerivAt u (f' y) y :=
     fun y => (hu_diff y).hasFDerivAt
   have h_hasFDerivAt_f' : HasFDerivAt f' f'' x := (hf'_diff x).hasFDerivAt
-  -- Apply symmetry: f''(v)(w) = f''(w)(v).
   have h_symm := second_derivative_symmetric (𝕜 := ℝ) (f' := f')
     h_hasFDerivAt_u h_hasFDerivAt_f' (EuclideanSpace.single l 1)
     (EuclideanSpace.single i 1)
-  -- Chain rule: derivatives of (apply e_i) ∘ f' and (apply e_l) ∘ f'.
   have h_apply_e_i : HasFDerivAt
       (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single i (1 : ℝ)))
       (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single i (1 : ℝ)))
@@ -924,8 +835,6 @@ private lemma mixed_partial_symm
   simp only [ContinuousLinearMap.apply_apply]
   exact h_symm
 
-/-! ## The smooth-weak-solution status of `∂_l u` -/
-
 /-- The bilinear identity: `B.bilin (∂_l u) ψ = ∫_Ω f'_l · ψ` where
 `f'_l = perturbedSource B u f l`. The proof combines:
 * `principal_summand_integral_zero` summed over `(i, j)`,
@@ -944,10 +853,8 @@ private theorem bilin_partial_eq_integral_perturbed
       ∫ x in Ω, perturbedSource B u f l x * ψ x := by
   classical
   obtain ⟨hu, hu_test⟩ := h_weak
-  -- ∂_l u is smooth.
   have hu_l : ContDiff ℝ (⊤ : ℕ∞) (fun y : E =>
       (fderiv ℝ u y) (EuclideanSpace.single l 1)) := contDiff_partial hu l
-  -- ∂_l ψ is smooth, has compact support, tsupport in Ω.
   have hψ_l : ContDiff ℝ (⊤ : ℕ∞) (fun y : E =>
       (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) := contDiff_partial hψ l
   have hψ_l_supp : HasCompactSupport (fun y : E =>
@@ -957,21 +864,16 @@ private theorem bilin_partial_eq_integral_perturbed
       (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) ⊆ Ω :=
     (tsupport_fderiv_apply_subset (𝕜 := ℝ) (EuclideanSpace.single l 1)).trans
       hψ_tsub
-  -- Decompose B.bilin (∂_l u) ψ.
   have h_lhs := bilin_decomp B hu_l hψ hψ_supp
-  -- Decompose B.bilin u (∂_l ψ).
   have h_orig := bilin_decomp B hu hψ_l hψ_l_supp
-  -- Original weak equation applied to test ∂_l ψ.
   have h_orig_eq : B.bilin u (fun y : E =>
         (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) =
       ∫ x in Ω, f x * (fderiv ℝ ψ x) (EuclideanSpace.single l 1) :=
     hu_test (fun y : E => (fderiv ℝ ψ y) (EuclideanSpace.single l 1))
       hψ_l hψ_l_supp hψ_l_tsub
-  -- IBP on f against ∂_l ψ.
   have h_ibp_f : ∫ x in Ω, f x * (fderiv ℝ ψ x) (EuclideanSpace.single l 1) =
       -∫ x in Ω, (fderiv ℝ f x) (EuclideanSpace.single l 1) * ψ x :=
     ibp_smooth_against_test hf hΩ hψ hψ_supp hψ_tsub l
-  -- IBP on (∂_l a^{ij})(∂_i u) against ∂_j ψ for each (i, j).
   have h_ibp_corr : ∀ i j : Fin d,
       ∫ x in Ω,
         (fderiv ℝ (fun y : E => B.a y i j) x) (EuclideanSpace.single l 1) *
@@ -982,37 +884,10 @@ private theorem bilin_partial_eq_integral_perturbed
             (fderiv ℝ u y) (EuclideanSpace.single i 1)) x)
             (EuclideanSpace.single j 1) * ψ x :=
     fun i j => ibp_principal_correction hΩ B hu hψ hψ_supp hψ_tsub l i j
-  -- Principal summand integral is zero for each (i, j).
   have h_princ_zero := fun i j =>
     principal_summand_integral_zero B hu hψ hψ_supp hψ_tsub i j l
-  -- Zeroth summand integral is zero.
   have h_zero_zero := zeroth_summand_integral_zero B hu hψ hψ_supp hψ_tsub l
-  -- Now compute. The strategy:
-  -- B.bilin (∂_l u) ψ
-  -- = ∑_{ij} ∫ a^{ij}(∂_i ∂_l u)(∂_j ψ) + ∫ c (∂_l u) ψ                 [bilin_decomp]
-  -- = -∑_{ij} ∫ (∂_l a^{ij})(∂_i u)(∂_j ψ) - ∑_{ij} ∫ a^{ij}(∂_i u)(∂_j ∂_l ψ)
-  --     [from principal_summand_integral_zero, rearranged]
-  --   - ∫ (∂_l c) u ψ - ∫ c u (∂_l ψ)
-  --     [from zeroth_summand_integral_zero, rearranged]
-  -- = -∑_{ij} ∫ (∂_l a^{ij})(∂_i u)(∂_j ψ) - B.bilin u (∂_l ψ)
-  --     [combine principal and zeroth via bilin_decomp on (u, ∂_l ψ)]
-  --   - ∫ (∂_l c) u ψ
-  -- = -∑_{ij} ∫ (∂_l a^{ij})(∂_i u)(∂_j ψ) - ∫ f · (∂_l ψ) - ∫ (∂_l c) u ψ
-  --     [original weak equation]
-  -- = -∑_{ij} ∫ (∂_l a^{ij})(∂_i u)(∂_j ψ) + ∫ (∂_l f) ψ - ∫ (∂_l c) u ψ
-  --     [IBP on f]
-  -- = ∑_{ij} ∫ ∂_j[(∂_l a^{ij})(∂_i u)] ψ + ∫ (∂_l f) ψ - ∫ (∂_l c) u ψ
-  --     [IBP on (∂_l a^{ij})(∂_i u)]
-  -- = ∫ perturbedSource B u f l · ψ                                       [definition]
-  -- Step 1: rewrite B.bilin via bilin_decomp.
   rw [h_lhs]
-  -- Use principal_summand_integral_zero to express ∫ a^{ij}(∂_i ∂_l u)(∂_j ψ).
-  -- We have: ∑_{ij} ∫ ((∂_l a^{ij})(∂_i u)(∂_j ψ) + a^{ij}(∂_i ∂_l u)(∂_j ψ) +
-  --                    a^{ij}(∂_i u)(∂_j ∂_l ψ)) = 0  (per (i, j))
-  -- So: ∫ a^{ij}(∂_i ∂_l u)(∂_j ψ) = -∫ (∂_l a^{ij})(∂_i u)(∂_j ψ) - ∫ a^{ij}(∂_i u)(∂_j ∂_l ψ).
-  -- Actually, we want to substitute that into our LHS.
-  -- Express ∫ a^{ij}(∂_i ∂_l u)(∂_j ψ) using h_princ_zero:
-  -- T1 + T2 + T3 = 0 → T2 = -T1 - T3.
   have h_princ_substitute : ∀ i j : Fin d, ∫ x in Ω, B.a x i j *
         (fderiv ℝ (fun y : E =>
           (fderiv ℝ u y) (EuclideanSpace.single i 1)) x)
@@ -1030,9 +905,6 @@ private theorem bilin_partial_eq_integral_perturbed
     intro i j
     have := h_princ_zero i j
     linarith
-  -- Now we have ∫ a^{ij}(∂_l ∂_i u)(∂_j ψ) on the LHS (from `h_princ_substitute`)
-  -- but `B.bilin (∂_l u) ψ` involves ∫ a^{ij}(∂_i (∂_l u))(∂_j ψ) (via bilin_decomp).
-  -- These are equal pointwise by `mixed_partial_symm`.
   have h_lhs_swap : ∀ i j : Fin d,
       ∫ x in Ω, B.a x i j *
         (fderiv ℝ (fun y : E =>
@@ -1048,8 +920,6 @@ private theorem bilin_partial_eq_integral_perturbed
     refine integral_congr_ae ?_
     refine Filter.Eventually.of_forall ?_
     intro x
-    -- Apply mixed_partial_symm: (fderiv (∂_l u) x) e_i = (fderiv (∂_i u) x) e_l.
-    -- The LHS has (fderiv (∂_l u) x) e_i; we want (fderiv (∂_i u) x) e_l.
     change B.a x i j * (fderiv ℝ (fun y : E =>
           (fderiv ℝ u y) (EuclideanSpace.single l 1)) x)
           (EuclideanSpace.single i 1) *
@@ -1059,16 +929,6 @@ private theorem bilin_partial_eq_integral_perturbed
           (EuclideanSpace.single l 1) *
         (fderiv ℝ ψ x) (EuclideanSpace.single j 1)
     rw [(mixed_partial_symm hu x i l).symm]
-  -- Now plug it all together. The main observation:
-  -- B.bilin (∂_l u) ψ = ∑_{ij} ∫ a^{ij}(∂_i ∂_l u)(∂_j ψ) + ∫ c (∂_l u) ψ
-  --                  = ∑_{ij} ∫ a^{ij}(∂_l ∂_i u)(∂_j ψ) + ∫ c (∂_l u) ψ  [Schwarz]
-  --                  = ∑_{ij} (-∫ (∂_l a^{ij})(∂_i u)(∂_j ψ) - ∫ a^{ij}(∂_i u)(∂_l ∂_j ψ))
-  --                    + ∫ c (∂_l u) ψ                                     [h_princ_substitute]
-  -- Then we use B.bilin u (∂_l ψ) decomposition + zeroth_summand_integral_zero.
-  -- It's simpler to compute the diff (LHS - RHS_target) = 0 step-by-step.
-  -- Goal after rw [h_lhs] is now of the form:
-  --   ∑_{ij} ∫ a^{ij}(∂_l u via ∂_i)(∂_j ψ) + ∫ c (∂_l u) ψ = ∫ perturbedSource · ψ
-  -- We rewrite the principal sum to use the swapped form via h_lhs_swap.
   have h_lhs_swap_sum :
       (∑ i : Fin d, ∑ j : Fin d, ∫ x in Ω, B.a x i j *
         (fderiv ℝ (fun y : E =>
@@ -1086,13 +946,6 @@ private theorem bilin_partial_eq_integral_perturbed
     intro j _
     exact h_lhs_swap i j
   rw [h_lhs_swap_sum]
-  -- Now the LHS of the goal is:
-  --   ∑_{ij} ∫ a^{ij}(∂_l ∂_i u)(∂_j ψ) + ∫ c (∂_l u) ψ
-  -- Substituting via h_princ_substitute:
-  --   = ∑_{ij} (-∫ (∂_l a^{ij})(∂_i u)(∂_j ψ) - ∫ a^{ij}(∂_i u)(∂_l (∂_j ψ)))
-  --     + ∫ c (∂_l u) ψ
-  -- Sum-rewrite: pull each integral out of the sum.
-  -- I'll set up auxiliary sums for clarity.
   set S₁ : ℝ := ∑ i : Fin d, ∑ j : Fin d, ∫ x in Ω,
       (fderiv ℝ (fun y : E => B.a y i j) x) (EuclideanSpace.single l 1) *
       (fderiv ℝ u x) (EuclideanSpace.single i 1) *
@@ -1108,7 +961,6 @@ private theorem bilin_partial_eq_integral_perturbed
       (fderiv ℝ ψ x) (EuclideanSpace.single l 1) with hZ₂_def
   set Z₃ : ℝ := ∫ x in Ω, (fderiv ℝ B.c x) (EuclideanSpace.single l 1) *
       u x * ψ x with hZ₃_def
-  -- Equation: principal sum (after substitution) = -S₁ - S₂.
   have h_principal_sum_eq :
       (∑ i : Fin d, ∑ j : Fin d, ∫ x in Ω, B.a x i j *
         (fderiv ℝ (fun y : E =>
@@ -1116,7 +968,6 @@ private theorem bilin_partial_eq_integral_perturbed
           (EuclideanSpace.single l 1) *
         (fderiv ℝ ψ x) (EuclideanSpace.single j 1)) = -S₁ - S₂ := by
     rw [hS₁_def, hS₂_def]
-    -- Use h_princ_substitute term-by-term.
     have hsubst : ∀ i j : Fin d,
         (∫ x in Ω, B.a x i j *
           (fderiv ℝ (fun y : E =>
@@ -1132,42 +983,18 @@ private theorem bilin_partial_eq_integral_perturbed
             (fderiv ℝ (fun y : E =>
               (fderiv ℝ ψ y) (EuclideanSpace.single j 1)) x)
               (EuclideanSpace.single l 1)) := h_princ_substitute
-    -- Sum both sides.
     rw [Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl
       (fun j _ => hsubst i j))]
-    -- Now: ∑_i ∑_j ((-A_ij) - B_ij) = -∑_i ∑_j A_ij - ∑_i ∑_j B_ij = -S₁ - S₂.
     simp only [Finset.sum_sub_distrib, Finset.sum_neg_distrib]
   rw [h_principal_sum_eq]
-  -- Now: -S₁ - S₂ + ∫ c (∂_l u) ψ = ∫ perturbedSource · ψ.
-  -- Note that ∫ c (∂_l u) ψ = Z₁.
-  -- Using h_zero_zero: Z₃ + Z₁ + Z₂ = 0, so Z₁ = -Z₃ - Z₂.
   have h_Z : Z₁ = -Z₃ - Z₂ := by
     rw [hZ₁_def, hZ₂_def, hZ₃_def]
     have := h_zero_zero
     linarith
   change -S₁ - S₂ + Z₁ = ∫ x in Ω, perturbedSource B u f l x * ψ x
   rw [h_Z]
-  -- LHS = -S₁ - S₂ + (-Z₃ - Z₂) = -S₁ - S₂ - Z₃ - Z₂.
-  -- Now we need to show this equals ∫ perturbedSource · ψ.
-  -- Recall: B.bilin u (∂_l ψ) = ∑_{ij} ∫ a^{ij}(∂_i u)(∂_j ∂_l ψ) + ∫ c · u · ∂_l ψ
-  --                            = S₂ + Z₂.
-  -- And B.bilin u (∂_l ψ) = ∫_Ω f · ∂_l ψ = -∫_Ω (∂_l f) ψ (by IBP).
-  -- So S₂ + Z₂ = -∫_Ω (∂_l f) ψ, i.e., -S₂ - Z₂ = ∫_Ω (∂_l f) ψ.
-  -- Combining: LHS = -S₁ - Z₃ + ∫_Ω (∂_l f) ψ.
-  -- Goal RHS: ∫ perturbedSource · ψ
-  --        = ∫ ((∂_l f)(x) - (∂_l c)(x) u(x) +
-  --             ∑_{ij} ∂_j[(∂_l a^{ij})(∂_i u)](x)) * ψ(x)
-  --        = ∫_Ω (∂_l f) ψ - Z₃ + ∑_{ij} ∫_Ω ∂_j[(∂_l a^{ij})(∂_i u)] · ψ
-  -- And ∫_Ω ∂_j[(∂_l a^{ij})(∂_i u)] · ψ = -∫_Ω (∂_l a^{ij})(∂_i u)(∂_j ψ) (IBP).
-  -- So ∑_{ij} ∫_Ω ∂_j[(∂_l a^{ij})(∂_i u)] · ψ = -S₁.
-  -- Therefore RHS = ∫_Ω (∂_l f) ψ - Z₃ - S₁ = -S₁ - Z₃ + ∫_Ω (∂_l f) ψ = LHS.
-  -- Now I need to formalize this calculation.
-  -- Using h_orig (decomp of B.bilin u (∂_l ψ)) and h_orig_eq:
   have h_orig_combined : S₂ + Z₂ =
       ∫ x in Ω, f x * (fderiv ℝ ψ x) (EuclideanSpace.single l 1) := by
-    -- B.bilin u (∂_l ψ) = ∑_{ij} ∫ a^{ij}(∂_i u)(∂_j(∂_l ψ)) + ∫ c · u · (∂_l ψ).
-    -- S₂ = ∑_{ij} ∫ a^{ij}(∂_i u) * (∂_l (∂_j ψ)). Same by Schwarz on ψ.
-    -- Z₂ = ∫ c · u · (∂_l ψ). Same.
     have h_S₂_swap : S₂ = ∑ i : Fin d, ∑ j : Fin d, ∫ x in Ω, B.a x i j *
         (fderiv ℝ u x) (EuclideanSpace.single i 1) *
         (fderiv ℝ (fun y : E =>
@@ -1194,11 +1021,9 @@ private theorem bilin_partial_eq_integral_perturbed
         (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) := by
       rw [h_orig, h_S₂_swap, hZ₂_def]
     rw [h_eq, h_orig_eq]
-  -- Apply IBP (h_ibp_f):
   have h_S₂_Z₂ : S₂ + Z₂ =
       -∫ x in Ω, (fderiv ℝ f x) (EuclideanSpace.single l 1) * ψ x := by
     rw [h_orig_combined, h_ibp_f]
-  -- Define the IBP-applied form for the principal correction sum.
   have h_S₁_eq_neg_corr : S₁ = -(∑ i : Fin d, ∑ j : Fin d,
       ∫ x in Ω, (fderiv ℝ (fun y : E =>
         (fderiv ℝ (fun z : E => B.a z i j) y) (EuclideanSpace.single l 1) *
@@ -1213,7 +1038,6 @@ private theorem bilin_partial_eq_integral_perturbed
               (fderiv ℝ (fun y : E => B.a y i j) x) (EuclideanSpace.single l 1) *
               (fderiv ℝ u x) (EuclideanSpace.single i 1) *
               (fderiv ℝ ψ x) (EuclideanSpace.single j 1))) by simp]
-    -- Each term = - (∫ ∂_j [(∂_l a^{ij})(∂_i u)] · ψ).
     rw [show (∑ i : Fin d, ∑ j : Fin d, -(-(∫ x in Ω,
               (fderiv ℝ (fun y : E => B.a y i j) x) (EuclideanSpace.single l 1) *
               (fderiv ℝ u x) (EuclideanSpace.single i 1) *
@@ -1231,19 +1055,7 @@ private theorem bilin_partial_eq_integral_perturbed
       have h := h_ibp_corr i j
       linarith]
     simp only [Finset.sum_neg_distrib]
-  -- Rewrite S₁ using h_S₁_eq_neg_corr.
   rw [h_S₁_eq_neg_corr]
-  -- Now LHS = -(-(∑_{ij} ∫ ∂_j[(∂_l a^{ij})(∂_i u)] · ψ)) - S₂ - Z₃ - Z₂.
-  -- = ∑_{ij} ∫ ∂_j[(∂_l a^{ij})(∂_i u)] · ψ - S₂ - Z₃ - Z₂.
-  -- Use h_S₂_Z₂: -S₂ - Z₂ = ∫ (∂_l f) ψ.
-  -- So LHS = ∑_{ij} ∫ ∂_j[(∂_l a^{ij})(∂_i u)] · ψ + ∫ (∂_l f) ψ - Z₃.
-  -- This should equal ∫ perturbedSource · ψ.
-  -- The integrand pointwise is (∂_l f)(x) - (∂_l c)(x) u(x) + (sum_ij ...).
-  -- ∫ this · ψ = ∫ (∂_l f) ψ - ∫ (∂_l c) u ψ + ∑_{ij} ∫ ∂_j[...] ψ.
-  -- Rewrite ∫ ((P - Q) + R) ψ = ∫ P ψ - ∫ Q ψ + ∫ R ψ.
-  -- I'll establish this via integral_add and integral_sub with appropriate
-  -- integrability witnesses.
-  -- Smooth functions:
   have h_dlf : ContDiff ℝ (⊤ : ℕ∞) (fun x : E =>
       (fderiv ℝ f x) (EuclideanSpace.single l 1)) :=
     contDiff_partial hf l
@@ -1259,9 +1071,6 @@ private theorem bilin_partial_eq_integral_perturbed
         perturbedSource B u f l x * ψ x) := hψ_supp.mul_left
     exact ((h_pert_smooth.continuous.mul hψ.continuous).integrable_of_hasCompactSupport
       h_supp).restrict
-  -- Let me handle the integral directly using a single congruence step.
-  -- Strategy: show LHS and RHS pointwise differ from a reference quantity.
-  -- Here, the simplest is to manipulate the integral.
   have h_pert_decomp : ∫ x in Ω, perturbedSource B u f l x * ψ x =
       (∫ x in Ω, (fderiv ℝ f x) (EuclideanSpace.single l 1) * ψ x) -
       (∫ x in Ω, (fderiv ℝ B.c x) (EuclideanSpace.single l 1) * u x * ψ x) +
@@ -1270,7 +1079,6 @@ private theorem bilin_partial_eq_integral_perturbed
           (fderiv ℝ (fun z : E => B.a z i j) y) (EuclideanSpace.single l 1) *
             (fderiv ℝ u y) (EuclideanSpace.single i 1)) x)
           (EuclideanSpace.single j 1) * ψ x := by
-    -- Expand the integrand: (P - Q + R) * ψ = P*ψ - Q*ψ + R*ψ.
     have hpw : ∀ x : E, perturbedSource B u f l x * ψ x =
         (fderiv ℝ f x) (EuclideanSpace.single l 1) * ψ x -
         (fderiv ℝ B.c x) (EuclideanSpace.single l 1) * u x * ψ x +
@@ -1291,7 +1099,6 @@ private theorem bilin_partial_eq_integral_perturbed
       refine integral_congr_ae ?_
       refine Filter.Eventually.of_forall hpw
     rw [h_int_eq]
-    -- Now distribute integral over add/sub. Need integrability.
     have h_T1_int : Integrable (fun x : E =>
         (fderiv ℝ f x) (EuclideanSpace.single l 1) * ψ x)
         (volume.restrict Ω) :=
@@ -1350,8 +1157,6 @@ private theorem bilin_partial_eq_integral_perturbed
       rw [heq]
       exact integrable_finset_sum _
         (fun i _ => integrable_finset_sum _ (fun j _ => h_corr_int i j))
-    -- Goal: ∫ (T1 - T2 + R*ψ) = (∫T1 - ∫T2) + ∑∑ ∫(...)·ψ
-    -- Strategy: re-express the integrand in form where add/sub work.
     have h_form_eq : (fun x : E =>
           (fderiv ℝ f x) (EuclideanSpace.single l 1) * ψ x -
           (fderiv ℝ B.c x) (EuclideanSpace.single l 1) * u x * ψ x +
@@ -1402,10 +1207,6 @@ private theorem bilin_partial_eq_integral_perturbed
           (EuclideanSpace.single j 1) * ψ x) (volume.restrict Ω) :=
       integrable_finset_sum _
         (fun i _ => integrable_finset_sum _ (fun j _ => h_corr_int i j))
-    -- Now: LHS_integral = ∫ (T1 - T2) + ∫ R_sum
-    --                   = (∫T1 - ∫T2) + ∫ R_sum
-    -- where R_sum = ∑_{ij} R_{ij}.
-    -- ∫ R_sum = ∑_{ij} ∫ R_{ij} (integral_finset_sum twice).
     have hLHS : ∫ x in Ω,
           (fderiv ℝ f x) (EuclideanSpace.single l 1) * ψ x -
           (fderiv ℝ B.c x) (EuclideanSpace.single l 1) * u x * ψ x +
@@ -1435,11 +1236,6 @@ private theorem bilin_partial_eq_integral_perturbed
     intro i _
     rw [integral_finset_sum _ (fun j _ => h_corr_int i j)]
   rw [h_pert_decomp]
-  -- Now use h_S₂_Z₂: -S₂ - Z₂ = ∫_Ω (∂_l f) ψ.
-  -- LHS: -(-(...sum...)) - S₂ - Z₃ - Z₂
-  -- Simplify: ...sum... - S₂ - Z₃ - Z₂
-  -- Using -S₂ - Z₂ = ∫ (∂_l f) ψ:
-  -- LHS = ...sum... + (∫ (∂_l f) ψ) - Z₃
   change -(-(∑ i : Fin d, ∑ j : Fin d, ∫ x in Ω,
         (fderiv ℝ (fun y : E =>
           (fderiv ℝ (fun z : E => B.a z i j) y) (EuclideanSpace.single l 1) *
@@ -1452,14 +1248,10 @@ private theorem bilin_partial_eq_integral_perturbed
           (fderiv ℝ (fun z : E => B.a z i j) y) (EuclideanSpace.single l 1) *
             (fderiv ℝ u y) (EuclideanSpace.single i 1)) x)
           (EuclideanSpace.single j 1) * ψ x
-  -- The Z₃ on LHS is ∫ (∂_l c)(x) * u(x) * ψ(x).
-  -- The integral on RHS (second) is ∫ (∂_l c)(x) * u(x) * ψ(x).
-  -- Match.
   have hZ₃_explicit : Z₃ =
       ∫ x in Ω, (fderiv ℝ B.c x) (EuclideanSpace.single l 1) * u x * ψ x := by
     rw [hZ₃_def]
   rw [hZ₃_explicit]
-  -- Move things around.
   linarith
 
 /-- **Differentiated weak-solution identity.** For a smooth weak solution
@@ -1479,8 +1271,6 @@ theorem partial_smooth_weak_solution
   refine ⟨contDiff_partial h_weak.1 l, ?_⟩
   intro ψ hψ hψ_supp hψ_tsub
   exact bilin_partial_eq_integral_perturbed hΩ B h_weak hf hψ hψ_supp hψ_tsub l
-
-/-! ## Iterated `H²` regularity for smooth solutions -/
 
 /-- For a smooth weak solution `u` of `B(u, ·) = ⟨f, ·⟩` and a direction
 `l : Fin d`, the partial `∂_l u` lies in `H²_loc` with a quantitative
@@ -1516,16 +1306,13 @@ theorem partial_u_in_h2_loc
                 ∂(volume : Measure E) +
               ∫ x in Ω', (perturbedSource B u f l x)^2 ∂(volume : Measure E)) := by
   classical
-  -- Apply partial_smooth_weak_solution to get B.IsSmoothWeakSolution (∂_l u) (f'_l).
   have h_part_weak : B.IsSmoothWeakSolution
       (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single l 1))
       (perturbedSource B u f l) :=
     partial_smooth_weak_solution hΩ B h_weak hf l
-  -- f'_l ∈ L²_loc (since smooth → continuous → L² on compact closure).
   have h_pert_l2 : ∀ {Ω' : Set E}, IsCompact (closure Ω') →
       MemLp (perturbedSource B u f l) 2 (volume.restrict Ω') := by
     intro Ω' hΩ'_cc
-    -- Smooth perturbedSource → continuous → bounded on compact closure → L².
     have h_smooth : ContDiff ℝ (⊤ : ℕ∞) (perturbedSource B u f l) :=
       contDiff_perturbedSource B h_weak.1 hf l
     have h_cont : Continuous (perturbedSource B u f l) := h_smooth.continuous
@@ -1537,7 +1324,6 @@ theorem partial_u_in_h2_loc
       exact h_volume_lt_top
     obtain ⟨M, hM⟩ := hΩ'_cc.bddAbove_image h_cont.abs.continuousOn
     refine MemLp.of_bound h_cont.aestronglyMeasurable (max M 0) ?_
-    -- The bound holds for x ∈ Ω' ⊆ closure Ω'. Use ae_restrict_iff.
     rw [ae_restrict_iff (μ := volume) (s := Ω')
       ((isClosed_le (h_cont.norm) continuous_const).measurableSet)]
     refine Filter.Eventually.of_forall ?_
@@ -1546,16 +1332,11 @@ theorem partial_u_in_h2_loc
     have h := hM (Set.mem_image_of_mem _ hx_closure)
     rw [Real.norm_eq_abs]
     exact h.trans (le_max_left _ _)
-  -- Apply h2_loc_smooth_solution to (∂_l u, perturbedSource). The engine's
-  -- constant is independent of the solution data; specialise it to the
-  -- partial-derivative weak solution and the direction pair.
   obtain ⟨C, hC_nn, h_eng⟩ := h2_loc_smooth_solution (d := d) B
     hΩ'' hΩ''_compact_closure hΩ''_in_Ω h_room
   intro i k
   obtain ⟨g, hg_memLp, hg_weak, Ω', hΩ'_open, hΩ''_in_Ω', hΩ'_in,
     hΩ'_compact, hbound⟩ := h_eng h_part_weak h_pert_l2 i k
-  -- Translate the conclusion: ∂_i (∂_l u) is the same as
-  -- (fderiv (∂_l u) y) (e_i) by definition.
   exact ⟨g, hg_memLp, hg_weak, Ω', hΩ'_open, hΩ''_in_Ω', hΩ'_in,
     hΩ'_compact, C, hC_nn, hbound⟩
 

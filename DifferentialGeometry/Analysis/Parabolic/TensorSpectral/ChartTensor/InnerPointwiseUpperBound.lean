@@ -110,18 +110,14 @@ theorem exists_tensorInnerPointwise_chartRSTwist_upper_bound_on_pouTsupport
               (chartRSTwist (I := I) (M := M) α b r s T) ≤
             C * ‖T‖ ^ 2 := by
   classical
-  -- Extract the chart-frame upper bound.
   obtain ⟨C, hC_nn, h_chart⟩ :=
     exists_chartTensorInnerPointwise_rs_model_upper_bound_on_pouTsupport
       (I := I) (M := M) (E := E) g r s α
   refine ⟨C, hC_nn, ?_⟩
   intro b hb T
-  -- `tsupport ⊆ baseSet` provides the bridge hypothesis.
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     pouTsupport_subset_baseSet (I := I) (M := M) α hb
-  -- Apply the chart-frame upper bound at `T`.
   have h := h_chart b hb T
-  -- Rewrite the chart-frame diagonal value via the bridge identity.
   rw [chartTensorInnerPointwise_rs_model_eq_tensorInnerPointwise
       (I := I) (M := M) g r s α hb_base T T] at h
   exact h
@@ -147,7 +143,6 @@ theorem exists_tensorInnerPointwise_upper_bound_via_chartRSTwistInv_norm_sq_on_p
           tensorInnerPointwise (I := I) (M := M) g r s b S S ≤
             C * ‖chartRSTwistInv (I := I) (M := M) α b r s S‖ ^ 2 := by
   classical
-  -- Extract the chart-twist composed bound.
   obtain ⟨C, hC_nn, h_twist⟩ :=
     exists_tensorInnerPointwise_chartRSTwist_upper_bound_on_pouTsupport
       (I := I) (M := M) (E := E) g r s α
@@ -155,16 +150,12 @@ theorem exists_tensorInnerPointwise_upper_bound_via_chartRSTwistInv_norm_sq_on_p
   intro b hb S
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     pouTsupport_subset_baseSet (I := I) (M := M) α hb
-  -- Set `T = chartRSTwistInv α b r s S`. By round-trip,
-  -- `chartRSTwist α b r s T = S` on the chart base set.
   set T : TensorRSModel r s ℝ E :=
     chartRSTwistInv (I := I) (M := M) α b r s S with hT_def
   have h_round : chartRSTwist (I := I) (M := M) α b r s T = S := by
     rw [hT_def]
     exact chartRSTwist_chartRSTwistInv (I := I) (M := M) α hb_base r s S
-  -- Specialise the twist-composed bound at `T`.
   have h := h_twist b hb T
-  -- Rewrite the LHS using the round-trip identity.
   rw [h_round] at h
   exact h
 
@@ -197,7 +188,6 @@ theorem exists_tensorInnerPointwise_upper_bound_via_trivProj_norm_sq_on_pouTsupp
               (S.toFun b) (S.toFun b) ≤
             C * ‖tensorTrivProj (I := I) (M := M) (E := E) g r s S α b‖ ^ 2 := by
   classical
-  -- Extract the chartRSTwistInv-form upper bound.
   obtain ⟨C, hC_nn, h_inv⟩ :=
     exists_tensorInnerPointwise_upper_bound_via_chartRSTwistInv_norm_sq_on_pouTsupport
       (I := I) (M := M) (E := E) g r s α
@@ -205,9 +195,7 @@ theorem exists_tensorInnerPointwise_upper_bound_via_trivProj_norm_sq_on_pouTsupp
   intro S b hb
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     pouTsupport_subset_baseSet (I := I) (M := M) α hb
-  -- Apply the chartRSTwistInv-form bound at `S.toFun b`.
   have h := h_inv b hb (S.toFun b)
-  -- Rewrite `chartRSTwistInv α b r s (S.toFun b) = tensorTrivProj g r s S α b`.
   have h_proj := tensorTrivProj_eq_chartRSTwistInv_toFun
     (I := I) (M := M) g r s α S hb_base
   rw [← h_proj] at h

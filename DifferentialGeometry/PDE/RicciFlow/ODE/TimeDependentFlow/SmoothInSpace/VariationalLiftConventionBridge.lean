@@ -117,14 +117,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## The two chart representations of a section
-
-`chartRawRepr` is the raw-fibre representation `R(z) = (X (φ.symm z) : E)` consumed by the
-BanachIC chart vector field; `chartTrivRepr` is the trivialised representation
-`T(z) = chartE_section_repr α X (φ.symm z)` used inside `chartLeviCivitaInnerCLM`.  The
-*moving* trivialization CLM `chartMovingTriv α z = trivToE α (φ.symm z)` reconciles them
-pointwise. -/
-
 /-- The **raw-fibre** chart representation of a section: `R(z) = (X (φ.symm z) : E)`, the
 value of `X` at the chart-coordinate point `z`, read with no trivialization applied (the
 `TangentSpace I (φ.symm z) = E` defeq). -/
@@ -161,11 +153,9 @@ lemma chartMovingTriv_basepoint
     (α : M) (v : E) :
     chartMovingTriv (I := I) α (extChartAt I α α) v = v := by
   unfold chartMovingTriv
-  -- `(extChartAt I α).symm (extChartAt I α α) = α`.
   have hself : (extChartAt I α).symm (extChartAt I α α) = α :=
     (extChartAt I α).left_inv (mem_extChartAt_source (I := I) α)
   rw [hself]
-  -- `trivToE α α v = v` via the core self-coordChange = identity.
   have hcore : trivToE (I := I) α α
       = (tangentBundleCore I M).coordChange (achart H α) (achart H α) α :=
     TangentBundle.continuousLinearMapAt_trivializationAt_eq_core (I := I) (M := M)
@@ -173,15 +163,6 @@ lemma chartMovingTriv_basepoint
   rw [hcore]
   exact (tangentBundleCore I M).coordChange_self (achart H α) α
     (by rw [tangentBundleCore_baseSet]; exact mem_chart_source H α) v
-
-/-! ## The product-rule decomposition (the convention bridge)
-
-The Fréchet derivative of the trivialised representation `T` at the basepoint image
-`z₀ = φ α` decomposes, by the bilinear application product rule
-(`fderiv_clm_apply`), into the trivialization-image of the **raw** flat derivative plus the
-**moving-trivialization correction**.  This is the precise relationship between the
-Euclidean variational right-hand side (raw representation) and the flat summand of
-`chartLeviCivitaInnerCLM` (trivialised representation). -/
 
 /-- **Convention bridge: trivialised flat derivative = raw flat derivative + moving-
 trivialization correction.**
@@ -218,17 +199,13 @@ theorem chartTrivRepr_fderiv_eq
             (chartRawRepr (I := I) α X (extChartAt I α α)) := by
   classical
   set z₀ : E := extChartAt I α α with hz₀
-  -- Rewrite `T` as the bilinear application `z ↦ C(z) (R(z))`.
   have hTeq : chartTrivRepr (I := I) α X
       = fun z => chartMovingTriv (I := I) α z (chartRawRepr (I := I) α X z) :=
     funext (fun z => chartTrivRepr_eq_movingTriv_rawRepr (I := I) α X z)
   rw [hTeq]
-  -- Product rule for the bilinear application.
   rw [fderiv_clm_apply hC hR]
-  -- Apply both summands at `h` and simplify `C(z₀) = 1`.
   rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.comp_apply,
     ContinuousLinearMap.flip_apply]
-  -- The first summand is `C(z₀) (fderiv R z₀ h) = fderiv R z₀ h`.
   rw [chartMovingTriv_basepoint (I := I) α (fderiv ℝ (chartRawRepr (I := I) α X) z₀ h)]
 
 /-- **The flat summand of the inner CLM, read through the raw representation.**
@@ -250,7 +227,6 @@ theorem chartLeviCivita_flat_summand_eq_rawRepr
       = fderiv ℝ (chartRawRepr (I := I) α X) (extChartAt I α α) w
         + (fderiv ℝ (fun z => chartMovingTriv (I := I) α z) (extChartAt I α α) w)
             (chartRawRepr (I := I) α X (extChartAt I α α)) := by
-  -- `chartE_section_repr α X ∘ φ.symm = chartTrivRepr α X` definitionally.
   have hcomp : (chartE_section_repr (I := I) α X ∘ (extChartAt I α).symm)
       = chartTrivRepr (I := I) α X := rfl
   rw [hcomp]

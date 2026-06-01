@@ -78,13 +78,9 @@ theorem exists_tensorPouSobolevHsNorm_toReal_le_iteratedCovGrad_tensorL2Norm_sum
             tensorL2Norm (I := I) (M := M) g r (s + j)
               (iteratedCovGrad g r s j T).toFun := by
   classical
-  -- The order-peeling half (in `ℝ≥0∞`).
   obtain ⟨CB, hCB_nn, hCB⟩ :=
     exists_tensorPouSobolevHsNorm_le_iteratedCovGrad_zero_sum
       (I := I) (M := M) g r s k
-  -- The base-half constant at each valence `(r, s + j)`, packaged as a function
-  -- of `j` via the choice principle, together with its non-negativity and
-  -- defining bound.
   set CAfun : ℕ → ℝ := fun j =>
     (tensorPouSobolevHsNorm_zero_le_tensorL2Norm
       (I := I) (M := M) g r (s + j)).choose with hCAfun_def
@@ -96,7 +92,6 @@ theorem exists_tensorPouSobolevHsNorm_toReal_le_iteratedCovGrad_tensorL2Norm_sum
         CAfun j * tensorL2Norm (I := I) (M := M) g r (s + j) S.toFun := fun j S =>
     (tensorPouSobolevHsNorm_zero_le_tensorL2Norm
       (I := I) (M := M) g r (s + j)).choose_spec.2 S
-  -- A single base constant: the finite maximum over `j ∈ range (2k + 1)`.
   set CAmax : ℝ :=
     (Finset.range (2 * k + 1)).sup'
       ⟨0, Finset.mem_range.mpr (Nat.succ_pos (2 * k))⟩ CAfun with hCAmax_def
@@ -105,38 +100,29 @@ theorem exists_tensorPouSobolevHsNorm_toReal_le_iteratedCovGrad_tensorL2Norm_sum
       (Finset.le_sup' CAfun (Finset.mem_range.mpr (Nat.succ_pos (2 * k))))
   have hCAfun_le_max : ∀ j ∈ Finset.range (2 * k + 1), CAfun j ≤ CAmax :=
     fun j hj => Finset.le_sup' CAfun hj
-  -- The headline constant.
   refine ⟨CB * CAmax, mul_nonneg hCB_nn hCAmax_nn, fun T => ?_⟩
-  -- Per-`j` intrinsic `L²` norm of `∇^j T` (a non-negative real).
   set L : ℕ → ℝ := fun j =>
     tensorL2Norm (I := I) (M := M) g r (s + j) (iteratedCovGrad g r s j T).toFun
     with hL_def
   have hL_nn : ∀ j : ℕ, 0 ≤ L j := fun j =>
     tensorL2Norm_nonneg (I := I) (M := M) g r (s + j)
       (iteratedCovGrad g r s j T).toFun
-  -- Each order-`0` chart-Sobolev norm of `∇^j T` is finite, hence equals
-  -- `ofReal` of its real part, and is bounded by `ofReal (CAmax · L j)`.
   have h_term_le : ∀ j ∈ Finset.range (2 * k + 1),
       tensorPouSobolevHsNorm (I := I) (M := M) g 0 (iteratedCovGrad g r s j T) ≤
         ENNReal.ofReal (CAmax * L j) := by
     intro j hj
-    -- Finiteness of the order-`0` norm of `∇^j T`.
     have h_ne_top :
         tensorPouSobolevHsNorm (I := I) (M := M) g 0
           (iteratedCovGrad g r s j T) ≠ ⊤ :=
       (tensorPouSobolevHsNorm_lt_top (I := I) (M := M) g 0
         (iteratedCovGrad g r s j T)).ne
-    -- `value = ofReal value.toReal`.
     rw [← ENNReal.ofReal_toReal h_ne_top]
     refine ENNReal.ofReal_le_ofReal ?_
-    -- Base half at valence `(r, s + j)` applied to `S = ∇^j T`, then bump the
-    -- constant up to the max (using `L j ≥ 0`).
     calc (tensorPouSobolevHsNorm (I := I) (M := M) g 0
             (iteratedCovGrad g r s j T)).toReal
         ≤ CAfun j * L j := hCAfun_spec j (iteratedCovGrad g r s j T)
       _ ≤ CAmax * L j :=
           mul_le_mul_of_nonneg_right (hCAfun_le_max j hj) (hL_nn j)
-  -- Bound the order-peeling `ℝ≥0∞` sum termwise, then collapse `ofReal`.
   have h_sum_le :
       ∑ j ∈ Finset.range (2 * k + 1),
           tensorPouSobolevHsNorm (I := I) (M := M) g 0 (iteratedCovGrad g r s j T) ≤
@@ -150,8 +136,6 @@ theorem exists_tensorPouSobolevHsNorm_toReal_le_iteratedCovGrad_tensorL2Norm_sum
             (fun j _ => mul_nonneg hCAmax_nn (hL_nn j))).symm
       _ = ENNReal.ofReal (CAmax * ∑ j ∈ Finset.range (2 * k + 1), L j) := by
           rw [Finset.mul_sum]
-  -- Chain the order-peeling bound with the termwise base bound (in `ℝ≥0∞`),
-  -- collapsing the product of `ofReal`s into one `ofReal`.
   have h_enn :
       tensorPouSobolevHsNorm (I := I) (M := M) g k T ≤
         ENNReal.ofReal
@@ -167,14 +151,12 @@ theorem exists_tensorPouSobolevHsNorm_toReal_le_iteratedCovGrad_tensorL2Norm_sum
       _ = ENNReal.ofReal
             (CB * CAmax * ∑ j ∈ Finset.range (2 * k + 1), L j) := by
           rw [← ENNReal.ofReal_mul hCB_nn, mul_assoc]
-  -- Convert the `ℝ≥0∞` bound to the real-valued conclusion.
   have h_rhs_nn :
       0 ≤ CB * CAmax * ∑ j ∈ Finset.range (2 * k + 1), L j :=
     mul_nonneg (mul_nonneg hCB_nn hCAmax_nn)
       (Finset.sum_nonneg (fun j _ => hL_nn j))
   have h_toReal :=
     ENNReal.toReal_le_of_le_ofReal h_rhs_nn h_enn
-  -- `mul_assoc` to match `C * (∑ …)`.
   calc (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal
       ≤ CB * CAmax * ∑ j ∈ Finset.range (2 * k + 1), L j := h_toReal
     _ = CB * CAmax * ∑ j ∈ Finset.range (2 * k + 1),

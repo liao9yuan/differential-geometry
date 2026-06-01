@@ -48,8 +48,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Chart-α coordinate projection on the model fibre -/
-
 /-- The linear functional `v ↦ ((chartModelBasis E).repr v) m`, packaged as a
 continuous linear map `E →L[ℝ] ℝ`. -/
 private noncomputable def chartModelBasisProj (m : Fin (Module.finrank ℝ E)) :
@@ -68,8 +66,6 @@ private noncomputable def chartModelBasisProj (m : Fin (Module.finrank ℝ E)) :
   rw [LinearMap.comp_apply]
   simp [Module.Basis.equivFun]
 
-/-! ## Building blocks: smoothness of the Levi-Civita value on `B^α_i` along itself -/
-
 /-- The Levi-Civita Hom-section `x ↦ ⟨x, (LC g) B^α_i x⟩ : TotalSpace (E →L[ℝ] E)
 (Hom(TM, TM))` is `ContMDiff` on `Set.univ`. Direct consequence of
 `LeviCivita_isContMDiff` applied to the smooth section `B^α_i`. -/
@@ -84,10 +80,8 @@ private lemma leviCivita_chartFrame_hom_contMDiff
           TotalSpace (E →L[ℝ] E) (fun x : M =>
             TangentSpace I x →L[ℝ] TangentSpace I x))) := by
   classical
-  -- The chart-frame section is C^∞ smooth.
   have hB :=
     (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).contMDiff
-  -- C^∞ + 1 = C^∞.
   have hB' : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1)
       (fun x : M => TotalSpace.mk' E (E := TangentSpace I) x
         ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun x))
@@ -96,11 +90,9 @@ private lemma leviCivita_chartFrame_hom_contMDiff
       rw [ENat.coe_top_add_one]
     rw [h_eq]
     exact hB.contMDiffOn
-  -- Levi-Civita smoothness instance.
   have h_hom_on :=
     LeviCivita_section_contMDiffOn_univ (I := I) g (σ := fun x : M =>
       (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun x) hB'
-  -- Move from `ContMDiffOn ... Set.univ` to `ContMDiff ...`.
   exact contMDiffOn_univ.mp h_hom_on
 
 /-- The tangent vector field `x ↦ ⟨x, (LC g) B^α_i x (B^α_i x)⟩ : TotalSpace E
@@ -120,7 +112,6 @@ private lemma leviCivita_chartFrame_self_section_contMDiff
   have h_hom := leviCivita_chartFrame_hom_contMDiff (I := I) (M := M) g α i
   have hB :=
     (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).contMDiff
-  -- Apply `ContMDiff.clm_bundle_apply` with `b x = x`.
   exact h_hom.clm_bundle_apply (v := fun x : M =>
     (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun x) hB
 
@@ -139,10 +130,8 @@ private lemma leviCivita_chartFrame_self_trivialized_contMDiffOn
           ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b)))
       (trivializationAt E (TangentSpace I) α).baseSet := by
   classical
-  -- Smoothness of the tangent-bundle section.
   have h_section :=
     leviCivita_chartFrame_self_section_contMDiff (I := I) (M := M) g α i
-  -- Trivialization-iff: section smooth on baseSet ↔ trivialized form smooth on baseSet.
   have h_triv :
       ContMDiffOn I 𝓘(ℝ, E) ∞
         (fun b : M =>
@@ -157,7 +146,6 @@ private lemma leviCivita_chartFrame_self_trivialized_contMDiffOn
         (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b
         ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b))
     exact hiff.mp h_section.contMDiffOn
-  -- Replace `(triv ⟨b, v⟩).2` with `triv.clmAt b v` on the base set.
   have h_eq_baseSet :
       Set.EqOn (fun b : M =>
           ((trivializationAt E (TangentSpace I) α)
@@ -228,8 +216,6 @@ private lemma leviCivita_chartFrame_self_coordProj_contMDiffOn
     (chartModelBasisProj (E := E) m).contMDiff
   exact h_proj.contMDiffOn.comp (t := Set.univ) h_triv (Set.subset_preimage_univ)
 
-/-! ## Headline: smoothness of the chart-pulled chart-α `m`-coordinate -/
-
 /-- **Headline.** The chart-α `m`-th coordinate of the Levi-Civita covariant
 derivative of the chart-frame orthonormal section
 `B^α_i := chartFrameNormGlobalSmooth g α i` along itself, evaluated at a base
@@ -255,17 +241,14 @@ theorem leviCivita_chartFrame_self_chartCoord_pullback_contDiffOn_chartTarget
                 ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))))))
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- The chart-symm composition is smooth on `chartTargetEuclid α`.
   have h_chart :
       ContMDiffOn 𝓘(ℝ, EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) I ∞
         (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
           (extChartAt I α).symm ((toEuclidean (E := E)).symm y))
         (chartTargetEuclid (I := I) (M := M) α) :=
     contMDiffOn_chart_symm (I := I) (M := M) α
-  -- The chart-α `m`-coord scalar function on the chart-α trivialization base set.
   have h_coord :=
     leviCivita_chartFrame_self_coordProj_contMDiffOn (I := I) (M := M) g α i m
-  -- The chart-symm composition lands in the trivialization base set.
   have h_maps :
       MapsTo (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
           (extChartAt I α).symm ((toEuclidean (E := E)).symm y))
@@ -279,7 +262,6 @@ theorem leviCivita_chartFrame_self_chartCoord_pullback_contDiffOn_chartTarget
     change (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈
       (chartAt H α).source
     exact h_src
-  -- Compose.
   have h_comp :
       ContMDiffOn 𝓘(ℝ, EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) 𝓘(ℝ, ℝ) ∞
         (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
@@ -293,7 +275,6 @@ theorem leviCivita_chartFrame_self_chartCoord_pullback_contDiffOn_chartTarget
                   ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))))))
         (chartTargetEuclid (I := I) (M := M) α) :=
     h_coord.comp h_chart h_maps
-  -- A `ContMDiffOn` between model spaces gives `ContDiffOn`.
   exact (contMDiffOn_iff_contDiffOn).mp h_comp
 
 section

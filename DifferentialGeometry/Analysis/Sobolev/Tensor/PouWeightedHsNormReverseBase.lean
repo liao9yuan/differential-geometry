@@ -76,14 +76,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The square-root partition-of-unity-weighted raw chart-frame component -/
 
 /-- The square-root-partition-of-unity-weighted raw chart-frame scalar
 component: `√(ρ_α) · raw_{IJ}` as a manifold-side scalar field. Its square is
@@ -121,13 +117,6 @@ lemma tensorChartComponentSqrtPou_sq
     (chartAtlasPOU I M).nonneg α b
   rw [tensorChartComponentSqrtPou_apply, mul_pow, Real.sq_sqrt hρ_nn]
 
-/-! ## Pointwise quadratic bound
-
-The pointwise bound mirrors
-`tensorChartComponentScalar_sq_le_const_mul_tensorInner`, except the weight
-appears to the first power: `ρ_α ≤ 1` replaces `ρ_α² ≤ 1`. The same constant
-`C_proj² · K` works. -/
-
 /-- Pointwise quadratic bound on the square-root-weighted raw component:
 `(√ρ_α · raw_{IJ})² ≤ C · ⟨S, S⟩_g` uniformly in `(S, Idx, Jdx)`, with `C ≥ 0`
 depending only on `(g, r, s, α)`. -/
@@ -160,22 +149,18 @@ lemma tensorChartComponentSqrtPou_sq_le_const_mul_tensorInner
   have hQ_nn : 0 ≤ tensorInnerPointwise (I := I) (M := M) g r s b
       (S.toFun b) (S.toFun b) :=
     tensorInnerPointwise_nonneg (I := I) (M := M) g r s b _
-  -- `(√ρ · raw)² = ρ · (P_IJ T)²`.
   have hsq_eq : (tensorChartComponentSqrtPou (I := I) (M := M)
       g r s S α Idx Jdx b) ^ 2 = ρ b * (P_IJ T) ^ 2 := by
     rw [tensorChartComponentSqrtPou_sq (I := I) (M := M) g r s S α Idx Jdx b]
     rfl
   by_cases hb : b ∈ tsupport ρ
-  · -- Inside `tsupport ρ`: the trivialization chain applies.
-    have hρ_nn : 0 ≤ ρ b := (chartAtlasPOU I M).nonneg α b
+  · have hρ_nn : 0 ≤ ρ b := (chartAtlasPOU I M).nonneg α b
     have hρ_le_one : ρ b ≤ 1 := (chartAtlasPOU I M).le_one α b
-    -- `|P_IJ T| ≤ C_proj · ‖T‖`.
     have h_proj_le : ‖P_IJ T‖ ≤ C_proj * ‖T‖ :=
       (ContinuousLinearMap.le_opNorm _ _).trans
         (mul_le_mul_of_nonneg_right
           (tensorChartComponentProjection_norm_le_uniform (E := E) r s Idx Jdx)
           (norm_nonneg _))
-    -- `(P_IJ T)² ≤ C_proj² · ‖T‖²`.
     have h_proj_sq_le : (P_IJ T) ^ 2 ≤ C_proj ^ 2 * ‖T‖ ^ 2 := by
       have h_abs : (P_IJ T) ^ 2 = ‖P_IJ T‖ ^ 2 := by
         rw [Real.norm_eq_abs, sq_abs]
@@ -185,11 +170,9 @@ lemma tensorChartComponentSqrtPou_sq_le_const_mul_tensorInner
         ring
       have h_lhs : ‖P_IJ T‖ * ‖P_IJ T‖ = ‖P_IJ T‖ ^ 2 := by rw [sq]
       linarith [hsq, h_lhs.symm.le, h_rhs.symm.le, h_lhs.le, h_rhs.le]
-    -- `‖T‖² ≤ K · ⟨S, S⟩`.
     have h_triv_sq_le : ‖T‖ ^ 2 ≤ K *
         tensorInnerPointwise (I := I) (M := M) g r s b
           (S.toFun b) (S.toFun b) := h_norm S b hb
-    -- Combine: `(P_IJ T)² ≤ C_proj² · K · ⟨S, S⟩`.
     have hC_proj_sq_nn : 0 ≤ C_proj ^ 2 := sq_nonneg _
     have h_chain_sq : (P_IJ T) ^ 2 ≤
         C_proj ^ 2 *
@@ -197,7 +180,6 @@ lemma tensorChartComponentSqrtPou_sq_le_const_mul_tensorInner
               (S.toFun b) (S.toFun b)) := by
       have h_mul := mul_le_mul_of_nonneg_left h_triv_sq_le hC_proj_sq_nn
       exact h_proj_sq_le.trans h_mul
-    -- Multiply in `ρ b ≤ 1` (first power!).
     have h_KQ_nn : 0 ≤
         K * tensorInnerPointwise (I := I) (M := M) g r s b
           (S.toFun b) (S.toFun b) := mul_nonneg hK_nn hQ_nn
@@ -222,8 +204,7 @@ lemma tensorChartComponentSqrtPou_sq_le_const_mul_tensorInner
             tensorInnerPointwise (I := I) (M := M) g r s b
               (S.toFun b) (S.toFun b) := by ring
     linarith [h_factored, h_rhs_rearr.le, h_rhs_rearr.symm.le]
-  · -- Outside `tsupport ρ`: `ρ b = 0`, so the LHS is `0`, and the RHS is `≥ 0`.
-    have hρ_zero : ρ b = 0 := by
+  · have hρ_zero : ρ b = 0 := by
       by_contra hne
       exact hb (subset_tsupport _ hne)
     rw [hsq_eq, hρ_zero, zero_mul]
@@ -240,11 +221,6 @@ lemma tensorChartComponentSqrtPou_sq_le_const_mul_tensorInner
       have := mul_nonneg hC_sq_nn (mul_nonneg hK_nn hQ_nn)
       linarith [heq.le, heq.symm.le]
     exact h_RHS_nn
-
-/-! ## `eLpNorm` conversion helpers (file-local)
-
-These re-derive the small `eLpNorm`↔`lintegral` bridges used in
-`ComponentL2BoundUniform` (where they are private). -/
 
 private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq
     {β : Type*} [MeasurableSpace β] (μ : Measure β) (f : β → ℝ) :
@@ -289,8 +265,6 @@ private lemma eLpNorm_two_le_ofReal_sqrt
   rw [sqrt_ofReal_eq_ofReal_sqrt hS] at h_pow
   exact h_pow
 
-/-! ## Integrated intrinsic `L²` bound on the square-root-weighted component -/
-
 /-- Squared intrinsic `L²` bound: the `(eLpNorm)²` of the square-root-weighted
 raw component against the Riemannian volume measure is bounded by
 `ofReal (C · ⟨S, S⟩_{L²})`, uniformly in `(S, Idx, Jdx)`. -/
@@ -314,7 +288,6 @@ private lemma sq_eLpNorm_tensorChartComponentSqrtPou_le_const_mul_tensorL2Inner
   set f : M → ℝ := tensorChartComponentSqrtPou (I := I) (M := M)
     g r s S α Idx Jdx with hf_def
   set μ : Measure M := riemannianVolumeMeasure (I := I) (M := M) g with hμ_def
-  -- Pointwise ENNReal bound.
   have h_pt_enn : ∀ b : M,
       (‖f b‖ₑ : ℝ≥0∞) ^ 2 ≤
         ENNReal.ofReal (C * tensorInnerPointwise (I := I) (M := M)
@@ -324,7 +297,6 @@ private lemma sq_eLpNorm_tensorChartComponentSqrtPou_le_const_mul_tensorL2Inner
       rw [Real.enorm_eq_ofReal_abs, ← ENNReal.ofReal_pow (abs_nonneg _) 2,
         sq_abs]]
     exact ENNReal.ofReal_le_ofReal (h_pt S Idx Jdx b)
-  -- Integrability of the RHS integrand.
   have h_inner_int := SmoothCcTensor.integrable_inner_cross
     (I := I) (M := M) (g := g) (r := r) (s := s) S S
   have h_C_smul_int :
@@ -339,7 +311,6 @@ private lemma sq_eLpNorm_tensorChartComponentSqrtPou_le_const_mul_tensorL2Inner
     intro b
     exact mul_nonneg hC_nn
       (tensorInnerPointwise_nonneg (I := I) (M := M) g r s b _)
-  -- Convert `(eLpNorm f 2 μ)^2` and bound the lintegral.
   rw [sq_eLpNorm_two_eq_lintegral_enorm_sq μ f]
   have h_lint_le :
       ∫⁻ b, (‖f b‖ₑ : ℝ≥0∞) ^ 2 ∂μ ≤
@@ -416,8 +387,6 @@ theorem eLpNorm_tensorChartComponentSqrtPou_le_uniform
     ENNReal.ofReal_mul (Real.sqrt_nonneg _)] at h_eLpNorm_le
   exact h_eLpNorm_le
 
-/-! ## Support of the square-root-weighted component -/
-
 /-- The support of `√ρ_α` equals the support of `ρ_α` (the square root vanishes
 exactly where its argument does, since `ρ_α ≥ 0`). -/
 private lemma support_sqrt_pou_eq
@@ -456,16 +425,6 @@ private lemma tsupport_tensorChartComponentSqrtPou_subset
   unfold tsupport
   rw [support_sqrt_pou_eq (I := I) (M := M) α]
 
-/-! ## Continuity and measurability of the square-root-weighted component
-
-The square-root weight `√ρ_α` is globally continuous (the square root is
-continuous everywhere), and the raw component is continuous on the chart
-source. The product is globally continuous because on the open complement of
-`tsupport ρ_α ⊆ chart source` it vanishes, so the two opens (chart source and
-the complement of `tsupport ρ_α`) cover `M`. This is the continuity analogue of
-`tensorChartComponentPou_contMDiff` (square root is not smooth at a zero, so
-only continuity holds in general). -/
-
 /-- The square-root-weighted raw component is globally continuous on `M`. -/
 private lemma continuous_tensorChartComponentSqrtPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -483,17 +442,14 @@ private lemma continuous_tensorChartComponentSqrtPou
   rw [continuous_iff_continuousAt]
   intro x
   by_cases hx_chart : x ∈ (chartAt H α).source
-  · -- Inside the chart source: product of two continuous-at functions.
-    have hRaw_on := tensorChartComponentRaw_contMDiffOn_chart_source
+  · have hRaw_on := tensorChartComponentRaw_contMDiffOn_chart_source
       (I := I) (M := M) g r s S α Idx Jdx
     have hRaw_at : ContinuousAt
         (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) x :=
       ((hRaw_on.contMDiffAt
         (IsOpen.mem_nhds (chartAt H α).open_source hx_chart)).continuousAt)
     exact (hSqrt_cont.continuousAt).mul hRaw_at
-  · -- Outside the chart source: identically zero on an open neighborhood,
-    -- since `tsupport (√ρ_α · raw) ⊆ tsupport ρ_α ⊆ chart source`.
-    have hsupp_sub :
+  · have hsupp_sub :
         tsupport (tensorChartComponentSqrtPou (I := I) (M := M)
             g r s S α Idx Jdx) ⊆ (chartAt H α).source :=
       (tsupport_tensorChartComponentSqrtPou_subset (I := I) (M := M)
@@ -526,14 +482,6 @@ private lemma measurable_tensorChartComponentSqrtPou
   (continuous_tensorChartComponentSqrtPou (I := I) (M := M)
     g r s S α Idx Jdx).measurable
 
-/-! ## The order-`0` per-chart integrand as a chart-pushed `L²` norm
-
-The order-`0` Hilbert-Schmidt chart-Sobolev per-chart integrand
-`∫_{ChTE α} ρ_α(pull y) · |raw_{IJ}(pull y)|² dVol_Eucl` equals the squared
-Euclidean `L²` norm of `chartPushedRaw α (√ρ_α · raw_{IJ})`, because on the
-chart target image `chartPushedRaw α w_{IJ}(y) = w_{IJ}(pull y)` and
-`(w_{IJ})² = ρ_α · |raw_{IJ}|²`. -/
-
 private lemma hsNorm_zero_integrand_eq_sq_eLpNorm_chartPushedRaw
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -562,8 +510,6 @@ private lemma hsNorm_zero_integrand_eq_sq_eLpNorm_chartPushedRaw
             (chartTargetEuclid (I := I) (M := M) α))) ^ 2 := by
   classical
   rw [sq_eLpNorm_two_eq_lintegral_enorm_sq]
-  -- Both sides are integrals against `volume.restrict ChTE`; compare integrands
-  -- a.e. (i.e. on `ChTE`, since the restricted measure is supported there).
   rw [← MeasureTheory.lintegral_indicator
         (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet,
       ← MeasureTheory.lintegral_indicator
@@ -571,7 +517,6 @@ private lemma hsNorm_zero_integrand_eq_sq_eLpNorm_chartPushedRaw
   refine MeasureTheory.lintegral_congr (fun y => ?_)
   by_cases hy : y ∈ chartTargetEuclid (I := I) (M := M) α
   · rw [Set.indicator_of_mem hy, Set.indicator_of_mem hy]
-    -- On `ChTE`: identify both integrands with `ofReal (ρ·raw²)` at `pull y`.
     set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
     have hraw_eval :
         (iteratedFDeriv ℝ 0
@@ -589,7 +534,6 @@ private lemma hsNorm_zero_integrand_eq_sq_eLpNorm_chartPushedRaw
           tensorChartComponentSqrtPou (I := I) (M := M) g r s S α Idx Jdx b :=
       chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy
     rw [hraw_eval, hpush]
-    -- LHS: `ofReal (ρ b · |raw b|²)`.   RHS: `‖w b‖ₑ²`.
     have hw_sq :
         (tensorChartComponentSqrtPou (I := I) (M := M) g r s S α Idx Jdx b) ^ 2 =
           ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
@@ -599,14 +543,6 @@ private lemma hsNorm_zero_integrand_eq_sq_eLpNorm_chartPushedRaw
     congr 1
     rw [sq_abs, sq_abs, hw_sq]
   · rw [Set.indicator_of_notMem hy, Set.indicator_of_notMem hy]
-
-/-! ## Per-chart Euclidean `L²` bound on the square-root chart-push
-
-Chaining the reverse change-of-variables bridge with the uniform intrinsic
-`L²` bound gives, for each chart `α`, a single constant `B_α ≥ 0` such that the
-Euclidean `L²` norm of `chartPushedRaw α (√ρ_α · raw_{IJ})` is at most
-`ofReal B_α · ofReal (tensorL2Norm g r s S.toFun)`, uniformly in `(S, Idx,
-Jdx)`. -/
 
 private lemma eLpNorm_chartPushedRaw_sqrtPou_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
@@ -625,7 +561,6 @@ private lemma eLpNorm_chartPushedRaw_sqrtPou_le_uniform
             ENNReal.ofReal
               (tensorL2Norm (I := I) (M := M) g r s S.toFun) := by
   classical
-  -- The reverse change-of-variables bridge constant `C_α`.
   set ρ : C^∞⟮I, M; ℝ⟯ := chartAtlasPOU I M α with hρ_def
   set Kα : Set M := tsupport ((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ) with hKα_def
   have hKα_compact : IsCompact Kα := (isClosed_tsupport _).isCompact
@@ -634,7 +569,6 @@ private lemma eLpNorm_chartPushedRaw_sqrtPou_le_uniform
     DifferentialGeometry.Analysis.Sobolev.Chart.eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of_subset
       (I := I) (M := M) g α hKα_compact hKα_sub (by norm_num : (1 : ℝ≥0∞) ≤ 2)
       (by decide : (2 : ℝ≥0∞) ≠ ⊤)
-  -- The uniform intrinsic-L² bound constant `D_α`.
   obtain ⟨D, hD_nn, hD_bound⟩ :=
     eLpNorm_tensorChartComponentSqrtPou_le_uniform
       (I := I) (M := M) (E := E) g r s α
@@ -647,15 +581,12 @@ private lemma eLpNorm_chartPushedRaw_sqrtPou_le_uniform
   have hw_supp : tsupport w ⊆ Kα :=
     tsupport_tensorChartComponentSqrtPou_subset (I := I) (M := M)
       g r s S α Idx Jdx
-  -- Apply the reverse bridge to `w`.
   have h_bridge :=
     hC_bound (u := w) hw_meas hw_supp
-  -- `riemannianMeasure ρ = riemannianVolumeMeasure g` (defeq).
   rw [show DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)
         = DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g
       from rfl] at h_bridge
-  -- Chain with the intrinsic L² bound on `w`.
   refine h_bridge.trans ?_
   have h_intrinsic := hD_bound S Idx Jdx
   calc ENNReal.ofReal C *
@@ -667,8 +598,6 @@ private lemma eLpNorm_chartPushedRaw_sqrtPou_le_uniform
     _ = ENNReal.ofReal (C * D) *
           ENNReal.ofReal (tensorL2Norm (I := I) (M := M) g r s S.toFun) := by
         rw [ENNReal.ofReal_mul hC_pos.le, mul_assoc]
-
-/-! ## Choice of a uniform per-chart constant -/
 
 /-- A non-negative real constant `B_α` (depending only on `(g, r, s, α)`) such
 that the Euclidean `L²` norm of the square-root chart-push is bounded by
@@ -701,15 +630,6 @@ private lemma sqrtPouChartConst_spec
   (eLpNorm_chartPushedRaw_sqrtPou_le_uniform (I := I) (M := M)
     g r s α).choose_spec.2 S Idx Jdx
 
-/-! ## The headline base-case reverse bound
-
-At order `0` the inner finite sum collapses to the single derivative order
-`j = 0` (and the single empty basis-index tuple). Each per-chart-per-component
-integrand is the squared Euclidean `L²` norm of the square-root chart-push,
-bounded by `(ofReal B_α · ofReal L)²`. Summing over the finite partition of
-unity and the finite component index set, then taking the outer square root,
-gives a single constant times `tensorL2Norm g r s S.toFun`. -/
-
 /-- **Order-`0` reverse comparison.** There is a non-negative real constant `C`
 (depending only on `(g, r, s)`) such that for every smooth compactly-supported
 `(r, s)`-tensor section `S`, the order-`0` Hilbert-Schmidt
@@ -723,11 +643,9 @@ theorem tensorPouSobolevHsNorm_zero_le_tensorL2Norm
         (tensorPouSobolevHsNorm (I := I) (M := M) g 0 S).toReal ≤
           C * tensorL2Norm (I := I) (M := M) g r s S.toFun := by
   classical
-  -- The number of component multi-index pairs.
   set N : ℝ := (Fintype.card ((Fin r → Fin (Module.finrank ℝ E)) ×
       (Fin s → Fin (Module.finrank ℝ E))) : ℝ) with hN_def
   have hN_nn : 0 ≤ N := by positivity
-  -- The summed constant over the finite partition-of-unity support set.
   set Ksum : ℝ := ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
       N * (sqrtPouChartConst (I := I) (M := M) g r s α) ^ 2 with hKsum_def
   have hKsum_nn : 0 ≤ Ksum := by
@@ -737,12 +655,10 @@ theorem tensorPouSobolevHsNorm_zero_le_tensorL2Norm
   intro S
   set L : ℝ := tensorL2Norm (I := I) (M := M) g r s S.toFun with hL_def
   have hL_nn : 0 ≤ L := tensorL2Norm_nonneg (I := I) (M := M) g r s S.toFun
-  -- Step 1: a squared-norm bound in `ℝ≥0∞`.
   have h_sq_le :
       tensorPouSobolevHsNormSq (I := I) (M := M) g 0 S ≤
         ENNReal.ofReal (Ksum * L ^ 2) := by
     rw [tensorPouSobolevHsNormSq_eq_inner_sum]
-    -- Reduce the `tsum` over `α` to a `Finset.sum` over the POU support set.
     have h_tsum_eq :
         (∑' α : M,
           ∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -815,7 +731,6 @@ theorem tensorPouSobolevHsNorm_zero_le_tensorL2Norm
         h_integrand_zero]
       simp
     rw [h_tsum_eq]
-    -- Bound the finite double sum termwise.
     have h_termwise :
         ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
           (∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -840,8 +755,6 @@ theorem tensorPouSobolevHsNorm_zero_le_tensorL2Norm
             ENNReal.ofReal
               (N * (sqrtPouChartConst (I := I) (M := M) g r s α) ^ 2 * L ^ 2) := by
       intro α _
-      -- Each `j`-sum collapses to `j = 0`; each basis-index sum to the empty
-      -- tuple. Bound the per-`IJ` integrand by `ofReal (B_α² · L²)`.
       have h_per_IJ :
           ∀ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
               (Fin s → Fin (Module.finrank ℝ E)),
@@ -865,14 +778,10 @@ theorem tensorPouSobolevHsNorm_zero_le_tensorL2Norm
               ENNReal.ofReal
                 ((sqrtPouChartConst (I := I) (M := M) g r s α) ^ 2 * L ^ 2) := by
         intro IJ
-        -- `range (2*0+1) = {0}`.
         rw [show (2 * 0 + 1) = 1 from rfl, Finset.sum_range_one]
-        -- `∑ basisIdx : Fin 0 → Fin n` is over a singleton (empty tuple).
         rw [Fintype.sum_subsingleton _ (default : Fin 0 → Fin (Module.finrank ℝ E))]
-        -- The remaining single integrand equals the squared Euclidean `L²` norm.
         rw [hsNorm_zero_integrand_eq_sq_eLpNorm_chartPushedRaw
           (I := I) (M := M) g r s S α IJ.1 IJ.2 default]
-        -- Bound by `(ofReal B_α · ofReal L)²`.
         have h_le := sqrtPouChartConst_spec (I := I) (M := M) g r s α S IJ.1 IJ.2
         calc (eLpNorm
                   (chartPushedRaw I α
@@ -892,7 +801,6 @@ theorem tensorPouSobolevHsNorm_zero_le_tensorL2Norm
                 ← ENNReal.ofReal_pow (mul_nonneg (sqrtPouChartConst_nonneg
                   (I := I) (M := M) g r s α) hL_nn)]
               rw [mul_pow]
-      -- Sum the per-`IJ` bound over the (finite) component index set.
       calc (∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
                 (Fin s → Fin (Module.finrank ℝ E)),
               ∑ j ∈ Finset.range (2 * 0 + 1),
@@ -956,14 +864,12 @@ theorem tensorPouSobolevHsNorm_zero_le_tensorL2Norm
             (fun α _ => by positivity)]
           congr 1
           rw [hKsum_def, Finset.sum_mul]
-  -- Step 2: take `.toReal` and the outer square root.
   have h_finite : tensorPouSobolevHsNormSq (I := I) (M := M) g 0 S ≠ ⊤ :=
     (tensorPouSobolevHsNormSq_lt_top (I := I) (M := M) g 0 S).ne
   have h_toReal_sq :
       (tensorPouSobolevHsNormSq (I := I) (M := M) g 0 S).toReal ≤ Ksum * L ^ 2 := by
     have := ENNReal.toReal_mono (ENNReal.ofReal_ne_top) h_sq_le
     rwa [ENNReal.toReal_ofReal (by positivity)] at this
-  -- `(HsNorm).toReal = √((HsNormSq).toReal)`.
   have h_norm_toReal :
       (tensorPouSobolevHsNorm (I := I) (M := M) g 0 S).toReal =
         Real.sqrt ((tensorPouSobolevHsNormSq (I := I) (M := M) g 0 S).toReal) := by
@@ -974,14 +880,6 @@ theorem tensorPouSobolevHsNorm_zero_le_tensorL2Norm
       ≤ Real.sqrt (Ksum * L ^ 2) := Real.sqrt_le_sqrt h_toReal_sq
     _ = Real.sqrt Ksum * L := by
         rw [Real.sqrt_mul hKsum_nn, Real.sqrt_sq hL_nn]
-
-/-! ## The metric `L²` completion-norm form (discharges `h_norm_ge`)
-
-The intrinsic `L²` norm of `S.toFun` equals the completion-norm `‖S‖` on the
-pre-Hilbert space `SmoothCcTensor g r s` (via
-`SmoothCcTensor.norm_sq_eq_inner_self`), so the base-case bound can be restated
-directly in terms of `‖S‖`. This is precisely the reverse seminorm comparison
-fed into `TensorPouSobolevHilbert.toTensorL2_continuousLinearEquiv`. -/
 
 /-- The intrinsic `L²` norm of `S.toFun` agrees with the metric `L²`
 completion-norm of `S`. -/

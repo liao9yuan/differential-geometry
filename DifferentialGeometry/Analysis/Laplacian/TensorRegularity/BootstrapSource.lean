@@ -68,28 +68,12 @@ open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-Match the convention in the surrounding tensor-regularity files: install the
-Borel σ-algebras locally, without leaking global instances onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## An `Ω`-uniform quantitative smooth-multiplier estimate
-
-The quantitative Leibniz estimate `wkpNorm_smul_smooth_bounded_le` produces, for
-a fixed open set `Ω`, a constant controlling `wkpNorm k 2 (η · u) Ω` in terms of
-`wkpNorm k 2 u Ω`. For a *globally* `C^∞` multiplier `η` with a *global* bound
-on its iterated derivatives, the constant is in fact independent of `Ω`: it is
-assembled by induction on `k` purely from the global derivative bound and the
-ambient dimension. The lemma below records this `Ω`-uniform form, which is what
-makes the headline constant uniform in the precompact subdomain. -/
 
 section UniformMultiplier
 
@@ -138,7 +122,6 @@ theorem wkpNorm_smul_globalSmooth_uniform
       exact mul_le_mul_of_nonneg_right
         (ENNReal.ofReal_le_ofReal (by linarith)) (zero_le _)
   | succ k ih =>
-      -- The induction hypothesis applied to `η` and to each partial `∂_i η`.
       have hbound_k : ∀ j ≤ k, ∀ x : EE, ‖iteratedFDeriv ℝ j η x‖ ≤ C :=
         fun j hj x => hbound j (hj.trans (Nat.le_succ _)) x
       obtain ⟨Kη, hKη_nn, hKη⟩ := ih hη_smooth hbound_k
@@ -158,7 +141,6 @@ theorem wkpNorm_smul_globalSmooth_uniform
               ENNReal.ofReal K' * wkpNorm (d := d) k 2 u Ω := fun i =>
         ih (h_partial_smooth i) (h_partial_bound i)
       choose Ki hKi_nn hKi using h_partial_ih
-      -- The aggregate constant: `C + ∑_i (Kη + Ki)`.
       have hsummand_nn : ∀ i : Fin d, 0 ≤ Kη + Ki i :=
         fun i => add_nonneg hKη_nn (hKi_nn i)
       refine ⟨C + ∑ i : Fin d, (Kη + Ki i),
@@ -166,11 +148,9 @@ theorem wkpNorm_smul_globalSmooth_uniform
       intro Ω hΩ u hu
       have hη_bound_succ : ∀ j ≤ k + 1, ∀ x ∈ Ω,
           ‖iteratedFDeriv ℝ j η x‖ ≤ C := fun j hj x _ => hbound j hj x
-      -- Order-`(k+1)` decomposition of both norms.
       rw [wkpNorm_succ_eq_eLpNorm_add_sum_partial (d := d) k 2 Ω
         (fun x => η x * u x)]
       set D : ℝ≥0∞ := wkpNorm (d := d) (k + 1) 2 u Ω with hD_def
-      -- The `L²` term.
       have h0 : ∀ x ∈ Ω, ‖η x‖ ≤ C := by
         intro x _
         have h := hbound 0 (Nat.zero_le _) x
@@ -181,13 +161,11 @@ theorem wkpNorm_smul_globalSmooth_uniform
         refine mul_le_mul_of_nonneg_left ?_ (zero_le _)
         rw [hD_def, wkpNorm_succ_eq_eLpNorm_add_sum_partial (d := d) k 2 Ω u]
         exact le_self_add
-      -- Each partial term `∂_i(η · u)`.
       have hpartial_le : ∀ i : Fin d,
           wkpNorm (d := d) k 2
             (chosenWeakPartial' 2 i (fun x => η x * u x) Ω) Ω ≤
             ENNReal.ofReal (Kη + Ki i) * D := by
         intro i
-        -- `∂_i(η · u) =ᵃᵉ η · ∂_i u + (∂_i η) · u`.
         have hu_W1 : DeGiorgi.MemW1p (d := d) 2 u Ω := hu.memW1p
         have hae := chosenWeakPartial'_smul_smooth_bounded_ae (d := d)
           (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ hη_smooth h0
@@ -195,7 +173,6 @@ theorem wkpNorm_smul_globalSmooth_uniform
             have h := hbound 1 (by omega) x
             rwa [norm_iteratedFDeriv_one] at h) hu_W1 i
         rw [wkpNorm_congr_ae (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ hae]
-        -- Membership of the two summands.
         have h_du_mem : MemWkp (d := d) k 2 (chosenWeakPartial' 2 i u Ω) Ω :=
           hu.chosenWeakPartial_mem i
         have hu_k : MemWkp (d := d) k 2 u Ω := hu.le_succ
@@ -207,7 +184,6 @@ theorem wkpNorm_smul_globalSmooth_uniform
             (fun x => (fderiv ℝ η x) (EuclideanSpace.single i 1) * u x) Ω :=
           MemWkp.smul_smooth_bounded (d := d) k (by norm_num : (1 : ℝ≥0∞) ≤ 2)
             hΩ (h_partial_smooth i) (fun j hj x _ => h_partial_bound i j hj x) hu_k
-        -- Triangle, then the two `Ω`-uniform bounds.
         refine (wkpNorm_add_le (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ
           h_eta_du_mem h_dei_u_mem).trans ?_
         have hA : wkpNorm (d := d) k 2
@@ -225,7 +201,6 @@ theorem wkpNorm_smul_globalSmooth_uniform
           exact wkpNorm_mono_order (d := d) (Nat.le_succ k) u Ω
         refine (add_le_add hA hB).trans ?_
         rw [← add_mul, ← ENNReal.ofReal_add hKη_nn (hKi_nn i)]
-      -- Sum the partial terms and combine with the `L²` term.
       have hsum_le :
           (∑ i : Fin d, wkpNorm (d := d) k 2
             (chosenWeakPartial' 2 i (fun x => η x * u x) Ω) Ω) ≤
@@ -239,21 +214,12 @@ theorem wkpNorm_smul_globalSmooth_uniform
 
 end UniformMultiplier
 
-/-! ## The geometric setting for the headline -/
-
 section Headline
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
 /-- The local dimension of the chart, as a natural number. -/
 local notation "dimE" => Module.finrank ℝ E
-
-/-! ### Globally `C^∞` extension of a chart coefficient
-
-A chart coefficient `c` is `C^∞` on the open chart target only. Multiplying it
-by a smooth cutoff `ζ` that vanishes outside the chart target produces a
-globally `C^∞` function: on the chart target both factors are smooth, and off
-the topological support of `ζ` the product is identically zero. -/
 
 /-- A function `C^∞` on an open set `U` and vanishing off a closed subset
 `C ⊆ U` is globally `C^∞`. -/
@@ -318,14 +284,6 @@ private lemma exists_chartCutoff (α : M) {K : Set EuclN}
            hasCompactSupport := HasCompactSupport.of_support_subset_isCompact
              hL_compact ((subset_tsupport _).trans hζ_supp) }⟩
 
-/-! ### The quantitative single-term multiplier bound
-
-For a chart coefficient `c` and a globally `C^∞` compactly-supported function
-`v` supported inside `K`, the product `c · v` equals the globally `C^∞`
-extension `(ζ · c) · v`. The `Ω`-uniform multiplier estimate then bounds
-`wkpNorm m 2 (c · v) Ω''` by a constant — depending only on `c`, `K` and `m` —
-times `wkpNorm m 2 v Ω''`. -/
-
 /-- For a chart coefficient `c`, smooth on the chart target, the product
 `ζ · c` of the cutoff and `c` is globally `C^∞`. -/
 private lemma cutoff_mul_coeff_contDiff (α : M) {K : Set EuclN}
@@ -360,7 +318,6 @@ private lemma exists_wkpNorm_chartCoeff_mul_le (α : M) {K : Set EuclN}
           ENNReal.ofReal Kc * wkpNorm (d := dimE) m 2 v Ω'' := by
   classical
   obtain ⟨ζ⟩ := exists_chartCutoff (I := I) (M := M) α hK hK_target
-  -- The globally `C^∞` extension `ζ · c` and a global derivative bound.
   have hζc_smooth : ContDiff ℝ ∞ (fun y => ζ.toFun y * c y) :=
     cutoff_mul_coeff_contDiff (I := I) (M := M) α ζ hc
   obtain ⟨C, hC_nn, hC_bound⟩ :=
@@ -369,21 +326,16 @@ private lemma exists_wkpNorm_chartCoeff_mul_le (α : M) {K : Set EuclN}
       (η := fun y => ζ.toFun y * c y)
       (by simpa using hζc_smooth)
       (ζ.hasCompactSupport.mul_right) m
-  -- The derivative bound with the quantifiers in the order the multiplier
-  -- estimate consumes them.
   have hC_bound' : ∀ j ≤ m, ∀ x : EuclN, ‖iteratedFDeriv ℝ j
       (fun y => ζ.toFun y * c y) x‖ ≤ C := fun j hj x => hC_bound x j hj
-  -- The `Ω`-uniform multiplier constant for `ζ · c`.
   obtain ⟨K₀, hK₀_nn, hK₀⟩ :=
     wkpNorm_smul_globalSmooth_uniform (d := dimE) m
       (η := fun y => ζ.toFun y * c y) (by simpa using hζc_smooth) hC_nn hC_bound'
   refine ⟨K₀, hK₀_nn, ?_⟩
   intro v hv_smooth hv_cpt hv_K Ω'' hΩ''_open _hΩ''_target
-  -- `v ∈ W^{m,2}(Ω'')` for any open `Ω''`.
   have hv_mem : MemWkp (d := dimE) m 2 v Ω'' :=
     memWkp_of_smooth_compactSupport_anyOpen (d := dimE) hΩ''_open
       (by simpa using hv_smooth) hv_cpt (by norm_num : (1 : ℝ≥0∞) ≤ 2) m
-  -- `c · v = (ζ · c) · v` everywhere: on `K`, `ζ = 1`; off `K`, `v = 0`.
   have h_eq : (fun y => c y * v y) = (fun y => (ζ.toFun y * c y) * v y) := by
     funext y
     by_cases hyK : y ∈ K
@@ -397,14 +349,6 @@ private lemma exists_wkpNorm_chartCoeff_mul_le (α : M) {K : Set EuclN}
       (fun j hj x _ => hC_bound x j hj) hv_mem
   · rw [h_eq]
     exact hK₀ hΩ''_open hv_mem
-
-/-! ### Compactly-supported `C^∞` functions built from chart components
-
-The chart components `tensorComponentEuclid g r s S α P` and their
-chart-Euclidean partials are globally `C^∞` and compactly supported when `S` is
-supported inside the chart source. The lemmas below package the smoothness, the
-compact support, and the `K`-support of these functions, and record the order
-drop of `wkpNorm` under a chart-Euclidean partial. -/
 
 /-- The chart-Euclidean partial `euclidPartial l v` of a globally `C^∞`
 function `v` is globally `C^∞`. -/
@@ -468,15 +412,6 @@ lemma memWkp_euclidPartial {m : ℕ} {Ω'' : Set EuclN}
   classicalPartial_memWkp_of_memWkp_succ (d := dimE) hΩ''
     (by simpa using hv_smooth) hv l
 
-/-! ### The Christoffel correction as a finite sum of chart components
-
-The lower-order Christoffel correction `covDerivLowerOrderTerm g r s T α k Idx
-Jdx` is, on the chart target, the finite sum over component multi-index pairs of
-a `C^∞` coefficient times an undifferentiated chart component
-(`tensorComponentEuclid`): the raw chart component read at the chart-source
-preimage is exactly the chart-Euclidean push-forward of the raw component. This
-expansion is consumed by the coefficient-group bounds. -/
-
 /-- On the chart target the Christoffel correction `covDerivLowerOrderTerm`
 equals the finite sum over component multi-index pairs of `covDerivLowerOrderCoeff`
 against the chart components `tensorComponentEuclid g r s T α p`. -/
@@ -493,14 +428,6 @@ lemma covDerivLowerOrderTerm_eq_sum_componentEuclid
   rw [covDerivLowerOrderTerm_def]
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [tensorComponentEuclid_apply_of_mem (I := I) (M := M) g r s T α p hy]
-
-/-! ### Global smoothness and `W^{m,2}` bounds of a finite chart-coefficient sum
-
-A finite sum `∑ a, c a · v a` of products of a `C^∞` chart coefficient `c a` and
-a globally `C^∞` compactly-supported function `v a` supported inside `K` is again
-globally `C^∞` with compact support inside `K`, and its `W^{m,2}` norm on a
-precompact subdomain is controlled by the `W^{m,2}` norms of the `v a` with a
-constant uniform in the `v a`. The two helpers below record these facts. -/
 
 /-- For a chart coefficient `c` smooth on the chart target and a globally `C^∞`
 function `v` supported inside the compact `K ⊆ chartTargetEuclid α`, the product
@@ -578,7 +505,6 @@ private lemma exists_wkpNorm_chartCoeffSum_le (α : M) {K : Set EuclN}
           ENNReal.ofReal Kc *
             ∑ a ∈ S, wkpNorm (d := dimE) m 2 (v a) Ω'' := by
   classical
-  -- A per-coefficient multiplier constant `Kc a`, uniform in the function `v`.
   have hper : ∀ a ∈ S, ∃ Ka : ℝ, 0 ≤ Ka ∧
       ∀ {v : EuclN → ℝ}, ContDiff ℝ ∞ v → HasCompactSupport v →
       tsupport v ⊆ K → ∀ {Ω'' : Set EuclN}, IsOpen Ω'' →
@@ -591,13 +517,11 @@ private lemma exists_wkpNorm_chartCoeffSum_le (α : M) {K : Set EuclN}
   choose! Ka hKa_nn hKa using hper
   refine ⟨∑ a ∈ S, Ka a, Finset.sum_nonneg (fun a ha => hKa_nn a ha), ?_⟩
   intro v hv_smooth hv_cpt hv_K Ω'' hΩ''_open hΩ''_target
-  -- Membership of each summand.
   have h_term_mem : ∀ a ∈ S,
       MemWkp (d := dimE) m 2 (fun y => c a y * v a y) Ω'' :=
     fun a ha => (hKa a ha (hv_smooth a ha) (hv_cpt a ha) (hv_K a ha)
       hΩ''_open hΩ''_target).1
   refine ⟨memWkp_finset_sum (d := dimE) hΩ''_open S _ h_term_mem, ?_⟩
-  -- The common bound `D` is the full sum of the `v`-norms.
   set D : ℝ≥0∞ := ∑ a ∈ S, wkpNorm (d := dimE) m 2 (v a) Ω'' with hD_def
   have h_term_le : ∀ a ∈ S,
       wkpNorm (d := dimE) m 2 (fun y => c a y * v a y) Ω'' ≤
@@ -639,20 +563,10 @@ lemma exists_wkpNorm_chartCoeffSum_bddBy (α : M) {K : Set EuclN}
   intro v hv_cd hv_cpt hv_K Ω'' hΩ''_open hΩ''_target G hG
   obtain ⟨h_mem, h_le⟩ := hKc hv_cd hv_cpt hv_K hΩ''_open hΩ''_target
   refine ⟨h_mem, h_le.trans ?_⟩
-  -- `∑ a, wkpNorm m 2 (v a) ≤ S.card • G`, then absorb the cardinality.
   have hsum : (∑ a ∈ S, wkpNorm (d := dimE) m 2 (v a) Ω'') ≤ S.card • G :=
     Finset.sum_le_card_nsmul S _ G hG
   refine (mul_le_mul_of_nonneg_left hsum (zero_le _)).trans ?_
   rw [nsmul_eq_mul, ← mul_assoc, ENNReal.ofReal_mul hKc_nn, ENNReal.ofReal_natCast]
-
-/-! ### Agreement of functions and their chart-Euclidean partials on an open set
-
-Two functions equal on an open set `U` are a.e.-equal for the volume measure
-restricted to `U`, and their chart-Euclidean partials agree at every point of
-`U`. The two helpers below transfer these elementary facts; the second is what
-lets the gradient group of `tensorComponentWeakRHS` be replaced, on the
-precompact subdomain, by the chart-Euclidean partial of a globally `C^∞`
-function. -/
 
 /-- Two functions equal everywhere on an open set `U` are a.e.-equal for the
 volume measure restricted to `U`. -/

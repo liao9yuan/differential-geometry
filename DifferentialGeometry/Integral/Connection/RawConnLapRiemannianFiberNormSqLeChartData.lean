@@ -51,20 +51,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Auxiliary: bound the squared second Euclidean partial by the iterated
-Fréchet derivative norm squared.
-
-For a function `f : EuclN → ℝ` that is `C^2` at `y`, the second Euclidean
-partial `∂_l ∂_k f y` equals the iterated Fréchet derivative
-`iteratedFDeriv ℝ 2 f y` evaluated at `![e_l, e_k]`. Hence its absolute value
-is bounded by the operator norm `‖iteratedFDeriv ℝ 2 f y‖`. -/
 
 /-- For a `C^2` (at `y`) scalar function on Euclidean space, the squared
 second Euclidean partial `∂_l ∂_k f y` is bounded by the operator norm
@@ -77,24 +67,19 @@ lemma euclidPartial_sq_le_iteratedFDeriv_two_sq
     (euclidPartial (E := E) l (euclidPartial (E := E) k f) y) ^ 2 ≤
       ‖iteratedFDeriv ℝ 2 f y‖ ^ 2 := by
   classical
-  -- `fderiv f` is `ContDiffAt 1` at `y`, hence differentiable at `y`.
   have hf_fderiv_cd1 : ContDiffAt ℝ 1 (fderiv ℝ f) y := by
     have h2 : ContDiffAt ℝ ((1 : ℕ) + 1) f y := by
       simpa using hf
     exact h2.fderiv_right_succ
   have hf_fderiv_diff : DifferentiableAt ℝ (fderiv ℝ f) y :=
     hf_fderiv_cd1.differentiableAt_one
-  -- Single-basis-vector unit vectors.
   set ek : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) := EuclideanSpace.single k 1
   set el : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) := EuclideanSpace.single l 1
-  -- The CLM `eval ek : (Eucl →L[ℝ] ℝ) →L[ℝ] ℝ`.
   set evalEk : (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) →L[ℝ] ℝ) →L[ℝ] ℝ :=
     ContinuousLinearMap.apply ℝ ℝ ek with hEvalEk_def
-  -- `(fun z => fderiv ℝ f z ek) = evalEk ∘ (fderiv ℝ f)`.
   have h_apply_def :
       (fun z => fderiv ℝ f z ek) = evalEk ∘ (fderiv ℝ f) := by
     funext z; rfl
-  -- Chain rule for the composition.
   have h_diff_evalEk : DifferentiableAt ℝ evalEk (fderiv ℝ f y) :=
     evalEk.differentiable.differentiableAt
   have h_fderiv_evalEk_at :
@@ -110,26 +95,22 @@ lemma euclidPartial_sq_le_iteratedFDeriv_two_sq
     rw [h_apply_def]
     rw [fderiv_comp y h_diff_evalEk hf_fderiv_diff]
     rw [h_fderiv_evalEk_at]
-  -- Evaluate at `el`.
   have h_eval_el :
       fderiv ℝ (fun z => fderiv ℝ f z ek) y el =
         fderiv ℝ (fderiv ℝ f) y el ek := by
     rw [h_fderiv_app]
     simp [evalEk, ContinuousLinearMap.comp_apply,
       ContinuousLinearMap.apply_apply]
-  -- Connect to `iteratedFDeriv`.
   have h_two_apply :
       iteratedFDeriv ℝ 2 f y (![el, ek] : Fin 2 → _) =
         fderiv ℝ (fderiv ℝ f) y el ek := by
     have := iteratedFDeriv_two_apply (𝕜 := ℝ) f y (![el, ek])
     simpa using this
-  -- The LHS is `fderiv ℝ (fun z => fderiv ℝ f z ek) y el`.
   have h_lhs_value :
       euclidPartial (E := E) l (euclidPartial (E := E) k f) y =
         fderiv ℝ (fun z => fderiv ℝ f z ek) y el := by
     unfold euclidPartial
     rfl
-  -- Operator-norm bound on the iteratedFDeriv evaluation.
   have h_opNorm :
       ‖iteratedFDeriv ℝ 2 f y (![el, ek] : Fin 2 → _)‖ ≤
         ‖iteratedFDeriv ℝ 2 f y‖ *
@@ -140,7 +121,6 @@ lemma euclidPartial_sq_le_iteratedFDeriv_two_sq
   have h_prod : (∏ i : Fin 2, ‖(![el, ek] : Fin 2 → _) i‖) = 1 := by
     rw [Fin.prod_univ_two]
     simp [h_norm_el, h_norm_ek]
-  -- Combine.
   have h_value :
       euclidPartial (E := E) l (euclidPartial (E := E) k f) y =
         iteratedFDeriv ℝ 2 f y (![el, ek] : Fin 2 → _) := by
@@ -160,8 +140,6 @@ lemma euclidPartial_sq_le_iteratedFDeriv_two_sq
     rw [sq_abs]
   rw [h_sq]
   exact pow_le_pow_left₀ (abs_nonneg _) h_abs 2
-
-/-! ## Headline -/
 
 /-- **Pointwise bound: `riemannianFiberNormSq` of the raw tensor connection
 Laplacian by chart-`α` second-derivative and zeroth-derivative data.**
@@ -209,14 +187,11 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_on_pouTsupport_g
                     ((toEuclidean (E := E)) ((extChartAt I α) b))) ^ 2)) + 1) := by
   classical
   set n : ℕ := Module.finrank ℝ E with hn_def
-  -- Step 1: H bound.
   obtain ⟨C_H, hC_H_nn, hH⟩ :=
     riemannianFiberNormSq_le_raw_components_on_pouTsupport
       (I := I) (M := M) g r s α
-  -- Apply H to the bundled `rawTensorConnLapSmooth T₀`.
   set S : SmoothCcTensor g r s :=
     rawTensorConnLapSmooth (I := I) g r s T₀ with hS_def
-  -- Step 2: B.3 bound, per `(Idx, Jdx)`. Each yields a constant `K Idx Jdx`.
   have hB_each : ∀ Idx : Fin r → Fin n, ∀ Jdx : Fin s → Fin n,
       ∃ K : ℝ, 0 ≤ K ∧
         ∀ (b : M),
@@ -272,7 +247,6 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_on_pouTsupport_g
     rw [← hS_value]; exact hH_at
   set y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) :=
     (toEuclidean (E := E)) ((extChartAt I α) b) with hy_def
-  -- Per-IJ bound on `(rawComp Idx Jdx)^2`.
   have hPerIJ : ∀ Idx : Fin r → Fin n, ∀ Jdx : Fin s → Fin n,
       (tensorChartComponentRaw (I := I) (M := M) g r s
             S α Idx Jdx b) ^ 2 ≤
@@ -310,13 +284,7 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_on_pouTsupport_g
                       (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx))) y) ^ 2
               + 1) := hK_fn_bd Idx Jdx b hb_inter
       _ ≤ K_max * _ := mul_le_mul_of_nonneg_right (hKmax_bd Idx Jdx) h_sum_nn
-  -- Step 6: bridge `Σ_{kl} (∂_l ∂_k f)^2 ≤ n² ‖iteratedFDeriv 2 f‖^2`.
-  -- Use `chartPushedRaw_tensorChartComponentRaw_contDiffOn` and openness of
-  -- `chartTargetEuclid α` to get `ContDiffAt ℝ 2` on `y`.
   have hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α := by
-    -- From `b ∈ chartLeviCivitaGoodSet α`, `b` is in the chart source, so
-    -- `extChartAt I α b ∈ extChartAt I α target`, hence `toEuclidean … ∈
-    -- chartTargetEuclid`.
     have hb_good : b ∈ chartLeviCivitaGoodSet (I := I) α := hb_inter.2
     have hb_src : b ∈ (extChartAt I α).source :=
       chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hb_good
@@ -327,7 +295,6 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_on_pouTsupport_g
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have h_y_mem_nhds : chartTargetEuclid (I := I) (M := M) α ∈ nhds y :=
     h_open.mem_nhds hy_target
-  -- Per-IJ partial-sum to iteratedFDeriv-norm bound.
   have hPartialSum_le : ∀ Idx : Fin r → Fin n, ∀ Jdx : Fin s → Fin n,
       (∑ k : Fin n, ∑ l : Fin n,
         (euclidPartial (E := E) l
@@ -338,7 +305,6 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_on_pouTsupport_g
         (chartPushedRaw I α
           (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx)) y‖ ^ 2 := by
     intro Idx Jdx
-    -- `ContDiffOn ∞` on open ⇒ `ContDiffAt ∞` at `y`.
     have h_cd_on : ContDiffOn ℝ ∞
         (chartPushedRaw I α
           (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx))
@@ -354,18 +320,15 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_on_pouTsupport_g
           (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx)) y := by
       apply h_cd_at_inf.of_le
       decide
-    -- Set up shorthand.
     set f : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
       chartPushedRaw I α
         (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx)
       with hf_def
-    -- Each summand bounded by `‖iteratedFDeriv 2 f y‖^2`.
     have h_each : ∀ k l : Fin n,
         (euclidPartial (E := E) l (euclidPartial (E := E) k f) y) ^ 2 ≤
           ‖iteratedFDeriv ℝ 2 f y‖ ^ 2 := by
       intro k l
       exact euclidPartial_sq_le_iteratedFDeriv_two_sq h_cd_at_2 k l
-    -- Sum the per-(k,l) bounds.
     have h_sum :
         (∑ k : Fin n, ∑ l : Fin n,
           (euclidPartial (E := E) l (euclidPartial (E := E) k f) y) ^ 2) ≤
@@ -384,13 +347,6 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_on_pouTsupport_g
           (euclidPartial (E := E) l (euclidPartial (E := E) k f) y) ^ 2)
         ≤ (∑ k : Fin n, ∑ l : Fin n, ‖iteratedFDeriv ℝ 2 f y‖ ^ 2) := h_sum
       _ = nSq * ‖iteratedFDeriv ℝ 2 f y‖ ^ 2 := h_const_sum
-  -- Step 7: combine all bounds. The plan:
-  -- riemannianFiberNormSq ≤ C_H · Σ_IJ (rawComp_IJ)²
-  --                      ≤ C_H · Σ_IJ K_max · (Σ_{kl} (∂²f)² + 1)
-  --                      ≤ C_H · K_max · Σ_IJ (nSq · ‖iterFD f‖² + 1)
-  --                      ≤ C_H · K_max · (nSq + 1) · cardIJ · (Σ_IJ (‖iterFD f‖² + f²) + 1)
-  -- The final step absorbs the `+1` constants and the `nSq` factor.
-  -- Names for the sum-pieces.
   set bigSumPartial : ℝ :=
     ∑ Idx : Fin r → Fin n, ∑ Jdx : Fin s → Fin n,
       (∑ k : Fin n, ∑ l : Fin n,
@@ -418,14 +374,12 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_on_pouTsupport_g
         (chartPushedRaw I α
           (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx) y) ^ 2)
     with hBigSumGoal_def
-  -- bigSumGoal = bigSumIterFD + bigSumChartPushed.
   have hBigSumGoal_eq : bigSumGoal = bigSumIterFD + bigSumChartPushed := by
     rw [hBigSumGoal_def, hBigSumIterFD_def, hBigSumChartPushed_def]
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl ?_
     intro Idx _
     rw [← Finset.sum_add_distrib]
-  -- Non-negativity.
   have hBigSumPartial_nn : 0 ≤ bigSumPartial := by
     rw [hBigSumPartial_def]
     refine Finset.sum_nonneg (fun _ _ => ?_)
@@ -446,7 +400,6 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_on_pouTsupport_g
   have hBigSumGoal_nn : 0 ≤ bigSumGoal := by
     rw [hBigSumGoal_eq]
     linarith [hBigSumIterFD_nn, hBigSumChartPushed_nn]
-  -- Σ_IJ K_max · (innerSum + 1) = K_max · (bigSumPartial + cardIJ).
   have hSumOverIJ_constSum :
       (∑ Idx : Fin r → Fin n, ∑ Jdx : Fin s → Fin n, K_max *
         ((∑ k : Fin n, ∑ l : Fin n,
@@ -495,7 +448,6 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_on_pouTsupport_g
     rw [Finset.sum_add_distrib, ← Finset.mul_sum, Finset.sum_const]
     simp only [Finset.card_univ, Fintype.card_fun, Fintype.card_fin, nsmul_eq_mul]
     push_cast; ring
-  -- Bound `Σ_IJ (rawComp_IJ)^2 ≤ K_max · (bigSumPartial + cardIJ)`.
   have hSumIJ_rawCompSq :
       (∑ Idx : Fin r → Fin n,
         ∑ Jdx : Fin s → Fin n,
@@ -516,7 +468,6 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_on_pouTsupport_g
           refine Finset.sum_le_sum (fun Jdx _ => ?_)
           exact hPerIJ Idx Jdx
       _ = K_max * (bigSumPartial + cardIJ) := hSumOverIJ_constSum
-  -- Now: bigSumPartial ≤ nSq · bigSumIterFD.
   have hBigSumPartial_le :
       bigSumPartial ≤ nSq * bigSumIterFD := by
     rw [hBigSumPartial_def, hBigSumIterFD_def, Finset.mul_sum]
@@ -524,17 +475,6 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_on_pouTsupport_g
     rw [Finset.mul_sum]
     refine Finset.sum_le_sum (fun Jdx _ => ?_)
     exact hPartialSum_le Idx Jdx
-  -- Combine the two pieces.
-  -- K_max · (bigSumPartial + cardIJ)
-  --   ≤ K_max · (nSq · bigSumIterFD + cardIJ)
-  --   ≤ K_max · max(nSq, cardIJ) · (bigSumIterFD + 1)
-  --   ≤ K_max · (nSq + cardIJ) · (bigSumIterFD + 1)        (since max ≤ sum for nn)
-  -- And then `(bigSumIterFD + 1) ≤ (bigSumIterFD + bigSumChartPushed + 1) = bigSumGoal + 1`.
-  -- We follow the simpler path using `nSq + 1` outer factor.
-  -- Plan: C = C_H · cardIJ · K_max · (nSq + 1).
-  -- We want:
-  --   C_H · K_max · (bigSumPartial + cardIJ)
-  --     ≤ C_H · cardIJ · K_max · (nSq + 1) · (bigSumGoal + 1).
   have hCard_one_le : (1 : ℝ) ≤ cardIJ := by
     have hN_pos : 0 < n := Nat.pos_of_ne_zero (NeZero.ne (Module.finrank ℝ E))
     have h_n_one : (1 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hN_pos
@@ -576,8 +516,6 @@ end Integral
 end DifferentialGeometry
 
 end
-
-/-! ## Sanity check: axioms used by the headline. -/
 
 open DifferentialGeometry.Integral.Connection in
 #print axioms rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_on_pouTsupport_goodSet

@@ -66,8 +66,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -76,8 +74,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## Continuity / measurability of `chartAtlasPOU` weight -/
 
 omit [I.Boundaryless] [CompactSpace M] in
 private lemma chartAtlasPOU_continuous (α : M) :
@@ -88,8 +84,6 @@ omit [I.Boundaryless] [CompactSpace M] in
 private lemma chartAtlasPOU_measurable (α : M) :
     Measurable fun x : M => (chartAtlasPOU I M α : M → ℝ) x :=
   (chartAtlasPOU_continuous (I := I) (M := M) α).measurable
-
-/-! ## Sub-multiplicativity of the partition-of-unity weight -/
 
 omit [I.Boundaryless] [CompactSpace M] in
 private lemma enorm_pou_mul_le (α : M) (u : M → ℝ) (x : M) :
@@ -108,8 +102,6 @@ private lemma enorm_pou_mul_le (α : M) (u : M → ℝ) (x : M) :
       _ = |u x| := one_mul _
   rw [Real.enorm_eq_ofReal_abs, Real.enorm_eq_ofReal_abs]
   exact ENNReal.ofReal_le_ofReal habsmul
-
-/-! ## Subordination of `tsupport (ρα · u)` -/
 
 omit [I.Boundaryless] [CompactSpace M] in
 private lemma tsupport_pou_mul_subset_chartSource (α : M) (u : M → ℝ) :
@@ -147,8 +139,6 @@ private lemma tsupport_pou_mul_subset_tsupport_pou (α : M) (u : M → ℝ) :
     rw [hρ_zero]; ring
   exact closure_mono h_supp_sub
 
-/-! ## Chart-pushed agrees with chart-pushedRaw of `(ρα · u)` on chart target -/
-
 private lemma chartPushed_eq_chartPushedRaw_on_chartTarget
     (α : M) (u : M → ℝ) {y : EuclN}
     (hy : y ∈ DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α) :
@@ -161,8 +151,6 @@ private lemma chartPushed_eq_chartPushedRaw_on_chartTarget
   unfold DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
   rw [DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_apply_of_mem
     (I := I) (M := M) α (fun x : M => (chartAtlasPOU I M α : M → ℝ) x * u x) hy]
-
-/-! ## Compact set `K_α := toEuclidean '' (extChartAt α '' tsupport ρα)` -/
 
 private def kαCompact (α : M) : Set EuclN :=
   (toEuclidean : E ≃L[ℝ] EuclN) ''
@@ -257,8 +245,6 @@ private lemma chartPushedRaw_pou_mul_tsupport_subset_kα
     (I := I) (M := M) α u) ?_
   exact (kαCompact_isCompact (I := I) (M := M) α).isClosed
 
-/-! ## Density bound on `K_α` -/
-
 private lemma exists_density_sup_on_kα
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ M_sup : ℝ, 0 < M_sup ∧
@@ -284,8 +270,6 @@ private lemma exists_density_sup_on_kα
     rw [Set.not_nonempty_iff_eq_empty] at hKne
     rw [hKne] at hy
     exact absurd hy (Set.notMem_empty y)
-
-/-! ## eLpNorm bound: chart-pulled-weighted vs volume on `K_α` -/
 
 private lemma eLpNorm_chartPulledWeighted_le_density_volume_on_kα
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -357,14 +341,11 @@ private lemma eLpNorm_chartPulledWeighted_le_density_volume_on_kα
   gcongr
   rw [← ENNReal.ofReal_rpow_of_pos hM_sup_pos]
 
-/-! ## Headline: `eLpNorm` bound for measurable functions
-
-For any *measurable* `u : M → ℝ`, the `eLpNorm` of `chartPushed POU α u` against
+/-- For any *measurable* `u : M → ℝ`, the `eLpNorm` of `chartPushed POU α u` against
 the chart-pulled weighted measure restricted to the chart target is bounded
 above by a constant times the manifold `eLpNorm` of `u` against the Riemannian
 volume measure. The constant depends on the chart `α`, the metric `g`, and the
 partition of unity, but is uniform in `u`. -/
-
 theorem eLpNorm_chartPushed_chartPulledWeightedMeasure_restrict_le
     (g : SmoothRiemannianMetric I M) (α : M)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ⊤) :
@@ -447,7 +428,6 @@ theorem eLpNorm_chartPushed_chartPulledWeightedMeasure_restrict_le
         (chartPushedRaw_pou_mul_tsupport_subset_kα (I := I) (M := M) α u)
         hp_one hp_top
     have h_step2_raw := hC_K_bnd hv_meas hv_supp hv_image_sub_K_E
-    -- Convert riemannianMeasure to riemannianVolumeMeasure (definitionally equal).
     have h_step2 : eLpNorm
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α v) p
           ((volume : Measure EuclN).restrict
@@ -524,8 +504,6 @@ theorem eLpNorm_chartPushed_chartPulledWeightedMeasure_restrict_le
     rw [h_eLpNorm_zero]
     exact zero_le _
 
-/-! ## Globalised inverse chart for measurable representation -/
-
 /-- A globally Borel-measurable extension of `(extChartAt I α).symm` taking a
 fixed default value (here `α : M`) outside the chart target. -/
 private noncomputable def extChartAtSymmExt (α : M) : E → M := by
@@ -555,8 +533,6 @@ private lemma extChartAtSymmExt_measurable (α : M) :
     (DifferentialGeometry.Integral.Measure.measurableSet_extChartAt_target
       (I := I) (M := M) α)
 
-/-! ## `MemLp` of the chart-push for measurable functions in `MemLp 2 μ_g` -/
-
 /-- For a measurable `u : M → ℝ` that is in `MemLp 2 μ_g`, the chart-pushed
 function `chartPushed POU α u` is in `MemLp 2` of the chart-pulled weighted
 measure restricted to the chart target image. -/
@@ -570,19 +546,13 @@ theorem chartPushed_memLp_chartPulledWeightedMeasure_restrict_of_memLp
         ((chartPulledWeightedMeasure (I := I) g α).restrict
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α)) := by
   classical
-  -- Apply the headline `eLpNorm` bound.
   have hp_one : (1 : ℝ≥0∞) ≤ 2 := by norm_num
   have hp_top : (2 : ℝ≥0∞) ≠ ⊤ := by norm_num
   obtain ⟨C, hC_pos, hC_bnd⟩ :=
     eLpNorm_chartPushed_chartPulledWeightedMeasure_restrict_le (I := I) (M := M) g α
       (p := 2) hp_one hp_top
   refine ⟨?_, ?_⟩
-  · -- AEStronglyMeasurable: chartPushed POU α u is a product of measurable functions composed
-    -- with the chart, modulo a.e. agreement with the globally measurable extension.
-    -- Define a global Borel-measurable substitute for `chartPushed POU α u` on EuclN:
-    --   ψ(y) := ρα(extChartAtSymmExt α (toE.symm y)) * u(extChartAtSymmExt α (toE.symm y))
-    -- This is the composition of three measurable functions.
-    set ψ : EuclN → ℝ := fun y =>
+  · set ψ : EuclN → ℝ := fun y =>
         ((chartAtlasPOU I M α : M → ℝ)
           (extChartAtSymmExt (I := I) (M := M) α ((toEuclidean (E := E)).symm y))) *
         u (extChartAtSymmExt (I := I) (M := M) α ((toEuclidean (E := E)).symm y))
@@ -601,7 +571,6 @@ theorem chartPushed_memLp_chartPulledWeightedMeasure_restrict_of_memLp
       · exact (chartAtlasPOU_measurable (I := I) (M := M) α).comp
           (h_extSymm_meas.comp h_toE_symm_meas)
       · exact hu_meas.comp (h_extSymm_meas.comp h_toE_symm_meas)
-    -- ψ agrees with chartPushed POU α u on chartTargetEuclid α.
     have h_ψ_eq_chartPushed : ∀ y ∈ DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α,
         ψ y = DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed (I := I) (M := M)
@@ -630,17 +599,13 @@ theorem chartPushed_memLp_chartPulledWeightedMeasure_restrict_of_memLp
       refine Filter.Eventually.of_forall (fun y hy => ?_)
       exact (h_ψ_eq_chartPushed y hy).symm
     exact (hψ_meas.aestronglyMeasurable).congr h_aeeq.symm
-  · -- eLpNorm < ⊤.
-    refine lt_of_le_of_lt (hC_bnd hu_meas) ?_
+  · refine lt_of_le_of_lt (hC_bnd hu_meas) ?_
     apply ENNReal.mul_lt_top ENNReal.ofReal_lt_top
     exact hu_memLp.2
 
-/-! ## `eLpNorm` convergence preservation under chart push
-
-For measurable sequences `u_n, u : M → ℝ` with `u_n → u` in `Lp ℝ 2 μ_g`, the
+/-- For measurable sequences `u_n, u : M → ℝ` with `u_n → u` in `Lp ℝ 2 μ_g`, the
 chart-pushed sequence converges in `eLpNorm 2` against the chart-pulled
 weighted measure restricted to the chart target. -/
-
 theorem chartPushed_tendsto_chartPulledWeightedMeasure
     (g : SmoothRiemannianMetric I M) (α : M)
     {u : ℕ → M → ℝ} {u_lim : M → ℝ}
@@ -664,8 +629,6 @@ theorem chartPushed_tendsto_chartPulledWeightedMeasure
   obtain ⟨C, hC_pos, hC_bnd⟩ :=
     eLpNorm_chartPushed_chartPulledWeightedMeasure_restrict_le (I := I) (M := M) g α
       (p := 2) hp_one hp_top
-  -- For each n, use linearity of chartPushed:
-  --  chartPushed POU α (u n) y - chartPushed POU α u_lim y = chartPushed POU α (u n - u_lim) y.
   have h_chartPushed_sub : ∀ n,
       (fun y =>
         DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed (I := I) (M := M)
@@ -679,7 +642,6 @@ theorem chartPushed_tendsto_chartPulledWeightedMeasure
     funext y
     unfold DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
     ring
-  -- Bound: ∀ n, eLpNorm chart-side ≤ C · eLpNorm manifold-side.
   have h_bnd : ∀ n,
       eLpNorm (fun y =>
           DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed (I := I) (M := M)
@@ -694,7 +656,6 @@ theorem chartPushed_tendsto_chartPulledWeightedMeasure
     intro n
     rw [h_chartPushed_sub n]
     exact hC_bnd ((hu_meas n).sub hu_lim_meas)
-  -- Squeeze: 0 ≤ eLpNorm ≤ C · eLpNorm_n → 0.
   have h_rhs_tendsto :
       Filter.Tendsto (fun n => ENNReal.ofReal C *
           eLpNorm (fun x : M => u n x - u_lim x) 2

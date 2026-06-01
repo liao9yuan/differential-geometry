@@ -65,14 +65,6 @@ theorem pou_weighted_norm_equals_chart_component_norm_up_to_constant
             (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ∧
           (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ≤
             C * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal :=
-  -- At order `k = 0` the operator-norm aggregation
-  -- `tensorPouSobolevNorm g 0 T` and the Hilbert-Schmidt aggregation
-  -- `tensorPouSobolevHsNorm g 0 T` collapse to the same single integrand
-  -- term `chartAtlasPOU α · |T_{IJ}^α|²`: the derivative-order sum is
-  -- over `Finset.range 1 = {0}`, the HS basis-index sum is over the
-  -- singleton `Fin 0 → Fin n`, and `iteratedFDeriv ℝ 0 f y = f y`. This
-  -- exact fibrewise reduction is packaged as
-  -- `fibrewise_gram_twist_estimate` (with `c = C = 1`).
   fibrewise_gram_twist_estimate (I := I) (M := M) g r s
 
 end DifferentialGeometry.PDE.RicciFlow.HebeyBlock

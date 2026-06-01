@@ -49,14 +49,10 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Headline -/
 
 /-- **`riemannianFiberNormSq` is bounded by squared raw chart-`α` components on
 POU tsupport.**
@@ -94,15 +90,12 @@ theorem riemannianFiberNormSq_le_raw_components_on_pouTsupport
                   (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx b) ^ 2) := by
   classical
   set n : ℕ := Module.finrank ℝ E with hn_def
-  -- Step 1: obtain the N3 bound (Riemannian → chart-α frame summands).
   obtain ⟨C₃, hC₃_nn, hN3⟩ :=
     riemannianFiberNormSq_le_chartAlpha_summand_sum_on_pouTsupport
       (I := I) (M := M) g r s α
-  -- Step 2: obtain the N2 bound (chart-α frame summand → raw components²).
   obtain ⟨C₂, hC₂_nn, hN2⟩ :=
     fiberNormSqSummand_chartAlpha_le_raw_components_sq
       (I := I) (M := M) g r s α
-  -- Combine constants: C = C₃ * (n^r * n^s) * C₂.
   set cardIJ : ℝ := (n : ℝ) ^ r * (n : ℝ) ^ s with hcardIJ_def
   set C : ℝ := C₃ * cardIJ * C₂ with hC_def
   have hcardIJ_nn : 0 ≤ cardIJ := by
@@ -113,7 +106,6 @@ theorem riemannianFiberNormSq_le_raw_components_on_pouTsupport
     refine mul_nonneg (mul_nonneg hC₃_nn hcardIJ_nn) hC₂_nn
   refine ⟨C, hC_nonneg, ?_⟩
   intro S b hb
-  -- Sums of raw-components squared are nonneg.
   set RawSq : ℝ :=
     ∑ Idx' : Fin r → Fin n,
       ∑ Jdx' : Fin s → Fin n,
@@ -124,7 +116,6 @@ theorem riemannianFiberNormSq_le_raw_components_on_pouTsupport
     refine Finset.sum_nonneg (fun _ _ => ?_)
     refine Finset.sum_nonneg (fun _ _ => ?_)
     exact sq_nonneg _
-  -- Step A: from N3 — Riemannian fiber norm² ≤ C₃ · ∑ IJ fiberNormSqSummand_chartAlpha.
   have hA :
       riemannianFiberNormSq (I := I) (M := M) g r s b (S.toSection b) ≤
         C₃ *
@@ -135,7 +126,6 @@ theorem riemannianFiberNormSq_le_raw_components_on_pouTsupport
                 (fun i : Fin n =>
                   chartBasisVecFiber (I := I) α i b)
                 Idx Jdx) := hN3 S hb
-  -- Step B: each summand bounded by C₂ · RawSq.
   have hB_each : ∀ Idx : Fin r → Fin n, ∀ Jdx : Fin s → Fin n,
       fiberNormSqSummand (I := I) (M := M) g b r s (S.toSection b)
           n
@@ -145,7 +135,6 @@ theorem riemannianFiberNormSq_le_raw_components_on_pouTsupport
     intro Idx Jdx
     rw [hRawSq_def]
     exact hN2 S hb Idx Jdx
-  -- Sum the per-summand bounds over IJ.
   have hB_sum :
       (∑ Idx : Fin r → Fin n,
         ∑ Jdx : Fin s → Fin n,
@@ -160,7 +149,6 @@ theorem riemannianFiberNormSq_le_raw_components_on_pouTsupport
     refine Finset.sum_le_sum ?_
     intro Jdx _
     exact hB_each Idx Jdx
-  -- Evaluate the constant double sum.
   have hInner : ∀ _Idx : Fin r → Fin n,
       (∑ _Jdx : Fin s → Fin n, C₂ * RawSq) = ((n : ℝ) ^ s) * (C₂ * RawSq) := by
     intro _Idx
@@ -186,7 +174,6 @@ theorem riemannianFiberNormSq_le_raw_components_on_pouTsupport
     rw [Finset.card_univ, Fintype.card_fun, Fintype.card_fin, Fintype.card_fin]
     push_cast
     ring
-  -- Multiply through by C₃ ≥ 0 to get the post-Step-A bound.
   have h_sum_nn :
       0 ≤ ∑ Idx : Fin r → Fin n,
             ∑ Jdx : Fin s → Fin n,
@@ -214,7 +201,6 @@ theorem riemannianFiberNormSq_le_raw_components_on_pouTsupport
         ≤ (∑ _Idx : Fin r → Fin n,
             ∑ _Jdx : Fin s → Fin n, C₂ * RawSq) := hB_sum
       _ = cardIJ * (C₂ * RawSq) := hConstSum
-  -- Multiply through by C₃ ≥ 0.
   have hAB_scaled :
       C₃ *
         (∑ Idx : Fin r → Fin n,
@@ -225,15 +211,12 @@ theorem riemannianFiberNormSq_le_raw_components_on_pouTsupport
               Idx Jdx) ≤
         C₃ * (cardIJ * (C₂ * RawSq)) :=
     mul_le_mul_of_nonneg_left hAB_inner hC₃_nn
-  -- Final transitivity.
   have h_final :
       riemannianFiberNormSq (I := I) (M := M) g r s b (S.toSection b) ≤
         C₃ * (cardIJ * (C₂ * RawSq)) := hA.trans hAB_scaled
-  -- Identify C₃ * (cardIJ * (C₂ * RawSq)) = C * RawSq.
   have h_C_assoc : C₃ * (cardIJ * (C₂ * RawSq)) = C * RawSq := by
     rw [hC_def]; ring
   rw [h_C_assoc] at h_final
-  -- Unfold RawSq to match the goal form.
   rw [hRawSq_def] at h_final
   exact h_final
 
@@ -242,8 +225,6 @@ end Integral
 end DifferentialGeometry
 
 end
-
-/-! ## Sanity check: axioms used by the headline. -/
 
 open DifferentialGeometry.Integral.Connection in
 #print axioms riemannianFiberNormSq_le_raw_components_on_pouTsupport

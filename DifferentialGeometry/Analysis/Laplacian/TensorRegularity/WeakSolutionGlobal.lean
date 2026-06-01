@@ -101,45 +101,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-Match the convention in the surrounding chart-local Laplacian files: install the
-Borel σ-algebras locally, without leaking global instances onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The lower-order rotation coefficients
-
-When the inverse-Gram-rotated test section `rotatedTestSection g r s α P₀ χ` is
-substituted into the second slot of the component-coupled lower-order remainder
-`covLowerOrderIntegrand`, the chart components of the rotated test section enter
-through two channels: the zeroth-order Christoffel correction
-`covDerivLowerOrderTerm` of the rotated test section, and the chart-Euclidean
-partial derivative of the Euclidean push-forward of the rotated test section's
-raw chart component.
-
-* The Christoffel correction `covDerivLowerOrderTerm g r s (rotatedTestSection …)
-  α l Q.1 Q.2` is, by `covDerivLowerOrderTerm_def`, a finite linear combination
-  of raw chart components of the rotated test section; each such raw component is
-  the inverse-Gram entry `covChartMetricGramInv g r s α · p P₀` times the
-  chart-pushed bump (`rotatedTestSection_chartComp`). It therefore collapses to
-  the chart-pushed bump times the zeroth-order coefficient `loVCoeff` below.
-
-* The chart-Euclidean partial of the raw-component push-forward splits, by the
-  Leibniz rule, into the chart-pushed-bump term and the inverse-Gram-coefficient
-  term (`euclidPartial_chartPushedRaw_rotatedTestSection_eqOn`).
-
-Collecting the contributions, the rotated lower-order remainder is the
-chart-pushed bump `χ̃` times the **lower-order value coefficient**
-`covLowerOrderRotationValueCoeff` plus a finite sum, over chart directions `l`,
-of the chart-Euclidean partial `∂_l χ̃` times the **lower-order gradient
-coefficient** `covLowerOrderRotationGradCoeff`. -/
 
 /-- The collapsed Christoffel-correction coefficient: the value, on the chart
 target, of `covDerivLowerOrderTerm g r s (rotatedTestSection …) α l Q.1 Q.2`
@@ -253,12 +220,6 @@ lemma covLowerOrderRotationValueCoeff_def
                         lowerOrderRotationLOCoeff (I := I) (M := M)
                           g r s α P₀ l Q y) := rfl
 
-/-! ## The rotated Christoffel-correction collapse
-
-On the Euclidean chart target the zeroth-order Christoffel correction
-`covDerivLowerOrderTerm` of the rotated test section collapses to the
-chart-pushed bump times the collapsed coefficient `lowerOrderRotationLOCoeff`. -/
-
 /-- On the Euclidean chart target the Christoffel correction
 `covDerivLowerOrderTerm g r s (rotatedTestSection …) α l Q.1 Q.2` equals the
 collapsed coefficient `lowerOrderRotationLOCoeff` times the chart-pushed bump. -/
@@ -277,17 +238,8 @@ private lemma covDerivLowerOrderTerm_rotatedTestSection_eq
   classical
   rw [covDerivLowerOrderTerm_def, lowerOrderRotationLOCoeff, Finset.sum_mul]
   refine Finset.sum_congr rfl (fun p _ => ?_)
-  -- The raw chart component of the rotated test section at the multi-index `p`.
   rw [rotatedTestSection_chartComp (I := I) (M := M) g r s α P₀ hχs hχt p hy]
   ring
-
-/-! ## The rotated lower-order collapse
-
-On the Euclidean chart target the component-coupled lower-order remainder
-`covLowerOrderIntegrand` evaluated at the inverse-Gram-rotated test section
-collapses to the chart-pushed bump times the lower-order value coefficient plus a
-finite sum, over chart directions, of the chart-Euclidean partial of the
-chart-pushed bump times the lower-order gradient coefficient. -/
 
 /-- **The rotated lower-order collapse.** On the Euclidean chart target the
 component-coupled lower-order remainder `covLowerOrderIntegrand g r s T
@@ -314,8 +266,6 @@ theorem covLowerOrderIntegrand_rotated_collapse
   classical
   rw [covLowerOrderIntegrand_def, covLowerOrderRotationValueCoeff_def]
   unfold covLowerOrderRotationGradCoeff
-  -- The Leibniz split of the chart-Euclidean partial of the rotated test
-  -- section's raw component, valid at `y` in the chart target.
   have hleibniz : ∀ Q : CompIdx E r s, ∀ l : Fin (Module.finrank ℝ E),
       euclidPartial (E := E) l
           (chartPushedRaw I α
@@ -329,8 +279,6 @@ theorem covLowerOrderIntegrand_rotated_collapse
           euclidPartial (E := E) l (chartPushedRaw I α χ) y := fun Q l =>
     euclidPartial_chartPushedRaw_rotatedTestSection_eqOn (I := I) (M := M)
       g r s α P₀ hχs hχt Q l hy
-  -- Substitute the Christoffel collapse and the Leibniz split into each
-  -- `(P, Q, k, l)` summand, regrouping into a `χ̃`-part and a `∂_l χ̃`-part.
   have hsummand : ∀ P Q : CompIdx E r s, ∀ k l : Fin (Module.finrank ℝ E),
       chartInvGramEuclid (I := I) g α k l y *
           (euclidPartial (E := E) k
@@ -372,11 +320,9 @@ theorem covLowerOrderIntegrand_rotated_collapse
     rw [covDerivLowerOrderTerm_rotatedTestSection_eq (I := I) (M := M)
       g r s α P₀ hχs hχt l Q hy, hleibniz Q l]
     ring
-  -- Rewrite every inner summand and split the integrand into the two groups.
   rw [Finset.sum_congr rfl (fun P _ => Finset.sum_congr rfl (fun Q _ => by
     rw [Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl
       (fun l _ => hsummand P Q k l))]))]
-  -- Distribute each inner `(k, l)`-sum across the value / gradient split.
   have hsplit : ∀ P Q : CompIdx E r s,
       (∑ k : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
@@ -421,32 +367,24 @@ theorem covLowerOrderIntegrand_rotated_collapse
                 covChartMetricGramInv (I := I) (M := M) g r s α y Q P₀) *
               euclidPartial (E := E) l (chartPushedRaw I α χ) y := by
     intro P Q
-    -- Distribute every inner `(k, l)`-sum across the two summands.
     simp only [Finset.sum_add_distrib]
     congr 1
-    · -- The value group: factor the chart-pushed bump out of the double sum.
-      rw [Finset.sum_mul]
+    · rw [Finset.sum_mul]
       refine Finset.sum_congr rfl (fun k _ => ?_)
       rw [Finset.sum_mul]
-    · -- The gradient group: swap the `k`- and `l`-sums, factor `∂_l χ̃`.
-      rw [Finset.sum_comm]
+    · rw [Finset.sum_comm]
       refine Finset.sum_congr rfl (fun l _ => ?_)
       rw [Finset.sum_mul]
   rw [Finset.sum_congr rfl (fun P _ => Finset.sum_congr rfl (fun Q _ => by
     rw [hsplit P Q, mul_add]))]
-  -- Collect: the value group is `valueCoeff · χ̃`, the gradient group is
-  -- `∑_l gradCoeff_l · ∂_l χ̃`.
   simp only [Finset.sum_add_distrib]
   congr 1
-  · -- The value group.
-    rw [Finset.sum_mul]
+  · rw [Finset.sum_mul]
     refine Finset.sum_congr rfl (fun P _ => ?_)
     rw [Finset.sum_mul]
     refine Finset.sum_congr rfl (fun Q _ => ?_)
     rw [mul_assoc]
-  · -- The gradient group: pull the `∂_l χ̃` factor and the `l`-sum outermost.
-    -- Both sides equal the fully expanded sum over `(P, Q, l, k)`.
-    have hLHS :
+  · have hLHS :
         (∑ P : CompIdx E r s, ∑ Q : CompIdx E r s,
           covChartMetricGram (I := I) (M := M) g r s α P Q y *
             ∑ l : Fin (Module.finrank ℝ E),
@@ -464,7 +402,6 @@ theorem covLowerOrderIntegrand_rotated_collapse
                     g r s T α k P.1 P.2 y *
                   covChartMetricGramInv (I := I) (M := M) g r s α y Q P₀) *
                 euclidPartial (E := E) l (chartPushedRaw I α χ) y := by
-      -- Pull every `∑_l` to the outside, in three commutation steps.
       have h1 : ∀ P Q : CompIdx E r s,
           covChartMetricGram (I := I) (M := M) g r s α P Q y *
               ∑ l : Fin (Module.finrank ℝ E),
@@ -487,7 +424,6 @@ theorem covLowerOrderIntegrand_rotated_collapse
         rw [← mul_assoc, Finset.mul_sum, Finset.sum_mul]
       rw [Finset.sum_congr rfl (fun P _ => Finset.sum_congr rfl
         (fun Q _ => h1 P Q))]
-      -- Swap `∑_Q ∑_l → ∑_l ∑_Q` under `∑_P`, then `∑_P ∑_l → ∑_l ∑_P`.
       rw [Finset.sum_congr rfl (fun P (_ : P ∈ (Finset.univ : Finset (CompIdx E r s))) =>
         Finset.sum_comm (s := (Finset.univ : Finset (CompIdx E r s)))
           (t := (Finset.univ : Finset (Fin (Module.finrank ℝ E)))))]
@@ -517,17 +453,6 @@ theorem covLowerOrderIntegrand_rotated_collapse
       refine Finset.sum_congr rfl (fun Q _ => ?_)
       rw [Finset.mul_sum, Finset.sum_mul]
     rw [hLHS, hRHS]
-
-/-! ## Smoothness of the lower-order rotation coefficients
-
-Every constituent of the lower-order rotation coefficients is `C^∞` on the
-Euclidean chart target: the chart-frame tensor-metric Gram `covChartMetricGram`,
-the un-weighted inverse Gram `chartInvGramEuclid`, the inverse-Gram entries
-`covChartMetricGramInv`, the lower-order correction coefficients
-`covDerivLowerOrderCoeff`, the Christoffel corrections `covDerivLowerOrderTerm`,
-the chart-Euclidean partials of the raw-component push-forwards, and the
-chart-Euclidean partial of the inverse-Gram entry. A finite sum and product of
-`C^∞` functions is `C^∞`. -/
 
 /-- The `l`-th chart-Euclidean partial derivative of a function `C^∞` on the
 Euclidean chart target is again `C^∞` on the chart target. -/
@@ -647,14 +572,6 @@ theorem covLowerOrderRotationValueCoeff_contDiffOn
       (covChartMetricGramInv_entry_contDiffOn (I := I) (M := M) g r s α Q P₀)
   exact ((hdkT.mul hloVc).add (hloT.mul hdlGinv)).add (hloT.mul hloVc)
 
-/-! ## The test-bump-free coefficient of the principal rotation remainder
-
-The first-order rotation remainder `covPrincipalRotationRemainder` of the
-principal part contains the chart-pushed bump `χ̃` as a literal factor in every
-summand. The **principal rotation coefficient** `covPrincipalRotationCoeff` is
-that remainder with the chart-pushed bump stripped out: a test-bump-independent
-`C^∞` function on the Euclidean chart target. -/
-
 /-- **The test-bump-free coefficient of the principal rotation remainder.** The
 first-order rotation remainder `covPrincipalRotationRemainder` divided by the
 chart-pushed bump: the contributions in which the chart-Euclidean partial `∂_l`
@@ -717,7 +634,6 @@ lemma covPrincipalRotationRemainder_eq_coeff_mul
   refine Finset.sum_congr rfl (fun P _ => ?_)
   rw [Finset.sum_mul]
   refine Finset.sum_congr rfl (fun Q _ => ?_)
-  -- For the fixed `(P, Q)`-summand: `covG · (∑ rem) = (covG · ∑ coeff) · χ̃`.
   have hinner :
       (∑ k : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
@@ -763,17 +679,6 @@ theorem covPrincipalRotationCoeff_contDiffOn
       g r s T α k P.1 P.2
   · exact euclidPartial_contDiffOn_target (I := I) (M := M) α l
       (covChartMetricGramInv_entry_contDiffOn (I := I) (M := M) g r s α Q P₀)
-
-/-! ## The explicit test-function-independent right-hand side
-
-Collecting the non-principal contributions of the chart-pulled global weak
-equation produces the explicit, test-function-independent Euclidean right-hand
-side `tensorComponentWeakRHS`. On the Euclidean chart target it is the chart
-density times the bump-independent source coefficient, minus the chart density
-times the principal rotation coefficient, minus the chart density times the
-lower-order value coefficient, plus the integration-by-parts divergence of the
-chart density times the lower-order gradient coefficient. Off the chart target
-it is `0`. -/
 
 /-- The chart-density-weighted lower-order gradient coefficient in chart direction
 `l`: the coefficient whose chart-Euclidean divergence is the integration-by-parts
@@ -889,16 +794,6 @@ lemma tensorComponentWeakRHS_apply_of_notMem
   unfold tensorComponentWeakRHS
   rw [if_neg hy]
 
-/-! ## Smoothness of the explicit right-hand side
-
-The explicit right-hand side `tensorComponentWeakRHS` is globally `C^∞`: on the
-Euclidean chart target each constituent — the chart density, the source
-coefficient, the principal-rotation coefficient, the lower-order value and
-gradient coefficients, and the chart-Euclidean partial of the density-weighted
-gradient coefficient — is `C^∞`, and the whole right-hand side is supported
-inside the compact union of the Euclidean images of the topological supports of
-`T` and `F`, which lies inside the open chart target. -/
-
 /-- A function that is `C^∞` on an open set `U` and vanishes off a closed set
 `C ⊆ U` is globally `C^∞`. -/
 private lemma contDiff_of_contDiffOn_zero_off_closed_local
@@ -957,7 +852,6 @@ private lemma tensorComponentEuclid_eq_zero_off_image
     refine chartPushedRaw_eq_zero_off_image_tsupport (I := I) (M := M)
       (u := tensorChartComponentRaw (I := I) (M := M) g r s S α P.1 P.2)
       α hyT (fun hmem => hy ?_)
-    -- `tsupport (raw component) ⊆ tsupport S.toFun`.
     have hsub := tensorChartComponentRaw_tsupport_subset (I := I) (M := M)
       g r s S α P.1 P.2
     exact (Set.image_mono (Set.image_mono hsub)) hmem
@@ -970,7 +864,6 @@ private lemma image_tsupport_isCompact
     (S : SmoothCcTensor g r s) (α : M)
     (hS_supp : tsupport S.toFun ⊆ (chartAt H α).source) :
     IsCompact (toEuclidean '' ((extChartAt I α) '' tsupport S.toFun)) := by
-  -- `extChartAt I α` is continuous on `tsupport S.toFun ⊆ chart source`.
   have hcontOn : ContinuousOn (extChartAt I α) (tsupport S.toFun) := by
     refine (continuousOn_extChartAt (I := I) α).mono ?_
     intro x hx
@@ -990,7 +883,6 @@ private lemma image_tsupport_subset_target
     toEuclidean '' ((extChartAt I α) '' tsupport S.toFun) ⊆
       chartTargetEuclid (I := I) (M := M) α := by
   rintro y ⟨w, ⟨x, hx, rfl⟩, rfl⟩
-  -- `extChartAt I α x ∈ (extChartAt I α).target` since `x` is in the chart source.
   refine ⟨(extChartAt I α) x, ?_, rfl⟩
   have hx_src : x ∈ (extChartAt I α).source := by
     rw [extChartAt_source_eq_chartAt_source (I := I)]
@@ -1017,8 +909,6 @@ theorem tensorComponentWeakRHS_contDiff
   have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) α
-  -- The compact barrier: the union of the Euclidean images of `tsupport T` and
-  -- `tsupport F`.
   set CT : Set EuclN := toEuclidean '' ((extChartAt I α) '' tsupport T.toFun)
     with hCT_def
   set CF : Set EuclN := toEuclidean '' ((extChartAt I α) '' tsupport F.toFun)
@@ -1031,15 +921,12 @@ theorem tensorComponentWeakRHS_contDiff
     image_tsupport_subset_target (I := I) (M := M) g r s T α hT_supp
   have hCF_target : CF ⊆ chartTargetEuclid (I := I) (M := M) α :=
     image_tsupport_subset_target (I := I) (M := M) g r s F α hF_supp
-  -- The barrier `K' := CT ∪ CF` is compact and inside the chart target.
   have hK'_compact : IsCompact (CT ∪ CF) := hCT_compact.union hCF_compact
   have hK'_target : CT ∪ CF ⊆ chartTargetEuclid (I := I) (M := M) α :=
     Set.union_subset hCT_target hCF_target
-  -- The chart density and the four chart coefficients are `C^∞` on the target.
   have hdensity : ContDiffOn ℝ ∞ (densityOnEuclid (I := I) g α)
       (chartTargetEuclid (I := I) (M := M) α) :=
     densityOnEuclid_contDiffOn (I := I) g α
-  -- The body of `tensorComponentWeakRHS` is `C^∞` on the chart target.
   have hbody : ContDiffOn ℝ ∞
       (fun y : EuclN =>
         densityOnEuclid (I := I) g α y *
@@ -1068,14 +955,12 @@ theorem tensorComponentWeakRHS_contDiff
       (hdensity.mul (covLowerOrderRotationValueCoeff_contDiffOn
         (I := I) (M := M) g r s T α P₀))).add ?_
     exact ContDiffOn.sum (fun l _ => hgrad l)
-  -- `tensorComponentWeakRHS` is `C^∞` on the chart target.
   have hcontDiffOn : ContDiffOn ℝ ∞
       (tensorComponentWeakRHS (I := I) (M := M) g r s T F α hK hK_target P₀)
       (chartTargetEuclid (I := I) (M := M) α) := by
     refine hbody.congr (fun y hy => ?_)
     exact (tensorComponentWeakRHS_apply_of_mem (I := I) (M := M)
       g r s T F α hK hK_target P₀ hy)
-  -- Off the barrier `K'`, the right-hand side vanishes.
   have hzero : ∀ y, y ∉ CT ∪ CF →
       tensorComponentWeakRHS (I := I) (M := M) g r s T F α hK hK_target P₀ y = 0 := by
     intro y hy
@@ -1084,15 +969,12 @@ theorem tensorComponentWeakRHS_contDiff
     by_cases hyT : y ∈ chartTargetEuclid (I := I) (M := M) α
     · rw [tensorComponentWeakRHS_apply_of_mem (I := I) (M := M)
         g r s T F α hK hK_target P₀ hyT]
-      -- The source coefficient vanishes: every term carries a `tensorComponentEuclid F`.
       have hS0 : sourcePairingCoeff (I := I) (M := M) g r s F α P₀ y = 0 := by
         rw [sourcePairingCoeff_def]
         refine Finset.sum_eq_zero (fun Q _ => ?_)
         refine mul_eq_zero_of_right _ (Finset.sum_eq_zero (fun P _ => ?_))
         rw [tensorComponentEuclid_eq_zero_off_image (I := I) (M := M)
           g r s F α P (by rw [← hCF_def]; exact hyCF), mul_zero]
-      -- The principal rotation coefficient vanishes: every term carries
-      -- `∂_k (chartPushedRaw (tensorChartComponentRaw T))`.
       have hpush_zero : ∀ (Idx : Fin r → Fin (Module.finrank ℝ E))
           (Jdx : Fin s → Fin (Module.finrank ℝ E)),
           ∀ z, z ∉ CT →
@@ -1117,7 +999,6 @@ theorem tensorComponentWeakRHS_contDiff
               (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx)) y = 0 :=
         fun k Idx Jdx => euclidPartial_eq_zero_off_closed (E := E) hClosedCT
           (hpush_zero Idx Jdx) k hyCT
-      -- The Christoffel correction of `T` vanishes off `CT`.
       have hloT_zero : ∀ (k : Fin (Module.finrank ℝ E))
           (Idx : Fin r → Fin (Module.finrank ℝ E))
           (Jdx : Fin s → Fin (Module.finrank ℝ E)),
@@ -1125,7 +1006,6 @@ theorem tensorComponentWeakRHS_contDiff
         intro k Idx Jdx
         rw [covDerivLowerOrderTerm_def]
         refine Finset.sum_eq_zero (fun p _ => ?_)
-        -- `tensorChartComponentRaw … T … p` read at the chart preimage of `y`.
         have hraw0 : tensorChartComponentRaw (I := I) (M := M) g r s T α p.1 p.2
             ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) = 0 := by
           have := hpush_zero p.1 p.2 y hyCT
@@ -1133,7 +1013,6 @@ theorem tensorComponentWeakRHS_contDiff
           · rwa [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hyT'] at this
           · exact absurd hyT hyT'
         rw [hraw0, mul_zero]
-      -- The principal rotation coefficient vanishes.
       have hP0 : covPrincipalRotationCoeff (I := I) (M := M) g r s T α P₀ y = 0 := by
         rw [covPrincipalRotationCoeff_def]
         refine Finset.sum_eq_zero (fun P _ => ?_)
@@ -1141,7 +1020,6 @@ theorem tensorComponentWeakRHS_contDiff
         refine mul_eq_zero_of_right _ (Finset.sum_eq_zero (fun k _ => ?_))
         refine Finset.sum_eq_zero (fun l _ => ?_)
         rw [hdkT_zero k P.1 P.2]; ring
-      -- The lower-order value coefficient vanishes.
       have hV0 : covLowerOrderRotationValueCoeff (I := I) (M := M)
           g r s T α P₀ y = 0 := by
         rw [covLowerOrderRotationValueCoeff_def]
@@ -1150,8 +1028,6 @@ theorem tensorComponentWeakRHS_contDiff
         refine mul_eq_zero_of_right _ (Finset.sum_eq_zero (fun k _ => ?_))
         refine Finset.sum_eq_zero (fun l _ => ?_)
         rw [hdkT_zero k P.1 P.2, hloT_zero k P.1 P.2]; ring
-      -- The lower-order gradient partial vanishes: `weightedGradCoeff` is `0`
-      -- on the open set `chartTargetEuclid α \ CT`, a neighbourhood of `y`.
       have hGrad0 : ∀ l : Fin (Module.finrank ℝ E),
           euclidPartial (E := E) l
             (weightedGradCoeff (I := I) (M := M) g r s T α P₀ l) y = 0 := by
@@ -1163,8 +1039,6 @@ theorem tensorComponentWeakRHS_contDiff
           ⟨hyT, hyCT⟩
         refine euclidPartial_eq_zero_of_open_zero (E := E) hUopen hyU
           (fun z hz => ?_) l
-        -- On `chartTargetEuclid α \ CT` the Christoffel correction of `T`
-        -- vanishes, hence so does `weightedGradCoeff`.
         unfold weightedGradCoeff
         refine mul_eq_zero_of_right _ ?_
         rw [covLowerOrderRotationGradCoeff_def]

@@ -82,19 +82,12 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Canonical measurable-space and Borel-space instances on `E` and `M`
-
-File-local Borel structures, matching the other files in this directory.
-Declared `local` so they do not leak into external typeclass search. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 namespace SmoothCcTensor
-
-/-! ## A uniform-inducing form of the dense embedding `toL2` -/
 
 section UniformInducing
 
@@ -113,8 +106,6 @@ Mathlib `ContinuousLinearMap.extend` extension API used to define
 `extendL2` below. -/
 theorem isUniformInducing_toL2 :
     IsUniformInducing (toL2 (g := g) (r := r) (s := s)) := by
-  -- The underlying function of `toL2` is the canonical coercion to the
-  -- Hausdorff completion, which is uniform-inducing by Mathlib.
   have hcoe : (toL2 (g := g) (r := r) (s := s) :
         SmoothCcTensor g r s → TensorL2 r s g) =
       ((↑) : SmoothCcTensor g r s →
@@ -128,8 +119,6 @@ theorem isUniformInducing_toL2 :
   exact UniformSpace.Completion.isUniformInducing_coe _
 
 end UniformInducing
-
-/-! ## Lift to a complete codomain -/
 
 section ExtendL2
 
@@ -172,8 +161,6 @@ theorem extendL2_unique (T : SmoothCcTensor g r s →L[ℝ] F)
 
 end ExtendL2
 
-/-! ## Lift between completions of different `(r, s)`-orders -/
-
 section MapL2
 
 variable [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
@@ -203,8 +190,6 @@ embedding of the image. -/
     (S : SmoothCcTensor g r₁ s₁) :
     mapL2 T ((toL2 (g := g) (r := r₁) (s := s₁)) S) =
       (toL2 (g := g) (r := r₂) (s := s₂)) (T S) := by
-  -- Reduce both sides to the canonical coercion to the Hausdorff
-  -- completion and use the Mathlib `completion_apply_coe` lemma.
   have hS := toL2_apply (g := g) (r := r₁) (s := s₁) S
   have hTS := toL2_apply (g := g) (r := r₂) (s := s₂) (T S)
   rw [hS, hTS]
@@ -223,17 +208,11 @@ theorem mapL2_unique
     (h : U.comp (toL2 (g := g) (r := r₁) (s := s₁)) =
       (toL2 (g := g) (r := r₂) (s := s₂)).comp T) :
     mapL2 T = U := by
-  -- A continuous linear map on the completion is determined by its
-  -- values on the dense range of `toL2`. We show that `mapL2 T` and
-  -- `U` agree on every embedded smooth section, then extend by
-  -- continuity.
   refine ContinuousLinearMap.ext fun x => ?_
   refine UniformSpace.Completion.induction_on (α := SmoothCcTensor g r₁ s₁)
       (p := fun y => (mapL2 T) y = U y) x ?_ ?_
   · exact isClosed_eq (mapL2 T).continuous U.continuous
   · intro a
-    -- Translate the canonical coercion through `toL2` and unfold both
-    -- sides on the dense subset.
     have hcoe :
         (a : UniformSpace.Completion (SmoothCcTensor g r₁ s₁)) =
           (toL2 (g := g) (r := r₁) (s := s₁)) a :=

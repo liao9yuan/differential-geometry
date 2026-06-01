@@ -83,8 +83,6 @@ open DifferentialGeometry.Analysis.Laplacian.ChosenThirdMixedPartialChartPushed
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -93,8 +91,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Auxiliary public definition: second weak partial of `chosenFChartDeriv` -/
 
 /-- The canonical chosen weak `l₂`-partial of `chosenFChartDeriv g α hu_h l₁`
 on `chartTargetEuclid α`. Used inside `fChartEffTwiceNumerator` to package the
@@ -109,42 +105,29 @@ noncomputable def fChartDeriv2
     (chosenFChartDeriv (I := I) (M := M) g α hu_h l₁)
     (chartTargetEuclid (I := I) (M := M) α)
 
-/-! ## The numerator: explicit combination of chart-pulled contributions
-
-The numerator records the right-hand side of the twice-integrated
-differentiated chart-bilinear identity, before division by the chart-pulled
-density. It is the explicit sum of 13 summands, organised into five layers.
--/
-
 /-- The numerator of `fChartEffTwice` before division by the density. -/
 noncomputable def fChartEffTwiceNumerator
     (g : SmoothRiemannianMetric I M) (α : M)
     (l₁ l₂ : Fin (Module.finrank ℝ E))
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
     (y : EuclN) : ℝ :=
-  -- Layer (A.1): ∂_j ∂_{l₂} a · D₁.weak_partial_deriv (= chosenSecond(i, l₁)).
   (∑ i : Fin (Module.finrank ℝ E),
     ∑ j : Fin (Module.finrank ℝ E),
       (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₂) y)
           (EuclideanSpace.single j 1) *
         chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₁ y)
-  -- Layer (A.2): ∂_{l₂} a · chosenThird(i, l₁, j).
   + (∑ i : Fin (Module.finrank ℝ E),
       ∑ j : Fin (Module.finrank ℝ E),
         weightedInvGramDerivOnEuclid (I := I) g α i j l₂ y *
           chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l₁ j y)
-  -- Layer (A.3): -∂_{l₂} c · D₁.u_chart_deriv (= base.weak_partial l₁).
   - densityDerivOnEuclid (I := I) g α l₂ y *
       (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
         (laplacianDomainPow_succ_subset_laplacianDomain
           (I := I) (M := M) g 1 hu_h)).weak_partial l₁ y
-  -- Layer (B.1): ∂_{l₂} c · D₁.f_chart_deriv (= chosenFChartDeriv l₁).
   + densityDerivOnEuclid (I := I) g α l₂ y *
       chosenFChartDeriv (I := I) (M := M) g α hu_h l₁ y
-  -- Layer (B.2): c · f_chart_deriv2 (= fChartDeriv2 l₁ l₂).
   + densityOnEuclid (I := I) g α y *
       fChartDeriv2 (I := I) (M := M) g α hu_h l₁ l₂ y
-  -- Layer (C.1): ∂_j ∂_{l₂} ∂_{l₁} a · base.weak_partial.
   + (∑ i : Fin (Module.finrank ℝ E),
       ∑ j : Fin (Module.finrank ℝ E),
         (fderiv ℝ (weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂) y)
@@ -152,42 +135,33 @@ noncomputable def fChartEffTwiceNumerator
           (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
             (laplacianDomainPow_succ_subset_laplacianDomain
               (I := I) (M := M) g 1 hu_h)).weak_partial i y)
-  -- Layer (C.2): ∂_{l₂} ∂_{l₁} a · chosenSecond(i, j).
   + (∑ i : Fin (Module.finrank ℝ E),
       ∑ j : Fin (Module.finrank ℝ E),
         weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂ y *
           chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i j y)
-  -- Layer (C.3): ∂_j ∂_{l₁} a · chosenSecond(i, l₂).
   + (∑ i : Fin (Module.finrank ℝ E),
       ∑ j : Fin (Module.finrank ℝ E),
         (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₁) y)
             (EuclideanSpace.single j 1) *
           chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₂ y)
-  -- Layer (C.4): ∂_{l₁} a · chosenThird(i, l₂, j).
   + (∑ i : Fin (Module.finrank ℝ E),
       ∑ j : Fin (Module.finrank ℝ E),
         weightedInvGramDerivOnEuclid (I := I) g α i j l₁ y *
           chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l₂ j y)
-  -- Layer (D.1): -∂_{l₂} ∂_{l₁} c · base.u_chart.
   - densitySecondDerivOnEuclid (I := I) g α l₁ l₂ y *
       (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
         (laplacianDomainPow_succ_subset_laplacianDomain
           (I := I) (M := M) g 1 hu_h)).u_chart y
-  -- Layer (D.2): -∂_{l₁} c · base.weak_partial(l₂).
   - densityDerivOnEuclid (I := I) g α l₁ y *
       (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
         (laplacianDomainPow_succ_subset_laplacianDomain
           (I := I) (M := M) g 1 hu_h)).weak_partial l₂ y
-  -- Layer (E.1): ∂_{l₂} ∂_{l₁} c · base.f_chart.
   + densitySecondDerivOnEuclid (I := I) g α l₁ l₂ y *
       (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
         (laplacianDomainPow_succ_subset_laplacianDomain
           (I := I) (M := M) g 1 hu_h)).f_chart y
-  -- Layer (E.2): ∂_{l₁} c · chosenFChartDeriv(l₂).
   + densityDerivOnEuclid (I := I) g α l₁ y *
       chosenFChartDeriv (I := I) (M := M) g α hu_h l₂ y
-
-/-! ## The effective chart-pulled `L²` source -/
 
 /-- The effective chart-pulled `L²` source `fChartEffTwice g α l₁ l₂ hu_h`.
 Defined as the indicator of `chartImagePOUTsupport α` applied to
@@ -233,8 +207,6 @@ theorem density_mul_fChartEffTwice_eq_indicator_numerator
     field_simp
   · rw [Set.indicator_of_notMem hy_K, Set.indicator_of_notMem hy_K, mul_zero]
 
-/-! ## Support property -/
-
 /-- The support of `fChartEffTwice g α l₁ l₂ hu_h` is contained in
 `chartImagePOUTsupport α`. -/
 theorem fChartEffTwice_supported_in_chartImagePOUTsupport
@@ -245,18 +217,6 @@ theorem fChartEffTwice_supported_in_chartImagePOUTsupport
       chartImagePOUTsupport (I := I) (M := M) α := by
   unfold fChartEffTwice
   exact Set.support_indicator_subset
-
-/-! ## Weighted `L²` membership
-
-Strategy: each summand of the numerator is `MemLp 2 (volume.restrict K)` for
-`K := chartImagePOUTsupport α` (a compact subset of `chartTargetEuclid α`).
-The sum is `MemLp 2 (volume.restrict K)`. Multiplying by `1 / densityOnEuclid`
-(continuous, bounded above on `K`) keeps the function in
-`MemLp 2 (volume.restrict K)`. The indicator construction plus a
-`weighted ≤ c_max · volume` bound on `K` yields the headline weighted `L²`
-claim. -/
-
-/-! ### Boundedness on `K` for continuous-on-`chartTargetEuclid α` factors -/
 
 private lemma exists_bound_continuousOn_compact
     {f : EuclN → ℝ} {α : M}
@@ -279,8 +239,6 @@ private lemma exists_bound_continuousOn_compact
     hK_compact.exists_isMaxOn hK_ne h_abs_K
   exact ⟨|f y_max|, fun y hy => h_max hy⟩
 
-/-! ### Multiplication of `MemLp 2 (vol.restrict K)` by a bounded function -/
-
 private lemma memLp_two_of_bounded_mul
     {f h : EuclN → ℝ} {K : Set EuclN}
     (hh_meas : AEStronglyMeasurable h ((volume : Measure EuclN).restrict K))
@@ -302,8 +260,6 @@ private lemma memLp_two_of_bounded_mul
     exact hy.trans (le_max_left _ _)
   exact MemLp.mul' (p := ∞) (q := 2) (r := 2) hf hh_memLp_top
 
-/-! ### Boundedness summary on `K = chartImagePOUTsupport α` -/
-
 private abbrev Kα (α : M) : Set EuclN :=
   chartImagePOUTsupport (I := I) (M := M) α
 
@@ -318,9 +274,6 @@ private lemma Kα_meas (α : M) :
 private lemma Kα_subset_target (α : M) :
     Kα (I := I) (M := M) α ⊆ chartTargetEuclid (I := I) (M := M) α :=
   chartImagePOUTsupport_subset_target (I := I) (M := M) α
-
-/-! ### Combined helper: `MemLp 2` for a continuous-on-target coefficient
-times an `MemLp 2` factor on `Kα` -/
 
 private lemma memLp_two_continuousOn_mul_on_Kα
     {α : M} {h f : EuclN → ℝ}
@@ -348,8 +301,6 @@ private lemma memLp_two_continuousOn_mul_on_Kα
     intro y hy
     exact hC_bd y hy
   exact memLp_two_of_bounded_mul (h := h) h_meas h_ae_bd hf
-
-/-! ### Bound: `weighted_measure.restrict K ≤ c_max • volume.restrict K` -/
 
 private lemma chartPulledWeightedMeasure_restrict_compact_le_volume
     {g : SmoothRiemannianMetric I M} (α : M)
@@ -386,8 +337,6 @@ private lemma chartPulledWeightedMeasure_restrict_compact_le_volume
   rw [smul_eq_mul]
   exact h_pointwise_bd.trans (le_of_eq h_const_eval)
 
-/-! ### Transfer `MemLp` from `vol.restrict K` to `weighted.restrict K` -/
-
 private lemma memLp_chartPulledWeighted_restrict_of_volume_restrict
     {g : SmoothRiemannianMetric I M} {α : M} {w : EuclN → ℝ}
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -400,8 +349,6 @@ private lemma memLp_chartPulledWeighted_restrict_of_volume_restrict
       α hK_compact hK_meas hK_in
   exact hw.of_measure_le_smul (c := ENNReal.ofReal c)
     ENNReal.ofReal_ne_top h_le
-
-/-! ### Continuity of fderiv-applied-to-unit-vector for smooth coefficients -/
 
 /-- Continuity of `∂_j (weightedInvGramDerivOnEuclid l i j)` on the chart target. -/
 private lemma weightedInvGramDerivOnEuclid_partial_continuousOn
@@ -457,8 +404,6 @@ private lemma weightedInvGramSecondDerivOnEuclid_partial_continuousOn
   have h := h_eval.contDiffOn.comp h_fderiv_diff (mapsTo_univ _ _)
   exact h.continuousOn
 
-/-! ### Restriction lemma for the chart-target -/
-
 private lemma memLp_restrict_Kα_of_memLp_chartTarget
     (α : M) {f : EuclN → ℝ}
     (hf : MemLp f 2 ((volume : Measure EuclN).restrict
@@ -476,8 +421,6 @@ private lemma memLp_restrict_Kα_of_memLp_chartTarget
       (Kα_subset_target (I := I) (M := M) α)
   rw [← h_eq]
   exact hf.restrict _
-
-/-! ### Per-summand `MemLp 2 (vol.restrict K)` for each of the 13 contributions -/
 
 /-- (A.1-pair) For fixed `i, j`:
 `∂_j (weightedInvGramDerivOnEuclid l₂ i j) · chosenSecond(i, l₁)` is in
@@ -860,8 +803,6 @@ private lemma termE2_memLp_vol_K
     rw [this]
     exact MemLp.zero
 
-/-! ### Aggregate: the numerator is `MemLp 2 (vol.restrict K)` -/
-
 private lemma fChartEffTwiceNumerator_memLp_vol_K
     (g : SmoothRiemannianMetric I M) (α : M)
     (l₁ l₂ : Fin (Module.finrank ℝ E))
@@ -869,7 +810,6 @@ private lemma fChartEffTwiceNumerator_memLp_vol_K
     MemLp (fChartEffTwiceNumerator (I := I) (M := M) g α l₁ l₂ hu_h) 2
       ((volume : Measure EuclN).restrict (Kα (I := I) (M := M) α)) := by
   classical
-  -- Per-summand `MemLp`s, summed pairs collected via `memLp_finset_sum`.
   have hA1 : MemLp (fun y => (∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
           (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₂) y)
@@ -948,8 +888,6 @@ private lemma fChartEffTwiceNumerator_memLp_vol_K
   have hD2 := termD2_memLp_vol_K (I := I) (M := M) g α l₁ l₂ hu_h
   have hE1 := termE1_memLp_vol_K (I := I) (M := M) g α l₁ l₂ hu_h
   have hE2 := termE2_memLp_vol_K (I := I) (M := M) g α l₁ l₂ hu_h
-  -- Combine. The numerator is:
-  -- A1 + A2 - A3 + B1 + B2 + C1 + C2 + C3 + C4 - D1 - D2 + E1 + E2.
   have h_step1 := hA1.add hA2
   have h_step2 := h_step1.sub hA3
   have h_step3 := h_step2.add hB1
@@ -965,8 +903,6 @@ private lemma fChartEffTwiceNumerator_memLp_vol_K
   unfold fChartEffTwiceNumerator
   convert h_step12 using 2 with y
 
-/-! ### Continuity of `1 / densityOnEuclid` on the chart target -/
-
 /-- `fun y => 1 / densityOnEuclid g α y` is continuous on `chartTargetEuclid α`. -/
 private lemma one_div_densityOnEuclid_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) :
@@ -980,8 +916,6 @@ private lemma one_div_densityOnEuclid_continuousOn
     funext y; rw [one_div]
   rw [h_eq]
   exact h_inv
-
-/-! ### The (numerator / density) is `MemLp 2 (vol.restrict K)` -/
 
 private lemma fChartEffTwiceNumerator_div_density_memLp_vol_K
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -1004,8 +938,6 @@ private lemma fChartEffTwiceNumerator_div_density_memLp_vol_K
   rw [h_eq]
   exact memLp_two_continuousOn_mul_on_Kα (α := α)
     (one_div_densityOnEuclid_continuousOn (I := I) (M := M) g α) h_num
-
-/-! ## Headline weighted-`L²` membership -/
 
 /-- `fChartEffTwice g α l₁ l₂ hu_h` lies in `MemLp 2` of the chart-pulled
 weighted measure restricted to `chartTargetEuclid α`. -/

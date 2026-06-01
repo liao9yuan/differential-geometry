@@ -75,16 +75,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The fibrewise isometry bridge
-
-A continuous bilinear form `B : F →L[ℝ] F →L[ℝ] ℝ` is identified with the model
-`(0,2)`-multilinear fibre `ContinuousMultilinearMap ℝ (fun _ : Fin 2 => F) ℝ` by
-uncurrying: the inverse of `continuousMultilinearCurryLeftEquiv` separates the
-first slot, and `continuousMultilinearCurryFin1` identifies the inner `(0,1)`
-multilinear codomain with `F →L[ℝ] ℝ`.  Both ingredients are
-`LinearIsometryEquiv`s of operator norm `1`, so the composite identification is a
-fibre isometry. -/
-
 /-- The fibrewise continuous linear **isometry** identifying a continuous
 bilinear form `F →L[ℝ] F →L[ℝ] ℝ` with the model `(0,2)`-multilinear fibre
 `ContinuousMultilinearMap ℝ (fun _ : Fin 2 => F) ℝ`.
@@ -98,8 +88,6 @@ postcomposed on the inner arrow.  The result is operator-norm preserving. -/
 def bilinFormToModel (F : Type*) [NormedAddCommGroup F] [NormedSpace ℝ F] :
     (F →L[ℝ] F →L[ℝ] ℝ) ≃ₗ[ℝ]
       ContinuousMultilinearMap ℝ (fun _ : Fin 2 => F) ℝ :=
-  -- `F →L (F →L ℝ)  ≃  F →L CMM(Fin 1)`  (postcompose the inner arrow with
-  -- `(Fin1).symm`), then  `F →L CMM(Fin 1)  ≃  CMM(Fin 2)`  via `LeftEquiv.symm`.
   ((ContinuousLinearEquiv.refl ℝ F).arrowCongr
       (continuousMultilinearCurryFin1 ℝ F ℝ).symm.toContinuousLinearEquiv).toLinearEquiv.trans
     (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 2 => F) ℝ).symm.toLinearEquiv
@@ -109,7 +97,6 @@ theorem bilinFormToModel_apply (F : Type*)
     (B : F →L[ℝ] F →L[ℝ] ℝ) (v : Fin 2 → F) :
     bilinFormToModel F B v = B (v 0) (v 1) := by
   classical
-  -- Unfold the composite equivalence and apply the two curry application laws.
   change (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 2 => F) ℝ).symm
       (((ContinuousLinearEquiv.refl ℝ F).arrowCongr
           (continuousMultilinearCurryFin1 ℝ F ℝ).symm.toContinuousLinearEquiv) B) v =
@@ -119,7 +106,6 @@ theorem bilinFormToModel_apply (F : Type*)
   simp only [ContinuousLinearEquiv.refl_symm, ContinuousLinearEquiv.refl_apply,
     LinearIsometryEquiv.coe_toContinuousLinearEquiv]
   rw [continuousMultilinearCurryFin1_symm_apply]
-  -- `(B (v 0)) (tail v 0) = B (v 0) (v 1)` since `tail v 0 = v 1`.
   rfl
 
 theorem bilinFormToModel_symm_apply (F : Type*)
@@ -127,11 +113,8 @@ theorem bilinFormToModel_symm_apply (F : Type*)
     (T : ContinuousMultilinearMap ℝ (fun _ : Fin 2 => F) ℝ) (v w : F) :
     (bilinFormToModel F).symm T v w = T ![v, w] := by
   classical
-  -- Round trip: apply `bilinFormToModel_apply` to `(symm T)` and use
-  -- `apply_symm_apply`, evaluating at the tuple `![v, w]`.
   have h := bilinFormToModel_apply F ((bilinFormToModel F).symm T) ![v, w]
   rw [(bilinFormToModel F).apply_symm_apply T] at h
-  -- `![v, w] 0 = v`, `![v, w] 1 = w`.
   simpa using h.symm
 
 /-- **The fibre bridge is an operator-norm isometry (constant `1`).**  Being the
@@ -144,17 +127,13 @@ theorem bilinFormToModel_norm_map (F : Type*)
     ‖bilinFormToModel F B‖ = ‖B‖ := by
   classical
   refine le_antisymm ?_ ?_
-  · -- `‖model‖ ≤ ‖B‖`: the model CMM is bounded by `‖B‖` on every tuple via
-    -- `bilinFormToModel_apply` and the bilinear op-norm bound.
-    refine ContinuousMultilinearMap.opNorm_le_bound (norm_nonneg B) (fun m => ?_)
+  · refine ContinuousMultilinearMap.opNorm_le_bound (norm_nonneg B) (fun m => ?_)
     rw [bilinFormToModel_apply]
     rw [Fin.prod_univ_two]
     calc ‖B (m 0) (m 1)‖
         ≤ ‖B‖ * ‖m 0‖ * ‖m 1‖ := B.le_opNorm₂ (m 0) (m 1)
       _ = ‖B‖ * (‖m 0‖ * ‖m 1‖) := by ring
-  · -- `‖B‖ ≤ ‖model‖`: bound `B` on each pair via `bilinFormToModel_symm_apply`
-    -- and the CMM op-norm bound on the tuple `![v, w]`.
-    refine ContinuousLinearMap.opNorm_le_bound₂ B (norm_nonneg _) (fun v w => ?_)
+  · refine ContinuousLinearMap.opNorm_le_bound₂ B (norm_nonneg _) (fun v w => ?_)
     have hsymm : B v w = bilinFormToModel F B ![v, w] := by
       conv_lhs => rw [← (bilinFormToModel F).symm_apply_apply B]
       rw [bilinFormToModel_symm_apply]
@@ -171,16 +150,6 @@ def bilinFormToModelₗᵢ (F : Type*) [NormedAddCommGroup F] [NormedSpace ℝ F
     (F →L[ℝ] F →L[ℝ] ℝ) ≃ₗᵢ[ℝ]
       ContinuousMultilinearMap ℝ (fun _ : Fin 2 => F) ℝ :=
   { bilinFormToModel F with norm_map' := bilinFormToModel_norm_map F }
-
-/-! ## Smoothness of the covariant `(0,2)`-tensor field
-
-`deTurckRicciRHS g_bg g`, viewed pointwise through `bilinFormToModel`, is a smooth
-section of the `(0,2)` covariant tensor bundle.  Smoothness is verified through
-the basis-coordinate criterion `contMDiff_multilinearSection_iff_coord`: the
-trivialised `σ`-coordinate of the section at the chart centre `x₀` equals the
-chart-`x₀` frame component
-`deTurckRicciRHS g_bg g x (e^{x₀}_{σ 0}(x)) (e^{x₀}_{σ 1}(x))`, which is `C^∞` on
-the chart source by `combine_smoothness_of_summands`. -/
 
 /-- The pointwise model value of the Ricci–DeTurck right-hand side: the
 `(0,2)`-multilinear map obtained from the bilinear form `deTurckRicciRHS g_bg g x`
@@ -206,14 +175,10 @@ def deTurckRHSField (g_bg g : SmoothRiemannianMetric I M) :
   letI := tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 2
   letI := TangentBundle.contMDiffVectorBundle (I := I) (M := M) (n := ∞)
   ⟨fun x => deTurckRHSModelFun (I := I) g_bg g x, by
-    -- Smoothness via the basis-coordinate criterion.
     let d := Module.finrank ℝ E
     let b : Module.Basis (Fin d) ℝ E := chartModelBasis E
     refine (contMDiff_multilinearSection_iff_coord (TangentSpace I) ∞ b _).mpr
       fun σ x₀ => ?_
-    -- On the chart-`x₀` source the trivialised coordinate equals the chart-frame
-    -- component of `deTurckRicciRHS`, which is `C^∞` by
-    -- `combine_smoothness_of_summands`.
     have hcomp : ContMDiffOn I 𝓘(ℝ, ℝ) ∞
         (fun x : M =>
           deTurckRicciRHS (I := I) g_bg g x
@@ -227,25 +192,14 @@ def deTurckRHSField (g_bg g : SmoothRiemannianMetric I M) :
     have h_src_nhd : (chartAt H x₀).source ∈ 𝓝 x₀ :=
       (chartAt H x₀).open_source.mem_nhds hx₀_src
     refine ((hcomp x₀ hx₀_src).contMDiffAt h_src_nhd).congr_of_eventuallyEq ?_
-    -- Pointwise: the trivialised coordinate of the section is the chart-frame
-    -- component.  Use `continuousMultilinearMap_basis_repr` and the
-    -- trivialisation-application law `Bundle.Trivialization.continuousMultilinearMap_apply`.
     have h_base_nhd :
         (trivializationAt E (TangentSpace I) x₀).baseSet ∈ 𝓝 x₀ :=
       (trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds hx₀_base
     filter_upwards [h_base_nhd] with x hx
     rw [continuousMultilinearMap_basis_repr]
-    -- The coordinate is now `(triv ⟨x, f x⟩).2 (fun j => b (σ j))`.  The
-    -- trivialisation of the `(0,2)`-tensor bundle is the `continuousMultilinearMap`
-    -- trivialisation, whose second component is `T.compContinuousLinearMap symmL`;
-    -- evaluated on the model basis tuple this is
-    -- `(toModel (f x)) (fun j => symmL ℝ x (b (σ j)))`.  By definition this equals
-    -- `deTurckRicciRHS g_bg g x (chartFrameVec x₀ (σ 0) x) (chartFrameVec x₀ (σ 1) x)`.
     change Tensor0SSpace.toModel (deTurckRHSModelFun (I := I) g_bg g x)
         (fun j => (trivializationAt E (TangentSpace I) x₀).symmL ℝ x (b (σ j))) = _
     rw [deTurckRHSModelFun_toModel_apply]
-    -- `(triv.symmL ℝ x) (b (σ j)) = chartFrameVec x₀ (σ j) x` by definition,
-    -- with `b = chartModelBasis E`.
     rfl⟩
 
 @[simp] theorem deTurckRHSField_toModel_apply
@@ -253,8 +207,6 @@ def deTurckRHSField (g_bg g : SmoothRiemannianMetric I M) :
     Tensor0SSpace.toModel (deTurckRHSField (I := I) g_bg g x) v =
       deTurckRicciRHS (I := I) g_bg g x (v 0) (v 1) :=
   deTurckRHSModelFun_toModel_apply (I := I) g_bg g x v
-
-/-! ## The compactly-supported smooth `(0,2)`-tensor section -/
 
 /-- The Ricci–DeTurck right-hand side `deTurckRicciRHS g_bg g`, promoted to a smooth
 mixed `(0,2)`-tensor section (a section of the hom bundle
@@ -298,8 +250,6 @@ theorem deTurckRHSSection_toModel_apply
             (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) v =
       deTurckRicciRHS (I := I) g_bg g x (v 0) (v 1) := by
   classical
-  -- `(deTurckRHSSection …).toSection x` is `(eval₀ x).smulRight (field x)`.
-  -- Applied at `constOfIsEmpty 1` it is `(eval₀ x (constOfIsEmpty 1)) • field x`.
   rw [deTurckRHSSection_toSection]
   change Tensor0SSpace.toModel
       ((MixedSection.eval₀ (F := E) (E := (TangentSpace I : M → Type _)) x).smulRight

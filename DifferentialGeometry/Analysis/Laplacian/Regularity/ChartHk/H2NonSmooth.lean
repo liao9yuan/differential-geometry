@@ -69,16 +69,12 @@ open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Headline: per-chart H² regularity (hypothesis-bearing form) -/
 
 /-- **Per-chart `H²` regularity from a uniform diffQuot bound.**
 
@@ -123,10 +119,8 @@ theorem h2_chart_loc_of_uniform_bound
         ENNReal.ofReal (M_bound i k) := by
   classical
   intro i k
-  -- The cthickening of `closure Ω''` is a compact set inside `chartTargetEuclid α`.
   have h_cthick_compact : IsCompact (Metric.cthickening h₀ (closure Ω'')) :=
     hΩ''_compact_closure.cthickening
-  -- Pick a precompact open Ω with cthickening h₀ (closure Ω'') ⊆ Ω ⊆ closure Ω ⊆ chartTarget.
   obtain ⟨δ, hδ_pos, hδ_subset⟩ :=
     h_cthick_compact.exists_cthickening_subset_open
       (chartTargetEuclid_isOpen (I := I) (M := M) α) h_room
@@ -137,7 +131,6 @@ theorem h2_chart_loc_of_uniform_bound
     Metric.self_subset_thickening hδ_pos _
   have hΩ_in_cthick : Ω ⊆ Metric.cthickening δ (Metric.cthickening h₀ (closure Ω'')) :=
     Metric.thickening_subset_cthickening _ _
-  -- closure Ω ⊆ cthickening δ (cthickening h₀ (closure Ω'')) ⊆ chartTarget.
   have h_cthick_outer_compact :
       IsCompact (Metric.cthickening δ (Metric.cthickening h₀ (closure Ω''))) :=
     h_cthick_compact.cthickening
@@ -148,24 +141,19 @@ theorem h2_chart_loc_of_uniform_bound
     h_cthick_outer_compact.of_isClosed_subset isClosed_closure h_closureΩ_subset
   have hΩ_in_chart : closure Ω ⊆ chartTargetEuclid (I := I) (M := M) α :=
     h_closureΩ_subset.trans hδ_subset
-  -- room: cthickening h₀ (closure Ω'') ⊆ Ω.
   have h_room_Ω : Metric.cthickening h₀ (closure Ω'') ⊆ Ω := h_cthick_in_Ω
-  -- closure Ω'' ⊆ Ω.
   have h_closureΩ''_in_Ω : closure Ω'' ⊆ Ω := by
     intro y hy
     apply h_cthick_in_Ω
     apply Metric.self_subset_cthickening _ hy
-  -- Use the local-L² hypothesis directly on closure Ω (compact ⊆ chartTarget).
   have h_wp_memLp_closureΩ :
       MemLp (D.weak_partial i) 2
         ((volume : Measure EuclN).restrict (closure Ω)) :=
     D.weak_partial_locally_memLp i (closure Ω) h_closureΩ_compact hΩ_in_chart
-  -- Restrict to Ω (smaller).
   have h_wp_memLp_Ω :
       MemLp (D.weak_partial i) 2
         ((volume : Measure EuclN).restrict Ω) :=
     h_wp_memLp_closureΩ.mono_measure (Measure.restrict_mono subset_closure le_rfl)
-  -- Apply the localized weak-partial converter.
   have h_bdd : ∀ h : ℝ, 0 < |h| → |h| ≤ h₀ →
       eLpNorm
           (DifferentialGeometry.Analysis.Sobolev.diffQuot

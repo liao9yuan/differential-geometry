@@ -69,15 +69,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Boundary chart-basis tangent vectors
-
-We mirror `chartBasisVecFiber` and `chartBasisVec` for the boundary tangent
-bundle: given `α₀ : BoundaryManifold I M` and an index `i`, we use the inverse
-of the boundary trivialization at `α₀` to transport the `i`-th model-basis
-vector to a vector in `TangentSpace hI.boundaryI α` for `α` in the
-trivialization base set. Off the base set the value is a default (junk) value
-in the fiber. -/
-
 /-- The `i`-th pointwise tangent vector of the boundary chart-local frame
 attached to `α₀ : BoundaryManifold I M`. For `α` in the boundary trivialization
 base set, this is the image of the `i`-th model-basis vector of `hI.boundaryE`
@@ -141,8 +132,6 @@ lemma boundaryChartBasisVec_contMDiffOn
   intro α hα
   exact (trivializationAt_boundaryChartBasisVec_snd (M := M) α₀ i hα)
 
-/-! ## Fiberwise basis from the boundary trivialization -/
-
 /-- The boundary chart-basis family at a point `α ∈ triv.baseSet` is a basis of
 `TangentSpace hI.boundaryI α`, obtained by transporting the fixed model-space
 basis through the continuous linear equivalence given by the boundary
@@ -182,8 +171,6 @@ lemma boundaryChartBasisFamily_linearIndependent
     exact boundaryChartBasisFamily_apply (M := M) α₀ hα i
   rw [← hcongr]
   exact h
-
-/-! ## The boundary Gram matrix -/
 
 /-- The Gram matrix of the boundary chart-basis frame at `α` under
 `(inducedMetric g).inner α`. -/
@@ -230,7 +217,6 @@ lemma boundaryGramMatrix_dotProduct_mulVec
       inducedMetricInner (M := M) g α
         (∑ i, c i • boundaryChartBasisVecFiber (M := M) α₀ i α)
         (∑ j, c j • boundaryChartBasisVecFiber (M := M) α₀ j α) := by
-  -- Direct bilinear expansion via `map_sum` and `map_smul`.
   have hexpand' :
       inducedMetricInner (M := M) g α
           (∑ i, c i • boundaryChartBasisVecFiber (M := M) α₀ i α)
@@ -239,7 +225,6 @@ lemma boundaryGramMatrix_dotProduct_mulVec
             inducedMetricInner (M := M) g α
               (boundaryChartBasisVecFiber (M := M) α₀ i α)
               (boundaryChartBasisVecFiber (M := M) α₀ j α) := by
-    -- Left linearity: pull `∑ᵢ cᵢ • vᵢ` out of the first argument.
     have hL :
         inducedMetricInner (M := M) g α
             (∑ i, c i • boundaryChartBasisVecFiber (M := M) α₀ i α)
@@ -253,10 +238,7 @@ lemma boundaryGramMatrix_dotProduct_mulVec
     rw [ContinuousLinearMap.sum_apply]
     refine Finset.sum_congr rfl ?_
     intro i _
-    -- Goal: `(c i • inducedMetricInner g α v_i) (∑ j, c j • v_j) = ∑ j, (c i * c j) * inducedMetricInner g α v_i v_j`
     rw [ContinuousLinearMap.smul_apply]
-    -- Goal: `c i • (inducedMetricInner g α v_i) (∑ j, c j • v_j) = ∑ j, (c i * c j) * inducedMetricInner g α v_i v_j`
-    -- Right linearity on the right argument.
     have hR :
         (inducedMetricInner (M := M) g α
             (boundaryChartBasisVecFiber (M := M) α₀ i α))
@@ -268,7 +250,6 @@ lemma boundaryGramMatrix_dotProduct_mulVec
       rw [map_sum]
       refine Finset.sum_congr rfl ?_
       intro j _
-      -- Apply CLM's map_smul, then convert smul to multiplication.
       change _ = c j * _
       rw [← smul_eq_mul]
       exact ContinuousLinearMap.map_smul _ _ _
@@ -277,7 +258,6 @@ lemma boundaryGramMatrix_dotProduct_mulVec
     intro j _
     ring
   rw [hexpand']
-  -- Now the left-hand side.
   simp only [dotProduct, Matrix.mulVec, boundaryGramMatrix_apply, Pi.star_apply, star_trivial]
   refine Finset.sum_congr rfl ?_
   intro i _
@@ -314,8 +294,6 @@ lemma boundaryGramMatrix_det_pos
     (hα : α ∈ (trivializationAt hI.boundaryE (TangentSpace hI.boundaryI) α₀).baseSet) :
     0 < (boundaryGramMatrix (M := M) g α₀ α).det :=
   (boundaryGramMatrix_posDef (M := M) g α₀ hα).det_pos
-
-/-! ## Smoothness of the Gram matrix entries -/
 
 /-- Each entry of the boundary Gram matrix is smooth on the boundary
 trivialization base set. Proof: the induced inner product evaluated at two
@@ -379,8 +357,6 @@ lemma boundaryGramMatrix_det_contMDiffOn
     (contMDiffOn_const (c := ((Equiv.Perm.sign σ : ℤ) : ℝ))) ?_
   refine contMDiffOn_finset_prod (fun i _ => ?_)
   exact boundaryGramMatrix_entry_contMDiffOn (M := M) g α₀ (σ i) i
-
-/-! ## The boundary inverse Gram matrix -/
 
 /-- The inverse Gram matrix at `(α₀, α)` for the boundary case. On the boundary
 chart base set this is the matrix inverse of the (positive-definite) boundary
@@ -503,8 +479,7 @@ theorem boundaryInvGramMatrix_entry_contMDiffOn
     exact Ring.inverse_eq_inv _
   refine ContMDiffOn.congr ?_ hcongr
   refine ContMDiffOn.mul ?_ ?_
-  · -- `(det · )⁻¹` is smooth where `det · ≠ 0`.
-    have hdet_smooth : ContMDiffOn hI.boundaryI 𝓘(ℝ) ∞
+  · have hdet_smooth : ContMDiffOn hI.boundaryI 𝓘(ℝ) ∞
         (fun α : BoundaryManifold I M =>
           (boundaryGramMatrix (M := M) g α₀ α).det)
         (trivializationAt hI.boundaryE (TangentSpace hI.boundaryI) α₀).baseSet :=

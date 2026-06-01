@@ -86,12 +86,6 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev.Chart hiding chartTargetEuclid
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -100,15 +94,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## The structural increment of the elliptic bootstrap
-
-The elliptic bootstrap raises the Sobolev order by one each time it
-differentiates the divergence-form weak identity. The *combinatorial* content
-of one increment is purely structural: a function lies in `W^{m+1,2}` of an
-open set as soon as it lies in `W^{1,2}` and each of its canonical chosen weak
-partials lies in `W^{m,2}`. This is the elementary `MemWkp_succ`
-decomposition, isolated here. -/
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 /-- **Structural increment of `MemWkp` order.** A function `u` lies in
@@ -131,14 +116,6 @@ private lemma memWkp_succ_of_chosenWeakPartial_memWkp
       (d := Module.finrank ℝ E) (m + 1) 2 u Ω := by
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_succ]
   exact ⟨h_w1p, h_partials⟩
-
-/-! ## The order-`2k` headline for the eigenvector chart component (`k ≤ 1`)
-
-The order-2 interior-regularity result `eigenvector_chartComponent_memWkp`
-states that the eigenvector chart component lies in `MemWkp 2 2 … Ω''`. The
-requested arbitrary-`k` headline is `MemWkp (2 * k) 2 … Ω''`; for `k ≤ 1` the
-exponent `2 * k` is `≤ 2`, so the headline follows from the order-2 result by
-the downward monotonicity `MemWkp.le_of_le`. -/
 
 /-- **Arbitrary-order interior regularity of the eigenvector chart component,
 order `2k` for `k ≤ 1` — chart-locality-free twin.**
@@ -184,7 +161,6 @@ theorem eigenvector_chartComponent_memWkp_two_k
           (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.tensorResolventL2_isCompactOperator
             (I := I) (M := M) g r s) i) α P₀ :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω'' := by
-  -- The order-2 interior-regularity result (chart-locality-free).
   have h_two : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 2 2
       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
@@ -194,28 +170,8 @@ theorem eigenvector_chartComponent_memWkp_two_k
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω'' :=
     eigenvector_chartComponent_memWkp g r s i α P₀
       hΩ''_open hΩ''_compact_closure hR₀_pos h_room
-  -- `2 * k ≤ 2` for `k ≤ 1`, so downward monotonicity in the order applies.
   have h_le : 2 * k ≤ 2 := by omega
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.le_of_le h_le h_two
-
-/-! ## The elliptic-bootstrap increment for the eigenvector chart component
-
-The order-2 interior engine `eigenvector_chartComponent_memWkp` extracts, for
-the eigenvector chart component, interior `W^{2,2}` regularity. The standard
-elliptic bootstrap iterates this engine: a first weak partial `v := ∂_l
-u_chart` of the chart component satisfies a *differentiated* divergence-form
-weak identity with the same principal symbol, hence is the chart component of a
-new `TensorChartBilinearH1ComplData`; the order-2 engine applied to that datum
-delivers `W^{2,2}` of `v`, i.e. `W^{3,2}` of `u_chart`; iterating raises the
-order indefinitely.
-
-The structural increment is captured by the lemma below. It takes, as input
-data, a *differentiated* chart-bilinear datum `D'` for each of the chosen weak
-partials of the chart component, together with the order-2 interior regularity
-of every `D'.u_chart` (the conclusion of the order-2 engine applied to `D'`)
-and the a.e. identification of `D'.u_chart` with the corresponding chosen weak
-partial. From this it assembles the next regularity order, by the structural
-`MemWkp_succ` decomposition combined with the ae-invariance `MemWkp_congr_ae`. -/
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 /-- **Elliptic-bootstrap increment for the eigenvector chart component.**
@@ -249,15 +205,10 @@ theorem tensorChartComponent_memWkp_succ_of_diffData
         (d := Module.finrank ℝ E) (2 * m) 2 (v l) Ω'') :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) (2 * m + 1) 2 u Ω'' := by
-  -- `2 * m + 1 = (2 * m) + 1`; apply the structural `MemWkp_succ` increment.
   refine memWkp_succ_of_chosenWeakPartial_memWkp h_w1p (fun l => ?_)
-  -- The chosen weak `l`-partial agrees a.e. with `v l`, which lies in
-  -- `MemWkp (2 * m) 2`; transport along the ae-equality.
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ''_open (h_diff_ae l)).mpr
       (h_diff_memWkp l)
-
-/-! ## Sanity tests -/
 
 section ElaborationTests
 

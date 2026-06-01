@@ -71,12 +71,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Continuity of the lifted integral curve
-
-Mathlib's `IsMIntegralCurveAt.continuousAt` directly applies to any
-local integral curve. Continuity of the lift transfers to continuity of
-the base curve via the bundle projection. -/
-
 section LiftContinuity
 
 /-- A local integral curve of the chart-fixed geodesic vector field at
@@ -100,11 +94,6 @@ lemma IsMIntegralCurve.continuous_lift
 
 end LiftContinuity
 
-/-! ## Continuity of base geodesics
-
-A local geodesic `γ : ℝ → M` is the projection of a continuous lift
-`f` via the continuous bundle projection `Bundle.TotalSpace.proj`. -/
-
 section BaseContinuity
 
 /-- Continuity of the bundle projection on the tangent bundle, restated
@@ -120,27 +109,16 @@ theorem IsGeodesicAt.continuousAt
     (hγ : IsGeodesicAt (I := I) g γ t₀) :
     ContinuousAt γ t₀ := by
   obtain ⟨α, f, hproj, _hα_src, hf⟩ := hγ
-  -- `γ = TotalSpace.proj ∘ f`; both factors are continuous.
   have hf_cont : ContinuousAt f t₀ := hf.continuousAt
   have hπ_cont : ContinuousAt
       (Bundle.TotalSpace.proj : TangentBundle I M → M) (f t₀) :=
     continuous_tangentBundle_proj.continuousAt
   have hcomp : ContinuousAt (fun t => (f t).proj) t₀ := hπ_cont.comp hf_cont
-  -- Rewrite `(f t).proj = γ t` via `hproj`.
   have heq : (fun t => (f t).proj) = γ := funext hproj
   rw [heq] at hcomp
   exact hcomp
 
 end BaseContinuity
-
-/-! ## Chart-pushed derivative of the lift
-
-`IsMIntegralCurveAt.eventually_hasDerivAt` from Mathlib expresses the
-manifold-derivative property of an integral curve in the chart at the
-lift's value `f t₀`. We package the geodesic specialisation: the
-chart-pushed lift `extChartAt I.tangent (f t₀) ∘ f` admits a
-`HasDerivAt`-formula on a neighbourhood of `t₀`, with the chart-pushed
-value of the geodesic vector field as right-hand side. -/
 
 section ChartPushedDerivative
 
@@ -190,17 +168,8 @@ theorem chartPushLift_eventually_hasDerivAt
     (hf : IsMIntegralCurveAt f (geodesicVectorFieldChart (I := I) g α) t₀) :
     ∀ᶠ t in 𝓝 t₀, HasDerivAt (chartPushLift (I := I) f t₀)
       (chartPushVF (I := I) g α f t₀ t) t := by
-  -- Direct invocation of `IsMIntegralCurveAt.eventually_hasDerivAt` on
-  -- the boundaryless manifold `TangentBundle I M` (modelled on
-  -- `I.tangent`). The Mathlib statement has the same shape; unfold the
-  -- chart-pushed definitions to match.
   have h := hf.eventually_hasDerivAt
   filter_upwards [h] with t ht
-  -- `ht : HasDerivAt ((extChartAt I.tangent (f t₀)) ∘ f)
-  --   (tangentCoordChange I.tangent (f t) (f t₀) (f t)
-  --     (geodesicVectorFieldChart g α (f t))) t`
-  -- We need: `HasDerivAt (chartPushLift f t₀) (chartPushVF g α f t₀ t) t`.
-  -- Both sides agree by `chartPushLift` / `chartPushVF` definitions.
   exact ht
 
 /-- **Chart-pushed first-order regularity.** On a neighbourhood of `t₀`,
@@ -221,7 +190,6 @@ lemma chartPushLift_continuousAt
     {f : ℝ → TangentBundle I M} {t₀ : ℝ}
     (hf_cont : ContinuousAt f t₀) :
     ContinuousAt (chartPushLift (I := I) f t₀) t₀ := by
-  -- `chartPushLift f t₀ = (extChartAt I.tangent (f t₀)) ∘ f`.
   have hchart_cont : ContinuousAt (extChartAt I.tangent (f t₀)) (f t₀) :=
     continuousAt_extChartAt (I := I.tangent) (f t₀)
   exact hchart_cont.comp hf_cont
@@ -233,13 +201,6 @@ image of `f t₀`. -/
     chartPushLift (I := I) f t₀ t₀ = extChartAt I.tangent (f t₀) (f t₀) := rfl
 
 end ChartPushedDerivative
-
-/-! ## Geodesic-level packaging of the chart-pushed derivative
-
-We restate the chart-pushed derivative formula at the level of the
-`IsGeodesicAt` predicate, exposing the chart basepoint `α` and the lift
-`f` as existentials. This is the downstream-friendly form for chart-local
-arguments that operate on a geodesic without unpacking the lift. -/
 
 section IsGeodesicAtChartPush
 

@@ -100,22 +100,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The bare slot-`0` Parseval split for the canonical curvature defect
-
-The slot-`0` Parseval decomposition `riemannianFiberNormSq_succ_eq_sum_slot0Curry`
-(`SlotSplitParsevalBridge.lean`), specialised at rank `s = 2` to the underlying `(0, 3)`-tensor
-of the canonical commutator defect `covGradRoughLapCurv g T₀ = Δ_∇(∇T₀) − ∇(Δ_∇ T₀)`. It writes
-the `(0, 3)` fibre norm as a finite frame-sum of the slot-`s` fibre norms of the slot-`0`
-curries, indexed by an internally-built `g`-orthonormal tangent frame `e`. No vector-field
-currying and no `smoothExtensionTangent` is involved: the split is the bookkeeping that exposes
-the fixed-orthonormal-frame components in which the third-order Weitzenböck content lives. -/
 
 set_option linter.unusedSectionVars false in
 /-- **Slot-`0` Parseval split of the canonical curvature defect.** For the canonical commutator
@@ -141,13 +129,6 @@ theorem riemannianFiberNormSq_three_eq_sum_slot0Curry
               ((covGradRoughLapCurv (I := I) (M := M) g T₀).toSection x) a) := by
   exact riemannianFiberNormSq_succ_eq_sum_slot0Curry (I := I) (M := M) g 2 x
     ((covGradRoughLapCurv (I := I) (M := M) g T₀).toSection x)
-
-/-! ## The slot-split reduction: per-direction `(0, 2)` bound ⟹ `(0, 3)` bound
-
-A uniform bound `B` on each of the `n = finrank ℝ E` slot-`0` curried `(0, 2)` fibre norms of
-the defect lifts, through the Parseval split, to the bound `n · B` on the `(0, 3)` fibre norm.
-This is the genuine bridge from a per-frame-direction `(0, 2)` curried bound to the `(0, 3)`
-`hpt` shape: the frame-sum has exactly `n` summands, each `≤ B`. -/
 
 set_option linter.unusedSectionVars false in
 /-- **Slot-split reduction (raw bound form).** If for some `g`-orthonormal frame `e` realising
@@ -181,15 +162,6 @@ theorem riemannianFiberNormSq_three_le_of_slot0_bound
         ≤ ∑ _a : Fin n, B := Finset.sum_le_sum (fun a _ => hbound a)
     _ = (n : ℝ) * B := by
         rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
-
-/-! ## The budget-shape reduction and the `hpt` packaging
-
-We package the slot-split reduction in the exact `hpt` budget shape consumed by
-`secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound` (`CovGradRoughLapCurvL2Bound.lean`).
-The hypothesis is the per-frame-direction `(0, 2)` curried bound — for each `x`, over the
-Parseval frame at `x`, every slot-`0` curried `(0, 2)` fibre norm of the defect is bounded by
-`D₀²` times the rfns budget. The conclusion is the `(0, 3)` `hpt` with `C₀ = √(finrank ℝ E)·D₀`,
-i.e. `C₀² = (finrank ℝ E) · D₀²`. -/
 
 /-- The rfns budget at `x`: `rfns(T₀) + rfns(∇T₀) + rfns(∇²T₀)`, the exact right-hand-side
 combination of `secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound`. -/
@@ -255,20 +227,16 @@ theorem covGradRoughLapCurv_hpt_of_slot0_budget
   classical
   intro x
   obtain ⟨n, e, K₀, hn, hsplit, hper⟩ := hbudget x
-  -- Lift the per-direction budget bound through the slot-split reduction to `n · (D₀² budget)`.
   have hle : riemannianFiberNormSq (I := I) (M := M) g 0 3 x
       ((covGradRoughLapCurv (I := I) (M := M) g T₀).toSection x) ≤
         (n : ℝ) * (D₀ ^ 2 * rfnsBudget (I := I) (M := M) g T₀ x) :=
     riemannianFiberNormSq_three_le_of_slot0_bound (I := I) (M := M) g T₀ x e K₀ hsplit
       (D₀ ^ 2 * rfnsBudget (I := I) (M := M) g T₀ x) hper
-  -- The frame size `n` is `finrank ℝ (TangentSpace I x) = finrank ℝ E`.
   have hn_E : (n : ℝ) = (Module.finrank ℝ E : ℝ) := by
     rw [hn]; norm_cast
-  -- Rewrite `(√(finrank) · D₀)² = finrank · D₀²`.
   have hsq : (Real.sqrt (Module.finrank ℝ E) * D₀) ^ 2 =
       (Module.finrank ℝ E : ℝ) * D₀ ^ 2 := by
     rw [mul_pow, Real.sq_sqrt (by positivity)]
-  -- The budget equals the explicit rfns sum.
   have hbud_eq : rfnsBudget (I := I) (M := M) g T₀ x =
       (riemannianFiberNormSq (I := I) (M := M) g 0 2 x (T₀.toSection x) +
         riemannianFiberNormSq (I := I) (M := M) g 0 3 x

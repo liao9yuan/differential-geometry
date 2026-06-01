@@ -74,21 +74,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Christoffel-correction symmetry: the difference cancels
-
-The Christoffel-correction CLM
-`christoffelCorrection g α x Y v = ∑ᵢⱼₖ (b.repr (trivToE α x v))ᵢ
-  (b.repr Y)ⱼ Γᵏᵢⱼ(φα x) • eₖ`
-satisfies the following symmetry: when one swaps the section component `Y` and
-the tangent vector `v` (after both are expressed via the basis representation
-of their `trivToE`-image), the sum is unchanged. This follows from the
-symmetry `chartChristoffel g α i j k = chartChristoffel g α j i k` and a
-relabeling of the summation indices `i ↔ j`.
-
-In our application, `Y` will be `chartE_section_repr α σ x = trivToE α x (σ x)`
-for a section `σ`, and the swap takes the role of `(σ, v)` to `(τ, w)` where
-`σ x = w` and `τ x = v`. -/
-
 /-- **Symmetry-cancellation of the Christoffel correction.** For two
 tangent vectors `v, w : TangentSpace I x`, the Christoffel-correction CLMs
 satisfy
@@ -105,15 +90,6 @@ lemma christoffelCorrection_symm_cancel
       christoffelCorrection (I := I) g α x (trivToE (I := I) α x v) w := by
   classical
   rw [christoffelCorrection_apply, christoffelCorrection_apply]
-  -- LHS body (over `i, j, k`):
-  --   `(b.repr (trivToE α x v))_i * (b.repr (trivToE α x w))_j * Γ^k_{i,j}(φα x) • e_k`.
-  -- RHS body (over `i, j, k`):
-  --   `(b.repr (trivToE α x w))_i * (b.repr (trivToE α x v))_j * Γ^k_{i,j}(φα x) • e_k`.
-  -- Swap the outer two sums on LHS via `Finset.sum_comm`. After swap, the bound `(j, i)`
-  -- of LHS aligns with the bound `(i, j)` of RHS. The body becomes
-  -- `(b.repr v)_i * (b.repr w)_j * Γ^k_{i,j}` versus
-  -- `(b.repr w)_i * (b.repr v)_j * Γ^k_{j,i}`.
-  -- Identify `Γ^k_{j,i} = Γ^k_{i,j}` via `chartChristoffel_symm`, then commutativity closes.
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl (fun i _ => ?_)
   refine Finset.sum_congr rfl (fun j _ => ?_)
@@ -121,8 +97,6 @@ lemma christoffelCorrection_symm_cancel
   rw [chartChristoffel_symm (I := I) g α j i k (extChartAt I α x)]
   congr 1
   ring
-
-/-! ## Torsion-free property -/
 
 set_option linter.unusedVariables false in
 /-- **Torsion-free property of the chart-local Levi-Civita.** On the good set
@@ -149,32 +123,15 @@ theorem chartLeviCivita_torsion_free_on (g : SmoothRiemannianMetric I M) (α : M
         VectorField.mlieBracket I X Y x := by
   intro X Y x hX hY hx
   classical
-  -- Unpack the good-set membership.
   have hx_src : x ∈ (extChartAt I α).source :=
     chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hx
   have hx_base : x ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hx
   have hx_int : extChartAt I α x ∈ interior ((extChartAt I α).target : Set E) :=
     chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx
-  -- Expand both `chartLeviCivita g α Y x (X x)` and `chartLeviCivita g α X x (Y x)`.
-  -- chartLeviCivita g α Y x (X x) = trivFromE α x (
-  --   fderiv (Y^E_α ∘ φα.symm) (φα x) (trivToE α x (X x))
-  --   + christoffelCorrection α x (Y^E_α x) (X x))
   rw [chartLeviCivita_apply (I := I) g α Y hx (X x)]
   rw [chartLeviCivita_apply (I := I) g α X hx (Y x)]
-  -- Now both sides have form `trivFromE α x (...)` and we want their difference
-  -- to equal `mlieBracket I X Y x`.
-  -- Use `← map_sub` (linearity of `trivFromE α x`) to combine.
   rw [← map_sub]
-  -- Goal: `trivFromE α x ([fderiv_Y + Christ_Y] - [fderiv_X + Christ_X]) = mlieBracket`.
-  -- Reorganise: `[fderiv_Y - fderiv_X] + [Christ_Y - Christ_X]`.
-  -- Note `chartE_section_repr α Y x = trivToE α x (Y x)` etc.
-  -- So `Christ_Y = christoffelCorrection α x (trivToE α x (Y x)) (X x)` and
-  -- `Christ_X = christoffelCorrection α x (trivToE α x (X x)) (Y x)`.
-  -- By `christoffelCorrection_symm_cancel` (with v = X x, w = Y x):
-  -- `christoffelCorrection α x (trivToE α x (Y x)) (X x)
-  --   = christoffelCorrection α x (trivToE α x (X x)) (Y x)`.
-  -- So `Christ_Y - Christ_X = 0` and we're left with `trivFromE α x [fderiv_Y - fderiv_X]`.
   have hreorg :
       (fderiv ℝ (chartE_section_repr (I := I) α Y ∘ (extChartAt I α).symm)
             (extChartAt I α x) (trivToE (I := I) α x (X x))
@@ -189,7 +146,6 @@ theorem chartLeviCivita_torsion_free_on (g : SmoothRiemannianMetric I M) (α : M
             (extChartAt I α x) (trivToE (I := I) α x (X x))
         - fderiv ℝ (chartE_section_repr (I := I) α X ∘ (extChartAt I α).symm)
             (extChartAt I α x) (trivToE (I := I) α x (Y x))) := by
-    -- Identify `chartE_section_repr α σ x = trivToE α x (σ x)`.
     have hY_repr : chartE_section_repr (I := I) α Y x =
         trivToE (I := I) α x (Y x) :=
       chartE_section_repr_eq_trivToE (I := I) α Y x
@@ -197,7 +153,6 @@ theorem chartLeviCivita_torsion_free_on (g : SmoothRiemannianMetric I M) (α : M
         trivToE (I := I) α x (X x) :=
       chartE_section_repr_eq_trivToE (I := I) α X x
     rw [hY_repr, hX_repr]
-    -- Use `christoffelCorrection_symm_cancel` to identify the two Christoffel terms.
     have hcancel :
         christoffelCorrection (I := I) g α x (trivToE (I := I) α x (Y x)) (X x) =
           christoffelCorrection (I := I) g α x (trivToE (I := I) α x (X x)) (Y x) :=
@@ -205,8 +160,6 @@ theorem chartLeviCivita_torsion_free_on (g : SmoothRiemannianMetric I M) (α : M
     rw [hcancel]
     abel
   rw [hreorg]
-  -- The goal is now exactly the chart-α form of the Lie bracket. Apply
-  -- `mlieBracket_eq_chart_fderiv_diff_general`.
   exact (mlieBracket_eq_chart_fderiv_diff_general (I := I) α x X Y
     hx_src hx_base hx_int hX hY).symm
 

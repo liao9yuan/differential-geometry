@@ -59,8 +59,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Laplacian.Spectral
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -69,8 +67,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 namespace scalarHs
 
 variable {g : SmoothRiemannianMetric I M} {σ : ℝ}
-
-/-! ## Finitely-supported coordinate families -/
 
 /-- A finitely-supported coordinate family `f` defines an element of
 `scalarHs g σ` for every exponent `σ`. -/
@@ -94,8 +90,6 @@ def ofFiniteSupport (g : SmoothRiemannianMetric I M) (σ : ℝ)
     (hf : (Function.support f).Finite) :
     (ofFiniteSupport (I := I) (M := M) g σ f hf).coeff = f := rfl
 
-/-! ## The spectral basis vector -/
-
 open scoped Classical in
 /-- The standard basis coordinate family `j ↦ if j = i then 1 else 0`
 defines an element of every `scalarHs g σ` — the spectral representation
@@ -117,8 +111,6 @@ open scoped Classical in
     (i j : EigenIdx (I := I) (M := M) g) :
     (basisVec (I := I) (M := M) g σ i).coeff j =
       (if j = i then (1 : ℝ) else 0) := rfl
-
-/-! ## The submodule of finitely-supported elements -/
 
 /-- The submodule of `scalarHs g σ` consisting of elements whose
 eigenbasis coordinate family has finite support. Equivalently, the span
@@ -154,8 +146,6 @@ def finiteSupportSubmodule (g : SmoothRiemannianMetric I M) (σ : ℝ) :
     T ∈ finiteSupportSubmodule (I := I) (M := M) g σ ↔
       (Function.support T.coeff).Finite := Iff.rfl
 
-/-! ## Decomposition of finitely-supported elements -/
-
 /-- A finitely-supported `scalarHs g σ` element equals the finite
 `ℝ`-linear combination of basis vectors over its support: if
 `T ∈ finiteSupportSubmodule g σ`, then
@@ -169,7 +159,6 @@ theorem hasSum_smul_basisVec_of_finite
   set hT' := (mem_finiteSupportSubmodule (I := I) (M := M) T).mp hT
   refine scalarHs.ext ?_
   funext j
-  -- Read off the `j`-th coordinate of the finite sum.
   have h_sum : (∑ i ∈ hT'.toFinset,
         T.coeff i • basisVec (I := I) (M := M) g σ i).coeff j =
       ∑ i ∈ hT'.toFinset,
@@ -182,26 +171,15 @@ theorem hasSum_smul_basisVec_of_finite
         simp only [scalarHs.smul_coeff, basisVec_coeff,
           mul_ite, mul_one, mul_zero]
   rw [h_sum]
-  -- The summand vanishes except at `i = j`, where it is `T.coeff j`.
   rw [Finset.sum_eq_single j]
   · simp
   · intro i _ hij
     simp [Ne.symm hij]
   · intro hj
-    -- `j ∉ support` forces `T.coeff j = 0`.
     have hzero : T.coeff j = 0 := by
       by_contra hne
       exact hj (hT'.mem_toFinset.mpr (Function.mem_support.mpr hne))
     simp [hzero]
-
-/-! ## Unconditional sum of spectral basis components
-
-Every `T ∈ scalarHs g σ` is the unconditional sum of its spectral basis
-components `(coeff i T) • basisVec g σ i`. The proof transports the
-canonical finitely-supported `ℓ²` approximations
-(`lp.hasSum_single`) along the diagonal rescaling isometric equivalence
-`rescaleEquivL2`. Density of the finitely-supported submodule is then
-immediate. -/
 
 open scoped Classical in
 /-- The rescaling isometry carries the spectral basis component
@@ -234,13 +212,9 @@ theorem hasSum_smul_basisVec
     HasSum (fun i : EigenIdx (I := I) (M := M) g =>
       T.coeff i • basisVec (I := I) (M := M) g σ i) T := by
   classical
-  -- Transport `HasSum` along the continuous-linear-equiv `rescaleEquivL2`:
-  -- it suffices to prove the `HasSum` of the *image* family in `ℓ²`.
   rw [← ContinuousLinearEquiv.hasSum'
     (e := (rescaleEquivL2 (I := I) (M := M)
       (g := g) (σ := σ)).toContinuousLinearEquiv)]
-  -- The image of `(coeff i T) • basisVec g σ i` is the canonical `ℓ²`
-  -- unit family, whose sum is `rescaleEquivL2 T` by `lp.hasSum_single`.
   have h_l2 : HasSum
       (fun i : EigenIdx (I := I) (M := M) g =>
         lp.single 2 i
@@ -268,13 +242,10 @@ theorem mem_closure_finiteSupportSubmodule
       (finiteSupportSubmodule (I := I) (M := M) g σ :
         Set (scalarHs (I := I) (M := M) g σ)) := by
   classical
-  -- `T` is the limit of finite partial sums of `T.coeff i • basisVec i`,
-  -- each of which has finite support, hence lies in the submodule.
   refine mem_closure_of_tendsto
     (hasSum_smul_basisVec (I := I) (M := M) T) ?_
   refine Filter.Eventually.of_forall (fun u => ?_)
   refine Submodule.sum_mem _ (fun i _ => ?_)
-  -- `T.coeff i • basisVec g σ i` has support contained in `{i}`.
   refine Submodule.smul_mem _ _ ?_
   rw [mem_finiteSupportSubmodule]
   refine Set.Finite.subset (Set.finite_singleton i) ?_
@@ -284,8 +255,6 @@ theorem mem_closure_finiteSupportSubmodule
   simpa using hj
 
 end scalarHs
-
-/-! ## Density of finitely-supported elements -/
 
 /-- The finitely-supported elements form a dense submodule of
 `scalarHs g σ`: their topological closure is the whole space.
@@ -309,8 +278,6 @@ theorem scalarHs.finiteSupportSubmodule_dense
   rw [Submodule.dense_iff_topologicalClosure_eq_top]
   exact scalarHs.finiteSupportSubmodule_topologicalClosure_eq_top
     (I := I) (M := M)
-
-/-! ## Sanity tests -/
 
 example {g : SmoothRiemannianMetric I M} {σ : ℝ}
     (i : EigenIdx (I := I) (M := M) g) :

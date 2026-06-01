@@ -97,19 +97,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## The chart-Riemann CLM
-
-We package the chart-Riemann tensor entries `chartRiemannTensor g x i j k l (extChartAt I x x)`
-into a continuous trilinear CLM on `T_x M = E`. The construction mirrors `ricciFun`'s
-basis-coordinate triple sum: each input vector contributes its basis components, and the
-output is the basis-weighted sum of `e_l` against `R^l{}_{ijk}` at the chart point.
-
-Recall the index convention from `chartRiemannTensor`:
-* `i` is the "vector" index (third CLM input position).
-* `(j, k)` are the differentiation indices (first two CLM input positions).
-* `l` is the upper output index.
--/
-
 /-- The trilinear LinearMap form of the chart-Riemann tensor at `x`. This is the
 basis-coordinate sum encoding the chart entries `R^l{}_{ijk}` evaluated at the chart
 basepoint. -/
@@ -141,8 +128,6 @@ def chartRiemannLin (g : SmoothRiemannianMetric I M) (x : M) :
         rw [← Finset.sum_add_distrib]
         refine Finset.sum_congr rfl (fun l _ => ?_)
         simp only [Finsupp.coe_add, Pi.add_apply]
-        -- Goal: ((a + b) * X * Y * R) • el = (a * X * Y * R) • el + (b * X * Y * R) • el
-        -- Use module.add_smul to expand.
         rw [show ((((chartModelBasis E).repr u₁) i + ((chartModelBasis E).repr u₂) i) *
               ((chartModelBasis E).repr v) j * ((chartModelBasis E).repr w) k *
               chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) =
@@ -167,7 +152,6 @@ def chartRiemannLin (g : SmoothRiemannianMetric I M) (x : M) :
         rw [Finset.smul_sum]
         refine Finset.sum_congr rfl (fun l _ => ?_)
         simp only [Finsupp.coe_smul, Pi.smul_apply, smul_eq_mul]
-        -- Goal: ((c * a) * X * Y * R) • el = c • ((a * X * Y * R) • el)
         rw [show (c * ((chartModelBasis E).repr u) i * ((chartModelBasis E).repr v) j *
                 ((chartModelBasis E).repr w) k *
                 chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) =
@@ -354,7 +338,6 @@ def chartRiemannCLM (g : SmoothRiemannianMetric I M) (x : M) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x :=
   haveI : T2Space (TangentSpace I x) := inferInstanceAs (T2Space E)
   haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
-  -- Step 1: convert each inner LinearMap layer to a CLM, then bundle outward.
   let outer : TangentSpace I x →ₗ[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x :=
     { toFun := fun v =>
         let mid : TangentSpace I x →ₗ[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x :=
@@ -399,11 +382,6 @@ theorem chartRiemannCLM_apply (g : SmoothRiemannianMetric I M) (x : M)
                 ((chartModelBasis E) l : TangentSpace I x) :=
   chartRiemannLin_apply (I := I) g x v w u
 
-/-! ## Basis-evaluation lemmas
-
-When all three input vectors are basis vectors, the quadruple sum collapses to a single
-sum over `l`, with coefficients `chartRiemannTensor g x i j k l (extChartAt I x x)`. -/
-
 /-- Helper: `(chartModelBasis E).repr (b a) b' = if a = b' then 1 else 0`.
 
 Mathlib's `Module.Basis.repr_self_apply` directly gives this form. -/
@@ -426,7 +404,6 @@ theorem chartRiemannCLM_basis_apply (g : SmoothRiemannianMetric I M) (x : M)
           ((chartModelBasis E) l : TangentSpace I x) := by
   classical
   rw [chartRiemannCLM_apply]
-  -- Step 1: rewrite each basis-rep by the corresponding Kronecker delta.
   have hkron :
       ∑ i' : Fin (Module.finrank ℝ E),
         ∑ j' : Fin (Module.finrank ℝ E),
@@ -452,7 +429,6 @@ theorem chartRiemannCLM_basis_apply (g : SmoothRiemannianMetric I M) (x : M)
     refine Finset.sum_congr rfl (fun l _ => ?_)
     rw [repr_basis_eq_kron, repr_basis_eq_kron, repr_basis_eq_kron]
   rw [hkron]
-  -- Step 2: collapse the three outer sums to (i, j, k) using the Kronecker filters.
   rw [Finset.sum_eq_single i]
   · rw [Finset.sum_eq_single j]
     · rw [Finset.sum_eq_single k]
@@ -487,15 +463,11 @@ theorem chartRiemannCLM_repr_basis (g : SmoothRiemannianMetric I M) (x : M)
       chartRiemannTensor (I := I) g x i j k l (extChartAt I x x) := by
   classical
   rw [chartRiemannCLM_basis_apply]
-  -- The basis-rep of `∑ l', c l' • e_l'` at index `l` is `c l`.
   rw [map_sum]
   rw [Finsupp.coe_finset_sum]
   rw [Finset.sum_apply]
-  -- After `Finsupp.coe_finset_sum` and `Finset.sum_apply`, goal is
-  -- ∑ l', ((b.repr (R l' • b l')) l) = R l.
   rw [Finset.sum_eq_single l]
-  · -- At l' = l: (b.repr (R l • b l)) l = R l.
-    rw [LinearEquiv.map_smul, Finsupp.smul_apply,
+  · rw [LinearEquiv.map_smul, Finsupp.smul_apply,
         Module.Basis.repr_self_apply, smul_eq_mul, if_pos rfl, mul_one]
   · intro l' _ hl_ne
     rw [LinearEquiv.map_smul, Finsupp.smul_apply,
@@ -503,12 +475,6 @@ theorem chartRiemannCLM_repr_basis (g : SmoothRiemannianMetric I M) (x : M)
     have h_neg : ¬ l' = l := hl_ne
     rw [if_neg h_neg, mul_zero]
   · intro hl; exact absurd (Finset.mem_univ _) hl
-
-/-! ## Antisymmetry of `chartRiemannCLM` in the differentiation indices
-
-The chart-Riemann tensor is antisymmetric in `(j, k)` — interchanging `j` and `k` flips
-the sign of every term. This transfers to the CLM as antisymmetry in the first two
-arguments. The proof is by basis-coefficient comparison: equal in every basis triple. -/
 
 /-- **Antisymmetry of `chartRiemannCLM` in the first two CLM arguments.** Interchanging
 the two differentiation directions `(v, w)` flips the sign of the chart-Riemann CLM
@@ -523,17 +489,6 @@ theorem chartRiemannCLM_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
     chartRiemannCLM (I := I) g x v w u = - chartRiemannCLM (I := I) g x w v u := by
   classical
   rw [chartRiemannCLM_apply, chartRiemannCLM_apply]
-  -- Match summand-wise: at indices (i, j, k, l) on the LHS, pair with indices (i, k, j, l) on
-  -- the RHS. Use Finset.sum_comm to swap (j, k) on the RHS, then `chartRiemannTensor_antisymm_jk`
-  -- to flip the sign.
-  -- Key: prove both sides equal a common third form.
-  -- Let `f i j k l = (u_i * v_j * w_k * R^l_{i,j,k}) • e_l`.
-  -- LHS = ∑(i,j,k,l) f i j k l
-  -- RHS = -∑(i,j,k,l) (u_i * w_j * v_k * R^l_{i,j,k}) • e_l = -∑(i,j,k,l) g i j k l
-  -- where g i j k l = (u_i * w_j * v_k * R^l_{i,j,k}) • e_l.
-  -- After Finset.sum_comm on (j, k) for RHS and rewriting g i k j l = (u_i * w_k * v_j * R^l_{i,k,j}) • e_l
-  --    = -(u_i * v_j * w_k * R^l_{i,j,k}) • e_l = -f i j k l (using ring on scalars + antisymm).
-  -- So RHS = -∑ -f = ∑ f = LHS. ✓
   have key : ∀ i j k l : Fin (Module.finrank ℝ E),
       ((chartModelBasis E).repr u i *
           (chartModelBasis E).repr w k *
@@ -558,7 +513,6 @@ theorem chartRiemannCLM_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
               (chartModelBasis E).repr w k *
               chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) from by ring]
     rw [neg_smul]
-  -- Compute RHS using Finset.sum_comm + the key lemma.
   have hRHS_to_neg_LHS :
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
@@ -578,8 +532,6 @@ theorem chartRiemannCLM_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
                   (chartModelBasis E).repr w k *
                   chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
                 ((chartModelBasis E) l : TangentSpace I x)) := by
-    -- Step: at each i, swap (j, k) on the LHS via Finset.sum_comm, then apply `key`.
-    -- Use congrArg over the outer ∑ i.
     have step1 : ∀ i : Fin (Module.finrank ℝ E),
         (∑ j : Fin (Module.finrank ℝ E),
           ∑ k : Fin (Module.finrank ℝ E),
@@ -598,7 +550,6 @@ theorem chartRiemannCLM_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
                   chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
                 ((chartModelBasis E) l : TangentSpace I x)) := by
       intro i
-      -- (a) Swap (j, k) on the LHS at fixed i.
       rw [Finset.sum_comm
         (s := (Finset.univ : Finset (Fin (Module.finrank ℝ E))))
         (t := (Finset.univ : Finset (Fin (Module.finrank ℝ E))))
@@ -609,7 +560,6 @@ theorem chartRiemannCLM_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
                 (chartModelBasis E).repr v k *
                 chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
               ((chartModelBasis E) l : TangentSpace I x))]
-      -- (b) Apply `key` summand-wise (after relabeling outer (k, j) → (j, k) on body).
       rw [show ∑ k : Fin (Module.finrank ℝ E),
               ∑ j : Fin (Module.finrank ℝ E),
                 ∑ l : Fin (Module.finrank ℝ E),
@@ -627,7 +577,6 @@ theorem chartRiemannCLM_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
                       chartRiemannTensor (I := I) g x i k j l (extChartAt I x x)) •
                     ((chartModelBasis E) l : TangentSpace I x) from by
         rw [Finset.sum_comm]]
-      -- (c) Apply `key` to flip sign per (i, j, k, l).
       rw [show ∑ j : Fin (Module.finrank ℝ E),
               ∑ k : Fin (Module.finrank ℝ E),
                 ∑ l : Fin (Module.finrank ℝ E),
@@ -648,9 +597,7 @@ theorem chartRiemannCLM_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
         refine Finset.sum_congr rfl (fun k _ => ?_)
         refine Finset.sum_congr rfl (fun l _ => ?_)
         exact key i j k l]
-      -- (d) Pull negation out of the three sums.
       simp only [Finset.sum_neg_distrib]
-    -- Combine `step1` over all `i` to get the full identity.
     rw [show (∑ i : Fin (Module.finrank ℝ E),
             ∑ j : Fin (Module.finrank ℝ E),
               ∑ k : Fin (Module.finrank ℝ E),
@@ -671,17 +618,9 @@ theorem chartRiemannCLM_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
                     ((chartModelBasis E) l : TangentSpace I x)) from by
       refine Finset.sum_congr rfl (fun i _ => ?_)
       exact step1 i]
-    -- Pull the outer negation out.
     simp only [Finset.sum_neg_distrib]
   rw [hRHS_to_neg_LHS]
-  -- After this rw, goal is LHS = -(-RHS_orig). Use abel to normalize negations.
   abel
-
-/-! ## Specialisation to the chart-basis triple
-
-For the canonical model basis `e := chartModelBasis E`, the antisymmetry identity
-specialises to the index-level statement: swapping the two differentiation basis vectors
-flips the sign of the basis output. -/
 
 /-- Antisymmetry of the chart-Riemann CLM on the canonical model-basis triple. -/
 theorem chartRiemannCLM_basis_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
@@ -701,39 +640,15 @@ theorem chartRiemannCLM_diag (g : SmoothRiemannianMetric I M) (x : M)
     chartRiemannCLM (I := I) g x v v u = 0 := by
   have h : chartRiemannCLM (I := I) g x v v u = -chartRiemannCLM (I := I) g x v v u :=
     chartRiemannCLM_antisymm_jk (I := I) g x v v u
-  -- `a = -a` over `ℝ` implies `a = 0`. Use `eq_neg_self_iff` or rearrange algebraically.
-  -- Direct: `a + a = 0` from `a = -a`, then `(2 : ℝ) • a = 0`, then since `2 ≠ 0`, `a = 0`.
   set a := chartRiemannCLM (I := I) g x v v u with ha_def
-  -- From `a = -a`, get `a + a = 0` by `nlinarith`-style: `a + a = a + (-a) = 0`.
   have h_add : a + a = 0 := by
     nth_rewrite 1 [h]
     rw [neg_add_cancel]
-  -- Now `(2 : ℝ) • a = a + a = 0`, cancel the nonzero scalar `2`.
   have h_two_smul : (2 : ℝ) • a = a + a := by
     rw [show (2 : ℝ) = 1 + 1 from by norm_num, add_smul, one_smul]
   have h_smul_zero : (2 : ℝ) • a = 0 := h_two_smul.trans h_add
   have htwo : (2 : ℝ) ≠ 0 := by norm_num
   exact (smul_eq_zero.mp h_smul_zero).resolve_left htwo
-
-/-! ## Bridge with `riemannOp` (section-level reduction)
-
-The fundamental bridge identification
-$$
-  \text{riemannOp}\,(\text{LeviCivita}\,g)\,x = \text{chartRiemannCLM}\,g\,x
-$$
-is determined, by trilinearity in finite dimensions, by the basis-coordinate identities
-$$
-  \text{riemannOp}\,(\text{LeviCivita}\,g)\,x\,(e_j)\,(e_k)\,(e_i) =
-    \sum_l R^l{}_{ijk}(g, x)(\varphi_x x)\,e_l \qquad \forall\, i, j, k.
-$$
-By `riemannOp_apply_smooth`, for any choice of smooth global tangent sections
-`X_i, X_j, X_k` with `X_i x = e_i` etc., the left-hand side equals the section-level
-formula `riemannSec (LeviCivita g) X_j X_k X_i x`. The chart-Christoffel calculation
-identifying this with the right-hand side iterates `LeviCivita_chart_apply` twice and
-unfolds the chart-Levi-Civita inner CLM at the basepoint.
-
-This file delivers the section-level reduction (the "`riemannOp_apply_smooth` form" of
-the bridge); the iterated chart-Christoffel identification is the deferred deep step. -/
 
 /-- **Section-level reduction of `riemannOp` on smooth basis extensions.** For any
 choice of smooth global tangent sections `X i` with `X i x = (chartModelBasis E) i`,
@@ -753,7 +668,6 @@ theorem riemannOp_chartBasis_via_riemannSec (g : SmoothRiemannianMetric I M) (x 
         ((chartModelBasis E) j) ((chartModelBasis E) k)
         ((chartModelBasis E) i) =
       riemannSec (LeviCivita (I := I) g) (X j) (X k) (X i) x := by
-  -- Replace each basis vector by `X _ x`, then apply riemannOp_apply_smooth.
   rw [show ((chartModelBasis E) j : TangentSpace I x) = X j x from (hXx j).symm,
       show ((chartModelBasis E) k : TangentSpace I x) = X k x from (hXx k).symm,
       show ((chartModelBasis E) i : TangentSpace I x) = X i x from (hXx i).symm]
@@ -769,23 +683,12 @@ theorem riemannSec_chartBasis_swap (g : SmoothRiemannianMetric I M) (x : M)
       - riemannSec (LeviCivita (I := I) g) (X k) (X j) (X i) x :=
   riemannSec_swap (cov := LeviCivita (I := I) g) (X j) (X k) (X i) x
 
-/-! ## Diagonal vanishing of the section-level Riemann formula on basis extensions
-
-A direct consequence of `riemannSec_self_eq_zero`: when the two differentiation
-arguments coincide, the section-level Riemann formula vanishes. -/
-
 /-- **Section-level diagonal vanishing.** For smooth sections `X j`, the section-level
 Riemann formula vanishes on the diagonal `(X j, X j)`. -/
 theorem riemannSec_chartBasis_diag (g : SmoothRiemannianMetric I M) (x : M)
     (X : Π b : M, TangentSpace I b) (Z : Π b : M, TangentSpace I b) :
     riemannSec (LeviCivita (I := I) g) X X Z x = 0 :=
   riemannSec_self_eq_zero (cov := LeviCivita (I := I) g) X Z x
-
-/-! ## Pointwise antisymmetry of `riemannOp` on the basis triple
-
-Using `riemannOp_swap` (the antisymmetry of the bundled CLM in its first two slots,
-already established in `CurvatureBundling`), we record the basis-vector form for
-downstream use alongside `chartRiemannCLM_basis_antisymm_jk`. -/
 
 /-- Antisymmetry of `riemannOp (LeviCivita g) x` on the canonical model-basis triple. -/
 theorem riemannOp_basis_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)

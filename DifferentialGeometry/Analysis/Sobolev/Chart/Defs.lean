@@ -41,8 +41,6 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Chart-pushed function via `toEuclidean` -/
-
 /-- The chart-pushed scalar function: given `u : M → ℝ`, the partition-of-unity
 weight `ρ α : M → ℝ`, and a chart `α : M`, return the function on the standard
 Euclidean space `EuclideanSpace ℝ (Fin (Module.finrank ℝ E))` defined by
@@ -59,8 +57,6 @@ def chartPushed
 def chartTargetEuclid (α : M) :
     Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
   toEuclidean '' (extChartAt I α).target
-
-/-! ## The chart-based `W^{k,p}` predicate -/
 
 /-- `MemWkpChart g k p u`: for every chart `α : M` in the canonical atlas, the
 chart-pushed function `chartPushed ρ α u` is in `MemWkp k p` of the chart
@@ -119,8 +115,6 @@ theorem MemWkpChart_iff
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
           (chartTargetEuclid (I := I) (M := M) α) := Iff.rfl
 
-/-! ## Basic structural lemmas -/
-
 omit [IsManifold I ∞ M] in
 /-- The chart-pushed function for the zero scalar function is zero. -/
 theorem chartPushed_zero
@@ -138,10 +132,8 @@ theorem chartTargetEuclid_isOpen
     [I.Boundaryless] (α : M) :
     IsOpen (chartTargetEuclid (I := I) (M := M) α) := by
   unfold chartTargetEuclid
-  -- `(extChartAt I α).target` is open in `E` (boundaryless case).
   have hOpenE : IsOpen ((extChartAt I α).target) :=
     isOpen_extChartAt_target (I := I) α
-  -- Homeomorphic image of an open set is open.
   exact toEuclidean.toHomeomorph.isOpenMap _ hOpenE
 
 /-- Membership of the zero function in `W^{k,p}_chart(M)`. -/
@@ -162,7 +154,6 @@ theorem wkpNormChart_zero_fun
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) :
     wkpNormChart (I := I) (M := M) g k p (fun _ : M => (0 : ℝ)) = 0 := by
   unfold wkpNormChart
-  -- For each α, `chartPushed ρ α 0 = 0`, and `wkpNorm k p 0 _ = 0`.
   have hpt : ∀ α : M,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) k p
@@ -175,11 +166,8 @@ theorem wkpNormChart_zero_fun
     exact DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_zero_fun_zero
       (d := Module.finrank ℝ E) hp
       (chartTargetEuclid_isOpen (I := I) (M := M) α)
-  -- Sum of zeros is zero.
   rw [tsum_congr hpt]
   exact tsum_zero
-
-/-! ## Closure under addition and scalar multiplication -/
 
 omit [IsManifold I ∞ M] in
 /-- The chart-pushed function is linear in `u`: `chartPushed ρ α (u + v) = chartPushed ρ α u + chartPushed ρ α v`. -/
@@ -245,7 +233,6 @@ theorem MemWkpChart_neg
     (hu : MemWkpChart (I := I) (M := M) g k p u) :
     MemWkpChart (I := I) (M := M) g k p (fun x => -u x) := by
   have h := MemWkpChart_const_smul (I := I) (M := M) g hp (-1) hu
-  -- (-1) * u x = -u x
   have hEq : (fun x : M => (-1 : ℝ) * u x) = (fun x : M => -u x) := by
     funext x; ring
   rw [hEq] at h
@@ -262,13 +249,10 @@ theorem MemWkpChart_sub
     MemWkpChart (I := I) (M := M) g k p (fun x => u x - v x) := by
   have hneg := MemWkpChart_neg (I := I) (M := M) g hp hv
   have h := MemWkpChart_add (I := I) (M := M) g hp hu hneg
-  -- u x + -v x = u x - v x
   have hEq : (fun x : M => u x + -v x) = (fun x : M => u x - v x) := by
     funext x; ring
   rw [hEq] at h
   exact h
-
-/-! ## The chart-based Sobolev subspace `WkpChart g k p` as an `AddSubgroup` of `M → ℝ` -/
 
 /-- The chart-based Sobolev subspace as an `AddSubgroup` of `M → ℝ`, parametrised
 by the metric `g`, the order `k`, the exponent `p`, and the assumption `1 ≤ p`. -/
@@ -290,10 +274,7 @@ def wkpChartSubmodule
   zero_mem' := MemWkpChart_zero_fun (I := I) (M := M) g hp
   add_mem' := fun hu hv => MemWkpChart_add (I := I) (M := M) g hp hu hv
   smul_mem' := fun c u hu => by
-    -- `c • u = fun x => c * u x` for the function module structure on `M → ℝ`.
     have h := MemWkpChart_const_smul (I := I) (M := M) g hp c hu
-    -- The underlying function is `fun x => c * u x`, but `c • u` could unfold
-    -- differently. Let's match.
     have hEq : (c • u : M → ℝ) = fun x => c * u x := by
       funext x
       simp [Pi.smul_apply, smul_eq_mul]
@@ -308,9 +289,6 @@ def WkpChart
     (k : ℕ) (p : ℝ≥0∞) (hp : 1 ≤ p) : Type _ :=
   ↥(wkpChartSubmodule (I := I) (M := M) g k p hp)
 
-/-! Algebraic structure of `WkpChart g k p hp` is inherited from the underlying
-`Submodule ℝ (M → ℝ)`. In particular it is an `AddCommGroup` and a `Module ℝ`. -/
-
 instance
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -324,8 +302,6 @@ instance
     (k : ℕ) (p : ℝ≥0∞) (hp : 1 ≤ p) :
     Module ℝ (WkpChart (I := I) (M := M) g k p hp) :=
   inferInstanceAs (Module ℝ ↥(wkpChartSubmodule (I := I) (M := M) g k p hp))
-
-/-! ## Order monotonicity of the predicate -/
 
 /-- Membership in `W^{k+1,p}_chart` implies membership in `W^{k,p}_chart`. -/
 theorem MemWkpChart.le_succ
@@ -347,8 +323,6 @@ theorem MemWkpChart.le_of_le
     MemWkpChart (I := I) (M := M) g k p u := by
   intro α
   exact (h α).le_of_le hk
-
-/-! ## a.e.-invariance of the chart-based norm under chart-by-chart equality -/
 
 /-- The chart-pushed-equivalence relation: two functions `u, v : M → ℝ` are
 chart-pushed equivalent if every chart-pushed image `chartPushed ρ α u` agrees a.e.
@@ -430,8 +404,6 @@ theorem wkpNormChart_congr_chartPushed_ae
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     (huv α)
 
-/-! ## Triangle inequality and scalar-multiplication identity for `wkpNormChart` -/
-
 /-- The triangle inequality for the chart-based norm. -/
 theorem wkpNormChart_add_le
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
@@ -448,8 +420,6 @@ theorem wkpNormChart_add_le
   refine ENNReal.tsum_le_tsum ?_
   intro α
   rw [chartPushed_add]
-  -- For each α, `chartPushed ρ α (u+v) = chartPushed ρ α u + chartPushed ρ α v`
-  -- pointwise. Apply the Euclidean triangle.
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_add_le
     (d := Module.finrank ℝ E) hp
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
@@ -474,8 +444,6 @@ theorem wkpNormChart_const_smul
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     (hu α) c
 
-/-! ## Finiteness of `wkpNormChart` for compact `M` and members -/
-
 /-- The chart-based norm is finite for any function in `MemWkpChart`, when `M` is
 compact and `1 ≤ p`. (Compactness ensures the partition-of-unity has finitely many
 supports.) -/
@@ -487,28 +455,19 @@ theorem wkpNormChart_lt_top_of_memWkpChart
     wkpNormChart (I := I) (M := M) g k p u < ⊤ := by
   classical
   unfold wkpNormChart
-  -- The partition of unity has locally finite supports; on a compact space, this
-  -- means only finitely many supports are nonempty. For α with empty support of
-  -- ρ α, `chartPushed ρ α u` is the zero function, so `wkpNorm = 0`. Hence the
-  -- tsum has finitely many nonzero terms.
-  -- Define the per-α term.
   set f : M → ℝ≥0∞ := fun α =>
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
       (d := Module.finrank ℝ E) k p
       (chartPushed (I := I) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
       (chartTargetEuclid (I := I) (M := M) α) with hf_def
-  -- Locally finite support family for the partition of unity.
   have hPOU_locFin : LocallyFinite
       (fun α : M => Function.support
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : M → ℝ)) :=
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M).locallyFinite
-  -- On a compact space, finitely many supports are nonempty.
   have hSupport_finite : {α : M | (Function.support
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : M → ℝ)).Nonempty}.Finite :=
     hPOU_locFin.finite_nonempty_of_compact
-  -- For α not in this finite set, ρ α is zero everywhere, so chartPushed is zero
-  -- everywhere, so wkpNorm = 0.
   have hf_zero_off : ∀ α : M, (Function.support
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : M → ℝ)) = ∅ →
         f α = 0 := by
@@ -537,15 +496,12 @@ theorem wkpNormChart_lt_top_of_memWkpChart
     exact DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_zero_fun_zero
       (d := Module.finrank ℝ E) hp
       (chartTargetEuclid_isOpen (I := I) (M := M) α)
-  -- Define the finite set: those α with non-empty support.
   set S : Set M := {α : M | (Function.support
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : M → ℝ)).Nonempty}
       with hS_def
   have hS_finite : S.Finite := hSupport_finite
-  -- The function f is supported in S.
   have hf_supp_S : Function.support f ⊆ S := by
     intro α hα
-    -- `α ∈ support f` means `f α ≠ 0`.
     by_contra hαS
     apply hα
     have h_not_in_S : (Function.support
@@ -556,11 +512,9 @@ theorem wkpNormChart_lt_top_of_memWkpChart
         exact hαS hne
       exact Set.not_nonempty_iff_eq_empty.mp h_not_nonempty
     exact hf_zero_off α h_not_in_S
-  -- Now: tsum f = Σ over α ∈ S, f α (a finite sum).
   have htsum_eq : ∑' α : M, f α = ∑ α ∈ hS_finite.toFinset, f α := by
     rw [tsum_eq_sum]
     intro α hα
-    -- α ∉ hS_finite.toFinset means α ∉ S, so support of ρ α is empty.
     have hαS : α ∉ S := by
       intro hαS
       apply hα
@@ -574,10 +528,8 @@ theorem wkpNormChart_lt_top_of_memWkpChart
       exact Set.not_nonempty_iff_eq_empty.mp h_not_nonempty
     exact hf_zero_off α hempty
   rw [htsum_eq]
-  -- The finite sum is bounded by Σ over α, where each f α < ⊤.
   apply ENNReal.sum_lt_top.mpr
   intro α _
-  -- f α < ⊤ since u ∈ MemWkpChart implies the chart-pushed is in MemWkp.
   rw [hf_def]
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_lt_top_of_memWkp
     (d := Module.finrank ℝ E) (hu α)

@@ -68,8 +68,6 @@ open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1ComplFromDom
 open DifferentialGeometry.Analysis.Laplacian.H1ComplToLpChartBridge
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -78,8 +76,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## The chart-pulled partial-derivative function for a smooth scalar -/
 
 /-- The chart-pulled `j`-th classical partial derivative of the chart-pushed
 function, for a smooth scalar `v`. -/
@@ -99,8 +95,6 @@ noncomputable def chartPushedPartial
       (fderiv ℝ (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed (I := I) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α v.toFun) y)
         (EuclideanSpace.single j 1) := rfl
-
-/-! ## The chart-pushed partial as an `Lp` element -/
 
 /-- The chart-pushed partial as an `Lp ℝ 2` element, requiring the partial
 to be in `MemLp 2` against the chart-pulled weighted measure restricted to
@@ -147,15 +141,6 @@ lemma eLpNorm_chartPushedPartial_eq_ofReal_norm
   rw [ENNReal.ofReal_toReal]
   exact h.2.ne
 
-/-! ## Headline theorems
-
-The headline theorems take an `H1Compl g`-Cauchy approximating sequence
-plus a "Lipschitz package" — a function-space-valued continuous linear map
-constructed externally from the chain-rule + density estimate. The Cauchy
-property of `chartPushedPartial` in `Lp` follows by linearity + continuity;
-the existence of an `Lp` limit follows from completeness of `Lp`.
--/
-
 /-- Headline Cauchy theorem in `Lp`: if the chart-pushed-partial map admits
 a continuous linear extension `T : SmoothScalar g →L[ℝ] Lp ℝ 2 (weighted, chartTarget)`
 that agrees with `chartPushedPartialLp g α j (v) h_v` on smooth scalars, then
@@ -171,18 +156,15 @@ theorem cauchy_in_Lp_of_h1Compl_cauchy_with_extension
       smoothToH1Compl (I := I) (M := M) g (v n))) :
     Cauchy (atTop.map fun n => T (v n)) := by
   classical
-  -- The completion embedding `smoothToH1Compl` is uniform inducing.
   have h_inducing : IsUniformInducing (UniformSpace.Completion.toComplL :
       SmoothScalar g →L[ℝ] H1Compl g) := by
     rw [show (UniformSpace.Completion.toComplL : SmoothScalar g → H1Compl g) =
         ((↑) : SmoothScalar g → UniformSpace.Completion (SmoothScalar g)) from
         UniformSpace.Completion.coe_toComplL]
     exact UniformSpace.Completion.isUniformInducing_coe (SmoothScalar g)
-  -- So `(v n)` is Cauchy in `SmoothScalar g`.
   have h_cauchy_smooth : Cauchy (atTop.map v) := by
     rw [(h_inducing.cauchy_map_iff).symm]
     exact h_cauchy_h1
-  -- T is uniformly continuous (continuous linear map), so preserves Cauchy.
   have hT_uc : UniformContinuous T := T.uniformContinuous
   exact h_cauchy_smooth.map hT_uc
 
@@ -205,13 +187,10 @@ theorem cauchy_in_Lp_of_chartPushed_partial_smoothApprox_with_extension
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α)),
       Tendsto (fun n => ‖T (v n) - g_j_α‖) atTop (𝓝 0) := by
   classical
-  -- Tendsto ⟹ Cauchy.
   have h_cauchy_h1 : Cauchy (atTop.map fun n =>
       smoothToH1Compl (I := I) (M := M) g (v n)) := h_tendsto.cauchy_map
-  -- Lp Cauchy from the extension.
   have h_lp_cauchy : Cauchy (atTop.map fun n => T (v n)) :=
     cauchy_in_Lp_of_h1Compl_cauchy_with_extension (I := I) (M := M) g α T h_cauchy_h1
-  -- Lp is complete; Cauchy converges.
   have h_seq_cauchy : CauchySeq (fun n => T (v n)) := h_lp_cauchy
   obtain ⟨g_j_α, h_tendsto_lim⟩ := cauchySeq_tendsto_of_complete h_seq_cauchy
   refine ⟨g_j_α, ?_⟩
@@ -223,18 +202,6 @@ theorem cauchy_in_Lp_of_chartPushed_partial_smoothApprox_with_extension
   rw [h_funext] at h_dist
   exact h_dist
 
-/-! ## `eLpNorm`-formulation of the chart-pushed-partial Cauchy property
-
-The deliverable statement asks for a Cauchy property at the `eLpNorm` level.
-Since `ℝ≥0∞` does not carry a `UniformSpace` instance compatible with the
-filter-Cauchy formulation, we instead state the equivalent: for every
-`ε > 0`, there is `N` such that for all `n, m ≥ N`, the `eLpNorm` of the
-difference `chartPushedPartial g α j (v n) - chartPushedPartial g α j (v m)`
-is `< ε`.
-
-The map `T` agrees with the chart-pushed partial difference in the `Lp` norm
-(the hypothesis `h_T_partial_normEq`). Combined with the `Lp` Cauchy
-property, this gives the chart-weighted `eLpNorm` Cauchy formulation. -/
 theorem cauchy_eLpNorm_diff_chartPushedPartial_with_extension
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))
@@ -263,11 +230,9 @@ theorem cauchy_eLpNorm_diff_chartPushedPartial_with_extension
         < ε := by
   classical
   intro ε hε_pos hε_top
-  -- Lp Cauchy of (T ∘ v).
   have h_lp_cauchy : Cauchy (atTop.map fun n => T (v n)) :=
     cauchy_in_Lp_of_h1Compl_cauchy_with_extension (I := I) (M := M) g α T h_cauchy_h1
   have h_seq_cauchy : CauchySeq (fun n => T (v n)) := h_lp_cauchy
-  -- Get N from the cauchy_iff (symmetric form): ∀ n m ≥ N, dist (T v_n) (T v_m) < ε.toReal.
   have hε_real_pos : 0 < ε.toReal := ENNReal.toReal_pos (ne_of_gt hε_pos) hε_top
   rw [Metric.cauchySeq_iff] at h_seq_cauchy
   obtain ⟨N, hN⟩ := h_seq_cauchy ε.toReal hε_real_pos
@@ -276,7 +241,6 @@ theorem cauchy_eLpNorm_diff_chartPushedPartial_with_extension
   have h_norm : ‖T (v n) - T (v m)‖ < ε.toReal := by
     rw [← dist_eq_norm]; exact h_dist
   rw [h_T_partial_normEq] at h_norm
-  -- h_norm : (eLpNorm ...).toReal < ε.toReal.
   have hLeR : eLpNorm
       (fun y => chartPushedPartial (I := I) (M := M) g α j (v n) y -
         chartPushedPartial (I := I) (M := M) g α j (v m) y) 2

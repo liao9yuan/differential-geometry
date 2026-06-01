@@ -138,22 +138,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The canonical commutator defect as a `SmoothCcTensor`
-
-The commutator equation `Δ_∇(∇T₀) = ∇(Δ_∇ T₀) + Curv` is the form consumed by the
-generalized Gårding estimate `secondCovGrad_l2NormSq_le_rawConnLap_gen`. The canonical
-choice of defect is the difference of the two `(0, 3)`-tensor fields,
-`Curv := Δ_∇(∇T₀) − ∇(Δ_∇ T₀)`, which lives in `SmoothCcTensor g 0 3` via the
-subtraction structure on `SmoothCcTensor`. The commutator equation then holds by
-`sub_add_cancel`; the genuine analytic content is the `L²` bound on this defect, which
-is isolated below into the explicit `Tensor3rdCurv` and the moving-frame residual. -/
 
 /-- **The canonical commutator defect.** The difference of the rough Laplacian of the
 `(0, 3)`-tensor gradient field and the gradient of the rough Laplacian, as a smooth
@@ -185,14 +173,6 @@ theorem covGradRoughLap_commutator_eq
   rw [add_comm]
   rw [sub_add_cancel]
 
-/-! ## The fixed-at-`x` swapped frame trace, read through the unit and curried
-
-The right-hand side of the frame-trace swap `frame_trace_third_eq_swap_unit` is the
-fixed-at-`x` frame trace `∑ᵢ ∇_W ∇_{Bᵢ}∇_{Bᵢ} T₀`, evaluated at the unit `(0, 0)`-tensor.
-With `W := smoothExtensionTangent x w` and `B_i := smoothOrthoFrame g x i`, we name this
-`(0, 2)`-tensor value so the moving-frame residual can be defined as the difference of
-the moving-frame right-hand-side reading and this fixed-frame value. -/
-
 /-- **The fixed-at-`x` swapped frame trace at the unit.** With `W := smoothExtensionTangent
 x w` and `B_i := smoothOrthoFrame g x i`, this is the unit-`(0, 0)`-evaluation of the
 fixed-frame trace `∑ᵢ ∇_W ∇_{Bᵢ}∇_{Bᵢ} T₀`:
@@ -211,17 +191,6 @@ noncomputable def fixedFrameSwapTraceUnit
             (fun y : M => T₀.toSection y))) x
         (smoothExtensionTangent (I := I) x w x))
     (unitZeroSec (I := I) (M := M) x)
-
-/-! ## The moving-frame residual
-
-The right-hand-side curried reading `covGrad_rawConnLap_unit_eval_curry` is the
-moving-frame directional derivative `(∇_w Δ_∇T₀)(x)(unit)`. Subtracting the fixed-frame
-swapped trace `fixedFrameSwapTraceUnit` isolates the **moving-frame residual** — the
-explicit correction that arises because the rough Laplacian section `z ↦ Δ_∇T₀(z)` is
-traced against the moving `g_z`-orthonormal frame `Cᶻ_i`, while the fixed-frame trace is
-against the `g_x`-orthonormal frame `B_i = smoothOrthoFrame g x i`. Both differenced
-terms are second-covariant-derivative-order in `T₀`, so the residual is controlled by
-`‖∇²T₀‖`. -/
 
 /-- **The moving-frame residual at the unit.** With `W := smoothExtensionTangent x w`,
 `B_i := smoothOrthoFrame g x i`, and `Δ_∇ T₀ = rawTensorConnLapSmooth g 0 2 T₀` the
@@ -254,14 +223,6 @@ lemma covGradRoughLapMovingFrameResidual_def
           (unitZeroSec (I := I) (M := M) x) -
         fixedFrameSwapTraceUnit (I := I) (M := M) g T₀ x w := rfl
 
-/-! ## The right-hand-side curried-unit decomposition
-
-The moving-frame right-hand-side reading `(∇_w Δ_∇T₀)(x)(unit)` decomposes, by the
-definition of the residual, as the fixed-frame swapped trace plus the residual. This is
-the algebraic isolation `a = b + (a − b)` with `a` the moving-frame reading and `b` the
-fixed-frame swapped trace; it exhibits the residual as the single concrete correction
-between the two frame readings. -/
-
 /-- **Right-hand-side curried-unit decomposition.** The moving-frame right-hand-side
 reading `(∇_w Δ_∇T₀)(x)(unit)` equals the fixed-frame swapped trace
 `(∑ᵢ ∇_W ∇_{Bᵢ}∇_{Bᵢ} T₀)(x)(unit)` plus the moving-frame residual:
@@ -284,15 +245,6 @@ theorem rhs_curry_eq_swap_add_residual
   rw [covGradRoughLapMovingFrameResidual_def]
   rw [add_comm]
   rw [sub_add_cancel]
-
-/-! ## The right-hand-side reading expressed through the residual
-
-Combining the right-hand-side reading `covGrad_rawConnLap_unit_eval_curry` (which
-identifies the slot-`0` curry of the unit-evaluation of `∇(Δ_∇ T₀)` with the moving-frame
-directional derivative) and the decomposition `rhs_curry_eq_swap_add_residual`, the
-slot-`0` curry of `∇(Δ_∇ T₀)`, read along `w`, is the fixed-frame swapped trace plus the
-residual. This is the precise right-hand-side input the remaining curvature reconciliation
-consumes. -/
 
 /-- **Slot-`0` curry of the gradient of the rough Laplacian, via the residual.** The
 slot-`0` curry of the unit-`(0, 0)`-evaluation of `∇(Δ_∇ T₀) = covGrad g 0 2
@@ -317,17 +269,6 @@ theorem covGrad_rawConnLap_curry_eq_swap_add_residual
         covGradRoughLapMovingFrameResidual (I := I) (M := M) g T₀ x w := by
   rw [covGrad_rawConnLap_unit_eval_curry (I := I) (M := M) g T₀ x w]
   exact rhs_curry_eq_swap_add_residual (I := I) (M := M) g T₀ x w
-
-/-! ## The frame-trace swap, recombined with `Tensor3rdCurv` and the residual
-
-The frame-trace swap `frame_trace_third_eq_swap_unit` writes the fixed-frame trace of the
-once-`W`-derived tensor as the fixed-frame swapped trace plus `Tensor3rdCurv`. Substituting
-the right-hand-side decomposition `covGrad_rawConnLap_curry_eq_swap_add_residual` expresses
-the fixed-frame trace of `∇_W T₀` in terms of the gradient-of-Laplacian reading,
-`Tensor3rdCurv`, and (minus) the residual. This is the recombined identity from which the
-curvature defect `covGradRoughLapCurv` is read once the slot-`0` Christoffel matching
-(`CovGradRoughLapCommutatorClose2.lean` obstruction 1) identifies the commutator left-hand
-side with the fixed-frame trace `∑ᵢ ∇_{Bᵢ}∇_{Bᵢ}(∇_W T₀)`. -/
 
 /-- **Frame-trace of `∇_W T₀`, via the gradient-of-Laplacian reading.** With
 `W := smoothExtensionTangent x w` and `B_i := smoothOrthoFrame g x i`, the unit-`(0, 0)`-
@@ -363,9 +304,7 @@ theorem frame_trace_thirdW_eq_covGrad_rawConnLap_sub_residual_add_curv
           Tensor3rdCurv (I := I) g 0 2 (smoothExtensionTangent (I := I) x w)
             (fun y : M => T₀.toSection y) x)
           (unitZeroSec (I := I) (M := M) x) := by
-  -- The frame-trace swap (unit-read): LHS = fixed-frame swapped trace + Tensor3rdCurv.
   rw [frame_trace_third_eq_swap_unit (I := I) (M := M) g T₀ x w]
-  -- The fixed-frame swapped trace, by definition, is `fixedFrameSwapTraceUnit`.
   rw [show
       (∑ i : Fin (Module.finrank ℝ E),
           (tensorCov (I := I) g 0 2).toFun
@@ -375,7 +314,6 @@ theorem frame_trace_thirdW_eq_covGrad_rawConnLap_sub_residual_add_curv
             (smoothExtensionTangent (I := I) x w x))
           (unitZeroSec (I := I) (M := M) x) =
         fixedFrameSwapTraceUnit (I := I) (M := M) g T₀ x w from rfl]
-  -- Replace the fixed-frame swapped trace by `(gradient-of-Laplacian reading) − residual`.
   rw [show fixedFrameSwapTraceUnit (I := I) (M := M) g T₀ x w =
         tensor0S_curry (I := I) (M := M) 2 x
             ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from

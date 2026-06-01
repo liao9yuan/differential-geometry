@@ -50,8 +50,6 @@ variable {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanHalfSpace n) M]
   [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M]
 
-/-! ## Step 1: From `CauchySeq` to ENNReal-form Cauchy bound -/
-
 /-- The chart-based half-space seminorm satisfies: a `CauchySeq` of `WkpChart`
 elements yields the εδ-Cauchy condition in `wkpNormChart` (ENNReal-valued). -/
 theorem wkpNormChart_cauchy_of_seminormCauchySeq
@@ -91,8 +89,6 @@ theorem wkpNormChart_cauchy_of_seminormCauchySeq
   rw [← ENNReal.ofReal_toReal h_ne_top]
   exact ENNReal.ofReal_le_ofReal hdist.le
 
-/-! ## Step 2: Chart-by-chart Cauchy on each chart target -/
-
 /-- For each chart `α`, the chart-pushed sequence is `wkpNormHalfSpace`-Cauchy
 on `chartTargetEuclid α`. -/
 theorem chartPushed_cauchy_of_wkpNormChart_cauchy
@@ -123,7 +119,6 @@ theorem chartPushed_cauchy_of_wkpNormChart_cauchy
   refine ⟨N, ?_⟩
   intro i j hi hj
   have h_le := hN i j hi hj
-  -- The chart-pushed difference equals the chart-push of the difference (linearity).
   have h_chartPushed_eq : (fun y => chartPushed (n := n) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU
           (modelWithCornersEuclideanHalfSpace n) M) α
@@ -141,7 +136,6 @@ theorem chartPushed_cauchy_of_wkpNormChart_cauchy
     ring
   rw [h_chartPushed_eq]
   unfold wkpNormChart at h_le
-  -- Each summand is bounded by the tsum.
   have h_summand_le_tsum :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormHalfSpace
         (d := n) k p
@@ -160,8 +154,6 @@ theorem chartPushed_cauchy_of_wkpNormChart_cauchy
           (chartTargetEuclid (n := n) (M := M) α') :=
     ENNReal.le_tsum α
   exact le_trans h_summand_le_tsum h_le
-
-/-! ## Step 3: For each chart, get a `wkpNormHalfSpace`-limit -/
 
 /-- For each chart `α`, the chart-pushed sequence has a `wkpNormHalfSpace`-limit
 which is itself in `MemWkpHalfSpace k p` of `chartTargetEuclid α`. -/
@@ -191,10 +183,8 @@ theorem exists_chart_limit
               (wkpChartFun (f N)) y - v_α y)
             (chartTargetEuclid (n := n) (M := M) α))
         atTop (𝓝 0) := by
-  -- Chart-by-chart Cauchy.
   have h_chart_cauchy := chartPushed_cauchy_of_wkpNormChart_cauchy
     (n := n) (M := M) (g := g) (hp := hp) h_cauchy α
-  -- Chart membership.
   have h_chart_mem : ∀ N,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkpHalfSpace
         (d := n) k p
@@ -204,12 +194,9 @@ theorem exists_chart_limit
           (wkpChartFun (f N)))
         (chartTargetEuclid (n := n) (M := M) α) := fun N =>
     (wkpChartFun_memWkpChart (f N)) α
-  -- Apply half-space Banach completeness.
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkpHalfSpace.exists_limit_of_wkpNormHalfSpace_cauchy
     (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α)
     k p hp_one hp_top h_chart_mem h_chart_cauchy
-
-/-! ## Step 4: TendstoInMeasure on each chart's interior part -/
 
 /-- The chart-pushed sequence converges in measure on the interior part of
 each chart target. The interior part is the open part, on which measures and
@@ -245,9 +232,6 @@ theorem chartPushed_tendstoInMeasure
           (modelWithCornersEuclideanHalfSpace n) M) α
         (wkpChartFun (f N)))
       atTop v_α := by
-  -- The half-space norm is the boundaryless norm on the interior part.
-  -- We dominate `eLpNorm` by `wkpNormHalfSpace` and apply the in-measure
-  -- characterisation.
   have h_eLp : Tendsto
       (fun N => eLpNorm
         (fun y => chartPushed (n := n) (M := M)
@@ -264,7 +248,6 @@ theorem chartPushed_tendstoInMeasure
     obtain ⟨N, hN⟩ := h_v ε hε_pos
     refine ⟨N, ?_⟩
     intro N' hN'
-    -- `wkpNormHalfSpace = wkpNorm ∘ interiorHalfSpace`. Use the eLpNorm bound.
     have h_eLp_le_wkp :=
       DifferentialGeometry.Analysis.Sobolev.Euclidean.eLpNorm_iterWeakPartial_le_wkpNorm
         (d := n) (k := k) p
@@ -276,14 +259,12 @@ theorem chartPushed_tendstoInMeasure
           (chartTargetEuclid (n := n) (M := M) α)) 0 (Nat.zero_le _) ![]
     rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial_zero]
       at h_eLp_le_wkp
-    -- Reduce the half-space norm to the boundaryless norm.
     change eLpNorm _ p _ ≤ ε
     exact le_trans h_eLp_le_wkp (hN N' hN')
   have hp_zero : p ≠ 0 := by
     intro h
     rw [h] at hp_one
     exact absurd hp_one (by norm_num : ¬ ((1 : ℝ≥0∞) ≤ 0))
-  -- Strong measurability on the interior part for the sequence and the limit.
   have h_aesm_seq : ∀ N, AEStronglyMeasurable
       (chartPushed (n := n) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU
@@ -300,8 +281,6 @@ theorem chartPushed_tendstoInMeasure
     h_v_mem.memLp.aestronglyMeasurable
   exact tendstoInMeasure_of_tendsto_eLpNorm_of_ne_top hp_zero hp_top
     h_aesm_seq h_aesm_lim h_eLp
-
-/-! ## Step 5: A.e. pointwise subsequence on each chart's interior part -/
 
 /-- For each chart `α`, there is a strict subsequence along which the
 chart-pushed `wkpChartFun (f N)` converges pointwise a.e. on the interior part

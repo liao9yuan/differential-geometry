@@ -123,8 +123,6 @@ open DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapStrongInduc
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH2kBridge
 open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpFour
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -133,46 +131,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Polymorphic chart-`H^{2k}` headline via the chart-side bridge
-
-The chart-side `H^{2k}` bridge predicate `ChartSideH2kBridge g k u_h.coeFn`
-is, by definition, the per-chart chart-`H^{2k}` regularity of the canonical
-chart-pushed POU representative. The headline theorem extracts this per-chart
-information and reformulates it at the chart-pushed function shape.
-
-For `k ≤ 2`, the chart-side bridge is unconditional (via the existing
-infrastructure: `iteratedH2Regularity_zero` at `k = 0`,
-`iteratedH2Regularity_one` at `k = 1`, and
-`chartPushed_memWkp_four_two_of_laplacianDomainPow_two` at `k = 2`).
-For `k ≥ 3`, the chart-side bridge is the channel through which the
-polymorphic chart-`H^{2k}` regularity propagates. The coupled inductive
-descent on the `laplacianDomainPow` filtration is the mathematical
-mechanism: at outer level `k + 1`, the chart-`H^{2(k+1)}` regularity follows
-from the chart-`H^{2k}` regularity at level `k` (applied both to `u_h`
-itself by downward monotonicity and to the `(1 - Δ_g)`-preimage) via a
-double application of the per-step boost
-`chartPushed_memWkp_m_plus_two_step`, with the per-stage chart-`H²` of the
-`m`-mixed partial discharged by the weakened polymorphic Nirenberg interior
-result.
--/
-
-/-! ## The coupled inductive descent
-
-The coupled descent is captured by the following auxiliary statement:
-for `u_h ∈ laplacianDomainPow g k`, the chart-`H^{2k}` regularity of the
-canonical chart-pushed representative holds at every chart point `α`. The
-proof is by `Nat.rec` on `k`, with the base case at `k ≤ 2` discharged
-unconditionally and the step delegating to the polymorphic chart-side
-bridge framework.
-
-The induction's payload at level `k` is the per-chart chart-`H^{2k}`
-membership of the canonical chart-pushed POU representative for **every**
-`u_h ∈ laplacianDomainPow g k` — which is precisely the `ChartSideH2kBridge`
-predicate. At level `k + 1`, the bridge for `u_h` follows from the bridges
-at level `k` (for `u_h` itself by monotonicity and for the `(1-Δ_g)`-
-preimage in `laplacianDomainPow g k`) via the polymorphic inner bootstrap.
--/
 
 /-- **Polymorphic-in-`k` chart-side bridge.**
 For every `k ≤ 2` and every `u_h ∈ laplacianDomainPow g k`, the chart-side
@@ -187,12 +145,6 @@ theorem chartSideH2kBridge_unconditional_le_two
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ)) :=
   chartSideH2kBridge_unconditional_of_laplacianDomainPow_le_two
     (I := I) (M := M) g hk hu_h
-
-/-! ## Headline polymorphic chart-`H^{2k}` (truncated unconditional form)
-
-For arbitrary `k : ℕ`, the chart-`H^{2 · min(k, 2)}` regularity of the
-chart-pushed parent is unconditional. We expose the polymorphic-in-`k`
-headline at this truncated regularity order. -/
 
 /-- **Polymorphic-in-`k` chart-`H^{2 · min(k, 2)}` (unconditional)** for
 `u_h ∈ laplacianDomainPow g k`. For `k ≤ 2`, this matches the requested
@@ -214,17 +166,6 @@ theorem chartPushed_memWkp_two_min_k_two
         (I := I) (M := M) α) :=
   DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapCanonical.chartPushed_memWkp_two_k_of_laplacianDomainPow_min_two
     (I := I) (M := M) g α k hu_h
-
-/-! ## Bridge-driven polymorphic chart-`H^{2k}` at the exact order `2k`
-
-The chart-side bridge predicate `ChartSideH2kBridge g k u_h.coeFn`
-unambiguously captures the chart-`H^{2k}` regularity at every chart point.
-Given the bridge, the headline chart-`H^{2k}` at the exact order is
-immediate.
-
-The full unconditional discharge for arbitrary `k` requires the coupled
-inductive descent on `(1-Δ_g)`-preimages; the recursion anchors at `k ≤ 2`
-where the bridge is unconditional. -/
 
 /-- **Polymorphic-in-`k` chart-`H^{2k}` from the chart-side bridge.**
 
@@ -250,21 +191,6 @@ theorem chartPushed_memWkp_two_k_of_chartSideBridge
         (I := I) (M := M) α) :=
   h_bridge α
 
-/-! ## Coupled descent driver
-
-The coupled descent on `k` reduces the chart-side `H^{2(k+1)}` bridge at
-outer level `k + 1` to the chart-side `H^{2k}` bridges at outer level `k`
-for both `u_h` itself and the `(1 - Δ_g)`-preimage. The reduction is
-mediated by the polymorphic per-step boost `chartPushed_memWkp_m_plus_two_step`
-combined with the weakened polymorphic Nirenberg interior result.
-
-This module exposes the coupled descent in **bridge-conditional form** —
-i.e., the chart-`H^{2(k+1)}` bridge at outer level `k + 1` is delivered
-*given* the chart-`H^{2k}` bridges at outer level `k` for `u_h` and its
-`(1 - Δ_g)`-preimage. The descent is anchored at `k ≤ 2` by the existing
-unconditional infrastructure.
--/
-
 /-- **Downward monotonicity of `laplacianDomainPow` (re-exposed).** -/
 theorem laplacianDomainPow_le_of_le_aux
     (g : SmoothRiemannianMetric I M) {k j : ℕ} (hjk : j ≤ k)
@@ -273,12 +199,6 @@ theorem laplacianDomainPow_le_of_le_aux
     u_h ∈ laplacianDomainPow (I := I) (M := M) g j :=
   DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapCanonical.laplacianDomainPow_le_of_le
     (I := I) (M := M) g hjk hu_h
-
-/-! ## Polymorphic-in-`k` `ChartSideH2kBridge` discharge (unconditional)
-
-The polymorphic-in-`k` chart-`H^{2 · min(k, 2)}` bridge holds unconditionally
-for arbitrary `k`. This is the polymorphic discharge of the bridge predicate
-in its strongest current unconditional form. -/
 
 /-- **Polymorphic-in-`k` `ChartSideH2kBridge g (min(k, 2))` (unconditional).** -/
 theorem chartSideH2kBridge_min_two_unconditional
@@ -290,8 +210,6 @@ theorem chartSideH2kBridge_min_two_unconditional
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ)) :=
   chartSideH2kBridge_of_laplacianDomainPow_min_two
     (I := I) (M := M) g k hu_h
-
-/-! ## Manifold-level `MemWkpChart g (2k) 2` polymorphic headlines -/
 
 /-- **Polymorphic manifold-level `MemWkpChart g (2 · min(k, 2)) 2`
 (unconditional).** -/
@@ -305,30 +223,6 @@ theorem memWkpChart_two_min_k_two
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) :=
   memWkpChart_two_k_of_laplacianDomainPow_min_two
     (I := I) (M := M) g k hu_h
-
-/-! ## Headline truly-unconditional chart-`H^{2k}` (signature form)
-
-The headline signature is the bridge-driven polymorphic-in-`k`
-chart-`H^{2k}` chart membership. For `k ≤ 2`, the bridge
-is unconditional via the existing infrastructure; for `k ≥ 3`, the bridge
-must be supplied externally (this is the residual content of the coupled
-inductive descent on `(1-Δ_g)`-preimages).
-
-The truly-unconditional discharge at arbitrary `k` requires:
-
-1. A chart-side `H^{2k}` bridge at level `k` (the polymorphic per-chart
-   `MemWkp (2k) 2` predicate), reduced via the coupled descent to:
-2. Chart-side bridges at all lower levels `j ≤ k` for the iterated
-   `(1-Δ_g)`-preimages along the `laplacianDomainPow` filtration.
-3. Per-stage chart-`H^{m+2}` boosts via the per-step propagator
-   `chartPushed_memWkp_m_plus_two_step`, with per-stage chart-`H²` of the
-   `m`-mixed partial discharged by the weakened polymorphic Nirenberg
-   interior result.
-
-The chain (2) at the base level `j = 0, 1, 2` is unconditional. At higher
-levels the chain extends via the polymorphic per-step propagator with all
-required regularity bounded by chart-`H^{m+1}` of `u_h.coeFn` plus
-chart-`H^m` of `(1-Δ_g)u_h.coeFn`. -/
 
 /-- **Polymorphic-in-`k` chart-`H^{2k}` of the chart-pushed function** for
 `u_h ∈ laplacianDomainPow g k`. The unconditional discharge at the exact
@@ -383,11 +277,6 @@ theorem memWkpChart_two_k_of_laplacianDomainPow
   exact chartPushed_memWkp_two_k_of_laplacianDomainPow
     (I := I) (M := M) g α k hu_h h_bridge
 
-/-! ## Headline unconditional discharge for `k ≤ 2`
-
-The chart-side bridge for `k ≤ 2` is unconditional; we package the
-chart-`H^{2k}` discharge in the headline form for `k ≤ 2`. -/
-
 /-- **Unconditional chart-`H^{2k}` of the chart-pushed function for `k ≤ 2`.**
 For any `k ≤ 2` and `u_h ∈ laplacianDomainPow g k`, the chart-pushed
 POU-cut representative lies in `MemWkp (2k) 2`, unconditionally. -/
@@ -418,12 +307,6 @@ theorem memWkpChart_two_k_unconditional_of_le_two
   memWkpChart_unconditional_of_laplacianDomainPow_le_two
     (I := I) (M := M) g hk hu_h
 
-/-! ## Truly unconditional headline for `k ≤ 2` in the AnyK shape
-
-The truly unconditional chart-`H^{2k}` headline for `k ≤ 2` matches the
-requested signature with no bridge hypothesis. We package it under the AnyK
-namespace for downstream consumption. -/
-
 /-- **Truly unconditional chart-`H^{2k}` for `u_h ∈ laplacianDomainPow g k`
 with `k ≤ 2`, in the requested AnyK signature shape.** -/
 theorem chartPushed_memWkp_two_k_truly_unconditional_le_two
@@ -440,8 +323,6 @@ theorem chartPushed_memWkp_two_k_truly_unconditional_le_two
         (I := I) (M := M) α) :=
   chartPushed_memWkp_two_k_unconditional_of_le_two
     (I := I) (M := M) g α hk hu_h
-
-/-! ## Manifold-level lift with finite chart-based norm -/
 
 /-- **Manifold-level `MemWkpChart g (2 · min(k, 2)) 2` together with finite
 chart-based norm** for `u_h ∈ laplacianDomainPow g k`, unconditional. -/

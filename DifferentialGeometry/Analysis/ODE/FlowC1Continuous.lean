@@ -45,12 +45,6 @@ namespace Flow
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
-/-! ## Re-centering the local flow
-
-If `IsLocalFlow f t₀ x₀ r tmin tmax Φ` and `x₁` is close to `x₀` (with positive
-"residual" radius `r'`), then `IsLocalFlow f t₀ x₁ r' tmin tmax Φ`.  This restriction
-just shrinks the spatial domain so it remains inside the original closed ball. -/
-
 namespace IsLocalFlow
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
@@ -85,11 +79,6 @@ lemma restrict_center_of_norm_le
   linarith
 
 end IsLocalFlow
-
-/-! ## Joint Fréchet derivative on an open neighbourhood
-
-By repeatedly applying V.2.c.1 (after re-centering), the flow has a pointwise joint
-Fréchet derivative on an open neighbourhood of `(x₀, t₀)`. -/
 
 section JointPointwise
 
@@ -128,13 +117,6 @@ theorem hasFDerivAt_flow_jointly_at
 
 end JointPointwise
 
-/-! ## Grönwall comparison for two variational solutions with different central orbits
-
-The key technical lemma for continuity of the spatial variational CLM in the base point.
-If two variational solutions share the same initial value `δ` but have different central
-orbits, their pointwise norm difference is bounded by the operator-norm difference of
-their linearizations. -/
-
 section GronwallCompare
 
 variable {f : ℝ → E → E} {t₀ : ℝ}
@@ -160,7 +142,6 @@ theorem variationalSolution_compare_norm
   have hy₁_bd : ∀ τ ∈ Icc (t₀ - T) (t₀ + T), ‖y₁ τ‖ ≤ ‖δ‖ * exp (M * T) :=
     IsVariationalSolutionOn.norm_le_exp_of_mem_Icc (le_of_lt hT) hM h₁ hA₁_bd
   set w : ℝ → E := fun τ => y₁ τ - y₂ τ
-  /- Bound function: ‖w'(τ)‖ ≤ M ‖w(τ)‖ + ε ‖δ‖ exp(MT). -/
   have hbound_aux : ∀ τ ∈ Icc (t₀ - T) (t₀ + T),
       ‖A₁ τ (y₁ τ) - A₂ τ (y₂ τ)‖ ≤ M * ‖w τ‖ + ε * (‖δ‖ * exp (M * T)) := by
     intro τ hτ
@@ -183,7 +164,6 @@ theorem variationalSolution_compare_norm
     linarith
   have heps_nn : 0 ≤ ε * (‖δ‖ * exp (M * T)) :=
     mul_nonneg hε (mul_nonneg (norm_nonneg _) (le_of_lt (exp_pos _)))
-  /- Goal helper: from Grönwall bound `(t - t₀)` shape, conclude target shape. -/
   have hreduce : ∀ {s : ℝ}, 0 ≤ s → s ≤ T → s * exp (M * s) ≤ T * exp (M * T) := by
     intro s hs₀ hsT
     have hexp_le : exp (M * s) ≤ exp (M * T) := by
@@ -192,7 +172,6 @@ theorem variationalSolution_compare_norm
           apply mul_le_mul_of_nonneg_right hsT (le_of_lt (exp_pos _))
       _ ≤ T * exp (M * T) := by
           apply mul_le_mul_of_nonneg_left hexp_le (le_of_lt hT)
-  /- Goal helper: from gronwallBound 0 K ε x ≤ ε x exp(K x) and x ≤ T, conclude the target. -/
   have hreduce_full : ∀ {s : ℝ}, 0 ≤ s → s ≤ T →
       gronwallBound 0 M (ε * (‖δ‖ * exp (M * T))) s
         ≤ ε * ‖δ‖ * exp (M * T) * T * exp (M * T) := by
@@ -223,8 +202,7 @@ theorem variationalSolution_compare_norm
         mul_le_mul_of_nonneg_left hsT (mul_nonneg hε (norm_nonneg _))
       linarith
   rcases le_or_gt t₀ t with htge | htlt
-  · -- Right half [t₀, t₀ + T].
-    have hsub_R : Icc t₀ (t₀ + T) ⊆ Icc (t₀ - T) (t₀ + T) := Icc_subset_Icc_left (by linarith)
+  · have hsub_R : Icc t₀ (t₀ + T) ⊆ Icc (t₀ - T) (t₀ + T) := Icc_subset_Icc_left (by linarith)
     have hw_cont : ContinuousOn w (Icc t₀ (t₀ + T)) :=
       (h₁.continuousOn.sub h₂.continuousOn).mono hsub_R
     have hw_d : ∀ τ ∈ Ico t₀ (t₀ + T),
@@ -251,8 +229,7 @@ theorem variationalSolution_compare_norm
     have hx_nn : 0 ≤ t - t₀ := by linarith
     have hx_le_T : t - t₀ ≤ T := by linarith [ht.2]
     exact le_trans hgr_t (hreduce_full hx_nn hx_le_T)
-  · -- Left half: reflect.  z := w ∘ φ where φ s := 2 t₀ - s.
-    have hsub_L : Icc (t₀ - T) t₀ ⊆ Icc (t₀ - T) (t₀ + T) := Icc_subset_Icc_right (by linarith)
+  · have hsub_L : Icc (t₀ - T) t₀ ⊆ Icc (t₀ - T) (t₀ + T) := Icc_subset_Icc_right (by linarith)
     set φ : ℝ → ℝ := fun s => 2 * t₀ - s
     set z : ℝ → E := w ∘ φ
     have hφ_cont : Continuous φ := by
@@ -305,7 +282,6 @@ theorem variationalSolution_compare_norm
         refine ⟨by linarith [hτ.2], by linarith [hτ.1]⟩
       rw [norm_neg]
       have h := hbound_aux (φ τ) hreflect
-      -- ‖w (φ τ)‖ = ‖z τ‖.
       change ‖A₁ (φ τ) (y₁ (φ τ)) - A₂ (φ τ) (y₂ (φ τ))‖ ≤ M * ‖z τ‖ + ε * (‖δ‖ * exp (M * T))
       have h_w_z : w (φ τ) = z τ := rfl
       rw [h_w_z] at h
@@ -331,14 +307,6 @@ theorem variationalSolution_compare_norm
     exact le_trans hgr_τ' (hreduce_full hx_nn hx_le_T)
 
 end GronwallCompare
-
-/-! ## Operator-norm continuity of the variational CLM in `(x, t)`
-
-Two ingredients:
-1. (Spatial: comparing different central orbits).  At fixed time `t`, the variational CLM
-   depends Lipschitz-continuously on the central-orbit linearization.
-2. (Time: same central orbit).  The variational CLM at fixed central orbit depends
-   Lipschitz-continuously on `t`. -/
 
 section VariationalCLMContinuity
 
@@ -460,8 +428,6 @@ lemma variationalLinearMapAt_opNorm_time_lipschitz
 
 end VariationalCLMContinuity
 
-/-! ## Joint continuity of `(x, t) ↦ variationalLinearMapAt(x, t)` -/
-
 section JointContinuity
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
@@ -495,18 +461,6 @@ lemma continuousOn_fderiv_jointly
   exact hpartial.comp hmap hmt
 
 end JointContinuity
-
-/-! ## The `ContDiffOn ℝ 1` upgrade
-
-We package the above pieces.  On a strict sub-neighbourhood of `(x₀, t₀)` — namely
-`ball x₀ ρ ×ˢ Ioo (t₀ - T) (t₀ + T)` with `ρ + r' ≤ r` for some `r' > 0` (so every base
-point in the ball admits its own positive-radius re-centering) — the flow `Φ` is `C¹`.
-
-The proof has two pieces:
-
-* **Differentiability on the open neighbourhood**, from `hasFDerivAt_flow_jointly_at`.
-* **Continuity of the Fréchet derivative**, by an ε-δ argument that uses the pointwise
-  HasFDerivAt formula together with the variational-CLM comparison bounds. -/
 
 section ContDiffOnUpgrade
 
@@ -573,21 +527,16 @@ lemma uniformly_close_fderiv_in_x
       ∀ τ ∈ Icc (t₀ - T') (t₀ + T'),
         ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩) - fderiv ℝ (f τ) (Φ ⟨xq, τ⟩)‖ < ε := by
   set Kc : Set (E × ℝ) := closedBall x₀ ρ ×ˢ Icc (t₀ - T) (t₀ + T) with hKc_def
-  -- Define F on all of E × ℝ (it's well-defined since Φ is defined everywhere — we just
-  -- don't have continuity outside the slab).
   set F : E × ℝ → (E →L[ℝ] E) := fun q => fderiv ℝ (f q.2) (Φ ⟨q.1, q.2⟩)
   have hF_cont_slab : ContinuousOn F Kc :=
     continuousOn_fderiv_jointly hΦ hf_C1 hsub hρ_le
-  -- The compact "line" L = {x} × Icc (t₀-T', t₀+T').  Lies inside the open interior of Kc.
   set L : Set (E × ℝ) := {x} ×ˢ Icc (t₀ - T') (t₀ + T')
   have hL_cpt : IsCompact L :=
     (isCompact_singleton (x := x)).prod isCompact_Icc
-  -- The strictly-interior slab.
   set Uo : Set (E × ℝ) := ball x₀ ρ ×ˢ Ioo (t₀ - T) (t₀ + T)
   have hUo_open : IsOpen Uo := isOpen_ball.prod isOpen_Ioo
   have hUo_sub_Kc : Uo ⊆ Kc := fun p hp =>
     ⟨(mem_ball.mp hp.1).le |> mem_closedBall.mpr, Ioo_subset_Icc_self hp.2⟩
-  -- The line L lies in Uo.
   have hL_sub_Uo : L ⊆ Uo := by
     intro p hp
     rcases hp with ⟨hp_x, hp_t⟩
@@ -597,8 +546,6 @@ lemma uniformly_close_fderiv_in_x
       exact lt_of_lt_of_le hx (by linarith)
     · exact ⟨lt_of_lt_of_le (by linarith) hp_t.1,
         lt_of_le_of_lt hp_t.2 (by linarith)⟩
-  -- F has ContinuousAt at every point of L (since L ⊆ Uo and Uo is open with F continuous
-  -- there).
   have hF_at_L : ∀ p ∈ L, ContinuousAt F p := by
     intro p hp
     have hp_Uo : p ∈ Uo := hL_sub_Uo hp
@@ -606,13 +553,11 @@ lemma uniformly_close_fderiv_in_x
     have hUo_nhds : Uo ∈ nhds p := IsOpen.mem_nhds hUo_open hp_Uo
     have hKc_nhds : Kc ∈ nhds p := Filter.mem_of_superset hUo_nhds hUo_sub_Kc
     exact (hF_cont_slab p hp_Kc).continuousAt hKc_nhds
-  -- Apply uniformContinuousAt on the compact L.
   have hr_unif : { y : (E →L[ℝ] E) × (E →L[ℝ] E) | dist y.1 y.2 < ε / 2 } ∈
       uniformity (E →L[ℝ] E) := Metric.dist_mem_uniformity (by positivity)
   have hL_unif := hL_cpt.uniformContinuousAt_of_continuousAt F hF_at_L hr_unif
   rcases Metric.mem_uniformity_dist.mp hL_unif with ⟨δ, hδ_pos, hδ⟩
   refine ⟨δ, hδ_pos, fun xq hxq τ hτ => ?_⟩
-  -- Apply hδ at p₁ := (x, τ) ∈ L and p₂ := (xq, τ).
   set p₁ : E × ℝ := (x, τ)
   set p₂ : E × ℝ := (xq, τ)
   have hp₁_L : p₁ ∈ L := ⟨mem_singleton x, hτ⟩
@@ -628,7 +573,6 @@ lemma uniformly_close_fderiv_in_x
     hδ h_dist hp₁_L
   change dist (F p₁) (F p₂) < ε / 2 at hpair_d
   rw [dist_eq_norm] at hpair_d
-  -- hpair_d : ‖F p₁ - F p₂‖ < ε / 2 < ε.
   change ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩) - fderiv ℝ (f τ) (Φ ⟨xq, τ⟩)‖ < ε
   linarith
 
@@ -682,7 +626,6 @@ theorem continuousOn_fderiv_flow_of_isLocalFlow
   have hsub_mid_out : Icc (t₀ - T_mid) (t₀ + T_mid) ⊆ Icc (t₀ - T_out) (t₀ + T_out) :=
     Icc_subset_Icc (by linarith) (by linarith)
   have hsub_mid : Icc (t₀ - T_mid) (t₀ + T_mid) ⊆ Icc tmin tmax := hsub_mid_out.trans hsub
-  -- Restricted hA_bd on closedBall x₀ ρ_mid × Icc (t₀ - T_mid) (t₀ + T_mid).
   have hA_bd_mid : ∀ x ∈ closedBall x₀ (ρ_mid : ℝ), ∀ τ ∈ Icc (t₀ - T_mid) (t₀ + T_mid),
       ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩)‖ ≤ M := fun x hx τ hτ =>
     hA_bd x (closedBall_subset_closedBall (le_of_lt hρ_mid_lt_out) hx) τ (hsub_mid_out hτ)
@@ -719,19 +662,14 @@ theorem continuousOn_fderiv_flow_of_isLocalFlow
   have hε_spatial_pos : 0 < ε_spatial := by positivity
   set δ_lip_t : ℝ := c / (4 * (ETM + 1)) with hδ_lip_t_def
   have hδ_lip_t_pos : 0 < δ_lip_t := by positivity
-  -- Get uniform δ_fd for the linearization, uniform over τ ∈ Icc (t₀-T_mid) (t₀+T_mid).
-  -- We use uniformly_close_fderiv_in_x with the OUTER slab as ambient.
   rcases uniformly_close_fderiv_in_x hΦ hf_C1 hT_out_pos hT_mid_lt_out hT_mid_pos hsub
     hρ_out_le_r hρ_mid_lt_out hρ_mid_pos
     (show dist x x₀ < (ρ_mid : ℝ) from lt_trans hp_x hρ_lt_mid) hε_spatial_pos
     with ⟨δ_fd, hδ_fd_pos, hδ_fd⟩
-  -- δ_fd guarantees: for any xq with dist xq x < δ_fd, for any τ ∈ Icc (t₀-T_mid) (t₀+T_mid),
-  -- ‖fderiv (f τ) (Φ⟨x, τ⟩) - fderiv (f τ) (Φ⟨xq, τ⟩)‖ < ε_spatial.
   have hp_Kc_mid : (x, t) ∈ closedBall x₀ (ρ_mid : ℝ) ×ˢ Icc (t₀ - T_mid) (t₀ + T_mid) :=
     ⟨hx_cb_mid, Ioo_subset_Icc_self hp_t_mid⟩
   rcases Metric.continuousOn_iff.mp htp_cont (x, t) hp_Kc_mid (c / 2) (by positivity)
     with ⟨δ_tp, hδ_tp_pos, hδ_tp⟩
-  -- Choose δ_p > 0.
   have hρgap_pos : 0 < ((ρ : ℝ) - dist x x₀) / 2 := by linarith
   set δ_p : ℝ := min (min δ_fd δ_tp) (min δ_lip_t (((ρ : ℝ) - dist x x₀) / 2)) with hδ_p_def
   have hδ_p_pos : 0 < δ_p :=
@@ -772,7 +710,6 @@ theorem continuousOn_fderiv_flow_of_isLocalFlow
       ‖(Lsp_q - Lsp_p).coprod (Lti_q - Lti_p)‖
         ≤ ‖Lsp_q - Lsp_p‖ + ‖Lti_q - Lti_p‖ :=
     opNorm_coprod_le _ _
-  -- Spatial: use comparison + time-Lipschitz.
   set Lsp_q_t : E →L[ℝ] E :=
     variationalLinearMapAt (f := f) (α := fun s => Φ ⟨xq, s⟩) (t₀ := t₀)
       hT_mid_pos hM hMT_mid hA_cont_xq (hA_bd_mid xq hxq_cb_mid)
@@ -827,7 +764,6 @@ theorem continuousOn_fderiv_flow_of_isLocalFlow
       mul_le_mul_of_nonneg_left (by linarith) (le_of_lt hε_spatial_pos)
     have key : ε_spatial * (ETT + 1) = c / 4 := by rw [hε_spatial_def]; field_simp
     linarith
-  -- Time piece.
   have h_ti_bound : ‖Lti_q - Lti_p‖ ≤ c / 2 := by
     have hdiff : Lti_q - Lti_p = (ContinuousLinearMap.id ℝ ℝ).smulRight
         (f tq (Φ ⟨xq, tq⟩) - f t (Φ ⟨x, t⟩)) := by
@@ -893,9 +829,7 @@ theorem contDiffOn_flow_of_isLocalFlow
   rw [show (1 : WithTop ℕ∞) = (0 + 1 : WithTop ℕ∞) by simp,
       contDiffOn_succ_iff_fderiv_of_isOpen hU_open]
   refine ⟨?_, ?_, ?_⟩
-  · -- DifferentiableOn ℝ Φ U: at each (x, t) ∈ U, use hasFDerivAt_flow_jointly_at with
-    -- the middle parameters.
-    intro p hp
+  · intro p hp
     rcases hp with ⟨hp_x, hp_t⟩
     rw [mem_ball] at hp_x
     obtain ⟨x, t⟩ := p

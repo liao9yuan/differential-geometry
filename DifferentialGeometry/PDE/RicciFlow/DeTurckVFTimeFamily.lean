@@ -90,8 +90,6 @@ theorem deturck_vf_time_family_smoothness
             Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
         (Set.Ico (0 : ℝ) T) := by
   intro x
-  -- Step 1: rewrite the bundled section value at `x` as the chart-coord sum at
-  -- chart `α := x`, using the bridge lemma.
   have hrewrite : (fun t : ℝ =>
         (deTurckVF (I := I) (g_DT t) g_bg :
           Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) =
@@ -103,25 +101,15 @@ theorem deturck_vf_time_family_smoothness
     funext t
     exact deTurckVF_apply_eq_chartDeTurckVFComp_sum_self (I := I) (g_DT t) g_bg x
   rw [hrewrite]
-  -- Step 2: it suffices to show continuity of each summand
-  -- `t ↦ chartDeTurckVFComp (g_DT t) g_bg x p (extChartAt I x x) • (chartModelBasis E p)`.
   refine continuousOn_finset_sum _ ?_
   intro p _
-  -- The scalar coefficient is continuous-in-`t`; the vector factor is constant.
   refine ContinuousOn.smul ?_ continuousOn_const
-  -- Apply `chartDeTurckVFComp_continuous_in_metric_at` with `α := x`,
-  -- `y := extChartAt I x x`.
-  -- Chart-Gram-entry continuity from `h_metric_cont`.
   have h_entry : ∀ i j : Fin (Module.finrank ℝ E),
       ContinuousOn
         (fun t : ℝ =>
           chartGramOnE (I := I) (g_DT t) x i j (extChartAt I x x))
         (Set.Ico (0 : ℝ) T) := by
     intro i j
-    -- `chartGramOnE g x i j (extChartAt I x x) =
-    --    g.inner ((extChartAt x).symm (extChartAt I x x)) (e_i ...) (e_j ...)
-    --  = g.inner x (chartBasisVecFiber x i x) (chartBasisVecFiber x j x)
-    --  = g.inner x (chartModelBasis E i) (chartModelBasis E j)`.
     have hreduce :
         (fun t : ℝ =>
             chartGramOnE (I := I) (g_DT t) x i j (extChartAt I x x))
@@ -137,20 +125,17 @@ theorem deturck_vf_time_family_smoothness
           chartBasisVecFiber_self (I := I) x j]
     rw [hreduce]
     exact h_metric_cont x ((chartModelBasis E) i) ((chartModelBasis E) j)
-  -- Chart-Gram-partial continuity directly from `h_metric_partial_cont`.
   have h_partial : ∀ l i j : Fin (Module.finrank ℝ E),
       ContinuousOn
         (fun t : ℝ =>
           partialDeriv (E := E) l (chartGramOnE (I := I) (g_DT t) x i j)
             (extChartAt I x x))
         (Set.Ico (0 : ℝ) T) := h_metric_partial_cont x
-  -- Self-base-set membership: `x ∈ (trivializationAt E (TangentSpace I) x).baseSet`.
   have hx_base : ((extChartAt I x).symm (extChartAt I x x)) ∈
       (trivializationAt E (TangentSpace I) x).baseSet := by
     rw [extChartAt_to_inv (I := I) x]
     rw [trivializationAt_baseSet_eq_chartAt_source]
     exact mem_chart_source H x
-  -- Apply the chart-coordinate component continuity helper.
   exact chartDeTurckVFComp_continuous_in_metric_at (I := I) g_bg x
     (extChartAt I x x) (Set.Ico (0 : ℝ) T) g_DT h_entry h_partial hx_base p
 

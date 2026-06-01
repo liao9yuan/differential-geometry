@@ -94,14 +94,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## The scalar-extraction continuous linear functional on `(0, 0)`-tensors
-
-The fibre `Tensor0SSpace 0 I x` is the space of continuous multilinear maps from the
-empty family of tangent vectors to `ℝ`; each element is determined by its value on the
-unique empty tuple. The continuous linear functional `tensor00Scalar x` extracts this
-value, composing `Tensor0SSpace.toModelL 0 x` (bridging the bundle/norm topologies) with
-`continuousMultilinearCurryFin0`. -/
-
 /-- The scalar-extraction functional on the `(0, 0)`-tensor fibre: `τ ↦ τ(⋆)`. -/
 noncomputable def tensor00Scalar (x : M) :
     Tensor0SSpace 0 I x →L[ℝ] ℝ :=
@@ -113,23 +105,13 @@ lemma tensor00Scalar_apply (x : M) (τ : Tensor0SSpace 0 I x)
     tensor00Scalar (I := I) (M := M) x τ = τ m := by
   unfold tensor00Scalar
   rw [ContinuousLinearMap.comp_apply]
-  -- `toModelL 0 x τ = τ` on the carrier, then `continuousMultilinearCurryFin0` evaluates.
   have h1 : (Tensor0SSpace.toModelL (I := I) 0 x) τ = Tensor0SSpace.toModel τ := rfl
   rw [h1]
   change (continuousMultilinearCurryFin0 ℝ E ℝ) (Tensor0SSpace.toModel τ) = _
   rw [continuousMultilinearCurryFin0_apply]
-  -- `toModel τ 0 = τ 0 = τ m`, the last step by `Subsingleton` of the empty tuple type.
   change τ (0 : Fin 0 → TangentSpace I x) = τ m
   congr 1
   exact Subsingleton.elim _ _
-
-/-! ## The `g`-orthonormal coframe covector and the dual tensor frame
-
-For a `g`-orthonormal tangent frame `e` and a pair of indices `(a, b)`, the rank-`2`
-coframe covector `coframe2 g x e a b` is the `(0, 2)`-tensor
-`(u, v) ↦ g.inner x (e a) u · g.inner x (e b) v`, built (exactly as the `ω^J` covectors
-in `fiberNormSqComponent`) from `mkPiAlgebra` over `Fin 2` composed with the two coframe
-linear functionals. -/
 
 /-- The rank-`2` `g`-orthonormal coframe covector `ω^a ⊗ ω^b` as a `(0, 2)`-tensor. -/
 noncomputable def coframe2
@@ -170,14 +152,6 @@ lemma dualTensorFrame_apply
   unfold dualTensorFrame
   rw [ContinuousLinearMap.smulRight_apply]
 
-/-! ## The Kronecker identity for the dual tensor frame components
-
-The empty-index covector `ω^K` used in `fiberNormSqComponent` (at `r = 0`) is the
-`mkPiAlgebra`-product over the empty family, hence evaluates to `1` on every input. So the
-dual tensor frame `F_{a, b}` applied to `ω^K` is `coframe2 g x e a b`, whose evaluation on
-the frame pair `(e (J 0), e (J 1))` collapses, by `g`-orthonormality of `e`, to the
-Kronecker product `δ_{a, J 0} δ_{b, J 1}`. -/
-
 /-- **Kronecker identity for the dual tensor frame.** For a `g`-orthonormal tangent frame
 `e`, the `(K, J)`-frame component of `dualTensorFrame g x e a b` equals
 `δ_{a, J 0} · δ_{b, J 1}` (independent of `K`, which ranges over the singleton
@@ -191,9 +165,7 @@ lemma fiberNormSqComponent_dualTensorFrame
         (dualTensorFrame (I := I) (M := M) g x e a b) n e K J =
       (if a = J 0 then (1 : ℝ) else 0) * (if b = J 1 then (1 : ℝ) else 0) := by
   classical
-  -- Unfold the frame component: it is `F_{a,b}(ω^K)(e_J)`.
   unfold fiberNormSqComponent
-  -- `F_{a,b}(ω^K) = tensor00Scalar x (ω^K) • coframe2 g x e a b`.
   rw [show ((dualTensorFrame (I := I) (M := M) g x e a b :
           Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x)
           ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
@@ -203,7 +175,6 @@ lemma fiberNormSqComponent_dualTensorFrame
               (fun k => g.inner x (e (K k)))) •
           coframe2 (I := I) (M := M) g x e a b from
       dualTensorFrame_apply (I := I) (M := M) g x e a b _]
-  -- `tensor00Scalar x (ω^K) = ω^K(e_J) = ∏_{k:Fin 0} … = 1`.
   have hscalar : tensor00Scalar (I := I) (M := M) x
       ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
         (fun k => g.inner x (e (K k)))) = 1 := by
@@ -212,15 +183,8 @@ lemma fiberNormSqComponent_dualTensorFrame
       ContinuousMultilinearMap.mkPiAlgebra_apply]
     simp
   rw [hscalar, one_smul]
-  -- Evaluate `coframe2` on the frame pair and apply `g`-orthonormality.
   rw [coframe2_apply (I := I) (M := M) g x e a b (fun k : Fin 2 => e (J k))]
   rw [horth a (J 0), horth b (J 1)]
-/-! ## Expansion of a `(0, 2)` covariant tensor in the `g`-orthonormal coframe
-
-A `(0, 2)` covariant tensor `A` (an element of `Tensor0SSpace 2 I x`) expands in the
-`g`-orthonormal coframe basis as `A = ∑_{a, b} A(e_a, e_b) • (ω^a ⊗ ω^b)`. The proof uses
-`Module.Basis.ext_multilinear`: both sides agree on every pair of basis vectors
-`(e_c, e_d)` because `coframe2 g x e a b (e_c, e_d) = δ_{ac} δ_{bd}`. -/
 
 /-- **Coframe expansion of a `(0, 2)` covariant tensor.** For a `g`-orthonormal frame `e`
 arising from a `Module.Basis bse` (`bse i = e i`), every `(0, 2)` covariant tensor `A`
@@ -236,29 +200,22 @@ lemma tensor02_coframe_expansion
       (A (fun k : Fin 2 => e ((![a, b] : Fin 2 → Fin n) k))) •
         coframe2 (I := I) (M := M) g x e a b := by
   classical
-  -- Both sides are `(0, 2)` tensors; prove equality of the underlying multilinear maps
-  -- via `Module.Basis.ext_multilinear`, then transport back through `tensor0SSpace_ext`.
   apply tensor0SSpace_ext (𝕜 := ℝ) 2 x
   intro u
-  -- The underlying continuous multilinear maps (these coercions are `rfl`-level).
   let Acmm : ContinuousMultilinearMap ℝ (fun _ : Fin 2 => TangentSpace I x) ℝ := A
   let Rcmm : ContinuousMultilinearMap ℝ (fun _ : Fin 2 => TangentSpace I x) ℝ :=
     ∑ a : Fin n, ∑ b : Fin n,
       (A (fun k : Fin 2 => e ((![a, b] : Fin 2 → Fin n) k))) •
         coframe2 (I := I) (M := M) g x e a b
-  -- It suffices to prove `Acmm = Rcmm` as multilinear maps; evaluate at `u`.
   suffices h : Acmm.toMultilinearMap = Rcmm.toMultilinearMap by
     exact congrArg
       (fun (T : MultilinearMap ℝ (fun _ : Fin 2 => TangentSpace I x) ℝ) => T u) h
   refine Module.Basis.ext_multilinear (e := fun _ : Fin 2 => bse) ?_
   intro v
-  -- `v : Fin 2 → Fin n`; the basis tuple is `(e (v 0), e (v 1))`.
   have hbtuple : (fun i : Fin 2 => bse (v i)) = (fun i : Fin 2 => e (v i)) := by
     funext i; rw [hbse (v i)]
-  -- Reduce the multilinear-map evaluations to the continuous-multilinear-map ones.
   change Acmm (fun i : Fin 2 => bse (v i)) = Rcmm (fun i : Fin 2 => bse (v i))
   rw [hbtuple]
-  -- Evaluate the RHS finite sum at the basis tuple summand-wise.
   have hRHS_eval : Rcmm (fun i : Fin 2 => e (v i)) =
       ∑ a : Fin n, ∑ b : Fin n,
         (A (fun k : Fin 2 => e ((![a, b] : Fin 2 → Fin n) k))) *
@@ -274,14 +231,12 @@ lemma tensor02_coframe_expansion
     rw [ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   change Acmm (fun i : Fin 2 => e (v i)) = _
   rw [hRHS_eval]
-  -- `coframe2 g x e a b (e (v 0), e (v 1)) = δ_{a, v 0} δ_{b, v 1}`.
   have hcoframe : ∀ a b : Fin n,
       coframe2 (I := I) (M := M) g x e a b (fun i : Fin 2 => e (v i)) =
         (if a = v 0 then (1 : ℝ) else 0) * (if b = v 1 then (1 : ℝ) else 0) := by
     intro a b
     rw [coframe2_apply (I := I) (M := M) g x e a b (fun i : Fin 2 => e (v i))]
     rw [horth a (v 0), horth b (v 1)]
-  -- Rewrite each summand's `coframe2` factor via the Kronecker identity.
   rw [show (∑ a : Fin n, ∑ b : Fin n,
         (A (fun k : Fin 2 => e ((![a, b] : Fin 2 → Fin n) k))) *
           coframe2 (I := I) (M := M) g x e a b (fun i : Fin 2 => e (v i))) =
@@ -290,7 +245,6 @@ lemma tensor02_coframe_expansion
           ((if a = v 0 then (1 : ℝ) else 0) * (if b = v 1 then (1 : ℝ) else 0)) from by
     refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => ?_))
     rw [hcoframe a b]]
-  -- Collapse the double sum to the single surviving term `(a, b) = (v 0, v 1)`.
   rw [Finset.sum_comm]
   rw [Finset.sum_eq_single (v 1)]
   · rw [Finset.sum_eq_single (v 0)]
@@ -305,12 +259,6 @@ lemma tensor02_coframe_expansion
     refine Finset.sum_eq_zero (fun a _ => ?_)
     rw [if_neg hb, mul_zero, mul_zero]
   · intro h; exact absurd (Finset.mem_univ (v 1)) h
-
-/-! ## The `g`-orthonormal frame witness with an explicit `Module.Basis`
-
-A strengthened version of `tangent_frame_expansion` that additionally exposes the
-underlying `Module.Basis` of the `g`-orthonormal frame. This is the witness used to feed
-`tensor02_coframe_expansion`. -/
 
 /-- **`g`-orthonormal frame witness with `Module.Basis`.** There is a frame
 `e : Fin n → TangentSpace I x` arising from a `Module.Basis bse` (`bse i = e i`), with
@@ -347,17 +295,14 @@ lemma tangent_orthonormalBasis_witness
   have hinner_eq : ∀ u v : TangentSpace I x, (inner ℝ u v : ℝ) = g.inner x u v :=
     fun u v => rfl
   refine ⟨n, fun i => eob i, eob.toBasis, rfl, ?_, ?_, ?_, ?_, ?_⟩
-  · -- `bse i = e i`.
-    intro i
+  · intro i
     rw [OrthonormalBasis.coe_toBasis]
-  · -- `g`-orthonormality.
-    intro i j
+  · intro i j
     have horth : Orthonormal ℝ (fun i : Fin n => eob i) := eob.orthonormal
     have hite := (orthonormal_iff_ite (𝕜 := ℝ) (E := TangentSpace I x)).mp horth i j
     rw [← hinner_eq (eob i) (eob j)]
     exact hite
-  · -- Parseval.
-    intro v
+  · intro v
     have hpars : ∑ i : Fin n, (inner ℝ (eob i) v : ℝ) ^ 2 = ‖v‖ ^ 2 :=
       OrthonormalBasis.sum_sq_inner_right eob v
     have hnorm_sq : (‖v‖ : ℝ) ^ 2 = g.inner x v v := by
@@ -370,8 +315,7 @@ lemma tangent_orthonormalBasis_witness
             refine Finset.sum_congr rfl (fun i _ => ?_); rw [hinner_eq (eob i) v]
       _ = ‖v‖ ^ 2 := hpars
       _ = g.inner x v v := hnorm_sq
-  · -- Frame expansion.
-    intro v
+  · intro v
     have hrepr : ∑ i : Fin n, (inner ℝ (eob i) v : ℝ) • eob i = v :=
       OrthonormalBasis.sum_repr' eob v
     have hcongr : (∑ i : Fin n, g.inner x (eob i) v • eob i) =
@@ -379,19 +323,8 @@ lemma tangent_orthonormalBasis_witness
       refine Finset.sum_congr rfl (fun i _ => ?_)
       rw [hinner_eq (eob i) v]
     rw [hcongr, hrepr]
-  · -- The double-sum representation of `riemannianFiberNormSq`.
-    intro S
+  · intro S
     rfl
-
-/-! ## Parseval in the dual tensor frame and the `T`-independent per-point bound
-
-Combining the coframe expansion `tensor02_coframe_expansion`, the dual-tensor-frame
-expansion, Parseval, and a Cauchy–Schwarz over the `(a, b)`-index gives the
-`T`-independent per-point bound
-```
-∑_{i, j} riemannianFiberNormSq g 0 2 x (R_x(e_i, e_j) T) ≤ C_x · riemannianFiberNormSq g 0 2 x T.
-```
--/
 
 /-- **Dual-tensor-frame expansion of a `(0, 2)`-tensor.** For the `g`-orthonormal frame
 `e` (with basis `bse`), every `(0, 2)`-tensor `T` expands as
@@ -408,50 +341,37 @@ lemma tensor_dualFrame_expansion
       (fiberNormSqComponent (I := I) (M := M) g x 0 2 T n e K₀ (![a, b])) •
         dualTensorFrame (I := I) (M := M) g x e a b := by
   classical
-  -- `T` is a continuous linear map `Tensor0SSpace 0 → Tensor0SSpace 2`; prove the
-  -- equality by extensionality on the `(0, 0)`-tensor argument `τ`.
   apply tensorRSSpace_ext (𝕜 := ℝ) 0 2 x
   intro τ
-  -- Abbreviate the scalar value of `τ`.
   set c : ℝ := tensor00Scalar (I := I) (M := M) x τ with hc_def
-  -- LHS: `T τ`. Since `τ = c • ω^{K₀}` as `(0, 0)`-tensors, `T τ = c • T ω^{K₀}`.
-  -- Here `ω^{K₀}` is the empty covector used in `fiberNormSqComponent`.
   set ωK : Tensor0SSpace 0 I x :=
     (ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
       (fun k => g.inner x (e (K₀ k))) with hωK_def
-  -- `τ = c • ωK` as `(0, 0)`-tensors (both are scalars times the unit).
   have hτ : τ = c • ωK := by
     apply tensor0SSpace_ext (𝕜 := ℝ) 0 x
     intro m
     rw [hc_def, tensor00Scalar_apply (I := I) (M := M) x τ m]
-    -- `(c • ωK) m = c * (ωK m)`, and `ωK m = 1`.
     rw [ContinuousMultilinearMap.smul_apply, smul_eq_mul]
     have hωK1 : ωK m = 1 := by
       rw [hωK_def, ContinuousMultilinearMap.compContinuousLinearMap_apply,
         ContinuousMultilinearMap.mkPiAlgebra_apply]
       simp
     rw [hωK1, mul_one]
-  -- LHS reduces to `c • (T ωK)`.
   have hLHS : (T : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x) τ =
       c • (T : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x) ωK := by
     rw [hτ, ContinuousLinearMap.map_smul]
-  -- The `(0, 2)`-tensor `T ωK` expands in the coframe.
   set A : Tensor0SSpace 2 I x :=
     (T : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x) ωK with hA_def
   have hA_expand : A = ∑ a : Fin n, ∑ b : Fin n,
       (A (fun k : Fin 2 => e ((![a, b] : Fin 2 → Fin n) k))) •
         coframe2 (I := I) (M := M) g x e a b :=
     tensor02_coframe_expansion (I := I) (M := M) g x e bse hbse horth A
-  -- The `A`-evaluation equals the `fiberNormSqComponent` of `T`.
   have hAeval : ∀ a b : Fin n,
       A (fun k : Fin 2 => e ((![a, b] : Fin 2 → Fin n) k)) =
         fiberNormSqComponent (I := I) (M := M) g x 0 2 T n e K₀ (![a, b]) := by
     intro a b
     rw [hA_def]
     rfl
-  -- Goal: `T τ = (∑_a ∑_b comp_{a,b} • dualTensorFrame_{a,b}) τ`.
-  -- Compute both sides into the common double-sum `∑_a ∑_b comp_{a,b} • (c • coframe2_{a,b})`.
-  -- LHS:
   have hLHS' : (T : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x) τ =
       ∑ a : Fin n, ∑ b : Fin n,
         (fiberNormSqComponent (I := I) (M := M) g x 0 2 T n e K₀ (![a, b])) •
@@ -461,7 +381,6 @@ lemma tensor_dualFrame_expansion
     rw [Finset.smul_sum]
     refine Finset.sum_congr rfl (fun b _ => ?_)
     rw [hAeval a b, smul_comm]
-  -- RHS:
   have hRHS' : (∑ a : Fin n, ∑ b : Fin n,
         (fiberNormSqComponent (I := I) (M := M) g x 0 2 T n e K₀ (![a, b])) •
           dualTensorFrame (I := I) (M := M) g x e a b :
@@ -493,36 +412,23 @@ lemma riemannianFiberNormSq_eq_sum_component_sq
         (fiberNormSqComponent (I := I) (M := M) g x 0 2 T n e K₀ (![a, b])) ^ 2 := by
   classical
   rw [hrepr T]
-  -- The covector index `K : Fin 0 → Fin n` is the unique empty function `K₀`.
   rw [Finset.sum_eq_single K₀]
-  · -- Reindex the `J : Fin 2 → Fin n` sum to a double sum over `(a, b)`.
-    -- `fiberNormSqSummand = (fiberNormSqComponent)²`, and `J ↦ (J 0, J 1)` is a bijection
-    -- with inverse `(a, b) ↦ ![a, b]`.
-    rw [show (∑ J : Fin 2 → Fin n,
+  · rw [show (∑ J : Fin 2 → Fin n,
           fiberNormSqSummand (I := I) (M := M) g x 0 2 T n e K₀ J) =
         ∑ J : Fin 2 → Fin n,
           (fiberNormSqComponent (I := I) (M := M) g x 0 2 T n e K₀ J) ^ 2 from by
       refine Finset.sum_congr rfl (fun J _ => ?_)
       rw [fiberNormSqSummand_eq_component_sq]]
-    -- Sum over `Fin 2 → Fin n` via the product reindexing.
     rw [← Fintype.sum_prod_type'
       (f := fun a b => (fiberNormSqComponent (I := I) (M := M) g x 0 2 T n e K₀ (![a, b])) ^ 2)]
-    -- `∑_{J : Fin 2 → Fin n} comp(J)² = ∑_{p : Fin n × Fin n} comp(![p.1, p.2])²` via the
-    -- equiv `(Fin 2 → Fin n) ≃ Fin n × Fin n`.
     rw [← Equiv.sum_comp (finTwoArrowEquiv (Fin n)).symm
       (fun J : Fin 2 → Fin n =>
         (fiberNormSqComponent (I := I) (M := M) g x 0 2 T n e K₀ J) ^ 2)]
     refine Finset.sum_congr rfl (fun p _ => ?_)
-    -- `(finTwoArrowEquiv (Fin n)).symm p = ![p.1, p.2]`.
     rw [finTwoArrowEquiv_symm_apply]
   · intro K _ hK
     exact absurd (Subsingleton.elim K K₀) hK
   · intro h; exact absurd (Finset.mem_univ K₀) h
-
-/-! ## The `T`-independent per-point bound
-
-A Cauchy–Schwarz over the `(a, b)`-index, applied to the dual-tensor-frame expansion of
-`T` carried through the curvature operator `R_x(e_i, e_j)`, gives the per-point bound. -/
 
 /-- **`T`-independent per-point bound.** For the `g`-orthonormal frame `e` (with basis
 `bse`), the frame-pair residual sum of the curvature acting on `T` is bounded by the
@@ -555,18 +461,13 @@ lemma sum_riemannianFiberNormSq_riemannOp_le_Cx
               (dualTensorFrame (I := I) (M := M) g x e a b))) *
         riemannianFiberNormSq (I := I) (M := M) g 0 2 x T := by
   classical
-  -- The empty covector index.
   let K₀ : Fin 0 → Fin n := fun k => k.elim0
   set R := riemannOp (tensorCov (I := I) g 0 2) x with hR_def
-  -- Parseval gives `riemannianFiberNormSq T = ∑_{a,b} comp(T)²`.
   have hParseval := riemannianFiberNormSq_eq_sum_component_sq
     (I := I) (M := M) g x e hrepr T K₀
-  -- The dual-frame expansion of `T`.
   have hTexp := tensor_dualFrame_expansion (I := I) (M := M) g x e bse hbse horth T K₀
-  -- Abbreviate the `T`-components.
   set cT : Fin n × Fin n → ℝ :=
     fun p => fiberNormSqComponent (I := I) (M := M) g x 0 2 T n e K₀ (![p.1, p.2]) with hcT
-  -- Per-frame-pair: `riemannianFiberNormSq (R e_i e_j T) ≤ (∑_{a,b} comp²)·(∑_{a,b} rfns(R e_i e_j F_{a,b}))`.
   have hpair : ∀ i j : Fin n,
       riemannianFiberNormSq (I := I) (M := M) g 0 2 x (R (e i) (e j) T) ≤
         (∑ a : Fin n, ∑ b : Fin n,
@@ -574,22 +475,18 @@ lemma sum_riemannianFiberNormSq_riemannOp_le_Cx
               (R (e i) (e j) (dualTensorFrame (I := I) (M := M) g x e a b))) *
           riemannianFiberNormSq (I := I) (M := M) g 0 2 x T := by
     intro i j
-    -- Express `R e_i e_j T` through the dual-frame expansion of `T`.
     have hRT : R (e i) (e j) T =
         ∑ a : Fin n, ∑ b : Fin n,
           cT (a, b) • R (e i) (e j) (dualTensorFrame (I := I) (M := M) g x e a b) := by
       conv_lhs => rw [hTexp]
-      -- `R e_i e_j` is a CLM applied to the tensor argument; distribute over the sum.
       rw [map_sum]
       refine Finset.sum_congr rfl (fun a _ => ?_)
       rw [map_sum]
       refine Finset.sum_congr rfl (fun b _ => ?_)
       rw [ContinuousLinearMap.map_smul]
     rw [hRT]
-    -- Parseval of the LHS via the frame-component linear functional `L_{K,J}`.
     rw [hrepr (∑ a : Fin n, ∑ b : Fin n,
       cT (a, b) • R (e i) (e j) (dualTensorFrame (I := I) (M := M) g x e a b))]
-    -- Bound each `(K, J)` summand by Cauchy–Schwarz over `(a, b)`.
     have hterm : ∀ (Kx : Fin 0 → Fin n) (Jx : Fin 2 → Fin n),
         fiberNormSqSummand (I := I) (M := M) g x 0 2
             (∑ a : Fin n, ∑ b : Fin n,
@@ -601,7 +498,6 @@ lemma sum_riemannianFiberNormSq_riemannOp_le_Cx
                 (R (e i) (e j) (dualTensorFrame (I := I) (M := M) g x e p.1 p.2)) n e Kx Jx := by
       intro Kx Jx
       rw [fiberNormSqSummand_eq_component_sq]
-      -- Component of the double sum: linear in the tensor argument.
       have hcomp :
           fiberNormSqComponent (I := I) (M := M) g x 0 2
               (∑ a : Fin n, ∑ b : Fin n,
@@ -623,11 +519,9 @@ lemma sum_riemannianFiberNormSq_riemannOp_le_Cx
         refine Finset.sum_congr rfl (fun p _ => ?_)
         rw [fiberNormSqComponent_smul]
       rw [hcomp]
-      -- Cauchy–Schwarz over the product index.
       exact Finset.sum_mul_sq_le_sq_mul_sq Finset.univ cT
         (fun p => fiberNormSqComponent (I := I) (M := M) g x 0 2
           (R (e i) (e j) (dualTensorFrame (I := I) (M := M) g x e p.1 p.2)) n e Kx Jx)
-    -- Sum the per-summand bound over `(K, J)`.
     calc
       (∑ Kx : Fin 0 → Fin n, ∑ Jx : Fin 2 → Fin n,
           fiberNormSqSummand (I := I) (M := M) g x 0 2
@@ -655,8 +549,6 @@ lemma sum_riemannianFiberNormSq_riemannOp_le_Cx
               riemannianFiberNormSq (I := I) (M := M) g 0 2 x
                 (R (e i) (e j) (dualTensorFrame (I := I) (M := M) g x e p.1 p.2)) := by
             congr 1
-            -- Fold `∑_K ∑_J summand(F_p)` into `riemannianFiberNormSq (R F_p)`, then swap
-            -- the `(K, J)` sums to the inside of the `p` sum.
             rw [show (∑ p : Fin n × Fin n,
                   riemannianFiberNormSq (I := I) (M := M) g 0 2 x
                     (R (e i) (e j) (dualTensorFrame (I := I) (M := M) g x e p.1 p.2))) =
@@ -666,8 +558,6 @@ lemma sum_riemannianFiberNormSq_riemannOp_le_Cx
                     n e Kx Jx from by
               refine Finset.sum_congr rfl (fun p _ => ?_)
               rw [hrepr (R (e i) (e j) (dualTensorFrame (I := I) (M := M) g x e p.1 p.2))]]
-            -- Now both sides are triple sums; reorder `∑_K ∑_J ∑_p = ∑_p ∑_K ∑_J`.
-            -- First, under each `K`, swap the inner `∑_J ∑_p → ∑_p ∑_J`.
             rw [show (∑ Kx : Fin 0 → Fin n, ∑ Jx : Fin 2 → Fin n, ∑ p : Fin n × Fin n,
                   fiberNormSqSummand (I := I) (M := M) g x 0 2
                     (R (e i) (e j) (dualTensorFrame (I := I) (M := M) g x e p.1 p.2))
@@ -678,15 +568,12 @@ lemma sum_riemannianFiberNormSq_riemannOp_le_Cx
                     n e Kx Jx from by
               refine Finset.sum_congr rfl (fun Kx _ => ?_)
               rw [Finset.sum_comm]]
-            -- Then swap the outer `∑_K ∑_p → ∑_p ∑_K`.
             rw [Finset.sum_comm]
       _ ≤ (∑ a : Fin n, ∑ b : Fin n,
               riemannianFiberNormSq (I := I) (M := M) g 0 2 x
                 (R (e i) (e j) (dualTensorFrame (I := I) (M := M) g x e a b))) *
             riemannianFiberNormSq (I := I) (M := M) g 0 2 x T := by
             apply le_of_eq
-            -- Identify `∑_p cT² = riemannianFiberNormSq T` (Parseval) and rewrite the
-            -- residual product sum into the iterated `(a, b)` double sum.
             rw [show (∑ p : Fin n × Fin n, cT p ^ 2) =
                 riemannianFiberNormSq (I := I) (M := M) g 0 2 x T from by
               rw [hParseval, ← Fintype.sum_prod_type' (f := fun a b => cT (a, b) ^ 2)]]
@@ -701,7 +588,6 @@ lemma sum_riemannianFiberNormSq_riemannOp_le_Cx
                   riemannianFiberNormSq (I := I) (M := M) g 0 2 x
                     (R (e i) (e j) (dualTensorFrame (I := I) (M := M) g x e a b)))]
             ring
-  -- Sum the per-frame-pair bound over `(i, j)`.
   calc
     (∑ i : Fin n, ∑ j : Fin n,
         riemannianFiberNormSq (I := I) (M := M) g 0 2 x (R (e i) (e j) T))
@@ -718,11 +604,6 @@ lemma sum_riemannianFiberNormSq_riemannOp_le_Cx
           rw [Finset.sum_mul]
           refine Finset.sum_congr rfl (fun i _ => ?_)
           rw [Finset.sum_mul]
-
-/-! ## The combined `(v, w, T)`-uniform per-point bound
-
-Combining the Stage 1 `(v, w)`-factorisation with the `T`-independent per-point bound gives
-a single per-point constant `C_x` controlling the curvature term for *all* `(v, w, T)`. -/
 
 /-- **`(v, w, T)`-uniform per-point fibre-norm bound for the tensor curvature operator.**
 For any point `x`, there is a `T`-independent (and `(v, w)`-independent) nonnegative
@@ -743,11 +624,9 @@ theorem exists_Cx_riemannianFiberNormSq_riemannOp_tensorCov_le
           Cx * g.inner x v v * g.inner x w w *
             riemannianFiberNormSq (I := I) (M := M) g 0 2 x T := by
   classical
-  -- Obtain the `g`-orthonormal frame with its `Module.Basis`, Parseval, expansion, repr.
   obtain ⟨n, e, bse, _hn, hbse, horth, hpars, hexpand, hrepr⟩ :=
     tangent_orthonormalBasis_witness (I := I) (M := M) g x
   set R := riemannOp (tensorCov (I := I) g 0 2) x with hR_def
-  -- The per-point constant `C_x`.
   set Cx : ℝ :=
     ∑ i : Fin n, ∑ j : Fin n, ∑ a : Fin n, ∑ b : Fin n,
       riemannianFiberNormSq (I := I) (M := M) g 0 2 x
@@ -759,18 +638,14 @@ theorem exists_Cx_riemannianFiberNormSq_riemannOp_tensorCov_le
     exact riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 2 x _
   refine ⟨Cx, hCx_nonneg, ?_⟩
   intro v w T
-  -- Nonnegativity of the intrinsic factors via Parseval.
   have hvv_nonneg : 0 ≤ g.inner x v v := by
     rw [← hpars v]; exact Finset.sum_nonneg (fun i _ => sq_nonneg _)
   have hww_nonneg : 0 ≤ g.inner x w w := by
     rw [← hpars w]; exact Finset.sum_nonneg (fun i _ => sq_nonneg _)
-  -- Stage 1 `(v, w)`-factorisation for this exact frame: bound the LHS by
-  -- `‖v‖²·‖w‖² · ∑_{i,j} riemannianFiberNormSq (R e_i e_j T)`.
   have hvw : riemannianFiberNormSq (I := I) (M := M) g 0 2 x (R v w T) ≤
       g.inner x v v * g.inner x w w *
         ∑ i : Fin n, ∑ j : Fin n,
           riemannianFiberNormSq (I := I) (M := M) g 0 2 x (R (e i) (e j) T) := by
-    -- Expand the LHS via `hrepr`, bound each summand by the Stage 1 per-component lemma.
     rw [hrepr (R v w T)]
     have hterm : ∀ K : Fin 0 → Fin n, ∀ J : Fin 2 → Fin n,
         fiberNormSqSummand (I := I) (M := M) g x 0 2 (R v w T) n e K J ≤
@@ -798,15 +673,12 @@ theorem exists_Cx_riemannianFiberNormSq_riemannOp_tensorCov_le
             ∑ i : Fin n, ∑ j : Fin n,
               riemannianFiberNormSq (I := I) (M := M) g 0 2 x (R (e i) (e j) T) := by
             congr 1
-            -- Fold and reorder: `∑_K ∑_J ∑_i ∑_j = ∑_i ∑_j (∑_K ∑_J) = ∑_i ∑_j rfns`.
             rw [show (∑ i : Fin n, ∑ j : Fin n,
                   riemannianFiberNormSq (I := I) (M := M) g 0 2 x (R (e i) (e j) T)) =
                 ∑ i : Fin n, ∑ j : Fin n, ∑ K : Fin 0 → Fin n, ∑ J : Fin 2 → Fin n,
                   fiberNormSqSummand (I := I) (M := M) g x 0 2 (R (e i) (e j) T) n e K J from by
               refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
               rw [hrepr (R (e i) (e j) T)]]
-            -- Reorder `∑_K ∑_J ∑_i ∑_j = ∑_i ∑_j ∑_K ∑_J` by collapsing each pair of sums
-            -- to a single product-index sum and applying one `Finset.sum_comm`.
             set F : (Fin 0 → Fin n) → (Fin 2 → Fin n) → Fin n → Fin n → ℝ :=
               fun K J i j =>
                 fiberNormSqSummand (I := I) (M := M) g x 0 2 (R (e i) (e j) T) n e K J
@@ -845,14 +717,12 @@ theorem exists_Cx_riemannianFiberNormSq_riemannOp_tensorCov_le
                         ∑ q : (Fin 0 → Fin n) × (Fin 2 → Fin n), F q.1 q.2 i j)).symm
             rw [hLHS, hRHS]
             exact Finset.sum_comm
-  -- The `T`-independent per-point bound for the residual.
   have hCxT : (∑ i : Fin n, ∑ j : Fin n,
         riemannianFiberNormSq (I := I) (M := M) g 0 2 x (R (e i) (e j) T)) ≤
       Cx * riemannianFiberNormSq (I := I) (M := M) g 0 2 x T := by
     rw [hCx_def]
     exact sum_riemannianFiberNormSq_riemannOp_le_Cx
       (I := I) (M := M) g x e bse hbse horth hrepr T
-  -- Chain the two bounds.
   calc
     riemannianFiberNormSq (I := I) (M := M) g 0 2 x (R v w T)
         ≤ g.inner x v v * g.inner x w w *

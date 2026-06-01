@@ -69,13 +69,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## The density log-derivative equals the contracted Christoffel symbol
-
-On the interior of the chart target, Jacobi's formula gives
-`∂ᵢ D = ½ tr(G⁻¹ ∂ᵢ G) · D`, where `D = chartDensityOnE g α`. The contracted
-Christoffel symbol `∑ₖ Γᵏᵢₖ` equals `½ tr(G⁻¹ ∂ᵢ G)` after cancelling the two
-terms that are exchanged by the symmetry of `G` and `G⁻¹`. -/
-
 /-- Symmetry of the chart inverse Gram matrix entries pulled back to `E`
 (the inverse of a symmetric matrix is symmetric). -/
 lemma chartInvGramOnE_symm
@@ -106,7 +99,6 @@ lemma sum_chartChristoffel_diag_eq_half_trace
         chartInvGramOnE (I := I) g α k l y *
           partialDeriv (E := E) i (chartGramOnE (I := I) g α l k) y := by
   classical
-  -- Expand each `Γᵏᵢₖ` via the Christoffel definition, into a double sum.
   have hexpand : (∑ k : Fin (Module.finrank ℝ E),
         chartChristoffel (I := I) g α i k k y) =
       ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
@@ -119,7 +111,6 @@ lemma sum_chartChristoffel_diag_eq_half_trace
     refine Finset.sum_congr rfl (fun l _ => ?_)
     rw [← chartInvGramOnE_def]
   rw [hexpand]
-  -- Pull the `1/2` out of the target double sum, then split the summand.
   rw [Finset.mul_sum]
   rw [show (∑ k : Fin (Module.finrank ℝ E), (1 / 2 : ℝ) *
             ∑ l : Fin (Module.finrank ℝ E),
@@ -130,9 +121,6 @@ lemma sum_chartChristoffel_diag_eq_half_trace
             partialDeriv (E := E) i (chartGramOnE (I := I) g α l k) y) from by
       refine Finset.sum_congr rfl (fun k _ => ?_)
       rw [Finset.mul_sum]]
-  -- It now suffices, summand-by-summand, to show the two cross terms sum to
-  -- the same value. Move everything to a single double sum and prove the
-  -- cancellation `∑ₖₗ G^{kl}(∂ₖ G_{li} − ∂ₗ G_{ik}) = 0`.
   rw [← sub_eq_zero]
   rw [← Finset.sum_sub_distrib]
   rw [show (∑ k : Fin (Module.finrank ℝ E),
@@ -154,10 +142,8 @@ lemma sum_chartChristoffel_diag_eq_half_trace
       rw [Finset.mul_sum, ← Finset.sum_sub_distrib]
       refine Finset.sum_congr rfl (fun l _ => ?_)
       ring]
-  -- The double sum of the cross-difference is zero.
   rw [mul_eq_zero]
   right
-  -- Split into two double sums and show they are equal.
   rw [show (∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
           (chartInvGramOnE (I := I) g α k l y *
               partialDeriv (E := E) k (chartGramOnE (I := I) g α l i) y -
@@ -173,12 +159,9 @@ lemma sum_chartChristoffel_diag_eq_half_trace
       refine Finset.sum_congr rfl (fun k _ => ?_)
       rw [← Finset.sum_sub_distrib]]
   rw [sub_eq_zero]
-  -- `∑ₖₗ G^{kl} ∂ₖ G_{li} = ∑ₖₗ G^{kl} ∂ₗ G_{ik}` by swapping k↔l and using symmetries.
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl (fun k _ => ?_)
   refine Finset.sum_congr rfl (fun l _ => ?_)
-  -- After `sum_comm` the LHS summand at (k, l) is `G^{lk} ∂_l G_{ki}`.
-  -- Rewrite via `G^{lk} = G^{kl}` and `∂_l G_{ki} = ∂_l G_{ik}`.
   have hGUsym : chartInvGramOnE (I := I) g α l k y =
       chartInvGramOnE (I := I) g α k l y := chartInvGramOnE_symm (I := I) g α l k y
   have hdGsym : partialDeriv (E := E) l (chartGramOnE (I := I) g α k i) y =
@@ -202,8 +185,6 @@ lemma partialDeriv_chartDensityOnE_eq_sum_chartChristoffel_diag
       (∑ k : Fin (Module.finrank ℝ E),
         chartChristoffel (I := I) g α i k k y) * chartDensityOnE (I := I) g α y := by
   classical
-  -- The matrix trace from Jacobi's formula equals the double-sum used in the
-  -- contracted-Christoffel lemma.
   have htrace : Matrix.trace
         ((chartGramMatrix (I := I) g α ((extChartAt I α).symm y))⁻¹ *
           Matrix.of (fun a b => partialDeriv (E := E) i
@@ -217,16 +198,9 @@ lemma partialDeriv_chartDensityOnE_eq_sum_chartChristoffel_diag
     refine Finset.sum_congr rfl (fun l _ => ?_)
     rw [chartInvGramOnE_def, Matrix.of_apply]
     rfl
-  -- Jacobi's formula for the density derivative.
   rw [partialDeriv_chartDensityOnE (I := I) g α y i hy]
   rw [sum_chartChristoffel_diag_eq_half_trace (I := I) g α i y]
   rw [htrace]
-
-/-! ## The frame side: chart-coordinate expansion of the covariant derivative
-
-To analyse `g(∇_{∂ₘ}Z, ∂ₙ)` we need the chart-α coordinate components of the
-Levi-Civita covariant derivative of `Z` in the chart-coordinate direction
-`∂ₘ := chartBasisVecFiber α m`. -/
 
 /-- The linear functional `v ↦ ((chartModelBasis E).repr v) k`, packaged as a
 continuous linear map `E →L[ℝ] ℝ`. -/
@@ -251,8 +225,6 @@ private lemma trivToE_chartBasisVecFiber
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
     trivToE (I := I) α b (chartBasisVecFiber (I := I) α m b) = (chartModelBasis E) m := by
   classical
-  -- `chartBasisVecFiber α m b = (triv α).symm b (eₘ) = trivFromE α b (eₘ)`,
-  -- and `trivToE (trivFromE w) = w` on the base set.
   have hcoe : chartBasisVecFiber (I := I) α m b = trivFromE (I := I) α b ((chartModelBasis E) m) := by
     unfold chartBasisVecFiber trivFromE
     rfl
@@ -282,30 +254,22 @@ lemma chartCoord_leviCivita_chartBasis
   set y₀ : E := extChartAt I α b with hy₀_def
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
-  -- `Z` is smooth, hence MDifferentiable at `b`.
   have hZ_mdiff :
       MDifferentiableAt I (I.prod 𝓘(ℝ, E))
         (fun y : M => TotalSpace.mk' E
           (E := fun z : M => TangentSpace I z) y (Z.toFun y)) b :=
     (Z.contMDiff b).mdifferentiableAt (by simp)
-  -- Identify the bundled Levi-Civita value with the chart-α local value at `b`.
   rw [LeviCivita_chart_apply (I := I) g α hb hZ_mdiff
     (chartBasisVecFiber (I := I) α m b)]
   rw [chartLeviCivita_apply (I := I) g α Z.toFun hb
     (chartBasisVecFiber (I := I) α m b)]
-  -- Round-trip the outer `trivFromE`.
   rw [trivToE_trivFromE (I := I) α hb_base]
-  -- Trivialise the direction.
   rw [trivToE_chartBasisVecFiber (I := I) α m hb_base]
-  -- Split the repr of a sum.
   rw [map_add]
   rw [Finsupp.add_apply]
   congr 1
-  · -- The Fréchet-derivative term: `(b.repr (fderiv (Z̃∘φ.symm)(y₀)(eₘ))) k = ∂ₘ Zᵏ(y₀)`.
-    -- `b.repr · k` is the continuous linear functional `coordProjE k`; commute with fderiv.
-    set F : E → E :=
+  · set F : E → E :=
       chartE_section_repr (I := I) α Z.toFun ∘ (extChartAt I α).symm with hF_def
-    -- Differentiability of the chart pullback `F` of `Z̃` at `y₀`.
     have hb_src : b ∈ (chartAt H α).source :=
       chartLeviCivitaGoodSet_mem_chartAt_source (I := I) hb
     have hb_int : extChartAt I α b ∈ interior ((extChartAt I α).target : Set E) :=
@@ -314,18 +278,14 @@ lemma chartCoord_leviCivita_chartBasis
       rw [hF_def, hy₀_def]
       exact (mdifferentiableAt_section_iff_chartE_fderiv I α Z.toFun
         hb_src hb_base hb_int).mp hZ_mdiff
-    -- `(b.repr (fderiv F y₀ eₘ)) k = coordProjE k (fderiv F y₀ eₘ)`.
     rw [show ((chartModelBasis E).repr (fderiv ℝ F y₀ ((chartModelBasis E) m))) k =
           coordProjE (E := E) k (fderiv ℝ F y₀ ((chartModelBasis E) m)) from by
         rw [coordProjE_apply]]
-    -- Commute the CLM `coordProjE k` with `fderiv` and identify the composite.
     rw [← ContinuousLinearMap.comp_apply]
     rw [show (coordProjE (E := E) k).comp (fderiv ℝ F y₀) =
           fderiv ℝ ((coordProjE (E := E) k : E → ℝ) ∘ F) y₀ from by
         rw [fderiv_comp y₀ (coordProjE (E := E) k).differentiableAt hF_diff,
             ContinuousLinearMap.fderiv]]
-    -- The composite `coordProjE k ∘ F` agrees with `chartCoeffOnE α Z k` on a
-    -- neighbourhood of `y₀` (the chart target), so their `fderiv`s coincide.
     change (fderiv ℝ ((coordProjE (E := E) k : E → ℝ) ∘ F) y₀) ((chartModelBasis E) m) =
         partialDeriv (E := E) m (chartCoeffOnE (I := I) α Z k) y₀
     have htgt_nhd : (extChartAt I α).target ∈ 𝓝 y₀ :=
@@ -336,7 +296,6 @@ lemma chartCoord_leviCivita_chartBasis
       rw [hF_def]
       simp only [Function.comp_apply, coordProjE_apply]
       rw [chartCoeffOnE, chartCoeff_def]
-      -- On the chart target, `chartE_section_repr = (triv⟨·, Z ·⟩).2`.
       have hz_base : (extChartAt I α).symm z ∈
           (trivializationAt E (TangentSpace I) α).baseSet := by
         have hsource : (extChartAt I α).symm z ∈ (extChartAt I α).source :=
@@ -348,11 +307,9 @@ lemma chartCoord_leviCivita_chartBasis
       rfl
     rw [hev.fderiv_eq]
     rfl
-  · -- The Christoffel-correction term.
-    rw [christoffelCorrection_apply (I := I) g α b
+  · rw [christoffelCorrection_apply (I := I) g α b
       (chartE_section_repr (I := I) α Z.toFun b)
       (chartBasisVecFiber (I := I) α m b)]
-    -- View the slot-`k` repr as the CLM `coordProjE k`.
     rw [show ((chartModelBasis E).repr
             (∑ a : Fin (Module.finrank ℝ E), ∑ c : Fin (Module.finrank ℝ E),
               ∑ d : Fin (Module.finrank ℝ E),
@@ -371,15 +328,10 @@ lemma chartCoord_leviCivita_chartBasis
                     (chartE_section_repr (I := I) α Z.toFun b)) c *
                   chartChristoffel (I := I) g α a c d (extChartAt I α b)) •
                   (chartModelBasis E) d) from by rw [coordProjE_apply]]
-    -- Push the CLM through the triple sum and the scalar `•`.
     rw [map_sum]
-    -- The direction repr is `δₐₘ`: trivialise it.
     rw [trivToE_chartBasisVecFiber (I := I) α m hb_base]
-    -- Now evaluate.
     simp only [map_sum, map_smul, smul_eq_mul, coordProjE_apply,
       Module.Basis.repr_self_apply]
-    -- The inner-most `d`-sum collapses to `d = k`, and the `a`-sum to `a = m`.
-    -- The `chartCoeffOnE α Z c` at `y₀` equals the `c`-th coordinate of `Z̃ b`.
     have hZcoeff : ∀ c : Fin (Module.finrank ℝ E),
         chartCoeffOnE (I := I) α Z c y₀ =
           ((chartModelBasis E).repr
@@ -394,8 +346,7 @@ lemma chartCoord_leviCivita_chartBasis
     rw [Finset.sum_eq_single m]
     · refine Finset.sum_congr rfl (fun c _ => ?_)
       rw [Finset.sum_eq_single k]
-      · -- `a = m`, `d = k`.
-        rw [if_pos rfl, if_pos rfl, hZcoeff c]
+      · rw [if_pos rfl, if_pos rfl, hZcoeff c]
         ring
       · intro d _ hdk
         rw [if_neg hdk]
@@ -419,7 +370,6 @@ private lemma tangent_eq_coordSum
       ((chartModelBasis E).repr (trivToE (I := I) α b w)) k •
         chartBasisVecFiber (I := I) α k b := by
   classical
-  -- Expand `trivToE w` in the model basis, then map back with `trivFromE`.
   have hsum : trivToE (I := I) α b w =
       ∑ k : Fin (Module.finrank ℝ E),
         ((chartModelBasis E).repr (trivToE (I := I) α b w)) k • (chartModelBasis E) k :=
@@ -459,10 +409,8 @@ lemma inner_leviCivita_chartBasis_eq
   classical
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
-  -- Expand the first argument in the coordinate frame.
   rw [tangent_eq_coordSum (I := I) α hb_base
     ((LeviCivita (I := I) g).toFun Z.toFun b (chartBasisVecFiber (I := I) α m b))]
-  -- Bilinearity of `g.inner` in the first slot.
   rw [map_sum, ContinuousLinearMap.sum_apply]
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
@@ -496,7 +444,6 @@ lemma frameTrace_eq_metricTrace
   set C : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
     fun i k => chartFrameNormGlobalSmoothCoordMatrix (I := I) (M := M) g α i k b with hC_def
   set L := (LeviCivita (I := I) g).toFun Z.toFun b with hL_def
-  -- Expand each frame summand into a coordinate double sum.
   have hsummand : ∀ i : Fin (Module.finrank ℝ E),
       g.inner b (L ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b))
           ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b) =
@@ -505,13 +452,11 @@ lemma frameTrace_eq_metricTrace
             g.inner b (L (chartBasisVecFiber (I := I) α m b))
               (chartBasisVecFiber (I := I) α n b) := by
     intro i
-    -- Coordinate expansion of `Fᵢ(b)`.
     have hFeq : (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b =
         ∑ m : Fin (Module.finrank ℝ E), C i m • chartBasisVecFiber (I := I) α m b := by
       rw [hC_def]
       exact chartFrameNormGlobalSmooth_eq_coordMatrix_sum (I := I) (M := M) g α i hb
     rw [hFeq]
-    -- First slot: push `L` through the sum and the scalar smul.
     have hLslot : L (∑ m : Fin (Module.finrank ℝ E),
             C i m • chartBasisVecFiber (I := I) α m b) =
         ∑ m : Fin (Module.finrank ℝ E),
@@ -520,7 +465,6 @@ lemma frameTrace_eq_metricTrace
       refine Finset.sum_congr rfl (fun m _ => ?_)
       rw [map_smul]
     rw [hLslot]
-    -- First slot: `g.inner b (∑ₘ Cᵢₘ • L∂ₘ) = ∑ₘ Cᵢₘ • g.inner b (L∂ₘ)` (as CLMs).
     have hslot1 : (g.inner b) (∑ m : Fin (Module.finrank ℝ E),
             C i m • L (chartBasisVecFiber (I := I) α m b)) =
         ∑ m : Fin (Module.finrank ℝ E),
@@ -531,18 +475,15 @@ lemma frameTrace_eq_metricTrace
     rw [hslot1, ContinuousLinearMap.sum_apply]
     refine Finset.sum_congr rfl (fun m _ => ?_)
     rw [ContinuousLinearMap.smul_apply, smul_eq_mul]
-    -- Second slot.
     rw [map_sum, Finset.mul_sum]
     refine Finset.sum_congr rfl (fun n _ => ?_)
     rw [map_smul, smul_eq_mul]
     ring
   rw [Finset.sum_congr rfl (fun i _ => hsummand i)]
-  -- Swap the order: `∑ᵢ ∑ₘ ∑ₙ = ∑ₘ ∑ₙ ∑ᵢ`.
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl (fun m _ => ?_)
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl (fun n _ => ?_)
-  -- `∑ᵢ Cᵢₘ Cᵢₙ * g(...) = (∑ᵢ Cᵢₘ Cᵢₙ) * g(...) = G^{mn} * g(...)`.
   rw [← Finset.sum_mul]
   rw [show (∑ i : Fin (Module.finrank ℝ E), C i m * C i n) =
         chartInvGramMatrix (I := I) g α b m n from by
@@ -573,14 +514,12 @@ lemma metricTrace_eq_coord_covariant_divergence
   classical
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
-  -- Abbreviate the chart-coordinate covariant-derivative components.
   set A : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
     fun m k =>
       partialDeriv (E := E) m (chartCoeffOnE (I := I) α Z k) (extChartAt I α b) +
         ∑ j : Fin (Module.finrank ℝ E),
           chartChristoffel (I := I) g α m j k (extChartAt I α b) *
             chartCoeffOnE (I := I) α Z j (extChartAt I α b) with hA_def
-  -- Substitute the inner-product expansion.
   have hstep1 : (∑ m : Fin (Module.finrank ℝ E), ∑ n : Fin (Module.finrank ℝ E),
         chartInvGramMatrix (I := I) g α b m n *
           g.inner b
@@ -595,7 +534,6 @@ lemma metricTrace_eq_coord_covariant_divergence
     refine Finset.sum_congr rfl (fun n _ => ?_)
     rw [inner_leviCivita_chartBasis_eq (I := I) g α Z m n hb]
   rw [hstep1]
-  -- Reorganise `∑ₘ ∑ₙ G^{mn} ∑ₖ Aₘₖ Gₖₙ = ∑ₘ ∑ₖ Aₘₖ (∑ₙ G^{mn} Gₖₙ)`.
   rw [show (∑ m : Fin (Module.finrank ℝ E), ∑ n : Fin (Module.finrank ℝ E),
           chartInvGramMatrix (I := I) g α b m n *
             ∑ k : Fin (Module.finrank ℝ E),
@@ -605,7 +543,6 @@ lemma metricTrace_eq_coord_covariant_divergence
             chartInvGramMatrix (I := I) g α b m n *
               chartGramMatrix (I := I) g α b k n) from by
       refine Finset.sum_congr rfl (fun m _ => ?_)
-      -- `∑ₙ G^{mn}(∑ₖ AₘₖGₖₙ) = ∑ₙ ∑ₖ G^{mn}AₘₖGₖₙ`.
       rw [show (∑ n : Fin (Module.finrank ℝ E),
               chartInvGramMatrix (I := I) g α b m n *
                 ∑ k : Fin (Module.finrank ℝ E),
@@ -620,14 +557,12 @@ lemma metricTrace_eq_coord_covariant_divergence
       rw [Finset.sum_comm]
       refine Finset.sum_congr rfl (fun k _ => ?_)
       rw [Finset.mul_sum]]
-  -- The `n`-sum collapses: `∑ₙ G^{mn} Gₖₙ = δₘₖ` (via symmetry of `G`).
   have hδ : ∀ m k : Fin (Module.finrank ℝ E),
       (∑ n : Fin (Module.finrank ℝ E),
         chartInvGramMatrix (I := I) g α b m n *
           chartGramMatrix (I := I) g α b k n) =
         if m = k then (1 : ℝ) else 0 := by
     intro m k
-    -- `Gₖₙ = Gₙₖ`, so `∑ₙ G^{mn} Gₖₙ = (G⁻¹ G) m k = (1) m k`.
     have hGsym : ∀ n : Fin (Module.finrank ℝ E),
         chartGramMatrix (I := I) g α b k n = chartGramMatrix (I := I) g α b n k := by
       intro n
@@ -642,7 +577,6 @@ lemma metricTrace_eq_coord_covariant_divergence
         rw [hGsym n]]
     rw [chartInvGramMatrix_mul_chartGramMatrix (I := I) g α hb_base]
     rw [Matrix.one_apply]
-  -- Plug in and collapse the `k`-sum to `k = m`.
   refine Finset.sum_congr rfl (fun m _ => ?_)
   rw [show (∑ k : Fin (Module.finrank ℝ E),
           A m k * (∑ n : Fin (Module.finrank ℝ E),
@@ -657,8 +591,6 @@ lemma metricTrace_eq_coord_covariant_divergence
     rw [if_neg (Ne.symm hkm), mul_zero]
   · intro hm
     exact absurd (Finset.mem_univ m) hm
-
-/-! ## The divergence side: coordinate expansion of `localDivergence` -/
 
 /-- **Coordinate expansion of the chart-α Voss–Weyl divergence.** For a smooth
 tangent section `Z` and a point `b` in the chart-α Levi-Civita good set, the
@@ -682,19 +614,15 @@ lemma localDivergence_eq_coord_covariant_divergence
               chartChristoffel (I := I) g α i k k (extChartAt I α b)) := by
   classical
   set y₀ : E := extChartAt I α b with hy₀_def
-  -- The chart image lies in the interior of the chart target, and `b` lies in
-  -- the chart base set.
   have hy₀_int : y₀ ∈ interior (extChartAt I α).target :=
     chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hb
   have hy₀_target : y₀ ∈ (extChartAt I α).target := interior_subset hy₀_int
   have hop_int : IsOpen (interior (extChartAt I α).target) := isOpen_interior
   have hy₀_nhd : interior (extChartAt I α).target ∈ 𝓝 y₀ := hop_int.mem_nhds hy₀_int
-  -- Density is positive (nonzero) at `b`.
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
   have hD_ne : chartDensity (I := I) g α b ≠ 0 :=
     ne_of_gt (chartDensity_pos (I := I) g α hb_base)
-  -- Differentiability of `chartCoeffOnE α Z i` and `chartDensityOnE g α` at `y₀`.
   have hcoeff_diff : ∀ i : Fin (Module.finrank ℝ E),
       DifferentiableAt ℝ (chartCoeffOnE (I := I) α Z i) y₀ := by
     intro i
@@ -705,17 +633,14 @@ lemma localDivergence_eq_coord_covariant_divergence
     exact (hcd_int.contDiffAt hy₀_nhd).differentiableAt (by simp)
   have hdens_diff : DifferentiableAt ℝ (chartDensityOnE (I := I) g α) y₀ :=
     chartDensityOnE_differentiableAt_interior (I := I) g α hy₀_int
-  -- The chart density on `M` equals the pulled-back density at the chart image.
   have hD_eq : chartDensity (I := I) g α b = chartDensityOnE (I := I) g α y₀ := by
     rw [chartDensityOnE]
     rw [hy₀_def]
     rw [(extChartAt I α).left_inv (by
       rw [extChartAt_source_eq_chartAt_source (I := I)]
       exact chartLeviCivitaGoodSet_mem_chartAt_source (I := I) hb)]
-  -- Leibniz-expand each numerator term `∂ᵢ(Zⁱ · D)`.
   rw [localDivergence_def]
   rw [hD_eq]
-  -- Numerator sum: `∑ᵢ ∂ᵢ(Zⁱ · D) = ∑ᵢ ((∂ᵢ Zⁱ) D + Zⁱ (∂ᵢ D))`.
   have hnum : (∑ i : Fin (Module.finrank ℝ E),
         partialDeriv (E := E) i
           (fun y => chartCoeffOnE (I := I) α Z i y * chartDensityOnE (I := I) g α y) y₀) =
@@ -725,13 +650,11 @@ lemma localDivergence_eq_coord_covariant_divergence
           chartCoeffOnE (I := I) α Z i y₀ *
             partialDeriv (E := E) i (chartDensityOnE (I := I) g α) y₀) := by
     refine Finset.sum_congr rfl (fun i _ => ?_)
-    -- Leibniz product rule for `partialDeriv` (= fderiv in direction `e_i`).
     unfold partialDeriv
     rw [fderiv_fun_mul (hcoeff_diff i) hdens_diff]
     simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply, smul_eq_mul]
     ring
   rw [hnum]
-  -- Substitute the density log-derivative for each `i`, then divide by `D`.
   rw [show (∑ i : Fin (Module.finrank ℝ E),
           (partialDeriv (E := E) i (chartCoeffOnE (I := I) α Z i) y₀ *
               chartDensityOnE (I := I) g α y₀ +
@@ -743,18 +666,14 @@ lemma localDivergence_eq_coord_covariant_divergence
                 (∑ k : Fin (Module.finrank ℝ E),
                   chartChristoffel (I := I) g α i k k y₀)) *
             chartDensityOnE (I := I) g α y₀) from ?_]
-  · -- Divide the common factor `D`.
-    have hDOnE_ne : chartDensityOnE (I := I) g α y₀ ≠ 0 := by
+  · have hDOnE_ne : chartDensityOnE (I := I) g α y₀ ≠ 0 := by
       rw [← hD_eq]; exact hD_ne
     rw [← Finset.sum_mul]
     rw [mul_div_assoc, div_self hDOnE_ne, mul_one]
-    -- Split into the two summands.
     rw [Finset.sum_add_distrib]
   · refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [partialDeriv_chartDensityOnE_eq_sum_chartChristoffel_diag (I := I) g α i hy₀_int]
     ring
-
-/-! ## Headline: divergence equals the covariant frame-trace -/
 
 /-- **The Voss–Weyl divergence equals the Levi-Civita covariant frame-trace.**
 For a smooth Riemannian metric `g`, a chart base point `α : M`, a smooth tangent
@@ -781,20 +700,14 @@ theorem voss_weyl_divergence_eq_leviCivita_frameTrace
             ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b))
           ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b) := by
   classical
-  -- LHS: `divergence_g = localDivergence g α Z b` (Voss–Weyl chart invariance).
   have hb_src : b ∈ (chartAt H α).source :=
     chartLeviCivitaGoodSet_mem_chartAt_source (I := I) hb
   rw [voss_weyl_divergence_formula (I := I) g α Z hb_src]
   rw [localDivergence_eq_coord_covariant_divergence (I := I) g α Z hb]
-  -- RHS: rewrite the frame-trace into the coordinate covariant divergence.
   rw [frameTrace_eq_metricTrace (I := I) g α Z hb_pou hb]
   rw [metricTrace_eq_coord_covariant_divergence (I := I) g α Z hb]
-  -- Match the two coordinate covariant divergences.
-  -- The plain-divergence part `∑ₘ ∂ₘ Zᵐ` matches; reduce the Christoffel parts.
   rw [Finset.sum_add_distrib]
   congr 1
-  -- LHS Christoffel: `∑ᵢ Zⁱ (∑ₖ Γᵏᵢₖ)`; RHS Christoffel: `∑ₘ (∑ⱼ Γᵐₘⱼ Zʲ)`.
-  -- Match via `Finset.sum_comm` and lower-index symmetry of the Christoffel symbol.
   rw [show (∑ i : Fin (Module.finrank ℝ E),
           chartCoeffOnE (I := I) α Z i (extChartAt I α b) *
             ∑ k : Fin (Module.finrank ℝ E),
@@ -806,16 +719,10 @@ theorem voss_weyl_divergence_eq_leviCivita_frameTrace
       rw [Finset.mul_sum]
       refine Finset.sum_congr rfl (fun k _ => ?_)
       ring]
-  -- RHS Christoffel: `∑ₘ ∑ⱼ Γᵐₘⱼ Zʲ`.  Swap sums and use `Γᵐₘⱼ = Γᵐⱼₘ`.
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl (fun i _ => ?_)
   refine Finset.sum_congr rfl (fun k _ => ?_)
-  -- After `sum_comm` on the RHS, the summand at `(i, k)` is `Γᵏᵢⱼ`-shaped; align.
   rw [chartChristoffel_symm (I := I) g α k i i]
-
-/-! ## The divergence side: coordinate expansion of `localDivergence`
-
-(see `localDivergence_eq_coord_covariant_divergence` above) -/
 
 end Connection
 end Integral

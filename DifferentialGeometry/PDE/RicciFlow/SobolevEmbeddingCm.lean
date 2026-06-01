@@ -84,8 +84,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The iterated section-level covariant gradient `∇^j` -/
-
 /-- The **iterated section-level covariant gradient** `∇^j` of a smooth
 compactly-supported `(r, s)`-tensor section, as a smooth compactly-supported
 `(r, s + j)`-tensor section.
@@ -120,8 +118,6 @@ noncomputable def iteratedCovGradSobolevNorm
   ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s + j) (2 * (k - j))
     (iteratedCovGrad g r s j T)‖
 
-/-! ## The `C^m` embedding -/
-
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 /-- **The `C^m` tensor Sobolev embedding.**
@@ -153,10 +149,6 @@ theorem iteratedCovGrad_toSobolev_embedding_Cm
           C * ∑ j ∈ Finset.range (m + 1),
             iteratedCovGradSobolevNorm g r s k j T := by
   classical
-  -- For each degree `j` (with `j ≤ m` the operative case), the `C⁰` embedding
-  -- (m = 0 instance) applied to the `(r, s + j)`-tensor `∇^j T`.  Threshold:
-  -- `2 (k - j) > dim M`, since `2k > dim M + 2m ≥ dim M + 2j` and `j ≤ m ≤ k`.
-  -- We quantify over all `j : ℕ` so that `choose` yields a plain `Cfun : ℕ → ℝ`.
   have h_perdeg : ∀ j : ℕ,
       ∃ Cj : ℝ, 0 < Cj ∧ (j ≤ m → ∀ (T : SmoothCcTensor g r s) (x : M),
         (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r (s + j) I b) :=
@@ -165,15 +157,13 @@ theorem iteratedCovGrad_toSobolev_embedding_Cm
           Cj * iteratedCovGradSobolevNorm g r s k j T) := by
     intro j
     by_cases hjm : j ≤ m
-    · -- `2 (k - j) > dim M`, i.e. `2 (k - j) > dim M + 2 · 0`.
-      have h_super_j : 2 * (k - j) > Module.finrank ℝ E + 2 * 0 := by omega
+    · have h_super_j : 2 * (k - j) > Module.finrank ℝ E + 2 * 0 := by omega
       obtain ⟨Cj, hCj_pos, hCj⟩ :=
         tensorPouSobolevHilbert_embedding_Ck_gNorm (I := I) (M := M)
           g r (s + j) (k - j) 0 h_super_j
       exact ⟨Cj, hCj_pos,
         fun _ T x => hCj (iteratedCovGrad g r s j T) x⟩
     · exact ⟨1, one_pos, fun h => absurd h hjm⟩
-  -- Choose a constant for each degree, then take their finite maximum (plus 1).
   choose Cfun hCfun_pos hCfun using h_perdeg
   have hne : (Finset.range (m + 1)).Nonempty :=
     Finset.nonempty_range_iff.mpr (Nat.succ_ne_zero m)
@@ -188,7 +178,6 @@ theorem iteratedCovGrad_toSobolev_embedding_Cm
     set Cmax : ℝ := (Finset.range (m + 1)).sup' hne Cfun with hCmax_def
     have hCmax_nn : 0 ≤ Cmax :=
       le_trans (le_of_lt (hCfun_pos j₀)) (Finset.le_sup' Cfun hj₀)
-    -- Pointwise: each term is `≤ Cmax · ‖(∇^j T).toHs‖`; sum and factor.
     calc (∑ j ∈ Finset.range (m + 1),
             (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r (s + j) I b) :=
               Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r (s + j)

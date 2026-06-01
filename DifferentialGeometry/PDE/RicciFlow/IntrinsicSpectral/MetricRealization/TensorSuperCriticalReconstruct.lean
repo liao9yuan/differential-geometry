@@ -93,8 +93,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -102,19 +100,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## `CompleteSpace E`
-
-A finite-dimensional real normed space is complete; this is needed by the
-chart-component machinery imported from the elliptic-bridge layer. -/
-
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-
-/-! ## Two trivial topological facts about the chart target minus its kernel
-
-The chart target minus the compact partition-of-unity kernel is open (an open
-set minus a closed set) and is a subset of the chart target. These twins of the
-private elliptic-bridge helpers are reproved inline for use in the a.e. patching
-below. -/
 
 /-- The chart-`α` Euclidean target minus the (closed) partition-of-unity kernel
 is open. -/
@@ -133,15 +119,6 @@ private lemma chartTargetEuclid_sdiff_chartPouKernel_subset' (α : M) :
       chartTargetEuclid (I := I) (M := M) α :=
   Set.diff_subset
 
-/-! ## The chart component of `w` is a.e. zero off the kernel, on `Ω \ K`
-
-The chart component of any abstract `L²` element is almost everywhere zero off
-the compact partition-of-unity kernel
-(`tensorL2ChartComponent_ae_zero_off_chartPouKernel`). Restricting that a.e.
-implication to the open subset `Ω \ K` of the chart target — where the kernel
-membership fails everywhere — turns it into an honest a.e. equality with the
-zero function. -/
-
 /-- For an arbitrary `L²` tensor `w`, the canonical Euclidean chart
 `P₀`-component is almost everywhere zero on the chart-`α` target minus the
 partition-of-unity kernel. -/
@@ -156,7 +133,6 @@ private lemma superCriticalChartComponent_ae_zero_off_kernel
         (chartTargetEuclid (I := I) (M := M) α \
           chartPouKernel (I := I) (M := M) α)] (fun _ : EuclN => (0 : ℝ)) := by
   classical
-  -- The a.e. implication "off the kernel ⇒ zero", on `chartL2Measure α`.
   have h_ae :
       ∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
         y ∉ chartPouKernel (I := I) (M := M) α →
@@ -164,8 +140,6 @@ private lemma superCriticalChartComponent_ae_zero_off_kernel
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y = 0 :=
     tensorL2ChartComponent_ae_zero_off_chartPouKernel
       (I := I) (M := M) g r s w α P₀
-  -- `chartL2Measure α = volume.restrict (chartTargetEuclid α)`, so we may
-  -- restrict the a.e. implication to the open subset `Ω \ K`.
   have hV_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α \
       chartPouKernel (I := I) (M := M) α) :=
     (chartTargetEuclid_sdiff_chartPouKernel_isOpen' (I := I) (M := M) α).measurableSet
@@ -176,8 +150,6 @@ private lemma superCriticalChartComponent_ae_zero_off_kernel
         y ∉ chartPouKernel (I := I) (M := M) α →
           ((tensorL2ChartComponent (I := I) (M := M) g r s w α P₀ :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y = 0 := by
-    -- `chartL2Measure α` is `volume.restrict (chartTargetEuclid α)`, which
-    -- dominates its further restriction to `Ω \ K`.
     refine ae_mono ?_ h_ae
     show (volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α \
@@ -188,21 +160,10 @@ private lemma superCriticalChartComponent_ae_zero_off_kernel
           (chartTargetEuclid (I := I) (M := M) α) from rfl]
     exact Measure.restrict_mono_set _
       (chartTargetEuclid_sdiff_chartPouKernel_subset' (I := I) (M := M) α)
-  -- On `Ω \ K` the kernel membership fails for every point, so the implication
-  -- collapses to the value being zero.
   rw [Filter.EventuallyEq, ae_restrict_iff' hV_meas]
   filter_upwards [(ae_restrict_iff' hV_meas).mp h_ae_V] with y hy
   intro hy_V
   exact hy hy_V hy_V.2
-
-/-! ## The per-chart smooth-representative existence
-
-The localised representative is the smooth Sobolev representative on the chart
-target multiplied by a smooth cutoff that equals `1` on a neighbourhood of the
-compact kernel and is supported strictly inside the chart target. It agrees a.e.
-with the chart component on the chart target: on the kernel the cutoff is `1`
-and the Sobolev representative is a.e. the chart component; off the kernel both
-the chart component and the localised representative are a.e. zero. -/
 
 /-- **Per-chart smooth representative of the chart component of a super-critical
 `L²` tensor.** For an `L²` tensor `w` whose canonical Euclidean chart
@@ -232,7 +193,6 @@ theorem superCriticalChartComponent_exists_smooth_representative
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s w α P₀ :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) := by
   classical
-  -- Abbreviations for the chart target, the chart component and the kernel.
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   set u : EuclN → ℝ :=
     (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s w α P₀ :
@@ -244,53 +204,37 @@ theorem superCriticalChartComponent_exists_smooth_representative
   have hK_compact : IsCompact K := chartPouKernel_isCompact (I := I) (M := M) α
   have hK_subset_Ω : K ⊆ Ω :=
     chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
-  -- `u ∈ MemWkp k 2` on the chart target for every order `k`: the hypothesis
-  -- gives even orders `2k`, and downward monotonicity gives the odd ones.
   have hu_memWkp : ∀ k : ℕ,
       MemWkp (d := Module.finrank ℝ E) k 2 u Ω := by
     intro k
-    -- `k ≤ 2k`, so `MemWkp (2k) ⇒ MemWkp k`.
     exact MemWkp.le_of_le (d := Module.finrank ℝ E)
       (by omega : k ≤ 2 * k) (h_all k)
-  -- The iterated-Sobolev embedding: a `C^∞` representative `u₀` on the open
-  -- chart target, almost everywhere equal to `u`.
   obtain ⟨u₀, hu₀_cdiff, hu_ae_u₀⟩ :=
     contDiffOn_of_forall_memWkp_two (d := Module.finrank ℝ E) hΩ_open hu_memWkp
-  -- A smooth cutoff `η`, equal to `1` on a neighbourhood of the compact kernel
-  -- `K` and compactly supported strictly inside the chart target `Ω`.
   obtain ⟨δ, η, hδ_pos, _hδ_subset, hη_cdiff, hη_cpt, _hη_range,
       hη_one_cthick, hη_tsupp⟩ :=
     exists_smooth_cutoff_with_neighborhood (d := Module.finrank ℝ E)
       hK_compact hΩ_open hK_subset_Ω
-  -- The cutoff is `1` on the kernel itself.
   have hη_one_K : ∀ y ∈ K, η y = 1 := fun y hy =>
     hη_one_cthick y (Metric.self_subset_cthickening _ hy)
-  -- The localised representative.
   set u_smooth : EuclN → ℝ := fun y => η y * u₀ y with hu_smooth_def
-  -- `u_smooth` is `C^∞` on the chart target: a product of two `C^∞` functions.
   have hu_smooth_cdiff : ContDiffOn ℝ (∞ : WithTop ℕ∞) u_smooth Ω :=
     (hη_cdiff.contDiffOn).mul hu₀_cdiff
-  -- `u_smooth` has compact support: its support sits inside that of `η`.
   have hu_smooth_cpt : HasCompactSupport u_smooth :=
     HasCompactSupport.mul_right hη_cpt
-  -- `tsupport u_smooth ⊆ tsupport η ⊆ Ω`.
   have hu_smooth_tsupp : tsupport u_smooth ⊆ Ω :=
     (tsupport_mul_subset_left).trans hη_tsupp
   refine ⟨u_smooth, hu_smooth_cdiff, hu_smooth_cpt, hu_smooth_tsupp, ?_⟩
-  -- The almost-everywhere identity `u_smooth =ᵐ u`.
-  -- The chart component is a.e. zero off the kernel.
   have hu_ae_zero :
       u =ᵐ[(volume : Measure EuclN).restrict (Ω \ K)]
         (fun _ : EuclN => (0 : ℝ)) :=
     superCriticalChartComponent_ae_zero_off_kernel
       (I := I) (M := M) g r s w α P₀
-  -- `u₀ =ᵐ u` on `Ω` (the embedding), hence on the open subset `Ω \ K`.
   have hK_closed : IsClosed K := hK_compact.isClosed
   have hΩK_subset : Ω \ K ⊆ Ω := Set.diff_subset
   have hu₀_ae_u_ΩK : u₀ =ᵐ[(volume : Measure EuclN).restrict (Ω \ K)] u :=
     Filter.EventuallyEq.symm
       (ae_restrict_of_ae_restrict_of_subset hΩK_subset hu_ae_u₀)
-  -- Off the kernel: `u₀ =ᵐ u =ᵐ 0`, hence `u_smooth = η · u₀ =ᵐ 0`.
   have hu_smooth_ae_zero_ΩK :
       u_smooth =ᵐ[(volume : Measure EuclN).restrict (Ω \ K)]
         (fun _ : EuclN => (0 : ℝ)) := by
@@ -299,11 +243,9 @@ theorem superCriticalChartComponent_exists_smooth_representative
           (fun _ : EuclN => (0 : ℝ)) := hu₀_ae_u_ΩK.trans hu_ae_zero
     filter_upwards [hu₀_ae_zero_ΩK] with y hy
     simp [hu_smooth_def, hy]
-  -- `u =ᵐ u_smooth` on `Ω \ K`: both are a.e. zero there.
   have hu_ae_u_smooth_ΩK :
       u =ᵐ[(volume : Measure EuclN).restrict (Ω \ K)] u_smooth :=
     hu_ae_zero.trans hu_smooth_ae_zero_ΩK.symm
-  -- On the kernel: `η = 1`, so `u_smooth = u₀ =ᵐ u`.
   have hK_meas : MeasurableSet K := hK_closed.measurableSet
   have hu₀_ae_u_K : u₀ =ᵐ[(volume : Measure EuclN).restrict K] u :=
     Filter.EventuallyEq.symm
@@ -316,7 +258,6 @@ theorem superCriticalChartComponent_exists_smooth_representative
   have hu_ae_u_smooth_K :
       u =ᵐ[(volume : Measure EuclN).restrict K] u_smooth :=
     (hu₀_ae_u_K.symm).trans hu_smooth_ae_u₀_K.symm
-  -- Patch the two a.e. identities over `Ω = K ∪ (Ω \ K)`.
   have hΩ_eq : Ω = K ∪ (Ω \ K) := by
     rw [Set.union_diff_cancel hK_subset_Ω]
   have hu_ae_u_smooth :
@@ -326,18 +267,6 @@ theorem superCriticalChartComponent_exists_smooth_representative
       (fun x => u x = u_smooth x)).mpr ⟨hu_ae_u_smooth_K, hu_ae_u_smooth_ΩK⟩
   exact hu_ae_u_smooth.symm
 
-/-! ## The chart-component function of the abstract source
-
-For an `L²` tensor `w`, ranks `(r, s)`, a chart centre `α` and a component
-multi-index `P`, the **source chart-component function** is the underlying
-function of the canonical Euclidean chart `P`-component
-`tensorL2ChartComponent g r s w α P`. This plays, for the abstract source `w`,
-exactly the rôle that `eigenvectorChartComponentFun` plays for the
-intrinsic eigenbasis vector in the eigenvector route: it is the chart-`α`
-`P`-component that the chosen smooth representative approximates almost
-everywhere, and that the abstract partition-of-unity transport law
-`tensorL2ChartComponent_ae_eq_pou_transport_sum` decomposes. -/
-
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 /-- The source chart-component function: the underlying function of the
@@ -346,14 +275,6 @@ private def wChartComp (w : TensorL2 r s g) (α : M)
     (P : TensorCompIdx (E := E) r s) : EuclN → ℝ :=
   fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s w α P :
     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
-
-/-! ## The chosen per-chart smooth component family
-
-For a chart centre `α` and component multi-index `P`, the per-chart existence
-theorem `superCriticalChartComponent_exists_smooth_representative` produces a
-smooth, compactly-supported chart-`α` `P`-component function. We pick one with
-`Classical.choose` and record its four defining properties. The construction
-mirrors `chosenComp` from the eigenvector route. -/
 
 /-- The chosen smooth chart-`α` `P`-component representative of the abstract
 source `w`. -/
@@ -452,13 +373,6 @@ private lemma chosenComp_w_hsupp (w : TensorL2 r s g)
   fun P => ⟨chosenComp_w_hasCompactSupport (I := I) (M := M) g r s w h_all α P,
     chosenComp_w_tsupport (I := I) (M := M) g r s w h_all α P⟩
 
-/-! ## The per-chart smooth section
-
-For a chart centre `α`, feeding the chosen chart-`α` component family to the
-chart-frame section constructor yields a smooth compactly-supported tensor
-section whose raw chart-`α` frame is that family. This mirrors
-`eigenvectorSmoothChart`. -/
-
 /-- The per-chart smooth section at `α`: the chart-frame tensor section assembled
 from the chosen chart-`α` smooth component family of the abstract source `w`. -/
 private def wSmoothChart (w : TensorL2 r s g)
@@ -530,11 +444,6 @@ private lemma tensorChartComponentRaw_wSmoothChart_eq_zero_off_source
         ((wSmoothChart (I := I) (M := M) g r s w h_all α).toSection x)
       from rfl, hsec, map_zero, map_zero]
 
-/-! ## The smooth representative of the abstract source
-
-The smooth representative is the finite sum, over the chart centres in the
-finite partition-of-unity support set, of the per-chart smooth sections. -/
-
 /-- The smooth compactly-supported `(r, s)`-tensor section realising the abstract
 source `w`: the finite sum over the chart centres in `chartAtlasPOU_finset` of
 the per-chart sections. -/
@@ -555,8 +464,6 @@ private lemma wSmooth_eq (w : TensorL2 r s g)
       ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
         wSmoothChart (I := I) (M := M) g r s w h_all α := rfl
 
-/-! ## The transport chart centres lie in the partition-of-unity support set -/
-
 /-- Every transport chart centre of `β` belongs to the partition-of-unity
 support set. -/
 private lemma transportChartCenters_subset_chartAtlasPOU_finset' (β : M) :
@@ -566,8 +473,6 @@ private lemma transportChartCenters_subset_chartAtlasPOU_finset' (β : M) :
   rw [mem_transportChartCenters] at hγ
   rw [chartAtlasPOU_finset_mem]
   exact hγ.mono (Set.inter_subset_left)
-
-/-! ## A measure-theoretic gluing helper -/
 
 /-- If two functions agree almost everywhere with respect to `μ.restrict t` and
 agree everywhere off the measurable set `t`, then they agree almost everywhere
@@ -589,8 +494,6 @@ private lemma ae_eq_of_ae_eq_restrict_of_eqOn_compl'
   rw [MeasureTheory.Measure.restrict_apply₀'] at h_restrict
   · rwa [h_inter]
   · exact ht.nullMeasurableSet
-
-/-! ## The `if`-gated finite-sum / chart-pushforward helpers -/
 
 /-- An `if`-gated finite sum equals the finite sum of the `if`-gated summands. -/
 private lemma ite_finsetSum_eq_finsetSum_ite'
@@ -653,14 +556,6 @@ private lemma chartPushedRaw_ite_transitionSum_eq_finsetSum_w (w : TensorL2 r s 
           (wSmoothChart (I := I) (M := M) g r s w h_all α)
           α Q.1 Q.2 x
     else 0) y
-
-/-! ## The chart-`β` component of the per-chart section (D-i)
-
-`wSmoothChart α` is a smooth compactly-supported section, so its canonical
-chart-`β` component is the `L²` class of the concrete partition-of-unity-weighted
-Euclidean chart component, which factors on the chart target as the chart-pushed
-partition-of-unity weight times the chart-pushed raw chart-`β` frame component,
-the latter rewritten via the `(r, s)`-tensor transformation law. -/
 
 open Classical in
 /-- For a point `x` of the chart-`β` source, the raw chart-`β` frame component
@@ -750,13 +645,6 @@ private lemma wSmoothChart_tensorL2ChartComponent_coeFn_aeEq (w : TensorL2 r s g
   exact raw_wSmoothChart_eq_ite (I := I) (M := M) g r s w h_all α β
     P₀ (symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) β hy)
 
-/-! ## The chart-`γ` kernel cutoff pushed to the Euclidean chart target
-
-The chart-`γ` kernel cutoff `chartKernelCutoff γ`, pushed to the Euclidean chart
-target. On the partition-of-unity kernel `chartPouKernel γ` it is identically
-`1`. These helpers carry no chart-selection witness; they are reproved here
-because their eigenvector-route analogues are `private`. -/
-
 /-- The chart-`γ` kernel cutoff `chartKernelCutoff γ`, pushed to the Euclidean
 chart target of `γ`. -/
 private def chartKernelCutoffPushed (γ : M) : EuclN → ℝ :=
@@ -810,13 +698,6 @@ private lemma chartPushedPouWeight_toEuclidean_extChartAt'
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _
       (toEuclidean_extChartAt_mem_chartTargetEuclid (I := I) (M := M) α hz),
     symm_toEuclidean_symm_toEuclidean_extChartAt (I := I) (M := M) α hz]
-
-/-! ## The chart-`γ` kernel-cutoff factorisation of the source component
-
-Almost everywhere on the Euclidean chart target of `γ`, the source chart-`γ`
-`Q`-component is unchanged by multiplication with the pushed chart-`γ` kernel
-cutoff: where the component is nonzero it sits inside the partition-of-unity
-kernel, where the pushed cutoff is `1`. -/
 
 /-- The source chart-`γ` `Q`-component equals, almost everywhere on the Lebesgue
 volume restricted to the Euclidean chart target of `γ`, the pushed chart-`γ`
@@ -928,8 +809,6 @@ private lemma wChartComp_comp_chartTransition_ae_eq_cutoff_mul (w : TensorL2 r s
     ae_mono (Measure.restrict_mono_set _
       (chartOverlapEuclid_subset_chartTarget (I := I) (M := M) γ β)) h_target
   exact chartTransitionEuclid_comp_ae_eq_restrict (I := I) (M := M) β γ h_overlap
-
-/-! ## The single transport-term reconciliation -/
 
 open Classical in
 /-- **Single transport-term reconciliation for the abstract source.** The
@@ -1129,8 +1008,6 @@ private lemma wSmoothChart_transport_term_aeEq (w : TensorL2 r s g)
   refine h_goal.trans ?_
   exact (Filter.EventuallyEq.refl _ W).mul hB_eq.symm
 
-/-! ## The per-chart summand as a transport sum -/
-
 open Classical in
 /-- The canonical chart-`β` `P₀`-component of the per-chart smooth section
 `wSmoothChart α` equals, almost everywhere on the chart-`β` `L²` measure, the
@@ -1207,8 +1084,6 @@ private lemma wSmoothChart_tensorL2ChartComponent_eq_transport_sum
   funext y
   rw [Finset.mul_sum]
 
-/-! ## The off-transport-centre vanishing of the source transport sum -/
-
 /-- The source chart-`α` `Q`-component, gated to the zero locus of the
 chart-pushed partition-of-unity weight of `α`, vanishes almost everywhere on the
 chart-`α` `L²` measure. -/
@@ -1220,14 +1095,11 @@ private lemma wChartComp_ite_chartPushedPouWeight_zero_ae_zero (w : TensorL2 r s
       =ᵐ[chartL2Measure (I := I) (M := M) α]
       (fun _ : EuclN => (0 : ℝ)) := by
   classical
-  -- The source chart component is, a.e., the pushed pou weight times the cutoff
-  -- chart component; where the weight is zero, the component is zero.
   have h_gate : ∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
       chartPushedPouWeight (I := I) (M := M) α y = 0 →
         wChartComp (I := I) (M := M) g r s w α Q y = 0 := by
     filter_upwards [tensorL2ChartComponent_eq_chartPushedPou_mul_cutoff
       (I := I) (M := M) g r s w α Q] with y hy hy_zero
-    -- `chartPushedPouWeight α = chartPushedRaw I α (chartAtlasPOU α)` by def.
     rw [show wChartComp (I := I) (M := M) g r s w α Q y =
         ((tensorL2ChartComponent (I := I) (M := M) g r s w α Q :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y from rfl,
@@ -1399,8 +1271,6 @@ private lemma transportSum_w_ae_zero_of_notMem (w : TensorL2 r s g)
   funext y
   rw [Finset.sum_const_zero]
 
-/-! ## The global chart-component matching (the gate) -/
-
 open Classical in
 /-- **The global chart-component matching.** The canonical Euclidean chart-`β`
 `P₀`-component of the smooth representative `wSmooth` equals — as an element of
@@ -1540,8 +1410,6 @@ private lemma wSmooth_tensorL2ChartComponent_eq (w : TensorL2 r s g)
         transportChartCenters (I := I) (M := M) β, F α y) = 0 from hy,
     add_zero]
 
-/-! ## The tensor super-critical reconstruction bridge -/
-
 /-- **The tensor super-critical reconstruction bridge.** For a closed
 (compact, boundaryless) smooth Riemannian manifold `(M, g)` modelled on a
 finite-dimensional real inner-product space `E`, the bridge predicate
@@ -1560,7 +1428,6 @@ theorem tensorSuperCriticalReconstruct
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     TensorSuperCriticalReconstruct (I := I) (M := M) g r s := by
   intro w h_all
-  -- Repackage the hypothesis into the `wChartComp` shape.
   have h_all' : ∀ k : ℕ, ∀ (α : M) (P₀ : TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) (2 * k) 2
         (wChartComp (I := I) (M := M) g r s w α P₀)

@@ -63,8 +63,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Generic gluing principle: chart-local continuity → global Borel-measurability -/
-
 /-- Generic gluing principle.  If a function `f : M → F` to a Borel-measurable
 codomain is continuous on every chart source of `M`, and `M` is a Borel-charted
 space, then `f` is Borel-measurable.
@@ -87,18 +85,14 @@ theorem measurable_of_continuousOn_chart_source
   have hrange_nonempty : (Set.range (fun x : M => chartAt H x)).Nonempty :=
     Set.range_nonempty (fun x : M => chartAt H x)
   obtain ⟨φ, hφ⟩ := hcount.exists_eq_range hrange_nonempty
-  -- Level sets
   set s : ℕ → Set M := fun n => {x : M | chartAt H x = φ n} with hs_def
-  -- Each `s n` is Borel-measurable.
   have hsmeas : ∀ n, MeasurableSet (s n) := fun n => hmeas (φ n)
-  -- Each `s n` is contained in `(φ n).source`.
   have hssub : ∀ n, s n ⊆ (φ n).source := by
     intro n x hx
     have hxs : x ∈ (chartAt H x).source := ChartedSpace.mem_chart_source x
     have hxe : chartAt H x = φ n := hx
     rw [hxe] at hxs
     exact hxs
-  -- The level sets cover `M`.
   have hcov : (⋃ n, s n) = univ := by
     refine Set.eq_univ_of_forall (fun x => ?_)
     have hxr : chartAt H x ∈ Set.range (fun y : M => chartAt H y) :=
@@ -108,14 +102,12 @@ theorem measurable_of_continuousOn_chart_source
     refine mem_iUnion.mpr ⟨n, ?_⟩
     change chartAt H x = φ n
     exact hn.symm
-  -- Each `s n` is non-empty (since `φ n ∈ Set.range chartAt`).
   have hsne : ∀ n, (s n).Nonempty := by
     intro n
     have hin : φ n ∈ Set.range (fun y : M => chartAt H y) := by
       rw [hφ]; exact Set.mem_range_self n
     obtain ⟨x, hx⟩ := hin
     exact ⟨x, hx⟩
-  -- `f` is continuous on each `(φ n).source`.
   have hf_φ : ∀ n, ContinuousOn f (φ n).source := by
     intro n
     obtain ⟨x₀, hx₀⟩ := hsne n
@@ -123,12 +115,9 @@ theorem measurable_of_continuousOn_chart_source
     have hcx := hf x₀
     rw [hh] at hcx
     exact hcx
-  -- Each chart source is open.
   have hopen_source : ∀ n, IsOpen (φ n).source := fun n => (φ n).open_source
-  -- Now show measurability via opens.
   refine measurable_of_isOpen ?_
   intro U hU
-  -- `f ⁻¹' U = ⋃ n, f ⁻¹' U ∩ s n`.
   have hpre : f ⁻¹' U = ⋃ n, f ⁻¹' U ∩ s n := by
     ext x
     simp only [mem_preimage, mem_iUnion, mem_inter_iff]
@@ -141,7 +130,6 @@ theorem measurable_of_continuousOn_chart_source
       exact hx
   rw [hpre]
   refine MeasurableSet.iUnion (fun n => ?_)
-  -- `f ⁻¹' U ∩ s n = ((φ n).source ∩ f ⁻¹' U) ∩ s n` since `s n ⊆ (φ n).source`.
   have h1 : f ⁻¹' U ∩ s n = ((φ n).source ∩ f ⁻¹' U) ∩ s n := by
     ext y
     simp only [mem_inter_iff]
@@ -151,18 +139,9 @@ theorem measurable_of_continuousOn_chart_source
     · rintro ⟨⟨_, hyU⟩, hys⟩
       exact ⟨hyU, hys⟩
   rw [h1]
-  -- `(φ n).source ∩ f ⁻¹' U` is open by `ContinuousOn.isOpen_inter_preimage`.
   have hopen : IsOpen ((φ n).source ∩ f ⁻¹' U) :=
     (hf_φ n).isOpen_inter_preimage (hopen_source n) hU
   exact MeasurableSet.inter hopen.measurableSet (hsmeas n)
-
-/-! ## Chart-local smoothness of the trivialization-projected section
-
-The `(r, s)`-tensor bundle's chart-induced trivialization at any reference point
-`α` produces, when applied to a smooth section, a smooth `ModelFiber`-valued
-function on the entire base set `(chartAt H α).source` (not merely on the level
-set of `chartAt H` at `α`).  This is the standard
-`Trivialization.contMDiffOn_section_baseSet_iff` packaging. -/
 
 private lemma rs_baseSet_eq_chart_source' (α : M) (r s : ℕ) :
     (trivializationAt (TensorRSModel r s ℝ E)
@@ -214,35 +193,18 @@ private lemma continuousOn_trivProj
       ((chartAt H α).source) :=
   (contMDiffOn_trivProj (I := I) (M := M) S α).continuousOn
 
-/-! ## Level-set identity: trivialization-projection equals fibre-to-model
-
-The naive equality "trivialization at `α` evaluated at `⟨x, T⟩` equals
-`TensorRSSpace.toModel T`" fails on the full chart source: the chart-induced
-trivialization carries a non-identity change-of-coordinates depending on `x`.
-
-The equality does, however, hold on the **level set** `{x | chartAt H x =
-chartAt H α}`: there `achart H x = achart H α`, so the
-`tangentBundleCore`-coordChange is the identity by
-`VectorBundleCore.coordChange_self`, and the trivialization's
-`continuousLinearMapAt` and `symmL` reduce to identities.  These collapse the
-`ContinuousLinearMap.inCoordinates` formula for the
-`(r, s)`-tensor-bundle trivialization to the intrinsic fibre-to-model
-coercion. -/
-
 /-- The tangent-bundle trivialization at `α`, restricted to the level set
 `{x | chartAt H x = chartAt H α}`, has identity `continuousLinearMapAt` map. -/
 private lemma tangent_continuousLinearMapAt_levelSet (α x : M)
     (hx : chartAt H x = chartAt H α) :
     (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ x =
       (1 : E →L[ℝ] E) := by
-  -- `x ∈ (chartAt H α).source` from the level-set hypothesis.
   have hx_src : x ∈ (chartAt H α).source := by
     have hxs : x ∈ (chartAt H x).source := ChartedSpace.mem_chart_source x
     rw [hx] at hxs
     exact hxs
   rw [TangentBundle.continuousLinearMapAt_trivializationAt_eq_core
     (b₀ := α) (b := x) hx_src]
-  -- `achart H x = achart H α` on the level set.
   have hach : achart H x = achart H α := by
     apply Subtype.ext
     change chartAt H x = chartAt H α
@@ -283,13 +245,11 @@ private lemma tensor0S_continuousLinearMapAt_levelSet_apply
     have hxs : x ∈ (chartAt H x).source := ChartedSpace.mem_chart_source x
     rw [hx] at hxs
     exact hxs
-  -- `(0, s)`-tensor trivialization base set = chart source.
   have hx_base : x ∈ (trivializationAt (Tensor0SModel s ℝ E)
       (fun y : M => Tensor0SSpace s I y) α).baseSet := by
     change x ∈ (trivializationAt E (TangentSpace I) α).baseSet
     change x ∈ (chartAt H α).source
     exact hx_src
-  -- `linearMapAt = continuousLinearMapAt` on the base set.
   have hcLMAt :
       (trivializationAt (Tensor0SModel s ℝ E)
         (fun y : M => Tensor0SSpace s I y) α).continuousLinearMapAt ℝ x p =
@@ -299,8 +259,6 @@ private lemma tensor0S_continuousLinearMapAt_levelSet_apply
         (fun y : M => Tensor0SSpace s I y) α).linearMapAt ℝ x p = _
     rw [Bundle.Trivialization.linearMapAt_apply, if_pos hx_base]
   rw [hcLMAt]
-  -- Unfold the (0,s)-tensor trivialization application: it composes with
-  -- the tangent symmL.
   have happly : (trivializationAt (Tensor0SModel s ℝ E)
       (fun y : M => Tensor0SSpace s I y) α ⟨x, p⟩).2 =
       p.compContinuousLinearMap
@@ -366,15 +324,6 @@ private lemma tensorRS_levelSet_identity
     ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from S.toSection x) v)]
   rfl
 
-/-! ## Borel-measurability of `SmoothCcTensor.toFun`
-
-We assemble the cover-and-glue argument by hand.  The level sets `s n` of
-`chartAt H` are Borel, each contained in `(chartAt H x_n).source` for a
-representative `x_n`, and on each `s n` the section's `toFun` agrees with the
-chart-local trivialization-projection at `x_n` (continuous on the chart
-source).  Hence `S.toFun` is Borel, by writing the preimage of any open set as
-a countable union of intersections of opens with Borel sets. -/
-
 /-- The underlying map `S.toFun : M → TensorRSModel r s ℝ E` of a smooth
 compactly-supported `(r, s)`-tensor section is Borel-measurable. -/
 theorem SmoothCcTensor.measurable_toFun
@@ -389,32 +338,26 @@ theorem SmoothCcTensor.measurable_toFun
   letI : MeasurableSpace (TensorRSModel r s ℝ E) := borel (TensorRSModel r s ℝ E)
   haveI : BorelSpace (TensorRSModel r s ℝ E) := ⟨rfl⟩
   classical
-  -- Borel-charted-space data.
   have hcount := IsBorelChartedSpace.chartAt_range_countable (H := H) (M := M)
   have hmeas_lvl := IsBorelChartedSpace.measurableSet_chartAt_preimage (H := H) (M := M)
   have hrange_nonempty : (Set.range (fun y : M => chartAt H y)).Nonempty :=
     Set.range_nonempty (fun y : M => chartAt H y)
   obtain ⟨φ, hφ⟩ := hcount.exists_eq_range hrange_nonempty
-  -- Level sets and Borel-measurability.
   set s' : ℕ → Set M := fun n => {x : M | chartAt H x = φ n} with hs'_def
   have hs'meas : ∀ n, MeasurableSet (s' n) := fun n => hmeas_lvl (φ n)
-  -- Each `s' n` is contained in `(φ n).source`.
   have hs'sub : ∀ n, s' n ⊆ (φ n).source := by
     intro n x hx
     have hxs : x ∈ (chartAt H x).source := ChartedSpace.mem_chart_source x
     have hxe : chartAt H x = φ n := hx
     rw [hxe] at hxs
     exact hxs
-  -- Each `s' n` is non-empty: pick a representative `x_n ∈ s' n`.
   have hs'ne : ∀ n, (s' n).Nonempty := by
     intro n
     have hin : φ n ∈ Set.range (fun y : M => chartAt H y) := by
       rw [hφ]; exact Set.mem_range_self n
     obtain ⟨x, hx⟩ := hin
     exact ⟨x, hx⟩
-  -- For each `n`, choose a representative `xn : M`.
   choose xn hxn using hs'ne
-  -- Cover: every point lies in some `s' n`.
   have hcov : (⋃ n, s' n) = univ := by
     refine Set.eq_univ_of_forall (fun x => ?_)
     have hxr : chartAt H x ∈ Set.range (fun y : M => chartAt H y) :=
@@ -424,35 +367,27 @@ theorem SmoothCcTensor.measurable_toFun
     refine mem_iUnion.mpr ⟨n, ?_⟩
     change chartAt H x = φ n
     exact hn.symm
-  -- The chart-local function `g_n` projected via `xn`.
   set g_n : ℕ → M → TensorRSModel r s ℝ E := fun n x =>
       (trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) (xn n) ⟨x, S.toSection x⟩).2
     with hg_n_def
-  -- `g_n` is continuous on `(chartAt H (xn n)).source`.
   have hg_n_cont : ∀ n, ContinuousOn (g_n n) (chartAt H (xn n)).source := by
     intro n
     exact continuousOn_trivProj (I := I) (M := M) S (xn n)
-  -- On `s' n`, we have `g_n x = S.toFun x`.
   have hg_n_eq : ∀ n, ∀ x ∈ s' n, g_n n x = S.toFun x := by
     intro n x hx
-    -- `chartAt H x = φ n = chartAt H (xn n)`.
     have hxφ : chartAt H x = φ n := hx
     have hxnφ : chartAt H (xn n) = φ n := hxn n
     have hx_eq : chartAt H x = chartAt H (xn n) := by rw [hxφ, hxnφ]
     exact tensorRS_levelSet_identity (I := I) (M := M) S (xn n) x hx_eq
-  -- Also each `s' n ⊆ (chartAt H (xn n)).source`: from `hs'sub` plus `φ n =
-  -- chartAt H (xn n)`.
   have hs'sub_chartXn : ∀ n, s' n ⊆ (chartAt H (xn n)).source := by
     intro n x hx
     have h1 : x ∈ (φ n).source := hs'sub n hx
     have hxnφ : chartAt H (xn n) = φ n := hxn n
     rw [hxnφ]
     exact h1
-  -- Borel-measurability via opens.
   refine measurable_of_isOpen ?_
   intro U hU
-  -- `S.toFun ⁻¹' U = ⋃ n, S.toFun ⁻¹' U ∩ s' n`.
   have hpre : S.toFun ⁻¹' U = ⋃ n, S.toFun ⁻¹' U ∩ s' n := by
     ext x
     simp only [mem_preimage, mem_iUnion, mem_inter_iff]
@@ -465,7 +400,6 @@ theorem SmoothCcTensor.measurable_toFun
       exact hx
   rw [hpre]
   refine MeasurableSet.iUnion (fun n => ?_)
-  -- On `s' n`: `S.toFun ⁻¹' U ∩ s' n = (g_n n) ⁻¹' U ∩ s' n`.
   have heq_pre : S.toFun ⁻¹' U ∩ s' n = (g_n n) ⁻¹' U ∩ s' n := by
     ext x
     simp only [mem_inter_iff, mem_preimage]
@@ -479,7 +413,6 @@ theorem SmoothCcTensor.measurable_toFun
       rw [h] at hxU
       exact ⟨hxU, hxs⟩
   rw [heq_pre]
-  -- `(g_n n) ⁻¹' U ∩ s' n ⊆ (chartAt H (xn n)).source ∩ ((g_n n) ⁻¹' U) ∩ s' n`.
   have h1 : (g_n n) ⁻¹' U ∩ s' n =
       ((chartAt H (xn n)).source ∩ ((g_n n) ⁻¹' U)) ∩ s' n := by
     ext y
@@ -490,7 +423,6 @@ theorem SmoothCcTensor.measurable_toFun
     · rintro ⟨⟨_, hyU⟩, hys⟩
       exact ⟨hyU, hys⟩
   rw [h1]
-  -- `(chartAt H (xn n)).source ∩ (g_n n) ⁻¹' U` is open by chart-local continuity.
   have hopen : IsOpen ((chartAt H (xn n)).source ∩ (g_n n) ⁻¹' U) :=
     (hg_n_cont n).isOpen_inter_preimage (chartAt H (xn n)).open_source hU
   exact MeasurableSet.inter hopen.measurableSet (hs'meas n)

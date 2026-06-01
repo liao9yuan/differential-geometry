@@ -186,30 +186,12 @@ open DifferentialGeometry.Analysis.Laplacian.HessianPairingLapDom
 open DifferentialGeometry.Analysis.Laplacian.HessianPairingChart
 open DifferentialGeometry.Analysis.Laplacian.RicciPairingCLM
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## The unconditional Bochner candidate
-
-For `u_h ∈ laplacianDomainPow g 2`, we package the Lp class
-
-```
-F(u_h) := gradInnerCLM g φ u_h
-          - gradInnerCLM g (Δφ) u_h
-          - gradInnerCLM g φ (u_h - preimageLift g hu_h)
-          - 2 • ricciPairingCLM g φ u_h
-          - 2 • hessPairingLpOnLapDom g φ hu_dom.
-```
-
-This is fully concrete and unconditional: every summand is a known Lp
-class, and the construction depends only on the iterated-domain
-membership of `u_h`. -/
 
 /-- The auxiliary `Lp` class representing `g(∇φ, ∇(Δu_h))`. Constructed
 explicitly as `gradInnerCLM g φ (u_h - preimageLift g hu_h)`, this is the
@@ -314,15 +296,6 @@ theorem gradInnerLaplacianCandidateUnconditional_explicit
   rw [gradInnerLapU_eq_sub]
   abel
 
-/-! ## Reverse implication for the unconditional candidate
-
-If `gradInnerCLM g φ u_h ∈ H1ComplToLp '' laplacianDomain g`, then by the
-`smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image` equivalence,
-`smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2`. This is the standalone
-direction not depending on the candidate construction. -/
-
-/-! ## Reformulation of the smooth-case regularity theorem -/
-
 /-- **Smooth-case regularity (repackaged)**: for smooth `v ∈ SmoothScalar g`,
 the gradient inner product `gradInnerCLM g φ (smoothToH1Compl v)` lies in
 the image `H1ComplToLp '' laplacianDomain g`. This repackages
@@ -335,13 +308,6 @@ theorem gradInnerCLM_mem_image_laplacianDomain_smooth
         (laplacianDomain (I := I) (M := M) g : Set (H1Compl g)) :=
   gradInnerCLM_smoothToH1Compl_mem_image_laplacianDomain
     (I := I) (M := M) g φ v
-
-/-! ## Hypothesis-bearing form of the regularity theorem
-
-We expose the regularity result in hypothesis-bearing form: given a witness
-`w_lift ∈ laplacianDomain g` whose `H1ComplToLp` equals `gradInnerCLM g φ
-u_h`, conclude the membership. This is the canonical form of "the
-gradient inner product has an H¹Compl-lift in `laplacianDomain g`". -/
 
 /-- **Hypothesis-bearing regularity theorem.** Given `w_lift ∈ H1Compl g`
 in `laplacianDomain g` whose `H1ComplToLp` equals `gradInnerCLM g φ u_h`,
@@ -358,12 +324,6 @@ theorem gradInnerCLM_mem_image_laplacianDomain_from_witness
       Set.image (H1ComplToLp (I := I) (M := M) g)
         (laplacianDomain (I := I) (M := M) g : Set (H1Compl g)) :=
   ⟨w_lift, hw_lift_dom, hw_lift_eq⟩
-
-/-! ## Continuity of the unconditional candidate in the iterated-domain element
-
-We expose the `Lp` norm bound on `gradInnerLaplacianCandidateUnconditional`
-via the triangle inequality on its five summands. This is the foundation
-for the future density argument. -/
 
 /-- The unconditional candidate's `Lp` norm is bounded by the sum of its
 five constituent terms' norms. -/
@@ -417,23 +377,6 @@ theorem gradInnerLaplacianCandidateUnconditional_norm_le
     rw [norm_smul]; simp
   linarith [hstep1, hstep2, hstep3, hstep4, h_smul_ricci, h_smul_hess]
 
-/-! ## Smooth-case identifications of the candidate's individual summands
-
-For smooth `v ∈ SmoothScalar g`, each of the five summands in
-`gradInnerLaplacianCandidateUnconditional g φ (smoothToH1Compl-membership)`
-corresponds to an explicit smooth-Lp class.
-
-* `gradInnerCLM g φ u_h = smoothToLp(g(∇φ, ∇v))` — by
-  `gradInnerCLM_smoothToH1Compl`.
-* `gradInnerCLM g (Δφ) u_h = smoothToLp(g(∇(Δφ), ∇v))` — by the same lemma.
-* `ricciPairingCLM g φ u_h = smoothToLp(Ric(∇φ, ∇v))` — by
-  `ricciPairingCLM_smoothToH1Compl`.
-
-The `gradInnerLapU` and `hessPairingLpOnLapDom` pieces depend on
-`preimageLift` (which is a `Classical.choose` artefact) and on the chart
-atlas; they identify with smooth Lp classes only modulo elements in the
-kernel of `H1ComplToLp`, which complicates the direct identification. -/
-
 /-- Smooth-case identification of `gradInnerCLM g φ` on `smoothToH1Compl`. -/
 lemma gradInnerCLM_smoothToH1Compl_eq_smoothToLp
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
@@ -454,13 +397,6 @@ lemma ricciPairingCLM_smoothToH1Compl_eq_smoothToLp
         (smoothRicciPairingBundle (I := I) (M := M) g φ v) := by
   rw [ricciPairingCLM_smoothToH1Compl]
   rfl
-
-/-! ## The witness construction in the smooth case
-
-For smooth `v ∈ SmoothScalar g`, the regularity theorem's witness `w_lift`
-is `smoothToH1Compl(gradInnerSmoothBundle g φ v) ∈ laplacianDomain g`. The
-key identity `H1ComplToLp w_lift = gradInnerCLM g φ u_h` follows from
-`H1ComplToLp_smoothToH1Compl` and the smooth-case identification above. -/
 
 /-- The smooth witness for the regularity theorem at `u_h := smoothToH1Compl v`:
 the H¹Compl-lift of the smooth scalar `gradInnerSmoothBundle g φ v`. -/
@@ -492,8 +428,6 @@ theorem H1ComplToLp_smoothGradInnerWitness
   rw [H1ComplToLp_smoothToH1Compl]
   rw [gradInnerCLM_smoothToH1Compl_eq_smoothToLp]
 
-/-! ## Repackaging the smooth-case regularity theorem via the explicit witness -/
-
 /-- **Smooth-case regularity with explicit witness**: for smooth
 `v ∈ SmoothScalar g`, the gradient inner product
 `gradInnerCLM g φ (smoothToH1Compl v)` is the `H1ComplToLp` image of the
@@ -506,15 +440,6 @@ theorem gradInnerCLM_eq_H1ComplToLp_smoothWitness
       H1ComplToLp (I := I) (M := M) g
         (smoothGradInnerWitness (I := I) (M := M) g φ v) := by
   rw [H1ComplToLp_smoothGradInnerWitness]
-
-/-! ## Linkage to the iterated-closure equivalence
-
-The headline regularity theorem is part of an equivalence with the
-iterated-closure property `smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2`,
-mediated by
-`GradInnerLpIdentity.smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image`.
-We use this equivalence to package the smooth-case result as the
-iterated-closure property for the smooth case. -/
 
 /-- **Smooth-case iterated closure**: for smooth `v ∈ SmoothScalar g`,
 `smoothMulH1Compl g φ (smoothToH1Compl v) ∈ laplacianDomainPow g 2`. This is
@@ -531,13 +456,6 @@ theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_via
     (smoothToH1Compl_mem_laplacianDomainPow_two (I := I) (M := M) g v)]
   exact gradInnerCLM_mem_image_laplacianDomain_smooth
     (I := I) (M := M) g φ v
-
-/-! ## The headline regularity theorem for `u_h ∈ laplacianDomainPow g 2`
-
-We expose the headline form of the regularity theorem with the
-non-smooth case handled hypothetically: given a witness construction for
-arbitrary `u_h ∈ laplacianDomainPow g 2`, conclude the membership. The
-smooth case is fully discharged below. -/
 
 /-- **Regularity theorem, hypothesis-bearing form.** Given a witness
 construction `mkWitness` producing an H¹Compl-lift in `laplacianDomain g`
@@ -570,13 +488,6 @@ theorem exists_witness_smoothToH1Compl
   · exact smoothGradInnerWitness_mem_laplacianDomain (I := I) (M := M) g φ v
   · exact H1ComplToLp_smoothGradInnerWitness (I := I) (M := M) g φ v
 
-/-! ## The variational identity as a hypothesis-bearing theorem
-
-The variational identity for the unconditional candidate states that the
-Lp class `gradInnerCLM g φ u_h` is the `H1ComplToLp` image of the resolvent
-of `gradInnerLaplacianCandidateUnconditional g φ hu_h`. This is the
-canonical form of the regularity theorem at the resolvent level. -/
-
 /-- **The unconditional candidate's resolvent image equals `gradInnerCLM g φ u_h`,
 given the variational identity hypothesis.** When the Lp-class variational
 identity holds (i.e. `gradInnerCLM g φ u_h.coeFn` has weak Laplacian
@@ -599,20 +510,8 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_of_variational
   refine ⟨resolvent (I := I) (M := M) g
     (gradInnerLaplacianCandidateUnconditional (I := I) (M := M) g φ hu_h),
     ?_, hvar_id.symm⟩
-  -- The resolvent image is in the Laplacian domain by definition.
   exact (laplacianDomain_mem_iff (I := I) (M := M) g).mpr
     ⟨gradInnerLaplacianCandidateUnconditional (I := I) (M := M) g φ hu_h, rfl⟩
-
-/-! ## The variational identity at the smooth Lp level
-
-For smooth `v`, the variational identity is verified by an explicit
-construction. For general `u_h ∈ laplacianDomainPow g 2`, the identity is
-exposed as a hypothesis (`hvar_id` in
-`gradInnerCLM_eq_H1ComplToLp_resolvent_of_variational`). The non-smooth
-case will be discharged by follow-up work via the polarised
-Bochner-Weitzenböck identity at the pointwise level, lifted to an Lp
-identity via the smoothToLp linear map, and extended to non-smooth `u_h`
-by density of smooth scalars in `H1Compl g`. -/
 
 /-- For smooth `v`, the smooth witness `smoothGradInnerWitness g φ v`
 satisfies the smooth-case resolvent characterisation: it is the resolvent
@@ -681,14 +580,6 @@ theorem gradInnerCLM_smoothToH1Compl_eq_resolventL2_smoothCandidate
   rw [gradInnerCLM_smoothToH1Compl_eq_H1ComplToLp_resolvent_smoothCandidate]
   rfl
 
-/-! ## Polarisation of the chart Hessian Frobenius squared
-
-For smooth `(φ, v)`, the polarisation identity expresses the cross-term
-`hessPairingChart g φ v b` via the polarisation of
-`chartHessFrobeniusSq`. This is simply a rearrangement of the definition
-of `hessPairingChart` and does not require any linearity-in-`f`
-argument. -/
-
 /-- Restating the polarisation defining `hessPairingChart`:
 
 ```
@@ -713,18 +604,6 @@ theorem chartHessFrobeniusSq_polar_eq_hessPairing
         chartHessFrobeniusSq (I := I) g (fun x : M => φ x - v x) b =
       4 * hessPairingChart (I := I) g φ v b :=
   (hessPairingChart_polar (I := I) (M := M) g φ v b).symm
-
-/-! ## Pointwise polarisation of `g.inner` in tangent vectors
-
-For arbitrary tangent vectors `u, w ∈ T_b M`, the bilinearity-in-vectors
-of `g.inner` together with the symmetry of `g` gives the polarisation
-
-```
-g.inner b (u + w) (u + w) - g.inner b (u - w) (u - w) = 4 · g.inner b u w.
-```
-
-This is a pure tangent-bundle calculation; we use it as a building block
-for the polarised Bochner identity. -/
 
 /-- Pointwise polarisation of `g.inner` in tangent vectors: for any two
 tangent vectors `u, w ∈ T_b M`,
@@ -788,15 +667,6 @@ theorem ricciTensor_polar
     ring
   rw [hp1, hp2, h_sym]
   ring
-
-/-! ## The unconditional smooth-case candidate identification target
-
-The non-smooth case of the regularity theorem needs the unconditional
-candidate to identify with `smoothToLp((1-Δ_classical)(g(∇φ, ∇v)))` in the
-smooth case. This is the smooth case of the polarised Bochner-Weitzenböck
-identity.
-
-We package the target statement here (without proof) for later use. -/
 
 /-- **Smooth-case candidate target** (to be proved). For smooth `v` with
 `u_h := smoothToH1Compl v` and `hu_h :=

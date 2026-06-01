@@ -69,22 +69,6 @@ theorem connection_laplacian_l2_maximal_regularity
             timeL2 (TensorL2 r s g) T,
           ∀ f : timeL2 (TensorL2 r s g) T,
             (SolOp f).deriv = LapField (SolField f) + f := by
-  -- The substantive content is the De Simon maximal-regularity theorem:
-  -- existence of a Duhamel solution operator with the two-derivative-gain
-  -- bound (companion `H²` field), the initial-condition vanishing, and
-  -- the inhomogeneous-heat-equation reproducing identity
-  -- `∂_t u = Δ_∇ u + f`. The fourth clause excludes the trivial witness
-  -- `SolOp = 0` (which forces `f = 0` for all `f`, false in general).
-  --
-  -- The full proof is the predicate-free port of
-  -- `Analysis/Parabolic/MaximalRegularity/Operator.lean` together with
-  -- the `H²(POU)` identification from the intrinsic-spectral pipeline
-  -- (`Hebey-block` chart-Sobolev ↔ intrinsic-∇ bridge identifies the
-  -- spectral resolvent's range with `TensorPouSobolevHilbert g r s 2`,
-  -- supplying the bounded `H²(POU) →L L²` rough-Laplacian companion
-  -- operator `LapField`). It depends on the predicate-free eigenbasis
-  -- `α.4`, the predicate-free Hebey-block bridge, and the per-mode
-  -- Duhamel scalar `L²` estimates of `PerModeL2`.
   sorry
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

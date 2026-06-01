@@ -59,8 +59,6 @@ variable
   (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
-/-! ### Pointwise definition -/
-
 /-- The pointwise partial evaluation of a `(0, s + 1)`-tensor section `T` at a tangent
 vector field `Y`. At a point `b ∈ M`, this is obtained by currying `T b` to a continuous
 linear map `TangentSpace I b →L[ℝ] Tensor0SSpace s I b` and applying it to `Y b`. -/
@@ -84,8 +82,6 @@ theorem tensor0SPartialEval_eq_curriedSection {s : ℕ}
     (Y : Π b : M, TangentSpace I b) (b : M) :
     tensor0SPartialEval I M T Y b = curriedSection I M T b (Y b) := rfl
 
-/-! ### Evaluation formula -/
-
 /-- The defining identity for the partial evaluation: evaluating
 `tensor0SPartialEval T Y b` on `(v₁, …, v_s)` (through `Tensor0SSpace.toModel`) reproduces
 `T b` applied to the `Fin.cons (Y b) (v₁, …, v_s)` tuple. -/
@@ -99,8 +95,6 @@ theorem tensor0SPartialEval_toModel_apply {s : ℕ}
     Tensor0SSpace.toModel (T b) (Fin.cons (Y b) v)
   exact TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
     (T := T b) (v0 := Y b) (vs := v)
-
-/-! ### Linearity in the tensor argument -/
 
 /-- The partial evaluation is additive in the tensor argument (pointwise). -/
 theorem tensor0SPartialEval_add_T {s : ℕ}
@@ -141,8 +135,6 @@ theorem tensor0SPartialEval_zero_T {s : ℕ}
   rw [map_zero (tensor0S_curry (I := I) (M := M) s b)]
   rfl
 
-/-! ### Linearity in the vector-field argument -/
-
 /-- The partial evaluation is additive in the vector-field argument (pointwise). -/
 theorem tensor0SPartialEval_add_Y {s : ℕ}
     (T : Π b : M, Tensor0SSpace (s + 1) I b)
@@ -179,17 +171,6 @@ theorem tensor0SPartialEval_zero_Y {s : ℕ}
       (0 : TangentSpace I b) = 0
   exact ContinuousLinearMap.map_zero _
 
-/-! ### Smoothness
-
-From a smooth `(0, s + 1)`-tensor section `T` and a smooth tangent vector field `Y`, the
-partial evaluation `tensor0SPartialEval T Y` is a smooth `(0, s)`-tensor section.
-
-The proof factors through the bundle/curry bridge
-`contMDiff_curriedSection_iff_section`: the curried section
-`b ↦ tensor0S_curry s b (T b)` is smooth into the Hom-bundle iff `T` is smooth, and then
-applying a smooth Hom-bundle section to a smooth vector field gives a smooth
-`Tensor0SSpace s`-section via `ContMDiff.clm_bundle_apply`. -/
-
 /-- Smoothness of the partial evaluation. If the bundle-topology section associated to `T`
 is smooth and the bundle-topology section associated to `Y` is smooth, then so is the
 partial-evaluation bundle-topology section. -/
@@ -205,13 +186,11 @@ theorem contMDiff_tensor0SPartialEval {s : ℕ}
       (fun b : M => TotalSpace.mk' (Tensor0SModel s ℝ E)
         (E := fun x : M => Tensor0SSpace s I x) b
         (tensor0SPartialEval I M T Y b)) := by
-  -- Curried section is smooth, by the bridge.
   have hCurried : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] Tensor0SModel s ℝ E)) ∞
       (fun b : M => TotalSpace.mk' (E →L[ℝ] Tensor0SModel s ℝ E)
         (E := fun y : M => TangentSpace I y →L[ℝ] Tensor0SSpace s I y)
         b (curriedSection I M T b)) :=
     (contMDiff_curriedSection_iff_section (I := I) (M := M) T).mp hT
-  -- Apply the smooth Hom-bundle section to the smooth vector field `Y`.
   have hApplied : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel s ℝ E)) ∞
       (fun b : M => TotalSpace.mk' (Tensor0SModel s ℝ E)
         (E := fun x : M => Tensor0SSpace s I x) b
@@ -223,10 +202,7 @@ theorem contMDiff_tensor0SPartialEval {s : ℕ}
       (IM := I) (IB := I)
       (b := id) (ϕ := fun b : M => curriedSection I M T b)
       (v := fun b : M => Y b) hCurried hY
-  -- Conclude — the partial evaluation is, pointwise, exactly `curriedSection T b (Y b)`.
   exact hApplied
-
-/-! ### Convenience packaging from smooth-section types -/
 
 /-- Smoothness of the partial evaluation, packaged from a smooth `(0, s + 1)`-tensor section
 `T` (as a `Cₛ^∞⟮…⟯`) and a smooth tangent vector field `Y` (as a `Cₛ^∞⟮…⟯`). -/

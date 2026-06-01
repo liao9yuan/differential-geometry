@@ -85,8 +85,6 @@ open DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualLinearity
 open DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqH1ComplTendsto
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -95,8 +93,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Smooth-scalar difference -/
 
 /-- For two smooth scalars `v₁ v₂ : SmoothScalar g`, their pointwise difference
 packaged as a `SmoothScalar g`. -/
@@ -111,8 +107,6 @@ private lemma smoothScalarSub_toFun
     (v₁ v₂ : SmoothScalar g) :
     (smoothScalarSub v₁ v₂).toFun = fun x => v₁.toFun x - v₂.toFun x := rfl
 
-/-! ## Order monotonicity of `wkpNormChart` from `m+1` down to `1` -/
-
 private lemma wkpNormChart_one_le_succ
     (g : SmoothRiemannianMetric I M) (m : ℕ) (u : M → ℝ) :
     wkpNormChart (I := I) (M := M) g 1 2 u ≤
@@ -125,8 +119,6 @@ private lemma wkpNormChart_one_le_succ
           wkpNormChart (I := I) (M := M) g (k + 1 + 1) 2 u :=
         wkpNormChart_le_succ (I := I) (M := M) g (k + 1) 2 u
       exact ih.trans h_step
-
-/-! ## Polymorphic chart-`W^{m+1,2}` smooth-density approximator -/
 
 /-- For a function `u : M → ℝ` in `MemWkpChart g (m+1) 2`, there is a smooth
 approximator at any chart-`W^{m+1,2}` rate `ε > 0`. -/
@@ -232,8 +224,6 @@ theorem smoothApproxSeqWkpM_wkpNormChart_diff_le
       ENNReal.ofReal (1 / ((a : ℝ) + 1)) + ENNReal.ofReal (1 / ((b : ℝ) + 1)) := by
     rw [add_comm]
   exact le_trans h_add (le_of_le_of_eq h_bound1 h_comm)
-
-/-! ## Chart-target `wkpNorm m 2`-Cauchy property of the smooth residual -/
 
 /-- **Chart-target `wkpNorm m 2`-Cauchy property of `smoothFChartResidual` along
 the chart-`W^{m+1,2}` smooth approximator sequence.** -/
@@ -372,11 +362,6 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_wkpM
   have h_simp : C * (2 * (ε / (2 * C))) = ε := by
     field_simp
   rw [h_simp]
-
-/-! ## Manifold-side `H1Compl` convergence
-
-We follow the same chain as in the `m = 2` template, except we feed in
-chart-`W^{m+1,2}` Cauchy and use order monotonicity from `m+1` down to `1`. -/
 
 /-- `SmoothScalar g`-Cauchy property of `smoothApproxSeqWkpM`. -/
 private theorem smoothApproxSeqWkpM_cauchy_smoothScalar
@@ -693,8 +678,6 @@ private theorem smoothToLp_smoothApproxSeqWkpM_tendsto
     exact this
   linarith
 
-/-! ## Identification of the `H1Compl` limit -/
-
 set_option maxHeartbeats 800000 in
 private lemma inner_smoothToH1Compl_limit_eq_u_h_wkpM
     (g : SmoothRiemannianMetric I M) (m : ℕ)
@@ -793,8 +776,6 @@ theorem smoothApproxSeqWkpM_tendsto_h1Compl
     ((denseRange_smoothToH1Compl (I := I) (M := M) g).equalizer
       hL_cont hR_cont hLR_smooth) w
 
-/-! ## `eLpNorm ≤ wkpNorm m 2` bridge (order-zero term) -/
-
 /-- The order-zero term `eLpNorm u 2 (volume.restrict Ω)` is bounded by
 `wkpNorm m 2 u Ω` for any `m ≥ 0`. -/
 private lemma eLpNorm_le_wkpNorm_m_two
@@ -838,8 +819,6 @@ private lemma eLpNorm_tendsto_zero_of_wkpNorm_m_two_tendsto_zero
     (fun _ => zero_le _)
     (fun n => eLpNorm_le_wkpNorm_m_two m (fun y => u n y - F_lim y) Ω)
 
-/-! ## Mutual absolute continuity of the two restricted measures -/
-
 private lemma volume_restrict_chartTarget_absolutelyContinuous_weighted
     (g : SmoothRiemannianMetric I M) (α : M) :
     (volume : Measure EuclN).restrict
@@ -875,8 +854,6 @@ private lemma volume_restrict_chartTarget_absolutelyContinuous_weighted
     densityOnEuclid_pos (I := I) g α hy_chart
   exact (ENNReal.ofReal_pos.mpr h_pos).ne'
 
-/-! ## AEStronglyMeasurable witnesses -/
-
 private lemma smoothFChartResidual_aestronglyMeasurable
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (μ : Measure EuclN) :
@@ -895,8 +872,6 @@ private lemma fChartResidual_aestronglyMeasurable
         (I := I) (M := M) g α u_h) μ := by
   unfold DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fChartResidual
   exact (Lp.stronglyMeasurable _).aestronglyMeasurable.mono_measure (le_refl _)
-
-/-! ## Subsequence-extraction lemmas -/
 
 private lemma exists_subseq_ae_volume_restrict
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -980,8 +955,6 @@ private lemma exists_subseq_ae_weighted_restrict
       h_aesm_n hF_aesm h_tendsto
   exact h_tim.exists_seq_tendsto_ae
 
-/-! ## Identification of the chart-target `wkpNorm m 2`-limit -/
-
 /-- **Identification of the chart-target `wkpNorm m 2`-limit with `fChartResidual`.** -/
 theorem smoothApproxSeqWkpM_smoothFChartResidual_limit_eq_fChartResidual_wkpM
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ)
@@ -1026,8 +999,6 @@ theorem smoothApproxSeqWkpM_smoothFChartResidual_limit_eq_fChartResidual_wkpM
         ((chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α)) :=
     fChartResidual_aestronglyMeasurable (I := I) (M := M) g α u_h _
-  -- Step 1: chart-target `wkpNorm m 2`-tendsto ⇒ `eLpNorm 2`-tendsto on
-  -- `volume.restrict chartTarget`.
   have h_eLpNorm_volume_tendsto :
       Tendsto (fun n =>
         eLpNorm (fun y =>
@@ -1043,12 +1014,10 @@ theorem smoothApproxSeqWkpM_smoothFChartResidual_limit_eq_fChartResidual_wkpM
       (F_lim := F_lim)
       (Ω := chartTargetEuclid (I := I) (M := M) α)
       h_wkp_tendsto
-  -- Step 2: Manifold-side H1Compl-convergence.
   have h_h1Compl_tendsto : Tendsto (fun n =>
       smoothToH1Compl (I := I) (M := M) g (v n))
       atTop (𝓝 u_h) :=
     smoothApproxSeqWkpM_tendsto_h1Compl (I := I) (M := M) g m hu_chart
-  -- Step 3: Lp tendsto on weighted measure.
   have h_eLpNorm_weighted_tendsto :
       Tendsto (fun n =>
         eLpNorm (fun y =>
@@ -1061,11 +1030,9 @@ theorem smoothApproxSeqWkpM_smoothFChartResidual_limit_eq_fChartResidual_wkpM
         atTop (𝓝 0) :=
     smoothFChartResidual_tendsto_fChartResidual_lp_weighted
       (I := I) (M := M) g α v h_h1Compl_tendsto
-  -- Step 4: Extract a.e.-convergent subseq.
   obtain ⟨σ, hσ_strict, hσ_ae⟩ :=
     exists_subseq_ae_volume_restrict (I := I) (M := M) g α
       (v := v) (F_lim := F_lim) hF_lim_aesm_volume h_eLpNorm_volume_tendsto
-  -- Step 5: Compose subseq.
   have h_eLpNorm_weighted_subseq :
       Tendsto (fun n =>
         eLpNorm (fun y =>
@@ -1083,7 +1050,6 @@ theorem smoothApproxSeqWkpM_smoothFChartResidual_limit_eq_fChartResidual_wkpM
       (F := DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fChartResidual
         (I := I) (M := M) g α u_h)
       hF_res_aesm_weighted h_eLpNorm_weighted_subseq
-  -- Step 6: combine via mutual absolute continuity and uniqueness of a.e. limits.
   have h_volume_ae_σ_τ :
       ∀ᵐ y ∂((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)),
@@ -1112,8 +1078,6 @@ theorem smoothApproxSeqWkpM_smoothFChartResidual_limit_eq_fChartResidual_wkpM
     with y h_to_Flim h_to_fChart
   exact tendsto_nhds_unique h_to_Flim h_to_fChart
 
-/-! ## Chart-target `MemWkp m 2` of `fChartResidual` unconditionally -/
-
 /-- **Unconditional `MemWkp m 2` of `fChartResidual`** given chart-`H^{m+1}` of
 `u_h.coeFn`. -/
 theorem fChartResidual_memWkp_m
@@ -1134,13 +1098,6 @@ theorem fChartResidual_memWkp_m
       (I := I) (M := M) g α m hu_chart)
     (smoothApproxSeqWkpM_smoothFChartResidual_limit_eq_fChartResidual_wkpM
       (I := I) (M := M) g α m hu_chart)
-
-/-! ## Decomposition `base.f_chart =ᵐ fChartPiecePreimage + fChartResidual`
-
-We generalise the m=2-specific decomposition (originally stated under
-`u_h ∈ laplacianDomainPow g 2`) to arbitrary `u_h ∈ laplacianDomain g`. The
-decomposition only relies on the algebraic structure of `fHLeibniz`, not on
-any auxiliary regularity hypothesis. -/
 
 /-- The chart-pushed `(1-Δ)u_h` piece (canonical chart-pushed function with
 the partition-of-unity weight, applied to the resolvent preimage). -/
@@ -1283,8 +1240,6 @@ private lemma base_f_chart_ae_eq_piecePreimage_add_residual_general_weighted
               (fHLeibnizResidualLp (I := I) (M := M) g α u_h) :
               Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
                 (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) := by
-    -- We follow the m=2 template (chartPushedRawLpFromLp distributes over sums
-    -- on the chart-pulled weighted measure).
     have h_FG_coeFn := chartPushedRawLpFromLp_coeFn (I := I) (M := M) g α
       (smoothMulLpRhoPreimageGeneral (I := I) (M := M) g α hu_h_lapdom +
         fHLeibnizResidualLp (I := I) (M := M) g α u_h)
@@ -1369,8 +1324,6 @@ lemma base_f_chart_ae_eq_piecePreimage_add_residual_general
     (base_f_chart_ae_eq_piecePreimage_add_residual_general_weighted
       (I := I) (M := M) g α hu_h_lapdom)
 
-/-! ## `fChartPiecePreimageGeneral` chart-`MemWkp m 2` from MemWkpChart hypothesis -/
-
 /-- Given chart-`H^m` of the preimage representative `((1-Δ)u_h).coeFn`, the
 chart-pushed piece lies in `MemWkp m 2`. -/
 lemma fChartPiecePreimageGeneral_memWkp_of_memWkpChart
@@ -1387,8 +1340,6 @@ lemma fChartPiecePreimageGeneral_memWkp_of_memWkpChart
   classical
   unfold fChartPiecePreimageGeneral
   exact h_rhs α
-
-/-! ## Final headline -/
 
 /-- **Polymorphic-in-`m` unconditional chart-target `MemWkp m 2` of `base.f_chart`**.
 
@@ -1425,16 +1376,12 @@ theorem base_f_chart_memWkp_m
         hu_h_lapdom).f_chart
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- Step 1: a.e. decomposition.
   have h_decomp := base_f_chart_ae_eq_piecePreimage_add_residual_general
     (I := I) (M := M) g α hu_h_lapdom
-  -- Step 2: fChartPiecePreimageGeneral ∈ MemWkp m 2.
   have h_piece1_memWkp := fChartPiecePreimageGeneral_memWkp_of_memWkpChart
     (I := I) (M := M) g α m hu_h_lapdom h_chart_H_m_RHS
-  -- Step 3: fChartResidual ∈ MemWkp m 2 unconditionally.
   have h_residual_memWkp := fChartResidual_memWkp_m
     (I := I) (M := M) g α m h_chart_H_m_plus_1_u
-  -- Step 4: sum is in MemWkp m 2.
   have hΩ_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have hp_one : (1 : ℝ≥0∞) ≤ 2 := by norm_num
@@ -1447,7 +1394,6 @@ theorem base_f_chart_memWkp_m
         (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.add hp_one hΩ_open
       h_piece1_memWkp h_residual_memWkp
-  -- Step 5: transfer via a.e. equality.
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
     hp_one hΩ_open h_decomp.symm).mp h_sum_memWkp
 

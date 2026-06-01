@@ -90,13 +90,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpa
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Chart metric-difference jet seminorms
-
-The chart `0`-jet difference magnitude is already `chartGramDiffSup` (from the
-inverse-Gram leaf).  We add the first- and second-partial aggregates and the
-`1`/`2`-jet sums.  All are entry-`L¹` sums over the relevant index ranges, so each
-individual entry difference is bounded by the corresponding seminorm. -/
-
 /-- The single `(a, l, b)`-entry of the chart first-partial difference:
 `|∂_a G_{lb}(g₁)(y) − ∂_a G_{lb}(g₂)(y)|`. -/
 def gramPartialDiffEntry (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E)
@@ -222,13 +215,6 @@ lemma chartGramPartial2DiffSup_le_jet2
       chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y :=
   le_add_of_nonneg_left (chartMetricJet1DiffSup_nonneg _ _ _ _)
 
-/-! ## Chart-target / base-set bookkeeping
-
-A point `y` in the interior of the chart target gives a manifold point
-`x_y := (extChartAt I α).symm y` lying in the chart base set; this is the
-positivity context for the inverse-Gram matrix and the differentiability context
-for the metric partials. -/
-
 /-- For `y` in the interior of the chart target, the corresponding manifold point
 lies in the chart base set. -/
 lemma symm_mem_baseSet_of_mem_interior_target
@@ -240,14 +226,6 @@ lemma symm_mem_baseSet_of_mem_interior_target
   rw [extChartAt_source_eq_chartAt_source (I := I)] at hsource
   rw [trivializationAt_baseSet_eq_chartAt_source]
   exact hsource
-
-/-! ## Smoothness of the metric partials on the chart-target interior
-
-The first partials of `chartGramOnE` and `chartInvGramOnE`, and the iterated
-second partials of `chartGramOnE`, are `C^∞` on the interior of the chart target.
-These are derived from the public smoothness of `chartGramOnE` / `chartInvGramOnE`
-(`chartGramOnE_contDiffOn`, `chartInvGramOnE_contDiffOn`) by differentiating once
-or twice on the open interior. -/
 
 /-- The first partial of a function that is `C^∞` on the (open) chart-target
 interior is again `C^∞` there. -/
@@ -290,13 +268,6 @@ private lemma partial2_chartGramOnE_contDiffOn_int
   partialDeriv_contDiffOn_interior_of_contDiffOn (I := I) α
     (partial_chartGramOnE_contDiffOn_int (I := I) g α a l b) c
 
-/-! ## Closed-form for the Christoffel symbol in terms of `chartInvGramOnE`
-
-The chart Christoffel symbol is `½ ∑_l G^{kl}(g) · S^g_{ij,l}`, where
-`G^{kl}(g) = chartInvGramOnE g k l` (definitionally equal to the
-`chartInvGramMatrix` entry at the corresponding manifold point) and `S^g_{ij,l}`
-is the metric-partial bracket. -/
-
 /-- The metric-partial bracket `S^g_{ij,l}(y) = ∂_i G_{lj} + ∂_j G_{li} − ∂_l G_{ij}`
 appearing in the Christoffel formula. -/
 def gramBracket (g : SmoothRiemannianMetric I M) (α : M)
@@ -314,13 +285,6 @@ lemma chartChristoffel_eq_sum_invGramOnE_bracket
         chartInvGramOnE (I := I) g α k l y * gramBracket (I := I) g α i j l y := by
   rw [chartChristoffel_def]
   rfl
-
-/-! ## Uniform bounds on `K` for the building blocks
-
-Each ingredient of the Christoffel formula — inverse-Gram entries, the
-`gramBracket`, the first partials of inverse-Gram, and the second partials of the
-Gram entries — is continuous on the interior of the chart target, hence uniformly
-bounded on a compact subset.  We package each as a uniform bound on `K`. -/
 
 /-- A continuous real function on the interior of the chart target is uniformly
 bounded (in absolute value) on a compact subset `K`. -/
@@ -407,12 +371,6 @@ private lemma exists_partialDeriv_chartInvGramOnE_bound_on_compact
     (fun p => partial_chartInvGramOnE_contDiffOn_int (I := I) g α p.1.1 p.1.2 p.2) hK hKsub
   exact ⟨C, hC_nn, fun y hy m k l => hC y hy ((m, k), l)⟩
 
-/-! ## Per-point Christoffel difference bound
-
-The difference of products `A₁B₁ − A₂B₂` is `(A₁ − A₂)B₁ + A₂(B₁ − B₂)`; bounding
-each factor by the relevant uniform constant and the relevant jet seminorm gives
-the per-point Christoffel Lipschitz estimate. -/
-
 /-- **Per-point Christoffel Lipschitz bound.**  Let `g₁, g₂` be smooth Riemannian
 metrics, `α` a chart base point, and `y` in the interior of the chart target.
 If the inverse-Gram entries of `g₂` are bounded by `M_b` on `K`, the
@@ -440,25 +398,18 @@ theorem chartChristoffel_sub_abs_le
       (1 / 2 : ℝ) * (Module.finrank ℝ E : ℝ) * (Cinv * P + 3 * M_b) *
         chartMetricJet1DiffSup (I := I) (M := M) g₁ g₂ α y := by
   classical
-  -- Rewrite both Christoffel symbols in product form.
   rw [chartChristoffel_eq_sum_invGramOnE_bracket, chartChristoffel_eq_sum_invGramOnE_bracket]
-  -- Factor the ½ out of the difference.
   rw [← mul_sub, ← Finset.sum_sub_distrib, abs_mul, abs_of_nonneg (by norm_num : (0:ℝ) ≤ 1/2)]
   set jet1 : ℝ := chartMetricJet1DiffSup (I := I) (M := M) g₁ g₂ α y with hjet1_def
   have hjet1_nn : 0 ≤ jet1 := chartMetricJet1DiffSup_nonneg _ _ _ _
-  -- After the earlier rewrites the goal is
-  -- `(1/2) * |∑ …| ≤ (1/2) * n * (Cinv·P + 3·M_b) * jet1`.
   rw [show (1 / 2 : ℝ) * (Module.finrank ℝ E : ℝ) * (Cinv * P + 3 * M_b) * jet1 =
         (1 / 2 : ℝ) * ((Module.finrank ℝ E : ℝ) * ((Cinv * P + 3 * M_b) * jet1)) by ring]
   refine mul_le_mul_of_nonneg_left ?_ (by norm_num : (0:ℝ) ≤ 1/2)
-  -- `|∑ …| ≤ ∑ |…| ≤ ∑ (Cinv·P + 3·M_b)·jet1 = n · ((Cinv·P + 3·M_b)·jet1)`.
   refine le_trans (Finset.abs_sum_le_sum_abs _ _) ?_
   refine le_trans (Finset.sum_le_sum
     (g := fun _ : Fin (Module.finrank ℝ E) => (Cinv * P + 3 * M_b) * jet1)
     (fun l _ => ?_)) ?_
-  · -- The per-term bound, with the goal's own `i j k l` in scope.
-    -- `A₁B₁ − A₂B₂ = (A₁ − A₂)B₁ + A₂(B₁ − B₂)`.
-    have hsplit :
+  · have hsplit :
         chartInvGramOnE (I := I) g₁ α k l y * gramBracket (I := I) g₁ α i j l y -
           chartInvGramOnE (I := I) g₂ α k l y * gramBracket (I := I) g₂ α i j l y =
         (chartInvGramOnE (I := I) g₁ α k l y - chartInvGramOnE (I := I) g₂ α k l y) *
@@ -467,21 +418,16 @@ theorem chartChristoffel_sub_abs_le
             (gramBracket (I := I) g₁ α i j l y - gramBracket (I := I) g₂ α i j l y) := by
       ring
     rw [hsplit]
-    -- Triangle inequality, then bound the two summands.
     refine (abs_add_le _ _).trans ?_
     have hbracketDiff :
         |gramBracket (I := I) g₁ α i j l y - gramBracket (I := I) g₂ α i j l y| ≤
           3 * chartGramPartialDiffSup (I := I) (M := M) g₁ g₂ α y := by
-      -- `gramBracket` is a sum/difference of three first-partials; each entry diff
-      -- is bounded by `chartGramPartialDiffSup`.
       have h1 := partialDeriv_chartGramOnE_sub_abs_le_partialDiffSup (I := I) (M := M)
         g₁ g₂ α y i l j
       have h2 := partialDeriv_chartGramOnE_sub_abs_le_partialDiffSup (I := I) (M := M)
         g₁ g₂ α y j l i
       have h3 := partialDeriv_chartGramOnE_sub_abs_le_partialDiffSup (I := I) (M := M)
         g₁ g₂ α y l i j
-      -- Name the three signed differences `d1, d2, d3`; the bracket difference is
-      -- `d1 + d2 - d3`, and `|d1 + d2 - d3| ≤ |d1| + |d2| + |d3|`.
       set d1 : ℝ := partialDeriv (E := E) i (chartGramOnE (I := I) g₁ α l j) y -
         partialDeriv (E := E) i (chartGramOnE (I := I) g₂ α l j) y with hd1
       set d2 : ℝ := partialDeriv (E := E) j (chartGramOnE (I := I) g₁ α l i) y -
@@ -504,7 +450,6 @@ theorem chartChristoffel_sub_abs_le
               chartGramPartialDiffSup (I := I) (M := M) g₁ g₂ α y :=
             add_le_add (add_le_add h1 h2) h3
         _ = 3 * chartGramPartialDiffSup (I := I) (M := M) g₁ g₂ α y := by ring
-    -- First summand: |(A₁−A₂) B₁| ≤ (Cinv·chartGramDiffSup) · P.
     have hsum1 :
         |(chartInvGramOnE (I := I) g₁ α k l y - chartInvGramOnE (I := I) g₂ α k l y) *
             gramBracket (I := I) g₁ α i j l y| ≤
@@ -512,14 +457,12 @@ theorem chartChristoffel_sub_abs_le
       rw [abs_mul]
       refine mul_le_mul (hCinv k l) (hP i j l) (abs_nonneg _)
         (mul_nonneg hCinv_nn (chartGramDiffSup_nonneg _ _ _ _))
-    -- Second summand: |A₂ (B₁−B₂)| ≤ M_b · (3·chartGramPartialDiffSup).
     have hsum2 :
         |chartInvGramOnE (I := I) g₂ α k l y *
             (gramBracket (I := I) g₁ α i j l y - gramBracket (I := I) g₂ α i j l y)| ≤
           M_b * (3 * chartGramPartialDiffSup (I := I) (M := M) g₁ g₂ α y) := by
       rw [abs_mul]
       refine mul_le_mul (hMb k l) hbracketDiff (abs_nonneg _) hMb_nn
-    -- Combine and dominate both pieces by `(Cinv·P + M_b)·jet1`.
     refine (add_le_add hsum1 hsum2).trans ?_
     have hgram_le : chartGramDiffSup (I := I) (M := M) g₁ g₂ α ((extChartAt I α).symm y) ≤
         jet1 := chartGramDiffSup_le_jet1 (I := I) (M := M) g₁ g₂ α y
@@ -533,10 +476,7 @@ theorem chartChristoffel_sub_abs_le
             exact mul_le_mul_of_nonneg_left hgram_le hCinv_nn
           · exact mul_le_mul_of_nonneg_left hpartial_le hMb_nn
       _ = (Cinv * P + 3 * M_b) * jet1 := by ring
-  · -- `∑_{l} (Cinv·P + 3·M_b)·jet1 = n · ((Cinv·P + 3·M_b)·jet1)`.
-    simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, le_refl]
-
-/-! ## Uniform-over-compact Christoffel headline -/
+  · simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, le_refl]
 
 /-- **Uniform Lipschitz dependence of the chart Christoffel symbols on the chart
 `1`-jet of the metric difference, over a compact subset of the chart-target
@@ -562,7 +502,6 @@ theorem exists_chartChristoffel_lipschitz_on_compact
       |chartChristoffel (I := I) g₁ α i j k y - chartChristoffel (I := I) g₂ α i j k y| ≤
         C * chartMetricJet1DiffSup (I := I) (M := M) g₁ g₂ α y := by
   classical
-  -- The manifold-side compact set `K' := symm '' K ⊆ chart source`.
   have hKsub_target : K ⊆ (extChartAt I α).target := hKsub.trans interior_subset
   set K' : Set M := (extChartAt I α).symm '' K with hK'_def
   have hK'_compact : IsCompact K' :=
@@ -572,16 +511,12 @@ theorem exists_chartChristoffel_lipschitz_on_compact
     have hsource : (extChartAt I α).symm y ∈ (extChartAt I α).source :=
       (extChartAt I α).map_target (hKsub_target hyK)
     rwa [extChartAt_source_eq_chartAt_source (I := I)] at hsource
-  -- Inverse-Gram perturbation constant `Cinv` on `K'`.
   obtain ⟨Cinv, hCinv_pos, hCinv⟩ :=
     exists_chartInvGramMatrix_lipschitz_on_compact (I := I) (M := M) g₁ g₂ α hK'_compact hK'_sub
-  -- Uniform inverse-Gram entry bound `M_b` for `g₂` on `K`.
   obtain ⟨M_b, hMb_nn, hMb⟩ :=
     exists_chartInvGramOnE_bound_on_compact (I := I) g₂ α hK hKsub
-  -- Uniform `gramBracket` bound `P` for `g₁` on `K`.
   obtain ⟨P, hP_nn, hP⟩ :=
     exists_gramBracket_bound_on_compact (I := I) g₁ α hK hKsub
-  -- The constant.
   refine ⟨(1 / 2 : ℝ) * (Module.finrank ℝ E : ℝ) * (Cinv * P + 3 * M_b) + 1, ?_, ?_⟩
   · have hnn : 0 ≤ (1 / 2 : ℝ) * (Module.finrank ℝ E : ℝ) * (Cinv * P + 3 * M_b) := by
       refine mul_nonneg (mul_nonneg (by norm_num) (by positivity)) ?_
@@ -589,29 +524,20 @@ theorem exists_chartChristoffel_lipschitz_on_compact
       linarith
     linarith
   intro y hy i j k
-  -- The per-point bound with the uniform constants.
   have hxy_mem : (extChartAt I α).symm y ∈ K' := ⟨y, hy, rfl⟩
-  -- `hCinv` at `x_y`, rewritten through `chartInvGramOnE`.
   have hCinv' : ∀ k l : Fin (Module.finrank ℝ E),
       |chartInvGramOnE (I := I) g₁ α k l y - chartInvGramOnE (I := I) g₂ α k l y| ≤
         Cinv * chartGramDiffSup (I := I) (M := M) g₁ g₂ α ((extChartAt I α).symm y) := by
     intro k l
     have h := hCinv ((extChartAt I α).symm y) hxy_mem k l
-    -- `chartInvGramOnE g α k l y = chartInvGramMatrix g α (symm y) k l` definitionally.
     simpa only [chartInvGramOnE_def] using h
   have h_pt := chartChristoffel_sub_abs_le (I := I) (M := M) g₁ g₂ α
     hP_nn hMb_nn (fun k l => hMb y hy k l) (fun i j l => hP y hy i j l)
     hCinv' hCinv_pos.le i j k
-  -- Enlarge the constant.
   have hjet1_nn : 0 ≤ chartMetricJet1DiffSup (I := I) (M := M) g₁ g₂ α y :=
     chartMetricJet1DiffSup_nonneg _ _ _ _
   refine h_pt.trans ?_
   refine mul_le_mul_of_nonneg_right (by linarith) hjet1_nn
-
-/-! ## Differentiability of the Christoffel building blocks
-
-For the Leibniz expansion of `∂_m Γ` we need the inverse-Gram entries and the
-`gramBracket` to be differentiable at points of the chart-target interior. -/
 
 /-- The inverse-Gram entry is differentiable at points of the chart-target
 interior. -/
@@ -642,12 +568,6 @@ private lemma gramBracket_differentiableAt_int
   have h2 := partial_chartGramOnE_differentiableAt_int (I := I) g α j l i hy
   have h3 := partial_chartGramOnE_differentiableAt_int (I := I) g α l i j hy
   exact (h1.add h2).sub h3
-
-/-! ## Leibniz expansion of `∂_m Γ`
-
-`∂_m Γ^k_{ij}(g)(y) = ½ ∑_l [ (∂_m G^{kl}) · S_{ij,l} + G^{kl} · (∂_m S_{ij,l}) ]`,
-the product rule applied to each summand of the Christoffel formula.  The factor
-`∂_m S_{ij,l}` is the second-partial bracket `gramBracketDeriv`. -/
 
 /-- The derivative `∂_m S_{ij,l}(y) = ∂_m∂_i G_{lj} + ∂_m∂_j G_{li} − ∂_m∂_l G_{ij}`
 of the `gramBracket`. -/
@@ -688,7 +608,6 @@ theorem partialDeriv_chartChristoffel_eq
           chartInvGramOnE (I := I) g α k l y *
             gramBracketDeriv (I := I) g α m i j l y) := by
   classical
-  -- Rewrite `chartChristoffel` as `½ ∑_l (G^{kl} · S_{ij,l})`.
   have heq : chartChristoffel (I := I) g α i j k =
       fun z : E => (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
         chartInvGramOnE (I := I) g α k l z * gramBracket (I := I) g α i j l z := by
@@ -699,7 +618,6 @@ theorem partialDeriv_chartChristoffel_eq
           (fun z : E => (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
             chartInvGramOnE (I := I) g α k l z * gramBracket (I := I) g α i j l z) y from by
     rw [heq]]
-  -- Pull out the constant ½ and differentiate the finite sum.
   have hsum_diff : ∀ l : Fin (Module.finrank ℝ E),
       DifferentiableAt ℝ
         (fun z : E => chartInvGramOnE (I := I) g α k l z * gramBracket (I := I) g α i j l z) y :=
@@ -714,19 +632,11 @@ theorem partialDeriv_chartChristoffel_eq
       (fun l => fun z : E => chartInvGramOnE (I := I) g α k l z * gramBracket (I := I) g α i j l z)
       (fun l _ => hsum_diff l)]
   refine Finset.sum_congr rfl (fun l _ => ?_)
-  -- Product rule for each summand.
   rw [partialDeriv_mul (i := m) (chartInvGramOnE (I := I) g α k l)
       (gramBracket (I := I) g α i j l)
       (chartInvGramOnE_differentiableAt_int (I := I) g α k l hy)
       (gramBracket_differentiableAt_int (I := I) g α i j l hy),
     partialDeriv_gramBracket_eq (I := I) g α m i j l hy]
-
-/-! ## Perturbation bound for the inverse-Gram partial derivative
-
-The first partial of the inverse-Gram entry has the closed form
-`∂_m G^{kl} = −∑_{a,b} G^{ka} G^{bl} ∂_m G_{ab}` (`partialDeriv_chartInvGramOnE_eq`).
-The difference `∂_m G₁^{kl} − ∂_m G₂^{kl}` is therefore a sum of differences of
-triple products, each controlled by the `1`-jet difference seminorm. -/
 
 /-- Elementary majorisation of a difference of triple products:
 `|A₁B₁C₁ − A₂B₂C₂| ≤ |A₁−A₂|·|B₁|·|C₁| + |A₂|·|B₁−B₂|·|C₁| + |A₂|·|B₂|·|C₁−C₂|`. -/
@@ -766,18 +676,14 @@ theorem partialDeriv_chartInvGramOnE_sub_abs_le
       (Module.finrank ℝ E : ℝ) ^ 2 * (2 * Cinv * M_b * Q + M_b ^ 2) *
         chartMetricJet1DiffSup (I := I) (M := M) g₁ g₂ α y := by
   classical
-  -- Expand both partials via the closed-form inverse-Gram-derivative formula.
   rw [partialDeriv_chartInvGramOnE_eq (I := I) g₁ α y m k l hy,
     partialDeriv_chartInvGramOnE_eq (I := I) g₂ α y m k l hy]
-  -- `(-S₁) - (-S₂) = S₂ - S₁`; rephrase as `S₁ - S₂` (abs is symmetric), then
-  -- distribute the outer sum into a sum of differences.
   rw [neg_sub_neg, abs_sub_comm, ← Finset.sum_sub_distrib]
   set jet1 : ℝ := chartMetricJet1DiffSup (I := I) (M := M) g₁ g₂ α y with hjet1_def
   have hjet1_nn : 0 ≤ jet1 := chartMetricJet1DiffSup_nonneg _ _ _ _
   set gd : ℝ := chartGramDiffSup (I := I) (M := M) g₁ g₂ α ((extChartAt I α).symm y) with hgd
   have hgd_le : gd ≤ jet1 := chartGramDiffSup_le_jet1 (I := I) (M := M) g₁ g₂ α y
   have hgd_nn : 0 ≤ gd := chartGramDiffSup_nonneg _ _ _ _
-  -- Termwise (double sum) bound by `(2·Cinv·M_b·Q + M_b²)·jet1`.
   have hterm : ∀ a : Fin (Module.finrank ℝ E),
       |(∑ b : Fin (Module.finrank ℝ E), chartInvGramOnE (I := I) g₁ α k a y *
             chartInvGramOnE (I := I) g₁ α b l y *
@@ -791,14 +697,12 @@ theorem partialDeriv_chartInvGramOnE_sub_abs_le
     refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
     refine le_trans (Finset.sum_le_sum (g := fun _ : Fin (Module.finrank ℝ E) =>
       (2 * Cinv * M_b * Q + M_b ^ 2) * jet1) (fun b _ => ?_)) ?_
-    · -- Triple-product difference bound.
-      have htp := abs_triple_prod_sub_le
+    · have htp := abs_triple_prod_sub_le
         (chartInvGramOnE (I := I) g₁ α k a y) (chartInvGramOnE (I := I) g₂ α k a y)
         (chartInvGramOnE (I := I) g₁ α b l y) (chartInvGramOnE (I := I) g₂ α b l y)
         (partialDeriv (E := E) m (chartGramOnE (I := I) g₁ α a b) y)
         (partialDeriv (E := E) m (chartGramOnE (I := I) g₂ α a b) y)
       refine htp.trans ?_
-      -- Bound the three terms.
       have hC_ka : |chartInvGramOnE (I := I) g₁ α k a y -
           chartInvGramOnE (I := I) g₂ α k a y| ≤ Cinv * gd := hCinv k a
       have hC_bl : |chartInvGramOnE (I := I) g₁ α b l y -
@@ -810,7 +714,6 @@ theorem partialDeriv_chartInvGramOnE_sub_abs_le
       have hP_ab' : |partialDeriv (E := E) m (chartGramOnE (I := I) g₁ α a b) y -
           partialDeriv (E := E) m (chartGramOnE (I := I) g₂ α a b) y| ≤ jet1 :=
         hP_ab.trans (chartGramPartialDiffSup_le_jet1 (I := I) (M := M) g₁ g₂ α y)
-      -- Term 1: `|A₁−A₂|·|B₁|·|C₁| ≤ (Cinv·gd)·M_b·Q ≤ Cinv·M_b·Q·jet1`.
       have ht1 : |chartInvGramOnE (I := I) g₁ α k a y - chartInvGramOnE (I := I) g₂ α k a y| *
             |chartInvGramOnE (I := I) g₁ α b l y| *
             |partialDeriv (E := E) m (chartGramOnE (I := I) g₁ α a b) y| ≤
@@ -826,7 +729,6 @@ theorem partialDeriv_chartInvGramOnE_sub_abs_le
           _ ≤ Cinv * M_b * Q * jet1 :=
               mul_le_mul_of_nonneg_left hgd_le
                 (mul_nonneg (mul_nonneg hCinv_nn hMb_nn) hQ_nn)
-      -- Term 2: `|A₂|·|B₁−B₂|·|C₁| ≤ M_b·(Cinv·gd)·Q ≤ Cinv·M_b·Q·jet1`.
       have ht2 : |chartInvGramOnE (I := I) g₂ α k a y| *
             |chartInvGramOnE (I := I) g₁ α b l y - chartInvGramOnE (I := I) g₂ α b l y| *
             |partialDeriv (E := E) m (chartGramOnE (I := I) g₁ α a b) y| ≤
@@ -842,7 +744,6 @@ theorem partialDeriv_chartInvGramOnE_sub_abs_le
           _ ≤ Cinv * M_b * Q * jet1 :=
               mul_le_mul_of_nonneg_left hgd_le
                 (mul_nonneg (mul_nonneg hCinv_nn hMb_nn) hQ_nn)
-      -- Term 3: `|A₂|·|B₂|·|C₁−C₂| ≤ M_b·M_b·jet1 = M_b²·jet1`.
       have ht3 : |chartInvGramOnE (I := I) g₂ α k a y| *
             |chartInvGramOnE (I := I) g₂ α b l y| *
             |partialDeriv (E := E) m (chartGramOnE (I := I) g₁ α a b) y -
@@ -856,7 +757,6 @@ theorem partialDeriv_chartInvGramOnE_sub_abs_le
               refine mul_le_mul (mul_le_mul (hMb2 k a) (hMb2 b l) (abs_nonneg _) hMb_nn)
                 hP_ab' (abs_nonneg _) (mul_nonneg hMb_nn hMb_nn)
           _ = M_b ^ 2 * jet1 := by ring
-      -- Combine: total ≤ Cinv·M_b·Q·jet1 + Cinv·M_b·Q·jet1 + M_b²·jet1.
       calc |chartInvGramOnE (I := I) g₁ α k a y - chartInvGramOnE (I := I) g₂ α k a y| *
               |chartInvGramOnE (I := I) g₁ α b l y| *
               |partialDeriv (E := E) m (chartGramOnE (I := I) g₁ α a b) y| +
@@ -871,15 +771,12 @@ theorem partialDeriv_chartInvGramOnE_sub_abs_le
             add_le_add (add_le_add ht1 ht2) ht3
         _ = (2 * Cinv * M_b * Q + M_b ^ 2) * jet1 := by ring
     · simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, le_refl]
-  -- Outer sum over `a`.
   refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
   refine le_trans (Finset.sum_le_sum (g := fun _ : Fin (Module.finrank ℝ E) =>
     (Module.finrank ℝ E : ℝ) * ((2 * Cinv * M_b * Q + M_b ^ 2) * jet1)) (fun a _ => hterm a)) ?_
   simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
   rw [show (Module.finrank ℝ E : ℝ) ^ 2 * (2 * Cinv * M_b * Q + M_b ^ 2) * jet1 =
         (Module.finrank ℝ E : ℝ) * ((Module.finrank ℝ E : ℝ) * ((2 * Cinv * M_b * Q + M_b ^ 2) * jet1)) by ring]
-
-/-! ## Uniform bounds and difference bound for `gramBracketDeriv` -/
 
 /-- `gramBracketDeriv` difference is bounded by `3 · chartGramPartial2DiffSup`. -/
 lemma gramBracketDeriv_sub_abs_le
@@ -956,12 +853,6 @@ private lemma exists_partial_chartGramOnE_bound_on_compact
     (fun p => partial_chartGramOnE_contDiffOn_int (I := I) g α p.1.1 p.1.2 p.2) hK hKsub
   exact ⟨C, hC_nn, fun y hy m a b => hC y hy ((m, a), b)⟩
 
-/-! ## Per-point Christoffel-derivative difference bound
-
-`∂_m Γ` is, by the Leibniz formula, `½ ∑_l [(∂_m G^{kl})·S_l + G^{kl}·∂_m S_l]`.
-Its `g₁ − g₂` difference splits, per summand, into four product-difference pieces;
-each is bounded by a uniform constant times the chart `2`-jet seminorm. -/
-
 /-- **Per-point Christoffel-derivative Lipschitz bound.**  On the chart-target
 interior, with the uniform inverse-Gram-partial Lipschitz bound `Cd·jet1`, the
 uniform inverse-Gram entry bound `M_b`, the uniform `gramBracket` bound `P`, the
@@ -994,7 +885,6 @@ theorem partialDeriv_chartChristoffel_sub_abs_le
         (Cd * P + 3 * D + Cinv * R + 3 * M_b) *
         chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y := by
   classical
-  -- Expand both Christoffel derivatives via the Leibniz formula.
   rw [partialDeriv_chartChristoffel_eq (I := I) g₁ α m i j k hy,
     partialDeriv_chartChristoffel_eq (I := I) g₂ α m i j k hy,
     ← mul_sub, ← Finset.sum_sub_distrib, abs_mul, abs_of_nonneg (by norm_num : (0:ℝ) ≤ 1/2)]
@@ -1005,23 +895,18 @@ theorem partialDeriv_chartChristoffel_sub_abs_le
   have hjet1_nn : 0 ≤ jet1 := chartMetricJet1DiffSup_nonneg _ _ _ _
   set gd : ℝ := chartGramDiffSup (I := I) (M := M) g₁ g₂ α ((extChartAt I α).symm y) with hgd
   have hgd_nn : 0 ≤ gd := chartGramDiffSup_nonneg _ _ _ _
-  -- `gd ≤ jet1 ≤ jet2`.
   have hgd_le2 : gd ≤ jet2 :=
     le_trans (chartGramDiffSup_le_jet1 (I := I) (M := M) g₁ g₂ α y) hjet1_le
-  -- Reshape RHS for a single `mul_le_mul_of_nonneg_left`.
   rw [show (1 / 2 : ℝ) * (Module.finrank ℝ E : ℝ) *
         (Cd * P + 3 * D + Cinv * R + 3 * M_b) * jet2 =
       (1 / 2 : ℝ) * ((Module.finrank ℝ E : ℝ) *
         ((Cd * P + 3 * D + Cinv * R + 3 * M_b) * jet2)) by ring]
   refine mul_le_mul_of_nonneg_left ?_ (by norm_num : (0:ℝ) ≤ 1/2)
-  -- `|∑ …| ≤ ∑ |…| ≤ ∑ (…)·jet2 = n · ((…)·jet2)`.
   refine le_trans (Finset.abs_sum_le_sum_abs _ _) ?_
   refine le_trans (Finset.sum_le_sum
     (g := fun _ : Fin (Module.finrank ℝ E) =>
       (Cd * P + 3 * D + Cinv * R + 3 * M_b) * jet2) (fun l _ => ?_)) ?_
-  · -- Per-term-`l` bound, with the goal's own `i j k m l` in scope.
-    -- Split the summand difference into two product-difference groups.
-    have hsplit :
+  · have hsplit :
         (partialDeriv (E := E) m (chartInvGramOnE (I := I) g₁ α k l) y *
               gramBracket (I := I) g₁ α i j l y +
             chartInvGramOnE (I := I) g₁ α k l y *
@@ -1041,8 +926,6 @@ theorem partialDeriv_chartChristoffel_sub_abs_le
               (gramBracketDeriv (I := I) g₁ α m i j l y -
                 gramBracketDeriv (I := I) g₂ α m i j l y)) := by ring
     rw [hsplit]
-    -- Bound each of the four pieces by its constant·jet2 contribution.
-    -- Piece A1: |(∂G₁ − ∂G₂)·S₁| ≤ (Cd·jet1)·P ≤ Cd·P·jet2.
     have hA1 : |(partialDeriv (E := E) m (chartInvGramOnE (I := I) g₁ α k l) y -
           partialDeriv (E := E) m (chartInvGramOnE (I := I) g₂ α k l) y) *
           gramBracket (I := I) g₁ α i j l y| ≤ Cd * P * jet2 := by
@@ -1054,7 +937,6 @@ theorem partialDeriv_chartChristoffel_sub_abs_le
               (mul_nonneg hCd_nn hjet1_nn)
         _ = Cd * P * jet1 := by ring
         _ ≤ Cd * P * jet2 := mul_le_mul_of_nonneg_left hjet1_le (mul_nonneg hCd_nn hP_nn)
-    -- Piece A2: |∂G₂·(S₁−S₂)| ≤ D·(3·partialDiffSup) ≤ 3·D·jet2.
     have hA2 : |partialDeriv (E := E) m (chartInvGramOnE (I := I) g₂ α k l) y *
           (gramBracket (I := I) g₁ α i j l y - gramBracket (I := I) g₂ α i j l y)| ≤
           3 * D * jet2 := by
@@ -1089,7 +971,6 @@ theorem partialDeriv_chartChristoffel_sub_abs_le
             |gramBracket (I := I) g₁ α i j l y - gramBracket (I := I) g₂ α i j l y|
           ≤ D * (3 * jet2) := mul_le_mul (hD k l) hbrkdiff (abs_nonneg _) hD_nn
         _ = 3 * D * jet2 := by ring
-    -- Piece B1: |(G₁−G₂)·∂S₁| ≤ (Cinv·gd)·R ≤ Cinv·R·jet2.
     have hB1 : |(chartInvGramOnE (I := I) g₁ α k l y - chartInvGramOnE (I := I) g₂ α k l y) *
           gramBracketDeriv (I := I) g₁ α m i j l y| ≤ Cinv * R * jet2 := by
       rw [abs_mul]
@@ -1099,7 +980,6 @@ theorem partialDeriv_chartChristoffel_sub_abs_le
               (mul_nonneg hCinv_nn hgd_nn)
         _ = Cinv * R * gd := by ring
         _ ≤ Cinv * R * jet2 := mul_le_mul_of_nonneg_left hgd_le2 (mul_nonneg hCinv_nn hR_nn)
-    -- Piece B2: |G₂·(∂S₁−∂S₂)| ≤ M_b·(3·partial2DiffSup) ≤ 3·M_b·jet2.
     have hB2 : |chartInvGramOnE (I := I) g₂ α k l y *
           (gramBracketDeriv (I := I) g₁ α m i j l y -
             gramBracketDeriv (I := I) g₂ α m i j l y)| ≤ 3 * M_b * jet2 := by
@@ -1115,14 +995,11 @@ theorem partialDeriv_chartChristoffel_sub_abs_le
               gramBracketDeriv (I := I) g₂ α m i j l y|
           ≤ M_b * (3 * jet2) := mul_le_mul (hMb2 k l) hbdderiv (abs_nonneg _) hMb_nn
         _ = 3 * M_b * jet2 := by ring
-    -- Combine the four pieces via two triangle inequalities.
     refine (abs_add_le _ _).trans ?_
     refine le_trans (add_le_add ((abs_add_le _ _).trans (add_le_add hA1 hA2))
       ((abs_add_le _ _).trans (add_le_add hB1 hB2))) (le_of_eq ?_)
     ring
   · simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, le_refl]
-
-/-! ## Uniform-over-compact Christoffel-derivative headline -/
 
 /-- **Uniform Lipschitz dependence of the chart Christoffel-symbol derivatives on
 the chart `2`-jet of the metric difference, over a compact subset of the
@@ -1149,7 +1026,6 @@ theorem exists_chartChristoffelDeriv_lipschitz_on_compact
           partialDeriv (E := E) m (chartChristoffel (I := I) g₂ α i j k) y| ≤
         C * chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y := by
   classical
-  -- Manifold-side compact set `K' := symm '' K ⊆ chart source`, for `Cinv`.
   have hKsub_target : K ⊆ (extChartAt I α).target := hKsub.trans interior_subset
   set K' : Set M := (extChartAt I α).symm '' K with hK'_def
   have hK'_compact : IsCompact K' :=
@@ -1159,7 +1035,6 @@ theorem exists_chartChristoffelDeriv_lipschitz_on_compact
     have hsource : (extChartAt I α).symm z ∈ (extChartAt I α).source :=
       (extChartAt I α).map_target (hKsub_target hzK)
     rwa [extChartAt_source_eq_chartAt_source (I := I)] at hsource
-  -- Gather the uniform constants.
   obtain ⟨Cinv, hCinv_pos, hCinv⟩ :=
     exists_chartInvGramMatrix_lipschitz_on_compact (I := I) (M := M) g₁ g₂ α hK'_compact hK'_sub
   obtain ⟨Mb1, hMb1_nn, hMb1⟩ := exists_chartInvGramOnE_bound_on_compact (I := I) g₁ α hK hKsub
@@ -1171,7 +1046,6 @@ theorem exists_chartChristoffelDeriv_lipschitz_on_compact
   obtain ⟨D, hD_nn, hD⟩ :=
     exists_partialDeriv_chartInvGramOnE_bound_on_compact (I := I) g₂ α hK hKsub
   obtain ⟨R, hR_nn, hR⟩ := exists_gramBracketDeriv_bound_on_compact (I := I) g₁ α hK hKsub
-  -- The inverse-Gram-partial Lipschitz constant.
   set Cd : ℝ := (Module.finrank ℝ E : ℝ) ^ 2 * (2 * Cinv * M_b * Q + M_b ^ 2) with hCd_def
   have hCd_nn : 0 ≤ Cd := by
     refine mul_nonneg (by positivity) ?_
@@ -1190,18 +1064,15 @@ theorem exists_chartChristoffelDeriv_lipschitz_on_compact
   intro y hy i j k
   have hy_int : y ∈ interior (extChartAt I α).target := hKsub hy
   have hxy_mem : (extChartAt I α).symm y ∈ K' := ⟨y, hy, rfl⟩
-  -- Per-point inverse-Gram Lipschitz at `x_y`, through `chartInvGramOnE`.
   have hCinv' : ∀ k l : Fin (Module.finrank ℝ E),
       |chartInvGramOnE (I := I) g₁ α k l y - chartInvGramOnE (I := I) g₂ α k l y| ≤
         Cinv * chartGramDiffSup (I := I) (M := M) g₁ g₂ α ((extChartAt I α).symm y) := by
     intro k l
     simpa only [chartInvGramOnE_def] using hCinv ((extChartAt I α).symm y) hxy_mem k l
-  -- Promote the per-metric inverse-Gram entry bounds to the common `M_b`.
   have hMb1' : ∀ k l, |chartInvGramOnE (I := I) g₁ α k l y| ≤ M_b :=
     fun k l => (hMb1 y hy k l).trans (le_max_left _ _)
   have hMb2' : ∀ k l, |chartInvGramOnE (I := I) g₂ α k l y| ≤ M_b :=
     fun k l => (hMb2 y hy k l).trans (le_max_right _ _)
-  -- The inverse-Gram-partial Lipschitz bound (`hCd`).
   have hCd : ∀ k l : Fin (Module.finrank ℝ E),
       |partialDeriv (E := E) m (chartInvGramOnE (I := I) g₁ α k l) y -
           partialDeriv (E := E) m (chartInvGramOnE (I := I) g₂ α k l) y| ≤
@@ -1209,7 +1080,6 @@ theorem exists_chartChristoffelDeriv_lipschitz_on_compact
     intro k l
     exact partialDeriv_chartInvGramOnE_sub_abs_le (I := I) (M := M) g₁ g₂ α hy_int
       hMb_nn hQ_nn hCinv_pos.le hMb1' hMb2' (fun m a b => hQ y hy m a b) hCinv' m k l
-  -- Apply the per-point Christoffel-derivative bound.
   have h_pt := partialDeriv_chartChristoffel_sub_abs_le (I := I) (M := M) g₁ g₂ α hy_int
     hCd_nn hCinv_pos.le hMb_nn hP_nn hD_nn hR_nn m i j k
     hCd hMb2' (fun i j l => hP y hy i j l) (fun k l => hD y hy m k l)

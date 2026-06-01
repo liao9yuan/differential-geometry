@@ -69,8 +69,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## Step 1: a single Euclidean integral is a term of the Hs-norm² -/
-
 /-- The squared Hilbert–Schmidt POU-weighted chart-Sobolev norm equals the
 `tsum` over chart base points of the finite block.  This is `(‖T.toHs k‖)²`. -/
 private theorem hsNorm_sq_toReal_eq
@@ -107,7 +105,6 @@ private theorem hsBlock_le_hsNorm_sq
           ∂(volume : Measure EuclN))
       ≤ (tensorPouSobolevHsNorm (I := I) (M := M) g k T) ^ 2 := by
   classical
-  -- Abbreviate the innermost integral.
   set F : (α : M) → ((Fin r → Fin (Module.finrank ℝ E)) ×
       (Fin s → Fin (Module.finrank ℝ E))) → (j : ℕ) →
       (Fin j → Fin (Module.finrank ℝ E)) → ℝ≥0∞ :=
@@ -125,7 +122,6 @@ private theorem hsBlock_le_hsNorm_sq
                 (fun i => EuclideanSpace.basisFun
                   (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2)
         ∂(volume : Measure EuclN) with hF_def
-  -- The squared norm is the tsum of the per-chart inner sum.
   set S : ℝ≥0∞ :=
     ∑' α : M, ∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin s → Fin (Module.finrank ℝ E)),
@@ -138,10 +134,8 @@ private theorem hsBlock_le_hsNorm_sq
     rw [h_eq, ← ENNReal.rpow_natCast _ 2, ← ENNReal.rpow_mul]
     norm_num
   rw [hnorm_sq]
-  -- Block at `(α₀, IJ₀, j₀)` ≤ inner sum at α₀ ≤ tsum.
   set blk : ℝ≥0∞ :=
     ∑ basisIdx : Fin j₀ → Fin (Module.finrank ℝ E), F α₀ IJ₀ j₀ basisIdx with hblk
-  -- Step a: blk ≤ per-(α₀, IJ₀) order sum.
   have h_order :
       blk ≤ ∑ j ∈ Finset.range (2 * k + 1),
         ∑ basisIdx : Fin j → Fin (Module.finrank ℝ E), F α₀ IJ₀ j basisIdx := by
@@ -149,7 +143,6 @@ private theorem hsBlock_le_hsNorm_sq
     exact Finset.single_le_sum
       (f := fun j => ∑ basisIdx : Fin j → Fin (Module.finrank ℝ E), F α₀ IJ₀ j basisIdx)
       (fun j _ => zero_le _) hj₀
-  -- Step b: per-(α₀, IJ₀) order sum ≤ per-α₀ component sum.
   have h_comp :
       (∑ j ∈ Finset.range (2 * k + 1),
         ∑ basisIdx : Fin j → Fin (Module.finrank ℝ E), F α₀ IJ₀ j basisIdx) ≤
@@ -161,7 +154,6 @@ private theorem hsBlock_le_hsNorm_sq
       (f := fun IJ => ∑ j ∈ Finset.range (2 * k + 1),
         ∑ basisIdx : Fin j → Fin (Module.finrank ℝ E), F α₀ IJ j basisIdx)
       (fun IJ _ => zero_le _) (Finset.mem_univ IJ₀)
-  -- Step c: per-α₀ component sum ≤ tsum over α = S.
   have h_tsum :
       (∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
           (Fin s → Fin (Module.finrank ℝ E)),
@@ -169,8 +161,6 @@ private theorem hsBlock_le_hsNorm_sq
           ∑ basisIdx : Fin j → Fin (Module.finrank ℝ E), F α₀ IJ j basisIdx) ≤ S := by
     rw [hS_def]; exact ENNReal.le_tsum α₀
   exact le_trans h_order (le_trans h_comp h_tsum)
-
-/-! ## Step 2: operator norm ↦ Hilbert–Schmidt basis sum -/
 
 /-- Any coordinate of a Euclidean vector is bounded by its norm. -/
 private lemma euclN_coord_le_norm (v : EuclN) (i : Fin (Module.finrank ℝ E)) :
@@ -266,7 +256,6 @@ private theorem cmm_norm_sq_le_card_mul_sum_basisFun
         ∑ β : Fin j → Fin (Module.finrank ℝ E),
           |f (fun i => EuclideanSpace.basisFun (Fin (Module.finrank ℝ E)) ℝ (β i))| ^ 2 := by
   classical
-  -- Convert `basisFun` to `single` throughout the goal.
   simp only [EuclideanSpace.basisFun_apply]
   have h1 := cmm_norm_le_sum_single (E := E) f
   have h1' : ‖f‖ ^ 2 ≤
@@ -277,14 +266,11 @@ private theorem cmm_norm_sq_le_card_mul_sum_basisFun
       (fun (β : Fin j → Fin (Module.finrank ℝ E)) (_ : β ∈ Finset.univ) => abs_nonneg
         (f (fun i => EuclideanSpace.single (β i) (1 : ℝ))))]
   refine h1'.trans ?_
-  -- Cauchy–Schwarz: `(∑ |·|)² ≤ card · ∑ |·|²`.
   have hcs := sq_sum_le_card_mul_sum_sq
     (s := (Finset.univ : Finset (Fin j → Fin (Module.finrank ℝ E))))
     (f := fun β => |f (fun i => EuclideanSpace.single (β i) (1 : ℝ))|)
   rw [Finset.card_univ, Fintype.card_fun, Fintype.card_fin, Fintype.card_fin] at hcs
   exact hcs
-
-/-! ## Step 3: global-smooth cutoff extension of a raw chart component -/
 
 /-- The raw chart-`α` component pulled back to the chart target,
 `raw_{α,IJ} ∘ pull`, is `ContDiffOn ℝ ∞` on the open `chartTargetEuclid α`.
@@ -362,21 +348,18 @@ private theorem exists_global_smooth_eqOn_ball_of_rawPull
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   have hΩ_open : IsOpen Ω :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- The pulled-back raw component, as a (globally defined) function.
   set rp : EuclN → ℝ :=
     tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx
       ∘ (extChartAt I α).symm
       ∘ (toEuclidean (E := E)).symm with hrp_def
   have hrp_on : ContDiffOn ℝ ∞ rp Ω :=
     rawPull_contDiffOn (I := I) (M := M) g r s T α Idx Jdx
-  -- A smooth cutoff `η = 1` on a neighbourhood of `closedBall y₀ R`, supported in `Ω`.
   obtain ⟨δ, η, hδ_pos, _hδ_sub, hη_smooth, hη_cpt, _hη_range, hη_one, hη_supp⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.exists_smooth_cutoff_with_neighborhood
       (d := Module.finrank ℝ E)
       (isCompact_closedBall y₀ R) hΩ_open hball
   refine ⟨fun y => η y * rp y, ?_, ?_⟩
-  · -- Global smoothness via the two-open cover `Ω ∪ (tsupport η)ᶜ = univ`.
-    have hη_smooth' : ContDiff ℝ ∞ η := hη_smooth
+  · have hη_smooth' : ContDiff ℝ ∞ η := hη_smooth
     have h_on_Ω : ContDiffOn ℝ ∞ (fun y => η y * rp y) Ω :=
       hη_smooth'.contDiffOn.mul hrp_on
     set t : Set EuclN := (tsupport η)ᶜ with ht_def
@@ -393,8 +376,7 @@ private theorem exists_global_smooth_eqOn_ball_of_rawPull
       · exact Or.inr (hη_supp hy)
       · exact Or.inl hy
     exact contDiff_of_contDiffOn_union_of_isOpen h_on_Ω h_on_t h_union hΩ_open ht_open
-  · -- Agreement on `closedBall y₀ R`: `η = 1` there.
-    intro y hy
+  · intro y hy
     have hη_y : η y = 1 := hη_one y (Metric.self_subset_cthickening _ hy)
     simp only [hη_y, one_mul, hrp_def]
 
@@ -420,7 +402,6 @@ private theorem hsIntegrandReal_continuousOn
   classical
   have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- POU pulled back is continuous on the chart target.
   have hPOU_pull_cont :
       ContinuousOn (fun z : EuclN =>
           (chartAtlasPOU I M α : M → ℝ)
@@ -431,7 +412,6 @@ private theorem hsIntegrandReal_continuousOn
     exact hPOU_cont.comp_continuousOn'
       (DifferentialGeometry.Analysis.Sobolev.Chart.continuousOn_symm_toEuclideanSymm
         (I := I) (M := M) α)
-  -- The iterated derivative is continuous on the chart target.
   have h_cdOn := rawPull_contDiffOn (I := I) (M := M) g r s T α IJ.1 IJ.2
   have h_iter_contOn : ContinuousOn
       (fun z => iteratedFDeriv ℝ j
@@ -447,7 +427,6 @@ private theorem hsIntegrandReal_continuousOn
       h_cdOn.contDiffAt (h_open.mem_nhds hz)
     exact (h_cd.continuousAt_iteratedFDeriv (k := j)
       (by exact_mod_cast le_top)).continuousWithinAt
-  -- Evaluation at the fixed basis tuple is continuous.
   have h_eval_contOn : ContinuousOn
       (fun z : EuclN =>
         (iteratedFDeriv ℝ j
@@ -464,8 +443,6 @@ private theorem hsIntegrandReal_continuousOn
       continuous_eval_const _
     exact h_apply.comp_continuousOn h_iter_contOn
   exact hPOU_pull_cont.mul ((h_eval_contOn.abs).pow 2)
-
-/-! ## Step 4: per-order squared `L²` derivative norm ≤ `(card/c) · Hs block` -/
 
 /-- For the pulled-back raw component `f := raw_{α,IJ} ∘ pull`, smooth on the
 chart target, and a ball `B(y₀, R)` on which `ρ_α(pull) ≥ c > 0` and which is
@@ -515,10 +492,8 @@ private theorem eLpNorm_sq_iteratedFDeriv_le_hsBlock
     (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) α).measurableSet
   have hball_meas : MeasurableSet (Metric.ball y₀ R) := measurableSet_ball
-  -- card abbreviation
   set cardj : ℝ := (((Module.finrank ℝ E) ^ j : ℕ) : ℝ) with hcardj_def
   have hcardj_nn : 0 ≤ cardj := by positivity
-  -- (eLpNorm g 2 μ)² = ∫⁻ ‖g z‖ₑ²  (over the restricted measure).
   have h_eLp_sq :
       (eLpNorm (fun z => ‖iteratedFDeriv ℝ j f z‖) 2
           ((volume : Measure EuclN).restrict (Metric.ball y₀ R))) ^ 2 =
@@ -529,12 +504,9 @@ private theorem eLpNorm_sq_iteratedFDeriv_le_hsBlock
     rw [show ((2 : ℝ≥0) : ℝ≥0∞) = (2 : ℝ≥0∞) by norm_num] at h
     rw [show ((2 : ℝ≥0) : ℝ) = ((2 : ℕ) : ℝ) by norm_num] at h
     rw [ENNReal.rpow_natCast] at h
-    -- the inner `‖·‖ₑ ^ ((2:ℕ):ℝ)` → `‖·‖ₑ ^ (2:ℕ)`.
     simp only [ENNReal.rpow_natCast] at h
     exact h
   rw [h_eLp_sq]
-  -- Pointwise on the ball: ‖ ‖∂ʲf z‖ ‖ₑ² ≤ ENNReal.ofReal (card · c⁻¹ · ∑_basis ρ·|∂ʲf(basis)|²).
-  -- First restrict to ball, then dominate the integrand.
   have h_int_le :
       (∫⁻ z in Metric.ball y₀ R, ‖(‖iteratedFDeriv ℝ j f z‖)‖ₑ ^ 2 ∂(volume : Measure EuclN))
         ≤ ∫⁻ z in Metric.ball y₀ R,
@@ -550,20 +522,16 @@ private theorem eLpNorm_sq_iteratedFDeriv_le_hsBlock
     refine lintegral_mono_ae ?_
     refine (ae_restrict_iff' hball_meas).2 ?_
     filter_upwards with z hz
-    -- LHS: ‖ ‖∂ʲf z‖ ‖ₑ² = ENNReal.ofReal (‖∂ʲf z‖²).
     have hLHS : ‖(‖iteratedFDeriv ℝ j f z‖)‖ₑ ^ 2 =
         ENNReal.ofReal (‖iteratedFDeriv ℝ j f z‖ ^ 2) := by
       rw [Real.enorm_eq_ofReal (norm_nonneg _), ← ENNReal.ofReal_pow (norm_nonneg _)]
     rw [hLHS]
-    -- Real-side bound: ‖∂ʲf z‖² ≤ card · c⁻¹ · ∑_basis ρ·|∂ʲf(basis)|².
     have hρz : c ≤ (chartAtlasPOU I M α : M → ℝ)
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm z)) := hρ_lb z hz
     have hρz_pos : 0 < (chartAtlasPOU I M α : M → ℝ)
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm z)) := lt_of_lt_of_le hc_pos hρz
-    -- op-norm-HS: ‖∂ʲf z‖² ≤ card · ∑_basis |∂ʲf z(basis)|².
     have h_hs := cmm_norm_sq_le_card_mul_sum_basisFun (E := E)
       (iteratedFDeriv ℝ j f z)
-    -- ∑_basis |..|² ≤ c⁻¹ · ∑_basis ρ·|..|²  (since 1 ≤ ρ/c, c>0).
     have h_weight :
         (∑ basisIdx : Fin j → Fin (Module.finrank ℝ E),
             |(iteratedFDeriv ℝ j f z)
@@ -577,7 +545,6 @@ private theorem eLpNorm_sq_iteratedFDeriv_le_hsBlock
                       (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2 := by
       rw [Finset.mul_sum]
       refine Finset.sum_le_sum (fun b _ => ?_)
-      -- `|..|² ≤ (c⁻¹ · ρ) · |..|²` since `1 ≤ c⁻¹ · ρ`.
       have h_one_le : (1 : ℝ) ≤ c⁻¹ *
           (chartAtlasPOU I M α : M → ℝ)
             ((extChartAt I α).symm ((toEuclidean (E := E)).symm z)) := by
@@ -614,7 +581,6 @@ private theorem eLpNorm_sq_iteratedFDeriv_le_hsBlock
       refine h_hs.trans ?_
       rw [hcardj_def]
       exact mul_le_mul_of_nonneg_left h_weight (by positivity)
-    -- Cast to ENNReal (bottom-up combination of the `ofReal`s).
     have h_sum_eq :
         (∑ basisIdx : Fin j → Fin (Module.finrank ℝ E),
             ENNReal.ofReal
@@ -635,26 +601,19 @@ private theorem eLpNorm_sq_iteratedFDeriv_le_hsBlock
     rw [h_sum_eq, ← ENNReal.ofReal_mul (by positivity), ← ENNReal.ofReal_mul hcardj_nn]
     exact ENNReal.ofReal_le_ofReal h_real
   refine h_int_le.trans ?_
-  -- Pull both constants out of the integral.
   rw [lintegral_const_mul' _ _ ENNReal.ofReal_ne_top,
     lintegral_const_mul' _ _ ENNReal.ofReal_ne_top]
-  -- RHS constant: `ofReal (cardj · c⁻¹) = ofReal cardj · ofReal c⁻¹`.
   rw [ENNReal.ofReal_mul hcardj_nn, mul_assoc]
   refine mul_le_mul_of_nonneg_left ?_ (zero_le _)
   refine mul_le_mul_of_nonneg_left ?_ (zero_le _)
-  -- `∫_ball ∑_basis (…) = ∑_basis ∫_ball (…)`, then `∫_ball ≤ ∫_Ω`.
   rw [lintegral_finset_sum']
   swap
   · intro b _
-    -- AEMeasurable on `volume.restrict (ball)`: the integrand is `ContinuousOn`
-    -- the chart target (⊇ ball), hence continuous on the ball.
     refine ContinuousOn.aemeasurable ?_ hball_meas
     refine ENNReal.continuous_ofReal.comp_continuousOn ?_
     exact (hsIntegrandReal_continuousOn (I := I) (M := M) g r s T α IJ j b).mono hball_sub
   refine Finset.sum_le_sum (fun b _ => ?_)
   exact lintegral_mono_set hball_sub
-
-/-! ## Step 5: per-component pointwise bound at a chart-image point -/
 
 /-- The `eLpNorm` of `‖∂ʲu‖` over a ball is finite for a globally smooth `u`
 (the ball has finite measure, and the integrand is continuous, hence bounded on
@@ -710,33 +669,26 @@ private theorem rawPullCenter_le_hsNorm
           ((extChartAt I α).symm ((toEuclidean (E := E)).symm y₁))|
         ≤ Cα * ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) T'‖ := by
   classical
-  -- The Euclidean local-ball embedding constant (uniform in the smooth input).
   have hk' : (Module.finrank ℝ E : ℝ) < 2 * ((2 * k : ℕ) : ℝ) := by push_cast; linarith [hk]
   obtain ⟨Cloc, hCloc_nn, hCloc⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.smooth_localBall_L2_pointwise_embedding
       (d := Module.finrank ℝ E) (K := 2 * k) hk' (x₀ := y₀) (R := R) hR
-  -- The per-order amplification factor.
   set A : ℝ := Real.sqrt (((Module.finrank ℝ E) ^ (2 * (2 * k)) : ℕ) * c⁻¹) with hA_def
   have hA_nn : 0 ≤ A := Real.sqrt_nonneg _
   refine ⟨Cloc * ((2 * (2 * k) + 1 : ℕ) * A), by positivity, ?_⟩
   intro T' y₁ hy₁
   set hsn : ℝ := ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) T'‖ with hhsn_def
   have hhsn_nn : 0 ≤ hsn := norm_nonneg _
-  -- Global-smooth extension `ftil` of `raw ∘ pull` on `closedBall y₀ R`.
   obtain ⟨ftil, hftil_smooth, hftil_eq⟩ :=
     exists_global_smooth_eqOn_ball_of_rawPull (I := I) (M := M) g r s T' α IJ.1 IJ.2 hball
-  -- `y₁ ∈ ball y₀ (R/4) ⊆ closedBall y₀ R`.
   have hy₁_cb : y₁ ∈ Metric.closedBall y₀ R :=
     (Metric.ball_subset_ball (by linarith)).trans Metric.ball_subset_closedBall hy₁
-  -- localBall: |ftil y₁| ≤ Cloc · ∑_{j≤4k} (eLpNorm(‖∂ʲftil‖)₂ ball).toReal.
   have h_loc := hCloc (f := ftil) hftil_smooth y₁ hy₁
-  -- `ftil y₁ = raw ∘ pull y₁`.
   have hftil_y0 : ftil y₁ =
       tensorChartComponentRaw (I := I) (M := M) g r s T' α IJ.1 IJ.2
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y₁)) := by
     have := hftil_eq hy₁_cb
     simpa [Function.comp_apply] using this
-  -- On `ball y₀ R`, `ftil = raw ∘ pull`, so all derivative norms agree there.
   have hball_open : Metric.ball y₀ R ⊆ chartTargetEuclid (I := I) (M := M) α :=
     (Metric.ball_subset_closedBall).trans hball
   have h_eqOn_ball : Set.EqOn ftil
@@ -744,7 +696,6 @@ private theorem rawPullCenter_le_hsNorm
         ∘ (extChartAt I α).symm
         ∘ (toEuclidean (E := E)).symm) (Metric.ball y₀ R) :=
     hftil_eq.mono Metric.ball_subset_closedBall
-  -- Per-order eLpNorm equality `ftil ↔ raw∘pull`.
   have h_eLp_eq : ∀ j,
       eLpNorm (fun z => ‖iteratedFDeriv ℝ j ftil z‖) 2
           ((volume : Measure EuclN).restrict (Metric.ball y₀ R)) =
@@ -764,7 +715,6 @@ private theorem rawPullCenter_le_hsNorm
       Filter.eventuallyEq_of_mem hball_nhd h_eqOn_ball
     have h_iter_eq := (h_ev.iteratedFDeriv ℝ j).eq_of_nhds
     simp only [h_iter_eq]
-  -- Per-order toReal bound: (eLpNorm(‖∂ʲftil‖)₂ ball).toReal ≤ A · hsn.
   have h_per_order : ∀ j ∈ Finset.range (2 * (2 * k) + 1),
       (eLpNorm (fun z => ‖iteratedFDeriv ℝ j ftil z‖) 2
         ((volume : Measure EuclN).restrict (Metric.ball y₀ R))).toReal ≤ A * hsn := by
@@ -775,30 +725,20 @@ private theorem rawPullCenter_le_hsNorm
           ∘ (extChartAt I α).symm
           ∘ (toEuclidean (E := E)).symm) z‖) 2
       ((volume : Measure EuclN).restrict (Metric.ball y₀ R)) with hX_def
-    -- X is finite.
     have hX_ne_top : X ≠ ⊤ := by
       rw [hX_def, ← h_eLp_eq j]
       exact smooth_eLpNorm_iteratedFDeriv_ball_ne_top (j := j) hftil_smooth
-    -- Keystone: X² ≤ ofReal(card·c⁻¹) · hsBlock ≤ ofReal(card·c⁻¹)·(hsNorm)².
     have h_key := eLpNorm_sq_iteratedFDeriv_le_hsBlock (I := I) (M := M)
       g r s T' α IJ j hc_pos hball_open hρ_lb
     rw [← hX_def] at h_key
-    -- hsBlock ≤ (hsNorm)²  (Step 1).
     have h_blk_le := hsBlock_le_hsNorm_sq (I := I) (M := M) g (2 * k) T' α IJ j hj
-    -- card · c⁻¹ ≥ 0.
     have hcard_nn : (0 : ℝ) ≤ ((Module.finrank ℝ E) ^ (2 * (2 * k)) : ℕ) := by positivity
-    -- Card index reconciliation: the keystone uses `(finrank E)^j`; bound it by
-    -- the order-`4k` card because `j ≤ 4k`.  We instead just keep `j` and note
-    -- `A` was defined with the top order; use monotonicity of the constant.
-    -- Combine: X² ≤ ofReal((finrank E)^j · c⁻¹) · (hsNorm g (2k) T')².
     have h_X_sq_le :
         X ^ 2 ≤ ENNReal.ofReal (((Module.finrank ℝ E) ^ j : ℕ) * c⁻¹) *
           (tensorPouSobolevHsNorm (I := I) (M := M) g (2 * k) T') ^ 2 :=
       h_key.trans (mul_le_mul_of_nonneg_left h_blk_le (zero_le _))
-    -- hsNorm finite.
     have h_hsn_ne_top : (tensorPouSobolevHsNorm (I := I) (M := M) g (2 * k) T') ≠ ⊤ :=
       (tensorPouSobolevHsNorm_lt_top (I := I) (M := M) g (2 * k) T').ne
-    -- Take toReal of the squared inequality.
     have h_rhs_ne_top :
         ENNReal.ofReal (((Module.finrank ℝ E) ^ j : ℕ) * c⁻¹) *
           (tensorPouSobolevHsNorm (I := I) (M := M) g (2 * k) T') ^ 2 ≠ ⊤ :=
@@ -807,11 +747,9 @@ private theorem rawPullCenter_le_hsNorm
     have h_toReal := ENNReal.toReal_mono h_rhs_ne_top h_X_sq_le
     rw [ENNReal.toReal_pow, ENNReal.toReal_mul, ENNReal.toReal_ofReal
       (by positivity), ENNReal.toReal_pow] at h_toReal
-    -- `(hsNorm g (2k) T').toReal = hsn`.
     have h_hsn_eq : (tensorPouSobolevHsNorm (I := I) (M := M) g (2 * k) T').toReal = hsn := by
       rw [hhsn_def, tensorPouSobolevHilbert_norm_eq]
     rw [h_hsn_eq] at h_toReal
-    -- So X.toReal² ≤ ((finrank E)^j · c⁻¹) · hsn² ≤ A² · hsn².
     have hX_toReal_nn : 0 ≤ X.toReal := ENNReal.toReal_nonneg
     have h_card_mono : (((Module.finrank ℝ E) ^ j : ℕ) : ℝ) * c⁻¹ ≤ A ^ 2 := by
       rw [hA_def, Real.sq_sqrt (by positivity)]
@@ -827,15 +765,12 @@ private theorem rawPullCenter_le_hsNorm
       calc (((Module.finrank ℝ E) ^ j : ℕ) : ℝ) * c⁻¹ * hsn ^ 2
           ≤ A ^ 2 * hsn ^ 2 := mul_le_mul_of_nonneg_right h_card_mono hhsn_sq_nn
         _ = (A * hsn) ^ 2 := by ring
-    -- Conclude X.toReal ≤ A · hsn via square roots.
     have hAhsn_nn : 0 ≤ A * hsn := mul_nonneg hA_nn hhsn_nn
     calc X.toReal = Real.sqrt (X.toReal ^ 2) := (Real.sqrt_sq hX_toReal_nn).symm
       _ ≤ Real.sqrt ((A * hsn) ^ 2) := Real.sqrt_le_sqrt h_Xsq_le_Asq
       _ = A * hsn := Real.sqrt_sq hAhsn_nn
-  -- Assemble: |ftil y₀| = ‖ftil y₀‖ ≤ Cloc · ∑_{j} (…).toReal ≤ Cloc·(4k+1)·A·hsn.
   rw [← hftil_y0, ← Real.norm_eq_abs]
   refine h_loc.trans ?_
-  -- ∑_{j} (…).toReal ≤ (4k+1) · (A · hsn).
   have h_sum_le :
       (∑ j ∈ Finset.range (2 * (2 * k) + 1),
           (eLpNorm (fun z => ‖iteratedFDeriv ℝ j ftil z‖) 2
@@ -850,8 +785,6 @@ private theorem rawPullCenter_le_hsNorm
       ≤ Cloc * (((2 * (2 * k) + 1 : ℕ) : ℝ) * (A * hsn)) :=
         mul_le_mul_of_nonneg_left h_sum_le hCloc_nn
     _ = Cloc * (((2 * (2 * k) + 1 : ℕ) : ℝ) * A) * hsn := by ring
-
-/-! ## Step 6: uniform-over-compact per-component bound via Lebesgue number -/
 
 /-- **Uniform per-component bound on a compact chart-image set.**
 
@@ -882,36 +815,28 @@ private theorem uniformRawPull_le_hsNorm
           ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))|
         ≤ D * ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) T'‖ := by
   classical
-  -- Trivial case `Kc = ∅`.
   rcases Set.eq_empty_or_nonempty Kc with hKc_empty | hKc_ne
   · exact ⟨0, le_refl 0, fun T' y hy => by rw [hKc_empty] at hy; exact absurd hy (Set.notMem_empty y)⟩
-  -- Lebesgue number: a uniform radius `δ` with `ball y δ ⊆ O` for `y ∈ Kc`.
   obtain ⟨δ, hδ_pos, hδ_ball⟩ :=
     lebesgue_number_lemma_of_metric (s := Kc) (c := fun _ : Unit => O)
       hKc_compact (fun _ => hO_open) (by intro x hx; exact Set.mem_iUnion.mpr ⟨(), hKcO hx⟩)
-  -- For `y ∈ Kc`, `ball y δ ⊆ O`.
   have hδ_sub : ∀ y ∈ Kc, Metric.ball y δ ⊆ O := by
     intro y hy
     obtain ⟨_, hsub⟩ := hδ_ball y hy
     exact hsub
-  -- Per-center constant `Cα` (uniform over `ball center (δ/8)`), via the
-  -- ball-uniform per-component lemma with `R = δ/2`.
   have hδ2_pos : 0 < δ / 2 := by linarith
-  -- For each center `y ∈ Kc`, build the per-component constant.
   have h_center : ∀ y : Kc, ∃ Cy : ℝ, 0 ≤ Cy ∧ ∀ (T' : SmoothCcTensor g r s),
       ∀ y₁ ∈ Metric.ball (y : EuclN) ((δ / 2) / 4),
       |tensorChartComponentRaw (I := I) (M := M) g r s T' α IJ.1 IJ.2
           ((extChartAt I α).symm ((toEuclidean (E := E)).symm y₁))|
         ≤ Cy * ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) T'‖ := by
     intro y
-    -- `closedBall y (δ/2) ⊆ ball y δ ⊆ O ⊆ chartTargetEuclid`.
     have hhalf_lt : δ / 2 < δ := half_lt_self hδ_pos
     have hhalf_le : δ / 2 ≤ δ := le_of_lt hhalf_lt
     have hcb_sub : Metric.closedBall (y : EuclN) (δ / 2) ⊆
         chartTargetEuclid (I := I) (M := M) α := by
       refine (Metric.closedBall_subset_ball hhalf_lt).trans ?_
       exact (hδ_sub y y.2).trans hO_sub
-    -- `ρ ≥ c` on `ball y (δ/2)`.
     have hρ_ball : ∀ z ∈ Metric.ball (y : EuclN) (δ / 2),
         c ≤ (chartAtlasPOU I M α : M → ℝ)
           ((extChartAt I α).symm ((toEuclidean (E := E)).symm z)) := by
@@ -924,7 +849,6 @@ private theorem uniformRawPull_le_hsNorm
         α IJ hδ2_pos hc_pos hcb_sub hρ_ball
     exact ⟨Cy, hCy_nn, hCy⟩
   choose Cfun hCfun_nn hCfun using h_center
-  -- Finite sub-cover of `Kc` by the smaller balls `ball y (δ/8)`.
   obtain ⟨tcov, htcov⟩ :=
     hKc_compact.elim_finite_subcover
       (U := fun y : Kc => Metric.ball (y : EuclN) ((δ / 2) / 4))
@@ -933,7 +857,6 @@ private theorem uniformRawPull_le_hsNorm
         intro z hz
         refine Set.mem_iUnion.mpr ⟨⟨z, hz⟩, ?_⟩
         rw [Metric.mem_ball, dist_self]; positivity)
-  -- The maximum of the finite family of constants (plus 1 for nonemptiness slack).
   set Dmax : ℝ := (tcov.image Cfun).sup' (by
     rcases hKc_ne with ⟨z, hz⟩
     obtain ⟨y, hy_t, _⟩ := Set.mem_iUnion₂.mp (htcov hz)
@@ -943,10 +866,8 @@ private theorem uniformRawPull_le_hsNorm
   intro T' y hy
   set hsn : ℝ := ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) T'‖ with hhsn_def
   have hhsn_nn : 0 ≤ hsn := norm_nonneg _
-  -- `y` lies in some cover ball `ball y_i (δ/8)`.
   obtain ⟨yi, hyi_t, hy_in⟩ := Set.mem_iUnion₂.mp (htcov hy)
   have h_bound := hCfun yi T' y hy_in
-  -- `Cfun yi ≤ Dmax`.
   have hCyi_le : Cfun yi ≤ Dmax := by
     rw [hDmax_def]
     refine le_sup_of_le_left ?_
@@ -955,8 +876,6 @@ private theorem uniformRawPull_le_hsNorm
           ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))|
       ≤ Cfun yi * hsn := h_bound
     _ ≤ Dmax * hsn := mul_le_mul_of_nonneg_right hCyi_le hhsn_nn
-
-/-! ## Step 7: per-chart fibre-norm bound on `K_α = {ρ_α ≥ 1/N}` -/
 
 /-- For a chart base point `α` and a positive threshold `c`, the super-level set
 `K_α := {x | c ≤ ρ_α x}` is compact and contained in the chart-`α` source. -/
@@ -971,7 +890,6 @@ private theorem superlevel_compact_subset_source
     isClosed_le continuous_const hρ_cont
   refine ⟨hclosed.isCompact, ?_⟩
   intro x hx
-  -- `c ≤ ρ_α x` with `c > 0` ⇒ `x ∈ support ρ_α ⊆ tsupport ρ_α ⊆ chart α source`.
   have hx_pos : (0 : ℝ) < (chartAtlasPOU I M α : M → ℝ) x := lt_of_lt_of_le hc_pos hx
   have hx_supp : x ∈ Function.support (fun y : M => (chartAtlasPOU I M α : M → ℝ) y) :=
     ne_of_gt hx_pos
@@ -1008,11 +926,9 @@ private theorem chartFiberNorm_le_hsNorm_on_superlevel
   set Kset : Set M := {x : M | c ≤ (chartAtlasPOU I M α : M → ℝ) x} with hKset_def
   obtain ⟨hK_compact, hK_sub⟩ := superlevel_compact_subset_source (I := I) (M := M) α hc_pos
   rw [← hKset_def] at hK_compact hK_sub
-  -- Off-centre fibre core on the compact `Kset`.
   obtain ⟨C₁, hC₁_pos, hC₁⟩ :=
     tensorFiberNorm_sq_le_chartAlphaComponents_on_compact (I := I) (M := M) g r s α
       hK_compact hK_sub
-  -- The compact chart image of `Kset`.
   set Kc : Set EuclN :=
     (toEuclidean (E := E)) '' ((extChartAt I α) '' Kset) with hKc_def
   have hKc_compact : IsCompact Kc := by
@@ -1021,7 +937,6 @@ private theorem chartFiberNorm_le_hsNorm_on_superlevel
         ((continuousOn_extChartAt α).mono (by
           intro x hx; rw [extChartAt_source]; exact hK_sub hx))
     exact h1.image (toEuclidean (E := E)).continuous
-  -- The open neighbourhood `O := {y ∈ chartTargetEuclid | c/2 < ρ_α(pull y)}`.
   set O : Set EuclN :=
     chartTargetEuclid (I := I) (M := M) α ∩
       (fun y : EuclN => (chartAtlasPOU I M α : M → ℝ)
@@ -1043,7 +958,6 @@ private theorem chartFiberNorm_le_hsNorm_on_superlevel
       isOpen_Ioi
   have hO_sub : O ⊆ chartTargetEuclid (I := I) (M := M) α := by
     rw [hO_def]; exact Set.inter_subset_left
-  -- `Kc ⊆ O`: chart images of `Kset` satisfy `ρ_α(pull) = ρ_α(x) ≥ c > c/2`.
   have hx_ext_src : ∀ x ∈ Kset, x ∈ (extChartAt I α).source := by
     intro x hx; rw [extChartAt_source]; exact hK_sub hx
   have hpull_eq : ∀ x ∈ Kset,
@@ -1063,14 +977,12 @@ private theorem chartFiberNorm_le_hsNorm_on_superlevel
       rw [hy_eq]
       exact ⟨(extChartAt I α) x, (extChartAt I α).map_source (hx_ext_src x hx_K), rfl⟩
     refine ⟨hy_target, ?_⟩
-    -- `ρ_α(pull y) = ρ_α x ≥ c > c/2`.
     have hgoal : c / 2 < (chartAtlasPOU I M α : M → ℝ)
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := by
       rw [hpull]
       have hx_ge : c ≤ (chartAtlasPOU I M α : M → ℝ) x := hx_K
       linarith [hc_pos, hx_ge]
     exact hgoal
-  -- `ρ ≥ c/2` on `O`.
   have hρ_on_O : ∀ y ∈ O,
       c / 2 ≤ (chartAtlasPOU I M α : M → ℝ)
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := by
@@ -1078,8 +990,6 @@ private theorem chartFiberNorm_le_hsNorm_on_superlevel
     rw [hO_def] at hy
     exact le_of_lt hy.2
   have hc2_pos : 0 < c / 2 := by linarith
-  -- Uniform-over-compact per-component bounds, then aggregate via the fibre core.
-  -- Choose, for each component pair, the uniform constant on `Kc`.
   have h_comp : ∀ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
       (Fin s → Fin (Module.finrank ℝ E)),
       ∃ Dij : ℝ, 0 ≤ Dij ∧ ∀ (T' : SmoothCcTensor g r s), ∀ y ∈ Kc,
@@ -1090,10 +1000,8 @@ private theorem chartFiberNorm_le_hsNorm_on_superlevel
     exact uniformRawPull_le_hsNorm (I := I) (M := M) g r s k hk α IJ hc2_pos
       hKc_compact hO_open hKcO hO_sub hρ_on_O
   choose Dfun hDfun_nn hDfun using h_comp
-  -- The maximum component constant.
   set Dmax : ℝ := (Finset.univ.sup' (Finset.univ_nonempty) Dfun) ⊔ 0 with hDmax_def
   have hDmax_nn : 0 ≤ Dmax := le_sup_right
-  -- Final constant: `D := √(C₁ · #pairs) · Dmax`.
   set npairs : ℝ := (Fintype.card ((Fin r → Fin (Module.finrank ℝ E)) ×
       (Fin s → Fin (Module.finrank ℝ E))) : ℝ) with hnp_def
   have hnp_nn : 0 ≤ npairs := Nat.cast_nonneg _
@@ -1102,16 +1010,13 @@ private theorem chartFiberNorm_le_hsNorm_on_superlevel
   set hsn : ℝ := ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) T‖ with hhsn_def
   have hhsn_nn : 0 ≤ hsn := norm_nonneg _
   have hx_K : x ∈ Kset := hx
-  -- The chart image of `x` lies in `Kc`.
   set yx : EuclN := (toEuclidean (E := E)) ((extChartAt I α) x) with hyx_def
   have hyx_Kc : yx ∈ Kc := by
     rw [hKc_def, hyx_def]
     exact ⟨(extChartAt I α) x, ⟨x, hx_K, rfl⟩, rfl⟩
   have hpull_x : (extChartAt I α).symm ((toEuclidean (E := E)).symm yx) = x := by
     rw [hyx_def]; exact hpull_eq x hx_K
-  -- Off-centre fibre core at `x`: `‖T x‖² ≤ C₁ · ∑_IJ raw_α(x)²`.
   have h_core := hC₁ T x hx_K
-  -- Per-component bound at `x` (via `yx ∈ Kc`).
   have h_each : ∀ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
       (Fin s → Fin (Module.finrank ℝ E)),
       (tensorChartComponentRaw (I := I) (M := M) g r s T α IJ.1 IJ.2 x) ^ 2 ≤
@@ -1119,14 +1024,12 @@ private theorem chartFiberNorm_le_hsNorm_on_superlevel
     intro IJ
     have h := hDfun IJ T yx hyx_Kc
     rw [hpull_x] at h
-    -- |raw_α(x)| ≤ Dfun IJ · hsn ≤ Dmax · hsn.
     have hDle : Dfun IJ ≤ Dmax := by
       rw [hDmax_def]
       exact le_sup_of_le_left (Finset.le_sup' Dfun (Finset.mem_univ IJ))
     have h' : |tensorChartComponentRaw (I := I) (M := M) g r s T α IJ.1 IJ.2 x|
         ≤ Dmax * hsn :=
       h.trans (mul_le_mul_of_nonneg_right hDle hhsn_nn)
-    -- square both sides.
     have habs_nn : 0 ≤ |tensorChartComponentRaw (I := I) (M := M) g r s T α IJ.1 IJ.2 x| :=
       abs_nonneg _
     have hDhsn_nn : 0 ≤ Dmax * hsn := mul_nonneg hDmax_nn hhsn_nn
@@ -1134,17 +1037,14 @@ private theorem chartFiberNorm_le_hsNorm_on_superlevel
         = |tensorChartComponentRaw (I := I) (M := M) g r s T α IJ.1 IJ.2 x| ^ 2 := (sq_abs _).symm
       _ ≤ (Dmax * hsn) ^ 2 := by
           exact pow_le_pow_left₀ habs_nn h' 2
-  -- Sum over the IJ pairs.
   have h_sum_sq : (∑ Idx : Fin r → Fin (Module.finrank ℝ E),
         ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
           (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx x) ^ 2)
         ≤ npairs * (Dmax * hsn) ^ 2 := by
     rw [hnp_def]
-    -- Rewrite the double sum as a sum over the product type.
     rw [← Fintype.sum_prod_type']
     refine (Finset.sum_le_sum (fun IJ _ => h_each IJ)).trans ?_
     rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
-  -- Combine with the off-centre fibre core.
   have h_sq : ‖T.toSection x‖ ^ 2 ≤ (Real.sqrt (C₁ * npairs) * Dmax) ^ 2 * hsn ^ 2 := by
     refine h_core.trans ?_
     calc C₁ * (∑ Idx : Fin r → Fin (Module.finrank ℝ E),
@@ -1156,7 +1056,6 @@ private theorem chartFiberNorm_le_hsNorm_on_superlevel
           have hsq : Real.sqrt (C₁ * npairs) ^ 2 = C₁ * npairs :=
             Real.sq_sqrt (by positivity)
           nlinarith [hsq]
-  -- Take square roots.
   have hsec_nn : 0 ≤ ‖T.toSection x‖ := norm_nonneg _
   have hconst_nn : 0 ≤ Real.sqrt (C₁ * npairs) * Dmax := by positivity
   have h_rhs_sq : (Real.sqrt (C₁ * npairs) * Dmax) ^ 2 * hsn ^ 2 =
@@ -1166,8 +1065,6 @@ private theorem chartFiberNorm_le_hsNorm_on_superlevel
     _ ≤ Real.sqrt ((Real.sqrt (C₁ * npairs) * Dmax * hsn) ^ 2) := Real.sqrt_le_sqrt h_sq
     _ = Real.sqrt (C₁ * npairs) * Dmax * hsn :=
         Real.sqrt_sq (by positivity)
-
-/-! ## Step 8: global headline in the Riemannian fibre norm -/
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
@@ -1197,15 +1094,12 @@ theorem tensorPouSobolevHilbert_embedding_Ck_gNorm
   letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
   classical
-  -- Supercritical threshold for the Euclidean local-ball embedding.
   have hk : (Module.finrank ℝ E : ℝ) < 2 * (2 * k) := by
     have : Module.finrank ℝ E < 2 * (2 * k) := by omega
     exact_mod_cast this
-  -- Empty manifold: the universal statement is vacuous; take `C = 1`.
   rcases isEmpty_or_nonempty M with hMempty | hMne
   · exact ⟨1, one_pos, fun _T x => (hMempty.false x).elim⟩
   obtain ⟨x₀⟩ := hMne
-  -- The finite atlas-POU index finset is non-empty (its POU sums to `1`).
   set S : Finset M := chartAtlasPOU_finset (I := I) (M := M) with hS_def
   have hS_ne : S.Nonempty := by
     have hsum := chartAtlasPOU_finset_sum_eq_one (I := I) (M := M) x₀
@@ -1217,21 +1111,18 @@ theorem tensorPouSobolevHilbert_embedding_Ck_gNorm
   have hN_pos : 0 < N := Finset.card_pos.mpr hS_ne
   have hN_pos_real : (0 : ℝ) < N := by exact_mod_cast hN_pos
   have hcN_pos : (0 : ℝ) < 1 / N := by positivity
-  -- Per-chart constant on `K_α = {ρ_α ≥ 1/N}`.
   have h_perchart : ∀ α : M, ∃ Dα : ℝ, 0 ≤ Dα ∧ ∀ (T : SmoothCcTensor g r s),
       ∀ x ∈ {x : M | (1 / N : ℝ) ≤ (chartAtlasPOU I M α : M → ℝ) x},
         ‖T.toSection x‖ ≤ Dα *
           ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) T‖ := fun α =>
     chartFiberNorm_le_hsNorm_on_superlevel (I := I) (M := M) g r s k hk α hcN_pos
   choose Dfun hDfun_nn hDfun using h_perchart
-  -- Global constant: finite maximum over the active charts (plus 1).
   set C : ℝ := S.sup' hS_ne Dfun + 1 with hC_def
   have hSsup_nn : 0 ≤ S.sup' hS_ne Dfun := by
     obtain ⟨β, hβ⟩ := hS_ne
     exact le_trans (hDfun_nn β) (Finset.le_sup' Dfun hβ)
   have hC_pos : 0 < C := by rw [hC_def]; linarith
   refine ⟨C, hC_pos, fun T x => ?_⟩
-  -- Some active chart `α` has `ρ_α x ≥ 1/N` (the POU sums to `1` over `N` charts).
   have hsum := chartAtlasPOU_finset_sum_eq_one (I := I) (M := M) x
   rw [← hS_def] at hsum
   have h_exists_α : ∃ α ∈ S, (1 / N : ℝ) ≤ (chartAtlasPOU I M α : M → ℝ) x := by

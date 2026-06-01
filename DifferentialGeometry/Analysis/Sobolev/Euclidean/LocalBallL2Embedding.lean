@@ -52,12 +52,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EuN" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Quantitative subcritical tower descent (norm-tracking)
-
-The driver `tower_to_supercritical_quant` mirrors the membership-only driver
-`tower_to_supercritical` but carries a quantitative `wkpNorm` bound for the final
-supercritical exponent. -/
-
 /-- **Norm-tracking subcritical tower descent.**
 
 From `MemWkp (m + 1 + s) (ofReal p) f Ω` for a compactly-supported `f` with
@@ -85,7 +79,6 @@ private theorem tower_to_supercritical_quant
   induction s with
   | zero =>
       intro p hp_one _hreg hkp f _hf_cpt _hf_supp hf
-      -- `s = 0`: order `m + 1`, exponent `p > d`; identity descent.
       have hp_dim : (d : ℝ) < p := by
         have : ((0 + 1 : ℕ) : ℝ) = 1 := by norm_num
         rw [this, one_mul] at hkp
@@ -97,8 +90,7 @@ private theorem tower_to_supercritical_quant
       intro p hp_one hreg hkp f hf_cpt hf_supp hf
       have hp_ne_d : p ≠ (d : ℝ) := hreg.p_ne_n_of_one_le (by omega)
       rcases lt_or_gt_of_ne hp_ne_d with hp_lt | hp_gt
-      · -- Sub-critical: one quantitative tower step at order `m + 1 + s`.
-        have hp_pos : 0 < p := by linarith
+      · have hp_pos : 0 < p := by linarith
         have hf' : MemWkp (d := d) ((m + 1 + s) + 1) (ENNReal.ofReal p) f Ω := by
           have h_idx : m + 1 + (s + 1) = (m + 1 + s) + 1 := by ring
           rw [h_idx] at hf
@@ -129,17 +121,12 @@ private theorem tower_to_supercritical_quant
           exact hreg.tower_step hp_one hp_lt
         have h_mem_p1' : MemWkp (d := d) (m + 1 + s) (ENNReal.ofReal p_1) f Ω := by
           rw [hp_1_def]; exact h_mem_p1
-        -- Recurse.
         obtain ⟨q, hq_one, hq_dim, C', hC'_nn, h_mem_q, h_norm_q⟩ :=
           ih hp_1_one hreg_p_1 hkp_next hf_cpt hf_supp h_mem_p1'
-        -- Combine the two quantitative bounds.
         refine ⟨q, hq_one, hq_dim,
           C' * subcriticalConstant (m + 1 + s) d p,
           mul_nonneg hC'_nn (subcriticalConstant_nonneg _ _ _), h_mem_q, ?_⟩
-        -- `h_norm_p1` is in terms of order `(m + 1 + s) + 1 = m + 1 + (s + 1)`.
         have h_idx : m + 1 + (s + 1) = (m + 1 + s) + 1 := by ring
-        -- `wkpNorm (m+1) q f ≤ ofReal C' * wkpNorm (m+1+s) p_1 f`
-        --                    ≤ ofReal C' * ofReal subC * wkpNorm ((m+1+s)+1) p f
         have h_step_norm :
             wkpNorm (d := d) (m + 1 + s) (ENNReal.ofReal p_1) f Ω ≤
               ENNReal.ofReal (subcriticalConstant (m + 1 + s) d p) *
@@ -159,8 +146,7 @@ private theorem tower_to_supercritical_quant
                 wkpNorm (d := d) (m + 1 + (s + 1)) (ENNReal.ofReal p) f Ω := by
           rw [ENNReal.ofReal_mul hC'_nn, h_idx]; ring
         rw [← h_rhs_eq]; exact h_chain
-      · -- Super-critical: order drop, identity norm bound (`wkpNorm` is monotone).
-        refine ⟨p, hp_one, hp_gt, 1, by norm_num,
+      · refine ⟨p, hp_one, hp_gt, 1, by norm_num,
           MemWkp.le_of_le (by omega) hf, ?_⟩
         rw [ENNReal.ofReal_one, one_mul]
         exact wkpNorm_mono_order (d := d) (by omega) f Ω
@@ -201,8 +187,7 @@ private theorem tower_to_supercritical_quant_uniform
       intro p hp_one hreg hkp
       have hp_ne_d : p ≠ (d : ℝ) := hreg.p_ne_n_of_one_le (by omega)
       rcases lt_or_gt_of_ne hp_ne_d with hp_lt | hp_gt
-      · -- Sub-critical: one quantitative tower step at order `m + 1 + s`.
-        have hp_pos : 0 < p := by linarith
+      · have hp_pos : 0 < p := by linarith
         set p_1 : ℝ := (d : ℝ) * p / ((d : ℝ) - p) with hp_1_def
         have hd_pos : 0 < (d : ℝ) := by exact_mod_cast NeZero.pos d
         have hd_p_pos : 0 < (d : ℝ) - p := by linarith
@@ -220,7 +205,6 @@ private theorem tower_to_supercritical_quant_uniform
           rw [hp_1_def]; exact h_id
         have hreg_p_1 : RegularExponent.IsRegular (d : ℝ) p_1 (s + 1) := by
           rw [hp_1_def]; exact hreg.tower_step hp_one hp_lt
-        -- Recurse to obtain the (f-independent) exponent and constant.
         obtain ⟨q, hq_one, hq_dim, C', hC'_nn, h_uniform⟩ :=
           ih hp_1_one hreg_p_1 hkp_next
         refine ⟨q, hq_one, hq_dim,
@@ -257,20 +241,11 @@ private theorem tower_to_supercritical_quant_uniform
                 wkpNorm (d := d) (m + 1 + (s + 1)) (ENNReal.ofReal p) f Ω := by
           rw [ENNReal.ofReal_mul hC'_nn, h_idx]; ring
         rw [← h_rhs_eq]; exact h_chain
-      · -- Super-critical: order drop, identity norm bound.
-        refine ⟨p, hp_one, hp_gt, 1, by norm_num, ?_⟩
+      · refine ⟨p, hp_one, hp_gt, 1, by norm_num, ?_⟩
         intro f _hf_cpt _hf_supp hf
         refine ⟨MemWkp.le_of_le (by omega) hf, ?_⟩
         rw [ENNReal.ofReal_one, one_mul]
         exact wkpNorm_mono_order (d := d) (by omega) f Ω
-
-/-! ## Reverse bridge: `wkpNorm` of a smooth function ≤ sum of derivative `eLpNorm`s
-
-For a smooth, compactly-supported `ψ` with `tsupport ψ ⊆ Ω`, every iterated weak
-partial agrees a.e. on `Ω` with the corresponding iterated classical partial,
-whose pointwise norm is dominated by `‖iteratedFDeriv ℝ j ψ‖`.  Summing over the
-finitely-many multi-indices of each order yields the order-`k` `wkpNorm` bounded
-by `(d^k)` times the sum of derivative `L^p` norms. -/
 
 /-- Each iterated weak partial of a smooth compactly-supported function has
 `eLpNorm` bounded by the `eLpNorm` of the corresponding-order iterated
@@ -282,7 +257,6 @@ private theorem eLpNorm_iterWeakPartial_le_eLpNorm_iteratedFDeriv
     (hψ_cpt : HasCompactSupport ψ) (hψ_supp : tsupport ψ ⊆ Ω) :
     eLpNorm (iterWeakPartial (d := d) p j β ψ Ω) p (volume.restrict Ω) ≤
       eLpNorm (fun z => ‖iteratedFDeriv ℝ j ψ z‖) p (volume.restrict Ω) := by
-  -- iterWeakPartial =ᵐ iterClassicalPartial, then pointwise bound.
   have h_ae :=
     iterWeakPartial_smooth_ae_eq_iterClassicalPartial (d := d) hp_one hΩ_open j β
       hψ_smooth hψ_cpt hψ_supp
@@ -307,7 +281,6 @@ private theorem wkpNorm_le_sum_eLpNorm_iteratedFDeriv
   rw [wkpNorm_eq_sum, Finset.mul_sum]
   refine Finset.sum_le_sum (fun j hj => ?_)
   have hj_le : j ≤ k := by rw [Finset.mem_range] at hj; omega
-  -- Bound the multi-index sum by `card · (single eLpNorm)`.
   have h_card_le :
       ∑ _β : Fin j → Fin d,
           eLpNorm (fun z => ‖iteratedFDeriv ℝ j ψ z‖) p (volume.restrict Ω) ≤
@@ -320,13 +293,6 @@ private theorem wkpNorm_le_sum_eLpNorm_iteratedFDeriv
   refine le_trans (Finset.sum_le_sum (fun β _ => ?_)) h_card_le
   exact eLpNorm_iterWeakPartial_le_eLpNorm_iteratedFDeriv (d := d) hΩ_open hp_one
     j β hψ_smooth hψ_cpt hψ_supp
-
-/-! ## Finite-measure exponent descent (Hölder)
-
-On the finite-measure restricted measure `volume.restrict (ball x₀ R)`, the
-`L^{p'}` norm of a function is bounded by its `L²` norm times a power of the
-(finite) total measure, whenever `1 ≤ p' ≤ 2`.  This reconciles the
-subcritical-tower exponent `p' < 2` with the `L²` data on the ball. -/
 
 /-- Exponent descent `L^{p'} ≤ L²` on a ball of finite measure. -/
 private theorem eLpNorm_le_eLpNorm_two_mul_rpow_ball
@@ -347,12 +313,6 @@ private theorem eLpNorm_le_eLpNorm_two_mul_rpow_ball
     ENNReal.toReal_ofReal (by linarith)
   have h_toReal_two : ((2 : ℝ≥0∞)).toReal = (2 : ℝ) := by norm_num
   rwa [h_toReal_p', h_toReal_two] at h
-
-/-! ## Smooth iterated-derivative-norm `eLpNorm` finiteness on a ball
-
-For a smooth function `u` the `eLpNorm` of `‖iteratedFDeriv ℝ j u‖` over a ball
-is finite (the ball has finite measure and the integrand is continuous, hence
-bounded on the compact closed ball). -/
 
 /-- `eLpNorm (‖iteratedFDeriv ℝ j u‖) p` over a ball is finite for smooth `u`. -/
 private theorem smooth_iteratedFDeriv_norm_eLpNorm_ball_ne_top
@@ -381,12 +341,6 @@ private theorem smooth_iteratedFDeriv_norm_eLpNorm_ball_ne_top
     rw [norm_one, mul_one]
     exact hM z hz'
 
-/-! ## Quantitative `L²` cutoff–Leibniz bound
-
-For a smooth cutoff `χ` whose iterated derivatives up to order `j` are bounded by
-`Cχ`, the `L²` norm of `‖iteratedFDeriv ℝ j (χ·f)‖` over a ball is controlled by
-a constant times the sum over `i ≤ j` of the `L²` norms of `‖iteratedFDeriv ℝ i f‖`. -/
-
 /-- Pointwise–to–`eLpNorm` cutoff Leibniz bound at fixed order `j`. -/
 private theorem eLpNorm_iteratedFDeriv_smul_le
     {x₀ : EuN} {R : ℝ}
@@ -401,10 +355,8 @@ private theorem eLpNorm_iteratedFDeriv_smul_le
             (volume.restrict (Metric.ball x₀ R)) := by
   classical
   set μ : Measure EuN := volume.restrict (Metric.ball x₀ R) with hμ
-  -- The dominating summand functions.
   set g : ℕ → EuN → ℝ :=
     fun i z => (j.choose i : ℝ) * Cχ * ‖iteratedFDeriv ℝ (j - i) f z‖ with hg
-  -- Pointwise bound `‖∂ʲ(χf) z‖ ≤ ∑ᵢ g i z`.
   have h_pt : ∀ z : EuN,
       ‖(fun z => ‖iteratedFDeriv ℝ j (fun y => χ y * f y) z‖) z‖ ≤
         ‖(∑ i ∈ Finset.range (j + 1), g i) z‖ := by
@@ -428,7 +380,6 @@ private theorem eLpNorm_iteratedFDeriv_smul_le
           (j.choose i : ℝ) * Cχ * ‖iteratedFDeriv ℝ (j - i) f z‖ := by
       gcongr
     simpa [hg, mul_assoc] using h_step
-  -- `eLpNorm` monotonicity then triangle inequality.
   refine (eLpNorm_mono h_pt).trans ?_
   have h_meas : ∀ i ∈ Finset.range (j + 1), AEStronglyMeasurable (g i) μ := by
     intro i _
@@ -441,14 +392,11 @@ private theorem eLpNorm_iteratedFDeriv_smul_le
     exact hcont.aestronglyMeasurable
   refine (eLpNorm_sum_le h_meas (by norm_num : (1 : ℝ≥0∞) ≤ 2)).trans ?_
   refine Finset.sum_le_sum (fun i _ => ?_)
-  -- `eLpNorm (g i) 2 = ‖(j.choose i)·Cχ‖ₑ · eLpNorm (‖∂^{j-i}f‖) 2`.
   have h_smul : g i = ((j.choose i : ℝ) * Cχ) •
       (fun z => ‖iteratedFDeriv ℝ (j - i) f z‖) := by
     funext z; simp [hg, smul_eq_mul, mul_assoc]
   rw [h_smul, eLpNorm_const_smul,
     Real.enorm_eq_ofReal (mul_nonneg (Nat.cast_nonneg _) hCχ)]
-
-/-! ## Main theorem -/
 
 /-- **Quantitative local-ball `L²`-Sobolev pointwise embedding for smooth
 functions.**
@@ -471,31 +419,24 @@ theorem smooth_localBall_L2_pointwise_embedding
               (eLpNorm (fun z => ‖iteratedFDeriv ℝ j f z‖) 2
                 (volume.restrict (Metric.ball x₀ R))).toReal := by
   classical
-  -- Abbreviations.
   set Ω : Set EuN := Metric.ball x₀ R with hΩ_def
   have hΩ_open : IsOpen Ω := Metric.isOpen_ball
   have hd_pos : (0 : ℝ) < d := Nat.cast_pos.mpr (NeZero.pos d)
-  -- `K ≥ 1` from `d < 2K` and `d ≥ 1`.
   have hK_pos : 1 ≤ K := by
     by_contra h
     have hK0 : K = 0 := by omega
     rw [hK0] at hdK; simp at hdK; linarith [hd_pos, hdK]
-  -- `0 < 2*K - 1 + 1 = 2*K`.
   set s : ℕ := 2 * K - 1 with hs_def
   have hs1 : s + 1 = 2 * K := by omega
-  -- ## Step 1: smooth cutoff `χ = 1` on `closedBall (R/2)`, supported in `Ω`.
   have hball_sub : Metric.closedBall x₀ (R / 2) ⊆ Ω := by
     rw [hΩ_def]
     exact Metric.closedBall_subset_ball (by linarith)
   obtain ⟨δ, χ, hδ_pos, _hδ_sub, hχ_smooth, hχ_cpt, _hχ_range, hχ_one, hχ_supp⟩ :=
     exists_smooth_cutoff_with_neighborhood (d := d)
       (isCompact_closedBall x₀ (R / 2)) hΩ_open hball_sub
-  -- Uniform cutoff-derivative bound up to order `2K`.
   obtain ⟨Cχ, hCχ_nn, hCχ_bound⟩ :=
     exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport (d := d)
       hχ_smooth hχ_cpt (2 * K)
-  -- ## Step 2: a regular subcritical exponent `p' ∈ (1, 2)`.
-  -- Avoid the finitely many borderline exponents `d / m`, `1 ≤ m ≤ 2K`.
   have h_Ioo_inf : (Set.Ioo (1 : ℝ) 2).Infinite := Set.Ioo_infinite (by norm_num)
   obtain ⟨p', hp'_mem, hp'_notMem⟩ :=
     h_Ioo_inf.exists_notMem_finset
@@ -505,7 +446,6 @@ theorem smooth_localBall_L2_pointwise_embedding
   have hp'_pos : 0 < p' := by linarith
   have hreg : RegularExponent.IsRegular (d : ℝ) p' (2 * K) := by
     intro m hm hm_le hmp
-    -- If `m·p' = d` then `p' = d/m`, contradicting `p' ∉ image`.
     apply hp'_notMem
     rw [Finset.mem_image]
     refine ⟨m, Finset.mem_Icc.mpr ⟨hm, hm_le⟩, ?_⟩
@@ -521,16 +461,12 @@ theorem smooth_localBall_L2_pointwise_embedding
       _ ≤ 2 * K * p' := by
           apply mul_le_mul_of_nonneg_left hp'_one
           positivity
-  -- ## Step 3: the uniform tower — exponent `q > d`, constant `C₁`, both `f`-free.
   have hreg_s : RegularExponent.IsRegular (d : ℝ) p' (s + 1) := by rw [hs1]; exact hreg
   obtain ⟨q, hq_one, hq_dim, C₁, hC₁_nn, h_tower⟩ :=
     tower_to_supercritical_quant_uniform (d := d) hΩ_open 0 s hp'_one hreg_s hkp
-  -- ## Step 4: the order-0 Morrey sup bound at exponent `q`.
   obtain ⟨C₂, hC₂_nn, hC₂_bound⟩ :=
     DifferentialGeometry.Analysis.Sobolev.EuclideanMorrey.smooth_morrey_iteratedFDeriv_bound_uniform
       (d := d) (p := q) hq_dim (x₀ := x₀) (R := R) hR 0
-  -- ## Constants.
-  -- Hölder exponent-descent factor and the Leibniz / combinatorial constants.
   set Vexp : ℝ := (volume Ω ^ (1 / p' - 1 / (2 : ℝ))).toReal with hVexp_def
   have hVexp_nn : 0 ≤ Vexp := ENNReal.toReal_nonneg
   set Cleib : ℝ := (2 : ℝ) ^ (2 * K) * Cχ with hCleib_def
@@ -540,18 +476,14 @@ theorem smooth_localBall_L2_pointwise_embedding
     Finset.sum_nonneg (fun j _ => by positivity)
   set dpow : ℝ := ((d ^ (2 * K) : ℕ) : ℝ) with hdpow_def
   have hdpow_nn : 0 ≤ dpow := by positivity
-  -- The master constant.
   refine ⟨C₂ * (C₁ * (dpow * (Vexp * (Cleib * Npairs)))),
     by positivity, ?_⟩
-  -- ## Introduce `f` and the point `x`.
   intro f hf_smooth x hx
-  -- `χ·f` is smooth and compactly supported with `tsupport ⊆ Ω`.
   set χf : EuN → ℝ := fun y => χ y * f y with hχf_def
   have hχf_smooth : ContDiff ℝ (⊤ : ℕ∞) χf := hχ_smooth.mul hf_smooth
   have hχf_cpt : HasCompactSupport χf := hχ_cpt.mul_right
   have hχf_supp : tsupport χf ⊆ Ω :=
     (tsupport_smul_subset_left χ f).trans hχ_supp
-  -- `χf ∈ MemWkp (2K) p' Ω`.
   have hχf_mem_p' : MemWkp (d := d) (2 * K) (ENNReal.ofReal p') χf Ω :=
     MemWkp_of_smooth_compactSupport (d := d) hΩ_open hχf_smooth hχf_cpt hχf_supp
       (by rw [← ENNReal.ofReal_one]; exact ENNReal.ofReal_le_ofReal hp'_one) (2 * K)
@@ -559,11 +491,9 @@ theorem smooth_localBall_L2_pointwise_embedding
     have : 0 + 1 + s = 2 * K := by omega
     rw [this]; exact hχf_mem_p'
   obtain ⟨hχf_mem_q, h_tower_norm⟩ := h_tower hχf_cpt hχf_supp hχf_mem_p'_idx
-  -- ## Target sum and its finiteness.
   set T : ℝ := ∑ j ∈ Finset.range (2 * K + 1),
     (eLpNorm (fun z => ‖iteratedFDeriv ℝ j f z‖) 2 (volume.restrict Ω)).toReal with hT_def
   have hT_nn : 0 ≤ T := Finset.sum_nonneg (fun j _ => ENNReal.toReal_nonneg)
-  -- Finiteness of derivative `eLpNorm`s of `f` and `χf`.
   have hfin_f : ∀ (e : ℝ≥0∞) (j : ℕ),
       eLpNorm (fun z => ‖iteratedFDeriv ℝ j f z‖) e (volume.restrict Ω) ≠ ⊤ := by
     intro e j; rw [hΩ_def]
@@ -572,11 +502,9 @@ theorem smooth_localBall_L2_pointwise_embedding
       eLpNorm (fun z => ‖iteratedFDeriv ℝ j χf z‖) e (volume.restrict Ω) ≠ ⊤ := by
     intro e j; rw [hΩ_def]
     exact smooth_iteratedFDeriv_norm_eLpNorm_ball_ne_top (j := j) hχf_smooth
-  -- ## Step 5: Morrey on `χf` at `x ∈ ball (R/2)`.
   have hx_half : x ∈ Metric.ball x₀ (R / 2) :=
     Metric.ball_subset_ball (by linarith) hx
   have h_morrey := hC₂_bound (u := χf) hχf_smooth x hx_half
-  -- The Morrey RHS sum `S_q ≤ (wkpNorm 1 q χf Ω).toReal`.
   have hq_enn_one : (1 : ℝ≥0∞) ≤ ENNReal.ofReal q := by
     rw [← ENNReal.ofReal_one]; exact ENNReal.ofReal_le_ofReal hq_one
   set S_q : ℝ := ∑ j ∈ Finset.range (0 + 2),
@@ -587,11 +515,9 @@ theorem smooth_localBall_L2_pointwise_embedding
     have h_bridge :=
       eLpNorm_iteratedFDeriv_le_wkpNorm (d := d) hΩ_open hq_enn_one
         1 hχf_smooth hχf_cpt hχf_supp
-    -- `S_q = (∑ eLpNorm).toReal ≤ (wkpNorm).toReal`.
     rw [hS_q_def, show (0 + 2 : ℕ) = 1 + 1 by rfl,
       ← ENNReal.toReal_sum (fun j _ => hfin_χf _ j)]
     exact ENNReal.toReal_mono (wkpNorm_lt_top_of_memWkp hχf_mem_q).ne h_bridge
-  -- ## Step 6: tower bound at the `wkpNorm` level (in reals).
   have h_wk1_finite : wkpNorm (d := d) 1 (ENNReal.ofReal q) χf Ω ≠ ⊤ :=
     (wkpNorm_lt_top_of_memWkp hχf_mem_q).ne
   have h_wk2_finite : wkpNorm (d := d) (0 + 1 + s) (ENNReal.ofReal p') χf Ω ≠ ⊤ :=
@@ -605,7 +531,6 @@ theorem smooth_localBall_L2_pointwise_embedding
       ENNReal.mul_ne_top ENNReal.ofReal_ne_top h_wk2_finite
     have := ENNReal.toReal_mono h_mul_finite h_tower_norm
     rwa [ENNReal.toReal_mul, ENNReal.toReal_ofReal hC₁_nn] at this
-  -- ## Step 7: reverse bridge — `wkpNorm (2K) p' χf` ≤ d^{2K} · ∑ eLpNorm(‖∂ʲχf‖)_{p'}.
   set Wsum_p' : ℝ := ∑ j ∈ Finset.range (s + 1 + 1),
     (eLpNorm (fun z => ‖iteratedFDeriv ℝ j χf z‖) (ENNReal.ofReal p')
       (volume.restrict Ω)).toReal with hWsum_p'_def
@@ -625,7 +550,6 @@ theorem smooth_localBall_L2_pointwise_embedding
       exact (ENNReal.sum_lt_top.mpr (fun j _ => lt_of_le_of_ne le_top (hfin_χf _ j))).ne
     have h_toReal := ENNReal.toReal_mono h_sum_finite h
     rw [ENNReal.toReal_mul, ENNReal.toReal_sum (fun j _ => hfin_χf _ j)] at h_toReal
-    -- Reconcile `0+1+s` with `s+1`.
     have h_idx1 : 0 + 1 + s = s + 1 := by omega
     have h_idx2 : 0 + 1 + s + 1 = s + 1 + 1 := by omega
     rw [hWsum_p'_def, hdpow_def]
@@ -635,15 +559,12 @@ theorem smooth_localBall_L2_pointwise_embedding
     rw [h_dcast] at h_toReal
     rw [show (s + 1 + 1 : ℕ) = 0 + 1 + s + 1 by omega] at h_toReal ⊢
     convert h_toReal using 3
-  -- ## Step 8: Hölder descent `p' → 2` and `L²` cutoff–Leibniz, per order `j`.
-  -- Per-`j` bound `(eLpNorm(‖∂ʲχf‖)_{p'}).toReal ≤ Vexp · (2K+1) · Cleib · T`.
   have h_per_j : ∀ j ∈ Finset.range (s + 1 + 1),
       (eLpNorm (fun z => ‖iteratedFDeriv ℝ j χf z‖) (ENNReal.ofReal p')
           (volume.restrict Ω)).toReal ≤
         Vexp * (((j : ℝ) + 1) * (Cleib * T)) := by
     intro j hj
     have hj_le : j ≤ 2 * K := by rw [Finset.mem_range] at hj; omega
-    -- Hölder descent.
     have h_meas_χf : AEStronglyMeasurable
         (fun z => ‖iteratedFDeriv ℝ j χf z‖) (volume.restrict Ω) := by
       have h_iter_cont : Continuous (fun z : EuN => iteratedFDeriv ℝ j χf z) := by
@@ -654,11 +575,9 @@ theorem smooth_localBall_L2_pointwise_embedding
       hp'_one hp'_two (x₀ := x₀) (R := R)
       (g := fun z => ‖iteratedFDeriv ℝ j χf z‖) (by rw [hΩ_def] at h_meas_χf; exact h_meas_χf)
     rw [← hΩ_def] at h_hold
-    -- L² Leibniz bound on `‖∂ʲχf‖`.
     have h_leib := eLpNorm_iteratedFDeriv_smul_le (d := d) (x₀ := x₀) (R := R)
       hχ_smooth hf_smooth hCχ_nn j (fun i hi z => hCχ_bound z i (hi.trans hj_le))
     rw [← hΩ_def] at h_leib
-    -- Combine in ENNReal.
     have h_combined :
         eLpNorm (fun z => ‖iteratedFDeriv ℝ j χf z‖) (ENNReal.ofReal p')
             (volume.restrict Ω) ≤
@@ -668,7 +587,6 @@ theorem smooth_localBall_L2_pointwise_embedding
                 (volume.restrict Ω)) *
             (volume Ω) ^ (1 / p' - 1 / (2 : ℝ)) :=
       h_hold.trans (mul_le_mul' h_leib (le_refl _))
-    -- Finiteness of the dominating product.
     have h_sum_fin :
         (∑ i ∈ Finset.range (j + 1),
             ENNReal.ofReal ((j.choose i : ℝ) * Cχ) *
@@ -689,18 +607,14 @@ theorem smooth_localBall_L2_pointwise_embedding
                 (volume.restrict Ω)) *
             (volume Ω) ^ (1 / p' - 1 / (2 : ℝ)) ≠ ⊤ :=
       ENNReal.mul_ne_top h_sum_fin h_vol_fin
-    -- Take toReal.
     have h_toReal := ENNReal.toReal_mono h_prod_fin h_combined
     rw [ENNReal.toReal_mul, ENNReal.toReal_sum
       (fun i _ => ENNReal.mul_ne_top ENNReal.ofReal_ne_top (hfin_f _ (j - i)))] at h_toReal
     refine h_toReal.trans ?_
-    -- The descent factor is `Vexp`.
     rw [show ((volume Ω) ^ (1 / p' - 1 / (2 : ℝ))).toReal = Vexp from rfl]
-    -- Bound the real sum.
     rw [mul_comm Vexp _]
     refine mul_le_mul_of_nonneg_right ?_ hVexp_nn
     simp only [ENNReal.toReal_mul]
-    -- `∑ᵢ ((j.choose i)·Cχ)·(eLpNorm(‖∂^{j-i}f‖)₂).toReal ≤ (j+1)·(Cleib·T)`.
     have h_each : ∀ i ∈ Finset.range (j + 1),
         (ENNReal.ofReal ((j.choose i : ℝ) * Cχ)).toReal *
             (eLpNorm (fun z => ‖iteratedFDeriv ℝ (j - i) f z‖) 2
@@ -730,9 +644,6 @@ theorem smooth_localBall_L2_pointwise_embedding
     rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul] at h_sum_each
     refine h_sum_each.trans (le_of_eq ?_)
     push_cast; ring
-  -- ## Final assembly.
-  -- Chain: Morrey → bridge → tower → reverse bridge → per-`j` → count.
-  -- `Wsum_p' ≤ Vexp · (Cleib · Npairs) · T`.
   have h_idx_range : Finset.range (s + 1 + 1) = Finset.range (2 * K + 1) := by
     congr 1; omega
   have h_Wsum_le : Wsum_p' ≤ Vexp * (Cleib * Npairs) * T := by
@@ -742,13 +653,11 @@ theorem smooth_localBall_L2_pointwise_embedding
       exact Finset.sum_le_sum h_per_j
     refine h_sum_le.trans (le_of_eq ?_)
     rw [h_idx_range, hNpairs_def]
-    -- `∑_j Vexp·((j+1)·(Cleib·T)) = Vexp·(Cleib·(∑_j (j+1)))·T`.
     rw [← Finset.mul_sum]
     rw [show (∑ j ∈ Finset.range (2 * K + 1), ((j : ℝ) + 1) * (Cleib * T)) =
         (∑ j ∈ Finset.range (2 * K + 1), ((j : ℝ) + 1)) * (Cleib * T) from
       (Finset.sum_mul ..).symm]
     ring
-  -- The combined `wkpNorm`-side real bound.
   have h_wk_chain :
       (wkpNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal ≤
         C₁ * (dpow * (Vexp * (Cleib * Npairs) * T)) := by
@@ -756,20 +665,17 @@ theorem smooth_localBall_L2_pointwise_embedding
     refine mul_le_mul_of_nonneg_left ?_ hC₁_nn
     refine h_revbridge.trans ?_
     exact mul_le_mul_of_nonneg_left h_Wsum_le hdpow_nn
-  -- Morrey + bridge.
   have h_morrey_chain : ‖χf x‖ ≤ C₂ * (wkpNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal := by
     have h0 : ‖iteratedFDeriv ℝ 0 χf x‖ = ‖χf x‖ := by rw [norm_iteratedFDeriv_zero]
     rw [← h0]
     refine h_morrey.trans ?_
     exact mul_le_mul_of_nonneg_left h_Sq_le hC₂_nn
-  -- `χf x = f x` because `χ x = 1` near `x ∈ ball (R/4)`.
   have hχ_x : χ x = 1 := by
     refine hχ_one x ?_
     have hx_cb : x ∈ Metric.closedBall x₀ (R / 2) :=
       Metric.ball_subset_closedBall (Metric.ball_subset_ball (by linarith) hx)
     exact Metric.self_subset_cthickening _ hx_cb
   have hχf_x : χf x = f x := by rw [hχf_def]; simp [hχ_x]
-  -- Final calc.
   calc ‖f x‖ = ‖χf x‖ := by rw [hχf_x]
     _ ≤ C₂ * (wkpNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal := h_morrey_chain
     _ ≤ C₂ * (C₁ * (dpow * (Vexp * (Cleib * Npairs) * T))) :=

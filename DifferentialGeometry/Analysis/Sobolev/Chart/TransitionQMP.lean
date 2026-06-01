@@ -57,8 +57,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## The Borel-measurable representative of the chart-transition map -/
-
 /-- The Borel-measurable representative of `chartTransitionEuclid γ α`: it agrees
 with `chartTransitionEuclid γ α` on the chart overlap `chartOverlapEuclid γ α`
 and is `0` off it. Unlike the bare `chartTransitionEuclid γ α`, this function is
@@ -110,8 +108,6 @@ lemma chartTransitionEuclidRestr_measurable
   exact ContinuousOn.measurable_piecewise h_cont_on h_const_on
     h_overlap_open.measurableSet
 
-/-! ## The chart-transition map carries overlap-null sets to null sets -/
-
 /-- The preimage of `s` under `chartTransitionEuclid γ α`, intersected with the
 chart-`γ` overlap, is the image under `chartTransitionEuclid α γ` of `s`
 intersected with the chart-`α` overlap. This is the chart-transition analogue of
@@ -149,7 +145,6 @@ lemma chartTransitionEuclid_preimage_overlap_null
         (chartTransitionEuclid (I := I) (M := M) γ α ⁻¹' s ∩
           chartOverlapEuclid (I := I) (M := M) γ α) = 0 := by
   rw [chartTransitionEuclid_preimage_inter_overlap (I := I) (M := M) γ α s]
-  -- `chartTransitionEuclid α γ` is differentiable on the chart-`α` overlap.
   have h_diffOn : DifferentiableOn ℝ
       (chartTransitionEuclid (I := I) (M := M) α γ)
       (chartOverlapEuclid (I := I) (M := M) α γ) :=
@@ -164,8 +159,6 @@ lemma chartTransitionEuclid_preimage_overlap_null
     measure_mono_null Set.inter_subset_left hs
   exact MeasureTheory.addHaar_image_eq_zero_of_differentiableOn_of_addHaar_eq_zero
     (volume) h_diffOn_sub h_sub_null
-
-/-! ## Headline: quasi-measure-preservation -/
 
 /-- The chart-transition map (in its Borel-measurable representative) is
 quasi-measure-preserving from the volume restricted to the chart-`γ` overlap to
@@ -186,11 +179,9 @@ theorem chartTransitionEuclid_quasiMeasurePreserving_restrict
   have h_pre_meas : MeasurableSet
       (chartTransitionEuclidRestr (I := I) (M := M) γ α ⁻¹' s) :=
     chartTransitionEuclidRestr_measurable (I := I) (M := M) γ α hs_meas
-  -- Rewrite the pushed-forward measure as the volume of the preimage in the overlap.
   rw [MeasureTheory.Measure.map_apply
         (chartTransitionEuclidRestr_measurable (I := I) (M := M) γ α) hs_meas,
       MeasureTheory.Measure.restrict_apply h_pre_meas]
-  -- On the overlap the representative equals `chartTransitionEuclid γ α`.
   have h_inter_eq :
       chartTransitionEuclidRestr (I := I) (M := M) γ α ⁻¹' s ∩
           chartOverlapEuclid (I := I) (M := M) γ α =
@@ -202,8 +193,6 @@ theorem chartTransitionEuclid_quasiMeasurePreserving_restrict
     rw [chartTransitionEuclidRestr_eqOn_overlap (I := I) (M := M) γ α hy]
   rw [h_inter_eq]
   exact chartTransitionEuclid_preimage_overlap_null (I := I) (M := M) γ α hs_zero
-
-/-! ## Headline corollary: transport of almost-everywhere equalities -/
 
 /-- The Borel-measurable representative transports a.e.-equalities: if `f` and
 `h` agree almost everywhere on the chart-`α` overlap, then `f` and `h`
@@ -218,8 +207,6 @@ theorem chartTransitionEuclidRestr_comp_ae_eq_restrict
         (volume : Measure EuclN).restrict
           (chartOverlapEuclid (I := I) (M := M) γ α)]
       fun y => h (chartTransitionEuclidRestr (I := I) (M := M) γ α y) := by
-  -- The transition image of the chart-`γ` overlap lies in the chart-`α` overlap,
-  -- so the representative is quasi-measure-preserving into the chart-`α` overlap.
   have h_qmp_into :
       MeasureTheory.Measure.QuasiMeasurePreserving
         (chartTransitionEuclidRestr (I := I) (M := M) γ α)
@@ -240,8 +227,6 @@ theorem chartTransitionEuclidRestr_comp_ae_eq_restrict
     rw [MeasureTheory.Measure.map_apply
           (chartTransitionEuclidRestr_measurable (I := I) (M := M) γ α) hs_meas,
         MeasureTheory.Measure.restrict_apply h_pre_meas]
-    -- On the chart-`γ` overlap the representative lands in the chart-`α` overlap,
-    -- so the preimage of `s` may be replaced by the preimage of `s ∩ overlap`.
     have h_inter_eq :
         chartTransitionEuclidRestr (I := I) (M := M) γ α ⁻¹' s ∩
             chartOverlapEuclid (I := I) (M := M) γ α =
@@ -264,7 +249,6 @@ theorem chartTransitionEuclidRestr_comp_ae_eq_restrict
         exact ⟨hy_eq ▸ hys, hyΩ⟩
     rw [h_inter_eq]
     exact chartTransitionEuclid_preimage_overlap_null (I := I) (M := M) γ α hs_zero
-  -- Compose the a.e.-equality with the quasi-measure-preserving map.
   exact h_qmp_into.ae_eq hfh
 
 /-- Transport of a.e.-equalities, stated directly for `chartTransitionEuclid γ α`
@@ -282,8 +266,6 @@ theorem chartTransitionEuclid_comp_ae_eq_restrict
         (volume : Measure EuclN).restrict
           (chartOverlapEuclid (I := I) (M := M) γ α)]
       fun y => h (chartTransitionEuclid (I := I) (M := M) γ α y) := by
-  -- On the chart-`γ` overlap, `chartTransitionEuclid γ α` equals its representative;
-  -- pre-composition with an a.e.-equal argument preserves a.e.-equality.
   have h_repr := chartTransitionEuclidRestr_ae_eq_restrict (I := I) (M := M) γ α
   have h_f_repr : (fun y => f (chartTransitionEuclid (I := I) (M := M) γ α y))
       =ᵐ[(volume : Measure EuclN).restrict

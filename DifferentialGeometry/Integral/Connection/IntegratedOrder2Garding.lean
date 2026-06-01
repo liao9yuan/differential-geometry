@@ -90,8 +90,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## The diagonal Green identity at arbitrary rank -/
-
 set_option linter.unusedSectionVars false in
 /-- **Diagonal Green identity at rank `s`.** For a smooth compactly-supported
 `(0, s)`-tensor field `S`, the diagonal `L²` self-pairing of the covariant gradient
@@ -111,8 +109,6 @@ lemma tensorL2Inner_covGrad_self_eq_neg_rawConnLap_inner_gen
       - tensorL2Inner (I := I) (M := M) g 0 s
           (rawTensorConnLapSmooth (I := I) g 0 s S).toFun S.toFun :=
   tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_gen (I := I) (M := M) g s S S
-
-/-! ## The order-`1` covariant-gradient control at arbitrary rank -/
 
 set_option linter.unusedSectionVars false in
 /-- **First-order covariant-gradient `L²` control at arbitrary rank.** For a smooth
@@ -134,9 +130,7 @@ theorem covGrad_l2NormSq_le_rawConnLap_mul_self_gen
       tensorL2Norm (I := I) (M := M) g 0 s
           (rawTensorConnLapSmooth (I := I) g 0 s S).toFun *
         tensorL2Norm (I := I) (M := M) g 0 s S.toFun := by
-  -- Abbreviate the rough Laplacian field.
   set ΔS : SmoothCcTensor g 0 s := rawTensorConnLapSmooth (I := I) g 0 s S with hΔS_def
-  -- The diagonal Green identity: `‖∇S‖²_{L²} = − ⟨Δ_∇ S, S⟩_{L²}`.
   have hgreen :
       tensorL2Norm (I := I) (M := M) g 0 (s + 1)
           (covGrad (I := I) (M := M) g 0 s S).toFun ^ 2 =
@@ -146,20 +140,15 @@ theorem covGrad_l2NormSq_le_rawConnLap_mul_self_gen
     rw [hΔS_def]
     exact tensorL2Inner_covGrad_self_eq_neg_rawConnLap_inner_gen (I := I) (M := M) g s S
   rw [hgreen]
-  -- The cross pairing `⟨Δ_∇ S, S⟩_{L²}` is bounded in absolute value, via global
-  -- Cauchy–Schwarz, by `‖Δ_∇ S‖_{L²} · ‖S‖_{L²}`.
   have hcs := abs_tensorL2Inner_le (I := I) (M := M) g 0 s ΔS.toFun S.toFun
     (SmoothCcTensor.memL2_toFun (I := I) (M := M) ΔS)
     (SmoothCcTensor.memL2_toFun (I := I) (M := M) S)
     (SmoothCcTensor.integrable_inner_cross (I := I) (M := M) ΔS S)
-  -- `− x ≤ |x|`.
   have hneg_le :
       - tensorL2Inner (I := I) (M := M) g 0 s ΔS.toFun S.toFun ≤
         |tensorL2Inner (I := I) (M := M) g 0 s ΔS.toFun S.toFun| :=
     neg_le_abs _
   exact le_trans hneg_le hcs
-
-/-! ## The integrated order-`2` Gårding reduction -/
 
 set_option linter.unusedSectionVars false in
 /-- **Order-`2` Gårding from the integrated curvature cross-term bound.** For a smooth
@@ -215,7 +204,6 @@ theorem secondCovGrad_l2NormSq_le_of_cross_bound
             (rawTensorConnLapSmooth (I := I) g 0 s S).toFun ^ 2 +
           tensorL2Norm (I := I) (M := M) g 0 s S.toFun ^ 2) := by
   classical
-  -- Abbreviations for the four `L²` (first-power) norms appearing in the estimate.
   set nHess : ℝ := tensorL2Norm (I := I) (M := M) g 0 (s + 1 + 1)
     (covGrad (I := I) (M := M) g 0 (s + 1)
       (covGrad (I := I) (M := M) g 0 s S)).toFun with hnHess_def
@@ -224,11 +212,9 @@ theorem secondCovGrad_l2NormSq_le_of_cross_bound
   set nLap : ℝ := tensorL2Norm (I := I) (M := M) g 0 s
     (rawTensorConnLapSmooth (I := I) g 0 s S).toFun with hnLap_def
   set nS : ℝ := tensorL2Norm (I := I) (M := M) g 0 s S.toFun with hnS_def
-  -- Non-negativity of all four norms.
   have hnGrad_nn : 0 ≤ nGrad := tensorL2Norm_nonneg (I := I) (M := M) g 0 (s + 1) _
   have hnLap_nn : 0 ≤ nLap := tensorL2Norm_nonneg (I := I) (M := M) g 0 s _
   have hnS_nn : 0 ≤ nS := tensorL2Norm_nonneg (I := I) (M := M) g 0 s _
-  -- The integrated order-`2` Weitzenböck identity: `nHess² = nLap² − ⟨Curv, ∇S⟩`.
   have hweitz :
       nHess ^ 2 =
         nLap ^ 2 -
@@ -240,13 +226,9 @@ theorem secondCovGrad_l2NormSq_le_of_cross_bound
             (covGrad (I := I) (M := M) g 0 s S).toFun := by
     rw [hnHess_def, hnLap_def]
     exact weitzenbock_integrated_covGrad_l2_normSq (I := I) (M := M) g s S
-  -- The order-`1` control: `nGrad² ≤ nLap · nS`.
   have horder1 : nGrad ^ 2 ≤ nLap * nS := by
     rw [hnGrad_def, hnLap_def, hnS_def]
     exact covGrad_l2NormSq_le_rawConnLap_mul_self_gen (I := I) (M := M) g s S
-  -- The conclusion is, after the `set` folding, `nHess² ≤ (2 + 2·Ccross)·(nLap² + nS²)`.
-  -- From the Weitzenböck identity and the cross-term hypothesis (in the `nGrad`/`nS`
-  -- form), bound `nHess²` by `nLap² + Ccross · (nGrad² + nS · nGrad)`.
   have hstep1 : nHess ^ 2 ≤ nLap ^ 2 + Ccross * (nGrad ^ 2 + nS * nGrad) := by
     have hcross' :
         - tensorL2Inner (I := I) (M := M) g 0 (s + 1)
@@ -257,27 +239,17 @@ theorem secondCovGrad_l2NormSq_le_of_cross_bound
               (covGrad (I := I) (M := M) g 0 s S).toFun ≤
           Ccross * (nGrad ^ 2 + nS * nGrad) := by
       rw [hnGrad_def, hnS_def]; exact hcross
-    -- `nHess² = nLap² + (− ⟨Curv, ∇S⟩) ≤ nLap² + Ccross·(nGrad² + nS·nGrad)`.
     rw [hweitz]
     linarith [hcross']
-  -- Young / order-`1` absorption on the right-hand side.
-  -- (i) `nGrad² ≤ nLap · nS`.
-  -- (ii) `nS · nGrad ≤ ½ (nS² + nGrad²) ≤ ½ nS² + ½ nLap · nS` (using (i)).
-  -- (iii) `nLap · nS ≤ ½ (nLap² + nS²)` (Young).
-  -- Hence `nGrad² + nS·nGrad ≤ 2·(nLap² + nS²)` after collecting, and the leading
-  -- `nLap²` from the Weitzenböck term is folded in.
   have hyoung_ls : nLap * nS ≤ (nLap ^ 2 + nS ^ 2) / 2 := by
     nlinarith [sq_nonneg (nLap - nS)]
   have hyoung_sg : nS * nGrad ≤ (nS ^ 2 + nGrad ^ 2) / 2 := by
     nlinarith [sq_nonneg (nS - nGrad)]
-  -- Combine the two Young bounds with the order-`1` control to dominate the bracket.
   have hbracket : nGrad ^ 2 + nS * nGrad ≤ 2 * (nLap ^ 2 + nS ^ 2) := by
     have h1 : nGrad ^ 2 ≤ (nLap ^ 2 + nS ^ 2) / 2 := le_trans horder1 hyoung_ls
     have h2 : nS * nGrad ≤ (nS ^ 2 + nGrad ^ 2) / 2 := hyoung_sg
     have h3 : nGrad ^ 2 ≤ (nLap ^ 2 + nS ^ 2) / 2 := h1
     nlinarith [h1, h2, h3]
-  -- Assemble: `nHess² ≤ nLap² + Ccross·(bracket) ≤ nLap² + 2·Ccross·(nLap² + nS²)`,
-  -- and `nLap² ≤ 2·(nLap² + nS²)`, so the total is `(2 + 2·Ccross)·(nLap² + nS²)`.
   have hkey : Ccross * (nGrad ^ 2 + nS * nGrad) ≤ Ccross * (2 * (nLap ^ 2 + nS ^ 2)) :=
     mul_le_mul_of_nonneg_left hbracket hCcross
   have hnLapSq_nn : 0 ≤ nLap ^ 2 := sq_nonneg _

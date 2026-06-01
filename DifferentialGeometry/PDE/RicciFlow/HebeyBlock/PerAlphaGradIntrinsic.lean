@@ -52,14 +52,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Inactive-`α` vanishing (chart-locality-free) -/
 
 /-- On a chart base point `α` that is **not** active (its partition-of-unity
 weight is identically zero), the gradient self-inner square-root integrand of
@@ -116,8 +112,6 @@ private lemma eLpNorm_sqrt_g_inner_gradFun_eq_zero_of_inactive_intrinsic
     simp
   rw [h_integrand_zero]
   exact eLpNorm_zero
-
-/-! ## Per-`α` gradient constants and their sum over the active finset -/
 
 private noncomputable def perAlphaGradConstant
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) : ℝ :=
@@ -186,9 +180,6 @@ private lemma perAlphaGradConstant_le_totalActiveGradConstant
     Finset.sum_nonneg (fun β _ =>
       perAlphaGradConstant_intrinsic_nonneg (I := I) (M := M) g r s β)
   linarith
-
-/-! ## Headline `α`-uniform `L²` bound for the gradient self-inner
-square-root integrand -/
 
 /-- **Intrinsic headline theorem (α-uniform L² bound for the metric self-inner
 square-root of the gradient of chart-frame scalar components).** For a closed

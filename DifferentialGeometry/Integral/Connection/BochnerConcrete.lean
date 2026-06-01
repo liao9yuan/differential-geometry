@@ -77,10 +77,6 @@ variable [SigmaCompactSpace M] [T2Space M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Helper: Hilbert-Schmidt-type contraction in the model basis
-
-Apply `orthonormal_basis_bilin_trace` to the bilinear form `(z, w) ↦ g(T(z), T(w))`. -/
-
 /-- For a continuous linear self-map `T : T_x M →L T_x M` and any `g_x`-orthonormal
 frame `B`, the orthonormal-frame Hilbert-Schmidt norm squared equals the inverse Gram
 contraction of `g(T(e_k), T(e_l))`:
@@ -103,10 +99,8 @@ private theorem sum_g_inner_T_self_eq_invGram_sum
             g.inner x (T ((chartModelBasis E) k))
               (T ((chartModelBasis E) l)) := by
   classical
-  -- Define Hb(z, w) := g.inner x (T z) (T w) as a continuous bilinear form.
   set Hb : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
     (((g.inner x).comp T).flip.comp T).flip with hHb_def
-  -- Application formula.
   have hHb_apply : ∀ z w : TangentSpace I x,
       Hb z w = g.inner x (T z) (T w) := by
     intro z w
@@ -116,10 +110,7 @@ private theorem sum_g_inner_T_self_eq_invGram_sum
         ContinuousLinearMap.comp_apply,
         ContinuousLinearMap.flip_apply,
         ContinuousLinearMap.comp_apply]
-  -- Apply orthonormal_basis_bilin_trace.
   have htrace := orthonormal_basis_bilin_trace (I := I) g x Hb B hB
-  -- htrace : ∑ i, Hb (B i) (B i) = ∑ k l, G^{kl} * Hb e_k e_l.
-  -- Rewrite both sides via hHb_apply.
   rw [show (∑ i : Fin (Module.finrank ℝ E),
         g.inner x (T (B i)) (T (B i))) =
         ∑ i : Fin (Module.finrank ℝ E), Hb (B i) (B i) from
@@ -130,13 +121,6 @@ private theorem sum_g_inner_T_self_eq_invGram_sum
   refine Finset.sum_congr rfl ?_
   intro l _
   rw [hHb_apply]
-
-/-! ## Helper: model-basis decomposition for `g.inner x v`
-
-For any tangent vector `v` and model-basis index `n`, the inner product
-`g.inner x v (b n)` decomposes as a sum of model-basis components weighted by the Gram
-matrix. From this we derive that the model-basis component of `v` (i.e., `b.repr v n`)
-admits an inverse-Gram-weighted formula: `b.repr v n = ∑_m G^{nm} g.inner x v (b m)`. -/
 
 /-- The metric inner product on the model basis equals the chart Gram matrix entry. -/
 private lemma g_inner_modelBasis_eq_chartGram
@@ -161,10 +145,8 @@ private lemma g_inner_modelBasis_first_decomp
           chartGramMatrix (I := I) g x x p n := by
   classical
   set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E with hb_def
-  -- Decompose v in the model basis.
   have hv_eq : v = ∑ p : Fin (Module.finrank ℝ E), b.repr v p • b p :=
     (Module.Basis.sum_repr b v).symm
-  -- Apply g.inner x · (b n) to both sides.
   rw [show g.inner x v =
       g.inner x (∑ p : Fin (Module.finrank ℝ E), b.repr v p • b p) from
     congrArg (g.inner x) hv_eq]
@@ -194,10 +176,6 @@ private lemma modelBasis_repr_eq_invGram_sum
           g.inner x v ((chartModelBasis E) m) := by
   classical
   set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E with hb_def
-  -- ∑ m G^{nm} g(v, b_m) = ∑ m G^{nm} (∑ p (b.repr v p) G_{pm})
-  --                     = ∑ p (b.repr v p) (∑ m G^{nm} G_{pm})
-  -- Using G^{-1}: ∑ m G^{nm} G_{pm} = δ^n_p, so the result is (b.repr v n).
-  -- Substitute the inner sum.
   have h_inner : ∀ m : Fin (Module.finrank ℝ E),
       g.inner x v (b m) =
         ∑ p : Fin (Module.finrank ℝ E),
@@ -214,7 +192,6 @@ private lemma modelBasis_repr_eq_invGram_sum
     refine Finset.sum_congr rfl ?_
     intro m _
     rw [h_inner m]]
-  -- Distribute and reorder.
   rw [show (∑ m : Fin (Module.finrank ℝ E),
         chartInvGramMatrix (I := I) g x x n m *
           (∑ p : Fin (Module.finrank ℝ E),
@@ -224,7 +201,6 @@ private lemma modelBasis_repr_eq_invGram_sum
           (∑ m : Fin (Module.finrank ℝ E),
             chartInvGramMatrix (I := I) g x x n m *
               chartGramMatrix (I := I) g x x p m) from by
-    -- ∑ m c * (∑ p A_p * B_m) = ∑ m ∑ p c * A_p * B_m = ∑ p A_p * (∑ m c * B_m).
     rw [show (∑ m : Fin (Module.finrank ℝ E),
             chartInvGramMatrix (I := I) g x x n m *
               (∑ p : Fin (Module.finrank ℝ E),
@@ -243,18 +219,12 @@ private lemma modelBasis_repr_eq_invGram_sum
     refine Finset.sum_congr rfl ?_
     intro m _
     ring]
-  -- Inner sum: ∑ m G^{nm} G_{pm} = (G G^{-1})^n_p (after reordering) = δ^n_p?
-  -- Actually: (G^{-1} G)_{n p} = ∑ m G^{-1}_{nm} G_{m p} = δ_{n p}.
-  -- But we have G^{nm} G_{pm} — note G_{pm} (not G_{mp}), and G is symmetric.
-  -- So ∑ m G^{nm} G_{pm} = ∑ m G^{nm} G_{mp} (by G symmetry) = (G^{-1} G)_{n p} = δ_{n p}.
-  -- For matrix products, this is precisely (chartInvGram * chartGram) n p.
   have h_inner_collapse : ∀ p : Fin (Module.finrank ℝ E),
       (∑ m : Fin (Module.finrank ℝ E),
         chartInvGramMatrix (I := I) g x x n m *
           chartGramMatrix (I := I) g x x p m) =
         (if n = p then (1 : ℝ) else 0) := by
     intro p
-    -- chartGramMatrix is symmetric: G_{pm} = G_{mp}.
     have hsymm : ∀ m : Fin (Module.finrank ℝ E),
         chartGramMatrix (I := I) g x x p m =
           chartGramMatrix (I := I) g x x m p := by
@@ -270,7 +240,6 @@ private lemma modelBasis_repr_eq_invGram_sum
       refine Finset.sum_congr rfl ?_
       intro m _
       rw [hsymm m]]
-    -- Now this is exactly (chartInvGram * chartGram) n p.
     have hxbase : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
       mem_baseSet_trivializationAt E (TangentSpace I) x
     have hidentity := chartInvGramMatrix_mul_chartGramMatrix
@@ -293,16 +262,12 @@ private lemma modelBasis_repr_eq_invGram_sum
     refine Finset.sum_congr rfl ?_
     intro p _
     rw [h_inner_collapse p]]
-  -- Collapse the sum to the term `p = n`.
   rw [Finset.sum_eq_single n]
   · rw [if_pos rfl, mul_one]
   · intro p _ hpn
     rw [if_neg (fun h => hpn h.symm), mul_zero]
   · intro hn
     exact absurd (Finset.mem_univ n) hn
-
-/-! ## Main bridge: orthonormal-frame Frobenius equals chart-coordinate metric
-Frobenius. -/
 
 /-- **Unconditional bridge: orthonormal-frame Frobenius equals chart-coordinate metric
 Frobenius.** For a smooth scalar `f : M → ℝ` on a smooth boundaryless Riemannian
@@ -316,7 +281,6 @@ theorem frobeniusSq_grad_vector_eq_chartHessFrobeniusSq
       chartHessFrobeniusSq (I := I) g f x := by
   classical
   set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E with hb_def
-  -- Define T : T_x M →L T_x M via T(v) := (LeviCivita g) (∇f) x v.
   set T : TangentSpace I x →L[ℝ] TangentSpace I x :=
     (LeviCivita (I := I) g).toFun
       (fun b => gradFun (I := I) g f b) x with hT_def
@@ -325,49 +289,31 @@ theorem frobeniusSq_grad_vector_eq_chartHessFrobeniusSq
   have hB_orth : ∀ i j : Fin (Module.finrank ℝ E),
       g.inner x (B i) (B j) = if i = j then (1 : ℝ) else 0 := fun i j =>
     smoothOrthoFrame_orthonormal_at_center (I := I) g x i j
-  -- Step 1: frobeniusSq_grad_vector g (∇f) x = ∑_i g(T(B_i), T(B_i)).
   have hStep1 : frobeniusSq_grad_vector (I := I) g
         (fun b => gradFun (I := I) g f b) x =
       ∑ i : Fin (Module.finrank ℝ E),
         g.inner x (T (B i)) (T (B i)) := by
     rw [frobeniusSq_grad_vector_def]
   rw [hStep1]
-  -- Step 2: ∑_i g(T(B_i), T(B_i)) = ∑_{kl} G^{kl} g(T(e_k), T(e_l)).
   rw [sum_g_inner_T_self_eq_invGram_sum (I := I) g x T B hB_orth]
-  -- Step 3: Decompose g(T(e_k), T(e_l)) in the model basis.
-  -- g(T(e_k), T(e_l)) = ∑_n (b.repr (T e_l) n) * g(T(e_k), e_n).
-  -- And (b.repr (T e_l) n) = ∑_m G^{nm} g(T(e_l), e_m).
-  -- And g(T(e_k), e_n) = abstractHessian g f x e_k e_n = chartHessianTensor g x f k n x.
-  -- And g(T(e_l), e_m) = chartHessianTensor g x f l m x.
-  -- So g(T(e_k), T(e_l)) = ∑_n (∑_m G^{nm} chartHessianTensor l m x) chartHessianTensor k n x
-  --                     = ∑_{mn} G^{nm} chartHessianTensor l m x chartHessianTensor k n x.
-  -- Substitute this expansion.
   have hM : chartHessianMatrixIdentity (I := I) g f x :=
     chartHessianMatrixIdentity_holds (I := I) g hf x
-  -- Helper: g(T(e_k), e_n) = chartHessianTensor g x f k n x.
   have h_TE_eq : ∀ k n : Fin (Module.finrank ℝ E),
       g.inner x (T (b k)) (b n) =
         chartHessianTensor (I := I) g x f k n x := by
     intro k n
-    -- T(e_k) = (LC g)(∇f) x e_k. By abstractHessian_eq_inner_cov_gradFun_extend,
-    -- g(T(e_k), b_n) = abstractHessian g f x e_k b_n.
-    -- Then by hM, abstractHessian g f x e_k e_n = chartHessianTensor g x f k n x.
     have h1 : g.inner x (T (b k)) (b n) =
         g.inner x ((LeviCivita (I := I) g).toFun
             (fun b => gradFun (I := I) g f b) x (b k)) (b n) := rfl
     rw [h1]
     rw [abstractHessian_eq_inner_cov_gradFun_extend (I := I) g hf x (b k) (b n)]
     exact hM k n
-  -- Decompose T(e_l) in model basis: T(e_l) = ∑_n (b.repr (T e_l) n) • b n.
-  -- Hence g(T(e_k), T(e_l)) = ∑_n (b.repr (T e_l) n) * g(T(e_k), b_n) =
-  --   ∑_n (b.repr (T e_l) n) * chartHessianTensor g x f k n x.
   have h_g_TT : ∀ k l : Fin (Module.finrank ℝ E),
       g.inner x (T (b k)) (T (b l)) =
         ∑ n : Fin (Module.finrank ℝ E),
           b.repr (T (b l)) n *
             chartHessianTensor (I := I) g x f k n x := by
     intro k l
-    -- Apply g.inner x (T (b k)) to T (b l) = ∑ n (b.repr (T (b l)) n) • b n.
     have hTl_eq : T (b l) = ∑ n : Fin (Module.finrank ℝ E),
         b.repr (T (b l)) n • b n :=
       (Module.Basis.sum_repr b (T (b l))).symm
@@ -384,7 +330,6 @@ theorem frobeniusSq_grad_vector_eq_chartHessFrobeniusSq
       (g.inner x (T (b k))).map_smul (b.repr (T (b l)) n) (b n)]
     rw [smul_eq_mul]
     rw [h_TE_eq k n]
-  -- Substitute h_g_TT into the LHS.
   rw [show (∑ k : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
           chartInvGramMatrix (I := I) g x x k l *
@@ -400,14 +345,12 @@ theorem frobeniusSq_grad_vector_eq_chartHessFrobeniusSq
     refine Finset.sum_congr rfl ?_
     intro l _
     rw [h_g_TT k l]]
-  -- Now expand b.repr (T (b l)) n via modelBasis_repr_eq_invGram_sum.
   have h_repr_T_eq : ∀ l n : Fin (Module.finrank ℝ E),
       b.repr (T (b l)) n =
         ∑ m : Fin (Module.finrank ℝ E),
           chartInvGramMatrix (I := I) g x x n m *
             g.inner x (T (b l)) (b m) :=
     fun l n => modelBasis_repr_eq_invGram_sum (I := I) g x (T (b l)) n
-  -- Substitute and use h_TE_eq for g(T(b l)) (b m) = chartHessianTensor g x f l m x.
   rw [show (∑ k : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
           chartInvGramMatrix (I := I) g x x k l *
@@ -430,7 +373,6 @@ theorem frobeniusSq_grad_vector_eq_chartHessFrobeniusSq
     refine Finset.sum_congr rfl ?_
     intro n _
     rw [h_repr_T_eq l n]
-    -- Substitute g(T(b l)) (b m) = chartHessianTensor g x f l m x.
     rw [show (∑ m : Fin (Module.finrank ℝ E),
           chartInvGramMatrix (I := I) g x x n m *
             g.inner x (T (b l)) (b m)) =
@@ -440,24 +382,7 @@ theorem frobeniusSq_grad_vector_eq_chartHessFrobeniusSq
       refine Finset.sum_congr rfl ?_
       intro m _
       rw [h_TE_eq l m]]]
-  -- Now we have a quadruple sum. Distribute and reorganize to match
-  -- chartHessFrobeniusSq g f x.
-  -- LHS at this point:
-  -- ∑_k ∑_l G^{kl} ∑_n (∑_m G^{nm} H_{lm}) * H_{kn}
-  -- = ∑_{klmn} G^{kl} * G^{nm} * H_{lm} * H_{kn}
-  -- chartHessFrobeniusSq:
-  -- ∑_{i j k l} G^{ik} G^{jl} H_{ij} H_{kl}
-  -- We need to match: relabel LHS variables (k_LHS, l_LHS, m_LHS, n_LHS) to RHS
-  -- (i_RHS, k_RHS, l_RHS, j_RHS):
-  -- (k_LHS = i, l_LHS = k, m_LHS = l, n_LHS = j)
-  -- ⇒ G^{kl} → G^{ik}, G^{nm} → G^{jl}, H_{lm} → H_{kl}, H_{kn} → H_{ij}
-  -- ⇒ G^{ik} G^{jl} H_{kl} H_{ij} = G^{ik} G^{jl} H_{ij} H_{kl} ✓.
-  -- After distribution and Finset.sum_comm shuffles, we get the RHS.
   rw [chartHessFrobeniusSq_def]
-  -- LHS: ∑ k l G^{kl} (∑ n (∑ m G^{nm} H_{lm}) * H_{kn})
-  --    = ∑ k l ∑ n ∑ m G^{kl} * G^{nm} * H_{lm} * H_{kn}
-  -- RHS: ∑ i j k l G^{ik} G^{jl} H_{ij} H_{kl}
-  -- Rewrite LHS as a quadruple sum.
   rw [show (∑ k : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
           chartInvGramMatrix (I := I) g x x k l *
@@ -486,15 +411,6 @@ theorem frobeniusSq_grad_vector_eq_chartHessFrobeniusSq
     refine Finset.sum_congr rfl ?_
     intro m _
     ring]
-  -- LHS now: ∑ k l n m G^{kl} G^{nm} H_{lm} H_{kn}.
-  -- RHS: ∑ i j k l G^{ik} G^{jl} H_{ij} H_{kl}.
-  -- Reorder LHS to match: rename (k → i, l → k, n → j, m → l):
-  -- ∑ i k j l G^{ik} G^{jl} H_{kl} H_{ij}.
-  -- Then commute multiplications: G^{ik} G^{jl} H_{kl} H_{ij} = G^{ik} G^{jl} H_{ij} H_{kl}.
-  -- Use Finset.sum_comm to rearrange the order of summation.
-  -- Goal LHS: ∑ k l n m ... → want ∑ i j k l = ∑ k_LHS n_LHS l_LHS m_LHS (with i=k_LHS,
-  -- j=n_LHS, k_RHS = l_LHS, l_RHS = m_LHS).
-  -- The order on LHS is (k, l, n, m); we want order (k, n, l, m) (i.e., swap middle two).
   have h_swap : (∑ k : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
           ∑ n : Fin (Module.finrank ℝ E),
@@ -515,11 +431,6 @@ theorem frobeniusSq_grad_vector_eq_chartHessFrobeniusSq
     intro k _
     rw [Finset.sum_comm]
   rw [h_swap]
-  -- Now the order is (k, n, l, m). Compare to RHS (i, j, k, l):
-  -- (k_LHS = i_RHS, n_LHS = j_RHS, l_LHS = k_RHS, m_LHS = l_RHS).
-  -- The inner expression: G^{kl} G^{nm} H_{lm} H_{kn} with l = k_RHS, m = l_RHS, k = i,
-  -- n = j becomes G^{i k_RHS} G^{j l_RHS} H_{k_RHS l_RHS} H_{ij}. After commuting H's,
-  -- this is G^{ik} G^{jl} H_{ij} H_{kl} = the RHS summand.
   refine Finset.sum_congr rfl ?_
   intro k _
   refine Finset.sum_congr rfl ?_
@@ -529,8 +440,6 @@ theorem frobeniusSq_grad_vector_eq_chartHessFrobeniusSq
   refine Finset.sum_congr rfl ?_
   intro m _
   ring
-
-/-! ## Step 5: unconditional pointwise Bochner-Weitzenböck identity (concrete form). -/
 
 /-- **Bochner-Weitzenböck identity for `|∇f|²` (concrete form).** For a smooth
 scalar `f : M → ℝ` on a boundaryless Riemannian manifold, the connection Laplacian
@@ -556,13 +465,10 @@ theorem bochner_pointwise_grad_normSq_of_boundaryless
               (gradFun (I := I) g f x) (gradFun (I := I) g f x) +
         2 * g.inner x (gradFun (I := I) g f x)
             (gradFun (I := I) g (Δ_g (I := I) g hf) x) := by
-  -- The abstract identity gives `(1/2) Δ_g (norm²grad) = ... + ricciTensor + frob`.
   have h := bochner_pointwise_abstract_unconditional (I := I) g hf x
-  -- `normGradSq_contMDiff = normGradSqFun_contMDiff` as smoothness witnesses (re-export).
   have hLHS_eq : Δ_g (I := I) g (normGradSq_contMDiff (I := I) g hf) x =
       Δ_g (I := I) g (normGradSqFun_contMDiff (I := I) g hf) x := rfl
   rw [hLHS_eq] at h
-  -- Multiply by 2.
   have h' : Δ_g (I := I) g (normGradSqFun_contMDiff (I := I) g hf) x =
       2 * (g.inner x (gradFun (I := I) g (Δ_g (I := I) g hf) x)
             (gradFun (I := I) g f x) +
@@ -572,7 +478,6 @@ theorem bochner_pointwise_grad_normSq_of_boundaryless
             (fun b => gradFun (I := I) g f b) x) := by
     linarith [h]
   rw [h']
-  -- Reorder to match the standard RHS order. Use `g.symm` on the cross term.
   rw [show g.inner x (gradFun (I := I) g (Δ_g (I := I) g hf) x)
           (gradFun (I := I) g f x) =
         g.inner x (gradFun (I := I) g f x)

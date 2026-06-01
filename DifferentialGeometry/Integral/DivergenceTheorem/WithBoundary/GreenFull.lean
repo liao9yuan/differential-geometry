@@ -79,29 +79,12 @@ namespace WithBoundary
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## File-local Borel-space instances
-
-Match the convention in the surrounding files: `M` carries its canonical Borel
-σ-algebra. Declared `local` to avoid leaking into callers. -/
-
 private local instance instMeasurableSpaceM
     {M : Type*} [TopologicalSpace M] : MeasurableSpace M := borel M
 
 private local instance instBorelSpaceM
     {M : Type*} [TopologicalSpace M] :
     @BorelSpace M _ (borel M) := letI : MeasurableSpace M := borel M; ⟨rfl⟩
-
-/-! ## The classical Laplace–Beltrami operator on an arbitrary smooth scalar
-
-Defined as the with-boundary divergence of the full smooth gradient section
-`grad_g_full_section g hh`. Contrary to `Δ_g_with_boundary`, **no
-interior-support hypothesis on `h` is required**: the gradient packaging is
-taken from `GradientGlobalSection.lean`, which proves global smoothness of
-the gradient section up to the boundary on the half-space model.
-
-The operator's value at any point `x : M` (interior or boundary) is:
-`Δ_g_classical g hh x = divergence_g_with_boundary g (grad_g_full_section g hh) x`.
--/
 
 section ClassicalLaplacian
 
@@ -133,15 +116,6 @@ noncomputable def Δ_g_classical
         (grad_g_full_section (M := M) (n := n) g hh) x := rfl
 
 end ClassicalLaplacian
-
-/-! ## Integrability of `divergence_g_with_boundary g X` on a compact manifold
-
-For any smooth tangent section `X` on a compact half-space-modelled smooth
-manifold-with-boundary, the with-boundary divergence is integrable against the
-canonical Riemannian volume measure. The proof uses the partition-of-unity
-decomposition of the volume measure (`riemannianVolumeMeasure_eq_finset_sum`)
-combined with chart-by-chart integrability bounds (mirroring the structure of
-`stokes_compact_via_pou`'s proof). -/
 
 section IntegrabilityHelpers
 
@@ -175,7 +149,6 @@ private lemma integrable_divergence_g_with_boundary
     chartAtlasPOU_isSubordinate I M
   have hsupp_each : ∀ α : M, tsupport ((ρ α : M → ℝ)) ⊆ (chartAt H α).source := by
     intro α; exact hρsub α
-  -- Continuity of each `(localDivergenceWithin g α X) * (ρ α)` on M.
   have hsummand_cont : ∀ α : M,
       Continuous (fun x : M => localDivergenceWithin (I := I) g α X x *
         (ρ α : M → ℝ) x) := by
@@ -204,7 +177,6 @@ private lemma integrable_divergence_g_with_boundary
         change localDivergenceWithin (I := I) g α X y * (ρ α : M → ℝ) y = 0
         rw [hρy, mul_zero]
       exact (continuousAt_const (y := (0 : ℝ))).congr hev.symm
-  -- Per-α: `tsupport (localDivergenceWithin g α X * ρ α) ⊆ (chart α source)`.
   have hsumm_supp : ∀ α : M,
       tsupport (fun x : M => localDivergenceWithin (I := I) g α X x *
         (ρ α : M → ℝ) x) ⊆ (chartAt H α).source := by
@@ -220,13 +192,11 @@ private lemma integrable_divergence_g_with_boundary
         rw [h, mul_zero]
       exact hρne
     exact htss.trans (hsupp_each α)
-  -- Integrability of each summand against `chartLocalMeasure α`.
   have hloc_int : ∀ α : M,
       Integrable
         (fun x : M => localDivergenceWithin (I := I) g α X x *
           (ρ α : M → ℝ) x) (chartLocalMeasure (I := I) g α) := by
     intro α
-    -- Continuous + compact-supported on chart source ⇒ integrable.
     have hsupp_compact : IsCompact (tsupport (fun x : M =>
         localDivergenceWithin (I := I) g α X x * (ρ α : M → ℝ) x)) :=
       .of_isClosed_subset isCompact_univ (isClosed_tsupport _) (Set.subset_univ _)
@@ -273,22 +243,13 @@ private lemma integrable_divergence_g_with_boundary
             rw [MeasureTheory.lintegral_indicator (isClosed_tsupport _).measurableSet]
             simp
       _ < ⊤ := ENNReal.mul_lt_top ENNReal.ofReal_lt_top hμ_supp
-  -- a.e. equality of `divergence_g_with_boundary g X * ρ α` and
-  -- `localDivergenceWithin g α X * ρ α` against `chartLocalMeasure g α`.
   have hae_eq : ∀ α : M,
       (fun x : M => divergence_g_with_boundary (I := I) g X x * (ρ α : M → ℝ) x)
         =ᵐ[chartLocalMeasure (I := I) g α]
       (fun x : M => localDivergenceWithin (I := I) g α X x * (ρ α : M → ℝ) x) := by
     intro α
-    -- Use the existing `chartLocal_integral_divergence_eq_localDivergenceWithin` argument:
-    -- the boundary set has chartLocalMeasure-zero, and on the chart source the
-    -- two divergences agree.
     have h_open : IsOpen (tsupport (ρ α : M → ℝ))ᶜ :=
       (isClosed_tsupport _).isOpen_compl
-    -- The ae-equality follows from the general boundary-vanishing fact.
-    -- We rebuild it locally: outside chart source, ρ α = 0.
-    -- Inside chart source ∩ I.interior M, the two divergences agree by Voss-Weyl.
-    -- Inside chart source ∩ I.boundary M, the chartLocalMeasure is zero.
     set bad : Set M := (chartAt H α).source ∩ I.boundary M with hbad_def
     have h_bad_measzero :
         chartLocalMeasure (I := I) g α bad = 0 :=
@@ -296,8 +257,6 @@ private lemma integrable_divergence_g_with_boundary
     refine MeasureTheory.ae_iff.mpr ?_
     apply MeasureTheory.measure_mono_null _ h_bad_measzero
     intro x hx
-    -- `hx : ¬ (divergence_g_with_boundary g X x * ρ α x = localDiv g α X x * ρ α x)`.
-    -- Show `x ∈ bad := chart source ∩ I.boundary M`.
     simp only [Set.mem_setOf_eq] at hx
     by_cases hx_chart : x ∈ (chartAt H α).source
     · by_cases hx_int : x ∈ I.interior M
@@ -306,34 +265,26 @@ private lemma integrable_divergence_g_with_boundary
             localDivergenceWithin (I := I) g α X x :=
           voss_weyl_divergence_with_boundary_formula (I := I) g α X hx_chart hx_int
         rw [hd_eq]
-      · -- `x ∉ I.interior M ⇒ x ∈ I.boundary M`.
-        refine ⟨hx_chart, ?_⟩
+      · refine ⟨hx_chart, ?_⟩
         rw [← I.compl_interior]
         exact hx_int
-    · -- `x ∉ chart source`. Then `ρ α x = 0` since `tsupport ρα ⊆ chart source`.
-      exfalso; apply hx
+    · exfalso; apply hx
       have hx_nots : x ∉ tsupport (ρ α : M → ℝ) :=
         fun h => hx_chart (hsupp_each α h)
       have hρ_zero : (ρ α : M → ℝ) x = 0 := by
         by_contra hne
         exact hx_nots (subset_tsupport _ hne)
       rw [hρ_zero, mul_zero, mul_zero]
-  -- Integrability of `divergence_g_with_boundary g X * ρ α` against
-  -- `chartLocalMeasure g α`.
   have hglob_int : ∀ α : M,
       Integrable
         (fun x : M => divergence_g_with_boundary (I := I) g X x *
           (ρ α : M → ℝ) x) (chartLocalMeasure (I := I) g α) :=
     fun α => (hloc_int α).congr (hae_eq α).symm
-  -- Volume-measure decomposition.
   have hVol_eq :=
     riemannianVolumeMeasure_eq_finset_sum (I := I) (M := M) g
   rw [hVol_eq]
-  -- Integrability against finset sum is equivalent to per-summand integrability.
   rw [integrable_finset_sum_measure]
-  -- Per-summand: integrability against `(chartLocalMeasure α).withDensity ρα`.
   intro α _hα
-  -- Convert via withDensity equivalence.
   have hρα_meas : Measurable (fun y : M => ENNReal.ofReal ((ρ α : M → ℝ) y)) :=
     ENNReal.measurable_ofReal.comp (ρ α).contMDiff.continuous.measurable
   have hρα_aemeas : AEMeasurable (fun y : M => ENNReal.ofReal ((ρ α : M → ℝ) y))
@@ -356,26 +307,6 @@ private lemma integrable_divergence_g_with_boundary
   exact hglob_int α
 
 end IntegrabilityHelpers
-
-/-! ## Green's first identity with a boundary surface integral
-
-For smooth scalars `f, h : M → ℝ` on a compact half-space-modelled smooth
-manifold-with-boundary `(M, g)`, Green's first identity reads
-
-  `∫_M ⟨∇f, ∇h⟩_g dμ_g + ∫_M f · Δ_g h dμ_g
-     = ∫_{∂M} f · g(ν, ∇h) dS`,
-
-where `ν := outwardNormal g` and `dS := surfaceMeasure g`. Here the boundary
-term is a genuine surface integral over `∂M`; this form is conditional on a
-per-chart surface-integral identification hypothesis (from
-`SurfaceIntegralIdentification.lean`) and an integrability hypothesis on the
-boundary integrand — see the theorem docstring.
-
-The proof applies the global Stokes theorem to `Y := f · ∇h` (using
-`grad_g_full_section` for the gradient packaging), the divergence Leibniz rule
-for the pointwise expansion, the supplied per-chart identification hypothesis
-for the boundary sum identification, and finally `integral_add` to split the
-volume integral. -/
 
 section GreenFull
 
@@ -451,7 +382,6 @@ theorem green_first_eq_boundary_surface_integral
         ∂(surfaceMeasure
           (I := modelWithCornersEuclideanHalfSpace n) (M := M) g) := by
   classical
-  -- Set abbreviations: `X := ∇h` (full section), `Y := f · ∇h`.
   set I' : ModelWithCorners ℝ (EuclideanSpace ℝ (Fin n)) (EuclideanHalfSpace n) :=
     modelWithCornersEuclideanHalfSpace n with hI'_def
   set X : Cₛ^∞⟮I'; EuclideanSpace ℝ (Fin n),
@@ -460,34 +390,24 @@ theorem green_first_eq_boundary_surface_integral
   set Y : Cₛ^∞⟮I'; EuclideanSpace ℝ (Fin n),
       (TangentSpace I' : M → Type _)⟯ :=
     smoothSmul (I := I') f hf X with hY_def
-  -- Apply the global Stokes theorem to `Y`.
   have hStokes :=
     integral_divergence_with_boundary_eq_boundaryFaceSum (I := I') g Y
-  -- Per-chart Leibniz rule.
   have h_leibniz : ∀ x : M,
       divergence_g_with_boundary (I := I') g Y x =
         f x * divergence_g_with_boundary (I := I') g X x +
           tangentSectionAction (I := I') X f x :=
     divergence_g_with_boundary_smoothSmul (I := I') g f hf X
-  -- Identification: `f · div(X) = f · Δ_g_classical g hh`.
   have h1 : ∀ x : M,
       f x * divergence_g_with_boundary (I := I') g X x =
         f x * Δ_g_classical (M := M) (n := n) g hh x := by
     intro x; rfl
-  -- Identification: `tangentSectionAction X f x = ⟨∇f, ∇h⟩`.
   have h2 : ∀ x : M,
       tangentSectionAction (I := I') X f x =
         g.inner x
           (gradFun (I := I') g f x)
           (gradFun (I := I') g h x) := by
     intro x
-    -- `tangentSectionAction X f x = g.inner x (X x) (gradFun g f x)` by Riesz duality
-    -- + `X x = gradFun g h x` by `grad_g_full_section_apply`.
     rw [tangentSectionAction_grad_g_with_boundary_eq_inner (I := I') g hf X x]
-    -- Now goal:
-    -- `g.inner x (X x) (grad_g_with_boundary g f x) =
-    --   g.inner x (gradFun g f x) (gradFun g h x)`.
-    -- `X x = gradFun g h x` def'l, and `grad_g_with_boundary = gradFun` def'l.
     change g.inner x
         (gradFun (I := I') g h x)
         (gradFun (I := I') g f x) =
@@ -495,9 +415,6 @@ theorem green_first_eq_boundary_surface_integral
         (gradFun (I := I') g f x)
         (gradFun (I := I') g h x)
     exact g.symm x _ _
-  -- Combined pointwise identity:
-  -- `divergence_g_with_boundary g Y x =
-  --   f x * Δ_g_classical g hh x + ⟨∇f, ∇h⟩ x`.
   have h_combined : ∀ x : M,
       divergence_g_with_boundary (I := I') g Y x =
         f x * Δ_g_classical (M := M) (n := n) g hh x +
@@ -506,7 +423,6 @@ theorem green_first_eq_boundary_surface_integral
             (gradFun (I := I') g h x) := by
     intro x
     rw [h_leibniz x, h1 x, h2 x]
-  -- Integrate both sides.
   have h_int_eq :
       ∫ x, divergence_g_with_boundary (I := I') g Y x
           ∂(riemannianVolumeMeasure (I := I') (M := M) g) =
@@ -517,7 +433,6 @@ theorem green_first_eq_boundary_surface_integral
           ∂(riemannianVolumeMeasure (I := I') (M := M) g) := by
     refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
     exact h_combined x
-  -- Integrability of the inner product `⟨∇f, ∇h⟩`: continuous on compact M.
   haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I') (M := M) g) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
       (I := I') (M := M) g
@@ -554,11 +469,9 @@ theorem green_first_eq_boundary_surface_integral
       exact ⟨C, fun x => hCmem ⟨x, Set.mem_univ _, rfl⟩⟩
     exact (integrable_const C).mono' h_inner_cont'.aestronglyMeasurable
       (Filter.Eventually.of_forall hC)
-  -- Integrability of `divergence_g_with_boundary g Y` (via POU decomposition).
   have h_div_Y_int : Integrable (divergence_g_with_boundary (I := I') g Y)
       (riemannianVolumeMeasure (I := I') (M := M) g) :=
     integrable_divergence_g_with_boundary (I := I') g Y
-  -- Pointwise identity packaged as a.e.-equality of integrands.
   have h_div_Y_ae : (fun x : M => divergence_g_with_boundary (I := I') g Y x)
       =ᵐ[riemannianVolumeMeasure (I := I') (M := M) g]
       (fun x : M => f x * Δ_g_classical (M := M) (n := n) g hh x +
@@ -566,7 +479,6 @@ theorem green_first_eq_boundary_surface_integral
           (gradFun (I := I') g f x)
           (gradFun (I := I') g h x)) :=
     Filter.Eventually.of_forall h_combined
-  -- Integrability of the sum (transfer from `h_div_Y_int`).
   have h_sum_int : Integrable (fun x : M =>
       f x * Δ_g_classical (M := M) (n := n) g hh x +
         g.inner x
@@ -574,7 +486,6 @@ theorem green_first_eq_boundary_surface_integral
           (gradFun (I := I') g h x))
       (riemannianVolumeMeasure (I := I') (M := M) g) :=
     h_div_Y_int.congr h_div_Y_ae
-  -- Integrability of `f * Δ_g_classical g hh`: difference of integrables.
   have h_fΔ_int : Integrable (fun x : M =>
       f x * Δ_g_classical (M := M) (n := n) g hh x)
       (riemannianVolumeMeasure (I := I') (M := M) g) := by
@@ -589,11 +500,8 @@ theorem green_first_eq_boundary_surface_integral
       funext x; ring
     rw [h_eq]
     exact h_sum_int.sub h_inner_int
-  -- Apply `integral_add` to split the integral.
   rw [h_int_eq] at hStokes
   rw [integral_add h_fΔ_int h_inner_int] at hStokes
-  -- `hStokes : ∫ f · Δ + ∫ ⟨∇f, ∇h⟩ = boundaryFaceSum g Y`.
-  -- Identify `boundaryFaceSum g Y` with the surface integral via I2.
   have h_BFS_eq :
       boundaryFaceSum (I := I') g Y =
         ∫ x : I'.boundary M,
@@ -605,7 +513,6 @@ theorem green_first_eq_boundary_surface_integral
     boundaryFaceSum_eq_surface_integral_of_chartIdentification
       (n := n) (M := M) g Y h_chart_iden h_int
   rw [h_BFS_eq] at hStokes
-  -- Rewrite `g.inner x.val (ν x) (Y x.val) = f x.val * g.inner x.val (ν x) (∇h x.val)`.
   have h_Y_inner : ∀ b : I'.boundary M,
       g.inner b.val
         (outwardNormal (I := I') (M := M) g b :
@@ -617,15 +524,12 @@ theorem green_first_eq_boundary_surface_integral
             TangentSpace _ b.val)
           (gradFun (I := I') g h b.val) := by
     intro b
-    -- `Y b.val = f b.val • X b.val = f b.val • gradFun g h b.val`
-    -- by `smoothSmul_apply` and `grad_g_full_section_apply`.
     have hY_b : (Y : ∀ x : M, TangentSpace I' x) b.val =
         f b.val • gradFun (I := I') g h b.val := by
       change f b.val • (X : ∀ x : M, TangentSpace I' x) b.val =
         f b.val • gradFun (I := I') g h b.val
       rfl
     rw [hY_b]
-    -- Linearity of g.inner in the second argument.
     rw [ContinuousLinearMap.map_smul, smul_eq_mul]
   have h_surf_eq :
       ∫ x : I'.boundary M,
@@ -643,8 +547,6 @@ theorem green_first_eq_boundary_surface_integral
           ∂(surfaceMeasure (I := I') (M := M) g) :=
     integral_congr_ae (Filter.Eventually.of_forall h_Y_inner)
   rw [h_surf_eq] at hStokes
-  -- Goal: `∫ ⟨∇f, ∇h⟩ + ∫ f · Δ = ∫ f · g(ν, ∇h) dS`.
-  -- hStokes says: `∫ f · Δ + ∫ ⟨∇f, ∇h⟩ = ∫ f · g(ν, ∇h) dS`.
   linarith
 
 end GreenFull

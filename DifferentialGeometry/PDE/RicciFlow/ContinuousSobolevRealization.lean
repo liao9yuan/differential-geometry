@@ -74,12 +74,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-! ## Pointwise section arithmetic
-
-These identities express the algebraic operations on `SmoothCcTensor` at the
-level of fibre values.  They are proved through the project's definitional
-`toSection_*` lemmas, avoiding the bundle-norm instance diamond. -/
-
 set_option linter.unusedSectionVars false in
 /-- The fibre value of a sum of sections is the sum of the fibre values. -/
 lemma smoothCcTensor_toSection_add_apply
@@ -112,13 +106,6 @@ lemma smoothCcTensor_toSection_zero_apply
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (x : M) :
     (0 : SmoothCcTensor g r s).toSection x = 0 := by
   rw [SmoothCcTensor.toSection_zero]; rfl
-
-/-! ## The `C⁰` Riemannian-fibre sup value
-
-The sup-of-fibre-norm value of a smooth compactly-supported section, in the
-genuine Riemannian fibre norm of the `(r, s)`-tensor bundle. At supercritical
-order `2k > dim M` the range is bounded above (by the embedding constant times
-the `H^{2k}` norm), so the `iSup` is a genuine finite real number. -/
 
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
@@ -259,29 +246,14 @@ lemma gSupVal_smul (g : SmoothRiemannianMetric I M) (r s k : ℕ)
   · subst hc
     rw [zero_smul, gSupVal_zero, abs_zero, zero_mul]
   · refine le_antisymm (gSupVal_smul_le (I := I) (M := M) g r s k hk c T) ?_
-    -- Reverse: |c| * gSupVal T ≤ gSupVal (c • T).
-    -- From gSupVal_smul_le applied to c⁻¹ and (c • T):
-    --   gSupVal T = gSupVal (c⁻¹ • (c • T)) ≤ |c⁻¹| * gSupVal (c • T).
     have hstep := gSupVal_smul_le (I := I) (M := M) g r s k hk c⁻¹ (c • T)
     rw [smul_smul, inv_mul_cancel₀ hc, one_smul] at hstep
     have hcpos : 0 < |c| := abs_pos.mpr hc
     rw [abs_inv] at hstep
-    -- gSupVal T ≤ |c|⁻¹ * gSupVal (c • T)
-    -- ⇒ |c| * gSupVal T ≤ gSupVal (c • T)
     have h2 : |c| * gSupVal (I := I) (M := M) g r s T ≤
         |c| * (|c|⁻¹ * gSupVal (I := I) (M := M) g r s (c • T)) :=
       mul_le_mul_of_nonneg_left hstep (le_of_lt hcpos)
     rwa [← mul_assoc, mul_inv_cancel₀ (ne_of_gt hcpos), one_mul] at h2
-
-/-! ## The abstract `C⁰` tensor-section Banach space
-
-The sup-of-fibre-norm seminorm `gSupVal` is, at supercritical order, a genuine
-`AddGroupSeminorm` (subadditive, symmetric, vanishing at zero) which is in
-addition absolutely homogeneous.  We package it on a fresh wrapper type
-`CSupTensor g r s k` of the smooth pre-Hilbert sections at order `2k`, derive
-its `SeminormedAddCommGroup` and `NormedSpace ℝ` structure, and complete it to a
-genuine Banach space `CSupBanach g r s k`.  This is the abstract,
-chart-locality-free `C⁰` space of `(r, s)`-tensor sections. -/
 
 /-- A fresh Lean wrapper around the order-`2k` smooth pre-Hilbert sections,
 carrying the `C⁰` Riemannian-fibre sup-seminorm (instead of the `H^{2k}`
@@ -499,12 +471,6 @@ instance instCSupBanachCompleteSpace
   (inferInstance :
     CompleteSpace (UniformSpace.Completion (CSupTensor g r s k)))
 
-/-! ## The smooth-level `C⁰` inclusion as a linear map into the Banach space
-
-On the dense smooth subspace `SmoothCcTensorHs g r s (2k)` the `C⁰`-valued
-inclusion is the composite of the `CSupTensor` wrapping with the canonical
-coercion into the completion `CSupBanach`. -/
-
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
@@ -538,7 +504,6 @@ lemma norm_smoothToC0Lin
       gSupVal (I := I) (M := M) g r s S.toCcTensor := by
   letI := csupSeminormedAddCommGroup (I := I) (M := M) g r s k hk
   letI := csupNormedSpace (I := I) (M := M) g r s k hk
-  -- smoothToC0Lin S = toComplₗᵢ (ofHs S), and toComplₗᵢ is a linear isometry.
   have hiso :=
     (UniformSpace.Completion.toComplₗᵢ :
         CSupTensor g r s k →ₗᵢ[ℝ]
@@ -561,8 +526,6 @@ lemma norm_coe_toCompl_eq_toHs
     (S : IntrinsicSobolev.SmoothCcTensorHs g r s (2 * k)) :
     ‖(S : TensorPouSobolevHilbert g r s (2 * k))‖ =
       ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) S.toCcTensor‖ := by
-  -- Both sides equal `‖S‖` in `SmoothCcTensorHs`: the LHS is the completion
-  -- coercion of `S`; the RHS is `‖↑(⟨S.toCcTensor⟩)‖` and `⟨S.toCcTensor⟩ = S`.
   have hrhs : SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) S.toCcTensor =
       ((⟨S.toCcTensor⟩ : IntrinsicSobolev.SmoothCcTensorHs g r s (2 * k)) :
         TensorPouSobolevHilbert g r s (2 * k)) := rfl
@@ -593,7 +556,6 @@ lemma exists_smoothToC0Lin_norm_le
   refine ⟨C, hCpos, fun S => ?_⟩
   rw [norm_smoothToC0Lin (I := I) (M := M) g r s k hk S,
     norm_coe_toCompl_eq_toHs (I := I) (M := M) g r s k S]
-  -- gSupVal (S.toCcTensor) = ⨆ x ‖S.toCcTensor.toSection x‖ ≤ C * ‖toHs(2k)‖.
   rcases isEmpty_or_nonempty M with hM | hM
   · rw [gSupVal, Real.iSup_of_isEmpty]
     exact mul_nonneg (le_of_lt hCpos) (norm_nonneg _)
@@ -601,8 +563,6 @@ lemma exists_smoothToC0Lin_norm_le
     refine Real.iSup_le (fun x => ?_)
       (mul_nonneg (le_of_lt hCpos) (norm_nonneg _))
     exact hC S.toCcTensor x
-
-/-! ## The continuous Sobolev embedding `H^{2k} → C⁰` as a continuous linear map -/
 
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup

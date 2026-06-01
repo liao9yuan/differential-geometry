@@ -105,23 +105,10 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## Topological prerequisite: the manifold interior is open
-
-This is `ModelWithCorners.isOpen_interior` at `n = ∞` (which satisfies
-`n ≠ 0`). We restate it here so that subsequent proofs can refer to a single
-named lemma. -/
-
 /-- `I.interior M` is open in `M`. -/
 private lemma isOpen_interior_M : IsOpen (I.interior M) :=
   I.isOpen_interior (M := M) (n := ∞)
     (by exact (by decide : (∞ : WithTop ℕ∞) ≠ 0))
-
-/-! ## Local-vanishing principle for the with-boundary divergence
-
-If a smooth tangent section `X` vanishes on an open neighborhood of a point
-`x`, then `divergence_g_with_boundary g X x = 0`. This is the with-boundary
-analogue of `divergence_g_zero_of_eventuallyEq_zero` from `Proper.lean`,
-proved directly via the within-derivative formulation. -/
 
 /-- If `X` vanishes on a neighborhood of an `x` lying in some chart source,
 then the chart-local with-boundary divergence at any chart whose source
@@ -138,32 +125,24 @@ private lemma localDivergenceWithin_zero_of_eventuallyEq_zero
     rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hx
   have hy_target : y ∈ (extChartAt I α).target := (extChartAt I α).map_source hxs
   have hsymm_y : (extChartAt I α).symm y = x := (extChartAt I α).left_inv hxs
-  -- `extChartAt I α.symm` is continuous at any chart-target point — without
-  -- needing the target to be open.
   have hcont_symm_at : ContinuousAt (extChartAt I α).symm y :=
     continuousAt_extChartAt_symm'' (I := I) (x := α) hy_target
-  -- Eventually-zero on the chart-target side, in the within-target filter.
   have hev_pre : ∀ i : Fin (Module.finrank ℝ E),
       (fun z : E => chartCoeffOnE (I := I) α X i z * chartDensityOnE (I := I) g α z)
         =ᶠ[𝓝[(extChartAt I α).target] y] (fun _ : E => (0 : ℝ)) := by
     intro i
-    -- `extChartAt I α.symm` viewed within `(extChartAt I α).target` is
-    -- `ContinuousWithinAt`, hence pulls neighborhoods of `x` back to within-target nbhds of `y`.
     have hcwa : ContinuousWithinAt (extChartAt I α).symm (extChartAt I α).target y := by
       have h := (continuousOn_extChartAt_symm (I := I) α) y hy_target
       exact h
-    -- `Tendsto symm (𝓝[T] y) (𝓝 ((symm) y)) = 𝓝 x`, so we can pull `hev`.
     have htendsto : Filter.Tendsto (extChartAt I α).symm
         (𝓝[(extChartAt I α).target] y) (𝓝 x) := by
       have h := hcwa.tendsto
       rw [hsymm_y] at h
       exact h
-    -- Pull-back: `X ∘ symm =ᶠ[𝓝[T] y] 0 ∘ symm`.
     have hpull : (fun z : E => (X : ∀ x, TangentSpace I x) ((extChartAt I α).symm z))
         =ᶠ[𝓝[(extChartAt I α).target] y]
         (fun z : E => (0 : ∀ x, TangentSpace I x) ((extChartAt I α).symm z)) :=
       htendsto.eventually hev
-    -- Membership of the target in within-target nbhds is automatic.
     have htarget_nhd : (extChartAt I α).target ∈ 𝓝[(extChartAt I α).target] y :=
       self_mem_nhdsWithin
     filter_upwards [hpull, htarget_nhd] with z hz htz
@@ -190,9 +169,6 @@ private lemma localDivergenceWithin_zero_of_eventuallyEq_zero
         (fun z => chartCoeffOnE (I := I) α X i z * chartDensityOnE (I := I) g α z) y = 0 := by
     intro i
     unfold partialDerivWithin
-    -- Use the within-version of `EventuallyEq.fderivWithin_eq`. The pointwise
-    -- equality at `y` requires showing the integrand is zero at `y`, which we get
-    -- from `hev_pre i` via `Filter.EventuallyEq.eq_of_nhdsWithin`.
     have hat_y : (fun z : E => chartCoeffOnE (I := I) α X i z * chartDensityOnE (I := I) g α z) y
         = (fun _ : E => (0 : ℝ)) y :=
       Filter.EventuallyEq.eq_of_nhdsWithin (hev_pre i) hy_target
@@ -224,8 +200,6 @@ lemma divergence_g_with_boundary_zero_of_eventuallyEq_zero
   rw [divergence_g_with_boundary_def]
   exact localDivergenceWithin_zero_of_eventuallyEq_zero (I := I) g x X
     (mem_chart_source H x) hev
-
-/-! ## Support of the with-boundary divergence -/
 
 set_option linter.unusedVariables false in
 /-- The support of `divergence_g_with_boundary g X` is contained in the
@@ -276,23 +250,6 @@ lemma hasCompactSupport_divergence_g_with_boundary
     (support_divergence_g_with_boundary_subset_of_interior_support
       (I := I) g X hX_int)
 
-/-! ## Smooth interior cutoff
-
-Existence of a smooth cutoff `χ : M → ℝ` with compact support inside
-`I.interior M` and equal to `1` on a neighborhood of a given compact subset
-of `I.interior M`. Built from the smooth Urysohn lemma
-`exists_contMDiffMap_one_nhds_of_subset_interior`. -/
-
-/-! ## Continuity of `tangentSectionAction X f` when `f` is supported in the interior
-
-When `f : M → ℝ` is smooth with `tsupport f ⊆ I.interior M`, the directional
-derivative `tangentSectionAction X f : M → ℝ` is continuous on all of `M`:
-on the open `I.interior M` it is smooth (by `tangentSectionAction_contMDiffOn`,
-applied at every chart at every interior point — the interior chart-image
-condition is automatic since the chart image of an interior point is an
-interior point of the chart target), and off `tsupport f ⊆ I.interior M` it
-vanishes (by support reasoning on `mfderiv f`). -/
-
 /-- If `f : M → ℝ` is smooth and `tsupport f ⊆ I.interior M`, the
 directional derivative `tangentSectionAction X f` is continuous on `M`. -/
 private lemma tangentSectionAction_continuous_of_interior_support
@@ -304,19 +261,15 @@ private lemma tangentSectionAction_continuous_of_interior_support
   rw [continuous_iff_continuousAt]
   intro x
   by_cases hx_supp : x ∈ tsupport f
-  · -- `x ∈ tsupport f ⊆ I.interior M`. Use smoothness via the chart at `x`.
-    have hx_int : x ∈ I.interior M := hf_int hx_supp
+  · have hx_int : x ∈ I.interior M := hf_int hx_supp
     have hx_chart : x ∈ (chartAt H x).source := mem_chart_source H x
-    -- The chart image of `x` lies in the interior of the chart target.
     have hx_target_int : extChartAt I x x ∈ interior (extChartAt I x).target :=
       extChartAt_mem_interior_target_of_isInteriorPoint
         (I := I) (M := M) x hx_chart hx_int
-    -- `tangentSectionAction X f` is smooth on the smoothness domain at chart α := x.
     have hsmooth : ContMDiffOn I 𝓘(ℝ) ∞ (tangentSectionAction (I := I) X f)
         ((extChartAt I x).source ∩
           (extChartAt I x : M → E) ⁻¹' interior (extChartAt I x).target) :=
       tangentSectionAction_contMDiffOn (I := I) x X hf
-    -- The smoothness domain is open and contains `x`.
     have hxsrc : x ∈ (extChartAt I x).source := by
       rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hx_chart
     have hxU : x ∈ (extChartAt I x).source ∩
@@ -330,9 +283,7 @@ private lemma tangentSectionAction_continuous_of_interior_support
     have hcont_at : ContinuousAt (tangentSectionAction (I := I) X f) x :=
       ((hsmooth x hxU).continuousWithinAt.continuousAt) (hUopen.mem_nhds hxU)
     exact hcont_at
-  · -- `x ∉ tsupport f`, so `f =ᶠ[𝓝 x] 0`, hence `mfderiv f =ᶠ[𝓝 x] 0`,
-    -- hence `tangentSectionAction X f =ᶠ[𝓝 x] 0`, hence continuous at `x`.
-    have h_open : IsOpen (tsupport f)ᶜ := (isClosed_tsupport _).isOpen_compl
+  · have h_open : IsOpen (tsupport f)ᶜ := (isClosed_tsupport _).isOpen_compl
     have hev : f =ᶠ[𝓝 x] (fun _ => (0 : ℝ)) := by
       filter_upwards [h_open.mem_nhds hx_supp] with y hy
       by_contra hne
@@ -359,10 +310,8 @@ private lemma exists_smooth_interior_cutoff
   haveI : LocallyCompactSpace M := locallyCompactSpace_of_chartedSpace E H I M
   haveI : TopologicalSpace.MetrizableSpace M := Manifold.metrizableSpace I M
   haveI : NormalSpace M := NormalSpace.of_regularSpace_lindelofSpace
-  -- Find a compact `L` with `K ⊆ interior L ⊆ L ⊆ I.interior M`.
   obtain ⟨L, hL_compact, hKL, hL_sub_int⟩ :=
     exists_compact_between hK_compact (isOpen_interior_M (I := I) (M := M)) hK_sub
-  -- Apply the smooth Urysohn lemma with `s := K` (closed, compact) and `t := L`.
   obtain ⟨f, hf_one, hf_zero, hf_range⟩ :=
     exists_contMDiffMap_one_nhds_of_subset_interior (I := I) (M := M)
       (n := (⊤ : ℕ∞))
@@ -377,16 +326,6 @@ private lemma exists_smooth_interior_cutoff
     intro y hy
     by_contra hyL
     exact hy (hf_zero y hyL)
-
-/-! ## Inlined helpers from `Proper.lean`
-
-The following private helpers `withDensity_pou_restrict_eq_zero_of_disjoint`,
-`riemannianVolumeMeasure_restrict_eq_finset_sum`,
-`integral_riemannianVolumeMeasure_of_compactSupport_eq_finset_sum`, and
-`integrable_chartLocalMeasure_of_compactSupport_subset_chartSource` mirror
-those in `Proper.lean`. They are reproduced here because the originals are
-file-private to `Proper.lean`. None of them depends on `[I.Boundaryless]`,
-so they apply equally well in the with-boundary setting. -/
 
 /-- Compactly-supported continuous integrand on the chart source is integrable
 against the chart-local measure (the chart-local measure is finite on the
@@ -594,13 +533,6 @@ private lemma integral_riemannianVolume_compactSupport_finset_sum
   change (ENNReal.ofReal ((ρ α : M → ℝ) x)).toReal • h x = h x * ((ρ α : M → ℝ) x)
   rw [ENNReal.toReal_ofReal (ρ.nonneg α x), smul_eq_mul, mul_comm]
 
-/-! ## Single-chart integration helpers (no `[I.Boundaryless]`)
-
-The boundaryless `integral_riemannianVolumeMeasure_eq_chartLocal_of_support_in_chart`
-in `Closed.lean` carries a vestigial `[I.Boundaryless]` hypothesis. We re-prove
-it here without that hypothesis, for use under with-boundary conditions. The
-proof is identical modulo dropping the redundant typeclass argument. -/
-
 /-- For a continuous `f : M → ℝ` on a closed manifold whose topological
 support is contained in a single chart source at `α₀`, the integral against
 the canonical Riemannian volume measure equals the integral against the
@@ -757,23 +689,6 @@ private lemma integral_riemannianVolume_eq_chartLocal_of_compactSupport_in_chart
       exact hxK (subset_tsupport _ hne)
     rw [hh_zero, zero_mul]
 
-/-! ## Closed manifold + interior support
-
-Strategy:
-
-1. Split the global integral as a finite sum of POU-weighted chart-local
-   integrals.
-2. On each chart `α`, use the with-boundary Voss–Weyl identity to identify
-   `divergence_g_with_boundary g X` with `localDivergenceWithin g α X`.
-3. Multiply each summand by the cutoff `χ` (which equals `1` on `tsupport X
-   ⊇ tsupport (divergence_g_with_boundary g X)`).
-4. Apply chart-local IBP `chart_local_ibp_within` with test function `χ · ρ α`
-   (which has `tsupport ⊆ chart α source ∩ I.interior M`).
-5. Convert the resulting tangent-action integrals back to the global measure.
-6. The total integrand equals `tangentSectionAction X (∑ χ · ρ α) = X(χ)` on
-   support of `X`, and that's `0` because `χ ≡ 1` near `tsupport X`. Off
-   support of `X` it's also `0`. -/
-
 /-- **Divergence theorem on a closed Riemannian manifold for sections supported
 in the interior.** For any smooth tangent section `X` on a closed (compact)
 smooth Riemannian manifold `(M, g)` whose topological support sits inside the
@@ -796,18 +711,13 @@ theorem integral_divergence_with_boundary_eq_zero_of_compact_of_interior_support
   set S : Finset M := chartAtlasPOU_finset (I := I) (M := M) with hS_def
   have hρsub : ρ.IsSubordinate (fun α : M => (chartAt H α).source) :=
     chartAtlasPOU_isSubordinate I M
-  -- `tsupport X` is compact (closed in compact `M`).
   have hX_compact : IsCompact (tsupport X) :=
     .of_isClosed_subset isCompact_univ (isClosed_tsupport _) (Set.subset_univ _)
-  -- Locality of the with-boundary divergence.
   have hdiv_supp : tsupport (divergence_g_with_boundary (I := I) g X) ⊆ tsupport X :=
     tsupport_divergence_g_with_boundary_subset_of_interior_support
       (I := I) g X hX_int
   have hdiv_supp_int : tsupport (divergence_g_with_boundary (I := I) g X) ⊆ I.interior M :=
     hdiv_supp.trans hX_int
-  -- Continuity of `divergence_g_with_boundary g X` on all of `M`: it agrees with
-  -- a smooth function on the open `I.interior M ⊇ tsupport (...)` and vanishes
-  -- on a neighborhood of every point off `tsupport (...)`.
   have hdiv_cont : Continuous (divergence_g_with_boundary (I := I) g X) := by
     rw [continuous_iff_continuousAt]
     intro x
@@ -825,10 +735,8 @@ theorem integral_divergence_with_boundary_eq_zero_of_compact_of_interior_support
         by_contra hne
         exact hy (subset_tsupport _ hne)
       exact (continuous_const.continuousAt.congr hev_zero.symm)
-  -- Choose a smooth interior cutoff `χ`.
   obtain ⟨χ, hχ_smooth, hχ_cs, hχ_supp_int, hχ_one_nhds, hχ_range⟩ :=
     exists_smooth_interior_cutoff (I := I) (M := M) hX_compact hX_int
-  -- Step (a): expand the global integral as a finite sum of weighted chart-local integrals.
   have h_step_a : ∫ x, divergence_g_with_boundary (I := I) g X x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g)
       = ∑ α ∈ S, ∫ x, divergence_g_with_boundary (I := I) g X x * ρ α x
@@ -840,7 +748,6 @@ theorem integral_divergence_with_boundary_eq_zero_of_compact_of_interior_support
     simp only [riemannianMeasureFamily_def] at hKey
     exact hKey.symm
   rw [h_step_a]
-  -- Step (b): multiply each integrand by `χ` (invisible since `χ ≡ 1` on supp(div)).
   have hχ_one_K : ∀ x ∈ tsupport X, χ x = 1 := by
     intro x hxK
     rcases (Filter.eventually_iff_exists_mem.mp hχ_one_nhds) with ⟨U, hU_nhds, hU_eq⟩
@@ -872,8 +779,6 @@ theorem integral_divergence_with_boundary_eq_zero_of_compact_of_interior_support
         = (divergence_g_with_boundary (I := I) g X x * χ x) * ρ α x := by rw [hχx]
       _ = divergence_g_with_boundary (I := I) g X x * (χ x * ρ α x) := by ring
   rw [Finset.sum_congr rfl h_step_b]
-  -- Step (c): on each chart α source, replace the with-boundary divergence by
-  -- `localDivergenceWithin g α X` via Voss–Weyl on the interior.
   have h_step_c : ∀ α ∈ S,
       ∫ x, divergence_g_with_boundary (I := I) g X x * (χ x * ρ α x)
           ∂(chartLocalMeasure (I := I) g α) =
@@ -885,16 +790,14 @@ theorem integral_divergence_with_boundary_eq_zero_of_compact_of_interior_support
     · by_cases hx_int : x ∈ I.interior M
       · simp only [voss_weyl_divergence_with_boundary_formula
             (I := I) g α X hxα hx_int]
-      · -- `x ∉ I.interior M` ⇒ `χ x = 0`.
-        have hxnotin : x ∉ tsupport χ := fun h => hx_int (hχ_supp_int h)
+      · have hxnotin : x ∉ tsupport χ := fun h => hx_int (hχ_supp_int h)
         have hχ_zero : χ x = 0 := by
           by_contra hne
           exact hxnotin (subset_tsupport _ hne)
         change divergence_g_with_boundary (I := I) g X x * (χ x * ρ α x) =
           localDivergenceWithin (I := I) g α X x * (χ x * ρ α x)
         rw [hχ_zero, zero_mul, mul_zero, mul_zero]
-    · -- `x ∉ chart α source` ⇒ `ρ α x = 0`.
-      have hxnotin : x ∉ tsupport (ρ α : M → ℝ) := fun h => hxα (hρsub α h)
+    · have hxnotin : x ∉ tsupport (ρ α : M → ℝ) := fun h => hxα (hρsub α h)
       have hρα_zero : (ρ α : M → ℝ) x = 0 := by
         by_contra hne
         exact hxnotin (subset_tsupport _ hne)
@@ -902,7 +805,6 @@ theorem integral_divergence_with_boundary_eq_zero_of_compact_of_interior_support
         localDivergenceWithin (I := I) g α X x * (χ x * ρ α x)
       rw [hρα_zero, mul_zero, mul_zero, mul_zero]
   rw [Finset.sum_congr rfl h_step_c]
-  -- Step (d): apply chart-local IBP at each α ∈ S with test function `φ_α := χ * ρ α`.
   set φ : M → M → ℝ := fun α x => χ x * (ρ α : M → ℝ) x with hφ_def
   have hφ_smooth : ∀ α : M, ContMDiff I 𝓘(ℝ) ∞ (φ α) := fun α =>
     hχ_smooth.mul (ρ α).contMDiff
@@ -943,7 +845,6 @@ theorem integral_divergence_with_boundary_eq_zero_of_compact_of_interior_support
       = -(∑ α ∈ S, ∫ x, tangentSectionAction (I := I) X (φ α) x
             ∂(chartLocalMeasure (I := I) g α)) from by
     rw [← Finset.sum_neg_distrib]]
-  -- Step (e): convert each chart-local tangent-action integral to the global one.
   have hAct_cont : ∀ α : M,
       Continuous (tangentSectionAction (I := I) X (φ α)) := fun α =>
     tangentSectionAction_continuous_of_interior_support (I := I) X (hφ_smooth α)
@@ -977,8 +878,6 @@ theorem integral_divergence_with_boundary_eq_zero_of_compact_of_interior_support
     exact (integral_riemannianVolume_eq_chartLocal_of_support_in_chart
       (I := I) g α (hAct_cont α) (hAct_supp α)).symm
   rw [Finset.sum_congr rfl h_step_e]
-  -- Step (f): swap the finite sum with the integral; identify the inner sum
-  -- with `tangentSectionAction X (∑ φ α)`. This is `0` everywhere (POU completeness).
   haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
   have h_each_int : ∀ α ∈ S, Integrable
@@ -1055,12 +954,6 @@ theorem integral_divergence_with_boundary_eq_zero_of_compact_of_interior_support
       = (fun _ : M => (0 : ℝ)) from funext h_pt]
   rw [integral_zero, neg_zero]
 
-/-! ## Proper-support version
-
-Same strategy as the closed case but without `[CompactSpace M]`. Use the
-proper-support boundaryless `Proper.lean`'s pattern: a finite POU index set
-`pouFinset_for_compactSet` with respect to the compact `tsupport X`. -/
-
 /-- **Divergence theorem for compactly-supported sections supported in the
 manifold interior.** For any smooth tangent section `X` with compact support
 on a σ-compact Hausdorff smooth Riemannian manifold `(M, g)` whose topological
@@ -1088,7 +981,6 @@ theorem integral_divergence_with_boundary_eq_zero_of_hasCompactSupport_of_interi
     fun {α} => Set.Finite.mem_toFinset _
   have hρsub : ρ.IsSubordinate (fun α : M => (chartAt H α).source) :=
     chartAtlasPOU_isSubordinate I M
-  -- Support, smoothness/continuity, compact support of the divergence.
   have hdiv_supp : tsupport (divergence_g_with_boundary (I := I) g X) ⊆ K :=
     tsupport_divergence_g_with_boundary_subset_of_interior_support
       (I := I) g X hX_int
@@ -1113,10 +1005,8 @@ theorem integral_divergence_with_boundary_eq_zero_of_hasCompactSupport_of_interi
         by_contra hne
         exact hy (subset_tsupport _ hne)
       exact (continuous_const.continuousAt.congr hev_zero.symm)
-  -- Choose a smooth interior cutoff `χ` with `χ ≡ 1` on a neighborhood of `K`.
   obtain ⟨χ, hχ_smooth, hχ_cs, hχ_supp_int, hχ_one_nhds, hχ_range⟩ :=
     exists_smooth_interior_cutoff (I := I) (M := M) hK_compact hX_int
-  -- Step (a): expand the global integral over the relevant Finset `S`.
   have h_step_a : ∫ x, divergence_g_with_boundary (I := I) g X x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g)
       = ∑ α ∈ S, ∫ x, divergence_g_with_boundary (I := I) g X x * (ρ α : M → ℝ) x
@@ -1156,7 +1046,6 @@ theorem integral_divergence_with_boundary_eq_zero_of_hasCompactSupport_of_interi
         (fun _ : M => (0 : ℝ)) from funext h_zero]
     exact integral_zero ..
   rw [h_step_a]
-  -- Step (b): replace `(div_g_with_boundary g X) * ρ α` with `(...) * (χ * ρ α)`.
   have hχ_one_K : ∀ x ∈ K, χ x = 1 := by
     intro x hxK
     rcases (Filter.eventually_iff_exists_mem.mp hχ_one_nhds) with ⟨U, hU_nhds, hU_eq⟩
@@ -1188,7 +1077,6 @@ theorem integral_divergence_with_boundary_eq_zero_of_hasCompactSupport_of_interi
         = (divergence_g_with_boundary (I := I) g X x * χ x) * (ρ α : M → ℝ) x := by rw [hχx]
       _ = divergence_g_with_boundary (I := I) g X x * (χ x * (ρ α : M → ℝ) x) := by ring
   rw [Finset.sum_congr rfl h_step_b]
-  -- Step (c): replace `divergence_g_with_boundary g X` with `localDivergenceWithin g α X`.
   have h_step_c : ∀ α ∈ S,
       ∫ x, divergence_g_with_boundary (I := I) g X x * (χ x * (ρ α : M → ℝ) x)
         ∂(chartLocalMeasure (I := I) g α) =
@@ -1215,7 +1103,6 @@ theorem integral_divergence_with_boundary_eq_zero_of_hasCompactSupport_of_interi
         localDivergenceWithin (I := I) g α X x * (χ x * (ρ α : M → ℝ) x)
       rw [hρα_zero, mul_zero, mul_zero, mul_zero]
   rw [Finset.sum_congr rfl h_step_c]
-  -- Step (d): apply chart-local IBP at each α ∈ S with test function `φ_α := χ * ρ α`.
   set φ : M → M → ℝ := fun α x => χ x * (ρ α : M → ℝ) x with hφ_def
   have hφ_smooth : ∀ α : M, ContMDiff I 𝓘(ℝ) ∞ (φ α) := fun α =>
     hχ_smooth.mul (ρ α).contMDiff
@@ -1256,7 +1143,6 @@ theorem integral_divergence_with_boundary_eq_zero_of_hasCompactSupport_of_interi
       = -(∑ α ∈ S, ∫ x, tangentSectionAction (I := I) X (φ α) x
             ∂(chartLocalMeasure (I := I) g α)) from by
     rw [← Finset.sum_neg_distrib]]
-  -- Step (e): convert chart-local tangent action integrals to the global one.
   have hAct_cont : ∀ α : M,
       Continuous (tangentSectionAction (I := I) X (φ α)) := fun α =>
     tangentSectionAction_continuous_of_interior_support (I := I) X (hφ_smooth α)
@@ -1307,7 +1193,6 @@ theorem integral_divergence_with_boundary_eq_zero_of_hasCompactSupport_of_interi
     exact (integral_riemannianVolume_eq_chartLocal_of_compactSupport_in_chart
       (I := I) g α (hAct_cont α) (hAct_cs α) (hAct_supp α)).symm
   rw [Finset.sum_congr rfl h_step_e]
-  -- Step (f): pull the finite sum into the integrand and identify it as zero.
   haveI : IsLocallyFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g) :=
     riemannianVolumeMeasure_isLocallyFiniteMeasure (I := I) (M := M) g
   have hAct_int : ∀ α ∈ S, Integrable

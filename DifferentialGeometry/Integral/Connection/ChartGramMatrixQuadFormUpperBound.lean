@@ -53,18 +53,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M]
 
-/-! ## Pointwise multiplicative bound `|a · b| ≤ ∑_k ξ k ^ 2`
-
-A standard arithmetic fact: for any `i j : Fin N` and any `ξ : Fin N → ℝ`,
-`|ξ i · ξ j| ≤ ∑_k ξ k ^ 2`. By AM-GM
-`|ξ i · ξ j| ≤ (ξ i ^ 2 + ξ j ^ 2) / 2`, and since each summand is at most
-the full sum, `(ξ i ^ 2 + ξ j ^ 2) / 2 ≤ ∑_k ξ k ^ 2`. -/
-
 private lemma abs_mul_le_sum_sq
     {N : ℕ} (ξ : Fin N → ℝ) (i j : Fin N) :
     |ξ i * ξ j| ≤ ∑ k : Fin N, ξ k ^ 2 := by
   classical
-  -- `2 · |ξ i · ξ j| ≤ ξ i ^ 2 + ξ j ^ 2` (AM-GM).
   have hAMGM : 2 * |ξ i * ξ j| ≤ ξ i ^ 2 + ξ j ^ 2 := by
     have h := sq_nonneg (|ξ i| - |ξ j|)
     have h_abs_sq_i : |ξ i| ^ 2 = ξ i ^ 2 := sq_abs (ξ i)
@@ -72,9 +64,7 @@ private lemma abs_mul_le_sum_sq
     have h_abs_mul : |ξ i * ξ j| = |ξ i| * |ξ j| := abs_mul _ _
     nlinarith [h_abs_sq_i, h_abs_sq_j, h_abs_mul,
       abs_nonneg (ξ i), abs_nonneg (ξ j)]
-  -- `|ξ i · ξ j| ≤ (ξ i ^ 2 + ξ j ^ 2) / 2`.
   have h_half_le : |ξ i * ξ j| ≤ (ξ i ^ 2 + ξ j ^ 2) / 2 := by linarith
-  -- Each summand is at most the full sum: `ξ i ^ 2 ≤ ∑_k ξ k ^ 2`, idem `j`.
   have h_i_le : ξ i ^ 2 ≤ ∑ k : Fin N, ξ k ^ 2 := by
     refine Finset.single_le_sum (s := Finset.univ)
       (f := fun k : Fin N => ξ k ^ 2) ?_ (Finset.mem_univ i)
@@ -85,17 +75,10 @@ private lemma abs_mul_le_sum_sq
       (f := fun k : Fin N => ξ k ^ 2) ?_ (Finset.mem_univ j)
     intro k _
     exact sq_nonneg _
-  -- Hence `(ξ i ^ 2 + ξ j ^ 2) / 2 ≤ ∑_k ξ k ^ 2`, and combining with AM-GM
-  -- gives `|ξ i · ξ j| ≤ ∑_k ξ k ^ 2`.
   have h_half_total : (ξ i ^ 2 + ξ j ^ 2) / 2 ≤ ∑ k : Fin N, ξ k ^ 2 := by
     have h_sum_le : ξ i ^ 2 + ξ j ^ 2 ≤ 2 * ∑ k : Fin N, ξ k ^ 2 := by linarith
     linarith
   exact le_trans h_half_le h_half_total
-
-/-! ## Helper: `chartGramMatrix` entry is `g.inner` at the chart-basis-fiber vectors
-
-This is exactly `chartGramMatrix_apply` from `Integral/Measure/ChartDensity.lean`;
-we name it locally for readability. -/
 
 private lemma chartGramMatrix_eq_inner
     (g : SmoothRiemannianMetric I M) (α b : M)
@@ -106,12 +89,6 @@ private lemma chartGramMatrix_eq_inner
         (chartBasisVecFiber (I := I) α j b) :=
   chartGramMatrix_apply g α b i j
 
-/-! ## Uniform entrywise bound on the POU tsupport
-
-Apply `chartGramMatrix_entry_isBounded_on_compact` to the compact POU
-tsupport. We collect the resulting entrywise bounds into a single
-non-negative constant `C₀ := ∑_{(i,j)} K_{ij}`. -/
-
 private lemma chartGramMatrix_sum_entry_bound_on_pouTsupport
     [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) :
@@ -121,7 +98,6 @@ private lemma chartGramMatrix_sum_entry_bound_on_pouTsupport
         ∀ i j : Fin (Module.finrank ℝ E),
           |chartGramMatrix (I := I) g α b i j| ≤ C₀ := by
   classical
-  -- Build the compact POU support set.
   set Kα : Set M := tsupport (fun x : M =>
     ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) with hKα_def
   have hKα_compact : IsCompact Kα :=
@@ -135,7 +111,6 @@ private lemma chartGramMatrix_sum_entry_bound_on_pouTsupport
       trivializationAt_baseSet_eq_chartAt_source (I := I) (M := M) α
     rw [← h_set_eq]
     exact hKα_sub_base
-  -- For each `(i, j)`, choose a bound `K_{ij} > 0` valid on `Kα`.
   have hchoice : ∀ ij : Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E),
       ∃ K : ℝ, 0 < K ∧
         ∀ b ∈ Kα, |chartGramMatrix (I := I) g α b ij.1 ij.2| ≤ K := by
@@ -143,8 +118,6 @@ private lemma chartGramMatrix_sum_entry_bound_on_pouTsupport
     exact chartGramMatrix_entry_isBounded_on_compact (I := I) (M := M)
       g α ij.1 ij.2 hKα_compact hKα_sub_src
   choose K hK_pos hK_le using hchoice
-  -- Take `C₀ := max (max_{ij} K_{ij}) 0`. We use the explicit Finset.max via
-  -- summing all entries: `∑_{ij} K_{ij}` is an upper bound on each `K_{ij}`.
   set V : Finset (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)) :=
     Finset.univ with hV_def
   set C₀ : ℝ := ∑ ij ∈ V, K ij with hC₀_def
@@ -154,7 +127,6 @@ private lemma chartGramMatrix_sum_entry_bound_on_pouTsupport
     exact le_of_lt (hK_pos ij)
   refine ⟨C₀, hC₀_nonneg, ?_⟩
   intro b hb i j
-  -- `K (i, j) ≤ C₀` since `C₀ = ∑_{kl} K (k, l)` and `K ≥ 0`.
   have hK_ij_le_C₀ : K (i, j) ≤ C₀ := by
     refine Finset.single_le_sum (s := V) (f := fun ij => K ij) ?_
       (Finset.mem_univ (i, j))
@@ -163,8 +135,6 @@ private lemma chartGramMatrix_sum_entry_bound_on_pouTsupport
   have h_entry : |chartGramMatrix (I := I) g α b i j| ≤ K (i, j) :=
     hK_le (i, j) b hb
   linarith
-
-/-! ## Headline -/
 
 /-- **Uniform upper bound on the chart-`α` Gram-matrix quadratic form over
 the closed support of the chart-atlas partition-of-unity weight at `α`.**
@@ -194,27 +164,20 @@ theorem exists_chartGramMatrix_quadForm_upper_bound_on_pouTsupport
                        (chartBasisVecFiber (I := I) α j b) * ξ i * ξ j) ≤
             C * (∑ i : Fin (Module.finrank ℝ E), (ξ i)^2) := by
   classical
-  -- Number of index pairs.
   set N : ℕ := Module.finrank ℝ E with hN_def
-  -- Uniform entrywise bound on the POU tsupport.
   obtain ⟨C₀, hC₀_nonneg, hC₀_bound⟩ :=
     chartGramMatrix_sum_entry_bound_on_pouTsupport (I := I) (M := M) g α
-  -- The per-pair bound is `G_{ij} ξ i ξ j ≤ C₀ · Σ_k ξ k ^ 2`; summing over
-  -- the `N × N` index pairs gives the headline with `C := N ^ 2 · C₀`.
   set C : ℝ := (N : ℝ) ^ 2 * C₀ with hC_def
   have hC_nonneg : 0 ≤ C := by
     have hN_sq_nn : 0 ≤ (N : ℝ) ^ 2 := sq_nonneg _
     exact mul_nonneg hN_sq_nn hC₀_nonneg
   refine ⟨C, hC_nonneg, ?_⟩
   intro b hb ξ
-  -- Entrywise pointwise bound: for each `(i, j)`,
-  --   `G_{ij}(b) · ξ i · ξ j ≤ C₀ · ∑_k ξ k ^ 2`.
   have h_per_pair : ∀ i j : Fin N,
       g.inner b (chartBasisVecFiber (I := I) α i b)
                 (chartBasisVecFiber (I := I) α j b) * ξ i * ξ j ≤
         C₀ * ∑ k : Fin N, ξ k ^ 2 := by
     intro i j
-    -- Substitute `G_{ij}` and bound `G_{ij} · ξ i · ξ j ≤ |G_{ij} · ξ i · ξ j|`.
     set G_ij : ℝ := g.inner b (chartBasisVecFiber (I := I) α i b)
         (chartBasisVecFiber (I := I) α j b) with hG_def
     have hG_eq_chart : G_ij = chartGramMatrix (I := I) g α b i j := by
@@ -223,12 +186,9 @@ theorem exists_chartGramMatrix_quadForm_upper_bound_on_pouTsupport
     have h_abs_G : |G_ij| ≤ C₀ := by
       rw [hG_eq_chart]
       exact hC₀_bound b hb i j
-    -- `G_{ij} · ξ i · ξ j ≤ |G_{ij} · ξ i · ξ j|`.
     have h_le_abs : G_ij * ξ i * ξ j ≤ |G_ij * ξ i * ξ j| := le_abs_self _
-    -- `|G_{ij} · ξ i · ξ j| = |G_{ij}| · |ξ i · ξ j|`.
     have h_abs_prod : |G_ij * ξ i * ξ j| = |G_ij| * |ξ i * ξ j| := by
       rw [mul_assoc, abs_mul, abs_mul]
-    -- `|G_{ij}| · |ξ i · ξ j| ≤ C₀ · |ξ i · ξ j|`.
     have h_abs_mul_bound : |ξ i * ξ j| ≤ ∑ k : Fin N, ξ k ^ 2 :=
       abs_mul_le_sum_sq (N := N) ξ i j
     have h_abs_nn : 0 ≤ |ξ i * ξ j| := abs_nonneg _
@@ -238,7 +198,6 @@ theorem exists_chartGramMatrix_quadForm_upper_bound_on_pouTsupport
       _ ≤ C₀ * |ξ i * ξ j| := mul_le_mul_of_nonneg_right h_abs_G h_abs_nn
       _ ≤ C₀ * ∑ k : Fin N, ξ k ^ 2 :=
           mul_le_mul_of_nonneg_left h_abs_mul_bound hC₀_nonneg
-  -- Sum over `(i, j) ∈ Finset.univ × Finset.univ`.
   calc (∑ i : Fin N,
           ∑ j : Fin N,
             g.inner b (chartBasisVecFiber (I := I) α i b)

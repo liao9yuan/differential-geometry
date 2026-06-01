@@ -79,8 +79,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary
 open DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp
 
-/-! ## Continuous functions on a closed manifold are bounded -/
-
 private lemma exists_bound_continuous_compactSpace
     [CompactSpace M] {f : M → ℝ} (hf : Continuous f) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ x : M, |f x| ≤ C := by
@@ -105,8 +103,6 @@ private lemma exists_bound_continuous_compactSpace
     intro x
     exact (hM ⟨x⟩).elim
 
-/-! ## Continuous functions on a closed manifold lie in `L^p` -/
-
 private lemma continuous_memLp_of_compactSpace
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -121,18 +117,9 @@ private lemma continuous_memLp_of_compactSpace
   obtain ⟨C, _hC_nn, hC⟩ := exists_bound_continuous_compactSpace hf
   exact MemLp.of_bound hmeas C (Filter.Eventually.of_forall (fun x => hC x))
 
-/-! ## Interior-of-`M` is open -/
-
 private lemma isOpen_interior_M : IsOpen (I.interior M) :=
   I.isOpen_interior (M := M) (n := ∞)
     (by exact (by decide : (∞ : WithTop ℕ∞) ≠ 0))
-
-/-! ## Continuity of `tangentSectionAction X u` for interior-supported `X`
-
-When `X` has `tsupport X ⊆ I.interior M`, the action `tangentSectionAction X u`
-is continuous globally on `M`, even if `u` is not interior-supported.
-This drops the `tsupport u ⊆ I.interior M` hypothesis from the existing
-`tangentSectionAction_continuous_of_interior_support`. -/
 
 private lemma tangentSectionAction_continuous_of_X_interior_support
     [T2Space M]
@@ -144,8 +131,7 @@ private lemma tangentSectionAction_continuous_of_X_interior_support
   rw [continuous_iff_continuousAt]
   intro x
   by_cases hx_supp : x ∈ tsupport (X : ∀ x, TangentSpace I x)
-  · -- `x ∈ tsupport X ⊆ I.interior M`. Use smoothness via the chart at `x`.
-    have hx_int : x ∈ I.interior M := hX_int hx_supp
+  · have hx_int : x ∈ I.interior M := hX_int hx_supp
     have hx_chart : x ∈ (chartAt H x).source := mem_chart_source H x
     have hx_target_int : extChartAt I x x ∈ interior (extChartAt I x).target :=
       extChartAt_mem_interior_target_of_isInteriorPoint
@@ -165,8 +151,7 @@ private lemma tangentSectionAction_continuous_of_X_interior_support
       exact hcontOn.isOpen_inter_preimage (isOpen_extChartAt_source (I := I) x)
         isOpen_interior
     exact ((hsmooth x hxU).continuousWithinAt.continuousAt) (hUopen.mem_nhds hxU)
-  · -- `x ∉ tsupport X`. Then `X` vanishes on a neighborhood of `x`.
-    have h_open : IsOpen (tsupport (X : ∀ x, TangentSpace I x))ᶜ :=
+  · have h_open : IsOpen (tsupport (X : ∀ x, TangentSpace I x))ᶜ :=
       (isClosed_tsupport _).isOpen_compl
     have hev_zero : tangentSectionAction (I := I) X u =ᶠ[𝓝 x]
         (fun _ => (0 : ℝ)) := by
@@ -178,8 +163,6 @@ private lemma tangentSectionAction_continuous_of_X_interior_support
       rw [hX_zero]
       exact (mfderiv I 𝓘(ℝ, ℝ) u y).map_zero
     exact (continuous_const.continuousAt.congr hev_zero.symm)
-
-/-! ## IBP for arbitrary smooth `u` and interior-supported `X` -/
 
 /-- **Integration by parts (with-boundary, no interior-support on the scalar).**
 For a smooth scalar `u : M → ℝ` and a smooth tangent test field `X` with compact
@@ -200,7 +183,6 @@ private theorem integral_tangentSectionAction_eq_neg_no_u_interior_support
       -∫ x, u x * divergence_g_with_boundary (I := I) g X x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
   classical
-  -- The section `Y := smoothSmul u hu X = u · X`.
   set Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     smoothSmul (I := I) u hu X with hY_def
   have hY_cs : HasCompactSupport Y :=
@@ -213,7 +195,6 @@ private theorem integral_tangentSectionAction_eq_neg_no_u_interior_support
           tangentSectionAction (I := I) X u x :=
     divergence_g_with_boundary_smoothSmul (I := I) g u hu X
   have hu_cont : Continuous u := hu.continuous
-  -- Continuity of `divergence_g_with_boundary g X` (mirrors the existing IBP proof).
   have hX_div_cont : Continuous (divergence_g_with_boundary (I := I) g X) := by
     have hdiv_supp : tsupport (divergence_g_with_boundary (I := I) g X) ⊆ tsupport X :=
       tsupport_divergence_g_with_boundary_subset_of_interior_support
@@ -289,16 +270,6 @@ private theorem integral_tangentSectionAction_eq_neg_no_u_interior_support
     rw [← h_int_split, ← h_div_Y_split]; exact h_div_Y_zero
   linarith [h_sum_zero]
 
-/-! ## Continuity of the metric `g`-norm of `gradFun g u` for interior-supported smooth `u`
-
-When `u` has `tsupport u ⊆ I.interior M`, the intrinsic gradient `gradFun u`
-packages as a globally smooth tangent section
-`Y := grad_g_with_boundary_section g hu hu_int : Cₛ^∞⟮I; E, TangentSpace I⟯`.
-The metric pairing `g.inner x (Y x) (Y x) = g.inner x (gradFun u x) (gradFun u x)`
-is then continuous on `M` via the smooth-section pairing continuity, and the
-square root is in `L^p` against the Riemannian volume measure on a compact `M`.
--/
-
 private lemma memLp_g_norm_gradFun_interior_smooth
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞)
@@ -307,13 +278,10 @@ private lemma memLp_g_norm_gradFun_interior_smooth
     MemLp (fun x : M => Real.sqrt
         (g.inner x (gradFun (I := I) g u x) (gradFun (I := I) g u x))) p
       (riemannianVolumeMeasure I M g) := by
-  -- Package the gradient as a smooth global section.
   set Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     grad_g_with_boundary_section (I := I) g hu hu_int with hY_def
-  -- Continuity of `g.inner x (Y x) (Y x)` from the smooth-sections pairing.
   have hY_inner_cont : Continuous (fun x : M => g.inner x (Y x) (Y x)) :=
     TangentBundle.continuous_g_inner_of_smooth_sections (I := I) (M := M) g Y Y
-  -- `Y x = gradFun u x`, so the inner product equals the gradient pairing.
   have hY_eq : ∀ x : M, g.inner x (Y x) (Y x) =
       g.inner x (gradFun (I := I) g u x) (gradFun (I := I) g u x) := by
     intro x
@@ -324,14 +292,10 @@ private lemma memLp_g_norm_gradFun_interior_smooth
     refine hY_inner_cont.congr ?_
     intro x
     exact hY_eq x
-  -- The square root is continuous on `M`.
   have hG_cont : Continuous (fun x : M => Real.sqrt
       (g.inner x (gradFun (I := I) g u x) (gradFun (I := I) g u x))) :=
     Real.continuous_sqrt.comp hgrad_inner_cont
   exact continuous_memLp_of_compactSpace g p hG_cont
-
-/-! ## A smooth interior-supported function provides an explicit `L^p`
-weak Riemannian gradient with boundary -/
 
 /-- For a smooth `u : M → ℝ` with `tsupport u ⊆ I.interior M`, the intrinsic
 gradient `gradFun u : M → E` is a weak `L^p` Riemannian gradient with boundary
@@ -343,13 +307,10 @@ private lemma hasWeakRiemannianGradLp_withBoundary_gradFun_interior
     (hu_int : tsupport u ⊆ I.interior M) :
     HasWeakRiemannianGradLp_withBoundary (I := I) (M := M) g u
       (fun x : M => (gradFun (I := I) g u x : E)) := by
-  -- Package the gradient as a smooth global section.
   set Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     grad_g_with_boundary_section (I := I) g hu hu_int with hY_def
   refine ⟨?_, ?_⟩
-  · -- AEStronglyMeasurable for the gradient pairing against any test field.
-    intro Z
-    -- `g.inner x (gradFun u x) (Z x) = g.inner x (Y x) (Z x)` by definition.
+  · intro Z
     have h_eq : ∀ x : M, g.inner x (gradFun (I := I) g u x) (Z x) =
         g.inner x (Y x) (Z x) := by
       intro x
@@ -363,10 +324,7 @@ private lemma hasWeakRiemannianGradLp_withBoundary_gradFun_interior
       intro x
       exact (h_eq x).symm
     exact h_cont'.aestronglyMeasurable
-  · -- IBP identity for interior-supported `X`.
-    intro X hX hX_int
-    -- LHS: `∫ g.inner x (gradFun u x) (X x) = ∫ tangentSectionAction X u x`.
-    -- We use `g.inner x (gradFun u x) (X x) = mfderiv u x (X x) = tangentSectionAction X u x`.
+  · intro X hX hX_int
     have h_pt : ∀ x : M, g.inner x (gradFun (I := I) g u x) (X x) =
         tangentSectionAction (I := I) X u x := by
       intro x
@@ -374,12 +332,8 @@ private lemma hasWeakRiemannianGradLp_withBoundary_gradFun_interior
       rw [inner_gradFun_right (I := I) g u x ((X : ∀ z, TangentSpace I z) x)]
       rfl
     rw [integral_congr_ae (Filter.Eventually.of_forall h_pt)]
-    -- Apply the existing with-boundary IBP.
     exact integral_tangentSectionAction_eq_neg_integral_smul_divergence_with_boundary
       (I := I) g hu hu_int X hX hX_int
-
-/-! ## Smooth bridge: smooth interior-supported `u` ⟹
-`MemW1pIntrinsicLp_withBoundary u` -/
 
 /-- **Smooth bridge (interior-supported case).** Every smooth function with
 topological support contained in the manifold interior on a closed Riemannian
@@ -424,27 +378,6 @@ theorem MemW1pIntrinsicLp_withBoundary_of_MemWkpChart_smooth_interior
       (I := I) (M := M) g p u :=
   MemW1pIntrinsicLp_withBoundary_of_contMDiff_interior
     (I := I) (M := M) g p hu_smooth hu_int
-
-/-! ## Chart-source continuity of `g.inner x (gradFun u x) (gradFun u x)`
-for general smooth `u` (not necessarily interior-supported)
-
-The metric pairing `g.inner x (gradFun u x) (gradFun u x)` is continuous on
-each chart source `(chartAt H α).source`, including boundary points. The
-argument is a chart-coordinate expansion: with the chart-local within-formula
-`gradFun u y = ∑ i, c_i(y) e_i(y)` (where `c_i = gradChartCoeffWithin g α u i`
-and `e_i = chartBasisVecFiber α i` are continuous on the chart source), the
-metric inner product expands to a polynomial in continuous functions.
-
-The chart-coefficient `c_i(y)` is itself a sum
-`∑ j, (chartInvGramMatrix g α y i j) · (partialDerivWithin (target) j (scalarOnE α u) (extChartAt I α y))`
-each factor of which is continuous on the chart source: the inverse Gram
-matrix is smooth on the chart base set; the within-partial of the chart
-pullback is `ContDiffOn ℝ ∞` (hence continuous) on the full chart target via
-`partialDerivWithin_contDiffOn_top_of_uniqueDiffOn`; and the chart map itself
-is continuous on the chart source.
-
-Combining with `chartGramMatrix g α y i j`, also smooth on the chart base
-set, gives a continuous expression on `(chartAt H α).source`. -/
 
 /-- The within-partial of the chart pullback is continuous on the full
 chart target. Direct from `partialDerivWithin_contDiffOn_top_of_uniqueDiffOn`
@@ -506,7 +439,6 @@ private lemma gradChartCoeffWithin_continuousOn_source
     (i : Fin (Module.finrank ℝ E)) :
     ContinuousOn (gradChartCoeffWithin (I := I) g α u i) (chartAt H α).source := by
   classical
-  -- Unfold to the explicit sum.
   have heq : ∀ y ∈ (chartAt H α).source,
       gradChartCoeffWithin (I := I) g α u i y =
         ∑ j : Fin (Module.finrank ℝ E),
@@ -517,8 +449,7 @@ private lemma gradChartCoeffWithin_continuousOn_source
   refine ContinuousOn.congr ?_ heq
   refine continuousOn_finset_sum _ (fun j _ => ?_)
   refine ContinuousOn.mul ?_ ?_
-  · -- `chartInvGramMatrix g α y i j` is smooth on the chart base set.
-    have h1 : ContMDiffOn I 𝓘(ℝ) ∞
+  · have h1 : ContMDiffOn I 𝓘(ℝ) ∞
         (fun y => chartInvGramMatrix (I := I) g α y i j)
         (trivializationAt E (TangentSpace I) α).baseSet :=
       chartInvGramMatrix_entry_contMDiffOn (I := I) g α i j
@@ -555,7 +486,6 @@ private lemma g_inner_gradFun_gradFun_continuousOn_chart_source
       (fun y : M => g.inner y (gradFun (I := I) g u y) (gradFun (I := I) g u y))
       (chartAt H α).source := by
   classical
-  -- Step 1: rewrite `gradFun u y = gradChartLocalWithin g α u y` on the chart source.
   have h_rewrite : ∀ y ∈ (chartAt H α).source,
       g.inner y (gradFun (I := I) g u y) (gradFun (I := I) g u y) =
         g.inner y (gradChartLocalWithin (I := I) g α u y)
@@ -563,7 +493,6 @@ private lemma g_inner_gradFun_gradFun_continuousOn_chart_source
     intro y hy
     rw [(gradChartLocalWithin_eq_gradFun (I := I) g α hu hy)]
   refine ContinuousOn.congr ?_ (fun y hy => h_rewrite y hy)
-  -- Step 2: expand the inner product `g.inner y (∑ a_i e_i) (∑ a_j e_j)`.
   have h_expand : ∀ y ∈ (chartAt H α).source,
       g.inner y (gradChartLocalWithin (I := I) g α u y)
           (gradChartLocalWithin (I := I) g α u y) =
@@ -573,9 +502,7 @@ private lemma g_inner_gradFun_gradFun_continuousOn_chart_source
               gradChartCoeffWithin (I := I) g α u j y *
                 chartGramMatrix (I := I) g α y i j := by
     intro y _hy
-    -- `gradChartLocalWithin g α u y = ∑ i, c_i • e_i y`.
     unfold gradChartLocalWithin
-    -- `g.inner y (∑ i a_i • e_i) (∑ j b_j • e_j) = ∑_i ∑_j a_i b_j (g.inner y e_i e_j)`.
     rw [show (g.inner y (∑ i : Fin (Module.finrank ℝ E),
               gradChartCoeffWithin (I := I) g α u i y •
                 chartBasisVecFiber (I := I) α i y)
@@ -591,8 +518,7 @@ private lemma g_inner_gradFun_gradFun_continuousOn_chart_source
     · refine Finset.sum_congr rfl (fun i _ => ?_)
       refine Finset.sum_congr rfl (fun j _ => ?_)
       rfl
-    · -- Bilinearity: pull out the smul-coefficients.
-      rw [show (g.inner y (∑ i : Fin (Module.finrank ℝ E),
+    · rw [show (g.inner y (∑ i : Fin (Module.finrank ℝ E),
             gradChartCoeffWithin (I := I) g α u i y •
               chartBasisVecFiber (I := I) α i y))
           = ∑ i : Fin (Module.finrank ℝ E),
@@ -620,16 +546,12 @@ private lemma g_inner_gradFun_gradFun_continuousOn_chart_source
         refine Finset.sum_congr rfl (fun i _ => ?_)
         rw [map_smul]
   refine ContinuousOn.congr ?_ (fun y hy => h_expand y hy)
-  -- Step 3: each summand is a product of continuous functions.
   refine continuousOn_finset_sum _ (fun i _ => ?_)
   refine continuousOn_finset_sum _ (fun j _ => ?_)
-  -- `gradChartCoeffWithin u i y * gradChartCoeffWithin u j y * chartGramMatrix g α y i j`.
   refine ContinuousOn.mul (ContinuousOn.mul ?_ ?_) ?_
   · exact gradChartCoeffWithin_continuousOn_source (I := I) g α hu i
   · exact gradChartCoeffWithin_continuousOn_source (I := I) g α hu j
   · exact chartGramMatrix_entry_continuousOn_source (I := I) g α i j
-
-/-! ## Global continuity of `g.inner x (gradFun u x) (gradFun u x)` for smooth `u` -/
 
 /-- For a smooth scalar `u : M → ℝ` on a smooth manifold whose model `I` may
 have a non-trivial boundary, the metric pairing
@@ -653,8 +575,6 @@ private lemma g_inner_gradFun_gradFun_continuous
     g_inner_gradFun_gradFun_continuousOn_chart_source (I := I) g x hu
   exact (hcontOn x hx_chart).continuousAt (hopen.mem_nhds hx_chart)
 
-/-! ## L^p of `√(g.inner x (gradFun u x) (gradFun u x))` for arbitrary smooth `u` -/
-
 /-- For a smooth scalar `u : M → ℝ` on a compact Riemannian manifold with
 smooth boundary, `√(g.inner (gradFun u) (gradFun u))` is in `L^p` for every
 exponent `p`. -/
@@ -667,19 +587,6 @@ private lemma memLp_g_norm_gradFun_smooth
       (riemannianVolumeMeasure I M g) := by
   have hcont := g_inner_gradFun_gradFun_continuous (I := I) (M := M) g hu
   exact continuous_memLp_of_compactSpace g p (Real.continuous_sqrt.comp hcont)
-
-/-! ## Smooth-section weak `L^p` Riemannian gradient (general smooth `u`)
-
-The pointwise pairing `g.inner x (gradFun u x) (Y x)` is continuous on `M`
-for any smooth tangent test field `Y` and smooth scalar `u`. Direct
-chart-by-chart argument analogous to `g_inner_gradFun_gradFun_continuous`,
-expanding `gradFun u` via the chart-local within-formula and `Y` via its
-smooth-section structure. We use the duality
-`g.inner x (gradFun u x) (Y x) = mfderiv u x (Y x) = tangentSectionAction Y u x`,
-and prove continuity of `tangentSectionAction Y u` via the chart-source
-representation
-`tangentSectionAction Y u x = ∑ i, chartCoeff α Y i x · partialDerivWithin (target) i (scalarOnE α u) (extChartAt I α x)`.
--/
 
 /-- Within-version of the chart-local representation of `tangentSectionAction`,
 valid at every chart-source point. -/
@@ -696,18 +603,14 @@ private lemma tangentSectionAction_chartLocal_within
   classical
   have hbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [trivializationAt_baseSet_eq_chartAt_source]; exact hx
-  -- Decompose `Y x = ∑ i, chartCoeff α Y i x • chartBasisVecFiber α i x`.
   have hY_decomp : (Y : ∀ z, TangentSpace I z) x =
       ∑ i : Fin (Module.finrank ℝ E),
         chartCoeff (I := I) α Y i x •
           chartBasisVecFiber (I := I) α i x :=
     chartCoeff_recompose (I := I) α Y hbase
-  -- `mfderiv` is linear, so apply it to the decomposition.
   change mfderiv I 𝓘(ℝ) u x ((Y : ∀ z, TangentSpace I z) x) = _
   rw [hY_decomp, map_sum]
   refine Finset.sum_congr rfl (fun i _ => ?_)
-  -- `mfderiv u x (c • v) = c • mfderiv u x v` for the codomain `ℝ`.
-  -- Compute via `ContinuousLinearMap.map_smul`.
   rw [show mfderiv I 𝓘(ℝ) u x (chartCoeff (I := I) α Y i x •
         chartBasisVecFiber (I := I) α i x) =
       chartCoeff (I := I) α Y i x •
@@ -737,7 +640,6 @@ private lemma tangentSectionAction_continuousOn_chart_source
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
     ContinuousOn (tangentSectionAction (I := I) Y u) (chartAt H α).source := by
   classical
-  -- Use the chart-local within-representation.
   have h_eq : ∀ y ∈ (chartAt H α).source,
       tangentSectionAction (I := I) Y u y =
         ∑ i : Fin (Module.finrank ℝ E),
@@ -772,7 +674,6 @@ private lemma continuous_g_inner_gradFun_section
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     Continuous (fun x : M => g.inner x (gradFun (I := I) g u x) (Y x)) := by
-  -- `g.inner x (gradFun u x) (Y x) = tangentSectionAction Y u x`.
   have h_eq : ∀ x : M, g.inner x (gradFun (I := I) g u x) (Y x) =
       tangentSectionAction (I := I) Y u x := by
     intro x
@@ -781,8 +682,6 @@ private lemma continuous_g_inner_gradFun_section
     rfl
   exact (tangentSectionAction_continuous (I := I) (M := M) Y hu).congr
     (fun x => (h_eq x).symm)
-
-/-! ## Smooth bridge for arbitrary smooth `u` -/
 
 /-- `gradFun u` is a weak `L^p` Riemannian gradient with boundary of smooth
 `u`, with no interior-support hypothesis. -/
@@ -793,13 +692,10 @@ private lemma hasWeakRiemannianGradLp_withBoundary_gradFun_smooth
     HasWeakRiemannianGradLp_withBoundary (I := I) (M := M) g u
       (fun x : M => (gradFun (I := I) g u x : E)) := by
   refine ⟨?_, ?_⟩
-  · -- AEStronglyMeasurable for the gradient pairing against any test field.
-    intro Z
+  · intro Z
     have h := continuous_g_inner_gradFun_section (I := I) (M := M) g hu Z
     exact h.aestronglyMeasurable
-  · -- IBP identity for interior-supported `X`.
-    intro X hX hX_int
-    -- `g.inner x (gradFun u x) (X x) = tangentSectionAction X u x`.
+  · intro X hX hX_int
     have h_pt : ∀ x : M, g.inner x (gradFun (I := I) g u x) (X x) =
         tangentSectionAction (I := I) X u x := by
       intro x
@@ -807,7 +703,6 @@ private lemma hasWeakRiemannianGradLp_withBoundary_gradFun_smooth
       rw [inner_gradFun_right (I := I) g u x ((X : ∀ z, TangentSpace I z) x)]
       rfl
     rw [integral_congr_ae (Filter.Eventually.of_forall h_pt)]
-    -- Apply our IBP variant (drops the interior-support hypothesis on `u`).
     exact integral_tangentSectionAction_eq_neg_no_u_interior_support
       (I := I) g hu X hX hX_int
 
@@ -911,33 +806,6 @@ theorem w1pNormIntrinsicLp_withBoundary_lt_top_of_contMDiff_interior
   refine lt_of_le_of_lt (iInf_le_of_le G (iInf_le _ hG_weak)) ?_
   exact hG_p.2
 
-/-! ## Reverse direction: chart-based norm controlled by intrinsic-`L^p` norm
-on smooth inputs (with-boundary)
-
-This section delivers the per-`u` reverse direction of the smooth-input
-norm equivalence in the with-boundary setting. The boundaryless analog is
-`Analysis.Sobolev.EquivalenceFull.wkpNormChart_le_const_mul_w1pNormIntrinsicLp_smooth`.
-
-The argument follows the same template:
-
-1. For smooth `u` on a closed manifold-with-boundary, the intrinsic-`L^p`
-   Sobolev norm `w1pNormIntrinsicLp_withBoundary g p u` is finite (existing
-   theorem `w1pNormIntrinsicLp_withBoundary_lt_top_of_contMDiff`).
-
-2. The chart-based norm `wkpNormChart g 1 p u` is finite under the
-   chart-pushed strict-interior support hypothesis (existing infrastructure
-   `MemWkpChart_of_contMDiff_AllChartsInteriorSupport` combined with
-   `wkpNormChart_lt_top_of_memWkpChart`).
-
-3. If `w1pNormIntrinsicLp_withBoundary u = 0`, the smooth `u` is identically
-   zero on the closed manifold (continuity + open positivity of the
-   Riemannian volume measure), hence `wkpNormChart u = 0` as well.
-
-4. Otherwise both norms are positive and finite, and the per-`u` constant
-   `C := (wkpNormChart u).toReal / (w1pNormIntrinsicLp_withBoundary u).toReal + 1`
-   delivers the inequality.
--/
-
 /-- For a smooth `u` on a closed Riemannian manifold-with-boundary, if the
 intrinsic-`L^p` Sobolev norm with boundary vanishes (with `1 ≤ p < ∞`), then
 `u = 0` pointwise everywhere. -/
@@ -954,8 +822,6 @@ private lemma smooth_u_eq_zero_of_w1pNormIntrinsicLp_withBoundary_zero
   haveI : BorelSpace E := ⟨rfl⟩
   letI : MeasurableSpace M := borel M
   haveI : BorelSpace M := ⟨rfl⟩
-  -- `w1pNormIntrinsicLp_withBoundary` is `eLpNorm u + iInf ...`. Both summands
-  -- are nonneg; their sum being zero forces each to be zero.
   have h_eLp_u_zero : eLpNorm u p (riemannianVolumeMeasure I M g) = 0 := by
     have h_le_sum :
         eLpNorm u p (riemannianVolumeMeasure I M g) ≤
@@ -965,7 +831,6 @@ private lemma smooth_u_eq_zero_of_w1pNormIntrinsicLp_withBoundary_zero
       exact le_self_add
     rw [h_zero] at h_le_sum
     exact le_antisymm h_le_sum (zero_le _)
-  -- `u =ᵃᵉ 0` from `eLpNorm u = 0`.
   have h_aestronglyMeasurable : AEStronglyMeasurable u
       (riemannianVolumeMeasure I M g) :=
     hu_smooth.continuous.aestronglyMeasurable
@@ -976,7 +841,6 @@ private lemma smooth_u_eq_zero_of_w1pNormIntrinsicLp_withBoundary_zero
   have h_u_aeEq_zero :
       u =ᵐ[riemannianVolumeMeasure I M g] 0 :=
     (eLpNorm_eq_zero_iff h_aestronglyMeasurable h_p_ne_zero).mp h_eLp_u_zero
-  -- Continuity + open positive measure ⟹ pointwise equality.
   have hu_cont : Continuous u := hu_smooth.continuous
   have h_zero_cont : Continuous (fun _ : M => (0 : ℝ)) := continuous_const
   have h_pos : (riemannianVolumeMeasure I M g).IsOpenPosMeasure :=
@@ -1017,7 +881,6 @@ theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth_finite
           DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
             (I := modelWithCornersEuclideanHalfSpace n) (M := M) g p u := by
   classical
-  -- Both norms are finite for smooth `u` on a closed manifold; both are real.
   have h_intr_lt_top :
       DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
         (I := modelWithCornersEuclideanHalfSpace n) (M := M) g p u < ⊤ :=
@@ -1030,7 +893,6 @@ theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth_finite
       DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
         (I := modelWithCornersEuclideanHalfSpace n) (M := M) g p u ≠ ⊤ :=
     h_intr_lt_top.ne
-  -- Convert ENNReal-valued norms to nonneg reals.
   set a : ℝ :=
     (DifferentialGeometry.Analysis.Sobolev.WithBoundary.wkpNormChart
       (n := n) (M := M) g 1 p u).toReal with ha_def
@@ -1046,7 +908,6 @@ theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth_finite
     rw [hC_def]
     exact add_nonneg (div_nonneg ha_nn (le_of_lt hb_pos)) (le_of_lt one_pos)
   refine ⟨C, hC_nn, ?_⟩
-  -- Convert to ENNReal.ofReal form.
   rw [show DifferentialGeometry.Analysis.Sobolev.WithBoundary.wkpNormChart
       (n := n) (M := M) g 1 p u = ENNReal.ofReal a from
     (ENNReal.ofReal_toReal h_chart_ne_top).symm]
@@ -1090,13 +951,11 @@ theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth
               (I := modelWithCornersEuclideanHalfSpace n) (M := M) g p u := by
   intro u hu_smooth h_int
   classical
-  -- Chart-side `MemWkpChart` from the strict-interior support hypothesis.
   have h_mem_chart :
       DifferentialGeometry.Analysis.Sobolev.WithBoundary.MemWkpChart
         (n := n) (M := M) g 1 p u :=
     DifferentialGeometry.Analysis.Sobolev.WithBoundary.MemWkpChart_of_contMDiff_AllChartsInteriorSupport
       (n := n) (M := M) g hp_one hu_smooth h_int
-  -- Hence the chart-based norm is finite.
   have h_chart_lt_top :
       DifferentialGeometry.Analysis.Sobolev.WithBoundary.wkpNormChart
         (n := n) (M := M) g 1 p u < ⊤ :=
@@ -1105,8 +964,7 @@ theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth
   by_cases h_intr_zero :
       DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
         (I := modelWithCornersEuclideanHalfSpace n) (M := M) g p u = 0
-  · -- Boundary case: intrinsic norm zero ⟹ `u` identically zero ⟹ `wkpNormChart u = 0`.
-    refine ⟨0, le_refl _, ?_⟩
+  · refine ⟨0, le_refl _, ?_⟩
     have h_u_zero : u = (fun _ : M => (0 : ℝ)) :=
       smooth_u_eq_zero_of_w1pNormIntrinsicLp_withBoundary_zero
         (I := modelWithCornersEuclideanHalfSpace n) (M := M) g hp_one
@@ -1115,8 +973,7 @@ theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth
     rw [DifferentialGeometry.Analysis.Sobolev.WithBoundary.wkpNormChart_zero_fun
       (n := n) (M := M) g hp_one]
     simp
-  · -- General case: intrinsic norm positive. Apply the finite-case theorem.
-    obtain ⟨C, hC_nn, hC_bound⟩ :=
+  · obtain ⟨C, hC_nn, hC_bound⟩ :=
       wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth_finite
         (n := n) (M := M) g hp_one hp_top hu_smooth h_chart_lt_top h_intr_zero
     exact ⟨C, hC_nn, hC_bound⟩

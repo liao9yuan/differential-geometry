@@ -64,8 +64,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" =>
   EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## The squared-sum form of `tensorPouSobolevNorm` at order `k = 1` -/
-
 private noncomputable def tensorPouSobolevNormSqSum_one
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
@@ -161,8 +159,6 @@ private lemma tensorPouSobolevNormSqSum_one_eq_finsetSum
     funext y; exact h_integrand_zero y
   rw [heq]; simp
 
-/-! ## Per-α density sup bound -/
-
 variable (I M) in
 private noncomputable def perChartDensityCeil
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -204,8 +200,6 @@ private lemma perChartDensityCeil_bound
   exact (exists_sup_chartDensity_on_pou_tsupport_image
     (I := I) (M := M) g α h_supp_ne).choose_spec.2 y hy_image
 
-/-! ## Measurable per-(Idx, Jdx, j) summand on `M` -/
-
 private noncomputable def compNormSqOnM
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T₀ : SmoothCcTensor g r s)
     (α : M) (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -245,14 +239,6 @@ private lemma compNormSqOnM_eq_of_mem_chartSrc
           ((extChartAt I α) b)‖ ^ 2 := by
   unfold compNormSqOnM
   rw [extChartAtExt_apply_of_mem (I := I) (α := α) hb]
-
-/-! ## Per-α integral bound on a measurable M-side function
-
-Given a non-negative constant `CB` (which will be the global max of the
-per-α H.4.bridge constants) and a measurable M-side integrand
-`G_α(b) := ofReal(POU_α(b) · CB · BigSum_α(b))` supported in the chart source,
-the integral `∫ G_α dμ_g` is bounded by a per-α uniform constant times the
-chart-target Euclidean Sobolev sum. -/
 
 private lemma per_alpha_measurable_lintegral_le
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -308,7 +294,6 @@ private lemma per_alpha_measurable_lintegral_le
     refine Finset.sum_nonneg (fun _ _ => ?_)
     refine Finset.sum_nonneg (fun _ _ => ?_)
     exact compNormSqOnM_nonneg (I := I) (M := M) g r s T₀ α _ _ _ _
-  -- Pointwise: ofReal(rho · CB · BigSum_M) = ofReal CB · Σ_{Idx Jdx j} ofReal(rho · compNormSq).
   have h_distrib_pt : ∀ b : M,
       ENNReal.ofReal (rho b * CB * BigSum_M b) =
         ENNReal.ofReal CB *
@@ -341,7 +326,6 @@ private lemma per_alpha_measurable_lintegral_le
       refine Finset.sum_nonneg (fun Jdx _ => ?_)
       refine Finset.sum_nonneg (fun j _ => ?_)
       exact mul_nonneg (hrho_nn b) (compNormSqOnM_nonneg (I := I) (M := M) g r s T₀ α _ _ _ _)
-  -- Rewrite the M-integral.
   have h_integrand_eq : (fun b : M => ENNReal.ofReal (rho b * CB * BigSum_M b)) =
       fun b : M =>
         ENNReal.ofReal CB *
@@ -349,7 +333,6 @@ private lemma per_alpha_measurable_lintegral_le
             ENNReal.ofReal
               (rho b * compNormSqOnM (I := I) (M := M) g r s T₀ α Idx Jdx j b) := by
     funext b; exact h_distrib_pt b
-  -- Per-summand measurability on M.
   set hμ_g : Measure M := riemannianVolumeMeasure (I := I) (M := M) g
   have hSum_meas : ∀ Idx Jdx j,
       Measurable (fun b : M =>
@@ -357,7 +340,6 @@ private lemma per_alpha_measurable_lintegral_le
     intro Idx Jdx j
     exact ENNReal.measurable_ofReal.comp
       (hrho_meas.mul (compNormSqOnM_measurable (I := I) (M := M) g r s T₀ α Idx Jdx j))
-  -- Pull constant CB out and swap finite sum with integral.
   have h_int_rw :
       ∫⁻ b, ENNReal.ofReal (rho b * CB * BigSum_M b) ∂hμ_g =
         ENNReal.ofReal CB *
@@ -375,12 +357,8 @@ private lemma per_alpha_measurable_lintegral_le
       Finset.measurable_sum _ (fun j _ => hSum_meas Idx Jdx j))]
     refine Finset.sum_congr rfl (fun Jdx _ => ?_)
     exact lintegral_finset_sum _ (fun j _ => hSum_meas Idx Jdx j)
-  -- Show the LHS of the goal equals h_int_rw LHS.
   change ∫⁻ b, ENNReal.ofReal (rho b * CB * BigSum_M b) ∂hμ_g ≤ _
   rw [h_int_rw]
-  -- Now: ofReal CB · Σ_{IJ,j} (∫ ofReal(rho · compNormSq)) ≤
-  --      ofReal(CB · cE · Msup) · Σ_{IJ,j} (Euclidean integral).
-  -- Bound each per-summand integral.
   have hper_summand_le : ∀ Idx Jdx j,
       (∫⁻ b, ENNReal.ofReal
             (rho b * compNormSqOnM (I := I) (M := M) g r s T₀ α Idx Jdx j b) ∂hμ_g) ≤
@@ -607,7 +585,6 @@ private lemma per_alpha_measurable_lintegral_le
     have h_cE_eq : (euclideanHaarFactor E : ℝ≥0∞) = ENNReal.ofReal cE := by
       rw [hcE_def, ENNReal.ofReal_coe_nnreal]
     rw [h_cE_eq, ← ENNReal.ofReal_mul hcE_nn]
-  -- Combine: pull constants.
   have h_step :
       ∑ Idx : Fin r → Fin n, ∑ Jdx : Fin s → Fin n, ∑ j ∈ Finset.range 3,
           ∫⁻ b, ENNReal.ofReal
@@ -628,7 +605,6 @@ private lemma per_alpha_measurable_lintegral_le
     refine Finset.sum_le_sum (fun j _ => ?_)
     exact hper_summand_le Idx Jdx j
   refine le_trans (mul_le_mul_right h_step _) ?_
-  -- Pull constant (cE * Msup) out of the triple sum.
   have h_pull :
       ∑ Idx : Fin r → Fin n, ∑ Jdx : Fin s → Fin n, ∑ j ∈ Finset.range 3,
         ENNReal.ofReal (cE * Msup) *
@@ -659,14 +635,11 @@ private lemma per_alpha_measurable_lintegral_le
     rw [Finset.mul_sum]
   rw [h_pull]
   rw [← mul_assoc, ← ENNReal.ofReal_mul hCB_nn]
-  -- Rearrange constants and swap (Idx, Jdx) with the IJ pair.
   have h_const_eq : CB * (cE * Msup) = CB * cE * Msup := by ring
   rw [h_const_eq]
   refine mul_le_mul_right ?_ _
   rw [← Finset.sum_product']
   exact le_refl _
-
-/-! ## The headline -/
 
 /-- **Intrinsic L² bound for the raw tensor connection Laplacian by the squared
 partition-of-unity-weighted chart-Sobolev norm.**
@@ -700,7 +673,6 @@ theorem rawTensorConnLap_intrinsicL2_le_tensorPouSobolevNorm_sq
   classical
   set n := Module.finrank ℝ E with hn_def
   set S : Finset M := chartAtlasPOU_finset (I := I) (M := M) with hS_def
-  -- Choose per-α H.4.bridge witnesses.
   have h_bridge_choose :
       ∀ α : M, ∃ CB : ℝ, 0 ≤ CB ∧
         ∀ T₀' : SmoothCcTensor g r s,
@@ -737,7 +709,6 @@ theorem rawTensorConnLap_intrinsicL2_le_tensorPouSobolevNorm_sq
     have hSne : S.Nonempty := ⟨α, hα⟩
     rw [dif_pos hSne]
     exact Finset.le_sup' CB hα
-  -- Per-α density-multiplied constant from the per_alpha_measurable_lintegral_le.
   set D_per_alpha : M → ℝ := fun α =>
     CB_max * (euclideanHaarFactor E : ℝ) *
       (perChartDensityCeil (I := I) (M := M) g α + 1) with hD_per_alpha_def
@@ -746,7 +717,6 @@ theorem rawTensorConnLap_intrinsicL2_le_tensorPouSobolevNorm_sq
     rw [hD_per_alpha_def]
     refine mul_nonneg (mul_nonneg hCB_max_nn (NNReal.coe_nonneg _)) ?_
     linarith [perChartDensityCeil_nonneg (I := I) (M := M) g α]
-  -- Global constant: max over α ∈ S of D_per_alpha.
   set D_max : ℝ := if hSne : S.Nonempty then S.sup' hSne D_per_alpha else 1 with hD_max_def
   have hD_max_nn : 0 ≤ D_max := by
     rw [hD_max_def]
@@ -776,7 +746,6 @@ theorem rawTensorConnLap_intrinsicL2_le_tensorPouSobolevNorm_sq
     exact chartAtlasPOU_finset_sum_eq_one (I := I) (M := M) b
   have hpou_nn : ∀ α b, 0 ≤ (chartAtlasPOU I M α : M → ℝ) b := fun α b =>
     (chartAtlasPOU I M).nonneg α b
-  -- Define per-α measurable function H_α.
   set H_alpha : M → M → ℝ≥0∞ := fun α b =>
     ENNReal.ofReal
       ((chartAtlasPOU I M α : M → ℝ) b * CB_max *
@@ -796,7 +765,6 @@ theorem rawTensorConnLap_intrinsicL2_le_tensorPouSobolevNorm_sq
     refine Finset.measurable_sum _ (fun _ _ => ?_)
     refine Finset.measurable_sum _ (fun _ _ => ?_)
     exact compNormSqOnM_measurable (I := I) (M := M) g r s T₀ α _ _ _
-  -- Pointwise bound: ofReal F(b) ≤ Σ_{α ∈ S} H_α(b).
   have h_pointwise_M : ∀ b : M,
       ENNReal.ofReal (F b) ≤ ∑ α ∈ S, H_alpha α b := by
     intro b
@@ -904,14 +872,12 @@ theorem rawTensorConnLap_intrinsicL2_le_tensorPouSobolevNorm_sq
       rw [ENNReal.ofReal_sum_of_nonneg h_summand_nn]
     rw [h_distrib] at h_ofReal_le
     exact h_ofReal_le
-  -- Step D: integrate the pointwise bound.
   have h_int_M_le :
       ∫⁻ b, ENNReal.ofReal (F b)
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤
       ∫⁻ b, ∑ α ∈ S, H_alpha α b
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
     lintegral_mono h_pointwise_M
-  -- Swap sum and integral.
   have h_sum_swap :
       ∫⁻ b, ∑ α ∈ S, H_alpha α b
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
@@ -919,7 +885,6 @@ theorem rawTensorConnLap_intrinsicL2_le_tensorPouSobolevNorm_sq
             ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
     lintegral_finset_sum S (fun α _ => hH_alpha_meas α)
   rw [h_sum_swap] at h_int_M_le
-  -- Per-α: apply per_alpha_measurable_lintegral_le.
   have h_per_α_int : ∀ α ∈ S,
       ∫⁻ b, H_alpha α b
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤
@@ -936,14 +901,10 @@ theorem rawTensorConnLap_intrinsicL2_le_tensorPouSobolevNorm_sq
                         ((toEuclidean (E := E)).symm y)‖ ^ 2)
                 ∂(volume : Measure EuclN) := by
     intro α hα
-    -- H_alpha α has the exact shape of per_alpha_measurable_lintegral_le's LHS.
     have h_use := per_alpha_measurable_lintegral_le
       (I := I) (M := M) g r s α CB_max hCB_max_nn T₀
-    -- h_use : ∫ H_α ≤ ofReal D_per_alpha α · (Euclidean sum)
-    -- We bound D_per_alpha α ≤ D_max.
     refine le_trans h_use ?_
     exact mul_le_mul_left (ENNReal.ofReal_le_ofReal (hD_α_le_max α hα)) _
-  -- Sum the per-α bounds.
   have h_sum_per_α :
       ∑ α ∈ S, ∫⁻ b, H_alpha α b
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤
@@ -990,7 +951,6 @@ theorem rawTensorConnLap_intrinsicL2_le_tensorPouSobolevNorm_sq
                 ∂(volume : Measure EuclN) := by
     rw [Finset.mul_sum]
   rw [h_pull] at h_sum_per_α
-  -- Identify the inner sum as (tensorPouSobolevNorm g 1 T₀)^2.
   have h_inner_eq :
       ∑ α ∈ S,
         ∑ IJ : (Fin r → Fin n) × (Fin s → Fin n),
@@ -1007,7 +967,6 @@ theorem rawTensorConnLap_intrinsicL2_le_tensorPouSobolevNorm_sq
         (tensorPouSobolevNorm (I := I) (M := M) g 1 T₀) ^ 2 := by
     rw [tensorPouSobolevNorm_one_sq_eq (I := I) (M := M) g T₀]
     rw [tensorPouSobolevNormSqSum_one_eq_finsetSum (I := I) (M := M) g T₀, ← hS_def]
-  -- Change LHS form to use F.
   change ∫⁻ b, ENNReal.ofReal
         (riemannianFiberNormSq (I := I) (M := M) g r s b
           (rawTensorConnLap (I := I) g r s
@@ -1046,8 +1005,6 @@ end Integral
 end DifferentialGeometry
 
 end
-
-/-! ## Sanity check: axioms used by the headline. -/
 
 open DifferentialGeometry.Integral.Connection in
 #print axioms rawTensorConnLap_intrinsicL2_le_tensorPouSobolevNorm_sq

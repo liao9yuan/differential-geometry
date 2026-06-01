@@ -79,18 +79,11 @@ theorem time_dependent_vf_chart_local_picard_with_lipschitz
             HasDerivWithinAt (flow y)
               ((X t ((chartAt H α).symm (I.symm (flow y t)))) : E)
               (Set.Icc (0 : ℝ) T) t) := by
-  -- Unpack the Lipschitz/continuity hypotheses.
   obtain ⟨L, K, r, hL, hr, hK, hLipt⟩ := hLip
-  -- Chart-coordinate vector field on `E` (defined for all `y`; values outside
-  -- the chart image are unused).
   set f : ℝ → E → E :=
     fun t y => (X t ((chartAt H α).symm (I.symm y)) : E) with hf_def
-  -- Chart-coordinate centre.
   set x₀ : E := I ((chartAt H α) α) with hx₀_def
-  -- Continuity of `t ↦ f t x₀` on the compact `[0, L]`, used to extract a
-  -- uniform upper bound on `‖f t x₀‖`.
   have hCont_at_centre : ContinuousOn (fun t : ℝ => f t x₀) (Set.Icc 0 L) := by
-    -- `f t x₀ = X t α` (since `(chartAt H α).symm (I.symm (I (chartAt H α α))) = α`).
     have hsymm₁ : I.symm x₀ = (chartAt H α) α := by
       simp [hx₀_def]
     have hsymm₂ : (chartAt H α).symm (I.symm x₀) = α := by
@@ -101,14 +94,12 @@ theorem time_dependent_vf_chart_local_picard_with_lipschitz
       change X t ((chartAt H α).symm (I.symm x₀)) = X t α
       rw [hsymm₂]
     rw [hrw]
-    -- Continuity of `t ↦ X t α` follows from continuity of `uncurry X`.
     have hCont' : Continuous (fun t : ℝ => X t α) := by
       have hpair : Continuous (fun t : ℝ => ((t, α) : ℝ × M)) := by fun_prop
       have hCont'' : Continuous (Function.uncurry fun t x => X t x) :=
         continuousOn_univ.mp hCont
       exact hCont''.comp hpair
     exact hCont'.continuousOn.mono (Set.subset_univ _)
-  -- Extract the uniform bound `Mctr := sup_{t ∈ [0,L]} ‖f t x₀‖`.
   have hcompactL : IsCompact (Set.Icc (0 : ℝ) L) := isCompact_Icc
   have hnonemptyL : (Set.Icc (0 : ℝ) L).Nonempty := ⟨0, by simp [hL.le]⟩
   obtain ⟨Mctr, hMctr⟩ :
@@ -119,8 +110,6 @@ theorem time_dependent_vf_chart_local_picard_with_lipschitz
     refine ⟨C, fun t ht => ?_⟩
     have := hC (Set.mem_image_of_mem _ ht)
     simpa [Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)] using this
-  -- Choose Picard parameters: a := r/2, r' := r/4, Lbound := Mctr + K·a + 1,
-  -- horizon T := min L ((a - r') / (Lbound + 1)).
   set a : ℝ := r / 2 with ha_def
   have ha_pos : 0 < a := by rw [ha_def]; linarith
   set r' : ℝ := r / 4 with hr'_def
@@ -139,16 +128,13 @@ theorem time_dependent_vf_chart_local_picard_with_lipschitz
     rw [hT_def]
     exact lt_min hL hdiv
   have hT_le_L : T ≤ L := min_le_left _ _
-  -- NNReal versions of the parameters.
   set aN : NNReal := Real.toNNReal a
   set rN : NNReal := Real.toNNReal r'
   set LboundN : NNReal := Real.toNNReal Lbound
   set Kn : NNReal := Real.toNNReal K
-  -- Coercion equalities for the NNReal parameters.
   have haN : (aN : ℝ) = a := Real.coe_toNNReal _ ha_pos.le
   have hrN : (rN : ℝ) = r' := Real.coe_toNNReal _ hr'_pos.le
   have hLboundN : (LboundN : ℝ) = Lbound := Real.coe_toNNReal _ hLbound_pos.le
-  -- Lipschitz on the closed sub-ball.
   have hLipt_closed :
       ∀ t ∈ Set.Icc (0 : ℝ) T,
         LipschitzOnWith Kn (f t) (Metric.closedBall x₀ aN) := by
@@ -162,7 +148,6 @@ theorem time_dependent_vf_chart_local_picard_with_lipschitz
       exact hy
     have ha_lt_r : a < r := by rw [ha_def]; linarith
     exact Metric.mem_ball.mpr (lt_of_le_of_lt hy_le ha_lt_r)
-  -- Norm bound on `closedBall x₀ aN`.
   have hnorm_le :
       ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ y ∈ Metric.closedBall x₀ aN,
         ‖f t y‖ ≤ Lbound := by
@@ -175,7 +160,6 @@ theorem time_dependent_vf_chart_local_picard_with_lipschitz
       have ha_lt_r : a < r := by rw [ha_def]; linarith
       exact Metric.mem_ball.mpr (lt_of_le_of_lt hy_le ha_lt_r)
     have h_x₀_open : x₀ ∈ Metric.ball x₀ r := Metric.mem_ball_self hr
-    -- ‖f t y‖ ≤ ‖f t y - f t x₀‖ + ‖f t x₀‖ ≤ K · dist y x₀ + ‖f t x₀‖.
     have hLip := (hLipt t ht').dist_le_mul y hy_open x₀ h_x₀_open
     have hdist : dist y x₀ ≤ a := by
       rw [Metric.mem_closedBall, haN] at hy
@@ -191,13 +175,10 @@ theorem time_dependent_vf_chart_local_picard_with_lipschitz
       _ ≤ K * a + max Mctr 0 := by
           rw [hKKn_eq]; gcongr
       _ ≤ Lbound := by rw [hLbound_def]; linarith
-  -- Continuity on `closedBall x₀ aN`.
   have hcont_closed :
       ∀ y ∈ Metric.closedBall x₀ aN,
         ContinuousOn (fun t : ℝ => f t y) (Set.Icc 0 T) := by
     intro y _
-    -- `f t y = X t ((chartAt H α).symm (I.symm y))`; continuity in `t` follows
-    -- from continuity of `uncurry X` on `ℝ × M`.
     set z : M := (chartAt H α).symm (I.symm y) with hz_def
     have hrw : (fun t : ℝ => f t y) = fun t : ℝ => (X t z : E) := by
       funext t; rfl
@@ -208,14 +189,10 @@ theorem time_dependent_vf_chart_local_picard_with_lipschitz
         continuousOn_univ.mp hCont
       exact hCont''.comp hpair
     exact hCont'.continuousOn.mono (Set.subset_univ _)
-  -- The time-interval bound `Lbound · max (T - 0) (0 - 0) ≤ a - r'`.
   have hT0 : (0 : ℝ) ≤ T := hT_pos.le
-  -- Pick the `IsPicardLindelof` parameters at `t₀ = 0`.
   set t₀_set : Set.Icc (0 : ℝ) T := ⟨0, by simp [hT0]⟩
   have hmul_max :
       (LboundN : ℝ) * max (T - (t₀_set : ℝ)) ((t₀_set : ℝ) - 0) ≤ aN - rN := by
-    -- Show the bound `Lbound · T ≤ a - r'`, then transport back through the
-    -- NNReal coercions.
     have hLb1 : (0 : ℝ) < Lbound + 1 := by linarith
     have hT_le : T ≤ (a - r') / (Lbound + 1) := min_le_right _ _
     have hdiff : 0 ≤ a - r' := by linarith
@@ -229,18 +206,15 @@ theorem time_dependent_vf_chart_local_picard_with_lipschitz
               apply mul_le_mul_of_nonneg_right _ hdiff
               rw [div_le_one hLb1]; linarith
         _ = a - r' := one_mul _
-    -- Translate to the NNReal goal: max (T - 0) (0 - 0) = T, then substitute.
     have ht₀_val : (t₀_set : ℝ) = 0 := rfl
     have hmax_eq : max (T - (t₀_set : ℝ)) ((t₀_set : ℝ) - 0) = T := by
       rw [ht₀_val]; simp [hT0]
     rw [hmax_eq]
     have : (aN - rN : ℝ) = a - r' := by
       push_cast [haN, hrN]; ring
-    -- Conclude.
     calc (LboundN : ℝ) * T = Lbound * T := by rw [hLboundN]
       _ ≤ a - r' := hcore
       _ = ((aN : ℝ) - (rN : ℝ)) := by rw [this]
-  -- Assemble the IsPicardLindelof witness.
   have hPL :
       IsPicardLindelof f (tmin := 0) (tmax := T) t₀_set x₀ aN rN LboundN Kn := by
     refine
@@ -255,27 +229,19 @@ theorem time_dependent_vf_chart_local_picard_with_lipschitz
       have : (LboundN : ℝ) = Lbound := hLboundN
       rw [this]; exact hLb
     · exact hmul_max
-  -- Apply Picard–Lindelöf to obtain the local flow.
   obtain ⟨flow, hflow⟩ :=
     hPL.exists_forall_mem_closedBall_eq_forall_mem_Icc_hasDerivWithinAt
-  -- Package the conclusion.
   refine ⟨T, hT_pos, r', hr'_pos, flow, ?_⟩
   intro y hy
-  -- Translate membership from radius `r'` to radius `rN`.
   have hy' : y ∈ Metric.closedBall x₀ rN := by
     rw [Metric.mem_closedBall] at hy ⊢
     rw [hrN]; exact hy
   obtain ⟨h_init, h_flow⟩ := hflow y hy'
   refine ⟨?_, ?_⟩
-  · -- `flow y 0 = y`; the `t₀` of the Picard structure is `⟨0, _⟩ : Icc 0 T`,
-    -- which is the real `0`.
-    have : flow y (t₀_set : ℝ) = y := h_init
+  · have : flow y (t₀_set : ℝ) = y := h_init
     simpa [t₀_set] using this
   · intro t ht
     have hd := h_flow t ht
-    -- `hd : HasDerivWithinAt (flow y) (f t (flow y t)) (Icc 0 T) t`.
-    -- The goal velocity is `(X t ((chartAt H α).symm (I.symm (flow y t))) : E)`,
-    -- which is definitionally `f t (flow y t)`.
     exact hd
 
 end DifferentialGeometry.PDE.RicciFlow.ODE

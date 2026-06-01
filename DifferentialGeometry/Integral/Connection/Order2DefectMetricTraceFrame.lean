@@ -110,17 +110,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The metric-trace Hessian
-
-The diagonal trace of the second covariant derivative `tensorSecondCovDeriv` against the
-`g_x`-orthonormal frame `smoothOrthoFrame g x i`, packaged as a named `(r, s)`-tensor value. -/
 
 /-- **The metric-trace Hessian.** With `B_i := smoothOrthoFrame g x i` the `g_x`-orthonormal
 smooth frame at `x`, the diagonal trace of the second covariant derivative:
@@ -158,19 +151,6 @@ theorem rawTensorConnLap_eq_metricTraceHessian
     rawTensorConnLap (I := I) g r s T x = metricTraceHessian (I := I) g r s T x := by
   rw [metricTraceHessian_def]
   exact rawTensorConnLap_eq_frame_trace_secondCovDeriv (I := I) g r s T x
-
-/-! ## First-slot linearity of the second covariant derivative
-
-The second covariant derivative `tensorSecondCovDeriv g r s X Y T x` is, by definition,
-```
-cov.toFun (∇_Y T) x (X x) − cov.toFun T x ((LeviCivita g).toFun Y x (X x)),
-```
-with `cov := tensorCov g r s`. Both `cov.toFun (∇_Y T) x` and `(LeviCivita g).toFun Y x` are
-continuous linear maps in their tangent-vector argument, so the whole expression is a continuous
-linear function of `X x` (for fixed smooth field `Y` and raw section `T`). This is the genuine
-first-slot tensoriality that lets the diagonal frame trace be read as the contraction of the
-first covariant-direction slot against the metric — independently of how `X` is chosen, as long as
-its value at `x` is fixed. -/
 
 /-- **The first-slot Hessian map.** For a fixed smooth field `Y` and raw section `T`, the
 continuous-linear map sending a tangent vector `v ∈ T_x M` to the second covariant derivative of
@@ -211,22 +191,6 @@ theorem tensorSecondCovDeriv_eq_firstSlotHessMap
       firstSlotHessMap (I := I) g r s Y T x (X x) := by
   rw [tensorSecondCovDeriv_def, firstSlotHessMap_apply]
 
-/-! ## Intrinsic metric-contraction reading of the diagonal trace (first slot)
-
-The diagonal frame trace `metricTraceHessian g r s T x = ∑ᵢ ∇²_{Bᵢ, Bᵢ} T (x)` traces the *first*
-covariant-direction slot against the orthonormal frame `Bᵢ := smoothOrthoFrame g x i`. Because the
-first slot of the Hessian is a continuous-linear form (`firstSlotHessMap`), the diagonal trace
-equals the `g`-weighted double sum
-```
-∑ᵢ ∑ⱼ g.inner x (Bᵢ x) (Bⱼ x) • firstSlotHessMap g r s Bᵢ T x (Bⱼ x),
-```
-since the orthonormality `g.inner x (Bᵢ x) (Bⱼ x) = δᵢⱼ` collapses the inner double sum to the
-diagonal. The `g`-weighted form is the **intrinsic metric-contraction reading** of the first slot:
-it contracts the first slot's tangent-vector argument against the frame through the metric, which
-on an orthonormal frame is the identity. This exhibits `Δ_∇ T` as a genuine metric trace of the
-first covariant-direction slot — frame-independent up to the metric coefficients — which is the
-foundation the outer covariant derivative passes through in the metric-trace route. -/
-
 /-- **The diagonal trace as a `g`-weighted double sum over the first slot.** With
 `B_i := smoothOrthoFrame g x i`,
 ```
@@ -248,9 +212,7 @@ theorem metricTraceHessian_eq_gWeighted_firstSlot
   classical
   rw [metricTraceHessian_def]
   refine Finset.sum_congr rfl (fun i _ => ?_)
-  -- Reduce the `i`-th diagonal summand to the inner `j`-sum.
   rw [tensorSecondCovDeriv_eq_firstSlotHessMap]
-  -- The inner `j`-sum: orthonormality collapses it to the `j = i` term.
   rw [show (∑ j : Fin (Module.finrank ℝ E),
         g.inner x (smoothOrthoFrame (I := I) g x i x)
             (smoothOrthoFrame (I := I) g x j x) •
@@ -270,21 +232,6 @@ theorem metricTraceHessian_eq_gWeighted_firstSlot
     (fun j => firstSlotHessMap (I := I) g r s (smoothOrthoFrame (I := I) g x i) T x
       (smoothOrthoFrame (I := I) g x j x))]
   rw [if_pos (Finset.mem_univ i)]
-
-/-! ## STEP 4 — the third-order tensor Ricci identity (curvature reordering)
-
-The metric-trace route's STEP 4 reorders the three covariant-derivative slots of `∇³T₀`; the
-difference of the two orderings is the genuine Riemann curvature. At the level needed by the
-route, the relevant reordering is the antisymmetric pair-swap of the second covariant derivative
-of the gradient tensor `S := ∇T₀ = covGrad g 0 2 T₀` (a rank-`(0, 3)` section). Through the
-first-slot Hessian map this reads, for two tangent fields `X, Y`,
-```
-firstSlotHessMap g 0 3 Y S x (X x) − firstSlotHessMap g 0 3 X S x (Y x) = R_x(X x, Y x)(S x).
-```
-This is `tensorSecondCovDeriv_antisymm_eq_riemannOp` at rank `(0, 3)`, rewritten through the
-first-slot map; the right-hand side is the continuous trilinear curvature form on the fibres,
-controlled in STEP 5 by the curvature fibre bound. No moving-frame derivative appears: the swap
-is between two honest covariant-derivative orderings of `∇T₀`. -/
 
 /-- **STEP 4 (third-order tensor Ricci identity, first-slot form).** For smooth tangent fields
 `X, Y` and the rank-`(0, 3)` gradient tensor `S := covGrad g 0 2 T₀ = ∇T₀`, the antisymmetric
@@ -312,15 +259,6 @@ theorem thirdOrder_ricci_identity_firstSlot
   exact tensorSecondCovDeriv_antisymm_eq_riemannOp (I := I) g 0 3
     (T := fun y : M => (covGrad (I := I) (M := M) g 0 2 T₀).toSection y)
     hX hY (covGrad_contMDiff_mk' (I := I) (M := M) g T₀)
-
-/-! ## The endpoint bridge: any pointwise defect bound yields the unconditional estimate
-
-Independently of how the pointwise fibre-norm bound `hpt` on the canonical defect
-`covGradRoughLapCurv g T₀` is obtained, *any* such bound (with `C₀ ≥ 0`) instantiates
-`secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound` to give the unconditional order-`2`
-covariant Gårding estimate. This is the final assembly of the metric-trace route: STEPS 1–5 chain
-(through the missing STEP 2) into `hpt`, and `hpt_to_unconditional_bound` turns `hpt` into the
-headline. -/
 
 /-- **Endpoint bridge (pointwise `hpt` ⇒ unconditional estimate).** If the canonical commutator
 defect `covGradRoughLapCurv g T₀ = Δ_∇(∇T₀) − ∇(Δ_∇ T₀)` satisfies the pointwise fibre-norm bound

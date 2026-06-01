@@ -86,23 +86,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## A finite triangle inequality for `a + b − c`
-
-A file-local convenience: the `L²` seminorm of `a + b − c` is bounded by the
-sum of the three `L²` seminorms, for strongly measurable summands. -/
 
 /-- For three almost-everywhere strongly measurable functions, the `L²`
 seminorm of `a + b − c` is bounded by the sum of the three `L²` seminorms. -/
@@ -136,14 +125,6 @@ private lemma euclidPartial_contDiff_of_contDiff
   rw [hcomp]
   exact (ContinuousLinearMap.apply ℝ ℝ
     (EuclideanSpace.single k 1)).contDiff.comp hfd
-
-/-! ## The pushed partition-of-unity weight and its closed support
-
-The headline weight is `chartPushedRaw I α (⇑(chartAtlasPOU I M α))`, the
-canonical partition-of-unity weight at `α` pushed to the Euclidean chart
-target. Since `chartAtlasPOU I M α` is a globally smooth function whose closed
-support lies in the chart source, its chart push-forward is globally `C^∞` on
-the Euclidean model space. -/
 
 /-- The closed support of the canonical partition-of-unity weight at `α`. -/
 private def pouKernelM (α : M) : Set M :=
@@ -180,13 +161,6 @@ private lemma chartPushedRaw_pou_contDiff (α : M) :
     (chartAtlasPOU_contMDiff (I := I) (M := M) α)
     (pouKernelM_subset_chart_source (I := I) (M := M) α)
 
-/-! ## Step 1 — the chosen weak partial agrees a.e. with the classical partial
-
-For a smooth compactly-supported section the Euclidean chart component is
-globally `C^∞` with compact support inside the chart target. The chosen weak
-partial of a smooth function agrees almost everywhere with the classical
-Euclidean partial derivative by uniqueness of weak partials. -/
-
 /-- The Euclidean chart component is globally `C^∞` on the Euclidean model
 space. -/
 private lemma tensorChartComponent_contDiff
@@ -197,9 +171,6 @@ private lemma tensorChartComponent_contDiff
     ContDiff ℝ ∞
       (tensorChartComponent (I := I) (M := M) g r s S α Idx Jdx) := by
   classical
-  -- `tensorChartComponent = chartPushedRaw I α (tensorChartComponentPou …)`,
-  -- and `tensorChartComponentPou` is a globally smooth `M`-function whose
-  -- closed support lies in the chart source.
   rw [tensorChartComponent_def]
   refine DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
     (I := I) (M := M) ?_ ?_
@@ -263,7 +234,6 @@ private lemma chosenWeakPartial'_tensorChartComponent_ae_eq_euclidPartial
   have hΩ_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have hp_one : (1 : ℝ≥0∞) ≤ 2 := by norm_num
-  -- `u` lies in `W^{1,2}` of the chart target.
   have hu_W1 : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 1 2 u (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_of_smooth_compactSupport
@@ -271,22 +241,12 @@ private lemma chosenWeakPartial'_tensorChartComponent_ae_eq_euclidPartial
   have hu_W1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 u
       (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p.mp hu_W1
-  -- Uniqueness of weak partials: `chosenWeakPartial' =ᵐ classical partial`.
   have h_ae :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial_smooth_ae_eq
       (d := Module.finrank ℝ E) hp_one hΩ_open hu_smooth hu_W1p k
-  -- The classical partial is, definitionally, `euclidPartial k u`.
   refine h_ae.trans (Filter.EventuallyEq.of_eq ?_)
   funext y
   rw [euclidPartial_def]
-
-/-! ## The Leibniz factorisation of the chart component on the chart target
-
-On the open Euclidean chart target the chart component factorises as the pushed
-partition-of-unity weight times the pushed raw chart component. The Leibniz
-product rule for the Fréchet derivative then splits its classical `k`-th
-partial into a cross-term carrying the derivative of the weight and a term
-carrying the derivative of the pushed raw component. -/
 
 /-- On the chart target the chart component is the pushed partition-of-unity
 weight times the pushed raw chart component. -/
@@ -348,14 +308,12 @@ private lemma euclidPartial_tensorChartComponent_eq_leibniz
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have hΩ_nhds : chartTargetEuclid (I := I) (M := M) α ∈ 𝓝 y :=
     hΩ_open.mem_nhds hy
-  -- On a neighbourhood of `y` the chart component agrees with `ρ · w`.
   have h_eqf : tensorChartComponent (I := I) (M := M) g r s S α Idx Jdx
       =ᶠ[𝓝 y] (fun z : EuclN => ρ z * w z) := by
     filter_upwards [hΩ_nhds] with z hz
     rw [hρ_def, hw_def]
     exact tensorChartComponent_eq_pou_mul_rawPushed
       (I := I) (M := M) g r s S α Idx Jdx hz
-  -- Differentiability of the two factors at `y`.
   have hρ_diff : DifferentiableAt ℝ ρ y :=
     ((chartPushedRaw_pou_contDiff (I := I) (M := M) α).differentiable
       (by simp)).differentiableAt
@@ -365,24 +323,16 @@ private lemma euclidPartial_tensorChartComponent_eq_leibniz
       (I := I) (M := M) g r s S α Idx Jdx).differentiableOn (by simp)
   have hw_diff : DifferentiableAt ℝ w y :=
     (hw_diffOn y hy).differentiableAt hΩ_nhds
-  -- The Fréchet derivative of the chart component at `y` is the product rule.
   have h_fderiv :
       fderiv ℝ (tensorChartComponent (I := I) (M := M) g r s S α Idx Jdx) y =
         ρ y • fderiv ℝ w y + w y • fderiv ℝ ρ y := by
     rw [h_eqf.fderiv_eq]
     exact fderiv_mul hρ_diff hw_diff
-  -- Evaluate both sides at the `k`-th standard basis vector.
   rw [euclidPartial_def, h_fderiv,
     ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
     ContinuousLinearMap.smul_apply, smul_eq_mul, smul_eq_mul,
     euclidPartial_def, euclidPartial_def]
   ring
-
-/-! ## The covariant-derivative component substitution
-
-The chart-coordinate covariant-derivative component formula rewrites the `k`-th
-Euclidean partial of the pushed raw chart component as the chart covariant-
-derivative component minus the lower-order correction term. -/
 
 /-- **The covariant-component substitution.** For a chart-target point `y`, the
 `k`-th Euclidean partial of the pushed raw chart component equals the chart
@@ -409,13 +359,6 @@ private lemma euclidPartial_rawPushed_eq_covDerivComponent_sub
   have h := covDerivComponent_eq_euclidPartial_add_lowerOrder
     (I := I) (M := M) g r s S α k Idx Jdx hy
   linarith [h]
-
-/-! ## The three-term pointwise identity on the chart target
-
-Combining the Leibniz factorisation with the covariant-component substitution,
-the classical `k`-th partial of the chart component splits, on the chart
-target, into the partition-of-unity-weighted covariant component, the
-partition-of-unity-weighted lower-order term, and the Leibniz cross-term. -/
 
 /-- The Leibniz cross-term: the `k`-th partial of the pushed partition-of-unity
 weight times the pushed raw chart component. -/
@@ -487,12 +430,6 @@ private lemma euclidPartial_tensorChartComponent_eq_three_terms
   unfold pouCovDerivComponent leibnizCrossTerm pouLowerOrderTerm
   ring
 
-/-! ## Continuity of the three terms on the chart target
-
-Each of the three terms is a product of functions continuous on the chart
-target, hence continuous there and almost-everywhere strongly measurable for
-the Euclidean volume restricted to the chart target. -/
-
 private lemma chartPushedRaw_pou_continuousOn (α : M) :
     ContinuousOn
       (chartPushedRaw (I := I) (M := M) α
@@ -545,8 +482,6 @@ private lemma pouCovDerivComponent_continuousOn
     ContinuousOn (pouCovDerivComponent (I := I) (M := M) g r s S α k Idx Jdx)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- On the chart target the covariant component is, by the substitution lemma,
-  -- the `k`-th partial of the pushed raw component plus the lower-order term.
   set galt : EuclN → ℝ := fun y : EuclN =>
     chartPushedRaw (I := I) (M := M) α
         (⇑(chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)) y *
@@ -565,8 +500,6 @@ private lemma pouCovDerivComponent_continuousOn
         (fun Idx' Jdx' => chartPushedRaw_tensorChartComponentRaw_contDiffOn
           (I := I) (M := M) g r s S α Idx' Jdx')).continuousOn)
   refine hgalt_cont.congr (fun y hy => ?_)
-  -- Pointwise: the weighted covariant component is the weight times
-  -- `(∂ₖ rawPushed + lower-order)`.
   have h := euclidPartial_rawPushed_eq_covDerivComponent_sub
     (I := I) (M := M) g r s S α k Idx Jdx hy
   unfold pouCovDerivComponent
@@ -611,13 +544,6 @@ private lemma leibnizCrossTerm_continuousOn
   exact (euclidPartial_chartPushedRaw_pou_continuousOn (I := I) (M := M) α k).mul
     (chartPushedRaw_rawComponent_continuousOn (I := I) (M := M) g r s S α Idx Jdx)
 
-/-! ## The Leibniz cross-term — uniform `L²` bound
-
-The cross-term `(∂ₖρ_α) · (raw push-forward)` is, by the support principle for
-derivatives, supported inside the closed support of `ρ_α`; on that compact
-kernel the chart-frame distortion bound controls the raw component, and the
-reverse chart-push `L²` bridge transports the bound to the Euclidean side. -/
-
 /-- The `k`-th partial of the pushed partition-of-unity weight has topological
 support inside the chart image of the closed support of the canonical
 partition-of-unity weight. -/
@@ -630,7 +556,6 @@ private lemma euclidPartial_chartPushedRaw_pou_tsupport_subset
       (toEuclidean (E := E)) ''
         ((extChartAt I α) '' (pouKernelM (I := I) (M := M) α)) := by
   classical
-  -- `tsupport (∂ₖ ρ_α-pushed) ⊆ tsupport ρ_α-pushed`.
   have h1 : tsupport
       (euclidPartial (E := E) k
         (chartPushedRaw (I := I) (M := M) α
@@ -645,12 +570,10 @@ private lemma euclidPartial_chartPushedRaw_pou_tsupport_subset
     intro y hy
     refine subset_tsupport _ ?_
     simpa [euclidPartial_def] using hy
-  -- `tsupport ρ_α-pushed ⊆ toEuclidean '' (extChartAt '' pouKernelM)`.
   have h2 : tsupport (chartPushedRaw (I := I) (M := M) α
         (⇑(chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯))) ⊆
       (toEuclidean (E := E)) ''
         ((extChartAt I α) '' (pouKernelM (I := I) (M := M) α)) := by
-    -- The right-hand side is compact, hence closed.
     have hK_compact : IsCompact ((extChartAt I α) ''
         (pouKernelM (I := I) (M := M) α)) :=
       chartImage_pouTsupport_isCompact (I := I) (M := M) α
@@ -660,17 +583,14 @@ private lemma euclidPartial_chartPushedRaw_pou_tsupport_subset
     refine closure_minimal ?_ hKE_compact.isClosed
     intro y hy
     rw [Function.mem_support] at hy
-    -- `y` lies in the chart target.
     have hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α := by
       by_contra hy_off
       exact hy (chartPushedRaw_apply_of_notMem (I := I) (M := M) α
         (⇑(chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)) hy_off)
     set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y)
       with hb_def
-    -- The chart base point lies in the chart source.
     have hb_src : b ∈ (chartAt H α).source :=
       symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy_target
-    -- The chart base point lies in the closed support of the POU weight.
     have hb_pou : b ∈ pouKernelM (I := I) (M := M) α := by
       refine subset_tsupport _ ?_
       rw [Function.mem_support]
@@ -679,7 +599,6 @@ private lemma euclidPartial_chartPushedRaw_pou_tsupport_subset
       rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α
         (⇑(chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)) hy_target]
       exact hb_zero
-    -- `y` is the image of `b` under `toEuclidean ∘ extChartAt`.
     have hb_ext : b ∈ (extChartAt I α).source := by
       rw [DifferentialGeometry.Integral.Measure.extChartAt_source_eq_chartAt_source
         (I := I) (M := M)]
@@ -716,13 +635,6 @@ private lemma leibnizCrossTerm_eq_zero_off_pou_kernel
     exact hy (euclidPartial_chartPushedRaw_pou_tsupport_subset (I := I) (M := M) α k
       (subset_tsupport _ (Function.mem_support.mpr hne)))
   rw [hχ_zero, zero_mul]
-
-/-! ### The manifold-side raw-component cutoff function
-
-The manifold-side function whose chart push-forward dominates the cross-term is
-the closed-support indicator of the raw chart component; it is supported inside
-the closed support of the partition-of-unity weight, on which the chart-frame
-distortion bound controls the raw component. -/
 
 /-- The manifold-side raw-component cutoff: the raw chart component on the
 closed support of the canonical partition-of-unity weight at `α`, zero
@@ -763,7 +675,6 @@ private lemma rawComponentCutoff_measurable
     Measurable (rawComponentCutoff (I := I) (M := M) g r s S α Idx Jdx) := by
   classical
   unfold rawComponentCutoff
-  -- Rewrite the closed-support indicator as a `piecewise`.
   rw [show (pouKernelM (I := I) (M := M) α).indicator
         (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) =
       (pouKernelM (I := I) (M := M) α).piecewise
@@ -773,7 +684,6 @@ private lemma rawComponentCutoff_measurable
     by_cases hx : x ∈ pouKernelM (I := I) (M := M) α
     · simp [Set.indicator_of_mem hx, Set.piecewise_eq_of_mem _ _ _ hx]
     · simp [Set.indicator_of_notMem hx, Set.piecewise_eq_of_notMem _ _ _ hx]]
-  -- The raw component is continuous on the chart source ⊇ `pouKernelM`.
   have hraw_cont : ContinuousOn
       (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx)
       (pouKernelM (I := I) (M := M) α) :=
@@ -782,13 +692,6 @@ private lemma rawComponentCutoff_measurable
       (pouKernelM_subset_chart_source (I := I) (M := M) α)
   exact ContinuousOn.measurable_piecewise hraw_cont
     (continuousOn_const) (pouKernelM_isClosed (I := I) (M := M) α).measurableSet
-
-/-! ### The chart-frame distortion `L²` bound for the raw-component cutoff
-
-On the closed support of the partition-of-unity weight the raw chart component
-is bounded, in absolute value squared, by a uniform constant times the
-pointwise tensor inner product; integrating against the Riemannian volume
-measure produces a uniform `L²` bound. -/
 
 /-- **Uniform pointwise quadratic bound for the raw-component cutoff.** There is
 a single non-negative constant `C` such that for every section, every component
@@ -805,7 +708,6 @@ private lemma exists_const_rawComponentCutoff_sq_le
           C * tensorInnerPointwise (I := I) (M := M) g r s b
             (S.toFun b) (S.toFun b) := by
   classical
-  -- The chart-frame distortion bound on the closed support of the POU weight.
   obtain ⟨K, hK_nn, h_norm⟩ :=
     tensorTrivProj_norm_sq_le_const_mul_tensorInner
       (I := I) (M := M) (E := E) g r s α
@@ -819,12 +721,10 @@ private lemma exists_const_rawComponentCutoff_sq_le
       (S.toFun b) (S.toFun b) :=
     tensorInnerPointwise_nonneg (I := I) (M := M) g r s b _
   by_cases hb : b ∈ pouKernelM (I := I) (M := M) α
-  · -- Inside the closed support of the POU weight: run the distortion bound.
-    have hcut_eq : rawComponentCutoff (I := I) (M := M) g r s S α Idx Jdx b =
+  · have hcut_eq : rawComponentCutoff (I := I) (M := M) g r s S α Idx Jdx b =
         tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx b := by
       rw [rawComponentCutoff, Set.indicator_of_mem hb]
     rw [hcut_eq, tensorChartComponentRaw_def]
-    -- `|P_IJ T| ≤ C_proj · ‖T‖`.
     set T : TensorRSModel r s ℝ E :=
       tensorTrivProj (I := I) (M := M) g r s S α b with hT_def
     have h_proj_le :
@@ -834,7 +734,6 @@ private lemma exists_const_rawComponentCutoff_sq_le
         (mul_le_mul_of_nonneg_right
           (tensorChartComponentProjection_norm_le_uniform (E := E) r s Idx Jdx)
           (norm_nonneg _))
-    -- Square it.
     have h_proj_sq_le :
         (tensorChartComponentProjection (E := E) r s Idx Jdx T) ^ 2 ≤
           C_proj ^ 2 * ‖T‖ ^ 2 := by
@@ -845,11 +744,9 @@ private lemma exists_const_rawComponentCutoff_sq_le
       have hsq := mul_self_le_mul_self (norm_nonneg _) h_proj_le
       nlinarith [hsq, norm_nonneg (tensorChartComponentProjection (E := E)
         r s Idx Jdx T), norm_nonneg T, hC_proj_nn]
-    -- `‖T‖² ≤ K · tensorInner`.
     have h_triv_sq_le : ‖T‖ ^ 2 ≤ K *
         tensorInnerPointwise (I := I) (M := M) g r s b
           (S.toFun b) (S.toFun b) := h_norm S b hb
-    -- Combine.
     calc (tensorChartComponentProjection (E := E) r s Idx Jdx T) ^ 2
         ≤ C_proj ^ 2 * ‖T‖ ^ 2 := h_proj_sq_le
       _ ≤ C_proj ^ 2 *
@@ -859,8 +756,7 @@ private lemma exists_const_rawComponentCutoff_sq_le
       _ = C_proj ^ 2 * K *
           tensorInnerPointwise (I := I) (M := M) g r s b
             (S.toFun b) (S.toFun b) := by ring
-  · -- Off the closed support: the cutoff vanishes, the right-hand side is `≥ 0`.
-    have hcut_zero : rawComponentCutoff (I := I) (M := M) g r s S α Idx Jdx b
+  · have hcut_zero : rawComponentCutoff (I := I) (M := M) g r s S α Idx Jdx b
         = 0 := by
       rw [rawComponentCutoff, Set.indicator_of_notMem hb]
     rw [hcut_zero]
@@ -869,11 +765,6 @@ private lemma exists_const_rawComponentCutoff_sq_le
           (S.toFun b) (S.toFun b) :=
       mul_nonneg (mul_nonneg (sq_nonneg _) hK_nn) hQ_nn
     simpa using h_rhs_nn
-
-/-! ### `eLpNorm` conversion helpers
-
-We convert `(eLpNorm f 2 μ)²` to a lintegral of `‖f x‖ₑ²`, bound it by an
-`ENNReal.ofReal` after a pointwise comparison, then take square roots. -/
 
 private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq
     {β : Type*} [MeasurableSpace β] (μ : Measure β) (f : β → ℝ) :
@@ -931,7 +822,6 @@ private lemma exists_const_eLpNorm_rawComponentCutoff_le
   set f : M → ℝ := rawComponentCutoff (I := I) (M := M) g r s S α Idx Jdx
     with hf_def
   set μ : Measure M := riemannianVolumeMeasure (I := I) (M := M) g with hμ_def
-  -- Pointwise `ENNReal` bound.
   have h_pt_enn : ∀ b : M,
       (‖f b‖ₑ : ℝ≥0∞) ^ 2 ≤
         ENNReal.ofReal (C * tensorInnerPointwise (I := I) (M := M)
@@ -941,7 +831,6 @@ private lemma exists_const_eLpNorm_rawComponentCutoff_le
       rw [Real.enorm_eq_ofReal_abs, ← ENNReal.ofReal_pow (abs_nonneg _) 2,
         sq_abs]]
     exact ENNReal.ofReal_le_ofReal (h_pt S Idx Jdx b)
-  -- Integrability and non-negativity of the right-hand side.
   have h_inner_int := SmoothCcTensor.integrable_inner_cross
     (I := I) (M := M) (g := g) (r := r) (s := s) S S
   have h_C_smul_int :
@@ -956,7 +845,6 @@ private lemma exists_const_eLpNorm_rawComponentCutoff_le
     intro b
     exact mul_nonneg hC_nn
       (tensorInnerPointwise_nonneg (I := I) (M := M) g r s b _)
-  -- `(eLpNorm f 2 μ)² ≤ ENNReal.ofReal (C · tensorL2Inner)`.
   have h_sq :
       (eLpNorm f 2 μ) ^ 2 ≤
         ENNReal.ofReal (C *
@@ -983,7 +871,6 @@ private lemma exists_const_eLpNorm_rawComponentCutoff_le
       rw [integral_const_mul]
     rw [h_lint_eq, h_int_const_mul] at h_lint_le
     exact h_lint_le
-  -- `tensorL2Inner S S = (tensorL2Norm S.toFun)²`.
   have h_inner_nn :
       0 ≤ tensorL2Inner (I := I) (M := M) g r s S.toFun S.toFun := by
     unfold tensorL2Inner
@@ -995,7 +882,6 @@ private lemma exists_const_eLpNorm_rawComponentCutoff_le
         (tensorL2Norm (I := I) (M := M) g r s S.toFun) ^ 2 := by
     unfold tensorL2Norm
     rw [sq, Real.mul_self_sqrt h_inner_nn]
-  -- Take square roots.
   set Stotal : ℝ := C * tensorL2Inner (I := I) (M := M) g r s S.toFun S.toFun
     with hStotal_def
   have hStotal_nn : 0 ≤ Stotal := mul_nonneg hC_nn h_inner_nn
@@ -1003,7 +889,6 @@ private lemma exists_const_eLpNorm_rawComponentCutoff_le
     have h_pow := le_sqrt_of_sq_le h_sq
     rw [sqrt_ofReal_eq_ofReal_sqrt hStotal_nn] at h_pow
     exact h_pow
-  -- `√(C · ‖S‖²) = √C · ‖S‖`.
   have h_sqrt_factor : Real.sqrt Stotal = Real.sqrt C * ‖S‖ := by
     rw [hStotal_def, h_norm_sq, Real.sqrt_mul hC_nn,
       show (tensorL2Norm (I := I) (M := M) g r s S.toFun) ^ 2 =
@@ -1014,12 +899,6 @@ private lemma exists_const_eLpNorm_rawComponentCutoff_le
       SmoothCcTensor.norm_def (I := I) (M := M)]
   rw [h_sqrt_factor, ENNReal.ofReal_mul (Real.sqrt_nonneg _)] at h_eLp_le
   exact h_eLp_le
-
-/-! ### The pointwise bound of the cross-term by the chart-pushed cutoff
-
-The Leibniz cross-term is bounded pointwise by the uniform supremum of the
-`k`-th partial of the pushed partition-of-unity weight times the chart
-push-forward of the raw-component cutoff. -/
 
 /-- A uniform supremum bound for the `k`-th partial of the pushed
 partition-of-unity weight: a single non-negative constant bounding the absolute
@@ -1036,12 +915,10 @@ private lemma exists_const_euclidPartial_chartPushedRaw_pou_le
     euclidPartial (E := E) k
       (chartPushedRaw (I := I) (M := M) α
         (⇑(chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯))) with hχ_def
-  -- `χ` is continuous (a `C^∞` function's partial is continuous).
   have hχ_cont : Continuous χ := by
     rw [hχ_def]
     exact (euclidPartial_contDiff_of_contDiff (E := E)
       (chartPushedRaw_pou_contDiff (I := I) (M := M) α) k).continuous
-  -- `χ` has compact support, contained in the (compact) chart-image kernel.
   have hχ_cpt : HasCompactSupport χ := by
     refine HasCompactSupport.of_support_subset_isCompact
       (K := (toEuclidean (E := E)) ''
@@ -1051,8 +928,6 @@ private lemma exists_const_euclidPartial_chartPushedRaw_pou_le
     · refine subset_trans ?_
         (euclidPartial_chartPushedRaw_pou_tsupport_subset (I := I) (M := M) α k)
       exact subset_tsupport _
-  -- A continuous function with compact support is bounded: `‖χ‖` attains a
-  -- maximum on the compact `tsupport χ`, and `χ` vanishes off `tsupport χ`.
   by_cases hK_ne : (tsupport χ).Nonempty
   · obtain ⟨x₀, _, hx₀_max⟩ :=
       hχ_cpt.exists_isMaxOn hK_ne (hχ_cont.norm.continuousOn)
@@ -1089,9 +964,7 @@ private lemma leibnizCrossTerm_le_const_mul_chartPushedRaw_cutoff
   · set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y)
       with hb_def
     by_cases hb : b ∈ pouKernelM (I := I) (M := M) α
-    · -- Inside the closed support: the cutoff push-forward equals the raw
-      -- push-forward.
-      have h_cut_eval : chartPushedRaw (I := I) (M := M) α
+    · have h_cut_eval : chartPushedRaw (I := I) (M := M) α
           (rawComponentCutoff (I := I) (M := M) g r s S α Idx Jdx) y =
             tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx b := by
         rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α
@@ -1105,13 +978,11 @@ private lemma leibnizCrossTerm_le_const_mul_chartPushedRaw_cutoff
       unfold leibnizCrossTerm
       rw [h_cut_eval, h_raw_eval, norm_mul]
       exact mul_le_mul_of_nonneg_right (hCχ y) (norm_nonneg _)
-    · -- Off the closed support: the cross-term vanishes.
-      have h_cross_zero : leibnizCrossTerm (I := I) (M := M) g r s S α
+    · have h_cross_zero : leibnizCrossTerm (I := I) (M := M) g r s S α
           k Idx Jdx y = 0 := by
         refine leibnizCrossTerm_eq_zero_off_pou_kernel
           (I := I) (M := M) g r s S α k Idx Jdx ?_
         rintro ⟨z, ⟨b', hb'_pou, hb'_eq⟩, hz_eq⟩
-        -- `y = toEuclidean (extChartAt b')` forces `b = b' ∈ pouKernelM`.
         apply hb
         have hy_symm : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
           rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
@@ -1129,8 +1000,7 @@ private lemma leibnizCrossTerm_le_const_mul_chartPushedRaw_cutoff
         exact hb'_pou
       rw [h_cross_zero, norm_zero]
       exact mul_nonneg hCχ_nn (norm_nonneg _)
-  · -- Off the chart target: both push-forwards vanish.
-    have h_cross_zero : leibnizCrossTerm (I := I) (M := M) g r s S α
+  · have h_cross_zero : leibnizCrossTerm (I := I) (M := M) g r s S α
         k Idx Jdx y = 0 := by
       unfold leibnizCrossTerm
       rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α
@@ -1141,13 +1011,6 @@ private lemma leibnizCrossTerm_le_const_mul_chartPushedRaw_cutoff
       chartPushedRaw_apply_of_notMem (I := I) (M := M) α
         (rawComponentCutoff (I := I) (M := M) g r s S α Idx Jdx) hy
     rw [h_cross_zero, norm_zero, h_cut_zero, norm_zero, mul_zero]
-
-/-! ### The uniform `L²` bound for the Leibniz cross-term
-
-Combining the pointwise cross-term bound with the reverse chart-push `L²`
-bridge and the uniform `L²` bound for the raw-component cutoff produces a single
-non-negative constant bounding the cross-term `L²` norm, uniformly in the
-section. -/
 
 /-- **A uniform `L²` bound for the Leibniz cross-term.** For a closed Riemannian
 manifold `(M, g)`, ranks `(r, s)`, a chart center `α : M`, and a chart-
@@ -1169,17 +1032,14 @@ private theorem exists_const_eLpNorm_leibnizCrossTerm_le_uniform
             (chartTargetEuclid (I := I) (M := M) α))
         ≤ ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞) := by
   classical
-  -- The uniform supremum bound for the `k`-th partial of the pushed weight.
   obtain ⟨Cχ, hCχ_nn, hCχ⟩ :=
     exists_const_euclidPartial_chartPushedRaw_pou_le (I := I) (M := M) α k
-  -- The reverse chart-push `L²` bridge against the closed POU support.
   have hp_one : (1 : ℝ≥0∞) ≤ 2 := by norm_num
   have hp_top : (2 : ℝ≥0∞) ≠ (⊤ : ℝ≥0∞) := by norm_num
   obtain ⟨C_bridge, hC_bridge_pos, hC_bridge⟩ :=
     eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of_subset
       (I := I) (M := M) g α (pouKernelM_isCompact (I := I) (M := M) α)
       (pouKernelM_subset_chart_source (I := I) (M := M) α) hp_one hp_top
-  -- The uniform `L²` bound for the raw-component cutoff.
   obtain ⟨C_cut, hC_cut_nn, hC_cut⟩ :=
     exists_const_eLpNorm_rawComponentCutoff_le (I := I) (M := M) g r s α
   refine ⟨Cχ * (C_bridge * C_cut),
@@ -1188,12 +1048,10 @@ private theorem exists_const_eLpNorm_leibnizCrossTerm_le_uniform
   set μ : Measure EuclN :=
     (volume : Measure EuclN).restrict (chartTargetEuclid (I := I) (M := M) α)
     with hμ_def
-  -- The norm of the chart-pushed cutoff, as a non-negative dominating function.
   set normCut : EuclN → ℝ := fun y : EuclN =>
     ‖chartPushedRaw (I := I) (M := M) α
       (rawComponentCutoff (I := I) (M := M) g r s S.toCcTensor α Idx Jdx) y‖
     with hnormCut_def
-  -- Pointwise bound `‖cross y‖ ≤ (Cχ • normCut) y`.
   have h_ptwise : ∀ y : EuclN,
       ‖leibnizCrossTerm (I := I) (M := M) g r s S.toCcTensor α k Idx Jdx y‖ ≤
         (Cχ • normCut) y := by
@@ -1201,7 +1059,6 @@ private theorem exists_const_eLpNorm_leibnizCrossTerm_le_uniform
     rw [Pi.smul_apply, smul_eq_mul, hnormCut_def]
     exact leibnizCrossTerm_le_const_mul_chartPushedRaw_cutoff
       (I := I) (M := M) g r s S.toCcTensor α k Idx Jdx hCχ_nn hCχ y
-  -- `eLpNorm` is monotone in the pointwise norm; pull the scalar out.
   have h_mono :
       eLpNorm (leibnizCrossTerm (I := I) (M := M) g r s S.toCcTensor α
           k Idx Jdx) 2 μ ≤
@@ -1214,7 +1071,6 @@ private theorem exists_const_eLpNorm_leibnizCrossTerm_le_uniform
     rw [eLpNorm_const_smul Cχ normCut 2 μ, hnormCut_def, eLpNorm_norm]
   have hCχ_enorm : ‖Cχ‖ₑ = ENNReal.ofReal Cχ := by
     rw [Real.enorm_eq_ofReal_abs, abs_of_nonneg hCχ_nn]
-  -- The reverse chart-push `L²` bridge.
   have h_bridge :
       eLpNorm (chartPushedRaw (I := I) (M := M) α
           (rawComponentCutoff (I := I) (M := M) g r s S.toCcTensor α Idx Jdx)) 2 μ ≤
@@ -1229,7 +1085,6 @@ private theorem exists_const_eLpNorm_leibnizCrossTerm_le_uniform
       riemannianMeasure (I := I) g (chartAtlasPOU I M) =
         riemannianVolumeMeasure (I := I) (M := M) g := rfl
   rw [h_meas_eq] at h_bridge
-  -- The uniform `L²` bound for the raw-component cutoff, against `‖S‖₊`.
   have h_cut_h1 :
       eLpNorm (rawComponentCutoff (I := I) (M := M) g r s S.toCcTensor α Idx Jdx) 2
           (riemannianVolumeMeasure (I := I) (M := M) g) ≤
@@ -1241,7 +1096,6 @@ private theorem exists_const_eLpNorm_leibnizCrossTerm_le_uniform
         ← ofReal_norm_eq_enorm S]]
     exact ENNReal.ofReal_le_ofReal
       (SmoothCcTensorH1.l2Norm_le_h1Norm (I := I) (M := M) S)
-  -- Chain the estimates.
   calc eLpNorm (leibnizCrossTerm (I := I) (M := M) g r s S.toCcTensor α
           k Idx Jdx) 2 μ
       ≤ eLpNorm (Cχ • normCut) 2 μ := h_mono
@@ -1262,12 +1116,6 @@ private theorem exists_const_eLpNorm_leibnizCrossTerm_le_uniform
     _ = ENNReal.ofReal (Cχ * (C_bridge * C_cut)) * (‖S‖₊ : ℝ≥0∞) := by
         rw [ENNReal.ofReal_mul hCχ_nn, ENNReal.ofReal_mul hC_bridge_pos.le]
         ring
-
-/-! ## The headline uniform `L²` estimate
-
-Summing the three-term split over the chart-coordinate directions and chaining
-the three uniform `L²` bounds — for the covariant component, the lower-order
-term, and the Leibniz cross-term — yields the headline. -/
 
 /-- **A uniform `L²` bound for the chosen weak chart-partials of the chart
 component.** For a closed Riemannian manifold `(M, g)`, ranks `(r, s)` and a
@@ -1299,18 +1147,13 @@ theorem exists_const_sum_eLpNorm_chosenWeakPartial'_tensorChartComponent_le_unif
             (chartTargetEuclid (I := I) (M := M) α))
         ≤ ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞) := by
   classical
-  -- The uniform covariant-component `L²` bound (sibling).
   obtain ⟨C_cov, hC_cov_nn, hC_cov⟩ :=
     exists_const_sum_eLpNorm_pou_covDerivComponent_le_uniform
       (I := I) (M := M) g r s α
-  -- The uniform lower-order `L²` bound (sibling).
   obtain ⟨C_low, hC_low_nn, hC_low⟩ :=
     exists_const_sum_eLpNorm_pou_covDerivLowerOrderTerm_le_uniform
       (I := I) (M := M) g r s α
-  -- The number of chart-coordinate directions.
   set n : ℕ := Module.finrank ℝ E with hn_def
-  -- A single uniform constant for the Leibniz cross-term, valid for every `k`.
-  -- The cross-term constant depends on `k`; take the sum over the directions.
   have h_cross_const : ∀ k : Fin n,
       ∃ C : ℝ, 0 ≤ C ∧ ∀ (S : SmoothCcTensorH1 g r s)
         (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -1321,11 +1164,9 @@ theorem exists_const_sum_eLpNorm_chosenWeakPartial'_tensorChartComponent_le_unif
               (chartTargetEuclid (I := I) (M := M) α))
           ≤ ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞) := fun k =>
     exists_const_eLpNorm_leibnizCrossTerm_le_uniform (I := I) (M := M) g r s α k
-  -- The summed cross-term constant.
   set C_cross : ℝ := ∑ k : Fin n, (h_cross_const k).choose with hC_cross_def
   have hC_cross_nn : 0 ≤ C_cross :=
     Finset.sum_nonneg (fun k _ => (h_cross_const k).choose_spec.1)
-  -- The headline constant: the sum of the three uniform constants.
   refine ⟨C_cov + C_low + C_cross,
     by positivity, ?_⟩
   intro S Idx Jdx
@@ -1334,8 +1175,6 @@ theorem exists_const_sum_eLpNorm_chosenWeakPartial'_tensorChartComponent_le_unif
     with hμ_def
   have hμ_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_measurableSet (I := I) (M := M) α
-  -- Per-direction bound: rewrite the chosen weak partial via the three-term
-  -- split and bound each summand.
   have hdir : ∀ k : Fin n,
       eLpNorm (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
           (d := Module.finrank ℝ E) 2 k
@@ -1351,11 +1190,9 @@ theorem exists_const_sum_eLpNorm_chosenWeakPartial'_tensorChartComponent_le_unif
               (pouLowerOrderTerm (I := I) (M := M) g r s S.toCcTensor α
                 k Idx Jdx) 2 μ := by
     intro k
-    -- Step 1: the chosen weak partial agrees a.e. with the classical partial.
     have h_step1 := chosenWeakPartial'_tensorChartComponent_ae_eq_euclidPartial
       (I := I) (M := M) g r s S.toCcTensor α k Idx Jdx
     rw [hμ_def, eLpNorm_congr_ae h_step1]
-    -- Abbreviations for the three terms.
     set tCov : EuclN → ℝ :=
       pouCovDerivComponent (I := I) (M := M) g r s S.toCcTensor α k Idx Jdx
       with htCov_def
@@ -1365,7 +1202,6 @@ theorem exists_const_sum_eLpNorm_chosenWeakPartial'_tensorChartComponent_le_unif
     set tLow : EuclN → ℝ :=
       pouLowerOrderTerm (I := I) (M := M) g r s S.toCcTensor α k Idx Jdx
       with htLow_def
-    -- The three-term split holds a.e. on the chart target.
     have h_three :
         euclidPartial (E := E) k
             (tensorChartComponent (I := I) (M := M) g r s S.toCcTensor α Idx Jdx)
@@ -1378,8 +1214,6 @@ theorem exists_const_sum_eLpNorm_chosenWeakPartial'_tensorChartComponent_le_unif
       exact euclidPartial_tensorChartComponent_eq_three_terms
         (I := I) (M := M) g r s S.toCcTensor α k Idx Jdx hy
     rw [eLpNorm_congr_ae h_three]
-    -- The three terms are `AEStronglyMeasurable`; apply the finite triangle
-    -- inequality `‖a + b − c‖ ≤ ‖a‖ + ‖b‖ + ‖c‖`.
     have h_cov_meas : AEStronglyMeasurable tCov
         ((volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α)) :=
@@ -1396,18 +1230,14 @@ theorem exists_const_sum_eLpNorm_chosenWeakPartial'_tensorChartComponent_le_unif
       (pouLowerOrderTerm_continuousOn (I := I) (M := M) g r s S.toCcTensor α
         k Idx Jdx).aestronglyMeasurable hμ_meas
     exact eLpNorm_add_add_sub_le h_cov_meas h_cross_meas h_low_meas
-  -- Sum the per-direction bounds over the chart-coordinate directions.
   refine (Finset.sum_le_sum (fun k _ => hdir k)).trans ?_
-  -- Distribute the sum across the three terms.
   rw [Finset.sum_add_distrib, Finset.sum_add_distrib]
-  -- Bound each of the three summed contributions.
   have h_cov_sum :
       ∑ k : Fin n,
         eLpNorm (pouCovDerivComponent (I := I) (M := M) g r s S.toCcTensor α
           k Idx Jdx) 2 μ ≤
         ENNReal.ofReal C_cov * (‖S‖₊ : ℝ≥0∞) := by
     have h := hC_cov S Idx Jdx
-    -- The sibling integrand is exactly `pouCovDerivComponent`.
     refine le_of_eq_of_le ?_ h
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rfl
@@ -1435,9 +1265,7 @@ theorem exists_const_sum_eLpNorm_chosenWeakPartial'_tensorChartComponent_le_unif
     rw [← Finset.sum_mul]
     refine mul_le_mul_of_nonneg_right ?_ (zero_le _)
     rw [hC_cross_def]
-    -- `∑ ENNReal.ofReal cₖ = ENNReal.ofReal (∑ cₖ)` (each `cₖ ≥ 0`).
     rw [ENNReal.ofReal_sum_of_nonneg (fun k _ => (h_cross_const k).choose_spec.1)]
-  -- Combine the three contributions.
   calc (∑ k : Fin n,
             eLpNorm (pouCovDerivComponent (I := I) (M := M) g r s S.toCcTensor α
               k Idx Jdx) 2 μ

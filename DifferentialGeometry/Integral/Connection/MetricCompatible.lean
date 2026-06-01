@@ -51,8 +51,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimension
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Definition: local metric compatibility -/
-
 /-- The covariant derivative `cov` (in unbundled form) is *metric-compatible* on a set `s ⊆ M`
 with respect to `g` if, for every pair of tangent-bundle sections `Y, Z` differentiable at a
 point `x ∈ s`, the directional derivative of the scalar function `b ↦ g.inner b (Y b) (Z b)`
@@ -79,8 +77,6 @@ def IsMetricCompatible (cov : CovariantDerivative I E (TangentSpace I : M → Ty
     (g : Measure.SmoothRiemannianMetric I M) : Prop :=
   IsMetricCompatibleOn cov.toFun g Set.univ
 
-/-! ## Differential CLM packaging -/
-
 /-- The Leibniz / metric-compatibility differential as a continuous linear functional on
 `TangentSpace I x`. This packages the right-hand side of the metric-compatibility identity
 $$
@@ -104,8 +100,6 @@ lemma metricCompatibleDifferential_apply
     (Yx Zx : TangentSpace I x) (v : TangentSpace I x) :
     metricCompatibleDifferential g covY covZ Yx Zx v =
       g.inner x Zx (covY v) + g.inner x Yx (covZ v) := rfl
-
-/-! ## Local API -/
 
 namespace IsMetricCompatibleOn
 
@@ -136,14 +130,10 @@ lemma swap {s : Set M} (h : IsMetricCompatibleOn cov g s)
     (v : TangentSpace I x) :
     (mfderiv I 𝓘(ℝ) (fun b => g.inner b (Z b) (Y b)) x) v =
       g.inner x (cov Z x v) (Y x) + g.inner x (Z x) (cov Y x v) := by
-  -- Replace the integrand on the LHS using inner-product symmetry: pointwise,
-  -- `g.inner b (Z b) (Y b) = g.inner b (Y b) (Z b)`.
   have hfun : (fun b => g.inner b (Z b) (Y b)) = (fun b => g.inner b (Y b) (Z b)) := by
     funext b; exact (g.symm b (Z b) (Y b))
   rw [hfun]
-  -- Apply the metric-compatibility identity for the YZ ordering.
   have hYZ := h hY hZ hxs v
-  -- And swap the RHS using inner-product symmetry at `x`.
   rw [g.symm x (cov Z x v) (Y x), g.symm x (Z x) (cov Y x v),
       add_comm]
   exact hYZ
@@ -171,14 +161,11 @@ lemma hasMFDerivAt {s : Set M} (h : IsMetricCompatibleOn cov g s)
       (metricCompatibleDifferential g (cov Y x) (cov Z x) (Y x) (Z x)) := by
   refine hsmooth.hasMFDerivAt.congr_mfderiv ?_
   ext v
-  -- Goal: `(mfderiv ...) v = metricCompatibleDifferential g (cov Y x) (cov Z x) (Y x) (Z x) v`.
   change (mfderiv I 𝓘(ℝ) (fun b => g.inner b (Y b) (Z b)) x) v =
       g.inner x (Z x) (cov Y x v) + g.inner x (Y x) (cov Z x v)
   rw [h hY hZ hxs v, g.symm x (cov Y x v) (Z x)]
 
 end IsMetricCompatibleOn
-
-/-! ## Global API -/
 
 namespace IsMetricCompatible
 

@@ -111,14 +111,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 variable {a : ℝ} {T : ℝ}
 
-/-! ## The maximal-regularity solution space `E_T`
-
-The strong-solution space of the quasi-linear tensor heat equation is the
-time-Sobolev space `H¹([0,T]; Hᵃ)`: an element is the data of an initial value
-`u(0) ∈ Hᵃ` and an `L²` time derivative `∂_t u ∈ L²([0,T]; Hᵃ)`.  It is a
-complete real Hilbert space, supporting the trace `u(0)` and the time derivative
-`∂_t u` as continuous linear maps, and embeds into `C([0,T]; Hᵃ)`. -/
-
 /-- **The maximal-regularity solution space** `E_T` of the quasi-linear tensor
 heat equation: the time-Sobolev space `H¹([0,T]; Hᵃ)`.
 
@@ -138,13 +130,6 @@ definitionally an element of `timeH1 …` and the `timeH1` API (`mk`, `init`,
 `deriv`, `trace0`, `timeDeriv`, `toFun`, …) applies verbatim. -/
 abbrev MaxRegSolutionSpace (a : ℝ) (T : ℝ) : Type _ :=
   timeH1 (tensorHs (I := I) (M := M) g r s a) T
-
-/-! ## The per-mode building blocks of the homogeneous part
-
-For initial datum `u₀ ∈ H^{a+2}`, write `cᵢ = u₀.coeff i` for its `i`-th
-eigen-coordinate.  Mode by mode the homogeneous heat flow is the scalar decay
-`t ↦ cᵢ · e^{−λᵢ t}`; its time derivative is `t ↦ −λᵢ · cᵢ · e^{−λᵢ t}`.  Both
-are continuous functions of time, hence elements of `L²(0,T)`. -/
 
 /-- The `i`-th eigen-coordinate of the homogeneous heat flow `e^{tΔ_∇} u₀`:
 the element of `L²(0,T)` represented by the continuous decay function
@@ -180,7 +165,6 @@ theorem homDerivModeCoeff_eq_smul
       (-(TensorEigenIdx.lambda (I := I) (M := M) i)) •
         homModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i := by
   refine Lp.ext ?_
-  -- Both sides are represented a.e. by their defining continuous functions.
   have hderiv : ⇑(homDerivModeCoeff (I := I) (M := M) (a := a) (T := T)
         u₀ i) =ᵐ[timeMeasure T]
       fun t => -(TensorEigenIdx.lambda (I := I) (M := M) i) *
@@ -196,14 +180,6 @@ theorem homDerivModeCoeff_eq_smul
   filter_upwards [hderiv, hmode, hsmul] with t htderiv htmode htsmul
   rw [htderiv, htsmul, Pi.smul_apply, htmode, smul_eq_mul]
 
-/-! ## Weighted summability of the homogeneous mode families
-
-The two homogeneous mode families — `i ↦ homModeCoeff u₀ i` at scale `a+2`, and
-`i ↦ homDerivModeCoeff u₀ i` at scale `a` — have summable spectral-weighted
-squares, the precondition for the synthesis `timeL2OfModes`.  The decay factor
-`e^{−λᵢ t}` is bounded by `1`, and `λᵢ² ≤ (1 + λᵢ)²`, so both families are
-dominated by the (summable) weighted family of `u₀ ∈ H^{a+2}`. -/
-
 /-- The squared `L²(0,T)` norm of the homogeneous-flow coordinate is bounded by
 `T · cᵢ²`: the decay kernel is `≤ 1`, so `∫₀ᵀ (e^{−λᵢ t} cᵢ)² ≤ T · cᵢ²`. -/
 theorem norm_homModeCoeff_sq_le (hT : 0 ≤ T)
@@ -216,7 +192,6 @@ theorem norm_homModeCoeff_sq_le (hT : 0 ≤ T)
           (f := fun t => Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
             u₀.coeff i)
           (Continuous.continuousOn (by fun_prop)) from rfl]
-  -- Bound the norm by `√T · |cᵢ|` via the kernel bound `e^{−λᵢ t} ≤ 1`.
   have hbound : ‖TimeSobolev.ofContinuousOn (X := ℝ) (T := T)
         (f := fun t => Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
           u₀.coeff i)
@@ -231,7 +206,6 @@ theorem norm_homModeCoeff_sq_le (hT : 0 ≤ T)
       Real.exp_pos _
     rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (le_of_lt hexp_pos)]
     nlinarith [abs_nonneg (u₀.coeff i), hexp_le, hexp_pos]
-  -- Square the norm bound.
   have hsq : ‖TimeSobolev.ofContinuousOn (X := ℝ) (T := T)
         (f := fun t => Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
           u₀.coeff i)
@@ -278,7 +252,6 @@ theorem summable_homModeCoeff (hT : 0 ≤ T)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2)) :
     Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (a + 2) *
       ‖homModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i‖ ^ 2) := by
-  -- Dominated by `T` times the (summable) weighted family of `u₀ ∈ H^{a+2}`.
   have hdom : Summable (fun i => T *
       (tensorSobolevWeight (I := I) (M := M) i (a + 2) * (u₀.coeff i) ^ 2)) :=
     u₀.weighted_summable.mul_left T
@@ -302,7 +275,6 @@ theorem weighted_homDerivModeCoeff_le (hT : 0 ≤ T)
   have hbase_pos : (0 : ℝ) < 1 + lam := by linarith
   have hw_nonneg : 0 ≤ tensorSobolevWeight (I := I) (M := M) i a :=
     tensorSobolevWeight_nonneg (I := I) (M := M) i a
-  -- The derivative coordinate is `−λᵢ` times the homogeneous-flow coordinate.
   have hderiv_eq :=
     homDerivModeCoeff_eq_smul (I := I) (M := M) (a := a) (T := T) u₀ i
   have hnorm : ‖homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i‖ ^ 2 =
@@ -310,10 +282,8 @@ theorem weighted_homDerivModeCoeff_le (hT : 0 ≤ T)
         ‖homModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i‖ ^ 2 := by
     rw [hderiv_eq, norm_smul, mul_pow, Real.norm_eq_abs, sq_abs, neg_pow,
       neg_one_sq, one_mul]
-  -- The homogeneous-flow coordinate bound, scaled by `(1 + λᵢ)ᵃ · λᵢ²`.
   have hmode :=
     norm_homModeCoeff_sq_le (I := I) (M := M) (a := a) (T := T) hT u₀ i
-  -- The weight identity `(1 + λᵢ)ᵃ · (1 + λᵢ)² = (1 + λᵢ)^{a+2}`.
   have hweight : tensorSobolevWeight (I := I) (M := M) i a * (1 + lam) ^ 2 =
       tensorSobolevWeight (I := I) (M := M) i (a + 2) := by
     have hexpand : tensorSobolevWeight (I := I) (M := M) i (a + 2) =
@@ -323,7 +293,6 @@ theorem weighted_homDerivModeCoeff_le (hT : 0 ≤ T)
     rw [hexpand, hbase, ← Real.rpow_natCast (1 + lam) 2,
       ← Real.rpow_add hbase_pos]
     norm_num
-  -- `λᵢ² ≤ (1 + λᵢ)²`.
   have hlam_sq_le : lam ^ 2 ≤ (1 + lam) ^ 2 := by nlinarith
   calc tensorSobolevWeight (I := I) (M := M) i a *
           ‖homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i‖ ^ 2
@@ -361,12 +330,6 @@ theorem summable_homDerivModeCoeff (hT : 0 ≤ T)
   · exact mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i a)
       (sq_nonneg _)
   · exact weighted_homDerivModeCoeff_le (I := I) (M := M) (a := a) (T := T) hT u₀ i
-
-/-! ## The homogeneous part
-
-The homogeneous heat flow `t ↦ e^{tΔ_∇} u₀`, synthesised from its eigen-
-coordinate families.  Its `H^{a+2}`-valued field, its `Hᵃ`-valued time
-derivative, and the packaged element of the solution space `E_T`. -/
 
 /-- **The `H^{a+2}`-valued field of the homogeneous heat flow.**  For initial
 datum `u₀ ∈ H^{a+2}`, this is the element of `L²([0,T]; H^{a+2})` whose `i`-th
@@ -522,14 +485,6 @@ theorem maxRegHomogeneous_timeDeriv_eq (hT : 0 ≤ T)
   exact maxRegHomogeneousDerivField_eq_scaleLaplacian (I := I) (M := M)
     (h_compact := h_compact) (a := a) (T := T) hT u₀
 
-/-! ## Additivity of the maximal-regularity operator
-
-The Duhamel solution operator `maximalRegularityOp` is additive in its forcing
-term: this is needed to evaluate the difference of two Duhamel images and obtain
-the Lipschitz estimate.  Additivity holds mode by mode because the per-mode
-derivative coordinate `derivModeCoeff` is the composition of the linear maps
-`timeModeCoeff` and `perModeConvDerivL2`. -/
-
 /-- Chart-locality-free version of `maximalRegularityDerivField_add`,
 parameterized on resolvent compactness `h_compact`. -/
 theorem maximalRegularityDerivField_add (hT : 0 ≤ T)
@@ -619,14 +574,6 @@ theorem maximalRegularityOp_sub (hT : 0 < T) (hT1 : T ≤ 1)
   rw [sub_add_cancel] at hadd
   rw [hadd, add_sub_cancel_right]
 
-/-! ## The affine Duhamel map
-
-The affine Duhamel solution map `𝒯(u₀, g) = (homogeneous part) +
-maximalRegularityOp g`: it sends a forcing term `g ∈ L²([0,T]; Hᵃ)` to the
-candidate strong solution, the homogeneous heat flow corrected by the Duhamel
-integral of the forcing.  Its `H^{a+2}`-valued field is the sum of the
-homogeneous-flow field and the maximal-regularity solution field. -/
-
 /-- **The `H^{a+2}`-valued field of the affine Duhamel map.**  For initial datum
 `u₀ ∈ H^{a+2}` and forcing term `g ∈ L²([0,T]; Hᵃ)`, this is the element of
 `L²([0,T]; H^{a+2})` representing the candidate solution in its full `H^{a+2}`
@@ -682,7 +629,6 @@ the homogeneous part. -/
         (show a ≤ a + 2 by linarith) u₀ := by
   rw [maxRegDuhamelMap, TimeSobolev.timeH1.init_add,
     maxRegHomogeneous_init (I := I) (M := M) (a := a) (T := T) u₀]
-  -- The maximal-regularity operator has vanishing initial value.
   rw [show (maximalRegularityOp (I := I) (M := M) a hT hT1 gforce).init =
         (0 : tensorHs (I := I) (M := M) g r s a) from rfl, add_zero]
 
@@ -735,14 +681,6 @@ theorem maxRegDuhamelMap_timeDeriv_eq (hT : 0 < T) (hT1 : T ≤ 1)
   rw [hsolve]
   rw [maxRegDuhamelSolField, map_add]
   abel
-
-/-! ## The Lipschitz estimate of the affine Duhamel map
-
-For a fixed initial datum the homogeneous part of the affine Duhamel map cancels
-in a difference, leaving the difference of the maximal-regularity images.  The
-`H¹`-graph-norm bound `maximalRegularityOp_norm_le` (`‖·‖ ≤ 2‖·‖`) then yields
-the contraction-in-the-forcing estimate, the input to the downstream Banach
-fixed-point argument. -/
 
 /-- Chart-locality-free version of `maxRegDuhamelMap_dist_le`, parameterized on
 resolvent compactness `h_compact`:

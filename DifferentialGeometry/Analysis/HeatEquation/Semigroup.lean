@@ -70,19 +70,12 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Laplacian
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## The eigenvalue index type and the heat coefficient
-
-We abbreviate the basis index type for readability and prove the basic
-positivity / boundedness properties of the per-eigenvalue heat coefficient. -/
 
 /-- The (sigma) basis-index type for the L² eigenbasis associated with `g`. -/
 abbrev EigenIdx (g : SmoothRiemannianMetric I M) :=
@@ -119,8 +112,6 @@ private lemma heat_coeff_sq_le_one {g : SmoothRiemannianMetric I M}
   obtain ⟨h_pos, h_le⟩ := heat_coeff_mem_unit_interval (I := I) (M := M) i ht
   have h_nn : 0 ≤ Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t) := h_pos.le
   nlinarith [sq_nonneg (Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t) - 1)]
-
-/-! ## Square-summability of the basis Fourier coefficients (Parseval) -/
 
 /-- Parseval-type square-summability of the basis coefficients of a vector. -/
 lemma summable_basis_coeff_sq
@@ -181,8 +172,6 @@ lemma parseval_norm_sq
     rw [show ⟪u, b i⟫_ℝ = ⟪b i, u⟫_ℝ from real_inner_comm _ _, sq]
   rw [h_eq] at h_par
   rw [h_par, h_sq]
-
-/-! ## Summability of the heat-eigenbasis series (for `t ≥ 0`) -/
 
 /-- For `t ≥ 0`, the family of heat-coefficient–weighted basis terms is
 summable in `Lp ℝ 2 μ_g`. -/
@@ -251,8 +240,6 @@ lemma summable_heatTerm
           ⟪b i, u⟫_ℝ)) := h_iff.mpr h_sq_summable
   rw [h_map_eq] at h_summable_V
   exact h_summable_V
-
-/-! ## L² norm bound: the orthogonal-family Parseval-style identity -/
 
 /-- For `f : ι → ℝ` square-summable and orthonormal `b`, the sum
 `∑' i, f i • b i` has L²-norm equal to the lp-norm of `f`. -/
@@ -326,7 +313,6 @@ private lemma norm_sq_heatTerm_sum_le
           resolventHilbertEigenbasisSigma (I := I) (M := M) g i‖ ^ 2 ≤
       ‖u‖ ^ 2 := by
   set b := resolventHilbertEigenbasisSigma (I := I) (M := M) g
-  -- Reform: smul-smul as a single scalar multiplication.
   have h_summand_eq :
       (fun i : EigenIdx (I := I) (M := M) g =>
         Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t) •
@@ -336,10 +322,8 @@ private lemma norm_sq_heatTerm_sum_le
           ⟪b i, u⟫_ℝ) • b i) := by
     funext i; rw [mul_smul]
   rw [h_summand_eq]
-  -- Define f i := exp(-λ_i t) * ⟪b i, u⟫.
   set f : EigenIdx (I := I) (M := M) g → ℝ := fun i =>
     Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t) * ⟪b i, u⟫_ℝ
-  -- Pointwise bound (f i)² ≤ ⟪b i, u⟫².
   have h_f_sq_le : ∀ i, (f i) ^ 2 ≤ (⟪b i, u⟫_ℝ) ^ 2 := by
     intro i
     have h_sq_le : (Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t)) ^ 2 ≤ 1 :=
@@ -362,11 +346,9 @@ private lemma norm_sq_heatTerm_sum_le
       (I := I) (M := M) g u)
     · intro i; positivity
     · exact h_f_sq_le
-  -- Apply the orthonormal norm-sq formula.
   have h_norm_sq_eq := orthonormal_norm_sq_eq_tsum_sq (I := I) (M := M) g f h_summable_f_sq
   change ‖∑' i, f i • b i‖ ^ 2 ≤ ‖u‖ ^ 2
   rw [h_norm_sq_eq]
-  -- ∑' i, (f i)² ≤ ∑' i, ⟪b i, u⟫² = ‖u‖² (Parseval).
   have h_dom : ∑' i : EigenIdx (I := I) (M := M) g, (f i) ^ 2 ≤
       ∑' i, (⟪b i, u⟫_ℝ) ^ 2 :=
     Summable.tsum_le_tsum h_f_sq_le h_summable_f_sq
@@ -389,8 +371,6 @@ private lemma norm_heatTerm_sum_le
         resolventHilbertEigenbasisSigma (I := I) (M := M) g i‖ := norm_nonneg _
   have h_rhs_nn : 0 ≤ ‖u‖ := norm_nonneg _
   exact (abs_le_of_sq_le_sq' h_sq h_rhs_nn).2
-
-/-! ## Underlying linear map and CLM packaging -/
 
 /-- The underlying function of the heat semigroup at time `t`. -/
 private noncomputable def heatSemigroupFun
@@ -442,7 +422,6 @@ private lemma heatSemigroupFun_smul
       c • heatSemigroupFun (I := I) (M := M) g t u := by
   unfold heatSemigroupFun
   set b := resolventHilbertEigenbasisSigma (I := I) (M := M) g
-  -- ⟪b i, c • u⟫ = c * ⟪b i, u⟫. Then exp•(c * ⟪⟫)•b = c • exp•⟪⟫•b.
   have h_summand_eq : ∀ i : EigenIdx (I := I) (M := M) g,
       Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t) •
         ⟪b i, c • u⟫_ℝ • b i =
@@ -450,8 +429,6 @@ private lemma heatSemigroupFun_smul
         ⟪b i, u⟫_ℝ • b i) := by
     intro i
     rw [real_inner_smul_right]
-    -- LHS: exp • ((c * ⟪b i, u⟫) • b i) = (exp * (c * ⟪b i, u⟫)) • b i.
-    -- RHS: c • exp • ⟪b i, u⟫ • b i = (c * (exp * ⟪b i, u⟫)) • b i.
     rw [smul_smul, smul_smul, smul_smul]
     congr 1
     ring
@@ -464,8 +441,6 @@ private lemma heatSemigroupFun_smul
     funext i; exact h_summand_eq i
   rw [h_sum_eq]
   exact (summable_heatTerm (I := I) (M := M) g ht u).tsum_const_smul c
-
-/-! ## The heat semigroup CLM -/
 
 /-- The heat semigroup `e^{t Δ_g}` on `Lp ℝ 2 μ_g`.
 
@@ -517,8 +492,6 @@ theorem heatSemigroup_opNorm_le_one (g : SmoothRiemannianMetric I M)
   rw [dif_pos ht]
   exact LinearMap.mkContinuous_norm_le _ zero_le_one _
 
-/-! ## Action on basis vectors -/
-
 /-- The heat semigroup acts diagonally on basis vectors:
 `e^{t Δ_g} (b i) = exp(-λ_i t) • b i`. -/
 theorem heatSemigroup_apply_basis
@@ -531,11 +504,9 @@ theorem heatSemigroup_apply_basis
   classical
   set b := resolventHilbertEigenbasisSigma (I := I) (M := M) g
   rw [heatSemigroup_apply_of_nonneg (I := I) (M := M) g ht]
-  -- The eigenbasis-sigma is just b applied as a function.
   rw [show resolventEigenbasisSigma (I := I) (M := M) g i = b i from
     (resolventEigenbasisSigma_eq_resolventEigenbasisVec (I := I) (M := M) g i).trans
       (resolventHilbertEigenbasisSigma_apply (I := I) (M := M) g i).symm]
-  -- Use orthonormality of b to collapse the sum.
   have h_orthonormal : Orthonormal ℝ b := b.orthonormal
   have h_inner_eq : ∀ j : EigenIdx (I := I) (M := M) g,
       ⟪b j, b i⟫_ℝ = if j = i then 1 else 0 := by
@@ -565,8 +536,6 @@ theorem heatSemigroup_apply_basis
   rw [h_sum_eq]
   rw [tsum_ite_eq i]
 
-/-! ## Self-adjointness for `t ≥ 0` -/
-
 /-- For `t ≥ 0`, the heat semigroup is self-adjoint. -/
 theorem heatSemigroup_isSelfAdjoint (g : SmoothRiemannianMetric I M)
     {t : ℝ} (ht : 0 ≤ t) :
@@ -574,22 +543,14 @@ theorem heatSemigroup_isSelfAdjoint (g : SmoothRiemannianMetric I M)
   rw [ContinuousLinearMap.isSelfAdjoint_iff_isSymmetric]
   intro u v
   set b := resolventHilbertEigenbasisSigma (I := I) (M := M) g
-  -- Show ⟪H u, v⟫ = ⟪u, H v⟫. After IsSymmetric unfolds, the LHS uses
-  -- `↑H u` (LinearMap coercion), but it is defeq to `H u`.
-  -- We compute both sides by bringing the inner product inside the tsum
-  -- and showing they reduce to the same triple-product sum.
   change ⟪(heatSemigroup (I := I) (M := M) g t) u, v⟫_ℝ =
       ⟪u, (heatSemigroup (I := I) (M := M) g t) v⟫_ℝ
   rw [heatSemigroup_apply_of_nonneg (I := I) (M := M) g ht u,
       heatSemigroup_apply_of_nonneg (I := I) (M := M) g ht v]
-  -- LHS: ⟪∑' i, exp(-λ_i t) • ⟪b i, u⟫ • b i, v⟫.
-  -- Move inner inside via continuity.
-  -- Define the inner-product CLMs.
   let φv : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) →L[ℝ] ℝ :=
     (innerSL ℝ).flip v
   let φu : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) →L[ℝ] ℝ :=
     innerSL ℝ u
-  -- Compute LHS via continuity of inner product (mapL).
   have h_lhs : ⟪∑' i : EigenIdx (I := I) (M := M) g,
         Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t) •
           ⟪b i, u⟫_ℝ • b i, v⟫_ℝ =
@@ -659,8 +620,6 @@ theorem heatSemigroup_isSelfAdjoint (g : SmoothRiemannianMetric I M)
     exact h_inner_hsum'.tsum_eq.symm
   rw [h_lhs, h_rhs]
 
-/-! ## Zero-time identity -/
-
 /-- At `t = 0`, the heat semigroup is the identity. -/
 theorem heatSemigroup_zero (g : SmoothRiemannianMetric I M) :
     heatSemigroup (I := I) (M := M) g 0 = ContinuousLinearMap.id ℝ _ := by
@@ -686,8 +645,6 @@ theorem heatSemigroup_zero (g : SmoothRiemannianMetric I M) :
   rw [h_eq] at h_hsum
   exact h_hsum.tsum_eq
 
-/-! ## Semigroup law -/
-
 /-- Semigroup law: `e^{(s+t) Δ_g} = e^{s Δ_g} ∘ e^{t Δ_g}` for `s, t ≥ 0`. -/
 theorem heatSemigroup_add (g : SmoothRiemannianMetric I M)
     {s t : ℝ} (hs : 0 ≤ s) (ht : 0 ≤ t) :
@@ -702,7 +659,6 @@ theorem heatSemigroup_add (g : SmoothRiemannianMetric I M)
       ContinuousLinearMap.comp_apply,
       heatSemigroup_apply_of_nonneg (I := I) (M := M) g ht u]
   have h_summable_t := summable_heatTerm (I := I) (M := M) g ht u
-  -- Pull `heatSemigroup g s` inside the tsum.
   have h_pull :
       heatSemigroup (I := I) (M := M) g s
           (∑' i : EigenIdx (I := I) (M := M) g,
@@ -719,20 +675,16 @@ theorem heatSemigroup_add (g : SmoothRiemannianMetric I M)
   intro i
   rw [(heatSemigroup (I := I) (M := M) g s).map_smul,
       (heatSemigroup (I := I) (M := M) g s).map_smul]
-  -- heatSemigroup g s (b i) = exp(-λ_i s) • b i.
   have h_basis_apply :
       heatSemigroup (I := I) (M := M) g s (b i) =
       Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * s) • b i := by
     have hh := heatSemigroup_apply_basis (I := I) (M := M) g hs i
-    -- `resolventEigenbasisSigma g i = b i` propositionally.
     have h_eq : resolventEigenbasisSigma (I := I) (M := M) g i = b i :=
       (resolventEigenbasisSigma_eq_resolventEigenbasisVec (I := I) (M := M) g i).trans
         (resolventHilbertEigenbasisSigma_apply (I := I) (M := M) g i).symm
     rw [h_eq] at hh
     exact hh
   rw [h_basis_apply]
-  -- Goal: exp(-λ_i (s+t)) • ⟪b i, u⟫ • b i = exp(-λ_i t) • ⟪b i, u⟫ • exp(-λ_i s) • b i.
-  -- Both sides equal (exp(-λ_i s) * exp(-λ_i t) * ⟪b i, u⟫) • b i.
   have h_exp_add : Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * (s + t)) =
       Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * s) *
       Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t) := by
@@ -740,7 +692,6 @@ theorem heatSemigroup_add (g : SmoothRiemannianMetric I M)
         -(EigenIdx.lambda (I := I) (M := M) i) * s +
         -(EigenIdx.lambda (I := I) (M := M) i) * t from by ring,
         Real.exp_add]
-  -- Convert both sides to single-coefficient form.
   rw [show Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * (s + t)) •
       ⟪b i, u⟫_ℝ • b i =
       (Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * (s + t)) *
@@ -755,8 +706,6 @@ theorem heatSemigroup_add (g : SmoothRiemannianMetric I M)
   rw [h_exp_add]
   ring
 
-/-! ## Strong continuity at `t = 0+` -/
-
 /-- Strong continuity at `t = 0+`: as `t → 0+`, `heatSemigroup g t u → u`. -/
 theorem heatSemigroup_continuous_at_zero
     (g : SmoothRiemannianMetric I M)
@@ -768,7 +717,6 @@ theorem heatSemigroup_continuous_at_zero
   intro ε hε
   have h_summable_sq : Summable (fun i : EigenIdx (I := I) (M := M) g =>
       (⟪b i, u⟫_ℝ) ^ 2) := summable_basis_coeff_sq (I := I) (M := M) g u
-  -- Find finite T such that the tail of ∑ ⟪b i, u⟫² is < ε²/16.
   have hε16_pos : (0 : ℝ) < ε ^ 2 / 16 := by positivity
   obtain ⟨T, hT⟩ : ∃ T : Finset (EigenIdx (I := I) (M := M) g),
       ∑' i : { i : EigenIdx (I := I) (M := M) g // i ∉ T },
@@ -797,7 +745,6 @@ theorem heatSemigroup_continuous_at_zero
       apply tsum_nonneg
       intro i; exact sq_nonneg _
     rwa [abs_of_nonneg h_tail_nn] at hT_T
-  -- Head sum h(t) → 0 as t → 0.
   have h_head_tendsto : Tendsto (fun t : ℝ =>
       ∑ i ∈ T, (Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t) - 1) ^ 2 *
         (⟪b i, u⟫_ℝ) ^ 2) (𝓝 (0 : ℝ)) (𝓝 0) := by
@@ -834,13 +781,11 @@ theorem heatSemigroup_continuous_at_zero
   rw [Metric.tendsto_nhds] at h_head_tendsto
   obtain ⟨δ, hδ_pos, hδ⟩ := Metric.eventually_nhds_iff_ball.mp
     (h_head_tendsto (ε ^ 2 / 4) (by positivity))
-  -- Choose the δ-neighborhood within {t ≥ 0}.
   rw [Filter.eventually_iff_exists_mem]
   refine ⟨{t : ℝ | 0 ≤ t ∧ t < δ}, ?_, ?_⟩
   · rw [mem_nhdsWithin_iff_exists_mem_nhds_inter]
     refine ⟨Set.Iio δ, Iio_mem_nhds hδ_pos, ?_⟩
     intro x hx
-    -- hx : x ∈ Set.Iio δ ∩ Set.Ici 0
     refine ⟨hx.2, ?_⟩
     exact hx.1
   intro t ht_in
@@ -850,7 +795,6 @@ theorem heatSemigroup_continuous_at_zero
     exact (abs_lt_of_sq_lt_sq' h_sq hε.le).2
   rw [heatSemigroup_apply_of_nonneg (I := I) (M := M) g ht_nn u]
   have h_summable_heat := summable_heatTerm (I := I) (M := M) g ht_nn u
-  -- Build HasSum for the heat-side and for the basis-side.
   have h_hsum_heat : HasSum (fun i : EigenIdx (I := I) (M := M) g =>
       Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t) •
         ⟪b i, u⟫_ℝ • b i)
@@ -863,7 +807,6 @@ theorem heatSemigroup_continuous_at_zero
       funext i; rw [b.repr_apply_apply]
     rw [h_eq] at h_repr
     exact h_repr
-  -- Subtract the two HasSums.
   have h_hsum_diff : HasSum (fun i : EigenIdx (I := I) (M := M) g =>
       Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t) •
         ⟪b i, u⟫_ℝ • b i - ⟪b i, u⟫_ℝ • b i)
@@ -887,7 +830,6 @@ theorem heatSemigroup_continuous_at_zero
     rw [h_summand_eq] at h_hsum_diff
     exact h_hsum_diff.tsum_eq.symm
   rw [h_sum_diff]
-  -- Convert to single-coefficient form: ((exp(...) - 1) * ⟪b i, u⟫) • b i.
   have h_sum_eq :
       (fun i : EigenIdx (I := I) (M := M) g =>
         (Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t) - 1) •
@@ -899,7 +841,6 @@ theorem heatSemigroup_continuous_at_zero
   rw [h_sum_eq]
   set f : EigenIdx (I := I) (M := M) g → ℝ := fun i =>
     (Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t) - 1) * ⟪b i, u⟫_ℝ
-  -- Pointwise bound (f i)² ≤ 4 ⟪b i, u⟫².
   have h_f_sq_le : ∀ i, (f i) ^ 2 ≤ 4 * (⟪b i, u⟫_ℝ) ^ 2 := by
     intro i
     have h_pos : 0 < Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t) :=
@@ -929,14 +870,12 @@ theorem heatSemigroup_continuous_at_zero
   have h_norm_sq_eq := orthonormal_norm_sq_eq_tsum_sq (I := I) (M := M) g f h_summable_f_sq
   change ‖∑' i, f i • b i‖ ^ 2 < ε ^ 2
   rw [h_norm_sq_eq]
-  -- Split tsum into head + tail.
   have h_split : ∑' i : EigenIdx (I := I) (M := M) g, (f i) ^ 2 =
       (∑ i ∈ T, (f i) ^ 2) +
       ∑' i : { i : EigenIdx (I := I) (M := M) g // i ∉ T },
         (f (i : EigenIdx (I := I) (M := M) g)) ^ 2 :=
     (h_summable_f_sq.sum_add_tsum_subtype_compl T).symm
   rw [h_split]
-  -- Bound head < ε²/4.
   have h_head_bound : ∑ i ∈ T, (f i) ^ 2 < ε ^ 2 / 4 := by
     have h_in_ball : t ∈ Metric.ball (0 : ℝ) δ := by
       rw [Metric.mem_ball, dist_zero_right, Real.norm_eq_abs, abs_of_nonneg ht_nn]
@@ -958,7 +897,6 @@ theorem heatSemigroup_continuous_at_zero
     have h_nn : 0 ≤ ∑ i ∈ T, (f i) ^ 2 := by
       apply Finset.sum_nonneg; intros; exact sq_nonneg _
     rwa [abs_of_nonneg h_nn] at h_dist
-  -- Bound tail ≤ 4 * tail_inner_sq < 4 * ε²/16 = ε²/4.
   have h_tail_bound : ∑' i : { i : EigenIdx (I := I) (M := M) g // i ∉ T },
       (f (i : EigenIdx (I := I) (M := M) g)) ^ 2 < ε ^ 2 / 4 := by
     have h_tail_le : ∑' i : { i : EigenIdx (I := I) (M := M) g // i ∉ T },

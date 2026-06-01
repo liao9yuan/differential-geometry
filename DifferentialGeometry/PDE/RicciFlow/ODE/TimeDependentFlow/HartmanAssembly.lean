@@ -140,8 +140,6 @@ theorem time_dependent_vf_flow_diffeomorph_on_closed_manifold
       (X t ((chartAt H α).symm (I.symm y)) : E)))
     (hSmoothNegX_chart : ∀ α : M, ContDiff ℝ ∞ (Function.uncurry fun t y =>
       ((-X t ((chartAt H α).symm (I.symm y))) : E)))
-    -- Chart-overlap agreement for the forward flow: for every base point x,
-    -- the global flow Φ agrees with a C^∞ chart-at-x-conjugated flow near x.
     (hLocalFwd : ∀ (Φ : ℝ → M → M) (T : ℝ), 0 < T →
       (∀ x : M, ∃ α : M, x ∈ (hper α).U ∧
         ∀ s : ℝ, Φ s x = (chartAt H α).symm
@@ -154,7 +152,6 @@ theorem time_dependent_vf_flow_diffeomorph_on_closed_manifold
           Φ s y = (chartAt H x).symm (I.symm (flow (I ((chartAt H x) y)) s))) ∧
         (∀ t ∈ Set.Ioo (0 : ℝ) T,
           I.symm (flow (I ((chartAt H x) x)) t) ∈ (chartAt H x).target))
-    -- Same for the reverse flow.
     (hLocalRev : ∀ (Ψ : ℝ → M → M) (T : ℝ), 0 < T →
       (∀ x : M, ∃ α : M, x ∈ (hperNeg α).U ∧
         ∀ s : ℝ, Ψ s x = (chartAt H α).symm
@@ -167,8 +164,6 @@ theorem time_dependent_vf_flow_diffeomorph_on_closed_manifold
           Ψ s y = (chartAt H x).symm (I.symm (flow (I ((chartAt H x) y)) s))) ∧
         (∀ t ∈ Set.Ioo (0 : ℝ) T,
           I.symm (flow (I ((chartAt H x) x)) t) ∈ (chartAt H x).target))
-    -- Per-chart bijectivity: for each α, a positive horizon on which the
-    -- forward and reverse flows are mutual inverses on (hper α).U ∩ (hperNeg α).U.
     (hBijPerChart : ∀ (Φ Ψ : ℝ → M → M),
       (∀ x, Φ 0 x = x) → (∀ x, Ψ 0 x = x) →
       (∀ x : M, ∃ α : M, ∀ s : ℝ,
@@ -190,26 +185,18 @@ theorem time_dependent_vf_flow_diffeomorph_on_closed_manifold
             (I.symm ((hper α).flow (I ((chartAt H α) x)) s))) ∧
         ∀ t, 0 < t → t < T →
           ∃ d : Diffeomorph I I M M ∞, ∀ x, d x = Φ t x := by
-  -- ═══════════════════════════════════════════════════════════════════
-  -- Step 1: Assemble the global forward flow Φ via chart-cover glue.
-  -- ═══════════════════════════════════════════════════════════════════
   obtain ⟨T_fwd, hT_fwd_pos, _S_fwd, _hCover_fwd, Φ, hΦ_init, hΦ_repr⟩ :=
     time_dependent_vf_global_flow_glue X hper
-  -- Extract per-point representation identity in the required form.
   have hΦ_repr' : ∀ x : M, ∃ α : M, x ∈ (hper α).U ∧
       ∀ s : ℝ, Φ s x = (chartAt H α).symm
         (I.symm ((hper α).flow (I ((chartAt H α) x)) s)) := by
     intro x
     obtain ⟨α, _hαS, hxU, hrepr⟩ := hΦ_repr x
     exact ⟨α, hxU, hrepr⟩
-  -- Also need the simplified form without the U membership.
   have hΦ_repr_simple : ∀ x : M, ∃ α : M, ∀ s : ℝ,
       Φ s x = (chartAt H α).symm
         (I.symm ((hper α).flow (I ((chartAt H α) x)) s)) := by
     intro x; obtain ⟨α, _, hrepr⟩ := hΦ_repr' x; exact ⟨α, hrepr⟩
-  -- ═══════════════════════════════════════════════════════════════════
-  -- Step 2: Assemble the global reverse flow Ψ (for -X).
-  -- ═══════════════════════════════════════════════════════════════════
   obtain ⟨T_rev, hT_rev_pos, _S_rev, _hCover_rev, Ψ, hΨ_init, hΨ_repr⟩ :=
     time_dependent_vf_global_flow_glue (fun t x => -(X t x)) hperNeg
   have hΨ_repr' : ∀ x : M, ∃ α : M, x ∈ (hperNeg α).U ∧
@@ -222,58 +209,35 @@ theorem time_dependent_vf_flow_diffeomorph_on_closed_manifold
       Ψ s x = (chartAt H α).symm
         (I.symm ((hperNeg α).flow (I ((chartAt H α) x)) s)) := by
     intro x; obtain ⟨α, _, hrepr⟩ := hΨ_repr' x; exact ⟨α, hrepr⟩
-  -- ═══════════════════════════════════════════════════════════════════
-  -- Step 3: Forward flow is smooth in space.
-  -- ═══════════════════════════════════════════════════════════════════
-  -- Apply the chart-overlap agreement hypothesis to get hLocal data.
   have hLocalFwd_data := hLocalFwd Φ T_fwd hT_fwd_pos hΦ_repr'
-  -- Apply smooth-in-space.
   have hΦ_smooth : ∀ t : ℝ, 0 < t → t < T_fwd → ContMDiff I I ∞ (Φ t) :=
     time_dependent_vf_flow_smooth_in_space X T_fwd hT_fwd_pos Φ hLocalFwd_data
-  -- ═══════════════════════════════════════════════════════════════════
-  -- Step 4: Reverse flow is smooth in space.
-  -- ═══════════════════════════════════════════════════════════════════
   have hLocalRev_data := hLocalRev Ψ T_rev hT_rev_pos hΨ_repr'
   have hΨ_smooth : ∀ t : ℝ, 0 < t → t < T_rev → ContMDiff I I ∞ (Ψ t) :=
     time_dependent_vf_flow_smooth_in_space
       (fun t x => -(X t x)) T_rev hT_rev_pos Ψ hLocalRev_data
-  -- ═══════════════════════════════════════════════════════════════════
-  -- Step 5: Uniform bijectivity via compactness.
-  -- ═══════════════════════════════════════════════════════════════════
-  -- Instantiate the per-chart bijectivity hypothesis.
   have hBij := hBijPerChart Φ Ψ hΦ_init hΨ_init hΦ_repr_simple hΨ_repr_simple
-  -- Apply the uniform horizon extraction.
   obtain ⟨T_bij, hT_bij_pos, hΨΦ_eq, hΦΨ_eq⟩ :=
     chart_cover_flow_bijective_two_sided_uniform_horizon
       X hper hperNeg Φ Ψ hΦ_init hΨ_init hΦ_repr_simple hΨ_repr_simple hBij
-  -- ═══════════════════════════════════════════════════════════════════
-  -- Step 6: Package into a diffeomorphism on the common horizon.
-  -- ═══════════════════════════════════════════════════════════════════
-  -- Take T = min(T_fwd, T_rev, T_bij).
   set T : ℝ := min (min T_fwd T_rev) T_bij with hT_def
   have hT_pos : 0 < T := lt_min (lt_min hT_fwd_pos hT_rev_pos) hT_bij_pos
-  -- Forward flow smooth on (0, T).
   have hΦ_smooth_T : ∀ t, 0 < t → t < T → ContMDiff I I ∞ (Φ t) := by
     intro t ht htT
     exact hΦ_smooth t ht (lt_of_lt_of_le htT (le_trans (min_le_left _ _)
       (min_le_left _ _)))
-  -- Reverse flow smooth on (0, T).
   have hΨ_smooth_T : ∀ t, 0 < t → t < T → ContMDiff I I ∞ (Ψ t) := by
     intro t ht htT
     exact hΨ_smooth t ht (lt_of_lt_of_le htT (le_trans (min_le_left _ _)
       (min_le_right _ _)))
-  -- Ψ ∘ Φ = id on [0, T).
   have hΨΦ : ∀ s ∈ Set.Ico (0 : ℝ) T, ∀ x : M, Ψ s (Φ s x) = x := by
     intro s hs x
     exact hΨΦ_eq s ⟨hs.1, lt_of_lt_of_le hs.2 (min_le_right _ _)⟩ x
-  -- Φ ∘ Ψ = id on [0, T).
   have hΦΨ : ∀ s ∈ Set.Ico (0 : ℝ) T, ∀ x : M, Φ s (Ψ s x) = x := by
     intro s hs x
     exact hΦΨ_eq s ⟨hs.1, lt_of_lt_of_le hs.2 (min_le_right _ _)⟩ x
-  -- Apply the diffeomorphism packaging theorem.
   have hDiffeo := time_dependent_vf_globalflow_diffeomorph
     (I := I) hT_pos hΦ_init hΨ_init hΦ_smooth_T hΨ_smooth_T hΨΦ hΦΨ
-  -- Package the conclusion, exposing the chart-coordinate representation of `Φ`.
   refine ⟨T, hT_pos, Φ, hΦ_init, hΦ_repr_simple, ?_⟩
   intro t ht htT
   obtain ⟨d, hd_fwd, _⟩ := hDiffeo t ht htT

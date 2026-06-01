@@ -62,14 +62,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The Dirichlet form -/
 
 set_option linter.unusedSectionVars false in
 /-- The **Dirichlet quadratic form** associated to the connection
@@ -88,8 +84,6 @@ def dirichletForm (g : SmoothRiemannianMetric I M) (r s : ℕ) :
         ⟨SmoothCcTensor.toL2 (g := g) (r := r) (s := s) T,
           toL2_mem_connLaplacianL2_domain (I := I) g r s T⟩)
       (SmoothCcTensor.toL2 (g := g) (r := r) (s := s) S))
-
-/-! ## Integration by parts: link to the rough Laplacian on `L²` -/
 
 set_option linter.unusedSectionVars false in
 /-- **Definitional identity.** The Dirichlet form equals the negative

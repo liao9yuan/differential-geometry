@@ -81,15 +81,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 local notation "EuclN" =>
   EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## Headline
-
-The chart-target form of the pointwise squared op-norm bound for
-`rawTensorConnLap` previously lived here as
-`tensorTrivProjPushedNormSq_rawTensorConnLap_le_chartTarget_data_on_pouImage`.
-That declaration carried an explicit locally-constant-chart atlas hypothesis
-(a predicate that is mathematically false on normal manifolds such as `S²`)
-and has been removed as vacuous/unsound. -/
-
 end Connection
 end Integral
 end DifferentialGeometry

@@ -346,7 +346,6 @@ theorem uc_pi1_countable_lebesgue_subdivision
     apply div_le_div_of_nonneg_right _ hkR.le
     · exact_mod_cast Nat.le_succ _
 
-
 /-- **Piece homotopy.** Two paths inside the same basis element `B n`
 that share endpoints are homotopic in the ambient space, by the
 semi-local condition refining the basis. -/
@@ -975,8 +974,7 @@ theorem fundamentalGroup_countable_surjection_of_nullHomotopic_basis
         · intro hj s; omega
         · intro _hbd; exact ⟨hpj, hgj, rfl⟩
       · by_cases hblast : (j : ℕ) = k
-        · -- Boundary `j = last k`: constant path at `x`.
-          have hjeq : j = Fin.last k := Fin.ext (by rw [hblast, Fin.val_last])
+        · have hjeq : j = Fin.last k := Fin.ext (by rw [hblast, Fin.val_last])
           have hpj : p₀ j = x := by rw [hjeq]; exact hplast
           have hgj : γv j = x := by rw [hjeq]; exact hγvlast
           refine ⟨(_root_.Path.refl x).cast hpj hgj, ?_, ?_, ?_⟩
@@ -994,8 +992,7 @@ theorem fundamentalGroup_countable_surjection_of_nullHomotopic_basis
             have := hp0_succ_in ⟨(j : ℕ) - 1, hjb_lt⟩
             rwa [hpv] at this
           · intro _hbd; exact ⟨hpj, hgj, rfl⟩
-        · -- Interior vertex `0 < j.val < k`.
-          have hjpos : 0 < (j : ℕ) := Nat.pos_of_ne_zero hb0
+        · have hjpos : 0 < (j : ℕ) := Nat.pos_of_ne_zero hb0
           have hjlt : (j : ℕ) < k := by have := j.isLt; omega
           have hjb_lt : (j : ℕ) - 1 < k := by omega
           set jf : Fin k := ⟨(j : ℕ), hjlt⟩ with hjf_def
@@ -1043,14 +1040,11 @@ theorem fundamentalGroup_countable_surjection_of_nullHomotopic_basis
         change (i : ℕ) + 1 - 1 = (i : ℕ); omega
       rwa [hidxeq] at this
     · obtain ⟨hpjx, hgjx, heq⟩ := hc_bdry 0 (Or.inl rfl)
-      -- `hpjx : p₀ 0 = x` and `hgjx : γv 0 = x`; proof-irrelevant with `hp0`/`hγv0`.
       rw [heq]
     · obtain ⟨hpjx, hgjx, heq⟩ := hc_bdry (Fin.last k) (Or.inr (by simp [Fin.val_last]))
       rw [heq]
   obtain ⟨c, hc_cs, hc_su, hc0, hclast⟩ := hconn
-  -- Each `T i` is, on the nose, a path `γv i.castSucc → γv i.succ`.
   let T' : (i : Fin k) → _root_.Path (γv i.castSucc) (γv i.succ) := fun i => T i
-  -- Range-in-`B (idx i)` records as `range _.toContinuousMap ⊆ B (idx i)`.
   have range_subset_of_mem :
       ∀ {a b : X} (u : _root_.Path a b) (n : ℕ),
         (∀ s : unitInterval, (u s : X) ∈ B n) →
@@ -1071,7 +1065,6 @@ theorem fundamentalGroup_countable_surjection_of_nullHomotopic_basis
   have hc_su_range : ∀ i : Fin k,
       Set.range (c i.succ).toContinuousMap ⊆ B (idx i) :=
     fun i => range_subset_of_mem (c i.succ) (idx i) (hc_su i)
-  -- Range of a `Path.trans` is the union of the two ranges.
   have htrans_range_subset :
       ∀ {a b d : X} (u : _root_.Path a b) (v : _root_.Path b d) (n : ℕ),
         Set.range u.toContinuousMap ⊆ B n →
@@ -1087,9 +1080,6 @@ theorem fundamentalGroup_countable_surjection_of_nullHomotopic_basis
       exact hu ⟨s', by simpa [Path.coe_toContinuousMap] using hs'⟩
     · rcases h2 with ⟨s', hs'⟩
       exact hv ⟨s', by simpa [Path.coe_toContinuousMap] using hs'⟩
-  -- The per-segment commuting square, via `uc_pi1_countable_piece_homotopy`:
-  -- both `(seg i).trans (c i.succ)` and `(c i.castSucc).trans (T' i)` are
-  -- paths `p₀ i.castSucc → γv i.succ` inside `B (idx i)`, hence homotopic.
   have hsquare : ∀ i : Fin k,
       _root_.Path.Homotopic.Quotient.trans
           (⟦seg i⟧ : _root_.Path.Homotopic.Quotient (p₀ i.castSucc) (p₀ i.succ))
@@ -1111,7 +1101,6 @@ theorem fundamentalGroup_countable_surjection_of_nullHomotopic_basis
           (hc_cs_range i) (hT'_range i))
     exact (_root_.Path.Homotopic.Quotient.mk_trans (seg i) (c i.succ)).symm.trans
       (hpiece.trans (_root_.Path.Homotopic.Quotient.mk_trans (c i.castSucc) (T' i)))
-  -- Apply the telescoping lemma.
   have htel :
       _root_.Path.Homotopic.Quotient.trans
           (⟦c 0⟧ : _root_.Path.Homotopic.Quotient (p₀ 0) (γv 0))
@@ -1123,7 +1112,6 @@ theorem fundamentalGroup_countable_surjection_of_nullHomotopic_basis
             (⟦c (Fin.last k)⟧
               : _root_.Path.Homotopic.Quotient (p₀ (Fin.last k)) (γv (Fin.last k))) :=
     uc_pi1_countable_telescope p₀ γv seg T' c hsquare
-  -- Lift the two `trans` to path-level `Path.trans` via `mk_trans`.
   have htel' :
       (⟦(c 0).trans (_root_.Path.concat γv T')⟧
         : _root_.Path.Homotopic.Quotient (p₀ 0) (γv (Fin.last k)))
@@ -1132,11 +1120,6 @@ theorem fundamentalGroup_countable_surjection_of_nullHomotopic_basis
       (htel.trans
         (_root_.Path.Homotopic.Quotient.mk_trans
           (_root_.Path.concat p₀ seg) (c (Fin.last k))).symm)
-  -- `htel' : ⟦(c 0).trans (concat γv T')⟧ = ⟦(concat p₀ seg).trans (c (last k))⟧`.
-  -- Cast both sides into `Quotient x x` and cancel the boundary `refl`s
-  -- *at the quotient level* (`Path.trans` with `refl` is only homotopic, not
-  -- equal, so the cancellation must happen after `⟦·⟧`).
-  -- Helper: casting a quotient `trans` splits as a `trans` of casts.
   have qtrans_cast :
       ∀ {a₁ a₂ b₁ b₂ d₁ d₂ : X}
         (A : _root_.Path.Homotopic.Quotient a₂ b₂)
@@ -1151,10 +1134,6 @@ theorem fundamentalGroup_countable_surjection_of_nullHomotopic_basis
     induction A using Quotient.ind with | _ a =>
     induction Bq using Quotient.ind with | _ b =>
     rfl
-  -- Cast `htel'` along `(Quotient.cast · hp0.symm hb_eq)` into `Quotient x x`,
-  -- stated directly in the split `trans (cast …) (cast …)` form (the splitting
-  -- `qtrans_cast` is definitional, so the `congrArg` term elaborates against
-  -- this target up to `rfl`).
   have htelcast :
       _root_.Path.Homotopic.Quotient.trans
           (_root_.Path.Homotopic.Quotient.cast
@@ -1181,13 +1160,7 @@ theorem fundamentalGroup_countable_surjection_of_nullHomotopic_basis
                 : _root_.Path.Homotopic.Quotient (p₀ 0) (γv (Fin.last k))) hp0.symm hb_eq :=
       congrArg
         (fun w => _root_.Path.Homotopic.Quotient.cast w hp0.symm hb_eq) htel'
-    -- Both sides split definitionally via `qtrans_cast` (which is `rfl`), so
-    -- the split target is definitionally equal to `hbase`.
     exact hbase
-  -- Boundary connector casts collapse to `Quotient.refl x`.
-  -- (Each `cast ⟦P⟧ hx hy` is definitionally `⟦P.cast hx hy⟧`, and the cast
-  -- path equals the relevant base path by `Path.ext`; `Quotient.refl x` is
-  -- definitionally `⟦Path.refl x⟧`.)
   have hc0cast :
       _root_.Path.Homotopic.Quotient.cast
           (⟦c 0⟧ : _root_.Path.Homotopic.Quotient (p₀ 0) (γv 0)) hp0.symm hγv0.symm
@@ -1211,9 +1184,6 @@ theorem fundamentalGroup_countable_surjection_of_nullHomotopic_basis
   rw [hc0cast, hclastcast,
       _root_.Path.Homotopic.Quotient.refl_trans,
       _root_.Path.Homotopic.Quotient.trans_refl] at htelcast
-  -- Now `htelcast : cast ⟦concat γv T'⟧ hγv0.symm hb_eq
-  --                = cast ⟦concat p₀ seg⟧ hp0.symm hplast.symm`.
-  -- Identify the two casts with `⟦concatT⟧` and `⟦polyLoop⟧` respectively.
   have hLq : _root_.Path.Homotopic.Quotient.cast
       (⟦_root_.Path.concat γv T'⟧
         : _root_.Path.Homotopic.Quotient (γv 0) (γv (Fin.last k))) hγv0.symm hb_eq

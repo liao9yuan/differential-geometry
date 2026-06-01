@@ -63,12 +63,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
-/-! ## The rough Laplacian on the spectral Sobolev scale
-
-The connection Laplacian acts on the `i`-th eigen-coordinate by `-λᵢ`.  Since
-the squared coordinate is weighted by `(1 + λᵢ)^σ`, the bound `λᵢ ≤ 1 + λᵢ`
-shows the rough Laplacian of an element of `H^{τ+2}` lies in `Hᵗ`. -/
-
 variable {τ : ℝ}
 
 /-- The base inequality `λᵢ² ≤ (1 + λᵢ)²` for the connection-Laplacian
@@ -202,11 +196,6 @@ coordinate by `-λᵢ`. -/
     (tensorScaleLaplacian (I := I) (M := M) τ v).coeff i =
       -(TensorEigenIdx.lambda (I := I) (M := M) i) * v.coeff i := rfl
 
-/-! ## The rough Laplacian on time-`L²` tensor fields
-
-Acting pointwise in time, the rough Laplacian carries `L²([0,T]; H^{τ+2})` to
-`L²([0,T]; Hᵗ)`. -/
-
 variable {τ : ℝ} {T : ℝ}
 
 /-- **The rough Laplacian on time-`L²` tensor fields**, as a continuous linear
@@ -245,8 +234,6 @@ theorem timeModeCoeff_timeScaleLaplacian
   have hvcoe := timeModeCoeff_coeFn (I := I) (M := M) v i
   filter_upwards [hlhs, hΔ, hsmul, hvcoe] with t ht hΔt hsmt hvt
   rw [ht, hΔt, tensorScaleLaplacian_coeff, hsmt, Pi.smul_apply, hvt, smul_eq_mul]
-
-/-! ## The maximal-regularity operator solves the heat equation -/
 
 /-- Chart-locality-free version of `maximalRegularityOp_solves_perMode`,
 parameterized on resolvent compactness `h_compact`. -/

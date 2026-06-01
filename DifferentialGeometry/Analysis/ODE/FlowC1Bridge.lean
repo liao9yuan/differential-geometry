@@ -47,14 +47,6 @@ namespace Flow
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
-/-! ## Auxiliary lemmas: passing from Icc derivative to Ici / Iic derivative
-
-The variational solution has `HasDerivWithinAt` on the closed interval `Icc (t₀-T) (t₀+T)`.
-Grönwall lemmas in Mathlib want `HasDerivWithinAt _ _ (Ici τ) τ` (right derivative) or
-`HasDerivWithinAt _ _ (Iic τ) τ` (left derivative) for `τ` strictly inside.  These follow
-from the Icc statement by `mono_of_mem_nhdsWithin`, because `Icc` agrees with `Ici` / `Iic`
-on a neighbourhood of an interior point. -/
-
 section IccToIciIic
 
 variable {y : ℝ → E} {y' : E} {a b τ : ℝ}
@@ -78,12 +70,6 @@ lemma hasDerivWithinAt_Iic_of_Icc
   refine ⟨le_of_lt hs.1.1, hs.2.trans hτ.2⟩
 
 end IccToIciIic
-
-/-! ## Uniform-interval existence for the variational ODE
-
-The variational ODE is linear: `y' t = (A t) (y t)` with `A t : E →L[ℝ] E` continuous in
-`t`.  On a closed interval `[t₀ - T, t₀ + T]` on which `‖A t‖ ≤ M` with `M · T < 1`, a
-variational solution exists for **every** initial value `δ ∈ E`. -/
 
 section UniformExistence
 
@@ -161,11 +147,6 @@ theorem exists_isVariationalSolutionOn_Icc_of_short
 
 end UniformExistence
 
-/-! ## Grönwall bound on the variational solution
-
-A variational solution `y` on the closed interval `[t₀ - T, t₀ + T]` with `y(t₀) = δ`
-satisfies `‖y(t)‖ ≤ ‖δ‖ · exp(M · |t - t₀|)`. -/
-
 section GronwallBound
 
 variable {f : ℝ → E → E} {α : ℝ → E} {t₀ : ℝ}
@@ -182,8 +163,7 @@ theorem IsVariationalSolutionOn.norm_le_exp_of_mem_Icc
   intro t ht
   set A : ℝ → E →L[ℝ] E := fun t => fderiv ℝ (f t) (α t) with hA_def
   rcases le_or_gt t₀ t with htge | htlt
-  · -- Right half `[t₀, t]`.
-    have hsub_R : Icc t₀ (t₀ + T) ⊆ Icc (t₀ - T) (t₀ + T) := Icc_subset_Icc_left (by linarith)
+  · have hsub_R : Icc t₀ (t₀ + T) ⊆ Icc (t₀ - T) (t₀ + T) := Icc_subset_Icc_left (by linarith)
     have hy_contR : ContinuousOn y (Icc t₀ (t₀ + T)) := hy.continuousOn.mono hsub_R
     have hy_dR : ∀ τ ∈ Ico t₀ (t₀ + T),
         HasDerivWithinAt y ((A τ) (y τ)) (Ici τ) τ := by
@@ -213,8 +193,7 @@ theorem IsVariationalSolutionOn.norm_le_exp_of_mem_Icc
     calc ‖y t‖ ≤ ‖δ‖ * exp (M * (t - t₀)) := hgr_t
       _ ≤ ‖δ‖ * exp (M * T) := by
         apply mul_le_mul_of_nonneg_left hexp_mono (norm_nonneg _)
-  · -- Left half: use reflection `z s := y (2 t₀ - s)` on `[t₀, t₀+T]`.
-    have hsub_L : Icc (t₀ - T) t₀ ⊆ Icc (t₀ - T) (t₀ + T) := Icc_subset_Icc_right (by linarith)
+  · have hsub_L : Icc (t₀ - T) t₀ ⊆ Icc (t₀ - T) (t₀ + T) := Icc_subset_Icc_right (by linarith)
     have hy_contL : ContinuousOn y (Icc (t₀ - T) t₀) := hy.continuousOn.mono hsub_L
     have hy_dL : ∀ τ ∈ Ioc (t₀ - T) t₀,
         HasDerivWithinAt y ((A τ) (y τ)) (Iic τ) τ := by
@@ -223,7 +202,6 @@ theorem IsVariationalSolutionOn.norm_le_exp_of_mem_Icc
       have hd := hy.2 τ hτ_in
       have hτ_Ioc : τ ∈ Ioc (t₀ - T) (t₀ + T) := ⟨hτ.1, by linarith [hτ.2]⟩
       exact hasDerivWithinAt_Iic_of_Icc hd hτ_Ioc
-    -- Reflect.
     let φ : ℝ → ℝ := fun s => 2 * t₀ - s
     let z : ℝ → E := y ∘ φ
     have hφ_cont : Continuous φ := by
@@ -255,7 +233,6 @@ theorem IsVariationalSolutionOn.norm_le_exp_of_mem_Icc
         linarith
       have hcomp := HasDerivWithinAt.scomp (g₁ := y)
         (h := φ) τ hy_d_τ hφ hmaps
-      -- The derivative is `(-1 : ℝ) • (A …)(y …)`.
       change HasDerivWithinAt z _ (Ici τ) τ
       convert hcomp using 1
       module
@@ -300,12 +277,6 @@ theorem IsVariationalSolutionOn.norm_le_exp_of_mem_Icc
 
 end GronwallBound
 
-/-! ## Uniqueness on `Icc` and the variational linear map
-
-Combining uniform-interval existence + Grönwall pointwise uniqueness + linearity in `δ`,
-we obtain a continuous linear map `variationalLinearMapAt : E →L[ℝ] E` at each fixed
-`t ∈ Icc (t₀-T) (t₀+T)`. -/
-
 section LinearMap
 
 variable {f : ℝ → E → E} {α : ℝ → E} {t₀ : ℝ}
@@ -319,7 +290,6 @@ theorem IsVariationalSolutionOn.unique_Icc
     (h₁ : IsVariationalSolutionOn f α δ t₀ y₁ (Icc (t₀ - T) (t₀ + T)))
     (h₂ : IsVariationalSolutionOn f α δ t₀ y₂ (Icc (t₀ - T) (t₀ + T))) :
     EqOn y₁ y₂ (Icc (t₀ - T) (t₀ + T)) := by
-  -- Difference solves the linear ODE with zero initial value; Grönwall makes it zero.
   intro t ht
   have hcomb := h₁.linear_combination (c₁ := 1) (c₂ := -1) h₂
   have hdiff : IsVariationalSolutionOn f α (0 : E) t₀ (fun s => y₁ s - y₂ s)

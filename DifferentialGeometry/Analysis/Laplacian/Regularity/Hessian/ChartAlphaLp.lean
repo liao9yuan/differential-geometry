@@ -76,8 +76,6 @@ open DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaMatrix
 open DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaFrobenius
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -86,8 +84,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Pointwise identification on the chart-α source -/
 
 /-- **Pointwise identification on the chart-α source.** For smooth `φ : C^∞⟮I, M; ℝ⟯`,
 smooth scalar `v : SmoothScalar g`, chart base point `α : M`, and manifold point
@@ -102,8 +98,6 @@ theorem smoothTensorPairing_eq_hessPairingChart_on_chartSource
       hessPairingChart (I := I) g φ
         (smoothScalarToContMDiffMap (I := I) (g := g) v) x := by
   classical
-  -- Step 1: x ∈ chart α source ⇒ extChartAt α x ∈ chart α target ⇒
-  --   toEuclidean (extChartAt α x) ∈ chartTargetEuclid α.
   have hx_src_ext : x ∈ (extChartAt I α).source := by
     rwa [extChartAt_source_eq_chartAt_source]
   have hx_tgt_ext : extChartAt I α x ∈ (extChartAt I α).target :=
@@ -113,21 +107,14 @@ theorem smoothTensorPairing_eq_hessPairingChart_on_chartSource
     unfold chartTargetEuclid
     simp only [Set.mem_image]
     exact ⟨extChartAt I α x, hx_tgt_ext, rfl⟩
-  -- Step 2: apply the unconditional bridge.
   have h_bridge := smoothTensorPairingChart_eq_hessPairingChart_pullback
     (I := I) (M := M) g α φ v h_toE_mem
-  -- The bridge says LHS = hessPairingChart g φ v_bundle ((extChartAt α).symm (toEuclidean.symm y))
-  -- where y = toEuclidean (extChartAt α x). We need to identify this with hessPairingChart at x.
-  -- (extChartAt α).symm (toEuclidean.symm (toEuclidean (extChartAt α x))) = (extChartAt α).symm (extChartAt α x) = x.
   rw [h_bridge]
-  -- Reduce: (extChartAt α).symm (toEuclidean.symm (toEuclidean (extChartAt α x))) = x.
   have h_toE_inv : (toEuclidean (E := E)).symm
       ((toEuclidean (E := E)) (extChartAt I α x)) = extChartAt I α x :=
     (toEuclidean (E := E)).symm_apply_apply _
   rw [h_toE_inv]
   rw [(extChartAt I α).left_inv hx_src_ext]
-
-/-! ## POU-weighted pointwise identification -/
 
 /-- **POU-weighted pointwise identification.** For smooth `φ` and `v`,
 the POU-weighted sum (over the chart atlas POU finset) of the chart-α tensor
@@ -145,14 +132,6 @@ theorem pou_weighted_tensor_pairing_eq_hessPairingChart_pointwise
       hessPairingChart (I := I) g φ
         (smoothScalarToContMDiffMap (I := I) (g := g) v) x := by
   classical
-  -- For each α with non-zero POU at x, we have x ∈ tsupport (POU α) ⊆ chart α source.
-  -- For such α, by smoothTensorPairing_eq_hessPairingChart_on_chartSource:
-  --   smoothTensorPairingChart α φ v (toE(extChartAt α x)) = hessPairingChart g φ v_bundle x.
-  -- For α with POU(α)(x) = 0, the term contributes 0.
-  -- Sum: ∑ α POU(α)(x) · hessPairingChart g φ v_bundle x = hessPairingChart g φ v_bundle x · (∑ α POU(α)(x))
-  --     = hessPairingChart g φ v_bundle x · 1 = hessPairingChart g φ v_bundle x.
-  --
-  -- We need to carefully handle the case POU(α)(x) ≠ 0 vs = 0.
   have h_per_term : ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
       (chartAtlasPOU I M α : M → ℝ) x *
         smoothTensorPairingChart (I := I) (M := M) g α φ v
@@ -163,8 +142,7 @@ theorem pou_weighted_tensor_pairing_eq_hessPairingChart_pointwise
     intro α hα
     by_cases h_pou : (chartAtlasPOU I M α : M → ℝ) x = 0
     · rw [h_pou, zero_mul, zero_mul]
-    · -- x ∈ support of (POU α), hence x ∈ tsupport (POU α) ⊆ chart α source.
-      have h_x_supp : x ∈ tsupport ((chartAtlasPOU I M α : M → ℝ)) := by
+    · have h_x_supp : x ∈ tsupport ((chartAtlasPOU I M α : M → ℝ)) := by
         apply subset_tsupport _
         simp only [Function.mem_support, ne_eq]
         exact h_pou
@@ -176,7 +154,6 @@ theorem pou_weighted_tensor_pairing_eq_hessPairingChart_pointwise
       exact smoothTensorPairing_eq_hessPairingChart_on_chartSource
         (I := I) (M := M) g α φ v h_x_chart
   rw [Finset.sum_congr rfl h_per_term]
-  -- Now sum = ∑ α POU(α)(x) · hessPairingChart g φ v_bundle x = hessPairingChart x · (∑ α POU(α)(x)).
   rw [← Finset.sum_mul]
   rw [chartAtlasPOU_finset_sum_eq_one (I := I) (M := M) x]
   rw [one_mul]

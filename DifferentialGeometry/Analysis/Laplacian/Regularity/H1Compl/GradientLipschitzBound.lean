@@ -83,8 +83,6 @@ open DifferentialGeometry.Analysis.Laplacian.H1ComplGradientLipschitz
 open DifferentialGeometry.Analysis.Laplacian.H1ComplToLpChartBridge
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -93,14 +91,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## The chart-supported compact set in `EuclN` (independent of `v`)
-
-`kPouCompact α` is the image of `tsupport (chartAtlasPOU I M α)` under the
-composition `toEuclidean ∘ extChartAt I α`. It is compact (image of a
-compact set under continuous maps), contained in `chartTargetEuclid α`,
-and **depends only on `α`**, not on any specific `v : SmoothScalar g`.
-This is the key uniform-in-`v` set. -/
 
 /-- The compact subset of `EuclN` corresponding to `tsupport (POU α)` under
 the chart map and `toEuclidean`. -/
@@ -150,12 +140,6 @@ theorem kPouCompact_subset_chartTargetEuclid (α : M) :
   have hz_target : z ∈ (extChartAt I α).target := by
     rw [← hxz]; exact (extChartAt I α).map_source hxsrc
   refine ⟨z, hz_target, hzy⟩
-
-/-! ## Containment of `tsupport(smoothChartExt g α v) ⊆ kPouCompact α`
-
-The key uniform-in-v containment: for every `v : SmoothScalar g`, the
-support of the smooth-extension lies inside the chart-supported compact set
-`kPouCompact α`. -/
 
 theorem smoothChartExt_support_subset_kPouCompact
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
@@ -218,8 +202,6 @@ theorem smoothChartExtPartial_tsupport_subset_kPouCompact
   exact h_fderiv_supp.trans
     (smoothChartExt_tsupport_subset_kPouCompact (I := I) (M := M) g α v)
 
-/-! ## Density bound on `kPouCompact α` -/
-
 theorem exists_density_sup_on_kPouCompact
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ M_d : ℝ, 0 < M_d ∧
@@ -245,8 +227,6 @@ theorem exists_density_sup_on_kPouCompact
     rw [Set.not_nonempty_iff_eq_empty] at hKne
     rw [hKne] at hy
     exact absurd hy (Set.notMem_empty y)
-
-/-! ## Finiteness of the chart-pulled weighted measure of `kPouCompact α` -/
 
 theorem chartPulledWeightedMeasure_kPouCompact_lt_top
     (g : SmoothRiemannianMetric I M) (α : M) :
@@ -275,12 +255,6 @@ theorem chartPulledWeightedMeasure_kPouCompact_lt_top
           rw [MeasureTheory.setLIntegral_const]
   exact lt_of_le_of_lt h_int_bd
     (ENNReal.mul_lt_top ENNReal.ofReal_lt_top hK_compact.measure_lt_top)
-
-/-! ## Linear-map representation: `chartPushedPartialLpLin`
-
-The chart-pushed-partial map, viewed as a linear map from `SmoothScalar g`
-to `Lp ℝ 2 (chart-weighted, chartTarget)`. The well-definedness uses the
-`MemLp 2` membership from `H1ComplGradientLipschitz`. -/
 
 /-- The `chartPushedPartialLp` map on `SmoothScalar g`, packaged as a
 linear map. -/
@@ -325,24 +299,14 @@ noncomputable def chartPushedPartialLpLin
         chartPushedPartial (I := I) (M := M) g α j (v + w) := by
       unfold chartPushedPartialLp
       exact h1
-    -- The Lp.ext gives goal: ↑↑(LP_(v+w)) =ᵐ ↑↑(LP_v + LP_w).
-    -- We prove this by chaining: ↑↑(LP_(v+w)) =ᵐ chartPushedPartial(v+w) =ᵐ ... =ᵐ ↑↑(LP_v + LP_w).
     have h_coeAdd := MeasureTheory.Lp.coeFn_add
       (chartPushedPartialLp (I := I) (M := M) g α j v
         (chartPushedPartial_memLp (I := I) (M := M) g α j v))
       (chartPushedPartialLp (I := I) (M := M) g α j w
         (chartPushedPartial_memLp (I := I) (M := M) g α j w))
-    -- h_coeAdd : ↑↑(LP_v + LP_w) =ᵐ ↑↑LP_v + ↑↑LP_w
-    -- Combine: ↑↑(LP_(v+w)) =ᵐ chartPushedPartial(v+w) =ᵐ chartPushedPartial v + chartPushedPartial w
-    --                      =ᵐ ↑↑LP_v + ↑↑LP_w =ᵐ ↑↑(LP_v + LP_w).
     refine h_lhs.trans (h_aeEq_combined.trans ?_)
-    -- Goal: (fun y => chartPushedPartial v y + chartPushedPartial w y) =ᵐ ↑↑(LP_v + LP_w)
     refine EventuallyEq.symm ?_
-    -- Goal: ↑↑(LP_v + LP_w) =ᵐ (fun y => chartPushedPartial v y + chartPushedPartial w y)
     filter_upwards [h_coeAdd, h2, h3] with y hy_add hy_v hy_w
-    -- hy_add : (↑↑(LP_v + LP_w)) y = (↑↑LP_v + ↑↑LP_w) y
-    -- hy_v : (↑↑LP_v) y = chartPushedPartial v y
-    -- hy_w : (↑↑LP_w) y = chartPushedPartial w y
     have h_v_eq : (chartPushedPartialLp (I := I) (M := M) g α j v
           (chartPushedPartial_memLp (I := I) (M := M) g α j v) :
             EuclN → ℝ) y =
@@ -391,7 +355,6 @@ noncomputable def chartPushedPartialLpLin
           (chartPushedPartial_memLp (I := I) (M := M) g α j v) :
             EuclN → ℝ) y =
           chartPushedPartial (I := I) (M := M) g α j v y := hy_v
-    -- Goal involves (RingHom.id ℝ) c • ...; reduce to c • ...
     change ((c • (chartPushedPartialLp (I := I) (M := M) g α j v
         (chartPushedPartial_memLp (I := I) (M := M) g α j v))) : Lp ℝ 2 _) y =
         c * chartPushedPartial (I := I) (M := M) g α j v y
@@ -404,10 +367,6 @@ lemma chartPushedPartialLpLin_apply
       chartPushedPartialLp (I := I) (M := M) g α j v
         (chartPushedPartial_memLp (I := I) (M := M) g α j v) := rfl
 
-/-! ## Norm of `chartPushedPartialLpLin v` equals the eLpNorm
-
-A direct consequence of the definition. -/
-
 theorem norm_chartPushedPartialLpLin
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (v : SmoothScalar g) :
@@ -418,41 +377,6 @@ theorem norm_chartPushedPartialLpLin
   rw [chartPushedPartialLpLin_apply]
   exact norm_chartPushedPartialLp (I := I) (M := M) g α j v
     (chartPushedPartial_memLp (I := I) (M := M) g α j v)
-
-/-! ## Lipschitz bound via the structural ingredients
-
-We construct the Lipschitz constant for the chart-pushed-partial map by
-combining the structural ingredients (chart-supported compact set + density
-bound) with the **operator-norm scaling argument** for linear maps between
-seminormed spaces and Banach spaces.
-
-The bound is established as follows. Consider the map
-`F : ℝ → ℝ` defined by
-`F(t) := sup { ‖chartPushedPartialLpLin v‖ : v ∈ SmoothScalar g, ‖v‖ ≤ t }`.
-By linearity of the map, `F(t) = t · F(1)`. So `F(1) < ∞` is sufficient.
-
-To prove `F(1) < ∞`: the set of `v` with `‖v‖ ≤ 1` is bounded in the H¹
-pre-norm. The chart-pushed-partial of any such `v` is in `Lp ℝ 2 (...)`
-with finite L²-norm (proved in `H1ComplGradientLipschitz`). For the
-**uniform** bound, we use the chain-rule + product-rule analysis on the
-smoothChartExt structure, as outlined in the file's docstring.
-
-For this file, the uniform bound is exhibited through a **finite operator
-norm extraction**: the chart-pushed-partial map, when viewed as a linear
-map between seminormed spaces, has a well-defined **operator semi-norm**,
-which we exhibit as the desired Lipschitz constant. The proof of
-finiteness uses the structural compactness ingredients above. -/
-
-/-! ## Uniform bound on `eLpNorm` from the structural ingredients
-
-Combining the support containment and the finite chart-pulled weighted
-measure of `kPouCompact α`, we obtain the bound:
-```
-eLpNorm (smoothChartExtPartial g α j v) 2 (chart-weighted, chartTarget)
-  ≤ ENNReal.ofReal (sup |smoothChartExtPartial g α j v|) ·
-      (chartPulledWeightedMeasure g α (kPouCompact α))^{1/2}
-```
-The first factor depends on `v`; the second is a uniform constant. -/
 
 theorem chartPushedPartial_lipschitz_uniform_support
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
@@ -465,21 +389,17 @@ theorem chartPushedPartial_lipschitz_uniform_support
         ((chartPulledWeightedMeasure (I := I) g α)
           (kPouCompact (I := I) (M := M) α)) ^ ((1 : ℝ) / 2) := by
   classical
-  -- Step 1: get the sup-bound on the smooth-extension partial.
   have h_cont : Continuous (smoothChartExtPartial (I := I) (M := M) g α j v) :=
     smoothChartExtPartial_continuous (I := I) (M := M) g α j v
   have h_cs : HasCompactSupport (smoothChartExtPartial (I := I) (M := M) g α j v) :=
     smoothChartExtPartial_hasCompactSupport (I := I) (M := M) g α j v
   obtain ⟨N₀, hN₀⟩ := h_cont.bounded_above_of_compact_support h_cs
-  -- N₀ may be negative; take max with 0.
   set N : ℝ := max N₀ 0 with hN_def
   refine ⟨N, le_max_right _ _, fun y => ?_, ?_⟩
   · exact (hN₀ y).trans (le_max_left _ _)
-  -- Step 2: replace chartPushedPartial with smoothChartExtPartial via aeEq.
   have h_aeEq := chartPushedPartial_aeEq_smoothChartExtPartial
     (I := I) (M := M) g α j v
   rw [eLpNorm_congr_ae h_aeEq]
-  -- Step 3: bound the L²-norm.
   have hK_compact : IsCompact (kPouCompact (I := I) (M := M) α) :=
     kPouCompact_isCompact (I := I) (M := M) α
   have hK_meas : MeasurableSet (kPouCompact (I := I) (M := M) α) :=
@@ -489,7 +409,6 @@ theorem chartPushedPartial_lipschitz_uniform_support
   have hN_nn : 0 ≤ N := le_max_right _ _
   have hN_bd : ∀ y, |smoothChartExtPartial (I := I) (M := M) g α j v y| ≤ N := fun y =>
     (hN₀ y).trans (le_max_left _ _)
-  -- Pointwise: |smoothChartExtPartial v y|^2 ≤ N² · indicator K(y).
   have h_ptbd_sq : ∀ y, ‖smoothChartExtPartial (I := I) (M := M) g α j v y‖ₑ ^ (2 : ℝ) ≤
       ENNReal.ofReal (N^2) *
         Set.indicator (kPouCompact (I := I) (M := M) α) (fun _ => (1 : ℝ≥0∞)) y := by
@@ -514,12 +433,10 @@ theorem chartPushedPartial_lipschitz_uniform_support
       rw [h_f_zero, enorm_zero]
       rw [Set.indicator_of_notMem hy, mul_zero]
       rw [ENNReal.zero_rpow_of_pos (by norm_num)]
-  -- L² norm via lintegral.
   rw [MeasureTheory.eLpNorm_eq_lintegral_rpow_enorm_toReal
     (by norm_num : (2 : ℝ≥0∞) ≠ 0)
     (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)]
   rw [show ((2 : ℝ≥0∞).toReal : ℝ) = 2 from by norm_num]
-  -- Bound the lintegral.
   have h_lint_bd : ∫⁻ y, ‖smoothChartExtPartial (I := I) (M := M) g α j v y‖ₑ ^ (2 : ℝ)
       ∂μ_w ≤
       ENNReal.ofReal (N^2) *
@@ -561,12 +478,8 @@ theorem chartPushedPartial_lipschitz_uniform_support
           ((chartPulledWeightedMeasure (I := I) g α)
             (kPouCompact (I := I) (M := M) α)) ^ ((1 : ℝ) / 2) := by
         congr 1
-        -- Goal: ENNReal.ofReal (N ^ 2) ^ (1 / 2) = ENNReal.ofReal N
-        -- Strategy: ENNReal.ofReal(N^2) = ENNReal.ofReal N * ENNReal.ofReal N (via product),
-        -- then take ^(1/2) and use commutativity with the .toNNReal.
         rw [show (N^2 : ℝ) = N * N from sq N]
         rw [ENNReal.ofReal_mul hN_nn]
-        -- Goal: (ENNReal.ofReal N * ENNReal.ofReal N) ^ (1/2) = ENNReal.ofReal N
         rw [show (ENNReal.ofReal N * ENNReal.ofReal N : ℝ≥0∞) =
             (ENNReal.ofReal N)^(2 : ℝ) from by
           rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) from by norm_num]

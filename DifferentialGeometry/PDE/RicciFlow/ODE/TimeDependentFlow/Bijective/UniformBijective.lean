@@ -101,7 +101,6 @@ theorem chart_cover_flow_bijective_two_sided_uniform_horizon
       (∀ s ∈ Set.Ico (0 : ℝ) T, ∀ x : M, Ψ s (Φ s x) = x) ∧
       (∀ s ∈ Set.Ico (0 : ℝ) T, ∀ x : M, Φ s (Ψ s x) = x) := by
   classical
-  -- Apply the abstract compactness extraction to the joint bijectivity property.
   have hExtracted := compact_uniform_horizon_extraction
     (fun α => (hper α).U ∩ (hperNeg α).U)
     (fun α => (hBijPerChart α).choose)

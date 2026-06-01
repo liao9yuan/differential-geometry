@@ -94,20 +94,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The un-lowered first directional covariant derivative as a smooth section
-
-For a smooth `(0, 2)`-tensor section `T` and a smooth tangent vector field `B`,
-the assignment `y ↦ ∇_{B y} T y` — the *un-lowered* directional covariant
-derivative, valued in the `(0, 2)`-tensor fibre — is the covariant derivative of
-`T` along `B`, i.e. `covApply (tensorRSCovariantDerivative I M 0 2 (LeviCivita g)) B T`.
-This is a smooth `(0, 2)`-tensor section. -/
 
 /-- The un-lowered first directional covariant derivative `y ↦ ∇_{B y} T y` of a
 smooth `(0, 2)`-tensor section `T` along a smooth tangent vector field `B`, as a
@@ -142,18 +132,15 @@ lemma covDerivAlongVFraw_contMDiff
         (covDerivAlongVFraw (I := I) (M := M) g T B y)) := by
   classical
   set cov := tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g) with hcov_def
-  -- Smoothness of `T` in total-space form, bumped to `∞ + 1 = ∞`.
   have hT : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 2 ℝ E))
       ((∞ : WithTop ℕ∞) + 1)
       (fun y : M => TotalSpace.mk' (TensorRSModel 0 2 ℝ E)
         (E := fun z : M => TensorRSSpace 0 2 I z) y (T y)) := by
     rw [show ((∞ : WithTop ℕ∞) + 1) = ∞ from rfl]
     exact T.contMDiff
-  -- Smoothness of the vector field `B` in total-space form.
   have hB : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun y : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) y (B y)) :=
     B.contMDiff
-  -- `covApply_contMDiffOn` on `Set.univ`.
   have hOn : ContMDiffOn I (I.prod 𝓘(ℝ, TensorRSModel 0 2 ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (TensorRSModel 0 2 ℝ E)
         (E := fun z : M => TensorRSSpace 0 2 I z) y
@@ -180,14 +167,6 @@ def covDerivAlongVFSection
     covDerivAlongVFSection (I := I) (M := M) g T B y =
       (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g)).toFun
         (fun y : M => T y) y (B y) := rfl
-
-/-! ## Lowering of the first directional derivative
-
-The metric index-lowering of the un-lowered first directional covariant
-derivative `∇_B T` coincides pointwise with the lowered directional derivative
-`loweredCovDerivAt g 0 2 T y (B y)`. This is exactly the committed rank-`0`
-connection-intertwining identity `loweredCovDerivAt_eq_lower_tensorCovDerivAt`,
-since `(covDerivAlongVFSection g T B) y = ∇^{(0,2)}_{B y} T y` as a `(0, 2)`-tensor. -/
 
 /-- **The lowering of the un-lowered first directional derivative is the lowered
 directional derivative.** At each point `y`, the metric index-lowering of
@@ -217,16 +196,6 @@ lemma toModel_liftedTensorSection_covDerivAlongVFSection
   rw [toModel_liftedTensorSection]
   exact covDerivAlongVFSection_lowered_eq (I := I) (M := M) g T B y
 
-/-! ## The second directional derivative as the Hessian plus the frame correction
-
-The covariant derivative `∇_B (∇_B T)` of the first directional derivative along
-the same vector field `B` is, by the definition of the second covariant
-derivative `tensorSecondCovDeriv`, the un-symmetrised Hessian
-`tensorSecondCovDeriv g 0 2 B B T` plus the `∇_{∇_B B} T` correction term. This
-is the algebraic identity that, summed over an orthonormal frame, reconstructs
-the rough Laplacian (whose fixed-frame form is precisely
-`∑ᵢ (∇_{Bᵢ}(∇_{Bᵢ} T) − ∇_{∇_{Bᵢ} Bᵢ} T) = ∑ᵢ tensorSecondCovDeriv g 0 2 Bᵢ Bᵢ T`). -/
-
 /-- **The second directional derivative is the Hessian plus the frame
 correction.** The covariant derivative of the first directional derivative
 `covDerivAlongVFSection g T B` along `B` equals the un-symmetrised second
@@ -244,31 +213,12 @@ lemma covDerivAlong_covDerivAlongVFSection_eq
           (fun b : M => T b) y
           ((LeviCivita (I := I) g).toFun (fun b : M => B b) y (B y)) := by
   rw [tensorSecondCovDeriv_def]
-  -- LHS = cov.toFun (covApply cov B T) y (B y); RHS Hessian = same − cov.toFun T y (∇_B B);
-  -- adding back the correction cancels the subtraction.
   change (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g)).toFun
       (covApply (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g))
         (fun b : M => B b) (fun b : M => T b)) y (B y) = _
   rw [show tensorCov (I := I) g 0 2 =
       tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g) from rfl]
   abel
-
-/-! ## The per-direction second-order combined integration-by-parts identity
-
-Applying the committed first-order covariant integration-by-parts identity
-`integral_tensorInner_tangentAction_add_smul_divergence_eq_zero` at rank `(0, 2)`
-with the *first directional derivative* `covDerivAlongVFSection g T B = ∇_B T` in
-place of the original section yields the per-direction second-order combined
-identity: the integral of
-
-```
-⟨(∇_B (∇_B T))ᵇ, vᵇ⟩ + ⟨(∇_B T)ᵇ, (∇_B v)ᵇ⟩ + ⟨∇_B T, v⟩ · divᵍ B
-```
-
-vanishes. Here all lowered-inner products are the covariant `(0, 0 + 2)` inner
-product `tensorInnerPointwise_0s (0 + 2)`, `(·)ᵇ` denotes the lifted
-`(0, 0 + 2)`-tensor section / lowered directional derivative, and the middle
-term is exactly the per-direction summand of the headline Dirichlet integrand. -/
 
 /-- The model coercion of the lowered second directional derivative
 `loweredCovDerivAlongVF g 0 2 (∇_B T) B x` equals the metric index-lowering of
@@ -288,13 +238,9 @@ lemma toModel_loweredCovDerivAlongVF_covDerivAlongVFSection_eq
           (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g)).toFun
             (fun b : M => T b) x
             ((LeviCivita (I := I) g).toFun (fun b : M => B b) x (B x)))) := by
-  -- `loweredCovDerivAlongVF g 0 2 W B x = loweredCovDerivAt g 0 2 W x (B x)`,
-  -- whose `toModel` is the lowering of the un-lowered `∇_{B x} W x`.
   rw [loweredCovDerivAlongVF_apply]
   rw [loweredCovDerivAt_eq_lower_tensorCovDerivAt (I := I) (M := M) g
     (covDerivAlongVFSection (I := I) (M := M) g T B) x (B x)]
-  -- The un-lowered `∇_{B x}(∇_B T) x = covDerivAlongVFSection g (∇_B T) B x`,
-  -- which is the Hessian plus the correction.
   congr 1
   exact congrArg TensorRSSpace.toModel
     (covDerivAlong_covDerivAlongVFSection_eq (I := I) (M := M) g T B x)
@@ -333,19 +279,6 @@ theorem integral_secondOrder_combined_eq_zero
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) = 0 :=
   integral_tensorInner_covDeriv_combined_eq_zero (I := I) (M := M) g 0 2
     (covDerivAlongVFSection (I := I) (M := M) g T B) v B
-
-/-! ## The per-direction second-order term as a fixed-frame summand
-
-The un-lowered per-direction second-order term
-`∇_B (∇_B T) − ∇_{(∇_B B)} T` is exactly the summand of the fixed-frame raw
-connection Laplacian `rawTensorConnLap_fixedFrame` for the frame value `B`. This
-is the bridge that converts the per-direction second-order IBP terms of this
-file into the rough Laplacian: summed over the globally smooth chart-`α` frame
-`Bᵢ = chartFrameNormGlobalSmooth g α i`, which is `g_b`-orthonormal on the
-intersection of the chart-`α` partition-of-unity tsupport with the chart-`α`
-Levi-Civita good set, the committed chart-frame trace identity
-`rawTensorConnLap_via_chartFrameNormGlobalSmooth` then reproduces
-`rawTensorConnLap g 0 2 T b`. -/
 
 /-- **Per-direction un-lowered second-order term as the fixed-frame summand.**
 The un-lowered second-order covariant term

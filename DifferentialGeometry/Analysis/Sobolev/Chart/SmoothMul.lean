@@ -46,16 +46,12 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## A smooth manifold-side cutoff `b_α` with `b_α ≡ 1` on `tsupport ρ_α` -/
 
 /-- For each chart point `α : M` on a closed manifold there exists a smooth
 manifold-side cutoff `b_α : M → ℝ` taking values in `[0,1]`, equal to `1` on
@@ -76,12 +72,6 @@ lemma exists_chart_cutoff_M
       (I := I) (M := M) α hK_compact h_tsupp_in_int_K
   refine ⟨η, hη_smooth, hη_range, hη_one_on_tsupp, ?_⟩
   exact hη_tsupport_in_K.trans hK_chart
-
-/-! ## Chart-α smooth extension to `EuclideanSpace`
-
-For a smooth `f : M → ℝ` with `tsupport f ⊆ (chartAt H α).source`, the chart
-pull-back extends to a globally smooth, compactly supported function on
-`EuclideanSpace ℝ (Fin n)`. We re-introduce the construction here. -/
 
 /-- The smooth global extension of `f : M → ℝ` to `EuclN`, equal to
 `f ((extChartAt I α).symm (toEuclidean.symm y))` on the chart-target image and
@@ -132,8 +122,6 @@ private lemma smoothExtensionScalar_apply_of_notMem_chartTargetEuclid
   apply smoothExtensionScalar_apply_of_notMem_target
   rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
   exact hy
-
-/-! ## Smoothness of the extension for compactly supported smooth `f` -/
 
 /-- If `f : M → ℝ` is smooth, the formula
 `y ↦ f ((extChartAt I α).symm (toEuclidean.symm y))` is smooth on
@@ -271,8 +259,6 @@ private lemma hasCompactSupport_smoothExtensionScalar
   exact smoothExtensionScalar_eq_zero_off_image_tsupport
     (I := I) (M := M) α (f := f) hf_supp hyK
 
-/-! ## Uniform iterated-derivative bounds for the smooth extension -/
-
 /-- For a smooth function `ψ : EuclN → ℝ` with compact support, all iterated
 derivatives up to order `k` enjoy uniform bounds. -/
 private lemma iteratedFDeriv_uniformBound_of_compactSupport
@@ -323,8 +309,6 @@ lemma smoothExtensionScalar_iteratedFDeriv_bound
     hasCompactSupport_smoothExtensionScalar (I := I) (M := M) α hf_supp
   exact iteratedFDeriv_uniformBound_of_compactSupport hψ_smooth hψ_compact k
 
-/-! ## The factorization identity on the chart target -/
-
 /-- For each chart `α` and any choice of cutoff `b_α` with `b_α ≡ 1` on
 `tsupport ρ_α`, the chart-pushed product
 `chartPushed ρ α (φ · u)` equals `smoothExtensionScalar α (b_α · φ) · chartPushed ρ α u`
@@ -343,25 +327,21 @@ lemma chartPushed_mul_eq_smoothExtension_mul_chartPushed
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u y := by
   classical
   set x : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hx_def
-  -- LHS unfolds to ρ_α(x) · φ(x) · u(x).
   have hLHS :
       chartPushed (I := I) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
         (fun x => φ x * u x) y =
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) x * (φ x * u x) := rfl
-  -- First RHS factor.
   have hRHS1 : smoothExtensionScalar (I := I) (M := M) α (fun x => b x * φ x) y =
       b x * φ x := by
     rw [smoothExtensionScalar_apply_of_mem_chartTargetEuclid (I := I) (M := M) α
       (fun x => b x * φ x) hy]
-  -- Second RHS factor.
   have hRHS2 : chartPushed (I := I) (M := M)
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u y =
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) x * u x := rfl
   rw [hLHS, hRHS1, hRHS2]
-  -- Reduce to: ρ_α(x) · φ(x) · u(x) = b(x) · φ(x) · (ρ_α(x) · u(x)).
   by_cases hρ : (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
     : C^∞⟮I, M; ℝ⟯) x = 0
   · rw [hρ]; ring
@@ -370,8 +350,6 @@ lemma chartPushed_mul_eq_smoothExtension_mul_chartPushed
       subset_tsupport _ (Function.mem_support.mpr hρ)
     have hb_x : b x = 1 := hb_one x hx_supp
     rw [hb_x]; ring
-
-/-! ## The main theorem -/
 
 /-- **Closure of `MemWkpChart` under multiplication by smooth bounded
 functions.** If `u : M → ℝ` is in `MemWkpChart g k p` and `φ : C^∞⟮I, M; ℝ⟯`
@@ -386,11 +364,8 @@ theorem MemWkpChart_smooth_mul
     MemWkpChart (I := I) (M := M) g k p (fun x => (φ : M → ℝ) x * u x) := by
   classical
   intro α
-  -- Get smooth manifold cutoff `b_α` with `b_α ≡ 1` on `tsupport ρ_α`,
-  -- `tsupport b_α ⊆ (chartAt H α).source`.
   obtain ⟨b, hb_smooth, _, hb_one_on_tsupp, hb_supp⟩ :=
     exists_chart_cutoff_M (I := I) (M := M) α
-  -- Build `b_α · φ` and its smooth global extension `Λ_α := smoothExtensionScalar α (b · φ)`.
   have hbφ_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun x : M => b x * (φ : M → ℝ) x) :=
     hb_smooth.mul φ.contMDiff
   have hbφ_supp : tsupport (fun x : M => b x * (φ : M → ℝ) x) ⊆ (chartAt H α).source := by
@@ -398,21 +373,17 @@ theorem MemWkpChart_smooth_mul
       funext x; rfl
     rw [h_eq]
     refine (tsupport_smul_subset_left (f := b) (g := (φ : M → ℝ))).trans hb_supp
-  -- Get uniform iteratedFDeriv bound on `Λ_α` up to order `k`.
   obtain ⟨C, hC_nn, hC_bound⟩ :=
     smoothExtensionScalar_iteratedFDeriv_bound
       (I := I) (M := M) α hbφ_smooth hbφ_supp k
-  -- Set up the chart target.
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- `Λ_α` is `ContDiff ℝ ∞`.
   set Λ : EuclN → ℝ := smoothExtensionScalar (I := I) (M := M) α
     (fun x : M => b x * (φ : M → ℝ) x) with hΛ_def
   have hΛ_smooth : ContDiff ℝ ∞ Λ := by
     rw [hΛ_def]
     exact contDiff_smoothExtensionScalar (I := I) (M := M) α hbφ_smooth hbφ_supp
   have hΛ_smooth_top : ContDiff ℝ (⊤ : ℕ∞) Λ := hΛ_smooth
-  -- The factorization on `Ω`: `chartPushed POU α (φ · u) =ᵐ Λ · chartPushed POU α u` on `Ω`.
   have h_factorize :
       (fun y : EuclN => chartPushed (I := I) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
@@ -428,7 +399,6 @@ theorem MemWkpChart_smooth_mul
     exact chartPushed_mul_eq_smoothExtension_mul_chartPushed
       (I := I) (M := M) (α := α) (b := b) (φ := (φ : M → ℝ)) (u := u)
       hb_one_on_tsupp hy
-  -- Apply the Euclidean `MemWkp.smul_smooth_bounded` to `Λ · chartPushed POU α u`.
   have hΛ_bound :
       ∀ j ≤ k, ∀ y ∈ Ω, ‖iteratedFDeriv ℝ j Λ y‖ ≤ C := fun j hj y _ =>
     hC_bound j hj y
@@ -444,7 +414,6 @@ theorem MemWkpChart_smooth_mul
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u y) Ω :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.smul_smooth_bounded
       (d := Module.finrank ℝ E) k hp hΩ_open hΛ_smooth_top hΛ_bound hu_α
-  -- Transfer back via the a.e.-equality.
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
     (d := Module.finrank ℝ E) hp hΩ_open h_factorize.symm).mp h_mem
 

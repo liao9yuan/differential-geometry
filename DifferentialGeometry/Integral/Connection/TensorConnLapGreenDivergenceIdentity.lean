@@ -97,14 +97,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The Dirichlet current `1`-form and its musical sharp -/
 
 /-- **The Dirichlet `1`-form.** At a base point `b`, the linear functional
 `X ↦ ⟨∇_X T, v⟩_g` on `T_b M`. -/
@@ -157,8 +153,6 @@ lemma inner_dirichletVF
       dirichletForm (I := I) (M := M) g T v b X := by
   rw [dirichletVF]
   exact inner_metricSharp (I := I) g b (dirichletForm (I := I) (M := M) g T v b) X
-
-/-! ## Smoothness of the Dirichlet current as a tangent-bundle section -/
 
 /-- **Chart-local smoothness of the Dirichlet-form chart-basis component.** For
 each chart base point `α` and chart-basis index `j`, the scalar
@@ -237,20 +231,6 @@ def dirichletVFSection
     dirichletVFSection (I := I) (M := M) g T v b =
       dirichletVF (I := I) (M := M) g T v b := rfl
 
-/-! ## The intrinsic divergence as the chart-basis metric covariant trace
-
-At every base point `b`, the Voss–Weyl divergence of a smooth tangent vector
-field `Z` equals the metric trace, in the chart centred at `b` itself, of the
-Levi-Civita covariant derivative of `Z`:
-
-```
-divergence_g g Z b = ∑_{m,n} G⁻¹_{mn}(b) · g(∇_{∂_m}Z, ∂_n),
-```
-
-with `∂_m = chartBasisVecFiber b m` and `G⁻¹ = chartInvGramMatrix g b b`.  This
-is the genuinely intrinsic (partition-of-unity-free) form: it holds at every
-point because every `b` lies in its own chart source. -/
-
 /-- **Divergence equals the chart-basis metric covariant trace (at every point).**
 For a smooth tangent vector field `Z` and any base point `b`,
 `divergence_g g Z b = ∑_{m,n} G⁻¹_{mn}(b) · g(∇_{∂_m}Z, ∂_n)`, with the chart
@@ -266,18 +246,13 @@ lemma divergence_g_chartBasis_metricTrace_self
               (chartBasisVecFiber (I := I) b m b))
             (chartBasisVecFiber (I := I) b n b) := by
   classical
-  -- `b` lies in its own chart source and Levi-Civita good set.
   have hb_src : b ∈ (chartAt H b).source := mem_chart_source H b
   have hb_good : b ∈ chartLeviCivitaGoodSet (I := I) b := by
     rw [mem_chartLeviCivitaGoodSet_iff_mem_extChartAt_source (I := I) b b]
     exact mem_extChartAt_source (I := I) b
-  -- `divergence_g g Z b = localDivergence g b Z b` (Voss–Weyl chart invariance).
   rw [voss_weyl_divergence_formula (I := I) g b Z hb_src]
   rw [localDivergence_eq_coord_covariant_divergence (I := I) g b Z hb_good]
-  -- Rewrite the metric trace into the coordinate covariant divergence, then match.
   rw [metricTrace_eq_coord_covariant_divergence (I := I) g b Z hb_good]
-  -- Both sides are now chart-`b` coordinate covariant divergences; reconcile the
-  -- Christoffel parts.
   rw [Finset.sum_add_distrib]
   congr 1
   rw [show (∑ i : Fin (Module.finrank ℝ E),
@@ -296,23 +271,6 @@ lemma divergence_g_chartBasis_metricTrace_self
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [chartChristoffel_symm (I := I) g b k i i]
 
-/-! ## The divergence as the smooth-orthonormal-frame trace
-
-At every base point `b`, the intrinsic Voss–Weyl divergence of a smooth tangent
-vector field `Z` equals the orthonormal-frame trace of its Levi-Civita
-derivative against the smooth orthonormal frame `Bᵢ := smoothOrthoFrame g b i`,
-which is `g_b`-orthonormal at its centre `b`:
-
-```
-divergence_g g Z b = ∑ᵢ g(∇_{Bᵢ}Z, Bᵢ).
-```
-
-The intrinsic divergence is computed by `divergence_g_chartBasis_metricTrace_self`
-as the inverse-Gram-weighted metric trace in the chart centred at `b`; the
-purely algebraic change-of-basis invariance of the metric trace
-(`orthonormal_basis_bilin_trace`) then rewrites it as the orthonormal-frame
-trace. -/
-
 /-- **Divergence equals the smooth-orthonormal-frame trace (at every point).**
 For a smooth tangent vector field `Z` and any base point `b`,
 
@@ -330,8 +288,6 @@ lemma divergence_g_eq_smoothOrthoFrame_trace
             (smoothOrthoFrame (I := I) g b i b))
           (smoothOrthoFrame (I := I) g b i b) := by
   classical
-  -- The divergence bilinear form `Hb (u) (w) = g(∇_u Z, w)`, as a continuous
-  -- bilinear form on the tangent space at `b`.
   set L : TangentSpace I b →L[ℝ] TangentSpace I b :=
     (LeviCivita (I := I) g).toFun Z.toFun b with hL_def
   set Hb : TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ :=
@@ -339,18 +295,13 @@ lemma divergence_g_eq_smoothOrthoFrame_trace
   have hHb_apply : ∀ u w : TangentSpace I b, Hb u w = g.inner b (L u) w := by
     intro u w
     rw [hHb_def, ContinuousLinearMap.comp_apply]
-  -- The smooth orthonormal frame at `b` is `g_b`-orthonormal.
   have hB_orth : ∀ i j : Fin (Module.finrank ℝ E),
       g.inner b (smoothOrthoFrame (I := I) g b i b)
         (smoothOrthoFrame (I := I) g b j b) = if i = j then (1 : ℝ) else 0 :=
     fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g b i j
-  -- Orthonormal-frame trace identity for the bilinear form `Hb`.
   have htrace := orthonormal_basis_bilin_trace (I := I) g b Hb
     (fun i : Fin (Module.finrank ℝ E) => smoothOrthoFrame (I := I) g b i b) hB_orth
-  -- Intrinsic divergence as the chart-basis metric trace, centred at `b`.
   rw [divergence_g_chartBasis_metricTrace_self (I := I) g Z b]
-  -- The chart-basis fibre vectors at the chart base point equal the model basis,
-  -- so the chart-basis metric trace coincides with the model-basis form of `htrace`.
   rw [show (∑ m : Fin (Module.finrank ℝ E), ∑ n : Fin (Module.finrank ℝ E),
           chartInvGramMatrix (I := I) g b b m n *
             g.inner b (L (chartBasisVecFiber (I := I) b m b))
@@ -358,30 +309,13 @@ lemma divergence_g_eq_smoothOrthoFrame_trace
         ∑ m : Fin (Module.finrank ℝ E), ∑ n : Fin (Module.finrank ℝ E),
           chartInvGramMatrix (I := I) g b b m n *
             Hb ((chartModelBasis E) m) ((chartModelBasis E) n) from ?_]
-  · -- Apply the trace identity, reversed.
-    rw [← htrace]
+  · rw [← htrace]
     refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [hHb_apply]
   · refine Finset.sum_congr rfl (fun m _ => ?_)
     refine Finset.sum_congr rfl (fun n _ => ?_)
     rw [hHb_apply, chartBasisVecFiber_self (I := I) b m,
       chartBasisVecFiber_self (I := I) b n]
-
-/-! ## The per-direction Bochner expansion of the divergence summand
-
-For the Dirichlet current `Z` and the smooth orthonormal frame section
-`B̃ᵢ := smoothOrthoFrame g b i` (with value `Bᵢ = B̃ᵢ b`), the divergence summand
-`g(∇_{Bᵢ}Z, Bᵢ)` expands via metric compatibility (`leibniz_inner`), the Riesz
-identity `inner_dirichletVF`, the tensor covariant product rule
-(`tangentSectionAction_tensorInnerScalar`), and the frame-acceleration absorption
-`covDerivAlong_covDerivAlongVFSection_eq` into
-
-```
-g(∇_{Bᵢ}Z, Bᵢ) = ⟨∇²_{Bᵢ, Bᵢ}T, v⟩ + ⟨∇_{Bᵢ}T, ∇_{Bᵢ}v⟩,
-```
-
-where `∇²_{Bᵢ, Bᵢ}T = tensorSecondCovDeriv g 0 2 B̃ᵢ B̃ᵢ T` and the second slot is
-the per-direction Dirichlet integrand. -/
 
 /-- **Per-direction Bochner expansion of the divergence summand.** -/
 private lemma divergence_dirichletVF_summand_eq
@@ -406,23 +340,16 @@ private lemma divergence_dirichletVF_summand_eq
             (tensorCovDerivAt (I := I) (M := M) g 0 2 v b
               (smoothOrthoFrame (I := I) g b i b))) := by
   classical
-  -- Abbreviations.
   set B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     ⟨fun y : M => smoothOrthoFrame (I := I) g b i y,
       smoothOrthoFrame_smooth (I := I) g b i⟩ with hB_def
   set Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     dirichletVFSection (I := I) (M := M) g T v with hZ_def
-  -- `B b = smoothOrthoFrame g b i b`.
   have hBb : (B : ∀ y, TangentSpace I y) b = smoothOrthoFrame (I := I) g b i b := rfl
-  -- Metric-compatibility (Leibniz) for the tangent inner product `g(Z, B)`.
-  --   B(g(Z, B)) = g(∇_B Z, B) + g(Z, ∇_B B).
   have hleib := leibniz_inner (I := I) g
     (V := fun y : M => Z y) (W := fun y : M => B y)
     Z.contMDiff B.contMDiff
     (x := b) ((B : ∀ y, TangentSpace I y) b)
-  -- The directional derivative `B(g(Z, B))` is the tangent action, which equals
-  -- the tangent action of `B` on the mixed inner-product scalar
-  -- `tensorInnerScalar g 0 2 (∇_B T) v` (since `g(Z, B) = ⟨∇_B T, v⟩` by Riesz).
   have hfun : (fun y : M => g.inner y (Z y) (B y)) =
       tensorInnerScalar (I := I) (M := M) g 0 2
         (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) v.toSection := by
@@ -430,9 +357,6 @@ private lemma divergence_dirichletVF_summand_eq
     rw [hZ_def, dirichletVFSection_apply, inner_dirichletVF, dirichletForm_apply,
       tensorInnerScalar_apply, covDerivAlongVFSection_apply]
     rfl
-  -- The tangent action of `B` on `g(Z, B)`, decomposed by the covariant product
-  -- rule into the lowered second-order and cross terms, then converted to the
-  -- un-lowered mixed inner products.
   have hprod : tangentSectionAction (I := I) B
         (fun y : M => g.inner y (Z y) (B y)) b =
       tensorInnerPointwise (I := I) (M := M) g 0 2 b
@@ -451,24 +375,20 @@ private lemma divergence_dirichletVF_summand_eq
             (tensorInnerScalar (I := I) (M := M) g 0 2
               (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) v.toSection) from by
       rw [hfun]]
-    -- Lowered product rule.
     rw [tangentSectionAction_tensorInnerScalar (I := I) (M := M) g 0 2
       (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) v.toSection B b]
     congr 1
-    · -- First (second-order) summand: un-lowered mixed → lowered.
-      rw [tensorInnerPointwise_eq_liftedTensorSection_inner (I := I) (M := M) g 0 2
+    · rw [tensorInnerPointwise_eq_liftedTensorSection_inner (I := I) (M := M) g 0 2
         (covDerivAlongVFSection (I := I) (M := M) g
           (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) B)
         v.toSection b]
       rw [toModel_liftedTensorSection_covDerivAlongVFSection (I := I) (M := M) g
         (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) B b]
-    · -- Second (cross) summand: un-lowered mixed → lowered.
-      rw [tensorInnerPointwise_eq_liftedTensorSection_inner (I := I) (M := M) g 0 2
+    · rw [tensorInnerPointwise_eq_liftedTensorSection_inner (I := I) (M := M) g 0 2
         (covDerivAlongVFSection (I := I) (M := M) g T.toSection B)
         (covDerivAlongVFSection (I := I) (M := M) g v.toSection B) b]
       rw [toModel_liftedTensorSection_covDerivAlongVFSection (I := I) (M := M) g T.toSection B b,
         toModel_liftedTensorSection_covDerivAlongVFSection (I := I) (M := M) g v.toSection B b]
-  -- The frame-acceleration correction term `g(Z, ∇_B B)`.
   have haccel : g.inner b (Z b)
         ((LeviCivita (I := I) g).toFun (fun y : M => B y) b
           ((B : ∀ y, TangentSpace I y) b)) =
@@ -479,11 +399,7 @@ private lemma divergence_dirichletVF_summand_eq
               ((B : ∀ y, TangentSpace I y) b))))
         (TensorRSSpace.toModel (v.toSection b)) := by
     rw [hZ_def, dirichletVFSection_apply, inner_dirichletVF, dirichletForm_apply]
-  -- Absorb the correction into the second covariant derivative.
-  -- `∇_B(∇_B T) b = ∇²_{B,B}T b + ∇_{∇_B B}T b`.
   have hsecond := covDerivAlong_covDerivAlongVFSection_eq (I := I) (M := M) g T.toSection B b
-  -- Solve for the divergence summand `g(∇_B Z, B)` from the Leibniz identity:
-  --   g(∇_B Z, B) = B(g(Z, B)) − g(Z, ∇_B B).
   have hsummand : g.inner b
         ((LeviCivita (I := I) g).toFun (fun y : M => Z y) b
           ((B : ∀ y, TangentSpace I y) b))
@@ -494,18 +410,12 @@ private lemma divergence_dirichletVF_summand_eq
             ((B : ∀ y, TangentSpace I y) b)) := by
     rw [tangentSectionAction_def]
     rw [hleib]; ring
-  -- Assemble.  The goal LHS `g(∇_{Bᵢ}Z, Bᵢ)` is definitionally the `hsummand`
-  -- LHS (`Z.toFun = fun y ↦ Z y`, `smoothOrthoFrame g b i b = B b`).
   change g.inner b
       ((LeviCivita (I := I) g).toFun (fun y : M => Z y) b
         ((B : ∀ y, TangentSpace I y) b))
       ((B : ∀ y, TangentSpace I y) b) = _
   rw [hsummand, hprod, haccel]
-  -- The model coercion of `∇_B(∇_B T) b` splits as the second covariant
-  -- derivative plus the correction.
   rw [hsecond, TensorRSSpace.toModel_add, tensorInnerPointwise_add_left]
-  -- The correction term's model coercion: `∇_{∇_B B}T b` matches
-  -- `tensorCovDerivAt g 0 2 T b ((LeviCivita g).toFun B b (B b))`.
   have haccel_eq :
       (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g)).toFun
           (fun y : M => T.toSection y) b
@@ -514,31 +424,14 @@ private lemma divergence_dirichletVF_summand_eq
           ((LeviCivita (I := I) g).toFun (fun y : M => B y) b
             ((B : ∀ y, TangentSpace I y) b)) := rfl
   rw [haccel_eq]
-  -- The cross-term sections `covDerivAlongVFSection g · B b` are definitionally
-  -- the directional derivatives `tensorCovDerivAt g 0 2 · b (B b)`.
   rw [show covDerivAlongVFSection (I := I) (M := M) g T.toSection B b =
         tensorCovDerivAt (I := I) (M := M) g 0 2 T b ((B : ∀ y, TangentSpace I y) b) from rfl,
     show covDerivAlongVFSection (I := I) (M := M) g v.toSection B b =
         tensorCovDerivAt (I := I) (M := M) g 0 2 v b ((B : ∀ y, TangentSpace I y) b) from rfl]
-  -- `B b = smoothOrthoFrame g b i b`; the `± ⟨∇_{∇_B B}T, v⟩` correction terms cancel.
   rw [hBb]
-  -- The frame section `fun y ↦ B y` is the smooth orthonormal frame `smoothOrthoFrame g b i`.
   rw [show (fun y : M => (B : ∀ z : M, TangentSpace I z) y) =
         (fun y : M => smoothOrthoFrame (I := I) g b i y) from rfl]
   ring
-
-/-! ## The pointwise Bochner divergence identity
-
-Summing the per-direction Bochner expansion over the orthonormal frame:
-
-```
-div_g Z b = ⟨∇T, ∇v⟩_b + ⟨Δ_∇ T, v⟩_b,
-```
-
-where the rough Laplacian sum `∑ᵢ ∇²_{Bᵢ, Bᵢ}T = rawTensorConnLap T` by
-`rawTensorConnLap_eq_frame_trace_secondCovDeriv`, and the Dirichlet integrand sum
-`∑ᵢ ⟨∇_{Bᵢ}T, ∇_{Bᵢ}v⟩ = tensorCovDerivPointwiseInner g 0 2 T v` by
-`tensorCovDerivPointwiseInner_eq_smoothOrthoFrame_diag_sum`. -/
 
 /-- **Dirichlet integrand = smooth-orthonormal-frame diagonal sum.** For every
 `b`, with `Bᵢ = smoothOrthoFrame g b i b`,
@@ -555,8 +448,6 @@ private lemma tensorCovDerivPointwiseInner_eq_smoothOrthoFrame_diag
             (tensorCovDerivAt (I := I) (M := M) g 0 2 v b
               (smoothOrthoFrame (I := I) g b i b))) := by
   classical
-  -- Build a `Module.Basis` from the orthonormal frame values, then apply the
-  -- diagonal-frame reduction.
   have hB_orth : ∀ i j, g.inner b
       (smoothOrthoFrame (I := I) g b i b) (smoothOrthoFrame (I := I) g b j b) =
       if i = j then (1 : ℝ) else 0 :=
@@ -627,23 +518,16 @@ lemma divergence_dirichletVF_eq
               (rawTensorConnLap (I := I) g 0 2 (fun y : M => T.toSection y) b))
             (TensorRSSpace.toModel (v.toSection b)) := by
   classical
-  -- The divergence is the orthonormal-frame trace.
   rw [divergence_g_eq_smoothOrthoFrame_trace (I := I) g
     (dirichletVFSection (I := I) (M := M) g T v) b]
-  -- Each summand expands by the per-direction Bochner expansion.
   rw [Finset.sum_congr rfl (fun i _ =>
     divergence_dirichletVF_summand_eq (I := I) (M := M) g T v b i)]
-  -- Separate the second-order frame sum from the Dirichlet cross sum.
   rw [Finset.sum_add_distrib]
-  -- The cross sum is the Dirichlet integrand.
   rw [← tensorCovDerivPointwiseInner_eq_smoothOrthoFrame_diag (I := I) (M := M) g T v b]
-  -- The second-order frame sum is `⟨rawConnLap T, v⟩`.
   rw [add_comm]
   congr 1
-  -- `∑ᵢ ⟨∇²_{Bᵢ,Bᵢ}T, v⟩ = ⟨∑ᵢ ∇²_{Bᵢ,Bᵢ}T, v⟩ = ⟨rawConnLap T, v⟩`.
   rw [rawTensorConnLap_eq_frame_trace_secondCovDeriv (I := I) g 0 2
     (fun y : M => T.toSection y) b]
-  -- Push `toModel` through the finite sum, then use left-additivity over the sum.
   rw [show TensorRSSpace.toModel
         (∑ i : Fin (Module.finrank ℝ E),
           tensorSecondCovDeriv (I := I) g 0 2
@@ -654,8 +538,7 @@ lemma divergence_dirichletVF_eq
           (tensorSecondCovDeriv (I := I) g 0 2
             (smoothOrthoFrame (I := I) g b i) (smoothOrthoFrame (I := I) g b i)
             (fun y : M => T.toSection y) b) from ?_]
-  · -- `tensorInnerPointwise b (∑ Aᵢ) v = ∑ tensorInnerPointwise b Aᵢ v`.
-    rw [show (∑ i : Fin (Module.finrank ℝ E),
+  · rw [show (∑ i : Fin (Module.finrank ℝ E),
             TensorRSSpace.toModel
               (tensorSecondCovDeriv (I := I) g 0 2
                 (smoothOrthoFrame (I := I) g b i) (smoothOrthoFrame (I := I) g b i)
@@ -669,19 +552,10 @@ lemma divergence_dirichletVF_eq
     rw [tensorInnerPointwise_sum_left (I := I) (M := M) g 0 2 b Finset.univ _ _ _]
     refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [one_mul]
-  · -- Push `toModel` through the sum: `toModel` is the additive equiv coercion.
-    exact map_sum (tensorRSSpace_continuousLinearEquiv (I := I) 0 2 b)
+  · exact map_sum (tensorRSSpace_continuousLinearEquiv (I := I) 0 2 b)
       (fun i => tensorSecondCovDeriv (I := I) g 0 2
         (smoothOrthoFrame (I := I) g b i) (smoothOrthoFrame (I := I) g b i)
         (fun y : M => T.toSection y) b) Finset.univ
-
-/-! ## The integrated Green identity
-
-The pointwise Bochner divergence identity is a divergence; its integral against
-the Riemannian volume vanishes on the closed manifold (the Dirichlet current is
-smooth and, on a compact manifold, compactly supported).  Combined with the
-gradient-side bridge and the rough-Laplacian section identification, this yields
-the headline. -/
 
 /-- **Green / `L²`-adjoint identity for the rough connection Laplacian on a closed
 manifold.** For smooth compactly-supported `(0, 2)`-tensors `T, v`,
@@ -705,12 +579,10 @@ theorem green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed
   set μ := riemannianVolumeMeasure (I := I) (M := M) g with hμ_def
   set Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     dirichletVFSection (I := I) (M := M) g T v with hZ_def
-  -- The integral of the divergence vanishes (closed manifold ⇒ compact support).
   have hZ_cs : HasCompactSupport (Z : ∀ x, TangentSpace I x) :=
     HasCompactSupport.of_compactSpace _
   have hdiv_zero : ∫ b, divergence_g (I := I) g Z b ∂μ = 0 :=
     integral_divergence_eq_zero_of_hasCompactSupport (I := I) g Z hZ_cs
-  -- Rewrite the divergence integrand by the pointwise Bochner identity.
   have hpt : ∀ b : M, divergence_g (I := I) g Z b =
       tensorCovDerivPointwiseInner (I := I) (M := M) g 0 2 T v b
         + tensorInnerPointwise (I := I) (M := M) g 0 2 b
@@ -719,7 +591,6 @@ theorem green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed
             (TensorRSSpace.toModel (v.toSection b)) := by
     intro b; rw [hZ_def]; exact divergence_dirichletVF_eq (I := I) (M := M) g T v b
   rw [integral_congr_ae (Filter.Eventually.of_forall hpt)] at hdiv_zero
-  -- Integrability of the two summands (each smooth with compact support).
   have hcross_cont : Continuous
       (fun b : M => tensorCovDerivPointwiseInner (I := I) (M := M) g 0 2 T v b) := by
     rw [show (fun b : M => tensorCovDerivPointwiseInner (I := I) (M := M) g 0 2 T v b) =
@@ -760,22 +631,17 @@ theorem green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed
           (TensorRSSpace.toModel (v.toSection b))) μ :=
     Continuous.integrable_of_hasCompactSupport_riemannianVolumeMeasure
       (I := I) g hsecond_cont (HasCompactSupport.of_compactSpace _)
-  -- Split the integral of the sum.
   rw [integral_add hcross_int hsecond_int] at hdiv_zero
-  -- The LHS gradient inner product equals the cross integral.
   rw [tensorL2Inner_covGrad_eq_integral_tensorCovDerivPointwiseInner
     (I := I) (M := M) g 0 2 T v, ← hμ_def]
-  -- The RHS rough-Laplacian inner product equals the second integral.
   rw [show tensorL2Inner (I := I) (M := M) g 0 2
         (rawTensorConnLapSmooth (I := I) g 0 2 T).toFun v.toFun =
       ∫ b, tensorInnerPointwise (I := I) (M := M) g 0 2 b
           (TensorRSSpace.toModel
             (rawTensorConnLap (I := I) g 0 2 (fun y : M => T.toSection y) b))
           (TensorRSSpace.toModel (v.toSection b)) ∂μ from ?_]
-  · -- `∫ cross + ∫ second = 0` ⇒ `∫ cross = − ∫ second`.
-    linarith [hdiv_zero]
-  · -- Unfold `tensorL2Inner` and rewrite the rough-Laplacian section value.
-    unfold tensorL2Inner
+  · linarith [hdiv_zero]
+  · unfold tensorL2Inner
     rw [← hμ_def]
     refine integral_congr_ae (Filter.Eventually.of_forall (fun b => ?_))
     simp only [SmoothCcTensor.toFun_apply, rawTensorConnLapSmooth_toSection_apply]

@@ -91,9 +91,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Smoothness of the chart-pulled tensor representation
-on the chart-target image of the good set -/
-
 /-- Smoothness on the chart-target image of the chart-`α` Levi-Civita good set
 of the chart-pulled tensor representation. Re-derived here to avoid relying on
 a private helper. -/
@@ -200,8 +197,6 @@ private lemma uB_contDiffOn_goodSet
       (T% (B.toFun : Π x : M, TangentSpace I x))
       (chartLeviCivitaGoodSet (I := I) α) := hB_total.contMDiffOn
   exact chartE_pullback_contDiffOn_goodSet (I := I) α hB_on
-
-/-! ## Differentiability of each piece at `x = extChartAt I α b` -/
 
 /-- Differentiability of the intrinsic Fréchet-derivative piece at the chart
 point. -/
@@ -411,8 +406,6 @@ private lemma outputSlotPiece_differentiableAt
         (by rw [hx'_inv]; exact hx'_src) l
     exact h_factor
   exact (h_evt.differentiableAt_iff).mpr h_clm_diff
-
-/-! ## Pointwise eventual equality from the chart-pulled explicit formula -/
 
 /-- The chart-pulled representation of `covApply ∇ B T` is, on an open
 neighbourhood of `extChartAt I α b`, equal to the intrinsic piece plus

@@ -70,18 +70,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## File-local completeness instance on the model `E` -/
-
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-
-/-! ## The smooth-cc image submodule -/
 
 set_option linter.unusedSectionVars false in
 /-- The canonical `ℝ`-submodule of `TensorL2 r s g` carved out by the
@@ -93,9 +87,6 @@ def smoothCcToL2Submodule (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     Submodule ℝ (TensorL2 r s g) :=
   LinearMap.range
     ((SmoothCcTensor.toL2 (g := g) (r := r) (s := s)).toLinearMap)
-
-/-! ## The underlying `ℝ`-linear action of the rough Laplacian on smooth
-sections -/
 
 set_option linter.unusedSectionVars false in
 /-- The `ℝ`-linear map sending a smooth, compactly-supported
@@ -114,8 +105,6 @@ def connLaplacianL2Action (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     SmoothCcTensor.toL2 (g := g) (r := r) (s := s)
       (rawTensorConnLapSmooth (I := I) g r s T)
   map_add' T₁ T₂ := by
-    -- Linearity follows from the linearity of `rawTensorConnLapSmooth`
-    -- combined with the linearity of `SmoothCcTensor.toL2`.
     have h_lap_add :
         rawTensorConnLapSmooth (I := I) g r s (T₁ + T₂) =
           rawTensorConnLapSmooth (I := I) g r s T₁ +
@@ -123,8 +112,6 @@ def connLaplacianL2Action (g : SmoothRiemannianMetric I M) (r s : ℕ) :
       apply SmoothCcTensor.ext
       apply ContMDiffSection.ext
       intro x
-      -- The bundled additivity from `tensorConnLaplacian_of_contMDiff_add`,
-      -- which is what `rawTensorConnLapSmooth` packages.
       have hsum :=
         tensorConnLaplacian_of_contMDiff_add (I := I) g r s T₁ T₂
           (rawTensorConnLap_contMDiff (I := I) g r s
@@ -134,9 +121,6 @@ def connLaplacianL2Action (g : SmoothRiemannianMetric I M) (r s : ℕ) :
           (rawTensorConnLap_contMDiff (I := I) g r s
             (fun z : M => (T₁ + T₂).toSection z)
             (T₁ + T₂).toSection.contMDiff_toFun) x
-      -- Convert `tensorConnLaplacian_of_contMDiff` to `rawTensorConnLapSmooth`
-      -- (they agree, both reducing to `rawTensorConnLap`) and identify the
-      -- additive section values on the RHS.
       have hLHS : (rawTensorConnLapSmooth (I := I) g r s (T₁ + T₂)).toSection x =
           (tensorConnLaplacian_of_contMDiff (I := I) g r s (T₁ + T₂)
             (rawTensorConnLap_contMDiff (I := I) g r s
@@ -152,7 +136,6 @@ def connLaplacianL2Action (g : SmoothRiemannianMetric I M) (r s : ℕ) :
             (rawTensorConnLap_contMDiff (I := I) g r s
               (fun z : M => T₂.toSection z)
               T₂.toSection.contMDiff_toFun)).toSection x := rfl
-      -- Underlying section values commute with the `+` on `SmoothCcTensor`.
       have hsum_section :
           (rawTensorConnLapSmooth (I := I) g r s T₁ +
               rawTensorConnLapSmooth (I := I) g r s T₂).toSection x =
@@ -162,7 +145,6 @@ def connLaplacianL2Action (g : SmoothRiemannianMetric I M) (r s : ℕ) :
         rfl
       rw [hLHS, hsum_section, hRHS₁, hRHS₂]
       exact hsum
-    -- Now apply linearity of `SmoothCcTensor.toL2`.
     rw [h_lap_add, SmoothCcTensor.toL2_add]
   map_smul' c T := by
     have h_lap_smul :
@@ -204,18 +186,6 @@ set_option linter.unusedSectionVars false in
     connLaplacianL2Action (I := I) g r s T =
       SmoothCcTensor.toL2 (g := g) (r := r) (s := s)
         (rawTensorConnLapSmooth (I := I) g r s T) := rfl
-
-/-! ## Factoring through `SmoothCcTensor.toL2`
-
-The action `connLaplacianL2Action` is `ℝ`-linear and factors through
-`SmoothCcTensor.toL2` into the codomain of `TensorL2`. We package the
-factorisation as an `ℝ`-linear map on the image submodule
-`smoothCcToL2Submodule g r s`, which is the actual domain of the
-partially-defined operator. The factorisation uses a linear section of
-the canonical surjection `SmoothCcTensor g r s ↠ smoothCcToL2Submodule g r s`,
-which exists because every `ℝ`-vector space is free, hence projective
-(`Module.Free.of_divisionRing` ⇒ `Module.Projective.of_free` ⇒
-`LinearMap.exists_rightInverse_of_surjective`). -/
 
 set_option linter.unusedSectionVars false in
 /-- The canonical surjection `SmoothCcTensor g r s →ₗ[ℝ] smoothCcToL2Submodule g r s`
@@ -283,15 +253,11 @@ lemma toL2_smoothCcSection
     SmoothCcTensor.toL2 (g := g) (r := r) (s := s)
         (smoothCcSection (I := I) g r s u) = (u : TensorL2 r s g) := by
   have h := toL2RangeRestrict_smoothCcSection_apply (I := I) g r s u
-  -- `toL2RangeRestrict T = ⟨toL2 T, _⟩` by definition of `rangeRestrict`.
-  -- Taking the underlying value gives `toL2 T = u.val`.
   have hval : ((toL2RangeRestrict (I := I) g r s)
       (smoothCcSection (I := I) g r s u)).val = (u : TensorL2 r s g) := by
     exact congrArg Subtype.val h
-  -- Unfold `toL2RangeRestrict` on the LHS.
   change SmoothCcTensor.toL2 (g := g) (r := r) (s := s)
       (smoothCcSection (I := I) g r s u) = (u : TensorL2 r s g)
-  -- The value of `LinearMap.rangeRestrict f x` is `f x`.
   have hrr : ((toL2RangeRestrict (I := I) g r s)
       (smoothCcSection (I := I) g r s u)).val =
       SmoothCcTensor.toL2 (g := g) (r := r) (s := s)
@@ -318,8 +284,6 @@ set_option linter.unusedSectionVars false in
     connLaplacianL2OnDomain (I := I) g r s u =
       connLaplacianL2Action (I := I) g r s
         (smoothCcSection (I := I) g r s u) := rfl
-
-/-! ## The partially-defined operator on `L²` -/
 
 set_option linter.unusedSectionVars false in
 /-- The connection (rough) Laplacian `Δ_∇` as a partially-defined operator
@@ -362,8 +326,6 @@ theorem connLaplacianL2_apply_toL2
         (smoothCcSection (I := I) g r s
           ⟨SmoothCcTensor.toL2 (g := g) (r := r) (s := s) T, hT⟩) := rfl
 
-/-! ## Membership lemma -/
-
 set_option linter.unusedSectionVars false in
 /-- The `L²`-image of any smooth compactly-supported `(r, s)`-tensor section
 lies in the domain of `connLaplacianL2`. -/
@@ -372,7 +334,6 @@ theorem toL2_mem_connLaplacianL2_domain
     SmoothCcTensor.toL2 (g := g) (r := r) (s := s) T ∈
       (connLaplacianL2 (I := I) g r s).domain := by
   rw [connLaplacianL2_domain_eq]
-  -- Membership in the linear range is by definition of `LinearMap.range`.
   exact LinearMap.mem_range_self _ T
 
 end ConnectionLaplacian

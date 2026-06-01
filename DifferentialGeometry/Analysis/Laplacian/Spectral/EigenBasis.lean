@@ -62,8 +62,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -71,20 +69,11 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-! ## Injectivity of the L²-side resolvent
-
-The L² resolvent `R = H1ComplToLp ∘ resolvent` is injective on `Lp ℝ 2 μ_g`.
-The variational identity yields `‖resolvent g u‖²_{H¹} = ⟪R u, u⟫_{L²}`, so
-if `R u = 0` then `resolvent g u = 0`, and `resolvent_injective` finishes. -/
-
 /-- `resolventL2 g` is injective on `Lp ℝ 2 μ_g`: its kernel is `{0}`. -/
 theorem resolventL2_injective (g : SmoothRiemannianMetric I M) :
     Function.Injective (resolventL2 (I := I) (M := M) g) := by
   rw [injective_iff_map_eq_zero]
   intro u hRu
-  -- Set v = resolvent g u in the variational identity:
-  --   ⟨resolvent g u, v⟩_{H¹} = ⟨H1ComplToLp v, u⟩_{L²}
-  -- yields ‖resolvent g u‖² = ⟨resolventL2 g u, u⟩ = 0.
   have h_var := resolvent_inner_eq_lpFunctional (I := I) (M := M) g u
     (resolvent (I := I) (M := M) g u)
   have h_self_norm : ⟪resolvent (I := I) (M := M) g u,
@@ -97,7 +86,6 @@ theorem resolventL2_injective (g : SmoothRiemannianMetric I M) :
     rw [resolventL2_apply]
   rw [h_self_norm] at h_var
   rw [h_replace, hRu, inner_zero_left] at h_var
-  -- h_var : ‖resolvent g u‖² = 0
   have h_resolvent_zero : resolvent (I := I) (M := M) g u = 0 := by
     have h_norm_sq_zero : ‖resolvent (I := I) (M := M) g u‖ ^ 2 = 0 := h_var
     have h_norm_zero : ‖resolvent (I := I) (M := M) g u‖ = 0 :=
@@ -110,13 +98,10 @@ theorem resolventL2_injective (g : SmoothRiemannianMetric I M) :
 /-- The eigenspace of `R` at the eigenvalue `0` is trivial. -/
 theorem resolventEigenspace_zero_eq_bot (g : SmoothRiemannianMetric I M) :
     resolventEigenspace (I := I) (M := M) g 0 = ⊥ := by
-  -- `resolventEigenspace g 0 = ker (resolventL2 g).toLinearMap = {0}` by injectivity.
   unfold resolventEigenspace
   rw [Module.End.eigenspace_zero]
   rw [LinearMap.ker_eq_bot]
   exact resolventL2_injective (I := I) (M := M) g
-
-/-! ## The subtype of nonzero resolvent eigenvalues -/
 
 /-- A nonzero eigenvalue of the L² resolvent `R = resolventL2 g`.
 
@@ -150,12 +135,6 @@ lemma hasEigenvalue (μ : NonzeroResolventEigenvalue (I := I) (M := M) g) :
 
 end NonzeroResolventEigenvalue
 
-/-! ## Countability of `NonzeroResolventEigenvalue g`
-
-We exhibit the underlying set of nonzero eigenvalues as a countable union of
-finite shells `{|μ| ≥ 1/(n+1)}`, each of which is finite by the discrete-
-spectrum theorem `resolvent_eigenvalues_finite_above_on_closed`. -/
-
 /-- The set of nonzero eigenvalues of `R = resolventL2 g`, exhibited as the
 countable union over `n : ℕ` of the finite shells `{μ | μ ≠ 0 ∧ HasEigenvalue
 ... μ ∧ 1/(n+1) ≤ |μ|}`. -/
@@ -171,7 +150,6 @@ private lemma nonzero_resolvent_eigenvalues_set_eq_iUnion
   ext μ
   constructor
   · rintro ⟨hμ_ne, hμ_eig⟩
-    -- Pick `n` with `1/(n+1) ≤ |μ|`.
     have h_abs_pos : 0 < |μ| := abs_pos.mpr hμ_ne
     obtain ⟨n, hn⟩ := exists_nat_one_div_lt h_abs_pos
     refine Set.mem_iUnion.mpr ⟨n, hμ_eig, ?_⟩
@@ -180,7 +158,6 @@ private lemma nonzero_resolvent_eigenvalues_set_eq_iUnion
     obtain ⟨n, hμ_in_n⟩ := Set.mem_iUnion.mp hμ_in_union
     obtain ⟨hμ_eig, hμ_size⟩ := hμ_in_n
     refine ⟨?_, hμ_eig⟩
-    -- 1/(n+1) > 0, so |μ| > 0, hence μ ≠ 0.
     have h_pos : (0 : ℝ) < 1 / (n + 1) := by positivity
     have h_abs_pos : 0 < |μ| := lt_of_lt_of_le h_pos hμ_size
     exact abs_pos.mp h_abs_pos
@@ -196,7 +173,6 @@ theorem nonzero_resolvent_eigenvalues_set_countable
   rw [nonzero_resolvent_eigenvalues_set_eq_iUnion]
   apply Set.countable_iUnion
   intro n
-  -- The shell `{μ | HasEigenvalue ... μ ∧ 1/(n+1) ≤ |μ|}` is finite.
   have h_pos : (0 : ℝ) < 1 / (n + 1) := by positivity
   exact (resolvent_eigenvalues_finite_above_on_closed
     (I := I) (M := M) g h_pos).countable
@@ -217,14 +193,11 @@ noncomputable instance NonzeroResolventEigenvalue.instEncodable
     Encodable (NonzeroResolventEigenvalue (I := I) (M := M) g) :=
   Encodable.ofCountable _
 
-/-! ## Sign and bound properties of nonzero resolvent eigenvalues -/
-
 /-- A nonzero eigenvalue of `R = resolventL2 g` is strictly positive. -/
 theorem nonzeroResolventEigenvalue_pos
     {g : SmoothRiemannianMetric I M}
     (μ : NonzeroResolventEigenvalue (I := I) (M := M) g) :
     0 < μ.val := by
-  -- Pick a unit eigenvector u; nonneg eigenvalue + ne_zero ⇒ pos.
   obtain ⟨u, hu_mem, hu_ne⟩ := μ.hasEigenvalue.exists_hasEigenvector
   have hu_in : u ∈ resolventEigenspace (I := I) (M := M) g μ.val := hu_mem
   have h_nn : 0 ≤ μ.val :=
@@ -253,8 +226,6 @@ theorem laplacianEigenvalueOf_nonneg
   have h_num_nn : 0 ≤ 1 - μ.val := by linarith
   exact div_nonneg h_num_nn h_pos.le
 
-/-! ## Per-eigenspace finite-dimensionality -/
-
 /-- The eigenspace of `R = resolventL2 g` at a nonzero eigenvalue is
 finite-dimensional. -/
 instance NonzeroResolventEigenvalue.instFiniteDimensional
@@ -263,8 +234,6 @@ instance NonzeroResolventEigenvalue.instFiniteDimensional
     FiniteDimensional ℝ
       (resolventEigenspace (I := I) (M := M) g μ.val) :=
   resolventEigenspace_finiteDim_of_eigenvalue_ne_zero (I := I) (M := M) g μ.val_ne_zero
-
-/-! ## Per-eigenspace orthonormal basis -/
 
 /-- The standard orthonormal basis of the (finite-dimensional) eigenspace of
 `R = resolventL2 g` at a nonzero eigenvalue, indexed by
@@ -278,10 +247,6 @@ noncomputable def resolventEigenspaceONB
       ℝ (resolventEigenspace (I := I) (M := M) g μ.val) :=
   stdOrthonormalBasis ℝ (resolventEigenspace (I := I) (M := M) g μ.val)
 
-/-! ## Orthogonality of the eigenspace family
-
-Standard consequence of self-adjointness of `R`. -/
-
 /-- The family of eigenspaces of `R = resolventL2 g` indexed by nonzero
 eigenvalues is an orthogonal family in `Lp ℝ 2 μ_g`. -/
 theorem resolventEigenspace_orthogonalFamily_nonzero
@@ -294,29 +259,15 @@ theorem resolventEigenspace_orthogonalFamily_nonzero
       ((resolventL2 (I := I) (M := M) g).toLinearMap).IsSymmetric :=
     (ContinuousLinearMap.isSelfAdjoint_iff_isSymmetric).mp
       (resolventL2_isSelfAdjoint (I := I) (M := M) g)
-  -- The eigenspace family across all real μ is already orthogonal; restrict
-  -- to the nonzero subtype via `OrthogonalFamily.comp` along the
-  -- coercion `NonzeroResolventEigenvalue g → ℝ`.
   have h_full : OrthogonalFamily ℝ
       (fun μ : ℝ =>
         ↥(resolventEigenspace (I := I) (M := M) g μ))
       (fun μ => (resolventEigenspace (I := I) (M := M) g μ).subtypeₗᵢ) := by
-    -- This is `LinearMap.IsSymmetric.orthogonalFamily_eigenspaces` applied
-    -- to the symmetric `(resolventL2 g).toLinearMap`. Note that
-    -- `resolventEigenspace g μ` is by definition `Module.End.eigenspace
-    -- ((resolventL2 g).toLinearMap) μ`.
     exact hSymm.orthogonalFamily_eigenspaces
-  -- Restrict via the (injective) underlying-value map.
   have h_inj : Function.Injective
       (fun μ : NonzeroResolventEigenvalue (I := I) (M := M) g => μ.val) :=
     fun μ ν h => Subtype.ext h
   exact h_full.comp h_inj
-
-/-! ## Span identification: span of basis vectors equals iSup of eigenspaces
-
-The orthonormal basis vectors at index `⟨μ, k⟩` are the basis vectors of the
-finite-dimensional eigenspace `resolventEigenspace g μ.val`. Their span
-equals the supremum of all eigenspaces (over nonzero eigenvalues). -/
 
 /-- The sigma-indexed family of vectors forming the eigenbasis: at index
 `⟨μ, k⟩`, this is the `k`-th `stdOrthonormalBasis` vector of
@@ -339,7 +290,6 @@ theorem resolventEigenbasisVec_mem
         (resolventEigenspace (I := I) (M := M) g μ.val))) :
     resolventEigenbasisVec (I := I) (M := M) g i ∈
       resolventEigenspace (I := I) (M := M) g i.1.val := by
-  -- Unfold and observe the result is a coercion of a subtype element.
   unfold resolventEigenbasisVec
   exact (resolventEigenspaceONB (I := I) (M := M) i.1 i.2).property
 
@@ -347,17 +297,11 @@ theorem resolventEigenbasisVec_mem
 theorem resolventEigenbasisVec_orthonormal (g : SmoothRiemannianMetric I M) :
     Orthonormal ℝ
       (resolventEigenbasisVec (I := I) (M := M) g) := by
-  -- This is `OrthogonalFamily.orthonormal_sigma_orthonormal` applied to the
-  -- per-eigenspace orthonormal basis families. The function output of that
-  -- lemma is `fun a => (eigenspace).subtypeₗᵢ (resolventEigenspaceONB a.1 a.2)`,
-  -- which equals `resolventEigenbasisVec g a` by `rfl` (subtypeₗᵢ is the
-  -- subtype coercion).
   have h_fam := resolventEigenspace_orthogonalFamily_nonzero (I := I) (M := M) g
   have h_each : ∀ μ : NonzeroResolventEigenvalue (I := I) (M := M) g,
       Orthonormal ℝ (resolventEigenspaceONB (I := I) (M := M) μ) :=
     fun μ => (resolventEigenspaceONB (I := I) (M := M) μ).orthonormal
   have h_sig := h_fam.orthonormal_sigma_orthonormal h_each
-  -- Convert via `Orthonormal` argument.
   convert h_sig using 1
 
 /-- Span of the eigenbasis vectors lies inside the supremum (over nonzero
@@ -370,7 +314,6 @@ private lemma span_resolventEigenbasisVec_le_iSup_eigenspace
         resolventEigenspace (I := I) (M := M) g μ.val := by
   rw [Submodule.span_le]
   rintro v ⟨i, rfl⟩
-  -- v = resolventEigenbasisVec g i, which lies in the eigenspace at i.1.val.
   refine SetLike.mem_coe.mpr ?_
   refine Submodule.mem_iSup_of_mem i.1 ?_
   exact resolventEigenbasisVec_mem (I := I) (M := M) g i
@@ -384,12 +327,7 @@ private lemma resolventEigenspace_le_span_resolventEigenbasisVec
     resolventEigenspace (I := I) (M := M) g μ.val ≤
       Submodule.span ℝ (Set.range
         (resolventEigenbasisVec (I := I) (M := M) g)) := by
-  -- The basis vectors `resolventEigenspaceONB μ k` for `k : Fin n_μ`
-  -- span the eigenspace (as a submodule of itself). After embedding
-  -- via `subtype`, they span the eigenspace as a submodule of `Lp`.
   intro x hx
-  -- The eigenspace, viewed as a Submodule of itself, has the basis vectors
-  -- spanning it (this is `Basis.span_eq` for the OrthonormalBasis's `toBasis`).
   set b := resolventEigenspaceONB (I := I) (M := M) μ
   have h_basis_span : Submodule.span ℝ
       (Set.range (b.toBasis :
@@ -397,7 +335,6 @@ private lemma resolventEigenspace_le_span_resolventEigenbasisVec
           (resolventEigenspace (I := I) (M := M) g μ.val)) →
         resolventEigenspace (I := I) (M := M) g μ.val)) = ⊤ :=
     b.toBasis.span_eq
-  -- Lift to: `eigenspace μ ≤ Submodule.span ℝ ((subtype) '' range b)`.
   have h_subtype_apply : ((resolventEigenspace (I := I) (M := M) g μ.val).subtype '' Set.range b) =
       Set.range (fun k =>
         ((b k : resolventEigenspace (I := I) (M := M) g μ.val) :
@@ -409,7 +346,6 @@ private lemma resolventEigenspace_le_span_resolventEigenbasisVec
       exact ⟨k, by rw [← hzy, ← hk]; rfl⟩
     · rintro ⟨k, hk⟩
       exact ⟨b k, ⟨k, rfl⟩, hk⟩
-  -- Each `(b k : Lp)` is one of the `resolventEigenbasisVec g ⟨μ, k⟩`.
   have h_in_basis_set : ∀ k : Fin (Module.finrank ℝ
         (resolventEigenspace (I := I) (M := M) g μ.val)),
       ((b k : resolventEigenspace (I := I) (M := M) g μ.val) :
@@ -424,9 +360,6 @@ private lemma resolventEigenspace_le_span_resolventEigenbasisVec
       Set.range (resolventEigenbasisVec (I := I) (M := M) g) := by
     rintro y ⟨k, rfl⟩
     exact h_in_basis_set k
-  -- x lies in eigenspace, which equals (subtype.range = eigenspace) by `range_subtype`.
-  -- So x = subtype ⟨x, hx⟩, and ⟨x, hx⟩ ∈ ⊤ = span (range b), so applying subtype:
-  -- x ∈ span ((subtype) '' range b) ⊆ span (range basisVec).
   have hx_subtype : x = (resolventEigenspace (I := I) (M := M) g μ.val).subtype ⟨x, hx⟩ := rfl
   have h_top_mem : (⟨x, hx⟩ : resolventEigenspace (I := I) (M := M) g μ.val) ∈
       Submodule.span ℝ (Set.range (b.toBasis :
@@ -442,19 +375,15 @@ private lemma resolventEigenspace_le_span_resolventEigenbasisVec
           resolventEigenspace (I := I) (M := M) g μ.val))) := by
     refine ⟨⟨x, hx⟩, h_top_mem, rfl⟩
   rw [Submodule.map_span] at h_after_map
-  -- We have: x ∈ span ((subtype) '' range (b.toBasis)).
-  -- Replace `b.toBasis` by `b` via `OrthonormalBasis.coe_toBasis`.
   have h_eq_basis : ((b.toBasis :
         Fin (Module.finrank ℝ
           (resolventEigenspace (I := I) (M := M) g μ.val)) →
         resolventEigenspace (I := I) (M := M) g μ.val)) = (b : _ → _) := by
     funext k
-    -- `OrthonormalBasis.coe_toBasis` gives `(⇑b.toBasis : ι → E) = ⇑b`.
     have := OrthonormalBasis.coe_toBasis b
     exact congr_fun this k
   rw [h_eq_basis] at h_after_map
   rw [h_subtype_apply] at h_after_map
-  -- Conclude: span (image) ≤ span (range basisVec).
   exact Submodule.span_mono h_subtype_subset h_after_map
 
 /-- The span (in `Lp ℝ 2 μ_g`) of the eigenbasis vectors equals the supremum
@@ -467,15 +396,8 @@ theorem span_resolventEigenbasisVec_eq_iSup_eigenspace
         resolventEigenspace (I := I) (M := M) g μ.val := by
   refine le_antisymm
     (span_resolventEigenbasisVec_le_iSup_eigenspace (I := I) (M := M) g) ?_
-  -- Reverse: each eigenspace ≤ span (...).
   exact iSup_le (resolventEigenspace_le_span_resolventEigenbasisVec
     (I := I) (M := M) g)
-
-/-! ## Density: the orthogonal complement of the eigenbasis span is `⊥`
-
-The orthogonal complement of `iSup over all real μ` of the eigenspaces is
-trivial by `resolventEigenspaces_iSup_orthogonal_eq_bot_on_closed`. The
-zero eigenspace is `⊥`, so dropping it from the iSup is harmless. -/
 
 /-- The orthogonal complement of the supremum (over nonzero eigenvalues) of
 the resolvent eigenspaces is `⊥`. -/
@@ -483,14 +405,6 @@ theorem nonzero_iSup_resolventEigenspace_orthogonal_eq_bot
     (g : SmoothRiemannianMetric I M) :
     (⨆ μ : NonzeroResolventEigenvalue (I := I) (M := M) g,
         resolventEigenspace (I := I) (M := M) g μ.val)ᗮ = ⊥ := by
-  -- Step 1: The supremum over nonzero eigenvalues equals the supremum over
-  -- the eigenvalue subtype `{μ // resolventEigenspace g μ ≠ ⊥}`. Because
-  -- every nonzero eigenvalue has a nontrivial eigenspace (as it has an
-  -- eigenvector), and conversely every nontrivial eigenspace is at a value
-  -- where R has an eigenvalue.
-  -- Step 2: That iSup equals iSup over all reals (via `iSup_ne_bot_subtype`).
-  -- Step 3: Apply the existing trivial-orthogonal-complement theorem.
-  -- We do this by showing the iSups are equal as submodules.
   suffices h_iSup_eq :
       (⨆ μ : NonzeroResolventEigenvalue (I := I) (M := M) g,
         resolventEigenspace (I := I) (M := M) g μ.val) =
@@ -498,23 +412,16 @@ theorem nonzero_iSup_resolventEigenspace_orthogonal_eq_bot
     rw [h_iSup_eq]
     exact resolventEigenspaces_iSup_orthogonal_eq_bot_on_closed
       (I := I) (M := M) g
-  -- We prove the two iSups are equal by mutual ≤.
   refine le_antisymm ?_ ?_
-  · -- ≤: Each `eigenspace μ.val` for `μ : Nonzero...` is bounded by its single term.
-    refine iSup_le (fun μ => ?_)
+  · refine iSup_le (fun μ => ?_)
     exact le_iSup (fun ν : ℝ => resolventEigenspace (I := I) (M := M) g ν) μ.val
-  · -- ≥: For each `ν : ℝ`, `eigenspace ν ≤ iSup over Nonzero...`.
-    refine iSup_le (fun ν => ?_)
+  · refine iSup_le (fun ν => ?_)
     by_cases hν : ν = 0
-    · -- The zero eigenspace is ⊥, so trivially ≤ anything.
-      rw [hν, resolventEigenspace_zero_eq_bot (I := I) (M := M) g]
+    · rw [hν, resolventEigenspace_zero_eq_bot (I := I) (M := M) g]
       exact bot_le
-    · -- For `ν ≠ 0`, two cases: either `eigenspace ν` is `⊥` (trivially ≤),
-      -- or there's a nonzero vector ⇒ `HasEigenvalue` ⇒ ν is in the subtype.
-      by_cases h_eig_bot : resolventEigenspace (I := I) (M := M) g ν = ⊥
+    · by_cases h_eig_bot : resolventEigenspace (I := I) (M := M) g ν = ⊥
       · rw [h_eig_bot]; exact bot_le
-      · -- Eigenspace is non-trivial, so ν is an eigenvalue.
-        have h_ev : Module.End.HasEigenvalue
+      · have h_ev : Module.End.HasEigenvalue
             ((resolventL2 (I := I) (M := M) g).toLinearMap) ν := by
           unfold resolventEigenspace at h_eig_bot
           exact h_eig_bot
@@ -536,8 +443,6 @@ theorem span_resolventEigenbasisVec_orthogonal_eq_bot
         (resolventEigenbasisVec (I := I) (M := M) g)))ᗮ = ⊥ := by
   rw [span_resolventEigenbasisVec_eq_iSup_eigenspace]
   exact nonzero_iSup_resolventEigenspace_orthogonal_eq_bot (I := I) (M := M) g
-
-/-! ## The sigma-indexed eigenbasis as an `OrthonormalBasis` -/
 
 /-- The sigma-indexed orthonormal basis of `Lp ℝ 2 μ_g` consisting of
 eigenvectors of `R = resolventL2 g`, indexed by pairs `⟨μ, k⟩` with `μ` a
@@ -566,7 +471,6 @@ noncomputable def resolventHilbertEigenbasisSigma
     resolventHilbertEigenbasisSigma (I := I) (M := M) g i =
       resolventEigenbasisVec (I := I) (M := M) g i := by
   unfold resolventHilbertEigenbasisSigma
-  -- `HilbertBasis.mkOfOrthogonalEqBot` has `coe_mkOfOrthogonalEqBot : ⇑(...) = v`.
   exact congr_fun
     (HilbertBasis.coe_mkOfOrthogonalEqBot
       (resolventEigenbasisVec_orthonormal (I := I) (M := M) g)
@@ -595,8 +499,6 @@ noncomputable def resolventEigenbasisSigma
   unfold resolventEigenbasisSigma
   exact resolventHilbertEigenbasisSigma_apply (I := I) (M := M) g i
 
-/-! ## Each basis vector is an eigenvector of `R = resolventL2 g` -/
-
 /-- Each sigma-indexed eigenbasis vector is an eigenvector of `R` at the
 corresponding nonzero eigenvalue: `R (b ⟨μ, k⟩) = μ.val • b ⟨μ, k⟩`. -/
 theorem resolventL2_apply_resolventEigenbasisSigma
@@ -608,20 +510,11 @@ theorem resolventL2_apply_resolventEigenbasisSigma
         (resolventEigenbasisSigma (I := I) (M := M) g i) =
       i.1.val • resolventEigenbasisSigma (I := I) (M := M) g i := by
   rw [resolventEigenbasisSigma_eq_resolventEigenbasisVec]
-  -- The basis vector at index ⟨μ, k⟩ lies in the eigenspace at μ.val.
   have h_mem : resolventEigenbasisVec (I := I) (M := M) g i ∈
       resolventEigenspace (I := I) (M := M) g i.1.val :=
     resolventEigenbasisVec_mem (I := I) (M := M) g i
   exact (mem_resolventEigenspace_iff (I := I) (M := M) g i.1.val
     (resolventEigenbasisVec (I := I) (M := M) g i)).mp h_mem
-
-/-! ## Lifted Laplacian eigenfunctions
-
-For each basis index `i = ⟨μ, k⟩`, the `R`-eigenvector
-`e := resolventEigenbasisSigma g i` lifts to an element `i.1.val⁻¹ • resolvent g e`
-of `H1Compl g` that lies in `laplacianDomain g` and projects to `e` under
-`H1ComplToLp g`. The variational Laplacian then acts on this lifted vector
-as multiplication by the negative Laplacian eigenvalue. -/
 
 /-- Membership of the lifted eigenvector in `laplacianDomain g`. -/
 private lemma laplacianEigenfunction_mem
@@ -661,11 +554,6 @@ theorem H1ComplToLp_laplacianEigenfunction
         (laplacianEigenfunction (I := I) (M := M) g i :
           H1Compl (I := I) (M := M) g) =
       resolventEigenbasisSigma (I := I) (M := M) g i := by
-  -- H1ComplToLp (μ⁻¹ • resolvent g (b i))
-  --   = μ⁻¹ • H1ComplToLp(resolvent g (b i))
-  --   = μ⁻¹ • resolventL2 g (b i)
-  --   = μ⁻¹ • (μ • b i)
-  --   = b i.
   have hRb : resolventL2 (I := I) (M := M) g
         (resolventEigenbasisSigma (I := I) (M := M) g i) =
       i.1.val • resolventEigenbasisSigma (I := I) (M := M) g i :=
@@ -676,7 +564,6 @@ theorem H1ComplToLp_laplacianEigenfunction
       resolventL2 (I := I) (M := M) g
         (resolventEigenbasisSigma (I := I) (M := M) g i) := by
     rw [resolventL2_apply]
-  -- Compute.
   change H1ComplToLp (I := I) (M := M) g
       ((i.1.val)⁻¹ • resolvent (I := I) (M := M) g
         (resolventEigenbasisSigma (I := I) (M := M) g i)) =
@@ -696,19 +583,12 @@ theorem laplacianOp_laplacianEigenfunction
         (laplacianEigenfunction (I := I) (M := M) g i) =
       -(laplacianEigenvalueOf i.1.val) •
         resolventEigenbasisSigma (I := I) (M := M) g i := by
-  -- The basis vector lies in the eigenspace at i.1.val.
   have h_mem : resolventEigenbasisSigma (I := I) (M := M) g i ∈
       resolventEigenspace (I := I) (M := M) g i.1.val := by
     rw [resolventEigenbasisSigma_eq_resolventEigenbasisVec]
     exact resolventEigenbasisVec_mem (I := I) (M := M) g i
-  -- Apply `laplacianOp_of_resolventEigenvector_lift`.
   have h := laplacianOp_of_resolventEigenvector_lift (I := I) (M := M) g
     i.1.val_ne_zero h_mem
-  -- The witness for membership in laplacianDomain is propositionally equal,
-  -- so `Subtype.ext` lets us identify the two `laplacianEigenfunction g i`
-  -- and the form used in `laplacianOp_of_resolventEigenvector_lift`.
-  -- Both refer to `μ⁻¹ • resolvent g (b i)`, so they are the same Subtype
-  -- element (by Subtype.ext).
   have h_subtype_eq :
       (laplacianEigenfunction (I := I) (M := M) g i :
         laplacianDomain (I := I) (M := M) g) =
@@ -721,8 +601,6 @@ theorem laplacianOp_laplacianEigenfunction
     rfl
   rw [h_subtype_eq]
   exact h
-
-/-! ## Sanity tests -/
 
 example (g : SmoothRiemannianMetric I M) :
     HilbertBasis

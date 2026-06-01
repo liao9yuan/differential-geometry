@@ -52,8 +52,6 @@ private abbrev I_half (n : ℕ) [NeZero n] :
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-! ## The bilinear form B = inner on `H1ComplInterior` -/
-
 /-- The bilinear form `B(u, v) := ⟨u, v⟩` packaged as a continuous bilinear map
 on `H1ComplInterior g`. This is the inner product itself. -/
 noncomputable def H1ComplInteriorBilin
@@ -77,8 +75,6 @@ lemma H1ComplInteriorBilin_isCoercive
   rw [real_inner_self_eq_norm_sq]
   ring_nf
   exact le_refl _
-
-/-! ## The L² functional `L_f` for `f ∈ Lp ℝ 2 μ_g` -/
 
 /-- The map `f ↦ L_f` where `L_f v := ⟨H1ComplInteriorToLp v, f⟩_{L²}`. -/
 noncomputable def lpFunctionalCLMInterior
@@ -105,8 +101,6 @@ noncomputable def lpFunctionalCLMInterior
     ⟪H1ComplInteriorToLp g v, f⟫_ℝ
   rw [innerSL_apply_apply]
   exact real_inner_comm (H1ComplInteriorToLp g v) f
-
-/-! ## The Lax–Milgram resolvent -/
 
 noncomputable def H1ComplInteriorLaxMilgramEquiv
     (g : SmoothRiemannianMetric (I_half n) M) :
@@ -165,8 +159,6 @@ theorem resolventInterior_inner_eq_lpFunctional
   unfold resolventInterior
   rw [ContinuousLinearMap.comp_apply, H1ComplInteriorRieszRepr_inner,
     lpFunctionalCLMInterior_apply]
-
-/-! ## Sanity test -/
 
 example (g : SmoothRiemannianMetric (I_half n) M) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I_half n) (M := M) g) →L[ℝ]

@@ -83,20 +83,11 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-
-/-! ## The `L²` energy identity for a smooth representative
-
-The `SmoothCcTensor` `L²` (semi-)norm of `S` is the global metric `L²` norm of its
-underlying map `S.toFun`, whose square is the Bochner integral of the diagonal
-pointwise pairing. We record this as an integral identity, then specialise it to
-the eigenvector representatives, whose `L²` norm is `1` by orthonormality. -/
 
 /-- The squared `SmoothCcTensor` `L²` norm equals the Bochner integral of the
 diagonal pointwise tensor pairing of the underlying map. -/
@@ -116,17 +107,14 @@ theorem eigenvectorSmooth_norm_eq_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s) :
     ‖eigenvectorSmooth (I := I) (M := M) g r s i‖ = 1 := by
-  -- The `L²`-class of the representative is the orthonormal basis vector `bᵢ`.
   have h_class : (eigenvectorSmooth (I := I) (M := M) g r s i :
         TensorL2 r s g) =
       tensorResolventEigenbasisVec (I := I) (M := M)
         (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s) i :=
     eigenvectorSmooth_toL2 (I := I) (M := M) g r s i
-  -- `‖bᵢ‖ = 1` by orthonormality of the eigenbasis vectors.
   have h_one := (tensorResolventEigenbasisVec_orthonormal (I := I) (M := M)
     (g := g) (r := r) (s := s)
     (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)).norm_eq_one i
-  -- The completion coercion is norm-preserving.
   have h_coe : ‖(eigenvectorSmooth (I := I) (M := M) g r s i :
         TensorL2 r s g)‖ =
       ‖eigenvectorSmooth (I := I) (M := M) g r s i‖ :=
@@ -148,8 +136,6 @@ theorem eigenvectorSmooth_integral_normSq_eq_one
     (eigenvectorSmooth (I := I) (M := M) g r s i)
   rw [eigenvectorSmooth_norm_eq_one (I := I) (M := M) g r s i] at h
   rw [← h]; norm_num
-
-/-! ## The diagonal reproducing kernel and the cardinality identity -/
 
 /-- The **on-diagonal reproducing kernel** of the eigenbasis over a finite index
 set `F`, at a point `x : M`: the sum over `i ∈ F` of the squared Riemannian fibre
@@ -186,11 +172,9 @@ theorem finsetCard_eq_integral_diagonalKernel
     (F.card : ℝ) =
       ∫ x, diagonalKernel (I := I) (M := M) g r s F x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
-  -- Interchange the finite sum with the Bochner integral.
   simp only [diagonalKernel]
   rw [MeasureTheory.integral_finset_sum F
     (fun i _ => diagonalKernel_summand_integrable (I := I) (M := M) g r s i)]
-  -- Each integral is `1`.
   rw [Finset.sum_congr rfl
     (fun i _ => eigenvectorSmooth_integral_normSq_eq_one (I := I) (M := M) g r s i)]
   simp
@@ -210,8 +194,6 @@ private lemma diagonalKernel_integrable
   rw [h]
   exact MeasureTheory.integrable_finset_sum F
     (fun i _ => diagonalKernel_summand_integrable (I := I) (M := M) g r s i)
-
-/-! ## The headline reduction: pointwise diagonal kernel bound ⟹ counting bound -/
 
 /-- **Polynomial eigenvalue-counting bound from a pointwise diagonal kernel bound.**
 
@@ -244,18 +226,14 @@ theorem eigenvalueCountingBound_of_pointwiseDiagonalKernelBound
     (hkernel : ∀ (Λ : ℝ) (x : M),
       diagonalKernel (I := I) (M := M) g r s (count Λ) x ≤ B * Λ ^ q) :
     EigenvalueCountingBound (I := I) (M := M) g r s := by
-  -- The total Riemannian volume is finite (closed manifold).
   haveI hfin : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
   set vol : ℝ :=
     (riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ with hvol_def
   have hvol_nonneg : 0 ≤ vol := by rw [hvol_def]; exact MeasureTheory.measureReal_nonneg
-  -- Witness: degree `q`, constant `A = B · vol(M)`, family `count`.
   refine ⟨q, B * vol, mul_nonneg hB hvol_nonneg, count, hmem, ?_⟩
   intro Λ
-  -- Cardinality = integral of the diagonal kernel.
   rw [finsetCard_eq_integral_diagonalKernel (I := I) (M := M) g r s (count Λ)]
-  -- Bound the kernel integral by the integral of the constant `B · Λ^q`.
   have h_int_mono :
       ∫ x, diagonalKernel (I := I) (M := M) g r s (count Λ) x
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤
@@ -265,7 +243,6 @@ theorem eigenvalueCountingBound_of_pointwiseDiagonalKernelBound
       (MeasureTheory.integrable_const _)
       (fun x => hkernel Λ x)
   refine le_trans h_int_mono (le_of_eq ?_)
-  -- `∫ const = vol(M) • const = (B · Λ^q) · vol(M) = (B · vol(M)) · Λ^q`.
   rw [MeasureTheory.integral_const, smul_eq_mul, ← hvol_def]
   ring
 

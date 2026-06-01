@@ -91,18 +91,10 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 /-- The Euclidean ambient space of dimension `Module.finrank ℝ E`. -/
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Helper: chart-transition raw-component swap
-
-The first non-trivial step: the finite double sum of squared chart-α raw
-components is bounded by a uniform constant times the finite double sum
-of squared chart-β raw components on the POU tsupport intersection. -/
 
 /-- **Chart-transition raw-component swap.** For `b ∈ tsupport (POU α) ∩
 tsupport (POU β)`, the finite double sum of squared chart-α raw components
@@ -126,12 +118,10 @@ theorem sum_raw_α_sq_le_sum_raw_β_sq_on_pouInter
                 ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
                   (tensorChartComponentRaw (I := I) (M := M) g r s T β Idx Jdx b) ^ 2 := by
   classical
-  -- Component cardinality.
   set N : ℝ := ((Finset.univ : Finset
         ((Fin r → Fin (Module.finrank ℝ E)) ×
          (Fin s → Fin (Module.finrank ℝ E)))).card : ℝ) with hN_def
   have hN_nn : 0 ≤ N := Nat.cast_nonneg _
-  -- Phase-4c.1 uniform op-norm bound on `transitionCoeff`.
   obtain ⟨K_trans, hK_trans_nn, hK_trans_le⟩ :=
     transitionCoeff_le_uniform_on_pouTsupport (E := E) (I := I) (M := M) r s
   refine ⟨N * (N * K_trans ^ 2), ?_, ?_⟩
@@ -139,13 +129,11 @@ theorem sum_raw_α_sq_le_sum_raw_β_sq_on_pouInter
   intro T α β b hb
   set V : Finset ((Fin r → Fin (Module.finrank ℝ E)) ×
       (Fin s → Fin (Module.finrank ℝ E))) := Finset.univ with hV_def
-  -- Membership in the chart sources.
   have hbα : b ∈ (chartAt H α).source :=
     DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α hb.1
   have hbβ : b ∈ (chartAt H β).source :=
     DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M β hb.2
   have hb_inter_βα : b ∈ (chartAt H β).source ∩ (chartAt H α).source := ⟨hbβ, hbα⟩
-  -- Chart-transition law.
   have h_trans : ∀ (P : (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin s → Fin (Module.finrank ℝ E))),
       tensorChartComponentRaw (I := I) (M := M) g r s T α P.1 P.2 b =
@@ -155,9 +143,7 @@ theorem sum_raw_α_sq_le_sum_raw_β_sq_on_pouInter
     intro P
     have h_sum := tensorChartComponentRaw_eq_transitionCoeff_sum
       (E := E) (I := I) (M := M) g r s T β α P hb_inter_βα
-    -- Convert the universe sum to a finset sum.
     convert h_sum using 1
-  -- Per-(Idx, Jdx) squared bound.
   have h_per_pair : ∀ P ∈ V,
       (tensorChartComponentRaw (I := I) (M := M) g r s T α P.1 P.2 b) ^ 2 ≤
         N * K_trans ^ 2 *
@@ -245,7 +231,6 @@ theorem sum_raw_α_sq_le_sum_raw_β_sq_on_pouInter
       _ = N * K_trans ^ 2 *
             ∑ Q ∈ V,
               (tensorChartComponentRaw (I := I) (M := M) g r s T β Q.1 Q.2 b) ^ 2 := by ring
-  -- Convert double sums to pair sums.
   have h_α_pair_sum :
       (∑ Idx : Fin r → Fin (Module.finrank ℝ E),
         ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
@@ -273,7 +258,6 @@ theorem sum_raw_α_sq_le_sum_raw_β_sq_on_pouInter
         (Fin s → Fin (Module.finrank ℝ E)) =>
         (tensorChartComponentRaw (I := I) (M := M) g r s T β Q.1 Q.2 b) ^ 2)]
   rw [h_α_pair_sum, h_β_pair_sum]
-  -- Sum the per-pair bound over P. RHS is constant (independent of P).
   calc (∑ P ∈ V,
           (tensorChartComponentRaw (I := I) (M := M) g r s T α P.1 P.2 b) ^ 2)
       ≤ ∑ P ∈ V,
@@ -294,14 +278,6 @@ theorem sum_raw_α_sq_le_sum_raw_β_sq_on_pouInter
     _ = N * (N * K_trans ^ 2) *
           ∑ Q ∈ V,
             (tensorChartComponentRaw (I := I) (M := M) g r s T β Q.1 Q.2 b) ^ 2 := by ring
-
-/-! ## Pointwise step: `POU(α) · ‖repr α‖²` bound by `Σ_β Σ_IJ (tensorChartComponentPou β IJ)²`
-
-The pointwise bound that drives the per-`β` integration. It holds globally
-on `M` — at points outside `tsupport POU α`, the left-hand side vanishes
-identically (since `POU(α b) = 0` there), so the bound is trivial; at
-points inside, the Cauchy–Schwarz + chart-transition +
-`reprNormSq_le_sum_components_sq` chain gives the bound. -/
 
 /-- **Pointwise chart-α representation bound.** For every smooth
 compactly-supported `(r, s)`-tensor section `T : SmoothCcTensor g r s`,
@@ -325,18 +301,15 @@ theorem pointwise_α_repr_le_sum_β_componentPou_sq
                 ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
                   (tensorChartComponentPou (I := I) (M := M) g r s T β Idx Jdx b) ^ 2 := by
   classical
-  -- Component cardinality, basis-norm constant.
   set N : ℝ := ((Finset.univ : Finset
         ((Fin r → Fin (Module.finrank ℝ E)) ×
          (Fin s → Fin (Module.finrank ℝ E)))).card : ℝ) with hN_def
   have hN_nn : 0 ≤ N := Nat.cast_nonneg _
   set Bnorm : ℝ := tensorChartBasisNormConstant (E := E) r s with hBnorm_def
   have hBnorm_nn : 0 ≤ Bnorm := tensorChartBasisNormConstant_nonneg (E := E) r s
-  -- POU finset cardinality.
   set N_pou : ℝ := ((chartAtlasPOU_finset (I := I) (M := M)).card : ℝ)
     with hN_pou_def
   have hN_pou_nn : 0 ≤ N_pou := Nat.cast_nonneg _
-  -- Chart-transition raw-component swap constant.
   obtain ⟨K_swap, hK_swap_nn, hK_swap_le⟩ :=
     sum_raw_α_sq_le_sum_raw_β_sq_on_pouInter
       (E := E) (I := I) (M := M) g r s
@@ -351,15 +324,12 @@ theorem pointwise_α_repr_le_sum_β_componentPou_sq
       (fun z : M => T.toSection z) b‖ with hV_def
   have hV_nn : 0 ≤ V := norm_nonneg _
   have hV_sq_nn : 0 ≤ V ^ 2 := sq_nonneg _
-  -- Case split on whether b ∈ tsupport POU α.
   by_cases hbα_tsupp :
       b ∈ tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
-  · -- Main case: chart-transition argument applies.
-    have h_repr_sq := reprNormSq_le_sum_components_sq
+  · have h_repr_sq := reprNormSq_le_sum_components_sq
       (I := I) (M := M) g r s T α b
     have h_sum_one := chartAtlasPOU_finset_sum_eq_one (I := I) (M := M) b
-    -- `1 = (Σ_β POU(β b))² ≤ N_pou · Σ_β POU(β b)²`.
     have h_one_sq : (1 : ℝ) ≤
         N_pou * ∑ β ∈ chartAtlasPOU_finset (I := I) (M := M),
           ((chartAtlasPOU I M β : M → ℝ) b) ^ 2 := by
@@ -378,7 +348,6 @@ theorem pointwise_α_repr_le_sum_β_componentPou_sq
         rw [h_sum_eq]; norm_num
       rw [h_sum_sq_one] at hbase
       exact hbase
-    -- `V² ≤ N_pou · Σ_β POU(β b)² · V²`.
     have h_V_sq_bound : V ^ 2 ≤
         N_pou * ∑ β ∈ chartAtlasPOU_finset (I := I) (M := M),
           ((chartAtlasPOU I M β : M → ℝ) b) ^ 2 * V ^ 2 := by
@@ -390,10 +359,8 @@ theorem pointwise_α_repr_le_sum_β_componentPou_sq
               ((chartAtlasPOU I M β : M → ℝ) b) ^ 2 * V ^ 2 from by
         rw [mul_assoc, Finset.sum_mul]] at h_mul
       exact h_mul
-    -- `ρα · V² ≤ V² ≤ ...`.
     have h_step1 : ρα * V ^ 2 ≤ V ^ 2 := by
       nlinarith [hρα_nn, hρα_le_one, hV_sq_nn]
-    -- Per-β: bound POU(β b)² · V² by the per-β raw-component squares.
     have h_per_β : ∀ β ∈ chartAtlasPOU_finset (I := I) (M := M),
         ((chartAtlasPOU I M β : M → ℝ) b) ^ 2 * V ^ 2 ≤
           (N * Bnorm ^ 2 * K_swap) *
@@ -405,8 +372,7 @@ theorem pointwise_α_repr_le_sum_β_componentPou_sq
       by_cases hb_β_tsupp :
           b ∈ tsupport (fun x : M =>
             ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
-      · -- Apply chart-transition swap.
-        have hb_inter :
+      · have hb_inter :
             b ∈ tsupport (fun x : M =>
                 ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
               tsupport (fun x : M =>
@@ -441,8 +407,7 @@ theorem pointwise_α_repr_le_sum_β_componentPou_sq
                 (((chartAtlasPOU I M β : M → ℝ) b) ^ 2 *
                   ∑ Idx, ∑ Jdx,
                     (tensorChartComponentRaw (I := I) (M := M) g r s T β Idx Jdx b) ^ 2) := by ring
-      · -- POU(β b) = 0.
-        have h_ρβ_zero : (chartAtlasPOU I M β : M → ℝ) b = 0 := by
+      · have h_ρβ_zero : (chartAtlasPOU I M β : M → ℝ) b = 0 := by
           have hsub : Function.support
               ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) ⊆
             tsupport ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
@@ -456,9 +421,7 @@ theorem pointwise_α_repr_le_sum_β_componentPou_sq
           exact hb_β_tsupp (hsub hin)
         rw [h_ρβ_zero]
         ring_nf
-        -- LHS = 0, RHS ≥ 0.
         exact le_refl 0
-    -- Identity `POU(β b)² · Σ raw² = Σ tensorChartComponentPou²`.
     have h_componentPou : ∀ β,
         ((chartAtlasPOU I M β : M → ℝ) b) ^ 2 *
           (∑ Idx : Fin r → Fin (Module.finrank ℝ E),
@@ -479,7 +442,6 @@ theorem pointwise_α_repr_le_sum_β_componentPou_sq
       refine Finset.sum_congr rfl (fun Idx _ => ?_)
       rw [Finset.mul_sum]
       exact Finset.sum_congr rfl (fun Jdx _ => h_pt Idx Jdx)
-    -- Final chain.
     calc ρα * V ^ 2
         ≤ V ^ 2 := h_step1
       _ ≤ N_pou * ∑ β ∈ chartAtlasPOU_finset (I := I) (M := M),
@@ -505,8 +467,7 @@ theorem pointwise_α_repr_le_sum_β_componentPou_sq
             congr 1
             refine Finset.sum_congr rfl (fun β _ => ?_)
             exact h_componentPou β
-  · -- Trivial case: POU(α b) = 0.
-    have h_ρα_zero : ρα = 0 := by
+  · have h_ρα_zero : ρα = 0 := by
       have hsub : Function.support
           ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) ⊆
         tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
@@ -533,8 +494,6 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
 
 #print axioms
   DifferentialGeometry.Analysis.Parabolic.TensorSpectral.sum_raw_α_sq_le_sum_raw_β_sq_on_pouInter

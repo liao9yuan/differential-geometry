@@ -97,25 +97,17 @@ theorem fibrewise_gram_twist_estimate
             (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ∧
           (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ≤
             C * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal := by
-  -- At `k = 0`, both Sobolev norms reduce to the same expression because
-  -- (1) the derivative-order sum collapses to `j = 0`, and (2) at `j = 0`
-  -- the iterated Fréchet derivative is function evaluation and the
-  -- HS-basis-index sum is over the singleton `Fin 0 → Fin n`.
   refine ⟨1, 1, by norm_num, le_refl 1, fun T => ?_⟩
   have hEq :
       tensorPouSobolevHsNorm (I := I) (M := M) g 0 T =
         tensorPouSobolevNorm (I := I) (M := M) g 0 T := by
     rw [tensorPouSobolevHsNorm_eq, tensorPouSobolevNorm_eq]
-    -- Reduce the two `(·)^(1/2)` expressions to equality of the bases.
     congr 1
     refine tsum_congr (fun α => ?_)
     refine Finset.sum_congr rfl (fun IJ _ => ?_)
     refine Finset.sum_congr rfl (fun j hj => ?_)
-    -- `2 * 0 + 1 = 1`, so `Finset.range 1 = {0}` and `j = 0`.
     simp only [Finset.mem_range, Nat.mul_zero, Nat.zero_add] at hj
     interval_cases j
-    -- For `j = 0`: HS sum is over `Fin 0 → Fin n` (a singleton via
-    -- `Pi.uniqueOfIsEmpty`).  Reduce both sides to function evaluation.
     rw [Finset.univ_unique, Finset.sum_singleton]
     refine MeasureTheory.lintegral_congr (fun y => ?_)
     congr 2

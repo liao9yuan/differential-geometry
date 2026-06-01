@@ -45,26 +45,20 @@ theorem abs_det_le_factorial_mul_opNormPow_finrank
   classical
   set n : ℕ := Module.finrank ℝ E with hn
   set e : OrthonormalBasis (Fin n) ℝ E := stdOrthonormalBasis ℝ E with he
-  -- The matrix of `L` in the orthonormal basis `e`.
   set b : Module.Basis (Fin n) ℝ E := e.toBasis with hb
   set M : Matrix (Fin n) (Fin n) ℝ :=
     LinearMap.toMatrix b b (L : E →ₗ[ℝ] E) with hM
-  -- Entrywise bound: `|M i j| ≤ ‖L‖`.
   have hopNorm_nonneg : (0 : ℝ) ≤ ‖L‖ := norm_nonneg _
   have entry_bound : ∀ i j : Fin n, |M i j| ≤ ‖L‖ := by
     intro i j
-    -- Rewrite the entry as an inner product.
     have hMij : M i j = ⟪e i, L (e j)⟫_ℝ := by
       simp [hM, hb, LinearMap.toMatrix_apply,
         OrthonormalBasis.coe_toBasis, OrthonormalBasis.coe_toBasis_repr_apply,
         OrthonormalBasis.repr_apply_apply]
     rw [hMij]
-    -- Cauchy–Schwarz over ℝ: `|⟪x, y⟫| ≤ ‖x‖ * ‖y‖`.
     have hCS : |⟪e i, L (e j)⟫_ℝ| ≤ ‖e i‖ * ‖L (e j)‖ :=
       abs_real_inner_le_norm (e i) (L (e j))
-    -- `‖e i‖ = 1`.
     have hei : ‖e i‖ = 1 := e.norm_eq_one i
-    -- `‖L (e j)‖ ≤ ‖L‖ * ‖e j‖ = ‖L‖`.
     have hLej : ‖L (e j)‖ ≤ ‖L‖ * ‖e j‖ := L.le_opNorm (e j)
     have hej : ‖e j‖ = 1 := e.norm_eq_one j
     calc |⟪e i, L (e j)⟫_ℝ|
@@ -72,14 +66,11 @@ theorem abs_det_le_factorial_mul_opNormPow_finrank
       _ = ‖L (e j)‖ := by rw [hei, one_mul]
       _ ≤ ‖L‖ * ‖e j‖ := hLej
       _ = ‖L‖ := by rw [hej, mul_one]
-  -- Apply `Matrix.det_le` with the absolute-value `AbsoluteValue.abs`.
   have hdet :
       AbsoluteValue.abs (M.det) ≤
         (Fintype.card (Fin n)).factorial • ‖L‖ ^ Fintype.card (Fin n) :=
     Matrix.det_le (abv := AbsoluteValue.abs) (x := ‖L‖) entry_bound
-  -- Convert to `*` and `Fintype.card (Fin n) = n`.
   have hcard : Fintype.card (Fin n) = n := Fintype.card_fin n
-  -- `M.det = LinearMap.det L`.
   have hMdet : M.det = LinearMap.det (L : E →ₗ[ℝ] E) := by
     simp [hM, hb, LinearMap.det_toMatrix]
   have h1 :
@@ -88,7 +79,6 @@ theorem abs_det_le_factorial_mul_opNormPow_finrank
     have := hdet
     rw [AbsoluteValue.abs_apply, hMdet] at this
     exact this
-  -- Replace `Fintype.card (Fin n)` by `n` and `•` by `*`.
   have h2 :
       (Fintype.card (Fin n)).factorial • ‖L‖ ^ Fintype.card (Fin n) =
         ((n.factorial : ℕ) : ℝ) * ‖L‖ ^ n := by

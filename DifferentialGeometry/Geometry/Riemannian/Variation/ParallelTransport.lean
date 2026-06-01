@@ -516,11 +516,9 @@ theorem trivCoord_comp_symmL_eq_chartTransitionAt [I.Boundaryless]
     · rw [tangentBundleCore_baseSet]; exact hβsrc
   have hcomp := (tangentBundleCore I M).coordChange_comp
     (achart H α) (achart H b) (achart H β) b hmem v
-  -- The composite equals the single coordinate change `α → β`, i.e. `tangentCoordChange`.
   have hcc : ((tangentBundleCore I M).coordChange (achart H α) (achart H β) b) v =
       Geodesic.chartTransitionAt (I := I) α β (extChartAt I α b) v := by
     change tangentCoordChange I α β b v = _
-    -- Bridge `tangentCoordChange` to `chartTransitionAt` in the boundaryless setting.
     rw [tangentCoordChange_def]
     rw [Geodesic.chartTransitionAt_def, Geodesic.chartTransitionMap_def]
     have hrange : (Set.range I : Set E) = Set.univ :=
@@ -541,28 +539,23 @@ theorem exists_uniform_chart_partition
       ∀ k : ℕ, k < N → ∀ t ∈ Set.Icc (k * L / N) ((k + 1) * L / N),
         γ t ∈ (chartAt H (bp k)).source := by
   classical
-  -- The chart-source cover of `Icc 0 L` indexed by `τ : ℝ`.
   set c : ℝ → Set ℝ := fun τ => γ ⁻¹' (chartAt H (γ τ)).source with hc_def
   have hc_open : ∀ τ, IsOpen (c τ) := fun τ =>
     (chartAt H (γ τ)).open_source.preimage hγ
   have hcover : Set.Icc (0 : ℝ) L ⊆ ⋃ τ, c τ := by
     intro x _hx
     exact Set.mem_iUnion.2 ⟨x, by simp only [hc_def, Set.mem_preimage]; exact mem_chart_source H (γ x)⟩
-  -- Lebesgue number `δ`.
   obtain ⟨δ, hδ_pos, hδ⟩ :=
     lebesgue_number_lemma_of_metric (isCompact_Icc (a := (0 : ℝ)) (b := L)) hc_open hcover
-  -- Choose `N` with mesh `L / N < δ`.
   obtain ⟨N₀, hN₀⟩ := exists_nat_gt (L / δ)
   set N : ℕ := N₀ + 1 with hN_def
   have hN_pos : 0 < N := Nat.succ_pos _
   have hN_pos_real : (0 : ℝ) < N := by exact_mod_cast hN_pos
-  -- Mesh bound: `L / N < δ`.
   have hmesh : L / N < δ := by
     have hN_gt : L / δ < N := lt_of_lt_of_le hN₀ (by exact_mod_cast Nat.le_succ N₀)
     rw [div_lt_iff₀ hN_pos_real]
     rw [div_lt_iff₀ hδ_pos] at hN_gt
     linarith
-  -- Basepoint chooser: midpoint of the `k`-th grid interval lies in `Icc 0 L`.
   have hmid_mem : ∀ k : ℕ, k < N →
       ((k * L / N + (k + 1) * L / N) / 2) ∈ Set.Icc (0 : ℝ) L := by
     intro k hk
@@ -570,8 +563,7 @@ theorem exists_uniform_chart_partition
     · have h1 : 0 ≤ (k : ℝ) * L / N := by positivity
       have h2 : 0 ≤ ((k : ℝ) + 1) * L / N := by positivity
       linarith
-    · -- `(k+1)·L/N ≤ L` since `k+1 ≤ N`.
-      have hk1 : (k : ℝ) + 1 ≤ N := by exact_mod_cast Nat.succ_le_of_lt hk
+    · have hk1 : (k : ℝ) + 1 ≤ N := by exact_mod_cast Nat.succ_le_of_lt hk
       have hub1 : ((k : ℝ) + 1) * L / N ≤ L := by
         rw [div_le_iff₀ hN_pos_real]
         nlinarith [hL.le, hk1]
@@ -579,7 +571,6 @@ theorem exists_uniform_chart_partition
         apply div_le_div_of_nonneg_right ?_ hN_pos_real.le
         nlinarith [hL.le]
       linarith
-  -- For each `k < N`, pick a basepoint time whose `δ`-ball covers the grid interval.
   have hchoose : ∀ k : ℕ, k < N → ∃ τ : ℝ,
       ∀ t ∈ Set.Icc ((k : ℝ) * L / N) (((k : ℝ) + 1) * L / N),
         γ t ∈ (chartAt H (γ τ)).source := by
@@ -589,7 +580,6 @@ theorem exists_uniform_chart_partition
     have htball : t ∈ Metric.ball ((k * L / N + (k + 1) * L / N) / 2) δ := by
       rw [Metric.mem_ball, Real.dist_eq]
       obtain ⟨htl, htr⟩ := ht
-      -- `(k+1)L/N - kL/N = L/N < δ`; `t` within the closed interval, midpoint centre.
       have hwidth : ((k : ℝ) + 1) * L / N - (k : ℝ) * L / N = L / N := by
         field_simp; ring
       have hmid_lo : (k * L / N + (k + 1) * L / N) / 2 - t ≤ L / N := by
@@ -604,16 +594,8 @@ theorem exists_uniform_chart_partition
     have := hτ htball
     simp only [hc_def, Set.mem_preimage] at this
     exact this
-  -- Assemble the basepoint function via choice.
   choose! tp htp using hchoose
   exact ⟨N, fun k => γ (tp k), hN_pos, fun k hk t ht => htp k hk t ht⟩
-
-/-! ### Continuity of the chart-curve on a chart-source piece
-
-A small helper: when `γ` stays inside the chart source of `α` on a compact
-interval, the chart-curve `extChartAt I α ∘ γ` and its velocity are
-continuous there — the input regularity the single-chart ODE primitive
-`parallel_local_existence_on_Icc` consumes. -/
 
 /-- The chart-curve `chartCurve α γ` is continuous on a compact interval on
 which `γ` stays inside the chart source of `α`. -/
@@ -628,16 +610,6 @@ theorem chartCurve_continuousOn_of_mapsTo
     rw [extChartAt_source (I := I) α]
     exact hsrc t ht
   exact hφ.comp hγ.continuousOn hmaps
-
-/-! ### Single-piece parallel transport as a bundle section
-
-On a compact sub-interval `[a, b]` on which `γ` stays in one chart source
-`α`, the single-chart `parallel_local_existence_on_Icc` produces an
-`E`-valued solution `Y` of the chart-`α` parallel-transport ODE with
-prescribed value at `a`. Wrapping `Y` through the inverse trivialisation
-`(triv α).symmL (γ s)` turns it into a genuine fibre-valued section
-`s ↦ V s ∈ T_{γ s} M` that is parallel — in the intrinsic moving-foot
-sense — at every interior point of `[a, b]`. -/
 
 /-- **Single-piece existence of an intrinsically-parallel bundle section.**
 On a compact interval `[a, b]` with `a < b` on which `γ` (smooth) stays in
@@ -659,12 +631,9 @@ theorem exists_piece_parallel_section [I.Boundaryless]
       (∀ t ∈ Set.Ioo a b, DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t) ∧
       (∀ t ∈ Set.Ioo a b, covDerivAlong (I := I) g γ V t = 0) := by
   classical
-  -- Velocity of the chart-α curve.
   set uPrime : ℝ → E := fun t => deriv (AlongCurve.chartCurve (I := I) α γ) t with huPrime_def
-  -- Continuity inputs for the single-chart ODE primitive.
   have hcurveCont : ContinuousOn (AlongCurve.chartCurve (I := I) α γ) (Set.Icc a b) :=
     chartCurve_continuousOn_of_mapsTo (I := I) α γ hγ.continuous hsrc
-  -- The chart-α curve is `C^∞` on the open neighbourhood `U` where `γ` is in source.
   set U : Set ℝ := γ ⁻¹' (chartAt H α).source with hU_def
   have hU_open : IsOpen U := (chartAt H α).open_source.preimage hγ.continuous
   have hUcd : ContDiffOn ℝ ∞ (AlongCurve.chartCurve (I := I) α γ) U := by
@@ -674,28 +643,20 @@ theorem exists_piece_parallel_section [I.Boundaryless]
       exact hφ.comp hγ.contMDiffOn (fun s hs => hs)
     have hfun : (AlongCurve.chartCurve (I := I) α γ) = ((extChartAt I α) ∘ γ) := rfl
     rw [hfun]; exact contMDiffOn_iff_contDiffOn.mp h_comp_mdiff
-  -- `uPrime` is continuous on `Icc a b` (⊆ U).
   have hIcc_sub_U : Set.Icc a b ⊆ U := fun t ht => hsrc t ht
   have huPrimeCont : ContinuousOn uPrime (Set.Icc a b) := by
     have hderiv_cd : ContDiffOn ℝ ∞ (deriv (AlongCurve.chartCurve (I := I) α γ)) U :=
       hUcd.deriv_of_isOpen hU_open (by exact_mod_cast (le_refl (∞ : WithTop ℕ∞)))
     exact (hderiv_cd.continuousOn).mono hIcc_sub_U
-  -- `γ t₀ ∈ chart source`; the chart-α coordinate of `v₀`.
   have hγa_src : γ t₀ ∈ (chartAt H α).source := hsrc t₀ ht₀
-  -- Initial value for the chart-α ODE: the chart-α coordinate of `v₀`.
   set y₀ : E := (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ t₀) v₀ with hy₀_def
-  -- The single-chart ODE solution `Y` on `[a, b]`.
   obtain ⟨Y, hY_deriv, hY_init⟩ :=
     parallel_local_existence_on_Icc (I := I) g α γ uPrime hab.le ht₀
       huPrimeCont hcurveCont hsrc y₀
-  -- The fibre-valued section: invert the trivialisation at the foot `γ s`.
   set V : ∀ t, TangentSpace I (γ t) := fun s =>
     (trivializationAt E (TangentSpace I) α).symmL ℝ (γ s) (Y s) with hV_def
-  -- ### Shared infrastructure.
-  -- `Icc a b ∈ 𝓝 t` for `t ∈ Ioo a b`, so `HasDerivWithinAt (Icc)` upgrades to `HasDerivAt`.
   have hIccNhds : ∀ t ∈ Set.Ioo a b, Set.Icc a b ∈ 𝓝 t := fun t ht =>
     Filter.mem_of_superset (Ioo_mem_nhds ht.1 ht.2) Set.Ioo_subset_Icc_self
-  -- The chart-α curve has `HasDerivAt (uPrime t) t` at interior points.
   have hcurveDeriv : ∀ t ∈ Set.Ioo a b,
       HasDerivAt (AlongCurve.chartCurve (I := I) α γ) (uPrime t) t := by
     intro t ht
@@ -703,19 +664,16 @@ theorem exists_piece_parallel_section [I.Boundaryless]
     have : DifferentiableAt ℝ (AlongCurve.chartCurve (I := I) α γ) t :=
       (hUcd.differentiableOn (by simp) t ht_U).differentiableAt (hU_open.mem_nhds ht_U)
     exact this.hasDerivAt
-  -- `Y` is parallel in the chart at `α` on `Ioo a b`.
   have hY_par_Ioo : IsParallelChart (I := I) g α γ uPrime Y (Set.Ioo a b) := by
     refine ⟨fun t ht => hcurveDeriv t ht, ?_⟩
     intro t ht
     have hd := (hY_deriv t (Set.mem_Icc_of_Ioo ht)).hasDerivAt (hIccNhds t ht)
     simpa using hd
-  -- The moving-foot chart rep equals the transition-push of `Y` near each `t ∈ Ioo a b`.
   have hrep_eq : ∀ t ∈ Set.Ioo a b,
       chartRepAt (I := I) γ V t =ᶠ[𝓝 t]
         (fun s => Geodesic.chartTransitionAt (I := I) α (γ t)
           (AlongCurve.chartCurve (I := I) α γ s) (Y s)) := by
     intro t ht
-    -- Near `t`, `γ s` lies in both chart sources of `α` and `γ t`.
     set W : Set ℝ := γ ⁻¹' ((chartAt H α).source ∩ (chartAt H (γ t)).source) with hW_def
     have hW_open : IsOpen W :=
       ((chartAt H α).open_source.inter (chartAt H (γ t)).open_source).preimage hγ.continuous
@@ -727,21 +685,16 @@ theorem exists_piece_parallel_section [I.Boundaryless]
     rw [trivCoord_comp_symmL_eq_chartTransitionAt (I := I) α (γ t) hsα hsβ (Y s)]
     rw [AlongCurve.chartCurve_def]
   refine ⟨V, ?_, ?_, ?_⟩
-  · -- `V t₀ = v₀`: `symmL (γ t₀) (Y t₀) = symmL (γ t₀) (y₀) = v₀`.
-    rw [hV_def]
+  · rw [hV_def]
     simp only
     rw [hY_init, hy₀_def]
     have hbase : γ t₀ ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
       rw [TangentBundle.trivializationAt_baseSet]; exact hγa_src
     exact (trivializationAt E (TangentSpace I) α).symmL_continuousLinearMapAt (R := ℝ) hbase v₀
-  · -- Differentiability of the moving-foot chart rep at interior points.
-    intro t ht
-    -- Transfer to the transition-push representation, differentiable by chain/product rule.
+  · intro t ht
     refine (DifferentiableAt.congr_of_eventuallyEq ?_ (hrep_eq t ht))
-    -- `s ↦ chartTransitionAt α (γt) (chartCurve α γ s) (Y s)` is differentiable at `t`.
     set Tαβ : E → (E →L[ℝ] E) := fun x => Geodesic.chartTransitionAt (I := I) α (γ t) x
       with hTαβ_def
-    -- `chartTransitionAt` is smooth on the transition source, which contains `chartCurve α γ t`.
     have hsrc_t : AlongCurve.chartCurve (I := I) α γ t ∈
         Geodesic.chartTransitionSource (I := I) α (γ t) :=
       Geodesic.extChartAt_mem_chartTransitionSource (I := I) α (γ t)
@@ -751,38 +704,27 @@ theorem exists_piece_parallel_section [I.Boundaryless]
     have hTdiff : DifferentiableAt ℝ Tαβ (AlongCurve.chartCurve (I := I) α γ t) :=
       ((Geodesic.chartTransitionAt_smooth (I := I) α (γ t)).contDiffAt
         (hTopen.mem_nhds hsrc_t)).differentiableAt (by simp)
-    -- `chartCurve α γ` is differentiable at `t`; `Y` is differentiable at `t`.
     have hcurve_diff : DifferentiableAt ℝ (AlongCurve.chartCurve (I := I) α γ) t :=
       (hcurveDeriv t ht).differentiableAt
     have hY_diff : DifferentiableAt ℝ Y t :=
       ((hY_deriv t (Set.mem_Icc_of_Ioo ht)).hasDerivAt (hIccNhds t ht)).differentiableAt
-    -- The CLM-valued map `s ↦ Tαβ (chartCurve α γ s)` is differentiable at `t`.
     have hTcomp_diff : DifferentiableAt ℝ
         (fun s => (Tαβ (AlongCurve.chartCurve (I := I) α γ s) : E →L[ℝ] E)) t :=
       hTdiff.comp t hcurve_diff
-    -- Apply the bilinear CLM-application differentiability.
     exact hTcomp_diff.clm_apply hY_diff
-  · -- Intrinsic covariant derivative vanishes at interior points.
-    intro t ht
-    -- Reduce to the chart-`(γ t)` covariant derivative.
+  · intro t ht
     rw [covDerivAlong_eq_zero_iff (I := I) g γ V t]
-    -- Work on a small open neighbourhood `o ⊆ Ioo a b` on which `γ` is in both
-    -- chart sources (`α` and `γ t`).
     set o : Set ℝ := Set.Ioo a b ∩ γ ⁻¹' (chartAt H (γ t)).source with ho_def
     have ho_open : IsOpen o :=
       isOpen_Ioo.inter ((chartAt H (γ t)).open_source.preimage hγ.continuous)
     have hto : t ∈ o := ⟨ht, mem_chart_source H (γ t)⟩
     have ho_sub : o ⊆ Set.Ioo a b := fun s hs => hs.1
-    -- On `o`, `γ s` is in both chart sources.
     have hoverlap : ∀ s ∈ o, γ s ∈ (chartAt H α).source ∩ (chartAt H (γ t)).source :=
       fun s hs => ⟨hsrc s (Set.mem_Icc_of_Ioo (ho_sub hs)), hs.2⟩
-    -- `Y` is parallel in chart `α` on `o`.
     have hY_par_o : IsParallelChart (I := I) g α γ uPrime Y o :=
       ⟨fun s hs => hY_par_Ioo.1 s (ho_sub hs), fun s hs => hY_par_Ioo.2 s (ho_sub hs)⟩
-    -- The transition-pushed representation is parallel in the chart at `γ t` on `o`.
     have hpush_par := parallel_chart_overlap_consistency (I := I) g α (γ t) γ hγ.continuous
       uPrime Y o hoverlap hY_par_o
-    -- The pushed velocity equals `deriv (chartCurve (γ t) γ)` pointwise on `o`.
     set Yβ : ℝ → E := fun s => Geodesic.chartTransitionAt (I := I) α (γ t)
       (AlongCurve.chartCurve (I := I) α γ s) (Y s) with hYβ_def
     have hvel_eq : ∀ s ∈ o,
@@ -791,7 +733,6 @@ theorem exists_piece_parallel_section [I.Boundaryless]
             (AlongCurve.chartCurve (I := I) α γ s) (uPrime s) := by
       intro s hs
       exact (hpush_par.1 s hs).deriv
-    -- Rewrite the push's `IsParallelChart` to the canonical foot velocity.
     have hpush_par' : IsParallelChart (I := I) g (γ t) γ
         (fun s => deriv (AlongCurve.chartCurve (I := I) (γ t) γ) s) Yβ o := by
       refine ⟨fun s hs => ?_, fun s hs => ?_⟩
@@ -801,30 +742,16 @@ theorem exists_piece_parallel_section [I.Boundaryless]
       · have h2 := hpush_par.2 s hs
         simp only [hvel_eq s hs]
         exact h2
-    -- The centered foot bridge: `chartCovDerivAlong g (γ t) γ Yβ t = 0`.
-    -- (Inlined: the parallel-transport ODE at `t` gives `deriv Yβ t = -Γ(…)`,
-    --  which cancels the Christoffel term of `chartCovDerivAlong`.)
     have hYβ_zero : chartCovDerivAlong (I := I) g (γ t) γ Yβ t = 0 := by
       have hd := hpush_par'.hasDerivAt hto
       rw [chartCovDerivAlong_def, hd.deriv]
       abel
-    -- `chartRepAt γ V t =ᶠ Yβ` near `t`, so their chart covariant derivatives agree at `t`.
     have hrep_eqβ : chartRepAt (I := I) γ V t =ᶠ[𝓝 t] Yβ := hrep_eq t ht
-    -- `chartCovDerivAlong` depends only on `deriv X t` and `X t`, both local in `X`.
     have hgoal : chartCovDerivAlong (I := I) g (γ t) γ (chartRepAt (I := I) γ V t) t =
         chartCovDerivAlong (I := I) g (γ t) γ Yβ t := by
       rw [chartCovDerivAlong_def, chartCovDerivAlong_def]
       rw [hrep_eqβ.deriv_eq, hrep_eqβ.eq_of_nhds]
     rw [hgoal, hYβ_zero]
-
-/-! ### Inner-product preservation for intrinsically-parallel sections
-
-Two sections `V`, `W` along `γ` whose intrinsic covariant derivatives vanish
-on `Icc lo hi` (and whose chart representations are differentiable there)
-preserve the genuine Riemannian inner product `g(γ t)(V t, W t)`: it is
-constant in `t`, equal to its value at `lo`. This is the metric-compatibility
-constancy argument, with both covariant-correction terms vanishing because
-both sections are parallel. -/
 
 set_option linter.unusedVariables false in
 /-- **Parallel transport preserves the inner product.** If two sections `V`, `W`
@@ -848,7 +775,6 @@ theorem parallel_transport_preserves_inner_product [I.Boundaryless]
       g.inner (γ t) (V t) (W t) = g.inner (γ lo) (V lo) (W lo) := by
   classical
   set f : ℝ → ℝ := fun t => g.inner (γ t) (V t) (W t) with hf_def
-  -- At every `t₀ ∈ Icc lo hi`, `f` has derivative `0` (chart pinned at the foot `γ t₀`).
   have hlocal : ∀ t₀ ∈ Set.Icc lo hi, HasDerivAt f 0 t₀ := by
     intro t₀ ht₀
     set α : M := γ t₀ with hα_def
@@ -862,7 +788,6 @@ theorem parallel_transport_preserves_inner_product [I.Boundaryless]
       hbaseSet_open.preimage hγ.continuous
     have hsrc_mem : {s : ℝ | γ s ∈ (trivializationAt E (TangentSpace I) α).baseSet} ∈ 𝓝 t₀ :=
       hsrc_open.mem_nhds hbase_t₀
-    -- Round trips for `V` and `W` near `t₀`.
     have hVround : ∀ s ∈ {s : ℝ | γ s ∈ (trivializationAt E (TangentSpace I) α).baseSet},
         (trivializationAt E (TangentSpace I) α).symmL ℝ (γ s) (Vrep s) = V s := by
       intro s hs
@@ -873,7 +798,6 @@ theorem parallel_transport_preserves_inner_product [I.Boundaryless]
       intro s hs
       simpa [hWrep_def, chartRepAt_apply] using
         (trivializationAt E (TangentSpace I) α).symmL_continuousLinearMapAt (R := ℝ) hs (W s)
-    -- `f` agrees with the chart-Gram form of `Vrep`, `Wrep` near `t₀`.
     have hf_eq : f =ᶠ[𝓝 t₀]
         fun s => AlongCurve.chartGramAlongCurve (I := I) g α γ Vrep Wrep s := by
       filter_upwards [hsrc_mem] with s hs
@@ -893,7 +817,6 @@ theorem parallel_transport_preserves_inner_product [I.Boundaryless]
         rw [TangentBundle.trivializationAt_baseSet] at hs
         exact hs
       rw [DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE_def, hinv]
-    -- The chart trajectory has the prescribed velocity at `t₀`, in the interior of the target.
     have hu_hasDerivAt : HasDerivAt (chartCurve (I := I) α γ)
         (deriv (chartCurve (I := I) α γ) t₀) t₀ := by
       have hcd : ContDiffAt ℝ ∞ (chartCurve (I := I) α γ) t₀ := by
@@ -910,13 +833,11 @@ theorem parallel_transport_preserves_inner_product [I.Boundaryless]
         (I := I) α ((extChartAt I α).map_source hxsrc)
     have hVrep_hasDerivAt : HasDerivAt Vrep (deriv Vrep t₀) t₀ := (hVdiff t₀ ht₀).hasDerivAt
     have hWrep_hasDerivAt : HasDerivAt Wrep (deriv Wrep t₀) t₀ := (hWdiff t₀ ht₀).hasDerivAt
-    -- The chart-Gram form has derivative `0` at `t₀` by the covariant product rule.
     have hgram := AlongCurve.chartGramAlongCurve_hasDerivAt_covariant (I := I) g α γ Vrep Wrep
       (uPrime := fun _ => deriv (chartCurve (I := I) α γ) t₀)
       (Vprime := fun _ => deriv Vrep t₀)
       (Wprime := fun _ => deriv Wrep t₀)
       hu_hasDerivAt hmem_int hVrep_hasDerivAt hWrep_hasDerivAt
-    -- Both covariant-correction terms vanish because both sections are parallel.
     have hcorrV :
         deriv Vrep t₀ +
           chartChristoffelContraction (I := I) g α
@@ -941,7 +862,6 @@ theorem parallel_transport_preserves_inner_product [I.Boundaryless]
       simp only [hcorrV, hcorrW]
       simp
     exact hderiv0.congr_of_eventuallyEq hf_eq
-  -- `f` continuous, zero right-derivative, hence constant on `Icc lo hi`.
   have hcont : ContinuousOn f (Set.Icc lo hi) :=
     fun t ht => ((hlocal t ht).continuousAt).continuousWithinAt
   have hderivWithin : ∀ x ∈ Set.Ico lo hi, HasDerivWithinAt f 0 (Set.Ici x) x :=
@@ -950,14 +870,6 @@ theorem parallel_transport_preserves_inner_product [I.Boundaryless]
     constant_of_has_deriv_right_zero hcont hderivWithin
   intro t ht
   exact hconst t ht
-
-/-! ### Intrinsic uniqueness of parallel transport
-
-Two intrinsically-parallel sections that agree at one point of `Icc lo hi` agree
-everywhere on `Icc lo hi`. The mechanism is metric compatibility together with
-positive-definiteness: the difference `D := V - W` is itself parallel (covariant
-derivative is ℝ-linear), so its squared `g`-length is constant; vanishing at the
-agreement point forces `D ≡ 0`. -/
 
 /-- **Uniqueness of parallel transport.** If `V` and `W` are sections along the
 smooth curve `γ` with vanishing intrinsic covariant derivative on `Icc lo hi`
@@ -978,9 +890,7 @@ theorem parallel_transport_unique_of_eq_at_point [I.Boundaryless]
     {t₀ : ℝ} (ht₀ : t₀ ∈ Set.Icc lo hi) (hagree : V t₀ = W t₀) :
     ∀ t ∈ Set.Icc lo hi, V t = W t := by
   classical
-  -- The difference section `D := V - W`.
   set D : ∀ t, TangentSpace I (γ t) := fun s => V s - W s with hD_def
-  -- `D = V + (-1) • W`; its chart rep is differentiable, and it is parallel.
   have hDdiff : ∀ t ∈ Set.Icc lo hi,
       DifferentiableAt ℝ (chartRepAt (I := I) γ D t) t := by
     intro t ht
@@ -991,7 +901,6 @@ theorem parallel_transport_unique_of_eq_at_point [I.Boundaryless]
     exact (hVdiff t ht).sub (hWdiff t ht)
   have hDpar : ∀ t ∈ Set.Icc lo hi, covDerivAlong (I := I) g γ D t = 0 := by
     intro t ht
-    -- `D s = V s + (-1 : ℝ) • W s`.
     have hDfun : D = fun s => V s + ((-1 : ℝ) • W s) := by
       funext s; rw [hD_def]; simp [sub_eq_add_neg]
     rw [hDfun]
@@ -1005,24 +914,19 @@ theorem parallel_transport_unique_of_eq_at_point [I.Boundaryless]
     rw [covDerivAlong_smul (I := I) g γ (-1 : ℝ) W t]
     rw [hVpar t ht, hWpar t ht]
     simp
-  -- The squared `g`-length of `D` is constant, hence `0` everywhere (since `D t₀ = 0`).
   have hDt₀ : D t₀ = 0 := by rw [hD_def]; simp only; rw [hagree]; abel
   have hconst := parallel_transport_preserves_inner_product (I := I) g γ hγ hlohi D D
     hDdiff hDdiff hDpar hDpar
   intro t ht
-  -- `g.inner (γ t) (D t) (D t) = g.inner (γ lo) (D lo) (D lo)`... pin to `t₀`.
   have hzero_t₀ : g.inner (γ t₀) (D t₀) (D t₀) = 0 := by
     rw [hDt₀]; simp
-  -- `g.inner (γ t) (D t) (D t) = g.inner (γ lo) (D lo) (D lo) = g.inner (γ t₀) (D t₀) (D t₀)`.
   have hval_t : g.inner (γ t) (D t) (D t) = g.inner (γ lo) (D lo) (D lo) := hconst t ht
   have hval_t₀ : g.inner (γ t₀) (D t₀) (D t₀) = g.inner (γ lo) (D lo) (D lo) := hconst t₀ ht₀
   have hDt_sq : g.inner (γ t) (D t) (D t) = 0 := by
     rw [hval_t, ← hval_t₀, hzero_t₀]
-  -- Positive-definiteness: squared length `0` forces `D t = 0`.
   have hDt : D t = 0 := by
     by_contra hne
     exact absurd hDt_sq (ne_of_gt (g.pos (γ t) (D t) hne))
-  -- Conclude `V t = W t`.
   have : V t - W t = 0 := hDt
   rw [sub_eq_zero] at this
   exact this
@@ -1066,7 +970,6 @@ theorem exists_uniform_chart_radius
     lebesgue_number_lemma_of_metric (isCompact_Icc (a := (-1 : ℝ)) (b := L + 1)) hc_open hcover
   refine ⟨min (δ / 2) 1, lt_min (by positivity) one_pos, ?_⟩
   intro t ht
-  -- `t ∈ Icc 0 L ⊆ Icc (-1) (L+1)`.
   have ht_in : t ∈ Set.Icc (-1 : ℝ) (L + 1) := ⟨by linarith [ht.1], by linarith [ht.2]⟩
   obtain ⟨τ, hτ⟩ := hδ t ht_in
   refine ⟨γ τ, fun s hs => ?_⟩
@@ -1081,15 +984,6 @@ theorem exists_uniform_chart_radius
   have := hτ hsball
   simp only [hc_def, Set.mem_preimage] at this
   exact this
-
-/-! ### Global parallel transport on a compact interval
-
-Assembling the single-chart pieces into one globally-defined parallel section.
-The construction proceeds by induction on the partition: at each step the
-section already built on `[0, sₖ]` is extended over the next chart-piece, the
-overlap pinned by `parallel_transport_unique_of_eq_at_point`. Because every point of
-`Icc 0 L` lies in the open interior of some chart-piece, the intrinsic
-parallelism and chart-rep differentiability hold at every `t ∈ Icc 0 L`. -/
 
 /-- **Existence of global parallel transport on `Icc 0 L`.** For a smooth curve
 `γ`, `L > 0`, and any initial tangent vector `v₀ ∈ T_{γ 0} M`, there is a
@@ -1123,11 +1017,9 @@ theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
       (∀ t ∈ Set.Ioo (-δ) (L + δ), DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t) ∧
       (∀ t ∈ Set.Ioo (-δ) (L + δ), covDerivAlong (I := I) g γ V t = 0) := by
   classical
-  -- Uniform chart radius `r`; step `= r / 4`.
   obtain ⟨r, hr_pos, hr⟩ := exists_uniform_chart_radius (H := H) γ hγ.continuous L
   set step : ℝ := r / 4 with hstep_def
   have hstep_pos : 0 < step := by rw [hstep_def]; positivity
-  -- Reach after `n` steps (capped at `L`).
   set c : ℕ → ℝ := fun n => min L (n * step) with hc_def
   have hc_nonneg : ∀ n, 0 ≤ c n := fun n => le_min hL.le (by positivity)
   have hc_le : ∀ n, c n ≤ L := fun n => min_le_left _ _
@@ -1140,17 +1032,14 @@ theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
     refine le_min (min_le_left _ _) (le_trans (min_le_right _ _) ?_)
     have : (n : ℝ) * step ≤ ((n : ℝ) + 1) * step := by nlinarith [hstep_pos]
     exact this
-  -- If `c n = L` then `c (n+1) = L`.
   have hc_stuck : ∀ n, c n = L → c (n + 1) = L := fun n hn =>
     le_antisymm (hc_le (n + 1)) (hn ▸ hc_mono n)
-  -- The inductive predicate: a parallel section on `Ioo (-step) (c n + step)`.
   set Q : ℕ → Prop := fun n => ∃ V : ∀ t, TangentSpace I (γ t),
       V 0 = v₀ ∧
       (∀ t ∈ Set.Ioo (-step) (c n + step),
         DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t) ∧
       (∀ t ∈ Set.Ioo (-step) (c n + step), covDerivAlong (I := I) g γ V t = 0)
     with hQ_def
-  -- A single chart-piece centred at a point `p ∈ Icc 0 L`, valid on `Ioo (p-step) (p+2 step)`.
   have hpiece : ∀ p ∈ Set.Icc (0 : ℝ) L, ∀ w : TangentSpace I (γ p),
       ∃ Vp : ∀ t, TangentSpace I (γ t), Vp p = w ∧
         (∀ t ∈ Set.Ioo (p - step) (p + 2 * step),
@@ -1159,7 +1048,6 @@ theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
           covDerivAlong (I := I) g γ Vp t = 0) := by
     intro p hp w
     obtain ⟨α, hα⟩ := hr p hp
-    -- The piece interval `[p - step, p + 2 step]` is inside `[p - r, p + r]`.
     have hsub : Set.Icc (p - step) (p + 2 * step) ⊆ Set.Icc (p - r) (p + r) := by
       intro s hs
       refine ⟨?_, ?_⟩
@@ -1174,7 +1062,6 @@ theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
     obtain ⟨Vp, hVp_init, hVp_diff, hVp_par⟩ :=
       exists_piece_parallel_section (I := I) g α γ hγ hlt hp_mem hsrc' w
     exact ⟨Vp, hVp_init, hVp_diff, hVp_par⟩
-  -- ### Base case: `Q 0`.
   have hc0 : c 0 = 0 := by
     change min L ((0 : ℕ) * step) = 0
     rw [Nat.cast_zero, zero_mul]; exact min_eq_right hL.le
@@ -1188,11 +1075,9 @@ theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
     · intro t ht
       rw [hc0] at ht
       refine hV0_par t ⟨by linarith [ht.1], by linarith [ht.2, hstep_pos]⟩
-  -- ### Inductive step: `Q n → Q (n+1)`.
   have hQstep : ∀ n, Q n → Q (n + 1) := by
     intro n hn
     obtain ⟨Vn, hVn_init, hVn_diff, hVn_par⟩ := hn
-    -- If already at `L`, the predicate is unchanged.
     by_cases hcL : c n = L
     · have hcn1L : c (n + 1) = L := hc_stuck n hcL
       refine ⟨Vn, hVn_init, ?_, ?_⟩
@@ -1202,8 +1087,7 @@ theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
       · intro t ht
         refine hVn_par t ⟨ht.1, ?_⟩
         rw [hcn1L] at ht; rw [hcL]; exact ht.2
-    · -- Genuine extension. `c n < L`, so `c n = n * step`.
-      have hcn_lt : c n < L := lt_of_le_of_ne (hc_le n) hcL
+    · have hcn_lt : c n < L := lt_of_le_of_ne (hc_le n) hcL
       have hcn_def : c n = min L ((n : ℝ) * step) := rfl
       have hns_lt : (n : ℝ) * step < L := by
         have : min L ((n : ℝ) * step) < L := by rw [← hcn_def]; exact hcn_lt
@@ -1213,9 +1097,7 @@ theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
       have hcn_eq : c n = (n : ℝ) * step := by
         rw [hcn_def]; exact min_eq_right (le_of_lt hns_lt)
       have hcn_mem : c n ∈ Set.Icc (0 : ℝ) L := ⟨hc_nonneg n, hc_le n⟩
-      -- The centred piece at `c n` with the value `Vn (c n)`.
       obtain ⟨Vp, hVp_init, hVp_diff, hVp_par⟩ := hpiece (c n) hcn_mem (Vn (c n))
-      -- Overlap interval `[c n - step/2, c n]`, where both `Vn` and `Vp` are parallel + diff.
       set ov_lo : ℝ := c n - step / 2 with hov_lo
       have hov_lo_lt : ov_lo ≤ c n := by rw [hov_lo]; linarith [hstep_pos]
       have hVn_dom : Set.Icc ov_lo (c n) ⊆ Set.Ioo (-step) (c n + step) := by
@@ -1226,20 +1108,17 @@ theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
         intro s hs
         rw [hov_lo] at hs
         refine ⟨by linarith [hs.1, hstep_pos], by linarith [hs.2, hstep_pos]⟩
-      -- Uniqueness on the overlap: `Vn = Vp` there (they agree at `c n`).
       have hagree : ∀ s ∈ Set.Icc ov_lo (c n), Vn s = Vp s := by
         refine parallel_transport_unique_of_eq_at_point (I := I) g γ hγ hov_lo_lt Vn Vp
           (fun s hs => hVn_diff s (hVn_dom hs)) (fun s hs => hVp_diff s (hVp_dom hs))
           (fun s hs => hVn_par s (hVn_dom hs)) (fun s hs => hVp_par s (hVp_dom hs))
           ⟨hov_lo_lt, le_refl _⟩ ?_
         rw [hVp_init]
-      -- The glued section.
       set Vc : ∀ t, TangentSpace I (γ t) := fun s => if s ≤ c n then Vn s else Vp s with hVc_def
       have hVc0 : Vc 0 = v₀ := by
         rw [hVc_def]; simp only
         rw [if_pos (by linarith [hc_nonneg n] : (0 : ℝ) ≤ c n)]
         exact hVn_init
-      -- Range facts for `c (n+1)`.
       have hcast : ((n + 1 : ℕ) : ℝ) * step = (n : ℝ) * step + step := by
         push_cast; ring
       have hcn1_eq : c (n + 1) = min L ((n : ℝ) * step + step) := by
@@ -1247,19 +1126,15 @@ theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
         rw [hcast]
       have hcn1_le : c (n + 1) ≤ c n + step := by
         rw [hcn1_eq, hcn_eq]; exact min_le_right _ _
-      -- The glue equals `Vn` near points left of `c n`, and `Vp` near points right of `ov_lo`.
       refine ⟨Vc, hVc0, ?_, ?_⟩
-      · -- Differentiability on `Ioo (-step) (c (n+1) + step)`.
-        intro t ht
+      · intro t ht
         by_cases htc : t < c n
-        · -- Left region: `Vc =ᶠ Vn`.
-          have heq : ∀ᶠ s in 𝓝 t, Vc s = Vn s := by
+        · have heq : ∀ᶠ s in 𝓝 t, Vc s = Vn s := by
             filter_upwards [eventually_lt_nhds htc] with s hs
             rw [hVc_def]; simp only; rw [if_pos (le_of_lt hs)]
           rw [(chartRepAt_eventuallyEq_of_eventuallyEq (I := I) γ heq).differentiableAt_iff]
           exact hVn_diff t ⟨ht.1, by linarith [htc, hstep_pos]⟩
-        · -- Right region (including the junction): `Vc =ᶠ Vp`.
-          replace htc := not_lt.mp htc
+        · replace htc := not_lt.mp htc
           have ht_gt : ov_lo < t := by rw [hov_lo]; linarith [htc, hstep_pos]
           have heq : ∀ᶠ s in 𝓝 t, Vc s = Vp s := by
             filter_upwards [eventually_gt_nhds ht_gt] with s hs
@@ -1271,8 +1146,7 @@ theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
           refine hVp_diff t ⟨by linarith [htc, hstep_pos], ?_⟩
           have : c (n + 1) + step ≤ c n + 2 * step := by linarith [hcn1_le, hstep_pos]
           linarith [ht.2, this]
-      · -- Parallelism on `Ioo (-step) (c (n+1) + step)`.
-        intro t ht
+      · intro t ht
         by_cases htc : t < c n
         · have heq : ∀ᶠ s in 𝓝 t, Vc s = Vn s := by
             filter_upwards [eventually_lt_nhds htc] with s hs
@@ -1291,9 +1165,7 @@ theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
           refine hVp_par t ⟨by linarith [htc, hstep_pos], ?_⟩
           have : c (n + 1) + step ≤ c n + 2 * step := by linarith [hcn1_le, hstep_pos]
           linarith [ht.2, this]
-  -- ### Assemble: `Q n` for all `n`, then take `n` large enough that `c n = L`.
   have hQall : ∀ n, Q n := fun n => Nat.rec hQ0 hQstep n
-  -- Choose `N` with `N * step ≥ L`.
   obtain ⟨N, hN⟩ := exists_nat_gt (L / step)
   have hN_ge : (N : ℝ) * step ≥ L := by
     rw [ge_iff_le, ← div_le_iff₀ hstep_pos]; exact le_of_lt hN
@@ -1301,7 +1173,6 @@ theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
     rw [hc_def]; exact min_eq_left hN_ge
   obtain ⟨V, hV_init, hV_diff, hV_par⟩ := hQall N
   rw [hcN] at hV_diff hV_par
-  -- The window is `Ioo (-step) (L + step)`; expose `δ := step`.
   refine ⟨step, hstep_pos, V, hV_init, ?_, ?_⟩
   · intro t ht
     exact hV_diff t ⟨ht.1, ht.2⟩

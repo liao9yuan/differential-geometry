@@ -62,15 +62,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Continuity of the Euclidean-side iterated Fréchet derivative on the
-chart target -/
 
 /-- On the open Euclidean chart target `(extChartAt I α).target`, the `j`-th
 iterated Fréchet derivative of the composite
@@ -94,7 +89,6 @@ lemma iteratedFDeriv_tensorChartComponentRaw_comp_symm_continuousOn
           y)
       ((extChartAt I α).target) := by
   classical
-  -- Extract the C^∞-on-target witness for the composite F_E : E → ℝ.
   have hraw_src : ContMDiffOn I 𝓘(ℝ) ∞
       (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx)
       ((chartAt H α).source) :=
@@ -118,10 +112,8 @@ lemma iteratedFDeriv_tensorChartComponentRaw_comp_symm_continuousOn
         (extChartAt I α).symm)
       (extChartAt I α).target :=
     hcomp_E.contDiffOn
-  -- The chart target is open.
   have hopen : IsOpen ((extChartAt I α).target) :=
     isOpen_extChartAt_target (I := I) α
-  -- Apply ContDiffOn.continuousOn_iteratedFDerivWithin at order j.
   have hcontWithin :
       ContinuousOn
         (iteratedFDerivWithin ℝ j
@@ -131,13 +123,10 @@ lemma iteratedFDeriv_tensorChartComponentRaw_comp_symm_continuousOn
         ((extChartAt I α).target) :=
     hcontDiff_E.continuousOn_iteratedFDerivWithin (by exact_mod_cast le_top)
       hopen.uniqueDiffOn
-  -- Identify iteratedFDerivWithin = iteratedFDeriv on the open set.
   refine hcontWithin.congr (fun y hy => ?_)
   exact (iteratedFDerivWithin_of_isOpen (𝕜 := ℝ)
     (f := (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx) ∘
       (extChartAt I α).symm) j hopen hy).symm
-
-/-! ## Continuity of the M-side composite on the chart source -/
 
 /-- The composite `b ↦ iteratedFDeriv ℝ j F_E (extChartAt I α b)` (with
 `F_E := tensorChartComponentRaw g r s T₀ α Idx Jdx ∘ (extChartAt I α).symm`) is
@@ -157,17 +146,14 @@ private lemma comp_extChartAt_continuousOn_chart_source
           ((extChartAt I α) b))
       ((chartAt H α).source) := by
   classical
-  -- iteratedFDeriv is continuous on the chart target.
   have hcont_target :=
     iteratedFDeriv_tensorChartComponentRaw_comp_symm_continuousOn
       (I := I) (M := M) g r s T₀ α Idx Jdx j
-  -- extChartAt I α is continuous on its source = chart source.
   have hext_cont : ContinuousOn (fun b : M => (extChartAt I α) b)
       ((extChartAt I α).source) := continuousOn_extChartAt (I := I) α
   have hsrc_eq : (extChartAt I α).source = (chartAt H α).source :=
     extChartAt_source (I := I) α
   rw [hsrc_eq] at hext_cont
-  -- maps into the chart target on the chart source.
   have hmaps : Set.MapsTo (fun b : M => (extChartAt I α) b)
       ((chartAt H α).source) ((extChartAt I α).target) := by
     intro b hb
@@ -175,8 +161,6 @@ private lemma comp_extChartAt_continuousOn_chart_source
       rw [extChartAt_source (I := I)]; exact hb
     exact (extChartAt I α).map_source hb'
   exact hcont_target.comp hext_cont hmaps
-
-/-! ## Continuity of the M-side composite using the Borel-measurable extension -/
 
 /-- The composite `b ↦ iteratedFDeriv ℝ j F_E (extChartAtExt α b)` is continuous
 on the chart source. On the chart source, `extChartAtExt α = extChartAt I α`, so
@@ -203,8 +187,6 @@ private lemma comp_extChartAtExt_continuousOn_chart_source
   have h_eq : extChartAtExt (I := I) α b = (extChartAt I α) b :=
     extChartAtExt_apply_of_mem (I := I) (α := α) hb
   rw [h_eq]
-
-/-! ## Headline -/
 
 /-- **Borel-measurability on `M` of the chart-`α` pulled-back iterated Fréchet
 derivative data.**
@@ -241,7 +223,6 @@ theorem compDataIJ_chart_on_M_measurable
             (extChartAt I α).symm)
           (extChartAtExt (I := I) α b)‖ ^ 2) := by
   classical
-  -- Set up the inner function and its continuity on the chart source.
   set f : M → (E [×j]→L[ℝ] ℝ) := fun b =>
     iteratedFDeriv ℝ j
       ((tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx) ∘
@@ -251,33 +232,19 @@ theorem compDataIJ_chart_on_M_measurable
     rw [hf_def]
     exact comp_extChartAtExt_continuousOn_chart_source
       (I := I) (M := M) g r s T₀ α Idx Jdx j
-  -- The chart source is open, hence measurable.
   have hsrc_open : IsOpen ((chartAt H α).source) := (chartAt H α).open_source
   have hsrc_meas : MeasurableSet ((chartAt H α).source) := hsrc_open.measurableSet
-  -- Constant zero on the chart-source complement is continuous.
   have hzero_cont : ContinuousOn (fun _ : M => (0 : (E [×j]→L[ℝ] ℝ)))
       ((chartAt H α).source)ᶜ := continuous_const.continuousOn
-  -- Rewrite f as the piecewise of f and 0.
   set f_pw : M → (E [×j]→L[ℝ] ℝ) := ((chartAt H α).source).piecewise f (fun _ => 0)
     with hf_pw_def
-  -- f_pw is Borel-measurable by ContinuousOn.measurable_piecewise.
   have hf_pw_meas : Measurable f_pw := by
     rw [hf_pw_def]
     exact ContinuousOn.measurable_piecewise hf_cont_src hzero_cont hsrc_meas
-  -- The original function `b ↦ ‖f b‖²` agrees on the chart source with
-  -- `b ↦ ‖f_pw b‖²` and is zero outside (where `extChartAtExt α b = 0`, so
-  -- `f b = iteratedFDeriv ℝ j (...) 0`, which is a constant — but not
-  -- necessarily zero). We must therefore handle the off-source piece directly.
-  -- The cleanest route: write the target function as a piecewise itself.
-  -- On the chart source: equals ‖f b‖² (continuous, hence measurable).
-  -- Off the chart source: extChartAtExt α b = 0, so f b = iteratedFDeriv ℝ j F 0
-  -- (a constant), and the target function is the constant ‖iteratedFDeriv ℝ j F 0‖².
-  -- Both pieces are measurable; the piecewise is Borel-measurable.
   set c : E [×j]→L[ℝ] ℝ :=
     iteratedFDeriv ℝ j
       ((tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx) ∘
         (extChartAt I α).symm) 0 with hc_def
-  -- The norm-squared composed.
   have h_target_eq : (fun b : M => ‖f b‖ ^ 2) =
       ((chartAt H α).source).piecewise
         (fun b : M => ‖f b‖ ^ 2)
@@ -286,7 +253,6 @@ theorem compDataIJ_chart_on_M_measurable
     by_cases hb : b ∈ (chartAt H α).source
     · rw [Set.piecewise_eq_of_mem _ _ _ hb]
     · rw [Set.piecewise_eq_of_notMem _ _ _ hb]
-      -- Off source: extChartAtExt α b = 0, so f b = c.
       have hext_zero : extChartAtExt (I := I) α b = 0 :=
         extChartAtExt_apply_of_notMem (I := I) (α := α) hb
       have hf_b : f b = c := by
@@ -297,13 +263,9 @@ theorem compDataIJ_chart_on_M_measurable
         rw [hext_zero]
       rw [hf_b]
   rw [h_target_eq]
-  -- Measurability of the piecewise: each piece is measurable, and the chart
-  -- source is a measurable set.
-  -- `b ↦ ‖f b‖²` is continuous on (chart source) — hence measurable on it.
   have hf_norm_sq_cont : ContinuousOn (fun b : M => ‖f b‖ ^ 2)
       ((chartAt H α).source) :=
     (hf_cont_src.norm).pow 2
-  -- `b ↦ ‖c‖²` is constant, hence continuous, hence measurable.
   have hconst_cont : ContinuousOn (fun _ : M => ‖c‖ ^ 2)
       ((chartAt H α).source)ᶜ := continuous_const.continuousOn
   exact ContinuousOn.measurable_piecewise hf_norm_sq_cont hconst_cont hsrc_meas

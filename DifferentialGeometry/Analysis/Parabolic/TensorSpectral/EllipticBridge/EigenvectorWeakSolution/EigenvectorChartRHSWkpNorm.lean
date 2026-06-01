@@ -122,37 +122,12 @@ open DifferentialGeometry.Analysis.Laplacian.MetricExtension
   hiding chartTargetEuclid chartTargetEuclid_isOpen
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The quantitative smooth-coefficient `wkpNorm` bound with ae-vanishing
-
-The two cross-Leibniz double-sum terms and the two divergence-limit terms are
-products of a `C^∞`-on-the-chart-target coefficient with a `W^{K,2}` factor that
-vanishes almost everywhere off a compact kernel inside the chart target. The
-helper below records the order-`K` `wkpNorm` analogue of the `MemWkp` closure
-`memWkp_smoothCoef_mul_aeZeroFactor`: the product lies in `W^{K,2}` and its
-order-`K` Sobolev norm is bounded by an explicit constant times the order-`K`
-norm of the factor.
-
-The proof cuts the coefficient off to a globally `C^∞` compactly-supported
-representative `χ · coef` (`χ` a smooth cutoff equal to `1` on a closed
-thickening of the kernel, supported in the chart target). Its iterated
-derivatives up to order `K` are uniformly bounded, so the quantitative
-global-smoothness Leibniz bound `wkpNorm_smul_smooth_bounded_le` applies. The
-cut-off product `(χ · coef) · factor` agrees almost everywhere with
-`coef · factor` on `volume.restrict` of the chart target — on the thickening
-`χ = 1`; off the kernel the factor ae-vanishes — so `wkpNorm` transfers. -/
 
 section SmoothCoefBound
 
@@ -200,13 +175,9 @@ private lemma wkpNorm_smoothCoef_mul_aeZeroFactor_le
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
   have hΩ_meas : MeasurableSet Ω := hΩ_open.measurableSet
-  -- A smooth cutoff `χ` equal to `1` on a closed thickening of `Kkern`,
-  -- supported in the chart target `Ω`.
   obtain ⟨δ, χ, hδ_pos, hδ_in, hχ_smooth, hχ_cs, _hχ_range, hχ_one, hχ_tsupp⟩ :=
     exists_smooth_cutoff_with_neighborhood (d := Module.finrank ℝ E)
       hKkern_compact hΩ_open hKkern_in
-  -- `χ · coef` is globally smooth: smooth on `tsupport χ ⊆ Ω`, identically zero
-  -- (hence smooth) on the open complement of `tsupport χ`.
   have hχ_coef_smooth : ContDiff ℝ (⊤ : ℕ∞) (fun y => χ y * coef y) := by
     have h_open_compl : IsOpen ((tsupport χ)ᶜ) :=
       (isClosed_tsupport _).isOpen_compl
@@ -223,27 +194,21 @@ private lemma wkpNorm_smoothCoef_mul_aeZeroFactor_le
       exact contDiffAt_const.congr_of_eventuallyEq h_eq_zero
   have hχ_coef_cs : HasCompactSupport (fun y => χ y * coef y) :=
     HasCompactSupport.mul_right hχ_cs
-  -- A uniform bound on the iterated derivatives of `χ · coef` up to order `K`.
   obtain ⟨C₀, hC₀_nn, hC₀_bd⟩ :=
     exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
       (d := Module.finrank ℝ E) hχ_coef_smooth hχ_coef_cs K
-  -- The quantitative global-smoothness Leibniz bound for the cut-off
-  -- coefficient.
   obtain ⟨Kc, hKc_pos, hKc_bd⟩ :=
     wkpNorm_smul_smooth_bounded_le (d := Module.finrank ℝ E) K
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) (by norm_num) hΩ_open hχ_coef_smooth
       hC₀_nn (fun j hj y _hy => hC₀_bd y j hj)
-  -- `(χ · coef) · factor =ᵐ coef · factor` on `volume.restrict Ω`.
   set Cδ : Set EuclN := Metric.cthickening δ Kkern with hCδ_def
   have hCδ_closed : IsClosed Cδ := Metric.isClosed_cthickening
   have hCδ_meas : MeasurableSet Cδ := hCδ_closed.measurableSet
-  -- The factor ae-vanishes off `Kkern` against `volume.restrict Ω`.
   have hfactor_ae_zero' : ∀ᵐ y ∂((volume : Measure EuclN).restrict Ω),
       y ∉ Kkern → factor y = 0 := by
     have h := hfactor_ae_zero
     rw [chartL2Measure] at h
     exact h
-  -- On `Ω ∩ Cδ`: `χ = 1`, so `(χ · coef) · factor = coef · factor`.
   have h_eq_on_inter : (fun y => (χ y * coef y) * factor y)
       =ᵐ[(volume : Measure EuclN).restrict (Ω ∩ Cδ)]
       (fun y => coef y * factor y) := by
@@ -252,7 +217,6 @@ private lemma wkpNorm_smoothCoef_mul_aeZeroFactor_le
     have hχy : χ y = 1 := hχ_one y hy.2
     change (χ y * coef y) * factor y = coef y * factor y
     rw [hχy]; ring
-  -- On `Ω \ Cδ ⊆ Ω \ Kkern`: the factor ae-vanishes, so both products ae-vanish.
   have hKkern_in_Cδ : Kkern ⊆ Cδ := Metric.self_subset_cthickening _
   have h_eq_on_diff : (fun y => (χ y * coef y) * factor y)
       =ᵐ[(volume : Measure EuclN).restrict (Ω \ Cδ)]
@@ -290,8 +254,6 @@ private lemma wkpNorm_smoothCoef_mul_aeZeroFactor_le
       rw [← h_cover]
     rw [hΩ_restrict_eq, Measure.restrict_union h_disj h_diff_meas]
     exact (ae_add_measure_iff).mpr ⟨h_eq_on_inter, h_eq_on_diff⟩
-  -- `(χ · coef) · factor ∈ MemWkp K 2` via `MemWkp.smul_smooth_bounded`;
-  -- transferred to `coef · factor` through the almost-everywhere equality.
   have h_prod_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
       (fun y => (χ y * coef y) * factor y) Ω :=
     MemWkp.smul_smooth_bounded (d := Module.finrank ℝ E) K
@@ -302,8 +264,6 @@ private lemma wkpNorm_smoothCoef_mul_aeZeroFactor_le
     (MemWkp_congr_ae (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae_eq).mp h_prod_memWkp
   refine ⟨h_memWkp, Kc, le_of_lt hKc_pos, ?_⟩
-  -- The order-`K` `wkpNorm` of `coef · factor` equals that of `(χ · coef) ·
-  -- factor`, which the Leibniz bound controls.
   have h_norm_eq : wkpNorm (d := Module.finrank ℝ E) K 2
       (fun y => coef y * factor y) Ω
       = wkpNorm (d := Module.finrank ℝ E) K 2
@@ -338,11 +298,6 @@ private lemma memWkpFinsetSum
 
 end SmoothCoefBound
 
-/-! ## The reciprocal chart density
-
-The two divergence-limit bracket terms carry the reciprocal chart density
-`1 / densityOnEuclid g α` as a `C^∞`-on-the-chart-target coefficient. -/
-
 set_option linter.unusedSectionVars false in
 /-- The reciprocal `1 / densityOnEuclid g α` of the chart density is `C^∞` on the
 open Euclidean chart target: the chart density is `C^∞`
@@ -354,14 +309,6 @@ private lemma one_div_densityOnEuclid_contDiffOn
       (chartTargetEuclid (I := I) (M := M) α) :=
   contDiffOn_const.div (densityOnEuclid_contDiffOn (I := I) g α)
     (fun _ hy => (densityOnEuclid_pos (I := I) g α hy).ne')
-
-/-! ## A finite-sum aggregation lemma
-
-A finite indexed family of summands, each having its order-`K` `wkpNorm` bounded
-by `ENNReal.ofReal Cⱼ` times one fixed aggregate `ℝ≥0∞`-quantity `A`, has its
-summed `wkpNorm` bounded by `ENNReal.ofReal` of an explicit constant times `A`.
-The explicit constant is the sum of all the per-summand constants times the
-cardinality of the index type. -/
 
 section Aggregation
 
@@ -383,13 +330,11 @@ private lemma wkpNorm_sum_le_const_mul_aggregate
   choose Cf hCf_nn hCf using hbd
   refine ⟨(∑ j : ι, Cf j) * (Fintype.card ι : ℝ),
     mul_nonneg (Finset.sum_nonneg (fun j _ => hCf_nn j)) (by positivity), ?_⟩
-  -- The triangle inequality `wkpNorm_sum_le`.
   have h_tri : wkpNorm (d := Module.finrank ℝ E) K 2
       (fun y => ∑ j : ι, F j y) Ω ≤ ∑ j : ι,
         wkpNorm (d := Module.finrank ℝ E) K 2 (F j) Ω :=
     wkpNorm_sum_le (d := Module.finrank ℝ E) (by norm_num) hΩ
       (Finset.univ : Finset ι) F (fun j _ => hF j)
-  -- Each per-summand `wkpNorm` is `≤ ENNReal.ofReal (∑ Cf) * A`.
   have h_step : ∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (F j) Ω
       ≤ ∑ _j : ι, ENNReal.ofReal (∑ k : ι, Cf k) * A := by
     refine Finset.sum_le_sum (fun j _ => ?_)
@@ -416,11 +361,6 @@ private lemma wkpNorm_sum_le_const_mul_aggregate
         rw [h_cast]
 
 end Aggregation
-
-/-! ## Aggregate-domination arithmetic
-
-Each of the seven summands of the seven-fold `ℝ≥0∞` aggregate is dominated by
-the aggregate. -/
 
 section Domination
 
@@ -465,22 +405,10 @@ private lemma le_sevenSum (a₁ a₂ a₃ a₄ a₅ a₆ a₇ : ℝ≥0∞) :
 
 end Domination
 
-/-! ## The conversion `ENNReal.ofReal 2 = (2 : ℝ≥0∞)`
-
-Recorded once for reuse in the constant-folding of the two-piece aggregate
-bounds of bracket terms 5 and 6. -/
-
 /-- The conversion `ENNReal.ofReal 2 = (2 : ℝ≥0∞)`. -/
 private lemma ofReal_two : ENNReal.ofReal 2 = (2 : ℝ≥0∞) := by
   rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) from by norm_num, ENNReal.ofReal_natCast]
   norm_num
-
-/-! ## The `wkpNorm` of the seven-term bracket
-
-Iterated Minkowski (`wkpNorm_sub_le` / `wkpNorm_add_le`) bounds the order-`K`
-`wkpNorm` of the seven-term bracket by the sum of the `wkpNorm`s of the seven
-terms; each is then bounded by an explicit constant times the full aggregate,
-and the seven constants fold into one. -/
 
 section BracketBound
 
@@ -518,9 +446,6 @@ private lemma wkpNorm_sub_le
 
 end BracketBound
 
-/-! ## The order-`K` `wkpNorm`-graded bound for the eigenvector chart right-hand
-side -/
-
 section MainBound
 
 set_option linter.unusedSectionVars false in
@@ -539,43 +464,7 @@ private lemma eigenIdx_val_pos
 
 end MainBound
 
-/-! ## Eigenbasis-uniform order-`K` `wkpNorm`-graded bound for the chart
-right-hand side
-
-The order-`K` `wkpNorm` bound `eigenvectorChartRHS_wkpNorm_le` has its constant
-`C` placed by an `∃` *after* the eigenbasis index `i` — hence the constant is
-per-eigenvector. The downstream bounded-operator endpoint needs the constant
-*uniform* across the eigenbasis: a single `C` serving every `i` simultaneously,
-with the `∀ i` quantifier moved inside the `∃ C`.
-
-This section records the eigenbasis-uniform companions, bottom-up: the seven
-per-term bounds, the chart-direction divergence sum, the seven-term bracket
-bound, and finally the public headline. Every uniform companion takes the
-order-`(K + 1)` partition-of-unity regularity input *phrased uniformly over `i`*
-(`∀ i β Q, MemWkp (K + 1) 2 …` — exactly the hypothesis shape of every committed
-per-limit `_uniform` building block, since the constants those lemmas extract
-are chart-transition geometric data and the uniform hypothesis is the channel
-through which their `Classical.choice` witnesses become `i`-independent). The
-`(i.fst.val)⁻¹` eigenvalue factor of the headline stays inside the `∀ i` as a
-legitimate explicit eigenvalue factor; only `C` is hoisted out.
-
-These results are 100% additive: every declaration above is untouched. A
-uniform companion cannot be derived from its per-`i` original — one cannot
-obtain `∃ C, ∀ i, …` from `∀ i, ∃ C, …` — so each carries its own proof,
-namely the per-`i` proof with the `i`-free geometric witness hoisted before the
-`∀ i`. -/
-
 section UniformBounds
-
-/-! ### The factor-uniform smooth-coefficient `wkpNorm` bound with ae-vanishing
-
-The per-`i` per-term proofs invoke `wkpNorm_smoothCoef_mul_aeZeroFactor_le` with
-the cross-limit / divergence-limit object as the `factor` — that object is
-`i`-dependent, so the constant the per-`i` lemma returns is placed by an `∃`
-after the `i`-dependent `factor`. The factor-uniform companion below hoists the
-constant before the `∀ factor`: the cut-off coefficient `χ · coef`, its uniform
-iterated-derivative bound, and the resulting global-smoothness Leibniz constant
-are all `factor`-independent, so a single constant serves every `factor`. -/
 
 set_option linter.unusedSectionVars false in
 /-- **Factor-uniform quantitative smooth-coefficient `wkpNorm` bound with
@@ -614,12 +503,9 @@ private lemma wkpNorm_smoothCoef_mul_aeZeroFactor_le_uniform
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
   have hΩ_meas : MeasurableSet Ω := hΩ_open.measurableSet
-  -- A smooth cutoff `χ` equal to `1` on a closed thickening of `Kkern`,
-  -- supported in the chart target `Ω`. All this data is `factor`-independent.
   obtain ⟨δ, χ, hδ_pos, hδ_in, hχ_smooth, hχ_cs, _hχ_range, hχ_one, hχ_tsupp⟩ :=
     exists_smooth_cutoff_with_neighborhood (d := Module.finrank ℝ E)
       hKkern_compact hΩ_open hKkern_in
-  -- `χ · coef` is globally smooth.
   have hχ_coef_smooth : ContDiff ℝ (⊤ : ℕ∞) (fun y => χ y * coef y) := by
     have h_open_compl : IsOpen ((tsupport χ)ᶜ) :=
       (isClosed_tsupport _).isOpen_compl
@@ -636,20 +522,14 @@ private lemma wkpNorm_smoothCoef_mul_aeZeroFactor_le_uniform
       exact contDiffAt_const.congr_of_eventuallyEq h_eq_zero
   have hχ_coef_cs : HasCompactSupport (fun y => χ y * coef y) :=
     HasCompactSupport.mul_right hχ_cs
-  -- A uniform bound on the iterated derivatives of `χ · coef` up to order `K`.
   obtain ⟨C₀, hC₀_nn, hC₀_bd⟩ :=
     exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
       (d := Module.finrank ℝ E) hχ_coef_smooth hχ_coef_cs K
-  -- The quantitative global-smoothness Leibniz bound for the cut-off
-  -- coefficient: its constant `Kc` is `factor`-independent and is hoisted here,
-  -- before the `∀ factor`.
   obtain ⟨Kc, hKc_pos, hKc_bd⟩ :=
     wkpNorm_smul_smooth_bounded_le (d := Module.finrank ℝ E) K
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) (by norm_num) hΩ_open hχ_coef_smooth
       hC₀_nn (fun j hj y _hy => hC₀_bd y j hj)
   refine ⟨Kc, le_of_lt hKc_pos, fun factor hfactor_memWkp hfactor_ae_zero => ?_⟩
-  -- The per-`factor` argument: `(χ · coef) · factor =ᵐ coef · factor` on
-  -- `volume.restrict Ω`, and `wkpNorm` / `MemWkp` transfer.
   set Cδ : Set EuclN := Metric.cthickening δ Kkern with hCδ_def
   have hCδ_closed : IsClosed Cδ := Metric.isClosed_cthickening
   have hCδ_meas : MeasurableSet Cδ := hCδ_closed.measurableSet
@@ -722,14 +602,6 @@ private lemma wkpNorm_smoothCoef_mul_aeZeroFactor_le_uniform
   rw [h_norm_eq]
   exact hKc_bd hfactor_memWkp
 
-/-! ### The eigenbasis-uniform finite-sum aggregation lemma
-
-The eigenbasis-uniform companion of `wkpNorm_sum_le_const_mul_aggregate`: a
-finite indexed family of summands, each carrying — *uniformly over a parameter
-`δ`* — a `wkpNorm` bound by `ENNReal.ofReal Cⱼ` times a `δ`-indexed aggregate
-quantity `A d`, has its summed `wkpNorm` bounded, *uniformly over `δ`*, by an
-explicit constant times `A d`. -/
-
 set_option linter.unusedSectionVars false in
 /-- **Eigenbasis-uniform finite-sum aggregation.** A finite indexed family `F`
 of `W^{K,2}` summands on an open set, each `wkpNorm`-bounded — uniformly over a
@@ -755,13 +627,11 @@ private lemma wkpNorm_sum_le_const_mul_aggregate_uniform
   refine ⟨(∑ j : ι, Cf j) * (Fintype.card ι : ℝ),
     mul_nonneg (Finset.sum_nonneg (fun j _ => hCf_nn j)) (by positivity),
     fun d => ?_⟩
-  -- The triangle inequality `wkpNorm_sum_le`, at the parameter value `d`.
   have h_tri : wkpNorm (d := Module.finrank ℝ E) K 2
       (fun y => ∑ j : ι, F j d y) Ω ≤ ∑ j : ι,
         wkpNorm (d := Module.finrank ℝ E) K 2 (F j d) Ω :=
     wkpNorm_sum_le (d := Module.finrank ℝ E) (by norm_num) hΩ
       (Finset.univ : Finset ι) (fun j => F j d) (fun j _ => hF j d)
-  -- Each per-summand `wkpNorm` is `≤ ENNReal.ofReal (∑ Cf) * A d`.
   have h_step : ∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (F j d) Ω
       ≤ ∑ _j : ι, ENNReal.ofReal (∑ k : ι, Cf k) * A d := by
     refine Finset.sum_le_sum (fun j _ => ?_)
@@ -789,21 +659,9 @@ private lemma wkpNorm_sum_le_const_mul_aggregate_uniform
 
 end UniformBounds
 
-/-! ## Chart-locality-free declarations
-
-The declarations below are chart-locality-free `_unconditional` declarations,
-keyed onto the intrinsic compact self-adjoint resolvent eigenbasis
-`tensorResolventEigenbasisVec …` (through the intrinsic compactness
-witness `tensorResolventL2_isCompactOperator g r s`) and onto the
-chart-locality-free eigenvector-resolvent / cross- / lower-order limit objects,
-with every chart-locality-dependent dependency replaced by its committed
-`_unconditional` companion. -/
-
 section Unconditional
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
-
-/-! ### The order-`(K + 1)` partition-of-unity regularity input (twin) -/
 
 /-- Chart-locality-free twin of `PouRegularity`. -/
 private def PouRegularity
@@ -816,8 +674,6 @@ private def PouRegularity
             (eigenvectorResolvent (I := I) (M := M) g r s i))
           β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
       (chartTargetEuclid (I := I) (M := M) β)
-
-/-! ### The seven bracket terms (twins) -/
 
 section BracketTermsUnconditional
 
@@ -897,8 +753,6 @@ private lemma eigenvectorChartRHS_eq_smul_bracket :
 
 end BracketTermsUnconditional
 
-/-! ### `W^{K,2}` membership of the seven bracket terms (twins) -/
-
 section TermMemWkpUnconditional
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -976,8 +830,6 @@ private lemma rhsTerm7_memWkp
     g r s i α P₀ K h_pou
 
 end TermMemWkpUnconditional
-
-/-! ### The order-`K` source-quantity aggregate (twins) -/
 
 section AggregateUnconditional
 
@@ -1070,8 +922,6 @@ private def wkpRhsAggregate : ℝ≥0∞ :=
 
 end AggregateUnconditional
 
-/-! ### Aggregate-domination arithmetic (twins) -/
-
 section DominationUnconditional
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1131,8 +981,6 @@ private lemma aggrCutoffPartial_le :
   exact (le_sevenSum _ _ _ _ _ _ _).2.2.2.2.2.2
 
 end DominationUnconditional
-
-/-! ### The per-term order-`K` `wkpNorm` bounds (twins) -/
 
 section TermBoundsUnconditional
 
@@ -1706,8 +1554,6 @@ private lemma rhsTerm7_wkpNorm_le
 
 end TermBoundsUnconditional
 
-/-! ### The `wkpNorm` of the seven-term bracket (twin) -/
-
 section BracketBoundUnconditional
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1874,9 +1720,6 @@ private lemma rhsBracket_wkpNorm_le
 
 end BracketBoundUnconditional
 
-/-! ### The order-`K` `wkpNorm`-graded bound for the chart right-hand side
-(twin) -/
-
 section MainBoundUnconditional
 
 /-- **Chart-locality-free twin of `eigenvectorChartRHS_wkpNorm_le`.** -/
@@ -2041,8 +1884,6 @@ theorem eigenvectorChartRHS_wkpNorm_le
     resInclNorm]
 
 end MainBoundUnconditional
-
-/-! ### Eigenbasis-uniform order-`K` `wkpNorm`-graded bound (twins) -/
 
 section UniformTermBoundsUnconditional
 
@@ -2660,8 +2501,6 @@ private lemma rhsTerm7_wkpNorm_le_uniform
 
 end UniformTermBoundsUnconditional
 
-/-! ### The eigenbasis-uniform seven-term bracket `wkpNorm` bound (twin) -/
-
 section UniformBracketBoundUnconditional
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -2841,8 +2680,6 @@ private lemma rhsBracket_wkpNorm_le_uniform
   rw [add_mul, add_mul, add_mul, add_mul, add_mul, add_mul]
 
 end UniformBracketBoundUnconditional
-
-/-! ### The eigenbasis-uniform order-`K` `wkpNorm`-graded bound (twin) -/
 
 section UniformMainBoundUnconditional
 

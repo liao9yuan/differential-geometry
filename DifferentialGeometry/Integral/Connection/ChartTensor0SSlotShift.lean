@@ -59,14 +59,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Local slot-substitution CLM
-
-We introduce a publicly-named slot-substitution CLM that mirrors the private
-slot-CLM used internally by `chartTensor0SSlotCorrection`. The two are
-definitionally equal (both are the same `if i = k then Φ else id` formula),
-which lets the proof of the main identity manipulate slot indices without
-referring to internal private symbols. -/
-
 /-- The slot-`k` substitution CLM family: returns `Φ` at slot index `k`, and
 the identity at every other slot index. -/
 def localSlotCLM (s : ℕ) {b : M}
@@ -103,8 +95,6 @@ lemma chartTensor0SSlotCorrection_eq_localSlotCLM_compose (s : ℕ)
             (fun _ : Fin s => TangentSpace I b) ℝ from T b)
         (localSlotCLM (I := I) s k
           (chartLeviCivitaParallelCLM (I := I) g α b X)) := by
-  -- Both sides reduce by the same `if i = k then Φ else id` formula on
-  -- the slot index.
   rfl
 
 /-- Pointwise application formula for the slot-`k` Christoffel correction
@@ -126,8 +116,6 @@ lemma chartTensor0SSlotCorrection_apply_localSlotCLM (s : ℕ)
     (I := I) s g α T X b k]
   rfl
 
-/-! ## Pointwise evaluation of the curried partial evaluation -/
-
 /-- Evaluating the partial evaluation `tensor0SPartialEval T Y b` (a
 `Tensor0SSpace s I b`) at a `Fin s`-tuple equals evaluating the original
 `(0, s + 1)`-tensor `T b` at the `Fin.cons (Y b) _` tuple of length `s + 1`. -/
@@ -142,36 +130,14 @@ lemma tensor0SPartialEval_apply_tangent (s : ℕ)
           (fun _ : Fin (s + 1) => TangentSpace I b) ℝ from T b)
         (Fin.cons (Y b) vs) := by
   classical
-  -- Rewrite the partial evaluation as `tensor0S_curry s b (T b) (Y b)`.
   change (show ContinuousMultilinearMap ℝ
       (fun _ : Fin s => TangentSpace I b) ℝ from
     tensor0S_curry (I := I) (M := M) s b (T b) (Y b)) vs =
     (show ContinuousMultilinearMap ℝ
         (fun _ : Fin (s + 1) => TangentSpace I b) ℝ from T b)
       (Fin.cons (Y b) vs)
-  -- `Tensor0SSpace.toModel` carrier is the identity; both sides reduce to
-  -- the same evaluation modulo the defeq `TangentSpace I b = E`.
   exact TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
     (T := T b) (v0 := Y b) (vs := vs)
-
-/-! ## Tuple-equality lemma for the slot-shift
-
-Compare the LHS tuple
-`fun i : Fin (s + 1) => localSlotCLM (s + 1) k.succ Φ i (Fin.cons w m i)`
-with the RHS tuple
-`Fin.cons w (fun j : Fin s => localSlotCLM s k Φ j (m j))`.
-
-Both are evaluated on the `Fin (s + 1)`-indexed argument list of `T b`, with
-the LHS coming from the chart slot correction at the *shifted* index `k.succ`
-and the RHS from the chart slot correction at index `k` composed with the
-`Fin.cons` partial-evaluation prepend. The two tuples coincide slot-by-slot:
-
-* At `i = 0`: the LHS slot CLM is the identity (since `0 ≠ k.succ`), so the
-  LHS evaluates to `Fin.cons w m 0 = w`, equal to the RHS head.
-* At `i = j.succ`: by `Fin.succ_injective`, the LHS condition `j.succ = k.succ`
-  is the same as the RHS condition `j = k`, so the LHS slot CLM equals the
-  RHS slot CLM. Both are applied to `m j` (via `Fin.cons_succ` for the LHS).
--/
 
 /-- Tuple-equality lemma: the two `Fin (s + 1)`-indexed tuples agree
 pointwise. -/
@@ -187,12 +153,9 @@ private lemma slot_shift_tuple_eq (s : ℕ) {b : M}
   classical
   funext i
   refine Fin.cases ?_ ?_ i
-  · -- At `i = 0`. LHS: slot CLM is `id` (since `0 ≠ k.succ`), giving `Fin.cons w m 0 = w`.
-    -- RHS: `Fin.cons w _ 0 = w`.
-    have h_ne : (0 : Fin (s + 1)) ≠ k.succ := by
+  · have h_ne : (0 : Fin (s + 1)) ≠ k.succ := by
       intro h
       exact (Fin.succ_ne_zero k h.symm).elim
-    -- Reduce both `Fin.cons` applications at index `0` to `w`.
     have hL_cons : (Fin.cons w m : Fin (s + 1) → TangentSpace I b) 0 = w :=
       Fin.cons_zero (α := fun _ : Fin (s + 1) => TangentSpace I b) w m
     have hR_cons : (Fin.cons w (fun j : Fin s =>
@@ -206,8 +169,6 @@ private lemma slot_shift_tuple_eq (s : ℕ) {b : M}
     rw [localSlotCLM_other (I := I) (s + 1) k.succ Φ h_ne]
     rfl
   · intro j
-    -- At `i = j.succ`. The LHS condition `j.succ = k.succ` is equivalent to
-    -- `j = k` via `Fin.succ_injective`. The RHS uses `j = k` directly.
     have hL_cons : (Fin.cons w m : Fin (s + 1) → TangentSpace I b) j.succ = m j :=
       Fin.cons_succ (α := fun _ : Fin (s + 1) => TangentSpace I b) w m j
     have hR_cons : (Fin.cons w (fun j' : Fin s =>
@@ -219,22 +180,17 @@ private lemma slot_shift_tuple_eq (s : ℕ) {b : M}
         ((Fin.cons w m : Fin (s + 1) → TangentSpace I b) j.succ) =
       (Fin.cons w _ : Fin (s + 1) → TangentSpace I b) j.succ
     rw [hL_cons, hR_cons]
-    -- LHS slot CLM at index `j.succ` with substitution position `k.succ`
-    -- equals the RHS slot CLM at index `j` with substitution position `k`.
     have hCLM_eq :
         localSlotCLM (I := I) (s + 1) k.succ Φ j.succ =
           localSlotCLM (I := I) s k Φ j := by
       unfold localSlotCLM
       by_cases hjk : j = k
       · subst hjk; simp
-      · -- `j.succ ≠ k.succ` iff `j ≠ k`.
-        have hsucc_ne : (j.succ : Fin (s + 1)) ≠ k.succ := by
+      · have hsucc_ne : (j.succ : Fin (s + 1)) ≠ k.succ := by
           intro h
           exact hjk (Fin.succ_injective _ h)
         simp [hjk, hsucc_ne]
     rw [hCLM_eq]
-
-/-! ## The main identity -/
 
 /-- **Slot-shift identity (unconditional).** For a smooth Riemannian metric
 `g`, a chart center `α`, a basepoint `b`, a `(0, s + 1)`-tensor section `T`,
@@ -264,38 +220,19 @@ theorem chartTensor0SSlotCorrection_succ_eq_partialEval
           (tensor0SPartialEval I M T
             (chartParallelExtend (I := I) α b v)) X b k) m := by
   classical
-  -- Abbreviate the slot CLM operator and the parallel-extension head.
   set Φ : TangentSpace I b →L[ℝ] TangentSpace I b :=
     chartLeviCivitaParallelCLM (I := I) g α b X with hΦ_def
   set w : TangentSpace I b := chartParallelExtend (I := I) α b v b with hw_def
-  -- Unfold the LHS using the slot-correction evaluation formula (in
-  -- `localSlotCLM` form).
   rw [chartTensor0SSlotCorrection_apply_localSlotCLM (I := I) (s + 1) g α
     T X b k.succ (Fin.cons w m)]
-  -- Unfold the RHS using the slot-correction evaluation formula at slot `k`.
   rw [chartTensor0SSlotCorrection_apply_localSlotCLM (I := I) s g α
     (tensor0SPartialEval I M T (chartParallelExtend (I := I) α b v)) X b k m]
-  -- The RHS evaluation has the form `(tensor0SPartialEval T Y b) (...)`.
-  -- Pull the partial evaluation back through the curry identity to reveal
-  -- the underlying `T b` evaluated at `Fin.cons (Y b) _`.
   rw [tensor0SPartialEval_apply_tangent (s := s) (T := T)
     (Y := chartParallelExtend (I := I) α b v) (b := b)
     (vs := fun j : Fin s =>
       localSlotCLM (I := I) s k Φ j (m j))]
-  -- Both sides now evaluate `T b` on a `Fin (s + 1)`-tuple. The tuples are
-  -- equal by `slot_shift_tuple_eq`.
   congr 1
-  -- The goal is exactly the conclusion of `slot_shift_tuple_eq` (with
-  -- `Φ` set as `chartLeviCivitaParallelCLM g α b X`).
   exact slot_shift_tuple_eq (I := I) s k Φ w m
-
-/-! ## Conditional version with literal `v`
-
-When `b` lies in the trivialization base set of the chart-`α` tangent-bundle
-trivialization, the chart-parallel extension collapses at `b` to its input
-`v`, since `trivFromE α b ∘ trivToE α b = id` there. The slot-shift identity
-then specialises to the form with the literal vector `v` appearing as the
-`Fin.cons` head on the left-hand side. -/
 
 /-- **Slot-shift identity (literal `v`, conditional).** Under the
 trivialization-base-set hypothesis
@@ -319,8 +256,6 @@ theorem chartTensor0SSlotCorrection_succ_eq_partialEval_of_mem
           (tensor0SPartialEval I M T
             (chartParallelExtend (I := I) α b v)) X b k) m := by
   classical
-  -- Reduce to the unconditional form by collapsing
-  -- `chartParallelExtend α b v b = v` on the base set.
   have hcollapse : chartParallelExtend (I := I) α b v b = v := by
     unfold chartParallelExtend
     exact trivFromE_trivToE (I := I) α hb v

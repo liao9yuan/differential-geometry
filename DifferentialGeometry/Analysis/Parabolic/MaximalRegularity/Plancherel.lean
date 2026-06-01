@@ -83,23 +83,12 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-
-/-! ## Countability of the eigen-index type
-
-The Fubini/Tonelli interchange `∫ ∑' = ∑' ∫` (`MeasureTheory.lintegral_tsum`)
-requires the index type to be countable.  The eigen-index type
-`TensorEigenIdx g r s` is the sigma-type pairing each nonzero resolvent
-eigenvalue with a finite eigenspace index; the base is countable under the
-uniform chart-Sobolev hypothesis and the fibres are `Fin _`, so the total space
-is countable. -/
 
 /-- Chart-locality-free countability of the eigen-index type
 `TensorEigenIdx g r s`, parameterized only on the resolvent compactness
@@ -114,15 +103,6 @@ lemma countable_tensorEigenIdx
     TensorNonzeroResolventEigenvalue.countable_ofCompact
       (I := I) (M := M) g r s h_compact
   infer_instance
-
-/-! ## The eigenbasis-coordinate functional on `Hᵃ`
-
-For a fixed eigen-index `i`, the coordinate map `T ↦ T.coeff i` is a bounded
-linear functional on `Hᵃ`.  Linearity is immediate from `add_coeff` /
-`smul_coeff`; the bound `|T.coeff i| ≤ (1 + λᵢ)^(-a/2) · ‖T‖` is the single-term
-estimate extracted from the weighted-Parseval identity
-`‖T‖² = ∑ⱼ (1 + λⱼ)ᵃ · (T.coeff j)²`.  Continuity of this functional is what
-makes the time-mode coordinate `t ↦ (f t).coeff i` measurable. -/
 
 /-- The single-term lower bound from weighted Parseval: the `i`-th weighted
 square is at most the full weighted sum, i.e. at most `‖T‖²`. -/
@@ -149,7 +129,6 @@ lemma tensorHsAbsCoeffLe {a : ℝ}
       0 < Real.sqrt (tensorSobolevWeight (I := I) (M := M) i a) :=
     Real.sqrt_pos.mpr hw_pos
   have hbound := tensorHsWeightMulCoeffSqLeNormSq (I := I) (M := M) T i
-  -- `weight i a · (T.coeff i)² ≤ ‖T‖²`, so squaring the claimed bound holds.
   have hsq : (T.coeff i) ^ 2 ≤
       ((Real.sqrt (tensorSobolevWeight (I := I) (M := M) i a))⁻¹ * ‖T‖) ^ 2 := by
     have hsqrt_sq :
@@ -158,7 +137,6 @@ lemma tensorHsAbsCoeffLe {a : ℝ}
       sq_sqrt_tensorSobolevWeight (I := I) (M := M) i a
     rw [mul_pow, inv_pow, hsqrt_sq, inv_mul_eq_div, le_div_iff₀ hw_pos, mul_comm]
     exact hbound
-  -- Take square roots of the squared inequality.
   have hrhs_nonneg :
       0 ≤ (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i a))⁻¹ * ‖T‖ :=
     mul_nonneg (le_of_lt (inv_pos.mpr hsqrt_pos)) (norm_nonneg T)
@@ -197,15 +175,6 @@ lemma tensorHsCoeffL_opNorm_le {a : ℝ}
   LinearMap.mkContinuous_norm_le _
     (le_of_lt (inv_pos.mpr (Real.sqrt_pos.mpr
       (tensorSobolevWeight_pos (I := I) (M := M) i a)))) _
-
-/-! ## The time-mode coordinate map
-
-For `f ∈ L²([0,T]; Hᵃ)` and an eigen-index `i`, the function
-`t ↦ (f t).coeff i` is the composition of the time-`L²` representative `⇑f`
-with the bounded linear coordinate functional `tensorHsCoeffL i`.  Composition
-of an `Lp` element with a continuous linear map is itself an `Lp` element
-(`ContinuousLinearMap.compLpL`), so this composition defines an element of
-`L²(0,T)`; the construction is linear and bounded in `f`. -/
 
 /-- **The time-mode coordinate map.**  For a time-`L²` tensor field
 `f ∈ L²([0,T]; Hᵃ)` and an eigen-index `i`, `timeModeCoeff f i ∈ L²(0,T)` is
@@ -269,12 +238,6 @@ theorem norm_timeModeCoeff_le {a : ℝ} {T : ℝ}
       (tensorHsCoeffL (I := I) (M := M) i))
     (tensorHsCoeffL_opNorm_le (I := I) (M := M) i)
 
-/-! ## Pointwise integrability of the eigen-coordinate squares
-
-Each `timeModeCoeff f i` lies in `L²(0,T)`, hence its square is integrable for
-the (finite) time measure; the per-mode `L²` norm is the integral of that
-square.  These facts feed the Fubini interchange below. -/
-
 /-- The square of a time-mode coordinate is integrable for the time measure. -/
 theorem integrable_timeModeCoeff_sq {a : ℝ} {T : ℝ}
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
@@ -308,13 +271,6 @@ theorem integrable_weight_mul_coeff_sq {a : ℝ} {T : ℝ}
   filter_upwards [timeModeCoeff_coeFn (I := I) (M := M) f i] with t ht
   rw [ht]
 
-/-! ## The Plancherel–Fubini norm identity
-
-The crux of the file.  Combining the spatial Plancherel identity (the
-`Hᵃ`-norm formula `‖T‖² = ∑ᵢ (1 + λᵢ)ᵃ (T.coeff i)²`) with the Tonelli
-interchange of the (nonnegative) `i`-sum and the `t`-integral yields the mode
-decomposition of the time-`L²` norm. -/
-
 section PlancherelFubini
 
 variable {a : ℝ} {T : ℝ}
@@ -339,7 +295,6 @@ private theorem aemeasurable_planIntegrand
     AEMeasurable (planIntegrand (I := I) (M := M) f i) (timeMeasure T) := by
   letI : MeasurableSpace ℝ := borel ℝ
   haveI : BorelSpace ℝ := ⟨rfl⟩
-  -- `t ↦ (f t).coeff i` is a.e. equal to the measurable `timeModeCoeff f i`.
   have hmeas : AEMeasurable (fun t => (f t).coeff i) (timeMeasure T) := by
     refine AEMeasurable.congr
       (Lp.aestronglyMeasurable
@@ -366,7 +321,6 @@ private theorem lintegral_planIntegrand
       fun t => tensorSobolevWeight (I := I) (M := M) i a *
         ((f t).coeff i) ^ 2 :=
     Eventually.of_forall fun t => mul_nonneg hw_nonneg (sq_nonneg _)
-  -- `∫⁻ ofReal = ofReal ∫`, then rewrite the Bochner integral.
   have hofReal :
       (∫⁻ t, planIntegrand (I := I) (M := M) f i t ∂(timeMeasure T))
         = ENNReal.ofReal (∫ t, tensorSobolevWeight (I := I) (M := M) i a *
@@ -374,7 +328,6 @@ private theorem lintegral_planIntegrand
     (ofReal_integral_eq_lintegral_ofReal hint hnn).symm
   rw [hofReal]
   congr 1
-  -- `∫ weight·((f t).coeff i)² = weight·∫ (timeModeCoeff f i t)²`.
   rw [integral_const_mul]
   congr 1
   rw [norm_timeModeCoeff_sq_eq_integral (I := I) (M := M) f i,
@@ -511,16 +464,6 @@ theorem norm_sq_eq_tsum_timeModeCoeff
 
 end PlancherelFubini
 
-/-! ## The assembly corollary
-
-The form consumed by the maximal-regularity operator.  A per-mode estimate,
-phrased already with the spectral weights — `(1 + λᵢ)ᵇ · ‖gᵢ‖² ≤ C² · (1 + λᵢ)ᵃ
-· ‖fᵢ‖²` — sums, via the Plancherel–Fubini identity applied at both scales, to
-the operator bound `‖g‖²_{L²([0,T];Hᵇ)} ≤ C² · ‖f‖²_{L²([0,T];Hᵃ)}`.  Phrasing
-the hypothesis with the weights already attached makes the assembly a direct
-`tsum`-monotonicity argument and keeps the two Sobolev scales `a`, `b`
-independent. -/
-
 /-- Chart-locality-free version of `norm_sq_le_of_weighted_perMode_le`,
 parameterized on resolvent compactness `h_compact`. -/
 theorem norm_sq_le_of_weighted_perMode_le {a b : ℝ} {T : ℝ} {C : ℝ}
@@ -568,24 +511,6 @@ theorem norm_le_of_weighted_perMode_le {a b : ℝ} {T : ℝ} {C : ℝ}
   have hrhs_nonneg : 0 ≤ C * ‖fT‖ := mul_nonneg hC (norm_nonneg fT)
   have h := Real.sqrt_le_sqrt hsq
   rwa [Real.sqrt_sq (norm_nonneg gT), Real.sqrt_sq hrhs_nonneg] at h
-
-/-! ## The synthesis direction
-
-To *build* the maximal-regularity operator's output one needs the converse of
-the coordinate map: a family `{gᵢ}` of `L²(0,T)` functions whose weighted
-squares `(1 + λᵢ)ᵇ · ‖gᵢ‖²` are summable assembles into an element of
-`L²([0,T]; Hᵇ)` with those eigen-coordinates.
-
-The reconstruction is delivered in two parts.  The **uniqueness** half —
-`timeModeCoeff_injective` — is unconditional and immediate from the
-injectivity of the coordinate map: a time-`L²` tensor field is determined by
-its eigen-coordinate family.  The **existence** half is provided as the
-pointwise reconstruction `timeModeSynthesisPointwise`: at each time `t` at
-which the coordinate family `i ↦ gᵢ(t)` is weighted-square-summable it defines
-an `Hᵇ` element; assembling these into a time-`L²` element is the remaining
-step left to the maximal-regularity construction, which has the per-mode
-output functions `gᵢ` in explicit closed form and so can build the field
-directly. -/
 
 /-- **Synthesis — pointwise tensor reconstruction.**  Given, for each eigen-index
 `i`, a real number `cFam i` forming a weighted-square-summable family, the

@@ -71,19 +71,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Auxiliary scalar function: the chart-side inner product
-
-For sections `Y, Z` of the tangent bundle, define the scalar function
-`F_{Y,Z} : E → ℝ` by
-$$
-  F_{Y,Z}(y) = \sum_{i,j}\,
-    (Y^E)_i(\varphi^{-1} y)\,(Z^E)_j(\varphi^{-1} y)\,G^E_{ij}(y),
-$$
-where `Y^E := chartE_section_repr α Y`, `Z^E := chartE_section_repr α Z`,
-`G^E_{ij} := chartGramOnE g α i j`, and `(Y^E)_i := (chartModelBasis E).repr ∘ Y^E`.
-This is the chart-pullback of `b ↦ g.inner b (Y b) (Z b)` to the chart target,
-expressed via `g_inner_eq_chart_sum`. -/
-
 /-- The chart-side scalar function `F_{Y,Z}` whose Fréchet derivative encodes
 the metric-compatibility identity. -/
 def chartInnerOnE (g : SmoothRiemannianMetric I M) (α : M)
@@ -142,8 +129,6 @@ lemma chartInnerOnE_eq_g_inner
   rw [hG i j]
   rfl
 
-/-! ## Differentiability of `chartInnerOnE` factors -/
-
 /-- The component-extraction map: composing a differentiable function with the
 linear functional `b.coord i` preserves differentiability. -/
 private lemma differentiableAt_repr_comp
@@ -151,7 +136,6 @@ private lemma differentiableAt_repr_comp
     (i : Fin (Module.finrank ℝ E)) :
     DifferentiableAt ℝ (fun y => ((chartModelBasis E).repr (f y)) i) y := by
   classical
-  -- `b.repr · i = b.coord i` is a continuous linear functional on `E`.
   set ci : E →L[ℝ] ℝ := ((chartModelBasis E).coord i).toContinuousLinearMap
   have hclm : DifferentiableAt ℝ ci (f y) := ci.differentiableAt
   exact hclm.comp y hf
@@ -173,8 +157,6 @@ lemma chartGramOnE_differentiableAt_int
   have hy_nhd : interior (extChartAt I α).target ∈ 𝓝 y := hop_int.mem_nhds hy
   exact (hcd_int.contDiffAt hy_nhd).differentiableAt (by simp)
 
-/-! ## The `mfderiv` of `b ↦ g.inner b (Y b) (Z b)` in chart coordinates -/
-
 /-- `b ↦ g.inner b (Y b) (Z b)` is `EventuallyEq` to
 `chartInnerOnE g α Y Z ∘ extChartAt I α` on a neighborhood of any good-set
 point. -/
@@ -194,8 +176,6 @@ private lemma chartInnerOnE_eventuallyEq
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
   exact (chartInnerOnE_eq_g_inner (I := I) g α Y Z hb_src hb_base).symm
-
-/-! ## The `partialDeriv k` of `chartE_section_repr α Y ∘ φ.symm` component -/
 
 /-- The `i`-th component of the chart-pulled-back section. -/
 private def chartReprComp
@@ -241,22 +221,17 @@ private lemma chartReprComp_fderiv_apply
   classical
   set fE : E → E := chartE_section_repr (I := I) α Y ∘ (extChartAt I α).symm
   set ci : E →L[ℝ] ℝ := ((chartModelBasis E).coord i).toContinuousLinearMap
-  -- `chartReprComp α Y i = ci ∘ fE` (definitionally).
   have hfun : chartReprComp (I := I) α Y i = ci ∘ fE := rfl
-  -- Apply `fderiv_comp` with the chain rule.
   have hfE_diff : DifferentiableAt ℝ fE (extChartAt I α x) :=
     differentiableAt_chartE_pullback_of_MDiff (I := I) α hx hY
   have hci_diff : DifferentiableAt ℝ ci (fE (extChartAt I α x)) := ci.differentiableAt
   have hcomp : fderiv ℝ (ci ∘ fE) (extChartAt I α x) =
       (fderiv ℝ ci (fE (extChartAt I α x))).comp (fderiv ℝ fE (extChartAt I α x)) :=
     fderiv_comp (extChartAt I α x) hci_diff hfE_diff
-  -- `fderiv ℝ ci y = ci` since `ci` is a CLM.
   have hci_fderiv : fderiv ℝ ci (fE (extChartAt I α x)) = ci :=
     ContinuousLinearMap.fderiv ci
   rw [hfun, hcomp, hci_fderiv]
   rfl
-
-/-! ## Differentiability of summand factors -/
 
 /-- Each three-fold product `chartReprComp α Y i · chartReprComp α Z j · G^E_{ij}`
 is differentiable at `φ x`. -/
@@ -296,8 +271,6 @@ private lemma chartInnerOnE_differentiableAt
   apply DifferentiableAt.fun_sum
   intro j _
   exact chartInnerOnE_summand_differentiableAt (I := I) g α hx hY hZ i j
-
-/-! ## Computing the Fréchet derivative of `chartInnerOnE` componentwise -/
 
 /-- Fréchet derivative formula for the three-fold-product summand. -/
 private lemma chartInnerOnE_summand_fderiv_apply
@@ -399,8 +372,6 @@ private lemma chartInnerOnE_fderiv_apply
   refine Finset.sum_congr rfl (fun j _ => ?_)
   exact chartInnerOnE_summand_fderiv_apply (I := I) g α hx hY hZ i j w
 
-/-! ## Mfderiv → Fréchet identification -/
-
 /-- The manifold derivative of `b ↦ g.inner b (Y b) (Z b)` at a good-set point
 `x`, applied to a tangent vector `v`, equals the Fréchet derivative of
 `chartInnerOnE g α Y Z` at `φ x` applied to `trivToE α x v`. -/
@@ -439,8 +410,6 @@ private lemma mfderiv_g_inner_eq_chartInnerOnE_fderiv
     mfderiv_scalar_eq_chart_fderiv (I := I) α
       (chartInnerOnE (I := I) g α Y Z ∘ extChartAt I α)
       hx_src_chart hx_int hcomp_at v
-  -- The goal is `(mfderiv I 𝓘(ℝ) (chartInnerOnE g α Y Z ∘ extChartAt I α) x) v = ...`.
-  -- Rewrite using `hmf_to_fderiv`. Use `exact` style via `Eq.trans`.
   refine hmf_to_fderiv.trans ?_
   have hev_pull :
       ((chartInnerOnE (I := I) g α Y Z ∘ extChartAt I α) ∘
@@ -456,8 +425,6 @@ private lemma mfderiv_g_inner_eq_chartInnerOnE_fderiv
       chartInnerOnE (I := I) g α Y Z y
     rw [(extChartAt I α).right_inv hy_tgt]
   rw [Filter.EventuallyEq.fderiv_eq hev_pull]
-
-/-! ## Expansion of `fderiv (chartGramOnE g α i j)` along `w` via partial derivatives -/
 
 /-- The directional derivative of `chartGramOnE g α i j` along `w` equals the
 basis expansion of `w` weighted by the partial derivatives. -/
@@ -483,8 +450,6 @@ private lemma fderiv_chartGramOnE_apply_eq_partialDeriv_sum
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [map_smul, smul_eq_mul]
   rfl
-
-/-! ## The `b.repr` of the Christoffel-correction CLM -/
 
 /-- The `i`-th component of `christoffelCorrection α x Y v` under
 `(chartModelBasis E).repr`. -/
@@ -522,8 +487,6 @@ private lemma christoffelCorrection_repr_apply
     simp
   · intro habs
     exact absurd (Finset.mem_univ i) habs
-
-/-! ## Fully expanded LHS and RHS -/
 
 /-- The fully expanded LHS as a sum involving Fréchet derivatives, chart Gram
 entries, and the `chartChristoffel` symbols (the latter via the chart metric
@@ -769,15 +732,6 @@ private lemma g_inner_Y_chartLeviCivita_Z_expand
   rw [christoffelCorrection_repr_apply (I := I) g α x
     (chartE_section_repr (I := I) α Z x) v j]
 
-/-! ## The algebraic match: LHS Christoffel piece = RHS Christoffel pieces
-
-We separate the algebraic content into a lemma about abstract reals (so we can
-focus on the index-shuffling without manifold infrastructure noise).
-
-The proof uses `Finset.sum_comm` chains to swap binders (taking advantage of
-Lean 4's automatic alpha-equivalence on lambda-abstracted bound variables) and
-the chart Gram symmetry `G i j = G j i`. -/
-
 /-- **Algebraic core of the metric-compatibility match.** The arithmetic
 identity needed to close the metric-compatibility theorem after both sides are
 expanded in chart coordinates. The variables `B i, D j, w k` are the
@@ -799,7 +753,6 @@ private lemma christoffel_match
       (∑ i : Fin n, ∑ j : Fin n,
         B i * (∑ k : Fin n, ∑ l : Fin n, w k * D l * Γ k l j) * G i j) := by
   classical
-  -- Step 1: expand LHS into two quadruple sums.
   have hLHS :
       (∑ i : Fin n, ∑ j : Fin n,
           B i * D j *
@@ -837,7 +790,6 @@ private lemma christoffel_match
       refine Finset.sum_congr rfl (fun j _ => ?_)
       refine Finset.sum_congr rfl (fun k _ => ?_)
       rw [mul_add]]
-    -- Now distribute the two parts.
     have hdistr1 :
         (∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n,
             B i * D j * w k * (∑ l : Fin n, Γ k i l * G l j)) =
@@ -875,7 +827,6 @@ private lemma christoffel_match
       rw [← Finset.sum_add_distrib]]
     rw [hdistr1, hdistr2]
   rw [hLHS]
-  -- Step 2: expand RHS_Y and RHS_Z each into a quadruple sum.
   have hRHS_Y :
       (∑ i : Fin n, ∑ j : Fin n,
           (∑ k : Fin n, ∑ l : Fin n, w k * B l * Γ k l i) * D j * G i j) =
@@ -897,13 +848,11 @@ private lemma christoffel_match
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [Finset.mul_sum, Finset.sum_mul]
   rw [hRHS_Y, hRHS_Z]
-  -- Step 3: match LHS₁ with RHS_Y via (i ↔ l) re-indexing.
   have hMatch_Y :
       (∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n, ∑ l : Fin n,
           B i * D j * w k * Γ k i l * G l j) =
       (∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n, ∑ l : Fin n,
           (w k * B l * Γ k l i) * D j * G i j) := by
-    -- Bring l to outermost on LHS via swap chain (k,l), (j,l), (i,l).
     rw [show
       (∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n, ∑ l : Fin n,
           B i * D j * w k * Γ k i l * G l j) =
@@ -917,15 +866,12 @@ private lemma christoffel_match
         refine Finset.sum_congr rfl (fun j _ => ?_)
         exact Finset.sum_comm]
       exact Finset.sum_comm]
-    -- Now apply Finset.sum_comm on outer (i, l) pair: get ∑ i ∑ l ... with body F(l, j, k, i)
-    -- (where F(i, j, k, l) := B i * D j * w k * Γ k i l * G l j).
     rw [show
       (∑ i : Fin n, ∑ l : Fin n, ∑ j : Fin n, ∑ k : Fin n,
           B i * D j * w k * Γ k i l * G l j) =
       (∑ i : Fin n, ∑ l : Fin n, ∑ j : Fin n, ∑ k : Fin n,
           B l * D j * w k * Γ k l i * G i j) from
       Finset.sum_comm]
-    -- Reorder (l, j, k) → (j, k, l):
     rw [show
       (∑ i : Fin n, ∑ l : Fin n, ∑ j : Fin n, ∑ k : Fin n,
           B l * D j * w k * Γ k l i * G i j) =
@@ -939,25 +885,17 @@ private lemma christoffel_match
           Finset.sum_comm]
       refine Finset.sum_congr rfl (fun j _ => ?_)
       exact Finset.sum_comm]
-    -- Match per-summand.
     refine Finset.sum_congr rfl (fun i _ => ?_)
     refine Finset.sum_congr rfl (fun j _ => ?_)
     refine Finset.sum_congr rfl (fun k _ => ?_)
     refine Finset.sum_congr rfl (fun l _ => ?_)
     ring
-  -- Step 4: match LHS₂ with RHS_Z via (j ↔ l) re-indexing + Gram symm.
   have hMatch_Z :
       (∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n, ∑ l : Fin n,
           B i * D j * w k * Γ k j l * G l i) =
       (∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n, ∑ l : Fin n,
           B i * (w k * D l * Γ k l j) * G i j) := by
     refine Finset.sum_congr rfl (fun i _ => ?_)
-    -- Goal: ∑ j k l F(i, j, k, l) = ∑ j k l G'(i, j, k, l).
-    -- F(i, j, k, l) = B i * D j * w k * Γ k j l * G l i.
-    -- G'(i, j, k, l) = B i * (w k * D l * Γ k l j) * G i j.
-    -- (j ↔ l) re-indexing on F gives: B i * D l * w k * Γ k l j * G j i.
-    -- Apply Gram symm G j i = G i j to get B i * D l * w k * Γ k l j * G i j = G' (modulo ring).
-    -- Bring l to position 1 (just inside).
     rw [show (∑ j : Fin n, ∑ k : Fin n, ∑ l : Fin n,
               B i * D j * w k * Γ k j l * G l i) =
           (∑ j : Fin n, ∑ l : Fin n, ∑ k : Fin n,
@@ -969,15 +907,12 @@ private lemma christoffel_match
           (∑ l : Fin n, ∑ j : Fin n, ∑ k : Fin n,
               B i * D j * w k * Γ k j l * G l i) from
         Finset.sum_comm]
-    -- Apply Finset.sum_comm on outer (l, j) pair: get ∑ l ∑ j ... with body F(i, l, k, j)
-    -- (where F(i, j, k, l) := B i * D j * w k * Γ k j l * G l i).
     rw [show
       (∑ l : Fin n, ∑ j : Fin n, ∑ k : Fin n,
           B i * D j * w k * Γ k j l * G l i) =
       (∑ l : Fin n, ∑ j : Fin n, ∑ k : Fin n,
           B i * D l * w k * Γ k l j * G j i) from
       Finset.sum_comm]
-    -- Reorder back: (l, k) → (k, l).
     rw [show
       (∑ l : Fin n, ∑ j : Fin n, ∑ k : Fin n,
           B i * D l * w k * Γ k l j * G j i) =
@@ -986,15 +921,12 @@ private lemma christoffel_match
       rw [Finset.sum_comm]
       refine Finset.sum_congr rfl (fun j _ => ?_)
       exact Finset.sum_comm]
-    -- Match per-summand: G j i = G i j by Gram symm, then ring.
     refine Finset.sum_congr rfl (fun j _ => ?_)
     refine Finset.sum_congr rfl (fun k _ => ?_)
     refine Finset.sum_congr rfl (fun l _ => ?_)
     rw [hGsymm j i]
     ring
   rw [hMatch_Y, hMatch_Z]
-
-/-! ## The metric-compatibility theorem -/
 
 /-- **Metric compatibility of the chart-local Levi-Civita.** On the open good
 set at `α`, the chart-local Levi-Civita covariant derivative `chartLeviCivita
@@ -1010,44 +942,10 @@ theorem chartLeviCivita_isMetricCompatibleOn
       (chartLeviCivitaGoodSet (I := I) α) := by
   classical
   intro Y Z x hY hZ hx v
-  -- Step 1: expand the LHS via `mfderiv_g_inner_chart_expand`.
   rw [mfderiv_g_inner_chart_expand (I := I) g α hx hY hZ v]
-  -- Step 2: expand the RHS via the two `g_inner_chartLeviCivita_..._expand` lemmas.
   rw [g_inner_chartLeviCivita_Y_Z_expand (I := I) g α hx v,
       g_inner_Y_chartLeviCivita_Z_expand (I := I) g α hx v]
-  -- Step 3: simplify the algebraic identity to the form handled by `christoffel_match`.
-  -- LHS structure (after expand):
-  --   ∑ i j (term_A + term_BC + term_partial_G)
-  -- where:
-  --   term_A := A_i * D_j * G_ij,
-  --   term_BC := B_i * C_j * G_ij,
-  --   term_partial_G := B_i * D_j * (∑_k w_k * ((∑_l Γ^l_{ki} G_lj) + (∑_l Γ^l_{kj} G_li))),
-  -- with abbreviations A_i := (b.repr (fderiv Y_pull) (triv v))_i,
-  --                    C_j := (b.repr (fderiv Z_pull) (triv v))_j,
-  --                    B_i := (b.repr Y x)_i, D_j := (b.repr Z x)_j,
-  --                    G_ij := chartGramOnE g α i j (φ x), w_k := (b.repr (triv v))_k,
-  --                    Γ^c_{a,b} := chartChristoffel g α a b c (φ x).
-  --
-  -- RHS structure (after expand):
-  --   ∑ i j (A_i + Christ_Y_i) * D_j * G_ij + ∑ i j B_i * (C_j + Christ_Z_j) * G_ij
-  -- where:
-  --   Christ_Y_i := ∑_k ∑_l w_k * B_l * Γ^i_{k,l},
-  --   Christ_Z_j := ∑_k ∑_l w_k * D_l * Γ^j_{k,l}.
-  --
-  -- Distribute the RHS:
-  --   ∑ i j A_i * D_j * G_ij + ∑ i j Christ_Y_i * D_j * G_ij
-  -- + ∑ i j B_i * C_j * G_ij + ∑ i j B_i * Christ_Z_j * G_ij.
-  --
-  -- The term_A and term_BC pieces of the LHS exactly match the first and third
-  -- pieces of the RHS. The term_partial_G of the LHS must match the sum of
-  -- the second and fourth pieces of the RHS (the Christoffel pieces). This is
-  -- exactly `christoffel_match`.
-  --
-  -- Distribute the RHS sums via `add_mul`, `mul_add` and `Finset.sum_add_distrib`.
-  -- We do this in two steps: first distribute over (Y-side), then (Z-side).
   set n := Module.finrank ℝ E with hn
-  -- Convenient abbreviations for the per-(i, j) summands (as functions of (i, j)).
-  -- Step (a): distribute the RHS_Y `(A_i + Christ_Y_i) * D_j * G_ij`.
   have hRHS_Y_distr :
     (∑ i : Fin n, ∑ j : Fin n,
         ( ((chartModelBasis E).repr
@@ -1085,7 +983,6 @@ theorem chartLeviCivita_isMetricCompatibleOn
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl (fun j _ => ?_)
     rw [add_mul, add_mul]
-  -- Step (b): distribute the RHS_Z `B_i * (C_j + Christ_Z_j) * G_ij`.
   have hRHS_Z_distr :
     (∑ i : Fin n, ∑ j : Fin n,
         ((chartModelBasis E).repr
@@ -1124,7 +1021,6 @@ theorem chartLeviCivita_isMetricCompatibleOn
     refine Finset.sum_congr rfl (fun j _ => ?_)
     rw [mul_add, add_mul]
   rw [hRHS_Y_distr, hRHS_Z_distr]
-  -- Step (c): split the LHS into three pieces (term_A, term_BC, term_partial_G).
   have hLHS_split :
     (∑ i : Fin n, ∑ j : Fin n,
         (((chartModelBasis E).repr
@@ -1188,20 +1084,6 @@ theorem chartLeviCivita_isMetricCompatibleOn
     rw [← Finset.sum_add_distrib]
     rw [← Finset.sum_add_distrib]
   rw [hLHS_split]
-  -- Now the goal has the form:
-  --   term_A + term_BC + term_partial_G = (term_A + Christ_Y_part) + (term_BC + Christ_Z_part).
-  -- Reorganize via `add_assoc` and `add_comm` to isolate `term_partial_G = Christ_Y_part + Christ_Z_part`.
-  -- Recall term_A = first RHS piece, term_BC = third RHS piece (after the (RHS_Y + RHS_Z) sum).
-  -- Goal-rewriting is easiest via `ring_nf` if all pieces are in scope. But these are sum-expressions,
-  -- and `ring` doesn't reorganize sums of sums. We do it manually.
-  -- The full reorganization:
-  --   LHS = term_A + (term_BC + term_partial_G)
-  --   RHS = (term_A + Christ_Y_part) + (term_BC + Christ_Z_part)
-  --       = term_A + (Christ_Y_part + (term_BC + Christ_Z_part))
-  --       = term_A + (term_BC + (Christ_Y_part + Christ_Z_part))
-  -- So suffices to show: term_partial_G = Christ_Y_part + Christ_Z_part.
-  -- This is `christoffel_match`.
-  -- Final algebraic step.
   have hGsymm : ∀ a b : Fin n,
       chartGramOnE (I := I) g α a b (extChartAt I α x) =
         chartGramOnE (I := I) g α b a (extChartAt I α x) := by
@@ -1218,11 +1100,6 @@ theorem chartLeviCivita_isMetricCompatibleOn
       (G := fun a b => chartGramOnE (I := I) g α a b (extChartAt I α x))
       (Γ := fun a b c => chartChristoffel (I := I) g α a b c (extChartAt I α x))
       hGsymm
-  -- Now the goal has the form:
-  --   term_A + term_BC + term_PG = (term_A + Christ_Y) + (term_BC + Christ_Z),
-  -- where term_PG = LHS of `hmatch` and Christ_Y + Christ_Z = RHS of `hmatch`.
-  -- Apply `hmatch` (which is `term_PG = Christ_Y + Christ_Z`) and reorganize the
-  -- additions via `linear_combination`.
   linear_combination hmatch
 
 end Connection

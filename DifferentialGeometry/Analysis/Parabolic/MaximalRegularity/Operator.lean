@@ -82,14 +82,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 variable {a : ℝ} {T : ℝ}
 
-/-! ## The per-mode building blocks
-
-For a forcing term `f ∈ L²([0,T]; Hᵃ)` and an eigen-index `i`, the `i`-th
-eigen-coordinate `timeModeCoeff f i` is a scalar `L²(0,T)` function; the per-mode
-convolution `perModeConvL2 λᵢ (timeModeCoeff f i)` and its time derivative
-`perModeConvDerivL2 λᵢ (timeModeCoeff f i)` are the building blocks of the
-solution and its time derivative. -/
-
 /-- The per-mode solution coordinate: `perModeConvL2 λᵢ (timeModeCoeff f i)`,
 the convolution of the `i`-th eigen-coordinate of the forcing against the heat
 kernel of eigenvalue `λᵢ`. -/
@@ -108,11 +100,6 @@ def derivModeCoeff (hT : 0 ≤ T)
   perModeConvDerivL2 (TensorEigenIdx.lambda (I := I) (M := M) i)
     (tensor_lambda_nonneg (I := I) (M := M) i) hT
     (timeModeCoeff (I := I) (M := M) f i)
-
-/-! ## Per-mode `L²` estimates with the spectral weights attached
-
-The two scalar maximal-regularity estimates, recast with the `Hˢ` spectral
-weights `(1 + λᵢ)^σ` so as to feed `norm_sq_le_of_weighted_perMode_le`. -/
 
 /-- The auxiliary per-mode bound on the convolution itself:
 `‖perModeConvL2 λᵢ (timeModeCoeff f i)‖ ≤ T · ‖timeModeCoeff f i‖`. -/
@@ -167,27 +154,6 @@ theorem one_add_lambda_mul_norm_solModeCoeff_le (hT : 0 ≤ T)
           ‖timeModeCoeff (I := I) (M := M) f i‖ := by gcongr
     _ = (1 + T) * ‖timeModeCoeff (I := I) (M := M) f i‖ := by ring
 
-/-! ### The half-derivative-gain estimate with `T^{1/2}` decay
-
-The two-derivative-gain bound `(1 + λᵢ)·‖φᵢ‖ ≤ (1 + T)·‖fᵢ‖` does **not** decay
-as `T → 0`: the `λᵢ·‖φᵢ‖ ≤ ‖fᵢ‖` half (the full two-derivative gain) carries the
-absolute constant `1`.  This is the genuine criticality of `L²`-maximal
-regularity: the marginal-regularity map `L²(Hᵃ) → L²(H^{a+2})` is *not* a
-contraction in the small-time limit.
-
-The **subordinate (one-derivative) gain**, by contrast, *does* decay.  The key
-per-mode estimate is
-
-  `√λᵢ · ‖φᵢ‖ ≤ √T · ‖fᵢ‖`,
-
-obtained by geometric-mean interpolation between the two existing bounds:
-`(√λᵢ · ‖φᵢ‖)² = (λᵢ · ‖φᵢ‖) · ‖φᵢ‖ ≤ ‖fᵢ‖ · (T · ‖fᵢ‖) = T · ‖fᵢ‖²`.  Since one
-power of `1 + λᵢ` is two Sobolev derivatives, `√λᵢ` is exactly one derivative, so
-this is the `L²(Hᵃ) → L²(H^{a+1})` estimate with the parabolic decay factor
-`√T → 0`.  Combined with `‖φᵢ‖ ≤ T‖fᵢ‖` and `√(1 + λᵢ) ≤ 1 + √λᵢ`, it yields the
-weighted `H^{a+1}` bound `(1 + λᵢ)^{a+1}·‖φᵢ‖² ≤ (2√T)²·(1 + λᵢ)ᵃ·‖fᵢ‖²` for
-`0 < T ≤ 1`, the per-mode input to the small-time contraction. -/
-
 /-- **The per-mode half-derivative-gain estimate.**  For `0 ≤ T`,
 
   `√λᵢ · ‖φᵢ‖ ≤ √T · ‖fᵢ‖`.
@@ -209,11 +175,9 @@ theorem sqrt_lambda_mul_norm_solModeCoeff_le (hT : 0 ≤ T)
   set ff := ‖timeModeCoeff (I := I) (M := M) f i‖ with hff_def
   have hφ_nn : 0 ≤ φ := norm_nonneg _
   have hff_nn : 0 ≤ ff := norm_nonneg _
-  -- The two existing per-mode bounds.
   have h1 : φ ≤ T * ff := norm_solModeCoeff_le (I := I) (M := M) (a := a) hT f i
   have h2 : lam * φ ≤ ff :=
     lambda_mul_norm_solModeCoeff_le (I := I) (M := M) (a := a) hT f i
-  -- `(√λ · φ)² = (λ·φ)·φ ≤ ff·(T·ff) = T·ff² = (√T·ff)²`.
   have hlhs_nn : 0 ≤ Real.sqrt lam * φ :=
     mul_nonneg (Real.sqrt_nonneg _) hφ_nn
   have hrhs_nn : 0 ≤ Real.sqrt T * ff :=
@@ -224,7 +188,6 @@ theorem sqrt_lambda_mul_norm_solModeCoeff_le (hT : 0 ≤ T)
     rw [mul_pow, Real.sq_sqrt hT]; ring
   have hsq_le : (Real.sqrt lam * φ) ^ 2 ≤ (Real.sqrt T * ff) ^ 2 := by
     rw [hsqL, hsqR]
-    -- `(λφ)·φ ≤ ff·(T·ff)`: `λφ ≤ ff` (with `φ ≥ 0`) and `φ ≤ T·ff`.
     calc lam * φ * φ ≤ ff * φ := mul_le_mul_of_nonneg_right h2 hφ_nn
       _ ≤ ff * (T * ff) := mul_le_mul_of_nonneg_left h1 hff_nn
       _ = T * ff * ff := by ring
@@ -252,7 +215,6 @@ theorem one_add_lambda_sqrt_mul_norm_solModeCoeff_le (hT : 0 < T) (hT1 : T ≤ 1
   set ff := ‖timeModeCoeff (I := I) (M := M) f i‖ with hff_def
   have hφ_nn : 0 ≤ φ := norm_nonneg _
   have hff_nn : 0 ≤ ff := norm_nonneg _
-  -- `(1 + λ)^{1/2} = √(1 + λ) ≤ 1 + √λ`.
   have hsqrt_le : (1 + lam) ^ (1 / 2 : ℝ) ≤ 1 + Real.sqrt lam := by
     have hrw : (1 + lam) ^ (1 / 2 : ℝ) = Real.sqrt (1 + lam) := by
       rw [Real.sqrt_eq_rpow]
@@ -260,12 +222,10 @@ theorem one_add_lambda_sqrt_mul_norm_solModeCoeff_le (hT : 0 < T) (hT1 : T ≤ 1
     have hsl_nn : 0 ≤ Real.sqrt lam := Real.sqrt_nonneg _
     have hrhs_nn : 0 ≤ 1 + Real.sqrt lam := by linarith
     have hsl_sq : Real.sqrt lam ^ 2 = lam := Real.sq_sqrt hlam_nn
-    -- `√(1+λ) ≤ 1+√λ` ⇐ `1+λ ≤ (1+√λ)²` and `1+√λ ≥ 0`.
     rw [show (1 + Real.sqrt lam) = Real.sqrt ((1 + Real.sqrt lam) ^ 2) from
       (Real.sqrt_sq hrhs_nn).symm]
     refine Real.sqrt_le_sqrt ?_
     nlinarith [hsl_nn, hsl_sq]
-  -- The two per-mode pieces, both bounded by `√T · ff`.
   have hconv : φ ≤ Real.sqrt T * ff := by
     have hTle : T ≤ Real.sqrt T := by
       have hsqrt_ge : Real.sqrt T * Real.sqrt T = T := Real.mul_self_sqrt hT.le
@@ -276,7 +236,6 @@ theorem one_add_lambda_sqrt_mul_norm_solModeCoeff_le (hT : 0 < T) (hT1 : T ≤ 1
       _ ≤ Real.sqrt T * ff := mul_le_mul_of_nonneg_right hTle hff_nn
   have hhalf : Real.sqrt lam * φ ≤ Real.sqrt T * ff :=
     sqrt_lambda_mul_norm_solModeCoeff_le (I := I) (M := M) (a := a) hT.le f i
-  -- Combine: `(1+λ)^{1/2}·φ ≤ (1 + √λ)·φ = φ + √λ·φ ≤ 2√T·ff`.
   calc (1 + lam) ^ (1 / 2 : ℝ) * φ
       ≤ (1 + Real.sqrt lam) * φ := mul_le_mul_of_nonneg_right hsqrt_le hφ_nn
     _ = φ + Real.sqrt lam * φ := by ring
@@ -292,12 +251,6 @@ theorem norm_derivModeCoeff_le (hT : 0 ≤ T)
   perModeConvDerivL2_sq_le (TensorEigenIdx.lambda (I := I) (M := M) i)
     (tensor_lambda_nonneg (I := I) (M := M) i) hT
     (timeModeCoeff (I := I) (M := M) f i)
-
-/-! ## Weighted summability of the mode families
-
-The two mode families — `i ↦ φᵢ` at scale `a+2`, and `i ↦ fᵢ − λᵢ·φᵢ` at
-scale `a` — have summable spectral-weighted squares, the precondition for the
-synthesis `timeL2OfModes`. -/
 
 /-- The spectral weight at `σ + 2` factors as the weight at `σ` times
 `(1 + λᵢ)²`. -/
@@ -329,7 +282,6 @@ theorem weighted_solModeCoeff_le (hT : 0 ≤ T)
     have := tensor_lambda_nonneg (I := I) (M := M) i; linarith
   have hsol_nonneg : 0 ≤ ‖solModeCoeff (I := I) (M := M) (a := a) hT f i‖ :=
     norm_nonneg _
-  -- The squared per-mode estimate, weighted by `(1 + λᵢ)ᵃ`.
   have hsq : ((1 + TensorEigenIdx.lambda (I := I) (M := M) i) *
         ‖solModeCoeff (I := I) (M := M) (a := a) hT f i‖) ^ 2 ≤
       ((1 + T) * ‖timeModeCoeff (I := I) (M := M) f i‖) ^ 2 := by
@@ -388,11 +340,9 @@ theorem weighted_solModeCoeff_Ha1_le (hT : 0 < T) (hT1 : T ≤ 1)
     tensorSobolevWeight_nonneg (I := I) (M := M) i a
   have hsol_nonneg : 0 ≤ ‖solModeCoeff (I := I) (M := M) (a := a) hT.le f i‖ :=
     norm_nonneg _
-  -- `(1 + λ)^{a+1} = (1 + λ)ᵃ · (1 + λ)` and `(1 + λ) = ((1 + λ)^{1/2})²`.
   have hweight_sq : (1 + lam) = ((1 + lam) ^ (1 / 2 : ℝ)) ^ 2 := by
     rw [← Real.rpow_natCast ((1 + lam) ^ (1 / 2 : ℝ)) 2, ← Real.rpow_mul hbase_nn]
     norm_num
-  -- The squared per-mode estimate.
   have hsq : ((1 + lam) ^ (1 / 2 : ℝ) *
         ‖solModeCoeff (I := I) (M := M) (a := a) hT.le f i‖) ^ 2 ≤
       (2 * Real.sqrt T * ‖timeModeCoeff (I := I) (M := M) f i‖) ^ 2 := by
@@ -501,12 +451,6 @@ theorem summable_derivModeCoeff (hT : 0 ≤ T)
       (sq_nonneg _)
   · exact weighted_derivModeCoeff_le (I := I) (M := M) (a := a) hT f i
 
-/-! ## The solution field and the time-derivative field
-
-The synthesis `timeL2OfModes` assembles the per-mode coordinate families into
-genuine time-`L²` tensor fields: the solution `u ∈ L²([0,T]; H^{a+2})` and its
-time derivative `∂_t u ∈ L²([0,T]; Hᵃ)`. -/
-
 /-- **The time-derivative field `∂_t u`.**  For a forcing term `f ∈ L²([0,T];
 Hᵃ)`, this is the element of `L²([0,T]; Hᵃ)` whose `i`-th eigen-coordinate is
 `fᵢ − λᵢ·φᵢ`, the per-mode scalar ODE right-hand side. -/
@@ -554,16 +498,6 @@ theorem maximalRegularitySolField_timeModeCoeff (hT : 0 ≤ T)
       solModeCoeff (I := I) (M := M) (a := a) hT f i :=
   timeL2OfModes_timeModeCoeff (I := I) (M := M) _
     (summable_solModeCoeff (I := I) (M := M) (a := a) hT h_compact f) i
-
-/-! ## The solution field viewed at the intermediate `H^{a+1}` scale
-
-The same per-mode solution coordinates `i ↦ φᵢ`, synthesised at the intermediate
-exponent `a + 1` rather than `a + 2`.  This is the one-derivative-gain view of
-the Duhamel solution; its `L²([0,T]; H^{a+1})` norm carries the parabolic decay
-factor `2√T → 0` (`maximalRegularitySolField_Ha1_norm_le`), the analytic input to
-the small-time contraction for a subcritical (one-derivative-loss) nonlinearity.
-By construction (same mode family) it is the `H^{a+1}`-view of the full
-`H^{a+2}`-valued field `maximalRegularitySolField`. -/
 
 /-- **The solution field `u`, viewed in `L²([0,T]; H^{a+1})`.**  For a forcing
 term `f ∈ L²([0,T]; Hᵃ)` and `0 < T ≤ 1`, the element of `L²([0,T]; H^{a+1})`
@@ -649,12 +583,6 @@ theorem maximalRegularitySolFieldHa1_sub (hT : 0 < T) (hT1 : T ≤ 1)
   rw [sub_add_cancel] at hadd
   rw [hadd, add_sub_cancel_right]
 
-/-! ## The maximal-regularity operator
-
-The Duhamel solution operator, packaged as a map into the strong-solution
-space `H¹([0,T]; Hᵃ)`: the time-`H¹` element with initial value `0` and `L²`
-time derivative the time-derivative field `∂_t u`. -/
-
 /-- **The `L²`-maximal-regularity operator.**  For a forcing term `f ∈ L²([0,T];
 Hᵃ)`, `maximalRegularityOp a hT hT1 f` is the Duhamel solution of
 `∂_t u = Δ_∇ u + f`, `u(0) = 0`, packaged as an element of the strong-solution
@@ -689,8 +617,6 @@ theorem maximalRegularityOp_trace0 (hT : 0 < T) (hT1 : T ≤ 1)
     TimeSobolev.timeH1.trace0 _ T
         (maximalRegularityOp (I := I) (M := M) a hT hT1 f) = 0 :=
   rfl
-
-/-! ## The maximal-regularity bounds -/
 
 /-- Chart-locality-free version of `maximalRegularityOp_norm_Ha2_le`
 (the `H^{a+2}` two-derivative-gain bound), parameterized on resolvent

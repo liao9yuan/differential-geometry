@@ -68,16 +68,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## Iterated `L²`-side resolvent -/
 
 /-- The `k`-th iterated `L²`-side resolvent: `(1 - Δ_g)^{-k}` acting on
 `Lp ℝ 2 μ_g`. Defined as the `k`-fold composition of `resolventL2 g`. -/
@@ -127,8 +123,6 @@ lemma iteratedResolventL2_add (g : SmoothRiemannianMetric I M) (j k : ℕ) :
     rw [Nat.succ_add, iteratedResolventL2_succ, iteratedResolventL2_succ, ih]
     rw [ContinuousLinearMap.comp_assoc]
 
-/-! ## The iterated Laplacian domain -/
-
 /-- The `k`-th iterated Laplacian domain: the image of the composition
 `resolvent g ∘ iteratedResolventL2 g (k-1)` for `k ≥ 1`, and the whole
 `H1Compl g` for `k = 0`.
@@ -175,8 +169,6 @@ lemma laplacianDomainPow_succ_mem_iff (g : SmoothRiemannianMetric I M) (k : ℕ)
   constructor
   · rintro ⟨f, hf⟩
     refine ⟨f, ?_⟩
-    -- (resolvent.toLinearMap ∘L iteratedResolventL2.toLinearMap) f
-    --   = resolvent (iteratedResolventL2 f). Definitional unfolding.
     simp only [LinearMap.coe_comp, Function.comp_apply,
       ContinuousLinearMap.coe_coe] at hf
     exact hf.symm
@@ -195,20 +187,11 @@ lemma laplacianDomainPow_succ_subset_laplacianDomain
     (laplacianDomainPow (I := I) (M := M) g (k + 1) : Set (H1Compl g)) ⊆
       (laplacianDomain (I := I) (M := M) g : Set (H1Compl g)) := by
   intro u hu
-  -- u ∈ laplacianDomainPow g (k+1) gives some f with u = resolvent (Sᵏ f).
-  -- Then u ∈ range(resolvent) = laplacianDomain.
   rw [SetLike.mem_coe, laplacianDomainPow_succ_mem_iff] at hu
   obtain ⟨f, hf⟩ := hu
   rw [SetLike.mem_coe]
   rw [laplacianDomain_mem_iff]
   exact ⟨iteratedResolventL2 (I := I) (M := M) g k f, hf⟩
-
-/-! ## Compatibility: descent of `(1-Δ)` along `laplacianDomainPow`
-
-The key inductive structure: if `u ∈ laplacianDomainPow g (k+1)`, then the
-"preimage under the resolvent" of `u` lies in `laplacianDomainPow g k`, in
-the sense that this preimage as an `Lp` element equals
-`iteratedResolventL2 g k f` for some `f ∈ Lp`. -/
 
 /-- For `u ∈ laplacianDomainPow g (k+1)`, the canonical preimage
 `laplacianDomain.preimage u` (which is `(1 - Δ_g) u` in `L²`) lies in the
@@ -224,18 +207,11 @@ lemma laplacianDomainPow_succ_preimage_in_range
         (iteratedResolventL2 (I := I) (M := M) g k).toLinearMap := by
   rw [laplacianDomainPow_succ_mem_iff] at hu_h
   obtain ⟨f, hf⟩ := hu_h
-  -- u_h = resolvent (iteratedResolventL2 k f), so preimage u_h = iteratedResolventL2 k f.
   rw [LinearMap.mem_range]
   refine ⟨f, ?_⟩
-  -- Need: iteratedResolventL2 g k f = preimage of ⟨u_h, hu_h⟩.
-  -- Apply resolvent_injective.
   apply resolvent_injective (I := I) (M := M) g
   rw [resolvent_laplacianDomain_preimage_eq]
-  -- LHS: resolvent (iteratedResolventL2 g k f). RHS: ↑⟨u_h, _⟩ = u_h.
-  -- By hf, u_h = resolvent (iteratedResolventL2 g k f).
   exact hf.symm
-
-/-! ## Sanity checks -/
 
 example (g : SmoothRiemannianMetric I M) :
     Submodule ℝ (H1Compl (I := I) (M := M) g) :=

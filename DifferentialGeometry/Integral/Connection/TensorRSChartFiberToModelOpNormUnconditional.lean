@@ -53,22 +53,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
-/-! ## Per-point local op-norm bound on `(triv α).clmAt`
-
-For each `y₀ ∈ M`, we exhibit an open neighbourhood `W_{y₀}` of `y₀`, contained
-in `(chartAt H y₀).source ∩ (chartAt H α).source`, and a constant
-`M_{y₀} > 0`, such that for every `b ∈ W_{y₀}` and every
-`T : TensorRSSpace r s I b`,
-
-  `‖(triv α).clmAt b T‖ ≤ M_{y₀} · ‖T‖`.
-
-The constant arises as the product of:
-* `D_{y₀} := 1 + ‖coordChangeL y₀ α y₀‖`, a continuity-based upper bound on the
-  `coordChangeL` op-norm in a sufficiently small neighbourhood of `y₀`;
-* `C_{y₀}` from `eventually_norm_trivializationAt_lt y₀` applied to the
-  `(r, s)`-tensor bundle, which under `[IsContinuousRiemannianBundle …]` bounds
-  `‖(triv y₀).clmAt b‖_op` for `b` near `y₀`. -/
-
 set_option synthInstance.maxHeartbeats 800000 in
 attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
@@ -90,18 +74,14 @@ private lemma exists_W_and_constant
   haveI hICRB : IsContinuousRiemannianBundle (TensorRSModel r s ℝ E)
       (fun b : M => TensorRSSpace r s I b) :=
     tensorRS_isContinuousRiemannianBundle (I := I) (M := M) g r s
-  -- `(triv y₀).clmAt b` is op-norm bounded in a neighbourhood of `y₀`.
   obtain ⟨C₁, hC₁_pos, hC₁_ev⟩ :=
     eventually_norm_trivializationAt_lt (TensorRSModel r s ℝ E)
       (fun b : M => TensorRSSpace r s I b) y₀
-  -- `b ↦ ‖coordChangeL y₀ α b‖` is continuous on `(chartAt H y₀).source ∩
-  -- (chartAt H α).source`, hence locally bounded near `y₀`.
   set ccF : M → (TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E) := fun b =>
     (trivializationAt (TensorRSModel r s ℝ E)
       (fun y : M => TensorRSSpace r s I y) y₀).coordChangeL ℝ
       (trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α) b with hccF_def
-  -- Smoothness of `b ↦ coordChangeL y₀ α b` on the intersection of base sets.
   have h_smooth :
       ContMDiffOn I 𝓘(ℝ, TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E) ∞ ccF
         ((trivializationAt (TensorRSModel r s ℝ E)
@@ -129,7 +109,6 @@ private lemma exists_W_and_constant
     change (trivializationAt E (TangentSpace I) α).baseSet ∩
         (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source
     rw [Set.inter_self, TangentBundle.trivializationAt_baseSet (𝕜 := ℝ) (I := I) α]
-  -- Convert smoothness to continuity at `y₀`.
   have hy₀_y₀ : y₀ ∈ (chartAt H y₀).source := mem_chart_source H y₀
   have hy₀_inter :
       y₀ ∈ (chartAt H y₀).source ∩ (chartAt H α).source := ⟨hy₀_y₀, h_y₀_α⟩
@@ -152,7 +131,6 @@ private lemma exists_W_and_constant
     h_cont_chart.continuousAt (h_open_inter.mem_nhds hy₀_inter)
   have h_norm_continuousAt : ContinuousAt (fun b => ‖ccF b‖) y₀ :=
     continuous_norm.continuousAt.comp h_cc_continuousAt
-  -- Set the threshold C₂ for the coordChange norm: ‖ccF y₀‖ + 1.
   set C₂ : ℝ := ‖ccF y₀‖ + 1 with hC₂_def
   have hC₂_pos : 0 < C₂ := by
     rw [hC₂_def]; positivity
@@ -160,7 +138,6 @@ private lemma exists_W_and_constant
     have h_lt : ‖ccF y₀‖ < C₂ := by rw [hC₂_def]; linarith
     have h_mem_nhds : Set.Iio C₂ ∈ 𝓝 ‖ccF y₀‖ := Iio_mem_nhds h_lt
     exact h_norm_continuousAt h_mem_nhds
-  -- Extract open sets from the eventually statements via `mem_nhds_iff`.
   rcases (Filter.eventually_iff_exists_mem.mp hC₁_ev) with ⟨U₁, hU₁_nhd, hU₁_bound⟩
   rcases mem_nhds_iff.mp hU₁_nhd with ⟨V₁, hV₁_sub, hV₁_open, hV₁_mem⟩
   rcases (Filter.eventually_iff_exists_mem.mp h_cc_ev) with ⟨U₂, hU₂_nhd, hU₂_bound⟩
@@ -172,7 +149,6 @@ private lemma exists_W_and_constant
   refine ⟨C₂ * C₁, by positivity, ?_⟩
   intro b hb T
   obtain ⟨⟨⟨hb_V₁, hb_V₂⟩, hb_y₀_src⟩, hb_α_src⟩ := hb
-  -- The trivialisation `(triv y₀).clmAt b` op-norm is `< C₁` on V₁.
   have h_clm_norm_lt : ‖(trivializationAt (TensorRSModel r s ℝ E)
       (fun y : M => TensorRSSpace r s I y) y₀).continuousLinearMapAt ℝ b‖ < C₁ :=
     hU₁_bound b (hV₁_sub hb_V₁)
@@ -181,7 +157,6 @@ private lemma exists_W_and_constant
     le_of_lt h_clm_norm_lt
   have h_cc_norm_lt : ‖ccF b‖ < C₂ := hU₂_bound b (hV₂_sub hb_V₂)
   have h_cc_norm_le : ‖ccF b‖ ≤ C₂ := le_of_lt h_cc_norm_lt
-  -- Factorisation of (triv α).clmAt b T via the coordChange and (triv y₀).clmAt b.
   have hb_tan_y₀ : b ∈ (trivializationAt E (TangentSpace I) y₀).baseSet := by
     rw [TangentBundle.trivializationAt_baseSet (𝕜 := ℝ) (I := I) y₀]; exact hb_y₀_src
   have hb_tan_α : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
@@ -190,7 +165,6 @@ private lemma exists_W_and_constant
       (fun y : M => TensorRSSpace r s I y) y₀).baseSet := ⟨hb_tan_y₀, hb_tan_y₀⟩
   have hb_α_RS : b ∈ (trivializationAt (TensorRSModel r s ℝ E)
       (fun y : M => TensorRSSpace r s I y) α).baseSet := ⟨hb_tan_α, hb_tan_α⟩
-  -- Apply the symm-of-clmAt + coordChangeL formula.
   set ey₀ := trivializationAt (TensorRSModel r s ℝ E)
     (fun y : M => TensorRSSpace r s I y) y₀ with hey₀_def
   set eα := trivializationAt (TensorRSModel r s ℝ E)
@@ -242,8 +216,6 @@ private lemma exists_W_and_constant
         mul_le_mul_of_nonneg_left h_norm_clm_T (le_of_lt hC₂_pos)
     _ = C₂ * C₁ * ‖T‖ := by ring
 
-/-! ## Headline: unconditional uniform op-norm bound on compact subsets -/
-
 set_option synthInstance.maxHeartbeats 800000 in
 attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
@@ -268,8 +240,6 @@ theorem tensorRSChartFiberToModel_opNorm_isBounded_on_compact_unconditional
   classical
   letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
-  -- For each `y₀ ∈ M`, define `W` to be the open nbhd from `exists_W_and_constant`
-  -- when `y₀ ∈ (chartAt H α).source`, or the singleton `∅` otherwise.
   let W : M → Set M := fun y₀ =>
     if hy : y₀ ∈ (chartAt H α).source then
       (exists_W_and_constant (I := I) (M := M) g r s α y₀ hy).choose
@@ -301,7 +271,6 @@ theorem tensorRSChartFiberToModel_opNorm_isBounded_on_compact_unconditional
     simp only [N, dif_pos hy]
     exact (exists_W_and_constant (I := I) (M := M) g r s α y₀ hy).choose_spec.2.2.choose_spec.2
       b hb T
-  -- Finite subcover.
   have h_cover : K ⊆ ⋃ y₀ ∈ K, W y₀ := fun b hb =>
     Set.mem_iUnion₂.mpr ⟨b, hb, hW_mem b (hKsub hb)⟩
   rcases hK.elim_finite_subcover_image (b := K) (c := W)
@@ -318,9 +287,7 @@ theorem tensorRSChartFiberToModel_opNorm_isBounded_on_compact_unconditional
     intro y₀ hy₀; rw [hS'_def] at hy₀
     exact hS_sub (hS_finite.mem_toFinset.mp hy₀)
   by_cases hS_empty : S' = ∅
-  · -- If K is empty (since W's cover K and S' is the chosen finite subcover),
-    -- then no `b ∈ K` exists, so any positive C works.
-    refine ⟨1, one_pos, ?_⟩
+  · refine ⟨1, one_pos, ?_⟩
     intro b hb _
     have : b ∈ ⋃ y₀ ∈ S', W y₀ := hS_cover' hb
     rw [hS_empty] at this

@@ -81,28 +81,12 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 open DifferentialGeometry.Analysis.Sobolev.NirenbergCrossBounds
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-Match the convention in the surrounding tensor-regularity files: install the
-Borel σ-algebras locally, without leaking global instances onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## `L²`-locality of the explicit right-hand side
-
-The Euclidean engine `h2_loc_smooth_solution` needs the right-hand side to lie
-in `L²` on every compact-closure open set. We package the standard fact: a
-`C^∞` function with compact support lies in `L^p` for the ambient `volume`, and
-therefore in `L²` on every restricted measure. Applied to
-`tensorComponentWeakRHS` — which is `C^∞` (`tensorComponentWeakRHS_contDiff`)
-and compactly supported (`tensorComponentWeakRHS_hasCompactSupport`) — this
-discharges the engine's locality hypothesis. -/
 
 omit [NeZero (Module.finrank ℝ E)] in
 /-- A `C^∞` function with compact support on `EuclN` lies in `L²` on every
@@ -114,25 +98,6 @@ private lemma memLp_two_contDiff_hasCompactSupport_restrict
     MemLp f 2 ((volume : Measure EuclN).restrict Ω') :=
   (hf_cd.continuous.memLp_of_hasCompactSupport (μ := volume) (p := 2)
     hf_cs).restrict _
-
-/-! ## The headline: per-component interior `H²` regularity
-
-The per-component, per-chart interior `H²` regularity statement. The proof:
-
-1. `tensorComponent_isSmoothWeakSolution` provides the
-   `IsSmoothWeakSolution` witness for the principal-part form
-   `tensorPrincipalForm g α hK hK_target`, the chart component
-   `tensorComponentEuclid g r s T α P₀`, and the explicit right-hand side
-   `tensorComponentWeakRHS g r s T F α hK hK_target P₀`.
-2. The engine's locality hypothesis for the right-hand side is discharged from
-   the smoothness `tensorComponentWeakRHS_contDiff` and compact support
-   `tensorComponentWeakRHS_hasCompactSupport` via
-   `memLp_two_contDiff_hasCompactSupport_restrict`.
-3. The geometric room conditions `closure Ω'' ⊆ Ω` and
-   `Metric.cthickening 2 (closure Ω'') ⊆ Ω` are trivial: the principal-part
-   form `tensorPrincipalForm` has domain `Ω = Set.univ`.
-4. `h2_loc_smooth_solution` delivers the conclusion.
--/
 
 /-- **Interior `H²` regularity of the chart components of a tensor weak
 solution.**
@@ -198,15 +163,12 @@ theorem tensor_h2_loc_chartComp
                     g r s T F α hK hK_target P₀ x) ^ 2
                 ∂(volume : Measure EuclN)) := by
   classical
-  -- Step 1: the smooth-weak-solution witness for the principal-part form.
   have h_weak :
       (tensorPrincipalForm (I := I) (M := M) g α hK hK_target).IsSmoothWeakSolution
         (tensorComponentEuclid (I := I) (M := M) g r s T α P₀)
         (tensorComponentWeakRHS (I := I) (M := M) g r s T F α hK hK_target P₀) :=
     tensorComponent_isSmoothWeakSolution (I := I) (M := M)
       g r s T F α hK hK_target P₀ hT_supp hF_supp hT_K hweak
-  -- Step 2: the explicit right-hand side is `C^∞` and compactly supported,
-  -- hence locally `L²` on every restricted measure.
   have hRHS_cd : ContDiff ℝ ∞
       (tensorComponentWeakRHS (I := I) (M := M) g r s T F α hK hK_target P₀) :=
     tensorComponentWeakRHS_contDiff (I := I) (M := M)
@@ -221,15 +183,11 @@ theorem tensor_h2_loc_chartComp
     intro Ω' _
     exact memLp_two_contDiff_hasCompactSupport_restrict (E := E)
       hRHS_cd hRHS_cs Ω'
-  -- Step 3: the geometric room conditions are trivial — domain is `Set.univ`.
   have h_closure_in :
       closure Ω'' ⊆ (Set.univ : Set EuclN) := fun y _ => Set.mem_univ y
   have h_room :
       Metric.cthickening 2 (closure Ω'') ⊆ (Set.univ : Set EuclN) :=
     fun y _ => Set.mem_univ y
-  -- Step 4: apply the Euclidean interior `H²` regularity engine.
-  -- The engine produces a constant independent of the solution data; specialise
-  -- it to the principal-part weak solution and the direction pair.
   obtain ⟨C, hC_nn, h_eng⟩ := h2_loc_smooth_solution
     (d := Module.finrank ℝ E)
     (tensorPrincipalForm (I := I) (M := M) g α hK hK_target)
@@ -239,13 +197,6 @@ theorem tensor_h2_loc_chartComp
     hΩ'_compact, hbound⟩ := h_eng h_weak hf_l2_loc i k
   exact ⟨g_ik, hg_memLp, hg_weak, Ω', hΩ'_open, hΩ''_in_Ω', hΩ'_in,
     hΩ'_compact, C, hC_nn, hbound⟩
-
-/-! ## Packaged corollary over all component multi-indices
-
-The headline `tensor_h2_loc_chartComp` is stated for a fixed component
-multi-index `P₀`. The following corollary repackages it as a single statement
-quantifying over every `P₀ : CompIdx E r s`, under the per-component support
-hypothesis `hT_K`. -/
 
 /-- **Interior `H²` regularity of every chart component of a tensor weak
 solution.**

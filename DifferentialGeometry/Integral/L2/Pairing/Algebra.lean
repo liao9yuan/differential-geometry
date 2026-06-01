@@ -47,17 +47,10 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Canonical measurable-space and Borel-space instances on `E` and `M`
-
-File-local Borel structures, matching the other files in this directory.
-Declared `local` so they do not leak into external typeclass search. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Symmetry and bilinearity of the global `L²` pairing -/
 
 set_option linter.unusedSectionVars false in
 /-- Symmetry of the global `L²` inner product: follows from pointwise
@@ -232,16 +225,6 @@ theorem tensorL2Inner_nonneg
   intro x
   exact tensorInnerPointwise_nonneg (I := I) (M := M) g r s x (S x)
 
-/-! ## Closure of `MemL2` under bilinear-pairing-of-arguments operations
-
-The key analytic ingredient is the AM–GM bound
-`|⟨S(x), T(x)⟩_{g(x)}| ≤ (⟨S(x), S(x)⟩ + ⟨T(x), T(x)⟩) / 2`,
-which is a consequence of the pointwise Cauchy–Schwarz inequality
-(`|b| ≤ √a √c`) and the elementary inequality `√a √c ≤ (a + c) / 2`
-(equivalent to `(√a - √c)² ≥ 0`). Combined with an
-ae-strong-measurability hypothesis on the cross integrand, this gives
-integrability of the cross pairing from `MemL2 S` and `MemL2 T`. -/
-
 set_option linter.unusedSectionVars false in
 /-- The cross diagonal pointwise inner is integrable, given that both
 diagonal pointwise pairings are integrable and the cross integrand is
@@ -260,13 +243,11 @@ theorem MemL2.integrable_inner_of_aestronglyMeasurable
     MeasureTheory.Integrable
       (fun x => tensorInnerPointwise (I := I) (M := M) g r s x (S x) (T x))
       (riemannianVolumeMeasure (I := I) (M := M) g) := by
-  -- Dominating function: `(1/2) * (⟨S, S⟩ + ⟨T, T⟩)`.
   set F : M → ℝ := fun x =>
     tensorInnerPointwise (I := I) (M := M) g r s x (S x) (T x)
   set G : M → ℝ := fun x =>
     (1 / 2 : ℝ) * (tensorInnerPointwise (I := I) (M := M) g r s x (S x) (S x) +
       tensorInnerPointwise (I := I) (M := M) g r s x (T x) (T x))
-  -- `G` is integrable: linear combination of the two diagonal integrands.
   have hG_integrable : MeasureTheory.Integrable G
       (riemannianVolumeMeasure (I := I) (M := M) g) := by
     have h_sum : MeasureTheory.Integrable (fun x =>
@@ -275,8 +256,6 @@ theorem MemL2.integrable_inner_of_aestronglyMeasurable
         (riemannianVolumeMeasure (I := I) (M := M) g) :=
       hS.add hT
     exact h_sum.const_mul (1 / 2 : ℝ)
-  -- Pointwise bound: `‖F x‖ = |F x| ≤ G x`, from pointwise Cauchy–Schwarz
-  -- and AM–GM.
   have h_bound : ∀ x : M, ‖F x‖ ≤ G x := by
     intro x
     set a := tensorInnerPointwise (I := I) (M := M) g r s x (S x) (S x)
@@ -284,15 +263,12 @@ theorem MemL2.integrable_inner_of_aestronglyMeasurable
     set c := tensorInnerPointwise (I := I) (M := M) g r s x (T x) (T x)
     have ha : 0 ≤ a := tensorInnerPointwise_nonneg (I := I) (M := M) g r s x (S x)
     have hc : 0 ≤ c := tensorInnerPointwise_nonneg (I := I) (M := M) g r s x (T x)
-    -- Pointwise Cauchy–Schwarz in absolute-value form via the squared form:
-    -- `b² ≤ a c`, so `|b| ≤ √(a c)`.
     have hb_sq : b ^ 2 ≤ a * c :=
       tensorInnerPointwise_sq_le_mul (I := I) (M := M) g r s x (S x) (T x)
     have habs : |b| ≤ Real.sqrt (a * c) := by
       have h1 : |b| = Real.sqrt (b ^ 2) := (Real.sqrt_sq_eq_abs _).symm
       rw [h1]
       exact Real.sqrt_le_sqrt hb_sq
-    -- `√(a c) ≤ (a + c) / 2` by AM–GM (equivalent to `(√a - √c)² ≥ 0`).
     have hAMGM : Real.sqrt (a * c) ≤ (a + c) / 2 := by
       have hsq_a : Real.sqrt a ^ 2 = a := Real.sq_sqrt ha
       have hsq_c : Real.sqrt c ^ 2 = c := Real.sq_sqrt hc
@@ -309,7 +285,6 @@ theorem MemL2.integrable_inner_of_aestronglyMeasurable
         (Real.sqrt_mul ha c).symm
       rw [hprod] at hkey
       linarith
-    -- Combine: `|b| ≤ √(a c) ≤ (a + c) / 2 = G x`.
     have hF_norm : ‖F x‖ = |b| := by
       change ‖b‖ = |b|
       exact Real.norm_eq_abs b
@@ -319,7 +294,6 @@ theorem MemL2.integrable_inner_of_aestronglyMeasurable
       _ ≤ (a + c) / 2 := hAMGM
       _ = (1 / 2 : ℝ) * (a + c) := by ring
       _ = G x := hGx.symm
-  -- Apply `Integrable.mono'`.
   refine MeasureTheory.Integrable.mono' hG_integrable hST_meas ?_
   exact Filter.Eventually.of_forall h_bound
 
@@ -339,13 +313,11 @@ theorem MemL2.add
       (fun x => tensorInnerPointwise (I := I) (M := M) g r s x (S x) (T x))
       (riemannianVolumeMeasure (I := I) (M := M) g)) :
     MemL2 (I := I) (M := M) g r s (S + T) := by
-  -- Cross integrability.
   have hST : MeasureTheory.Integrable
       (fun x => tensorInnerPointwise (I := I) (M := M) g r s x (S x) (T x))
       (riemannianVolumeMeasure (I := I) (M := M) g) :=
     MemL2.integrable_inner_of_aestronglyMeasurable
       (I := I) (M := M) hS hT hST_meas
-  -- The cross-flipped integrand is also integrable (by symmetry).
   have hTS : MeasureTheory.Integrable
       (fun x => tensorInnerPointwise (I := I) (M := M) g r s x (T x) (S x))
       (riemannianVolumeMeasure (I := I) (M := M) g) := by
@@ -356,7 +328,6 @@ theorem MemL2.add
       exact (tensorInnerPointwise_symm (I := I) (M := M) g r s x (T x) (S x))
     rw [hsymm]
     exact hST
-  -- Sum is integrable: `⟨S, S⟩ + ⟨S, T⟩ + ⟨T, S⟩ + ⟨T, T⟩`.
   have hsum : MeasureTheory.Integrable
       (fun x =>
         tensorInnerPointwise (I := I) (M := M) g r s x (S x) (S x) +
@@ -365,7 +336,6 @@ theorem MemL2.add
           tensorInnerPointwise (I := I) (M := M) g r s x (T x) (T x))
       (riemannianVolumeMeasure (I := I) (M := M) g) :=
     ((hS.integrable_inner_self.add hST).add hTS).add hT.integrable_inner_self
-  -- Pointwise expansion of the diagonal pairing of `S + T`.
   have hexpand : ∀ x : M,
       tensorInnerPointwise (I := I) (M := M) g r s x ((S + T) x) ((S + T) x) =
         tensorInnerPointwise (I := I) (M := M) g r s x (S x) (S x) +
@@ -378,7 +348,6 @@ theorem MemL2.add
     rw [tensorInnerPointwise_add_left, tensorInnerPointwise_add_right,
         tensorInnerPointwise_add_right]
     ring
-  -- Conclude.
   change MeasureTheory.Integrable
       (fun x => tensorInnerPointwise (I := I) (M := M) g r s x ((S + T) x) ((S + T) x))
       (riemannianVolumeMeasure (I := I) (M := M) g)
@@ -404,7 +373,6 @@ theorem MemL2.smul
     (hS : MemL2 (I := I) (M := M) g r s S) :
     MemL2 (I := I) (M := M) g r s (c • S) := by
   unfold MemL2
-  -- Pointwise: `⟨c • S(x), c • S(x)⟩ = c² ⟨S(x), S(x)⟩`.
   have hexpand : ∀ x : M,
       tensorInnerPointwise (I := I) (M := M) g r s x ((c • S) x) ((c • S) x) =
         (c * c) *

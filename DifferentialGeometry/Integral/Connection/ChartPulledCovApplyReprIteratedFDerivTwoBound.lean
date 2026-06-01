@@ -86,8 +86,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## ContDiffAt-2 facts for each of the three pieces at the chart point -/
-
 /-- The intrinsic piece is `ContDiffAt ∞` at `extChartAt I α b` whenever `b`
 lies in the chart-`α` Levi-Civita good set. -/
 private lemma intrinsicPiece_contDiffAt_two
@@ -108,7 +106,6 @@ private lemma intrinsicPiece_contDiffAt_two
     with hU_def
   have hU_open : IsOpen U := chartLeviCivitaGoodSet_image_isOpen (I := I) α
   have hx_mem : extChartAt I α b ∈ U := ⟨b, hb_good, rfl⟩
-  -- ContDiffOn ∞ of `fderiv F` on U.
   have hF_cd : ContDiffOn ℝ ∞
       (tensorRSChartE_section_repr (I := I) r s α
           (fun y' : M => T.toSection y') ∘ (extChartAt I α).symm) U :=
@@ -118,7 +115,6 @@ private lemma intrinsicPiece_contDiffAt_two
       (fderiv ℝ (tensorRSChartE_section_repr (I := I) r s α
           (fun y' : M => T.toSection y') ∘ (extChartAt I α).symm)) U :=
     hF_cd.fderiv_of_isOpen hU_open h_le
-  -- ContDiffOn ∞ of `u = chartE_section_repr α B ∘ symm` on U.
   have hB_total : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => TotalSpace.mk' E
         (E := fun y : M => TangentSpace I y) x (B.toFun x)) := B.contMDiff
@@ -128,7 +124,6 @@ private lemma intrinsicPiece_contDiffAt_two
   have hu_cd : ContDiffOn ℝ ∞
       (chartE_section_repr (I := I) α B.toFun ∘ (extChartAt I α).symm) U :=
     chartE_pullback_contDiffOn_goodSet (I := I) α hB_on
-  -- ContDiffAt 2 of `c · u` at the chart point.
   have hc_at : ContDiffAt ℝ 2
       (fderiv ℝ (tensorRSChartE_section_repr (I := I) r s α
           (fun y' : M => T.toSection y') ∘ (extChartAt I α).symm))
@@ -158,7 +153,6 @@ private lemma intrinsicPiece_contDiffAt_two
       have h1 : ((2 : ℕ) : ℕ∞) ≤ (⊤ : ℕ∞) := le_top
       exact (WithTop.coe_le_coe.mpr h1 : _)
     exact h_at_top.of_le h2_le
-  -- `clm_apply` lifts to ContDiffAt of `c y (u y)`.
   exact hc_at.clm_apply hu_at
 
 /-- The chart-pulled input-slot correction is `ContDiffAt 2` at the chart
@@ -183,17 +177,14 @@ private lemma inputSlotPiece_contDiffAt_two
     with hU_def
   have hU_open : IsOpen U := chartLeviCivitaGoodSet_image_isOpen (I := I) α
   have hx_mem : extChartAt I α b ∈ U := ⟨b, hb_good, rfl⟩
-  -- ContDiffOn ∞ of the chart kernel pulled back by symm.
   have hK_cd : ContDiffOn ℝ ∞
       (fun y : E => inputSlotChartKernel (I := I) g r s α B.toFun k
                       ((extChartAt I α).symm y)) U :=
     inputSlotChartKernel_chart_pulled_contDiffOn (I := I) (M := M) g r s α B k
-  -- ContDiffOn ∞ of repr T pulled back by symm.
   have hF_cd : ContDiffOn ℝ ∞
       (tensorRSChartE_section_repr (I := I) r s α
           (fun y' : M => T.toSection y') ∘ (extChartAt I α).symm) U :=
     R_contDiffOn_goodSet (I := I) (M := M) g r s α T
-  -- ContDiffAt 2 of kernel and repr T.
   have hK_at : ContDiffAt ℝ 2
       (fun y : E => inputSlotChartKernel (I := I) g r s α B.toFun k
                       ((extChartAt I α).symm y))
@@ -224,14 +215,12 @@ private lemma inputSlotPiece_contDiffAt_two
       have h1 : ((2 : ℕ) : ℕ∞) ≤ (⊤ : ℕ∞) := le_top
       exact (WithTop.coe_le_coe.mpr h1 : _)
     exact h_at_top.of_le h2_le
-  -- ContDiffAt 2 of `kernel · F`.
   have h_kernel_F_at : ContDiffAt ℝ 2
       (fun y : E => inputSlotChartKernel (I := I) g r s α B.toFun k
           ((extChartAt I α).symm y)
           ((tensorRSChartE_section_repr (I := I) r s α
               (fun y' : M => T.toSection y') ∘ (extChartAt I α).symm) y))
       (extChartAt I α b) := hK_at.clm_apply hF_at
-  -- Pointwise equality on a neighbourhood of `extChartAt I α b`.
   have h_evt :
       (fun y : E =>
         (trivializationAt (TensorRSModel r s ℝ E)
@@ -353,8 +342,6 @@ private lemma outputSlotPiece_contDiffAt_two
       (b := (extChartAt I α).symm y)
       (by rw [hx'_inv]; exact hx'_src) l
   exact h_kernel_F_at.congr_of_eventuallyEq h_evt
-
-/-! ## Pointwise eventual equality from the chart-pulled explicit formula -/
 
 /-- The chart-pulled representation of `covApply ∇ B T` is, on an open
 neighbourhood of `extChartAt I α b`, equal to the intrinsic piece plus

@@ -76,12 +76,6 @@ namespace PDE
 namespace RicciFlow
 namespace IntrinsicSpectral
 
-/-! ## The scalar per-mode endpoint smoothing estimate
-
-Everything in this section is pure one-variable analysis on `[0,t]`: there
-is no manifold and no Hilbert-space-valued object, only real functions of
-time.  The decay rate is written `lam`, the forcing `f`. -/
-
 section Scalar
 
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
@@ -147,7 +141,6 @@ theorem one_add_lambda_mul_duhamel_kernel_sq_integral_le {lam t : ℝ}
     duhamelKernelSqIntegral_nonneg ht
   have hmass_le_t : duhamelKernelSqIntegral lam t ≤ t :=
     duhamelKernelSqIntegral_le_t hlam ht
-  -- `2·lam·mass = 1 − e^{−2·lam·t} ≤ 1`, hence `lam·mass ≤ 1/2`.
   have hlam_mass : lam * duhamelKernelSqIntegral lam t ≤ 1 / 2 := by
     have h := two_lambda_mul_duhamelKernelSqIntegral lam t
     have hexp_nn : (0 : ℝ) ≤ Real.exp (-(2 * lam * t)) := (Real.exp_pos _).le
@@ -156,13 +149,6 @@ theorem one_add_lambda_mul_duhamel_kernel_sq_integral_le {lam t : ℝ}
       = duhamelKernelSqIntegral lam t + lam * duhamelKernelSqIntegral lam t := by
     ring
   rw [hexpand]; linarith
-
-/-! ### The endpoint Cauchy–Schwarz bound
-
-For a forcing `f` continuous on `[0,t]`, the value `perModeConv lam f t` of
-the Duhamel convolution at the endpoint time `t` is bounded, via the
-weighted Cauchy–Schwarz inequality with weight `e^{−2·lam·(t−s)}`, by the
-kernel `L²`-mass times the `L²(0,t)` mass of `f`. -/
 
 variable {f : ℝ → ℝ}
 
@@ -181,31 +167,16 @@ theorem perModeConv_endpoint_sq_le (lam : ℝ) (hf : Continuous f) {t : ℝ}
     (ht : 0 ≤ t) :
     (perModeConv lam f t) ^ 2
       ≤ duhamelKernelSqIntegral lam t * ∫ s in (0 : ℝ)..t, f s ^ 2 := by
-  -- Discriminant of the nonnegative quadratic `c ↦ ∫₀ᵗ (e^{−lam(t−s)}·f(s) −
-  -- c·e^{−lam(t−s)})² ds` over `c`.  Equivalently, weighted Cauchy–Schwarz
-  -- with weight `w(s) = e^{−2·lam·(t−s)}` and `g(s) = f(s)`:
-  --   `(∫ w·g)² ≤ (∫ w)·(∫ w·g²)`,
-  -- but we need `(∫ √w·(√w·g))` form.  Use the kernel `k(s) = e^{−lam(t−s)}`
-  -- so that `perModeConv = ∫ k·f`, `k² = w`, and the bound is
-  --   `(∫ k·f)² ≤ (∫ k²)·(∫ f²) = (∫ w)·(∫ f²)`,
-  -- the plain Cauchy–Schwarz for the pair `(k, f)`.
   set k : ℝ → ℝ := fun s => Real.exp (-(lam * (t - s))) with hk_def
-  -- `perModeConv lam f t = ∫₀ᵗ k(s)·f(s) ds`.
   have hconv_eq : perModeConv lam f t = ∫ s in (0 : ℝ)..t, k s * f s := rfl
-  -- Plain Cauchy–Schwarz `(∫ k·f)² ≤ (∫ k²)·(∫ f²)` via the discriminant of
-  -- the nonnegative quadratic `c ↦ ∫ (k − c·f)²` — handled by
-  -- `weighted_cauchy_schwarz` with weight `≡ 1`, integrand `k·f` versus the
-  -- pair, but cleanest is the direct discriminant argument.
   set A : ℝ := ∫ s in (0 : ℝ)..t, f s ^ 2 with hA
   set B : ℝ := ∫ s in (0 : ℝ)..t, k s * f s with hB
   set C : ℝ := ∫ s in (0 : ℝ)..t, k s ^ 2 with hC
-  -- `C = duhamelKernelSqIntegral lam t` (kernel squared is `e^{−2λ(t−s)}`).
   have hC_eq : C = duhamelKernelSqIntegral lam t := by
     rw [hC]; unfold duhamelKernelSqIntegral
     refine intervalIntegral.integral_congr (fun s _ => ?_)
     rw [hk_def, ← Real.exp_nat_mul]
     congr 1; push_cast; ring
-  -- Nonnegative quadratic `Q(c) = ∫ (k − c·f)² = C − 2Bc + Ac²`.
   have hquad : ∀ c : ℝ, 0 ≤ A * (c * c) + (-(2 * B)) * c + C := by
     intro c
     have hintegrand : (fun s => (k s - c * f s) ^ 2)
@@ -229,13 +200,10 @@ theorem perModeConv_endpoint_sq_le (lam : ℝ) (hf : Continuous f) {t : ℝ}
       intervalIntegral.integral_nonneg ht (fun s _ => sq_nonneg _)
     rw [hexpand] at hnonneg
     nlinarith [hnonneg]
-  -- The discriminant of the nonnegative quadratic `A·c² − 2B·c + C` is `≤ 0`.
   have hdiscrim : discrim A (-(2 * B)) C ≤ 0 :=
     discrim_le_zero (fun c => by nlinarith [hquad c])
   rw [discrim] at hdiscrim
-  -- Replace `C` by `duhamelKernelSqIntegral lam t` in the discriminant bound.
   rw [hC_eq] at hdiscrim
-  -- `(2B)² − 4·A·dks ≤ 0` ⇒ `B² ≤ dks·A`.
   rw [hconv_eq]
   nlinarith [hdiscrim]
 
@@ -266,23 +234,6 @@ theorem one_add_lambda_mul_perModeConv_endpoint_sq_le (lam : ℝ)
 
 end Scalar
 
-/-! ## The Duhamel value at a fixed time on the spectral Sobolev scale
-
-For a closed Riemannian manifold and ranks `(r, s)`, fix a time `t > 0`.
-Feeding the per-mode endpoint estimate to each eigen-coordinate of a
-spatially-smooth forcing assembles the Duhamel value `u(t)` as an element
-of `Hˢ` for every `σ`.
-
-The forcing is presented as a family of **continuous-in-time** per-mode
-coordinate functions `φ : ∀ i, ℝ → ℝ` (one scalar forcing per spectral
-mode), the natural pointwise data after the spatial spectral
-decomposition.  Its membership in `H^c` (per fixed time, integrated in `L²`
-over `[0,t]`) is the summability of the `H^c`-weighted endpoint masses
-`i ↦ (1 + λᵢ)^c · ∫₀ᵗ (φ i)²`.  The one-derivative gain then places the
-endpoint value family `i ↦ perModeConv λᵢ (φ i) t` in `H^{c+1}`.  If the
-forcing is in `H^c` for *every* `c` (spatially smooth), the value lands in
-`⋂_σ Hˢ`. -/
-
 section Assembly
 
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
@@ -296,8 +247,6 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ### File-local Borel-space instances on `E` and `M` -/
 
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
@@ -322,14 +271,11 @@ theorem duhamel_endpoint_value_weighted_summable
     Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
       tensorSobolevWeight (I := I) (M := M) i (c + 1) *
         (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (φ i) t) ^ 2) := by
-  -- Dominated by `(t + 1/2)` times the (summable) forcing-mass family.
   refine Summable.of_nonneg_of_le (fun i => ?_) (fun i => ?_) (hmass.mul_left (t + 1 / 2))
   · exact mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i (c + 1))
       (sq_nonneg _)
-  · -- The per-mode `H^{c+1}` bound from the one-derivative gain.
-    set lam := TensorEigenIdx.lambda (I := I) (M := M) i with hlam_def
+  · set lam := TensorEigenIdx.lambda (I := I) (M := M) i with hlam_def
     have hlam_nn : 0 ≤ lam := tensor_lambda_nonneg (I := I) (M := M) i
-    -- `(1 + λᵢ)^{c+1} = (1 + λᵢ)^c · (1 + λᵢ)`.
     have hweight_split :
         tensorSobolevWeight (I := I) (M := M) i (c + 1) =
           tensorSobolevWeight (I := I) (M := M) i c * (1 + lam) := by
@@ -339,7 +285,6 @@ theorem duhamel_endpoint_value_weighted_summable
         Real.rpow_one]
     have hwc_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i c :=
       tensorSobolevWeight_nonneg (I := I) (M := M) i c
-    -- The one-derivative gain, weighted by `(1 + λᵢ)^c`.
     have hgain := one_add_lambda_mul_perModeConv_endpoint_sq_le
       (f := φ i) lam hlam_nn (hφ i) ht
     calc tensorSobolevWeight (I := I) (M := M) i (c + 1) *
@@ -433,7 +378,6 @@ theorem duhamel_into_all_tensorHs {g : SmoothRiemannianMetric I M} {r s : ℕ}
           tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s)
               h_compact hσ v = u := by
   classical
-  -- The fixed `L²` element `u` with coordinates `i ↦ perModeConv λᵢ (φ i) t`.
   set bsis := tensorResolventHilbertEigenbasisSigma
     (I := I) (M := M) h_compact with hbsis_def
   have hval_summable :
@@ -441,7 +385,6 @@ theorem duhamel_into_all_tensorHs {g : SmoothRiemannianMetric I M} {r s : ℕ}
         (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (φ i) t) ^ 2) :=
     duhamel_endpoint_value_summable_sq (I := I) (M := M) (c := 0) le_rfl ht φ hφ
       (by simpa using hsmooth 0 le_rfl)
-  -- The value family lies in `ℓ²`, so the inverse representation gives `u`.
   have hmemℓp : Memℓp (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
       perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (φ i) t) 2 := by
     apply memℓp_gen
@@ -457,30 +400,25 @@ theorem duhamel_into_all_tensorHs {g : SmoothRiemannianMetric I M} {r s : ℕ}
       norm_num
     rw [h_eq]; exact hval_summable
   set u : TensorL2 r s g := bsis.repr.symm ⟨_, hmemℓp⟩ with hu_def
-  -- The coordinates of `u` are the value family.
   have hu_coeff : ∀ i, tensorL2Coeff (I := I) (M := M) h_compact u i =
       perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (φ i) t := by
     intro i
     rw [tensorL2Coeff, hu_def, hbsis_def,
       LinearIsometryEquiv.apply_symm_apply]
   refine ⟨u, hu_coeff, fun σ hσ => ?_⟩
-  -- The `Hˢ` witness at order `σ`: gained one derivative from forcing in
-  -- `H^{max (σ-1) 0}` (so the gained order `c+1 ≥ σ` and `c ≥ 0`).
   set c : ℝ := max (σ - 1) 0 with hc_def
   have hc_nn : 0 ≤ c := le_max_right _ _
   have hσ_le : σ ≤ c + 1 := by
     have : σ - 1 ≤ c := le_max_left _ _; linarith
   set vTop : tensorHs (I := I) (M := M) g r s (c + 1) :=
     duhamelValueHs (I := I) (M := M) (c := c) ht φ hφ (hsmooth c hc_nn) with hvTop_def
-  -- Restrict the coordinate family to the weaker exponent `σ ≤ c + 1`.
   have hv_summable :
       Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
         tensorSobolevWeight (I := I) (M := M) i σ * (vTop.coeff i) ^ 2) := by
     refine Summable.of_nonneg_of_le (fun i => ?_) (fun i => ?_) vTop.weighted_summable
     · exact mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i σ)
         (sq_nonneg _)
-    · -- `(1 + λ)^σ ≤ (1 + λ)^{c+1}` since `σ ≤ c + 1` and `1 + λ ≥ 1`.
-      have hbase : (1 : ℝ) ≤ 1 + TensorEigenIdx.lambda (I := I) (M := M) i :=
+    · have hbase : (1 : ℝ) ≤ 1 + TensorEigenIdx.lambda (I := I) (M := M) i :=
         one_le_one_add_lambda (I := I) (M := M) i
       have hwle : tensorSobolevWeight (I := I) (M := M) i σ ≤
           tensorSobolevWeight (I := I) (M := M) i (c + 1) :=
@@ -489,12 +427,8 @@ theorem duhamel_into_all_tensorHs {g : SmoothRiemannianMetric I M} {r s : ℕ}
   set v : tensorHs (I := I) (M := M) g r s σ :=
     { coeff := vTop.coeff, weighted_summable := hv_summable } with hv_def
   refine ⟨v, ?_⟩
-  -- The realization of `v` matches `u`: both have the same eigenbasis
-  -- coordinates `i ↦ perModeConv λᵢ (φ i) t`.  The eigenbasis representation
-  -- is injective, so matching `tensorL2Coeff` on every `i` suffices.
   refine bsis.repr.injective ?_
   ext i
-  -- `bsis.repr T i = tensorL2Coeff h_compact T i` by definition.
   have hcoeff_lhs : (bsis.repr (tensorHsToL2 (I := I) (M := M)
         (g := g) (r := r) (s := s) h_compact hσ v)) i =
       tensorL2Coeff (I := I) (M := M) h_compact
@@ -506,7 +440,6 @@ theorem duhamel_into_all_tensorHs {g : SmoothRiemannianMetric I M} {r s : ℕ}
     tensorHsToL2_tensorL2Coeff
       (I := I) (M := M) (h_compact := h_compact) hσ v i,
     hu_coeff i]
-  -- `v.coeff i = vTop.coeff i = perModeConv λᵢ (φ i) t`.
   rfl
 
 end Assembly

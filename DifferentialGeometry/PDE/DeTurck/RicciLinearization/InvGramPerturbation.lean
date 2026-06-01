@@ -82,14 +82,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## Partial-derivative algebra
-
-The lemmas below mirror the `partialDerivWithin_*` family from
-`Integral/DivergenceTheorem/WithBoundary/PartialDerivWithin.lean`, specialised to the
-boundaryless Fréchet partial derivative `partialDeriv`.  Each is derived from the
-corresponding Mathlib `fderiv` lemma by applying the resulting continuous linear map to
-the model-basis vector `chartModelBasis E i`. -/
-
 section PartialDerivAlgebra
 
 variable {i : Fin (Module.finrank ℝ E)} {y : E}
@@ -169,13 +161,6 @@ lemma partialDeriv_sum {ι : Type*} (s : Finset ι) (A : ι → E → ℝ)
 
 end PartialDerivAlgebra
 
-/-! ## The metric-perturbation convention
-
-A chart-coordinate metric perturbation is a symmetric, smooth family of real-valued
-component fields on the model space `E`.  The downstream linearization steps
-(Christoffel-symbol linearization, Ricci principal part) are parameterised over this
-structure. -/
-
 /-- A **chart-coordinate metric perturbation**: a family `toFun i j : E → ℝ` of component
 fields, with `toFun i j` standing for `h_{ij}(y)` in chart coordinates.  It is symmetric
 and smooth.  It is deliberately **not** required to be positive-definite — the Ricci
@@ -240,16 +225,6 @@ instance : Zero (ChartMetricPerturbation E) :=
   cases h; cases h'; congr 1; funext i j; exact hyp i j
 
 end ChartMetricPerturbation
-
-/-! ## Metric trace and index raising
-
-The metric `g` provides, in the chart at a point `x`, the inverse Gram matrix
-`chartInvGramMatrix g x x` (the chart `g^{ij}`).  Contracting it against a covector or a
-perturbation produces, respectively, the raised covector and the metric trace.
-
-The chart-`x`, point-`x` inverse Gram matrix `chartInvGramMatrix g x x` is exactly the
-one `metricCovectorNormSq` from `PDE/DeTurck/Symbol.lean` contracts against, so the
-raising convention here matches the symbol's. -/
 
 section TraceAndRaising
 
@@ -333,19 +308,6 @@ lemma metricTrace_eq_sum (g : SmoothRiemannianMetric I M) (x : M)
 
 end TraceAndRaising
 
-/-! ## The inverse-Gram perturbation
-
-Differentiating the matrix identity `G · G⁻¹ = I` shows that the linearization of
-`G ↦ G⁻¹` in a symmetric direction `h` is
-$$D(G^{lm})[h] \;=\; -\sum_{a,b} G^{la}\, G^{bm}\, h_{ab}.$$
-This is the same algebraic shape as `partialDeriv_chartInvGramOnE_eq` (the directional
-derivative of `chartInvGramOnE` along a coordinate line, whose `∂_l G_{ab}` is here
-replaced by the abstract perturbation `h_{ab}`).
-
-The downstream Ricci-symbol computation reads the principal symbol off the
-`∂²h`-coefficients directly, so `invGramPerturbation` only contributes lower-order terms;
-it is recorded here in closed form, together with its symmetry, for completeness. -/
-
 section InvGramPerturbation
 
 /-- The **inverse-Gram perturbation**: the linearization of `G ↦ G⁻¹` at the metric `g`
@@ -382,7 +344,6 @@ lemma invGramPerturbation_symm (g : SmoothRiemannianMetric I M) (α : M)
       invGramPerturbation (I := I) g α h m l y := by
   rw [invGramPerturbation_def, invGramPerturbation_def]
   congr 1
-  -- Swap the two summation indices and use symmetry of `G⁻¹` and of `h`.
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl (fun a _ => ?_)
   refine Finset.sum_congr rfl (fun b _ => ?_)

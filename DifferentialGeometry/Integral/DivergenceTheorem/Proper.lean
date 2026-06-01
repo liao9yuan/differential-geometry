@@ -78,13 +78,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## POU finiteness restricted to a compact set
-
-For the canonical chart-atlas POU `ρ := chartAtlasPOU I M`, the set of indices
-`α : M` whose topological support intersects a given compact set `K` is finite.
-This refines `chartAtlasPOU_finite_support` (which requires `[CompactSpace M]`)
-to a hypothesis on the support of the integrand instead. -/
-
 /-- For compact `K ⊆ M`, the set of POU indices `α : M` for which
 `tsupport (chartAtlasPOU α) ∩ K ≠ ∅` is finite. The proof applies
 `LocallyFinite.finite_nonempty_inter_compact` to the locally-finite family
@@ -97,15 +90,6 @@ lemma pouFinset_for_compactSet
   have hLF : LocallyFinite (fun α : M => tsupport ((chartAtlasPOU I M) α)) :=
     (chartAtlasPOU I M).locallyFinite.closure
   exact hLF.finite_nonempty_inter_compact hK
-
-/-! ## Local-vanishing principle for the divergence
-
-If a smooth tangent section `X` vanishes on an open neighborhood of a point
-`x`, then `divergence_g g X x = 0`. This follows from the chart-pulled-back
-form: in any chart at `α` the chart-coefficient `chartCoeffOnE α X i` vanishes
-on the chart-target neighborhood corresponding to that of `x`, hence its
-partial derivatives at the chart image of `x` vanish, hence the chart-local
-Voss–Weyl divergence vanishes at `x`. -/
 
 private lemma localDivergence_zero_of_eventuallyEq_zero [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -130,10 +114,7 @@ private lemma localDivergence_zero_of_eventuallyEq_zero [I.Boundaryless]
     have hpull : (fun z : E => (X : ∀ x, TangentSpace I x) ((extChartAt I α).symm z))
         =ᶠ[𝓝 y]
         (fun z : E => (0 : ∀ x, TangentSpace I x) ((extChartAt I α).symm z)) := by
-      -- `hcont_symm_at` says `Filter.map (extChartAt α).symm (𝓝 y) ≤ 𝓝 ((extChartAt α).symm y)`.
-      -- And `(extChartAt α).symm y = x`, so this gives `Filter.map ... ≤ 𝓝 x`.
       have hcomap : Filter.map (extChartAt I α).symm (𝓝 y) ≤ 𝓝 x := by
-        -- `hcont_symm_at` is `ContinuousAt _ y`, unfolds to `Tendsto _ (𝓝 y) (𝓝 (_ y))`.
         have h : Filter.Tendsto (extChartAt I α).symm (𝓝 y) (𝓝 ((extChartAt I α).symm y)) :=
           hcont_symm_at
         rw [hsymm_y] at h
@@ -217,8 +198,6 @@ lemma hasCompactSupport_divergence_g [I.Boundaryless] [T2Space M]
     HasCompactSupport (divergence_g (I := I) g X) :=
   hX.mono' (support_divergence_g_subset (I := I) g X)
 
-/-! ## Compact support of `tangentSectionAction X f` -/
-
 /-- The directional derivative `tangentSectionAction X f` vanishes wherever `X`
 vanishes (because `mfderiv f x` applied to the zero vector is zero). -/
 lemma tangentSectionAction_zero_of_X_zero
@@ -256,8 +235,6 @@ lemma hasCompactSupport_tangentSectionAction
     HasCompactSupport (tangentSectionAction (I := I) X f) :=
   hX.mono' ((support_tangentSectionAction_subset (I := I) X f).trans
     (subset_tsupport (X : ∀ x, TangentSpace I x)))
-
-/-! ## Integrability of compactly-supported continuous functions -/
 
 private lemma integrable_chartLocalMeasure_of_compactSupport_subset_chartSource
     [T2Space M]
@@ -304,16 +281,6 @@ private lemma integrable_chartLocalMeasure_of_compactSupport_subset_chartSource
           rw [setLIntegral_const, one_mul]
     _ < ⊤ := ENNReal.mul_lt_top ENNReal.ofReal_lt_top hμ_supp
 
-/-! ## Restriction equality of the global volume measure to a compact set
-
-For compact `K ⊆ M` and the chart-atlas POU `ρ`, the restriction of the
-canonical Riemannian volume measure to `K` equals the finite-Finset sum of
-POU-weighted chart-local measures restricted to `K`, where the Finset is
-`pouFinset_for_compactSet`. The key fact is that for a POU index `α` outside
-this Finset, `tsupport (ρ α) ∩ K = ∅`, so the
-`(chartLocalMeasure α).withDensity (ofReal (ρ α))` measure is identically zero
-on `K`. -/
-
 private lemma withDensity_pou_restrict_eq_zero_of_disjoint
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -359,7 +326,6 @@ private lemma riemannianVolumeMeasure_restrict_eq_finset_sum
       (tsupport ((chartAtlasPOU I M) α) ∩ K).Nonempty := fun {α} =>
     Set.Finite.mem_toFinset _
   have hK_meas : MeasurableSet K := hK_compact.isClosed.measurableSet
-  -- Define `f` so we can manipulate it as `M → Measure M`.
   set f : M → MeasureTheory.Measure M := fun α =>
     ((chartLocalMeasure (I := I) g α).withDensity
       (fun x : M => ENNReal.ofReal (ρ α x))).restrict K with hf_def
@@ -368,12 +334,10 @@ private lemma riemannianVolumeMeasure_restrict_eq_finset_sum
   change MeasureTheory.Measure.sum f =
     (∑ α ∈ S, (chartLocalMeasure (I := I) g α).withDensity
       (fun x : M => ENNReal.ofReal (ρ α x))).restrict K
-  -- Split the Measure.sum over M as sum over S + sum over Sᶜ.
   rw [show MeasureTheory.Measure.sum f
       = MeasureTheory.Measure.sum (fun i : (S : Set M) => f i)
         + MeasureTheory.Measure.sum (fun i : ↥((S : Set M)ᶜ) => f i) from
     (MeasureTheory.Measure.sum_add_sum_compl (S : Set M) f).symm]
-  -- The complement sum is zero.
   have hcompl_zero : MeasureTheory.Measure.sum (fun i : ↥((S : Set M)ᶜ) => f i) = 0 := by
     have hzero : ∀ i : ↥((S : Set M)ᶜ), f i = 0 := by
       intro i
@@ -386,22 +350,17 @@ private lemma riemannianVolumeMeasure_restrict_eq_finset_sum
     rw [MeasureTheory.Measure.sum_apply _ hB]
     simp [hzero]
   rw [hcompl_zero, add_zero]
-  -- The sum over (S : Set M) becomes a Finset sum.
   have hSF : MeasureTheory.Measure.sum (fun i : (S : Set M) => f i) = ∑ α ∈ S, f α :=
     MeasureTheory.Measure.sum_coe_finset S f
   rw [hSF]
-  -- Now: ∑ α ∈ S, f α = (∑ α ∈ S, withDensity_α).restrict K.
-  -- Use induction on a generic Finset, with the conclusion as the motive.
   refine Finset.induction
     (motive := fun (T : Finset M) =>
       ∑ α ∈ T, f α = (∑ α ∈ T, (chartLocalMeasure (I := I) g α).withDensity
         (fun x : M => ENNReal.ofReal (ρ α x))).restrict K)
     ?_ ?_ S
-  · -- empty case
-    simp only [Finset.sum_empty, hf_def]
+  · simp only [Finset.sum_empty, hf_def]
     exact (Measure.restrict_zero (s := K)).symm
-  · -- insert case
-    intro α t hα ih
+  · intro α t hα ih
     simp only [Finset.sum_insert hα]
     rw [show f α = ((chartLocalMeasure (I := I) g α).withDensity
         (fun x : M => ENNReal.ofReal (ρ α x))).restrict K from rfl]
@@ -477,8 +436,6 @@ private lemma integral_riemannianVolumeMeasure_of_compactSupport_eq_finset_sum
   refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
   change (ENNReal.ofReal ((ρ α : M → ℝ) x)).toReal • h x = h x * ((ρ α : M → ℝ) x)
   rw [ENNReal.toReal_ofReal (ρ.nonneg α x), smul_eq_mul, mul_comm]
-
-/-! ## Single-chart equality for compactly-supported integrands -/
 
 private lemma integral_riemannianVolumeMeasure_eq_chartLocal_of_compactSupport_in_chart
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
@@ -556,25 +513,15 @@ private lemma integral_riemannianVolumeMeasure_eq_chartLocal_of_compactSupport_i
       exact hxK (subset_tsupport _ hne)
     rw [hh_zero, zero_mul]
 
-/-! ## Smooth cutoff function with compact support equal to one near `tsupport X`
-
-Existence of a smooth function `χ : M → ℝ` with compact support and `χ = 1` on
-a neighborhood of a given compact set (here: `tsupport X`). Built by combining
-`exists_compact_between` (compact neighborhood of a compact set) with the
-manifold smooth Urysohn lemma `exists_contMDiffMap_one_nhds_of_subset_interior`.
--/
-
 private lemma exists_smooth_cutoff_compactSupport_one_nhds
     [T2Space M] [SigmaCompactSpace M]
     {K : Set M} (hK_compact : IsCompact K) :
     ∃ χ : M → ℝ, ContMDiff I 𝓘(ℝ) ∞ χ ∧ HasCompactSupport χ ∧
       (∀ᶠ y in 𝓝ˢ K, χ y = 1) ∧ (∀ y, χ y ∈ Icc (0 : ℝ) 1) := by
   classical
-  -- Get a compact neighborhood `L` of `K` in `M`.
   haveI : LocallyCompactSpace M := locallyCompactSpace_of_chartedSpace E H I M
   obtain ⟨L, hL_compact, hKL, _hLuniv⟩ :=
     exists_compact_between hK_compact isOpen_univ (Set.subset_univ K)
-  -- Apply smooth Urysohn: K is closed (compact T2), K ⊆ interior L.
   haveI : TopologicalSpace.MetrizableSpace M := Manifold.metrizableSpace I M
   haveI : NormalSpace M := NormalSpace.of_regularSpace_lindelofSpace
   obtain ⟨f, hf_one, hf_zero, hf_range⟩ :=
@@ -582,13 +529,10 @@ private lemma exists_smooth_cutoff_compactSupport_one_nhds
       (n := (⊤ : ℕ∞))
       hK_compact.isClosed hKL
   refine ⟨f, f.contMDiff.of_le (mod_cast le_top), ?_, hf_one, hf_range⟩
-  -- f has compact support since it vanishes outside compact L.
   refine HasCompactSupport.of_support_subset_isCompact hL_compact ?_
   intro y hy
   by_contra hyL
   exact hy (hf_zero y hyL)
-
-/-! ## The divergence theorem -/
 
 /-- **Divergence theorem on a σ-compact boundaryless Riemannian manifold for
 compactly-supported sections.** For any smooth tangent section `X` with compact
@@ -621,11 +565,8 @@ theorem integral_divergence_eq_zero_of_hasCompactSupport
     hasCompactSupport_divergence_g (I := I) g hX
   have hdiv_supp : tsupport (divergence_g (I := I) g X) ⊆ K :=
     tsupport_divergence_g_subset (I := I) g X
-  -- Choose a smooth cutoff `χ` with compact support and χ = 1 on a nbhd of K.
   obtain ⟨χ, hχ_smooth, hχ_cs, hχ_one_nhds, hχ_range⟩ :=
     exists_smooth_cutoff_compactSupport_one_nhds (I := I) (M := M) hK_compact
-  -- Step (a): expand the global integral as a finite sum of POU-weighted
-  -- chart-local integrals over the relevant Finset `S`.
   have h_step_a : ∫ x, divergence_g (I := I) g X x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g)
       = ∑ α ∈ S, ∫ x, divergence_g (I := I) g X x * (ρ α : M → ℝ) x
@@ -641,7 +582,6 @@ theorem integral_divergence_eq_zero_of_hasCompactSupport
     apply Finset.sum_subset hSdiv
     intro α _ hα_notin
     rw [Set.Finite.mem_toFinset _] at hα_notin
-    -- hα_notin : α ∉ {β | (tsupport (POU β) ∩ tsupport (divergence_g g X)).Nonempty}
     simp only [Set.mem_setOf_eq] at hα_notin
     rw [Set.not_nonempty_iff_eq_empty] at hα_notin
     have h_zero : ∀ x : M, divergence_g (I := I) g X x * (ρ α : M → ℝ) x = 0 := by
@@ -665,15 +605,9 @@ theorem integral_divergence_eq_zero_of_hasCompactSupport
         (fun _ : M => (0 : ℝ)) from funext h_zero]
     exact integral_zero ..
   rw [h_step_a]
-  -- Step (b): replace the integrand `(divergence_g g X) * ρ α` with
-  -- `(divergence_g g X) * (χ * ρ α)`. The product `(divergence_g g X) * (1 - χ)`
-  -- is identically zero (because `χ = 1` on `tsupport X` ⊇ `tsupport (divergence_g g X)`).
-  -- Hence `(divergence_g g X) * ρ α = (divergence_g g X) * χ * ρ α`.
   have hχ_one_K : ∀ x ∈ K, χ x = 1 := by
     intro x hxK
-    -- `hχ_one_nhds : ∀ᶠ y in 𝓝ˢ K, χ y = 1`. Get the set on which this holds.
     rcases (Filter.eventually_iff_exists_mem.mp hχ_one_nhds) with ⟨U, hU_nhds, hU_eq⟩
-    -- `U ∈ 𝓝ˢ K` means `K ⊆ interior U`. So x ∈ K ⊆ interior U ⊆ U.
     have hU_open : K ⊆ interior U := by
       rwa [← subset_interior_iff_mem_nhdsSet] at hU_nhds
     exact hU_eq x (interior_subset (hU_open hxK))
@@ -700,7 +634,6 @@ theorem integral_divergence_eq_zero_of_hasCompactSupport
         = (divergence_g (I := I) g X x * χ x) * (ρ α : M → ℝ) x := by rw [hχx]
       _ = divergence_g (I := I) g X x * (χ x * (ρ α : M → ℝ) x) := by ring
   rw [Finset.sum_congr rfl h_step_b]
-  -- Step (c): replace `divergence_g g X` with `localDivergence g α X` on each chart α.
   have h_step_c : ∀ α ∈ S,
       ∫ x, divergence_g (I := I) g X x * (χ x * (ρ α : M → ℝ) x)
         ∂(chartLocalMeasure (I := I) g α) =
@@ -710,8 +643,7 @@ theorem integral_divergence_eq_zero_of_hasCompactSupport
     refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
     by_cases hxα : x ∈ (chartAt H α).source
     · simp only [voss_weyl_divergence_formula (I := I) g α X hxα]
-    · -- x ∉ chart α source, so x ∉ tsupport (ρ α), so ρ α x = 0.
-      have hxnotin : x ∉ tsupport (ρ α : M → ℝ) := fun h => hxα (hρsub α h)
+    · have hxnotin : x ∉ tsupport (ρ α : M → ℝ) := fun h => hxα (hρsub α h)
       have hρα_zero : (ρ α : M → ℝ) x = 0 := by
         by_contra hne
         exact hxnotin (subset_tsupport _ hne)
@@ -719,8 +651,6 @@ theorem integral_divergence_eq_zero_of_hasCompactSupport
         localDivergence (I := I) g α X x * (χ x * (ρ α : M → ℝ) x)
       rw [hρα_zero, mul_zero, mul_zero, mul_zero]
   rw [Finset.sum_congr rfl h_step_c]
-  -- Step (d): apply chart-local IBP for each α ∈ S with test function `φ_α := χ * ρ α`,
-  -- which has compact support (from χ) and tsupport ⊆ tsupport (ρ α) ⊆ chart α source.
   set φ : M → M → ℝ := fun α x => χ x * (ρ α : M → ℝ) x with hφ_def
   have hφ_smooth : ∀ α : M, ContMDiff I 𝓘(ℝ) ∞ (φ α) := fun α =>
     hχ_smooth.mul (ρ α).contMDiff
@@ -744,22 +674,17 @@ theorem integral_divergence_eq_zero_of_hasCompactSupport
     intro α _
     exact chart_local_ibp (I := I) g α X (hφ_smooth α) (hφ_cs α) (hφ_supp α)
   rw [Finset.sum_congr rfl h_step_d]
-  -- Pull out negation across the finite sum.
   rw [show (∑ α ∈ S, -∫ x, tangentSectionAction (I := I) X (φ α) x
             ∂(chartLocalMeasure (I := I) g α))
       = -(∑ α ∈ S, ∫ x, tangentSectionAction (I := I) X (φ α) x
             ∂(chartLocalMeasure (I := I) g α)) from by
     rw [← Finset.sum_neg_distrib]]
-  -- Step (e): convert each `∫ tangentSectionAction X φ_α d(chartLocalMeasure α)`
-  -- to `∫ tangentSectionAction X φ_α d(volume)` (since the support is in chart α source).
   have hAct_smooth : ∀ α : M,
       ContMDiff I 𝓘(ℝ) ∞ (tangentSectionAction (I := I) X (φ α)) := fun α =>
     tangentSectionAction_contMDiff (I := I) X (hφ_smooth α)
   have hAct_cont : ∀ α : M,
       Continuous (tangentSectionAction (I := I) X (φ α)) := fun α =>
     (hAct_smooth α).continuous
-  -- The support of `tangentSectionAction X (φ α)` is in tsupport (φ α) (locality of mfderiv).
-  -- We need this support ⊆ chart α source for the chart-local integral identity.
   have hAct_supp : ∀ α : M,
       tsupport (tangentSectionAction (I := I) X (φ α)) ⊆ (chartAt H α).source := by
     intro α
@@ -768,7 +693,6 @@ theorem integral_divergence_eq_zero_of_hasCompactSupport
     intro x hx
     rw [Function.mem_support] at hx
     by_contra hne
-    -- φ α =ᶠ[𝓝 x] 0 (since x ∉ tsupport (φ α)), so mfderiv φ α x = 0.
     have h_open : IsOpen (tsupport (φ α))ᶜ := (isClosed_tsupport _).isOpen_compl
     have hev : (φ α) =ᶠ[𝓝 x] (fun _ => (0 : ℝ)) := by
       filter_upwards [h_open.mem_nhds hne] with y hy
@@ -785,8 +709,6 @@ theorem integral_divergence_eq_zero_of_hasCompactSupport
     exact hx hAct_zero
   have hAct_cs : ∀ α : M, HasCompactSupport (tangentSectionAction (I := I) X (φ α)) := by
     intro α
-    -- support of tangent action ⊆ tsupport (φ α): if x ∉ tsupport (φ α), then φ α
-    -- vanishes on a neighborhood of x, so mfderiv (φ α) x = 0.
     have h1 : Function.support (tangentSectionAction (I := I) X (φ α)) ⊆ tsupport (φ α) := by
       intro x hx
       by_contra hne
@@ -812,9 +734,6 @@ theorem integral_divergence_eq_zero_of_hasCompactSupport
     exact (integral_riemannianVolumeMeasure_eq_chartLocal_of_compactSupport_in_chart
       (I := I) g α (hAct_cont α) (hAct_cs α) (hAct_supp α)).symm
   rw [Finset.sum_congr rfl h_step_e]
-  -- Step (f): pull the finite sum into the integrand and identify it with
-  -- `tangentSectionAction X (∑ α ∈ S, φ α)` on tsupport X (where it is zero by POU completeness)
-  -- and zero off tsupport X (where X = 0 ⇒ all actions are zero).
   haveI : IsLocallyFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g) :=
     riemannianVolumeMeasure_isLocallyFiniteMeasure (I := I) (M := M) g
   have hAct_int : ∀ α ∈ S, Integrable
@@ -827,18 +746,14 @@ theorem integral_divergence_eq_zero_of_hasCompactSupport
             ∂(riemannianVolumeMeasure (I := I) (M := M) g) from
         (integral_finset_sum (μ := riemannianVolumeMeasure (I := I) (M := M) g)
           S hAct_int).symm]
-  -- Now show the inner sum vanishes pointwise.
   have h_pt : ∀ x : M,
       ∑ α ∈ S, tangentSectionAction (I := I) X (φ α) x = 0 := by
     intro x
-    -- Case on whether X x = 0.
     by_cases hXx : X x = (0 : TangentSpace I x)
     · refine Finset.sum_eq_zero (fun α _ => ?_)
       exact tangentSectionAction_zero_of_X_zero (I := I) X (φ α) hXx
-    · -- X x ≠ 0 ⇒ x ∈ support X ⊆ tsupport X = K. On K, χ = 1 on a nbhd, so φ α =ᶠ[𝓝 x] ρ α.
-      have hxsupp : x ∈ Function.support (X : ∀ x, TangentSpace I x) := hXx
+    · have hxsupp : x ∈ Function.support (X : ∀ x, TangentSpace I x) := hXx
       have hxK : x ∈ K := subset_tsupport _ hxsupp
-      -- χ = 1 on a nbhd of K, so on a nbhd of x, χ = 1 hence φ α y = ρ α y.
       rcases (Filter.eventually_iff_exists_mem.mp hχ_one_nhds) with ⟨U, hU_nhds, hU_eq⟩
       have hU_int : K ⊆ interior U := by
         rwa [← subset_interior_iff_mem_nhdsSet] at hU_nhds
@@ -849,12 +764,10 @@ theorem integral_divergence_eq_zero_of_hasCompactSupport
         filter_upwards [hU_x_nhd] with y hyU
         change χ y * (ρ α : M → ℝ) y = (ρ α : M → ℝ) y
         rw [hU_eq y hyU, one_mul]
-      -- mfderiv φ α x = mfderiv ρ α x.
       have hmfderiv_φα : ∀ α : M,
           mfderiv I 𝓘(ℝ) (φ α) x = mfderiv I 𝓘(ℝ) ((ρ α : M → ℝ)) x := by
         intro α
         exact Filter.EventuallyEq.mfderiv_eq (hev_φα α)
-      -- Hence tangentSectionAction X (φ α) x = tangentSectionAction X (ρ α) x.
       have hact_eq : ∀ α : M,
           tangentSectionAction (I := I) X (φ α) x =
             tangentSectionAction (I := I) X ((ρ α : M → ℝ)) x := by
@@ -871,20 +784,13 @@ theorem integral_divergence_eq_zero_of_hasCompactSupport
       have hcomm := tangentSectionAction_finset_sum (I := I) X S
         (fun α => ((ρ α : M → ℝ))) x hMDiff_each
       rw [← hcomm]
-      -- ∑ α ∈ S, ρ α y =ᶠ[𝓝 x] 1 (POU completeness on a neighborhood of x).
       have h_finset_eq_one : (fun y : M => ∑ α ∈ S, (ρ α : M → ℝ) y) =ᶠ[𝓝 x]
           (fun _ : M => (1 : ℝ)) := by
         filter_upwards [ρ.eventually_finsupport_subset x] with y hy
-        -- y near x: ρ.finsupport y ⊆ ρ.fintsupport x. Need ρ.finsupport y ⊆ S.
-        -- ρ.fintsupport x = {α : x ∈ tsupport (ρ α)}. For α with x ∈ tsupport (ρ α), since
-        -- x ∈ K, we have α ∈ S.
         have hfins_S : ρ.finsupport y ⊆ S := by
           intro α hα
           rw [hSmem]
           rw [ρ.mem_finsupport] at hα
-          -- ρ α y ≠ 0, so y ∈ support (ρ α) ⊆ tsupport (ρ α). But S contains α iff
-          -- tsupport (ρ α) ∩ K ≠ ∅. We have hy : ρ.finsupport y ⊆ ρ.fintsupport x.
-          -- α ∈ ρ.finsupport y ⇒ α ∈ ρ.fintsupport x ⇒ x ∈ tsupport (ρ α). And x ∈ K. So α ∈ S.
           have hα_x : α ∈ ρ.fintsupport x := hy ((ρ.mem_finsupport y).mpr hα)
           have hx_tsupp : x ∈ tsupport (ρ α : M → ℝ) :=
             (ρ.mem_fintsupport_iff x α).mp hα_x

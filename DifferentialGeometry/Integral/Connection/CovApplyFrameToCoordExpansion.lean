@@ -80,22 +80,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Smoothness of the chart-α coordinate matrix on the base set
-
-The coordinate matrix `C^k_i(b) := (chartBasisFamily α hb).repr (B^α_i b) k`
-defined in `ChartFrameNormGlobalSmoothCoordBasisExpansion` is, on the chart-α
-trivialization base set, the composition
-
-```
-b ↦ (triv α).clmAt b (B^α_i b) ↦ (chartModelBasis E).repr · k
-```
-
-of the smoothly-varying trivialization image of the globally smooth section
-`B^α_i` with a fixed continuous linear functional `E →L[ℝ] ℝ`. Hence it is
-smooth as a function of `b` on the chart-α trivialization base set, and in
-particular at any chart-α Levi-Civita good-set point.
--/
-
 /-- The linear functional `v ↦ ((chartModelBasis E).repr v) k`, packaged as a
 continuous linear map `E →L[ℝ] ℝ`. -/
 private noncomputable def chartModelBasisProj (k : Fin (Module.finrank ℝ E)) :
@@ -148,13 +132,11 @@ lemma chartFrameNormGlobalSmoothCoordMatrix_contMDiffOn
         chartFrameNormGlobalSmoothCoordMatrix (I := I) (M := M) g α i k b)
       (trivializationAt E (TangentSpace I) α).baseSet := by
   classical
-  -- The chart-α globally smooth section is smooth on M.
   have hB_smooth :
       ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
         (fun b : M => TotalSpace.mk' E (E := TangentSpace I) b
           ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b)) :=
     (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).contMDiff
-  -- The map `b ↦ (e ⟨b, B_i b⟩).2` is smooth on baseSet via the section iff.
   have h_triv :
       ContMDiffOn I 𝓘(ℝ, E) ∞
         (fun b : M =>
@@ -166,7 +148,6 @@ lemma chartFrameNormGlobalSmoothCoordMatrix_contMDiffOn
       (s := fun b : M =>
         (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b)
     exact hiff.mp hB_smooth.contMDiffOn
-  -- On baseSet, `(e ⟨b, ·⟩).2 = e.continuousLinearMapAt ℝ b ·`.
   have h_eq_baseSet :
       Set.EqOn (fun b : M =>
           ((trivializationAt E (TangentSpace I) α)
@@ -175,7 +156,6 @@ lemma chartFrameNormGlobalSmoothCoordMatrix_contMDiffOn
           ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b))
         (trivializationAt E (TangentSpace I) α).baseSet := by
     intro b hb
-    -- Beta-reduce both sides via `change`.
     change ((trivializationAt E (TangentSpace I) α) ⟨b,
         (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b⟩).2 =
       (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b
@@ -241,9 +221,6 @@ private lemma chartFrameNormGlobalSmoothCoordMatrix_mdiffAt
     (h_contMDiffOn b hb_base).contMDiffAt (h_open.mem_nhds hb_base)
   exact h_contMDiffAt.mdifferentiableAt (by simp)
 
-/-! ## Pointwise expansion of `covApply cov_RS B^α_i T₀.toSection` on
-the chart-α Levi-Civita good set -/
-
 private lemma covApply_frameVec_eq_coord_sum_on_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -290,14 +267,6 @@ private lemma covApply_frameVec_eq_coord_sum_on_goodSet
   intro k _
   rw [L.map_smul]
 
-/-! ## Smoothness witnesses at a chart-α Levi-Civita good-set point
-
-For the application of the `IsCovariantDerivativeOn.leibniz` / `.add` rules
-to the section `Σ_k C^k_i • covApply cov_RS ∂_k T₀.toSection` at a point `b`
-in the chart-α Levi-Civita good set, we need `MDifferentiableAt` witnesses for
-the scalar functions `C^k_i` and the bundle sections `covApply cov_RS ∂_k
-T₀.toSection` at `b`. -/
-
 /-- `MDifferentiableAt`-witness for the chart-α coordinate vector field
 `chartBasisVecFiber α k` viewed as a tangent-bundle section, at any point of
 the chart-α trivialization base set. -/
@@ -334,7 +303,6 @@ private lemma covApply_chartBasisVecFiber_T₀_mdiffAt
           (fun w : M => chartBasisVecFiber (I := I) α k w)
           (fun w : M => T₀.toSection w) z)) b := by
   classical
-  -- Smoothness of `b ↦ cov_RS.toFun T₀.toSection b` as a Hom-bundle section.
   have hcov_RS_smooth :
       CovariantDerivative.ContMDiffCovariantDerivative
         (TensorRSNabla.tensorRSCovariantDerivative I M r s
@@ -364,11 +332,6 @@ private lemma covApply_chartBasisVecFiber_T₀_mdiffAt
               (LeviCivita (I := I) g)).toFun (fun w : M => T₀.toSection w) z)) b :=
     ((hHomSec_on.contMDiffAt (Filter.univ_mem))).mdifferentiableAt (by simp)
   exact MDifferentiableAt.clm_bundle_apply (b := id) hHomSec_at hX_at
-
-/-! ## Smoothness of `Σ_k C^k_i • covApply cov_RS ∂_k T₀.toSection` at `b`
-
-A finite sum of smoothly-scaled smooth sections is smooth. We prove this by
-`Finset` induction. -/
 
 private lemma finsum_smul_section_mdiffAt
     {ι : Type*} (s_finset : Finset ι)
@@ -409,7 +372,6 @@ private lemma finsum_smul_section_mdiffAt
           (E := fun w : M => TensorRSSpace r s I w) z (σ i z)) b :=
       fun i hi => hσ i (Finset.mem_insert_of_mem hi)
     have hrest := ih hf_rest hσ_rest
-    -- Split the sum into `f k₀ z • σ k₀ z + ∑ i ∈ t, ...`.
     have hsplit : (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun w : M => TensorRSSpace r s I w) z
         (∑ i ∈ insert k₀ t, f i z • σ i z)) =
@@ -420,24 +382,15 @@ private lemma finsum_smul_section_mdiffAt
       congr 1
       rw [Finset.sum_insert hk₀t]
     rw [hsplit]
-    -- Smul section + add section.
     have hf_k₀_σ : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
         (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
           (E := fun w : M => TensorRSSpace r s I w) z
           ((fun w : M => f k₀ w • σ k₀ w) z)) b := by
-      -- Use MDifferentiableAt.smul_section.
-      -- The section `fun z => f k₀ z • σ k₀ z` is `f k₀ • σ k₀` in `Pi.instSMul` form.
       have := MDifferentiableAt.smul_section (𝕜 := ℝ)
         (E := fun z : M => TensorRSSpace r s I z) (F := TensorRSModel r s ℝ E)
         (f := f k₀) (s := σ k₀) (x₀ := b) hf_k₀ hσ_k₀
-      -- The `T% (f • s)` should expand to `fun z => TotalSpace.mk' _ z (f z • s z)`.
       exact this
     exact mdifferentiableAt_add_section hf_k₀_σ hrest
-
-/-! ## Leibniz expansion of the finite sum
-
-We now prove the finite-sum Leibniz expansion of `cov_RS` evaluated on
-`Σ_k f_k • σ_k` at `b`, applied to a tangent vector `v`. -/
 
 private lemma cov_RS_finsum_smul_section_leibniz_apply
     {ι : Type*} (s_finset : Finset ι)
@@ -483,12 +436,10 @@ private lemma cov_RS_finsum_smul_section_leibniz_apply
         (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
           (E := fun w : M => TensorRSSpace r s I w) z (σ i z)) b :=
       fun i hi => hσ i (Finset.mem_insert_of_mem hi)
-    -- Rewrite `∑ i ∈ insert k t, f i z • σ i z = f k z • σ k z + ∑ i ∈ t, f i z • σ i z`.
     have hsum_apply : ∀ z : M, (∑ i ∈ insert k t, f i z • σ i z :
         TensorRSSpace r s I z) =
         f k z • σ k z + ∑ i ∈ t, f i z • σ i z := by
       intro z; rw [Finset.sum_insert hkt]
-    -- Smoothness witnesses.
     have h_fkσk_mdiff : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
         (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
           (E := fun w : M => TensorRSSpace r s I w) z (f k z • σ k z)) b :=
@@ -500,7 +451,6 @@ private lemma cov_RS_finsum_smul_section_leibniz_apply
           (E := fun w : M => TensorRSSpace r s I w) z (∑ i ∈ t, f i z • σ i z)) b :=
       finsum_smul_section_mdiffAt (I := I) (M := M)
         (s_finset := t) r s f σ (b := b) hf_rest hσ_rest
-    -- Rewrite the function inside cov_RS in pointwise-additive form.
     have hfun_eq :
         (fun z : M => ∑ i ∈ insert k t, f i z • σ i z) =
         ((fun z : M => f k z • σ k z) + (fun z : M => ∑ i ∈ t, f i z • σ i z)) := by
@@ -509,13 +459,11 @@ private lemma cov_RS_finsum_smul_section_leibniz_apply
         (fun z : M => f k z • σ k z) z + (fun z : M => ∑ i ∈ t, f i z • σ i z) z
       rw [hsum_apply z]
     rw [hfun_eq]
-    -- Apply additivity of cov_RS.
     rw [(TensorRSNabla.tensorRSCovariantDerivative I M r s
         (LeviCivita (I := I) g)).isCovariantDerivativeOn.add
       (σ := fun z : M => f k z • σ k z)
       (σ' := fun z : M => ∑ i ∈ t, f i z • σ i z)
       (x := b) h_fkσk_mdiff h_sum_mdiff]
-    -- Apply Leibniz to the first piece.
     have h_leib_k := (TensorRSNabla.tensorRSCovariantDerivative I M r s
         (LeviCivita (I := I) g)).isCovariantDerivativeOn.leibniz
       (σ := σ k) (g := f k) (x := b) hσ_k hf_k
@@ -523,15 +471,12 @@ private lemma cov_RS_finsum_smul_section_leibniz_apply
         Π z : M, TensorRSSpace r s I z) := rfl
     rw [h_smul_form]
     rw [h_leib_k]
-    -- Apply the inductive hypothesis.
     have h_ih := ih hf_rest hσ_rest
     rw [ContinuousLinearMap.add_apply]
     rw [h_ih]
     rw [Finset.sum_insert hkt]
     rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
         ContinuousLinearMap.smulRight_apply]
-
-/-! ## Main headline -/
 
 /-- **Chart-α coordinate-basis expansion of the bundle covariant derivative of
 `covApply cov_RS B^α_i T₀.toSection` applied to a chart-coordinate vector**,
@@ -593,7 +538,6 @@ theorem cov_RS_covApply_frameVec_eq_coord_expansion
               (fun z : M => T₀.toSection z) b) := by
   intro l
   classical
-  -- Smoothness witnesses.
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
   have hC_mdiff : ∀ k : Fin (Module.finrank ℝ E),
@@ -612,7 +556,6 @@ theorem cov_RS_covApply_frameVec_eq_coord_expansion
             (fun w : M => T₀.toSection w) z)) b := fun k =>
     covApply_chartBasisVecFiber_T₀_mdiffAt
       (I := I) (M := M) g r s α T₀ k (b := b) hb_base
-  -- Smoothness witness for the original section `covApply cov_RS B^α_i T₀`.
   have hOrig_mdiff : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
       (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun w : M => TensorRSSpace r s I w) z
@@ -651,7 +594,6 @@ theorem cov_RS_covApply_frameVec_eq_coord_expansion
       ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).contMDiff.contMDiffAt).mdifferentiableAt
         (by simp)
     exact MDifferentiableAt.clm_bundle_apply (b := id) hHomSec_at hB_at
-  -- Smoothness witness for the expanded section.
   have hSum_mdiff : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
       (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun w : M => TensorRSSpace r s I w) z
@@ -672,7 +614,6 @@ theorem cov_RS_covApply_frameVec_eq_coord_expansion
           (fun w : M => T₀.toSection w) z)
       (b := b)
       (fun k _ => hC_mdiff k) (fun k _ => hσ_mdiff k)
-  -- `congr_of_eventuallyEq` to swap the section for its expansion at `b`.
   have hGoodOpen : IsOpen (chartLeviCivitaGoodSet (I := I) α) :=
     chartLeviCivitaGoodSet_isOpen (I := I) α
   have hGood_nhds : chartLeviCivitaGoodSet (I := I) α ∈ 𝓝 b :=
@@ -707,7 +648,6 @@ theorem cov_RS_covApply_frameVec_eq_coord_expansion
                 (fun w : M => T₀.toSection w) z) b :=
     cov_RS.isCovariantDerivativeOnUniv.congr_of_eventuallyEq
       hOrig_mdiff hSum_mdiff (Filter.univ_mem) hEvent
-  -- Apply the finite-sum Leibniz expansion.
   have hLeibniz := cov_RS_finsum_smul_section_leibniz_apply
     (ι := Fin (Module.finrank ℝ E))
     (s_finset := Finset.univ) (g := g) (r := r) (s := s)
@@ -720,7 +660,6 @@ theorem cov_RS_covApply_frameVec_eq_coord_expansion
     (hf := fun k _ => hC_mdiff k)
     (hσ := fun k _ => hσ_mdiff k)
     (v := chartBasisVecFiber (I := I) α l b)
-  -- Connect.
   change cov_RS.toFun
         (covApply cov_RS
           (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun

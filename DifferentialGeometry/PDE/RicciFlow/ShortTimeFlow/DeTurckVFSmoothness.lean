@@ -1,8 +1,3 @@
-/-
-Joint smoothness and up-to-`t = 0` continuity of the time-dependent DeTurck
-vector field on the open interior, plus the chart-Gram joint-`C∞` interface.
-Skeleton stubs for the short-time-existence blueprint (GAP 2, flow regularity).
--/
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists
@@ -69,15 +64,6 @@ open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 private abbrev Idx (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] := Fin (Module.finrank ℝ E)
 
-/-! ### Generic matrix-family helpers on `ℝ × E`
-
-A square-matrix-valued family `A : ℝ × E → Matrix n n ℝ` with jointly-`C^∞` entries
-has jointly-`C^∞` determinant, adjugate entries, and (where `det ≠ 0`) inverse
-entries. These mirror the single-variable manifold-level helpers
-`chartGramMatrix_det_contMDiffOn` / `chartGramMatrix_adjugate_entry_contMDiffOn` /
-`chartGramMatrix_inv_entry_contMDiffOn` (`Tensor/RSTensor/Tensor0SRiemannian.lean`),
-but are stated for joint `ContDiffOn` on a subset of `ℝ × E`. -/
-
 variable {n : Type*} [Fintype n] [DecidableEq n]
 
 /-- Joint smoothness of the determinant of a matrix family with jointly-`C^∞`
@@ -103,23 +89,19 @@ private lemma contDiffOn_jointAdjugate {s : Set (ℝ × E)}
     (hA : ∀ i j, ContDiffOn ℝ ∞ (fun p : ℝ × E => A p i j) s) (a b : n) :
     ContDiffOn ℝ ∞ (fun p : ℝ × E => (A p).adjugate a b) s := by
   classical
-  -- `adjugate A a b = det (A.updateRow b (Pi.single a 1))`.
   have heq : (fun p : ℝ × E => (A p).adjugate a b)
       = fun p : ℝ × E => ((A p).updateRow b (Pi.single a 1)).det := by
     funext p; rw [Matrix.adjugate_apply]
   rw [heq]
-  -- The updated matrix has jointly-`C^∞` entries (either constant or an entry of `A`).
   refine contDiffOn_jointDet (A := fun p => (A p).updateRow b (Pi.single a 1)) ?_
   intro i j
   by_cases hij : i = b
-  · -- Row replaced: entry is the constant `(Pi.single a 1) j`.
-    have hcongr : (fun p : ℝ × E =>
+  · have hcongr : (fun p : ℝ × E =>
           ((A p).updateRow b (Pi.single a 1)) i j)
         = fun _ : ℝ × E => (Pi.single a 1 : n → ℝ) j := by
       funext p; rw [hij, Matrix.updateRow_self]
     rw [hcongr]; exact contDiffOn_const
-  · -- Row unchanged: entry is `A p i j`.
-    have hcongr : (fun p : ℝ × E =>
+  · have hcongr : (fun p : ℝ × E =>
           ((A p).updateRow b (Pi.single a 1)) i j)
         = fun p : ℝ × E => A p i j := by
       funext p; rw [Matrix.updateRow_ne hij]
@@ -133,7 +115,6 @@ private lemma contDiffOn_jointMatrixInv_entry {s : Set (ℝ × E)}
     (hdet : ∀ p ∈ s, (A p).det ≠ 0) (a b : n) :
     ContDiffOn ℝ ∞ (fun p : ℝ × E => (A p)⁻¹ a b) s := by
   classical
-  -- `A⁻¹ a b = (det A)⁻¹ * adjugate A a b`.
   have hexp : (fun p : ℝ × E => (A p)⁻¹ a b)
       = fun p : ℝ × E => (A p).det⁻¹ * (A p).adjugate a b := by
     funext p
@@ -146,15 +127,6 @@ private lemma contDiffOn_jointMatrixInv_entry {s : Set (ℝ × E)}
     hdet_sm.inv hdet
   exact hinv_sm.mul (contDiffOn_jointAdjugate hA a b)
 
-/-! ### Joint spatial partial derivative
-
-For a jointly-`C^∞` scalar field `F : ℝ × E → ℝ` on an open product, the spatial
-partial derivative `(s, y) ↦ partialDeriv l (F (s, ·)) y` is again jointly `C^∞`.
-This is the `C^∞` upgrade of `continuousOn_partialFDeriv_uncurry`
-(`Analysis/ODE/Variational.lean`); the partial-`y` Fréchet derivative equals the joint
-Fréchet derivative post-composed with `inr`, and the joint Fréchet derivative is
-`C^∞` by `ContDiffOn.fderiv_of_isOpen`. -/
-
 private lemma contDiffOn_jointPartialDeriv {sI : Set ℝ} {U : Set E}
     (hsI : IsOpen sI) (hU : IsOpen U)
     {F : ℝ × E → ℝ} (hF : ContDiffOn ℝ ∞ F (sI ×ˢ U))
@@ -164,10 +136,8 @@ private lemma contDiffOn_jointPartialDeriv {sI : Set ℝ} {U : Set E}
       (sI ×ˢ U) := by
   classical
   have hprod_open : IsOpen (sI ×ˢ U) := hsI.prod hU
-  -- The joint Fréchet derivative is `C^∞` on the open product.
   have hF' : ContDiffOn ℝ ∞ (fun p : ℝ × E => fderiv ℝ F p) (sI ×ˢ U) :=
     hF.fderiv_of_isOpen hprod_open (by rw [ENat.coe_top_add_one])
-  -- Post-compose with `· .comp inr`, then apply at the constant model-basis vector.
   have hcomp : ContDiffOn ℝ ∞
       (fun p : ℝ × E =>
         (fderiv ℝ F p).comp (ContinuousLinearMap.inr ℝ ℝ E)) (sI ×ˢ U) := by
@@ -176,7 +146,6 @@ private lemma contDiffOn_jointPartialDeriv {sI : Set ℝ} {U : Set E}
       (ContinuousLinearMap.compL ℝ E (ℝ × E) ℝ).flip
         (ContinuousLinearMap.inr ℝ ℝ E) |>.contDiff
     exact hL.comp_contDiffOn hF'
-  -- Evaluate at the constant model-basis direction.
   have hcomp_apply : ContDiffOn ℝ ∞
       (fun p : ℝ × E =>
         ((fderiv ℝ F p).comp (ContinuousLinearMap.inr ℝ ℝ E))
@@ -184,12 +153,9 @@ private lemma contDiffOn_jointPartialDeriv {sI : Set ℝ} {U : Set E}
     hcomp.clm_apply contDiffOn_const
   refine hcomp_apply.congr ?_
   intro p hp
-  -- `partialDeriv l (F (p.1, ·)) p.2 = fderiv ℝ (F (p.1, ·)) p.2 (e_l)
-  --   = ((fderiv ℝ F p).comp inr) (e_l)`.
   have hp_open : (sI ×ˢ U) ∈ 𝓝 p := hprod_open.mem_nhds hp
   have hdiff_joint : DifferentiableAt ℝ F p :=
     (hF.contDiffAt hp_open).differentiableAt (by simp)
-  -- Reuse the `Variational.lean` identity in curried form.
   have hcurry : fderiv ℝ (fun y : E => F (p.1, y)) p.2
       = (fderiv ℝ F p).comp (ContinuousLinearMap.inr ℝ ℝ E) := by
     have hg : HasFDerivAt (fun y : E => ((p.1 : ℝ), y))
@@ -215,14 +181,6 @@ private lemma contDiffOn_jointPartialDeriv {sI : Set ℝ} {U : Set E}
     rw [huncurry_eq] at hcomp_raw
     exact hcomp_raw.fderiv
   rw [partialDeriv, hcurry]
-
-/-! ### Joint chart-field smoothness on the chart-target interior
-
-Fix a base point `α : M` and a time-family `g_DT`. On `Ioo 0 T ×ˢ interior (target)`,
-the joint chart-Gram smoothness hypothesis `h_gram_E` produces, in turn, the joint
-smoothness of the inverse Gram entry, the chart-Christoffel symbol of `g_DT s`, and
-finally the chart DeTurck-VF component. These mirror `chartInvGramOnE_contDiffOn`,
-`chartChristoffel_contDiffOn_interior`, and `chartDeTurckVFComp_contDiffOn_interior`. -/
 
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
@@ -272,18 +230,14 @@ private lemma chartInvGramOnE_joint_contDiffOn
   classical
   let A : ℝ × E → Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
     fun p => Matrix.of fun i j => chartGramOnE (I := I) (g_DT p.1) α i j p.2
-  -- The inverse entry is the matrix inverse entry of the joint Gram matrix.
   have hcongr : (fun p : ℝ × E => chartInvGramOnE (I := I) (g_DT p.1) α a b p.2)
       = fun p : ℝ × E => (A p)⁻¹ a b := by
     funext p
     exact chartInvGramOnE_eq_matrixInv (I := I) (g_DT p.1) α a b p.2
   rw [hcongr]
-  -- Apply the generic matrix-inverse helper.
   refine contDiffOn_jointMatrixInv_entry (A := A) (fun i j => ?_) ?_ a b
-  · -- Each entry is jointly `C^∞` by `h_gram_E`.
-    exact h_gram_E i j
-  · -- Determinant is nonzero (positive) on the interior.
-    intro p hp
+  · exact h_gram_E i j
+  · intro p hp
     have hy_int : p.2 ∈ interior (extChartAt I α).target := hp.2
     have hbase := symm_mem_baseSet_of_mem_interior (I := I) (α := α) hy_int
     have hpos : 0 < (A p).det := by
@@ -308,7 +262,6 @@ private lemma chartChristoffel_joint_contDiffOn
         chartChristoffel (I := I) (g_DT p.1) α i j k p.2)
       (Set.Ioo (0 : ℝ) T ×ˢ interior (extChartAt I α).target) := by
   classical
-  -- Rewrite `chartChristoffel` in `chartInvGramOnE` form (matching `HessianTrace.lean`).
   have hrewrite : (fun p : ℝ × E =>
         chartChristoffel (I := I) (g_DT p.1) α i j k p.2)
       = fun p : ℝ × E =>
@@ -325,14 +278,12 @@ private lemma chartChristoffel_joint_contDiffOn
   rw [hrewrite]
   have hsI : IsOpen (Set.Ioo (0 : ℝ) T) := isOpen_Ioo
   have hU : IsOpen (interior (extChartAt I α).target) := isOpen_interior
-  -- The joint spatial partial derivative of any chart-Gram entry is jointly `C^∞`.
   have hpd : ∀ a b c : Fin (Module.finrank ℝ E),
       ContDiffOn ℝ ∞
         (fun p : ℝ × E =>
           partialDeriv (E := E) a (chartGramOnE (I := I) (g_DT p.1) α b c) p.2)
         (Set.Ioo (0 : ℝ) T ×ˢ interior (extChartAt I α).target) := by
     intro a b c
-    -- `chartGramOnE (g_DT p.1) α b c = fun y => F (p.1, y)` with `F` jointly smooth.
     have := contDiffOn_jointPartialDeriv (E := E) hsI hU (h_gram_E b c) a
     exact this
   refine (contDiffOn_const).mul ?_
@@ -379,18 +330,9 @@ private lemma chartDeTurckVFComp_joint_contDiffOn_E
   refine ContDiffOn.sum (fun a _ => ?_)
   refine ContDiffOn.sum (fun b _ => ?_)
   refine ContDiffOn.mul (chartInvGramOnE_joint_contDiffOn (I := I) g_DT α T h_gram_E a b) ?_
-  -- The Christoffel difference is jointly `C^∞`.
   refine ContDiffOn.sub (chartChristoffel_joint_contDiffOn (I := I) g_DT α T h_gram_E a b k) ?_
-  -- The background Christoffel is `y`-only smooth.
   exact contDiffOn_snd_of_contDiffOn_interior (I := I) T
     (chartChristoffel_contDiffOn_interior (I := I) g_bg α a b k)
-
-/-! ### From the manifold-level chart-Gram hypothesis to the `E`-level one
-
-The nodes' hypothesis `h_gDT` is the manifold-level joint smoothness of
-`(s, x) ↦ chartGramOnE (g_DT s) α i j (extChartAt I α x)`. Composing with the chart
-inverse `(extChartAt I α).symm` (smooth on the chart target) recovers the `E`-level
-joint smoothness `h_gram_E` on the chart-target interior. -/
 
 private lemma chartGramOnE_joint_contDiffOn_of_manifold
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (T : ℝ)
@@ -404,31 +346,25 @@ private lemma chartGramOnE_joint_contDiffOn_of_manifold
       (fun p : ℝ × E => chartGramOnE (I := I) (g_DT p.1) α i j p.2)
       (Set.Ioo (0 : ℝ) T ×ˢ interior (extChartAt I α).target) := by
   classical
-  -- The chart inverse, lifted to a product map fixing the time coordinate.
   set Ψ : ℝ × E → ℝ × M := fun p => (p.1, (extChartAt I α).symm p.2) with hΨ
-  -- `Ψ` is `ContMDiffOn` on `Ioo ×ˢ interior(target)`.
   have hΨ_smooth : ContMDiffOn ((𝓘(ℝ, ℝ)).prod 𝓘(ℝ, E)) ((𝓘(ℝ, ℝ)).prod I) ∞ Ψ
       (Set.Ioo (0 : ℝ) T ×ˢ interior (extChartAt I α).target) := by
     refine ContMDiffOn.prodMk ?_ ?_
     · exact contMDiffOn_fst
-    · -- `(extChartAt I α).symm ∘ snd`, smooth since `symm` is smooth on target.
-      have hsymm : ContMDiffOn 𝓘(ℝ, E) I ∞ (extChartAt I α).symm
+    · have hsymm : ContMDiffOn 𝓘(ℝ, E) I ∞ (extChartAt I α).symm
           (extChartAt I α).target := contMDiffOn_extChartAt_symm (I := I) α
       refine hsymm.comp contMDiffOn_snd ?_
       intro p hp; exact Set.mem_preimage.mpr (interior_subset hp.2)
-  -- Membership: `Ψ` maps `Ioo ×ˢ interior` into `Ioo ×ˢ univ`.
   have hmaps : Set.MapsTo Ψ
       (Set.Ioo (0 : ℝ) T ×ˢ interior (extChartAt I α).target)
       (Set.Ioo (0 : ℝ) T ×ˢ Set.univ) := by
     intro p hp
     exact ⟨hp.1, Set.mem_univ _⟩
-  -- The composite is `ContMDiffOn`.
   have hcomp : ContMDiffOn ((𝓘(ℝ, ℝ)).prod 𝓘(ℝ, E)) 𝓘(ℝ, ℝ) ∞
       ((fun q : ℝ × M =>
           chartGramOnE (I := I) (g_DT q.1) α i j (extChartAt I α q.2)) ∘ Ψ)
       (Set.Ioo (0 : ℝ) T ×ˢ interior (extChartAt I α).target) :=
     (h_gDT i j).comp hΨ_smooth hmaps
-  -- On the interior, the `E`-level function equals the composite.
   have hcongr : Set.EqOn
       (fun p : ℝ × E => chartGramOnE (I := I) (g_DT p.1) α i j p.2)
       ((fun q : ℝ × M =>
@@ -442,16 +378,8 @@ private lemma chartGramOnE_joint_contDiffOn_of_manifold
       (fun p : ℝ × E => chartGramOnE (I := I) (g_DT p.1) α i j p.2)
       (Set.Ioo (0 : ℝ) T ×ˢ interior (extChartAt I α).target) :=
     hcomp.congr hcongr
-  -- Transfer `ContMDiffOn` over self prod-models to `ContDiffOn`.
   rw [← contMDiffOn_iff_contDiffOn, modelWithCornersSelf_prod, ← chartedSpaceSelf_prod]
   exact hcomp'
-
-/-! ### The keystone producer (manifold level)
-
-Composing the `E`-level joint smoothness with the chart map `q ↦ (q.1, extChartAt I α q.2)`
-(smooth on the good set, with image in the chart-target interior) yields the
-manifold-level joint smoothness of the chart DeTurck-VF component as a scalar function
-of `q : ℝ × M` on `Ioo 0 T ×ˢ chartLeviCivitaGoodSet α`. -/
 
 private lemma chartDeTurckVFComp_joint_contMDiffOn
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
@@ -467,44 +395,30 @@ private lemma chartDeTurckVFComp_joint_contMDiffOn
         chartDeTurckVFComp (I := I) (g_DT q.1) g_bg α p (extChartAt I α q.2))
       (Set.Ioo (0 : ℝ) T ×ˢ chartLeviCivitaGoodSet (I := I) α) := by
   classical
-  -- `E`-level joint smoothness of the chart component on the chart-target interior.
   have h_gram_E := chartGramOnE_joint_contDiffOn_of_manifold (I := I) g_DT α T h_gDT
   have hE := chartDeTurckVFComp_joint_contDiffOn_E (I := I) g_DT g_bg α T h_gram_E p
-  -- Convert the `E`-level `ContDiffOn` to a prod-self-model `ContMDiffOn`.
   have hE' : ContMDiffOn ((𝓘(ℝ, ℝ)).prod 𝓘(ℝ, E)) 𝓘(ℝ, ℝ) ∞
       (fun q : ℝ × E => chartDeTurckVFComp (I := I) (g_DT q.1) g_bg α p q.2)
       (Set.Ioo (0 : ℝ) T ×ˢ interior (extChartAt I α).target) := by
     rw [← contMDiffOn_iff_contDiffOn, modelWithCornersSelf_prod,
       ← chartedSpaceSelf_prod] at hE
     exact hE
-  -- The chart map `Φ q = (q.1, extChartAt I α q.2)`, smooth on the good set.
   set Φ : ℝ × M → ℝ × E := fun q => (q.1, extChartAt I α q.2) with hΦ
   have hΦ_smooth : ContMDiffOn ((𝓘(ℝ, ℝ)).prod I) ((𝓘(ℝ, ℝ)).prod 𝓘(ℝ, E)) ∞ Φ
       (Set.Ioo (0 : ℝ) T ×ˢ chartLeviCivitaGoodSet (I := I) α) := by
     refine ContMDiffOn.prodMk contMDiffOn_fst ?_
-    -- `extChartAt I α ∘ snd`, smooth on the chart source (⊇ good set base).
     have hext : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I α) (chartAt H α).source :=
       contMDiffOn_extChartAt (I := I) (x := α)
     refine hext.comp contMDiffOn_snd ?_
     intro q hq
     exact Set.mem_preimage.mpr (chartLeviCivitaGoodSet_mem_chartAt_source (I := I) hq.2)
-  -- `Φ` maps the good-set product into the interior product.
   have hmaps : Set.MapsTo Φ
       (Set.Ioo (0 : ℝ) T ×ˢ chartLeviCivitaGoodSet (I := I) α)
       (Set.Ioo (0 : ℝ) T ×ˢ interior (extChartAt I α).target) := by
     intro q hq
     exact ⟨hq.1, chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hq.2⟩
-  -- The composite is the desired scalar function.
   have hcomp := hE'.comp hΦ_smooth hmaps
-  -- `(fun q => F q.2) ∘ Φ = fun q => chartDeTurckVFComp (g_DT q.1) g_bg α p (extChartAt I α q.2)`.
   exact hcomp
-
-/-! ### Trivialised fibre representation of the bridge sum
-
-On the good set at `α`, the canonical-trivialisation fibre image of the bundled
-DeTurck vector field equals the `chartModelBasis`-coordinate sum of the chart
-components. This is the section-side bridge that, combined with the producer above,
-discharges the bundle-`ContMDiffWithinAt` of the section. -/
 
 private lemma deTurckVF_trivSnd_eq_chartModelBasis_sum
     [I.Boundaryless]
@@ -519,26 +433,17 @@ private lemma deTurckVF_trivSnd_eq_chartModelBasis_sum
   classical
   have hbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hx
-  -- The fibre map at `x` is a continuous linear equivalence.
   set L : TangentSpace I x ≃L[ℝ] E :=
     (trivializationAt E (TangentSpace I) α).continuousLinearEquivAt ℝ x hbase with hL
   have hL_apply : ∀ v : TangentSpace I x,
       (trivializationAt E (TangentSpace I) α ⟨x, v⟩).2 = L v := fun _ => rfl
-  -- Expand the bundled VF via the chart bridge.
   rw [deTurckVF_apply_eq_chartDeTurckVFComp_sum (I := I) g g_bg α hx]
   rw [hL_apply, map_sum]
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [map_smul]
   congr 1
-  -- `L (chartBasisVecFiber α p x) = chartModelBasis E p`.
   rw [← hL_apply (chartBasisVecFiber (I := I) α p x)]
   exact trivializationAt_chartBasisVec_snd (I := I) α p hbase
-
-/-! ### `C⁰` joint analogues on `Icc × interior(target)`
-
-The up-to-`t = 0` continuity node has only `C⁰`/`C¹` chart-Gram data on the closed
-interval `Icc 0 T`, so we re-derive the joint-continuity analogues of the matrix
-helpers and chart fields with `ContinuousOn` in place of `ContDiffOn`. -/
 
 variable {n : Type*} [Fintype n] [DecidableEq n]
 
@@ -687,7 +592,6 @@ private lemma chartDeTurckVFComp_joint_continuousOn_E
   refine ContinuousOn.mul (chartInvGramOnE_joint_continuousOn (I := I) g_DT α T h_gram0 a b) ?_
   refine ContinuousOn.sub
     (chartChristoffel_joint_continuousOn (I := I) g_DT α T h_gram0 h_partial a b k) ?_
-  -- The background Christoffel is `y`-only continuous.
   have hbg : ContinuousOn (chartChristoffel (I := I) g₀ α a b k)
       (interior (extChartAt I α).target) :=
     (chartChristoffel_contDiffOn_interior (I := I) g₀ α a b k).continuousOn
@@ -719,7 +623,6 @@ private lemma chartDeTurckVFComp_joint_continuousOn_M
       (Set.Icc (0 : ℝ) T ×ˢ chartLeviCivitaGoodSet (I := I) α) := by
   classical
   have hE := chartDeTurckVFComp_joint_continuousOn_E (I := I) g_DT g₀ α T h_gram0 h_partial k
-  -- The chart map `Φ q = (q.1, extChartAt I α q.2)`, continuous on the good set.
   set Φ : ℝ × M → ℝ × E := fun q => (q.1, extChartAt I α q.2) with hΦdef
   have hΦ : ContinuousOn Φ
       (Set.Icc (0 : ℝ) T ×ˢ chartLeviCivitaGoodSet (I := I) α) := by
@@ -738,17 +641,8 @@ private lemma chartDeTurckVFComp_joint_continuousOn_M
       (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) := by
     intro q hq
     exact ⟨hq.1, chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hq.2⟩
-  -- The composite is the desired scalar function.
   have hcomp := hE.comp hΦ hmaps
   exact hcomp
-
-/-! ### `C⁰` joint spatial partial derivatives on `Icc × interior(target)`
-
-For the second conjunct (joint continuity of the spatial Fréchet derivative of the
-chart DeTurck-VF component) we need joint continuity of the first spatial partials of
-the inverse Gram entry and the chart Christoffel symbol. We obtain these from the
-pointwise inverse-derivative identity `partialDeriv_chartInvGramOnE_eq` and a Leibniz
-expansion of the Christoffel symbol, expressed through the `C⁰`/`C¹` chart-Gram data. -/
 
 /-- Leibniz rule for the model-direction partial derivative of a product. -/
 private lemma partialDeriv_mul_eq {f h : E → ℝ} {y : E}
@@ -778,7 +672,6 @@ private lemma partialDeriv_chartInvGramOnE_joint_continuousOn
         partialDeriv (E := E) l (chartInvGramOnE (I := I) (g_DT q.1) α j' p') q.2)
       (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) := by
   classical
-  -- Use the pointwise identity on the interior, then continuity of the RHS.
   have hrw : Set.EqOn
       (fun q : ℝ × E =>
         partialDeriv (E := E) l (chartInvGramOnE (I := I) (g_DT q.1) α j' p') q.2)
@@ -855,7 +748,6 @@ private lemma partialDeriv_chartChristoffel_joint_continuousOn
         partialDeriv (E := E) m (chartChristoffel (I := I) (g_DT q.1) α i j k) q.2)
       (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) := by
   classical
-  -- Pointwise Leibniz expansion of `∂_m Γ^k_{ij}` on the interior.
   have hrw : Set.EqOn
       (fun q : ℝ × E =>
         partialDeriv (E := E) m (chartChristoffel (I := I) (g_DT q.1) α i j k) q.2)
@@ -875,10 +767,8 @@ private lemma partialDeriv_chartChristoffel_joint_continuousOn
       (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) := by
     intro q hq
     have hy : q.2 ∈ interior (extChartAt I α).target := hq.2
-    -- Beta-reduce the `EqOn` application `(fun q => …) q` before introducing `g`.
     simp only []
     set g := g_DT q.1
-    -- Differentiability of the single-metric factors at `q.2`.
     have hInv : ∀ a b, DifferentiableAt ℝ (chartInvGramOnE (I := I) g α a b) q.2 := by
       intro a b
       exact (((chartInvGramOnE_contDiffOn (I := I) g α a b).mono interior_subset).contDiffAt
@@ -895,7 +785,6 @@ private lemma partialDeriv_chartChristoffel_joint_continuousOn
         exact (hGr.fderiv_of_isOpen isOpen_interior (by rw [ENat.coe_top_add_one])).clm_apply
           contDiffOn_const
       exact (hG.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
-    -- The Christoffel symbol equals `(1/2) ∑_l invGram · bracket` as a function of `z`.
     have hΓfun : chartChristoffel (I := I) g α i j k =
         fun z : E => (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
           chartInvGramOnE (I := I) g α k l z *
@@ -906,9 +795,6 @@ private lemma partialDeriv_chartChristoffel_joint_continuousOn
       refine congrArg (fun t => (1 / 2 : ℝ) * t) ?_
       refine Finset.sum_congr rfl (fun l _ => ?_); rfl
     rw [hΓfun]
-    -- The per-`l` summand and its bracket, as explicit `E → ℝ` functions, so the
-    -- sum/product rewrites below match the goal syntactically rather than up to
-    -- `HMul` on functions.
     have hbrDiff : ∀ l, DifferentiableAt ℝ
         (fun z : E => partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) z +
           partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) z -
@@ -920,7 +806,6 @@ private lemma partialDeriv_chartChristoffel_joint_continuousOn
             partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) z -
             partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) z)) q.2 := fun l =>
       (hInv k l).mul (hbrDiff l)
-    -- Differentiate the constant multiple and the sum.
     rw [partialDeriv_const_mul_eq
       (f := fun z : E => ∑ l : Fin (Module.finrank ℝ E),
         chartInvGramOnE (I := I) g α k l z *
@@ -937,9 +822,7 @@ private lemma partialDeriv_chartChristoffel_joint_continuousOn
           partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) z))
       Finset.univ m (fun l _ => hsumDiff l)]
     refine Finset.sum_congr rfl (fun l _ => ?_)
-    -- Leibniz on the `l`-th summand `invGram · bracket`.
     rw [partialDeriv_mul_eq m (hInv k l) (hbrDiff l)]
-    -- Expand the partial of the bracket.
     rw [partialDeriv_sub_eq m ((hParG i l j).fun_add (hParG j l i)) (hParG l i j)]
     rw [partialDeriv_add_eq m (hParG i l j) (hParG j l i)]
   refine ContinuousOn.congr ?_ hrw
@@ -992,10 +875,8 @@ private lemma partialDeriv_chartDeTurckVFComp_joint_continuousOn
       (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) := by
     intro q hq
     have hy : q.2 ∈ interior (extChartAt I α).target := hq.2
-    -- Beta-reduce the `EqOn` application `(fun q => …) q` before introducing `g`.
     simp only []
     set g := g_DT q.1
-    -- Differentiability of the single-metric factors at `q.2`.
     have hInv : ∀ a b, DifferentiableAt ℝ (chartInvGramOnE (I := I) g α a b) q.2 := fun a b =>
       (((chartInvGramOnE_contDiffOn (I := I) g α a b).mono interior_subset).contDiffAt
         (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
@@ -1005,7 +886,6 @@ private lemma partialDeriv_chartDeTurckVFComp_joint_continuousOn
     have hΓbg : ∀ a b, DifferentiableAt ℝ (chartChristoffel (I := I) g₀ α a b k) q.2 := fun a b =>
       ((chartChristoffel_contDiffOn_interior (I := I) g₀ α a b k).contDiffAt
         (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
-    -- Expand the component as the explicit double sum, then differentiate via Leibniz.
     have hcomp : chartDeTurckVFComp (I := I) g g₀ α k =
         fun z : E => ∑ a : Fin (Module.finrank ℝ E),
           ∑ b : Fin (Module.finrank ℝ E),
@@ -1014,7 +894,6 @@ private lemma partialDeriv_chartDeTurckVFComp_joint_continuousOn
                 chartChristoffel (I := I) g₀ α a b k z) := by
       funext z; rw [chartDeTurckVFComp_def]
     rw [hcomp]
-    -- Per-`b` summand (for fixed `a`) as an explicit `E → ℝ` function.
     have hbDiff : ∀ a b, DifferentiableAt ℝ
         (fun z : E => chartInvGramOnE (I := I) g α a b z *
           (chartChristoffel (I := I) g α a b k z -
@@ -1041,8 +920,7 @@ private lemma partialDeriv_chartDeTurckVFComp_joint_continuousOn
   refine continuousOn_finset_sum _ (fun a _ => ?_)
   refine continuousOn_finset_sum _ (fun b _ => ?_)
   refine ContinuousOn.add ?_ ?_
-  · -- `(∂_m invGram) · (Γ - Γbg)`.
-    refine ContinuousOn.mul
+  · refine ContinuousOn.mul
       (partialDeriv_chartInvGramOnE_joint_continuousOn (I := I) g_DT α T h_gram0 h_partial m a b)
       ?_
     refine ContinuousOn.sub
@@ -1051,12 +929,10 @@ private lemma partialDeriv_chartDeTurckVFComp_joint_continuousOn
         (interior (extChartAt I α).target) :=
       (chartChristoffel_contDiffOn_interior (I := I) g₀ α a b k).continuousOn
     exact hbg.comp continuousOn_snd (fun p hp => hp.2)
-  · -- `invGram · (∂_m Γ - ∂_m Γbg)`.
-    refine ContinuousOn.mul (chartInvGramOnE_joint_continuousOn (I := I) g_DT α T h_gram0 a b) ?_
+  · refine ContinuousOn.mul (chartInvGramOnE_joint_continuousOn (I := I) g_DT α T h_gram0 a b) ?_
     refine ContinuousOn.sub
       (partialDeriv_chartChristoffel_joint_continuousOn (I := I) g_DT α T h_gram0 h_partial
         h_partial2 m a b k) ?_
-    -- `∂_m Γbg` is `y`-only continuous (single metric `C∞` on interior).
     have hbg : ContinuousOn (partialDeriv (E := E) m (chartChristoffel (I := I) g₀ α a b k))
         (interior (extChartAt I α).target) := by
       unfold partialDeriv
@@ -1110,7 +986,6 @@ private lemma fderiv_chartDeTurckVFComp_joint_continuousOn
         fderiv ℝ (fun y : E => chartDeTurckVFComp (I := I) (g_DT q.1) g₀ α k y) q.2)
       (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) := by
   classical
-  -- Rewrite the fderiv via the coordinate-sum reconstruction on the interior.
   have hrw : Set.EqOn
       (fun q : ℝ × E =>
         fderiv ℝ (fun y : E => chartDeTurckVFComp (I := I) (g_DT q.1) g₀ α k y) q.2)
@@ -1144,24 +1019,18 @@ theorem deturck_vf_joint_smoothness
         : TangentBundle I M))
       (Set.Ioo (0 : ℝ) T ×ˢ Set.univ) := by
   classical
-  -- Work pointwise on the domain `Ioo 0 T ×ˢ univ`.
   intro q₀ hq₀
   set α : M := q₀.2 with hα
-  -- Reduce the bundle membership to the trivialised fibre representation.
   rw [Bundle.contMDiffWithinAt_totalSpace]
   refine ⟨contMDiffWithinAt_snd, ?_⟩
-  -- Fold the base-point `q₀.2` to the abbreviation `α`.
   simp only [← hα]
-  -- The good set at `α` is an open neighbourhood of `α = q₀.2`.
   have hgood_open : IsOpen (chartLeviCivitaGoodSet (I := I) α) :=
     chartLeviCivitaGoodSet_isOpen (I := I) α
   have hα_mem : α ∈ chartLeviCivitaGoodSet (I := I) α :=
     self_mem_chartLeviCivitaGoodSet (I := I) α
-  -- The producer gives the scalar coefficient smoothness on `Ioo ×ˢ goodSet α`.
   have hcoeff := fun p =>
     DeTurckVFSmoothnessKeystone.chartDeTurckVFComp_joint_contMDiffOn
       (I := I) g_DT g_bg α T (h_gDT α) p
-  -- The chartModelBasis-coordinate sum is `ContMDiffWithinAt` at `q₀` on `Ioo ×ˢ goodSet α`.
   have hsum_within : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, E) ∞
       (fun q : ℝ × M =>
         ∑ p : Fin (Module.finrank ℝ E),
@@ -1173,7 +1042,6 @@ theorem deturck_vf_joint_smoothness
     have hq₀_mem : q₀ ∈ Set.Ioo (0 : ℝ) T ×ˢ chartLeviCivitaGoodSet (I := I) α :=
       ⟨hq₀.1, hα ▸ hα_mem⟩
     exact (hcoeff p) q₀ hq₀_mem
-  -- The neighbourhood `Ioo ×ˢ goodSet α` of `q₀` inside `Ioo ×ˢ univ`.
   have hnhds : Set.Ioo (0 : ℝ) T ×ˢ chartLeviCivitaGoodSet (I := I) α
       ∈ nhdsWithin q₀ (Set.Ioo (0 : ℝ) T ×ˢ Set.univ) := by
     have hsub : Set.Ioo (0 : ℝ) T ×ˢ chartLeviCivitaGoodSet (I := I) α
@@ -1185,7 +1053,6 @@ theorem deturck_vf_joint_smoothness
       ⟨hq₀.1, hα ▸ hα_mem⟩
     exact Filter.mem_of_superset
       (nhdsWithin_le_nhds (hopen.mem_nhds hmemq₀)) (by intro x hx; exact hx)
-  -- Restrict `hsum_within` to the larger domain set via the neighbourhood.
   have hsum_within' : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, E) ∞
       (fun q : ℝ × M =>
         ∑ p : Fin (Module.finrank ℝ E),
@@ -1193,7 +1060,6 @@ theorem deturck_vf_joint_smoothness
             ((chartModelBasis E) p : E))
       (Set.Ioo (0 : ℝ) T ×ˢ Set.univ) q₀ :=
     hsum_within.mono_of_mem_nhdsWithin hnhds
-  -- The trivialised fibre representation equals the coordinate sum near `q₀`.
   have heqOn : Set.EqOn
       (fun q : ℝ × M =>
         (trivializationAt E (TangentSpace I) α
@@ -1257,18 +1123,12 @@ theorem deturck_vf_continuous_up_to_zero
             DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT q.1) g₀ α k y) q.2)
           (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target)) := by
   refine ⟨?_, ?_⟩
-  · -- First conjunct: raw-`E` continuity of the bundled section value up to `t = 0`.
-    -- The raw fibre value reads, on each chart-`α` good set, as the
-    -- `chartBasisVecFiber`-coordinate sum of the chart components; the scalar
-    -- coefficients are continuous by the `C⁰` keystone and the frame fibres by
-    -- the geometric input `h_frame`. We work pointwise via `ContinuousWithinAt`.
-    intro q₀ hq₀
+  · intro q₀ hq₀
     set α : M := q₀.2 with hα
     have hgood_open : IsOpen (chartLeviCivitaGoodSet (I := I) α) :=
       chartLeviCivitaGoodSet_isOpen (I := I) α
     have hα_mem : α ∈ chartLeviCivitaGoodSet (I := I) α :=
       self_mem_chartLeviCivitaGoodSet (I := I) α
-    -- The scalar coefficients are jointly `C⁰` on `Icc ×ˢ goodSet α`.
     have hscalar : ∀ p : Fin (Module.finrank ℝ E),
         ContinuousOn
           (fun q : ℝ × M =>
@@ -1276,8 +1136,6 @@ theorem deturck_vf_continuous_up_to_zero
           (Set.Icc (0 : ℝ) T ×ˢ chartLeviCivitaGoodSet (I := I) α) := fun p =>
       DeTurckVFSmoothnessKeystone.chartDeTurckVFComp_joint_continuousOn_M
         (I := I) g_DT g₀ α T (h_gram0 α) (h_partial α) p
-    -- The frame fibres are continuous in `x` on `goodSet α`, hence jointly on the
-    -- product (they ignore the time coordinate).
     have hframe_joint : ∀ p : Fin (Module.finrank ℝ E),
         ContinuousOn
           (fun q : ℝ × M =>
@@ -1285,7 +1143,6 @@ theorem deturck_vf_continuous_up_to_zero
           (Set.Icc (0 : ℝ) T ×ˢ chartLeviCivitaGoodSet (I := I) α) := by
       intro p
       exact (h_frame α p).comp continuousOn_snd (fun q hq => hq.2)
-    -- The coordinate sum is jointly `C⁰` on `Icc ×ˢ goodSet α`.
     have hsum : ContinuousOn
         (fun q : ℝ × M =>
           ∑ p : Fin (Module.finrank ℝ E),
@@ -1294,7 +1151,6 @@ theorem deturck_vf_continuous_up_to_zero
         (Set.Icc (0 : ℝ) T ×ˢ chartLeviCivitaGoodSet (I := I) α) := by
       refine continuousOn_finset_sum _ (fun p _ => ?_)
       exact (hscalar p).smul (hframe_joint p)
-    -- On the good-set product, the raw fibre value equals the coordinate sum.
     have heqOn : Set.EqOn
         (fun q : ℝ × M => (deTurckVF (I := I) (g_DT q.1) g₀ q.2 : TangentSpace I q.2))
         (fun q : ℝ × M =>
@@ -1304,13 +1160,10 @@ theorem deturck_vf_continuous_up_to_zero
         (Set.Icc (0 : ℝ) T ×ˢ chartLeviCivitaGoodSet (I := I) α) := by
       intro q hq
       exact deTurckVF_apply_eq_chartDeTurckVFComp_sum (I := I) (g_DT q.1) g₀ α hq.2
-    -- Transfer the continuity to the raw fibre value, then to a within-neighbourhood
-    -- of `q₀` inside the full domain.
     have hraw : ContinuousOn
         (fun q : ℝ × M => (deTurckVF (I := I) (g_DT q.1) g₀ q.2 : TangentSpace I q.2))
         (Set.Icc (0 : ℝ) T ×ˢ chartLeviCivitaGoodSet (I := I) α) :=
       hsum.congr heqOn
-    -- `q₀` lies in the open good-set product, a neighbourhood inside the full domain.
     have hmemq₀ : q₀ ∈ Set.Icc (0 : ℝ) T ×ˢ chartLeviCivitaGoodSet (I := I) α :=
       ⟨hq₀.1, hα ▸ hα_mem⟩
     have hnhds : Set.Icc (0 : ℝ) T ×ˢ chartLeviCivitaGoodSet (I := I) α
@@ -1324,9 +1177,7 @@ theorem deturck_vf_continuous_up_to_zero
       intro x hx
       exact ⟨hx.1.1, hx.2.2⟩
     exact (hraw.continuousWithinAt hmemq₀).mono_of_mem_nhdsWithin hnhds
-  · -- Second conjunct: joint continuity of the spatial Fréchet derivative of the chart
-    -- DeTurck-VF component, fully discharged by the `C⁰` keystone producer.
-    intro α k
+  · intro α k
     exact DeTurckVFSmoothnessKeystone.fderiv_chartDeTurckVFComp_joint_continuousOn
       (I := I) g_DT g₀ α T (h_gram0 α) (h_partial α) (h_partial2 α) k
 
@@ -1342,10 +1193,6 @@ theorem deturck_solution_joint_smooth
       (fun q : ℝ × M => (TotalSpace.mk' E q.2
         (deTurckVF (I := I) (g_DT q.1) (g_DT 0) q.2) : TangentBundle I M))
       (Set.Ioo (0 : ℝ) T ×ˢ Set.univ) :=
-  -- This is `deturck_vf_joint_smoothness` specialised to the background metric
-  -- `g_bg := g_DT 0`.  The smoothness hypothesis `h_smooth` is literally the
-  -- chart-Gram joint-`C∞` hypothesis `h_gDT` of that theorem (it only constrains
-  -- the evolving family `g_DT q.1`, not the background), so it transports verbatim.
   deturck_vf_joint_smoothness (I := I) (g_DT 0) g_DT T h_smooth
 
 end DifferentialGeometry.PDE.RicciFlow

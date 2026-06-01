@@ -54,19 +54,12 @@ open DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeSmoothApprox
 open DifferentialGeometry.Analysis.Sobolev.SubstitutionNonSmoothChartBilinear
 open DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeIBPExpand
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Step A: Boundedness of η, ∂_j η, and `weightedInvGramOnEuclid`
-
-Standard sup-bound facts for continuous compactly-supported / chart-target
-functions. -/
 
 /-- Continuous compactly-supported functions are uniformly bounded. -/
 private lemma exists_bound_of_contDiff_compactSupport
@@ -117,11 +110,6 @@ private lemma exists_bound_weightedInvGram
     (hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ K, |weightedInvGramOnEuclid (I := I) g α i j y| ≤ C :=
   weightedInvGramOnEuclid_bounded_on_compact (I := I) (M := M) g α i j hK hK_in
-
-/-! ## Step B: Local L² of the factor `F = weightedInvGramOnEuclid · weak_partial`
-
-The factor `F = weightedInvGramOnEuclid · weak_partial` is locally `L²` on
-chart-target compacts — a `bounded × L²` argument. -/
 
 /-- `weightedInvGramOnEuclid g α i j · D.weak_partial i` is `MemLp 2`
 on `(volume.restrict (cthickening |h| K_0))`. -/
@@ -175,11 +163,6 @@ private lemma F_ij_memLp_restrict
     h_weight_aesm.mul hwp_lp.aestronglyMeasurable
   exact MemLp.mono (hwp_lp.const_mul C) h_prod_aesm h_pt_bound
 
-/-! ## Step C: Global L² extension of `F` via zero-extension on cthickening
-
-The zero-extension `F_ext = (cthickening |h| K_0).indicator F` is `MemLp 2`
-on the whole space. -/
-
 /-- Indicator-based extension of `F = weightedInvGramOnEuclid · weak_partial`
 to all of EuclN. -/
 private noncomputable def F_ij_extended
@@ -211,8 +194,6 @@ private lemma F_ij_extended_memLp
     h_thick_compact.measurableSet
   exact (MeasureTheory.memLp_indicator_iff_restrict h_thick_meas).mpr
     (F_ij_memLp_restrict (I := I) (M := M) D hK_0_compact hh_le h_thick i j)
-
-/-! ## Step D: Global L² of u_chart and weak_partial via indicator extension -/
 
 private lemma u_chart_indicator_memLp
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -253,11 +234,6 @@ private lemma weak_partial_indicator_memLp
   exact D.weak_partial_locally_memLp j (Metric.cthickening |h| K_0)
     h_thick_compact h_thick
 
-/-! ## Step E: L² of `diffQuot` via Minkowski
-
-For an `L²` function on EuclN, `diffQuot k h` is `L²` with norm
-≤ (2/|h|) times the original norm. -/
-
 private lemma memLp_diffQuot_of_memLp
     {F : EuclN → ℝ} (hF_lp : MemLp F 2 (volume : Measure EuclN))
     (k : Fin (Module.finrank ℝ E)) {h : ℝ} (hh : h ≠ 0) :
@@ -272,7 +248,6 @@ private lemma memLp_diffQuot_of_memLp
     DifferentialGeometry.Analysis.Sobolev.aestronglyMeasurable_diffQuot
       (d := Module.finrank ℝ E) k h hF_aesm
   refine ⟨hdq_aesm, ?_⟩
-  -- Rewrite diffQuot k h F = h⁻¹ • (translate k h F - F).
   have h_dq_eq : DifferentialGeometry.Analysis.Sobolev.diffQuot
       (d := Module.finrank ℝ E) k h F =
       h⁻¹ • (DifferentialGeometry.Analysis.Sobolev.translate
@@ -295,12 +270,6 @@ private lemma memLp_diffQuot_of_memLp
       (d := Module.finrank ℝ E) k h F) - F) 2 (volume : Measure EuclN) :=
     hτF_lp.sub hF_lp
   exact (h_diff_lp.const_smul h⁻¹).eLpNorm_lt_top
-
-/-! ## Step F: Pre-IBP integrability of the (i, j) integrand
-
-The integrand `weightedInvGramOnEuclid · weak_partial · diffQuot k (-h) (test_factor)`
-is `L¹` on `cthickening |h| K_0`, by Hölder using:
-- Bounded × `L²` × `L²`. -/
 
 /-- The "test factor" for the IBP integrand. -/
 private noncomputable def testFactor
@@ -357,12 +326,10 @@ private lemma testFactorExtended_memLp_two
   have h_partial_eta_cont : Continuous
       (fun z : EuclN => (fderiv ℝ η z) (EuclideanSpace.single j 1)) :=
     (hη.continuous_fderiv h_top_ne_zero).clm_apply continuous_const
-  -- Indicator-extended factors are globally L².
   have hu_ext_lp := u_chart_indicator_memLp (I := I) (M := M) D
     hK_0_compact hh_le h_thick
   have hwp_ext_lp := weak_partial_indicator_memLp (I := I) (M := M) D
     hK_0_compact hh_le h_thick j
-  -- Their diffQuot is also L².
   have hdq_u_ext_lp : MemLp
       (DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h
@@ -375,9 +342,7 @@ private lemma testFactorExtended_memLp_two
         ((Metric.cthickening |h| K_0).indicator (D.weak_partial j))) 2
       (volume : Measure EuclN) :=
     memLp_diffQuot_of_memLp hwp_ext_lp k hh
-  -- testFactorExtended = t1' + t2'.
   unfold testFactorExtended
-  -- Term 1: η² · diffQuot wp_ext.
   have ht1'_pt_bd : ∀ z, ‖(η z)^2 *
       DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h
@@ -411,7 +376,6 @@ private lemma testFactorExtended_memLp_two
       (volume : Measure EuclN) :=
     MemLp.mono (hdq_wp_ext_lp.const_mul (M_η^2)) ht1'_aesm
       (Filter.Eventually.of_forall ht1'_pt_bd)
-  -- Term 2: 2 · η · ∂_j η · diffQuot u_ext.
   have ht2'_pt_bd : ∀ z, ‖2 * η z * (fderiv ℝ η z) (EuclideanSpace.single j 1) *
       DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h
@@ -476,7 +440,6 @@ private lemma testFactorExtended_memLp_two
       (volume : Measure EuclN) :=
     MemLp.mono (hdq_u_ext_lp.const_mul (2 * M_η * M_dη)) ht2'_aesm
       (Filter.Eventually.of_forall ht2'_pt_bd)
-  -- testFactorExtended = t1' + t2'.
   exact ht1'_lp.add ht2'_lp
 
 /-- On `tsupport η`, `testFactor` and `testFactorExtended` agree.
@@ -497,12 +460,10 @@ private lemma testFactor_eq_testFactorExtended_on_tsupport
     testFactor (I := I) (M := M) D η k h j z =
       testFactorExtended (I := I) (M := M) D η k h K_0 j z := by
   classical
-  -- Both terms transition through the diffQuot equality on tsupport η points.
   have h_K_0_thick : K_0 ⊆ Metric.cthickening |h| K_0 :=
     Metric.self_subset_cthickening _
   have hz_K_0 : z ∈ K_0 := hη_supp_in_K_0 hz
   have hz_thick : z ∈ Metric.cthickening |h| K_0 := h_K_0_thick hz_K_0
-  -- z + h • e_k ∈ cthickening |h| K_0.
   have hz_shift : z + h • EuclideanSpace.single k 1 ∈ Metric.cthickening |h| K_0 := by
     refine Metric.mem_cthickening_of_dist_le _ _ |h| K_0 hz_K_0 ?_
     rw [dist_eq_norm]
@@ -511,7 +472,6 @@ private lemma testFactor_eq_testFactorExtended_on_tsupport
       rw [add_sub_cancel_left]
     rw [hcalc, norm_smul]
     simp [Real.norm_eq_abs]
-  -- diffQuot at z agrees on F and indicator F.
   have h_dq_wp : DifferentialGeometry.Analysis.Sobolev.diffQuot
       (d := Module.finrank ℝ E) k h (D.weak_partial j) z =
     DifferentialGeometry.Analysis.Sobolev.diffQuot
@@ -611,11 +571,6 @@ private lemma testFactor_memLp_two
   exact testFactorExtended_memLp_two (I := I) (M := M) D hK_0_compact hη hη_supp
     k hh hh_le h_thick j
 
-/-! ## Step G: Per-`(i, j)` integrability
-
-The pre-IBP integrand is L¹ on cthickening: bounded × L²(local) × L²(global)
-= L¹ via Hölder. -/
-
 /-- The pre-IBP integrand on cthickening is integrable. -/
 theorem chartBilinear_factor_integrable
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -643,22 +598,15 @@ theorem chartBilinear_factor_integrable
                 (d := Module.finrank ℝ E) k h D.u_chart z) y)
       ((volume : Measure EuclN).restrict (Metric.cthickening |h| K_0)) := by
   classical
-  -- The integrand = F · diffQuot k (-h) testFactor.
-  -- F = w_ij · weak_partial_i ∈ L²(cthickening).
-  -- testFactor ∈ L²(global).
-  -- diffQuot k (-h) testFactor ∈ L²(global).
-  -- Hence F · diffQuot k (-h) testFactor ∈ L¹(cthickening) by Hölder.
   have hF_lp : MemLp (fun y =>
       weightedInvGramOnEuclid (I := I) g α i j y * D.weak_partial i y) 2
       ((volume : Measure EuclN).restrict (Metric.cthickening |h| K_0)) :=
     F_ij_memLp_restrict (I := I) (M := M) D hK_0_compact hh_le h_thick i j
-  -- testFactor is L² globally.
   have h_test_lp_global :
       MemLp (testFactor (I := I) (M := M) D η k h j) 2
         (volume : Measure EuclN) :=
     testFactor_memLp_two (I := I) (M := M) D hK_0_compact hη hη_supp
       hη_supp_in_K_0 k hh hh_le h_thick j
-  -- diffQuot k (-h) testFactor is L² globally.
   have hnh : (-h) ≠ 0 := neg_ne_zero.mpr hh
   have h_dq_test_lp_global :
       MemLp (DifferentialGeometry.Analysis.Sobolev.diffQuot
@@ -666,14 +614,12 @@ theorem chartBilinear_factor_integrable
         (testFactor (I := I) (M := M) D η k h j)) 2
         (volume : Measure EuclN) :=
     memLp_diffQuot_of_memLp h_test_lp_global k hnh
-  -- Restricting to cthickening preserves L².
   have h_dq_test_lp_restrict :
       MemLp (DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k (-h)
         (testFactor (I := I) (M := M) D η k h j)) 2
         ((volume : Measure EuclN).restrict (Metric.cthickening |h| K_0)) :=
     h_dq_test_lp_global.restrict _
-  -- Hölder: L² × L² → L¹ on the restricted measure.
   have h_int_prod : Integrable (fun y =>
       (fun y => weightedInvGramOnEuclid (I := I) g α i j y *
         D.weak_partial i y) y *
@@ -689,8 +635,6 @@ theorem chartBilinear_factor_integrable
       (volume : Measure EuclN).restrict (Metric.cthickening |h| K_0))
       (p := (2 : ℝ≥0∞)) (q := (2 : ℝ≥0∞)) hF_lp h_dq_test_lp_restrict
     simpa using h
-  -- The goal integrand is the same as the just-bounded one.
-  -- Make associativity explicit: w * wp * diffQuot = (w * wp) * diffQuot.
   have h_assoc : (fun y =>
       weightedInvGramOnEuclid (I := I) g α i j y *
         D.weak_partial i y *
@@ -739,8 +683,6 @@ theorem chartBilinear_factor_integrable_after
             (d := Module.finrank ℝ E) k h D.u_chart y))
       ((volume : Measure EuclN).restrict (Metric.cthickening |h| K_0)) := by
   classical
-  -- Strategy: extend F = w · weak_partial to F_ext, then diffQuot k h F_ext is L² globally.
-  -- testFactor is L² globally. Their product is L¹ globally, hence on the restricted measure.
   have hF_ext_lp : MemLp (F_ij_extended (I := I) (M := M) D (h := h) K_0 i j) 2
       (volume : Measure EuclN) :=
     F_ij_extended_memLp (I := I) (M := M) D hK_0_compact hh_le h_thick i j
@@ -754,7 +696,6 @@ theorem chartBilinear_factor_integrable_after
       (volume : Measure EuclN) :=
     testFactor_memLp_two (I := I) (M := M) D hK_0_compact hη hη_supp
       hη_supp_in_K_0 k hh hh_le h_thick j
-  -- Hölder for L²×L² globally.
   have h_int_prod_global : Integrable (fun y =>
       DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h
@@ -763,9 +704,6 @@ theorem chartBilinear_factor_integrable_after
       (volume : Measure EuclN) :=
     DifferentialGeometry.Analysis.Sobolev.integrable_mul_of_memLp_two
       (d := Module.finrank ℝ E) h_dq_F_ext_lp h_test_lp
-  -- On cthickening, diffQuot F_ext = diffQuot F (where both points lie in cthickening).
-  -- But really we just want to use h_int_prod_global restricted, then a.e. equality.
-  -- Restrict and do a.e. equality.
   have h_int_prod_restrict : Integrable (fun y =>
       DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h
@@ -773,10 +711,6 @@ theorem chartBilinear_factor_integrable_after
       testFactor (I := I) (M := M) D η k h j y)
       ((volume : Measure EuclN).restrict (Metric.cthickening |h| K_0)) :=
     h_int_prod_global.restrict
-  -- Substitute via a.e. equality on cthickening.
-  -- testFactor = testFactorExtended on cthickening (in fact, everywhere).
-  -- diffQuot F_ext = diffQuot F on K_0 (a subset of cthickening), but G = 0 outside K_0,
-  -- so the product is the same. We use a pointwise equality.
   have h_pointwise_eq :
       ∀ᵐ y ∂((volume : Measure EuclN).restrict (Metric.cthickening |h| K_0)),
       DifferentialGeometry.Analysis.Sobolev.diffQuot
@@ -795,7 +729,6 @@ theorem chartBilinear_factor_integrable_after
             (d := Module.finrank ℝ E) k h D.u_chart y) := by
     refine Filter.Eventually.of_forall ?_
     intro y
-    -- testFactor y = the explicit expression by definition.
     have h_test_eq : testFactor (I := I) (M := M) D η k h j y =
         (η y) ^ 2 *
           DifferentialGeometry.Analysis.Sobolev.diffQuot
@@ -803,11 +736,8 @@ theorem chartBilinear_factor_integrable_after
           2 * η y * (fderiv ℝ η y) (EuclideanSpace.single j 1) *
             DifferentialGeometry.Analysis.Sobolev.diffQuot
               (d := Module.finrank ℝ E) k h D.u_chart y := rfl
-    -- Outside tsupport η, testFactor = 0, so the product is 0 on both sides.
     by_cases hy : y ∈ tsupport η
-    · -- On tsupport η, F_ext y = F y AND F_ext (y + h e_k) = F (y + h e_k).
-      -- This is because both lie in cthickening.
-      have h_K_0_thick : K_0 ⊆ Metric.cthickening |h| K_0 :=
+    · have h_K_0_thick : K_0 ⊆ Metric.cthickening |h| K_0 :=
         Metric.self_subset_cthickening _
       have hy_K_0 : y ∈ K_0 := hη_supp_in_K_0 hy
       have hy_thick : y ∈ Metric.cthickening |h| K_0 := h_K_0_thick hy_K_0
@@ -819,7 +749,6 @@ theorem chartBilinear_factor_integrable_after
           rw [add_sub_cancel_left]
         rw [hcalc, norm_smul]
         simp [Real.norm_eq_abs]
-      -- diffQuot F_ext = diffQuot F on y.
       have h_F_ext_eq : DifferentialGeometry.Analysis.Sobolev.diffQuot
           (d := Module.finrank ℝ E) k h
           (F_ij_extended (I := I) (M := M) D (h := h) K_0 i j) y =
@@ -837,8 +766,7 @@ theorem chartBilinear_factor_integrable_after
         · rw [Set.indicator_of_mem hy_shift]
         · rw [Set.indicator_of_mem hy_thick]
       rw [h_F_ext_eq, h_test_eq]
-    · -- Outside tsupport η, testFactor y = 0, so both sides are 0.
-      have h_test_zero : testFactor (I := I) (M := M) D η k h j y = 0 :=
+    · have h_test_zero : testFactor (I := I) (M := M) D η k h j y = 0 :=
         testFactor_eq_zero_outside_tsupport (I := I) (M := M) D k h j hy
       rw [h_test_zero]
       have hηy : η y = 0 := image_eq_zero_of_notMem_tsupport hy
@@ -853,13 +781,6 @@ theorem chartBilinear_factor_integrable_after
         ring
       rw [h_rhs_test, mul_zero, mul_zero]
   exact h_int_prod_restrict.congr h_pointwise_eq
-
-/-! ## Step H: Support of `diffQuot k (-h) testFactor` and `D_h F_ext · testFactor`
-
-We need: outside `cthickening |h| K_0`, the LHS integrand is zero (because
-`diffQuot k (-h) testFactor` vanishes there, since testFactor is supported in
-K_0 ⊆ cthickening). And outside K_0 (in particular, outside cthickening), the
-RHS integrand is zero (because testFactor = 0 there). -/
 
 /-- Support of `diffQuot k (-h) testFactor` is contained in `cthickening |h| K_0`. -/
 private lemma diffQuot_testFactor_support_subset
@@ -877,10 +798,8 @@ private lemma diffQuot_testFactor_support_subset
         Metric.cthickening |h| K_0 := by
   intro y hy
   rw [Function.mem_support] at hy
-  -- diffQuot k (-h) F at y depends on F(y) and F(y - h e_k).
   by_cases hh_eq : h = 0
   · subst hh_eq
-    -- diffQuot _ 0 _ = 0, contradiction.
     have : DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k (-(0:ℝ))
         (testFactor (I := I) (M := M) D η k (0:ℝ) j) y = 0 := by
@@ -888,8 +807,6 @@ private lemma diffQuot_testFactor_support_subset
     exact absurd this hy
   · rw [DifferentialGeometry.Analysis.Sobolev.diffQuot_apply_of_ne
         (d := Module.finrank ℝ E) k (neg_ne_zero.mpr hh_eq)] at hy
-    -- (testFactor (y + (-h) e_k) - testFactor y) / (-h) ≠ 0.
-    -- Hence testFactor (y + (-h) e_k) ≠ 0 OR testFactor y ≠ 0.
     have h_num_ne : testFactor (I := I) (M := M) D η k h j
         (y + (-h) • EuclideanSpace.single k 1) -
         testFactor (I := I) (M := M) D η k h j y ≠ 0 := by
@@ -911,9 +828,7 @@ private lemma diffQuot_testFactor_support_subset
       apply h_num_ne
       rw [h1, h2, sub_self]
     rcases h_or with h_shift | h_at
-    · -- testFactor (y + (-h) e_k) ≠ 0 ⇒ y + (-h) e_k ∈ tsupport η ⊆ K_0.
-      -- Hence y is at distance ≤ |h| from K_0.
-      have h_in_supp : y + (-h) • EuclideanSpace.single k 1 ∈ tsupport η := by
+    · have h_in_supp : y + (-h) • EuclideanSpace.single k 1 ∈ tsupport η := by
         by_contra hnot
         exact h_shift
           (testFactor_eq_zero_outside_tsupport (I := I) (M := M) D k h j hnot)
@@ -926,8 +841,7 @@ private lemma diffQuot_testFactor_support_subset
         rw [sub_add_eq_sub_sub, sub_self, zero_sub, ← neg_smul, neg_neg]
       rw [hcalc, norm_smul]
       simp [Real.norm_eq_abs]
-    · -- testFactor y ≠ 0 ⇒ y ∈ tsupport η ⊆ K_0 ⊆ cthickening |h| K_0.
-      have h_in_supp : y ∈ tsupport η := by
+    · have h_in_supp : y ∈ tsupport η := by
         by_contra hnot
         exact h_at (testFactor_eq_zero_outside_tsupport (I := I) (M := M) D k h j hnot)
       exact Metric.self_subset_cthickening _ (hη_supp_in_K_0 h_in_supp)
@@ -950,11 +864,6 @@ private lemma diffQuot_testFactor_eq_zero_outside_cthickening
   by_contra hne
   exact hy (diffQuot_testFactor_support_subset (I := I) (M := M) D
     hη_supp_in_K_0 k j hne)
-
-/-! ## Step I: The discrete IBP per `(i, j)`
-
-We now derive the per-(i,j) IBP equality on cthickening, by extending F to F_ext
-globally L², applying the global IBP, and restricting back. -/
 
 /-- The discrete IBP for the pair (i, j), on cthickening `|h| K_0`. -/
 theorem chartBilinear_diffQuot_ibp_per_ij
@@ -999,7 +908,6 @@ theorem chartBilinear_diffQuot_ibp_per_ij
     cthickening_K_0_isCompact (E := E) hK_0_compact hh_le
   have h_thick_meas : MeasurableSet (Metric.cthickening |h| K_0) :=
     h_thick_compact.measurableSet
-  -- Use the global IBP on F_ext and testFactor.
   have hF_ext_lp : MemLp (F_ij_extended (I := I) (M := M) D (h := h) K_0 i j) 2
       (volume : Measure EuclN) :=
     F_ij_extended_memLp (I := I) (M := M) D hK_0_compact hh_le h_thick i j
@@ -1007,7 +915,6 @@ theorem chartBilinear_diffQuot_ibp_per_ij
       (volume : Measure EuclN) :=
     testFactor_memLp_two (I := I) (M := M) D hK_0_compact hη hη_supp
       hη_supp_in_K_0 k hh hh_le h_thick j
-  -- Apply integral_diffQuot_mul_eq_neg_integral_mul_diffQuot.
   have h_global_ibp :
       ∫ y, DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h
@@ -1019,16 +926,6 @@ theorem chartBilinear_diffQuot_ibp_per_ij
           (testFactor (I := I) (M := M) D η k h j) y ∂(volume : Measure EuclN) :=
     DifferentialGeometry.Analysis.Sobolev.integral_diffQuot_mul_eq_neg_integral_mul_diffQuot
       (d := Module.finrank ℝ E) k hh hF_ext_lp h_test_lp
-  -- Now relate the global integrals to the cthickening-restricted ones.
-  -- LHS of h_global_ibp = ∫_{cthickening} D_h F · testFactor (after a.e. eq.):
-  -- D_h F_ext · testFactor: zero outside cthickening?
-  -- Actually testFactor zero outside tsupport η ⊆ K_0 ⊆ cthickening; so
-  -- D_h F_ext · testFactor = 0 outside K_0.
-  -- On K_0 ⊆ cthickening: D_h F_ext (y) = D_h F (y) (both eval points in cthickening).
-  -- So ∫_ℝᵈ D_h F_ext · testFactor = ∫_{K_0} D_h F · testFactor = ∫_{cthickening} D_h F · testFactor.
-  -- But testFactor on cthickening might not match the explicit integrand testFactor expression.
-  -- Let's compute step by step.
-  -- First, show ∫_ℝᵈ D_h F_ext · testFactor = ∫_{cthickening} D_h F · testFactor.
   have h_lhs_eq :
       ∫ y, DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h
@@ -1046,19 +943,7 @@ theorem chartBilinear_diffQuot_ibp_per_ij
             DifferentialGeometry.Analysis.Sobolev.diffQuot
               (d := Module.finrank ℝ E) k h D.u_chart y)
       ∂(volume : Measure EuclN) := by
-    -- Strategy: D_h F_ext · testFactor is supported in tsupport(testFactor) ⊆ K_0 ⊆ cthickening.
-    -- On cthickening, D_h F_ext (y) = D_h F (y) when y, y+h•e_k ∈ cthickening.
-    -- For y ∈ K_0, y+h•e_k ∈ cthickening |h| K_0 (by triangle ineq).
-    -- For y ∈ cthickening \ K_0, testFactor y = 0 if also y ∉ tsupport η.
-    -- BUT: testFactor y could be nonzero if y ∈ tsupport η ∩ (cthickening \ K_0); but since
-    -- tsupport η ⊆ K_0, this is empty. So on cthickening \ K_0, testFactor y = 0.
-    -- Hence ∫_{cthickening} D_h F_ext · testFactor = ∫_{K_0} D_h F · testFactor.
-    -- And ∫_ℝᵈ D_h F_ext · testFactor = ∫_{cthickening} D_h F_ext · testFactor + 0 (outside cthickening:
-    --   testFactor = 0 since tsupport η ⊆ K_0 ⊆ cthickening).
-    -- So the integrand is supported in cthickening; we can restrict.
 
-    -- Approach: show that the integrand equals (a.e. on whole space) the cthickening-restricted version.
-    -- Use the support analysis to rewrite.
     have h_global_to_restricted :
         ∫ y, DifferentialGeometry.Analysis.Sobolev.diffQuot
           (d := Module.finrank ℝ E) k h
@@ -1070,11 +955,9 @@ theorem chartBilinear_diffQuot_ibp_per_ij
             (F_ij_extended (I := I) (M := M) D (h := h) K_0 i j) y *
           testFactor (I := I) (M := M) D η k h j y
         ∂(volume : Measure EuclN) := by
-      -- testFactor is zero outside tsupport η ⊆ K_0 ⊆ cthickening.
       symm
       refine MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero ?_
       intro y hy_compl
-      -- y ∉ cthickening |h| K_0 ⇒ y ∉ K_0 ⇒ y ∉ tsupport η ⇒ testFactor y = 0.
       have hy_not_K_0 : y ∉ K_0 := fun h_in =>
         hy_compl (Metric.self_subset_cthickening _ h_in)
       have hy_not_tsupp : y ∉ tsupport η := fun h_in =>
@@ -1083,22 +966,10 @@ theorem chartBilinear_diffQuot_ibp_per_ij
         testFactor_eq_zero_outside_tsupport (I := I) (M := M) D k h j hy_not_tsupp
       rw [h_test_zero, mul_zero]
     rw [h_global_to_restricted]
-    -- Now ∫_{cthickening} D_h F_ext · testFactor.
-    -- Rewrite via a.e. equality to D_h F · testFactor_value_explicit.
     refine integral_congr_ae ?_
     refine (ae_restrict_iff' h_thick_meas).mpr ?_
     refine Filter.Eventually.of_forall ?_
     intro y hy
-    -- For y ∈ cthickening, decompose: testFactor y is "explicit testFactor" by definition.
-    -- D_h F_ext y = D_h F y if both y, y+h•e_k in cthickening.
-    -- y ∈ cthickening, so OK. Need y + h•e_k ∈ cthickening (given y ∈ cthickening).
-    -- In general, this is NOT always true (cthickening is not closed under the shift),
-    -- but if y ∈ K_0 then y+h•e_k ∈ cthickening.
-    -- Strategy: split based on y ∈ tsupport η or not.
-    -- The goal here is (after the def-unfolding of testFactor):
-    -- D_h F_ext y * (η^2 * D_h wp y + 2 η ∂η * D_h u y) =
-    -- D_h F y * (η^2 * D_h wp y + 2 η ∂η * D_h u y)
-    -- They differ only in F_ext vs F. We split the cases.
     by_cases hy_tsupp : y ∈ tsupport η
     · have hy_K_0 : y ∈ K_0 := hη_supp_in_K_0 hy_tsupp
       have hy_thick : y ∈ Metric.cthickening |h| K_0 :=
@@ -1111,7 +982,6 @@ theorem chartBilinear_diffQuot_ibp_per_ij
           rw [add_sub_cancel_left]
         rw [hcalc, norm_smul]
         simp [Real.norm_eq_abs]
-      -- D_h F_ext y = D_h F y.
       have h_F_ext_eq : DifferentialGeometry.Analysis.Sobolev.diffQuot
           (d := Module.finrank ℝ E) k h
           (F_ij_extended (I := I) (M := M) D (h := h) K_0 i j) y =
@@ -1128,8 +998,6 @@ theorem chartBilinear_diffQuot_ibp_per_ij
         congr 1
         · rw [Set.indicator_of_mem hy_shift]
         · rw [Set.indicator_of_mem hy_thick]
-      -- Goal: D_h F_ext y * testFactor y = D_h F y * (explicit)
-      -- testFactor y = (explicit) by definition. So substitute D_h F_ext = D_h F.
       change DifferentialGeometry.Analysis.Sobolev.diffQuot
           (d := Module.finrank ℝ E) k h
           (F_ij_extended (I := I) (M := M) D (h := h) K_0 i j) y *
@@ -1150,8 +1018,7 @@ theorem chartBilinear_diffQuot_ibp_per_ij
             DifferentialGeometry.Analysis.Sobolev.diffQuot
               (d := Module.finrank ℝ E) k h D.u_chart y)
       rw [h_F_ext_eq]
-    · -- y ∉ tsupport η ⇒ testFactor y = 0 ⇒ both products are 0.
-      have hηy : η y = 0 := image_eq_zero_of_notMem_tsupport hy_tsupp
+    · have hηy : η y = 0 := image_eq_zero_of_notMem_tsupport hy_tsupp
       have h_test_explicit_zero : (η y) ^ 2 *
             DifferentialGeometry.Analysis.Sobolev.diffQuot
               (d := Module.finrank ℝ E) k h (D.weak_partial j) y +
@@ -1181,7 +1048,6 @@ theorem chartBilinear_diffQuot_ibp_per_ij
             DifferentialGeometry.Analysis.Sobolev.diffQuot
               (d := Module.finrank ℝ E) k h D.u_chart y)
       rw [h_test_explicit_zero, mul_zero, mul_zero]
-  -- RHS of h_global_ibp = ∫_{cthickening} F · D_{-h} testFactor.
   have h_rhs_eq :
       ∫ y, F_ij_extended (I := I) (M := M) D (h := h) K_0 i j y *
         DifferentialGeometry.Analysis.Sobolev.diffQuot
@@ -1199,7 +1065,6 @@ theorem chartBilinear_diffQuot_ibp_per_ij
                 DifferentialGeometry.Analysis.Sobolev.diffQuot
                   (d := Module.finrank ℝ E) k h D.u_chart z) y
       ∂(volume : Measure EuclN) := by
-    -- F_ext is zero outside cthickening; restrict integration.
     have h_global_to_restricted :
         ∫ y, F_ij_extended (I := I) (M := M) D (h := h) K_0 i j y *
         DifferentialGeometry.Analysis.Sobolev.diffQuot
@@ -1214,7 +1079,6 @@ theorem chartBilinear_diffQuot_ibp_per_ij
       symm
       refine MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero ?_
       intro y hy_compl
-      -- y ∉ cthickening ⇒ F_ext y = 0.
       unfold F_ij_extended
       rw [Set.indicator_of_notMem hy_compl, zero_mul]
     rw [h_global_to_restricted]
@@ -1222,8 +1086,6 @@ theorem chartBilinear_diffQuot_ibp_per_ij
     refine (ae_restrict_iff' h_thick_meas).mpr ?_
     refine Filter.Eventually.of_forall ?_
     intro y hy_thick
-    -- F_ext y = w_ij(y) · weak_partial(y) on cthickening.
-    -- testFactor expression definitionally equals the explicit form.
     change F_ij_extended (I := I) (M := M) D (h := h) K_0 i j y *
         DifferentialGeometry.Analysis.Sobolev.diffQuot
           (d := Module.finrank ℝ E) k (-h)
@@ -1244,14 +1106,8 @@ theorem chartBilinear_diffQuot_ibp_per_ij
                 (d := Module.finrank ℝ E) k h D.u_chart z) y
     unfold F_ij_extended
     rw [Set.indicator_of_mem hy_thick]
-  -- Combine.
   rw [← h_rhs_eq, ← h_lhs_eq]
   linarith
-
-/-! ## Step J: Unconditional discharge of `variational_identity_after_ibp`
-
-Combine the integrability and IBP discharges with the variant that depends on
-hypotheses, to produce the closed-form unconditional theorem. -/
 
 set_option linter.unusedVariables false in
 /-- The unconditional version of `variational_identity_after_ibp`: the per-(i,j)
@@ -1315,7 +1171,6 @@ theorem variational_identity_after_ibp_unconditional
         densityOnEuclid (I := I) g α y * D.f_chart y *
           standardNirenbergTest (d := Module.finrank ℝ E) k h η D.u_chart y
         ∂(volume : Measure EuclN) := by
-  -- Discharge the per-(i,j) IBP hypothesis.
   have h_ibp_per_ij : ∀ i j : Fin (Module.finrank ℝ E),
       ∫ y in Metric.cthickening |h| K_0,
         weightedInvGramOnEuclid (I := I) g α i j y *
@@ -1344,7 +1199,6 @@ theorem variational_identity_after_ibp_unconditional
     intro i j
     exact chartBilinear_diffQuot_ibp_per_ij (I := I) (M := M) D
       hK_0_compact hK_0_in hη hη_supp hη_supp_in_K_0 k hh hh_le h_thick i j
-  -- Discharge per-(i,j) integrability of the pre-IBP integrand.
   have h_principal_integrable : ∀ i j : Fin (Module.finrank ℝ E),
       Integrable (fun y =>
         weightedInvGramOnEuclid (I := I) g α i j y *
@@ -1361,7 +1215,6 @@ theorem variational_identity_after_ibp_unconditional
     intro i j
     exact chartBilinear_factor_integrable (I := I) (M := M) D
       hK_0_compact hK_0_in hη hη_supp hη_supp_in_K_0 k hh hh_le h_thick i j
-  -- Discharge per-(i,j) integrability of the post-IBP integrand.
   have h_principal_integrable_after : ∀ i j : Fin (Module.finrank ℝ E),
       Integrable (fun y =>
         DifferentialGeometry.Analysis.Sobolev.diffQuot
@@ -1378,7 +1231,6 @@ theorem variational_identity_after_ibp_unconditional
     intro i j
     exact chartBilinear_factor_integrable_after (I := I) (M := M) D
       hK_0_compact hK_0_in hη hη_supp hη_supp_in_K_0 k hh hh_le h_thick i j
-  -- Apply variational_identity_after_ibp.
   exact variational_identity_after_ibp (I := I) (M := M) D
     hK_0_compact hK_0_in hη hη_supp hη_supp_in_K_0 k hh hh_le h_thick
     h_expanded h_ibp_per_ij h_principal_integrable h_principal_integrable_after

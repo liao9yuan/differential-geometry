@@ -86,14 +86,6 @@ instance : CoeFun (SmoothRiemannianMetricFamily I M)
           contMDiffOn_chartGramMatrix_entry := h } : SmoothRiemannianMetricFamily I M) :
       ℝ → SmoothRiemannianMetric I M) = toFun := rfl
 
-/-! ## Bridge: jointly-smooth family → `MetricFamilyRegularAt`
-
-From a `SmoothRiemannianMetricFamily`, every Gram-matrix entry is
-time-differentiable at every time (restricted to the chart base set), and each
-such entry and its time-derivative is jointly continuous on
-`ℝ ×ˢ base_α`. These are exactly the three fields of
-`MetricFamilyRegularAt`. -/
-
 namespace SmoothRiemannianMetricFamily
 
 private lemma contDiff_chartGramMatrix_time
@@ -137,19 +129,13 @@ theorem metricFamilyRegularAt_of_smoothFamily
     MetricFamilyRegularAt (I := I) gFam.toFun t₀ := by
   classical
   refine ⟨?_, ?_, ?_⟩
-  · -- Pointwise `HasDerivAt` at every time, from time-slice smoothness.
-    intro x₀ i j x hx t
+  · intro x₀ i j x hx t
     have hcd := gFam.contDiff_chartGramMatrix_time x₀ hx i j
     have hne : (∞ : WithTop ℕ∞) ≠ 0 := by decide
     exact (hcd.differentiable hne).differentiableAt.hasDerivAt
-  · -- Joint continuity of each Gram-matrix entry.
-    intro x₀ i j
+  · intro x₀ i j
     exact (gFam.contMDiffOn_chartGramMatrix_entry x₀ i j).continuousOn
-  · -- Joint continuity of the time-derivative of each Gram-matrix entry.
-    -- The key step: the joint `ContMDiffOn` implies `ContDiffOn` on an open set in
-    -- `ℝ × E` after pulling back via a chart, and the partial derivative is
-    -- therefore continuous in the joint variable.
-    intro x₀ i j
+  · intro x₀ i j
     refine continuousOn_iff_continuous_restrict.mpr ?_
     refine continuous_iff_continuousAt.mpr (fun q₀ => ?_)
     set r₀ : ℝ := q₀.val.1
@@ -317,18 +303,15 @@ theorem functionRegularAt_of_jointContMDiff
     FunctionRegularAt f t₀ := by
   classical
   refine ⟨?_, ?_, ?_⟩
-  · -- Pointwise `HasDerivAt` at every time from time-slice smoothness.
-    intro x t
+  · intro x t
     have hincl : ContMDiff 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod I) ∞ (fun r : ℝ => (r, x)) :=
       contMDiff_id.prodMk contMDiff_const
     have hcomp := hf.comp hincl
     rw [contMDiff_iff_contDiff] at hcomp
     have hne : (∞ : WithTop ℕ∞) ≠ 0 := by decide
     exact (hcomp.differentiable hne).differentiableAt.hasDerivAt
-  · -- Joint continuity of `f` on `ℝ × M`.
-    exact hf.continuous
-  · -- Joint continuity of the pointwise time-derivative.
-    refine continuous_iff_continuousAt.mpr (fun p₀ => ?_)
+  · exact hf.continuous
+  · refine continuous_iff_continuousAt.mpr (fun p₀ => ?_)
     set α' : M := p₀.2
     set ec : PartialEquiv M E := extChartAt I α'
     have hsrc_open : IsOpen ec.source := isOpen_extChartAt_source (I := I) α'

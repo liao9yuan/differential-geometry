@@ -25,8 +25,6 @@ variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Pointwise bound on the partial derivative `(∂ᵢη)` -/
-
 /-- `‖(∂ᵢ η) x‖ ≤ ‖fderiv ℝ η x‖`. -/
 lemma norm_partial_eta_le_fderiv
     {η : E → ℝ} (i : Fin d) (x : E) :
@@ -36,8 +34,6 @@ lemma norm_partial_eta_le_fderiv
   have h_one : ‖(EuclideanSpace.single i (1 : ℝ))‖ = 1 := by simp
   rw [h_one, mul_one] at h
   exact h
-
-/-! ## `eLpNorm` bound for `η · v` -/
 
 /-- For a function `η` with `‖η x‖ ≤ C` on `Ω`, and any function `v : E → ℝ`,
 we have `eLpNorm (η · v) ≤ ENNReal.ofReal C · eLpNorm v`. -/
@@ -83,8 +79,6 @@ lemma eLpNorm_partial_eta_mul_le
           gcongr
           exact hη_grad_bound x hx
 
-/-! ## `eLpNorm` bound on the chosen weak partial of `η · u` -/
-
 /-- The chosen weak partial of `η · u`, evaluated in `eLpNorm`, is bounded by
 `C · eLpNorm (∂ᵢu) + C · eLpNorm u`. -/
 lemma eLpNorm_chosenWeakPartial'_smul_smooth_bounded_le
@@ -101,10 +95,8 @@ lemma eLpNorm_chosenWeakPartial'_smul_smooth_bounded_le
         eLpNorm (chosenWeakPartial' (d := d) p i u Ω) p (volume.restrict Ω) +
       ENNReal.ofReal C * eLpNorm u p (volume.restrict Ω) := by
   classical
-  -- The chosen weak partial of η · u is a.e. equal to η · (∂ᵢu) + (∂ᵢη) · u.
   have hae := chosenWeakPartial'_smul_smooth_bounded_ae (d := d) hp_one hΩ
     hη_smooth hη_bound hη_grad_bound hu i
-  -- AE strong measurability of the two summands.
   have hηcwp_meas : AEStronglyMeasurable
       (fun x => η x * chosenWeakPartial' (d := d) p i u Ω x)
       (volume.restrict Ω) :=
@@ -118,9 +110,7 @@ lemma eLpNorm_chosenWeakPartial'_smul_smooth_bounded_le
       (fun x => (fderiv ℝ η x) (EuclideanSpace.single i (1 : ℝ)) * u x)
       (volume.restrict Ω) :=
     hderiv_cont.aestronglyMeasurable.mul hu.1.aestronglyMeasurable
-  -- Replace the chosen partial by the explicit a.e.-equal sum.
   rw [eLpNorm_congr_ae hae]
-  -- Convert lambda-form into the pointwise sum so we can apply the triangle.
   have hSumEq :
       (fun x => η x * chosenWeakPartial' (d := d) p i u Ω x +
         (fderiv ℝ η x) (EuclideanSpace.single i (1 : ℝ)) * u x) =
@@ -141,7 +131,6 @@ lemma eLpNorm_chosenWeakPartial'_smul_smooth_bounded_le
             p (volume.restrict Ω) :=
     eLpNorm_add_le hηcwp_meas hdηu_meas hp_one
   refine htriangle.trans ?_
-  -- Bound each summand.
   have hbnd1 :
       eLpNorm (fun x => η x * chosenWeakPartial' (d := d) p i u Ω x)
           p (volume.restrict Ω)
@@ -154,8 +143,6 @@ lemma eLpNorm_chosenWeakPartial'_smul_smooth_bounded_le
         ≤ ENNReal.ofReal C * eLpNorm u p (volume.restrict Ω) :=
     eLpNorm_partial_eta_mul_le (d := d) hΩ hη_grad_bound i u
   exact add_le_add hbnd1 hbnd2
-
-/-! ## Helpers for ENNReal arithmetic on the constant `K` -/
 
 /-- `ENNReal.ofReal C = ENNReal.ofReal (max C 0)`: the unsigned-real coercion
 already truncates negative values. -/
@@ -180,8 +167,6 @@ lemma natCast_one_add_d_mul_ofReal (d : ℕ) (C : ℝ) :
   have hnn : (0 : ℝ) ≤ ((1 + d : ℕ) : ℝ) := Nat.cast_nonneg _
   rw [natCast_one_add_d_eq_ofReal d, ofReal_eq_ofReal_max_zero C,
       ← ENNReal.ofReal_mul hnn]
-
-/-! ## The main quantitative bound -/
 
 /-- For a smooth function `η : E → ℝ` whose iterated derivatives up to order `k`
 are uniformly bounded by `C` on the open set `Ω`, the operation `u ↦ η · u` is
@@ -221,7 +206,6 @@ theorem wkpNorm_smul_smooth_bounded_le_one
       ENNReal.ofReal_le_ofReal (by linarith)
     exact hb.trans (mul_le_mul' hC (le_refl _))
   | 1, _ =>
-    -- k = 1: the original proof, adapted to use hη_bound
     have h_eta0 : ∀ x ∈ Ω, ‖η x‖ ≤ C := by
       intro x hx
       have h := hη_bound 0 (by omega) x hx
@@ -232,7 +216,6 @@ theorem wkpNorm_smul_smooth_bounded_le_one
       rwa [norm_iteratedFDeriv_one] at h
     classical
     let _ := hp_top
-    -- Choose `K := (1 + d) * (max C 0 + 1)`.
     set K : ℝ := ((1 + d : ℕ) : ℝ) * (max C 0 + 1) with hK_def
     have h_natpos : (0 : ℝ) < ((1 + d : ℕ) : ℝ) := by
       have h : (0 : ℕ) < 1 + d := Nat.lt_of_lt_of_le Nat.zero_lt_one (Nat.le_add_right _ _)
@@ -244,14 +227,12 @@ theorem wkpNorm_smul_smooth_bounded_le_one
     refine ⟨K, hK_pos, ?_⟩
     intro v hv
     have hv_W1p : DeGiorgi.MemW1p (d := d) p v Ω := hv.memW1p
-    -- Useful abbreviations.
     set Au : ℝ≥0∞ := eLpNorm v p (volume.restrict Ω) with hAu_def
     set Bu : Fin d → ℝ≥0∞ :=
       fun i => eLpNorm (chosenWeakPartial' p i v Ω) p (volume.restrict Ω)
       with hBu_def
     set OC : ℝ≥0∞ := ENNReal.ofReal C with hOC_def
     set OK : ℝ≥0∞ := ENNReal.ofReal K with hOK_def
-    -- Pointwise bounds for the LHS pieces.
     have h_eta_v_bnd :
         eLpNorm (fun x => η x * v x) p (volume.restrict Ω) ≤ OC * Au :=
       eLpNorm_eta_mul_le (d := d) hΩ_open h_eta0 v
@@ -261,7 +242,6 @@ theorem wkpNorm_smul_smooth_bounded_le_one
           ≤ OC * Bu i + OC * Au := fun i =>
       eLpNorm_chosenWeakPartial'_smul_smooth_bounded_le (d := d) hp_one hΩ_open
         hη_smooth h_eta0 h_eta1 hv_W1p i
-    -- Expand `wkpNorm 1 p _ Ω`.
     have hLHS_unfold : wkpNorm (d := d) 1 p (fun x => η x * v x) Ω =
         eLpNorm (fun x => η x * v x) p (volume.restrict Ω) +
         ∑ α : Fin 1 → Fin d,
@@ -296,7 +276,6 @@ theorem wkpNorm_smul_smooth_bounded_le_one
             (f := fun α : Fin 0 → Fin d =>
               eLpNorm (iterWeakPartial (d := d) p 0 α v Ω) p (volume.restrict Ω))]
       simp [iterWeakPartial_zero, hAu_def]
-    -- Reduce iterWeakPartial p 1 α to chosenWeakPartial' p (α 0).
     have hIter1_eta_v : ∀ α : Fin 1 → Fin d,
         iterWeakPartial (d := d) p 1 α (fun x => η x * v x) Ω =
           chosenWeakPartial' (d := d) p (α 0) (fun x => η x * v x) Ω := by
@@ -322,7 +301,6 @@ theorem wkpNorm_smul_smooth_bounded_le_one
       refine congrArg (Au + ·) ?_
       refine Finset.sum_congr rfl (fun α _ => ?_)
       rw [hIter1_v α]
-    -- Rewrite the gradient sum as `Σ α, Bu (α 0)`.
     have hSumBu :
         ∑ α : Fin 1 → Fin d,
             eLpNorm (chosenWeakPartial' (d := d) p (α 0) v Ω) p
@@ -331,14 +309,12 @@ theorem wkpNorm_smul_smooth_bounded_le_one
       refine Finset.sum_congr rfl (fun α _ => ?_)
       rw [hBu_def]
     rw [hLHS_unfold', hRHS_unfold', hSumBu]
-    -- Bound the gradient sum using `h_chosen_bnd`.
     have hSum_chosen_bnd :
         ∑ α : Fin 1 → Fin d,
             eLpNorm (chosenWeakPartial' (d := d) p (α 0) (fun x => η x * v x) Ω) p
               (volume.restrict Ω)
           ≤ ∑ α : Fin 1 → Fin d, (OC * Bu (α 0) + OC * Au) :=
       Finset.sum_le_sum (fun α _ => h_chosen_bnd (α 0))
-    -- Combined LHS bound.
     refine (add_le_add h_eta_v_bnd hSum_chosen_bnd).trans ?_
     have hSum_split :
         ∑ α : Fin 1 → Fin d, (OC * Bu (α 0) + OC * Au) =
@@ -351,13 +327,11 @@ theorem wkpNorm_smul_smooth_bounded_le_one
         ∑ _α : Fin 1 → Fin d, OC * Au = (d : ℝ≥0∞) * (OC * Au) := by
       rw [Finset.sum_const, hCard, nsmul_eq_mul]
     rw [hSum_const]
-    -- Σ_α OC * Bu (α 0) = OC * Σ_α Bu (α 0).
     have hSum_factor :
         ∑ α : Fin 1 → Fin d, OC * Bu (α 0) = OC * ∑ α : Fin 1 → Fin d, Bu (α 0) := by
       rw [Finset.mul_sum]
     rw [hSum_factor]
     set SBu : ℝ≥0∞ := ∑ α : Fin 1 → Fin d, Bu (α 0) with hSBu_def
-    -- Step (a): (1 + d) * OC ≤ OK.
     have h_one_plus_d_OC_le_OK : ((1 + d : ℕ) : ℝ≥0∞) * OC ≤ OK := by
       rw [hOC_def, hOK_def, natCast_one_add_d_mul_ofReal]
       apply ENNReal.ofReal_le_ofReal
@@ -365,7 +339,6 @@ theorem wkpNorm_smul_smooth_bounded_le_one
       have : max C 0 ≤ max C 0 + 1 := by linarith
       have hMul := mul_le_mul_of_nonneg_left this h_natpos.le
       exact hMul
-    -- Step (b): OC ≤ OK.
     have h_OC_le_OK : OC ≤ OK := by
       rw [hOC_def, hOK_def, ofReal_eq_ofReal_max_zero]
       apply ENNReal.ofReal_le_ofReal
@@ -380,20 +353,16 @@ theorem wkpNorm_smul_smooth_bounded_le_one
         simpa [one_mul] using this
       linarith
     change OC * Au + (OC * SBu + (d : ℝ≥0∞) * (OC * Au)) ≤ OK * (Au + SBu)
-    -- Convert (a) into useful form: OC + d * OC = (1 + d) * OC.
     have h_factor_one_plus_d :
         OC + (d : ℝ≥0∞) * OC = ((1 + d : ℕ) : ℝ≥0∞) * OC := by
       rw [show ((1 + d : ℕ) : ℝ≥0∞) = 1 + (d : ℝ≥0∞) by push_cast; ring]
       rw [add_mul, one_mul]
-    -- Rearrange LHS: OC * Au + (OC * SBu + d * (OC * Au))
-    --              = (OC + d * OC) * Au + OC * SBu.
     have h_lhs_factor :
         OC * Au + (OC * SBu + (d : ℝ≥0∞) * (OC * Au)) =
           ((1 + d : ℕ) : ℝ≥0∞) * OC * Au + OC * SBu := by
       rw [← h_factor_one_plus_d, add_mul]
       ring
     rw [h_lhs_factor]
-    -- Bound each term.
     have hbnd_Au : ((1 + d : ℕ) : ℝ≥0∞) * OC * Au ≤ OK * Au :=
       mul_le_mul_left h_one_plus_d_OC_le_OK Au
     have hbnd_SBu : OC * SBu ≤ OK * SBu :=

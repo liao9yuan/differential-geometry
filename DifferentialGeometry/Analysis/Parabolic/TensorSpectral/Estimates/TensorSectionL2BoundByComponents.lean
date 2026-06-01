@@ -53,8 +53,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## Multi-index type abbreviations and convenient sum helpers -/
-
 /-- Covariant multi-index type used as an index across the file. -/
 abbrev MIdxC (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
     [FiniteDimensional ℝ E] (r : ℕ) :=
@@ -81,8 +79,6 @@ private lemma sumScalarSq_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α b : M) :
     0 ≤ sumScalarSq g r s S α b :=
   Finset.sum_nonneg (fun _ _ => Finset.sum_nonneg (fun _ _ => sq_nonneg _))
-
-/-! ## Algebraic recovery: `‖T‖² ≤ C₁ · Σ (P_IJ T)²` -/
 
 /-- **Algebraic fibre-norm recovery.** The model-fibre norm squared of a
 mixed `(r, s)`-tensor `T` is dominated by the multi-index cardinality times
@@ -142,8 +138,6 @@ lemma tensorRSModel_norm_sq_le_sum_projection_sq (r s : ℕ)
     rw [hprod, Finset.sum_product (f := fun p => (P p) ^ 2)]] at h_sq
   exact h_sq
 
-/-! ## Per-α pointwise bound on `POU² · tensorInner` -/
-
 private lemma pou_sq_tensorInner_le_sum_scalar_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -197,8 +191,6 @@ private lemma pou_sq_tensorInner_le_sum_scalar_sq
   · have : ρ = 0 := by by_contra hne; exact hb (subset_tsupport _ hne)
     rw [show ρ ^ 2 * Q = 0 from by rw [this]; ring]
     exact mul_nonneg (mul_nonneg hK_nn hC₁_nn) h_sum_nn
-
-/-! ## Pointwise bound: `tensorInner ≤ C · Σ_α Σ_IJ scalar²` -/
 
 private lemma tensorInner_le_const_mul_sum_scalar_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
@@ -261,8 +253,6 @@ private lemma tensorInner_le_const_mul_sum_scalar_sq
     h_CS.trans (mul_le_mul_of_nonneg_left h_per_α hN_nn)
   linarith [h_combined, (show N * (Cmax * sumSS) = N * Cmax * sumSS by ring)]
 
-/-! ## Integral and integrability helpers for the scalar field -/
-
 section ScalarHelpers
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -316,8 +306,6 @@ private lemma tensorChartComponentScalar_integral_sq_eq_eLpNorm_toReal_sq :
   norm_num
 
 end ScalarHelpers
-
-/-! ## Headline -/
 
 /-- **Headline `L²` bound for a tensor section by chart-frame scalar
 components.** There is `C ≥ 0` (depending only on `(g, r, s)` and the

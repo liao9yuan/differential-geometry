@@ -52,8 +52,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Pointwise metric on the tangent space -/
-
 /-- The pointwise metric `g(x) : E →L[ℝ] E →L[ℝ] ℝ` on the tangent space
 `TangentSpace I x = E`, packaged as a continuous bilinear pairing. This is a
 convenient alias for `g.inner x`; the definitional content is
@@ -100,14 +98,6 @@ lemma modelInnerAt_eq_zero_iff
   have hpos := modelInnerAt_pos_of_ne_zero (I := I) (M := M) g x hv
   exact absurd h (ne_of_gt hpos)
 
-/-! ## Gram-matrix machinery on the fixed model-space basis
-
-The pointwise inner product on `(0, s)`-tensors is defined via the
-Gram-matrix inverse of `g(x)` evaluated on the fixed model-space basis
-`chartModelBasis E`. The Gram matrix is always symmetric positive
-definite, hence invertible, and its inverse is again symmetric positive
-definite. -/
-
 /-- The Gram matrix of `g(x)` on the fixed model-space basis
 `chartModelBasis E`. Exposed for use in boundedness lemmas. -/
 def gramMatrixAt (g : SmoothRiemannianMetric I M) (x : M) :
@@ -148,7 +138,6 @@ lemma gramMatrixAt_posDef
   refine Matrix.PosDef.of_dotProduct_mulVec_pos
     (gramMatrixAt_isHermitian (I := I) (M := M) g x) ?_
   intro v hv
-  -- The quadratic form equals `g.inner x w w` where `w = ∑ᵢ vᵢ • eᵢ`.
   let w : E := ∑ i : Fin (Module.finrank ℝ E),
     v i • (chartModelBasis E) i
   have hw_ne : w ≠ 0 := by
@@ -159,21 +148,17 @@ lemma gramMatrixAt_posDef
     exact hv (funext (hlin v h))
   have hquad : star v ⬝ᵥ (gramMatrixAt (I := I) (M := M) g x) *ᵥ v =
       g.inner x w w := by
-    -- Expand `g.inner x w w` using bilinearity twice.
     have hbilin :
         g.inner x w w =
           ∑ j : Fin (Module.finrank ℝ E),
             v j * ∑ i : Fin (Module.finrank ℝ E),
               v i * g.inner x ((chartModelBasis E) i)
                 ((chartModelBasis E) j) := by
-      -- Expand using linearity of `g.inner x` twice.
       change g.inner x (∑ i, v i • (chartModelBasis E) i)
           (∑ j, v j • (chartModelBasis E) j) = _
-      -- Expand `g.inner x A (∑_j v_j • e_j) = ∑_j v_j * (g.inner x A e_j)`.
       rw [map_sum]
       refine Finset.sum_congr rfl ?_
       intro j _
-      -- Use the `map_smul` property of the CLM `g.inner x A`.
       have hsm1 :
           (g.inner x (∑ i, v i • (chartModelBasis E) i))
               (v j • (chartModelBasis E) j)
@@ -189,7 +174,6 @@ lemma gramMatrixAt_posDef
         rw [hh, smul_eq_mul]
       rw [hsm1]
       congr 1
-      -- Now expand `g.inner x (∑_i v_i • e_i) e_j`.
       rw [map_sum, ContinuousLinearMap.sum_apply]
       refine Finset.sum_congr rfl ?_
       intro i _
@@ -203,11 +187,6 @@ lemma gramMatrixAt_posDef
         rw [hh, ContinuousLinearMap.smul_apply, smul_eq_mul]
       exact hsm2
     rw [hbilin]
-    -- Unfold the matrix dot product and matrix-vector multiplication.
-    -- LHS: `∑ i star(v i) * (G *ᵥ v) i`.
-    -- Target RHS after swap: `∑ i v i * ∑ j v j * g.inner x eᵢ eⱼ`, but `hbilin`
-    -- gives a sum in `j` first. So we need to commute sums on both sides.
-    -- Transform LHS to a double-sum form.
     have hLHS :
         ∑ i : Fin (Module.finrank ℝ E),
             star (v i) * (gramMatrixAt (I := I) (M := M) g x *ᵥ v) i =
@@ -228,10 +207,6 @@ lemma gramMatrixAt_posDef
     change ∑ i : Fin (Module.finrank ℝ E),
         star (v i) * (gramMatrixAt (I := I) (M := M) g x *ᵥ v) i = _
     rw [hLHS]
-    -- Now transform the RHS (from `hbilin`) to the same double-sum form.
-    -- RHS: `∑ j v j * ∑ i v i * g.inner x eᵢ eⱼ`.
-    -- Target: `∑ i ∑ j v i * v j * g.inner x eᵢ eⱼ`.
-    -- Distribute `v j` into inner sum, then commute.
     have hRHS :
         ∑ j : Fin (Module.finrank ℝ E),
             v j * ∑ i : Fin (Module.finrank ℝ E),
@@ -283,16 +258,6 @@ lemma gramMatrixAt_inv_mul_self
   refine Matrix.nonsing_inv_mul _ ?_
   exact Matrix.isUnit_iff_isUnit_det _ |>.mp
     (gramMatrixAt_isUnit (I := I) (M := M) g x)
-
-/-! ## Index lowering for mixed `(r, s)`-tensors
-
-The mixed `(r, s)`-tensor fiber is
-`TensorRSModel r s ℝ E = Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E`.
-
-A mixed tensor is made into a covariant `(0, r + s)`-tensor by applying the
-metric to each of its `r` upper slots, producing a continuous linear map
-`(Tensor0SModel r →L[ℝ] Tensor0SModel s) →L[ℝ] (0, r + s)`-tensor. The
-map is injective fiberwise. -/
 
 /-- Separable covariant `(0, r)`-tensor obtained by applying `g(x)` to each
 of the `r` vectors `v ⟨0⟩, …, v ⟨r-1⟩` on the left slot. For `w : Fin r → E`,
@@ -458,8 +423,7 @@ private noncomputable def lowerAllUpperIndicesML
   refine MultilinearMap.mk'
     (fun v => lowerAllUpperIndicesFn (I := I) (M := M) g r s x T v)
     (fun v i a b => ?_) (fun v i c a => ?_)
-  · -- additivity
-    refine Fin.addCases ?_ ?_ i
+  · refine Fin.addCases ?_ ?_ i
     · intro i'
       simp only [lowerAllUpperIndicesFn]
       rw [update_castAdd_first_noop_last,
@@ -480,8 +444,7 @@ private noncomputable def lowerAllUpperIndicesML
           update_natAdd_last,
           update_natAdd_last]
       rw [ContinuousMultilinearMap.map_update_add]
-  · -- scalar homogeneity
-    refine Fin.addCases ?_ ?_ i
+  · refine Fin.addCases ?_ ?_ i
     · intro i'
       simp only [lowerAllUpperIndicesFn]
       rw [update_castAdd_first_noop_last,
@@ -523,15 +486,12 @@ private lemma lowerAllUpperIndicesML_norm_bound
         ∏ j : Fin (r + s), ‖v j‖ := by
   classical
   rw [lowerAllUpperIndicesML_apply]
-  -- Split the product on `Fin (r + s)` into the two blocks.
   have hsplit : ∏ j : Fin (r + s), ‖v j‖
       = (∏ i : Fin r, ‖v (Fin.castAdd s i)‖) *
         ∏ j : Fin s, ‖v (Fin.natAdd r j)‖ := by
     rw [Fin.prod_univ_add]
-  -- Abbreviation for the separable form.
   set α := separableFormAt (I := I) (M := M) g x r
       (fun i : Fin r => v (Fin.castAdd s i)) with hα_def
-  -- Norm bound on α: `‖α‖ ≤ ∏ i, ‖g.inner x‖ * ‖v (castAdd s i)‖`.
   have hα_bound :
       ‖α‖ ≤ ∏ i : Fin r, ‖g.inner x‖ * ‖v (Fin.castAdd s i)‖ := by
     rw [hα_def]
@@ -553,7 +513,6 @@ private lemma lowerAllUpperIndicesML_norm_bound
     refine Finset.prod_le_prod (fun _ _ => norm_nonneg _) ?_
     intro i _
     exact (g.inner x).le_opNorm (v (Fin.castAdd s i))
-  -- Bound on T α u.
   calc ‖T α (fun j : Fin s => v (Fin.natAdd r j))‖
       ≤ ‖T α‖ * ∏ j : Fin s, ‖v (Fin.natAdd r j)‖ :=
         ContinuousMultilinearMap.le_opNorm _ _
@@ -689,8 +648,6 @@ lemma lowerAllUpperIndices_apply
         (fun j : Fin s => v (Fin.natAdd r j)) :=
   lowerAllUpperIndicesCMLM_apply (I := I) (M := M) g r s x T v
 
-/-! ## Auxiliary lemmas and injectivity of the index-lowering map -/
-
 /-- Evaluating a separable `(0, r)`-form on a model-basis tuple yields a
 product of Gram-matrix entries. -/
 private lemma separableFormAt_basis_apply
@@ -718,8 +675,6 @@ private lemma lower_at_basis_pair_zero_of_lower_zero
     (T (separableFormAt (I := I) (M := M) g x r
           (fun k : Fin r => (chartModelBasis E) (idx k))))
         (fun j : Fin s => (chartModelBasis E) (jdx j)) = 0 := by
-  -- The hypothesis gives `lowerAllUpperIndices T = 0` as a CMLM, so
-  -- evaluation at `Fin.append (e ∘ idx) (e ∘ jdx)` is zero.
   have hzero :
       lowerAllUpperIndices (I := I) (M := M) g r s x T
           (Fin.append
@@ -792,24 +747,17 @@ theorem lowerAllUpperIndices_injective
   classical
   rw [injective_iff_map_eq_zero]
   intro T hT
-  -- Set up notation. `n` is the rank of the model space.
   let n : ℕ := Module.finrank ℝ E
-  -- It suffices to prove `T α = 0` for every `α`.
   refine ContinuousLinearMap.ext ?_
   intro α
-  -- It suffices to prove `(T α) (e_kdx) = 0` for every basis tuple `e_kdx`.
   refine cmlm_eq_zero_of_basis_zero (E := E) (p := s) (T α) ?_
   intro kdx
-  -- For each `idx : Fin r → Fin n`, the value `T (β_idx) (e_kdx) = 0`.
   have hTβ : ∀ idx : Fin r → Fin n,
       (T (separableFormAt (I := I) (M := M) g x r
             (fun k : Fin r => (chartModelBasis E) (idx k))))
           (fun j : Fin s => (chartModelBasis E) (kdx j)) = 0 :=
     fun idx => lower_at_basis_pair_zero_of_lower_zero
       (I := I) (M := M) g r s x T hT idx kdx
-  -- The spanning argument: express `α` via the inverse Gram matrix.
-  -- Define the coefficients
-  --   c idx := ∑ jdx, α(e_jdx) · ∏ k, (G⁻¹)(jdx k, idx k).
   let Ginv : Matrix (Fin n) (Fin n) ℝ :=
     (gramMatrixAt (I := I) (M := M) g x)⁻¹
   let G : Matrix (Fin n) (Fin n) ℝ :=
@@ -822,17 +770,13 @@ theorem lowerAllUpperIndices_injective
     ∑ jdx : Fin r → Fin n,
       α (fun k : Fin r => (chartModelBasis E) (jdx k)) *
         ∏ k : Fin r, Ginv (jdx k) (idx k)
-  -- Spanning: `α = ∑ idx, c idx • β_idx` as a CMLM.
   have hspan :
       α = ∑ idx : Fin r → Fin n, c idx •
         separableFormAt (I := I) (M := M) g x r
           (fun k : Fin r => (chartModelBasis E) (idx k)) := by
     refine tensor0SModel_ext_basis _ _ ?_
     intro kdx'
-    -- Evaluate both sides on `e_kdx'` and match.
     rw [ContinuousMultilinearMap.sum_apply]
-    -- LHS: `α(e_kdx')`.
-    -- RHS: ∑ idx, c idx · β_idx(e_kdx') = ∑ idx, c idx · ∏ k, G(idx k, kdx' k).
     have hRHS_step :
         (∑ idx : Fin r → Fin n,
           (c idx • separableFormAt (I := I) (M := M) g x r
@@ -845,7 +789,6 @@ theorem lowerAllUpperIndices_injective
       rw [ContinuousMultilinearMap.smul_apply, smul_eq_mul,
         separableFormAt_basis_apply]
     rw [hRHS_step]
-    -- Expand `c idx` and rearrange.
     have hRHS_expand :
         ∑ idx : Fin r → Fin n,
             c idx * ∏ k : Fin r, G (idx k) (kdx' k)
@@ -854,7 +797,6 @@ theorem lowerAllUpperIndices_injective
               ∑ idx : Fin r → Fin n,
                 (∏ k : Fin r, Ginv (jdx k) (idx k)) *
                   ∏ k : Fin r, G (idx k) (kdx' k) := by
-      -- Distribute the outer product over the inner sum, then swap.
       have h1 : ∀ idx : Fin r → Fin n,
           c idx * ∏ k : Fin r, G (idx k) (kdx' k)
             = ∑ jdx : Fin r → Fin n,
@@ -876,7 +818,6 @@ theorem lowerAllUpperIndices_injective
       intro jdx _
       rw [Finset.mul_sum]
     rw [hRHS_expand]
-    -- Combine the two products via `Finset.prod_mul_distrib` and Fubini.
     have hcombine : ∀ jdx : Fin r → Fin n,
         ∑ idx : Fin r → Fin n,
             (∏ k : Fin r, Ginv (jdx k) (idx k)) *
@@ -957,7 +898,6 @@ theorem lowerAllUpperIndices_injective
         (fun jdx => α (fun k : Fin r => (chartModelBasis E) (jdx k)))
       rw [h, if_pos (Finset.mem_univ _)]
     rw [hsimplify]
-  -- Apply `T` linearly to the spanning equation.
   rw [hspan]
   rw [map_sum]
   rw [ContinuousMultilinearMap.sum_apply]

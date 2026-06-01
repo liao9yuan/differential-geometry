@@ -77,16 +77,6 @@ open scoped Manifold Topology ContDiff
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 
-/-! ## (a) Connection content at the orbit point (two-instance world)
-
-In the world where `E` carries a standalone `[NormedSpace ℝ E]` (for the tangent-bundle
-charted space) *and* `[InnerProductSpace ℝ E]`, we discharge, at the orbit point
-`α := Φ_fam t x`, the Levi-Civita / inner-CLM identity and the conversion of a
-flat-plus-Christoffel value reading into the covariant `-(LeviCivita g) X` value.
-
-Both lemmas return *equalities of vectors in `E`*, so they cross cleanly into the
-single-instance world consumed by `RawVariationalIdentity`. -/
-
 section OrbitValue
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -121,13 +111,10 @@ theorem leviCivita_orbit_value_eq
           (mfderiv I I (Φ_fam t : M → M) x v))
       = (LeviCivita (I := I) g) (X : ∀ x : M, TangentSpace I x) (Φ_fam t x)
           (mfderiv I I (Φ_fam t : M → M) x v) := by
-  -- The orbit point lies in its own chart Levi-Civita good set.
   have hα : (Φ_fam t x) ∈ chartLeviCivitaGoodSet (I := I) (Φ_fam t x) :=
     self_mem_chartLeviCivitaGoodSet (I := I) (Φ_fam t x)
-  -- The bundled smooth section is manifold-differentiable at the orbit point.
   have hX : MDiffAt (T% (X : ∀ x : M, TangentSpace I x)) (Φ_fam t x) :=
     (X.contMDiff (Φ_fam t x)).mdifferentiableAt (by simp)
-  -- Apply the orbit-point inner-CLM bridge.
   exact trivFromE_innerCLM_eq_leviCivita_at_orbit (I := I) g
     (X : ∀ x : M, TangentSpace I x) (Φ_fam t x)
     (mfderiv I I (Φ_fam t : M → M) x v) hα hX
@@ -156,21 +143,9 @@ theorem negCovariant_value_of_innerCLM_value
     val
       = -(LeviCivita (I := I) g) (X : ∀ x : M, TangentSpace I x) (Φ_fam t x)
           (mfderiv I I (Φ_fam t : M → M) x v) := by
-  -- Rewrite the inner CLM value at the orbit point as the bundled covariant value.
   rw [hQinner, leviCivita_orbit_value_eq (I := I) g X Φ_fam t x v]
 
 end OrbitValue
-
-/-! ## (b) The assembled combinator (single-instance world)
-
-In the standing `[InnerProductSpace ℝ E]`-only world of the variational-flow file, we
-assemble `RawVariationalIdentity` from the chart-coordinate Euclidean ODE `hDchart`, the
-chart-reading eventual agreement `hagree`, and the flat-plus-Christoffel value reading
-`hQinner`.  The covariant value identification is produced by
-`negCovariant_value_of_innerCLM_value` (which is proved in the two-instance world but whose
-conclusion is an `E`-equation that typechecks here, the standalone normed-space instance
-supplied by `InnerProductSpace.toNormedSpace`), and the assembly is the existing minimal
-combinator `rawVariationalIdentity_of_chartFlow_value`. -/
 
 section Assembly
 
@@ -225,11 +200,8 @@ theorem rawVariationalIdentity_of_chartFlow_innerCLM
             (X : ∀ x : M, TangentSpace I x) (Φ_fam t x)
             (mfderiv I I (Φ_fam t : M → M) x v))) :
     RawVariationalIdentity (I := I) g X Φ_fam t x v := by
-  -- Convert the flat-plus-Christoffel reading into the covariant value identification
-  -- (the connection content; good-set / smoothness side conditions discharged inside).
   have hQval := negCovariant_value_of_innerCLM_value (I := I) g X Φ_fam t x v
     (Q (Dchart' d)) hQinner
-  -- Feed into the existing minimal transport combinator.
   exact rawVariationalIdentity_of_chartFlow_value (I := I) g X Φ_fam t x v Q d
     hDchart hagree hQval
 

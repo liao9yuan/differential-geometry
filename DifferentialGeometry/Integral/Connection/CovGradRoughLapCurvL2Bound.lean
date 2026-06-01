@@ -106,20 +106,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Square-integrability of the intrinsic fibre norm
-
-The squared metric `L²` norm of a tensor section field is finite (the section is
-compactly-supported and smooth), so its intrinsic Riemannian fibre norm is integrable. This is
-the transport of `SmoothCcTensor.memL2_toFun` (integrability of the *model* diagonal pointwise
-pairing) through the fibre-norm bridge equality
-`riemannianFiberNormSq_eq_tensorInnerPointwise`. -/
 
 set_option linter.unusedSectionVars false in
 /-- **Integrability of the intrinsic fibre norm.** For a smooth compactly-supported
@@ -130,25 +120,15 @@ theorem integrable_riemannianFiberNormSq_toSection
     MeasureTheory.Integrable
       (fun x => riemannianFiberNormSq (I := I) (M := M) g r s x (S.toSection x))
       (riemannianVolumeMeasure (I := I) (M := M) g) := by
-  -- `MemL2 S.toFun` is integrability of the model diagonal pointwise pairing.
   have hmem := SmoothCcTensor.memL2_toFun (I := I) (M := M) S
   have hmem' :
       MeasureTheory.Integrable
         (fun x => tensorInnerPointwise (I := I) (M := M) g r s x (S.toFun x) (S.toFun x))
         (riemannianVolumeMeasure (I := I) (M := M) g) := hmem
-  -- Rewrite the integrand into the intrinsic fibre norm via the bridge equality.
   refine hmem'.congr (Filter.Eventually.of_forall (fun x => ?_))
   simp only [SmoothCcTensor.toFun_apply]
   exact (riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x
     (S.toSection x)).symm
-
-/-! ## The pointwise-to-`L²` packaging for the curvature defect bound
-
-A pointwise fibre-norm bound on the curvature defect `Curv` by `C₀²` times the sum of the
-fibre norms of `T₀`, `∇T₀` and `∇²T₀` integrates to a squared-`L²` inequality through the
-bridge corollary; taking square roots and using `p² + q² + r² ≤ (p + q + r)²` yields the
-first-power `hcurv` bound of the shape consumed by
-`secondCovGrad_l2NormSq_le_rawConnLap_gen`. -/
 
 set_option linter.unusedSectionVars false in
 /-- **Pointwise-to-`L²` packaging for `hcurv`.** Let `T₀ : SmoothCcTensor g 0 2` and
@@ -187,7 +167,6 @@ theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound
             (covGrad (I := I) (M := M) g 0 2 T₀)).toFun) := by
   classical
   set μ := riemannianVolumeMeasure (I := I) (M := M) g with hμ_def
-  -- Abbreviations for the three argument tensors and the three squared `L²` norms.
   set S : SmoothCcTensor g 0 3 := covGrad (I := I) (M := M) g 0 2 T₀ with hS_def
   set Hess : SmoothCcTensor g 0 (3 + 1) :=
     covGrad (I := I) (M := M) g 0 3 (covGrad (I := I) (M := M) g 0 2 T₀) with hHess_def
@@ -195,14 +174,10 @@ theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound
   set nGrad : ℝ := tensorL2Norm (I := I) (M := M) g 0 3 S.toFun with hnGrad_def
   set nHess : ℝ := tensorL2Norm (I := I) (M := M) g 0 (3 + 1) Hess.toFun with hnHess_def
   set nCurv : ℝ := tensorL2Norm (I := I) (M := M) g 0 3 Curv.toFun with hnCurv_def
-  -- Non-negativity of the four norms.
   have hnT_nn : 0 ≤ nT := tensorL2Norm_nonneg (I := I) (M := M) g 0 2 _
   have hnGrad_nn : 0 ≤ nGrad := tensorL2Norm_nonneg (I := I) (M := M) g 0 3 _
   have hnHess_nn : 0 ≤ nHess := tensorL2Norm_nonneg (I := I) (M := M) g 0 (3 + 1) _
   have hnCurv_nn : 0 ≤ nCurv := tensorL2Norm_nonneg (I := I) (M := M) g 0 3 _
-  -- The three squared `L²` norms as integrals of the intrinsic fibre norm (the bridge
-  -- corollary). `S.toFun x = toModel (S.toSection x)` definitionally, so the bridge applies
-  -- to each section directly.
   have hbridgeT : nT ^ 2 =
       ∫ x, riemannianFiberNormSq (I := I) (M := M) g 0 2 x (T₀.toSection x) ∂μ := by
     rw [hnT_def, hμ_def]
@@ -231,11 +206,9 @@ theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound
         (r := 0) (s := 3) (x := x) (Curv.toSection x) := rfl
     rw [hfun]
     exact tensorL2Norm_sq_eq_integral_riemannianFiberNormSq (I := I) (M := M) g 0 3 _
-  -- Integrability of the three argument fibre norms (the bound RHS integrand).
   have hintT := integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g 0 2 T₀
   have hintGrad := integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g 0 3 S
   have hintHess := integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g 0 (3 + 1) Hess
-  -- The bound RHS function: `C₀² · (rfns T₀ + rfns S + rfns Hess)`, integrable.
   set RHS : M → ℝ := fun x =>
     C₀ ^ 2 *
       (riemannianFiberNormSq (I := I) (M := M) g 0 2 x (T₀.toSection x) +
@@ -245,24 +218,20 @@ theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound
   have hRHS_int : MeasureTheory.Integrable RHS μ := by
     rw [hRHS_def, hμ_def]
     exact ((hintT.add hintGrad).add hintHess).const_mul (C₀ ^ 2)
-  -- Pointwise bound: the curvature fibre norm is `≤ RHS` (folding `hpt` through `S`/`Hess`).
   have hpt' : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 3 x (Curv.toSection x) ≤ RHS x := by
     intro x
     rw [hRHS_def, hS_def, hHess_def]
     exact hpt x
-  -- Non-negativity of the curvature fibre norm (for `integral_mono_of_nonneg`).
   have hcurv_nn : (0 : M → ℝ) ≤ᵐ[μ]
       (fun x => riemannianFiberNormSq (I := I) (M := M) g 0 3 x (Curv.toSection x)) :=
     Filter.Eventually.of_forall (fun x =>
       riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 3 x _)
-  -- Integral monotonicity: `∫ rfns(Curv) ≤ ∫ RHS`.
   have hint_le :
       (∫ x, riemannianFiberNormSq (I := I) (M := M) g 0 3 x (Curv.toSection x) ∂μ) ≤
         ∫ x, RHS x ∂μ :=
     MeasureTheory.integral_mono_of_nonneg hcurv_nn hRHS_int
       (Filter.Eventually.of_forall hpt')
-  -- Evaluate `∫ RHS = C₀² · (∫ rfns T₀ + ∫ rfns S + ∫ rfns Hess)`.
   have hRHS_integral :
       (∫ x, RHS x ∂μ) =
         C₀ ^ 2 *
@@ -273,7 +242,6 @@ theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound
     rw [hRHS_def]
     rw [MeasureTheory.integral_const_mul]
     congr 1
-    -- Split the integral of the threefold sum into the three integrals.
     have hsplit12 :
         (∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 2 x (T₀.toSection x) +
             riemannianFiberNormSq (I := I) (M := M) g 0 3 x (S.toSection x)) ∂μ) =
@@ -290,7 +258,6 @@ theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound
               (Hess.toSection x) ∂μ) :=
       MeasureTheory.integral_add (hintT.add hintGrad) hintHess
     rw [hsplit123, hsplit12]
-  -- Hence `nCurv² ≤ C₀² · (nT² + nGrad² + nHess²)`, rewriting each integral by its bridge.
   have hsq_bound : nCurv ^ 2 ≤ C₀ ^ 2 * (nT ^ 2 + nGrad ^ 2 + nHess ^ 2) := by
     rw [hbridgeCurv, hbridgeT, hbridgeGrad, hbridgeHess]
     calc (∫ x, riemannianFiberNormSq (I := I) (M := M) g 0 3 x (Curv.toSection x) ∂μ)
@@ -300,31 +267,16 @@ theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound
               (∫ x, riemannianFiberNormSq (I := I) (M := M) g 0 3 x (S.toSection x) ∂μ) +
               (∫ x, riemannianFiberNormSq (I := I) (M := M) g 0 (3 + 1) x
                 (Hess.toSection x) ∂μ)) := hRHS_integral
-  -- Make the four norm abbreviations opaque so the closing arithmetic does not whnf-unfold
-  -- the underlying `tensorL2Norm` integral expressions during atom matching.
   clear_value nT nGrad nHess nCurv
-  -- It suffices to show `nCurv² ≤ (C₀ · (nT + nGrad + nHess))²` (both sides nonnegative).
   have hy_nn : 0 ≤ C₀ * (nT + nGrad + nHess) :=
     mul_nonneg hC₀ (by linarith [hnT_nn, hnGrad_nn, hnHess_nn])
   have hfinal_sq : nCurv ^ 2 ≤ (C₀ * (nT + nGrad + nHess)) ^ 2 := by
     refine le_trans hsq_bound ?_
-    -- `C₀² · (nT² + nGrad² + nHess²) ≤ C₀² · (nT + nGrad + nHess)² = (C₀·(…))²`.
     have hcross : nT ^ 2 + nGrad ^ 2 + nHess ^ 2 ≤ (nT + nGrad + nHess) ^ 2 := by
       nlinarith [mul_nonneg hnT_nn hnGrad_nn, mul_nonneg hnT_nn hnHess_nn,
         mul_nonneg hnGrad_nn hnHess_nn]
     nlinarith [mul_le_mul_of_nonneg_left hcross (sq_nonneg C₀), sq_nonneg C₀]
-  -- Convert the squared bound back to the first-power bound.
   nlinarith [hfinal_sq, hnCurv_nn, hy_nn, sq_nonneg (nCurv - C₀ * (nT + nGrad + nHess))]
-
-/-! ## The Gårding assembly with the pointwise curvature hypothesis
-
-Combining the canonical commutator equation `covGradRoughLap_commutator_eq` (which discharges
-`hcomm` for the canonical defect `covGradRoughLapCurv`) with the pointwise-to-`L²` packaging
-`tensorL2Norm_le_of_pointwise_fiberNormSq_bound` (which discharges `hcurv` from the pointwise
-fibre-norm hypothesis) instantiates `secondCovGrad_l2NormSq_le_rawConnLap_gen`. The result is
-the order-`2` covariant Gårding estimate whose only external input is the *pointwise*
-fibre-norm bound on the canonical curvature defect — the genuine third-order tensor Weitzenböck
-content isolated in `CovGradRoughLapCommutatorClose3.lean`. -/
 
 set_option linter.unusedSectionVars false in
 /-- **Order-`2` covariant Gårding estimate from a pointwise curvature defect bound.** Let `g`
@@ -362,7 +314,6 @@ theorem secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound
         (tensorL2Norm (I := I) (M := M) g 0 2
             (rawTensorConnLapSmooth (I := I) g 0 2 T₀).toFun ^ 2 +
           tensorL2Norm (I := I) (M := M) g 0 2 T₀.toFun ^ 2) := by
-  -- `hcomm` for the canonical defect, and `hcurv` from the pointwise bound.
   refine secondCovGrad_l2NormSq_le_rawConnLap_gen (I := I) (M := M) g T₀
     (covGradRoughLapCurv (I := I) (M := M) g T₀) C₀ hC₀
     (covGradRoughLap_commutator_eq (I := I) (M := M) g T₀) ?_

@@ -85,15 +85,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## Part 1: the `mfderiv` / chart-`fderiv` dictionary
-
-The manifold pushforward of a self-map `F : M → M`, through fixed source/target
-extended charts, reads off as a chart-coordinate Fréchet derivative composed with
-the chart differentials.  We isolate this as a transfer principle: a path of
-`E`-valued maps that equals such a chart-coordinate expression near `t`, and whose
-chart-coordinate part has a known `HasDerivAt`, inherits that `HasDerivAt` through
-the fixed chart CLMs. -/
-
 /-- **Operator-valued `HasDerivAt` through a fixed pre/post composition.**
 
 If `s ↦ A s : E →L[ℝ] E` has `HasDerivAt` at `t` with derivative `A'`, then for any
@@ -107,11 +98,9 @@ theorem hasDerivAt_clm_pre_post
     {A : ℝ → (E →L[ℝ] E)} {A' : E →L[ℝ] E} {t : ℝ}
     (hA : HasDerivAt A A' t) (Q : E →L[ℝ] E) (d : E) :
     HasDerivAt (fun s : ℝ => Q (A s d)) (Q (A' d)) t := by
-  -- Evaluate at `d`: `s ↦ A s d` has derivative `A' d` (apply-CLM composed with `hA`).
   have hEval : HasDerivAt (fun s : ℝ => A s d) (A' d) t := by
     have := (ContinuousLinearMap.apply ℝ E d).hasFDerivAt.comp_hasDerivAt t hA
     simpa [ContinuousLinearMap.apply_apply] using this
-  -- Post-compose with the fixed CLM `Q`.
   have := Q.hasFDerivAt.comp_hasDerivAt t hEval
   simpa using this
 
@@ -141,19 +130,9 @@ theorem hasDerivAt_mfderiv_flow_of_chart
     (hagree : (fun s : ℝ => (mfderiv I I (Fam s) x v : E))
       =ᶠ[𝓝 t] (fun s : ℝ => Q (Dchart s d))) :
     HasDerivAt (fun s : ℝ => (mfderiv I I (Fam s) x v : E)) (Q (Dchart' d)) t := by
-  -- The chart-coordinate path has the transferred `HasDerivAt`; congr along `hagree`.
   have hchart : HasDerivAt (fun s : ℝ => Q (Dchart s d)) (Q (Dchart' d)) t :=
     hasDerivAt_clm_pre_post hDchart Q d
   exact hchart.congr_of_eventuallyEq hagree
-
-/-! ## Part 2: flat → covariant reconciliation of the Levi-Civita right-hand side
-
-On the good set of a base point `α`, the bundled Levi-Civita value at a tangent
-vector field `X` (viewed as a section) splits into a *flat* chart-coordinate Fréchet
-derivative and a Christoffel correction.  This is the manifold realization of
-`∂_j X^i = (∇X)^i_j - Γ^i_{jk} X^k`: the flat term `fderiv (X̃ ∘ φ.symm)(triv v)` is
-exactly the Euclidean `D_y f` of Part 1, and the Christoffel correction is the gap to
-the covariant derivative. -/
 
 /-- **Flat-plus-Christoffel decomposition of the chart Levi-Civita value.**
 
@@ -209,51 +188,8 @@ theorem chartLeviCivita_flat_eq_sub_christoffel
               (christoffelCorrection (I := I) g α x
                 (chartE_section_repr (I := I) α X x) v) := by
   have hsplit := chartLeviCivita_flat_add_christoffel (I := I) g α X hx hX v
-  -- `trivFromE` is linear, so the bracketed sum splits additively.
   rw [map_add] at hsplit
-  -- `hsplit : LeviCivita value = trivFromE(flat) + trivFromE(christoffel)`.
   rw [hsplit]
   abel
-
-/-! ## Part 3 and the remaining glue (documented)
-
-With Parts 1 and 2 in hand, the closing argument for `RawVariationalIdentity` at the
-fixed time `t`, base point `x`, tangent vector `v`, takes `α := Φ_fam t x` (the time-`t`
-orbit point) and proceeds:
-
-* **Source/target charts and the chart flow.**  Pick the chart at `α = Φ_fam t x` for
-  the *target* and the chart at `x` for the *source*.  On a small ball, `Φ_fam s`
-  reads off as the chart-conjugated Euclidean flow `Φ` of the chart vector field
-  `f_chart s y = (X s ((chartAt H α).symm (I.symm y)) : E)` (the `f` consumed by
-  `ChartLocalPicardData.contDiffOn_top` / `exists_isLocalFlow_contDiffOn_top` in
-  `BanachIC.lean`); `BanachIC` supplies its joint-`C^∞`-on-`E` regularity and the
-  Euclidean operator-valued variational ODE of
-  `IsLocalFlow.hasDerivAt_partial_spatial_fderiv` then gives
-  `HasDerivAt Dchart Dchart' t` with
-  `Dchart' = (fderiv ℝ (f_chart t) (Φ (x,t))).comp (Dchart t)`.  This is the input
-  to `hasDerivAt_mfderiv_flow_of_chart` (Part 1).
-
-* **Flat→covariant (Part 2).**  `Dchart'` is the *flat* coordinate operator
-  `(D_y f_chart) · (D_x Φ)`.  Up to the chart-convention bridge between the BanachIC
-  representation `X s ((chartAt H α).symm (I.symm ·))` and the trivialization
-  representation `chartE_section_repr α X`, the term `D_y f_chart` is exactly the flat
-  part isolated in `chartLeviCivita_flat_eq_sub_christoffel`, which equals
-  `(LeviCivita g) X - (trivialized) Γ`.
-
-* **The `-X` sign (Part 3).**  `RawVariationalIdentity` integrates `-X`, so
-  `f_chart = -X` in coordinates and the flat operator picks up the overall minus:
-  `Dchart'` lands on `-(LeviCivita g) X (Φ_fam t x) (mfderiv I I (Φ_fam t) x v)`,
-  matching the `RawVariationalIdentity` right-hand side exactly.
-
-The remaining glue is the *moving-target trivialization transport*: the value
-`mfderiv I I (Φ_fam s) x v : E` lives in `TangentSpace I (Φ_fam s x)`, whose
-trivialization base point moves with `s`, whereas Part 2 is stated at the fixed
-trivialization of `α = Φ_fam t x`.  Reconciling these — i.e. producing the precise
-`hagree` eventual equality of `hasDerivAt_mfderiv_flow_of_chart` with `Q` the
-target-chart-symm CLM at `α` and `d = trivToE x v` — together with the
-BanachIC/trivialization convention bridge, is the documented gap.  No axiom is
-introduced: `RawVariationalIdentity` stays a hypothesis of
-`variational_flow_feeds_cartan_witness`, and the lemmas above are the genuine
-building blocks of its eventual discharge. -/
 
 end DifferentialGeometry.PDE.RicciFlow.ODE

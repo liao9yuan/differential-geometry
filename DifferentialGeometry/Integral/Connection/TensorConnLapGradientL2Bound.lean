@@ -74,14 +74,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The squared `L²` norm of a smooth section as its self-pairing -/
 
 set_option linter.unusedSectionVars false in
 /-- The squared metric `L²` norm of the underlying field of a smooth
@@ -93,11 +89,6 @@ lemma tensorL2Norm_sq_toFun
       tensorL2Inner (I := I) (M := M) g r s S.toFun S.toFun := by
   rw [tensorL2Norm_def]
   exact Real.sq_sqrt (tensorL2Inner_nonneg (I := I) (M := M) g r s S.toFun)
-
-/-! ## The diagonal Green identity
-
-Specialise the `(0, 2)` connection-Laplacian Green identity
-`green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed` at `v := T`. -/
 
 set_option linter.unusedSectionVars false in
 /-- **Diagonal `(0, 2)` Green identity.** For a smooth compactly-supported
@@ -116,11 +107,6 @@ lemma tensorL2Inner_covGrad_self_eq_neg_rawConnLap_inner
       - tensorL2Inner (I := I) (M := M) g 0 2
           (rawTensorConnLapSmooth (I := I) g 0 2 T).toFun T.toFun :=
   green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed (I := I) (M := M) g T T
-
-/-! ## The first-order elliptic-regularity control
-
-The diagonal Green identity bounds `‖∇T‖²_{L²}` by `|⟨Δ_∇ T, T⟩_{L²}|`, which
-the global Cauchy–Schwarz inequality bounds by `‖Δ_∇ T‖_{L²} · ‖T‖_{L²}`. -/
 
 set_option linter.unusedSectionVars false in
 /-- **First-order covariant-gradient `L²` control.** For a smooth
@@ -143,9 +129,7 @@ theorem covGrad_l2NormSq_le_rawConnLap_mul_self
       tensorL2Norm (I := I) (M := M) g 0 2
           (rawTensorConnLapSmooth (I := I) g 0 2 T).toFun *
         tensorL2Norm (I := I) (M := M) g 0 2 T.toFun := by
-  -- Abbreviate the rough Laplacian field.
   set ΔT : SmoothCcTensor g 0 2 := rawTensorConnLapSmooth (I := I) g 0 2 T with hΔT_def
-  -- The diagonal Green identity: ‖∇T‖²_{L²} = − ⟨Δ_∇T, T⟩_{L²}.
   have hgreen :
       tensorL2Norm (I := I) (M := M) g 0 (2 + 1)
           (covGrad (I := I) (M := M) g 0 2 T).toFun ^ 2 =
@@ -155,13 +139,10 @@ theorem covGrad_l2NormSq_le_rawConnLap_mul_self
     rw [hΔT_def]
     exact tensorL2Inner_covGrad_self_eq_neg_rawConnLap_inner (I := I) (M := M) g T
   rw [hgreen]
-  -- The cross pairing ⟨Δ_∇T, T⟩_{L²} is bounded in absolute value, via global
-  -- Cauchy–Schwarz, by ‖Δ_∇T‖_{L²} · ‖T‖_{L²}.
   have hcs := abs_tensorL2Inner_le (I := I) (M := M) g 0 2 ΔT.toFun T.toFun
     (SmoothCcTensor.memL2_toFun (I := I) (M := M) ΔT)
     (SmoothCcTensor.memL2_toFun (I := I) (M := M) T)
     (SmoothCcTensor.integrable_inner_cross (I := I) (M := M) ΔT T)
-  -- − x ≤ |x|.
   have hneg_le :
       - tensorL2Inner (I := I) (M := M) g 0 2 ΔT.toFun T.toFun ≤
         |tensorL2Inner (I := I) (M := M) g 0 2 ΔT.toFun T.toFun| :=
@@ -188,7 +169,6 @@ theorem covGrad_l2Norm_le_geomMean
   have hnn : 0 ≤ tensorL2Norm (I := I) (M := M) g 0 (2 + 1)
       (covGrad (I := I) (M := M) g 0 2 T).toFun :=
     tensorL2Norm_nonneg (I := I) (M := M) g 0 (2 + 1) _
-  -- `x ≤ √(x²) ≤ √(bound)` from `x² ≤ bound` and `x ≥ 0`.
   rw [← Real.sqrt_sq hnn]
   exact Real.sqrt_le_sqrt hsq
 

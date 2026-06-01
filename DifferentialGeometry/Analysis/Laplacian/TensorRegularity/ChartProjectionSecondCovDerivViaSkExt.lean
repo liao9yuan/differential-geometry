@@ -83,13 +83,6 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## Packaging a globally smooth `(r, s)`-tensor section as `SmoothCcTensor`
-
-Under `[CompactSpace M]` every function `M → _` has compact support
-automatically (`HasCompactSupport.of_compactSpace`). Hence a globally smooth
-section of the `(r, s)`-tensor bundle can be wrapped as a `SmoothCcTensor g r s`
-with no further hypothesis. -/
-
 /-- Package a globally smooth `(r, s)`-tensor section as a `SmoothCcTensor`,
 using the ambient `[CompactSpace M]` to supply compact support. -/
 private def packageAsCc
@@ -105,8 +98,6 @@ private lemma packageAsCc_toSection
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
                 fun b : M => TensorRSSpace r s I b⟯) :
     (packageAsCc (I := I) (M := M) g r s S).toSection = S := rfl
-
-/-! ## The headline -/
 
 /-- **Chart-α `(Idx, Jdx)` projection of the bundle-level second covariant
 derivative at a good-set point, expressed via the smooth extension `S_k_ext`
@@ -154,19 +145,14 @@ theorem chartα_proj_secondCovDeriv_eq_chartCoord_first_deriv_of_Sk_ext
   letI _h_fib : FiberBundle (TensorRSModel r s ℝ E)
       (fun x : M => TensorRSSpace r s I x) :=
     tensorRSBundle_fiber r s
-  -- Step 1: invoke B.2.c.i to obtain `S_k_ext`, the open neighbourhood `U`, and
-  -- the pointwise agreement on `U` between `S_k_ext.toFun` and the raw
-  -- chart-basis-applied bundled covariant derivative.
   obtain ⟨S_k_ext, U, hU_open, hb₀_U, hU_sub_good, hU_eq⟩ :=
     covApply_covRS_chartBasis_globalSmoothExtension
       (I := I) (M := M) g r s α T₀ k (b₀ := b₀) hb₀
   refine ⟨S_k_ext, U, hU_open, hb₀_U, hU_sub_good, ?_⟩
-  -- Step 2: prove the pointwise identity for `b ∈ U`.
   intro b hb_U
   have hb_good : b ∈ chartLeviCivitaGoodSet (I := I) α := hU_sub_good hb_U
   have hb_src : b ∈ (extChartAt I α).source :=
     chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hb_good
-  -- Abbreviations.
   set cov := TensorRSNabla.tensorRSCovariantDerivative I M r s
     (LeviCivita (I := I) g) with hcov_def
   set σ : Π y : M, TensorRSSpace r s I y :=
@@ -175,27 +161,20 @@ theorem chartα_proj_secondCovDeriv_eq_chartCoord_first_deriv_of_Sk_ext
     fun y : M => (S_k_ext : Π y' : M, TensorRSSpace r s I y') y with hσ'_def
   set S_k_packed : SmoothCcTensor g r s :=
     packageAsCc (I := I) (M := M) g r s S_k_ext with hS_k_packed_def
-  -- Step 3: identify `σ'` with `S_k_packed.toSection`.
   have hσ'_eq_packed :
       σ' = (fun y : M => S_k_packed.toSection y) := by
     funext y
     simp [hσ'_def, hS_k_packed_def, packageAsCc_toSection]
-  -- Step 4: `S_k_ext` and `σ` agree eventually at `b ∈ U` (i.e. on `U`,
-  -- an open neighbourhood of `b`).
   have hagree_σ_σ' : ∀ᶠ y in 𝓝 b, σ y = σ' y := by
     have hU_nhds : U ∈ 𝓝 b := hU_open.mem_nhds hb_U
     refine Filter.eventually_of_mem hU_nhds (fun y hy_U => ?_)
-    -- On `U`, `S_k_ext.toFun y = covApply … y`, so `σ y = σ' y`.
     have hSk_y :
         (S_k_ext : Π y' : M, TensorRSSpace r s I y') y =
           covApply cov (chartBasisVecFiber (I := I) α k) T₀.toSection y :=
       hU_eq y hy_U
-    -- `σ y = covApply cov … y`; `σ' y = S_k_ext.toFun y`.
     change covApply cov (chartBasisVecFiber (I := I) α k) T₀.toSection y =
         (S_k_ext : Π y' : M, TensorRSSpace r s I y') y
     exact hSk_y.symm
-  -- Step 5: `σ'` is `MDifferentiableAt` at `b` in total-space form
-  -- (the underlying section of `S_k_ext` is globally smooth).
   have hσ'_total_smooth :
       ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
         (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
@@ -206,15 +185,12 @@ theorem chartα_proj_secondCovDeriv_eq_chartCoord_first_deriv_of_Sk_ext
         (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
           (E := fun z : M => TensorRSSpace r s I z) y (σ' y)) b :=
     (hσ'_total_smooth b).mdifferentiableAt (by simp)
-  -- Step 6: `σ` is `MDifferentiableAt` at `b` by EventuallyEq with `σ'`,
-  -- in the total-space form.
   have htotal_agree :
       (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
           (E := fun z : M => TensorRSSpace r s I z) y (σ y)) =ᶠ[𝓝 b]
         (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
           (E := fun z : M => TensorRSSpace r s I z) y (σ' y)) := by
     refine hagree_σ_σ'.mono (fun y hy => ?_)
-    -- `TotalSpace.mk'` is pointwise: agreement at `y` lifts to total-space.
     change TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun z : M => TensorRSSpace r s I z) y (σ y) =
       TotalSpace.mk' (TensorRSModel r s ℝ E)
@@ -226,32 +202,25 @@ theorem chartα_proj_secondCovDeriv_eq_chartCoord_first_deriv_of_Sk_ext
           (E := fun z : M => TensorRSSpace r s I z) y (σ y)) b :=
     (htotal_agree.mdifferentiableAt_iff (𝕜 := ℝ) (I := I)
       (I' := I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))).mpr hσ'_total_mdiff
-  -- Step 7: by locality (B.2.c.ii), `cov.toFun σ b = cov.toFun σ' b`.
   have hcov_loc : cov.toFun σ b = cov.toFun σ' b :=
     tensorRSCovariantDerivative_congr_of_eventuallyEq
       (I := I) (M := M) g r s
       (σ := σ) (σ' := σ') (x := b) hagree_σ_σ' hσ_total_mdiff hσ'_total_mdiff
-  -- Step 8: apply at the vector `chartBasisVecFiber α l b`.
   have hcov_loc_at_v :
       cov.toFun σ b (chartBasisVecFiber (I := I) α l b) =
       cov.toFun σ' b (chartBasisVecFiber (I := I) α l b) := by
     rw [hcov_loc]
-  -- Step 9: rewrite `σ' = S_k_packed.toSection` pointwise.
   have hcov_σ'_eq_packed :
       cov.toFun σ' b (chartBasisVecFiber (I := I) α l b) =
       cov.toFun (fun y : M => S_k_packed.toSection y) b
         (chartBasisVecFiber (I := I) α l b) := by
     rw [hσ'_eq_packed]
-  -- Step 10: identify the bundle covariant derivative at the chart-basis with
-  -- `tensorCovDerivAt` (definitional unfolding).
   have hcov_tensor :
       cov.toFun (fun y : M => S_k_packed.toSection y) b
         (chartBasisVecFiber (I := I) α l b) =
       tensorCovDerivAt (I := I) (M := M) g r s S_k_packed b
         (chartBasisVecFiber (I := I) α l b) := by
     rw [tensorCovDerivAt_def]
-  -- Step 11: on the good set, `tensorCovDerivAt = chartTensorRSCovariantDerivative
-  -- … (chartBasisVecFiber α l) b` (with `m := l`).
   have hcov_chart :
       tensorCovDerivAt (I := I) (M := M) g r s S_k_packed b
         (chartBasisVecFiber (I := I) α l b) =
@@ -259,28 +228,13 @@ theorem chartα_proj_secondCovDeriv_eq_chartCoord_first_deriv_of_Sk_ext
         (chartBasisVecFiber (I := I) α l) b :=
     tensorCovDerivAt_eq_chartTensorRSCovariantDerivative
       (I := I) (M := M) g r s S_k_packed α l (b := b) hb_good
-  -- Step 12: assemble all the rewrites for the inner argument.
   have hinner :
       cov.toFun σ b (chartBasisVecFiber (I := I) α l b) =
       chartTensorRSCovariantDerivative (I := I) r s g α S_k_packed.toSection
         (chartBasisVecFiber (I := I) α l) b := by
     rw [hcov_loc_at_v, hcov_σ'_eq_packed, hcov_tensor, hcov_chart]
-  -- Step 13: rewrite the LHS using `hinner`. The LHS is the
-  -- `tensorChartComponentProjection` of the `continuousLinearMapAt`-wrapped
-  -- value of `cov.toFun σ b (chartBasisVecFiber α l b)`.
   rw [hinner]
-  -- Step 14: the RHS now matches `covDerivComponentEuclid_def` applied to
-  -- `S_k_packed` with `m := l` at `y := toEuclidean ((extChartAt I α) b)`. By
-  -- chart left-inverse on the good set, the `(extChartAt I α).symm
-  -- (toEuclidean.symm (toEuclidean ((extChartAt I α) b)))` equals `b`.
   rw [covDerivComponentEuclid_def]
-  -- Goal now has both sides as
-  -- `tensorChartComponentProjection r s Idx Jdx
-  --   ((triv α).continuousLinearMapAt ℝ b'
-  --     (chartTensorRSCovariantDerivative r s g α S_k_packed.toSection
-  --       (chartBasisVecFiber α l) b'))`
-  -- where `b' = (extChartAt I α).symm (toEuclidean.symm (toEuclidean ((extChartAt I α) b)))`.
-  -- Reduce `b'` to `b`.
   have hsymm_te :
       (toEuclidean (E := E)).symm
         ((toEuclidean (E := E)) ((extChartAt I α) b)) =
@@ -288,7 +242,6 @@ theorem chartα_proj_secondCovDeriv_eq_chartCoord_first_deriv_of_Sk_ext
     (toEuclidean (E := E)).symm_apply_apply _
   have hleft_inv : (extChartAt I α).symm ((extChartAt I α) b) = b :=
     (extChartAt I α).left_inv hb_src
-  -- Now rewrite the RHS so `b' = b`.
   rw [hsymm_te, hleft_inv]
 
 end TensorRegularity

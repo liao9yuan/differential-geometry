@@ -84,34 +84,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-Match the convention in the surrounding chart-local Laplacian files: install
-the Borel σ-algebras locally, without leaking global instances onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The Euclidean chart component of a tensor section
-
-The chart-coordinate covariant derivative of an `(r, s)`-tensor section — and
-hence the chart-coordinate decomposition `tensorCovDerivPointwiseInner_chart_eq`
-of the `H^1` Dirichlet integrand — is built from the *raw* chart-frame scalar
-components `tensorChartComponentRaw g r s T α Idx Jdx`, prior to any
-partition-of-unity weighting. The Euclidean object on which the chart-local
-divergence-form elliptic analysis operates is the Euclidean push-forward of this
-raw chart component: `tensorComponentEuclid g r s T α P₀`.
-
-This is the `(r, s)`-tensor analogue of the scalar chart pull-back
-`chartPullback I α f` from `ChartLocalLaplacian.lean`: like it, the function is
-the composition of a manifold-side scalar with the inverse chart map and the
-linear isometry `toEuclidean.symm`, extended by `0` off the chart-Euclidean
-target. -/
 
 /-- **The Euclidean chart component of an `(r, s)`-tensor section.** For a chart
 center `α` and a component multi-index `P₀ : CompIdx E r s`, this is the
@@ -175,17 +153,6 @@ theorem tensorComponentEuclid_contDiffOn
   chartPushedRaw_tensorChartComponentRaw_contDiffOn (I := I) (M := M)
     g r s T α P₀.1 P₀.2
 
-/-! ## Smoothness and support of the Euclidean chart component for a
-chart-supported section
-
-When the section `T` is supported inside the chart source, the raw chart-frame
-scalar component `tensorChartComponentRaw g r s T α P₀.1 P₀.2` is supported
-there too: the trivialization projection `tensorTrivProj` is built from a
-continuous linear map applied to `T.toSection`, and a continuous linear map
-sends `0` to `0`, so the raw component vanishes wherever `T.toSection` vanishes.
-Hence the Euclidean push-forward is globally `C^∞` (extension by zero) and has
-compact support inside a compact subset of the Euclidean chart target. -/
-
 /-- The raw chart-frame scalar component of a section vanishes wherever the
 underlying section vanishes: it is the chart-frame component projection of the
 trivialization projection of `T.toSection`, both continuous-linear, so a zero
@@ -198,7 +165,6 @@ private lemma tensorChartComponentRaw_eq_zero_of_section_eq_zero
     {x : M} (hx : T.toSection x = 0) :
     tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx x = 0 := by
   classical
-  -- The raw component is `proj (triv.continuousLinearMapAt α x (T.toSection x))`.
   rw [tensorChartComponentRaw_def]
   unfold tensorTrivProj
   rw [hx, map_zero, map_zero]
@@ -216,8 +182,6 @@ lemma tensorChartComponentRaw_tsupport_subset
   refine closure_minimal ?_ (isClosed_tsupport _)
   intro x hx
   by_contra hx_notsupp
-  -- Off `tsupport T.toFun` the section value `T.toFun x = toModel (T.toSection x)`
-  -- is `0`; `toModel` is injective, so `T.toSection x = 0`.
   have hzero : T.toFun x = 0 := image_eq_zero_of_notMem_tsupport hx_notsupp
   have hsec : T.toSection x = 0 := by
     have hmod : TensorRSSpace.toModel (T.toSection x) = 0 := hzero
@@ -257,16 +221,13 @@ theorem tensorComponentEuclid_contDiff
     (hT_supp : tsupport T.toFun ⊆ (chartAt H α).source) :
     ContDiff ℝ ∞ (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) := by
   classical
-  -- The raw chart component is supported inside the chart source.
   have hraw_supp : tsupport
       (tensorChartComponentRaw (I := I) (M := M) g r s T α P₀.1 P₀.2) ⊆
       (chartAt H α).source :=
     tensorChartComponentRaw_tsupport_subset_chart_source
       (I := I) (M := M) g r s T α P₀.1 P₀.2 hT_supp
-  -- The Euclidean chart target is open.
   have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- The barrier set: the Euclidean image of the raw component's support.
   set K : Set EuclN :=
     toEuclidean '' ((extChartAt I α) ''
       (tsupport (tensorChartComponentRaw (I := I) (M := M)
@@ -281,20 +242,15 @@ theorem tensorComponentEuclid_contDiff
       (I := I) (M := M)
       (u := tensorChartComponentRaw (I := I) (M := M) g r s T α P₀.1 P₀.2)
       (α := α) hraw_supp
-  -- The Euclidean push-forward is `C^∞` on the open chart target and `0` off
-  -- the compact barrier `K`; hence globally `C^∞`.
   rw [contDiff_iff_contDiffAt]
   intro y
   by_cases hy : y ∈ chartTargetEuclid (I := I) (M := M) α
   · exact ((tensorComponentEuclid_contDiffOn (I := I) (M := M)
       g r s T α P₀).contDiffWithinAt hy).contDiffAt (hopen.mem_nhds hy)
-  · -- Off the chart target the function vanishes on an open neighborhood.
-    have hyK : y ∉ K := fun h => hy (hK_target h)
+  · have hyK : y ∉ K := fun h => hy (hK_target h)
     have hKc_open : IsOpen Kᶜ := hK_compact.isClosed.isOpen_compl
     refine (contDiff_const (c := (0 : ℝ))).contDiffAt.congr_of_eventuallyEq ?_
     filter_upwards [hKc_open.mem_nhds hyK] with z hz
-    -- On `Kᶜ` the push-forward is zero: either off the chart target, or inside
-    -- the chart target but off the Euclidean image of the support.
     by_cases hzT : z ∈ chartTargetEuclid (I := I) (M := M) α
     · exact chartPushedRaw_eq_zero_off_image_tsupport
         (I := I) (M := M)
@@ -320,8 +276,6 @@ theorem tensorComponentEuclid_tsupport_subset
       (chartAt H α).source :=
     tensorChartComponentRaw_tsupport_subset_chart_source
       (I := I) (M := M) g r s T α P₀.1 P₀.2 hT_supp
-  -- The Euclidean image of the raw component's support is compact and inside
-  -- the chart target; the push-forward vanishes off it.
   set K : Set EuclN :=
     toEuclidean '' ((extChartAt I α) ''
       (tsupport (tensorChartComponentRaw (I := I) (M := M)
@@ -336,8 +290,6 @@ theorem tensorComponentEuclid_tsupport_subset
       (I := I) (M := M)
       (u := tensorChartComponentRaw (I := I) (M := M) g r s T α P₀.1 P₀.2)
       (α := α) hraw_supp
-  -- `support (tensorComponentEuclid …) ⊆ K`, and `K` is closed and inside the
-  -- chart target.
   have hsupp : Function.support
       (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) ⊆ K := by
     intro y hy
@@ -382,7 +334,6 @@ theorem tensorComponentEuclid_hasCompactSupport
       (I := I) (M := M)
       (u := tensorChartComponentRaw (I := I) (M := M) g r s T α P₀.1 P₀.2)
       (α := α) hraw_supp
-  -- `support (tensorComponentEuclid …) ⊆ K`, and `K` is compact.
   have hsupp : Function.support
       (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) ⊆ K := by
     intro y hy
@@ -396,41 +347,6 @@ theorem tensorComponentEuclid_hasCompactSupport
     · exact hy (tensorComponentEuclid_apply_of_notMem
         (I := I) (M := M) g r s T α P₀ hyT)
   exact HasCompactSupport.of_support_subset_isCompact hK_compact hsupp
-
-/-! ## The headline: per-component scalar weak solution (hypothesis-bearing form)
-
-The headline result is stated in **hypothesis-bearing form**, matching the
-scalar precedent `chart_pulled_smooth_weak_solution_of_chartIdentity` from
-`ChartLocalLaplacian.lean`.
-
-It takes as a hypothesis the chart-pulled scalar bilinear identity
-```
-(tensorPrincipalForm g α hK hK_target).bilin (tensorComponentEuclid g r s T α P₀) φ
-  = ∫ y, f y * φ y
-```
-for every smooth compactly-supported Euclidean test function `φ`, and concludes
-that the Euclidean chart component `tensorComponentEuclid g r s T α P₀` is a
-smooth weak solution of the principal-part bilinear form `tensorPrincipalForm`
-with the supplied right-hand side `f`.
-
-This packaging is the standard channel through which the manifold-side global
-`H^1` weak equation of the connection Laplacian, after chart-pull-back via the
-chart-pulled-volume identity `tensorCovDerivPointwiseInner_integral_chart_pull`,
-the inverse-Gram rotation `rotatedTestSection` and the resulting principal
-collapse `covPrincipalIntegrand_rotated_collapse` / pointwise identification
-`weightedInvGram_principalIntegrand_eq` of the principal integrand, delivers a
-Euclidean weak-solution statement compatible with the De Giorgi / Nirenberg
-interior-regularity machinery. The downstream caller supplies the hypothesis,
-computed by combining the global `H^1` weak equation of the connection
-Laplacian with the chart-coordinate decomposition machinery of the companion
-files.
-
-The hypothesis on `T`'s support — `tsupport T.toFun ⊆ (chartAt H α).source` —
-is the honest chart-containment hypothesis: it is
-exactly the hypothesis under which the Euclidean chart component
-`tensorComponentEuclid g r s T α P₀` is globally `C^∞` (the smoothness component
-of `IsSmoothWeakSolution`). It mirrors the scalar precedent's hypothesis
-`tsupport f ⊆ (chartAt H α).source`. -/
 
 /-- **Per-component scalar weak solution of the connection Laplacian
 (hypothesis-bearing form).**
@@ -475,10 +391,7 @@ theorem tensorComponent_isSmoothWeakSolution_of_chartIdentity
     (tensorPrincipalForm (I := I) (M := M) g α hK hK_target).IsSmoothWeakSolution
       (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) f := by
   classical
-  -- The smoothness component: the Euclidean chart component is globally `C^∞`
-  -- because `T` is supported inside the chart source.
   refine ⟨tensorComponentEuclid_contDiff (I := I) (M := M) g r s T α P₀ hT_supp, ?_⟩
-  -- The weak-identity component is the supplied hypothesis.
   intro φ hφ hφ_cs hφ_supp
   exact hbilin φ hφ hφ_cs hφ_supp
 

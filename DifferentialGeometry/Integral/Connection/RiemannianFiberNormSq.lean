@@ -49,20 +49,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimension
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Local inner-product machinery on `TangentSpace I b` from `g`
-
-The smooth Riemannian metric `g` provides a positive-definite symmetric continuous
-bilinear form `g.inner b : TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ`. Mathlib's
-`RiemannianMetric.toCore` packages this into an `InnerProductSpace.Core`, from which
-`InnerProductSpace.ofCoreOfTopology` builds an `InnerProductSpace ℝ (TangentSpace I b)`
-compatible with the existing topology on the tangent space.
-
-These tools are used **locally** inside the summand-builder via `letI`, so the
-resulting `NormedAddCommGroup` / `InnerProductSpace` instances do not propagate
-outside and do not clash with the existing `NormedAddCommGroup` instance on
-`TangentSpace I b` (which comes from the model fibre `E`). All we extract from the
-local instances is a real number — the sum of squared evaluations of `T`. -/
-
 /-- The basic summand-by-summand quantity: a real-valued function of multi-indices `K`,
 `J` and an orthonormal basis `e` (with respect to `g`) of `TangentSpace I b`. We package
 it as a separate function so the unfolding of `riemannianFiberNormSq` does not have to
@@ -93,9 +79,6 @@ private lemma fiberNormSqSummand_zero
     fiberNormSqSummand (I := I) (M := M) g b r s
       (0 : TensorRSSpace r s I b) n e K J = 0 := by
   unfold fiberNormSqSummand
-  -- The underlying CLM of the zero tensor is the zero CLM, which evaluates to the
-  -- zero `(0,s)`-tensor on any covariant input; that in turn evaluates to `0 ∈ ℝ` on
-  -- any `s`-tuple of tangent vectors. Both steps are `rfl`.
   have h_inner : ((0 : TensorRSSpace r s I b)
       ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin r) ℝ).compContinuousLinearMap
         (fun k => g.inner b (e (K k)))) :
@@ -105,8 +88,6 @@ private lemma fiberNormSqSummand_zero
         (fun k => g.inner b (e (K k)))))
       (fun k => e (J k)) : ℝ) = 0 from by rw [h_inner]; rfl]
   norm_num
-
-/-! ## The definition -/
 
 /-- The Riemannian fiber norm-squared of an `(r,s)`-tensor at the point `b ∈ M`.
 
@@ -130,26 +111,19 @@ noncomputable def riemannianFiberNormSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T : TensorRSSpace r s I b) : ℝ := by
   classical
-  -- Build the core inner-product structure from `g`.
   let cd : InnerProductSpace.Core ℝ (TangentSpace I b) := g.toRiemannianMetric.toCore b
-  -- Continuity / boundedness witnesses for the topology-preserving construction.
   have hc : ContinuousAt (fun v : TangentSpace I b => cd.inner v v) 0 :=
     g.toRiemannianMetric.continuousAt b
   have hb : Bornology.IsVonNBounded ℝ {v : TangentSpace I b |
       RCLike.re (cd.inner v v) < 1} :=
     g.toRiemannianMetric.isVonNBounded b
-  -- Local override of `NormedAddCommGroup` to be compatible with `InnerProductSpace`.
   letI : NormedAddCommGroup (TangentSpace I b) := cd.toNormedAddCommGroupOfTopology hc hb
   letI : InnerProductSpace ℝ (TangentSpace I b) :=
     InnerProductSpace.ofCoreOfTopology cd hc hb
-  -- The dimension of the tangent space and an orthonormal basis (w.r.t. `g`).
   let n : ℕ := Module.finrank ℝ (TangentSpace I b)
   let e : OrthonormalBasis (Fin n) ℝ (TangentSpace I b) := stdOrthonormalBasis ℝ _
-  -- The double sum of squared evaluations.
   exact ∑ K : Fin r → Fin n, ∑ J : Fin s → Fin n,
     fiberNormSqSummand (I := I) (M := M) g b r s T n (fun i => e i) K J
-
-/-! ## Non-negativity and zero -/
 
 /-- The Riemannian fiber norm-squared is non-negative. This is immediate from the fact
 that the definition is a finite sum of non-negative summands (each is a square). -/
@@ -178,8 +152,6 @@ theorem riemannianFiberNormSq_zero
 end Connection
 end Integral
 end DifferentialGeometry
-
-/-! ## Sanity check: axioms used by the headlines. -/
 
 open DifferentialGeometry.Integral.Connection in
 #print axioms riemannianFiberNormSq

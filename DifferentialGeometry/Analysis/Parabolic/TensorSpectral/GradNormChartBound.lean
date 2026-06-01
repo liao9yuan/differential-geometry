@@ -56,8 +56,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-! ## Per-chart `tsupport` is compact and lies in the chart source -/
-
 section CompactBound
 
 variable [CompactSpace M]
@@ -76,13 +74,6 @@ private lemma tsupport_chartAtlasPOU_subset_chartSource (α : M) :
   intro x hx
   exact (chartAtlasPOU_isSubordinate I M) α hx
 
-/-! ## Per-chart sup of `chartInvGramMatrix_l1Sum` on the POU `tsupport`
-
-A continuous function on a compact set attains a finite supremum. Combined
-with the pointwise non-negativity of `chartInvGramMatrix_l1Sum`, this yields
-a non-negative per-chart bound on the partition-of-unity `tsupport`.
--/
-
 /-- **Per-chart sup bound.** There exists a non-negative real constant
 `M_Ginv` such that `chartInvGramMatrix_l1Sum g α b ≤ M_Ginv` for every point
 `b` in the `tsupport` of the chart-`α` partition-of-unity function. -/
@@ -93,52 +84,29 @@ theorem exists_chartInvGramMatrix_l1Sum_sup_on_pouTsupport
           ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
         chartInvGramMatrix_l1Sum (I := I) (M := M) g α b ≤ M_Ginv := by
   classical
-  -- Abbreviate the tsupport set.
   set K : Set M := tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) with hK
-  -- `K` is compact (closed in compact `M`).
   have hK_compact : IsCompact K :=
     tsupport_chartAtlasPOU_isCompact (I := I) (M := M) α
-  -- `K` is contained in the chart source.
   have hK_subset : K ⊆ (chartAt H α).source :=
     tsupport_chartAtlasPOU_subset_chartSource (I := I) (M := M) α
-  -- `chartInvGramMatrix_l1Sum g α` is continuous on `K`.
   have h_cont : ContinuousOn
       (chartInvGramMatrix_l1Sum (I := I) (M := M) g α) K :=
     (chartInvGramMatrix_l1Sum_continuousOn (I := I) (M := M) g α).mono hK_subset
   by_cases hK_ne : K.Nonempty
-  · -- `K` nonempty: continuous function on compact attains a max.
-    obtain ⟨b_max, _hb_max_mem, hb_max_isMax⟩ :=
+  · obtain ⟨b_max, _hb_max_mem, hb_max_isMax⟩ :=
       hK_compact.exists_isMaxOn hK_ne h_cont
-    -- Take `M_Ginv := max (l1Sum at b_max) 0` for guaranteed non-negativity.
     refine ⟨max (chartInvGramMatrix_l1Sum (I := I) (M := M) g α b_max) 0,
             le_max_right _ _, ?_⟩
     intro b hb
     have h_le_max : chartInvGramMatrix_l1Sum (I := I) (M := M) g α b ≤
         chartInvGramMatrix_l1Sum (I := I) (M := M) g α b_max := hb_max_isMax hb
     exact h_le_max.trans (le_max_left _ _)
-  · -- `K` empty: any non-negative constant works (vacuous quantifier).
-    refine ⟨0, le_refl 0, ?_⟩
+  · refine ⟨0, le_refl 0, ?_⟩
     intro b hb
     exact (hK_ne ⟨b, hb⟩).elim
 
 end CompactBound
-
-/-! ## Vanishing of the chart-component gradient outside the POU tsupport
-
-The manifold-side scalar component
-`tensorChartComponentScalar g r s S α Idx Jdx` is the partition-of-unity
-weight `ρ_α` times the raw chart-frame scalar component. Off the
-topological support `tsupport ρ_α`, the POU weight is identically zero on
-an open neighbourhood, so the entire scalar component vanishes
-identically near any such point. Consequently its gradient vanishes
-there, and the metric inner product of the gradient with itself, as well
-as its square root, are zero.
-
-This vanishing identity is the foundational ingredient for cleanly
-splitting integrals of `|∇_g (tensorChartComponentScalar …)|_g` over the
-manifold into chart-`α` contributions supported on `tsupport ρ_α`.
--/
 
 section VanishOutsidePou
 
@@ -156,17 +124,14 @@ private lemma tensorChartComponentScalar_eventuallyEq_zero_of_notMem_pouTsupport
     tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx =ᶠ[𝓝 b]
       (fun _ : M => (0 : ℝ)) := by
   classical
-  -- The complement of `tsupport ρ_α` is open and contains `b`.
   set K : Set M := tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) with hK_def
   have hK_closed : IsClosed K := isClosed_tsupport _
   have h_open_compl : IsOpen Kᶜ := hK_closed.isOpen_compl
   have hb_compl : b ∈ Kᶜ := hb
-  -- On `Kᶜ` the POU weight is zero, hence the product is zero.
   have h_mem : Kᶜ ∈ 𝓝 b := h_open_compl.mem_nhds hb_compl
   refine Filter.eventually_of_mem h_mem ?_
   intro y hy
-  -- `y ∈ Kᶜ` ⇒ `y ∉ tsupport ρ_α` ⇒ `y ∉ Function.support ρ_α` ⇒ `ρ_α y = 0`.
   have hy_notin : y ∉ K := hy
   have hy_notin_supp : y ∉ Function.support
       (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) := by
@@ -175,7 +140,6 @@ private lemma tensorChartComponentScalar_eventuallyEq_zero_of_notMem_pouTsupport
   have h_rho_zero : ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) y = 0 := by
     by_contra h_ne
     exact hy_notin_supp h_ne
-  -- Unfold `tensorChartComponentScalar` = `ρ_α y * raw y` and substitute zero.
   change tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx y = 0
   unfold tensorChartComponentScalar tensorChartComponentPou
   rw [h_rho_zero, zero_mul]
@@ -223,31 +187,12 @@ theorem sqrt_g_inner_gradFun_tensorChartComponentScalar_eq_zero_outside_pouTsupp
     gradFun_tensorChartComponentScalar_eq_zero_of_notMem_pouTsupport
       (I := I) (M := M) g r s S α Idx Jdx hb
   rw [h_grad_zero]
-  -- `g.inner b 0 0 = 0` then `√0 = 0`.
   have h_inner_zero : g.inner b
       (0 : TangentSpace I b) (0 : TangentSpace I b) = 0 := by
     rw [map_zero]
   rw [h_inner_zero, Real.sqrt_zero]
 
 end VanishOutsidePou
-
-/-! ## Leibniz rule for the chart partial of the scalar component
-
-The manifold-side scalar component `tensorChartComponentScalar` is by
-construction the product of the partition-of-unity weight `ρ_α` and the raw
-chart-frame scalar component `tensorChartComponentRaw`. Pulling this product
-back through the inverse extended chart yields a pointwise product of two
-chart-target-smooth Euclidean factors. The standard Leibniz rule for the
-Fréchet derivative then gives a clean two-term decomposition of the
-chart-direction partial derivative at any point `extChartAt I α b` lying in
-the interior of the chart target.
-
-The decomposition is the algebraic ingredient needed downstream for
-distributing chart-direction partial-derivative bounds across the two
-factors. The hypothesis `b ∈ (chartAt H α).source` ensures
-`extChartAt I α b ∈ (extChartAt I α).target`, which under `[I.Boundaryless]`
-coincides with its own interior, so all `fderiv` invocations are meaningful.
--/
 
 section LeibnizChartPartial
 
@@ -288,7 +233,6 @@ private lemma scalarOnE_tensorChartComponentRaw_contDiffOn
         ((chartAt H α).source) :=
     tensorChartComponentRaw_contMDiffOn_chart_source
       (I := I) (M := M) g r s S α Idx Jdx
-  -- Rewrite the chart-source as the extChartAt source.
   have hsrc_eq : (chartAt H α).source = (extChartAt I α).source := by
     rw [extChartAt_source_eq_chartAt_source (I := I)]
   have hraw_on' :
@@ -296,11 +240,9 @@ private lemma scalarOnE_tensorChartComponentRaw_contDiffOn
         (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx)
         ((extChartAt I α).source) := by
     rw [← hsrc_eq]; exact hraw_on
-  -- The chart-inverse `(extChartAt I α).symm` is smooth from target to source.
   have hsymm :
       ContMDiffOn 𝓘(ℝ, E) I ∞ (extChartAt I α).symm
         (extChartAt I α).target := contMDiffOn_extChartAt_symm (I := I) α
-  -- Compose: `raw ∘ symm` smooth on the target.
   have hsymm_maps :
       Set.MapsTo (extChartAt I α).symm
         (extChartAt I α).target (extChartAt I α).source := fun _ hy =>
@@ -410,18 +352,15 @@ theorem partialDeriv_scalarOnE_tensorChartComponentScalar_leibniz
           (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx))
         (extChartAt I α b) := by
   classical
-  -- Abbreviations.
   set ρ : M → ℝ :=
     fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x with hρ_def
   set raw : M → ℝ :=
     tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx with hraw_def
   set z : E := extChartAt I α b with hz_def
-  -- Membership facts: `extChartAt I α b ∈ target`.
   have hb_src : b ∈ (extChartAt I α).source := by
     rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hb
   have hz_target : z ∈ (extChartAt I α).target :=
     (extChartAt I α).map_source hb_src
-  -- Step 1: rewrite `tensorChartComponentScalar = ρ · raw`.
   have h_scalar_eq :
       tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx =
         (fun x : M => ρ x * raw x) := by
@@ -430,20 +369,17 @@ theorem partialDeriv_scalarOnE_tensorChartComponentScalar_leibniz
         ρ x * raw x
     unfold tensorChartComponentScalar tensorChartComponentPou
     rfl
-  -- Step 2: `scalarOnE α (ρ · raw) = (scalarOnE α ρ) · (scalarOnE α raw)`.
   have h_scalarOnE_prod :
       scalarOnE (I := I) α
           (tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx) =
         (fun y : E => scalarOnE (I := I) α ρ y * scalarOnE (I := I) α raw y) := by
     rw [h_scalar_eq]
     exact scalarOnE_mul_pointwise (I := I) α ρ raw
-  -- Step 3: differentiability of the two factors at `z`.
   have hρ_diff : DifferentiableAt ℝ (scalarOnE (I := I) α ρ) z :=
     differentiableAt_scalarOnE_chartAtlasPOU (I := I) (M := M) α hz_target
   have hraw_diff : DifferentiableAt ℝ (scalarOnE (I := I) α raw) z :=
     differentiableAt_scalarOnE_tensorChartComponentRaw
       (I := I) (M := M) g r s S α Idx Jdx hz_target
-  -- Step 4: apply `fderiv_fun_mul` and evaluate at the basis vector.
   unfold partialDeriv
   rw [h_scalarOnE_prod]
   have h_fderiv_mul :
@@ -455,30 +391,10 @@ theorem partialDeriv_scalarOnE_tensorChartComponentScalar_leibniz
   rw [h_fderiv_mul]
   rw [ContinuousLinearMap.add_apply,
       ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply]
-  -- The goal is now an `ℝ`-arithmetic identity. Convert `smul` to `mul`.
   simp only [smul_eq_mul]
   ring
 
 end LeibnizChartPartial
-
-/-! ## Pointwise bound on the metric self-inner-product of the chart-component
-gradient
-
-The gradient pointwise bound from the geometry layer
-`g_inner_gradFun_le_chartInvGramMatrix_l1Sum_mul_sum_sq_partials` together with
-the per-chart sup bound
-`exists_chartInvGramMatrix_l1Sum_sup_on_pouTsupport`, the Leibniz expansion
-`partialDeriv_scalarOnE_tensorChartComponentScalar_leibniz`, and the existing
-two-term split of the squared partial of the raw scalar component
-`fderiv_tensorChartComponentRaw_pullback_norm_sq_two_term_split` combine to a
-pointwise bound on the topological support of the chart-`α` partition-of-unity
-function. The bound has three terms: a sum over `k` of squared covariant-
-derivative pieces, a sum over `k` of squared Christoffel-correction pieces,
-and a single squared raw chart-frame scalar component piece.
-
-The bound is the building block needed downstream to convert pointwise control
-on the chart-component gradient into integrated `L^2`-type estimates.
--/
 
 section PointwiseGradientBound
 
@@ -488,14 +404,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Connection
 open Tensor0SBundle
 
-/-! ### Uniform sup bounds for `scalarOnE α ρ_α` and its chart-direction
-partials on the chart-α POU `tsupport`
-
-The pullback of the chart-α partition-of-unity weight is bounded pointwise by
-one (since `0 ≤ ρ ≤ 1`), and the sum of squared chart-direction partials of
-the pullback is continuous on the chart target, hence attains a finite sup on
-the compact image of the POU `tsupport` under the chart map. -/
-
 /-- Pointwise bound `|scalarOnE α ρ_α (y)| ≤ 1` for every chart-target point.
 The pullback inherits the pointwise bound `0 ≤ ρ ≤ 1` from the partition-of-
 unity. -/
@@ -503,7 +411,6 @@ private lemma scalarOnE_chartAtlasPOU_abs_le_one (α : M) (y : E) :
     |scalarOnE (I := I) α
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) y| ≤ 1 := by
   classical
-  -- The pullback evaluates `ρ_α` at `(extChartAt I α).symm y`.
   set x : M := (extChartAt I α).symm y
   have h_nn : 0 ≤ ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x :=
     (chartAtlasPOU I M).nonneg α x
@@ -544,7 +451,6 @@ private lemma sum_sq_partialDeriv_scalarOnE_chartAtlasPOU_continuousOn
       (by exact_mod_cast (le_top : (1 : ℕ∞) ≤ ⊤))
   refine continuousOn_finset_sum _ ?_
   intro k _
-  -- `partialDeriv k u y = fderiv ℝ u y (chartModelBasis E k)`.
   unfold partialDeriv
   have h_eval_cont :
       Continuous (fun L : E →L[ℝ] ℝ => L ((chartModelBasis E) k)) :=
@@ -566,33 +472,25 @@ theorem exists_sum_sq_partialDeriv_scalarOnE_chartAtlasPOU_sup
               ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ))
             (extChartAt I α b)) ^ 2 ≤ M_dρ := by
   classical
-  -- Abbreviate the POU tsupport.
   set K : Set M := tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) with hK_def
-  -- `K` is compact (closed in compact M).
   have hK_compact : IsCompact K :=
     tsupport_chartAtlasPOU_isCompact (I := I) (M := M) α
-  -- `K ⊆ chart source`.
   have hK_subset_chartSrc : K ⊆ (chartAt H α).source :=
     tsupport_chartAtlasPOU_subset_chartSource (I := I) (M := M) α
-  -- Therefore `K ⊆ extChartAt source`.
   have hK_subset_extSrc : K ⊆ (extChartAt I α).source := by
     intro x hx
     rw [extChartAt_source_eq_chartAt_source (I := I)]
     exact hK_subset_chartSrc hx
-  -- `extChartAt I α` is continuous on the chart source, hence on K.
   have h_ext_cont_on_K : ContinuousOn (extChartAt I α) K :=
     (continuousOn_extChartAt (I := I) α).mono hK_subset_extSrc
-  -- The image of K under extChartAt is compact.
   set K' : Set E := (extChartAt I α) '' K with hK'_def
   have hK'_compact : IsCompact K' :=
     hK_compact.image_of_continuousOn h_ext_cont_on_K
-  -- `K' ⊆ chart target`.
   have hK'_subset_target : K' ⊆ (extChartAt I α).target := by
     rintro y ⟨x, hx_in_K, hx_eq⟩
     rw [← hx_eq]
     exact (extChartAt I α).map_source (hK_subset_extSrc hx_in_K)
-  -- The function `y ↦ ∑_k (∂_k ρ̃)²` is continuous on chart target, hence on K'.
   have h_cont_on_K' : ContinuousOn (fun y : E =>
         ∑ k : Fin (Module.finrank ℝ E),
           (partialDeriv (E := E) k
@@ -600,7 +498,6 @@ theorem exists_sum_sq_partialDeriv_scalarOnE_chartAtlasPOU_sup
               ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)) y) ^ 2) K' :=
     (sum_sq_partialDeriv_scalarOnE_chartAtlasPOU_continuousOn
       (I := I) (M := M) α).mono hK'_subset_target
-  -- The function is non-negative pointwise.
   by_cases hK'_ne : K'.Nonempty
   · obtain ⟨y_max, _hy_max_mem, hy_max_isMax⟩ :=
       hK'_compact.exists_isMaxOn hK'_ne h_cont_on_K'
@@ -610,25 +507,13 @@ theorem exists_sum_sq_partialDeriv_scalarOnE_chartAtlasPOU_sup
                   ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)) y_max) ^ 2)
             0, le_max_right _ _, ?_⟩
     intro b hb
-    -- `extChartAt I α b ∈ K'`.
     have hb_in_K' : extChartAt I α b ∈ K' := ⟨b, hb, rfl⟩
     have h_le_max := hy_max_isMax hb_in_K'
     exact h_le_max.trans (le_max_left _ _)
-  · -- `K'` empty.  But `K = ∅` then (since `extChartAt I α` is a function).
-    refine ⟨0, le_refl 0, ?_⟩
+  · refine ⟨0, le_refl 0, ?_⟩
     intro b hb
     have hb_in_K' : extChartAt I α b ∈ K' := ⟨b, hb, rfl⟩
     exact (hK'_ne ⟨_, hb_in_K'⟩).elim
-
-/-! ### Reformulation of the existing two-term split with a canonical X
-
-The existing
-`fderiv_tensorChartComponentRaw_pullback_norm_sq_two_term_split` takes an
-arbitrary vector field `X` with `X b = trivFromE α b w`. Specialising
-`w := chartModelBasis E k` and `X := chartBasisVecFiber α k` gives a clean
-per-`k` form, with the hypothesis `X b = trivFromE α b (chartModelBasis E k)`
-discharged by definitional unfolding.
--/
 
 /-- The `k`-th canonical tangent vector field `chartBasisVecFiber α k` agrees
 with `trivFromE α b (chartModelBasis E k)` at every point `b`. This is the
@@ -637,19 +522,6 @@ private lemma chartBasisVecFiber_eq_trivFromE_chartModelBasis
     (α : M) (k : Fin (Module.finrank ℝ E)) (b : M) :
     chartBasisVecFiber (I := I) α k b =
       trivFromE (I := I) α b ((chartModelBasis E) k) := rfl
-
-/-! ### Headline pointwise bound
-
-We assemble the main inequality:
-`g.inner (∇ u) (∇ u) ≤ C · (∑_k Tcov_k² + ∑_k Tchr_k² + raw²)` on the POU
-`tsupport`, where
-- `Tcov_k := ‖triv.continuousLinearMapAt b (cov-derivative piece)‖`,
-- `Tchr_k := ‖triv.continuousLinearMapAt b (Christoffel-corrections)‖`,
-- `raw := scalarOnE α (tensorChartComponentRaw …) (φ b)`,
-- `u := tensorChartComponentScalar g r s S α Idx Jdx`.
-
-The constant `C` depends on `g`, `α`, and `(r, s)` but is independent of
-`S`, the multi-indices `(Idx, Jdx)`, and `b`. -/
 
 /-- Elementary squared-triangle inequality: `(a + b)² ≤ 2 a² + 2 b²` for real
 numbers. -/
@@ -732,7 +604,6 @@ private theorem g_inner_gradFun_tensorChartComponentScalar_le_const_on_pouTsuppo
       (tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx) b :=
     ((tensorChartComponentScalar_contMDiff (I := I) (M := M)
         g r s S α Idx Jdx).contMDiffAt).mdifferentiableAt (by simp)
-  -- Abbreviations for the per-k atoms appearing in the goal.
   set Tcov : Fin (Module.finrank ℝ E) → ℝ := fun k =>
     ‖(trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
@@ -760,7 +631,6 @@ private theorem g_inner_gradFun_tensorChartComponentScalar_le_const_on_pouTsuppo
     Finset.sum_nonneg (fun k _ => hTcov_nn k)
   have hTchr_sum_nn : 0 ≤ Tchr_sum :=
     Finset.sum_nonneg (fun k _ => hTchr_nn k)
-  -- Pullback values at `z` of `raw` and `ρ_α`.
   set raw_z : ℝ := scalarOnE (I := I) α
       (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) z
     with hraw_z_def
@@ -776,7 +646,6 @@ private theorem g_inner_gradFun_tensorChartComponentScalar_le_const_on_pouTsuppo
     have h1 : |ρ_z| * |ρ_z| ≤ 1 * 1 :=
       mul_le_mul hρ_z_abs_le_one hρ_z_abs_le_one (abs_nonneg _) zero_le_one
     nlinarith [h1]
-  -- Chart-gradient pointwise bound: `g.inner ≤ l1Sum α b · ∑_k (∂_k ũ)²`.
   have h_step_grad3 :
       g.inner b
         (gradFun (I := I) g
@@ -796,7 +665,6 @@ private theorem g_inner_gradFun_tensorChartComponentScalar_le_const_on_pouTsuppo
     exact this
   have h_l1Sum_le : chartInvGramMatrix_l1Sum (I := I) (M := M) g α b ≤ M_Ginv :=
     hM_Ginv_le b hb
-  -- Leibniz expansion for `∂_k(scalarOnE α (ρ_α · raw))` at `z`.
   have h_leibniz : ∀ k : Fin (Module.finrank ℝ E),
       partialDeriv (E := E) k (scalarOnE (I := I) α
           (tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx)) z =
@@ -812,8 +680,6 @@ private theorem g_inner_gradFun_tensorChartComponentScalar_le_const_on_pouTsuppo
       (I := I) (M := M) g r s S α Idx Jdx hb_chart_src k
     rw [hraw_z_def, hρ_z_def, hz_def]
     exact h
-  -- Per-`k` squared inequality `(a+b)² ≤ 2 a² + 2 b²` applied to the Leibniz
-  -- expansion gives `(∂_k ũ)² ≤ 2 (∂_k ρ̃)² · raw² + 2 ρ² · (∂_k raw̃)²`.
   have h_sq_le : ∀ k : Fin (Module.finrank ℝ E),
       (partialDeriv (E := E) k (scalarOnE (I := I) α
           (tensorChartComponentScalar (I := I) (M := M)
@@ -851,7 +717,6 @@ private theorem g_inner_gradFun_tensorChartComponentScalar_le_const_on_pouTsuppo
           (tensorChartComponentRaw (I := I) (M := M)
             g r s S α Idx Jdx)) z) ^ 2 := by ring
     linarith [h_tri, h_eq1.le, h_eq1.symm.le, h_eq2.le, h_eq2.symm.le]
-  -- Summed: ∑_k (∂_k ũ)² ≤ 2 raw² · Sρ + 2 ρ² · Sraw.
   set Sρ : ℝ := ∑ k : Fin (Module.finrank ℝ E),
     (partialDeriv (E := E) k (scalarOnE (I := I) α
       (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) z) ^ 2
@@ -866,7 +731,6 @@ private theorem g_inner_gradFun_tensorChartComponentScalar_le_const_on_pouTsuppo
   have hSρ_le_M_dρ : Sρ ≤ M_dρ := by
     rw [hSρ_def, hz_def]
     exact hM_dρ_le b hb
-  -- Sum the per-k inequality.
   have h_sum_sq_le :
       ∑ k : Fin (Module.finrank ℝ E),
         (partialDeriv (E := E) k (scalarOnE (I := I) α
@@ -892,7 +756,6 @@ private theorem g_inner_gradFun_tensorChartComponentScalar_le_const_on_pouTsuppo
       ring
     rw [hRHS_eq]
     exact Finset.sum_le_sum (fun k _ => h_sq_le k)
-  -- Apply ρ² ≤ 1 and Sρ ≤ M_dρ.
   have h_sum_sq_le' :
       ∑ k : Fin (Module.finrank ℝ E),
         (partialDeriv (E := E) k (scalarOnE (I := I) α
@@ -910,7 +773,6 @@ private theorem g_inner_gradFun_tensorChartComponentScalar_le_const_on_pouTsuppo
         mul_le_mul_of_nonneg_right h_2ρ_le hSraw_nn
       linarith [h_step, h_arith.le, h_arith.symm.le]
     linarith
-  -- Two-term split for each `(∂_k raw̃)²`.
   have h_twoTerm_per_k : ∀ k : Fin (Module.finrank ℝ E),
       (partialDeriv (E := E) k (scalarOnE (I := I) α
           (tensorChartComponentRaw (I := I) (M := M)
@@ -920,8 +782,6 @@ private theorem g_inner_gradFun_tensorChartComponentScalar_le_const_on_pouTsuppo
         2 * ‖tensorChartComponentProjection (E := E) r s Idx Jdx‖ ^ 2 *
           Tchr k := by
     intro k
-    -- `partialDeriv k u z = fderiv ℝ u z (chartModelBasis E k)`.
-    -- `scalarOnE α raw = raw ∘ (extChartAt I α).symm` definitionally.
     have h_lhs_eq :
         partialDeriv (E := E) k (scalarOnE (I := I) α
           (tensorChartComponentRaw (I := I) (M := M)
@@ -931,11 +791,8 @@ private theorem g_inner_gradFun_tensorChartComponentScalar_le_const_on_pouTsuppo
             (extChartAt I α).symm) z
           ((chartModelBasis E) k) := rfl
     rw [h_lhs_eq]
-    -- The hypothesis `chartBasisVecFiber α k b = trivFromE α b (chartModelBasis E k)`.
     have hXb : chartBasisVecFiber (I := I) α k b =
         trivFromE (I := I) α b ((chartModelBasis E) k) := rfl
-    -- Apply the two-term split with `X := chartBasisVecFiber α k`,
-    -- `w := chartModelBasis E k`.
     have h_split :=
       fderiv_tensorChartComponentRaw_pullback_norm_sq_two_term_split
         (I := I) (M := M) g r s α S Idx Jdx
@@ -944,11 +801,9 @@ private theorem g_inner_gradFun_tensorChartComponentScalar_le_const_on_pouTsuppo
     rw [hz_def]
     rw [hTcov_def, hTchr_def]
     exact h_split
-  -- Set `Pnorm_sq := ‖proj‖²` for brevity.
   set Pnorm_sq : ℝ := ‖tensorChartComponentProjection (E := E) r s Idx Jdx‖ ^ 2
     with hPnorm_sq_def
   have hPnorm_sq_nn : 0 ≤ Pnorm_sq := sq_nonneg _
-  -- Sum to get `Sraw ≤ 2 Pnorm_sq · Tcov_sum + 2 Pnorm_sq · Tchr_sum`.
   have h_Sraw_le :
       Sraw ≤ 2 * Pnorm_sq * Tcov_sum + 2 * Pnorm_sq * Tchr_sum := by
     rw [hSraw_def, hTcov_sum_def, hTchr_sum_def]
@@ -957,7 +812,6 @@ private theorem g_inner_gradFun_tensorChartComponentScalar_le_const_on_pouTsuppo
     refine Finset.sum_le_sum (fun k _ => ?_)
     rw [hPnorm_sq_def]
     exact h_twoTerm_per_k k
-  -- Upgrade `Pnorm_sq` to `C_proj²`.
   have h_Pnorm_le_C_proj : Pnorm_sq ≤ C_proj ^ 2 := by
     rw [hPnorm_sq_def, hC_proj_def]
     have hP_nn : 0 ≤ ‖tensorChartComponentProjection (E := E) r s Idx Jdx‖ :=
@@ -983,7 +837,6 @@ private theorem g_inner_gradFun_tensorChartComponentScalar_le_const_on_pouTsuppo
     have h2 : 2 * Pnorm_sq * Tchr_sum ≤ 2 * C_proj ^ 2 * Tchr_sum :=
       mul_le_mul_of_nonneg_right h_2P_le hTchr_sum_nn
     linarith
-  -- Sum-sq-of-partials ≤ 2 raw² · M_dρ + 4 C_proj² · (Tcov_sum + Tchr_sum).
   have h_sum_sq_final :
       ∑ k : Fin (Module.finrank ℝ E),
         (partialDeriv (E := E) k (scalarOnE (I := I) α
@@ -997,18 +850,14 @@ private theorem g_inner_gradFun_tensorChartComponentScalar_le_const_on_pouTsuppo
       have := mul_le_mul_of_nonneg_left h_Sraw_le' (by norm_num : (0 : ℝ) ≤ 2)
       linarith
     linarith
-  -- Multiply by `M_Ginv * (chartInvGramMatrix_l1Sum α b ≤ M_Ginv)`.
-  -- `l1Sum` is non-negative.
   have h_l1Sum_nn : 0 ≤ chartInvGramMatrix_l1Sum (I := I) (M := M) g α b := by
     unfold chartInvGramMatrix_l1Sum
     exact Finset.sum_nonneg (fun _ _ => abs_nonneg _)
-  -- ∑_k (∂_k ũ)² is non-negative.
   have h_sum_sq_nn : 0 ≤ ∑ k : Fin (Module.finrank ℝ E),
         (partialDeriv (E := E) k (scalarOnE (I := I) α
           (tensorChartComponentScalar (I := I) (M := M)
             g r s S α Idx Jdx)) z) ^ 2 :=
     Finset.sum_nonneg (fun _ _ => sq_nonneg _)
-  -- Combine D-grad.3 and the bound on l1Sum.
   have h_step_combined :
       g.inner b
         (gradFun (I := I) g
@@ -1038,7 +887,6 @@ private theorem g_inner_gradFun_tensorChartComponentScalar_le_const_on_pouTsuppo
           (4 * C_proj ^ 2 * Tcov_sum + 4 * C_proj ^ 2 * Tchr_sum)) :=
       mul_le_mul_of_nonneg_left h_sum_sq_final hM_Ginv_nn
     linarith
-  -- Rearrange the RHS and absorb into `C`.
   have h_rhs_arith : M_Ginv * (2 * raw_z ^ 2 * M_dρ +
         (4 * C_proj ^ 2 * Tcov_sum + 4 * C_proj ^ 2 * Tchr_sum)) =
       (2 * M_Ginv * M_dρ) * raw_z ^ 2 +
@@ -1054,7 +902,6 @@ private theorem g_inner_gradFun_tensorChartComponentScalar_le_const_on_pouTsuppo
         (4 * M_Ginv * C_proj ^ 2) * Tcov_sum +
         (4 * M_Ginv * C_proj ^ 2) * Tchr_sum := by
     rw [← h_rhs_arith]; exact h_step_combined
-  -- Replace coefficients by `C`.
   have h_coef1_term : (2 * M_Ginv * M_dρ) * raw_z ^ 2 ≤ C * raw_z ^ 2 :=
     mul_le_mul_of_nonneg_right h_coef1_le_C hraw_sq_nn
   have h_coef2_term : (4 * M_Ginv * C_proj ^ 2) * Tcov_sum ≤ C * Tcov_sum :=
@@ -1064,7 +911,6 @@ private theorem g_inner_gradFun_tensorChartComponentScalar_le_const_on_pouTsuppo
   have h_target_arith :
       C * (Tcov_sum + Tchr_sum + raw_z ^ 2) =
         C * Tcov_sum + C * Tchr_sum + C * raw_z ^ 2 := by ring
-  -- Final assembly.
   calc g.inner b
         (gradFun (I := I) g
           (tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx) b)

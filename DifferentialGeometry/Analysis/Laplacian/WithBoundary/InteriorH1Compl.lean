@@ -53,8 +53,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace (EuclideanSpace ℝ (Fin n)) :=
   borel _
 private local instance : BorelSpace (EuclideanSpace ℝ (Fin n)) := ⟨rfl⟩
@@ -67,8 +65,6 @@ private abbrev I_half (n : ℕ) [NeZero n] :
   modelWithCornersEuclideanHalfSpace n
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## The H¹ Hilbert completion -/
 
 /-- The H¹ Hilbert space for interior-supported smooth functions on `(M, g)`,
 defined as the Hausdorff completion of the pre-Hilbert space
@@ -86,8 +82,6 @@ noncomputable def smoothToH1ComplInterior (g : SmoothRiemannianMetric (I_half n)
     (f : InteriorSmoothScalar g) :
     smoothToH1ComplInterior g f = (f : H1ComplInterior g) := rfl
 
-/-! ## L²-membership of interior-supported smooth scalars -/
-
 /-- An interior-supported smooth scalar function on a closed
 manifold-with-boundary lies in `MemLp 2`: it is continuous and supported in
 a compact set (since `M` itself is compact). -/
@@ -99,8 +93,6 @@ lemma InteriorSmoothScalar.memLp_two
     riemannianVolumeMeasure_isFiniteMeasureOnCompacts (I := I_half n) (M := M) g
   exact f.smooth.continuous.memLp_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
-
-/-! ## The L² inclusion as a linear map -/
 
 /-- The linear map from interior-supported smooth scalars to `Lp ℝ 2 μ_g`. -/
 noncomputable def smoothToLpLinInterior (g : SmoothRiemannianMetric (I_half n) M) :
@@ -121,8 +113,6 @@ noncomputable def smoothToLpLinInterior (g : SmoothRiemannianMetric (I_half n) M
     (g : SmoothRiemannianMetric (I_half n) M)
     (f : InteriorSmoothScalar g) :
     smoothToLpLinInterior g f = f.memLp_two.toLp f.toFun := rfl
-
-/-! ## Squared L² norm equals `∫ f²` -/
 
 lemma InteriorSmoothScalar.norm_smoothToLp_sq
     {g : SmoothRiemannianMetric (I_half n) M} (f : InteriorSmoothScalar g) :
@@ -188,8 +178,6 @@ lemma InteriorSmoothScalar.norm_smoothToLp_le_one_mul
     ‖smoothToLpLinInterior g f‖ ≤ 1 * ‖f‖ := by
   rw [one_mul]; exact f.norm_smoothToLp_le
 
-/-! ## The L² inclusion as a continuous linear map -/
-
 /-- The continuous linear map from interior-supported smooth scalars to
 `Lp ℝ 2 μ_g`. -/
 noncomputable def smoothToLpInterior (g : SmoothRiemannianMetric (I_half n) M) :
@@ -202,8 +190,6 @@ noncomputable def smoothToLpInterior (g : SmoothRiemannianMetric (I_half n) M) :
     (g : SmoothRiemannianMetric (I_half n) M)
     (f : InteriorSmoothScalar g) :
     smoothToLpInterior g f = f.memLp_two.toLp f.toFun := rfl
-
-/-! ## The L² inclusion extended to the H¹ completion -/
 
 private lemma denseRange_toComplL_interiorSmoothScalar
     (g : SmoothRiemannianMetric (I_half n) M) :
@@ -248,8 +234,6 @@ noncomputable def H1ComplInteriorToLp
     (e := UniformSpace.Completion.toComplL)
     (denseRange_toComplL_interiorSmoothScalar g)
     (isUniformInducing_toComplL_interiorSmoothScalar g) f
-
-/-! ## Sanity tests -/
 
 example (g : SmoothRiemannianMetric (I_half n) M) : Type _ := H1ComplInterior g
 

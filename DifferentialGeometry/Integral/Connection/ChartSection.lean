@@ -57,8 +57,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## The chart-trivialised representation -/
-
 /-- The chart-trivialised `E`-valued representation of a tangent-bundle section, taken
 through the canonical trivialization at the base point `α`.
 
@@ -91,28 +89,15 @@ lemma chartE_section_repr_eq_trivialization_snd
     chartE_section_repr (I := I) α σ x =
       (trivializationAt E (TangentSpace I) α ⟨x, σ x⟩).2 := by
   classical
-  -- `triv.continuousLinearMapAt ℝ x v = (triv ⟨x, v⟩).2` for `x ∈ baseSet`.
-  -- Use `apply_eq_prod_continuousLinearEquivAt` which gives `e ⟨b, z⟩ = (b, e.continuousLinearEquivAt R b hb z)`,
-  -- and `coe_continuousLinearEquivAt_eq` which identifies the equiv with the CLM.
   unfold chartE_section_repr
   set T : Bundle.Trivialization E (π E (TangentSpace I : M → Type _)) :=
     trivializationAt E (TangentSpace I) α
   rw [T.apply_eq_prod_continuousLinearEquivAt ℝ x hx (σ x)]
-  -- Now goal: `T.continuousLinearMapAt ℝ x (σ x) = (x, T.continuousLinearEquivAt ℝ x hx (σ x)).2`
-  -- The `.2` unfolds via `coe_continuousLinearEquivAt_eq`.
   rw [show (x, (T.continuousLinearEquivAt ℝ x hx) (σ x)).2 =
         T.continuousLinearEquivAt ℝ x hx (σ x) from rfl]
   rw [show (T.continuousLinearEquivAt ℝ x hx (σ x) : E) =
           T.continuousLinearMapAt ℝ x (σ x) from
         congrFun (T.coe_continuousLinearEquivAt_eq (R := ℝ) hx) (σ x)]
-
-/-! ## (A) Section MDifferentiability ↔ chart-image MDifferentiability
-
-The first half of the bridge: at a point `x` in the trivialization base set, a
-section is MDifferentiable as a map `M → TotalSpace E (TangentSpace I)` iff its
-chart-trivialised `E`-valued representation is MDifferentiable as a map
-`M → E`. This relies directly on the Mathlib characterization
-`mdifferentiableAt_section_iff`. -/
 
 variable (I) in
 /-- **Section MDifferentiability bridge (within-at form).** A section `σ` of the
@@ -155,23 +140,6 @@ theorem mdifferentiableAt_section_iff_chartE
   rw [← mdifferentiableWithinAt_univ, ← mdifferentiableWithinAt_univ]
   exact mdifferentiableWithinAt_section_iff_chartE I α σ hx
 
-/-! ### Bridging the `E → E` chart-pulled-back map
-
-The chart-trivialised representation `σ^E_α : M → E` can be further pulled back
-through `(extChartAt I α).symm` to a function `E → E`, defined on the chart
-target. The MDifferentiability statement then translates to ordinary Fréchet
-`DifferentiableAt`, since both source and target are vector spaces.
-
-We expose two flavours:
-
-* `mdifferentiableAt_iff_pullback_of_mem_source` — the
-  `MDifferentiableAt I 𝓘(ℝ, E)` of a function `M → E` is equivalent to the
-  `MDifferentiableWithinAt` of its chart-pull-back, on the appropriate
-  range subset of `E`.
-* `mdifferentiableAt_section_iff_chartE_fderiv` — at an interior point of the
-  chart target, the section's MDifferentiability collapses fully to ordinary
-  Fréchet `DifferentiableAt` of the chart-pulled-back `E → E` map. -/
-
 /-- An `E`-valued function on `M` is `MDifferentiableAt I 𝓘(ℝ, E)` at a point in
 the chart source iff its pull-back through `(extChartAt I α).symm` is
 `MDifferentiableWithinAt 𝓘(ℝ, E) 𝓘(ℝ, E)` over `range I` at the corresponding
@@ -190,7 +158,6 @@ private lemma mdifferentiableWithinAt_range_iff_differentiableAt_of_interior
     (hy_int : y ∈ interior ((extChartAt I α).target : Set E)) :
     MDifferentiableWithinAt 𝓘(ℝ, E) 𝓘(ℝ, E) f (range I) y ↔ DifferentiableAt ℝ f y := by
   classical
-  -- `interior target ⊆ target ⊆ range I`, so on the interior, `range I ∈ 𝓝 y`.
   have htgt : (extChartAt I α).target ⊆ range I := extChartAt_target_subset_range α
   have hint_open : IsOpen (interior ((extChartAt I α).target : Set E)) := isOpen_interior
   have hrange_nhds : range I ∈ 𝓝 y :=
@@ -221,8 +188,6 @@ theorem mdifferentiableAt_section_iff_chartE_fderiv
       (chartE_section_repr (I := I) α σ) hx_src]
   exact mdifferentiableWithinAt_range_iff_differentiableAt_of_interior (α := α) hx_int
 
-/-! ## (A′) Section ContMDiff ↔ chart-image ContMDiff -/
-
 variable (I) in
 /-- **Section ContMDiff bridge (within-at form).** A section `σ` of the tangent
 bundle is `ContMDiffWithinAt I (I.prod 𝓘(ℝ, E)) k` at a point `x` of the
@@ -236,8 +201,6 @@ theorem contMDiffWithinAt_section_iff_chartE
     ContMDiffWithinAt I (I.prod 𝓘(ℝ, E)) k (T% σ) u x ↔
       ContMDiffWithinAt I 𝓘(ℝ, E) k (chartE_section_repr (I := I) α σ) u x := by
   classical
-  -- The Mathlib `_iff` form for an arbitrary trivialization needs
-  -- `ContMDiffVectorBundle 1`, which is auto-instated from `ContMDiffVectorBundle ∞`.
   have hiff :=
     Bundle.Trivialization.contMDiffWithinAt_section (𝕜 := ℝ) (IB := I)
       (n := (k : WithTop ℕ∞)) (s := σ) (a := u)
@@ -271,22 +234,6 @@ theorem contMDiffAt_section_iff_chartE
   rw [← contMDiffWithinAt_univ, ← contMDiffWithinAt_univ]
   exact contMDiffWithinAt_section_iff_chartE I α σ hx
 
-/-! ## (B′′) Manifold derivative of the section in chart coordinates
-
-The Mathlib defeq `TangentSpace 𝓘(ℝ, E) y = E` permits us to view the
-`mfderiv` of an `E`-valued function on `M` as a CLM `T_xM →L[ℝ] E`. For our
-chart-trivialised representation, this identifies, via the chain rule for
-`mfderiv` of a composition with `extChartAt`, with the Fréchet `fderiv` of the
-chart-pulled-back `E → E` map composed with the chart differential.
-
-The key observation: for the canonical tangent-bundle trivialization at `α`,
-the trivialization's `continuousLinearMapAt ℝ x` *equals* the manifold
-derivative of `extChartAt I α` at `x` (Mathlib's
-`TangentBundle.continuousLinearMapAt_trivializationAt`). So the
-chart-differential image of a tangent vector `v` is just
-`triv.continuousLinearMapAt ℝ x v` — exactly what we want for the downstream
-chart-local Levi-Civita construction. -/
-
 variable (I) in
 /-- **Manifold derivative of the chart-trivialised representation.** At a point
 `x` in the chart source whose chart image lies in the interior of the chart
@@ -314,7 +261,6 @@ theorem mfderiv_section_eq_chartE_fderiv
   set φ := extChartAt I α
   set y₀ : E := φ x
   set gE : E → E := fE ∘ φ.symm
-  -- Step 1: `fE = gE ∘ φ` on the chart source, which is in `𝓝 x`.
   have hfE_eqOn : ∀ y, y ∈ φ.source → fE y = gE (φ y) := by
     intro y hy
     change fE y = fE (φ.symm (φ y))
@@ -329,7 +275,6 @@ theorem mfderiv_section_eq_chartE_fderiv
   have hmfderiv_eq :
       mfderiv I 𝓘(ℝ, E) fE x = mfderiv I 𝓘(ℝ, E) (gE ∘ φ) x :=
     Filter.EventuallyEq.mfderiv_eq hev
-  -- Step 2: chart smoothness, section differentiability give chain rule applicability.
   have hφ_mdiff : MDiffAt φ x := mdifferentiableAt_extChartAt (I := I) (x := α) hx_src
   have hgE_diff : DifferentiableAt ℝ gE y₀ :=
     (mdifferentiableAt_section_iff_chartE_fderiv (I := I) α σ hx_src hx_base hx_int).mp hσ
@@ -339,30 +284,21 @@ theorem mfderiv_section_eq_chartE_fderiv
       mfderiv I 𝓘(ℝ, E) (gE ∘ φ) x =
         (mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) gE (φ x)).comp (mfderiv I 𝓘(ℝ, E) φ x) :=
     mfderiv_comp x hgE_mdiff hφ_mdiff
-  -- `mfderiv` for a vector-space-target map equals `fderiv`.
   have hmf_to_fderiv :
       mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) gE (φ x) = fderiv ℝ gE (φ x) :=
     mfderiv_eq_fderiv (𝕜 := ℝ) (E := E) (E' := E) (f := gE) (x := φ x)
-  -- For the canonical tangent-bundle trivialization at `α`,
-  -- `triv.continuousLinearMapAt ℝ x = mfderiv (extChartAt I α) x`.
   have htriv_eq :
       mfderiv I 𝓘(ℝ, E) (extChartAt I α) x =
         (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ x :=
     (TangentBundle.continuousLinearMapAt_trivializationAt (𝕜 := ℝ) (I := I)
       (x₀ := α) (x := x) hx_src).symm
-  -- Now combine: rewrite the LHS via `hmfderiv_eq`, `hchain`, `hmf_to_fderiv`.
   rw [hmfderiv_eq, hchain, hmf_to_fderiv]
-  -- Goal: `((fderiv ℝ gE (φ x)).comp (mfderiv I 𝓘(ℝ,E) φ x)) v = fderiv ℝ gE y₀ (triv v)`.
-  -- Reduce `comp` and replace `mfderiv φ x v` with `triv.continuousLinearMapAt ℝ x v`
-  -- using `htriv_eq` (recall `φ := extChartAt I α`, `y₀ := φ x`, definitionally).
   change (fderiv ℝ gE (φ x))
         ((mfderiv I 𝓘(ℝ, E) (extChartAt I α) x) v) =
       fderiv ℝ gE y₀
         ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ x v)
   rw [htriv_eq]
   rfl
-
-/-! ## (C) Smoothness preservation -/
 
 variable (I) in
 /-- **ContMDiff section ⟹ ContDiffOn chart pull-back.** A globally `C^k` section
@@ -382,10 +318,8 @@ theorem contDiffOn_chartE_pullback_of_contMDiff_section
   subst hx_eq
   set fE := chartE_section_repr (I := I) α σ
   set φ := extChartAt I α
-  -- `fE` is `ContMDiffAt I 𝓘(ℝ, E) k` at `x` via the section bridge.
   have hfE_at : ContMDiffAt I 𝓘(ℝ, E) k fE x :=
     (contMDiffAt_section_iff_chartE I α σ hx_base).mp (hσ x)
-  -- `(extChartAt I α).symm` is `ContMDiffWithinAt 𝓘(ℝ,E) I k` at `φ x` over `φ.target`.
   have hxφ_src : x ∈ φ.source := by rw [extChartAt_source]; exact hx_src
   have hxφ_tgt : φ x ∈ φ.target := φ.map_source hxφ_src
   have hxφ_inv : φ.symm (φ x) = x := φ.left_inv hxφ_src
@@ -395,25 +329,13 @@ theorem contDiffOn_chartE_pullback_of_contMDiff_section
     have hsymm_on : ContMDiffOn 𝓘(ℝ, E) I (k : WithTop ℕ∞) φ.symm φ.target :=
       hsymm_on_inf.of_le (by exact_mod_cast le_top)
     exact hsymm_on (φ x) hxφ_tgt
-  -- Composition: `fE ∘ φ.symm` is `ContMDiffWithinAt 𝓘(ℝ,E) 𝓘(ℝ,E) k` at `φ x` over `φ.target`.
-  -- Use the chain rule: `ContMDiffAt.comp_contMDiffWithinAt` evaluates `g` at `f x`, here
-  -- `f x = φ.symm (φ x) = x`, so we rewrite `hfE_at` to be at `φ.symm (φ x)`.
   have hcomp_at : ContMDiffWithinAt 𝓘(ℝ, E) 𝓘(ℝ, E) k (fE ∘ φ.symm) φ.target (φ x) := by
     have hfE_at' : ContMDiffAt I 𝓘(ℝ, E) k fE (φ.symm (φ x)) := by
       rw [hxφ_inv]; exact hfE_at
     exact hfE_at'.comp_contMDiffWithinAt (φ x) hsymm_at
-  -- Translate to `ContDiffWithinAt` (vector-space target / source).
   rw [contMDiffWithinAt_iff_contDiffWithinAt] at hcomp_at
   refine hcomp_at.mono ?_
   exact inter_subset_right
-
-/-! ## (D) Trivialization linear-action helpers
-
-Mathlib already provides `(trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ x`
-as a CLM `TangentSpace I x →L[ℝ] E`, and `.symmL ℝ x` as a CLM `E →L[ℝ] TangentSpace I x`.
-We expose convenient names for these and bundle the round-trip identities, so
-the downstream Levi-Civita chart-local construction can use a small fixed
-vocabulary. -/
 
 variable (I) in
 /-- The chart-trivialization CLM at `(α, x)`. -/
@@ -481,14 +403,6 @@ lemma chartE_section_repr_zero (α : M) (x : M) :
   unfold chartE_section_repr
   rw [map_zero]
 
-/-! ## (E) Manifold derivative of a scalar function in chart coordinates
-
-For a scalar function `f : M → ℝ`, the manifold derivative `mfderiv I 𝓘(ℝ) f x`
-is identified, at an interior point of the chart target, with the Fréchet
-derivative of the chart-pulled-back map `f ∘ (extChartAt I α).symm` precomposed
-with the trivialization map `trivToE α x`. This is the scalar-function analogue
-of `mfderiv_section_eq_chartE_fderiv`. -/
-
 variable (I) in
 /-- **Manifold derivative of a scalar function in chart coordinates.** At a
 point `x` of the chart source whose chart image lies in the interior of the
@@ -508,7 +422,6 @@ theorem mfderiv_scalar_eq_chart_fderiv
   classical
   set φ := extChartAt I α
   set g : E → ℝ := f ∘ φ.symm
-  -- Step 1: `f = g ∘ φ` on the chart source, which is in `𝓝 x`.
   have hf_eqOn : ∀ y, y ∈ φ.source → f y = g (φ y) := by
     intro y hy
     change f y = f (φ.symm (φ y))
@@ -522,12 +435,7 @@ theorem mfderiv_scalar_eq_chart_fderiv
   have hmfderiv_eq :
       mfderiv I 𝓘(ℝ) f x = mfderiv I 𝓘(ℝ) (g ∘ φ) x :=
     Filter.EventuallyEq.mfderiv_eq hev
-  -- Step 2: chart smoothness, scalar function differentiability give chain rule applicability.
   have hφ_mdiff : MDiffAt φ x := mdifferentiableAt_extChartAt (I := I) (x := α) hx_src
-  -- The pullback `g = f ∘ φ.symm` is `MDifferentiableAt 𝓘(ℝ,E) 𝓘(ℝ)` at `φ x`,
-  -- because `f` is `MDifferentiableAt I 𝓘(ℝ)` at `x = φ.symm (φ x)` and `φ.symm` is
-  -- `MDifferentiableWithinAt 𝓘(ℝ,E) I (range I)` at `φ x` with `range I ∈ 𝓝 (φ x)`.
-  -- Once we have `MDifferentiableAt`, vector-space target reduces to `DifferentiableAt`.
   have hxφ_tgt : φ x ∈ φ.target := φ.map_source hsrc_extChart
   have hxφ_inv : φ.symm (φ x) = x := φ.left_inv hsrc_extChart
   have hsymm_within :
@@ -546,27 +454,21 @@ theorem mfderiv_scalar_eq_chart_fderiv
       hf hsymm_within hxφ_inv
   have hg_at : MDifferentiableAt 𝓘(ℝ, E) 𝓘(ℝ) g (φ x) :=
     hg_within.mdifferentiableAt hrange_nhds
-  -- Chain rule for `mfderiv (g ∘ φ) x`.
   have hchain :
       mfderiv I 𝓘(ℝ) (g ∘ φ) x =
         (mfderiv 𝓘(ℝ, E) 𝓘(ℝ) g (φ x)).comp (mfderiv I 𝓘(ℝ, E) φ x) :=
     mfderiv_comp x hg_at hφ_mdiff
-  -- For a vector-space-source/target map, `mfderiv` equals `fderiv`. We need the
-  -- domain to be a vector space (E) and the codomain (ℝ).
   have hg_diff : DifferentiableAt ℝ g (φ x) :=
     hg_at.differentiableAt
   have hmf_to_fderiv :
       mfderiv 𝓘(ℝ, E) 𝓘(ℝ) g (φ x) = fderiv ℝ g (φ x) :=
     mfderiv_eq_fderiv (𝕜 := ℝ) (E := E) (E' := ℝ) (f := g) (x := φ x)
-  -- For the canonical tangent-bundle trivialization at `α`,
-  -- `triv.continuousLinearMapAt ℝ x = mfderiv (extChartAt I α) x`.
   have htriv_eq :
       mfderiv I 𝓘(ℝ, E) (extChartAt I α) x =
         (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ x :=
     (TangentBundle.continuousLinearMapAt_trivializationAt (𝕜 := ℝ) (I := I)
       (x₀ := α) (x := x) hx_src).symm
   rw [hmfderiv_eq, hchain, hmf_to_fderiv]
-  -- Goal: `((fderiv ℝ g (φ x)).comp (mfderiv I 𝓘(ℝ,E) φ x)) v = fderiv ℝ g (φ x) (trivToE α x v)`.
   change (fderiv ℝ g (φ x))
         ((mfderiv I 𝓘(ℝ, E) (extChartAt I α) x) v) =
       fderiv ℝ g (φ x)

@@ -36,8 +36,6 @@ namespace DifferentialGeometry.Analysis.ODE.Flow
 open Set Metric Function
 open scoped ContDiff NNReal
 
-/-! ## `C^∞` from finite-order regularity -/
-
 /-- If `f` is `C^k` on `S` for every natural number `k`, then `f` is `C^∞` on `S`. -/
 theorem contDiffOn_top_of_forall_nat
     {𝕜 E F : Type*} [NontriviallyNormedField 𝕜]
@@ -47,8 +45,6 @@ theorem contDiffOn_top_of_forall_nat
     (h : ∀ k : ℕ, ContDiffOn 𝕜 (k : ℕ∞) f S) :
     ContDiffOn 𝕜 (∞ : WithTop ℕ∞) f S :=
   contDiffOn_infty.mpr h
-
-/-! ## Coefficient regularity -/
 
 section CoefficientRegularity
 
@@ -75,8 +71,6 @@ private theorem contDiffOn_variational_coeff_aux
   exact hpfd.comp hiM (fun _ _ => mem_univ _)
 
 end CoefficientRegularity
-
-/-! ## The Hartman `C^∞` theorem -/
 
 section HartmanTheorem
 
@@ -108,18 +102,14 @@ theorem IsLocalFlow.contDiffOn_top
       ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)) := by
   apply contDiffOn_top_of_forall_nat
   intro n
-  -- Abbreviations.
   set U := (ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)
-  -- f is C^k for every k.
   have hf_Ck : ∀ k : ℕ, ContDiffOn ℝ (k : ℕ∞) (uncurry f) (univ : Set (ℝ × E)) :=
     fun k => (hf_top.contDiffOn : ContDiffOn ℝ ∞ (uncurry f) univ).of_le
       (by exact_mod_cast (le_top : (k : ℕ∞) ≤ ⊤))
-  -- C^1 base.
   have hf_C1 : ContDiffOn ℝ 1 (uncurry f) (univ : Set (ℝ × E)) := by simpa using hf_Ck 1
   have hΦ_C1 : ContDiffOn ℝ 1 Φ U :=
     contDiffOn_flow_of_isLocalFlow hΦ hf_C1 hT hT_lt_mid hT_mid_lt_out hM hMT_mid hsub hr'
       hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd
-  -- Picard parameter setup for variational linear map.
   have hT_mid_pos : 0 < T_mid := lt_trans hT hT_lt_mid
   have hsub_mid_out : Icc (t₀ - T_mid) (t₀ + T_mid) ⊆ Icc (t₀ - T_out) (t₀ + T_out) :=
     Icc_subset_Icc (by linarith) (by linarith)
@@ -130,29 +120,22 @@ theorem IsLocalFlow.contDiffOn_top
       hA_bd x (closedBall_subset_closedBall (le_of_lt hρ_mid_lt_out) hx) τ (hsub_mid_out hτ)
   have hab : t₀ - T < t₀ + T := by linarith
   have ht₀_mem : t₀ ∈ Ioo (t₀ - T) (t₀ + T) := ⟨by linarith, by linarith⟩
-  -- Induction on n.
   induction n with
   | zero => exact hΦ_C1.of_le (by decide)
   | succ n ih =>
-    -- f is C^{n+1} (and more).
     have hf_Csucc : ContDiffOn ℝ ((n : ℕ∞) + 1) (uncurry f) (univ : Set (ℝ × E)) := by
       simpa using hf_Ck (n + 1)
-    -- Coefficient A(x,t) := fderiv ℝ (f t) (Φ(x,t)) is C^n.
     have hcoeff_Cn : ContDiffOn ℝ (n : ℕ∞) (fun q : E × ℝ => fderiv ℝ (f q.2) (Φ q)) U :=
       contDiffOn_variational_coeff_aux hf_Csucc ih
-    -- Coefficient in curried form for linearODESolution.
     set A : E → ℝ → (E →L[ℝ] E) := fun x t => fderiv ℝ (f t) (Φ ⟨x, t⟩)
-    -- Each scalar variational solution linearODESolution(A, ..., fun _ => δ) is C^n.
     have hlinear_Cn : ∀ δ : E, ContDiffOn ℝ (n : ℕ∞)
         (uncurry (linearODESolution A (t₀ - T) (t₀ + T) t₀ (fun _ => δ)))
         (ball x₀ (ρ : ℝ) ×ˢ Ioo (t₀ - T) (t₀ + T)) :=
       fun δ => linearODESolution_contDiffOn hab ht₀_mem isOpen_ball n
         (hcoeff_Cn : ContDiffOn ℝ (n : ℕ∞) (uncurry A) _)
         (contDiffOn_const : ContDiffOn ℝ (n : ℕ∞) (fun (_ : E) => δ) (ball x₀ (ρ : ℝ)))
-    -- The spatial piece of fderiv Φ.
     set Lsp : E × ℝ → E →L[ℝ] E :=
       fun q => (fderiv ℝ Φ q).comp (ContinuousLinearMap.inl ℝ E ℝ)
-    -- fderiv_eq: fderiv Φ = Lsp.coprod(timePieceFn) on U.
     have hfderiv_coprod : ∀ q ∈ U, fderiv ℝ Φ q = (Lsp q).coprod (timePieceFn f Φ q) := by
       intro ⟨x, t⟩ ⟨hx, ht⟩
       have hx' : dist x x₀ < ↑ρ := mem_ball.mp hx
@@ -161,32 +144,18 @@ theorem IsLocalFlow.contDiffOn_top
       have ht_mid : t ∈ Ioo (t₀ - T_mid) (t₀ + T_mid) := ⟨by linarith [ht.1], by linarith [ht.2]⟩
       have hfd := hasFDerivAt_flow_jointly_at hΦ hf_C1 hT_mid_pos hM hMT_mid hsub_mid
         hr' hρρ' hA_bd_mid hx_cb_mid ht_mid
-      -- fderiv Φ (x,t) = (vlm).coprod(tp)  by hfd.fderiv
-      -- Lsp (x,t) = (fderiv Φ (x,t)).comp(inl) = vlm  by coprod_comp_inl
-      -- So fderiv Φ = Lsp.coprod(tp).
-      -- From coprod decomposition: L = L.comp(inl).coprod(L.comp(inr))
-      -- After rw [hfd.fderiv], the goal becomes:
-      --   (vlm).coprod(tp) = Lsp(x,t).coprod(timePieceFn ...)
-      -- Since Lsp(x,t) = (fderiv Φ (x,t)).comp(inl) = (vlm.coprod(tp)).comp(inl) = vlm
-      -- and timePieceFn agrees with the time piece, this is done.
       rw [hfd.fderiv]
       change (variationalLinearMapAt hT_mid_pos hM hMT_mid _ _ _).coprod
             ((ContinuousLinearMap.id ℝ ℝ).smulRight (f t (Φ (x, t))))
         = (Lsp (x, t)).coprod (timePieceFn f Φ (x, t))
       congr 1
-      · -- Lsp(x,t) = vlm
-        change _ = (fderiv ℝ Φ (x, t)).comp (ContinuousLinearMap.inl ℝ E ℝ)
+      · change _ = (fderiv ℝ Φ (x, t)).comp (ContinuousLinearMap.inl ℝ E ℝ)
         rw [hfd.fderiv]
         exact (ContinuousLinearMap.coprod_comp_inl _ _).symm
-    -- Lsp is C^n via contDiffOn_clm_apply + linearODESolution identification.
     have hLsp_Cn : ContDiffOn ℝ (n : ℕ∞) Lsp U := by
       rw [contDiffOn_clm_apply]
       intro δ
-      -- Show: (x,t) ↦ Lsp(x,t)(δ) is C^n.
-      -- Strategy: show it equals linearODESolution(A, ..., fun _ => δ, x, t) on U,
-      -- which is C^n by hlinear_Cn.
       refine (hlinear_Cn δ).congr (fun q hq => ?_)
-      -- Need: Lsp q δ = uncurry (linearODESolution A ...) q.
       obtain ⟨hx_ball, ht_Ioo⟩ := hq
       have hx' : dist q.1 x₀ < ↑ρ := mem_ball.mp hx_ball
       have hx_cb_mid : q.1 ∈ closedBall x₀ (ρ_mid : ℝ) :=
@@ -199,20 +168,16 @@ theorem IsLocalFlow.contDiffOn_top
         (mem_closedBall_self (by exact_mod_cast (le_of_lt hr')))).mono hsub_mid)
       have hA_bd_x := fun τ hτ => hA_bd_mid q.1 hx_cb_mid τ hτ
       have ht_Icc : q.2 ∈ Icc (t₀ - T_mid) (t₀ + T_mid) := Ioo_subset_Icc_self ht_mid
-      -- From hasFDerivAt_flow_jointly_at:
       have hfd := hasFDerivAt_flow_jointly_at hΦ hf_C1 hT_mid_pos hM hMT_mid hsub_mid
         hr' hρρ' hA_bd_mid hx_cb_mid ht_mid
-      -- Step 1: Lsp q = variationalLinearMapAt(...)
       have hLsp_eq_vlm : Lsp q =
           variationalLinearMapAt hT_mid_pos hM hMT_mid hA_cont_x hA_bd_x ht_Icc := by
         change (fderiv ℝ Φ q).comp (ContinuousLinearMap.inl ℝ E ℝ) = _
         conv_lhs => rw [show q = (q.1, q.2) from Prod.mk.eta.symm]
         rw [hfd.fderiv]
         exact ContinuousLinearMap.coprod_comp_inl _ _
-      -- Step 2: variationalLinearMapAt(δ) = variationalSolutionFun(δ)(q.2)
       have hvlm_eq := variationalLinearMapAt_apply hT_mid_pos hM hMT_mid hA_cont_x hA_bd_x
         ht_Icc δ
-      -- Step 3: variationalSolutionFun(δ)(q.2) = linearODESolution(A, ...)(q.1)(q.2)
       have hvsf := variationalSolutionFun_isSolution hT_mid_pos hM hMT_mid hA_cont_x hA_bd_x δ
       have hA_cont_Ioo : ContinuousOn (A q.1) (Ioo (t₀ - T) (t₀ + T)) :=
         hA_cont_x.mono (fun s hs => Ioo_subset_Icc_self
@@ -229,14 +194,10 @@ theorem IsLocalFlow.contDiffOn_top
         (fun s hs => linearODESolution_hasDerivAt_of_hasSolution A (t₀ - T) (t₀ + T) t₀
           (fun _ => δ) h_exists hs)
         (by rw [hvsf.1, linearODESolution_init])
-      -- Combine.
       simp only [hLsp_eq_vlm, hvlm_eq, uncurry]
       have h_eq := h_uniq ht_Ioo
-      -- h_eq : variationalSolutionFun ... q.2 = linearODESolution ... q.1 q.2
-      -- (up to beta-reduction in linearODE_unique_on_Ioo's EqOn conclusion)
       dsimp at h_eq
       exact h_eq
-    -- Upgrade Φ from C^n to C^{n+1} by `contDiffOn_flow_succ_of_spatial_smooth`.
     exact contDiffOn_flow_succ_of_spatial_smooth hΦ hT hT_lt_mid hT_mid_lt_out hM hMT_mid hsub
       hr' hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd
       (by simpa using hf_Ck (n + 1)) ih hLsp_Cn hfderiv_coprod

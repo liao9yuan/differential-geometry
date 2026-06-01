@@ -64,22 +64,11 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## Bridge between the two `chartTargetEuclid` namespaces -/
-
 omit [CompleteSpace E] in
 private lemma chartTargetEuclid_eq_local (α : M) :
     (chartTargetEuclid (I := I) (M := M) α : Set EuclN) =
       DifferentialGeometry.Analysis.Laplacian.MetricExtension.chartTargetEuclid
         (I := I) (M := M) α := rfl
-
-/-! ## Local weighted-versus-volume `eLpNorm` comparison helper
-
-Inline restatement of the chart-pulled weighted vs. plain volume `eLpNorm`
-comparison: for a family of functions vanishing almost everywhere off the
-compact partition-of-unity kernel `chartPouKernel α`, the weighted `L²`-norm
-against the chart-pulled weighted measure restricted to the chart target is
-bounded by a single nonneg constant (depending only on `(g, α)`) times the
-plain-volume `L²`-norm restricted to the chart target. -/
 
 omit [CompleteSpace E] in
 private lemma chartPulledWeightedMeasure_restrict_le_volume_on_chartPouKernel_local
@@ -193,8 +182,6 @@ private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel_unifo
       ENNReal.ofReal (Real.sqrt c) := by
     rw [Real.sqrt_eq_rpow, ← ENNReal.ofReal_rpow_of_nonneg hc_nn (by positivity)]
   rw [h_pow_eq, smul_eq_mul]
-
-/-! ## Chart-locality-free twins -/
 
 section Unconditional
 

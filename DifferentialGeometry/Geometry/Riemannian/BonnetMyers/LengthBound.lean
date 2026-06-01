@@ -268,34 +268,16 @@ theorem sum_index_form_integrand_eval
               (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun) t
           = (piOverL * cosπL) • (e i).toFun t := by
     intro i
-    -- The scalar weight `f := sin(π·/L)` is differentiable at `t`.
     have h_weight_diff : DifferentiableAt ℝ (fun s : ℝ => Real.sin (Real.pi * s / L)) t :=
       h_weight_hasDeriv.differentiableAt
-    -- Genuine regularity of the frame in chart coordinates at the foot `t`:
-    -- the chart-`(γ t)`-coordinate representation `chartRepAt γ (e i) t` is
-    -- differentiable at `t`.  This is the same "varies differentiably along γ"
-    -- regularity that the intrinsic Leibniz rule `covDerivAlong_smulFun`
-    -- requires (cf. `perp_to_velocity_preserved_of_parallel`'s `hVdiff`); it is the frame
-    -- regularity hypothesis `_heDiff`, now stated in chart-representation form.
     have h_chartrep_diff :
         DifferentiableAt ℝ (chartRepAt (I := I) γ (e i).toFun t) t :=
       _heDiff i t ht
-    -- The underlying function of `smulFun ...` is `s ↦ sin(πs/L) • (e i).toFun s`;
-    -- this is definitional, so `covDerivAlong` of the section coincides with
-    -- `covDerivAlong` of the scalar-function multiple of `(e i).toFun`.
     have h_leibniz :=
       covDerivAlong_smulFun (I := I) g γ
         (fun s => Real.sin (Real.pi * s / L)) (e i).toFun t h_weight_diff h_chartrep_diff
-    -- `h_leibniz : covDerivAlong g γ (fun s => sin(πs/L) • (e i).toFun s) t
-    --   = (deriv sin t) • (e i).toFun t + sin(πt/L) • covDerivAlong g γ (e i).toFun t`.
-    -- The parallelism `_hParallel` kills the second summand; `deriv sin t = piOverL*cosπL`.
     rw [_hParallel i t ht, smul_zero, add_zero, h_weight_hasDeriv.deriv] at h_leibniz
-    -- The LHS of `h_leibniz` is `covDerivAlong` of `(smulFun sin (e i)).toFun` by
-    -- definitional unfolding of `smulFun`; the goal follows.
     exact h_leibniz
-  -- Step 4: For each i, the per-i integrand equals
-  --   (piOverL * cosπL)² - sinπL² · ⟨R(e_i, γ', γ'), e_i⟩_g.
-  -- We expand the integrand using the named pieces.
   have h_integrand_i :
       ∀ i : Fin (Module.finrank ℝ E - 1),
         indexFormIntegrand (I := I) g γ
@@ -310,28 +292,20 @@ theorem sum_index_form_integrand_eval
                   ((e i).toFun t) (uPrime t) (uPrime t))
                 ((e i).toFun t) := by
     intro i
-    -- Substitute chartCovDerivAlong values, gammaPrime.
-    -- The let-bindings need to be unfolded; use simp only with rfl-defs.
-    -- We rewrite the result by computing each component.
     have h_ndV := h_nabla_V i
     have h_V_val :
         (SectionAlongCurve.smulFun
             (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun t
           = sinπL • (e i).toFun t := by simp [sinπL]
-    -- Compute ⟨∇V, ∇V⟩_g = (piOverL * cosπL)^2 · 1.
     have h_inner_ND :
         g.inner (γ t)
             ((piOverL * cosπL) • (e i).toFun t)
             ((piOverL * cosπL) • (e i).toFun t)
           = (piOverL * cosπL) ^ 2 := by
-      -- g.inner is bilinear; pull out scalars.
       have hpull1 : g.inner (γ t) ((piOverL * cosπL) • (e i).toFun t)
             = (piOverL * cosπL) • g.inner (γ t) ((e i).toFun t) :=
         (g.inner (γ t)).map_smul (piOverL * cosπL) ((e i).toFun t)
       rw [hpull1]
-      -- Now `(piOverL * cosπL) • g.inner (γ t) ((e i).toFun t)` is an `E →L[ℝ] ℝ`,
-      -- and its application to ((piOverL * cosπL) • (e i).toFun t) equals
-      -- `(piOverL * cosπL) * g.inner (γ t) ((e i).toFun t) ((piOverL * cosπL) • (e i).toFun t)`.
       have : ((piOverL * cosπL) • g.inner (γ t) ((e i).toFun t))
               ((piOverL * cosπL) • (e i).toFun t)
             = (piOverL * cosπL) *
@@ -353,8 +327,6 @@ theorem sum_index_form_integrand_eval
         have := _hON t ht i i
         simpa using this
       rw [hON_ii]; ring
-    -- Compute ⟨R(V, γ', γ'), V⟩_g.
-    -- R(sin • e_i, γ', γ') = sin • R(e_i, γ', γ').
     have h_riem_pullout :
         riemannOp (LeviCivita (I := I) g) (γ t)
             (sinπL • (e i).toFun t)
@@ -375,7 +347,6 @@ theorem sum_index_form_integrand_eval
       rw [hsmul]
       simp [ContinuousLinearMap.smul_apply]
     have h_gp : mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ) = uPrime t := h_gammaPrime
-    -- Use h_gp to rewrite gammaPrime in the riemannOp value.
     have h_inner_R :
         g.inner (γ t)
             (riemannOp (LeviCivita (I := I) g) (γ t)
@@ -389,9 +360,6 @@ theorem sum_index_form_integrand_eval
                   ((e i).toFun t) (uPrime t) (uPrime t))
                 ((e i).toFun t) := by
       rw [h_riem_pullout]
-      -- Now g.inner (γ t) (sinπL • R(e_i, γ', γ')) (sinπL • e_i)
-      -- = sinπL · g.inner (γ t) (R(...)) (sinπL • e_i)
-      -- = sinπL · (sinπL · g.inner (γ t) (R(...)) (e_i))
       have hL1 :
           g.inner (γ t)
               (sinπL • riemannOp (LeviCivita (I := I) g) (γ t)
@@ -456,14 +424,8 @@ theorem sum_index_form_integrand_eval
         rw [smul_eq_mul]
       rw [hR2, h_gp]
       ring
-    -- Now assemble.
-    -- Goal: indexFormIntegrand ... = (piOverL * cosπL)^2 - sinπL^2 * R-inner-thing.
-    -- After unfolding the let-bindings inside `indexFormIntegrand`, the goal
-    -- becomes a subtraction equation we can chain via `rw`.
     simp only [indexFormIntegrand]
     rw [h_ndV, h_V_val, h_inner_ND, h_inner_R]
-  -- Step 5: Sum over i, decompose using h_integrand_i.
-  -- ∑_i [a - b · c_i] = (n-1) * a - b · ∑_i c_i
   have h_sum_split :
       ∑ i : Fin (Module.finrank ℝ E - 1),
         indexFormIntegrand (I := I) g γ
@@ -492,8 +454,6 @@ theorem sum_index_form_integrand_eval
                     ((e i).toFun t))
         from Finset.sum_congr rfl (fun i _ => h_integrand_i i)]
     rw [Finset.sum_sub_distrib, ← Finset.mul_sum]
-  -- Step 6: Apply trace identity to collapse the Ricci sum.
-  -- Need: uPrime t is a unit g-vector and (e i) is ON-perp to uPrime t.
   have h_unit : g.inner (γ t) (uPrime t) (uPrime t) = 1 := _hUnit t ht
   have h_ON_e : ∀ i j, g.inner (γ t) ((e i).toFun t) ((e j).toFun t)
       = if i = j then 1 else 0 := _hON t ht
@@ -508,9 +468,6 @@ theorem sum_index_form_integrand_eval
         = ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t) :=
     ricci_eq_sum_sectional_curvature_of_orthonormal_perp_frame (I := I) g (γ t) (uPrime t)
       h_unit (fun i => (e i).toFun t) h_ON_e h_perp_e
-  -- Step 7: Combine. The constant sum equals (n-1) · (piOverL*cosπL)^2.
-  -- We bind `nm1 : ℝ` to the canonical real cast (`(n - 1 : ℕ) : ℝ`) so the
-  -- inner equality stays inside `ℕ→ℝ` and we lift to `(n : ℝ) - 1` afterwards.
   have hn_pos : 0 < Module.finrank ℝ E := Nat.pos_of_ne_zero (NeZero.ne _)
   have h_n_ge_one : 1 ≤ Module.finrank ℝ E := hn_pos
   have h_const_sum :
@@ -519,7 +476,6 @@ theorem sum_index_form_integrand_eval
     rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin,
       nsmul_eq_mul]
   rw [h_sum_split, h_const_sum, h_trace]
-  -- Cast: ((n-1 : ℕ) : ℝ) = (n : ℝ) - 1 since n ≥ 1.
   have h_cast : ((Module.finrank ℝ E - 1 : ℕ) : ℝ)
       = (Module.finrank ℝ E : ℝ) - 1 := by
     rw [Nat.cast_sub h_n_ge_one, Nat.cast_one]
@@ -648,8 +604,6 @@ theorem sum_index_form_frame_evaluation
       have hL_nonneg : (0 : ℝ) ≤ L := le_of_lt hL
       rw [Set.uIcc_of_le hL_nonneg] at ht
       exact hPointwise ht)
-
-/-! ## Sum-index-form bound from the Ricci hypothesis -/
 
 /-- **sum-index-form-bound-by-curvature-hypothesis.** Given the lower
 Ricci bound `(n-1) K · g(v, v) ≤ Ric(v, v)` (i.e.
@@ -849,8 +803,6 @@ theorem sum_index_form_bound_by_curvature_hypothesis
   apply le_of_eq
   ring
 
-/-! ## Length-bound contradiction assembly -/
-
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Bonnet-Myers length bound.** For a unit-speed minimising geodesic
@@ -918,26 +870,16 @@ theorem bonnet_myers_length_le_of_ricci_bound
   classical
   by_contra hcontra
   rw [not_le] at hcontra
-  -- hcontra : Real.pi / Real.sqrt K < L
-  -- Step 1: basic positivity facts.
   have h_pi_pos : (0 : ℝ) < Real.pi := Real.pi_pos
   have h_sqrtK_pos : (0 : ℝ) < Real.sqrt K := Real.sqrt_pos.mpr _hK
   have h_piOverL_pos : (0 : ℝ) < Real.pi / L := div_pos h_pi_pos _hL
-  -- Step 2: (n - 1 : ℝ) ≥ 1 from _hdim.
   have h_nm1_ge_one : (1 : ℝ) ≤ (Module.finrank ℝ E : ℝ) - 1 := by
     have : (2 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := by exact_mod_cast _hdim
     linarith
   have h_nm1_pos : (0 : ℝ) < (Module.finrank ℝ E : ℝ) - 1 := by linarith
-  -- Step 3: derive (π/L)² < K from π/√K < L.
-  --   From π/√K < L and L > 0 we get π/L < √K.
-  --   Squaring both sides (both nonneg) gives (π/L)² < K.
   have h_piOverL_lt_sqrtK : Real.pi / L < Real.sqrt K := by
-    -- π/√K < L ↔ π < L * √K (since √K > 0)
-    -- π < L * √K and L > 0 ↔ π / L < √K
     rw [div_lt_iff₀ h_sqrtK_pos] at hcontra
-    -- hcontra : π < L * √K
     rw [div_lt_iff₀ _hL]
-    -- goal : π < √K * L
     linarith
   have h_sq_lt_K : (Real.pi / L) ^ 2 < K := by
     have h_nonneg : (0 : ℝ) ≤ Real.pi / L := le_of_lt h_piOverL_pos
@@ -947,10 +889,6 @@ theorem bonnet_myers_length_le_of_ricci_bound
       simpa [sq] using this
     rw [Real.sq_sqrt (le_of_lt _hK)] at h_sq
     exact h_sq
-  -- Step 4: use the parallel orthonormal perpendicular frame `e` supplied as
-  -- a hypothesis.
-  -- Step 5: apply sum_index_form_bound_by_curvature_hypothesis, threading all
-  -- the parallel-frame data along.
   have h_upper :
       (∑ i : Fin (Module.finrank ℝ E - 1),
           indexForm (I := I) g γ 0 L
@@ -963,10 +901,6 @@ theorem bonnet_myers_length_le_of_ricci_bound
     sum_index_form_bound_by_curvature_hypothesis (I := I) g γ _hL _hγ _hgeo
       _hRic uPrime _huPrimeEq _hUnit e _heDiff _hParallel _hON _hPerp
       _hIntegrandSum _hRicIntegrable
-  -- Step 6: apply indexForm_nonneg_of_minimising_geodesic pointwise and sum.
-  -- The trial vector field V_i(t) := sin(π t / L) • (e i)(t) vanishes at the
-  -- endpoints since sin(0) = sin(π) = 0, so the endpoint conditions for
-  -- `indexForm_nonneg_of_minimising_geodesic` are satisfied for any `e i`.
   have h_each_nonneg : ∀ i : Fin (Module.finrank ℝ E - 1),
       0 ≤ indexForm (I := I) g γ 0 L
         ((SectionAlongCurve.smulFun
@@ -974,7 +908,6 @@ theorem bonnet_myers_length_le_of_ricci_bound
         ((SectionAlongCurve.smulFun
           (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun) := by
     intro i
-    -- Unit-speed of `γ'` in terms of the manifold velocity, via `_huPrimeEq`.
     have hUnit_mfd : ∀ t ∈ Set.Icc (0 : ℝ) L,
         g.inner (γ t)
             (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
@@ -982,9 +915,6 @@ theorem bonnet_myers_length_le_of_ricci_bound
       intro t ht
       rw [_huPrimeEq t ht]
       exact _hUnit t ht
-    -- Perpendicularity of the trial field `V_i = sin(π·/L) • e_i` to `γ'`.
-    -- The scalar `sin(π t / L)` factors out by bilinearity, leaving the frame
-    -- perpendicularity `_hPerp`.
     have hVperp : ∀ t ∈ Set.Icc (0 : ℝ) L,
         g.inner (γ t)
             ((SectionAlongCurve.smulFun
@@ -1001,10 +931,8 @@ theorem bonnet_myers_length_le_of_ricci_bound
       (fun t => (SectionAlongCurve.smulFun
         (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun t)
       _hL _hγ_smooth (_hVbundle i) _hgeo _hmin hUnit_mfd hVperp ?_ ?_
-    · -- V 0 = 0: sin(π·0/L) = sin 0 = 0, so the smul gives zero.
-      simp [SectionAlongCurve.smulFun_toFun, Real.sin_zero]
-    · -- V L = 0: sin(π·L/L) = sin π = 0, so the smul gives zero.
-      have hL_ne : L ≠ 0 := ne_of_gt _hL
+    · simp [SectionAlongCurve.smulFun_toFun, Real.sin_zero]
+    · have hL_ne : L ≠ 0 := ne_of_gt _hL
       have h_arg : Real.pi * L / L = Real.pi := by field_simp
       simp [SectionAlongCurve.smulFun_toFun, h_arg, Real.sin_pi]
   have h_sum_nonneg :
@@ -1015,9 +943,6 @@ theorem bonnet_myers_length_le_of_ricci_bound
             ((SectionAlongCurve.smulFun
               (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun) :=
     Finset.sum_nonneg (fun i _ => h_each_nonneg i)
-  -- Step 7: derive contradiction.
-  -- Upper bound: (n - 1) * (L / 2) * ((π/L)² - K).
-  -- (n - 1) ≥ 1 > 0, L/2 > 0, (π/L)² - K < 0, so product < 0.
   have h_L_half_pos : (0 : ℝ) < L / 2 := by linarith
   have h_diff_neg : (Real.pi / L) ^ 2 - K < 0 := by linarith
   have h_upper_strict_neg :
@@ -1025,7 +950,6 @@ theorem bonnet_myers_length_le_of_ricci_bound
     have h_prod1_pos : (0 : ℝ) < (Module.finrank ℝ E - 1 : ℝ) * (L / 2) :=
       mul_pos h_nm1_pos h_L_half_pos
     exact mul_neg_of_pos_of_neg h_prod1_pos h_diff_neg
-  -- Chain: 0 ≤ sum ≤ upper < 0.
   linarith [h_sum_nonneg, h_upper, h_upper_strict_neg]
 
 end BonnetMyers

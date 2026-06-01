@@ -81,8 +81,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Outer coordinate-basis expansion of one chart-frame trace summand -/
-
 /-- **Coordinate-basis expansion of the outer tangent-vector slot of one
 chart-frame trace summand for the raw tensor connection Laplacian.**
 
@@ -120,7 +118,6 @@ private lemma covRS_covApply_B_i_T₀_at_B_i_eq_coord_sum_outer
               (fun z : M => T₀.toSection z)) b
             (chartBasisVecFiber (I := I) α l b) := by
   classical
-  -- Step 1: expand `B_i(b)` in the chart-α coordinate basis via B.2.b.
   have hExpand :
       (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b =
         ∑ l : Fin (Module.finrank ℝ E),
@@ -128,16 +125,12 @@ private lemma covRS_covApply_B_i_T₀_at_B_i_eq_coord_sum_outer
             chartBasisVecFiber (I := I) α l b := by
     have h := chartFrameNormGlobalSmooth_eq_coordMatrix_sum
       (I := I) (M := M) g α i (b := b) hb
-    -- `h` rewrites the coercion form; restore via `rfl`.
     have hcoerce : ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i :
           Π b : M, TangentSpace I b) b)
         = (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b := rfl
     rw [hcoerce] at h
     exact h
-  -- Step 2: distribute the bundle covariant derivative's continuous linear
-  -- action on `TangentSpace I b` over the finite sum.
   rw [hExpand]
-  -- Set the outer CLM for readability.
   set Lcov : TangentSpace I b →L[ℝ] TensorRSSpace r s I b :=
     (TensorRSNabla.tensorRSCovariantDerivative I M r s
         (LeviCivita (I := I) g)).toFun
@@ -145,14 +138,10 @@ private lemma covRS_covApply_B_i_T₀_at_B_i_eq_coord_sum_outer
         (LeviCivita (I := I) g))
         (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun
         (fun z : M => T₀.toSection z)) b
-  -- `Lcov (∑ l, c_l • v_l) = ∑ l, c_l • Lcov v_l` by `map_sum` + `map_smul`.
   rw [map_sum]
   refine Finset.sum_congr rfl ?_
   intro l _
   rw [Lcov.map_smul]
-
-/-! ## Chart-α (Idx, Jdx)-projection of the coordinate-basis-expanded
-chart-frame trace summand -/
 
 /-- **Chart-α `(Idx, Jdx)`-projection of one outer-coordinate-basis-expanded
 chart-frame trace summand.**
@@ -195,17 +184,13 @@ private lemma chart_α_proj_covRS_covApply_B_i_T₀_at_B_i_eq_coord_sum_outer
                     (fun z : M => T₀.toSection z)) b
                   (chartBasisVecFiber (I := I) α l b))) := by
   classical
-  -- Step 1: expand the outer tangent-vector slot of the bundle covariant
-  -- derivative.
   rw [covRS_covApply_B_i_T₀_at_B_i_eq_coord_sum_outer
       (I := I) (M := M) g r s α T₀ i (b := b) hb]
-  -- Step 2: distribute the trivialization CLM through the finite sum.
   set L : TensorRSSpace r s I b →L[ℝ] ℝ :=
     (tensorChartComponentProjection (E := E) r s Idx Jdx).comp
       ((trivializationAt (TensorRSModel r s ℝ E)
           (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b)
     with hL_def
-  -- The LHS is `L (∑ l, c_l • v_l)`; rewrite as `∑ l, c_l • L v_l` via `map_sum`.
   have hApply :
       L (∑ l : Fin (Module.finrank ℝ E),
             chartFrameNormGlobalSmoothCoordMatrix (I := I) (M := M) g α i l b •
@@ -229,12 +214,8 @@ private lemma chart_α_proj_covRS_covApply_B_i_T₀_at_B_i_eq_coord_sum_outer
     refine Finset.sum_congr rfl ?_
     intro l _
     rw [L.map_smul]
-  -- Convert `L` action to `tensorChartComponentProjection ∘ (triv α).clmAt b`.
-  -- Both sides reduce to that form by unfolding `L`.
   simp only [hL_def, ContinuousLinearMap.comp_apply, smul_eq_mul] at hApply
   exact hApply
-
-/-! ## The headline identity -/
 
 /-- **Chart-α `(Idx, Jdx)` raw component of `rawTensorConnLapSmooth T₀` as a
 chart-coordinate-weighted bundle second covariant derivative double sum minus
@@ -292,7 +273,6 @@ theorem chartPushed_rawConnLap_chart_α_proj_eq_weighted_secondCovDeriv_minus_fr
                 (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b
                 ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b))))) := by
   classical
-  -- Step 1: rewrite the LHS in terms of `rawTensorConnLap T₀` at `b`.
   have hLHS_eq :
       tensorChartComponentRaw (I := I) (M := M) g r s
           (rawTensorConnLapSmooth (I := I) g r s T₀) α Idx Jdx b =
@@ -304,15 +284,10 @@ theorem chartPushed_rawConnLap_chart_α_proj_eq_weighted_secondCovDeriv_minus_fr
     unfold tensorChartComponentRaw tensorTrivProj
     rw [rawTensorConnLapSmooth_toSection_apply (I := I) g r s T₀ b]
   rw [hLHS_eq]
-  -- Step 2: apply B.2.a (chart-frame trace identity) to the chart-α
-  -- (Idx, Jdx)-projection of the trivialized rawTensorConnLap at `b`.
   have hStep2 :=
     tensorChartComponentRaw_rawTensorConnLap_eq_chart_frame_trace_sum
       (I := I) (M := M) g r s α T₀ Idx Jdx (b := b) hb
   rw [hStep2]
-  -- Step 3: per-`i` distribution of the projection through the subtraction and
-  -- of the bundle covariant derivative's outer slot through the
-  -- coordinate-basis expansion of `B_i(b)`.
   have hperI : ∀ i : Fin (Module.finrank ℝ E),
       tensorChartComponentProjection (E := E) r s Idx Jdx
           ((trivializationAt (TensorRSModel r s ℝ E)
@@ -352,13 +327,9 @@ theorem chartPushed_rawConnLap_chart_α_proj_eq_weighted_secondCovDeriv_minus_fr
                   (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b
                   ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b)))) := by
     intro i
-    -- Distribute the trivialization CLM, then the projection, through the
-    -- subtraction; then distribute the projection of the first piece through
-    -- the chart-basis outer expansion.
     rw [map_sub, map_sub]
     rw [chart_α_proj_covRS_covApply_B_i_T₀_at_B_i_eq_coord_sum_outer
         (I := I) (M := M) g r s α T₀ Idx Jdx i (b := b) hb.2]
-  -- Step 4: assemble via `Finset.sum_congr` + `Finset.sum_sub_distrib`.
   rw [show (∑ i : Fin (Module.finrank ℝ E),
         tensorChartComponentProjection (E := E) r s Idx Jdx
           ((trivializationAt (TensorRSModel r s ℝ E)

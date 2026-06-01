@@ -76,23 +76,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## The principal sum: chart-α inverse-Gram-matrix-weighted bilinear bundle
-second covariant derivative
-
-The principal term is the chart-α inverse-Gram-matrix-weighted double sum over
-the chart-α coordinate indices `(k, l)` of the chart-α `(Idx, Jdx)` projection
-of the bundle covariant derivative
-`(cov_RS).toFun (covApply cov_RS (chartBasisVecFiber α k) T₀.toSection)` at
-`b` applied to the chart-α coordinate-basis tangent vector
-`chartBasisVecFiber α l b`.
-
-The inner vector field is `chartBasisVecFiber α k`, the chart-α coordinate-
-basis tangent vector indexed by the *chart-α coordinate index* `k`. The
-chart-α inverse Gram matrix `chartInvGramMatrix g α b k l` weights the double
-sum. Pairing the chart-coordinate basis on both inner and outer slots is the
-form required for the orthonormality contraction
-`Σ_i C^k_i · C^l_i = g^{kl}` to collapse on both sides. -/
-
 /-- **The chart-α inverse-Gram-matrix-weighted principal sum.** -/
 noncomputable def chartInvGramPrincipalSum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -113,15 +96,6 @@ noncomputable def chartInvGramPrincipalSum
                 (chartBasisVecFiber (I := I) α k)
                 (fun z : M => T₀.toSection z)) b
               (chartBasisVecFiber (I := I) α l b)))
-
-/-! ## The chart-α coordinate-matrix-weighted predecessor double sum
-
-The predecessor identity (file
-`RawConnLapChartProjAsWeightedSecondCovDerivMinusΓTrace`) supplies the chart-α
-`(Idx, Jdx)`-projection of the raw tensor connection Laplacian as a *frame-
-weighted* double sum over `(i, l)` of `C(b)^l_i ·` (chart-α `(Idx, Jdx)`
-projection of `(cov_RS).toFun (covApply cov_RS B_i T₀) b (∂_l b)`), minus the
-chart-frame trace Γ-correction. -/
 
 /-- **The chart-α frame-coordinate-matrix-weighted predecessor double sum.** -/
 noncomputable def chartFrameCoordMatrixWeightedDoubleSum
@@ -144,13 +118,6 @@ noncomputable def chartFrameCoordMatrixWeightedDoubleSum
                 (fun z : M => T₀.toSection z)) b
               (chartBasisVecFiber (I := I) α l b)))
 
-/-! ## The Leibniz remainder
-
-Defined as the algebraic difference between the predecessor's frame-weighted
-double sum and the chart-α inverse-Gram-matrix-weighted principal sum. Carries
-the chart-α frame-vs-coordinate-basis residual data after the inverse-Gram
-contraction has been extracted on the principal slot. -/
-
 /-- **The chart-α Leibniz remainder.** -/
 noncomputable def chartLeibnizRemainder
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -160,11 +127,6 @@ noncomputable def chartLeibnizRemainder
     (b : M) : ℝ :=
   chartFrameCoordMatrixWeightedDoubleSum (I := I) (M := M) g r s α T₀ Idx Jdx b -
     chartInvGramPrincipalSum (I := I) (M := M) g r s α T₀ Idx Jdx b
-
-/-! ## The chart-frame trace Γ-correction
-
-Unchanged from the predecessor: chart-α `(Idx, Jdx)`-projection of the
-single-cov chart-frame trace Γ-correction summand. -/
 
 /-- **The chart-frame trace Γ-correction.** -/
 noncomputable def chartFrameTraceΓCorrection
@@ -184,9 +146,6 @@ noncomputable def chartFrameTraceΓCorrection
             (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b
             ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b))))
 
-/-! ## The algebraic identity: principal + Leibniz remainder = predecessor's
-frame-weighted double sum -/
-
 /-- **Algebraic identity: principal sum + Leibniz remainder = frame-weighted
 double sum.** A direct application of the definition of the Leibniz remainder
 as the difference of the frame-weighted double sum and the principal sum. -/
@@ -203,8 +162,6 @@ lemma chartInvGramPrincipal_plus_LeibnizRemainder_eq_frameWeighted
   classical
   unfold chartLeibnizRemainder
   ring
-
-/-! ## The headline identity -/
 
 /-- **Full chart-coordinate expansion of the chart-α `(Idx, Jdx)`-projection of
 the raw tensor connection Laplacian.**
@@ -247,14 +204,10 @@ theorem chartPushed_rawConnLap_chart_α_proj_eq_chartInvGram_secondCovDeriv_plus
         chartLeibnizRemainder (I := I) (M := M) g r s α T₀ Idx Jdx b) -
       chartFrameTraceΓCorrection (I := I) (M := M) g r s α T₀ Idx Jdx b := by
   classical
-  -- Step 1: rewrite via the predecessor identity (frame-weighted double sum
-  -- minus chart-frame trace Γ-correction).
   have hPred :=
     chartPushed_rawConnLap_chart_α_proj_eq_weighted_secondCovDeriv_minus_frameTraceΓ
       (I := I) (M := M) g r s α T₀ Idx Jdx (b := b) hb
   rw [hPred]
-  -- Step 2: identify the predecessor's frame-weighted double sum with
-  -- `chartFrameCoordMatrixWeightedDoubleSum`, by unfolding the latter.
   have hFrameWeighted_eq :
       (∑ i : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
@@ -272,8 +225,6 @@ theorem chartPushed_rawConnLap_chart_α_proj_eq_chartInvGram_secondCovDeriv_plus
         chartFrameCoordMatrixWeightedDoubleSum (I := I) (M := M)
           g r s α T₀ Idx Jdx b := rfl
   rw [hFrameWeighted_eq]
-  -- Step 3: identify the predecessor's chart-frame trace Γ-correction with
-  -- `chartFrameTraceΓCorrection`, by unfolding the latter.
   have hΓ_eq :
       (∑ i : Fin (Module.finrank ℝ E),
         tensorChartComponentProjection (E := E) r s Idx Jdx
@@ -287,8 +238,6 @@ theorem chartPushed_rawConnLap_chart_α_proj_eq_chartInvGram_secondCovDeriv_plus
                 ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b))))) =
         chartFrameTraceΓCorrection (I := I) (M := M) g r s α T₀ Idx Jdx b := rfl
   rw [hΓ_eq]
-  -- Step 4: identify the frame-weighted double sum with the principal sum plus
-  -- the Leibniz remainder via the algebraic identity.
   have hSplit :=
     chartInvGramPrincipal_plus_LeibnizRemainder_eq_frameWeighted
       (I := I) (M := M) g r s α T₀ Idx Jdx b

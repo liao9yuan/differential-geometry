@@ -107,21 +107,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The slot-`0` frame-trace matching predicate
-
-The left-hand side of the target commutator, `Δ_∇(∇T₀) = rawTensorConnLapSmooth g 0 3
-(covGrad g 0 2 T₀)`, is a `(0, 3)`-tensor field. Its unit-`(0, 0)`-evaluation, curried along
-the gradient direction `w` (extended to the smooth field `W := smoothExtensionTangent x w`),
-should equal the fixed-frame iterated-covariant trace `∑ᵢ ∇_{Bᵢ}∇_{Bᵢ}(∇_W T₀)(x)(unit)` over
-the `g_x`-orthonormal frame `B_i := smoothOrthoFrame g x i`. This is the torsion-free slot-`0`
-Christoffel matching — the only remaining structural input. -/
 
 /-- **Slot-`0` frame-trace matching.** For `g`, `T₀`, the point `x`, and gradient direction
 `w`, the predicate
@@ -150,14 +139,6 @@ def slot0FrameTraceMatching
           (smoothOrthoFrame (I := I) g x i x))
       (unitZeroSec (I := I) (M := M) x)
 
-/-! ## The left-hand-side reading expressed through `unitGradAbstractRoughLap`
-
-The unit-`(0, 0)`-evaluation of `Δ_∇(∇T₀)`, curried along `w`, is read through the abstract
-`(0, 3)` rough Laplacian of the unit-evaluated gradient field. This conjoins the section-level
-reduction `rawTensorConnLap_covGrad_unit_eval_eq_abstract_roughLap`
-(`CovGradRoughLapCommutatorAbstract.lean`) with the smooth-extension fixed-point
-`smoothExtensionTangent_eq`. -/
-
 /-- **LHS reading of `Δ_∇(∇T₀)`, curried.** The unit-`(0, 0)`-evaluation of
 `Δ_∇(∇T₀) = rawTensorConnLapSmooth g 0 3 (covGrad g 0 2 T₀)`, curried along the gradient
 direction `w`, equals the slot-`0` curry of the abstract `(0, 3)` rough Laplacian of the
@@ -181,22 +162,6 @@ lemma rawConnLap_covGrad_curry_eq_abstractRoughLap_curry
   rw [rawTensorConnLapSmooth_toSection_apply]
   rw [rawTensorConnLap_covGrad_unit_eval_eq_abstract_roughLap (I := I) (M := M) g T₀ x]
   rw [smoothExtensionTangent_eq]
-
-/-! ## Transporting the fixed-frame iterated trace to abstract `(0, 2)` form
-
-The right-hand side of the slot-`0` matching `slot0FrameTraceMatching` is the fixed-frame
-RS-level iterated-covariant trace `∑ᵢ ∇_{Bᵢ}∇_{Bᵢ}(∇_W T₀)(x)(unit)`. Each summand is the
-RS-level directional covariant derivative of a smooth `(0, 2)`-tensor section, twice; its
-unit-`(0, 0)`-evaluation transports — with no correction term, the unit `(0, 0)`-section being
-`∇`-parallel — to the abstract `(0, 2)` covariant derivative of the unit-evaluated section. The
-two transports are `covDeriv_unit_eval_eq_two` (`CovGradRoughLapCommutatorClose2.lean`) and the
-rank-`2` analogue `covApply_unit_eval_eq_two` proved here (mirroring the rank-`3`
-`covApply_unit_eval_eq` of `CovGradRoughLapCommutator.lean`).
-
-This reduces the slot-`0` matching to a purely **abstract `(0, 2)` Christoffel-bookkeeping**
-identity: the curvature-free reorganization of the abstract double covariant derivative against
-the depth-`2` / depth-`1` slot-`0` Christoffel corrections of the left-hand-side reading
-`curry_unitGradAbstractRoughLap_along`. No curvature term occurs in either form. -/
 
 /-- **Rank-`2` `covApply` unit-evaluation intertwining.** For a smooth `Cₛ^∞`
 `(0, 2)`-tensor section `σ` and a smooth tangent vector field `X`, the unit-`(0, 0)`-evaluation
@@ -292,14 +257,11 @@ lemma frameTraceSummand_unit_eq_abstract
     smoothOrthoFrame_smooth (I := I) g x i
   have hW : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (smoothExtensionTangent (I := I) x w)) :=
     smoothExtensionTangent_contMDiff x w
-  -- Outer transport: `cov₂ S x (Bᵢ x) (unit) = cov₂ₐ(y ↦ S y (unit)) x (Bᵢ x)`.
   have hStep1 := covDeriv_unit_eval_eq_two (I := I) (M := M) g
     (covApplyBcovApplyT₀Section (I := I) (M := M) g T₀ hW hB) x
     (smoothOrthoFrame (I := I) g x i x)
-  -- Inner transport: `(covApply cov₂ Bᵢ (∇_W T₀)) y (unit) = covApply cov₂ₐ Bᵢ (·(unit)) y`.
   have hInner := covApply_unit_eval_eq_two (I := I) (M := M) g
     (covApplyT₀Section (I := I) (M := M) g T₀ hW) (smoothOrthoFrame (I := I) g x i)
-  -- The packaged sections reduce definitionally to the raw `covApply` forms.
   calc (tensorCov (I := I) g 0 2).toFun
           (covApply (tensorCov (I := I) g 0 2) (smoothOrthoFrame (I := I) g x i)
             (covApply (tensorCov (I := I) g 0 2)
@@ -344,13 +306,6 @@ lemma frameTraceSummand_unit_eq_abstract
                   (unitZeroSec (I := I) (M := M) z)) y) x
           (smoothOrthoFrame (I := I) g x i x) := rfl
 
-/-! ## The headline curried curvature-defect identity
-
-Combining the slot-`0` matching with the already-proved right-hand-side reading and the
-frame-trace swap, the unit-`(0, 0)`-evaluation of the canonical defect
-`covGradRoughLapCurv g T₀`, curried along `w`, is the explicit curvature field
-`Tensor3rdCurv` minus the moving-frame residual. -/
-
 /-- **Curried curvature-defect identity from the slot-`0` matching.** Assume the slot-`0`
 frame-trace matching `slot0FrameTraceMatching g T₀ x w`. Then the unit-`(0, 0)`-evaluation of
 the canonical commutator defect `covGradRoughLapCurv g T₀ = Δ_∇(∇T₀) − ∇(Δ_∇ T₀)`, curried
@@ -379,7 +334,6 @@ theorem covGradRoughLapCurv_curry_eq_of_slot0Matching
           (fun y : M => T₀.toSection y) x)
         (unitZeroSec (I := I) (M := M) x) -
       covGradRoughLapMovingFrameResidual (I := I) (M := M) g T₀ x w := by
-  -- The defect's underlying section is the difference of the two `(0, 3)` sections.
   have hdef : (covGradRoughLapCurv (I := I) (M := M) g T₀).toSection x =
       (rawTensorConnLapSmooth (I := I) g 0 3
           (covGrad (I := I) (M := M) g 0 2 T₀)).toSection x -
@@ -387,20 +341,13 @@ theorem covGradRoughLapCurv_curry_eq_of_slot0Matching
           (rawTensorConnLapSmooth (I := I) g 0 2 T₀)).toSection x := by
     rw [covGradRoughLapCurv, SmoothCcTensor.toSection_sub]; rfl
   rw [hdef]
-  -- Distribute the unit-evaluation and the slot-`0` curry along `w` over the difference.
   rw [ContinuousLinearMap.sub_apply, map_sub, ContinuousLinearMap.sub_apply]
-  -- The `Δ_∇(∇T₀)` term: substitute the slot-`0` matching hypothesis directly (its left-hand
-  -- side is exactly the curried unit-evaluation of `Δ_∇(∇T₀)`).
   unfold slot0FrameTraceMatching at hmatch
   rw [hmatch]
-  -- The `∇(Δ_∇ T₀)` term: the slot-`0` curry of the gradient is the directional derivative.
   rw [covGrad_rawConnLap_unit_eval_curry (I := I) (M := M) g T₀ x w]
-  -- The frame-trace swap (re-read through `covGrad_rawConnLap_unit_eval_curry`): the
-  -- fixed-frame iterated trace equals `(∇_w Δ_∇T₀)(unit) − residual + Tensor3rdCurv(unit)`.
   have hswap := frame_trace_thirdW_eq_covGrad_rawConnLap_sub_residual_add_curv
     (I := I) (M := M) g T₀ x w
   rw [covGrad_rawConnLap_unit_eval_curry (I := I) (M := M) g T₀ x w] at hswap
-  -- Substitute the fixed-frame trace via the frame-trace swap; the goal closes by `abel`.
   rw [hswap]
   abel
 

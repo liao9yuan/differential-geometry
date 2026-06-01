@@ -58,8 +58,6 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Unified packaging of V.4 chart-flow + R.D.3.a manifold-lift data -/
-
 section UnifiedPackaging
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
@@ -114,8 +112,6 @@ theorem exists_unified_chartFlow_data
         IsMIntegralCurveOn (chartFlowOrbitLift (I := I) Φ p v)
           (geodesicVectorFieldChart (I := I) g p) (Set.Ioo (-T) T)) := by
   classical
-  -- The base chart point `x₀ := extChartAt I p p` lies in the chart-
-  -- target interior under `[I.Boundaryless]`.
   set x₀ : E := extChartAt I p p with hx₀_def
   have hx₀_src : p ∈ (extChartAt I p).source :=
     mem_extChartAt_source (I := I) p
@@ -123,18 +119,15 @@ theorem exists_unified_chartFlow_data
     (extChartAt I p).map_source hx₀_src
   have hx₀_interior : x₀ ∈ interior (extChartAt I p).target :=
     extChartAt_target_subset_interior_of_boundaryless (I := I) p hx₀_target
-  -- Invoke V.4's combined witness ONCE.
   obtain ⟨b, r, ε, ρ_V4, T_V4, Φ, hr, hε, hρ_V4_pos, hT_V4_pos, hb_sub, hΦ_ILF,
     hΦ_cd_V4, hΦ_init0⟩ :=
     Geodesic.exists_chartPhase_contDiffOn_isLocalFlow_combined
       (I := I) (g := g) (α := p) (x₀ := x₀) (v₀ := (0 : E)) hx₀_interior
-  -- Inner-ball confinement on uniform (ρ₀, T₀) from V.4 ContDiffOn + initial.
   obtain ⟨ρ₀, T₀, hρ₀_pos, hT₀_pos, hρ₀_le_V4, hT₀_lt_V4, h_orbit_in⟩ :=
     exists_uniform_orbit_in_inner_ball (I := I) (g := g) (p := p)
       (x₀ := x₀) hx₀_def
       (b := b) (ρ_V4 := ρ_V4) (T_V4 := T_V4) hρ_V4_pos hT_V4_pos
       (Φ := Φ) hΦ_cd_V4 hΦ_init0
-  -- Shrink ρ₀ to ensure ρ ≤ r, and T₀ to ensure T < ε.
   set ρ : ℝ := min ρ₀ ((r : ℝ) / 2) with hρ_def
   have hρ_pos : 0 < ρ := by
     apply lt_min hρ₀_pos
@@ -158,7 +151,6 @@ theorem exists_unified_chartFlow_data
     have : T = min T₀ (ε / 2) := hT_def
     rw [this]; linarith
   have hT_lt_T_V4 : T < T_V4 := lt_of_le_of_lt hT_le_T₀ hT₀_lt_V4
-  -- Restrict V.4's ContDiffOn to the shrunken product set.
   have hΦ_cd : ContDiffOn ℝ 1 Φ
       ((Metric.ball ((x₀, (0 : E)) : E × E) ρ) ×ˢ Set.Ioo (-T) T) := by
     apply hΦ_cd_V4.mono
@@ -168,7 +160,6 @@ theorem exists_unified_chartFlow_data
     · refine ⟨?_, ?_⟩
       · linarith [hw.2.1]
       · linarith [hw.2.2]
-  -- Initial value identity for every v ∈ ball 0 ρ via IsLocalFlow.
   have hΦ_init_v : ∀ v ∈ Metric.ball (0 : E) ρ,
       Φ (((x₀, v) : E × E), 0) = ((x₀, v) : E × E) := by
     intro v hv
@@ -181,7 +172,6 @@ theorem exists_unified_chartFlow_data
       have hv_r : ‖v‖ ≤ (r : ℝ) := le_of_lt (lt_of_lt_of_le hv hρ_le_r)
       exact max_le hr_nn hv_r
     exact hΦ_ILF.apply_initial ((x₀, v) : E × E) hv_in
-  -- Inner-ball confinement on (ρ, T) ⊆ (ρ₀, T₀).
   have h_inner_T : ∀ v ∈ Metric.ball (0 : E) ρ, ∀ s ∈ Set.Icc (-T) T,
       Φ (((x₀, v) : E × E), s) ∈
         Metric.ball (((x₀, (0 : E)) : E × E)) b.rIn := by
@@ -195,7 +185,6 @@ theorem exists_unified_chartFlow_data
       · linarith [hs.1]
       · linarith [hs.2]
     exact h_orbit_in v hv_ρ₀ s hs_T₀
-  -- Chart-target-interior confinement from inner-ball + hb_sub.
   have hΦ_target : ∀ v ∈ Metric.ball (0 : E) ρ, ∀ s ∈ Set.Icc (-T) T,
       Φ (((x₀, v) : E × E), s) ∈
         (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E) := by
@@ -209,7 +198,6 @@ theorem exists_unified_chartFlow_data
         Metric.closedBall ((x₀, (0 : E)) : E × E) b.rOut :=
       Metric.closedBall_subset_closedBall h_inner_le_outer h_in_closed
     exact hb_sub h_in_outer
-  -- Uniform chart-phase ODE on Ioo (-T) T.
   have hΦ_phase : ∀ v ∈ Metric.ball (0 : E) ρ, ∀ s ∈ Set.Ioo (-T) T,
       HasDerivAt (fun s' : ℝ => Φ (((x₀, v) : E × E), s'))
         (chartPhaseVF (I := I) g p (Φ (((x₀, v) : E × E), s))) s := by
@@ -219,7 +207,6 @@ theorem exists_unified_chartFlow_data
       (b := b) (r := r) (ε := ε) hr hε
       (Φ := Φ) hΦ_ILF hb_sub
       (ρ := ρ) (T := T) hρ_pos hT_pos hT_lt_ε hρ_le_r h_inner_T v hv s hs
-  -- Zero-section orbit constancy (eventually in 𝓝 0).
   have hconst_ev : ∀ᶠ s in 𝓝 (0 : ℝ),
       Φ (((x₀, (0 : E)) : E × E), s) = ((x₀, (0 : E)) : E × E) := by
     change ∀ᶠ s in 𝓝 (0 : ℝ),
@@ -227,12 +214,10 @@ theorem exists_unified_chartFlow_data
         ((extChartAt I p p, (0 : E)) : E × E)
     exact chartFlow_zero_section_eventually_const (I := I) (g := g) (p := p)
       (Φ := Φ) (b := b) (r := r) (ε := ε) hΦ_ILF hb_sub hr hε
-  -- Extract an open interval Ioo (-δ_match) δ_match on which constancy holds.
   rcases Filter.eventually_iff_exists_mem.mp hconst_ev with ⟨U, hU_nhds, hU⟩
   rcases _root_.mem_nhds_iff.mp hU_nhds with ⟨V, hVU, hV_open, hV_mem_zero⟩
   rcases (Metric.isOpen_iff.mp hV_open) (0 : ℝ) hV_mem_zero with
     ⟨δ_match, hδ_match_pos, hδ_sub⟩
-  -- Set T_match := min δ_match T (so 0 < T_match ≤ T).
   set T_match : ℝ := min δ_match T with hT_match_def
   have hT_match_pos : 0 < T_match := lt_min hδ_match_pos hT_pos
   have hT_match_le_T : T_match ≤ T := min_le_right _ _
@@ -250,8 +235,6 @@ theorem exists_unified_chartFlow_data
       · have h2 : s < T_match := hs.2
         linarith
     exact hU _ (hVU hs_in_V)
-  -- Manifold-lift integral-curve property: apply
-  -- chartFlowOrbitLift_isMIntegralCurveOn_Ioo to each v ∈ ball 0 ρ.
   have hF_int : ∀ v ∈ Metric.ball (0 : E) ρ,
       IsMIntegralCurveOn (chartFlowOrbitLift (I := I) Φ p v)
         (geodesicVectorFieldChart (I := I) g p) (Set.Ioo (-T) T) := by
@@ -260,37 +243,30 @@ theorem exists_unified_chartFlow_data
       (hΦ_target v hv) (hΦ_phase v hv)
   refine ⟨Φ, ρ, T, T_match, hρ_pos, hT_pos, hT_match_pos, hT_match_le_T, ?_,
     ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · -- ContDiffOn ℝ 1 Φ on the shrunken product, with x₀ unfolded.
-    change ContDiffOn ℝ 1 Φ
+  · change ContDiffOn ℝ 1 Φ
       ((Metric.ball ((extChartAt I p p, (0 : E)) : E × E) ρ) ×ˢ Set.Ioo (-T) T)
     exact hΦ_cd
-  · -- Initial value Φ((x₀, 0), 0) = (x₀, 0).
-    change Φ (((extChartAt I p p, (0 : E)) : E × E), 0) =
+  · change Φ (((extChartAt I p p, (0 : E)) : E × E), 0) =
       ((extChartAt I p p, (0 : E)) : E × E)
     exact hΦ_init0
-  · -- Per-v initial values.
-    intro v hv
+  · intro v hv
     change Φ (((extChartAt I p p, v) : E × E), 0) =
       ((extChartAt I p p, v) : E × E)
     exact hΦ_init_v v hv
-  · -- Chart-target-interior confinement.
-    intro v hv s hs
+  · intro v hv s hs
     change Φ (((extChartAt I p p, v) : E × E), s) ∈
       (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E)
     exact hΦ_target v hv s hs
-  · -- Chart-phase ODE.
-    intro v hv s hs
+  · intro v hv s hs
     change HasDerivAt (fun s' : ℝ => Φ (((extChartAt I p p, v) : E × E), s'))
       (chartPhaseVF (I := I) g p
         (Φ (((extChartAt I p p, v) : E × E), s))) s
     exact hΦ_phase v hv s hs
-  · -- Zero-section orbit constancy.
-    intro s hs
+  · intro s hs
     change Φ (((extChartAt I p p, (0 : E)) : E × E), s) =
       ((extChartAt I p p, (0 : E)) : E × E)
     exact hΦ_const_zero_section s hs
-  · -- Manifold-lift integral-curve property.
-    intro v hv
+  · intro v hv
     exact hF_int v hv
 
 end UnifiedPackaging

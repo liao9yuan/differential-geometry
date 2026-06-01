@@ -55,16 +55,11 @@ theorem lie_derivative_metric_pullback_natural_under_diffeomorphism_pointwise
       = lieDerivMetric (I := I) g
           ⟨Diffeomorph.pushforward Φ Y, hPush_smooth⟩ (Φ x)
             (mfderiv I I Φ x v) (mfderiv I I Φ x w) := by
-  -- Step 1: Apply Cartan to the LHS (computing `lieDerivMetric (Φ*g) Y x v w`).
   rw [cartan_formula_for_lie_deriv_metric (I := I)
     (Diffeomorph.pullbackMetric g Φ) ⟨Y, hY_smooth⟩ x v w]
-  -- Step 2: Apply Cartan to the RHS (computing
-  -- `lieDerivMetric g (Φ_*Y) (Φ x) (dΦv) (dΦw)`).
   rw [cartan_formula_for_lie_deriv_metric (I := I) g
     ⟨Diffeomorph.pushforward Φ Y, hPush_smooth⟩ (Φ x)
     (mfderiv I I (⇑Φ) x v) (mfderiv I I (⇑Φ) x w)]
-  -- After Cartan, the `Cₛ^∞` coercions unfold to the underlying section
-  -- functions `Y` and `Diffeomorph.pushforward Φ Y`. Normalise the surface form.
   change (Diffeomorph.pullbackMetric g Φ).inner x
         ((LeviCivita (I := I) (Diffeomorph.pullbackMetric g Φ)) Y x v) w
       + (Diffeomorph.pullbackMetric g Φ).inner x v
@@ -74,20 +69,14 @@ theorem lie_derivative_metric_pullback_natural_under_diffeomorphism_pointwise
         (mfderiv I I (⇑Φ) x w)
       + g.inner (Φ x) (mfderiv I I (⇑Φ) x v) ((LeviCivita (I := I) g)
         (Diffeomorph.pushforward Φ Y) (Φ x) (mfderiv I I (⇑Φ) x w))
-  -- Step 3: Convert each `(Φ*g).inner x` summand on the LHS to `g.inner (Φ x)`
-  -- via the pullback evaluation formula.
   rw [pullback_metric_evaluation_formula (I := I) g Φ x
         ((LeviCivita (I := I) (Diffeomorph.pullbackMetric g Φ)) Y x v) w,
       pullback_metric_evaluation_formula (I := I) g Φ x v
         ((LeviCivita (I := I) (Diffeomorph.pullbackMetric g Φ)) Y x w)]
-  -- Step 4: Establish manifold-differentiability of the section `Y` at `x` from
-  -- the supplied total-space smoothness witness.
   have hinfty : (∞ : WithTop ℕ∞) ≠ 0 := by decide
   have hY_mdiff : MDifferentiableAt I I.tangent
       (fun y : M => (TotalSpace.mk' E y (Y y) : TangentBundle I M)) x :=
     (hY_smooth x).mdifferentiableAt hinfty
-  -- Step 5: Apply the connection-pullback pointwise identity in both slots.
-  -- Each call rewrites `mfderiv Φ x (∇^{Φ*g} Y x v) = ∇^g (Φ_*Y) (Φx) (mfderiv Φ x v)`.
   rw [LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise (I := I) g Φ v hY_mdiff,
       LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise (I := I) g Φ w hY_mdiff]
 

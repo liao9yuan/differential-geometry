@@ -91,21 +91,16 @@ theorem rawTensorConnLap_via_chartFrameNormGlobalSmooth
           (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun)
         (fun y : M => T.toSection y) b := by
   classical
-  -- (1) Smoothness of `T.toSection` as a total-space-valued map, in the
-  -- precise `TotalSpace.mk'` shape that the workhorse lemma expects.
   have hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun z : M => TensorRSSpace r s I z) y (T.toSection y)) :=
     T.toSection.contMDiff
-  -- (2) Smoothness of each `chartFrameNormGlobalSmooth g α i` as a
-  -- total-space-valued tangent-bundle section.
   have hB_smooth : ∀ i : Fin (Module.finrank ℝ E),
       ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
         (fun y : M => TotalSpace.mk' E
           (E := fun z : M => TangentSpace I z) y
           ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun y)) :=
     fun i => (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).contMDiff
-  -- (3) Orthonormality of the chart-α frame at `b`, from the Phase 2 headline.
   have hB_orth : ∀ i j : Fin (Module.finrank ℝ E),
       g.inner b
           ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b)
@@ -114,7 +109,6 @@ theorem rawTensorConnLap_via_chartFrameNormGlobalSmooth
     fun i j =>
       chartFrameNormGlobalSmooth_orthonormal_on_pouTsupportGoodSet
         (I := I) (M := M) g α hb i j
-  -- (4) Compose the three discharges through the workhorse lemma.
   exact rawTensorConnLap_eq_fixedFrame_of_orthonormal (I := I) g r s
     (fun y : M => T.toSection y) hT_total
     (B := fun i : Fin (Module.finrank ℝ E) =>

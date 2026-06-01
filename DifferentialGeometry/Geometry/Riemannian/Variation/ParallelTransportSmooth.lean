@@ -310,32 +310,23 @@ theorem parallelTransport_section_contMDiffOn_Ioo [I.Boundaryless]
         (Set.Ioo (-δ) (L + δ)) := by
   classical
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
-  -- The open-window parallel-transport section.
   obtain ⟨δ, hδ_pos, V, hV0, hVdiff, hVpar⟩ :=
     exists_global_parallel_transport_on_Ioo (I := I) g γ hγ hL v₀
   refine ⟨δ, hδ_pos, V, hV0, hVdiff, hVpar, ?_⟩
-  -- The window as an open set.
   set Ω : Set ℝ := Set.Ioo (-δ) (L + δ) with hΩ_def
   have hΩ_open : IsOpen Ω := isOpen_Ioo
-  -- It remains to prove bundle-`C^∞` of `t ↦ ⟨γ t, V t⟩` on `Ω`, pointwise.
   intro t₀ ht₀
-  -- Reduce to `ContMDiffAt` at `t₀` (which then restricts to `ContMDiffWithinAt`).
   have hmdat : ContMDiffAt 𝓘(ℝ, ℝ) I.tangent ∞
       (fun t => TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (V t)) t₀ := by
-    -- Pin the chart at the fixed foot `α := γ t₀`.
     set α : M := γ t₀ with hα_def
     set Y : ℝ → E := chartRepAtBase (I := I) α γ V with hY_def
-    -- ### Step 1: a closed sub-interval `Icc a b ∋ t₀`, in `Ω`, on which `γ`
-    -- stays in `chartAt H α` and which is a neighbourhood of `t₀`.
     set W₀ : Set ℝ := γ ⁻¹' (chartAt H α).source with hW₀_def
     have hW₀_open : IsOpen W₀ := (chartAt H α).open_source.preimage hγ.continuous
     have ht₀_W₀ : t₀ ∈ W₀ := by
       rw [hW₀_def, mem_preimage]; exact mem_chart_source H α
-    -- The intersection `W₀ ∩ Ω` is an open neighbourhood of `t₀`.
     have ht₀_inter : t₀ ∈ W₀ ∩ Ω := ⟨ht₀_W₀, ht₀⟩
     have hinter_open : IsOpen (W₀ ∩ Ω) := hW₀_open.inter hΩ_open
     obtain ⟨ε, hε_pos, hball⟩ := Metric.isOpen_iff.mp hinter_open t₀ ht₀_inter
-    -- The closed sub-interval `Icc a b := Icc (t₀ - ε/2) (t₀ + ε/2)`.
     set a : ℝ := t₀ - ε / 2 with ha_def
     set b : ℝ := t₀ + ε / 2 with hb_def
     have ht₀_lo : a ≤ t₀ := by rw [ha_def]; linarith
@@ -351,10 +342,8 @@ theorem parallelTransport_section_contMDiffOn_Ioo [I.Boundaryless]
     have hIcc_src : ∀ s ∈ Set.Icc a b, γ s ∈ (chartAt H α).source :=
       fun s hs => hIcc_sub_W₀ hs
     have ht₀_mem_Icc : t₀ ∈ Set.Icc a b := ⟨ht₀_lo, ht₀_hi⟩
-    -- `Icc a b` is a neighbourhood of `t₀`.
     have hIcc_nhds : Set.Icc a b ∈ 𝓝 t₀ :=
       Icc_mem_nhds (by rw [ha_def]; linarith) (by rw [hb_def]; linarith)
-    -- The open window `W := Ioo (t₀ - ε) (t₀ + ε)`, on which `γ` lands in chart source.
     set W : Set ℝ := Set.Ioo (t₀ - ε) (t₀ + ε) with hW_def
     have hW_open : IsOpen W := isOpen_Ioo
     have hW_sub_inter : W ⊆ W₀ ∩ Ω := by
@@ -370,7 +359,6 @@ theorem parallelTransport_section_contMDiffOn_Ioo [I.Boundaryless]
       refine ⟨?_, ?_⟩
       · rw [ha_def] at hs; linarith [hs.1]
       · rw [hb_def] at hs; linarith [hs.2]
-    -- ### Step 2: smoothness inputs for the vector field on the open window `W`.
     have hu_cd : ContDiffOn ℝ ∞ (chartCurve (I := I) α γ) W := by
       have h_comp_mdiff : ContMDiffOn 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞ ((extChartAt I α) ∘ γ) W := by
         have hφ : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I α) (chartAt H α).source :=
@@ -393,7 +381,6 @@ theorem parallelTransport_section_contMDiffOn_Ioo [I.Boundaryless]
         (Function.uncurry (parallelTransportVF (I := I) g α γ))
         (W ×ˢ (Set.univ : Set E)) :=
       parallelTransportVF_contDiffOn (I := I) g α γ hW_open hu_cd hu_int
-    -- ### Step 3: `Y` solves the parallel-transport ODE on `Icc a b`.
     have hY_ode_at : ∀ s ∈ Set.Icc a b,
         HasDerivAt Y (parallelTransportVF (I := I) g α γ s (Y s)) s := by
       intro s hs
@@ -430,7 +417,6 @@ theorem parallelTransport_section_contMDiffOn_Ioo [I.Boundaryless]
     have hY_ode : ∀ s ∈ Set.Icc a b,
         HasDerivWithinAt Y (parallelTransportVF (I := I) g α γ s (Y s)) (Set.Icc a b) s :=
       fun s hs => (hY_ode_at s hs).hasDerivWithinAt
-    -- ### Step 4: bootstrap `Y` to `C^∞` on `Icc a b`.
     have hY_smooth : ContDiffOn ℝ ∞ Y (Set.Icc a b) := by
       refine ODE.contDiffOn_enat_Icc_of_hasDerivWithinAt
         (f := parallelTransportVF (I := I) g α γ)
@@ -438,12 +424,10 @@ theorem parallelTransport_section_contMDiffOn_Ioo [I.Boundaryless]
       · exact hVF_cd.mono (Set.prod_mono hIcc_sub_W (le_refl _))
       · exact hY_ode
       · exact fun s _ => Set.mem_univ _
-    -- ### Step 5: `Y` is `ContDiffAt ℝ ∞` at `t₀` (interior of `Icc a b`).
     have hY_cdat : ContDiffAt ℝ ∞ Y t₀ :=
       (hY_smooth.contDiffWithinAt ht₀_mem_Icc).contDiffAt hIcc_nhds
     have hY_cmat : ContMDiffAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞ Y t₀ :=
       hY_cdat.contMDiffAt
-    -- ### Step 6: round-trip to bundle smoothness at `t₀`.
     rw [Bundle.contMDiffAt_totalSpace]
     refine ⟨hγ t₀, ?_⟩
     have hbase₀ : γ t₀ ∈ (trivializationAt E (TangentSpace I) (γ t₀)).baseSet :=

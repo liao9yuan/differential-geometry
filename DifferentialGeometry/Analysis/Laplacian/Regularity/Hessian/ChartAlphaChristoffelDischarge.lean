@@ -92,8 +92,6 @@ open DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaFrobenius
 open DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaLp
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -102,12 +100,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## The Christoffel discharge hypothesis
-
-The discharge hypothesis asserts pointwise vanishing of the POU-weighted sum
-of chart-α Christoffel differences over the chart atlas POU finset, at every
-`x : M`. -/
 
 /-- **Christoffel discharge hypothesis.** For smooth `φ` and `v`, the
 POU-weighted sum of `smoothPairingChristoffelDiff` over the chart atlas POU
@@ -131,12 +123,6 @@ omit [NeZero (Module.finrank ℝ E)] in
               smoothPairingChristoffelDiff (I := I) (M := M) g α φ v
                 ((toEuclidean (E := E)) (extChartAt I α x)) = 0 := Iff.rfl
 
-/-! ## Step 1: per-chart algebraic decomposition
-
-For each chart `α`, the chart-α Euclidean pairing decomposes as the chart-α
-tensor pairing plus the Christoffel diff (the identity
-`smoothEuclidHessianPairingChart_eq_tensor_plus_diff`). -/
-
 /-- **Per-chart algebraic decomposition, lifted.** For smooth `φ` and `v`,
 chart base point `α : M`, and `x : M`, the per-chart Euclidean pairing at
 `toE(extChartAt α x)` equals the chart-α tensor pairing plus the Christoffel
@@ -152,12 +138,6 @@ theorem smoothEuclidHessianPairingChart_at_chartAt_eq_tensor_plus_diff
           ((toEuclidean (E := E)) (extChartAt I α x)) :=
   smoothEuclidHessianPairingChart_eq_tensor_plus_diff
     (I := I) (M := M) g α φ v ((toEuclidean (E := E)) (extChartAt I α x))
-
-/-! ## Step 2: POU-weighted assembly
-
-We sum the per-chart algebraic decomposition with POU weights and use the
-chart-α tensor invariance (`pou_weighted_tensor_pairing_eq_hessPairingChart_pointwise`)
-to identify the tensor-side sum with the chart-invariant `hessPairingChart`. -/
 
 /-- **POU-weighted decomposition.** For smooth `φ` and `v`, the POU-weighted sum
 of `smoothEuclidHessianPairingChart` over the chart atlas POU finset decomposes
@@ -178,7 +158,6 @@ theorem pou_weighted_euclid_pairing_decompose
           smoothPairingChristoffelDiff (I := I) (M := M) g α φ v
             ((toEuclidean (E := E)) (extChartAt I α x)) := by
   classical
-  -- Step 1: replace each per-chart Euclidean pairing with tensor + Christoffel diff.
   have h_per_term : ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
       (chartAtlasPOU I M α : M → ℝ) x *
           smoothEuclidHessianPairingChart (I := I) (M := M) g α φ v
@@ -193,10 +172,8 @@ theorem pou_weighted_euclid_pairing_decompose
     rw [smoothEuclidHessianPairingChart_at_chartAt_eq_tensor_plus_diff
       (I := I) (M := M) g φ v α x]
     ring
-  -- Step 2: split the sum.
   rw [Finset.sum_congr rfl h_per_term]
   rw [Finset.sum_add_distrib]
-  -- Step 3: identify the tensor-side sum with the chart-invariant pairing.
   rw [pou_weighted_tensor_pairing_eq_hessPairingChart_pointwise
     (I := I) (M := M) g φ v x]
 
@@ -219,12 +196,6 @@ theorem pou_weighted_euclid_pairing_eq_hessPairingChart_pointwise_of_discharge
   rw [pou_weighted_euclid_pairing_decompose (I := I) (M := M) g φ v x]
   rw [h_discharge x]
   rw [add_zero]
-
-/-! ## Step 3: identification of LapDom-side chart contribution
-
-The LapDom-side `hessPairingMChartContribution g φ α hu_h x` equals (by
-definition) `POU(α)(x) · hessPairingChartLocal g α φ hu_h (toE(extChartAt α x))`.
-We expose this unfolding lemma for use downstream. -/
 
 omit [NeZero (Module.finrank ℝ E)] in
 /-- **LapDom-side chart contribution, definitional form.** The LapDom-side

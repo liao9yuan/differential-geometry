@@ -45,17 +45,10 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Canonical measurable-space and Borel-space instances on `E` and `M`
-
-File-local canonical Borel structures, matching those installed in `ChartDensity.lean`.
-Declared `local` so they do not pollute external typeclass search. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Existence of a smooth partition of unity subordinate to the chart atlas -/
 
 variable (I M) in
 /-- A smooth partition of unity on `M`, indexed by `M`, subordinate to the family of
@@ -70,8 +63,6 @@ variable (I M) in
 lemma chartAtlasPOU_isSubordinate [T2Space M] [SigmaCompactSpace M] :
     (chartAtlasPOU I M).IsSubordinate (fun x : M => (chartAt H x).source) :=
   (SmoothPartitionOfUnity.exists_isSubordinate_chartAt_source I M).choose_spec
-
-/-! ## The glued global measure -/
 
 /-- Given a smooth Riemannian metric `g` on the tangent bundle of `M`, and a smooth
 partition of unity `ρ` on `M` (indexed by `M`, subordinate to the chart atlas), the
@@ -93,8 +84,6 @@ lemma riemannianMeasure_def
         (chartLocalMeasure (I := I) g α).withDensity
           (fun x : M => ENNReal.ofReal (ρ α x))) := rfl
 
-/-! ## Measurability of the weights -/
-
 /-- Each partition-of-unity weight, coerced to `ℝ≥0∞` via `ENNReal.ofReal`, is measurable
 with respect to the Borel σ-algebra on `M`. -/
 lemma measurable_ofReal_pou_weight
@@ -103,8 +92,6 @@ lemma measurable_ofReal_pou_weight
   have hcont : Continuous (fun x : M => ρ α x) :=
     (ρ α).contMDiff.continuous
   exact ENNReal.measurable_ofReal.comp hcont.measurable
-
-/-! ## Integral decomposition -/
 
 /-- The lower Lebesgue integral of a measurable non-negative extended-real-valued function
 against the global glued measure decomposes as a countable sum of lower Lebesgue integrals
@@ -120,14 +107,12 @@ theorem riemannianMeasure_lintegral_eq
   classical
   rw [riemannianMeasure_def, lintegral_sum_measure]
   refine tsum_congr (fun α => ?_)
-  -- `∫⁻ f d((chartLocalMeasure …).withDensity (ENNReal.ofReal ∘ ρ α)) = ∫⁻ (ENNReal.ofReal ∘ ρ α) * f dμ`
   have hρ : Measurable (fun x : M => ENNReal.ofReal (ρ α x)) := by
     have hcont : Continuous (fun x : M => ρ α x) := (ρ α).contMDiff.continuous
     exact ENNReal.measurable_ofReal.comp hcont.measurable
   have h :=
     lintegral_withDensity_eq_lintegral_mul (μ := chartLocalMeasure (I := I) g α)
       (f := fun x : M => ENNReal.ofReal (ρ α x)) hρ (g := f) hf
-  -- Rewrite the pointwise `Pi.mul_apply` on the right.
   simpa [Pi.mul_apply] using h
 
 /-- A `Finset`-truncation lemma: for any finite subset `s ⊆ M`, the partial sum of the

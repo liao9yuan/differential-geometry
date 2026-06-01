@@ -90,11 +90,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## The principal second-derivative part on the Euclidean chart target
-
-The principal-part function on the Euclidean chart target is
-`Σ_{k, l} weightedInvGramEuclid g α k l · ∂_l ∂_k (chartPushedRaw …)`. -/
-
 /-- The principal second-derivative sum on the Euclidean chart target: a
 finite double sum of products of the volume-weighted inverse Gram coefficient
 and the mixed second Euclidean partial of the chart-pushed raw component of
@@ -124,7 +119,6 @@ private lemma principalSecondDerivSum_contDiffOn
       (principalSecondDerivSum (I := I) (M := M) g r s α T₀ Idx Jdx)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- The Euclidean partial in `k` of the chart-pushed raw component is `C^∞`.
   have hk : ∀ k : Fin (Module.finrank ℝ E),
       ContDiffOn ℝ ∞
         (euclidPartial (E := E) k
@@ -132,7 +126,6 @@ private lemma principalSecondDerivSum_contDiffOn
             (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx)))
         (chartTargetEuclid (I := I) (M := M) α) := fun k =>
     euclidPartial_chartPushedRaw_contDiffOn (I := I) (M := M) g r s T₀ α k Idx Jdx
-  -- The Euclidean partial in `l` of a `C^∞`-on-an-open-set function is `C^∞`.
   have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have hkl : ∀ k l : Fin (Module.finrank ℝ E),
@@ -144,9 +137,6 @@ private lemma principalSecondDerivSum_contDiffOn
         (chartTargetEuclid (I := I) (M := M) α) := by
     intro k l
     have hu := hk k
-    -- Reuse the same `euclidPartial`-of-`ContDiffOn`-on-open-set helper as
-    -- in CovDerivComponentEuclidSkExtExpansion: take fderiv-on-set, identify
-    -- with `fderiv` by openness, apply at `single l 1`.
     have hsucc : ContDiffOn ℝ ((∞ : WithTop ℕ∞) + 1)
         (euclidPartial (E := E) k
           (chartPushedRaw I α
@@ -185,7 +175,6 @@ private lemma principalSecondDerivSum_contDiffOn
         (EuclideanSpace.single l 1)).contDiff.comp_contDiffOn hfderiv
     refine hcomp.congr (fun z _ => ?_)
     rfl
-  -- Each summand is `C^∞`: product of `C^∞` factors.
   have hsum_pair : ∀ k l : Fin (Module.finrank ℝ E),
       ContDiffOn ℝ ∞
         (fun y =>
@@ -196,7 +185,6 @@ private lemma principalSecondDerivSum_contDiffOn
                   (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx))) y)
         (chartTargetEuclid (I := I) (M := M) α) := fun k l =>
     (weightedInvGramEuclid_contDiffOn (I := I) (M := M) g α k l).mul (hkl k l)
-  -- Inner sum over `l`: finite sum of `C^∞`.
   have hsum_inner : ∀ k : Fin (Module.finrank ℝ E),
       ContDiffOn ℝ ∞
         (fun y =>
@@ -208,16 +196,7 @@ private lemma principalSecondDerivSum_contDiffOn
                     (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx))) y)
         (chartTargetEuclid (I := I) (M := M) α) := fun k =>
     ContDiffOn.sum (fun l _ => hsum_pair k l)
-  -- Outer sum over `k`: finite sum of `C^∞`.
   exact ContDiffOn.sum (fun k _ => hsum_inner k)
-
-/-! ## The chart-pushed raw component of `rawTensorConnLapSmooth T₀`
-
-The chart-pushed raw component of `rawTensorConnLapSmooth g r s T₀`, viewed as
-a function on the Euclidean chart target, is `ContDiffOn ℝ ∞`. This is a direct
-consequence of the smoothness of the underlying section
-`(rawTensorConnLapSmooth g r s T₀).toSection` and
-`chartPushedRaw_tensorChartComponentRaw_contDiffOn`. -/
 
 /-- The chart-α `(Idx, Jdx)` raw component of `rawTensorConnLapSmooth g r s T₀`,
 chart-pushed to the Euclidean chart target. -/
@@ -243,12 +222,6 @@ private lemma chartPushed_rawConnLapComponent_contDiffOn
       (chartTargetEuclid (I := I) (M := M) α) :=
   chartPushedRaw_tensorChartComponentRaw_contDiffOn (I := I) (M := M) g r s
     (rawTensorConnLapSmooth (I := I) g r s T₀) α Idx Jdx
-
-/-! ## The lower-order correction
-
-`Coeff_LO` is defined as the difference between the chart-pushed raw component
-of `rawTensorConnLapSmooth T₀` and the principal second-derivative sum. Both
-are `ContDiffOn ℝ ∞` on the Euclidean chart target, hence so is the difference. -/
 
 /-- The lower-order correction on the Euclidean chart target. -/
 private noncomputable def lowerOrderCorrection
@@ -289,13 +262,6 @@ private lemma chartPushed_rawConnLapComponent_eq_principal_add_LO
   unfold lowerOrderCorrection
   ring
 
-/-! ## Chart-pushed evaluation at the chart-Euclidean image of `b`
-
-For `b` in the chart-α Levi-Civita good set, the chart-Euclidean image
-`toEuclidean ((extChartAt I α) b)` lies in the chart target, and the
-chart-pushed raw component evaluated at that image equals the raw component at
-`b`. -/
-
 private lemma chartPushed_rawConnLapComponent_apply_of_good
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -316,8 +282,6 @@ private lemma chartPushed_rawConnLapComponent_apply_of_good
       chartTargetEuclid (I := I) (M := M) α :=
     ⟨(extChartAt I α) b, hb_tgt, rfl⟩
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy_chart]
-  -- Reduce `(extChartAt I α).symm ((toEuclidean.symm) ((toEuclidean) ((extChartAt I α) b)))`
-  -- to `b` via the canonical left inverses.
   have hsymm_te :
       (toEuclidean (E := E)).symm
         ((toEuclidean (E := E)) ((extChartAt I α) b)) =
@@ -326,21 +290,6 @@ private lemma chartPushed_rawConnLapComponent_apply_of_good
   have hleft_inv : (extChartAt I α).symm ((extChartAt I α) b) = b :=
     (extChartAt I α).left_inv hb_src
   rw [hsymm_te, hleft_inv]
-
-/-! ## The headline identity
-
-For `b` in an open neighbourhood `U ∋ b₀` of the chart-α partition-of-unity
-tsupport intersected with the chart-α Levi-Civita good set, the chart-α
-`(Idx, Jdx)` raw component of `rawTensorConnLapSmooth g r s T₀` at `b` is a
-finite linear combination of mixed second Euclidean partials of the chart-pushed
-raw component of `T₀`, with `ContDiffOn ℝ ∞` coefficients on the chart target,
-plus a `ContDiffOn ℝ ∞` lower-order correction.
-
-The principal-part coefficient is `weightedInvGramEuclid g α k l`, the
-volume-weighted inverse Gram matrix entry in chart-Euclidean coordinates. The
-lower-order correction `Coeff_LO` aggregates the second-application Γ
-corrections and the chart-frame-trace `(∇T₀)(∇_{B_i} B_i)` corrections from
-the underlying frame-trace identity for `rawTensorConnLap`. -/
 
 /-- **Chart-α `(Idx, Jdx)` raw component of the tensor connection Laplacian as
 a finite linear combination of second Euclidean partials with smooth
@@ -396,18 +345,11 @@ theorem tensorChartComponentRaw_rawTensorConnLap_eq_chart_α_coord_formula
   refine ⟨chartLeviCivitaGoodSet (I := I) α,
     chartLeviCivitaGoodSet_isOpen (I := I) α, hb₀.2, Set.Subset.rfl, ?_⟩
   refine ⟨fun k l => weightedInvGramEuclid (I := I) (M := M) g α k l, ?_, ?_, ?_, ?_⟩
-  · -- `Coeff_LO`.
-    exact lowerOrderCorrection (I := I) (M := M) g r s α T₀ Idx Jdx
-  · -- `Coeff_2 k l` is `C^∞`.
-    intro k l
+  · exact lowerOrderCorrection (I := I) (M := M) g r s α T₀ Idx Jdx
+  · intro k l
     exact weightedInvGramEuclid_contDiffOn (I := I) (M := M) g α k l
-  · -- `Coeff_LO` is `C^∞`.
-    exact lowerOrderCorrection_contDiffOn (I := I) (M := M) g r s α T₀ Idx Jdx
-  · -- The pointwise identity on `U = chartLeviCivitaGoodSet α`.
-    intro b hb
-    -- LHS: the raw component at `b`.
-    -- Step 1: rewrite the LHS as the chart-pushed-raw evaluation at the
-    -- chart-Euclidean image of `b`.
+  · exact lowerOrderCorrection_contDiffOn (I := I) (M := M) g r s α T₀ Idx Jdx
+  · intro b hb
     set y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) :=
       (toEuclidean (E := E)) ((extChartAt I α) b) with hy_def
     have hLHS_eq :
@@ -417,11 +359,8 @@ theorem tensorChartComponentRaw_rawTensorConnLap_eq_chart_α_coord_formula
       (chartPushed_rawConnLapComponent_apply_of_good
         (I := I) (M := M) g r s α T₀ Idx Jdx hb).symm
     rw [hLHS_eq]
-    -- Step 2: rewrite the chart-pushed-raw via principal + LO.
     rw [chartPushed_rawConnLapComponent_eq_principal_add_LO
         (I := I) (M := M) g r s α T₀ Idx Jdx y]
-    -- Goal: principal sum + LO = principal sum (with `Coeff_2 = weightedInvGramEuclid`) + LO.
-    -- These are literally equal by `principalSecondDerivSum` unfolding.
     rfl
 
 section

@@ -72,16 +72,12 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Laplacian
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## Resolvent eigenvalue ↔ Laplacian eigenvalue: `μ · (1 + λ) = 1` -/
 
 /-- The basic relation between a nonzero resolvent eigenvalue `μ` and the
 corresponding Laplacian eigenvalue `λ := (1 - μ)/μ`: `μ · (1 + λ) = 1`. -/
@@ -93,8 +89,6 @@ private lemma mul_one_add_lambda_eq_one
   have h_ne : i.1.val ≠ 0 := h_pos.ne'
   field_simp
   linarith
-
-/-! ## Basis action of `(resolventL2 g)^k` -/
 
 /-- The iterated `L²`-side resolvent acts on the eigenbasis by spectral
 multiplication: `(resolventL2 g)^k (b i) = μ_i^k • b i`. -/
@@ -114,7 +108,6 @@ private lemma iteratedResolventL2_apply_basis
     rw [iteratedResolventL2_succ]
     rw [ContinuousLinearMap.comp_apply]
     rw [ih]
-    -- resolventL2 (μ^k • b i) = μ^k • resolventL2 (b i) = μ^k • μ • b i = μ^{k+1} • b i.
     rw [(resolventL2 (I := I) (M := M) g).map_smul]
     have h_basis :
         resolventL2 (I := I) (M := M) g
@@ -131,19 +124,6 @@ private lemma iteratedResolventL2_apply_basis
     rw [h_basis]
     rw [smul_smul]
     rw [show i.1.val ^ k * i.1.val = i.1.val ^ (k + 1) from by ring]
-
-/-! ## The auxiliary operator `oneMinusLapHeat g k t = (1-Δ_g)^k e^{tΔ_g}`
-
-We define this as the finite binomial sum
-
-  `oneMinusLapHeat g k t := ∑_{j=0}^k C(k, j) • heatPower g j t`,
-
-which is well-defined as a continuous linear map (finite sum of CLMs). On
-the eigenbasis it acts as
-
-  `oneMinusLapHeat g k t (b i) = (1+λ_i)^k · exp(-λ_i t) • b i`,
-
-by the binomial theorem `(1 + λ_i)^k = ∑_{j=0}^k C(k, j) λ_i^j`. -/
 
 /-- The auxiliary operator `(1-Δ_g)^k · e^{tΔ_g}` on `Lp ℝ 2 μ_g`, defined
 as the binomial finite sum `∑_{j=0}^k C(k, j) heatPower g j t`. -/
@@ -179,8 +159,6 @@ private lemma oneMinusLapHeat_apply_basis
   set b := resolventHilbertEigenbasisSigma (I := I) (M := M) g
   set lam := EigenIdx.lambda (I := I) (M := M) i with hlam_def
   rw [oneMinusLapHeat_apply]
-  -- Each summand: C(k, j) • heatPower g j t (b i) = C(k, j) • (λ^j exp(-λt)) • b i
-  --             = (C(k, j) · λ^j · exp(-λt)) • b i.
   have h_term_eq : ∀ j ∈ Finset.range (k + 1),
       (k.choose j : ℝ) • heatPower (I := I) (M := M) g j t (b i) =
       ((k.choose j : ℝ) * lam ^ j * Real.exp (-lam * t)) • b i := by
@@ -193,27 +171,20 @@ private lemma oneMinusLapHeat_apply_basis
     rw [show (k.choose j : ℝ) * (lam ^ j * Real.exp (-lam * t)) =
       (k.choose j : ℝ) * lam ^ j * Real.exp (-lam * t) from by ring]
   rw [Finset.sum_congr rfl h_term_eq]
-  -- Now: ∑ j (C(k,j) λ^j exp(-λt)) • b i = ((∑ j C(k,j) λ^j) exp(-λt)) • b i
-  --                                     = ((1+λ)^k · exp(-λt)) • b i.
   rw [← Finset.sum_smul]
   congr 1
-  -- ∑ j C(k,j) λ^j · exp(-λt) = (1+λ)^k · exp(-λt).
   have h_binom : ∑ j ∈ Finset.range (k + 1),
       (k.choose j : ℝ) * lam ^ j * Real.exp (-lam * t) =
       (1 + lam) ^ k * Real.exp (-lam * t) := by
     rw [← Finset.sum_mul]
     congr 1
-    -- ∑ j C(k,j) λ^j = (1+λ)^k. Use the binomial theorem.
     have h_pow := add_pow (lam : ℝ) 1 k
-    -- h_pow : (lam + 1)^k = ∑ m ∈ range (k+1), lam^m * 1^(k-m) * C(k, m).
     rw [show ((1 : ℝ) + lam) ^ k = (lam + 1) ^ k from by rw [add_comm]]
     rw [h_pow]
     apply Finset.sum_congr rfl
     intro j _
     rw [one_pow, mul_one, mul_comm]
   rw [h_binom]
-
-/-! ## Spectral identity: `(resolventL2)^k ∘ oneMinusLapHeat g k t = heatSemigroup g t` -/
 
 /-- The key spectral identity, on every basis vector:
 `(resolventL2 g)^k (oneMinusLapHeat g k t (b i)) = heatSemigroup g t (b i)`. -/
@@ -227,21 +198,14 @@ private lemma iteratedResolventL2_oneMinusLapHeat_basis
         (resolventHilbertEigenbasisSigma (I := I) (M := M) g i) := by
   set b := resolventHilbertEigenbasisSigma (I := I) (M := M) g
   set lam := EigenIdx.lambda (I := I) (M := M) i
-  -- LHS: iteratedResolventL2 k ((1+λ)^k exp(-λt) • b i)
-  --    = (1+λ)^k exp(-λt) • iteratedResolventL2 k (b i)
-  --    = (1+λ)^k exp(-λt) • μ^k • b i
-  --    = ((1+λ)^k exp(-λt)) · μ^k • b i.
   rw [oneMinusLapHeat_apply_basis (I := I) (M := M) g k ht i]
   rw [(iteratedResolventL2 (I := I) (M := M) g k).map_smul]
   rw [iteratedResolventL2_apply_basis (I := I) (M := M) g k i]
   rw [smul_smul]
-  -- Want: ((1+λ)^k exp(-λt)) * μ^k = exp(-λt). Use μ * (1+λ) = 1.
   have h_inv : i.1.val * (1 + lam) = 1 :=
     mul_one_add_lambda_eq_one (I := I) (M := M) g i
-  -- So (μ * (1+λ))^k = 1, i.e., μ^k * (1+λ)^k = 1.
   have h_pow_inv : i.1.val ^ k * (1 + lam) ^ k = 1 := by
     rw [← mul_pow, h_inv, one_pow]
-  -- Compute the scalar:
   have h_pow_inv' : (1 + lam) ^ k * i.1.val ^ k = 1 := by
     rw [mul_comm]; exact h_pow_inv
   have h_scalar :
@@ -251,9 +215,7 @@ private lemma iteratedResolventL2_oneMinusLapHeat_basis
         ((1 + lam) ^ k * i.1.val ^ k) * Real.exp (-lam * t) from by ring]
     rw [h_pow_inv', one_mul]
   rw [h_scalar]
-  -- RHS: heatSemigroup t (b i) = exp(-λt) • b i.
   have h_rhs := heatSemigroup_apply_basis (I := I) (M := M) g ht.le i
-  -- This gives: heatSemigroup t (resolventEigenbasisSigma g i) = exp(-λt) • resolventEigenbasisSigma g i.
   have h_eq_basis : resolventEigenbasisSigma (I := I) (M := M) g i = b i := by
     change resolventEigenbasisSigma (I := I) (M := M) g i =
       resolventHilbertEigenbasisSigma (I := I) (M := M) g i
@@ -276,12 +238,7 @@ theorem iteratedResolventL2_oneMinusLapHeat_apply
         (oneMinusLapHeat (I := I) (M := M) g k t u) =
       heatSemigroup (I := I) (M := M) g t u := by
   set b := resolventHilbertEigenbasisSigma (I := I) (M := M) g with hb_def
-  -- Strategy: write u = ∑' i, b.repr u i • b i, apply both sides linearly,
-  -- and use the basis identity.
   have h_hsum : HasSum (fun i => b.repr u i • b i) u := b.hasSum_repr u
-  -- Apply (iteratedResolventL2 k ∘L oneMinusLapHeat k t) and heatSemigroup t
-  -- to the HasSum:
-  -- Bind the operator into a local term to avoid repeated unification.
   let A := iteratedResolventL2 (I := I) (M := M) g k
   let B := oneMinusLapHeat (I := I) (M := M) g k t
   let H := heatSemigroup (I := I) (M := M) g t
@@ -301,8 +258,6 @@ theorem iteratedResolventL2_oneMinusLapHeat_apply
     funext i
     change b.repr u i • H (b i) = H (b.repr u i • b i)
     rw [H.map_smul]
-  -- The two HasSum summands agree on every basis vector by
-  -- `iteratedResolventL2_oneMinusLapHeat_basis`.
   have h_summand_eq :
       (fun i => b.repr u i • A (B (b i))) =
       (fun i => b.repr u i • H (b i)) := by
@@ -312,11 +267,8 @@ theorem iteratedResolventL2_oneMinusLapHeat_apply
       b.repr u i • heatSemigroup (I := I) (M := M) g t (b i)
     rw [iteratedResolventL2_oneMinusLapHeat_basis (I := I) (M := M) g k ht i]
   rw [h_summand_eq] at h_LHS_hsum
-  -- Now both sides are limits of the same HasSum; by uniqueness of HasSum, they agree.
   change A (B u) = H u
   exact HasSum.unique h_LHS_hsum h_RHS_hsum
-
-/-! ## Headline: every heat-evolved datum lies in every iterated Laplacian domain -/
 
 /-- **Heat-evolved data lies in every iterated Laplacian domain.**
 
@@ -338,27 +290,13 @@ theorem heatSemigroup_mem_laplacianDomainPow_all
         H1ComplToLp (I := I) (M := M) g u_h =
           heatSemigroup (I := I) (M := M) g t u_0 := by
   intro k
-  -- Always construct the witness for index k + 1; this gives membership in
-  -- laplacianDomainPow g (k+1) ⊆ ... ⊆ laplacianDomain g (for k ≥ 1) and
-  -- trivially in laplacianDomainPow g 0 = ⊤ (for k = 0).
-  -- The k = 0 case is handled by using the k = 1 witness, which lies in
-  -- laplacianDomainPow g 1 ⊆ ⊤.
-  -- Concretely we construct u_h ∈ laplacianDomainPow g (k+1) and observe
-  -- that this implies u_h ∈ laplacianDomainPow g k for k ≤ k+1.
-  -- For uniform treatment, distinguish k = 0 and k = k' + 1.
   rcases Nat.eq_zero_or_pos k with hk0 | hk_pos
-  · -- k = 0 case: use the k = 1 witness; laplacianDomainPow g 0 = ⊤.
-    subst hk0
-    -- Take u_h := resolvent g (oneMinusLapHeat g 1 t u_0).
+  · subst hk0
     refine ⟨resolvent (I := I) (M := M) g
       (oneMinusLapHeat (I := I) (M := M) g 1 t u_0), ?_, ?_⟩
-    · -- u_h ∈ laplacianDomainPow g 0 = ⊤.
-      rw [laplacianDomainPow_zero]
+    · rw [laplacianDomainPow_zero]
       exact Submodule.mem_top
-    · -- H1ComplToLp g u_h = resolventL2 g (oneMinusLapHeat g 1 t u_0)
-      --                  = iteratedResolventL2 g 1 (oneMinusLapHeat g 1 t u_0)
-      --                  = heatSemigroup t u_0.
-      rw [show H1ComplToLp (I := I) (M := M) g
+    · rw [show H1ComplToLp (I := I) (M := M) g
             (resolvent (I := I) (M := M) g
               (oneMinusLapHeat (I := I) (M := M) g 1 t u_0)) =
           resolventL2 (I := I) (M := M) g
@@ -370,21 +308,13 @@ theorem heatSemigroup_mem_laplacianDomainPow_all
             (oneMinusLapHeat (I := I) (M := M) g 1 t u_0) from ?_]
       · exact iteratedResolventL2_oneMinusLapHeat_apply (I := I) (M := M) g 1 ht u_0
       · rw [iteratedResolventL2_one]
-  · -- k ≥ 1: write k = k' + 1.
-    obtain ⟨k', rfl⟩ : ∃ k', k = k' + 1 := ⟨k - 1, by omega⟩
-    -- Take u_h := resolvent g (iteratedResolventL2 g k' (oneMinusLapHeat g (k'+1) t u_0)).
+  · obtain ⟨k', rfl⟩ : ∃ k', k = k' + 1 := ⟨k - 1, by omega⟩
     refine ⟨resolvent (I := I) (M := M) g
       (iteratedResolventL2 (I := I) (M := M) g k'
         (oneMinusLapHeat (I := I) (M := M) g (k' + 1) t u_0)), ?_, ?_⟩
-    · -- u_h ∈ laplacianDomainPow g (k' + 1).
-      rw [laplacianDomainPow_succ_mem_iff]
+    · rw [laplacianDomainPow_succ_mem_iff]
       exact ⟨oneMinusLapHeat (I := I) (M := M) g (k' + 1) t u_0, rfl⟩
-    · -- H1ComplToLp g u_h = heatSemigroup t u_0.
-      -- H1ComplToLp (resolvent (iteratedResolventL2 k' (oneMinusLapHeat (k'+1) t u_0)))
-      --   = resolventL2 (iteratedResolventL2 k' (oneMinusLapHeat (k'+1) t u_0))
-      --   = iteratedResolventL2 (k'+1) (oneMinusLapHeat (k'+1) t u_0)  [by iteratedResolventL2_succ]
-      --   = heatSemigroup t u_0.
-      have h_step1 : H1ComplToLp (I := I) (M := M) g
+    · have h_step1 : H1ComplToLp (I := I) (M := M) g
             (resolvent (I := I) (M := M) g
               (iteratedResolventL2 (I := I) (M := M) g k'
                 (oneMinusLapHeat (I := I) (M := M) g (k' + 1) t u_0))) =
@@ -393,7 +323,6 @@ theorem heatSemigroup_mem_laplacianDomainPow_all
               (oneMinusLapHeat (I := I) (M := M) g (k' + 1) t u_0)) :=
         (resolventL2_apply (I := I) (M := M) g _).symm
       rw [h_step1]
-      -- Use iteratedResolventL2_succ_apply.
       rw [show resolventL2 (I := I) (M := M) g
             (iteratedResolventL2 (I := I) (M := M) g k'
               (oneMinusLapHeat (I := I) (M := M) g (k' + 1) t u_0)) =

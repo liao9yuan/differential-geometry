@@ -105,14 +105,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Per-summand identification of the `firstSlotHessMap` diagonal reading -/
 
 /-- **Per-summand identification.** The diagonal `firstSlotHessMap` summand against a vector `v`
 is the second covariant derivative with both direction slots `v`:
@@ -127,19 +123,6 @@ theorem firstSlotHessMap_eq_secondCovDeriv_field
     firstSlotHessMap (I := I) g r s Y T y (X y) =
       tensorSecondCovDeriv (I := I) g r s X Y T y := by
   rw [tensorSecondCovDeriv_eq_firstSlotHessMap]
-
-/-! ## The frame-frozen diagonal sum and its `g`-weighted reading on the neighbourhood
-
-The metric-trace route differentiates the section
-```
-F_x (y) := ∑ᵢ tensorSecondCovDeriv g r s Bᵢ Bᵢ T y      (Bᵢ := smoothOrthoFrame g x i),
-```
-the diagonal sum over the *fixed, `x`-centred* smooth orthonormal frame. The key fact that powers
-the route is that `Bᵢ` is `g_y`-orthonormal for *every* `y` in its orthonormality neighbourhood
-`smoothOrthoFrameNbhd x` (`smoothOrthoFrame_orthonormal`), not merely at the centre `x`. Hence the
-`g`-weighted double sum collapses to the diagonal `F_x` *throughout the neighbourhood*, with the
-metric weights `g(Bᵢ y, Bⱼ y) = δᵢⱼ` locally constant. This is the neighbourhood-valid `g`-weighted
-reading on which the outer covariant derivative acts. -/
 
 /-- **The frame-frozen diagonal sum.** The diagonal sum of the second covariant derivative over the
 fixed `x`-centred smooth orthonormal frame `Bᵢ := smoothOrthoFrame g x i`, read at a point `y`:
@@ -200,9 +183,7 @@ theorem frozenFrameTrace_eq_gWeighted_of_mem_nbhd
   classical
   rw [frozenFrameTrace_def]
   refine Finset.sum_congr rfl (fun i _ => ?_)
-  -- The `i`-th diagonal summand, read through the first-slot Hessian map.
   rw [tensorSecondCovDeriv_eq_firstSlotHessMap]
-  -- The inner `j`-sum collapses to the `j = i` term by orthonormality of the frame at `y`.
   rw [show (∑ j : Fin (Module.finrank ℝ E),
         g.inner y (smoothOrthoFrame (I := I) g x i y)
             (smoothOrthoFrame (I := I) g x j y) •

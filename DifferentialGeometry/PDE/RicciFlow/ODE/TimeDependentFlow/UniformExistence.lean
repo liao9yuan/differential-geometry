@@ -64,8 +64,6 @@ def ChartLocalPicardData.U
 lemma ChartLocalPicardData.isOpen_U
     {X : ℝ → ∀ x : M, TangentSpace I x} {α : M}
     (data : ChartLocalPicardData X α) : IsOpen data.U := by
-  -- Open chart source intersected with pre-image of an open set under the
-  -- continuous restriction of the chart.
   unfold ChartLocalPicardData.U
   have h₁ : IsOpen (chartAt H α).source := (chartAt H α).open_source
   have h₂ : IsOpen (I ⁻¹' Metric.ball (I ((chartAt H α) α)) data.r) :=
@@ -79,7 +77,6 @@ lemma ChartLocalPicardData.mem_U_self
     (data : ChartLocalPicardData X α) : α ∈ data.U := by
   unfold ChartLocalPicardData.U
   refine ⟨mem_chart_source H α, ?_⟩
-  -- `I ((chartAt H α) α) ∈ ball _ data.r` since the centre lies in the open ball.
   exact Metric.mem_ball_self data.r_pos
 
 /--
@@ -111,8 +108,6 @@ theorem time_dependent_vf_uniform_existence_time_on_closed_mfd
                 HasDerivWithinAt (flow α y)
                   ((X t ((chartAt H α).symm (I.symm (flow α y t)))) : E)
                   (Set.Icc (0 : ℝ) T) t := by
-  -- Step 1: extract a finite open subcover of `M` by the per-α open
-  -- neighborhoods `(hper α).U`.
   have hCompact : IsCompact (Set.univ : Set M) := isCompact_univ
   have hOpenU : ∀ α : M, IsOpen ((hper α).U) := fun α => (hper α).isOpen_U
   have hCover : (Set.univ : Set M) ⊆ ⋃ α : M, (hper α).U := by
@@ -121,29 +116,17 @@ theorem time_dependent_vf_uniform_existence_time_on_closed_mfd
     exact (hper x).mem_U_self
   obtain ⟨S, hS⟩ :=
     hCompact.elim_finite_subcover (fun α : M => (hper α).U) hOpenU hCover
-  -- `hS : Set.univ ⊆ ⋃ α ∈ S, (hper α).U`; together with `subset_univ` this
-  -- gives equality.
   have hCoverEq : (⋃ α ∈ S, (hper α).U) = (Set.univ : Set M) := by
     apply Set.eq_univ_of_univ_subset
     exact hS
-  -- Step 2: take a uniform horizon `T = min` of the per-α horizons over `S`.
-  -- If `S` is empty, the cover equality forces `M` to be empty, in which
-  -- case we use any positive `T` (we pick `T = 1`).
   rcases Finset.eq_empty_or_nonempty S with hSempty | hSnonempty
-  · -- Empty case: `M = ∅`, take `T = 1`.
-    refine ⟨1, by norm_num, S, hCoverEq, fun _ _ _ => 0, ?_⟩
-    -- `α ∈ S` is impossible since `S = ∅`.
+  · refine ⟨1, by norm_num, S, hCoverEq, fun _ _ _ => 0, ?_⟩
     intro α hα
     rw [hSempty] at hα
     exact absurd hα (Finset.notMem_empty α)
-  · -- Non-empty case: take `T = min_{α ∈ S} (hper α).T`.
-    -- Pick `T` as the minimum of `(hper α).T` over `α ∈ S`, using
-    -- `Finset.min'` and positivity.
-    let Tmin : ℝ := S.image (fun α : M => (hper α).T) |>.min' (by
+  · let Tmin : ℝ := S.image (fun α : M => (hper α).T) |>.min' (by
       rw [Finset.image_nonempty]; exact hSnonempty)
     have hTmin_pos : 0 < Tmin := by
-      -- `Tmin = (hper α₀).T` for some `α₀ ∈ S`; positivity comes from
-      -- `(hper α₀).T_pos`.
       have hmem : Tmin ∈ S.image (fun α : M => (hper α).T) :=
         Finset.min'_mem _ _
       rcases Finset.mem_image.mp hmem with ⟨α₀, _, hα₀_eq⟩
@@ -153,21 +136,14 @@ theorem time_dependent_vf_uniform_existence_time_on_closed_mfd
       intro α hα
       apply Finset.min'_le
       exact Finset.mem_image.mpr ⟨α, hα, rfl⟩
-    -- Construct the per-α flow: for `α ∈ S`, use `(hper α).flow`; otherwise
-    -- arbitrary (since the conclusion only quantifies over `α ∈ S`).
     refine ⟨Tmin, hTmin_pos, S, hCoverEq, fun α => (hper α).flow, ?_⟩
     intro α hα y hy
-    -- Specialise `(hper α).flow_spec` at `y`.
     obtain ⟨hinit, hflow⟩ := (hper α).flow_spec y hy
     refine ⟨hinit, ?_⟩
     intro t ht
-    -- `t ∈ [0, Tmin] ⊆ [0, (hper α).T]`.
     have ht' : t ∈ Set.Icc (0 : ℝ) (hper α).T :=
       ⟨ht.1, ht.2.trans (hTmin_le α hα)⟩
     have hderiv := hflow t ht'
-    -- Restrict the derivative-within from `Icc 0 (hper α).T` down to
-    -- `Icc 0 Tmin` (since the smaller interval is a subset and `t` lies in
-    -- the smaller one).
     have hsub : Set.Icc (0 : ℝ) Tmin ⊆ Set.Icc (0 : ℝ) (hper α).T := by
       intro s hs
       exact ⟨hs.1, hs.2.trans (hTmin_le α hα)⟩

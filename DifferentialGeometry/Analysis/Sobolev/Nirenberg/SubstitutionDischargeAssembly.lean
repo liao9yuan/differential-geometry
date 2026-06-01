@@ -64,21 +64,12 @@ open DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeIBP
 open DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeFinal
 open DifferentialGeometry.Analysis.Sobolev.SubstitutionNonSmoothChartBilinear
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Section 1: Cutoff with explicit δ-buffer
-
-The chart-target cutoff `χ` from `exists_chart_target_cutoff` is `χ ≡ 1`
-on `cthickening |h| K_0`, but to prove that `(fderiv χ)(e_i) = 0` on
-`cthickening |h| K_0` we need a strictly larger neighborhood. We package
-the construction with the δ-buffer exposed. -/
 
 set_option linter.unusedVariables false in
 /-- Strengthened cutoff construction with the δ-buffer exposed: there is a
@@ -140,17 +131,6 @@ private lemma chi_eq_one_on_cthickening
     Metric.self_subset_cthickening _ hx
   exact hχ_one x hx_inner
 
-/-! ## Section 2: The "test factor" inline definitions
-
-To prove `MemLp 2` of the explicit weak partial of `v_h` and of `v_h`
-itself, we use the indicator-extension trick: the explicit formula uses
-`D.weak_partial j` and `D.u_chart` only at points within `cthickening |h| K_0`
-(because the `η`-factor restricts evaluation to `K_0`, and the inner
-difference quotient propagates by `|h|`). Hence the formula computed with
-the indicator-extended versions agrees pointwise with the original formula.
-The indicator-extended versions are globally `L²`, and so are their
-difference quotients. -/
-
 /-- The "test factor" associated to the explicit weak partial of `v_h`,
 using the original `D.weak_partial j` and `D.u_chart`. -/
 private noncomputable def tF
@@ -206,7 +186,6 @@ private lemma tF_eq_tFE_on_tsupport
     refine Metric.mem_cthickening_of_dist_le _ z |h| K_0 hz_K_0 ?_
     rw [dist_eq_norm, add_sub_cancel_left, norm_smul]
     simp [Real.norm_eq_abs]
-  -- diffQuot k h (D.weak_partial j) z = diffQuot k h (indicator D.weak_partial j) z.
   have h_dq_wp : DifferentialGeometry.Analysis.Sobolev.diffQuot
       (d := Module.finrank ℝ E) k h (D.weak_partial j) z =
       DifferentialGeometry.Analysis.Sobolev.diffQuot
@@ -285,9 +264,6 @@ private lemma tF_eq_tFE
   · rw [tF_eq_zero_outside_tsupport (I := I) (M := M) D k h j hz,
       tFE_eq_zero_outside_tsupport (I := I) (M := M) D k K_0 j hz]
 
-/-! ## Section 3: Memberlp witnesses for `tF`, `tFE`, and the explicit weak
-partial of `v_h`. -/
-
 /-- Indicator extension of `D.u_chart` is in `MemLp 2`. -/
 private lemma uChart_indicator_memLp
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -344,7 +320,6 @@ private lemma memLp_diffQuot_of_memLp_local
     DifferentialGeometry.Analysis.Sobolev.aestronglyMeasurable_diffQuot
       (d := Module.finrank ℝ E) k h hF_aesm
   refine ⟨hdq_aesm, ?_⟩
-  -- diffQuot k h F = h⁻¹ • (translate k h F - F).
   have h_dq_eq : DifferentialGeometry.Analysis.Sobolev.diffQuot
       (d := Module.finrank ℝ E) k h F =
       h⁻¹ • (DifferentialGeometry.Analysis.Sobolev.translate
@@ -356,7 +331,6 @@ private lemma memLp_diffQuot_of_memLp_local
       DifferentialGeometry.Analysis.Sobolev.translate, smul_eq_mul]
     field_simp
   rw [h_dq_eq]
-  -- ‖h⁻¹ • (τ - F)‖ ≤ |h⁻¹| · (‖τ‖ + ‖F‖) < ⊤.
   have hτF_lp : MemLp (DifferentialGeometry.Analysis.Sobolev.translate
       (d := Module.finrank ℝ E) k h F) 2 (volume : Measure EuclN) :=
     DifferentialGeometry.Analysis.Sobolev.memLp_translate
@@ -386,7 +360,6 @@ private lemma tFE_memLp_two
   classical
   have hη_cont : Continuous η := hη.continuous
   have h_top_ne_zero : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0 := by decide
-  -- Bound on η.
   obtain ⟨M_η, hM_η_nn, hM_η_bd⟩ : ∃ M_η : ℝ, 0 ≤ M_η ∧ ∀ x, |η x| ≤ M_η := by
     by_cases hSupp_empty : (tsupport η).Nonempty
     · obtain ⟨xMax, _hxMax_in, hxMax_max⟩ :=
@@ -403,7 +376,6 @@ private lemma tFE_memLp_two
       · exact absurd ⟨x, hx⟩ hSupp_empty
       · have hηx : η x = 0 := image_eq_zero_of_notMem_tsupport hx
         rw [hηx, abs_zero]
-  -- Bound on ∂_j η.
   have h_partial_eta_cont : Continuous
       (fun z : EuclN => (fderiv ℝ η z) (EuclideanSpace.single j 1)) :=
     (hη.continuous_fderiv h_top_ne_zero).clm_apply continuous_const
@@ -441,7 +413,6 @@ private lemma tFE_memLp_two
             (f := fun z : EuclN => (fderiv ℝ η z) (EuclideanSpace.single j 1)) hx
         rw [show (fderiv ℝ η x) (EuclideanSpace.single j 1) = 0 from hpartialx,
           abs_zero]
-  -- Indicator-extended factors are globally L².
   have hu_ext_lp := uChart_indicator_memLp (I := I) (M := M) D
     hK_0_compact hh_le h_thick
   have hwp_ext_lp := weakPartial_indicator_memLp (I := I) (M := M) D
@@ -459,7 +430,6 @@ private lemma tFE_memLp_two
       (volume : Measure EuclN) :=
     memLp_diffQuot_of_memLp_local hwp_ext_lp k hh
   unfold tFE
-  -- Term 1: (η)² · diffQuot wp_ext, bounded by M_η² · |diffQuot wp_ext|.
   have ht1_pt_bd : ∀ z, ‖(η z)^2 *
       DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h
@@ -491,7 +461,6 @@ private lemma tFE_memLp_two
       (volume : Measure EuclN) :=
     MemLp.mono (hdq_wp_ext_lp.const_mul (M_η^2)) ht1_aesm
       (Filter.Eventually.of_forall ht1_pt_bd)
-  -- Term 2: 2 · η · ∂_j η · diffQuot u_ext, bounded by 2·M_η·M_dη · |diffQuot u_ext|.
   have ht2_pt_bd : ∀ z, ‖2 * η z * (fderiv ℝ η z) (EuclideanSpace.single j 1) *
       DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h
@@ -502,7 +471,6 @@ private lemma tFE_memLp_two
           ((Metric.cthickening |h| K_0).indicator D.u_chart) z‖ := by
     intro z
     rw [Real.norm_eq_abs, Real.norm_eq_abs]
-    -- Compute |2 * η z * ∂η * dq|.
     have h_lhs_abs : |(2 : ℝ) * η z *
         (fderiv ℝ η z) (EuclideanSpace.single j 1) *
         DifferentialGeometry.Analysis.Sobolev.diffQuot
@@ -578,8 +546,6 @@ private lemma weakPartial_v_h_memLp
     (j : Fin (Module.finrank ℝ E)) :
     MemLp (weakPartial_v_h (I := I) (M := M) D η k h j) 2
       (volume : Measure EuclN) := by
-  -- weakPartial_v_h = diffQuot k (-h) tF = diffQuot k (-h) tFE (a.e. = pointwise),
-  -- and tFE is L² globally.
   classical
   unfold weakPartial_v_h
   rw [tF_eq_tFE (I := I) (M := M) D hη_supp_in_K_0 k j]
@@ -603,12 +569,6 @@ private lemma standardNirenbergTest_uChart_memLp_cthickening
     MemLp (standardNirenbergTest (d := Module.finrank ℝ E) k h η D.u_chart) 2
       ((volume : Measure EuclN).restrict (Metric.cthickening |h| K_0)) := by
   classical
-  -- standardNirenbergTest = diffQuot k (-h) (η² · diffQuot k h u_chart).
-  -- Define F(z) = η² · diffQuot k h u_chart(z) and F_ext(z) = η² · diffQuot k h (indicator u_chart)(z).
-  -- F = F_ext pointwise (because the η² factor restricts evaluation to tsupport η ⊆ K_0,
-  -- and at those points, indicator agrees with the original).
-  -- F_ext is globally L² (η² bounded, diffQuot of indicator-extended L² is L²).
-  -- Hence standardNirenbergTest is globally L², thus also on the cthickening.
   set F : EuclN → ℝ := fun z =>
     (η z)^2 *
       DifferentialGeometry.Analysis.Sobolev.diffQuot
@@ -618,12 +578,10 @@ private lemma standardNirenbergTest_uChart_memLp_cthickening
       DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h
         ((Metric.cthickening |h| K_0).indicator D.u_chart) z with hF_ext_def
-  -- Pointwise F = F_ext.
   have hF_eq : F = F_ext := by
     funext z
     by_cases hz : z ∈ tsupport η
-    · -- On tsupport η ⊆ K_0, the diffQuot's agree.
-      have hz_K_0 : z ∈ K_0 := hη_supp_in_K_0 hz
+    · have hz_K_0 : z ∈ K_0 := hη_supp_in_K_0 hz
       have hz_thick : z ∈ Metric.cthickening |h| K_0 :=
         Metric.self_subset_cthickening _ hz_K_0
       have hz_shift : z + h • EuclideanSpace.single k 1 ∈ Metric.cthickening |h| K_0 := by
@@ -651,8 +609,7 @@ private lemma standardNirenbergTest_uChart_memLp_cthickening
           (d := Module.finrank ℝ E) k h
           ((Metric.cthickening |h| K_0).indicator D.u_chart) z
       rw [h_dq_u]
-    · -- Off tsupport η, η z = 0, so both sides are 0.
-      have hηz : η z = 0 := image_eq_zero_of_notMem_tsupport hz
+    · have hηz : η z = 0 := image_eq_zero_of_notMem_tsupport hz
       change (η z)^2 *
         DifferentialGeometry.Analysis.Sobolev.diffQuot
           (d := Module.finrank ℝ E) k h D.u_chart z =
@@ -662,7 +619,6 @@ private lemma standardNirenbergTest_uChart_memLp_cthickening
           ((Metric.cthickening |h| K_0).indicator D.u_chart) z
       rw [show (η z)^2 = 0 from by rw [hηz]; ring]
       ring
-  -- F_ext is L² globally.
   have hη_cont : Continuous η := hη.continuous
   obtain ⟨M_η, hM_η_nn, hM_η_bd⟩ : ∃ M_η : ℝ, 0 ≤ M_η ∧ ∀ x, |η x| ≤ M_η := by
     by_cases hSupp_empty : (tsupport η).Nonempty
@@ -709,30 +665,24 @@ private lemma standardNirenbergTest_uChart_memLp_cthickening
   have hF_ext_lp : MemLp F_ext 2 (volume : Measure EuclN) :=
     MemLp.mono (hdq_u_ext_lp.const_mul (M_η^2)) hF_ext_aesm
       (Filter.Eventually.of_forall hF_ext_pt_bd)
-  -- F = F_ext, so F is L² globally.
   have hF_lp : MemLp F 2 (volume : Measure EuclN) := by
     rw [hF_eq]; exact hF_ext_lp
-  -- standardNirenbergTest = diffQuot k (-h) F.
   have hnh : (-h) ≠ 0 := neg_ne_zero.mpr hh
   have h_dq_F_lp : MemLp
       (DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k (-h) F) 2
       (volume : Measure EuclN) :=
     memLp_diffQuot_of_memLp_local hF_lp k hnh
-  -- Restrict to cthickening preserves L².
   have h_restrict_lp : MemLp
       (DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k (-h) F) 2
       ((volume : Measure EuclN).restrict (Metric.cthickening |h| K_0)) :=
     h_dq_F_lp.restrict _
-  -- standardNirenbergTest = diffQuot k (-h) F.
   have h_test_eq : standardNirenbergTest (d := Module.finrank ℝ E) k h η D.u_chart =
       DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k (-h) F := rfl
   rw [h_test_eq]
   exact h_restrict_lp
-
-/-! ## Section 4: Discharge of theorem 2 (variational identity at v_h) -/
 
 set_option linter.unusedVariables false in
 /-- **Theorem 2 unconditional**: the variational identity holds at
@@ -775,23 +725,18 @@ theorem variational_identity_at_v_h_unconditional
           standardNirenbergTest (d := Module.finrank ℝ E) k h η D.u_chart y
         ∂(volume : Measure EuclN) := by
   classical
-  -- Build the cutoff χ.
   obtain ⟨δ, χ, hδ_pos, hχ_smooth, hχ_cs, hχ_nn, hχ_le_one,
     hχ_one_strong, hχ_supp⟩ :=
     exists_chart_target_cutoff_strong (I := I) (M := M) (α := α)
       hK_0_compact hh_le h_thick
-  -- χ = 1 on cthickening |h| K_0.
   have hχ_one : ∀ x ∈ Metric.cthickening |h| K_0, χ x = 1 := fun x hx =>
     chi_eq_one_on_cthickening hδ_pos hχ_one_strong hx
-  -- (fderiv χ) e_i = 0 on cthickening |h| K_0.
   have hχ_dx_zero : ∀ x ∈ Metric.cthickening |h| K_0, ∀ i,
       (fderiv ℝ χ x) (EuclideanSpace.single i 1) = 0 := fun x hx i =>
     fderiv_chi_zero_on_cthickening hδ_pos hχ_one_strong hx i
-  -- Smooth approximating sequence for χ · D.u_chart.
   obtain ⟨u_seq, hu_seq_smooth, hu_seq_cs, hu_seq_l2, hu_seq_grad_l2⟩ :=
     exists_smooth_uChart_approx (I := I) (M := M) D
       hχ_smooth hχ_cs hχ_supp
-  -- L² convergence of v_h_n → v_h.
   have h_v_seq_l2 :
       Tendsto (fun n => eLpNorm (fun x =>
         standardNirenbergTest (d := Module.finrank ℝ E) k h η (u_seq n) x -
@@ -801,7 +746,6 @@ theorem variational_identity_at_v_h_unconditional
     standardNirenbergTest_seq_tendsto_eLpNorm (I := I) (M := M) D
       hχ_smooth hχ_cs hχ_supp hη hη_supp k hh hh_le hK_0_compact
       hχ_one hη_supp_in_K_0 hu_seq_smooth hu_seq_cs hu_seq_l2
-  -- Gradient L² convergence: ∂_j v_h_n → weakPartial_v_h j.
   have h_v_seq_grad_l2 : ∀ j : Fin (Module.finrank ℝ E),
       Tendsto (fun n => eLpNorm
         (fun y => (fderiv ℝ
@@ -822,7 +766,6 @@ theorem variational_identity_at_v_h_unconditional
       hχ_smooth hχ_cs hχ_supp hη hη_supp hK_0_compact hχ_one hχ_dx_zero
       hη_supp_in_K_0 k hh hh_le hu_seq_smooth hu_seq_cs hu_seq_l2
       hu_seq_grad_l2 j
-  -- Define the explicit weak partial of v_h.
   set wpv : Fin (Module.finrank ℝ E) → EuclN → ℝ := fun j y =>
     DifferentialGeometry.Analysis.Sobolev.diffQuot
       (d := Module.finrank ℝ E) k (-h)
@@ -832,18 +775,15 @@ theorem variational_identity_at_v_h_unconditional
         2 * η z * (fderiv ℝ η z) (EuclideanSpace.single j 1) *
           DifferentialGeometry.Analysis.Sobolev.diffQuot
             (d := Module.finrank ℝ E) k h D.u_chart z) y with hwpv_def
-  -- v_h is L² on the cthickening.
   have hv_h_lp : MemLp (standardNirenbergTest (d := Module.finrank ℝ E)
       k h η D.u_chart) 2
       ((volume : Measure EuclN).restrict (Metric.cthickening |h| K_0)) :=
     standardNirenbergTest_uChart_memLp_cthickening (I := I) (M := M) D
       hK_0_compact hη hη_supp hη_supp_in_K_0 k hh hh_le h_thick
-  -- weakPartial_v_h j = wpv j (definitional).
   have h_wpv_eq_def : ∀ j : Fin (Module.finrank ℝ E),
       wpv j = weakPartial_v_h (I := I) (M := M) D η k h j := by
     intro j
     rfl
-  -- wpv j is L² on the cthickening (via weakPartial_v_h being L² globally).
   have hv_h_grad_lp : ∀ j : Fin (Module.finrank ℝ E),
       MemLp (wpv j) 2
         ((volume : Measure EuclN).restrict (Metric.cthickening |h| K_0)) := by
@@ -851,19 +791,15 @@ theorem variational_identity_at_v_h_unconditional
     rw [h_wpv_eq_def j]
     exact (weakPartial_v_h_memLp (I := I) (M := M) D
       hK_0_compact hη hη_supp hη_supp_in_K_0 k hh hh_le h_thick j).restrict _
-  -- Support of v_h_n in cthickening.
   have h_v_seq_supp : ∀ n : ℕ,
       tsupport (standardNirenbergTest (d := Module.finrank ℝ E)
         k h η (u_seq n)) ⊆ Metric.cthickening |h| K_0 := fun n =>
     standardNirenbergTest_tsupport_in_thickening (E := E) k h hη_supp
       hη_supp_in_K_0 (u_seq n)
-  -- Apply theorem 2.
   exact variational_identity_at_v_h (I := I) (M := M) D
     hK_0_compact hK_0_in hη hη_supp hη_supp_in_K_0 k hh hh_le h_thick
     wpv hv_h_lp hv_h_grad_lp u_seq hu_seq_smooth hu_seq_cs h_v_seq_supp
     h_v_seq_l2 h_v_seq_grad_l2
-
-/-! ## Section 5: Discharge of theorem 3 (substitution of weak partial) -/
 
 set_option linter.unusedVariables false in
 /-- **Theorem 3 unconditional**: the variational identity at `v_h` rewrites
@@ -906,15 +842,6 @@ theorem variational_identity_v_h_expanded_unconditional
         ∂(volume : Measure EuclN) :=
   variational_identity_at_v_h_unconditional (I := I) (M := M) D
     hK_0_compact hK_0_in hη hη_supp hη_supp_in_K_0 k hh hh_le h_thick
-
-/-! ## Section 6: Discharge of theorem 5 (discrete product rule + symbolic
-matching)
-
-Apply the discrete product rule on `D_h^k(weightedInvGramOnEuclid · D.weak_partial i)`
-to expand the principal IBP'd term into FOUR terms. The integrals over
-`cthickening |h| K_0` reduce to integrals over `K_0` because all four
-integrands are zero outside `tsupport η ⊆ K_0` (the `η²` and
-`2η · ∂_j η` factors vanish there). -/
 
 /-- Pointwise expansion of `D_h^k(weightedInvGramOnEuclid · D.weak_partial i)`
 via the discrete product rule. -/
@@ -1000,12 +927,6 @@ private lemma integral_cthickening_eq_integral_K_0
     (MeasureTheory.integral_indicator hK_0_meas).symm
   rw [h_lhs_eq, h_rhs_eq, h_indicator_eq]
 
-/-! ## Section 7: Integrability of the post-IBP Tk_ij summands on K_0
-
-For matching to the symbolic pieces, we need each of the four pieces
-`Tk_ij` (k = 1, 2, 3, 4) to be integrable on `K_0`. Each is a product of
-bounded factors and `L²` factors, hence `L¹` by Hölder. -/
-
 /-- Bound on a continuous compactly-supported function. -/
 private lemma exists_uniform_bound_continuous_compactSupport
     {f : EuclN → ℝ} (hf_cont : Continuous f) (hf_cs : HasCompactSupport f) :
@@ -1069,7 +990,6 @@ private lemma diffQuot_weakPartial_memLp_K_0
       (d := Module.finrank ℝ E) k h (D.weak_partial i)) 2
       ((volume : Measure EuclN).restrict K_0) := by
   classical
-  -- Use the fact that on K_0, dq(wp_i) = dq(indicator wp_i) pointwise (since y, y+h e_k ∈ cthickening).
   set wp_i_ext : EuclN → ℝ :=
     (Metric.cthickening |h| K_0).indicator (D.weak_partial i) with hwp_i_ext_def
   have hwp_i_ext_lp : MemLp wp_i_ext 2 (volume : Measure EuclN) :=
@@ -1079,13 +999,11 @@ private lemma diffQuot_weakPartial_memLp_K_0
         (d := Module.finrank ℝ E) k h wp_i_ext) 2
       (volume : Measure EuclN) :=
     memLp_diffQuot_of_memLp_local hwp_i_ext_lp k hh
-  -- Restrict to K_0.
   have hdq_wp_i_ext_lp_restrict : MemLp
       (DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h wp_i_ext) 2
       ((volume : Measure EuclN).restrict K_0) :=
     hdq_wp_i_ext_lp.restrict K_0
-  -- On K_0, dq(wp_i) = dq(wp_i_ext) pointwise.
   have h_pt_eq : ∀ y ∈ K_0,
       DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h (D.weak_partial i) y =
@@ -1121,7 +1039,6 @@ private lemma diffQuot_weakPartial_memLp_K_0
     refine Filter.Eventually.of_forall ?_
     intro y hy
     exact (h_pt_eq y hy).symm
-  -- MemLp is preserved by ae equality.
   exact MemLp.ae_eq h_ae_eq hdq_wp_i_ext_lp_restrict
 
 /-- `dq(D.u_chart)` is `MemLp 2` on `K_0` via the indicator-extended version. -/
@@ -1188,9 +1105,6 @@ private lemma diffQuot_uChart_memLp_K_0
     exact (h_pt_eq y hy).symm
   exact MemLp.ae_eq h_ae_eq hdq_u_ext_lp_restrict
 
-/-! ## Section 8: Continuity of `translate(weightedInvGramOnEuclid)` and
-`diffQuot(weightedInvGramOnEuclid)` on the relevant compact sets -/
-
 set_option linter.unusedVariables false in
 /-- `translate k h (weightedInvGramOnEuclid g α i j)` is continuous on `K_0`
 when `cthickening |h| K_0 ⊆ chartTargetEuclid α`. -/
@@ -1206,10 +1120,6 @@ private lemma translate_weightedInvGramOnEuclid_continuousOn_K_0
       (d := Module.finrank ℝ E) k h
       (fun y => weightedInvGramOnEuclid (I := I) g α i j y)) K_0 := by
   classical
-  -- translate k h F y = F (y + h • e_k). This is F ∘ (y ↦ y + h • e_k).
-  -- The translation map is continuous (homeomorphism).
-  -- F is continuous on chartTarget. y ∈ K_0 ⊆ cthickening |h| K_0 ⊆ chartTarget,
-  -- and y + h • e_k ∈ cthickening |h| K_0 ⊆ chartTarget.
   have h_w_cont : ContinuousOn (weightedInvGramOnEuclid (I := I) g α i j)
       (chartTargetEuclid (I := I) (M := M) α) :=
     (weightedInvGramOnEuclid_contDiffOn (I := I) g α i j).continuousOn
@@ -1241,8 +1151,6 @@ private lemma diffQuot_weightedInvGramOnEuclid_continuousOn_K_0
       (d := Module.finrank ℝ E) k h
       (fun y => weightedInvGramOnEuclid (I := I) g α i j y)) K_0 := by
   classical
-  -- diffQuot k h F y = (F (y + h e_k) - F y) / h (when h ≠ 0).
-  -- For h = 0, diffQuot is 0.
   by_cases hh : h = 0
   · subst hh
     have h_dq_zero : DifferentialGeometry.Analysis.Sobolev.diffQuot
@@ -1253,7 +1161,6 @@ private lemma diffQuot_weightedInvGramOnEuclid_continuousOn_K_0
       simp [DifferentialGeometry.Analysis.Sobolev.diffQuot]
     rw [h_dq_zero]
     exact continuousOn_const
-  -- h ≠ 0. diffQuot k h F y = (F(y + h e_k) - F y) / h.
   have h_dq_eq : DifferentialGeometry.Analysis.Sobolev.diffQuot
       (d := Module.finrank ℝ E) k h
       (fun y => weightedInvGramOnEuclid (I := I) g α i j y) =
@@ -1277,11 +1184,6 @@ private lemma diffQuot_weightedInvGramOnEuclid_continuousOn_K_0
     h_w_cont.mono hK_0_in
   exact (h_translate_cont.sub h_w_cont_K_0).div_const h
 
-/-! ## Section 9: Integrability of each Tk_ij on K_0
-
-Each Tk_ij has the form `bounded × bounded × L² × L²`, hence `L¹` by
-Hölder. -/
-
 /-- Each Tk-style integrand `c · η^a · ∂_j_η^b · F1 · F2` on K_0 is L¹,
 where `c` is bounded continuous on K_0, `η^a · ∂_j η^b` is bounded
 continuous, and `F1, F2 ∈ L²`. We package this as a generic helper. -/
@@ -1300,29 +1202,23 @@ private lemma integrable_bdd_bdd_L2_L2
     rw [show (1 : ℝ≥0∞)⁻¹ = 1 from inv_one]
     rw [ENNReal.inv_two_add_inv_two]
   have hK_0_meas : MeasurableSet K_0 := hK_0_compact.isClosed.measurableSet
-  -- Bound for c on K_0.
   obtain ⟨M_c, _hM_c_nn, hM_c_bd⟩ :=
     exists_uniform_bound_on_compact h_c_cont hK_0_compact
-  -- Bound for bdd_factor on K_0 (any continuous function bounded on compact).
   obtain ⟨M_b, _hM_b_nn, hM_b_bd⟩ :=
     exists_uniform_bound_on_compact h_bdd_cont.continuousOn hK_0_compact
-  -- L¹ of F1 · F2 on K_0.
   have h_F1F2_int : Integrable (fun y => F1 y * F2 y)
       ((volume : Measure EuclN).restrict K_0) := by
     have h := MemLp.integrable_mul (μ :=
       (volume : Measure EuclN).restrict K_0)
       (p := (2 : ℝ≥0∞)) (q := (2 : ℝ≥0∞)) hF1_lp hF2_lp
     simpa using h
-  -- bdd_factor (continuous) is AEStronglyMeasurable.
   have h_bdd_aesm : AEStronglyMeasurable bdd_factor
       ((volume : Measure EuclN).restrict K_0) :=
     h_bdd_cont.aestronglyMeasurable.mono_measure
       (MeasureTheory.Measure.restrict_le_self)
-  -- c (continuous on K_0) is AEStronglyMeasurable on restrict K_0.
   have h_c_aesm : AEStronglyMeasurable c
       ((volume : Measure EuclN).restrict K_0) :=
     h_c_cont.aestronglyMeasurable_of_isCompact hK_0_compact hK_0_meas
-  -- Combine c · bdd_factor: bounded by M_c · M_b on K_0.
   have h_c_b_aesm : AEStronglyMeasurable (fun y => c y * bdd_factor y)
       ((volume : Measure EuclN).restrict K_0) :=
     h_c_aesm.mul h_bdd_aesm
@@ -1334,12 +1230,10 @@ private lemma integrable_bdd_bdd_L2_L2
     rw [Real.norm_eq_abs, abs_mul]
     exact mul_le_mul (hM_c_bd y hy) (hM_b_bd y (by trivial))
       (abs_nonneg _) (le_trans (abs_nonneg _) (hM_c_bd y hy))
-  -- (c · bdd_factor) · (F1 · F2) is integrable: bounded × L¹ = L¹.
   have h_combine : Integrable (fun y =>
       c y * bdd_factor y * (F1 y * F2 y))
       ((volume : Measure EuclN).restrict K_0) :=
     h_F1F2_int.bdd_mul h_c_b_aesm h_c_b_bound
-  -- Match the integrand: c y * bdd_factor y * F1 y * F2 y = c y * bdd_factor y * (F1 y * F2 y).
   have h_eq : (fun y => c y * bdd_factor y * F1 y * F2 y) =
       (fun y => c y * bdd_factor y * (F1 y * F2 y)) := by
     funext y; ring
@@ -1403,7 +1297,6 @@ private lemma T2_ij_integrable_K_0
         (d := Module.finrank ℝ E) k h D.u_chart y)
       ((volume : Measure EuclN).restrict K_0) := by
   classical
-  -- Group as (2 · τw · η · ∂_j η) · dq(wp_i) · dq(u).
   have h_τw_cont := translate_weightedInvGramOnEuclid_continuousOn_K_0
     (I := I) (M := M) g α i j (k := k) (h := h) hh_le h_thick
   have h_top_ne_zero : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0 := by decide
@@ -1417,7 +1310,6 @@ private lemma T2_ij_integrable_K_0
     hK_0_compact k hh hh_le h_thick
   have h_int := integrable_bdd_bdd_L2_L2 hK_0_compact h_τw_cont hη_factor_cont
     hdq_wp_i_lp hdq_u_lp
-  -- Match: c y * bdd y * F1 y * F2 y = τw y * (2 · η · ∂_j η y) * dq(wp_i) y * dq(u) y.
   have h_eq : (fun y =>
       DifferentialGeometry.Analysis.Sobolev.translate
         (d := Module.finrank ℝ E) k h
@@ -1532,8 +1424,6 @@ private lemma T4_ij_integrable_K_0
   rw [← h_eq]
   exact h_int
 
-/-! ## Section 10: Principal post-IBP integrand expansion to symbolic terms -/
-
 set_option linter.unusedVariables false in
 /-- The post-IBP integrand summed over `(i, j)`, integrated over the
 cthickening, equals `principal + cross_1 + cross_2 + cross_3` after applying
@@ -1569,7 +1459,6 @@ private lemma principal_post_ibp_integral_eq_symbolic
         + cross_2_term_chartBilinear (I := I) (M := M) D K_0 η k h
         + cross_3_term_chartBilinear (I := I) (M := M) D K_0 η k h := by
   classical
-  -- Define the four Tk_ij integrands.
   set T1 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → EuclN → ℝ :=
     fun i j y => DifferentialGeometry.Analysis.Sobolev.translate
       (d := Module.finrank ℝ E) k h
@@ -1606,7 +1495,6 @@ private lemma principal_post_ibp_integral_eq_symbolic
       D.weak_partial i y *
       DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h D.u_chart y with hT4_def
-  -- LHS_ij is the per-(i,j) summand of the integrand.
   set LHS_ij : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → EuclN → ℝ :=
     fun i j y => DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h
@@ -1618,7 +1506,6 @@ private lemma principal_post_ibp_integral_eq_symbolic
         2 * η y * (fderiv ℝ η y) (EuclideanSpace.single j 1) *
           DifferentialGeometry.Analysis.Sobolev.diffQuot
             (d := Module.finrank ℝ E) k h D.u_chart y) with hLHS_def
-  -- Pointwise expansion.
   have h_pointwise_expand : ∀ i j y,
       LHS_ij i j y = T1 i j y + T2 i j y + T3 i j y + T4 i j y := by
     intro i j y
@@ -1683,7 +1570,6 @@ private lemma principal_post_ibp_integral_eq_symbolic
       DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h D.u_chart y)
     ring
-  -- The (i,j)-summed pointwise expansion.
   have h_sum_expand : ∀ y, (∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E), LHS_ij i j y) =
       (∑ i, ∑ j, T1 i j y) + (∑ i, ∑ j, T2 i j y) +
@@ -1702,7 +1588,6 @@ private lemma principal_post_ibp_integral_eq_symbolic
           (∑ j, T3 i j y) + (∑ j, T4 i j y)) from
         funext h_per_ij]
     simp [Finset.sum_add_distrib]
-  -- Convert the integral via the pointwise expansion.
   have h_int_expand :
       ∫ y in Metric.cthickening |h| K_0,
           (∑ i : Fin (Module.finrank ℝ E),
@@ -1716,7 +1601,6 @@ private lemma principal_post_ibp_integral_eq_symbolic
     refine Filter.Eventually.of_forall ?_
     intro y
     exact h_sum_expand y
-  -- Move from cthickening to K_0 (each summed Tk vanishes outside K_0 ⊇ tsupport η).
   have h_T_zero : ∀ y ∉ tsupport η,
       ((∑ i, ∑ j, T1 i j y) + (∑ i, ∑ j, T2 i j y) +
       (∑ i, ∑ j, T3 i j y) + (∑ i, ∑ j, T4 i j y)) = 0 := by
@@ -1802,7 +1686,6 @@ private lemma principal_post_ibp_integral_eq_symbolic
           ∂(volume : Measure EuclN) :=
     integral_cthickening_eq_integral_K_0 (E := E) hK_0_compact hh_le
       hη_supp_in_K_0 h_T_zero
-  -- Now over K_0, split by linearity (each Tk_ij integrable).
   have hT1_ij_int : ∀ i j, Integrable (T1 i j)
       ((volume : Measure EuclN).restrict K_0) := fun i j =>
     T1_ij_integrable_K_0 (I := I) (M := M) D hK_0_compact hη k hh hh_le
@@ -1819,7 +1702,6 @@ private lemma principal_post_ibp_integral_eq_symbolic
       ((volume : Measure EuclN).restrict K_0) := fun i j =>
     T4_ij_integrable_K_0 (I := I) (M := M) D hK_0_compact hK_0_in hη k hh hh_le
       h_thick i j
-  -- Sum integrability.
   have hT1_sum_int : Integrable (fun y => ∑ i, ∑ j, T1 i j y)
       ((volume : Measure EuclN).restrict K_0) := by
     refine integrable_finset_sum _ ?_
@@ -1840,7 +1722,6 @@ private lemma principal_post_ibp_integral_eq_symbolic
     refine integrable_finset_sum _ ?_
     intro i _
     exact integrable_finset_sum _ (fun j _ => hT4_ij_int i j)
-  -- Linearity over K_0.
   have h_split :
       ∫ y in K_0,
           ((∑ i, ∑ j, T1 i j y) + (∑ i, ∑ j, T2 i j y) +
@@ -1860,7 +1741,6 @@ private lemma principal_post_ibp_integral_eq_symbolic
     rw [integral_add hT123_int hT4_sum_int]
     rw [integral_add hT12_int hT3_sum_int]
     rw [integral_add hT1_sum_int hT2_sum_int]
-  -- Match each integral to the symbolic term.
   have h_principalTerm : ∫ y in K_0, (∑ i, ∑ j, T1 i j y)
       ∂(volume : Measure EuclN) =
       principalTerm_chartBilinear (I := I) (M := M) D K_0 η k h := by
@@ -1868,7 +1748,6 @@ private lemma principal_post_ibp_integral_eq_symbolic
   have h_cross1 : ∫ y in K_0, (∑ i, ∑ j, T2 i j y)
       ∂(volume : Measure EuclN) =
       cross_1_term_chartBilinear (I := I) (M := M) D K_0 η k h := by
-    -- cross_1 = ∑_i ∑_j ∫_{K_0} T2_ij. Need to swap sum and integral.
     rw [show (fun y : EuclN => ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E), T2 i j y) =
         (fun y => ∑ i : Fin (Module.finrank ℝ E),
@@ -1914,8 +1793,6 @@ private lemma principal_post_ibp_integral_eq_symbolic
   rw [h_int_expand, h_thick_to_K_0, h_split, h_principalTerm, h_cross1,
     h_cross2, h_cross3]
 
-/-! ## Section 11: Discharge of theorem 5 (variational identity → symbolic LHS = RHS) -/
-
 set_option linter.unusedVariables false in
 /-- **Theorem 5 unconditional**: applying the discrete product rule to the
 post-IBP integrand and matching to the symbolic pieces yields the
@@ -1939,13 +1816,11 @@ theorem variational_identity_after_product_rule_unconditional
       + f_term_chartBilinear (I := I) (M := M) D K_0 η k h
       = c_term_chartBilinear (I := I) (M := M) D K_0 η k h := by
   classical
-  -- Get the post-IBP unconditional variational identity from M.3.E.
   have h_after_ibp_eq :=
     variational_identity_after_ibp_unconditional (I := I) (M := M) D
       hK_0_compact hK_0_in hη hη_supp hη_supp_in_K_0 k hh hh_le h_thick
       (variational_identity_v_h_expanded_unconditional (I := I) (M := M) D
         hK_0_compact hK_0_in hη hη_supp hη_supp_in_K_0 k hh hh_le h_thick)
-  -- Match each piece to the symbolic ones.
   have h_principal_in_K_0_eq :
       ∫ y in Metric.cthickening |h| K_0,
           (∑ i : Fin (Module.finrank ℝ E),
@@ -1979,13 +1854,9 @@ theorem variational_identity_after_product_rule_unconditional
           standardNirenbergTest (d := Module.finrank ℝ E) k h η D.u_chart y
       ∂(volume : Measure EuclN) =
       f_term_chartBilinear (I := I) (M := M) D K_0 η k h := rfl
-  -- Apply theorem 5 with discharged hypotheses.
   exact variational_identity_after_product_rule (I := I) (M := M) D
     hK_0_compact hK_0_in hη hη_supp hη_supp_in_K_0 k hh hh_le h_thick
     h_after_ibp_eq h_principal_in_K_0_eq h_c_term_eq h_f_term_eq
-
-/-! ## Section 12: Final assembly — the truly unconditional chart-bilinear
-substitution identity -/
 
 /-- **Chart-bilinear substitution identity (unconditional, full form).**
 The chart-bilinear LHS equals the chart-bilinear RHS, derived from the
@@ -2085,8 +1956,6 @@ theorem nirenberg_substitution_identity_chartBilinear_unconditional
             standardNirenbergTest
               (d := Module.finrank ℝ E) k h η D.u_chart x
         ∂(volume : Measure EuclN) := by
-  -- The explicit form is precisely chartBilinear_LHS = chartBilinear_RHS
-  -- after unfolding the symbolic pieces.
   have h := chartBilinear_substitution_identity_holds (I := I) (M := M) D
     hK_0_compact hK_0_in hη hη_supp hη_supp_in_K_0 k hh hh_le h_thick
   unfold chartBilinear_LHS chartBilinear_RHS at h

@@ -40,16 +40,12 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Definition of the mollification operator -/
-
 /-- The ε-mollified version of a function `u : E → ℝ`:
 `mollifyEps hε u := mollifierEps hε ⋆ u`. The convolution uses the standard
 `lsmul ℝ ℝ` bilinear pairing on real-valued functions. -/
 def mollifyEps {ε : ℝ} (hε : 0 < ε) (u : E → ℝ) : E → ℝ :=
   DifferentialGeometry.Analysis.Sobolev.mollifierEps (d := d) hε ⋆[
     ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] u
-
-/-! ## Smoothness of the mollified function -/
 
 /-- For `0 < ε` and a locally integrable `u : E → ℝ`, the mollified function
 is smooth on the whole space. -/
@@ -69,8 +65,6 @@ theorem mollifyEps_continuous {ε : ℝ} (hε : 0 < ε) {u : E → ℝ}
     Continuous (mollifyEps (d := d) hε u) :=
   (mollifyEps_contDiff (d := d) hε hu_loc).continuous
 
-/-! ## Pointwise integral formula -/
-
 /-- The mollified value at `x` is the integral of `mollifierEps(t) · u(x - t)`. -/
 lemma mollifyEps_apply {ε : ℝ} (hε : 0 < ε) (u : E → ℝ) (x : E) :
     mollifyEps (d := d) hε u x =
@@ -80,8 +74,6 @@ lemma mollifyEps_apply {ε : ℝ} (hε : 0 < ε) (u : E → ℝ) (x : E) :
   simp [mollifyEps, MeasureTheory.convolution_def,
     ContinuousLinearMap.lsmul_apply, smul_eq_mul]
 
-/-! ## Compact support of the mollified function -/
-
 /-- If `u` has compact support, so does `mollifyEps hε u`. -/
 theorem mollifyEps_hasCompactSupport {ε : ℝ} (hε : 0 < ε) {u : E → ℝ}
     (hu_supp : HasCompactSupport u) :
@@ -90,8 +82,6 @@ theorem mollifyEps_hasCompactSupport {ε : ℝ} (hε : 0 < ε) {u : E → ℝ}
     (μ := (volume : Measure E))
     (DifferentialGeometry.Analysis.Sobolev.mollifierEps_compactSupport hε)
     hu_supp
-
-/-! ## `L²` membership for compactly-supported `L²` data -/
 
 /-- For `u ∈ L²` with compact support, the mollified function is in `L²`.
 Combination of smoothness (hence continuity) and compact support of the
@@ -108,8 +98,6 @@ theorem mollifyEps_memLp_two_of_hasCompactSupport {ε : ℝ} (hε : 0 < ε)
     mollifyEps_hasCompactSupport (d := d) hε hu_supp
   exact h_cont.memLp_of_hasCompactSupport h_supp
 
-/-! ## Pointwise convergence as ε → 0 -/
-
 /-- Pointwise convergence of the mollified function to a continuous function
 at every point: for `u : E → ℝ` continuous and any `x₀ : E`,
 `mollifyEps εₙ u x₀ → u x₀` along any sequence `εₙ → 0⁺`. -/
@@ -117,7 +105,6 @@ theorem tendsto_mollifyEps_of_continuous {ι : Type*} {l : Filter ι}
     {ε : ι → ℝ} (hε : ∀ i, 0 < ε i) (hε_tendsto : Tendsto ε l (𝓝 0))
     {u : E → ℝ} (hu : Continuous u) (x₀ : E) :
     Tendsto (fun i => mollifyEps (d := d) (hε i) u x₀) l (𝓝 (u x₀)) := by
-  -- Reduce to the Mathlib statement for `ContDiffBump.normed`.
   have h_bump_rOut : ∀ i,
       (DifferentialGeometry.Analysis.Sobolev.mollifierBumpEps (d := d) (hε i)).rOut
         = ε i := by
@@ -144,7 +131,6 @@ theorem tendsto_mollifyEps_of_continuous {ι : Type*} {l : Filter ι}
         l (𝓝 (u x₀)) :=
     ContDiffBump.convolution_tendsto_right_of_continuous (μ := (volume : Measure E))
       h_rOut_tendsto hu x₀
-  -- Rewrite using `mollifyEps`.
   have h_fn_eq : ∀ i,
       ((DifferentialGeometry.Analysis.Sobolev.mollifierBumpEps (d := d)
             (hε i)).normed (volume : Measure E) ⋆[
@@ -166,7 +152,6 @@ theorem ae_tendsto_mollifyEps_of_locallyIntegrable {ι : Type*} {l : Filter ι}
     {u : E → ℝ} (hu_loc : LocallyIntegrable u (volume : Measure E)) :
     ∀ᵐ x₀ ∂(volume : Measure E),
       Tendsto (fun i => mollifyEps (d := d) (hε i) u x₀) l (𝓝 (u x₀)) := by
-  -- Mathlib provides a.e. convergence with the bump radii ratio `K`.
   have h_bump_rOut : ∀ i,
       (DifferentialGeometry.Analysis.Sobolev.mollifierBumpEps (d := d) (hε i)).rOut
         = ε i := by
@@ -205,7 +190,6 @@ theorem ae_tendsto_mollifyEps_of_locallyIntegrable {ι : Type*} {l : Filter ι}
     ContDiffBump.ae_convolution_tendsto_right_of_locallyIntegrable
       (μ := (volume : Measure E)) h_rOut_tendsto h_ratio hu_loc
   filter_upwards [h_ae] with x₀ hx₀
-  -- Repackage to mollifyEps.
   have h_eq : ∀ i,
       ((DifferentialGeometry.Analysis.Sobolev.mollifierBumpEps (d := d)
           (hε i)).normed (volume : Measure E) ⋆[

@@ -82,25 +82,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Multiplying a smooth compactly-supported tensor section by a smooth scalar
-
-Multiplying a smooth compactly-supported `(r, s)`-tensor section by a globally
-`C^∞` scalar function produces another smooth compactly-supported section: the
-pointwise scalar product of a `C^∞` function and a `C^∞` section is a `C^∞`
-section, and the support shrinks into that of the original section. -/
 
 /-- The pointwise scalar product of a globally `C^∞` real-valued function `φ`
 and a smooth compactly-supported `(r, s)`-tensor section `S`, packaged as a
@@ -114,8 +101,6 @@ private def smoothFnSmul
       contMDiff_toFun := ContMDiff.smul_section hφ S.toSection.contMDiff }
   hasCompactSupport := by
     classical
-    -- The scaled section vanishes wherever `S.toFun` vanishes, so its support
-    -- sits inside `tsupport S.toFun`.
     refine HasCompactSupport.of_support_subset_isCompact S.hasCompactSupport ?_
     intro x hx
     rw [Function.mem_support] at hx
@@ -137,38 +122,21 @@ private lemma smoothFnSmul_toSection_apply
     (smoothFnSmul (I := I) (M := M) g r s φ hφ S).toSection x =
       φ x • S.toSection x := rfl
 
-/-! ## The chart-atlas partition of unity sums to one on a compact manifold
-
-The chart-atlas partition of unity `chartAtlasPOU I M` is a smooth partition of
-unity on `univ`, so its `finsum` at every point is `1`. On a compact manifold
-its nonempty-support index set is the finite set `chartAtlasPOU_finset`, so the
-`finsum` collapses to the `Finset` sum over that set. -/
-
 /-- The chart-atlas partition-of-unity weights sum to `1` over the finite
 support `Finset` at every point of a compact manifold. -/
 private lemma chartAtlasPOU_finset_sum_eq_one (x : M) :
     ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
         ((chartAtlasPOU I M) α x) = 1 := by
   classical
-  -- The `finsum` of the partition-of-unity weights at `x` is `1`.
   have h_finsum : ∑ᶠ α : M, ((chartAtlasPOU I M) α x) = 1 :=
     (chartAtlasPOU I M).sum_eq_one (Set.mem_univ x)
-  -- The support of `α ↦ chartAtlasPOU I M α x` lies in the finite-support set.
   have h_supp : Function.support (fun α : M => ((chartAtlasPOU I M) α x)) ⊆
       (chartAtlasPOU_finset (I := I) (M := M) : Set M) := by
     intro α hα
     rw [Function.mem_support] at hα
     rw [Finset.mem_coe, chartAtlasPOU_finset_mem]
     exact ⟨x, hα⟩
-  -- The `finsum` collapses to the `Finset` sum over the finite-support set.
   rw [← h_finsum, finsum_eq_sum_of_support_subset _ h_supp]
-
-/-! ## The strictly positive partition-of-unity square
-
-The smooth function `Φ := ∑_α (chartAtlasPOU I M α)²`, summed over the finite
-support `Finset`, is everywhere strictly positive: at every point the weights
-sum to `1`, so at least one is positive, and a positive number squared is
-positive. A strictly positive `C^∞` function has a `C^∞` reciprocal. -/
 
 /-- The sum of squares of the chart-atlas partition-of-unity weights over the
 finite support `Finset`. -/
@@ -180,7 +148,6 @@ private def pouSq (x : M) : ℝ :=
 private lemma contMDiff_pouSq :
     ContMDiff I (𝓘(ℝ, ℝ)) ∞ (pouSq (I := I) (M := M)) := by
   classical
-  -- A finite sum of products of `C^∞` functions is `C^∞`.
   refine contMDiff_finset_sum (fun α _ => ?_)
   exact ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff).mul
     ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff)
@@ -190,13 +157,9 @@ weights sum to `1`, so some weight is strictly positive, and squaring it gives a
 strictly positive summand of the non-negative sum. -/
 private lemma pouSq_pos (x : M) : 0 < pouSq (I := I) (M := M) x := by
   classical
-  -- The weights sum to `1`, so they are not all zero.
   have h_sum := chartAtlasPOU_finset_sum_eq_one (I := I) (M := M) x
-  -- Every weight is non-negative.
   have h_nonneg : ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
       0 ≤ ((chartAtlasPOU I M) α x) := fun α _ => (chartAtlasPOU I M).nonneg α x
-  -- Some weight in the finite support set is strictly positive: the sum of the
-  -- weights is `1 > 0`, so the sum exceeds the sum of zeros.
   have h_sum_lt :
       ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M), (0 : ℝ) <
         ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M), ((chartAtlasPOU I M) α x) := by
@@ -204,7 +167,6 @@ private lemma pouSq_pos (x : M) : 0 < pouSq (I := I) (M := M) x := by
     exact zero_lt_one
   obtain ⟨α₀, hα₀_mem, hα₀_pos⟩ :=
     Finset.exists_lt_of_sum_lt h_sum_lt
-  -- The whole sum is bounded below by the strictly positive `α₀`-summand.
   refine lt_of_lt_of_le (mul_pos hα₀_pos hα₀_pos) ?_
   refine Finset.single_le_sum (f := fun α : M =>
     ((chartAtlasPOU I M) α x) * ((chartAtlasPOU I M) α x))
@@ -222,13 +184,6 @@ reciprocal of a nowhere-zero `C^∞` function is `C^∞`. -/
 private lemma contMDiff_pouSqRecip :
     ContMDiff I (𝓘(ℝ, ℝ)) ∞ (pouSqRecip (I := I) (M := M)) :=
   (contMDiff_pouSq (I := I) (M := M)).inv₀ (pouSq_ne_zero (I := I) (M := M))
-
-/-! ## The doubly-weighted reconstruction of a smooth section
-
-For a smooth section `T`, the doubly partition-of-unity-weighted, `Φ⁻¹`-scaled
-sections `pouSmul g r s α (pouSmul g r s α (Φ⁻¹ • T))` sum, over the finite
-support `Finset`, back to `T`: at every point the pointwise weight is
-`∑_α (chartAtlasPOU I M α x)² · Φ(x)⁻¹ = Φ(x) · Φ(x)⁻¹ = 1`. -/
 
 /-- The smooth compactly-supported `(r, s)`-tensor section `Φ⁻¹ • T`, the
 reciprocal of the partition-of-unity square scaling `T`. -/
@@ -249,10 +204,7 @@ private lemma sum_pouSmul_pouSmul_reconSeed_eq
           (pouSmul (I := I) (M := M) g r s α
             (reconSeed (I := I) (M := M) g r s T)) = T := by
   classical
-  -- It suffices to check the underlying sections agree, pointwise.
   refine SmoothCcTensor.ext (ContMDiffSection.ext (fun x => ?_))
-  -- The underlying section of the `Finset` sum, evaluated at `x`, is the
-  -- pointwise `Finset` sum of the summand sections at `x`.
   have h_eval :
       (∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
           pouSmul (I := I) (M := M) g r s α
@@ -262,7 +214,6 @@ private lemma sum_pouSmul_pouSmul_reconSeed_eq
           (pouSmul (I := I) (M := M) g r s α
             (pouSmul (I := I) (M := M) g r s α
               (reconSeed (I := I) (M := M) g r s T))).toSection x := by
-    -- The underlying section of the sum is the sum of the underlying sections.
     have h_sum_section :
         (∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
             pouSmul (I := I) (M := M) g r s α
@@ -275,7 +226,6 @@ private lemma sum_pouSmul_pouSmul_reconSeed_eq
       map_sum (SmoothCcTensor.toSectionAddHom (I := I) (M := M) (g := g)
         (r := r) (s := s)) _ _
     rw [h_sum_section]
-    -- Evaluating a `Finset` sum of sections at `x` is the `Finset` sum of values.
     have h_coe : ⇑(∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
           (pouSmul (I := I) (M := M) g r s α
             (pouSmul (I := I) (M := M) g r s α
@@ -290,7 +240,6 @@ private lemma sum_pouSmul_pouSmul_reconSeed_eq
     rw [Finset.sum_apply] at h_eval'
     exact h_eval'
   rw [h_eval]
-  -- Each summand value is the doubly-weighted scaled tensor value.
   have h_summand : ∀ α : M,
       (pouSmul (I := I) (M := M) g r s α
           (pouSmul (I := I) (M := M) g r s α
@@ -299,15 +248,12 @@ private lemma sum_pouSmul_pouSmul_reconSeed_eq
             pouSqRecip (I := I) (M := M) x) • T.toSection x := by
     intro α
     rw [pouSmul_toSection_apply, pouSmul_toSection_apply]
-    -- Unfold `reconSeed` to the `Φ⁻¹`-scaled section and collapse the scalars.
     rw [show (reconSeed (I := I) (M := M) g r s T) =
         smoothFnSmul (I := I) (M := M) g r s
           (pouSqRecip (I := I) (M := M)) (contMDiff_pouSqRecip (I := I) (M := M))
           T from rfl,
       smoothFnSmul_toSection_apply, smul_smul, smul_smul]
-  -- Sum the summand values; the pointwise weight collapses to `1`.
   rw [Finset.sum_congr rfl (fun α _ => h_summand α), ← Finset.sum_smul]
-  -- The pointwise weight `∑_α (POU α x)² · Φ⁻¹(x)` is `Φ(x) · Φ⁻¹(x) = 1`.
   have h_weight :
       ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
           ((chartAtlasPOU I M) α x) * ((chartAtlasPOU I M) α x) *
@@ -316,14 +262,6 @@ private lemma sum_pouSmul_pouSmul_reconSeed_eq
     change pouSq (I := I) (M := M) x * (pouSq (I := I) (M := M) x)⁻¹ = 1
     exact mul_inv_cancel₀ (pouSq_ne_zero (I := I) (M := M) x)
   rw [h_weight, one_smul]
-
-/-! ## Orthogonality of an element with vanishing chart components
-
-If every canonical Euclidean chart component of an abstract `L²` element `w`
-vanishes, then `w` is orthogonal to every partition-of-unity-weighted concrete
-section: the chart-pull headline expresses the inner product as a chart-Euclidean
-integral whose integrand carries a factor `tensorL2ChartComponent w`, which is
-`0`. -/
 
 /-- If every canonical Euclidean chart component of `w` is the zero `L²` class,
 then the global `L²` inner product of any partition-of-unity-weighted concrete
@@ -338,10 +276,8 @@ private lemma inner_pouSmul_eq_zero_of_chartComponent_eq_zero
       tensorL2ChartComponent (I := I) (M := M) g r s w α Q = 0) :
     (⟪(pouSmul (I := I) (M := M) g r s α Sg : TensorL2 r s g), w⟫_ℝ : ℝ) = 0 := by
   classical
-  -- The chart-pull headline expresses the inner product as a chart integral.
   rw [tensorL2Inner_pouSmul_tensorL2ChartComponent_pull
     (I := I) (M := M) g r s α w Sg hSg]
-  -- Each chart component of `w` is the zero `L²` class, hence a.e. zero.
   have h_each : ∀ Q : CompIdx E r s,
       ((tensorL2ChartComponent (I := I) (M := M) g r s w α Q :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) =ᵐ[
@@ -355,7 +291,6 @@ private lemma inner_pouSmul_eq_zero_of_chartComponent_eq_zero
       exact Lp.coeFn_zero (E := ℝ) (p := 2)
         (μ := chartL2Measure (I := I) (M := M) α)
     exact h0
-  -- The whole chart-pull integrand is a.e. zero on the chart target.
   have h_integrand_ae :
       (fun y : EuclN => densityOnEuclid (I := I) g α y *
           (∑ P : CompIdx E r s, ∑ Q : CompIdx E r s,
@@ -366,7 +301,6 @@ private lemma inner_pouSmul_eq_zero_of_chartComponent_eq_zero
                 y)) =ᵐ[
         (volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α)] 0 := by
-    -- Combine the finitely many a.e.-vanishing chart components.
     have h_all : ∀ᵐ y ∂((volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α)),
         ∀ Q : CompIdx E r s,
@@ -376,7 +310,6 @@ private lemma inner_pouSmul_eq_zero_of_chartComponent_eq_zero
       intro Q
       filter_upwards [h_each Q] with y hy using hy
     filter_upwards [h_all] with y hy
-    -- At a point where every chart component vanishes, the integrand is zero.
     change densityOnEuclid (I := I) g α y *
         (∑ P : CompIdx E r s, ∑ Q : CompIdx E r s,
           covChartMetricGram (I := I) (M := M) g r s α P Q y *
@@ -394,22 +327,12 @@ private lemma inner_pouSmul_eq_zero_of_chartComponent_eq_zero
       refine Finset.sum_eq_zero (fun P _ => Finset.sum_eq_zero (fun Q _ => ?_))
       rw [hy Q, mul_zero]
     rw [h_sum_zero, mul_zero]
-  -- An a.e.-zero integrand has zero integral.
   have hctE_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) α).measurableSet
   rw [setIntegral_congr_ae hctE_meas
     ((ae_restrict_iff' hctE_meas).mp h_integrand_ae)]
   exact integral_zero EuclN ℝ
-
-/-! ## The headline
-
-The chart-component map is continuous and `ℝ`-linear, so the statement reduces
-on `w := u - v` to: an `L²` element with all chart components zero is zero. For
-such a `w`, every smooth section `T` reconstructs as the doubly-weighted sum
-`∑_α pouSmul g r s α (pouSmul g r s α (Φ⁻¹ • T))`; each summand is orthogonal to
-`w`, so `⟪(T : TensorL2), w⟫ = 0`. Smooth sections are dense and `⟪·, w⟫` is
-continuous, so `⟪·, w⟫` vanishes identically, hence `w = 0`. -/
 
 /-- An abstract `L²` tensor element all of whose canonical Euclidean chart
 components vanish is zero. -/
@@ -419,24 +342,19 @@ private lemma tensorL2_eq_zero_of_chartComponent_eq_zero
       tensorL2ChartComponent (I := I) (M := M) g r s w α Q = 0) :
     w = 0 := by
   classical
-  -- It suffices to show `⟪w, w⟫ = 0`.
   refine inner_self_eq_zero (𝕜 := ℝ) |>.mp ?_
-  -- The dense range of the canonical embedding of smooth sections.
   have h_dense : DenseRange ((↑) :
       SmoothCcTensor g r s → UniformSpace.Completion (SmoothCcTensor g r s)) :=
     UniformSpace.Completion.denseRange_coe
-  -- `⟪w, ·⟫` vanishes on every coerced smooth section.
   have h_on_smooth : ∀ T : SmoothCcTensor g r s,
       (⟪w, (T : TensorL2 r s g)⟫_ℝ : ℝ) = 0 := by
     intro T
-    -- Reconstruct `T` as the doubly-weighted sum.
     have h_recon :
         (T : TensorL2 r s g) =
           ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
             ((pouSmul (I := I) (M := M) g r s α
               (pouSmul (I := I) (M := M) g r s α
                 (reconSeed (I := I) (M := M) g r s T))) : TensorL2 r s g) := by
-      -- Pull the `Finset` sum through the canonical embedding.
       have h_map := map_sum
         (UniformSpace.Completion.toComplL :
           SmoothCcTensor g r s →L[ℝ] TensorL2 r s g)
@@ -445,28 +363,22 @@ private lemma tensorL2_eq_zero_of_chartComponent_eq_zero
             (reconSeed (I := I) (M := M) g r s T)))
         (chartAtlasPOU_finset (I := I) (M := M))
       rw [sum_pouSmul_pouSmul_reconSeed_eq (I := I) (M := M) g r s T] at h_map
-      -- `toComplL` is the canonical embedding coercion.
       rw [show ((T : TensorL2 r s g)) =
           (UniformSpace.Completion.toComplL :
             SmoothCcTensor g r s →L[ℝ] TensorL2 r s g) T from rfl, h_map]
       rfl
     rw [h_recon, inner_sum]
-    -- Each summand inner product is zero.
     refine Finset.sum_eq_zero (fun α _ => ?_)
-    -- `pouSmul g r s α (reconSeed …)` is supported inside the chart-`α` source.
     have hSg : tsupport
         (pouSmul (I := I) (M := M) g r s α
           (reconSeed (I := I) (M := M) g r s T)).toFun ⊆ (chartAt H α).source :=
       pouSmul_tsupport_subset_chartSource (I := I) (M := M) g r s α
         (reconSeed (I := I) (M := M) g r s T)
-    -- Apply the orthogonality lemma with `Sg := pouSmul g r s α (reconSeed …)`,
-    -- after swapping the inner-product arguments (real symmetry).
     rw [real_inner_comm]
     exact inner_pouSmul_eq_zero_of_chartComponent_eq_zero
       (I := I) (M := M) g r s α
       (pouSmul (I := I) (M := M) g r s α (reconSeed (I := I) (M := M) g r s T))
       hSg w (fun Q => hw α Q)
-  -- `⟪w, ·⟫` is continuous; it vanishes on the dense range, hence everywhere.
   have h_zero : (fun x : TensorL2 r s g => (⟪w, x⟫_ℝ : ℝ)) =
       (fun _ : TensorL2 r s g => (0 : ℝ)) := by
     refine h_dense.equalizer ?_ continuous_const ?_
@@ -496,17 +408,12 @@ theorem tensorL2_eq_of_chartComponent_eq
       tensorL2ChartComponent (I := I) (M := M) g r s v α P₀) :
     u = v := by
   classical
-  -- It suffices to show the difference `u - v` is zero.
   rw [← sub_eq_zero]
-  -- Every chart component of `u - v` vanishes, by linearity of the
-  -- chart-component continuous linear map.
   refine tensorL2_eq_zero_of_chartComponent_eq_zero (I := I) (M := M)
     g r s (u - v) (fun α P₀ => ?_)
   rw [← tensorL2ChartComponentCLM_apply (I := I) (M := M) g r s α P₀,
     map_sub, tensorL2ChartComponentCLM_apply, tensorL2ChartComponentCLM_apply,
     h α P₀, sub_self]
-
-/-! ## Sanity tests -/
 
 section ElaborationTests
 

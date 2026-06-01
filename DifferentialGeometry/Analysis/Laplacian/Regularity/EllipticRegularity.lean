@@ -63,14 +63,6 @@ namespace EllipticRegularity
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 
-/-! ## Constant-coefficient chart-local elliptic form
-
-The constant-identity bilinear form on `EuclideanSpace ℝ (Fin (Module.finrank ℝ E))`,
-which encodes the Euclidean Laplacian on a chart. It is the universal
-divergence-form data: the coefficient matrix is the identity, the
-zeroth-order coefficient is zero, and the ellipticity constants
-are `lam = capLam = 1`. -/
-
 /-- The constant identity bilinear form on any open set
 `Ω : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))`. This packages the
 Euclidean Laplacian's divergence-form data as a `SmoothEllipticBilinearForm`,
@@ -83,14 +75,11 @@ def chartLocalEuclideanForm
   c := fun _ => 0
   symm := by
     intro _ i j
-    -- Both sides equal `Matrix.one i j = if i = j then 1 else 0` and
-    -- `Matrix.one j i = if j = i then 1 else 0`, equal in either case.
     by_cases hij : i = j
     · subst hij; rfl
     · simp [hij, Ne.symm hij]
   smooth_a := by
     intro i j
-    -- Each entry of the identity matrix is the constant `1` (i = j) or `0` (i ≠ j).
     by_cases hij : i = j
     · subst hij
       have hone : (fun _ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
@@ -114,16 +103,13 @@ def chartLocalEuclideanForm
   hlam_le_capLam := le_refl _
   coercive := by
     intro x _hx ξ
-    -- For the identity matrix, ⟪ξ, I·ξ⟫_ℝ = ⟪ξ, ξ⟫_ℝ = ‖ξ‖².
     have h_id_action :
         DeGiorgi.matMulE
           (1 : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ) ξ = ξ := by
-      -- `matMulE 1 ξ = WithLp.toLp 2 (1.mulVec ξ.ofLp) = WithLp.toLp 2 ξ.ofLp = ξ`.
       ext i
       rw [DeGiorgi.matMulE_apply]
       rw [Matrix.one_mulVec]
     rw [h_id_action]
-    -- Goal: 1 * ‖ξ‖² ≤ ⟪ξ, ξ⟫_ℝ.
     rw [one_mul, real_inner_self_eq_norm_mul_norm, sq]
 
 @[simp] lemma chartLocalEuclideanForm_a_apply
@@ -158,10 +144,8 @@ theorem chartLocalEuclideanForm_principalIntegrand
           ((fderiv ℝ v x) (EuclideanSpace.single i 1)) := by
   classical
   unfold DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.principalIntegrand
-  -- Goal: ∑ i, ∑ j, 1.{i,j} * ∂_i u * ∂_j v = ∑ i, ∂_i u * ∂_i v.
   refine Finset.sum_congr rfl ?_
   intro i _
-  -- Inner sum: ∑ j, 1.{i,j} * ∂_i u * ∂_j v = ∂_i u * ∂_i v (only diagonal contributes).
   rw [Finset.sum_eq_single i]
   · simp [chartLocalEuclideanForm_a_apply]
   · intro j _ hji
@@ -217,9 +201,6 @@ theorem chartLocalEuclideanForm_bilin
   refine integral_congr_ae ?_
   refine Filter.Eventually.of_forall ?_
   intro x
-  -- Goal: principalIntegrand u v x + c x * u x * v x =
-  --       ∑ i, ∂_i u x * ∂_i v x.
-  -- Substitute: c = 0, principalIntegrand = standard Dirichlet sum.
   change DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.principalIntegrand
       (chartLocalEuclideanForm (E := E) Ω) u v x +
       (chartLocalEuclideanForm (E := E) Ω).c x * u x * v x =
@@ -228,31 +209,6 @@ theorem chartLocalEuclideanForm_bilin
           ((fderiv ℝ v x) (EuclideanSpace.single i 1))
   rw [chartLocalEuclideanForm_principalIntegrand, chartLocalEuclideanForm_c_apply]
   ring
-
-/-! ## A note on the with-metric form
-
-The full chart-local form for the variational Laplacian `Δ_g u` carries
-matrix coefficient `a^{ij}(y) = √det g(y) · g^{ij}(y)` (where `y` ranges over
-`(extChartAt I α).target ⊆ E` and `g` is the Riemannian metric viewed
-through the chart at `α`), zeroth-order coefficient `c(y) = 0`, and
-ellipticity constants extracted from the (uniformly bounded below) smallest
-eigenvalue of `g(y)` on a precompact open subset.
-
-Realising this as a `SmoothEllipticBilinearForm` requires extending the
-chart-restricted matrix coefficient to a smooth function on the entire
-model Euclidean space, with global uniform ellipticity. The natural
-construction is a smooth blend with the identity matrix outside a precompact
-open neighbourhood of the target compact set. The infrastructure for this
-extension — particularly the global smoothness and global uniform
-ellipticity of the blended matrix — is left for subsequent modules.
-
-The constant-identity form `chartLocalEuclideanForm` already supports the
-key downstream application: invoking
-`SmoothEllipticBilinearForm.exists_cutoff_with_fderiv_bound` and
-`h2_loc_smooth_solution` with constant identity coefficients. This realises
-the Euclidean second-order regularity theorem for chart-pushed solutions of
-the *Euclidean* divergence-form equation, which is the model case of the
-Riemannian eigenfunction problem. -/
 
 end EllipticRegularity
 end Laplacian

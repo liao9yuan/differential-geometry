@@ -75,16 +75,12 @@ open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Sobolev.NirenbergStandardTest
 open DifferentialGeometry.Analysis.Sobolev.NirenbergDiffQuotTestFunction
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Step A: Auxiliary support / boundedness lemmas -/
 
 /-- Support inclusion: under `tsupport η ⊆ K_0` and
 `cthickening |h| K_0 ⊆ chartTargetEuclid α`, the symmetric Nirenberg test
@@ -101,21 +97,15 @@ lemma standardNirenbergTest_tsupport_in_thickening
     tsupport (standardNirenbergTest k h η u) ⊆
       Metric.cthickening |h| K_0 := by
   classical
-  -- `tsupport (standardNirenbergTest k h η u) ⊆ tsupport η ∪
-  --   {x | x + (-h) • e_k ∈ tsupport η}`.
   have h_supp := standardNirenbergTest_tsupport_subset
     (d := Module.finrank ℝ E) k h hη_cs u
   refine h_supp.trans ?_
-  -- Both pieces lie inside `cthickening |h| K_0`.
   intro x hx
   rcases hx with hx_in | hx_trans
-  · -- Direct: x ∈ tsupport η ⊆ K_0 ⊆ cthickening |h| K_0.
-    have hx_K_0 : x ∈ K_0 := hη_supp_in_K_0 hx_in
+  · have hx_K_0 : x ∈ K_0 := hη_supp_in_K_0 hx_in
     exact Metric.self_subset_cthickening _ hx_K_0
-  · -- x + (-h) • e_k ∈ tsupport η ⊆ K_0; need x ∈ cthickening |h| K_0.
-    have hy_K_0 : x + (-h) • EuclideanSpace.single k 1 ∈ K_0 :=
+  · have hy_K_0 : x + (-h) • EuclideanSpace.single k 1 ∈ K_0 :=
       hη_supp_in_K_0 hx_trans
-    -- dist(x, y) = ‖x - y‖ = ‖h • e_k‖ = |h|.
     have h_dist : dist x (x + (-h) • EuclideanSpace.single k 1) ≤ |h| := by
       have h_norm_eq : dist x (x + (-h) • EuclideanSpace.single k 1) = |h| := by
         rw [dist_eq_norm]
@@ -203,12 +193,6 @@ lemma densityOnEuclid_bounded_above_on_compact
   intro y hy
   exact h_max_eq hy
 
-/-! ## Step B: Boundedness on the cthickening of `K_0`
-
-The cthickening `cthickening |h| K_0` is compact (as the `|h|`-thickening of
-a compact set is compact in a finite-dimensional space) and lies inside
-`chartTargetEuclid α` by hypothesis. -/
-
 /-- The closed thickening `cthickening |h| K_0` is compact in
 `EuclideanSpace ℝ (Fin n)`. This uses that the chart target is contained in
 finite-dimensional Euclidean space, where closed and bounded sets are
@@ -223,36 +207,6 @@ lemma cthickening_compact_of_compact
   have h_closed : IsClosed (Metric.cthickening |h| K_0) :=
     Metric.isClosed_cthickening
   exact (Metric.isCompact_iff_isClosed_bounded).mpr ⟨h_closed, h_bdd⟩
-
-/-! ## Step C: Algebraic content of the substitution identity
-
-We now state the headline theorem in *hypothesis-bearing* form, mirroring
-`nirenberg_substitution_identity_nonsmooth`. The hypothesis encodes the
-substitution identity that follows from testing
-`chart_bilinear_identity_h1_0` with the symmetric Nirenberg test function
-`v_h := standardNirenbergTest k h η D.u_chart` and expanding via the
-discrete product rule on the chart-pulled inverse Gram matrix and the
-weak-partial structure of `D`. The headline is the equality
-
-  `principal + cross_1 + cross_2 + cross_3 + f_term = c_term`,
-
-where:
-
-* `principal := ∫_{K_0} ∑_{i,j} translate k h (weightedInvGramOnEuclid g α i j) ·
-    η² · diffQuot k h (D.weak_partial i) · diffQuot k h (D.weak_partial j)`
-* `cross_1 := ∑_{i,j} ∫_{K_0} 2 ·
-    translate k h (weightedInvGramOnEuclid g α i j) · η · ∂_j η ·
-    diffQuot k h (D.weak_partial i) · diffQuot k h D.u_chart`
-* `cross_2 := ∑_{i,j} ∫_{K_0} diffQuot k h (weightedInvGramOnEuclid g α i j) ·
-    η² · D.weak_partial i · diffQuot k h (D.weak_partial j)`
-* `cross_3 := ∑_{i,j} ∫_{K_0} 2 ·
-    diffQuot k h (weightedInvGramOnEuclid g α i j) · η · ∂_j η ·
-    D.weak_partial i · diffQuot k h D.u_chart`
-* `c_term := ∫_{cthickening |h| K_0} densityOnEuclid g α · D.u_chart ·
-    standardNirenbergTest k h η D.u_chart`
-* `f_term := ∫_{cthickening |h| K_0} densityOnEuclid g α · D.f_chart ·
-    standardNirenbergTest k h η D.u_chart`.
--/
 
 set_option linter.unusedVariables false in
 /-- **Chart-bilinear non-smooth substitution identity (hypothesis-bearing).**
@@ -422,15 +376,6 @@ theorem nirenberg_substitution_identity_chartBilinear
         ∂(volume : Measure EuclN) :=
   h_substitution_identity_holds
 
-/-! ## Step D: L² conversion lemmas on `K_0`
-
-The data `D` provides `MemLp 2` for `D.u_chart` and `D.f_chart` against the
-chart-pulled weighted measure on `chartTargetEuclid α`, and locally `MemLp 2`
-for the weak partials `D.weak_partial i` against plain Lebesgue on compact
-subsets of `chartTargetEuclid α`. On the compact `K_0 ⊆ chartTargetEuclid α`
-both directions reduce to plain Lebesgue `MemLp 2` (for `u_chart` and
-`f_chart` via `densityOnEuclid` boundedness). -/
-
 /-- `D.u_chart` is plain `MemLp 2` on the compact `K_0`. -/
 lemma uChart_memLp_volume_restrict_K_0
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -467,13 +412,6 @@ lemma weakPartial_memLp_volume_restrict_compact
     (hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α) :
     MemLp (D.weak_partial i) 2 ((volume : Measure EuclN).restrict K) :=
   D.weak_partial_locally_memLp i K hK_compact hK_in
-
-/-! ## Step E: Boundedness on the cthickening of `K_0`
-
-The cthickening `cthickening |h| K_0` is compact (under `|h| ≤ 1` and `K_0`
-compact) and lies inside `chartTargetEuclid α` by hypothesis. Several
-quantities that depend on the chart enjoy uniform bounds on this larger
-set. -/
 
 /-- `D.weak_partial i` is plain `MemLp 2` on the cthickening
 `cthickening |h| K_0`, when this set lies inside `chartTargetEuclid α`. -/
@@ -521,13 +459,6 @@ lemma densityOnEuclid_bounded_above_on_cthickening
   densityOnEuclid_bounded_above_on_compact (I := I) (M := M) g α
     (cthickening_compact_of_compact (E := E) hK_0_compact hh_le) h_thick
 
-/-! ## Step F: Translates of bounded smooth coefficients
-
-The translate `translate k h (weightedInvGramOnEuclid g α i j)` is bounded
-on `K_0` whenever `weightedInvGramOnEuclid g α i j` is bounded on the
-cthickening `cthickening |h| K_0`. This is the form used in the
-substitution identity. -/
-
 /-- The translate `translate k h (weightedInvGramOnEuclid g α i j)`,
 restricted to `K_0`, is bounded above by the bound on
 `weightedInvGramOnEuclid g α i j` over the cthickening. -/
@@ -549,8 +480,6 @@ lemma translate_weightedInvGramOnEuclid_bounded_on_K_0
       hK_0_compact hh_le h_thick
   refine ⟨C, hC_nn, ?_⟩
   intro x hx_K_0
-  -- translate k h (·) x = (·) (x + h • e_k)
-  -- We need x + h • e_k ∈ cthickening |h| K_0.
   have h_shifted_in : x + h • EuclideanSpace.single k 1 ∈
       Metric.cthickening |h| K_0 := by
     refine Metric.mem_cthickening_of_dist_le _ x |h| K_0 hx_K_0 ?_
@@ -558,7 +487,6 @@ lemma translate_weightedInvGramOnEuclid_bounded_on_K_0
       rw [dist_eq_norm, add_sub_cancel_left, norm_smul]
       simp [Real.norm_eq_abs]
     rw [h_norm_eq]
-  -- Apply bound at the shifted point.
   have h_translate_eq :
       DifferentialGeometry.Analysis.Sobolev.translate
         (d := Module.finrank ℝ E) k h
@@ -567,13 +495,6 @@ lemma translate_weightedInvGramOnEuclid_bounded_on_K_0
         (x + h • EuclideanSpace.single k 1) := rfl
   rw [h_translate_eq]
   exact hC_bd _ h_shifted_in
-
-/-! ## Step G: Algebraic re-export theorems
-
-The headline theorem `nirenberg_substitution_identity_chartBilinear` (above)
-exposes the substitution identity in hypothesis-bearing form. Here we
-provide convenient re-exports that highlight the structural pieces of the
-identity (principal, four cross terms, c_term, f_term). -/
 
 /-- **Principal term in the chart-bilinear substitution identity.**
 
@@ -705,12 +626,6 @@ def f_term_chartBilinear
         (d := Module.finrank ℝ E) k h η D.u_chart x
   ∂(volume : Measure EuclN)
 
-/-! ## Step H: Re-export of the headline identity in symbolic form
-
-We provide a re-export of `nirenberg_substitution_identity_chartBilinear`
-that uses the structural symbolic names `principalTerm_chartBilinear`,
-`cross_1_term_chartBilinear`, etc., for clearer downstream consumption. -/
-
 set_option linter.unusedVariables false in
 /-- **Symbolic form of the chart-bilinear substitution identity.**
 
@@ -743,12 +658,6 @@ theorem nirenberg_substitution_identity_chartBilinear_symbolic
     + f_term_chartBilinear (I := I) (M := M) D K_0 η k h
     = c_term_chartBilinear (I := I) (M := M) D K_0 η k h :=
   h_substitution_identity_holds
-
-/-! ## Step I: Equivalence between the explicit and symbolic forms
-
-The hypothesis-bearing identity in `nirenberg_substitution_identity_chartBilinear`
-and the symbolic identity in `nirenberg_substitution_identity_chartBilinear_symbolic`
-are definitionally equal. -/
 
 /-- The explicit hypothesis form and the symbolic form of the substitution
 identity are definitionally equal. -/
@@ -836,13 +745,6 @@ lemma substitution_identity_RHS_explicit_eq_symbolic
     c_term_chartBilinear (I := I) (M := M) D K_0 η k h := by
   rfl
 
-/-! ## Step J: Auxiliary measurability and Borel structure
-
-Section 4.4 of the project rules requires that the measurable structure on
-`EuclN` is the Borel σ-algebra coming from its topology. We re-export
-several frequently-used measurability lemmas that follow from this
-default. -/
-
 /-- Measurability of `K_0` from compactness. -/
 lemma K_0_measurableSet
     {K_0 : Set EuclN} (hK_0_compact : IsCompact K_0) :
@@ -854,11 +756,6 @@ lemma cthickening_measurableSet
     {h : ℝ} {K_0 : Set EuclN} :
     MeasurableSet (Metric.cthickening |h| K_0) :=
   Metric.isClosed_cthickening.measurableSet
-
-/-! ## Step K: Aestrong measurability of weak partials and other ingredients
-
-The data `D` provides each weak partial `D.weak_partial i` as locally `MemLp 2`.
-We extract `AEStronglyMeasurable` witnesses for use in compositions. -/
 
 /-- `D.weak_partial i` is `AEStronglyMeasurable` against
 `volume.restrict K` for any compact `K ⊆ chartTargetEuclid α`. -/
@@ -898,11 +795,6 @@ lemma fChart_aestronglyMeasurable_restrict_K_0
   (fChart_memLp_volume_restrict_K_0 (I := I) (M := M) D
     hK_0_compact hK_0_in).aestronglyMeasurable
 
-/-! ## Step L: Continuity of the smooth chart-pulled coefficients
-
-The functions `densityOnEuclid g α`, `weightedInvGramOnEuclid g α i j`,
-and their translates are continuous on `chartTargetEuclid α`. -/
-
 /-- `densityOnEuclid g α` is continuous on `chartTargetEuclid α`. -/
 lemma densityOnEuclid_continuousOn_chartTarget
     (g : SmoothRiemannianMetric I M) (α : M) :
@@ -936,12 +828,6 @@ lemma weightedInvGramOnEuclid_continuousOn_K_0
     ContinuousOn (weightedInvGramOnEuclid (I := I) g α i j) K_0 :=
   (weightedInvGramOnEuclid_continuousOn_chartTarget (I := I) g α i j).mono hK_0_in
 
-/-! ## Step M: Aestrong measurability of smooth coefficients on `K_0`
-
-The smooth coefficients `densityOnEuclid g α` and
-`weightedInvGramOnEuclid g α i j` are AE-strongly-measurable against
-`volume.restrict K_0`. -/
-
 /-- `densityOnEuclid g α` is AE-strongly-measurable against `volume.restrict K_0`. -/
 lemma densityOnEuclid_aestronglyMeasurable_K_0
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -966,18 +852,6 @@ lemma weightedInvGramOnEuclid_aestronglyMeasurable_K_0
   (weightedInvGramOnEuclid_continuousOn_K_0 (I := I) g α i j hK_0_in).aestronglyMeasurable
     (K_0_measurableSet (E := E) hK_0_compact)
 
-/-! ## Step N: standardNirenbergTest is supported in `K_0`-related sets
-
-Two basic support inclusions:
-
-* `tsupport (standardNirenbergTest k h η D.u_chart) ⊆ cthickening |h| K_0`
-  (under `tsupport η ⊆ K_0`).
-* `tsupport (standardNirenbergTest k h η D.u_chart) ⊆ chartTargetEuclid α`
-  (under `tsupport η ⊆ K_0` and `cthickening |h| K_0 ⊆ chartTargetEuclid α`).
-
-These are immediate corollaries of `standardNirenbergTest_tsupport_in_thickening`
-and `standardNirenbergTest_tsupport_in_chartTarget`. -/
-
 /-- `standardNirenbergTest k h η D.u_chart` has compact support whenever `η`
 does. -/
 lemma standardNirenbergTest_hasCompactSupport_uChart
@@ -991,12 +865,6 @@ lemma standardNirenbergTest_hasCompactSupport_uChart
   standardNirenbergTest_hasCompactSupport
     (d := Module.finrank ℝ E) k h hη_cs D.u_chart
 
-/-! ## Step O: Compactness of the cthickening of `K_0` for `|h| ≤ 1`
-
-Reused for the master inequality discharge: under `|h| ≤ 1`, the cthickening
-remains compact (since cthickening of compact in finite-dim Euclidean is
-compact). -/
-
 /-- `cthickening |h| K_0` is compact for `K_0` compact. -/
 lemma cthickening_K_0_isCompact
     {K_0 : Set EuclN} (hK_0_compact : IsCompact K_0) {h : ℝ}
@@ -1008,11 +876,6 @@ lemma cthickening_K_0_isCompact
   have h_closed : IsClosed (Metric.cthickening |h| K_0) :=
     Metric.isClosed_cthickening
   exact (Metric.isCompact_iff_isClosed_bounded).mpr ⟨h_closed, h_bdd⟩
-
-/-! ## Step P: Re-export through `(extChartAt I α)` parametrisation
-
-Convenience exports for the natural `(α, K_0, η, k, h)` parametrisation
-used in downstream chart-by-chart application. -/
 
 /-- The substitution identity in symbolic form, restated as a single
 algebraic equation. This is the most compact form for downstream
@@ -1061,11 +924,6 @@ lemma five_terms_sum_eq_c_term_iff_substitution_identity
   · exact fun h => h.symm
   · exact fun h => h.symm
 
-/-! ## Step Q: Trivial reduction `h = 0` case
-
-For `h = 0`, the standard Nirenberg test function is identically zero. The
-substitution identity collapses trivially. -/
-
 /-- For `h = 0`, the symmetric Nirenberg test function is identically zero,
 so the c_term and f_term vanish. -/
 lemma standardNirenbergTest_zero_h_uChart
@@ -1087,10 +945,6 @@ lemma diffQuot_zero_h_uChart
       (d := Module.finrank ℝ E) k 0 D.u_chart = 0 := by
   funext x
   simp [DifferentialGeometry.Analysis.Sobolev.diffQuot]
-
-/-! ## Step R: Bilinear form notation
-
-Define a convenient short symbolic name for the LHS sum. -/
 
 /-- The chart-bilinear LHS sum: `principal + cross_1 + cross_2 + cross_3 + f_term`.
 
@@ -1143,17 +997,6 @@ theorem nirenberg_substitution_identity_chartBilinear_compact
     chartBilinear_RHS (I := I) (M := M) D K_0 η k h :=
   h_substitution_identity_holds
 
-/-! ## Step S: Smooth-test admissibility of `standardNirenbergTest`
-
-When `D.u_chart` is smooth (in particular, when produced by mollification),
-the standard Nirenberg test function `v_h := D_{-h}^k(η² · D_h^k u_chart)` is
-itself smooth and compactly supported in `cthickening |h| K_0 ⊆
-chartTargetEuclid α`. This lets us apply `chart_bilinear_identity_h1Compl`
-directly with `v_h` as the smooth-CS test function.
-
-This admissibility lemma is the central ingredient in the smooth-case
-substitution identity. -/
-
 /-- When `D.u_chart` is smooth and `tsupport η ⊆ K_0` with
 `cthickening |h| K_0 ⊆ chartTargetEuclid α`, the standard Nirenberg test
 function `v_h := D_{-h}^k(η² · D_h^k u_chart)` is smooth, compactly supported
@@ -1178,17 +1021,9 @@ lemma standardNirenbergTest_smooth_admissible
       (d := Module.finrank ℝ E) k h η D.u_chart) ⊆
         chartTargetEuclid (I := I) (M := M) α := by
   refine ⟨?_, ?_, ?_⟩
-  · -- Smoothness: standardNirenbergTest = diffQuot k (-h) (η² · diffQuot k h u_chart).
-    -- η² is smooth (η is). diffQuot k h u_chart is smooth (u_chart is). Their product
-    -- is smooth. diffQuot k (-h) of a smooth function is smooth.
-    -- We unfold standardNirenbergTest and rely on smoothness of diffQuot of smooth.
-    unfold standardNirenbergTest
-    -- diffQuot k (-h) (η² * diffQuot k h u_chart).
-    -- For h = 0 case: standardNirenbergTest = 0, smooth.
-    -- For h ≠ 0 case: use diffQuot of smooth = smooth.
+  · unfold standardNirenbergTest
     by_cases hh : (-h) = 0
-    · -- (-h) = 0 implies h = 0, in which case diffQuot k 0 of anything is 0.
-      have h_zero : DifferentialGeometry.Analysis.Sobolev.diffQuot
+    · have h_zero : DifferentialGeometry.Analysis.Sobolev.diffQuot
           (d := Module.finrank ℝ E) k (-h)
           (fun y : EuclN => (η y) ^ 2 *
             DifferentialGeometry.Analysis.Sobolev.diffQuot
@@ -1197,13 +1032,11 @@ lemma standardNirenbergTest_smooth_admissible
         simp [DifferentialGeometry.Analysis.Sobolev.diffQuot, hh]
       rw [h_zero]
       exact contDiff_const
-    · -- diffQuot k (-h) of (η² · diffQuot k h u_chart) is smooth.
-      have h_inner_smooth : ContDiff ℝ (⊤ : ℕ∞)
+    · have h_inner_smooth : ContDiff ℝ (⊤ : ℕ∞)
           (fun y : EuclN => (η y) ^ 2 *
             DifferentialGeometry.Analysis.Sobolev.diffQuot
               (d := Module.finrank ℝ E) k h D.u_chart y) := by
         refine ContDiff.mul (hη.pow 2) ?_
-        -- diffQuot k h u_chart is smooth.
         by_cases hh' : h = 0
         · have h_zero : DifferentialGeometry.Analysis.Sobolev.diffQuot
               (d := Module.finrank ℝ E) k h D.u_chart = 0 := by
@@ -1225,7 +1058,6 @@ lemma standardNirenbergTest_smooth_admissible
               contDiff_id.add contDiff_const
             exact hu_chart_smooth.comp h_add_smooth
           exact (h_translate_smooth.sub hu_chart_smooth).div_const h
-      -- Now diffQuot k (-h) of smooth is smooth.
       have h_diffQuot_eq :
           DifferentialGeometry.Analysis.Sobolev.diffQuot
             (d := Module.finrank ℝ E) k (-h)
@@ -1252,18 +1084,10 @@ lemma standardNirenbergTest_smooth_admissible
           contDiff_id.add contDiff_const
         exact h_inner_smooth.comp h_add_smooth
       exact (h_translate_inner_smooth.sub h_inner_smooth).div_const (-h)
-  · -- Compact support.
-    exact standardNirenbergTest_hasCompactSupport
+  · exact standardNirenbergTest_hasCompactSupport
       (d := Module.finrank ℝ E) k h hη_supp D.u_chart
-  · -- tsupport ⊆ chartTargetEuclid α.
-    exact standardNirenbergTest_tsupport_in_chartTarget (E := E) (I := I) (M := M)
+  · exact standardNirenbergTest_tsupport_in_chartTarget (E := E) (I := I) (M := M)
       (α := α) k h hη_supp hη_supp_in_K_0 h_thick D.u_chart
-
-/-! ## Step T: Direct application of the variational identity for smooth `u_chart`
-
-When `D.u_chart` is smooth, the standard Nirenberg test function `v_h` is a
-legitimate smooth-CS test function for `D.variational_identity`. We package
-the resulting variational identity at the smooth-`u_chart` level. -/
 
 /-- The variational identity holds with `v_h := standardNirenbergTest k h η D.u_chart`
 as the test function whenever `D.u_chart` is smooth. This is a direct
@@ -1303,13 +1127,6 @@ lemma variational_identity_at_standardNirenbergTest_smooth_uChart
       D hu_chart_smooth hK_0_compact hη hη_supp hη_supp_in_K_0 k h h_thick
   exact D.variational_identity (standardNirenbergTest
     (d := Module.finrank ℝ E) k h η D.u_chart) h_v_smooth h_v_supp h_v_tsupp
-
-/-! ## Step U: Headline-form package for the smooth-uChart case
-
-Combining the variational identity with the algebraic substitution structure
-(applied at smoothness level), we get the full chart-bilinear substitution
-identity for smooth `D.u_chart`. The hypothesis-bearing form remains the
-appropriate API; this section provides supporting infrastructure. -/
 
 /-- The smooth-case headline: under smoothness of `D.u_chart`, the
 substitution identity reduces to a pair of identifications:
@@ -1359,11 +1176,6 @@ lemma smooth_uChart_variational_lhs_identity
     hη_supp_in_K_0 k h h_thick
   linarith
 
-/-! ## Step V: Symmetric Nirenberg test function via `nirenbergTestFunction` form
-
-`standardNirenbergTest` factors through the diffQuot of `nirenbergTestFunction`-style
-data. We expose the relationship for downstream callers. -/
-
 /-- `standardNirenbergTest k h η u = diffQuot k (-h) (fun y => (η y)^2 * diffQuot k h u y)`. -/
 lemma standardNirenbergTest_eq_diffQuot_neg_h
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -1375,28 +1187,6 @@ lemma standardNirenbergTest_eq_diffQuot_neg_h
       (d := Module.finrank ℝ E) k (-h)
       (fun y => (η y)^2 * DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h D.u_chart y) := rfl
-
-/-! ## Step W: Approximation route for non-smooth `u_chart`
-
-For non-smooth `u_chart`, the substitution identity follows by approximating
-`u_chart` with smooth functions (mollification) and passing to the L² limit.
-The approximation route is encoded in the hypothesis
-`h_substitution_identity_holds` of the headline theorem.
-
-Concretely, the chart_bilinear_identity_h1_0 path provides L²-convergence
-analysis: if `ψ_seq n → v_h` in L²(K_0) and `(fderiv (ψ_seq n)) e_j →
-weak_partial_ψ j` in L²(K_0), then the variational identity transfers from
-ψ_seq to v_h.
-
-The smooth approximating sequence comes from mollifying D.u_chart by
-`mollifyEps ε D.u_chart`: this gives a smooth function whose
-`standardNirenbergTest k h η (mollifyEps ε D.u_chart)` is smooth-CS.
-As ε → 0, this approximates `v_h` in L² + L²-grad. -/
-
-/-! ## Step X: Final headline (re-exported)
-
-For ease of reference, we re-export the headline theorem at the end of
-the file with a more compact signature. -/
 
 set_option linter.unusedVariables false in
 /-- **Final headline** — a re-export of `nirenberg_substitution_identity_chartBilinear`. -/

@@ -83,16 +83,12 @@ open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## A scalar absorption inequality -/
 
 omit [CompleteSpace E] in
 /-- `μ · μ⁻¹^eN ≤ μ⁻¹^eN` whenever `0 < μ ≤ 1`. -/
@@ -104,14 +100,6 @@ private lemma mu_mul_inv_pow_le_inv_pow_local
   have h : μ * μ⁻¹ ^ eN ≤ 1 * μ⁻¹ ^ eN :=
     mul_le_mul_of_nonneg_right hμ_le_one hμ_inv_pow_nn
   simpa using h
-
-/-! ## Chart-locality-free converters
-
-The per-`K'`-family cross-right limit-component atom converter and its
-supporting machinery, re-keyed onto the intrinsic compact-operator eigenbasis
-`tensorResolventEigenbasisVec` (built from the unconditional
-compactness witness `tensorResolventL2_isCompactOperator`) and onto
-the `_unconditional` atom objects of the companion files. -/
 
 section Unconditional
 
@@ -270,7 +258,6 @@ private lemma crossRightLimitComponent_coe_ae_eq
               (tensorResolventL2_isCompactOperator (I := I) (M := M)
                 g r s) i) α P :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) := by
-  -- Reduce to an a.e. statement under `chartL2Measure α`.
   have h_smul := Lp.coeFn_smul i.fst.val
     (tensorL2ChartComponentCutoff (I := I) (M := M) g r s
       (tensorResolventEigenbasisVec (I := I) (M := M)
@@ -340,9 +327,6 @@ theorem eigenvector_crossRightLimit_perK_from_uniform_β_unconditional
   set d : ℕ := Module.finrank ℝ E with hd_def
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- The input-uniform cutoff bridge, parameterised over each (P, K').  The
-  -- constant produced by the uniform bridge depends only on `(α, P, K')` and
-  -- not on the `L²` element `u`.
   set Cu : TensorCompIdx (E := E) r s → ℕ → ℝ := fun P k =>
     (wkpNorm_tensorL2ChartComponentCutoff_le_of_pou_uniform
       (I := I) (M := M) g r s α P k).choose with hCu_def
@@ -371,9 +355,6 @@ theorem eigenvector_crossRightLimit_perK_from_uniform_β_unconditional
                 (chartTargetEuclid (I := I) (M := M) β)) := fun P k u h_pou_u =>
     (wkpNorm_tensorL2ChartComponentCutoff_le_of_pou_uniform
       (I := I) (M := M) g r s α P k).choose_spec.2 u h_pou_u
-  -- A `P`-uniform bridge constant.  Collect the per-`P` constants into a
-  -- single value floored at `1` so a single `K'`-only constant works for all
-  -- `P`.
   set Cu_max : ℕ → ℝ := fun k =>
     1 + ∑ P : TensorCompIdx (E := E) r s, Cu P k with hCu_max_def
   have hCu_max_nn : ∀ k, 0 ≤ Cu_max k := fun k => by
@@ -388,13 +369,11 @@ theorem eigenvector_crossRightLimit_perK_from_uniform_β_unconditional
       Finset.single_le_sum (f := fun P' => Cu P' k)
         (fun P' _ => hCu_nn P' k) (Finset.mem_univ P)
     linarith
-  -- Cardinal of the transport chart centre × component-multi-index product.
   set S : M → Finset M := fun α' => transportChartCenters (I := I) (M := M) α'
     with hS_def
   set CT : ℕ := (S α).card *
     (Finset.univ : Finset (TensorCompIdx (E := E) r s)).card with hCT_def
   have hCT_real_nn : (0 : ℝ) ≤ (CT : ℝ) := Nat.cast_nonneg _
-  -- The output constant per `K'`.
   set C : ℕ → ℝ := fun K' => Cu_max K' * (CT : ℝ) * CN with hC_def
   have hC_nn : ∀ K', 0 ≤ C K' := fun K' => by
     rw [hC_def]
@@ -406,7 +385,6 @@ theorem eigenvector_crossRightLimit_perK_from_uniform_β_unconditional
     eigenval_pos_local (I := I) (M := M) g r s i
   have hμ_le_one : i.fst.val ≤ 1 :=
     eigenval_le_one_local (I := I) (M := M) g r s i
-  -- The eigenvector chart components are `MemWkp K' 2` at every `(β, Q)`.
   have h_pou_eigen : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
       MemWkp (d := d) K' 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
@@ -418,7 +396,6 @@ theorem eigenvector_crossRightLimit_perK_from_uniform_β_unconditional
     fun β Q => eigenvectorVec_pou_memWkp_local
       (I := I) (M := M) g r s i K'
       (fun β' Q' => h_pou_resolv i K' β' Q' hK') β Q
-  -- The cutoff chart component of the eigenvector vector is `MemWkp K' 2`.
   have h_cutoff_mem : MemWkp (d := d) K' 2
       (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
           (tensorResolventEigenbasisVec (I := I) (M := M)
@@ -430,7 +407,6 @@ theorem eigenvector_crossRightLimit_perK_from_uniform_β_unconditional
         (tensorResolventL2_isCompactOperator (I := I) (M := M)
           g r s) i) α P K'
       h_pou_eigen
-  -- Rewrite the atom's wkpNorm through the a.e. equality.
   have h_ae_atom := crossRightLimitComponent_coe_ae_eq
     (I := I) (M := M) g r s i α P
   have h_norm_eq : wkpNorm (d := d) K' 2
@@ -447,7 +423,6 @@ theorem eigenvector_crossRightLimit_perK_from_uniform_β_unconditional
               EuclN → ℝ) y) Ω :=
     wkpNorm_congr_ae (d := d)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae_atom
-  -- Factor the scalar out.
   have h_smul_eq : wkpNorm (d := d) K' 2
       (fun y => i.fst.val *
         ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
@@ -466,7 +441,6 @@ theorem eigenvector_crossRightLimit_perK_from_uniform_β_unconditional
               EuclN → ℝ) y) Ω :=
     wkpNorm_const_smul (d := d)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_cutoff_mem i.fst.val
-  -- Bound the cutoff chart component via the uniform cutoff bridge.
   have h_cutoff_le : wkpNorm (d := d) K' 2
       (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
           (tensorResolventEigenbasisVec (I := I) (M := M)
@@ -486,7 +460,6 @@ theorem eigenvector_crossRightLimit_perK_from_uniform_β_unconditional
         (tensorResolventL2_isCompactOperator (I := I) (M := M)
           g r s) i)
       h_pou_eigen
-  -- The chart-component converter at every `(β, Q)` and order `K' ≤ N`.
   have h_each_cpt_le : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
       wkpNorm (d := d) K' 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
@@ -501,10 +474,8 @@ theorem eigenvector_crossRightLimit_perK_from_uniform_β_unconditional
             (tensorResolventL2_isCompactOperator (I := I) (M := M)
               g r s) i‖ := by
     intro β Q
-    -- The chart-cpt converter takes an `(β, Q)` base point; specialise.
     exact eigenvector_chartComponent_perK_from_uniform_β_unconditional
       (I := I) (M := M) g r s N CN hCN_nn eN hCN_bd β Q K' hK' i
-  -- Bound the double sum by `|S| * |TensorCompIdx| * RHS_each`.
   set RHS_each : ℝ≥0∞ := ENNReal.ofReal (CN * (i.fst.val)⁻¹ ^ eN) *
     ENNReal.ofReal
       ‖tensorResolventEigenbasisVec (I := I) (M := M)
@@ -535,7 +506,6 @@ theorem eigenvector_crossRightLimit_perK_from_uniform_β_unconditional
       _ = (CT : ℝ≥0∞) * RHS_each := by
           simp only [Finset.sum_const, hCT_def, nsmul_eq_mul, Nat.cast_mul]
           ring
-  -- Pass to the `P`-uniform `Cu_max` bound.
   have h_cutoff_max_le : wkpNorm (d := d) K' 2
       (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
           (tensorResolventEigenbasisVec (I := I) (M := M)
@@ -554,7 +524,6 @@ theorem eigenvector_crossRightLimit_perK_from_uniform_β_unconditional
     refine h_cutoff_le.trans ?_
     exact mul_le_mul_of_nonneg_right
       (ENNReal.ofReal_le_ofReal (hCu_le_max P K')) (zero_le _)
-  -- Combine: cutoff norm ≤ Cu_max K' * (CT * RHS_each).
   have h_cutoff_le_final : wkpNorm (d := d) K' 2
       (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
           (tensorResolventEigenbasisVec (I := I) (M := M)
@@ -564,7 +533,6 @@ theorem eigenvector_crossRightLimit_perK_from_uniform_β_unconditional
       ≤ ENNReal.ofReal (Cu_max K') * ((CT : ℝ≥0∞) * RHS_each) := by
     refine h_cutoff_max_le.trans ?_
     exact mul_le_mul_of_nonneg_left h_double_sum_le (zero_le _)
-  -- Assemble the chain.
   rw [h_norm_eq, h_smul_eq]
   have h_norm_eq_val : ‖i.fst.val‖ₑ = ENNReal.ofReal i.fst.val := by
     rw [Real.enorm_eq_ofReal hμ_pos.le]
@@ -580,7 +548,6 @@ theorem eigenvector_crossRightLimit_perK_from_uniform_β_unconditional
       ≤ ENNReal.ofReal i.fst.val *
           (ENNReal.ofReal (Cu_max K') * ((CT : ℝ≥0∞) * RHS_each)) :=
     mul_le_mul_of_nonneg_left h_cutoff_le_final (zero_le _)
-  -- Rearrange `μ * Cu_max * CT * RHS_each` into the goal form.
   have hCu_max_nn_K' : 0 ≤ Cu_max K' := hCu_max_nn _
   have h_packCT : (CT : ℝ≥0∞) = ENNReal.ofReal (CT : ℝ) := by
     simp [hCT_def, ENNReal.ofReal_natCast]
@@ -675,7 +642,6 @@ theorem eigenvector_crossRightLimit_perK_from_uniform_β_unconditional
                 (tensorResolventL2_isCompactOperator
                   (I := I) (M := M) g r s) i‖ := by
             rw [hCN_pow_eq]
-  -- Bound the packed scalar by `C K' * μ⁻¹^eN = Cu_max K' * CT * CN * μ⁻¹^eN`.
   have h_scalar_le :
       i.fst.val * Cu_max K' * (CT : ℝ) * (CN * (i.fst.val)⁻¹ ^ eN) ≤
         C K' * (i.fst.val)⁻¹ ^ eN := by
@@ -704,7 +670,6 @@ theorem eigenvector_crossRightLimit_perK_from_uniform_β_unconditional
               g r s) i‖ := by
     refine mul_le_mul_of_nonneg_right ?_ (zero_le _)
     exact ENNReal.ofReal_le_ofReal h_scalar_le
-  -- Final chain.
   calc
     ENNReal.ofReal i.fst.val *
         wkpNorm (d := d) K' 2

@@ -49,13 +49,9 @@ namespace DivergenceTheorem
 namespace WithBoundary
 namespace EuclideanHalfSpaceInstance
 
-/-! ## Helper arithmetic on `n - 1` for `[NeZero n]` -/
-
 /-- For a positive natural number, `(n - 1) + 1 = n`. -/
 private theorem n_sub_one_add_one (n : ℕ) [NeZero n] : (n - 1) + 1 = n :=
   Nat.sub_one_add_one_eq_of_pos (Nat.pos_of_neZero n)
-
-/-! ## Index-shift maps `Fin (n - 1) → Fin n` -/
 
 /-- Given `[NeZero n]`, the index-shift map sending `j : Fin (n - 1)` to
 `Fin n` by adding one (i.e., `j ↦ j.succ` after a length cast). -/
@@ -67,7 +63,6 @@ private theorem succIndex_ne_zero (n : ℕ) [NeZero n] (j : Fin (n - 1)) :
     succIndex n j ≠ 0 := by
   intro h
   have hval : (succIndex n j).val = (0 : Fin n).val := by rw [h]
-  -- `(succIndex n j).val = j.val + 1`, but `(0 : Fin n).val = 0`.
   have hsucc : (succIndex n j).val = j.val + 1 := rfl
   rw [hsucc, Fin.val_zero] at hval
   exact Nat.succ_ne_zero _ hval
@@ -90,8 +85,6 @@ private theorem succIndex_predIndex (n : ℕ) [NeZero n] (i : Fin n) (h : i ≠ 
     · exact absurd (Fin.ext (h0.trans rfl) : i = 0) h
     · exact h0
   apply Fin.ext
-  -- `(succIndex n (predIndex n i h)).val = (Fin.cast _ (Fin.succ ⟨i.val - 1, _⟩)).val
-  -- = (i.val - 1) + 1 = i.val`.
   change (i.val - 1) + 1 = i.val
   omega
 
@@ -99,11 +92,8 @@ private theorem succIndex_predIndex (n : ℕ) [NeZero n] (i : Fin n) (h : i ≠ 
 private theorem predIndex_succIndex (n : ℕ) [NeZero n] (j : Fin (n - 1)) :
     predIndex n (succIndex n j) (succIndex_ne_zero n j) = j := by
   apply Fin.ext
-  -- `(predIndex n (succIndex n j) _).val = (succIndex n j).val - 1 = (j.val + 1) - 1 = j.val`.
   change (j.val + 1) - 1 = j.val
   omega
-
-/-! ## Coordinate-level building blocks -/
 
 /-- Coordinate-level inclusion: insert `0` at index `0`. Sends
 `x : Fin (n - 1) → ℝ` to the function `Fin n → ℝ` defined by
@@ -147,8 +137,6 @@ private theorem consZeroFun_tailFun (n : ℕ) [NeZero n] (y : Fin n → ℝ)
   · rw [dif_pos h, h]; exact hy.symm
   · rw [dif_neg h, succIndex_predIndex]
 
-/-! ## The continuous-linear inclusion / projection on the unwrapped pi-types -/
-
 /-- The continuous linear inclusion `(Fin (n - 1) → ℝ) →L[ℝ] (Fin n → ℝ)`
 inserting a `0` at index `0`. -/
 private def consZeroCLM (n : ℕ) [NeZero n] :
@@ -184,8 +172,6 @@ private theorem tailCLM_apply (n : ℕ) [NeZero n] (y : Fin n → ℝ) :
   rw [ContinuousLinearMap.pi_apply]
   rfl
 
-/-! ## The continuous-linear inclusion / projection on `EuclideanSpace` -/
-
 /-- The continuous linear inclusion of `EuclideanSpace ℝ (Fin (n - 1))` into
 `EuclideanSpace ℝ (Fin n)` inserting a `0` at index `0`. -/
 def inclEuclideanCLM (n : ℕ) [NeZero n] :
@@ -212,38 +198,19 @@ def projEuclidean (n : ℕ) [NeZero n] :
     EuclideanSpace ℝ (Fin n) → EuclideanSpace ℝ (Fin (n - 1)) :=
   projEuclideanCLM n
 
-/-! ## Coordinate-level identities on `EuclideanSpace`
-
-These identities use the fact that, for `y : EuclideanSpace ℝ (Fin n)`,
-the application `y i` is `ofLp y i`, and the round-trip
-`(EuclideanSpace.equiv _ _).symm ((EuclideanSpace.equiv _ _) y) = y` is
-definitional.
--/
-
 /-- Coordinate-access agreement: `inclEuclideanCLM n x i` (treating both
 sides as functions of `Fin n`) equals `consZeroFun n (ofLp x) i`, where
 `ofLp x : Fin (n - 1) → ℝ` is the underlying tuple of `x`. -/
 private theorem inclEuclideanCLM_apply_coord (n : ℕ) [NeZero n]
     (x : EuclideanSpace ℝ (Fin (n - 1))) (i : Fin n) :
     (inclEuclideanCLM n x) i = consZeroFun n x i := by
-  -- Unfold the composition. The output of `inclEuclideanCLM n x` lives in
-  -- `EuclideanSpace ℝ (Fin n)`. Coordinate access on it is `ofLp` evaluation.
   change (((EuclideanSpace.equiv (Fin n) ℝ).symm.toContinuousLinearMap.comp
           ((consZeroCLM n).comp
             (EuclideanSpace.equiv (Fin (n - 1)) ℝ).toContinuousLinearMap)) x) i
         = consZeroFun n x i
-  -- The application of the symm-of-equiv is `WithLp.toLp 2`. After that,
-  -- coordinate access is just the underlying function.
-  -- We rewrite using `ContinuousLinearMap.coe_comp'` and the explicit
-  -- coercion of `ContinuousLinearEquiv` symm.
   simp only [ContinuousLinearMap.coe_comp', Function.comp_apply,
     ContinuousLinearEquiv.coe_coe]
-  -- Now the LHS is `((EuclideanSpace.equiv (Fin n) ℝ).symm
-  --   ((consZeroCLM n) ((EuclideanSpace.equiv (Fin (n - 1)) ℝ) x))) i`.
-  -- Coordinate-access on `EuclideanSpace.equiv.symm _ : EuclideanSpace _ _` reduces to
-  -- the underlying function:
   rw [consZeroCLM_apply]
-  -- And the round-trip `EuclideanSpace.equiv x` is `ofLp x = x` (as a function).
   rfl
 
 /-- Coordinate-access agreement for the projection. -/
@@ -269,19 +236,13 @@ theorem inclEuclidean_zero_coord (n : ℕ) [NeZero n] (x : EuclideanSpace ℝ (F
 /-- The plain-function inverse identity: `projEuclidean (inclEuclidean x) = x`. -/
 theorem projEuclidean_inclEuclidean (n : ℕ) [NeZero n] (x : EuclideanSpace ℝ (Fin (n - 1))) :
     projEuclidean n (inclEuclidean n x) = x := by
-  -- We compute coordinate by coordinate.
   apply (EuclideanSpace.equiv (Fin (n - 1)) ℝ).injective
   funext j
-  -- The goal is to show `(EuclideanSpace.equiv) (projEuclidean (inclEuclidean x)) j = (EuclideanSpace.equiv) x j`.
-  -- The left side reduces to `tailFun (inclEuclideanCLM x : as function)`.
   change (projEuclideanCLM n (inclEuclideanCLM n x)) j = (x : Fin (n - 1) → ℝ) j
   rw [projEuclideanCLM_apply_coord]
-  -- LHS is now `tailFun n (inclEuclideanCLM n x) j = (inclEuclideanCLM n x) (succIndex n j)`.
   unfold tailFun
   rw [inclEuclideanCLM_apply_coord]
   exact consZeroFun_succIndex n _ _
-
-/-! ## Smoothness of `inclEuclidean` and `projEuclidean` -/
 
 /-- The inclusion `inclEuclidean` is `C^∞`. -/
 theorem inclEuclidean_contDiff (n : ℕ) [NeZero n] :
@@ -303,8 +264,6 @@ theorem projEuclidean_continuous (n : ℕ) [NeZero n] :
     Continuous (projEuclidean n) :=
   (projEuclideanCLM n).continuous
 
-/-! ## Topological properties of `inclEuclidean` -/
-
 /-- The inclusion `inclEuclidean` is injective. -/
 theorem inclEuclidean_injective (n : ℕ) [NeZero n] :
     Function.Injective (inclEuclidean n) := by
@@ -325,27 +284,16 @@ theorem range_inclEuclidean (n : ℕ) [NeZero n] :
     exact inclEuclidean_zero_coord n x
   · intro hy
     refine ⟨projEuclidean n y, ?_⟩
-    -- Need: `inclEuclidean (projEuclidean y) = y`. Coordinate-wise check.
     apply (EuclideanSpace.equiv (Fin n) ℝ).injective
     funext i
     change (inclEuclideanCLM n (projEuclideanCLM n y)) i = (y : Fin n → ℝ) i
     rw [inclEuclideanCLM_apply_coord]
-    -- Now the goal is `consZeroFun n (projEuclideanCLM n y) i = (y : Fin n → ℝ) i`,
-    -- where on the LHS the `consZeroFun` argument is implicitly converted via
-    -- the `CoeFun` instance on `EuclideanSpace`.
-    -- Replace `consZeroFun n (projEuclideanCLM n y)` with the value of `tailFun`
-    -- applied to `y` at the appropriate index.
     by_cases h : i = (0 : Fin n)
     · rw [h, consZeroFun_zero]
       exact hy.symm
-    · -- Use the inverse `consZeroFun_tailFun`.
-      -- We need to show `consZeroFun n (projEuclideanCLM n y) i = y i` when `i ≠ 0`.
-      -- Unfold `consZeroFun`:
-      unfold consZeroFun
+    · unfold consZeroFun
       rw [dif_neg h]
-      -- Goal: `(projEuclideanCLM n y) (predIndex n i h) = (y : Fin n → ℝ) i`.
       rw [projEuclideanCLM_apply_coord]
-      -- `tailFun n y (predIndex n i h) = y (succIndex n (predIndex n i h)) = y i`
       unfold tailFun
       rw [succIndex_predIndex]
 
@@ -353,7 +301,6 @@ theorem range_inclEuclidean (n : ℕ) [NeZero n] :
 theorem inclEuclidean_isClosed_range (n : ℕ) [NeZero n] :
     IsClosed (Set.range (inclEuclidean n)) := by
   rw [range_inclEuclidean]
-  -- The hyperplane `{y | y 0 = 0}` is the preimage of `{0}` under coordinate `0`.
   have heq : {y : EuclideanSpace ℝ (Fin n) | y 0 = 0}
       = (fun y : EuclideanSpace ℝ (Fin n) => y 0) ⁻¹' {0} := rfl
   rw [heq]
@@ -371,8 +318,6 @@ theorem inclEuclidean_isInducing (n : ℕ) [NeZero n] :
         (projEuclidean_continuous n).isOpen_preimage U hU, ?_⟩
     ext x
     simp [projEuclidean_inclEuclidean]
-
-/-! ## The lifted inclusion `EuclideanSpace ℝ (Fin (n - 1)) → EuclideanHalfSpace n` -/
 
 /-- The boundary inclusion lifted to `EuclideanHalfSpace n`. -/
 def inclH (n : ℕ) [NeZero n] :
@@ -397,21 +342,12 @@ theorem inclH_injective (n : ℕ) [NeZero n] : Function.Injective (inclH n) := b
 
 /-- `inclH` is a topological inducing map. -/
 theorem inclH_isInducing (n : ℕ) [NeZero n] : IsInducing (inclH n) := by
-  -- `Subtype.val ∘ inclH n = inclEuclidean n` (definitionally).
-  -- The composition `Subtype.val ∘ inclH n` is inducing (via
-  -- `inclEuclidean_isInducing`), and `Subtype.val` is itself inducing.
-  -- By `IsInducing.of_comp`, `inclH n` is inducing.
   have h_comp_inducing :
       IsInducing ((Subtype.val : EuclideanHalfSpace n → EuclideanSpace ℝ (Fin n))
                     ∘ inclH n) := by
-    -- Definitionally `Subtype.val ∘ inclH n = inclEuclidean n`.
     change IsInducing (inclEuclidean n)
     exact inclEuclidean_isInducing n
-  -- `IsInducing.of_comp (hf : Continuous f) (hg : Continuous g)
-  --   (hgf : IsInducing (g ∘ f)) : IsInducing f`, with `f := inclH n`, `g := Subtype.val`.
   exact IsInducing.of_comp (inclH_continuous n) continuous_subtype_val h_comp_inducing
-
-/-! ## Range identity in `EuclideanSpace ℝ (Fin n)` -/
 
 /-- The image of `inclH` after `modelWithCornersEuclideanHalfSpace n` is
 exactly the hyperplane `{y | y 0 = 0}`. -/
@@ -433,8 +369,6 @@ theorem range_modelWithCorners_comp_inclH (n : ℕ) [NeZero n] :
     rw [inclH_val]
     exact hx
 
-/-! ## The model frontier reduces to a hyperplane -/
-
 /-- The frontier of the range of `modelWithCornersEuclideanHalfSpace n` is the
 hyperplane `{y | y 0 = 0}`. This packages
 `frontier_range_modelWithCornersEuclideanHalfSpace` from Mathlib in the
@@ -445,8 +379,6 @@ theorem frontier_range_modelWithCornersEuclideanHalfSpace_eq (n : ℕ) [NeZero n
   rw [frontier_range_modelWithCornersEuclideanHalfSpace]
   ext y
   exact eq_comm
-
-/-! ## Smoothness of the composition `I ∘ inclH ∘ boundaryI.symm` -/
 
 /-- The composite `I ∘ inclH ∘ boundaryI.symm` agrees with `inclEuclidean`.
 Because `boundaryI = modelWithCornersSelf ℝ _` is the identity model, the
@@ -459,14 +391,6 @@ theorem comp_modelWithCornersEuclideanHalfSpace_inclH_self_symm (n : ℕ) [NeZer
     = inclEuclidean n := by
   funext x
   rfl
-
-/-! ## The standard inward direction `e_0 = EuclideanSpace.single 0 1`
-
-We use the `0`-th standard basis vector of `EuclideanSpace ℝ (Fin n)` as the
-inward direction. Concretely, this is `EuclideanSpace.single 0 1`, the vector
-whose `0`-th coordinate is `1` and whose other coordinates are `0`. It is
-transverse to the boundary hyperplane `{y | y 0 = 0}` because its `0`-th
-coordinate is non-zero. -/
 
 /-- The `0`-th coordinate of the standard inward direction is `1`. -/
 private theorem single_zero_one_apply_zero (n : ℕ) [NeZero n] :
@@ -491,7 +415,6 @@ continuous linear map `inclEuclideanCLM n`. -/
 private theorem fderiv_inclEuclidean (n : ℕ) [NeZero n]
     (y : EuclideanSpace ℝ (Fin (n - 1))) :
     fderiv ℝ (inclEuclidean n) y = inclEuclideanCLM n := by
-  -- `inclEuclidean n` is the underlying function of the CLM `inclEuclideanCLM n`.
   change fderiv ℝ (inclEuclideanCLM n : EuclideanSpace ℝ (Fin (n - 1)) →
       EuclideanSpace ℝ (Fin n)) y = inclEuclideanCLM n
   exact (inclEuclideanCLM n).fderiv
@@ -516,8 +439,6 @@ private theorem single_zero_one_transverse (n : ℕ) [NeZero n] :
       fderiv_inclEuclidean n y, range_inclEuclideanCLM, range_inclEuclidean]
   exact single_zero_one_notMem_hyperplane n
 
-/-! ## The boundary hyperplane is Haar-null -/
-
 /-- The hyperplane `{y : EuclideanSpace ℝ (Fin n) | y 0 = 0}` is the kernel of
 the continuous linear functional `EuclideanSpace.proj 0`. As a strict linear
 subspace of a finite-dim normed space, it has zero additive Haar measure (for
@@ -530,7 +451,6 @@ private theorem hyperplane_basisAddHaar_zero (n : ℕ) [NeZero n] :
       {y : EuclideanSpace ℝ (Fin n) | y 0 = 0} = 0 := by
   letI : MeasurableSpace (EuclideanSpace ℝ (Fin n)) := borel _
   haveI : BorelSpace (EuclideanSpace ℝ (Fin n)) := ⟨rfl⟩
-  -- Express the hyperplane as the kernel of `EuclideanSpace.proj 0`.
   set ker : Submodule ℝ (EuclideanSpace ℝ (Fin n)) :=
     (EuclideanSpace.proj 0 :
       EuclideanSpace ℝ (Fin n) →L[ℝ] ℝ).toLinearMap.ker with hker_def
@@ -541,26 +461,21 @@ private theorem hyperplane_basisAddHaar_zero (n : ℕ) [NeZero n] :
   rw [hsubm]
   refine MeasureTheory.Measure.addHaar_submodule
     (μ := (Module.finBasis ℝ (EuclideanSpace ℝ (Fin n))).addHaar) ker ?_
-  -- Show ker ≠ ⊤. The vector `e_0` is not in the kernel.
   intro hker_eq
-  -- Membership of `e_0` in `⊤` is automatic; transport it to membership in ker.
   have h_in_top : EuclideanSpace.single (0 : Fin n) (1 : ℝ) ∈
       (⊤ : Submodule ℝ (EuclideanSpace ℝ (Fin n))) := Submodule.mem_top
   rw [← hker_eq] at h_in_top
-  -- Membership in ker means `proj 0` of it is 0.
   have h_proj_zero : (EuclideanSpace.proj (0 : Fin n) :
       EuclideanSpace ℝ (Fin n) →L[ℝ] ℝ)
         (EuclideanSpace.single (0 : Fin n) (1 : ℝ)) = 0 := by
     have := h_in_top
     simp only [hker_def, LinearMap.mem_ker, ContinuousLinearMap.coe_coe] at this
     exact this
-  -- But proj 0 evaluates to coordinate 0 of the vector.
   have h_eval : (EuclideanSpace.proj (0 : Fin n) :
       EuclideanSpace ℝ (Fin n) →L[ℝ] ℝ)
         (EuclideanSpace.single (0 : Fin n) (1 : ℝ)) =
       (EuclideanSpace.single (0 : Fin n) (1 : ℝ)) 0 := rfl
   rw [single_zero_one_apply_zero n] at h_eval
-  -- Contradiction: `proj 0 e_0 = 1` but is also `0`.
   exact one_ne_zero (h_proj_zero.symm.trans h_eval).symm
 
 /-- The model-level boundary `frontier (Set.range (modelWithCornersEuclideanHalfSpace n))`
@@ -578,8 +493,6 @@ private theorem frontier_range_modelWithCorners_basisAddHaar_zero
   haveI : BorelSpace (EuclideanSpace ℝ (Fin n)) := ⟨rfl⟩
   rw [frontier_range_modelWithCornersEuclideanHalfSpace_eq]
   exact hyperplane_basisAddHaar_zero n
-
-/-! ## The `HasSmoothBoundary` instance -/
 
 /-- The Euclidean half-space `EuclideanHalfSpace n` (for any `n` with `[NeZero n]`)
 is a model with smooth boundary, with boundary modelled on the boundaryless
@@ -630,17 +543,8 @@ instance instHasSmoothBoundary (n : ℕ) [NeZero n] :
     exact frontier_range_modelWithCorners_basisAddHaar_zero n
   finrank_boundaryE_succ := by
     intro _
-    -- `Module.finrank ℝ (EuclideanSpace ℝ (Fin (n - 1))) + 1
-    --     = (n - 1) + 1 = n = Module.finrank ℝ (EuclideanSpace ℝ (Fin n))`.
     rw [finrank_euclideanSpace_fin, finrank_euclideanSpace_fin]
     exact Nat.sub_one_add_one_eq_of_pos (Nat.pos_of_neZero n)
-
-/-! ## Test: usability of the instance
-
-The instance is genuinely usable. We verify that the boundary type and model
-projections have the expected shape, and that the boundary chart structure is
-recoverable from the typeclass.
--/
 
 /-- Test: the boundary normed model of the half-space instance is the
 `(n - 1)`-dimensional Euclidean space. -/
@@ -666,32 +570,6 @@ example (n : ℕ) [NeZero n] :
 example (n : ℕ) [NeZero n] :
     ContDiff ℝ ∞ (instHasSmoothBoundary n).projE := projEuclidean_contDiff n
 
-/-! ## `HasOrientableBoundary` instance for the Euclidean half-space model
-
-The orientation typeclass `HasOrientableBoundary M` (defined in
-`Orientation.lean`) records that, for any two manifold base points
-`α₀, α₁ : BoundaryManifold I M` and any common boundary point `y` in their
-chart sources, the chart-α₀ inward-direction representative
-`inwardCoordAt α₀ y` and the chart-α₁ inward-direction representative
-`inwardCoordAt α₁ y` differ by a strictly positive scalar modulo a
-boundary-tangent vector.
-
-For `M` self-charted by `EuclideanHalfSpace n` (the canonical model space
-itself), the chart structure is trivial: all charts are the identity, and
-chart transitions are the identity. Hence `inwardCoordAt α y = inwardCoordE`
-for every base `α` and every boundary point `y`, and the orientation property
-holds trivially with `c = 1`.
-
-The general case for arbitrary `M` modelled on `EuclideanHalfSpace n` (with
-non-trivial chart structure) reduces to the standard result that smooth
-diffeomorphisms of half-space neighborhoods preserve the inward-pointing
-direction at boundary points, with strictly positive `e_0`-component. The
-present file provides the canonical self-charted instance; downstream code
-producing non-trivially-charted manifolds-with-boundary can either supply the
-typeclass instance manually or invoke the general theorem once it is
-formalised.
--/
-
 /-- The "trivial" base-coordinate identification on the canonical self-charted
 model `EuclideanHalfSpace n`. The inverse trivialisation of the tangent bundle
 at any base point, evaluated at any other point in the chart source, sends
@@ -706,23 +584,10 @@ private theorem inwardCoordAt_self_charted_eq
     DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.inwardCoordAt
       (M := EuclideanHalfSpace n) α y =
       (instHasSmoothBoundary n).inwardCoordE := by
-  -- `inwardCoordAt α y = (trivializationAt E (TangentSpace I) α.val).symm y inwardCoordE`.
-  -- For self-charted `M = EuclideanHalfSpace n`, the chart-at-x is the identity,
-  -- so `extChartAt = I` (essentially) and the chart transition collapses to the
-  -- identity on `range I`. Hence `coordChange = id` and the symm-trivialization
-  -- acts as the identity on the model-side input.
-  -- The cleanest path: use `tangentCoordChange_self`. Here `α.val` and `y.val`
-  -- are points in `EuclideanHalfSpace n`, and y.val ∈ chartAt α.val.source by
-  -- hypothesis. The `tangentCoordChange` for `M = H` (self-charted) at α.val
-  -- vs α.val coincides with the identity (`tangentCoordChange_self`). To get
-  -- the cross-base case (`α.val` to `y.val`), we use `tangentCoordChange_comp`.
   change ((trivializationAt (EuclideanSpace ℝ (Fin n))
       (TangentSpace (modelWithCornersEuclideanHalfSpace n)) (α : EuclideanHalfSpace n)).symm
         (y : EuclideanHalfSpace n)) (instHasSmoothBoundary n).inwardCoordE =
       (instHasSmoothBoundary n).inwardCoordE
-  -- Use `symmL_trivializationAt_eq_core`: when y.val ∈ chart-source α.val,
-  -- the inverse trivialisation equals the `coordChange` at the base from
-  -- `achart (EHS n) α.val` to `achart (EHS n) y.val`.
   have h_symmL :
       ((trivializationAt (EuclideanSpace ℝ (Fin n))
           (TangentSpace (modelWithCornersEuclideanHalfSpace n))
@@ -732,18 +597,6 @@ private theorem inwardCoordAt_self_charted_eq
           (achart (EuclideanHalfSpace n) (y : EuclideanHalfSpace n))
           (y : EuclideanHalfSpace n) :=
     TangentBundle.symmL_trivializationAt_eq_core (𝕜 := ℝ) hy
-  -- Both `achart (EuclideanHalfSpace n) p` for any `p` is the identity chart
-  -- (because `EuclideanHalfSpace n` is self-charted by `chartedSpaceSelf`),
-  -- so the coordChange between them at any point equals the identity.
-  -- Concretely: `(tangentBundleCore I H).coordChange (achart H α.val) (achart H y.val) z`
-  --   = `fderivWithin ℝ (extChartAt I y.val ∘ (extChartAt I α.val).symm) (range I) (extChartAt I α.val z)`.
-  -- For self-charted `H`, both `extChartAt I α.val` and `extChartAt I y.val` are equal to `I` (as functions),
-  -- so the composition is `I ∘ I.symm = id` on `range I`. Hence the fderivWithin equals `id`.
-  -- The cleanest way: use `tangentCoordChange_self` after rewriting the second `achart` to coincide.
-  -- But the two acharts have different base points; in the self-charted setting they agree as functions
-  -- but may not be defeq.
-  -- We unfold to fderivWithin and compute directly.
-  -- Step 1: `(triv α.val).symm y v = ((triv α.val).symmL y) v` (definitional).
   have h_symm_to_symmL :
       ((trivializationAt (EuclideanSpace ℝ (Fin n))
           (TangentSpace (modelWithCornersEuclideanHalfSpace n))
@@ -754,52 +607,19 @@ private theorem inwardCoordAt_self_charted_eq
             (α : EuclideanHalfSpace n)).symmL ℝ (y : EuclideanHalfSpace n))
               (instHasSmoothBoundary n).inwardCoordE := rfl
   rw [h_symm_to_symmL, h_symmL]
-  -- Now we have: `coordChange (achart α.val) (achart y.val) y.val inwardCoordE = inwardCoordE`.
-  -- Express via fderivWithin: this equals fderivWithin ℝ φ (range I) (extChartAt I α.val y.val) inwardCoordE,
-  -- where φ = extChartAt I y.val ∘ (extChartAt I α.val).symm.
   rw [tangentBundleCore_coordChange_achart]
-  -- For `M = H` self-charted: extChartAt I p = I (as functions on H, agreeing on the source = univ).
-  -- So φ = I ∘ I.symm = id on range I.
-  -- The fderivWithin of the identity (more precisely: a function eventually-equal to the identity on
-  -- range I at the chart-point) is the identity.
-  -- We use `Filter.EventuallyEq.fderivWithin_eq` after establishing the eventually-equal.
-  -- Strategy: use `fderivWithin_extChartAt_comp_extChartAt_symm_range` from Mathlib's
-  -- MFDeriv.Atlas. That lemma says: fderivWithin ℝ (extChartAt I x ∘ (extChartAt I x).symm) (range I) (extChartAt I x x) = id
-  -- but we have extChartAt I y.val ∘ (extChartAt I α.val).symm with different basepoints.
-  -- For self-charted M = H: `(extChartAt I p).symm = I.symm` (as a function, on the target), and
-  -- `extChartAt I p = I` (as a function, on the source). Both agree as functions because the
-  -- identity-chart's extension has source = range I, target = univ, and acts as I (resp. I.symm).
-  -- Hence the composition `extChartAt I y.val ∘ (extChartAt I α.val).symm = I ∘ I.symm`, which equals
-  -- the identity on the range of I.
-  -- We compute: at `extChartAt I α.val y.val = I y.val` (in range I), the fderivWithin equals id.
-  -- Use `fderivWithin_id` after showing the function eventually equals `id` near this point in `range I`.
-  --
-  -- Step: show `extChartAt I y.val ∘ (extChartAt I α.val).symm` and `id` are eventually-equal at the
-  -- relevant point.
-  -- Specifically, on the entire range I, both the LHS and id agree (LHS is I ∘ I.symm, restricted to
-  -- range I, which is the identity).
   set z₀ : EuclideanSpace ℝ (Fin n) := extChartAt (modelWithCornersEuclideanHalfSpace n)
                                           (α : EuclideanHalfSpace n) (y : EuclideanHalfSpace n)
   have h_z₀_in_range :
       z₀ ∈ Set.range (modelWithCornersEuclideanHalfSpace n :
                         EuclideanHalfSpace n → EuclideanSpace ℝ (Fin n)) := by
-    -- z₀ = extChartAt I α.val y.val = I (chartAt H α.val y.val) = I y.val (since chart is identity)
-    -- Hence z₀ ∈ range I.
     show z₀ ∈ Set.range (modelWithCornersEuclideanHalfSpace n)
     refine ⟨(y : EuclideanHalfSpace n), ?_⟩
-    -- need: I y = z₀ where z₀ = extChartAt I α y.
-    -- For self-charted M=H: extChartAt I α y = (chartAt H α).extend I y = I (chartAt H α y) = I y
-    -- (since chartAt H α is identity on its source and y is in the source).
     change (modelWithCornersEuclideanHalfSpace n) (y : EuclideanHalfSpace n) = z₀
-    -- z₀ unfolds to extChartAt I α.val y.val
     change (modelWithCornersEuclideanHalfSpace n) (y : EuclideanHalfSpace n) =
         extChartAt (modelWithCornersEuclideanHalfSpace n) (α : EuclideanHalfSpace n)
           (y : EuclideanHalfSpace n)
-    -- For the self-charted EHS n, chartAt H α = OpenPartialHomeomorph.refl
-    -- and extChartAt I α y = I (chartAt H α y) = I y
     rfl
-  -- Now show: fderivWithin ℝ φ (range I) z₀ = id, where φ = extChartAt I y.val ∘ (extChartAt I α.val).symm.
-  -- For self-charted EHS n: φ = I ∘ I.symm. The composition equals id on range I.
   have h_phi_eq_id_on_range :
       ∀ z ∈ Set.range (modelWithCornersEuclideanHalfSpace n :
                         EuclideanHalfSpace n → EuclideanSpace ℝ (Fin n)),
@@ -807,14 +627,10 @@ private theorem inwardCoordAt_self_charted_eq
           (extChartAt (modelWithCornersEuclideanHalfSpace n) (α : EuclideanHalfSpace n)).symm) z = z := by
     intro z hz
     rcases hz with ⟨h, rfl⟩
-    -- z = I h. Compute (extChartAt I y.val).symm (I h) = h (since extChartAt = I for self-charted).
     change (modelWithCornersEuclideanHalfSpace n) ((modelWithCornersEuclideanHalfSpace n).symm
             (modelWithCornersEuclideanHalfSpace n h)) =
           (modelWithCornersEuclideanHalfSpace n) h
     rw [(modelWithCornersEuclideanHalfSpace n).left_inv h]
-  -- We can now compute the fderivWithin.
-  -- The function φ = extChartAt I y.val ∘ (extChartAt I α.val).symm equals id on range I.
-  -- Hence fderivWithin ℝ φ (range I) z₀ = fderivWithin ℝ id (range I) z₀ = id.
   have h_eq_on_range :
       Set.EqOn ((extChartAt (modelWithCornersEuclideanHalfSpace n) (y : EuclideanHalfSpace n)) ∘
                   (extChartAt (modelWithCornersEuclideanHalfSpace n) (α : EuclideanHalfSpace n)).symm)
@@ -822,8 +638,6 @@ private theorem inwardCoordAt_self_charted_eq
                 (Set.range (modelWithCornersEuclideanHalfSpace n)) := by
     intro z hz
     exact h_phi_eq_id_on_range z hz
-  -- The fderivWithin of φ on `range I` at z₀ equals the fderivWithin of id on `range I` at z₀,
-  -- which equals the identity (since `range I` has unique-diff at every interior-type point).
   have h_fderiv_phi :
       fderivWithin ℝ ((extChartAt (modelWithCornersEuclideanHalfSpace n) (y : EuclideanHalfSpace n)) ∘
                        (extChartAt (modelWithCornersEuclideanHalfSpace n) (α : EuclideanHalfSpace n)).symm)
@@ -833,7 +647,6 @@ private theorem inwardCoordAt_self_charted_eq
         UniqueDiffWithinAt ℝ (Set.range (modelWithCornersEuclideanHalfSpace n)) z₀ :=
       (modelWithCornersEuclideanHalfSpace n).uniqueDiffOn z₀ h_z₀_in_range
     rw [fderivWithin_congr h_eq_on_range (h_eq_on_range h_z₀_in_range), fderivWithin_id h_unique]
-  -- Apply the result: the coordChange equals identity, so its action on inwardCoordE returns inwardCoordE.
   rw [h_fderiv_phi]
   rfl
 
@@ -852,61 +665,11 @@ instance instHasOrientableBoundary_self_EuclideanHalfSpace
   inwardCoord_chart_consistent := by
     intro α₀ α₁ y hα₀ hα₁
     refine ⟨1, by norm_num, ?_⟩
-    -- We want: `inwardCoordAt α₀ y - 1 • inwardCoordAt α₁ y ∈ range (dincl y).toLinearMap`.
-    -- For self-charted `EuclideanHalfSpace n`, both `inwardCoordAt α₀ y` and `inwardCoordAt α₁ y`
-    -- equal `inwardCoordE`, so the difference is zero.
     have h₀ := inwardCoordAt_self_charted_eq n α₀ y hα₀
     have h₁ := inwardCoordAt_self_charted_eq n α₁ y hα₁
     rw [h₀, h₁]
     simp only [one_smul, sub_self]
     exact ⟨0, map_zero _⟩
-
-/-! ## Documented gap: orientation for the general case
-
-For arbitrary `M` with `[ChartedSpace (EuclideanHalfSpace n) M]` and
-`[IsManifold (𝓡∂ n) ∞ M]`, the orientation property is the standard fact
-that smooth diffeomorphisms between half-space neighborhoods preserve the
-inward direction at boundary points (with strictly positive `e_0`-component).
-
-The formal proof reduces to the following Mathlib-style key lemma:
-
-> For a smooth invertible map `φ : U → V` between open subsets of
-> `range I = {z : EuclideanSpace ℝ (Fin n) | 0 ≤ z 0}` mapping `U ∩ frontier`
-> bijectively to `V ∩ frontier`, and any boundary point `z₀ ∈ U ∩ frontier`,
-> the `fderivWithin ℝ φ (range I) z₀` applied to `EuclideanSpace.single 0 1`
-> has strictly positive 0-th component.
-
-Steps for a Mathlib-style proof:
-
-1. The chart transition `extChartAt I y.val ∘ (extChartAt I α.val).symm`, restricted
-   to `range I`, is a smooth invertible map between open subsets of `range I`.
-   (Available: `Mathlib.Geometry.Manifold.IsManifold.ExtChartAt` provides
-   `contDiffOn_extendCoordChange` and `isInvertible_fderivWithin_extendCoordChange`.)
-
-2. The chart transition maps the boundary `frontier (range I)` bijectively
-   to itself. (Follows from `IsLocalDiffeomorphAt.isBoundaryPoint_iff` in
-   `Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary`, line 394.)
-
-3. By a Taylor-expansion argument: for `z₀` on the boundary and `e_0 = (1,0,…,0)`,
-   the path `t ↦ z₀ + t · e_0` enters the half-space for `t > 0`. Its image under
-   `φ` enters the half-space for small `t > 0`. Differentiating gives
-   `(fderivWithin ℝ φ (range I) z₀ e_0) 0 ≥ 0`.
-
-4. Strict positivity follows by combining (3) for `φ` and (3) for `φ⁻¹`,
-   using the chain rule and invertibility of the derivative.
-
-Once this key lemma is available in Mathlib, the general instance follows
-algebraically: with `c_α := ((dincl-projection-of-inwardCoordAt α y))-coefficient
-of inwardCoord y`, set `c := c_α₀ / c_α₁ > 0`. The specifically-required
-strict positivity result is currently not in Mathlib. Until it is added (or
-formalised here), the typeclass `HasOrientableBoundary` must be supplied
-manually for non-self-charted manifolds-with-boundary modelled on
-`EuclideanHalfSpace n`.
-
-This file therefore provides the canonical self-charted instance
-(`instHasOrientableBoundary_self_EuclideanHalfSpace`) but leaves the general
-instance for downstream code or future Mathlib API additions.
--/
 
 end EuclideanHalfSpaceInstance
 

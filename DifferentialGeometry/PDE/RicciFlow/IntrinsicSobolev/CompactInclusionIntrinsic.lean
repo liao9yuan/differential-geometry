@@ -55,15 +55,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Approximation of any H¹ tensor vector by a smooth compactly-supported
-section -/
 
 set_option linter.unusedSectionVars false in
 /-- For each vector `v ∈ TensorH1Compl g r s` and each `δ > 0`, there
@@ -88,8 +83,6 @@ private lemma exists_smooth_close_to_TensorH1_intrinsic
   rw [show smoothToTensorH1Compl (I := I) (M := M) g r s S = q from hS_eq]
   rw [dist_eq_norm] at hS_close
   exact hS_close
-
-/-! ## Headline: compactness of the tensor H¹ → L² inclusion (intrinsic) -/
 
 set_option maxHeartbeats 4000000 in
 set_option linter.unusedSectionVars false in
@@ -116,19 +109,14 @@ theorem tensorH1ComplToTensorL2_isCompactOperator_intrinsic
   classical
   have h_uniform :=
     tensorChartComponent_wkpNormChart_le (I := I) (M := M) g r s
-  -- Reduce to: the closure of the image of the closed unit ball is compact.
   have h_iff := isCompactOperator_iff_isCompact_closure_image_closedBall
       (TensorH1ComplToTensorL2 (I := I) (M := M) g r s :
         TensorH1Compl g r s →ₗ[ℝ] TensorL2 r s g) zero_lt_one
   refine h_iff.mpr ?_
-  -- Use isCompact_iff_isSeqCompact (TensorL2 r s g is metric).
   rw [isCompact_iff_isSeqCompact]
-  -- Set up notation.
   set T : TensorH1Compl g r s →L[ℝ] TensorL2 r s g :=
     TensorH1ComplToTensorL2 (I := I) (M := M) g r s with hT_def
-  -- Prove sequential compactness.
   intro y hy_in_closure
-  -- For each n, choose zₙ ∈ T '' closedBall 0 1 with `‖yₙ - zₙ‖ < 1/(n+1)`.
   have h_choose_z : ∀ n : ℕ, ∃ z ∈ T '' Metric.closedBall (0 : TensorH1Compl g r s) 1,
       dist (y n) z < 1 / (n + 1 : ℝ) := by
     intro n
@@ -149,19 +137,16 @@ theorem tensorH1ComplToTensorL2_isCompactOperator_intrinsic
     exact exists_smooth_close_to_TensorH1_intrinsic
       (I := I) (M := M) g r s (x n) h_pos
   choose S hS_close using h_choose_S
-  -- ‖xₙ‖ ≤ 1 (closed ball).
   have h_xn_norm : ∀ n : ℕ, ‖x n‖ ≤ 1 := by
     intro n
     have hxn_mem : x n ∈ Metric.closedBall (0 : TensorH1Compl g r s) 1 := hx_mem n
     rw [Metric.mem_closedBall, dist_zero_right] at hxn_mem
     exact hxn_mem
-  -- The canonical embedding is isometric on smooth sections.
   have h_S_isometric : ∀ n : ℕ,
       ‖smoothToTensorH1Compl (I := I) (M := M) g r s (S n)‖ = ‖S n‖ := by
     intro n
     rw [smoothToTensorH1Compl_apply]
     exact UniformSpace.Completion.norm_coe (S n)
-  -- ‖S n‖ ≤ 2 via the triangle inequality.
   have h_Sn_norm_le_two : ∀ n : ℕ, ‖S n‖ ≤ 2 := by
     intro n
     have h_iso := h_S_isometric n
@@ -176,8 +161,6 @@ theorem tensorH1ComplToTensorL2_isCompactOperator_intrinsic
         linarith
       linarith
     have h_xn_le : ‖x n‖ ≤ 1 := h_xn_norm n
-    -- ‖smoothToTensorH1Compl (S n)‖ = ‖x n - (x n - smoothToTensorH1Compl (S n))‖
-    --   ≤ ‖x n‖ + ‖x n - smoothToTensorH1Compl (S n)‖ ≤ 1 + 1 = 2.
     have h_tri : ‖smoothToTensorH1Compl (I := I) (M := M) g r s (S n)‖ ≤
         ‖x n‖ + ‖x n - smoothToTensorH1Compl (I := I) (M := M) g r s (S n)‖ := by
       have h_id : smoothToTensorH1Compl (I := I) (M := M) g r s (S n) =
@@ -200,10 +183,7 @@ theorem tensorH1ComplToTensorL2_isCompactOperator_intrinsic
         ‖smoothToTensorH1Compl (I := I) (M := M) g r s (S n)‖ ≤ 2 := by linarith
     rw [← h_iso]
     exact h_smooth_le
-  -- Extract the uniform constant from the intrinsic bound.
   obtain ⟨C, hC_nn, h_uniform_bound⟩ := h_uniform
-  -- Convert the uniform bound at `S n` into a real-valued envelope.
-  -- For each n, α, Idx, Jdx: wkpNormChart … (S n) ≤ ENNReal.ofReal (2 * C).
   have h_wkp_bound : ∀ (α : M)
       (Idx : Fin r → Fin (Module.finrank ℝ E))
       (Jdx : Fin s → Fin (Module.finrank ℝ E)) (n : ℕ),
@@ -213,7 +193,6 @@ theorem tensorH1ComplToTensorL2_isCompactOperator_intrinsic
           ENNReal.ofReal (2 * C) := by
     intro α Idx Jdx n
     have h := h_uniform_bound (S n) α Idx Jdx
-    -- `(‖S n‖₊ : ℝ≥0∞) = ENNReal.ofReal ‖S n‖`.
     have h_coe : (‖S n‖₊ : ℝ≥0∞) = ENNReal.ofReal ‖S n‖ := by
       rw [show ((‖S n‖₊ : ℝ≥0∞)) = ‖S n‖ₑ from (enorm_eq_nnnorm (S n)).symm,
         ← ofReal_norm_eq_enorm (S n)]
@@ -222,16 +201,13 @@ theorem tensorH1ComplToTensorL2_isCompactOperator_intrinsic
         ENNReal.ofReal (C * ‖S n‖) :=
       (ENNReal.ofReal_mul hC_nn).symm
     rw [h_mul] at h
-    -- C * ‖S n‖ ≤ 2 * C since ‖S n‖ ≤ 2 and C ≥ 0.
     have h_le : C * ‖S n‖ ≤ 2 * C := by
       have h_Sn_le := h_Sn_norm_le_two n
       nlinarith [hC_nn, h_Sn_le, norm_nonneg (S n)]
     exact h.trans (ENNReal.ofReal_le_ofReal h_le)
-  -- Apply the conditional sequence-level Rellich-Kondrachov extraction.
   obtain ⟨φ, hφ_mono, T_lim, h_tendsto_T⟩ :=
     tensorH1Compl_to_tensorL2_relatively_compact
       (I := I) (M := M) g r s (S := S) (R := 2 * C) h_wkp_bound
-  -- Rewrite the bridge limit in distance form (smooth approximants in L²).
   have h_smooth_tendsto :
       Tendsto (fun k =>
           TensorH1ComplToTensorL2 (I := I) (M := M) g r s
@@ -239,7 +215,6 @@ theorem tensorH1ComplToTensorL2_isCompactOperator_intrinsic
         atTop (𝓝 T_lim) := by
     rw [tendsto_iff_norm_sub_tendsto_zero]
     exact h_tendsto_T
-  -- Now show Tendsto (y ∘ φ) atTop (𝓝 T_lim).
   have h_y_tendsto : Tendsto (fun k => y (φ k)) atTop (𝓝 T_lim) := by
     rw [tendsto_iff_dist_tendsto_zero]
     refine squeeze_zero (f := fun k : ℕ =>
@@ -251,8 +226,7 @@ theorem tensorH1ComplToTensorL2_isCompactOperator_intrinsic
                 T_lim)
       (fun k => ?_)
       ?_
-    · -- Triangle inequality: bound `dist (y (φ k)) T_lim` by three pieces.
-      have h_t1 : dist (y (φ k)) T_lim ≤
+    · have h_t1 : dist (y (φ k)) T_lim ≤
           dist (y (φ k)) (z (φ k)) + dist (z (φ k)) T_lim := dist_triangle _ _ _
       have h_t2 : dist (z (φ k)) T_lim ≤
           dist (z (φ k))
@@ -263,10 +237,8 @@ theorem tensorH1ComplToTensorL2_isCompactOperator_intrinsic
                 (smoothToTensorH1Compl (I := I) (M := M) g r s (S (φ k))))
               T_lim :=
         dist_triangle _ _ _
-      -- Bound `dist (y, z) < 1/(φ k + 1)`.
       have h_yz : dist (y (φ k)) (z (φ k)) < 1 / ((φ k : ℝ) + 1) :=
         hz_close (φ k)
-      -- Identify `z = T x` and `T (smoothToTensorH1Compl S) = ...`.
       have hT_S_eq :
           TensorH1ComplToTensorL2 (I := I) (M := M) g r s
               (smoothToTensorH1Compl (I := I) (M := M) g r s (S (φ k))) =
@@ -298,7 +270,6 @@ theorem tensorH1ComplToTensorL2_isCompactOperator_intrinsic
             smoothToTensorH1Compl (I := I) (M := M) g r s (S (φ k))‖ <
           1 / ((φ k : ℝ) + 1) :=
         hS_close (φ k)
-      -- Compare `1 / (φ k + 1) ≤ 1 / (k + 1)`.
       have h_phi_ge : (k : ℝ) + 1 ≤ (φ k : ℝ) + 1 := by
         have h_phi_ge_k : k ≤ φ k := hφ_mono.le_apply
         exact_mod_cast Nat.add_le_add_right h_phi_ge_k 1
@@ -350,8 +321,7 @@ theorem tensorH1ComplToTensorL2_isCompactOperator_intrinsic
                   (smoothToTensorH1Compl (I := I) (M := M) g r s
                     (S (φ k))))
                 T_lim := by ring
-    · -- The bound tends to 0.
-      have h1 : Tendsto (fun k : ℕ => 2 * (1 / ((k : ℝ) + 1)))
+    · have h1 : Tendsto (fun k : ℕ => 2 * (1 / ((k : ℝ) + 1)))
           atTop (𝓝 0) := by
         rw [show (0 : ℝ) = 2 * 0 by ring]
         exact (tendsto_const_nhds (x := (2 : ℝ))).mul
@@ -365,9 +335,7 @@ theorem tensorH1ComplToTensorL2_isCompactOperator_intrinsic
       rw [show (0 : ℝ) = 0 + 0 by ring]
       exact h1.add h2
   refine ⟨T_lim, ?_, φ, hφ_mono, h_y_tendsto⟩
-  · -- T_lim ∈ closure (T '' B): use that closure is closed and y(φ k) → T_lim
-    -- with each y(φ k) in closure.
-    exact IsClosed.mem_of_tendsto isClosed_closure h_y_tendsto
+  · exact IsClosed.mem_of_tendsto isClosed_closure h_y_tendsto
       (Filter.Eventually.of_forall (fun k => hy_in_closure (φ k)))
 
 end IntrinsicSobolev

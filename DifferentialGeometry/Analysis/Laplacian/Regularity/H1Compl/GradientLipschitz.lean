@@ -56,8 +56,6 @@ open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.H1ComplGradientChartBridge
 open DifferentialGeometry.Analysis.Laplacian.H1ComplToLpChartBridge
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -66,12 +64,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## Smooth extension `smoothChartExt α v`
-
-The smooth global extension of the chart-pushed function `(ρα · v.toFun)`,
-defined as the chart-pulled formula on the chart target image and `0`
-elsewhere. -/
 
 /-- The smooth extension of the chart-pushed function for `v : SmoothScalar g`
 on the chart at `α`. -/
@@ -128,8 +120,6 @@ private lemma smoothChartExt_eq_chartPushed_on_target
   rw [smoothChartExt_apply_of_mem_target (I := I) (M := M) g α v h_toE_symm_in]
   unfold DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
   rfl
-
-/-! ## Smoothness, compact support, and linearity of the extension -/
 
 private lemma smoothChartExt_smooth_aux
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
@@ -353,8 +343,6 @@ theorem smoothChartExt_hasCompactSupport
       simp
     exact smoothChartExt_apply_of_notMem_target (I := I) (M := M) g α v h_notMem
 
-/-! ## Linearity of `smoothChartExt` -/
-
 private lemma smoothChartExt_zero_apply
     (g : SmoothRiemannianMetric I M) (α : M) (y : EuclN) :
     smoothChartExt (I := I) (M := M) g α (0 : SmoothScalar g) y = 0 := by
@@ -434,8 +422,6 @@ private lemma smoothChartExt_sub
       smoothChartExt (I := I) (M := M) g α v - smoothChartExt (I := I) (M := M) g α w := by
   funext y
   exact smoothChartExt_sub_apply (I := I) (M := M) g α v w y
-
-/-! ## The classical j-th partial of the smooth extension -/
 
 /-- The classical j-th partial of `smoothChartExt α v`, a smooth, compactly
 supported function on `EuclN`. -/
@@ -524,13 +510,6 @@ theorem smoothChartExtPartial_sub
     exact fderiv_fun_sub h1 h2
   rw [h_fderiv_eq, ContinuousLinearMap.sub_apply]
 
-/-! ## Equality of `chartPushedPartial` with `smoothChartExtPartial`
-
-The chart-pushed function `chartPushed POU α v.toFun` agrees with the smooth
-extension `smoothChartExt g α v` on the open chart-target image. Hence their
-fderivs (and j-th partials) agree on this open set, and the partials agree
-a.e. against any measure restricted to the chart-target image. -/
-
 private lemma chartPushed_eventuallyEq_smoothChartExt
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) {y : EuclN}
     (hy : y ∈ DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
@@ -574,15 +553,6 @@ theorem chartPushedPartial_aeEq_smoothChartExtPartial
   exact chartPushedPartial_eq_smoothChartExtPartial_on_target
     (I := I) (M := M) g α j v hy
 
-/-! ## `MemLp 2` of the smooth extension's partial
-
-Strategy: the partial is continuous compactly supported on `EuclN`. Its
-support is contained in a compact subset `K_partial` of `chartTargetEuclid α`.
-On `K_partial`, the chart-pulled density is bounded (continuous on the open
-chart target, restricted to a compact subset). Hence the chart-pulled
-weighted measure of `K_partial` is finite, and the L²-norm of the partial
-against the restricted measure is bounded by `‖partial‖_∞ · √μ(K_partial)`. -/
-
 theorem smoothChartExtPartial_memLp_chartWeighted_restrict
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (v : SmoothScalar g) :
@@ -594,7 +564,6 @@ theorem smoothChartExtPartial_memLp_chartWeighted_restrict
     smoothChartExtPartial_continuous (I := I) (M := M) g α j v
   have h_cs : HasCompactSupport (smoothChartExtPartial (I := I) (M := M) g α j v) :=
     smoothChartExtPartial_hasCompactSupport (I := I) (M := M) g α j v
-  -- Sup-norm bound.
   obtain ⟨M_partial, hM_partial_nn, hM_partial_bd⟩ : ∃ N : ℝ, 0 ≤ N ∧
       ∀ y : EuclN, |smoothChartExtPartial (I := I) (M := M) g α j v y| ≤ N := by
     rcases h_cont.bounded_above_of_compact_support h_cs with ⟨N, hN⟩
@@ -608,15 +577,11 @@ theorem smoothChartExtPartial_memLp_chartWeighted_restrict
     intro y hy
     by_contra hne
     exact hy (subset_tsupport _ hne)
-  -- Show K_partial ⊆ chartTargetEuclid α.
   have hK_partial_in_chartTarget : K_partial ⊆
       DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α := by
-    -- The fderiv-applied function vanishes wherever the function is locally constant zero.
-    -- Specifically: tsupport (fderiv f y · e) ⊆ tsupport f.
     have h_fderiv_supp : tsupport (smoothChartExtPartial (I := I) (M := M) g α j v) ⊆
         tsupport (smoothChartExt (I := I) (M := M) g α v) :=
       tsupport_fderiv_apply_subset (𝕜 := ℝ) (EuclideanSpace.single j 1)
-    -- Show: support ⊆ K_image (compact ⊆ chartTargetEuclid α). Hence tsupport ⊆ K_image.
     set K_image : Set EuclN := (toEuclidean (E := E)) ''
         ((extChartAt I α) '' (tsupport
           (fun x : M => (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) x * v.toFun x)))
@@ -631,7 +596,6 @@ theorem smoothChartExtPartial_memLp_chartWeighted_restrict
       intro y hy_supp
       by_contra hyK
       apply hy_supp
-      -- smoothChartExt v y = 0 if y ∉ K_image. Same argument as in hasCompactSupport proof.
       by_cases hy_target : y ∈ DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
           (I := I) (M := M) α
       · obtain ⟨w, hw_target, hwy⟩ := hy_target
@@ -670,7 +634,6 @@ theorem smoothChartExtPartial_memLp_chartWeighted_restrict
         closure_minimal h_supp_in_K_image hK_image_compact.isClosed
       exact h_tsupp_in_K.trans hK_image_in
     exact h_fderiv_supp.trans h_smoothExt_supp_in_chartTarget
-  -- Show density is bounded on K_partial.
   have h_dens_contOn :
       ContinuousOn (densityOnEuclid (I := I) g α) K_partial :=
     (densityOnEuclid_continuousOn (I := I) g α).mono hK_partial_in_chartTarget
@@ -687,10 +650,8 @@ theorem smoothChartExtPartial_memLp_chartWeighted_restrict
       rw [Set.not_nonempty_iff_eq_empty] at hKne
       rw [hKne] at hy
       exact absurd hy (Set.notMem_empty y)
-  -- Volume of K_partial < ⊤.
   have h_vol_K_lt_top : (volume : Measure EuclN) K_partial < ⊤ :=
     hK_compact.measure_lt_top
-  -- chartPulledWeightedMeasure K_partial < ⊤.
   have h_cpw_K_lt_top : (chartPulledWeightedMeasure (I := I) g α) K_partial < ⊤ := by
     unfold chartPulledWeightedMeasure
     rw [withDensity_apply _ hK_compact.measurableSet]
@@ -707,13 +668,11 @@ theorem smoothChartExtPartial_memLp_chartWeighted_restrict
             rw [MeasureTheory.setLIntegral_const]
     exact lt_of_le_of_lt h_int_bd
       (ENNReal.mul_lt_top ENNReal.ofReal_lt_top h_vol_K_lt_top)
-  -- Bound eLpNorm directly via lintegral.
   rw [MeasureTheory.eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num : (2 : ℝ≥0∞) ≠ 0)
     (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)]
   have h_two : (2 : ℝ≥0∞).toReal = 2 := by norm_num
   rw [h_two]
   refine ENNReal.rpow_lt_top_of_nonneg (by positivity) ?_
-  -- Bound: ∫⁻ y, |f y|² d(restrict S) ≤ ofReal M² · μ K_partial
   have h_lint_bd : ∫⁻ y, ‖smoothChartExtPartial (I := I) (M := M) g α j v y‖ₑ ^ (2 : ℝ)
       ∂((chartPulledWeightedMeasure (I := I) g α).restrict
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α))
@@ -770,7 +729,6 @@ theorem smoothChartExtPartial_memLp_chartWeighted_restrict
                 (chartPulledWeightedMeasure (I := I) g α) K_partial :=
               MeasureTheory.Measure.restrict_apply_le _ _
             gcongr
-  -- Now bound by `≠ ⊤`.
   have h_lint_lt_top : ∫⁻ y, ‖smoothChartExtPartial (I := I) (M := M) g α j v y‖ₑ ^ (2 : ℝ)
       ∂((chartPulledWeightedMeasure (I := I) g α).restrict
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α))

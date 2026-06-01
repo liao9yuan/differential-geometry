@@ -66,8 +66,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Openness of the chart-target image of the good set -/
-
 /-- The chart-target image of the good set is open in `E`. -/
 lemma chartLeviCivitaGoodSet_image_isOpen (α : M) :
     IsOpen ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) := by
@@ -75,8 +73,6 @@ lemma chartLeviCivitaGoodSet_image_isOpen (α : M) :
   set S : Set M := chartLeviCivitaGoodSet (I := I) α
   have hint_open : IsOpen (interior ((extChartAt I α).target : Set E)) :=
     isOpen_interior
-  -- Within `interior φ.target`, `φ.symm` is continuous; we show
-  -- `φ '' S = interior φ.target ∩ φ.symm ⁻¹' S`, then conclude openness.
   have heq :
       (extChartAt I α) '' S =
         interior ((extChartAt I α).target : Set E) ∩ (extChartAt I α).symm ⁻¹' S := by
@@ -102,13 +98,6 @@ lemma chartLeviCivitaGoodSet_image_isOpen (α : M) :
       continuousOn_extChartAt_symm α
     exact htgt_cont.mono interior_subset
   exact hsymm_cont.isOpen_inter_preimage hint_open hS_open
-
-/-! ## Chart-side Christoffel correction CLM
-
-Define the chart-side Christoffel correction as a CLM `E →L[ℝ] E`, then
-identify it with `christoffelCorrection (...) ∘ trivFromE` on the baseset.
-We expose the Christoffel correction as a finite sum of "scalar(x) times
-constant CLM" terms, which makes the smoothness argument elementary. -/
 
 /-- Constant building-block CLM `E →L[ℝ] E` indexed by basis triples
 `(i, j, k)`: `Cᵢⱼₖ : w ↦ (b.repr w)ᵢ • bⱼ`, used for the Christoffel-
@@ -157,8 +146,6 @@ lemma christoffelCorrectionCLM_apply
   refine Finset.sum_congr rfl (fun j _ => ?_)
   rw [ContinuousLinearMap.sum_apply]
   refine Finset.sum_congr rfl (fun k _ => ?_)
-  -- `(scalar • Cᵢₖ) w = scalar • Cᵢₖ w = scalar • ((b.repr w)ᵢ • bₖ)`
-  -- where Cᵢₖ : w ↦ (b.repr w)ᵢ • bₖ.
   rw [ContinuousLinearMap.smul_apply]
   change ((chartModelBasis E).repr (chartE_section_repr (I := I) α σ x) j *
         chartChristoffel (I := I) g α i j k (extChartAt I α x)) •
@@ -166,12 +153,10 @@ lemma christoffelCorrectionCLM_apply
     _
   unfold christoffelBlockCLM
   rw [ContinuousLinearMap.smulRight_apply]
-  -- `(b.coord i).toContinuousLinearMap w = (b.repr w) i`.
   change ((chartModelBasis E).repr (chartE_section_repr (I := I) α σ x) j *
         chartChristoffel (I := I) g α i j k (extChartAt I α x)) •
       (((chartModelBasis E).repr w) i • (chartModelBasis E) k) = _
   rw [smul_smul]
-  -- Now: `((repr σ̃)_j * Γ * (repr w)_i) • b_k = ((repr w)_i * (repr σ̃)_j * Γ) • b_k`
   congr 1
   ring
 
@@ -193,13 +178,10 @@ lemma christoffelCorrection_eq_christoffelCorrectionCLM
   refine Finset.sum_congr rfl (fun i _ => ?_)
   refine Finset.sum_congr rfl (fun j _ => ?_)
   refine Finset.sum_congr rfl (fun k _ => ?_)
-  -- The only difference is `trivToE α x (trivFromE α x w) = w` on the baseset.
   have hround :
       trivToE (I := I) α x (trivFromE (I := I) α x w) = w :=
     trivToE_trivFromE (I := I) α hx w
   rw [hround]
-
-/-! ## Smoothness building blocks -/
 
 /-- Chart-side smoothness of `chartE_section_repr α σ ∘ (extChartAt I α).symm`
 on the chart-target image of the good set. Built from a local
@@ -221,13 +203,11 @@ lemma chartE_pullback_contDiffOn_goodSet
   have hx_base :
       x ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hxS
-  -- `chartE_section_repr α σ` is `ContMDiffAt I 𝓘(ℝ, E) ∞` at `x`.
   have hfE_at : ContMDiffAt I 𝓘(ℝ, E) ∞
       (chartE_section_repr (I := I) α σ) x := by
     have hσ_at : ContMDiffAt I (I.prod 𝓘(ℝ, E)) ∞ (T% σ) x :=
       hσ.contMDiffAt (hgood_open.mem_nhds hxS)
     exact (contMDiffAt_section_iff_chartE I α σ (k := (⊤ : ℕ∞)) hx_base).mp hσ_at
-  -- `(extChartAt I α).symm` is `ContMDiffWithinAt 𝓘(ℝ, E) I ∞` at `φ x` over `φ.target`.
   set φ := extChartAt I α
   have hxφ_src : x ∈ φ.source := by
     rw [extChartAt_source]; exact hx_src
@@ -237,7 +217,6 @@ lemma chartE_pullback_contDiffOn_goodSet
     have hsymm_on : ContMDiffOn 𝓘(ℝ, E) I (∞ : WithTop ℕ∞) φ.symm φ.target :=
       contMDiffOn_extChartAt_symm (I := I) (n := ∞) (x := α)
     exact hsymm_on (φ x) hxφ_tgt
-  -- Compose.
   have hcomp_at : ContMDiffWithinAt 𝓘(ℝ, E) 𝓘(ℝ, E) ∞
       (chartE_section_repr (I := I) α σ ∘ φ.symm) φ.target (φ x) := by
     have hfE_at' : ContMDiffAt I 𝓘(ℝ, E) ∞
@@ -331,11 +310,9 @@ lemma christoffelCorrectionCLM_contMDiffOn
       (chartLeviCivitaGoodSet (I := I) α) := by
   classical
   unfold christoffelCorrectionCLM
-  -- Triple finite-sum: each summand is smooth.
   refine contMDiffOn_finset_sum (t := Finset.univ) (fun i _ => ?_)
   refine contMDiffOn_finset_sum (t := Finset.univ) (fun j _ => ?_)
   refine contMDiffOn_finset_sum (t := Finset.univ) (fun k _ => ?_)
-  -- Goal: smoothness of `fun x => scalar(x) • Cᵢₖ` where Cᵢₖ is constant.
   have hrepr_smooth :=
     chartE_section_repr_basis_component_contMDiffOn (I := I) α (j := j) hσ
   have hΓ_smooth :=
@@ -346,15 +323,11 @@ lemma christoffelCorrectionCLM_contMDiffOn
         chartChristoffel (I := I) g α i j k (extChartAt I α x))
       (chartLeviCivitaGoodSet (I := I) α) :=
     hrepr_smooth.mul hΓ_smooth
-  -- The "block" CLM `Cᵢₖ` is a constant, hence smooth.
   have hblock_const : ContMDiffOn I 𝓘(ℝ, E →L[ℝ] E) ∞
       (fun (_ : M) => christoffelBlockCLM (E := E) i k)
       (chartLeviCivitaGoodSet (I := I) α) :=
     contMDiffOn_const
-  -- `ContMDiffOn.smul` for `scalar(x) • CLM(x)`.
   exact hscalar.smul hblock_const
-
-/-! ## Chart-side smoothness of the Fréchet-derivative piece -/
 
 /-- The Fréchet derivative of the chart-pulled-back section is `C^∞` on the
 chart-target image of the good set, viewed as a CLM-valued function. -/
@@ -400,8 +373,6 @@ lemma fderiv_chartE_pullback_contMDiffOn
     h_fd_on.contDiffAt (himg_open.mem_nhds (Set.mem_image_of_mem _ hx))
   exact (hfd_chart.comp_contMDiffAt hφ_at).contMDiffWithinAt
 
-/-! ## Identification: chart-side `inCoordinates` of `chartLeviCivita` -/
-
 /-- On the good set, the `inCoordinates` form of `chartLeviCivita g α σ x`
 equals the sum of the chart-pulled-back Fréchet derivative and the
 Christoffel-correction CLM. -/
@@ -417,7 +388,6 @@ lemma inCoordinates_chartLeviCivita_eq
   classical
   have hx_base := chartLeviCivitaGoodSet_mem_baseSet (I := I) hx
   ext w
-  -- `inCoordinates ... w = trivToE α x ((cov σ x) (trivFromE α x w))`.
   have hLHS_unfold :
       ContinuousLinearMap.inCoordinates E (TangentSpace I) E (TangentSpace I)
         α x α x (chartLeviCivita (I := I) g α σ x) w =
@@ -425,7 +395,6 @@ lemma inCoordinates_chartLeviCivita_eq
         ((chartLeviCivita (I := I) g α σ x) (trivFromE (I := I) α x w)) := rfl
   rw [hLHS_unfold]
   rw [chartLeviCivita_apply (I := I) g α σ hx (trivFromE (I := I) α x w)]
-  -- `trivToE α x ∘ trivFromE α x = id_E` on the baseset (applied twice).
   rw [trivToE_trivFromE (I := I) α hx_base]
   rw [trivToE_trivFromE (I := I) α hx_base]
   rw [show christoffelCorrection (I := I) g α x
@@ -433,8 +402,6 @@ lemma inCoordinates_chartLeviCivita_eq
       christoffelCorrectionCLM (I := I) g α σ x w from
     christoffelCorrection_eq_christoffelCorrectionCLM (I := I) g α σ hx_base w]
   rw [ContinuousLinearMap.add_apply]
-
-/-! ## Final smoothness theorem -/
 
 /-- **Smoothness of the chart-local Levi-Civita as a covariant derivative.**
 For any smooth section `σ` of the tangent bundle (as `ContMDiff` of `T% σ`),
@@ -449,13 +416,11 @@ theorem chartLeviCivita_contMDiffCovariantDerivativeOn
   contMDiff := by
     intro σ hσ
     classical
-    -- Convert hσ from `CMDiff[goodSet] (∞ + 1) (T% σ)` to ContMDiffOn at `∞`.
     have hσ_inf : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞ (T% σ)
         (chartLeviCivitaGoodSet (I := I) α) := by
       have h_le : (∞ : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) + 1 := by
         rw [ENat.coe_top_add_one]
       exact hσ.of_le h_le
-    -- The chart-side sum is smooth.
     have h_fd_on :=
       fderiv_chartE_pullback_contMDiffOn (I := I) α hσ_inf
     have h_χ_on :=
@@ -467,14 +432,10 @@ theorem chartLeviCivita_contMDiffCovariantDerivativeOn
           christoffelCorrectionCLM (I := I) g α σ x)
         (chartLeviCivitaGoodSet (I := I) α) :=
       h_fd_on.add h_χ_on
-    -- Translate to smoothness of the section via the trivialization
-    -- characterisation, using the canonical hom-bundle trivialization at `α`.
     intro x hx
     have hx_base :
         x ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
       chartLeviCivitaGoodSet_mem_baseSet (I := I) hx
-    -- The hom-bundle trivialization at `α` has baseset = baseset ∩ baseset =
-    -- baseset of the tangent bundle.
     have hx_hom_base :
         x ∈ (trivializationAt (E →L[ℝ] E)
               (fun b : M => TangentSpace I b →L[ℝ] TangentSpace I b) α).baseSet := by
@@ -485,8 +446,7 @@ theorem chartLeviCivita_contMDiffCovariantDerivativeOn
           (fun b : M => TangentSpace I b →L[ℝ] TangentSpace I b) α).contMDiffWithinAt_section
       (chartLeviCivitaGoodSet (I := I) α) hx_hom_base]
     refine ((h_sum x hx).congr_of_eventuallyEq ?_ ?_)
-    · -- Eventually-equal on `goodSet` neighborhood of `x`.
-      filter_upwards
+    · filter_upwards
         [self_mem_nhdsWithin (s := chartLeviCivitaGoodSet (I := I) α)] with x' hx'
       symm
       have hcov :
@@ -504,8 +464,7 @@ theorem chartLeviCivita_contMDiffCovariantDerivativeOn
               (TangentSpace I) α x' α x'
               (chartLeviCivita (I := I) g α σ x') := rfl
       rw [htriv, hcov]
-    · -- Pointwise at `x`.
-      symm
+    · symm
       have hcov :=
         inCoordinates_chartLeviCivita_eq (I := I) g α σ hx
       have htriv :

@@ -110,10 +110,8 @@ theorem chartCloseDop_apply_eq_mfderiv
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M) (s : ℝ) (v : TangentSpace I x)
     (hsrc : (Φ_fam s : M → M) x ∈ (chartAt H α).source) :
     chartCloseDop (I := I) Φ_fam α x s v = mfderiv I I (Φ_fam s : M → M) x v := by
-  -- The diffeomorphism `Φ_fam s` is manifold-differentiable at `x`.
   have hF : MDifferentiableAt I I (Φ_fam s : M → M) x :=
     flowFamily_mdifferentiableAt_fixed_time (I := I) Φ_fam s x
-  -- The chart dictionary read backwards.
   rw [chartCloseDop_apply]
   exact (mfderiv_flow_eq_chartFderiv_apply (I := I) (Φ_fam s : M → M) α v hF hsrc).symm
 
@@ -153,7 +151,6 @@ theorem chartCloseDop_eventuallyEq_mfderiv_orbit
     (hcontAt : ContinuousAt (fun s : ℝ => (Φ_fam s : M → M) x) t) :
     (fun s : ℝ => chartCloseDop (I := I) Φ_fam (Φ_fam t x) x s v)
       =ᶠ[𝓝 t] (fun s : ℝ => mfderiv I I (Φ_fam s : M → M) x v) := by
-  -- The orbit stays in the chart source of `α := Φ_fam t x` near `t`.
   have hmem : ∀ᶠ s : ℝ in 𝓝 t,
       (Φ_fam s : M → M) x ∈ (chartAt H (Φ_fam t x)).source :=
     flow_orbit_eventually_mem_chartAt_source (I := I) Φ_fam t x hcontAt

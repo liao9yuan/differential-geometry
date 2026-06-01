@@ -37,8 +37,6 @@ variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## The order-zero term equals the `L^p`-norm -/
-
 /-- The order-`0` slice of `wkpNorm` — the sum over the unique empty
 multi-index `α : Fin 0 → Fin d` — is just `eLpNorm u`. This is the building
 block that lets us peel the `L^p`-piece off the iterated norm. -/
@@ -70,14 +68,9 @@ theorem wkpNorm_split_order_zero
               p (volume.restrict Ω) := by
   classical
   unfold wkpNorm
-  -- Peel off the `j = 0` term from `Finset.range (k + 1)`.
   rw [Finset.sum_range_succ']
-  -- The remaining sum reindexes `j ↦ j + 1`; the peeled term is the `j = 0` slice.
   rw [order_zero_sum_eq_eLpNorm (d := d) p u Ω]
-  -- Reorder the additive group to match the stated form.
   rw [add_comm]
-
-/-! ## The full order-`k` decomposition -/
 
 /-- **Order-`k` decomposition of the iterated Sobolev norm** (general exponent).
 `wkpNorm k p u Ω` equals the `L^p`-norm of `u` plus the aggregate, over all
@@ -98,25 +91,19 @@ theorem wkpNorm_k_decomposition
   classical
   rw [wkpNorm_split_order_zero (d := d) k p u Ω]
   congr 1
-  -- Reindex `∑_{j ∈ range k} F (j + 1)` as `∑_{j ∈ Icc 1 k} F j`.
   rw [Finset.sum_bij (i := fun (j : ℕ) (_ : j ∈ Finset.range k) => j + 1)]
-  · -- maps into `Icc 1 k`
-    intro j hj
+  · intro j hj
     rw [Finset.mem_range] at hj
     rw [Finset.mem_Icc]
     omega
-  · -- injective
-    intro j₁ _ j₂ _ h
+  · intro j₁ _ j₂ _ h
     omega
-  · -- surjective onto `Icc 1 k`
-    intro j hj
+  · intro j hj
     rw [Finset.mem_Icc] at hj
     refine ⟨j - 1, ?_, ?_⟩
     · rw [Finset.mem_range]; omega
     · omega
-  · -- value agreement: needs the index identity `j - 1 + 1 = j`, handled by the
-    -- bijection landing on `j + 1` directly.
-    intro j _
+  · intro j _
     rfl
 
 /-- **Order-`k` decomposition at exponent `2`.** The `L^2` chart Sobolev norm of

@@ -72,25 +72,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Chart-locality-free twins
-
-The chart-locality-free declarations re-key the eigenvector chart component onto
-the intrinsic compact-operator eigenbasis `tensorResolventEigenbasisVec`
-via the canonical unconditional chart component
-`eigenvectorChartComponentFun_unconditional`. -/
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- Chart-locality-free twin of
@@ -107,12 +94,6 @@ private lemma eigenvectorChartComponentFun_ae_eq_chartPushedPouWeight_mul_cutoff
               (tensorResolventL2_isCompactOperator (I := I) (M := M)
                 g r s) i) α Q :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) := by
-  -- `eigenvectorChartComponentFun_unconditional` is the function-coercion of the
-  -- abstract partition-of-unity chart component of the intrinsic eigenbasis
-  -- vector; the D.a bridge rewrites that, almost everywhere, as
-  -- `chartPushedRaw α (chartAtlasPOU α)` times the cutoff chart component. The
-  -- pushed partition-of-unity weight `chartPushedPouWeight α` is by definition
-  -- that chart pushforward.
   exact tensorL2ChartComponent_eq_chartPushedPou_mul_cutoff
     (I := I) (M := M) g r s
     (tensorResolventEigenbasisVec (I := I) (M := M)
@@ -129,12 +110,9 @@ theorem eigenvectorChartComponentFun_ae_zero_where_chartPushedPouWeight_zero
       chartPushedPouWeight (I := I) (M := M) α y = 0 →
         eigenvectorChartComponentFun_unconditional (I := I) (M := M)
           g r s i α Q y = 0 := by
-  -- The eigenvector chart component is, almost everywhere, the pushed
-  -- partition-of-unity weight times the cutoff chart component.
   filter_upwards
     [eigenvectorChartComponentFun_ae_eq_chartPushedPouWeight_mul_cutoff
       (I := I) (M := M) g r s i α Q] with y hy hy_zero
-  -- Where the weight is zero the product is zero.
   rw [hy, hy_zero, zero_mul]
 
 /-- Chart-locality-free twin of
@@ -148,22 +126,15 @@ theorem eigenvectorChartComponentFun_ae_eq_zero_on_chartPushedPouWeight_zero
         {y : EuclN | chartPushedPouWeight (I := I) (M := M) α y = 0}]
       (fun _ : EuclN => (0 : ℝ)) := by
   classical
-  -- The zero locus of the pushed partition-of-unity weight is measurable: the
-  -- pushed weight is a measurable function (chart pushforward of the `C^∞`
-  -- partition-of-unity weight).
   have h_meas : MeasurableSet
       {y : EuclN | chartPushedPouWeight (I := I) (M := M) α y = 0} :=
     measurableSet_eq_fun (chartPushedPouWeight_measurable (I := I) (M := M) α)
       measurable_const
-  -- Translate the implication-a.e. statement on the full measure to an a.e.
-  -- identity on the measure restricted to the zero locus.
   rw [Filter.EventuallyEq, ae_restrict_iff' h_meas]
   filter_upwards
     [eigenvectorChartComponentFun_ae_zero_where_chartPushedPouWeight_zero
       (I := I) (M := M) g r s i α Q] with y hy hy_zero
   exact hy hy_zero
-
-/-! ## Sanity tests (chart-locality-free) -/
 
 section ElaborationTestsUnconditional
 

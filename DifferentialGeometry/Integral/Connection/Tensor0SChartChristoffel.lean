@@ -85,15 +85,6 @@ variable
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
-/-! ## The chart-α-trivialised representation of a `(0, s)`-tensor section
-
-The chart-α canonical trivialisation `trivializationAt (Tensor0SModel s ℝ E)
-(fun b => Tensor0SSpace s I b) α` sends each fibre `Tensor0SSpace s I b` to
-the model fibre `Tensor0SModel s ℝ E` via its
-`continuousLinearMapAt ℝ b`. On the base set, this is a continuous linear
-isomorphism; off the base set, `continuousLinearMapAt` is the zero map, so
-the representation is `0` there. -/
-
 /-- The chart-α-trivialised `Tensor0SModel s ℝ E`-valued representation of a
 `(0, s)`-tensor section. -/
 noncomputable def tensor0SChartE_section_repr (s : ℕ) (α : M)
@@ -139,8 +130,6 @@ lemma tensor0SChartE_section_repr_smul (s : ℕ) (α : M) (c : ℝ)
         (fun y : M => Tensor0SSpace s I y) α).continuousLinearMapAt ℝ b
         (c • T b) = _
   exact map_smul _ c (T b)
-
-/-! ## The intrinsic chart-α Fréchet derivative piece -/
 
 /-- The fibre right-inverse of the chart-α trivialisation on the base set,
 sending a model fibre value back to a section fibre value. -/
@@ -189,7 +178,6 @@ lemma tensor0SIntrinsicChartCLM_add_section (s : ℕ) (α : M)
       tensor0SIntrinsicChartCLM (I := I) s α T₁ b +
         tensor0SIntrinsicChartCLM (I := I) s α T₂ b := by
   classical
-  -- Function-level identity for the chart pullback.
   have hsum_pull :
       (tensor0SChartE_section_repr (I := I) s α (T₁ + T₂) ∘
           (extChartAt I α).symm) =
@@ -200,7 +188,6 @@ lemma tensor0SIntrinsicChartCLM_add_section (s : ℕ) (α : M)
     funext y
     exact congrFun (tensor0SChartE_section_repr_add (I := I) s α T₁ T₂)
       ((extChartAt I α).symm y)
-  -- Fréchet-derivative additivity at `φ b`.
   have hfd : fderiv ℝ
         (tensor0SChartE_section_repr (I := I) s α (T₁ + T₂) ∘
           (extChartAt I α).symm) (extChartAt I α b) =
@@ -212,10 +199,8 @@ lemma tensor0SIntrinsicChartCLM_add_section (s : ℕ) (α : M)
             (extChartAt I α).symm) (extChartAt I α b) := by
     rw [hsum_pull]
     exact fderiv_add h₁ h₂
-  -- Combine at the CLM level by additive composition.
   unfold tensor0SIntrinsicChartCLM
   rw [hfd]
-  -- Now goal: `(from_model) ∘L ((A + B) ∘L triv) = (from_model ∘L A ∘L triv) + (from_model ∘L B ∘L triv)`.
   ext v
   rw [ContinuousLinearMap.add_apply]
   rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply,
@@ -257,8 +242,6 @@ lemma tensor0SIntrinsicChartCLM_smul_section (s : ℕ) (α : M)
     ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
   rw [ContinuousLinearMap.smul_apply, map_smul]
 
-/-! ## The chart-α Christoffel correction (residual definition) -/
-
 variable
   (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
   [ContMDiffCovariantDerivative cov ∞]
@@ -278,23 +261,6 @@ lemma tensor0SChartChristoffelCorrection_def (s : ℕ) (α : M)
     tensor0SChartChristoffelCorrection (I := I) cov s α T b =
       (Tensor0SNabla.tensor0SCovariantDerivative I M s cov T) b -
         tensor0SIntrinsicChartCLM (I := I) s α T b := rfl
-
-/-! ## Headline decomposition theorem
-
-The headline identity:
-
-```
-(tensor0SCovariantDerivative s cov T) b =
-  tensor0SIntrinsicChartCLM s α T b
-    + tensor0SChartChristoffelCorrection s α T b.
-```
-
-By construction (definition of the Christoffel correction as the residual),
-this is a definitional identity. The mathematical content of the splitting
-is concentrated in `tensor0SChartChristoffelCorrection`: identifying its
-concrete per-slot Γ-action structure, mirroring `christoffelCorrection` of
-`LeviCivitaChartLocal.lean` for the tangent bundle, is the natural follow-up
-anchored by the present construction. -/
 
 /-- **Headline decomposition (CLM-form).** -/
 theorem tensor0SCovariantDerivative_chart_decomp (s : ℕ) (α : M)
@@ -325,8 +291,6 @@ theorem tensor0SCovariantDerivative_chart_decomp_vectorField
       tensor0SIntrinsicChartCLM (I := I) s α T b (X b) +
         tensor0SChartChristoffelCorrection (I := I) cov s α T b (X b) :=
   tensor0SCovariantDerivative_chart_decomp_apply (I := I) cov s α T b (X b)
-
-/-! ## Compile-time sanity check -/
 
 example
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))

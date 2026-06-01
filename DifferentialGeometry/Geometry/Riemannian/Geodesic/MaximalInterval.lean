@@ -77,12 +77,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Initial-data carriers
-
-A geodesic with prescribed initial data `(p : M, v : T_p M)` is one whose
-lift `f` satisfies `f 0 = ⟨p, v⟩`. We encode this in a `Prop`-valued
-predicate that records the initial datum at `t = 0`. -/
-
 /-- `γ` is a geodesic on `s` with initial datum `(p, v)` at time `0` if
 the velocity lift `f` projects to `γ`, satisfies `f 0 = ⟨p, v⟩`, and is an
 integral curve of the chart-fixed geodesic vector field at the chart
@@ -116,8 +110,6 @@ lemma IsGeodesicOnWithInitial.isGeodesicAt
     (ht_src : γ t ∈ (chartAt H p).source) :
     IsGeodesicAt (I := I) g γ t := by
   obtain ⟨f, hproj, _, hf⟩ := hγ
-  -- The foot at `t` is `γ t` (projection identity), so it lies in the
-  -- base chart-source by the foot-in-source hypothesis.
   refine ⟨p, f, hproj, ?_, hf.isMIntegralCurveAt ht⟩
   rw [hproj t]; exact ht_src
 
@@ -141,12 +133,6 @@ lemma IsGeodesicOnWithInitial.mono
     IsGeodesicOnWithInitial (I := I) g γ s' p v := by
   obtain ⟨f, hproj, hf0, hf⟩ := hγ
   exact ⟨f, hproj, hf0, hf.mono hs⟩
-
-/-! ## The maximal interval
-
-The maximal interval is the union over all *open* sets `J ⊆ ℝ` such that
-`0 ∈ J` and a geodesic with initial data `(p, v)` exists on `J`. Taking
-the union of opens gives an open set, automatically containing `0`. -/
 
 /-- The "membership witness" predicate for the maximal interval: at time
 `t`, there exists a connected open `J ∋ 0, t` and a geodesic with initial
@@ -189,16 +175,9 @@ theorem maximalGeodesicInterval_isOpen
   rw [isOpen_iff_mem_nhds]
   intro t ht
   obtain ⟨γ, J, hJ, hJ_conn, h0, ht_in, hγ⟩ := ht
-  -- `J ⊆ maximalGeodesicInterval g p v` and `J ∈ 𝓝 t`.
   refine Filter.mem_of_superset (hJ.mem_nhds ht_in) ?_
   intro t' ht'
   exact ⟨γ, J, hJ, hJ_conn, h0, ht', hγ⟩
-
-/-! ## Local existence on the maximal interval
-
-We use `exists_geodesic_with_initial_velocity_at` to produce a local geodesic at `0`, which
-gives a small open interval `(-ε, ε)` contained in the maximal interval.
-This automatically places `0` in the maximal interval. -/
 
 section LocalExistence
 
@@ -212,14 +191,11 @@ lemma exists_maximalGeodesicWitness_zero
     MaximalGeodesicWitness (I := I) g p v 0 := by
   obtain ⟨f, hf0, hf⟩ :=
     exists_isMIntegralCurveAt_geodesicVectorFieldChart (I := I) g p v
-  -- Extract an open interval around `0` on which `f` is an integral curve.
   rw [isMIntegralCurveAt_iff'] at hf
   obtain ⟨ε, hε, hf_on⟩ := hf
   refine ⟨projectCurve (I := I) f, Metric.ball (0 : ℝ) ε,
     Metric.isOpen_ball, ?_, Metric.mem_ball_self hε, Metric.mem_ball_self hε, ?_⟩
-  · -- `Metric.ball (0 : ℝ) ε` is convex, hence preconnected.
-    exact (convex_ball (0 : ℝ) ε).isPreconnected
-  -- Package as `IsGeodesicOnWithInitial`.
+  · exact (convex_ball (0 : ℝ) ε).isPreconnected
   exact ⟨f, fun _ => rfl, hf0, hf_on⟩
 
 /-- `0` belongs to the maximal interval. -/
@@ -235,19 +211,6 @@ theorem maximalGeodesicInterval_nonempty
   ⟨0, zero_mem_maximalGeodesicInterval (I := I) g p v⟩
 
 end LocalExistence
-
-/-! ## The canonical maximal geodesic
-
-We define `maximalGeodesic g p v t` by:
-
-* if `t ∈ maximalGeodesicInterval g p v`, choose any witness
-  `(γ, J)` covering `t` and return `γ t`;
-* otherwise, return `p` (junk value).
-
-Outside the maximal interval, the curve is the constant `p`. On the
-maximal interval, the *value* depends on the choice of witness; we
-package it through `Classical.choice`. Pointwise the value matches some
-local geodesic with the prescribed initial data. -/
 
 section MaximalGeodesicDefinition
 
@@ -303,12 +266,6 @@ lemma maximalGeodesic_of_mem
 
 end MaximalGeodesicDefinition
 
-/-! ## Initial value of the maximal geodesic
-
-`maximalGeodesic g p v 0 = p`. This follows from
-`zero_mem_maximalGeodesicInterval` and the fact that any witness `γ` at
-`t = 0` satisfies `γ 0 = p` (by `IsGeodesicOnWithInitial.start_eq`). -/
-
 section MaximalGeodesicValue
 
 variable [I.Boundaryless] [CompleteSpace E]
@@ -321,19 +278,9 @@ theorem maximalGeodesic_zero
   rw [maximalGeodesic_of_mem (I := I) (g := g) (p := p) (v := v) h0]
   obtain ⟨_J, _hJ, _hJ_conn, _h0J, _h0J', hγ⟩ :=
     maximalGeodesicChosenCurve_spec (I := I) g p v h0
-  -- `hγ : IsGeodesicOnWithInitial g (chosen) J p v`, so chosen 0 = p.
   exact hγ.start_eq
 
 end MaximalGeodesicValue
-
-/-! ## Pointwise geodesic property on the maximal interval
-
-For every `t` in the maximal interval, the value `maximalGeodesic g p v t`
-matches some local geodesic at `t`, and that local geodesic gives rise to
-an `IsGeodesicAt` predicate at `t`. We do NOT claim a single
-`IsGeodesicOn` predicate on the whole maximal interval: doing so would
-require gluing chart-fixed integral curves across chart changes, which is
-a moving-chart phenomenon and is deferred. -/
 
 section MaximalGeodesicAtTime
 
@@ -360,8 +307,6 @@ theorem exists_isGeodesicAt_of_mem_maximalGeodesicInterval
       IsGeodesicAt (I := I) g γ t := by
   obtain ⟨γ, J, hJ, _hJ_conn, h0, ht, hγ⟩ := h
   refine ⟨γ, J, hJ, h0, ht, hγ, ?_⟩
-  -- Local spray `IsGeodesicAt` from the initial-data witness: `t` is an
-  -- interior point of `J`, and the foot `γ t` lies in the base chart-source.
   exact hγ.isGeodesicAt (hJ.mem_nhds ht) (ht_src γ J hγ)
 
 /-- For every `t` in the maximal interval, there exists a geodesic
@@ -381,18 +326,10 @@ theorem exists_isGeodesicAt_zero_of_mem_maximalGeodesicInterval
   obtain ⟨γ, J, hJ, h0, ht, hγ_init, hγ_at⟩ :=
     exists_isGeodesicAt_of_mem_maximalGeodesicInterval (I := I) h ht_src
   refine ⟨γ, hγ_init.start_eq, ?_, hγ_at⟩
-  -- `IsGeodesicAt g γ 0`: the foot at `0` is `γ 0 = p ∈ (chartAt H p).source`.
   refine hγ_init.isGeodesicAt (hJ.mem_nhds h0) ?_
   rw [hγ_init.start_eq]; exact mem_chart_source H p
 
 end MaximalGeodesicAtTime
-
-/-! ## Existence of a maximal-interval geodesic via canonical witness
-
-The theorems below package the canonical maximal geodesic together with
-its starting properties: it starts at `p`, and on the maximal interval
-some witnessing local geodesic agrees with it pointwise. This is the
-useful downstream-facing form. -/
 
 section MaximalGeodesicMain
 
@@ -433,20 +370,6 @@ theorem maximalGeodesic_structure_of_footInSource
 
 end MaximalGeodesicMain
 
-/-! ## Bridge lemmas: from local data on `Icc 0 L` to global data on `Set.univ`
-
-The lemmas below consume the conclusion of the Hopf-Rinow assembly
-(`maximalGeodesicInterval g p v = Set.univ`) together with a substantive
-global witness obtained on the way to the assembly, and package the
-resulting global geodesic / smoothness / length identifications in a
-form directly usable by downstream theorems.
-
-These are pure structural compositions: the genuine analytic content
-(short-time existence + completeness + no-escape) is supplied as
-hypotheses; the bridges only carry the rewriting along the equality
-`maximalGeodesicInterval g p v = Set.univ` and the function-equality
-between an "any global witness" and the canonical `maximalGeodesic`. -/
-
 section BridgeLemmas
 
 variable [I.Boundaryless] [CompleteSpace E]
@@ -466,25 +389,6 @@ lemma isGeodesic_iff_isGeodesicOn_univ
     exact hγ t (Set.mem_univ t)
 
 end BridgeLemmas
-
-/-! ## Bridge 3: `pathELength` agrees with the chart-integral arc length on `C¹` curves
-
-For a `C¹` curve `γ : ℝ → M` with `a ≤ b`, the Mathlib quantity
-`pathELength I γ a b : ℝ≥0∞` equals `ENNReal.ofReal (arcLength g γ a b)`,
-where `arcLength g γ a b = ∫ t in a..b, √(g.inner (γ t) (γ'(t)) (γ'(t)))`
-is the chart-independent real-valued arc-length integral used downstream
-in the second-variation / index-form machinery.
-
-The identity requires a per-time enorm-identification
-`‖mfderiv 𝓘(ℝ,ℝ) I γ t 1‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner (γ t) v v))`
-between the bundle enorm on the tangent space and the explicit
-square-root of the inner product. This identification follows from the
-construction of the `RiemannianBundle` instance: the inner product on
-the fibre `TangentSpace I (γ t)` is by definition `g.inner (γ t)`, hence
-the induced norm is the square root of that inner product. We expose the
-identification as a hypothesis to keep the bridge a structural
-composition; the identification itself is a separate lemma at the
-`RiemannianBundle`-instance level. -/
 
 section ArcLengthBridge
 
@@ -511,14 +415,11 @@ private lemma continuousOn_velocityWithin_totalSpace_C1
           (η t)
           (mfderivWithin 𝓘(ℝ, ℝ) I η (Set.Icc a b) t (1 : ℝ)) : TangentBundle I M))
       (Set.Icc a b) := by
-  -- `Icc a b` has the unique-mdiff property as a subset of the model `ℝ`.
   have hUnique : UniqueMDiffOn 𝓘(ℝ, ℝ) (Set.Icc a b) := by
     intro x hx
     rw [uniqueMDiffWithinAt_iff_uniqueDiffWithinAt]
     exact (uniqueDiffOn_Icc hab) x hx
-  -- The bundled within-derivative is continuous on the bundle preimage of `Icc a b`.
   have hTan := hη.continuousOn_tangentMapWithin (le_refl 1) hUnique
-  -- The unit lift `t ↦ ⟨t, 1⟩ : ℝ → TangentBundle 𝓘(ℝ, ℝ) ℝ` is continuous.
   have hLift : Continuous (fun t : ℝ =>
       (⟨t, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ)) := by
     have h_homeo :
@@ -526,7 +427,6 @@ private lemma continuousOn_velocityWithin_totalSpace_C1
           ModelProd ℝ ℝ → TangentBundle 𝓘(ℝ, ℝ) ℝ) :=
       (tangentBundleModelSpaceHomeomorph 𝓘(ℝ, ℝ)).symm.continuous
     exact h_homeo.comp (continuous_id.prodMk continuous_const)
-  -- Precompose: the lift maps `Icc a b` into the bundle preimage.
   have hMaps : Set.MapsTo (fun t : ℝ => (⟨t, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ))
       (Set.Icc a b) (Bundle.TotalSpace.proj ⁻¹' (Set.Icc a b)) := by
     intro t ht
@@ -536,7 +436,6 @@ private lemma continuousOn_velocityWithin_totalSpace_C1
         (⟨t, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ))
       (Set.Icc a b) :=
     hTan.comp hLift.continuousOn hMaps
-  -- The composite equals the target total-space section.
   refine hComp.congr ?_
   intro t _ht
   rfl
@@ -608,12 +507,10 @@ lemma speedSqrt_integrableOn_Icc_of_C1
       (Set.Icc a b) MeasureTheory.volume := by
   classical
   rcases eq_or_lt_of_le hab with hab_eq | hab_lt
-  · -- Degenerate interval `a = b`: `Icc a a = {a}` is a single point.
-    subst hab_eq
+  · subst hab_eq
     rw [Set.Icc_self, MeasureTheory.integrableOn_singleton_iff]
     exact Or.inr (by simp)
-  · -- `a < b`. Continuity of the within-velocity speed integrand.
-    have hVW := continuousOn_velocityWithin_totalSpace_C1 (I := I) (M := M)
+  · have hVW := continuousOn_velocityWithin_totalSpace_C1 (I := I) (M := M)
       hab_lt hη
     have hSpeedSq := continuousOn_g_speedSq_velocityWithin (I := I) (M := M) g hVW
     have hSqrtW : ContinuousOn
@@ -623,7 +520,6 @@ lemma speedSqrt_integrableOn_Icc_of_C1
             (mfderivWithin 𝓘(ℝ, ℝ) I η (Set.Icc a b) t (1 : ℝ))))
         (Set.Icc a b) :=
       Real.continuous_sqrt.comp_continuousOn hSpeedSq
-    -- Integrability of the within-velocity form on the compact interval.
     have hIntW : MeasureTheory.IntegrableOn
         (fun t : ℝ => Real.sqrt
           (g.inner (η t)
@@ -631,8 +527,6 @@ lemma speedSqrt_integrableOn_Icc_of_C1
             (mfderivWithin 𝓘(ℝ, ℝ) I η (Set.Icc a b) t (1 : ℝ))))
         (Set.Icc a b) MeasureTheory.volume :=
       hSqrtW.integrableOn_Icc
-    -- On the interior `Ioo a b`, `mfderivWithin = mfderiv`, so the two integrands
-    -- agree; `Ioo a b` is co-null in `Icc a b`.
     have hAgree : ∀ t ∈ Set.Ioo a b,
         Real.sqrt
             (g.inner (η t)
@@ -646,8 +540,6 @@ lemma speedSqrt_integrableOn_Icc_of_C1
       have hmem : Set.Icc a b ∈ nhds t :=
         Icc_mem_nhds ht.1 ht.2
       rw [mfderivWithin_of_mem_nhds hmem]
-    -- The two integrands are a.e. equal on `Icc a b` (they agree on `Ioo a b`,
-    -- whose complement in `Icc a b` is the null pair `{a, b}`).
     have hae : (fun t : ℝ => Real.sqrt
           (g.inner (η t)
             (mfderivWithin 𝓘(ℝ, ℝ) I η (Set.Icc a b) t (1 : ℝ))
@@ -659,8 +551,6 @@ lemma speedSqrt_integrableOn_Icc_of_C1
             (mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ)))) := by
       have hIoo_ae : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc a b)),
           t ∈ Set.Ioo a b := by
-        -- The restrictions to `Ioo a b` and `Icc a b` agree (they differ by the
-        -- null endpoints), so a.e. on `Icc a b` a point lies in `Ioo a b`.
         rw [← MeasureTheory.restrict_Ioo_eq_restrict_Icc]
         exact MeasureTheory.ae_restrict_mem measurableSet_Ioo
       filter_upwards [hIoo_ae] with t ht
@@ -705,20 +595,12 @@ theorem pathELength_eq_arcLength
       = ENNReal.ofReal
         (DifferentialGeometry.Geometry.Riemannian.Variation.arcLength (I := I) g γ a b) := by
   classical
-  -- Set up notation: `F t := √ (g.inner (γ t) (γ' t) (γ' t))`.
   set F : ℝ → ℝ := fun t : ℝ => Real.sqrt
       (g.inner (γ t)
         (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ))
         (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ))) with hF_def
-  -- `F` is non-negative everywhere as a square root.
   have hF_nn : ∀ t : ℝ, 0 ≤ F t := fun t => Real.sqrt_nonneg _
-  -- Step 1: rewrite `pathELength` as a lintegral on `Icc a b`.
   rw [Manifold.pathELength_eq_lintegral_mfderiv_Icc]
-  -- Step 2: replace the integrand on `Icc a b` by `ENNReal.ofReal (F t)`
-  -- using the pointwise `hEnorm` identification.
-  -- Replace the integrand on `Icc a b` by `ENNReal.ofReal (F t)` via
-  -- `setLIntegral_congr_fun`, applied directly to the goal.
-  -- Change form to bridge beta-reductions.
   change ∫⁻ t in Set.Icc a b, (fun t : ℝ => ‖mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ)‖ₑ) t
     = ENNReal.ofReal (DifferentialGeometry.Geometry.Riemannian.Variation.arcLength
         (I := I) g γ a b)
@@ -730,8 +612,6 @@ theorem pathELength_eq_arcLength
       measurableSet_Icc
       (fun t ht => by simpa [hF_def] using hEnorm t ht)
   rw [h_lint_eq]
-  -- Step 3: convert the lintegral of `ofReal ∘ F` on `Icc a b` to `ofReal`
-  -- of the Bochner integral on `Icc a b` via `ofReal_integral_eq_lintegral_ofReal`.
   have h_ofReal :
       ENNReal.ofReal (∫ t in Set.Icc a b, F t)
         = ∫⁻ t in Set.Icc a b, ENNReal.ofReal (F t) := by
@@ -739,14 +619,8 @@ theorem pathELength_eq_arcLength
       MeasureTheory.ae_of_all _ hF_nn
     exact MeasureTheory.ofReal_integral_eq_lintegral_ofReal hγ_int hF_nn_ae
   rw [← h_ofReal]
-  -- Step 4: convert the set-integral on `Icc a b` to the interval integral
-  -- `∫ t in a..b, F t`, which is the definition of `arcLength`.
-  -- For `a ≤ b`, `∫ t in a..b, F t = ∫ t in Ioc a b, F t`, and the
-  -- difference between `Icc a b` and `Ioc a b` is the single point `{a}`,
-  -- which is volume-null.
   have h_Icc_Ioc :
       ∫ t in Set.Icc a b, F t = ∫ t in Set.Ioc a b, F t := by
-    -- `Icc a b = {a} ∪ Ioc a b` and `{a}` has measure zero.
     have h_set : Set.Icc a b = {a} ∪ Set.Ioc a b := by
       ext x
       simp only [Set.mem_Icc, Set.mem_union, Set.mem_singleton_iff, Set.mem_Ioc]
@@ -759,7 +633,6 @@ theorem pathELength_eq_arcLength
         · exact ⟨le_refl _, hab⟩
         · exact ⟨le_of_lt h1, h2⟩
     rw [h_set]
-    -- Disjoint union integral. `{a}` and `Ioc a b` are disjoint.
     have hdisj : Disjoint ({a} : Set ℝ) (Set.Ioc a b) := by
       rw [Set.disjoint_left]
       rintro y hy hy'
@@ -775,16 +648,11 @@ theorem pathELength_eq_arcLength
       hγ_int.mono_set Set.Ioc_subset_Icc_self
     rw [MeasureTheory.setIntegral_union hdisj measurableSet_Ioc
       h_int_singleton h_int_Ioc]
-    -- The integral over `{a}` vanishes.
     have h_singleton : ∫ t in ({a} : Set ℝ), F t = 0 := by
       simp
     rw [h_singleton, zero_add]
-  -- Step 5: the interval integral identification.
-  -- `arcLength g γ a b := ∫ t in a..b, F t` and `∫ t in a..b, F t = ∫ t in Ioc a b, F t`
-  -- by `intervalIntegral.integral_of_le hab`.
   have h_intInterval : ∫ t in a..b, F t = ∫ t in Set.Ioc a b, F t :=
     intervalIntegral.integral_of_le hab
-  -- Conclude: rewrite both sides to share `∫ t in Ioc a b, F t`.
   have h_arcLength :
       DifferentialGeometry.Geometry.Riemannian.Variation.arcLength (I := I) g γ a b
         = ∫ t in a..b, F t := by

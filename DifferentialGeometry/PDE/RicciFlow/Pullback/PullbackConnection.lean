@@ -14,7 +14,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
--- order 452: pullback-connection construction
 /-- The pullback connection induced by a diffeomorphism `Φ : M ≃ₘ⟮I, I⟯ M`
 acting on a Riemannian metric `g`. By the Koszul identity, the unique
 torsion-free metric-compatible connection on `(M, Φ*g)` is the Levi-Civita
@@ -28,7 +27,6 @@ noncomputable def pullback_connection_construct
     CovariantDerivative I E (TangentSpace I : M → Type _) :=
   LeviCivita (I := I) (Diffeomorph.pullbackMetric g Φ)
 
--- order 453: pullback connection is torsion-free
 /-- The pullback connection `pullback_connection_construct g Φ` is
 torsion-free. This is immediate from the fact that the Levi-Civita
 connection of any smooth Riemannian metric is torsion-free. -/
@@ -38,7 +36,6 @@ theorem pullback_connection_torsion_free
     (pullback_connection_construct g Φ).torsion = 0 :=
   LeviCivita_torsion_eq_zero (I := I) (Diffeomorph.pullbackMetric g Φ)
 
--- order 454: pullback connection is metric-compatible
 /-- The pullback connection `pullback_connection_construct g Φ` is
 metric-compatible with the pullback metric `Diffeomorph.pullbackMetric g Φ`.
 This is immediate from the metric-compatibility of the Levi-Civita

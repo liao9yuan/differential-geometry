@@ -80,15 +80,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## Chart-coordinate bridges for the chart Gram matrix
-
-`chartDeTurckCorrPrincipalSymbolExpr` uses the chart-target Gram field `chartGramOnE g x`
-and inverse-Gram field `chartInvGramOnE g x`, both evaluated at the chart image
-`extChartAt I x x` of the base point.  The inverse-Gram bridge
-`chartInvGramOnE_extChartAt_self` and the inverse-Gram symmetry
-`chartInvGramMatrix_self_symm` are already available; here we add the Gram-field bridge
-and the contraction of the chart Gram matrix against the chart inverse Gram matrix. -/
-
 section GramBridge
 
 /-- The chart-target Gram field of `g`, in the chart at `x`, evaluated at the chart image
@@ -113,33 +104,20 @@ lemma sum_chartGram_mul_chartInvGram_self (g : SmoothRiemannianMetric I M) (x : 
         chartGramMatrix (I := I) g x x k j *
           chartInvGramMatrix (I := I) g x x k l =
       (if l = j then (1 : ℝ) else 0) := by
-  -- `x` lies in the base set of the trivialization at `x` itself.
   have hx : x ∈ (trivializationAt E (TangentSpace I) x).baseSet := by
     rw [trivializationAt_baseSet_eq_chartAt_source]
     exact mem_chart_source H x
-  -- The `(l, j)` entry of `chartInvGramMatrix · chartGramMatrix = 1`.
   have hmul := chartInvGramMatrix_mul_chartGramMatrix (I := I) g x hx
   have hentry : (chartInvGramMatrix (I := I) g x x *
       chartGramMatrix (I := I) g x x) l j = (1 : Matrix _ _ ℝ) l j := by
     rw [hmul]
   rw [Matrix.one_apply, Matrix.mul_apply] at hentry
-  -- Rewrite the entry as the desired sum, using symmetry of the inverse Gram matrix.
   rw [← hentry]
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [chartInvGramMatrix_self_symm (I := I) g x l k]
   ring
 
 end GramBridge
-
-/-! ## The principal symbol's component
-
-`deTurckCorrSymbolComp` is the `(i, j)` component of the linearized-DeTurck-correction
-principal symbol.  It has the **same shape** as `chartDeTurckCorrPrincipalSymbolExpr`,
-with each iterated derivative `∂_a∂_b h_{cd}` replaced by the symbol substitution
-`ξ_a ξ_b · t_{cd}` (`ξ_a = (chartModelBasis E).repr ξ a`, `t_{cd} = formComp x t c d`).
-The chart Gram and inverse-Gram factors and the index placement are kept exactly as in
-`chartDeTurckCorrPrincipalSymbolExpr`, evaluated at the chart image `extChartAt I x x` of
-the base point. -/
 
 section SymbolComponent
 
@@ -226,27 +204,6 @@ def deTurckCorrSymbolComp (g g' : SmoothRiemannianMetric I M) (x : M) (ξ : E)
                         formComp (I := I) x t a b))) := rfl
 
 end SymbolComponent
-
-/-! ## The closed-form gauge symbol
-
-We contract the chart Gram and inverse-Gram factors of `deTurckCorrSymbolComp`.  Working
-separately on each of the two `k`-sums, the contraction proceeds in three stages:
-
-* **Gram / internal-inverse-Gram contraction.**  The `∂²h`-block's internal `l`-sum
-  carries a factor `G^{kl}`; the outer chart Gram factor is `g_{kj}` (resp. `g_{ik}`).
-  Summing over `k` collapses the pair via `∑_k g_{kj} G^{kl} = δ^l_j`
-  (`sum_chartGram_mul_chartInvGram_self`).  This sets `l = j` (resp. `l = i`) in the
-  block.
-* **Symmetric-pair raising.**  The two terms `ξ_a t_{jb}` and `ξ_b t_{ja}` of the block,
-  contracted against the inverse-Gram trace factor `G^{ab}`, each become the
-  second-slot raised contraction `∑_l ξ^l t_{jl} = raisedFormContractionSnd`; the third
-  term `−ξ_l t_{ab}` becomes `−ξ_j · tr_g t` (`formMetricTrace`).
-* **Assembly.**  The two equal raised contractions and the `½` of the block combine into
-  the unit-coefficient gauge expression `ξ_d ∑_l ξ^l t_{m·} − ½ ξ_d ξ_m tr_g t`.
-
-The per-block contraction lemma is proved first; the closed-form theorem then assembles
-the two `k`-sum contractions and transports the chart-target Gram fields to the chart
-Gram matrices via the bridges. -/
 
 section ClosedForm
 
@@ -362,8 +319,6 @@ private lemma deTurckCorr_block_contraction (g : SmoothRiemannianMetric I M) (x 
             raisedFormContractionSnd (I := I) g x ξ t m -
         (1 / 2 : ℝ) * ((chartModelBasis E).repr ξ d * (chartModelBasis E).repr ξ m *
           formMetricTrace (I := I) g x t) := by
-  -- Stage 1.  For each `(a, b)`, pull the `k`-sum into the internal `l`-sum and contract
-  -- `∑_k g_{km} G^{kl} = δ^l_m`, collapsing the `l`-sum to its `l = m` term.
   have hstage1 : ∀ a b : Fin (Module.finrank ℝ E),
       ∑ k : Fin (Module.finrank ℝ E),
           chartGramMatrix (I := I) g x x k m *
@@ -385,7 +340,6 @@ private lemma deTurckCorr_block_contraction (g : SmoothRiemannianMetric I M) (x 
               (chartModelBasis E).repr ξ d * (chartModelBasis E).repr ξ m *
                 formComp (I := I) x t a b)) := by
     intro a b
-    -- Abbreviate the three-term bracket evaluated at the lower index `l`.
     set P : Fin (Module.finrank ℝ E) → ℝ := fun l =>
       (chartModelBasis E).repr ξ d * (chartModelBasis E).repr ξ a *
           formComp (I := I) x t l b +
@@ -424,9 +378,6 @@ private lemma deTurckCorr_block_contraction (g : SmoothRiemannianMetric I M) (x 
             rw [if_neg hl, zero_mul]
           · intro hm
             exact absurd (Finset.mem_univ m) hm
-  -- Stage 2.  Reorder the outer `k`-sum past the `(a, b)` double sum, apply `hstage1` to
-  -- each contracted block, then split the surviving three-term bracket and contract.
-  -- Reorder: `∑_k g_{km} ∑_{a,b} INNER = ∑_{a,b} ∑_k g_{km} INNER`.
   have reorder :
       (∑ k : Fin (Module.finrank ℝ E),
           chartGramMatrix (I := I) g x x k m *
@@ -484,7 +435,6 @@ private lemma deTurckCorr_block_contraction (g : SmoothRiemannianMetric I M) (x 
     refine Finset.sum_congr rfl (fun a _ => ?_)
     rw [Finset.sum_comm]
   rw [reorder]
-  -- Apply `hstage1` to contract the `∑_k g_{km}` block for each `(a, b)`.
   rw [show (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         ∑ k : Fin (Module.finrank ℝ E),
           chartGramMatrix (I := I) g x x k m *
@@ -509,8 +459,6 @@ private lemma deTurckCorr_block_contraction (g : SmoothRiemannianMetric I M) (x 
     refine Finset.sum_congr rfl (fun a _ => ?_)
     refine Finset.sum_congr rfl (fun b _ => ?_)
     exact hstage1 a b]
-  -- Factor out `½`, split the three-term bracket over the `(a, b)` double sum, and
-  -- contract each piece with `block_term_a` / `block_term_b` / `block_term_trace`.
   calc
     ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
           chartInvGramMatrix (I := I) g x x a b *
@@ -596,7 +544,6 @@ theorem deTurckCorrSymbolComp_eq_closedForm (g g' : SmoothRiemannianMetric I M) 
           raisedFormContractionSnd (I := I) g x ξ t i -
         (chartModelBasis E).repr ξ i * (chartModelBasis E).repr ξ j *
           formMetricTrace (I := I) g x t := by
-  -- Transport the chart-target Gram / inverse-Gram fields to the chart matrices.
   have hgram : ∀ k j' : Fin (Module.finrank ℝ E),
       chartGramOnE (I := I) g x k j' (extChartAt I x x) =
         chartGramMatrix (I := I) g x x k j' :=
@@ -605,8 +552,6 @@ theorem deTurckCorrSymbolComp_eq_closedForm (g g' : SmoothRiemannianMetric I M) 
       chartInvGramOnE (I := I) g x a b (extChartAt I x x) =
         chartInvGramMatrix (I := I) g x x a b :=
     fun a b => chartInvGramOnE_extChartAt_self (I := I) g x a b
-  -- One `k`-sum of the symbol, for a fixed lower index `d` and free upper index `m`,
-  -- transported to chart matrices and contracted by `deTurckCorr_block_contraction`.
   have hksum : ∀ d m : Fin (Module.finrank ℝ E),
       (∑ k : Fin (Module.finrank ℝ E),
           chartGramOnE (I := I) g x k m (extChartAt I x x) *
@@ -636,9 +581,6 @@ theorem deTurckCorrSymbolComp_eq_closedForm (g g' : SmoothRiemannianMetric I M) 
     refine congrArg _ ?_
     refine Finset.sum_congr rfl (fun l _ => ?_)
     rw [hinv k l]
-  -- The second `k`-sum of `deTurckCorrSymbolComp` carries the chart Gram factor in the
-  -- order `g_{ik}`; symmetry of the chart Gram matrix puts it into the order `g_{ki}`
-  -- expected by `hksum`.
   have hsecond :
       (∑ k : Fin (Module.finrank ℝ E),
           chartGramOnE (I := I) g x i k (extChartAt I x x) *
@@ -666,18 +608,10 @@ theorem deTurckCorrSymbolComp_eq_closedForm (g g' : SmoothRiemannianMetric I M) 
                         formComp (I := I) x t a b)) := by
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [chartGramOnE_symm (I := I) g x i k]
-  -- Contract each of the two `k`-sums of the symbol and assemble.
   rw [deTurckCorrSymbolComp_def, hsecond, hksum i j, hksum j i]
   ring
 
 end ClosedForm
-
-/-! ## Linearity of the symbol component in the input bilinear form
-
-The principal symbol is, by construction, an `ℝ`-linear endomorphism of the tensor fibre.
-We read the component-level linearity off the closed form: each of the three classical
-terms is linear in `t` (`raisedFormContractionSnd`, `formComp`, `formMetricTrace` are all
-linear in `t`), so their combination is. -/
 
 section Linearity
 
@@ -725,15 +659,6 @@ theorem deTurckCorrSymbolComp_smul (g g' : SmoothRiemannianMetric I M) (x : M) (
 
 end Linearity
 
-/-! ## Symmetry of the symbol component on a symmetric input
-
-The DeTurck-correction tensor is symmetric, and so is its principal symbol: on a
-symmetric input bilinear form `t` (`t v w = t w v`) the symbol component satisfies
-`σ_{ij}(ξ)(t) = σ_{ji}(ξ)(t)`.  From the closed form the `i ↔ j` swap interchanges the two
-raised-contraction terms `ξ_i ∑_l ξ^l t_{jl}` and `ξ_j ∑_l ξ^l t_{il}`, fixes the trace
-term `ξ_iξ_j tr_g t`, and the symmetry of `t` is not even needed — the gauge symbol is
-manifestly `(i, j)`-symmetric. -/
-
 section Symmetry
 
 /-- **The linearized-DeTurck-correction symbol component is `(i, j)`-symmetric.**
@@ -753,12 +678,6 @@ theorem deTurckCorrSymbolComp_symm (g g' : SmoothRiemannianMetric I M) (x : M) (
   ring
 
 end Symmetry
-
-/-! ## Independence of the background metric
-
-The substituted second-order part inherits the background-metric `g'`-independence of
-`chartDeTurckCorrPrincipalSymbolExpr`: the parameter `g'` is carried for signature
-uniformity only and never appears in the body of `deTurckCorrSymbolComp`. -/
 
 section BackgroundIndependence
 

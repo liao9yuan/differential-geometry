@@ -56,12 +56,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Geometric facts: closed-half-space portion of a ball
-
-Every with-boundary Morrey statement quantifies over `x, y` lying in the
-intersection `Metric.ball x₀ r ∩ closedHalfSpace`. This intersection is a subset
-of `Metric.ball x₀ r`, so we package the elementary subset relation explicitly. -/
-
 /-- The closed-half-space portion of an open ball is contained in the ball. -/
 theorem ball_inter_closedHalfSpace_subset_ball
     {x₀ : E} {r : ℝ} :
@@ -78,14 +72,6 @@ theorem ball_inter_closedHalfSpace_subset_closedHalfSpace
         DifferentialGeometry.Analysis.Sobolev.Euclidean.closedHalfSpace ⊆
       DifferentialGeometry.Analysis.Sobolev.Euclidean.closedHalfSpace :=
   inter_subset_right
-
-/-! ## Smooth-input half-space Morrey bounds
-
-For SMOOTH `u : E → ℝ`, the boundaryless smooth Morrey theorems apply on the
-full ball `Metric.ball x₀ R`. Their conclusions on the half-radius ball
-`Metric.ball x₀ (R / 2)` hold a fortiori on the closed-half-space portion
-`Metric.ball x₀ (R / 2) ∩ closedHalfSpace`, since the latter is a subset of
-the former. -/
 
 /-- **Smooth pair Hölder bound on the closed-half-space portion of a ball.**
 
@@ -165,13 +151,6 @@ theorem smooth_morrey_holder_modulus_halfSpace
   exact hbound (ball_inter_closedHalfSpace_subset_ball hx)
     (ball_inter_closedHalfSpace_subset_ball hy)
 
-/-! ## Uniform-in-`u` smooth half-space Morrey bounds
-
-These mirror `smooth_morrey_pair_bound_uniform` and
-`smooth_morrey_sup_bound_uniform`, with the constant `C` produced ahead of `u`
-and the conclusion restricted to the closed-half-space portion of the
-half-radius ball. -/
-
 /-- **Uniform-in-`u` smooth pair Hölder bound on the closed-half-space portion
 of a ball.** Strengthens `smooth_morrey_pair_bound_halfSpace` by quantifying the
 constant `C` ahead of `u`. -/
@@ -214,22 +193,6 @@ theorem smooth_morrey_sup_bound_uniform_halfSpace
   intro u hu x hx
   exact hbound hu x (ball_inter_closedHalfSpace_subset_ball hx)
 
-/-! ## `MemWkpHalfSpace` interior-ball Morrey
-
-For the Dirichlet-variant `MemWkpHalfSpace 1 p u Ω` predicate, the underlying
-weak-derivative theory is the boundaryless one on the open set
-`interiorHalfSpace Ω = Ω ∩ openHalfSpace`. When the ball `Metric.ball x₀ R`
-is fully contained in `interiorHalfSpace Ω`, every input/output of the
-boundaryless `morrey_holder_representative` carries through verbatim, and the
-restriction of the Hölder modulus to the closed-half-space portion of
-`Metric.ball x₀ (R / 4)` is automatic since the entire
-`Metric.ball x₀ (R / 4)` is already inside the open half-space (so a fortiori
-in the closed half-space).
-
-This is the **interior-ball case** of the with-boundary Morrey embedding. The
-boundary case requires an extension argument (e.g., even reflection) which is
-out of scope for the present module. -/
-
 /-- A ball strictly inside the open half-space is half-space-friendly:
 `Metric.ball x₀ R ⊆ openHalfSpace ⊆ closedHalfSpace`. -/
 theorem ball_subset_openHalfSpace_of_dist_pos
@@ -239,7 +202,6 @@ theorem ball_subset_openHalfSpace_of_dist_pos
       DifferentialGeometry.Analysis.Sobolev.Euclidean.openHalfSpace := by
   intro y hy
   rw [Metric.mem_ball, dist_eq_norm] at hy
-  -- |y 0 - x₀ 0| ≤ ‖y - x₀‖ < R, so y 0 > x₀ 0 - R ≥ 0.
   have h_proj : |y 0 - x₀ 0| ≤ ‖y - x₀‖ := by
     have h_eq : |y 0 - x₀ 0| = |(y - x₀) 0| := by
       simp [PiLp.sub_apply]
@@ -314,15 +276,11 @@ theorem morrey_holder_representative_halfSpace_interior
             DifferentialGeometry.Analysis.Sobolev.Euclidean.closedHalfSpace,
         ‖ũ x - ũ y‖ ≤ C * (dist x y) ^ (1 - (d : ℝ) / p) * G) := by
   classical
-  -- Unused but needed to ensure the half-space-friendly hypothesis is recorded.
   have _ := hΩ
-  -- The ball `Metric.ball x₀ R` lies inside `interiorHalfSpace Ω`, an open set.
   have h_ball_sub_int :
       Metric.ball x₀ R ⊆
         DifferentialGeometry.Analysis.Sobolev.Euclidean.interiorHalfSpace Ω :=
     ball_subset_interiorHalfSpace_of_dist_pos hx₀ h_ball_sub
-  -- `MemWkpHalfSpace 1 p u Ω` unfolds to `MemWkp 1 p u (interiorHalfSpace Ω)`.
-  -- And `MemWkp 1 p ↔ DeGiorgi.MemW1p p`.
   have h_memW1p :
       DeGiorgi.MemW1p (ENNReal.ofReal p) u
         (DifferentialGeometry.Analysis.Sobolev.Euclidean.interiorHalfSpace Ω) := by
@@ -331,19 +289,14 @@ theorem morrey_holder_representative_halfSpace_interior
         (DifferentialGeometry.Analysis.Sobolev.Euclidean.interiorHalfSpace Ω) :=
       hu
     exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p).mp h_unfold
-  -- Get a witness on the interior part.
   let hw_int : DeGiorgi.MemW1pWitness (ENNReal.ofReal p) u
       (DifferentialGeometry.Analysis.Sobolev.Euclidean.interiorHalfSpace Ω) :=
     h_memW1p.someWitness
-  -- Restrict to the ball `Metric.ball x₀ R`, which is open and inside the
-  -- interior part.
   have h_ball_open : IsOpen (Metric.ball x₀ R) := Metric.isOpen_ball
   let hw_ball : DeGiorgi.MemW1pWitness (ENNReal.ofReal p) u (Metric.ball x₀ R) :=
     DeGiorgi.MemW1pWitness.restrict h_ball_open h_ball_sub_int hw_int
-  -- Apply boundaryless Morrey Hölder representative on the ball.
   obtain ⟨ũ, CHolder, hũ_cont, hC_nn, h_ae, h_holder⟩ :=
     morrey_holder_representative (d := d) hp hR hw_ball
-  -- Use the gradient L^p norm on the ball as the controlling quantity.
   set G : ℝ := (eLpNorm (fun z => ‖hw_ball.weakGrad z‖) (ENNReal.ofReal p)
     (volume.restrict (Metric.ball x₀ R))).toReal with hG_def
   have hG_nn : 0 ≤ G := ENNReal.toReal_nonneg
@@ -406,7 +359,6 @@ theorem morrey_sup_bound_halfSpace_interior
   have hG_nn : 0 ≤ G := ENNReal.toReal_nonneg
   refine ⟨ũ, CSup, Nu, G, hũ_cont, hC_nn, hNu_nn, hG_nn, h_ae, ?_⟩
   intro x hx
-  -- Convert the sum-then-toReal form to (Nu + G).
   have h_u_finite : eLpNorm u (ENNReal.ofReal p)
       (volume.restrict (Metric.ball x₀ R)) ≠ ⊤ := hw_ball.memLp.eLpNorm_ne_top
   have h_grad_finite : eLpNorm (fun z => ‖hw_ball.weakGrad z‖) (ENNReal.ofReal p)

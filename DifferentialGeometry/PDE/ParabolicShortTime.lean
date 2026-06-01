@@ -66,8 +66,6 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Section A — Predicates -/
-
 /-- A smooth family of Riemannian metrics `g_fam : ℝ → SmoothRiemannianMetric I M`
 solves the quasi-linear parabolic PDE `∂_t g(t) = F(g(t))` on the time interval
 `[0, T)` with initial value `g₀`, when the time derivative of the underlying
@@ -131,8 +129,6 @@ def IsSmoothQuasilinearMetricRHS
         (chartAt H α).source)
     ∧ ∀ g : SmoothRiemannianMetric I M, IsStrictlyParabolicMetricRHS F g
 
-/-! ## Section B — The Phase 7 → Phase 8 endpoint (skeleton) -/
-
 /-- **Short-time existence for a strictly parabolic quasi-linear PDE on smooth
 Riemannian metrics over a closed manifold.**
 
@@ -158,11 +154,7 @@ theorem quasilinear_parabolic_metric_short_time_existence
     (_hSmooth : IsSmoothQuasilinearMetricRHS (I := I) F) :
     ∃ T : ℝ, ∃ g_fam : ℝ → SmoothRiemannianMetric I M,
       IsQuasilinearMetricParabolicSolution (I := I) F g₀ T g_fam := by
-  -- Skeleton: actual proof composes the linearisation, the linear-tensor
-  -- existence below, and the abstract `semilinear_mild_solution_existence`.
   sorry
-
-/-! ## Section C — Auxiliary: linear inhomogeneous tensor heat equation -/
 
 /-- A predicate stating that `u : ℝ → TensorL2 r s g` is the mild Duhamel solution
 of the linear inhomogeneous tensor heat equation `∂_t u + L u = F(t)` with initial
@@ -199,33 +191,16 @@ theorem linear_tensor_parabolic_shortTime_exists
     (F : ℝ → X) (hF : Continuous F) :
     ∃ T : ℝ, ∃ u : ℝ → X,
       IsLinearTensorParabolicMildSolution S u₀ F T u := by
-  -- The Duhamel formula directly produces the mild solution; no Banach
-  -- fixed point is needed in the purely linear case. Pick any positive
-  -- existence time; `T := 1` suffices.
   refine ⟨1, Analysis.Parabolic.QuasiLinear.duhamel S u₀ F, ?_, ?_, ?_, ?_⟩
   · exact zero_lt_one
   · exact Analysis.Parabolic.QuasiLinear.duhamel_zero S u₀ F
-  · -- Continuity on `[0, 1]` from continuity on `[0, ∞)` by restriction.
-    have h_cont :
+  · have h_cont :
         ContinuousOn (Analysis.Parabolic.QuasiLinear.duhamel S u₀ F)
           (Set.Ici (0 : ℝ)) :=
       Analysis.Parabolic.QuasiLinear.duhamel_continuousOn S u₀ hF
     exact h_cont.mono (Set.Icc_subset_Ici_self)
-  · -- The Duhamel integral identity is `rfl` against the definition.
-    intro t _
+  · intro t _
     rfl
-
-/-! ## Section D — Composition note
-
-The skeleton's two `theorem`s are deliberately *both* stubbed at the
-predicate-free public surface; the abstract existence machinery in
-`Analysis/Parabolic/QuasiLinear/Existence.lean::semilinear_mild_solution_existence`
-(which is fully proved, no `sorry`) gives the underlying Duhamel /
-Banach-fixed-point argument. To close `linear_tensor_parabolic_shortTime_exists`
-the open work is purely the existing-infrastructure lift to a
-predicate-free statement; `quasilinear_parabolic_metric_short_time_existence`
-additionally needs the linearisation + Banach fixed-point assembly. Both
-are tracked downstream of Route Y completion. -/
 
 end PDE
 end DifferentialGeometry

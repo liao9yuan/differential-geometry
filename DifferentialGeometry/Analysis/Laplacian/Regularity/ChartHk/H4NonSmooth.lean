@@ -84,16 +84,12 @@ open DifferentialGeometry.Analysis.Laplacian.ChartH2NonSmooth
 open DifferentialGeometry.Analysis.Laplacian.ChartH3NonSmooth
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Headline: per-chart H⁴ regularity from iterated differentiated data -/
 
 /-- **Per-chart `H⁴` regularity for `u_chart` via iterated differentiated
 chart-bilinear data and uniform difference-quotient bounds.**
@@ -201,8 +197,6 @@ theorem h4_chart_loc_explicit_iterated
         (D₂.weak_partial i) Ω'' ∧
       eLpNorm g_ik 2 ((volume : Measure EuclN).restrict Ω'') ≤
         ENNReal.ofReal (M_bound i k) := by
-  -- Reduce to the headline (the chain hypotheses are documentation; the
-  -- regularity follows from D₂ alone).
   let _ := D₀
   let _ := D₀_l
   let _ := D₁

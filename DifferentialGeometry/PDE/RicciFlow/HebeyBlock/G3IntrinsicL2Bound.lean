@@ -101,22 +101,11 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## Off-baseset vanishing
-
-The `Bundle.Trivialization.symmL` function evaluates to `0` off the
-trivialisation base set, so `trivFromE α b = 0` (as a CLM) for
-`b ∉ chartAt H α .source`. Composing with `christoffelCorrection` therefore
-makes `chartLeviCivitaParallelCLM g α b X v = 0` off the chart `α` base
-set. -/
-
 private lemma trivFromE_apply_eq_zero_of_notMem_baseSet
     (α : M) {b : M} (hb : b ∉ (trivializationAt E (TangentSpace I) α).baseSet)
     (w : E) :
     trivFromE (I := I) α b w = 0 := by
   classical
-  -- `trivFromE α b = (trivializationAt E (TangentSpace I) α).symmL ℝ b` and
-  -- `Trivialization.symmL_apply e b w = e.symm b w`. Off the base set,
-  -- `e.symm b w = 0` by `Trivialization.symm_apply_of_notMem`.
   change (trivializationAt E (TangentSpace I) α).symmL ℝ b w = 0
   rw [Bundle.Trivialization.symmL_apply]
   exact Bundle.Trivialization.symm_apply_of_notMem
@@ -131,25 +120,12 @@ private lemma chartLeviCivitaParallelCLM_apply_eq_zero_of_notMem_baseSet
   rw [chartLeviCivitaParallelCLM_apply]
   exact trivFromE_apply_eq_zero_of_notMem_baseSet (I := I) α hb _
 
-/-! ## Closed-form decomposition of the Christoffel-correction tangent
-vector along the chart-frame chartBasisVec
-
-For a chart-frame direction `m, k`, the expression
-`chartLeviCivitaParallelCLM g α b (chartBasisVecFiber α m)
-  (chartBasisVecFiber α k b)` equals
-`Σ_p chartChristoffel g α k m p (extChartAt I α b) • chartBasisVecFiber α p b`
-on the chart `α` base set. Both the input and the evaluation vector are
-basis vectors after applying `trivToE`, collapsing the triple sum in
-`christoffelCorrection_apply` to a single sum over the output index `p`. -/
-
 private lemma trivToE_chartBasisVecFiber_eq_chartModelBasis
     (α : M) (m : Fin (Module.finrank ℝ E)) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
     trivToE (I := I) α b (chartBasisVecFiber (I := I) α m b) =
       (chartModelBasis E) m := by
   classical
-  -- `chartBasisVecFiber α m b = trivFromE α b (chartModelBasis E m)` by
-  -- definition; round-trip `trivToE ∘ trivFromE = id` on the base set.
   change trivToE (I := I) α b
       (trivFromE (I := I) α b (chartModelBasis E m)) = _
   exact trivToE_trivFromE (I := I) α hb _
@@ -166,9 +142,6 @@ private lemma chartLeviCivitaParallelCLM_chartBasisVec_apply_chartBasisVec_eq_su
           chartBasisVecFiber (I := I) α p b := by
   classical
   rw [chartLeviCivitaParallelCLM_apply]
-  -- Identify `trivToE α b (chartBasisVecFiber α k b) = chartModelBasis E k`
-  -- and `trivToE α b (chartBasisVecFiber α m b) = chartModelBasis E m`.
-  -- The `christoffelCorrection_apply` formula then collapses to a single sum.
   have hX_id :
       trivToE (I := I) α b (chartBasisVecFiber (I := I) α m b) =
         (chartModelBasis E) m :=
@@ -178,21 +151,7 @@ private lemma chartLeviCivitaParallelCLM_chartBasisVec_apply_chartBasisVec_eq_su
         (chartModelBasis E) k :=
     trivToE_chartBasisVecFiber_eq_chartModelBasis (I := I) α k hb
   rw [christoffelCorrection_apply]
-  -- The triple sum
-  --   `Σ_{i,j,k} (repr (trivToE v) i) (repr Y j) Γ_{ij}^p • (chartModelBasis E) k`
-  -- collapses since `repr (chartModelBasis E) m i = δ_{i,m}` and similarly
-  -- `repr (chartModelBasis E) k j = δ_{j,k}` (after renaming the outer index).
-  -- Notation: in `christoffelCorrection`, the outer sum index `i` runs over
-  -- `repr (trivToE α b v) i = repr (chartModelBasis E k) i = δ_{i,k}`,
-  -- and `j` runs over `repr Y j = repr (chartModelBasis E m) j = δ_{j,m}`.
-  -- The remaining sum is over `k` (renamed `p` here, since `k` is taken).
   rw [hv_id, hX_id]
-  -- The Christoffel correction expansion is `∑_{i j p}` (with index symbols).
-  -- Pull the `trivFromE α b` map through the outer two collapsed sums.
-  -- Apply `trivFromE α b` to each summand (after the collapse to one sum).
-  -- We do the collapse explicitly via `Finset.sum_eq_single`.
-  -- Step 1: extract the `i = k` term in the outer sum.
-  -- `(chartModelBasis E).repr (chartModelBasis E k) i = if i = k then 1 else 0`.
   have hrepr_v : ∀ i : Fin (Module.finrank ℝ E),
       ((chartModelBasis E).repr (chartModelBasis E k)) i =
         if i = k then (1 : ℝ) else 0 := by
@@ -201,7 +160,6 @@ private lemma chartLeviCivitaParallelCLM_chartBasisVec_apply_chartBasisVec_eq_su
     by_cases hi : i = k
     · subst hi; simp
     · simp [hi]
-  -- `(chartModelBasis E).repr (chartModelBasis E m) j = if j = m then 1 else 0`.
   have hrepr_Y : ∀ j : Fin (Module.finrank ℝ E),
       ((chartModelBasis E).repr (chartModelBasis E m)) j =
         if j = m then (1 : ℝ) else 0 := by
@@ -210,19 +168,7 @@ private lemma chartLeviCivitaParallelCLM_chartBasisVec_apply_chartBasisVec_eq_su
     by_cases hj : j = m
     · subst hj; simp
     · simp [hj]
-  -- Now `trivFromE α b` of the triple sum.  Apply `trivFromE α b` to the
-  -- explicit sum form of `christoffelCorrection_apply` and use `map_sum`,
-  -- `map_smul` to push it inside, then collapse the two delta sums.
-  -- Goal (after rfl + intros) is
-  --   `trivFromE α b (Σ_{i j p} ...) =
-  --      Σ_p (Γ_{km}^p (extChartAt I α b)) • chartBasisVecFiber α p b`.
   rw [map_sum]
-  -- Inner: Σ_i, distribute `trivFromE α b` over `Σ_j`.
-  -- Each summand: `trivFromE α b (Σ_{j p} (repr(δ_k) i * repr(δ_m) j * Γ_{ij}^p) • e_p)`.
-  -- Rewrite each `i`-summand.  Use `map_sum` again to pull `trivFromE` into the j-sum.
-  -- Then expand `repr(δ_k) i`, `repr(δ_m) j` via the delta formulas and apply
-  -- `Finset.sum_ite_eq` / `Finset.sum_ite_eq'`.
-  -- For clarity we proceed step by step using `Finset.sum_eq_single`.
   have h_outer :
       ∀ i : Fin (Module.finrank ℝ E),
         trivFromE (I := I) α b
@@ -242,9 +188,7 @@ private lemma chartLeviCivitaParallelCLM_chartBasisVec_apply_chartBasisVec_eq_su
     by_cases hik : i = k
     · subst hik
       rw [if_pos rfl]
-      -- The j-sum collapses to j = m.
       rw [map_sum]
-      -- Now goal is `Σ_j trivFromE α b (Σ_p ...) = Σ_p ...`.
       have hj_eq :
           ∀ j : Fin (Module.finrank ℝ E),
             trivFromE (I := I) α b
@@ -287,12 +231,8 @@ private lemma chartLeviCivitaParallelCLM_chartBasisVec_apply_chartBasisVec_eq_su
             simp
           exact h_sum_zero
       rw [Finset.sum_congr rfl (fun j _ => hj_eq j)]
-      -- Now sum: Σ_j (if j = m then ... else 0) = (the m-summand).
-      -- The branch body no longer depends on `j` (it was substituted to `m`),
-      -- so we use `Finset.sum_ite_eq'` via `simp` to avoid pattern brittleness.
       simp only [Finset.sum_ite_eq', Finset.mem_univ, if_true]
     · rw [if_neg hik]
-      -- All inner summands are 0 since `repr (chartModelBasis E k) i = 0`.
       rw [map_sum]
       refine Finset.sum_eq_zero ?_
       intro j _
@@ -303,22 +243,10 @@ private lemma chartLeviCivitaParallelCLM_chartBasisVec_apply_chartBasisVec_eq_su
       rw [hrepr_v i, if_neg hik]
       simp
   rw [Finset.sum_congr rfl (fun i _ => h_outer i)]
-  -- The branch body no longer depends on `i` (it was substituted to `k`),
-  -- so we use `Finset.sum_ite_eq'` via `simp only` to avoid pattern brittleness
-  -- (and to avoid `simp` unfolding `chartBasisVecFiber`).
   simp only [Finset.sum_ite_eq', Finset.mem_univ, if_true]
-  -- Identify `trivFromE α b (chartModelBasis E p) = chartBasisVecFiber α p b`.
   refine Finset.sum_congr rfl ?_
   intro p _
   rfl
-
-/-! ## Pointwise `g`-inner-product bound on the chart base set
-
-The squared `g`-norm of `Φ_b k = chartLeviCivitaParallelCLM g α b
-(chartBasisVecFiber α k) (chartBasisVecFiber α k b)` expands as
-`Σ_{p,q} Γ_{kk}^p Γ_{kk}^q · chartGramMatrix g α b p q`, a finite bilinear
-sum bounded uniformly on the partition-of-unity support by the product
-of Christoffel-sup² and Gram-sup. -/
 
 /-- Bilinear expansion: `g.inner b (∑_p a p • e_p) (∑_q a q • e_q) =
 ∑_p ∑_q (a p · a q) · chartGramMatrix g α b p q`. -/
@@ -333,7 +261,6 @@ private lemma g_inner_sum_smul_chartBasisVec_self_eq_double_sum
         ∑ q : Fin (Module.finrank ℝ E),
           a p * a q * chartGramMatrix (I := I) g α b p q := by
   classical
-  -- Left linearity: pull `Σ p, a p • ·` out of the first argument of `g.inner b`.
   have h_left :
       g.inner b (∑ p, a p • chartBasisVecFiber (I := I) α p b) =
         ∑ p, a p • g.inner b (chartBasisVecFiber (I := I) α p b) := by
@@ -342,13 +269,10 @@ private lemma g_inner_sum_smul_chartBasisVec_self_eq_double_sum
     intro p _
     rw [map_smul]
   rw [h_left]
-  -- Apply the sum of CLMs to the second argument.
   rw [ContinuousLinearMap.sum_apply]
   refine Finset.sum_congr rfl ?_
   intro p _
-  -- Goal: `(a p • g.inner b (e_p)) (Σ q, a q • e_q) = Σ q, a p * a q * gram p q`.
   rw [ContinuousLinearMap.smul_apply, smul_eq_mul]
-  -- Right linearity: pull `Σ q, a q • ·` out of the second argument.
   rw [map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl ?_
   intro q _
@@ -378,8 +302,6 @@ private lemma g_inner_Phi_eq_double_sum
   exact g_inner_sum_smul_chartBasisVec_self_eq_double_sum (I := I) (M := M) g α b
     (fun p => chartChristoffel (I := I) g α k k p (extChartAt I α b))
 
-/-! ## Pointwise bound on the partition-of-unity support -/
-
 /-- Uniform sup bound on `g.inner b Φ_b k Φ_b k` over `tsupport(POU_α)`,
 the chart-`α` partition-of-unity support, where
 `Φ_b k := chartLeviCivitaParallelCLM g α b (chartBasisVecFiber α k)
@@ -403,12 +325,8 @@ private theorem g_inner_chartLeviCivitaParallelCLM_chartBasisVec_self_le_const_o
               (chartBasisVecFiber (I := I) α k)
               (chartBasisVecFiber (I := I) α k b)) ≤ K := by
   classical
-  -- Christoffel sup on the chart image of the POU support.
   obtain ⟨CΓ, hCΓ_nn, hCΓ_le⟩ :=
     chartChristoffel_bdd_on_pou_tsupport (I := I) (M := M) g α
-  -- Gram-matrix entry sup on the POU support (compact ⊆ chart source).
-  -- We use the pointwise bound `|chartGramMatrix g α b p q| ≤ C_G` for each
-  -- pair (p, q), then take the maximum over the finite index pairs.
   set K_M : Set M := tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) with hK_M_def
   have hK_M_compact : IsCompact K_M :=
@@ -417,7 +335,6 @@ private theorem g_inner_chartLeviCivitaParallelCLM_chartBasisVec_self_le_const_o
   have hK_M_sub : K_M ⊆ (chartAt H α).source := by
     intro b hb
     exact (DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M) α hb
-  -- Per `(p, q)`, get the sup bound; take the maximum over the finite product.
   have h_gram_each : ∀ p q : Fin (Module.finrank ℝ E),
       ∃ Cpq : ℝ, 0 < Cpq ∧ ∀ b ∈ K_M,
         |chartGramMatrix (I := I) g α b p q| ≤ Cpq := by
@@ -426,7 +343,6 @@ private theorem g_inner_chartLeviCivitaParallelCLM_chartBasisVec_self_le_const_o
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartGramMatrix_entry_isBounded_on_compact
         (I := I) (M := M) g α p q hK_M_compact hK_M_sub
   choose Cpq_fn hCpq_pos hCpq_le using h_gram_each
-  -- A single sup `C_G` over all `(p, q)` pairs.
   set s : Finset (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)) :=
     Finset.univ with hs_def
   have hs_ne : s.Nonempty := by
@@ -445,26 +361,18 @@ private theorem g_inner_chartLeviCivitaParallelCLM_chartBasisVec_self_le_const_o
     refine (hCpq_le p q b hb).trans ?_
     have hpq_mem : (p, q) ∈ s := Finset.mem_univ _
     exact Finset.le_sup' (fun pq => Cpq_fn pq.1 pq.2) hpq_mem
-  -- Final constant: `K := n² · CΓ² · C_G` where `n = Module.finrank ℝ E`.
   refine ⟨(Module.finrank ℝ E : ℝ) ^ 2 * CΓ ^ 2 * C_G, by positivity, ?_⟩
   intro b hb
-  -- `b ∈ K_M = tsupport POU_α ⊆ baseSet`.
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [DifferentialGeometry.Integral.Measure.trivializationAt_baseSet_eq_chartAt_source]
     exact hK_M_sub hb
-  -- `extChartAt I α b ∈ image of tsupport POU_α` (the chart-image set used
-  -- by `chartChristoffel_bdd_on_pou_tsupport`).
   have hb_in_chartImage :
       extChartAt I α b ∈ (extChartAt I α) '' K_M := by
     exact ⟨b, hb, rfl⟩
-  -- The pointwise Christoffel sup bound at `extChartAt I α b`.
   have hCΓ_at : ∀ i j p : Fin (Module.finrank ℝ E),
       |chartChristoffel (I := I) g α i j p (extChartAt I α b)| ≤ CΓ :=
     fun i j p => hCΓ_le (extChartAt I α b) hb_in_chartImage i j p
-  -- Algebraic chain.
   rw [g_inner_Phi_eq_double_sum (I := I) (M := M) g α hb_base k]
-  -- Now goal: Σ_{p,q} Γ_{kk}^p · Γ_{kk}^q · gram p q ≤ K.
-  -- Step 1: Triangle inequality on the double sum.
   have h_tri :
       |∑ p : Fin (Module.finrank ℝ E),
           ∑ q : Fin (Module.finrank ℝ E),
@@ -478,7 +386,6 @@ private theorem g_inner_chartLeviCivitaParallelCLM_chartBasisVec_self_le_const_o
               chartGramMatrix (I := I) g α b p q| :=
     (Finset.abs_sum_le_sum_abs _ _).trans
       (Finset.sum_le_sum (fun p _ => Finset.abs_sum_le_sum_abs _ _))
-  -- Per-summand bound: each |Γ · Γ · gram| ≤ CΓ · CΓ · C_G.
   have h_per : ∀ p q : Fin (Module.finrank ℝ E),
       |chartChristoffel (I := I) g α k k p (extChartAt I α b) *
         chartChristoffel (I := I) g α k k q (extChartAt I α b) *
@@ -501,7 +408,6 @@ private theorem g_inner_chartLeviCivitaParallelCLM_chartBasisVec_self_le_const_o
     have hG_nn : 0 ≤ |chartGramMatrix (I := I) g α b p q| := abs_nonneg _
     have hΓp_nn : 0 ≤ |chartChristoffel (I := I) g α k k p (extChartAt I α b)| :=
       abs_nonneg _
-    -- Two-step mul_le_mul: bound each factor.
     have h_step1 :
         |chartChristoffel (I := I) g α k k p (extChartAt I α b)| *
           |chartChristoffel (I := I) g α k k q (extChartAt I α b)| ≤
@@ -518,9 +424,7 @@ private theorem g_inner_chartLeviCivitaParallelCLM_chartBasisVec_self_le_const_o
           |chartGramMatrix (I := I) g α b p q| ≤
         (CΓ * CΓ) * C_G :=
       mul_le_mul h_step1 hG hG_nn h_step1_nn
-    -- Note CΓ * CΓ = CΓ ^ 2 and we want CΓ * CΓ * C_G.
     exact h_step2
-  -- Sum the per-summand bounds.
   have h_dbl_sum_le :
       (∑ p : Fin (Module.finrank ℝ E),
           ∑ q : Fin (Module.finrank ℝ E),
@@ -564,7 +468,6 @@ private theorem g_inner_chartLeviCivitaParallelCLM_chartBasisVec_self_le_const_o
       rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin]
       simp [nsmul_eq_mul]
     linarith
-  -- Combine triangle + per-summand bound; rearrange RHS to match the constant.
   have h_abs_le_self :
       ∑ p : Fin (Module.finrank ℝ E),
           ∑ q : Fin (Module.finrank ℝ E),
@@ -581,8 +484,6 @@ private theorem g_inner_chartLeviCivitaParallelCLM_chartBasisVec_self_le_const_o
       (Module.finrank ℝ E : ℝ) * ((Module.finrank ℝ E : ℝ) * (CΓ * CΓ * C_G)) =
         (Module.finrank ℝ E : ℝ) ^ 2 * CΓ ^ 2 * C_G := by ring
   linarith
-
-/-! ## Global pointwise bound: pou-weighted integrand uniformly bounded -/
 
 /-- Pointwise bound: `chartAtlasPOU I M α b · √(g.inner b Φ_b Φ_b) ≤ √K`
 globally on `M`, where
@@ -624,15 +525,12 @@ private theorem chartAtlasPOU_mul_sqrt_g_inner_Phi_le_sqrt_const_globally
     rw [hq_b_def]
     exact DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg
       (I := I) (M := M) g b Φ_b
-  -- POU values are in [0, 1] (canonical chart atlas POU).
   have hρ_b_nn : 0 ≤ ρ_b := by
     rw [hρ_b_def]
     exact (chartAtlasPOU I M).nonneg α b
-  -- We split on whether `b ∈ tsupport POU_α`.
   by_cases hb : b ∈ tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
-  · -- On the POU support: pointwise sup bound on `q_b`, ρ_b ≤ 1.
-    have hρ_b_le_one : ρ_b ≤ 1 := by
+  · have hρ_b_le_one : ρ_b ≤ 1 := by
       rw [hρ_b_def]
       exact (chartAtlasPOU I M).le_one α b
     have hq_b_le : q_b ≤ K := by
@@ -640,7 +538,6 @@ private theorem chartAtlasPOU_mul_sqrt_g_inner_Phi_le_sqrt_const_globally
       exact h_pt b hb
     have hsqrt_q_b : Real.sqrt q_b ≤ Real.sqrt K := Real.sqrt_le_sqrt hq_b_le
     have hsqrt_K_nn : 0 ≤ Real.sqrt K := Real.sqrt_nonneg _
-    -- ρ_b · sqrt(q_b) ≤ 1 · sqrt(K) = sqrt(K).
     calc ρ_b * Real.sqrt q_b
         ≤ 1 * Real.sqrt K := by
           have h_factor : ρ_b * Real.sqrt q_b ≤ 1 * Real.sqrt q_b :=
@@ -649,34 +546,13 @@ private theorem chartAtlasPOU_mul_sqrt_g_inner_Phi_le_sqrt_const_globally
             mul_le_mul_of_nonneg_left hsqrt_q_b zero_le_one
           linarith
       _ = Real.sqrt K := by ring
-  · -- Off the POU support: ρ_b = 0 (since `b ∉ tsupport ρ`), so the product is 0.
-    have hρ_b_zero : ρ_b = 0 := by
+  · have hρ_b_zero : ρ_b = 0 := by
       rw [hρ_b_def]
       exact image_eq_zero_of_notMem_tsupport hb
     rw [hρ_b_zero]
     have : (0 : ℝ) * Real.sqrt q_b = 0 := by ring
     rw [this]
     exact Real.sqrt_nonneg _
-
-/-! ## Headline: intrinsic `L²` bound on the G3 Christoffel atom
-
-For a closed (compact, boundaryless) Riemannian manifold `(M, g)`, ranks
-`(r, s) : ℕ × ℕ`, a chart base point `α : M`, and a chart-frame direction
-`k`, the `L²` norm of the partition-of-unity-weighted square-root of
-`g.inner b Φ_b Φ_b` (with `Φ_b := chartLeviCivitaParallelCLM g α b
-(chartBasisVecFiber α k) (chartBasisVecFiber α k b)`) is bounded uniformly
-by `ENNReal.ofReal C · ENNReal.ofReal ‖S‖ + ENNReal.ofReal C₀`, where the
-two constants depend only on `(g, α, k, atlas)`. The integrand is
-S-independent so we deliver the strict S-independent bound `≤ ENNReal.ofReal C₀`
-and offer the S-product wrapper as a separate corollary.
-
-The constant `C₀` is `μ_g(M)^{1/2} · √K`, where `K` is the pointwise
-bound from `g_inner_chartLeviCivitaParallelCLM_chartBasisVec_self_le_const_on_pouTsupport`
-and `μ_g(M)` is finite by `riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace`.
-
-The proof uses `MeasureTheory.eLpNorm_le_of_ae_bound`, which translates a
-pointwise `‖·‖ ≤ C` bound into the headline `eLpNorm ≤ μ(univ)^{1/p} ·
-ENNReal.ofReal C` bound. -/
 
 /-- **Intrinsic `L²` bound on the partition-of-unity-weighted square-root
 of the `g`-norm-squared of the Christoffel-correction tangent vector
@@ -705,7 +581,6 @@ theorem chartAtlasPOU_mul_sqrt_g_inner_chartLeviCivitaParallelCLM_chartBasisVec_
   obtain ⟨K, hK_nn, h_pt⟩ :=
     chartAtlasPOU_mul_sqrt_g_inner_Phi_le_sqrt_const_globally
       (I := I) (M := M) g α k
-  -- The integrand is `≥ 0` pointwise, so `‖x‖ = x` and the bound `‖x‖ ≤ √K` holds.
   set f : M → ℝ := fun b =>
     ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
       Real.sqrt
@@ -727,7 +602,6 @@ theorem chartAtlasPOU_mul_sqrt_g_inner_chartLeviCivitaParallelCLM_chartBasisVec_
     intro b
     rw [h_norm_eq b, hf_def]
     exact h_pt b
-  -- Apply `eLpNorm_le_of_ae_bound`.
   have h_eLpNorm_bound :
       eLpNorm f 2 (riemannianVolumeMeasure (I := I) (M := M) g) ≤
         (riemannianVolumeMeasure (I := I) (M := M) g
@@ -736,17 +610,14 @@ theorem chartAtlasPOU_mul_sqrt_g_inner_chartLeviCivitaParallelCLM_chartBasisVec_
     MeasureTheory.eLpNorm_le_of_ae_bound
       (μ := riemannianVolumeMeasure (I := I) (M := M) g) (f := f)
       (C := Real.sqrt K) (Filter.Eventually.of_forall h_pt')
-  -- The measure of `univ` is finite; introduce a closed form for the constant.
   set μM_univ : ℝ≥0∞ := riemannianVolumeMeasure (I := I) (M := M) g Set.univ
     with hμM_univ_def
   have hμM_univ_lt_top : μM_univ < ⊤ := by
     rw [hμM_univ_def]
     exact (measure_lt_top (riemannianVolumeMeasure (I := I) (M := M) g) Set.univ)
-  -- Rephrase the measure factor as `ENNReal.ofReal` of its real value.
   set μM_real : ℝ := μM_univ.toReal with hμM_real_def
   have hμM_real_nn : 0 ≤ μM_real := by
     rw [hμM_real_def]; exact ENNReal.toReal_nonneg
-  -- `μM_univ ^ (2.toReal⁻¹) = ENNReal.ofReal (μM_real ^ (1/2))` because `μM_univ < ⊤`.
   have h_two_toReal : (2 : ℝ≥0∞).toReal = (2 : ℝ) := by simp
   have h_inv : (2 : ℝ≥0∞).toReal⁻¹ = (1 / 2 : ℝ) := by rw [h_two_toReal]; norm_num
   have hμM_univ_rpow_eq :
@@ -757,7 +628,6 @@ theorem chartAtlasPOU_mul_sqrt_g_inner_chartLeviCivitaParallelCLM_chartBasisVec_
       exact (ENNReal.ofReal_toReal hμM_univ_lt_top.ne).symm
     rw [h_ofReal_back]
     rw [ENNReal.ofReal_rpow_of_nonneg hμM_real_nn (by norm_num : (0 : ℝ) ≤ 1 / 2)]
-  -- Compose: total bound = `ENNReal.ofReal (μM_real^(1/2) · √K)`.
   set C : ℝ := μM_real ^ ((1 / 2 : ℝ)) * Real.sqrt K with hC_def
   have hC_nn : 0 ≤ C := by
     rw [hC_def]
@@ -766,15 +636,7 @@ theorem chartAtlasPOU_mul_sqrt_g_inner_chartLeviCivitaParallelCLM_chartBasisVec_
   refine h_eLpNorm_bound.trans ?_
   rw [hμM_univ_rpow_eq]
   rw [hC_def]
-  -- `ENNReal.ofReal a * ENNReal.ofReal b = ENNReal.ofReal (a * b)` for `a, b ≥ 0`.
   rw [ENNReal.ofReal_mul (Real.rpow_nonneg hμM_real_nn _)]
-
-/-! ## User-facing form: parametrise by `SmoothCcTensorH1`
-
-Some downstream consumers expect the bound packaged as an `∀ S` statement,
-with the constant uniform in `S`. Since the integrand is S-independent,
-the same `C` works for every `S`. We include this wrapper for API
-uniformity with the existing G2/G4 atom bounds. -/
 
 /-- **G3 intrinsic L² bound (parametric form).** For ranks `(r, s)`, the
 `L²` norm of the partition-of-unity-weighted square-root of `g.inner b Φ_b Φ_b`
@@ -802,29 +664,8 @@ theorem g3_christoffel_atom_eLpNorm_le_uniform_intrinsic_pou
           (riemannianVolumeMeasure (I := I) (M := M) g) ≤
         ENNReal.ofReal C := by
   classical
-  -- The per-`(α, k)` bound is provided by the foundational theorem; aggregate
-  -- over the (finite) active chart-atlas POU finset to get a single `C`
-  -- uniform in `(α, k)`. Off the active finset, `chartAtlasPOU I M α b = 0`
-  -- pointwise, so the integrand is `0` and the `eLpNorm` is `0`.
-  --
-  -- Since `Fin (Module.finrank ℝ E)` is finite and the active finset is
-  -- finite, we can take the sum of the per-(α, k) bounds; alternatively a
-  -- simpler-and-stricter bound is the (max over `k`) of the (sum over `α`)
-  -- of the per-(α, k) constants. We use the straight sum here for clarity.
-  -- For uniformity in (S), the integrand is S-independent, so any per-(α, k)
-  -- bound works for every S.
-  --
-  -- We use a simple max-bound: for each `k`, the per-α bound is a constant;
-  -- there is a uniform constant for each (α, k) which we max over the finite
-  -- product (`chartAtlasPOU_activeFinset × Fin n`). Off the active finset,
-  -- `chartAtlasPOU = 0` pointwise so the integrand is `0`.
-  --
-  -- We choose to express this as the sup over a finite set of (α, k) values
-  -- coming from `chartAtlasPOU_activeFinset × Fin n`, with the bound for
-  -- other `α` being `0`.
   set S_act : Finset M :=
     chartAtlasPOU_activeFinset (I := I) (M := M) with hS_act_def
-  -- Get the per-(α, k) constant.
   have hper : ∀ α : M, ∀ k : Fin (Module.finrank ℝ E),
       ∃ C : ℝ, 0 ≤ C ∧
         eLpNorm
@@ -844,20 +685,6 @@ theorem g3_christoffel_atom_eLpNorm_le_uniform_intrinsic_pou
     exact
       chartAtlasPOU_mul_sqrt_g_inner_chartLeviCivitaParallelCLM_chartBasisVec_self_eLpNorm_le_uniform_intrinsic
         (I := I) (M := M) g α k
-  -- A single uniform-in-(α,k) constant: sum over the active finset of
-  -- (max over k) of the per-(α, k) C.  Off the active finset, the POU is
-  -- zero so the integrand is zero — but we don't need to handle that
-  -- case separately since the bound `eLpNorm ≤ ENNReal.ofReal C_total`
-  -- holds vacuously when LHS = 0 (and `C_total ≥ 0` makes the bound valid).
-  --
-  -- The pure-aggregation step: take `Cα := Classical.choose (hper α k)` per
-  -- `(α, k)`, then `C_total := Σ_{α ∈ S_act} Σ_k Cα k`. This is a fixed
-  -- finite sum independent of (α, k) by construction.
-  --
-  -- However: for any specific (α, k), the bound `eLpNorm ≤ ENNReal.ofReal (Cα k)`
-  -- holds, and `Cα k ≤ C_total` (as a sum of non-negative reals containing
-  -- this `(α, k)`-summand when `α ∈ S_act`, and otherwise the integrand is
-  -- `0` so any non-negative bound works).
   set Cα_k : M → Fin (Module.finrank ℝ E) → ℝ :=
     fun α k => Classical.choose (hper α k) with hCα_k_def
   have hCα_k_nn : ∀ α : M, ∀ k : Fin (Module.finrank ℝ E), 0 ≤ Cα_k α k :=
@@ -877,7 +704,6 @@ theorem g3_christoffel_atom_eLpNorm_le_uniform_intrinsic_pou
           (riemannianVolumeMeasure (I := I) (M := M) g) ≤
         ENNReal.ofReal (Cα_k α k) :=
     fun α k => (Classical.choose_spec (hper α k)).2
-  -- The total constant: sum over the active finset, summed over `k`.
   set C_total : ℝ := ∑ α ∈ S_act, ∑ k : Fin (Module.finrank ℝ E), Cα_k α k
     with hC_total_def
   have hC_total_nn : 0 ≤ C_total :=
@@ -885,11 +711,9 @@ theorem g3_christoffel_atom_eLpNorm_le_uniform_intrinsic_pou
       Finset.sum_nonneg (fun k _ => hCα_k_nn α k))
   refine ⟨C_total, hC_total_nn, ?_⟩
   intro _S α k
-  -- Per-α-k bound `≤ ENNReal.ofReal (Cα α k)`; show `Cα α k ≤ C_total`.
   by_cases hα : α ∈ S_act
   · have h_in_sum : Cα_k α k ≤ C_total := by
       rw [hC_total_def]
-      -- Cα_k α k ≤ Σ_{j} Cα_k α j ≤ Σ_{β ∈ S_act} Σ_j Cα_k β j (since `α ∈ S_act`).
       have h1 : Cα_k α k ≤ ∑ j : Fin (Module.finrank ℝ E), Cα_k α j := by
         have h_split :
             ∑ j : Fin (Module.finrank ℝ E), Cα_k α j =
@@ -918,8 +742,7 @@ theorem g3_christoffel_atom_eLpNorm_le_uniform_intrinsic_pou
     have hofReal_le : ENNReal.ofReal (Cα_k α k) ≤ ENNReal.ofReal C_total :=
       ENNReal.ofReal_le_ofReal h_in_sum
     exact (hCα_k_bd α k).trans hofReal_le
-  · -- α ∉ S_act: pou_α = 0 pointwise; the integrand is 0; LHS = 0.
-    have h_zero : ∀ b : M, ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b = 0 :=
+  · have h_zero : ∀ b : M, ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b = 0 :=
       chartAtlasPOU_eq_zero_of_notMem_activeFinset (I := I) (M := M) hα
     have h_integrand_zero :
         (fun b : M =>
@@ -945,8 +768,6 @@ end PDE
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
 
 section Sanity
 #print axioms

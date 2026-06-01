@@ -40,27 +40,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## File-local Borel-space instances
-
-Match the convention in the surrounding files: `E` and `M` carry their canonical
-Borel σ-algebras. Declared `local` to avoid leaking into callers. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Green's first identity
-
-For smooth `f, h : M → ℝ` with at least one compactly supported, the gradient
-of `h` is a compactly-supported smooth tangent section, and we can apply the
-basic integration-by-parts identity from `IntegrationByParts.lean` with this
-section. The duality `tangentSectionAction X f x = g.inner x (X x) (grad_g f x)`
-(provided by `tangentSectionAction_eq_inner_grad_g`) and the symmetry of the
-metric yield the integrand `g.inner x (grad_g f x) (grad_g h x)`.
-
-Because the divergence of `grad_g h` equals the Laplacian `Δ_g h`, the right-
-hand side of the IBP identity becomes the integral of `f · Δ_g h`. -/
 
 /-- **Green's first identity.** For smooth `f, h : M → ℝ` on a σ-compact
 Hausdorff smooth Riemannian manifold `(M, g)` without boundary, with `h`
@@ -82,18 +65,10 @@ theorem green_first_integral_inner_grad_eq_neg_integral_smul_laplacian
       -∫ x, f x * Δ_g (I := I) g hh x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
   classical
-  -- Set X := grad_g g hh, which is a smooth tangent section with compact support.
   set X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ := grad_g (I := I) g hh with hX_def
   have hX_cs : HasCompactSupport X := hasCompactSupport_grad_g (I := I) g hh hh_supp
-  -- Apply identity (a) of `IntegrationByParts.lean` with this `X` and `f`.
   have h_ibp := integral_tangentSectionAction_eq_neg_integral_smul_divergence
     (I := I) g hf X hX_cs
-  -- LHS of `h_ibp`: ∫ tangentSectionAction X f.
-  -- By duality `tangentSectionAction X f x = g.inner x (X x) (grad_g g hf x)`
-  -- (where `X = grad_g g hh`), this equals `g.inner x (grad_g g hh x) (grad_g g hf x)`.
-  -- By symmetry of the metric, equals `g.inner x (grad_g g hf x) (grad_g g hh x)`.
-  -- RHS of `h_ibp`: -∫ f x * divergence_g g X x = -∫ f x * Δ_g g hh x.
-  -- Hence the result.
   have hLHS_eq : ∀ x : M,
       tangentSectionAction (I := I) X f x =
         g.inner x ((grad_g (I := I) g hf :
@@ -102,10 +77,6 @@ theorem green_first_integral_inner_grad_eq_neg_integral_smul_laplacian
             Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) := by
     intro x
     rw [tangentSectionAction_eq_inner_grad_g (I := I) g hf X x]
-    -- `tangentSectionAction_eq_inner_grad_g` gives:
-    -- `tangentSectionAction X f x = g.inner x (X x) (grad_g g hf x)`.
-    -- Now with `X = grad_g g hh`, this is `g.inner x (grad_g g hh x) (grad_g g hf x)`.
-    -- Apply symmetry to swap.
     change g.inner x (X x) ((grad_g (I := I) g hf :
             Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) =
       g.inner x ((grad_g (I := I) g hf :
@@ -114,7 +85,6 @@ theorem green_first_integral_inner_grad_eq_neg_integral_smul_laplacian
   have hRHS_eq : ∀ x : M,
       f x * divergence_g (I := I) g X x = f x * Δ_g (I := I) g hh x := by
     intro x
-    -- Δ_g g hh x = divergence_g g (grad_g g hh) x = divergence_g g X x by `hX_def`.
     rfl
   have hLHS_int : ∫ x, tangentSectionAction (I := I) X f x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
@@ -131,17 +101,6 @@ theorem green_first_integral_inner_grad_eq_neg_integral_smul_laplacian
     integral_congr_ae (Filter.Eventually.of_forall hRHS_eq)
   rw [← hLHS_int, h_ibp, hRHS_int]
 
-/-! ## Green's second identity
-
-On a closed manifold, both `f` and `h` automatically have compact support (since
-the manifold is compact). Applying Green's first identity twice — once with `h`
-compactly supported and once with `f` compactly supported — gives
-$\int g(\nabla f, \nabla h) = -\int f \Delta h = -\int h \Delta f$, so the
-integrand `f \Delta h - h \Delta f` integrates to zero.
-
-We provide the symmetric variant of Green's first identity (with `f` having
-compact support instead of `h`) as a corollary, then combine. -/
-
 /-- A symmetric variant of Green's first identity, with the compact-support
 hypothesis on `f` instead of `h`. -/
 private theorem integral_inner_grad_eq_neg_integral_smul_laplacian'
@@ -157,14 +116,10 @@ private theorem integral_inner_grad_eq_neg_integral_smul_laplacian'
       -∫ x, h x * Δ_g (I := I) g hf x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
   classical
-  -- Apply the IBP identity with `X = grad_g g hf` (compactly supported) and the scalar `h`.
   set X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ := grad_g (I := I) g hf with hX_def
   have hX_cs : HasCompactSupport X := hasCompactSupport_grad_g (I := I) g hf hf_supp
   have h_ibp := integral_tangentSectionAction_eq_neg_integral_smul_divergence
     (I := I) g hh X hX_cs
-  -- LHS: ∫ tangentSectionAction X h x = ∫ g.inner x (X x) (grad_g g hh x)
-  --      = ∫ g.inner x (grad_g g hf x) (grad_g g hh x).
-  -- RHS: -∫ h x * divergence_g g X x = -∫ h x * Δ_g g hf x.
   have hLHS_eq : ∀ x : M,
       tangentSectionAction (I := I) X h x =
         g.inner x ((grad_g (I := I) g hf :
@@ -204,29 +159,22 @@ theorem green_second_integral_smul_laplacian_sub_eq_zero
     ∫ x, (f x * Δ_g (I := I) g hh x - h x * Δ_g (I := I) g hf x)
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) = 0 := by
   classical
-  -- On compact M, every continuous (or smooth) function has compact support.
   have hf_cs : HasCompactSupport f := HasCompactSupport.of_compactSpace _
   have hh_cs : HasCompactSupport h := HasCompactSupport.of_compactSpace _
-  -- Green's first with `h` compactly supported.
   have h1 := green_first_integral_inner_grad_eq_neg_integral_smul_laplacian (I := I) g hf hh hh_cs
-  -- Symmetric variant with `f` compactly supported.
   have h2 := integral_inner_grad_eq_neg_integral_smul_laplacian' (I := I) g hf hh hf_cs
-  -- From `h1` and `h2`: -∫ f * Δh = -∫ h * Δf, so ∫ f * Δh = ∫ h * Δf.
   have h_eq : ∫ x, f x * Δ_g (I := I) g hh x
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
         ∫ x, h x * Δ_g (I := I) g hf x
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
-    -- Use h1.symm and h2 to relate both sides.
     have : -∫ x, f x * Δ_g (I := I) g hh x
             ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
           -∫ x, h x * Δ_g (I := I) g hf x
             ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
       rw [← h1, h2]
     linarith
-  -- Now expand the integral of the difference.
   haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
-  -- Both `f * Δh` and `h * Δf` are continuous on compact `M`, hence integrable.
   have hΔh_cont : Continuous (Δ_g (I := I) g hh) :=
     (Δ_g_contMDiff (I := I) g hh).continuous
   have hΔf_cont : Continuous (Δ_g (I := I) g hf) :=

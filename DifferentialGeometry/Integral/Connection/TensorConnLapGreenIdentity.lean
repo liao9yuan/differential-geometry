@@ -87,23 +87,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Phase A: the rank-`0` metric-lowering intertwiner at general `(0, s)`
-
-This generalises the committed `(0, 2)` lemma
-`loweredCovDerivAt_eq_lower_tensorCovDerivAt` to arbitrary `(0, s)`. At rank
-`r = 0` the lowering map evaluates the genuine covariant derivative against the
-unit `(0, 0)`-tensor `constOfIsEmpty 1`, so the proof is metric-free: the
-covariant derivative of the constant unit section vanishes
-(`tensor0SCovariantDerivative_unitZero_eq_zero`), and the product rule
-`tensorRSCovariantDerivative_apply` then identifies the lowering with the lifted
-section's covariant derivative. -/
 
 /-- **Rank-`0` lowering is evaluation at the unit `(0, 0)`-tensor (general `(0, s)`),
 in reindexed-evaluation form.** At rank `r = 0` the model coercion of the
@@ -133,19 +120,6 @@ lemma toModel_liftedTensorSection_zero_eq_apply_unit_reindex
       (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ)))]
   rw [Tensor0SSpace.toModel_ofModel]
 
-/-! ## Phase B: the directional covariant derivative as the lowered derivative,
-at `(0, 2)`
-
-At `(0, 2)` the lowered index `0 + 2` reduces definitionally to `2`, so the
-committed rank-`0` intertwiner `loweredCovDerivAt_eq_lower_tensorCovDerivAt`
-applies directly. We package it as the statement that the mixed pointwise inner
-product of two un-lowered directional covariant derivatives of `(0, 2)`-tensor
-sections equals the covariant `(0, 0 + 2)` inner product of the corresponding
-lowered directional derivatives. This is the bridge that converts the
-diagonal-frame Dirichlet integrand (`tensorCovDerivAt`, un-lowered) to the
-integrand consumed by the directional integration-by-parts machinery
-(`loweredCovDerivAt`, lowered). -/
-
 /-- **Mixed inner product of two un-lowered directional derivatives equals the
 covariant `(0, 0 + 2)` inner product of the lowered derivatives (at `(0, 2)`).**
 For smooth `(0, 2)`-tensor sections `W`, `S`, a point `x`, and tangent vectors
@@ -171,10 +145,7 @@ theorem tensorInnerPointwise_covDeriv_eq_tensorInnerPointwise_0s_lowered_two
           (loweredCovDerivAt (I := I) (M := M) g 0 2 W.toSection x a))
         (Tensor0SSpace.toModel
           (loweredCovDerivAt (I := I) (M := M) g 0 2 S.toSection x b)) := by
-  -- `tensorInnerPointwise g 0 2 x P Q = tensorInnerPointwise_0s (0+2) g x (lower P) (lower Q)`.
   unfold tensorInnerPointwise
-  -- Each `lower (∇_· ·)` equals `toModel (∇_·^lowered ·)` by the committed
-  -- rank-`0` intertwiner (at `(0, 2)` the index `0 + 2` reduces to `2`).
   rw [show lowerAllUpperIndices (I := I) (M := M) g 0 2 x
         (TensorRSSpace.toModel
           (tensorCovDerivAt (I := I) (M := M) g 0 2 W x a)) =
@@ -187,21 +158,6 @@ theorem tensorInnerPointwise_covDeriv_eq_tensorInnerPointwise_0s_lowered_two
       Tensor0SSpace.toModel
         (loweredCovDerivAt (I := I) (M := M) g 0 2 S.toSection x b) from
     (loweredCovDerivAt_eq_lower_tensorCovDerivAt (I := I) (M := M) g S.toSection x b).symm]
-
-/-! ## Phase C: the diagonal-frame reduction of the Dirichlet integrand into the
-lowered directional form, at `(0, 2)`
-
-Given a smooth tangent vector field family `B : Fin n → (tangent vector field)`
-that is `g_x`-orthonormal at the evaluation point `x`, the pointwise Dirichlet
-integrand `tensorCovDerivPointwiseInner g 0 2 T v x` equals the plain diagonal
-sum over `B` of the covariant `(0, 0 + 2)` inner products of the *lowered*
-directional covariant derivatives `loweredCovDerivAt g 0 2 · x (B i x)`. This is
-the precise per-point integrand that the directional integration-by-parts
-machinery (stated through `loweredCovDerivAlongVF` / `tensorInnerPointwise_0s`)
-consumes, once a fixed smooth orthonormal frame field is supplied on the
-partition-of-unity tsupport. It combines the diagonal-frame reduction
-`tensorCovDerivPointwiseInner_eq_orthoFrame_diag_sum` with the index-lowering
-intertwiner of Phase B. -/
 
 /-- **Diagonal-frame reduction of the Dirichlet integrand into the lowered
 directional form (at `(0, 2)`).** For smooth `(0, 2)`-tensor sections `T`, `v`,
@@ -230,7 +186,6 @@ theorem tensorCovDerivPointwiseInner_eq_lowered_orthoFrame_diag_sum_two
           (Tensor0SSpace.toModel
             (loweredCovDerivAt (I := I) (M := M) g 0 2 v.toSection b (B i b))) := by
   classical
-  -- Build a `Module.Basis` from the `g_b`-orthonormal frame values `B i b`.
   have hB_li : LinearIndependent ℝ (fun i : Fin (Module.finrank ℝ E) => B i b) := by
     rw [linearIndependent_iff']
     intro fs c hsum k hk_mem
@@ -263,16 +218,13 @@ theorem tensorCovDerivPointwiseInner_eq_lowered_orthoFrame_diag_sum_two
     change (basisOfLinearIndependentOfCardEqFinrank hB_li hcard :
         Fin (Module.finrank ℝ E) → E) i = B i b
     rw [coe_basisOfLinearIndependentOfCardEqFinrank]
-  -- The basis is `g_b`-orthonormal (its values equal `B i b`).
   have hframe_orth : ∀ i j,
       g.inner b (frame i) (frame j) = if i = j then (1 : ℝ) else 0 := by
     intro i j
     rw [hframe_eq i, hframe_eq j]
     exact hB_orth i j
-  -- Step 2: the diagonal-frame reduction.
   rw [tensorCovDerivPointwiseInner_eq_orthoFrame_diag_sum
     (I := I) (M := M) g 0 2 T v b frame hframe_orth]
-  -- Phase B per direction: convert each un-lowered pairing into the lowered one.
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [hframe_eq i]
   exact tensorInnerPointwise_covDeriv_eq_tensorInnerPointwise_0s_lowered_two

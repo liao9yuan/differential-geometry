@@ -59,14 +59,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Headline: unconditional compactness of the L²-side tensor resolvent -/
 
 /-- **Compactness of the L²-side tensor resolvent (chart-locality-free).**
 For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, the L²-side
@@ -89,14 +85,6 @@ theorem tensorResolventL2_isCompactOperator
     (tensorH1ComplToTensorL2_isCompactOperator_intrinsic
       (I := I) (M := M) g r s)
 
-/-! ## Companion: compact self-adjoint package on the L²-side resolvent
-
-Self-adjointness is already established unconditionally in
-`Resolvent.lean::tensorResolventL2_isSelfAdjoint`. Combining it with the
-present unconditional compactness result yields the precise hypothesis needed
-for the compact self-adjoint spectral theorem on the L² Hilbert space, with no
-chart-selection hypothesis anywhere in the chain. -/
-
 /-- The L²-side tensor resolvent `tensorResolventL2 g r s` on a closed
 Riemannian manifold is both a compact operator and self-adjoint, with no
 chart-selection hypothesis. Compactness is `tensorResolventL2_isCompactOperator`
@@ -107,8 +95,6 @@ theorem tensorResolventL2_isCompactOperator_isSelfAdjoint_intrinsic
       IsSelfAdjoint (tensorResolventL2 (I := I) (M := M) g r s) :=
   ⟨tensorResolventL2_isCompactOperator (I := I) (M := M) g r s,
    tensorResolventL2_isSelfAdjoint (I := I) (M := M) g r s⟩
-
-/-! ## Sanity test: the headline is exactly the eigenbasis hypothesis -/
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s) :=

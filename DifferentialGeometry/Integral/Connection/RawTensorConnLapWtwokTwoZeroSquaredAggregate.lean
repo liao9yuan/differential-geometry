@@ -68,21 +68,17 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 local notation "EuclN" =>
   EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## `eLpNorm` squared rewrite as a lintegral of `ENNReal.ofReal` of the square -/
-
 /-- For a real-valued function `f` (Borel-measurable square) and a measure `μ`,
 the square of `eLpNorm f 2 μ` equals the lintegral of `ENNReal.ofReal (f x ^ 2)`. -/
 private lemma sq_eLpNorm_two_eq_lintegral_ofReal_sq
     {α : Type*} {_ : MeasurableSpace α} (f : α → ℝ) (μ : Measure α) :
     (eLpNorm f 2 μ) ^ 2 = ∫⁻ x, ENNReal.ofReal ((f x) ^ 2) ∂μ := by
   classical
-  -- Use the existing `sq_eLpNorm_two_eq_lintegral_enorm_sq`-style argument.
   have h_rpow : eLpNorm f 2 μ = (∫⁻ x, ‖f x‖ₑ ^ (2 : ℝ≥0∞).toReal ∂μ) ^
       (1 / (2 : ℝ≥0∞).toReal) :=
     eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num) (by norm_num)
   have h_two_toReal : ((2 : ℝ≥0∞)).toReal = (2 : ℝ) := by norm_num
   rw [h_rpow, h_two_toReal]
-  -- Reduce the integrand's rpow to a natural pow.
   set I : ℝ≥0∞ := ∫⁻ x, ‖f x‖ₑ ^ (2 : ℝ) ∂μ with hI_def
   have hI_eq : I = ∫⁻ x, ENNReal.ofReal ((f x) ^ 2) ∂μ := by
     refine lintegral_congr ?_
@@ -93,15 +89,12 @@ private lemma sq_eLpNorm_two_eq_lintegral_ofReal_sq
       rw [Real.norm_eq_abs, sq_abs]]
     rw [← ofReal_norm_eq_enorm]
     rw [ENNReal.ofReal_pow (norm_nonneg _) 2]
-  -- Show `(I ^ (1/2)) ^ 2 = I` via `ENNReal.rpow_natCast`, `ENNReal.rpow_mul`.
   have h_step1 : (I ^ ((1 : ℝ) / 2)) ^ 2 = (I ^ ((1 : ℝ) / 2)) ^ ((2 : ℕ) : ℝ) := by
     rw [ENNReal.rpow_natCast]
   rw [h_step1]
   rw [← ENNReal.rpow_mul]
   have h_eq : ((1 : ℝ) / 2) * ((2 : ℕ) : ℝ) = 1 := by norm_num
   rw [h_eq, ENNReal.rpow_one, hI_eq]
-
-/-! ## ENNReal Cauchy–Schwarz: `(∑ aᵢ)² ≤ N · ∑ aᵢ²` over a finset -/
 
 /-- Cauchy–Schwarz in `ℝ≥0∞` for a finset sum:
 `(∑ i ∈ s, f i) ^ 2 ≤ s.card · ∑ i ∈ s, (f i) ^ 2`.
@@ -113,8 +106,7 @@ private lemma ennreal_sq_finset_sum_le_card_mul_finset_sum_sq
     (∑ i ∈ s, f i) ^ 2 ≤ (s.card : ℝ≥0∞) * ∑ i ∈ s, (f i) ^ 2 := by
   classical
   by_cases h_top : ∃ j ∈ s, f j = ⊤
-  · -- Some `f j = ⊤`. Then `∑ f i ≥ ⊤`, so LHS = `⊤²`. Also `∑ (f i)² ≥ ⊤² = ⊤`.
-    obtain ⟨j, hj, hj_top⟩ := h_top
+  · obtain ⟨j, hj, hj_top⟩ := h_top
     have h_sum_top : ∑ i ∈ s, f i = ⊤ := by
       rw [ENNReal.sum_eq_top]
       exact ⟨j, hj, hj_top⟩
@@ -122,12 +114,10 @@ private lemma ennreal_sq_finset_sum_le_card_mul_finset_sum_sq
     rw [show ((⊤ : ℝ≥0∞)) ^ 2 = ⊤ from by
       rw [sq]; exact ENNReal.top_mul_top]
     by_cases hs : s.card = 0
-    · -- s = ∅, contradicting `j ∈ s`.
-      rw [Finset.card_eq_zero] at hs
+    · rw [Finset.card_eq_zero] at hs
       subst hs
       simp at hj
-    · -- s.card > 0, so RHS = ⊤.
-      have h_card_pos : 0 < s.card := Nat.pos_of_ne_zero hs
+    · have h_card_pos : 0 < s.card := Nat.pos_of_ne_zero hs
       have h_card_ne : ((s.card : ℝ≥0∞)) ≠ 0 := by
         rw [Ne, Nat.cast_eq_zero]; exact hs
       have h_sum_sq_top : ∑ i ∈ s, (f i) ^ 2 = ⊤ := by
@@ -137,18 +127,14 @@ private lemma ennreal_sq_finset_sum_le_card_mul_finset_sum_sq
         rw [show ((⊤ : ℝ≥0∞)) ^ 2 = ⊤ from by rw [sq]; exact ENNReal.top_mul_top]
       rw [h_sum_sq_top]
       rw [ENNReal.mul_top h_card_ne]
-  · -- All `f i ≠ ⊤`. Lift to reals.
-    -- Convert `h_top` from `¬∃ ...` to `∀ ..., ¬...`.
-    have hf_ne_top : ∀ i ∈ s, f i ≠ ⊤ := by
+  · have hf_ne_top : ∀ i ∈ s, f i ≠ ⊤ := by
       intro i hi h_eq_top
       exact h_top ⟨i, hi, h_eq_top⟩
-    -- The sum is finite.
     have h_sum_ne_top : ∑ i ∈ s, f i ≠ ⊤ := by
       intro h_sum_top
       rw [ENNReal.sum_eq_top] at h_sum_top
       obtain ⟨i, hi, h_eq_top⟩ := h_sum_top
       exact hf_ne_top i hi h_eq_top
-    -- The sum-of-squares is also finite.
     have hf_sq_ne_top : ∀ i ∈ s, (f i) ^ 2 ≠ ⊤ := by
       intro i hi
       rw [sq]
@@ -158,39 +144,31 @@ private lemma ennreal_sq_finset_sum_le_card_mul_finset_sum_sq
       rw [ENNReal.sum_eq_top] at h_eq_top
       obtain ⟨i, hi, h_top⟩ := h_eq_top
       exact hf_sq_ne_top i hi h_top
-    -- Convert to reals.
     set a : ι → ℝ := fun i => (f i).toReal with ha_def
     have ha_nn : ∀ i, 0 ≤ a i := fun i => ENNReal.toReal_nonneg
     have hfi_eq : ∀ i ∈ s, f i = ENNReal.ofReal (a i) := by
       intro i hi
       rw [ha_def]
       exact (ENNReal.ofReal_toReal (hf_ne_top i hi)).symm
-    -- Sum.
     have h_sum_eq : ∑ i ∈ s, f i = ENNReal.ofReal (∑ i ∈ s, a i) := by
       rw [ENNReal.ofReal_sum_of_nonneg (fun i _ => ha_nn i)]
       exact Finset.sum_congr rfl hfi_eq
-    -- (f i)² = ENNReal.ofReal ((a i)²).
     have hfsq_eq : ∀ i ∈ s, (f i) ^ 2 = ENNReal.ofReal ((a i) ^ 2) := by
       intro i hi
       rw [hfi_eq i hi]
       rw [← ENNReal.ofReal_pow (ha_nn i) 2]
-    -- Sum of squares.
     have h_sumsq_eq : ∑ i ∈ s, (f i) ^ 2 = ENNReal.ofReal (∑ i ∈ s, (a i) ^ 2) := by
       rw [ENNReal.ofReal_sum_of_nonneg (fun i _ => sq_nonneg _)]
       exact Finset.sum_congr rfl hfsq_eq
-    -- LHS = ofReal((Σ a)²).
     rw [h_sum_eq]
     rw [← ENNReal.ofReal_pow (Finset.sum_nonneg (fun i _ => ha_nn i)) 2]
     rw [h_sumsq_eq]
-    -- Move RHS into ofReal.
     have h_card_eq :
         (s.card : ℝ≥0∞) = ENNReal.ofReal (s.card : ℝ) := by
       rw [ENNReal.ofReal_natCast]
     rw [h_card_eq]
     rw [← ENNReal.ofReal_mul (Nat.cast_nonneg _)]
-    -- Now: ofReal((Σ a)²) ≤ ofReal(card · Σ a²).
     apply ENNReal.ofReal_le_ofReal
-    -- Real-valued CS: `(Σ aᵢ)² ≤ card · Σ aᵢ²`. Prove inline.
     have h_double_sum : ∑ i ∈ s, ∑ j ∈ s, (a i - a j) ^ 2 =
         2 * ((s.card : ℝ) * (∑ i ∈ s, (a i) ^ 2) -
               (∑ i ∈ s, a i) ^ 2) := by

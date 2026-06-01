@@ -560,12 +560,10 @@ theorem bm_c_gc_escape_cauchy
   have h_edist_eq :
       edist (γ (tₙ m)) (γ (tₙ n)) = edist (γ s) (γ t) := by
     rcases le_total (tₙ m) (tₙ n) with h | h
-    ·
-      have hs_eq : s = tₙ m := by rw [hs_def, min_eq_left h]
+    · have hs_eq : s = tₙ m := by rw [hs_def, min_eq_left h]
       have ht_eq : t = tₙ n := by rw [ht_def, max_eq_right h]
       rw [hs_eq, ht_eq]
-    ·
-      have hs_eq : s = tₙ n := by rw [hs_def, min_eq_right h]
+    · have hs_eq : s = tₙ n := by rw [hs_def, min_eq_right h]
       have ht_eq : t = tₙ m := by rw [ht_def, max_eq_left h]
       rw [hs_eq, ht_eq, edist_comm]
   have ht_sub_s : t - s = |tₙ m - tₙ n| := by
@@ -735,8 +733,7 @@ theorem bm_c_gc_position_limit
   suffices hcauchy : Cauchy (Filter.map γ (nhdsWithin b (Set.Iio b))) by
     exact cauchy_map_iff_exists_tendsto.mp hcauchy
   refine EMetric.cauchy_iff.mpr ⟨?_, ?_⟩
-  ·
-    haveI : (Filter.map γ (nhdsWithin b (Set.Iio b))).NeBot := Filter.map_neBot
+  · haveI : (Filter.map γ (nhdsWithin b (Set.Iio b))).NeBot := Filter.map_neBot
     exact Filter.NeBot.ne this
   · intro ε hε
     obtain ⟨δ₀, _hδ₀_nn, hδ₀_ofReal_pos, hδ₀_ofReal_lt⟩ :=
@@ -1282,8 +1279,7 @@ private lemma exists_chartGramQuad_lower_bound
   intro z hz V
   rcases eq_or_ne V 0 with hV | hV
   · subst hV; simp [chartGramQuad]
-  ·
-    set r : ℝ := ‖V‖ with hr_def
+  · set r : ℝ := ‖V‖ with hr_def
     have hr_pos : 0 < r := by rw [hr_def]; exact norm_pos_iff.mpr hV
     set Vhat : E := r⁻¹ • V with hVhat_def
     have hVhat_unit : Vhat ∈ Metric.sphere (0 : E) 1 := by
@@ -1528,10 +1524,8 @@ theorem exists_isGeodesicOn_Ioo_at_velocity
     have ht_both := hδ_sub htball
     exact ⟨hf_on.isMIntegralCurveAt (Metric.isOpen_ball.mem_nhds ht_both.1), ht_both.2⟩
   refine ⟨projectCurve (I := I) f, δ, hδ, hη0, hηcont, ?_, ?_, ?_, ?_⟩
-  ·
-    rw [show (projectCurve (I := I) f) = (fun t => (f t).proj) from rfl, hmf, hf0snd]
-  ·
-    intro t ht
+  · rw [show (projectCurve (I := I) f) = (fun t => (f t).proj) from rfl, hmf, hf0snd]
+  · intro t ht
     have hfd : MDifferentiableAt 𝓘(ℝ, ℝ) I.tangent f t :=
       (hf_at_t t ht).1.hasMFDerivAt.mdifferentiableAt
     have hpd : MDifferentiableAt I.tangent I
@@ -1539,11 +1533,9 @@ theorem exists_isGeodesicOn_Ioo_at_velocity
       (Bundle.contMDiffAt_proj (E := (TangentSpace I : M → Type _)) (n := 1)).mdifferentiableAt
         (by norm_num)
     exact (hpd.comp t hfd)
-  ·
-    intro t ht
+  · intro t ht
     exact (hf_at_t t ht).2
-  ·
-    intro t ht
+  · intro t ht
     have hgeo_at : IsGeodesicAt (I := I) g (projectCurve (I := I) f) t :=
       ⟨y, f, hηt, (hf_at_t t ht).2, (hf_at_t t ht).1⟩
     exact hgeo_at.hasGeodesicEquationAt g
@@ -2003,8 +1995,7 @@ theorem hasEndpointContinuation_of_complete
     intro s hs
     rcases lt_or_eq_of_le hs.2 with hlt | heq
     · exact (hcη_deriv_open s ⟨hs.1, hlt⟩).hasDerivWithinAt
-    ·
-      rw [heq]
+    · rw [heq]
       exact (hcη_deriv_at b (by rw [sub_self]; exact hδ_mem0)).hasDerivWithinAt
   have hContAt_b : ∀ (cf : ℝ → E × E) (L : E × E), cf b = L →
       Tendsto cf (𝓝[<] b) (𝓝 L) → ContinuousWithinAt cf (Set.Icc a'' b) b := by
@@ -2182,8 +2173,7 @@ theorem isGeodesicOn_Ici_of_endpointContinuation
   let S : Set ℝ := (fun a : Rec => a.1.1) '' Mc
   have hS_ne : S.Nonempty := ⟨b₀, ⟨r₀, hr₀_mem, rfl⟩⟩
   by_cases hbdd : BddAbove S
-  ·
-    exfalso
+  · exfalso
     let s := sSup S
     have hb₀_le_s : b₀ ≤ s := le_csSup hbdd ⟨r₀, hr₀_mem, rfl⟩
     have hs_pos : 0 < s := lt_of_lt_of_le hb₀ hb₀_le_s
@@ -2224,8 +2214,7 @@ theorem isGeodesicOn_Ici_of_endpointContinuation
     have heq_chain : Mc = insert r' Mc :=
       hMc_max.2 hchain' (Set.subset_insert _ _)
     exact hr'_notMem (heq_chain ▸ Set.mem_insert _ _)
-  ·
-    refine ⟨Γ, ?_, hΓ_agree⟩
+  · refine ⟨Γ, ?_, hΓ_agree⟩
     intro t _
     rw [not_bddAbove_iff] at hbdd
     obtain ⟨b, hbS, htb⟩ := hbdd t
@@ -2274,13 +2263,11 @@ theorem chartCurve_contDiffAt_one_of_isGeodesicOn
   rw [contDiffAt_one_iff]
   refine ⟨fun s' => ContinuousLinearMap.toSpanSingleton ℝ (deriv u s'), W',
     hW'_open.mem_nhds hW'_mem, ?_, ?_⟩
-  ·
-    have hCLE : Continuous
+  · have hCLE : Continuous
         (fun w : E => (ContinuousLinearMap.toSpanSingleton ℝ w : ℝ →L[ℝ] E)) :=
       ContinuousLinearMap.toSpanSingletonCLE.continuous
     exact hCLE.comp_continuousOn hderiv_contOn
-  ·
-    intro s' hs'
+  · intro s' hs'
     have hcont_s' : ContinuousAt γ s' := hW_contAt s' (hW'_sub hs')
     have hsrc_s' : γ s' ∈ (chartAt H (γ t)).source := hW_src s' (hW'_sub hs')
     have hu_ev' : ∀ᶠ r in 𝓝 s', HasDerivAt u (deriv u r) r := by
@@ -2431,8 +2418,7 @@ theorem isGeodesicOn_Ioo_extend
   have hG_cont : ContinuousOn G (Set.Ioo a₀ (b + δ)) := by
     intro t ht
     rcases lt_trichotomy t b with hlt | heq | hgt
-    ·
-      have htγ : t ∈ Set.Ioo a₀ b := ⟨ht.1, hlt⟩
+    · have htγ : t ∈ Set.Ioo a₀ b := ⟨ht.1, hlt⟩
       have hGγ : G =ᶠ[𝓝[Set.Ioo a₀ (b + δ)] t] γ := by
         have hnhds : Set.Iio b ∈ 𝓝 t := isOpen_Iio.mem_nhds hlt
         filter_upwards [nhdsWithin_le_nhds hnhds] with s hs
@@ -2442,8 +2428,7 @@ theorem isGeodesicOn_Ioo_extend
         exact mem_nhdsWithin_of_mem_nhds (isOpen_Ioo.mem_nhds htγ)
       refine hγ_at.congr_of_eventuallyEq hGγ ?_
       simp only [hG_def, if_pos hlt]
-    ·
-      subst heq
+    · subst heq
       have hG_eq_ηb : G =ᶠ[𝓝[Set.Ioo a₀ (t + δ)] t] (fun s => η (s - t)) := by
         rw [eventuallyEq_nhdsWithin_iff]
         have hleft : ∀ᶠ s in 𝓝[<] t, G s = η (s - t) := by
@@ -2465,8 +2450,7 @@ theorem isGeodesicOn_Ioo_extend
         exact mem_nhdsWithin_of_mem_nhds (isOpen_Ioo.mem_nhds htmem)
       refine hηb_at.congr_of_eventuallyEq hG_eq_ηb ?_
       simp only [hG_def, if_neg (lt_irrefl t), sub_self]
-    ·
-      have htηb : t ∈ Set.Ioo (b - δ) (b + δ) := ⟨by linarith, ht.2⟩
+    · have htηb : t ∈ Set.Ioo (b - δ) (b + δ) := ⟨by linarith, ht.2⟩
       have hGηb : G =ᶠ[𝓝[Set.Ioo a₀ (b + δ)] t] (fun s => η (s - b)) := by
         have hnhds : Set.Ioi b ∈ 𝓝 t := isOpen_Ioi.mem_nhds hgt
         filter_upwards [nhdsWithin_le_nhds hnhds] with s hs
@@ -2572,8 +2556,7 @@ theorem isGeodesicOn_Ioi_of_endpointContinuation
   let S : Set ℝ := (fun a : Rec => a.1.1) '' Mc
   have hS_ne : S.Nonempty := ⟨b₀, ⟨r₀, hr₀_mem, rfl⟩⟩
   by_cases hbdd : BddAbove S
-  ·
-    exfalso
+  · exfalso
     let s := sSup S
     have hb₀_le_s : b₀ ≤ s := le_csSup hbdd ⟨r₀, hr₀_mem, rfl⟩
     have hs_pos : 0 < s := lt_of_lt_of_le hb₀ hb₀_le_s
@@ -2621,8 +2604,7 @@ theorem isGeodesicOn_Ioi_of_endpointContinuation
     have heq_chain : Mc = insert r' Mc :=
       hMc_max.2 hchain' (Set.subset_insert _ _)
     exact hr'_notMem (heq_chain ▸ Set.mem_insert _ _)
-  ·
-    refine ⟨Γ, ?_, ?_, hΓ_agree⟩
+  · refine ⟨Γ, ?_, ?_, hΓ_agree⟩
     · intro t ht
       rw [not_bddAbove_iff] at hbdd
       obtain ⟨b, hbS, htb⟩ := hbdd t
@@ -2745,13 +2727,11 @@ private theorem path_length_minimising_sequence
     exact ⟨ρ, hρ0, hρ1, hρ_smooth, hρ_len⟩
   choose γ hγ0 hγ1 hγ_smooth hγ_len using hstep
   refine ⟨γ, hγ0, hγ1, hγ_smooth, ?_, ?_⟩
-  ·
-    intro n
+  · intro n
     rw [hd_def]
     exact Manifold.riemannianEDist_le_pathELength (I := I) (γ := γ n)
       (a := 0) (b := 1) (hγ_smooth n) (hγ0 n) (hγ1 n) zero_le_one
-  ·
-    intro n; rw [hd_def] at hγ_len ⊢; exact hγ_len n
+  · intro n; rw [hd_def] at hγ_len ⊢; exact hγ_len n
 
 /-- **Path-length infimum is attained.** On a complete Riemannian manifold
 (`IsRiemannianManifold I M`, `CompleteSpace M`), for every `p q : M` there
@@ -2766,10 +2746,8 @@ theorem exists_continuous_path_realizing_riemannianEDist
       Continuous γ ∧ γ 0 = p ∧ γ 1 = q ∧
         pathELength I γ 0 1 = riemannianEDist I p q := by
   by_cases hd : riemannianEDist I p q = ⊤
-  ·
-    sorry
-  ·
-    obtain ⟨γseq, hγ0, hγ1, hγ_smooth, hγ_lb, hγ_ub⟩ :=
+  · sorry
+  · obtain ⟨γseq, hγ0, hγ1, hγ_smooth, hγ_lb, hγ_ub⟩ :=
       path_length_minimising_sequence (I := I) p q hd
     set d : ℝ≥0∞ := riemannianEDist I p q with hd_def
     have hLen_tendsto :
@@ -2855,18 +2833,15 @@ theorem unit_speed_rescale
               (mfderiv 𝓘(ℝ, ℝ) I η t 1) = 1 := by
   set c : ℝ := (b - a) / L with hc_def
   refine ⟨fun s => γ (a + s * c), ?_, ?_, ?_, ?_, ?_⟩
-  ·
-    change γ (a + 0 * c) = γ a
+  · change γ (a + 0 * c) = γ a
     simp
-  ·
-    change γ (a + L * c) = γ b
+  · change γ (a + L * c) = γ b
     have hL_ne : L ≠ 0 := ne_of_gt hL
     have hLc : L * c = b - a := by
       simp [hc_def, mul_div_assoc', mul_div_cancel_left₀ _ hL_ne]
     have hsum : a + L * c = b := by rw [hLc]; ring
     rw [hsum]
-  ·
-    have hreparam :
+  · have hreparam :
         IsGeodesicOn (I := I) g (fun s => γ (c * s + a))
           {s : ℝ | c * s + a ∈ Set.Icc a b} :=
       isGeodesicOn_affineReparam (I := I) g (a := a) (b := b)
@@ -2890,12 +2865,9 @@ theorem unit_speed_rescale
       calc s * c ≤ L * c := mul_le_mul_of_nonneg_right hsL hc_nonneg
         _ = b - a := hLc
     refine ⟨?_, ?_⟩
-    ·
-      linarith
-    ·
-      linarith
-  ·
-    have hφ_cd : ContDiff ℝ 1 (fun s : ℝ => a + s * c) := by
+    · linarith
+    · linarith
+  · have hφ_cd : ContDiff ℝ 1 (fun s : ℝ => a + s * c) := by
       exact contDiff_const.add (contDiff_id.mul contDiff_const)
     have hφ_mC1 :
         ContMDiffOn 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) 1 (fun s : ℝ => a + s * c) (Set.Icc 0 L) :=
@@ -2921,8 +2893,7 @@ theorem unit_speed_rescale
         ContMDiffOn 𝓘(ℝ, ℝ) I 1 (γ ∘ (fun s : ℝ => a + s * c)) (Set.Icc 0 L) :=
       hγ_C1.comp hφ_mC1 hMapsTo
     exact hcomp
-  ·
-    intro t _ht
+  · intro t _ht
     sorry
 
 /-- **Hopf-Rinow existence (unit-speed minimising geodesic).** On a complete
@@ -2958,23 +2929,17 @@ theorem exists_unit_speed_minimizing_geodesic_between_points
   have hη_C1 : ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc 0 L) := hη_C1_min
   have hη_len : pathELength I η 0 L = ENNReal.ofReal L := hη_len_min
   rcases (lt_or_eq_of_le hL_nonneg) with hLpos | hLzero
-  ·
-    obtain ⟨ζ, hζ0, hζL, hζ_geod, hζ_C1, hζ_unit⟩ :=
+  · obtain ⟨ζ, hζ0, hζL, hζ_geod, hζ_C1, hζ_unit⟩ :=
       unit_speed_rescale (I := I) g (γ := η) (a := 0) (b := L) (L := L)
         hL_nonneg hLpos hη_geod_closed hη_len hη_C1
     refine ⟨ζ, L, hL_nonneg, ?_, ?_, ?_, hζ_geod, hζ_unit, ?_⟩
-    ·
-      rw [hζ0]; exact hηp
-    ·
-      rw [hζL]; exact hηq
-    ·
-      exact hζ_C1
-    ·
-      have hL_eq_pq : ENNReal.ofReal L = riemannianEDist I p q := by
+    · rw [hζ0]; exact hηp
+    · rw [hζL]; exact hηq
+    · exact hζ_C1
+    · have hL_eq_pq : ENNReal.ofReal L = riemannianEDist I p q := by
         rw [hL_eq_dist, hα0, hα1]
       exact hL_eq_pq.symm
-  ·
-    subst hLzero
+  · subst hLzero
     have hpq : p = q := by rw [← hηp]; exact hηq
     have hfin_pos : 0 < Module.finrank ℝ E :=
       Nat.pos_of_ne_zero (NeZero.ne _)
@@ -2997,10 +2962,8 @@ theorem exists_unit_speed_minimizing_geodesic_between_points
     obtain ⟨γ', f, hf0, hγ'_eq, hγ'_zero, hf_mIC, hγ'_geod⟩ :=
       exists_geodesic_with_initial_velocity_at (I := I) g p v
     refine ⟨γ', 0, le_refl 0, hγ'_zero, ?_, ?_, ?_, ?_, ?_⟩
-    ·
-      rw [hγ'_zero, hpq]
-    ·
-      have hIcc_eq : (Set.Icc (0 : ℝ) 0) = ({0} : Set ℝ) :=
+    · rw [hγ'_zero, hpq]
+    · have hIcc_eq : (Set.Icc (0 : ℝ) 0) = ({0} : Set ℝ) :=
         Set.Icc_self 0
       rw [hIcc_eq]
       intro t ht
@@ -3025,13 +2988,11 @@ theorem exists_unit_speed_minimizing_geodesic_between_points
             _ = extChartAt 𝓘(ℝ, ℝ) (0 : ℝ) 0 := by rw [hx_sym0]
         exact hxx
       exact (contDiffWithinAt_singleton).mono hsub
-    ·
-      intro t ht
+    · intro t ht
       rw [Set.Icc_self 0, Set.mem_singleton_iff] at ht
       subst ht
       exact hγ'_geod.hasGeodesicEquationAt
-    ·
-      intro t ht
+    · intro t ht
       have hIcc_eq : (Set.Icc (0 : ℝ) 0) = ({0} : Set ℝ) :=
         Set.Icc_self 0
       rw [hIcc_eq] at ht
@@ -3055,8 +3016,7 @@ theorem exists_unit_speed_minimizing_geodesic_between_points
         exact hv_unit
       exact hgoal (f 0) hf0
         (mfderiv 𝓘(ℝ, ℝ) I (projectCurve (I := I) f) 0 (1 : ℝ)) hmf
-    ·
-      rw [← hpq, ENNReal.ofReal_zero]
+    · rw [← hpq, ENNReal.ofReal_zero]
       exact riemannianEDist_self
 
 end MinimiserExistence

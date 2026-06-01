@@ -90,8 +90,6 @@ open DifferentialGeometry.Analysis.Laplacian.DifferentiatedCrossTermIBP
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -100,8 +98,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Local abbreviations for the compact support `K = chartImagePOUTsupport α` -/
 
 /-- The compact "kernel" inside which all chart-pulled effective sources are
 supported. -/
@@ -119,8 +115,6 @@ private lemma Kα_meas (α : M) :
 private lemma Kα_subset_target (α : M) :
     Kα (I := I) (M := M) α ⊆ chartTargetEuclid (I := I) (M := M) α :=
   chartImagePOUTsupport_subset_target (I := I) (M := M) α
-
-/-! ## Polymorphic IBP for the chosen `m`-fold mixed weak partial -/
 
 /-- **Per-pair polymorphic IBP.** Given chart-`H^{m+1}` regularity of the
 canonical chart-pushed representative of `u_h.coeFn`, the chosen `m`-fold mixed
@@ -180,34 +174,21 @@ theorem per_pair_ibp_chosenMthMixed
           ψ y
           ∂(volume : Measure EuclN))) := by
   classical
-  -- Abbreviate the open chart target.
   set Ω : Set EuclN :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
       (I := I) (M := M) α with hΩ_def
   have hΩ_open : IsOpen Ω :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) α
-  -- The weakly differentiable factor: the chosen `m`-fold mixed partial.
   set v : EuclN → ℝ :=
     chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h m dirs with hv_def
-  -- Its weak partials in any direction `j`: the `(m+1)`-fold mixed partial
-  -- with the new direction `j` appended via `Fin.snoc`.
   set w : Fin (Module.finrank ℝ E) → EuclN → ℝ := fun j =>
     chosenMthMixedPartialChartPushedU
       (I := I) (M := M) g α u_h (m + 1) (Fin.snoc dirs j) with hw_def
-  -- chart-H^m regularity of `v` (from chart-H^{m+1} of the parent).
   have h_v_memW1p :
       DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 v Ω :=
     chosenMthMixedPartialChartPushedU_memW1p_two
       (I := I) (M := M) g α u_h m h_chart_regularity dirs
-  -- Weak partial: `w j` is the chosen `j`-th weak partial of `v` on Ω.
-  -- By the recursive definition,
-  -- chosenMthMixedPartialChartPushedU u_h (m+1) (Fin.snoc dirs j)
-  --   = chosenWeakPartial' 2 ((Fin.snoc dirs j) (Fin.last m))
-  --       (chosenMthMixedPartialChartPushedU u_h m (Fin.init (Fin.snoc dirs j)))
-  --       Ω
-  --   = chosenWeakPartial' 2 j (chosenMthMixedPartialChartPushedU u_h m dirs) Ω
-  -- using `Fin.snoc_last` and `Fin.init_snoc`.
   have h_w_eq : ∀ j : Fin (Module.finrank ℝ E),
       w j = DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
         (d := Module.finrank ℝ E) 2 j v Ω := by
@@ -222,15 +203,12 @@ theorem per_pair_ibp_chosenMthMixed
     have h_init : Fin.init (Fin.snoc (α := fun _ => Fin (Module.finrank ℝ E))
         dirs j) = dirs := by simp
     rw [h_last, h_init]
-  -- `w j` is a weak `j`-partial of `v`.
   have hw_isWeakPartial : ∀ j : Fin (Module.finrank ℝ E),
       DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) j (w j) v Ω := by
     intro j
     rw [h_w_eq j]
     exact DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_isWeakPartial_of_mem
       h_v_memW1p j
-  -- `v` is in `MemLp 2 (volume.restrict Ω)`, hence locally `MemLp 2` on every
-  -- compact subset of `Ω`.
   have hv_global_memLp : MemLp v 2 ((volume : Measure EuclN).restrict Ω) :=
     h_v_memW1p.1
   have hv_locMemLp : ∀ K' : Set EuclN, IsCompact K' → K' ⊆ Ω →
@@ -244,7 +222,6 @@ theorem per_pair_ibp_chosenMthMixed
       exact Set.inter_eq_self_of_subset_left hK'_in
     rw [← h_eq]
     exact hv_global_memLp.restrict K'
-  -- `w j` is in `MemLp 2 (volume.restrict Ω)`, hence locally `MemLp 2`.
   have hw_global_memLp : ∀ j : Fin (Module.finrank ℝ E),
       MemLp (w j) 2 ((volume : Measure EuclN).restrict Ω) := by
     intro j
@@ -263,27 +240,22 @@ theorem per_pair_ibp_chosenMthMixed
       exact Set.inter_eq_self_of_subset_left hK'_in
     rw [← h_eq]
     exact (hw_global_memLp j).restrict K'
-  -- The compact set `K = tsupport ψ`, contained in `Ω`.
   set K : Set EuclN := tsupport ψ with hK_def
   have hK_compact : IsCompact K := hψ_cs
   have hK_in : K ⊆ Ω := hψ_supp
-  -- Smooth global extension of `φ` on a neighborhood of `K`.
   obtain ⟨δ, φExt, hδ_pos, hδ_subset, hφExt_smooth, hφExt_eq⟩ :=
     DifferentialGeometry.Analysis.Laplacian.DifferentiatedCrossTermIBP.exists_smooth_global_extension
       (I := I) (M := M) (φ := φ) α hφ_chart hK_compact hK_in
-  -- Apply the generic IBP primitive to `(φExt, v, w)` in direction `l`.
   have h_ibp_ext :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.integral_smul_weak_partial_eq
       (d := Module.finrank ℝ E) (Ω := Ω) hΩ_open
       (φ := φExt) hφExt_smooth (v := v) (w := w)
       hv_locMemLp hw_locMemLp hw_isWeakPartial l
       (ψ := ψ) hψ_smooth hψ_cs hψ_supp
-  -- Replace `φExt` by `φ` everywhere on `Ω` in the integrals.
   have hΩ_meas : MeasurableSet Ω := hΩ_open.measurableSet
   have hcthick_subset : Metric.cthickening δ K ⊆ Ω := hδ_subset
   have hK_in_thickening : K ⊆ Metric.cthickening δ K :=
     Metric.self_subset_cthickening _
-  -- `fderiv ψ` vanishes outside `tsupport ψ`.
   have h_fderiv_zero_outside_K : ∀ x ∉ K, fderiv ℝ ψ x = 0 := by
     intro x hx
     have h_compl_open : IsOpen (Kᶜ) := (isClosed_tsupport _).isOpen_compl
@@ -296,7 +268,6 @@ theorem per_pair_ibp_chosenMthMixed
       filter_upwards [hψ_zero_nbhd] with y hy
       rw [hy]
     rw [hψ_const_zero]; simp
-  -- LHS replacement: ∫_Ω φExt · v · ∂_lψ = ∫_Ω φ · v · ∂_lψ.
   have hLHS_eq :
       ∫ y in Ω, φExt y * v y *
           (fderiv ℝ ψ y) (EuclideanSpace.single l 1) ∂(volume : Measure EuclN) =
@@ -307,7 +278,6 @@ theorem per_pair_ibp_chosenMthMixed
     · rw [hφExt_eq y (hK_in_thickening hy_K)]
     · rw [h_fderiv_zero_outside_K y hy_K]
       simp
-  -- fderiv replacement: on K, fderiv φExt y = fderiv φ y.
   have h_fderiv_φExt_eq_φ_on_K : ∀ y ∈ K, ∀ j' : Fin (Module.finrank ℝ E),
       (fderiv ℝ φExt y) (EuclideanSpace.single j' 1) =
       (fderiv ℝ φ y) (EuclideanSpace.single j' 1) := by
@@ -327,7 +297,6 @@ theorem per_pair_ibp_chosenMthMixed
     have h_fderiv_eq : fderiv ℝ φExt y = fderiv ℝ φ y :=
       Filter.EventuallyEq.fderiv_eq h_eq_nbhd
     rw [h_fderiv_eq]
-  -- Leibniz term 1 replacement.
   have hLeibniz1_eq :
       ∫ y in Ω, (fderiv ℝ φExt y) (EuclideanSpace.single l 1) * v y * ψ y
         ∂(volume : Measure EuclN) =
@@ -338,7 +307,6 @@ theorem per_pair_ibp_chosenMthMixed
     · rw [h_fderiv_φExt_eq_φ_on_K y hy_K l]
     · have hψy : ψ y = 0 := image_eq_zero_of_notMem_tsupport hy_K
       rw [hψy]; ring
-  -- Leibniz term 2 replacement.
   have hLeibniz2_eq :
       ∫ y in Ω, φExt y * w l y * ψ y ∂(volume : Measure EuclN) =
       ∫ y in Ω, φ y * w l y * ψ y ∂(volume : Measure EuclN) := by
@@ -347,39 +315,8 @@ theorem per_pair_ibp_chosenMthMixed
     · rw [hφExt_eq y (hK_in_thickening hy_K)]
     · have hψy : ψ y = 0 := image_eq_zero_of_notMem_tsupport hy_K
       rw [hψy]; ring
-  -- Combine.
   rw [← hLHS_eq, ← hLeibniz1_eq, ← hLeibniz2_eq]
   exact h_ibp_ext
-
-/-! ## The step's effective source numerator (polymorphic)
-
-For a level-`m` data-instance with direction multi-index `dirs : Fin m → Fin n`,
-once-more-differentiated in direction `l` against a smooth chart-target test
-factor `ψ`, the right-hand side of the level-`(m+1)` identity (before division
-by the chart-pulled density) is the explicit five-layer sum below.
-
-Layer A (LHS first IBP-in-`j` of sub-term-1 of the once-more-differentiated
-principal block):
-```
-A := ∑_{i,j} (∂_j ∂_l a_{ij}) · chosenMthMixed(m+1, Fin.cons i dirs)
-```
-Layer B (LHS second IBP-in-`j` of sub-term-2):
-```
-B := ∑_{i,j} (∂_l a_{ij}) · chosenMthMixed(m+2, Fin.cons i (Fin.snoc dirs j))
-```
-Layer C (LHS IBP of the mass block in direction `l`):
-```
-C := -(∂_l c) · chosenMthMixed(m, dirs)
-```
-Layer D (RHS IBP of the previous-level `fChartEff` against `∂_l c`):
-```
-D := (∂_l c) · fChartEffPrev
-```
-Layer E (RHS IBP of the previous-level `fChartEff` against `c · ∂_l ψ`):
-```
-E := c · (weak l-partial of fChartEffPrev)
-```
--/
 
 /-- The numerator of `fChartEffStep` before division by the chart-pulled
 density. -/
@@ -390,34 +327,27 @@ noncomputable def fChartEffStepNumerator
     (fChartEffPrev : EuclN → ℝ)
     (l : Fin (Module.finrank ℝ E))
     (y : EuclN) : ℝ :=
-  -- Layer A: (∂_j ∂_l a_ij) · chosenMthMixed(m+1, Fin.cons i dirs)
   (∑ i : Fin (Module.finrank ℝ E),
     ∑ j : Fin (Module.finrank ℝ E),
       (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l) y)
           (EuclideanSpace.single j 1) *
         chosenMthMixedPartialChartPushedU
           (I := I) (M := M) g α u_h (m + 1) (Fin.cons i dirs) y)
-  -- Layer B: (∂_l a_ij) · chosenMthMixed(m+2, Fin.cons i (Fin.snoc dirs j))
   + (∑ i : Fin (Module.finrank ℝ E),
       ∑ j : Fin (Module.finrank ℝ E),
         weightedInvGramDerivOnEuclid (I := I) g α i j l y *
           chosenMthMixedPartialChartPushedU
             (I := I) (M := M) g α u_h (m + 2)
             (Fin.cons i (Fin.snoc dirs j)) y)
-  -- Layer C: -(∂_l c) · chosenMthMixed(m, dirs)
   - densityDerivOnEuclid (I := I) g α l y *
       chosenMthMixedPartialChartPushedU
         (I := I) (M := M) g α u_h m dirs y
-  -- Layer D: (∂_l c) · fChartEffPrev
   + densityDerivOnEuclid (I := I) g α l y * fChartEffPrev y
-  -- Layer E: c · weak l-partial of fChartEffPrev
   + densityOnEuclid (I := I) g α y *
       DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
         (d := Module.finrank ℝ E) 2 l fChartEffPrev
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
           (I := I) (M := M) α) y
-
-/-! ## The effective chart-pulled `L²` source at the step -/
 
 /-- The effective chart-pulled `L²` source at the inductive step:
 `fChartEffStep g α u_h m dirs fChartEffPrev l`. Defined as the indicator of
@@ -473,8 +403,6 @@ theorem density_mul_fChartEffStep_eq_indicator_numerator
     field_simp
   · rw [Set.indicator_of_notMem hy_K, Set.indicator_of_notMem hy_K, mul_zero]
 
-/-! ## Support property -/
-
 /-- The support of `fChartEffStep g α u_h m dirs fChartEffPrev l` is contained
 in `chartImagePOUTsupport α`. -/
 theorem fChartEffStep_supported_in_chartImagePOUTsupport
@@ -488,21 +416,6 @@ theorem fChartEffStep_supported_in_chartImagePOUTsupport
       chartImagePOUTsupport (I := I) (M := M) α := by
   unfold fChartEffStep
   exact Set.support_indicator_subset
-
-/-! ## Weighted `MemLp 2` regularity of `fChartEffStep`
-
-Strategy:
-
-* Each of the five layers (A–E) of the numerator is in `MemLp 2 (vol.restrict K)`
-  on the compact set `K := chartImagePOUTsupport α`.
-* The sum is in `MemLp 2 (vol.restrict K)`.
-* Multiplication by `1 / densityOnEuclid` (continuous, bounded above on `K`)
-  preserves `MemLp 2 (vol.restrict K)`.
-* The indicator construction plus a `weighted ≤ c_max · volume` bound on `K`
-  gives the headline weighted-`L²` claim.
--/
-
-/-! ### Boundedness on `K` for continuous-on-`chartTargetEuclid α` factors -/
 
 private lemma exists_bound_continuousOn_compact
     {f : EuclN → ℝ} {α : M}
@@ -528,8 +441,6 @@ private lemma exists_bound_continuousOn_compact
     hK_compact.exists_isMaxOn hK_ne h_abs_K
   exact ⟨|f y_max|, fun y hy => h_max hy⟩
 
-/-! ### Multiplication of `MemLp 2 (vol.restrict K)` by a bounded function -/
-
 private lemma memLp_two_of_bounded_mul
     {f h : EuclN → ℝ} {K : Set EuclN}
     (hh_meas : AEStronglyMeasurable h ((volume : Measure EuclN).restrict K))
@@ -550,8 +461,6 @@ private lemma memLp_two_of_bounded_mul
     apply ENNReal.ofReal_le_ofReal
     exact hy.trans (le_max_left _ _)
   exact MemLp.mul' (p := ∞) (q := 2) (r := 2) hf hh_memLp_top
-
-/-! ### Combined helper: continuous-on-target coefficient × `MemLp 2 (vol.K)` factor -/
 
 private lemma memLp_two_continuousOn_mul_on_Kα
     {α : M} {h f : EuclN → ℝ}
@@ -581,8 +490,6 @@ private lemma memLp_two_continuousOn_mul_on_Kα
     intro y hy
     exact hC_bd y hy
   exact memLp_two_of_bounded_mul (h := h) h_meas h_ae_bd hf
-
-/-! ### Bound `weighted.restrict K ≤ c_max • volume.restrict K` and `MemLp` transfer -/
 
 private lemma chartPulledWeightedMeasure_restrict_compact_le_volume
     {g : SmoothRiemannianMetric I M} (α : M)
@@ -634,8 +541,6 @@ private lemma memLp_chartPulledWeighted_restrict_of_volume_restrict
   exact hw.of_measure_le_smul (c := ENNReal.ofReal c)
     ENNReal.ofReal_ne_top h_le
 
-/-! ### Continuity of fderiv-applied-to-unit-vector for smooth coefficients -/
-
 /-- Continuity of `∂_j (weightedInvGramDerivOnEuclid l i j)` on the chart target. -/
 private lemma weightedInvGramDerivOnEuclid_partial_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -666,8 +571,6 @@ private lemma weightedInvGramDerivOnEuclid_partial_continuousOn
   have h := h_eval.contDiffOn.comp h_fderiv_diff (mapsTo_univ _ _)
   exact h.continuousOn
 
-/-! ### Restriction lemma: `vol.restrict K` ← `vol.restrict chartTarget` -/
-
 private lemma memLp_restrict_Kα_of_memLp_chartTarget
     (α : M) {f : EuclN → ℝ}
     (hf : MemLp f 2 ((volume : Measure EuclN).restrict
@@ -687,8 +590,6 @@ private lemma memLp_restrict_Kα_of_memLp_chartTarget
       (Kα_subset_target (I := I) (M := M) α)
   rw [← h_eq]
   exact hf.restrict _
-
-/-! ### Per-layer `MemLp 2 (vol.restrict K)` lemmas -/
 
 /-- Layer A pair: for fixed `i, j`, given chart-`H^{m+1}` regularity of the
 parent, the integrand `(∂_j ∂_l a_ij) · chosenMthMixed(m+1, Fin.cons i dirs)`
@@ -714,7 +615,6 @@ private lemma termA_pair_memLp_vol_K
           (I := I) (M := M) g α u_h (m + 1) (Fin.cons i dirs) y) 2
       ((volume : Measure EuclN).restrict (Kα (I := I) (M := M) α)) := by
   classical
-  -- The (m+1)-mixed partial is `MemLp 2` on `vol.restrict K` (local).
   have h_factor :
       MemLp (chosenMthMixedPartialChartPushedU
         (I := I) (M := M) g α u_h (m + 1) (Fin.cons i dirs)) 2
@@ -788,8 +688,6 @@ private lemma termC_memLp_vol_K
           (I := I) (M := M) g α u_h m dirs y) 2
       ((volume : Measure EuclN).restrict (Kα (I := I) (M := M) α)) := by
   classical
-  -- chart-H^{m+1} ⇒ chart-H^m of m-mixed partial ⇒ MemLp 2 on K.
-  -- We use the polymorphic regularity bridge with k = 0.
   have h_parent_m :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) m 2
@@ -798,7 +696,6 @@ private lemma termC_memLp_vol_K
           ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ))
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
           (I := I) (M := M) α) := by
-    -- `MemWkp (m+1)` implies `MemWkp m` (downward closed).
     exact h_chart_regularity_1.le_succ
   have h_factor :
       MemLp (chosenMthMixedPartialChartPushedU
@@ -827,7 +724,6 @@ private lemma termD_memLp_vol_K
         densityDerivOnEuclid (I := I) g α l y * fChartEffPrev y) 2
       ((volume : Measure EuclN).restrict (Kα (I := I) (M := M) α)) := by
   classical
-  -- Transfer from weighted to plain volume on `K`.
   have h_prev_vol_K :
       MemLp fChartEffPrev 2
         ((volume : Measure EuclN).restrict (Kα (I := I) (M := M) α)) :=
@@ -858,8 +754,7 @@ private lemma termE_memLp_vol_K
       DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 fChartEffPrev
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
           (I := I) (M := M) α)
-  · -- Weak l-partial is in MemLp 2 on vol.restrict chartTarget, hence on K.
-    have h_global :
+  · have h_global :
         MemLp (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
           (d := Module.finrank ℝ E) 2 l fChartEffPrev
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
@@ -878,8 +773,7 @@ private lemma termE_memLp_vol_K
       memLp_restrict_Kα_of_memLp_chartTarget (I := I) (M := M) α h_global
     exact memLp_two_continuousOn_mul_on_Kα (α := α)
       (densityOnEuclid_continuousOn (I := I) g α) h_K
-  · -- Weak l-partial is the zero function.
-    have h_zero :
+  · have h_zero :
         DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
           (d := Module.finrank ℝ E) 2 l fChartEffPrev
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
@@ -895,8 +789,6 @@ private lemma termE_memLp_vol_K
       rw [h_zero]; simp
     rw [this]
     exact MemLp.zero
-
-/-! ### Aggregate: the numerator is `MemLp 2 (vol.restrict K)` -/
 
 private lemma fChartEffStepNumerator_memLp_vol_K
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -929,7 +821,6 @@ private lemma fChartEffStepNumerator_memLp_vol_K
         g α u_h m dirs fChartEffPrev l) 2
       ((volume : Measure EuclN).restrict (Kα (I := I) (M := M) α)) := by
   classical
-  -- Layer A: doubly summed.
   have hA : MemLp (fun y => (∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
           (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l) y)
@@ -943,7 +834,6 @@ private lemma fChartEffStepNumerator_memLp_vol_K
     intro j _
     exact termA_pair_memLp_vol_K (I := I) (M := M) g α m dirs
       h_chart_regularity_1 l i j
-  -- Layer B: doubly summed.
   have hB : MemLp (fun y => (∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
           weightedInvGramDerivOnEuclid (I := I) g α i j l y *
@@ -963,15 +853,12 @@ private lemma fChartEffStepNumerator_memLp_vol_K
     fChartEffPrev h_prev_memLp_weighted l
   have hE := termE_memLp_vol_K (I := I) (M := M) g α
     fChartEffPrev l
-  -- The numerator is A + B - C + D + E.
   have h_step1 := hA.add hB
   have h_step2 := h_step1.sub hC
   have h_step3 := h_step2.add hD
   have h_step4 := h_step3.add hE
   unfold fChartEffStepNumerator
   convert h_step4 using 2 with y
-
-/-! ### Continuity of `1 / densityOnEuclid` on the chart target -/
 
 private lemma one_div_densityOnEuclid_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) :
@@ -986,8 +873,6 @@ private lemma one_div_densityOnEuclid_continuousOn
     funext y; rw [one_div]
   rw [h_eq]
   exact h_inv
-
-/-! ### (numerator / density) is `MemLp 2 (vol.restrict K)` -/
 
 private lemma fChartEffStepNumerator_div_density_memLp_vol_K
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -1036,8 +921,6 @@ private lemma fChartEffStepNumerator_div_density_memLp_vol_K
   rw [h_eq]
   exact memLp_two_continuousOn_mul_on_Kα (α := α)
     (one_div_densityOnEuclid_continuousOn (I := I) (M := M) g α) h_num
-
-/-! ## Headline weighted-`L²` membership -/
 
 /-- `fChartEffStep g α u_h m dirs fChartEffPrev l` lies in `MemLp 2` of the
 chart-pulled weighted measure restricted to `chartTargetEuclid α`. The

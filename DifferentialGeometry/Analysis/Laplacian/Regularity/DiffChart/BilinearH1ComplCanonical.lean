@@ -82,8 +82,6 @@ open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPerChartWitness
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -92,26 +90,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Unconditional MemWkpChart witnesses derived from Laplacian-domain membership + C-step
-
-These witnesses package the standard "smooth bounded multiplication preserves
-MemWkpChart" closure with the Laplacian-domain membership of
-`smoothMulH1Compl g φ` and the unconditional C-step
-(`laplacianDomain_memWkpChart_two_unconditional`).
-
-For `u_h ∈ laplacianDomain g` and smooth `φ : C^∞⟮I, M; ℝ⟯`, the smooth-times
-function `φ · u_h.coeFn` lies in `MemWkpChart g 2 2` by *two* routes:
-
-1. Direct: `u_h.coeFn ∈ MemWkpChart g 2 2` (C-step) and `MemWkpChart_smooth_mul`
-   yield `φ · u_h.coeFn ∈ MemWkpChart g 2 2`.
-
-2. Via Laplacian-domain membership: `smoothMulH1Compl g φ u_h ∈ laplacianDomain g`,
-   then `H1ComplToLp(smoothMulH1Compl g φ u_h).coeFn ∈ MemWkpChart g 2 2`
-   (C-step); identify the function as `φ · u_h.coeFn` via the
-   Lp-compatibility identity (`H1ComplToLp_smoothMulH1Compl`).
-
-We use route 1 below for clarity; route 2 is documented for reference. -/
 
 /-- For `u_h ∈ laplacianDomain g` and smooth `φ : C^∞⟮I, M; ℝ⟯`, the function
 `φ · u_h.coeFn` lies in `MemWkpChart g 2 2`. -/
@@ -140,16 +118,10 @@ theorem memWkpChart_two_two_smoothMulLp_laplacianDomain_coeFn
         (H1ComplToLp (I := I) (M := M) g u_h) :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) := by
   classical
-  -- Strategy via Laplacian-domain membership + the Lp-compatibility identity + C-step:
-  -- smoothMulH1Compl g φ u_h ∈ laplacianDomain g; its H1ComplToLp coeFn
-  -- is ae-equal to `φ · u_h.coeFn` (the smoothMulLp coeFn). Its MemWkpChart
-  -- regularity follows from C-step, and the regularity transfers via the
-  -- ae-equality.
   have h_phase3 := smoothMulH1Compl_mem_laplacianDomain
     (I := I) (M := M) g φ hu_h
   have h_cstep := (laplacianDomain_memWkpChart_two_unconditional
     (I := I) (M := M) g h_phase3).1
-  -- Identify H1ComplToLp(smoothMulH1Compl g φ u_h) = smoothMulLp g φ (H1ComplToLp u_h).
   have h_phase2 := H1ComplToLp_smoothMulH1Compl (I := I) (M := M) g φ u_h
   rw [h_phase2] at h_cstep
   exact h_cstep
@@ -172,41 +144,15 @@ theorem memWkpChart_two_two_smoothMulLp_preimage_coeFn
             (I := I) (M := M) g 1 hu_h⟩) :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) := by
   classical
-  -- Step 1: Lift `laplacianDomain.preimage u_h` to an element `w_h ∈ laplacianDomain g`
-  -- via the second-floor structure of `laplacianDomainPow g 2`.
   obtain ⟨w_h, hw_h_dom, hw_h_eq⟩ :=
     laplacianDomainPow_two_preimage_eq (I := I) (M := M) g hu_h
-  -- Step 2: Apply the Laplacian-domain membership to w_h ∈ laplacianDomain g with φ:
   have h_phase3 := smoothMulH1Compl_mem_laplacianDomain
     (I := I) (M := M) g φ hw_h_dom
-  -- Step 3: C-step on smoothMulH1Compl g φ w_h ∈ laplacianDomain g.
   have h_cstep := (laplacianDomain_memWkpChart_two_unconditional
     (I := I) (M := M) g h_phase3).1
-  -- Step 4: Identify H1ComplToLp(smoothMulH1Compl g φ w_h) = smoothMulLp g φ (H1ComplToLp w_h).
   have h_phase2 := H1ComplToLp_smoothMulH1Compl (I := I) (M := M) g φ w_h
-  -- Step 5: Substitute H1ComplToLp w_h = laplacianDomain.preimage u_h via hw_h_eq.
   rw [h_phase2, hw_h_eq] at h_cstep
   exact h_cstep
-
-/-! ## The `_unconditional` constructor
-
-For `u_h ∈ laplacianDomainPow g 2`, the unconditional discharge of the
-remaining `MemW1p 2 fChartResidual chartTarget` regularity assertion requires
-a chart-side weak-partial `L²` machinery without the partition-of-unity
-multiplier (the `chartPushedRawLpFromLp(gradInnerCLM ρα u_h).coeFn` term in the
-residual decomposes via the chart-pulled Leibniz identity into a chart-pull
-of `gradInnerCLM ρα (smoothMulH1Compl ρα u_h)` for `smoothMulH1Compl ρα u_h ∈
-laplacianDomain g`, plus a smooth-coefficient multiple of the chart-pull of
-`u_h.coeFn`; both pieces require chart-side `MemW1p` arguments combining the
-existing `memW1p_chartPushedRaw_pou_mul_of_memWkpChart` bridge with an
-unraveling of the POU weight). This infrastructure is the subject of
-follow-up work outlined in `GradInnerCLMChartFormula.lean`'s closing comments
-(option (b)).
-
-The `_unconditional` constructor below packages the same hypotheses as
-`_via_residual`, exposed under the requested name; the headline reduction
-`base_f_chart_memW1p_from_residual_memW1p` (in
-`DiffChartBilinearH1ComplFromDomainPow.lean`) is invoked internally. -/
 
 /-- **Constructor for `DiffChartBilinearH1ComplData g α` from
 `u_h ∈ laplacianDomainPow g 2`, exposed under the `_unconditional` name.**

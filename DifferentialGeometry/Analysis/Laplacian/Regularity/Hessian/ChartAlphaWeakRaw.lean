@@ -133,8 +133,6 @@ open DifferentialGeometry.Analysis.Laplacian.ManifoldH2NonSmooth
 open DifferentialGeometry.Analysis.Laplacian.H1ComplToLpChartBridge
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -143,12 +141,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## The POU-cut chart pull-back for `u_h ∈ laplacianDomain g`
-
-For brevity, we abbreviate `chartPushedPouFun g α u_h := chartPushed POU α
-((H1ComplToLp u_h) : M → ℝ)`. This is the canonical function whose chart-α
-weak partial derivatives we use throughout. -/
 
 /-- The POU-cut chart pull-back of the L² representative of `u_h : H1Compl g`. -/
 private noncomputable def chartPushedPouFun
@@ -181,13 +173,6 @@ private lemma chartPushedPouFun_memW1p
       (chartTargetEuclid (I := I) (M := M) α) := by
   have h := chartPushedPouFun_memWkp_two_two (I := I) (M := M) g α hu_h
   exact h.memW1p
-
-/-! ## Chart-α first weak partial of the POU-cut chart pull-back
-
-The chart-α first weak partial is the canonical `chosenWeakPartial' 2 j` of
-`chartPushedPouFun`. For `u_h ∈ laplacianDomain g`, the resulting function is
-in `MemLp 2` of the plain Lebesgue volume restricted to the entire chart
-target. -/
 
 /-- The chart-α first weak partial of the POU-cut chart pull-back. -/
 noncomputable def chosenChartFirstWeakPartial
@@ -263,13 +248,6 @@ theorem chosenChartFirstWeakPartial_locally_memLp
   rw [← h_eq]
   exact h_global.restrict K
 
-/-! ## Chart-α second weak partial of the POU-cut chart pull-back
-
-The chart-α second weak partial is the canonical
-`chosenWeakPartial' 2 l (chosenWeakPartial' 2 k _ _) _`. For
-`u_h ∈ laplacianDomain g`, the resulting function is in `MemLp 2` of the
-plain Lebesgue volume restricted to the entire chart target. -/
-
 /-- The chart-α second weak partial of the POU-cut chart pull-back: the
 canonical chosen weak `l`-partial of the chosen weak `k`-partial. -/
 noncomputable def chosenChartSecondWeakPartial
@@ -310,9 +288,7 @@ theorem chosenChartSecondWeakPartial_memLp_chartTarget
       ((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
   classical
-  -- The chart-pushed POU-cut function is in MemWkp 2 2.
   have h_memWkp_2 := chartPushedPouFun_memWkp_two_two (I := I) (M := M) g α hu_h
-  -- The k-th chosen weak partial is in MemW1p 2.
   have h_inner_memW1p : DeGiorgi.MemW1p 2
       (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
         (d := Module.finrank ℝ E) 2 k
@@ -322,7 +298,6 @@ theorem chosenChartSecondWeakPartial_memLp_chartTarget
     have h_step := h_memWkp_2.chosenWeakPartial_mem k
     rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p] at h_step
     exact h_step
-  -- The l-th chosen weak partial of the k-th is in L²(chart-target).
   unfold chosenChartSecondWeakPartial
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_memLp_of_mem
     h_inner_memW1p l
@@ -350,18 +325,6 @@ theorem chosenChartSecondWeakPartial_locally_memLp
   rw [← h_eq]
   exact h_global.restrict K
 
-/-! ## Chart-α Christoffel correction term (weak version)
-
-The chart-α Christoffel correction is the finite sum
-`Σ_m Γ^m_{kl}(α, toE.symm y) · chosenChartFirstWeakPartial g α hu_h m y`.
-
-Each term in the sum is a product of:
-* a continuous-bounded function `chartChristoffel g α k l m ∘ toE.symm`
-  on `chartTargetEuclid α` (bounded on compact subsets), and
-* an `L²` function `chosenChartFirstWeakPartial g α hu_h m`.
-
-Hence the product is `L²` on every compact subset of the chart target. -/
-
 /-- The chart-α Christoffel correction sum applied to the chart-α first weak
 partials of the POU-cut chart pull-back. -/
 noncomputable def chartChristoffelCorrectionWeak
@@ -382,9 +345,6 @@ noncomputable def chartChristoffelCorrectionWeak
       ∑ m : Fin (Module.finrank ℝ E),
         chartChristoffel (I := I) g α k l m ((toEuclidean (E := E)).symm y) *
           chosenChartFirstWeakPartial (I := I) (M := M) g α hu_h m y := rfl
-
-/-! ## Boundedness of the chart Christoffel symbol on compact subsets of the
-chart target -/
 
 /-- The chart Christoffel symbol pulled back to `EuclideanSpace`, i.e.,
 `y ↦ chartChristoffel g α k l m (toE.symm y)`, is continuous on the chart
@@ -420,8 +380,7 @@ private lemma chartChristoffel_toE_symm_bounded_on_compact
       |chartChristoffel (I := I) g α k l m ((toEuclidean (E := E)).symm y)| ≤ C := by
   classical
   by_cases hKne : K.Nonempty
-  · -- On a non-empty compact set, a continuous function attains its sup norm.
-    have h_cont_on_K : ContinuousOn (fun y : EuclN =>
+  · have h_cont_on_K : ContinuousOn (fun y : EuclN =>
         chartChristoffel (I := I) g α k l m ((toEuclidean (E := E)).symm y)) K :=
       (chartChristoffel_toE_symm_continuousOn_chartTargetEuclid
         (I := I) (M := M) g α k l m).mono hK_in
@@ -440,8 +399,6 @@ private lemma chartChristoffel_toE_symm_bounded_on_compact
     rw [hKne] at hy
     exact absurd hy (Set.notMem_empty y)
 
-/-! ## L² regularity of one Christoffel term (a product of bounded × L²) -/
-
 /-- Each term in the Christoffel correction sum is in `MemLp 2` of the plain
 Lebesgue volume restricted to any compact subset of the chart target. -/
 private lemma chartChristoffelCorrectionWeak_summand_memLp
@@ -456,21 +413,17 @@ private lemma chartChristoffelCorrectionWeak_summand_memLp
           chosenChartFirstWeakPartial (I := I) (M := M) g α hu_h m y) 2
       ((volume : Measure EuclN).restrict K) := by
   classical
-  -- The L² regularity of the partial.
   have h_partial_memLp : MemLp
       (chosenChartFirstWeakPartial (I := I) (M := M) g α hu_h m) 2
       ((volume : Measure EuclN).restrict K) :=
     chosenChartFirstWeakPartial_locally_memLp (I := I) (M := M) g α hu_h m
       hK_compact hK_in
-  -- The bounded Christoffel symbol.
   obtain ⟨C, hC_nn, hC_bd⟩ := chartChristoffel_toE_symm_bounded_on_compact
     (I := I) (M := M) g α k l m hK_compact hK_in
-  -- The continuity of the Christoffel restricted to K.
   have h_chris_contOn_K : ContinuousOn (fun y : EuclN =>
       chartChristoffel (I := I) g α k l m ((toEuclidean (E := E)).symm y)) K :=
     (chartChristoffel_toE_symm_continuousOn_chartTargetEuclid
       (I := I) (M := M) g α k l m).mono hK_in
-  -- Strongly measurable on the restricted measure.
   have hK_meas : MeasurableSet K := hK_compact.isClosed.measurableSet
   have h_chris_aemeas :
       AEStronglyMeasurable (fun y : EuclN =>
@@ -478,11 +431,8 @@ private lemma chartChristoffelCorrectionWeak_summand_memLp
         ((volume : Measure EuclN).restrict K) := by
     refine ContinuousOn.aestronglyMeasurable_of_isCompact h_chris_contOn_K
       hK_compact hK_meas
-  -- The pointwise bound on K.
-  -- Apply MemLp.of_le_mul: |chris · partial| ≤ C · |partial| (pointwise ae on K).
   refine MemLp.of_le_mul (c := C) h_partial_memLp
     (h_chris_aemeas.mul (h_partial_memLp.1)) ?_
-  -- Pointwise bound: ‖chris y · partial y‖ ≤ C · ‖partial y‖.
   refine (MeasureTheory.ae_restrict_iff' hK_meas).mpr ?_
   refine Filter.Eventually.of_forall (fun y hy => ?_)
   simp only [Real.norm_eq_abs, abs_mul]
@@ -501,12 +451,9 @@ theorem chartChristoffelCorrectionWeak_memLp_chartTarget_compact
       ((volume : Measure EuclN).restrict K) := by
   classical
   unfold chartChristoffelCorrectionWeak
-  -- A finite sum of L^2 functions is L^2.
   exact MeasureTheory.memLp_finset_sum (Finset.univ : Finset (Fin (Module.finrank ℝ E)))
     (fun m _ => chartChristoffelCorrectionWeak_summand_memLp
       (I := I) (M := M) g α hu_h k l m hK_compact hK_in)
-
-/-! ## Chart-α tensor-corrected weak Hessian -/
 
 /-- The chart-α tensor-corrected weak Hessian of the POU-cut chart pull-back:
 `chosenSecondPartial - Σ_m Γ^m_{kl} · chosenFirstPartial_m`. -/

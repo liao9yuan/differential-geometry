@@ -52,8 +52,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Submodule of compactly-supported smooth `(r, s)`-tensor sections -/
-
 /-- The `ℝ`-submodule of smooth `(r, s)`-tensor sections whose underlying
 map to the model fiber `TensorRSModel r s ℝ E` (via
 `TensorRSSpace.toModel`) has compact support.  Closure under pointwise
@@ -125,8 +123,6 @@ lemma mem_compactlySupportedSmoothTensorSections {r s : ℕ}
       HasCompactSupport
         (fun x : M => TensorRSSpace.toModel (S x)) := Iff.rfl
 
-/-! ## Wrapper structure parameterised by a Riemannian metric -/
-
 /-- A smooth, compactly-supported `(r, s)`-tensor section, packaged
 together with an explicit Riemannian-metric parameter `g`.
 
@@ -165,8 +161,6 @@ set_option linter.unusedSectionVars false in
   cases S; cases T; congr
 
 end SmoothCcTensor
-
-/-! ## `AddCommGroup` and `Module ℝ` instances on `SmoothCcTensor g r s` -/
 
 section Algebra
 
@@ -303,15 +297,11 @@ set_option linter.unusedSectionVars false in
 @[simp] lemma SmoothCcTensor.toSection_zsmul (S : SmoothCcTensor g r s) (z : ℤ) :
     (z • S).toSection = z • S.toSection := by
   rcases z with n | n
-  · -- `(Int.ofNat n) • S = n • S` by definition of `zsmulRec`.
-    change (n • S).toSection = (Int.ofNat n) • S.toSection
+  · change (n • S).toSection = (Int.ofNat n) • S.toSection
     rw [SmoothCcTensor.toSection_nsmul]
     simp
-  · -- `(Int.negSucc n) • S = -((n + 1) • S)` by definition of `zsmulRec`.
-    change (-((n + 1) • S)).toSection = (Int.negSucc n) • S.toSection
+  · change (-((n + 1) • S)).toSection = (Int.negSucc n) • S.toSection
     rw [SmoothCcTensor.toSection_neg, SmoothCcTensor.toSection_nsmul]
-    -- The RHS unfolds to `-((n+1) • S.toSection)` via `Int.negSucc_emod_two`;
-    -- both sides are definitionally `-((n + 1) • S.toSection)`.
     show -((n + 1) • S.toSection) =
       Int.negSucc n • S.toSection
     rw [show (Int.negSucc n : ℤ) = -((n + 1 : ℕ) : ℤ) from rfl,
@@ -343,8 +333,6 @@ instance : Module ℝ (SmoothCcTensor g r s) :=
   SmoothCcTensor.toSection_injective.module ℝ
     SmoothCcTensor.toSectionAddHom
     SmoothCcTensor.toSection_smul
-
-/-! ## Function-level coercion lemmas -/
 
 set_option linter.unusedSectionVars false in
 @[simp] lemma SmoothCcTensor.toFun_zero :

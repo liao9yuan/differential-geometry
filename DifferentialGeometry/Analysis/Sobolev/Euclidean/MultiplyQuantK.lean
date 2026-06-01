@@ -29,8 +29,6 @@ variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Decomposition identity for `wkpNorm (k+1) p u Ω` -/
-
 /-- Reindex the inner sum at level `j+1` over multi-indices `Fin (j+1) → Fin d`
 into a double sum: outer over the first axis `i : Fin d`, inner over the
 tail `Fin j → Fin d`. -/
@@ -43,7 +41,6 @@ private lemma sum_fin_succ_to_iterWeakPartial_succ
           (iterWeakPartial (d := d) q j α'
             (chosenWeakPartial' (d := d) q i u Ω) Ω) q (volume.restrict Ω) := by
   classical
-  -- Reindex via Fin.consEquiv.
   rw [← Fintype.sum_equiv
         (Fin.consEquiv (fun _ : Fin (j + 1) => Fin d))
         (fun (pr : Fin d × (Fin j → Fin d)) =>
@@ -52,7 +49,6 @@ private lemma sum_fin_succ_to_iterWeakPartial_succ
         (fun α : Fin (j + 1) → Fin d =>
           eLpNorm (iterWeakPartial (d := d) q (j + 1) α u Ω) q (volume.restrict Ω))
         (fun pr => by simp [Fin.consEquiv])]
-  -- Split the sum over Fin d × (Fin j → Fin d) into a double sum.
   rw [Fintype.sum_prod_type]
   refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun α' _ => ?_))
   rw [iterWeakPartial_succ]
@@ -74,7 +70,6 @@ theorem wkpNorm_succ_eq_eLpNorm_add_sum_partial
         wkpNorm (d := d) k p (chosenWeakPartial' (d := d) p i u Ω) Ω := by
   classical
   unfold wkpNorm
-  -- Split off the j = 0 term.
   have h_split :
       ∑ j ∈ Finset.range (k + 2),
         ∑ α : Fin j → Fin d,
@@ -105,7 +100,6 @@ theorem wkpNorm_succ_eq_eLpNorm_add_sum_partial
     rw [Finset.sum_insert h_zero_not_in]
     rw [Finset.sum_image (fun j _ j' _ h => by omega)]
   rw [h_split]
-  -- Simplify j = 0 term.
   have h_zero_term :
       (∑ α : Fin 0 → Fin d,
         eLpNorm (iterWeakPartial (d := d) p 0 α u Ω) p (volume.restrict Ω)) =
@@ -120,10 +114,6 @@ theorem wkpNorm_succ_eq_eLpNorm_add_sum_partial
             eLpNorm (iterWeakPartial (d := d) p 0 α u Ω) p (volume.restrict Ω))]
     simp [iterWeakPartial_zero]
   rw [h_zero_term]
-  -- Pull i out and identify with wkpNorm k p (∂_i u) Ω.
-  -- The inner sum at j' ∈ range (k+1), over α : Fin (j'+1) → Fin d, decomposes via
-  -- sum_fin_succ_to_iterWeakPartial_succ to a sum over i and α' : Fin j' → Fin d.
-  -- Then we swap (∑_j' ∑_i) → (∑_i ∑_j').
   have h_inner_swap :
       ∑ j' ∈ Finset.range (k + 1),
         ∑ α : Fin (j' + 1) → Fin d,
@@ -136,7 +126,6 @@ theorem wkpNorm_succ_eq_eLpNorm_add_sum_partial
               (iterWeakPartial (d := d) p j' α'
                 (chosenWeakPartial' (d := d) p i u Ω) Ω) p
               (volume.restrict Ω) := by
-    -- First rewrite each summand via sum_fin_succ_to_iterWeakPartial_succ.
     have h_rewrite : ∀ j' ∈ Finset.range (k + 1),
         (∑ α : Fin (j' + 1) → Fin d,
           eLpNorm (iterWeakPartial (d := d) p (j' + 1) α u Ω) p
@@ -148,11 +137,8 @@ theorem wkpNorm_succ_eq_eLpNorm_add_sum_partial
             (volume.restrict Ω)) :=
       fun j' _ => sum_fin_succ_to_iterWeakPartial_succ (d := d) j' p u Ω
     rw [Finset.sum_congr rfl h_rewrite]
-    -- Now swap the outer sum ∑_j' with the inner ∑_i.
     rw [Finset.sum_comm]
   rw [h_inner_swap]
-
-/-! ## Comparison: `wkpNorm k p (∂ᵢu) ≤ wkpNorm (k+1) p u` -/
 
 /-- The `wkpNorm` at order `k` of a chosen weak partial is bounded by the
 `wkpNorm` at order `k+1` of the original function. -/
@@ -162,7 +148,6 @@ lemma wkpNorm_chosenWeakPartial_le_wkpNorm_succ
       wkpNorm (d := d) (k + 1) p u Ω := by
   classical
   rw [wkpNorm_succ_eq_eLpNorm_add_sum_partial (d := d) k p Ω u]
-  -- The summand at index i is one term of the sum.
   have h_one_term :
       wkpNorm (d := d) k p (chosenWeakPartial' (d := d) p i u Ω) Ω ≤
         ∑ i' : Fin d,
@@ -177,8 +162,6 @@ lemma wkpNorm_chosenWeakPartial_le_wkpNorm_succ
         wkpNorm (d := d) k p (chosenWeakPartial' (d := d) p i' u Ω) Ω := by
     exact le_add_self
   exact h_one_term.trans h_left_le
-
-/-! ## Inductive quantitative Leibniz bound at arbitrary order `k` -/
 
 section LeibnizQuant
 
@@ -203,22 +186,13 @@ theorem wkpNorm_smul_smooth_bounded_le
   classical
   induction k generalizing η with
   | zero =>
-      -- Base case k = 0: use the k = 0 branch of wkpNorm_smul_smooth_bounded_le_one.
       exact wkpNorm_smul_smooth_bounded_le_one (k := 0) (Nat.zero_le _)
         hp_one hp_top hΩ_open hη_smooth hC_nonneg hη_bound
   | succ k ih =>
-      -- Inductive step k → k+1.
-      -- η · u: by Leibniz a.e., ∂_i(η · u) =ᵃᵉ η · ∂_i u + (∂_i η) · u.
-      -- The bound at order k+1 unfolds via wkpNorm_succ_eq_eLpNorm_add_sum_partial.
-      -- Use ih on η (with bound up to order k) and on each ∂_i η.
-      -- Obtain induction hypothesis for η.
       have hη_bound_k : ∀ j ≤ k, ∀ x ∈ Ω, ‖iteratedFDeriv ℝ j η x‖ ≤ C :=
         fun j hj x hx => hη_bound j (hj.trans (Nat.le_succ _)) x hx
       obtain ⟨K_eta, hK_eta_pos, hK_eta_bound⟩ :=
         ih hη_smooth hη_bound_k
-      -- For each i, ∂_i η has order-(j+1)-derivative bound from hη_bound (order k+1).
-      -- We need order-k derivatives of ∂_i η, which are order-(j+1) for j ≤ k of η,
-      -- giving order 1 to k+1 of η, all ≤ C.
       have h_partial_eta_smooth : ∀ i : Fin d, ContDiff ℝ (⊤ : ℕ∞)
           (fun x : E => (fderiv ℝ η x) (EuclideanSpace.single i 1)) := fun i =>
         contDiff_partial_eta (d := d) hη_smooth i
@@ -232,7 +206,6 @@ theorem wkpNorm_smul_smooth_bounded_le
               ≤ ‖iteratedFDeriv ℝ (j + 1) η x‖ :=
                 norm_iteratedFDeriv_partial_le (d := d) hη_smooth i j x
           _ ≤ C := hη_bound (j + 1) (Nat.succ_le_succ hj) x hx
-      -- Apply the IH to each (∂_i η).
       have h_partial_eta_ih : ∀ i : Fin d, ∃ K' : ℝ, 0 < K' ∧
           ∀ {u : E → ℝ}, MemWkp (d := d) k p u Ω →
             wkpNorm (d := d) k p
@@ -247,7 +220,6 @@ theorem wkpNorm_smul_smooth_bounded_le
             (fun x => (fderiv ℝ η x) (EuclideanSpace.single i 1) * u x) Ω ≤
             ENNReal.ofReal (K_pi i) * wkpNorm (d := d) k p u Ω := fun i =>
         (h_partial_eta_ih i).choose_spec.2
-      -- Build the combined constant: K_total = max(C+1, K_eta + (∑ K_pi)).
       set K_partial_sum : ℝ := ∑ i : Fin d, K_pi i with hKPS_def
       have hK_partial_sum_pos : 0 < K_partial_sum := by
         rw [hKPS_def]
@@ -277,19 +249,16 @@ theorem wkpNorm_smul_smooth_bounded_le
           _ ≤ K_eta + K_partial_sum := by linarith
           _ ≤ max (C + 1) (K_eta + K_partial_sum) := le_max_right _ _
       have hK_total_pos : 0 < K_total := lt_of_lt_of_le (by linarith) hC_plus_one_le_K_total
-      -- We need K_final ≥ C + K_partial_sum and K_final ≥ K_eta + K_partial_sum, so:
       set K_final : ℝ := C + K_eta + K_partial_sum + 1 with hKf_def
       have hK_final_pos : 0 < K_final := by
         rw [hKf_def]
         linarith [hK_eta_pos, hK_partial_sum_pos]
       refine ⟨K_final, hK_final_pos, ?_⟩
       intro u hu
-      -- Decompose wkpNorm (k+1) p (η · u) Ω and wkpNorm (k+1) p u Ω.
       have hηu_W : MemWkp (d := d) (k + 1) p (fun x => η x * u x) Ω :=
         MemWkp.smul_smooth_bounded (d := d) (k + 1) hp_one hΩ_open hη_smooth hη_bound hu
       rw [wkpNorm_succ_eq_eLpNorm_add_sum_partial (d := d) k p Ω (fun x => η x * u x)]
       rw [wkpNorm_succ_eq_eLpNorm_add_sum_partial (d := d) k p Ω u]
-      -- Bound eLpNorm (η · u) ≤ C · eLpNorm u.
       have h0 : ∀ x ∈ Ω, ‖η x‖ ≤ C := by
         intro x hx
         have h := hη_bound 0 (Nat.zero_le _) x hx
@@ -297,7 +266,6 @@ theorem wkpNorm_smul_smooth_bounded_le
       have h_eta_u_eLp_le : eLpNorm (fun x => η x * u x) p (volume.restrict Ω) ≤
           ENNReal.ofReal C * eLpNorm u p (volume.restrict Ω) :=
         eLpNorm_eta_mul_le (d := d) hΩ_open h0 u
-      -- For each i, bound wkpNorm k p (∂_i(η·u)) ≤ K_eta · wkpNorm k p (∂_i u) + K_pi i · wkpNorm k p u.
       have h_partial_bound : ∀ i : Fin d,
           wkpNorm (d := d) k p
             (chosenWeakPartial' (d := d) p i (fun x => η x * u x) Ω) Ω ≤
@@ -305,7 +273,6 @@ theorem wkpNorm_smul_smooth_bounded_le
             wkpNorm (d := d) k p (chosenWeakPartial' (d := d) p i u Ω) Ω +
           ENNReal.ofReal (K_pi i) * wkpNorm (d := d) k p u Ω := by
         intro i
-        -- Rewrite chosenWeakPartial' p i (η · u) Ω =ᵃᵉ η · ∂_i u + (∂_i η) · u.
         have h0' : ∀ x ∈ Ω, ‖η x‖ ≤ C := h0
         have h1' : ∀ x ∈ Ω, ‖fderiv ℝ η x‖ ≤ C := by
           intro x hx
@@ -314,10 +281,7 @@ theorem wkpNorm_smul_smooth_bounded_le
         have hu_W1p : DeGiorgi.MemW1p (d := d) p u Ω := hu.memW1p
         have hae := chosenWeakPartial'_smul_smooth_bounded_ae (d := d) hp_one hΩ_open
           hη_smooth h0' h1' hu_W1p i
-        -- Use wkpNorm_congr_ae to swap.
         rw [wkpNorm_congr_ae (d := d) hp_one hΩ_open hae]
-        -- Now bound wkpNorm k p (η · ∂_i u + (∂_i η) · u) ≤
-        --   wkpNorm k p (η · ∂_i u) + wkpNorm k p ((∂_i η) · u).
         have h_du_mem : MemWkp (d := d) k p (chosenWeakPartial' (d := d) p i u Ω) Ω :=
           hu.chosenWeakPartial_mem i
         have h_eta_du_mem : MemWkp (d := d) k p
@@ -333,17 +297,6 @@ theorem wkpNorm_smul_smooth_bounded_le
         refine add_le_add ?_ ?_
         · exact hK_eta_bound h_du_mem
         · exact hK_pi_bound i hu_at_k
-      -- Combine.
-      -- LHS: eLpNorm (η · u) + Σ_i wkpNorm k p (∂_i(η · u))
-      -- ≤ C · eLpNorm u + Σ_i (K_eta · wkpNorm k p (∂_i u) + K_pi i · wkpNorm k p u)
-      -- = C · eLpNorm u + K_eta · Σ_i wkpNorm k p (∂_i u) + (Σ_i K_pi i) · wkpNorm k p u.
-      -- RHS: K_final · (eLpNorm u + Σ_i wkpNorm k p (∂_i u))
-      -- For the bound, we use:
-      --   C ≤ K_final
-      --   K_eta ≤ K_final
-      --   K_partial_sum * wkpNorm k p u ≤ K_partial_sum * (eLpNorm u + Σ_i wkpNorm k p (∂_i u))
-      --     since wkpNorm k p u ≤ wkpNorm k+1 p u = eLpNorm u + Σ_i wkpNorm k p (∂_i u).
-      -- We'll bound by K_final * (eLpNorm u + Σ_i wkpNorm k p (∂_i u)).
       have h_sum_bound :
           (∑ i : Fin d,
             wkpNorm (d := d) k p
@@ -376,11 +329,8 @@ theorem wkpNorm_smul_smooth_bounded_le
                   wkpNorm (d := d) k p (chosenWeakPartial' (d := d) p i u Ω) Ω) +
               ENNReal.ofReal K_partial_sum * wkpNorm (d := d) k p u Ω := by
               congr 1
-              -- (∑ i, ENNReal.ofReal (K_pi i)) = ENNReal.ofReal K_partial_sum.
-              -- Use ENNReal.ofReal_sum_of_nonneg.
               rw [hKPS_def]
               rw [ENNReal.ofReal_sum_of_nonneg (fun i _ => (hK_pi_pos i).le)]
-      -- Combine the eLpNorm and sum bounds.
       have h_lhs_bound :
           eLpNorm (fun x => η x * u x) p (volume.restrict Ω) +
           ∑ i : Fin d,
@@ -393,8 +343,6 @@ theorem wkpNorm_smul_smooth_bounded_le
           ENNReal.ofReal K_partial_sum * wkpNorm (d := d) k p u Ω) :=
         add_le_add h_eta_u_eLp_le h_sum_bound
       refine h_lhs_bound.trans ?_
-      -- Now bound by ENNReal.ofReal K_final * (eLpNorm u + Σ_i wkpNorm k p (∂_i u)).
-      -- We have wkpNorm k p u Ω ≤ wkpNorm (k+1) p u Ω = eLpNorm u + Σ_i wkpNorm k p (∂_i u).
       set S_lp : ℝ≥0∞ := eLpNorm u p (volume.restrict Ω) with hSlp_def
       set S_part : ℝ≥0∞ := ∑ i : Fin d,
         wkpNorm (d := d) k p (chosenWeakPartial' (d := d) p i u Ω) Ω with hSpart_def
@@ -405,23 +353,11 @@ theorem wkpNorm_smul_smooth_bounded_le
             ∑ i : Fin d, wkpNorm (d := d) k p
               (chosenWeakPartial' (d := d) p i u Ω) Ω from rfl]
         rw [← wkpNorm_succ_eq_eLpNorm_add_sum_partial (d := d) k p Ω u]
-        -- wkpNorm k p u Ω ≤ wkpNorm (k+1) p u Ω. We need: MemWkp k p u Ω.
-        -- We have hu : MemWkp (k+1) p u Ω.
         unfold wkpNorm
         refine Finset.sum_le_sum_of_subset_of_nonneg ?_ ?_
         · intro j hj
           rw [Finset.mem_range] at hj ⊢; omega
         · intros _ _ _; exact zero_le _
-      -- Now combine.
-      -- LHS: C · S_lp + (K_eta · S_part + K_partial_sum · wkpNorm k p u Ω)
-      -- We bound `wkpNorm k p u Ω ≤ S_lp + S_part`, so:
-      -- LHS ≤ C · S_lp + K_eta · S_part + K_partial_sum · (S_lp + S_part)
-      --     = (C + K_partial_sum) · S_lp + (K_eta + K_partial_sum) · S_part
-      --     ≤ K_final · (S_lp + S_part).
-      -- We pick K_final = max C ((d : ℝ) * K_eta + K_partial_sum) + 1, but actually
-      -- the simpler bound K_final = max (C + K_partial_sum) (K_eta + K_partial_sum) + 1 works.
-      -- Re-derive: K_final := max(C + K_partial_sum, K_eta + K_partial_sum). With +1 for slack.
-      -- Easier: directly bound each piece.
       have hC_plus_KPS_le_K_final : ENNReal.ofReal C + ENNReal.ofReal K_partial_sum ≤
           ENNReal.ofReal K_final := by
         rw [← ENNReal.ofReal_add hC_nonneg hK_partial_sum_pos.le]
@@ -434,12 +370,6 @@ theorem wkpNorm_smul_smooth_bounded_le
         refine ENNReal.ofReal_le_ofReal ?_
         rw [hKf_def]
         linarith [hC_nonneg]
-      -- Now compute:
-      -- C · S_lp + (K_eta · S_part + K_partial_sum · wkpNorm k p u Ω)
-      --   ≤ C · S_lp + K_eta · S_part + K_partial_sum · (S_lp + S_part)
-      --   = (C + K_partial_sum) · S_lp + (K_eta + K_partial_sum) · S_part
-      --   ≤ K_final · S_lp + K_final · S_part
-      --   = K_final · (S_lp + S_part).
       have h_main_calc :
           ENNReal.ofReal C * S_lp +
           (ENNReal.ofReal K_eta * S_part +
@@ -484,8 +414,6 @@ theorem wkpNorm_smul_smooth_bounded_le
       exact h_main_calc
 
 end LeibnizQuant
-
-/-! ## Uniform iterated-derivative bound for smooth compactly supported functions -/
 
 /-- Public version: iterated derivatives of a smooth function with compact
 support are uniformly bounded up to any finite order. -/

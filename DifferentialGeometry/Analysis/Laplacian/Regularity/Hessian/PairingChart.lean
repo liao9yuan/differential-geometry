@@ -53,20 +53,12 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Connection
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Polarization identity
-
-For any pointwise inner product `⟨·, ·⟩`, polarization gives
-`⟨A, B⟩ = (⟨A+B, A+B⟩ - ⟨A-B, A-B⟩) / 4`. We use this to define the Hess
-pairing via the Frobenius norm-squared. -/
 
 /-- The pointwise Hess-Frobenius pairing of two smooth scalars `φ, v` at a
 point `b : M`, defined via polarization of the Frobenius norm squared. -/
@@ -84,8 +76,6 @@ noncomputable def hessPairingChart
             (fun x : M => φ x + v x) b -
           chartHessFrobeniusSq (I := I) g
             (fun x : M => φ x - v x) b) / 4 := rfl
-
-/-! ## Continuity of `hessPairingChart` -/
 
 /-- The smoothness of `φ + v` as `M → ℝ`. -/
 private lemma smoothAddOfTwoSmooth
@@ -112,10 +102,6 @@ theorem hessPairingChart_continuous
     (smoothSubOfTwoSmooth (I := I) φ v)
   exact (h1.sub h2).div_const 4
 
-/-! ## `Lp 2` membership
-
-On a compact Riemannian manifold, a continuous function is in `Lp 2`. -/
-
 /-- `hessPairingChart` is in `Lp 2 μ_g` on the compact manifold. -/
 theorem hessPairingChart_memLp_two
     (g : SmoothRiemannianMetric I M) (φ v : C^∞⟮I, M; ℝ⟯) :
@@ -125,8 +111,6 @@ theorem hessPairingChart_memLp_two
     riemannianVolumeMeasure_isFiniteMeasureOnCompacts (I := I) (M := M) g
   exact (hessPairingChart_continuous (I := I) g φ v).memLp_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
-
-/-! ## The `Lp 2` class of the Hess pairing for smooth `(φ, v)` -/
 
 /-- Coerce a `SmoothScalar g` to a `C^∞⟮I, M; ℝ⟯` bundled smooth function. -/
 noncomputable def smoothScalarToContMDiffMap

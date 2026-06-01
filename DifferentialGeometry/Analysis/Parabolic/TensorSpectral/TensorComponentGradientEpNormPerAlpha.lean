@@ -93,19 +93,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Elementary `Real.sqrt` inequalities
-
-`√(a + b) ≤ √a + √b` and `√(a + b + c) ≤ √a + √b + √c` for non-negative
-reals. These are used in the headline-assembly step to split the pointwise
-gradient bound into three summands after taking square roots, prior to the
-three-way Minkowski application. -/
 
 /-- For non-negative reals `a`, `b`, `√(a + b) ≤ √a + √b`. -/
 lemma sqrt_add_le_sqrt_add_sqrt {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :
@@ -133,8 +124,6 @@ lemma sqrt_add3_le_sum {a b c : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) (hc : 0 ≤ c
     sqrt_add_le_sqrt_add_sqrt ha hb
   linarith
 
-/-! ## Coercion helper -/
-
 /-- For any element of a `SeminormedAddCommGroup`,
 `(‖x‖₊ : ℝ≥0∞) = ENNReal.ofReal ‖x‖`. -/
 lemma coe_nnnorm_eq_ofReal_norm {X : Type*} [SeminormedAddCommGroup X]
@@ -142,19 +131,6 @@ lemma coe_nnnorm_eq_ofReal_norm {X : Type*} [SeminormedAddCommGroup X]
     (‖x‖₊ : ℝ≥0∞) = ENNReal.ofReal ‖x‖ := by
   rw [show ((‖x‖₊ : ℝ≥0∞)) = ‖x‖ₑ from (enorm_eq_nnnorm x).symm,
     ← ofReal_norm_eq_enorm x]
-
-/-! ## Elementary `Finset`-norm bounds for the bridge step
-
-The bridge inequality requires bounding `‖∑ x_i‖² ≤ n · ∑ ‖x_i‖²` (a special
-case of the Cauchy-Schwarz / power-mean inequality on a finite sum of norms),
-and combining two such bounds for the input- and output-slot families. The
-helpers below package the two ingredients we need:
-
-* `sum_norm_sq_le_card_mul_sum_norm_sq` — `‖∑ x_i‖² ≤ |s| · ∑ ‖x_i‖²` on any
-  finite indexing set, for any `NormedAddCommGroup` family;
-* `norm_sq_neg_sum_add_sum_le_two_mul` — `‖−∑ x_i + ∑ y_l‖² ≤ 2·(‖∑ x_i‖² +
-  ‖∑ y_l‖²)`, the squared-triangle bound `(a + b)² ≤ 2(a² + b²)` applied to
-  the two block sums. -/
 
 /-- For a finite indexing set `s : Finset ι` and a `NormedAddCommGroup`-valued
 family `x : ι → X`, the square of the norm of the sum is bounded by `|s|`
@@ -165,7 +141,6 @@ lemma sum_norm_sq_le_card_mul_sum_norm_sq
     (s : Finset ι) (x : ι → X) :
     ‖∑ i ∈ s, x i‖ ^ 2 ≤ (s.card : ℝ) * ∑ i ∈ s, ‖x i‖ ^ 2 := by
   classical
-  -- Step A: triangle inequality on the sum, then square both sides.
   have h_tri : ‖∑ i ∈ s, x i‖ ≤ ∑ i ∈ s, ‖x i‖ := norm_sum_le _ _
   have h_lhs_nn : 0 ≤ ‖∑ i ∈ s, x i‖ := norm_nonneg _
   have h_rhs_nn : 0 ≤ ∑ i ∈ s, ‖x i‖ :=
@@ -174,8 +149,6 @@ lemma sum_norm_sq_le_card_mul_sum_norm_sq
     have := mul_self_le_mul_self h_lhs_nn h_tri
     rw [← sq, ← sq] at this
     exact this
-  -- Step B: power-mean inequality `(∑ a_i)² ≤ |s| · ∑ a_i²` for non-neg reals.
-  -- Mathlib's `sq_sum_le_card_mul_sum_sq` (Cauchy-Schwarz with constant-1).
   have h_pmi : (∑ i ∈ s, ‖x i‖) ^ 2 ≤ (s.card : ℝ) * ∑ i ∈ s, ‖x i‖ ^ 2 :=
     sq_sum_le_card_mul_sum_sq
   exact h_sq_tri.trans h_pmi
@@ -190,7 +163,6 @@ lemma norm_sq_neg_sum_add_sum_le_two_mul
     ‖- (∑ i : Fin r', x i) + (∑ l : Fin s', y l)‖ ^ 2 ≤
       2 * (‖∑ i : Fin r', x i‖ ^ 2 + ‖∑ l : Fin s', y l‖ ^ 2) := by
   classical
-  -- Triangle, then `(a + b)² ≤ 2(a² + b²)`.
   set u : X := ∑ i : Fin r', x i with hu_def
   set v : X := ∑ l : Fin s', y l with hv_def
   have h_tri : ‖- u + v‖ ≤ ‖u‖ + ‖v‖ := by
@@ -202,19 +174,12 @@ lemma norm_sq_neg_sum_add_sum_le_two_mul
     have := mul_self_le_mul_self h_lhs_nn h_tri
     rw [← sq, ← sq] at this
     exact this
-  -- `(a + b)² ≤ 2(a² + b²)` for real `a, b`.
   have h_abc : (‖u‖ + ‖v‖) ^ 2 ≤ 2 * (‖u‖ ^ 2 + ‖v‖ ^ 2) := by
     have h_id : (‖u‖ + ‖v‖) ^ 2 + (‖u‖ - ‖v‖) ^ 2 = 2 * (‖u‖ ^ 2 + ‖v‖ ^ 2) := by
       ring
     have h_diff_nn : 0 ≤ (‖u‖ - ‖v‖) ^ 2 := sq_nonneg _
     linarith
   exact h_sq.trans h_abc
-
-/-! ## Sub-additivity of `Real.sqrt` over a finite Fin-sum
-
-We need `√(∑ k, a k) ≤ ∑ k, √(a k)` for non-negative reals, which we obtain
-by induction on the cardinality via the two-term `sqrt_add_le_sqrt_add_sqrt`
-helper above. -/
 
 /-- For a non-negative real-valued family `a : Fin n → ℝ`, the square root of
 the finite sum is bounded by the sum of square roots:
@@ -223,8 +188,6 @@ lemma sqrt_sum_le_sum_sqrt_fin {n : ℕ} (a : Fin n → ℝ)
     (ha : ∀ k, 0 ≤ a k) :
     Real.sqrt (∑ k : Fin n, a k) ≤ ∑ k : Fin n, Real.sqrt (a k) := by
   classical
-  -- Induction on `n` by `Finset.induction_on` over `Finset.univ : Finset (Fin n)`.
-  -- We instead prove the more general statement on any `Finset`.
   suffices h : ∀ (s : Finset (Fin n)),
       Real.sqrt (∑ k ∈ s, a k) ≤ ∑ k ∈ s, Real.sqrt (a k) by
     simpa using h Finset.univ
@@ -242,16 +205,6 @@ lemma sqrt_sum_le_sum_sqrt_fin {n : ℕ} (a : Fin n → ℝ)
       have h_sqrt_ind : Real.sqrt (∑ k ∈ s', a k) ≤ ∑ k ∈ s', Real.sqrt (a k) := ih
       linarith
 
-/-! ## Unconditional pointwise bound on the model-norm trivialised Christoffel sum
-
-The model-norm trivialised chart-Christoffel correction sum
-`Tchr b = ∑ₖ ‖triv_α·(−∑ᵢ inputᵢ + ∑ₗ outputₗ)‖²` (the `G1` Christoffel atom) is
-bounded, on the compact partition-of-unity support, by a constant multiple of the
-intrinsic tensor inner product `tensorInnerPointwise g r s b (T b) (T b)`. The
-constant is locality-free: it is assembled from the unconditional fibre forward
-op-norm bound, the squared-triangle / power-mean finite-sum bounds, the
-unconditional Riemannian slot operator-norm bounds, and the exact Riemannian
-section isometry `‖T_sec b‖²_Riem = tensorInnerPointwise g r s b (T b) (T b)`. -/
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
   Bundle.continuousMultilinearMap.instNormedAddCommGroup
@@ -278,7 +231,6 @@ private theorem tchr_model_triv_sum_le_const_mul_tensorInnerPointwise_on_pouTsup
   letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
   set n : ℕ := Module.finrank ℝ E with hn_def
-  -- Unconditional Riemannian slot operator-norm bounds, unified into `M_F`.
   obtain ⟨M_F_in, hM_F_in_nn, hM_F_in_le⟩ :=
     chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport_local
       (I := I) (M := M) g r s α
@@ -287,7 +239,6 @@ private theorem tchr_model_triv_sum_le_const_mul_tensorInnerPointwise_on_pouTsup
       (I := I) (M := M) g r s α
   set M_F : ℝ := max M_F_in M_F_out with hM_F_def
   have hM_F_nn : 0 ≤ M_F := le_max_of_le_left hM_F_in_nn
-  -- Unconditional fibre forward op-norm bound on the compact POU support.
   have hK_cpt : IsCompact (tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
     pouTsupport_isCompact (I := I) (M := M) α
@@ -298,11 +249,9 @@ private theorem tchr_model_triv_sum_le_const_mul_tensorInnerPointwise_on_pouTsup
     tensorRSChartFiberToModel_opNorm_isBounded_on_compact_unconditional
       (I := I) (M := M) g r s α hK_cpt hK_sub
   have hCto_nn : 0 ≤ Cto := le_of_lt hCto_pos
-  -- The assembled constant.
   refine ⟨Cto ^ 2 * (2 * ((r : ℝ) + (s : ℝ))) * (n : ℝ) *
       ((r : ℝ) + (s : ℝ)) * M_F ^ 2, by positivity, ?_⟩
   intro T b hb
-  -- Exact Riemannian section isometry: `‖T.toSection b‖²_Riem = TIP b`.
   have h_sec_iso : ‖T.toSection b‖ ^ 2 =
       tensorInnerPointwise (I := I) (M := M) g r s b (T.toFun b) (T.toFun b) := by
     have h_inner : (⟪T.toSection b, T.toSection b⟫_ℝ : ℝ) =
@@ -312,7 +261,6 @@ private theorem tchr_model_triv_sum_le_const_mul_tensorInnerPointwise_on_pouTsup
       rw [DifferentialGeometry.Tensor.TensorRSRiemannianBundle.tensorRSRiemannianInnerCLM_apply]
       rfl
     rw [← h_inner, real_inner_self_eq_norm_sq]
-  -- Per-direction `k` bound.
   have h_per_k : ∀ k : Fin n,
       ‖(trivializationAt (TensorRSModel r s ℝ E)
           (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
@@ -335,7 +283,6 @@ private theorem tchr_model_triv_sum_le_const_mul_tensorInnerPointwise_on_pouTsup
         (fun b' => T.toSection b') (chartBasisVecFiber (I := I) α k) b l with hc_def
     set X : TensorRSSpace r s I b := - (∑ i : Fin r, a i) + (∑ l : Fin s, c l)
       with hX_def
-    -- `model² ≤ Cto² · ‖X‖²_Riem`.
     have h_to : ‖(trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b X‖ ≤
         Cto * ‖X‖ := hCto_bound b hb X
@@ -343,7 +290,6 @@ private theorem tchr_model_triv_sum_le_const_mul_tensorInnerPointwise_on_pouTsup
     have h_model_le : ‖(trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b X‖ ^ 2 ≤
         Cto ^ 2 * ‖X‖ ^ 2 := by nlinarith [h_sq, sq_nonneg Cto, norm_nonneg X]
-    -- `‖X‖²_Riem ≤ 2(‖Σa‖² + ‖Σc‖²)`.
     have h_X_sq_split : ‖X‖ ^ 2 ≤
         2 * (‖∑ i : Fin r, a i‖ ^ 2 + ‖∑ l : Fin s, c l‖ ^ 2) :=
       norm_sq_neg_sum_add_sum_le_two_mul (r' := r) (s' := s) a c
@@ -357,7 +303,6 @@ private theorem tchr_model_triv_sum_le_const_mul_tensorInnerPointwise_on_pouTsup
       have h := sum_norm_sq_le_card_mul_sum_norm_sq
         (s := (Finset.univ : Finset (Fin s))) c
       rwa [Finset.card_univ, Fintype.card_fin] at h
-    -- Each slot ≤ M_F·‖T.toSection b‖_Riem (unconditional), summed.
     have h_a_each : ∀ i : Fin r, ‖a i‖ ^ 2 ≤ M_F ^ 2 * ‖T.toSection b‖ ^ 2 := by
       intro i
       have h0 : ‖a i‖ ≤ M_F_in * ‖T.toSection b‖ :=
@@ -418,7 +363,6 @@ private theorem tchr_model_triv_sum_le_const_mul_tensorInnerPointwise_on_pouTsup
           mul_le_mul_of_nonneg_left h_X_sq_bound h_Cto_sq_nn
       _ = Cto ^ 2 * (2 * ((r : ℝ) + (s : ℝ))) * ((r : ℝ) + (s : ℝ)) *
             M_F ^ 2 * ‖T.toSection b‖ ^ 2 := by ring
-  -- Sum over `k` and apply the isometry.
   calc (∑ k : Fin n,
           ‖(trivializationAt (TensorRSModel r s ℝ E)
               (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
@@ -442,27 +386,6 @@ private theorem tchr_model_triv_sum_le_const_mul_tensorInnerPointwise_on_pouTsup
           tensorInnerPointwise (I := I) (M := M) g r s b (T.toFun b) (T.toFun b) := by
         rw [h_sec_iso]
 
-/-! ## Unconditional Riemannian-norm G5 headline
-
-This headline bounds the `L²` seminorm of `√ g.inner b (∇u_α b) (∇u_α b)` (a
-quantity that does not reference the tensor-bundle fibre norm) by a constant
-multiple of the `H¹` norm of the input tensor section, with **no chart-locality
-hypothesis**.
-
-The raw atom (G4) and the model-norm covariant atom (G2) are reused verbatim.
-The Christoffel slot-correction term is instead controlled through the
-unconditional intrinsic-Riemannian-fibre-norm slot operator-norm bounds
-(`chartTensorRS{Input,Output}SlotCorrection_riemannian_norm_le_on_pouTsupport_local`),
-the unconditional fibre forward op-norm bound
-(`tensorRSChartFiberToModel_opNorm_isBounded_on_compact_unconditional`), and the
-exact Riemannian section isometry
-`‖S.toSection b‖²_Riem = tensorInnerPointwise g r s b (S.toFun b) (S.toFun b)`.
-No chart-locality predicate is required.
-
-The `letI : Bundle.RiemannianBundle …` in the statement installs the `g`-induced
-fibre norm; it is vacuous for the conclusion (which mentions no tensor-bundle
-norm) and is present only so that the unconditional Riemannian slot bounds apply
-inside the proof. -/
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
   Bundle.continuousMultilinearMap.instNormedAddCommGroup
@@ -503,18 +426,6 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
   classical
   letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
-  -- ===== STRATEGY =====
-  -- The conclusion mentions no tensor-bundle fibre norm; only the chart atoms in
-  -- the proof do. We mirror the locality-conditioned headline assembly verbatim
-  -- for the raw `L²` atom (G4) and the model-norm covariant atom (G2) — both
-  -- already locality-free — and bound the model-norm Christoffel atom by the
-  -- intrinsic tensor inner product via the unconditional pointwise bound
-  -- `tchr_model_triv_sum_le_const_mul_tensorInnerPointwise_on_pouTsupport`
-  -- (which routes through the Riemannian slot bounds, fibre op-norm, and section
-  -- isometry). The third lintegral is then bounded by the integral of
-  -- `tensorInnerPointwise` (≤ ‖S‖²) via `lintegral_mono`, so no measurability of
-  -- the Riemannian integrand is needed.
-  -- ===== Step 1: locality-free ingredients =====
   obtain ⟨A, B, hA_nn, hB_nn, h_G1⟩ :=
     g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport_h1
       (I := I) (M := M) g r s α
@@ -524,11 +435,9 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
   obtain ⟨C₄, hC₄_nn, h_G4⟩ :=
     exists_integral_indicator_tsupp_raw_sq_le_const_mul_h1NormSq
       (I := I) (M := M) g r s α
-  -- Unconditional pointwise bound on the model-norm Christoffel atom sum.
   obtain ⟨Cchr, hCchr_nn, h_Tchr_TIP⟩ :=
     tchr_model_triv_sum_le_const_mul_tensorInnerPointwise_on_pouTsupport
       (I := I) (M := M) g r s α
-  -- ===== Step 2: final constant =====
   set C₃ : ℝ := B * Cchr with hC₃_def
   have hC₃_nn : 0 ≤ C₃ := by rw [hC₃_def]; positivity
   set C_sq : ℝ := A * C₄ ^ 2 + B * C₂ ^ 2 + C₃ with hC_sq_def
@@ -537,7 +446,6 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
   have hC_nn : 0 ≤ C := Real.sqrt_nonneg _
   refine ⟨C, hC_nn, ?_⟩
   intro S Idx Jdx
-  -- ===== Step 3: abbreviations =====
   set μ : MeasureTheory.Measure M := riemannianVolumeMeasure (I := I) (M := M) g
     with hμ_def
   set u : M → ℝ := tensorChartComponentScalar (I := I) (M := M)
@@ -553,14 +461,12 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
     exact DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg
       (I := I) (M := M) g b _
   change eLpNorm TinnerSqrt 2 μ ≤ ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞)
-  -- Raw indicator (G4 atom).
   set rawZ : M → ℝ := fun b : M =>
       scalarOnE (I := I) α
         (tensorChartComponentRaw (I := I) (M := M)
           g r s S.toCcTensor α Idx Jdx) (extChartAt I α b) with hrawZ_def
   set rawInd : M → ℝ := fun b : M =>
       (tsupport ρ).indicator rawZ b with hrawInd_def
-  -- Model-norm covariant atom sum (G2 / G1 atom).
   set Tcov : M → ℝ := fun b : M => ∑ k : Fin (Module.finrank ℝ E),
       ‖(trivializationAt (TensorRSModel r s ℝ E)
           (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
@@ -568,7 +474,6 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
           (fun b' => S.toCcTensor.toSection b')
           (chartBasisVecFiber (I := I) α k) b)‖ ^ 2
     with hTcov_def
-  -- Model-norm trivialised Christoffel atom sum (G1 atom).
   set Tchr : M → ℝ := fun b : M => ∑ k : Fin (Module.finrank ℝ E),
       ‖(trivializationAt (TensorRSModel r s ℝ E)
           (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
@@ -587,7 +492,6 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
     rw [hTcov_def]; exact Finset.sum_nonneg (fun _ _ => sq_nonneg _)
   have hTchr_nn : ∀ b, 0 ≤ Tchr b := fun b => by
     rw [hTchr_def]; exact Finset.sum_nonneg (fun _ _ => sq_nonneg _)
-  -- ===== Step 4: pointwise bound on `Tinner` =====
   have h_ptbound : ∀ b : M, Tinner b ≤
       A * (rawInd b) ^ 2 + B * (ρ b) ^ 2 * Tcov b + B * (ρ b) ^ 2 * Tchr b := by
     intro b
@@ -624,7 +528,6 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
       have h_ρ_zero : ρ b = 0 := by
         by_contra hne; exact hb (subset_tsupport _ hne)
       rw [h_rawInd_zero, h_ρ_zero]; simp
-  -- ===== Step 5: squared `eLpNorm` → lintegral, with ENNReal pointwise bound =====
   have h_TinnerSqrt_sq : ∀ b, (TinnerSqrt b) ^ 2 = Tinner b := fun b => by
     rw [hTinnerSqrt_def, Real.sq_sqrt (hTinner_nn b)]
   have h_pt_enn : ∀ b, (‖TinnerSqrt b‖ₑ : ℝ≥0∞) ^ 2 ≤
@@ -654,7 +557,6 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
   have h_sq_to_lint : (eLpNorm TinnerSqrt 2 μ) ^ 2 =
       ∫⁻ b, (‖TinnerSqrt b‖ₑ : ℝ≥0∞) ^ 2 ∂μ :=
     sq_eLpNorm_two_eq_lintegral_enorm_sq μ TinnerSqrt
-  -- ===== Step 6: bound the squared eLpNorm =====
   have h_sq_bound : (eLpNorm TinnerSqrt 2 μ) ^ 2 ≤
       ENNReal.ofReal (C_sq * ‖S‖ ^ 2) := by
     rw [h_sq_to_lint]
@@ -668,7 +570,6 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
       refine lintegral_mono_ae ?_
       filter_upwards with b using h_pt_enn b
     refine h_lint_mono.trans ?_
-    -- AE-strong-measurability of `f1` (model-side; locality-free).
     have h_atom3 :
         AEStronglyMeasurable
           (fun b : M =>
@@ -734,7 +635,6 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
       exact (ENNReal.continuous_ofReal.comp_aestronglyMeasurable h_A_sq :
         AEStronglyMeasurable (fun b : M => ENNReal.ofReal (A * (rawInd b) ^ 2)) μ)
     have h_f1_aemeas : AEMeasurable f1 μ := h_f1_ae_str.aemeasurable
-    -- AE-strong-measurability of `f2` (model-side covariant atom; locality-free).
     have h_atom1 :
         AEStronglyMeasurable
           (fun b : M =>
@@ -809,7 +709,6 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
       rw [hrearr] at h_B_sq
       exact ENNReal.continuous_ofReal.comp_aestronglyMeasurable h_B_sq
     have h_f2_aemeas : AEMeasurable f2 μ := h_f2_ae_str.aemeasurable
-    -- Split the lintegral via `lintegral_add_left'` (twice).
     have h_split12 :
         ∫⁻ b, f1 b + f2 b + f3 b ∂μ =
           ∫⁻ b, f1 b ∂μ + ∫⁻ b, f2 b + f3 b ∂μ := by
@@ -824,7 +723,6 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
         ∫⁻ b, f2 b + f3 b ∂μ = ∫⁻ b, f2 b ∂μ + ∫⁻ b, f3 b ∂μ :=
       lintegral_add_left' h_f2_aemeas _
     rw [h_split12, h_split23]
-    -- First lintegral via G4.
     have h_G4_S : eLpNorm rawInd 2 μ ≤ ENNReal.ofReal C₄ * (‖S‖₊ : ℝ≥0∞) := by
       have := h_G4 S Idx Jdx
       have h_fun_eq :
@@ -881,7 +779,6 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
         _ = ENNReal.ofReal (A * (C₄ ^ 2 * ‖S‖ ^ 2)) :=
             (ENNReal.ofReal_mul hA_nn).symm
         _ = ENNReal.ofReal (A * C₄ ^ 2 * ‖S‖ ^ 2) := by congr 1; ring
-    -- Second lintegral via G2.
     have h_G2_S := h_G2 S
     have h_f2_int : ∫⁻ b, f2 b ∂μ ≤ ENNReal.ofReal (B * C₂ ^ 2 * ‖S‖ ^ 2) := by
       set h2 : M → ℝ := fun b : M =>
@@ -938,14 +835,12 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
         _ = ENNReal.ofReal (B * (C₂ ^ 2 * ‖S‖ ^ 2)) :=
             (ENNReal.ofReal_mul hB_nn).symm
         _ = ENNReal.ofReal (B * C₂ ^ 2 * ‖S‖ ^ 2) := by congr 1; ring
-    -- Third lintegral via the unconditional Christoffel→tensorInner bound.
     have h_f3_int : ∫⁻ b, f3 b ∂μ ≤ ENNReal.ofReal (C₃ * ‖S‖ ^ 2) := by
       set TIP : M → ℝ := fun b : M =>
         tensorInnerPointwise (I := I) (M := M) g r s b
           (S.toCcTensor.toFun b) (S.toCcTensor.toFun b) with hTIP_def
       have hTIP_nn : ∀ b, 0 ≤ TIP b := fun b =>
         tensorInnerPointwise_nonneg (I := I) (M := M) g r s b _
-      -- Pointwise: `B · ρ² · Tchr b ≤ C₃ · TIP b`.
       have h_pt_f3 : ∀ b, B * (ρ b) ^ 2 * Tchr b ≤ C₃ * TIP b := by
         intro b
         by_cases hb : b ∈ tsupport (fun x : M =>
@@ -1011,7 +906,6 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
         _ = ENNReal.ofReal (∫ b, C₃ * TIP b ∂μ) := h_lint_to_int
         _ ≤ ENNReal.ofReal (C₃ * ‖S‖ ^ 2) :=
             ENNReal.ofReal_le_ofReal h_int_CTIP_le
-    -- Combine the three lintegrals (right-associated to match the split).
     have h_sum_le :
         ∫⁻ b, f1 b ∂μ + (∫⁻ b, f2 b ∂μ + ∫⁻ b, f3 b ∂μ) ≤
           ENNReal.ofReal (A * C₄ ^ 2 * ‖S‖ ^ 2) +
@@ -1028,7 +922,6 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
       ← ENNReal.ofReal_add hA_sq_nn (add_nonneg hB_sq_nn hC3_sq_nn)]
     refine ENNReal.ofReal_le_ofReal ?_
     rw [hC_sq_def]; exact le_of_eq (by ring)
-  -- ===== Step 7: take square roots =====
   have h_eLpNorm_le := eLpNorm_two_le_ofReal_sqrt
     (μ := μ) (f := TinnerSqrt) (mul_nonneg hC_sq_nn (sq_nonneg _)) h_sq_bound
   refine h_eLpNorm_le.trans ?_

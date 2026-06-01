@@ -45,8 +45,6 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -98,57 +96,42 @@ theorem eLpNorm_chartPushed_le_const_mul_eLpNorm_riemannianVolumeMeasure
           eLpNorm u 2
             (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g) := by
   classical
-  -- Set up the partition-of-unity weight at `α` and its compact support.
   set ρ : C^∞⟮I, M; ℝ⟯ :=
     DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α with hρ_def
   set Kα : Set M := tsupport ((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ) with hKα_def
   have hKα_compact : IsCompact Kα := (isClosed_tsupport _).isCompact
   have hKα_sub : Kα ⊆ (chartAt H α).source :=
     DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α
-  -- The standard exponent `p = 2 : ℝ≥0∞`.
   have hp_one : (1 : ℝ≥0∞) ≤ 2 := by norm_num
   have hp_top : (2 : ℝ≥0∞) ≠ ⊤ := by decide
-  -- Reverse chart-density bridge: a uniform-in-`u` Euclidean-to-intrinsic
-  -- bound for `chartPushedRaw` whenever `tsupport u ⊆ Kα`.
   obtain ⟨C, hC_pos, hC_bound⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Chart.eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of_subset
       (I := I) (M := M) g α hKα_compact hKα_sub hp_one hp_top
   refine ⟨C, hC_pos.le, ?_⟩
-  -- The auxiliary function `f := ρ_α · u`.
   set f : M → ℝ := fun x : M => ((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x * u x with hf_def
   have hρ_cont : Continuous ((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
     (ρ.contMDiff).continuous
   have hf_meas : Measurable f := hρ_cont.measurable.mul hu_meas
-  -- `tsupport f ⊆ tsupport ρ_α = Kα`, by `tsupport_smul_subset_left`.
   have hf_supp : tsupport f ⊆ Kα := by
     have h_eq : f = (fun x : M => ((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x • u x) := by
       funext x; rfl
     rw [h_eq]
     exact tsupport_smul_subset_left
       (f := fun x : M => ((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) (g := u)
-  -- Apply the existing reverse bridge to `f`.
   have h_raw_bound :=
     hC_bound (u := f) hf_meas hf_supp
-  -- Switch `riemannianMeasure ρ` for `riemannianVolumeMeasure`, since they are defeq.
   rw [show DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)
         = DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g from rfl]
     at h_raw_bound
-  -- Now convert the LHS `eLpNorm (chartPushedRaw α f)` to
-  -- `eLpNorm (chartPushed ρ α u)` using the a.e. equality.
   have h_ae :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed_eq_chartPushedRaw_pou_ae
       (I := I) (M := M)
       (ρ := DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)
       α u
-  -- `chartPushed ρ α u =ᵃᵉ chartPushedRaw α f` on `volume.restrict ChTE`.
-  -- Hence their `eLpNorm`s are equal.
   rw [eLpNorm_congr_ae h_ae]
-  -- After the rewrite, the LHS matches the RHS form of `h_raw_bound`.
-  -- It remains to bound `eLpNorm f` by `eLpNorm u` (pointwise `|f x| ≤ |u x|`).
   refine h_raw_bound.trans ?_
   gcongr
-  -- Pointwise `|f x| ≤ |u x|` via `abs_pou_mul_le_abs`.
   refine eLpNorm_mono (f := f) (g := u) ?_
   intro x
   have h_norm_f : ‖f x‖ = |((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x * u x| := Real.norm_eq_abs _

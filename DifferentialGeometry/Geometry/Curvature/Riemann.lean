@@ -61,20 +61,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Chart-coordinate Riemann curvature tensor
-
-The Riemann curvature tensor in chart coordinates is the standard expression
-in terms of Christoffel symbols and their first partial derivatives. The
-component `R^l{}_{ijk}(α, y)` carries one upper index `l` and three lower
-indices `i, j, k`. The convention used here is the geometer's convention
-$$R^l{}_{ijk} =
-    \partial_j \Gamma^l{}_{ik} - \partial_k \Gamma^l{}_{ij}
-  + \sum_m \bigl(\Gamma^l{}_{jm} \Gamma^m{}_{ik}
-                 - \Gamma^l{}_{km} \Gamma^m{}_{ij}\bigr),$$
-which makes `R^l{}_{ijk}` antisymmetric in `(j, k)` (interchanging `j` and
-`k` flips the sign of every term).
--/
-
 /-- The chart-coordinate Riemann curvature tensor `R^l{}_{ijk}(α, y)`.
 
 This is the pointwise scalar combining the Christoffel symbols of the chart
@@ -120,9 +106,6 @@ theorem chartRiemannTensor_antisymm_jk
       - chartRiemannTensor (I := I) g α i k j l y := by
   classical
   rw [chartRiemannTensor_def, chartRiemannTensor_def]
-  -- Both sides are linear combinations of partial derivatives and Christoffel
-  -- products. The first two terms are visibly antisymmetric in (j, k); the
-  -- summed term flips sign under m-summation by exchanging the two products.
   have hsum :
       (∑ m : Fin (Module.finrank ℝ E),
           (chartChristoffel (I := I) g α j m l y *
@@ -141,18 +124,6 @@ theorem chartRiemannTensor_antisymm_jk
   rw [hsum]
   ring
 
-/-! ## Chart-coordinate Ricci tensor
-
-The Ricci tensor is the contraction `Rc_{ik} := ∑ j, R^j{}_{ijk}` of the
-Riemann tensor on its first upper index `l` against the second lower index
-`j`. With the sign convention chosen above, this gives
-$$\operatorname{Rc}_{ik}(\alpha, y) = \sum_j R^j{}_{ijk}(\alpha, y)
-  = \sum_j \Bigl(\partial_j \Gamma^j{}_{ik}(\alpha, y)
-                  - \partial_k \Gamma^j{}_{ij}(\alpha, y)\Bigr)
-    + \sum_{j, m} \Bigl(\Gamma^j{}_{jm}(\alpha, y) \Gamma^m{}_{ik}(\alpha, y)
-                       - \Gamma^j{}_{km}(\alpha, y) \Gamma^m{}_{ij}(\alpha, y)\Bigr).$$
--/
-
 /-- The chart-coordinate Ricci tensor `Rc_{ik}(α, y) = ∑ j, R^j{}_{ijk}(α, y)`,
 obtained by contracting the upper index of `chartRiemannTensor` against the
 second lower index. -/
@@ -167,15 +138,6 @@ def chartRicciTensor (g : SmoothRiemannianMetric I M) (α : M)
     chartRicciTensor (I := I) g α i k y =
       ∑ j : Fin (Module.finrank ℝ E),
         chartRiemannTensor (I := I) g α i j k j y := rfl
-
-/-! ## Pointwise Ricci tensor as a `pointwiseBilin`
-
-We package the chart Ricci tensor at the chart `α := x` itself as a
-real-valued bilinear form on `TangentSpace I x = E`. Components of tangent
-vectors are read off in the canonical model basis `chartModelBasis E`.
-This is the same convention used by `hessFun` in the file
-`Hessian.lean`; in particular `pointwiseBilin` and `IsPointwiseSymm` are the
-project's standard carrier and symmetry predicate. -/
 
 /-- The pointwise Ricci tensor of a smooth Riemannian metric `g`, packaged as
 a `pointwiseBilin` (a real bilinear form on each `TangentSpace I x`). At each
@@ -275,7 +237,6 @@ lemma ricciFun_basis_apply
       chartRicciTensor (I := I) g x i k (extChartAt I x x) := by
   classical
   rw [ricciFun_apply]
-  -- Replace the basis-rep entries by Kronecker deltas.
   conv_lhs => rw [show
       (∑ i' : Fin (Module.finrank ℝ E),
         ∑ k' : Fin (Module.finrank ℝ E),
@@ -289,7 +250,6 @@ lemma ricciFun_basis_apply
             chartRicciTensor (I := I) g x i' k' (extChartAt I x x)) from
       Finset.sum_congr rfl (fun i' _ => Finset.sum_congr rfl (fun k' _ => by
         rw [Module.Basis.repr_self_apply, Module.Basis.repr_self_apply]))]
-  -- After replacing reprs by Kronecker deltas, the only surviving term is `(i, k)`.
   rw [Finset.sum_eq_single i]
   · rw [Finset.sum_eq_single k]
     · simp
@@ -306,24 +266,6 @@ lemma ricciFun_basis_apply
   · intro hi
     exact absurd (Finset.mem_univ i) hi
 
-/-! ## Symmetry of the pointwise Ricci tensor
-
-The Ricci tensor is symmetric as a `(0, 2)`-tensor: `Rc(X, Y) = Rc(Y, X)`.
-At the chart-coordinate level this is the identity
-`Rc_{ik}(x, ϕ_x x) = Rc_{ki}(x, ϕ_x x)`.
-
-The standard derivation uses the algebraic identities of the
-Levi-Civita Riemann tensor: combining `chartChristoffel_symm` (torsion-free
-property) with the first Bianchi identity and metric compatibility yields
-the chart-level Ricci symmetry. We expose the result here as a
-*hypothesis-bearing* form: a downstream client supplies the chart-level
-symmetry of `chartRicciTensor` and obtains pointwise symmetry of `ricciFun`.
-
-This is parallel to the hypothesis-bearing forms exposed by `Hessian.lean`
-(e.g. `laplacian_sq_le_dim_mul_frobenius_sq_of_trace_eq`), where a bridging
-identity to the geometric trace is supplied externally.
--/
-
 /-- **Hypothesis-bearing pointwise symmetry of `ricciFun`.** Given chart-level
 symmetry of `chartRicciTensor` at every point `x` evaluated in the chart at
 `x` itself, the pointwise Ricci form is symmetric. -/
@@ -336,7 +278,6 @@ theorem ricciFun_symm_of_chartRicciTensor_symm
   intro x v w
   classical
   rw [ricciFun_apply, ricciFun_apply]
-  -- Swap the order of summation on RHS: ∑ i k, ... = ∑ k i, ...
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl ?_
   intro i _

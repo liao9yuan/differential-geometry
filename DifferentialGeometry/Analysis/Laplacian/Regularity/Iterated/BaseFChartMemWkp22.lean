@@ -68,8 +68,6 @@ open DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqCauchyW22
 open DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqIdentificationW22
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -79,16 +77,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## Chart-target `MemWkp 2 2` of the smooth chart-pulled residual
-
-`smoothFChartResidual g α v` is a.e. equal to
-`chartPushedRaw α (smoothRep g α v)` on `volume.restrict chartTargetEuclid α`.
-The pointwise identity
-`chartPushedRaw α (smoothRep) = -chartPushedRaw α gradInnerPiece -
-  chartPushedRaw α lapPiece`
-on the chart target, together with the smooth-compact-support
-`MemWkp 2 2`-membership of each piece, gives the headline. -/
-
 /-- Chart-target `MemWkp 2 2` of the smooth chart-pulled residual. -/
 lemma smoothFChartResidual_memWkp_two_two
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
@@ -97,10 +85,8 @@ lemma smoothFChartResidual_memWkp_two_two
       (smoothFChartResidual (I := I) (M := M) g α v)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- Step 1: smoothFChartResidual =ᵐ chartPushedRaw α (smoothRep).
   have h_ae := smoothFChartResidual_ae_eq_chartPushedRaw_smoothRep
     (I := I) (M := M) g α v
-  -- Step 2: pointwise identity.
   have h_ptwise : chartPushedRaw (I := I) (M := M) α
         (smoothRep (I := I) (M := M) g α v) =
       fun y => -chartPushedRaw (I := I) (M := M) α
@@ -109,8 +95,6 @@ lemma smoothFChartResidual_memWkp_two_two
           (lapPiece (I := I) (M := M) g α v.toFun) y := by
     funext y
     exact chartPushedRaw_smoothRep_eq (I := I) (M := M) g α v y
-  -- Step 3: MemWkp 2 2 of the two pieces (smooth + compact support inside
-  -- chartTarget).
   have hP_grad : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 2 2
       (chartPushedRaw (I := I) (M := M) α
@@ -159,8 +143,6 @@ lemma smoothFChartResidual_memWkp_two_two
       (d := Module.finrank ℝ E)
       (chartTargetEuclid_isOpen (I := I) (M := M) α)
       hCP_smooth hCP_cpt hCP_tsupp (by norm_num : (1 : ℝ≥0∞) ≤ 2) 2
-  -- Step 4: rewrite -A - B = (-1)·A + (-1)·B and apply closure under scaling /
-  -- addition.
   have hΩ_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have hp_one : (1 : ℝ≥0∞) ≤ 2 := by norm_num
@@ -187,7 +169,6 @@ lemma smoothFChartResidual_memWkp_two_two
       (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.add hp_one hΩ_open
       hP_negA hP_negB
-  -- The pointwise sum equals -A - B = chartPushedRaw α (smoothRep).
   have h_eq_sum :
       (fun y : EuclN => (-1 : ℝ) * chartPushedRaw (I := I) (M := M) α
           (gradInnerPiece (I := I) (M := M) g α v.toFun) y +
@@ -199,11 +180,8 @@ lemma smoothFChartResidual_memWkp_two_two
     rw [h_ptwise]
     ring
   rw [h_eq_sum] at hP_sum
-  -- Transfer via a.e. equality of smoothFChartResidual with chartPushedRaw smoothRep.
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
     hp_one hΩ_open h_ae.symm).mp hP_sum
-
-/-! ## Hypothesis-bearing `MemWkp 2 2` discharge of `fChartResidual` -/
 
 /-- **Density-form discharge via the chart-target `W^{2,2}`-Cauchy hypothesis
 and identification of the Cauchy limit.**
@@ -244,7 +222,6 @@ theorem memWkp_fChartResidual_of_wkpNorm_cauchy_identification_w22
         (I := I) (M := M) g α u_h)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- Step 1: Each smooth residual is in MemWkp 2 2.
   have h_smooth_W2p : ∀ n,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) 2 2
@@ -252,21 +229,17 @@ theorem memWkp_fChartResidual_of_wkpNorm_cauchy_identification_w22
         (chartTargetEuclid (I := I) (M := M) α) := by
     intro n
     exact smoothFChartResidual_memWkp_two_two (I := I) (M := M) g α (v n)
-  -- Step 2: Apply Cauchy completeness of MemWkp 2 2.
   obtain ⟨F_lim, hF_lim_memWkp, hF_lim_tendsto⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.exists_limit_of_wkpNorm_cauchy
       (hΩ_open := chartTargetEuclid_isOpen (I := I) (M := M) α)
       (k := 2) (p := 2) (hp_one := by norm_num) (hp_top := by norm_num)
       (u := fun n => smoothFChartResidual (I := I) (M := M) g α (v n))
       h_smooth_W2p h_cauchy
-  -- Step 3: Identification.
   have hF_lim_aeEq := h_identification F_lim hF_lim_memWkp hF_lim_tendsto
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
     (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     hF_lim_aeEq).mp hF_lim_memWkp
-
-/-! ## Truly unconditional `MemWkp 2 2` of `fChartResidual` -/
 
 /-- **Truly unconditional `MemWkp 2 2 fChartResidual`**.
 
@@ -288,8 +261,6 @@ theorem fChartResidual_memWkp_two_two
       (I := I) (M := M) g α hu_h)
     (smoothApproxSeqWkpThree_smoothFChartResidual_limit_eq_fChartResidual_w22
       (I := I) (M := M) g α hu_h)
-
-/-! ## Headline: truly unconditional `MemWkp 2 2` of `base.f_chart` -/
 
 /-- **Headline: truly unconditional `MemWkp 2 2` of `base.f_chart`**.
 
@@ -318,16 +289,12 @@ theorem base_f_chart_memWkp_two_two
           (I := I) (M := M) g 1 hu_h)).f_chart
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- Step 1: a.e. decomposition `base.f_chart =ᵐ fChartPiecePreimage + fChartResidual`.
   have h_decomp := base_f_chart_ae_eq_piecePreimage_add_residual_chartPulled_on_vol
     (I := I) (M := M) g α hu_h
-  -- Step 2: fChartPiecePreimage ∈ MemWkp 2 2 unconditionally.
   have h_piece1_memWkp := fChartPiecePreimage_memWkp_two_two
     (I := I) (M := M) g α hu_h
-  -- Step 3: fChartResidual ∈ MemWkp 2 2 unconditionally.
   have h_residual_memWkp := fChartResidual_memWkp_two_two
     (I := I) (M := M) g α hu_h
-  -- Step 4: sum is in MemWkp 2 2.
   have hΩ_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have hp_one : (1 : ℝ≥0∞) ≤ 2 := by norm_num
@@ -339,7 +306,6 @@ theorem base_f_chart_memWkp_two_two
         (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.add hp_one hΩ_open
       h_piece1_memWkp h_residual_memWkp
-  -- Step 5: transfer via a.e. equality.
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
     hp_one hΩ_open h_decomp.symm).mp h_sum_memWkp
 

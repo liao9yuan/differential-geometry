@@ -50,31 +50,12 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev.NirenbergStandardTest
 open DifferentialGeometry.Analysis.Sobolev.NirenbergDiffQuotTestFunction
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Minkowski-style bound for difference quotients
-
-For `w ∈ L²(K)` with `cthickening |h| (closure Ω'') ⊆ K` (and `K`
-measurable), the difference quotient `D_h^k w` satisfies
-
-`‖D_h^k w‖_{L²(Ω'')} ≤ (2/|h|) · ‖w‖_{L²(K)}`.
-
-The argument:
-
-1. Extend `w` by zero outside `K` to `w_ext = K.indicator w`. This `w_ext`
-   has the same `L²` norm as `w` on `K`.
-2. For `x ∈ Ω''`, both `x` and `x + h e_k` lie in `K` (by the cthickening
-   hypothesis). So `D_h^k w(x) = D_h^k w_ext(x)`.
-3. Use Minkowski: `‖D_h^k w_ext‖_{L²} ≤ (1/|h|) · ‖τ_h w_ext - w_ext‖_{L²}
-   ≤ (2/|h|) · ‖w_ext‖_{L²}` (translation invariance of `L²` norm).
-4. Restrict back to `Ω''`. -/
 
 /-- For `w ∈ L²(volume.restrict K)` with `cthickening |h| (closure Ω'') ⊆ K`,
 the difference quotient `D_h^k w` satisfies the `L²(Ω'')` bound
@@ -97,7 +78,6 @@ theorem eLpNorm_diffQuot_restrict_le_of_cthickening
       (2 / ENNReal.ofReal |h|) *
         eLpNorm w 2 ((volume : Measure EuclN).restrict K) := by
   classical
-  -- Step 1: extend w by zero outside K.
   set w_ext : EuclN → ℝ := K.indicator w with hw_ext_def
   have hw_ext_aesm : AEStronglyMeasurable w_ext (volume : Measure EuclN) := by
     rw [hw_ext_def]
@@ -107,7 +87,6 @@ theorem eLpNorm_diffQuot_restrict_le_of_cthickening
         eLpNorm w 2 ((volume : Measure EuclN).restrict K) := by
     rw [hw_ext_def]
     rw [eLpNorm_indicator_eq_eLpNorm_restrict hK_meas]
-  -- Step 2: for x ∈ Ω'', D_h^k w_ext x = D_h^k w x (both x and x+h e_k ∈ K).
   have h_dq_eq_on_Ω'' : ∀ x ∈ Ω'',
       DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h w_ext x =
@@ -135,7 +114,6 @@ theorem eLpNorm_diffQuot_restrict_le_of_cthickening
       DifferentialGeometry.Analysis.Sobolev.diffQuot_apply_of_ne
         (d := Module.finrank ℝ E) k hh w x]
     rw [hw_ext_def, Set.indicator_of_mem hy_in_K, Set.indicator_of_mem hx_in_K]
-  -- Step 3: replace D_h^k w by D_h^k w_ext in the L²(Ω'') norm.
   have hΩ''_meas : MeasurableSet Ω'' := hΩ''_open.measurableSet
   have h_eq_eLpNorm :
       eLpNorm
@@ -152,7 +130,6 @@ theorem eLpNorm_diffQuot_restrict_le_of_cthickening
     intro x hx
     exact (h_dq_eq_on_Ω'' x hx).symm
   rw [h_eq_eLpNorm]
-  -- Step 4: bound by global L² of D_h^k w_ext.
   have h_le_global :
       eLpNorm
           (DifferentialGeometry.Analysis.Sobolev.diffQuot
@@ -164,7 +141,6 @@ theorem eLpNorm_diffQuot_restrict_le_of_cthickening
           (volume : Measure EuclN) :=
     eLpNorm_mono_measure _ Measure.restrict_le_self
   refine h_le_global.trans ?_
-  -- Step 5: Minkowski-style bound for D_h^k w_ext.
   have h_dq_eq_pointwise :
       DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h w_ext =
@@ -202,7 +178,6 @@ theorem eLpNorm_diffQuot_restrict_le_of_cthickening
     rw [h_eq, eLpNorm_const_smul]
     simp [Real.enorm_eq_ofReal_abs]
   rw [h_const_pull]
-  -- Minkowski.
   have hτ_aesm :
       AEStronglyMeasurable
         (DifferentialGeometry.Analysis.Sobolev.translate

@@ -73,29 +73,20 @@ theorem chart_alpha_coord_gronwall_uniqueness
       v t ∈ Metric.closedBall (I ((chartAt H α₁) α₁)) r)
     (heq0 : u 0 = v 0) :
     Set.EqOn u v (Set.Icc (0 : ℝ) T) := by
-  -- The chart-α₁-coordinate vector field `f`.
   set f : ℝ → E → E :=
     fun t y => (X t ((chartAt H α₁).symm (I.symm y)) : E) with hf_def
-  -- The constraint set: the open ball of radius `r'`. Both `u t` and `v t`
-  -- lie there for every `t ∈ [0, T)` (since they lie in `closedBall r ⊂ ball r'`).
   set s : ℝ → Set E := fun _ => Metric.ball (I ((chartAt H α₁) α₁)) r' with hs_def
-  -- Lipschitz hypothesis in the form needed by Mathlib.
   have hv_lip : ∀ t ∈ Set.Ico (0 : ℝ) T, LipschitzOnWith K (f t) (s t) := by
     intro t ht
     exact hLip t ht
-  -- ODE identity at `u`.
   have hf_u : ∀ t ∈ Set.Ico (0 : ℝ) T,
       HasDerivWithinAt u (f t (u t)) (Set.Ici t) t := by
     intro t ht
     exact hu_ode t ht
-  -- ODE identity at `v`.
   have hf_v : ∀ t ∈ Set.Ico (0 : ℝ) T,
       HasDerivWithinAt v (f t (v t)) (Set.Ici t) t := by
     intro t ht
     exact hv_ode t ht
-  -- `u t ∈ s t` and `v t ∈ s t` for `t ∈ [0, T)`: membership in the closed
-  -- ball of radius `r` implies membership in the open ball of radius `r'`,
-  -- since `r < r'`.
   have hus : ∀ t ∈ Set.Ico (0 : ℝ) T, u t ∈ s t := by
     intro t ht
     have h := hu_ball t ht
@@ -108,8 +99,6 @@ theorem chart_alpha_coord_gronwall_uniqueness
     rw [Metric.mem_closedBall] at h
     rw [hs_def]
     exact Metric.mem_ball.mpr (lt_of_le_of_lt h hr_lt_r')
-  -- Apply Mathlib's Grönwall uniqueness on the closed interval `[0, T]`
-  -- with initial time `0`.
   exact ODE_solution_unique_of_mem_Icc_right
     (v := f) (s := s) (K := K)
     hv_lip hu_cont hf_u hus hv_cont hf_v hvs heq0
@@ -192,12 +181,9 @@ theorem chart_cover_flow_unique_on_overlap_chart_alpha_coord
         = (chartAt H α₂).symm
           (I.symm ((hper₂).flow (I ((chartAt H α₂) x)) s)) := by
   classical
-  -- The chart-α₁-coordinate curve `u₁` is the flow itself.
   set u₁ : ℝ → E := fun s => (hper₁).flow (I ((chartAt H α₁) x)) s with hu₁_def
-  -- The chart-α₁-coordinate image of the chart-α₂ manifold trajectory.
   set u₂ : ℝ → E := fun s => I ((chartAt H α₁) ((chartAt H α₂).symm
     (I.symm ((hper₂).flow (I ((chartAt H α₂) x)) s)))) with hu₂_def
-  -- Initial-condition agreement: `u₁ 0 = I ((chartAt H α₁) x)` (from `flow_spec.1`).
   have hxChart₁_closedBall_r₁ : I ((chartAt H α₁) x) ∈
       Metric.closedBall (I ((chartAt H α₁) α₁)) hper₁.r := by
     unfold ChartLocalPicardData.U at hx₁
@@ -207,7 +193,6 @@ theorem chart_cover_flow_unique_on_overlap_chart_alpha_coord
   obtain ⟨hflow₁_init, hu₁_ode_full⟩ :=
     (hper₁).flow_spec (I ((chartAt H α₁) x)) hxChart₁_closedBall_r₁
   have hu₁_init : u₁ 0 = I ((chartAt H α₁) x) := hflow₁_init
-  -- Initial-condition agreement: `u₂ 0 = I ((chartAt H α₁) x)`.
   have hxChart₂_closedBall_r₂ : I ((chartAt H α₂) x) ∈
       Metric.closedBall (I ((chartAt H α₂) α₂)) hper₂.r := by
     unfold ChartLocalPicardData.U at hx₂
@@ -220,16 +205,13 @@ theorem chart_cover_flow_unique_on_overlap_chart_alpha_coord
     change I ((chartAt H α₁) ((chartAt H α₂).symm
       (I.symm ((hper₂).flow (I ((chartAt H α₂) x)) 0)))) = I ((chartAt H α₁) x)
     rw [hflow₂_init, hx_α₂_pullback_eq_x]
-  -- Hence `u₁ 0 = u₂ 0`.
   have heq0 : u₁ 0 = u₂ 0 := by rw [hu₁_init, hu₂_init]
-  -- Continuity of `u₁` on `[0, S]`: derived from `flow_spec.2` on `[0, hper₁.T]`.
   have hu₁_cont_full : ContinuousOn u₁ (Set.Icc (0 : ℝ) hper₁.T) := by
     intro t ht
     have hderiv := hu₁_ode_full t ht
     exact hderiv.continuousWithinAt
   have hu₁_cont : ContinuousOn u₁ (Set.Icc (0 : ℝ) S) :=
     hu₁_cont_full.mono (Set.Icc_subset_Icc le_rfl hS_le₁)
-  -- ODE for `u₁` on `[0, S)`: restrict from `[0, hper₁.T]`.
   have hu₁_ode : ∀ t ∈ Set.Ico (0 : ℝ) S,
       HasDerivWithinAt u₁
         ((X t ((chartAt H α₁).symm (I.symm (u₁ t)))) : E)
@@ -238,7 +220,6 @@ theorem chart_cover_flow_unique_on_overlap_chart_alpha_coord
     have ht' : t ∈ Set.Icc (0 : ℝ) hper₁.T :=
       ⟨ht.1, ht.2.le.trans hS_le₁⟩
     have hderiv := hu₁_ode_full t ht'
-    -- `hderiv : HasDerivWithinAt u₁ _ (Icc 0 hper₁.T) t`. We need `(Ici t) t`.
     have hderiv_inter : HasDerivWithinAt u₁
         ((X t ((chartAt H α₁).symm (I.symm (u₁ t)))) : E)
         (Set.Ici t ∩ Set.Icc 0 hper₁.T) t :=
@@ -255,52 +236,28 @@ theorem chart_cover_flow_unique_on_overlap_chart_alpha_coord
         rw [mem_nhdsWithin]
         refine ⟨Set.Iio hper₁.T, isOpen_Iio, ht_lt, ?_⟩
         intro s hs
-        -- `hs : s ∈ Set.Iio hper₁.T ∩ Set.Ici t`,
-        -- i.e. `hs.1 : s < hper₁.T` and `hs.2 : t ≤ s`.
-        -- Goal: `s ∈ Set.Ico t hper₁.T`, i.e. `t ≤ s` and `s < hper₁.T`.
         exact ⟨hs.2, hs.1⟩
       exact Filter.mem_of_superset h_mem_open h_subset
     exact hderiv_inter.mono_of_mem_nhdsWithin h_nhdsWithin
-  -- Apply the chart-α₁-coordinate Grönwall primitive.
   have hEqOn : Set.EqOn u₁ u₂ (Set.Icc (0 : ℝ) S) :=
     chart_alpha_coord_gronwall_uniqueness (M := M) (I := I) (E := E)
       X α₁ S r r' K hS_pos hr_lt_r' u₁ u₂
       hLip hu₁_cont hu2_cont hu₁_ode hu2_ode hu1_ball hu2_ball heq0
-  -- Convert `u₁ s = u₂ s` for `s ∈ [0, S]` into the manifold-trajectory
-  -- equality.
   intro s hs
   have hEq := hEqOn hs
-  -- Unfold the definitions of `u₁` and `u₂`.
   have hEq' : (hper₁).flow (I ((chartAt H α₁) x)) s
       = I ((chartAt H α₁) ((chartAt H α₂).symm
         (I.symm ((hper₂).flow (I ((chartAt H α₂) x)) s)))) := by
     have := hEq
     rw [hu₁_def, hu₂_def] at this
     exact this
-  -- Apply `(chartAt H α₁).symm ∘ I.symm` to both sides.
   change (chartAt H α₁).symm (I.symm ((hper₁).flow (I ((chartAt H α₁) x)) s))
     = (chartAt H α₂).symm (I.symm ((hper₂).flow (I ((chartAt H α₂) x)) s))
   rw [hEq']
-  -- Goal:
-  --   (chartAt H α₁).symm (I.symm (I ((chartAt H α₁) (γ₂ s)))) = γ₂ s
-  -- where `γ₂ s = (chartAt H α₂).symm (I.symm ((hper₂).flow ... s))`.
   rw [I.left_inv]
-  -- Goal: (chartAt H α₁).symm ((chartAt H α₁) (γ₂ s)) = γ₂ s.
-  -- This is `(chartAt H α₁).left_inv` at `γ₂ s`, which requires
-  -- `γ₂ s ∈ (chartAt H α₁).source`. Supplied by `hα₂_in_α₁_source`.
   have hmem : (chartAt H α₂).symm (I.symm ((hper₂).flow (I ((chartAt H α₂) x)) s))
       ∈ (chartAt H α₁).source := hα₂_in_α₁_source s hs
   exact (chartAt H α₁).left_inv hmem
-
-/-!
-## Analytic compatibility lemmas for the chart-overlap headline
-
-Two analytic compatibility statements that, together with a chart-α₁ Lipschitz
-hypothesis, allow `chart_cover_flow_unique_on_overlap_chart_alpha_coord` to be
-invoked. They are kept separate from the headline because their proofs use
-purely analytic facts (continuity / chain rule on the chart-transition map)
-that have no Grönwall content.
--/
 
 /--
 **Lemma A.** Continuity of the chart-α₂ flow trajectory at `s = 0` plus
@@ -335,10 +292,7 @@ theorem chart_overlap_alpha_in_alpha_source_short_time
         (chartAt H α₂).symm (I.symm ((hper₂).flow (I ((chartAt H α₂) x)) s))
           ∈ (chartAt H α₁).source := by
   classical
-  -- Abbreviations.
   set y₂ : E := I ((chartAt H α₂) x) with hy₂_def
-  -- From `x ∈ hper₂.U` extract `x ∈ (chartAt H α₂).source` and
-  -- `y₂ ∈ closedBall (I ((chartAt H α₂) α₂)) (hper₂).r`.
   have hx₂_source : x ∈ (chartAt H α₂).source := by
     unfold ChartLocalPicardData.U at hx₂
     exact hx₂.1
@@ -348,62 +302,39 @@ theorem chart_overlap_alpha_in_alpha_source_short_time
     have h : (chartAt H α₂) x ∈
         I ⁻¹' Metric.ball (I ((chartAt H α₂) α₂)) hper₂.r := hx₂.2
     exact Metric.ball_subset_closedBall h
-  -- The chart-α₂-coord flow at `y₂`.
   set u₂ : ℝ → E := fun s => (hper₂).flow y₂ s with hu₂_def
-  -- Extract the flow specification at `y₂`.
   obtain ⟨hflow₂_init, hflow₂_ode⟩ := (hper₂).flow_spec y₂ hy₂_closedBall
-  -- `u₂ 0 = y₂`.
   have hu₂_init : u₂ 0 = y₂ := hflow₂_init
-  -- Continuity of `u₂` on `[0, hper₂.T]`: from the right-handed derivative.
   have hu₂_cont : ContinuousOn u₂ (Set.Icc (0 : ℝ) hper₂.T) := by
     intro t ht
     exact (hflow₂_ode t ht).continuousWithinAt
-  -- `0 ∈ [0, hper₂.T]`.
   have h0_mem : (0 : ℝ) ∈ Set.Icc (0 : ℝ) hper₂.T :=
     ⟨le_rfl, (hper₂).T_pos.le⟩
-  -- Continuity of `u₂` at `s = 0` within `[0, hper₂.T]`.
   have hu₂_cont0 : ContinuousWithinAt u₂ (Set.Icc (0 : ℝ) hper₂.T) 0 :=
     hu₂_cont 0 h0_mem
-  -- The continuity of `I.symm` at any point of `range I`.
-  -- `flow₂(0) = y₂ = I ((chart₂) x)`, which is in `range I`.
-  -- Compose `u₂` with `I.symm` to get a continuous map at `0`.
   have hIsymm_cont : Continuous (I.symm : E → H) := I.continuous_invFun
-  -- Now compose with `(chart₂).symm`, which is continuous on `(chart₂).target`.
-  -- `I.symm (u₂ 0) = I.symm y₂ = I.symm (I ((chart₂) x)) = (chart₂) x`
-  -- (since `I.left_inv` applies to `(chart₂) x : H`).
   have hIsymm_at0 : I.symm (u₂ 0) = (chartAt H α₂) x := by
     rw [hu₂_init, hy₂_def, I.left_inv]
-  -- `(chart₂) x ∈ (chart₂).target` since `x ∈ (chart₂).source` and a chart's
-  -- application of a source point lands in the target.
   have hChart2_target : (chartAt H α₂) x ∈ (chartAt H α₂).target :=
     (chartAt H α₂).map_source hx₂_source
-  -- Continuity of `(chart₂).symm` at `(chart₂) x`. Since `(chart₂).target`
-  -- is open, this is equivalent to local continuity.
   have hChart2_target_open : IsOpen (chartAt H α₂).target :=
     (chartAt H α₂).open_target
-  -- The manifold trajectory `γ₂(s) := (chart₂).symm (I.symm (u₂ s))`.
   set γ₂ : ℝ → M := fun s =>
     (chartAt H α₂).symm (I.symm (u₂ s)) with hγ₂_def
-  -- Initial value: `γ₂(0) = x`.
   have hγ₂_init : γ₂ 0 = x := by
     change (chartAt H α₂).symm (I.symm (u₂ 0)) = x
     rw [hIsymm_at0]
     exact (chartAt H α₂).left_inv hx₂_source
-  -- Continuity of `γ₂` at `s = 0` within `[0, hper₂.T]`.
   have hγ₂_cont0 : ContinuousWithinAt γ₂ (Set.Icc (0 : ℝ) hper₂.T) 0 := by
-    -- Step 1: `I.symm ∘ u₂` is continuous at `0` within `[0, hper₂.T]`.
     have h1 : ContinuousWithinAt (fun s => I.symm (u₂ s))
         (Set.Icc (0 : ℝ) hper₂.T) 0 := by
       exact hIsymm_cont.continuousAt.comp_continuousWithinAt hu₂_cont0
-    -- Step 2: the value of this map at `0` is `(chart₂) x`, which lies in
-    -- `(chart₂).target`, on which `(chart₂).symm` is continuous.
     have h_at0_target : (fun s => I.symm (u₂ s)) 0 ∈ (chartAt H α₂).target := by
       change I.symm (u₂ 0) ∈ (chartAt H α₂).target
       rw [hIsymm_at0]; exact hChart2_target
     have h_chart2symm_cont : ContinuousAt (chartAt H α₂).symm (I.symm (u₂ 0)) := by
       rw [hIsymm_at0]
       exact ((chartAt H α₂).continuousAt_symm hChart2_target)
-    -- Compose: `γ₂ = (chart₂).symm ∘ (I.symm ∘ u₂)`.
     have hcomp : ContinuousWithinAt
         ((chartAt H α₂).symm ∘ (fun s => I.symm (u₂ s)))
         (Set.Icc (0 : ℝ) hper₂.T) 0 :=
@@ -411,27 +342,18 @@ theorem chart_overlap_alpha_in_alpha_source_short_time
         (g := (chartAt H α₂).symm)
         (f := fun s => I.symm (u₂ s))
         h_chart2symm_cont h1
-    -- `γ₂ = (chart₂).symm ∘ (I.symm ∘ u₂)` by definition.
     exact hcomp
-  -- `γ₂(0) = x ∈ (chart₁).source`, and `(chart₁).source` is open.
   have hChart1_source_open : IsOpen (chartAt H α₁).source :=
     (chartAt H α₁).open_source
   have hγ₂_init_mem : γ₂ 0 ∈ (chartAt H α₁).source := by
     rw [hγ₂_init]; exact hx₁
-  -- Continuity at `0` within `[0, hper₂.T]` + open set membership at the value:
-  -- there is a set `V ∈ nhdsWithin 0 (Icc 0 hper₂.T)` with `γ₂ '' V ⊆ chart₁.source`.
   have hpreim : γ₂ ⁻¹' (chartAt H α₁).source ∈
       nhdsWithin (0 : ℝ) (Set.Icc (0 : ℝ) hper₂.T) := by
     apply hγ₂_cont0
     exact hChart1_source_open.mem_nhds hγ₂_init_mem
-  -- Convert this to: there exists `ε > 0` with `Ico 0 ε ⊆ {s | γ₂ s ∈ source}`.
   rw [mem_nhdsWithin] at hpreim
   obtain ⟨V, hV_open, hV_mem, hV_subset⟩ := hpreim
-  -- `0 ∈ V`, `V` open: there is `ε > 0` with `Ioo (-ε) ε ⊆ V`.
   obtain ⟨ε, hε_pos, hε_ball⟩ := Metric.isOpen_iff.mp hV_open 0 hV_mem
-  -- Take `S₀ := min ε (hper₂.T)`; then `S₀ ∈ (0, hper₂.T]` and on `[0, S₀]`
-  -- we have `[0, S₀] ⊆ ball 0 ε ∩ Icc 0 hper₂.T ⊆ V ∩ Icc 0 hper₂.T`.
-  -- We also need `S₀ < ε` so that `[0, S₀] ⊆ Ioo (-ε) ε`. Use `min (ε/2) hper₂.T`.
   set S₀ : ℝ := min (ε / 2) hper₂.T with hS₀_def
   have hS₀_pos : 0 < S₀ := by
     apply lt_min
@@ -441,15 +363,12 @@ theorem chart_overlap_alpha_in_alpha_source_short_time
   have hS₀_lt_ε : S₀ < ε := lt_of_le_of_lt (min_le_left _ _) (by linarith)
   refine ⟨S₀, hS₀_pos, hS₀_le_T, ?_⟩
   intro s hs
-  -- `s ∈ [0, S₀]`. We need `γ₂ s ∈ (chart₁).source`.
   have hs_in_Icc : s ∈ Set.Icc (0 : ℝ) hper₂.T :=
     ⟨hs.1, hs.2.trans hS₀_le_T⟩
   have hs_in_ε : s ∈ Metric.ball (0 : ℝ) ε := by
     rw [Metric.mem_ball, Real.dist_eq, sub_zero, abs_of_nonneg hs.1]
     exact lt_of_le_of_lt hs.2 hS₀_lt_ε
   have hs_in_V : s ∈ V := hε_ball hs_in_ε
-  -- `s ∈ V ∩ Icc 0 hper₂.T`, and by `hV_subset`, this gives
-  -- `s ∈ γ₂ ⁻¹' (chart₁).source`.
   have : s ∈ γ₂ ⁻¹' (chartAt H α₁).source := hV_subset ⟨hs_in_V, hs_in_Icc⟩
   exact this
 
@@ -514,32 +433,24 @@ theorem chart_overlap_chart_alpha_coord_ode
             (I.symm ((hper₂).flow (I ((chartAt H α₂) x)) t)))))))) : E)
         (Set.Ici t) t := by
   classical
-  -- Abbreviations.
   set y₂ : E := I ((chartAt H α₂) x) with hy₂_def
   set u₂ : ℝ → E := fun s => (hper₂).flow y₂ s with hu₂_def
   set g : E → E := fun y =>
     I ((chartAt H α₁) ((chartAt H α₂).symm (I.symm y))) with hg_def
-  -- Extract `y₂ ∈ closedBall (I ((chartAt H α₂) α₂)) (hper₂).r`.
   have hy₂_closedBall : y₂ ∈
       Metric.closedBall (I ((chartAt H α₂) α₂)) hper₂.r := by
     unfold ChartLocalPicardData.U at hx₂
     have h : (chartAt H α₂) x ∈
         I ⁻¹' Metric.ball (I ((chartAt H α₂) α₂)) hper₂.r := hx₂.2
     exact Metric.ball_subset_closedBall h
-  -- The chart-α₂-coord flow specification.
   obtain ⟨_hflow₂_init, hflow₂_ode⟩ := (hper₂).flow_spec y₂ hy₂_closedBall
-  -- For each `t ∈ Ico 0 S`, derive the chart-α₁-coord ODE.
   intro t ht
-  -- `t ∈ [0, hper₂.T]` since `S ≤ hper₂.T`.
   have ht_T : t ∈ Set.Icc (0 : ℝ) hper₂.T :=
     ⟨ht.1, ht.2.le.trans hS_le₂⟩
-  -- Apply chart-α₂ ODE: `HasDerivWithinAt u₂ (X t (chart₂.symm I.symm (u₂ t))) (Icc 0 hper₂.T) t`.
   have hu₂_deriv : HasDerivWithinAt u₂
       ((X t ((chartAt H α₂).symm (I.symm (u₂ t)))) : E)
       (Set.Icc (0 : ℝ) hper₂.T) t :=
     hflow₂_ode t ht_T
-  -- Restrict to `Ici t`: `Ici t ∩ Icc 0 hper₂.T ∈ nhdsWithin t (Ici t)`,
-  -- since `t < S ≤ hper₂.T`.
   have ht_lt_T : t < hper₂.T := lt_of_lt_of_le ht.2 hS_le₂
   have ht_ge : (0 : ℝ) ≤ t := ht.1
   have h_nhdsWithin_T :
@@ -562,11 +473,7 @@ theorem chart_overlap_chart_alpha_coord_ode
       ((X t ((chartAt H α₂).symm (I.symm (u₂ t)))) : E)
       (Set.Ici t) t :=
     hu₂_deriv_inter.mono_of_mem_nhdsWithin h_nhdsWithin_T
-  -- Extract the chart-transition derivative `L_t` and its action on
-  -- `X t (γ₂(t))` from `hcompat`.
   obtain ⟨L_t, hL_t_deriv, hL_t_fix⟩ := hcompat t ht
-  -- Apply the chain rule: `HasFDerivAt g L_t (u₂ t)` + `HasDerivWithinAt u₂ v (Ici t) t`
-  -- gives `HasDerivWithinAt (g ∘ u₂) (L_t v) (Ici t) t`.
   have h_chain : HasDerivWithinAt (g ∘ u₂)
       (L_t ((X t ((chartAt H α₂).symm (I.symm (u₂ t)))) : E))
       (Set.Ici t) t := by
@@ -574,18 +481,11 @@ theorem chart_overlap_chart_alpha_coord_ode
         (L_t ((X t ((chartAt H α₂).symm (I.symm (u₂ t)))) : E))
         (Set.Ici t) t := hL_t_deriv.comp_hasDerivWithinAt t hu₂_deriv_Ici
     exact this
-  -- Substitute `L_t v = v` from `hL_t_fix`.
   have h_chain' : HasDerivWithinAt (g ∘ u₂)
       ((X t ((chartAt H α₂).symm (I.symm (u₂ t)))) : E)
       (Set.Ici t) t := by
     rw [hL_t_fix] at h_chain
     exact h_chain
-  -- The goal's LHS function is `g ∘ u₂` (definitionally).
-  -- The goal's RHS velocity is
-  --   `X t ((chart₁).symm (I.symm (I ((chart₁) ((chart₂).symm (I.symm (u₂ t)))))))`.
-  -- We need to rewrite this as
-  --   `X t ((chart₂).symm (I.symm (u₂ t)))`
-  -- via `I.left_inv` + `(chart₁).left_inv` (the latter using `hα₂_in_α₁_source t ht`).
   have hI_li : I.symm (I ((chartAt H α₁) ((chartAt H α₂).symm (I.symm (u₂ t)))))
       = (chartAt H α₁) ((chartAt H α₂).symm (I.symm (u₂ t))) :=
     I.left_inv _
@@ -593,30 +493,23 @@ theorem chart_overlap_chart_alpha_coord_ode
       ((chartAt H α₁) ((chartAt H α₂).symm (I.symm (u₂ t))))
       = (chartAt H α₂).symm (I.symm (u₂ t)) :=
     (chartAt H α₁).left_inv (hα₂_in_α₁_source t ht)
-  -- Rewrite the goal's velocity.
   have h_rhs_eq :
       ((X t ((chartAt H α₁).symm (I.symm
         (I ((chartAt H α₁) ((chartAt H α₂).symm
           (I.symm ((hper₂).flow (I ((chartAt H α₂) x)) t)))))))) : E)
       = ((X t ((chartAt H α₂).symm (I.symm (u₂ t)))) : E) := by
-    -- The LHS of `h_rhs_eq`'s argument is exactly the rewriting target after
-    -- substituting `u₂ t = (hper₂).flow (I ((chartAt H α₂) x)) t` and applying
-    -- `hI_li` then `hChart1_li`.
     have : (chartAt H α₁).symm (I.symm
         (I ((chartAt H α₁) ((chartAt H α₂).symm (I.symm (u₂ t))))))
         = (chartAt H α₂).symm (I.symm (u₂ t)) := by
       rw [hI_li, hChart1_li]
-    -- Both sides equal `X t · `(chart₂).symm (I.symm (u₂ t))``.
     rw [hu₂_def]
     rw [this]
-  -- The goal's LHS function unfolded is `g ∘ u₂` (after unfolding `g` and `u₂`).
   have h_lhs_eq :
       (fun s : ℝ => I ((chartAt H α₁) ((chartAt H α₂).symm
         (I.symm ((hper₂).flow (I ((chartAt H α₂) x)) s)))))
       = g ∘ u₂ := by
     funext s
     rfl
-  -- Assemble.
   rw [h_lhs_eq, h_rhs_eq]
   exact h_chain'
 

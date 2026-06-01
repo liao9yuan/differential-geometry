@@ -78,18 +78,10 @@ open DifferentialGeometry.Analysis.Parabolic
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The intrinsic eigenbasis coordinate of the heat output
-
-The single fact that turns the diagonal eigenbasis action
-(`tensorHeatSemigroup_intrinsic_inner_eigenbasis`) into a statement about
-the chart-locality-free coordinate functional `tensorL2Coeff`. -/
 
 /-- **Heat-output coordinate formula.** For `t ≥ 0`, the intrinsic
 eigenbasis coordinate of `e^{tΔ} u₀` is `exp(-λᵢ t)` times the coordinate
@@ -110,14 +102,6 @@ theorem tensorHeatSemigroup_intrinsic_tensorL2Coeff_ofCompact
   rw [tensorL2Coeff_eq_inner, tensorL2Coeff_eq_inner]
   exact tensorHeatSemigroup_intrinsic_inner_eigenbasis
     (I := I) (M := M) g r s ht u₀ i
-
-/-! ## The `L²` base element as an `H⁰` coordinate family
-
-For a fixed `u₀ : L²`, its intrinsic eigenbasis coordinate family is the
-coordinate family of an `H⁰` element, via the chart-locality-free
-identification `tensorHsZeroEquivL2`. Applying the spectral
-heat rescaling `heatHsFun σ ht` to this `H⁰` element produces, for `0 < t`,
-an `Hˢ` element with coordinate `exp(-λᵢ t) · ⟪bᵢ, u₀⟫`. -/
 
 /-- The `H⁰` element carrying the intrinsic eigenbasis coordinate family of
 `u₀`: its `i`-th coordinate is `tensorL2Coeff … u₀ i`. -/
@@ -158,8 +142,6 @@ intrinsic eigenbasis coordinate of `u₀`. -/
   unfold heatHsWitness
   rw [tensorHs.heatHsFun_coeff, baseHZero_coeff]
 
-/-! ## The smoothing theorem: `e^{tΔ} u₀ ∈ Hˢ` for every `σ`, `t > 0` -/
-
 /-- **Parabolic smoothing into `Hˢ`.** For `0 < t`, any initial datum
 `u₀ : L²`, and any exponent `σ ≥ 0`, the heat output `e^{tΔ} u₀` is the
 chart-locality-free `L²` realization of the `Hˢ` element
@@ -184,12 +166,9 @@ theorem heat_semigroup_into_tensorHs (g : SmoothRiemannianMetric I M) (r s : ℕ
   set h_compact :=
     tensorResolventL2_isCompactOperator (I := I) (M := M) g r s
     with hcompact_def
-  -- The chart-locality-free eigenbasis representation is injective, so it
-  -- suffices to match `tensorL2Coeff` on both sides.
   refine (tensorResolventHilbertEigenbasisSigma
     (I := I) (M := M) h_compact).repr.injective ?_
   ext i
-  -- The two coordinates are both `exp(-λᵢ t) · ⟪bᵢ, u₀⟫`.
   have hlhs :
       ((tensorResolventHilbertEigenbasisSigma
           (I := I) (M := M) h_compact).repr
@@ -230,62 +209,6 @@ theorem heat_semigroup_into_all_tensorHs (g : SmoothRiemannianMetric I M)
   fun σ hσ =>
     ⟨heatHsWitness (I := I) (M := M) g r s σ ht u₀,
       heat_semigroup_into_tensorHs (I := I) (M := M) g r s hσ ht u₀⟩
-
-/-! ## The smooth-representative gate and its reduction
-
-The complementary direction is the deepest analytic content of the whole
-spectral programme: an element of the spectral smooth subspace
-`⋂_σ Hˢ` — equivalently a tensor in `⋂_k domain((1 - Δ_∇)^k)` — has a
-genuine `C^∞` representative as a `SmoothCcTensor`. We do **not** prove it
-here; we record the precise predicate `SpectralSmoothRealizesAsSmooth` and
-a documentation lemma stating which already-existing unconditional
-ingredients it reduces to, and which single ingredient remains.
-
-### Landscape of the all-orders elliptic-regularity infrastructure
-
-The chart-`H^{2k}` regularity needed to convert "lies in every domain
-`((1 - Δ)^k)`" into "all chart-partial derivatives exist in `L²` at every
-order" is, for the **scalar** Laplacian, available **unconditionally** (no
-`HasLocallyConstantChartAt`): the polymorphic-in-`k` bootstrap
-
-  `chartPushed_memWkp_two_k_of_laplacianDomainPow`
-    (`Analysis/Laplacian/Regularity/Iterated/BootstrapChartHmAnyK.lean`)
-
-proves, for every `k : ℕ` and every `u_h ∈ laplacianDomainPow g k`, the
-chart-`H^{2k}` regularity `MemWkp (2 * k) 2` of the chart-pushed
-representative — with no chart-selection hypothesis anywhere in its file
-(verified: zero `HasLocallyConstantChartAt` occurrences in
-`BootstrapChartHmAnyK`, `BootstrapChartHmStrong`,
-`BootstrapChartHmCanonical`, `BootstrapChartHmFinal`, `MixedPartials`,
-`BootstrapChartHm`).
-
-The **tensor** analog at arbitrary order is, by contrast, presently
-`HasLocallyConstantChartAt`-gated: `eigenvector_chartComponent_memWkp_arbitrary`
-(`…/EllipticBridge/EigenvectorWeakSolution/EigenvectorArbitraryKRegularity.lean`)
-carries `h_atlas` throughout. The remaining piece of the gate is therefore
-an **unconditional tensor all-orders bootstrap** — the
-`TensorEigenIdx`-indexed, `(r, s)`-valued analog of
-`chartPushed_memWkp_two_k_of_laplacianDomainPow`, obtained by running the
-scalar `…AnyK` machinery component-wise on the chart-frame scalar
-components `tensorChartComponentScalar` of an
-`u ∈ ⋂_k domain((1 - Δ_∇)^k)` element.
-
-### The embedding half is already unconditional
-
-The other half — converting all-orders chart-Sobolev regularity into a
-`C^∞` pointwise tensor field — is the unconditional `C^m` tensor Sobolev
-embedding
-
-  `iteratedCovGrad_toSobolev_embedding_Cm`
-    (`PDE/RicciFlow/SobolevEmbeddingCm.lean`),
-
-which bounds, for `2k > dim M + 2m`, the `C^m` fibre norms of a
-`SmoothCcTensor` by its `H^{2(k-j)}` Sobolev norms (no `h_atlas`; it is
-built on the Riemannian-fibre `C⁰` embedding
-`tensorPouSobolevHilbert_embedding_Ck_gNorm`). Combined over all `m`, this
-yields the `C^∞` control; what it does **not** by itself supply is a
-*genuine smooth representative of a general `L²`/`Hˢ` class*, which is
-exactly what the missing unconditional tensor bootstrap above produces. -/
 
 /-- **The smooth-representative gate (predicate on the data).**
 

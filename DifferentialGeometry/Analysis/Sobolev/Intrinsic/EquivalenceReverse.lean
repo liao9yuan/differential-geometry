@@ -67,8 +67,6 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 local notation "EuclN_E" =>
   EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## g-Cauchy-Schwarz inequality on tangent vectors -/
-
 /-- Cauchy-Schwarz inequality for the metric inner product `g.inner x` at a
 fixed point `x`. The proof uses the standard polynomial argument applied to
 `t ↦ g.inner x (v + t • w) (v + t • w) ≥ 0`. -/
@@ -105,7 +103,6 @@ private lemma g_inner_cauchy_schwarz_sq
     rw [h_step]
     rw [(g.inner x v).map_add, (g.inner x v).map_smul]
     rw [h2]
-    -- Now goal has `(t • g.inner x w) (v + t • w)` which is `t • ((g.inner x w) (v + t • w))`.
     rw [show ((t • (g.inner x) w) : TangentSpace I x →L[ℝ] ℝ) (v + t • w)
           = t * ((g.inner x w) (v + t • w)) from by
       change t • ((g.inner x) w) (v + t • w) = t * ((g.inner x w) (v + t • w))
@@ -186,8 +183,6 @@ private lemma abs_g_inner_le_sqrt_mul_sqrt
   rw [Real.sqrt_mul h_v_nn] at h_sqrt_le
   exact h_sqrt_le
 
-/-! ## Tangent-space pushforward of the Euclidean basis -/
-
 /-- The "chart-target unit" tangent vector at `x` corresponding to the
 standard Euclidean basis vector `e_i` (transported back through `toEuclidean`
 and through the chart trivialization). This is the chart pushforward of
@@ -205,8 +200,6 @@ private lemma chartTargetUnit_smoothOn (α : M)
       (trivializationAt E (TangentSpace I) α).baseSet := by
   set v_E : E := (toEuclidean (E := E) : E ≃L[ℝ] EuclN_E).symm
     (EuclideanSpace.single i (1 : ℝ)) with hv_E_def
-  -- The section x ↦ trivialization.symm x v_E is smooth on the base set.
-  -- Use the standard `contMDiffOn_section_baseSet_iff` lemma.
   have hiff :=
     ((trivializationAt E (TangentSpace I) α)).contMDiffOn_section_baseSet_iff
       (IB := I) (n := ∞)
@@ -216,11 +209,8 @@ private lemma chartTargetUnit_smoothOn (α : M)
       (trivializationAt E (TangentSpace I) α).baseSet := contMDiffOn_const
   refine hconst.congr ?_
   intro x hx
-  -- triv (mk x (triv.symm x v_E)).snd = v_E on the base set.
   exact congrArg Prod.snd
     ((trivializationAt E (TangentSpace I) α).apply_mk_symm hx v_E)
-
-/-! ## Continuity of `g.inner x (chartTargetUnitFiber α i x) (chartTargetUnitFiber α i x)` -/
 
 /-- The function `x ↦ g.inner x (w_i(x)) (w_i(x))` is continuous on the chart
 base set. -/
@@ -232,8 +222,6 @@ private lemma g_inner_chartTargetUnit_continuousOn
         (chartTargetUnitFiber (I := I) α i x)
         (chartTargetUnitFiber (I := I) α i x))
       (trivializationAt E (TangentSpace I) α).baseSet := by
-  -- The metric g is smooth, the section chartTargetUnit is smooth on the base set.
-  -- Hence g.inner x (w_i(x)) (w_i(x)) is smooth, in particular continuous.
   have hg : ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun y => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -255,9 +243,6 @@ private lemma g_inner_chartTargetUnit_continuousOn
   have hpx := happ x hx
   rw [Bundle.contMDiffWithinAt_totalSpace] at hpx
   exact (hpx.2.continuousWithinAt)
-
-/-! ## Sup of `g.inner x (chartTargetUnitFiber α i x) (chartTargetUnitFiber α i x)`
-on the compact `tsupport ρ_α` -/
 
 /-- Bound on `g.inner x (w_i(x)) (w_i(x))` over the compact `tsupport(ρ_α)`,
 summed over `i`. -/
@@ -386,9 +371,6 @@ private lemma chartTargetUnitSqSum_le_sup
     (hKα_compact.image_of_continuousOn h_cont).bddAbove
   exact hImg.choose_spec ⟨x, hx, rfl⟩
 
-/-! ## Chain-rule identity: `mfderiv f x (chartTargetUnitFiber α i x)
-= partialDeriv i (chartSmoothExt α f) y` -/
-
 /-- `mfderiv (extChartAt α) x` applied to `(triv.symm x v_E)` returns `v_E`,
 for `x` in the trivialization base set and `v_E ∈ E`. -/
 private lemma mfderiv_extChartAt_apply_triv_symm
@@ -400,7 +382,6 @@ private lemma mfderiv_extChartAt_apply_triv_symm
     exact hxchart
   rw [← TangentBundle.continuousLinearMapAt_trivializationAt (𝕜 := ℝ) (I := I)
     (x₀ := α) (x := x) hxchart]
-  -- Rewrite the symm as symmL.
   have h_symm_eq : ((trivializationAt E (TangentSpace I) α).symm x
         : E → TangentSpace I x) v_E
       = ((trivializationAt E (TangentSpace I) α).symmL ℝ x : E →L[ℝ] TangentSpace I x) v_E := rfl
@@ -428,7 +409,6 @@ private lemma mfderiv_triv_symm_const_eq_fderiv_scalarOnE
   have hxsrc : x ∈ φ.source := by
     rw [DifferentialGeometry.Integral.Measure.extChartAt_source_eq_chartAt_source
       (I := I)]; exact hxchart
-  -- f =ᵃᵉ scalarOnE α f ∘ φ near x.
   have hcomp_eq : ∀ᶠ y in 𝓝 x, f y =
       (DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE
         (I := I) α f) (φ y) := by
@@ -445,7 +425,6 @@ private lemma mfderiv_triv_symm_const_eq_fderiv_scalarOnE
           (I := I) α f) ∘ (extChartAt I α)) x :=
     Filter.EventuallyEq.mfderiv_eq hcong
   rw [hmfderiv_cong]
-  -- Differentiability of scalarOnE α f at φ x.
   have hphi_mdiff : MDifferentiableAt I 𝓘(ℝ, E) (extChartAt I α) x :=
     mdifferentiableAt_extChartAt (I := I) (x := α) hxchart
   have hphi_symm_mdiff :
@@ -491,7 +470,6 @@ private lemma mfderiv_triv_symm_const_eq_fderiv_scalarOnE
         mfderiv_eq_fderiv (𝕜 := ℝ)
           (f := DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE
             (I := I) α f)]
-  -- Apply the composed CLM to (triv.symm x v_E).
   change (fderiv ℝ
           (DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE
             (I := I) α f) (φ x))
@@ -523,7 +501,6 @@ private lemma fderiv_chartSmoothExt_apply_eq_fderiv_scalarOnE
           ((toEuclidean (E := E) : E ≃L[ℝ] EuclN_E).symm
             (EuclideanSpace.single i (1 : ℝ))) := by
   classical
-  -- chartSmoothExt α f = scalarOnE α f ∘ toEuclidean.symm on a neighborhood of y.
   have h_chartTarget_open :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) (α := α)
@@ -550,7 +527,6 @@ private lemma fderiv_chartSmoothExt_apply_eq_fderiv_scalarOnE
     rw [DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_eq_preimage_symm
       (I := I) (M := M)] at hy
     exact hy
-  -- scalarOnE α f is C^∞ on chart target.
   have h_scalar_smooth :=
     DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE_contDiffOn
       (I := I) α hf
@@ -570,7 +546,6 @@ private lemma fderiv_chartSmoothExt_apply_eq_fderiv_scalarOnE
   have h_TE_symm_diffAt : DifferentiableAt ℝ
       (fun z' : EuclN_E => (toEuclidean (E := E)).symm z') y :=
     ((toEuclidean (E := E)).symm).differentiable.differentiableAt
-  -- fderiv chartSmoothExt y = fderiv scalarOnE (φ y) ∘ toEuclidean.symm.
   have h_fderiv_eq :
       fderiv ℝ
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartSmoothExt
@@ -589,8 +564,6 @@ private lemma fderiv_chartSmoothExt_apply_eq_fderiv_scalarOnE
   rw [h_TE_symm_fderiv] at h_fderiv_eq
   rw [h_fderiv_eq]
   rfl
-
-/-! ## Pointwise gradient bound -/
 
 /-- For smooth `f` with `tsupport f ⊆ tsupport(ρ_α)`, and `y ∈ chartTargetEuclid α`
 with `x = (extChartAt α)^{-1}(toEuclidean.symm y)`:
@@ -639,12 +612,10 @@ private lemma sq_fderiv_chartSmoothExt_apply_le_g_inner_mul
     exact (extChartAt I α).right_inv hsymm_target
   have hf_diff : MDifferentiableAt I 𝓘(ℝ, ℝ) f x :=
     hf.mdifferentiable (by simp) x
-  -- Step 1: fderiv (chartSmoothExt α f) y (e_i) = fderiv (scalarOnE α f) (toEuclidean.symm y) (v_E).
   have h_fderiv_eq_chain := fderiv_chartSmoothExt_apply_eq_fderiv_scalarOnE
     (I := I) (M := M) α hf hf_supp_chart hf_compact (y := y) hy i
   set v_E : E := (toEuclidean (E := E) : E ≃L[ℝ] EuclN_E).symm
     (EuclideanSpace.single i (1 : ℝ)) with hv_E_def
-  -- Step 2: fderiv (scalarOnE) (φ x) (v_E) = mfderiv f x (triv.symm x v_E).
   have h_mfderiv_eq :
       fderiv ℝ
           (DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE
@@ -673,8 +644,6 @@ private lemma sq_fderiv_chartSmoothExt_apply_le_g_inner_mul
       (I := I) g f x)
     (chartTargetUnitFiber (I := I) α i x)
 
-/-! ## Pointwise Leibniz bound for `g(grad(ρu), grad(ρu))` -/
-
 /-- Leibniz: `gradFun g (ρ · u) x = ρ(x) · gradFun g u x + u(x) · gradFun g ρ x`. -/
 private lemma gradFun_mul_pointwise
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -696,9 +665,7 @@ private lemma gradFun_mul_pointwise
       (ρ x • DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u x +
         u x • DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g ρ x) v
   rw [DifferentialGeometry.Integral.DivergenceTheorem.inner_gradFun (I := I) g _ x v]
-  -- mfderiv (ρ * u) x v = ρ(x) * mfderiv u x v + u(x) * mfderiv ρ x v.
   have h_fun_eq : (fun y : M => ρ y * u y) = ρ * u := by funext y; rfl
-  -- We work with the CLM cast to ℝ to avoid TangentSpace 𝓘(ℝ,ℝ) confusion.
   set d_ρ : TangentSpace I x →L[ℝ] ℝ := mfderiv I 𝓘(ℝ, ℝ) ρ x with hd_ρ_def
   set d_u : TangentSpace I x →L[ℝ] ℝ := mfderiv I 𝓘(ℝ, ℝ) u x with hd_u_def
   have h_mfderiv_mul : mfderiv I 𝓘(ℝ, ℝ) (fun y : M => ρ y * u y) x v =
@@ -716,9 +683,7 @@ private lemma gradFun_mul_pointwise
         ContinuousLinearMap.smul_apply]
     simp [smul_eq_mul]
   rw [h_mfderiv_mul]
-  -- Goal: ρ x * d_u v + u x * d_ρ v = g.inner x (ρ • g_u + u • g_ρ) v.
   symm
-  -- bilinearity expansion + inner_gradFun.
   have h1 : (g.inner x)
       (ρ x • DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u x +
        u x • DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g ρ x) =
@@ -755,8 +720,6 @@ private lemma gradFun_mul_pointwise
         (I := I) g ρ x)) v = d_ρ v from by
     rw [hd_ρ_def]
     exact DifferentialGeometry.Integral.DivergenceTheorem.inner_gradFun (I := I) g ρ x v]
-
-/-! ## Continuous bound on `√g(grad ρ_α, grad ρ_α)` over the compact `M` -/
 
 /-- For closed Riemannian manifolds and smooth `f`, the function
 `x ↦ √g(grad f, grad f)(x)` is continuous. -/
@@ -804,7 +767,6 @@ private lemma chartAtlasPOU_le_one
     [T2Space M] [SigmaCompactSpace M] (α : M) (x : M) :
     ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
       : C^∞⟮I, M; ℝ⟯) : M → ℝ) x ≤ 1 := by
-  -- Each smooth POU partition is bounded by the partition value.
   exact (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M).le_one α x
 
 private lemma chartAtlasPOU_nonneg
@@ -819,8 +781,6 @@ private lemma abs_chartAtlasPOU_le_one
       : C^∞⟮I, M; ℝ⟯) : M → ℝ) x| ≤ 1 :=
   abs_le.mpr ⟨by linarith [chartAtlasPOU_nonneg (I := I) (M := M) α x],
     chartAtlasPOU_le_one (I := I) (M := M) α x⟩
-
-/-! ## Pointwise bound: `√g(grad(ρ_α u), grad(ρ_α u)) ≤ K_α · (|u| + √g(grad u, grad u))` -/
 
 /-- The Leibniz pointwise bound on the metric norm of `grad(ρ_α u)`. -/
 private lemma sqrt_g_inner_gradFun_pou_mul_le
@@ -844,7 +804,6 @@ private lemma sqrt_g_inner_gradFun_pou_mul_le
   classical
   set ρ : C^∞⟮I, M; ℝ⟯ :=
     DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
-  -- Sup of √g(grad ρ, grad ρ) over compact M.
   obtain ⟨K_grad_ρ, hK_grad_ρ_nn, hK_grad_ρ⟩ :=
     exists_continuous_sup_of_compactSpace (M := M)
       (f := fun x : M => Real.sqrt
@@ -855,10 +814,8 @@ private lemma sqrt_g_inner_gradFun_pou_mul_le
             ((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)))
       (continuous_sqrt_g_inner_gradFun_self (I := I) (M := M) g ρ.contMDiff)
       (fun _ => Real.sqrt_nonneg _)
-  -- Use K = max(1, K_grad_ρ).
   refine ⟨max 1 K_grad_ρ, le_trans zero_le_one (le_max_left _ _), ?_⟩
   intro x
-  -- gradFun (ρ * u) x = ρ x • gradFun u x + u x • gradFun ρ x.
   have hρ_diff : MDifferentiableAt I 𝓘(ℝ, ℝ) ((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x :=
     ρ.contMDiff.mdifferentiable (by simp) x
   have hu_diff : MDifferentiableAt I 𝓘(ℝ, ℝ) u x :=
@@ -866,12 +823,6 @@ private lemma sqrt_g_inner_gradFun_pou_mul_le
   have h_grad_eq := gradFun_mul_pointwise (I := I) g (ρ := (ρ : M → ℝ)) (u := u)
     (x := x) hρ_diff hu_diff
   rw [h_grad_eq]
-  -- g.inner x (ρ • g_u + u • g_ρ) (ρ • g_u + u • g_ρ) ≤ 2(ρ²) g(g_u, g_u) + 2(u²) g(g_ρ, g_ρ).
-  -- Let a = ρ x • gradFun u x, b = u x • gradFun ρ x.
-  -- g(a + b, a + b) = g(a,a) + 2g(a,b) + g(b,b).
-  -- |g(a,b)| ≤ √(g(a,a)) · √(g(b,b)) (Cauchy-Schwarz).
-  -- (√g(a+b, a+b))² ≤ (√g(a,a) + √g(b,b))²
-  -- ⟹ √g(a+b, a+b) ≤ √g(a,a) + √g(b,b).
   set gu : TangentSpace I x :=
     DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u x with hgu_def
   set gρ : TangentSpace I x :=
@@ -879,7 +830,6 @@ private lemma sqrt_g_inner_gradFun_pou_mul_le
       ((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x with hgρ_def
   set a : TangentSpace I x := ((ρ : M → ℝ)) x • gu
   set b : TangentSpace I x := u x • gρ
-  -- Simple form: g(a, a) = (ρ x)² g(gu, gu).
   have ha_self_eq : g.inner x a a = ((ρ : M → ℝ) x)^2 * g.inner x gu gu := by
     change (g.inner x ((((ρ : M → ℝ) x)) • gu)) ((((ρ : M → ℝ) x)) • gu) =
       _ * g.inner x gu gu
@@ -894,8 +844,6 @@ private lemma sqrt_g_inner_gradFun_pou_mul_le
     rw [(g.inner x gρ).map_smul]
     simp [smul_eq_mul, sq]
     ring
-  -- (√g(a+b, a+b))² = g(a+b, a+b) ≤ g(a,a) + 2|g(a,b)| + g(b,b)
-  --                 ≤ g(a,a) + 2 √(g(a,a)) √(g(b,b)) + g(b,b) = (√g(a,a) + √g(b,b))²
   have h_sym : g.inner x a b = g.inner x b a := g.symm x a b
   have h_inner_self_nn : ∀ z : TangentSpace I x, 0 ≤ g.inner x z z := by
     intro z
@@ -909,7 +857,6 @@ private lemma sqrt_g_inner_gradFun_pou_mul_le
   have h_a_nn : 0 ≤ g.inner x a a := h_inner_self_nn _
   have h_b_nn : 0 ≤ g.inner x b b := h_inner_self_nn _
   have h_apb_nn : 0 ≤ g.inner x (a + b) (a + b) := h_inner_self_nn _
-  -- Expand g(a+b, a+b).
   have h_apb_eq : g.inner x (a + b) (a + b) =
       g.inner x a a + 2 * g.inner x a b + g.inner x b b := by
     have h_step : g.inner x (a + b) (a + b) =
@@ -922,9 +869,7 @@ private lemma sqrt_g_inner_gradFun_pou_mul_le
     rw [h_step, (g.inner x a).map_add, (g.inner x b).map_add]
     rw [h_sym]
     ring
-  -- Cauchy-Schwarz: |g(a,b)| ≤ √g(a,a) · √g(b,b).
   have h_CS_ab := abs_g_inner_le_sqrt_mul_sqrt (I := I) g x a b
-  -- (√g(a+b, a+b))² ≤ (√g(a,a) + √g(b,b))²
   have h_apb_le_sum_sq :
       g.inner x (a + b) (a + b) ≤
         (Real.sqrt (g.inner x a a) + Real.sqrt (g.inner x b b))^2 := by
@@ -939,7 +884,6 @@ private lemma sqrt_g_inner_gradFun_pou_mul_le
       linarith
     nlinarith [h_2ab_le, h_sqrt_a_sq, h_sqrt_b_sq,
       Real.sqrt_nonneg (g.inner x a a), Real.sqrt_nonneg (g.inner x b b)]
-  -- √g(a+b, a+b) ≤ √g(a,a) + √g(b,b).
   have h_sum_nn : 0 ≤ Real.sqrt (g.inner x a a) + Real.sqrt (g.inner x b b) :=
     add_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
   have h_sqrt_apb_le : Real.sqrt (g.inner x (a + b) (a + b)) ≤
@@ -948,8 +892,6 @@ private lemma sqrt_g_inner_gradFun_pou_mul_le
     rw [Real.sqrt_sq h_sum_nn] at h
     exact h
   refine h_sqrt_apb_le.trans ?_
-  -- √g(a,a) = |ρ x| · √g(gu, gu) ≤ √g(gu, gu) (since |ρ x| ≤ 1).
-  -- √g(b,b) = |u x| · √g(gρ, gρ) ≤ |u x| · K_grad_ρ.
   have h_sqrt_a : Real.sqrt (g.inner x a a) =
       |((ρ : M → ℝ)) x| * Real.sqrt (g.inner x gu gu) := by
     rw [ha_self_eq]
@@ -963,7 +905,6 @@ private lemma sqrt_g_inner_gradFun_pou_mul_le
     rw [Real.sqrt_mul (sq_nonneg _)]
     rw [Real.sqrt_sq_eq_abs]
   rw [h_sqrt_a, h_sqrt_b]
-  -- |ρ x| ≤ 1, so |ρ x| * √g(gu, gu) ≤ √g(gu, gu) ≤ max 1 K_grad_ρ * √g(gu, gu).
   have hρ_abs : |((ρ : M → ℝ)) x| ≤ 1 := abs_chartAtlasPOU_le_one (I := I) (M := M) α x
   have hsqrt_gu_nn : 0 ≤ Real.sqrt (g.inner x gu gu) := Real.sqrt_nonneg _
   have hsqrt_gρ_nn : 0 ≤ Real.sqrt (g.inner x gρ gρ) := Real.sqrt_nonneg _
@@ -977,12 +918,10 @@ private lemma sqrt_g_inner_gradFun_pou_mul_le
       |u x| * K_grad_ρ := by
     apply mul_le_mul_of_nonneg_left _ (abs_nonneg _)
     exact hK_grad_ρ x
-  -- Combine.
   have hM := le_max_left (1 : ℝ) K_grad_ρ
   have hM' := le_max_right (1 : ℝ) K_grad_ρ
   set K := max (1 : ℝ) K_grad_ρ
   have hK_nn : 0 ≤ K := le_trans zero_le_one hM
-  -- We want: |ρ| · √g(gu,gu) + |u| · √g(gρ,gρ) ≤ K · (|u| + √g(gu,gu)).
   have h_step1 : Real.sqrt (g.inner x gu gu) ≤ K * Real.sqrt (g.inner x gu gu) := by
     have := mul_le_mul_of_nonneg_right hM hsqrt_gu_nn
     linarith
@@ -996,8 +935,6 @@ private lemma sqrt_g_inner_gradFun_pou_mul_le
     _ ≤ K * Real.sqrt (g.inner x gu gu) + K * |u x| :=
         add_le_add h_step1 h_step2
     _ = K * (|u x| + Real.sqrt (g.inner x gu gu)) := by ring
-
-/-! ## Smoothness of `chartSmoothExt α (ρ_α u)` and `chartPushed = chartSmoothExt` on ChTE -/
 
 /-- `chartSmoothExt α (ρ_α u) y` agrees with `chartPushed (chartAtlasPOU) α u y` on
 the chart target. -/
@@ -1048,8 +985,6 @@ lemma chartSmoothExt_eq_chartPushed_pou_ae
       (I := I) (M := M) α)] with y hy
   exact chartSmoothExt_eq_chartPushed_pou_on_target (I := I) (M := M) α u hy
 
-/-! ## Smoothness of `chartSmoothExt α (ρ_α u)` for smooth `u` -/
-
 /-- For closed manifolds and smooth `u`, the function
 `chartSmoothExt α (ρ_α u)` is C^∞ on EuclN. -/
 lemma contDiff_chartSmoothExt_pou_mul_local_reverse
@@ -1076,9 +1011,6 @@ lemma contDiff_chartSmoothExt_pou_mul_local_reverse
     exact h1.trans
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α)
   have hf_compact : IsCompact (tsupport f) := (isClosed_tsupport _).isCompact
-  -- Use the existing private lemma in EquivalenceFull (we re-derive here to avoid private access).
-  -- The proof: chartSmoothExt α f = scalarOnE α f ∘ toEuclidean.symm on the open chart target,
-  -- and is identically zero on the closed complement of the compact image.
   rw [contDiff_iff_contDiffAt]
   intro y
   set form : EuclN_E → ℝ := fun z =>
@@ -1086,7 +1018,6 @@ lemma contDiff_chartSmoothExt_pou_mul_local_reverse
   have h_target_open :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) (α := α)
-  -- Smooth on the chart target (open).
   have h_form_contDiffOn : ContDiffOn ℝ ∞ form
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := by
@@ -1135,8 +1066,7 @@ lemma contDiff_chartSmoothExt_pou_mul_local_reverse
       else (0 : ℝ)) =
       f ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))
     rw [if_pos htarget_at_z]
-  · -- chartSmoothExt α f y = 0 on a neighborhood (off the closed compact image).
-    set K : Set EuclN_E := (toEuclidean (E := E)) '' ((extChartAt I α) '' (tsupport f))
+  · set K : Set EuclN_E := (toEuclidean (E := E)) '' ((extChartAt I α) '' (tsupport f))
     have hK_compact : IsCompact K := by
       have h_extChart_cont : ContinuousOn (extChartAt I α) (tsupport f) :=
         (continuousOn_extChartAt α).mono (by
@@ -1160,7 +1090,6 @@ lemma contDiff_chartSmoothExt_pou_mul_local_reverse
     have hK_compl_open : IsOpen Kᶜ := hK_compact.isClosed.isOpen_compl
     apply ContDiffAt.congr_of_eventuallyEq (f := fun _ : EuclN_E => (0 : ℝ)) contDiffAt_const
     filter_upwards [hK_compl_open.mem_nhds hy_off_K] with z hz
-    -- chartSmoothExt α f z = 0 outside K.
     classical
     by_cases hz_target : (toEuclidean (E := E)).symm z ∈ (extChartAt I α).target
     · have hsymm_source : (extChartAt I α).symm
@@ -1184,12 +1113,6 @@ lemma contDiff_chartSmoothExt_pou_mul_local_reverse
               else (0 : ℝ)) = 0
       rw [if_neg hz_target]
 
-/-! ## Per-α reverse L^p part bound
-
-For each α ∈ canonical POU finset and smooth `u`,
-`eLpNorm (chartPushed ρ α u) p (volume.restrict ChTE) ≤ C_α · eLpNorm u p μ_g`,
-with `C_α` uniform in `u`. -/
-
 private lemma eLpNorm_chartPushed_le_const_mul_eLpNorm_u
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -1211,13 +1134,11 @@ private lemma eLpNorm_chartPushed_le_const_mul_eLpNorm_u
   have hKα_compact : IsCompact Kα := (isClosed_tsupport _).isCompact
   have hKα_sub : Kα ⊆ (chartAt H α).source :=
     DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α
-  -- Apply the existing reverse chart-density bridge with K = Kα and the function (ρ_α u).
   obtain ⟨C_K, hC_K_pos, hC_K_bound⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Chart.eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of_subset
       (I := I) (M := M) g α hKα_compact hKα_sub hp_one hp_top
   refine ⟨C_K, hC_K_pos.le, ?_⟩
   intro u hu
-  -- chartPushed ρ α u = chartPushedRaw α (ρ_α u) a.e. on volume.restrict ChTE.
   set f : M → ℝ := fun y : M => ((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ) y * u y with hf_def
   have hf_meas : Measurable f := (ρ.contMDiff.continuous.measurable).mul hu.continuous.measurable
   have hf_supp : tsupport f ⊆ Kα := by
@@ -1226,23 +1147,16 @@ private lemma eLpNorm_chartPushed_le_const_mul_eLpNorm_u
     rw [h_eq]
     exact tsupport_smul_subset_left
       (f := fun y : M => ((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ) y) (g := u)
-  -- Use chart-density bridge: eLpNorm (chartPushedRaw α f) ≤ C_K · eLpNorm f p μ_g (in form of riemannianMeasure on chartAtlasPOU).
   have h_step1 := hC_K_bound hf_meas hf_supp
-  -- riemannianMeasure ρ ↔ riemannianVolumeMeasure.
   rw [← DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure_def
     (I := I) (M := M) g] at h_step1
-  -- chartPushed ρ α u =ᵃᵉ chartPushedRaw α f.
   have h_ae :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed_eq_chartPushedRaw_pou_ae
       (I := I) (M := M) (ρ := DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)
       α u
   rw [eLpNorm_congr_ae h_ae]
   refine h_step1.trans ?_
-  -- Bound eLpNorm f ≤ eLpNorm u (since |f| ≤ |u|).
   gcongr
-  -- We want eLpNorm f p μ ≤ eLpNorm u p μ. Use eLpNorm_mono_real with bound ‖f x‖ ≤ |u x|.
-  -- But the codomain function for eLpNorm_mono_real must be ℝ-valued.
-  -- Use eLpNorm_mono_ae instead with `‖f‖ ≤ ‖u‖` ae.
   apply eLpNorm_mono
   intro x
   have h_abs_f : ‖f x‖ = |((ρ : M → ℝ) x) * u x| := Real.norm_eq_abs _
@@ -1252,13 +1166,6 @@ private lemma eLpNorm_chartPushed_le_const_mul_eLpNorm_u
   calc |((ρ : M → ℝ) x)| * |u x|
       ≤ 1 * |u x| := by gcongr
     _ = |u x| := one_mul _
-
-/-! ## Per-α gradient L^p bound
-
-For each α and smooth `u`,
-`∑_i eLpNorm chosenWeakPartial' p i (chartPushed ρ α u) ChTE p (volume.restrict ChTE) ≤
-  C_α · (eLpNorm u p μ_g + eLpNorm √g(grad u, grad u) p μ_g)`,
-with `C_α` uniform in `u`. -/
 
 /-- Pointwise bound for `|fderiv chartSmoothExt α (ρ_α u) y e_i|`:
 `≤ K · (chartPushedRaw α (|u| + √g(grad u, grad u))) y`,
@@ -1285,18 +1192,9 @@ private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le
                     (DifferentialGeometry.Integral.DivergenceTheorem.gradFun
                       (I := I) g u x))) y := by
   classical
-  -- Get the per-α sup of g(w_i, w_i) on tsupport ρ_α.
   set M_α : ℝ := chartTargetUnitSqSumSupOnPouTsupport (I := I) (M := M) g α with hM_α_def
   have hM_α_nn : 0 ≤ M_α := chartTargetUnitSqSumSupOnPouTsupport_nonneg
     (I := I) (M := M) g α
-  -- We need a single uniform constant K. Use K = (max(1, K_grad_ρ)) · √M_α.
-  -- But K_grad depends on ρ_α (the POU at α), which is fixed. So this is uniform in u.
-  -- Use sqrt_g_inner_gradFun_pou_mul_le applied to u to get K_grad. Since the K
-  -- in that lemma is `max 1 (sup_M √g(grad ρ_α, grad ρ_α))`, it's independent of u.
-  -- But the lemma signature has K depending on u. We need to extract the u-independent K.
-  -- Trick: the K in sqrt_g_inner_gradFun_pou_mul_le is actually `max 1 K_grad_ρ` where
-  -- K_grad_ρ = sup of √g(∇ρ_α, ∇ρ_α). So the K is u-independent.
-  -- Let's redefine: K_grad_ρ := sup of √g(∇ρ_α, ∇ρ_α) on M.
   set ρ : C^∞⟮I, M; ℝ⟯ :=
     DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α with hρ_def
   obtain ⟨K_grad_ρ, hK_grad_ρ_nn, hK_grad_ρ_bound⟩ :=
@@ -1325,12 +1223,6 @@ private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le
     exact h1.trans
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α)
   have hf_compact : IsCompact (tsupport f) := (isClosed_tsupport _).isCompact
-  -- Apply sqrt_g_inner_gradFun_pou_mul_le.
-  -- But that lemma's K depends on u. However, looking at its proof, the K is exactly `max 1 K_grad_ρ`,
-  -- which we've extracted. Let me use it directly.
-  -- Re-derive the bound inline. We have for each x:
-  -- √g(grad f, grad f)(x) ≤ K_grad · (|u x| + √g(grad u, grad u)(x)).
-  -- This is sqrt_g_inner_gradFun_pou_mul_le but the K there is set to be exactly max(1, K_grad_ρ).
   have hK_grad_bound : ∀ x : M, Real.sqrt
         (g.inner x
           (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g f x)
@@ -1342,17 +1234,12 @@ private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le
             (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u x))) := by
     intro x
     obtain ⟨K', hK'_nn, hK'_bound⟩ := sqrt_g_inner_gradFun_pou_mul_le (I := I) (M := M) g α hu
-    -- hK' has the bound; show our K_grad ≥ K' so that the result transfers.
-    -- Actually K' from the lemma might be different from K_grad. We use hK'_bound and bound K' ≤ K_grad
-    -- if needed.
-    -- Cleaner: prove the bound directly using the same Cauchy-Schwarz argument inline.
     have hρ_diff : MDifferentiableAt I 𝓘(ℝ, ℝ) ((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x :=
       ρ.contMDiff.mdifferentiable (by simp) x
     have hu_diff : MDifferentiableAt I 𝓘(ℝ, ℝ) u x :=
       hu.mdifferentiable (by simp) x
     have h_grad_eq := gradFun_mul_pointwise (I := I) g (ρ := (ρ : M → ℝ)) (u := u)
       (x := x) hρ_diff hu_diff
-    -- h_grad_eq: gradFun g f x = ρ x • gradFun g u x + u x • gradFun g ρ x.
     set gu : TangentSpace I x :=
       DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u x
     set gρ : TangentSpace I x :=
@@ -1361,7 +1248,6 @@ private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le
     set a : TangentSpace I x := ((ρ : M → ℝ)) x • gu
     set b : TangentSpace I x := u x • gρ
     rw [h_grad_eq]
-    -- Now Cauchy-Schwarz: √g(a+b, a+b) ≤ √g(a,a) + √g(b,b).
     have h_inner_self_nn : ∀ z : TangentSpace I x, 0 ≤ g.inner x z z := by
       intro z
       by_cases hz : z = 0
@@ -1408,7 +1294,6 @@ private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le
       rw [Real.sqrt_sq h_sum_nn] at h
       exact h
     refine h_sqrt_apb_le.trans ?_
-    -- √g(a, a) = |ρ x| · √g(gu, gu); √g(b, b) = |u x| · √g(gρ, gρ).
     have h_sqrt_a : Real.sqrt (g.inner x a a) =
         |((ρ : M → ℝ)) x| * Real.sqrt (g.inner x gu gu) := by
       have h_a_self_eq : g.inner x a a = ((ρ : M → ℝ) x)^2 * g.inner x gu gu := by
@@ -1453,12 +1338,10 @@ private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le
       _ ≤ K_grad * Real.sqrt (g.inner x gu gu) + K_grad * |u x| :=
           add_le_add h_step1 h_step2
       _ = K_grad * (|u x| + Real.sqrt (g.inner x gu gu)) := by ring
-  -- Now we have hK_grad_bound. Continue with the original proof structure.
   by_cases hy_in : y ∈
       DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α
-  · -- y ∈ chart target.
-    set x : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hx_def
+  · set x : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hx_def
     have h_sq_bound := sq_fderiv_chartSmoothExt_apply_le_g_inner_mul (I := I) (M := M) g
       α hf_smooth hf_supp_chart hf_compact (y := y) hy_in i
     have h_lhs_nn : 0 ≤ |fderiv ℝ
@@ -1489,16 +1372,12 @@ private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le
                 (chartTargetUnitFiber (I := I) α i x)
                 (chartTargetUnitFiber (I := I) α i x)) := by
       have h := Real.sqrt_le_sqrt h_sq_bound
-      -- h : √((fderiv ...)^2) ≤ √(g(grad f, grad f) · g(w_i, w_i))
-      -- LHS: √(...^2) = |...| (using sqrt_sq_eq_abs).
       rw [Real.sqrt_sq_eq_abs] at h
       rw [Real.sqrt_mul h_grad_f_nn] at h
       exact h
     refine h_abs_le_sqrt.trans ?_
-    -- Bound √g(w_i, w_i) by √M_α (when x ∈ tsupport ρ_α) or by 0 otherwise.
     by_cases hx_pou : x ∈ tsupport ((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ)
-    · -- x ∈ tsupport ρ_α.
-      have h_w_nn : ∀ j : Fin (Module.finrank ℝ E), 0 ≤
+    · have h_w_nn : ∀ j : Fin (Module.finrank ℝ E), 0 ≤
           g.inner x
             (chartTargetUnitFiber (I := I) α j x)
             (chartTargetUnitFiber (I := I) α j x) := fun j => by
@@ -1575,8 +1454,7 @@ private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le
                   (g.inner z
                     (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u z)
                     (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u z))) hy_in]
-    · -- x ∉ tsupport ρ_α. Then gradFun f x = 0, so √g(grad f, grad f) = 0.
-      have hx_off_f : x ∉ tsupport f :=
+    · have hx_off_f : x ∉ tsupport f :=
         fun hin => hx_pou ((tsupport_smul_subset_left
           (f := fun z : M => ((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ) z) (g := u)) hin)
       have h_grad_f_zero : DifferentialGeometry.Integral.DivergenceTheorem.gradFun
@@ -1606,12 +1484,7 @@ private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le
               (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u z)
               (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u z))) hy_in]
       exact add_nonneg (abs_nonneg _) (Real.sqrt_nonneg _)
-  · -- y ∉ chart target. We use the fact that chartSmoothExt α f is C^∞ and is zero
-    -- off the compact image of tsupport f. There is a closed compact set
-    -- K = chart-image(tsupport f) such that chartSmoothExt = 0 outside K.
-    -- For y ∉ ChTE, we have y ∉ K (since K ⊆ ChTE). So chartSmoothExt α f vanishes
-    -- on a neighborhood of y (the open set Kᶜ).
-    have h_chartSmoothExt_smooth : ContDiff ℝ ∞
+  · have h_chartSmoothExt_smooth : ContDiff ℝ ∞
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartSmoothExt
           (I := I) (M := M) α f) :=
       contDiff_chartSmoothExt_pou_mul_local_reverse (I := I) (M := M) α hu
@@ -1642,7 +1515,6 @@ private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le
     have h_eqz : (DifferentialGeometry.Analysis.Sobolev.Chart.chartSmoothExt
         (I := I) (M := M) α f) =ᶠ[𝓝 y] (fun _ : EuclN_E => (0 : ℝ)) := by
       filter_upwards [h_nhds] with z hz
-      -- chartSmoothExt α f z = 0 outside K.
       classical
       by_cases hz_target : (toEuclidean (E := E)).symm z ∈ (extChartAt I α).target
       · have hsymm_source : (extChartAt I α).symm
@@ -1681,8 +1553,6 @@ private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le
             (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u z)
             (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u z))) hy_in]
 
-/-! ## Per-α gradient L^p bound (uniform in `u`) -/
-
 /-- Refinement of `abs_fderiv_chartSmoothExt_apply_pou_mul_le` using the indicator of
 `tsupport ρ_α`. Since the LHS vanishes off the chart pushforward of `tsupport ρ_α`,
 the bound holds with the indicator-truncated `v`. -/
@@ -1718,8 +1588,7 @@ private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le_indicator
   by_cases hy_in : y ∈
       DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α
-  · -- y ∈ ChTE.
-    have h_full := hK_bound (u := u) hu i y
+  · have h_full := hK_bound (u := u) hu i y
     rw [DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_apply_of_mem
       (I := I) α _ hy_in] at h_full
     rw [DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_apply_of_mem
@@ -1735,12 +1604,10 @@ private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le_indicator
       with hv_def
     set x : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hx_def
     by_cases hx_Kα : x ∈ Kα
-    · -- x ∈ Kα: indicator Kα v x = v x.
-      change _ ≤ K * (Set.indicator Kα v) x
+    · change _ ≤ K * (Set.indicator Kα v) x
       rw [Set.indicator_of_mem hx_Kα]
       exact h_full
-    · -- x ∉ Kα: indicator Kα v x = 0. Need to show LHS = 0.
-      change _ ≤ K * (Set.indicator Kα v) x
+    · change _ ≤ K * (Set.indicator Kα v) x
       rw [Set.indicator_of_notMem hx_Kα, mul_zero]
       set f : M → ℝ := fun z : M => ((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ) z * u z with hf_def
       have hf_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ f := ρ.contMDiff.mul hu
@@ -1766,7 +1633,6 @@ private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le_indicator
           g f h_mfd_eq
       have h_sq := sq_fderiv_chartSmoothExt_apply_le_g_inner_mul (I := I) (M := M) g
         α hf_smooth hf_supp_chart hf_compact (y := y) hy_in i
-      -- Unwrap the `let x := ...` binder.
       simp only at h_sq
       have h_inner_zero : g.inner x
           (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g f x)
@@ -1788,8 +1654,7 @@ private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le_indicator
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartSmoothExt
           (I := I) (M := M) α f) y (EuclideanSpace.single i (1 : ℝ))| ≤ 0
       rw [h_zero, abs_zero]
-  · -- y ∉ ChTE.
-    have h_full := hK_bound (u := u) hu i y
+  · have h_full := hK_bound (u := u) hu i y
     rw [DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_apply_of_notMem
       (I := I) α _ hy_in] at h_full
     rw [DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_apply_of_notMem
@@ -1843,7 +1708,6 @@ theorem eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul
         (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u x)
         (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u x))
   set v_α : M → ℝ := Set.indicator Kα v
-  -- v is measurable.
   have hv_meas : Measurable v := by
     have h_abs_meas : Measurable (fun x : M => |u x|) := hu.continuous.measurable.abs
     have h_grad_meas : Measurable (fun x : M => Real.sqrt
@@ -1861,7 +1725,6 @@ theorem eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul
     apply hx
     change (Set.indicator Kα v) x = 0
     rw [Set.indicator_of_notMem hxc]
-  -- Step 1: pointwise bound (with indicator).
   have h_pt : ∀ y : EuclN_E, ‖fderiv ℝ
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartSmoothExt
           (I := I) (M := M) α
@@ -1871,7 +1734,6 @@ theorem eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul
     intro y
     rw [Real.norm_eq_abs]
     exact hK_bound (u := u) hu i y
-  -- Step 2: take eLpNorm.
   have h_eLp_le : eLpNorm (fun y : EuclN_E => fderiv ℝ
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartSmoothExt
           (I := I) (M := M) α
@@ -1886,7 +1748,6 @@ theorem eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
             (I := I) (M := M) α)) := eLpNorm_mono_real h_pt
   refine h_eLp_le.trans ?_
-  -- Step 3: pull out K and apply chart-density bridge.
   have h_pull_K : eLpNorm (fun y : EuclN_E => K *
       DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α v_α y) p
       ((volume : Measure EuclN_E).restrict
@@ -1909,11 +1770,9 @@ theorem eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul
     have hK_enorm : ‖K‖ₑ = ENNReal.ofReal K := Real.enorm_eq_ofReal hK_nn
     rw [hK_enorm]
   rw [h_pull_K]
-  -- Now need: ENNReal.ofReal K * eLpNorm chartPushedRaw α v_α ≤ ENNReal.ofReal (K * C_K) * (eLpNorm u + eLpNorm √g..).
   have h_step2 := hC_K_bound hv_α_meas hv_α_supp
   rw [← DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure_def
     (I := I) (M := M) g] at h_step2
-  -- eLpNorm v_α ≤ eLpNorm u + eLpNorm √g.
   have h_v_α_le : ∀ x, ‖v_α x‖ ≤ |u x| +
       Real.sqrt
         (g.inner x
@@ -1987,8 +1846,6 @@ theorem eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul
               (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g)) := by
         rw [← mul_assoc, ← ENNReal.ofReal_mul hK_nn]
 
-/-! ## Per-α `wkpNorm` bound and assembly -/
-
 /-- The classical partial of `chartSmoothExt α (ρ_α u)` agrees a.e. on
 `volume.restrict ChTE` with `chosenWeakPartial' p i (chartPushed ρ α u) ChTE`. -/
 lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
@@ -2028,10 +1885,8 @@ lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
     exact h1.trans
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α)
   have hf_compact : IsCompact (tsupport f) := (isClosed_tsupport _).isCompact
-  -- ψ is C^∞ on EuclN.
   have hψ_smooth : ContDiff ℝ ∞ ψ :=
     contDiff_chartSmoothExt_pou_mul_local_reverse (I := I) (M := M) α hu
-  -- ψ has compact support in ChTE.
   have hψ_supp : tsupport ψ ⊆
       DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α := by
@@ -2117,7 +1972,6 @@ lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
                 else (0 : ℝ)) = 0
         rw [if_neg hz_target]
     exact hK_compact.of_isClosed_subset (isClosed_tsupport _) h_sub_image
-  -- ψ ∈ MemWkp 1 p (chart target).
   have hψ_mem_W1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) p ψ
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := by
@@ -2127,16 +1981,12 @@ lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
         (I := I) (M := M) α)
       hψ_smooth hψ_compact_supp hψ_supp hp_one 1
     exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p).mp h
-  -- chartPushed ρ α u =ᵃᵉ ψ on volume.restrict ChTE.
   have h_ae_chartPushed : DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
       (I := I) (M := M) (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u
       =ᵐ[(volume : Measure EuclN_E).restrict
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
             (I := I) (M := M) α)]
       ψ := (chartSmoothExt_eq_chartPushed_pou_ae (I := I) (M := M) α u).symm
-  -- chosenWeakPartial' p i (chartPushed ρ α u) ChTE = chosenWeakPartial' p i ψ ChTE a.e.
-  -- (chosen weak partial of two ae-equal functions are ae-equal — uniqueness of weak partials).
-  -- The classical partial of ψ is a weak partial. By uniqueness, it equals chosen WP a.e.
   have h_classical_isWeak :
       DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
         (fun y : EuclN_E => fderiv ℝ ψ y (EuclideanSpace.single i 1)) ψ
@@ -2149,7 +1999,6 @@ lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
         (I := I) (M := M) α)
       (hψ_smooth.of_le (by norm_cast))
-  -- The chosenWeakPartial' p i ψ ChTE is also a weak partial.
   have h_chosen_isWeak :
       DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
         (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
@@ -2160,7 +2009,6 @@ lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
           (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_isWeakPartial_of_mem
       hψ_mem_W1p i
-  -- Both are L^p loc. (Continuity / W1p L^p).
   have h_classical_loc : LocallyIntegrable
       (fun y : EuclN_E => fderiv ℝ ψ y (EuclideanSpace.single i (1 : ℝ)))
       ((volume : Measure EuclN_E).restrict
@@ -2180,7 +2028,6 @@ lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
           (I := I) (M := M) α)) :=
     (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_memLp_of_mem
       hψ_mem_W1p i).locallyIntegrable hp_one
-  -- AE equality of weak partials.
   have h_chosen_psi_ae :
       (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
         (d := Module.finrank ℝ E) p i ψ
@@ -2197,27 +2044,17 @@ lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
         (I := I) (M := M) α)
       h_chosen_isWeak h_classical_isWeak
       h_chosen_loc h_classical_loc
-  -- chosenWeakPartial' of chartPushed = chosenWeakPartial' of ψ a.e.
-  -- (because chartPushed =ᵃᵉ ψ, but chosenWeakPartial is defined per function. For ae-equal inputs,
-  -- both are weak partials of either input, hence ae-equal by ae_eq lemma.)
-  -- The chosenWeakPartial' of chartPushed is a weak partial of chartPushed.
-  -- Since chartPushed =ᵃᵉ ψ, it's a weak partial of ψ.
-  -- And chosenWeakPartial' of ψ is a weak partial of ψ.
-  -- By ae_eq, they're ae-equal.
-  -- This requires chartPushed ∈ MemW1p (so that chosenWeakPartial' is meaningful for it).
   have h_chartPushed_mem_W1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) p
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
         (I := I) (M := M) (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := by
-    -- chartPushed =ᵃᵉ ψ, ψ ∈ MemW1p, so chartPushed ∈ MemW1p (MemW1p preserved under ae-equality).
     have h := DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p (d := Module.finrank ℝ E) (p := p)
       (u := DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
         (I := I) (M := M) (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
       (Ω := DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α)
     refine h.mp ?_
-    -- MemWkp 1 p (chartPushed) ↔ MemWkp 1 p ψ via ae-equality.
     have h_psi_mem : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) 1 p ψ
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
@@ -2227,7 +2064,6 @@ lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
       (d := Module.finrank ℝ E) hp_one
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
         (I := I) (M := M) α) h_ae_chartPushed).mpr h_psi_mem
-  -- chosenWeakPartial' of chartPushed is a weak partial of chartPushed, hence of ψ.
   have h_chosen_chartPushed_isWeak :
       DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
         (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
@@ -2253,7 +2089,6 @@ lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
         ψ
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
           (I := I) (M := M) α) := by
-    -- Derive from h_chosen_chartPushed_isWeak using ae-equality on the input.
     intro φ hφ_smooth hφ_compact hφ_supp
     have h_lhs := h_chosen_chartPushed_isWeak φ hφ_smooth hφ_compact hφ_supp
     rw [show (∫ x in DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
@@ -2269,7 +2104,6 @@ lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
     · refine MeasureTheory.integral_congr_ae ?_
       filter_upwards [h_ae_chartPushed] with x hx
       rw [hx]
-  -- Local integrability.
   have h_chosen_chartPushed_loc : LocallyIntegrable
       (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
         (d := Module.finrank ℝ E) p i
@@ -2282,7 +2116,6 @@ lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
           (I := I) (M := M) α)) :=
     (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_memLp_of_mem
       h_chartPushed_mem_W1p i).locallyIntegrable hp_one
-  -- Apply ae_eq.
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq
     (Ω := DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
       (I := I) (M := M) α)
@@ -2290,8 +2123,6 @@ lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
       (I := I) (M := M) α)
     h_chosen_chartPushed_isWeak_psi h_classical_isWeak
     h_chosen_chartPushed_loc h_classical_loc
-
-/-! ## Per-α total `wkpNorm` bound (uniform in `u`) -/
 
 /-- Sum over `Fin 1 → Fin d` indexed via the natural equivalence. -/
 private lemma sum_Fin1_eq_sum_Fin (d : ℕ)
@@ -2337,13 +2168,11 @@ private lemma wkpNorm_chartPushed_le_const_mul_per_α
   intro u hu
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_eq_sum]
   rw [Finset.sum_range_succ, Finset.sum_range_one]
-  -- j = 0: rewrite using uniqueness of Fin 0 → _.
   haveI : Unique (Fin 0 → Fin (Module.finrank ℝ E)) :=
     { default := fun i : Fin 0 => i.elim0
       uniq := fun β => by funext j; exact j.elim0 }
   rw [Fintype.sum_unique]
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial_zero]
-  -- j = 1: rewrite each iterWeakPartial 1 β as chosenWeakPartial' (β 0).
   have h_j1_eq : (∑ β : Fin 1 → Fin (Module.finrank ℝ E),
       eLpNorm
         (DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial
@@ -2399,7 +2228,6 @@ private lemma wkpNorm_chartPushed_le_const_mul_per_α
         ((volume : Measure EuclN_E).restrict
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α)))
   rw [h_j1_eq]
-  -- Bound L^p part.
   have h_Lp := hC_Lp_bound (u := u) hu
   have h_Lp_step :
       eLpNorm (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
@@ -2416,7 +2244,6 @@ private lemma wkpNorm_chartPushed_le_const_mul_per_α
                   (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u x))) p
               (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g)) := by
     refine h_Lp.trans ?_; gcongr; exact le_self_add
-  -- Bound gradient sum.
   have h_chosenWP_eq : ∀ i : Fin (Module.finrank ℝ E),
       eLpNorm
         (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
@@ -2512,8 +2339,6 @@ private lemma wkpNorm_chartPushed_le_const_mul_per_α
   gcongr
   rw [ENNReal.ofReal_add hC_Lp_nn (mul_nonneg (Nat.cast_nonneg _) hC_grad_nn)]
 
-/-! ## Auxiliary: chartPushed of `u` is `0` when `chartAtlasPOU α = 0` -/
-
 private lemma chartPushed_eq_zero_of_pou_zero
     [T2Space M] [SigmaCompactSpace M] (α : M) (u : M → ℝ)
     (h_pou_zero : ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -2528,8 +2353,6 @@ private lemma chartPushed_eq_zero_of_pou_zero
       : C^∞⟮I, M; ℝ⟯) : M → ℝ)
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) = 0 from by rw [h_pou_zero]]
   simp
-
-/-! ## Headline -/
 
 /-- Reverse direction (uniform-in-`u`). For a closed Riemannian manifold
 modelled on a finite-dim real inner-product space and an exponent
@@ -2583,7 +2406,6 @@ theorem wkpNormChart_le_const_mul_intrinsicLpComponents_smooth_uniform
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
             (I := I) (M := M) α) := rfl
   rw [h_def]
-  -- Outside S, the per-α wkpNorm is 0 (POU α = 0 ⟹ chartPushed = 0).
   have h_outside_zero : ∀ α : M, α ∉ S →
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) 1 p
@@ -2614,7 +2436,6 @@ theorem wkpNormChart_le_const_mul_intrinsicLpComponents_smooth_uniform
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
         (I := I) (M := M) α)
   rw [tsum_eq_sum (s := S) h_outside_zero]
-  -- Per-α bound for α ∈ S.
   have h_per_α : ∀ α ∈ S,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) 1 p

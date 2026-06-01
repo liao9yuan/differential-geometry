@@ -78,15 +78,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The lower-order remainder integrand
-
-The lower-order remainder collects the three non-principal product groups of
-the component-formula expansion `(∂S + LO_S) · (∂T + LO_T)`: the cross terms
-`∂S · LO_T` and `LO_S · ∂T`, and the pure lower-order term `LO_S · LO_T`. The
-prefactor — the chart-frame tensor-metric Gram `covChartMetricGram` and the
-un-weighted inverse Gram `chartInvGramEuclid` — is identical to the principal
-part `covPrincipalIntegrand`. -/
-
 /-- **The component-coupled lower-order remainder of the chart-coordinate
 Dirichlet integrand.** Same `covChartMetricGram` / `chartInvGramEuclid`
 prefactor as `covPrincipalIntegrand`, but the inner factor is the sum of the
@@ -155,16 +146,6 @@ lemma covLowerOrderIntegrand_def
                         covDerivLowerOrderTerm (I := I) (M := M)
                           g r s T α l Q.1 Q.2 y) := rfl
 
-/-! ## The headline coupled identity
-
-Splitting the inner product `(∂S + LO_S) · (∂T + LO_T)` of the component-coupled
-double sum `tensorCovDerivPointwiseInner_chart_eq_component_sum` into the
-`∂S · ∂T` group and the three non-principal groups, the former collects into
-the principal part `covPrincipalIntegrand` and the latter into the lower-order
-remainder `covLowerOrderIntegrand`. The split is purely the distributive law
-`(a + b)(c + d) = a·c + (a·d + b·c + b·d)` summed over the four nested
-`Finset`s. -/
-
 /-- **The chart-coordinate decomposition of the tensor `H^1` Dirichlet
 integrand.** For `y` in the Euclidean chart target `chartTargetEuclid α`, set
 `b := (extChartAt I α).symm (toEuclidean.symm y)`. The pointwise integrand
@@ -185,41 +166,20 @@ theorem tensorCovDerivPointwiseInner_chart_eq
       covPrincipalIntegrand (I := I) (M := M) g r s S T α y +
         covLowerOrderIntegrand (I := I) (M := M) g r s S T α y := by
   classical
-  -- Start from the single component-coupled double sum.
   rw [tensorCovDerivPointwiseInner_chart_eq_component_sum (I := I) (M := M)
     g r s S T α hy]
-  -- Unfold the principal part and the lower-order remainder.
   rw [covPrincipalIntegrand_def, covLowerOrderIntegrand_def]
-  -- Distribute the `(P, Q)` sum across the principal / lower-order split.
   rw [← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl (fun P _ => ?_)
   rw [← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl (fun Q _ => ?_)
-  -- `covG · A = covG · A₁ + covG · A₂` once `A = A₁ + A₂`.
   rw [← mul_add]
   congr 1
-  -- Distribute the `(k, l)` sum across the split.
   rw [← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl (fun l _ => ?_)
-  -- Pointwise: `Ginv · (∂S + LO_S)(∂T + LO_T) =
-  --   Ginv · ∂S∂T + Ginv · (∂S·LO_T + LO_S·∂T + LO_S·LO_T)`.
   ring
-
-/-! ## Smoothness of the lower-order remainder
-
-On the Euclidean chart target the prefactors `covChartMetricGram` and
-`chartInvGramEuclid` are `C^∞` (`covChartMetricGram_contDiffOn`,
-`chartInvGramEuclid_contDiffOn`). The Euclidean push-forward
-`chartPushedRaw I α (tensorChartComponentRaw …)` of a raw chart component is
-`C^∞` there — the raw component is smooth on the chart source
-(`tensorChartComponentRaw_contMDiffOn_chart_source`), transported through
-`(extChartAt I α).symm` and `toEuclidean.symm` — hence its chart-Euclidean
-partial derivative `euclidPartial` is again `C^∞`. The lower-order correction
-`covDerivLowerOrderTerm` is `C^∞` (`covDerivComponent_lowerOrder_contDiffOn`,
-with the raw-component `C^∞` hypothesis discharged from the same push-forward
-smoothness). A finite sum and product of `C^∞` functions is `C^∞`. -/
 
 /-- The Euclidean push-forward `chartPushedRaw I α (tensorChartComponentRaw …)`
 of a raw chart component of a smooth compactly-supported tensor section is
@@ -234,18 +194,15 @@ theorem chartPushedRaw_tensorChartComponentRaw_contDiffOn
         (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx))
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- The raw component is `C^∞` on the chart source.
   have hraw_src : ContMDiffOn I 𝓘(ℝ) ∞
       (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx)
       ((chartAt H α).source) :=
     tensorChartComponentRaw_contMDiffOn_chart_source (I := I) (M := M)
       g r s S α Idx Jdx
-  -- The chart source coincides with `(extChartAt I α).source`.
   have hraw_extsrc : ContMDiffOn I 𝓘(ℝ) ∞
       (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx)
       ((extChartAt I α).source) := by
     rw [extChartAt_source]; exact hraw_src
-  -- Compose with `(extChartAt I α).symm`: smooth on the chart target.
   have hsymm : ContMDiffOn 𝓘(ℝ, E) I ∞ (extChartAt I α).symm
       (extChartAt I α).target := contMDiffOn_extChartAt_symm (I := I) α
   have hmaps : Set.MapsTo (extChartAt I α).symm (extChartAt I α).target
@@ -260,7 +217,6 @@ theorem chartPushedRaw_tensorChartComponentRaw_contDiffOn
         (extChartAt I α).symm)
       (extChartAt I α).target :=
     hcomp_E.contDiffOn
-  -- Pre-compose with the linear isometry `toEuclidean.symm`.
   have hcomp_eucl : ContDiffOn ℝ ∞
       (((tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) ∘
           (extChartAt I α).symm) ∘
@@ -272,7 +228,6 @@ theorem chartPushedRaw_tensorChartComponentRaw_contDiffOn
     · intro y hy
       rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
       exact hy
-  -- On the chart target `chartPushedRaw` is exactly this composition.
   refine hcomp_eucl.congr (fun z hz => ?_)
   exact chartPushedRaw_apply_of_mem (I := I) (M := M) α
     (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) hz
@@ -291,9 +246,6 @@ theorem euclidPartial_chartPushedRaw_contDiffOn
           (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx)))
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- `euclidPartial k u = fderiv ℝ u · (single k 1)`. On the open Euclidean
-  -- chart target, the Fréchet derivative of a `C^∞` function is `C^∞`, and
-  -- evaluation at a fixed vector is a continuous linear map.
   set u : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
     chartPushedRaw I α
       (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) with hu_def
@@ -302,7 +254,6 @@ theorem euclidPartial_chartPushedRaw_contDiffOn
       g r s S α Idx Jdx
   have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- The Fréchet derivative is `C^∞` on the open set.
   have hfderiv : ContDiffOn ℝ ∞ (fun z => fderiv ℝ u z)
       (chartTargetEuclid (I := I) (M := M) α) := by
     have hsucc : ContDiffOn ℝ ((∞ : WithTop ℕ∞) + 1) u
@@ -314,7 +265,6 @@ theorem euclidPartial_chartPushedRaw_contDiffOn
       ((contDiffOn_succ_iff_fderivWithin hopen.uniqueDiffOn).mp hsucc).2.2
     refine hfw.congr (fun z hz => ?_)
     exact (fderivWithin_of_isOpen (f := u) (𝕜 := ℝ) hopen hz).symm
-  -- Evaluation at `single k 1` is a continuous linear map; compose.
   have hcomp : ContDiffOn ℝ ∞
       ((fun L : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) →L[ℝ] ℝ =>
           L (EuclideanSpace.single k 1)) ∘ (fun z => fderiv ℝ u z))
@@ -337,7 +287,6 @@ theorem covLowerOrderIntegrand_contDiffOn
       (covLowerOrderIntegrand (I := I) (M := M) g r s S T α)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- The raw-component push-forward `C^∞` hypotheses for `S` and `T`.
   have hrawS : ∀ (Idx' : Fin r → Fin (Module.finrank ℝ E))
       (Jdx' : Fin s → Fin (Module.finrank ℝ E)),
       ContDiffOn ℝ ∞
@@ -354,7 +303,6 @@ theorem covLowerOrderIntegrand_contDiffOn
         (chartTargetEuclid (I := I) (M := M) α) := fun Idx' Jdx' =>
     chartPushedRaw_tensorChartComponentRaw_contDiffOn (I := I) (M := M)
       g r s T α Idx' Jdx'
-  -- The `(P, Q)`-summand is `C^∞`.
   have hsummand : ∀ P Q : (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin s → Fin (Module.finrank ℝ E)),
       ContDiffOn ℝ ∞
@@ -381,12 +329,10 @@ theorem covLowerOrderIntegrand_contDiffOn
                           g r s T α l Q.1 Q.2 y))
         (chartTargetEuclid (I := I) (M := M) α) := by
     intro P Q
-    -- The chart-frame tensor-metric Gram prefactor is `C^∞`.
     have hgram : ContDiffOn ℝ ∞
         (covChartMetricGram (I := I) (M := M) g r s α P Q)
         (chartTargetEuclid (I := I) (M := M) α) :=
       covChartMetricGram_contDiffOn (I := I) (M := M) g r s α P Q
-    -- The inner `(k, l)`-summand is `C^∞`.
     have hinner : ∀ k l : Fin (Module.finrank ℝ E),
         ContDiffOn ℝ ∞
           (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
@@ -412,7 +358,6 @@ theorem covLowerOrderIntegrand_contDiffOn
       have hGinv : ContDiffOn ℝ ∞ (chartInvGramEuclid (I := I) g α k l)
           (chartTargetEuclid (I := I) (M := M) α) :=
         chartInvGramEuclid_contDiffOn (I := I) (M := M) g α k l
-      -- The four building blocks.
       have hSpartial : ContDiffOn ℝ ∞
           (euclidPartial (E := E) k
             (chartPushedRaw I α
@@ -439,11 +384,8 @@ theorem covLowerOrderIntegrand_contDiffOn
           (chartTargetEuclid (I := I) (M := M) α) :=
         covDerivComponent_lowerOrder_contDiffOn (I := I) (M := M)
           g r s T α l Q.1 Q.2 hrawT
-      -- The three product groups are `C^∞`; so is their sum, and the product
-      -- with the inverse Gram entry.
       exact hGinv.mul (((hSpartial.mul hTlo).add (hSlo.mul hTpartial)).add
         (hSlo.mul hTlo))
-    -- A finite sum of `C^∞` functions is `C^∞`.
     have hklsum : ContDiffOn ℝ ∞
         (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
           ∑ k : Fin (Module.finrank ℝ E),
@@ -468,8 +410,6 @@ theorem covLowerOrderIntegrand_contDiffOn
         (chartTargetEuclid (I := I) (M := M) α) :=
       ContDiffOn.sum (fun k _ => ContDiffOn.sum (fun l _ => hinner k l))
     exact hgram.mul hklsum
-  -- A finite sum of `C^∞` functions is `C^∞`; the lower-order remainder is,
-  -- definitionally, exactly this finite sum.
   have hsum : ContDiffOn ℝ ∞
       (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
         ∑ P : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -500,15 +440,6 @@ theorem covLowerOrderIntegrand_contDiffOn
     ContDiffOn.sum (fun P _ => ContDiffOn.sum (fun Q _ => hsummand P Q))
   exact hsum
 
-/-! ## The principal/lower-order split is exact
-
-The headline `tensorCovDerivPointwiseInner_chart_eq` reads, rearranged: on the
-Euclidean chart target the lower-order remainder is exactly the genuine
-chart-coordinate Dirichlet integrand minus the principal part. This `Set.EqOn`
-form records that the decomposition is exact and is the channel through which a
-downstream integral over the chart target reduces the lower-order remainder to
-genuine-integrand and principal-part contributions. -/
-
 /-- **The principal/lower-order split is exact.** On the Euclidean chart target
 `chartTargetEuclid α`, the lower-order remainder `covLowerOrderIntegrand`
 equals the genuine chart-coordinate Dirichlet integrand
@@ -525,22 +456,12 @@ theorem covLowerOrderIntegrand_eqOn
   intro y hy
   have h := tensorCovDerivPointwiseInner_chart_eq (I := I) (M := M)
     g r s S T α hy
-  -- `LHS = P + L` ⟹ `L = LHS − P`.
   change covLowerOrderIntegrand (I := I) (M := M) g r s S T α y =
     tensorCovDerivPointwiseInner (I := I) (M := M) g r s S T
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) -
       covPrincipalIntegrand (I := I) (M := M) g r s S T α y
   rw [h]
   ring
-
-/-! ## Symmetry of the lower-order remainder
-
-Swapping the section pair `(S, T)` swaps the roles of `S` and `T` in every
-product group: `∂S · LO_T ↔ LO_S · ∂T` and `LO_S · LO_T ↔ LO_T · LO_S`, with
-the two component multi-index pairs `P, Q` and the two chart directions `k, l`
-also swapped. The chart-frame tensor-metric Gram `covChartMetricGram` and the
-inverse Gram `chartInvGramEuclid` are both symmetric, so the value is
-unchanged. -/
 
 /-- **Symmetry of the lower-order remainder under the `(S, T)` swap.** -/
 theorem covLowerOrderIntegrand_symm
@@ -551,23 +472,18 @@ theorem covLowerOrderIntegrand_symm
       covLowerOrderIntegrand (I := I) (M := M) g r s T S α y := by
   classical
   rw [covLowerOrderIntegrand_def, covLowerOrderIntegrand_def]
-  -- Swap the two outer `(P, Q)` sums.
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl (fun P _ => ?_)
   refine Finset.sum_congr rfl (fun Q _ => ?_)
-  -- The chart-frame tensor-metric Gram is symmetric in `(Q, P)`.
   rw [covChartMetricGram_symm (I := I) (M := M) g r s α Q P y]
   congr 1
-  -- Swap the two inner `(k, l)` sums.
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl (fun k _ => ?_)
   refine Finset.sum_congr rfl (fun l _ => ?_)
-  -- The inverse Gram is symmetric in `(l, k)`.
   rw [show chartInvGramEuclid (I := I) g α l k y =
       chartInvGramEuclid (I := I) g α k l y from ?_]
   · ring
-  · -- Symmetry of the chart inverse Gram matrix.
-    rw [chartInvGramEuclid_def, chartInvGramEuclid_def, chartInvGramOnE_def,
+  · rw [chartInvGramEuclid_def, chartInvGramEuclid_def, chartInvGramOnE_def,
       chartInvGramOnE_def]
     have hHerm : (chartInvGramMatrix (I := I) g α
         ((extChartAt I α).symm (toEuclidean.symm y))).IsHermitian := by

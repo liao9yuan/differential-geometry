@@ -57,14 +57,11 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Local Young inequality (private re-derivation) -/
-
 /-- Young's inequality for nonnegative absolute values, written in the
 form used by `c_term_bound`. Re-derivation since the upstream version
 is `private`. -/
 private lemma two_abs_mul_le_eps_sq_add_cterm (a b ε : ℝ) (hε : 0 < ε) :
     2 * |a| * |b| ≤ ε * a^2 + (1/ε) * b^2 := by
-  -- 2 * |a| * |b| = 2 * (√ε |a|) * (|b| / √ε), then AM-GM.
   have hsqrt_pos : 0 < Real.sqrt ε := Real.sqrt_pos.mpr hε
   have hsqrt_ne : Real.sqrt ε ≠ 0 := ne_of_gt hsqrt_pos
   set u : ℝ := Real.sqrt ε * |a|
@@ -83,8 +80,6 @@ private lemma two_abs_mul_le_eps_sq_add_cterm (a b ε : ℝ) (hε : 0 < ε) :
     _ ≤ u^2 + v^2 := two_mul_le_add_sq u v
     _ = ε * a^2 + (1/ε) * b^2 := by rw [hu_sq, hv_sq]
 
-/-! ## Local L² lemma for the test function -/
-
 /-- The Nirenberg test function `v_test = D_{-h}^k(η² · D_h^k u)` is in
 `L²(E)` whenever `u ∈ L²(E)` and `η` is smooth with compact support. -/
 private lemma memLp_two_v_test
@@ -94,7 +89,6 @@ private lemma memLp_two_v_test
     MemLp (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
         k h η u) 2 (volume : Measure E) := by
   classical
-  -- Inner function `g := η² · D_h^k u`.
   set gFun : E → ℝ := fun y : E => (η y)^2 *
     DifferentialGeometry.Analysis.Sobolev.diffQuot k h u y with hgFun_def
   have hη_sq_cont : Continuous (fun x : E => (η x)^2) := hη.continuous.pow 2
@@ -133,8 +127,6 @@ private lemma aestronglyMeasurable_v_test
       (volume : Measure E) :=
     hη_sq_cont.aestronglyMeasurable.mul h_dqu_aesm
   exact aestronglyMeasurable_diffQuot (d := d) k (-h) h_g_aesm
-
-/-! ## Headline non-smooth `c`-term bound -/
 
 set_option linter.unusedVariables false in
 /-- **Quantitative non-smooth `c`-term bound.**
@@ -189,7 +181,6 @@ theorem c_term_bound_nonsmooth_quantitative
             ∂(volume : Measure E) +
           ∫ x in Ω', (u x)^2 ∂(volume : Measure E)) := by
   classical
-  -- Bound the c-coefficient on the compact closure of Ω'.
   set Mc : ℝ := Classical.choose
     (SmoothEllipticBilinearForm.bounded_c_on_compact (d := d) B hΩ'_compact)
     with hMc_eq
@@ -199,7 +190,6 @@ theorem c_term_bound_nonsmooth_quantitative
   have h_Mc : ∀ x ∈ closure Ω', |B.c x| ≤ Mc :=
     (Classical.choose_spec
       (SmoothEllipticBilinearForm.bounded_c_on_compact (d := d) B hΩ'_compact)).2
-  -- Constant C depending on ε, N, Mc but not on h.
   set C : ℝ := max (4 * ε * N^2) (Mc^2 / (2 * ε)) with hC_def
   have hC_nn : 0 ≤ C := by
     rw [hC_def]
@@ -208,40 +198,30 @@ theorem c_term_bound_nonsmooth_quantitative
     exact mul_nonneg (by linarith) hε.le
   intro h hh hh_le
   have h_thick_in_Ω' : Metric.cthickening |h| (tsupport η) ⊆ Ω' := hh_supp_in_Ω' hh_le
-  -- Notation for the test function.
   set v_test : E → ℝ :=
     DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
       k h η u with hv_test_def
-  -- Support of v_test is in Ω' ⊆ Ω.
   have h_v_test_supp : tsupport v_test ⊆ Ω' :=
     (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.tsupport_nirenbergTestFunction_subset
       (d := d) η u k h).trans h_thick_in_Ω'
   have h_v_test_in_Ω : tsupport v_test ⊆ Ω := fun x hx =>
     hΩ'_closure (subset_closure (h_v_test_supp hx))
-  -- Continuity / measurability infrastructure.
   have h_c_cont : Continuous B.c := B.continuous_c
   have h_v_test_aesm : AEStronglyMeasurable v_test (volume : Measure E) :=
     aestronglyMeasurable_v_test (d := d) hu_l2 hη k h
   have h_v_test_l2 : MemLp v_test 2 (volume : Measure E) :=
     memLp_two_v_test (d := d) hu_l2 hη hη_supp k h
-  -- v_test = 0 outside Ω (resp. Ω').
   have h_v_test_zero_outside : ∀ x ∉ Ω, v_test x = 0 := fun x hx =>
     image_eq_zero_of_notMem_tsupport (fun hy => hx (h_v_test_in_Ω hy))
   have h_v_test_zero_outside_Ω' : ∀ x ∉ Ω', v_test x = 0 := fun x hx =>
     image_eq_zero_of_notMem_tsupport (fun hy => hx (h_v_test_supp hy))
-  -- Step 1: convert ∫_Ω c u v_test = ∫_{Ω'} c u v_test (via going through ∫_E).
-  -- Integrability: |c · u · v_test| is bounded.
-  --   Globally: |c·u·v_test| · 𝟙_Ω' is bounded by Mc · |u · v_test|, where |u · v_test| ∈ L¹(E).
-  --   Outside Ω': v_test = 0 ⇒ integrand = 0.
   have h_uv_l1 : Integrable (fun x : E => u x * v_test x) (volume : Measure E) :=
     MemLp.integrable_mul (p := 2) (q := 2) hu_l2 h_v_test_l2
-  -- Bound: |c·u·v_test| ≤ Mc · |u · v_test| pointwise (using v_test = 0 off Ω').
   have h_pointwise_cuv :
       ∀ x : E, |B.c x * u x * v_test x| ≤ Mc * |u x * v_test x| := by
     intro x
     by_cases hx : x ∈ Ω'
-    · -- |c x| ≤ Mc on closure Ω'.
-      have hx_cl : x ∈ closure Ω' := subset_closure hx
+    · have hx_cl : x ∈ closure Ω' := subset_closure hx
       have h_c_le : |B.c x| ≤ Mc := h_Mc x hx_cl
       have h_uv_nn : 0 ≤ |u x * v_test x| := abs_nonneg _
       calc |B.c x * u x * v_test x|
@@ -256,7 +236,6 @@ theorem c_term_bound_nonsmooth_quantitative
       have h_rhs_nn : 0 ≤ Mc * |u x * v_test x| :=
         mul_nonneg hMc_nn (abs_nonneg _)
       exact h_rhs_nn
-  -- Integrability of `B.c · u · v_test` on E.
   have h_cuv_aesm : AEStronglyMeasurable (fun x : E => B.c x * u x * v_test x)
       (volume : Measure E) := by
     have h1 : AEStronglyMeasurable B.c (volume : Measure E) :=
@@ -266,7 +245,6 @@ theorem c_term_bound_nonsmooth_quantitative
     exact h2.mul h_v_test_aesm
   have h_cuv_int : Integrable (fun x : E => B.c x * u x * v_test x)
       (volume : Measure E) := by
-    -- Use the bounding function g x = Mc · |u x * v_test x|.
     have h_uv_abs_l1 : Integrable (fun x : E => |u x * v_test x|)
         (volume : Measure E) := h_uv_l1.abs
     refine (h_uv_abs_l1.const_mul Mc).mono' h_cuv_aesm ?_
@@ -274,7 +252,6 @@ theorem c_term_bound_nonsmooth_quantitative
     intro x
     rw [Real.norm_eq_abs]
     exact h_pointwise_cuv x
-  -- ∫_Ω c · u · v_test = ∫_E c · u · v_test = ∫_{Ω'} c · u · v_test.
   have h_int_E : ∫ x in Ω, B.c x * u x * v_test x ∂(volume : Measure E) =
       ∫ x, B.c x * u x * v_test x ∂(volume : Measure E) := by
     have h_eq_zero : ∀ x, x ∉ Ω → B.c x * u x * v_test x = 0 := by
@@ -282,7 +259,6 @@ theorem c_term_bound_nonsmooth_quantitative
       rw [h_v_test_zero_outside x hx]; ring
     exact setIntegral_eq_integral_of_forall_compl_eq_zero h_eq_zero
   rw [h_int_E]
-  -- Step 2: ∫_E c u v_test = ∫_{Ω'} c u v_test.
   have h_int_Ω' : ∫ x, B.c x * u x * v_test x ∂(volume : Measure E) =
       ∫ x in Ω', B.c x * u x * v_test x ∂(volume : Measure E) := by
     have h_eq_zero : ∀ x, x ∉ Ω' → B.c x * u x * v_test x = 0 := by
@@ -290,7 +266,6 @@ theorem c_term_bound_nonsmooth_quantitative
       rw [h_v_test_zero_outside_Ω' x hx]; ring
     exact (setIntegral_eq_integral_of_forall_compl_eq_zero h_eq_zero).symm
   rw [h_int_Ω']
-  -- Step 3: pointwise Young: |cu · v_test| ≤ (ε/2) · v_test² + (1/(2ε)) · (cu)².
   have h_pointwise_cu_v : ∀ x : E,
       |B.c x * u x * v_test x| ≤ (ε/2) * (v_test x)^2 + (1/(2*ε)) * (B.c x * u x)^2 := by
     intro x
@@ -304,14 +279,10 @@ theorem c_term_bound_nonsmooth_quantitative
       field_simp
     have h_ε_eq : ε * (v_test x)^2 = 2 * ((ε / 2) * (v_test x)^2) := by ring
     linarith [h_y, h_div_eq, h_ε_eq]
-  -- Integrability on Ω'.
-  -- v_test² ∈ L¹(E) (since v_test ∈ L²(E)).
   have h_v_test_sq_int : Integrable (fun x : E => (v_test x)^2)
       (volume : Measure E) := h_v_test_l2.integrable_sq
   have h_v_test_sq_int_Ω' : IntegrableOn (fun x : E => (v_test x)^2) Ω' volume :=
     h_v_test_sq_int.integrableOn
-  -- (cu)² is in L²(Ω') (c bounded on closure Ω', u ∈ L² ⊇ L²(Ω')).
-  -- We bound it using c bounded on closure Ω'.
   have h_u_sq_int_Ω' : IntegrableOn (fun x : E => (u x)^2) Ω' volume := by
     have h_u_sq_int_E : Integrable (fun x : E => (u x)^2) (volume : Measure E) :=
       hu_l2.integrable_sq
@@ -340,13 +311,11 @@ theorem c_term_bound_nonsmooth_quantitative
     have h_cu_sq_nn : 0 ≤ (B.c x * u x)^2 := sq_nonneg _
     rw [abs_of_nonneg h_cu_sq_nn]
     exact h_cu_sq_bound x hx
-  -- |c · u · v_test| ∈ L¹(Ω').
   have h_cu_v_int_Ω' : IntegrableOn (fun x : E => B.c x * u x * v_test x) Ω' volume :=
     h_cuv_int.integrableOn
   have h_rhs_int_Ω' : IntegrableOn (fun x : E =>
       (ε/2) * (v_test x)^2 + (1/(2*ε)) * (B.c x * u x)^2) Ω' volume := by
     refine (h_v_test_sq_int_Ω'.const_mul (ε/2)).add (h_cu_sq_int_Ω'.const_mul (1/(2*ε)))
-  -- |∫_{Ω'} cu v_test| ≤ ∫_{Ω'} |cu v_test| ≤ ∫_{Ω'} ((ε/2) v² + (1/(2ε))(cu)²).
   have h_step1 : |∫ x in Ω', B.c x * u x * v_test x ∂(volume : Measure E)| ≤
       ∫ x in Ω', |B.c x * u x * v_test x| ∂(volume : Measure E) :=
     abs_integral_le_integral_abs (μ := (volume : Measure E).restrict Ω')
@@ -358,11 +327,9 @@ theorem c_term_bound_nonsmooth_quantitative
     refine Filter.Eventually.of_forall ?_
     intro x; exact h_pointwise_cu_v x
   refine (h_step1.trans h_step2).trans ?_
-  -- ∫_{Ω'} ((ε/2) v² + (1/(2ε)) (cu)²) = (ε/2) ∫_{Ω'} v² + (1/(2ε)) ∫_{Ω'} (cu)².
   rw [integral_add (h_v_test_sq_int_Ω'.const_mul (ε/2))
       (h_cu_sq_int_Ω'.const_mul (1/(2*ε)))]
   rw [integral_const_mul, integral_const_mul]
-  -- ∫_{Ω'} v² ≤ ∫_E v².
   have h_v_test_sq_Ω'_le_E :
       ∫ x in Ω', (v_test x)^2 ∂(volume : Measure E) ≤
       ∫ x, (v_test x)^2 ∂(volume : Measure E) := by
@@ -372,9 +339,7 @@ theorem c_term_bound_nonsmooth_quantitative
         intro x hx; rw [h_v_test_zero_outside_Ω' x hx]; ring
       exact (setIntegral_eq_integral_of_forall_compl_eq_zero h_eq_zero).symm
     rw [h_eq]
-  -- Bound on ‖v_test‖² via the supplied hypothesis.
   have h_v_test_bound := h_v_test_sq_bound hh hh_le
-  -- (cu)² ≤ Mc² · u² on Ω'.
   have h_cu_sq_int_Ω'_le : ∫ x in Ω', (B.c x * u x)^2 ∂(volume : Measure E) ≤
       Mc^2 * ∫ x in Ω', (u x)^2 ∂(volume : Measure E) := by
     have h_const_int : IntegrableOn (fun x : E => Mc^2 * (u x)^2) Ω' volume :=
@@ -385,7 +350,6 @@ theorem c_term_bound_nonsmooth_quantitative
       setIntegral_mono_on h_cu_sq_int_Ω' h_const_int hΩ'.measurableSet h_cu_sq_bound
     rw [integral_const_mul] at h_step
     exact h_step
-  -- Now combine.
   have h_v_sq_le_8N_2I :
       ∫ x in Ω', (v_test x)^2 ∂(volume : Measure E) ≤
         8 * N^2 *
@@ -395,13 +359,11 @@ theorem c_term_bound_nonsmooth_quantitative
             (DifferentialGeometry.Analysis.Sobolev.diffQuot k h (g k) x)^2
           ∂(volume : Measure E) :=
     h_v_test_sq_Ω'_le_E.trans h_v_test_bound
-  -- Bound `∫_{tsupport η} (D_h^k u)² ≤ ∫_{Ω'} ∑_i (g i)²` (FK bound).
   have h_diff_bound :
       ∫ x in tsupport η, (DifferentialGeometry.Analysis.Sobolev.diffQuot k h u x)^2
           ∂(volume : Measure E) ≤
         ∫ x in Ω', ∑ i : Fin d, ((g i) x) ^ 2 ∂(volume : Measure E) :=
     h_FK_diffQuot_u_bound hh hh_le
-  -- Bound `∫ η² · (D_h^k g_k)² ≤ ∫ η² · ∑_i (D_h^k g_i)²`.
   have h_partial_le_sum : ∀ x : E,
       (η x)^2 *
         (DifferentialGeometry.Analysis.Sobolev.diffQuot k h (g k) x)^2 ≤
@@ -413,7 +375,6 @@ theorem c_term_bound_nonsmooth_quantitative
     exact Finset.single_le_sum
       (f := fun i => (DifferentialGeometry.Analysis.Sobolev.diffQuot k h (g i) x)^2)
       (fun i _ => sq_nonneg _) (Finset.mem_univ k)
-  -- Integrability of η² · (D_h^k g_k)² and η² · ∑_i (D_h^k g_i)².
   have h_eta_sq_partial_int : Integrable (fun x : E =>
       (η x)^2 *
         (DifferentialGeometry.Analysis.Sobolev.diffQuot k h (g k) x)^2) volume := by
@@ -428,7 +389,6 @@ theorem c_term_bound_nonsmooth_quantitative
       (η x)^2 *
         ∑ i : Fin d,
           (DifferentialGeometry.Analysis.Sobolev.diffQuot k h (g i) x)^2) volume := by
-    -- Sum over i of (η² · (D_h^k g_i)²), then swap.
     have h_per_i : ∀ i : Fin d, Integrable (fun x : E =>
         (η x)^2 *
           (DifferentialGeometry.Analysis.Sobolev.diffQuot k h (g i) x)^2) volume := by
@@ -460,13 +420,11 @@ theorem c_term_bound_nonsmooth_quantitative
             (DifferentialGeometry.Analysis.Sobolev.diffQuot k h (g i) x)^2
         ∂(volume : Measure E) :=
     integral_mono h_eta_sq_partial_int h_eta_sq_sum_int h_partial_le_sum
-  -- Now combine all the bounds.
   have h_gradL2_nn : 0 ≤ ∫ x in Ω',
         ∑ i : Fin d, ((g i) x) ^ 2 ∂(volume : Measure E) :=
     integral_nonneg (fun x => Finset.sum_nonneg (fun i _ => sq_nonneg _))
   have h_uL2_nn : 0 ≤ ∫ x in Ω', (u x)^2 ∂(volume : Measure E) :=
     integral_nonneg (fun x => sq_nonneg _)
-  -- Compute step by step.
   have h_v_full_bound :
       (ε/2) * ∫ x in Ω', (v_test x)^2 ∂(volume : Measure E) ≤
       4 * ε * N^2 *
@@ -475,9 +433,6 @@ theorem c_term_bound_nonsmooth_quantitative
           ∑ i : Fin d,
             (DifferentialGeometry.Analysis.Sobolev.diffQuot k h (g i) x)^2
         ∂(volume : Measure E) := by
-    -- (ε/2) · ‖v_test‖² ≤ (ε/2) · (8N² ∫_{tsupp η}(D_h^k u)² + 2 ∫ η²(D_h^k g_k)²)
-    --                 = 4εN² ∫_{tsupp η}(D_h^k u)² + ε ∫ η²(D_h^k g_k)²
-    --                 ≤ 4εN² ∫_{Ω'} ∑ g_i² + ε ∫ η² ∑ (D_h^k g_i)².
     have h_step_a := mul_le_mul_of_nonneg_left h_v_sq_le_8N_2I (by linarith : 0 ≤ ε/2)
     have h_step_b : (ε/2) * (8 * N^2 *
             ∫ x in tsupport η, (DifferentialGeometry.Analysis.Sobolev.diffQuot k h u x)^2
@@ -522,7 +477,6 @@ theorem c_term_bound_nonsmooth_quantitative
         mul_le_mul_of_nonneg_left h_partial_int_le hε.le
       linarith
     linarith
-  -- (1/(2ε)) ∫_{Ω'} (cu)² ≤ Mc²/(2ε) · ∫_{Ω'} u².
   have h_cu_full_bound :
       (1/(2*ε)) * ∫ x in Ω', (B.c x * u x)^2 ∂(volume : Measure E) ≤
       (Mc^2 / (2 * ε)) * ∫ x in Ω', (u x)^2 ∂(volume : Measure E) := by
@@ -532,7 +486,6 @@ theorem c_term_bound_nonsmooth_quantitative
     have h_eq : (1 / (2 * ε)) * (Mc ^ 2 * ∫ x in Ω', u x ^ 2 ∂(volume : Measure E)) =
         Mc^2 / (2*ε) * ∫ x in Ω', (u x)^2 ∂(volume : Measure E) := by ring
     linarith [h_step, h_eq]
-  -- Final composition.
   have h_C_grad_le : 4 * ε * N^2 ≤ C := le_max_left _ _
   have h_C_uL2_le : Mc^2 / (2*ε) ≤ C := le_max_right _ _
   have h_combine :

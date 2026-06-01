@@ -134,12 +134,10 @@ theorem chart_cover_flow_bijective_on_short_time
       ∀ s ∈ Set.Ico (0 : ℝ) S, Ψ s (Φ s x) = x := by
   classical
   intro x
-  -- Extract per-point data.
   obtain ⟨S, hS_pos, hS_le, α_x, hx_source, hΨ_repr_at_Φ, hChartCoord_inv⟩ :=
     hPick x
   refine ⟨S, hS_pos, hS_le, ?_⟩
   intro s hs
-  -- Apply the single-chart primitive.
   exact chart_cover_flow_bijective_single_chart_short_time
     (X := X) (α := α_x) (hperNeg := hperNeg α_x)
     (Ψ := Ψ) (Φtx := Φ s x) (t := s)
@@ -179,7 +177,6 @@ theorem chart_cover_flow_bijective_on_short_time_symm
     hPick x
   refine ⟨S, hS_pos, hS_le, ?_⟩
   intro s hs
-  -- Re-use the chart-pullback-to-manifold primitive.
   exact chart_pullback_to_manifold_eq_via_chart_coord_inv
     (α := α_x)
     (cflow := fun u => (hper α_x).flow (I ((chartAt H α_x) (Ψ s x))) u)

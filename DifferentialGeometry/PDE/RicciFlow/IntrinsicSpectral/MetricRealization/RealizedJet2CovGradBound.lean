@@ -91,12 +91,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-! ## Differentiability bookkeeping for `chartGramOnE`
-
-`chartGramOnE g α l b` is `C^∞` on `(extChartAt I α).target` (`chartGramOnE_contDiffOn`),
-hence differentiable at every interior point.  We name the differentiability and the
-first-partial smoothness needed to commute `partialDeriv` past the subtraction. -/
-
 /-- The chart Gram entry on `E` is differentiable at an interior point. -/
 private lemma chartGramOnE_diffAt_interior
     (g : SmoothRiemannianMetric I M) (α : M) (l b : Fin (Module.finrank ℝ E))
@@ -139,15 +133,6 @@ private lemma partialDeriv_chartGramOnE_diffAt_interior
     partialDeriv_contDiffOn_interior (I := I) α hcd_int a
   exact (hcd_partial.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
-/-! ## The chart-frame component of the fixed realized tensor difference
-
-For two realizable elements `u₁, u₂` with smooth representatives `T₁, T₂`, the chart-frame
-component function `y ↦ ccTensorBilinSymm g_bg S ((extChartAt I α).symm y) (e_l) (e_b)` of
-the fixed difference `S = T₁ − T₂` is, by `chartGramOnE_realizeMetricAt_sub_eq_reprDiff`,
-equal to the chart-Gram-on-`E` difference of the two realized metrics, as functions on
-`E`.  We record this function-level identity so that the chart-coordinate partials of the
-metric-difference Gram entries are exactly the partials of the tensor component. -/
-
 /-- The chart-`α` `(l, b)` frame component of the fixed realized tensor difference
 `S = realizableRepr hu₁ − realizableRepr hu₂`, as a function on the chart target `E`. -/
 def reprDiffChartCompOnE (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
@@ -176,11 +161,6 @@ theorem chartGramOnE_realizeMetricAt_sub_funext
   funext y
   rw [reprDiffChartCompOnE]
   exact chartGramOnE_realizeMetricAt_sub_eq_reprDiff (I := I) g_bg hu₁ hu₂ α l b y
-
-/-! ## The chart `2`-jet seminorm of the realized-metric difference, entry by entry
-
-We rewrite each `chartGramOnE`-difference (and its partials, on the interior) as the
-corresponding chart partial of the chart component of `S`. -/
 
 /-- The `0`-jet entry of the realized-metric difference equals the chart component of `S`
 at the chart point. -/
@@ -236,8 +216,6 @@ theorem partialDeriv2_chartGramOnE_realizeMetricAt_sub_eq
       partialDeriv (E := E) c
         (partialDeriv (E := E) a
           (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b)) y := by
-  -- The first partials of the two metric Gram entries agree, on the interior, with the
-  -- first partial of the chart component.  Differentiating once more gives the claim.
   have hop : IsOpen (interior ((extChartAt I α).target : Set E)) := isOpen_interior
   have h_eqOn : Set.EqOn
       (fun z => partialDeriv (E := E) a
@@ -248,8 +226,6 @@ theorem partialDeriv2_chartGramOnE_realizeMetricAt_sub_eq
       (interior ((extChartAt I α).target : Set E)) := by
     intro z hz
     exact partialDeriv_chartGramOnE_realizeMetricAt_sub_eq (I := I) g_bg hu₁ hu₂ α a l b hz
-  -- Pass the second partial `∂_c` through the subtraction (interior differentiability)
-  -- and then rewrite by the eventually-equal first partials.
   rw [partialDeriv, partialDeriv, partialDeriv, ← ContinuousLinearMap.sub_apply]
   have hfd_sub :
       fderiv ℝ (partialDeriv (E := E) a
@@ -266,8 +242,6 @@ theorem partialDeriv2_chartGramOnE_realizeMetricAt_sub_eq
       (partialDeriv_chartGramOnE_diffAt_interior (I := I) (realizeMetricAt (I := I) g_bg u₂)
         α a l b hy)).symm
   rw [hfd_sub]
-  -- Replace the differenced first partial by the chart-component first partial via
-  -- equality on a neighbourhood.
   have hev : (fun z => partialDeriv (E := E) a
           (chartGramOnE (I := I) (realizeMetricAt (I := I) g_bg u₁) α l b) z -
         partialDeriv (E := E) a
@@ -277,13 +251,6 @@ theorem partialDeriv2_chartGramOnE_realizeMetricAt_sub_eq
     Filter.eventuallyEq_iff_exists_mem.mpr
       ⟨interior ((extChartAt I α).target : Set E), hop.mem_nhds hy, h_eqOn⟩
   rw [hev.fderiv_eq]
-
-/-! ## The iterated covariant-gradient jet sum
-
-The right-hand side of the headline bound is the sum of the `g_bg`-fibre norms of the
-iterated covariant gradients `∇^j S` (`j = 0, 1, 2`) of the fixed tensor difference `S`,
-evaluated at the chart preimage `(extChartAt I α).symm y`.  This matches the left-hand side
-of the unconditional `C²` Sobolev embedding `iteratedCovGrad_toSobolev_embedding_C2_unconditional`. -/
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
@@ -329,20 +296,6 @@ theorem iteratedCovGradJetSum_le_toHs (g_bg : SmoothRiemannianMetric I M) (k : �
   refine ⟨C, hC_pos, fun S x => ?_⟩
   rw [iteratedCovGradJetSum]
   exact hC S x
-
-/-! ## The headline chart `2`-jet bound modulo the pointwise covariant-gradient input
-
-The chart `2`-jet seminorm of the difference of the two realized metrics, on a compact
-piece `K ⊆ interior (extChartAt I α).target`, is bounded by a constant times the iterated
-covariant-gradient jet sum of the fixed tensor difference `S`, evaluated at the chart
-preimage.
-
-The algebraic reduction (this file) identifies each `chartMetricJet2DiffSup` summand with a
-chart `∂^j` of the chart-frame component of `S`.  The pointwise covariant-gradient jet bound
-`hcovgrad_jet_bound` — the iterated inversion `∂^j(component of S) ≤ C · ∑_{i ≤ 2} ‖∇^i S‖`
-of the chart covariant-derivative formula `∇T = ∂T + Γ·T`, with the Christoffel carriers
-uniformly bounded on `K` — supplies the per-summand bound.  The headline is the finite sum
-of the per-summand bounds across the index ranges of the three jet aggregates. -/
 
 set_option linter.unusedSectionVars false in
 /-- **The chart `2`-jet seminorm of the realized-metric difference is bounded by the
@@ -400,7 +353,6 @@ theorem chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum
   set n : ℕ := Module.finrank ℝ E
   set S : SmoothCcTensor g_bg 0 2 :=
     realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂ with hS_def
-  -- The total number of chart-jet index terms across the three aggregates.
   set Ncard : ℝ := (Fintype.card ((Fin n) × (Fin n)) : ℝ)
     + (Fintype.card ((Fin n) × (Fin n) × (Fin n)) : ℝ)
     + (Fintype.card ((Fin n) × (Fin n) × (Fin n) × (Fin n)) : ℝ) with hNcard_def
@@ -410,8 +362,6 @@ theorem chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum
   intro y hy
   set R : ℝ := iteratedCovGradJetSum (I := I) g_bg S ((extChartAt I α).symm y) with hR_def
   have hR_nn : 0 ≤ R := iteratedCovGradJetSum_nonneg (I := I) g_bg S _
-  -- Bound each of the three jet aggregates by `(card) · C₀ · R`.
-  -- 0-jet aggregate: `chartGramDiffSup g₁ g₂ α (symm y) = ∑_{pq} |entry|`.
   have h0 : chartGramDiffSup (I := I) (M := M)
         (realizeMetricAt (I := I) g_bg u₁) (realizeMetricAt (I := I) g_bg u₂) α
         ((extChartAt I α).symm y) ≤
@@ -432,7 +382,6 @@ theorem chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum
           Finset.sum_le_sum (fun pq _ => (hcovgrad_jet_bound y hy pq.1 pq.2).1)
       _ = (Fintype.card ((Fin n) × (Fin n)) : ℝ) * (C₀ * R) := by
           rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ]
-  -- 1-jet aggregate.
   have h1 : chartGramPartialDiffSup (I := I) (M := M)
         (realizeMetricAt (I := I) g_bg u₁) (realizeMetricAt (I := I) g_bg u₂) α y ≤
       (Fintype.card ((Fin n) × (Fin n) × (Fin n)) : ℝ) * (C₀ * R) := by
@@ -451,7 +400,6 @@ theorem chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum
           Finset.sum_le_sum (fun p _ => (hcovgrad_jet_bound y hy p.1 p.2.2).2.1 p.2.1)
       _ = (Fintype.card ((Fin n) × (Fin n) × (Fin n)) : ℝ) * (C₀ * R) := by
           rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ]
-  -- 2-jet aggregate.
   have h2 : chartGramPartial2DiffSup (I := I) (M := M)
         (realizeMetricAt (I := I) g_bg u₁) (realizeMetricAt (I := I) g_bg u₂) α y ≤
       (Fintype.card ((Fin n) × (Fin n) × (Fin n) × (Fin n)) : ℝ) * (C₀ * R) := by
@@ -472,7 +420,6 @@ theorem chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum
             (hcovgrad_jet_bound y hy p.2.2.1 p.2.2.2).2.2 p.1 p.2.1)
       _ = (Fintype.card ((Fin n) × (Fin n) × (Fin n) × (Fin n)) : ℝ) * (C₀ * R) := by
           rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ]
-  -- Assemble the three aggregates.
   rw [chartMetricJet2DiffSup, chartMetricJet1DiffSup]
   calc chartGramDiffSup (I := I) (M := M)
           (realizeMetricAt (I := I) g_bg u₁) (realizeMetricAt (I := I) g_bg u₂) α
@@ -486,15 +433,6 @@ theorem chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum
           + (Fintype.card ((Fin n) × (Fin n) × (Fin n) × (Fin n)) : ℝ) * (C₀ * R) := by
         gcongr
     _ = C₀ * Ncard * R := by rw [hNcard_def]; ring
-
-/-! ## The chart `2`-jet seminorm bounded by the intrinsic `H^{2k}` norm of the fixed
-tensor difference
-
-Chaining the headline jet bound with the unconditional `C²` Sobolev embedding eliminates
-the pointwise iterated-covariant-gradient sum in favour of the intrinsic `H^{2k}` Sobolev
-norm of the fixed tensor difference `S`.  This is the shape consumed downstream: it sits one
-spectral norm-equivalence step (`hnorm_bridge`, the gate's `IteratedGardingExtensionBound`)
-away from the `H^{a+1}` spectral norm of `u₁ − u₂`. -/
 
 set_option linter.unusedSectionVars false in
 /-- **The chart `2`-jet seminorm of the realized-metric difference is bounded by the
@@ -545,11 +483,9 @@ theorem chartMetricJet2DiffSup_realizeMetricAt_le_toHs
   classical
   set S : SmoothCcTensor g_bg 0 2 :=
     realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂ with hS_def
-  -- The algebraic chart-jet reduction against the pointwise iterated-covariant-gradient sum.
   obtain ⟨C₁, hC₁_nn, hC₁⟩ :=
     chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum (I := I) g_bg hu₁ hu₂
       α hKsub hC₀ hcovgrad_jet_bound
-  -- The unconditional `C²` Sobolev embedding.
   obtain ⟨C₂, hC₂_pos, hC₂⟩ :=
     iteratedCovGradJetSum_le_toHs (I := I) g_bg k h_super
   refine ⟨C₁ * C₂, mul_nonneg hC₁_nn hC₂_pos.le, ?_⟩

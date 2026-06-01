@@ -59,26 +59,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Compositional reduction: L²-side compactness from H¹→L² compactness
-
-The L²-side resolvent factors as
-`tensorResolventL2 g r s = TensorH1ComplToTensorL2 g r s ∘ tensorResolvent g r s`,
-where `tensorResolvent` is a bounded linear map `TensorL2 → TensorH1Compl`
-(from `Variational.lean`) and `TensorH1ComplToTensorL2` is the bounded
-H¹ → L² inclusion (from `H1Compl.lean`).
-
-By Mathlib's `IsCompactOperator.comp_clm`, if `TensorH1ComplToTensorL2`
-is a compact operator and `tensorResolvent` is a continuous linear map,
-then their composition is a compact operator. This is the trivial half
-of the standard Rellich-Kondrachov compactness proof for the L²-side
-resolvent. -/
 
 /-- The L²-side tensor resolvent factors as the composition of the
 bounded tensor resolvent into `TensorH1Compl` followed by the
@@ -108,28 +92,13 @@ theorem tensorResolventL2_isCompactOperator_of_isCompactOperator
       IsCompactOperator
         (TensorH1ComplToTensorL2 (I := I) (M := M) g r s)) :
     IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s) := by
-  -- Rewrite the L²-side resolvent as the composition.
-  -- The composition of a continuous linear map (`tensorResolvent`) on the
-  -- domain side with a compact operator on the codomain side is compact.
-  -- Use `IsCompactOperator.comp_clm`: if `f : M₂ → M₃` is compact and
-  -- `g : M₁ →L M₂` is continuous linear, then `f ∘ g : M₁ → M₃` is compact.
-  -- Here `f := TensorH1ComplToTensorL2 g r s` and `g := tensorResolvent g r s`.
   have h_comp : IsCompactOperator
       ((fun v : TensorH1Compl g r s =>
           TensorH1ComplToTensorL2 (I := I) (M := M) g r s v) ∘
         (fun f : TensorL2 r s g =>
           tensorResolvent (I := I) (M := M) g r s f)) :=
     h_H1L2.comp_clm (tensorResolvent (I := I) (M := M) g r s)
-  -- This composition coincides with `tensorResolventL2` as a function.
   exact h_comp
-
-/-! ## Restatement: a compact-operator predicate on the H¹ → L² inclusion
-gives the L²-side compactness.
-
-This is the form actually consumed by downstream eigenbasis / discrete
-spectrum constructions: from `IsCompactOperator (TensorH1ComplToTensorL2)`,
-both compactness predicates (H¹ → L² and the L²-side resolvent) are
-exported. The first is the input; the second is the immediate corollary. -/
 
 /-- Companion phrasing: the *self-adjoint* compact L²-side resolvent
 predicate. The self-adjointness is already established in
@@ -146,8 +115,6 @@ theorem tensorResolventL2_isCompactOperator_and_isSelfAdjoint
   ⟨tensorResolventL2_isCompactOperator_of_isCompactOperator
     (I := I) (M := M) g r s h_H1L2,
    tensorResolventL2_isSelfAdjoint (I := I) (M := M) g r s⟩
-
-/-! ## Sanity tests -/
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h : IsCompactOperator (TensorH1ComplToTensorL2 (I := I) (M := M) g r s)) :

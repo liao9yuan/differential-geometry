@@ -35,15 +35,6 @@ noncomputable def smoothRiemannianMetricToInfty
     (g : SmoothRiemannianMetric I M) :
     Integral.Measure.SmoothRiemannianMetric I M := g
 
-/-! ## Continuous-linear upgrade of the Lie-derivative metric
-
-The `lieDerivMetric g W x : T_x M →ₗ[ℝ] T_x M →ₗ[ℝ] ℝ` is a curried real-bilinear
-form.  On a finite-dimensional inner-product space it is automatically continuous;
-we promote it to `T_x M →L[ℝ] T_x M →L[ℝ] ℝ` by applying
-`LinearMap.toContinuousLinearMap` twice (the finite-dimensional automatic-continuity
-construction), exactly as for `ricciTensor` in
-`Integral/Connection/Ricci.lean`. -/
-
 /-- Auxiliary linear map: `v ↦ (lieDerivMetric g W x v).toContinuousLinearMap`,
 viewed as a `LinearMap` from `T_x M` to the continuous-functional space
 `T_x M →L[ℝ] ℝ`. -/

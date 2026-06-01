@@ -66,19 +66,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## The output bilinear form reconstructed from the symbol components
-
-Given the input bilinear form `t`, the linearized-DeTurck-correction symbol produces an
-output bilinear form `s` on the fibre.  Its chart components are the gauge-symbol formula
-`deTurckCorrSymbolComp g g' x ξ t i j`, and `s` is reconstructed from them by
-$$s(v, w) = \sum_{i,j} v_i\, w_j\, \sigma_{ij}(\xi)(t),$$
-the model-basis components being `v_i = (chartModelBasis E).repr v i`.
-
-The reconstruction is bilinear in `(v, w)`: each summand `v_i w_j σ_{ij}` is the product
-of the two linear coordinate functionals `v ↦ v_i`, `w ↦ w_j` with the constant
-`σ_{ij}(ξ)(t)`, so additivity and homogeneity in each slot are immediate from linearity
-of `(chartModelBasis E).repr` together with finite-sum distributivity. -/
-
 section Output
 
 /-- Additivity of a single model-basis coordinate of a model vector.  It is the
@@ -202,15 +189,6 @@ lemma deTurckCorrectionSymbolOutput_smul (g g' : SmoothRiemannianMetric I M) (x 
 
 end Output
 
-/-! ## The bundled linearized-DeTurck-correction symbol
-
-`deTurckCorrectionSymbol g g'` is the `TensorSymbol I M`: at each base point `x` and
-covector `ξ` the fibrewise linear endomorphism `t ↦ deTurckCorrectionSymbolOutput g g' x ξ t`
-of the `(0,2)`-tensor fibre.  The endomorphism is `ℝ`-linear in `t` by
-`deTurckCorrectionSymbolOutput_add` / `deTurckCorrectionSymbolOutput_smul`, which in turn
-come from the component-level `ℝ`-linearity `deTurckCorrSymbolComp_add` /
-`deTurckCorrSymbolComp_smul`. -/
-
 section Bundle
 
 /-- The **bundled linearized-DeTurck-correction principal symbol** as a `TensorSymbol I M`.
@@ -258,9 +236,7 @@ theorem deTurckCorrectionSymbol_apply_apply (g g' : SmoothRiemannianMetric I M) 
       deTurckCorrSymbolComp (I := I) g g' x ξ t i j := by
   classical
   rw [deTurckCorrectionSymbol_apply, deTurckCorrectionSymbolOutput_apply_apply]
-  -- The coordinates of a basis vector are the Kronecker delta `Finsupp.single`.
   rw [(chartModelBasis E).repr_self, (chartModelBasis E).repr_self]
-  -- Collapse the outer sum at `i` and the inner sum at `j`.
   rw [Finset.sum_eq_single i]
   · rw [Finset.sum_eq_single j]
     · rw [Finsupp.single_eq_same, Finsupp.single_eq_same]

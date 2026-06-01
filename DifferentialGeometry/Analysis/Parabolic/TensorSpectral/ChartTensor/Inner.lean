@@ -64,13 +64,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Auxiliary symmetry of the chart-frame `(0, n)`-inner product
-
-The chart-frame `(0, n)`-inner product is symmetric in its two tensor
-arguments. The proof mirrors the symmetry proof of `tensorInnerPointwise_0s`,
-using the Hermitian property of the chart Gram matrix (and hence of its
-inverse). It holds at every `b : M`, with no need for `b ∈ baseSet`. -/
-
 private lemma chartGramMatrix_inv_isHermitian
     (g : SmoothRiemannianMetric I M) (α b : M) :
     (chartGramMatrix g α b)⁻¹.IsHermitian :=
@@ -101,14 +94,6 @@ private lemma chartTensorInnerPointwise_0s_symm_aux
         simpa [star_trivial] using this
       rw [ih, hG]
 
-/-! ## Auxiliary non-negativity of the chart-frame `(0, n)`-inner product
-
-Non-negativity on the diagonal holds on the chart base set. We derive it from
-the bridge identity `tensorInnerPointwise_0s_bridge_identity`, which expresses
-`chartTensorInnerPointwise_0s` in terms of `tensorInnerPointwise_0s` after a
-`chartJ`-pullback of the input tensor. The non-negativity of
-`tensorInnerPointwise_0s` then yields the conclusion. -/
-
 /-- For `b ∈ baseSet`, the chart-frame `(0, n)`-inner product on the diagonal
 equals a `tensorInnerPointwise_0s` value of a `chartJ`-pulled-back tensor,
 hence is non-negative. -/
@@ -117,17 +102,11 @@ private lemma chartTensorInnerPointwise_0s_nonneg_aux
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) (n : ℕ)
     (T : Tensor0SModel n ℝ E) :
     0 ≤ chartTensorInnerPointwise_0s (I := I) (M := M) n g α b T T := by
-  -- Pull `T` back along `chartJ α b` to obtain a tensor whose `chartJinv`
-  -- composition recovers `T` on the chart base set.
   set Tback : Tensor0SModel n ℝ E :=
     T.compContinuousLinearMap (fun _ : Fin n =>
       chartJ (I := I) (M := M) α b) with hTback_def
-  -- The bridge identity rewrites the tensor inner product of `Tback` as the
-  -- chart-frame inner product of `Tback.compCLM chartJinv`, which we show
-  -- equals `T`.
   have hbridge :=
     tensorInnerPointwise_0s_bridge_identity (I := I) (M := M) g α n hb Tback Tback
-  -- Show `Tback.compContinuousLinearMap chartJinv = T` on the chart base set.
   have hcomp_id :
       Tback.compContinuousLinearMap
           (fun _ : Fin n => chartJinv (I := I) (M := M) α b)
@@ -140,13 +119,9 @@ private lemma chartTensorInnerPointwise_0s_nonneg_aux
     congr 1
     funext k
     exact chartJ_chartJinv (I := I) (M := M) α hb (v k)
-  -- Apply both substitutions.
   rw [hcomp_id] at hbridge
-  -- Now `hbridge : tensorInnerPointwise_0s ... Tback Tback = chartTensorInnerPointwise_0s ... T T`.
   rw [← hbridge]
   exact tensorInnerPointwise_0s_nonneg (I := I) (M := M) g b n Tback
-
-/-! ## The chart-frame `(r, s)`-inner product -/
 
 /-- Chart-α-frame scalar inner product on `(r, s)`-model tensors, defined by
 lowering all `r` upper indices with `chartGramMatrix g α b` (the chart-local
@@ -170,8 +145,6 @@ lemma chartTensorInnerPointwise_rs_model_def
         (chartLowerAllUpperIndices_model (I := I) (M := M) r s g α b T₀)
         (chartLowerAllUpperIndices_model (I := I) (M := M) r s g α b T₁) :=
   rfl
-
-/-! ## Algebraic properties -/
 
 /-- Additivity of the chart-frame `(r, s)`-inner product in the first argument. -/
 lemma chartTensorInnerPointwise_rs_model_add_left
@@ -245,34 +218,9 @@ lemma chartTensorInnerPointwise_rs_model_nonneg
   rw [chartTensorInnerPointwise_rs_model_def]
   exact chartTensorInnerPointwise_0s_nonneg_aux (I := I) (M := M) g α hb (r + s) _
 
-/-! ## Smoothness in the chart base point
-
-For fixed `r, s, g, α`, and fixed `T₀ T₁ : TensorRSModel r s ℝ E`, the
-chart-frame `(r, s)`-inner product is smooth in `b` on the chart base set.
-The proof composes the two existing smoothness facts:
-
-1. `chartLowerAllUpperIndices_model_contMDiffOn` provides
-   `Tensor0SModel (r + s) ℝ E`-valued smoothness of the lowering map in `b`.
-2. `chartTensorInnerPointwise_0s_contMDiffOn_smooth_args` provides scalar
-   smoothness of the chart-frame `(0, n)`-inner product when each
-   basis-tuple evaluation of the tensor arguments is smooth in `b`.
-
-To bridge the two, we first observe that each basis-tuple scalar evaluation
-of the `Tensor0SModel`-valued smoothness factors through a continuous linear
-evaluation, which is smooth as a CLM-composition. -/
-
 section Smoothness
 
 variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
-
-/-! ### Local replay of the basis-evaluation bridge
-
-We need: smoothness of a `Tensor0SModel n ℝ E`-valued function from smoothness
-of every basis-tuple scalar evaluation. The required bridge lemma is private
-in the imported infrastructure, so we replay it here. The construction uses
-the basis-tuple evaluation linear equivalence
-`Tensor0SModel n ℝ E ≃L[ℝ] ((Fin n → Fin (finrank ℝ E)) → ℝ)`.
--/
 
 /-- The basis-tuple evaluation linear map on `Tensor0SModel n ℝ E`. -/
 private noncomputable def localEvalBasisLinear (n : ℕ) :
@@ -373,8 +321,6 @@ private lemma local_contMDiffOn_into_tensor0SModel_of_eval_basis
   intro b _
   exact ((localEvalBasisCLE (E := E) n).symm_apply_apply (Φ b)).symm
 
-/-! ### Basis-tuple smoothness of the chart-frame separable form and lowering map -/
-
 /-- Smoothness of every basis-tuple evaluation of `chartSeparableFormAt`. The
 scalar evaluation factors as a finite product of chart Gram matrix entries,
 each smooth on the chart base set. -/
@@ -387,9 +333,6 @@ private lemma chartSeparableFormAt_basis_scalar_contMDiffOn
             (fun k : Fin r => (chartModelBasis E) (φ_first k))
             (fun k : Fin r => (chartModelBasis E) (ψ k)))
       (trivializationAt E (TangentSpace I) α).baseSet := by
-  -- The scalar evaluation unfolds to a product of chartGramBilin pairings on
-  -- model-basis vectors, each of which is a finite sum of chartGramMatrix
-  -- entries multiplied by basis-coordinate constants.
   have heq :
       (fun b : M =>
           chartSeparableFormAt (I := I) (M := M) g α b r
@@ -404,7 +347,6 @@ private lemma chartSeparableFormAt_basis_scalar_contMDiffOn
     exact chartSeparableFormAt_apply (I := I) (M := M) g α b r _ _
   rw [heq]
   refine contMDiffOn_finset_prod (fun k _ => ?_)
-  -- Expand `chartGramBilin` via `chartGramBilin_apply` to a double sum.
   have hentry :
       (fun b : M =>
           chartGramBilin (I := I) (M := M) g α b
@@ -444,7 +386,6 @@ private lemma chartLowerAllUpperIndices_model_basis_eval_contMDiffOn
     fun j => (chartModelBasis E) (φ (Fin.natAdd r j)) with hv_last
   set v_first : Fin r → E :=
     fun k => (chartModelBasis E) (φ (Fin.castAdd s k)) with hv_first
-  -- Step 1: rewrite the scalar function via the evaluation formula.
   have hrewrite :
       (fun b : M =>
           (chartLowerAllUpperIndices_model (I := I) (M := M) r s g α b T)
@@ -454,22 +395,17 @@ private lemma chartLowerAllUpperIndices_model_basis_eval_contMDiffOn
     funext b
     rw [chartLowerAllUpperIndices_model_apply]
   rw [hrewrite]
-  -- Step 2: factor through `Φ ↦ T Φ v_last` as a CLM `Tensor0SModel r → ℝ`.
   let evalLast : Tensor0SModel s ℝ E →L[ℝ] ℝ :=
     ContinuousMultilinearMap.apply ℝ (fun _ : Fin s => E) ℝ v_last
   let composed : Tensor0SModel r ℝ E →L[ℝ] ℝ := evalLast.comp T
   have hcomposed_apply : ∀ Φ : Tensor0SModel r ℝ E,
       composed Φ = T Φ v_last := fun _ => rfl
-  -- Smoothness of `b ↦ Sep(b)` into `Tensor0SModel r ℝ E` via the local
-  -- basis-evaluation bridge.
   have hSep : ContMDiffOn I 𝓘(ℝ, Tensor0SModel r ℝ E) ∞
       (fun b : M => chartSeparableFormAt (I := I) (M := M) g α b r v_first)
       (trivializationAt E (TangentSpace I) α).baseSet := by
     refine
       local_contMDiffOn_into_tensor0SModel_of_eval_basis (I := I) (M := M) _ ?_
     intro ψ
-    -- The basis-tuple evaluation of the separable form is exactly the scalar
-    -- function whose smoothness we have proven.
     have h_unfold :
         (fun b : M =>
             (chartSeparableFormAt (I := I) (M := M) g α b r v_first)
@@ -484,7 +420,6 @@ private lemma chartLowerAllUpperIndices_model_basis_eval_contMDiffOn
     rw [h_unfold]
     exact chartSeparableFormAt_basis_scalar_contMDiffOn
       (I := I) (M := M) g (r := r) α _ _
-  -- Compose with the CLM `composed`.
   have hcomp : ContMDiffOn I 𝓘(ℝ) ∞
       (fun b : M => composed
         (chartSeparableFormAt (I := I) (M := M) g α b r v_first))
@@ -506,7 +441,6 @@ theorem chartTensorInnerPointwise_rs_model_contMDiffOn
           chartTensorInnerPointwise_rs_model
             (I := I) (M := M) g r s α b T₀ T₁)
       (trivializationAt E (TangentSpace I) α).baseSet := by
-  -- Unfold to `chartTensorInnerPointwise_0s` of the two lowered tensors.
   have hunfold :
       (fun b : M =>
           chartTensorInnerPointwise_rs_model
@@ -520,9 +454,6 @@ theorem chartTensorInnerPointwise_rs_model_contMDiffOn
     funext b
     rw [chartTensorInnerPointwise_rs_model_def]
   rw [hunfold]
-  -- Apply `chartTensorInnerPointwise_0s_contMDiffOn_smooth_args` with each
-  -- basis-tuple evaluation supplied by
-  -- `chartLowerAllUpperIndices_model_basis_eval_contMDiffOn`.
   exact chartTensorInnerPointwise_0s_contMDiffOn_smooth_args
     (I := I) (M := M) g α (r + s)
     (fun b : M => chartLowerAllUpperIndices_model

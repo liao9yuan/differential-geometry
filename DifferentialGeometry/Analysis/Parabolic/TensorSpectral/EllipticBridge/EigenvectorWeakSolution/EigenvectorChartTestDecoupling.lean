@@ -109,37 +109,12 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Laplacian.ChartLocalLaplacian
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The cross-left chart-component formula
-
-`prependCovGradSlot g r s ζ S` tensors the exterior derivative `dζ` of a smooth
-scalar `ζ` as the leftmost covariant slot onto an `(r, s)`-tensor section `S`,
-with `S` un-differentiated. Its pointwise section value is, by
-`prependCovGradSlot_toSection_apply`, the image under the covariant-gradient
-bundle equivalence `covGradBundleEquiv r s b` of the right-scalar-multiplied
-continuous linear map `(extDerivFun ζ b).smulRight (S.toSection b)`.
-
-The raw chart-frame scalar component `tensorChartComponentRaw` at rank
-`(r, s + 1)` projects the chart-`α`-trivialised representation. The
-trivialisation-compatibility identity `covGradBundleEquiv_trivializationAt_eq`
-reduces the chart-`α`-trivialised representation of the covariant-gradient
-bundle equivalence to the constant model equivalence `covGradModelEquiv`, whose
-evaluation formula reads the tangent direction off the leftmost slot. The chart
-component therefore factors as the directional derivative of `ζ` along the
-chart-frame basis vector times the raw chart component of `S` with the leftmost
-slot removed. -/
 
 /-- The exterior derivative of an `ℝ`-valued function, applied to a tangent
 vector, is the manifold-Fréchet derivative: the `NormedSpace.fromTangentSpace`
@@ -210,11 +185,9 @@ theorem tensorChartComponentRaw_prependCovGradSlot
   letI : VectorBundle ℝ (TensorRSModel r (s + 1) ℝ E)
       (fun y : M => TensorRSSpace r (s + 1) I y) :=
     tensorRSBundle_vector r (s + 1)
-  -- The tangent-bundle trivialisation base set is the chart source.
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [TangentBundle.trivializationAt_baseSet]
     exact hb
-  -- The `(r, s + 1)`-tensor-bundle trivialisation base set is the chart source.
   have hb_baseS1 : b ∈ (trivializationAt (TensorRSModel r (s + 1) ℝ E)
       (fun y : M => TensorRSSpace r (s + 1) I y) α).baseSet := by
     change b ∈ ((trivializationAt (Tensor0SModel r ℝ E)
@@ -222,49 +195,30 @@ theorem tensorChartComponentRaw_prependCovGradSlot
       ((trivializationAt (Tensor0SModel (s + 1) ℝ E)
         (fun y : M => Tensor0SSpace (s + 1) I y) α).baseSet)
     exact ⟨hb_base, hb_base⟩
-  -- The covariant-gradient model element packaging `dζ ⊗ S`.
   set Φ : TangentSpace I b →L[ℝ] TensorRSSpace r s I b :=
     (extDerivFun (I := I) (ζ : M → ℝ) b).smulRight (S.toSection b) with hΦ_def
-  -- The raw component is the chart-frame projection of `tensorTrivProj`.
   rw [tensorChartComponentRaw_def]
   unfold tensorTrivProj
-  -- The underlying section value of `prependCovGradSlot` is `covGradBundleEquiv Φ`.
   rw [prependCovGradSlot_toSection_apply (I := I) (M := M) g r s ζ S b]
   rw [show ((extDerivFun (I := I) (ζ : M → ℝ) b).smulRight (S.toSection b)) = Φ
     from rfl]
-  -- `continuousLinearMapAt b X = (triv ⟨b, X⟩).2` on the base set.
   rw [Bundle.Trivialization.continuousLinearMapAt_apply,
     (trivializationAt (TensorRSModel r (s + 1) ℝ E)
         (fun y : M => TensorRSSpace r (s + 1) I y) α).coe_linearMapAt_of_mem
       (R := ℝ) hb_baseS1]
   beta_reduce
-  -- The trivialisation compatibility of the covariant-gradient bundle equivalence.
   rw [covGradBundleEquiv_trivializationAt_eq (I := I) (M := M) r s α hb_base Φ]
-  -- The chart-frame projection evaluates on `dualCovariantCMM r Idx` and the
-  -- basis tuple `chartModelBasis E ∘ Jdx`; `covGradModelEquiv` reads `Jdx 0` off
-  -- the leftmost slot.
   rw [tensorChartComponentProjection_apply,
     covGradModelEquiv_apply (E := E) r s]
-  -- The covariant-gradient bundle trivialisation fibre of `Φ`, evaluated at the
-  -- leftmost basis direction.
   rw [covGradBundle_trivFibre_eq (I := I) (M := M) r s α b Φ]
   rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
-  -- `triv_{TM}.symmL b (chartModelBasis E (Jdx 0)) = chartBasisVecFiber α (Jdx 0) b`.
   have hsymmL : (trivializationAt E (TangentSpace I) α).symmL ℝ b
       ((chartModelBasis E) (Jdx 0)) =
       chartBasisVecFiber (I := I) α (Jdx 0) b := rfl
   rw [hsymmL]
-  -- `Φ` applied to the chart-frame basis vector is `dζ(·) • S.toSection b`.
   rw [hΦ_def, ContinuousLinearMap.smulRight_apply]
-  -- Pull the scalar `dζ(·)` through `continuousLinearMapAt`, the `(0, r)`-tensor
-  -- evaluation, and the `(0, s + 1)`-tuple evaluation.
   rw [map_smul, ContinuousLinearMap.smul_apply,
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
-  -- The remaining factor is the raw chart component of `S` with the leftmost
-  -- slot removed: `tensorChartComponentProjection r s Idx (vecTail Jdx)` of
-  -- `tensorTrivProj g r s S α b`. The `(0, s)`-tuple
-  -- `chartModelBasis E ∘ vecTail Jdx` is, definitionally, the tail of
-  -- `chartModelBasis E ∘ Jdx`, so the two factors agree.
   congr 1
 
 /-- On the Euclidean chart target the directional derivative of a smooth scalar
@@ -290,10 +244,7 @@ private lemma partialDeriv_scalarOnE_eq_euclidPartial
     exact hy
   have hphi_b : extChartAt I α b = (toEuclidean (E := E)).symm y := by
     rw [hb_def]; exact (extChartAt I α).right_inv hy_pre
-  -- The chart-Euclidean partial as a Fréchet derivative of the push-forward.
   rw [euclidPartial_def]
-  -- Near `y` the push-forward equals the explicit composition through
-  -- `(extChartAt I α).symm` and `toEuclidean.symm`.
   have hpushed_eq :
       chartPushedRaw I α f =ᶠ[𝓝 y]
         ((scalarOnE (I := I) α f) ∘ (toEuclidean (E := E)).symm) := by
@@ -303,12 +254,9 @@ private lemma partialDeriv_scalarOnE_eq_euclidPartial
     rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α f hz]
     rfl
   rw [Filter.EventuallyEq.fderiv_eq hpushed_eq]
-  -- The chain rule through the linear isometry `toEuclidean.symm`.
   rw [(toEuclidean (E := E)).symm.comp_right_fderiv
     (f := scalarOnE (I := I) α f) (x := y)]
   rw [ContinuousLinearMap.comp_apply]
-  -- `toEuclidean.symm (single m 1) = chartModelBasis E m`; `toEuclidean.symm y =
-  -- extChartAt I α b`.
   rw [show (toEuclidean (E := E)).symm.toContinuousLinearMap
       (EuclideanSpace.single m (1 : ℝ)) = (chartModelBasis E) m from by
     rw [chartModelBasis_apply]; rfl]
@@ -337,34 +285,13 @@ private lemma extDerivFun_chartBasisVecFiber_eq_euclidPartial
       extChartAt I α b ∈ interior ((extChartAt I α).target : Set E) := by
     rw [hphi_b, (isOpen_extChartAt_target (I := I) α).interior_eq]
     exact hy_pre
-  -- The exterior derivative of the scalar is the manifold-Fréchet derivative;
-  -- along the chart-frame basis vector it is the chart-coordinate partial.
   rw [extDerivFun_apply_scalar (I := I) (ζ : M → ℝ) b
     (chartBasisVecFiber (I := I) α m b)]
   rw [mfderiv_chartBasisVecFiber_of_mdifferentiableAt (I := I) α
     (ζ.contMDiff.mdifferentiable (by norm_num)).mdifferentiableAt
     hb_chart hb_int m]
-  -- The chart-coordinate partial of `scalarOnE` is the chart-Euclidean partial of
-  -- the push-forward.
   exact partialDeriv_scalarOnE_eq_euclidPartial (I := I) (M := M)
     (ζ : M → ℝ) α m hy
-
-/-! ## The cross-right chart-component formula
-
-`covDerivAlongGrad g r s S ζ` is the covariant derivative of a smooth
-compactly-supported `(r, s)`-tensor section `S` along the gradient vector field
-of a smooth scalar `ζ`; its section value at `b` is the directional covariant
-derivative `tensorCovDerivAt g r s S b (gradFun g ζ b)`.
-
-The directional covariant derivative is a continuous linear map in the
-direction, so expanding the gradient on the chart-`α` frame `chartBasisVecFiber
-α m` (`gradChartLocal_eq_gradFun`: `gradFun g ζ b = ∑_m gradChartCoeff g α ζ m b
-• chartBasisVecFiber α m b`) distributes the raw chart component over the frame.
-Each frame-directional summand is, by `tensorCovDerivAt_eq_chartTensorRSCovariantDerivative`
-and the chart-coordinate covariant-derivative component formula
-`covDerivComponent_eq_euclidPartial_add_lowerOrder`, the chart-Euclidean partial
-derivative of the raw component of `S` plus the zeroth-order Christoffel
-correction `covDerivLowerOrderTerm`. -/
 
 /-- The directional covariant derivative `tensorCovDerivAt g r s S b` is a
 continuous linear map in the direction: it distributes over a finite sum of
@@ -378,8 +305,6 @@ private lemma tensorCovDerivAt_sum_smul_dir
       ∑ m : Fin (Module.finrank ℝ E),
         c m • tensorCovDerivAt (I := I) (M := M) g r s S b (v m) := by
   classical
-  -- `tensorCovDerivAt g r s S b` is the bundled directional covariant
-  -- derivative — a continuous linear map — applied to the direction.
   rw [tensorCovDerivAt_def]
   rw [show (∑ m : Fin (Module.finrank ℝ E), c m • v m) =
       (∑ m : Fin (Module.finrank ℝ E), c m • v m :
@@ -446,8 +371,6 @@ theorem tensorChartComponentRaw_covDerivAlongGrad
             covDerivLowerOrderTerm (I := I) (M := M) g r s S α m Idx Jdx y) := by
   classical
   set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
-  -- The chart-source preimage `b` lies in the chart source, the good set, and
-  -- has its chart image in the interior of the chart target.
   have hb_chart : b ∈ (chartAt H α).source :=
     symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy
   have hb_good : b ∈ chartLeviCivitaGoodSet (I := I) α :=
@@ -463,13 +386,9 @@ theorem tensorChartComponentRaw_covDerivAlongGrad
       extChartAt I α b ∈ interior ((extChartAt I α).target : Set E) := by
     rw [hphi_b, (isOpen_extChartAt_target (I := I) α).interior_eq]
     exact hy_pre
-  -- The raw component is the chart-frame projection of `tensorTrivProj`; the
-  -- underlying section value of `covDerivAlongGrad` is the directional covariant
-  -- derivative of `S` along the gradient of `ζ`.
   rw [tensorChartComponentRaw_def]
   unfold tensorTrivProj
   rw [covDerivAlongGrad_toSection_apply (I := I) (M := M) g r s S ζ b]
-  -- Expand the gradient on the chart-`α` frame `chartBasisVecFiber α m`.
   have hgrad : gradFun (I := I) g (ζ : M → ℝ) b =
       ∑ m : Fin (Module.finrank ℝ E),
         gradChartCoeff (I := I) g α (ζ : M → ℝ) m b •
@@ -479,39 +398,17 @@ theorem tensorChartComponentRaw_covDerivAlongGrad
       hb_base hb_int]
     rfl
   rw [hgrad]
-  -- The directional covariant derivative distributes over the frame sum.
   rw [tensorCovDerivAt_sum_smul_dir (I := I) (M := M) g r s S b
     (fun m => gradChartCoeff (I := I) g α (ζ : M → ℝ) m b)
     (fun m => chartBasisVecFiber (I := I) α m b)]
-  -- The trivialisation `continuousLinearMapAt` and the chart-frame projection
-  -- are continuous-linear: distribute them over the frame sum.
   rw [map_sum, map_sum]
   refine Finset.sum_congr rfl (fun m _ => ?_)
   rw [map_smul, map_smul, smul_eq_mul]
   congr 1
-  -- The `m`-th frame-directional chart component: replace the abstract
-  -- directional covariant derivative by the chart-coordinate one, then apply the
-  -- chart-coordinate covariant-derivative component formula.
   rw [tensorCovDerivAt_eq_chartTensorRSCovariantDerivative (I := I) (M := M)
     g r s S α m hb_good]
   exact covDerivComponent_eq_euclidPartial_add_lowerOrder (I := I) (M := M)
     g r s S α m Idx Jdx hy
-
-/-! ## The cross-left test-decoupling
-
-Substituting the inverse-Gram-rotated test section `S := rotatedTestSection g r
-s α P₀ χ` into the cross-left chart-component formula, and using
-`rotatedTestSection_chartComp` for the raw chart component of `S`, the cross-left
-chart component `tensorComponentEuclid g r (s + 1) (prependCovGradSlot g r s ζ_α
-S) α Q` factors, on the Euclidean chart target, as a single test-independent
-`C^∞` coefficient times the chart-pushed bump `chartPushedRaw I α χ`. No
-chart-Euclidean partial of `χ` appears: `S` is un-differentiated in
-`prependCovGradSlot`.
-
-The coefficient is the directional derivative `euclidPartial (Q.2 0)
-(chartPushedRaw I α ζ_α)` of the partition-of-unity weight, along the leftmost
-chart direction, times the inverse-Gram entry `covChartMetricGramInv g r s α ·
-(Q.1, Matrix.vecTail Q.2) P₀`. -/
 
 /-- **The cross-left test-decoupling coefficient.** For a chart center `α`,
 ranks `(r, s)`, a base component multi-index `P₀ : CompIdx E r s`, and a target
@@ -551,19 +448,16 @@ theorem crossLeftTestCoeff_contDiffOn
     (P₀ : CompIdx E r s) (Q : CompIdx E r (s + 1)) :
     ContDiffOn ℝ ∞ (crossLeftTestCoeff (I := I) (M := M) g r s α P₀ Q)
       (chartTargetEuclid (I := I) (M := M) α) := by
-  -- The chart-pushed partition-of-unity weight is `C^∞` on the chart target.
   have hbump : ContDiffOn ℝ ∞
       (chartPushedRaw I α ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ))
       (chartTargetEuclid (I := I) (M := M) α) :=
     chartPushedRaw_bump_contDiffOn (I := I) (M := M) α
       (chartAtlasPOU I M α).contMDiff.contMDiffOn
-  -- Its chart-Euclidean partial is `C^∞`.
   have hpartial : ContDiffOn ℝ ∞
       (euclidPartial (E := E) (Q.2 0)
         (chartPushedRaw I α ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)))
       (chartTargetEuclid (I := I) (M := M) α) :=
     euclidPartial_contDiffOn_target (I := I) (M := M) α (Q.2 0) hbump
-  -- The inverse-Gram entry is `C^∞`.
   have hGinv : ContDiffOn ℝ ∞
       (fun y : EuclN => covChartMetricGramInv (I := I) (M := M) g r s α y
         (Q.1, Matrix.vecTail Q.2) P₀)
@@ -602,21 +496,16 @@ theorem tensorComponentEuclid_prependCovGradSlot_rotatedTestSection_eqOn
         chartPushedRaw I α χ y)
       (chartTargetEuclid (I := I) (M := M) α) := by
   intro y hy
-  -- On the chart target the Euclidean chart component is the raw chart component
-  -- at the chart-source preimage.
   rw [tensorComponentEuclid_apply_of_mem (I := I) (M := M) g r (s + 1)
     (prependCovGradSlot (I := I) (M := M) g r s (chartAtlasPOU I M α)
       (rotatedTestSection (I := I) (M := M) g r s α P₀ χ hχs hχt)) α Q hy]
-  -- The chart source preimage `b` of `y` lies in the chart source.
   have hb_chart : (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈
       (chartAt H α).source :=
     symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy
-  -- The cross-left chart-component formula.
   rw [tensorChartComponentRaw_prependCovGradSlot (I := I) (M := M) g r s
     (chartAtlasPOU I M α)
     (rotatedTestSection (I := I) (M := M) g r s α P₀ χ hχs hχt) α Q.1 Q.2
     hb_chart]
-  -- The raw chart component of the rotated test section at `(Q.1, vecTail Q.2)`.
   rw [show tensorChartComponentRaw (I := I) (M := M) g r s
         (rotatedTestSection (I := I) (M := M) g r s α P₀ χ hχs hχt) α Q.1
         (Matrix.vecTail Q.2)
@@ -627,38 +516,10 @@ theorem tensorComponentEuclid_prependCovGradSlot_rotatedTestSection_eqOn
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) from rfl]
   rw [rotatedTestSection_chartComp (I := I) (M := M) g r s α P₀ hχs hχt
     (Q.1, Matrix.vecTail Q.2) hy]
-  -- The directional derivative of the partition-of-unity weight is the
-  -- chart-Euclidean partial of its push-forward.
   rw [extDerivFun_chartBasisVecFiber_eq_euclidPartial (I := I) (M := M)
     (chartAtlasPOU I M α) α (Q.2 0) hy]
   simp only [crossLeftTestCoeff_def]
   ring
-
-/-! ## The cross-right test-decoupling
-
-`covDerivAlongGrad g r s S ζ_α` differentiates the inverse-Gram-rotated test
-section `S := rotatedTestSection g r s α P₀ χ`. The cross-right chart-component
-formula `tensorChartComponentRaw_covDerivAlongGrad` expresses the chart component
-as a finite sum, over chart directions `m`, of the gradient chart-frame
-coefficient `gradChartCoeff g α ζ_α m` times the chart-Euclidean partial of the
-raw component of `S` plus the Christoffel correction `covDerivLowerOrderTerm`.
-
-For `S = rotatedTestSection g r s α P₀ χ`:
-
-* the raw chart component of `S` push-forward is, by
-  `chartPushedRaw_rotatedTestSection_eqOn`, the inverse-Gram entry
-  `gramInvEntry g r s α Q P₀` times the chart-pushed bump `chartPushedRaw I α χ`;
-* its chart-Euclidean partial splits, by
-  `euclidPartial_chartPushedRaw_rotatedTestSection_eqOn` (the Leibniz rule),
-  into the inverse-Gram-coefficient term and the chart-pushed-bump term;
-* the Christoffel correction `covDerivLowerOrderTerm` collapses, by
-  `covDerivLowerOrderTerm_def` and `rotatedTestSection_chartComp`, to the
-  collapsed coefficient `lowerOrderRotationLOCoeff` times the chart-pushed bump.
-
-So the cross-right chart component is a test-independent `C^∞` coefficient times
-the chart-pushed bump `chartPushedRaw I α χ` plus a finite sum, over chart
-directions, of a test-independent `C^∞` coefficient times the chart-Euclidean
-partial `euclidPartial l (chartPushedRaw I α χ)`. -/
 
 /-- **The Euclidean gradient chart-frame coefficient.** The chart-frame
 coefficient `gradChartCoeff g α ζ m` of the gradient of a smooth scalar `ζ`,
@@ -689,12 +550,10 @@ theorem gradChartCoeff_eq_gradChartCoeffEuclid
   classical
   rw [gradChartCoeff_def, gradChartCoeffEuclid]
   refine Finset.sum_congr rfl (fun j _ => ?_)
-  -- The inverse-Gram-matrix entry equals the Euclidean inverse-Gram entry.
   rw [show chartInvGramMatrix (I := I) g α
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) m j =
       chartInvGramEuclid (I := I) g α m j y from by
     rw [chartInvGramEuclid_def, chartInvGramOnE_def]]
-  -- The chart-coordinate partial of `scalarOnE` is the chart-Euclidean partial.
   rw [partialDeriv_scalarOnE_eq_euclidPartial (I := I) (M := M) ζ α j hy]
 
 /-- **The Euclidean gradient chart-frame coefficient is `C^∞`.** For a smooth
@@ -709,7 +568,6 @@ theorem gradChartCoeffEuclid_contDiffOn
     ContDiffOn ℝ ∞ (gradChartCoeffEuclid (I := I) (M := M) g α ζ m)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- The chart-pushed scalar is `C^∞` on the chart target.
   have hbump : ContDiffOn ℝ ∞ (chartPushedRaw I α ζ)
       (chartTargetEuclid (I := I) (M := M) α) :=
     chartPushedRaw_bump_contDiffOn (I := I) (M := M) α hζ
@@ -738,7 +596,6 @@ private lemma covDerivLowerOrderTerm_rotatedTestSection_eqOn
   classical
   rw [covDerivLowerOrderTerm_def, lowerOrderRotationLOCoeff, Finset.sum_mul]
   refine Finset.sum_congr rfl (fun p _ => ?_)
-  -- The raw chart component of the rotated test section at the multi-index `p`.
   rw [rotatedTestSection_chartComp (I := I) (M := M) g r s α P₀ hχs hχt p hy]
   ring
 
@@ -829,21 +686,18 @@ theorem crossRightTestValueCoeff_contDiffOn
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
   refine ContDiffOn.sum (fun m _ => ?_)
-  -- The Euclidean gradient chart-frame coefficient is `C^∞`.
   have hgrad : ContDiffOn ℝ ∞
       (gradChartCoeffEuclid (I := I) (M := M) g α
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) m)
       (chartTargetEuclid (I := I) (M := M) α) :=
     gradChartCoeffEuclid_contDiffOn (I := I) (M := M) g α
       (chartAtlasPOU I M α).contMDiff.contMDiffOn m
-  -- The chart-Euclidean partial of the `C^∞` inverse-Gram entry is `C^∞`.
   have hGinvPartial : ContDiffOn ℝ ∞
       (euclidPartial (E := E) m
         (gramInvEntry (I := I) (M := M) g r s α Q P₀))
       (chartTargetEuclid (I := I) (M := M) α) :=
     euclidPartial_contDiffOn_target (I := I) (M := M) α m
       (gramInvEntry_contDiffOn (I := I) (M := M) g r s α Q P₀)
-  -- The collapsed lower-order coefficient is `C^∞`.
   have hLO : ContDiffOn ℝ ∞
       (lowerOrderRotationLOCoeff (I := I) (M := M) g r s α P₀ m Q)
       (chartTargetEuclid (I := I) (M := M) α) :=
@@ -891,19 +745,13 @@ theorem tensorComponentEuclid_covDerivAlongGrad_rotatedTestSection_eqOn
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
   intro y hy
-  -- On the chart target the Euclidean chart component is the raw chart component
-  -- at the chart-source preimage.
   rw [tensorComponentEuclid_apply_of_mem (I := I) (M := M) g r s
     (covDerivAlongGrad (I := I) (M := M) g r s
       (rotatedTestSection (I := I) (M := M) g r s α P₀ χ hχs hχt)
       (chartAtlasPOU I M α)) α Q hy]
-  -- The cross-right chart-component formula.
   rw [tensorChartComponentRaw_covDerivAlongGrad (I := I) (M := M) g r s
     (chartAtlasPOU I M α)
     (rotatedTestSection (I := I) (M := M) g r s α P₀ χ hχs hχt) α Q.1 Q.2 hy]
-  -- Per chart direction `m`: rewrite the gradient chart-frame coefficient to its
-  -- Euclidean recast, the chart-Euclidean partial via the Leibniz split, and the
-  -- Christoffel correction via the rotated-test-section collapse.
   have hterm : ∀ m : Fin (Module.finrank ℝ E),
       gradChartCoeff (I := I) g α
             ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) m
@@ -927,12 +775,8 @@ theorem tensorComponentEuclid_covDerivAlongGrad_rotatedTestSection_eqOn
             gramInvEntry (I := I) (M := M) g r s α Q P₀ y *
           euclidPartial (E := E) m (chartPushedRaw I α χ) y := by
     intro m
-    -- The gradient chart-frame coefficient as its Euclidean recast.
     rw [gradChartCoeff_eq_gradChartCoeffEuclid (I := I) (M := M) g α
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) m hy]
-    -- The raw component of the rotated test section is
-    -- `tensorChartComponentRaw … (rotatedTestSection …) α Q.1 Q.2`; its
-    -- chart-Euclidean partial splits by the Leibniz rule.
     rw [show tensorChartComponentRaw (I := I) (M := M) g r s
           (rotatedTestSection (I := I) (M := M) g r s α P₀ χ hχs hχt) α Q.1 Q.2 =
         tensorChartComponentRaw (I := I) (M := M) g r s
@@ -940,35 +784,13 @@ theorem tensorComponentEuclid_covDerivAlongGrad_rotatedTestSection_eqOn
           Q.1 Q.2 from rfl]
     rw [euclidPartial_chartPushedRaw_rotatedTestSection_eqOn (I := I) (M := M)
       g r s α P₀ hχs hχt Q m hy]
-    -- The Christoffel correction collapses to the chart-pushed bump times the
-    -- collapsed lower-order coefficient.
     rw [covDerivLowerOrderTerm_rotatedTestSection_eqOn (I := I) (M := M)
       g r s α P₀ hχs hχt m Q hy]
     ring
   rw [Finset.sum_congr rfl (fun m _ => hterm m)]
-  -- Split the sum of the two grouped contributions.
   rw [Finset.sum_add_distrib]
-  -- The value-coefficient sum factors the chart-pushed bump out; the
-  -- gradient-coefficient sum collects the per-direction gradient coefficient.
   simp only [crossRightTestValueCoeff_def, crossRightTestGradCoeff_def,
     Finset.sum_mul]
-
-/-! ## The decoupled cross chart components in terms of the Euclidean test
-function
-
-For a Euclidean test function `ψ` — `C^∞` and compactly supported inside the
-Euclidean chart target — write `χ := chartTestPullback I α ψ` for the
-manifold-side chart bump. The round-trip identities
-`chartPushedRaw_chartTestPullback_eqOn` and
-`euclidPartial_chartPushedRaw_chartTestPullback_eqOn` rewrite the chart-pushed
-bump `chartPushedRaw I α χ` back to `ψ` (and its chart-Euclidean partials back to
-`euclidPartial l ψ`) on the Euclidean chart target.
-
-Composing with the cross-left and cross-right test-decoupling lemmas, the cross
-chart components — built from the rotated test section attached to `χ` — are
-expressed directly as test-independent `C^∞` coefficients against `ψ` and its
-chart-Euclidean partials `euclidPartial l ψ`, the form required by the
-downstream variational identity. -/
 
 /-- **The cross-left chart component in terms of the Euclidean test function.**
 For a Euclidean test function `ψ`, `C^∞` and compactly supported inside the
@@ -1000,14 +822,12 @@ theorem tensorComponentEuclid_prependCovGradSlot_rotatedTestSection_chartTestPul
       (fun y => crossLeftTestCoeff (I := I) (M := M) g r s α P₀ Q y * ψ y)
       (chartTargetEuclid (I := I) (M := M) α) := by
   intro y hy
-  -- The cross-left test-decoupling, instantiated at `χ := chartTestPullback I α ψ`.
   rw [tensorComponentEuclid_prependCovGradSlot_rotatedTestSection_eqOn
     (I := I) (M := M) g r s α P₀
     (chartTestPullback_contMDiffOn (I := I) (M := M) α hψ)
     (chartTestPullback_tsupport_subset_source (I := I) (M := M) α hψ_cs hψ_supp)
     Q hy]
   beta_reduce
-  -- The chart-pushed bump of `chartTestPullback I α ψ` is `ψ` on the chart target.
   rw [chartPushedRaw_chartTestPullback_eqOn (I := I) (M := M) α ψ hy]
 
 /-- **The cross-right chart component in terms of the Euclidean test function.**
@@ -1048,22 +868,17 @@ theorem tensorComponentEuclid_covDerivAlongGrad_rotatedTestSection_chartTestPull
             euclidPartial (E := E) l ψ y)
       (chartTargetEuclid (I := I) (M := M) α) := by
   intro y hy
-  -- The cross-right test-decoupling, instantiated at `χ := chartTestPullback I α ψ`.
   rw [tensorComponentEuclid_covDerivAlongGrad_rotatedTestSection_eqOn
     (I := I) (M := M) g r s α P₀
     (chartTestPullback_contMDiffOn (I := I) (M := M) α hψ)
     (chartTestPullback_tsupport_subset_source (I := I) (M := M) α hψ_cs hψ_supp)
     Q hy]
   beta_reduce
-  -- The chart-pushed bump of `chartTestPullback I α ψ` is `ψ`, and its
-  -- chart-Euclidean partials are the chart-Euclidean partials of `ψ`.
   rw [chartPushedRaw_chartTestPullback_eqOn (I := I) (M := M) α ψ hy]
   congr 1
   refine Finset.sum_congr rfl (fun l _ => ?_)
   rw [euclidPartial_chartPushedRaw_chartTestPullback_eqOn (I := I) (M := M)
     α ψ l hy]
-
-/-! ## Sanity tests -/
 
 section ElaborationTests
 

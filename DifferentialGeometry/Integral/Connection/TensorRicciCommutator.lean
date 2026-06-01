@@ -79,14 +79,6 @@ namespace Connection
 open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle
 
-/-! ## Part 1: the bundle-generic curvature-commutator bridge
-
-For an arbitrary vector bundle `V` over a smooth manifold `M`, equipped with a covariant
-derivative `cov` of class `C^∞`, the section-level Riemann formula on smooth global sections
-agrees with the bundled curvature operator `riemannOp`. This is the contrapositive reading
-of `riemannOp_apply_smooth`, exposed under a name that emphasises its role as the
-commutator-to-operator bridge. It requires no metric or boundary hypotheses. -/
-
 section General
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
@@ -137,13 +129,6 @@ theorem cov_commutator_eq_riemannOp_smooth
   exact riemannSec_eq_riemannOp_smooth (cov := cov) hX hY hZ
 
 end General
-
-/-! ## Part 2: the pointwise tensor Ricci identity
-
-We now specialise to the `(r, s)`-tensor bundle, with covariant derivative the
-`(r, s)`-tensor extension of the Levi-Civita connection. The abbreviation
-`tensorCov g r s := tensorRSCovariantDerivative I M r s (LeviCivita g)` is the
-covariant derivative whose iterated commutator is the tensor curvature. -/
 
 section TensorBundle
 
@@ -243,28 +228,6 @@ theorem tensorRicciCommutator_swap
     riemannSec (tensorCov (I := I) g r s) X X T x = 0 :=
   riemannSec_self_eq_zero (tensorCov (I := I) g r s) X T x
 
-/-! ### The Hessian (second covariant derivative) form of the Ricci identity
-
-The full second covariant derivative of a tensor `T` along `(X, Y)` is the `(r, s+2)`
-Hessian
-$$
-  \nabla^2_{X, Y} T := \nabla_X(\nabla_Y T) - \nabla_{\nabla_X Y} T,
-$$
-where `∇_X Y` is the Levi-Civita covariant derivative of `Y` along `X` on the **tangent**
-bundle. (Subtracting the `∇_{∇_X Y}` term is what makes `∇²` genuinely tensorial in
-`(X, Y)`, i.e. independent of the way `X, Y` are extended off `x`.) This is the object whose
-metric trace over `(X, Y)` is the rough Laplacian `Δ_∇ T = rawTensorConnLap g r s T`.
-
-The **Ricci identity in Hessian form** states that its antisymmetric part in `(X, Y)` is the
-curvature:
-$$
-  \nabla^2_{X, Y} T - \nabla^2_{Y, X} T = R(X, Y)\,T.
-$$
-This is the precise statement that the full second covariant derivative `∇²T` and the
-trace-Laplacian `Δ_∇ T` differ by curvature terms — the pointwise input to the order-2
-Gårding estimate, which controls `∫|∇²T|²` by `∫|Δ_∇ T|²` plus curvature-bounded lower-order
-terms. -/
-
 /-- The **second covariant derivative (Hessian)** of an `(r, s)`-tensor section `T` along the
 vector fields `X, Y` at `x`:
 $$
@@ -307,25 +270,15 @@ theorem tensorSecondCovDeriv_antisymm_eq_riemannSec
       riemannSec (tensorCov (I := I) g r s) X Y T x := by
   classical
   set cov := tensorCov (I := I) g r s with hcov_def
-  -- Torsion-freeness of the tangent Levi-Civita connection: `∇_X Y - ∇_Y X = [X, Y]`.
-  -- In `cov.toFun` convention, `(LeviCivita g).toFun Y x (X x) = (∇_X Y)(x)`, so the
-  -- difference of the two `∇_·` arguments is the Lie bracket.
   have hbr : (LeviCivita (I := I) g).toFun Y x (X x) -
       (LeviCivita (I := I) g).toFun X x (Y x) = VectorField.mlieBracket I X Y x :=
     (CovariantDerivative.torsion_eq_zero_iff (cov := LeviCivita (I := I) g)).mp
       (LeviCivita_torsion_eq_zero (I := I) g) hX hY
-  -- Unfold both Hessians and the curvature formula.
   rw [tensorSecondCovDeriv_def, tensorSecondCovDeriv_def, riemannSec_def]
-  -- The two `∇_X ∇_Y T` / `∇_Y ∇_X T` terms line up; the bracket term reconstitutes.
-  -- LHS = [cov(∇_Y T)(X) - cov T (∇_X Y)] - [cov(∇_X T)(Y) - cov T (∇_Y X)]
-  --     = cov(∇_Y T)(X) - cov(∇_X T)(Y) - (cov T (∇_X Y) - cov T (∇_Y X))
-  --     = cov(∇_Y T)(X) - cov(∇_X T)(Y) - cov T (∇_X Y - ∇_Y X)
-  --     = cov(∇_Y T)(X) - cov(∇_X T)(Y) - cov T [X,Y].
   have hsub : (cov.toFun T x ((LeviCivita (I := I) g).toFun Y x (X x)) -
         cov.toFun T x ((LeviCivita (I := I) g).toFun X x (Y x))) =
       cov.toFun T x (VectorField.mlieBracket I X Y x) := by
     rw [← map_sub (cov.toFun T x), hbr]
-  -- Now finish by linear arithmetic in the fibre.
   rw [show
       (cov.toFun (covApply cov Y T) x (X x) -
           cov.toFun T x ((LeviCivita (I := I) g).toFun Y x (X x))) -
@@ -358,15 +311,6 @@ theorem tensorSecondCovDeriv_antisymm_eq_riemannOp
   rw [tensorSecondCovDeriv_antisymm_eq_riemannSec (I := I) g r s T
         ((hX x).mdifferentiableAt (by simp)) ((hY x).mdifferentiableAt (by simp))]
   exact riemannSec_eq_riemannOp_smooth (cov := tensorCov (I := I) g r s) hX hY hT
-
-/-! ### The rough Laplacian as the frame trace of the Hessian
-
-`rawTensorConnLap g r s T x` (the rough / connection Laplacian `Δ_∇ T`) is, by definition,
-the metric trace of the second covariant derivative over a `g_x`-orthonormal frame at `x`.
-The following identity makes the link explicit: it is the diagonal frame sum of the
-`tensorSecondCovDeriv` Hessian. This is the contraction that converts the pointwise
-Hessian-form Ricci identity into the trace relation `Δ_∇ T = tr_g ∇²T` between the rough
-Laplacian and the full second covariant derivative. -/
 
 /-- **The rough Laplacian is the frame trace of the second covariant derivative.** With
 `B_i := smoothOrthoFrame g x i` the `g_x`-orthonormal smooth frame at `x`,

@@ -76,8 +76,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The scalar chart component -/
-
 /-- The `(Idx, Jdx)`-th chart-coordinate scalar component of a smooth
 compactly-supported `(r, s)`-tensor section `S`, as a function on the standard
 Euclidean model space `EuclideanSpace ℝ (Fin n)` (`n = finrank ℝ E`).
@@ -131,8 +129,6 @@ lemma tensorChartComp_apply_of_notMem
   rw [tensorChartComp_def, tensorChartComponent_def]
   exact chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy
 
-/-! ## `ℝ`-linearity in the tensor section -/
-
 /-- The chart component is additive in the tensor section. -/
 theorem tensorChartComp_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -163,7 +159,6 @@ theorem tensorChartComp_smul
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
     tensorChartComp (I := I) (M := M) g r s (0 : SmoothCcTensor g r s) α Idx Jdx =
       (fun _ => (0 : ℝ)) := by
-  -- `(0 : SmoothCcTensor) = (0 : ℝ) • 0`, and homogeneity gives `0 • _ = 0`.
   have h := tensorChartComp_smul (I := I) (M := M) g r s
     (0 : ℝ) (0 : SmoothCcTensor g r s) α Idx Jdx
   rw [zero_smul] at h
@@ -216,8 +211,6 @@ noncomputable def tensorChartCompₗ
     tensorChartCompₗ (I := I) (M := M) g r s α Idx Jdx S =
       tensorChartComp (I := I) (M := M) g r s S α Idx Jdx := rfl
 
-/-! ## Smoothness -/
-
 /-- Each chart component is a `C^∞` function on the Euclidean model space. -/
 theorem tensorChartComp_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -269,8 +262,6 @@ theorem tensorChartComp_continuous
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
     Continuous (tensorChartComp (I := I) (M := M) g r s S α Idx Jdx) :=
   (tensorChartComp_contDiff (I := I) (M := M) g r s S α Idx Jdx).continuous
-
-/-! ## Reconstruction / faithfulness -/
 
 /-- The model-fiber-valued chart-pushed POU-weighted tensor: the tensor-valued
 companion of `tensorChartComp`, against which the scalar components are
@@ -340,8 +331,6 @@ theorem tensorChartComp_eq_zero_of_section_eq_zero
     tensorChartComp (I := I) (M := M) g r s S α Idx Jdx = (fun _ => 0) := by
   rw [hS]
   exact tensorChartComp_zero (I := I) (M := M) g r s α Idx Jdx
-
-/-! ## Cardinality of the component index -/
 
 /-- The chart components of an `(r, s)`-tensor are indexed by pairs of
 multi-indices `(Fin r → Fin n) × (Fin s → Fin n)`; there are exactly

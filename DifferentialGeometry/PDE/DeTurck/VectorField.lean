@@ -54,8 +54,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## The DeTurck vector field as a bundled smooth section -/
-
 /-- The **DeTurck vector field** of two smooth Riemannian metrics `g` and `g'`,
 packaged as a bundled smooth section of the tangent bundle.
 
@@ -84,8 +82,6 @@ theorem deTurckVF_apply (g g' : SmoothRiemannianMetric I M) (x : M) :
     (deTurckVF (I := I) g g' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x =
       deTurckFun (I := I) g g' x := rfl
 
-/-! ## Vanishing for a metric against itself -/
-
 /-- **The DeTurck vector field of a metric against itself is the zero section.**
 
 When `g = g'` the connection-difference tensor `connDiff g g` is the zero
@@ -94,13 +90,9 @@ tensor, so its metric trace vanishes at every point; hence the bundled section
 theorem deTurckVF_self (g : SmoothRiemannianMetric I M) :
     deTurckVF (I := I) g g = 0 := by
   ext x
-  -- The section value at `x` is `deTurckFun g g x = 0`, and the zero section
-  -- also evaluates to `0`.
   rw [deTurckVF_apply, deTurckFun_self_apply (I := I) g x]
   rw [ContMDiffSection.coe_zero]
   rfl
-
-/-! ## The explicit chart-trace formula on the bundled section -/
 
 /-- **Chart-trace formula for the bundled DeTurck vector field.**
 

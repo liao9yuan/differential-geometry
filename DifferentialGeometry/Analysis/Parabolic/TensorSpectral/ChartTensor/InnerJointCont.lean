@@ -52,14 +52,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Bilinear expansion in a finite basis
-
-We expand the diagonal value of the chart-frame `(r, s)`-inner product in
-a finite basis of the model fibre. The expansion is purely algebraic and
-uses only the bilinearity and symmetry of the form (and hence does not
-depend on the inner-product / smoothness hypotheses needed downstream for
-the per-pair continuity). -/
-
 section Algebra
 
 /-- Bilinear expansion of the chart-frame `(r, s)`-inner product on the
@@ -81,14 +73,11 @@ private lemma chartTensorInnerPointwise_rs_model_basis_expand
             (basis i) (basis j) := by
   classical
   set a : ι → ℝ := fun i => basis.coord i T with ha_def
-  -- Step 1: `T = ∑ i, a i • basis i`.
   have hT : T = ∑ i : ι, a i • basis i := by
     have hrepr := basis.linearCombination_repr T
     rw [Finsupp.linearCombination_apply, Finsupp.sum_fintype] at hrepr
     · exact hrepr.symm
     · intros; rw [zero_smul]
-  -- Step 2: left-distributivity over a basis-coefficient sum, for any
-  -- right-hand tensor `S`.
   have hgen_left : ∀ (S : TensorRSModel r s ℝ E),
       chartTensorInnerPointwise_rs_model (I := I) (M := M) g r s α b
         (∑ i : ι, a i • basis i) S =
@@ -115,8 +104,6 @@ private lemma chartTensorInnerPointwise_rs_model_basis_expand
     intro i _
     rw [LL.map_smul]
     rfl
-  -- Step 3: right-distributivity over a basis-coefficient sum, for a fixed
-  -- basis-vector left argument.
   have hgen_right : ∀ (i : ι),
       chartTensorInnerPointwise_rs_model (I := I) (M := M) g r s α b
         (basis i) (∑ j : ι, a j • basis j) =
@@ -144,7 +131,6 @@ private lemma chartTensorInnerPointwise_rs_model_basis_expand
     intro j _
     rw [RR.map_smul]
     rfl
-  -- Step 4: combine the two distributivity steps with `T = ∑ i, a i • basis i`.
   calc chartTensorInnerPointwise_rs_model (I := I) (M := M) g r s α b T T
       = chartTensorInnerPointwise_rs_model (I := I) (M := M) g r s α b
           (∑ i : ι, a i • basis i) (∑ j : ι, a j • basis j) := by rw [← hT]
@@ -170,21 +156,6 @@ private lemma chartTensorInnerPointwise_rs_model_basis_expand
 
 end Algebra
 
-/-! ## Joint continuity of the diagonal quadratic form
-
-We now combine:
-
-* per-pair continuity in `b`: each `b ↦ F_{i,j}(b)` is `ContinuousOn baseSet`
-  via `chartTensorInnerPointwise_rs_model_contMDiffOn.continuousOn`;
-* continuity of coordinate functionals in `T`: `T ↦ basis.coord i T` is a
-  continuous linear map on the finite-dimensional model fibre via
-  `LinearMap.continuous_of_finiteDimensional`;
-* continuity of finite products and sums.
-
-This requires the inner-product / non-zero-finrank hypotheses that gate the
-per-pair smoothness fact.
--/
-
 section JointCont
 
 variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -204,15 +175,12 @@ theorem chartTensorInnerPointwise_rs_model_quadratic_continuousOn
             g r s α bT.1 bT.2 bT.2)
       ((trivializationAt E (TangentSpace I) α).baseSet ×ˢ Set.univ) := by
   classical
-  -- Canonical finite basis of the model fibre.
   let ι := Fin (Module.finrank ℝ (TensorRSModel r s ℝ E))
   let basis : Module.Basis ι ℝ (TensorRSModel r s ℝ E) :=
     Module.finBasis ℝ (TensorRSModel r s ℝ E)
-  -- Coordinate functionals, continuous on the finite-dimensional model fibre.
   let φ : ι → (TensorRSModel r s ℝ E →ₗ[ℝ] ℝ) := fun i => basis.coord i
   have hφ_cont : ∀ i, Continuous (φ i) := fun i =>
     LinearMap.continuous_of_finiteDimensional (φ i)
-  -- Per-pair `b`-continuity on the base set.
   set baseSet : Set M := (trivializationAt E (TangentSpace I) α).baseSet
     with hbaseSet_def
   have hF_cont : ∀ i j : ι,
@@ -222,7 +190,6 @@ theorem chartTensorInnerPointwise_rs_model_quadratic_continuousOn
         baseSet := fun i j =>
     (chartTensorInnerPointwise_rs_model_contMDiffOn
         (I := I) (M := M) g r s α (basis i) (basis j)).continuousOn
-  -- Bilinear expansion: rewrite the diagonal value as a finite double sum.
   have hexpand : ∀ b T,
       chartTensorInnerPointwise_rs_model (I := I) (M := M) g r s α b T T =
         ∑ i : ι, ∑ j : ι,
@@ -233,7 +200,6 @@ theorem chartTensorInnerPointwise_rs_model_quadratic_continuousOn
     exact
       chartTensorInnerPointwise_rs_model_basis_expand
         (I := I) (M := M) g r s α b basis T
-  -- Joint continuity of the expanded function.
   have hcontOn :
       ContinuousOn
         (fun bT : M × TensorRSModel r s ℝ E =>
@@ -246,27 +212,21 @@ theorem chartTensorInnerPointwise_rs_model_quadratic_continuousOn
     intro i _
     refine continuousOn_finset_sum _ ?_
     intro j _
-    -- The three factors:
-    -- (a) `(b, T) ↦ φ i T`, continuous everywhere ⇒ continuousOn.
     have hφi : ContinuousOn
         (fun bT : M × TensorRSModel r s ℝ E => φ i bT.2)
         (baseSet ×ˢ Set.univ) :=
       ((hφ_cont i).comp continuous_snd).continuousOn
-    -- (b) `(b, T) ↦ φ j T`, similarly.
     have hφj : ContinuousOn
         (fun bT : M × TensorRSModel r s ℝ E => φ j bT.2)
         (baseSet ×ˢ Set.univ) :=
       ((hφ_cont j).comp continuous_snd).continuousOn
-    -- (c) `(b, T) ↦ F_{i,j}(b)`, continuousOn `baseSet ×ˢ univ`.
     have hF : ContinuousOn
         (fun bT : M × TensorRSModel r s ℝ E =>
           chartTensorInnerPointwise_rs_model
             (I := I) (M := M) g r s α bT.1 (basis i) (basis j))
         (baseSet ×ˢ Set.univ) :=
       (hF_cont i j).comp continuousOn_fst (fun _ hp => hp.1)
-    -- Combine: `(φ i T) * (φ j T) * F_{i,j}(b)`.
     exact (hφi.mul hφj).mul hF
-  -- Conclude by `congr`-rewriting through `hexpand`.
   refine hcontOn.congr ?_
   intro bT _
   exact (hexpand bT.1 bT.2)

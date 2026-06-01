@@ -92,17 +92,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The chart-frame tensor-metric Gram
-
-The chart-`α`-frame `(r, s)`-inner product `chartTensorInnerPointwise_rs_model`
-(`ChartTensor/Inner.lean`) couples two model tensors through the chart-local
-Gram of `g`. Evaluated on the chart-frame basis elements
-`tensorChartBasisElement r s P.1 P.2` and `tensorChartBasisElement r s Q.1 Q.2`
-it yields a scalar — the chart-frame tensor-metric Gram on component
-multi-index pairs `P, Q`. The dependence on the base point enters only through
-chart Gram-matrix entries, which are `C^∞`; transported to the Euclidean chart
-target it is a `C^∞` function. -/
-
 /-- The chart-frame tensor-metric Gram on component multi-index pairs `P, Q`:
 the chart-`α`-frame `(r, s)`-inner product of the chart-frame basis elements
 indexed by `P` and `Q`, viewed as a function on the Euclidean chart target. -/
@@ -145,16 +134,6 @@ theorem covChartMetricGram_symm
     (tensorChartBasisElement (E := E) r s P.1 P.2)
     (tensorChartBasisElement (E := E) r s Q.1 Q.2)
 
-/-! ### Smoothness of the chart-frame tensor-metric Gram
-
-The map `b ↦ chartTensorInnerPointwise_rs_model g r s α b T₀ T₁` is, for fixed
-model tensors `T₀, T₁`, smooth on the chart-`α` base set
-(`chartTensorInnerPointwise_rs_model_contMDiffOn`). The chart-`α` base set is
-the chart source; pre-composing with `(extChartAt I α).symm` (smooth on the
-chart target into the source) and the linear isometry `toEuclidean.symm`
-transports this to a `ContDiffOn ℝ ∞` statement on the Euclidean chart
-target. -/
-
 /-- `(extChartAt I α).symm` maps the chart target into the chart-`α` base set
 (the chart source). -/
 private lemma extChartAt_symm_mapsTo_baseSet (α : M) :
@@ -177,7 +156,6 @@ theorem covChartMetricGram_contDiffOn
     ContDiffOn ℝ ∞ (covChartMetricGram (I := I) (M := M) g r s α P Q)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- The chart-base-set smoothness of the chart-frame inner product.
   have hbase : ContMDiffOn I 𝓘(ℝ) ∞
       (fun b : M =>
         chartTensorInnerPointwise_rs_model (I := I) (M := M) g r s α b
@@ -187,8 +165,6 @@ theorem covChartMetricGram_contDiffOn
     chartTensorInnerPointwise_rs_model_contMDiffOn (I := I) (M := M) g r s α
       (tensorChartBasisElement (E := E) r s P.1 P.2)
       (tensorChartBasisElement (E := E) r s Q.1 Q.2)
-  -- Compose with `(extChartAt I α).symm`: smooth on the chart target into
-  -- the base set.
   have hsymm : ContMDiffOn 𝓘(ℝ, E) I ∞ (extChartAt I α).symm
       (extChartAt I α).target := contMDiffOn_extChartAt_symm (I := I) α
   have hcomp_E : ContMDiffOn 𝓘(ℝ, E) 𝓘(ℝ) ∞
@@ -199,7 +175,6 @@ theorem covChartMetricGram_contDiffOn
         (extChartAt I α).symm)
       (extChartAt I α).target :=
     hbase.comp hsymm (extChartAt_symm_mapsTo_baseSet (I := I) (M := M) α)
-  -- Convert to a `ContDiffOn` statement on the `E`-side chart target.
   have hcontDiff_E : ContDiffOn ℝ ∞
       ((fun b : M =>
           chartTensorInnerPointwise_rs_model (I := I) (M := M) g r s α b
@@ -208,7 +183,6 @@ theorem covChartMetricGram_contDiffOn
         (extChartAt I α).symm)
       (extChartAt I α).target :=
     hcomp_E.contDiffOn
-  -- Pre-compose with the linear isometry `toEuclidean.symm`.
   have hcomp_eucl : ContDiffOn ℝ ∞
       (((fun b : M =>
             chartTensorInnerPointwise_rs_model (I := I) (M := M) g r s α b
@@ -223,18 +197,7 @@ theorem covChartMetricGram_contDiffOn
     · intro y hy
       rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
       exact hy
-  -- The composite is, definitionally, `covChartMetricGram`.
   exact hcomp_eucl
-
-/-! ## The chart-frame tensor-metric pairing of two model tensors
-
-For two model tensors `X`, `Y : TensorRSModel r s ℝ E`, the chart-`α`-frame
-`(r, s)`-inner product `chartTensorInnerPointwise_rs_model g r s α b X Y`
-expands, via the chart-frame basis decomposition `tensorRSModel_eq_sum_basis`
-and the bilinearity of `chartTensorInnerPointwise_rs_model`, into a finite
-component-coupled sum: a double sum over component multi-index pairs `P, Q`
-of `(chart-frame component of X at P) · (chart-frame component of Y at Q) ·
-(chart-frame tensor-metric Gram at (P, Q))`. -/
 
 /-- The chart-frame `(r, s)`-inner product expands as a finite component-coupled
 sum against the chart-frame component projections and the chart-frame
@@ -253,7 +216,6 @@ private lemma chartTensorInnerPointwise_rs_model_eq_component_sum
             (tensorChartComponentProjection (E := E) r s P.1 P.2 X *
               tensorChartComponentProjection (E := E) r s Q.1 Q.2 Y) := by
   classical
-  -- Expand both arguments in the chart-frame basis.
   have hX : X = ∑ P : (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin s → Fin (Module.finrank ℝ E)),
       tensorChartComponentProjection (E := E) r s P.1 P.2 X •
@@ -274,9 +236,7 @@ private lemma chartTensorInnerPointwise_rs_model_eq_component_sum
         tensorChartComponentProjection (E := E) r s Q.1 Q.2 Y •
           tensorChartBasisElement (E := E) r s Q.1 Q.2)]
     exact tensorRSModel_eq_sum_basis (E := E) r s Y
-  -- Substitute the expansion of `X` into the first slot.
   conv_lhs => rw [hX]
-  -- Distribute the first-slot sum out by additivity / homogeneity.
   rw [show chartTensorInnerPointwise_rs_model (I := I) (M := M) g r s α b
         (∑ P : (Fin r → Fin (Module.finrank ℝ E)) ×
               (Fin s → Fin (Module.finrank ℝ E)),
@@ -287,8 +247,7 @@ private lemma chartTensorInnerPointwise_rs_model_eq_component_sum
         tensorChartComponentProjection (E := E) r s P.1 P.2 X *
           chartTensorInnerPointwise_rs_model (I := I) (M := M) g r s α b
             (tensorChartBasisElement (E := E) r s P.1 P.2) Y from ?_]
-  · -- Now expand `Y` in the second slot of each summand.
-    refine Finset.sum_congr rfl (fun P _ => ?_)
+  · refine Finset.sum_congr rfl (fun P _ => ?_)
     rw [show chartTensorInnerPointwise_rs_model (I := I) (M := M) g r s α b
           (tensorChartBasisElement (E := E) r s P.1 P.2) Y =
         chartTensorInnerPointwise_rs_model (I := I) (M := M) g r s α b
@@ -297,7 +256,6 @@ private lemma chartTensorInnerPointwise_rs_model_eq_component_sum
                 (Fin s → Fin (Module.finrank ℝ E)),
             tensorChartComponentProjection (E := E) r s Q.1 Q.2 Y •
               tensorChartBasisElement (E := E) r s Q.1 Q.2) from by rw [← hY]]
-    -- Distribute the second-slot sum.
     rw [show chartTensorInnerPointwise_rs_model (I := I) (M := M) g r s α b
           (tensorChartBasisElement (E := E) r s P.1 P.2)
           (∑ Q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -313,8 +271,7 @@ private lemma chartTensorInnerPointwise_rs_model_eq_component_sum
     · rw [Finset.mul_sum]
       refine Finset.sum_congr rfl (fun Q _ => ?_)
       ring
-    · -- Second-slot additivity / homogeneity over the finite sum.
-      induction (Finset.univ : Finset ((Fin r → Fin (Module.finrank ℝ E)) ×
+    · induction (Finset.univ : Finset ((Fin r → Fin (Module.finrank ℝ E)) ×
           (Fin s → Fin (Module.finrank ℝ E)))) using Finset.induction with
       | empty =>
           rw [Finset.sum_empty, Finset.sum_empty]
@@ -326,8 +283,7 @@ private lemma chartTensorInnerPointwise_rs_model_eq_component_sum
           rw [Finset.sum_insert hQ, Finset.sum_insert hQ]
           rw [chartTensorInnerPointwise_rs_model_add_right,
             chartTensorInnerPointwise_rs_model_smul_right, ih]
-  · -- First-slot additivity / homogeneity over the finite sum.
-    induction (Finset.univ : Finset ((Fin r → Fin (Module.finrank ℝ E)) ×
+  · induction (Finset.univ : Finset ((Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin s → Fin (Module.finrank ℝ E)))) using Finset.induction with
     | empty =>
         rw [Finset.sum_empty, Finset.sum_empty]
@@ -339,18 +295,6 @@ private lemma chartTensorInnerPointwise_rs_model_eq_component_sum
         rw [Finset.sum_insert hP, Finset.sum_insert hP]
         rw [chartTensorInnerPointwise_rs_model_add_left,
           chartTensorInnerPointwise_rs_model_smul_left, ih]
-
-/-! ## The bundle-fibre tensor inner product of two `toModel` covariant
-derivatives via the chart-frame component sum
-
-The pointwise integrand `tensorCovDerivPointwiseInner` pairs two
-covariant-derivative values via the bundle-fibre tensor inner product
-`tensorInnerPointwise` of their canonical model-fibre images `toModel`. The
-bridge `triv_continuousLinearMapAt_eq_chartRSTwistInv_toModel` together with
-`chartTensorInnerPointwise_rs_model_eq_tensorInnerPointwise` re-expresses this
-bundle-fibre pairing as the chart-`α`-frame inner product of the
-trivialisation-projected values, which expands into the component-coupled
-sum. -/
 
 /-- On the chart-`α` base set, the bundle-fibre tensor inner product of the
 `toModel` images of two fibre elements `X`, `Y` equals the chart-`α`-frame
@@ -368,20 +312,15 @@ private lemma tensorInnerPointwise_toModel_eq_chart
             (fun z : M => TensorRSSpace r s I z) α).continuousLinearMapAt ℝ b
           Y) := by
   classical
-  -- The chart source is the tangent trivialisation base set.
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := hb
-  -- Express the trivialised values as inverse chart-twists of `toModel`.
   rw [triv_continuousLinearMapAt_eq_chartRSTwistInv_toModel (I := I) (M := M)
     r s α hb X]
   rw [triv_continuousLinearMapAt_eq_chartRSTwistInv_toModel (I := I) (M := M)
     r s α hb Y]
-  -- The chart-frame inner product of the inverse twists is the bundle-fibre
-  -- inner product of the forward twists of those — i.e. of `toModel X`/`Y`.
   rw [chartTensorInnerPointwise_rs_model_eq_tensorInnerPointwise (I := I) (M := M)
     g r s α hb_base
     (chartRSTwistInv (I := I) (M := M) α b r s (TensorRSSpace.toModel X))
     (chartRSTwistInv (I := I) (M := M) α b r s (TensorRSSpace.toModel Y))]
-  -- `chartRSTwist ∘ chartRSTwistInv = id` on the chart base set.
   rw [chartRSTwist_chartRSTwistInv (I := I) (M := M) α hb_base r s
     (TensorRSSpace.toModel X)]
   rw [chartRSTwist_chartRSTwistInv (I := I) (M := M) α hb_base r s
@@ -418,17 +357,6 @@ lemma tensorInnerPointwise_toModel_eq_component_sum
   refine Finset.sum_congr rfl (fun Q _ => ?_)
   rw [wrappedComponentProj_apply, wrappedComponentProj_apply]
 
-/-! ## Reducing the abstract covariant derivative to the chart-coordinate one
-
-The integrand `tensorCovDerivPointwiseInner` pairs the abstract bundled
-covariant-derivative values `tensorCovDerivAt`. On the chart-`α` Levi-Civita
-good set these agree with the chart-coordinate covariant derivative
-`chartTensorRSCovariantDerivative`, by the headline agreement
-`chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet`. The agreement is stated with a
-*global* smooth vector field `X`; since the chart-coordinate covariant
-derivative depends on `X` only through `X b`, the agreement transfers to the
-chart-coordinate basis vector field `chartBasisVecFiber α m`. -/
-
 /-- The chart-coordinate covariant derivative depends on the directional vector
 field `X` only through its value `X b` at the base point: the intrinsic chart
 piece reads `X b` directly, and each Christoffel slot correction factors
@@ -442,16 +370,12 @@ private lemma chartTensorRSCovariantDerivative_locality
     chartTensorRSCovariantDerivative (I := I) r s g α T X b =
       chartTensorRSCovariantDerivative (I := I) r s g α T Y b := by
   classical
-  -- `chartLeviCivitaParallelCLM` depends on `X` only via `X b`.
   have hparallel : chartLeviCivitaParallelCLM (I := I) g α b X =
       chartLeviCivitaParallelCLM (I := I) g α b Y := by
     unfold chartLeviCivitaParallelCLM
     rw [hXY]
-  -- The intrinsic piece and both slot corrections are determined by `X b`
-  -- and `chartLeviCivitaParallelCLM g α b X`.
   rw [chartTensorRSCovariantDerivative_def, chartTensorRSCovariantDerivative_def,
     hXY]
-  -- The input-slot corrections agree.
   have hinput : (∑ k : Fin r,
         chartTensorRSInputSlotCorrection (I := I) r s g α T X b k) =
       ∑ k : Fin r,
@@ -459,7 +383,6 @@ private lemma chartTensorRSCovariantDerivative_locality
     refine Finset.sum_congr rfl (fun k _ => ?_)
     unfold chartTensorRSInputSlotCorrection
     rw [hparallel]
-  -- The output-slot corrections agree.
   have houtput : (∑ l : Fin s,
         chartTensorRSOutputSlotCorrection (I := I) r s g α T X b l) =
       ∑ l : Fin s,
@@ -485,25 +408,15 @@ lemma tensorCovDerivAt_eq_chartTensorRSCovariantDerivative
       chartTensorRSCovariantDerivative (I := I) r s g α S.toSection
         (chartBasisVecFiber (I := I) α m) b := by
   classical
-  -- Produce a global smooth vector field `Xfield` with `Xfield b =
-  -- chartBasisVecFiber α m b`.
   obtain ⟨Xfield, hXfield⟩ :=
     ContMDiffSection.exists_eq_at (I := I) (F := E)
       (V := (TangentSpace I : M → Type _)) (n := (⊤ : ℕ∞)) b
       (chartBasisVecFiber (I := I) α m b)
-  -- `Xfield.toFun b = chartBasisVecFiber α m b` (the function-level form of
-  -- `hXfield`).
   have hXfield' : Xfield.toFun b = chartBasisVecFiber (I := I) α m b := hXfield
-  -- The abstract agreement for the global field `Xfield`.
   have hagree := chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet (I := I) (M := M)
     g r s α S.toSection Xfield hb
-  -- The chart-coordinate covariant derivative's `X`-locality replaces the
-  -- global field `Xfield.toFun` by `chartBasisVecFiber α m`.
   have hloc := chartTensorRSCovariantDerivative_locality (I := I) r s g α
     S.toSection Xfield.toFun (chartBasisVecFiber (I := I) α m) b hXfield'
-  -- Chain: `tensorCovDerivAt = tensorRSCovariantDerivative S.toSection b
-  -- (Xfield.toFun b) = chartTensorRSCovariantDerivative … Xfield.toFun b =
-  -- chartTensorRSCovariantDerivative … (chartBasisVecFiber α m) b`.
   calc tensorCovDerivAt (I := I) (M := M) g r s S b
           (chartBasisVecFiber (I := I) α m b)
       = TensorRSNabla.tensorRSCovariantDerivative I M r s
@@ -515,16 +428,6 @@ lemma tensorCovDerivAt_eq_chartTensorRSCovariantDerivative
     _ = chartTensorRSCovariantDerivative (I := I) r s g α
           (fun y : M => S.toSection y) (chartBasisVecFiber (I := I) α m) b :=
         hloc
-
-/-! ## The principal-part integrand
-
-Combining the component-expansion of the bundle-fibre tensor inner product with
-the chart-coordinate covariant-derivative component formula, the
-`euclidPartial · euclidPartial` group of products is isolated as the principal
-part. The chart-frame component projection of the chart-coordinate covariant
-derivative is `euclidPartial + covDerivLowerOrderTerm`
-(`covDerivComponent_eq_euclidPartial_add_lowerOrder`); the principal part keeps
-only the `euclidPartial` summand of each factor. -/
 
 /-- **The component-coupled principal part of the chart-coordinate Dirichlet
 integrand.** A double sum over component multi-index pairs `P, Q` of the
@@ -590,23 +493,18 @@ theorem covPrincipalIntegrand_symm
       covPrincipalIntegrand (I := I) (M := M) g r s T S α y := by
   classical
   rw [covPrincipalIntegrand_def, covPrincipalIntegrand_def]
-  -- Swap the two outer sums.
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl (fun P _ => ?_)
   refine Finset.sum_congr rfl (fun Q _ => ?_)
-  -- The chart-frame tensor-metric Gram is symmetric in `(Q, P)`.
   rw [covChartMetricGram_symm (I := I) (M := M) g r s α Q P y]
   congr 1
-  -- Swap the two inner sums; the inverse Gram is symmetric in `(l, k)`.
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl (fun k _ => ?_)
   refine Finset.sum_congr rfl (fun l _ => ?_)
   rw [show chartInvGramEuclid (I := I) g α l k y =
       chartInvGramEuclid (I := I) g α k l y from ?_]
   · ring
-  · -- Symmetry of the chart inverse Gram matrix: it is the inverse of the
-    -- Hermitian chart Gram matrix, hence Hermitian, hence (over `ℝ`) symmetric.
-    rw [chartInvGramEuclid_def, chartInvGramEuclid_def, chartInvGramOnE_def,
+  · rw [chartInvGramEuclid_def, chartInvGramEuclid_def, chartInvGramOnE_def,
       chartInvGramOnE_def]
     have hHerm : (chartInvGramMatrix (I := I) g α
         ((extChartAt I α).symm (toEuclidean.symm y))).IsHermitian := by
@@ -616,17 +514,6 @@ theorem covPrincipalIntegrand_symm
     have hsymm := hHerm.apply k l
     rw [star_trivial] at hsymm
     exact hsymm
-
-/-! ## The headline coupled identity
-
-The headline `tensorCovDerivPointwiseInner_chart_eq` decomposes the
-chart-coordinate Dirichlet integrand into the principal part
-`covPrincipalIntegrand` plus the lower-order remainder `covLowerOrderIntegrand`.
-The lower-order remainder is defined in the companion file
-`CovDerivChartFormLowerOrder.lean`; the headline itself is stated and proved
-there, downstream of both definitions. The lemma below is the analytic core: it
-expresses the chart-coordinate Dirichlet integrand as the *single*
-component-coupled double sum, before the four product groups are separated. -/
 
 /-- **The chart-coordinate Dirichlet integrand as a component-coupled double
 sum.** For `y` in the Euclidean chart target, set
@@ -667,16 +554,12 @@ theorem tensorCovDerivPointwiseInner_chart_eq_component_sum
                     covDerivLowerOrderTerm (I := I) (M := M)
                       g r s T α l Q.1 Q.2 y) := by
   classical
-  -- Notation: `b` is the chart-source preimage of `y`.
   set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
-  -- `toEuclidean.symm y` lies in the `E`-side chart target.
   have hy_pre : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
     rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
     exact hy
-  -- `b` lies in the chart source.
   have hb_chart : b ∈ (chartAt H α).source :=
     symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy
-  -- The chart image of `b` lies in the interior of the chart target.
   have hphi_b : extChartAt I α b = (toEuclidean (E := E)).symm y := by
     rw [hb_def]
     exact (extChartAt I α).right_inv hy_pre
@@ -684,22 +567,16 @@ theorem tensorCovDerivPointwiseInner_chart_eq_component_sum
       extChartAt I α b ∈ interior ((extChartAt I α).target : Set E) := by
     rw [hphi_b, (isOpen_extChartAt_target (I := I) α).interior_eq]
     exact hy_pre
-  -- `b` lies in the chart-`α` Levi-Civita good set.
   have hb_good : b ∈ chartLeviCivitaGoodSet (I := I) α := by
     refine ⟨⟨?_, ?_⟩, ?_⟩
     · rw [extChartAt_source]; exact hb_chart
     · rw [TangentBundle.trivializationAt_baseSet]; exact hb_chart
     · exact hb_int
-  -- Step 1: rewrite the abstract integrand as the chart-`α`-frame trace
-  -- expression.
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [TangentBundle.trivializationAt_baseSet]; exact hb_chart
   rw [← chartTensorCovDerivPointwiseInner_eq_tensorCovDerivPointwiseInner
     (I := I) (M := M) g α r s S T hb_base]
-  -- Unfold the chart-`α`-frame trace expression.
   unfold chartTensorCovDerivPointwiseInner
-  -- Step 2: replace each abstract covariant-derivative value by the
-  -- chart-coordinate covariant derivative.
   have hcov_S : ∀ i : Fin (Module.finrank ℝ E),
       tensorCovDerivAt (I := I) (M := M) g r s S b
           (chartBasisVecFiber (I := I) α i b) =
@@ -714,7 +591,6 @@ theorem tensorCovDerivPointwiseInner_chart_eq_component_sum
           (chartBasisVecFiber (I := I) α j) b := fun j =>
     tensorCovDerivAt_eq_chartTensorRSCovariantDerivative (I := I) (M := M)
       g r s T α j hb_good
-  -- Rewrite the chart-frame Gram entry as `chartInvGramEuclid`.
   have hG_entry : ∀ i j : Fin (Module.finrank ℝ E),
       (chartGramMatrix (I := I) g α b)⁻¹ i j =
         chartInvGramEuclid (I := I) g α i j y := by
@@ -724,7 +600,6 @@ theorem tensorCovDerivPointwiseInner_chart_eq_component_sum
       chartInvGramMatrix (I := I) g α
         ((extChartAt I α).symm (toEuclidean.symm y)) i j
     rw [chartInvGramMatrix]
-  -- Substitute the covariant-derivative and Gram rewrites termwise.
   have hsum_rewrite :
       (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
           (chartGramMatrix (I := I) g α b)⁻¹ i j *
@@ -748,7 +623,6 @@ theorem tensorCovDerivPointwiseInner_chart_eq_component_sum
     refine Finset.sum_congr rfl (fun j _ => ?_)
     rw [hcov_S i, hcov_T j, hG_entry i j]
   rw [hsum_rewrite]
-  -- Step 3: component-expand each bundle-fibre tensor inner product.
   have hinner_expand : ∀ i j : Fin (Module.finrank ℝ E),
       tensorInnerPointwise (I := I) (M := M) g r s b
           (TensorRSSpace.toModel
@@ -785,7 +659,6 @@ theorem tensorCovDerivPointwiseInner_chart_eq_component_sum
         T.toSection (chartBasisVecFiber (I := I) α j) b)]
     refine Finset.sum_congr rfl (fun P _ => ?_)
     refine Finset.sum_congr rfl (fun Q _ => ?_)
-    -- Identify the wrapped raw-component projections via the component formula.
     have hSproj : wrappedComponentProj (I := I) (M := M) r s α b P.1 P.2
           (chartTensorRSCovariantDerivative (I := I) r s g α
             S.toSection (chartBasisVecFiber (I := I) α i) b) =
@@ -809,7 +682,6 @@ theorem tensorCovDerivPointwiseInner_chart_eq_component_sum
       exact covDerivComponent_eq_euclidPartial_add_lowerOrder (I := I) (M := M)
         g r s T α j Q.1 Q.2 hy
     rw [hSproj, hTproj]
-  -- Substitute the component-expansion into the `(i, j)` double sum.
   have hLHS : (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
         chartInvGramEuclid (I := I) g α i j y *
           tensorInnerPointwise (I := I) (M := M) g r s b
@@ -848,8 +720,6 @@ theorem tensorCovDerivPointwiseInner_chart_eq_component_sum
     refine Finset.sum_congr rfl (fun Q _ => ?_)
     ring
   rw [hLHS]
-  -- The right-hand side, expanded by distributing the `covChartMetricGram`
-  -- factor through both inner sums.
   have hRHS : (∑ P : (Fin r → Fin (Module.finrank ℝ E)) ×
             (Fin s → Fin (Module.finrank ℝ E)),
         ∑ Q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -899,9 +769,6 @@ theorem tensorCovDerivPointwiseInner_chart_eq_component_sum
     refine Finset.sum_congr rfl (fun j _ => ?_)
     ring
   rw [hRHS]
-  -- Both sides are now the same quadruple sum, differing only in summation
-  -- order: `∑ i ∑ j ∑ P ∑ Q` versus `∑ P ∑ Q ∑ i ∑ j`. Re-index each as a
-  -- single sum over the relevant product type and swap the two product sums.
   set termFun :
       (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)) →
         ((Fin r → Fin (Module.finrank ℝ E)) ×
@@ -925,9 +792,6 @@ theorem tensorCovDerivPointwiseInner_chart_eq_component_sum
                     g r s T α PQ.2.1 PQ.2.2)) y +
               covDerivLowerOrderTerm (I := I) (M := M)
                 g r s T α ij.2 PQ.2.1 PQ.2.2 y)) with htermFun_def
-  -- The `∑ i ∑ j ∑ P ∑ Q` side as a sum over `(i, j)`-pairs of a sum over
-  -- `(P, Q)`-pairs. The product-sum is on the left so `Fintype.sum_prod_type`
-  -- expands it; the quadruple sum is recovered.
   have hLHS_prod :
       (∑ ij : Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E),
           ∑ PQ : ((Fin r → Fin (Module.finrank ℝ E)) ×
@@ -960,8 +824,6 @@ theorem tensorCovDerivPointwiseInner_chart_eq_component_sum
     refine Finset.sum_congr rfl (fun i _ => ?_)
     refine Finset.sum_congr rfl (fun j _ => ?_)
     rw [Fintype.sum_prod_type]
-  -- The `∑ P ∑ Q ∑ i ∑ j` side as a sum over `(P, Q)`-pairs of a sum over
-  -- `(i, j)`-pairs.
   have hRHS_prod :
       (∑ PQ : ((Fin r → Fin (Module.finrank ℝ E)) ×
                   (Fin s → Fin (Module.finrank ℝ E))) ×

@@ -82,15 +82,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## (a) Single-slot scalar derivatives from the raw vector derivative
-
-Each single-slot variation curve is the fixed continuous linear functional
-`(g.inner (Φ_fam t x)).flip c` (resp. `g.inner (Φ_fam t x) c`) applied to the
-raw vector-valued pushforward path. Composition of a `HasDerivAt` path with a
-fixed continuous-linear map therefore yields the scalar derivative, with the
-derivative value obtained by applying the same functional to the raw derivative.
--/
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 /-- **Slot-1 scalar derivative from the raw vector derivative.**
@@ -156,13 +147,6 @@ theorem variational_flow_inner_slot2_derivative
   rw [hfun] at hcomp
   exact hcomp
 
-/-! ## (b) Two-slot total derivative (bilinear product rule)
-
-When both slots vary, the total inner-product variation curve is the fixed
-continuous-bilinear form `g.inner (Φ_fam t x)` evaluated on the two raw
-pushforward paths. The continuous-bilinear product rule gives the total
-derivative as the sum of the two single-slot contributions. -/
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 /-- **Total two-slot derivative from the raw vector derivatives.**
@@ -194,25 +178,8 @@ theorem variational_flow_inner_total_derivative
     (u := u) (v := ww) (s := Set.univ) (x := t)
     hu.hasDerivWithinAt hw.hasDerivWithinAt
   rw [hasDerivWithinAt_univ] at hprod
-  -- The bilinear rule yields `B (u t) W' + B V' (ww t)`; reorder to the
-  -- slot-`v`-first convention `B V' (ww t) + B (u t) W'`.
   rw [add_comm]
   exact hprod
-
-/-! ## (c) The raw linearized-flow identity (the single remaining gap)
-
-The predicate `RawVariationalIdentity` packages the raw vector-valued
-variational ODE for one pushforward slot. It is the *sole* mathematical input to
-the variational reduction that is not proved in this file: it is the genuine
-variational ODE for the manifold flow, requiring smooth dependence of the flow on
-its initial condition (only Lipschitz IC-dependence is available from Mathlib's
-integral-curve API). It is exposed as a hypothesis, never as a `sorry`/`axiom`.
-
-Note this is a strictly *different and stronger* object than the Cartan-Lie
-conclusion: it is a *vector-valued* `HasDerivAt` on the `E`-fibre, whereas the
-downstream conclusion is a *scalar* `HasDerivAt` identifying a real derivative
-with `-lieDerivMetric ...`. Supplying `RawVariationalIdentity` is therefore not
-hypothesis-packaging. -/
 
 /-- **Raw linearized-flow variational identity for one pushforward slot.**
 
@@ -236,14 +203,6 @@ def RawVariationalIdentity
   HasDerivAt (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E))
     (-(LeviCivita (I := I) g) (X : ∀ x : M, TangentSpace I x) (Φ_fam t x)
       (mfderiv I I (Φ_fam t : M → M) x v)) t
-
-/-! ## (d) Capstone: feed the raw identities into the Cartan-cancellation witness
-
-Given the raw variational identities on both slots, the slot lemmas above
-produce the per-slot derivative witnesses; the bilinear total produces the total
-witness; and `map_neg` / `ContinuousLinearMap.neg_apply` produce the per-slot
-value identifications. Feeding these into `cartan_cancellation_derivative_witness`
-yields the headline `-lieDerivMetric` conclusion. -/
 
 /-- **Variational reduction feeding the Cartan-cancellation witness.**
 
@@ -275,19 +234,15 @@ theorem variational_flow_feeds_cartan_witness
       (-lieDerivMetric (I := I) g X (Φ_fam t x)
         (mfderiv I I (Φ_fam t : M → M) x v)
         (mfderiv I I (Φ_fam t : M → M) x w)) t := by
-  -- Abbreviations for the raw derivative values.
   set y := Φ_fam t x with hy
   set dΦv : E := mfderiv I I (Φ_fam t : M → M) x v with hdΦv
   set dΦw : E := mfderiv I I (Φ_fam t : M → M) x w with hdΦw
   set Vraw : E := -(LeviCivita (I := I) g) (X : ∀ x : M, TangentSpace I x) y dΦv with hVraw
   set Wraw : E := -(LeviCivita (I := I) g) (X : ∀ x : M, TangentSpace I x) y dΦw with hWraw
-  -- Per-slot derivative witnesses.
   have h_A := variational_flow_inner_slot1_derivative (I := I) g Φ_fam t x v w Vraw hv_raw
   have h_B := variational_flow_inner_slot2_derivative (I := I) g Φ_fam t x v w Wraw hw_raw
-  -- Total derivative witness.
   have h_total := variational_flow_inner_total_derivative (I := I) g Φ_fam t x v w
     Vraw Wraw hv_raw hw_raw
-  -- Per-slot value identifications: push the negation through `g.inner`.
   have h_A_value : g.inner y Vraw dΦw
       = -g.inner y ((LeviCivita (I := I) g)
           (X : ∀ x : M, TangentSpace I x) y dΦv) dΦw := by
@@ -296,7 +251,6 @@ theorem variational_flow_feeds_cartan_witness
       = -g.inner y dΦv ((LeviCivita (I := I) g)
           (X : ∀ x : M, TangentSpace I x) y dΦw) := by
     rw [hWraw, map_neg]
-  -- Feed everything into the Cartan-cancellation derivative witness.
   exact cartan_cancellation_derivative_witness (I := I) g X Φ_fam t x v w
     (g.inner y Vraw dΦw + g.inner y dΦv Wraw)
     (g.inner y Vraw dΦw) (g.inner y dΦv Wraw)

@@ -212,11 +212,8 @@ theorem chartPushVF_eq_geodesicVectorFieldChartFiber
     (t : ℝ) (ht : (f t).proj ∈ (chartAt H α).source) :
     chartPushVF (I := I) g α f 0 t =
       geodesicVectorFieldChartFiber (I := I) g α (f t) := by
-  -- Unfold `chartPushVF`.
   unfold chartPushVF
-  -- Reduce `tangentCoordChange ... (f 0) ...` to `tangentCoordChange ... ⟨α, 0⟩ ...`.
   rw [tangentCoordChange_tangent_f0_eq (I := I) hf0_proj (f t)]
-  -- Apply `tangentCoordChange_tangent_geodesicVF`.
   exact tangentCoordChange_tangent_geodesicVF (I := I) g α (f t) ht
 
 /-- The chart-α fibre form of the geodesic vector field at `f t` matches
@@ -229,20 +226,13 @@ theorem geodesicVectorFieldChartFiber_eq_chartPhaseVF
     geodesicVectorFieldChartFiber (I := I) g α (f t) =
       chartPhaseVF (I := I) g α (chartPushLift (I := I) f 0 t) := by
   classical
-  -- Both pairs `(chartFiberCoord α (f t), -Γ_α(...)(extChartAt I α (f t).proj))`.
   have hpair : chartPushLift (I := I) f 0 t =
       (extChartAt I α (f t).proj, chartFiberCoord (I := I) α (f t)) := by
     have h_eq := chartPushLift_eq_pair (I := I) (f := f) (t₀ := 0) (t := t) ?_
-    · -- `(f 0).proj = α`, so the RHS rewrites.
-      rw [h_eq]
+    · rw [h_eq]
       rw [hf0_proj]
-    · -- `(f t).proj ∈ (chartAt H (f 0).proj).source`: substitute `(f 0).proj = α`.
-      rw [hf0_proj]; exact ht
+    · rw [hf0_proj]; exact ht
   rw [hpair]
-  -- Now `chartPhaseVF g α (x, v) = (v, -Γ_α(v, v)(x))`.
-  -- `geodesicVectorFieldChartFiber g α (f t) = (chartFiberCoord α (f t),
-  --   -chartChristoffelContraction g α (chartFiberCoord α (f t)) (chartFiberCoord α (f t))
-  --     (extChartAt I α (f t).proj))`.
   rfl
 
 /-- **Headline identification.** When `(f 0).proj = α` and
@@ -259,17 +249,6 @@ theorem chartPushVF_eq_chartPhaseVF
         hf0_proj t ht]
   exact geodesicVectorFieldChartFiber_eq_chartPhaseVF (I := I) g α
     hf0_proj t ht
-
-/-! ### Generalisation to an arbitrary base time `t₀`
-
-The chart-pushed/chart-phase identification packaged in
-`chartPushVF_eq_chartPhaseVF` is autonomous in the sense that nothing
-above singles out `t = 0`: the base time `0` appears only as the index
-into the curve `f` chosen to align with the basepoint `α`. We mirror the
-lemma chain with an arbitrary base time `t₀`, using `(f t₀).proj = α` as
-the alignment hypothesis. The proofs are identical to the `t₀ = 0` case,
-because every intermediate identity is itself base-time-free up to the
-projection-equality hypothesis. -/
 
 /-- When `(f t₀).proj = α`, the achart of `TM` at `f t₀` equals the
 achart at `⟨α, 0⟩`. -/
@@ -346,12 +325,6 @@ theorem chartPushVF_eq_chartPhaseVF_at
 
 end ChartPushVFEq
 
-/-! ## Eventual chart-phase form of the chart-pushed derivative
-
-The Mathlib chart-pushed derivative formula gives the derivative in
-`chartPushVF` form; the identification `chartPushVF_eq_chartPhaseVF`
-upgrades it to the `chartPhaseVF` form, eventually around `0`. -/
-
 section EventualChartPhase
 
 variable [I.Boundaryless]
@@ -369,10 +342,8 @@ theorem chartPushLift_eventually_hasDerivAt_chartPhaseVF
     ∀ᶠ t in 𝓝 (0 : ℝ),
       HasDerivAt (chartPushLift (I := I) f 0)
         (chartPhaseVF (I := I) g α (chartPushLift (I := I) f 0 t)) t := by
-  -- The Mathlib-derived formula `HasDerivAt ... (chartPushVF ...) t`.
   have hd := chartPushLift_eventually_hasDerivAt (I := I) (g := g) (α := α)
     (t₀ := 0) (f := f) hf
-  -- Eventually `(f t).proj ∈ (chartAt H α).source`.
   have hπ_cont : Continuous
       (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
     FiberBundle.continuous_proj E (TangentSpace I)
@@ -388,7 +359,6 @@ theorem chartPushLift_eventually_hasDerivAt_chartPhaseVF
     rw [hf0_α]
     exact hα_nhds
   filter_upwards [hd, hsrc_nhds] with t htD ht_src
-  -- Use `chartPushVF_eq_chartPhaseVF`.
   have hreplace : chartPushVF (I := I) g α f 0 t =
       chartPhaseVF (I := I) g α (chartPushLift (I := I) f 0 t) :=
     chartPushVF_eq_chartPhaseVF (I := I) g α hf0_proj t ht_src
@@ -410,7 +380,6 @@ theorem chartPushLift_eventually_hasDerivAt_chartPhaseVF_and_target_interior
         (chartPhaseVF (I := I) g α (chartPushLift (I := I) f 0 t)) t ∧
       chartPushLift (I := I) f 0 t ∈
         (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) := by
-  -- Eventually `(f t).proj ∈ (chartAt H α).source`.
   have hπ_cont : Continuous
       (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
     FiberBundle.continuous_proj E (TangentSpace I)
@@ -425,14 +394,11 @@ theorem chartPushLift_eventually_hasDerivAt_chartPhaseVF_and_target_interior
     apply hcomp0.preimage_mem_nhds
     rw [hf0_α]
     exact hα_nhds
-  -- The chart-phase derivative formula.
   have hd_phase :=
     chartPushLift_eventually_hasDerivAt_chartPhaseVF (I := I) (g := g) (α := α)
       (f := f) hf0_proj hf
   filter_upwards [hd_phase, hsrc_nhds] with t htD ht_src
   refine ⟨htD, ?_⟩
-  -- Compute `chartPushLift f 0 t = (extChartAt I α (f t).proj, ...)` and
-  -- use boundarylessness to get the first component in the chart-target interior.
   have hpair : chartPushLift (I := I) f 0 t =
       (extChartAt I α (f t).proj, chartFiberCoord (I := I) α (f t)) := by
     have h_eq := chartPushLift_eq_pair (I := I) (f := f) (t₀ := 0) (t := t) ?_
@@ -440,7 +406,6 @@ theorem chartPushLift_eventually_hasDerivAt_chartPhaseVF_and_target_interior
     · rw [hf0_α]; exact ht_src
   rw [hpair]
   refine ⟨?_, Set.mem_univ _⟩
-  -- `extChartAt I α (f t).proj ∈ interior (extChartAt I α).target` via boundarylessness.
   have h_target : extChartAt I α (f t).proj ∈ (extChartAt I α).target := by
     have h_src : (f t).proj ∈ (extChartAt I α).source := by
       rw [extChartAt_source]
@@ -449,12 +414,6 @@ theorem chartPushLift_eventually_hasDerivAt_chartPhaseVF_and_target_interior
   exact extChartAt_target_subset_interior_of_boundaryless (I := I) α h_target
 
 end EventualChartPhase
-
-/-! ## Unconditional closure of the bridge headline
-
-We discharge the chart-phase-ODE hypothesis in the bridge headline
-unconditionally, yielding closed-form statements against
-`maximalGeodesicChosenCurve`. -/
 
 section UnconditionalBridge
 
@@ -478,13 +437,9 @@ theorem chartPushedFlow_eq_witness_curve_eventually_unconditional
         (extChartAt I p p, v_chart) ∧
       (∀ᶠ t in 𝓝 (0 : ℝ),
         γ t = chartFlowGeodesicCurve (I := I) Φ p v_chart t) := by
-  -- Build the chart-phase ODE hypothesis from
-  -- `chartPushLift_eventually_hasDerivAt_chartPhaseVF_and_target_interior`,
-  -- using `(f 0).proj = p`.
   have hf0_proj : (f 0).proj = p := by rw [hf0]
   have hd := chartPushLift_eventually_hasDerivAt_chartPhaseVF_and_target_interior
     (I := I) (g := g) (α := p) (f := f) hf0_proj hf_int_at0
-  -- Now invoke the conditional bridge.
   exact chartPushedFlow_eq_witness_curve_eventually
     (I := I) (g := g) (p := p) (v_chart := v_chart)
     (γ := γ) (f := f) hproj hf0 hf_int_at0 hd

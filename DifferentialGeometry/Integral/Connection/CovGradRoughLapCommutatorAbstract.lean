@@ -108,20 +108,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The abstract `(0, 3)` rough Laplacian of the unit-evaluated gradient field
-
-The committed transport `tensorSecondCovDeriv_covGrad_unit_eval` writes each
-frame summand of the unit-evaluated rough Laplacian of `∇T₀` as the abstract
-`(0, 3)`-tensor second covariant derivative of `U y := (∇T₀) y (unit)` along the
-orthonormal frame direction `Bᵢ`. Summing over the frame gives the abstract
-`(0, 3)` rough Laplacian of `U`; we record it as a named field. -/
 
 /-- **The abstract `(0, 3)` rough Laplacian of the unit-evaluated gradient
 field.** With `B_i := smoothOrthoFrame g x i` the `g_x`-orthonormal smooth frame,
@@ -164,16 +154,6 @@ lemma unitGradAbstractRoughLap_def
               (smoothOrthoFrame (I := I) g x i) x
               (smoothOrthoFrame (I := I) g x i x))) := rfl
 
-/-! ## The complete combined section reduction
-
-Combining the two committed lemmas — `rawTensorConnLap_covGrad_eq_frame_trace`
-(the frame-trace identity for the rough Laplacian of the gradient field) and
-`tensorSecondCovDeriv_covGrad_unit_eval` (the per-summand transport into the
-abstract `(0, 3)` second covariant derivative of `U`) — the entire left-hand side
-of the target commutator, evaluated at the unit `(0, 0)`-tensor, is the abstract
-`(0, 3)` rough Laplacian of `U`. The summation step is the additivity of the
-continuous-linear-map evaluation at the unit over the orthonormal frame. -/
-
 /-- **Combined section reduction of the commutator LHS.** For a smooth
 compactly-supported `(0, 2)`-tensor field `T₀`, the unit-`(0, 0)`-evaluation of
 the rough Laplacian of the `(0, 3)`-tensor gradient field `∇T₀ = covGrad g 0 2 T₀`
@@ -193,11 +173,7 @@ theorem rawTensorConnLap_covGrad_unit_eval_eq_abstract_roughLap
         (unitZeroSec (I := I) (M := M) x) =
       unitGradAbstractRoughLap (I := I) (M := M) g T₀ x := by
   classical
-  -- Step 1 (committed): the rough Laplacian of the gradient field is the frame
-  -- trace of its second covariant derivative.
   rw [rawTensorConnLap_covGrad_eq_frame_trace (I := I) (M := M) g T₀ x]
-  -- Distribute the unit-`(0, 0)`-evaluation (a continuous linear map) over the
-  -- frame sum.
   rw [unitGradAbstractRoughLap_def]
   rw [show
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from
@@ -213,29 +189,10 @@ theorem rawTensorConnLap_covGrad_unit_eval_eq_abstract_roughLap
               (fun y : M => (covGrad (I := I) (M := M) g 0 2 T₀).toSection y) x)
             (unitZeroSec (I := I) (M := M) x) from by
         rw [ContinuousLinearMap.sum_apply]]
-  -- Step 2 (committed): each summand transports to the abstract `(0, 3)` second
-  -- covariant derivative of `U`.
   refine Finset.sum_congr rfl (fun i _ => ?_)
   have hB : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (smoothOrthoFrame (I := I) g x i)) :=
     smoothOrthoFrame_smooth (I := I) g x i
   exact tensorSecondCovDeriv_covGrad_unit_eval (I := I) (M := M) g T₀ hB x
-
-/-! ## The slot-`0` Christoffel exposure for the abstract `(0, 3)` covariant derivative
-
-The abstract `(0, 3) = (0, 2 + 1)`-tensor covariant derivative is, by definition,
-the curry transport of the Hom-bundle covariant derivative
-`homBundleCovariantDerivative (LeviCivita g) cov₂` of the curried section
-`curriedSection W : y ↦ (v ↦ W y (Fin.cons v ·))`, where `cov₂ :=
-tensor0SCovariantDerivative I M 2 (LeviCivita g)`. The Hom-bundle product rule
-`homBundleCovariantDerivativeFun_apply_eq` exposes the slot-`0` Christoffel
-correction. We record it for an arbitrary smooth `(0, 3)`-tensor section `W` and
-smooth fields `Vfield`, `Y`.
-
-This is the precise structural input to the slot-`0`-Christoffel-vs-field-direction
-matching: in the full commutator each abstract differentiation of `U` produces such
-a correction, and summing them over the orthonormal frame reconstitutes the
-`covGrad`-reindex of the lower-rank rough Laplacian (the residual being the
-explicit curvature field). -/
 
 /-- **Slot-`0` Christoffel exposure for the abstract `(0, 3)` covariant
 derivative.** Let `cov₂ := tensor0SCovariantDerivative I M 2 (LeviCivita g)` and
@@ -273,7 +230,6 @@ theorem abstract_succ_covDeriv_unfold_at
         curriedSection I M W x
           ((LeviCivita (I := I) g).toFun Y x (Vfield x)) := by
   classical
-  -- The Hom-bundle product rule applied to the curried section `curriedSection W`.
   have hHom := HomConnection.homBundleCovariantDerivativeFun_apply_eq
     (I := I) (M := M) (F := Tensor0SModel 2 ℝ E)
     (V := fun z : M => Tensor0SSpace 2 I z)
@@ -281,8 +237,6 @@ theorem abstract_succ_covDeriv_unfold_at
     (cov_V := tensor0SCovariantDerivative I M 2 (LeviCivita (I := I) g))
     (τ := curriedSection I M W) (x := x) hC
     (V_field := fun y => Vfield y) (Y := fun y => Y y) hVfield hYfield
-  -- `cov₃.toFun W x v`, curried, is the Hom-bundle covariant derivative of the
-  -- curried section (the defining `succ` transport).
   have hsucc : tensor0S_curry (I := I) (M := M) 2 x
       ((Tensor0SNabla.tensor0SCovariantDerivative I M 3 (LeviCivita (I := I) g)).toFun
         W x (Vfield x)) =
@@ -301,7 +255,6 @@ theorem abstract_succ_covDeriv_unfold_at
       rw [tensor0SCovariantDerivative_succ_eq]]
     rw [tensor0SCovariantDerivative_succ_apply]
     exact (tensor0S_curry (I := I) (M := M) 2 x).apply_symm_apply _
-  -- Apply the curry to the slot-`0` direction `Y x` and use the product rule.
   rw [hsucc]
   exact hHom
 end Connection

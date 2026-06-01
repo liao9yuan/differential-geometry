@@ -110,18 +110,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## The principal symbol of the Ricci–DeTurck operator
-
-The Ricci–DeTurck operator is `𝒟(g, g') = −2 Rc(g) + 𝓛_{W(g,g')} g`.  Differentiating in
-`g` and reading off the leading (second-order) part, its principal symbol is the same
-linear combination of the symbols of the two summands:
-`σ(𝒟) = −2 · σ(Rc) + σ(𝓛_W g)`.  The first factor is the bundled linearized-Ricci symbol
-`ricciSymbol g`; the second is the bundled linearized-DeTurck-correction symbol
-`deTurckCorrectionSymbol g g'`.  Both are `TensorSymbol I M`s — fibrewise linear
-endomorphisms of the `(0,2)`-tensor fibre — and `TensorSymbol I M` values at a fixed
-`(x, ξ)` are `LinearMap`s, an `ℝ`-module, so the combination `−2 • _ + _` is again a
-`TensorSymbol I M`. -/
-
 /-- The **principal symbol of the Ricci–DeTurck operator** `𝒟(g, g') = −2 Rc(g) + 𝓛_W g`,
 as a `TensorSymbol I M`.
 
@@ -166,20 +154,6 @@ lemma deTurckSymbol_apply_apply (g g' : SmoothRiemannianMetric I M) (x : M) (ξ 
   rw [deTurckSymbol_apply, LinearMap.add_apply, LinearMap.smul_apply,
     LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul]
 
-/-! ## The symmetric-input raise identity
-
-The gauge cancellation rests on a single fact about symmetric bilinear forms.  The
-linearized-Ricci closed form raises the **first** index of `t`
-(`raisedFormContraction g x ξ t k = ∑_l ξ^l t_{lk}`), while the
-linearized-DeTurck-correction closed form raises the **second** index
-(`raisedFormContractionSnd g x ξ t k = ∑_l ξ^l t_{kl}`).  On a symmetric input these two
-contractions coincide, because `t_{lk} = t_{kl}` term by term.
-
-`RicciSymbolFormula.lean` already records `raisedFormContractionSnd_eq_of_symm`
-(`raisedFormContractionSnd = raisedFormContraction` on a symmetric input).  We restate it
-in the opposite orientation — `raisedFormContraction = raisedFormContractionSnd` — which
-is the orientation the cancellation computation consumes. -/
-
 /-- **The two raised contractions agree on a symmetric input.**
 
 For a symmetric fibre bilinear form `t` (`t v w = t w v`), the first-slot raised
@@ -195,25 +169,6 @@ lemma raisedFormContraction_eq_snd_of_symm (g : SmoothRiemannianMetric I M) (x :
     raisedFormContraction (I := I) g x ξ t k =
       raisedFormContractionSnd (I := I) g x ξ t k :=
   (raisedFormContractionSnd_eq_of_symm (I := I) g x ξ t ht k).symm
-
-/-! ## The gauge-cancellation theorem
-
-We now combine the two closed forms.  Evaluating `deTurckSymbol g g' x ξ t` on the
-model-basis vectors `e_i, e_k` and substituting the closed-form components
-
-* `(ricciSymbol g x ξ t)(e_i, e_k)`
-    `= ½ ξ_i (tξ)_k + ½ ξ_k (ξt)_i − ½ |ξ|²_g t_{ik} − ½ ξ_iξ_k tr_g t`,
-* `(deTurckCorrectionSymbol g g' x ξ t)(e_i, e_k)`
-    `= ξ_i (ξt)_k + ξ_k (ξt)_i − ξ_iξ_k tr_g t`,
-
-the `−2 • _ + _` combination is the literal real-algebra identity
-$$-2\bigl[\tfrac12\xi_i(t\xi)_k + \tfrac12\xi_k(\xi t)_i
-        - \tfrac12|\xi|^2_g t_{ik} - \tfrac12\xi_i\xi_k\operatorname{tr}_g t\bigr]
-  + \bigl[\xi_i(\xi t)_k + \xi_k(\xi t)_i - \xi_i\xi_k\operatorname{tr}_g t\bigr]
-  \;=\; \xi_i\bigl((\xi t)_k - (t\xi)_k\bigr) + |\xi|^2_g\, t_{ik},$$
-the `ξ_k(ξt)_i` and `ξ_iξ_k tr_g t` terms cancelling outright.  On a symmetric input
-`(t ξ)_k = (\xi t)_k` (`raisedFormContraction_eq_snd_of_symm`), so the residual gauge
-term `ξ_i((ξt)_k − (tξ)_k)` is zero and the value is exactly `|ξ|²_g t_{ik}`. -/
 
 /-- **The gauge-cancellation theorem.**
 
@@ -235,25 +190,11 @@ theorem deTurckSymbol_apply_apply_eq_isotropic_of_symm (g g' : SmoothRiemannianM
     (deTurckSymbol (I := I) g g' x ξ t)
         ((chartModelBasis E) i) ((chartModelBasis E) k) =
       metricCovectorNormSq (I := I) g x ξ * formComp (I := I) x t i k := by
-  -- Expand `deTurckSymbol` into the `−2 • σ_Rc + σ_DT` combination of the two outputs.
   rw [deTurckSymbol_apply_apply]
-  -- Substitute the two classical closed forms for the summand components.
   rw [ricciSymbol_apply_eq_closedForm (I := I) g x ξ t i k,
     deTurckCorrectionSymbol_apply_eq_closedForm (I := I) g g' x ξ t i k]
-  -- On a symmetric input the first-slot raised contraction equals the second-slot one,
-  -- which is what makes the residual gauge term `ξ_i ((ξt)_k − (tξ)_k)` vanish.
   rw [raisedFormContraction_eq_snd_of_symm (I := I) g x ξ t ht k]
-  -- The remaining identity is pure real algebra: the gauge terms cancel.
   ring
-
-/-! ## The isotropy theorem
-
-The component identity `deTurckSymbol_apply_apply_eq_isotropic_of_symm` is upgraded to the
-full bilinear-form identity.  Both `deTurckSymbol g g' x ξ t` and `|ξ|²_g • t` are fibre
-bilinear forms `TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ`; a bilinear map is
-determined by its values on basis pairs (`LinearMap.ext_basis`), and on the model-basis
-pair `(e_i, e_k)` the component theorem gives `|ξ|²_g · t_{ik}`, which is exactly the
-`(e_i, e_k)`-component of `|ξ|²_g • t`. -/
 
 /-- **The isotropy theorem.**
 
@@ -270,10 +211,7 @@ theorem deTurckSymbol_apply_eq_smul_of_symm (g g' : SmoothRiemannianMetric I M)
     (ht : ∀ v w, t v w = t w v) :
     deTurckSymbol (I := I) g g' x ξ t =
       metricCovectorNormSq (I := I) g x ξ • t := by
-  -- A bilinear form is determined by its values on basis pairs.
   refine LinearMap.ext_basis (chartModelBasis E) (chartModelBasis E) (fun i k => ?_)
-  -- Left component: the isotropic gauge-cancellation value `|ξ|²_g · t_{ik}`.
-  -- Right component: `(|ξ|²_g • t)(e_i, e_k) = |ξ|²_g · t(e_i, e_k) = |ξ|²_g · t_{ik}`.
   calc (deTurckSymbol (I := I) g g' x ξ t)
           ((chartModelBasis E) i) ((chartModelBasis E) k)
       = metricCovectorNormSq (I := I) g x ξ * formComp (I := I) x t i k :=
@@ -281,20 +219,6 @@ theorem deTurckSymbol_apply_eq_smul_of_symm (g g' : SmoothRiemannianMetric I M)
     _ = (metricCovectorNormSq (I := I) g x ξ • t)
           ((chartModelBasis E) i) ((chartModelBasis E) k) := by
         rw [LinearMap.smul_apply, LinearMap.smul_apply, smul_eq_mul, formComp_def]
-
-/-! ## Strict parabolicity — the capstone
-
-We can now state the headline theorem.  On the symmetric `(0,2)`-tensors — the space the
-metric perturbation lives in — the principal symbol of the Ricci–DeTurck operator is the
-isotropic symbol `|ξ|²_g · id`, and `|ξ|²_g > 0` for every nonzero covector
-(`metricCovectorNormSq_pos`).  A principal symbol that is a strictly positive scalar
-multiple of the identity is the defining property of a strictly (uniformly) parabolic
-operator; the Ricci–DeTurck flow is therefore strictly parabolic.
-
-The bare Ricci-flow operator `−2 Rc(g)` fails this — its symbol `−2 σ_Rc` keeps the gauge
-terms `ξ_i(tξ)_k`, `ξ_k(ξt)_i`, so it is only *weakly* parabolic.  The DeTurck term
-`𝓛_W g` contributes exactly the gauge symbol `σ_DT` that cancels those terms.  This is the
-whole purpose of the DeTurck trick. -/
 
 /-- For every base point `x`, every **nonzero** covector `ξ`, and every **symmetric** input
 tensor `t` (`t v w = t w v`), the Ricci–DeTurck symbol acts as `|ξ|²_g • t` and the

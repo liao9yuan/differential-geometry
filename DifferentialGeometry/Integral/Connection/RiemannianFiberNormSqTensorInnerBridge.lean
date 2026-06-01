@@ -77,16 +77,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Model-side Gram-matrix factorisation through a `g`-orthonormal frame
-
-The model inner Gram matrix `gramMatrixAt g x` is taken on the fixed model basis
-`chartModelBasis E`. A `g(x)`-orthonormal basis frame `E` (e.g. one produced from
-`stdOrthonormalBasis` of the local inner-product structure) is related to the model basis by
-the *mixed* Gram matrix `S i a = g.inner x (chartModelBasis E i) (E a)`. These constructions
-are model-only (they do not touch the bundle topology) and are re-derived here so that the
-Parseval identity can be stated and proved without reference to the (private) infrastructure
-in `TensorMetricCompatible`. -/
-
 /-- The mixed Gram matrix `S i a = g.inner x (chartModelBasis E i) (frame a)` of a tangent
 frame against the fixed model basis. -/
 private noncomputable def mixedGram
@@ -198,8 +188,6 @@ private lemma mixedGram_transpose_mul_inv_mul
   rw [← Matrix.mul_assoc, ← Matrix.mul_assoc, Matrix.mul_nonsing_inv Sᵀ hSTdet,
     Matrix.one_mul, Matrix.nonsing_inv_mul S hSdet]
 
-/-! ## Bilinear expansion helpers for `tensorInnerPointwise_0s` -/
-
 /-- Expansion of `tensorInnerPointwise_0s` over a finite sum of scalar-weighted tensors in
 the first argument. -/
 private lemma tensorInnerPointwise_0s_sum_smul_left
@@ -264,12 +252,6 @@ private lemma curryLeft_sum_smul {s : ℕ}
   | empty => simp
   | insert a A ha ih =>
       rw [Finset.sum_insert ha, map_add, map_smul, ih, Finset.sum_insert ha]
-
-/-! ## Frame independence of the leading-slot contraction
-
-The recursion defining `tensorInnerPointwise_0s (s + 1)` contracts the leading model slot
-through `(gramMatrixAt g x)⁻¹`. For a `g(x)`-orthonormal basis frame the contraction equals
-the plain diagonal sum over the frame. -/
 
 private lemma tensorInnerPointwise_0s_succ_orthoFrame
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
@@ -403,11 +385,6 @@ private lemma tensorInnerPointwise_0s_succ_orthoFrame
   · intro ha
     exact absurd (Finset.mem_univ a) ha
 
-/-! ## Model-side Parseval in a `g`-orthonormal frame
-
-Iterating the leading-slot frame contraction expresses the covariant `(0, N)` pointwise
-inner product as the diagonal sum over the `g`-orthonormal frame. -/
-
 /-- **Model Parseval.** For a `g(x)`-orthonormal basis frame `frame`, the covariant `(0, N)`
 pointwise inner product is the diagonal sum over the frame:
 `tensorInnerPointwise_0s N g x S T = ∑_{φ} S(frame ∘ φ) · T(frame ∘ φ)`. -/
@@ -422,7 +399,6 @@ theorem tensorInnerPointwise_0s_eq_diag_sum_orthoFrame
   classical
   induction N with
   | zero =>
-      -- A `Fin 0 → Fin n` is the unique empty function; the diagonal sum is a single term.
       rw [tensorInnerPointwise_0s_zero_arity]
       rw [Finset.sum_eq_single (fun a : Fin 0 => a.elim0)]
       · congr 1 <;>
@@ -432,9 +408,7 @@ theorem tensorInnerPointwise_0s_eq_diag_sum_orthoFrame
       · intro h
         exact absurd (Finset.mem_univ _) h
   | succ s ih =>
-      -- Peel the leading slot through the frame.
       rw [tensorInnerPointwise_0s_succ_orthoFrame (I := I) (M := M) g x s frame horth S T]
-      -- Apply the inductive hypothesis to each curried pair.
       have hstep : ∀ a : Fin (Module.finrank ℝ E),
           tensorInnerPointwise_0s (I := I) (M := M) s g x
               (S.curryLeft (frame a)) (T.curryLeft (frame a)) =
@@ -465,8 +439,6 @@ theorem tensorInnerPointwise_0s_eq_diag_sum_orthoFrame
           · intro m; simp
         rw [hS, hT]
       rw [Finset.sum_congr rfl (fun a _ => hstep a)]
-      -- Collapse the leading index `a` together with the tail tuple `ψ` into a single
-      -- `(s + 1)`-tuple via `Fin.consEquiv`.
       rw [← Fintype.sum_equiv
         (Fin.consEquiv (fun _ : Fin (s + 1) => Fin (Module.finrank ℝ E)))
         (fun p => S (fun k => frame
@@ -476,14 +448,6 @@ theorem tensorInnerPointwise_0s_eq_diag_sum_orthoFrame
         (fun φ => S (fun k => frame (φ k)) * T (fun k => frame (φ k)))
         (fun p => rfl)]
       rw [Fintype.sum_prod_type]
-
-/-! ## The bundle-side frame component as a lowered model-tensor evaluation
-
-The lowering map `lowerAllUpperIndices` sends the model tensor `toModel T` to a covariant
-`(0, r + s)`-tensor whose value on an appended frame tuple is exactly the bundle-side frame
-component. This is a definitional identity: the bundle/model trivialization
-`tensorRSSpace_continuousLinearEquiv` is the identity on the underlying carriers, and the
-separable `(0, r)`-form coincides with the `ω^K` covector built in `fiberNormSqComponent`. -/
 
 /-- The lowered model-tensor evaluated on the appended frame tuple equals the bundle-side
 frame component. -/
@@ -500,13 +464,6 @@ private lemma lower_toModel_append_eq_fiberNormSqComponent
   simp only [Fin.append_left, Fin.append_right]
   unfold fiberNormSqComponent separableFormAt
   rfl
-
-/-! ## The `g`-orthonormal frame underlying `riemannianFiberNormSq`
-
-`riemannianFiberNormSq` is defined by equipping the tangent space with the local
-inner-product structure coming from `g` and summing over the `stdOrthonormalBasis` of that
-structure. We expose this frame as a `Module.Basis` together with its `g`-orthonormality and
-the definitional double-sum representation of `riemannianFiberNormSq` against it. -/
 
 /-- **Frame witness for `riemannianFiberNormSq`.** There is a `g(x)`-orthonormal frame
 `e : Fin n → TangentSpace I x` (with `n = Module.finrank ℝ (TangentSpace I x)`), packaged as
@@ -547,18 +504,12 @@ private lemma riemannianFiberNormSq_frame_witness
     have hite := (orthonormal_iff_ite (𝕜 := ℝ) (E := TangentSpace I x)).mp horth a b
     rw [← hinner_eq (eob a) (eob b)]
     exact hite
-  · -- The double-sum representation. This is definitional: `riemannianFiberNormSq` sums
-    -- `fiberNormSqSummand` over the same `stdOrthonormalBasis` frame, and
-    -- `fiberNormSqSummand = fiberNormSqComponent ^ 2`.
-    intro T
+  · intro T
     rw [show riemannianFiberNormSq (I := I) (M := M) g r s x T =
         ∑ K : Fin r → Fin n, ∑ J : Fin s → Fin n,
           fiberNormSqSummand (I := I) (M := M) g x r s T n (fun i => eob i) K J from rfl]
     refine Finset.sum_congr rfl (fun K _ => Finset.sum_congr rfl (fun J _ => ?_))
-    -- `fiberNormSqSummand = fiberNormSqComponent ^ 2` definitionally.
     rfl
-
-/-! ## The fibre-norm bridge -/
 
 /-- **Fibre-norm bridge.** The intrinsic frame-based `g`-induced squared fibre norm
 `riemannianFiberNormSq` coincides with the model Gram-matrix-based pointwise inner product
@@ -575,18 +526,13 @@ theorem riemannianFiberNormSq_eq_tensorInnerPointwise
         (TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M)
           (r := r) (s := s) (x := x) T) := by
   classical
-  -- The `g`-orthonormal frame underlying `riemannianFiberNormSq`.
   obtain ⟨n, e, bse, hn, hbse, horth, hrepr⟩ :=
     riemannianFiberNormSq_frame_witness (I := I) (M := M) g r s x
-  -- `n = Module.finrank ℝ E` (definitional `TangentSpace I x = E`).
   have hn' : n = Module.finrank ℝ E := hn
   subst hn'
-  -- Rewrite `horth` / `hbse` in `bse`-form for the Parseval call.
   have hbse_orth : ∀ a b, g.inner x (bse a) (bse b) = if a = b then (1 : ℝ) else 0 := by
     intro a b; rw [hbse a, hbse b]; exact horth a b
-  -- LHS: the frame double sum.
   rw [hrepr T]
-  -- RHS: model Parseval in the same frame, applied to the lowered model tensor.
   set Tm := TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M)
     (r := r) (s := s) (x := x) T with hTm_def
   rw [show tensorInnerPointwise (I := I) (M := M) g r s x Tm Tm =
@@ -595,8 +541,6 @@ theorem riemannianFiberNormSq_eq_tensorInnerPointwise
         (lowerAllUpperIndices (I := I) (M := M) g r s x Tm) from rfl]
   rw [tensorInnerPointwise_0s_eq_diag_sum_orthoFrame (I := I) (M := M) g x (r + s)
     bse hbse_orth _ _]
-  -- Reindex the diagonal sum over `φ : Fin (r + s) → Fin n` by the `append` splitting
-  -- `φ ↔ (φ ∘ castAdd, φ ∘ natAdd)`.
   rw [← Fintype.sum_equiv (Fin.appendEquiv r s)
     (fun p : (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin s → Fin (Module.finrank ℝ E)) =>
@@ -605,11 +549,8 @@ theorem riemannianFiberNormSq_eq_tensorInnerPointwise
       (lowerAllUpperIndices (I := I) (M := M) g r s x Tm) (fun k => bse (φ k)) *
         (lowerAllUpperIndices (I := I) (M := M) g r s x Tm) (fun k => bse (φ k)))
     ?_]
-  · -- Convert the product-typed sum into the iterated `K`, `J` sum.
-    rw [Fintype.sum_prod_type]
-  · -- Per-`(K, J)` term: the lowered evaluation on the appended frame tuple equals the
-    -- bundle-side frame component, and squaring matches `comp * comp`.
-    intro p
+  · rw [Fintype.sum_prod_type]
+  · intro p
     have hbse_e : ∀ i : Fin (Module.finrank ℝ E), bse i = e i := hbse
     have happend :
         (fun k => bse ((Fin.appendEquiv r s) p k)) =

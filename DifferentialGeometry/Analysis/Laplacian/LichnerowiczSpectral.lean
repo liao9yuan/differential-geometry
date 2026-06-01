@@ -64,21 +64,12 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.HeatEquation
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## Injectivity of `H1ComplToLp` on `laplacianDomain g`
-
-If `u, v ∈ laplacianDomain g` and `H1ComplToLp u = H1ComplToLp v`, then
-`u = v` in `H1Compl g`. Every element of `laplacianDomain g` is the resolvent
-image of its unique preimage, and the composition
-`H1ComplToLp ∘ resolvent = resolventL2 : Lp → Lp` is injective. -/
 
 set_option maxHeartbeats 6400000 in
 /-- `H1ComplToLp` is injective on the variational-Laplacian domain. -/
@@ -98,7 +89,6 @@ theorem H1ComplToLp_inj_on_laplacianDomain
   have h_v_res : (v : H1Compl g) =
       resolvent (I := I) (M := M) g wv :=
     (resolvent_laplacianDomain_preimage_eq (I := I) (M := M) g v).symm
-  -- H1ComplToLp ∘ resolvent = resolventL2.
   have hLHS : resolventL2 (I := I) (M := M) g wu =
       H1ComplToLp (I := I) (M := M) g
         (resolvent (I := I) (M := M) g wu) :=
@@ -116,8 +106,6 @@ theorem H1ComplToLp_inj_on_laplacianDomain
     have h_inj := resolventL2_injective (I := I) (M := M) g
     exact h_inj h_eq_L2
   rw [h_u_res, h_v_res, h_pre_eq]
-
-/-! ## Headline 1: smooth representative of a spectral eigenfunction -/
 
 /-- The Lp coercion of the spectral basis vector at index `i`, named for
 elaboration efficiency in downstream statements. -/
@@ -163,15 +151,12 @@ theorem laplacianEigenfunction_smooth_representative
       (∀ x : M, Δ_g (I := I) g s.smooth x =
         -(laplacianEigenvalueOf i.1.val) * s.toFun x) := by
   classical
-  -- Notation.
   set μ_g : Measure M := riemannianVolumeMeasure (I := I) (M := M) g with hμ_g_def
   set b_i : Lp ℝ 2 μ_g := resolventEigenbasisSigma (I := I) (M := M) g i with hb_i_def
   set lam : ℝ := laplacianEigenvalueOf i.1.val with hlam_def
-  -- Step 1: unconditional spatial smoothing at `t = 1`.
   obtain ⟨u_smooth, hu_smooth_smooth, hu_smooth_ae⟩ :=
     heatSemigroup_smooth_representative_of_closed
       (I := I) (M := M) g (t := (1 : ℝ)) (by norm_num : (0 : ℝ) < 1) b_i
-  -- Step 2: heat semigroup acts diagonally on basis vectors.
   have h_heat_basis : heatSemigroup (I := I) (M := M) g 1 b_i =
       Real.exp (-lam * 1) • b_i := by
     have h := heatSemigroup_apply_basis (I := I) (M := M) g (t := (1 : ℝ))
@@ -179,7 +164,6 @@ theorem laplacianEigenfunction_smooth_representative
     have hlam_eq : EigenIdx.lambda (I := I) (M := M) i = lam := rfl
     rw [hlam_eq] at h
     exact h
-  -- Step 3: the smoothing identity translates to b_i.
   have h_exp_smul_ae :
       ((Real.exp (-lam * 1) • b_i :
         Lp ℝ 2 μ_g) : M → ℝ) =ᵐ[μ_g] u_smooth := by
@@ -191,7 +175,6 @@ theorem laplacianEigenfunction_smooth_representative
   have h_exp_simp : Real.exp (-lam * 1) = Real.exp (-lam) := by
     rw [mul_one]
   rw [h_exp_simp] at h_exp_smul_ae
-  -- Step 4: define `f := exp(lam) • u_smooth`, prove smoothness and a.e.-equality.
   set f : M → ℝ := Real.exp lam • u_smooth with hf_def
   have hf_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ f := by
     have h_eq : f = (fun x : M => Real.exp lam * u_smooth x) := by
@@ -210,8 +193,6 @@ theorem laplacianEigenfunction_smooth_representative
       rw [← Real.exp_add, add_neg_cancel]
       exact Real.exp_zero
     filter_upwards [h_pointwise_ae] with x hx
-    -- hx : (Real.exp (-lam) • ((b_i : Lp ℝ 2 μ_g) : M → ℝ)) x = u_smooth x
-    -- ⊢ ((b_i : M → ℝ) : Lp ℝ 2 μ_g) x = f x  (i.e., (b_i : M → ℝ) x = (Real.exp lam • u_smooth) x)
     have hx' : Real.exp (-lam) * ((b_i : Lp ℝ 2 μ_g) : M → ℝ) x = u_smooth x := by
       simpa [Pi.smul_apply, smul_eq_mul] using hx
     have h_f_apply : f x = Real.exp lam * u_smooth x := rfl
@@ -219,9 +200,7 @@ theorem laplacianEigenfunction_smooth_representative
     rw [show Real.exp lam * (Real.exp (-lam) * ((b_i : Lp ℝ 2 μ_g) : M → ℝ) x) =
         (Real.exp lam * Real.exp (-lam)) * ((b_i : Lp ℝ 2 μ_g) : M → ℝ) x from by ring]
     rw [h_exp_inv, one_mul]
-  -- Step 5: package `f` as a `SmoothScalar g`.
   set f_smooth : SmoothScalar g := ⟨f, hf_smooth⟩ with hf_smooth_def
-  -- Step 6: identify smoothToH1Compl(f_smooth) with the eigenfunction lift.
   have h_smoothToLp_eq_b_i :
       (smoothToLp (I := I) (M := M) g f_smooth :
         Lp ℝ 2 μ_g) = b_i := by
@@ -256,7 +235,6 @@ theorem laplacianEigenfunction_smooth_representative
     H1ComplToLp_inj_on_laplacianDomain (I := I) (M := M) g
       (h_H1ComplToLp_f_lap.trans h_H1ComplToLp_ef_lap.symm)
   have h_lap_eq : f_lap = ef_lap := Subtype.ext h_subtype_eq
-  -- Step 7: compute `laplacianOp g f_lap = laplacianOp g ef_lap`.
   have h_op_smooth :
       laplacianOp (I := I) (M := M) g f_lap =
         smoothToLp (I := I) (M := M) g f_smooth -
@@ -273,15 +251,12 @@ theorem laplacianEigenfunction_smooth_representative
       -(laplacianEigenvalueOf i.1.val) • b_i := by
     rw [← h_op_smooth, ← h_op_eigen]
     rw [h_lap_eq]
-  -- Step 8: rewrite to get smoothToLp(Δf) = -lam • b_i.
   set Δf_smooth : SmoothScalar g :=
     ⟨Δ_g (I := I) g hf_smooth, Δ_g_contMDiff (I := I) g hf_smooth⟩
     with hΔf_smooth_def
   have h_diff_eq : f_smooth - f_smooth.oneSubLapClassical = Δf_smooth := by
     apply SmoothScalar.ext
     funext x
-    -- Goal: (f_smooth - f_smooth.oneSubLapClassical).toFun x = Δf_smooth.toFun x
-    -- which reduces to f_smooth.toFun x - f_smooth.oneSubLapClassical.toFun x = Δ_g g hf_smooth x.
     change (f_smooth.toFun - f_smooth.oneSubLapClassical.toFun) x =
       Δ_g (I := I) g hf_smooth x
     rw [Pi.sub_apply, SmoothScalar.oneSubLapClassical_toFun, Pi.sub_apply]
@@ -336,7 +311,6 @@ theorem laplacianEigenfunction_smooth_representative
         Lp ℝ 2 μ_g) := by
       rw [h_Lp_eq]
     exact h_lhs_ae.symm.trans (h_lp_ae.trans h_rhs_ae)
-  -- Step 9: upgrade a.e. equality to pointwise equality via IsOpenPosMeasure.
   have h_pos : (riemannianVolumeMeasure (I := I) (M := M) g).IsOpenPosMeasure :=
     riemannianVolumeMeasure_isOpenPosMeasure (I := I) (M := M) g
   have h_Δf_cont : Continuous (fun x : M => Δ_g (I := I) g hf_smooth x) :=
@@ -349,17 +323,9 @@ theorem laplacianEigenfunction_smooth_representative
       (fun x : M => -(laplacianEigenvalueOf i.1.val) * f x) :=
     (Continuous.ae_eq_iff_eq _ h_Δf_cont h_neg_lam_f_cont).mp h_Δf_ae_neg_lam_f
   refine ⟨f_smooth, ?_, ?_⟩
-  · -- (b_i : M → ℝ) =ᵐ f_smooth.toFun
-    exact h_bi_ae_f
-  · -- ∀ x, Δ_g g f_smooth.smooth x = -lam * f_smooth.toFun x
-    intro x
+  · exact h_bi_ae_f
+  · intro x
     exact congrFun h_Δf_eq_neg_lam_f x
-
-/-! ## Auxiliary: strict positivity of the Laplacian eigenvalue
-under `μ < 1`
-
-For a nonzero resolvent eigenvalue `μ ∈ (0, 1]`, the Laplacian eigenvalue
-`lam = (1 - μ) / μ` is non-negative. Strict positivity requires `μ < 1`. -/
 
 /-- For a nonzero resolvent eigenvalue with `μ < 1`, the Laplacian eigenvalue
 `lam = (1 - μ) / μ` is strictly positive. -/
@@ -372,8 +338,6 @@ private lemma laplacianEigenvalueOf_pos_of_lt_one
   have h_pos : 0 < μ.val := nonzeroResolventEigenvalue_pos μ
   have h_num_pos : 0 < 1 - μ.val := by linarith
   exact div_pos h_num_pos h_pos
-
-/-! ## Headline 2: spectral Lichnerowicz inequality -/
 
 set_option maxHeartbeats 800000 in
 /-- **Lichnerowicz's eigenvalue inequality at the spectral level.**
@@ -408,16 +372,13 @@ theorem lichnerowicz_spectral_eigenvalue_ge_dim_mul_curvature_of_closed
     (hlam_pos : 0 < laplacianEigenvalueOf i.1.val) :
     (Module.finrank ℝ E : ℝ) * K ≤ laplacianEigenvalueOf i.1.val := by
   classical
-  -- Notation.
   set μ_g : Measure M := riemannianVolumeMeasure (I := I) (M := M) g with hμ_g_def
   set b_i : Lp ℝ 2 μ_g := resolventEigenbasisSigma (I := I) (M := M) g i with hb_i_def
-  -- Step 1: pick the smooth representative.
   obtain ⟨s, h_bi_ae_f, h_eigen⟩ :=
     laplacianEigenfunction_smooth_representative
       (I := I) (M := M) g i
   set f : M → ℝ := s.toFun with hf_def
   have hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f := s.smooth
-  -- Step 2: L²-positivity of f via ‖b_i‖² = 1.
   have h_f_sq_pos : 0 < ∫ x, f x * f x ∂μ_g := by
     have h_norm_sq_eq :
         ‖smoothToLp (I := I) (M := M) g s‖ ^ 2 =
@@ -445,7 +406,6 @@ theorem lichnerowicz_spectral_eigenvalue_ge_dim_mul_curvature_of_closed
     have h_b_i_norm_sq_pos : 0 < ‖b_i‖ ^ 2 := by
       rw [h_b_i_norm]; norm_num
     linarith
-  -- Step 3: apply Lichnerowicz.
   exact lichnerowicz_eigenvalue_ge_dim_mul_curvature_of_closed (I := I) (M := M) g hn_ge_two hK
     hf hlam_pos h_eigen h_ricci h_f_sq_pos
 

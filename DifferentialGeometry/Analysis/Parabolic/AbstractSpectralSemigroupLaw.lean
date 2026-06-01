@@ -27,8 +27,6 @@ namespace Parabolic
 variable {ι : Type*} {X : Type*} [NormedAddCommGroup X]
   [InnerProductSpace ℝ X] [CompleteSpace X]
 
-/-! ## Property 2: identity at `t = 0` -/
-
 /-- At `t = 0`, the abstract spectral heat semigroup is the identity. -/
 theorem abstractSpectralSemigroup_apply_zero (b : HilbertBasis ι ℝ X)
     {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i) :
@@ -38,7 +36,6 @@ theorem abstractSpectralSemigroup_apply_zero (b : HilbertBasis ι ℝ X)
   intro v
   rw [abstractSpectralSemigroup_apply_of_nonneg b hlam (le_refl 0) v,
       ContinuousLinearMap.id_apply]
-  -- `heatCoeff lam 0 i = exp(0) = 1`, so each term reduces to `⟪b i, v⟫ • b i`.
   have h_coeff_one : ∀ i : ι, heatCoeff lam 0 i = 1 := by
     intro i
     rw [heatCoeff_def, show -(lam i) * (0 : ℝ) = 0 from by ring, Real.exp_zero]
@@ -53,8 +50,6 @@ theorem abstractSpectralSemigroup_apply_zero (b : HilbertBasis ι ℝ X)
   rw [h_eq] at h_hsum
   exact h_hsum.tsum_eq
 
-/-! ## Property 3: the semigroup law -/
-
 /-- The semigroup law `S(t + s) = S(t) ∘ S(s)` for `t, s ≥ 0`. -/
 theorem abstractSpectralSemigroup_apply_add (b : HilbertBasis ι ℝ X)
     {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i)
@@ -68,7 +63,6 @@ theorem abstractSpectralSemigroup_apply_add (b : HilbertBasis ι ℝ X)
   rw [abstractSpectralSemigroup_apply_of_nonneg b hlam hts_nn,
       ContinuousLinearMap.comp_apply,
       abstractSpectralSemigroup_apply_of_nonneg b hlam hs v]
-  -- Pull `S(t)` inside the (summable) `S(s)`-series via continuity.
   have h_summable_s := summable_heatTerm b hlam hs v
   have h_pull :
       abstractSpectralSemigroup b hlam t
@@ -86,7 +80,6 @@ theorem abstractSpectralSemigroup_apply_add (b : HilbertBasis ι ℝ X)
       abstractSpectralSemigroup b hlam t (b i) = heatCoeff lam t i • b i :=
     abstractSpectralSemigroup_apply_basis b hlam ht i
   rw [h_basis_apply]
-  -- Combine the two exponential factors.
   have h_exp_add : heatCoeff lam (t + s) i = heatCoeff lam t i * heatCoeff lam s i := by
     rw [heatCoeff_def, heatCoeff_def, heatCoeff_def,
         show -(lam i) * (t + s) = -(lam i) * t + -(lam i) * s from by ring,

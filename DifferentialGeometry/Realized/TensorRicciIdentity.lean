@@ -248,9 +248,6 @@ theorem one_form_third_comm_of_coord
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x =>
         A (vec3 X Y Z)) htensor
   simp only at h_eval
-  -- Unfold the FunLike application of `_ - _` and `- _` on Tensor0SSpace into
-  -- pointwise subtraction and negation of the underlying continuous multilinear
-  -- maps, then specialize using `swapFirstTwo0S_apply_vec3`.
   have hsub : (nabla2Alpha - swapFirstTwo0S (I := I) nabla2Alpha) (vec3 X Y Z) =
       nabla2Alpha (vec3 X Y Z) - swapFirstTwo0S (I := I) nabla2Alpha (vec3 X Y Z) :=
     ContinuousMultilinearMap.sub_apply

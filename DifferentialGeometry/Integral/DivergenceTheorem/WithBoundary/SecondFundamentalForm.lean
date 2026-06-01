@@ -94,27 +94,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Chart-coordinate matrix entries of the second fundamental form
-
-We package the chart-coordinate formula
-
-$$\mathrm{II}_{ij}(x) = \sum_{k} g_{kj}(x)\,
-    \bigl[\partial_i \nu^k(\varphi(x)) +
-        \sum_l \Gamma^k{}_{il}(g)(\varphi(x))\,\nu^l(\varphi(x))\bigr]$$
-
-into a definition that takes the chart-coordinate normal-field components as a
-function `νChart : E → E`. The chart at the basepoint `x : BoundaryManifold I M`
-is used implicitly via `chartGramMatrix g (x : M)` and `chartChristoffel g (x : M)`.
-
-Notation: `νChart y l` is the `l`-th chart-coordinate component of the normal
-field at chart point `y ∈ E`, read off via `Module.finBasis ℝ E`. Concretely,
-this is `((Module.finBasis ℝ E).repr (νChart y)) l`.
-
-The partial derivative `∂_i ν^k` is the directional derivative of the scalar
-function `y ↦ ((Module.finBasis ℝ E).repr (νChart y)) k` in the direction
-`(Module.finBasis ℝ E) i`.
--/
-
 /-- The `k`-th chart-coordinate component of a normal-field extension
 `νChart : E → E`, read off in the basis `Module.finBasis ℝ E`. -/
 def normalFieldComp (νChart : E → E) (k : Fin (Module.finrank ℝ E)) : E → ℝ :=
@@ -184,18 +163,6 @@ def chartSecondFundamentalFormEntry
         chartGramMatrix (I := I) g (x : M) (x : M) k j *
           chartCovariantDerivativeOfNormal (I := I) g (x : M) νChart i k
             (extChartAt I (x : M) (x : M)) := rfl
-
-/-! ## The bilinear form on `T_x M`
-
-The bilinear form `secondFundamentalForm g x νChart : T_x M →ₗ[ℝ] T_x M →ₗ[ℝ] ℝ`
-is constructed by basis decomposition: for `X, Y : T_x M`, write
-`X = ∑ i X^i e_i`, `Y = ∑ j Y^j e_j` in the basis `Module.finBasis ℝ E`, then
-
-$$\mathrm{II}(X, Y) = \sum_{i, j} X^i Y^j \cdot \mathrm{II}_{ij}(x).$$
-
-This is a real-valued bilinear form on `T_x M` (= `E` definitionally). When `X`
-and `Y` are tangent to the boundary, it agrees with the metric pairing of
-`∇_X ν` against `Y`. -/
 
 /-- The second fundamental form of `∂M` in `M` at a boundary point `x`,
 parameterised by a chart-coordinate extension `νChart : E → E` of the outward
@@ -295,21 +262,6 @@ def secondFundamentalForm
             ((Module.finBasis ℝ E).repr Y) j *
             chartSecondFundamentalFormEntry (I := I) (M := M) g x νChart i j := rfl
 
-/-! ## Symmetry of the second fundamental form
-
-The second fundamental form is symmetric in `X, Y` precisely when the
-chart-coordinate matrix entries `II_{ij}(x)` are symmetric in `i, j`. This
-matrix-symmetry condition is what the **Codazzi-Mainardi symmetry** asserts:
-when `ν` is the unit-normalised gradient of a smooth defining function for
-`∂M`, the matrix entries are automatically symmetric — and therefore so is
-`II`.
-
-We package this as a separate hypothesis so that the bilinear-form symmetry
-holds whenever the user has verified the matrix-level symmetry. The most
-common verification is in the half-space chart, where `ν = -e_0/√{g^{00}}` is
-proportional to the chart-coordinate gradient of the defining function `-x_0`.
--/
-
 /-- **Symmetry of the second fundamental form** under the Codazzi
 matrix-symmetry hypothesis. If the chart-Christoffel-Weingarten matrix entries
 are symmetric in `(i, j)`, then so is the bilinear form `secondFundamentalForm`.
@@ -328,8 +280,6 @@ theorem secondFundamentalForm_symm
       secondFundamentalForm (I := I) (M := M) g x νChart Y X := by
   classical
   rw [secondFundamentalForm_apply, secondFundamentalForm_apply]
-  -- Goal: swap the order of summation and apply the matrix-level Codazzi
-  -- hypothesis.
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl ?_
   intro i _
@@ -337,13 +287,6 @@ theorem secondFundamentalForm_symm
   intro j _
   rw [h_codazzi j i]
   ring
-
-/-! ## Restriction to boundary tangent vectors
-
-When `X, Y` are tangent to the boundary at `x`, they lie in the image of
-`dincl x : boundaryE →L[ℝ] E`. The second fundamental form, when restricted
-to such vectors, recovers the classical Codazzi-symmetric form
-`II : T_x ∂M × T_x ∂M → ℝ`. -/
 
 /-- The second fundamental form restricted to two boundary tangent vectors. -/
 def secondFundamentalFormBoundary

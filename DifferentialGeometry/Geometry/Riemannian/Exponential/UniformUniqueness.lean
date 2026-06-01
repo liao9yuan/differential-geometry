@@ -69,8 +69,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-/-! ## Lipschitz constant for `chartPhaseVF` on a compact spatial set -/
-
 section LipschitzOnCompact
 
 variable [I.Boundaryless]
@@ -109,7 +107,6 @@ lemma chartPhaseVF_locallyLipschitzOn_of_compact
   intro z hz
   obtain ⟨L, t, ht, hL⟩ :=
     chartPhaseVF_exists_lipschitzOnWith_at (I := I) g α (hK_subset hz)
-  -- `t ∈ 𝓝 z` is stronger than `t ∈ 𝓝[K] z`.
   refine ⟨L, t, ?_, hL⟩
   exact mem_nhdsWithin_of_mem_nhds ht
 
@@ -127,15 +124,6 @@ theorem chartPhaseVF_lipschitzOnWith_of_compact
     hK_subset).exists_lipschitzOnWith_of_compact hK_compact
 
 end LipschitzOnCompact
-
-/-! ## Uniform-in-parameter chart-coordinate ODE uniqueness
-
-Given two chart-phase ODE solutions that agree at `0` and stay inside a
-compact set `K` over the open interval `Ioo (-T) T`, they agree on the
-**entire** open interval `Ioo (-T) T`. This is the uniform-in-parameter
-upgrade of `chartPhaseVF_orbit_uniqueness` (eventually-equal form). The
-proof is a direct application of `ODE_solution_unique_of_mem_Ioo` using
-the global Lipschitz constant obtained above. -/
 
 section UniformUniqueness
 
@@ -165,22 +153,15 @@ theorem chartPhaseVF_orbit_uniqueness_uniform_Ioo
     (hc₂_in_K : ∀ s ∈ Set.Ioo (-T) T, c₂ s ∈ K)
     (h_eq_at_zero : c₁ 0 = c₂ 0) :
     ∀ s ∈ Set.Ioo (-T) T, c₁ s = c₂ s := by
-  -- Extract a global Lipschitz constant `L` for `chartPhaseVF g α` on `K`.
   obtain ⟨L, hLip⟩ :=
     chartPhaseVF_lipschitzOnWith_of_compact (I := I) g α hK_compact hK_subset
-  -- Reframe as time-dependent ODE with `v t z := chartPhaseVF g α z` and
-  -- constant set function `s t := K`. The Lipschitz hypothesis is uniform
-  -- in `t`.
   set v : ℝ → (E × E) → E × E := fun _ z => chartPhaseVF (I := I) g α z with hv_def
   set sSet : ℝ → Set (E × E) := fun _ => K with hsSet_def
-  -- Lipschitz hypothesis for `ODE_solution_unique_of_mem_Ioo`.
   have hv_lip : ∀ t ∈ Set.Ioo (-T) T, LipschitzOnWith L (v t) (sSet t) := by
     intro t _
     exact hLip
-  -- Initial time `0 ∈ Ioo (-T) T` (since `T > 0`).
   have h0_in : (0 : ℝ) ∈ Set.Ioo (-T) T :=
     ⟨by linarith, hT_pos⟩
-  -- Repackage the ODE + set-containment hypotheses.
   have hf : ∀ t ∈ Set.Ioo (-T) T,
       HasDerivAt c₁ (v t (c₁ t)) t ∧ c₁ t ∈ sSet t := by
     intro t ht
@@ -189,7 +170,6 @@ theorem chartPhaseVF_orbit_uniqueness_uniform_Ioo
       HasDerivAt c₂ (v t (c₂ t)) t ∧ c₂ t ∈ sSet t := by
     intro t ht
     exact ⟨hc₂_hasDeriv t ht, hc₂_in_K t ht⟩
-  -- Apply `ODE_solution_unique_of_mem_Ioo`.
   have hEqOn : Set.EqOn c₁ c₂ (Set.Ioo (-T) T) :=
     ODE_solution_unique_of_mem_Ioo (v := v) (s := sSet) (K := L) (t₀ := 0)
       (a := -T) (b := T) hv_lip h0_in hf hg h_eq_at_zero
@@ -197,15 +177,6 @@ theorem chartPhaseVF_orbit_uniqueness_uniform_Ioo
   exact hEqOn hs
 
 end UniformUniqueness
-
-/-! ## Convenience form: agreement against the chart-pushed flow's orbit
-
-A useful specialisation: given a chart-phase ODE solution `c` and a
-chart-pushed flow orbit `t ↦ Φ((x₀, v_chart), t)` which both satisfy the
-chart-phase ODE on `Ioo (-T) T` with matching value at `0`, both staying
-in a compact set `K`, they agree on the entire interval. This is the
-form most immediately useful for matching the chart-flow's projection
-with a maximal-geodesic witness over a fixed time interval. -/
 
 section UniformAgainstFlow
 
@@ -232,22 +203,12 @@ theorem chartPhaseVF_solution_eq_chartFlowOrbit_on_Ioo
     (hΦ_in_K : ∀ s ∈ Set.Ioo (-T) T, Φ (z₀, s) ∈ K)
     (h_eq_at_zero : c 0 = Φ (z₀, 0)) :
     ∀ s ∈ Set.Ioo (-T) T, c s = Φ (z₀, s) := by
-  -- Apply the general uniform uniqueness to `c₁ = c` and `c₂ = fun τ => Φ (z₀, τ)`.
   exact chartPhaseVF_orbit_uniqueness_uniform_Ioo (I := I) g α
     hK_compact hK_subset hT_pos
     (c₁ := c) (c₂ := fun τ => Φ (z₀, τ))
     hc_hasDeriv hΦ_hasDeriv hc_in_K hΦ_in_K h_eq_at_zero
 
 end UniformAgainstFlow
-
-/-! ## Boxed form: closed ball as compact set
-
-A frequently-used special case: take the compact set to be a closed ball
-of some radius `r` around the base point `z₀`, where `r` is small enough
-that the closed ball is contained in the chart-target interior product.
-This is the natural shape produced by the chart-pushed flow's
-local-flow data: orbits stay inside a closed ball around the initial
-point on a small time interval. -/
 
 section UniformOnClosedBall
 

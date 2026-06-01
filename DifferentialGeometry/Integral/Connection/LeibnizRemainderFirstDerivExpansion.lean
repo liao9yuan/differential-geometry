@@ -82,20 +82,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Pointwise bridge: chart-α (Idx, Jdx) projection of
-`(triv α).clmAt b (covApply ∂_k T₀.toSection b)` at a chart-α good-set point
-equals `covDerivComponentEuclid g r s α T₀ k Idx Jdx (toEuclidean (extChartAt
-I α) b)`.
-
-This is the pointwise version of the chain
-`covApply_apply ↦ tensorCovDerivAt_def ↦
-tensorCovDerivAt_eq_chartTensorRSCovariantDerivative` followed by
-`covDerivComponentEuclid_def` (running its `(extChartAt I α).symm
-(toEuclidean.symm (toEuclidean ((extChartAt I α) b)))` reduction backwards via
-`extChartAt I α.left_inv`).
-
-No chart-locality predicate is needed beyond the chart-α good-set hypothesis. -/
-
 /-- **Pointwise bridge.** At a chart-α good-set point `b`, the chart-α
 `(Idx, Jdx)` projection through the canonical trivialisation of
 `covApply cov_RS ∂_k T₀.toSection b` equals
@@ -117,44 +103,24 @@ private lemma tensorChartComponentProjection_covApply_eq_covDerivComponentEuclid
       covDerivComponentEuclid (I := I) (M := M) g r s α T₀ k Idx Jdx
         ((toEuclidean (E := E)) ((extChartAt I α) b)) := by
   classical
-  -- `b ∈ (extChartAt I α).source` and hence `(extChartAt I α).symm
-  -- ((extChartAt I α) b) = b`.
   have hb_src : b ∈ (extChartAt I α).source :=
     chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hb_good
   have hb_inv : (extChartAt I α).symm ((extChartAt I α) b) = b :=
     (extChartAt I α).left_inv hb_src
-  -- `(toEuclidean.symm) (toEuclidean ((extChartAt I α) b)) = (extChartAt I α) b`.
   have hsymm_te : (toEuclidean (E := E)).symm
       ((toEuclidean (E := E)) ((extChartAt I α) b)) =
       (extChartAt I α) b :=
     (toEuclidean (E := E)).symm_apply_apply _
-  -- Combine the two: the chart-pullback returns `b`.
   have hpullback :
       (extChartAt I α).symm
           ((toEuclidean (E := E)).symm
               ((toEuclidean (E := E)) ((extChartAt I α) b))) = b := by
     rw [hsymm_te]; exact hb_inv
-  -- Unfold `covDerivComponentEuclid` and rewrite via `hpullback`.
   rw [covDerivComponentEuclid_def]
-  -- After unfolding, the RHS argument inside `tensorChartComponentProjection`
-  -- is `((triv α).clmAt b' (chartTensorRSCovariantDerivative r s g α
-  -- T₀.toSection (chartBasisVecFiber α k) b'))` with `b' := (extChartAt
-  -- I α).symm ((toEuclidean.symm) (toEuclidean ((extChartAt I α) b)))`.
-  -- Rewrite `b'` to `b`.
   rw [hpullback]
-  -- The goal is now:
-  --   π_(Idx, Jdx) ((triv α).clmAt b (covApply … ∂_k T₀.toSection b)) =
-  --   π_(Idx, Jdx) ((triv α).clmAt b (chartTensorRSCovariantDerivative … b))
-  -- Reduce to equality of the inner arguments to `continuousLinearMapAt`.
   congr 1
   congr 1
-  -- Goal: `covApply cov_RS (chartBasisVecFiber α k) T₀.toSection b =
-  --        chartTensorRSCovariantDerivative r s g α T₀.toSection
-  --          (chartBasisVecFiber α k) b`.
-  -- Chain: (a) `covApply_apply`, (b) `tensorCovDerivAt_def`,
-  -- (c) `tensorCovDerivAt_eq_chartTensorRSCovariantDerivative` (good set).
   rw [covApply_apply]
-  -- Now: `cov.toFun T₀.toSection b (chartBasisVecFiber α k b) = …`.
   have hCovDerivAt : (TensorRSNabla.tensorRSCovariantDerivative I M r s
         (LeviCivita (I := I) g)).toFun (fun z : M => T₀.toSection z) b
         (chartBasisVecFiber (I := I) α k b) =
@@ -162,11 +128,8 @@ private lemma tensorChartComponentProjection_covApply_eq_covDerivComponentEuclid
         (chartBasisVecFiber (I := I) α k b) := by
     rw [tensorCovDerivAt_def]
   rw [hCovDerivAt]
-  -- On the good set, `tensorCovDerivAt = chartTensorRSCov`.
   exact tensorCovDerivAt_eq_chartTensorRSCovariantDerivative
     (I := I) (M := M) g r s T₀ α k (b := b) hb_good
-
-/-! ## Combining with B.1: the explicit T₀-linear expansion -/
 
 /-- **Pointwise expansion of the chart-α (Idx, Jdx) projection of `(triv
 α).clmAt b (covApply ∂_k T₀.toSection b)` at a chart-α good-set point as the
@@ -197,11 +160,8 @@ private lemma tensorChartComponentProjection_covApply_eq_T₀_expansion
               (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α p.1 p.2)
               ((toEuclidean (E := E)) ((extChartAt I α) b)) := by
   classical
-  -- Step 1: bridge LHS to `covDerivComponentEuclid g r s α T₀ k Idx Jdx
-  -- (toEuclidean ((extChartAt I α) b))`.
   rw [tensorChartComponentProjection_covApply_eq_covDerivComponentEuclid
     (I := I) (M := M) g r s α T₀ k Idx Jdx hb_good]
-  -- Step 2: `toEuclidean ((extChartAt I α) b) ∈ chartTargetEuclid α`.
   have hb_src : b ∈ (extChartAt I α).source :=
     chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hb_good
   have hb_tgt : (extChartAt I α) b ∈ (extChartAt I α).target :=
@@ -210,33 +170,17 @@ private lemma tensorChartComponentProjection_covApply_eq_T₀_expansion
       (toEuclidean (E := E)) ((extChartAt I α) b) ∈
         chartTargetEuclid (I := I) (M := M) α :=
     ⟨(extChartAt I α) b, hb_tgt, rfl⟩
-  -- Step 3: apply B.1 in functional form (`covDerivComponentEuclid_eqOn`) at
-  -- `y := toEuclidean ((extChartAt I α) b)`.
   have hEqOn := covDerivComponentEuclid_eqOn (I := I) (M := M) g r s α T₀ k Idx
     Jdx hy_target
-  -- Beta-reduce the functional form into a pointwise sum.
   simp only at hEqOn
   rw [hEqOn]
-  -- Step 4: unfold the lower-order term as a finite sum over component
-  -- multi-index pairs.
   rw [covDerivLowerOrderTerm_def]
-  -- The inner-argument of `tensorChartComponentRaw … α p.1 p.2` is
-  -- `(extChartAt I α).symm (toEuclidean.symm (toEuclidean ((extChartAt I α)
-  -- b)))`. By `chartPushedRaw_apply_of_mem`, the summand equals the same
-  -- coefficient times `chartPushedRaw I α (tensorChartComponentRaw …)` at the
-  -- chart-Euclidean point.
   congr 1
   refine Finset.sum_congr rfl (fun p _ => ?_)
   congr 1
-  -- Goal: `tensorChartComponentRaw g r s T₀ α p.1 p.2 ((extChartAt I α).symm
-  -- ((toEuclidean.symm) (toEuclidean ((extChartAt I α) b)))) =
-  -- chartPushedRaw I α (tensorChartComponentRaw …) ((toEuclidean) ((extChartAt
-  -- I α) b))`.
   exact (chartPushedRaw_apply_of_mem (I := I) (M := M) α
     (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α p.1 p.2)
     hy_target).symm
-
-/-! ## The headline -/
 
 /-- **T₀-linear expansion of the chart-α Leibniz remainder.**
 
@@ -297,19 +241,11 @@ theorem chartLeibnizRemainder_eq_T₀_linear
                       ((toEuclidean (E := E)) ((extChartAt I α) b))) := by
   classical
   have hb_good : b ∈ chartLeviCivitaGoodSet (I := I) α := hb.2
-  -- Step 1: invoke the predecessor expand.2 headline.
   rw [chartLeibnizRemainder_eq_firstDerivOnly
     (I := I) (M := M) g r s α T₀ Idx Jdx hb]
-  -- Step 2: for each (i, l, k) summand, rewrite the inner chart-α (Idx, Jdx)
-  -- projection of `covApply ∂_k T₀.toSection b` via the explicit T₀-linear
-  -- expansion.
   refine Finset.sum_congr rfl (fun i _ => ?_)
   refine Finset.sum_congr rfl (fun l _ => ?_)
   refine Finset.sum_congr rfl (fun k _ => ?_)
-  -- The inner factor in the predecessor expansion is
-  --   π_(Idx, Jdx)((triv α).clmAt b (covApply ∂_k T₀.toSection b)),
-  -- replaced by the explicit T₀-linear combination at the chart-Euclidean
-  -- image of `b`.
   rw [tensorChartComponentProjection_covApply_eq_T₀_expansion
     (I := I) (M := M) g r s α T₀ k Idx Jdx hb_good]
 

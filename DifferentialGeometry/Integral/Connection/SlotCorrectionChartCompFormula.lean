@@ -73,41 +73,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Chart-frame component formula: input slot
-
-The input slot correction `chartTensorRSInputSlotCorrection r s g α T B b k`
-is, by definition, `(T b).comp (tensorSlotSubstCLM r b Φ)` where `Φ` is the
-`k`-th tangent-slot substitution by `chartLeviCivitaParallelCLM g α b B`.
-
-After projection through the chart-α trivialisation, the
-`(Idx, Jdx)`-chart-frame component is:
-
-```
-((T b)  ((dualCovariantCMM r Idx).compCLM (chartJ α b ∘ Φ_•)))
-  (fun j => chartJinv α b (chartModelBasis E (Jdx j)))
-```
-
-Concretely, `Φ_i = chartLeviCivitaParallelCLM g α b B` if `i = k`, and the
-identity otherwise. The right-hand side is therefore a value of `T b` on:
-
-* a `(0, r)`-CMM input whose covariant slots are precomposed with the
-  chart-Jacobian and either `chartLeviCivitaParallelCLM` (slot `k`) or the
-  identity (other slots),
-* a tuple of chart-frame vectors `chartJinv α b ∘ chartModelBasis ∘ Jdx`,
-  i.e. exactly the chart-`α` coordinate basis vectors at `b`.
-
-The combined expression is a polynomial in:
-
-* chart-Christoffel symbols `chartChristoffel g α i j k`
-  (via the explicit expansion of `chartLeviCivitaParallelCLM` in
-  `chartLeviCivitaParallelCLM_apply` + `christoffelCorrection_apply`),
-* B's chart components `(chartModelBasis E).repr (trivToE α b (B b))`
-  (same expansion),
-* T's chart components (evaluation of `T b` on tuples of chart-frame
-  vectors `chartJinv α b ∘ chartModelBasis ∘ Idx'`, i.e. the chart-frame
-  matrix of `T b`).
--/
-
 /-- **Closed-form chart-frame component of the upper-slot Christoffel
 correction.** For a smooth Riemannian manifold `(M, g)`, a chart center `α`,
 a tangent vector field `B`, an `(r, s)`-tensor section `T`, a base point `b`
@@ -147,19 +112,11 @@ theorem chartTensorRSInputSlotCorrection_chartComp_formula
         (fun j : Fin s =>
           chartJinv (I := I) (M := M) α b ((chartModelBasis E) (Jdx j))) := by
   classical
-  -- Bridge: `triv.cLMA(b)` on the slot correction is `chartRSTwistInv ∘ toModel`.
   rw [triv_continuousLinearMapAt_eq_chartRSTwistInv_toModel (I := I) (M := M)
     r s α hb (chartTensorRSInputSlotCorrection (I := I) r s g α T B b k)]
-  -- Unfold the component projection.
   rw [tensorChartComponentProjection_apply]
-  -- Unfold `chartRSTwistInv_apply`.
   rw [chartRSTwistInv_apply]
-  -- Expose CMM `compContinuousLinearMap` evaluation.
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
-  -- The slot correction, viewed as a CLM and evaluated at the precomposed
-  -- input, factors as `(T b)` applied to a `tensorSlotSubstCLM` value.
-  -- `TensorRSSpace.toModel` is identity at the function level, so we get the
-  -- raw `chartTensorRSInputSlotCorrection` action.
   change (((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from
               chartTensorRSInputSlotCorrection (I := I) r s g α T B b k)
             ((dualCovariantCMM (E := E) r Idx).compContinuousLinearMap
@@ -168,22 +125,11 @@ theorem chartTensorRSInputSlotCorrection_chartComp_formula
               (fun _ : Fin s => TangentSpace I b) ℝ)
         (fun j : Fin s =>
           chartJinv (I := I) (M := M) α b ((chartModelBasis E) (Jdx j))) = _
-  -- Unfold the input-slot correction's action on its input CMM.
   rw [chartTensorRSInputSlotCorrection_apply (I := I) r s g α T B b k
     ((dualCovariantCMM (E := E) r Idx).compContinuousLinearMap
       (fun _ : Fin r => chartJ (I := I) (M := M) α b))
     (fun j : Fin s =>
       chartJinv (I := I) (M := M) α b ((chartModelBasis E) (Jdx j)))]
-  -- The intermediate `tensorSlotSubstCLM` value: rewrite `tensorSlotSubstCLM ...`
-  -- via `tensorSlotSubstCLM_apply`. After applying `T b` and evaluating, the
-  -- proof reduces to a CMM equality between
-  --   `tensorSlotSubstCLM r b Phi w_in`
-  -- and the precomposed form
-  --   `(dualCovariantCMM r Idx).compCLM (fun i => (chartJ α b).comp (Phi i))`.
-  -- We lift this CMM equality through `T b` and through the final evaluation.
-  -- Name the slot-CLM family `Phi` and the precomposed input CMM `w_in` to
-  -- keep the rewrite below compact.
-  -- Step: prove the CMM equality first, then transport.
   have hsubst :
       (show ContinuousMultilinearMap ℝ
           (fun _ : Fin r => TangentSpace I b) ℝ from
@@ -206,7 +152,6 @@ theorem chartTensorRSInputSlotCorrection_chartComp_formula
     rw [ContinuousMultilinearMap.compContinuousLinearMap_apply,
       ContinuousMultilinearMap.compContinuousLinearMap_apply]
     rfl
-  -- Lift to a `Tensor0SSpace`-fibre equality (definitionally the same).
   have hsubst_fiber :
       (tensorSlotSubstCLM (I := I) r b
           (tangentSlotCLM (I := I) r k
@@ -220,29 +165,6 @@ theorem chartTensorRSInputSlotCorrection_chartComp_formula
               (chartLeviCivitaParallelCLM (I := I) g α b B) i))) :=
     hsubst
   rw [hsubst_fiber]
-
-/-! ## Chart-frame component formula: output slot
-
-The output slot correction `chartTensorRSOutputSlotCorrection r s g α T B b l`
-is, by definition, `(tensorSlotSubstCLM s b Ψ).comp (T b)` where `Ψ` is the
-`l`-th tangent-slot substitution by `chartLeviCivitaParallelCLM g α b B`.
-
-After projection through the chart-α trivialisation, the
-`(Idx, Jdx)`-chart-frame component is:
-
-```
-((T b) ((dualCovariantCMM r Idx).compCLM (fun _ => chartJ α b)))
-  (fun j => Ψ_j (chartJinv α b (chartModelBasis E (Jdx j))))
-```
-
-Concretely, `Ψ_j = chartLeviCivitaParallelCLM g α b B` if `j = l`, and the
-identity otherwise. The right-hand side is a value of `T b` on:
-
-* a `(0, r)`-CMM input precomposed by the chart-Jacobian (no slot
-  substitution on the input side),
-* a tuple of vectors where each chart-frame vector is then mapped through
-  the slot-CLM `Ψ_j`.
--/
 
 /-- **Closed-form chart-frame component of the lower-slot Christoffel
 correction.** For a smooth Riemannian manifold `(M, g)`, a chart center `α`,
@@ -283,19 +205,11 @@ theorem chartTensorRSOutputSlotCorrection_chartComp_formula
             (chartLeviCivitaParallelCLM (I := I) g α b B) j
             (chartJinv (I := I) (M := M) α b ((chartModelBasis E) (Jdx j)))) := by
   classical
-  -- Bridge: `triv.cLMA(b)` on the slot correction is `chartRSTwistInv ∘ toModel`.
   rw [triv_continuousLinearMapAt_eq_chartRSTwistInv_toModel (I := I) (M := M)
     r s α hb (chartTensorRSOutputSlotCorrection (I := I) r s g α T B b l)]
-  -- Unfold the component projection.
   rw [tensorChartComponentProjection_apply]
-  -- Unfold `chartRSTwistInv_apply`.
   rw [chartRSTwistInv_apply]
-  -- Expose CMM `compContinuousLinearMap` evaluation.
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
-  -- The slot correction, viewed as a CLM and evaluated at the precomposed
-  -- input, factors as `tensorSlotSubstCLM s b Ψ` applied to `T b ω`.
-  -- `TensorRSSpace.toModel` is identity at the function level, so we get the
-  -- raw `chartTensorRSOutputSlotCorrection` action.
   change (((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from
               chartTensorRSOutputSlotCorrection (I := I) r s g α T B b l)
             ((dualCovariantCMM (E := E) r Idx).compContinuousLinearMap
@@ -304,17 +218,11 @@ theorem chartTensorRSOutputSlotCorrection_chartComp_formula
               (fun _ : Fin s => TangentSpace I b) ℝ)
         (fun j : Fin s =>
           chartJinv (I := I) (M := M) α b ((chartModelBasis E) (Jdx j))) = _
-  -- Unfold the output-slot correction's action on its input CMM. The RHS of
-  -- `chartTensorRSOutputSlotCorrection_apply` already evaluates the
-  -- `tensorSlotSubstCLM`-substituted tuple in place; the resulting form is
-  -- exactly our headline RHS.
   exact chartTensorRSOutputSlotCorrection_apply (I := I) r s g α T B b l
     ((dualCovariantCMM (E := E) r Idx).compContinuousLinearMap
       (fun _ : Fin r => chartJ (I := I) (M := M) α b))
     (fun j : Fin s =>
       chartJinv (I := I) (M := M) α b ((chartModelBasis E) (Jdx j)))
-
-/-! ## Sanity-check examples -/
 
 example (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace 1 2 I b')

@@ -74,8 +74,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## The chart component of the DeTurck vector field -/
-
 /-- The `k`-th chart-coordinate component of the DeTurck vector field of the
 evolving metric `g` against the background metric `g'`, evaluated at the
 chart-coordinate point `y ∈ E`:
@@ -102,12 +100,6 @@ def chartDeTurckVFComp (g g' : SmoothRiemannianMetric I M) (α : M)
           (chartChristoffel (I := I) g α a b k y -
             chartChristoffel (I := I) g' α a b k y) := rfl
 
-/-! ## Vanishing against the metric itself
-
-When the background metric coincides with the evolving metric, every Christoffel
-difference `Γ^k{}_{ab}(g) - Γ^k{}_{ab}(g)` vanishes, so each summand is zero and
-the whole component vanishes. -/
-
 /-- **The DeTurck vector field of a metric against itself has zero chart
 components.**  Each summand of `chartDeTurckVFComp g g α k y` contains the factor
 `chartChristoffel g α a b k y - chartChristoffel g α a b k y = 0`. -/
@@ -129,15 +121,6 @@ components.**  Each summand of `chartDeTurckVFComp g g α k y` contains the fact
           rw [sub_self, mul_zero]
     _ = 0 := by simp
 
-/-! ## Smoothness of the chart component
-
-The inverse Gram entries `chartInvGramOnE g α a b` are `C^∞` on the whole chart
-target, and the chart Christoffel symbols `chartChristoffel g α a b k`,
-`chartChristoffel g' α a b k` are `C^∞` on the chart-target interior (they are
-built from partial derivatives of the smooth Gram entries times the smooth
-inverse Gram).  The component `chartDeTurckVFComp g g' α k` is a finite sum of
-products of these, hence `C^∞` on the chart-target interior. -/
-
 /-- **Smoothness of the chart DeTurck-vector-field component.**  The function
 `chartDeTurckVFComp g g' α k` is `C^∞` on the interior of the chart target
 `(extChartAt I α).target ⊆ E`. -/
@@ -147,7 +130,6 @@ theorem chartDeTurckVFComp_contDiffOn_interior
     ContDiffOn ℝ ∞ (chartDeTurckVFComp (I := I) g g' α k)
       (interior (extChartAt I α).target) := by
   classical
-  -- Rewrite the component as the explicit double sum as a function of `y`.
   have hrewrite : chartDeTurckVFComp (I := I) g g' α k =
       fun y : E =>
         ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
@@ -157,30 +139,17 @@ theorem chartDeTurckVFComp_contDiffOn_interior
     funext y
     rw [chartDeTurckVFComp_def]
   rw [hrewrite]
-  -- A finite double sum of `C^∞` summands is `C^∞`.
   refine ContDiffOn.sum (fun a _ => ?_)
   refine ContDiffOn.sum (fun b _ => ?_)
-  -- Each summand `G^{ab} · (Γ^k_{ab}(g) - Γ^k_{ab}(g'))` is a product of `C^∞`
-  -- factors on the chart-target interior.
   refine ContDiffOn.mul ?_ ?_
-  · -- The inverse Gram entry is `C^∞` on the chart target, hence on its interior.
-    exact (chartInvGramOnE_contDiffOn (I := I) g α a b).mono interior_subset
-  · -- The Christoffel difference is `C^∞` on the chart-target interior.
-    have hg : ContDiffOn ℝ ∞ (chartChristoffel (I := I) g α a b k)
+  · exact (chartInvGramOnE_contDiffOn (I := I) g α a b).mono interior_subset
+  · have hg : ContDiffOn ℝ ∞ (chartChristoffel (I := I) g α a b k)
         (interior (extChartAt I α).target) :=
       chartChristoffel_contDiffOn_interior (I := I) g α a b k
     have hg' : ContDiffOn ℝ ∞ (chartChristoffel (I := I) g' α a b k)
         (interior (extChartAt I α).target) :=
       chartChristoffel_contDiffOn_interior (I := I) g' α a b k
     exact hg.sub hg'
-
-/-! ## Differentiability corollaries
-
-A later linearization step differentiates the chart component `W^k` via
-`partialDeriv`, which needs `C^∞`-smoothness — equivalently, differentiability
-of all orders — on the chart-target interior.  We record the corollaries in the
-two forms a downstream step consumes: `DifferentiableOn` on the open interior
-and `DifferentiableAt` at each interior point. -/
 
 /-- **The chart DeTurck-vector-field component is differentiable on the
 chart-target interior.**  An immediate corollary of

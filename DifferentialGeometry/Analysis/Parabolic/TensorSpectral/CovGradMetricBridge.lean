@@ -84,22 +84,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Evaluating an `(r, s)`-tensor through the model coercion
-
-The model coercion `TensorRSSpace.toModel` is the continuous-linear-equivalence
-`tensorRSSpace_continuousLinearEquiv`, itself an `arrowCongr` of the two
-fibre-coercion equivalences `tensor0SSpace_continuousLinearEquiv` on the
-domain and codomain factors. As both factor equivalences are the identity on
-the underlying carriers, evaluating the model coercion of an `(r, s)`-tensor
-on a model `(0, r)`-tensor amounts to evaluating the tensor itself on the
-corresponding fibre `(0, r)`-tensor. -/
 
 /-- Evaluation of the model coercion of an `(r, s)`-tensor. For a tensor
 `T : TensorRSSpace r s I x` and a model `(0, r)`-tensor `Dm`, the
@@ -114,17 +102,6 @@ private lemma tensorRSSpace_toModel_apply
         ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from T)
           (Tensor0SSpace.ofModel Dm)) :=
   rfl
-
-/-! ## The covariant gradient through the model coercion
-
-The defining evaluation formula `covGrad_toSection_apply_eval` describes the
-section value of `covGrad g r s S` through the fibre coercion
-`Tensor0SSpace.toModel`. Transporting it through the model coercion
-`TensorRSSpace.toModel` (via `tensorRSSpace_toModel_apply` on both factors)
-yields the analogous evaluation formula at the level of the model fibres: the
-covariant gradient, evaluated on a model `(0, r)`-tensor `Dm` and a
-`Fin (s + 1)`-tuple `v`, reads off the differentiation direction `v 0` from the
-leftmost covariant slot and reduces to the directional covariant derivative. -/
 
 /-- **Model-fibre evaluation of the covariant gradient.** For a smooth
 compactly-supported `(r, s)`-tensor section `S`, the model coercion of the
@@ -141,31 +118,15 @@ private lemma covGrad_toModel_apply
       (TensorRSSpace.toModel
           (tensorCovDerivAt (I := I) (M := M) g r s S x (v 0)))
         Dm (Matrix.vecTail v) := by
-  -- View the model coercion of the `(r, s + 1)`-tensor explicitly as a
-  -- continuous linear map of model fibres.
   change (show Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel (s + 1) ℝ E from
       TensorRSSpace.toModel
         ((covGrad (I := I) (M := M) g r s S).toSection x)) Dm v = _
-  -- Push the model coercion on the covariant gradient through to the fibre
-  -- coercion `Tensor0SSpace.toModel`.
   rw [tensorRSSpace_toModel_apply (I := I) r (s + 1) x
         ((covGrad (I := I) (M := M) g r s S).toSection x) Dm]
-  -- Apply the defining evaluation formula for the section-level covariant
-  -- gradient at the fibre `(0, r)`-tensor `Tensor0SSpace.ofModel Dm`.
   rw [covGrad_toSection_apply_eval (I := I) (M := M) g r s S x
         (Tensor0SSpace.ofModel Dm) v]
-  -- Pull the directional covariant derivative back to the model coercion.
   rw [tensorRSSpace_toModel_apply (I := I) r s x
         (tensorCovDerivAt (I := I) (M := M) g r s S x (v 0)) Dm]
-
-/-! ## Slot bookkeeping for the differentiation slot
-
-The mixed pointwise inner product `tensorInnerPointwise g r (s + 1)` lowers the
-`r` upper slots first, so in the resulting covariant `(0, r + (s + 1))`-tensor
-the differentiation slot sits at index `r`. The lemmas below identify that
-index `r` slot and the action of the omit-index-`r` embedding
-`(diffSlot r s).succAbove : Fin (r + s) → Fin (r + (s + 1))` on the upper and
-covariant blocks. -/
 
 /-- The index of the differentiation slot inside the lowered covariant
 `(0, r + (s + 1))`-tensor: it sits at position `r`, after the `r` lowered upper
@@ -215,24 +176,6 @@ private lemma diffSlot_succAbove_natAdd (r s : ℕ) (a : Fin s) :
   simp only [Fin.val_succ, Fin.val_natAdd]
   omega
 
-/-! ## The lowered covariant gradient on an `insertNth` basis tuple
-
-The covariant `(0, r + (s + 1))`-tensor `lowerAllUpperIndices g r (s + 1) x A`,
-where `A` is the model coercion of the covariant gradient `covGrad g r s S`,
-evaluated on a model-basis tuple indexed by `Fin.insertNth (diffSlot r s) k i`,
-reduces to the covariant `(0, r + s)`-tensor
-`lowerAllUpperIndices g r s x (TensorRSSpace.toModel (∇_{eₖ} S))` evaluated on
-the model-basis tuple indexed by `i`.
-
-The key bookkeeping: `lowerAllUpperIndices` places the `r` upper slots before
-the covariant slots, so the differentiation slot of `covGrad` lands at index
-`r = diffSlot r s` of the `Fin (r + (s + 1))` tuple. Splitting the tuple at
-`diffSlot r s` (via `insertNth`) isolates the differentiation direction `eₖ`
-and identifies the remaining `r + s` slots — the `r` upper slots and the `s`
-genuine covariant slots — with the slots of the directional covariant
-derivative, by the embedding identities `diffSlot_succAbove_castAdd` and
-`diffSlot_succAbove_natAdd`. -/
-
 /-- **The lowered covariant gradient on an `insertNth` basis tuple.** For a
 smooth compactly-supported `(r, s)`-tensor section `S`, an index `k : Fin n`
 and a slot-index tuple `i : Fin (r + s) → Fin n`, the lowered covariant gradient
@@ -260,16 +203,10 @@ private lemma lower_covGrad_insertNth_basis
   classical
   set I' : Fin (r + (s + 1)) → Fin (Module.finrank ℝ E) :=
     Fin.insertNth (diffSlot r s) k i with hI'
-  -- Unfold both `lowerAllUpperIndices` evaluations.
   rw [lowerAllUpperIndices_apply, lowerAllUpperIndices_apply]
-  -- The differentiation direction read off the `(s + 1)`-block is `eₖ`: the
-  -- leftmost covariant slot of `covGrad` is `natAdd r 0 = diffSlot r s`, where
-  -- `I'` takes value `k`.
   have hdir : (chartModelBasis E) (I' (Fin.natAdd r (0 : Fin (s + 1)))) =
       (chartModelBasis E) k := by
     rw [natAdd_zero_eq_diffSlot, hI', Fin.insertNth_apply_same]
-  -- The upper-slot model tuples coincide: the omit-`diffSlot` embedding sends
-  -- the `Fin r` upper block to the `Fin r` upper block.
   have hupper : (fun a : Fin r =>
         (chartModelBasis E) (I' (Fin.castAdd (s + 1) a))) =
       (fun a : Fin r => (chartModelBasis E) (i (Fin.castAdd s a))) := by
@@ -277,9 +214,6 @@ private lemma lower_covGrad_insertNth_basis
     show (chartModelBasis E) (I' (Fin.castAdd (s + 1) a)) =
       (chartModelBasis E) (i (Fin.castAdd s a))
     rw [← diffSlot_succAbove_castAdd r s a, hI', Fin.insertNth_apply_succAbove]
-  -- The genuine covariant model tuples coincide: the tail of the
-  -- `(s + 1)`-block is the omit-`diffSlot` image of the `Fin s` covariant
-  -- block.
   have hcov : Matrix.vecTail
         (fun j : Fin (s + 1) => (chartModelBasis E) (I' (Fin.natAdd r j))) =
       (fun a : Fin s => (chartModelBasis E) (i (Fin.natAdd r a))) := by
@@ -287,20 +221,11 @@ private lemma lower_covGrad_insertNth_basis
     change (chartModelBasis E) (I' (Fin.natAdd r (Fin.succ a))) =
       (chartModelBasis E) (i (Fin.natAdd r a))
     rw [← diffSlot_succAbove_natAdd r s a, hI', Fin.insertNth_apply_succAbove]
-  -- Evaluate the covariant gradient through the model-fibre formula, then feed
-  -- in the three tuple identities.
   rw [covGrad_toModel_apply (I := I) (M := M) g r s S x
         (separableFormAt (I := I) (M := M) g x r
           (fun a : Fin r => (chartModelBasis E) (I' (Fin.castAdd (s + 1) a))))
         (fun j : Fin (s + 1) => (chartModelBasis E) (I' (Fin.natAdd r j)))]
   rw [hdir, hupper, hcov]
-
-/-! ## Splitting the differentiation slot out of the inverse-Gram product
-
-The inverse-Gram product over the `r + (s + 1)` covariant slots of the lowered
-`(r, s + 1)`-tensor factors, by `Fin.prod_univ_succAbove` at the differentiation
-slot `diffSlot r s`, into the inverse-Gram weight of the differentiation
-direction and the inverse-Gram product over the remaining `r + s` slots. -/
 
 /-- Splitting the inverse-Gram product at the differentiation slot. For
 slot-index tuples `i j : Fin (r + s) → Fin n` and differentiation indices
@@ -344,13 +269,6 @@ private lemma gramInv_prod_insertNth_split
   refine Finset.prod_congr rfl (fun a _ => ?_)
   rw [Fin.insertNth_apply_succAbove, Fin.insertNth_apply_succAbove]
 
-/-! ## Reindexing a slot-tuple sum at the differentiation slot
-
-A finite sum over `Fin (r + (s + 1))`-indexed slot tuples is reindexed, through
-the tuple-splitting equivalence `Fin.insertNthEquiv` at the differentiation slot
-`diffSlot r s`, into an iterated sum over a differentiation index `Fin n` and a
-`Fin (r + s)`-indexed slot tuple. -/
-
 /-- Reindexing a sum over `Fin (r + (s + 1))`-indexed slot tuples through the
 tuple-splitting equivalence `Fin.insertNthEquiv` at the differentiation slot:
 the sum equals the iterated sum over a differentiation index `k : Fin n` and a
@@ -370,8 +288,6 @@ private lemma sum_reindex_diffSlot (r s : ℕ)
       (Fin.insertNthEquiv (fun _ : Fin (r + (s + 1)) => Fin (Module.finrank ℝ E))
         (diffSlot r s)) F).symm
   rw [h1, Fintype.sum_prod_type]
-
-/-! ## The metric-isometry bridge -/
 
 /-- **The metric-isometry bridge for the section-level covariant gradient.**
 
@@ -400,8 +316,6 @@ theorem tensorCovDerivPointwiseInner_eq_tensorInnerPointwise_grad
         (TensorRSSpace.toModel
           ((covGrad (I := I) (M := M) g r s T).toSection x)) := by
   classical
-  -- Abbreviations: the inverse Gram matrix, the model basis, and the lowered
-  -- directional covariant derivatives of `S` and `T`.
   set Ginv := (gramMatrixAt (I := I) (M := M) g x)⁻¹ with hGinv_def
   set lowS : Fin (Module.finrank ℝ E) →
       ContinuousMultilinearMap ℝ (fun _ : Fin (r + s) => E) ℝ :=
@@ -415,10 +329,6 @@ theorem tensorCovDerivPointwiseInner_eq_tensorInnerPointwise_grad
       (TensorRSSpace.toModel
         (tensorCovDerivAt (I := I) (M := M) g r s T x ((chartModelBasis E) l)))
     with hlowT_def
-  -- The common explicit four-fold inverse-Gram-weighted sum: the
-  -- differentiation contraction `(k, l)` wrapped around the genuine `(r, s)`
-  -- contraction `(i, j)`, with the slot orders arranged as `(k, i, l, j)` to
-  -- match the differentiation-slot reindexing of the right-hand side.
   set common : ℝ :=
     ∑ k : Fin (Module.finrank ℝ E),
       ∑ i : Fin (r + s) → Fin (Module.finrank ℝ E),
@@ -429,12 +339,9 @@ theorem tensorCovDerivPointwiseInner_eq_tensorInnerPointwise_grad
                 (lowS k) (fun a => (chartModelBasis E) (i a)) *
                   (lowT l) (fun a => (chartModelBasis E) (j a)))
     with hcommon_def
-  -- Step 1: the left-hand side equals the common sum.
   have hLHS : tensorCovDerivPointwiseInner (I := I) (M := M) g r s S T x =
       common := by
     rw [tensorCovDerivPointwiseInner_def]
-    -- Expand each genuine `(r, s)` pointwise inner product into its explicit
-    -- inverse-Gram-weighted sum, and distribute the differentiation weight.
     have hexpand : ∀ k l : Fin (Module.finrank ℝ E),
         Ginv k l *
             tensorInnerPointwise (I := I) (M := M) g r s x
@@ -465,19 +372,14 @@ theorem tensorCovDerivPointwiseInner_eq_tensorInnerPointwise_grad
       rw [Finset.mul_sum]
     rw [Finset.sum_congr rfl (fun k _ =>
           Finset.sum_congr rfl (fun l _ => hexpand k l))]
-    -- The left-hand side now reads `∑_k ∑_l ∑_i ∑_j …`; the common sum reads
-    -- `∑_k ∑_i ∑_l ∑_j …`. Commute the `∑_l` and `∑_i` sums.
     rw [hcommon_def]
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [Finset.sum_comm]
-  -- Step 2: the right-hand side equals the common sum.
   have hRHS : tensorInnerPointwise (I := I) (M := M) g r (s + 1) x
         (TensorRSSpace.toModel
           ((covGrad (I := I) (M := M) g r s S).toSection x))
         (TensorRSSpace.toModel
           ((covGrad (I := I) (M := M) g r s T).toSection x)) = common := by
-    -- Expand the mixed `(r, s + 1)` pointwise inner product into its explicit
-    -- inverse-Gram-weighted sum over `Fin (r + (s + 1))`-indexed slot tuples.
     rw [show tensorInnerPointwise (I := I) (M := M) g r (s + 1) x
             (TensorRSSpace.toModel
               ((covGrad (I := I) (M := M) g r s S).toSection x))
@@ -492,26 +394,18 @@ theorem tensorCovDerivPointwiseInner_eq_tensorInnerPointwise_grad
                 ((covGrad (I := I) (M := M) g r s T).toSection x)))
         from rfl]
     rw [tensorInnerPointwise_0s_eq_sum]
-    -- Reindex the outer `I`-sum at the differentiation slot, via
-    -- `Fin.insertNthEquiv`.
     rw [sum_reindex_diffSlot]
-    -- Match the reindexed summand to the common-sum summand.
     rw [hcommon_def]
     refine Finset.sum_congr rfl (fun k _ => ?_)
     refine Finset.sum_congr rfl (fun i _ => ?_)
-    -- Reindex the inner `J`-sum at the differentiation slot.
     rw [sum_reindex_diffSlot]
     refine Finset.sum_congr rfl (fun l _ => ?_)
     refine Finset.sum_congr rfl (fun j _ => ?_)
-    -- Split the inverse-Gram product at the differentiation slot, and evaluate
-    -- the lowered covariant gradients on the `insertNth` basis tuples.
     rw [gramInv_prod_insertNth_split (I := I) (M := M) g x r s k l i j]
     rw [lower_covGrad_insertNth_basis (I := I) (M := M) g r s S x k i]
     rw [lower_covGrad_insertNth_basis (I := I) (M := M) g r s T x l j]
     rw [hlowS_def, hlowT_def]
     ring
-  -- Conclude: both sides equal the common sum, but with the `(i, k)` and
-  -- `(l, j)` summation orders swapped.
   rw [hLHS, hRHS]
 
 end TensorSpectral

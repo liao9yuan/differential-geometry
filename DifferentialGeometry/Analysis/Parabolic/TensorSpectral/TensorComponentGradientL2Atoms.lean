@@ -59,8 +59,6 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Connection
 
-/-! ## Chart-source continuity companion to the covariant-derivative atom -/
-
 section CovariantAtomsChartSource
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -69,8 +67,6 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ### File-local Borel-space instances on `E` and `M` -/
 
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
@@ -83,13 +79,6 @@ private lemma pouTsupport_measurableSet (α : M) :
     MeasurableSet (tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
   (isClosed_tsupport _).measurableSet
-
-/-! ### Point-only dependence of `chartTensorRSCovariantDerivative` in the
-tangent field
-
-The chart-frame `(r, s)`-tensor covariant derivative
-`chartTensorRSCovariantDerivative r s g α T X b`, viewed as a function of the
-tangent field `X`, depends only on the value of `X` at the basepoint `b`. -/
 
 private lemma chartTensorRSCovariantDerivative_eq_of_eq_at
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -120,9 +109,6 @@ private lemma chartTensorRSCovariantDerivative_eq_of_eq_at
     rw [hPara]
   rw [Finset.sum_congr rfl (fun k _ => hInput k)]
   rw [Finset.sum_congr rfl (fun l _ => hOutput l)]
-
-/-! ### Pointwise bridge: chart-frame covariant derivative ↔ abstract directional
-derivative -/
 
 lemma chartTensorRSCovariantDerivative_eq_tensorCovDerivAt_at
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -163,16 +149,6 @@ lemma chartTensorRSCovariantDerivative_eq_tensorCovDerivAt_at
   rw [hagree']
   have hYb' : Y.toFun b = X b := hYb
   rw [hYb']
-
-/-! ### Chart-source continuity of the trivialisation-projected chart-frame
-covariant derivative
-
-The trivialisation-`α` `continuousLinearMapAt ℝ b` applied to the chart-frame
-covariant derivative of a smooth tensor section, evaluated at a chart-basis
-direction, agrees on the chart-`α` source with the trivialisation `.2`-
-component of the bundled covariant-derivative section. The latter has
-chart-source smoothness via `tensorCovDeriv_chartBasis_trivImage_contMDiffOn`,
-giving chart-source continuity of the projected chart-frame value. -/
 
 /-- On the chart-`α` source, the trivialisation-`α` `continuousLinearMapAt ℝ b`
 applied to the chart-frame covariant derivative
@@ -251,8 +227,6 @@ private lemma triv_chartTensorRSCovariantDerivative_continuousOn_chart_source
   exact triv_continuousLinearMapAt_chartTensorRSCovariantDerivative_eq_triv_snd
     (I := I) (M := M) g r s α S hb_chart k
 
-/-! ### Chart-source continuity of the squared-norm sum -/
-
 private lemma norm_sq_sum_triv_chartTensorRSCovariantDerivative_continuousOn_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) :
@@ -277,8 +251,6 @@ private lemma norm_sq_sum_triv_chartTensorRSCovariantDerivative_continuousOn_cha
             (fun b' => S.toSection b') (chartBasisVecFiber (I := I) α k) b)‖)
       ((chartAt H α).source) := h_proj.norm
   exact h_norm.pow 2
-
-/-! ### Chart-source continuity of the integrand `b ↦ ρ_α(b) * √(∑ ‖·‖²)` -/
 
 private lemma pou_mul_sqrt_sum_continuousOn_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -455,8 +427,6 @@ theorem aestronglyMeasurable_pou_mul_sqrt_sum_triv_chart_cov
   exact pou_mul_sqrt_sum_aestronglyMeasurable_restrict_pouTsupport
     (I := I) (M := M) g r s α S.toCcTensor
 
-/-! ## `L²` bound on the covariant-derivative atom sum -/
-
 private lemma triv_continuousLinearMapAt_chart_cov_eq_chartRSTwistInv
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M} (hb : b ∈ (chartAt H α).source)
@@ -594,8 +564,6 @@ theorem exists_eLpNorm_sq_pou_mul_sum_triv_chart_cov_le_const_mul_h1NormSq
   exact h_eL S
 
 end CovariantAtomsChartSource
-
-/-! ## `L²` bound on the `raw²`-indicator atom -/
 
 section RawAtoms
 
@@ -998,8 +966,6 @@ theorem exists_integral_indicator_tsupp_raw_sq_le_const_mul_h1NormSq
 
 end RawAtoms
 
-/-! ## `AEStronglyMeasurable` companions for the `raw²` and Christoffel atoms -/
-
 section AtomMeasurability
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -1019,8 +985,6 @@ private lemma pouTsupport_measurableSet_meas (α : M) :
     MeasurableSet (tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
   (isClosed_tsupport _).measurableSet
-
-/-! ### `AEStronglyMeasurable` of the per-`α` `raw²`-indicator atom -/
 
 private lemma scalarOnE_raw_eq_raw_on_pouTsupport_meas
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -1142,9 +1106,6 @@ theorem aestronglyMeasurable_indicator_tsupp_abs_raw
   rw [aestronglyMeasurable_indicator_iff hρSet_meas]
   exact abs_scalarOnE_raw_aestronglyMeasurable_restrict_pouTsupport
     (I := I) (M := M) g r s α S.toCcTensor Idx Jdx
-
-/-! ### `AEStronglyMeasurable` of the per-direction Christoffel slot-correction
-atom integrand -/
 
 section ChristoffelAtomMeasurability
 
@@ -1348,17 +1309,6 @@ theorem aestronglyMeasurable_pou_mul_sqrt_sum_christoffel_correction
 
 end AtomMeasurability
 
-/-! ## Riemannian-fibre-norm covariant-derivative atom `L²` bound (HLCC-free)
-
-This section converts the model-norm covariant-derivative atom bound
-`exists_eLpNorm_sq_pou_mul_sum_triv_chart_cov_le_const_mul_h1NormSq` (which is
-itself free of any chart-locality predicate) into the **intrinsic Riemannian
-fibre-norm form**, in which each per-`k` covariant-derivative atom is measured
-by the genuine `g`-induced fibre norm on `TensorRSSpace r s I b`. The
-conversion is unconditional: the only extra ingredient is the unconditional
-uniform op-norm bound on the chart-`(r, s)` inverse trivialisation over the
-compact `tsupport` of the chart-`α` partition of unity. -/
-
 section CovariantAtomsRiemannian
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -1448,12 +1398,9 @@ theorem exists_eLpNorm_pou_mul_sum_fiber_chart_cov_le_const_mul_h1Norm_unconditi
   classical
   letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
-  -- Model-norm covariant-derivative atom `L²` bound (HLCC-free).
   obtain ⟨Cg2, hCg2_nn, hG2⟩ :=
     exists_eLpNorm_sq_pou_mul_sum_triv_chart_cov_le_const_mul_h1NormSq
       (I := I) (M := M) g r s α
-  -- Unconditional uniform op-norm bound on the chart-`α` inverse
-  -- trivialisation over the compact `tsupport ρ_α`.
   have hK_cpt :
       IsCompact (tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
@@ -1487,7 +1434,6 @@ theorem exists_eLpNorm_pou_mul_sum_fiber_chart_cov_le_const_mul_h1Norm_unconditi
               (fun b' => S.toCcTensor.toSection b')
               (chartBasisVecFiber (I := I) α k) b)‖ ^ 2)
     with hgM_def
-  -- Pointwise: `gF b ≤ Cop · gM b`, everywhere.
   have h_ptwise : ∀ b : M, gF b ≤ Cop * gM b := by
     intro b
     by_cases hb : b ∈ tsupport (fun x : M =>
@@ -1638,28 +1584,6 @@ theorem exists_eLpNorm_pou_mul_sum_fiber_chart_cov_le_const_mul_h1Norm_unconditi
 
 end CovariantAtomsRiemannian
 
-/-! ## Riemannian-fibre-norm Christoffel slot-correction atom `L²` bound
-
-This section provides the model-free Christoffel slot-correction atom `L²` bound
-in the **intrinsic Riemannian fibre norm**.
-
-The model-norm slot operator-norm bounds are replaced by their unconditional
-Riemannian-fibre-norm counterparts, derived here from:
-
-* the honest model-space Christoffel-correction bound
-  `christoffelCorrection_riem_norm_le_on_pouTsupport`,
-* the chart-`α`-conjugation kernel factorisation
-  (`chartTensorRS{Input,Output}SlotCorrection_chart_kernel_factorization`),
-* the unconditional inverse / forward chart-`(r, s)`-fibre op-norm bounds
-  (`tensorRSChartFiber{From,To}Model_opNorm_isBounded_on_compact_unconditional`).
-
-The honest section-norm step collapses to the **exact isometry**
-`‖S.toSection b‖²_Riem = tensorInnerPointwise g r s b (S.toFun b) (S.toFun b)`,
-so the section constant is `K_S = 1`. The atom assembly itself is the
-norm-agnostic
-`exists_eLpNorm_chartPou_mul_sqrt_chart_christoffel_correction_le_const_mul_h1Norm`,
-fed the Riemannian slot bounds and the `K_S = 1` section identity. -/
-
 section ChristoffelAtomsRiemannian
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -1675,8 +1599,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
-
-/-! ### Model-space basis geometry constants -/
 
 private noncomputable def chrRiemBasisCoordSup : ℝ :=
   (Finset.univ : Finset (Fin (Module.finrank ℝ E))).sup'
@@ -1720,8 +1642,6 @@ private lemma chrRiem_repr_coord_abs_le (x : E) (i : Fin (Module.finrank ℝ E))
 private lemma chrRiem_basis_vec_norm_le (k : Fin (Module.finrank ℝ E)) :
     ‖(chartModelBasis E) k‖ ≤ chrRiemBasisVecSup (E := E) :=
   Finset.le_sup' (f := fun k => ‖(chartModelBasis E) k‖) (Finset.mem_univ _)
-
-/-! ### Honest model-space Christoffel-correction norm bound on the POU tsupport -/
 
 /-- Honest model-space norm bound on `christoffelCorrection g α b Y v`,
 controlled by `C · ‖Y‖ · ‖trivToE α b v‖` uniformly on the chart-`α`
@@ -1836,8 +1756,6 @@ private theorem christoffelCorrection_riem_norm_le_on_pouTsupport
             (mul_nonneg (mul_nonneg hn_nn hCc_nn) (norm_nonneg _)))
     _ = (n : ℝ) ^ 3 * Cc ^ 2 * Cv * CΓ * ‖Y‖ * ‖w‖ := by ring
 
-/-! ### Uniform bound on the chart-`α`-conjugation slot factor (HLCC-free) -/
-
 private lemma chrRiem_slotConjFactor_self_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π b' : M, TangentSpace I b') {b : M}
@@ -1923,8 +1841,6 @@ private lemma chrRiem_slotConjFactor_basis_norm_le_on_pouTsupport
             (mul_le_mul_of_nonneg_left h_basis_le hCχ_nn) (norm_nonneg _)
   exact ContinuousLinearMap.opNorm_le_bound _
     (mul_nonneg hCχ_nn hCvec_nn) hpt
-
-/-! ### Uniform bound on the per-slot conjugation family products (HLCC-free) -/
 
 private lemma chrRiem_slotInputConjCLM_prod_norm_le_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M) :
@@ -2030,8 +1946,6 @@ private lemma chrRiem_outputSlotChartKernel_apply_norm_le
           (𝕜 := ℝ) (E := fun _ : Fin s => E) ℝ
           (slotOutputConjCLM (I := I) g s α X l b)
 
-/-! ### The `(r, s)`-tensor trivialisation base set -/
-
 private lemma chrRiem_tensorRSTriv_baseSet_eq_chartSource (r s : ℕ) (α : M) :
     (trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).baseSet =
@@ -2049,8 +1963,6 @@ private lemma chrRiem_tensorRSTriv_baseSet_eq_chartSource (r s : ℕ) (α : M) :
         (trivializationAt E (TangentSpace I) α).baseSet := rfl
   rw [h_r, h_s, Set.inter_self,
     DifferentialGeometry.Integral.Measure.trivializationAt_baseSet_eq_chartAt_source]
-
-/-! ### Headline: Riemannian-norm slot op-norm bounds (HLCC-free) -/
 
 set_option synthInstance.maxHeartbeats 800000 in
 attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
@@ -2251,8 +2163,6 @@ theorem chartTensorRSOutputSlotCorrection_riemannian_norm_le_on_pouTsupport_loca
           (mul_le_mul_of_nonneg_left h_to hCprod_nn) hCfrom_nn
     _ = Cfrom * Cprod * Cto * ‖T b‖ := by ring
 
-/-! ### Headline: the Riemannian-fibre-norm Christoffel slot-correction atom -/
-
 set_option synthInstance.maxHeartbeats 800000 in
 attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
@@ -2288,7 +2198,6 @@ theorem exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h
   classical
   letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
-  -- Riemannian-norm slot operator-norm bounds (HLCC-free), unified into `M_F`.
   obtain ⟨M_F_in, hM_F_in_nn, hM_F_in_le⟩ :=
     chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport_local
       (I := I) (M := M) g r s α
@@ -2297,7 +2206,6 @@ theorem exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h
       (I := I) (M := M) g r s α
   set M_F : ℝ := max M_F_in M_F_out with hM_F_def
   have hM_F_nn : 0 ≤ M_F := le_max_of_le_left hM_F_in_nn
-  -- Slot bounds reformulated against `M_F · ‖S.toSection b‖`.
   have hM_F_input :
       ∀ (S : SmoothCcTensor g r s) {b : M},
         b ∈ tsupport (fun x : M =>
@@ -2322,7 +2230,6 @@ theorem exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h
     have h_orig := hM_F_out_le (fun b' => S.toSection b') (b := b) hb j l
     exact h_orig.trans
       (mul_le_mul_of_nonneg_right (le_max_right _ _) (norm_nonneg _))
-  -- Section-norm step is the exact Riemannian isometry: `K_S = 1`.
   have hK_S_bound :
       ∀ (S : SmoothCcTensor g r s) {b : M},
         b ∈ tsupport (fun x : M =>
@@ -2340,8 +2247,6 @@ theorem exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h
       rw [DifferentialGeometry.Tensor.TensorRSRiemannianBundle.tensorRSRiemannianInnerCLM_apply]
       rfl
     rw [← h_inner, real_inner_self_eq_norm_sq]
-  -- Pointwise sum bound (inlined, in the active Riemannian fibre norm):
-  -- `Σ‖input‖² + Σ‖output‖² ≤ ((r + s)·M_F²) · tensorInnerPointwise`, on tsupport.
   set C : ℝ := ((r : ℝ) + (s : ℝ)) * M_F ^ 2 with hC_def
   have hC_nn : 0 ≤ C := by rw [hC_def]; positivity
   have h_pt : ∀ (T : SmoothCcTensor g r s) {b : M},
@@ -2421,7 +2326,6 @@ theorem exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h
             (T.toFun b) (T.toFun b) := by rw [hC_def]
   refine ⟨Real.sqrt C, Real.sqrt_nonneg _, ?_⟩
   intro S
-  -- Notation for the integrand and the measure.
   set ρ : M → ℝ := fun x : M =>
     ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x with hρ_def
   set SumSq : M → ℝ := fun b : M =>
@@ -2441,7 +2345,6 @@ theorem exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h
     exact add_nonneg
       (Finset.sum_nonneg fun _ _ => sq_nonneg _)
       (Finset.sum_nonneg fun _ _ => sq_nonneg _)
-  -- Pointwise `(f b)² ≤ C · tensorInnerPointwise`.
   have h_pt_sq : ∀ b : M, (f b) ^ 2 ≤
       C * tensorInnerPointwise (I := I) (M := M) g r s b
         (S.toCcTensor.toFun b) (S.toCcTensor.toFun b) := by
@@ -2476,7 +2379,6 @@ theorem exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h
       rw [hzero]
       exact mul_nonneg hC_nn
         (tensorInnerPointwise_nonneg (I := I) (M := M) g r s b _)
-  -- ENNReal-valued pointwise bound.
   have h_pt_enn : ∀ b : M,
       (‖f b‖ₑ : ℝ≥0∞) ^ 2 ≤
         ENNReal.ofReal (C * tensorInnerPointwise
@@ -2487,7 +2389,6 @@ theorem exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h
       rw [Real.enorm_eq_ofReal_abs, ← ENNReal.ofReal_pow (abs_nonneg _) 2,
         sq_abs]]
     exact ENNReal.ofReal_le_ofReal (h_pt_sq b)
-  -- Squared `eLpNorm` ≤ `ofReal (C · ‖S‖²)`.
   have h_inner_int :
       Integrable (fun b : M => tensorInnerPointwise
         (I := I) (M := M) g r s b
@@ -2545,7 +2446,6 @@ theorem exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h
           rw [integral_const_mul]
       _ ≤ ENNReal.ofReal (C * ‖S‖ ^ 2) :=
           ENNReal.ofReal_le_ofReal (mul_le_mul_of_nonneg_left h_int_le hC_nn)
-  -- Take square roots.
   set Tval : ℝ := C * ‖S‖ ^ 2 with hT_def
   have hT_nn : 0 ≤ Tval := mul_nonneg hC_nn (sq_nonneg _)
   have h_eLpNorm_le := eLpNorm_two_le_ofReal_sqrt hT_nn h_sq

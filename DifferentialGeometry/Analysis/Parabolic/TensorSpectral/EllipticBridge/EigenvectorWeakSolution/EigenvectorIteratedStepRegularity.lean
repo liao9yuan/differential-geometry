@@ -93,24 +93,12 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
   hiding chartTargetEuclid chartTargetEuclid_isOpen
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Chart-locality-free regularity propagators
-
-The `W^{k,2}` regularity propagators for the per-step effective source, keyed onto
-the intrinsic compact-operator eigenbasis.
--/
 
 /-- **Polymorphic `MemWkp K 2` regularity of the per-step effective source.**
 Given:
@@ -146,14 +134,10 @@ theorem eigenvectorChartIteratedStep_memWkp_K_two
         g r s i α P₀ m dirs fChartEffPrev l)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- `eigenvectorChartIteratedStep = indicator (chartPouKernel α) Q`,
-  -- where `Q = eigenvectorChartRHSDiffNumerator … (Fin.snoc dirs l) /
-  -- density`.
   set Q : EuclN → ℝ := fun y =>
     eigenvectorChartRHSDiffNumerator (I := I) (M := M)
       g r s i α P₀ m (Fin.snoc dirs l) fChartEffPrev y /
     densityOnEuclid (I := I) g α y with hQ_def
-  -- The standalone step is the indicator of the kernel applied to `Q`.
   have h_step_eq :
       eigenvectorChartIteratedStep (I := I) (M := M)
         g r s i α P₀ m dirs fChartEffPrev l =
@@ -164,13 +148,11 @@ theorem eigenvectorChartIteratedStep_memWkp_K_two
     funext y
     simp only [hQ_def]
     rw [h_num]
-  -- `Q ∈ MemWkp K 2` on the chart target — the substep-2a campaign lemma.
   have hQ_memWkp : MemWkp (d := Module.finrank ℝ E) K 2 Q
       (chartTargetEuclid (I := I) (M := M) α) :=
     eigenvectorChartRHSDiffNumerator_div_density_memWkp (I := I) (M := M)
       g r s i α P₀ m K (Fin.snoc dirs l)
       h_comp h_prev_memWkp_succ h_prev_ae_zero
-  -- `Q` ae-vanishes off the partition-of-unity kernel — the public restatement.
   have hQ_ae_zero : Q =ᵐ[(volume : Measure EuclN).restrict
       (chartTargetEuclid (I := I) (M := M) α \
         chartPouKernel (I := I) (M := M) α)]
@@ -178,11 +160,6 @@ theorem eigenvectorChartIteratedStep_memWkp_K_two
     eigenvectorChartRHSDiffNumerator_div_density_ae_zero_off_chartPouKernel
       (I := I) (M := M) g r s i α P₀ m (Fin.snoc dirs l)
       h_prev_ae_zero
-  -- `indicator (chartPouKernel α) Q =ᵐ Q` on the open chart target.
-  -- Split `chartTargetEuclid α = (chartTargetEuclid α ∩ chartPouKernel α) ∪
-  --   (chartTargetEuclid α \ chartPouKernel α)`:
-  --  on the kernel intersection, the indicator returns `Q`;
-  --  off the kernel, the indicator vanishes and `Q =ᵐ 0`.
   have h_indicator_ae_eq_Q :
       Set.indicator (chartPouKernel (I := I) (M := M) α) Q =ᵐ[
         (volume : Measure EuclN).restrict
@@ -195,14 +172,12 @@ theorem eigenvectorChartIteratedStep_memWkp_K_two
       chartPouKernel_measurableSet (I := I) (M := M) α
     have hKα_sub_Ω : Kα ⊆ Ω :=
       chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
-    -- On `Ω ∩ Kα`: `indicator Kα Q = Q`.
     have h_inter_meas : MeasurableSet (Ω ∩ Kα) := hΩ_meas.inter hKα_meas
     have h_eq_on_inter : Set.indicator Kα Q =ᵐ[
         (volume : Measure EuclN).restrict (Ω ∩ Kα)] Q := by
       refine (ae_restrict_iff' h_inter_meas).mpr ?_
       refine Filter.Eventually.of_forall fun y hy => ?_
       exact Set.indicator_of_mem hy.2 _
-    -- On `Ω \ Kα`: `indicator Kα Q = 0` and `Q =ᵐ 0`.
     have h_diff_meas : MeasurableSet (Ω \ Kα) := hΩ_meas.diff hKα_meas
     have h_indicator_ae_zero : Set.indicator Kα Q =ᵐ[
         (volume : Measure EuclN).restrict (Ω \ Kα)]
@@ -214,7 +189,6 @@ theorem eigenvectorChartIteratedStep_memWkp_K_two
         (volume : Measure EuclN).restrict (Ω \ Kα)] Q := by
       filter_upwards [h_indicator_ae_zero, hQ_ae_zero] with y h0 hQ0
       rw [h0, hQ0]
-    -- Cover `Ω` by the two disjoint pieces and recombine the ae-equalities.
     have h_cover : Ω = (Ω ∩ Kα) ∪ (Ω \ Kα) := by
       ext y; constructor
       · intro hy
@@ -230,7 +204,6 @@ theorem eigenvectorChartIteratedStep_memWkp_K_two
       rw [← h_cover]
     rw [hΩ_restrict_eq, MeasureTheory.Measure.restrict_union h_disj h_diff_meas]
     exact (MeasureTheory.ae_add_measure_iff).mpr ⟨h_eq_on_inter, h_eq_on_diff⟩
-  -- Transfer `MemWkp K 2` of `Q` to the standalone step via the ae-equality.
   rw [h_step_eq]
   exact (MemWkp_congr_ae (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2)
@@ -261,7 +234,6 @@ theorem eigenvectorChartIteratedStep_memW1p_two
       (eigenvectorChartIteratedStep (I := I) (M := M)
         g r s i α P₀ m dirs fChartEffPrev l)
       (chartTargetEuclid (I := I) (M := M) α) := by
-  -- `MemWkp 2 2 = MemWkp (1 + 1) 2` and `m + 3 = m + 2 + 1` realign the indices.
   have h_prev_memWkp_succ : MemWkp (d := Module.finrank ℝ E) (1 + 1) 2
       fChartEffPrev (chartTargetEuclid (I := I) (M := M) α) := by
     have h_eq : (1 + 1 : ℕ) = 2 := by norm_num

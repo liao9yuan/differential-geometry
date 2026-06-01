@@ -1,8 +1,3 @@
-/-
-Interior continuity of the DeTurck geometric forcing (M2) and the term-by-term
-per-mode assembly of the interior time-derivative (M3). Skeleton stubs for the
-short-time-existence blueprint (GAP 1, spectral M2/M3).
--/
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists
@@ -111,25 +106,9 @@ theorem forcing_continuous_interior
     ∀ ε : ℝ, 0 < ε →
       ContinuousOn (fun s => (N_cont (u₁ s) :
         tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ))) (Set.Icc ε T) := by
-  -- The interior carrier `u₁` is continuous on `[ε, T]` (`hcont`); the continuous
-  -- DeTurck nonlinearity `N_cont` is globally continuous (`hN_cont`); their
-  -- composition `s ↦ N_cont (u₁ s)` is therefore continuous on `[ε, T]`.
   intro ε hε
   exact hN_cont.comp_continuousOn (hcont ε hε)
 
--- `hu₂`, `hu₁`, `hu`, `hu₂sol`, `hforce` are the carried Duhamel-structure
--- hypotheses pinning the carrier `u`/`u₂`/`u₁` to the affine Duhamel solution
--- field and the forcing to the continuous DeTurck nonlinearity; they feed sibling
--- nodes and the blueprint dependency contract. The interior `HasDerivAt`
--- conclusion is discharged from the two genuine interior-smoothing inputs
--- `hderiv_ae` (the a.e. identity of the *L²* time-derivative field `u.deriv` with
--- the spectral RHS — derived downstream from `maxRegDuhamelMap_timeDeriv_eq`) and
--- `hRHS_cont` (interior continuity of the spectral RHS *path*). Neither input is
--- the conclusion: `hderiv_ae`/`hRHS_cont` are statements about `u.deriv` and the
--- RHS path's continuity, structurally distinct from the differentiability of the
--- represented path `timeH1.toFun u`. The remaining Duhamel hypotheses are unused
--- in THIS reduction (they pin the same data the two inputs already encode), so the
--- narrow unused-variable linter suppression keeps the signature intact.
 open MeasureTheory in
 set_option linter.unusedVariables false in
 theorem permode_sum_hasderivat
@@ -162,7 +141,6 @@ theorem permode_sum_hasderivat
         (scaleLaplacianFun (I := I) (M := M) (u₂ s) +
           deTurckGeometricN (I := I) g_bg a (u₁ s)) s := by
   classical
-  -- Abbreviate the spectral RHS path.
   set RHS : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ) :=
     fun s => scaleLaplacianFun (I := I) (M := M) (u₂ s) +
       deTurckGeometricN (I := I) g_bg a (u₁ s) with hRHS_def
@@ -170,32 +148,21 @@ theorem permode_sum_hasderivat
   obtain ⟨hs0, hsT⟩ := hs
   have hsmem : s ∈ Set.Ioo (0 : ℝ) T := ⟨hs0, hsT⟩
   have hTpos : (0 : ℝ) ≤ T := hs0.le.trans hsT.le
-  -- `timeH1.toFun u r = u.init + ∫₀ʳ u.deriv`.
-  -- The indefinite integral of the continuous RHS-representative has the FTC
-  -- derivative `RHS s` at the interior point `s`; we then transfer along the a.e.
-  -- equality `u.deriv =ᵐ RHS` to the indefinite integral of `u.deriv`.
   have h0mem : (0 : ℝ) ∈ Set.Icc (0 : ℝ) T := ⟨le_rfl, hTpos⟩
   have hsIcc : s ∈ Set.Icc (0 : ℝ) T := ⟨hs0.le, hsT.le⟩
-  -- `u.deriv` is interval-integrable on `0..s` (it is the `L²` derivative field).
   have hderiv_int : IntervalIntegrable (fun r => u.deriv r) volume 0 s :=
     u.intervalIntegrable_deriv h0mem hsIcc
-  -- The RHS representative is interval-integrable on `0..s` (a.e.-equal to `u.deriv`).
   have hRHS_int : IntervalIntegrable RHS volume 0 s := by
-    -- `u.deriv =ᵐ RHS` over `timeMeasure T` ⟹ over `volume.restrict (uIoc 0 s)`.
     have hsub : Set.uIoc (0 : ℝ) s ⊆ Set.Icc (0 : ℝ) T :=
       (Set.uIoc_subset_uIcc).trans (Set.uIcc_subset_Icc h0mem hsIcc)
     have hae := ae_restrict_of_ae_restrict_of_subset (μ := volume) hsub hderiv_ae
     exact hderiv_int.congr_ae hae
-  -- The RHS representative is continuous at `s` (continuous on the open `(0,T)`).
   have hRHS_at : ContinuousAt RHS s :=
     hRHS_cont.continuousAt (isOpen_Ioo.mem_nhds hsmem)
-  -- It is strongly measurable at `𝓝 s` (continuous on the open neighbourhood `(0,T)`).
   have hRHS_meas : StronglyMeasurableAtFilter RHS (𝓝 s) volume :=
     hRHS_cont.stronglyMeasurableAtFilter isOpen_Ioo s hsmem
-  -- FTC for the continuous RHS representative: `(∫₀· RHS)' s = RHS s`.
   have hftc_RHS : HasDerivAt (fun r => ∫ x in (0 : ℝ)..r, RHS x) (RHS s) s :=
     intervalIntegral.integral_hasDerivAt_right hRHS_int hRHS_meas hRHS_at
-  -- Near `s`, the indefinite integral of `u.deriv` equals that of `RHS`.
   have heq : (fun r => ∫ x in (0 : ℝ)..r, u.deriv x)
       =ᶠ[nhds s] fun r => ∫ x in (0 : ℝ)..r, RHS x := by
     filter_upwards [Ioo_mem_nhds hs0 hsT] with r hr
@@ -207,11 +174,8 @@ theorem permode_sum_hasderivat
     rw [ae_restrict_iff' measurableSet_uIoc] at hae
     filter_upwards [hae] with x hx hxmem
     exact hx hxmem
-  -- Transfer the FTC derivative back to the indefinite integral of `u.deriv`.
   have hftc_u : HasDerivAt (fun r => ∫ x in (0 : ℝ)..r, u.deriv x) (RHS s) s :=
     hftc_RHS.congr_of_eventuallyEq heq
-  -- Add the constant initial value: `toFun u r = u.init + ∫₀ʳ u.deriv` (`toFun_apply`),
-  -- so the goal's path is definitionally `fun r => u.init + ∫₀ʳ u.deriv`.
   have hconst : HasDerivAt
       (fun r => (timeH1.toFun u r : tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ)))
       (RHS s) s := by

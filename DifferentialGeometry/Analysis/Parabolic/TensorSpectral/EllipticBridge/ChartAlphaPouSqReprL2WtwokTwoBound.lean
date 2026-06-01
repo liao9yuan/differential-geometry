@@ -73,15 +73,10 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 /-- The Euclidean ambient space of dimension `Module.finrank ℝ E`. -/
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Helper: bound a single-chart double sum of squared `wkpNorm`s by the
-squared aggregated tensor Sobolev norm `wtwokTwoNorm² g 0 T`. -/
 
 /-- For any fixed chart base point `α : M`, the finite double sum of squared
 chart-component `wkpNorm 0 2` is bounded by the squared aggregated tensor
@@ -96,32 +91,26 @@ private lemma sum_wkpNorm_sq_α_le_wtwokTwoNorm_sq
               (chartTargetEuclid (I := I) (M := M) α)) ^ 2) ≤
       (wtwokTwoNorm (I := I) (M := M) g 0 T) ^ 2 := by
   classical
-  -- Abbreviations.
   set w : M → (Fin r → Fin (Module.finrank ℝ E)) →
       (Fin s → Fin (Module.finrank ℝ E)) → ℝ≥0∞ :=
     fun α' Idx Jdx => wkpNorm (d := Module.finrank ℝ E) 0 2
       (tensorChartComp (I := I) (M := M) g r s T α' Idx Jdx)
       (chartTargetEuclid (I := I) (M := M) α') with hw_def
-  -- Inner sum function `S α' := ∑_IJ w α' Idx Jdx`.
   set S : M → ℝ≥0∞ := fun α' =>
     ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
       ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
         w α' Idx Jdx with hS_def
-  -- Step 1: bound the inner-`Jdx`-sum of squares by the square of the sum.
   have h_inner :
       ∀ Idx : Fin r → Fin (Module.finrank ℝ E),
         (∑ Jdx : Fin s → Fin (Module.finrank ℝ E), (w α Idx Jdx) ^ 2) ≤
           (∑ Jdx : Fin s → Fin (Module.finrank ℝ E), w α Idx Jdx) ^ 2 := by
     intro Idx
     exact Finset.sum_sq_le_sq_sum_of_nonneg (fun Jdx _ => zero_le _)
-  -- Step 2: rewrite the double sum so the outer `Idx` index ranges over the
-  -- inner-Jdx-sum.
   set u : (Fin r → Fin (Module.finrank ℝ E)) → ℝ≥0∞ :=
     fun Idx => ∑ Jdx : Fin s → Fin (Module.finrank ℝ E), w α Idx Jdx with hu_def
   have h_outer : (∑ Idx : Fin r → Fin (Module.finrank ℝ E), (u Idx) ^ 2) ≤
       (∑ Idx : Fin r → Fin (Module.finrank ℝ E), u Idx) ^ 2 :=
     Finset.sum_sq_le_sq_sum_of_nonneg (fun Idx _ => zero_le _)
-  -- Combine: double sum of squares ≤ (double sum)².
   have h_double :
       (∑ Idx : Fin r → Fin (Module.finrank ℝ E),
           ∑ Jdx : Fin s → Fin (Module.finrank ℝ E), (w α Idx Jdx) ^ 2) ≤
@@ -131,11 +120,9 @@ private lemma sum_wkpNorm_sq_α_le_wtwokTwoNorm_sq
     refine Finset.sum_le_sum ?_
     intro Idx _
     exact h_inner Idx
-  -- `S α = ∑_IJ w α Idx Jdx`.
   have hSα_eq : S α =
       ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
         ∑ Jdx : Fin s → Fin (Module.finrank ℝ E), w α Idx Jdx := rfl
-  -- Step 3: bound `S α ≤ ∑'_β S β = wtwokTwoNorm`.
   have h_tsum_le : S α ≤ ∑' β : M, S β := ENNReal.le_tsum α
   have h_tsum_eq : (∑' β : M, S β) = wtwokTwoNorm (I := I) (M := M) g 0 T := by
     unfold wtwokTwoNorm
@@ -150,7 +137,6 @@ private lemma sum_wkpNorm_sq_α_le_wtwokTwoNorm_sq
               (chartTargetEuclid (I := I) (M := M) β)
     refine Finset.sum_congr rfl (fun Idx _ => ?_)
     refine Finset.sum_congr rfl (fun Jdx _ => ?_)
-    -- `w β Idx Jdx = wkpNorm 0 2 …` definitionally; `(2 * 0) = 0` numerically.
     change wkpNorm (d := Module.finrank ℝ E) 0 2
         (tensorChartComp (I := I) (M := M) g r s T β Idx Jdx)
         (chartTargetEuclid (I := I) (M := M) β) =
@@ -161,12 +147,10 @@ private lemma sum_wkpNorm_sq_α_le_wtwokTwoNorm_sq
   have h_Sα_le_wt : S α ≤ wtwokTwoNorm (I := I) (M := M) g 0 T := by
     rw [← h_tsum_eq]
     exact h_tsum_le
-  -- Square both sides (both nonneg in ENNReal).
   have h_Sα_sq_le_wt_sq :
       (S α) ^ 2 ≤ (wtwokTwoNorm (I := I) (M := M) g 0 T) ^ 2 := by
     have := h_Sα_le_wt
     exact pow_le_pow_left' this 2
-  -- Combine `h_double` with `h_Sα_sq_le_wt_sq`.
   calc (∑ Idx : Fin r → Fin (Module.finrank ℝ E),
           ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
             (wkpNorm (d := Module.finrank ℝ E) 0 2
@@ -181,8 +165,6 @@ private lemma sum_wkpNorm_sq_α_le_wtwokTwoNorm_sq
             ∑ Jdx : Fin s → Fin (Module.finrank ℝ E), w α Idx Jdx) ^ 2 := h_double
     _ = (S α) ^ 2 := by rw [hSα_eq]
     _ ≤ (wtwokTwoNorm (I := I) (M := M) g 0 T) ^ 2 := h_Sα_sq_le_wt_sq
-
-/-! ## The headline -/
 
 /-- **Chart-`α` POU(α)²-weighted L² bound for the chart-pulled representation
 by the order-`0` tensor Sobolev norm.**
@@ -224,17 +206,11 @@ theorem chart_α_pou_sq_repr_L2_le_wtwokTwoNorm_sq
           ENNReal.ofReal K *
             (wtwokTwoNorm (I := I) (M := M) g 0 T) ^ 2 := by
   classical
-  -- Step 1: invoke the order-0 chart-target POU-weighted L² bound to obtain
-  -- the per-chart double-sum upper bound.
   obtain ⟨K_up, hK_up_nn, hK_up_le⟩ :=
     chartTargetPouWeightedL2NormSq_repr_le_sum_chartComp_L2NormSq
       (E := E) (I := I) (M := M) g r s α
   refine ⟨K_up, hK_up_nn, ?_⟩
   intro T
-  -- Step 2: identify the LHS of the headline with the LHS of the upstream
-  -- lemma. The upstream has ENNReal.ofReal (POU²) · ENNReal.ofReal (‖repr‖²),
-  -- which equals ENNReal.ofReal (POU² · ‖repr‖²) by ENNReal.ofReal_mul since
-  -- POU² ≥ 0.
   have h_LHS_eq :
       ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
           ENNReal.ofReal
@@ -258,10 +234,8 @@ theorem chart_α_pou_sq_repr_L2_le_wtwokTwoNorm_sq
     refine Filter.Eventually.of_forall ?_
     intro y
     exact ENNReal.ofReal_mul (sq_nonneg _)
-  -- Step 3: combine.
   rw [h_LHS_eq]
   refine le_trans (hK_up_le T) ?_
-  -- Step 4: bound `Σ_{IJ} (wkpNorm α IJ)² ≤ wtwokTwoNorm² g 0 T`, then absorb.
   have h_sum_le := sum_wkpNorm_sq_α_le_wtwokTwoNorm_sq
     (I := I) (M := M) g r s α T
   exact mul_le_mul_of_nonneg_left h_sum_le (zero_le _)
@@ -272,8 +246,6 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
 
 #print axioms
   DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chart_α_pou_sq_repr_L2_le_wtwokTwoNorm_sq

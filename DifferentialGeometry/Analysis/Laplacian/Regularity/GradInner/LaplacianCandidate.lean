@@ -161,22 +161,12 @@ open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open DifferentialGeometry.Analysis.Laplacian.GradInnerLpIdentity
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## The smooth Ricci pairing of two smooth scalars
-
-For smooth `φ, v : C^∞(M, ℝ)`, the function
-`b ↦ ricciTensor g b (∇φ b) (∇v b)` is `C^∞` on `M` (composition of the
-smooth Ricci tensor section with the smooth gradient vector fields). On a
-closed manifold it is bounded and hence in every `Lp` class. We package
-this as a smooth bundle `smoothRicciPairingBundle g φ v : SmoothScalar g`. -/
 
 /-- Smoothness of the pointwise Ricci pairing `b ↦ ricciTensor g b (∇φ b) (∇v b)`
 for smooth `φ, v`. -/
@@ -186,11 +176,6 @@ lemma smoothRicciPairing_contMDiff
       ricciTensor (I := I) g b
         (gradFun (I := I) g φ b) (gradFun (I := I) g v.toFun b)) := by
   classical
-  -- Strategy (parallel to `Analysis/Laplacian/Lichnerowicz.lean:733`):
-  -- `ricciTensor` is a smooth (0,2)-tensor section; both gradients are
-  -- smooth tangent sections. The pointwise pairing of a smooth (0,2)-tensor
-  -- against two smooth tangent vectors is smooth.
-  -- We invoke `ContMDiff.clm_bundle_apply₂` directly.
   have hRic :=
     ricciTensor_contMDiff (I := I) g
   have hGradφ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -199,8 +184,6 @@ lemma smoothRicciPairing_contMDiff
   have hGradv : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (T% (fun b : M => gradFun (I := I) g v.toFun b)) :=
     gradFun_contMDiff_total_section (I := I) g v.smooth
-  -- Bundle-CLM-apply₂: applying a smooth (0,2)-tensor section to two
-  -- smooth tangent vector fields produces a smooth scalar (TotalSpace ℝ).
   have happ :
       ContMDiff I (I.prod 𝓘(ℝ, ℝ)) ∞
         (fun m : M => (⟨m,
@@ -210,7 +193,6 @@ lemma smoothRicciPairing_contMDiff
               TotalSpace ℝ (Bundle.Trivial M ℝ))) :=
     ContMDiff.clm_bundle_apply₂ (F₁ := E) (F₂ := E) (F₃ := ℝ)
       (b := id) hRic hGradφ hGradv
-  -- Extract the scalar smoothness from the `TotalSpace.mk'` form.
   intro m
   have hpm := happ m
   rw [Bundle.contMDiffAt_totalSpace] at hpm
@@ -232,12 +214,6 @@ noncomputable def smoothRicciPairingBundle
       ricciTensor (I := I) g b
         (gradFun (I := I) g φ b) (gradFun (I := I) g v.toFun b) := rfl
 
-/-! ## The Ricci pairing as an `Lp` class for smooth `v`
-
-For smooth `v`, the Ricci pairing `smoothRicciPairingBundle g φ v` is a
-bundled smooth scalar, hence trivially in `MemLp 2 μ_g` (continuous on
-compact `M`). We package this as the `Lp` class `smoothRicciPairingLp`. -/
-
 /-- The `Lp` class of the smooth Ricci pairing
 `b ↦ ricciTensor g b (∇φ b) (∇v b)`. -/
 noncomputable def smoothRicciPairingLp
@@ -250,63 +226,6 @@ noncomputable def smoothRicciPairingLp
     smoothRicciPairingLp (I := I) (M := M) g φ v =
       smoothToLp (I := I) (M := M) g
         (smoothRicciPairingBundle g φ v) := rfl
-
-/-! ## The Ricci pairing CLM: structural placeholder
-
-A full `ricciPairingCLM g φ : H1Compl g →L[ℝ] Lp ℝ 2 μ_g` extending the
-smooth construction along `smoothToH1Compl` would parallel the structure
-of `gradInnerCLM`. The non-trivial bound is
-
-```
-‖smoothRicciPairingLp g φ v‖_{L²} ≤ C(φ, g) · ‖v‖_{H¹},
-```
-
-where `C(φ, g)` depends on the supremum of `‖Ric‖_g · ‖∇φ‖_g` on compact
-`M`. Since the supremum bound is via continuity-on-compact and the
-overall Lipschitz structure follows the `gradInnerCLM` pattern, this CLM
-is constructible with ~300-500 lines of analogous infrastructure.
-
-Within the present module's scope, we instead expose the chart-pieces
-explicitly and defer the CLM packaging to later work. The candidate
-`gradInnerLaplacianCandidate` uses the bundled `smoothRicciPairingLp` for
-smooth inputs and treats the general H¹Compl extension as an external
-package.
--/
-
-/-! ## The full Bochner candidate `Lp` class
-
-For `u_h ∈ laplacianDomainPow g 2`, we define
-
-```
-gradInnerLaplacianCandidate g φ u_h hu_h h_hess_part h_ricci_part : Lp ℝ 2 μ_g
-  := gradInnerCLM g φ u_h
-     - gradInnerCLM g (Δφ) u_h
-     - gradInnerCLM g φ (preimageLift g hu_h)
-     - 2 • h_ricci_part
-     - 2 • h_hess_part
-```
-
-where:
-
-* `gradInnerCLM g φ u_h` is the existing gradient inner-product CLM
-  applied to `(φ, u_h)`.
-* `Δφ := smoothLaplacianBundle g φ` is the classical Laplacian of `φ`,
-  packaged as a smooth scalar.
-* `preimageLift g hu_h ∈ H1Compl g` is the H¹Compl-lift of the
-  `(1-Δ)`-preimage of `u_h`, available for `u_h ∈ laplacianDomainPow g 2`.
-* `h_ricci_part : Lp ℝ 2 μ_g` is supplied externally as the Lp class of
-  `Ric(∇φ, ∇u_h)`; on smooth inputs this would be `smoothRicciPairingLp`.
-* `h_hess_part : Lp ℝ 2 μ_g` is supplied externally as the Lp class of
-  `g(∇²φ, ∇²u_h)`. For smooth `u_h`, this equals the Lp class of the
-  pointwise smooth Frobenius pairing of `∇²φ` and `∇²u_h`. For non-smooth
-  `u_h ∈ laplacianDomainPow g 2`, the chart-side Hessian is in `Lp 2`
-  chart-wise (via `HessianLpClass.laplacianDomainHessianChart_memLp_two`).
-  Globalising this into an Lp 2 element of `Lp ℝ 2 μ_g` is the subject
-  of follow-up work.
-
-This definition is fully concrete: the candidate is in `Lp 2` by
-construction (every summand is in `Lp 2`, and `Lp 2` is closed under
-linear combinations). -/
 
 /-- **The Bochner candidate `Lp` class for the resolvent cross-term**.
 
@@ -353,13 +272,6 @@ noncomputable def gradInnerLaplacianCandidate
         - (2 : ℝ) • h_ricci_part
         - (2 : ℝ) • h_hess_part := rfl
 
-/-! ## Linearity of the candidate in `(h_ricci_part, h_hess_part)`
-
-The candidate depends linearly on the supplied Ricci and Hessian
-auxiliary Lp classes. This is structurally useful for the downstream
-regularity work, where the auxiliary classes will be constructed via
-dense extension or direct chart-side aggregation. -/
-
 /-- Linearity in `h_ricci_part`: the candidate is affine in the Ricci
 piece. (We state additivity; smul follows similarly.) -/
 theorem gradInnerLaplacianCandidate_ricci_add
@@ -393,14 +305,6 @@ theorem gradInnerLaplacianCandidate_hess_add
   rw [smul_add]
   abel
 
-/-! ## The candidate as an explicit Lp 2 class
-
-Since `Lp ℝ 2 μ_g` is a Banach space (closed under linear combinations),
-the candidate is in `Lp 2` definitionally: every summand is in `Lp 2`,
-and we use Banach-space addition/scalar multiplication. This trivial
-fact is captured by the existence of the candidate as a term of type
-`Lp ℝ 2 μ_g`. We expose it via the explicit norm bound below. -/
-
 /-- The candidate has finite `Lp 2` norm (trivially, as an element of
 `Lp ℝ 2 μ_g`). -/
 theorem gradInnerLaplacianCandidate_norm_lt_top
@@ -433,7 +337,6 @@ theorem gradInnerLaplacianCandidate_norm_le
       2 * ‖h_ricci_part‖ +
       2 * ‖h_hess_part‖ := by
   unfold gradInnerLaplacianCandidate
-  -- Apply triangle inequality five times: `‖a - b‖ ≤ ‖a‖ + ‖b‖`.
   have hstep1 : ‖gradInnerCLM (I := I) (M := M) g φ u_h
         - gradInnerCLM (I := I) (M := M) g
             (smoothLaplacianBundle (I := I) (M := M) g φ) u_h
@@ -480,7 +383,6 @@ theorem gradInnerLaplacianCandidate_norm_le
       ‖gradInnerCLM (I := I) (M := M) g
         (smoothLaplacianBundle (I := I) (M := M) g φ) u_h‖ := by
     exact norm_sub_le _ _
-  -- ‖(2 : ℝ) • x‖ = |2| · ‖x‖ = 2 · ‖x‖.
   have h_smul_ricci : ‖(2 : ℝ) • h_ricci_part‖ = 2 * ‖h_ricci_part‖ := by
     rw [norm_smul]
     simp
@@ -496,12 +398,6 @@ theorem gradInnerLaplacianCandidate_norm_le
     norm_nonneg ((2 : ℝ) • h_ricci_part),
     norm_nonneg ((2 : ℝ) • h_hess_part)]
 
-/-! ## Smooth-case identification of the Ricci piece
-
-For smooth `v ∈ SmoothScalar g`, viewed as `u_h := smoothToH1Compl g v`,
-the natural choice of `h_ricci_part` is the smooth Lp class
-`smoothRicciPairingLp g φ v`. We expose this as a convenience builder. -/
-
 /-- Smooth-case Ricci pairing: for smooth `v`, the Lp class
 `smoothRicciPairingLp g φ v` represents the Ricci pairing in the
 candidate. -/
@@ -514,9 +410,6 @@ lemma smoothRicciPairingLp_coeFn
         ricciTensor (I := I) g b
           (gradFun (I := I) g φ b) (gradFun (I := I) g v.toFun b)) := by
   unfold smoothRicciPairingLp
-  -- smoothToLp g (smoothRicciPairingBundle g φ v) is the L²-class of
-  -- the smooth scalar's pointwise function. The coeFn is ae-equal to
-  -- the underlying function (= the pointwise Ricci pairing).
   exact MemLp.coeFn_toLp
     (smoothRicciPairingBundle (I := I) (M := M) g φ v).memLp_two
 

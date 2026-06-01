@@ -1,8 +1,3 @@
-/-
-The H-scale (carrier-to-loss-of-one-derivative) local Lipschitz estimate for the
-DeTurck geometric nonlinearity on Sobolev tensor scales. Skeleton stub for the
-short-time-existence blueprint (GAP 1, existence layer).
--/
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists
@@ -42,10 +37,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
--- `hNsec_realize`/`hrepr_small` are carried construction-data hypotheses tying the
--- continuous nonlinearity to the linear realize; they constrain the internal carrier and
--- feed sibling nodes, but the per-mode weighted Lipschitz estimate proved here needs only
--- `hN_coeff` and `hNsec_lip`. Silence the resulting unused-binder linter on those two.
 set_option linter.unusedVariables false in
 /-- **H-scale local Lipschitz estimate for the continuous DeTurck nonlinearity.**
 
@@ -127,17 +118,11 @@ theorem deturckN_hscale_lipschitz
           (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
             (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) u₀) R) := by
   classical
-  -- Abbreviations for the compact-resolvent witness and the coefficient extractor.
   set hcompact :=
     tensorResolventL2_isCompactOperator (I := I) (M := M) g_bg 0 2 with hcompact_def
-  -- Unpack the weighted per-mode Lipschitz constant.
   obtain ⟨K, hK⟩ := hNsec_lip
-  -- The bound holds on the whole space, so any positive radius works; pick `R = 1`.
   refine ⟨K, 1, by norm_num, ?_⟩
-  -- Reduce `LipschitzOnWith` to the metric Lipschitz inequality.
   refine LipschitzOnWith.of_dist_le_mul (fun u _ u' _ => ?_)
-  -- The `tensorL2Coeff` extractor is additive in its `L²` argument;
-  -- hence it respects subtraction.
   have hsub :
       ∀ (S T : DifferentialGeometry.Integral.L2.TensorL2 0 2 g_bg)
         (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
@@ -149,8 +134,6 @@ theorem deturckN_hscale_lipschitz
     unfold tensorL2Coeff
     rw [map_sub]
     rfl
-  -- Pointwise: the eigenbasis coordinate of `N_cont u - N_cont u'` is the
-  -- difference-coefficient appearing in the weighted Lipschitz hypothesis.
   have hcoeff_diff :
       ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
         (I := I) (M := M) g_bg 0 2,
@@ -164,8 +147,6 @@ theorem deturckN_hscale_lipschitz
           = (N_cont u).coeff i - (N_cont u').coeff i := by
       rw [sub_eq_add_neg, tensorHs.add_coeff, tensorHs.neg_coeff, sub_eq_add_neg]
     rw [hcoeff_sub, hN_coeff u i, hN_coeff u' i, ← hsub]
-  -- The squared `Hᵃ`-norm of the difference is the weighted coordinate sum,
-  -- which by `hK` is bounded by `(K · dist u u')²`.
   have hnorm_sq :
       ‖N_cont u - N_cont u'‖ ^ 2 ≤ ((K : ℝ) * dist u u') ^ 2 := by
     rw [tensorHs.norm_sq_eq_tsum]
@@ -183,12 +164,10 @@ theorem deturckN_hscale_lipschitz
       funext i; rw [hcoeff_diff i]
     rw [hcongr]
     exact (hK u u').2
-  -- Conclude the metric Lipschitz inequality via `dist = ‖·-·‖` and `√`-monotonicity.
   rw [dist_eq_norm]
   have hKd_nonneg : 0 ≤ (K : ℝ) * dist u u' :=
     mul_nonneg K.coe_nonneg dist_nonneg
   have hnorm_nonneg : 0 ≤ ‖N_cont u - N_cont u'‖ := norm_nonneg _
-  -- `‖·‖ = √(‖·‖²) ≤ √((K·dist)²) = K·dist`.
   calc ‖N_cont u - N_cont u'‖
       = Real.sqrt (‖N_cont u - N_cont u'‖ ^ 2) :=
         (Real.sqrt_sq hnorm_nonneg).symm

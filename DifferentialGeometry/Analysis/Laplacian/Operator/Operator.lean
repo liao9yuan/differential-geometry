@@ -65,8 +65,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -74,43 +72,23 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-! ## Injectivity of the resolvent
-
-The variational identity for the resolvent reads
-`⟨resolvent g f, v⟩_{H¹} = ⟨H1ComplToLp v, f⟩_{L²}` for every `v ∈ H1Compl g`.
-
-If `resolvent g f = 0`, then `⟨0, v⟩ = 0 = ⟨H1ComplToLp v, f⟩` for every `v`.
-So `f` is `L²`-orthogonal to the entire image of `H1ComplToLp`. Since the
-image of `H1ComplToLp` is dense in `Lp ℝ 2 μ_g`
-(`denseRange_H1ComplToLp`), `f` is `L²`-orthogonal to a dense subset of `Lp`,
-hence `f = 0`. -/
-
 /-- The resolvent of `(1 - Δ_g)` is an injective continuous linear map. -/
 theorem resolvent_injective (g : SmoothRiemannianMetric I M) :
     Function.Injective (resolvent (I := I) (M := M) g) := by
-  -- Reduce to: `resolvent g f = 0 → f = 0`.
   rw [injective_iff_map_eq_zero]
   intro f hf
-  -- From `resolvent g f = 0`: `⟨H1ComplToLp v, f⟩_{L²} = 0` for every v ∈ H1Compl g.
   have h_orth : ∀ v : H1Compl g,
       ⟪H1ComplToLp (I := I) (M := M) g v, f⟫_ℝ = 0 := by
     intro v
     have h := resolvent_inner_eq_lpFunctional (I := I) (M := M) g f v
     rw [hf] at h
-    -- h : ⟨0, v⟩ = ⟨H1ComplToLp v, f⟩.
     rw [inner_zero_left] at h
     linarith
-  -- The CLM `φ : Lp ℝ 2 μ →L[ℝ] ℝ` defined by `φ w := ⟨w, f⟩_ℝ` vanishes on
-  -- a dense subset (image of `H1ComplToLp`), so it vanishes everywhere.
-  -- We use `DenseRange.equalizer` applied to `φ` and the zero CLM.
   have h_dense : DenseRange (H1ComplToLp (I := I) (M := M) g) :=
     denseRange_H1ComplToLp (I := I) (M := M) g
-  -- The CLM `w ↦ ⟨w, f⟩_ℝ`.
   have h_inner_zero : ∀ w : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g),
       (innerSL ℝ f) w = 0 := by
     intro w
-    -- The two continuous functions `(innerSL ℝ f)` and `0` agree on the range
-    -- of `H1ComplToLp`. By density, they agree everywhere.
     have h_eq_on_range :
         (fun y : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) =>
             (innerSL ℝ f) y) ∘ (H1ComplToLp (I := I) (M := M) g) =
@@ -126,20 +104,14 @@ theorem resolvent_injective (g : SmoothRiemannianMetric I M) :
       h_dense.equalizer (innerSL ℝ f).continuous continuous_const h_eq_on_range
     have := congrFun h_func_eq w
     exact this
-  -- In particular, `⟨f, f⟩ = 0`.
   have h_self : ⟪f, f⟫_ℝ = 0 := by
     have := h_inner_zero f
-    -- `(innerSL ℝ f) f = ⟨f, f⟩_ℝ`.
     rwa [innerSL_apply_apply] at this
-  -- `⟨f, f⟩_ℝ = ‖f‖²`, so `‖f‖² = 0`, so `f = 0`.
   rw [real_inner_self_eq_norm_sq] at h_self
   have h_norm_zero : ‖f‖ = 0 := by
     have h_pow_zero : ‖f‖ ^ 2 = 0 := h_self
-    -- `x ^ 2 = 0 → x = 0` for real x.
     exact pow_eq_zero_iff (two_ne_zero) |>.mp h_pow_zero
   exact norm_eq_zero.mp h_norm_zero
-
-/-! ## The variational Laplacian's domain -/
 
 /-- The domain of the variational Laplacian: the image of the resolvent
 `(1 - Δ_g)⁻¹` from `Lp ℝ 2 μ_g` to `H1Compl g`. -/
@@ -175,18 +147,12 @@ def laplacianDomain.preimage (g : SmoothRiemannianMetric I M)
       (u : H1Compl g) :=
   (Classical.choose_spec ((laplacianDomain_mem_iff (I := I) (M := M) g).mp u.2)).symm
 
-/-! ## Linearity of the preimage
-
-The preimage map is linear because the resolvent is injective and linear. -/
-
 /-- `laplacianDomain.preimage` of zero is zero. -/
 lemma laplacianDomain_preimage_zero (g : SmoothRiemannianMetric I M) :
     laplacianDomain.preimage (I := I) (M := M) g
         (0 : laplacianDomain (I := I) (M := M) g) = 0 := by
   apply resolvent_injective (I := I) (M := M) g
   rw [resolvent_laplacianDomain_preimage_eq]
-  -- LHS: `resolvent g (preimage 0) = ↑(0 : laplacianDomain g) = 0`.
-  -- RHS: `resolvent g 0 = 0`.
   rw [(resolvent (I := I) (M := M) g).map_zero]
   rfl
 
@@ -221,8 +187,6 @@ def laplacianDomain.preimageLin (g : SmoothRiemannianMetric I M) :
   map_add' := laplacianDomain_preimage_add (I := I) (M := M) g
   map_smul' c u := laplacianDomain_preimage_smul (I := I) (M := M) g c u
 
-/-! ## The variational Laplacian -/
-
 /-- The variational Laplacian as a linear map from its domain to `Lp ℝ 2 μ_g`.
 
 For `u ∈ laplacianDomain g`, with `u = resolvent g f`, the Laplacian acts as
@@ -252,8 +216,6 @@ theorem laplacianOp_resolvent (g : SmoothRiemannianMetric I M)
           (laplacianDomain_mem_iff (I := I) (M := M) g).mpr ⟨f, rfl⟩⟩ =
       H1ComplToLp (I := I) (M := M) g (resolvent (I := I) (M := M) g f) - f := by
   rw [laplacianOp_apply]
-  -- The remaining sub-difference is `... - preimage ⟨resolvent f, _⟩` and we want it
-  -- equal to `... - f`. We just need `preimage ⟨resolvent f, _⟩ = f`.
   have h_preimage_eq :
       laplacianDomain.preimage (I := I) (M := M) g
           ⟨resolvent (I := I) (M := M) g f,
@@ -262,8 +224,6 @@ theorem laplacianOp_resolvent (g : SmoothRiemannianMetric I M)
     rw [resolvent_laplacianDomain_preimage_eq]
   rw [h_preimage_eq]
 
-/-! ## The smooth bridge -/
-
 /-- For a smooth scalar `u`, the H¹ lift `smoothToH1Compl u` lies in the
 Laplacian domain. -/
 lemma smoothToH1Compl_mem_laplacianDomain
@@ -271,7 +231,6 @@ lemma smoothToH1Compl_mem_laplacianDomain
     smoothToH1Compl (I := I) (M := M) g u ∈
       laplacianDomain (I := I) (M := M) g := by
   rw [laplacianDomain_mem_iff]
-  -- By the smooth bridge: smoothToH1Compl u = resolvent (smoothToLp ((u - Δu) classical)).
   refine ⟨smoothToLp (I := I) (M := M) g u.oneSubLapClassical, ?_⟩
   exact smoothToH1Compl_eq_resolvent_oneSubLap (I := I) (M := M) u
 
@@ -284,9 +243,6 @@ theorem laplacianOp_smoothToH1Compl
           smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) u⟩ =
       smoothToLp (I := I) (M := M) g u -
         smoothToLp (I := I) (M := M) g u.oneSubLapClassical := by
-  -- By the smooth bridge: `smoothToH1Compl u = resolvent g (smoothToLp (u - Δu))`.
-  -- Then `Δ_g (smoothToH1Compl u) = H1ComplToLp (smoothToH1Compl u) - smoothToLp (u - Δu)`
-  --                             = smoothToLp u - smoothToLp (u - Δu) (since H1ComplToLp ∘ smoothToH1Compl = smoothToLp).
   rw [show (⟨smoothToH1Compl (I := I) (M := M) g u,
         smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) u⟩ :
         laplacianDomain (I := I) (M := M) g) =
@@ -295,21 +251,13 @@ theorem laplacianOp_smoothToH1Compl
         (laplacianDomain_mem_iff (I := I) (M := M) g).mpr
           ⟨smoothToLp (I := I) (M := M) g u.oneSubLapClassical, rfl⟩⟩ from ?_]
   · rw [laplacianOp_resolvent]
-    -- Need: `H1ComplToLp (resolvent (smoothToLp (u - Δu))) - smoothToLp (u - Δu) =
-    --       smoothToLp u - smoothToLp (u - Δu)`.
-    -- Use that `resolvent (smoothToLp (u - Δu)) = smoothToH1Compl u` (by the bridge),
-    -- so `H1ComplToLp (resolvent (...)) = H1ComplToLp (smoothToH1Compl u) = smoothToLp u`.
     have h_eq : resolvent (I := I) (M := M) g
           (smoothToLp (I := I) (M := M) g u.oneSubLapClassical) =
         smoothToH1Compl (I := I) (M := M) g u :=
       (smoothToH1Compl_eq_resolvent_oneSubLap (I := I) (M := M) u).symm
     rw [h_eq, H1ComplToLp_smoothToH1Compl]
-  · -- Subtype equality follows from underlying-element equality.
-    apply Subtype.ext
-    -- Underlying values are equal by the bridge.
+  · apply Subtype.ext
     exact smoothToH1Compl_eq_resolvent_oneSubLap (I := I) (M := M) u
-
-/-! ## Sanity tests -/
 
 example (g : SmoothRiemannianMetric I M) :
     Submodule ℝ (H1Compl g) := laplacianDomain (I := I) (M := M) g
@@ -319,24 +267,6 @@ example (g : SmoothRiemannianMetric I M) :
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
   laplacianOp (I := I) (M := M) g
 
-/-! ## Symmetry of the variational Laplacian
-
-For a closed Riemannian manifold `(M, g)`, the variational Laplacian
-`laplacianOp : laplacianDomain g →ₗ[ℝ] Lp ℝ 2 μ_g` is symmetric in the
-`Lp` inner product:
-
-  `⟨H1ComplToLp u, Δ_g v⟩_{L²} = ⟨Δ_g u, H1ComplToLp v⟩_{L²}`
-  for all `u, v ∈ laplacianDomain g`.
-
-The proof is direct from symmetry of the H¹ inner product on `H1Compl g`.
-Specifically, for `u = resolvent g f` and `v = resolvent g h`, the variational
-identity gives
-  `⟨resolvent g f, w⟩_{H¹} = ⟨H1ComplToLp w, f⟩_{L²}` for every `w`,
-in particular for `w = resolvent g h`. Then symmetry of the H¹ inner product
-swaps the two sides. -/
-
-/-! ### Auxiliary identities -/
-
 /-- For `u, v ∈ laplacianDomain g`, the H¹ inner product expands via the
 variational identity into an `Lp` inner product against the preimage. -/
 private lemma h1Inner_eq_lpInner_with_preimage
@@ -345,7 +275,6 @@ private lemma h1Inner_eq_lpInner_with_preimage
     ⟪(u : H1Compl g), (v : H1Compl g)⟫_ℝ =
       ⟪H1ComplToLp (I := I) (M := M) g (v : H1Compl g),
         laplacianDomain.preimage (I := I) (M := M) g u⟫_ℝ := by
-  -- `u = resolvent (preimage u)`. Apply the variational identity.
   have h_u_eq : (u : H1Compl g) = resolvent (I := I) (M := M) g
       (laplacianDomain.preimage (I := I) (M := M) g u) :=
     (resolvent_laplacianDomain_preimage_eq (I := I) (M := M) g u).symm
@@ -362,15 +291,9 @@ private lemma lpInner_preimage_swap
         laplacianDomain.preimage (I := I) (M := M) g u⟫_ℝ =
       ⟪H1ComplToLp (I := I) (M := M) g (u : H1Compl g),
         laplacianDomain.preimage (I := I) (M := M) g v⟫_ℝ := by
-  -- Both sides equal `⟨u, v⟩_{H¹}` (and `⟨v, u⟩_{H¹}` by symmetry).
-  -- LHS = ⟨v, u⟩_{H¹} via h1Inner_eq_lpInner_with_preimage applied to (u, v).
-  -- RHS = ⟨u, v⟩_{H¹} via h1Inner_eq_lpInner_with_preimage applied to (v, u).
-  -- ⟨v, u⟩ = ⟨u, v⟩ by symmetry of real inner product.
   rw [← h1Inner_eq_lpInner_with_preimage (I := I) (M := M) g u v]
   rw [← h1Inner_eq_lpInner_with_preimage (I := I) (M := M) g v u]
   exact real_inner_comm _ _
-
-/-! ### Main symmetry theorem -/
 
 /-- **Symmetry of the variational Laplacian.** For `u, v ∈ laplacianDomain g`,
 
@@ -381,21 +304,9 @@ theorem laplacianOp_symmetric (g : SmoothRiemannianMetric I M)
         laplacianOp (I := I) (M := M) g v⟫_ℝ =
       ⟪laplacianOp (I := I) (M := M) g u,
         H1ComplToLp (I := I) (M := M) g (v : H1Compl g)⟫_ℝ := by
-  -- LHS = ⟨H1ComplToLp u, H1ComplToLp v - preimage v⟩
-  --     = ⟨H1ComplToLp u, H1ComplToLp v⟩ - ⟨H1ComplToLp u, preimage v⟩.
-  -- RHS = ⟨H1ComplToLp u - preimage u, H1ComplToLp v⟩
-  --     = ⟨H1ComplToLp u, H1ComplToLp v⟩ - ⟨preimage u, H1ComplToLp v⟩.
-  -- The first parts cancel; the second parts equal each other by `lpInner_preimage_swap`
-  -- (after using symmetry of the real inner product to swap arguments).
   rw [laplacianOp_apply, laplacianOp_apply]
   rw [inner_sub_right, inner_sub_left]
-  -- LHS - RHS = -⟨H1ComplToLp u, preimage v⟩ - (-⟨preimage u, H1ComplToLp v⟩)
-  --          = -⟨H1ComplToLp u, preimage v⟩ + ⟨preimage u, H1ComplToLp v⟩
-  --          = -⟨H1ComplToLp u, preimage v⟩ + ⟨H1ComplToLp v, preimage u⟩  (real_inner_comm)
-  --          = 0  (lpInner_preimage_swap with u, v swapped)
   have h_swap := lpInner_preimage_swap (I := I) (M := M) g v u
-  -- h_swap : ⟨H1ComplToLp u, preimage v⟩ = ⟨H1ComplToLp v, preimage u⟩.
-  -- Apply symmetry to align with the proof goal.
   have h_swap_inner :
       ⟪H1ComplToLp (I := I) (M := M) g (u : H1Compl g),
           laplacianDomain.preimage (I := I) (M := M) g v⟫_ℝ =
@@ -403,12 +314,6 @@ theorem laplacianOp_symmetric (g : SmoothRiemannianMetric I M)
           H1ComplToLp (I := I) (M := M) g (v : H1Compl g)⟫_ℝ := by
     rw [h_swap, real_inner_comm]
   linarith [h_swap_inner]
-
-/-! ### Symmetry of the variational form
-
-A useful corollary: the variational form `⟨u, v⟩_{H¹}` is symmetric in
-`u, v ∈ laplacianDomain g`. (This follows trivially from symmetry of the
-H¹ inner product, but is worth recording.) -/
 
 /-- For `u, v ∈ laplacianDomain g`, the H¹ inner product is symmetric.
 This follows trivially from the symmetry of `⟨·, ·⟩_{H1Compl}`. -/
@@ -418,8 +323,6 @@ theorem h1Inner_symmetric_on_laplacianDomain
     ⟪(u : H1Compl g), (v : H1Compl g)⟫_ℝ =
       ⟪(v : H1Compl g), (u : H1Compl g)⟫_ℝ :=
   real_inner_comm _ _
-
-/-! ### Sanity tests -/
 
 example (g : SmoothRiemannianMetric I M)
     (u v : laplacianDomain (I := I) (M := M) g) :

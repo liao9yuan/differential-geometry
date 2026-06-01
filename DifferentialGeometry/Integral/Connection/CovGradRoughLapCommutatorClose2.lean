@@ -137,21 +137,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The right-hand-side reading of the gradient of the rough Laplacian
-
-The right-hand side of the target commutator is the covariant gradient
-`covGrad g 0 2 (Δ_∇ T₀)` of the rough Laplacian `Δ_∇ T₀ = rawTensorConnLapSmooth
-g 0 2 T₀`. Its unit-`(0, 0)`-evaluation is a `(0, 3)`-tensor; its slot-`0` curry,
-read along a tangent direction `w`, recovers the directional covariant derivative
-of `Δ_∇ T₀` at the unit. This is `curry_covGrad_unit_eval` instantiated at the
-smooth `(0, 2)`-tensor `S := Δ_∇ T₀`. -/
 
 /-- **Right-hand-side reading.** The slot-`0` curry of the unit-evaluation of the
 gradient `covGrad g 0 2 (Δ_∇ T₀)` along a tangent direction `w` is the directional
@@ -177,14 +166,6 @@ lemma covGrad_rawConnLap_unit_eval_curry
     (rawTensorConnLapSmooth g 0 2 T₀) x w
   exact this
 
-/-! ## The section-level K1b identity for the rank-`2` rough Laplacian
-
-The underlying section of `Δ_∇ T₀ = rawTensorConnLapSmooth g 0 2 T₀` agrees, at every
-point `x`, with the frame trace `∑ᵢ ∇²_{Bᵢ, Bᵢ} T₀` (`B_i := smoothOrthoFrame g x i`).
-This is `rawTensorConnLapSmooth_toSection_apply` followed by the rank-`2` instance of
-`rawTensorConnLap_eq_frame_trace_secondCovDeriv` (K1b). It is needed to relate the
-right-hand-side reading `(∇_w Δ_∇T₀)(x)(unit)` to the frame-trace swap. -/
-
 /-- **Section-level K1b for the rank-`2` rough Laplacian.** The underlying section of
 `Δ_∇ T₀ = rawTensorConnLapSmooth g 0 2 T₀`, evaluated at `x`, is the frame trace
 `∑ᵢ ∇²_{Bᵢ, Bᵢ} T₀ (x)` over the smooth `g_x`-orthonormal frame. -/
@@ -198,19 +179,6 @@ lemma rawConnLapSection_eq_frame_trace_secondCovDeriv_section
   rw [rawTensorConnLapSmooth_toSection_apply]
   exact rawTensorConnLap_eq_frame_trace_secondCovDeriv (I := I) g 0 2
     (fun y : M => T₀.toSection y) x
-
-/-! ## The right-hand-side frame-trace swap, read through the unit
-
-The frame-trace third-order Weitzenböck swap `frame_trace_thirdCovDeriv_swap` at rank
-`(0, 2)`, for the FIXED smooth direction `W := smoothExtensionTangent x w`, is a
-`(0, 2)`-tensor identity (both sides are continuous linear maps `Tensor0SSpace 0 →L
-Tensor0SSpace 2`). Evaluating at the unit `(0, 0)`-tensor:
-```
-(∑ᵢ ∇_{Bᵢ}∇_{Bᵢ}(∇_W T₀))(x)(unit)
-  = (∑ᵢ ∇_W ∇_{Bᵢ}∇_{Bᵢ} T₀)(x)(unit) + Tensor3rdCurv g 0 2 W T₀ x (unit),
-```
-with `B_i := smoothOrthoFrame g x i`. This isolates the explicit `Tensor3rdCurv`
-curvature defect on the right-hand side of the commutator. -/
 
 /-- **Frame-trace swap, unit-read.** For the smooth field `W := smoothExtensionTangent
 x w`, the unit-`(0, 0)`-evaluation of the rank-`(0, 2)` frame-trace third covariant
@@ -249,27 +217,10 @@ lemma frame_trace_third_eq_swap_unit
   have hswap := frame_trace_thirdCovDeriv_swap (I := I) g 0 2
     (W := smoothExtensionTangent (I := I) x w) (T := fun y : M => T₀.toSection y) (x := x)
     hW hT₀
-  -- The swap is a `(0, 2)`-tensor (CLM) identity; evaluate it at the unit `(0, 0)`-tensor.
   have happ := congrArg
     (fun (φ : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x) =>
       φ (unitZeroSec (I := I) (M := M) x)) hswap
-  -- Distribute the unit-evaluation over the frame sums and the curvature term.
   simpa only [ContinuousLinearMap.sum_apply, ContinuousLinearMap.add_apply] using happ
-
-/-! ## The left-hand-side reading of the abstract `(0, 3)` rough Laplacian
-
-The slot-`0` curry of the abstract `(0, 3)` rough Laplacian `unitGradAbstractRoughLap
-g T₀ x` of `U := unitGradField g T₀`, read along the extended gradient direction
-`W := smoothExtensionTangent x w`, distributes over the orthonormal frame sum. Each
-summand
-```
-cov₃ₐ.toFun (covApply cov₃ₐ Bᵢ U) x (Bᵢ x) − cov₃ₐ.toFun U x ((∇_{Bᵢ} Bᵢ)(x))
-```
-curried along `W x = w` unfolds by `curry_abstract_covDeriv_covApply_unitGrad_unfold_inner`
-(the depth-`2` slot-`0` naturality of `covApply cov₃ₐ Bᵢ U`) for the first term and by
-`curry_abstract_covDeriv_unitGrad_unfold'` (the depth-`1` slot-`0` naturality of `U`)
-for the second term, with the slot-`0` direction `(∇_{Bᵢ} Bᵢ)(x)` extended to a smooth
-field `Cᵢ := smoothExtensionTangent x ((∇_{Bᵢ} Bᵢ)(x))`. -/
 
 /-- **Left-hand-side reading.** The slot-`0` curry of the abstract `(0, 3)` rough
 Laplacian of `U := unitGradField g T₀` along the extended gradient direction
@@ -323,10 +274,8 @@ lemma curry_unitGradAbstractRoughLap_along
                       (smoothOrthoFrame (I := I) g x i x)) x)))
               (unitZeroSec (I := I) (M := M) x))) := by
   classical
-  -- Smoothness of the extended gradient direction `W`.
   have hW : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (smoothExtensionTangent (I := I) x w)) :=
     smoothExtensionTangent_contMDiff x w
-  -- Distribute the slot-`0` curry over the frame sum.
   rw [unitGradAbstractRoughLap_def]
   rw [show (tensor0S_curry (I := I) (M := M) 2 x
         (∑ i : Fin (Module.finrank ℝ E),
@@ -353,7 +302,6 @@ lemma curry_unitGradAbstractRoughLap_along
       map_sum (tensor0S_curry (I := I) (M := M) 2 x) _ _]
   rw [ContinuousLinearMap.sum_apply]
   refine Finset.sum_congr rfl (fun i _ => ?_)
-  -- Smoothness of the frame `B_i` and of the second-term direction extension `C_i`.
   have hB : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (smoothOrthoFrame (I := I) g x i)) :=
     smoothOrthoFrame_smooth (I := I) g x i
   have hC : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -361,11 +309,8 @@ lemma curry_unitGradAbstractRoughLap_along
         ((LeviCivita (I := I) g).toFun (smoothOrthoFrame (I := I) g x i) x
           (smoothOrthoFrame (I := I) g x i x)))) :=
     smoothExtensionTangent_contMDiff x _
-  -- The curry of a difference, applied to `W x`, is the difference of the applied curries.
   rw [map_sub, ContinuousLinearMap.sub_apply]
-  -- First term: depth-`2` unfold of `covApply cov₃ₐ Bᵢ U` along `W`.
   rw [curry_abstract_covDeriv_covApply_unitGrad_unfold (I := I) (M := M) g T₀ hB hB hW]
-  -- Second term: the slot-`0` direction `(∇_{Bᵢ} Bᵢ)(x)` is `Cᵢ x`; rewrite then unfold.
   have hCx : smoothExtensionTangent (I := I) x
       ((LeviCivita (I := I) g).toFun (smoothOrthoFrame (I := I) g x i) x
         (smoothOrthoFrame (I := I) g x i x)) x =
@@ -383,19 +328,6 @@ lemma curry_unitGradAbstractRoughLap_along
           ((LeviCivita (I := I) g).toFun (smoothOrthoFrame (I := I) g x i) x
             (smoothOrthoFrame (I := I) g x i x)) x) from by rw [hCx]]
   rw [curry_abstract_covDeriv_unitGrad_unfold' (I := I) (M := M) g T₀ hC hW]
-
-/-! ## Transporting the abstract `(0, 2)` derivative back to the RS level
-
-The inner-curried sections appearing in `curry_unitGradAbstractRoughLap_along` are
-abstract `(0, 2)`-tensor covariant derivatives of the unit-read of directional
-covariant derivatives of `T₀`. The following lemma transports such an abstract
-`(0, 2)` derivative back to the RS (`tensorCov g 0 2`) level via the global
-agreement `tensorRSCovariantDerivative_zeroS_unit_eval` (specialised to `s = 2`):
-the unit-evaluation of the RS-level directional covariant derivative of a smooth
-`(0, 2)`-rank `(r = 0, 2)`-tensor section equals the abstract `(0, 2)` covariant
-derivative of its unit-evaluation. This is the `s = 2` mirror of `covDeriv_unit_eval_eq`
-(stated there for `s = 3`); it is the channel by which the abstract `(0, 2)` slot-`0`
-unfolds re-enter the RS frame-trace third-order Weitzenböck swap. -/
 
 /-- **Unit-evaluation commutes with the rank-`(0, 2)` covariant derivative.** For a
 smooth `Cₛ^∞` `(r = 0, 2)`-tensor section `σ` and tangent vector `v`, the directional

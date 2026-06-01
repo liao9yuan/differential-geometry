@@ -82,65 +82,12 @@ open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The chart-Euclidean right-hand side of the limiting variational identity
-
-The source-free per-approximant chart bilinear identity, applied to the
-partition-of-unity-weighted approximants `Tₙ := pouSmul g r s α wₙ`, has — after
-the covariant-Leibniz Dirichlet split, the chart-pulls, the test-section
-decouplings and the single integration by parts — a chart-Euclidean right-hand
-side that is the explicit `densityOnEuclid`-and-`C^∞`-coefficient-weighted finite
-combination of the six chart-component limit objects produced by the companion
-files of this campaign.
-
-`eigenvectorChartRHS` packages that finite combination, scaled
-overall by the inverse `μ⁻¹` of the resolvent eigenvalue. Concretely the
-bracketed combination collects:
-
-* the canonical eigenvector chart component
-  `tensorL2ChartComponent g r s (eigenvector) α P₀`;
-* the cross-Leibniz limit objects `crossLeftLimitComponent`,
-  `crossRightLimitComponent`, each contracted by the chart-frame
-  tensor-metric Gram and the test-decoupling coefficient;
-* the two lower-order coefficient limits
-  `covPrincipalRotationCoeffLimit`,
-  `covLowerOrderRotationValueCoeffLimit`;
-* the two divergence limits `weightedGradCoeffDivLimit` (the
-  lower-order gradient divergence) and `crossRightGradCoeffDivLimit`
-  (the cross-right gradient divergence), each divided by the chart density
-  `densityOnEuclid g α`:
-  each divergence limit enters the limiting variational identity as a bare
-  `∫ (div) · ψ` term, and re-expressing it as `∫ densityOnEuclid · (div /
-  densityOnEuclid) · ψ` puts it in the density-weighted shape of the
-  variational-identity right-hand side. `densityOnEuclid g α` is `C^∞` and
-  strictly positive on the open chart target, so `1 / densityOnEuclid g α` is
-  `C^∞` there; the divergence limits are supported in the compact
-  partition-of-unity kernel, where `1 / densityOnEuclid g α` is `C^∞` and
-  bounded.
-
-Each limit object is `MemLp 2` with respect to the chart-pulled weighted measure
-restricted to `chartTargetEuclid α` (its companion-file `…_memLp_weighted`
-lemma), and each multiplying coefficient is `C^∞` on the open chart target and
-bounded on the compact kernel where the corresponding limit object is supported.
-The chart-Euclidean right-hand side is therefore again `MemLp 2` with respect to
-the chart-pulled weighted measure
-(`eigenvectorChartRHS_memLp_weighted`).
-
-The chart-Euclidean right-hand side is **data** (a function `EuclN → ℝ`): it is
-the `f_chart` field of the chart-bilinear divergence-form data structure
-`TensorChartBilinearH1ComplData g r s α P₀`. -/
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- **The chart-Euclidean right-hand side of the eigenvector weak-solution
@@ -152,13 +99,12 @@ noncomputable def eigenvectorChartRHS
     (α : M) (P₀ : TensorCompIdx (E := E) r s) : EuclN → ℝ :=
   fun y =>
     (i.fst.val)⁻¹ *
-      (-- The canonical eigenvector chart component.
+      (
         ((tensorL2ChartComponent (I := I) (M := M) g r s
             (tensorResolventEigenbasisVec (I := I) (M := M)
               (tensorResolventL2_isCompactOperator (I := I) (M := M)
                 g r s) i) α P₀ :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
-        -- The cross-left limit contribution (with the cross-left sign).
         - (∑ P : TensorCompIdx (E := E) r (s + 1),
             ∑ Q : TensorCompIdx (E := E) r (s + 1),
               (covChartMetricGram (I := I) (M := M) g r (s + 1) α P Q y *
@@ -166,7 +112,6 @@ noncomputable def eigenvectorChartRHS
                 ((crossLeftLimitComponent (I := I) (M := M)
                   g r s i α P :
                   Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
-        -- The cross-right value-coefficient contribution.
         + (∑ P : TensorCompIdx (E := E) r s,
             ∑ Q : TensorCompIdx (E := E) r s,
               (covChartMetricGram (I := I) (M := M) g r s α P Q y *
@@ -174,33 +119,17 @@ noncomputable def eigenvectorChartRHS
                 ((crossRightLimitComponent (I := I) (M := M)
                   g r s i α P :
                   Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
-        -- The principal rotation coefficient limit (with the source sign).
         - covPrincipalRotationCoeffLimit (I := I) (M := M)
             g r s i α P₀ y
-        -- The lower-order rotation value coefficient limit (with the source sign).
         - covLowerOrderRotationValueCoeffLimit (I := I) (M := M)
             g r s i α P₀ y
-        -- The lower-order gradient divergence limit, divided by the chart density.
         + (1 / densityOnEuclid (I := I) g α y) *
             (∑ l : Fin (Module.finrank ℝ E),
               weightedGradCoeffDivLimit (I := I) (M := M)
                 g r s i α P₀ l y)
-        -- The cross-right gradient divergence limit, divided by the chart density.
         - (1 / densityOnEuclid (I := I) g α y) *
             crossRightGradCoeffDivLimit (I := I) (M := M)
               g r s i α P₀ y)
-
-/-! ## Auxiliary facts about the chart density and the divergence limits
-
-The two divergence limits enter `eigenvectorChartRHS` divided by
-the chart density `densityOnEuclid g α`. The reciprocal `1 / densityOnEuclid g α`
-is `C^∞`
-on the open chart target (the chart density is `C^∞` and strictly positive
-there), and the `crossRightGradCoeffDivLimit` divergence limit — being an
-explicit finite sum each of whose summands carries an `indicator (chartPouKernel
-α)` factor — vanishes pointwise off the compact partition-of-unity kernel
-`chartPouKernel α`, hence is `MemLp 2` with respect to the chart-pulled weighted
-measure. -/
 
 /-- The reciprocal `1 / densityOnEuclid g α` of the chart density is `C^∞` on the
 open Euclidean chart target: the chart density is `C^∞`
@@ -264,15 +193,6 @@ private lemma crossRightGradCoeffDivLimit_memLp_weighted
         (I := I) (M := M) g r s i α P₀ hy))
     h_plain
 
-/-! ## Weighted-`L²` membership of the chart-Euclidean right-hand side
-
-`eigenvectorChartRHS` is a finite sum of products of a `C^∞`
-coefficient (smooth on the open chart target, bounded on the relevant compact
-chart kernel) with a chart-component limit object that is `MemLp 2` with respect
-to the chart-pulled weighted measure restricted to `chartTargetEuclid α`. The
-product helper `memLp_weighted_contDiffOn_mul` and finite-sum closure of `MemLp`
-deliver the weighted-`L²` membership. -/
-
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- **Weighted-`L²` membership of the chart-Euclidean right-hand side
 (chart-locality-free).** The chart-Euclidean right-hand side
@@ -296,8 +216,6 @@ theorem eigenvectorChartRHS_memLp_weighted
   set μw : Measure EuclN :=
     (chartPulledWeightedMeasure (I := I) g α).restrict
       (chartTargetEuclid (I := I) (M := M) α) with hμw_def
-  -- (1) The canonical eigenvector chart component: weighted-`MemLp` directly by
-  -- `tensorL2ChartComponent_memLp_weighted`.
   have h_uchart : MemLp
       (fun y =>
         ((tensorL2ChartComponent (I := I) (M := M) g r s
@@ -310,7 +228,6 @@ theorem eigenvectorChartRHS_memLp_weighted
       (tensorResolventEigenbasisVec (I := I) (M := M)
         (tensorResolventL2_isCompactOperator (I := I) (M := M)
           g r s) i) α P₀
-  -- (2) The cross-left limit contribution: a finite double sum.
   have h_crossLeft : ∀ (P Q : TensorCompIdx (E := E) r (s + 1)),
       MemLp
         (fun y => (covChartMetricGram (I := I) (M := M) g r (s + 1) α P Q y *
@@ -341,7 +258,6 @@ theorem eigenvectorChartRHS_memLp_weighted
       (crossLeftLimitComponent_memLp_weighted_unconditional (I := I) (M := M)
         g r s i α P)
       h_aezero
-  -- (3) The cross-right value-coefficient contribution: a finite double sum.
   have h_crossRight : ∀ (P Q : TensorCompIdx (E := E) r s),
       MemLp
         (fun y => (covChartMetricGram (I := I) (M := M) g r s α P Q y *
@@ -372,20 +288,16 @@ theorem eigenvectorChartRHS_memLp_weighted
       (crossRightLimitComponent_memLp_weighted_unconditional (I := I) (M := M)
         g r s i α P)
       h_aezero
-  -- (4) The principal rotation coefficient limit.
   have h_prc : MemLp (covPrincipalRotationCoeffLimit (I := I) (M := M)
       g r s i α P₀) 2 μw := by
     rw [hμw_def]
     exact covPrincipalRotationCoeffLimit_memLp_weighted_unconditional
       (I := I) (M := M) g r s i α P₀
-  -- (5) The lower-order rotation value coefficient limit.
   have h_lov : MemLp (covLowerOrderRotationValueCoeffLimit
       (I := I) (M := M) g r s i α P₀) 2 μw := by
     rw [hμw_def]
     exact covLowerOrderRotationValueCoeffLimit_memLp_weighted_unconditional
       (I := I) (M := M) g r s i α P₀
-  -- (6) The chart-density-weighted lower-order gradient divergence limit,
-  -- divided by the chart density.
   have h_gradDiv : MemLp
       (fun y => (1 / densityOnEuclid (I := I) g α y) *
         (∑ l : Fin (Module.finrank ℝ E),
@@ -420,7 +332,6 @@ theorem eigenvectorChartRHS_memLp_weighted
       (chartPouKernel_measurableSet (I := I) (M := M) α)
       (chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α)
       h_div_sum h_aezero
-  -- (7) The cross-right gradient divergence limit, divided by the chart density.
   have h_crossRightDiv : MemLp
       (fun y => (1 / densityOnEuclid (I := I) g α y) *
         crossRightGradCoeffDivLimit (I := I) (M := M)
@@ -443,7 +354,6 @@ theorem eigenvectorChartRHS_memLp_weighted
       (crossRightGradCoeffDivLimit_memLp_weighted (I := I) (M := M)
         g r s i α P₀)
       h_aezero
-  -- The cross-left and cross-right finite double sums.
   have h_crossLeft_sum : MemLp
       (fun y => ∑ P : TensorCompIdx (E := E) r (s + 1),
         ∑ Q : TensorCompIdx (E := E) r (s + 1),
@@ -472,8 +382,6 @@ theorem eigenvectorChartRHS_memLp_weighted
       (fun P _ => memLp_finset_sum (μ := μw)
         (Finset.univ : Finset (TensorCompIdx (E := E) r s))
         (fun Q _ => h_crossRight P Q))
-  -- Assemble: the bracket `(1) − (2) + (3) − (4) − (5) + (6) − (7)` is weighted
-  -- `MemLp`; the global `μ⁻¹` factor preserves weighted `MemLp`.
   have h_total :
       MemLp (eigenvectorChartRHS (I := I) (M := M) g r s i α P₀) 2
         μw := by

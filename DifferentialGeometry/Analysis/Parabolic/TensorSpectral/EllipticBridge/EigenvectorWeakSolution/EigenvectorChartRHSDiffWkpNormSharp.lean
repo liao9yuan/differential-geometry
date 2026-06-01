@@ -81,24 +81,12 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Eigenvalue / exponent helpers -/
-
-/-! ## File-local smooth-coefficient `wkpNorm` Leibniz bound
-
-A local copy of the factor-uniform `wkpNorm` smooth-coefficient bound — for a
-`C^∞` coefficient on the chart target and a factor that lies in `W^{K, 2}` on
-the chart target and ae-vanishes off the compact partition-of-unity kernel, the
-product `coef · factor` is in `W^{K, 2}` and has `wkpNorm K 2 ≤ ofReal C ·
-wkpNorm K 2 factor`. -/
 
 omit [CompleteSpace E] in
 /-- A factor-uniform smooth-coefficient `wkpNorm K 2` Leibniz bound for any
@@ -256,8 +244,6 @@ lemma sharpDiff_wkpNorm_coef_mul_factor_le_uniform
   rw [h_norm_eq]
   exact hKc_bd hfactor_memWkp
 
-/-! ## Helper: `wkpNorm` of an indicator of `chartPouKernel` of a function -/
-
 omit [CompleteSpace E] in
 /-- `wkpNorm K of indicator_{chartPouKernel α} Q = wkpNorm K of Q` on the open
 chart target, when `Q` ae-vanishes off the kernel. -/
@@ -279,14 +265,12 @@ lemma sharpDiff_wkpNorm_indicator_eq
     (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
   have hKα_meas : MeasurableSet Kα :=
     chartPouKernel_measurableSet (I := I) (M := M) α
-  -- On `Ω ∩ Kα`: `indicator Kα Q = Q`.
   have h_inter_meas : MeasurableSet (Ω ∩ Kα) := hΩ_meas.inter hKα_meas
   have h_eq_on_inter : Set.indicator Kα Q =ᵐ[
       (volume : Measure EuclN).restrict (Ω ∩ Kα)] Q := by
     refine (ae_restrict_iff' h_inter_meas).mpr ?_
     refine Filter.Eventually.of_forall fun y hy => ?_
     exact Set.indicator_of_mem hy.2 _
-  -- On `Ω \ Kα`: `indicator Kα Q = 0` and `Q =ᵐ 0`.
   have h_diff_meas : MeasurableSet (Ω \ Kα) := hΩ_meas.diff hKα_meas
   have h_indicator_ae_zero : Set.indicator Kα Q =ᵐ[
       (volume : Measure EuclN).restrict (Ω \ Kα)]
@@ -317,8 +301,6 @@ lemma sharpDiff_wkpNorm_indicator_eq
   exact wkpNorm_congr_ae (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     (chartTargetEuclid_isOpen (I := I) (M := M) α) h_indicator_ae_eq_Q
-
-/-! ## Chart-locality-free twins -/
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- Chart-locality-free twin of `sharpDiff_eigen_inv_one_le`. -/
@@ -539,7 +521,6 @@ private lemma sharpDiff_level_zero_wkpNorm
                 (tensorResolventL2_isCompactOperator (I := I) (M := M)
                   g r s) i‖ := by
   classical
-  -- The aggregate bound, sharp in `μ⁻¹^e`.
   obtain ⟨Cagg, eAgg, hCagg_nn, hCagg_bd⟩ :=
     rhsZeroAggregate_le_energy_perK (I := I) (M := M) g r s α P₀ K
       H.Ceig H.eEig H.hCeig_nn H.hCeig_bd
@@ -549,8 +530,6 @@ private lemma sharpDiff_level_zero_wkpNorm
       H.Ccom H.eCom H.hCcom_nn H.hCcom_bd
       H.CcR H.eCcR H.hCcR_nn H.hCcR_bd
       H.Ccut H.eCcut H.hCcut_nn H.hCcut_bd
-  -- The `μ⁻¹`-prefactor bound by the seven-summand source aggregate, derived
-  -- from the resolvent chart-cpt regularity input in the bundle.
   have h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
       (β : M) (Q : TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) (K + 1) 2
@@ -570,16 +549,11 @@ private lemma sharpDiff_level_zero_wkpNorm
     pow_nonneg hμ_inv_nn _
   have hCmu_aux := hCmu_bd i
   have hCagg_aux := hCagg_bd i
-  -- The aggregate on the RHS of `hCmu_aux` is, definitionally,
-  -- `rhsZeroAggregate g r s i α P₀ K`. Use `change` to rephrase.
   change wkpNorm (d := Module.finrank ℝ E) K 2
         (eigenvectorChartRHS (I := I) (M := M) g r s i α P₀)
         (chartTargetEuclid (I := I) (M := M) α)
       ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * Cmu) *
         rhsZeroAggregate (I := I) (M := M) g r s i α P₀ K at hCmu_aux
-  -- Compose: `wkpNorm RHS ≤ ofReal(μ⁻¹·Cmu) · rhsZeroAggregate ≤
-  --   ofReal(μ⁻¹·Cmu) · ofReal(Cagg·μ⁻¹^eAgg) · ‖vec‖ =
-  --   ofReal((Cmu·Cagg)·μ⁻¹^(eAgg+1)) · ‖vec‖`.
   refine le_trans hCmu_aux ?_
   refine le_trans (mul_le_mul' (le_refl _) hCagg_aux) ?_
   rw [show ENNReal.ofReal ((i.fst.val)⁻¹ * Cmu) =
@@ -596,8 +570,6 @@ private lemma sharpDiff_level_zero_wkpNorm
       ENNReal.ofReal_mul (mul_nonneg (mul_nonneg hCmu_nn hCagg_nn) hμ_inv_pow_nn),
       ENNReal.ofReal_mul (mul_nonneg hCmu_nn hCagg_nn),
       ENNReal.ofReal_mul hCmu_nn]]
-  -- Both sides are products with `‖vec‖`; reassociate the constants on the LHS
-  -- and the eigenvalue factor on the RHS.
   ring_nf
   exact le_refl _
 
@@ -625,8 +597,6 @@ private lemma sharpDiff_recursion
   induction m with
   | zero =>
       intro K _l
-      -- Level `0`: `eigenvectorChartRHSDiff … 0 _ =
-      -- eigenvectorChartRHS`.
       obtain ⟨C, e, hC_nn, hC_bd⟩ :=
         sharpDiff_level_zero_wkpNorm (I := I) (M := M)
           g r s α P₀ K H
@@ -640,13 +610,8 @@ private lemma sharpDiff_recursion
       exact hC_bd i
   | succ m ih =>
       intro K l
-      -- The IH at chain `K` and chain `K + 1`, at level `m`, direction
-      -- `Fin.init l`. The chain `K + 1` is needed for Layer E.
       obtain ⟨C_K, e_K, hC_K_nn, hC_K_bd⟩ := ih K (Fin.init l)
       obtain ⟨C_K1, e_K1, hC_K1_nn, hC_K1_bd⟩ := ih (K + 1) (Fin.init l)
-      -- The structural prerequisites for the numerator sharp bound:
-      -- `f_chart_m` is in `MemWkp (K+1) 2` (via `sharpDiff_diff_memWkp`),
-      -- and `f_chart_m` ae-vanishes off `chartPouKernel α`.
       have h_prev_mem_succ : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
           MemWkp (d := Module.finrank ℝ E) (K + 1) 2
             (eigenvectorChartRHSDiff (I := I) (M := M)
@@ -663,9 +628,6 @@ private lemma sharpDiff_recursion
         fun i =>
           eigenvectorChartRHSDiff_ae_zero_off_chartPouKernel
             (I := I) (M := M) g r s i α P₀ m (Fin.init l)
-      -- The five layer-atom bounds for the numerator sharp bound.
-      -- Layer A: `wkpNorm K 2 (m+1)-iter ≤ ofReal (Ceig (K+m+1) · μ⁻¹^eEig) · ‖vec‖`,
-      -- using the sharp bridge with `j = m + 1` and chart-cpt at `K + (m + 1)`.
       have hAtomA_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
           (a : Fin (Module.finrank ℝ E)),
           wkpNorm (d := Module.finrank ℝ E) K 2
@@ -697,8 +659,6 @@ private lemma sharpDiff_recursion
         have h_arith : K + m + 1 = K + (m + 1) := by ring
         rw [h_arith]
         exact h_eig
-      -- Layer B: `wkpNorm K 2 (chosenWeakPartial b (m+1)-iter) ≤
-      --            wkpNorm (K+1) 2 (m+1)-iter ≤ wkpNorm (K+m+2) of chart cpt`.
       have hAtomB_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
           (a b : Fin (Module.finrank ℝ E)),
           wkpNorm (d := Module.finrank ℝ E) K 2
@@ -739,7 +699,6 @@ private lemma sharpDiff_recursion
         have h_arith : K + m + 2 = (K + 1) + (m + 1) := by ring
         rw [h_arith]
         exact h_eig
-      -- Layer C: `wkpNorm K 2 (m-iter) ≤ wkpNorm (K + m) of chart cpt`.
       have hAtomC_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s),
           wkpNorm (d := Module.finrank ℝ E) K 2
               (eigenvectorChartIteratedPartial (I := I) (M := M)
@@ -767,7 +726,6 @@ private lemma sharpDiff_recursion
             (Fin.init l)).2
         refine le_trans h_bridge ?_
         exact H.hCeig_bd i (K + m)
-      -- Layer D: `wkpNorm K (f_chart_m)` — from IH at chain `K`.
       have hAtomD_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s),
           wkpNorm (d := Module.finrank ℝ E) K 2
               (eigenvectorChartRHSDiff (I := I) (M := M)
@@ -779,8 +737,6 @@ private lemma sharpDiff_recursion
                   (I := I) (M := M)
                   (tensorResolventL2_isCompactOperator
                     (I := I) (M := M) g r s) i‖ := hC_K_bd
-      -- Layer E: `wkpNorm K (chosenWeakPartial l_last (f_chart_m)) ≤
-      --            wkpNorm (K+1) (f_chart_m)`, from IH at chain `K+1`.
       have hAtomE_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s),
           wkpNorm (d := Module.finrank ℝ E) K 2
               (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
@@ -802,7 +758,6 @@ private lemma sharpDiff_recursion
           (eigenvectorChartRHSDiff (I := I) (M := M)
             g r s i α P₀ m (Fin.init l)) (l (Fin.last m))
         exact le_trans h_chosen (hC_K1_bd i)
-      -- Now apply the sharp numerator bound twin.
       obtain ⟨Cnum, eNum, hCnum_nn, hCnum_bd⟩ :=
         eigenvectorChartRHSDiffNumerator_wkpNorm_le_chartcpt_sharp
           (I := I) (M := M) g r s α P₀ m K l
@@ -814,23 +769,18 @@ private lemma sharpDiff_recursion
           C_K e_K hC_K_nn hAtomD_bd
           C_K1 e_K1 hC_K1_nn hAtomE_bd
           h_prev_mem_succ h_prev_ae_zero
-      -- Reduce the level-`(m+1)` `wkpNorm` to the numerator/density `wkpNorm`
-      -- via indicator stripping + reciprocal-density smooth-coefficient bound.
       obtain ⟨Cden, hCden_nn, hCden_bd⟩ :=
         sharpDiff_wkpNorm_coef_mul_factor_le_uniform (I := I) (M := M) α K
           (one_div_densityOnEuclid_contDiffOn_chartTargetEuclid
             (I := I) (M := M) g α)
       refine ⟨Cden * Cnum, eNum, mul_nonneg hCden_nn hCnum_nn, fun i => ?_⟩
-      -- The numerator function (at `i`).
       set numFun : EuclN → ℝ :=
         eigenvectorChartRHSDiffNumerator (I := I) (M := M)
           g r s i α P₀ m l
           (eigenvectorChartRHSDiff (I := I) (M := M)
             g r s i α P₀ m (Fin.init l)) with hnumFun_def
-      -- The quotient function `numFun / density`, written as `(1/density) · numFun`.
       set Q : EuclN → ℝ := fun y =>
         (1 / densityOnEuclid (I := I) g α y) * numFun y with hQ_def
-      -- Numerator is `MemWkp K 2` and ae-vanishes off `chartPouKernel`.
       have h_num_memWkp : MemWkp (d := Module.finrank ℝ E) K 2 numFun
           (chartTargetEuclid (I := I) (M := M) α) := by
         rw [hnumFun_def]
@@ -857,16 +807,12 @@ private lemma sharpDiff_recursion
         rw [hnumFun_def]
         exact eigenvectorChartRHSDiffNumerator_ae_zero_off_chartPouKernel
           (I := I) (M := M) g r s i α P₀ m l (h_prev_ae_zero i)
-      -- `Q = (1/density) · numFun` is `MemWkp K 2` and ae-vanishes off
-      -- `chartPouKernel`.
       have h_Q_props := hCden_bd numFun h_num_memWkp h_num_ae_zero
       have h_Q_bd : wkpNorm (d := Module.finrank ℝ E) K 2 Q
             (chartTargetEuclid (I := I) (M := M) α) ≤
           ENNReal.ofReal Cden *
             wkpNorm (d := Module.finrank ℝ E) K 2 numFun
               (chartTargetEuclid (I := I) (M := M) α) := h_Q_props.2
-      -- `Q` ae-vanishes off `chartPouKernel`: `Q y = (1/density) · numFun y`,
-      -- and `numFun` ae-vanishes off the kernel.
       have h_Q_ae_zero : Q =ᵐ[(volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α \
             chartPouKernel (I := I) (M := M) α)]
@@ -874,8 +820,6 @@ private lemma sharpDiff_recursion
         filter_upwards [h_num_ae_zero] with y hy
         rw [hQ_def]
         simp [hy]
-      -- The level-`(m+1)` diff RHS is the indicator of `chartPouKernel` applied
-      -- to `numFun / density = Q`.
       have h_diff_eq : eigenvectorChartRHSDiff (I := I) (M := M)
           g r s i α P₀ (m + 1) l =
           Set.indicator (chartPouKernel (I := I) (M := M) α) Q := by
@@ -888,13 +832,9 @@ private lemma sharpDiff_recursion
             one_div, mul_comm, ← div_eq_mul_inv]
         · rw [Set.indicator_of_notMem h_mem, Set.indicator_of_notMem h_mem]
       rw [h_diff_eq]
-      -- Strip the indicator via ae-equality on `Ω`.
       have h_strip := sharpDiff_wkpNorm_indicator_eq (I := I) (M := M) α K
         (Q := Q) h_Q_ae_zero
       rw [h_strip]
-      -- Now bound `wkpNorm K Q ≤ ofReal Cden · wkpNorm K numFun ≤
-      --     ofReal Cden · ofReal (Cnum · μ⁻¹^eNum) · ‖vec‖ =
-      --     ofReal ((Cden · Cnum) · μ⁻¹^eNum) · ‖vec‖`.
       have hCnum_bd_i : wkpNorm (d := Module.finrank ℝ E) K 2 numFun
             (chartTargetEuclid (I := I) (M := M) α) ≤
           ENNReal.ofReal (Cnum * (i.fst.val)⁻¹ ^ eNum) *

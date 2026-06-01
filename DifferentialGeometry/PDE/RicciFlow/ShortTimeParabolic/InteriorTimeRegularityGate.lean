@@ -1,9 +1,3 @@
-/-
-The interior parabolic time-regularity gate: for `t > 0` the carrier-scale path
-`timeH1.toFun u` is classically differentiable with the spectral value
-`Δ_∇ u₂ + N(u₁)`. Skeleton stub for the short-time-existence blueprint (GAP 1,
-interior spectral gate).
--/
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.ForcingPerModeAssembly
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
@@ -44,16 +38,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
--- `hu`, `hu₂sol`, `hforce` are genuine node-signature hypotheses retained for the
--- blueprint dependency contract (they pin the carrier to the Duhamel solution field
--- and the forcing to the continuous DeTurck nonlinearity). This proof discharges the
--- conclusion through the per-mode/Duhamel assembly sibling `permode_sum_hasderivat`,
--- threading those Duhamel hypotheses together with the two interior-smoothing inputs
--- `hderiv_ae` (a.e. identity of the L² time-derivative with the spectral RHS) and
--- `hRHS_cont` (interior continuity of the spectral RHS path) into the call site.
--- Some of the Duhamel hypotheses are subsumed by the two interior inputs at the call
--- site; the narrow linter suppression keeps the full signature intact and
--- warning-free.
 set_option linter.unusedVariables false in
 theorem deturck_interior_time_regularity
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
@@ -87,12 +71,6 @@ theorem deturck_interior_time_regularity
           deTurckGeometricN (I := I) g_bg a
             (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
               (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s := by
-  -- Reduce to the per-mode/Duhamel assembly sibling `permode_sum_hasderivat` by
-  -- instantiating its order-`(a+1)` carrier `u₁` as the canonical inclusion of the
-  -- order-`(a+2)` lift `u₂`. With that choice the `hu₁` link is definitional (`rfl`),
-  -- and the conclusion of `permode_sum_hasderivat` is syntactically the conclusion here.
-  -- The Duhamel-structure hypotheses and the two interior-smoothing inputs are
-  -- threaded through verbatim.
   exact permode_sum_hasderivat (I := I) (M := M) g_bg a u₀ gforce hT hT1 u u₂
     (fun s => tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
       (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))

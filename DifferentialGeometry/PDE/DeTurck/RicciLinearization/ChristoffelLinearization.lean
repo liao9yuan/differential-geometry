@@ -56,14 +56,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## Algebraic structure on perturbations
-
-The `ChartMetricPerturbation` structure ships with only a `Zero` instance.  Linearity of
-the principal Christoffel part in the perturbation direction is cleanest to state with a
-genuine sum `h₁ + h₂` and scalar multiple `c • h`, so we equip the structure with the
-pointwise `Add` and `SMul ℝ` operations.  Symmetry and smoothness of the component
-fields are closed under both, so these are honest perturbations again. -/
-
 namespace ChartMetricPerturbation
 
 /-- Pointwise sum of two perturbations: `(h₁ + h₂) i j y = h₁ i j y + h₂ i j y`. -/
@@ -91,8 +83,6 @@ instance : SMul ℝ (ChartMetricPerturbation E) :=
     (c • h) i j y = c • h i j y := rfl
 
 end ChartMetricPerturbation
-
-/-! ## The principal part of the linearized Christoffel symbol -/
 
 /-- The **principal part of the linearized Christoffel symbol** in the chart at `α`, in
 the perturbation direction `h`, evaluated at the chart-coordinate point `y ∈ E`:
@@ -123,13 +113,6 @@ def chartLinearizedChristoffelPrincipal (g : SmoothRiemannianMetric I M) (α : M
            partialDeriv (E := E) j (h l i) y -
            partialDeriv (E := E) l (h i j) y) := rfl
 
-/-! ## Symmetry in the lower index pair
-
-The principal part is symmetric in `i, j`.  This is the linearized torsion-free
-property of the Levi-Civita connection, visible directly from the formula: the first
-two derivative terms `∂_i h_{lj} + ∂_j h_{li}` swap into each other under `i ↔ j`, and
-the third term `∂_l h_{ij}` is `i ↔ j`-symmetric because `h` is symmetric. -/
-
 /-- **Symmetry of the principal linearized Christoffel part** in the lower indices. -/
 theorem chartLinearizedChristoffelPrincipal_symm
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -141,17 +124,9 @@ theorem chartLinearizedChristoffelPrincipal_symm
   congr 1
   refine Finset.sum_congr rfl (fun l _ => ?_)
   congr 1
-  -- Show `∂_i h_{lj} + ∂_j h_{li} - ∂_l h_{ij} = ∂_j h_{li} + ∂_i h_{lj} - ∂_l h_{ji}`.
-  -- The last term uses `h i j = h j i` as a function identity.
   rw [show partialDeriv (E := E) l (h i j) y =
         partialDeriv (E := E) l (h j i) y from by rw [h.symm_fun i j]]
   ring
-
-/-! ## Linearity in the perturbation direction
-
-The principal part is `ℝ`-linear in `h`: additive over a sum of perturbations,
-homogeneous under a real-scalar multiple, and zero on the zero perturbation.  Each
-follows by pushing the `partialDeriv` algebra lemmas through the `Finset.sum`. -/
 
 /-- The principal linearized Christoffel part vanishes on the zero perturbation. -/
 @[simp] lemma chartLinearizedChristoffelPrincipal_zero
@@ -188,7 +163,6 @@ theorem chartLinearizedChristoffelPrincipal_add
   rw [← mul_add, ← Finset.sum_add_distrib]
   congr 1
   refine Finset.sum_congr rfl (fun l _ => ?_)
-  -- Expand each `partialDeriv` of a sum-of-components into a sum of `partialDeriv`s.
   have hi : partialDeriv (E := E) i ((h₁ + h₂) l j) y =
       partialDeriv (E := E) i (h₁ l j) y + partialDeriv (E := E) i (h₂ l j) y := by
     have heq : ((h₁ + h₂) l j) = fun y => h₁ l j y + h₂ l j y := rfl
@@ -214,7 +188,6 @@ theorem chartLinearizedChristoffelPrincipal_smul
   classical
   rw [chartLinearizedChristoffelPrincipal_def, chartLinearizedChristoffelPrincipal_def,
     smul_eq_mul]
-  -- First rewrite the `c • h` summand into `c · (h-summand)`, term by term.
   have hsummand : ∀ l : Fin (Module.finrank ℝ E),
       chartInvGramOnE (I := I) g α k l y *
         (partialDeriv (E := E) i ((c • h) l j) y +
@@ -242,21 +215,6 @@ theorem chartLinearizedChristoffelPrincipal_smul
   rw [Finset.sum_congr rfl (fun l _ => hsummand l), ← Finset.mul_sum]
   ring
 
-/-! ## Smoothness on the chart target
-
-The principal part is `C^∞` on the chart target `(extChartAt I α).target`.  The chart
-inverse Gram entries are `C^∞` there (`chartInvGramOnE_contDiffOn`); each component
-field `h l j` of the perturbation is `C^∞` on all of `E` by construction, hence so is
-each `partialDeriv` of it (`fderiv` of a smooth function is smooth, and applying it to
-the constant model-basis vector keeps smoothness).  The principal part is a finite sum
-of products of these, so it is `C^∞` on the chart target.
-
-Restricting to `(extChartAt I α).target` is forced only by `chartInvGramOnE`: the
-inverse Gram matrix is smooth on the chart target but not, in general, on all of `E`.
-This is the form the second-order linearized-Ricci symbol consumes — it differentiates
-the principal part once more in chart coordinates, which it may do on the chart target
-(or its interior, when a boundaryless argument needs an open set). -/
-
 /-- Each `partialDeriv` of a globally `C^∞` real function on the model space is itself
 globally `C^∞`. -/
 private lemma partialDeriv_contDiff_of_contDiff
@@ -264,8 +222,6 @@ private lemma partialDeriv_contDiff_of_contDiff
     ContDiff ℝ ∞ (partialDeriv (E := E) i u) := by
   have hfderiv : ContDiff ℝ ∞ (fderiv ℝ u) :=
     hu.fderiv_right (by rw [ENat.coe_top_add_one])
-  -- `partialDeriv i u y = fderiv ℝ u y (chartModelBasis E i)` is `clm_apply` of
-  -- `fderiv ℝ u` against the constant model-basis vector.
   unfold partialDeriv
   exact hfderiv.clm_apply contDiff_const
 
@@ -285,9 +241,6 @@ theorem chartLinearizedChristoffelPrincipal_contDiffOn
       (fun y => chartLinearizedChristoffelPrincipal (I := I) g α h i j k y)
       (extChartAt I α).target := by
   classical
-  -- The principal part is `(1/2) • (finite sum of products)`.  We exhibit smoothness
-  -- of the summand `l ↦ G^{kl} · (∂_i h_{lj} + ∂_j h_{li} - ∂_l h_{ij})` and close
-  -- under `Finset.sum` and the constant scalar `1/2`.
   have hsummand : ∀ l : Fin (Module.finrank ℝ E),
       ContDiffOn ℝ ∞
         (fun y => chartInvGramOnE (I := I) g α k l y *
@@ -296,11 +249,9 @@ theorem chartLinearizedChristoffelPrincipal_contDiffOn
            partialDeriv (E := E) l (h i j) y))
         (extChartAt I α).target := by
     intro l
-    -- The inverse Gram entry is smooth on the chart target.
     have hG : ContDiffOn ℝ ∞ (chartInvGramOnE (I := I) g α k l)
         (extChartAt I α).target :=
       chartInvGramOnE_contDiffOn (I := I) g α k l
-    -- The three `partialDeriv` terms are globally smooth, hence smooth on the target.
     have hdi : ContDiffOn ℝ ∞ (partialDeriv (E := E) i (h l j))
         (extChartAt I α).target :=
       (partialDeriv_perturbation_contDiff h i l j).contDiffOn
@@ -311,7 +262,6 @@ theorem chartLinearizedChristoffelPrincipal_contDiffOn
         (extChartAt I α).target :=
       (partialDeriv_perturbation_contDiff h l i j).contDiffOn
     exact hG.mul ((hdi.add hdj).sub hdl)
-  -- Assemble the finite sum.
   have hsum : ContDiffOn ℝ ∞
       (fun y => ∑ l : Fin (Module.finrank ℝ E),
         chartInvGramOnE (I := I) g α k l y *
@@ -320,7 +270,6 @@ theorem chartLinearizedChristoffelPrincipal_contDiffOn
            partialDeriv (E := E) l (h i j) y))
       (extChartAt I α).target :=
     ContDiffOn.sum (fun l _ => hsummand l)
-  -- Prepend the constant scalar `1/2`.
   have hresult : ContDiffOn ℝ ∞
       (fun y => (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
         chartInvGramOnE (I := I) g α k l y *
@@ -329,7 +278,6 @@ theorem chartLinearizedChristoffelPrincipal_contDiffOn
            partialDeriv (E := E) l (h i j) y))
       (extChartAt I α).target :=
     contDiffOn_const.mul hsum
-  -- Identify the assembled function with the principal part.
   refine hresult.congr (fun y _ => ?_)
   rw [chartLinearizedChristoffelPrincipal_def]
 

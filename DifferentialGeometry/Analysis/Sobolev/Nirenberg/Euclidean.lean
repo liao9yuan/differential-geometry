@@ -76,8 +76,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Preliminary lemmas: difference-quotient bounds for smooth functions -/
-
 omit [NeZero d] in
 /-- A smooth function with compact support has all its difference quotients
 uniformly bounded by a constant independent of `h`. This packages the
@@ -118,8 +116,6 @@ theorem diffQuot_bound_of_smooth_compactSupport
       (Real.norm_eq_abs _).symm
     rw [h_lhs_norm]
     exact hLip_apply
-
-/-! ## Smooth elliptic divergence-form data -/
 
 /-- A smooth uniformly elliptic divergence-form structure on an open set
 `Ω : Set E`.
@@ -177,8 +173,6 @@ theorem capLam_pos {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω) :
 theorem capLam_nonneg {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω) :
     0 ≤ B.capLam := B.capLam_pos.le
 
-/-! ## Cutoff functions -/
-
 /-- A smooth cutoff function: for any compact `K` contained in an open set
 `Ω'`, there is `η ∈ C^∞(E)` with `0 ≤ η ≤ 1`, `η = 1` on `K`, and
 `tsupport η ⊆ Ω'`. Re-derivation of the standard Mathlib cutoff for use
@@ -232,30 +226,23 @@ theorem exists_cutoff_with_fderiv_bound
   obtain ⟨η, hη_cd, hη_supp, hη_range, hη_one, hη_tsupp⟩ :=
     exists_cutoff hK hΩ' hKΩ'
   refine ⟨η, hη_cd, hη_supp, hη_range, hη_one, hη_tsupp, ?_⟩
-  -- Continuity of `fderiv ℝ η`.
   have h_fderiv_cont : Continuous (fderiv ℝ η) :=
     hη_cd.continuous_fderiv (by simp)
-  -- Norm of `fderiv ℝ η` is continuous.
   have h_norm_cont : Continuous (fun x : E => ‖fderiv ℝ η x‖) := h_fderiv_cont.norm
-  -- `fderiv ℝ η` has compact support, so its norm has compact support too.
   have h_fderiv_cs : HasCompactSupport (fderiv ℝ η) := hη_supp.fderiv ℝ
   have h_norm_cs : HasCompactSupport (fun x : E => ‖fderiv ℝ η x‖) := by
     apply h_fderiv_cs.comp_left
     simp
-  -- A continuous function with compact support is bounded above.
   obtain ⟨N₀, hN₀⟩ := h_norm_cont.bddAbove_range_of_hasCompactSupport h_norm_cs
   refine ⟨max N₀ 0, le_max_right _ _, fun x => ?_⟩
   have h_le : ‖fderiv ℝ η x‖ ≤ N₀ := hN₀ ⟨x, rfl⟩
   exact h_le.trans (le_max_left _ _)
-
-/-! ## Supremum bound for the coefficients on a compact set -/
 
 /-- The coefficient matrix is bounded on any compact set. -/
 theorem bounded_a_on_compact {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {K : Set E} (hK : IsCompact K) :
     ∃ M : ℝ, 0 ≤ M ∧ ∀ i j : Fin d, ∀ x ∈ K, |B.a x i j| ≤ M := by
   classical
-  -- Each component is bounded on K by continuity + compactness.
   have h_each : ∀ ij : Fin d × Fin d, ∃ Mij : ℝ, 0 ≤ Mij ∧
       ∀ x ∈ K, |B.a x ij.1 ij.2| ≤ Mij := by
     intro ij
@@ -263,12 +250,10 @@ theorem bounded_a_on_compact {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     refine ⟨max Mij 0, le_max_right _ _, fun x hx => ?_⟩
     have h := hMij (mem_image_of_mem _ hx)
     exact h.trans (le_max_left _ _)
-  -- Pick the maximum bound across all (i,j).
   let pairBound : Fin d × Fin d → ℝ := fun ij => Classical.choose (h_each ij)
   have pairBound_nn : ∀ ij, 0 ≤ pairBound ij := fun ij => (Classical.choose_spec (h_each ij)).1
   have pairBound_le : ∀ ij : Fin d × Fin d, ∀ x ∈ K,
       |B.a x ij.1 ij.2| ≤ pairBound ij := fun ij => (Classical.choose_spec (h_each ij)).2
-  -- The total bound is the sum (always nonneg, dominates each pair).
   let M : ℝ := ∑ ij : Fin d × Fin d, pairBound ij
   have hM_nn : 0 ≤ M := Finset.sum_nonneg (fun ij _ => pairBound_nn ij)
   refine ⟨M, hM_nn, fun i j x hx => ?_⟩
@@ -321,8 +306,6 @@ theorem bounded_fderiv_a_on_compact {Ω : Set E} (B : SmoothEllipticBilinearForm
     exact pairBound_nn ij
   exact (pairBound_le (i, j) x hx).trans hsingle
 
-/-! ## The bilinear form and weak-solution predicate -/
-
 /-- The pointwise integrand of the principal part of the bilinear form:
 `∑ i, ∑ j, a^{ij}(x) (∂_i u)(x) (∂_j v)(x)`.
 
@@ -348,8 +331,6 @@ def IsSmoothWeakSolution {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
   ContDiff ℝ (⊤ : ℕ∞) u ∧
   ∀ φ : E → ℝ, ContDiff ℝ (⊤ : ℕ∞) φ → HasCompactSupport φ → tsupport φ ⊆ Ω →
     B.bilin u φ = ∫ x in Ω, f x * φ x
-
-/-! ## Symmetry and continuity properties of the bilinear form -/
 
 /-- Symmetry of the principal-integrand pairing: `∑ a^{ij} ∂_i u ∂_j v =
 ∑ a^{ij} ∂_i v ∂_j u`, using `a^{ij} = a^{ji}`. -/
@@ -389,8 +370,6 @@ theorem continuous_bilin_integrand {Ω : Set E}
   (B.continuous_principalIntegrand hu hv).add
     ((B.continuous_c.mul hu.continuous).mul hv.continuous)
 
-/-! ## Coercivity of the principal integrand -/
-
 /-- The gradient of `u` at `x`, packaged as a Euclidean vector
 `∇u(x) ∈ EuclideanSpace ℝ (Fin d)`. -/
 def gradientVec {Ω : Set E} (_B : SmoothEllipticBilinearForm d Ω)
@@ -404,29 +383,22 @@ theorem principalIntegrand_self_eq_inner {Ω : Set E}
     B.principalIntegrand u u x =
       ⟪B.gradientVec u x, DeGiorgi.matMulE (B.a x) (B.gradientVec u x)⟫_ℝ := by
   classical
-  -- Set up vector and inner-product notation explicitly.
   set ξ : E := B.gradientVec u x with hξ
   set V : Fin d → ℝ := fun i => (fderiv ℝ u x) (EuclideanSpace.single i 1) with hV
-  -- Compute the RHS by direct expansion.
   have h_inner :
       ⟪ξ, DeGiorgi.matMulE (B.a x) ξ⟫_ℝ =
         (fun j => (B.a x).mulVec V j) ⬝ᵥ V := by
-    -- ⟪x, y⟫_ℝ = y.ofLp ⬝ᵥ star x.ofLp by definition (rfl).
-    -- Over ℝ, star = id and ξ.ofLp = V; (matMulE ξ).ofLp = mulVec V.
     have hξofLp : ξ.ofLp = V := by simp [hξ, hV, gradientVec]
     have hmatofLp : (DeGiorgi.matMulE (B.a x) ξ).ofLp = (B.a x).mulVec V := by
       rw [DeGiorgi.matMulE_ofLp, hξofLp]
     change (DeGiorgi.matMulE (B.a x) ξ).ofLp ⬝ᵥ star ξ.ofLp =
       (fun j => (B.a x).mulVec V j) ⬝ᵥ V
     rw [hmatofLp, hξofLp]
-    -- Over ℝ, star V = V.
     change (B.a x).mulVec V ⬝ᵥ (star V) = (B.a x).mulVec V ⬝ᵥ V
     rfl
   rw [h_inner]
-  -- LHS expansion.
   unfold principalIntegrand
   rw [Finset.sum_comm]
-  -- For each j, ∑ i, a^{ij} V i V j = (a.mulVec V) j * V j (using symmetry).
   refine Finset.sum_congr rfl ?_
   intro j _
   change ∑ i, B.a x i j * V i * V j = (B.a x).mulVec V j * V j
@@ -434,7 +406,6 @@ theorem principalIntegrand_self_eq_inner {Ω : Set E}
   rw [Finset.sum_mul]
   refine Finset.sum_congr rfl ?_
   intro i _
-  -- Goal: B.a x i j * V i * V j = B.a x j i * V i * V j
   rw [B.symm x i j]
 
 /-- The pointwise lower bound for `u = v` from ellipticity: at every `x ∈ Ω`,
@@ -454,11 +425,9 @@ theorem gradientVec_norm_sq_eq_sum {Ω : Set E}
     ‖B.gradientVec u x‖ ^ 2 =
       ∑ i : Fin d, ((fderiv ℝ u x) (EuclideanSpace.single i 1)) ^ 2 := by
   unfold gradientVec
-  -- ‖toLp 2 V‖² = ∑ V i² for real-valued V.
   rw [EuclideanSpace.norm_sq_eq]
   refine Finset.sum_congr rfl ?_
   intro i _
-  -- (toLp 2 V) i = V i and V i ∈ ℝ so ‖V i‖² = (V i)².
   change ‖(fderiv ℝ u x) (EuclideanSpace.single i 1)‖ ^ 2 = _
   rw [Real.norm_eq_abs, sq_abs]
 
@@ -474,9 +443,6 @@ theorem bilin_integrand_self_ge {Ω : Set E}
   linarith
 
 end SmoothEllipticBilinearForm
-
-/-! ## Pointwise estimates for difference quotients of products of smooth
-functions -/
 
 omit [NeZero d] in
 /-- The difference quotient of a product splits as

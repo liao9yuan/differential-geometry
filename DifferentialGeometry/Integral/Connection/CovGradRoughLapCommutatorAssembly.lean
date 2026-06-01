@@ -63,26 +63,16 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## A `(0, 3)`-tensor is determined by its value at the unit `(0, 0)`-tensor
-
-The `(0, 0)`-fibre `Tensor0SSpace 0 I x` is `≃L[ℝ] ℝ` (via `tensor0Iso`), and the
-unit `(0, 0)`-tensor maps to `1`. So every `(0, 0)`-tensor `D` is the scalar
-`tensor0Iso x D` times the unit, and a continuous linear map out of
-`Tensor0SSpace 0 I x` is determined by its value at the unit. -/
 
 /-- Every `(0, 0)`-tensor `D` is `tensor0Iso x D` times the unit `(0, 0)`-tensor:
 `D = (tensor0Iso x D) • unit`. -/
 lemma zeroTensor_eq_smul_unit (x : M) (D : Tensor0SSpace 0 I x) :
     D = (tensor0Iso (I := I) M x D) • unitZeroSec (I := I) (M := M) x := by
   classical
-  -- Push through the CLE `tensor0Iso x`: `tensor0Iso x (a • unit) = a • tensor0Iso x unit = a`.
   have hunit : tensor0Iso (I := I) M x (unitZeroSec (I := I) (M := M) x) = (1 : ℝ) := by
     have h := scalarFn_unitZero (I := I) (M := M)
     have := congrFun h x
@@ -102,15 +92,6 @@ lemma tensor03_ext_unit {x : M}
   rw [zeroTensor_eq_smul_unit (I := I) (M := M) x D]
   rw [map_smul, map_smul, h]
 
-/-! ## Slot-`0` reading of the unit-evaluated gradient field
-
-The unit-evaluated gradient field `U y := (covGrad g 0 2 T₀)(y)(unit)` is a
-`(0, 3)`-tensor section. Its slot-`0` currying `tensor0S_curry 2 y (U y) w`,
-along a tangent vector `w`, is the `(0, 2)`-tensor that reads the directional
-covariant derivative `(∇_w T₀)(y)` at the unit `(0, 0)`-tensor:
-`tensorCovDerivAt g 0 2 T₀ y w (unit)`. The tangent direction `w` is the gradient
-direction in the leftmost slot. -/
-
 /-- **Slot-`0` reading of the unit-evaluated gradient field.** The currying of the
 unit-evaluated gradient field `unitGradField g T₀ y` along the slot-`0` tangent
 direction `w` recovers the directional covariant derivative of `T₀`, evaluated at
@@ -126,10 +107,8 @@ lemma curry_unitGradField_eq (g : SmoothRiemannianMetric I M)
         tensorCovDerivAt (I := I) (M := M) g 0 2 T₀ y w)
         (unitZeroSec (I := I) (M := M) y) := by
   classical
-  -- Both sides are `(0, 2)`-tensors; compare their model coercions on a `Fin 2`-tuple `m`.
   apply Tensor0SSpace.toModel_injective
   refine ContinuousMultilinearMap.ext (fun m => ?_)
-  -- LHS: the curry reads slot `0` as `w`, i.e. evaluates `U y` on `Fin.cons w m`.
   change Tensor0SSpace.toModel
       (tensor0S_curry (I := I) (M := M) 2 y (unitGradField (I := I) (M := M) g T₀ y) w) m =
     Tensor0SSpace.toModel
@@ -139,9 +118,7 @@ lemma curry_unitGradField_eq (g : SmoothRiemannianMetric I M)
   rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
     (T := unitGradField (I := I) (M := M) g T₀ y) (v0 := w) (vs := m)]
   rw [unitGradField_apply]
-  -- The gradient field, evaluated at the unit and on `Fin.cons w m`, reads `w` off slot `0`.
   rw [covGrad_apply_unit_eval (I := I) (M := M) g T₀ y (Fin.cons w m)]
-  -- `(Fin.cons w m) 0 = w` and `vecTail (Fin.cons w m) = m`.
   simp only [Fin.cons_zero, Matrix.vecTail]
   rw [show (Fin.cons w m ∘ Fin.succ) = m from funext (fun j => by simp [Fin.cons_succ])]
 
@@ -182,16 +159,6 @@ lemma curry_covGrad_unit_eval (g : SmoothRiemannianMetric I M)
   simp only [Fin.cons_zero, Matrix.vecTail]
   rw [show (Fin.cons w m ∘ Fin.succ) = m from funext (fun j => by simp [Fin.cons_succ])]
 
-/-! ## Slot-`0` naturality of the gradient field under one abstract differentiation
-
-Applying `abstract_succ_covDeriv_unfold_at` to the unit-evaluated gradient field
-`U := unitGradField g T₀` and using the slot-`0` reading `curry_unitGradField_eq`,
-the slot-`0` currying of the abstract `(0, 3)` covariant derivative of `U` along
-`X`, read in the slot-`0` direction `Y`, decomposes into the abstract `(0, 2)`
-covariant derivative of the directionally-derived `(0, 2)`-tensor field
-`y ↦ (∇_{Y y} T₀)(y)(unit)` minus the slot-`0` Christoffel correction
-`(∇_{(∇^{TM}_X Y)(x)} T₀)(x)(unit)`. -/
-
 /-- **Slot-`0` naturality, one level.** With `U := unitGradField g T₀`, smooth
 fields `X, Y`, and the differentiability witnesses `hC` (curried `U`), `hX`, `hY`,
 the slot-`0` currying of `∇^{(0,3)abs}_X U`, read along `Y`, is
@@ -226,11 +193,9 @@ lemma curry_abstract_covDeriv_unitGrad_unfold
             ((LeviCivita (I := I) g).toFun Y x (X x)))
           (unitZeroSec (I := I) (M := M) x) := by
   classical
-  -- The Hom-bundle product rule for the abstract `(0, 3)` covariant derivative.
   have hstep := abstract_succ_covDeriv_unfold_at (I := I) (M := M) g
     (unitGradField (I := I) (M := M) g T₀) (Vfield := X) (Y := Y) (x := x) hC hX hY
   rw [hstep]
-  -- Rewrite the curried-section pointwise reading via `curry_unitGradField_eq`.
   have hsec : (fun y : M => curriedSection I M (unitGradField (I := I) (M := M) g T₀) y (Y y)) =
       (fun y : M =>
         (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace 2 I y from
@@ -250,14 +215,6 @@ lemma curry_abstract_covDeriv_unitGrad_unfold
       ((LeviCivita (I := I) g).toFun Y x (X x))
   rw [hsec, hchr]
 
-/-! ## Smoothness of the unit-evaluated gradient field
-
-The unit-evaluated gradient field `U y := (covGrad g 0 2 T₀)(y)(unit)` is the
-application of the smooth Hom-bundle section `covGrad g 0 2 T₀` (a
-`(0, 3)`-rank `(0, 0) → (0, 3)`-tensor section) to the smooth constant unit
-`(0, 0)`-section `unitZeroSec`. The CLM-bundle application smoothness lemma
-`ContMDiff.clm_bundle_apply` yields total-space smoothness of `U`. -/
-
 /-- **Smoothness of the unit-evaluated gradient field.** `U y := unitGradField g T₀ y`
 is a smooth section of the `(0, 3)`-tensor bundle, as the application of the smooth
 gradient Hom-bundle section `covGrad g 0 2 T₀` to the smooth unit `(0, 0)`-section. -/
@@ -268,20 +225,17 @@ lemma contMDiff_unitGradField (g : SmoothRiemannianMetric I M)
         (E := fun z : M => Tensor0SSpace 3 I z) y
         (unitGradField (I := I) (M := M) g T₀ y)) := by
   classical
-  -- `covGrad g 0 2 T₀` as a Hom-bundle `(0, 0) → (0, 3)` section is smooth.
   have hϕ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 0 ℝ E →L[ℝ] Tensor0SModel 3 ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (Tensor0SModel 0 ℝ E →L[ℝ] Tensor0SModel 3 ℝ E)
         (E := fun z : M => (Tensor0SSpace 0 I z →L[ℝ] Tensor0SSpace 3 I z)) y
         ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace 3 I y from
           (covGrad (I := I) (M := M) g 0 2 T₀).toSection y))) :=
     covGrad_contMDiff_mk' (I := I) (M := M) g T₀
-  -- `unitZeroSec` as a `(0, 0)`-section is smooth.
   have hv : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 0 ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (Tensor0SModel 0 ℝ E)
         (E := fun z : M => Tensor0SSpace 0 I z) y
         (unitZeroSec (I := I) (M := M) y)) :=
     contMDiff_unitZeroSection (I := I) (M := M)
-  -- Apply the Hom-bundle section to the `(0, 0)`-section.
   exact ContMDiff.clm_bundle_apply (b := fun y : M => y)
     (E₁ := fun z : M => Tensor0SSpace 0 I z) (E₂ := fun z : M => Tensor0SSpace 3 I z)
     (F₁ := Tensor0SModel 0 ℝ E) (F₂ := Tensor0SModel 3 ℝ E) hϕ hv

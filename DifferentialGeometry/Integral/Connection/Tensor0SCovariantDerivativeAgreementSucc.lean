@@ -57,12 +57,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open Tensor0SNabla
 open Tensor0SPartialEval
 
-/-! ## Pointwise differentiability predicate for bundle-section forms
-
-The total-space form of a `(0, n)`-tensor section function `T` is
-`MDifferentiableAt` at `b` with respect to the bundle topology on
-`Tensor0SSpace n`. We use this predicate throughout. -/
-
 /-- The pointwise `MDifferentiableAt` predicate for the total-space form of a
 `(0, n)`-tensor section. -/
 def TensorSectionMDiffAt (n : ℕ)
@@ -73,8 +67,6 @@ def TensorSectionMDiffAt (n : ℕ)
   MDifferentiableAt I (I.prod 𝓘(ℝ, Tensor0SModel n ℝ E))
     (fun b' : M => TotalSpace.mk' (Tensor0SModel n ℝ E)
       (E := fun x : M => Tensor0SSpace n I x) b' (T b')) b
-
-/-! ## Differentiability bridge for tensor sections (chart pullback) -/
 
 /-- Auxiliary chart-pullback differentiability: given a raw `(0, n)`-tensor
 function `T` whose total-space form is `MDifferentiableAt` at a chart-α good-set
@@ -94,12 +86,10 @@ theorem differentiableAt_tensor0SChartE_pullback_of_mdifferentiableAt
   letI _h_fib : FiberBundle (Tensor0SModel n ℝ E)
       (fun x : M => Tensor0SSpace n I x) :=
     tensor0SBundle_fiber n
-  -- The trivialisation at α is valid at b (b in base set).
   have hb_base_α : b ∈ (trivializationAt (Tensor0SModel n ℝ E)
       (fun y : M => Tensor0SSpace n I y) α).baseSet := by
     change b ∈ (trivializationAt E (TangentSpace I) α).baseSet
     exact chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
-  -- Use the section-iff lemma at α and derive differentiability of α-repr.
   have hα_repr_diff : MDifferentiableAt I 𝓘(ℝ, Tensor0SModel n ℝ E)
       (fun b' : M =>
         ((trivializationAt (Tensor0SModel n ℝ E)
@@ -107,7 +97,6 @@ theorem differentiableAt_tensor0SChartE_pullback_of_mdifferentiableAt
     (Trivialization.mdifferentiableAt_section_iff (IB := I)
       (e := trivializationAt (Tensor0SModel n ℝ E)
         (fun y : M => Tensor0SSpace n I y) α) T hb_base_α).mp hT_at
-  -- On the base set, the α-repr equals `tensor0SChartE_section_repr n α T`.
   have hα_repr_eq : ∀ {b' : M}, b' ∈ (trivializationAt (Tensor0SModel n ℝ E)
       (fun y : M => Tensor0SSpace n I y) α).baseSet →
       ((trivializationAt (Tensor0SModel n ℝ E)
@@ -119,7 +108,6 @@ theorem differentiableAt_tensor0SChartE_pullback_of_mdifferentiableAt
       (fun y : M => Tensor0SSpace n I y) α).coe_linearMapAt_of_mem (R := ℝ) hb'
     have happ := congrFun hcoe (T b')
     exact happ.symm
-  -- The α-repr is eventually equal to `tensor0SChartE_section_repr n α T` in `𝓝 b`.
   have hbase_α_open : IsOpen ((trivializationAt (Tensor0SModel n ℝ E)
       (fun y : M => Tensor0SSpace n I y) α).baseSet) :=
     (trivializationAt (Tensor0SModel n ℝ E)
@@ -133,11 +121,9 @@ theorem differentiableAt_tensor0SChartE_pullback_of_mdifferentiableAt
         ((trivializationAt (Tensor0SModel n ℝ E)
             (fun y : M => Tensor0SSpace n I y) α) ⟨b', T b'⟩).2) := by
     filter_upwards [hbase_α_nhds] with b' hb' using (hα_repr_eq hb').symm
-  -- Transfer differentiability from α-repr to `tensor0SChartE_section_repr`.
   have hrepr_α_diff : MDifferentiableAt I 𝓘(ℝ, Tensor0SModel n ℝ E)
       (tensor0SChartE_section_repr (I := I) n α T) b :=
     hα_repr_diff.congr_of_eventuallyEq h_funeq
-  -- Bridge to `DifferentiableAt` of chart pullback via Mathlib's chart-pullback bridge.
   have hb_src : b ∈ (chartAt H α).source :=
     chartLeviCivitaGoodSet_mem_chartAt_source (I := I) hb
   have hb_int : extChartAt I α b ∈ interior ((extChartAt I α).target : Set E) :=
@@ -148,7 +134,6 @@ theorem differentiableAt_tensor0SChartE_pullback_of_mdifferentiableAt
   have hwithin : MDifferentiableWithinAt 𝓘(ℝ, E) 𝓘(ℝ, Tensor0SModel n ℝ E)
       (tensor0SChartE_section_repr (I := I) n α T ∘ (extChartAt I α).symm)
       (range I) (extChartAt I α b) := hpb.mp hrepr_α_diff
-  -- `range I` is a neighbourhood of `extChartAt I α b` (since `b` is interior).
   have htgt_subset : (extChartAt I α).target ⊆ range I :=
     extChartAt_target_subset_range α
   have hint_open : IsOpen (interior ((extChartAt I α).target : Set E)) :=
@@ -158,8 +143,6 @@ theorem differentiableAt_tensor0SChartE_pullback_of_mdifferentiableAt
       (interior_subset.trans htgt_subset)
   rw [mdifferentiableWithinAt_iff_differentiableWithinAt] at hwithin
   exact hwithin.differentiableAt hrange_nhds
-
-/-! ## Pointwise differentiability of `tensor0SPartialEval` at the basepoint -/
 
 /-- Pointwise `MDifferentiableAt` of the curried section is implied by the same
 of `T`. -/
@@ -186,17 +169,13 @@ theorem TensorSectionMDiffAt_partialEval
   letI _h_top : TopologicalSpace (TotalSpace (Tensor0SModel s ℝ E)
       (fun x : M => Tensor0SSpace s I x)) :=
     tensor0SBundle_topology s
-  -- The chart-parallel extension is `MDifferentiableAt` at `b`.
   have hY_at : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
       (fun b' : M => TotalSpace.mk' E
         (E := fun x : M => TangentSpace I x) b'
         (chartParallelExtend (I := I) α b v b')) b :=
     chartParallelExtend_mdifferentiableAt (I := I) α hb v
-  -- The curried section is `MDifferentiableAt` at `b` (from `T`).
   have hCurried_at := mdifferentiableAt_curriedSection_of_section
     (I := I) (M := M) s T hT_at
-  -- The bundle application of a smooth Hom-section to a differentiable vector
-  -- field is `MDifferentiableAt`.
   exact MDifferentiableAt.clm_bundle_apply (𝕜 := ℝ)
     (F₁ := E) (F₂ := Tensor0SModel s ℝ E)
     (E₁ := fun x : M => TangentSpace I x)

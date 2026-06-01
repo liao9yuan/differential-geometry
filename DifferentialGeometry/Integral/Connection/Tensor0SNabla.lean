@@ -57,8 +57,6 @@ variable
   (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
-/-! ### Base case `s = 0`: pointwise covariant-derivative function -/
-
 /-- The pointwise function defining the s=0 covariant derivative. The action on a tangent
 vector `v` is `(tensor0Iso x).symm (extDerivFun (scalarFn T) x v)`. -/
 noncomputable def tensor0SCovariantDerivative_zero_fun
@@ -144,8 +142,6 @@ theorem tensor0SCovariantDerivative_zero_fun_leibniz_section
   rw [map_smul]
   rw [tensor0Iso_symm_scalarFn]
 
-/-! ### Successor case: pointwise covariant-derivative function -/
-
 /-- The pointwise (s+1)-step covariant derivative function. Given `cov_TM` on the tangent
 bundle and `cov_s` on the (0,s)-tensor bundle, this constructs the action on a section
 `T` of `Tensor0SSpace (s+1)` at point `x`, returning a CLM into `Tensor0SSpace (s+1) I x`.
@@ -182,8 +178,6 @@ noncomputable def tensor0SCovariantDerivative_succ_fun {s : ℕ}
           (Tensor0SModel s ℝ E) (fun x : M => Tensor0SSpace s I x)
           cov_TM cov_s (curriedSection I M T) x v) := rfl
 
-/-! ### B3. Bundled `tensor0SCovariantDerivative_zero` -/
-
 /-- The (0,0)-tensor bundle covariant derivative on `fun x => Tensor0SSpace 0 I x`, packaged as
 a `CovariantDerivative`. The action on a section `T` is determined pointwise by
 `tensor0SCovariantDerivative_zero_fun I M T`, whose value on a tangent vector `v` is the
@@ -208,8 +202,6 @@ noncomputable def tensor0SCovariantDerivative_zero
         (mdifferentiableAt_scalarFn_iff_section I M T).mpr hT
       exact tensor0SCovariantDerivative_zero_fun_leibniz_section I M T g hT_scalar hg
   }
-
-/-! ### B4. `ContMDiffCovariantDerivative` instance for the base case -/
 
 /-- For a smooth section T of the (0,0)-tensor bundle and a smooth vector field Y, the scalar
 function `x ↦ ((tensor0SCovariantDerivative_zero_fun T x)(Y x) 0)` (which equals
@@ -276,8 +268,6 @@ noncomputable instance tensor0SCovariantDerivative_zero_contMDiff
         exact (contMDiff_scalarFn_iff_section (I := I) (M := M) S).mp h_scalarFn_smooth
       exact h_iso_scalar
   }
-
-/-! ### B5. Bundled `tensor0SCovariantDerivative_succ` + ContMDiff instance -/
 
 /-- The (0, s+1)-tensor bundle covariant derivative, inductively defined from a covariant
 derivative on `TM` (denoted `cov_TM`) and a covariant derivative on `(0, s)`-tensor bundle
@@ -478,13 +468,6 @@ noncomputable instance tensor0SCovariantDerivative_succ_contMDiff {s : ℕ}
       exact contMDiff_tensor0SCov_succ_section I M cov_TM cov_s T hT_smooth
   }
 
-/-! ### B6. Recursive definition
-
-The recursive covariant derivative `tensor0SCovariantDerivative s cov` is defined together
-with its smoothness instance `tensor0SCovariantDerivative_contMDiff`. The two are naturally
-mutually recursive: to apply the `_succ` constructor at stage `n+1` we need a smoothness
-instance at stage `n`. We bundle both into a single structure to untangle the recursion. -/
-
 /-- A smooth covariant derivative on the (0,s)-tensor bundle, wrapping the Mathlib
 `CovariantDerivative` structure together with its smoothness instance. -/
 private structure SmoothCov (s : ℕ)
@@ -537,8 +520,6 @@ theorem tensor0SCovariantDerivative_succ_eq {s : ℕ}
       tensor0SCovariantDerivative_succ I M cov
         (tensor0SCovariantDerivative I M s cov) := rfl
 
-/-! ### B7. User-facing apply lemmas -/
-
 /-- Apply lemma for the base case. -/
 theorem tensor0SCovariantDerivative_zero_apply
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -571,13 +552,6 @@ theorem tensor0SCovariantDerivative_apply_zero
   rw [tensor0SCovariantDerivative_zero_eq]
   rfl
 
-/-! ### The covariant derivative of the constant unit `(0, 0)`-section is zero
-
-The constant `(0, 0)`-section with value the unit continuous multilinear map
-`ofModel (constOfIsEmpty 1)` has zero covariant derivative: its scalar function
-`scalarFn` is the constant `1`, whose exterior derivative vanishes. This is the
-parallel-transport input for the rank-`0` index-lowering intertwining. -/
-
 /-- The scalar function of the constant unit `(0, 0)`-section is the constant
 function `1`: `tensor0Iso x (ofModel (constOfIsEmpty 1)) = 1`. -/
 theorem scalarFn_unitZero :
@@ -587,14 +561,12 @@ theorem scalarFn_unitZero :
       fun _ : M => (1 : ℝ) := by
   funext y
   rw [scalarFn_apply]
-  -- `tensor0Iso y (ofModel f) = curryFin0 (cle_0 (cle_0.symm f)) = curryFin0 f = f 0`.
   change (tensor0SSpace_continuousLinearEquiv (I := I) 0 y).trans
       (continuousMultilinearCurryFin0 ℝ E ℝ).toContinuousLinearEquiv
       ((tensor0SSpace_continuousLinearEquiv (I := I) 0 y).symm
         (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ))) = (1 : ℝ)
   rw [ContinuousLinearEquiv.trans_apply,
     ContinuousLinearEquiv.apply_symm_apply]
-  -- `curryFin0` applied to `constOfIsEmpty 1` is its value on the empty tuple, `1`.
   change (continuousMultilinearCurryFin0 ℝ E ℝ)
       (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ)) = (1 : ℝ)
   rw [continuousMultilinearCurryFin0_apply, ContinuousMultilinearMap.constOfIsEmpty_apply]
@@ -617,11 +589,6 @@ theorem tensor0SCovariantDerivative_unitZero_eq_zero
     simp [mfderiv_const]
   rw [hext]
   simp
-
-/-! ### Compile-time sanity check
-
-Given a `C^∞` covariant derivative on `TM`, the recursive construction produces a `C^∞`
-covariant derivative on `Tensor0SSpace 3` (the `(0,3)`-tensor bundle). -/
 
 example
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))

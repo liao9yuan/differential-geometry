@@ -83,8 +83,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## Chart-frame scalar component of the RHS difference -/
-
 set_option linter.unusedSectionVars false in
 /-- **The chart-`α`-frame scalar component of the RHS difference is the
 difference of the chart-frame components.**  This is the model-norm-free scalar
@@ -129,15 +127,6 @@ theorem deTurckRHS_diff_frame_component_contMDiffOn
   refine (h₁.sub h₂).congr (fun x _ => ?_)
   exact deTurckRHS_diff_frame_component_apply (I := I) g_bg g₁ g₂ α x i j
 
-/-! ## Per-point reverse bridge for the RHS difference
-
-At a single base point `x₀`, the Riemannian fibre norm of the RHS difference,
-identified as the `(0,2)`-tensor fibre element via `bilinFormToModelₗᵢ`, is
-controlled by its model-space norm at the chart centre — using the per-point
-reverse bridge `gNorm_le_modelNorm_pointwise` (which is itself derived purely
-from the unconditional chart-fibre trivialization op-norm bound at the chart
-centre, where `toModel` is the *intrinsic* identification). -/
-
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
@@ -159,19 +148,6 @@ theorem deTurckRHS_diff_gNorm_le_modelNorm_pointwise
     ∃ D : ℝ, 0 < D ∧ ∀ T : TensorRSSpace 0 2 I x₀,
       ‖T‖ ≤ D * ‖TensorRSSpace.toModel (𝕜 := ℝ) (I := I) T‖ :=
   gNorm_le_modelNorm_pointwise (I := I) (M := M) g₀ 0 2 x₀
-
-/-! ## The intrinsic `2`-jet seminorm of a metric difference
-
-The correct right-hand side of the pointwise Lipschitz bound is the **`2`-jet
-seminorm** of the metric perturbation `g₁ − g₂`, measured in `g₀`-induced
-Riemannian fibre norms.  The metric difference is the smooth covariant
-`(0,2)`-tensor field `b ↦ g₁.inner b − g₂.inner b`; its `0`-jet is the fibre
-value, its `1`-jet adds the first covariant derivative
-`∇^{g₀}(g₁ − g₂)` (a `(0,3)`-tensor), and its `2`-jet adds the second covariant
-derivative `∇^{g₀,2}(g₁ − g₂)` (a `(0,4)`-tensor).  This subsection gives the
-intrinsic `(0,2)` and `(0,3)` building blocks (the value and first-order terms);
-all fibre norms used are Riemannian, so no trivialization-image (chart-selection)
-norm enters and the construction needs no parallelizability witness. -/
 
 /-- The metric difference `g₁ − g₂`, as a `(0,2)`-tensor field
 `b ↦ g₁.inner b − g₂.inner b`.  This is
@@ -213,19 +189,14 @@ theorem metricDiff02Cov_eq_sub
         - (tensor02Cov (LeviCivita (I := I) g₀)).toFun
           (metricTensor02 (I := I) g₂) b := by
   classical
-  -- The `(0,2)`-tensor covariant derivative is additive on differentiable sections
-  -- (`add` axiom of `IsCovariantDerivativeOn`); both metric sections are smooth.
   set cov := tensor02Cov (LeviCivita (I := I) g₀) with hcov_def
   have hcovOn := cov.isCovariantDerivativeOnUniv
   have hT₁ : MDiffAtTensor02 (metricTensor02 (I := I) g₁) b :=
     metricTensor02_mdiff (I := I) g₁ b
   have hT₂ : MDiffAtTensor02 (metricTensor02 (I := I) g₂) b :=
     metricTensor02_mdiff (I := I) g₂ b
-  -- `MDiffAtTensor02 T b` is exactly section-differentiability `MDiffAt (T% T) b`
-  -- for the `(0,2)`-tensor bundle, so the section-arithmetic lemmas apply.
   have hT₂neg : MDiffAtTensor02 (-(metricTensor02 (I := I) g₂)) b :=
     mdifferentiableAt_neg_section hT₂
-  -- Step 1: `cov (-T₂) b = - cov T₂ b`, from additivity and `cov 0 = 0`.
   have hneg : cov.toFun (-(metricTensor02 (I := I) g₂)) b =
       - cov.toFun (metricTensor02 (I := I) g₂) b := by
     have hsum : cov.toFun (metricTensor02 (I := I) g₂
@@ -238,15 +209,12 @@ theorem metricDiff02Cov_eq_sub
         TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) b = 0 :=
       hcovOn.zero (Set.mem_univ b)
     rw [hzero] at hsum
-    -- `0 = cov T₂ b + cov (-T₂) b`, so `cov (-T₂) b = - cov T₂ b`.
     exact eq_neg_of_add_eq_zero_right hsum.symm
-  -- Step 2: `cov (T₁ - T₂) b = cov T₁ b + cov (-T₂) b = cov T₁ b - cov T₂ b`.
   have hadd : cov.toFun (metricTensor02 (I := I) g₁
         + (-(metricTensor02 (I := I) g₂))) b =
       cov.toFun (metricTensor02 (I := I) g₁) b
         + cov.toFun (-(metricTensor02 (I := I) g₂)) b :=
     hcovOn.add hT₁ hT₂neg (Set.mem_univ b)
-  -- `metricDiff02 = metricTensor02 g₁ + (-(metricTensor02 g₂))` as a section.
   have hdiff_eq : metricDiff02 (I := I) g₁ g₂ =
       metricTensor02 (I := I) g₁ + (-(metricTensor02 (I := I) g₂)) := by
     funext c
@@ -260,18 +228,6 @@ theorem metricDiff02Cov_eq_sub
     _ = cov.toFun (metricTensor02 (I := I) g₁) b
           - cov.toFun (metricTensor02 (I := I) g₂) b := by rw [hneg]; abel
 
-/-! ## The intrinsic `2`-jet (second covariant derivative) of a metric difference
-
-The `2`-jet term needs the **second** covariant derivative of a `(0,2)`-tensor
-field, i.e. the iterated operator `tensor02CovIterate (LeviCivita g₀)`, valued in
-the `(0,4)`-tensor bundle.  It is additive on differentiable `(0,2)`-tensor
-sections, so on the metric difference it splits as the difference of the two
-metric second covariant derivatives — exactly the structure of
-`metricDiff02Cov_eq_sub`.  The supporting differentiability fact is that the first
-covariant derivative `tensor02Cov (LeviCivita g₀)` of a *smooth* metric tensor is
-itself a differentiable `(0,3)`-tensor section (from the inherited smoothness of
-the induced `(0,2)`-tensor covariant derivative). -/
-
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 800000 in
 /-- The first covariant derivative `tensor02Cov (LeviCivita g₀) (metricTensor02 g)`
@@ -284,17 +240,13 @@ theorem metricTensor02Cov_mdiffAtTensor03
     MDiffAtTensor03 (I := I)
       ((tensor02Cov (LeviCivita (I := I) g₀)).toFun (metricTensor02 (I := I) g)) x := by
   classical
-  -- The metric section is `C^∞` as a `(0,2)`-tensor total-space section.
   have hmetric : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun (x : M) => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) b
         (metricTensor02 (I := I) g b)) := g.contMDiff
-  -- `tensor02Cov (LeviCivita g₀)` inherits `C^∞`-class smoothness.
   haveI hcov : CovariantDerivative.ContMDiffCovariantDerivative
       (tensor02Cov (LeviCivita (I := I) g₀)) ∞ :=
     tensor02Cov_isContMDiff (LeviCivita (I := I) g₀)
-  -- The smoothness field consumes a `CMDiff[univ] (∞+1)` section and produces a
-  -- `ContMDiffOn ... univ` of the covariant-derivative total-space section.
   have h_le : (∞ : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) + 1 := by rw [ENat.coe_top_add_one]
   have hmetric₁ : ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ((∞ : WithTop ℕ∞) + 1)
       (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
@@ -304,9 +256,6 @@ theorem metricTensor02Cov_mdiffAtTensor03
   have hcovOn := hcov.contMDiff
   have hsmooth :=
     hcovOn.contMDiff (σ := metricTensor02 (I := I) g) hmetric₁
-  -- `hsmooth` is `ContMDiffOn` of the `(0,3)`-valued covariant-derivative section on
-  -- `univ`; turn it into a global `ContMDiff` and extract `MDifferentiableAt` at `x`,
-  -- which is exactly `MDiffAtTensor03`.
   exact (contMDiffOn_univ.mp hsmooth x).mdifferentiableAt (by simp)
 
 /-- The second covariant derivative `∇^{g₀,2}(g₁ − g₂)` of the metric difference,
@@ -335,20 +284,16 @@ theorem metricDiff02CovIterate_eq_sub
         - tensor02CovIterate (LeviCivita (I := I) g₀) (metricTensor02 (I := I) g₂) b := by
   classical
   set cov := LeviCivita (I := I) g₀ with hcov_def
-  -- Inner `(0,2)`-tensor covariant derivative carries the subtraction inside (additivity
-  -- of `tensor02Cov` on the two smooth metric sections), as a *section* equality.
   have hinner_eq : (tensor02Cov cov).toFun (metricDiff02 (I := I) g₁ g₂) =
       (tensor02Cov cov).toFun (metricTensor02 (I := I) g₁)
         - (tensor02Cov cov).toFun (metricTensor02 (I := I) g₂) := by
     funext c
     have h := metricDiff02Cov_eq_sub (I := I) g₀ g₁ g₂ c
-    -- `metricDiff02Cov g₀ g₁ g₂ c = (tensor02Cov cov).toFun (metricDiff02 g₁ g₂) c` by def.
     have hlhs : metricDiff02Cov (I := I) g₀ g₁ g₂ c =
         (tensor02Cov cov).toFun (metricDiff02 (I := I) g₁ g₂) c := rfl
     rw [hlhs] at h
     rw [h]
     rfl
-  -- The two metric first covariant derivatives are differentiable `(0,3)`-sections.
   have hS₁ : MDiffAtTensor03 (I := I)
       ((tensor02Cov cov).toFun (metricTensor02 (I := I) g₁)) b :=
     metricTensor02Cov_mdiffAtTensor03 (I := I) g₀ g₁ b
@@ -370,16 +315,6 @@ theorem metricDiff02CovIterate_eq_sub
     _ = tensor02CovIterate cov (metricTensor02 (I := I) g₁) b
         - tensor02CovIterate cov (metricTensor02 (I := I) g₂) b := rfl
 
-/-! ## Smoothness of the metric-difference jets as bundle sections
-
-For the continuity of the intrinsic `2`-jet seminorm we need the three jet
-sections (`(0,2)`, `(0,3)`, `(0,4)`) of the metric difference to be smooth
-sections of their tensor bundles.  The `0`-jet is the metric-difference section,
-smooth from the metric smoothness; the `1`-jet is the induced `(0,2)`-tensor
-covariant derivative of a smooth section, smooth from `tensor02Cov_isContMDiff`;
-the `2`-jet is the further `(0,3)`-tensor covariant derivative, whose smoothness we
-build here by the same operator-to-bundle bridge used for the lower orders. -/
-
 /-- Smoothness of the trilinear pairing scalar `b ↦ S b (Y b) (Z b) (W b)` for a
 smooth `(0,3)`-tensor section `S` and smooth tangent sections `Y, Z, W`.  Three
 applications of `ContMDiff.clm_bundle_apply` peel the slots off. -/
@@ -397,7 +332,6 @@ private theorem tensor03_pairing_contMDiff
     (hW : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun b : M => TotalSpace.mk' E (E := TangentSpace I) b (W b))) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun b : M => S b (Y b) (Z b) (W b)) := by
-  -- `b ↦ S b (Y b)` : smooth `(0,2)`-section.
   have h1 : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) b (S b (Y b))) :=
@@ -405,7 +339,6 @@ private theorem tensor03_pairing_contMDiff
       (E₁ := fun x : M => TangentSpace I x)
       (E₂ := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
       (b := fun b : M => b) (ϕ := fun b => S b) (v := fun b => Y b) hS hY
-  -- `b ↦ S b (Y b) (Z b)` : smooth cotangent section.
   have h2 : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) ∞
       (fun b : M => TotalSpace.mk' (E →L[ℝ] ℝ)
         (E := fun x : M => TangentSpace I x →L[ℝ] ℝ) b (S b (Y b) (Z b))) :=
@@ -413,7 +346,6 @@ private theorem tensor03_pairing_contMDiff
       (E₁ := fun x : M => TangentSpace I x)
       (E₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
       (b := fun b : M => b) (ϕ := fun b => S b (Y b)) (v := fun b => Z b) h1 hZ
-  -- `b ↦ S b (Y b) (Z b) (W b)` : smooth scalar (trivial-bundle ℝ target).
   have h3 : ContMDiff I (I.prod 𝓘(ℝ, ℝ)) ∞
       (fun b : M => TotalSpace.mk' ℝ (E := fun _ : M => ℝ) b (S b (Y b) (Z b) (W b))) :=
     ContMDiff.clm_bundle_apply
@@ -441,7 +373,6 @@ private theorem tensor03Cov_quad_apply_smooth
     (Y Z W U : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun x => ((((tensor03Cov cov).toFun S x (Y x)) (Z x)) (W x)) (U x)) := by
-  -- Expand the value as the `tensor03Scalar` formula.
   have h_eq : ∀ x : M,
       ((((tensor03Cov cov).toFun S x (Y x)) (Z x)) (W x)) (U x) =
         extDerivFun (I := I) (fun b => S b (Z b) (W b) (U b)) x (Y x)
@@ -457,10 +388,8 @@ private theorem tensor03Cov_quad_apply_smooth
     have h := tensor03CovAt_apply_of_diff_extend cov hSx hYx hZx hWx hUx
     rw [tensor03Cov_toFun, tensor03CovFun_apply, h]
     rfl
-  -- (i) `b ↦ S b (Z b) (W b) (U b)` smooth scalar.
   have h_pair : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun b : M => S b (Z b) (W b) (U b)) :=
     tensor03_pairing_contMDiff hS Z.contMDiff W.contMDiff U.contMDiff
-  -- (ii) `extDerivFun (...)` smooth cotangent section, applied to `Y` gives smooth scalar.
   have h_extDeriv : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) ∞
       (fun x => TotalSpace.mk' (E →L[ℝ] ℝ)
         (E := fun x : M => TangentSpace I x →L[ℝ] (Bundle.Trivial M ℝ) x)
@@ -479,8 +408,6 @@ private theorem tensor03Cov_quad_apply_smooth
         (v := fun x => Y x) h_extDeriv Y.contMDiff
     intro x
     exact (contMDiffAt_section (F := ℝ) (E := Bundle.Trivial M ℝ) x).mp (hap x)
-  -- (iii)-(v) the three Christoffel-cross terms: `cov.toFun · x (Y x)` smooth tangent section,
-  -- paired against `S` with the other two slots.
   have h_covApp : ∀ (V : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
       ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
         (fun x => TotalSpace.mk' E (E := TangentSpace I) x (cov.toFun (fun y => V y) x (Y x))) := by
@@ -534,23 +461,19 @@ private theorem tensor03Cov_output_contMDiff
         (E := fun x : M => TangentSpace I x →L[ℝ]
           (TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] ℝ)))) x
         ((tensor03Cov cov).toFun S x)) := by
-  -- Outermost bridge: reduce to `Y`-applied `(0,3)`-section smoothness.
   apply cotangentCov_clmSection_smooth_aux
     (V₂ := fun x : M => TangentSpace I x →L[ℝ]
       (TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] ℝ)))
     (φ := fun x => (tensor03Cov cov).toFun S x)
   intro Y
-  -- Middle bridge: reduce to `(Y, Z)`-applied `(0,2)`-section smoothness.
   apply cotangentCov_clmSection_smooth_aux
     (V₂ := fun x : M => TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] ℝ))
     (φ := fun x => (tensor03Cov cov).toFun S x (Y x))
   intro Z
-  -- Inner bridge: reduce to `(Y, Z, W)`-applied cotangent-section smoothness.
   apply cotangentCov_clmSection_smooth_aux
     (V₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
     (φ := fun x => (tensor03Cov cov).toFun S x (Y x) (Z x))
   intro W
-  -- Innermost bridge: reduce to the four-slot scalar.
   apply cotangentCov_clmSection_smooth_aux
     (V₂ := fun _ : M => ℝ)
     (φ := fun x => (tensor03Cov cov).toFun S x (Y x) (Z x) (W x))
@@ -583,8 +506,6 @@ theorem tensor02CovIterate_metric_contMDiff
         (tensor02CovIterate (LeviCivita (I := I) g₀) (metricTensor02 (I := I) g) x)) := by
   haveI hcov : CovariantDerivative.ContMDiffCovariantDerivative
       (LeviCivita (I := I) g₀) ∞ := inferInstance
-  -- The first covariant derivative `tensor02Cov (LeviCivita g₀) (metricTensor02 g)` is a smooth
-  -- `(0,3)`-section.
   have h_metric : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun (x : M) => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) b
@@ -603,7 +524,6 @@ theorem tensor02CovIterate_metric_contMDiff
     contMDiffOn_univ.mp
       ((tensor02Cov_isContMDiff (LeviCivita (I := I) g₀)).contMDiff.contMDiff
         (σ := metricTensor02 (I := I) g) h_metric₁)
-  -- The further `(0,3)`-tensor covariant derivative is a smooth `(0,4)`-section.
   exact tensor03Cov_output_contMDiff (LeviCivita (I := I) g₀) hS₃
 
 set_option maxHeartbeats 1600000 in
@@ -633,18 +553,6 @@ theorem tensor02Cov_metric_contMDiff
     ((tensor02Cov_isContMDiff (LeviCivita (I := I) g₀)).contMDiff.contMDiff
       (σ := metricTensor02 (I := I) g) h_metric₁)
 
-/-! ## Continuity of the intrinsic fibre op-norm of a smooth tensor section
-
-The Riemannian fibre norms in the `2`-jet seminorm are realised through the
-const-`1` fibre isometries (`biForm₂ToModelₗᵢ`, `triFormToModelₗᵢ`,
-`quadFormToModelₗᵢ`), which are norm-preserving and act on the *fixed* fibre `E`
-(since `TangentSpace I x = E`); hence the fibre norm equals the operator norm of
-the curried multilinear form `σ x`.  For a continuous total-space section `σ` of a
-vector bundle that is a *continuous Riemannian bundle*, the real-valued map
-`x ↦ ‖σ x‖` is continuous: it equals the square root of the (continuous) fibre
-inner product `⟪σ x, σ x⟫`.  We use this with the operator-norm comparison built
-into the chart-fibre Riemannian metric. -/
-
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 800000 in
 /-- **Continuity of a fibre norm of a continuous section of a continuous Riemannian
@@ -668,18 +576,6 @@ private theorem continuous_riemannian_fiber_norm_of_continuous_section
   rw [h_eq]
   exact Real.continuous_sqrt.comp h_inner
 
-/-! ## Chart-frame scalar peeling for iterated-hom sections
-
-To package each metric-difference jet as a smooth `(0, k)`-tensor field
-(`Tensor0SField ∞ k`) we apply the chart-frame coordinate criterion
-`contMDiff_multilinearSection_iff_coord`, whose hypothesis is the `C^∞`-ness on
-the chart source of the chart-`α`-frame scalar component of the jet.  That
-component is the iterated-hom section evaluated on the smooth chart-`α`-pushforward
-frame vectors `chartFrameVec α (σ j)`, which we obtain by peeling the slots off the
-section one at a time via `ContMDiff.clm_bundle_apply`.  The `(0,3)` peeling already
-appears above as `tensor03_pairing_contMDiff`; we record the `(0,2)` and `(0,4)`
-analogues here. -/
-
 /-- Smoothness of the bilinear pairing scalar `b ↦ S b (Y b) (Z b)` for a smooth
 `(0,2)`-tensor (iterated-hom) section `S` and smooth tangent sections `Y, Z`.  Two
 applications of `ContMDiff.clm_bundle_apply` peel the slots off. -/
@@ -694,7 +590,6 @@ private theorem tensor02_pairing_contMDiff
     (hZ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun b : M => TotalSpace.mk' E (E := TangentSpace I) b (Z b))) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun b : M => S b (Y b) (Z b)) := by
-  -- `b ↦ S b (Y b)` : smooth cotangent section.
   have h1 : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) ∞
       (fun b : M => TotalSpace.mk' (E →L[ℝ] ℝ)
         (E := fun x : M => TangentSpace I x →L[ℝ] ℝ) b (S b (Y b))) :=
@@ -702,7 +597,6 @@ private theorem tensor02_pairing_contMDiff
       (E₁ := fun x : M => TangentSpace I x)
       (E₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
       (b := fun b : M => b) (ϕ := fun b => S b) (v := fun b => Y b) hS hY
-  -- `b ↦ S b (Y b) (Z b)` : smooth scalar (trivial-bundle ℝ target).
   have h2 : ContMDiff I (I.prod 𝓘(ℝ, ℝ)) ∞
       (fun b : M => TotalSpace.mk' ℝ (E := fun _ : M => ℝ) b (S b (Y b) (Z b))) :=
     ContMDiff.clm_bundle_apply
@@ -733,7 +627,6 @@ private theorem tensor04_pairing_contMDiff
     (hU : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun b : M => TotalSpace.mk' E (E := TangentSpace I) b (U b))) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun b : M => S b (Y b) (Z b) (W b) (U b)) := by
-  -- `b ↦ S b (Y b)` : smooth `(0,3)`-section.
   have h1 : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ)) ∞
       (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun x : M =>
@@ -743,19 +636,7 @@ private theorem tensor04_pairing_contMDiff
       (E₂ := fun x : M =>
         TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
       (b := fun b : M => b) (ϕ := fun b => S b) (v := fun b => Y b) hS hY
-  -- `b ↦ S b (Y b) (Z b) (W b) (U b)` : smooth scalar by the `(0,3)` peeling.
   exact tensor03_pairing_contMDiff h1 hZ hW hU
-
-/-! ## The metric-difference jets as smooth `(0, k)`-tensor fields
-
-Each jet `metricDiff02` / `metricDiff02Cov` / `metricDiff02CovIterate` is the
-iterated-hom value of a smooth section; here we package it as a `Tensor0SField ∞ k`
-(`k = 2, 3, 4`) whose model value at `x` is the `kFormToModel` image of the jet.
-Smoothness is verified through the basis-coordinate criterion
-`contMDiff_multilinearSection_iff_coord`, exactly as `deTurckRHSField` does for the
-DeTurck right-hand side: on the chart-`x₀` source the trivialised coordinate of the
-section is the chart-`x₀`-frame scalar component of the jet, which is `C^∞` by the
-appropriate peeling lemma. -/
 
 /-- The chart-`α`-frame scalar component of an iterated-hom section is `C^∞` on the
 chart source, assembled by extending the chart-`α` frame to global smooth tangent
@@ -1119,16 +1000,6 @@ def metricDiff02CovIterateField (g₀ g₁ g₂ : SmoothRiemannianMetric I M) :
       metricDiff02CovIterate (I := I) g₀ g₁ g₂ x (v 0) (v 1) (v 2) (v 3) :=
   metricDiff02CovIterateModelFun_toModel_apply (I := I) g₀ g₁ g₂ x v
 
-/-! ## The intrinsic `2`-jet seminorm of the metric difference
-
-The `2`-jet seminorm of `g₁ − g₂` at `x` is the sum of the three Riemannian fibre
-norms of its `0`-, `1`-, and `2`-jets.  Each jet is packaged as a smooth section of
-the `(0, k)`-tensor bundle (`metricDiff02Field`, `metricDiff02CovField`,
-`metricDiff02CovIterateField`, then pushed to the mixed `(0, k)`-tensor bundle via
-`MixedSection.fromMultilinearSection`); the norm is the **`g₀`-induced Riemannian
-fibre norm** of `tensorRS_riemannianBundle g₀ 0 k`, a genuine Riemannian (no
-trivialization-image / chart-selection) fibre norm. -/
-
 /-- The `0`-jet of the metric difference as a smooth section of the mixed
 `(0,2)`-tensor bundle, whose `g₀`-Riemannian fibre norm enters `metricDiff2JetNorm`. -/
 def metricDiff02MixedSection (g₁ g₂ : SmoothRiemannianMetric I M) :
@@ -1247,7 +1118,6 @@ theorem metricDiff2JetNorm_continuous
       (fun b : M => TensorRSSpace 0 4 I b) :=
     DifferentialGeometry.Tensor.TensorRSRiemannianBundleContinuous.tensorRS_isContinuousRiemannianBundle
       (I := I) (M := M) g₀ 0 4
-  -- Each jet section is smooth, hence its total-space map is continuous.
   have h0 : Continuous (fun x : M => ‖metricDiff02MixedSection (I := I) g₁ g₂ x‖) :=
     continuous_riemannian_fiber_norm_of_continuous_section
       (F₀ := TensorRSModel 0 2 ℝ E) (V₀ := fun b : M => TensorRSSpace 0 2 I b)
@@ -1264,69 +1134,6 @@ theorem metricDiff2JetNorm_continuous
       (σ := fun x => metricDiff02CovIterateMixedSection (I := I) g₀ g₁ g₂ x)
       (metricDiff02CovIterateMixedSection (I := I) g₀ g₁ g₂).contMDiff.continuous
   exact (h0.add h1).add h2
-
-/-! ## The quantitative pointwise Riemannian `2`-jet-Lipschitz bound
-
-The mathematically correct target — confirmed against the dependence of
-`deTurckRicciRHS g_bg g x` on the **`2`-jet** of `g` (the Ricci summand is affine
-in the second chart-derivatives `∂²g`, `chartRicci_affine_in_d2g`; the Lie
-summand `𝓛_{deTurckVF g g_bg} g` carries `∂g` and `∂²g` via the Christoffel
-symbols of `deTurckVF`) — is, for `g₁, g₂` in an `R`-ball around `g₀` and all
-`x : M`,
-
-  `‖deTurckRicciRHS g_bg g₁ x − deTurckRicciRHS g_bg g₂ x‖_{g₀,x}`
-    `≤ C(R) · ( ‖(g₁−g₂)(x)‖_{g₀,x} + ‖∇^{g₀}(g₁−g₂)(x)‖ + ‖∇^{g₀,2}(g₁−g₂)(x)‖ )`
-
-with all fibre norms Riemannian and `C(R)` coming from the (continuous,
-compact-bounded) coefficient functions of the quasilinear chart formulas.  The
-value-only inequality (`0`-jet right-hand side) is *false*: with `g₂ = g₁ +
-ε·χ·H`, `χ(x) = 0`, `∂²χ(x) ≠ 0` one has `(g₁−g₂)(x) = 0` while the second-order
-part of the RHS difference at `x` is nonzero.
-
-The full intrinsic `2`-jet seminorm of the metric difference is now available and
-HLCC-free, with all fibre norms the genuine `g₀`-induced Riemannian fibre norm of
-the `(0, k)`-tensor bundle `tensorRS_riemannianBundle g₀ 0 k`:
-
-* the `0`-jet term `‖(g₁−g₂)(x)‖_{g₀,x}` is the `(0,2)` Riemannian fibre norm of
-  `metricDiff02 g₁ g₂ x` (packaged as the smooth section `metricDiff02MixedSection`);
-* the `1`-jet term `‖∇^{g₀}(g₁−g₂)(x)‖_{g₀,x}` is the `(0,3)` Riemannian fibre norm
-  of `metricDiff02Cov g₀ g₁ g₂ x` (`metricDiff02Cov_eq_sub` expresses it as the
-  difference of the two metric covariant derivatives; packaged as
-  `metricDiff02CovMixedSection`);
-* the `2`-jet term `‖∇^{g₀,2}(g₁−g₂)(x)‖_{g₀,x}` is the `(0,4)` Riemannian fibre
-  norm of `metricDiff02CovIterate g₀ g₁ g₂ x` (the iterated covariant derivative,
-  `metricDiff02CovIterate_eq_sub` expresses it as a difference; smoothness of the
-  two metric `2`-jets is `tensor02CovIterate_metric_contMDiff`; packaged as
-  `metricDiff02CovIterateMixedSection`).
-
-`metricDiff2JetNorm` packages the sum of the three `g₀`-Riemannian fibre norms, with
-non-negativity (`metricDiff2JetNorm_nonneg`), the definitional unfolding
-(`metricDiff2JetNorm_eq_riemannianNorm_sum`) and — since each summand is the
-Riemannian fibre norm of a smooth section of a continuous Riemannian bundle —
-continuity (`metricDiff2JetNorm_continuous`), hence measurability for the downstream
-integration against the intrinsic `Hᵏ` norm.
-
-The quasilinear-coefficient apparatus (each chart-frame scalar component being an
-explicit smooth function of the chart `2`-jet `(g, ∂g, ∂²g)`, *affine* in `∂²g`
-from the Ricci summand and quasilinear from the Christoffel-built Lie summand,
-with all coefficients — inverse-Gram entries, Christoffel symbols and their
-derivatives — continuous in `g` and hence uniformly bounded over a compact chart
-kernel) is now available at the **chart-coordinate** level: the chart Ricci-tensor
-difference Lipschitz bound `exists_chartRicciTensor_lipschitz_on_compact` and the
-chart Lie-summand difference Lipschitz bound
-`exists_chartLieDeTurckComp_lipschitz_on_compact` together give the chart-frame
-scalar bound for the full Ricci–DeTurck right-hand side recorded below as
-`exists_chartDeTurckRHSComp_lipschitz_on_compact`. -/
-
-/-! ## The chart-coordinate Ricci–DeTurck right-hand-side component
-
-The chart-`α` `(i, j)` component of the Ricci–DeTurck right-hand side
-`deTurckRicciRHS g_bg g = -2 • Ric(g) + 𝓛_{W(g)} g`, expressed entirely through
-chart-coordinate building blocks: the chart Ricci tensor `chartRicciTensor g α i j`
-(scaled by `-2`) plus the chart Lie (gauge) summand `chartLieDeTurckComp g g_bg α i j`.
-This is the chart-coordinate carrier of the right-hand-side `(i, j)` component;
-its `2`-jet Lipschitz dependence on the metric is assembled from the two committed
-chart-coordinate atoms. -/
 
 /-- The chart-`α` `(i, j)` scalar component of the Ricci–DeTurck right-hand side
 `deTurckRicciRHS g_bg g = -2 • Ric(g) + 𝓛_{W(g)} g`, at the chart point `y ∈ E`:
@@ -1379,15 +1186,12 @@ theorem exists_chartDeTurckRHSComp_lipschitz_on_compact
           chartDeTurckRHSComp (I := I) g_bg g₂ α i j y| ≤
         C * chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y := by
   classical
-  -- Ricci-summand Lipschitz constant on `K` (against the `2`-jet seminorm).
   obtain ⟨Cric, hCric_pos, hCric⟩ :=
     DeTurckCoefficients.exists_chartRicciTensor_lipschitz_on_compact
       (I := I) (M := M) g₁ g₂ α hK hKsub
-  -- Lie-summand Lipschitz constant on `K` (against the `2`-jet seminorm).
   obtain ⟨Clie, hClie_pos, hClie⟩ :=
     DeTurckCoefficients.exists_chartLieDeTurckComp_lipschitz_on_compact
       (I := I) (M := M) g₁ g₂ g_bg α hK hKsub
-  -- The combined constant: `2 · Cric + Clie`, strictly positive.
   refine ⟨2 * Cric + Clie, ?_, ?_⟩
   · have h1 : 0 < 2 * Cric := by positivity
     linarith
@@ -1395,7 +1199,6 @@ theorem exists_chartDeTurckRHSComp_lipschitz_on_compact
   have hjet2_nn : 0 ≤ chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y :=
     DeTurckCoefficients.chartMetricJet2DiffSup_nonneg _ _ _ _
   set jet2 : ℝ := chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y with hjet2_def
-  -- The RHS-component difference splits as `-2 · (Ricci diff) + (Lie diff)`.
   have hsplit :
       chartDeTurckRHSComp (I := I) g_bg g₁ α i j y -
           chartDeTurckRHSComp (I := I) g_bg g₂ α i j y =
@@ -1405,9 +1208,7 @@ theorem exists_chartDeTurckRHSComp_lipschitz_on_compact
               chartLieDeTurckComp (I := I) g₂ g_bg α i j y) := by
     rw [chartDeTurckRHSComp_def, chartDeTurckRHSComp_def]; ring
   rw [hsplit]
-  -- Bound the two summands separately.
   refine (abs_add_le _ _).trans ?_
-  -- Ricci summand: `|-2 · (Ricci diff)| = 2 · |Ricci diff| ≤ 2 · Cric · jet2`.
   have hric_bound : |(-2 : ℝ) * (chartRicciTensor (I := I) g₁ α i j y -
         chartRicciTensor (I := I) g₂ α i j y)| ≤ 2 * Cric * jet2 := by
     rw [abs_mul]
@@ -1419,7 +1220,6 @@ theorem exists_chartDeTurckRHSComp_lipschitz_on_compact
         ≤ 2 * (Cric * jet2) :=
           mul_le_mul_of_nonneg_left hR (by norm_num)
       _ = 2 * Cric * jet2 := by ring
-  -- Lie summand: `|Lie diff| ≤ Clie · jet2`.
   have hlie_bound : |chartLieDeTurckComp (I := I) g₁ g_bg α i j y -
         chartLieDeTurckComp (I := I) g₂ g_bg α i j y| ≤ Clie * jet2 :=
     hClie y hy i j

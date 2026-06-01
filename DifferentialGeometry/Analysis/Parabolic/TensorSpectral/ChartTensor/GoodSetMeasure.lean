@@ -55,17 +55,10 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 
-/-! ## File-local Borel-space instances on `E`
-
-Match the convention used in `Analysis.Laplacian.MetricExtension`: install
-Borel σ-algebras locally without leaking global instances. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Set-theoretic identification with the chart source -/
 
 /-- Under `[I.Boundaryless]`, the chart Levi-Civita good set coincides with the
 chart source at `α`. -/
@@ -73,36 +66,27 @@ theorem chartLeviCivitaGoodSet_eq_extChartAt_source
     [I.Boundaryless] (α : M) :
     chartLeviCivitaGoodSet (I := I) α = (extChartAt I α).source := by
   classical
-  -- Identify the trivialization base set with the chart source.
   have hbase :
       (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source :=
     trivializationAt_baseSet_eq_chartAt_source (I := I) α
   have hbase_extSrc :
       (trivializationAt E (TangentSpace I) α).baseSet = (extChartAt I α).source := by
     rw [hbase, extChartAt_source_eq_chartAt_source (I := I)]
-  -- The chart target is open under the boundaryless assumption.
   have h_target_open : IsOpen ((extChartAt I α).target : Set E) :=
     isOpen_extChartAt_target (I := I) α
   have h_interior_eq :
       interior ((extChartAt I α).target : Set E) = (extChartAt I α).target :=
     h_target_open.interior_eq
-  -- Rewrite the good set.
   apply Set.eq_of_subset_of_subset
-  · -- Every good-set point lies in the chart source.
-    intro x hx
+  · intro x hx
     exact chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hx
-  · -- Every chart-source point is in the good set.
-    intro x hx
+  · intro x hx
     refine (mem_chartLeviCivitaGoodSet_iff (I := I)).mpr ?_
     refine ⟨hx, ?_, ?_⟩
-    · -- chart source ⊆ baseSet (equal sets).
-      rw [hbase_extSrc]; exact hx
-    · -- `extChartAt I α x ∈ interior target = target` follows from `map_source`.
-      have h_map : extChartAt I α x ∈ (extChartAt I α).target :=
+    · rw [hbase_extSrc]; exact hx
+    · have h_map : extChartAt I α x ∈ (extChartAt I α).target :=
         (extChartAt I α).map_source hx
       rw [h_interior_eq]; exact h_map
-
-/-! ## Image identifications -/
 
 /-- Under `[I.Boundaryless]`, the chart-image of the good set equals the chart
 target. -/
@@ -122,8 +106,6 @@ theorem chartLeviCivitaGoodSet_imageEuclid_eq_chartTargetEuclid
       = chartTargetEuclid (I := I) (M := M) α := by
   rw [chartLeviCivitaGoodSet_image_eq_target (I := I) α]
   rfl
-
-/-! ## Complement vanishing inside the chart target -/
 
 /-- Under `[I.Boundaryless]`, the chart target minus the chart-image of the
 good set is the empty set. -/
@@ -145,12 +127,6 @@ theorem chartLeviCivitaGoodSet_chartTargetEuclid_diff_image_eq_empty
       = (∅ : Set EuclN) := by
   rw [chartLeviCivitaGoodSet_imageEuclid_eq_chartTargetEuclid (I := I) (M := M) α]
   exact Set.diff_self
-
-/-! ## Measure-zero corollaries
-
-The set-theoretic equalities above immediately give measure-zero statements
-for any measure on `E` or on `EuclideanSpace`. We record the Lebesgue-volume
-version since that is what the chart-pushforward L² machinery uses. -/
 
 /-- The chart target minus the chart-image of the good set has Lebesgue
 measure zero under the volume on `E` (Borel σ-algebra on `E`). -/
@@ -198,12 +174,6 @@ theorem chartLeviCivitaGoodSet_image_complement_measureZero
   rw [chartLeviCivitaGoodSet_chartTargetEuclid_diff_image_eq_empty
       (I := I) (M := M) α]
   exact MeasureTheory.measure_empty
-
-/-! ## Almost-everywhere equality of indicators / membership predicates
-
-Two formulations downstream code may need: the indicator function of the good
-set agrees with the indicator of the chart source everywhere (not just a.e.),
-and the chart-target indicator equals the chart-image indicator everywhere. -/
 
 /-- Membership in the good set is equivalent to membership in the chart source
 (equality of sets, ergo equality of indicators / characteristic functions). -/

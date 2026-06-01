@@ -40,8 +40,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Canonical measurable-space and Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -65,20 +63,14 @@ theorem exists_pou_chartDensity_bound_on_chartTarget
   classical
   set ρα : M → ℝ := fun x => (chartAtlasPOU I M α : M → ℝ) x with hρα_def
   set T : Set M := tsupport ρα with hT_def
-  -- `tsupport ρα` is closed; on a compact manifold it is compact.
   have hT_closed : IsClosed T := isClosed_tsupport _
   have hT_compact : IsCompact T := hT_closed.isCompact
-  -- The chart-atlas partition of unity is subordinate to the chart sources, so
-  -- the support of `ρα` lies in `(chartAt H α).source`, hence in
-  -- `(extChartAt I α).source` (which coincides with the chart source).
   have hT_sub_chart : T ⊆ (chartAt H α).source :=
     (chartAtlasPOU_isSubordinate (I := I) (M := M) α)
   have hT_sub_extSrc : T ⊆ (extChartAt I α).source := by
     intro x hx
     rw [extChartAt_source_eq_chartAt_source (I := I) (M := M)]
     exact hT_sub_chart hx
-  -- Image `K := (extChartAt I α) '' T`. It is compact in `E` and lies inside
-  -- the chart target.
   have hext_contOn : ContinuousOn (extChartAt I α) T :=
     (continuousOn_extChartAt α).mono hT_sub_extSrc
   set K : Set E := (extChartAt I α) '' T with hK_def
@@ -86,25 +78,17 @@ theorem exists_pou_chartDensity_bound_on_chartTarget
   have hK_sub_target : K ⊆ (extChartAt I α).target := by
     rintro y ⟨x, hxT, rfl⟩
     exact (extChartAt I α).map_source (hT_sub_extSrc hxT)
-  -- Continuity of `ρα`.
   have hρα_cont : Continuous ρα := ((chartAtlasPOU I M α)).contMDiff.continuous
   have hρα_le_one : ∀ x, ρα x ≤ 1 :=
     fun x => (chartAtlasPOU (I := I) (M := M)).le_one _ _
   have hρα_nonneg : ∀ x, 0 ≤ ρα x :=
     fun x => (chartAtlasPOU (I := I) (M := M)).nonneg _ _
-  -- Continuity of the chart density on the chart source.
   have hdens_contOn : ContinuousOn (chartDensity g α) (chartAt H α).source := by
     have := chartDensity_continuousOn (I := I) g α
-    -- the base set of the trivialization at α equals `(chartAt H α).source`.
     simpa [trivializationAt_baseSet_eq_chartAt_source (I := I) (M := M)] using this
-  -- We split on whether `K` is empty.
   by_cases hK_ne : K.Nonempty
-  · -- Use the existing chart-density sup bound on a nonempty compact subset
-    -- of the chart target.
-    obtain ⟨M_sup, hM_sup_pos, hM_sup_le⟩ :=
+  · obtain ⟨M_sup, hM_sup_pos, hM_sup_le⟩ :=
       (by
-        -- inline-proof of `exists_sup_chartDensity_on_compact_pos` (avoid backward
-        -- dependency on the Sobolev layer).
         have hdens_pos_target : ∀ y ∈ (extChartAt I α).target,
             0 < chartDensity g α ((extChartAt I α).symm y) := by
           intro y hy
@@ -142,8 +126,7 @@ theorem exists_pou_chartDensity_bound_on_chartTarget
     refine ⟨M_sup, hM_sup_pos.le, ?_⟩
     intro y hy_target
     by_cases hy_K : y ∈ K
-    · -- `y ∈ K`: bound the density by `M_sup` and use `ρα ≤ 1`.
-      have hdens_le : chartDensity g α ((extChartAt I α).symm y) ≤ M_sup :=
+    · have hdens_le : chartDensity g α ((extChartAt I α).symm y) ≤ M_sup :=
         hM_sup_le y hy_K
       have hdens_nn : 0 ≤ chartDensity g α ((extChartAt I α).symm y) :=
         Real.sqrt_nonneg _
@@ -165,9 +148,7 @@ theorem exists_pou_chartDensity_bound_on_chartTarget
           le_trans step₁ step₂
         simpa using h₁
       exact hM_sup_le'
-    · -- `y ∉ K`: the POU value at `(extChartAt I α).symm y` is `0`, so the
-      -- product is `0`.
-      have hρα_zero : ρα ((extChartAt I α).symm y) = 0 := by
+    · have hρα_zero : ρα ((extChartAt I α).symm y) = 0 := by
         by_contra h_ne
         have hmem : (extChartAt I α).symm y ∈ Function.support ρα :=
           Function.mem_support.mpr h_ne
@@ -182,9 +163,7 @@ theorem exists_pou_chartDensity_bound_on_chartTarget
         rw [hρα_zero]; ring
       rw [this]
       exact hM_sup_pos.le
-  · -- `K` is empty: the POU `ρα` vanishes on every `(extChartAt I α).symm y`,
-    -- so the product is identically `0`. Use the bound `M_α = 0`.
-    rw [Set.not_nonempty_iff_eq_empty] at hK_ne
+  · rw [Set.not_nonempty_iff_eq_empty] at hK_ne
     refine ⟨0, le_rfl, ?_⟩
     intro y hy_target
     have hρα_zero : ρα ((extChartAt I α).symm y) = 0 := by

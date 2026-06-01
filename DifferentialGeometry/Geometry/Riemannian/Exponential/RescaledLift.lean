@@ -69,8 +69,6 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Definition of the rescaled manifold lift -/
-
 section Definition
 
 /-- The **rescaled manifold lift**: invert the chart of `TM` at the zero
@@ -90,12 +88,6 @@ def chartFlowOrbitLiftRescaled
 
 end Definition
 
-/-! ## Chart-target-interior confinement of the rescaled orbit
-
-The rescaling operation `(x, w) ↦ (x, t' • w)` preserves the first
-component, so the chart-target-interior condition on `Φ((x₀, v), τ)`
-carries over to its rescaled image. -/
-
 section ChartTargetInterior
 
 variable [I.Boundaryless]
@@ -109,13 +101,10 @@ lemma rescaleChartOrbit_mem_chartTargetInterior
     rescaleChartOrbit (E := E) t' z ∈
       (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E) := by
   refine ⟨?_, Set.mem_univ _⟩
-  -- (rescaleChartOrbit t' z).1 = z.1.
   change z.1 ∈ _
   exact hz.1
 
 end ChartTargetInterior
-
-/-! ## Initial value of the rescaled lift -/
 
 section InitialValue
 
@@ -131,27 +120,18 @@ theorem chartFlowOrbitLiftRescaled_zero
     chartFlowOrbitLiftRescaled (I := I) Φ p t' v 0 =
       (⟨p, t' • v⟩ : TangentBundle I M) := by
   classical
-  -- At s = 0, the time-rescaling t' * 0 = 0 reduces to the initial value.
   have hzero : chartFlowOrbitLiftRescaled (I := I) Φ p t' v 0 =
       (extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M)).symm
         (rescaleChartOrbit (E := E) t' (Φ (((extChartAt I p p, v) : E × E), 0))) := by
     unfold chartFlowOrbitLiftRescaled
     rw [mul_zero]
   rw [hzero, hΦ_init]
-  -- rescaleChartOrbit t' (x₀, v) = (x₀, t' • v).
   change (extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M)).symm
       ((extChartAt I p p, t' • v) : E × E) = (⟨p, t' • v⟩ : TangentBundle I M)
-  -- This is exactly the unrescaled `chartFlowOrbitLift_zero` evaluated at
-  -- the dummy chart-flow `Φ' := (fun _ => (extChartAt I p p, t' • v))`, but
-  -- we inline the proof to avoid creating an auxiliary definition.
-  -- Use chartFlowOrbitLift with v := t' • v at s = 0 with Φ'_init = (x₀, t' • v).
-  -- The defining unfolding of chartFlowOrbitLift gives exactly this LHS.
   exact chartFlowOrbitLift_zero (I := I) (Φ := fun _ => ((extChartAt I p p, t' • v) : E × E))
     p (t' • v) rfl
 
 end InitialValue
-
-/-! ## Projection identity for the rescaled lift -/
 
 section ProjectionIdentity
 
@@ -174,7 +154,6 @@ theorem chartFlowOrbitLiftRescaled_proj
     (z := rescaleChartOrbit (E := E) t' (Φ (((extChartAt I p p, v) : E × E), t' * s)))
     hresc_target
   rw [h]
-  -- (rescaleChartOrbit t' z).1 = z.1.
   rfl
 
 /-- **Chart-source membership of the projection.** -/
@@ -192,13 +171,6 @@ theorem chartFlowOrbitLiftRescaled_proj_mem_chartAt_source
 
 end ProjectionIdentity
 
-/-! ## Chart-phase ODE for the rescaled chart-coordinate orbit
-
-The chart-coordinate rescaled orbit
-`s ↦ rescaleChartOrbit t' (Φ((x₀, v), t' * s))`
-satisfies the chart-phase ODE on `Ioo (-T/t') (T/t')` whenever the
-unrescaled orbit `s' ↦ Φ((x₀, v), s')` satisfies it on `Ioo (-T) T`. -/
-
 section RescaledChartPhase
 
 variable [I.Boundaryless]
@@ -211,13 +183,11 @@ lemma mul_mem_Ioo_of_pos_of_lt
     t' * s ∈ Set.Ioo (-T) T := by
   obtain ⟨hlo, hhi⟩ := hs
   constructor
-  · -- t' * s > -T : multiply hlo : -T/t' < s by t' > 0; use neg_div.
-    have h1 : t' * (-T / t') < t' * s := mul_lt_mul_of_pos_left hlo ht'
+  · have h1 : t' * (-T / t') < t' * s := mul_lt_mul_of_pos_left hlo ht'
     have h2 : t' * (-T / t') = -T := by
       field_simp
     linarith
-  · -- t' * s < T : multiply hhi : s < T/t' by t' > 0.
-    have h1 : t' * s < t' * (T / t') := mul_lt_mul_of_pos_left hhi ht'
+  · have h1 : t' * s < t' * (T / t') := mul_lt_mul_of_pos_left hhi ht'
     have h2 : t' * (T / t') = T := by
       field_simp
     linarith
@@ -242,26 +212,17 @@ lemma rescaled_orbit_hasDerivAt_chartPhaseVF
         (rescaleChartOrbit (E := E) t'
           (Φ (((extChartAt I p p, v) : E × E), t' * s)))) s := by
   classical
-  -- The unrescaled orbit's chart-phase derivative at t' * s.
   have hts : t' * s ∈ Set.Ioo (-T) T :=
     mul_mem_Ioo_of_pos_of_lt ht'_pos hs
   have hd : HasDerivAt (fun s'' : ℝ => Φ (((extChartAt I p p, v) : E × E), s''))
       (chartPhaseVF (I := I) g p
         (Φ (((extChartAt I p p, v) : E × E), t' * s))) (t' * s) :=
     hΦ_phase (t' * s) hts
-  -- Apply the rescaling chain rule with `c := fun s'' => Φ((x₀, v), s'')`.
   exact hasDerivAt_rescaled_orbit (I := I) (g := g) (α := p)
     (c := fun s'' : ℝ => Φ (((extChartAt I p p, v) : E × E), s''))
     (s₀ := s) (a := t') hd
 
 end RescaledChartPhase
-
-/-! ## Local integral curve at every interior point of the rescaled interval
-
-Mirroring `InverseManifoldChain.lean`: at each `s₀ ∈ Ioo (-T/t') (T/t')`,
-Picard–Lindelöf yields a local lift identifying with
-`chartFlowOrbitLiftRescaled Φ p t' v` near `s₀` via the chart-coordinate
-uniqueness in the fixed chart at `⟨p, 0⟩`. -/
 
 section LocalLiftAtsZero
 
@@ -292,7 +253,6 @@ private lemma local_lift_eventuallyEq_chartFlowOrbitLiftRescaled
       (geodesicVectorFieldChart (I := I) g p) s₀) :
     g_loc =ᶠ[𝓝 s₀] chartFlowOrbitLiftRescaled (I := I) Φ p t' v := by
   classical
-  -- Source membership of (F_v^resc s₀).proj.
   have hresc_target_s₀ :=
     rescaleChartOrbit_mem_chartTargetInterior (I := I) (p := p) t' hΦ_target_s₀
   have hF_s₀_src : (chartFlowOrbitLiftRescaled (I := I) Φ p t' v s₀).proj ∈
@@ -300,38 +260,30 @@ private lemma local_lift_eventuallyEq_chartFlowOrbitLiftRescaled
     chartFlowOrbitLiftRescaled_proj_mem_chartAt_source (I := I) p v t' s₀ hΦ_target_s₀
   have hg_loc_s₀_src : (g_loc s₀).proj ∈ (chartAt H p).source := by
     rw [hg_loc_s₀]; exact hF_s₀_src
-  -- Chart-`⟨p,0⟩`-pushed derivative of `g_loc` near `s₀`.
   have hd_gloc :=
     eventually_hasDerivAt_chartPhaseVF_at_zero_section (I := I)
       (g := g) (α := p) (s₀ := s₀) (f := g_loc) hg_loc_s₀_src hg_loc_int
-  -- Define c₁(τ) := extChartAt I.tangent ⟨p,0⟩ (g_loc (s₀+τ));
-  -- c₂(τ) := rescaleChartOrbit t' (Φ((x₀, v), t' * (s₀+τ))).
   set c₁ : ℝ → E × E := fun τ : ℝ =>
     extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M) (g_loc (s₀ + τ)) with hc₁_def
   set c₂ : ℝ → E × E := fun τ : ℝ =>
     rescaleChartOrbit (E := E) t' (Φ (((extChartAt I p p, v) : E × E), t' * (s₀ + τ)))
     with hc₂_def
-  -- z₀ : common value at τ = 0.
   set z₀ : E × E := rescaleChartOrbit (E := E) t'
       (Φ (((extChartAt I p p, v) : E × E), t' * s₀)) with hz₀_def
   have hz₀_interior : z₀ ∈
       (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E) := hresc_target_s₀
-  -- c₂ 0 = z₀.
   have hc₂_zero : c₂ 0 = z₀ := by
     change rescaleChartOrbit (E := E) t'
         (Φ (((extChartAt I p p, v) : E × E), t' * (s₀ + 0))) =
       rescaleChartOrbit (E := E) t'
         (Φ (((extChartAt I p p, v) : E × E), t' * s₀))
     rw [add_zero]
-  -- c₁ 0 = z₀ via inverse-chart at ⟨p, 0⟩.
   have hc₁_zero : c₁ 0 = z₀ := by
     change extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M)
         (g_loc (s₀ + 0)) = z₀
     rw [add_zero, hg_loc_s₀]
-    -- chartFlowOrbitLiftRescaled at s₀ = (extChartAt I.tangent ⟨p,0⟩).symm (rescaleOrbit ...).
     unfold chartFlowOrbitLiftRescaled
     exact extChartAt_tangent_zero_apply_symm (I := I) p hresc_target_s₀
-  -- c₂ satisfies chart-phase ODE + interior near 0 (translate from `hd_phase`).
   have htranslate : Tendsto (fun τ : ℝ => s₀ + τ) (𝓝 0) (𝓝 s₀) := by
     have h1 : ContinuousAt (fun τ : ℝ => s₀ + τ) 0 :=
       (continuous_const.add continuous_id).continuousAt
@@ -344,15 +296,12 @@ private lemma local_lift_eventuallyEq_chartFlowOrbitLiftRescaled
     filter_upwards [hev] with τ hτ
     obtain ⟨hτD, hτT⟩ := hτ
     refine ⟨?_, ?_⟩
-    · -- Derive c₂ τ : chain rule via time-shift τ ↦ s₀ + τ.
-      have h_shift : HasDerivAt (fun τ : ℝ => s₀ + τ) 1 τ := by
+    · have h_shift : HasDerivAt (fun τ : ℝ => s₀ + τ) 1 τ := by
         simpa using (hasDerivAt_id τ).const_add s₀
       have hcomp := hτD.scomp τ h_shift
       simp only [one_smul] at hcomp
       convert hcomp using 1
-    · -- Interior: rescaling preserves it.
-      exact rescaleChartOrbit_mem_chartTargetInterior (I := I) (p := p) t' hτT
-  -- c₁ satisfies chart-phase ODE + interior near 0.
+    · exact rescaleChartOrbit_mem_chartTargetInterior (I := I) (p := p) t' hτT
   have hπ_cont : Continuous
       (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
     FiberBundle.continuous_proj E (TangentSpace I)
@@ -402,11 +351,9 @@ private lemma local_lift_eventuallyEq_chartFlowOrbitLiftRescaled
     have hcomp := hτD.scomp τ h_shift
     simp only [one_smul] at hcomp
     convert hcomp using 1
-  -- Apply chartPhaseVF_orbit_uniqueness to c₁, c₂.
   have hc_eq : c₁ =ᶠ[𝓝 (0 : ℝ)] c₂ :=
     chartPhaseVF_orbit_uniqueness (I := I) (g := g) (α := p)
       (c₁ := c₁) (c₂ := c₂) (z₀ := z₀) hz₀_interior hc₁_zero hc₂_zero hd_c₁ hd_c₂
-  -- Translate into `g_loc =ᶠ F_v^resc`.
   have htranslate_inv : Tendsto (fun s : ℝ => s - s₀) (𝓝 s₀) (𝓝 0) := by
     have h1 : ContinuousAt (fun s : ℝ => s - s₀) s₀ :=
       (continuous_id.sub continuous_const).continuousAt
@@ -414,7 +361,6 @@ private lemma local_lift_eventuallyEq_chartFlowOrbitLiftRescaled
     simpa using this
   have hc_eq_in_s : ∀ᶠ s in 𝓝 s₀, c₁ (s - s₀) = c₂ (s - s₀) :=
     htranslate_inv.eventually hc_eq
-  -- Source membership of (g_loc s).proj near s₀.
   have hgloc_proj_src : ∀ᶠ s in 𝓝 s₀, (g_loc s).proj ∈ (chartAt H p).source := by
     have hcomp : ContinuousAt (fun s : ℝ => (g_loc s).proj) s₀ :=
       hπ_cont.continuousAt.comp hg_loc_int.continuousAt
@@ -423,10 +369,7 @@ private lemma local_lift_eventuallyEq_chartFlowOrbitLiftRescaled
     rw [show (g_loc s₀).proj = (chartFlowOrbitLiftRescaled (I := I) Φ p t' v s₀).proj
       from by rw [hg_loc_s₀]]
     exact hp_open.mem_nhds hF_s₀_src
-  -- Combine and conclude.
   filter_upwards [hc_eq_in_s, hgloc_proj_src] with s hs_c_eq hs_gloc_src
-  -- c₁ (s - s₀) = extChartAt I.tangent ⟨p,0⟩ (g_loc s).
-  -- c₂ (s - s₀) = rescaleChartOrbit t' (Φ((x₀,v), t' * s)).
   have hs_ext_eq :
       extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M) (g_loc s) =
         rescaleChartOrbit (E := E) t'
@@ -439,7 +382,6 @@ private lemma local_lift_eventuallyEq_chartFlowOrbitLiftRescaled
           (Φ (((extChartAt I p p, v) : E × E), t' * s)) := by
       simp [hc₂_def, add_sub_cancel]
     rw [← h₁, hs_c_eq, h₂]
-  -- Invert the chart-of-TM at ⟨p, 0⟩.
   have hgloc_chsrc : g_loc s ∈
       (chartAt (ModelProd H E) (⟨p, (0 : E)⟩ : TangentBundle I M)).source :=
     (mem_chartAt_modelProd_zero_source_iff (I := I) p (g_loc s)).mpr hs_gloc_src
@@ -454,8 +396,6 @@ private lemma local_lift_eventuallyEq_chartFlowOrbitLiftRescaled
   rw [← hleft, hs_ext_eq]
 
 end LocalLiftAtsZero
-
-/-! ## Manifold integral-curve property on the rescaled interval -/
 
 section IntegralCurveOnIoo
 
@@ -477,17 +417,13 @@ theorem chartFlowOrbitLiftRescaled_isMIntegralCurveAt_of_mem_Ioo
     IsMIntegralCurveAt (chartFlowOrbitLiftRescaled (I := I) Φ p t' v)
       (geodesicVectorFieldChart (I := I) g p) s₀ := by
   classical
-  -- t' * s₀ ∈ Ioo (-T) T ⊆ Icc (-T) T.
   have hts₀ : t' * s₀ ∈ Set.Ioo (-T) T :=
     mul_mem_Ioo_of_pos_of_lt ht'_pos hs₀
   have hts₀_Icc : t' * s₀ ∈ Set.Icc (-T) T := Set.Ioo_subset_Icc_self hts₀
-  -- Chart-target-interior of the unrescaled orbit at t' * s₀.
   have hΦ_target_s₀ := hΦ_target_Icc (t' * s₀) hts₀_Icc
-  -- Existence of a local Picard–Lindelöf lift at the rescaled lift's value at s₀.
   have hF_s₀_src : (chartFlowOrbitLiftRescaled (I := I) Φ p t' v s₀).proj ∈
       (chartAt H p).source :=
     chartFlowOrbitLiftRescaled_proj_mem_chartAt_source (I := I) p v t' s₀ hΦ_target_s₀
-  -- Apply Mathlib Picard-Lindelöf existence at q := F_v^resc s₀.
   have hsmooth : ContMDiffAt I.tangent I.tangent.tangent ∞
       (fun w : TangentBundle I M =>
         (⟨w, geodesicVectorFieldChart (I := I) g p w⟩ :
@@ -506,7 +442,6 @@ theorem chartFlowOrbitLiftRescaled_isMIntegralCurveAt_of_mem_Ioo
       (I := I.tangent) (M := TangentBundle I M)
       (v := geodesicVectorFieldChart (I := I) g p)
       (t₀ := s₀) (x₀ := chartFlowOrbitLiftRescaled (I := I) Φ p t' v s₀) hsmooth1
-  -- Build the rescaled-orbit eventually-near-s₀ chart-phase ODE + interior.
   have hd_phase_ev : ∀ᶠ s in 𝓝 s₀,
       HasDerivAt
         (fun s' : ℝ => rescaleChartOrbit (E := E) t'
@@ -523,12 +458,10 @@ theorem chartFlowOrbitLiftRescaled_isMIntegralCurveAt_of_mem_Ioo
         (Φ := Φ) (T := T) (t' := t') ht'_pos v hΦ_phase_Ioo hs
     · exact hΦ_target_Icc (t' * s)
         (Set.Ioo_subset_Icc_self (mul_mem_Ioo_of_pos_of_lt ht'_pos hs))
-  -- Apply the eventually-equality lemma.
   have h_eq : g_loc =ᶠ[𝓝 s₀] chartFlowOrbitLiftRescaled (I := I) Φ p t' v :=
     local_lift_eventuallyEq_chartFlowOrbitLiftRescaled (I := I) (g := g) (p := p)
       (v := v) (t' := t') (Φ := Φ) (s₀ := s₀)
       hΦ_target_s₀ hd_phase_ev hg_loc_s₀ hg_loc_int
-  -- Transfer IsMIntegralCurveAt.
   rw [IsMIntegralCurveAt] at hg_loc_int ⊢
   filter_upwards [hg_loc_int, h_eq, h_eq.eventually_nhds] with s hs_int hs_eq hs_eq_nhds
   rw [← hs_eq]
@@ -556,15 +489,6 @@ theorem chartFlowOrbitLiftRescaled_isMIntegralCurveOn_Ioo
     ht'_pos hΦ_target_Icc hΦ_phase_Ioo hs₀
 
 end IntegralCurveOnIoo
-
-/-! ## Projection at `s = 1` equals `expMap g p (t' • v)`
-
-The rescaled lift `F_v^resc` starts at `⟨p, t' • v⟩` and is an integral
-curve of `geodesicVectorFieldChart g p` on the rescaled interval, which
-contains `1` when `t' < T`. By the preconnected propagation machinery
-from `PreconnectedPropagation.lean`, the projection of `F_v^resc` on
-this interval coincides with `maximalGeodesic g p (t' • v)`; specialising
-at `s = 1` gives the headline identification. -/
 
 section ProjectionAtOne
 
@@ -625,22 +549,14 @@ theorem chartFlowOrbitLiftRescaled_proj_eq_maximalGeodesic_on_Ioo
     (chartFlowOrbitLiftRescaled (I := I) Φ p t' v s).proj =
       maximalGeodesic (I := I) g p (t' • v) s := by
   classical
-  -- Data: F_v^resc 0 = ⟨p, t' • v⟩ and IsMIntegralCurveOn on Ioo (-T/t') (T/t').
   obtain ⟨hF0, hF_int⟩ :=
     rescaled_lift_witness_data (I := I) (g := g) (p := p) (v := v)
       (T := T) (t' := t') ht'_pos (Φ := Φ) hΦ_init hΦ_target_Icc hΦ_phase_Ioo
   set J : Set ℝ := Set.Ioo (-T / t') (T / t') with hJ_def
   have hJ_open : IsOpen J := isOpen_Ioo
   have hJ_conn : IsPreconnected J := isPreconnected_Ioo_real _ _
-  -- 0 ∈ J.
   have hT_div : 0 < T / t' := by
-    -- T > 0 follows from hs (Ioo (-T/t') (T/t') is nonempty), but we derive it
-    -- from positivity of s being in the interval: if hs.1 < hs.2 then 0 < T/t'
-    -- since -T/t' < T/t' iff 0 < T/t' (given t' > 0 we have -T/t' < T/t' iff 0 < T).
-    -- Actually we need to extract this. We get T > 0 from t'_pos and the fact
-    -- that the interval Ioo is nonempty, but a clean route: hs.1 < hs.2.
     have hineq : -T / t' < T / t' := lt_trans hs.1 hs.2
-    -- (-T)/t' < T/t' iff -T < T (since t' > 0) iff 0 < T.
     have : -T < T := by
       have := mul_lt_mul_of_pos_right hineq ht'_pos
       field_simp at this
@@ -650,18 +566,12 @@ theorem chartFlowOrbitLiftRescaled_proj_eq_maximalGeodesic_on_Ioo
   have hT_div_neg : -T / t' < 0 := by
     rw [neg_div]; exact neg_lt_zero.mpr hT_div
   have h0_J : (0 : ℝ) ∈ J := ⟨hT_div_neg, hT_div⟩
-  -- Picard–Lindelöf lift g_v at ⟨p, t' • v⟩.
   obtain ⟨g_v, hg0, hg_int⟩ :=
     exists_isMIntegralCurveAt_geodesicVectorFieldChart (I := I) (g := g)
       (p := p) (v := t' • v)
-  -- Witness ε-interval of g_v.
   obtain ⟨ε, hε, hg_on, hgeo, hg_src⟩ :=
     exists_picardLift_witness_interval (I := I) (g := g) (p := p)
       (v := t' • v) hg0 hg_int
-  -- Step 1: s ∈ maximalGeodesicInterval g p (t' • v) via the witness (projectCurve F_v^resc, J).
-  -- For that, we need to know that (F_v^resc s).proj defines a witness on J.
-  -- The witness curve here is `fun s => (F_v^resc s).proj`. Lift `F_v^resc` itself
-  -- satisfies IsGeodesicOnWithInitial g (·.proj) J p (t' • v).
   have hgeo_F : IsGeodesicOnWithInitial (I := I) g
       (fun s => (chartFlowOrbitLiftRescaled (I := I) Φ p t' v s).proj) J p (t' • v) := by
     refine ⟨chartFlowOrbitLiftRescaled (I := I) Φ p t' v, ?_, hF0, hF_int⟩
@@ -671,11 +581,9 @@ theorem chartFlowOrbitLiftRescaled_proj_eq_maximalGeodesic_on_Ioo
       J, hJ_open, hJ_conn, h0_J, hs, hgeo_F⟩
   have hs_mem : s ∈ maximalGeodesicInterval (I := I) g p (t' • v) := hs_witness
   rw [maximalGeodesic_of_mem (I := I) hs_mem]
-  -- Step 2: extract chosen-curve witness.
   obtain ⟨J', hJ'_open, hJ'_conn, h0_J', hs_J', hgeo'⟩ :=
     maximalGeodesicChosenCurve_spec (I := I) g p (t' • v) hs_mem
   obtain ⟨f', hproj', hf'_0, hf'_on⟩ := hgeo'
-  -- Step 3: clopen propagation on K := J ∩ J' to identify F_v^resc with f'.
   set K : Set ℝ := J ∩ J' with hK_def
   have hK_open : IsOpen K := hJ_open.inter hJ'_open
   have hK_conn : IsPreconnected K := by
@@ -685,14 +593,12 @@ theorem chartFlowOrbitLiftRescaled_proj_eq_maximalGeodesic_on_Ioo
     exact hK_ord.isPreconnected
   have h0_K : (0 : ℝ) ∈ K := ⟨h0_J, h0_J'⟩
   have hs_K : s ∈ K := ⟨hs, hs_J'⟩
-  -- IsMIntegralCurveOn restrictions:
   have hF_on_K : IsMIntegralCurveOn (chartFlowOrbitLiftRescaled (I := I) Φ p t' v)
       (geodesicVectorFieldChart (I := I) g p) K :=
     hF_int.mono Set.inter_subset_left
   have hf'_on_K : IsMIntegralCurveOn f'
       (geodesicVectorFieldChart (I := I) g p) K :=
     hf'_on.mono Set.inter_subset_right
-  -- Source membership of (F_v^resc s').proj on K.
   have hF_src_K : ∀ s' ∈ K,
       (chartFlowOrbitLiftRescaled (I := I) Φ p t' v s').proj ∈
         (chartAt H p).source := by
@@ -703,14 +609,11 @@ theorem chartFlowOrbitLiftRescaled_proj_eq_maximalGeodesic_on_Ioo
     have hΦ_target_s' := hΦ_target_Icc (t' * s') (Set.Ioo_subset_Icc_self hts')
     exact chartFlowOrbitLiftRescaled_proj_mem_chartAt_source (I := I) p v t' s'
       hΦ_target_s'
-  -- Initial value match at s' = 0: F_v^resc 0 = ⟨p, t' • v⟩ = f' 0.
   have h0_eq : chartFlowOrbitLiftRescaled (I := I) Φ p t' v 0 = f' 0 := by
     rw [hF0, hf'_0]
-  -- Apply preconnected propagation.
   have heqOn := isMIntegralCurveOn_eq_of_isPreconnected (I := I) (g := g) (p := p)
     (f₁ := chartFlowOrbitLiftRescaled (I := I) Φ p t' v) (f₂ := f')
     hK_open hK_conn h0_K hF_on_K hf'_on_K hF_src_K h0_eq
-  -- At s ∈ K, F_v^resc s = f' s. Project.
   have hF_s_eq : chartFlowOrbitLiftRescaled (I := I) Φ p t' v s = f' s := heqOn hs_K
   have : (chartFlowOrbitLiftRescaled (I := I) Φ p t' v s).proj = (f' s).proj := by
     rw [hF_s_eq]
@@ -736,25 +639,19 @@ theorem chartFlowOrbitLiftRescaled_proj_at_one
     (chartFlowOrbitLiftRescaled (I := I) Φ p t' v 1).proj =
       expMap (I := I) g p (show TangentSpace I p from t' • v) := by
   classical
-  -- 1 ∈ Ioo (-T/t') (T/t') since t' < T and t' > 0.
   have h1_in : (1 : ℝ) ∈ Set.Ioo (-T / t') (T / t') := by
     refine ⟨?_, ?_⟩
-    · -- -T/t' < 1: -T/t' ≤ 0 (since T > 0, t' > 0) ≤ ... wait, we need < 1.
-      -- We have T > 0 from t' < T and t' > 0, hence -T/t' < 0 < 1.
-      have hT_pos : 0 < T := lt_trans ht'_pos ht'_lt
+    · have hT_pos : 0 < T := lt_trans ht'_pos ht'_lt
       have : -T / t' < 0 := by
         rw [neg_div]
         exact neg_lt_zero.mpr (div_pos hT_pos ht'_pos)
       linarith
-    · -- 1 < T/t' iff t' < T (using t' > 0).
-      rw [lt_div_iff₀ ht'_pos]
+    · rw [lt_div_iff₀ ht'_pos]
       linarith
-  -- Apply the projection identification at s = 1.
   have hproj1 := chartFlowOrbitLiftRescaled_proj_eq_maximalGeodesic_on_Ioo
     (I := I) (g := g) (p := p) (v := v) (T := T) (t' := t') ht'_pos
     (Φ := Φ) hΦ_init hΦ_target_Icc hΦ_phase_Ioo (s := 1) h1_in
   rw [hproj1]
-  -- expMap g p (t' • v) = maximalGeodesic g p (t' • v) 1 by definition.
   rfl
 
 end ProjectionAtOne

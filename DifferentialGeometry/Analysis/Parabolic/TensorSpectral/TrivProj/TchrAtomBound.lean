@@ -66,8 +66,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## The POU-`tsupport` lies in the chart source -/
-
 /-- The closed support of the chart-`α` partition-of-unity weight is contained
 in the chart source. This is the chart-source form of the base-set inclusion
 `pouTsupport_subset_baseSet`. -/
@@ -78,17 +76,8 @@ private lemma pouTsupport_subset_chartAt_source (α : M) :
   intro b hb
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     pouTsupport_subset_baseSet (I := I) (M := M) α hb
-  -- The trivialization base set coincides with the chart source.
   rw [trivializationAt_baseSet_eq_chartAt_source (I := I)] at hb_base
   exact hb_base
-
-/-! ## Headline pointwise bound on the Tchr atom
-
-The Christoffel-correction sum lives in the fibre `TensorRSSpace r s I b`.
-We control the trivialization's `continuousLinearMapAt` action on this sum
-by first rewriting it as the chart-twist inverse of the model-fibre image
-(bridge identity), and then applying the chart-twist norm bound on the
-POU `tsupport`. -/
 
 /-- **Pointwise Tchr trivialization atom bound.** For a closed Riemannian
 manifold `(M, g)`, a chart base point `α`, and ranks `(r, s)`, there is a
@@ -125,24 +114,19 @@ theorem norm_sq_triv_christoffel_correction_le_const_mul_tensorInnerPointwise_on
                 + (∑ l : Fin s,
                     chartTensorRSOutputSlotCorrection (I := I) r s g α T X b l))) := by
   classical
-  -- Extract the constant from D-grad.6'.B (chart-twist norm bound).
   obtain ⟨K, hK_nn, hK_le⟩ :=
     chartRSTwistInv_sq_norm_le_const_mul_tensorInnerPointwise_on_pouTsupport
       (I := I) (M := M) g r s α
   refine ⟨K, hK_nn, ?_⟩
   intro T X b hb
-  -- Abbreviate the Christoffel-correction sum in the fibre.
   set Csum : TensorRSSpace r s I b :=
     - (∑ i : Fin r,
         chartTensorRSInputSlotCorrection (I := I) r s g α T X b i)
       + (∑ l : Fin s,
           chartTensorRSOutputSlotCorrection (I := I) r s g α T X b l)
     with hCsum_def
-  -- `b ∈ (chartAt H α).source` from `b ∈ tsupport ρ_α`.
   have hb_chart_src : b ∈ (chartAt H α).source :=
     pouTsupport_subset_chartAt_source (I := I) (M := M) α hb
-  -- Bridge identity at `Csum`: rewrites the trivialization action as the
-  -- chart-twist inverse of the model image.
   have h_bridge :
       (trivializationAt (TensorRSModel r s ℝ E)
             (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
@@ -151,14 +135,12 @@ theorem norm_sq_triv_christoffel_correction_le_const_mul_tensorInnerPointwise_on
           (TensorRSSpace.toModel Csum) :=
     triv_continuousLinearMapAt_eq_chartRSTwistInv_toModel
       (I := I) (M := M) r s α hb_chart_src Csum
-  -- Apply the chart-twist norm bound (D-grad.6'.B) to the model image of `Csum`.
   have h_twist_bound :
       ‖chartRSTwistInv (I := I) (M := M) α b r s
             (TensorRSSpace.toModel Csum)‖ ^ 2 ≤
         K * tensorInnerPointwise (I := I) (M := M) g r s b
             (TensorRSSpace.toModel Csum) (TensorRSSpace.toModel Csum) :=
     hK_le hb (TensorRSSpace.toModel Csum)
-  -- Combine: rewrite the LHS via the bridge identity.
   rw [h_bridge]
   exact h_twist_bound
 

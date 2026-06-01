@@ -78,8 +78,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Pointwise bound on `‖repr T b‖` by chart-frame component values -/
-
 /-- The model-fiber norm of the chart-α-trivialised representation of a smooth
 compactly-supported `(r, s)`-tensor section `T` at `b` is bounded by the sum
 of the absolute values of its chart-frame `(Idx, Jdx)`-components at `b`,
@@ -122,8 +120,6 @@ lemma tensorRepr_norm_le_sum_components
     (tensorChartBasisElement_norm_le (E := E) r s Idx Jdx)
     (abs_nonneg _)
 
-/-! ## Differentiability of the chart-pulled scalar components -/
-
 /-- Each chart-frame scalar component pulled by `(extChartAt I α).symm` is
 Fréchet-differentiable at the chart-coord image of any chart-source point. -/
 lemma tensorRepr_chart_pulled_component_differentiableAt
@@ -136,11 +132,8 @@ lemma tensorRepr_chart_pulled_component_differentiableAt
       (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx ∘
         (extChartAt I α).symm) (extChartAt I α b) := by
   classical
-  -- Smoothness on chart source.
   have hsmooth_on := tensorChartComponentRaw_contMDiffOn_chart_source
     (I := I) (M := M) g r s T α Idx Jdx
-  -- Compose with `(extChartAt I α).symm` (smooth on the chart target into
-  -- the chart source).
   have hsymm : ContMDiffOn 𝓘(ℝ, E) I ∞ (extChartAt I α).symm
       (extChartAt I α).target := contMDiffOn_extChartAt_symm (I := I) α
   have hmaps : Set.MapsTo (extChartAt I α).symm (extChartAt I α).target
@@ -153,15 +146,12 @@ lemma tensorRepr_chart_pulled_component_differentiableAt
       (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx ∘
         (extChartAt I α).symm) (extChartAt I α).target :=
     hsmooth_on.comp hsymm hmaps
-  -- `extChartAt I α b ∈ (extChartAt I α).target`.
   have hb_src : b ∈ (extChartAt I α).source :=
     (extChartAt_source (I := I) α).symm ▸ hb_chart
   have hb_target : extChartAt I α b ∈ (extChartAt I α).target :=
     (extChartAt I α).map_source hb_src
   have h_open_target : IsOpen (extChartAt I α).target :=
     isOpen_extChartAt_target (I := I) α
-  -- Promote ContMDiffOn → ContDiffOn on the open chart target, then to
-  -- DifferentiableAt at `extChartAt I α b`.
   have hcontDiffOn : ContDiffOn ℝ ∞
       (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx ∘
         (extChartAt I α).symm) (extChartAt I α).target :=
@@ -177,8 +167,6 @@ lemma tensorRepr_chart_pulled_component_differentiableAt
       (extChartAt I α).target (extChartAt I α b) :=
     hcdAt.differentiableWithinAt (by norm_num)
   exact hwithin.differentiableAt (h_open_target.mem_nhds hb_target)
-
-/-! ## Pointwise bound on `‖fderiv(repr T ∘ symm)‖` by component fderivs -/
 
 /-- The chart-coordinate Fréchet derivative of the chart-pulled
 chart-α-trivialised representation of `T.toSection` at the chart-coord point
@@ -200,7 +188,6 @@ lemma fderiv_tensorRepr_opNorm_le_sum_fderiv_components
               Idx Jdx ∘ (extChartAt I α).symm) (extChartAt I α b)‖ *
             ‖tensorChartBasisElement (E := E) r s Idx Jdx‖ := by
   classical
-  -- Rewrite the chart-pulled `repr` as a finite sum of `(scalar ∘ symm) • basis`.
   have hψ_eq :
       (tensorRSChartE_section_repr (I := I) r s α
           (fun y : M => T.toSection y) ∘ (extChartAt I α).symm) =
@@ -236,12 +223,9 @@ lemma fderiv_tensorRepr_opNorm_le_sum_fderiv_components
     rw [hcomp_eq Idx Jdx]
     rfl
   rw [hψ_eq]
-  -- Differentiability of each scalar summand at the chart-coord point.
   have hdiff_each := fun Idx Jdx =>
     tensorRepr_chart_pulled_component_differentiableAt
       (I := I) (M := M) g r s T α Idx Jdx hb_chart
-  -- fderiv distributes over a finite sum, then each summand uses
-  -- `fderiv_smul_const`.
   have hfderiv_sum :
       fderiv ℝ
         (fun y : E =>
@@ -289,8 +273,6 @@ lemma fderiv_tensorRepr_opNorm_le_sum_fderiv_components
   rw [fderiv_smul_const (hdiff_each Idx Jdx)]
   rw [ContinuousLinearMap.norm_smulRight_apply]
 
-/-! ## Headline -/
-
 /-- **Headline bound.** For a smooth Riemannian manifold `(M, g)`, a chart-
 centre `α : M`, and a smooth compactly-supported `(r, s)`-tensor section
 `T`, the model-fiber norm of the chart-α-trivialised representation of
@@ -327,11 +309,9 @@ theorem chart_pulled_tensor_repr_norm_le_chartComp_data
                   g r s T α Idx Jdx ∘ (extChartAt I α).symm)
                 (extChartAt I α b)‖ := by
   classical
-  -- The single constant: the basis-element norm bound.
   set K_basis : ℝ := tensorChartBasisNormConstant (E := E) r s with hK_basis_def
   have hK_basis_nn : 0 ≤ K_basis :=
     tensorChartBasisNormConstant_nonneg (E := E) r s
-  -- Tsupport ⊆ chart source, used only to invoke the differentiability lemma.
   set K_set : Set M := tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) with hK_set_def
   have hK_sub : K_set ⊆ (chartAt H α).source :=
@@ -340,8 +320,7 @@ theorem chart_pulled_tensor_repr_norm_le_chartComp_data
   intro T b hb
   have hb_chart : b ∈ (chartAt H α).source := hK_sub hb
   refine ⟨?_, ?_⟩
-  · -- Pointwise bound on the representation norm.
-    refine le_trans
+  · refine le_trans
       (tensorRepr_norm_le_sum_components (I := I) (M := M)
         g r s T α b) ?_
     rw [Finset.mul_sum]
@@ -351,8 +330,7 @@ theorem chart_pulled_tensor_repr_norm_le_chartComp_data
     refine Finset.sum_le_sum ?_
     intro Jdx _
     rw [mul_comm K_basis _]
-  · -- Pointwise bound on the Fréchet derivative operator norm.
-    refine le_trans
+  · refine le_trans
       (fderiv_tensorRepr_opNorm_le_sum_fderiv_components (I := I) (M := M)
         g r s T α (b := b) hb_chart) ?_
     rw [Finset.mul_sum]

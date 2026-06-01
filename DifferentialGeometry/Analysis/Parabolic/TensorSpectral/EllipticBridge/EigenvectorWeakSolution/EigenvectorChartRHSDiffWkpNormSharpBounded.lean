@@ -61,23 +61,12 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Chart-locality-free twins
-
-Re-keyed onto the intrinsic compact-operator eigenbasis: each occurrence of the
-eigenbasis vector becomes
-`tensorResolventEigenbasisVec
-  (tensorResolventL2_isCompactOperator g r s) i`, and the bundle
-structure together with every chart-local atom becomes its `_unconditional`
-twin, depending only on the compact-operator spectral data. -/
 
 section Unconditional
 
@@ -391,7 +380,6 @@ lemma rhsZeroAggregate_le_energy_perK_bdd
           = ENNReal.ofReal Cval * Rhs_eff := by
       rw [hRhs_eff_def, ENNReal.ofReal_mul hCval_nn, mul_assoc]
     exact h_step.trans_eq h_rw
-  -- Summand 1: the bare eigenvector chart component (at `K`).
   have hS1 :
       wkpNorm (d := Module.finrank ℝ E) K 2
           (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
@@ -400,7 +388,6 @@ lemma rhsZeroAggregate_le_energy_perK_bdd
         ≤ ENNReal.ofReal (H.Ceig K) * Rhs_eff :=
     h_bridge _ (H.Ceig K) (H.eEig K) (H.hCeig_nn K) hEig_le
       (H.hCeig_bd i K hK_le_N)
-  -- Summand 2: the cross-Leibniz transport double sum (at `K + 1`).
   have hS2_inner : ∀ β ∈ transportChartCenters (I := I) (M := M) α,
       ((∑ Q : TensorCompIdx (E := E) r s,
             wkpNorm (d := Module.finrank ℝ E) (K + 1) 2

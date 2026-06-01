@@ -75,14 +75,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Uniform value bound for `trivToE α b (B b)` on the POU tsupport
-
-The function `b ↦ trivToE α b (B b)` is just the chart-trivialised
-representation `chartE_section_repr α B.toFun b` (both are
-`(trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b (B.toFun b)`).
-This is smooth on the chart source, hence continuous on the compact POU
-tsupport, and therefore uniformly bounded above. -/
-
 /-- Uniform value bound for `‖trivToE α b (B b)‖` on the chart-`α`
 partition-of-unity tsupport. -/
 private lemma trivToE_B_value_bound_on_pouTsupport
@@ -97,8 +89,6 @@ private lemma trivToE_B_value_bound_on_pouTsupport
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) with hK_set_def
   have hK_compact : IsCompact K_set :=
     pouTsupport_isCompact (I := I) (M := M) α
-  -- Smoothness of `u(y) := chartE_section_repr α B.toFun ∘ symm` on the chart
-  -- target image of the good set.
   have hB_total : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => TotalSpace.mk' E
         (E := fun y : M => TangentSpace I y) x (B.toFun x)) := B.contMDiff
@@ -109,12 +99,10 @@ private lemma trivToE_B_value_bound_on_pouTsupport
       (chartE_section_repr (I := I) α B.toFun ∘ (extChartAt I α).symm)
       ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) :=
     chartE_pullback_contDiffOn_goodSet (I := I) α hB_on
-  -- Continuity of `‖u‖` on the open image.
   have hcont_u : ContinuousOn (fun y : E =>
       ‖(chartE_section_repr (I := I) α B.toFun ∘ (extChartAt I α).symm) y‖)
       ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) :=
     continuous_norm.comp_continuousOn hu_cd.continuousOn
-  -- Map K_set into the good-set image via extChartAt.
   have hφ_cm : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I α) (chartAt H α).source :=
     contMDiffOn_extChartAt (I := I) (n := ∞) (x := α)
   have hK_sub : K_set ⊆ (chartAt H α).source :=
@@ -137,9 +125,6 @@ private lemma trivToE_B_value_bound_on_pouTsupport
   obtain ⟨Cu, hCu_mem⟩ := hK_compact.bddAbove_image hcont_u_M
   refine ⟨max Cu 0, le_max_right _ _, ?_⟩
   intro b hb
-  -- `‖trivToE α b (B b)‖ = ‖chartE_section_repr α B.toFun b‖`
-  --                     = ‖(chartE_section_repr α B.toFun ∘ symm)
-  --                          (extChartAt I α b)‖` on the chart source.
   have hb_chart : b ∈ (chartAt H α).source := hK_sub hb
   have hb_extsrc : b ∈ (extChartAt I α).source := by
     rw [extChartAt_source]; exact hb_chart
@@ -148,8 +133,6 @@ private lemma trivToE_B_value_bound_on_pouTsupport
   have h_eq : ‖trivToE (I := I) α b (B.toFun b)‖ =
       ‖(chartE_section_repr (I := I) α B.toFun ∘ (extChartAt I α).symm)
           (extChartAt I α b)‖ := by
-    -- Unfold Function.comp; `chartE_section_repr α B.toFun b = trivToE α b (B b)`
-    -- by definition (both are `triv.continuousLinearMapAt ℝ b (B b)`).
     change ‖trivToE (I := I) α b (B.toFun b)‖ =
       ‖chartE_section_repr (I := I) α B.toFun
         ((extChartAt I α).symm (extChartAt I α b))‖

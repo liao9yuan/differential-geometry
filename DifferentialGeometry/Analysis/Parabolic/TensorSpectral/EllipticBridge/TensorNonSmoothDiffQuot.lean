@@ -69,31 +69,12 @@ open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.ChartH2NonSmooth
 open DifferentialGeometry.Analysis.Sobolev
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Headline: non-smooth interior `H²` regularity for a tensor chart component
-
-The chart `P₀`-component of a non-smooth `(r, s)`-tensor field, packaged as
-`TensorChartBilinearH1ComplData g r s α P₀`, is by construction a thin wrapper
-around the scalar divergence-form data `toChartData : ChartBilinearH1ComplData g α`.
-The projections `D.weak_partial`, `D.u_chart`, `D.f_chart` are definitionally
-the corresponding fields of `D.toChartData`, and the per-component variational
-identity uses the scalar principal symbol `weightedInvGramOnEuclid g α`. Hence
-the scalar interior-regularity engine `h2_chart_loc_of_uniform_bound` applies
-verbatim to `D.toChartData`, and its conclusion — the localized Nirenberg
-extraction of weak second partials in `L²(Ω'')` — transports to the tensor
-data structure without any new analysis. -/
 
 /-- **Non-smooth interior `H²`/`W^{2,2}_loc` regularity for a tensor chart
 component.**
@@ -152,14 +133,9 @@ theorem tensor_h2_chart_loc_of_uniform_bound
       eLpNorm g_ik 2 ((volume : Measure EuclN).restrict Ω'') ≤
         ENNReal.ofReal (M_bound i k) := by
   classical
-  -- The tensor projections `D.weak_partial`, `D.u_chart`, `D.f_chart` are
-  -- definitionally the corresponding fields of `D.toChartData`, so the scalar
-  -- engine applies verbatim to the underlying scalar data structure.
   exact h2_chart_loc_of_uniform_bound (I := I) (M := M)
     (g := g) (α := α) D.toChartData
     hΩ''_open hΩ''_compact_closure hh₀ h_room hM_nn h_uniform_bd
-
-/-! ## Sanity tests -/
 
 section ElaborationTests
 

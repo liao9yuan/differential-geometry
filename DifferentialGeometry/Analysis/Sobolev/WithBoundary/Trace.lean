@@ -77,13 +77,6 @@ variable {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanHalfSpace n) M]
   [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M]
 
-/-! ## Local Borel structures on `M` and `BoundaryManifold I M`
-
-We install file-local Borel measurable structures on `M` and the boundary
-manifold, mirroring those used in `Integral/Measure/` and
-`SurfaceMeasure.lean`. They are declared `local` to avoid pollution of
-external typeclass search. -/
-
 private local instance instMeasurableSpaceM : MeasurableSpace M := borel M
 private local instance instBorelSpaceM : BorelSpace M := ⟨rfl⟩
 private local instance instMeasurableSpaceBoundary :
@@ -93,13 +86,6 @@ private local instance instMeasurableSpaceBoundary :
 private local instance instBorelSpaceBoundary :
     BorelSpace
       (BoundaryManifold (modelWithCornersEuclideanHalfSpace n) M) := ⟨rfl⟩
-
-/-! ## Boundary restriction of a function on `M`
-
-For a function `u : M → ℝ`, the *boundary restriction* `boundaryRestrict u`
-is the function on the boundary submanifold defined by
-`boundaryRestrict u x := u (x : M)`. This is a literal restriction along the
-boundary inclusion `Subtype.val : BoundaryManifold I M → M`. -/
 
 /-- The boundary restriction of `u : M → ℝ`: literal restriction along the
 boundary inclusion. -/
@@ -127,8 +113,6 @@ def boundaryRestrict (u : M → ℝ) :
     boundaryRestrict (n := n) (M := M) (fun _ : M => (0 : ℝ)) =
       fun _ => (0 : ℝ) := rfl
 
-/-! ## Continuity and measurability of the boundary restriction -/
-
 /-- The boundary restriction of a continuous function is continuous. -/
 theorem boundaryRestrict_continuous {u : M → ℝ} (hu : Continuous u) :
     Continuous (boundaryRestrict (n := n) (M := M) u) :=
@@ -144,20 +128,11 @@ theorem boundaryRestrict_aestronglyMeasurable
       (surfaceMeasure (I := modelWithCornersEuclideanHalfSpace n) (M := M) g) :=
   (boundaryRestrict_continuous (n := n) (M := M) hu).aestronglyMeasurable
 
-/-! ## The boundary trace operator on continuous functions, for compact `M`
-
-When `M` is compact, the boundary submanifold inherits compactness as a
-closed subspace, and the boundary surface measure is therefore a finite
-measure. Continuous functions on a compact manifold are bounded, so their
-boundary restrictions lie in `L^p(surfaceMeasure)` for every `1 ≤ p ≤ ∞`. -/
-
 /-- The boundary submanifold inherits `CompactSpace` from `M`, since the
 boundary set `I.boundary M` is closed in any `C^∞` smooth manifold. -/
 instance instCompactSpaceBoundaryManifold [CompactSpace M] :
     CompactSpace
       (BoundaryManifold (modelWithCornersEuclideanHalfSpace n) M) := by
-  -- The boundary set is closed; on a compact space, closed subsets are
-  -- compact, and the corresponding subtype carries `CompactSpace`.
   have hOne : (∞ : WithTop ℕ∞) ≠ 0 := by
     intro h
     have h' : ((⊤ : ℕ∞) : WithTop ℕ∞) = ((0 : ℕ∞) : WithTop ℕ∞) := h
@@ -181,7 +156,6 @@ instance instIsFiniteMeasureSurfaceMeasure
       (modelWithCornersEuclideanHalfSpace n) M) :
     IsFiniteMeasure
       (surfaceMeasure (I := modelWithCornersEuclideanHalfSpace n) (M := M) g) := by
-  -- A measure that is finite on compact subsets of a compact space is finite.
   haveI : IsFiniteMeasureOnCompacts
       (surfaceMeasure (I := modelWithCornersEuclideanHalfSpace n) (M := M) g) :=
     surfaceMeasure_isFiniteMeasureOnCompacts (I := modelWithCornersEuclideanHalfSpace n)
@@ -213,9 +187,6 @@ theorem boundaryTotalMeasure_ne_top
       (modelWithCornersEuclideanHalfSpace n) M) :
     boundaryTotalMeasure (n := n) (M := M) g ≠ ⊤ :=
   (boundaryTotalMeasure_lt_top (n := n) (M := M) g).ne
-
-/-! ### `MemLp` and norm bound for the boundary restriction of a continuous
-function on a compact manifold-with-boundary -/
 
 /-- Pointwise sup-norm bound for a continuous real-valued function on a
 compact space: there is `C ∈ ℝ` with `|u x| ≤ C` for all `x`. -/
@@ -250,7 +221,6 @@ theorem boundaryRestrict_memLp_of_continuous
       (M := M) g),
         ‖boundaryRestrict (n := n) (M := M) u x‖ ≤ C :=
     Filter.Eventually.of_forall h_bound
-  -- `MemLp.of_bound` requires `IsFiniteMeasure`, which is in scope.
   exact MemLp.of_bound
     (boundaryRestrict_aestronglyMeasurable (n := n) (M := M) g hu) C h_ae
 
@@ -294,16 +264,6 @@ theorem boundaryRestrict_eLpNorm_le_of_continuous
     exists_continuous_bound_of_compact (M := M) hu
   exact ⟨C, hC_nonneg,
     boundaryRestrict_eLpNorm_le_of_bound (n := n) (M := M) g p hC⟩
-
-/-! ## The boundary trace operator: public API
-
-The boundary trace `boundaryTrace u` is, by definition, the literal boundary
-restriction `boundaryRestrict u`. Public theorems are stated in this form,
-and the smooth bridge identifies the trace with the restriction. The choice
-of name aligns the API with downstream Sobolev/PDE conventions; if a future
-extension to general `W^{1,p}` inputs by smooth-density continuation is
-formalised, only the *non-continuous* branch of the definition needs to be
-revised. -/
 
 /-- Boundary trace of `u : M → ℝ`: defined as the literal boundary
 restriction `u ∘ Subtype.val`. On continuous (in particular smooth) inputs,
@@ -350,9 +310,6 @@ multiplication. -/
     boundaryTrace (n := n) (M := M) (fun _ : M => (0 : ℝ)) =
       fun _ => (0 : ℝ) := rfl
 
-/-! ### `L^p` properties of the boundary trace, for continuous inputs on a compact
-manifold-with-boundary -/
-
 /-- The boundary trace of a continuous function on a compact manifold-with-
 boundary is in `L^p(surfaceMeasure)` for every exponent `1 ≤ p ≤ ∞`. -/
 theorem boundaryTrace_memLp_of_continuous
@@ -396,12 +353,6 @@ theorem boundaryTrace_eLpNorm_le_of_bound
         ENNReal.ofReal C :=
   boundaryRestrict_eLpNorm_le_of_bound (n := n) (M := M) g p hC
 
-/-! ## Smooth bridge
-
-For a smooth function `u : M → ℝ` (in the manifold-`C^∞` sense modelled on
-`EuclideanHalfSpace n`), the boundary trace agrees with the explicit
-restriction `u ∘ Subtype.val`. -/
-
 /-- Smooth bridge: a `C^∞` function on `M` is in particular continuous, so its
 boundary trace is the literal restriction along the boundary inclusion. -/
 theorem boundaryTrace_eq_restrict_of_contMDiff
@@ -444,19 +395,6 @@ theorem boundaryTrace_eLpNorm_le_of_contMDiff
           ENNReal.ofReal C :=
   boundaryTrace_eLpNorm_le_of_continuous (n := n) (M := M) g p hu.continuous
 
-/-! ## Half-space Euclidean trace inequality (interior-supported case)
-
-Below we record the *interior-supported* form of the half-space trace
-inequality. The Dirichlet (zero-trace) chart-based Sobolev predicate
-`MemWkpChart` is built on the *interior part* of each chart target — the
-slice `Ω ∩ {y | 0 < y 0}` strictly above the boundary hyperplane — and uses
-test functions whose support is compact inside that interior part. For such
-inputs, the boundary trace is *identically zero* on the boundary hyperplane;
-this is the structural fact recorded here. The quantitative trace inequality
-for general (non-Dirichlet) `W^{1,p}` test functions on the *closed*
-half-space is a separate analytical question and not captured by the
-interior-supported predicate. -/
-
 /-- The boundary hyperplane (under the canonical Euclidean half-space
 identification of the chart-target setting): `{y | y 0 = 0}`. -/
 @[reducible]
@@ -493,13 +431,10 @@ theorem zero_on_boundary_of_tsupport_subset_openHalfSpace
     (h_supp : tsupport u ⊆ openHalfSpaceEuclid (n := n))
     {y : EuclideanSpace ℝ (Fin n)} (hy : y ∈ boundaryHyperplaneEuclid (n := n)) :
     u y = 0 := by
-  -- A boundary point cannot be in the open half-space; hence not in `tsupport u`,
-  -- so `u y = 0` by definition of topological support.
   have h_y_not_in_open :
       y ∉ DifferentialGeometry.Analysis.Sobolev.Euclidean.openHalfSpace
             (d := n) := by
     intro h_in
-    -- `hy : y 0 = 0`; `h_in : 0 < y 0`. Contradiction.
     have h_zero : y 0 = 0 := hy
     have h_pos : (0 : ℝ) < y 0 := h_in
     rw [h_zero] at h_pos
@@ -519,7 +454,6 @@ theorem zero_on_boundaryHyperplane_of_tsupport_subset_interiorHalfSpace
       tsupport u ⊆ interiorHalfSpaceEuclid (n := n) Ω)
     {y : EuclideanSpace ℝ (Fin n)} (hy : y ∈ boundaryHyperplaneEuclid (n := n)) :
     u y = 0 := by
-  -- `interiorHalfSpace Ω = Ω ∩ openHalfSpace ⊆ openHalfSpace`. Apply the previous lemma.
   have h_supp' :
       tsupport u ⊆
         DifferentialGeometry.Analysis.Sobolev.Euclidean.openHalfSpace
@@ -531,12 +465,6 @@ theorem zero_on_boundaryHyperplane_of_tsupport_subset_interiorHalfSpace
     exact h_in
   exact zero_on_boundary_of_tsupport_subset_openHalfSpace
     (n := n) (u := u) h_supp' hy
-
-/-! ## Quantitative half-space trace inequality (smooth interior-supported case)
-
-Below we prove the qualitative trace identity: for a smooth function with
-support in the open half-space, the trace `(fun x' => u (inclEuclidean n x'))`
-is identically zero. -/
 
 /-- The boundary trace of an interior-supported function vanishes:
 `u (inclEuclidean n x') = 0` for all `x'` (since `inclEuclidean n x'` lies on
@@ -552,8 +480,6 @@ theorem trace_via_inclEuclidean_eq_zero_of_tsupport_subset_openHalfSpace
       0 := by
   refine zero_on_boundary_of_tsupport_subset_openHalfSpace
     (n := n) h_supp ?_
-  -- The 0th coordinate of `inclEuclidean n x'` is `0`, so it lies on the
-  -- boundary hyperplane.
   change
     (DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.EuclideanHalfSpaceInstance.inclEuclidean
         n x') 0 = 0
@@ -599,8 +525,6 @@ theorem eLpNorm_trace_eq_zero_of_tsupport_subset_openHalfSpace
             (DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.EuclideanHalfSpaceInstance.inclEuclidean
               n x'))
         p μ = 0 := by
-  -- The function is identically zero by
-  -- `trace_via_inclEuclidean_eq_zero_of_tsupport_subset_openHalfSpace`.
   have h_zero :
       (fun x' : EuclideanSpace ℝ (Fin (n - 1)) =>
         u
@@ -612,33 +536,6 @@ theorem eLpNorm_trace_eq_zero_of_tsupport_subset_openHalfSpace
       (n := n) h_supp x'
   rw [h_zero]
   exact eLpNorm_zero
-
-/-! ## Documentation summary
-
-This module provides a working boundary-trace operator
-`boundaryTrace : (M → ℝ) → BoundaryManifold I M → ℝ` together with full `L^p`
-boundedness on a compact manifold-with-boundary `M` for *continuous (in
-particular smooth) inputs*. The general `W^{1,p}_\text{chart}(M) \to L^p`
-extension would proceed by:
-
-1. **Quantitative half-space trace inequality** for general
-   `W^{1,p}_\text{chart}` test functions on the closed half-space (without
-   the interior-support / Dirichlet hypothesis). This requires a careful FTC
-   + Hölder argument and is not part of the present module — DeGiorgi's
-   weak-derivative library does not expose a half-space trace operator, and
-   reproducing the classical inequality uniformly for the `MemWkp k p` /
-   `MemWkpHalfSpace` predicates would significantly enlarge the scope.
-2. **Smooth-density extension** using density of `C^\infty(M) \cap W^{1,p}(M)`
-   in `W^{1,p}(M)`, established elsewhere in this development for compact `M`.
-
-For Dirichlet (interior-supported) `MemWkpChart` inputs — the predicate that
-the chart-based half-space Sobolev API uses by default — the boundary trace
-is identically zero, as recorded by
-`zero_on_boundary_of_tsupport_subset_openHalfSpace` and the `eLpNorm` zero
-identity above. The smooth bridge `boundaryTrace_eq_restrict_of_contMDiff`
-remains the operative entry point for downstream
-boundary-integration-by-parts identities.
--/
 
 end WithBoundary
 end Sobolev

@@ -50,20 +50,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Norm bound for the bounded inclusion `TensorH1ComplToTensorL2`
-
-The bound `‖TensorH1ComplToTensorL2 v‖_{L²} ≤ ‖v‖_{H¹}` holds on smooth
-compactly-supported H¹ tensors (where the inclusion equals the canonical
-L² coercion of the underlying smooth tensor, and the L² norm is bounded
-by the H¹ norm) and extends to all of `TensorH1Compl g r s` by density,
-using continuity of both sides. -/
 
 set_option linter.unusedSectionVars false in
 /-- The pointwise norm bound
@@ -73,18 +63,13 @@ lemma norm_TensorH1ComplToTensorL2_apply_le
     (v : TensorH1Compl g r s) :
     ‖TensorH1ComplToTensorL2 (I := I) (M := M) g r s v‖ ≤ ‖v‖ := by
   refine UniformSpace.Completion.induction_on (α := SmoothCcTensorH1 g r s) v ?_ ?_
-  · -- The set `{a | ‖TensorH1ComplToTensorL2 a‖ ≤ ‖a‖}` is closed by
-    -- continuity of both sides.
-    have h_cont_lhs : Continuous (fun w : TensorH1Compl g r s =>
+  · have h_cont_lhs : Continuous (fun w : TensorH1Compl g r s =>
         ‖TensorH1ComplToTensorL2 (I := I) (M := M) g r s w‖) :=
       (TensorH1ComplToTensorL2 (I := I) (M := M) g r s).continuous.norm
     have h_cont_rhs : Continuous (fun w : TensorH1Compl g r s => ‖w‖) :=
       continuous_norm
     exact isClosed_le h_cont_lhs h_cont_rhs
   · intro a
-    -- For smooth `a`: `TensorH1ComplToTensorL2 (a : TensorH1Compl g r s)
-    --   = (a.toCcTensor : TensorL2 r s g)`, and `‖(a.toCcTensor : TensorL2)‖
-    --   = ‖a.toCcTensor‖ ≤ ‖a‖`.
     have h_eq : TensorH1ComplToTensorL2 (I := I) (M := M) g r s
           ((a : TensorH1Compl g r s)) =
         (a.toCcTensor : TensorL2 r s g) := by
@@ -94,23 +79,17 @@ lemma norm_TensorH1ComplToTensorL2_apply_le
     have h_norm : ‖((a : TensorH1Compl g r s) : TensorH1Compl g r s)‖ = ‖a‖ :=
       UniformSpace.Completion.norm_coe a
     rw [h_eq, h_norm]
-    -- L² norm of the canonical embedding equals the SmoothCcTensor norm.
     have h_coe_norm :
         ‖(a.toCcTensor : TensorL2 r s g)‖ = ‖a.toCcTensor‖ :=
       UniformSpace.Completion.norm_coe _
     rw [h_coe_norm]
     exact SmoothCcTensorH1.l2Norm_le_h1Norm (I := I) (M := M) a
 
-/-! ## Density of smooth compactly-supported H¹ tensors in `TensorH1Compl` -/
-
 set_option linter.unusedSectionVars false in
 /-- The canonical embedding `smoothToTensorH1Compl` has dense range. -/
 lemma denseRange_smoothToTensorH1Compl
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     DenseRange (smoothToTensorH1Compl (I := I) (M := M) g r s) := by
-  -- `smoothToTensorH1Compl = UniformSpace.Completion.toComplL` by definition,
-  -- and the latter has dense range because its underlying function equals
-  -- the canonical coercion, whose range is dense in the completion.
   change DenseRange (UniformSpace.Completion.toComplL :
       SmoothCcTensorH1 g r s →L[ℝ] TensorH1Compl g r s)
   rw [show (UniformSpace.Completion.toComplL :
@@ -119,9 +98,6 @@ lemma denseRange_smoothToTensorH1Compl
         UniformSpace.Completion (SmoothCcTensorH1 g r s)) from
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.denseRange_coe
-
-/-! ## Approximation of any H¹ tensor vector by a smooth compactly-supported
-section -/
 
 set_option linter.unusedSectionVars false in
 /-- For each vector `v ∈ TensorH1Compl g r s` and each `δ > 0`, there

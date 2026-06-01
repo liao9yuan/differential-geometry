@@ -214,8 +214,7 @@ theorem radial_maximalGeodesic_cont_and_foot_in_source_of_small
     rw [show (t' • vb : TangentSpace I p) = v from hvb_resc] at h
     exact h.symm
   refine ⟨?_, ?_⟩
-  ·
-    exact ((hproj_cont.congr hEqOn).mono h12_sub_J)
+  · exact ((hproj_cont.congr hEqOn).mono h12_sub_J)
   · intro t ht
     have hts_Icc : t' * t ∈ Set.Icc (-T) T := by
       obtain ⟨ht0, ht1⟩ := ht
@@ -374,8 +373,7 @@ private lemma gp_coercive (g : SmoothRiemannianMetric I M) (p : M) :
   · subst hx0
     rw [ContinuousLinearMap.map_zero₂, norm_zero]
     simp
-  ·
-    have hnx_pos : 0 < ‖x‖ := norm_pos_iff.mpr hx0
+  · have hnx_pos : 0 < ‖x‖ := norm_pos_iff.mpr hx0
     set u : E := ‖x‖⁻¹ • x with hu_def
     have hu_sphere : u ∈ Metric.sphere (0 : E) 1 := by
       rw [mem_sphere_zero_iff_norm, hu_def, norm_smul]
@@ -1450,10 +1448,8 @@ theorem gauss_lemma_pullback
     rw [hφ1eval, hcollapse] at hφ1
     exact hφ1
   refine ⟨?_, ?_⟩
-  ·
-    exact key v
-  ·
-    intro w hw
+  · exact key v
+  · intro w hw
     rw [key w]; exact hw
 
 end GaussAssembly
@@ -2457,8 +2453,7 @@ theorem normalBall_radial_length_le_riemannianEDist
     rwa [hqeq] at hsymm_src
   set Z : Set ℝ := {t ∈ Set.Icc (0 : ℝ) 1 | γ t ∉ K} with hZ_def
   by_cases hZ : Z = ∅
-  ·
-    have hall_K : ∀ t ∈ Set.Icc (0 : ℝ) 1, γ t ∈ K := by
+  · have hall_K : ∀ t ∈ Set.Icc (0 : ℝ) 1, γ t ∈ K := by
       intro t ht
       by_contra hcon
       have htZ : t ∈ Z := ⟨ht, hcon⟩
@@ -2481,8 +2476,7 @@ theorem normalBall_radial_length_le_riemannianEDist
     have hSeq : Real.sqrt (g.inner p v v) = S := rfl
     rw [hSeq] at hlb
     exact lt_of_le_of_lt hlb hγ_len
-  ·
-    rw [← Ne.eq_def, ← Set.nonempty_iff_ne_empty] at hZ
+  · rw [← Ne.eq_def, ← Set.nonempty_iff_ne_empty] at hZ
     have hZ_sub : Z ⊆ Set.Icc (0 : ℝ) 1 := fun t ht => ht.1
     have hZbdd : BddBelow Z := ⟨0, fun t ht => ht.1.1⟩
     set t₀ : ℝ := sInf Z with ht₀_def
@@ -2498,8 +2492,7 @@ theorem normalBall_radial_length_le_riemannianEDist
     have ht₀_K : γ t₀ ∈ K := by
       rcases eq_or_lt_of_le ht₀_nn with h0 | h0
       · rw [← h0]; rw [hγ0]; exact hpK
-      ·
-        have htend : Filter.Tendsto (fun s => γ s) (nhdsWithin t₀ (Set.Iio t₀))
+      · have htend : Filter.Tendsto (fun s => γ s) (nhdsWithin t₀ (Set.Iio t₀))
             (nhds (γ t₀)) :=
           (hγcont.continuousWithinAt (s := Set.Iio t₀) (x := t₀))
         have hev : ∀ᶠ s in nhdsWithin t₀ (Set.Iio t₀), γ s ∈ K := by
@@ -2689,14 +2682,12 @@ private theorem minimizer_confined_to_C2_ball
     exact ht₀mem.2
   have hρt₀_le : ρ t₀ ≤ δ := by
     rcases eq_or_lt_of_le ht₀_lb with h0 | h0
-    ·
-      rw [← h0]
+    · rw [← h0]
       have hca : c a = 0 := by
         rw [hc_def]; simp only; rw [hγa, hψ_def]
         exact NormalCoordinates.normalChartAt_centre (I := I) g p
       rw [hρ_def]; simp only [hca, map_zero, Real.sqrt_zero]; exact hδ_pos.le
-    ·
-      have htend : Filter.Tendsto ρ (nhdsWithin t₀ (Set.Iio t₀)) (nhds (ρ t₀)) :=
+    · have htend : Filter.Tendsto ρ (nhdsWithin t₀ (Set.Iio t₀)) (nhds (ρ t₀)) :=
         (hρc.continuousWithinAt ht₀Icc).mono_of_mem_nhdsWithin (by
           rw [mem_nhdsWithin]
           exact ⟨Set.Ioi a, isOpen_Ioi, h0, by
@@ -2813,8 +2804,7 @@ private theorem radial_minimizer_radiality
     exact NormalCoordinates.normalChartAt_centre (I := I) g p
   have hρa0 : ρ a = 0 := by rw [hρ_def]; simp only [hca, map_zero, Real.sqrt_zero]
   rcases eq_or_lt_of_le hab with hab_eq | hab_lt
-  ·
-    subst hab_eq
+  · subst hab_eq
     refine ⟨?_, ?_⟩
     · intro s t hs ht hst
       have hsa : s = a := le_antisymm hs.2 hs.1
@@ -3238,8 +3228,7 @@ theorem normalBall_radial_minimizer_equality
     intro s t hs ht hst; exact hmono s t hs ht hst
   have hρnn : ∀ t, 0 ≤ ρ t := fun t => Real.sqrt_nonneg _
   rcases eq_or_lt_of_le hS_nn with hS0 | hSpos
-  ·
-    have hSeq : S = 0 := hS0.symm
+  · have hSeq : S = 0 := hS0.symm
     have hvz : v = 0 := by
       have : B v v = 0 := by rw [← hSsq, hSeq]; ring
       by_contra hv0
@@ -3348,8 +3337,7 @@ theorem normalBall_radial_minimizer_equality
     have hc_formula : ∀ t ∈ Set.Icc a b, c t = (ρ t / S) • v := by
       intro t ht
       rcases eq_or_lt_of_le (hρnn t) with hρt0 | hρtpos
-      ·
-        have hct0 : c t = 0 := by
+      · have hct0 : c t = 0 := by
           have : B (c t) (c t) = 0 := by
             have h : ρ t = 0 := hρt0.symm
             rw [hρ_def] at h; simp only at h
@@ -3357,10 +3345,8 @@ theorem normalBall_radial_minimizer_equality
           by_contra hc0
           exact absurd this (ne_of_gt (by rw [hB_def]; exact g.pos p (c t) hc0))
         rw [hct0, ← hρt0, zero_div, zero_smul]
-      ·
-        rcases eq_or_lt_of_le ht.2 with htb | htb
-        ·
-          rw [htb, hcb, hρb, div_self (ne_of_gt hSpos'), one_smul]
+      · rcases eq_or_lt_of_le ht.2 with htb | htb
+        · rw [htb, hcb, hρb, div_self (ne_of_gt hSpos'), one_smul]
         · have hta : a < t := by
             rcases eq_or_lt_of_le ht.1 with hta | hta
             · exfalso; rw [← hta] at hρtpos; exact (hρtpos.ne') hρa
@@ -3668,15 +3654,12 @@ theorem local_radial_identification_of_minimizer
     normalBall_radial_minimizer_equality (I := I) g q hEnorm hv_dom hv_ball hv_small
       hab_sub hγ_sub hγa_sub hγb_sub hγ_inBall hlen
   refine ⟨δ, hδ_pos, h_subset, (show TangentSpace I q from v), fun s => φ (t₀ + s), ?_, ?_, ?_⟩
-  ·
-    intro s hs t ht hst
+  · intro s hs t ht hst
     have hs' : t₀ + s ∈ Set.Icc t₀ (t₀ + δ) := ⟨by linarith [hs.1], by linarith [hs.2]⟩
     have ht' : t₀ + t ∈ Set.Icc t₀ (t₀ + δ) := ⟨by linarith [ht.1], by linarith [ht.2]⟩
     exact hφ_mono hs' ht' (by linarith)
-  ·
-    simp only [add_zero]; exact hφ0
-  ·
-    intro s hs
+  · simp only [add_zero]; exact hφ0
+  · intro s hs
     have hs' : t₀ + s ∈ Set.Icc t₀ (t₀ + δ) := ⟨by linarith [hs.1], by linarith [hs.2]⟩
     have := hφ_eq (t₀ + s) hs'
     rw [hq_def]; exact this
@@ -3850,8 +3833,7 @@ private theorem path_confined_to_normalBall
     have hγt₀_src : γ t₀ ∈ ψ.source := by
       rcases eq_or_lt_of_le ht₀_lb with ht₀0 | ht₀0
       · rw [← ht₀0, hγ0]; exact hcsrc
-      ·
-        have hγcontWithin : ContinuousWithinAt γ (Set.Iio t₀) t₀ := by
+      · have hγcontWithin : ContinuousWithinAt γ (Set.Iio t₀) t₀ := by
           have : ContinuousWithinAt γ (Set.Icc (0 : ℝ) 1) t₀ := hγcont t₀ ht₀Icc
           refine this.mono_of_mem_nhdsWithin ?_
           rw [mem_nhdsWithin]
@@ -3869,13 +3851,11 @@ private theorem path_confined_to_normalBall
         exact hKsub (hKclosed.mem_of_tendsto htend hev)
     refine fun s hs => ?_
     rcases eq_or_lt_of_le hs.2 with hst₀ | hst₀
-    ·
-      subst hst₀
+    · subst hst₀
       refine ⟨hγt₀_src, ?_⟩
       rcases eq_or_lt_of_le ht₀_lb with ht₀0 | ht₀0
       · rw [← ht₀0, hρ0]; exact hL₀_nn
-      ·
-        have hIoo_nhds : Set.Ioo 0 t₀ ∈ nhdsWithin t₀ (Set.Iio t₀) := by
+      · have hIoo_nhds : Set.Ioo 0 t₀ ∈ nhdsWithin t₀ (Set.Iio t₀) := by
           rw [mem_nhdsWithin]
           exact ⟨Set.Ioi 0, isOpen_Ioi, ht₀0, by intro z hz; exact ⟨hz.1, hz.2⟩⟩
         have hρcontWithin : ContinuousWithinAt ρ (Set.Ioo 0 t₀) t₀ := by
@@ -3947,10 +3927,8 @@ private theorem path_confined_to_normalBall
       refine ⟨⟨le_trans ht₀_lb ht₁_gt.le, ht₁_le_one⟩, ?_⟩
       intro s hs
       rcases le_or_gt s t₀ with hle | hgt
-      ·
-        exact ht₀S.2 s ⟨hs.1, hle⟩
-      ·
-        have hs_Ico : s ∈ Set.Ico t₀ u := ⟨le_of_lt hgt, lt_of_le_of_lt hs.2 ht₁_lt_u⟩
+      · exact ht₀S.2 s ⟨hs.1, hle⟩
+      · have hs_Ico : s ∈ Set.Ico t₀ u := ⟨le_of_lt hgt, lt_of_le_of_lt hs.2 ht₁_lt_u⟩
         obtain ⟨hsrc, hsρ⟩ := hu_sub hs_Ico
         refine ⟨hsrc, ?_⟩
         have hconf : ∀ z ∈ Set.Icc (0 : ℝ) s, γ z ∈ ψ.source ∧ ρ z < R := by

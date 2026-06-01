@@ -80,7 +80,6 @@ theorem hasDerivAt_clm_comp_right
     {A : ℝ → (E →L[ℝ] E)} {A' : E →L[ℝ] E} {t : ℝ}
     (hA : HasDerivAt A A' t) (R : E →L[ℝ] E) :
     HasDerivAt (fun s : ℝ => (A s).comp R) (A'.comp R) t := by
-  -- `L ↦ L.comp R` is a fixed continuous-linear map `(E →L E) →L (E →L E)`.
   have hcompR : HasFDerivAt (fun L : E →L[ℝ] E => L.comp R)
       ((ContinuousLinearMap.compL ℝ E E E).flip R) (A t) :=
     ((ContinuousLinearMap.compL ℝ E E E).flip R).hasFDerivAt
@@ -121,32 +120,25 @@ theorem chartCloseFderiv_eq_eucl_comp_trivToE
       = (fderiv ℝ (fun z => Φ_eucl z s) (extChartAt I α x)).comp
           (trivToE (I := I) α x) := by
   unfold chartCloseFderiv
-  -- Rewrite the mfderiv along the eventual chart-conjugation agreement.
   have hmfeq : mfderiv I 𝓘(ℝ, E) (fun y => extChartAt I α ((Φ_fam s : M → M) y)) x
       = mfderiv I 𝓘(ℝ, E) (fun y => Φ_eucl (extChartAt I α y) s) x :=
     Filter.EventuallyEq.mfderiv_eq hagree
   rw [hmfeq]
-  -- Source-chart differential is the trivialisation `trivToE α x`.
   have hsrc_eq : mfderiv I 𝓘(ℝ, E) (extChartAt I α) x = trivToE (I := I) α x :=
     (TangentBundle.continuousLinearMapAt_trivializationAt (I := I) hx_src).symm
-  -- `extChartAt I α` is manifold-differentiable at `x`.
   have hext_diff : MDifferentiableAt I 𝓘(ℝ, E) (extChartAt I α) x :=
     mdifferentiableAt_extChartAt (I := I) hx_src
-  -- The Euclidean factor is manifold-differentiable at `extChartAt I α x`.
   have heucl_mdiff : MDifferentiableAt 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ_eucl z s)
       (extChartAt I α x) :=
     heucl_diff.mdifferentiableAt
-  -- Chain rule for `(fun z => Φ_eucl z s) ∘ (extChartAt I α)`.
   have hchain :
       mfderiv I 𝓘(ℝ, E) ((fun z => Φ_eucl z s) ∘ (extChartAt I α)) x
         = (mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ_eucl z s) (extChartAt I α x)).comp
             (mfderiv I 𝓘(ℝ, E) (extChartAt I α) x) :=
     mfderiv_comp x heucl_mdiff hext_diff
-  -- The function `fun y => Φ_eucl (extChartAt I α y) s` is `(fun z => Φ_eucl z s) ∘ extChartAt I α`.
   have hcompfun : (fun y => Φ_eucl (extChartAt I α y) s)
       = (fun z => Φ_eucl z s) ∘ (extChartAt I α) := rfl
   rw [hcompfun, hchain, hsrc_eq]
-  -- The Euclidean factor's mfderiv is its fderiv (model-space map).
   rw [mfderiv_eq_fderiv]
   rfl
 
@@ -193,40 +185,16 @@ theorem chartCloseFderiv_hasDerivAt_of_eucl
     HasDerivAt (chartCloseFderiv (I := I) Φ_fam α x)
       (D'_eucl.comp (trivToE (I := I) α x)) t := by
   letI : InnerProductSpace ℝ (TangentSpace I x) := (inferInstance : InnerProductSpace ℝ E)
-  -- The Euclidean factor, post-composed with the fixed source-chart differential, has the
-  -- transported `HasDerivAt`.
   have hpost : HasDerivAt
       (fun s : ℝ => (fderiv ℝ (fun z => Φ_eucl z s) (extChartAt I α x)).comp (trivToE (I := I) α x))
       (D'_eucl.comp (trivToE (I := I) α x)) t :=
     hasDerivAt_clm_comp_right heucl (trivToE (I := I) α x)
-  -- Near `t`, this curve equals `chartCloseFderiv Φ_fam α x` (chart decomposition).
   have hev : (fun s : ℝ => chartCloseFderiv (I := I) Φ_fam α x s)
       =ᶠ[𝓝 t] (fun s : ℝ =>
         (fderiv ℝ (fun z => Φ_eucl z s) (extChartAt I α x)).comp (trivToE (I := I) α x)) := by
     filter_upwards [heucl_diff, hagree] with s hsd hsa
     exact chartCloseFderiv_eq_eucl_comp_trivToE (I := I) Φ_fam α x s Φ_eucl hx_src hsd hsa
   exact hpost.congr_of_eventuallyEq hev
-
-/-! ## `hT` from the moving-trivialisation inverse
-
-`chartCloseTriv Φ_fam α x s = trivFromE α (Φ_fam s x)` is the moving *inverse* target
-trivialisation.  On the chart base set, `trivToE α b` and `trivFromE α b` are mutually inverse
-continuous-linear maps (`trivToE_trivFromE`, `trivFromE_trivToE`), so `trivToE α b` is a unit of
-the endomorphism ring `E →L[ℝ] E` and `trivFromE α b = Ring.inverse (trivToE α b)`.
-
-Writing the orbit point in the chart, `trivToE α (Φ_fam s x) = chartMovingTriv α (c s)` with
-`c s := extChartAt I α (Φ_fam s x)` (the chart-`α` orbit, `chartMovingTriv` from
-`VariationalLiftConventionBridge.lean`), `chartCloseTriv Φ_fam α x s` reads off near `t` as
-
-  `Ring.inverse (chartMovingTriv α (c s))`.
-
-Its orbit-derivative is then produced by the *operator inverse* calculus
-(`DifferentiableAt.inverse`, valid because `chartMovingTriv α (c t) = chartMovingTriv α (φ α) = 1`
-is a unit) composed with the differentiable `chartMovingTriv α` (the convention-bridge side
-condition `hC`, the same datum the consumers already carry as `hCdiff`) and the chart-orbit
-`HasDerivAt` (the genuine orbit-velocity input).  The metric-free smooth-structure jet `T'` is
-the resulting derivative value.
--/
 
 section MovingTrivInverse
 
@@ -237,7 +205,6 @@ omit [CompleteSpace E] in
 (`chartMovingTriv_basepoint`), hence a unit of the endomorphism ring `E →L[ℝ] E`. -/
 theorem chartMovingTriv_basepoint_isUnit (α : M) :
     IsUnit (chartMovingTriv (I := I) α (extChartAt I α α)) := by
-  -- `chartMovingTriv α (φ α) = 1` since `chartMovingTriv α (φ α) v = v` for all `v`.
   have h1 : chartMovingTriv (I := I) α (extChartAt I α α) = (1 : E →L[ℝ] E) := by
     ext v
     simpa using chartMovingTriv_basepoint (I := I) α v
@@ -268,7 +235,6 @@ theorem chartCloseTriv_eq_ringInverse_chartMovingTriv
     rw [TangentBundle.trivializationAt_baseSet]; exact hsrc
   have hbsymm : (extChartAt I α).symm (extChartAt I α b) = b :=
     (extChartAt I α).left_inv (by simpa [extChartAt_source] using hsrc)
-  -- `chartMovingTriv α (φ b) * chartCloseTriv s = 1` (round trip, vector level).
   have hmul : chartMovingTriv (I := I) α (extChartAt I α b)
       * chartCloseTriv (I := I) Φ_fam α x s = 1 := by
     rw [ContinuousLinearMap.mul_def]; ext w
@@ -277,7 +243,6 @@ theorem chartCloseTriv_eq_ringInverse_chartMovingTriv
     unfold chartCloseTriv chartMovingTriv
     rw [hbsymm]
     exact trivToE_trivFromE (I := I) α hbase w
-  -- The other round trip gives the unit.
   have hmul' : chartCloseTriv (I := I) Φ_fam α x s
       * chartMovingTriv (I := I) α (extChartAt I α b) = 1 := by
     rw [ContinuousLinearMap.mul_def]; ext w
@@ -289,7 +254,6 @@ theorem chartCloseTriv_eq_ringInverse_chartMovingTriv
   have hunit : IsUnit (chartMovingTriv (I := I) α (extChartAt I α b)) :=
     isUnit_iff_exists_and_exists.mpr
       ⟨⟨chartCloseTriv (I := I) Φ_fam α x s, hmul⟩, ⟨chartCloseTriv (I := I) Φ_fam α x s, hmul'⟩⟩
-  -- `Ring.inverse L = (Ring.inverse L * L) * chartCloseTriv = chartCloseTriv`.
   symm
   calc Ring.inverse (chartMovingTriv (I := I) α (extChartAt I α b))
       = Ring.inverse (chartMovingTriv (I := I) α (extChartAt I α b))
@@ -343,17 +307,13 @@ theorem chartCloseTriv_hasDerivAt_of_movingTriv
           (1 : E →L[ℝ] E) (1 : E →L[ℝ] E)) g') t := by
   classical
   set α : M := Φ_fam t x with hα
-  -- At `t`, the orbit point is `α`, in its own chart, with `extChartAt I α (Φ_fam t x) = φ α`.
   have ht_self : (Φ_fam t : M → M) x = α := rfl
-  -- `chartMovingTriv α (φ α)` is the unit `1`.
   have hbase_eq : (fun s : ℝ => chartMovingTriv (I := I) α
         (extChartAt I α ((Φ_fam s : M → M) x))) t
       = chartMovingTriv (I := I) α (extChartAt I α α) := by
     simp only [ht_self]
   have hunit1 : chartMovingTriv (I := I) α (extChartAt I α α) = (1 : E →L[ℝ] E) := by
     ext v; simpa using chartMovingTriv_basepoint (I := I) α v
-  -- The ring inverse is Fréchet-differentiable at the unit `1`, with derivative
-  -- `-mulLeftRight 1⁻¹ 1⁻¹ = -mulLeftRight 1 1`.
   have hinv_fderiv : HasFDerivAt (Ring.inverse : (E →L[ℝ] E) → (E →L[ℝ] E))
       (-ContinuousLinearMap.mulLeftRight ℝ (E →L[ℝ] E) (1 : E →L[ℝ] E) (1 : E →L[ℝ] E))
       (chartMovingTriv (I := I) α (extChartAt I α α)) := by
@@ -362,7 +322,6 @@ theorem chartCloseTriv_hasDerivAt_of_movingTriv
     rw [hu]
     have := hasFDerivAt_ringInverse (𝕜 := ℝ) (R := E →L[ℝ] E) (1 : (E →L[ℝ] E)ˣ)
     simpa using this
-  -- Chain: `Ring.inverse ∘ (moving triv along orbit)` has the composed `HasDerivAt`.
   have hgt_eq : (fun s : ℝ => chartMovingTriv (I := I) α
         (extChartAt I α ((Φ_fam s : M → M) x))) t
       = chartMovingTriv (I := I) α (extChartAt I α α) := hbase_eq
@@ -373,7 +332,6 @@ theorem chartCloseTriv_hasDerivAt_of_movingTriv
           (1 : E →L[ℝ] E) (1 : E →L[ℝ] E)) g') t := by
     have := (hgt_eq ▸ hinv_fderiv).comp_hasDerivAt t hg
     simpa using this
-  -- Near `t`, `chartCloseTriv` equals this ring-inverse curve (chart membership of the orbit).
   have hmem : ∀ᶠ s : ℝ in 𝓝 t,
       (Φ_fam s : M → M) x ∈ (chartAt H α).source :=
     flow_orbit_eventually_mem_chartAt_source (I := I) Φ_fam t x hcontAt

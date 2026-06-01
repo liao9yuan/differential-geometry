@@ -71,22 +71,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The eigenbasis-vector sigma index
-
-The eigenbasis of the `L²`-side tensor resolvent is indexed by pairs `⟨μ, k⟩`
-with `μ` a nonzero eigenvalue and `k` an index in the standard orthonormal basis
-of the (finite-dimensional) eigenspace at `μ`. We abbreviate this index type. -/
 
 /-- The sigma-index type of the resolvent eigenbasis: a nonzero eigenvalue `μ`
 paired with an index `k` into the standard orthonormal basis of the eigenspace
@@ -97,13 +85,6 @@ abbrev TensorEigenIdx
     Fin (Module.finrank ℝ
       (tensorResolventEigenspace (I := I) (M := M) g r s μ.val))
 
-/-! ## The `H¹` pairing of the approximating sequence
-
-The completion embedding preserves the inner product: the `H¹` pairing of two
-embedded smooth sections equals the pre-Hilbert `H¹` inner product of the
-underlying sections, which decomposes (`tensorH1Inner_def`) as the `L²` pairing
-plus the integrated covariant-gradient pairing. -/
-
 /-- The `H¹` pairing of two completion-embedded smooth `H¹` sections equals the
 pre-Hilbert `H¹` inner product of the underlying sections. -/
 private lemma inner_smoothToTensorH1Compl
@@ -113,9 +94,7 @@ private lemma inner_smoothToTensorH1Compl
         smoothToTensorH1Compl (I := I) (M := M) g r s T⟫_ℝ =
       tensorH1Inner (I := I) (M := M) g r s S.toCcTensor T.toCcTensor := by
   rw [smoothToTensorH1Compl_apply, smoothToTensorH1Compl_apply]
-  -- `⟪(S : Completion), (T : Completion)⟫ = ⟪S, T⟫` by `inner_coe`.
   rw [UniformSpace.Completion.inner_coe]
-  -- The pre-Hilbert `H¹` inner product unfolds to `tensorH1Inner`.
   exact SmoothCcTensorH1.inner_def S T
 
 /-- The `H¹` pairing of two completion-embedded smooth `H¹` sections is the `L²`
@@ -133,9 +112,6 @@ private lemma inner_smoothToTensorH1Compl_eq_l2_add_dirichlet
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
   rw [inner_smoothToTensorH1Compl (I := I) (M := M) g r s S T,
     tensorH1Inner_def]
-  -- The `L²` part: `tensorL2Inner g r s S.toFun T.toFun
-  --   = ⟪(S.toCcTensor : TensorL2), (T.toCcTensor : TensorL2)⟫` by `inner_coe`
-  --   and `SmoothCcTensor.inner_def`.
   have h_l2 :
       tensorL2Inner (I := I) (M := M) g r s
           S.toCcTensor.toFun T.toCcTensor.toFun =
@@ -144,14 +120,6 @@ private lemma inner_smoothToTensorH1Compl_eq_l2_add_dirichlet
     rw [UniformSpace.Completion.inner_coe]
     exact (SmoothCcTensor.inner_def S.toCcTensor T.toCcTensor).symm
   rw [h_l2]
-
-/-! ## Chart-locality-free headlines
-
-By `tensorResolventL2_isCompactOperator` the `L²`-side resolvent is a
-compact operator with no chart-selection hypothesis, so the compact-keyed
-eigenbasis vector `tensorResolventEigenbasisVec` is available
-unconditionally. We thread that vector through the construction with no
-chart-selection hypothesis. -/
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- **The eigenvector resolvent (chart-locality-free).** The `H¹`-completion
@@ -169,9 +137,9 @@ noncomputable def eigenvectorResolvent
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- **The eigenvector is a rescaled `L²`-coercion of an `H¹` element
-(chart-locality-free).** Chart-locality-free twin of
-`eigenvector_eq_resolvent_smul`, keyed on the unconditional compactness
-witness. -/
+(chart-locality-free).** The eigenbasis vector `φ` equals `μ⁻¹` times the
+`L²`-coercion of the `H¹`-completion element `eigenvectorResolvent g r s i`,
+keyed on the unconditional compactness witness. -/
 theorem eigenvector_eq_resolvent_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -184,19 +152,16 @@ theorem eigenvector_eq_resolvent_smul
   letI : CompleteSpace E := FiniteDimensional.complete ℝ E
   set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g r s
     with hc_def
-  -- `φ` lies in the resolvent eigenspace at `μ := i.fst.val`.
   have h_mem :
       tensorResolventEigenbasisVec (I := I) (M := M) hc i ∈
         tensorResolventEigenspace (I := I) (M := M) g r s i.fst.val :=
     tensorResolventEigenbasisVec_mem (I := I) (M := M) hc i
-  -- Membership unfolds to `R φ = μ • φ`.
   have h_eig :
       tensorResolventL2 (I := I) (M := M) g r s
           (tensorResolventEigenbasisVec (I := I) (M := M) hc i) =
         i.fst.val • tensorResolventEigenbasisVec (I := I) (M := M) hc i :=
     (mem_tensorResolventEigenspace_iff (I := I) (M := M) g r s i.fst.val
       (tensorResolventEigenbasisVec (I := I) (M := M) hc i)).mp h_mem
-  -- `R φ = TensorH1ComplToTensorL2 (eigenvectorResolvent …)`.
   have h_eig' :
       TensorH1ComplToTensorL2 (I := I) (M := M) g r s
           (eigenvectorResolvent (I := I) (M := M) g r s i) =
@@ -205,14 +170,14 @@ theorem eigenvector_eq_resolvent_smul
     rw [← tensorResolventL2_apply (I := I) (M := M) g r s
       (tensorResolventEigenbasisVec (I := I) (M := M) hc i)]
     exact h_eig
-  -- `μ ≠ 0`, so we may divide.
   have hμ_ne : i.fst.val ≠ 0 := i.fst.val_ne_zero
   rw [h_eig', smul_smul, inv_mul_cancel₀ hμ_ne, one_smul]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- **The chart components of the eigenvector are rescaled chart components of
-the resolvent (chart-locality-free).** Chart-locality-free twin of
-`eigenvector_chartComponent_eq`. -/
+the resolvent (chart-locality-free).** Each canonical Euclidean chart component
+of the eigenbasis vector equals `μ⁻¹` times the corresponding chart component of
+the `L²`-coercion of `eigenvectorResolvent g r s i`. -/
 theorem eigenvector_chartComponent_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -234,7 +199,9 @@ theorem eigenvector_chartComponent_eq
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- **Smooth `H¹`-approximating sequence of the eigenvector resolvent
-(chart-locality-free).** Chart-locality-free twin of `exists_smoothApprox`. -/
+(chart-locality-free).** There is a sequence of smooth compactly-supported `H¹`
+tensor sections whose completion embeddings converge in `TensorH1Compl g r s` to
+`eigenvectorResolvent g r s i`, by density of the completion embedding. -/
 theorem exists_smoothApprox
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -264,8 +231,10 @@ theorem exists_smoothApprox
   exact hx_tendsto
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **The eigenvector weak equation (chart-locality-free).** Chart-locality-free
-twin of `eigenWeakEquation`. -/
+/-- **The eigenvector weak equation (chart-locality-free).** Testing
+`eigenvectorResolvent g r s i` against a smooth compactly-supported `H¹` section
+`S`, its `H¹` pairing with the embedded `S` equals the `L²` pairing of
+`S.toCcTensor` with the eigenbasis vector. -/
 theorem eigenWeakEquation
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -289,8 +258,10 @@ theorem eigenWeakEquation
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- **Convergence of the Dirichlet pairing of the approximating sequence
-(chart-locality-free).** Chart-locality-free twin of
-`smoothApprox_dirichlet_tendsto`. -/
+(chart-locality-free).** For a fixed smooth test section `S` and any `H¹`
+-approximating sequence `w` of `eigenvectorResolvent g r s i`, the integrated
+covariant-gradient (Dirichlet) pairing of `w n` against `S` converges to the
+full `H¹` pairing minus the `L²` pairing. -/
 theorem smoothApprox_dirichlet_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -310,7 +281,6 @@ theorem smoothApprox_dirichlet_tendsto
             ⟪TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                 (eigenvectorResolvent (I := I) (M := M) g r s i),
               (S.toCcTensor : TensorL2 r s g)⟫_ℝ)) := by
-  -- The Dirichlet integral is the full `H¹` pairing minus the `L²` pairing.
   have h_dirichlet_eq :
       (fun n => ∫ x, tensorCovDerivPointwiseInner (I := I) (M := M) g r s
           (w n).toCcTensor S.toCcTensor x
@@ -324,7 +294,6 @@ theorem smoothApprox_dirichlet_tendsto
       (I := I) (M := M) g r s (w n) S
     linarith [h_decomp]
   rw [h_dirichlet_eq]
-  -- The `H¹` pairing of the approximating sequence converges.
   have h_h1 :
       Filter.Tendsto
         (fun n => ⟪smoothToTensorH1Compl (I := I) (M := M) g r s (w n),
@@ -338,7 +307,6 @@ theorem smoothApprox_dirichlet_tendsto
       (innerSL ℝ).continuous₂.comp
         (continuous_id.prodMk continuous_const)
     exact (h_cont.tendsto _).comp hw
-  -- The `L²` pairing of the approximating sequence converges.
   have h_l2 :
       Filter.Tendsto
         (fun n => ⟪((w n).toCcTensor : TensorL2 r s g),

@@ -53,8 +53,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## The directed `wkpNorm`-recursion -/
-
 /-- **`wkpNorm`-recursion, forward direction.** The order-`(k+1)` iterated
 Sobolev norm of `u` is bounded by the `L^p`-norm of `u` plus the sum, over the
 coordinate axes, of the order-`k` norms of the chosen weak partials. This is the
@@ -92,9 +90,7 @@ theorem wkpNorm_succ_le_wkpNorm_add_sum_partial
         wkpNorm (d := d) k p (chosenWeakPartial' (d := d) p i u Ω) Ω := by
   classical
   rw [wkpNorm_succ_eq_eLpNorm_add_sum_partial (d := d) k p Ω u]
-  -- `eLpNorm u p ≤ wkpNorm k p u Ω` since `eLpNorm` is the `j = 0` summand.
   refine add_le_add ?_ (le_refl _)
-  -- The order-`0` norm `wkpNorm 0 p u Ω = eLpNorm u p` is `≤ wkpNorm k p u Ω`.
   have h0 : wkpNorm (d := d) 0 p u Ω ≤ wkpNorm (d := d) k p u Ω :=
     wkpNorm_mono_order (d := d) (Nat.zero_le k) u Ω
   rwa [wkpNorm_zero (d := d) p u Ω] at h0
@@ -118,8 +114,6 @@ theorem wkpNorm_chosenWeakPartial_le
     wkpNorm (d := d) k p (chosenWeakPartial' (d := d) p i u Ω) Ω ≤
       wkpNorm (d := d) (k + 1) p u Ω :=
   wkpNorm_chosenWeakPartial_le_wkpNorm_succ (d := d) k hΩ u i
-
-/-! ## Finite-sum closure -/
 
 /-- A finite sum of `W^{k,p}(Ω)` functions lies in `W^{k,p}(Ω)`. -/
 private theorem memWkp_finset_sum
@@ -155,7 +149,6 @@ theorem wkpNorm_sum_le
       rw [wkpNorm_zero_fun_zero (d := d) hp hΩ]
   | insert a s ha ih =>
       rw [Finset.sum_insert ha]
-      -- `∑_{insert a s} f i x = f a x + ∑_{s} f i x`.
       have h_split : (fun x => ∑ i ∈ insert a s, f i x) =
           (fun x => f a x + ∑ i ∈ s, f i x) := by
         funext x
@@ -171,13 +164,6 @@ theorem wkpNorm_sum_le
         wkpNorm_add_le (d := d) hp hΩ ha_mem h_sum_mem
       exact h_triangle.trans (add_le_add (le_refl _) (ih hs_mem))
 
-/-! ## `wkpNorm`-equality under zero-extension
-
-The iterated weak partials of a compactly-supported function, computed on a
-larger open set `V`, agree almost everywhere with the zero-extension (from the
-smaller domain `Ω`) of the iterated weak partials computed on `Ω`. Consequently
-the iterated Sobolev norm is unchanged under zero-extension. -/
-
 /-- For a compactly-supported `W^{1,p}(Ω)` function `u` with `tsupport u ⊆ Ω`,
 the chosen weak partial computed on the larger open set `V ⊇ Ω` is a.e. equal,
 on `volume.restrict V`, to the `Ω`-indicator of the chosen weak partial computed
@@ -191,14 +177,12 @@ private theorem chosenWeakPartial'_extend_zero_ae
       =ᵐ[volume.restrict V]
       Ω.indicator (chosenWeakPartial' (d := d) p i u Ω) := by
   classical
-  -- `u` is `W^{1,p}` on `V` by zero-extension of `W^{1,p}` membership.
   have hu_W1_Ω : MemWkp (d := d) 1 p u Ω := MemWkp.one_iff_memW1p.mpr hu
   have hu_W1_V : MemWkp (d := d) 1 p u V :=
     MemWkp.extend_zero (d := d) hp hp_top hΩ hV hΩV hu_W1_Ω hu_supp hu_compact
   have hu_V : DeGiorgi.MemW1p (d := d) p u V := MemWkp.one_iff_memW1p.mp hu_W1_V
   set g_Ω : E → ℝ := chosenWeakPartial' (d := d) p i u Ω with hg_Ω_def
   set g_V : E → ℝ := chosenWeakPartial' (d := d) p i u V with hg_V_def
-  -- On `Ω`, `g_V` and `g_Ω` are both weak `i`-partials of `u`, hence a.e. equal.
   have hg_V_ae_g_Ω : g_V =ᵐ[volume.restrict Ω] g_Ω := by
     have h_g_Ω_weak : DeGiorgi.HasWeakPartialDeriv i g_Ω u Ω :=
       chosenWeakPartial'_isWeakPartial_of_mem hu i
@@ -214,22 +198,18 @@ private theorem chosenWeakPartial'_extend_zero_ae
       exact (h_mem.mono_measure (Measure.restrict_mono_set volume hΩV)).locallyIntegrable hp
     exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ h_g_V_weak_Ω h_g_Ω_weak
       h_g_V_loc h_g_Ω_loc
-  -- On `V \ Ω`, `g_V` is a.e. zero (it is a.e. zero off `tsupport u`).
   have hg_V_zero_diff : g_V =ᵐ[volume.restrict (V \ Ω)] (fun _ : E => (0 : ℝ)) := by
     have h_g_V_zero : g_V =ᵐ[volume.restrict (V \ tsupport u)]
         (fun _ : E => (0 : ℝ)) :=
       chosenWeakPartial'_ae_zero_on_sdiff_tsupport hp hV hu_V i
     exact ae_restrict_of_ae_restrict_of_subset
       (Set.diff_subset_diff_right hu_supp) h_g_V_zero
-  -- Combine: `g_V =ᵐ[restrict V] Ω.indicator g_Ω`.
   have h_meas_Ω : MeasurableSet Ω := hΩ.measurableSet
-  -- On `Ω`: `g_V =ᵐ g_Ω` and `Ω.indicator g_Ω = g_Ω`.
   have h_on_Ω : g_V =ᵐ[volume.restrict Ω] Ω.indicator g_Ω := by
     have h_ind_eq : Ω.indicator g_Ω =ᵐ[volume.restrict Ω] g_Ω := by
       refine (ae_restrict_iff' h_meas_Ω).mpr ?_
       exact Filter.Eventually.of_forall fun x hx => Set.indicator_of_mem hx _
     exact hg_V_ae_g_Ω.trans h_ind_eq.symm
-  -- On `V \ Ω`: `g_V =ᵐ 0` and `Ω.indicator g_Ω = 0`.
   have h_on_diff : g_V =ᵐ[volume.restrict (V \ Ω)] Ω.indicator g_Ω := by
     have h_ind_zero : Ω.indicator g_Ω =ᵐ[volume.restrict (V \ Ω)]
         (fun _ : E => (0 : ℝ)) := by
@@ -238,7 +218,6 @@ private theorem chosenWeakPartial'_extend_zero_ae
       exact Filter.Eventually.of_forall fun x hx =>
         Set.indicator_of_notMem hx.2 _
     exact hg_V_zero_diff.trans h_ind_zero.symm
-  -- Patch the two pieces on `V = Ω ∪ (V \ Ω)`.
   have h_union : V = Ω ∪ (V \ Ω) := by
     ext x; constructor
     · intro hx
@@ -269,7 +248,6 @@ private theorem chosenWeakPartial'_indicator_aux
   set g_mod : E → ℝ := (tsupport u).indicator g_Ω with hg_mod_def
   have h_tsupp_u_closed : IsClosed (tsupport u) := isClosed_tsupport _
   have h_tsupp_u_compact : IsCompact (tsupport u) := hu_compact
-  -- Support of `g_mod` is inside `tsupport u`.
   have h_supp_subset : Function.support g_mod ⊆ tsupport u := by
     intro x hx
     by_contra hx_not
@@ -279,8 +257,7 @@ private theorem chosenWeakPartial'_indicator_aux
   refine ⟨?_, ?_, ?_⟩
   · exact h_tsupp_u_compact.of_isClosed_subset (isClosed_tsupport _) h_tsupp_subset
   · exact h_tsupp_subset.trans hu_supp
-  · -- `g_mod =ᵐ g_Ω` on `volume.restrict Ω`.
-    have h_meas_tsupp : MeasurableSet (tsupport u) :=
+  · have h_meas_tsupp : MeasurableSet (tsupport u) :=
       h_tsupp_u_closed.measurableSet
     have h_ae_tsupp : g_mod =ᵐ[volume.restrict (tsupport u)] g_Ω := by
       refine (ae_restrict_iff' h_meas_tsupp).mpr ?_
@@ -318,7 +295,6 @@ private theorem indicator_ae_congr_of_ae_restrict
     Ω.indicator f =ᵐ[volume.restrict V] Ω.indicator g := by
   classical
   have h_meas_Ω : MeasurableSet Ω := hΩ.measurableSet
-  -- On `Ω`: indicators equal `f`, `g` which agree a.e.
   have h_on_Ω : Ω.indicator f =ᵐ[volume.restrict Ω] Ω.indicator g := by
     have hf_eq : Ω.indicator f =ᵐ[volume.restrict Ω] f :=
       (ae_restrict_iff' h_meas_Ω).mpr
@@ -327,7 +303,6 @@ private theorem indicator_ae_congr_of_ae_restrict
       (ae_restrict_iff' h_meas_Ω).mpr
         (Filter.Eventually.of_forall fun x hx => Set.indicator_of_mem hx _)
     exact hf_eq.trans (hfg.trans hg_eq.symm)
-  -- On `V \ Ω`: both indicators are zero.
   have h_on_diff : Ω.indicator f =ᵐ[volume.restrict (V \ Ω)] Ω.indicator g := by
     have h_meas_diff : MeasurableSet (V \ Ω) := hV.measurableSet.diff h_meas_Ω
     refine (ae_restrict_iff' h_meas_diff).mpr ?_
@@ -362,7 +337,6 @@ private theorem iterWeakPartial_extend_zero_ae
   classical
   induction j generalizing u with
   | zero =>
-      -- `iterWeakPartial p 0 α u _ = u`; need `u =ᵐ[restrict V] Ω.indicator u`.
       simp only [iterWeakPartial_zero]
       have h_meas_Ω : MeasurableSet Ω := hΩ.measurableSet
       have h_on_Ω : u =ᵐ[volume.restrict Ω] Ω.indicator u :=
@@ -392,27 +366,19 @@ private theorem iterWeakPartial_extend_zero_ae
       have hu_W1_Ω : DeGiorgi.MemW1p (d := d) p u Ω := hu.memW1p
       set g_Ω : E → ℝ := chosenWeakPartial' (d := d) p (α 0) u Ω with hg_Ω_def
       set g_V : E → ℝ := chosenWeakPartial' (d := d) p (α 0) u V with hg_V_def
-      -- Compactly-supported-in-`Ω` surrogate `w` for `g_Ω`.
       obtain ⟨hw_compact, hw_supp, hw_ae⟩ :=
         chosenWeakPartial'_indicator_aux (d := d) hp hΩ hu_W1_Ω hu_supp hu_compact (α 0)
       set w : E → ℝ := (tsupport u).indicator g_Ω with hw_def
-      -- `w` has order-`j` membership on `Ω` (a.e.-equal to `g_Ω`).
       have hg_Ω_mem : MemWkp (d := d) j p g_Ω Ω := hu.chosenWeakPartial_mem (α 0)
       have hw_mem : MemWkp (d := d) j p w Ω :=
         (MemWkp_congr_ae (d := d) hp hΩ hw_ae).mpr hg_Ω_mem
-      -- Step 1: `g_V =ᵐ[restrict V] Ω.indicator g_Ω`.
       have h_chosen_ext : g_V =ᵐ[volume.restrict V] Ω.indicator g_Ω :=
         chosenWeakPartial'_extend_zero_ae (d := d) hp hp_top hΩ hV hΩV
           hu_W1_Ω hu_supp hu_compact (α 0)
-      -- Step 2: replace the input `g_V` by `Ω.indicator g_Ω`, and that by `w`
-      -- (which is a.e.-equal to `g_Ω`, hence its `Ω`-indicator is a.e.-equal to
-      -- `Ω.indicator g_Ω`).
       have h_w_ind_ae : Ω.indicator w =ᵐ[volume.restrict V] Ω.indicator g_Ω :=
         indicator_ae_congr_of_ae_restrict hΩ hV hΩV hw_ae
       have h_chosen_ext_w : g_V =ᵐ[volume.restrict V] Ω.indicator w :=
         h_chosen_ext.trans h_w_ind_ae.symm
-      -- The `Ω`-indicator of `w` equals `w` a.e. on `restrict V`? Not pointwise,
-      -- but `w` itself vanishes off `tsupport u ⊆ Ω`, hence `Ω.indicator w = w`.
       have h_ind_w_eq_w : Ω.indicator w = w := by
         funext x
         by_cases hxΩ : x ∈ Ω
@@ -421,21 +387,17 @@ private theorem iterWeakPartial_extend_zero_ae
           rw [Set.indicator_of_notMem hxΩ,
             image_eq_zero_of_notMem_tsupport hx_not]
       rw [h_ind_w_eq_w] at h_chosen_ext_w
-      -- Step 3: rewrite the order-`j` iterate of `g_V` over `V` using `g_V =ᵐ w`.
       have h_iter_input :
           iterWeakPartial (d := d) p j (fun t : Fin j => α t.succ) g_V V
             =ᵐ[volume.restrict V]
           iterWeakPartial (d := d) p j (fun t : Fin j => α t.succ) w V :=
         iterWeakPartial_ae_congr (d := d) hp hV j (fun t : Fin j => α t.succ)
           h_chosen_ext_w
-      -- Step 4: apply the induction hypothesis to `w`.
       have h_iter_w :
           iterWeakPartial (d := d) p j (fun t : Fin j => α t.succ) w V
             =ᵐ[volume.restrict V]
           Ω.indicator (iterWeakPartial (d := d) p j (fun t : Fin j => α t.succ) w Ω) :=
         ih (fun t : Fin j => α t.succ) hw_mem hw_supp hw_compact
-      -- Step 5: the order-`j` iterate of `w` over `Ω` is a.e.-equal (on `Ω`) to
-      -- that of `g_Ω`, so the `Ω`-indicators agree a.e. on `restrict V`.
       have h_iter_wΩ :
           iterWeakPartial (d := d) p j (fun t : Fin j => α t.succ) w Ω
             =ᵐ[volume.restrict Ω]
@@ -446,7 +408,6 @@ private theorem iterWeakPartial_extend_zero_ae
             =ᵐ[volume.restrict V]
           Ω.indicator (iterWeakPartial (d := d) p j (fun t : Fin j => α t.succ) g_Ω Ω) :=
         indicator_ae_congr_of_ae_restrict hΩ hV hΩV h_iter_wΩ
-      -- Chain steps 3–5.
       exact (h_iter_input.trans h_iter_w).trans h_ind_iter
 
 /-- **`wkpNorm`-equality under zero-extension.** For a compactly-supported
@@ -469,24 +430,13 @@ theorem wkpNorm_extend_zero
   have hj_le : j ≤ k := by
     rw [Finset.mem_range] at hj; omega
   have h_uWj : MemWkp (d := d) j p u Ω := MemWkp.le_of_le hj_le hu
-  -- The order-`j` iterate over `V` is a.e.-equal to the `Ω`-indicator of the
-  -- order-`j` iterate over `Ω`.
   have h_iter_ae :=
     iterWeakPartial_extend_zero_ae (d := d) hp hp_top hΩ hV hΩV α
       h_uWj hu_supp hu_compact
   rw [eLpNorm_congr_ae h_iter_ae]
-  -- `eLpNorm (Ω.indicator g) p (restrict V) = eLpNorm g p (restrict Ω)`.
   have h_meas_Ω : MeasurableSet Ω := hΩ.measurableSet
   rw [eLpNorm_indicator_eq_eLpNorm_restrict h_meas_Ω,
     Measure.restrict_restrict_of_subset hΩV]
-
-/-! ## Quantitative support-promotion bound
-
-The inequality analogue of `MemWkp_of_memWkp_precompact_of_ae_zero_off_compact`:
-an interior `wkpNorm`-bound on a precompact subdomain, together with the
-function being a.e. zero off a compact subset of that subdomain, yields a global
-`wkpNorm`-bound on the full domain. The promotion constant is the
-smooth-cutoff Leibniz constant supplied by `wkpNorm_smul_smooth_bounded_le`. -/
 
 section SupportPromotion
 
@@ -516,10 +466,7 @@ theorem wkpNorm_le_of_memWkp_precompact_of_ae_zero_off_compact
       wkpNorm (d := d) k p u Ω ≤
         ENNReal.ofReal K_prom * wkpNorm (d := d) k p u Ω' := by
   classical
-  -- `Ω' ⊆ Ω` follows from `closure Ω' ⊆ Ω`.
   have hΩ'Ω : Ω' ⊆ Ω := subset_closure.trans hΩ'_cl
-  -- A smooth cutoff `χ`, equal to `1` on a neighbourhood `cthickening δ K` of
-  -- `K`, compactly supported with `tsupport χ ⊆ Ω'`.
   obtain ⟨δ, χ, hδ_pos, _hδ_sub, hχ_smooth, hχ_compact, _hχ_range,
       hχ_one, hχ_supp⟩ :=
     exists_smooth_cutoff_with_neighborhood (d := d) hK_compact hΩ'_open hKΩ'
@@ -527,28 +474,20 @@ theorem wkpNorm_le_of_memWkp_precompact_of_ae_zero_off_compact
   have hN_closed : IsClosed N := Metric.isClosed_cthickening
   have hN_meas : MeasurableSet N := hN_closed.measurableSet
   have hK_sub_N : K ⊆ N := Metric.self_subset_cthickening K
-  -- The cutoff product `v = χ · u`.
   set v : E → ℝ := fun x => χ x * u x with hv_def
-  -- Uniform iterated-derivative bound for the smooth compactly-supported `χ`.
   obtain ⟨C, hC_nn, hC_bound⟩ :=
     exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport (d := d)
       hχ_smooth hχ_compact k
-  -- The quantitative Leibniz constant for the cutoff `χ`.
   obtain ⟨K_prom, hK_prom_pos, hK_prom_bound⟩ :=
     wkpNorm_smul_smooth_bounded_le (d := d) k hp hp_top hΩ'_open hχ_smooth hC_nn
       (fun j hj x hx => hC_bound x j hj)
   refine ⟨K_prom, hK_prom_pos, ?_⟩
-  -- Step 1: `v = χ · u` is `W^{k,p}` on `Ω'`.
   have hv_memWkp_Ω' : MemWkp (d := d) k p v Ω' :=
     MemWkp.smul_smooth_bounded (d := d) k hp hΩ'_open hχ_smooth
       (fun j _hj x _hx => hC_bound x j _hj) hu_precompact
-  -- Step 2: `v` has topological support inside `Ω'` and is compactly supported.
   have hv_tsupp : tsupport v ⊆ Ω' :=
     (tsupport_smul_subset_left χ u).trans hχ_supp
   have hv_compact : HasCompactSupport v := hχ_compact.mul_right
-  -- Step 3: `v` is almost everywhere equal to `u` on `Ω`.
-  -- On `Ω ∩ N` the cutoff equals `1`; on `Ω \ N ⊆ Ω \ K` the function `u`
-  -- vanishes a.e., hence so does `v`.
   have hv_ae_eq_u : v =ᵐ[(volume : Measure E).restrict Ω] u := by
     have h_split : Ω = (Ω ∩ N) ∪ (Ω \ N) := by
       rw [Set.inter_union_diff]
@@ -567,10 +506,6 @@ theorem wkpNorm_le_of_memWkp_precompact_of_ae_zero_off_compact
       rw [Filter.EventuallyEq, ae_restrict_union_eq]
       exact ⟨h_on_inter, h_on_diff⟩
     rwa [← h_split] at h_union
-  -- Step 4: chain the norm identities.
-  -- `wkpNorm k p u Ω = wkpNorm k p v Ω`            (a.e.-congruence)
-  --                  = wkpNorm k p v Ω'            (zero-extension equality)
-  --                 ≤ K_prom · wkpNorm k p u Ω'    (quantitative Leibniz).
   calc
     wkpNorm (d := d) k p u Ω
         = wkpNorm (d := d) k p v Ω :=
@@ -609,10 +544,7 @@ theorem wkpNorm_le_of_memWkp_precompact_of_ae_zero_off_compact_uniform
         wkpNorm (d := d) k p u Ω ≤
           ENNReal.ofReal K_prom * wkpNorm (d := d) k p u Ω' := by
   classical
-  -- `Ω' ⊆ Ω` follows from `closure Ω' ⊆ Ω`.
   have hΩ'Ω : Ω' ⊆ Ω := subset_closure.trans hΩ'_cl
-  -- A smooth cutoff `χ`, equal to `1` on a neighbourhood `cthickening δ K` of
-  -- `K`, compactly supported with `tsupport χ ⊆ Ω'`.  The cutoff is `u`-free.
   obtain ⟨δ, χ, hδ_pos, _hδ_sub, hχ_smooth, hχ_compact, _hχ_range,
       hχ_one, hχ_supp⟩ :=
     exists_smooth_cutoff_with_neighborhood (d := d) hK_compact hΩ'_open hKΩ'
@@ -620,28 +552,20 @@ theorem wkpNorm_le_of_memWkp_precompact_of_ae_zero_off_compact_uniform
   have hN_closed : IsClosed N := Metric.isClosed_cthickening
   have hN_meas : MeasurableSet N := hN_closed.measurableSet
   have hK_sub_N : K ⊆ N := Metric.self_subset_cthickening K
-  -- Uniform iterated-derivative bound for the smooth compactly-supported `χ`.
   obtain ⟨C, hC_nn, hC_bound⟩ :=
     exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport (d := d)
       hχ_smooth hχ_compact k
-  -- The quantitative Leibniz constant for the cutoff `χ` — already function-
-  -- uniform: `wkpNorm_smul_smooth_bounded_le` produces `∀ {u}, MemWkp → …`.
   obtain ⟨K_prom, hK_prom_pos, hK_prom_bound⟩ :=
     wkpNorm_smul_smooth_bounded_le (d := d) k hp hp_top hΩ'_open hχ_smooth hC_nn
       (fun j hj x hx => hC_bound x j hj)
-  -- Fix `K_prom` before introducing the function.
   refine ⟨K_prom, hK_prom_pos, fun u hu_ae_zero hu_precompact => ?_⟩
-  -- The cutoff product `v = χ · u`.
   set v : E → ℝ := fun x => χ x * u x with hv_def
-  -- Step 1: `v = χ · u` is `W^{k,p}` on `Ω'`.
   have hv_memWkp_Ω' : MemWkp (d := d) k p v Ω' :=
     MemWkp.smul_smooth_bounded (d := d) k hp hΩ'_open hχ_smooth
       (fun j _hj x _hx => hC_bound x j _hj) hu_precompact
-  -- Step 2: `v` has topological support inside `Ω'` and is compactly supported.
   have hv_tsupp : tsupport v ⊆ Ω' :=
     (tsupport_smul_subset_left χ u).trans hχ_supp
   have hv_compact : HasCompactSupport v := hχ_compact.mul_right
-  -- Step 3: `v` is almost everywhere equal to `u` on `Ω`.
   have hv_ae_eq_u : v =ᵐ[(volume : Measure E).restrict Ω] u := by
     have h_split : Ω = (Ω ∩ N) ∪ (Ω \ N) := by
       rw [Set.inter_union_diff]
@@ -660,7 +584,6 @@ theorem wkpNorm_le_of_memWkp_precompact_of_ae_zero_off_compact_uniform
       rw [Filter.EventuallyEq, ae_restrict_union_eq]
       exact ⟨h_on_inter, h_on_diff⟩
     rwa [← h_split] at h_union
-  -- Step 4: chain the norm identities.
   calc
     wkpNorm (d := d) k p u Ω
         = wkpNorm (d := d) k p v Ω :=

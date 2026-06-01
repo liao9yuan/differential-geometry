@@ -108,14 +108,10 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 /-- The Euclidean ambient space of dimension `Module.finrank ℝ E`. -/
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## File-local helpers -/
 
 /-- The intersection of two partition-of-unity tsupports is compact on a
 compact manifold. -/
@@ -167,8 +163,6 @@ private lemma ofReal_sq_eq_enorm_sq (r : ℝ) :
     ENNReal.ofReal (r ^ 2) = (‖r‖ₑ : ℝ≥0∞) ^ 2 := by
   rw [Real.enorm_eq_ofReal_abs, ← ENNReal.ofReal_pow (abs_nonneg _), sq_abs]
 
-/-! ## The headline change-of-variables bound -/
-
 /-- **Per-pair `(α, β)` chart change-of-variables bound for the
 partition-of-unity-localised chart-`α` integrand.**
 
@@ -218,7 +212,6 @@ theorem chart_α_pou_α_pou_β_raw_β_sq_le_chart_β_wkpNorm
                 (tensorChartComp (I := I) (M := M) g r s T β Idx Jdx)
                 (chartTargetEuclid (I := I) (M := M) β)) ^ 2 := by
   classical
-  -- Set up the compact set `K_M := tsupport POU(α) ∩ tsupport POU(β)`.
   set K_M : Set M :=
     tsupport (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
       tsupport (fun x : M => ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
@@ -228,17 +221,14 @@ theorem chart_α_pou_α_pou_β_raw_β_sq_le_chart_β_wkpNorm
     pouInter_subset_chartSourceα (I := I) (M := M) α β
   have hKM_subset_β : K_M ⊆ (chartAt H β).source :=
     pouInter_subset_chartSourceβ (I := I) (M := M) α β
-  -- Apply the strict chart-transition diffeomorphism constructor with `kmax = 0`.
   obtain ⟨Ω_αβ, Ω_βα, hΩαβ_open, _hΩβα_open, hΩαβ_subset_target,
       hΩβα_subset_target, hΩαβ_overlap, _hΩβα_overlap, h_image_subset, Φ,
       hΦ_eq, _hΦ_inv_eq⟩ :=
     chartTransition_smoothDiffeoBoundedAtOrder_strict (I := I) (M := M)
       α β hKM_compact hKM_subset_α hKM_subset_β 0
-  -- Cast the image-inclusion to the desired form.
   have h_image_subset' :
       ((toEuclidean : E ≃L[ℝ] EuclN) ∘ extChartAt I α) '' K_M ⊆ Ω_αβ :=
     h_image_subset
-  -- Set up the Euclidean chart target sets.
   set EuclTargetα : Set EuclN := chartTargetEuclid (I := I) (M := M) α
     with hEα_def
   set EuclTargetβ : Set EuclN := chartTargetEuclid (I := I) (M := M) β
@@ -246,7 +236,6 @@ theorem chart_α_pou_α_pou_β_raw_β_sq_le_chart_β_wkpNorm
   have hΩαβ_meas : MeasurableSet Ω_αβ := hΩαβ_open.measurableSet
   have hEα_meas : MeasurableSet EuclTargetα :=
     chartTargetEuclid_measurableSet (I := I) (M := M) α
-  -- Setup constants.
   have hjLB_pos : 0 < Φ.jacobian_lower_bound := Φ.jacobian_lower_bound_pos
   have hjLB_inv_pos : 0 < 1 / Φ.jacobian_lower_bound := by positivity
   set Kchg : ℝ := (1 / Φ.jacobian_lower_bound) ^ (1 / (2 : ℝ≥0∞).toReal)
@@ -254,28 +243,19 @@ theorem chart_α_pou_α_pou_β_raw_β_sq_le_chart_β_wkpNorm
   have hKchg_nn : 0 ≤ Kchg := by
     rw [hKchg_def]
     exact Real.rpow_nonneg hjLB_inv_pos.le _
-  -- The final constant `K`.
   refine ⟨Kchg ^ 2, sq_nonneg _, ?_⟩
   intro T
-  -- The pointwise integrand on M.
   set F : M → ℝ := fun x =>
     ((chartAtlasPOU I M α : M → ℝ) x) *
       (tensorChartComponentPou (I := I) (M := M) g r s T β Idx Jdx x) ^ 2
     with hF_def
-  -- The pointwise integrand on EuclN.
   set Fe : EuclN → ℝ≥0∞ := fun y =>
     ENNReal.ofReal
       (F ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
     with hFe_def
-  -- Step 1: the integrand `Fe y` vanishes on `EuclTargetα \ Ω_αβ`.
-  -- For `y ∈ EuclTargetα`, the point `x := (extChartAt α).symm (toEuclidean.symm y) ∈
-  -- chartSource α`, and both `POU(α)(x) ≥ 0` and `tensorChartComponentPou β IJ x ≥ 0`
-  -- in squared form. If neither vanishes then `x ∈ K_M` so
-  -- `y ∈ (toEuclidean ∘ extChartAt α) '' K_M ⊆ Ω_αβ`, contradicting `y ∉ Ω_αβ`.
   have h_Fe_vanish_on_EuclTargetα_minus_Ωαβ :
       ∀ y ∈ EuclTargetα, y ∉ Ω_αβ → Fe y = 0 := by
     intro y hy_target hy_off
-    -- `x := (extChartAt I α).symm (toEuclidean.symm y) ∈ chartSource α`.
     set x : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hx_def
     have hsymm_target_α : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
       have := hy_target
@@ -284,14 +264,12 @@ theorem chart_α_pou_α_pou_β_raw_β_sq_le_chart_β_wkpNorm
     have hy_eq_φα_x : (toEuclidean (E := E)) (extChartAt I α x) = y := by
       rw [hx_def, (extChartAt I α).right_inv hsymm_target_α]
       exact (toEuclidean (E := E)).apply_symm_apply y
-    -- If `x ∈ K_M`, derive contradiction with `y ∉ Ω_αβ`.
     have hx_notin_K : x ∉ K_M := by
       intro hxK
       have hy_in_image :
           y ∈ ((toEuclidean : E ≃L[ℝ] EuclN) ∘ extChartAt I α) '' K_M :=
         ⟨x, hxK, hy_eq_φα_x⟩
       exact hy_off (h_image_subset' hy_in_image)
-    -- `x ∉ K_M` ⇒ either x ∉ tsupport POU(α) or x ∉ tsupport POU(β).
     have h_cases :
         x ∉ tsupport (fun z : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) z) ∨
         x ∉ tsupport (fun z : M => ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) z) := by
@@ -299,8 +277,7 @@ theorem chart_α_pou_α_pou_β_raw_β_sq_le_chart_β_wkpNorm
       rw [not_or, not_not, not_not] at h_both
       exact hx_notin_K ⟨h_both.1, h_both.2⟩
     rcases h_cases with hxα | hxβ
-    · -- x ∉ tsupport POU(α) ⇒ POU(α)(x) = 0 ⇒ F x = 0.
-      have hPOUα_zero : (chartAtlasPOU I M α : M → ℝ) x = 0 := by
+    · have hPOUα_zero : (chartAtlasPOU I M α : M → ℝ) x = 0 := by
         have hsupp_sub : Function.support
             ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) ⊆
           tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
@@ -314,9 +291,7 @@ theorem chart_α_pou_α_pou_β_raw_β_sq_le_chart_β_wkpNorm
         simp [hF_def, hPOUα_zero]
       change ENNReal.ofReal (F x) = 0
       rw [hFx, ENNReal.ofReal_zero]
-    · -- x ∉ tsupport POU(β) ⇒ POU(β)(x) = 0 ⇒
-      -- tensorChartComponentPou g r s T β Idx Jdx x = 0 ⇒ F x = 0.
-      have hPOUβ_zero : (chartAtlasPOU I M β : M → ℝ) x = 0 := by
+    · have hPOUβ_zero : (chartAtlasPOU I M β : M → ℝ) x = 0 := by
         have hsupp_sub : Function.support
             ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) ⊆
           tsupport ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
@@ -334,7 +309,6 @@ theorem chart_α_pou_α_pou_β_raw_β_sq_le_chart_β_wkpNorm
         simp [hF_def, hcomp_zero]
       change ENNReal.ofReal (F x) = 0
       rw [hFx, ENNReal.ofReal_zero]
-  -- Step 2: restrict the LHS integral to Ω_αβ.
   have h_LHS_eq_restrict_Ωαβ :
       ∫⁻ y in EuclTargetα, Fe y ∂(volume : Measure EuclN) =
         ∫⁻ y in Ω_αβ, Fe y ∂(volume : Measure EuclN) := by
@@ -352,15 +326,6 @@ theorem chart_α_pou_α_pou_β_raw_β_sq_le_chart_β_wkpNorm
       show Ω_αβ ∩ EuclTargetα = Ω_αβ from
         Set.inter_eq_left.mpr hΩαβ_subset_target]
   rw [h_LHS_eq_restrict_Ωαβ]
-  -- Step 3: identify the integrand on Ω_αβ.
-  -- For y ∈ Ω_αβ, set x := (extChartAt α).symm (toEuclidean.symm y).
-  --   Since Ω_αβ ⊆ chartOverlapEuclid α β, there exists z ∈ source α ∩ source β
-  --   with y = toEuclidean (extChartAt α z); the relation forces z = x.
-  --   Hence x ∈ source α ∩ source β, and chartTransitionEuclid α β y =
-  --     toEuclidean (extChartAt β x), so tensorChartComp β IJ (Φ.toFun y) =
-  --     tensorChartComponentPou β IJ x.
-  -- The integrand thus becomes ENNReal.ofReal (POU(α)(x) ·
-  --   (tensorChartComp β IJ (Φ.toFun y))²).
   have h_integrand_eq_on_Ωαβ : ∀ y ∈ Ω_αβ,
       Fe y =
         ENNReal.ofReal
@@ -369,8 +334,6 @@ theorem chart_α_pou_α_pou_β_raw_β_sq_le_chart_β_wkpNorm
             (tensorChartComp (I := I) (M := M) g r s T β Idx Jdx (Φ.toFun y)) ^ 2) := by
     intro y hy
     set x : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hx_def
-    -- Step 3a: y ∈ chartOverlapEuclid α β, so y = toEuclidean(extChartAt α z) for some
-    -- z ∈ source α ∩ source β. Derive z = x.
     have hy_overlap : y ∈ chartOverlapEuclid (I := I) (M := M) α β :=
       hΩαβ_overlap hy
     rcases hy_overlap with ⟨w, ⟨z, hz_in, hzw⟩, hwy⟩
@@ -382,46 +345,35 @@ theorem chart_α_pou_α_pou_β_raw_β_sq_le_chart_β_wkpNorm
       have hx_def' : x = (extChartAt I α).symm ((toEuclidean (E := E)).symm y) := hx_def
       rw [hx_def', hy_eq2, (toEuclidean (E := E)).symm_apply_apply,
         (extChartAt I α).left_inv hz_extchart]
-    -- x ∈ source α ∩ source β.
     have hx_source_α : x ∈ (chartAt H α).source := hz_eq_x ▸ hz_in.1
     have hx_source_β : x ∈ (chartAt H β).source := hz_eq_x ▸ hz_in.2
-    -- Recover y from x.
     have hy_eq_φα_x : (toEuclidean (E := E)) (extChartAt I α x) = y := by
       rw [← hz_eq_x, ← hy_eq2]
-    -- On Ω_αβ, Φ.toFun y = chartTransitionEuclid α β y.
     have hΦy_eq : Φ.toFun y = chartTransitionEuclid (I := I) (M := M) α β y :=
       hΦ_eq y hy
-    -- chartTransitionEuclid α β y = toEuclidean (extChartAt β x).
     have h_trans_eq : chartTransitionEuclid (I := I) (M := M) α β y =
         (toEuclidean (E := E)) (extChartAt I β x) := by
       rw [← hy_eq_φα_x]
       exact chartTransitionEuclid_eq_chartα_image (I := I) (M := M) α β hx_source_α
     have hΦy_eq2 : Φ.toFun y = (toEuclidean (E := E)) (extChartAt I β x) := by
       rw [hΦy_eq, h_trans_eq]
-    -- toEuclidean (extChartAt β x) ∈ chartTargetEuclid β.
     have hΦy_target_β : Φ.toFun y ∈ EuclTargetβ := by
       rw [hΦy_eq2, hEβ_def]
       refine ⟨extChartAt I β x, ?_, rfl⟩
       exact (extChartAt I β).map_source (by
         rw [extChartAt_source (I := I)]; exact hx_source_β)
-    -- tensorChartComp β IJ (Φ.toFun y) = tensorChartComponentPou β IJ x.
     have h_comp_eq :
         tensorChartComp (I := I) (M := M) g r s T β Idx Jdx (Φ.toFun y) =
           tensorChartComponentPou (I := I) (M := M) g r s T β Idx Jdx x := by
       rw [tensorChartComp_apply_of_mem (I := I) (M := M) g r s T β Idx Jdx hΦy_target_β]
       congr 1
-      -- (extChartAt β).symm (toEuclidean.symm (Φ y)) = x.
       rw [hΦy_eq2, (toEuclidean (E := E)).symm_apply_apply]
       exact (extChartAt I β).left_inv (by
         rw [extChartAt_source (I := I)]; exact hx_source_β)
-    -- Conclude.
     change ENNReal.ofReal (F x) = _
     rw [hF_def, h_comp_eq]
-  -- Step 4: rewrite the LHS integral.
   rw [setLIntegral_congr_fun hΩαβ_meas (fun y hy =>
     h_integrand_eq_on_Ωαβ y hy)]
-  -- The LHS is now an integral over Ω_αβ of POU(α)(x) · (tensorChartComp β IJ (Φ.toFun y))².
-  -- Step 5: drop POU(α) ≤ 1.
   have hPOUα_le_one : ∀ x : M, (chartAtlasPOU I M α : M → ℝ) x ≤ 1 :=
     fun x => (chartAtlasPOU I M).le_one α x
   have hPOUα_nn : ∀ x : M, 0 ≤ (chartAtlasPOU I M α : M → ℝ) x :=
@@ -449,7 +401,6 @@ theorem chart_α_pou_α_pou_β_raw_β_sq_le_chart_β_wkpNorm
         ≤ 1 * (g_β (Φ.toFun y)) ^ 2 :=
           mul_le_mul_of_nonneg_right hpouα_le hsq_nn
       _ = (g_β (Φ.toFun y)) ^ 2 := one_mul _
-  -- Step 6: recognise as eLpNorm².
   have h_lintegral_eq_sq :
       (∫⁻ y in Ω_αβ,
           ENNReal.ofReal ((g_β (Φ.toFun y)) ^ 2)
@@ -461,7 +412,6 @@ theorem chart_α_pou_α_pou_β_raw_β_sq_le_chart_β_wkpNorm
     refine Filter.Eventually.of_forall ?_
     intro y
     exact ofReal_sq_eq_enorm_sq (g_β (Φ.toFun y))
-  -- Step 7: apply Φ.eLpNorm_comp_toFun_le_const for p = 2.
   have h_p_one : (1 : ℝ≥0∞) ≤ 2 := by norm_num
   have h_p_ne_top : (2 : ℝ≥0∞) ≠ ⊤ := by norm_num
   have h_chg :
@@ -471,7 +421,6 @@ theorem chart_α_pou_α_pou_β_raw_β_sq_le_chart_β_wkpNorm
           eLpNorm g_β 2 ((volume : Measure EuclN).restrict Ω_βα) := by
     rw [hKchg_def]
     exact Φ.eLpNorm_comp_toFun_le_const h_p_one h_p_ne_top hΩαβ_open g_β
-  -- Step 8: monotonicity in measure: extend to chartTargetEuclid β.
   have h_meas_mono : (volume : Measure EuclN).restrict Ω_βα ≤
       (volume : Measure EuclN).restrict EuclTargetβ :=
     Measure.restrict_mono hΩβα_subset_target le_rfl
@@ -479,11 +428,9 @@ theorem chart_α_pou_α_pou_β_raw_β_sq_le_chart_β_wkpNorm
       eLpNorm g_β 2 ((volume : Measure EuclN).restrict Ω_βα) ≤
         eLpNorm g_β 2 ((volume : Measure EuclN).restrict EuclTargetβ) :=
     eLpNorm_mono_measure _ h_meas_mono
-  -- Step 9: connect to wkpNorm 0 2.
   have h_wkp : wkpNorm (d := Module.finrank ℝ E) 0 2 g_β EuclTargetβ =
       eLpNorm g_β 2 ((volume : Measure EuclN).restrict EuclTargetβ) :=
     wkpNorm_zero (d := Module.finrank ℝ E) 2 g_β EuclTargetβ
-  -- Final assembly.
   calc (∫⁻ y in Ω_αβ,
           ENNReal.ofReal
             ((chartAtlasPOU I M α : M → ℝ)
@@ -516,8 +463,6 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
 
 #print axioms
   DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chart_α_pou_α_pou_β_raw_β_sq_le_chart_β_wkpNorm

@@ -65,14 +65,10 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The tensor eigen-index type and the heat coefficient -/
 
 /-- Sigma-index for the tensor eigenbasis: pairs an eigenvalue `μ`
 (nonzero, nontrivial eigenspace) with a finite-dimensional eigenspace
@@ -94,7 +90,6 @@ theorem tensor_lambda_nonneg
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     0 ≤ TensorEigenIdx.lambda (I := I) (M := M) i := by
-  -- Extract an eigenvector witness from the eigenvalue subtype.
   obtain ⟨u, hu_mem, hu_ne⟩ := i.fst.hasEigenvalue.exists_hasEigenvector
   have hu_in : u ∈ tensorResolventEigenspace
       (I := I) (M := M) g r s i.fst.val := hu_mem
@@ -127,16 +122,6 @@ lemma tensor_heat_coeff_sq_le_one
       (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) := h_pos.le
   nlinarith [sq_nonneg
     (Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) - 1)]
-
-/-! ## Parseval facts for the chart-locality-free eigenbasis
-
-The eigenbasis-coordinate summability and Parseval identity hold for any
-`HilbertBasis` of `TensorL2 r s g` indexed by `TensorEigenIdx`; in
-particular for the chart-locality-free resolvent eigenbasis
-`tensorResolventHilbertEigenbasisSigma h_compact`, whose
-compactness witness is supplied unconditionally elsewhere. The two
-lemmas below mirror `tensorSummable_basis_coeff_sq` /
-`tensorParseval_norm_sq` against the `_ofCompact` eigenbasis. -/
 
 /-- Parseval-type square-summability of the tensor basis coefficients for
 the chart-locality-free eigenbasis. -/
@@ -201,8 +186,6 @@ lemma tensorParseval_norm_sq
         Real.norm_eq_abs, sq_abs, sq]
   rw [h_eq] at h_par
   linarith [h_par, h_sq]
-
-/-! ## Sanity tests -/
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ) : Type _ :=
   TensorEigenIdx (I := I) (M := M) g r s

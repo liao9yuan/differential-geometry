@@ -95,8 +95,6 @@ open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplH3Direct
 open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThree
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -105,12 +103,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Auxiliary: chosen second mixed weak partial
-
-For `u_h : H1Compl g`, the chosen second mixed weak partial in directions
-`(l, i)` is `chosenWeakPartial' 2 i` applied to the canonical chosen first
-weak partial in direction `l` of the chart-pushed POU-cut representative. -/
 
 /-- The chosen second mixed weak partial of `chartPushed POU α u_h.coeFn` in
 directions `(l, i)`: first the chosen `l`-partial, then the chosen `i`-partial
@@ -123,17 +115,6 @@ noncomputable def chosenMixedSecondPartial
     (d := Module.finrank ℝ E) 2 i
     (chartPushedChosenFirstPartial (I := I) (M := M) g α u_h l)
     (chartTargetEuclid (I := I) (M := M) α)
-
-/-! ## Structural reduction of the target via `MemWkp_succ`
-
-The target `MemWkp 2 2 (chartPushedChosenFirstPartial g α u_h l)
-(chartTargetEuclid α)` is, by definition of `MemWkp` at step `k = 2`,
-equivalent to the conjunction
-```
-MemW1p 2 chartPushedChosenFirstPartial ∧
-  ∀ i, MemWkp 1 2 (chosenWeakPartial' 2 i chartPushedChosenFirstPartial) Ω
-```
-where `MemWkp 1 2 = MemW1p 2` (by `MemWkp.one_iff_memW1p`). -/
 
 /-- The target chart-`W^{2,2}` membership of the chosen first weak partial
 decomposes into chart-`H¹` of the first weak partial itself (unconditional)
@@ -168,13 +149,6 @@ theorem target_iff_per_direction
     rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p]
     exact h_second i
 
-/-! ## Chart-`H¹` of the chosen mixed second weak partial from chart-`H³`
-
-If `chartPushed POU α u_h.coeFn` lies in `MemWkp 3 2 (chartTargetEuclid α)`,
-then each chosen second mixed weak partial in directions `(l, i)` lies in
-`MemW1p 2 (chartTargetEuclid α)`, by two applications of
-`MemWkp.chosenWeakPartial_mem`. -/
-
 /-- Chart-`H³` of the chart-pushed function ⇒ each chosen second mixed weak
 partial is in `MemW1p 2 (chartTargetEuclid α)`. -/
 theorem chosenMixedSecondPartial_memW1p_of_chartPushed_memWkp_three
@@ -192,24 +166,15 @@ theorem chosenMixedSecondPartial_memW1p_of_chartPushed_memWkp_three
     DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
       (chosenMixedSecondPartial (I := I) (M := M) g α u_h l i)
       (chartTargetEuclid (I := I) (M := M) α) := by
-  -- Chart-`H³` ⇒ for each `l`, the chosen `l`-partial is in `MemWkp 2 2`.
   have h_first : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 2 2
       (chartPushedChosenFirstPartial (I := I) (M := M) g α u_h l)
       (chartTargetEuclid (I := I) (M := M) α) :=
     h_chartPushed_memWkp_three.chosenWeakPartial_mem l
-  -- `MemWkp 2 2` ⇒ for each `i`, the chosen `i`-partial is in
-  -- `MemWkp 1 2 = MemW1p 2`.
   have h_second := h_first.chosenWeakPartial_mem i
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p]
     at h_second
   exact h_second
-
-/-! ## Chart-`H²` of the chosen first weak partial from chart-`H³`
-
-Combining the structural reduction with the chart-`H³` discharge yields the
-chart-`H²` membership of `chartPushedChosenFirstPartial g α u_h l` in
-direction `l`. -/
 
 /-- From chart-`H³` of `chartPushed POU α u_h.coeFn`, the chosen first weak
 partial in direction `l` lies in `MemWkp 2 2 (chartTargetEuclid α)`. -/
@@ -236,21 +201,6 @@ theorem chartPushedChosenFirstPartial_memWkp_two_of_chartPushed_memWkp_three
   intro i
   exact chosenMixedSecondPartial_memW1p_of_chartPushed_memWkp_three
     (I := I) (M := M) g α u_h h_chartPushed_memWkp_three l i
-
-/-! ## Headline: chart-`H²` of the chosen first weak partial in target form
-
-The headline statement repackages the conclusion in the exact form requested
-by downstream consumers, with the chosen first weak partial spelled out
-explicitly (without the `chartPushedChosenFirstPartial` private alias).
-
-The chart-`H³` membership of `chartPushed POU α u_h.coeFn` appears as an
-explicit hypothesis. This hypothesis is mathematically natural and
-structurally equivalent to the chart-`H²` of each chosen first weak partial
-in every coordinate direction (the assembly form
-`chartPushed_memWkp_three_two_iff` provides the iff). The unconditional
-discharge of this hypothesis is the chart-bilinear Nirenberg bootstrap on
-the differentiated chart-bilinear identity, packaged in a dedicated
-chart-bilinear bootstrap module. -/
 
 /-- **Headline: chart-`W^{2,2}` regularity of the canonical chosen first weak
 partial of the chart-pushed POU-cut representative.**
@@ -289,9 +239,6 @@ theorem chartPushed_chosenFirstPartial_memWkp_two_two_of_laplacianDomainPow_two_
           (I := I) (M := M) α))
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := by
-  -- The chosen weak partial in the conclusion is exactly
-  -- `chartPushedChosenFirstPartial g α u_h l` (by definitional unfolding of
-  -- the alias).
   change DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
     (d := Module.finrank ℝ E) 2 2
     (chartPushedChosenFirstPartial (I := I) (M := M) g α u_h l)

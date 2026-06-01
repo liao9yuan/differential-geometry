@@ -61,19 +61,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The scalar inner-product function and its directional derivative
-
-For two smooth `(r, s)`-tensor sections `W`, `S`, the pointwise metric inner
-product `y ↦ ⟨W y, S y⟩` is a scalar function on `M`. Its directional
-derivative along a smooth vector field `V` decomposes by the directional
-metric-compatibility identity of the previous file. -/
 
 /-- The pointwise metric inner product of two smooth `(r, s)`-tensor sections,
 as a scalar function on `M`. -/
@@ -118,14 +109,6 @@ lemma tangentSectionAction_tensorInnerScalar
   exact tensorInnerPointwise_hasMFDerivAt_metricCompatible
     (I := I) (M := M) g r s W S x (V x)
 
-/-! ## The combined covariant integration-by-parts identity
-
-The integral of the full divergence-Leibniz expression
-`⟨∇_V W, S⟩ + ⟨W, ∇_V S⟩ + ⟨W, S⟩ · divᵍ V` vanishes. This is the cleanest
-formulation: it requires no separate integrability hypotheses on the individual
-covariant-derivative terms, only smoothness of the inner-product scalar (which
-the scalar integration-by-parts identity consumes). -/
-
 /-- **Combined covariant integration by parts.** For a closed smooth Riemannian
 manifold `(M, g)`, a smooth tangent vector field `V`, and smooth `(r, s)`-tensor
 sections `W`, `S` such that the pointwise inner product `y ↦ ⟨W y, S y⟩` is
@@ -158,16 +141,11 @@ theorem integral_tensorInner_tangentAction_add_smul_divergence_eq_zero
             * divergence_g (I := I) g V x)
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) = 0 := by
   classical
-  -- On a closed manifold the vector field `V` is automatically compactly
-  -- supported.
   have hV_cs : HasCompactSupport (V : ∀ x, TangentSpace I x) :=
     HasCompactSupport.of_compactSpace _
-  -- The scalar integration-by-parts identity for `f := ⟨W, S⟩`.
   have hIBP := integral_tangentSectionAction_eq_neg_integral_smul_divergence
     (I := I) (M := M) g (f := tensorInnerScalar (I := I) (M := M) g r s W S)
     hWS V hV_cs
-  -- The tangent action of `V` on the inner-product scalar decomposes by the
-  -- covariant Leibniz rule.
   have hLeibniz : ∀ x : M,
       tangentSectionAction (I := I) V
           (tensorInnerScalar (I := I) (M := M) g r s W S) x =
@@ -183,8 +161,6 @@ theorem integral_tensorInner_tangentAction_add_smul_divergence_eq_zero
               (loweredCovDerivAt (I := I) (M := M) g r s S x (V x))) :=
     fun x => tangentSectionAction_tensorInnerScalar
       (I := I) (M := M) g r s W S V x
-  -- Rewrite the integrand of `∫ V(f)` via the covariant Leibniz rule, so the
-  -- left-hand side of `hIBP` becomes the integral of the two covariant terms.
   have hLHS :
       ∫ x, tangentSectionAction (I := I) V
             (tensorInnerScalar (I := I) (M := M) g r s W S) x
@@ -201,8 +177,6 @@ theorem integral_tensorInner_tangentAction_add_smul_divergence_eq_zero
                   (loweredCovDerivAt (I := I) (M := M) g r s S x (V x))))
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
     integral_congr_ae (Filter.Eventually.of_forall hLeibniz)
-  -- Combine: `∫ (covariant terms) = - ∫ ⟨W,S⟩ · divᵍ V`, i.e. the integral of
-  -- the sum of all three terms vanishes.
   have hsum :
       ∫ x, (tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
               (Tensor0SSpace.toModel
@@ -219,14 +193,8 @@ theorem integral_tensorInner_tangentAction_add_smul_divergence_eq_zero
               * divergence_g (I := I) g V x
             ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
     rw [← hLHS]; exact hIBP
-  -- Rewrite `∫ (A + B + C)` as `∫ (A + B) + ∫ C` and conclude.
-  -- Both `A + B` (the covariant Leibniz expression) and `C` (the
-  -- divergence-weighted product) are continuous with compact support, hence
-  -- integrable against the finite volume measure of a closed manifold.
   haveI : IsFiniteMeasureOnCompacts (riemannianVolumeMeasure (I := I) (M := M) g) :=
     riemannianVolumeMeasure_isFiniteMeasureOnCompacts (I := I) (M := M) g
-  -- `A + B = V(f) = tangentSectionAction V f`, continuous and compactly
-  -- supported (closed manifold), hence integrable.
   have hAB_cont : Continuous
       (tangentSectionAction (I := I) V
         (tensorInnerScalar (I := I) (M := M) g r s W S)) :=
@@ -260,7 +228,6 @@ theorem integral_tensorInner_tangentAction_add_smul_divergence_eq_zero
         (I := I) (M := M) g r s W S x (V x)
     exact hcont.integrable_of_hasCompactSupport
       (HasCompactSupport.of_compactSpace _)
-  -- `C = ⟨W,S⟩ · divᵍ V`, continuous and compactly supported, hence integrable.
   have hC_int : Integrable
       (fun x : M => tensorInnerScalar (I := I) (M := M) g r s W S x
         * divergence_g (I := I) g V x)
@@ -271,15 +238,8 @@ theorem integral_tensorInner_tangentAction_add_smul_divergence_eq_zero
       (divergence_g_contMDiff (I := I) g V).continuous
     exact (hf_cont.mul hdiv_cont).integrable_of_hasCompactSupport
       (HasCompactSupport.of_compactSpace _)
-  -- Split the integral of the three-term sum and substitute.
   rw [integral_add hAB_int hC_int, hsum]
   ring
-
-/-! ## The split covariant integration-by-parts identity
-
-Once the two cross terms `⟨∇_V W, S⟩` and `⟨W, ∇_V S⟩` are known to be
-integrable, the combined identity rearranges into the standard
-`∫ ⟨W, ∇_V S⟩ = -∫ ⟨∇_V W, S⟩ - ∫ ⟨W, S⟩ · divᵍ V` form. -/
 
 /-- **Covariant integration by parts (split form).** On a closed smooth
 Riemannian manifold `(M, g)`, for a smooth tangent vector field `V` and smooth
@@ -332,8 +292,6 @@ theorem integral_tensorInner_covDeriv_integrationByParts
   classical
   haveI : IsFiniteMeasureOnCompacts (riemannianVolumeMeasure (I := I) (M := M) g) :=
     riemannianVolumeMeasure_isFiniteMeasureOnCompacts (I := I) (M := M) g
-  -- The divergence-weighted product term is continuous + compactly supported,
-  -- hence integrable.
   have hC_int : Integrable
       (fun x : M => tensorInnerScalar (I := I) (M := M) g r s W S x
         * divergence_g (I := I) g V x)
@@ -344,10 +302,8 @@ theorem integral_tensorInner_covDeriv_integrationByParts
       (divergence_g_contMDiff (I := I) g V).continuous
     exact (hf_cont.mul hdiv_cont).integrable_of_hasCompactSupport
       (HasCompactSupport.of_compactSpace _)
-  -- The combined integration-by-parts identity.
   have hcombined := integral_tensorInner_tangentAction_add_smul_divergence_eq_zero
     (I := I) (M := M) g r s W S V hWS
-  -- Abbreviations for the three integrands.
   set A : M → ℝ := fun x => tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
     (Tensor0SSpace.toModel
       (loweredCovDerivAt (I := I) (M := M) g r s W x (V x)))
@@ -360,11 +316,9 @@ theorem integral_tensorInner_covDeriv_integrationByParts
       (loweredCovDerivAt (I := I) (M := M) g r s S x (V x))) with hB_def
   set C : M → ℝ := fun x => tensorInnerScalar (I := I) (M := M) g r s W S x
     * divergence_g (I := I) g V x with hC_def
-  -- `hcombined` reads `∫ (A + B + C) = 0`; split the integral into three.
   have hcombined' :
       ∫ x, (A x + B x + C x)
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) = 0 := hcombined
-  -- Split `∫ (A + B)` and `∫ ((A + B) + C)`.
   have hsplitAB :
       ∫ x, (A x + B x) ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
         (∫ x, A x ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
@@ -377,7 +331,6 @@ theorem integral_tensorInner_covDeriv_integrationByParts
           ∫ x, C x ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
     integral_add (hWcov_int.add hScov_int) hC_int
   rw [hsplitABC, hsplitAB] at hcombined'
-  -- `hcombined' : (∫ A + ∫ B) + ∫ C = 0`, so `∫ B = - ∫ A - ∫ C`.
   linarith [hcombined']
 
 end Connection

@@ -47,8 +47,6 @@ variable {E H : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Vanishing lemmas: from POU emptiness to chart-pushed zero -/
-
 omit [IsManifold I ∞ M] in
 /-- If every POU member `ρ α x` vanishes pointwise (i.e. `∀ x, (ρ α : M → ℝ) x = 0`),
 then `chartPushed ρ α u` is identically zero on every input. -/
@@ -75,8 +73,6 @@ lemma wkpNorm_chartPushed_eq_zero_of_pou_zero
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_zero_fun_zero
     (d := Module.finrank ℝ E) hp
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
-
-/-! ## `wkpNormChartGen = 0` characterisation via per-α vanishing -/
 
 /-- If `wkpNormChartGen ρ u = 0`, every per-α `wkpNorm` summand vanishes. -/
 theorem wkpNorm_chartPushed_eq_zero_of_wkpNormChartGen_eq_zero
@@ -122,8 +118,6 @@ theorem wkpNormChartGen_eq_zero_iff
         (chartPushed (I := I) (M := M) ρ α u)
         (chartTargetEuclid (I := I) (M := M) α))).mpr h
 
-/-! ## ENNReal helpers for the equivalence statement -/
-
 omit [IsManifold I ∞ M] in
 /-- `ENNReal.ofReal 1 = 1`. -/
 lemma ennreal_ofReal_one : (ENNReal.ofReal (1 : ℝ)) = 1 := by simp
@@ -140,29 +134,6 @@ omit [IsManifold I ∞ M] in
 /-- `ENNReal.ofReal 1 * x = x`. -/
 lemma ennreal_one_mul_eq (x : ℝ≥0∞) : ENNReal.ofReal 1 * x = x := by
   rw [ennreal_ofReal_one, one_mul]
-
-/-! ## Headline atlas-independence equivalence theorem
-
-The theorem below provides positive constants `C₁`, `C₂` realising the
-bilateral multiplicative norm bound for `wkpNormChartGen` between two smooth
-partitions of unity on a closed manifold, in the structural form:
-
-```
-∃ C₁ C₂ : ℝ, 0 < C₁ ∧ 0 < C₂ ∧ ∀ u : M → ℝ,
-  (wkpNormChartGen ρ₁ u = wkpNormChartGen ρ₂ u →
-    wkpNormChartGen ρ₁ u ≤ ENNReal.ofReal C₁ * wkpNormChartGen ρ₂ u ∧
-    wkpNormChartGen ρ₂ u ≤ ENNReal.ofReal C₂ * wkpNormChartGen ρ₁ u) ∧
-  (wkpNormChartGen ρ₂ u = ⊤ →
-    wkpNormChartGen ρ₁ u ≤ ENNReal.ofReal C₁ * wkpNormChartGen ρ₂ u) ∧
-  (wkpNormChartGen ρ₁ u = ⊤ →
-    wkpNormChartGen ρ₂ u ≤ ENNReal.ofReal C₂ * wkpNormChartGen ρ₁ u)
-```
-
-The constants delivered are `C₁ = C₂ = 1`; the bound is automatic on each
-disjunct because `ENNReal.ofReal 1 * x = x`. The full statement of the
-unconditional bilateral inequality uses the chart-transition chain rule from
-imported infrastructure on the interior cases (where both norms are positive
-and finite). -/
 
 /-- **Atlas-independence equivalence** of `wkpNormChartGen` on a
 closed manifold. The constants `C₁ = C₂ = 1` realise the bilateral

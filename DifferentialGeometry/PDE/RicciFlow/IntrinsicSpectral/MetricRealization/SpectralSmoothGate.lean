@@ -98,18 +98,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The spectral-smooth-subspace membership hypothesis, abbreviated
-
-The gate hypothesis `SpectralSmoothRealizesAsSmooth` asks that an `L²` tensor `u`
-lie, via the chart-locality-free inclusion `tensorHsToL2`, in every
-`Hˢ`. We abbreviate that hypothesis on a fixed `u`. -/
 
 /-- **Gate membership.** `MemAllTensorHs g r s u` holds when, for every exponent
 `σ ≥ 0`, there is an element `v : tensorHs g r s σ` whose chart-locality-free
@@ -123,14 +115,6 @@ def MemAllTensorHs (g : SmoothRiemannianMetric I M) (r s : ℕ)
           (tensorResolventL2_isCompactOperator
             (I := I) (M := M) g r s) hσ v = u
 
-/-! ## Coordinate faithfulness of the gate hypothesis
-
-The chart-locality-free coordinate functional `tensorL2Coeff` reads off
-the eigenbasis coordinate of an `L²` element. By
-`tensorHsToL2_tensorL2Coeff`, the coordinate of the inclusion
-of an `Hˢ` element `v` is `v.coeff`. Consequently, any `Hˢ` witness of a fixed
-`u` has coordinate family forced to equal `spectralCoeff g r s u`. -/
-
 /-- **Every `Hˢ` witness of `u` has coordinate family `spectralCoeff u`.** If
 `v : tensorHs g r s σ` (with `σ ≥ 0`) has chart-locality-free `L²` realization
 `u`, then its coordinate family is exactly the spectral coordinate family of `u`:
@@ -143,15 +127,12 @@ theorem gateWitness_coeff_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
         hσ v = u)
     (i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s) :
     v.coeff i = spectralCoeff (I := I) (M := M) g r s u i := by
-  -- The coordinate of `inclusion v` equals `v.coeff i`.
   have h :=
     tensorHsToL2_tensorL2Coeff
       (I := I) (M := M)
       (h_compact := tensorResolventL2_isCompactOperator
         (I := I) (M := M) g r s) hσ v i
-  -- Rewriting `inclusion v = u` turns the LHS into the coordinate of `u`.
   rw [hv] at h
-  -- `spectralCoeff g r s u i` is, by definition, that coordinate of `u`.
   rw [spectralCoeff_apply]
   exact h.symm
 
@@ -165,9 +146,7 @@ theorem spectralWeighted_summable_of_mem (g : SmoothRiemannianMetric I M)
     Summable (fun i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s =>
       tensorSobolevWeight (I := I) (M := M) i σ *
         (spectralCoeff (I := I) (M := M) g r s u i) ^ 2) := by
-  -- Extract the `Hˢ` witness `v` at exponent `σ`.
   obtain ⟨v, hv⟩ := h_mem σ hσ
-  -- Its weighted squares are summable, and its coordinates equal those of `u`.
   have hsumm := v.weighted_summable
   have h_eq :
       (fun i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s =>
@@ -192,13 +171,6 @@ theorem gateWitness_zero_coeff_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Classical.choose (h_mem 0 (le_refl (0 : ℝ))))
     (Classical.choose_spec (h_mem 0 (le_refl (0 : ℝ)))) i
 
-/-! ## The finite-support case, self-contained
-
-When the spectral coordinate family of `u` is finitely supported, the `σ = 0`
-witness is a finitely-supported `H⁰` element, so its unconditional spectral
-smooth representative `tensorHsSmoothRepr` is a genuine
-`SmoothCcTensor` realizing `u`. -/
-
 /-- **Smooth realization of a finitely-supported gate element.** If `u` lies in
 every `Hˢ` and its spectral coordinate family `spectralCoeff g r s u` is finitely
 supported, then `u` is the `L²` class of a genuine `SmoothCcTensor`. -/
@@ -207,33 +179,16 @@ theorem spectralSmooth_realizesAsSmooth_of_finite_support'
     (h_mem : MemAllTensorHs (I := I) (M := M) g r s u)
     (hu_fs : (Function.support (spectralCoeff (I := I) (M := M) g r s u)).Finite) :
     ∃ T : SmoothCcTensor g r s, (T : TensorL2 r s g) = u := by
-  -- The `σ = 0` witness `v₀` realizing `u`.
   obtain ⟨v₀, hv₀⟩ := h_mem 0 (le_refl (0 : ℝ))
-  -- Its coordinate family equals `spectralCoeff g r s u`, hence finitely supported.
   have h_coeff : v₀.coeff = spectralCoeff (I := I) (M := M) g r s u := by
     funext i
     exact gateWitness_coeff_eq (I := I) (M := M) g r s u (le_refl (0 : ℝ)) v₀ hv₀ i
   have hv₀_fs : (Function.support v₀.coeff).Finite := by
     rw [h_coeff]; exact hu_fs
-  -- The unconditional spectral smooth representative of `v₀` realizes `u`.
   refine ⟨tensorHsSmoothRepr (I := I) (M := M) v₀ hv₀_fs, ?_⟩
   rw [tensorHsSmoothRepr_toL2 (I := I) (M := M)
     (le_refl (0 : ℝ)) v₀ hv₀_fs]
   exact hv₀
-
-/-! ## The iterated Gårding extension predicate and the genuine reduction
-
-The general (infinite spectral support) case requires one chart-locality-free
-elliptic-regularity input. We isolate it as a predicate phrased on the dense
-finite-support subspace, in operator-bound form: for every order `k`, there is a
-spectral exponent `σ ≥ 0` and a constant `C ≥ 0` such that every
-finitely-supported `Hˢ` element's smooth representative is bounded in the tensor
-`W^{2k,2}` norm by `C` times its spectral norm.
-
-This is the iterated spectral→intrinsic Gårding ("Hebey `H^{2k}`") estimate. Its
-order-`2` instance is the documented open `Order2NormEquivOnSmooth` (the second,
-hard inequality). We do **not** assume it in any headline; we reduce the full
-gate to it. -/
 
 /-- **The iterated Gårding extension bound (predicate).**
 
@@ -256,20 +211,6 @@ def IteratedGardingExtensionBound (g : SmoothRiemannianMetric I M) (r s : ℕ) :
       (wtwokTwoNorm (I := I) (M := M) g k
           (tensorHsSmoothRepr (I := I) (M := M) T hT_fs)).toReal ≤
         C * ‖T‖
-
-/-! ## The eigenvalue-tail summability input and the explicit `ℓ¹` control
-
-The on-disk per-eigenvector quantitative chart-Sobolev bound
-`tensorHsSmoothRepr_wtwokTwoNorm_le_uniform` controls the
-`W^{2k,2}` norm of a finite-support smooth representative by the explicit finite
-`ℓ¹` sum `∑_{i ∈ supp} |cᵢ| · (1 + λᵢ)^{2k+1}`. To turn this into a *spectral*
-norm bound (the `IteratedGardingExtensionBound` predicate) one needs the
-eigenvalue-tail summability `∑_i (1 + λᵢ)^{-p} < ∞` for `p` large — the Weyl-type
-input — which converts the `ℓ²` spectral control into `ℓ¹` control by
-Cauchy–Schwarz. We isolate that single analytic input as an explicit hypothesis
-(it is genuinely *not* on disk: the project deliberately avoids trace-class /
-heat-trace summability) and prove the resulting `IteratedGardingExtensionBound`
-unconditionally from it. -/
 
 /-- **Eigenvalue-tail summability (predicate).** `EigenvalueTailSummable g r s`
 holds when there *exists* an exponent `p > 0` for which the family
@@ -326,25 +267,18 @@ theorem spectralCoeff_weightedPow_summable
     Summable (fun i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s =>
       |spectralCoeff (I := I) (M := M) g r s u i| *
         tensorSobolevWeight (I := I) (M := M) i (N : ℝ)) := by
-  -- Extract the single witness tail exponent `p > 0` and run the AM–GM split with
-  -- the spectral side at exponent `σ = 2N + p ≥ 0`. Then `σ - 2N = p`, and the
-  -- AM–GM split is term-wise dominated for this fixed `p`.
   obtain ⟨p, hp_pos, h_tail_p⟩ := h_tail
   have hp_nonneg : (0 : ℝ) ≤ p := hp_pos.le
-  -- Spectral side at exponent `σ = 2N + p ≥ 0`.
   have hσ_nonneg : (0 : ℝ) ≤ 2 * (N : ℝ) + p := by positivity
   have h_spec :
       Summable (fun i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s =>
         tensorSobolevWeight (I := I) (M := M) i (2 * (N : ℝ) + p) *
           (spectralCoeff (I := I) (M := M) g r s u i) ^ 2) :=
     spectralWeighted_summable_of_mem (I := I) (M := M) g r s u h_mem hσ_nonneg
-  -- Eigenvalue-tail side at exponent `p`.
   have h_tailp :
       Summable (fun i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s =>
         tensorSobolevWeight (I := I) (M := M) i (-p)) := by
-    -- rewrite `(1+λ)^(-p)` as the Sobolev weight at `-p`.
     simpa only [eigenvalueTail_eq_weight] using h_tail_p
-  -- The dominating summable family.
   have h_dom :
       Summable (fun i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s =>
         (1 / 2) * (tensorSobolevWeight (I := I) (M := M) i (2 * (N : ℝ) + p) *
@@ -357,12 +291,9 @@ theorem spectralCoeff_weightedPow_summable
       tensorSobolevWeight_nonneg (I := I) (M := M) i (N : ℝ)
     positivity
   · intro i
-    -- Term-wise AM–GM bound.
     set c := spectralCoeff (I := I) (M := M) g r s u i with hc_def
     set wN := tensorSobolevWeight (I := I) (M := M) i (N : ℝ) with hwN_def
     have hwN_nonneg : 0 ≤ wN := tensorSobolevWeight_nonneg (I := I) (M := M) i (N : ℝ)
-    -- Factor the weights: weight^{2N+p} = weight^N · weight^N · weight^p,
-    -- and weight^{-p} = (weight^p)⁻¹.
     have hwp_pos : 0 < tensorSobolevWeight (I := I) (M := M) i p :=
       tensorSobolevWeight_pos (I := I) (M := M) i p
     have h_split :
@@ -376,13 +307,8 @@ theorem spectralCoeff_weightedPow_summable
         tensorSobolevWeight (I := I) (M := M) i (-p) =
           (tensorSobolevWeight (I := I) (M := M) i p)⁻¹ :=
       tensorHs.tensorSobolevWeight_neg (I := I) (M := M) i p
-    -- Abbreviate `wp := weight^p`.
     set wp := tensorSobolevWeight (I := I) (M := M) i p with hwp_def
-    -- Goal: |c| * wN ≤ ½(wN·wN·wp·c²) + ½·wp⁻¹.
     rw [h_split, h_neg]
-    -- AM–GM: |c|·wN = (√wp·|c|·wN)·(1/√wp) ≤ ½(wp·c²·wN²) + ½·wp⁻¹.
-    -- Equivalently `2·(|c|·wN) ≤ wp·wN²·c² + wp⁻¹`, i.e.
-    -- `0 ≤ (√wp·wN·|c| − 1/√wp)²` expanded.
     have hwp_ne : wp ≠ 0 := ne_of_gt hwp_pos
     have key : 2 * (|c| * wN) ≤ wN * wN * wp * c ^ 2 + wp⁻¹ := by
       set a := Real.sqrt wp with ha_def
@@ -390,43 +316,20 @@ theorem spectralCoeff_weightedPow_summable
       have hsqrt_pos : 0 < a := Real.sqrt_pos.mpr hwp_pos
       have hsqrt_ne : a ≠ 0 := ne_of_gt hsqrt_pos
       have hc_sq : c ^ 2 = |c| ^ 2 := (sq_abs c).symm
-      -- The two AM–GM factors `x = a·wN·|c|`, `y = a⁻¹`.
       have h_amgm : 2 * (a * wN * |c|) * a⁻¹ ≤ (a * wN * |c|) ^ 2 + a⁻¹ ^ 2 :=
         two_mul_le_add_sq (a * wN * |c|) a⁻¹
-      -- `a⁻¹ · a = 1`, and `a⁻¹² = wp⁻¹`.
       have hinv_mul : a⁻¹ * a = 1 := inv_mul_cancel₀ hsqrt_ne
       have hinv_sq : a⁻¹ ^ 2 = wp⁻¹ := by rw [inv_pow, hsqrt_sq]
-      -- The cross term `2·(a·wN·|c|)·a⁻¹ = 2·(|c|·wN)`.
       have hcross : 2 * (a * wN * |c|) * a⁻¹ = 2 * (|c| * wN) := by
         have : a * wN * |c| * a⁻¹ = (a⁻¹ * a) * (wN * |c|) := by ring
         rw [show 2 * (a * wN * |c|) * a⁻¹ = 2 * (a * wN * |c| * a⁻¹) by ring,
           this, hinv_mul, one_mul]
         ring
-      -- The leading term `(a·wN·|c|)² = wp·wN²·c² = wN·wN·wp·c²`.
       have hlead : (a * wN * |c|) ^ 2 = wN * wN * wp * c ^ 2 := by
         rw [mul_pow, mul_pow, hsqrt_sq, ← hc_sq]; ring
       rw [hcross, hlead, hinv_sq] at h_amgm
       exact h_amgm
-    -- Convert `2·X ≤ Y + Z` into `X ≤ ½Y + ½Z`.
     nlinarith [key, hwN_nonneg, abs_nonneg c, hwp_pos.le]
-
-/-! ## The tensor super-critical reconstruction bridge and the full reduction
-
-The remaining analytic content for the *general* gate is the **tensor
-super-critical reconstruction bridge**: an `L²` tensor element whose canonical
-Euclidean chart components all lie in every chart-Sobolev order `W^{2k,2}` is the
-`L²` class of a genuine `C^∞` (`SmoothCcTensor`) section. This is the tensor
-analogue of the unconditional scalar bridge
-`sobolev_smooth_representative_of_memWkpChart_forall`
-(`Analysis/Sobolev/Manifold/IteratedSobolevEmbeddingCInfty.lean`), composed with
-the global chart-frame reconstruction `tensorBundleSectionOfChartComponents` and
-the chart-component separation `tensorL2_eq_of_chartComponent_eq`.
-
-We isolate it as a predicate on the data and give the genuine reduction: granting
-the bridge, the full unconditional gate `SpectralSmoothRealizesAsSmooth` follows
-from the chart-Sobolev regularity of gate elements — itself the all-orders
-spectral→chart elliptic embedding whose order-`2` instance is the documented open
-`Order2NormEquivOnSmooth`. -/
 
 /-- **The tensor super-critical reconstruction bridge (predicate).**
 
@@ -486,9 +389,7 @@ theorem spectralSmooth_realizesAsSmooth_of_reduction
     (h_recon : TensorSuperCriticalReconstruct (I := I) (M := M) g r s) :
     SpectralSmoothRealizesAsSmooth (I := I) (M := M) g r s := by
   intro u h_mem
-  -- `h_mem` is exactly `MemAllTensorHs`.
   have h_memAll : MemAllTensorHs (I := I) (M := M) g r s u := h_mem
-  -- Supply the chart regularity of `u` from `h_reg`, feed it to `h_recon`.
   exact h_recon u (fun k α P₀ => h_reg u h_memAll k α P₀)
 
 end MetricRealization

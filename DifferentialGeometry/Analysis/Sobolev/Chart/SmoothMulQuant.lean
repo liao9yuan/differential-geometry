@@ -45,16 +45,12 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Per-chart quantitative bound -/
 
 /-- **Per-chart quantitative bound.** For a fixed chart `α : M` on a closed
 manifold and a smooth global function `φ : M → ℝ`, there is a positive constant
@@ -88,11 +84,8 @@ theorem MemWkpChart_smooth_mul_per_chart_quant
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
             (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- Get smooth manifold cutoff `b_α` with `b_α ≡ 1` on `tsupport ρ_α`,
-  -- `tsupport b_α ⊆ (chartAt H α).source`.
   obtain ⟨b, hb_smooth, _, hb_one_on_tsupp, hb_supp⟩ :=
     exists_chart_cutoff_M (I := I) (M := M) α
-  -- Build `b_α · φ` and its smooth global extension `Λ_α`.
   have hbφ_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun x : M => b x * (φ : M → ℝ) x) :=
     hb_smooth.mul φ.contMDiff
   have hbφ_supp : tsupport (fun x : M => b x * (φ : M → ℝ) x) ⊆ (chartAt H α).source := by
@@ -100,31 +93,25 @@ theorem MemWkpChart_smooth_mul_per_chart_quant
       funext x; rfl
     rw [h_eq]
     refine (tsupport_smul_subset_left (f := b) (g := (φ : M → ℝ))).trans hb_supp
-  -- Get uniform iteratedFDeriv bound on `Λ_α` up to order `k`.
   obtain ⟨C, hC_nn, hC_bound⟩ :=
     smoothExtensionScalar_iteratedFDeriv_bound
       (I := I) (M := M) α hbφ_smooth hbφ_supp k
-  -- Set up the chart target.
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- `Λ_α` is `ContDiff ℝ ∞`.
   set Λ : EuclN → ℝ := smoothExtensionScalar (I := I) (M := M) α
     (fun x : M => b x * (φ : M → ℝ) x) with hΛ_def
   have hΛ_smooth : ContDiff ℝ ∞ Λ := by
     rw [hΛ_def]
     exact contDiff_smoothExtensionScalar (I := I) (M := M) α hbφ_smooth hbφ_supp
   have hΛ_smooth_top : ContDiff ℝ (⊤ : ℕ∞) Λ := hΛ_smooth
-  -- Uniform bound on `Λ` restricted to `Ω`.
   have hΛ_bound :
       ∀ j ≤ k, ∀ y ∈ Ω, ‖iteratedFDeriv ℝ j Λ y‖ ≤ C := fun j hj y _ =>
     hC_bound j hj y
-  -- Apply the quantitative Euclidean Leibniz bound.
   obtain ⟨K, hK_pos, hK_bound⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_smul_smooth_bounded_le
       (d := Module.finrank ℝ E) k hp_one hp_top hΩ_open hΛ_smooth_top hC_nn hΛ_bound
   refine ⟨K, hK_pos, ?_⟩
   intro u hu
-  -- The factorization on `Ω`: `chartPushed POU α (φ · u) =ᵃᵉ Λ · chartPushed POU α u` on `Ω`.
   have h_factorize :
       (fun y : EuclN => chartPushed (I := I) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
@@ -140,7 +127,6 @@ theorem MemWkpChart_smooth_mul_per_chart_quant
     exact chartPushed_mul_eq_smoothExtension_mul_chartPushed
       (I := I) (M := M) (α := α) (b := b) (φ := (φ : M → ℝ)) (u := u)
       hb_one_on_tsupp hy
-  -- The wkpNorm is invariant under a.e. equality.
   have h_norm_eq :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
           (d := Module.finrank ℝ E) k p
@@ -155,10 +141,7 @@ theorem MemWkpChart_smooth_mul_per_chart_quant
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_congr_ae
       (d := Module.finrank ℝ E) hp_one hΩ_open h_factorize
   rw [h_norm_eq]
-  -- Apply the per-α quantitative bound.
   exact hK_bound hu
-
-/-! ## The headline quantitative bound -/
 
 /-- **Quantitative bound for multiplication by a smooth bounded function on
 `W^{k,p}_chart(M)`.** For a smooth global function `φ : M → ℝ` on a closed
@@ -181,10 +164,8 @@ theorem wkpNormChart_smooth_mul_le
       wkpNormChart (I := I) (M := M) g k p (fun x => (φ : M → ℝ) x * u x)
         ≤ ENNReal.ofReal C * wkpNormChart (I := I) (M := M) g k p u := by
   classical
-  -- Per-α quantitative bound: pick `K_α` for each `α`.
   set S : Finset M :=
     DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset (I := I) (M := M) with hS_def
-  -- For α ∈ S, choose K_α.
   have h_per_α : ∀ α : M, ∃ K : ℝ, 0 < K ∧ ∀ {u : M → ℝ},
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) k p
@@ -204,7 +185,6 @@ theorem wkpNormChart_smooth_mul_le
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
             (chartTargetEuclid (I := I) (M := M) α) := fun α =>
     MemWkpChart_smooth_mul_per_chart_quant (I := I) (M := M) k hp_one hp_top φ α
-  -- Choose them functorially.
   let Kα : M → ℝ := fun α => (h_per_α α).choose
   have hKα_pos : ∀ α : M, 0 < Kα α := fun α => (h_per_α α).choose_spec.1
   have hKα_bound : ∀ α : M, ∀ {u : M → ℝ},
@@ -226,14 +206,9 @@ theorem wkpNormChart_smooth_mul_le
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
             (chartTargetEuclid (I := I) (M := M) α) := fun α =>
     (h_per_α α).choose_spec.2
-  -- Take the maximum over the finite support set.
-  -- We extract a single constant `C ≥ 1` and `C ≥ K_α` for α ∈ S.
-  -- If `S` is empty: any positive `C` works (both sides of wkpNormChart are 0).
   by_cases hS_empty : S = ∅
-  · -- In this case `wkpNormChart` of any `u` is `0`. Set `C := 1`.
-    refine ⟨1, one_pos, ?_⟩
+  · refine ⟨1, one_pos, ?_⟩
     intro u _hu
-    -- Show wkpNormChart of `φ · u` = 0 and wkpNormChart u = 0.
     have h_zero_α : ∀ α : M, α ∉ S → ∀ x : M,
         ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 0 := fun α hα x =>
@@ -251,7 +226,6 @@ theorem wkpNormChart_smooth_mul_le
       unfold chartPushed
       rw [hzero]
       ring
-    -- Since S is empty, every α satisfies the zero condition.
     have h_all_zero : ∀ α : M, ∀ x : M,
         ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 0 := by
@@ -259,7 +233,6 @@ theorem wkpNormChart_smooth_mul_le
       apply h_zero_α α
       rw [hS_empty]
       exact Finset.notMem_empty α
-    -- Now both wkpNormCharts vanish.
     have h_per_α_zero : ∀ α : M,
         DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
           (d := Module.finrank ℝ E) k p
@@ -293,7 +266,6 @@ theorem wkpNormChart_smooth_mul_le
       rw [tsum_congr h_per_α_zero]
       exact tsum_zero
     rw [h_lhs_zero, h_rhs_zero, mul_zero]
-  -- Otherwise: S is nonempty; take max over S.
   have hS_nonempty : S.Nonempty := Finset.nonempty_iff_ne_empty.mpr hS_empty
   set K_max : ℝ := S.sup' hS_nonempty Kα with hKmax_def
   have hK_max_pos : 0 < K_max := by
@@ -303,15 +275,12 @@ theorem wkpNormChart_smooth_mul_le
   have hKα_le_max : ∀ α ∈ S, Kα α ≤ K_max := fun α hα => Finset.le_sup' Kα hα
   refine ⟨K_max, hK_max_pos, ?_⟩
   intro u hu
-  -- Compare the two tsums.
   unfold wkpNormChart
   rw [← ENNReal.tsum_mul_left]
   refine ENNReal.tsum_le_tsum ?_
   intro α
-  -- Two cases: α ∈ S or α ∉ S.
   by_cases hαS : α ∈ S
-  · -- Use the per-α bound and K_α ≤ K_max.
-    calc DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  · calc DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
@@ -332,9 +301,7 @@ theorem wkpNormChart_smooth_mul_le
             (chartTargetEuclid (I := I) (M := M) α) := by
           refine mul_le_mul_of_nonneg_right ?_ (zero_le _)
           exact ENNReal.ofReal_le_ofReal (hKα_le_max α hαS)
-  · -- For α ∉ S, both `chartPushed POU α (φ·u)` and `chartPushed POU α u` are zero
-    -- functions, so the inequality becomes `0 ≤ K_max * 0 = 0`.
-    have h_zero_pou : ∀ x : M,
+  · have h_zero_pou : ∀ x : M,
         ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 0 := fun x =>
       DifferentialGeometry.Integral.Measure.chartAtlasPOU_weight_zero_of_notMem

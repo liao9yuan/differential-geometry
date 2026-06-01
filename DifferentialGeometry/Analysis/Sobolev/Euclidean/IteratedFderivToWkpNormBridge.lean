@@ -29,8 +29,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin d)
 
-/-! ## The headline -/
-
 /-- **Second-iterated-Fréchet-derivative `L²` bound by `wkpNorm 2 2`.**
 For a smooth function `u : EuclideanSpace ℝ (Fin d) → ℝ` with compact support
 strictly inside an open set `Ω`, the `L²` norm of
@@ -46,13 +44,11 @@ theorem chartTarget_iteratedFDeriv_two_eLpNorm_le_wkpNorm_two
   classical
   have hp_one : (1 : ℝ≥0∞) ≤ 2 := by
     exact_mod_cast (by norm_num : (1 : ℕ) ≤ 2)
-  -- The full sum-over-`n` bound, available for any `k`.
   have hu_smooth' : ContDiff ℝ (⊤ : ℕ∞) u := hu_smooth
   have h_sum_le :=
     eLpNorm_iteratedFDeriv_le_wkpNorm (d := d) hΩ_open
       (p := (2 : ℝ≥0∞)) hp_one (k := 2)
       hu_smooth' hu_compact hu_supp
-  -- Extract the `n = 2` term from the sum on the left.
   have h2_mem : (2 : ℕ) ∈ Finset.range (2 + 1) := by
     rw [Finset.mem_range]; omega
   have h_single :

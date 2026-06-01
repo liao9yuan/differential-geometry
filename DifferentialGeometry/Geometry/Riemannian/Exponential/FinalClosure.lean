@@ -61,8 +61,6 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Unconditional discharge of `HasChartFlowGeodesicMatchData` -/
-
 section UnconditionalDischarge
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
@@ -79,11 +77,9 @@ theorem hasChartFlowGeodesicMatchData_unconditional
     (g : SmoothRiemannianMetric I M) (p : M) :
     HasChartFlowGeodesicMatchData (I := I) g p := by
   classical
-  -- Unified V.4 + manifold-lift data on a fixed Φ.
   obtain ⟨Φ, ρ, T, T_match, hρ_pos, hT_pos, hT_match_pos, hT_match_le_T,
     hΦ_cd, hΦ_init0, hΦ_init_v, hΦ_target, hΦ_phase, hΦ_const_zero, _hF_int⟩ :=
     exists_unified_chartFlow_data (I := I) g p
-  -- Choose t' := T_match / 2 ∈ (0, T_match) ⊆ (0, T).
   set t' : ℝ := T_match / 2 with ht'_def
   have ht'_pos : 0 < t' := by
     have : (0 : ℝ) < T_match / 2 := half_pos hT_match_pos
@@ -95,14 +91,9 @@ theorem hasChartFlowGeodesicMatchData_unconditional
   have ht'_in_Ioo : t' ∈ Set.Ioo (-T) T := by
     refine ⟨?_, ht'_lt_T⟩
     linarith
-  -- t' * 1 = t' for the projection identity unfolding.
   have ht'_mul_one : t' * 1 = t' := mul_one t'
-  -- Per-v phase-ODE specialisation on Ioo (-T) T and chart-target on Icc (-T) T.
-  -- The match radius ρ' is just ρ (the spatial ball radius of the unified data).
-  -- Discharge the manifold-side match predicate.
   have hmatch : ChartFlowGeodesicMatchAt (I := I) g p Φ t' ρ := by
     intro v hv_ball
-    -- Per-v hypotheses for chartFlowOrbitLiftRescaled_proj_at_one.
     have hΦ_init_v_at : Φ (((extChartAt I p p, v) : E × E), 0) =
         ((extChartAt I p p, v) : E × E) := hΦ_init_v v hv_ball
     have hΦ_target_v : ∀ s ∈ Set.Icc (-T) T,
@@ -116,19 +107,10 @@ theorem hasChartFlowGeodesicMatchData_unconditional
             (Φ (((extChartAt I p p, v) : E × E), s))) s := by
       intro s hs
       exact hΦ_phase v hv_ball s hs
-    -- Apply the rescaled-lift projection identity at s = 1.
     have hproj1 :=
       chartFlowOrbitLiftRescaled_proj_at_one (I := I) (g := g) (p := p) (v := v)
         (T := T) (t' := t') ht'_pos ht'_lt_T (Φ := Φ)
         hΦ_init_v_at hΦ_target_v hΦ_phase_v
-    -- Goal: expMap g p (t' • v) = chartFlowCandidate Φ p t' v.
-    -- Unfold the LHS via hproj1; unfold the RHS via the projection lemma.
-    -- (chartFlowOrbitLiftRescaled Φ p t' v 1).proj = expMap g p (t' • v) (from hproj1).
-    -- Also, since Φ((x₀, v), t' * 1) = Φ((x₀, v), t'), the projection lemma gives:
-    --   (chartFlowOrbitLiftRescaled Φ p t' v 1).proj
-    --     = (extChartAt I p).symm (Φ((x₀, v), t' * 1)).1
-    --     = (extChartAt I p).symm (Φ((x₀, v), t')).1
-    --     = chartFlowCandidate Φ p t' v.
     have hΦ_target_t' : Φ (((extChartAt I p p, v) : E × E), t' * 1) ∈
         (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E) := by
       rw [ht'_mul_one]
@@ -136,18 +118,13 @@ theorem hasChartFlowGeodesicMatchData_unconditional
     have hproj_def :=
       chartFlowOrbitLiftRescaled_proj (I := I) (p := p) (v := v) (t' := t')
         (Φ := Φ) (s := 1) hΦ_target_t'
-    -- chartFlowCandidate Φ p t' v = (extChartAt I p).symm (Φ((x₀, v), t')).1.
     have hcand_unfold : chartFlowCandidate (I := I) Φ p t' v =
         (extChartAt I p).symm (Φ (((extChartAt I p p, v) : E × E), t')).1 := rfl
-    -- Combine.
     have hproj_def' :
         (chartFlowOrbitLiftRescaled (I := I) Φ p t' v 1).proj =
           (extChartAt I p).symm (Φ (((extChartAt I p p, v) : E × E), t')).1 := by
       rw [hproj_def, ht'_mul_one]
-    -- expMap g p (t' • v) = (chartFlowOrbitLiftRescaled ...).proj = chartFlowCandidate ...
     rw [← hproj1, hproj_def', ← hcand_unfold]
-  -- Chart-target / inverse-chart conditions at (Φ((x₀, 0), t')).1.
-  -- Use zero-section orbit constancy at s = t' (where 0 < t' < T_match).
   have ht'_in_match : t' ∈ Set.Ioo (-T_match) T_match := by
     refine ⟨?_, ht'_lt_T_match⟩
     linarith
@@ -167,13 +144,10 @@ theorem hasChartFlowGeodesicMatchData_unconditional
       (Φ (((extChartAt I p p, (0 : E)) : E × E), t')).1 = p := by
     rw [hΦ_t'_zero_fst]
     exact (extChartAt I p).left_inv hx₀_src
-  -- Package: ρ' := ρ, t' as chosen, all conditions.
   exact ⟨Φ, ρ, T, t', ρ, hρ_pos, hT_pos, ht'_pos, ht'_in_Ioo, hρ_pos,
     hΦ_cd, hval_target, hval_symm, hmatch⟩
 
 end UnconditionalDischarge
-
-/-! ## The fully unconditional headline -/
 
 section TrulyUnconditional
 

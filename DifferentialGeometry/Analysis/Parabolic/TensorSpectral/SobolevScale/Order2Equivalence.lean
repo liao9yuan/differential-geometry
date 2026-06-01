@@ -120,22 +120,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## 1. Intrinsic order-`2` norm equivalence (Hilbert-Schmidt ↔ operator-norm)
-
-The inner product on `TensorPouSobolevHilbert g r s 2` is induced by the
-Hilbert-Schmidt chart-Sobolev norm `tensorPouSobolevHsNorm g 2`. The downstream
-partial-derivative spectral machinery measures order-`2` regularity by the
-operator-norm chart-Sobolev norm `tensorPouSobolevNorm g 2`. These are
-two-sidedly equivalent on smooth compactly-supported sections, with a single
-geometric pair of constants, by the order-`2` instance of the all-orders
-covariant-vs-partial comparison. No chart-locality predicate. -/
 
 /-- **Order-`2` intrinsic norm equivalence.** On smooth compactly-supported
 `(r, s)`-tensor sections the Hilbert-Schmidt chart-Sobolev norm
@@ -158,13 +146,6 @@ theorem tensorPouSobolevHs_order2_equiv_pouSobolev
   iterated_nabla_vs_iterated_partial_equivalence_H1
     (I := I) (M := M) g r s 2
 
-/-! ## 2. Spectral order-`2` space is isometric to `L²`
-
-Every two scales of the spectral tower are isometrically isomorphic via a
-fractional power of `(1 − Δ_∇)`, and `tensorHs g r s 0` is isometric to
-`TensorL2 r s g` (chart-locality-free, using only resolvent compactness).
-Composing gives `tensorHs g r s 2 ≃ₗᵢ TensorL2 r s g`. -/
-
 /-- **Spectral order-`2` ≅ `L²` (isometric).** The spectral order-`2` Sobolev
 space is isometrically isomorphic to the metric `L²` Hilbert space of
 `(r, s)`-tensor fields. The witnessing equivalence is the scale isometry
@@ -180,17 +161,6 @@ def tensorHs_order2_isometryEquiv_tensorL2
     (tensorHsZeroEquivL2 (I := I) (M := M)
       (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.tensorResolventL2_isCompactOperator
         (I := I) (M := M) g r s))
-
-/-! ## 3. The remaining elliptic-regularity gap, and the genuine reduction
-
-The order-`2` topological identification of the two towers requires a two-sided
-norm comparison, on the common dense subspace of smooth compactly-supported
-sections, between the intrinsic order-`2` norm and a reference norm `Nspec` for
-the spectral order-`2` side (concretely `Nspec T = ‖(1 − Δ_∇)(image of T)‖_{L²}`,
-i.e. the spectral order-`2` norm of `T`'s `L²`-realisation). We do not assume
-this comparison in any headline. We isolate it as a predicate and give the
-genuine reduction to a continuous linear equivalence; discharging the predicate
-chart-locality-freely is the open order-`2` Hebey-`H²` step. -/
 
 /-- The order-`2` Gårding/elliptic-regularity two-sided norm comparison on the
 common dense smooth subspace.
@@ -214,15 +184,6 @@ def Order2NormEquivOnSmooth
       Nspec T ≤ C₁ * (tensorPouSobolevHsNorm (I := I) (M := M) g 2 T).toReal) ∧
     (∀ T : SmoothCcTensor g r s,
       (tensorPouSobolevHsNorm (I := I) (M := M) g 2 T).toReal ≤ C₂ * Nspec T)
-
-/-! ### The linear bijection between the order-`2` smooth pre-Hilbert wrapper
-and the underlying smooth section type
-
-`SmoothCcTensorHs g r s 2` and `SmoothCcTensor g r s` carry the same data (one
-`toCcTensor` field); the bijection is `ℝ`-linear because all algebraic
-operations on the wrapper are inherited from the section type. This is the
-order-`2` analogue of `smoothCcTensorHsLinearEquiv` (built for order `0` in
-`L2BanachIso.lean`). -/
 
 /-- The canonical `ℝ`-linear equivalence between the order-`2` intrinsic
 pre-Hilbert wrapper `SmoothCcTensorHs g r s 2` and the underlying smooth
@@ -257,23 +218,6 @@ private lemma smoothCcTensorHs2_norm_eq
   rw [h_eq] at h1
   linarith
 
-/-! ### The genuine reduction to a continuous linear equivalence
-
-Given any real Banach space `F` together with a dense-range `ℝ`-linear
-embedding `e₂ : SmoothCcTensor g r s →ₗ[ℝ] F` of the smooth dense subspace, and
-the order-`2` two-sided norm comparison `Order2NormEquivOnSmooth g r s
-(fun T => ‖e₂ T‖) C₁ C₂` between the intrinsic order-`2` norm and the
-target-side norm `‖e₂ ·‖`, the wrapper bijection extends uniquely to a
-continuous linear equivalence between the order-`2` intrinsic Hilbert space and
-`F`. This is `LinearEquiv.extend` applied exactly as in the order-`0`
-construction `TensorPouSobolevHilbert.toTensorL2_continuousLinearEquiv`.
-
-The output `≃L` is strictly richer than the scalar-inequality input, so this is
-a genuine reduction, not hypothesis-packaging: the spectral order-`2` side and
-its dense embedding `e₂` are supplied separately, and discharging the predicate
-`Order2NormEquivOnSmooth` (the Gårding estimate) chart-locality-freely remains
-open. -/
-
 /-- **Reduction: order-`2` norm equivalence ⟹ continuous linear equivalence.**
 For any real Banach space `F`, any dense-range `ℝ`-linear embedding
 `e₂ : SmoothCcTensor g r s →ₗ[ℝ] F` of the smooth dense subspace with
@@ -302,7 +246,6 @@ noncomputable def tensorPouSobolevHilbert_order2_continuousLinearEquiv_of_normEq
       SmoothCcTensorHs g r s 2 →L[ℝ]
         UniformSpace.Completion (SmoothCcTensorHs g r s 2)).toLinearMap
   f.extend e₁ e₂
-    -- density of e₁
     (by
       change DenseRange (UniformSpace.Completion.toComplL :
         SmoothCcTensorHs g r s 2 →L[ℝ]
@@ -314,7 +257,6 @@ noncomputable def tensorPouSobolevHilbert_order2_continuousLinearEquiv_of_normEq
             UniformSpace.Completion (SmoothCcTensorHs g r s 2)) from
         UniformSpace.Completion.coe_toComplL]
       exact UniformSpace.Completion.denseRange_coe)
-    -- forward norm bound: ‖e₂ (f S)‖ ≤ C₁ · ‖e₁ S‖
     ⟨C₁, by
       intro S
       have hfS : f S = S.toCcTensor := rfl
@@ -330,9 +272,7 @@ noncomputable def tensorPouSobolevHilbert_order2_continuousLinearEquiv_of_normEq
         smoothCcTensorHs2_norm_eq (I := I) (M := M) g S
       rw [hS_norm]
       exact h_equiv.1 S.toCcTensor⟩
-    -- density of e₂
     he₂_dense
-    -- inverse norm bound: ‖e₁ (f.symm T)‖ ≤ C₂ · ‖e₂ T‖
     ⟨C₂, by
       intro T
       have hfsymmT : f.symm T = ⟨T⟩ := rfl

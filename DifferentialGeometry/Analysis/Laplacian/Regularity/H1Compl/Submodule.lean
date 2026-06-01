@@ -37,14 +37,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicH1Lp
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The `H¹` submodule -/
 
 /-- The submodule `H¹(M, g) ⊆ L²(M, μ_g)` of `L²` classes admitting a weak
 Riemannian gradient witness in `L² (M, E, μ_g)`. The carrier consists of

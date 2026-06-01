@@ -73,8 +73,6 @@ open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -83,8 +81,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## The numerator: explicit combination of chart-pulled contributions -/
 
 /-- The numerator of `fChartEff` before division by the density: the explicit
 sum of all chart-pulled contributions appearing on the right-hand side of the
@@ -116,8 +112,6 @@ noncomputable def fChartEffNumerator
           weightedInvGramDerivOnEuclid (I := I) g α i j l y *
             chosenSecondPartialChartPushedU
               (I := I) (M := M) g α u_h i j y)
-
-/-! ## The effective chart-pulled `L²` source -/
 
 /-- The effective chart-pulled `L²` source `fChartEff g α l hu_h`. Defined as
 the indicator of `chartImagePOUTsupport α` applied to
@@ -163,8 +157,6 @@ theorem density_mul_fChartEff_eq_indicator_numerator
     field_simp
   · rw [Set.indicator_of_notMem hy_K, Set.indicator_of_notMem hy_K, mul_zero]
 
-/-! ## Support property -/
-
 /-- The support of `fChartEff g α l hu_h` is contained in
 `chartImagePOUTsupport α`. -/
 theorem fChartEff_supported_in_chartImagePOUTsupport
@@ -175,18 +167,6 @@ theorem fChartEff_supported_in_chartImagePOUTsupport
       chartImagePOUTsupport (I := I) (M := M) α := by
   unfold fChartEff
   exact Set.support_indicator_subset
-
-/-! ## Weighted `L²` membership
-
-Strategy: each summand of the numerator is `MemLp 2 (volume.restrict K)` for
-`K := chartImagePOUTsupport α` (a compact subset of `chartTargetEuclid α`).
-The sum is `MemLp 2 (volume.restrict K)`. Multiplying by `1 / densityOnEuclid`
-(continuous, bounded above on `K` since `densityOnEuclid` is bounded below by
-a positive constant on `K`) keeps the function in `MemLp 2 (volume.restrict K)`.
-The indicator construction plus a `weighted ≤ c_max · volume` bound on `K`
-gives the headline weighted `L²` claim. -/
-
-/-! ### Boundedness on `K` for continuous-on-`chartTargetEuclid α` factors -/
 
 private lemma exists_bound_continuousOn_compact
     {f : EuclN → ℝ} {α : M}
@@ -209,8 +189,6 @@ private lemma exists_bound_continuousOn_compact
     hK_compact.exists_isMaxOn hK_ne h_abs_K
   exact ⟨|f y_max|, fun y hy => h_max hy⟩
 
-/-! ### Multiplication of `MemLp 2 (vol.restrict K)` by a bounded function -/
-
 private lemma memLp_two_of_bounded_mul
     {f h : EuclN → ℝ} {K : Set EuclN}
     (hh_meas : AEStronglyMeasurable h ((volume : Measure EuclN).restrict K))
@@ -219,7 +197,6 @@ private lemma memLp_two_of_bounded_mul
     (hf : MemLp f 2 ((volume : Measure EuclN).restrict K)) :
     MemLp (fun y => h y * f y) 2 ((volume : Measure EuclN).restrict K) := by
   classical
-  -- Step 1: `h ∈ MemLp ∞` on `volume.restrict K`.
   have hh_memLp_top : MemLp h ∞ ((volume : Measure EuclN).restrict K) := by
     refine ⟨hh_meas, ?_⟩
     rw [eLpNorm_exponent_top]
@@ -231,11 +208,7 @@ private lemma memLp_two_of_bounded_mul
     rw [Real.enorm_eq_ofReal_abs]
     apply ENNReal.ofReal_le_ofReal
     exact hy.trans (le_max_left _ _)
-  -- Step 2: HolderTriple ∞ 2 2 is automatic; use `MemLp.mul'` for the
-  -- pointwise product.
   exact MemLp.mul' (p := ∞) (q := 2) (r := 2) hf hh_memLp_top
-
-/-! ### Boundedness summary on `K = chartImagePOUTsupport α` -/
 
 private abbrev Kα (α : M) : Set EuclN :=
   chartImagePOUTsupport (I := I) (M := M) α
@@ -251,9 +224,6 @@ private lemma Kα_meas (α : M) :
 private lemma Kα_subset_target (α : M) :
     Kα (I := I) (M := M) α ⊆ chartTargetEuclid (I := I) (M := M) α :=
   chartImagePOUTsupport_subset_target (I := I) (M := M) α
-
-/-! ### Combined helper: `MemLp 2 (vol.restrict Kα)` for a continuous-on-target
-scalar coefficient times an `MemLp 2 (vol.restrict Kα)` factor -/
 
 /-- Combined helper consolidating the per-term `MemLp 2 (vol.restrict Kα)` patterns:
 given a function `h` continuous on the chart target (hence bounded on `Kα`) and a
@@ -285,8 +255,6 @@ private lemma memLp_two_continuousOn_mul_on_Kα
     intro y hy
     exact hC_bd y hy
   exact memLp_two_of_bounded_mul (h := h) h_meas h_ae_bd hf
-
-/-! ### Bound: `weighted_measure.restrict K ≤ c_max • volume.restrict K` -/
 
 private lemma chartPulledWeightedMeasure_restrict_compact_le_volume
     {g : SmoothRiemannianMetric I M} (α : M)
@@ -323,8 +291,6 @@ private lemma chartPulledWeightedMeasure_restrict_compact_le_volume
   rw [smul_eq_mul]
   exact h_pointwise_bd.trans (le_of_eq h_const_eval)
 
-/-! ### Transfer `MemLp` from `vol.restrict K` to `weighted.restrict K` -/
-
 private lemma memLp_chartPulledWeighted_restrict_of_volume_restrict
     {g : SmoothRiemannianMetric I M} {α : M} {w : EuclN → ℝ}
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -337,8 +303,6 @@ private lemma memLp_chartPulledWeighted_restrict_of_volume_restrict
       α hK_compact hK_meas hK_in
   exact hw.of_measure_le_smul (c := ENNReal.ofReal c)
     ENNReal.ofReal_ne_top h_le
-
-/-! ### Each summand is locally `MemLp 2` on `K = Kα α` -/
 
 /-- (I) `densityOnEuclid · chosenFChartDeriv`: in `MemLp 2 (vol.restrict K)`.
 We split on the W1p hypothesis: if `MemW1p 2 base.f_chart` holds, then
@@ -360,8 +324,7 @@ private lemma term_I_memLp_vol_K
           (laplacianDomainPow_succ_subset_laplacianDomain
             (I := I) (M := M) g 1 hu_h)).f_chart
         (chartTargetEuclid (I := I) (M := M) α)
-  · -- chosenFChartDeriv ∈ MemLp 2 (vol.restrict chartTargetEuclid α). Restrict to K.
-    have h_global :
+  · have h_global :
         MemLp (chosenFChartDeriv (I := I) (M := M) g α hu_h l) 2
           ((volume : Measure EuclN).restrict
             (chartTargetEuclid (I := I) (M := M) α)) := by
@@ -383,8 +346,7 @@ private lemma term_I_memLp_vol_K
       exact h_global.restrict _
     exact memLp_two_continuousOn_mul_on_Kα (α := α)
       (densityOnEuclid_continuousOn (I := I) g α) h_K
-  · -- chosenFChartDeriv = 0; product is identically zero, MemLp trivially.
-    have h_zero : chosenFChartDeriv (I := I) (M := M) g α hu_h l = 0 := by
+  · have h_zero : chosenFChartDeriv (I := I) (M := M) g α hu_h l = 0 := by
       unfold chosenFChartDeriv
       exact chosenWeakPartial'_of_not_mem h_memW1p l
     have : (fun y => densityOnEuclid (I := I) g α y *
@@ -408,7 +370,6 @@ private lemma term_II_memLp_vol_K
             (I := I) (M := M) g 1 hu_h)).u_chart y) 2
       ((volume : Measure EuclN).restrict (Kα (I := I) (M := M) α)) := by
   classical
-  -- u_chart ∈ MemLp 2 (weighted.restrict chartTarget) ⇒ MemLp 2 (vol.restrict K).
   have h_u_chart_K :
       MemLp ((chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
             (laplacianDomainPow_succ_subset_laplacianDomain
@@ -530,8 +491,6 @@ private lemma term_V_pair_memLp_vol_K
   exact memLp_two_continuousOn_mul_on_Kα (α := α)
     (weightedInvGramDerivOnEuclid_continuousOn (I := I) g α i j l) h_second_K
 
-/-! ### The numerator is `MemLp 2 (vol.restrict K)` -/
-
 private lemma fChartEffNumerator_memLp_vol_K
     (g : SmoothRiemannianMetric I M) (α : M)
     (l : Fin (Module.finrank ℝ E))
@@ -539,7 +498,6 @@ private lemma fChartEffNumerator_memLp_vol_K
     MemLp (fChartEffNumerator (I := I) (M := M) g α l hu_h) 2
       ((volume : Measure EuclN).restrict (Kα (I := I) (M := M) α)) := by
   classical
-  -- Unfold the numerator and combine via MemLp.add and MemLp.sub.
   have h_I := term_I_memLp_vol_K (I := I) (M := M) g α l hu_h
   have h_II := term_II_memLp_vol_K (I := I) (M := M) g α l hu_h
   have h_III := term_III_memLp_vol_K (I := I) (M := M) g α l hu_h
@@ -567,16 +525,12 @@ private lemma fChartEffNumerator_memLp_vol_K
     apply memLp_finset_sum
     intro j _
     exact term_V_pair_memLp_vol_K (I := I) (M := M) g α l hu_h i j
-  -- Combine: (I - II) + III + IV + V.
   have h_step1 := h_I.sub h_II
   have h_step2 := h_step1.add h_III
   have h_step3 := h_step2.add h_IV
   have h_step4 := h_step3.add h_V
-  -- The shapes match `fChartEffNumerator`.
   unfold fChartEffNumerator
   convert h_step4 using 2 with y
-
-/-! ### Continuity of `1 / densityOnEuclid` on the chart target -/
 
 /-- `fun y => 1 / densityOnEuclid g α y` is continuous on `chartTargetEuclid α`. -/
 private lemma one_div_densityOnEuclid_continuousOn
@@ -586,15 +540,11 @@ private lemma one_div_densityOnEuclid_continuousOn
   have h_cont := densityOnEuclid_continuousOn (I := I) g α
   have h_inv := h_cont.inv₀ (fun y hy =>
     (densityOnEuclid_pos (I := I) g α hy).ne')
-  -- `h_inv : ContinuousOn (fun y => (densityOnEuclid g α y)⁻¹) chartTarget`
-  -- Convert `1 / x` to `x⁻¹` via `one_div`.
   have h_eq : (fun y => 1 / densityOnEuclid (I := I) g α y) =
       (fun y => (densityOnEuclid (I := I) g α y)⁻¹) := by
     funext y; rw [one_div]
   rw [h_eq]
   exact h_inv
-
-/-! ### The (numerator / density) is `MemLp 2 (vol.restrict K)` -/
 
 private lemma fChartEffNumerator_div_density_memLp_vol_K
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -605,7 +555,6 @@ private lemma fChartEffNumerator_div_density_memLp_vol_K
       ((volume : Measure EuclN).restrict (Kα (I := I) (M := M) α)) := by
   classical
   have h_num := fChartEffNumerator_memLp_vol_K (I := I) (M := M) g α l hu_h
-  -- Rewrite division as multiplication by 1/density.
   have h_eq : (fun y => fChartEffNumerator (I := I) (M := M) g α l hu_h y /
       densityOnEuclid (I := I) g α y) =
       fun y => (1 / densityOnEuclid (I := I) g α y) *
@@ -615,8 +564,6 @@ private lemma fChartEffNumerator_div_density_memLp_vol_K
   rw [h_eq]
   exact memLp_two_continuousOn_mul_on_Kα (α := α)
     (one_div_densityOnEuclid_continuousOn (I := I) (M := M) g α) h_num
-
-/-! ## Headline weighted-`L²` membership -/
 
 /-- `fChartEff g α l hu_h` lies in `MemLp 2` of the chart-pulled weighted
 measure restricted to `chartTargetEuclid α`. -/
@@ -628,13 +575,6 @@ theorem fChartEff_memLp_two_weighted
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
   classical
-  -- Step 1: `fChartEff` is the indicator of `Kα α` applied to (numerator / density).
-  -- Step 2: indicator's MemLp on `μ.restrict chartTarget` reduces to MemLp of the
-  -- inner function on `(μ.restrict chartTarget).restrict Kα`.
-  -- Step 3: `(μ.restrict chartTarget).restrict Kα = μ.restrict Kα` since
-  -- `Kα ⊆ chartTarget`.
-  -- Step 4: weighted ≤ c_max · vol on Kα ⇒ MemLp on weighted.restrict Kα from
-  -- MemLp on vol.restrict Kα.
   set K : Set EuclN := Kα (I := I) (M := M) α with hK_def
   set f : EuclN → ℝ := fun y =>
     fChartEffNumerator (I := I) (M := M) g α l hu_h y /
@@ -643,7 +583,6 @@ theorem fChartEff_memLp_two_weighted
       fChartEff (I := I) (M := M) g α l hu_h = Set.indicator K f := by
     rfl
   rw [h_indicator_eq]
-  -- We aim to apply `memLp_indicator_iff_restrict`.
   have h_chartTarget_meas : MeasurableSet
       (chartTargetEuclid (I := I) (M := M) α) :=
     (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
@@ -651,10 +590,7 @@ theorem fChartEff_memLp_two_weighted
   have hK_compact : IsCompact K := Kα_compact (I := I) (M := M) α
   have hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α :=
     Kα_subset_target (I := I) (M := M) α
-  -- Need: `MemLp (K.indicator f) 2 (μ_w.restrict chartTarget)`.
-  -- By `memLp_indicator_iff_restrict`: ↔ `MemLp f 2 ((μ_w.restrict chartTarget).restrict K)`.
   rw [memLp_indicator_iff_restrict hK_meas]
-  -- (μ_w.restrict chartTarget).restrict K = μ_w.restrict K (since K ⊆ chartTarget).
   have h_double_restrict :
       ((chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α)).restrict K =
@@ -663,9 +599,6 @@ theorem fChartEff_memLp_two_weighted
     congr 1
     exact Set.inter_eq_self_of_subset_left hK_in
   rw [h_double_restrict]
-  -- Now: `MemLp f 2 (μ_w.restrict K)`.
-  -- By `memLp_chartPulledWeighted_restrict_of_volume_restrict`, suffices to show
-  -- `MemLp f 2 (volume.restrict K)`.
   refine memLp_chartPulledWeighted_restrict_of_volume_restrict
     (g := g) (α := α) hK_compact hK_meas hK_in ?_
   exact fChartEffNumerator_div_density_memLp_vol_K

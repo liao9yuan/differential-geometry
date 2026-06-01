@@ -86,22 +86,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The resolvent eigenvalue and the Sobolev weight
-
-The resolvent eigenvalue at index `i` is `μ = i.fst.val ∈ (0, 1]`, and the
-connection-Laplacian eigenvalue is `λᵢ = (1 - μ)/μ`. Hence `1 + λᵢ = 1/μ = μ⁻¹`,
-i.e. `(i.fst.val)⁻¹ = 1 + λᵢ`. This identifies the quantitative per-eigenvector
-chart-Sobolev bound's factor `(i.fst.val)⁻¹ ^ (2k+1)` with the spectral Sobolev
-weight `tensorSobolevWeight i (2k+1) = (1 + λᵢ)^{2k+1}`. -/
 
 /-- The reciprocal resolvent eigenvalue equals `1 + λᵢ`: `(i.fst.val)⁻¹ = 1 + λᵢ`,
 where `λᵢ` is the connection-Laplacian eigenvalue. The resolvent eigenvalue
@@ -111,21 +101,10 @@ theorem resolvent_eigenvalue_inv_eq_one_add_lambda
     (i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s) :
     (i.fst.val)⁻¹ = 1 + TensorEigenIdx.lambda (I := I) (M := M) i := by
   have hμ_ne : i.fst.val ≠ 0 := i.fst.val_ne_zero
-  -- `λᵢ = tensorLaplacianEigenvalueOf μ = (1 - μ)/μ`.
   change (i.fst.val)⁻¹ = 1 + tensorLaplacianEigenvalueOf i.fst.val
   rw [tensorLaplacianEigenvalueOf]
   field_simp
   ring
-
-/-! ## The per-eigenvector chart component, repackaged
-
-The canonical eigenvector chart component `eigenvectorChartComponentFun`
-and `eigenvectorChartComponentFun_unconditional` are, by definition, the
-coercion-to-function of the same `Lp` element
-`tensorL2ChartComponent g r s (tensorResolventEigenbasisVec …) α P₀`.
-We record the defining identification and the two consequences we need: the
-qualitative `W^{2k,2}` membership and the quantitative `W^{2k,2}` bound by the
-spectral Sobolev weight (using `‖bᵢ‖ = 1`). -/
 
 /-- The chart-locality-free eigenbasis vector at index `i`: the resolvent
 eigenbasis vector against the intrinsic compactness witness. It is, by definition,
@@ -202,35 +181,22 @@ private lemma eigenvectorComp_wkpNorm_le_weight (g : SmoothRiemannianMetric I M)
     eigenvector_chartComponent_wkpNorm_arbitrary
       (I := I) (M := M) g r s (2 * k) α P₀
   refine ⟨C, hC_nn, fun i => ?_⟩
-  -- Specialize the quantitative bound; identify `(i.fst.val)⁻¹^(2k+1)` and `‖bᵢ‖`.
   have h := hC_bd i
   rw [eigenvectorComp_eq_unconditional]
-  -- `‖bᵢ‖ = 1`, so `ENNReal.ofReal ‖bᵢ‖ = 1`.
   have h_norm_one : ‖tensorResolventEigenbasisVec (I := I) (M := M)
       (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s) i‖ = 1 :=
     eigenbasisVec_norm_eq_one (I := I) (M := M) g r s i
   rw [h_norm_one, ENNReal.ofReal_one, mul_one] at h
   refine h.trans (le_of_eq ?_)
-  -- `(i.fst.val)⁻¹ ^ (2k+1) = (1 + λᵢ)^(2k+1) = tensorSobolevWeight i (2k+1)`.
   congr 1
-  -- The exponent on the LHS is `(2 * k) + 1`; identify with `2 * k + 1`.
   rw [show (2 * k) + 1 = 2 * k + 1 from rfl]
   have h_inv : (i.fst.val)⁻¹ = 1 + TensorEigenIdx.lambda (I := I) (M := M) i :=
     resolvent_eigenvalue_inv_eq_one_add_lambda (I := I) (M := M) g r s i
   rw [h_inv]
-  -- `(1 + λ)^(2k+1 : ℕ) = (1 + λ)^((2k+1 : ℕ) : ℝ)` since `1 + λ ≥ 0`.
   have h_base_nn : (0 : ℝ) ≤ 1 + TensorEigenIdx.lambda (I := I) (M := M) i := by
     have := tensor_lambda_nonneg (I := I) (M := M) i; linarith
   rw [tensorSobolevWeight, ← Real.rpow_natCast (1 + TensorEigenIdx.lambda (I := I) (M := M) i)
     (2 * k + 1)]
-
-/-! ## A monotone exhausting finset sequence on the eigen-index type
-
-The tensor eigen-index type is countable, hence `Encodable`. We build an
-increasing sequence of finsets `eigenFinsetSeq n` exhausting it, so that summing
-over `eigenFinsetSeq n` converges (in the `atTop` finset filter) to any
-unconditional sum, and the partial sums become an `ℕ`-indexed sequence that the
-`ℕ`-indexed Sobolev completeness lemma can consume. -/
 
 open Classical in
 /-- The `n`-th exhausting finset: the indices with `Encodable.decode₂` code below
@@ -269,15 +235,6 @@ private lemma eigenFinsetSeq_tendsto (g : SmoothRiemannianMetric I M) (r s : ℕ
     (eigenFinsetSeq_monotone (I := I) (M := M) g r s)
     (eigenFinsetSeq_mem (I := I) (M := M) g r s)
 
-/-! ## The `ℓ¹` chart-Sobolev-norm control of a gate element
-
-The per-eigenvector `W^{2k,2}` bound is `wkpNorm (2k) 2 (compᵢ) ≤ C·(1+λᵢ)^{2k+1}`.
-Multiplying by `|cᵢ|` and summing, the chart-Sobolev norms of the eigen-components
-are `ℓ¹`-controlled: `∑ᵢ |cᵢ|·C·(1+λᵢ)^{2k+1} < ∞`, by
-`spectralCoeff_weightedPow_summable` at exponent `N = 2k+1` (the Weyl-type
-eigenvalue-tail summability input). This is the `ℓ¹` decay making the partial sums
-Cauchy in `W^{2k,2}`. -/
-
 /-- The per-eigenvector `ℓ¹` coefficient: `Aₖ(u, i) = C · |cᵢ| · (1 + λᵢ)^{2k+1}`,
 where `C` is the order-`2k` chart-Sobolev constant. It dominates `|cᵢ|` times the
 `W^{2k,2}` norm of the eigenvector chart component, and is summable. -/
@@ -308,7 +265,6 @@ private lemma ellOneCoeff_summable (g : SmoothRiemannianMetric I M) (r s : ℕ)
     Summable (ellOneCoeff (I := I) (M := M) g r s u C k) := by
   have h := spectralCoeff_weightedPow_summable (I := I) (M := M) g r s u h_mem h_tail
     (2 * k + 1)
-  -- `ellOneCoeff = (fun i => C • (|cᵢ| * weightᵢ))` up to reassociation.
   have h_eq :
       ellOneCoeff (I := I) (M := M) g r s u C k =
         fun i => C *
@@ -317,14 +273,6 @@ private lemma ellOneCoeff_summable (g : SmoothRiemannianMetric I M) (r s : ℕ)
     funext i; unfold ellOneCoeff; ring
   rw [h_eq]
   exact h.mul_left C
-
-/-! ## The chart-component partial sums and their `W^{2k,2}` control
-
-The chart component of the partial eigen-sum over a finset `s` is, in `Lp 2`, the
-finite sum `∑_{i∈s} cᵢ · (chart component of bᵢ)`; its underlying function is a.e.
-the pointwise finite sum `partialSumFun`. Each `partialSumFun s` lies in
-`W^{2k,2}`, and its `W^{2k,2}` norm is bounded by the finite `ℓ¹` partial sum
-`∑_{i∈s} ellOneCoeff u C k i`. -/
 
 /-- The pointwise partial sum of the (scaled) eigenvector chart components over a
 finset `s`: `∑_{i∈s} cᵢ · eigenvectorComp_i`. -/
@@ -380,7 +328,6 @@ private lemma partialSumFun_wkpNorm_le (g : SmoothRiemannianMetric I M) (r s' : 
       ENNReal.ofReal (∑ i ∈ s, ellOneCoeff (I := I) (M := M) g r s' u C k i) := by
   classical
   have h_open := chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- Apply the finite-sum triangle inequality with `D = 1` and weights `ellOneCoeff`.
   have h := wkpNorm_finset_sum_le (d := Module.finrank ℝ E) h_open s
     (fun i => fun y => spectralCoeff (I := I) (M := M) g r s' u i *
       eigenvectorComp (I := I) (M := M) g r s' i α P₀ y)
@@ -389,22 +336,18 @@ private lemma partialSumFun_wkpNorm_le (g : SmoothRiemannianMetric I M) (r s' : 
     (fun i _ => ellOneCoeff_nonneg (I := I) (M := M) g r s' u hC k i)
     1
     (fun i _ => ?_)
-  · -- Conclude with `D = 1` (multiplication by one).
-    rw [mul_one] at h
+  · rw [mul_one] at h
     exact h
-  · -- Per-summand bound: `wkpNorm (cᵢ • compᵢ) ≤ ENNReal.ofReal (ellOneCoeff) · 1`.
-    rw [mul_one]
+  · rw [mul_one]
     have h_smul := wkpNorm_const_smul (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_open
       (eigenvectorComp_memWkp (I := I) (M := M) g r s' i k α P₀)
       (spectralCoeff (I := I) (M := M) g r s' u i)
     rw [h_smul]
-    -- `‖cᵢ‖ₑ = ENNReal.ofReal |cᵢ|`.
     have h_enorm : ‖spectralCoeff (I := I) (M := M) g r s' u i‖ₑ =
         ENNReal.ofReal |spectralCoeff (I := I) (M := M) g r s' u i| := by
       rw [Real.enorm_eq_ofReal_abs]
     rw [h_enorm]
-    -- Chain: `ofReal|c| · wkpNorm ≤ ofReal|c| · ofReal(C·weight) = ofReal(ellOneCoeff)`.
     refine (mul_le_mul_of_nonneg_left (hC_bd i) (zero_le _)).trans (le_of_eq ?_)
     rw [← ENNReal.ofReal_mul (abs_nonneg _)]
     rfl
@@ -451,26 +394,15 @@ private lemma partialSumFun_wkpNorm_sub_le (g : SmoothRiemannianMetric I M)
   classical
   have h_summ := ellOneCoeff_summable (I := I) (M := M) g r s' u h_mem h_tail C k
   have h_nn := ellOneCoeff_nonneg (I := I) (M := M) g r s' u hC k
-  -- Rewrite the difference as the partial sum over `t \ s`.
   rw [partialSumFun_sub_of_subset (I := I) (M := M) g r s' u α P₀ hst]
-  -- Bound by the finite `ℓ¹` sum over `t \ s`.
   refine (partialSumFun_wkpNorm_le (I := I) (M := M) g r s' u k α P₀ hC hC_bd
     (t \ s)).trans ?_
-  -- `∑_{t\s} ellOneCoeff = ∑_t - ∑_s ≤ S - ∑_s`.
   rw [Finset.sum_sdiff_eq_sub hst]
   refine ENNReal.ofReal_le_ofReal ?_
   have h_t_le : ∑ i ∈ t, ellOneCoeff (I := I) (M := M) g r s' u C k i ≤
       ∑' i, ellOneCoeff (I := I) (M := M) g r s' u C k i :=
     Summable.sum_le_tsum t (fun i _ => h_nn i) h_summ
   linarith
-
-/-! ## The `Lp 2` convergence of the chart-component partial sums
-
-The chart component `tensorL2ChartComponentCLM g r s α P₀` is a continuous linear
-map into the Banach space `Lp ℝ 2 (chartL2Measure α)`. Applying it to the
-eigenbasis expansion `u = ∑ᵢ cᵢ • bᵢ` (Hilbert-basis `hasSum_repr`) and composing
-with the exhausting finset sequence yields `Lp 2`-convergence of the partial sums
-`∑_{i∈Fn} cᵢ • (chart component of bᵢ)` to `tensorL2ChartComponent u α P₀`. -/
 
 /-- The `Lp 2` element of the partial-sum chart component over a finset `s`:
 `∑_{i∈s} cᵢ • (tensorL2ChartComponent bᵢ α P₀)`. -/
@@ -492,13 +424,11 @@ private lemma partialSumLp_coeFn (g : SmoothRiemannianMetric I M) (r s' : ℕ)
       =ᵐ[chartL2Measure (I := I) (M := M) α]
       partialSumFun (I := I) (M := M) g r s' u α P₀ s := by
   classical
-  -- The coercion of a finset sum is a.e. the sum of coercions.
   have h_sum := coeFn_finsetSum_chartL2 (I := I) (M := M) α s
     (fun i => spectralCoeff (I := I) (M := M) g r s' u i •
       tensorL2ChartComponent (I := I) (M := M) g r s'
         (eigenbasisVec (I := I) (M := M) g r s' i) α P₀)
   refine h_sum.trans ?_
-  -- Each summand's coercion is a.e. `cᵢ * (coercion of the component)`.
   have h_each : ∀ i ∈ s,
       ((spectralCoeff (I := I) (M := M) g r s' u i •
           tensorL2ChartComponent (I := I) (M := M) g r s'
@@ -534,11 +464,9 @@ private lemma partialSumLp_tendsto (g : SmoothRiemannianMetric I M) (r s' : ℕ)
     (g := g) (r := r) (s := s')
     (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s')
     with hb_def
-  -- The Hilbert-basis expansion of `u`, mapped through the chart-component CLM.
   have h_repr : HasSum (fun i => b.repr u i • b i) u := b.hasSum_repr u
   have h_mapped :=
     h_repr.mapL (tensorL2ChartComponentCLM (I := I) (M := M) g r s' α P₀)
-  -- Identify the summands and the limit.
   have h_summand_eq : (fun i => tensorL2ChartComponentCLM (I := I) (M := M) g r s' α P₀
         (b.repr u i • b i)) =
       fun i => spectralCoeff (I := I) (M := M) g r s' u i •
@@ -547,7 +475,6 @@ private lemma partialSumLp_tendsto (g : SmoothRiemannianMetric I M) (r s' : ℕ)
     funext i
     rw [map_smul]
     rw [tensorL2ChartComponentCLM_apply]
-    -- `b.repr u i = spectralCoeff u i` and `b i = eigenbasisVec i`.
     have h_coeff : b.repr u i = spectralCoeff (I := I) (M := M) g r s' u i := rfl
     have h_vec : b i = eigenbasisVec (I := I) (M := M) g r s' i := by
       rw [hb_def, tensorResolventHilbertEigenbasisSigma_apply]
@@ -558,8 +485,6 @@ private lemma partialSumLp_tendsto (g : SmoothRiemannianMetric I M) (r s' : ℕ)
         tensorL2ChartComponent (I := I) (M := M) g r s' u α P₀ :=
     tensorL2ChartComponentCLM_apply (I := I) (M := M) g r s' α P₀ u
   rw [h_summand_eq, h_limit_eq] at h_mapped
-  -- `h_mapped : HasSum (fun i => cᵢ • compᵢ_Lp) (tensorL2ChartComponent u α P₀)`.
-  -- Unfold to a finset-`atTop` tendsto, compose with the exhausting sequence.
   have h_tendsto_finset :
       Filter.Tendsto (fun t : Finset _ =>
           ∑ i ∈ t, spectralCoeff (I := I) (M := M) g r s' u i •
@@ -570,12 +495,6 @@ private lemma partialSumLp_tendsto (g : SmoothRiemannianMetric I M) (r s' : ℕ)
     have := h_mapped
     rwa [HasSum, SummationFilter.unconditional_filter] at this
   exact h_tendsto_finset.comp (eigenFinsetSeq_tendsto (I := I) (M := M) g r s')
-
-/-! ## The `ℓ¹` partial sums converge to the total
-
-The finite partial sums of the summable nonneg `ℓ¹` coefficient family converge,
-along the exhausting finset sequence, to the total `∑' ellOneCoeff`, so the
-`ℓ¹` gap tends to `0`. -/
 
 private lemma ellOnePartial_tendsto (g : SmoothRiemannianMetric I M) (r s' : ℕ)
     [Encodable (TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s')]
@@ -599,11 +518,6 @@ private lemma ellOnePartial_tendsto (g : SmoothRiemannianMetric I M) (r s' : ℕ
     rwa [HasSum, SummationFilter.unconditional_filter] at h
   exact h_tendsto_finset.comp (eigenFinsetSeq_tendsto (I := I) (M := M) g r s')
 
-/-! ## The general-element chart-Sobolev regularity from the eigenvalue tail
-
-Granting eigenvalue-tail summability, the canonical chart components of any gate
-element lie in every chart-Sobolev order `W^{2k,2}`. -/
-
 /-- **General-element `W^{2k,2}` regularity of a single chart component.** Under the
 eigenvalue-tail summability input, for a gate element `u`, every order `k` and
 chart `(α, P₀)`, the canonical Euclidean chart component
@@ -621,26 +535,20 @@ private lemma gateElement_chartComponent_memWkp_of_tail
   classical
   set Ω := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- The order-`2k` chart-Sobolev constant and per-eigenvector bound.
   obtain ⟨C, hC_nn, hC_bd⟩ :=
     eigenvectorComp_wkpNorm_le_weight (I := I) (M := M) g r s' k α P₀
-  -- The `ℕ`-indexed partial-sum sequence.
   set useq : ℕ → EuclN → ℝ := fun n =>
     partialSumFun (I := I) (M := M) g r s' u α P₀
       (eigenFinsetSeq (I := I) (M := M) g r s' n) with huseq_def
-  -- Each partial sum lies in `MemWkp (2k) 2`.
   have h_useq_mem : ∀ n, MemWkp (d := Module.finrank ℝ E) (2 * k) 2 (useq n) Ω :=
     fun n => partialSumFun_memWkp (I := I) (M := M) g r s' u k α P₀ _
-  -- The `ℓ¹` total and the gap-to-total tendsto.
   set S := ∑' i, ellOneCoeff (I := I) (M := M) g r s' u C k i with hS_def
   have h_partial_tendsto :=
     ellOnePartial_tendsto (I := I) (M := M) g r s' u h_mem h_tail C k
-  -- The `wkpNorm`-Cauchy property of `useq`.
   have h_cauchy : ∀ ε > 0, ∃ N, ∀ m n, N ≤ m → N ≤ n →
       wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
         (fun y => useq m y - useq n y) Ω ≤ ENNReal.ofReal ε := by
     intro ε hε
-    -- The gap `S - ∑_{Fn} ellOneCoeff` tends to `0`, so pick `N` making it `< ε`.
     have h_gap_tendsto : Filter.Tendsto
         (fun n => S - ∑ i ∈ eigenFinsetSeq (I := I) (M := M) g r s' n,
           ellOneCoeff (I := I) (M := M) g r s' u C k i)
@@ -654,7 +562,6 @@ private lemma gateElement_chartComponent_memWkp_of_tail
         (fun n hn => by simpa using hn)
     obtain ⟨N, hN⟩ := h_eventually.exists_forall_of_atTop
     refine ⟨N, fun m n hm hn => ?_⟩
-    -- The partial `ℓ¹` sums are monotone along `Fn`.
     have h_ellOne_nn := ellOneCoeff_nonneg (I := I) (M := M) g r s' u hC_nn k
     have h_mono_partial : ∀ {a b : ℕ}, a ≤ b →
         (∑ i ∈ eigenFinsetSeq (I := I) (M := M) g r s' a,
@@ -665,7 +572,6 @@ private lemma gateElement_chartComponent_memWkp_of_tail
       exact Finset.sum_le_sum_of_subset_of_nonneg
         (eigenFinsetSeq_monotone (I := I) (M := M) g r s' hab)
         (fun i _ _ => h_ellOne_nn i)
-    -- Bound by the gap at the smaller index; reduce to the `s ⊆ t` case.
     have key : ∀ {a c : ℕ}, N ≤ a → a ≤ c →
         wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
           (fun y => useq c y - useq a y) Ω ≤ ENNReal.ofReal ε := by
@@ -680,11 +586,8 @@ private lemma gateElement_chartComponent_memWkp_of_tail
       have h_gap_a : S - ∑ i ∈ eigenFinsetSeq (I := I) (M := M) g r s' a,
           ellOneCoeff (I := I) (M := M) g r s' u C k i < ε := hN a haN
       linarith [h_gap_a]
-    -- Resolve the two orderings of `m, n`.
     rcases le_total m n with hmn | hnm
-    · -- `m ≤ n`: `useq m - useq n = -(useq n - useq m)`; use negation symmetry.
-      have h := key hm hmn
-      -- `wkpNorm (useq m - useq n) = wkpNorm (useq n - useq m)`.
+    · have h := key hm hmn
       have h_neg : (fun y => useq m y - useq n y) =
           (fun y => (-1 : ℝ) * (useq n y - useq m y)) := by
         funext y; ring
@@ -698,32 +601,25 @@ private lemma gateElement_chartComponent_memWkp_of_tail
       rw [show ‖(-1 : ℝ)‖ₑ = 1 by rw [enorm_neg, enorm_one], one_mul]
       exact key hm hmn
     · exact key hn hnm
-  -- Completeness: extract the `MemWkp (2k) 2` limit `F_lim` with `wkpNorm`-tendsto.
   obtain ⟨F_lim, hF_lim_mem, hF_lim_tendsto⟩ :=
     MemWkp.exists_limit_of_wkpNorm_cauchy
       (d := Module.finrank ℝ E) hΩ_open (2 * k) 2
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) (by norm_num : (2 : ℝ≥0∞) ≠ (⊤ : ℝ≥0∞))
       h_useq_mem h_cauchy
-  -- `F_lim` agrees a.e. with `tensorL2ChartComponent u α P₀` (both `Lp 2`-limits).
-  -- Package `F_lim` as an `Lp` element.
   have hF_lim_memLp : MemLp F_lim 2 ((volume : Measure EuclN).restrict Ω) :=
     hF_lim_mem.memLp
   set T : Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) :=
     tensorL2ChartComponent (I := I) (M := M) g r s' u α P₀ with hT_def
   set Flim_Lp : Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) :=
     hF_lim_memLp.toLp F_lim with hFlim_Lp_def
-  -- The `Lp` partial sums `fₙ := partialSumLp (Fn)` converge to `T`.
   have h_lp_T : Filter.Tendsto
       (fun n => partialSumLp (I := I) (M := M) g r s' u α P₀
         (eigenFinsetSeq (I := I) (M := M) g r s' n)) Filter.atTop (𝓝 T) :=
     partialSumLp_tendsto (I := I) (M := M) g r s' u α P₀
-  -- The `Lp` partial sums also converge to `Flim_Lp`: the `Lp` norm of the
-  -- difference is the `eLpNorm` of `useq n - F_lim`, which tends to `0`.
   have h_lp_Flim : Filter.Tendsto
       (fun n => partialSumLp (I := I) (M := M) g r s' u α P₀
         (eigenFinsetSeq (I := I) (M := M) g r s' n)) Filter.atTop (𝓝 Flim_Lp) := by
     rw [tendsto_iff_norm_sub_tendsto_zero]
-    -- `‖fₙ - Flim_Lp‖ = (eLpNorm (useq n - F_lim) 2 μ).toReal`.
     have h_norm_eq : ∀ n,
         ‖partialSumLp (I := I) (M := M) g r s' u α P₀
             (eigenFinsetSeq (I := I) (M := M) g r s' n) - Flim_Lp‖ =
@@ -732,7 +628,6 @@ private lemma gateElement_chartComponent_memWkp_of_tail
       intro n
       rw [Lp.norm_def]
       congr 1
-      -- The coercion of the `Lp` difference is a.e. `useq n - F_lim`.
       refine eLpNorm_congr_ae ?_
       have h1 := Lp.coeFn_sub (partialSumLp (I := I) (M := M) g r s' u α P₀
         (eigenFinsetSeq (I := I) (M := M) g r s' n)) Flim_Lp
@@ -743,7 +638,6 @@ private lemma gateElement_chartComponent_memWkp_of_tail
         MemLp.coeFn_toLp hF_lim_memLp
       filter_upwards [h1, h2, h3] with y hy1 hy2 hy3
       rw [hy1, Pi.sub_apply, hy2, hy3]
-    -- `eLpNorm (useq n - F_lim) 2 μ → 0` from the `wkpNorm`-tendsto.
     have h_eLp_Flim : Filter.Tendsto
         (fun n => eLpNorm (fun y => useq n y - F_lim y) 2
           (chartL2Measure (I := I) (M := M) α)) Filter.atTop (𝓝 0) := by
@@ -753,7 +647,6 @@ private lemma gateElement_chartComponent_memWkp_of_tail
           (fun y => useq n y - F_lim y) Ω)
         tendsto_const_nhds hF_lim_tendsto (fun _ => zero_le _)
         (fun n => eLpNorm_le_wkpNorm (d := Module.finrank ℝ E) (2 * k) 2 Ω _)
-    -- Combine: `‖fₙ - Flim_Lp‖ = (eLpNorm …).toReal → 0`.
     have h_toReal : Filter.Tendsto
         (fun n => (eLpNorm (fun y => useq n y - F_lim y) 2
           (chartL2Measure (I := I) (M := M) α)).toReal) Filter.atTop (𝓝 0) := by
@@ -762,9 +655,7 @@ private lemma gateElement_chartComponent_memWkp_of_tail
       simpa using this
     refine h_toReal.congr ?_
     intro n; exact (h_norm_eq n).symm
-  -- Uniqueness of `Lp` limits: `T = Flim_Lp`.
   have hT_eq : T = Flim_Lp := tendsto_nhds_unique h_lp_T h_lp_Flim
-  -- Transfer to a.e. equality of functions.
   have hae : F_lim =ᵐ[(volume : Measure EuclN).restrict Ω]
       (fun y => (T : EuclN → ℝ) y) := by
     have h3 : (Flim_Lp : EuclN → ℝ)
@@ -774,14 +665,6 @@ private lemma gateElement_chartComponent_memWkp_of_tail
     exact h3.symm
   exact (MemWkp_congr_ae (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     hΩ_open hae).mp hF_lim_mem
-
-/-! ## The headline reductions
-
-Granting eigenvalue-tail summability, the all-orders spectral→chart Sobolev
-regularity predicate `SpectralChartRegularity` holds for arbitrary
-infinite-support gate elements; composing with the tensor super-critical
-reconstruction bridge `tensorSuperCriticalReconstruct` discharges the full
-spectral smooth-representative gate `SpectralSmoothRealizesAsSmooth`. -/
 
 /-- **The all-orders spectral→chart Sobolev regularity from eigenvalue-tail
 summability.** Granting `EigenvalueTailSummable g r s` (the Weyl-type spectral

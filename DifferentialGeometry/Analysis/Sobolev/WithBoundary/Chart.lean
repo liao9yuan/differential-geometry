@@ -56,8 +56,6 @@ variable {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanHalfSpace n) M]
   [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M]
 
-/-! ## Chart-pushed function -/
-
 /-- The chart-pushed scalar function: given `u : M → ℝ`, the partition-of-unity
 weight `ρ α : M → ℝ`, and a chart `α : M`, return the function on the standard
 Euclidean space `EuclideanSpace ℝ (Fin n)` defined by
@@ -85,8 +83,6 @@ theorem chartTargetEuclid_isHalfSpaceRelOpen (α : M) :
       (chartTargetEuclid (n := n) (M := M) α) :=
   DifferentialGeometry.Analysis.Sobolev.Euclidean.extChartAt_target_isHalfSpaceRelOpen
     (n := n) (M := M) α
-
-/-! ## The chart-based half-space `W^{k,p}` predicate -/
 
 /-- `MemWkpChart g k p u`: for every chart `α : M` in the canonical atlas, the
 chart-pushed function `chartPushed ρ α u` is in `MemWkpHalfSpace k p` of the
@@ -149,8 +145,6 @@ theorem MemWkpChart_iff
               (modelWithCornersEuclideanHalfSpace n) M) α u)
           (chartTargetEuclid (n := n) (M := M) α) := Iff.rfl
 
-/-! ## Basic structural lemmas -/
-
 omit [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M] in
 /-- The chart-pushed function for the zero scalar function is zero. -/
 theorem chartPushed_zero
@@ -182,7 +176,6 @@ theorem wkpNormChart_zero_fun
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) :
     wkpNormChart (n := n) (M := M) g k p (fun _ : M => (0 : ℝ)) = 0 := by
   unfold wkpNormChart
-  -- For each α, `chartPushed ρ α 0 = 0`, and `wkpNormHalfSpace k p 0 _ = 0`.
   have hpt : ∀ α : M,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormHalfSpace
         (d := n) k p
@@ -198,8 +191,6 @@ theorem wkpNormChart_zero_fun
       (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α)
   rw [tsum_congr hpt]
   exact tsum_zero
-
-/-! ## Closure under addition and scalar multiplication -/
 
 omit [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M] in
 /-- The chart-pushed function is linear in `u`:
@@ -269,7 +260,6 @@ theorem MemWkpChart_neg
     (hu : MemWkpChart (n := n) (M := M) g k p u) :
     MemWkpChart (n := n) (M := M) g k p (fun x => -u x) := by
   have h := MemWkpChart_const_smul (n := n) (M := M) g hp (-1) hu
-  -- (-1) * u x = -u x
   have hEq : (fun x : M => (-1 : ℝ) * u x) = (fun x : M => -u x) := by
     funext x; ring
   rw [hEq] at h
@@ -287,13 +277,10 @@ theorem MemWkpChart_sub
     MemWkpChart (n := n) (M := M) g k p (fun x => u x - v x) := by
   have hneg := MemWkpChart_neg (n := n) (M := M) g hp hv
   have h := MemWkpChart_add (n := n) (M := M) g hp hu hneg
-  -- u x + -v x = u x - v x
   have hEq : (fun x : M => u x + -v x) = (fun x : M => u x - v x) := by
     funext x; ring
   rw [hEq] at h
   exact h
-
-/-! ## The chart-based Sobolev subspace `WkpChart g k p` as an `AddSubgroup` of `M → ℝ` -/
 
 /-- The chart-based Sobolev subspace as an `AddSubgroup` of `M → ℝ`,
 parametrised by the metric `g`, the order `k`, the exponent `p`, and the
@@ -318,7 +305,6 @@ def wkpChartSubmodule
   zero_mem' := MemWkpChart_zero_fun (n := n) (M := M) g hp
   add_mem' := fun hu hv => MemWkpChart_add (n := n) (M := M) g hp hu hv
   smul_mem' := fun c u hu => by
-    -- `c • u = fun x => c * u x` for the function module structure on `M → ℝ`.
     have h := MemWkpChart_const_smul (n := n) (M := M) g hp c hu
     have hEq : (c • u : M → ℝ) = fun x => c * u x := by
       funext x
@@ -335,9 +321,6 @@ def WkpChart
     (k : ℕ) (p : ℝ≥0∞) (hp : 1 ≤ p) : Type _ :=
   ↥(wkpChartSubmodule (n := n) (M := M) g k p hp)
 
-/-! Algebraic structure of `WkpChart g k p hp` is inherited from the underlying
-`Submodule ℝ (M → ℝ)`. In particular it is an `AddCommGroup` and a `Module ℝ`. -/
-
 instance
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -353,8 +336,6 @@ instance
     (k : ℕ) (p : ℝ≥0∞) (hp : 1 ≤ p) :
     Module ℝ (WkpChart (n := n) (M := M) g k p hp) :=
   inferInstanceAs (Module ℝ ↥(wkpChartSubmodule (n := n) (M := M) g k p hp))
-
-/-! ## Order monotonicity of the predicate -/
 
 /-- Membership in `W^{k+1,p}_chart` implies membership in `W^{k,p}_chart`. -/
 theorem MemWkpChart.le_succ
@@ -378,8 +359,6 @@ theorem MemWkpChart.le_of_le
     MemWkpChart (n := n) (M := M) g k p u := by
   intro α
   exact (h α).le_of_le hk
-
-/-! ## a.e.-invariance of the chart-based norm under chart-by-chart equality -/
 
 /-- The chart-pushed-equivalence relation: two functions `u, v : M → ℝ` are
 chart-pushed equivalent if every chart-pushed image `chartPushed ρ α u` agrees
@@ -467,16 +446,12 @@ theorem wkpNormChart_congr_chartPushed_ae
   unfold wkpNormChart
   refine tsum_congr ?_
   intro α
-  -- `wkpNormHalfSpace = wkpNorm ∘ interiorHalfSpace`. Apply the open-set
-  -- ae-invariance via `wkpNorm_congr_ae` on the interior part.
   unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormHalfSpace
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_congr_ae
     (d := n) hp
     (DifferentialGeometry.Analysis.Sobolev.Euclidean.interiorHalfSpace_isOpen
       (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α))
     (huv α)
-
-/-! ## Triangle inequality and scalar-multiplication identity for `wkpNormChart` -/
 
 /-- The triangle inequality for the chart-based norm. -/
 theorem wkpNormChart_add_le
@@ -520,8 +495,6 @@ theorem wkpNormChart_const_smul
     (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α)
     (hu α) c
 
-/-! ## Finiteness of `wkpNormChart` for compact `M` and members -/
-
 /-- The chart-based norm is finite for any function in `MemWkpChart`, when `M`
 is compact and `1 ≤ p`. (Compactness ensures the partition-of-unity has
 finitely many supports.) -/
@@ -534,10 +507,6 @@ theorem wkpNormChart_lt_top_of_memWkpChart
     wkpNormChart (n := n) (M := M) g k p u < ⊤ := by
   classical
   unfold wkpNormChart
-  -- The partition of unity has locally finite supports; on a compact space,
-  -- this means only finitely many supports are nonempty. For α with empty
-  -- support of `ρ α`, `chartPushed ρ α u` is the zero function, so
-  -- `wkpNormHalfSpace = 0`. Hence the tsum has finitely many nonzero terms.
   set f : M → ℝ≥0∞ := fun α =>
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormHalfSpace
       (d := n) k p

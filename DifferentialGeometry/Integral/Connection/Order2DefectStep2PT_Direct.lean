@@ -107,27 +107,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The intrinsic partial metric trace of a bilinear-direction Hessian family
-
-A *bilinear-direction Hessian family* is a function
-`H : (X Y : Π b, TangentSpace I b) → (Π b, TensorRSSpace r s I b) → M → TensorRSSpace r s I x`
-that, at each `x`, depends on `X, Y` only through their values `X x, Y x` (the genuine first-slot
-tensoriality of `tensorSecondCovDeriv`, recorded in `firstSlotHessMap`). Its **intrinsic partial
-metric trace** contracts the two direction arguments against the `g_x`-orthonormal frame
-`Bᵢ := smoothOrthoFrame g x i`:
-
-```
-metricTrace2 g r s H x := ∑ᵢ H (Bᵢ) (Bᵢ) T x.
-```
-
-For `H := tensorSecondCovDeriv g r s` this is exactly the committed `metricTraceHessian = Δ_∇`. -/
 
 /-- **The intrinsic partial metric trace.** The diagonal frame sum, over the `g_x`-orthonormal
 frame `Bᵢ := smoothOrthoFrame g x i`, of a bilinear-direction Hessian family `H` applied to `T`:
@@ -188,21 +171,6 @@ theorem rawTensorConnLap_eq_metricTrace2
   rw [metricTrace2_secondCovDeriv_eq_metricTraceHessian]
   exact rawTensorConnLap_eq_metricTraceHessian (I := I) g r s T x
 
-/-! ## The `g⁻¹`-weighted reading of the partial metric trace
-
-For the genuine second-covariant-derivative Hessian family, the first direction slot of the
-Hessian is a continuous-linear form `firstSlotHessMap` (committed in
-`Order2DefectMetricTraceFrame.lean`). The diagonal frame trace is therefore the `g`-weighted
-double sum
-
-```
-∑ᵢ ∑ⱼ g(Bᵢ, Bⱼ) • firstSlotHessMap g r s Bᵢ T x (Bⱼ),
-```
-
-which collapses to the diagonal by orthonormality. This `g`-weighted form is the intrinsic
-`g⁻¹`-contraction reading — frame-independent up to the metric coefficients — and is the form the
-outer covariant derivative passes through in STEP 2. -/
-
 /-- **The partial metric trace of the second-covariant-derivative Hessian family as a
 `g`-weighted double sum.** With `Bᵢ := smoothOrthoFrame g x i`,
 ```
@@ -224,19 +192,6 @@ theorem metricTrace2_eq_gWeighted
             (smoothOrthoFrame (I := I) g x j x) := by
   rw [metricTrace2_secondCovDeriv_eq_metricTraceHessian]
   exact metricTraceHessian_eq_gWeighted_firstSlot (I := I) g r s T x
-
-/-! ## The cometric skew core (`∇ g⁻¹ = 0` on the orthonormal frame)
-
-The single coefficient identity that makes the moving-frame correction in STEP 2's
-`∇`-commutation vanish is the **cometric skew core**: the symmetric part of the connection on the
-`g_x`-orthonormal frame vanishes,
-```
-g(∇_w Bᵢ, Bⱼ x) + g(Bᵢ x, ∇_w Bⱼ) = 0.
-```
-This is the metric-parallel property `∇g = 0` (equivalently `∇g⁻¹ = 0`) read on the orthonormal
-frame: differentiating the locally-constant pairing `y ↦ g(Bᵢ y, Bⱼ y) = δᵢⱼ` and applying
-tangent-bundle metric compatibility of the Levi-Civita connection. We re-derive it publicly here
-(the upstream version in `TensorMetricCompatible.lean` is private). -/
 
 omit [CompactSpace M] [I.Boundaryless] in
 /-- **The frame pairing is locally constant.** Near `x`, the `g`-pairing of the smooth
@@ -274,7 +229,6 @@ theorem cometric_skew_core
         (smoothOrthoFrame (I := I) g x i x)
         ((LeviCivita (I := I) g).toFun (smoothOrthoFrame (I := I) g x j) x w) = 0 := by
   classical
-  -- The smooth orthonormal frame components are smooth sections, hence MDifferentiableAt at `x`.
   have hEi : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
       (fun y => TotalSpace.mk' E (E := TangentSpace I) y
         (smoothOrthoFrame (I := I) g x i y)) x :=
@@ -283,13 +237,11 @@ theorem cometric_skew_core
       (fun y => TotalSpace.mk' E (E := TangentSpace I) y
         (smoothOrthoFrame (I := I) g x j y)) x :=
     (smoothOrthoFrame_smooth (I := I) g x j).contMDiffAt.mdifferentiableAt (by simp)
-  -- The pairing `y ↦ g(Bᵢ y, Bⱼ y)` has vanishing directional derivative (locally constant).
   have hmfderiv0 : mfderiv I 𝓘(ℝ) (fun y : M => g.inner y
         (smoothOrthoFrame (I := I) g x i y)
         (smoothOrthoFrame (I := I) g x j y)) x w = 0 := by
     rw [(frame_pairing_locally_const (I := I) g x i j).mfderiv_eq, mfderiv_const]
     rfl
-  -- Metric compatibility relates the derivative to the symmetric part of the connection.
   have hmc := (LeviCivita_isMetricCompatible (I := I) g).apply
     (Y := fun y => smoothOrthoFrame (I := I) g x i y)
     (Z := fun y => smoothOrthoFrame (I := I) g x j y)
@@ -313,7 +265,6 @@ theorem cometric_diagonal_skew
         ((LeviCivita (I := I) g).toFun (smoothOrthoFrame (I := I) g x i) x w)
         (smoothOrthoFrame (I := I) g x i x) = 0 := by
   have hcore := cometric_skew_core (I := I) g x i i w
-  -- The two summands are equal by `g`-symmetry, so each is half the (zero) sum.
   have hsymm : g.inner x
         (smoothOrthoFrame (I := I) g x i x)
         ((LeviCivita (I := I) g).toFun (smoothOrthoFrame (I := I) g x i) x w) =
@@ -322,29 +273,6 @@ theorem cometric_diagonal_skew
         (smoothOrthoFrame (I := I) g x i x) := g.symm x _ _
   rw [hsymm] at hcore
   linarith
-
-/-! ## The precise remaining subgoal (documented, not assumed)
-
-The cometric skew core `cometric_skew_core` is the coefficient identity that discharges the
-moving-frame correction in STEP 2's `∇`-commutation. The remaining content is the full
-`∇`-commutation of the partial metric trace through a bilinear-direction Hessian family `H`:
-
-```
-∇_w (metricTrace2 g r s H) (T) (x)
-  = metricTrace2 g r s (fun X Y => fun U z => H X Y U z) (∇_w T) (x)   (+ frame correction),
-```
-
-where the outer `∇` is computed through the `g`-weighted reading `metricTrace2_eq_gWeighted`, the
-frame correction is the moving-frame term `∑ᵢⱼ (∇_w g(Bᵢ, Bⱼ)) • firstSlotHessMap …`, and that
-correction vanishes by `cometric_skew_core` (exactly as the error term in
-`tensorMetricCompatDiff_succ_eq_sum` vanishes). The statement below records the precise
-commutation that, combined with `covGradRoughLapCurv_toSection_eq_sub`,
-`rawTensorConnLap_eq_metricTrace2`, `secondCovDeriv_gradTensor_antisymm_eq_riemannOp`, and
-`frame_offDiag_curvature_sum_fiberNormSq_le`, delivers the pointwise defect bound `hpt` and hence,
-through `hpt_to_unconditional_bound`, the unconditional order-`2` covariant Gårding estimate.
-
-This is genuine new content not present in the available infrastructure; it is the single
-remaining gap and is the subgoal `metricTrace2_covDeriv_comm`. -/
 
 end Connection
 end Integral

@@ -67,20 +67,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Part 1: definitions -/
-
-/-! ### Scalar connection Laplacian
-
-For a smooth scalar function `f : M → ℝ`, the connection Laplacian on `f` is
-the metric trace of the abstract Hessian, which by the divergence-of-gradient
-identity equals the Laplace-Beltrami operator `Δ_g f`. We define
-`connLaplacian_function g hf := Δ_g g hf` directly, and prove the trace-form
-identification `connLaplacian_function g hf x = chartHessTrace g f x` as a
-named theorem.
-
-The smoothness witness `hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f` is required by the
-underlying definition of `Δ_g` on a scalar field. -/
-
 /-- **Connection Laplacian on a smooth scalar function.** Defined as the
 Laplace-Beltrami operator `Δ_g f`, equivalently the metric trace of the
 chart-coordinate Hessian (see `connLaplacian_function_eq_chartHessTrace`). -/
@@ -93,23 +79,6 @@ def connLaplacian_function [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M) :
     connLaplacian_function (I := I) g hf x = Δ_g (I := I) g hf x := rfl
-
-/-! ### Vector connection Laplacian
-
-For a smooth tangent-bundle section `V : Π b, T_b M`, the connection Laplacian
-is the metric trace of the second covariant derivative,
-$$
-  (\Delta_\nabla V)(x) := \mathrm{tr}_g\bigl(W \mapsto \nabla_W \nabla V\bigr).
-$$
-In a `g_x`-orthonormal frame `B_i`, this trace evaluates to
-`∑_i (∇_{B_i} ∇_{B_i} V - ∇_{∇_{B_i} B_i} V)(x)`, which is the
-`localConnLap_vector` formula from `RicciIdentity.lean`.
-
-We define `connLaplacian_vector` using the canonical smooth orthonormal frame
-`smoothOrthoFrame g x` constructed in `RicciIdentitySmoothFrame.lean`. The
-smooth orthonormal frame is `g_x`-orthonormal at `x`
-(`smoothOrthoFrame_orthonormal_at_center`), making this the textbook value of
-`Δ_∇ V` at `x`. -/
 
 /-- **Connection Laplacian on a smooth tangent vector field**, defined via the
 smooth orthonormal frame at `x`:
@@ -129,24 +98,6 @@ def connLaplacian_vector
     connLaplacian_vector (I := I) g V x =
       localConnLap_vector (LeviCivita (I := I) g) (smoothOrthoFrame (I := I) g x)
         V x := rfl
-
-/-! ### One-form (cotangent) connection Laplacian
-
-For a smooth cotangent-bundle section `ω : Π b, T_b M →L[ℝ] ℝ`, the connection
-Laplacian is the metric trace of the second cotangent covariant derivative,
-$$
-  (\Delta_\nabla \omega)(x) := \mathrm{tr}_g\bigl(W \mapsto \nabla^*_W \nabla^* \omega\bigr).
-$$
-In a `g_x`-orthonormal frame `B_i`, this evaluates to the cotangent analogue of
-the vector formula:
-$$
-  (\Delta_\nabla \omega)(x) = \sum_i \bigl(\nabla^*_{B_i x}(\nabla^*_{B_i}\omega) -
-    \nabla^*_{(\nabla_{B_i} B_i)(x)}\,\omega\bigr).
-$$
-
-We package this for the cotangent extension of the Levi-Civita connection
-(`cotangentCov (LeviCivita g)`), which is the textbook 1-form Laplacian
-`Δ_∇ ω`. -/
 
 /-- **Connection Laplacian on a smooth cotangent (1-form) section**, defined
 via the cotangent extension of the Levi-Civita connection on the smooth
@@ -179,19 +130,6 @@ def connLaplacian_oneForm
               (smoothOrthoFrame (I := I) g x i) x
               (smoothOrthoFrame (I := I) g x i x))) := rfl
 
-/-! ## Part 2: identification with the Laplace-Beltrami operator
-
-The scalar connection Laplacian agrees with the Laplace-Beltrami operator
-`Δ_g` on `M`. By the divergence-of-gradient identity (or, equivalently, by the
-chart-coordinate trace formula `chartHessTrace = Δ_g`), the trace of the
-abstract Hessian against `g^{-1}` is the same scalar.
-
-We expose two named theorems:
-* `connLaplacian_function_eq_laplaceBeltrami` — the direct identity
-  `connLaplacian_function g hf = Δ_g g hf` (true by definition).
-* `connLaplacian_function_eq_chartHessTrace` — the trace-form identity
-  `connLaplacian_function g hf x = chartHessTrace g f x`. -/
-
 /-- **Identity with the Laplace-Beltrami operator** — definitional. -/
 theorem connLaplacian_function_eq_laplaceBeltrami [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
@@ -213,9 +151,6 @@ theorem connLaplacian_function_eq_chartHessTrace [I.Boundaryless]
   rw [connLaplacian_function_def]
   exact (chartHessTrace_eq_laplacian_pointwise_of_boundaryless
     (I := I) g hf x).symm
-
-/-! ## Part 3: smoothness and basic algebraic properties of the scalar
-connection Laplacian -/
 
 /-- The scalar connection Laplacian of a smooth function is smooth. -/
 theorem connLaplacian_function_contMDiff [I.Boundaryless]
@@ -244,36 +179,6 @@ theorem connLaplacian_function_add [I.Boundaryless]
       (contMDiff_const : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => c)) x = 0 := by
   rw [connLaplacian_function_def]
   exact Δ_g_const (I := I) g c x
-
-/-! ## Part 4: heart-of-Bochner identity for the gradient — conditional form
-
-The vector identity
-$$
-  \Delta_\nabla(\nabla f)(x) = \nabla(\Delta_g f)(x) + \mathrm{Ric}^\sharp(\nabla f)(x)
-$$
-relates the connection Laplacian on the gradient to the gradient of the
-scalar Laplacian plus the Ricci sharp of the gradient. With the smooth
-orthonormal frame `smoothOrthoFrame g x` (which is `g_x`-orthonormal at `x`,
-and `C^∞` as a tangent-bundle section family), the identity reduces by Riesz
-uniqueness to its inner-product form against an arbitrary test vector — see
-`heart_of_bochner_smoothOrthoFrame` for the underlying conditional reduction.
-
-We expose the identity in two stages:
-
-* `connLaplacian_grad_inner` — pointwise unfolding of
-  `g(connLaplacian_vector g (∇f), w)` as the trace expansion through
-  `localConnLap_vector_grad_inner_eq_hessian_diff`, ready to be combined with
-  the metric-compatibility / curvature reduction.
-* `connLaplacian_grad_eq_grad_laplacian_plus_ricciSharp_of_inner` — the **vector
-  identity** itself, in conditional form. The hypothesis `hInner` encodes the
-  algebraic reduction (Hessian symmetry + curvature trace) at the inner-product
-  level; the conclusion is the vector statement.
-
-The conditional packaging is the natural input for the downstream Bochner
-trace identity: a Bochner-class derivation supplies the inner-product
-reduction (typically via the abstract Hessian symmetry plus the
-curvature-trace identity), and the vector identity follows by Riesz
-uniqueness on a finite-dimensional inner-product space. -/
 
 /-- **Inner-product unfolding of the vector connection Laplacian on a
 gradient.** Combining the definition of `connLaplacian_vector` with the
@@ -345,21 +250,8 @@ theorem connLaplacian_grad_eq_grad_laplacian_plus_ricciSharp_of_inner
         (fun b => gradFun (I := I) g f b) x =
       gradFun (I := I) g (Δ_g (I := I) g hf) x +
         ricciSharp (I := I) g x (gradFun (I := I) g f x) := by
-  -- Unfold the vector connection Laplacian and apply the smooth-frame
-  -- packaging of the heart-of-Bochner reduction.
   unfold connLaplacian_vector
   exact heart_of_bochner_smoothOrthoFrame (I := I) g hf x hInner
-
-/-! ## Part 5: alternate forms and aliases for downstream consumers
-
-The vector identity `Δ_∇(∇f) = ∇(Δf) + Ric^♯(∇f)` is the core algebraic
-output of the heart-of-Bochner reduction. We expose two alternative forms:
-
-* `connLaplacian_grad_inner_eq_inner_form` — the inner-product equation against
-  every test vector, as the entry point for the Riesz reduction.
-* `connLaplacian_grad_iff_inner_form` — the iff statement, a direct
-  application of `vector_eq_iff_inner_eq`.
--/
 
 /-- The vector heart-of-Bochner identity, written in inner-product form: it
 holds against every smooth tangent test field `w` at `x`, then collapses to
@@ -398,8 +290,7 @@ theorem connLaplacian_grad_iff_inner_form [I.Boundaryless]
             g.inner x (ricciSharp (I := I) g x (gradFun (I := I) g f x)) w := by
   classical
   refine ⟨fun h w => ?_, fun h => ?_⟩
-  · -- Forward: substitute and use bilinearity of g.inner
-    rw [h]
+  · rw [h]
     rw [show g.inner x (gradFun (I := I) g (Δ_g (I := I) g hf) x +
           ricciSharp (I := I) g x (gradFun (I := I) g f x)) w =
         g.inner x (gradFun (I := I) g (Δ_g (I := I) g hf) x) w +
@@ -407,19 +298,6 @@ theorem connLaplacian_grad_iff_inner_form [I.Boundaryless]
       by rw [map_add, ContinuousLinearMap.add_apply]]
   · exact connLaplacian_grad_eq_grad_laplacian_plus_ricciSharp_of_inner
       (I := I) g hf x h
-
-/-! ### Algebraic ingredients of the inner-product reduction
-
-The hypothesis `hInner` of the heart-of-Bochner conditional form is the
-algebraic content of the textbook derivation, at the level of inner products.
-We expose its three constituent pieces, each of which is independently
-available through this file or its dependencies:
-
-1. **Hessian-trace form of the LHS** — `connLaplacian_grad_inner_hessian`
-   re-expresses `g(Δ_∇ ∇f, w)` as a sum of inner products of the iterated
-   covariant derivative of `∇f`.
-2. **Curvature trace** — re-export of `heart_of_bochner_curvature_term`.
-3. **Hessian symmetry** — re-export of `inner_cov_gradFun_symm`. -/
 
 /-- **Hessian-trace form of the LHS of B3.** The inner product `g(Δ_∇^B ∇f,
 w)`, traced through the smooth orthonormal frame at `x`, equals the same sum
@@ -484,12 +362,6 @@ theorem connLaplacian_grad_curvature_term [I.Boundaryless]
           (riemannSec (LeviCivita (I := I) g) B w B x) :=
   heart_of_bochner_curvature_term (I := I) g hf hB hw
 
-/-! ### Symmetry of the smooth orthonormal frame at the centre `x`
-
-The smooth orthonormal frame `smoothOrthoFrame g x` is `g_x`-orthonormal at
-the centre `x` (Stage 5 of `RicciIdentitySmoothFrame.lean`). We re-export
-this fact for downstream consumers that need the orthonormality directly. -/
-
 /-- **Orthonormality of the smooth orthonormal frame at the centre.** The
 frame `smoothOrthoFrame g x` is `g_x`-orthonormal at `x`. -/
 theorem smoothOrthoFrame_orthonormal_center
@@ -509,31 +381,6 @@ theorem smoothOrthoFrame_isSmooth
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (T% (smoothOrthoFrame (I := I) g x i)) :=
   smoothOrthoFrame_smooth (I := I) g x i
-
-/-! ## Part 6: B2 — Leibniz identity for the inner product
-
-For a smooth tangent vector field `V`, the second-order Leibniz identity
-$$
-  \Delta_\nabla\bigl(g(V, V)\bigr)(x) =
-    2\,g\bigl((\Delta_\nabla V)(x), V(x)\bigr)
-    + 2\,|\nabla V|^2_g(x)
-$$
-follows from applying the metric-compatibility identity twice to the function
-`b ↦ g(V, V)(b)` and tracing against the smooth orthonormal frame `B_i =
-smoothOrthoFrame g x i`. The Frobenius-norm-squared term `|∇V|^2_g(x)` is the
-sum
-$$
-  |\nabla V|^2_g(x) := \sum_i g_x\bigl((\nabla_{B_i} V)(x), (\nabla_{B_i} V)(x)\bigr)
-$$
-in an orthonormal frame at `x`.
-
-We expose the Leibniz identity in conditional form: the hypothesis encodes the
-trace-of-second-derivative reduction (which goes through metric compatibility
-twice and is the algebraic engine of the Bochner formula), and the conclusion
-is the algebraic Leibniz statement at `x`. The downstream consumer
-(typically a heat-equation derivation or a Lichnerowicz step) supplies the
-trace reduction in either the chart Hessian form or the orthonormal-frame
-form. -/
 
 /-- **Frame-traced Frobenius norm of `∇V`** in the smooth orthonormal frame at
 `x`. This is the orthonormal-frame value of the metric Frobenius norm squared
@@ -572,13 +419,11 @@ lemma frobeniusSq_grad_vector_nonneg
   unfold frobeniusSq_grad_vector
   refine Finset.sum_nonneg ?_
   intro i _
-  -- Each summand is g.inner x v v with v = (LeviCivita g).toFun V x (B_i x), which is ≥ 0.
   set v : TangentSpace I x :=
     (LeviCivita (I := I) g).toFun V x
       (smoothOrthoFrame (I := I) g x i x) with hv_def
   by_cases hv : v = 0
-  · -- v = 0 ⇒ g.inner x v v = 0 ≥ 0.
-    simp [hv]
+  · simp [hv]
   · exact le_of_lt (g.pos x v hv)
 
 /-- **Leibniz identity (B2) — conditional form.** For a smooth tangent vector
@@ -625,16 +470,12 @@ lemma extDerivFun_inner_self [I.Boundaryless]
     extDerivFun (I := I) (fun b => g.inner b (V b) (V b)) x X =
       2 * g.inner x ((LeviCivita (I := I) g).toFun V x X) (V x) := by
   classical
-  -- Apply metric compatibility (Y = Z = V).
   have hV_at : MDiffAt (T% V) x := (hV x).mdifferentiableAt (by simp)
   have hmc :=
     (LeviCivita_isMetricCompatible (I := I) g).apply hV_at hV_at X
-  -- hmc : (mfderiv I 𝓘(ℝ) (b ↦ g.inner b (V b) (V b))) x X
-  --   = g.inner x ((LeviCivita g) V x X) (V x) + g.inner x (V x) ((LeviCivita g) V x X)
   have hext_eq : extDerivFun (I := I) (fun b => g.inner b (V b) (V b)) x X =
       (mfderiv I 𝓘(ℝ) (fun b : M => g.inner b (V b) (V b)) x) X := rfl
   rw [hext_eq, hmc]
-  -- The two summands are equal by `g.symm` and combine to `2 * (·)`.
   rw [g.symm x (V x) ((LeviCivita (I := I) g).toFun V x X)]
   ring
 

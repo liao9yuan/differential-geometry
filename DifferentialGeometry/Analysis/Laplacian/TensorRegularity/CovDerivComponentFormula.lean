@@ -91,24 +91,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The lower-order correction coefficient family
-
-The chart-coordinate covariant derivative decomposes as the intrinsic
-Fréchet-derivative piece plus the Christoffel slot corrections. The two
-companion files express each slot correction's raw chart-scalar component as a
-finite linear combination of *undifferentiated* raw chart components:
-
-* the `k`-th input-slot correction sums over input multi-indices `Idx'`,
-  with the output multi-index `Jdx` unchanged, coefficients `inputSlotCoeff`;
-* the `l`-th output-slot correction sums over output multi-indices `Jdx'`,
-  with the input multi-index `Idx` unchanged, coefficients `outputSlotCoeff`.
-
-To package both into a single sum over full component multi-index *pairs*
-`(Idx', Jdx')`, we attach a Kronecker delta restoring the unchanged index:
-the input contribution carries `[Jdx' = Jdx]`, the output contribution carries
-`[Idx' = Idx]`. The lower-order correction coefficient is the input
-contribution minus the output contribution. -/
-
 /-- The lower-order correction coefficient of the chart-coordinate covariant
 derivative along the chart-coordinate basis vector field `chartBasisVecFiber α
 m`. For a source component multi-index pair `(Idx, Jdx)` and a target pair
@@ -160,7 +142,6 @@ theorem covDerivLowerOrderCoeff_contDiffOn
       (covDerivLowerOrderCoeff (I := I) (M := M) g r s α m Idx Idx' Jdx Jdx')
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- The input contribution: a finite sum of `C^∞` functions.
   have hinput : ContDiffOn ℝ ∞
       (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
         ∑ k : Fin r,
@@ -170,7 +151,6 @@ theorem covDerivLowerOrderCoeff_contDiffOn
     refine ContDiffOn.sum (fun k _ => ?_)
     exact (inputSlotCoeff_contDiffOn (I := I) (M := M) g r α m k Idx Idx').mul
       contDiffOn_const
-  -- The output contribution: a finite sum of `C^∞` functions.
   have houtput : ContDiffOn ℝ ∞
       (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
         ∑ l : Fin s,
@@ -180,22 +160,9 @@ theorem covDerivLowerOrderCoeff_contDiffOn
     refine ContDiffOn.sum (fun l _ => ?_)
     exact (outputSlotCoeff_contDiffOn (I := I) (M := M) g s α m l Jdx Jdx').mul
       contDiffOn_const
-  -- The coefficient is the input contribution minus the output contribution.
   have hsub := hinput.sub houtput
   refine hsub.congr (fun y _ => ?_)
   rw [covDerivLowerOrderCoeff_def]
-
-/-! ## The wrapped raw-component projection as a continuous linear functional
-
-Both companion files phrase their results on the
-`continuousLinearMapAt`-wrapped raw-component projection of a section value:
-the value is first re-trivialised through
-`(trivializationAt …).continuousLinearMapAt ℝ b`, then projected to the
-`(Idx, Jdx)`-component by `tensorChartComponentProjection`. Both operations
-are continuous linear maps, so their composite is a continuous linear
-functional on the `(r, s)`-tensor fibre. Bundling it explicitly lets the
-3-way decomposition of `chartTensorRSCovariantDerivative` be pushed through
-the projection by the `map_add` / `map_sub` / `map_sum` lemmas. -/
 
 /-- The wrapped raw-component projection as a continuous linear functional on
 the `(r, s)`-tensor fibre at `b`: the `continuousLinearMapAt`-trivialisation
@@ -222,18 +189,6 @@ lemma wrappedComponentProj_apply
         ((trivializationAt (TensorRSModel r s ℝ E)
             (fun z : M => TensorRSSpace r s I z) α).continuousLinearMapAt ℝ b
           T) := rfl
-
-/-! ## The headline component formula
-
-Decomposing `chartTensorRSCovariantDerivative` by `chartTensorRSCovariantDerivative_def`
-and pushing the linear functional `wrappedComponentProj` through the sum /
-difference splits the raw chart-scalar component into the intrinsic
-contribution and the two slot-correction contributions. The intrinsic
-contribution is the chart-Euclidean partial derivative (companion file 1); the
-slot-correction contributions are finite linear combinations of
-undifferentiated raw chart components (companion file 2). Re-indexing the slot
-sums by full component multi-index pairs collects everything into a single
-lower-order correction term with `covDerivLowerOrderCoeff` coefficients. -/
 
 /-- The raw-component projection of the intrinsic-piece value, regrouped by
 `chartTensorRSCovariantDerivative_def`. This records that the intrinsic term of
@@ -331,12 +286,9 @@ private lemma inputSlot_sum_reindex
           (if p.2 = Jdx then (1 : ℝ) else 0) *
           tensorChartComponentRaw (I := I) (M := M) g r s S α p.1 p.2 b := by
   classical
-  -- Expand the product-type sum on the right as an iterated sum, outer index
-  -- `Idx'`, inner index `Jdx'`.
   refine Eq.symm ?_
   rw [Fintype.sum_prod_type]
   refine Finset.sum_congr rfl (fun Idx' _ => ?_)
-  -- Collapse the inner `Jdx'`-sum via the Kronecker delta `[Jdx' = Jdx]`.
   rw [Finset.sum_eq_single Jdx]
   · rw [if_pos rfl, mul_one]
   · intro Jdx' _ hJdx'
@@ -366,9 +318,6 @@ private lemma outputSlot_sum_reindex
           (if p.1 = Idx then (1 : ℝ) else 0) *
           tensorChartComponentRaw (I := I) (M := M) g r s S α p.1 p.2 b := by
   classical
-  -- Expand the product-type sum on the right as an iterated sum, outer index
-  -- `Idx'`, inner index `Jdx'`; then collapse the outer `Idx'`-sum via the
-  -- Kronecker delta `[Idx' = Idx]`.
   refine Eq.symm ?_
   rw [Fintype.sum_prod_type, Finset.sum_eq_single Idx]
   · refine Finset.sum_congr rfl (fun Jdx' _ => ?_)
@@ -436,8 +385,6 @@ private lemma sum_inputSlot_eq
             ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := by
   classical
   set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
-  -- Rewrite each input-slot summand via companion file 2, then re-index by
-  -- component multi-index pairs.
   have hstep : (∑ k : Fin r,
         wrappedComponentProj (I := I) (M := M) r s α b Idx Jdx
           (chartTensorRSInputSlotCorrection (I := I) r s g α S.toSection
@@ -556,10 +503,7 @@ private lemma wrappedComponentProj_covDeriv_split
               (chartTensorRSOutputSlotCorrection (I := I) r s g α S.toSection
                 (chartBasisVecFiber (I := I) α m) b l)) := by
   classical
-  -- The 3-way decomposition of `chartTensorRSCovariantDerivative`.
   rw [chartTensorRSCovariantDerivative_def]
-  -- `wrappedComponentProj` is a continuous linear functional: distribute it
-  -- across the difference, the sum, and the finite slot-sums.
   rw [map_sub, map_add, map_sum, map_sum]
 
 /-- **The chart-coordinate covariant-derivative component formula.** Let
@@ -601,38 +545,14 @@ theorem covDerivComponent_eq_euclidPartial_add_lowerOrder
         + covDerivLowerOrderTerm (I := I) (M := M) g r s S α m Idx Jdx y := by
   classical
   set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
-  -- Recast the goal through the bundled `wrappedComponentProj` functional.
   rw [← wrappedComponentProj_apply (I := I) (M := M) r s α b Idx Jdx]
-  -- Push `wrappedComponentProj` through the 3-way covariant-derivative split.
   rw [wrappedComponentProj_covDeriv_split (I := I) (M := M) g r s S α m
     Idx Jdx b]
-  -- The intrinsic term is the chart-Euclidean partial derivative (file 1).
   rw [wrappedComponentProj_intrinsic_eq (I := I) (M := M) g r s S α m
     Idx Jdx hy]
-  -- Reassociate `(intrinsic + inputSum) − outputSum` as
-  -- `intrinsic + (inputSum − outputSum)`.
   rw [add_sub_assoc]
-  -- The input-slot sum minus the output-slot sum is the lower-order term.
   rw [inputSlot_sub_outputSlot_eq_lowerOrderTerm (I := I) (M := M) g r s S α m
     Idx Jdx hy]
-
-/-! ## Corollaries for the downstream consumer
-
-The two corollaries below extract from the headline the two facts that the
-downstream covariant-tensor-regularity argument needs:
-
-* the lower-order correction term is `C^∞` on the Euclidean chart target,
-  given that the raw chart components of `S` are `C^∞` there;
-* the lower-order correction term is, by construction, a finite linear
-  combination of undifferentiated raw chart components of `S` (zeroth order
-  in `S`).
-
-The raw chart components of a smooth compactly-supported section are smooth on
-the chart source (`tensorChartComponentRaw_contMDiffOn_chart_source`); their
-chart-Euclidean push-forwards `chartPushedRaw` are correspondingly `C^∞` on the
-Euclidean chart target. The first corollary is stated with that `C^∞`
-hypothesis explicit so it can be discharged either from the chart-source
-smoothness lemma or from any other source the consumer prefers. -/
 
 /-- **The lower-order correction term is `C^∞` on the Euclidean chart
 target.** Given that every Euclidean push-forward
@@ -657,8 +577,6 @@ theorem covDerivComponent_lowerOrder_contDiffOn
       (covDerivLowerOrderTerm (I := I) (M := M) g r s S α m Idx Jdx)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- Each summand is a `C^∞` coefficient times a `C^∞` raw-component
-  -- push-forward; the raw component appears undifferentiated.
   have hsummand : ∀ p : (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin s → Fin (Module.finrank ℝ E)),
       ContDiffOn ℝ ∞
@@ -668,14 +586,11 @@ theorem covDerivComponent_lowerOrder_contDiffOn
               ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
         (chartTargetEuclid (I := I) (M := M) α) := by
     intro p
-    -- The coefficient is `C^∞` (`covDerivLowerOrderCoeff_contDiffOn`).
     have hcoeff : ContDiffOn ℝ ∞
         (covDerivLowerOrderCoeff (I := I) (M := M) g r s α m Idx p.1 Jdx p.2)
         (chartTargetEuclid (I := I) (M := M) α) :=
       covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M) g r s α m
         Idx p.1 Jdx p.2
-    -- On the Euclidean chart target the raw-component factor is, pointwise,
-    -- the `C^∞` Euclidean push-forward `chartPushedRaw`.
     have hrawfac : ContDiffOn ℝ ∞
         (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
           tensorChartComponentRaw (I := I) (M := M) g r s S α p.1 p.2
@@ -685,7 +600,6 @@ theorem covDerivComponent_lowerOrder_contDiffOn
       exact (chartPushedRaw_apply_of_mem (I := I) (M := M) α
         (tensorChartComponentRaw (I := I) (M := M) g r s S α p.1 p.2) hy).symm
     exact hcoeff.mul hrawfac
-  -- A finite sum of `C^∞` functions is `C^∞`.
   have hsum :
       ContDiffOn ℝ ∞
         (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
@@ -696,7 +610,6 @@ theorem covDerivComponent_lowerOrder_contDiffOn
                 ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
         (chartTargetEuclid (I := I) (M := M) α) :=
     ContDiffOn.sum (fun p _ => hsummand p)
-  -- The lower-order term is, definitionally, exactly this finite sum.
   exact hsum
 
 /-- **The lower-order correction term is a finite linear combination of

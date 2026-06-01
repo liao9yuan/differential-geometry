@@ -109,35 +109,12 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## A plain-`volume.restrict` explicit-norm bound for a `C^∞`-coefficient product
-
-The quantitative coefficient lemma `eLpNorm_weighted_contDiffOn_mul_le` records,
-for the *chart-pulled weighted* measure, that a `C^∞`-on-the-chart-target
-coefficient `c` multiplied by an `L²` function `w` has `eLpNorm` bounded by an
-explicit constant — the sup of `‖c‖` over the compact support set — times the
-`eLpNorm` of `w`.
-
-The differentiated chart-RHS numerator is `MemLp 2` (and is `eLpNorm`-bounded
-here) for the **plain Lebesgue volume restricted to the compact kernel**
-`chartPouKernel α`, the measure of the qualitative companion
-`eigenvectorChartRHSDiffNumerator_memLp_volume_compact`. The plain-`volume`
-analogue is recorded here: on a compact `K`, all of which carries the restricted
-measure, the pointwise bound `‖c y‖ ≤ C` for `y ∈ K` gives `‖c y * w y‖ ≤
-‖C • w y‖` everywhere on the support; monotonicity and homogeneity of `eLpNorm`
-finish. -/
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
@@ -172,7 +149,6 @@ private lemma eLpNorm_volume_restrict_contDiffOn_mul_le
           eLpNorm w 2 ((volume : Measure EuclN).restrict K) := by
   classical
   set μ : Measure EuclN := (volume : Measure EuclN).restrict K with hμ_def
-  -- The `C^∞` coefficient is bounded on the compact `K` by a nonnegative `C`.
   have hcontOn_K : ContinuousOn c K := hc.continuousOn.mono hK_in
   have hbdd : ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ K, ‖c y‖ ≤ C := by
     by_cases hK_empty : K = ∅
@@ -182,8 +158,6 @@ private lemma eLpNorm_volume_restrict_contDiffOn_mul_le
         fun y hy => (hC₀ ⟨y, hy, rfl⟩).trans (le_max_left _ _)⟩
   obtain ⟨C, hC_nn, hC_bd⟩ := hbdd
   refine ⟨C, hC_nn, ?_⟩
-  -- Pointwise almost-everywhere norm domination `‖c · w‖ ≤ ‖C • w‖`. The
-  -- restricted measure is supported in `K`, where `‖c y‖ ≤ C` holds.
   have h_dom : ∀ᵐ y ∂μ, ‖c y * w y‖ ≤ ‖(C : ℝ) • w y‖ := by
     rw [hμ_def, ae_restrict_iff' hK_meas]
     refine Filter.Eventually.of_forall (fun y hyK => ?_)
@@ -192,12 +166,9 @@ private lemma eLpNorm_volume_restrict_contDiffOn_mul_le
       rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg hC_nn]
     rw [hlhs, hrhs]
     exact mul_le_mul_of_nonneg_right (hC_bd y hyK) (norm_nonneg _)
-  -- Monotonicity of `eLpNorm` under the a.e. norm domination.
   have h_mono :
       eLpNorm (fun y => c y * w y) 2 μ ≤ eLpNorm (fun y => (C : ℝ) • w y) 2 μ :=
     eLpNorm_mono_ae (μ := μ) h_dom
-  -- Homogeneity of `eLpNorm` under scalar multiplication, with `‖C‖ₑ` rewritten
-  -- to `ENNReal.ofReal C` (valid since `C ≥ 0`).
   have h_smul :
       eLpNorm (fun y => (C : ℝ) • w y) 2 μ
         = ENNReal.ofReal C * eLpNorm w 2 μ := by
@@ -208,15 +179,6 @@ private lemma eLpNorm_volume_restrict_contDiffOn_mul_le
     eLpNorm (fun y => c y * w y) 2 μ
         ≤ eLpNorm (fun y => (C : ℝ) • w y) 2 μ := h_mono
     _ = ENNReal.ofReal C * eLpNorm w 2 μ := h_smul
-
-/-! ## A finite-sum aggregation lemma
-
-A finite indexed family of summands `F j`, each with `eLpNorm` bounded by
-`ENNReal.ofReal Cⱼ` times one *fixed* aggregate `ℝ≥0∞`-quantity `A`, has its
-summed `eLpNorm` bounded by `ENNReal.ofReal` of an explicit constant times `A`.
-The explicit constant is the sum of the per-summand constants times the
-cardinality of the index type; the triangle inequality `eLpNorm_sum_le` and the
-monotonicity of `ENNReal.ofReal` assemble it. -/
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
   [CompactSpace M] [I.Boundaryless] [T2Space M]
@@ -267,24 +229,6 @@ private lemma eLpNorm_sum_le_const_mul_aggregate
     _ = ENNReal.ofReal ((∑ j : ι, Cf j) * (Fintype.card ι : ℝ)) * A := by
         rw [h_cast]
 
-/-! ## The uniform-constant explicit-norm `eLpNorm` bound
-
-The headline `eigenvectorChartRHSDiffNumerator_eLpNorm_le` produces, per
-eigenbasis index `i`, a nonnegative constant `C`. A downstream bounded-operator
-argument over the whole eigenbasis needs the constant *uniform* — one `C`
-serving every `i`. The five per-layer constants are geometric — sup-norms of the
-`C^∞` chart-target coefficients (`weightedInvGramDerivOnEuclid` and its `fderiv`,
-`densityDerivOnEuclid`, `densityOnEuclid`) over the compact partition-of-unity
-kernel — and do not depend on `i`. The eigenbasis index enters only through the
-iterated-weak-partial *atoms* and the regularity hypotheses, never the constant.
-
-The eigenvector index `i` is **not** a section variable here, so each restatement
-carries its own `∀ i`. A `_uniform` statement cannot be derived from its per-`i`
-original (one cannot get `∃ C, ∀ i` from `∀ i, ∃ C`); each carries its own proof
-— the per-`i` proof with the constant hoisted before the `∀ i`. The genuine
-regularity hypotheses `h_iter`, `h_prev`, `h_prev_zero` move to top-level
-`∀ i`-uniform hypotheses. -/
-
 section MainBoundUniform
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
@@ -305,7 +249,6 @@ private lemma eLpNorm_volume_restrict_contDiffOn_mul_le_uniform
           eLpNorm w 2 ((volume : Measure EuclN).restrict K) := by
   classical
   set μ : Measure EuclN := (volume : Measure EuclN).restrict K with hμ_def
-  -- The `C^∞` coefficient is bounded on the compact `K` by a nonnegative `C`.
   have hcontOn_K : ContinuousOn c K := hc.continuousOn.mono hK_in
   have hbdd : ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ K, ‖c y‖ ≤ C := by
     by_cases hK_empty : K = ∅
@@ -315,7 +258,6 @@ private lemma eLpNorm_volume_restrict_contDiffOn_mul_le_uniform
         fun y hy => (hC₀ ⟨y, hy, rfl⟩).trans (le_max_left _ _)⟩
   obtain ⟨C, hC_nn, hC_bd⟩ := hbdd
   refine ⟨C, hC_nn, fun w => ?_⟩
-  -- Pointwise almost-everywhere norm domination `‖c · w‖ ≤ ‖C • w‖`.
   have h_dom : ∀ᵐ y ∂μ, ‖c y * w y‖ ≤ ‖(C : ℝ) • w y‖ := by
     rw [hμ_def, ae_restrict_iff' hK_meas]
     refine Filter.Eventually.of_forall (fun y hyK => ?_)
@@ -324,11 +266,9 @@ private lemma eLpNorm_volume_restrict_contDiffOn_mul_le_uniform
       rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg hC_nn]
     rw [hlhs, hrhs]
     exact mul_le_mul_of_nonneg_right (hC_bd y hyK) (norm_nonneg _)
-  -- Monotonicity of `eLpNorm` under the a.e. norm domination.
   have h_mono :
       eLpNorm (fun y => c y * w y) 2 μ ≤ eLpNorm (fun y => (C : ℝ) • w y) 2 μ :=
     eLpNorm_mono_ae (μ := μ) h_dom
-  -- Homogeneity of `eLpNorm` under scalar multiplication.
   have h_smul :
       eLpNorm (fun y => (C : ℝ) • w y) 2 μ
         = ENNReal.ofReal C * eLpNorm w 2 μ := by
@@ -397,16 +337,6 @@ end MainBoundUniform
 
 section SharpAtomBounds
 
-/-! ### Unconditional `MemLp` helpers
-
-The sharp variants require, per summand, the `MemLp 2` of layer atoms
-(iterated weak partials and chosen weak partials thereof) for the
-restricted-volume measure on a compact subset of the chart target. The
-iterated weak partial is unconditionally `MemLp 2` of the chart-target
-restricted volume (`eigenvectorChartIteratedPartial_memLp_volume`); the
-chosen weak partial of an arbitrary function is unconditionally `MemLp 2`
-by the `DeGiorgi.MemW1p` case split. -/
-
 omit [CompleteSpace E] in
 /-- The canonical chosen weak partial `chosenWeakPartial' 2 b w Ω` of an
 arbitrary function is `MemLp 2` of the volume restricted to any measurable
@@ -432,21 +362,6 @@ private lemma chosenWp_memLp_volume_restrict
   exact h_eq ▸ h_global.restrict K
 
 end SharpAtomBounds
-
-/-! ## Chart-locality-free twins
-
-The chart-locality-free (`_unconditional`) twins of every chart-atlas-carrying
-declaration above, re-keyed onto the chart-locality-free differentiated
-numerator `eigenvectorChartRHSDiffNumerator`, the chart-locality-
-free iterated weak partial `eigenvectorChartIteratedPartial`, and
-the chart-locality-free resolvent eigenbasis vector
-`tensorResolventEigenbasisVec (tensorResolventL2_isCompactOperator g r s) i`.
-Each twin's proof body transfers verbatim from its chart-atlas-carrying original,
-with the `m`-fold mixed weak partials and the eigenbasis vector re-keyed; the
-finite-sum aggregation lemmas `eLpNorm_volume_restrict_contDiffOn_mul_le`,
-`eLpNorm_sum_le_const_mul_aggregate`, `eLpNorm_volume_restrict_contDiffOn_mul_le_uniform`,
-`eLpNorm_sum_le_const_mul_aggregate_uniform`, and `chosenWp_memLp_volume_restrict`
-are atlas-free and shared. -/
 
 /-- The chart-locality-free finite aggregate of source norms controlling the
 differentiated chart-RHS numerator. Chart-locality-free twin of
@@ -572,8 +487,6 @@ private lemma eLpNorm_chosenWeakPartial_iteratedPartial_succ_le
   exact wkpNorm_chosenWeakPartial_le (d := Module.finrank ℝ E) 1 hΩ_open _ b
 
 end AtomBoundsUnconditional
-
-/-! ### Chart-locality-free per-layer `eLpNorm` bounds -/
 
 section LayerBoundsUnconditional
 
@@ -949,8 +862,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerE_eLpNorm_le
 
 end LayerBoundsUnconditional
 
-/-! ### The chart-locality-free headline explicit-norm `eLpNorm` bound -/
-
 section MainBoundUnconditional
 
 set_option linter.unusedVariables false in
@@ -1180,8 +1091,6 @@ theorem eigenvectorChartRHSDiffNumerator_eLpNorm_le
   rw [add_mul, add_mul, add_mul, add_mul]
 
 end MainBoundUnconditional
-
-/-! ### Chart-locality-free uniform-constant per-layer `eLpNorm` bounds -/
 
 section MainBoundUniformUnconditional
 
@@ -1810,8 +1719,6 @@ theorem eigenvectorChartRHSDiffNumerator_eLpNorm_le_uniform
 
 end MainBoundUniformUnconditional
 
-/-! ### Chart-locality-free sharp per-layer `eLpNorm` bounds -/
-
 section SharpAtomBoundsUnconditional
 
 /-- Chart-locality-free twin of `iter_memLp_volume_restrict`. -/
@@ -2295,8 +2202,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerE_eLpNorm_le_chartcpt
           rw [← mul_assoc, ← ENNReal.ofReal_mul hC₀_nn, mul_assoc C₀ CatomE]
 
 end SharpAtomBoundsUnconditional
-
-/-! ### Chart-locality-free sharp `eLpNorm` bound for the numerator -/
 
 section SharpMainBoundUnconditional
 

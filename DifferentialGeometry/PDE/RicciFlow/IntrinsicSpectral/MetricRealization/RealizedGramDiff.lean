@@ -68,15 +68,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-! ## Additivity / subtractivity of the extracted bilinear form in the tensor
-
-The extraction `ccTensorBilin` factors through `ℝ`-linear stages — the section
-evaluation `MixedSection.toMultilinearSection`, the model coercion
-`Tensor0SSpace.toModel`, and the inverse fibre isometry `bilinFormToModel.symm` —
-so it is additive (and subtractive) in the tensor section.  The committed
-`ccTensorBilinSymm_smul` records homogeneity; here we record the matching
-subtraction identity. -/
-
 /-- The underlying multilinear field `ccTensorMultilinear` is subtractive in the
 tensor section. -/
 theorem ccTensorMultilinear_sub (g : SmoothRiemannianMetric I M)
@@ -124,12 +115,6 @@ theorem ccTensorBilinSymm_sub (g : SmoothRiemannianMetric I M)
   simp only [ccTensorBilinSymm_apply, ccTensorBilin_sub]
   ring
 
-/-! ## The smooth representatives of two realizable elements
-
-On the joint validity domain we name the smooth representatives `Tₖ` of `uₖ` (the
-chart-locality-free smooth representatives chosen by `realizableAt`), so that the
-realized metric `realizeMetricAt g_bg uₖ` is fibrewise `g_bg + h_sym(Tₖ)`. -/
-
 /-- The smooth representative of a realizable element `u`, chosen via the finite
 support witness packaged in `realizableAt`. -/
 def realizableRepr (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
@@ -149,20 +134,8 @@ theorem realizeMetricAt_inner_eq_repr (g_bg : SmoothRiemannianMetric I M) {σ : 
         ccTensorBilinSymm (I := I) g_bg (realizableRepr (I := I) g_bg hu) x v w := by
   classical
   obtain ⟨hu_fs, δ', hδ'_lt, hδ'⟩ := id hu
-  -- The chosen smooth representative coincides with the one for any finite-support
-  -- witness (finite support is a proposition, so all witnesses give equal smooth
-  -- representatives by proof irrelevance of `hu.choose`).
   rw [realizeMetricAt_inner_of_realizable (I := I) g_bg u hu_fs hδ'_lt hδ' x v w]
-  -- `tensorHsBilinSymm u hu_fs = ccTensorBilinSymm g_bg (repr)` definitionally.
   rfl
-
-/-! ## The chart-Gram difference of two realized metrics
-
-The chart-Gram matrix entry of a metric `g` at `α`, `x` is
-`g.inner x (e_i^α x) (e_j^α x)` with `e_i^α x = chartBasisVecFiber α i x`.  For two
-realizable elements `u₁, u₂`, the chart-Gram difference of the realized metrics is
-therefore the symmetrized extracted form of the tensor difference `T₁ − T₂` on the
-chart frame. -/
 
 /-- **The chart-Gram difference of two realized metrics is the realized symmetric
 form of the tensor difference.**

@@ -95,8 +95,6 @@ open DifferentialGeometry.Analysis.Laplacian.ChosenThirdMixedPartialChartPushed
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -105,8 +103,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## The polymorphic data structure -/
 
 /-- The `m`-times-differentiated chart-bilinear data on `chartTargetEuclid α`
 for an element `u_h : H1Compl g`. The structure captures the polymorphic
@@ -154,14 +150,6 @@ structure IteratedDiffChartBilinearData
         densityOnEuclid (I := I) g α y * fChartEff y * ψ y
         ∂(volume : Measure EuclN)
 
-/-! ## Hypothesis-bearing abstract constructor
-
-The constructor `mk_from_hypotheses` takes the variational identity as an
-explicit hypothesis, together with `fChartEff` and its `L²` regularity. This
-is the engine of inductive proofs: the inductive step constructs an instance
-of `IteratedDiffChartBilinearData g α u_h (m+1)` from the instance at level
-`m` plus the once-differentiated Leibniz expansion. -/
-
 /-- Hypothesis-bearing abstract constructor for
 `IteratedDiffChartBilinearData`. Takes the direction multi-index, the
 effective `L²` source, its `MemLp 2` regularity on the chart-pulled weighted
@@ -200,21 +188,6 @@ def IteratedDiffChartBilinearData.mk_from_hypotheses
     fChartEff := fChartEff
     fChartEff_memLp_weighted := fChartEff_memLp_weighted
     m_diff_variational_identity := m_diff_variational_identity }
-
-/-! ## `m = 0` instance — base bilinear identity rewritten polymorphically
-
-For `u_h ∈ laplacianDomainPow g 2`, the chart-pushed POU-cut function lies in
-`MemW1p 2 (chartTargetEuclid α)`, so the chosen first weak partial
-`chartPushedChosenFirstPartial g α u_h i = chosenWeakPartial' 2 i
-(chartPushed POU α u_h.coeFn) Ω` is a genuine weak partial. The base bilinear
-identity's principal LHS uses `base.weak_partial i = chartPushedWeakPartialLp`,
-which agrees a.e. with `chartPushedChosenFirstPartial g α u_h i` on
-`vol.restrict chartTargetEuclid α` via
-`base_weak_partial_ae_eq_chartPushedChosenFirstPartial`. Likewise the
-base `u_chart = (chartPushedLpFromLp ...).coeFn` agrees a.e. with
-`chartPushed POU α u_h.coeFn` on `vol.restrict chartTargetEuclid α` via
-mutual absolute continuity between the weighted and plain measures on the
-chart target. -/
 
 namespace IteratedDiffChartBilinearData
 
@@ -277,12 +250,6 @@ private lemma base_u_chart_ae_eq_chartPushed
   have h_coeFn :=
     DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentityIntegralForm.chartPushedLpFromLp_coeFn
       (I := I) (M := M) g α (H1ComplToLp (I := I) (M := M) g u_h)
-  -- `h_coeFn`: ae on (chartPulledWeighted).restrict chartTarget.
-  -- Goal: ae on volume.restrict chartTarget.
-  -- Bridge via the absolute-continuity relation
-  --   volume.restrict chartTarget ≪ chartPulledWeighted.restrict chartTarget.
-  -- This relation holds because the density is strictly positive on the chart
-  -- target (lines 1469-1512 of `LaplacianDomainChartData.lean`).
   have h_meas : MeasurableSet
       (chartTargetEuclid (I := I) (M := M) α) :=
     (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
@@ -361,24 +328,11 @@ def ofBase
         (I := I) (M := M) g 1 hu_h
     set D := chartBilinearH1ComplData_of_laplacianDomain
       (I := I) (M := M) g α hu_h_lap with hD_def
-    -- Base bilinear identity:
     have h_base := D.variational_identity ψ hψ_smooth hψ_cs hψ_supp
-    -- Step 1: replace the LHS principal `D.weak_partial i` with
-    -- `chartPushedChosenFirstPartial g α u_h i` ae on `vol.restrict chartTarget`.
-    -- Step 2: replace the LHS mass `D.u_chart` with
-    -- `chartPushed POU α u_h.coeFn` ae on `vol.restrict chartTarget`.
-    -- Step 3: unfold `chosenMthMixedPartialChartPushedU` at `m = 0, 1` via
-    -- the compatibility lemmas.
     have h_wp_ae := base_weak_partial_ae_eq_chartPushedChosenFirstPartial_aux
       (I := I) (M := M) g α hu_h
     have h_u_ae := base_u_chart_ae_eq_chartPushed
       (I := I) (M := M) g α hu_h_lap
-    -- Rewrite the LHS principal of the base identity to use
-    -- `chartPushedChosenFirstPartial`.
-    -- First, rewrite the polymorphic LHS principal: at `m = 0, k = m + 1 = 1`,
-    -- `chosenMthMixedPartialChartPushedU 1 (Fin.cons i Fin.elim0)` equals
-    -- `chartPushedChosenFirstPartial g α u_h i` by
-    -- `chosenMthMixed_one_cons_eq_chartPushedChosenFirstPartial`.
     have h_principal_eq :
         ∫ y in chartTargetEuclid (I := I) (M := M) α,
           (∑ i : Fin (Module.finrank ℝ E),
@@ -396,9 +350,6 @@ def ofBase
                 (fderiv ℝ ψ y) (EuclideanSpace.single j 1))
           ∂(volume : Measure EuclN) := by
       refine MeasureTheory.integral_congr_ae ?_
-      -- We have `D.weak_partial i =ᵐ chartPushedChosenFirstPartial g α u_h i`
-      -- ae on `vol.restrict chartTarget`. We need ae-equality of the summed
-      -- integrands.
       have h_wp_all : ∀ i, (chartBilinearH1ComplData_of_laplacianDomain
             (I := I) (M := M) g α hu_h_lap).weak_partial i =ᵐ[
             (volume : Measure EuclN).restrict
@@ -406,7 +357,6 @@ def ofBase
           chartPushedChosenFirstPartial (I := I) (M := M) g α u_h i :=
         fun i => base_weak_partial_ae_eq_chartPushedChosenFirstPartial_aux
           (I := I) (M := M) g α hu_h i
-      -- Build the ae-statement for the integrand.
       have h_ae_eqs : ∀ i,
           ∀ᵐ y ∂((volume : Measure EuclN).restrict
               (chartTargetEuclid (I := I) (M := M) α)),
@@ -416,8 +366,6 @@ def ofBase
         intro i
         filter_upwards [h_wp_all i] with y hy
         exact hy.symm
-      -- Now we want a single ae-statement combining all `i`.
-      -- We use `ae_all_iff` for `Fin n` (finite).
       have h_all_ae :
           ∀ᵐ y ∂((volume : Measure EuclN).restrict
               (chartTargetEuclid (I := I) (M := M) α)),
@@ -434,7 +382,6 @@ def ofBase
       intro j _
       rw [chosenMthMixed_one_cons_eq_chartPushedChosenFirstPartial
         (I := I) (M := M) g α u_h i, hy i]
-    -- Rewrite the LHS mass of the polymorphic identity using ae-eq of u_chart.
     have h_mass_eq :
         ∫ y in chartTargetEuclid (I := I) (M := M) α,
           densityOnEuclid (I := I) g α y *
@@ -446,17 +393,13 @@ def ofBase
             D.u_chart y * ψ y
           ∂(volume : Measure EuclN) := by
       refine MeasureTheory.integral_congr_ae ?_
-      -- u_chart =ᵐ chartPushed POU u_h.coeFn ae.
       filter_upwards [h_u_ae] with y hy
       rw [chosenMthMixed_zero_elim0_eq_chartPushed]
       rw [hy]
-    -- Combine.
     rw [h_principal_eq, h_mass_eq]
     exact h_base
 
 end IteratedDiffChartBilinearData
-
-/-! ## `m = 1` instance — once-differentiated unconditional identity -/
 
 namespace IteratedDiffChartBilinearData
 
@@ -471,10 +414,8 @@ private lemma chosenMthMixed_two_cons_const_eq_chosenSecond
         (Fin.cons i (fun _ : Fin 1 => l)) =
       chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l := by
   apply chosenMthMixedPartialChartPushedU_two_eq_chosenSecondPartialChartPushedU
-  · -- idx 0 = i: definitional via `Fin.cons` ↦ `Fin.cases`.
-    rfl
-  · -- idx 1 = l: `Fin.cons i (fun _ => l) 1` reduces to `(fun _ => l) 0 = l`.
-    rfl
+  · rfl
+  · rfl
 
 /-- The polymorphic m=1 LHS mass: `chosenMthMixedPartialChartPushedU g α u_h 1
 (fun _ => l)` equals `chartPushedChosenFirstPartial g α u_h l`. -/
@@ -507,18 +448,8 @@ def ofDiff
   m_diff_variational_identity := by
     classical
     intro ψ hψ_smooth hψ_cs hψ_supp
-    -- Once-differentiated unconditional identity.
     have h_once := derived_variational_identity_holds
       (I := I) (M := M) g α l hu_h hψ_smooth hψ_cs hψ_supp
-    -- `h_once` form:
-    --   ∫ Σ a · chosenSecondPartialChartPushedU(i, l) · ∂_j ψ
-    --     + ∫ density · D_base.weak_partial l · ψ
-    --   = ∫ density · fChartEff(l) · ψ
-    -- Rewrite LHS principal: chosenMthMixed 2 (Fin.cons i (fun _ => l))
-    --   = chosenSecondPartialChartPushedU i l.
-    -- Rewrite LHS mass: chosenMthMixed 1 (fun _ => l)
-    --   = chartPushedChosenFirstPartial l, then transfer to D_base.weak_partial l
-    --   via ae-equality on vol.restrict chartTarget.
     have h_principal_eq :
         ∫ y in chartTargetEuclid (I := I) (M := M) α,
           (∑ i : Fin (Module.finrank ℝ E),
@@ -544,9 +475,6 @@ def ofDiff
       intro j _
       rw [chosenMthMixed_two_cons_const_eq_chosenSecond
         (I := I) (M := M) g α u_h i l]
-    -- For the LHS mass rewrite, we need to bridge from
-    -- `chartPushedChosenFirstPartial l` to `D_base.weak_partial l` via
-    -- ae-equality on `vol.restrict chartTarget`.
     have h_wp_ae :=
       base_weak_partial_ae_eq_chartPushedChosenFirstPartial_aux
         (I := I) (M := M) g α hu_h l
@@ -572,8 +500,6 @@ def ofDiff
 
 end IteratedDiffChartBilinearData
 
-/-! ## `m = 2` instance — twice-differentiated unconditional identity -/
-
 namespace IteratedDiffChartBilinearData
 
 /-- Pointwise rewrite for the polymorphic m=2 LHS principal: at `m+1 = 3` and
@@ -587,12 +513,9 @@ private lemma chosenMthMixed_three_cons_two_eq_chosenThird
         (Fin.cons i (![l₁, l₂])) =
       chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l₁ l₂ := by
   apply chosenMthMixedPartialChartPushedU_three_eq_chosenThirdMixedPartialChartPushedU
-  · -- idx 0 = i: definitional.
-    rfl
-  · -- idx 1 = l₁: `Fin.cons i ![l₁,l₂] 1 = ![l₁,l₂] 0 = l₁`. Definitional.
-    rfl
-  · -- idx 2 = l₂: `Fin.cons i ![l₁,l₂] 2 = ![l₁,l₂] 1 = l₂`. Definitional.
-    rfl
+  · rfl
+  · rfl
+  · rfl
 
 /-- Pointwise rewrite for the polymorphic m=2 LHS mass: `chosenMthMixed 2
 ![l₁, l₂]` coincides with `chosenSecondPartialChartPushedU g α u_h l₁ l₂`. -/
@@ -631,23 +554,15 @@ def ofDiffTwice
   m_diff_variational_identity := by
     classical
     intro ψ hψ_smooth hψ_cs hψ_supp
-    -- Discharge the chart-`H³` conjunct unconditionally.
     have h_base_f_chart_memWkp22 :=
       base_f_chart_memWkp_two_two
         (I := I) (M := M) g α hu_h
     have h_chosenFChartDeriv_memW1p :=
       chosenFChartDeriv_memW1p_truly_unconditional
         (I := I) (M := M) g α hu_h l₁ h_base_f_chart_memWkp22
-    -- Twice-differentiated unconditional identity.
     have h_twice := twice_differentiated_variational_identity_holds
       (I := I) (M := M) g α hu_h l₁ l₂ h_chosenFChartDeriv_memW1p
       hψ_smooth hψ_cs hψ_supp
-    -- `h_twice` form:
-    --   ∫ Σ a · chosenThirdMixedPartialChartPushedU(i, l₁, l₂) · ∂_j ψ
-    --     + ∫ density · chosenSecondPartialChartPushedU(l₁, l₂) · ψ
-    --   = ∫ density · fChartEffTwice(l₁, l₂) · ψ.
-    -- Rewrite LHS principal via `chosenMthMixed_three_cons_two_eq_chosenThird`.
-    -- Rewrite LHS mass via `chosenMthMixed_two_pair_eq_chosenSecond`.
     have h_principal_eq :
         ∫ y in chartTargetEuclid (I := I) (M := M) α,
           (∑ i : Fin (Module.finrank ℝ E),

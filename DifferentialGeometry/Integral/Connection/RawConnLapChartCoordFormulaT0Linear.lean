@@ -51,8 +51,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Pre-extracted families of `T₀`-independent witnesses from sub.1 and sub.5. -/
-
 /-- Principal-block `GlobalCorr` family from sub.1, witnessing the `T₀`-independent
 smooth coefficient of `∂_m raw_T₀^{I',J'}` in the inverse-Gram-weighted bundled
 second cov-deriv. -/
@@ -240,8 +238,6 @@ private lemma chartFrameTraceΓCorrection_pointwise
         (chartFrameTraceΓCorrection_eq_T₀_linear
           (I := I) (M := M) g r s α Idx Jdx))).2.2 T₀ hb
 
-/-! ## Pulled-back smooth families. -/
-
 /-- Pulled-back inverse Gram matrix entry on the Euclidean chart target. -/
 private noncomputable def invGramPull
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -292,8 +288,6 @@ private lemma chartFrameCoordDirDerivPull_contDiffOn
       (chartTargetEuclid (I := I) (M := M) α) :=
   chartFrameNormGlobalSmoothCoordMatrix_dirDeriv_pullback_contDiffOn_chartTarget
     (I := I) (M := M) g α i k l
-
-/-! ## Pointwise pullback identification at chart-Euclidean image of `b`. -/
 
 private lemma invGramPull_at_b_eq
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -350,8 +344,6 @@ private lemma chartFrameCoordDirDerivPull_at_b_eq
     (extChartAt I α).left_inv hb_src
   unfold chartFrameCoordDirDerivPull
   rw [hsymm, hleft_inv]
-
-/-! ## The headline coefficients. -/
 
 /-- Principal `C_2` coefficient = pulled-back inverse Gram. -/
 private noncomputable def C_2_principal
@@ -470,8 +462,6 @@ private lemma C_0_zeroth_contDiffOn
   · exact chartFrameTraceΓ_Coeff_0_contDiffOn
       (I := I) (M := M) g r s α Idx Jdx I' J'
 
-/-! ## The headline. -/
-
 /-- **Full T₀-linear chart-coordinate formula for the chart-α `(Idx, Jdx)` raw
 component of `rawTensorConnLap T₀` at a chart-α POU-tsupport ∩ Levi-Civita
 good-set point `b`.**
@@ -537,7 +527,6 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
   set y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) :=
     (toEuclidean (E := E)) ((extChartAt I α) b) with hy_def
   have hb_good : b ∈ chartLeviCivitaGoodSet (I := I) α := hb.2
-  -- Set abbreviations for the recurring chart-Euclidean partial / raw functions.
   set P : (Fin r → Fin (Module.finrank ℝ E)) →
           (Fin s → Fin (Module.finrank ℝ E)) →
           Fin (Module.finrank ℝ E) → ℝ :=
@@ -599,13 +588,10 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
     fun I' J' =>
       chartFrameTraceΓ_Coeff_0 (I := I) (M := M) g r s α Idx Jdx I' J' y
     with hΓ0_def
-  -- Step 1: invoke predecessor identity.
   rw [chartPushed_rawConnLap_chart_α_proj_eq_chartInvGram_secondCovDeriv_plus_corrections
     (I := I) (M := M) g r s α T₀ Idx Jdx (b := b) hb]
-  -- Step 2: substitute Γ correction (sub.5).
   rw [chartFrameTraceΓCorrection_pointwise
     (I := I) (M := M) g r s α Idx Jdx T₀ hb_good]
-  -- Step 3: expand the chart-α inverse-Gram principal sum (sub.1).
   have hPrincipal_unfold :
       chartInvGramPrincipalSum (I := I) (M := M) g r s α T₀ Idx Jdx b =
         ∑ k, ∑ l,
@@ -618,11 +604,8 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
       (I := I) (M := M) g r s α Idx Jdx k l T₀ hb_good]
     rw [← invGramPull_at_b_eq (I := I) (M := M) g α k l hb_good]
   rw [hPrincipal_unfold]
-  -- Step 4: expand Leibniz remainder (expand.3).
   rw [chartLeibnizRemainder_eq_T₀_linear
     (I := I) (M := M) g r s α T₀ Idx Jdx hb]
-  -- Substitute `chartFrameNormGlobalSmoothCoordMatrix` and `extDerivFun` at `b`
-  -- by their `chartFrameCoordPull` and `chartFrameCoordDirDerivPull` values at `y`.
   have hLeibnizUnfold :
       (∑ i, ∑ l, ∑ k,
           chartFrameNormGlobalSmoothCoordMatrix (I := I) (M := M) g α i l b *
@@ -661,7 +644,6 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
         DCF i k l from
       (chartFrameCoordDirDerivPull_at_b_eq (I := I) (M := M) g α i k l hb_good).symm]
   rw [hLeibnizUnfold]
-  -- Now rewrite the inner Σ_p as Σ_{I'} Σ_{J'} via sum_product'.
   have hPair : ∀ (k : Fin (Module.finrank ℝ E)),
       (∑ p : (Fin r → Fin (Module.finrank ℝ E)) ×
               (Fin s → Fin (Module.finrank ℝ E)),
@@ -696,25 +678,6 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [hPair k]
   rw [hLeibniz_pair']
-  -- Now the LHS is fully expressed in abbreviations. The goal becomes:
-  -- (((Σ_{k,l} IG · (PP + Σ GC·P + Σ GC0·R)) + (Σ_{i,l,k} CF · DCF · (P_IJ + Σ_{I',J'} LC·R)))
-  --   - (Σ_{I',J',m} Γ1 · P + Σ_{I',J'} Γ0 · R))
-  -- = Σ_{k,l} (C_2 k l y) · PP k l + Σ_{I',J',m} (C_1 I' J' m y) · P I' J' m
-  --   + Σ_{I',J'} (C_0 I' J' y) · R I' J'.
-  --
-  -- Unfold the C_? coefficients on the RHS and reduce to a ring identity by
-  -- substituting suitable Σ-rearrangements.
-  -- The key bijection: write each side in fully distributed form with Σ_{I',J',m}
-  -- as outer indices, and verify coefficients match termwise.
-  --
-  -- Goal: All five blocks on the LHS combine to match the three blocks on the RHS.
-  -- We perform a final algebraic identification via `Finset.sum_*` rewrites
-  -- followed by a single `linarith`-style closure.
-  --
-  -- The strategy: show each RHS C_2/C_1/C_0-block matches a corresponding sum on
-  -- the LHS, leaving only a final `ring` step.
-  -- ------------------------------------------------------------------------
-  -- Match the C_2 block: C_2 k l y * PP k l = IG k l * PP k l.
   have hC2_RHS :
       (∑ k, ∑ l,
           C_2_principal (I := I) (M := M) g α k l y * PP k l) =
@@ -722,8 +685,6 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
     refine Finset.sum_congr rfl (fun k _ => ?_)
     refine Finset.sum_congr rfl (fun l _ => ?_)
     rfl
-  -- Match the C_1 block: distribute C_1's three pieces over `* P I' J' m`,
-  -- yielding three separate Σ over (I', J', m).
   have hC1_RHS :
       (∑ I' : Fin r → Fin (Module.finrank ℝ E),
         ∑ J' : Fin s → Fin (Module.finrank ℝ E),
@@ -764,7 +725,6 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
       ring
     rw [hStep1]
     simp only [Finset.sum_sub_distrib, Finset.sum_add_distrib]
-  -- Match the C_0 block:
   have hC0_RHS :
       (∑ I' : Fin r → Fin (Module.finrank ℝ E),
         ∑ J' : Fin s → Fin (Module.finrank ℝ E),
@@ -793,9 +753,6 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
     rw [hStep1]
     simp only [Finset.sum_sub_distrib, Finset.sum_add_distrib]
   rw [hC2_RHS, hC1_RHS, hC0_RHS]
-  -- The Γ blocks on both sides match directly (LHS has -Γ-block from sub.5, RHS
-  -- has -Γ block as the third C_1 / C_0 contribution).
-  -- The principal IG·GC and IG·GC0 blocks need a Σ-swap to match the LHS form.
   have hSwap_GC :
       (∑ k, ∑ l,
           IG k l *
@@ -805,7 +762,6 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
         ∑ I' : Fin r → Fin (Module.finrank ℝ E),
           ∑ J' : Fin s → Fin (Module.finrank ℝ E),
           ∑ m, (∑ k, ∑ l, IG k l * GC k l I' J' m) * P I' J' m := by
-    -- Distribute and reorder.
     have hDist :
         (∑ k, ∑ l,
             IG k l *
@@ -823,8 +779,6 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
       refine Finset.sum_congr rfl (fun J' _ => ?_)
       rw [Finset.mul_sum]
     rw [hDist]
-    -- Reorder Σ_k Σ_l Σ_{I'} Σ_{J'} Σ_m → Σ_{I'} Σ_{J'} Σ_m Σ_k Σ_l via repeated sum_comm.
-    -- Use the helper from FinsetSumSwapLib.
     rw [show
         (∑ k, ∑ l, ∑ I' : Fin r → Fin (Module.finrank ℝ E),
           ∑ J' : Fin s → Fin (Module.finrank ℝ E), ∑ m,
@@ -840,12 +794,6 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
       rw [Finset.mul_sum]
       refine Finset.sum_congr rfl (fun J' _ => ?_)
       rw [Finset.mul_sum]]
-    -- Use Σ-swap lib `Finset.sum_mul_inner_triple_sum_swap` with K = L = Fin n,
-    -- I = (Fin r → Fin n), J = (Fin s → Fin n), M = Fin n,
-    -- A := IG, B := GC k l (curry), X := P. But IG depends on (k,l) so direct
-    -- application doesn't fit. We do the swap manually with `Finset.sum_comm`.
-    --
-    -- Approach: bring Σ_{I',J',m} outside Σ_{k,l}. Use four sum_comm swaps.
     have h1 :
         (∑ k, ∑ l, IG k l *
             ∑ I' : Fin r → Fin (Module.finrank ℝ E),
@@ -862,7 +810,6 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
       refine Finset.sum_congr rfl (fun J' _ => ?_)
       rw [Finset.mul_sum]
     rw [h1]
-    -- Now do four sum_comm steps to bring (I',J',m) outermost.
     rw [show
         (∑ k, ∑ l, ∑ I' : Fin r → Fin (Module.finrank ℝ E),
           ∑ J' : Fin s → Fin (Module.finrank ℝ E),
@@ -892,18 +839,14 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
             ∑ k, ∑ l, ∑ m, IG k l * (GC k l I' J' m * P I' J' m) from by
       refine Finset.sum_congr rfl (fun I' _ => ?_)
       rw [Finset.sum_comm]]
-    -- Bring Σ_m outermost inside Σ_{I'} Σ_{J'}.
     refine Finset.sum_congr rfl (fun I' _ => ?_)
     refine Finset.sum_congr rfl (fun J' _ => ?_)
-    -- Σ_k Σ_l Σ_m IG · (GC · P) = Σ_m (Σ_k Σ_l IG · GC) · P.
-    -- Step a: swap inner Σ_l Σ_m (inside Σ_k) → Σ_k Σ_m Σ_l.
     have ha :
         (∑ k, ∑ l, ∑ m, IG k l * (GC k l I' J' m * P I' J' m)) =
         ∑ k, ∑ m, ∑ l, IG k l * (GC k l I' J' m * P I' J' m) := by
       refine Finset.sum_congr rfl (fun k _ => ?_)
       rw [Finset.sum_comm]
     rw [ha]
-    -- Step b: swap outer Σ_k Σ_m → Σ_m Σ_k.
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl (fun m _ => ?_)
     rw [Finset.sum_mul]
@@ -971,9 +914,6 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
     rw [Finset.sum_mul]
     refine Finset.sum_congr rfl (fun l _ => ?_)
     ring
-  -- Match the Leibniz block to the RHS.
-  -- LHS Leibniz block: Σ_i Σ_l Σ_k CF·DCF · (P_{Idx,Jdx,k} + Σ_{I',J'} LC·R).
-  -- Distribute and split.
   have hLeib_split :
       (∑ i, ∑ l, ∑ k,
           CF i l * DCF i k l *
@@ -994,8 +934,6 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
     refine Finset.sum_congr rfl (fun k _ => ?_)
     ring
   rw [hLeib_split]
-  -- Now match the Leibniz principal block (∂_k raw^{IJ}) with the RHS C_1 Leibniz
-  -- contribution: Σ_{I',J',m} (if (I',J')=(Idx,Jdx) then Σ_{i,l} CF·DCF else 0) · P.
   have hLeib_partial_collapse :
       (∑ I' : Fin r → Fin (Module.finrank ℝ E),
         ∑ J' : Fin s → Fin (Module.finrank ℝ E),
@@ -1017,11 +955,9 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
       refine Finset.sum_eq_zero (fun m _ => ?_)
       simp [hIne]
     · intro hI; exact absurd (Finset.mem_univ _) hI
-  -- Show: Σ_i Σ_l Σ_k CF·DCF · P_{Idx,Jdx,k} = Σ_k (Σ_i Σ_l CF·DCF) · P_{Idx,Jdx,k}.
   have hLeib_partial_factor :
       (∑ i, ∑ l, ∑ k, CF i l * DCF i k l * P Idx Jdx k) =
       ∑ k, (∑ i, ∑ l, CF i l * DCF i k l) * P Idx Jdx k := by
-    -- Bring Σ_k to outer.
     have hcomm1 :
         (∑ i, ∑ l, ∑ k, CF i l * DCF i k l * P Idx Jdx k) =
         ∑ i, ∑ k, ∑ l, CF i l * DCF i k l * P Idx Jdx k := by
@@ -1029,13 +965,10 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
       rw [Finset.sum_comm]
     rw [hcomm1]
     rw [Finset.sum_comm]
-    -- Currently: ∑_k ∑_i ∑_l CF · DCF · P. Move CF·DCF · into (Σ_i Σ_l).
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [Finset.sum_mul]
     refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [Finset.sum_mul]
-  -- Match the Leibniz zeroth block with the RHS C_0 Leibniz contribution:
-  -- Σ_i Σ_l Σ_k CF·DCF · (Σ_{I',J'} LC·R) = Σ_{I',J'} (Σ_i Σ_l Σ_k CF·DCF·LC) · R.
   have hLeib_zeroth_match :
       (∑ i, ∑ l, ∑ k, CF i l * DCF i k l *
           ∑ I' : Fin r → Fin (Module.finrank ℝ E),
@@ -1044,8 +977,6 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
       ∑ I' : Fin r → Fin (Module.finrank ℝ E),
         ∑ J' : Fin s → Fin (Module.finrank ℝ E),
           (∑ i, ∑ l, ∑ k, CF i l * DCF i k l * LC k I' J') * R I' J' := by
-    -- Strategy: distribute everything, then collect (I', J') outside.
-    -- LHS = Σ_i Σ_l Σ_k Σ_{I'} Σ_{J'} CF·DCF·LC·R.
     have hL :
         (∑ i, ∑ l, ∑ k, CF i l * DCF i k l *
             ∑ I' : Fin r → Fin (Module.finrank ℝ E),
@@ -1063,7 +994,6 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
       refine Finset.sum_congr rfl (fun J' _ => ?_)
       ring
     rw [hL]
-    -- RHS = Σ_{I'} Σ_{J'} (Σ_i Σ_l Σ_k CF·DCF·LC) · R = Σ_{I'} Σ_{J'} Σ_i Σ_l Σ_k CF·DCF·LC·R.
     have hR :
         (∑ I' : Fin r → Fin (Module.finrank ℝ E),
           ∑ J' : Fin s → Fin (Module.finrank ℝ E),
@@ -1079,9 +1009,6 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
       refine Finset.sum_congr rfl (fun l _ => ?_)
       rw [Finset.sum_mul]
     rw [hR]
-    -- Now both sides are equal up to reordering: 5 nested sums Σ_i Σ_l Σ_k Σ_{I'} Σ_{J'}
-    -- vs Σ_{I'} Σ_{J'} Σ_i Σ_l Σ_k. Reorder via Finset.sum_comm steps.
-    -- Step 1: Σ_i Σ_l Σ_k Σ_{I'} Σ_{J'} → Σ_i Σ_l Σ_{I'} Σ_k Σ_{J'}.
     have hS1 :
         (∑ i, ∑ l, ∑ k, ∑ I' : Fin r → Fin (Module.finrank ℝ E),
           ∑ J' : Fin s → Fin (Module.finrank ℝ E),
@@ -1093,7 +1020,6 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
       refine Finset.sum_congr rfl (fun l _ => ?_)
       rw [Finset.sum_comm]
     rw [hS1]
-    -- Step 2: Σ_i Σ_l Σ_{I'} → Σ_i Σ_{I'} Σ_l.
     have hS2 :
         (∑ i, ∑ l, ∑ I' : Fin r → Fin (Module.finrank ℝ E),
           ∑ k, ∑ J' : Fin s → Fin (Module.finrank ℝ E),
@@ -1104,11 +1030,8 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
       refine Finset.sum_congr rfl (fun i _ => ?_)
       rw [Finset.sum_comm]
     rw [hS2]
-    -- Step 3: Σ_i Σ_{I'} → Σ_{I'} Σ_i.
     rw [Finset.sum_comm]
-    -- Step 4: Now Σ_{I'} Σ_i Σ_l Σ_k Σ_{J'} → Σ_{I'} Σ_{J'} Σ_i Σ_l Σ_k.
     refine Finset.sum_congr rfl (fun I' _ => ?_)
-    -- Bring Σ_{J'} to outermost: Σ_i Σ_l Σ_k Σ_{J'} = Σ_{J'} Σ_i Σ_l Σ_k.
     have hT1 :
         (∑ i, ∑ l, ∑ k, ∑ J' : Fin s → Fin (Module.finrank ℝ E),
           CF i l * DCF i k l * LC k I' J' * R I' J') =
@@ -1127,7 +1050,6 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
       rw [Finset.sum_comm]
     rw [hT2]
     rw [Finset.sum_comm]
-  -- Distribute the principal sum.
   have hPrincipal_distrib :
       (∑ k, ∑ l,
           IG k l * (PP k l + (∑ I', ∑ J', ∑ m, GC k l I' J' m * P I' J' m)
@@ -1146,11 +1068,8 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
     refine Finset.sum_congr rfl (fun l _ => ?_)
     ring
   rw [hPrincipal_distrib]
-  -- Apply the swap identities.
   rw [hSwap_GC, hSwap_GC0]
-  -- Substitute the Leibniz partial / zeroth matches.
   rw [hLeib_partial_collapse, hLeib_partial_factor.symm, hLeib_zeroth_match]
-  -- The goal is now a ring identity over scalars.
   ring
 
 section

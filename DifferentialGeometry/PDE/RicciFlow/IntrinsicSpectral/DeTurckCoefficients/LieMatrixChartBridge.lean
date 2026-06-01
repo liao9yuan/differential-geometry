@@ -76,12 +76,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless]
 
-/-! ## The chart component as a model-basis coordinate of the trivialised value
-
-On the trivialization base set, the `k`-th chart component `chartCoeff α X k x` is
-the `k`-th model-basis coordinate of the trivialised section value
-`trivToE α x (X x) = (triv ⟨x, X x⟩).2`. -/
-
 /-- **The chart component is the model-basis coordinate of the trivialised value.**
 On the trivialization base set at `α`, `chartCoeff α X k x` equals the `k`-th
 `chartModelBasis E`-coordinate of `trivToE α x (X x)`.  The continuous-linear
@@ -96,16 +90,9 @@ lemma chartCoeff_eq_repr_trivToE (α : M)
       ((chartModelBasis E).repr (trivToE (I := I) α x (X x))) k := by
   rw [chartCoeff_def]
   congr 1
-  -- `trivToE α x (X x) = (triv ⟨x, X x⟩).2` on the base set.
   rw [trivToE,
     (trivializationAt E (TangentSpace I) α).continuousLinearMapAt_apply ℝ,
     (trivializationAt E (TangentSpace I) α).coe_linearMapAt_of_mem hx]
-
-/-! ## The bundled DeTurck-VF chart component equals the textbook component
-
-Expanding the bundled DeTurck vector field `deTurckVF g g_bg` in the chart-`α`
-coordinate frame and extracting the `k`-th model-basis coordinate produces the
-textbook component function `chartDeTurckVFComp g g_bg α k (ϕ_α x)`. -/
 
 /-- **The bundled DeTurck-VF chart component equals the textbook component
 function.**  On `chartLeviCivitaGoodSet α`,
@@ -125,17 +112,11 @@ theorem chartCoeff_deTurckVF_eq_chartDeTurckVFComp
   classical
   have hx_base : x ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hx
-  -- Rewrite the chart component as a model-basis coordinate of the trivialised value.
   rw [chartCoeff_eq_repr_trivToE (I := I) α (deTurckVF (I := I) g g_bg) k hx_base]
-  -- Expand the bundled DeTurck vector field in the chart-`α` coordinate frame.
   rw [deTurckVF_apply_eq_chartDeTurckVFComp_sum (I := I) g g_bg α hx]
-  -- `trivToE α x` is linear, so it distributes over the finite sum and the scalars.
   rw [map_sum]
-  -- The repr is a linear map; push it through the sum and the scalars too.
   rw [map_sum]
   simp only [Finsupp.coe_finset_sum, Finset.sum_apply]
-  -- Each `chartBasisVecFiber α p x` maps under `trivToE α x` to the model basis vector
-  -- `(chartModelBasis E) p`, whose `k`-th repr coordinate is `δ_{p,k}`.
   have hbasis : ∀ p : Fin (Module.finrank ℝ E),
       ((chartModelBasis E).repr (trivToE (I := I) α x
           (chartDeTurckVFComp (I := I) g g_bg α p (extChartAt I α x) •
@@ -144,7 +125,6 @@ theorem chartCoeff_deTurckVF_eq_chartDeTurckVFComp
           else 0) := by
     intro p
     rw [map_smul]
-    -- `trivToE α x (chartBasisVecFiber α p x) = (chartModelBasis E) p` on the base set.
     have htriv : trivToE (I := I) α x (chartBasisVecFiber (I := I) α p x) =
         (chartModelBasis E) p := by
       have : chartBasisVecFiber (I := I) α p x =
@@ -159,13 +139,6 @@ theorem chartCoeff_deTurckVF_eq_chartDeTurckVFComp
   rw [Finset.sum_ite_eq' Finset.univ k
     (fun p => chartDeTurckVFComp (I := I) g g_bg α p (extChartAt I α x))]
   rw [if_pos (Finset.mem_univ k)]
-
-/-! ## The two component functions agree on the chart image of the good set
-
-The chart-pulled-back component function `chartCoeffOnE α (deTurckVF g g_bg) k`
-agrees with the textbook function `chartDeTurckVFComp g g_bg α k` on the (open)
-chart image of the good set, hence their Fréchet partial derivatives at the chart
-image of a good-set point coincide. -/
 
 /-- **The two DeTurck-VF chart functions agree on the chart image of the good set.**
 For every `y ∈ (extChartAt I α) '' chartLeviCivitaGoodSet α`,
@@ -183,7 +156,6 @@ theorem chartCoeffOnE_deTurckVF_eqOn_goodSet_image
   rintro y ⟨b, hb_good, rfl⟩
   have hb_src : b ∈ (extChartAt I α).source :=
     chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hb_good
-  -- Unfold the chart-pulled component and apply the chart-inverse round-trip.
   rw [chartCoeffOnE, (extChartAt I α).left_inv hb_src]
   exact chartCoeff_deTurckVF_eq_chartDeTurckVFComp (I := I) g g_bg α k hb_good
 
@@ -200,24 +172,16 @@ theorem partialDeriv_chartCoeffOnE_deTurckVF_eq
         (chartCoeffOnE (I := I) α (deTurckVF (I := I) g g_bg) k) (extChartAt I α x) =
       partialDeriv (E := E) m
         (chartDeTurckVFComp (I := I) g g_bg α k) (extChartAt I α x) := by
-  -- The chart image of the good set is open and contains `ϕ_α x`.
   have hU_open : IsOpen ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) :=
     chartLeviCivitaGoodSet_image_isOpen (I := I) α
   have hx_mem : extChartAt I α x ∈
       (extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α := ⟨x, hx, rfl⟩
-  -- The two functions agree eventually near `ϕ_α x`.
   have heqOn := chartCoeffOnE_deTurckVF_eqOn_goodSet_image (I := I) g g_bg α k
   have heventually :
       chartCoeffOnE (I := I) α (deTurckVF (I := I) g g_bg) k =ᶠ[𝓝 (extChartAt I α x)]
         chartDeTurckVFComp (I := I) g g_bg α k :=
     heqOn.eventuallyEq_of_mem (hU_open.mem_nhds hx_mem)
-  -- Partial derivatives are determined by the Fréchet derivative, which is local.
   rw [partialDeriv, partialDeriv, heventually.fderiv_eq]
-
-/-! ## The headline Lie matrix chart bridge
-
-Assembling the three component identities term by term in the explicit coordinate
-formula `chartLieDerivMetricMatrix_def` / `chartLieDeTurckComp_def`. -/
 
 /-- **The Cartan-formula Lie matrix equals the textbook Christoffel Lie–DeTurck
 carrier.**  For the DeTurck vector field `W = deTurckVF g g_bg` and a point `x` in
@@ -242,25 +206,19 @@ theorem chartLieDerivMetricMatrix_deTurckVF_eq_chartLieDeTurckComp
   classical
   have hx_src : x ∈ (extChartAt I α).source :=
     chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hx
-  -- Gram matrix matches the pulled-back Gram density at `ϕ_α x`.
   have hgram : ∀ a b : Fin (Module.finrank ℝ E),
       chartGramMatrix (I := I) g α x a b =
         chartGramOnE (I := I) g α a b (extChartAt I α x) := by
     intro a b
     rw [chartGramOnE, (extChartAt I α).left_inv hx_src]
-  -- Unfold both sides to the explicit coordinate formula.
   rw [chartLieDerivMetricMatrix_def, chartLieDeTurckComp_def]
-  -- Match the three groups term by term.
   refine congr_arg₂ (· + ·) (congr_arg₂ (· + ·) ?_ ?_) ?_
-  · -- Convective group: `∑ k, W^k ∂_k g_{ij}`.
-    refine Finset.sum_congr rfl (fun k _ => ?_)
+  · refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [chartCoeff_deTurckVF_eq_chartDeTurckVFComp (I := I) g g_bg α k hx]
-  · -- First deformation group: `∑ k, g_{kj} ∂_i W^k`.
-    refine Finset.sum_congr rfl (fun k _ => ?_)
+  · refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [hgram k j,
       partialDeriv_chartCoeffOnE_deTurckVF_eq (I := I) g g_bg α i k hx]
-  · -- Second deformation group: `∑ k, g_{ik} ∂_j W^k`.
-    refine Finset.sum_congr rfl (fun k _ => ?_)
+  · refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [hgram i k,
       partialDeriv_chartCoeffOnE_deTurckVF_eq (I := I) g g_bg α j k hx]
 

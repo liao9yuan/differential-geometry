@@ -136,9 +136,6 @@ theorem manifoldFlowFamily_of_regular
         Φ_fam 0 = Diffeomorph.refl I M ∞ ∧
         (∀ x : M, Φ 0 x = x) ∧
         (∀ t : ℝ, 0 < t → t < T → ∀ x : M, Φ_fam t x = Φ t x) :=
-  -- Wire `chartLocalPicardData_of_regular` into the chart-cover assembly: the
-  -- per-base-point Picard data consumed by `manifoldFlowFamily_exists` is the
-  -- data *produced* from the regularity predicate, for `X` and for `-X`.
   manifoldFlowFamily_exists X
     (fun α => chartLocalPicardData_of_regular X hReg α)
     (fun α => chartLocalPicardData_of_regular (fun t x => -(X t x)) hRegNeg α)

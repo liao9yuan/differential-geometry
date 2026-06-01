@@ -104,8 +104,6 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplH3
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -114,11 +112,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## The first-order conjunct: `MemW1p 2` of the chart-pushed function
-
-This is unconditional from `u_h ∈ laplacianDomainPow g 2`, by extracting
-the `MemW1p 2` factor from the chart-`H²` membership. -/
 
 /-- The canonical chart-pushed function of `u_h ∈ laplacianDomainPow g 2`
 lies in `MemW1p 2 (chartTargetEuclid α)` unconditionally. This is the
@@ -138,17 +131,10 @@ theorem chartPushed_memW1p_two_of_laplacianDomainPow_two
           Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ))
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := by
-  -- `MemWkp 2 2 ⇒ MemW1p 2`.
   have h_memWkp22 :=
     DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.laplacianDomainPow_two_chartPushed_memWkp_two_two
       (I := I) (M := M) g α hu_h
   exact h_memWkp22.memW1p
-
-/-! ## `MemW1p 2` of each chosen first weak partial
-
-This is unconditional too — it is exactly the existing
-`chartPushedChosenFirstPartial_memW1p_two` — but it only gives `MemWkp 1 2`,
-not `MemWkp 2 2`. We restate it here in the form needed for the headline. -/
 
 /-- For `u_h ∈ laplacianDomainPow g 2` and each coordinate direction `i`,
 the canonical chosen first weak partial of `chartPushed POU α u_h.coeFn`
@@ -172,16 +158,7 @@ theorem chosenFirstPartial_memWkp_one_two
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := by
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p]
-  -- The chosen first weak partial of `chartPushed POU α u_h.coeFn` is in
-  -- `MemW1p 2` by the existing unconditional result.
   exact chartPushedChosenFirstPartial_memW1p_two (I := I) (M := M) g α hu_h i
-
-/-! ## Structural decomposition: `MemWkp 3 2 ↔ MemW1p 2 ∧ ∀ i, MemWkp 2 2 …`
-
-The iterated Sobolev predicate at order 3 decomposes definitionally into
-`MemW1p 2` and a per-direction chart-`H²` membership of the chosen first
-weak partials. We package this equivalence for our specific function so
-that the headline can assemble it directly. -/
 
 /-- The structural decomposition of `MemWkp 3 2` for the chart-pushed
 function. The decomposition is via `MemWkp_succ` (definitional unfolding):
@@ -218,15 +195,8 @@ theorem chartPushed_memWkp_three_two_iff
             (I := I) (M := M) α))
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
           (I := I) (M := M) α) := by
-  -- Direct unfolding via `MemWkp_succ` (with `k = 2`, giving the `MemWkp 3 2`).
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_succ
     (d := Module.finrank ℝ E) 2 2 _ _
-
-/-! ## Assembly form: `MemWkp 3 2` from per-direction `MemWkp 2 2`
-
-The intermediate assembly takes the per-direction chart-`H²` regularity
-of the chosen partials (the chart-`H³` data) as input and combines it
-with the unconditional `MemW1p 2` to produce the `MemWkp 3 2` membership. -/
 
 /-- **Assembly: `MemWkp 3 2` from per-direction `MemWkp 2 2` of the
 chosen first weak partials.**
@@ -267,12 +237,6 @@ theorem chartPushed_memWkp_three_two_of_chosen_partials_memWkp_two_two
   exact ⟨chartPushed_memW1p_two_of_laplacianDomainPow_two
     (I := I) (M := M) g α hu_h, h_chosen_partials_memWkp_two_two⟩
 
-/-! ## Equivalence with the bulk chart-`H³` hypothesis
-
-The bulk hypothesis `MemWkp 3 2 (chartPushed POU α u_h.coeFn)` is
-equivalent to the per-direction chart-`H²` hypothesis on the chosen
-first weak partials, by structural decomposition. -/
-
 /-- Reverse direction of the structural decomposition: if the chart-pushed
 function is itself in `MemWkp 3 2` of the chart target, then automatically
 each chosen first weak partial is in `MemWkp 2 2`. -/
@@ -302,13 +266,6 @@ theorem chosen_partials_memWkp_two_two_of_chartPushed_memWkp_three_two
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) :=
   h_chartPushed_memWkp_three_two.chosenWeakPartial_mem i
-
-/-! ## Headline form
-
-The headline statement re-exposes the assembly form in the simplest
-possible shape, taking the bulk chart-`H³` regularity as input — which
-is equivalent to the per-direction chart-`H²` hypothesis but is more
-ergonomic for callers that already have the bulk regularity. -/
 
 /-- **Headline: chart-`H³` regularity of the canonical chart-pushed function
 for `u_h ∈ laplacianDomainPow g 2`.**
@@ -350,11 +307,6 @@ theorem chartPushed_memWkp_three_two_of_laplacianDomainPow_two
           Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ))
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := by
-  -- Take the bulk chart-`H³` as input and re-expose as the headline statement.
-  -- The unused `hu_h` hypothesis is retained to clarify the intended downstream
-  -- discharge route: future infrastructure will discharge
-  -- `h_chartPushed_memWkp_three_two` unconditionally from
-  -- `u_h ∈ laplacianDomainPow g 2` via the chart-bilinear bootstrap.
   let _ := hu_h
   exact h_chartPushed_memWkp_three_two
 

@@ -65,12 +65,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## The metric-lowered `(0, r + s)`-tensor section
-
-For a smooth `(r, s)`-tensor section `S`, the metric lowers its `r` upper slots
-to produce a covariant `(0, r + s)`-tensor section. The lowering is performed
-fibrewise through the continuous-linear lowering map `lowerAllUpperIndices`. -/
-
 /-- The metric-lowered `(0, r + s)`-tensor section attached to a smooth
 `(r, s)`-tensor section `S`: at a point `y`, it is the model `(0, r + s)`-tensor
 `ofModel (lowerAllUpperIndices g r s y (toModel (S y)))`. -/
@@ -126,13 +120,6 @@ lemma liftedTensorSection_mdiffAt
   ((liftedTensorSection_contMDiff (I := I) (M := M) g r s S) x).mdifferentiableAt
     (by simp)
 
-/-! ## The mixed inner product as the inner product of lifted sections
-
-By the very definition of `tensorInnerPointwise` (lowering followed by the
-covariant `(0, r + s)` inner product), the mixed pointwise inner product of two
-`(r, s)`-tensor section values equals the covariant `(0, r + s)` inner product
-of the corresponding lifted sections. -/
-
 /-- The mixed `(r, s)` pointwise inner product of two `(r, s)`-tensor section
 values is the covariant `(0, r + s)` inner product of their metric-lowered
 `(0, r + s)`-tensor section values. -/
@@ -148,15 +135,6 @@ lemma tensorInnerPointwise_eq_liftedTensorSection_inner
           (liftedTensorSection (I := I) (M := M) g r s S y)) := by
   rw [toModel_liftedTensorSection, toModel_liftedTensorSection]
   rfl
-
-/-! ## The metric-lowered directional covariant derivative of an `(r, s)`-tensor
-
-For the metric inner product `tensorInnerPointwise g r s`, the natural
-directional covariant derivative of an `(r, s)`-tensor section is obtained by
-lowering the tensor to a covariant `(0, r + s)`-tensor and applying the
-covariant-rank-`(0, r + s)` Levi-Civita connection. Equivalently, it is the
-directional covariant derivative of the lifted section. This is the covariant
-derivative against which the mixed inner product is metric compatible. -/
 
 /-- The metric-lowered directional covariant derivative of a smooth
 `(r, s)`-tensor section `S` at a point `x` along a direction `v`: the
@@ -178,9 +156,6 @@ lemma loweredCovDerivAt_def
     loweredCovDerivAt (I := I) (M := M) g r s S x v =
       tensor0SCovariantDerivative I M (r + s) (LeviCivita (I := I) g)
         (liftedTensorSection (I := I) (M := M) g r s S) x v := rfl
-
-/-! ## Directional metric compatibility of the mixed `(r, s)`-tensor inner
-product -/
 
 open Tensor0SNabla in
 /-- **Directional metric compatibility of the mixed `(r, s)`-tensor inner
@@ -218,8 +193,6 @@ theorem tensorInnerPointwise_hasMFDerivAt_metricCompatible
             (liftedTensorSection (I := I) (M := M) g r s W x))
           (Tensor0SSpace.toModel
             (loweredCovDerivAt (I := I) (M := M) g r s S x v)) := by
-  -- Rewrite the integrand as the covariant `(0, r + s)` inner product of the
-  -- lifted sections.
   have hfun : (fun y : M => tensorInnerPointwise (I := I) (M := M) g r s y
         (TensorRSSpace.toModel (W y)) (TensorRSSpace.toModel (S y))) =
       fun y : M => tensorInnerPointwise_0s (I := I) (M := M) (r + s) g y
@@ -230,21 +203,12 @@ theorem tensorInnerPointwise_hasMFDerivAt_metricCompatible
     exact tensorInnerPointwise_eq_liftedTensorSection_inner
       (I := I) (M := M) g r s W S y
   rw [hfun]
-  -- Apply the covariant-rank-`(0, r + s)` metric-compatibility identity to the
-  -- smooth lifted sections.
   exact tensorInnerPointwise_0s_mfderiv_metricCompatible
     (I := I) (M := M) g (r + s)
     (liftedTensorSection (I := I) (M := M) g r s W)
     (liftedTensorSection (I := I) (M := M) g r s S)
     (liftedTensorSection_mdiffAt (I := I) (M := M) g r s W x)
     (liftedTensorSection_mdiffAt (I := I) (M := M) g r s S x) v
-
-/-! ## `HasMFDerivAt` form of directional metric compatibility
-
-The same identity recorded in `HasMFDerivAt` form, simultaneously asserting
-differentiability of `y ↦ ⟨W y, S y⟩` and the value of its differential. The
-differential is packaged as the metric-compatibility functional from the
-covariant-rank-`(0, r + s)` development. -/
 
 open Tensor0SNabla in
 /-- **`HasMFDerivAt` form of directional metric compatibility.** The pointwise

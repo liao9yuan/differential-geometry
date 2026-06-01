@@ -88,12 +88,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signature. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -102,12 +96,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 /-- Abbreviation for the Euclidean model space of the chart target. -/
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## The chart base point of a Euclidean chart-target point
-
-For `y` in the Euclidean chart target the chart base point
-`(extChartAt I α).symm (toEuclidean.symm y)` lies in the chart-`α` source, and
-hence — under `[I.Boundaryless]` — in the chart-`α` Levi-Civita good set. -/
-
 /-- For `y` in the Euclidean chart target, the chart base point lies in the
 chart-`α` Levi-Civita good set. -/
 private lemma chartBasePoint_mem_goodSet
@@ -115,22 +103,12 @@ private lemma chartBasePoint_mem_goodSet
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈
       chartLeviCivitaGoodSet (I := I) α := by
-  -- The chart base point lies in the chart-`α` source.
   have hsrc : (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈
       (chartAt H α).source :=
     symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy
-  -- The good set equals the chart source under `[I.Boundaryless]`.
   rw [mem_chartLeviCivitaGoodSet_iff_mem_extChartAt_source (I := I) α,
     extChartAt_source]
   exact hsrc
-
-/-! ## The inverse-twisted covariant derivative of a smooth section
-
-For a smooth compactly-supported tensor section `S` and a chart direction `i`,
-the function `b ↦ chartRSTwistInv α b r s (toModel (∇S(b)(eᵢ' b)))` valued in
-the model fibre space is `C^∞` on the chart-`α` source — from the chart-`α`
-smoothness of the trivialisation image of the abstract covariant derivative
-together with the bridge identity. -/
 
 /-- The base set of the `(r, s)`-tensor trivialisation at `α` equals the
 chart-`α` source. -/
@@ -172,20 +150,14 @@ private lemma chartRSTwistInv_tensorCovDeriv_contMDiffOn
               (chartBasisVecFiber (I := I) α i b))))
       ((chartAt H α).source) := by
   classical
-  -- The trivialisation image of the covariant derivative is `C^∞` on the
-  -- chart-`α` base set.
   have htriv := tensorCovDeriv_chartBasis_trivImage_contMDiffOn
     (I := I) (M := M) g r s S α i
   rw [tangent_baseSet_eq_chart_source (I := I) (M := M) α] at htriv
-  -- On the chart source the trivialisation image equals the inverse twist.
   refine htriv.congr (fun b hb => ?_)
-  -- Re-express the inverse twist through `continuousLinearMapAt`.
   rw [← triv_continuousLinearMapAt_eq_chartRSTwistInv_toModel (I := I) (M := M)
     r s α hb
     (tensorCovDerivAt (I := I) (M := M) g r s S b
       (chartBasisVecFiber (I := I) α i b))]
-  -- `continuousLinearMapAt ℝ b` agrees with `linearMapAt ℝ b` as a function;
-  -- the latter unfolds to the `.2`-projection on the chart base set.
   have hb_base : b ∈ (trivializationAt (TensorRSModel r s ℝ E)
       (fun y : M => TensorRSSpace r s I y) α).baseSet := by
     rw [tensorRS_baseSet_eq_chart_source (I := I) (M := M) α r s]
@@ -195,15 +167,6 @@ private lemma chartRSTwistInv_tensorCovDeriv_contMDiffOn
       (tensorCovDerivAt (I := I) (M := M) g r s S b
         (chartBasisVecFiber (I := I) α i b)) = _
   rw [Bundle.Trivialization.linearMapAt_apply, if_pos hb_base]
-
-/-! ## The manifold-side weighted norm-sum function
-
-The reverse chart-push `L²` bridge transports the Euclidean `L²` norm of a
-chart-pushed function back onto the Riemannian-volume `L²` norm of the
-underlying manifold-side function. The relevant manifold-side function is the
-`ρ_α`-weighted square root of the sum over chart directions of the squared
-inverse-twist norm; we show it is globally continuous, hence measurable —
-the hypothesis the reverse bridge requires. -/
 
 /-- The manifold-side weighted norm-sum function: the chart-atlas
 partition-of-unity weight at `α` times the square root of the sum, over chart
@@ -235,7 +198,6 @@ private lemma covNormSqSum_continuousOn_chart_source
                   (chartBasisVecFiber (I := I) α i b)))‖ ^ 2)
       ((chartAt H α).source) := by
   refine continuousOn_finset_sum _ (fun i _ => ?_)
-  -- The inverse-twisted covariant derivative is `C^∞`, hence continuous.
   have hcov : ContinuousOn
       (fun b : M =>
         chartRSTwistInv (I := I) (M := M) α b r s
@@ -245,7 +207,6 @@ private lemma covNormSqSum_continuousOn_chart_source
       ((chartAt H α).source) :=
     (chartRSTwistInv_tensorCovDeriv_contMDiffOn (I := I) (M := M)
       g r s S α i).continuousOn
-  -- The norm-squared of a continuous function is continuous.
   exact (hcov.norm).pow 2
 
 /-- **Global continuity of the manifold-side weighted norm-sum function.** The
@@ -257,9 +218,7 @@ private lemma covNormSumFun_continuous
     (S : SmoothCcTensor g r s) (α : M) :
     Continuous (covNormSumFun (I := I) (M := M) g r s S α) := by
   classical
-  -- The weight `ρ_α` as a smooth function and as `M → ℝ`.
   set ρ : C^∞⟮I, M; ℝ⟯ := chartAtlasPOU I M α with hρ_def
-  -- The square-root norm sum.
   set w : M → ℝ := fun b : M =>
     Real.sqrt
       (∑ i : Fin (Module.finrank ℝ E),
@@ -267,25 +226,20 @@ private lemma covNormSumFun_continuous
             (TensorRSSpace.toModel
               (tensorCovDerivAt (I := I) (M := M) g r s S b
                 (chartBasisVecFiber (I := I) α i b)))‖ ^ 2) with hw_def
-  -- `covNormSumFun = (⇑ρ) • w` at the function level.
   have hfun_eq : covNormSumFun (I := I) (M := M) g r s S α =
       fun b : M => ((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ) b • w b := by
     funext b
     rw [covNormSumFun]
     rfl
   rw [hfun_eq]
-  -- It suffices to prove continuity at every point of `tsupport ρ`.
   refine continuous_of_tsupport (fun x hx => ?_)
-  -- `tsupport ((⇑ρ) • w) ⊆ tsupport ρ ⊆ chart source`.
   have hx_supp : x ∈ tsupport ((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
     tsupport_smul_subset_left
       (f := fun b : M => ((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ) b) (g := w) hx
   have hx_src : x ∈ (chartAt H α).source :=
     chartAtlasPOU_isSubordinate I M α hx_supp
-  -- `ρ` is continuous at `x`.
   have hρ_contAt : ContinuousAt ((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x :=
     (ρ.contMDiff.continuous).continuousAt
-  -- `w` is continuous at `x`: it is `ContinuousOn` the open chart source.
   have hw_contOn : ContinuousOn w ((chartAt H α).source) := by
     rw [hw_def]
     exact (covNormSqSum_continuousOn_chart_source (I := I) (M := M)
@@ -310,7 +264,6 @@ private lemma covNormSumFun_tsupport_subset
     tsupport (covNormSumFun (I := I) (M := M) g r s S α) ⊆
       tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) := by
   classical
-  -- `covNormSumFun` is `(⇑ρ) • w`; its support sits inside that of `ρ`.
   have hfun_eq : covNormSumFun (I := I) (M := M) g r s S α =
       fun b : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b •
@@ -333,8 +286,6 @@ private lemma covNormSumFun_tsupport_subset
               (TensorRSSpace.toModel
                 (tensorCovDerivAt (I := I) (M := M) g r s S b
                   (chartBasisVecFiber (I := I) α i b)))‖ ^ 2))
-
-/-! ## The pointwise bound on the chart target -/
 
 /-- **The pointwise bound on the chart target.** Set
 `C_proj := chartComponentProjectionUniformBound r s`. For every `y`, the
@@ -366,34 +317,27 @@ private lemma pou_covDerivComponent_le_chartPushedRaw
   have hC_proj_nn : 0 ≤ C_proj :=
     chartComponentProjectionUniformBound_nonneg (E := E) r s
   by_cases hy : y ∈ chartTargetEuclid (I := I) (M := M) α
-  · -- On the chart target: run the inverse-twist chain.
-    set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y)
+  · set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y)
       with hb_def
-    -- The chart base point lies in the chart-`α` Levi-Civita good set.
     have hb_good : b ∈ chartLeviCivitaGoodSet (I := I) α :=
       chartBasePoint_mem_goodSet (I := I) (M := M) α hy
-    -- The chart base point lies in the chart-`α` source.
     have hb_src : b ∈ (chartAt H α).source := by
       have := symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy
       rwa [← hb_def] at this
-    -- The partition-of-unity weight: nonnegative and `≤ 1`.
     have hρ_nn : 0 ≤ ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b :=
       (chartAtlasPOU I M).nonneg α b
     have hρ_le_one : ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b ≤ 1 :=
       (chartAtlasPOU I M).le_one α b
-    -- Evaluate the chart push-forward of the partition-of-unity weight.
     have hpou_eval : chartPushedRaw (I := I) (M := M) α
         (⇑(chartAtlasPOU I M α)) y =
           ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b := by
       rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α
         (⇑(chartAtlasPOU I M α)) hy]
-    -- Evaluate the chart push-forward of the manifold-side norm-sum function.
     have hcov_eval : chartPushedRaw (I := I) (M := M) α
         (covNormSumFun (I := I) (M := M) g r s S α) y =
           covNormSumFun (I := I) (M := M) g r s S α b := by
       rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α
         (covNormSumFun (I := I) (M := M) g r s S α) hy]
-    -- Identify the trivialised covariant derivative with the inverse twist.
     have hcomp_eq :
         tensorChartComponentProjection (E := E) r s Idx Jdx
             ((trivializationAt (TensorRSModel r s ℝ E)
@@ -405,15 +349,12 @@ private lemma pou_covDerivComponent_le_chartPushedRaw
               (TensorRSSpace.toModel
                 (tensorCovDerivAt (I := I) (M := M) g r s S b
                   (chartBasisVecFiber (I := I) α m b)))) := by
-      -- Replace the chart-coordinate covariant derivative by the abstract one.
       rw [← tensorCovDerivAt_eq_chartTensorRSCovariantDerivative (I := I) (M := M)
         g r s S α m hb_good]
-      -- Re-trivialise via the bridge identity.
       rw [triv_continuousLinearMapAt_eq_chartRSTwistInv_toModel (I := I) (M := M)
         r s α hb_src
         (tensorCovDerivAt (I := I) (M := M) g r s S b
           (chartBasisVecFiber (I := I) α m b))]
-    -- Operator-norm bound on the multi-index projection.
     set X : TensorRSModel r s ℝ E :=
       chartRSTwistInv (I := I) (M := M) α b r s
         (TensorRSSpace.toModel
@@ -426,7 +367,6 @@ private lemma pou_covDerivComponent_le_chartPushedRaw
         (mul_le_mul_of_nonneg_right
           (tensorChartComponentProjection_norm_le_uniform (E := E) r s Idx Jdx)
           (norm_nonneg _))
-    -- The single-direction inverse-twist norm is `≤` the square-root sum.
     have h_norm_le_sqrt :
         ‖X‖ ≤
           Real.sqrt
@@ -435,7 +375,6 @@ private lemma pou_covDerivComponent_le_chartPushedRaw
                   (TensorRSSpace.toModel
                     (tensorCovDerivAt (I := I) (M := M) g r s S b
                       (chartBasisVecFiber (I := I) α i b)))‖ ^ 2) := by
-      -- `‖X‖ = √(‖X‖²) ≤ √(∑ᵢ ‖·‖²)` since the `m`-summand is one of the terms.
       have hsq_le :
           ‖X‖ ^ 2 ≤
             ∑ i : Fin (Module.finrank ℝ E),
@@ -454,16 +393,13 @@ private lemma pou_covDerivComponent_le_chartPushedRaw
         (Real.sqrt_sq (norm_nonneg _)).symm
       rw [hX_eq]
       exact Real.sqrt_le_sqrt hsq_le
-    -- Assemble the bound.
     rw [hcomp_eq, hpou_eval]
-    -- The norm of the weighted component.
     have h_norm_prod :
         ‖((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
             tensorChartComponentProjection (E := E) r s Idx Jdx X‖ =
           ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
             ‖tensorChartComponentProjection (E := E) r s Idx Jdx X‖ := by
       rw [norm_mul, Real.norm_of_nonneg hρ_nn]
-    -- The RHS evaluated.
     have hRHS_eq :
         (C_proj •
           chartPushedRaw (I := I) (M := M) α
@@ -481,7 +417,6 @@ private lemma pou_covDerivComponent_le_chartPushedRaw
       rw [hcov_eval]
       rfl
     rw [h_norm_prod, hRHS_eq]
-    -- Chain the projection, square-root, and partition-of-unity factors.
     set w : ℝ :=
       Real.sqrt
         (∑ i : Fin (Module.finrank ℝ E),
@@ -490,7 +425,6 @@ private lemma pou_covDerivComponent_le_chartPushedRaw
                 (tensorCovDerivAt (I := I) (M := M) g r s S b
                   (chartBasisVecFiber (I := I) α i b)))‖ ^ 2) with hw_def
     have hw_nn : 0 ≤ w := Real.sqrt_nonneg _
-    -- `|P X| ≤ C_proj · ‖X‖ ≤ C_proj · w`.
     have h_proj_le_w :
         ‖tensorChartComponentProjection (E := E) r s Idx Jdx X‖ ≤
           C_proj * w :=
@@ -504,8 +438,7 @@ private lemma pou_covDerivComponent_le_chartPushedRaw
       _ = C_proj *
             (((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b * w) := by
           ring
-  · -- Off the chart target: both sides vanish.
-    have hpou_zero : chartPushedRaw (I := I) (M := M) α
+  · have hpou_zero : chartPushedRaw (I := I) (M := M) α
         (⇑(chartAtlasPOU I M α)) y = 0 :=
       chartPushedRaw_apply_of_notMem (I := I) (M := M) α
         (⇑(chartAtlasPOU I M α)) hy
@@ -517,8 +450,6 @@ private lemma pou_covDerivComponent_le_chartPushedRaw
     change (0 : ℝ) ≤ C_proj * chartPushedRaw (I := I) (M := M) α
       (covNormSumFun (I := I) (M := M) g r s S α) y
     rw [hcov_zero, mul_zero]
-
-/-! ## The per-direction `L²` bound -/
 
 /-- The per-direction Euclidean `L²` norm of the `ρ_α`-weighted chart-frame
 covariant-derivative component is bounded by a single non-negative constant —
@@ -545,12 +476,10 @@ private lemma exists_const_eLpNorm_pou_covDerivComponent_le_uniform
             (chartTargetEuclid (I := I) (M := M) α))
         ≤ ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞) := by
   classical
-  -- The uniform projection operator-norm constant.
   set C_proj : ℝ := chartComponentProjectionUniformBound (E := E) r s
     with hC_proj_def
   have hC_proj_nn : 0 ≤ C_proj :=
     chartComponentProjectionUniformBound_nonneg (E := E) r s
-  -- The reverse chart-push `L²` bridge constant.
   set Kα : Set M :=
     tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) with hKα_def
   have hKα_compact : IsCompact Kα := (isClosed_tsupport _).isCompact
@@ -561,14 +490,12 @@ private lemma exists_const_eLpNorm_pou_covDerivComponent_le_uniform
   obtain ⟨C_bridge, hC_bridge_pos, hC_bridge⟩ :=
     eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of_subset
       (I := I) (M := M) g α hKα_compact hKα_sub hp_one hp_top
-  -- The verified unconditional covariant-derivative `L²` bound.
   obtain ⟨C_cov, hC_cov_nn, hC_cov⟩ :=
     exists_eLpNorm_chartPou_mul_sqrt_sum_chartRSTwistInv_cov_norm_sq_le_const_mul_h1Norm
       (I := I) (M := M) g r s α
   refine ⟨C_proj * (C_bridge * C_cov),
     mul_nonneg hC_proj_nn (mul_nonneg hC_bridge_pos.le hC_cov_nn), ?_⟩
   intro S Idx Jdx m
-  -- Notation for the Euclidean integrand and the manifold-side function.
   set f : EuclN → ℝ := fun y : EuclN =>
     chartPushedRaw (I := I) (M := M) α (⇑(chartAtlasPOU I M α)) y *
       tensorChartComponentProjection (E := E) r s Idx Jdx
@@ -585,26 +512,22 @@ private lemma exists_const_eLpNorm_pou_covDerivComponent_le_uniform
   set μ : Measure EuclN :=
     (volume : Measure EuclN).restrict (chartTargetEuclid (I := I) (M := M) α)
     with hμ_def
-  -- Step 1: pointwise bound `‖f y‖ ≤ (C_proj • chartPushedRaw α v) y`.
   have h_ptwise : ∀ y : EuclN,
       ‖f y‖ ≤ (C_proj • chartPushedRaw (I := I) (M := M) α v) y := by
     intro y
     rw [hf_def, hv_def, hC_proj_def]
     exact pou_covDerivComponent_le_chartPushedRaw (I := I) (M := M)
       g r s S.toCcTensor α Idx Jdx m y
-  -- Step 2: `eLpNorm f 2 μ ≤ eLpNorm (C_proj • chartPushedRaw α v) 2 μ`.
   have h_mono :
       eLpNorm f 2 μ ≤
         eLpNorm (C_proj • chartPushedRaw (I := I) (M := M) α v) 2 μ :=
     eLpNorm_mono_real h_ptwise
-  -- Step 3: pull the scalar out.
   have h_smul :
       eLpNorm (C_proj • chartPushedRaw (I := I) (M := M) α v) 2 μ =
         ‖C_proj‖ₑ * eLpNorm (chartPushedRaw (I := I) (M := M) α v) 2 μ :=
     eLpNorm_const_smul C_proj (chartPushedRaw (I := I) (M := M) α v) 2 μ
   have hC_proj_enorm : ‖C_proj‖ₑ = ENNReal.ofReal C_proj := by
     rw [Real.enorm_eq_ofReal_abs, abs_of_nonneg hC_proj_nn]
-  -- Step 4: the reverse chart-push `L²` bridge.
   have hv_meas : Measurable v :=
     covNormSumFun_measurable (I := I) (M := M) g r s S.toCcTensor α
   have hv_supp : tsupport v ⊆ Kα :=
@@ -615,14 +538,10 @@ private lemma exists_const_eLpNorm_pou_covDerivComponent_le_uniform
           eLpNorm v 2
             (riemannianMeasure (I := I) g (chartAtlasPOU I M)) :=
     hC_bridge hv_meas hv_supp
-  -- The Riemannian volume measure is the chart-atlas-POU Riemannian measure.
   have h_meas_eq :
       riemannianMeasure (I := I) g (chartAtlasPOU I M) =
         riemannianVolumeMeasure (I := I) (M := M) g := rfl
   rw [h_meas_eq] at h_bridge
-  -- Step 5: the unconditional covariant-derivative `L²` bound.
-  -- `covNormSumFun g r s S.toCcTensor α` is, by definition, the
-  -- partition-of-unity-weighted square-root norm sum of the input lemma.
   have hv_eq : v = fun b : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
         Real.sqrt
@@ -640,7 +559,6 @@ private lemma exists_const_eLpNorm_pou_covDerivComponent_le_uniform
         ENNReal.ofReal C_cov * (‖S‖₊ : ℝ≥0∞) := by
     rw [hv_eq]
     exact hC_cov S
-  -- Assemble the chain.
   calc eLpNorm f 2 μ
       ≤ eLpNorm (C_proj • chartPushedRaw (I := I) (M := M) α v) 2 μ := h_mono
     _ = ‖C_proj‖ₑ * eLpNorm (chartPushedRaw (I := I) (M := M) α v) 2 μ :=
@@ -660,11 +578,6 @@ private lemma exists_const_eLpNorm_pou_covDerivComponent_le_uniform
         rw [ENNReal.ofReal_mul hC_proj_nn,
           ENNReal.ofReal_mul hC_bridge_pos.le]
         ring
-
-/-! ## The headline uniform `L²` estimate
-
-Summing the `m`-independent per-direction bound over the finitely many chart
-directions yields a single uniform constant for the full sum. -/
 
 /-- **A uniform `L²` bound for the chart covariant-derivative component.** For
 a closed Riemannian manifold `(M, g)`, ranks `(r, s)` and a chart center
@@ -703,19 +616,14 @@ theorem exists_const_sum_eLpNorm_pou_covDerivComponent_le_uniform
               (chartTargetEuclid (I := I) (M := M) α))
         ≤ ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞) := by
   classical
-  -- The per-direction uniform constant.
   obtain ⟨C₀, hC₀_nn, hC₀⟩ :=
     exists_const_eLpNorm_pou_covDerivComponent_le_uniform
       (I := I) (M := M) g r s α
-  -- Scale by the (finite) number of chart directions.
   refine ⟨(Module.finrank ℝ E : ℝ) * C₀,
     mul_nonneg (Nat.cast_nonneg _) hC₀_nn, ?_⟩
   intro S Idx Jdx
-  -- Each summand is bounded by the same `m`-independent constant; sum the
-  -- constant bound over the finite chart-direction index set.
   refine (Finset.sum_le_sum (fun m _ => hC₀ S Idx Jdx m)).trans ?_
   rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
-  -- `(finrank) • (ENNReal.ofReal C₀ * ‖S‖₊) = ENNReal.ofReal (finrank · C₀) * ‖S‖₊`.
   rw [show ENNReal.ofReal ((Module.finrank ℝ E : ℝ) * C₀) =
         (Module.finrank ℝ E : ℝ≥0∞) * ENNReal.ofReal C₀ by
     rw [ENNReal.ofReal_mul (Nat.cast_nonneg _), ENNReal.ofReal_natCast]]

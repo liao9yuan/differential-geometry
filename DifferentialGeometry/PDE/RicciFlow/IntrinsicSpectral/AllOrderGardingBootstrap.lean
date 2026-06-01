@@ -120,16 +120,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Notation abbreviations used in the statements
-
-`∇^j U` is `iteratedCovGrad g 0 2 j U` and `Δ_∇^i U` is
-`rawTensorConnLapIter g 0 2 i U`. We phrase everything in the `SmoothCcTensor`
-seminorm `‖·‖`, which equals `tensorL2Norm g 0 (2 + j) (∇^j U).toFun` by
-`SmoothCcTensor.norm_def` and equals `‖(Δ_∇^i U).toL2‖` by
-`SmoothCcTensor.norm_toL2`. -/
-
-/-! ## The per-order ingredients, as named predicates -/
-
 /-- **The per-valence order-`2` Gårding hypothesis.** A nonnegative constant `Cg`
 such that for every covariant rank `s` and every smooth compactly-supported
 `(0, s)`-tensor `S`, the squared `L²` norm of the second covariant gradient is
@@ -219,8 +209,6 @@ theorem order2GardingFamily_of_curvatureCrossTermBound
   exact secondCovGrad_l2NormSq_le_of_cross_bound (I := I) (M := M) g s S Ccross hCcross
     (hcrossS s S)
 
-/-! ## Elementary norm facts -/
-
 set_option linter.unusedSectionVars false in
 /-- `‖∇^i U‖` as a `SmoothCcTensor` seminorm equals `tensorL2Norm` of its
 underlying field. -/
@@ -241,8 +229,6 @@ private lemma rawTensorConnLapIter_norm_eq_toL2
         (rawTensorConnLapIter (I := I) g 0 2 i U)‖ :=
   (SmoothCcTensor.norm_toL2 (I := I) (M := M)
     (rawTensorConnLapIter (I := I) g 0 2 i U)).symm
-
-/-! ## The bootstrap recursion (strong induction on the gradient order) -/
 
 set_option linter.unusedSectionVars false in
 /-- **The mixed bound.** For every gradient order `p` and every smooth
@@ -268,21 +254,10 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
   classical
   obtain ⟨hCg, hgardS⟩ := hgard
   obtain ⟨hCc, hcommU⟩ := hcomm
-  -- The square-root of `Cg`, controlling the Gårding step in first-power form.
   set sg : ℝ := Real.sqrt Cg with hsg_def
   have hsg_nn : 0 ≤ sg := Real.sqrt_nonneg _
-  -- A monotone-by-construction constant family. We only need *some* nonnegative
-  -- `B : ℕ → ℝ` with `B 0 = B 1 = 1` that dominates the step expression
-  --   sg·(2·B m + Cc·∑_{i<m+2} B i) + 1
-  -- Since `B m ≤ ∑_{i<m+2} B i` and `sg ≥ 0`, it suffices that
-  --   B (m+2) ≥ sg·(2 + Cc)·(∑_{i<m+2} B i) + 1.
-  -- We realize this with the single-back prefix-sum recursion
-  --   B (n+1) = K · (∑_{i≤n} B i) + 1   for n ≥ 1,   K := sg·(2 + Cc),
-  -- carried as a pair `(B n, ∑_{i≤n} B i)`. This makes the unfolding lemmas
-  -- definitional, avoiding strong-recursion β-reduction lemmas.
   set K : ℝ := sg * (2 + Cc) with hK_def
   have hK_nn : 0 ≤ K := mul_nonneg hsg_nn (by linarith [hCc])
-  -- `Bpair n = (B n, ∑_{i ≤ n} B i)`.
   let Bpair : ℕ → ℝ × ℝ := fun n => Nat.rec (motive := fun _ => ℝ × ℝ)
     (1, 1)
     (fun n prev =>
@@ -291,31 +266,25 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
       (b, s + b))
     n
   let B : ℕ → ℝ := fun n => (Bpair n).1
-  -- Definitional component-unfolding facts for `Bpair` (all by `rfl`).
   have hBfst_succ : ∀ n, (Bpair (n + 1)).1 =
       (if n = 0 then 1 else K * (Bpair n).2 + 1) := fun _ => rfl
   have hBsnd_succ : ∀ n, (Bpair (n + 1)).2 =
       (Bpair n).2 + (Bpair (n + 1)).1 := fun _ => rfl
   have hBsnd_zero : (Bpair 0).2 = 1 := rfl
-  -- `B 0 = 1`, `B 1 = 1`.
   have hB0 : B 0 = 1 := rfl
   have hB1 : B 1 = 1 := rfl
-  -- `B (n+1) = (Bpair (n+1)).1` (definitional).
   have hB_fst : ∀ n, B n = (Bpair n).1 := fun _ => rfl
-  -- The prefix-sum invariant `(Bpair n).2 = ∑_{i ∈ range (n+1)} B i`.
   have hBpair_sum : ∀ n, (Bpair n).2 = ∑ i ∈ Finset.range (n + 1), B i := by
     intro n
     induction n with
     | zero => rw [hBsnd_zero, Finset.sum_range_one, hB0]
     | succ m ihm =>
         rw [Finset.sum_range_succ, ← ihm, hBsnd_succ m, hB_fst (m + 1)]
-  -- The step recurrence for `B` at `n ≥ 2`: `B (n+2) = K · (∑_{i≤n+1} B i) + 1`.
   have hBsucc_pos : ∀ n, B (n + 2) = K * (∑ i ∈ Finset.range (n + 2), B i) + 1 := by
     intro n
     rw [hB_fst (n + 2), hBfst_succ (n + 1)]
     simp only [Nat.succ_ne_zero, if_false]
     rw [hBpair_sum (n + 1)]
-  -- Nonnegativity of `B`.
   have hB_nn : ∀ p, 0 ≤ B p := by
     intro p
     induction p using Nat.strong_induction_on with
@@ -330,7 +299,6 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
               have := Finset.mem_range.mp hi; omega))
           have : 0 ≤ K * (∑ i ∈ Finset.range (m + 2), B i) := mul_nonneg hK_nn h2
           linarith
-  -- The step *inequality* (dominating the actual recursion needed below).
   have hBstep : ∀ m, sg * (B m + Cc * (∑ i ∈ Finset.range (m + 2), B i) + B m) + 1 ≤
       B (m + 2) := by
     intro m
@@ -340,7 +308,6 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
       rw [Finset.mem_range]; omega
     have hsum_nn : 0 ≤ ∑ i ∈ Finset.range (m + 2), B i :=
       Finset.sum_nonneg (fun i _ => hB_nn i)
-    -- `sg·(2 B m + Cc·S) ≤ sg·(2 S + Cc·S) = K·S` (since `B m ≤ S`, `sg ≥ 0`, `Cc ≥ 0`).
     have hkey : sg * (B m + Cc * (∑ i ∈ Finset.range (m + 2), B i) + B m) ≤
         K * (∑ i ∈ Finset.range (m + 2), B i) := by
       rw [hK_def]
@@ -352,14 +319,12 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
         _ = sg * (2 + Cc) * (∑ i ∈ Finset.range (m + 2), B i) := by ring
     linarith
   refine ⟨B, hB_nn, ?_⟩
-  -- The main strong induction.
   intro p
   induction p using Nat.strong_induction_on with
   | _ n ih =>
     match n with
     | 0 =>
         intro U
-        -- `∇^0 U = U`, RHS `= B 0 · (‖Δ_∇^0 U‖) = 1 · ‖U‖`.
         rw [iteratedCovGrad_zero]
         rw [hB0]
         have hsum : ∑ i ∈ Finset.range ((0 + 1) / 2 + 1),
@@ -368,8 +333,6 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
         rw [hsum]; ring_nf; exact le_refl _
     | 1 =>
         intro U
-        -- Order-`1` control on `U` (valence `2`): `‖∇U‖² ≤ ‖Δ_∇U‖·‖U‖`.
-        -- RHS range: `(1+1)/2 + 1 = 2`, so `i ∈ {0,1}`, sum `= ‖U‖ + ‖Δ_∇U‖`.
         rw [hB1]
         have hord1 : ‖covGrad (I := I) (M := M) g 0 2 U‖ ^ 2 ≤
             ‖rawTensorConnLapSmooth (I := I) g 0 2 U‖ * ‖U‖ := hgrad1 2 U
@@ -385,17 +348,14 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
           rw [Finset.sum_range_succ, Finset.sum_range_one]
           rw [rawTensorConnLapIter_zero, rawTensorConnLapIter_one]
         rw [hsum, one_mul]
-        -- `‖∇U‖ ≤ √(‖Δ_∇U‖·‖U‖) ≤ ‖U‖ + ‖Δ_∇U‖` (AM–GM, `√(ab) ≤ a+b` for `a,b ≥ 0`).
         set a : ℝ := ‖rawTensorConnLapSmooth (I := I) g 0 2 U‖ with ha_def
         set b : ℝ := ‖U‖ with hb_def
         have ha_nn : 0 ≤ a := norm_nonneg _
         have hb_nn : 0 ≤ b := norm_nonneg _
         have hgrad_nn : 0 ≤ ‖covGrad (I := I) (M := M) g 0 2 U‖ := norm_nonneg _
-        -- `‖∇U‖ ≤ √(a·b)`.
         have hsqrt : ‖covGrad (I := I) (M := M) g 0 2 U‖ ≤ Real.sqrt (a * b) := by
           rw [← Real.sqrt_sq hgrad_nn]
           exact Real.sqrt_le_sqrt hord1
-        -- `√(a·b) ≤ b + a`.
         have hamgm : Real.sqrt (a * b) ≤ b + a := by
           rw [← Real.sqrt_sq (by positivity : (0:ℝ) ≤ b + a)]
           apply Real.sqrt_le_sqrt
@@ -403,22 +363,18 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
         linarith [hsqrt, hamgm]
     | (m + 2) =>
         intro U
-        -- Abbreviations.
         set S : SmoothCcTensor g 0 (2 + m) := iteratedCovGrad g 0 2 m U with hS_def
-        -- `∇^{m+2} U = ∇² S` (rank `(0, 2+m) → (0, 2+m+2)`).
         have hgrad2_eq :
             iteratedCovGrad g 0 2 (m + 2) U =
               covGrad (I := I) (M := M) g 0 (2 + m + 1)
                 (covGrad (I := I) (M := M) g 0 (2 + m) S) := by
           rw [hS_def]
           rfl
-        -- Gårding (squared) at valence `(0, 2+m)` on `S`.
         have hgard2 :
             ‖covGrad (I := I) (M := M) g 0 (2 + m + 1)
                 (covGrad (I := I) (M := M) g 0 (2 + m) S)‖ ^ 2 ≤
               Cg * (‖rawTensorConnLapSmooth (I := I) g 0 (2 + m) S‖ ^ 2 + ‖S‖ ^ 2) :=
           hgardS (2 + m) S
-        -- Abbreviate the three first-power norms in the step.
         set nHess : ℝ := ‖covGrad (I := I) (M := M) g 0 (2 + m + 1)
           (covGrad (I := I) (M := M) g 0 (2 + m) S)‖ with hnHess_def
         set nLapS : ℝ := ‖rawTensorConnLapSmooth (I := I) g 0 (2 + m) S‖ with hnLapS_def
@@ -426,7 +382,6 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
         have hnHess_nn : 0 ≤ nHess := norm_nonneg _
         have hnLapS_nn : 0 ≤ nLapS := norm_nonneg _
         have hnS_nn : 0 ≤ nS := norm_nonneg _
-        -- First-power Gårding: `nHess ≤ sg · (nLapS + nS)`.
         have hgard_fp : nHess ≤ sg * (nLapS + nS) := by
           rw [hsg_def]
           rw [← Real.sqrt_sq hnHess_nn]
@@ -439,20 +394,15 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
                   rw [← Real.sqrt_sq (by positivity : (0:ℝ) ≤ nLapS + nS)]
                   apply Real.sqrt_le_sqrt
                   nlinarith [mul_nonneg hnLapS_nn hnS_nn]
-        -- Commutator: `nLapS ≤ ‖∇^m(Δ_∇U)‖ + Cc·Σ_{i≤m+1} ‖∇^i U‖`.
-        -- Note `Δ_∇ S = Δ_∇(∇^m U)`.
         have hΔS_eq : rawTensorConnLapSmooth (I := I) g 0 (2 + m) S =
             rawTensorConnLapSmooth (I := I) g 0 (2 + m) (iteratedCovGrad g 0 2 m U) := by
           rw [hS_def]
         have hcomm_m := hcommU U m
-        -- `nLapS = ‖Δ_∇(∇^m U)‖`.
         have hnLapS_eq : nLapS =
             ‖rawTensorConnLapSmooth (I := I) g 0 (2 + m) (iteratedCovGrad g 0 2 m U)‖ := by
           rw [hnLapS_def, hΔS_eq]
-        -- Triangle inequality: `‖Δ_∇(∇^m U)‖ ≤ ‖∇^m(Δ_∇U)‖ + ‖defect‖`.
         set DefM : SmoothCcTensor g 0 (2 + m) :=
           iteratedCovGrad g 0 2 m (rawTensorConnLapSmooth (I := I) g 0 2 U) with hDefM_def
-        -- `‖x‖ ≤ ‖y‖ + ‖x - y‖`.
         have htri :
             ‖rawTensorConnLapSmooth (I := I) g 0 (2 + m) (iteratedCovGrad g 0 2 m U)‖ ≤
               ‖DefM‖ +
@@ -460,21 +410,17 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
                     (iteratedCovGrad g 0 2 m U) - DefM‖ :=
           norm_le_norm_add_norm_sub'
             (rawTensorConnLapSmooth (I := I) g 0 (2 + m) (iteratedCovGrad g 0 2 m U)) DefM
-        -- `‖defect‖ ≤ Cc·Σ_{i≤m+1}‖∇^i U‖`.
         have hdef_bound :
             ‖rawTensorConnLapSmooth (I := I) g 0 (2 + m)
                   (iteratedCovGrad g 0 2 m U) - DefM‖ ≤
               Cc * ∑ i ∈ Finset.range (m + 2), ‖iteratedCovGrad g 0 2 i U‖ := by
           rw [hDefM_def]; exact hcomm_m
-        -- Induction hypothesis at order `m` applied to the new base `Δ_∇ U`,
-        -- giving `‖∇^m(Δ_∇U)‖ ≤ B m · Σ_{i≤⌈m/2⌉} ‖Δ_∇^{i+1} U‖`.
         have hih_base :
             ‖DefM‖ ≤ B m * ∑ i ∈ Finset.range ((m + 1) / 2 + 1),
               ‖rawTensorConnLapIter (I := I) g 0 2 i
                 (rawTensorConnLapSmooth (I := I) g 0 2 U)‖ := by
           rw [hDefM_def]
           exact ih m (by omega) (rawTensorConnLapSmooth (I := I) g 0 2 U)
-        -- `Δ_∇^i (Δ_∇ U) = Δ_∇^{i+1} U`.
         have hlapiter_shift : ∀ i,
             rawTensorConnLapIter (I := I) g 0 2 i
                 (rawTensorConnLapSmooth (I := I) g 0 2 U) =
@@ -484,22 +430,16 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
           | zero => simp [rawTensorConnLapIter]
           | succ n ihn =>
               rw [rawTensorConnLapIter_succ, ihn, ← rawTensorConnLapIter_succ]
-        -- Induction hypothesis at orders `i ≤ m+1` applied to `U`.
         have hih_low : ∀ i, i < m + 2 →
             ‖iteratedCovGrad g 0 2 i U‖ ≤
               B i * ∑ j ∈ Finset.range ((i + 1) / 2 + 1),
                 ‖rawTensorConnLapIter (I := I) g 0 2 j U‖ :=
           fun i hi => ih i hi U
-        -- Now assemble. Set the target sum bound and the maximal range
-        -- `R := (m + 2 + 1) / 2 + 1 = ⌈(m+2)/2⌉ + 1 = ⌈m/2⌉ + 2`.
         set Rfull : ℕ := ((m + 2) + 1) / 2 + 1 with hRfull_def
         set Sfull : ℝ := ∑ i ∈ Finset.range Rfull,
           ‖rawTensorConnLapIter (I := I) g 0 2 i U‖ with hSfull_def
         have hSfull_nn : 0 ≤ Sfull :=
           Finset.sum_nonneg (fun i _ => norm_nonneg _)
-        -- The two key sub-sums are dominated by `Sfull` (range monotonicity,
-        -- nonnegative summands).
-        -- (a) `Σ_{i≤⌈m/2⌉} ‖Δ_∇^{i+1}U‖`: reindex `i ↦ i+1`, lands in `range Rfull`.
         have hbase_le_full :
             ∑ i ∈ Finset.range ((m + 1) / 2 + 1),
                 ‖rawTensorConnLapIter (I := I) g 0 2 i
@@ -513,7 +453,6 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
             apply Finset.sum_congr rfl
             intro i _; rw [hlapiter_shift i]
           rw [hrw]
-          -- `∑_{i<a} f(i+1) = ∑_{i ∈ [1,a]} f(i) ≤ ∑_{i<Rfull} f(i)`.
           have hshift : ∑ i ∈ Finset.range ((m + 1) / 2 + 1),
                 ‖rawTensorConnLapIter (I := I) g 0 2 (i + 1) U‖ =
               ∑ i ∈ Finset.Ico 1 ((m + 1) / 2 + 2),
@@ -527,7 +466,6 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
             rw [Finset.mem_range]
             rw [hRfull_def]; omega
           · intro i _ _; exact norm_nonneg _
-        -- (b) For `i ≤ m+1`, `Σ_{j≤⌈i/2⌉} ‖Δ_∇^j U‖ ≤ Sfull`.
         have hlow_sub_le_full : ∀ i, i < m + 2 →
             ∑ j ∈ Finset.range ((i + 1) / 2 + 1),
                 ‖rawTensorConnLapIter (I := I) g 0 2 j U‖ ≤ Sfull := by
@@ -538,8 +476,6 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
             rw [Finset.mem_range] at hx ⊢
             rw [hRfull_def]; omega
           · intro j _ _; exact norm_nonneg _
-        -- Combine the commutator chain.
-        -- `nLapS ≤ B m · Sfull + Cc · Σ_{i≤m+1}‖∇^i U‖`.
         have hSlow_nn : 0 ≤ ∑ i ∈ Finset.range (m + 2), ‖iteratedCovGrad g 0 2 i U‖ :=
           Finset.sum_nonneg (fun i _ => norm_nonneg _)
         have hnLapS_le :
@@ -558,7 +494,6 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
                   + Cc * ∑ i ∈ Finset.range (m + 2), ‖iteratedCovGrad g 0 2 i U‖ := by
                 have hb := mul_le_mul_of_nonneg_left hbase_le_full (hB_nn m)
                 linarith [hb]
-        -- `Σ_{i≤m+1}‖∇^i U‖ ≤ (Σ_{i≤m+1} B i) · Sfull` via `hih_low`.
         have hSlow_le :
             ∑ i ∈ Finset.range (m + 2), ‖iteratedCovGrad g 0 2 i U‖ ≤
               (∑ i ∈ Finset.range (m + 2), B i) * Sfull := by
@@ -571,7 +506,6 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
                   ‖rawTensorConnLapIter (I := I) g 0 2 j U‖ := hih_low i hi
             _ ≤ B i * Sfull :=
                 mul_le_mul_of_nonneg_left (hlow_sub_le_full i hi) (hB_nn i)
-        -- `nS = ‖∇^m U‖ ≤ B m · Σ_{i≤⌈m/2⌉}‖Δ_∇^i U‖ ≤ B m · Sfull`.
         have hnS_le : nS ≤ B m * Sfull := by
           rw [hnS_def, hS_def]
           calc ‖iteratedCovGrad g 0 2 m U‖
@@ -579,9 +513,6 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
                   ‖rawTensorConnLapIter (I := I) g 0 2 j U‖ := ih m (by omega) U
             _ ≤ B m * Sfull :=
                 mul_le_mul_of_nonneg_left (hlow_sub_le_full m (by omega)) (hB_nn m)
-        -- Assemble: `nHess ≤ sg·(nLapS + nS)`
-        --   ≤ sg·(B m·Σ + Cc·Σ_low + B m·Σ)
-        --   ≤ sg·(B m·Σ + Cc·(Σ B i)·Σ + B m·Σ) = (B(m+2) - 1)·Σ ≤ B(m+2)·Σ.
         have hcombine : nLapS + nS ≤
             (B m + Cc * (∑ i ∈ Finset.range (m + 2), B i) + B m) * Sfull := by
           have h1 : nLapS ≤ B m * Sfull + Cc * ((∑ i ∈ Finset.range (m + 2), B i) * Sfull) := by
@@ -591,7 +522,6 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
                   have hc := mul_le_mul_of_nonneg_left hSlow_le hCc
                   linarith [hc]
           nlinarith [h1, hnS_le, hSfull_nn]
-        -- Final bound.
         have hfinal : nHess ≤ B (m + 2) * Sfull := by
           have hstep := hBstep m
           calc nHess ≤ sg * (nLapS + nS) := hgard_fp
@@ -599,13 +529,9 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
                 exact mul_le_mul_of_nonneg_left hcombine hsg_nn
             _ = (sg * (B m + Cc * (∑ i ∈ Finset.range (m + 2), B i) + B m)) * Sfull := by ring
             _ ≤ B (m + 2) * Sfull := by
-                -- `sg·(…) ≤ sg·(…) + 1 ≤ B(m+2)` by `hstep`.
                 have hle : sg * (B m + Cc * (∑ i ∈ Finset.range (m + 2), B i) + B m) ≤
                     B (m + 2) := by linarith [hstep]
                 exact mul_le_mul_of_nonneg_right hle hSfull_nn
-        -- Convert back to the stated form. The goal's LHS `‖∇^{m+2} U‖` rewrites
-        -- to `nHess` (via `hgrad2_eq` and `hnHess_def`); the goal's RHS sum range
-        -- `((m+2)+1)/2 + 1` is exactly `Rfull`, so the RHS is `B (m+2) · Sfull`.
         have hLHS : ‖iteratedCovGrad g 0 2 (m + 2) U‖ = nHess := by
           rw [hgrad2_eq, hnHess_def]
         have hRHS : (B (m + 2) * ∑ i ∈ Finset.range (((m + 2) + 1) / 2 + 1),
@@ -613,8 +539,6 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
           rw [hSfull_def, hRfull_def]
         rw [hLHS, hRHS]
         exact hfinal
-
-/-! ## The all-order Gårding bootstrap headline -/
 
 set_option linter.unusedSectionVars false in
 /-- **The all-order intrinsic Gårding bootstrap.** For a closed smooth
@@ -657,12 +581,10 @@ theorem allOrder_covGrad_l2Norm_le_lapIter_sum
   classical
   obtain ⟨Cmix, hCmix_nn, hmix⟩ :=
     gradOrder_l2Norm_le_lapIter_sum (I := I) (M := M) g Cg Cc hgard hgrad1 hcomm
-  -- The headline constant: `(number of j-terms) · (max of Cmix over j ≤ 2k)`.
   set Cmax : ℝ := ∑ j ∈ Finset.range (2 * k + 1), Cmix j with hCmax_def
   have hCmax_nn : 0 ≤ Cmax :=
     Finset.sum_nonneg (fun j _ => hCmix_nn j)
   refine ⟨Cmax, hCmax_nn, fun T => ?_⟩
-  -- Convert the `tensorL2Norm`/`toL2` forms to `SmoothCcTensor` seminorms.
   have hLHS_eq : ∀ j,
       tensorL2Norm (I := I) (M := M) g 0 (2 + j) (iteratedCovGrad g 0 2 j T).toFun =
         ‖iteratedCovGrad g 0 2 j T‖ :=
@@ -674,12 +596,9 @@ theorem allOrder_covGrad_l2Norm_le_lapIter_sum
     fun i => (rawTensorConnLapIter_norm_eq_toL2 (I := I) (M := M) g i T).symm
   rw [Finset.sum_congr rfl (fun j _ => hLHS_eq j),
       Finset.sum_congr rfl (fun i _ => hRHS_eq i)]
-  -- The full RHS sum (over `i ≤ k`) is nonnegative.
   set Sk : ℝ := ∑ i ∈ Finset.range (k + 1), ‖rawTensorConnLapIter (I := I) g 0 2 i T‖
     with hSk_def
   have hSk_nn : 0 ≤ Sk := Finset.sum_nonneg (fun i _ => norm_nonneg _)
-  -- For each `j ≤ 2k`: `‖∇^j T‖ ≤ Cmix j · Σ_{i≤⌈j/2⌉}‖Δ_∇^i T‖ ≤ Cmix j · Sk`,
-  -- since `⌈j/2⌉ = (j+1)/2 ≤ k` when `j ≤ 2k`.
   have hper : ∀ j ∈ Finset.range (2 * k + 1),
       ‖iteratedCovGrad g 0 2 j T‖ ≤ Cmix j * Sk := by
     intro j hj
@@ -696,17 +615,10 @@ theorem allOrder_covGrad_l2Norm_le_lapIter_sum
         ≤ Cmix j * ∑ i ∈ Finset.range ((j + 1) / 2 + 1),
             ‖rawTensorConnLapIter (I := I) g 0 2 i T‖ := hmix j T
       _ ≤ Cmix j * Sk := mul_le_mul_of_nonneg_left hsub_le (hCmix_nn j)
-  -- Sum over `j` and factor `Sk`.
   calc ∑ j ∈ Finset.range (2 * k + 1), ‖iteratedCovGrad g 0 2 j T‖
       ≤ ∑ j ∈ Finset.range (2 * k + 1), Cmix j * Sk := Finset.sum_le_sum hper
     _ = (∑ j ∈ Finset.range (2 * k + 1), Cmix j) * Sk := by rw [Finset.sum_mul]
     _ = Cmax * Sk := by rw [hCmax_def]
-
-/-! ## Genuine inhabitation of the base-valence ingredients
-
-The `(0, 2)` instances of the order-`1` and order-`2` families are discharged
-unconditionally / from the on-disk order-`2` Gårding estimate, confirming that
-the threaded hypotheses are not vacuous at the base valence. -/
 
 set_option linter.unusedSectionVars false in
 /-- **The `(0, 2)` instance of `Order1ControlFamily`** is exactly the

@@ -49,8 +49,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicH1Lp
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -59,8 +57,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 namespace H1Intrinsic
 
 variable [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-
-/-! ## The Dirichlet form -/
 
 /-- The Dirichlet form `Q(u, v) := ∫_M g(∇u, ∇v) dμ_g`. -/
 def dirichletForm (g : SmoothRiemannianMetric I M)
@@ -91,8 +87,7 @@ theorem dirichletForm_self_nonneg (g : SmoothRiemannianMetric I M)
     g.inner x ((gradL2 (I := I) (M := M) g u : M → E) x)
       ((gradL2 (I := I) (M := M) g u : M → E) x)
   rcases eq_or_ne ((gradL2 (I := I) (M := M) g u : M → E) x) 0 with h0 | h0
-  · -- gradient at x is zero, so the integrand at x is g(0, 0) = 0.
-    have h_zero : g.inner x ((gradL2 (I := I) (M := M) g u : M → E) x)
+  · have h_zero : g.inner x ((gradL2 (I := I) (M := M) g u : M → E) x)
         ((gradL2 (I := I) (M := M) g u : M → E) x) = 0 := by
       rw [h0]
       change g.inner x (0 : TangentSpace I x) (0 : TangentSpace I x) = 0
@@ -105,11 +100,9 @@ theorem dirichletForm_zero_left (g : SmoothRiemannianMetric I M)
     (u : H1Intrinsic (I := I) (M := M) g) :
     dirichletForm (I := I) (M := M) g 0 u = 0 := by
   unfold dirichletForm
-  -- gradL2 0 = 0 (linear map), so g.inner x 0 _ = 0 a.e.
   have h0 : (gradL2 (I := I) (M := M) g (0 : H1Intrinsic (I := I) (M := M) g) :
       Lp E 2 (riemannianVolumeMeasure I M g)) = 0 := by
     rw [(gradL2 (I := I) (M := M) g).map_zero]
-  -- (gradL2 g 0 : M → E) =ᵐ 0 via Lp.coeFn_zero.
   have h_ae : (fun x : M =>
         g.inner x ((gradL2 g (0 : H1Intrinsic g) : M → E) x)
           ((gradL2 g u : M → E) x)) =ᵐ[riemannianVolumeMeasure I M g]
@@ -123,7 +116,6 @@ theorem dirichletForm_zero_left (g : SmoothRiemannianMetric I M)
       exact hx
     filter_upwards [hzero_fn] with x hx
     rw [hx]
-    -- g.inner x 0 v = 0 by linearity.
     rw [show (0 : E) = (0 : TangentSpace I x) from rfl,
       map_zero, ContinuousLinearMap.zero_apply]
   rw [integral_congr_ae h_ae]
@@ -135,8 +127,6 @@ theorem dirichletForm_zero_right (g : SmoothRiemannianMetric I M)
     dirichletForm (I := I) (M := M) g u 0 = 0 := by
   rw [dirichletForm_symm (I := I) (M := M) g u 0]
   exact dirichletForm_zero_left (I := I) (M := M) g u
-
-/-! ## The shifted form -/
 
 /-- The shifted form `B(u, v) := Q(u, v) + ⟨toLp u, toLp v⟩_{L²}`. The L²
 inner product term `⟨toLp u, toLp v⟩_{L²}` is realized as a Bochner
@@ -176,7 +166,6 @@ theorem shiftedForm_zero_left (g : SmoothRiemannianMetric I M)
   unfold shiftedForm
   rw [dirichletForm_zero_left (I := I) (M := M) g u]
   rw [zero_add]
-  -- toLp 0 = 0 → (toLp 0 : M → ℝ) =ᵐ 0 → integral of 0 * v = 0.
   have hzero : (toLp (I := I) (M := M) g (0 : H1Intrinsic (I := I) (M := M) g) :
       Lp ℝ 2 (riemannianVolumeMeasure I M g)) = 0 := by
     rw [(toLp (I := I) (M := M) g).map_zero]
@@ -202,23 +191,6 @@ theorem shiftedForm_zero_right (g : SmoothRiemannianMetric I M)
   rw [shiftedForm_symm (I := I) (M := M) g u 0]
   exact shiftedForm_zero_left (I := I) (M := M) g u
 
-/-! ## Continuous-linear-map formulation
-
-This section packages bilinearity of `dirichletForm` and `shiftedForm` as
-`LinearMap`-valued constructions:
-$$Q : H^1(M, g) \to_\ell H^1(M, g) \to_\ell \mathbb R$$
-and similarly for `B`. The continuous-linear-map version (`→L[ℝ]` instead
-of `→ₗ[ℝ]`) requires a uniform metric upper bound on `g.inner` over the
-compact manifold, which is established in `MetricBounds.lean` (or a
-dedicated downstream file when needed). -/
-
-/-! ### Bilinearity of the Dirichlet form
-
-The Dirichlet form is bilinear in both slots. Bilinearity follows from the
-bilinearity of the integrand (via the linearity of `gradL2 g` in `u` and the
-bilinearity of `g.inner b`) combined with the additivity of the Bochner
-integral. -/
-
 /-- Pointwise bilinear expansion: `g.inner b (G_{u₁+u₂}(b)) (G_v(b)) =
 g.inner b (G_{u₁}(b)) (G_v(b)) + g.inner b (G_{u₂}(b)) (G_v(b))` (a.e.). -/
 private lemma dirichletForm_integrand_add_left
@@ -231,12 +203,10 @@ private lemma dirichletForm_integrand_add_left
         ((gradL2 (I := I) (M := M) g v : M → E) x) +
         g.inner x ((gradL2 (I := I) (M := M) g u₂ : M → E) x)
           ((gradL2 (I := I) (M := M) g v : M → E) x)) := by
-  -- gradL2 is linear: gradL2 (u₁ + u₂) = gradL2 u₁ + gradL2 u₂.
   have hgrad_add : (gradL2 (I := I) (M := M) g (u₁ + u₂) :
         Lp E 2 (riemannianVolumeMeasure I M g)) =
       gradL2 (I := I) (M := M) g u₁ + gradL2 (I := I) (M := M) g u₂ :=
     map_add (gradL2 (I := I) (M := M) g) u₁ u₂
-  -- Transfer to the function-level via Lp.coeFn_add.
   have hfn_add : (fun x : M => ((gradL2 (I := I) (M := M) g (u₁ + u₂) :
         Lp E 2 (riemannianVolumeMeasure I M g)) : M → E) x)
       =ᵐ[riemannianVolumeMeasure I M g]
@@ -248,11 +218,9 @@ private lemma dirichletForm_integrand_add_left
     filter_upwards [Lp.coeFn_add (gradL2 (I := I) (M := M) g u₁)
       (gradL2 (I := I) (M := M) g u₂)] with x hx
     exact hx
-  -- Apply the bilinearity of g.inner pointwise.
   filter_upwards [hfn_add] with x hx
   show g.inner x ((gradL2 (I := I) (M := M) g (u₁ + u₂) : M → E) x)
         ((gradL2 (I := I) (M := M) g v : M → E) x) = _
-  -- Split the sum in the first argument: g.inner x (a+b) c = g.inner x a c + g.inner x b c.
   calc g.inner x ((gradL2 g (u₁ + u₂) : M → E) x) ((gradL2 g v : M → E) x)
       = g.inner x ((gradL2 g u₁ : M → E) x + (gradL2 g u₂ : M → E) x)
           ((gradL2 g v : M → E) x) := by rw [hx]
@@ -307,28 +275,21 @@ theorem dirichletForm_add_left (g : SmoothRiemannianMetric I M)
   unfold dirichletForm
   rw [integral_congr_ae (dirichletForm_integrand_add_left
     (I := I) (M := M) g u₁ u₂ v)]
-  -- Use that each summand is integrable.
   rw [integral_add ?_ ?_]
-  -- Integrability: from the IsH1Pair MemLp 2 of metric g-norm + Cauchy-Schwarz.
-  · -- First integrand integrable: g.inner x G_{u₁} G_v ∈ L¹.
-    have hL2_u₁ := (u₁.2 : IsH1Pair (I := I) (M := M) g _ _).2.1
+  · have hL2_u₁ := (u₁.2 : IsH1Pair (I := I) (M := M) g _ _).2.1
     have hL2_v := (v.2 : IsH1Pair (I := I) (M := M) g _ _).2.1
-    -- |g.inner x G G'| ≤ √g(G,G) · √g(G',G') (pointwise CS), and √g(G,G), √g(G',G') ∈ L².
-    -- Hence |g.inner x G G'| ∈ L¹ by Cauchy-Schwarz in L².
     refine MeasureTheory.Integrable.mono' (g := fun x =>
       Real.sqrt (g.inner x ((gradL2 g u₁ : M → E) x) ((gradL2 g u₁ : M → E) x)) *
         Real.sqrt (g.inner x ((gradL2 g v : M → E) x) ((gradL2 g v : M → E) x)))
       ?_ ?_ ?_
     · exact MemLp.integrable_mul hL2_u₁ hL2_v
-    · -- AESM of `g.inner x G_{u₁} G_v`. Bake into IsH1Pair with PairAEMeasurable.
-      have hpair_u₁ := (u₁.2 : IsH1Pair (I := I) (M := M) g _ _).2.2
+    · have hpair_u₁ := (u₁.2 : IsH1Pair (I := I) (M := M) g _ _).2.2
       exact hpair_u₁ _ (Lp.aestronglyMeasurable (gradL2 g v))
     · refine Filter.Eventually.of_forall (fun x => ?_)
       have hCS := abs_metric_inner_le_sqrt_metric_quadratic (I := I) (M := M)
         g x ((gradL2 g u₁ : M → E) x) ((gradL2 g v : M → E) x)
       rwa [show ‖_‖ = |_| from Real.norm_eq_abs _]
-  · -- Second integrand: similar.
-    have hL2_u₂ := (u₂.2 : IsH1Pair (I := I) (M := M) g _ _).2.1
+  · have hL2_u₂ := (u₂.2 : IsH1Pair (I := I) (M := M) g _ _).2.1
     have hL2_v := (v.2 : IsH1Pair (I := I) (M := M) g _ _).2.1
     refine MeasureTheory.Integrable.mono' (g := fun x =>
       Real.sqrt (g.inner x ((gradL2 g u₂ : M → E) x) ((gradL2 g u₂ : M → E) x)) *
@@ -372,8 +333,6 @@ theorem dirichletForm_smul_right (g : SmoothRiemannianMetric I M) (c : ℝ)
     dirichletForm_smul_left (I := I) (M := M) g c v u,
     dirichletForm_symm (I := I) (M := M) g v u]
 
-/-! ### The Dirichlet form as a bilinear `LinearMap`-valued map -/
-
 /-- The Dirichlet form `Q : H¹(M, g) →ₗ[ℝ] H¹(M, g) →ₗ[ℝ] ℝ`. -/
 def dirichletFormLM (g : SmoothRiemannianMetric I M) :
     H1Intrinsic (I := I) (M := M) g →ₗ[ℝ]
@@ -401,11 +360,6 @@ def dirichletFormLM (g : SmoothRiemannianMetric I M) :
     dirichletFormLM (I := I) (M := M) g u v =
       dirichletForm (I := I) (M := M) g u v := rfl
 
-/-! ### Bilinearity of the shifted form
-
-The shifted form `B(u, v) = Q(u, v) + ⟨u, v⟩_{L²}` is bilinear because both
-summands are bilinear. -/
-
 /-- Additivity of the shifted form in the left argument. -/
 theorem shiftedForm_add_left (g : SmoothRiemannianMetric I M)
     (u₁ u₂ v : H1Intrinsic (I := I) (M := M) g) :
@@ -417,7 +371,6 @@ theorem shiftedForm_add_left (g : SmoothRiemannianMetric I M)
       (I := I) (M := M) g
   unfold shiftedForm
   rw [dirichletForm_add_left (I := I) (M := M) g u₁ u₂ v]
-  -- L² inner product: (toLp (u₁+u₂)) v = (toLp u₁) v + (toLp u₂) v.
   have h_to_add : (toLp (I := I) (M := M) g (u₁ + u₂) :
         Lp ℝ 2 (riemannianVolumeMeasure I M g)) =
       toLp (I := I) (M := M) g u₁ + toLp (I := I) (M := M) g u₂ :=
@@ -453,8 +406,7 @@ theorem shiftedForm_add_left (g : SmoothRiemannianMetric I M)
       rw [hx, add_mul]
     rw [integral_congr_ae h_ae]
     refine integral_add ?_ ?_
-    · -- Integrability: |u₁ * v| ≤ ‖u₁‖_{L²} · ‖v‖_{L²} (pointwise * Cauchy-Schwarz, finite).
-      exact (MemLp.integrable_mul (Lp.memLp _) (Lp.memLp _) :
+    · exact (MemLp.integrable_mul (Lp.memLp _) (Lp.memLp _) :
         Integrable (fun x : M => ((toLp (I := I) (M := M) g u₁ : M → ℝ) x) *
             ((toLp (I := I) (M := M) g v : M → ℝ) x)) _)
     · exact (MemLp.integrable_mul (Lp.memLp _) (Lp.memLp _) :
@@ -470,7 +422,6 @@ theorem shiftedForm_smul_left (g : SmoothRiemannianMetric I M) (c : ℝ)
       c * shiftedForm (I := I) (M := M) g u v := by
   unfold shiftedForm
   rw [dirichletForm_smul_left (I := I) (M := M) g c u v]
-  -- L² inner product: (toLp (c•u)) * (toLp v) = c * (toLp u) * (toLp v).
   have h_to_smul : (toLp (I := I) (M := M) g (c • u) :
         Lp ℝ 2 (riemannianVolumeMeasure I M g)) =
       c • toLp (I := I) (M := M) g u :=
@@ -518,8 +469,6 @@ theorem shiftedForm_smul_right (g : SmoothRiemannianMetric I M) (c : ℝ)
   rw [shiftedForm_symm (I := I) (M := M) g u (c • v),
     shiftedForm_smul_left (I := I) (M := M) g c v u,
     shiftedForm_symm (I := I) (M := M) g v u]
-
-/-! ### The shifted form as a bilinear `LinearMap`-valued map -/
 
 /-- The shifted form `B : H¹(M, g) →ₗ[ℝ] H¹(M, g) →ₗ[ℝ] ℝ`. -/
 def shiftedFormLM (g : SmoothRiemannianMetric I M) :

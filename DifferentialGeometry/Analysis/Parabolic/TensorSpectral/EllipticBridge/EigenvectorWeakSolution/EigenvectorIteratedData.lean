@@ -89,12 +89,6 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev.Chart hiding chartTargetEuclid
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -103,13 +97,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## The open complement of the partition-of-unity kernel inside the chart target
-
-The compact partition-of-unity kernel `chartPouKernel α` is closed; its
-complement inside the open Euclidean chart target `chartTargetEuclid α` is the
-open set `chartTargetEuclid α \ chartPouKernel α`, on which every datum field of
-the iterated weak-elliptic datum vanishes almost everywhere. -/
 
 /-- The open complement of the partition-of-unity kernel inside the chart
 target. -/
@@ -126,13 +113,6 @@ private lemma chartTargetEuclid_sdiff_chartPouKernel_subset (α : M) :
         chartPouKernel (I := I) (M := M) α ⊆
       chartTargetEuclid (I := I) (M := M) α :=
   Set.diff_subset
-
-/-! ## Locality of the chosen weak partial off the kernel
-
-The chosen weak partial of a function that is almost everywhere zero on the open
-complement of the kernel is itself almost everywhere zero there. This is the
-locality of the weak derivative: the value of the chosen weak partial on an open
-subset depends only on the function restricted to that subset. -/
 
 /-- **Locality of the chosen weak partial.** If `u` is almost everywhere zero on
 the open set `chartTargetEuclid α \ chartPouKernel α`, then the chosen weak
@@ -163,20 +143,17 @@ lemma chosenWeakPartial'_ae_zero_off_chartPouKernel_of_ae_zero
     chartTargetEuclid_sdiff_chartPouKernel_isOpen (I := I) (M := M) α
   have hV_sub : V ⊆ Ω := chartTargetEuclid_sdiff_chartPouKernel_subset (I := I) (M := M) α
   by_cases hW : DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 u Ω
-  · -- `u` lies in `W^{1,2}(Ω)`; restrict the data to the open subset `V`.
-    have hu_V : DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 u V := by
+  · have hu_V : DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 u V := by
       refine ⟨hW.1.mono_measure (Measure.restrict_mono_set _ hV_sub), ?_⟩
       intro j
       obtain ⟨gj, hgj_memLp, hgj_weak⟩ := hW.2 j
       exact ⟨gj, hgj_memLp.mono_measure (Measure.restrict_mono_set _ hV_sub),
         DeGiorgi.HasWeakPartialDeriv.restrict hV_open hV_sub hgj_weak⟩
-    -- The chosen weak partial over `V` is almost everywhere zero on `V`.
     have h_chosen_V_zero :
         chosenWeakPartial' (d := Module.finrank ℝ E) 2 i u V
           =ᵐ[(volume : Measure EuclN).restrict V] (fun _ : EuclN => (0 : ℝ)) :=
       chosenWeakPartial'_ae_zero_of_ae_zero (d := Module.finrank ℝ E)
         (by norm_num) hV_open hu_ae i
-    -- The chosen weak partial over `Ω` and over `V` agree almost everywhere on `V`.
     have h_partial_Ω : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
         (chosenWeakPartial' (d := Module.finrank ℝ E) 2 i u Ω) u Ω :=
       chosenWeakPartial'_isWeakPartial_of_mem hW i
@@ -201,17 +178,8 @@ lemma chosenWeakPartial'_ae_zero_off_chartPouKernel_of_ae_zero
       DeGiorgi.HasWeakPartialDeriv.ae_eq hV_open h_partial_Ω_V h_partial_V
         hLp_Ω_V hLp_V
     exact h_eq.trans h_chosen_V_zero
-  · -- `u` is not `W^{1,2}(Ω)`: the chosen weak partial is identically zero.
-    rw [chosenWeakPartial'_of_not_mem hW]
+  · rw [chosenWeakPartial'_of_not_mem hW]
     exact Filter.Eventually.of_forall (fun _ => rfl)
-
-/-! ## The candidate weak chart partials are a.e. zero off the kernel
-
-Each candidate weak chart partial `eigenvectorChartWeakPartial` is a genuine weak
-partial of the eigenvector chart component. Since the chart component is almost
-everywhere zero on the open complement of the kernel, the constant `0` is also a
-weak partial there, and by uniqueness the candidate weak chart partial is almost
-everywhere zero there. -/
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- **Chart-locality-free twin of
@@ -244,13 +212,10 @@ lemma eigenvectorChartWeakPartial_ae_zero_off_chartPouKernel
   have hV_sub : V ⊆ Ω :=
     chartTargetEuclid_sdiff_chartPouKernel_subset (I := I) (M := M) α
   have hV_meas : MeasurableSet V := hV_open.measurableSet
-  -- The unconditional eigenvector chart component, as an abstract `L²` element.
   set uVec :=
     tensorResolventEigenbasisVec (I := I) (M := M)
       (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s) i
     with huVec_def
-  -- The canonical chart component of `uVec` is a.e. zero on `V`. Recast the
-  -- `chartL2Measure`-a.e. implication (= `volume.restrict Ω`) onto `V`.
   have h_ae : ∀ᵐ y ∂((volume : Measure EuclN).restrict Ω),
       y ∉ chartPouKernel (I := I) (M := M) α →
         (tensorL2ChartComponent (I := I) (M := M) g r s uVec α P₀ :
@@ -269,8 +234,6 @@ lemma eigenvectorChartWeakPartial_ae_zero_off_chartPouKernel
     filter_upwards [(ae_restrict_iff' hV_meas).mp h_ae_V] with y hy
     intro hy_V
     exact hy hy_V hy_V.2
-  -- `eigenvectorChartWeakPartial k` is a genuine weak `k`-partial
-  -- of the chart component on `Ω`, hence on the open subset `V`.
   have h_wp_Ω : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
       (eigenvectorChartWeakPartial (I := I) (M := M)
         g r s i α P₀ k)
@@ -284,8 +247,6 @@ lemma eigenvectorChartWeakPartial_ae_zero_off_chartPouKernel
       (tensorL2ChartComponent (I := I) (M := M) g r s uVec α P₀)
       V :=
     DeGiorgi.HasWeakPartialDeriv.restrict hV_open hV_sub h_wp_Ω
-  -- The constant `0` is a weak `k`-partial of the chart component on `V`
-  -- (since the chart component is a.e. zero on `V`).
   have h_zero_V : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
       (fun _ : EuclN => (0 : ℝ))
       (tensorL2ChartComponent (I := I) (M := M) g r s uVec α P₀) V := by
@@ -302,10 +263,6 @@ lemma eigenvectorChartWeakPartial_ae_zero_off_chartPouKernel
       simp [hx]
     rw [integral_congr_ae h_ae_lhs]
     simp
-  -- Uniqueness of weak partials on `V` identifies the two.
-  -- `eigenvectorChartWeakPartial k` is the coercion of the `Lp`
-  -- element `eigenvectorChartPartialLp`, hence `MemLp 2` of
-  -- `chartL2Measure α = volume.restrict Ω`.
   have h_wp_memLp_Ω : MemLp
       (eigenvectorChartWeakPartial (I := I) (M := M)
         g r s i α P₀ k) 2
@@ -343,8 +300,6 @@ lemma eigenvectorChartComponentFun_ae_zero_off_chartPouKernel
         (chartTargetEuclid (I := I) (M := M) α \
           chartPouKernel (I := I) (M := M) α)] (fun _ : EuclN => (0 : ℝ)) := by
   classical
-  -- `tensorL2ChartComponent_ae_zero_off_chartPouKernel` is stated as an a.e.
-  -- implication on `chartL2Measure α = volume.restrict (chartTargetEuclid α)`.
   have h_ae : ∀ᵐ y ∂((volume : Measure EuclN).restrict
       (chartTargetEuclid (I := I) (M := M) α)),
       y ∉ chartPouKernel (I := I) (M := M) α →
@@ -358,7 +313,6 @@ lemma eigenvectorChartComponentFun_ae_zero_off_chartPouKernel
   have hV_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α \
       chartPouKernel (I := I) (M := M) α) :=
     (chartTargetEuclid_sdiff_chartPouKernel_isOpen (I := I) (M := M) α).measurableSet
-  -- Restrict the a.e. implication from the chart target to its open subset `V`.
   have h_ae_V : ∀ᵐ y ∂((volume : Measure EuclN).restrict
       (chartTargetEuclid (I := I) (M := M) α \
         chartPouKernel (I := I) (M := M) α)),
@@ -371,13 +325,6 @@ lemma eigenvectorChartComponentFun_ae_zero_off_chartPouKernel
   filter_upwards [(ae_restrict_iff' hV_meas).mp h_ae_V] with y hy
   intro hy_V
   exact hy hy_V hy_V.2
-
-/-! ## The iterated weak chart partials are a.e. zero off the kernel
-
-Every `m`-fold mixed weak chart partial `eigenvectorChartIteratedPartial` is
-almost everywhere zero on the open complement of the partition-of-unity kernel.
-The proof is induction on `m`: the base case is the chart component, and the
-inductive step is the locality of the chosen weak partial. -/
 
 /-- **Chart-locality-free twin of
 `eigenvectorChartIteratedPartial_ae_zero_off_chartPouKernel`.** Every `m`-fold
@@ -408,12 +355,6 @@ lemma eigenvectorChartIteratedPartial_ae_zero_off_chartPouKernel
       rw [eigenvectorChartIteratedPartial_succ]
       exact chosenWeakPartial'_ae_zero_off_chartPouKernel_of_ae_zero
         α (ih (Fin.init l)) (l (Fin.last m))
-
-/-! ## The test-decoupling coefficients vanish off the kernel
-
-The cross-left and cross-right test-decoupling coefficients are built from
-chart-Euclidean partials of the chart push-forward of the chart-atlas
-partition-of-unity weight, hence vanish off the partition-of-unity kernel. -/
 
 /-- The cross-left test-decoupling coefficient vanishes off the
 partition-of-unity kernel. -/
@@ -453,15 +394,6 @@ lemma crossRightTestValueCoeff_eq_zero_off_chartPouKernel
   rw [gradChartCoeffEuclid_pou_eq_zero_off_chartPouKernel
     (I := I) (M := M) g α m hy, zero_mul]
 
-/-! ## The eigenvector chart right-hand side is a.e. zero off the kernel
-
-The seven-term eigenvector chart right-hand side `eigenvectorChartRHS` is almost
-everywhere zero on the open complement of the partition-of-unity kernel: the
-chart-component term is almost everywhere zero there, and each of the remaining
-six terms carries a factor that vanishes pointwise there (either an
-`indicator (chartPouKernel α)`, or a test-decoupling coefficient built from a
-chart-Euclidean partial of the chart-pushed partition-of-unity weight). -/
-
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- **Chart-locality-free twin of
 `eigenvectorChartRHS_ae_zero_off_chartPouKernel`.** The seven-term
@@ -488,21 +420,15 @@ lemma eigenvectorChartRHS_ae_zero_off_chartPouKernel
     chartPouKernel (I := I) (M := M) α with hV_def
   have hV_meas : MeasurableSet V :=
     (chartTargetEuclid_sdiff_chartPouKernel_isOpen (I := I) (M := M) α).measurableSet
-  -- The chart-component term is a.e. zero off the kernel.
   have h_comp := eigenvectorChartComponentFun_ae_zero_off_chartPouKernel
     (I := I) (M := M) g r s i α P₀
   rw [Filter.EventuallyEq, ae_restrict_iff' hV_meas]
   filter_upwards [(ae_restrict_iff' hV_meas).mp h_comp] with y h_comp_y
   intro hy_V
   have hy : y ∉ chartPouKernel (I := I) (M := M) α := hy_V.2
-  -- The chart-component term, evaluated at `y`, equals zero.
   have h_comp_zero : eigenvectorChartComponentFun (I := I) (M := M)
       g r s i α P₀ y = 0 := h_comp_y hy_V
-  -- Unfold `eigenvectorChartRHS`; the chart-component term is the
-  -- coercion of the eigenvector `L²` element, definitionally
-  -- `eigenvectorChartComponentFun`.
   rw [eigenvectorChartRHS]
-  -- The cross-left and cross-right value sums vanish pointwise off the kernel.
   have h_crossLeft :
       (∑ P : TensorCompIdx (E := E) r (s + 1),
         ∑ Q : TensorCompIdx (E := E) r (s + 1),
@@ -525,8 +451,6 @@ lemma eigenvectorChartRHS_ae_zero_off_chartPouKernel
     refine Finset.sum_eq_zero (fun P _ => Finset.sum_eq_zero (fun Q _ => ?_))
     rw [crossRightTestValueCoeff_eq_zero_off_chartPouKernel
       (I := I) (M := M) g r s α P₀ Q hy, mul_zero, zero_mul]
-  -- The remaining four terms vanish pointwise off the kernel by their
-  -- `_eq_zero_off_chartPouKernel_unconditional` lemmas.
   rw [show ((tensorL2ChartComponent (I := I) (M := M) g r s
         (tensorResolventEigenbasisVec (I := I) (M := M)
           (tensorResolventL2_isCompactOperator (I := I) (M := M)
@@ -540,21 +464,10 @@ lemma eigenvectorChartRHS_ae_zero_off_chartPouKernel
       (I := I) (M := M) g r s i α P₀ hy,
     crossRightGradCoeffDivLimit_eq_zero_off_chartPouKernel
       (I := I) (M := M) g r s i α P₀ hy]
-  -- The weighted-gradient-divergence term is a sum vanishing off the kernel.
   rw [Finset.sum_eq_zero (fun l _ =>
     weightedGradCoeffDivLimit_eq_zero_off_chartPouKernel_unconditional
       (I := I) (M := M) g r s i α P₀ l hy)]
   ring
-
-/-! ## Generic order-2 interior regularity for a chart-bilinear datum
-
-For any chart-bilinear divergence-form datum `D`, the order-2 interior engine
-`tensor_h2_chart_loc_of_uniform_bound` extracts, on a precompact interior
-subdomain `Ω''` with a difference-quotient room, a weak `H¹` partial of every
-`D.weak_partial j`. The uniform-in-`h` difference-quotient bound the engine
-consumes is discharged unconditionally, through the underlying scalar data
-`D.toChartData`, by `chartBilinearH1Compl_uniform_diffQuot_bound_of_data`. The
-Nirenberg cutoff is constructed internally from `Ω''` and the room radius. -/
 
 /-- Monotonicity of a thickening in the radius. -/
 private lemma thickening_mono_of_lt
@@ -701,13 +614,11 @@ lemma tensorChartBilinear_chartComponent_regularity_of_data
     fun x hx => h_room (Metric.self_subset_cthickening _ hx)
   have hΩ''_in_chart : Ω'' ⊆ chartTargetEuclid (I := I) (M := M) α :=
     fun y hy => h_closureΩ''_in_chart (subset_closure hy)
-  -- The sub-radius and its room.
   set R_dq : ℝ := R₀ / 16 with hR_dq_def
   have hR_dq_pos : 0 < R_dq := by positivity
   have h_room_dq : Metric.cthickening R_dq (closure Ω'') ⊆
       chartTargetEuclid (I := I) (M := M) α :=
     (Metric.cthickening_mono (by rw [hR_dq_def]; linarith) (closure Ω'')).trans h_room
-  -- Discharge the uniform bound and apply the order-2 engine.
   obtain ⟨M_bound, hM_nn, h_uniform_bd⟩ :=
     tensorChartBilinear_uniform_diffQuot_bound_of_data
       (g := g) (r := r) (s := s) (α := α) (P₀ := P₀) D
@@ -716,19 +627,16 @@ lemma tensorChartBilinear_chartComponent_regularity_of_data
     tensor_h2_chart_loc_of_uniform_bound (I := I) (M := M)
       (g := g) (r := r) (s := s) (α := α) (P₀ := P₀) D
       hΩ''_open hΩ''_compact_closure hR_dq_pos h_room_dq hM_nn h_uniform_bd
-  -- Each weak partial is `L²(Ω'')`.
   have h_dwp_memLp_Ω'' :
       ∀ j, MemLp (D.weak_partial j) 2 ((volume : Measure EuclN).restrict Ω'') :=
     fun j => (D.weak_partial_locally_memLp j hΩ''_compact_closure
       h_closureΩ''_in_chart).mono_measure
         (Measure.restrict_mono subset_closure le_rfl)
-  -- Each weak partial is a genuine weak partial of the chart component on `Ω''`.
   have h_dwp_weak_uChart_Ω'' :
       ∀ j, DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) j
         (D.weak_partial j) D.u_chart Ω'' :=
     fun j => DeGiorgi.HasWeakPartialDeriv.restrict hΩ''_open hΩ''_in_chart
       (D.weak_partial_isWeakPartial j)
-  -- The chart component lies in `W^{1,2}(Ω'')`.
   have h_uChart_memLp_Ω'' :
       MemLp D.u_chart 2 ((volume : Measure EuclN).restrict Ω'') :=
     (D.memLp_volume_restrict_u_chart hΩ''_compact_closure
@@ -738,7 +646,6 @@ lemma tensorChartBilinear_chartComponent_regularity_of_data
       D.u_chart Ω'' :=
     ⟨h_uChart_memLp_Ω'', fun j =>
       ⟨D.weak_partial j, h_dwp_memLp_Ω'' j, h_dwp_weak_uChart_Ω'' j⟩⟩
-  -- Each weak partial lies in `W^{1,2}(Ω'')` by the engine output.
   refine ⟨h_uChart_memW1p, fun j => ⟨h_dwp_memLp_Ω'' j, fun k => ?_⟩⟩
   obtain ⟨g_jk, hg_jk_memLp, hg_jk_partial, _hg_jk_norm⟩ := h_h2 j k
   exact ⟨g_jk, hg_jk_memLp, hg_jk_partial⟩

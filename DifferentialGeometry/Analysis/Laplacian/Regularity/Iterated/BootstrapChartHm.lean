@@ -76,8 +76,6 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -86,16 +84,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Polymorphic support-aware extension of `MemWkp k 2`
-
-The polymorphic cutoff-based extension lemma below promotes a `MemWkp k 2`
-membership on a precompact open subdomain `Ω' ⊆ Ω` to the entire ambient
-open set `Ω`, provided the function vanishes a.e. on `Ω \ K` for some
-compact `K ⊆ Ω'`. The cutoff `η` is smooth, equals `1` on a neighborhood
-of `K`, and has pointwise topological support inside `Ω'`. This generalises
-the bespoke `MemWkp_two_extend_via_cutoff_aux` used in the chart-`H⁴`
-assembly to arbitrary order `k`. -/
 
 /-- **Polymorphic cutoff-based extension of `MemWkp k 2` from a precompact
 open subdomain.** A function in `MemWkp k 2` of an open precompact `Ω' ⊆ Ω`
@@ -196,15 +184,6 @@ theorem MemWkp_extend_via_cutoff_poly
     (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open
     h_eta_u_ae_eq_u).mp h_eta_u_in_Ω
 
-/-! ## Polymorphic chart-`H^{m+2}` assembly from chart-`H²` of `m`-mixed
-partials
-
-The polymorphic `Nat.rec`-style assembly: for every level-`k ≤ m`, the
-chosen `k`-mixed partial of the chart-pushed parent admits chart-`H^{?}`
-regularity whose precise order decreases by `1` as we go from level `k` to
-level `k+1`. Combined recursively via `MemWkp_succ` at each layer, this
-produces chart-`H^{m+2}` of the chart-pushed parent. -/
-
 /-- **Polymorphic chart-`H^{m+2}` assembly via iterated `MemWkp_succ`.**
 For any `m, k : ℕ` and any `m`-direction multi-index `dirs`, if every chosen
 `k`-mixed partial of the chart-pushed function (for arbitrary multi-index
@@ -219,13 +198,8 @@ chart-pushed parent itself. -/
 private theorem chosenMthMixed_memWkp_of_chartH_at_all_multi_indices
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
-    ∀ (n_succ : ℕ), -- We prove the statement by induction on `n_succ := k + 1 - m`.
+    ∀ (n_succ : ℕ),
     ∀ (m : ℕ) (dirs : Fin m → Fin (Module.finrank ℝ E)),
-      -- chart-H^{m + n_succ + 1} of every (m + n_succ)-mixed partial via the
-      -- top-level chart-H^{n_succ + 1} hypothesis on every (m+n_succ)-multi-index,
-      -- AND chart-H¹ of every chosen-mixed-partial at intermediate levels.
-      -- Hypothesis: chart-H^{n_succ + 1} of every chosen (m+n_succ-1)-mixed partial.
-      -- Actually we take the simplest form: chart-H^{n_succ+1} at every direction.
       (∀ (idx_all : Fin m → Fin (Module.finrank ℝ E)),
         DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
           (chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h m idx_all)
@@ -241,23 +215,8 @@ private theorem chosenMthMixed_memWkp_of_chartH_at_all_multi_indices
         (chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h m dirs)
         (chartTargetEuclid (I := I) (M := M) α) := by
   intro n_succ m dirs h_w1p_m h_memWkp_succ
-  -- Apply MemWkp_succ: chart-H^{n_succ+2} of (m-mixed partial in dirs) iff
-  --   MemW1p 2 (m-mixed partial in dirs) AND
-  --   for every direction `i`, chart-H^{n_succ+1} of the chosen weak partial
-  --   `chosenWeakPartial' 2 i (m-mixed partial in dirs)` on chartTarget.
-  -- The chosen weak partial in direction i is `chosenMthMixedPartialChartPushedU
-  -- g α u_h (m + 1) (Fin.snoc dirs i)` — when we extend `dirs` by appending `i`
-  -- (the outermost direction, since the inductive recursion uses Fin.last as the
-  -- outermost direction).
   refine ⟨h_w1p_m dirs, ?_⟩
   intro i
-  -- Need: chart-H^{n_succ+1} of chosenWeakPartial' 2 i (chosenMthMixed m dirs) chartTarget.
-  -- By `chosenMthMixedPartialChartPushedU_succ` (definitionally, since
-  -- the recursion of `chosenMthMixedPartialChartPushedU` at level `m+1` and
-  -- multi-index `Fin.snoc dirs i` evaluates to `chosenWeakPartial' 2 i (chosenMthMixed m dirs) Ω`):
-  --   chosenMthMixed (m+1) (Fin.snoc dirs i) =
-  --     chosenWeakPartial' 2 ((Fin.snoc dirs i)(Fin.last m)) (chosenMthMixed m (Fin.init (Fin.snoc dirs i))) Ω
-  --   = chosenWeakPartial' 2 i (chosenMthMixed m dirs) Ω.
   have h_snoc_last : (Fin.snoc dirs i : Fin (m + 1) →
       Fin (Module.finrank ℝ E)) (Fin.last m) = i := Fin.snoc_last _ _
   have h_init_snoc : (Fin.init (Fin.snoc dirs i : Fin (m + 1) →
@@ -271,7 +230,6 @@ private theorem chosenMthMixed_memWkp_of_chartH_at_all_multi_indices
         (chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h m dirs)
         (chartTargetEuclid (I := I) (M := M) α) := by
     rw [chosenMthMixedPartialChartPushedU_succ, h_snoc_last, h_init_snoc]
-  -- Apply the hypothesis at `idx_next := Fin.snoc dirs i`.
   have h_next := h_memWkp_succ (Fin.snoc dirs i)
   rw [h_succ_eq] at h_next
   exact h_next
@@ -310,38 +268,6 @@ theorem chartPushed_memWkp_m_plus_two_of_mthMixed_chart_H_two
           Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ))
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := by
-  -- Apply repeated MemWkp_succ. We induct on m, treating the m-multi-index as
-  -- arbitrary. At each step, MemWkp_succ peels off one direction, reducing the
-  -- problem to MemWkp (m+1) 2 of (1-mixed partial in some direction). Continue.
-  -- Strategy: prove the general statement
-  --   ∀ k m, chart-H^{k + 2} of every (m - k)-mixed partial -- wait, that's confusing.
-  -- Let's prove the simpler general lemma by Nat.rec on a "remaining order" parameter.
-  -- We prove by induction on `r` (the order we want):
-  --   For every j ≤ m and dirs : Fin j, chart-H^{m + 2 - j} of (j-mixed partial in dirs).
-  -- For j = m: we have chart-H^2 of the m-mixed partial (h_top_memWkp_two).
-  -- For j = m-1: chart-H^3 of the (m-1)-mixed via MemWkp_succ at order 3.
-  -- ...
-  -- For j = 0: chart-H^{m+2} of the chart-pushed parent (= 0-mixed partial).
-  -- We use the auxiliary lemma above with n_succ varying.
-  --
-  -- Concretely: by induction on `s : ℕ` (= m - j), prove
-  --   chart-H^{s + 2} of every (m - s)-mixed partial (for s ≤ m).
-  -- We use a slightly different parametrisation: by `s := m - j`. At s = 0,
-  -- j = m and we have the hypothesis. At s = s' + 1, j = m - s' - 1 and we
-  -- apply the auxiliary lemma to step from chart-H^{s'+2} of (j+1)-mixed partials
-  -- to chart-H^{s'+3} of j-mixed partials.
-  --
-  -- Define a strong predicate:
-  --   P s ↔ s ≤ m ∧ ∀ (j : ℕ), j + s = m → ∀ (dirs : Fin j → ...),
-  --     chart-H^{s + 2} of (j-mixed partial in dirs).
-  -- We prove ∀ s ≤ m, P s by induction on s. Then specialise to s = m, j = 0.
-  --
-  -- Actually it's easier to prove the statement directly via Nat.rec on m.
-  -- We prove the more general statement
-  --   ∀ j (dirs : Fin j → Fin n), chart-H^{(m - j) + 2} of (j-mixed partial in dirs)
-  -- but with j ranging from m downwards. This requires a strong induction.
-  --
-  -- Cleanest: introduce a helper that does the induction.
   suffices h : ∀ s : ℕ, ∀ (j : ℕ), s + j = m → ∀ (dirs : Fin j → Fin (Module.finrank ℝ E)),
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) (s + 2) 2
@@ -352,19 +278,11 @@ theorem chartPushed_memWkp_m_plus_two_of_mthMixed_chart_H_two
   intro s
   induction s with
   | zero =>
-      -- Base case s = 0: need chart-H^2 of every m-mixed partial (j = m).
       intro j hj dirs
       have hj_eq : j = m := by omega
       subst hj_eq
       exact h_top_memWkp_two dirs
   | succ s ih =>
-      -- Step: chart-H^{(s+1) + 2} of every j-mixed partial with j + s + 1 = m.
-      -- Apply the auxiliary lemma at level j with `n_succ := s + 1`:
-      --   chart-H^{(s+1) + 2} of (j-mixed) ⇐ MemW1p of (j-mixed) AND
-      --     chart-H^{(s+1) + 1} of every (j+1)-mixed.
-      -- The chart-H^{s + 2} = chart-H^{(s+1) + 1} = chart-H^{s+2} of every
-      -- (j+1)-mixed is exactly the inductive hypothesis at `s` and `j + 1`
-      -- (where j + 1 + s = m).
       intro j hj dirs
       have hj_le_m : j ≤ m := by omega
       have hj_succ_in_m : s + (j + 1) = m := by omega
@@ -379,19 +297,6 @@ theorem chartPushed_memWkp_m_plus_two_of_mthMixed_chart_H_two
               (I := I) (M := M) g α u_h (j + 1) idx)
             (chartTargetEuclid (I := I) (M := M) α) :=
         fun idx => ih (j + 1) hj_succ_in_m idx
-      -- Apply the auxiliary lemma. n_succ in the auxiliary lemma plays the role
-      -- of `s + 1`, so n_succ + 1 = s + 2 and n_succ + 2 = s + 3.
-      -- Wait: we want to conclude chart-H^{(s+1) + 2} = chart-H^{s + 3}.
-      -- The auxiliary lemma at `n_succ := s + 1` concludes chart-H^{(s+1) + 2}.
-      -- It needs:
-      --   - h_w1p_m : MemW1p of every m-mixed (taking ALL idx — but it's only used at `dirs`).
-      --     Actually the auxiliary takes `∀ idx_all : Fin m → ⋯, MemW1p (m-mixed in idx_all)`
-      --     which is stronger than needed (it really needs only at `dirs`).
-      -- That's a slight mismatch. Let's modify the auxiliary to take only at the specific dirs.
-      -- Actually re-examine: the auxiliary takes a forall over idx_all because the
-      -- conclusion `chosenWeakPartial_mem` step requires MemW1p of the parent in all
-      -- multi-indices. But really, the auxiliary only USES h_w1p_m at the specific dirs.
-      -- We could pass `(fun _ => h_w1p)`.
       have h_w1p_at_all : ∀ idx_all : Fin j → Fin (Module.finrank ℝ E),
           DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
             (chosenMthMixedPartialChartPushedU
@@ -400,16 +305,8 @@ theorem chartPushed_memWkp_m_plus_two_of_mthMixed_chart_H_two
         h_intermediate_w1p j hj_le_m
       have h_aux := chosenMthMixed_memWkp_of_chartH_at_all_multi_indices
         (I := I) (M := M) g α u_h (s + 1) j dirs h_w1p_at_all h_next
-      -- h_aux : MemWkp ((s+1) + 2) 2 of (j-mixed in dirs) = MemWkp (s + 3) 2
       have h_eq : s + 1 + 2 = s + 1 + 2 := rfl
       exact h_aux
-
-/-! ## Base case: chart-`H²` from `laplacianDomainPow g 1`
-
-The base case of the bootstrap is `m = 0`: the chart-pushed POU-cut
-representative lies in chart-`H²` of every chart target, provided
-`u_h ∈ laplacianDomainPow g 1` (= `laplacianDomain g`). This follows from
-`iteratedH2Regularity_one`. -/
 
 /-- **Base case chart-`H²` of the chart-pushed function.** For
 `u_h ∈ laplacianDomainPow g 1`, the canonical chart-pushed POU-cut
@@ -426,16 +323,8 @@ theorem chartPushed_memWkp_two_of_laplacianDomainPow_one
           Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ))
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := by
-  -- `iteratedH2Regularity_one` gives MemWkpChart g 2 2 (canonical function).
   have h := (iteratedH2Regularity_one (I := I) (M := M) g hu_h).1
   exact h α
-
-/-! ## Headline iterated chart-`H^{m+2}` from chart-`H^{m+1}` plus chart-`H²`
-of every chosen `m`-mixed partial
-
-This is the per-step boost. Combined with the polymorphic Nirenberg pipeline
-(applied to every `m`-mixed partial of the chart-pushed parent), it would
-deliver chart-`H^{m+2}` of the chart-pushed parent. -/
 
 /-- **Per-step chart-`H^{m+2}` boost.** For a closed Riemannian manifold
 `(M, g)`, a chart point `α : M`, an element `u_h : H1Compl g`, and an order
@@ -476,16 +365,12 @@ theorem chartPushed_memWkp_m_plus_two_step
           Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ))
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := by
-  -- chart-H^{m+1} of the parent ⇒ MemW1p 2 of every j-mixed partial for j ≤ m
-  -- (via `chosenMthMixedPartialChartPushedU_memW1p_two` with the parent at order m+1).
-  -- The intermediate W1p is needed for the polymorphic assembly.
   have h_intermediate_w1p : ∀ (j : ℕ), j ≤ m →
       ∀ (idx : Fin j → Fin (Module.finrank ℝ E)),
         DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
           (chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h j idx)
           (chartTargetEuclid (I := I) (M := M) α) := by
     intro j hj idx
-    -- chart-H^{j+1} of the parent ⇒ MemW1p of every j-mixed partial.
     have h_parent_j_plus_1 :
         DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
           (d := Module.finrank ℝ E) (j + 1) 2
@@ -501,12 +386,6 @@ theorem chartPushed_memWkp_m_plus_two_step
       (I := I) (M := M) g α u_h j h_parent_j_plus_1 idx
   exact chartPushed_memWkp_m_plus_two_of_mthMixed_chart_H_two
     (I := I) (M := M) g α u_h m h_intermediate_w1p h_top_memWkp_two
-
-/-! ## Connection to the chart-Sobolev manifold-level regularity
-
-The chart-`H^{m+2}` of the chart-pushed parent corresponds to manifold-level
-`MemWkpChart g (m + 2) 2` of the canonical function representative,
-via the standard `ChartSideH2kBridge` framework when `m + 2 = 2k`. -/
 
 /-- **Chart-side bridge promotion at order `m + 2`.** If chart-`H^{m+2}` of
 the chart-pushed parent holds for every chart point `α`, then the manifold-

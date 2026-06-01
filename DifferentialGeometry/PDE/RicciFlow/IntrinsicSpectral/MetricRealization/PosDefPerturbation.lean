@@ -62,8 +62,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpa
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## The `g`-operator-norm smallness predicate -/
-
 /-- `gFibreOpBound g h δ` says the symmetric `(0,2)`-fibre field `h` is
 controlled, uniformly over `M`, by `δ` in the `g`-Riemannian fibre norm:
 `|h x v w| ≤ δ · √(g x v v) · √(g x w w)` for all base points `x` and all
@@ -75,8 +73,6 @@ def gFibreOpBound
     (δ : ℝ) : Prop :=
   ∀ (x : M) (v w : TangentSpace I x),
     |h x v w| ≤ δ * Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w)
-
-/-! ## The perturbed fibrewise inner product -/
 
 /-- The fibrewise sum `g.inner x + h x` as a continuous bilinear form on
 `TₓM`. -/
@@ -102,8 +98,6 @@ theorem perturbedInner_symm
     (x : M) (v w : TangentSpace I x) :
     perturbedInner g h x v w = perturbedInner g h x w v := by
   rw [perturbedInner_apply, perturbedInner_apply, g.symm x v w, hsymm x v w]
-
-/-! ## Diagonal lower bound and positive-definiteness -/
 
 /-- Diagonal control: under the `g`-operator-norm bound `δ`, the perturbation
 satisfies `|h x v v| ≤ δ · g x v v`. -/
@@ -149,8 +143,6 @@ theorem perturbedInner_pos_of_gOpBound
   have : 0 < (1 - δ) * g.inner x v v := mul_pos hcoeff hg_pos
   linarith
 
-/-! ## von-Neumann boundedness of the perturbed unit ball -/
-
 /-- A scaled `g`-sublevel set `{v | g x v v < r}` (for `r > 0`) is von-Neumann
 bounded: it is the image of the `g`-unit ball `{v | g x v v < 1}` (von-Neumann
 bounded by the metric structure) under scalar multiplication by `√r`. -/
@@ -162,7 +154,6 @@ private lemma gSublevel_isVonNBounded
   have hsr_pos : 0 < sr := Real.sqrt_pos.mpr hr
   have hsr_sq : sr * sr = r := by
     rw [hsr_def, ← Real.sqrt_mul hr.le, Real.sqrt_mul_self hr.le]
-  -- The scaling CLM `v ↦ √r • v`.
   set L : TangentSpace I x →L[ℝ] TangentSpace I x :=
     sr • ContinuousLinearMap.id ℝ (TangentSpace I x) with hL_def
   have hL_apply : ∀ w : TangentSpace I x, L w = sr • w := by
@@ -170,7 +161,6 @@ private lemma gSublevel_isVonNBounded
   have hg_unit : Bornology.IsVonNBounded ℝ
       {v : TangentSpace I x | g.inner x v v < 1} := g.isVonNBounded x
   have himg := hg_unit.image L
-  -- Identify the scaled sublevel set with the image set.
   have hset_eq :
       {v : TangentSpace I x | g.inner x v v < r}
         = (L : TangentSpace I x → TangentSpace I x) ''
@@ -180,8 +170,7 @@ private lemma gSublevel_isVonNBounded
     constructor
     · intro hv
       refine ⟨sr⁻¹ • v, ?_, ?_⟩
-      · -- `g (sr⁻¹ v, sr⁻¹ v) = sr⁻² · g(v,v) < 1`.
-        have hscale : g.inner x (sr⁻¹ • v) (sr⁻¹ • v)
+      · have hscale : g.inner x (sr⁻¹ • v) (sr⁻¹ • v)
             = sr⁻¹ * (sr⁻¹ * g.inner x v v) := by
           simp only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
         rw [hscale]
@@ -190,12 +179,10 @@ private lemma gSublevel_isVonNBounded
           field_simp
           rw [← hsr_sq]; ring
         rw [this, div_lt_one hr]; exact hv
-      · -- `L (sr⁻¹ v) = v`.
-        rw [hL_apply]
+      · rw [hL_apply]
         rw [smul_smul, mul_inv_cancel₀ (ne_of_gt hsr_pos), one_smul]
     · rintro ⟨w, hw, rfl⟩
       rw [hL_apply]
-      -- `g (√r w, √r w) = r · g(w,w) < r`.
       have hscale : g.inner x (sr • w) (sr • w) = sr * (sr * g.inner x w w) := by
         simp only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
       rw [hscale]
@@ -226,15 +213,11 @@ theorem perturbedInner_isVonNBounded
     intro v hv
     rw [Set.mem_setOf_eq] at hv ⊢
     have hlb := perturbedInner_self_lower_bound (I := I) (M := M) g h hδ x v
-    -- `(1 - δ) * g v v ≤ (g+h) v v < 1`, so `g v v < (1-δ)⁻¹ = r`.
     have h1 : (1 - δ) * g.inner x v v < 1 := lt_of_le_of_lt hlb hv
-    -- divide by `1 - δ > 0`.
     rw [hr_def, ← one_div]
     rw [lt_div_iff₀ hcoeff, mul_comm]
     exact h1
   exact (gSublevel_isVonNBounded (I := I) (M := M) g x hr_pos).subset hsub
-
-/-! ## Smoothness of the perturbed inner-product section -/
 
 /-- **Smoothness of the perturbed inner-product section.** If the perturbation
 `h` is a smooth section of the bundle of bilinear forms, then so is
@@ -259,24 +242,18 @@ theorem perturbedInner_contMDiff
         (E := fun b : M => TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ)
         x (perturbedInner g h x)) := by
   classical
-  -- Stage 1: for each smooth tangent section `Y`, the cotangent-valued section
-  -- `x ↦ ⟨x, perturbedInner g h x (Y x)⟩` is smooth.
   apply cotangentCov_clmSection_smooth_aux
     (V₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
     (φ := fun x : M => perturbedInner g h x)
   intro Y
-  -- Stage 2: for each smooth tangent section `W`, the scalar
-  -- `x ↦ perturbedInner g h x (Y x) (W x)` is smooth.
   apply cotangentCov_clmSection_smooth_aux
     (V₂ := fun _ : M => ℝ)
     (φ := fun x : M => perturbedInner g h x (Y x))
   intro W
-  -- Smoothness of the tangent sections themselves (as total-space sections).
   have hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => TotalSpace.mk' E (E := TangentSpace I) x (Y x)) := Y.contMDiff
   have hW : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => TotalSpace.mk' E (E := TangentSpace I) x (W x)) := W.contMDiff
-  -- The two scalar summands are smooth.
   have hg_scalar : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun x : M => g.inner x (Y x) (W x)) := by
     have h_total : ContMDiff I (I.prod 𝓘(ℝ, ℝ)) ∞
@@ -313,14 +290,12 @@ theorem perturbedInner_contMDiff
     have h_at := h_total x
     rw [contMDiffAt_totalSpace] at h_at
     exact h_at.2
-  -- Their sum is the perturbed scalar.
   have h_sum_scalar : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun x : M => perturbedInner g h x (Y x) (W x)) := by
     have h_eq : (fun x : M => perturbedInner g h x (Y x) (W x))
         = fun x : M => g.inner x (Y x) (W x) + h x (Y x) (W x) := by
       funext x; rw [perturbedInner_apply]
     rw [h_eq]; exact hg_scalar.add hh_scalar
-  -- Repackage as a trivial-bundle section.
   intro x
   rw [contMDiffAt_section]
   refine (h_sum_scalar.contMDiffAt).congr_of_eventuallyEq ?_
@@ -329,8 +304,6 @@ theorem perturbedInner_contMDiff
     (trivializationAt ℝ (Bundle.Trivial M ℝ) x
       ⟨y, perturbedInner g h y (Y y) (W y)⟩).2
   rfl
-
-/-! ## Assembly into a `SmoothRiemannianMetric` -/
 
 /-- **The perturbed metric `g + h`.** Given a symmetric smooth perturbation
 `h` whose `g`-operator norm is bounded by `δ < 1` everywhere, the fibrewise
@@ -368,8 +341,6 @@ noncomputable def perturbedMetric
     {δ : ℝ} (hδ_lt : δ < 1) (hδ : gFibreOpBound g h δ) (x : M) :
     (perturbedMetric g h hsymm hsmooth hδ_lt hδ).inner x = perturbedInner g h x :=
   rfl
-
-/-! ## Headline existence statement -/
 
 /-- **Positive-definiteness radius for metric perturbations.**
 

@@ -85,14 +85,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## Spectral support of an `L²` initial datum
-
-The intrinsic eigenbasis coordinate family of `u₀ : TensorL2 r s g` is
-`tensorL2Coeff h_compact u₀`. We say `u₀` has *finite spectral
-support* when this family is finitely supported. This is the genuine analytic
-hypothesis under which the spectral smoothing machinery produces a genuine
-smooth representative. -/
-
 /-- The intrinsic eigenbasis coordinate family of an `L²` tensor element, taken
 against the unconditional compactness witness
 `tensorResolventL2_isCompactOperator`. -/
@@ -109,13 +101,6 @@ def spectralCoeff (g : SmoothRiemannianMetric I M) (r s : ℕ)
         (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
         u₀ i := rfl
 
-/-! ## The spectral support is preserved by the heat rescaling
-
-The heat witness `heatHsWitness g r s σ ht u₀` carries the coordinate family
-`i ↦ exp(-λᵢ t) · spectralCoeff u₀ i`. Since the exponential factor is strictly
-positive (hence nonzero), this rescaling has *exactly the same* support as the
-underlying coordinate family of `u₀`. -/
-
 /-- **The heat witness has the same spectral support as the initial datum.** The
 support of the heat witness's coordinate family equals the spectral support of
 `u₀`: the exponential rescaling factor `exp(-λᵢ t)` is nonzero, so it neither
@@ -126,7 +111,6 @@ theorem heatHsWitness_support_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
       Function.support (spectralCoeff (I := I) (M := M) g r s u₀) := by
   apply Set.ext
   intro i
-  -- `exp(-λᵢ t) * c ≠ 0 ↔ c ≠ 0`, since the exponential factor is nonzero.
   have hexp : Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) ≠ 0 :=
     ne_of_gt (Real.exp_pos _)
   rw [Function.mem_support, Function.mem_support, heatHsWitness_coeff,
@@ -143,13 +127,6 @@ theorem heatHsWitness_finite_support_of_finite
     (Function.support (heatHsWitness (I := I) (M := M) g r s σ ht u₀).coeff).Finite := by
   rw [heatHsWitness_support_eq (I := I) (M := M) g r s σ ht u₀]
   exact hu₀_fs
-
-/-! ## The genuine smooth representative of the heat output
-
-For an initial datum with finite spectral support, the heat witness (at the
-fixed exponent `0`, which is the convenient `Hˢ`-scale carrying the heat output)
-is finitely supported, so the chart-locality-free spectral smooth representative
-`tensorHsSmoothRepr` produces a genuine `SmoothCcTensor`. -/
 
 /-- **The genuine smooth representative of the heat output.** For a closed
 Riemannian manifold `(M, g)`, ranks `(r, s)`, an initial datum `u₀` with finite
@@ -199,12 +176,6 @@ theorem heatOutputSmoothRepr_memWtwokTwo (g : SmoothRiemannianMetric I M) (r s :
     (heatHsWitness (I := I) (M := M) g r s 0 ht u₀)
     (heatHsWitness_finite_support_of_finite (I := I) (M := M) g r s 0 ht u₀ hu₀_fs) k
 
-/-! ## Existence of a smooth representative (packaged existential)
-
-A clean existential restatement: the positive-time heat output of a
-finitely-supported initial datum has a genuine smooth representative whose `L²`
-class is the heat output and which lies in every Sobolev order. -/
-
 /-- **The positive-time heat output has a genuine smooth representative.** For an
 initial datum `u₀` with finite spectral support, there is a smooth,
 compactly-supported tensor section (the `SmoothCcTensor` type is, by
@@ -220,16 +191,6 @@ theorem exists_smooth_heatOutput_representative (g : SmoothRiemannianMetric I M)
   ⟨heatOutputSmoothRepr (I := I) (M := M) g r s ht u₀ hu₀_fs,
     heatOutputSmoothRepr_toL2 (I := I) (M := M) g r s ht u₀ hu₀_fs,
     fun k => heatOutputSmoothRepr_memWtwokTwo (I := I) (M := M) g r s ht u₀ hu₀_fs k⟩
-
-/-! ## Discharging the smooth-representative gate `SpectralSmoothRealizesAsSmooth`
-
-The gate predicate `SpectralSmoothRealizesAsSmooth` of `SpectralSmoothing.lean`
-asserts that every `L²` tensor lying in `⋂_σ Hˢ` has a genuine `SmoothCcTensor`
-representative. We discharge it *for finitely-supported spectral data* directly
-from the unconditional spectral smooth representative: a finitely-supported
-`⋂_σ Hˢ` element is, in particular, an `H⁰` element with finite coordinate
-support, so `tensorHsSmoothRepr` produces its smooth
-representative, whose `L²` class is the element. -/
 
 /-- **Smooth realization of a finitely-supported member of `⋂_σ Hˢ`.** Let
 `u : TensorL2 r s g` lie (via the chart-locality-free inclusion) in `Hˢ` for
@@ -254,24 +215,12 @@ theorem spectralSmooth_realizesAsSmooth_of_finite_support
               (I := I) (M := M) g r s) (le_refl (0 : ℝ)) v = u →
           (Function.support v.coeff).Finite) :
     ∃ T : SmoothCcTensor g r s, (T : TensorL2 r s g) = u := by
-  -- Extract the `σ = 0` witness `v₀` realizing `u`.
   obtain ⟨v₀, hv₀⟩ := h_mem 0 (le_refl (0 : ℝ))
-  -- It has finite coordinate support by hypothesis.
   have hv₀_fs : (Function.support v₀.coeff).Finite := hu_fs v₀ hv₀
-  -- Its unconditional spectral smooth representative realizes it.
   refine ⟨tensorHsSmoothRepr (I := I) (M := M) v₀ hv₀_fs, ?_⟩
   rw [tensorHsSmoothRepr_toL2 (I := I) (M := M)
     (le_refl (0 : ℝ)) v₀ hv₀_fs]
   exact hv₀
-
-/-! ## Realizing the heat output as a smooth Riemannian metric
-
-For the metric-realization endpoint we specialise to covariant `(0,2)` tensors.
-The genuine smooth representative of the heat output is a `SmoothCcTensor g 0 2`;
-feeding it to the perturbation machinery `tensorSectionRealizeMetric` realizes
-`g + h_sym` as an honest `C^∞` Riemannian metric, under the (genuine) smallness
-hypothesis that the symmetrized extracted form is uniformly `g`-fibre small with
-constant `< 1`. -/
 
 /-- The symmetric smooth bilinear `Hom`-section extracted from the heat output's
 smooth representative. -/

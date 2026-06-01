@@ -59,8 +59,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.MemW1pFChartResidualFull
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -69,8 +67,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Monotonicity of `wkpNorm` and `wkpNormChart` in the order `k` -/
 
 /-- The Euclidean `wkpNorm` is monotone in the order parameter (when we step
 from `k` to `k+1`): the partial sum over indices `j ≤ k` is bounded by the
@@ -85,12 +81,8 @@ private lemma wkpNorm_succ_ge
         (d := d) (k + 1) p u Ω := by
   classical
   unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
-  -- The order-`k+1` norm sums `j ∈ Finset.range (k+2)`; the order-`k` norm
-  -- sums `j ∈ Finset.range (k+1)`. Since each term is nonneg, the larger sum
-  -- dominates.
   refine Finset.sum_le_sum_of_subset_of_nonneg ?_ ?_
-  · -- Finset.range (k+1) ⊆ Finset.range (k+2).
-    intro j hj
+  · intro j hj
     rw [Finset.mem_range] at hj ⊢
     omega
   · intro _ _ _; exact zero_le _
@@ -114,8 +106,6 @@ lemma wkpNormChart_one_le_two
     wkpNormChart (I := I) (M := M) g 1 p u ≤
       wkpNormChart (I := I) (M := M) g 2 p u := by
   exact wkpNormChart_le_succ (I := I) (M := M) g 1 p u
-
-/-! ## `L^2` and gradient-`L^2` bounds in terms of `wkpNormChart 1 2` -/
 
 /-- For a smooth `f : SmoothScalar g`, the manifold `eLpNorm` of `f.toFun` is
 bounded by a uniform constant times `wkpNormChart g 1 2 f.toFun`. -/
@@ -156,8 +146,6 @@ private lemma eLpNorm_gNormGrad_smoothScalar_le_const_mul_wkpNormChart_one
   refine ⟨C, hC_nn, ?_⟩
   intro f
   exact hbound f.smooth
-
-/-! ## Integral representation of the smooth-scalar squared norm -/
 
 /-- The squared L² eLpNorm of a smooth scalar equals `∫ f²`. -/
 private lemma eLpNorm_sq_toReal_eq_integral_sq
@@ -205,7 +193,6 @@ private lemma eLpNorm_gNormGrad_sq_toReal_eq_integral_inner_grad
     rw [sq]
     rw [Real.mul_self_sqrt]
     exact SmoothRiemannianMetric_inner_self_nonneg g x _
-  -- ψ is continuous.
   have hψ_cont : Continuous ψ := by
     have h_inner_cont : Continuous (fun x : M =>
         g.inner x (gradFun (I := I) g f.toFun x) (gradFun (I := I) g f.toFun x)) := by
@@ -253,8 +240,6 @@ private lemma eLpNorm_gNormGrad_sq_toReal_eq_integral_inner_grad
     exact hψ_sq a
   rw [h_integrand_eq] at h_inner
   exact h_inner.symm
-
-/-! ## Norm bound: smooth-scalar norm ≤ const · chart-W^{1,2} norm -/
 
 /-- The bound `‖f‖_{SmoothScalar g} ≤ C * (wkpNormChart g 1 2 f.toFun).toReal`
 for smooth `f`. -/
@@ -339,8 +324,6 @@ lemma norm_smoothScalar_le_const_mul_wkpNormChart_one
     _ ≤ C₀ * N + C₁ * N := add_le_add h_L_le_C0N h_Gnorm_le_C1N
     _ = (C₀ + C₁) * N := by ring
 
-/-! ## Finiteness of `wkpNormChart` on smooth scalar differences -/
-
 /-- For any smooth scalars `v, w : SmoothScalar g`, the chart-W^{1,2} norm of
 their difference is finite. -/
 lemma wkpNormChart_one_two_smoothScalar_diff_ne_top
@@ -361,8 +344,6 @@ lemma wkpNormChart_one_two_smoothScalar_diff_ne_top
     DifferentialGeometry.Analysis.Sobolev.Chart.MemWkpChart_sub
       (I := I) (M := M) g hp_one hv_mem hw_mem
   exact (wkpNormChart_lt_top_of_memWkpChart (I := I) (M := M) g hp_one h_diff_mem).ne
-
-/-! ## Smooth-scalar Cauchy property of `smoothApproxSeq` -/
 
 /-- The smooth approximator sequence is Cauchy in `SmoothScalar g`. -/
 theorem smoothApproxSeq_cauchy_smoothScalar
@@ -459,9 +440,7 @@ theorem smoothApproxSeq_cauchy_smoothScalar
       C * (2 * ε') := by
     refine h_final.trans ?_
     exact mul_le_mul_of_nonneg_left h_2N_le hC_nn
-  -- The goal is `‖vdiff‖ < ε` (or equivalently `‖vm - vn‖ < ε`).
   refine lt_of_le_of_lt (h_norm_bd.trans h_step1) ?_
-  -- C * (2 * ε') < ε.
   rw [hε'_def]
   have h1 : C * (2 * (ε / (2 * Cp1))) = C * ε / Cp1 := by
     field_simp
@@ -469,8 +448,6 @@ theorem smoothApproxSeq_cauchy_smoothScalar
   rw [div_lt_iff₀ hCp1_pos]
   have hC_lt_Cp1 : C < Cp1 := by rw [hCp1_def]; linarith
   nlinarith [hε_pos]
-
-/-! ## Cauchy property of the lifted sequence in `H1Compl g` -/
 
 /-- The lifted smooth approximator sequence is Cauchy in `H1Compl g`. -/
 theorem smoothToH1Compl_smoothApproxSeq_cauchy
@@ -485,8 +462,6 @@ theorem smoothToH1Compl_smoothApproxSeq_cauchy
   exact h_cauchy_smooth.map
     (smoothToH1Compl (I := I) (M := M) g).uniformContinuous
 
-/-! ## Existence of a limit `u_*` in `H1Compl g` -/
-
 private theorem smoothToH1Compl_smoothApproxSeq_has_limit
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -496,8 +471,6 @@ private theorem smoothToH1Compl_smoothApproxSeq_has_limit
         (smoothApproxSeq (I := I) (M := M) g hu_h n)) atTop (𝓝 u_star) :=
   cauchySeq_tendsto_of_complete
     (smoothToH1Compl_smoothApproxSeq_cauchy (I := I) (M := M) g hu_h)
-
-/-! ## `L^2` convergence of `smoothApproxSeq.toFun` to the Lp representative -/
 
 /-- The smooth approximator sequence's underlying functions converge to the
 canonical Lp representative of `u_h` in the manifold `L^2` norm. -/
@@ -518,21 +491,13 @@ private theorem eLpNorm_diff_smoothApproxSeq_tendsto_zero
       (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)
   set u : M → ℝ := ((H1ComplToLp (I := I) (M := M) g u_h :
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) with hu_def
-  -- u is measurable.
   have hu_meas : Measurable u := by
     rw [hu_def]
     exact (Lp.stronglyMeasurable _).measurable
-  -- We want: for every ε > 0, eventually eLpNorm (...) ≤ ε.
   rw [ENNReal.tendsto_atTop_zero]
   intro ε hε_pos
-  -- We aim to find N such that for n ≥ N, eLpNorm (u - smoothApproxSeq.toFun n) ≤ ε.
-  -- Using the bound: eLpNorm ≤ ofReal C * wkpNormChart g 1 2 (u - smoothApproxSeq.toFun n)
-  --                       ≤ ofReal C * wkpNormChart g 2 2 (u - smoothApproxSeq.toFun n)
-  --                       ≤ ofReal C * ofReal (1/(n+1)).
-  -- Choose N so that ofReal C * ofReal (1/(N+1)) ≤ ε.
   by_cases hC_zero : C = 0
-  · -- Then the bound trivially gives eLpNorm ≤ 0 = ofReal 0.
-    refine ⟨0, ?_⟩
+  · refine ⟨0, ?_⟩
     intro n _
     have h_bnd := hC_bnd (u := fun x => u x - (smoothApproxSeq (I := I) (M := M) g hu_h n).toFun x)
         (hu_meas.sub
@@ -540,8 +505,6 @@ private theorem eLpNorm_diff_smoothApproxSeq_tendsto_zero
     rw [hC_zero, ENNReal.ofReal_zero, zero_mul] at h_bnd
     exact h_bnd.trans (zero_le _)
   have hC_pos : 0 < C := lt_of_le_of_ne hC_nn (Ne.symm hC_zero)
-  -- For ε ≠ ⊤, choose N with C * (1/(N+1)) ≤ ε.toReal (when ε is finite).
-  -- For ε = ⊤, any N works.
   by_cases hε_top : ε = ⊤
   · refine ⟨0, ?_⟩
     intro n _
@@ -563,14 +526,11 @@ private theorem eLpNorm_diff_smoothApproxSeq_tendsto_zero
     linarith
   refine ⟨N, ?_⟩
   intro n hn
-  -- Apply the chart-W^{1,2} → L² bound.
   have h_meas : Measurable (fun x : M => u x -
       (smoothApproxSeq (I := I) (M := M) g hu_h n).toFun x) :=
     hu_meas.sub
       (smoothApproxSeq (I := I) (M := M) g hu_h n).smooth.continuous.measurable
   have h_bnd := hC_bnd h_meas
-  -- wkpNormChart g 1 2 (u - smoothApproxSeq.toFun n) ≤ wkpNormChart g 2 2 (...)
-  --                                                  ≤ ofReal (1/(n+1)).
   have h_chart_2_2 :
       wkpNormChart (I := I) (M := M) g 2 2
           (fun x : M => u x -
@@ -583,7 +543,6 @@ private theorem eLpNorm_diff_smoothApproxSeq_tendsto_zero
             (smoothApproxSeq (I := I) (M := M) g hu_h n).toFun x) ≤
         ENNReal.ofReal (1 / ((n : ℝ) + 1)) :=
     (wkpNormChart_one_le_two (I := I) (M := M) g 2 _).trans h_chart_2_2
-  -- Chain.
   have h_chain : eLpNorm
         (fun x => u x -
           (smoothApproxSeq (I := I) (M := M) g hu_h n).toFun x) 2
@@ -592,13 +551,11 @@ private theorem eLpNorm_diff_smoothApproxSeq_tendsto_zero
     refine h_bnd.trans ?_
     gcongr
   refine h_chain.trans ?_
-  -- ofReal C * ofReal (1/(n+1)) ≤ ε.
   have h_inv_n_nn : (0 : ℝ) ≤ 1 / ((n : ℝ) + 1) := by positivity
   have h_prod_eq : ENNReal.ofReal C * ENNReal.ofReal (1 / ((n : ℝ) + 1)) =
       ENNReal.ofReal (C * (1 / ((n : ℝ) + 1))) := by
     rw [← ENNReal.ofReal_mul hC_nn]
   rw [h_prod_eq]
-  -- C * (1/(n+1)) ≤ C * (1/(N+1)) ≤ C * ε_C = ε.toReal.
   have hNn : (N : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
   have hn1_pos : (0 : ℝ) < (n : ℝ) + 1 := by linarith
   have hn_inv_le_N_inv : (1 : ℝ) / ((n : ℝ) + 1) ≤ (1 : ℝ) / ((N : ℝ) + 1) := by
@@ -630,19 +587,11 @@ private theorem smoothToLp_smoothApproxSeq_tendsto
         (smoothApproxSeq (I := I) (M := M) g hu_h n))
       atTop (𝓝 (H1ComplToLp (I := I) (M := M) g u_h)) := by
   classical
-  -- The L²-norm distance between smoothToLp (smoothApproxSeq n) and
-  -- H1ComplToLp u_h is bounded by eLpNorm of the difference of representatives.
-  -- We use that `‖f - g‖_{Lp} ≤ (eLpNorm (f-g)).toReal` when both are MemLp.
   rw [Metric.tendsto_atTop]
   intro ε hε_pos
-  -- The L² convergence of representatives in eLpNorm gives convergence in Lp norm.
   have h_eLpNorm_tendsto :=
     eLpNorm_diff_smoothApproxSeq_tendsto_zero (I := I) (M := M) g hu_h
-  -- Convert to .toReal convergence.
-  -- eLpNorm_tendsto: Tendsto (eLpNorm (u - v_n) 2 μ_g) atTop (𝓝 0).
-  -- So eventually eLpNorm < ENNReal.ofReal (ε/2).
   rw [ENNReal.tendsto_atTop_zero] at h_eLpNorm_tendsto
-  -- Pick eps_ennr = ofReal (ε/2).
   have hε_half_pos : 0 < ε / 2 := by linarith
   obtain ⟨N, hN⟩ := h_eLpNorm_tendsto (ENNReal.ofReal (ε / 2))
     (ENNReal.ofReal_pos.mpr hε_half_pos)
@@ -651,10 +600,7 @@ private theorem smoothToLp_smoothApproxSeq_tendsto
   have h_eLpNorm_le := hN n hn
   set u : M → ℝ := ((H1ComplToLp (I := I) (M := M) g u_h :
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) with hu_def
-  -- The Lp distance from smoothToLp (smoothApproxSeq n) to H1ComplToLp u_h
-  -- equals ‖smoothToLp (smoothApproxSeq n) - H1ComplToLp u_h‖.
   rw [dist_eq_norm]
-  -- ‖smoothToLp v_n - H1ComplToLp u_h‖ = ‖H1ComplToLp u_h - smoothToLp v_n‖.
   have h_norm_sub_comm :
       ‖smoothToLp (I := I) (M := M) g
             (smoothApproxSeq (I := I) (M := M) g hu_h n) -
@@ -664,25 +610,18 @@ private theorem smoothToLp_smoothApproxSeq_tendsto
             (smoothApproxSeq (I := I) (M := M) g hu_h n)‖ :=
     norm_sub_rev _ _
   rw [h_norm_sub_comm]
-  -- ‖H1ComplToLp u_h - smoothToLp v_n‖ = eLpNorm (representative diff) .toReal.
   set Δ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
     H1ComplToLp (I := I) (M := M) g u_h -
       smoothToLp (I := I) (M := M) g
         (smoothApproxSeq (I := I) (M := M) g hu_h n) with hΔ_def
-  -- The Lp norm of `H1ComplToLp u_h - smoothToLp (smoothApproxSeq n)` is
-  -- bounded by `eLpNorm (u - smoothApproxSeq.toFun n) 2 μ_g .toReal` via the
-  -- coercion identities.
   have h_Δ_coe_ae : (Δ : M → ℝ) =ᵐ[
       riemannianVolumeMeasure (I := I) (M := M) g]
       (fun x => u x -
         (smoothApproxSeq (I := I) (M := M) g hu_h n).toFun x) := by
-    -- (a - b).coeFn =ᵐ a.coeFn - b.coeFn (Lp.coeFn_sub).
     have h_sub := MeasureTheory.Lp.coeFn_sub
       (H1ComplToLp (I := I) (M := M) g u_h)
       (smoothToLp (I := I) (M := M) g
         (smoothApproxSeq (I := I) (M := M) g hu_h n))
-    -- h_sub : ↑(H1ComplToLp u_h - smoothToLp ...) =ᵐ ↑(H1ComplToLp u_h) - ↑(smoothToLp ...)
-    -- smoothToLp v_n =ᵐ v_n.toFun (MemLp.coeFn_toLp).
     have h_smoothToLp_coe :
         (smoothToLp (I := I) (M := M) g
             (smoothApproxSeq (I := I) (M := M) g hu_h n) :
@@ -691,19 +630,13 @@ private theorem smoothToLp_smoothApproxSeq_tendsto
         (smoothApproxSeq (I := I) (M := M) g hu_h n).toFun :=
       MemLp.coeFn_toLp (smoothApproxSeq (I := I) (M := M) g hu_h n).memLp_two
     filter_upwards [h_sub, h_smoothToLp_coe] with x hx_sub hx_smoothToLp
-    -- Δ = H1ComplToLp u_h - smoothToLp ... is set; Δ.coeFn x =ᵐ (H1ComplToLp u_h - smoothToLp ...).coeFn x
-    -- which by h_sub is (↑(H1ComplToLp u_h)) x - (↑(smoothToLp ...)) x.
-    -- (↑(smoothToLp ...)) x =ᵐ (smoothApproxSeq n).toFun x by h_smoothToLp_coe.
-    -- u = ↑(H1ComplToLp u_h) so (↑(H1ComplToLp u_h)) x = u x.
     rw [hΔ_def, hx_sub, Pi.sub_apply, hx_smoothToLp]
-  -- ‖Δ‖ = eLpNorm (Δ : M → ℝ) 2 μ .toReal = eLpNorm (u - v_n.toFun) 2 μ .toReal.
   have h_norm_Δ : ‖Δ‖ = (eLpNorm (fun x => u x -
         (smoothApproxSeq (I := I) (M := M) g hu_h n).toFun x) 2
         (riemannianVolumeMeasure (I := I) (M := M) g)).toReal := by
     rw [Lp.norm_def]
     rw [eLpNorm_congr_ae h_Δ_coe_ae]
   rw [h_norm_Δ]
-  -- (eLpNorm ...).toReal ≤ ε / 2 < ε.
   have h_eLpNorm_finite : eLpNorm (fun x => u x -
       (smoothApproxSeq (I := I) (M := M) g hu_h n).toFun x) 2
       (riemannianVolumeMeasure (I := I) (M := M) g) ≠ ⊤ := by
@@ -713,7 +646,6 @@ private theorem smoothToLp_smoothApproxSeq_tendsto
         ENNReal.ofReal (ε / 2) := h_eLpNorm_le
     refine ne_of_lt ?_
     exact lt_of_le_of_lt h_le_half ENNReal.ofReal_lt_top
-  -- Take .toReal: ≤ ε/2 < ε.
   have h_toReal_le : (eLpNorm (fun x => u x -
       (smoothApproxSeq (I := I) (M := M) g hu_h n).toFun x) 2
       (riemannianVolumeMeasure (I := I) (M := M) g)).toReal ≤ ε / 2 := by
@@ -721,10 +653,6 @@ private theorem smoothToLp_smoothApproxSeq_tendsto
     rw [ENNReal.toReal_ofReal hε_half_pos.le] at this
     exact this
   linarith
-
-/-! ## Identification of the limit `u_*` with `u_h`
-
-We use the variational identity for smooth lifts and density. -/
 
 /-- For smooth `v, f : SmoothScalar g`, the H¹ inner product satisfies
 `smoothScalarH1Inner v f = ⟨smoothToLp(f.oneSubLapClassical), smoothToLp v⟩_{Lp}`. -/
@@ -744,29 +672,19 @@ lemma inner_h1Compl_smoothToH1Compl_eq_lpInner
     ⟪u_h, smoothToH1Compl (I := I) (M := M) g f⟫_ℝ =
       ⟪smoothToLp (I := I) (M := M) g f.oneSubLapClassical,
         H1ComplToLp (I := I) (M := M) g u_h⟫_ℝ := by
-  -- By symmetry: ⟪u_h, smoothToH1Compl f⟫ = ⟪smoothToH1Compl f, u_h⟫.
   rw [real_inner_comm]
-  -- Then by smoothToH1Compl_bilin_eq_lpFunctional + lpFunctionalCLM_apply.
   have h_bilin :
       H1ComplBilin (I := I) (M := M) g
           (smoothToH1Compl (I := I) (M := M) g f) u_h =
         lpFunctionalCLM (I := I) (M := M) g
           (smoothToLp (I := I) (M := M) g f.oneSubLapClassical) u_h :=
     smoothToH1Compl_bilin_eq_lpFunctional f u_h
-  -- H1ComplBilin g a b = ⟨a, b⟩.
   have h_LHS : ⟪smoothToH1Compl (I := I) (M := M) g f, u_h⟫_ℝ =
       H1ComplBilin (I := I) (M := M) g
         (smoothToH1Compl (I := I) (M := M) g f) u_h := rfl
   rw [h_LHS, h_bilin]
   rw [lpFunctionalCLM_apply]
-  -- After `lpFunctionalCLM_apply`, the LHS is `⟨H1ComplToLp u_h, smoothToLp f.oneSubLap⟩`,
-  -- but the goal RHS is `⟨smoothToLp f.oneSubLap, H1ComplToLp u_h⟩`. Use symmetry.
   exact real_inner_comm _ _
-
-/-! ## Inner-product identity at smooth tests via the L² limit
-
-For the limit `u_*` of the lifted sequence and any smooth `f`, the inner
-product `⟨smoothToH1Compl f, u_*⟩` equals the analogous one for `u_h`. -/
 
 set_option maxHeartbeats 800000 in
 /-- For a smooth test `f` and the limit `u_*` of the lifted sequence,
@@ -782,14 +700,12 @@ private lemma inner_smoothToH1Compl_limit_eq_u_h
     ⟪smoothToH1Compl (I := I) (M := M) g f, u_star⟫_ℝ =
       ⟪smoothToH1Compl (I := I) (M := M) g f, u_h⟫_ℝ := by
   classical
-  -- ⟨smoothToH1Compl f, smoothToH1Compl (v n)⟩ → ⟨smoothToH1Compl f, u_*⟩.
   have h_inner_star_lim : Tendsto (fun n =>
       ⟪smoothToH1Compl (I := I) (M := M) g f,
         smoothToH1Compl (I := I) (M := M) g
           (smoothApproxSeq (I := I) (M := M) g hu_h n)⟫_ℝ) atTop
         (𝓝 ⟪smoothToH1Compl (I := I) (M := M) g f, u_star⟫_ℝ) :=
     Tendsto.inner tendsto_const_nhds h_tendsto_star
-  -- Rewrite each term using smoothScalarH1Inner.
   have h_rewrite : ∀ n,
       ⟪smoothToH1Compl (I := I) (M := M) g f,
         smoothToH1Compl (I := I) (M := M) g
@@ -802,7 +718,6 @@ private lemma inner_smoothToH1Compl_limit_eq_u_h
     rw [smoothScalarH1Inner_symm]
     exact smoothScalarH1Inner_eq_lpInner_oneSubLap_right (I := I) (M := M) g
       (smoothApproxSeq (I := I) (M := M) g hu_h n) f
-  -- Lp convergence transferred.
   have h_lp_tendsto :=
     smoothToLp_smoothApproxSeq_tendsto (I := I) (M := M) g hu_h
   have h_inner_lp_lim : Tendsto (fun n =>
@@ -812,7 +727,6 @@ private lemma inner_smoothToH1Compl_limit_eq_u_h
         (𝓝 ⟪smoothToLp (I := I) (M := M) g f.oneSubLapClassical,
           H1ComplToLp (I := I) (M := M) g u_h⟫_ℝ) :=
     Tendsto.inner tendsto_const_nhds h_lp_tendsto
-  -- Same sequence, two limits.
   have h_rewrite_func : (fun n =>
       ⟪smoothToH1Compl (I := I) (M := M) g f,
         smoothToH1Compl (I := I) (M := M) g
@@ -835,8 +749,6 @@ private lemma inner_smoothToH1Compl_limit_eq_u_h
     exact real_inner_comm _ _
   rw [h_LHS_eq, h_RHS_eq]
 
-/-! ## The headline theorem -/
-
 /-- For `u_h ∈ laplacianDomainPow g 2`, the smooth approximator sequence
 converges to `u_h` in `H1Compl g`. -/
 theorem smoothApproxSeq_tendsto_h1Compl
@@ -849,28 +761,22 @@ theorem smoothApproxSeq_tendsto_h1Compl
           (I := I) (M := M) g hu_h n))
       atTop (𝓝 u_h) := by
   classical
-  -- Get the limit u_star.
   obtain ⟨u_star, h_tendsto_star⟩ :=
     smoothToH1Compl_smoothApproxSeq_has_limit (I := I) (M := M) g hu_h
-  -- Claim: u_star = u_h.
   suffices h_eq : u_star = u_h by
     convert h_tendsto_star using 2
     exact h_eq.symm
-  -- Strategy: show ⟨w, u_star⟩ = ⟨w, u_h⟩ for all w by density of smoothToH1Compl-range.
   apply ext_inner_left ℝ
   intro w
-  -- Both LHS, RHS are continuous in w.
   have hL_cont : Continuous (fun w => ⟪w, u_star⟫_ℝ) :=
     ((innerSL ℝ (E := H1Compl g)).flip u_star).continuous
   have hR_cont : Continuous (fun w => ⟪w, u_h⟫_ℝ) :=
     ((innerSL ℝ (E := H1Compl g)).flip u_h).continuous
-  -- On the range of `smoothToH1Compl`, the two coincide by the L²-limit argument.
   have hLR_smooth :
       (fun w => ⟪w, u_star⟫_ℝ) ∘ (smoothToH1Compl (I := I) (M := M) g) =
         (fun w => ⟪w, u_h⟫_ℝ) ∘ (smoothToH1Compl (I := I) (M := M) g) := by
     funext f
     exact inner_smoothToH1Compl_limit_eq_u_h (I := I) (M := M) g hu_h h_tendsto_star f
-  -- Conclude by density.
   exact congrFun
     ((denseRange_smoothToH1Compl (I := I) (M := M) g).equalizer
       hL_cont hR_cont hLR_smooth) w

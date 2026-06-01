@@ -83,14 +83,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The smooth one-minus-connection-Laplacian `(1 - Δ_∇)` -/
 
 /-- **The smooth one-minus-connection-Laplacian** on compactly-supported smooth
 `(r, s)`-tensor sections: `T ↦ T - Δ_∇ T`, where `Δ_∇ = rawTensorConnLapSmooth`
@@ -114,8 +110,6 @@ of `T` and `rawTensorConnLap T`. -/
   rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
     rawTensorConnLapSmooth_toSection_apply]
 
-/-! ## The `k`-fold iterate of `(1 - Δ_∇)` -/
-
 /-- **`k`-fold iterate of the smooth one-minus-connection-Laplacian.** Defined by
 recursion on `k`: `0 ↦ identity`; `(k+1) ↦ apply `(1 - Δ_∇)` once to the `k`-th
 iterate. -/
@@ -138,15 +132,6 @@ noncomputable def oneMinusConnLapSmoothIter
       oneMinusConnLapSmooth (I := I) g r s
         (oneMinusConnLapSmoothIter (I := I) g r s k T) := rfl
 
-/-! ## The Green / `H¹` bridge for `(1 - Δ_∇)` at rank `(0, 2)`
-
-The defining integration-by-parts identity: for smooth compactly-supported
-`(0, 2)`-tensors `T, v`, the `L²` pairing of `(1 - Δ_∇) T` with `v` equals the
-`H¹` pairing of the completion embeddings of `T` and `v`. Concretely
-`⟪T, v⟫_{L²} - ⟪Δ_∇ T, v⟫_{L²} = ⟪T, v⟫_{L²} + ⟪∇T, ∇v⟫_{L²}` by the
-connection-Laplacian Green identity
-`tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_two`. -/
-
 /-- **The Green / `H¹` bridge for `(1 - Δ_∇)`.** For smooth compactly-supported
 `(0, 2)`-tensors `T, v`,
 `⟪(1 - Δ_∇) T, v⟫_{L²} = ⟪⟦T⟧, ⟦v⟧⟫_{H¹}`,
@@ -163,10 +148,6 @@ theorem oneMinusConnLapSmooth_toL2_inner_eq_h1
         (v : TensorL2 0 2 g)⟫_ℝ =
       ⟪smoothToTensorH1Compl (I := I) (M := M) g 0 2 ⟨T⟩,
         smoothToTensorH1Compl (I := I) (M := M) g 0 2 ⟨v⟩⟫_ℝ := by
-  -- The `H¹` pairing of the two smooth embeddings decomposes as the `L²`
-  -- pairing plus the integrated covariant-gradient (Dirichlet) pairing.
-  -- `⟪⟦T⟧, ⟦v⟧⟫_{H¹} = ⟪⟨T⟩, ⟨v⟩⟫_{SmoothCcTensorH1}` (completion inner-coe),
-  -- which is `tensorH1Inner` of the underlying sections.
   have h_rhs :
       ⟪smoothToTensorH1Compl (I := I) (M := M) g 0 2 ⟨T⟩,
           smoothToTensorH1Compl (I := I) (M := M) g 0 2 ⟨v⟩⟫_ℝ =
@@ -176,8 +157,6 @@ theorem oneMinusConnLapSmooth_toL2_inner_eq_h1
     rw [smoothToTensorH1Compl_apply, smoothToTensorH1Compl_apply,
       UniformSpace.Completion.inner_coe, SmoothCcTensorH1.inner_def,
       tensorH1Inner_def]
-    -- `⟨T⟩.toCcTensor = T`, `⟨v⟩.toCcTensor = v` definitionally; identify the
-    -- `L²` part with the completion-inner-product of the coercions.
     rw [show tensorL2Inner (I := I) (M := M) g 0 2
             (⟨T⟩ : SmoothCcTensorH1 g 0 2).toCcTensor.toFun
             (⟨v⟩ : SmoothCcTensorH1 g 0 2).toCcTensor.toFun =
@@ -185,8 +164,6 @@ theorem oneMinusConnLapSmooth_toL2_inner_eq_h1
         rw [UniformSpace.Completion.inner_coe]
         exact (SmoothCcTensor.inner_def _ _).symm]
   rw [h_rhs]
-  -- The Dirichlet integral equals the `L²` self-pairing of the covariant
-  -- gradients, by the metric-isometry bridge.
   have h_dir :
       ∫ x, tensorCovDerivPointwiseInner (I := I) (M := M) g 0 2 T v x
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
@@ -195,8 +172,6 @@ theorem oneMinusConnLapSmooth_toL2_inner_eq_h1
           (covGrad (I := I) (M := M) g 0 2 v).toFun :=
     (tensorL2Inner_covGrad_eq_integral_tensorCovDerivPointwiseInner
       (I := I) (M := M) g 0 2 T v).symm
-  -- The connection-Laplacian Green identity:
-  -- `⟪∇T, ∇v⟫_{L²} = -⟪Δ_∇ T, v⟫_{L²}`.
   have h_green :
       tensorL2Inner (I := I) (M := M) g 0 (2 + 1)
           (covGrad (I := I) (M := M) g 0 2 T).toFun
@@ -205,7 +180,6 @@ theorem oneMinusConnLapSmooth_toL2_inner_eq_h1
             (rawTensorConnLapSmooth (I := I) g 0 2 T).toFun v.toFun :=
     tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_two
       (I := I) (M := M) g T v
-  -- The LHS `L²` pairing of `(1 - Δ_∇) T` with `v` unfolds via `inner_def`.
   have h_lhs :
       ⟪((oneMinusConnLapSmooth (I := I) g 0 2 T : SmoothCcTensor g 0 2) :
             TensorL2 0 2 g),
@@ -219,7 +193,6 @@ theorem oneMinusConnLapSmooth_toL2_inner_eq_h1
         tensorL2Inner (I := I) (M := M) g 0 2 T.toFun v.toFun := by
     rw [UniformSpace.Completion.inner_coe]
     exact SmoothCcTensor.inner_def _ _
-  -- `(1 - Δ_∇) T = T - Δ_∇ T`, so its `L²` pairing splits by bilinearity.
   have h_split :
       tensorL2Inner (I := I) (M := M) g 0 2
           (oneMinusConnLapSmooth (I := I) g 0 2 T).toFun v.toFun =
@@ -248,13 +221,6 @@ theorem oneMinusConnLapSmooth_toL2_inner_eq_h1
         rw [UniformSpace.Completion.inner_coe]; exact SmoothCcTensor.inner_def _ _]
   rw [h_lhs, h_split, h_l2_Tv, h_dir, h_green]
   ring
-
-/-! ## Parseval restated for the `_ofCompact` coordinate functional
-
-The Parseval identity `tensorParseval_norm_sq` is restated in terms of
-the coordinate functional `tensorL2Coeff`, which is the exact
-coordinate the spectral Sobolev scale `tensorHs` and the weighted-summability
-headline consume. -/
 
 /-- **Parseval for `tensorL2Coeff`.** For any `L²` tensor field `u`,
 the sum of the squared chart-locality-free eigenbasis coordinates equals the
@@ -285,14 +251,6 @@ theorem tensorL2Coeff_ofCompact_summable_sq'
       (tensorL2Coeff (I := I) (M := M) h_compact u i) ^ 2) :=
   tensorL2Coeff_summable_sq (I := I) (M := M) h_compact u
 
-/-! ## Step 1: even-order domination / monotonicity reduction
-
-The Sobolev weight `tensorSobolevWeight i a = (1 + λᵢ)^a` is monotone increasing
-in the exponent (since `1 + λᵢ ≥ 1`). Therefore weighted summability at an even
-integer order `2k ≥ a` dominates weighted summability at `a`: every weighted term
-at exponent `a` is bounded above by the corresponding term at exponent `2k`, and
-the terms are non-negative. -/
-
 /-- **Even-order domination (Step 1).** If `a ≤ 2k` and the coordinate family
 `c` is weighted-square-summable at the even integer exponent `2k`, then it is
 weighted-square-summable at `a`. The terms at exponent `a` are dominated by the
@@ -307,71 +265,14 @@ theorem summable_tensorSobolevWeight_of_even
     Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s =>
       tensorSobolevWeight (I := I) (M := M) i a * (c i) ^ 2) := by
   refine Summable.of_nonneg_of_le (fun i => ?_) (fun i => ?_) h2k
-  · -- The exponent-`a` weighted terms are non-negative.
-    have hw : 0 ≤ tensorSobolevWeight (I := I) (M := M) i a :=
+  · have hw : 0 ≤ tensorSobolevWeight (I := I) (M := M) i a :=
       tensorSobolevWeight_nonneg (I := I) (M := M) i a
     positivity
-  · -- Each exponent-`a` term is dominated by the exponent-`2k` term.
-    have hmono :
+  · have hmono :
         tensorSobolevWeight (I := I) (M := M) i a ≤
           tensorSobolevWeight (I := I) (M := M) i (2 * k : ℕ) :=
       tensorSobolevWeight_mono (I := I) (M := M) i hak
     exact mul_le_mul_of_nonneg_right hmono (sq_nonneg _)
-
-/-! ## Module note: the precise remaining ingredient
-
-The weighted-summability headline
-
-```
-theorem smoothCcTensor_tensorL2Coeff_weighted_summable
-    (g : SmoothRiemannianMetric I M) (a : ℝ) (T : SmoothCcTensor g 0 2)
-    (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2)) :
-    Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 =>
-      tensorSobolevWeight (I := I) (M := M) i a *
-        (tensorL2Coeff (I := I) (M := M) h_compact
-          (SmoothCcTensor.toL2 T) i) ^ 2)
-```
-
-reduces — via `summable_tensorSobolevWeight_of_even` (Step 1) and
-`tensorParseval_l2Coeff_ofCompact_sq` (Parseval, applied to
-`u = SmoothCcTensor.toL2 (oneMinusConnLapSmoothIter g 0 2 k T)`) — to the single
-**per-step eigen-coordinate identity**
-
-```
-tensorL2Coeff h_compact
-    (SmoothCcTensor.toL2 (oneMinusConnLapSmooth g 0 2 T)) i
-  = (1 + TensorEigenIdx.lambda i) *
-      tensorL2Coeff h_compact (SmoothCcTensor.toL2 T) i,
-```
-
-equivalently `⟪⟦T⟧, ⟦eᵢ⟧⟫_{H¹} = (1 + λᵢ) · ⟪T, eᵢ⟫_{L²}` for the smooth
-eigenvector `eᵢ = eigenvectorSmooth i`, which is provided here as
-the Green / `H¹` bridge `oneMinusConnLapSmooth_toL2_inner_eq_h1` together with the
-eigenvector identification
-
-```
-smoothToTensorH1Compl g 0 2 ⟨eigenvectorSmooth i⟩
-  = (i.fst.val)⁻¹ • eigenvectorResolvent i.
-```
-
-That eigenvector identification is the one fact not yet on disk. Both sides have
-the same image under `TensorH1ComplToTensorL2` (namely `eigenvectorSmooth i`
-in `L²`, by `eigenvectorSmooth_toL2` and
-`eigenvector_eq_resolvent_smul`), so it follows once
-`TensorH1ComplToTensorL2 g 0 2` is known to be **injective** — currently only its
-dense range (`denseRange_TensorH1ComplToTensorL2`) is established. The required
-missing lemma is therefore:
-
-```
-theorem TensorH1ComplToTensorL2_injective
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
-    Function.Injective (TensorH1ComplToTensorL2 (I := I) (M := M) g r s)
-```
-
-(the faithful Sobolev `H¹ ↪ L²` embedding for tensor fields). This is a genuine
-Sobolev-embedding theorem, not packaging; it is the precise prerequisite the
-headline awaits.
--/
 
 end IntrinsicSpectral
 end RicciFlow

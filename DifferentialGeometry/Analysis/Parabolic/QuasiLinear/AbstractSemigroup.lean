@@ -106,7 +106,6 @@ theorem continuousOn_uncurry (S : BoundedC0Semigroup X) :
   rw [Set.mem_Ici] at hσ₀_nn
   set σ₀ : ℝ := p₀.1 with hσ₀_def
   set v₀ : X := p₀.2 with hv₀_def
-  -- Increment bound on the domain `Ici 0 ×ˢ univ`.
   have h_bound : ∀ p : ℝ × X, p ∈ Set.Ici (0 : ℝ) ×ˢ Set.univ →
       ‖(fun q : ℝ × X => S q.1 q.2) p -
           (fun q : ℝ × X => S q.1 q.2) p₀‖ ≤
@@ -114,7 +113,6 @@ theorem continuousOn_uncurry (S : BoundedC0Semigroup X) :
     rintro ⟨σ, v⟩ hp
     obtain ⟨hσ_nn, -⟩ := hp
     rw [Set.mem_Ici] at hσ_nn
-    -- Insert `S σ v₀` and apply the triangle inequality.
     have h_decomp : S σ v - S σ₀ v₀ =
         S σ (v - v₀) + (S σ v₀ - S σ₀ v₀) := by
       rw [(S σ).map_sub]
@@ -129,11 +127,9 @@ theorem continuousOn_uncurry (S : BoundedC0Semigroup X) :
           norm_add_le _ _
       _ ≤ ‖v - v₀‖ + ‖S σ v₀ - S σ₀ v₀‖ := by
           gcongr
-  -- The bounding quantity tends to `0` along `𝓝[Ici 0 ×ˢ univ] p₀`.
   have h_rhs_to_zero :
       Tendsto (fun p : ℝ × X => ‖p.2 - v₀‖ + ‖S p.1 v₀ - S σ₀ v₀‖)
         (𝓝[Set.Ici (0 : ℝ) ×ˢ Set.univ] p₀) (𝓝 0) := by
-    -- First term: `p ↦ ‖p.2 - v₀‖ → 0`.
     have h_term1 :
         Tendsto (fun p : ℝ × X => ‖p.2 - v₀‖)
           (𝓝[Set.Ici (0 : ℝ) ×ˢ Set.univ] p₀) (𝓝 0) := by
@@ -146,7 +142,6 @@ theorem continuousOn_uncurry (S : BoundedC0Semigroup X) :
         simpa using this
       have := h_diff.norm
       simpa using this
-    -- Second term: `p ↦ ‖S p.1 v₀ - S σ₀ v₀‖ → 0` by strong continuity.
     have h_strong : ContinuousWithinAt (fun t : ℝ => S t v₀)
         (Set.Ici 0) σ₀ :=
       S.continuousOn_apply v₀ σ₀ (Set.mem_Ici.mpr hσ₀_nn)
@@ -175,7 +170,6 @@ theorem continuousOn_uncurry (S : BoundedC0Semigroup X) :
       simpa using this
     have := h_term1.add h_term2
     simpa using this
-  -- Squeeze the increment to `0`.
   have h_diff_to_zero :
       Tendsto (fun p : ℝ × X =>
           (fun q : ℝ × X => S q.1 q.2) p -
@@ -184,7 +178,6 @@ theorem continuousOn_uncurry (S : BoundedC0Semigroup X) :
     refine squeeze_zero_norm' ?_ h_rhs_to_zero
     filter_upwards [self_mem_nhdsWithin] with p hp
     exact h_bound p hp
-  -- Translate back to `ContinuousWithinAt`.
   have h_target :
       Tendsto (fun p : ℝ × X => S p.1 p.2)
         (𝓝[Set.Ici (0 : ℝ) ×ˢ Set.univ] p₀)

@@ -52,8 +52,6 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Equivalence
 open DifferentialGeometry.Analysis.Sobolev.EquivalenceReverse
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -61,8 +59,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
   [NeZero (Module.finrank ℝ E)]
-
-/-! ## Bounds on `eLpNorm` of a smooth scalar in terms of its pre-H¹ norm -/
 
 /-- The L² norm of a smooth scalar (as `eLpNorm` of its underlying function)
 is bounded by its pre-H¹ norm in `ENNReal`. -/
@@ -132,7 +128,6 @@ private lemma eLpNorm_sqrt_g_inner_grad_le_norm_smoothScalar
     s.sqrt_g_inner_grad_memLp_two
   set Fp : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
     hf_memLp.toLp f with hFp_def
-  -- ‖Fp‖² = ⟨Fp, Fp⟩_{L²} = ∫ ⟨Fp, Fp⟩ dμ_g (a.e.) = ∫ f² dμ_g.
   have h_norm_sq : ‖Fp‖ ^ 2 = ∫ x, f x * f x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
     have h := real_inner_self_eq_norm_sq Fp
@@ -209,8 +204,6 @@ private lemma eLpNorm_sqrt_g_inner_grad_le_norm_smoothScalar
   rw [h_re]
   exact ENNReal.ofReal_le_ofReal h_real
 
-/-! ## Approximation of any bounded H¹ vector by a smooth scalar -/
-
 /-- For each vector `v ∈ H1Compl g` and each `δ > 0`, there exists
 a smooth scalar `s` with `‖v - smoothToH1Compl g s‖ < δ`.
 
@@ -230,8 +223,6 @@ private lemma exists_smooth_close_to_H1 (g : SmoothRiemannianMetric I M)
   rw [dist_eq_norm] at hs_close
   exact hs_close
 
-/-! ## Compactness of the H¹ → L² inclusion -/
-
 set_option maxHeartbeats 4000000 in
 /-- **The H¹ → L² inclusion is a compact operator on a closed Riemannian
 manifold.**
@@ -246,20 +237,14 @@ to the same limit. -/
 theorem H1ComplToLp_isCompactOperator (g : SmoothRiemannianMetric I M) :
     IsCompactOperator (H1ComplToLp (I := I) (M := M) g) := by
   classical
-  -- Reduce to: the closure of the image of the closed unit ball is compact.
-  -- (We use the linear-map coercion of the CLM.)
   have h_iff := isCompactOperator_iff_isCompact_closure_image_closedBall
       (H1ComplToLp (I := I) (M := M) g : H1Compl g →ₗ[ℝ]
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) zero_lt_one
   refine h_iff.mpr ?_
-  -- Use isCompact_iff_isSeqCompact (Lp ℝ 2 is metric).
   rw [isCompact_iff_isSeqCompact]
-  -- Set up notation.
   set T : H1Compl g →L[ℝ] Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
     H1ComplToLp (I := I) (M := M) g with hT_def
-  -- Prove sequential compactness.
   intro y hy_in_closure
-  -- For each n, choose zₙ ∈ T '' closedBall 0 1 with `‖yₙ - zₙ‖ < 1/(n+1)`.
   have h_choose_z : ∀ n : ℕ, ∃ z ∈ T '' Metric.closedBall (0 : H1Compl g) 1,
       dist (y n) z < 1 / (n + 1 : ℝ) := by
     intro n
@@ -277,19 +262,16 @@ theorem H1ComplToLp_isCompactOperator (g : SmoothRiemannianMetric I M) :
     have h_pos : (0 : ℝ) < 1 / (n + 1) := by positivity
     exact exists_smooth_close_to_H1 (I := I) (M := M) g (x n) h_pos
   choose s hs_close using h_choose_s
-  -- ‖xₙ‖ ≤ 1 (closed ball).
   have h_xn_norm : ∀ n : ℕ, ‖x n‖ ≤ 1 := by
     intro n
     have hxn_mem : x n ∈ Metric.closedBall (0 : H1Compl g) 1 := hx_mem n
     rw [Metric.mem_closedBall, dist_zero_right] at hxn_mem
     exact hxn_mem
-  -- ‖smoothToH1Compl g (s n)‖ = ‖s n‖.
   have h_s_isometric : ∀ n : ℕ,
       ‖smoothToH1Compl (I := I) (M := M) g (s n)‖ = ‖s n‖ := by
     intro n
     rw [smoothToH1Compl_apply]
     exact UniformSpace.Completion.norm_coe (s n)
-  -- ‖s n‖ ≤ 2.
   have h_sn_norm_le_two : ∀ n : ℕ, ‖s n‖ ≤ 2 := by
     intro n
     have h_iso := h_s_isometric n
@@ -302,7 +284,6 @@ theorem H1ComplToLp_isCompactOperator (g : SmoothRiemannianMetric I M) :
         linarith
       linarith
     have h_xn_le : ‖x n‖ ≤ 1 := h_xn_norm n
-    -- ‖smoothToH1Compl s n‖ = ‖x n - (x n - smoothToH1Compl s n)‖ ≤ ‖x n‖ + ‖x n - smoothToH1Compl s n‖.
     have h_tri : ‖smoothToH1Compl (I := I) (M := M) g (s n)‖ ≤
         ‖x n‖ + ‖x n - smoothToH1Compl (I := I) (M := M) g (s n)‖ := by
       have h_id : smoothToH1Compl (I := I) (M := M) g (s n) =
@@ -319,13 +300,11 @@ theorem H1ComplToLp_isCompactOperator (g : SmoothRiemannianMetric I M) :
     have h_smooth_le : ‖smoothToH1Compl (I := I) (M := M) g (s n)‖ ≤ 2 := by linarith
     rw [← h_iso]
     exact h_smooth_le
-  -- Apply the REVERSE bridge.
   have h_two_ne_top : (2 : ℝ≥0∞) ≠ ⊤ := by norm_num
   have h_one_le_two : (1 : ℝ≥0∞) ≤ 2 := by norm_num
   obtain ⟨C₀, hC₀_nn, hC₀_bound⟩ :=
     wkpNormChart_le_const_mul_intrinsicLpComponents_smooth_uniform (E := E) (H := H)
       (I := I) (M := M) g (p := 2) h_one_le_two h_two_ne_top
-  -- For each n: wkpNormChart g 1 2 (s n).toFun ≤ ENNReal.ofReal (4 C₀).
   have h_wkp_bound : ∀ n : ℕ,
       wkpNormChart (I := I) (M := M) g 1 2 (s n).toFun ≤
         ENNReal.ofReal (4 * C₀) := by
@@ -378,7 +357,6 @@ theorem H1ComplToLp_isCompactOperator (g : SmoothRiemannianMetric I M) :
     have h_eq_4 : C₀ * (2 + 2) = 4 * C₀ := by ring
     rw [h_eq_4] at h_step
     exact h_step
-  -- Each `(s n).toFun` is measurable (continuous → measurable).
   have h_sn_meas : ∀ n : ℕ, Measurable (s n).toFun := fun n =>
     (s n).smooth.continuous.measurable
   have h_one_le_ofReal_two : (1 : ℝ≥0∞) ≤ ENNReal.ofReal 2 := by
@@ -398,7 +376,6 @@ theorem H1ComplToLp_isCompactOperator (g : SmoothRiemannianMetric I M) :
     intro n
     rw [h_two_eq]
     exact h_wkp_bound n
-  -- Apply Rellich-Kondrachov.
   obtain ⟨φ, hφ_mono, u_lim, hu_lim_memLp_pou, hu_lim_tendsto_pou⟩ :=
     rellich_kondrachov_chart_seq
       (I := I) (M := M) g (p := 2) (by norm_num) h_sn_meas h_sn_memWkp h_wkp_bound'
@@ -411,7 +388,6 @@ theorem H1ComplToLp_isCompactOperator (g : SmoothRiemannianMetric I M) :
   rw [h_pou_eq_g] at hu_lim_tendsto_pou
   rw [h_two_eq] at hu_lim_memLp_pou
   rw [h_two_eq] at hu_lim_tendsto_pou
-  -- Build L = MemLp.toLp u_lim.
   set L : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
     hu_lim_memLp_pou.toLp u_lim with hL_def
   have h_smooth_tendsto :
@@ -422,34 +398,22 @@ theorem H1ComplToLp_isCompactOperator (g : SmoothRiemannianMetric I M) :
         (f_lim := u_lim)
         (f_lim_ℒp := hu_lim_memLp_pou)).mpr hu_lim_tendsto_pou
     convert h using 2
-  -- Now show Tendsto (y ∘ φ) atTop (𝓝 L).
-  -- Bound dist (y (φ k)) L by sum of three terms tending to 0.
   have h_y_tendsto : Tendsto (fun k => y (φ k)) atTop (𝓝 L) := by
-    -- We use the bound:
-    -- dist (y (φ k)) L ≤ dist (y (φ k)) (z (φ k)) + dist (z (φ k)) (smoothToLp (s (φ k)))
-    --                  + dist (smoothToLp (s (φ k))) L.
     rw [tendsto_iff_dist_tendsto_zero]
-    -- Define the bounding sequence.
     refine squeeze_zero (f := fun k : ℕ =>
         dist (y (φ k)) L) (fun k => dist_nonneg)
       (g := fun k : ℕ => 2 * (1 / ((k : ℝ) + 1)) +
               dist (smoothToLp (I := I) (M := M) g (s (φ k))) L)
       (fun k => ?_)
       ?_
-    · -- Bound: dist (y (φ k)) L ≤ 2 / (k + 1) + dist (smoothToLp (s (φ k))) L.
-      -- Triangle inequality (twice).
-      have h_t1 : dist (y (φ k)) L ≤
+    · have h_t1 : dist (y (φ k)) L ≤
           dist (y (φ k)) (z (φ k)) + dist (z (φ k)) L := dist_triangle _ _ _
       have h_t2 : dist (z (φ k)) L ≤
           dist (z (φ k)) (smoothToLp (I := I) (M := M) g (s (φ k))) +
             dist (smoothToLp (I := I) (M := M) g (s (φ k))) L :=
         dist_triangle _ _ _
-      -- Bound ‖y - z‖.
       have h_yz : dist (y (φ k)) (z (φ k)) < 1 / ((φ k : ℝ) + 1) :=
         hz_close (φ k)
-      -- Bound ‖z - smoothToLp(s)‖.
-      -- z(φ k) = T(x(φ k)).
-      -- smoothToLp g (s (φ k)) = T (smoothToH1Compl g (s (φ k))).
       have hT_s_eq : smoothToLp (I := I) (M := M) g (s (φ k)) =
           T (smoothToH1Compl (I := I) (M := M) g (s (φ k))) := by
         rw [hT_def]
@@ -469,7 +433,6 @@ theorem H1ComplToLp_isCompactOperator (g : SmoothRiemannianMetric I M) :
       have h_xs_lt : ‖x (φ k) - smoothToH1Compl (I := I) (M := M) g (s (φ k))‖ <
           1 / ((φ k : ℝ) + 1) :=
         hs_close (φ k)
-      -- Bound 1 / (φ k + 1) ≤ 1 / (k + 1).
       have h_phi_ge : (k : ℝ) + 1 ≤ (φ k : ℝ) + 1 := by
         have h_phi_ge_k : k ≤ φ k := hφ_mono.le_apply
         exact_mod_cast Nat.add_le_add_right h_phi_ge_k 1
@@ -481,7 +444,6 @@ theorem H1ComplToLp_isCompactOperator (g : SmoothRiemannianMetric I M) :
         linarith
       have h_inv_le : 1 / ((φ k : ℝ) + 1) ≤ 1 / ((k : ℝ) + 1) :=
         one_div_le_one_div_of_le h_k_pos h_phi_ge
-      -- Combine.
       calc
         dist (y (φ k)) L
             ≤ dist (y (φ k)) (z (φ k)) + dist (z (φ k)) L := h_t1
@@ -491,7 +453,6 @@ theorem H1ComplToLp_isCompactOperator (g : SmoothRiemannianMetric I M) :
               add_le_add le_rfl h_t2
         _ ≤ 1 / ((φ k : ℝ) + 1) + 1 / ((φ k : ℝ) + 1) +
               dist (smoothToLp (I := I) (M := M) g (s (φ k))) L := by
-              -- yz_dist < 1/(φk + 1), zS_dist ≤ ‖x - smooth‖ < 1/(φk + 1).
               have hzS_lt : dist (z (φ k)) (smoothToLp (I := I) (M := M) g (s (φ k))) <
                   1 / ((φ k : ℝ) + 1) := lt_of_le_of_lt h_zS_le h_xs_lt
               linarith [le_of_lt h_yz, le_of_lt hzS_lt]
@@ -500,8 +461,7 @@ theorem H1ComplToLp_isCompactOperator (g : SmoothRiemannianMetric I M) :
               linarith
         _ = 2 * (1 / ((k : ℝ) + 1)) +
               dist (smoothToLp (I := I) (M := M) g (s (φ k))) L := by ring
-    · -- The bound tends to 0.
-      have h1 : Tendsto (fun k : ℕ => 2 * (1 / ((k : ℝ) + 1))) atTop (𝓝 0) := by
+    · have h1 : Tendsto (fun k : ℕ => 2 * (1 / ((k : ℝ) + 1))) atTop (𝓝 0) := by
         rw [show (0 : ℝ) = 2 * 0 by ring]
         exact (tendsto_const_nhds (x := (2 : ℝ))).mul tendsto_one_div_add_atTop_nhds_zero_nat
       have h2 : Tendsto (fun k : ℕ =>
@@ -510,11 +470,8 @@ theorem H1ComplToLp_isCompactOperator (g : SmoothRiemannianMetric I M) :
       rw [show (0 : ℝ) = 0 + 0 by ring]
       exact h1.add h2
   refine ⟨L, ?_, φ, hφ_mono, h_y_tendsto⟩
-  · -- L ∈ closure (T '' B): use that closure is closed and y(φ k) → L with each y(φ k) in closure.
-    exact IsClosed.mem_of_tendsto isClosed_closure h_y_tendsto
+  · exact IsClosed.mem_of_tendsto isClosed_closure h_y_tendsto
       (Filter.Eventually.of_forall (fun k => hy_in_closure (φ k)))
-
-/-! ## Compactness of the L²-side resolvent -/
 
 /-- **The L²-side resolvent of the variational Laplacian is a compact
 operator on a closed Riemannian manifold.**
@@ -523,25 +480,16 @@ Direct consequence: `resolventL2 g = H1ComplToLp g ∘L resolvent g`, and a
 compact operator post-composed with a bounded operator is again compact. -/
 theorem resolventL2_isCompactOperator (g : SmoothRiemannianMetric I M) :
     IsCompactOperator (resolventL2 (I := I) (M := M) g) := by
-  -- resolventL2 g = (H1ComplToLp g) ∘ (resolvent g) (as functions).
   have h_eq : (resolventL2 (I := I) (M := M) g : _ → _) =
       (H1ComplToLp (I := I) (M := M) g) ∘ (resolvent (I := I) (M := M) g) := by
     funext f
     rw [resolventL2_apply]
     rfl
-  -- (H1ComplToLp g) ∘ (resolvent g) = (H1ComplToLp g compact) ∘ (resolvent g bounded).
   rw [show (resolventL2 (I := I) (M := M) g : _ → _) =
         (fun v => (H1ComplToLp (I := I) (M := M) g) v) ∘
           (fun f => (resolvent (I := I) (M := M) g) f) from h_eq]
   exact (H1ComplToLp_isCompactOperator (I := I) (M := M) g).comp_clm
     (resolvent (I := I) (M := M) g)
-
-/-! ## Unconditional spectral theorems
-
-The following theorems repackage the conditional spectral results from
-`Spectral/Spectrum.lean` by discharging the
-`IsCompactOperator (resolventL2 g)` hypothesis using the compactness
-theorem `resolventL2_isCompactOperator` proved above. -/
 
 /-- For a closed Riemannian manifold `(M, g)`, every eigenspace of the
 `L²`-side resolvent `resolventL2 g` at a non-zero scalar `μ` is

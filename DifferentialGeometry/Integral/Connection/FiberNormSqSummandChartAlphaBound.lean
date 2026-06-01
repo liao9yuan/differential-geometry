@@ -48,18 +48,10 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Helper: elementwise Gram bound on POU tsupport (re-derivation)
-
-We re-derive an elementwise bound `|G_{ij}(b)| ≤ C_G` on the POU tsupport from
-`chartGramMatrix_entry_isBounded_on_compact`, packaged as a single non-negative
-constant `C_G ≥ 0` valid for all index pairs. -/
 
 private lemma chartGramMatrix_pou_uniform_entry_bound
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -108,8 +100,6 @@ private lemma chartGramMatrix_pou_uniform_entry_bound
     hK_le (i, j) b hb
   linarith
 
-/-! ## Round-trip lemma for the chart-α trivialisation -/
-
 /-- Applying `triv.continuousLinearMapAt ℝ b` to a chart-`α`-basis tangent
 vector returns the corresponding constant model basis vector, provided `b` lies
 in the trivialization base set. -/
@@ -129,24 +119,6 @@ private lemma trivAt_cLMA_chartBasisVecFiber
     rw [Trivialization.symmL_apply]
   rw [hSymmL, Trivialization.continuousLinearMapAt_symmL T (b := b) hb]
 
-/-! ## Algebraic expansion of `mkPiAlgebra ∘ g.inner ∘ chartBasisVec`
-
-For `b` in the chart base set at `α`, the chart-`α`-Gram-paired covariant tuple
-
-```
-ω_e_Idx := ⊗_k g.inner b (chartBasisVecFiber α (Idx k) b)
-```
-
-viewed in `Tensor0SSpace r I b ≡ ContinuousMultilinearMap ℝ (fun _ : Fin r => E) ℝ`,
-expands as
-
-```
-ω_e_Idx = Σ_{Idx' : Fin r → Fin n}
-            (∏_k G_{Idx k, Idx' k})
-              · (dualCovariantCMM r Idx').compCLM (fun _ => triv.cLMA b)
-```
-
-where `G_{i,j} = chartGramMatrix g α b i j` and `triv = trivializationAt E (TangentSpace I) α`. -/
 private lemma omega_eIdx_eq_sum_gram_compCLM
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -164,29 +136,22 @@ private lemma omega_eIdx_eq_sum_gram_compCLM
   set T : Bundle.Trivialization E (π E (TangentSpace I : M → Type _)) :=
     trivializationAt E (TangentSpace I) α with hT_def
   set cLMA : TangentSpace I b →L[ℝ] E := T.continuousLinearMapAt ℝ b with hcLMA_def
-  -- Compare pointwise as `ContinuousMultilinearMap ℝ (fun _ : Fin r => E) ℝ`.
   refine ContinuousMultilinearMap.ext (fun v => ?_)
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply,
     ContinuousMultilinearMap.mkPiAlgebra_apply]
-  -- For each k, expand `g.inner b (chartBasisVecFiber α (Idx k) b) (v k)`
-  -- in the chartBasisFamily.
   have h_inner_expand : ∀ k : Fin r,
       g.inner b (chartBasisVecFiber (I := I) α (Idx k) b) (v k) =
         ∑ l : Fin (Module.finrank ℝ E),
           chartGramMatrix (I := I) g α b (Idx k) l *
             ((chartModelBasis E).coord l) (cLMA (v k)) := by
     intro k
-    -- Set the coefficient `c l := (chartModelBasis E).coord l (cLMA (v k))`.
     set c : Fin (Module.finrank ℝ E) → ℝ :=
       fun l => ((chartModelBasis E).coord l) (cLMA (v k)) with hc_def
-    -- Expand `v k = Σ_l c l • chartBasisVecFiber α l b`.
     have h_v_expand : v k =
         ∑ l : Fin (Module.finrank ℝ E),
           c l • chartBasisVecFiber (I := I) α l b := by
-      -- v k = T.symmL ℝ b (cLMA (v k)) on baseSet.
       have h_round : T.symmL ℝ b (cLMA (v k)) = v k :=
         T.symmL_continuousLinearMapAt (R := ℝ) hb (v k)
-      -- cLMA (v k) = Σ_l c l • chartModelBasis E l.
       have h_basis_expand :
           cLMA (v k) =
             ∑ l : Fin (Module.finrank ℝ E),
@@ -195,14 +160,11 @@ private lemma omega_eIdx_eq_sum_gram_compCLM
         conv_lhs => rw [← hsum]
         refine Finset.sum_congr rfl ?_
         intro l _
-        -- Goal: repr (cLMA (v k)) l • basis l = c l • basis l.
-        -- c l = coord l (cLMA (v k)) = repr (cLMA (v k)) l.
         have h_c_eq : c l = ((chartModelBasis E).repr (cLMA (v k))) l := by
           change ((chartModelBasis E).coord l) (cLMA (v k)) =
             ((chartModelBasis E).repr (cLMA (v k))) l
           rw [Module.Basis.coord_apply]
         rw [h_c_eq]
-      -- Apply T.symmL ℝ b (linear) and push it through the sum.
       have : T.symmL ℝ b (cLMA (v k)) =
           ∑ l : Fin (Module.finrank ℝ E),
             c l • T.symmL ℝ b (chartModelBasis E l) := by
@@ -210,7 +172,6 @@ private lemma omega_eIdx_eq_sum_gram_compCLM
         refine Finset.sum_congr rfl ?_
         intro l _
         rw [map_smul]
-      -- T.symmL ℝ b (chartModelBasis E l) = chartBasisVecFiber α l b.
       have h_basis_vec : ∀ l : Fin (Module.finrank ℝ E),
           T.symmL ℝ b (chartModelBasis E l) = chartBasisVecFiber (I := I) α l b := by
         intro l
@@ -220,7 +181,6 @@ private lemma omega_eIdx_eq_sum_gram_compCLM
       refine Finset.sum_congr rfl ?_
       intro l _
       rw [h_basis_vec l]
-    -- Now expand g.inner b (chartBasisVecFiber α (Idx k) b) using h_v_expand.
     calc g.inner b (chartBasisVecFiber (I := I) α (Idx k) b) (v k)
         = g.inner b (chartBasisVecFiber (I := I) α (Idx k) b)
             (∑ l : Fin (Module.finrank ℝ E),
@@ -242,25 +202,16 @@ private lemma omega_eIdx_eq_sum_gram_compCLM
               chartGramMatrix (I := I) g α b (Idx k) l from
             (chartGramMatrix_apply g α b (Idx k) l).symm]
           ring
-  -- Expand the product using h_inner_expand pointwise.
   trans (∏ k : Fin r,
         ∑ l : Fin (Module.finrank ℝ E),
           chartGramMatrix (I := I) g α b (Idx k) l *
             ((chartModelBasis E).coord l) (cLMA (v k)))
   · exact Finset.prod_congr rfl (fun k _ => h_inner_expand k)
-  -- Expand ∏ ∑ as ∑ ∏ over Fin r → Fin n via Fintype.piFinset.
   rw [Finset.prod_univ_sum]
   rw [Fintype.piFinset_univ]
-  -- The RHS is (∑ Idx', a • CMM) applied to v. Move v into the sum and smul.
-  -- We compare both sides as `∑ Idx', P(Idx')` over the same indexing set.
-  -- Apply the RHS reductions to a fresh goal.
   refine Eq.trans ?_ (ContinuousMultilinearMap.sum_apply _ v).symm
   refine Finset.sum_congr rfl ?_
   intro Idx' _
-  -- Now show:
-  --  ∏ k, G(Idx k)(Idx' k) * coord(Idx' k)(cLMA(v k))
-  --   = ((∏ k, G(Idx k)(Idx' k)) • dualCovariantCMM r Idx' .compCLM ...) v
-  -- By smul_apply (rfl): `(c • F) v = c • (F v) = c * (F v)`.
   change ∏ i, chartGramMatrix (I := I) g α b (Idx i) (Idx' i) *
       ((chartModelBasis E).coord (Idx' i)) (cLMA (v i)) =
     (∏ k, chartGramMatrix (I := I) g α b (Idx k) (Idx' k)) •
@@ -268,10 +219,7 @@ private lemma omega_eIdx_eq_sum_gram_compCLM
         (fun _ : Fin r => cLMA)) v
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply,
     dualCovariantCMM_apply, smul_eq_mul]
-  -- Now: ∏ k, G * coord = (∏ k, G) * ∏ k, coord.
   rw [← Finset.prod_mul_distrib]
-
-/-! ## Round-trip: section evaluated at chart-`α` frame equals the model evaluation -/
 
 /-- For `b` in the chart base set at `α`, the value of `S.toSection b` (regarded as
 a `Tensor0SSpace r b → Tensor0SSpace s b` linear map) at a covariant input of
@@ -305,8 +253,6 @@ private lemma section_compCLM_eval_eq_tensorChartComponentRaw
   have hb_r : b ∈ er.baseSet := hb
   have hb_s : b ∈ es.baseSet := hb
   have hb_RS : b ∈ eRS.baseSet := ⟨hb_r, hb_s⟩
-  -- Step A: `(dualCovariantCMM r Idx').compCLM (fun _ => T.cLMA b)` (in Tensor0SSpace r I b)
-  -- equals `er.symmL ℝ b (dualCovariantCMM r Idx')`.
   have hA :
       ((er.symmL ℝ b (dualCovariantCMM (E := E) r Idx')) :
         ContinuousMultilinearMap ℝ (fun _ : Fin r => E) ℝ) =
@@ -315,8 +261,6 @@ private lemma section_compCLM_eval_eq_tensorChartComponentRaw
     Bundle.continuousMultilinearMap.triv_symmL_eq_compContinuousLinearMap
       (𝕜 := ℝ) (F := E) (E := (TangentSpace I : M → Type _)) (s := r)
       α b hb_r (dualCovariantCMM (E := E) r Idx')
-  -- Therefore, in Tensor0SSpace r I b (= ContinuousMultilinearMap), the two expressions
-  -- agree. So we may rewrite the inner argument.
   have hA' :
       ((dualCovariantCMM (E := E) r Idx').compContinuousLinearMap
         (fun _ : Fin r => T.continuousLinearMapAt ℝ b) :
@@ -324,11 +268,9 @@ private lemma section_compCLM_eval_eq_tensorChartComponentRaw
       (er.symmL ℝ b (dualCovariantCMM (E := E) r Idx') :
         Tensor0SSpace r I b) := hA.symm
   rw [hA']
-  -- Step B: Set X := (S.toSection b)(er.symmL b D) ∈ Tensor0SSpace s I b.
   set X : Tensor0SSpace s I b :=
     (S.toSection b : Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b)
       (er.symmL ℝ b (dualCovariantCMM (E := E) r Idx')) with hX_def
-  -- B.1: eRS.cLMA b (S.toSection b) applied to D equals es.cLMA b X.
   have hForward :
       (eRS.continuousLinearMapAt ℝ b (S.toSection b) :
         Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E)
@@ -343,16 +285,13 @@ private lemma section_compCLM_eval_eq_tensorChartComponentRaw
       simpa [Bundle.Trivialization.continuousLinearMapAt_apply] using h
     rw [h_cLMA]
     rfl
-  -- B.2: X = es.symmL b (es.cLMA b X) on baseSet.
   have h_round :
       es.symmL ℝ b (es.continuousLinearMapAt ℝ b X) = X :=
     Bundle.Trivialization.symmL_continuousLinearMapAt es hb_s X
-  -- triv_symmL formula for (0,s) bundle.
   have h_symmL_s :=
     Bundle.continuousMultilinearMap.triv_symmL_eq_compContinuousLinearMap
       (𝕜 := ℝ) (F := E) (E := (TangentSpace I : M → Type _)) (s := s)
       α b hb_s (es.continuousLinearMapAt ℝ b X)
-  -- X (chartBasisVecFiber α (Jdx ·) b) = (es.cLMA b X) (fun k => T.cLMA b (chartBasisVec ...)).
   have h_X_eval :
       (X : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ)
           (fun k : Fin s => chartBasisVecFiber (I := I) α (Jdx k) b) =
@@ -360,28 +299,19 @@ private lemma section_compCLM_eval_eq_tensorChartComponentRaw
           (fun k : Fin s =>
             T.continuousLinearMapAt ℝ b
               (chartBasisVecFiber (I := I) α (Jdx k) b)) := by
-    -- X = es.symmL b (es.cLMA b X) (h_round); rewrite and apply h_symmL_s.
     conv_lhs => rw [← h_round]
-    -- Now LHS: (es.symmL b (es.cLMA b X) : CMM)(chartBasisVec...).
     rw [show (es.symmL ℝ b (es.continuousLinearMapAt ℝ b X) :
             ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) =
           (es.continuousLinearMapAt ℝ b X).compContinuousLinearMap
             (fun _ : Fin s => T.continuousLinearMapAt ℝ b) from h_symmL_s]
     rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
-  -- T.cLMA b (chartBasisVecFiber α (Jdx k) b) = chartModelBasis E (Jdx k).
   have h_basis_subst :
       (fun k : Fin s => T.continuousLinearMapAt ℝ b
         (chartBasisVecFiber (I := I) α (Jdx k) b)) =
         (fun k : Fin s => chartModelBasis E (Jdx k)) := by
     funext k
     exact trivAt_cLMA_chartBasisVecFiber (I := I) α (Jdx k) hb
-  -- Combine.
   rw [h_X_eval, h_basis_subst]
-  -- Now LHS = (es.cLMA b X)(fun k => chartModelBasis E (Jdx k)).
-  -- RHS = tensorChartComponentRaw α Idx' Jdx b
-  --     = tensorChartComponentProjection (tensorTrivProj S α b) Idx' Jdx
-  --     = (tensorTrivProj S α b)(dualCovariantCMM r Idx')(fun k => chartModelBasis E (Jdx k)).
-  -- Use hForward and the def of tensorTrivProj.
   change (es.continuousLinearMapAt ℝ b X)
           (fun k : Fin s => chartModelBasis E (Jdx k)) =
         tensorChartComponentRaw (I := I) (M := M) g r s S α Idx' Jdx b
@@ -393,8 +323,6 @@ private lemma section_compCLM_eval_eq_tensorChartComponentRaw
   rw [h_def]
   unfold tensorTrivProj
   rw [hForward]
-
-/-! ## Main expansion lemma -/
 
 /-- For `b` in the chart base set at `α`, the value of `(S.toSection b) ω_e_Idx`
 at the chart-`α`-basis tuple expands as a finite sum:
@@ -424,11 +352,8 @@ private lemma section_omega_eIdx_apply_eq_sum_gram_components
   classical
   set T : Bundle.Trivialization E (π E (TangentSpace I : M → Type _)) :=
     trivializationAt E (TangentSpace I) α with hT_def
-  -- Step 1: rewrite ω_e_Idx as the chartBasisFamily-expanded sum (as Tensor0SSpace r I b).
   have h_omega_eq :=
     omega_eIdx_eq_sum_gram_compCLM (I := I) (M := M) g α hb r Idx
-  -- Step 2: apply S.toSection b linearly to both sides.
-  -- Rewrite ω_e_Idx in the Tensor0SSpace r I b form.
   have h_omega_TSp :
       (((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin r) ℝ).compContinuousLinearMap
         (fun k : Fin r =>
@@ -440,22 +365,15 @@ private lemma section_omega_eIdx_apply_eq_sum_gram_components
               (fun _ : Fin r => T.continuousLinearMapAt ℝ b)) :
                 Tensor0SSpace r I b) := h_omega_eq
   rw [h_omega_TSp]
-  -- Step 3: linearity of S.toSection b on the sum (as a CLM).
   rw [map_sum]
-  -- Step 4: evaluate the sum-of-tensors at the chart-`α`-basis input.
-  -- Sum at a multilinear evaluation distributes.
   rw [ContinuousMultilinearMap.sum_apply]
   refine Finset.sum_congr rfl ?_
   intro Idx' _
-  -- Distribute smul through S.toSection b (linearity).
   rw [map_smul]
-  -- Distribute the scalar multiplication through the multilinear evaluation.
   rw [ContinuousMultilinearMap.smul_apply]
   rw [smul_eq_mul]
   rw [section_compCLM_eval_eq_tensorChartComponentRaw (I := I) (M := M)
     g r s S α hb Idx' Jdx]
-
-/-! ## Cauchy–Schwarz combined with the uniform Gram-product bound -/
 
 private lemma sum_prod_gram_sq_le_uniform_const
     {r : ℕ} {n : ℕ}
@@ -511,8 +429,6 @@ private lemma sum_prod_gram_sq_le_uniform_const
         push_cast
         rfl
 
-/-! ## Headline -/
-
 /-- **`fiberNormSqSummand` at the chart-`α` frame is bounded by raw-component squares.**
 
 For a closed Riemannian manifold `(M, g)`, smooth tensor `S : SmoothCcTensor g r s`,
@@ -567,12 +483,10 @@ theorem fiberNormSqSummand_chartAlpha_le_raw_components_sq
       pouTsupport_subset_baseSet (I := I) (M := M) α
     exact hsub hb
   unfold fiberNormSqSummand
-  -- Rewrite the inner CMM evaluation as a sum-of-products.
   have h_expand :=
     section_omega_eIdx_apply_eq_sum_gram_components (I := I) (M := M)
       g r s S α hb_base Idx Jdx
   rw [h_expand]
-  -- Cauchy-Schwarz: (∑ a · c)² ≤ (∑ a²)(∑ c²).
   have h_CS :
       (∑ Idx' : Fin r → Fin n,
         (∏ k : Fin r, chartGramMatrix (I := I) g α b (Idx k) (Idx' k)) *
@@ -587,7 +501,6 @@ theorem fiberNormSqSummand_chartAlpha_le_raw_components_sq
         ∏ k : Fin r, chartGramMatrix (I := I) g α b (Idx k) (Idx' k))
       (g := fun Idx' : Fin r → Fin n =>
         tensorChartComponentRaw (I := I) (M := M) g r s S α Idx' Jdx b)
-  -- Bound the first factor uniformly.
   have h_uniform :
       ∑ Idx' : Fin r → Fin n,
           (∏ k : Fin r, chartGramMatrix (I := I) g α b (Idx k) (Idx' k)) ^ 2 ≤
@@ -596,7 +509,6 @@ theorem fiberNormSqSummand_chartAlpha_le_raw_components_sq
       (n := n) (r := r)
       (G := fun i j : Fin n => chartGramMatrix (I := I) g α b i j)
       hCG_nonneg (fun i j => hCG_bound hb i j) Idx
-  -- Combine.
   have h_sum_Jdx_nn :
       0 ≤ ∑ Idx' : Fin r → Fin n,
         (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx' Jdx b) ^ 2 :=
@@ -622,7 +534,6 @@ theorem fiberNormSqSummand_chartAlpha_le_raw_components_sq
       _ = C * (∑ Idx' : Fin r → Fin n,
             (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx' Jdx b) ^ 2) := by
           rw [hC_def]
-  -- Replace single Jdx by full Σ Idx' Jdx'.
   have h_single_Jdx_le_full :
       (∑ Idx' : Fin r → Fin n,
         (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx' Jdx b) ^ 2) ≤
@@ -631,7 +542,6 @@ theorem fiberNormSqSummand_chartAlpha_le_raw_components_sq
           (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx' Jdx' b) ^ 2) := by
     refine Finset.sum_le_sum ?_
     intro Idx' _
-    -- Single summand ≤ sum over Jdx' since each term is nonneg.
     refine Finset.single_le_sum (s := (Finset.univ : Finset (Fin s → Fin n)))
       (f := fun Jdx' : Fin s → Fin n =>
         (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx' Jdx' b) ^ 2) ?_
@@ -653,8 +563,6 @@ end Integral
 end DifferentialGeometry
 
 end
-
-/-! ## Sanity check: axioms used by the headline. -/
 
 open DifferentialGeometry.Integral.Connection in
 #print axioms fiberNormSqSummand_chartAlpha_le_raw_components_sq

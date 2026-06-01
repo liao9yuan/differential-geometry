@@ -66,21 +66,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## The chart-Laplacian of the canonical partition-of-unity weight
-
-For each point `α : M`, the smooth weight `ρα := chartAtlasPOU I M α` is a
-smooth real-valued function on the closed manifold `M`. Its classical
-Laplace–Beltrami operator `Δ_g ρα` is again a smooth real-valued function on
-`M`, hence a bundled smooth map `C^∞⟮I, M; ℝ⟯`. -/
 
 /-- The classical Laplace–Beltrami operator applied to the canonical
 partition-of-unity weight at `α`, packaged as a bundled smooth map. -/
@@ -93,20 +84,6 @@ noncomputable def laplacianOfChartPOU (g : SmoothRiemannianMetric I M) (α : M) 
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) :
     (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x =
       Δ_g (I := I) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff x := rfl
-
-/-! ## The Leibniz-compensated right-hand side `f_h`
-
-For `u_h ∈ H1Compl g` lying in `laplacianDomain g`, the Leibniz-compensated
-right-hand side is
-
-`f_h := ρα · (1 - Δ_g) u_h - 2 g(grad ρα, grad u_h) - u_h · Δ_g ρα`,
-
-where each of the three summands is an element of `Lp ℝ 2 μ_g`:
-
-* `ρα · (1 - Δ_g) u_h := smoothMulLp g ρα (H1ComplToLp u_h - laplacianOp ⟨u_h, _⟩)`,
-* `2 g(grad ρα, grad u_h) := (2 : ℝ) • gradInnerCLM g ρα u_h`,
-* `u_h · Δ_g ρα := smoothMulLp g (laplacianOfChartPOU α) (H1ComplToLp u_h)`.
--/
 
 /-- The Leibniz-compensated `L²` class associated with an element `u_h` of the
 variational Laplacian's domain at the chart point `α`. -/
@@ -135,12 +112,6 @@ lemma fHLeibniz_def (g : SmoothRiemannianMetric I M) (α : M)
             (laplacianOfChartPOU (I := I) (M := M) g α)
             (H1ComplToLp (I := I) (M := M) g u_h) := rfl
 
-/-! ## Smooth-case reduction
-
-For `v : SmoothScalar g`, the smooth lift `smoothToH1Compl g v` lies in
-`laplacianDomain g` and `fHLeibniz` reduces to the smooth-arithmetic
-combination of the three building blocks. -/
-
 /-- The smooth-case identity: for `v : SmoothScalar g`, the Leibniz-compensated
 right-hand side equals the explicit `Lp` arithmetic combination obtained by
 substituting the smooth bridges for each building block. -/
@@ -157,10 +128,6 @@ theorem fHLeibniz_smoothToH1Compl (g : SmoothRiemannianMetric I M) (α : M)
             (laplacianOfChartPOU (I := I) (M := M) g α)
             (smoothToLp (I := I) (M := M) g v) := by
   rw [fHLeibniz_def]
-  -- Step 1: rewrite the `(1 - Δ_g) u_h` block before any `simp` lemma fires.
-  -- `H1ComplToLp (smoothToH1Compl v) = smoothToLp v`, and
-  -- `laplacianOp ⟨smoothToH1Compl v, _⟩ = smoothToLp v - smoothToLp v.oneSubLap`,
-  -- so the difference equals `smoothToLp v.oneSubLap`.
   have h_oneSubLap :
       H1ComplToLp (I := I) (M := M) g
           (smoothToH1Compl (I := I) (M := M) g v) -
@@ -171,12 +138,8 @@ theorem fHLeibniz_smoothToH1Compl (g : SmoothRiemannianMetric I M) (α : M)
     rw [H1ComplToLp_smoothToH1Compl, laplacianOp_smoothToH1Compl]
     abel
   rw [h_oneSubLap]
-  -- Step 2: rewrite the gradient-inner term via the smooth-bridge identity.
   rw [gradInnerCLM_smoothToH1Compl]
-  -- Step 3: rewrite `H1ComplToLp (smoothToH1Compl g v)` in the third term.
   rw [H1ComplToLp_smoothToH1Compl]
-
-/-! ## Sanity tests -/
 
 example (g : SmoothRiemannianMetric I M) (α : M) :
     C^∞⟮I, M; ℝ⟯ := laplacianOfChartPOU (I := I) (M := M) g α

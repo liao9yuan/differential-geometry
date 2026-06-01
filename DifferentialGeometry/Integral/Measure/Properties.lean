@@ -57,17 +57,10 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Canonical measurable-space and Borel-space instances on `E` and `M`
-
-File-local canonical Borel structures, matching those in the other `Measure` files.
-Declared `local` so they do not pollute external typeclass search. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Chart-local measure: finiteness on compacts inside a chart source -/
 
 /-- The chart-local measure of a compact subset of the base chart source is finite.
 
@@ -84,7 +77,6 @@ theorem chartLocalMeasure_compact_lt_top
     chartLocalMeasure (I := I) g x₀ K < (⊤ : ℝ≥0∞) := by
   classical
   have hKmeas : MeasurableSet K := hK.isClosed.measurableSet
-  -- chartLocalMeasure K = ∫⁻ 1_K d chartLocalMeasure g x₀
   have hind_meas : Measurable (fun x : M => K.indicator (fun _ => (1 : ℝ≥0∞)) x) :=
     (measurable_const).indicator hKmeas
   have hlint := chartLocalMeasure_lintegral (I := I) (M := M) g x₀ hind_meas
@@ -93,7 +85,6 @@ theorem chartLocalMeasure_compact_lt_top
     rw [lintegral_indicator hKmeas, setLIntegral_const,
         one_mul]
   rw [hmeas_eq, hlint]
-  -- Set up the chart target and the image of K.
   set T : Set E := (extChartAt I x₀).target with hT_def
   set KE : Set E := (extChartAt I x₀) '' K with hKE_def
   have hT_meas : MeasurableSet T := measurableSet_extChartAt_target (I := I) x₀
@@ -114,7 +105,6 @@ theorem chartLocalMeasure_compact_lt_top
       (extChartAt I x₀).map_source hxsrc
     rw [hxy] at this
     exact this
-  -- Bound the chart density above on K by continuity.
   have hcontDensity_source : ContinuousOn (chartDensity g x₀) (chartAt H x₀).source :=
     chartDensity_continuousOn (I := I) g x₀
   have hcontDensity_K : ContinuousOn (chartDensity g x₀) K :=
@@ -122,7 +112,6 @@ theorem chartLocalMeasure_compact_lt_top
   have hbddAbove : BddAbove (chartDensity g x₀ '' K) :=
     (hK.image_of_continuousOn hcontDensity_K).bddAbove
   rcases hbddAbove with ⟨C, hC⟩
-  -- Helpful rewrite: on T, `symm` is a left inverse of extChartAt from source.
   have hsymm_in_K_iff : ∀ y ∈ T, ((extChartAt I x₀).symm y ∈ K ↔ y ∈ KE) := by
     intro y hyT
     constructor
@@ -136,7 +125,6 @@ theorem chartLocalMeasure_compact_lt_top
         rw [← hxy]
         exact (extChartAt I x₀).left_inv hxsrc
       rw [this]; exact hxK
-  -- Pointwise bound of the integrand on T: by `C` if `y ∈ KE`, by `0` otherwise.
   have hbound_pt : ∀ y ∈ T,
       ENNReal.ofReal (chartDensity g x₀ ((extChartAt I x₀).symm y)) *
           K.indicator (fun _ => (1 : ℝ≥0∞)) ((extChartAt I x₀).symm y) ≤
@@ -158,7 +146,6 @@ theorem chartLocalMeasure_compact_lt_top
         exact hy ((hsymm_in_K_iff y hyT).mp hmem)
       rw [Set.indicator_of_notMem hsymm_notin, Set.indicator_of_notMem hy,
           mul_zero, mul_zero]
-  -- Apply monotonicity, factor out the constant, reduce to modelHaar(KE).
   have hrhs_meas : Measurable
       (fun y : E => ENNReal.ofReal C * KE.indicator (fun _ => (1 : ℝ≥0∞)) y) :=
     (measurable_const).mul ((measurable_const).indicator hKE_meas)
@@ -181,8 +168,6 @@ theorem chartLocalMeasure_compact_lt_top
           exact Set.inter_subset_left
       _ < (⊤ : ℝ≥0∞) := by
           exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top hKE_compact.measure_lt_top
-
-/-! ## Riemannian volume measure: finiteness on compacts -/
 
 /-- If a compact set `K ⊆ M` does not meet `tsupport (ρ α)`, the `α`-contribution
 to the glued measure of `K` vanishes. -/
@@ -227,7 +212,6 @@ private lemma pou_term_le_chartLocalMeasure
     by_contra hne
     exact hx (subset_tsupport _ hne)
   rw [withDensity_apply _ hK]
-  -- Pointwise: `ofReal (ρ α x) ≤ 1_{tsupport(ρα)}(x)` for every `x`.
   have hpt : ∀ x : M,
       ENNReal.ofReal (ρ α x) ≤ (tsupport (ρ α)).indicator (fun _ => (1 : ℝ≥0∞)) x := by
     intro x
@@ -260,7 +244,6 @@ theorem riemannianMeasure_compact_lt_top
           (fun x : M => ENNReal.ofReal (ρ α x))) K := by
     rw [riemannianMeasure_def, Measure.sum_apply _ hKmeas]
   rw [hdecomp]
-  -- Finite set of relevant α indices.
   set S : Set M := {α | (tsupport (ρ α) ∩ K).Nonempty} with hS_def
   have hlf_ts : LocallyFinite (fun α : M => tsupport (ρ α)) := ρ.locallyFinite.closure
   have hS_fin : S.Finite := hlf_ts.finite_nonempty_inter_compact hK
@@ -313,8 +296,6 @@ theorem riemannianVolumeMeasure_isFiniteMeasureOnCompacts
   exact riemannianMeasure_isFiniteMeasureOnCompacts (I := I) (M := M) g
     (chartAtlasPOU I M) (chartAtlasPOU_isSubordinate I M)
 
-/-! ## Local compactness of `M` -/
-
 /-- `M` is a locally compact topological space. Under `[FiniteDimensional ℝ E]`
 (hence `ProperSpace E` and `LocallyCompactSpace E`) this follows from
 `I.locallyCompactSpace` and `ChartedSpace.locallyCompactSpace`. -/
@@ -327,8 +308,6 @@ theorem locallyCompactSpace_of_chartedSpace
   have _hE : ProperSpace E := FiniteDimensional.proper ℝ E
   have _hH : LocallyCompactSpace H := I.locallyCompactSpace
   exact ChartedSpace.locallyCompactSpace H M
-
-/-! ## Local finiteness of the glued measure -/
 
 /-- The glued Riemannian measure is locally finite. -/
 theorem riemannianMeasure_isLocallyFiniteMeasure
@@ -352,8 +331,6 @@ theorem riemannianVolumeMeasure_isLocallyFiniteMeasure
   exact riemannianMeasure_isLocallyFiniteMeasure (I := I) (M := M) g
     (chartAtlasPOU I M) (chartAtlasPOU_isSubordinate I M)
 
-/-! ## σ-finiteness -/
-
 /-- The glued Riemannian measure is σ-finite. -/
 theorem riemannianMeasure_sigmaFinite
     [T2Space M] [SigmaCompactSpace M]
@@ -373,8 +350,6 @@ theorem riemannianVolumeMeasure_sigmaFinite
   rw [riemannianVolumeMeasure_def]
   exact riemannianMeasure_sigmaFinite (I := I) (M := M) g
     (chartAtlasPOU I M) (chartAtlasPOU_isSubordinate I M)
-
-/-! ## Finiteness on a compact manifold -/
 
 /-- On a compact manifold, the glued Riemannian measure is a finite measure. -/
 theorem riemannianMeasure_isFiniteMeasure_of_compactSpace
@@ -396,8 +371,6 @@ theorem riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
   exact riemannianMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
     (chartAtlasPOU I M) (chartAtlasPOU_isSubordinate I M)
 
-/-! ## Positivity on nonempty open sets (open-positive property) -/
-
 /-- The set of manifold-interior points (those `x : M` whose extended-chart image at
 `x` lies in the topological interior of `range I`) is dense in `M`.
 
@@ -412,7 +385,6 @@ private lemma interior_isInteriorPoint_dense :
   rw [dense_iff_inter_open]
   intro V hVopen hVne
   obtain ⟨x, hxV⟩ := hVne
-  -- Local nbhd of `x` inside both `V` and the chart source at `x`.
   have hxsrc : x ∈ (chartAt H x).source := mem_chart_source H x
   have hxext : x ∈ (extChartAt I x).source := by
     rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hxsrc
@@ -420,30 +392,21 @@ private lemma interior_isInteriorPoint_dense :
   have hs_open : IsOpen s := hVopen.inter (chartAt H x).open_source
   have hxs : x ∈ s := ⟨hxV, hxsrc⟩
   have hs_nhd : s ∈ 𝓝 x := hs_open.mem_nhds hxs
-  -- The chart image of `s` is a within-`range I` nbhd of `extChartAt I x x`.
   have h_img_nhdW :
       (extChartAt I x) '' s ∈ 𝓝[range I] (extChartAt I x x) := by
     rw [← map_extChartAt_nhds (x := x)]
     exact Filter.image_mem_map hs_nhd
   rcases mem_nhdsWithin.mp h_img_nhdW with ⟨U, hU_open, hU_mem, hU_sub⟩
-  -- `extChartAt I x x ∈ closure (interior (range I))` by
-  -- `range_eq_closure_interior`.
   have hxImg_inRange : extChartAt I x x ∈ range I :=
     extChartAt_target_subset_range (I := I) x ((extChartAt I x).map_source hxext)
   have hxImg_inClosure :
       extChartAt I x x ∈ closure (interior (range I)) := by
     rw [← I.range_eq_closure_interior]; exact hxImg_inRange
-  -- Combine: `U ∩ interior (range I) ≠ ∅`, hence the chart image of `s` meets
-  -- the interior of `range I`.
   rcases mem_closure_iff.mp hxImg_inClosure U hU_open hU_mem with ⟨p, hp_U, hp_int⟩
-  -- `p` lives in `(extChartAt I x) '' s` because `p ∈ U ∩ range I` and
-  -- `interior (range I) ⊆ range I`.
   have hp_inRange : p ∈ range I := interior_subset hp_int
   have hp_inImg : p ∈ (extChartAt I x) '' s := hU_sub ⟨hp_U, hp_inRange⟩
   rcases hp_inImg with ⟨y, hys, hyEq⟩
   refine ⟨y, hys.1, ?_⟩
-  -- `y ∈ (chartAt H x).source` and `extChartAt I x y = p ∈ interior (range I)`.
-  -- By chart-invariance of `IsInteriorPoint`, `y` is an interior point.
   have hy_chartSrc : y ∈ (chartAt H x).source := hys.2
   have hyEq' : ((chartAt H x).extend I) y = p := hyEq
   have hp_inExtTarget :
@@ -475,7 +438,6 @@ private lemma chartLocalMeasure_open_pos_of_mem
     0 < chartLocalMeasure (I := I) g α V := by
   classical
   have hVmeas : MeasurableSet V := hVopen.measurableSet
-  -- Reduce chartLocalMeasure V via `chartLocalMeasure_lintegral`.
   have hind_meas : Measurable (V.indicator (fun _ => (1 : ℝ≥0∞))) :=
     (measurable_const).indicator hVmeas
   have hlint := chartLocalMeasure_lintegral (I := I) (M := M) g α hind_meas
@@ -485,17 +447,14 @@ private lemma chartLocalMeasure_open_pos_of_mem
   rw [hVvol, hlint]
   set T : Set E := (extChartAt I α).target with hT_def
   have hT_meas : MeasurableSet T := measurableSet_extChartAt_target (I := I) α
-  -- V is an open set on M containing α, inside source.
   have hVsub' : V ⊆ (extChartAt I α).source := by
     rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hVsub
   have hV_nhds : V ∈ 𝓝 x₁ := hVopen.mem_nhds hx₁V
-  -- The image `(extChartAt I α) '' V` is a nhd of `(extChartAt I α) x₁` in E.
   have hx₁src : x₁ ∈ (extChartAt I α).source := hVsub' hx₁V
   have hImgNhd : (extChartAt I α) '' V ∈ 𝓝 ((extChartAt I α) x₁) :=
     extChartAt_image_nhds_mem_nhds_of_mem_interior_range (I := I) (M := M)
       (x := α) (y := x₁) hx₁src hx₁_int hV_nhds
   rcases mem_nhds_iff.mp hImgNhd with ⟨W, hW_sub, hW_open, hW_mem⟩
-  -- W ⊆ (extChartAt I α) '' V, W is open in E, W contains (extChartAt I α) α.
   have hW_meas : MeasurableSet W := hW_open.measurableSet
   have hW_ne : W.Nonempty := ⟨(extChartAt I α) x₁, hW_mem⟩
   have hW_pos : 0 < (modelHaar (E := E)) W := hW_open.measure_pos _ hW_ne
@@ -505,8 +464,6 @@ private lemma chartLocalMeasure_open_pos_of_mem
     have hxsrc : x ∈ (extChartAt I α).source := hVsub' hxV
     have : (extChartAt I α) x ∈ T := (extChartAt I α).map_source hxsrc
     rwa [hxy] at this
-  -- On W, the integrand is positive: density > 0 (via `chartDensity_pos`), and
-  -- the indicator on W becomes `1` (since `symm` maps W into V).
   have hdensity_on_W : ∀ y ∈ W, 0 < chartDensity g α ((extChartAt I α).symm y) := by
     intro y hyW
     rcases hW_sub hyW with ⟨x, hxV, hxy⟩
@@ -525,8 +482,6 @@ private lemma chartLocalMeasure_open_pos_of_mem
     have hleft : (extChartAt I α).symm y = x := by
       rw [← hxy]; exact (extChartAt I α).left_inv hxsrc
     rw [hleft, Set.indicator_of_mem hxV]
-  -- Bound below: on W, the integrand is > 0 uniformly.
-  -- Use: ∫⁻ over T ≥ ∫⁻ over W.
   have h_restrict_subset :
       ∫⁻ y in W, ENNReal.ofReal (chartDensity g α ((extChartAt I α).symm y)) *
             V.indicator (fun _ => (1 : ℝ≥0∞)) ((extChartAt I α).symm y)
@@ -536,9 +491,6 @@ private lemma chartLocalMeasure_open_pos_of_mem
               ∂(modelHaar (E := E)) :=
     lintegral_mono_set hW_sub_T
   refine lt_of_lt_of_le ?_ h_restrict_subset
-  -- Positivity of the integral over W: the Haar measure of W is > 0 and the integrand
-  -- is > 0 on W.  Argue by contradiction: if the integral is 0, the integrand is
-  -- a.e. 0 on W, but it is > 0 on all of W and the Haar measure of W > 0 — contradiction.
   by_contra h0
   have h0' : ¬ (0 < ∫⁻ y in W, ENNReal.ofReal
       (chartDensity g α ((extChartAt I α).symm y)) *
@@ -620,7 +572,6 @@ private lemma exists_open_nbhd_pou_pos
     ∃ V : Set M, IsOpen V ∧ x ∈ V ∧ V ⊆ U ∧ V ⊆ (chartAt H α).source ∧
       ∃ c > (0 : ℝ), ∀ y ∈ V, c ≤ ρ α y := by
   have hcont : Continuous (fun y : M => ρ α y) := (ρ α).contMDiff.continuous
-  -- `x ∈ support (ρ α) ⊆ tsupport (ρ α) ⊆ (chartAt H α).source`.
   have hxSource : x ∈ (chartAt H α).source := by
     refine hρ α ?_
     exact subset_tsupport (ρ α) (by exact ne_of_gt hxpos)
@@ -646,8 +597,6 @@ theorem riemannianMeasure_isOpenPosMeasure
     (hρ : ρ.IsSubordinate (fun α : M => (chartAt H α).source)) :
     (riemannianMeasure (I := I) g ρ).IsOpenPosMeasure := by
   refine ⟨fun U hUopen hUne => ?_⟩
-  -- Pick `x ∈ U` that is also a manifold-interior point. This is possible because
-  -- `{z | I.IsInteriorPoint z}` is dense in `M`.
   rcases (interior_isInteriorPoint_dense (I := I) (M := M)).inter_open_nonempty
       U hUopen hUne with ⟨x, hxU, hx_int⟩
   have hexpos : ∃ α, 0 < ρ α x :=
@@ -656,9 +605,6 @@ theorem riemannianMeasure_isOpenPosMeasure
   rcases exists_open_nbhd_pou_pos (I := I) (M := M) ρ hρ hUopen hxU hαpos with
     ⟨V, hVopen, hxV, hVU, hVsource, c, hcpos, hcbound⟩
   have hVmeas : MeasurableSet V := hVopen.measurableSet
-  -- Translate `I.IsInteriorPoint x` (chart at `x`) to the chart at `α`, using
-  -- chart-invariance and the fact that `x ∈ (chartAt H α).source` (since `x ∈ V`
-  -- and `V ⊆ (chartAt H α).source`).
   have hx_chartαSrc : x ∈ (chartAt H α).source := hVsource hxV
   have hntop : (∞ : WithTop ℕ∞) ≠ 0 := by simp
   have hx_intExtTarget :
@@ -667,7 +613,6 @@ theorem riemannianMeasure_isOpenPosMeasure
       hx_int
   have hx_intRange : extChartAt I α x ∈ interior (range I) :=
     (chartAt H α).interior_extend_target_subset_interior_range hx_intExtTarget
-  -- Lower-bound the α-term's measure of V.
   have hind_le :
       (ENNReal.ofReal c) * chartLocalMeasure (I := I) g α V ≤
         ((chartLocalMeasure (I := I) g α).withDensity
@@ -681,9 +626,7 @@ theorem riemannianMeasure_isOpenPosMeasure
             (measurable_ofReal_pou_weight (I := I) (M := M) ρ α).aemeasurable ?_
           exact Filter.Eventually.of_forall (fun y hyV =>
             ENNReal.ofReal_le_ofReal (hcbound y hyV))
-  -- The factor `ENNReal.ofReal c > 0`.
   have hc_enn_pos : 0 < ENNReal.ofReal c := ENNReal.ofReal_pos.mpr hcpos
-  -- Chart-local measure of V is > 0 (V nonempty open inside source_α).
   have hμV_pos : 0 < chartLocalMeasure (I := I) g α V :=
     chartLocalMeasure_open_pos_of_mem (I := I) (M := M) g α hVopen hxV hVsource
       hx_intRange
@@ -707,15 +650,6 @@ theorem riemannianVolumeMeasure_isOpenPosMeasure
   rw [riemannianVolumeMeasure_def]
   exact riemannianMeasure_isOpenPosMeasure (I := I) (M := M) g
     (chartAtlasPOU I M) (chartAtlasPOU_isSubordinate I M)
-
-/-! ## Regularity (Radon property)
-
-A σ-compact Hausdorff manifold modelled on a finite-dimensional real normed space is
-metrizable (`Manifold.metrizableSpace`). On a σ-compact pseudometrizable space, every
-locally finite Borel measure is regular in Mathlib's sense
-(`MeasureTheory.Measure.Regular.of_sigmaCompactSpace_of_isLocallyFiniteMeasure`),
-which combines `IsFiniteMeasureOnCompacts`, `OuterRegular`, and inner regularity by
-compact sets. -/
 
 /-- The glued Riemannian measure is Regular (Radon). -/
 theorem riemannianMeasure_regular

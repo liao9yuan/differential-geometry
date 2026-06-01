@@ -59,14 +59,10 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Auxiliary: pointwise relationship of `chartPushed` and `chartPushedRaw` -/
 
 /-- On the chart-target image, `chartPushed ρ α u` agrees with the raw
 chart-pushforward of the partition-of-unity-weighted function `ρ_α u`. -/
@@ -97,8 +93,6 @@ lemma chartPushedRaw_pou_mul_ae_eq_chartPushed_on_target
   exact (chartPushed_eq_chartPushedRaw_pou_mul_on_target
     (I := I) (M := M) ρ α u hy).symm
 
-/-! ## tsupport of `ρ_α · u` ⊆ chart α source -/
-
 omit [IsManifold I ∞ M] in
 /-- The pointwise support of `ρ_α · u` is contained in the support of `ρ_α`. -/
 lemma support_pou_mul_fun_subset
@@ -128,8 +122,6 @@ lemma tsupport_pou_mul_fun_subset_chartAt_source
     tsupport (fun x => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x) ⊆ (chartAt H α).source :=
   (tsupport_pou_mul_fun_subset (I := I) (M := M) ρ α u).trans (hρ α)
 
-/-! ## Measurability bridges -/
-
 omit [IsManifold I ∞ M] in
 /-- Continuity of `(ρ α : C^∞⟮I, M; ℝ⟯)` as a real-valued function on `M`. -/
 lemma pou_continuous (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) :
@@ -140,8 +132,6 @@ omit [IsManifold I ∞ M] in
 lemma pou_measurable (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) :
     Measurable ((ρ α : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
   (pou_continuous (I := I) (M := M) ρ α).measurable
-
-/-! ## eLpNorm bound on `chartPushed` via bridge -/
 
 /-- For a Wkp-chart member `u : M → ℝ`, the chart-`α` chart-pushed `eLpNorm`
 on the chart target equals the chart-`α` chart-pushed-raw `eLpNorm` of
@@ -159,8 +149,6 @@ lemma eLpNorm_chartPushed_eq_eLpNorm_chartPushedRaw_pou_mul
   eLpNorm_congr_ae
     (chartPushedRaw_pou_mul_ae_eq_chartPushed_on_target
       (I := I) (M := M) ρ α u).symm
-
-/-! ## Decomposition of `u` via the partition of unity -/
 
 /-- On a compact manifold, the function `u : M → ℝ` decomposes pointwise as
 the finite POU sum `u(x) = ∑_α∈S ρ_α(x) u(x)` over the
@@ -183,8 +171,6 @@ lemma fun_eq_finset_sum_pou_mul
     rw [Finset.sum_mul]
   rw [h_eq, hsum, one_mul]
 
-/-! ## Order-zero `eLpNorm` bound by `wkpNorm` -/
-
 /-- The order-zero `eLpNorm` of `chartPushed α u` on `chartTargetEuclid α` is
 bounded by the chart-`α` `wkpNorm` of `chartPushed α u`. -/
 lemma eLpNorm_chartPushed_le_wkpNorm_chartPushed
@@ -198,8 +184,6 @@ lemma eLpNorm_chartPushed_le_wkpNorm_chartPushed
         (chartPushed (I := I) (M := M) ρ α u)
         (chartTargetEuclid (I := I) (M := M) α) :=
   Euclidean.wkpNorm_zero_le_wkpNorm
-
-/-! ## Chart-density sup bound on the (extChart)-image of tsupport(ρ_α) -/
 
 /-- For each chart `α` (with non-empty `tsupport(ρ_α)`), the chart density is
 bounded uniformly on the compact `(extChartAt I α)`-image of `tsupport(ρ_α)`. -/
@@ -232,15 +216,6 @@ lemma exists_sup_chartDensity_on_pou_tsupport_image
         : C^∞⟮I, M; ℝ⟯) : M → ℝ))).Nonempty := h_supp_ne.image _
   exact exists_sup_chartDensity_on_compact_pos (I := I) (M := M)
     g α hK_compact hK_ne hK_sub_target
-
-/-! ## Per-pair (manifold) `eLpNorm` bound via the existing public bridge
-
-Applying the per-`u` bridge `eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw`
-to `ρ_α · u` yields a per-`u` constant. For our Cauchy-completeness application,
-each pair `(f m - f n)` produces such a constant; the constants are
-mathematically uniformly bounded (since `tsupport(ρ_α (f m - f n)) ⊆ tsupport ρ_α`),
-but the existential form of the per-`u` bridge does not expose this. This
-auxiliary lemma packages the per-`u` bridge for use with `ρ_α u`. -/
 
 /-- Per-`u` `eLpNorm` bridge applied to `ρ_α u`: there is a constant
 `C > 0` (depending on `u`) such that the manifold-side `eLpNorm` of `ρ_α u` is
@@ -280,21 +255,10 @@ lemma eLpNorm_pou_mul_riemannianMeasure_le_const_mul_eLpNorm_chartPushed_per_u
       (I := I) (M := M) g α hp_one hp_top hρu_meas hρu_supp
   refine ⟨C, hC_pos, ?_⟩
   refine hbnd.trans ?_
-  -- chartPushedRaw α (ρα u) on volume.restrict equals chartPushed α u (a.e.).
   have h_eq :=
     eLpNorm_chartPushed_eq_eLpNorm_chartPushedRaw_pou_mul (I := I) (M := M)
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u p
   rw [hρu_def, ← h_eq]
-
-/-! ## Explicit chart Haar factor extraction via the public equality
-
-We extract the implicit Haar scaling factor as a concrete `ℝ≥0∞` value by
-applying `chartLocalMeasure_lintegral_via_chartTargetEuclid` to the indicator
-of `tsupport(ρ_α)`. The factor is determined by the ratio
-`chartLocalMeasure_α(tsupport ρ_α) / (∫⁻ y over target, density(symm y) · 1_{...} dvol)`.
-
-When this ratio is a well-defined finite positive ℝ≥0∞ value, it can be used
-as a uniform-in-`u` constant for the bridge inequality. -/
 
 /-- The chart-local-measure integral of the indicator of `tsupport(ρ_α)`
 under `chartLocalMeasure α`. This is a finite ℝ≥0∞ value when the manifold

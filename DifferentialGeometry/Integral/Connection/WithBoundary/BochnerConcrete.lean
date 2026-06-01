@@ -99,16 +99,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-/-! ## With-boundary pointwise Bochner-Weitzenböck identity (concrete metric form)
-
-A hypothesis-bearing endpoint mirroring `bochner_pointwise_concrete_metric_unconditional`
-on the with-boundary track.
-
-The hypothesis `h_pointwise` is the per-interior-point identity itself. The named
-theorem unwraps it at any single interior point `x`, providing a clean API that
-downstream consumers can rely on.
--/
-
 /-- **With-boundary pointwise Bochner-Weitzenböck identity (concrete metric form).**
 For a smooth Riemannian metric `g` on a smooth manifold `M` whose model carries
 a smooth `(n-1)`-dimensional boundary (`[HasSmoothBoundary E H I]`), and for a

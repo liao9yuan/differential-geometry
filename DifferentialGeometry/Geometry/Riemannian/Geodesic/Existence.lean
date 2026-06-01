@@ -51,8 +51,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Existence of the lifted integral curve on `TangentBundle I M` -/
-
 /-- **Picard-Lindelöf lift.** For a smooth Riemannian metric `g`, point
 `p : M`, and tangent vector `v : T_p M`, on a boundaryless smooth manifold
 modelled on a complete inner-product space, there exists a curve
@@ -65,8 +63,6 @@ theorem exists_isMIntegralCurveAt_geodesicVectorFieldChart
       f 0 = (⟨p, v⟩ : TangentBundle I M) ∧
       IsMIntegralCurveAt f (geodesicVectorFieldChart (I := I) g p) 0 := by
   classical
-  -- The chart-fixed geodesic vector field is smooth at `⟨p, v⟩`: the foot
-  -- point `p` is trivially in `(chartAt H p).source`.
   have hp_src : p ∈ (chartAt H p).source := mem_chart_source H p
   have hsmooth : ContMDiffAt I.tangent I.tangent.tangent ∞
       (fun q : TangentBundle I M =>
@@ -75,22 +71,17 @@ theorem exists_isMIntegralCurveAt_geodesicVectorFieldChart
       (⟨p, v⟩ : TangentBundle I M) :=
     geodesicVectorFieldChart_contMDiffAt (I := I) g p
       (p₀ := (⟨p, v⟩ : TangentBundle I M)) hp_src
-  -- Downgrade `C^∞` to `C^1`, the regularity required by Picard-Lindelöf.
   have hsmooth1 : ContMDiffAt I.tangent I.tangent.tangent 1
       (fun q : TangentBundle I M =>
         (⟨q, geodesicVectorFieldChart (I := I) g p q⟩ :
           TangentBundle I.tangent (TangentBundle I M)))
       (⟨p, v⟩ : TangentBundle I M) :=
     hsmooth.of_le (by exact_mod_cast (le_top : (1 : ℕ∞) ≤ ⊤))
-  -- Apply Mathlib's existence theorem on the boundaryless manifold
-  -- `TangentBundle I M`, modelled on `I.tangent`.
   exact
     exists_isMIntegralCurveAt_of_contMDiffAt_boundaryless
       (I := I.tangent) (M := TangentBundle I M)
       (v := geodesicVectorFieldChart (I := I) g p)
       (t₀ := (0 : ℝ)) (x₀ := (⟨p, v⟩ : TangentBundle I M)) hsmooth1
-
-/-! ## Projection to the base manifold -/
 
 /-- The base projection of a curve `f : ℝ → TangentBundle I M` to a curve
 `γ : ℝ → M`, namely `γ t := (f t).proj`. -/
@@ -104,8 +95,6 @@ lemma projectCurve_zero_of_lift {f : ℝ → TangentBundle I M} {p : M} {v : E}
     (hf0 : f 0 = (⟨p, v⟩ : TangentBundle I M)) :
     projectCurve (I := I) f 0 = p := by
   simp [projectCurve, hf0]
-
-/-! ## Headline existence theorem -/
 
 section ChartedPicardLindelof
 
@@ -140,22 +129,9 @@ theorem exists_geodesic_with_initial_velocity_at
     exists_isMIntegralCurveAt_geodesicVectorFieldChart (I := I) g p v
   refine ⟨projectCurve (I := I) f, f, hf0, rfl,
     projectCurve_zero_of_lift (I := I) hf0, hf, ?_⟩
-  -- `IsGeodesicAt g γ 0`: provide chart basepoint `p`, lift `f`, the
-  -- pointwise projection identity, the foot-in-source clause (the foot at
-  -- `0` is `p ∈ (chartAt H p).source`), and the integral-curve property.
   refine ⟨p, f, fun t => rfl, ?_, hf⟩
-  -- `(f 0).proj = p` by the initial datum, so it lies in the chart at `p`.
   have h0 : (f 0).proj = p := projectCurve_zero_of_lift (I := I) hf0
   rw [h0]; exact mem_chart_source H p
-
-/-! ## Derivative of the lifted curve in the chart at `⟨p, 0⟩`
-
-We package the immediate consequence of `IsMIntegralCurveAt` at `t = 0`:
-the manifold derivative of `f` at `0` equals `smulRight 1 (gvfChart g p (f 0))`.
-This is essentially `IsMIntegralCurveAt.hasMFDerivAt` specialised to the
-chart-fixed setup; we record it for use in the downstream chart-derivative
-bridge.
--/
 
 /-- The manifold derivative of the lifted curve at `0`. -/
 theorem hasMFDerivAt_lift_zero

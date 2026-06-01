@@ -61,12 +61,6 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-Match the convention in the surrounding tensor-regularity files: install the
-Borel σ-algebras locally, without leaking global instances onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -81,16 +75,6 @@ variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 /-- The local dimension of the chart, as a natural number. -/
 local notation "dimE" => Module.finrank ℝ E
 
-/-! ### A monotone-substitution combinator for the outer induction
-
-The inductive step of the headline substitutes the inductive hypothesis into the
-per-step regularity boost. The combinator below isolates that single
-substitution: given a low-order bound `S ≤ ofReal c · (BF_p + L)` and a per-step
-boost `S' ≤ ofReal a · (BF_{p'} + S)` with `p ≤ p'` (so `BF_p ≤ BF_{p'}` by
-monotonicity of the source norm in its order), the conclusion
-`S' ≤ ofReal (a · (1 + c)) · (BF_{p'} + L)` follows by absorbing `BF_p` into
-`BF_{p'}` and `BF_{p'}` into `BF_{p'} + L`. -/
-
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
   [NeZero (Module.finrank ℝ E)] in
 /-- The monotone-substitution step: chain a low-order bound and a per-step boost
@@ -101,27 +85,18 @@ private lemma chain_step_le
     (hlow : S ≤ ENNReal.ofReal c * (BFp + L))
     (hstep : S' ≤ ENNReal.ofReal a * (BFp' + S)) :
     S' ≤ ENNReal.ofReal (a * (1 + c)) * (BFp' + L) := by
-  -- `S ≤ ofReal c · (BFp' + L)` by monotonicity in the source order.
   have hlow' : S ≤ ENNReal.ofReal c * (BFp' + L) :=
     hlow.trans (mul_le_mul_of_nonneg_left
       (add_le_add hBF_mono le_rfl) (zero_le _))
-  -- `BFp' + S ≤ (1 + ofReal c) · (BFp' + L)`.
   have hsum : BFp' + S ≤ (1 + ENNReal.ofReal c) * (BFp' + L) := by
     rw [add_mul, one_mul]
     exact add_le_add (le_add_right le_rfl) hlow'
-  -- Chain and collect the constant.
   refine hstep.trans ?_
   refine (mul_le_mul_of_nonneg_left hsum (zero_le _)).trans (le_of_eq ?_)
   rw [← mul_assoc,
     show (1 : ℝ≥0∞) + ENNReal.ofReal c = ENNReal.ofReal (1 + c) from by
       rw [ENNReal.ofReal_add (by norm_num : (0 : ℝ) ≤ 1) hc, ENNReal.ofReal_one],
     ← ENNReal.ofReal_mul ha]
-
-/-! ### Monotonicity of the source-component sum in the Sobolev order
-
-The sum, over component multi-indices, of the `W^{n,2}` norms of the chart
-components of the source is monotone in `n`: a higher Sobolev order gives a
-larger norm. -/
 
 /-- The source-component sum is monotone in the Sobolev order. -/
 private lemma sum_componentNorm_mono_order
@@ -132,12 +107,6 @@ private lemma sum_componentNorm_mono_order
       ∑ Q : CompIdx E r s, wkpNorm (d := dimE) n' 2
         (tensorComponentEuclid (I := I) (M := M) g r s F α Q) Ω'' :=
   Finset.sum_le_sum (fun _Q _ => wkpNorm_mono_order (d := dimE) hn _ _)
-
-/-! ### The iterated interior elliptic a-priori estimate
-
-The headline. The outer induction on `k`: the base case `k = 0` is the per-step
-boost at order `0`; the inductive step applies the per-step boost at orders
-`2k+1` and `2k+2`, substituting the inductive hypothesis via `chain_step_le`. -/
 
 set_option maxHeartbeats 3200000 in
 /-- **Iterated interior elliptic a-priori estimate for a chart component.**
@@ -197,8 +166,6 @@ theorem tensorComponent_aPriori_estimate
               wkpNorm (d := dimE) 1 2
                 (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'') := by
   classical
-  -- The headline is proved by establishing the order-`(2k+2)` bound on the
-  -- *full component tuple*, then extracting the single `P₀` summand.
   suffices h_tuple : ∃ C : ℝ, 0 ≤ C ∧ ∀ (T F : SmoothCcTensor g r s),
       tsupport T.toFun ⊆ (chartAt H α).source →
       tsupport F.toFun ⊆ (chartAt H α).source →
@@ -222,16 +189,13 @@ theorem tensorComponent_aPriori_estimate
                 (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'') by
     obtain ⟨C, hC_nn, hC⟩ := h_tuple
     refine ⟨C, hC_nn, fun T F hT_supp hF_supp hT_K hF_K hweak => ?_⟩
-    -- The single-`P₀` norm is one summand of the full-tuple sum.
     exact (Finset.single_le_sum
       (f := fun P : CompIdx E r s => wkpNorm (d := dimE) (2 * k + 2) 2
         (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'')
       (fun P _ => zero_le _) (Finset.mem_univ P₀)).trans
         (hC T F hT_supp hF_supp hT_K hF_K hweak)
-  -- The outer induction on `k`.
   induction k with
   | zero =>
-      -- Base case: the per-step boost on the full component tuple at order `0`.
       obtain ⟨C, hC_nn, hC⟩ :=
         tensorComponent_aPriori_succ_sum (I := I) (M := M) g r s α hK hK_target
           0 hΩ''_open hΩ''_compact_closure hΩ''_target hK_Ω''
@@ -240,28 +204,19 @@ theorem tensorComponent_aPriori_estimate
       simpa using h
   | succ k ih =>
       obtain ⟨Ck, hCk_nn, hCk⟩ := ih
-      -- The per-step boost at order `2k+1`.
       obtain ⟨A, hA_nn, hA⟩ :=
         tensorComponent_aPriori_succ_sum (I := I) (M := M) g r s α hK hK_target
           (2 * k + 1) hΩ''_open hΩ''_compact_closure hΩ''_target hK_Ω''
-      -- The per-step boost at order `2k+2`.
       obtain ⟨B, hB_nn, hB⟩ :=
         tensorComponent_aPriori_succ_sum (I := I) (M := M) g r s α hK hK_target
           (2 * k + 2) hΩ''_open hΩ''_compact_closure hΩ''_target hK_Ω''
-      -- The aggregate constant for order `2(k+1)+2 = 2k+4`.
       refine ⟨B * (1 + A * (1 + Ck)), by positivity,
         fun T F hT_supp hF_supp hT_K hF_K hweak => ?_⟩
-      -- Abbreviations for the component sums.
       set L : ℝ≥0∞ := ∑ P : CompIdx E r s, wkpNorm (d := dimE) 1 2
         (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'' with hL_def
-      -- The inductive hypothesis at order `2k+2`.
       have h_ih := hCk T F hT_supp hF_supp hT_K hF_K hweak
-      -- The per-step boost at order `2k+1`, giving the order-`2k+3` bound.
       have h_step1 := hA T F hT_supp hF_supp hT_K hF_K hweak
-      -- The per-step boost at order `2k+2`, giving the order-`2k+4` bound.
       have h_step2 := hB T F hT_supp hF_supp hT_K hF_K hweak
-      -- Substitute the inductive hypothesis into the order-`2k+1` boost.
-      -- `∑_P wkpNorm (2k+3) T ≤ ofReal (A·(1+Ck)) · (∑_Q wkpNorm (2k+1) F + L)`.
       have h_23 :
           (∑ P : CompIdx E r s, wkpNorm (d := dimE) (2 * k + 1 + 2) 2
             (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'') ≤
@@ -273,8 +228,6 @@ theorem tensorComponent_aPriori_estimate
           (sum_componentNorm_mono_order (I := I) (M := M) g r s F α
             (Ω'' := Ω'') (by omega : 2 * k ≤ 2 * k + 1))
           h_ih h_step1
-      -- Substitute that into the order-`2k+2` boost.
-      -- `∑_P wkpNorm (2k+4) T ≤ ofReal (B·(1+A·(1+Ck))) · (∑_Q wkpNorm (2k+2) F + L)`.
       have h_24 :
           (∑ P : CompIdx E r s, wkpNorm (d := dimE) (2 * k + 2 + 2) 2
             (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'') ≤
@@ -286,7 +239,6 @@ theorem tensorComponent_aPriori_estimate
           (sum_componentNorm_mono_order (I := I) (M := M) g r s F α
             (Ω'' := Ω'') (by omega : 2 * k + 1 ≤ 2 * k + 2))
           h_23 h_step2
-      -- Re-index `2k+2+2 = 2(k+1)+2` and `2k+2 = 2(k+1)`.
       have h_lhs : 2 * k + 2 + 2 = 2 * (k + 1) + 2 := by ring
       have h_rhs : 2 * k + 2 = 2 * (k + 1) := by ring
       rw [h_lhs, h_rhs] at h_24
@@ -334,7 +286,6 @@ theorem tensorComponent_aPriori_estimate_all
               wkpNorm (d := dimE) 1 2
                 (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'') := by
   classical
-  -- The per-component-index constant from the headline.
   have h_per : ∀ P₀ : CompIdx E r s, ∃ C : ℝ, 0 ≤ C ∧
       ∀ (T F : SmoothCcTensor g r s),
         tsupport T.toFun ⊆ (chartAt H α).source →
@@ -359,15 +310,12 @@ theorem tensorComponent_aPriori_estimate_all
     fun P₀ => tensorComponent_aPriori_estimate (I := I) (M := M) g r s α hK
       hK_target k P₀ hΩ''_open hΩ''_compact_closure hΩ''_target hK_Ω''
   choose Cf hCf_nn hCf using h_per
-  -- A canonical component multi-index, used as the nonemptiness witness.
   have hCI_ne : (Finset.univ : Finset (CompIdx E r s)).Nonempty :=
     ⟨Classical.arbitrary (CompIdx E r s), Finset.mem_univ _⟩
-  -- The aggregate constant: the largest per-component-index constant.
   refine ⟨(Finset.univ : Finset (CompIdx E r s)).sup' hCI_ne Cf, ?_, ?_⟩
   · exact le_trans (hCf_nn (Classical.arbitrary (CompIdx E r s)))
       (Finset.le_sup' Cf (Finset.mem_univ _))
   · intro P₀ T F hT_supp hF_supp hT_K hF_K hweak
-    -- The per-`P₀` bound, lifted to the aggregate constant.
     refine (hCf P₀ T F hT_supp hF_supp hT_K hF_K hweak).trans ?_
     exact mul_le_mul_of_nonneg_right
       (ENNReal.ofReal_le_ofReal (Finset.le_sup' Cf (Finset.mem_univ P₀)))

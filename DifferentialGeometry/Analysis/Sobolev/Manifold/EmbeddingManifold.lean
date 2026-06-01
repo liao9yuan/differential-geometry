@@ -48,15 +48,10 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Pointwise / a.e. agreement of `chartPushed ρ α u` and
-`chartPushedRaw I α (ρ_α · u)` on `chartTargetEuclid α` -/
 
 /-- On the chart-target image of `α`, the partition-of-unity-weighted
 chart-push agrees pointwise with the raw chart-push of `(ρ α) · u`. -/
@@ -86,9 +81,6 @@ private lemma chartPushed_eq_chartPushedRaw_pou_ae'
   exact chartPushed_eq_chartPushedRaw_pou_mul_on_target'
     (I := I) (M := M) ρ α u hy
 
-/-! ## Per-chart auxiliaries: tsupport of `ρ_α · u` is contained in
-`tsupport ρ_α ⊆ chart α source`. -/
-
 omit [IsManifold I ∞ M] in
 /-- The (closed) support of `ρ_α · u` is contained in the (closed) support of
 `ρ_α`. This is a `tsupport`-level packaging of `tsupport_smul_subset_left`
@@ -97,7 +89,6 @@ private lemma tsupport_pou_mul_subset_tsupport_pou'
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ) :
     tsupport (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x) ⊆
       tsupport (ρ α : M → ℝ) := by
-  -- Multiplication = scalar multiplication on ℝ.
   have h_eq : (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x) =
       (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x • u x) := by
     funext x; rfl
@@ -115,8 +106,6 @@ private lemma measurable_pou_mul
     (ρ α).contMDiff.continuous
   exact hcont.measurable.mul hu
 
-/-! ## Decomposition `u = ∑_{α ∈ S} ρ_α · u` on a compact manifold -/
-
 /-- On a compact manifold, the canonical chart-atlas POU finite-support sum
 expression: `u(x) = ∑_{α ∈ chartAtlasPOU_finset} ρ_α(x) · u(x)` for every `x : M`. -/
 private theorem chartAtlasPOU_pou_decomp
@@ -126,20 +115,12 @@ private theorem chartAtlasPOU_pou_decomp
       (I := I) (M := M),
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : M → ℝ) x * u x := by
   classical
-  -- ∑ α, ρ_α x = 1 over the finset.
   have hsum : ∑ α ∈ DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset
       (I := I) (M := M),
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : M → ℝ) x = 1 :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartAtlasPOU_finset_sum_eq_one
       (I := I) (M := M) x
-  -- Pull u out of the sum.
   rw [← Finset.sum_mul, hsum, one_mul]
-
-/-! ## Per-chart `L^q` bound under `μ_g`
-
-Given the existing chart-target Hölder bound and the volume bridge, each
-`ρ_α · u` has its `L^q` norm under `μ_g` controlled by the chart-Sobolev norm
-of `u`. The constant depends on `α`, `g`, `p`, and `q`. -/
 
 /-- Per-chart bound combining the chart-target Hölder embedding and the
 manifold-to-chart-target measure bridge: for `q ≤ p` with `1 ≤ q ≤ p < ∞`, the
@@ -163,38 +144,31 @@ private theorem perChart_eLpNorm_le
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)) ≤
           K_α * wkpNormChart (I := I) (M := M) g 1 p u := by
   classical
-  -- Bridge constant: K_E = tsupport(ρ_α) is compact and inside chart α source.
   set ρ := DifferentialGeometry.Integral.Measure.chartAtlasPOU I M with hρ_def
   set Kα : Set M := tsupport (ρ α : M → ℝ) with hKα_def
   have hKα_compact : IsCompact Kα :=
     (isClosed_tsupport _).isCompact
   have hKα_sub : Kα ⊆ (chartAt H α).source :=
     DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α
-  -- Apply the K-uniform forward bridge with K = Kα and exponent q.
   have hq_ne_zero : q ≠ 0 := by
     intro h; rw [h] at hq_one; exact absurd hq_one (by norm_num)
   obtain ⟨C_α, hC_α_pos, hbridge⟩ :=
     eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw_uniform_of_subset
       (I := I) (M := M) g α hKα_compact hKα_sub hq_one hq_top
-  -- Compact image of Kα under extChartAt: a compact set in chart target.
   have hKα_chart_decomp :=
     image_extChartAt_tsupport_compact_subset_target
       (I := I) (M := M) (u := (ρ α : M → ℝ)) (α := α) hKα_sub
   obtain ⟨hKα_chart_compact, hKα_chart_sub_target⟩ := hKα_chart_decomp
-  -- Volume of the toEuclidean image of (extChartAt I α) '' tsupport ρ_α.
   set V_α : ℝ≥0∞ := MeasureTheory.volume
       (toEuclidean ''
         ((extChartAt I α) ''
           (tsupport ((ρ α : C^∞⟮I, M; ℝ⟯) : M → ℝ)))) with hV_α_def
-  -- V_α is finite (compact).
   have hV_α_lt_top : V_α < ⊤ :=
     volume_chartImage_tsupport_lt_top (I := I) (M := M) ρ
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M) α
   have hV_α_ne_top : V_α ≠ ⊤ := ne_of_lt hV_α_lt_top
-  -- The Hölder factor: V_α^{1/q.toReal - 1/p.toReal}.
   set exp_diff : ℝ := 1 / q.toReal - 1 / p.toReal with hexp_diff_def
   set H_α : ℝ≥0∞ := V_α ^ exp_diff with hH_α_def
-  -- 1/q.toReal - 1/p.toReal ≥ 0 since q ≤ p, p,q ∈ [1,∞).
   have hp_toReal_pos : 0 < p.toReal := by
     have hp_lt_top : p < ⊤ := lt_top_iff_ne_top.mpr hp_top
     have hp_ne_zero : p ≠ 0 := by
@@ -208,23 +182,18 @@ private theorem perChart_eLpNorm_le
     rw [hexp_diff_def, sub_nonneg]
     rw [one_div, one_div, inv_le_inv₀ hp_toReal_pos hq_toReal_pos]
     exact hq_le_p_toReal
-  -- H_α is finite (V_α is finite).
   have hH_α_ne_top : H_α ≠ ⊤ := by
     rw [hH_α_def]
     exact ENNReal.rpow_ne_top_of_nonneg hexp_diff_nonneg hV_α_ne_top
-  -- Set the per-chart total constant K_α := ofReal C_α * H_α.
   set K_α : ℝ≥0∞ := ENNReal.ofReal C_α * H_α with hK_α_def
   have hK_α_ne_top : K_α ≠ ⊤ :=
     ENNReal.mul_ne_top ENNReal.ofReal_ne_top hH_α_ne_top
   refine ⟨K_α, hK_α_ne_top, ?_⟩
   intro u hu_meas hu
-  -- Step 1: tsupport (ρ_α · u) ⊆ Kα = tsupport ρ_α.
   have h_supp : tsupport (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x) ⊆ Kα :=
     tsupport_pou_mul_subset_tsupport_pou' (I := I) (M := M) ρ α u
-  -- Step 2: ρ_α · u is measurable.
   have h_meas : Measurable (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x) :=
     measurable_pou_mul (I := I) (M := M) ρ α hu_meas
-  -- Step 3: bridge bound for f := ρ_α · u.
   have h_bridge :
       eLpNorm (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x) q
           (DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
@@ -235,8 +204,6 @@ private theorem perChart_eLpNorm_le
               ((volume : Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict
                 (chartTargetEuclid (I := I) (M := M) α)) :=
     hbridge h_meas h_supp
-  -- Step 4: chartPushedRaw I α (ρ_α · u) coincides ae with chartPushed ρ α u
-  -- on volume.restrict (chartTargetEuclid α). Hence eLpNorms equal.
   have h_eLpNorm_eq :
       eLpNorm (chartPushedRaw I α (fun x : M =>
           (ρ α : C^∞⟮I, M; ℝ⟯) x * u x)) q
@@ -247,12 +214,10 @@ private theorem perChart_eLpNorm_le
           ((volume : Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict
             (chartTargetEuclid (I := I) (M := M) α)) := by
     refine eLpNorm_congr_ae ?_
-    -- The two functions agree on chartTargetEuclid α (pointwise), hence ae on the restriction.
     have h_ae := chartPushed_eq_chartPushedRaw_pou_ae'
       (I := I) (M := M) ρ α u
     exact h_ae.symm
   rw [h_eLpNorm_eq] at h_bridge
-  -- Step 5: chart-target Hölder bound.
   have h_holder :
       eLpNorm (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u) q
@@ -261,7 +226,6 @@ private theorem perChart_eLpNorm_le
         wkpNormChart (I := I) (M := M) g 1 p u * V_α ^ exp_diff :=
     eLpNorm_chartPushed_q_le_wkpNorm_one_subexp (I := I) (M := M) g
       hq_ne_zero hp_top hqp hu α
-  -- Step 6: combine.
   calc eLpNorm (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x) q
           (DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M))
@@ -276,8 +240,6 @@ private theorem perChart_eLpNorm_le
     _ = K_α * wkpNormChart (I := I) (M := M) g 1 p u := by
         rw [hK_α_def, hH_α_def]
         ring
-
-/-! ## The total constant: a Finset sum of per-chart constants -/
 
 /-- Per-chart total constant produced by `perChart_eLpNorm_le`, packaged as a
 function `M → ℝ≥0∞`. We retain only the existence; the value is selected via
@@ -319,8 +281,6 @@ private lemma perChartConst_bound
   (Classical.choose_spec (perChart_eLpNorm_le (I := I) (M := M) g
     hp_one hp_top hq_one hq_top hqp α)).2 hu_meas hu
 
-/-! ## Manifold `MemLp` membership -/
-
 /-- For each chart `α`, `ρ_α · u` is in `L^q(M, μ_g)` whenever `u ∈ W^{1,p}_chart(M)`,
 `1 ≤ q ≤ p < ∞`. -/
 private theorem perChart_memLp_riemannianMeasure
@@ -339,15 +299,13 @@ private theorem perChart_memLp_riemannianMeasure
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)) := by
   classical
   refine ⟨?_, ?_⟩
-  · -- ae-strongly-measurable: continuous * measurable → measurable → aestrongly-measurable.
-    have h_meas : Measurable (fun x : M =>
+  · have h_meas : Measurable (fun x : M =>
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) x * u x) :=
       measurable_pou_mul (I := I) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α hu_meas
     exact h_meas.aestronglyMeasurable
-  · -- Finiteness via the per-chart bound.
-    have h_bound :=
+  · have h_bound :=
       perChartConst_bound (I := I) (M := M) g hp_one hp_top hq_one hq_top hqp α
         hu_meas hu
     have hK : perChartConst (I := I) (M := M) g hp_one hp_top hq_one hq_top hqp α ≠ ⊤ :=
@@ -361,8 +319,6 @@ private theorem perChart_memLp_riemannianMeasure
       · exact lt_top_iff_ne_top.mpr hK
       · exact lt_top_iff_ne_top.mpr hN
     exact lt_of_le_of_lt h_bound hRHS_lt_top
-
-/-! ## The main embedding: `MemWkpChart → MemLp` for `q ≤ p` -/
 
 /-- Continuous embedding `W^{1,p}_chart(M) ↪ L^q(M, μ_g)` for `q ≤ p` on a closed
 manifold, via Hölder + chart-density-volume bridge. -/
@@ -378,13 +334,11 @@ theorem MemWkpChart.memLp_riemannianMeasure_of_le_exponent
       (DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)) := by
   classical
-  -- u =ᵐ ∑ α ∈ S, (ρ_α · u). Pointwise on M, so a fortiori ae.
   set S : Finset M := DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset
     (I := I) (M := M) with hS_def
   have hpointwise : ∀ x : M, u x =
       ∑ α ∈ S, (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : M → ℝ) x * u x :=
     fun x => chartAtlasPOU_pou_decomp (I := I) (M := M) u x
-  -- Use congr_ae to bridge u and the sum, since they're pointwise equal.
   have h_ae : u =ᵐ[DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)]
       (∑ α ∈ S, fun x : M =>
@@ -396,13 +350,10 @@ theorem MemWkpChart.memLp_riemannianMeasure_of_le_exponent
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : M → ℝ) x * u x
     exact hpointwise x
   refine (memLp_congr_ae h_ae).mpr ?_
-  -- Apply memLp_finset_sum': each summand is in L^q, hence the sum is.
   refine memLp_finset_sum' (ε' := ℝ) S ?_
   intro α _
   exact perChart_memLp_riemannianMeasure (I := I) (M := M) g hp_one hp_top
     hq_one hq_top hqp hu_meas hu α
-
-/-! ## Quantitative bound: `eLpNorm u q ≤ C · wkpNormChart g 1 p u` -/
 
 /-- Quantitative `q ≤ p` Sobolev-Hölder embedding: there exists a constant `C`
 (depending on `g`, `p`, `q`, the canonical chart-atlas POU) such that for every
@@ -421,28 +372,22 @@ theorem eLpNorm_riemannianMeasure_le_const_mul_wkpNormChart_of_le_exponent
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)) ≤
           ENNReal.ofReal C * wkpNormChart (I := I) (M := M) g 1 p u := by
   classical
-  -- Total constant: D := ∑_{α ∈ S} K_α (per-chart constants).
   set S : Finset M := DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset
     (I := I) (M := M) with hS_def
   set D : ℝ≥0∞ :=
     ∑ α ∈ S, perChartConst (I := I) (M := M) g hp_one hp_top hq_one hq_top hqp α
     with hD_def
-  -- D is finite, since each summand is finite and S is finite.
   have hD_ne_top : D ≠ ⊤ := by
     rw [hD_def]
     apply ENNReal.sum_ne_top.mpr
     intro α _
     exact perChartConst_ne_top (I := I) (M := M) g hp_one hp_top hq_one hq_top hqp α
-  -- Pick C := max(1, D.toReal). Then C ≥ 1 > 0 and ENNReal.ofReal C ≥ D.
   refine ⟨max 1 D.toReal, ?_, ?_⟩
   · exact lt_of_lt_of_le zero_lt_one (le_max_left _ _)
   intro u hu_meas hu
-  -- u(x) = ∑ α ∈ S, ρ_α(x) · u(x) pointwise.
   have hpointwise : ∀ x : M, u x =
       ∑ α ∈ S, (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : M → ℝ) x * u x :=
     fun x => chartAtlasPOU_pou_decomp (I := I) (M := M) u x
-  -- Step 1: rewrite the LHS eLpNorm using the equality u = ∑ ρ_α u, applying
-  -- `eLpNorm_congr_ae` based on pointwise equality.
   have h_eLpNorm_eq :
       eLpNorm u q (DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)) =
@@ -458,7 +403,6 @@ theorem eLpNorm_riemannianMeasure_le_const_mul_wkpNormChart_of_le_exponent
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : M → ℝ) x * u x
     exact hpointwise x
   rw [h_eLpNorm_eq]
-  -- Apply Minkowski for finset sum (eLpNorm_sum_le).
   have h_aesm : ∀ α ∈ S,
       AEStronglyMeasurable
         (fun x : M =>
@@ -487,7 +431,6 @@ theorem eLpNorm_riemannianMeasure_le_const_mul_wkpNormChart_of_le_exponent
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)) :=
     eLpNorm_sum_le h_aesm hq_one
   refine h_minkowski.trans ?_
-  -- Each per-chart eLpNorm bounded by perChartConst * wkpNormChart.
   have h_each : ∀ α ∈ S,
       eLpNorm
           (fun x : M =>
@@ -500,7 +443,6 @@ theorem eLpNorm_riemannianMeasure_le_const_mul_wkpNormChart_of_le_exponent
     intro α _
     exact perChartConst_bound (I := I) (M := M) g hp_one hp_top hq_one hq_top hqp α
       hu_meas hu
-  -- Sum up the per-chart bounds.
   have h_sum_le :
       (∑ α ∈ S, eLpNorm
           (fun x : M =>
@@ -513,15 +455,10 @@ theorem eLpNorm_riemannianMeasure_le_const_mul_wkpNormChart_of_le_exponent
             wkpNormChart (I := I) (M := M) g 1 p u :=
     Finset.sum_le_sum h_each
   refine h_sum_le.trans ?_
-  -- ∑_α (K_α * N) = (∑_α K_α) * N = D * N.
   rw [← Finset.sum_mul]
-  -- The finset sum equals D.
   change D * wkpNormChart (I := I) (M := M) g 1 p u ≤
     ENNReal.ofReal (max 1 D.toReal) * wkpNormChart (I := I) (M := M) g 1 p u
-  -- D ≤ ENNReal.ofReal (max 1 D.toReal). Multiply by wkpNormChart.
   gcongr
-  -- Need: D ≤ ENNReal.ofReal (max 1 D.toReal).
-  -- ENNReal.ofReal D.toReal = D (since D ≠ ⊤).
   have hD_eq : ENNReal.ofReal D.toReal = D := ENNReal.ofReal_toReal hD_ne_top
   have h_max_le :
       ENNReal.ofReal D.toReal ≤ ENNReal.ofReal (max 1 D.toReal) := by
@@ -534,7 +471,3 @@ end Chart
 end Sobolev
 end Analysis
 end DifferentialGeometry
-
--- Local axiom check (uncomment to verify):
--- #print axioms DifferentialGeometry.Analysis.Sobolev.Chart.MemWkpChart.memLp_riemannianMeasure_of_le_exponent
--- #print axioms DifferentialGeometry.Analysis.Sobolev.Chart.eLpNorm_riemannianMeasure_le_const_mul_wkpNormChart_of_le_exponent

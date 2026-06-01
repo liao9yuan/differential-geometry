@@ -36,8 +36,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Definition -/
-
 /-- The symmetric Nirenberg test function
 `v_h := D_{-h}^k(η² · D_h^k u)`. -/
 noncomputable def standardNirenbergTest
@@ -67,8 +65,6 @@ omit [NeZero d] in
   unfold standardNirenbergTest
   simp [diffQuot]
 
-/-! ## Compact support -/
-
 omit [NeZero d] in
 /-- Support inclusion: if `v_h(x) ≠ 0`, then either `x ∈ tsupport η` or
 `x − h e_k ∈ tsupport η`. -/
@@ -81,17 +77,13 @@ theorem standardNirenbergTest_support_subset
   intro x hx
   rw [Function.mem_support] at hx
   by_cases hh : h = 0
-  · -- h = 0: v_h = 0 contradicts `hx`.
-    exfalso
+  · exfalso
     apply hx
     subst hh
     unfold standardNirenbergTest
     simp [diffQuot]
-  · -- h ≠ 0
-    have h_apply := standardNirenbergTest_apply (d := d) k h η u x hh
+  · have h_apply := standardNirenbergTest_apply (d := d) k h η u x hh
     rw [h_apply] at hx
-    -- (F(y) - F(x))/(-h) ≠ 0 with y = x + (-h) e_k
-    -- ⇒ F(y) ≠ 0 ∨ F(x) ≠ 0
     have h_num_ne : (η (x + (-h) • EuclideanSpace.single k 1))^2 *
         diffQuot k h u (x + (-h) • EuclideanSpace.single k 1) -
         (η x)^2 * diffQuot k h u x ≠ 0 := by
@@ -99,8 +91,7 @@ theorem standardNirenbergTest_support_subset
       apply hx
       rw [h_zero, zero_div]
     by_cases hηx : η x = 0
-    · -- η x = 0 ⇒ F(x) = 0 ⇒ F(y) ≠ 0 ⇒ η y ≠ 0 ⇒ y ∈ tsupport η.
-      right
+    · right
       have hFx_zero : (η x)^2 * diffQuot k h u x = 0 := by
         rw [show (η x)^2 = 0 from by rw [hηx]; ring, zero_mul]
       rw [hFx_zero, sub_zero] at h_num_ne
@@ -110,8 +101,7 @@ theorem standardNirenbergTest_support_subset
         rw [show (η (x + (-h) • EuclideanSpace.single k 1))^2 = 0 from by
           rw [h_zero]; ring, zero_mul]
       exact subset_tsupport η hηy_ne
-    · -- η x ≠ 0 ⇒ x ∈ tsupport η.
-      left
+    · left
       exact subset_tsupport η hηx
 
 omit [NeZero d] in
@@ -141,7 +131,6 @@ theorem standardNirenbergTest_hasCompactSupport
     (k : Fin d) (h : ℝ) {η : EuclN → ℝ} (hη_cs : HasCompactSupport η)
     (u : EuclN → ℝ) :
     HasCompactSupport (standardNirenbergTest k h η u) := by
-  -- Both `tsupport η` and the translated set are compact; their union is compact.
   set v : EuclN := (-h) • EuclideanSpace.single k 1 with hv_def
   set htrans_homeo : EuclN ≃ₜ EuclN := Homeomorph.addRight v with htrans_def
   have h_set_eq :
@@ -173,8 +162,6 @@ theorem standardNirenbergTest_hasCompactSupport
     standardNirenbergTest_tsupport_subset (d := d) k h hη_cs u
   exact h_union_compact.of_isClosed_subset (isClosed_tsupport _) h_sub
 
-/-! ## Local-integrability helpers -/
-
 omit [NeZero d] in
 /-- `D_h^k u` is locally integrable when `u` is. -/
 private lemma locallyIntegrable_diffQuot
@@ -185,8 +172,7 @@ private lemma locallyIntegrable_diffQuot
   · subst hh
     rw [diffQuot_zero_h]
     exact locallyIntegrable_const _
-  · -- `D_h^k u = h⁻¹ • τ_h u + (-h⁻¹) • u`
-    have h_eq_dq : diffQuot k h u =
+  · have h_eq_dq : diffQuot k h u =
         fun x => h⁻¹ * (translate k h u x) + (-h⁻¹) * u x := by
       funext x
       rw [diffQuot_apply_of_ne (d := d) k hh u x]
@@ -194,7 +180,6 @@ private lemma locallyIntegrable_diffQuot
         h⁻¹ * u (x + h • EuclideanSpace.single k 1) + (-h⁻¹) * u x
       field_simp; ring
     rw [h_eq_dq]
-    -- Translation of locInt is locInt.
     have hτ_locInt : LocallyIntegrable (translate k h u)
         (volume : Measure EuclN) := by
       have hMP : MeasurePreserving
@@ -258,8 +243,6 @@ private lemma locallyIntegrable_to_restrict_univ
     LocallyIntegrable f ((volume : Measure EuclN).restrict Set.univ) := by
   rwa [Measure.restrict_univ]
 
-/-! ## Weak partial derivative computation -/
-
 omit [NeZero d] in
 /-- The weak `j`-partial of the symmetric Nirenberg test function. By
 combining `hasWeakPartialDeriv_diffQuot` with the inner product/chain
@@ -284,7 +267,6 @@ theorem hasWeakPartialDeriv_standardNirenbergTest
           2 * η y * (fderiv ℝ η y) (EuclideanSpace.single j 1) *
             diffQuot k h u y))
       (standardNirenbergTest k h η u) Set.univ := by
-  -- Continuity helpers.
   have hη_cont : Continuous η := hη.continuous
   have hη_sq_cont : Continuous (fun y : EuclN => (η y)^2) := hη_cont.pow 2
   have hη_diff : Differentiable ℝ η := hη.differentiable (by simp)
@@ -294,19 +276,16 @@ theorem hasWeakPartialDeriv_standardNirenbergTest
   have h_2η_partial_cont : Continuous
       (fun y : EuclN => 2 * η y * (fderiv ℝ η y) (EuclideanSpace.single j 1)) :=
     (continuous_const.mul hη_cont).mul hpartial_η_cont
-  -- Unwind the restricted local-integrability hypotheses.
   have hu_locInt' : LocallyIntegrable u (volume : Measure EuclN) :=
     locallyIntegrable_of_restrict_univ (d := d) hu_locInt
   have hg_j_locInt' : LocallyIntegrable g_j (volume : Measure EuclN) :=
     locallyIntegrable_of_restrict_univ (d := d) hg_j_locInt
-  -- Local integrability of the difference quotients.
   have h_dq_u_locInt : LocallyIntegrable (diffQuot k h u)
       (volume : Measure EuclN) :=
     locallyIntegrable_diffQuot (d := d) k h hu_locInt'
   have h_dq_g_locInt : LocallyIntegrable (diffQuot k h g_j)
       (volume : Measure EuclN) :=
     locallyIntegrable_diffQuot (d := d) k h hg_j_locInt'
-  -- Local integrability of `F = η² · D_h^k u`.
   have h_F_locInt : LocallyIntegrable
       (fun y => (η y)^2 * diffQuot k h u y) (volume : Measure EuclN) :=
     locallyIntegrable_continuous_mul (d := d) hη_sq_cont h_dq_u_locInt
@@ -314,8 +293,6 @@ theorem hasWeakPartialDeriv_standardNirenbergTest
       (fun y => (η y)^2 * diffQuot k h u y)
       ((volume : Measure EuclN).restrict Set.univ) :=
     locallyIntegrable_to_restrict_univ (d := d) h_F_locInt
-  -- Local integrability of the weak-partial integrand:
-  --   η² · D_h^k g_j + 2η · ∂_j η · D_h^k u.
   have h_term1_locInt : LocallyIntegrable
       (fun y => (η y)^2 * diffQuot k h g_j y) (volume : Measure EuclN) :=
     locallyIntegrable_continuous_mul (d := d) hη_sq_cont h_dq_g_locInt
@@ -336,8 +313,6 @@ theorem hasWeakPartialDeriv_standardNirenbergTest
           diffQuot k h u y)
       ((volume : Measure EuclN).restrict Set.univ) :=
     locallyIntegrable_to_restrict_univ (d := d) h_partial_locInt
-  -- Step 1: weak partial of `F := η² · D_h^k u` is
-  -- `η² · D_h^k g_j + (∂_j (η²)) · D_h^k u`.
   have h_inner_wp :
       DeGiorgi.HasWeakPartialDeriv (d := d) j
         (fun y => (η y)^2 * diffQuot k h g_j y +
@@ -346,7 +321,6 @@ theorem hasWeakPartialDeriv_standardNirenbergTest
         (fun y => (η y)^2 * diffQuot k h u y) Set.univ :=
     hasWeakPartialDeriv_eta_sq_diffQuot (d := d) k j h hη
       hu_locInt hg_j_locInt hwp
-  -- Rewrite `(∂_j (η²)) y = 2 η y · (∂_j η) y` to obtain the expanded form.
   have h_eq :
       (fun y : EuclN =>
         (η y)^2 * diffQuot k h g_j y +
@@ -365,19 +339,9 @@ theorem hasWeakPartialDeriv_standardNirenbergTest
       rw [two_smul]; ring
     rw [h_two, smul_eq_mul]
   rw [h_eq] at h_inner_wp
-  -- Step 2: Apply hasWeakPartialDeriv_diffQuot with direction `(-h)`.
   unfold standardNirenbergTest
   exact hasWeakPartialDeriv_diffQuot (d := d) k j (-h)
     h_F_locInt_restrict h_partial_locInt_restrict h_inner_wp
-
-/-! ## L² bound
-
-The bound is derived via Minkowski's inequality on
-`D_{-h}^k F = (1/(-h)) (τ_{-h} F − F)`. To apply Minkowski we require
-strong measurability of the inner factor `F = η² · D_h^k u`, which we
-package via the hypothesis `hu_aesm : AEStronglyMeasurable u volume`.
-The continuity of `η` is supplied via `hη_cont : Continuous η`.
--/
 
 omit [NeZero d] in
 /-- `eLpNorm` of `c • f` is `|c|` times `eLpNorm` of `f` (specialised real
@@ -408,9 +372,6 @@ private lemma eLpNorm_translate_eq (k : Fin d) (h : ℝ) (F : EuclN → ℝ) :
   have hτ_emb : MeasurableEmbedding τ := τ.measurableEmbedding
   have h_eq : translate k h F = F ∘ (τ : EuclN → EuclN) := rfl
   rw [h_eq]
-  -- `MeasurableEmbedding.eLpNorm_map_measure` gives:
-  --   `eLpNorm F p (map τ volume) = eLpNorm (F ∘ τ) p volume`.
-  -- Combined with `map τ volume = volume` (MeasurePreserving), we get the result.
   rw [show eLpNorm F 2 (volume : Measure EuclN) =
       eLpNorm F 2 (Measure.map τ volume) from by rw [hMP.map_eq]]
   exact (hτ_emb.eLpNorm_map_measure (g := F) (p := 2)).symm
@@ -426,7 +387,6 @@ private lemma eLpNorm_diffQuot_neg_le
     eLpNorm (diffQuot k (-h) F) 2 (volume : Measure EuclN) ≤
       (2 / ENNReal.ofReal |h|) * eLpNorm F 2 (volume : Measure EuclN) := by
   have hnh : (-h) ≠ 0 := neg_ne_zero.mpr hh
-  -- Express D_{-h}^k F = (-h)⁻¹ • (τ_{-h} F - F) pointwise.
   have h_dq_eq : diffQuot k (-h) F =
       fun x => (-h)⁻¹ * (translate k (-h) F x - F x) := by
     funext x
@@ -435,12 +395,10 @@ private lemma eLpNorm_diffQuot_neg_le
       (-h)⁻¹ * (F (x + (-h) • EuclideanSpace.single k 1) - F x)
     field_simp
   rw [h_dq_eq]
-  -- Pull the constant out.
   have h_eq2 : (fun x => (-h)⁻¹ * (translate k (-h) F x - F x)) =
       fun x => (-h)⁻¹ * ((translate k (-h) F - F) x) := by
     funext x; simp [Pi.sub_apply]
   rw [h_eq2, eLpNorm_const_mul (-h)⁻¹ (translate k (-h) F - F)]
-  -- ‖τ_{-h} F - F‖_{L²} ≤ ‖τ_{-h} F‖_{L²} + ‖F‖_{L²} (Minkowski).
   have hτF_aesm : AEStronglyMeasurable (translate k (-h) F)
       (volume : Measure EuclN) := by
     have hMP : MeasurePreserving
@@ -457,11 +415,9 @@ private lemma eLpNorm_diffQuot_neg_le
       eLpNorm F 2 (volume : Measure EuclN) :=
     eLpNorm_translate_eq (d := d) k (-h) F
   rw [h_τF_eq] at h_minkowski
-  -- 2 · ‖F‖.
   have h_step : eLpNorm (translate k (-h) F - F) 2 (volume : Measure EuclN) ≤
       2 * eLpNorm F 2 (volume : Measure EuclN) := by
     rw [two_mul]; exact h_minkowski
-  -- Combine: ofReal|(-h)⁻¹| · 2 · ‖F‖ = (2/|h|) · ‖F‖.
   have h_inv_abs : |(-h)⁻¹| = |h|⁻¹ := by
     rw [abs_inv, abs_neg]
   have habs_h_pos : 0 < |h| := abs_pos.mpr hh
@@ -470,11 +426,6 @@ private lemma eLpNorm_diffQuot_neg_le
     rw [h_inv_abs]
     exact ENNReal.ofReal_inv_of_pos habs_h_pos
   rw [h_ofReal_inv]
-  -- Goal:  (ofReal|h|)⁻¹ * ‖τ_{-h}F - F‖ ≤ (2 / ofReal|h|) * ‖F‖
-  -- We have:  ‖τ_{-h}F - F‖ ≤ 2 * ‖F‖
-  -- So:      (ofReal|h|)⁻¹ * ‖τ_{-h}F - F‖ ≤ (ofReal|h|)⁻¹ * (2 * ‖F‖)
-  --                                        = (ofReal|h|)⁻¹ * 2 * ‖F‖
-  --                                        = 2 / ofReal|h| * ‖F‖.
   calc (ENNReal.ofReal |h|)⁻¹ *
         eLpNorm (translate k (-h) F - F) 2 (volume : Measure EuclN)
       ≤ (ENNReal.ofReal |h|)⁻¹ * (2 * eLpNorm F 2 (volume : Measure EuclN)) := by
@@ -502,7 +453,6 @@ private lemma eLpNorm_eta_sq_diffQuot_le
   have h_pow_eq : ∀ a : ℝ≥0∞, a ^ (2 : ℝ) = a ^ (2 : ℕ) := by
     intro a
     rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) from by norm_num, ENNReal.rpow_natCast]
-  -- Pointwise: ‖(η y)² · D_h u y‖ₑ² ≤ ofReal(M_η⁴) · ‖D_h u y‖ₑ².
   have h_pt : ∀ y : EuclN,
       (‖(η y)^2 * diffQuot k h u y‖ₑ : ℝ≥0∞)^(2 : ℕ) ≤
         ENNReal.ofReal (M_η^4) * (‖diffQuot k h u y‖ₑ : ℝ≥0∞)^(2 : ℕ) := by
@@ -543,7 +493,6 @@ private lemma eLpNorm_eta_sq_diffQuot_le
       ENNReal.ofReal (M_η^4 * (diffQuot k h u y)^2) from
       (ENNReal.ofReal_mul hM4_nn).symm]
     exact ENNReal.ofReal_le_ofReal h_real
-  -- Integrate.
   have h_lint_le :
       ∫⁻ y : EuclN, (‖(η y)^2 * diffQuot k h u y‖ₑ : ℝ≥0∞)^(2 : ℕ)
           ∂(volume : Measure EuclN) ≤
@@ -559,7 +508,6 @@ private lemma eLpNorm_eta_sq_diffQuot_le
             ∫⁻ y : EuclN, (‖diffQuot k h u y‖ₑ : ℝ≥0∞)^(2 : ℕ) := by
           rw [lintegral_const_mul']
           exact ENNReal.ofReal_ne_top
-  -- Convert to eLpNorm.
   rw [eLpNorm_eq_lintegral_rpow_enorm_toReal h2_ne_zero h2_ne_top,
     eLpNorm_eq_lintegral_rpow_enorm_toReal h2_ne_zero h2_ne_top]
   rw [h2_toReal]
@@ -578,7 +526,6 @@ private lemma eLpNorm_eta_sq_diffQuot_le
     refine lintegral_congr_ae ?_
     filter_upwards with y using h_pow_eq _
   rw [h_lhs_pow_eq, h_rhs_pow_eq]
-  -- Apply rpow (1/2).
   refine le_trans (ENNReal.rpow_le_rpow h_lint_le (by norm_num : (0 : ℝ) ≤ 1/2)) ?_
   have h_pull :
       (ENNReal.ofReal (M_η^4) *
@@ -587,7 +534,6 @@ private lemma eLpNorm_eta_sq_diffQuot_le
           (∫⁻ y : EuclN, (‖diffQuot k h u y‖ₑ : ℝ≥0∞)^(2 : ℕ))^((1 : ℝ) / 2) := by
     rw [ENNReal.mul_rpow_of_nonneg _ _ (by norm_num : (0 : ℝ) ≤ 1/2)]
   rw [h_pull]
-  -- (ofReal(M_η⁴))^(1/2) = ofReal(M_η²).
   have h_sqrt_M4 :
       (ENNReal.ofReal (M_η^4))^((1 : ℝ) / 2) = ENNReal.ofReal (M_η^2) := by
     have hM2_nn : 0 ≤ M_η^2 := sq_nonneg _
@@ -615,9 +561,7 @@ theorem eLpNorm_standardNirenbergTest_le
     eLpNorm (standardNirenbergTest k h η u) 2 (volume : Measure EuclN) ≤
       (2 / ENNReal.ofReal |h|) * ENNReal.ofReal (M_η^2) *
         eLpNorm (diffQuot k h u) 2 (volume : Measure EuclN) := by
-  -- Notation: F(y) = (η y)² · (D_h^k u)(y).
   set F : EuclN → ℝ := fun y => (η y)^2 * diffQuot k h u y with hF_def
-  -- Step A: ‖D_{-h} F‖_{L²} ≤ (2/|h|) ‖F‖_{L²} by Minkowski.
   have hF_aesm : AEStronglyMeasurable F (volume : Measure EuclN) := by
     rw [hF_def]
     have h1 : AEStronglyMeasurable (fun y : EuclN => (η y)^2)
@@ -629,13 +573,11 @@ theorem eLpNorm_standardNirenbergTest_le
   have h_step_A : eLpNorm (diffQuot k (-h) F) 2 (volume : Measure EuclN) ≤
       (2 / ENNReal.ofReal |h|) * eLpNorm F 2 (volume : Measure EuclN) :=
     eLpNorm_diffQuot_neg_le (d := d) k hh hF_aesm
-  -- Step B: ‖F‖_{L²} ≤ ofReal(M_η²) · ‖D_h u‖_{L²}.
   have h_step_B : eLpNorm F 2 (volume : Measure EuclN) ≤
       ENNReal.ofReal (M_η^2) *
         eLpNorm (diffQuot k h u) 2 (volume : Measure EuclN) := by
     rw [hF_def]
     exact eLpNorm_eta_sq_diffQuot_le (d := d) k h hM_η_nn hM_η
-  -- Combine.
   have h_lhs_unfold : standardNirenbergTest k h η u = diffQuot k (-h) F := rfl
   rw [h_lhs_unfold]
   calc eLpNorm (diffQuot k (-h) F) 2 (volume : Measure EuclN)

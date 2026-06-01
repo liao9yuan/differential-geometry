@@ -72,12 +72,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-Match the convention in the surrounding chart-local Laplacian files: install the
-Borel σ-algebras locally, without leaking global instances onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -86,12 +80,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 local notation "chartHaar" =>
   MeasureTheory.Measure.map (toEuclidean : E → EuclN) (modelHaar (E := E))
-
-/-! ## A chart-Euclidean partial vanishes off the support
-
-The chart-Euclidean partial derivative `euclidPartial l u` of a scalar function
-`u` on the Euclidean model space vanishes wherever `u` vanishes on a
-neighbourhood, in particular off the topological support of `u`. -/
 
 /-- The chart-Euclidean partial derivative of a function vanishes off the
 topological support of that function. -/
@@ -106,12 +94,6 @@ private lemma euclidPartial_eq_zero_of_notMem_tsupport
       (fun z hz => image_eq_zero_of_notMem_tsupport hz)
   rw [euclidPartial_def, Filter.EventuallyEq.fderiv_eq hu_evt,
     fderiv_const_apply, ContinuousLinearMap.zero_apply]
-
-/-! ## The source-free chart bilinear identity
-
-Replaying the left-hand-side half of `tensorComponent_chartBilinIdentity`, with
-no global-weak-equation substitution: the chart-pulled Dirichlet integral is the
-source term itself, carried through verbatim. -/
 
 /-- **The source-free per-component chart bilinear identity.**
 
@@ -165,25 +147,21 @@ theorem tensorComponent_chartBilinIdentity_of_dirichlet
             (weightedGradCoeff (I := I) (M := M) g r s T α P₀ l) y) * φ y
         ∂(volume : Measure EuclN) := by
   classical
-  -- The Euclidean chart target is open and measurable.
   have hcTE_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) α
   have hcTE_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     hcTE_open.measurableSet
   have hφ' : ContDiff ℝ ∞ φ := hφ
-  -- The manifold-side chart bump and its smoothness / support.
   have hχs : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (chartTestPullback (I := I) (M := M) α φ)
       (chartAt H α).source :=
     chartTestPullback_contMDiffOn (I := I) (M := M) α hφ
   have hχt : tsupport (chartTestPullback (I := I) (M := M) α φ) ⊆
       (chartAt H α).source :=
     chartTestPullback_tsupport_subset_source (I := I) (M := M) α hφ_cs hφ_supp
-  -- The chart density is `C^∞` on the chart target.
   have hdensity : ContDiffOn ℝ ∞ (densityOnEuclid (I := I) g α)
       (chartTargetEuclid (I := I) (M := M) α) :=
     densityOnEuclid_contDiffOn (I := I) g α
-  -- The chart-pushed bump and its chart-Euclidean partial agree with `φ`.
   have hbump_eqOn : Set.EqOn
       (chartPushedRaw I α (chartTestPullback (I := I) (M := M) α φ)) φ
       (chartTargetEuclid (I := I) (M := M) α) :=
@@ -194,7 +172,6 @@ theorem tensorComponent_chartBilinIdentity_of_dirichlet
         (euclidPartial (E := E) l φ)
         (chartTargetEuclid (I := I) (M := M) α) := fun l =>
     euclidPartial_chartPushedRaw_chartTestPullback_eqOn (I := I) (M := M) α φ l
-  -- `∂_l φ` is globally `C^∞` and has compact support inside the chart target.
   have hdφ : ∀ l : Fin (Module.finrank ℝ E),
       ContDiff ℝ ∞ (euclidPartial (E := E) l φ) := by
     intro l
@@ -221,17 +198,14 @@ theorem tensorComponent_chartBilinIdentity_of_dirichlet
     rw [Function.mem_support] at hz
     by_contra hz'
     exact hz (euclidPartial_eq_zero_of_notMem_tsupport (E := E) l hz')
-  -- The chart-Euclidean partial of `φ` vanishes off `tsupport φ`.
   have hφ_partial_zero : ∀ l : Fin (Module.finrank ℝ E), ∀ y, y ∉ tsupport φ →
       euclidPartial (E := E) l φ y = 0 := fun l y hy =>
     euclidPartial_eq_zero_of_notMem_tsupport (E := E) l hy
-  -- The chart-Euclidean partial of the chart component vanishes off its support.
   have hu_partial_zero : ∀ k : Fin (Module.finrank ℝ E), ∀ y,
       y ∉ tsupport (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) →
       euclidPartial (E := E) k
         (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) y = 0 :=
     fun k y hy => euclidPartial_eq_zero_of_notMem_tsupport (E := E) k hy
-  -- The test-weighted integrands: global `C^∞` smoothness.
   have hP_prc : ContDiff ℝ ∞
       (fun y => densityOnEuclid (I := I) g α y *
         covPrincipalRotationCoeff (I := I) (M := M) g r s T α P₀ y * φ y) :=
@@ -258,7 +232,6 @@ theorem tensorComponent_chartBilinIdentity_of_dirichlet
       (euclidPartial_contDiffOn_chartTarget (I := I) (M := M) α l
         (weightedGradCoeff_contDiffOn (I := I) (M := M) g r s T α P₀ l)) hφ'
       hφ_supp
-  -- `principalIntegrand` is globally `C^∞`.
   have hP_principal : ContDiff ℝ ∞
       ((tensorPrincipalForm (I := I) (M := M) g α hK hK_target).principalIntegrand
         (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) φ) := by
@@ -280,7 +253,6 @@ theorem tensorComponent_chartBilinIdentity_of_dirichlet
           (by rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from rfl])).clm_apply
           contDiff_const)))
     exact hbody
-  -- The test-weighted integrands: compact support and integrability.
   have hcs_mul : ∀ h : EuclN → ℝ,
       HasCompactSupport (fun y => h y * φ y) := fun h =>
     hasCompactSupport_mul_chartTest (E := E) hφ_cs
@@ -337,7 +309,6 @@ theorem tensorComponent_chartBilinIdentity_of_dirichlet
           (weightedGradCoeff (I := I) (M := M) g r s T α P₀ l) y * φ y)
       (volume : Measure EuclN) := fun l =>
     integrable_of_contDiff_hasCompactSupport (E := E) (hP_ibp l) (hcs_mul _)
-  -- The conversion `∫_{cTE} X ∂chartHaar = ∫ X ∂volume` for `X` vanishing off `cTE`.
   have hsetInt_to_int : ∀ X : EuclN → ℝ,
       (∀ y, y ∉ chartTargetEuclid (I := I) (M := M) α → X y = 0) →
       ∫ y in chartTargetEuclid (I := I) (M := M) α, X y ∂chartHaar =
@@ -346,9 +317,6 @@ theorem tensorComponent_chartBilinIdentity_of_dirichlet
     rw [DifferentialGeometry.Integral.Measure.map_toEuclidean_modelHaar_eq_volume
       (E := E)]
     exact MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero hX_zero
-  -- Step 1: chart-pull the global Dirichlet integral of `T` against the
-  -- rotated test section attached to `φ`. No global weak equation is used:
-  -- the chart-pulled Dirichlet integral is the source term itself.
   set vRot : SmoothCcTensor g r s :=
     rotatedTestSection (I := I) (M := M) g r s α P₀
       (chartTestPullback (I := I) (M := M) α φ) hχs hχt with hvRot_def
@@ -361,7 +329,6 @@ theorem tensorComponent_chartBilinIdentity_of_dirichlet
         ∂chartHaar :=
     tensorCovDerivPointwiseInner_integral_chart_pull (I := I) (M := M)
       g r s T vRot α hT_supp
-  -- Step 2: collapse the chart-pulled Dirichlet integrand on the chart target.
   have hLHS_integrand : ∀ y ∈ chartTargetEuclid (I := I) (M := M) α,
       densityOnEuclid (I := I) g α y *
           (covPrincipalIntegrand (I := I) (M := M) g r s T vRot α y +
@@ -378,7 +345,6 @@ theorem tensorComponent_chartBilinIdentity_of_dirichlet
               covLowerOrderRotationGradCoeff (I := I) (M := M) g r s T α P₀ l y *
                 euclidPartial (E := E) l φ y)) := by
     intro y hy
-    -- Identify the density-weighted scalar principal integrand.
     have hPI : (tensorPrincipalForm (I := I) (M := M) g α hK hK_target).principalIntegrand
           (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) φ y =
         densityOnEuclid (I := I) g α y *
@@ -390,7 +356,6 @@ theorem tensorComponent_chartBilinIdentity_of_dirichlet
                 euclidPartial (E := E) l φ y) :=
       (density_scalarPrincipal_eq_principalIntegrand (I := I) (M := M) g α hK
         hK_target hT_K φ hy).symm
-    -- The collapsed scalar principal integrand uses the chart-pushed component.
     have hscalar : ∑ k : Fin (Module.finrank ℝ E),
           ∑ l : Fin (Module.finrank ℝ E),
             chartInvGramEuclid (I := I) g α k l y *
@@ -413,7 +378,6 @@ theorem tensorComponent_chartBilinIdentity_of_dirichlet
           tensorComponentEuclid (I := I) (M := M) g r s T α P₀ from
         (tensorComponentEuclid_def (I := I) (M := M) g r s T α P₀).symm,
         hbump_partial_eqOn l hy]
-    -- The collapsed lower-order gradient sum uses the chart-pushed bump.
     have hgrad : ∑ l : Fin (Module.finrank ℝ E),
           covLowerOrderRotationGradCoeff (I := I) (M := M) g r s T α P₀ l y *
             euclidPartial (E := E) l
@@ -452,8 +416,6 @@ theorem tensorComponent_chartBilinIdentity_of_dirichlet
               covLowerOrderRotationGradCoeff (I := I) (M := M) g r s T α P₀ l y *
                 euclidPartial (E := E) l φ y))) ∂chartHaar :=
     MeasureTheory.setIntegral_congr_fun hcTE_meas hLHS_integrand
-  -- Step 3: convert the chart-pulled Dirichlet integral to a whole-space
-  -- `volume` integral.
   have hsum_zero : ∀ y, y ∉ chartTargetEuclid (I := I) (M := M) α →
       (tensorPrincipalForm (I := I) (M := M) g α hK hK_target).principalIntegrand
           (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) φ y +
@@ -499,7 +461,6 @@ theorem tensorComponent_chartBilinIdentity_of_dirichlet
               euclidPartial (E := E) l φ y))) ∂(volume : Measure EuclN) := by
     rw [hsource, hLHS_setInt]
     exact hsetInt_to_int _ hsum_zero
-  -- Step 4: split the whole-space integral into four pieces.
   have hint_gradsum : Integrable
       (fun y => ∑ l : Fin (Module.finrank ℝ E),
         densityOnEuclid (I := I) g α y *
@@ -570,7 +531,6 @@ theorem tensorComponent_chartBilinIdentity_of_dirichlet
             covLowerOrderRotationGradCoeff (I := I) (M := M) g r s T α P₀ l y *
               euclidPartial (E := E) l φ y)
         hint_lov hint_gradsum]
-  -- Step 5: integrate the lower-order gradient term by parts.
   have hgradsum_eq :
       ∫ y, (∑ l : Fin (Module.finrank ℝ E),
         densityOnEuclid (I := I) g α y *
@@ -617,7 +577,6 @@ theorem tensorComponent_chartBilinIdentity_of_dirichlet
     exact chartTarget_integral_byParts (I := I) (M := M) α l
       (weightedGradCoeff_contDiffOn (I := I) (M := M) g r s T α P₀ l)
       hφ'.contDiffOn hφ_cs hφ_supp
-  -- Step 6: assemble `bilin` and the source-free right-hand side.
   have hbilin_eq :
       (tensorPrincipalForm (I := I) (M := M) g α hK hK_target).bilin
           (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) φ =
@@ -635,7 +594,6 @@ theorem tensorComponent_chartBilinIdentity_of_dirichlet
         (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) φ y
     rw [tensorPrincipalForm_c_apply (I := I) (M := M) g α hK hK_target y]
     ring
-  -- The gradient term as a single integral of the divergence sum.
   have hgrad_int : ∑ l : Fin (Module.finrank ℝ E),
         ∫ y, euclidPartial (E := E) l
           (weightedGradCoeff (I := I) (M := M) g r s T α P₀ l) y * φ y
@@ -653,7 +611,6 @@ theorem tensorComponent_chartBilinIdentity_of_dirichlet
       funext y
       rw [Finset.sum_mul]
     rw [hdist, MeasureTheory.integral_finset_sum _ (fun l _ => hint_ibp l)]
-  -- The chart-pulled Dirichlet integral is the four-piece volume integral.
   have hgradsum_ibp :
       ∫ y, (∑ l : Fin (Module.finrank ℝ E),
         densityOnEuclid (I := I) g α y *
@@ -666,7 +623,6 @@ theorem tensorComponent_chartBilinIdentity_of_dirichlet
     rw [hgradsum_eq,
       Finset.sum_congr rfl (fun l (_ : l ∈ Finset.univ) => hIBP l),
       Finset.sum_neg_distrib, hgrad_int]
-  -- Assemble: `bilin u φ = source − ∫ prc·φ − ∫ lov·φ + ∫ divGrad·φ`.
   have hsource_eq :
       ∫ x, tensorCovDerivPointwiseInner (I := I) (M := M) g r s T vRot x
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) =

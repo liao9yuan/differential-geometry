@@ -75,8 +75,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## The `(r, s)`-tensor trivialisation base set -/
-
 /-- The base set of the chart-`α` `(r, s)`-tensor fibre trivialisation equals
 the chart-`α` source. -/
 private lemma tensorRSTriv_baseSet_eq_chartSource (r s : ℕ) (α : M) :
@@ -97,16 +95,6 @@ private lemma tensorRSTriv_baseSet_eq_chartSource (r s : ℕ) (α : M) :
   rw [h_r, h_s, Set.inter_self,
     DifferentialGeometry.Integral.Measure.trivializationAt_baseSet_eq_chartAt_source]
 
-/-! ## Uniform bound on the chart-`α`-conjugation slot factor
-
-The substituted-slot factor of the conjugation family is
-`chartJ α b ∘ chartLeviCivitaParallelCLM g α b X ∘ chartJinv α b`, an honest
-`E →L[ℝ] E` map. Applied to `w : E` it equals
-`christoffelCorrection g α b (trivToE α b (X b)) (trivFromE α b w)`, whose model
-norm is controlled by the honest Christoffel bound. We specialise the vector
-field `X` to the chart-frame basis section `chartBasisVecFiber α k`, for which
-`trivToE α b (X b) = chartModelBasis E k`, giving a bound independent of `b`. -/
-
 /-- Pointwise apply-formula for the conjugation slot factor at the substituted
 slot, on the chart source. -/
 private lemma slotConjFactor_self_apply
@@ -122,13 +110,11 @@ private lemma slotConjFactor_self_apply
   classical
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := hb
   rw [ContinuousLinearMap.comp_apply]
-  -- chartJ (parallel.comp chartJinv w) = chartJ (parallel (chartJinv w)).
   change chartJ (I := I) (M := M) α b
       ((chartLeviCivitaParallelCLM (I := I) g α b X)
         (chartJinv (I := I) (M := M) α b w)) = _
   rw [chartLeviCivitaParallelCLM_apply (I := I) g α b X
     (chartJinv (I := I) (M := M) α b w)]
-  -- chartJ = trivToE; chartJinv = trivFromE definitionally.
   change trivToE (I := I) α b
       (trivFromE (I := I) α b
         (christoffelCorrection (I := I) g α b
@@ -168,14 +154,12 @@ private lemma slotConjFactor_basis_norm_le_on_pouTsupport
     have := chartAtlasPOU_isSubordinate (I := I) (M := M) α hb
     exact this
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := hb_src
-  -- The basis vector field's chart-trivialised value is the model basis vector.
   have hX_triv :
       trivToE (I := I) α b (chartBasisVecFiber (I := I) α k b) =
         (chartModelBasis E) k := by
     change trivToE (I := I) α b
         (trivFromE (I := I) α b ((chartModelBasis E) k)) = _
     exact trivToE_trivFromE (I := I) α hb_base ((chartModelBasis E) k)
-  -- Per-`w` bound: ‖composite w‖ ≤ (Cχ * Cvec) * ‖w‖.
   have h_basis_le : ‖(chartModelBasis E) k‖ ≤ Cvec := by
     rw [hCvec_def]
     exact Finset.le_sup' (f := fun k => ‖(chartModelBasis E) k‖) (Finset.mem_univ k)
@@ -201,14 +185,6 @@ private lemma slotConjFactor_basis_norm_le_on_pouTsupport
             (mul_le_mul_of_nonneg_left h_basis_le hCχ_nn) (norm_nonneg _)
   exact ContinuousLinearMap.opNorm_le_bound _
     (mul_nonneg hCχ_nn hCvec_nn) hpt
-
-/-! ## Uniform op-norm bound on the slot kernels
-
-The full slot kernel acts on the model element `S : TensorRSModel r s ℝ E` by
-pre- or post-composing with the model-side comp-CLM of the conjugation family.
-We bound `‖inputSlotChartKernel S‖ ≤ (∏ ‖conj i‖) · ‖S‖` and dually for the
-output kernel. Every factor is either the identity (`≤ 1`) or the conjugation
-factor bounded above. -/
 
 /-- Uniform bound on the per-slot conjugation family product (input). -/
 private lemma slotInputConjCLM_prod_norm_le_on_pouTsupport
@@ -318,8 +294,6 @@ private lemma outputSlotChartKernel_apply_norm_le
           (𝕜 := ℝ) (E := fun _ : Fin s => E) ℝ
           (slotOutputConjCLM (I := I) g s α X l b)
 
-/-! ## Headline: Riemannian-norm slot op-norm bounds -/
-
 set_option synthInstance.maxHeartbeats 800000 in
 attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
@@ -346,22 +320,18 @@ theorem chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport
   classical
   letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
-  -- Compactness / source-inclusion of the partition-of-unity tsupport.
   have hK_cpt : IsCompact (tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
     pouTsupport_isCompact (I := I) (M := M) α
   have hK_sub : tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆ (chartAt H α).source := by
     intro x hx; exact chartAtlasPOU_isSubordinate (I := I) (M := M) α hx
-  -- model ← Riemannian forward op-norm bound (uniform).
   obtain ⟨Cto, hCto_pos, hCto_bound⟩ :=
     tensorRSChartFiberToModel_opNorm_isBounded_on_compact_unconditional
       (I := I) (M := M) g r s α hK_cpt hK_sub
-  -- Riemannian ← model inverse op-norm bound (uniform).
   obtain ⟨Cfrom, hCfrom_pos, hCfrom_bound⟩ :=
     tensorRSChartFiberFromModel_opNorm_isBounded_on_compact_unconditional
       (I := I) (M := M) g r s α hK_cpt hK_sub
-  -- product bound on the conjugation family (uniform).
   obtain ⟨Cprod, hCprod_nn, hCprod_bound⟩ :=
     slotInputConjCLM_prod_norm_le_on_pouTsupport (I := I) (M := M) g r α
   refine ⟨Cfrom * Cprod * Cto,
@@ -370,7 +340,6 @@ theorem chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport
   set Y : TensorRSSpace r s I b :=
     chartTensorRSInputSlotCorrection (I := I) r s g α T
       (chartBasisVecFiber (I := I) α k) b i with hY_def
-  -- ‖Y‖_Riem = ‖symmL b (CLM b Y)‖_Riem ≤ Cfrom * ‖CLM b Y‖_model.
   have hb_base : b ∈ (trivializationAt (TensorRSModel r s ℝ E)
       (fun y : M => TensorRSSpace r s I y) α).baseSet := by
     rw [tensorRSTriv_baseSet_eq_chartSource (I := I) (M := M) r s α]
@@ -388,7 +357,6 @@ theorem chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport
       ((trivializationAt (TensorRSModel r s ℝ E)
           (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b Y)
     rwa [h_roundtrip] at this
-  -- CLM b Y = kernel (CLM b (T b)) (kernel factorisation).
   have h_fact :
       (trivializationAt (TensorRSModel r s ℝ E)
           (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b Y =
@@ -400,7 +368,6 @@ theorem chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport
     chartTensorRSInputSlotCorrection_chart_kernel_factorization
       (I := I) (M := M) g r s α T (chartBasisVecFiber (I := I) α k)
       (hK_sub hb) i
-  -- ‖kernel (CLM b (T b))‖ ≤ (∏ conj) * ‖CLM b (T b)‖ ≤ Cprod * ‖CLM b (T b)‖.
   have h_kernel :
       ‖(trivializationAt (TensorRSModel r s ℝ E)
           (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b Y‖ ≤
@@ -410,13 +377,11 @@ theorem chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport
     refine le_trans (inputSlotChartKernel_apply_norm_le (I := I) (M := M)
       g r s α (chartBasisVecFiber (I := I) α k) i b _) ?_
     exact mul_le_mul_of_nonneg_right (hCprod_bound hb k i) (norm_nonneg _)
-  -- ‖CLM b (T b)‖_model ≤ Cto * ‖T b‖_Riem.
   have h_to :
       ‖(trivializationAt (TensorRSModel r s ℝ E)
           (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b (T b)‖ ≤
         Cto * ‖T b‖ :=
     hCto_bound b hb (T b)
-  -- Assemble.
   have hCto_nn : 0 ≤ Cto := le_of_lt hCto_pos
   have hCfrom_nn : 0 ≤ Cfrom := le_of_lt hCfrom_pos
   calc ‖Y‖
@@ -535,8 +500,6 @@ end PDE
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
 
 open DifferentialGeometry.PDE.RicciFlow.HebeyBlock in
 #print axioms chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport

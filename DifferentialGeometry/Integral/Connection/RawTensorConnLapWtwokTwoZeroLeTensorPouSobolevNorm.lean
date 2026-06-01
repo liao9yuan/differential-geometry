@@ -86,8 +86,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 local notation "EuclN" =>
   EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## File-local arithmetic helpers in `ℝ≥0∞` -/
-
 /-- Cauchy–Schwarz in `ℝ≥0∞` for a finset sum:
 `(∑ i ∈ s, f i) ^ 2 ≤ s.card · ∑ i ∈ s, (f i) ^ 2`. -/
 private lemma ennreal_sq_finset_sum_le_card_mul_sq_finset_sum
@@ -157,7 +155,6 @@ private lemma ennreal_sq_finset_sum_le_card_mul_sq_finset_sum
     rw [h_card_eq]
     rw [← ENNReal.ofReal_mul (Nat.cast_nonneg _)]
     apply ENNReal.ofReal_le_ofReal
-    -- Real Cauchy–Schwarz on a finset.
     have h_double_sum : ∑ i ∈ s, ∑ j ∈ s, (a i - a j) ^ 2 =
         2 * ((s.card : ℝ) * (∑ i ∈ s, (a i) ^ 2) -
               (∑ i ∈ s, a i) ^ 2) := by
@@ -230,8 +227,6 @@ private lemma sq_eLpNorm_two_eq_lintegral_ofReal_sq
   rw [← ENNReal.rpow_mul]
   have h_eq : ((1 : ℝ) / 2) * ((2 : ℕ) : ℝ) = 1 := by norm_num
   rw [h_eq, ENNReal.rpow_one, hI_eq]
-
-/-! ## Squared-sum form of `tensorPouSobolevNorm g 1 T` -/
 
 /-- The `tsum` aggregating `tensorPouSobolevNorm g 1 T` squared, written as a
 finite-sum integrand. -/
@@ -331,8 +326,6 @@ private lemma tensorPouSobolevNormSqAgg_eq_finset_sum
     funext y; exact h_integrand_zero y
   rw [heq]; simp
 
-/-! ## Collapse the chart-aggregating tsum on the LHS to a finset sum -/
-
 /-- The chart-aggregating `tsum` defining `wtwokTwoNorm g 0 (rawTensorConnLapSmooth
 g r s T)` collapses to a finset sum over `chartAtlasPOU_finset` of `eLpNorm`s of
 the chart components. -/
@@ -393,8 +386,6 @@ private lemma wtwokTwoNorm_zero_rawTensorConnLap_collapsed
     exact wkpNorm_zero_fun_zero (d := Module.finrank ℝ E) (by norm_num)
       (chartTargetEuclid_isOpen (I := I) (M := M) α)
 
-/-! ## Per-`α` chain factor from H.3 bridge -/
-
 /-- The chain operator-norm-to-the-fourth bound from the H.3 bridge, with
 `Lmax := max 1 Lop⁴`. We package the three orders `j = 0, 1, 2` into a single
 uniform factor. -/
@@ -432,8 +423,6 @@ private lemma chain_Lop_four_le_Lmax :
         EuclN ≃L[ℝ] E).toContinuousLinearMap‖ ^ 4 ≤ chainLmax (E := E) := by
   unfold chainLmax; exact le_max_right _ _
 
-/-! ## Pointwise squared bound `(tensorChartComp)² ≤ const · ρ · BigE` -/
-
 /-- For each `α : M` and ranks `(r, s)`, there is a non-negative constant `K`
 such that for every smooth compactly-supported `(r, s)`-tensor section `T`,
 every multi-index pair `(Idx, Jdx)`, and every chart-target point `y`,
@@ -468,7 +457,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
                       ((toEuclidean (E := E)).symm y)‖ ^ 2) := by
   classical
   set n : ℕ := Module.finrank ℝ E
-  -- Pull the B.3.refine constant per (Idx, Jdx) and take max.
   have h_each : ∀ idx : Fin r → Fin n, ∀ jdx : Fin s → Fin n,
       ∃ K : ℝ, 0 ≤ K ∧
         ∀ (T₀ : SmoothCcTensor g r s),
@@ -497,7 +485,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
     fun idx jdx =>
       rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
         (I := I) (M := M) g r s α idx jdx
-  -- Choose K-witnesses and take their max.
   choose K_pt hK_pt_nn hK_pt_le using h_each
   set K_max : ℝ :=
     (Finset.univ : Finset ((Fin r → Fin n) × (Fin s → Fin n))).sup'
@@ -514,13 +501,11 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
     rw [hK_max_def]
     exact Finset.le_sup' (f := fun p => K_pt p.1 p.2)
       (Finset.mem_univ (⟨idx, jdx⟩ : (Fin r → Fin n) × (Fin s → Fin n)))
-  -- Final constant: K_max · chainLmax · 3 (the factor 3 from the j ∈ {0,1,2}).
   set Lmax : ℝ := chainLmax (E := E) with hLmax_def
   have hLmax_nn : 0 ≤ Lmax := chainLmax_nonneg
   have h_one_le_Lmax : (1 : ℝ) ≤ Lmax := one_le_chainLmax
   refine ⟨K_max * Lmax * 3, by positivity, ?_⟩
   intro T Idx Jdx y
-  -- Notation.
   set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
   set ρ : ℝ := (chartAtlasPOU I M α : M → ℝ) b with hρ_def
   have hρ_nn : 0 ≤ ρ := (chartAtlasPOU I M).nonneg α b
@@ -538,7 +523,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
     refine Finset.sum_nonneg (fun _ _ => ?_)
     refine Finset.sum_nonneg (fun _ _ => ?_)
     exact sq_nonneg _
-  -- Case 1: y ∉ chartTargetEuclid α. Then tensorChartComp ... = 0.
   by_cases hy : y ∈ chartTargetEuclid (I := I) (M := M) α
   swap
   · have h_zero :
@@ -550,8 +534,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
     simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow]
     refine mul_nonneg ?_ (mul_nonneg hρ_nn hRHS_nn)
     positivity
-  -- Case 2: y ∈ chart target.
-  -- On chart target, b ∈ chart source, so b ∈ chartLeviCivitaGoodSet.
   have hb_chart_src : b ∈ (chartAt H α).source := by
     rw [hb_def]
     have h_in_target : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
@@ -565,7 +547,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
   have hb_good : b ∈ chartLeviCivitaGoodSet (I := I) α := by
     rw [chartLeviCivitaGoodSet_eq_extChartAt_source (I := I) α]
     exact hb_extSrc
-  -- LHS expansion: tensorChartComp = ρ · raw on chart target.
   have h_lhs_eq :
       tensorChartComp (I := I) (M := M) g r s
           (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx y =
@@ -575,7 +556,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
       (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx hy]
     unfold tensorChartComponentPou
     rfl
-  -- ρ · raw squared = ρ² · raw².
   have h_lhs_sq_eq :
       (tensorChartComp (I := I) (M := M) g r s
           (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx y) ^ 2 =
@@ -583,7 +563,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
           (tensorChartComponentRaw (I := I) (M := M) g r s
               (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx b) ^ 2 := by
     rw [h_lhs_eq, mul_pow]
-  -- We split on whether b ∈ tsupport ρ_α. If not, ρ = 0, so LHS = 0.
   by_cases hb_supp : b ∈ tsupport
       (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
   swap
@@ -595,16 +574,10 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
     rw [h_LHS_zero]
     refine mul_nonneg ?_ (mul_nonneg hρ_nn hRHS_nn)
     positivity
-  -- Both b ∈ tsupport ρ_α and b ∈ chartLeviCivitaGoodSet α hold, so apply
-  -- the B.3.refine pointwise bound for the (Idx, Jdx) component.
   have hb_inter : b ∈ tsupport
         (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
         chartLeviCivitaGoodSet (I := I) α := ⟨hb_supp, hb_good⟩
-  -- raw² ≤ K_pt(Idx, Jdx) · Σ_{Idx' Jdx'} (BigEuclN(b) for I'J').
   have h_raw_sq_bound := hK_pt_le Idx Jdx T b hb_inter
-  -- The point at which iteratedFDeriv on the EuclN side is evaluated:
-  -- (toEuclidean (E := E)) ((extChartAt I α) b).
-  -- Since y is in chart target, (extChartAt I α) b = (toEuclidean.symm y).
   have h_extAt_b : (extChartAt I α) b = (toEuclidean (E := E)).symm y := by
     rw [hb_def]
     have h_in_target : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
@@ -614,11 +587,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
   have h_to_b : (toEuclidean (E := E)) ((extChartAt I α) b) = y := by
     rw [h_extAt_b]
     exact (toEuclidean (E := E)).apply_symm_apply y
-  -- Per-(I'J') H.3 bridge bound: BigEuclN(b) ≤ Lmax · BigE(b).
-  -- BigEuclN(b) = ‖iteratedFDeriv ℝ 2 (chartPushedRaw I α (raw I'J')) y‖² +
-  --              ‖fderiv ℝ (chartPushedRaw I α (raw I'J')) y‖² +
-  --              (chartPushedRaw I α (raw I'J') y)².
-  -- BigE(b) = Σ_{j=0,1,2} ‖iteratedFDeriv ℝ j (raw I'J' ∘ symm) (toEuclidean.symm y)‖².
   have h_per_pair : ∀ Idx' : Fin r → Fin n, ∀ Jdx' : Fin s → Fin n,
       (‖iteratedFDeriv ℝ 2
           (chartPushedRaw I α
@@ -642,10 +610,7 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
                 ∘ (extChartAt I α).symm)
               ((toEuclidean (E := E)).symm y)‖ ^ 2 := by
     intro Idx' Jdx'
-    -- Order-0 identity: chartPushedRaw u y = u(symm y) for y in chart target.
-    -- This gives the order-0 squared identity.
     rw [h_to_b]
-    -- Smoothness of (raw I'J' ∘ symm) on the chart target.
     have hcontDiff :
         ContDiffOn ℝ ∞
           ((tensorChartComponentRaw (I := I) (M := M) g r s
@@ -665,7 +630,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
       have hmaps : Set.MapsTo (extChartAt I α).symm (extChartAt I α).target
           (extChartAt I α).source := fun y' hy' => (extChartAt I α).map_target hy'
       exact (hraw_extsrc.comp hsymm hmaps).contDiffOn
-    -- Order-0 identity.
     have h0 :
         (chartPushedRaw I α
             (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx' Jdx') y) ^ 2 =
@@ -677,7 +641,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
         (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx' Jdx') hy
       simp only [Function.comp] at this ⊢
       exact this
-    -- Order-1 bound.
     have hcontDiff1 :
         ContDiffOn ℝ 1
           ((tensorChartComponentRaw (I := I) (M := M) g r s
@@ -698,7 +661,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
       fderiv_chartPushedRaw_sq_le_compFderivSq (I := I) (M := M) (E := E) α
         (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx' Jdx')
         hcontDiff1 hy
-    -- Order-2 bound.
     have hcontDiff2 :
         ContDiffOn ℝ 2
           ((tensorChartComponentRaw (I := I) (M := M) g r s
@@ -719,10 +681,8 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
       iteratedFDeriv_two_chartPushedRaw_sq_le_compIterSq (I := I) (M := M) (E := E) α
         (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx' Jdx')
         hcontDiff2 hy
-    -- Use Lop_4 ≤ Lmax and Lop_2 ≤ Lmax.
     have hLop2_le_Lmax := chain_Lop_two_le_Lmax (E := E)
     have hLop4_le_Lmax := chain_Lop_four_le_Lmax (E := E)
-    -- Order-0: identity ≤ 1 · ‖∂^0(...)‖² (since iteratedFDeriv 0 = function value).
     have h_iterFD0 :
         ((tensorChartComponentRaw (I := I) (M := M) g r s T α Idx' Jdx') ∘
             (extChartAt I α).symm) ((toEuclidean (E := E)).symm y) =
@@ -731,7 +691,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
               (extChartAt I α).symm)
             ((toEuclidean (E := E)).symm y) 0 := by
       rw [iteratedFDeriv_zero_apply]
-    -- The order-0 norm: ‖iteratedFDeriv ℝ 0 f x‖ = ‖f x‖.
     have h_iterFD0_norm :
         ‖iteratedFDeriv ℝ 0
             ((tensorChartComponentRaw (I := I) (M := M) g r s T α Idx' Jdx') ∘
@@ -769,7 +728,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
                 (extChartAt I α).symm)
               ((toEuclidean (E := E)).symm y)‖ ^ 2 :=
           mul_le_mul_of_nonneg_right one_le_chainLmax (sq_nonneg _)
-    -- Order-1 bound: ≤ Lmax · ‖iteratedFDeriv ℝ 1 ...‖².
     have h_fderiv_eq_iterFD1 :
         ‖fderiv ℝ
             ((tensorChartComponentRaw (I := I) (M := M) g r s T α Idx' Jdx') ∘
@@ -793,7 +751,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
       refine le_trans h1 ?_
       rw [← h_fderiv_eq_iterFD1]
       exact mul_le_mul_of_nonneg_right hLop2_le_Lmax (sq_nonneg _)
-    -- Order-2 bound: ≤ Lmax · ‖iteratedFDeriv ℝ 2 ...‖².
     have h2_le :
         ‖iteratedFDeriv ℝ 2
             (chartPushedRaw I α
@@ -806,7 +763,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
               ((toEuclidean (E := E)).symm y)‖ ^ 2 := by
       refine le_trans h2 ?_
       exact mul_le_mul_of_nonneg_right hLop4_le_Lmax (sq_nonneg _)
-    -- Sum the three bounds.
     have h_sum_three :
         Lmax *
             ‖iteratedFDeriv ℝ 0
@@ -835,7 +791,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
       rw [Finset.sum_insert (by decide : (1 : ℕ) ∉ ({2} : Finset ℕ))]
       rw [Finset.sum_singleton]
       ring
-    -- Final chain.
     calc (‖iteratedFDeriv ℝ 2
             (chartPushedRaw I α
               (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx' Jdx')) y‖) ^ 2 +
@@ -867,14 +822,12 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
                   ((tensorChartComponentRaw (I := I) (M := M) g r s T α Idx' Jdx') ∘
                     (extChartAt I α).symm)
                   ((toEuclidean (E := E)).symm y)‖ ^ 2) := by
-            -- Rearrangement.
             rw [show (Finset.range 3) =
                 (insert 0 (insert 1 ({2} : Finset ℕ))) from by decide]
             rw [Finset.sum_insert (by decide : (0 : ℕ) ∉ insert 1 ({2} : Finset ℕ))]
             rw [Finset.sum_insert (by decide : (1 : ℕ) ∉ ({2} : Finset ℕ))]
             rw [Finset.sum_singleton]
             ring
-  -- Sum h_per_pair over (Idx', Jdx').
   have h_sum_pairs :
       ∑ Idx' : Fin r → Fin n, ∑ Jdx' : Fin s → Fin n,
         ((‖iteratedFDeriv ℝ 2
@@ -892,7 +845,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
              T α Idx' Jdx')
            ((toEuclidean (E := E)) ((extChartAt I α) b))) ^ 2) ≤
         Lmax * RHS_pouSobolev := by
-    -- Sum the per-pair bound.
     have h_sum :
         ∑ Idx' : Fin r → Fin n, ∑ Jdx' : Fin s → Fin n,
           ((‖iteratedFDeriv ℝ 2
@@ -921,7 +873,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
       refine Finset.sum_le_sum (fun Jdx' _ => ?_)
       exact h_per_pair Idx' Jdx'
     refine le_trans h_sum ?_
-    -- Rearrange Σ_{I'} Σ_{J'} Lmax · (...) = Lmax · Σ_{IJ} Σ_j ...
     rw [show (fun Idx' : Fin r → Fin n => ∑ Jdx' : Fin s → Fin n,
         Lmax *
           ∑ j ∈ Finset.range 3,
@@ -960,9 +911,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
     rw [hRHS_def]
     rw [← Finset.sum_product']
     exact le_refl _
-  -- Multiply h_raw_sq_bound by ρ² and combine.
-  -- raw² ≤ K_pt(Idx, Jdx) · Σ_pairs(...).
-  -- Lift to K_max bound.
   have h_K_pt_le_max_idxJdx : K_pt Idx Jdx ≤ K_max := hK_pt_le_max Idx Jdx
   have h_Spairs_nn :
       0 ≤ ∑ Idx' : Fin r → Fin n, ∑ Jdx' : Fin s → Fin n,
@@ -1004,7 +952,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
                ((toEuclidean (E := E)) ((extChartAt I α) b))) ^ 2) :=
     le_trans h_raw_sq_bound
       (mul_le_mul_of_nonneg_right h_K_pt_le_max_idxJdx h_Spairs_nn)
-  -- Multiply by ρ².
   have hρ_sq_nn : 0 ≤ ρ ^ 2 := sq_nonneg _
   have h_lhs_sq_le_pre :
       (tensorChartComp (I := I) (M := M) g r s
@@ -1028,14 +975,12 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
                  ((toEuclidean (E := E)) ((extChartAt I α) b))) ^ 2)) := by
     rw [h_lhs_sq_eq]
     exact mul_le_mul_of_nonneg_left h_raw_sq_bound_max hρ_sq_nn
-  -- ρ² ≤ ρ.
   have hρ_sq_le_ρ : ρ ^ 2 ≤ ρ := by
     have h_mul : ρ * ρ ≤ ρ * 1 := mul_le_mul_of_nonneg_left hρ_le_one hρ_nn
     rw [mul_one] at h_mul
     have h_sq_eq : ρ ^ 2 = ρ * ρ := sq ρ
     rw [h_sq_eq]
     exact h_mul
-  -- Apply the H.3 bridge bound (h_sum_pairs).
   have h_K_max_nn := hK_max_nn
   have h_chain_bound :
       ρ ^ 2 *
@@ -1058,7 +1003,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
         ρ ^ 2 * (K_max * (Lmax * RHS_pouSobolev)) :=
     mul_le_mul_of_nonneg_left
       (mul_le_mul_of_nonneg_left h_sum_pairs h_K_max_nn) hρ_sq_nn
-  -- Rearrange: ρ² · (K_max · Lmax · RHS) = (K_max · Lmax) · (ρ² · RHS) ≤ (K_max · Lmax) · (ρ · RHS).
   have h_step1 :
       ρ ^ 2 * (K_max * (Lmax * RHS_pouSobolev)) =
         K_max * Lmax * (ρ ^ 2 * RHS_pouSobolev) := by ring
@@ -1068,8 +1012,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
     mul_le_mul_of_nonneg_left
       (mul_le_mul_of_nonneg_right hρ_sq_le_ρ hRHS_nn)
       (mul_nonneg h_K_max_nn hLmax_nn)
-  -- The final bound: incorporate the factor 3.
-  -- We need (K_max · Lmax) · (ρ · RHS) ≤ (K_max · Lmax · 3) · (ρ · RHS).
   have h_step3 :
       K_max * Lmax * (ρ * RHS_pouSobolev) ≤
         K_max * Lmax * 3 * (ρ * RHS_pouSobolev) := by
@@ -1106,9 +1048,6 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
     _ ≤ K_max * Lmax * 3 * (ρ * RHS_pouSobolev) := h_step3
     _ = K_max * Lmax * 3 * (ρ * RHS_pouSobolev) := rfl
 
-/-! ## AEMeasurability of the per-`α`, per-`(IJ, j)` POU-weighted integrand on
-the Euclidean chart-target restriction -/
-
 /-- The per-`α`, per-`(IJ, j)` POU-weighted squared-norm integrand is
 AEMeasurable on the restriction of `volume` to the Euclidean chart target.
 The argument: the integrand is continuous on the open chart target
@@ -1130,9 +1069,6 @@ private lemma pouWeightedSummand_aemeasurable_on_chartTarget
       ((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
   classical
-  -- The integrand is `ENNReal.ofReal ∘ (POU(symm ∘ toEucl.symm) * ‖iterFD ...‖²)`.
-  -- Step 1: continuity of `iterFD j (rawComp ∘ (extChartAt I α).symm)` on the
-  -- Euclidean chart target `(extChartAt I α).target`.
   have h_iterFD_cont :
       ContinuousOn
         (fun y' : E => iteratedFDeriv ℝ j
@@ -1142,11 +1078,8 @@ private lemma pouWeightedSummand_aemeasurable_on_chartTarget
         ((extChartAt I α).target) :=
     iteratedFDeriv_tensorChartComponentRaw_comp_symm_continuousOn
       (I := I) (M := M) g r s T α IJ.1 IJ.2 j
-  -- Step 2: `toEuclidean.symm` is globally continuous.
   have h_toEucl_symm_cont : Continuous ((toEuclidean (E := E)).symm) :=
     (toEuclidean (E := E)).symm.continuous
-  -- Step 3: the chart target image equals the preimage of the chart target
-  -- under `toEuclidean.symm`.
   have h_eq_preimage :
       chartTargetEuclid (I := I) (M := M) α =
         (toEuclidean (E := E)).symm ⁻¹' (extChartAt I α).target :=
@@ -1157,8 +1090,6 @@ private lemma pouWeightedSummand_aemeasurable_on_chartTarget
     intro y hy
     rw [h_eq_preimage] at hy
     exact hy
-  -- Step 4: continuity on the chart target of
-  -- `fun y => iterFD j (...) (toEuclidean.symm y)`.
   have h_iterFD_comp_cont :
       ContinuousOn
         (fun y : EuclN => iteratedFDeriv ℝ j
@@ -1167,7 +1098,6 @@ private lemma pouWeightedSummand_aemeasurable_on_chartTarget
           ((toEuclidean (E := E)).symm y))
         (chartTargetEuclid (I := I) (M := M) α) :=
     h_iterFD_cont.comp h_toEucl_symm_cont.continuousOn h_maps
-  -- Step 5: continuity of the norm and norm squared.
   have h_norm_sq_cont :
       ContinuousOn
         (fun y : EuclN => ‖iteratedFDeriv ℝ j
@@ -1176,14 +1106,11 @@ private lemma pouWeightedSummand_aemeasurable_on_chartTarget
           ((toEuclidean (E := E)).symm y)‖ ^ 2)
         (chartTargetEuclid (I := I) (M := M) α) :=
     h_iterFD_comp_cont.norm.pow 2
-  -- Step 6: continuity of the POU weight composed with the chart maps.
   have h_pou_cont : Continuous (fun b : M => (chartAtlasPOU I M α : M → ℝ) b) :=
     (chartAtlasPOU I M α).contMDiff.continuous
-  -- Continuity of `(extChartAt I α).symm` on the chart target.
   have h_extSymm_cont :
       ContinuousOn (fun y : E => (extChartAt I α).symm y) ((extChartAt I α).target) :=
     continuousOn_extChartAt_symm (I := I) α
-  -- Continuity of `(extChartAt I α).symm ∘ toEucl.symm` on chart target image.
   have h_pou_comp_cont :
       ContinuousOn
         (fun y : EuclN => (chartAtlasPOU I M α : M → ℝ)
@@ -1195,7 +1122,6 @@ private lemma pouWeightedSummand_aemeasurable_on_chartTarget
           (chartTargetEuclid (I := I) (M := M) α) :=
       h_extSymm_cont.comp h_toEucl_symm_cont.continuousOn h_maps
     exact h_pou_cont.comp_continuousOn h_inner_cont
-  -- Step 7: continuity of the product `POU(...) * ‖iterFD(...)‖²` on chart target.
   have h_prod_cont :
       ContinuousOn
         (fun y : EuclN =>
@@ -1207,7 +1133,6 @@ private lemma pouWeightedSummand_aemeasurable_on_chartTarget
               ((toEuclidean (E := E)).symm y)‖ ^ 2)
         (chartTargetEuclid (I := I) (M := M) α) :=
     h_pou_comp_cont.mul h_norm_sq_cont
-  -- Step 8: AEMeasurability via `ContinuousOn.aemeasurable`.
   have h_meas_set :
       MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
@@ -1224,8 +1149,6 @@ private lemma pouWeightedSummand_aemeasurable_on_chartTarget
           (chartTargetEuclid (I := I) (M := M) α)) :=
     h_prod_cont.aemeasurable h_meas_set
   exact ENNReal.measurable_ofReal.comp_aemeasurable h_prod_aemeas
-
-/-! ## Per-`α`, per-`(Idx, Jdx)` squared `L²`-norm bound -/
 
 /-- Squared-`L²` per-`α`, per-`(Idx, Jdx)` bound. The squared `eLpNorm 2` of the
 chart component of the raw tensor connection Laplacian over the chart target is
@@ -1261,7 +1184,6 @@ private lemma sq_eLpNorm_tensorChartComp_le_pou_summand
       (I := I) (M := M) g r s α
   refine ⟨K, hK_nn, ?_⟩
   intro T Idx Jdx
-  -- (eLpNorm 2)² = ∫ ofReal (f y)² dμ.
   have h_sq_eLp :
       (eLpNorm
           (tensorChartComp (I := I) (M := M) g r s
@@ -1278,7 +1200,6 @@ private lemma sq_eLpNorm_tensorChartComp_le_pou_summand
   set μ : Measure EuclN :=
     (volume : Measure EuclN).restrict (chartTargetEuclid (I := I) (M := M) α)
     with hμ_def
-  -- Apply pointwise bound under lintegral_mono.
   have h_pt : ∀ y : EuclN,
       ENNReal.ofReal
           ((tensorChartComp (I := I) (M := M) g r s
@@ -1315,7 +1236,6 @@ private lemma sq_eLpNorm_tensorChartComp_le_pou_summand
                       ((toEuclidean (E := E)).symm y)‖ ^ 2)) ∂μ :=
     lintegral_mono h_pt
   refine le_trans h_int_le ?_
-  -- Split out the constant K and split sum.
   have h_pou_nn : ∀ y : EuclN,
       0 ≤ (chartAtlasPOU I M α : M → ℝ)
           ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := fun y =>
@@ -1348,7 +1268,6 @@ private lemma sq_eLpNorm_tensorChartComp_le_pou_summand
                       ∘ (extChartAt I α).symm)
                     ((toEuclidean (E := E)).symm y)‖ ^ 2 := fun y =>
     mul_nonneg (h_pou_nn y) (h_inner_sum_nn y)
-  -- Rewrite ofReal(K * prod) = ofReal K * ofReal prod.
   have h_ofReal_mul : ∀ y : EuclN,
       ENNReal.ofReal
         (K *
@@ -1373,9 +1292,6 @@ private lemma sq_eLpNorm_tensorChartComp_le_pou_summand
                       ∘ (extChartAt I α).symm)
                     ((toEuclidean (E := E)).symm y)‖ ^ 2) := fun y =>
     ENNReal.ofReal_mul hK_nn
-  -- Rewrite ofReal(POU * sum) = ofReal POU * ofReal sum... but POU may not split
-  -- cleanly through Σ via ofReal_sum_of_nonneg without a finset sum.
-  -- Instead: distribute POU into the inner sum.
   have h_distrib : ∀ y : EuclN,
       ((chartAtlasPOU I M α : M → ℝ)
           ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
@@ -1398,9 +1314,6 @@ private lemma sq_eLpNorm_tensorChartComp_le_pou_summand
     rw [Finset.mul_sum]
     refine Finset.sum_congr rfl (fun IJ' _ => ?_)
     rw [Finset.mul_sum]
-  -- After distribution, the integrand becomes
-  -- ofReal(K) * ofReal(Σ_IJ' Σ_j (POU * ‖...‖²)).
-  -- We use ofReal_sum_of_nonneg to push ofReal inside the sums.
   have h_inner_summand_nn : ∀ y : EuclN, ∀ IJ' : (Fin r → Fin (Module.finrank ℝ E)) ×
       (Fin s → Fin (Module.finrank ℝ E)), ∀ j ∈ Finset.range 3,
       0 ≤ ((chartAtlasPOU I M α : M → ℝ)
@@ -1410,7 +1323,6 @@ private lemma sq_eLpNorm_tensorChartComp_le_pou_summand
                   ∘ (extChartAt I α).symm)
                 ((toEuclidean (E := E)).symm y)‖ ^ 2 :=
     fun y IJ' j _ => mul_nonneg (h_pou_nn y) (sq_nonneg _)
-  -- Combine into the new integrand form.
   have h_integrand_eq : ∀ y : EuclN,
       ENNReal.ofReal
         (K *
@@ -1454,7 +1366,6 @@ private lemma sq_eLpNorm_tensorChartComp_le_pou_summand
     refine Finset.sum_congr rfl (fun IJ' _ => ?_)
     refine (ENNReal.ofReal_sum_of_nonneg (fun j hj =>
       h_inner_summand_nn y IJ' j hj))
-  -- Rewrite integrand and split.
   rw [show
       (fun y : EuclN => ENNReal.ofReal
         (K *
@@ -1479,10 +1390,8 @@ private lemma sq_eLpNorm_tensorChartComp_le_pou_summand
                       ∘ (extChartAt I α).symm)
                     ((toEuclidean (E := E)).symm y)‖ ^ 2)) from by
     funext y; exact h_integrand_eq y]
-  -- Now: ∫ ofReal K · (sum) dμ = ofReal K · ∫ sum dμ = ofReal K · sum ∫ dμ.
   rw [lintegral_const_mul' (ENNReal.ofReal K) _ ENNReal.ofReal_ne_top]
   refine mul_le_mul_right ?_ _
-  -- ∫ (Σ_IJ' Σ_j integrand) dμ = Σ_IJ' Σ_j ∫ integrand dμ.
   have h_swap_IJ :
       ∫⁻ y, ∑ IJ' : (Fin r → Fin (Module.finrank ℝ E)) ×
             (Fin s → Fin (Module.finrank ℝ E)),
@@ -1533,8 +1442,6 @@ private lemma sq_eLpNorm_tensorChartComp_le_pou_summand
       (I := I) (M := M) g r s T α IJ' j
   rw [h_swap_j]
 
-/-! ## Main headline: chart-Sobolev-zero bound -/
-
 /-- **Unconditional chart-Sobolev-zero bound on the raw tensor connection
 Laplacian by the partition-of-unity-weighted chart-Sobolev norm.**
 
@@ -1581,7 +1488,6 @@ theorem wtwokTwoNorm_zero_rawTensorConnLap_le_tensorPouSobolevNorm_one
   classical
   set n := Module.finrank ℝ E with hn_def
   set S : Finset M := chartAtlasPOU_finset (I := I) (M := M) with hS_def
-  -- Choose per-α K-witnesses.
   have h_each : ∀ α : M, ∃ K : ℝ, 0 ≤ K ∧
       ∀ (T : SmoothCcTensor g r s)
         (Idx : Fin r → Fin n)
@@ -1605,7 +1511,6 @@ theorem wtwokTwoNorm_zero_rawTensorConnLap_le_tensorPouSobolevNorm_one
                   ∂(volume : Measure EuclN)) := fun α =>
     sq_eLpNorm_tensorChartComp_le_pou_summand (I := I) (M := M) g r s α
   choose K_pt hK_pt_nn hK_pt_bound using h_each
-  -- Pick K_max as max over S of K_pt.
   set K_max : ℝ := if hSne : S.Nonempty then S.sup' hSne K_pt else 1 with hK_max_def
   have hK_max_nn : 0 ≤ K_max := by
     rw [hK_max_def]
@@ -1620,8 +1525,6 @@ theorem wtwokTwoNorm_zero_rawTensorConnLap_le_tensorPouSobolevNorm_one
     have hSne : S.Nonempty := ⟨α, hα⟩
     rw [dif_pos hSne]
     exact Finset.le_sup' K_pt hα
-  -- The final constant: C² := S.card · n^(r+s) · K_max · n^(r+s) = S.card · K_max · n^(2(r+s)).
-  -- Concretely: C := Real.sqrt (S.card · n^(2(r+s)) · K_max).
   set nIJ : ℕ :=
     Fintype.card ((Fin r → Fin n) × (Fin s → Fin n)) with hnIJ_def
   set Nflat : ℕ := S.card * nIJ with hNflat_def
@@ -1635,11 +1538,9 @@ theorem wtwokTwoNorm_zero_rawTensorConnLap_le_tensorPouSobolevNorm_one
   have hC_nn : 0 ≤ C := Real.sqrt_nonneg _
   refine ⟨ENNReal.ofReal C, ENNReal.ofReal_ne_top, ?_⟩
   intro T
-  -- Notation.
   set LHS : ℝ≥0∞ := wtwokTwoNorm (I := I) (M := M) g 0
     (rawTensorConnLapSmooth (I := I) g r s T) with hLHS_def
   set W₁ : ℝ≥0∞ := tensorPouSobolevNorm (I := I) (M := M) g 1 T with hW₁_def
-  -- Step 1: collapse LHS to finset sum.
   set FS : ℝ≥0∞ :=
     ∑ α ∈ S,
       ∑ Idx : Fin r → Fin n,
@@ -1653,8 +1554,6 @@ theorem wtwokTwoNorm_zero_rawTensorConnLap_le_tensorPouSobolevNorm_one
     rw [hLHS_def, hFS_def]
     exact wtwokTwoNorm_zero_rawTensorConnLap_collapsed
       (I := I) (M := M) g r s T
-  -- Step 2: flatten Σ_{α} Σ_{Idx} Σ_{Jdx} into Σ_{(α, IJ)} via product finset.
-  -- Define the per-(α, IJ) eLpNorm summand.
   set f : M × ((Fin r → Fin n) × (Fin s → Fin n)) → ℝ≥0∞ := fun p =>
     eLpNorm
       (tensorChartComp (I := I) (M := M) g r s
@@ -1671,14 +1570,12 @@ theorem wtwokTwoNorm_zero_rawTensorConnLap_le_tensorPouSobolevNorm_one
         (Finset.univ : Finset (Fin r → Fin n)) ×ˢ
           (Finset.univ : Finset (Fin s → Fin n)) from rfl]
     rw [Finset.sum_product]
-  -- card of the product finset = S.card · nIJ.
   have h_card_flat :
       (S ×ˢ (Finset.univ :
             Finset ((Fin r → Fin n) × (Fin s → Fin n)))).card =
         Nflat := by
     rw [Finset.card_product, hNflat_def, hnIJ_def]
     rfl
-  -- Apply ENNReal Cauchy-Schwarz.
   have h_CS : FS ^ 2 ≤ (Nflat : ℝ≥0∞) *
       ∑ p ∈ (S ×ˢ (Finset.univ :
             Finset ((Fin r → Fin n) × (Fin s → Fin n)))), (f p) ^ 2 := by
@@ -1688,8 +1585,6 @@ theorem wtwokTwoNorm_zero_rawTensorConnLap_le_tensorPouSobolevNorm_one
             Finset ((Fin r → Fin n) × (Fin s → Fin n)))) f
     rw [h_card_flat] at hCS_pre
     exact hCS_pre
-  -- Step 3: bound (f p)² for each p ∈ S × univ.
-  -- Use the per-α bound:
   have h_per_p : ∀ p ∈ (S ×ˢ (Finset.univ :
             Finset ((Fin r → Fin n) × (Fin s → Fin n)))),
       (f p) ^ 2 ≤
@@ -1714,7 +1609,6 @@ theorem wtwokTwoNorm_zero_rawTensorConnLap_le_tensorPouSobolevNorm_one
       ENNReal.ofReal_le_ofReal (hK_le_max p.1 hα)
     refine le_trans h_bound ?_
     refine mul_le_mul_left h_K_le _
-  -- Sum the per-p bounds.
   have h_sum_p_bd : ∑ p ∈ (S ×ˢ (Finset.univ :
             Finset ((Fin r → Fin n) × (Fin s → Fin n)))), (f p) ^ 2 ≤
         ∑ p ∈ (S ×ˢ (Finset.univ :
@@ -1733,7 +1627,6 @@ theorem wtwokTwoNorm_zero_rawTensorConnLap_le_tensorPouSobolevNorm_one
                           ((toEuclidean (E := E)).symm y)‖ ^ 2)
                   ∂(volume : Measure EuclN)) :=
     Finset.sum_le_sum h_per_p
-  -- Pull ofReal K_max out and re-collapse Σ over p ∈ S × univ.
   have h_pull_K :
       ∑ p ∈ (S ×ˢ (Finset.univ :
             Finset ((Fin r → Fin n) × (Fin s → Fin n)))),
@@ -1766,8 +1659,6 @@ theorem wtwokTwoNorm_zero_rawTensorConnLap_le_tensorPouSobolevNorm_one
                         ((toEuclidean (E := E)).symm y)‖ ^ 2)
                 ∂(volume : Measure EuclN)) := by
     rw [Finset.mul_sum]
-  -- Convert Σ over p ∈ S × univ to Σ_{α∈S} Σ_{IJ} (sum independent of IJ).
-  -- The summand depends on p.1 only.
   have h_sum_collapse_p :
       ∑ p ∈ (S ×ˢ (Finset.univ :
             Finset ((Fin r → Fin n) × (Fin s → Fin n)))),
@@ -1798,8 +1689,6 @@ theorem wtwokTwoNorm_zero_rawTensorConnLap_le_tensorPouSobolevNorm_one
                         ((toEuclidean (E := E)).symm y)‖ ^ 2)
                 ∂(volume : Measure EuclN)) := by
     rw [Finset.sum_product]
-    -- LHS: Σ_{α ∈ S} Σ_{IJ ∈ univ} G(α) (sum independent of IJ).
-    -- Use Finset.sum_const to reduce inner sum, then pull nIJ out.
     have h_inner : ∀ α : M,
         (∑ _IJ : (Fin r → Fin n) × (Fin s → Fin n),
           (∑ IJ' : (Fin r → Fin n) × (Fin s → Fin n),
@@ -1858,7 +1747,6 @@ theorem wtwokTwoNorm_zero_rawTensorConnLap_le_tensorPouSobolevNorm_one
                 ∂(volume : Measure EuclN))) from by
       funext α; exact h_inner α]
     rw [← Finset.mul_sum]
-  -- Identify the inner sum as (tensorPouSobolevNorm g 1 T)² via the existing helpers.
   have h_inner_eq :
       ∑ α ∈ S,
         (∑ IJ' : (Fin r → Fin n) × (Fin s → Fin n),
@@ -1876,7 +1764,6 @@ theorem wtwokTwoNorm_zero_rawTensorConnLap_le_tensorPouSobolevNorm_one
       W₁ ^ 2 := by
     rw [hW₁_def, tensorPouSobolevNorm_one_sq_eq_agg (I := I) (M := M) g T,
         tensorPouSobolevNormSqAgg_eq_finset_sum (I := I) (M := M) g T, ← hS_def]
-  -- Chain the bounds.
   have h_FS_sq_le : FS ^ 2 ≤
       (Nflat : ℝ≥0∞) * (ENNReal.ofReal K_max *
         ((nIJ : ℝ≥0∞) * W₁ ^ 2)) := by
@@ -1884,12 +1771,10 @@ theorem wtwokTwoNorm_zero_rawTensorConnLap_le_tensorPouSobolevNorm_one
     refine mul_le_mul_right ?_ _
     refine le_trans h_sum_p_bd ?_
     rw [h_pull_K, h_sum_collapse_p, h_inner_eq]
-  -- Rearrange RHS = ofReal C_sq · W₁².
   have h_rearrange :
       (Nflat : ℝ≥0∞) * (ENNReal.ofReal K_max *
           ((nIJ : ℝ≥0∞) * W₁ ^ 2)) =
         ENNReal.ofReal C_sq * W₁ ^ 2 := by
-    -- C_sq = (Nflat : ℝ) · (nIJ : ℝ) · K_max.
     have h_C_sq_ofReal :
         ENNReal.ofReal C_sq =
           (Nflat : ℝ≥0∞) * (nIJ : ℝ≥0∞) * ENNReal.ofReal K_max := by
@@ -1900,18 +1785,15 @@ theorem wtwokTwoNorm_zero_rawTensorConnLap_le_tensorPouSobolevNorm_one
     rw [h_C_sq_ofReal]
     ring
   rw [h_rearrange] at h_FS_sq_le
-  -- ofReal C_sq = (ofReal C)².
   have h_C_sq_eq : C_sq = C ^ 2 := by
     rw [hC_def, sq, Real.mul_self_sqrt hC_sq_nn]
   have h_ofReal_C_sq : ENNReal.ofReal C_sq = (ENNReal.ofReal C) ^ 2 := by
     rw [h_C_sq_eq, ENNReal.ofReal_pow (Real.sqrt_nonneg _)]
   rw [h_ofReal_C_sq] at h_FS_sq_le
-  -- Combine the squares.
   have h_mul_sq : (ENNReal.ofReal C) ^ 2 * W₁ ^ 2 =
       (ENNReal.ofReal C * W₁) ^ 2 := by
     rw [mul_pow]
   rw [h_mul_sq] at h_FS_sq_le
-  -- Take square root via ENNReal.pow_le_pow_left_iff.
   rw [hLHS_eq]
   exact (ENNReal.pow_le_pow_left_iff (a := FS)
     (b := ENNReal.ofReal C * W₁) (n := 2) (by norm_num)).mp h_FS_sq_le
@@ -1921,8 +1803,6 @@ end Integral
 end DifferentialGeometry
 
 end
-
-/-! ## Sanity check: axioms used by the pointwise headline and main headline. -/
 
 open DifferentialGeometry.Integral.Connection in
 #print axioms tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand

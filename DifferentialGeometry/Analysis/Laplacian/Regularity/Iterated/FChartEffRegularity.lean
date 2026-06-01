@@ -85,8 +85,6 @@ open DifferentialGeometry.Analysis.Laplacian.IteratedVariationalIdentityStep
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -95,8 +93,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Direction multi-index extracted from an infinite sequence -/
 
 /-- The level-`m` direction multi-index from an infinite sequence
 `dirs_seq : ℕ → Fin n`: the first `m` entries `(dirs_seq 0, …, dirs_seq (m-1))`. -/
@@ -118,8 +114,6 @@ private lemma dirsOf_succ (dirs_seq : ℕ → Fin (Module.finrank ℝ E)) (m : �
   · subst hlast
     rw [Fin.snoc_last]
     rfl
-
-/-! ## The level-`m` bundle: data + regularity + vanishing -/
 
 /-- The level-`m` canonical bundle: the iterated chart-bilinear data instance
 `D_m` together with the two propagated invariants needed to apply the
@@ -154,8 +148,6 @@ structure CanonicalIteratedDataBundle
 
 namespace CanonicalIteratedDataBundle
 
-/-! ## Base case: `m = 0` -/
-
 /-- The base `m = 0` bundle. Requires:
 
 * `u_h ∈ laplacianDomainPow g 2` (to apply `IteratedDiffChartBilinearData.ofBase`);
@@ -186,12 +178,9 @@ def ofBase
   data := IteratedDiffChartBilinearData.ofBase
     (I := I) (M := M) g α hu_h
   directions_eq := by
-    -- Both sides are functions `Fin 0 → Fin n`, hence equal pointwise (vacuously).
     funext i; exact i.elim0
   fChartEff_memW1p := h_base_f_chart_memW1p
   fChartEff_ae_zero_off_K := h_base_f_chart_ae_zero
-
-/-! ## Inductive step: `m → m + 1` -/
 
 /-- The inductive step `m → m + 1`. Requires the regularity hypotheses on
 `u_h.coeFn` at levels `m + 1` and `m + 2` (chart-`H^{m+1}` and chart-`H^{m+2}`),
@@ -223,15 +212,10 @@ def step
     h_chart_H_m_plus_1 h_chart_H_m_plus_2
     B_m.fChartEff_memW1p B_m.fChartEff_ae_zero_off_K
   directions_eq := by
-    -- The step's directions are `Fin.snoc B_m.data.directions (dirs_seq m)`.
-    -- We rewrite via `B_m.directions_eq` and `dirsOf_succ`.
     change Fin.snoc B_m.data.directions (dirs_seq m) = dirsOf dirs_seq (m + 1)
     rw [B_m.directions_eq, dirsOf_succ]
   fChartEff_memW1p := h_next_fChartEff_memW1p
   fChartEff_ae_zero_off_K := by
-    -- The step's fChartEff = fChartEffStep g α u_h m dirs fChartEffPrev l, which
-    -- equals `Set.indicator chartImagePOUTsupport α (_)`. Its value at any point
-    -- outside chartImagePOUTsupport α is 0.
     change fChartEffStep (I := I) (M := M) g α u_h m B_m.data.directions
         B_m.data.fChartEff (dirs_seq m) =ᵐ[
       (volume : Measure EuclN).restrict
@@ -246,13 +230,10 @@ def step
     refine (ae_restrict_iff' h_diff_open.measurableSet).mpr ?_
     refine Filter.Eventually.of_forall ?_
     intro y hy
-    -- Outside chartImagePOUTsupport α, the indicator is 0.
     unfold fChartEffStep
     exact Set.indicator_of_notMem hy.2 _
 
 end CanonicalIteratedDataBundle
-
-/-! ## Hypothesis packagings for the canonical family -/
 
 /-- Per-level chart-`H` regularity hypotheses for `u_h.coeFn`: at every level
 `m`, chart-`H^{m+1}` and chart-`H^{m+2}` are needed by the inductive step. -/
@@ -281,8 +262,6 @@ def FChartEffStepW1pHyp
       (fChartEffStep (I := I) (M := M) g α u_h m D_m.directions
         D_m.fChartEff (dirs_seq m))
       (chartTargetEuclid (I := I) (M := M) α)
-
-/-! ## The canonical family via `Nat.rec` -/
 
 /-- The canonical level-`m` bundle, built by induction. Requires:
 
@@ -321,10 +300,6 @@ def canonicalBundle
       exact CanonicalIteratedDataBundle.ofBase (I := I) (M := M) g α
         dirs_seq hu_h h_base_f_chart_memW1p h_base_f_chart_ae_zero
   | succ m ih =>
-      -- Build the level-`m` bundle from `h_chart_H_seq` restricted to
-      -- `k ≤ m + 2` (which is automatic since `m + 2 ≤ (m+1) + 2`) and
-      -- `h_step_propagator` restricted to `k < m` (automatic since
-      -- `m ≤ m + 1`).
       have h_chart_H_seq_m : ChartHRegHyp (I := I) (M := M) g α u_h (m + 2) := by
         intro k hk
         exact h_chart_H_seq k (hk.trans (by omega))
@@ -333,10 +308,8 @@ def canonicalBundle
         intro k hk D_k h_dirs h_W1p
         exact h_step_propagator k (hk.trans (Nat.lt_succ_self _)) D_k h_dirs h_W1p
       let B_m := ih h_chart_H_seq_m h_step_propagator_m
-      -- Chart-`H` regularity at levels `m + 1` and `m + 2`.
       have h_chart_H_m_plus_1 := h_chart_H_seq (m + 1) (by omega)
       have h_chart_H_m_plus_2 := h_chart_H_seq (m + 2) (by omega)
-      -- Step regularity from the propagator.
       have h_next_W1p := h_step_propagator m (Nat.lt_succ_self _) B_m.data
         B_m.directions_eq B_m.fChartEff_memW1p
       exact CanonicalIteratedDataBundle.step (I := I) (M := M)
@@ -370,8 +343,6 @@ def iteratedDiffChartBilinearData_canonical
     IteratedDiffChartBilinearData (I := I) (M := M) g α u_h m :=
   (canonicalBundle (I := I) (M := M) g α dirs_seq hu_h h_base_f_chart_memW1p
     h_base_f_chart_ae_zero m h_chart_H_seq h_step_propagator).data
-
-/-! ## Headline theorem: vanishing of the level-`m` source off `K_α` -/
 
 /-- **Polymorphic vanishing-off-`K_α`.** The level-`m` effective chart-pulled
 source `(iteratedDiffChartBilinearData_canonical … m).fChartEff` vanishes ae on
@@ -414,18 +385,6 @@ theorem fChartEff_at_level_ae_zero_off_K_alpha
   (canonicalBundle (I := I) (M := M) g α dirs_seq hu_h h_base_f_chart_memW1p
     h_base_f_chart_ae_zero m h_chart_H_seq h_step_propagator).fChartEff_ae_zero_off_K
 
-/-! ## Headline theorem: `MemWkp K 2` regularity of the level-`m` source
-
-The level-`m` source's `MemWkp K 2` regularity is derived inductively from a
-per-step **`MemWkp K 2` propagator hypothesis**: the regularity at level `m`
-follows from the regularity at level `m - 1` (one rank higher) via the
-inductive step's transformation of `fChartEffStep`.
-
-Concretely, the propagator says: `MemWkp (K+1) 2` of the previous source
-implies `MemWkp K 2` of the next source. Threading this through `m` levels,
-starting from `MemWkp (K+m) 2` of `base.f_chart`, gives `MemWkp K 2` at
-level `m`. -/
-
 /-- Per-level `MemWkp K 2` propagator hypothesis for `fChartEffStep`. The
 propagator says: if the level-`m` source is in `MemWkp (K+1) 2`, then the
 level-`(m+1)` source (built via `fChartEffStep`) is in `MemWkp K 2`. -/
@@ -442,11 +401,6 @@ def FChartEffStepMemWkpHyp
       (fChartEffStep (I := I) (M := M) g α u_h m D_m.directions
         D_m.fChartEff (dirs_seq m))
       (chartTargetEuclid (I := I) (M := M) α)
-
-/-! ### Auxiliary inductive structure carrying `MemWkp` regularity
-
-We strengthen `CanonicalIteratedDataBundle` with an additional `MemWkp K 2`
-witness at each level, threading the regularity inductively. -/
 
 /-- The level-`m` bundle with an additional `MemWkp (K + (M - m)) 2` witness on
 `data.fChartEff`, threaded inductively. The target regularity level at depth
@@ -551,8 +505,6 @@ private def step
 
 end CanonicalBundleWithMemWkp
 
-/-! ### Building the bundle at level `m = M_max` by induction -/
-
 /-- Build the `MemWkp`-strengthened canonical bundle at level `m ≤ M_max`. The
 result has `MemWkp (K + (M_max - m)) 2` of the level-`m` source. -/
 private def canonicalBundleWithMemWkp_aux
@@ -600,9 +552,7 @@ private def canonicalBundleWithMemWkp_aux
       have h_chart_H_m_plus_2 := h_chart_H_seq (m + 2) (by omega)
       have h_step_w1p_m :=
         h_step_W1p m hm B_m.data B_m.directions_eq B_m.fChartEff_memW1p
-      -- M_max - 1 - m = M_max - (m + 1) when m + 1 ≤ M_max.
       have h_idx_eq : M_max - 1 - m = M_max - (m + 1) := by omega
-      -- And K + (M_max - m) = (K + (M_max - 1 - m)) + 1 when m < M_max.
       have h_idx_eq_2 : K + (M_max - m) = (K + (M_max - 1 - m)) + 1 := by
         omega
       have h_Bm_memWkp := B_m.fChartEff_memWkp
@@ -613,21 +563,11 @@ private def canonicalBundleWithMemWkp_aux
         rw [← h_idx_eq_2]; exact h_Bm_memWkp
       have h_step_memWkp_m :=
         h_step_memWkp m hm B_m.data B_m.directions_eq h_Bm_memWkp'
-      -- The propagator gives `MemWkp (K + (M_max - 1 - m)) 2` at level `m + 1`.
-      -- Rewrite via `h_idx_eq` to `MemWkp (K + (M_max - (m + 1))) 2`.
       rw [h_idx_eq] at h_step_memWkp_m
       exact CanonicalBundleWithMemWkp.step (I := I) (M := M)
         (g := g) (α := α) (u_h := u_h) (dirs_seq := dirs_seq)
         (M_max := M_max) (K := K) (m := m) hm B_m
         h_chart_H_m_plus_1 h_chart_H_m_plus_2 h_step_w1p_m h_step_memWkp_m
-
-/-! ### Headline `MemWkp K 2` theorem
-
-The strengthened bundle `canonicalBundleWithMemWkp_aux` carries `MemWkp` data
-at every level; we expose the level-`m` data instance built from it together
-with the headline `MemWkp K 2` regularity of its effective source. This is
-analogous to the plain `iteratedDiffChartBilinearData_canonical` but with the
-additional `MemWkp` invariant threaded through. -/
 
 /-- The level-`m` iterated chart-bilinear data instance built from the
 `MemWkp`-strengthened canonical bundle. This is the data instance exposed by
@@ -720,12 +660,9 @@ theorem fChartEff_at_level_memWkp_K
         h_step_memWkp).fChartEff
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- The strengthened bundle's MemWkp witness gives `MemWkp (K + (m - m)) 2`
-  -- = `MemWkp K 2`.
   have h_mem := (canonicalBundleWithMemWkp_aux (I := I) (M := M) g α dirs_seq
     m K hu_h h_base_f_chart_memW1p h_base_f_chart_ae_zero h_base_f_chart_memWkp
     h_chart_H_seq h_step_propagator h_step_memWkp m (le_refl _)).fChartEff_memWkp
-  -- m - m = 0, so K + (m - m) = K + 0 = K.
   have h_idx_eq : K + (m - m) = K := by
     rw [Nat.sub_self, Nat.add_zero]
   rw [h_idx_eq] at h_mem

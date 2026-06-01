@@ -72,16 +72,6 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Chart-coordinate geodesic rescaling
-
-The chart-phase ODE `(ẋ, v̇) = (v, -Γ(v, v)(x))` on `E × E` has the
-following scaling invariance: if `c(s) = (x(s), v(s))` satisfies the
-ODE on a neighbourhood of `s = 0`, then for every `a ∈ ℝ` the curve
-`s ↦ (x(a s), a • v(a s))` also satisfies it. This is the chart-coord
-restatement of the manifold geodesic rescaling
-`γ_{p, a • v}(t) = γ_{p, v}(a t)`.
--/
-
 section ChartCoordRescaling
 
 variable [I.Boundaryless]
@@ -106,12 +96,10 @@ lemma chartPhaseVF_rescale
     chartPhaseVF (I := I) g α (x, a • v) =
       (a • v, -(a * a) • chartChristoffelContraction (I := I) g α v v x) := by
   classical
-  -- chartPhaseVF g α (z) = (z.2, -Γ(z.2, z.2)(z.1)).
   have h0 : chartPhaseVF (I := I) g α (x, a • v) =
       (a • v, -chartChristoffelContraction (I := I) g α (a • v) (a • v) x) := rfl
   rw [h0]
   refine Prod.ext rfl ?_
-  -- Snd: -Γ(a•v, a•v)(x) = -(a*a) • Γ(v,v)(x).
   have hΓ : chartChristoffelContraction (I := I) g α (a • v) (a • v) x =
       (a * a) • chartChristoffelContraction (I := I) g α v v x :=
     chartChristoffelContraction_smul_smul (I := I) g α a v x
@@ -133,20 +121,16 @@ lemma hasDerivAt_rescaled_orbit
         (rescaleChartOrbit (E := E) a (c (a * s₀)))) s₀ := by
   classical
   set z : E × E := c (a * s₀) with hz_def
-  -- Derivative of `s ↦ a * s` at s₀ is `a`.
   have hmul : HasDerivAt (fun s : ℝ => a * s) a s₀ := by
     have : HasDerivAt (fun s : ℝ => a * s) (a * 1) s₀ := (hasDerivAt_id s₀).const_mul a
     simpa using this
-  -- Composition: derivative of `c ∘ (· * a)` at s₀ is `a • c'(a * s₀)`.
   have hcomp : HasDerivAt (fun s : ℝ => c (a * s))
       (a • chartPhaseVF (I := I) g α z) s₀ := hd.scomp s₀ hmul
-  -- Apply `rescale := (id, a • id) : (E × E) →L[ℝ] (E × E)`.
   set rescale : (E × E) →L[ℝ] (E × E) :=
     (ContinuousLinearMap.id ℝ E).prodMap (a • (ContinuousLinearMap.id ℝ E))
     with hrescale_def
   have hrescale_apply : ∀ y : E × E, rescale y = (y.1, a • y.2) := by
     intro y
-    -- `prodMap f g (y) = (f y.1, g y.2)`; here `f = id`, `g = a • id`.
     change ((ContinuousLinearMap.id ℝ E) y.1, (a • (ContinuousLinearMap.id ℝ E)) y.2) =
         (y.1, a • y.2)
     refine Prod.ext rfl ?_
@@ -161,57 +145,25 @@ lemma hasDerivAt_rescaled_orbit
       (rescale (a • chartPhaseVF (I := I) g α z)) s₀ :=
     rescale.hasFDerivAt.comp_hasDerivAt s₀ hcomp
   rw [hrescaled_eq] at hcomp_rescale
-  -- Match the target deriv via `chartPhaseVF_rescale`.
   have hrhs_eq :
       rescale (a • chartPhaseVF (I := I) g α z) =
         chartPhaseVF (I := I) g α
           (rescaleChartOrbit (E := E) a (c (a * s₀))) := by
-    -- rescale (a • chartPhaseVF g α z)
-    --   = ((a • chartPhaseVF g α z).1, a • (a • chartPhaseVF g α z).2)
-    --   = (a • z.2, a • (a • (-Γ(z.2, z.2)(z.1))))
-    --   = (a • z.2, -(a * a) • Γ(z.2, z.2)(z.1))
     rw [hrescale_apply]
     have h_rescaled_form : rescaleChartOrbit (E := E) a (c (a * s₀)) =
         (z.1, a • z.2) := rfl
     rw [h_rescaled_form]
     rw [chartPhaseVF_rescale (I := I) g α a z.1 z.2]
-    -- LHS now: ((a • chartPhaseVF g α z).1, a • (a • chartPhaseVF g α z).2)
-    -- Compute chartPhaseVF g α z = (z.2, -Γ(z.2,z.2)(z.1)).
     have hpvf : chartPhaseVF (I := I) g α z =
         (z.2, -chartChristoffelContraction (I := I) g α z.2 z.2 z.1) := rfl
     rw [hpvf]
-    -- LHS: ((a • (z.2, -Γ)).1, a • (a • (z.2, -Γ)).2) = (a • z.2, a • (a • -Γ))
     simp only [Prod.smul_mk, smul_neg, smul_smul]
     refine Prod.ext rfl ?_
-    -- After simp: snd is `-((a * a) • Γ)`; goal RHS is `-(a * a) • Γ`.
-    -- Use `neg_smul`: `(-x) • y = -(x • y)`.
     rw [neg_smul]
   rw [← hrhs_eq]
   exact hcomp_rescale
 
 end ChartCoordRescaling
-
-/-! ## Packaging the uniform-in-`v` chart-flow bridge
-
-The substantive analytic input for closing `expMap_contMDiffAt_zero_of_uniformChartFlowBridge`
-proper is a **uniform-in-`v` identification** of the chart-flow's
-projection (at a fixed time `t'`, suitable after rescaling) with
-`expMap g p` on a neighbourhood of `0`. We package this as a
-single existence statement `UniformChartFlowBridge`.
-
-The bridge is morally produced by combining:
-
-* per-`v` `chartPushedFlow_eq_maximalGeodesicChosenCurve_eventually_unconditional`
-  (eventual-in-t agreement of the chart-flow's projection with the
-  maximal-geodesic witness curve);
-
-* chart-coordinate rescaling (`hasDerivAt_rescaled_orbit` above), which
-  translates `maximalGeodesic g p v t'` to `expMap g p (t' • v)`;
-
-* a continuity argument lifting the per-`v` eventual identification to
-  a single uniform-in-`v` identification on a small ball.
-
-We expose the bridge as a downstream input. -/
 
 section UniformBridge
 
@@ -245,13 +197,6 @@ def UniformChartFlowBridge (g : SmoothRiemannianMetric I M) (p : M) : Prop :=
 
 end UniformBridge
 
-/-! ## Headline: `expMap_contMDiffAt_zero_of_uniformChartFlowBridge` via `UniformChartFlowBridge`
-
-Combining the candidate's `ContMDiffAt 1` at `v = 0` with the
-uniform-in-`v` identification on the ball of radius `ρ`, the headline
-follows by `ContMDiffAt.congr_of_eventuallyEq`.
--/
-
 section Headline
 
 variable [I.Boundaryless] [CompleteSpace E]
@@ -275,15 +220,10 @@ theorem expMap_contMDiffAt_zero_of_uniformChartFlowBridge
       (0 : E) := by
   classical
   obtain ⟨Φ, t', ρ, ht'_pos, hρ_pos, hcand_cd, heq⟩ := h
-  -- Build the composed map `w ↦ chartFlowCandidate Φ p t' (w / t')`.
   set F : E → M := fun w : E =>
     chartFlowCandidate (I := I) Φ p t' ((1 / t') • w)
     with hF_def
-  -- Step 1: `F` is `ContMDiffAt 𝓘(ℝ, E) I 1` at `0`, by composition of the
-  -- smooth scalar multiplication `w ↦ (1 / t') • w : E → E` with the
-  -- candidate's `ContMDiffAt 1` at `0`.
   have hsmul_cd : ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 1 (fun w : E => (1 / t') • w) := by
-    -- Scalar multiplication by a constant is `C^∞`, hence `C^1`.
     have : ContDiff ℝ ∞ (fun w : E => (1 / t') • w) :=
       (contDiff_const.smul contDiff_id)
     have h1 : ContDiff ℝ 1 (fun w : E => (1 / t') • w) :=
@@ -291,10 +231,8 @@ theorem expMap_contMDiffAt_zero_of_uniformChartFlowBridge
     exact h1.contMDiff
   have hsmul_cda : ContMDiffAt 𝓘(ℝ, E) 𝓘(ℝ, E) 1
       (fun w : E => (1 / t') • w) (0 : E) := hsmul_cd.contMDiffAt
-  -- Value at 0: (1 / t') • 0 = 0.
   have hval0 : (1 / t') • (0 : E) = 0 := smul_zero _
   have hF_cd : ContMDiffAt 𝓘(ℝ, E) I 1 F (0 : E) := by
-    -- ContMDiffAt.comp at 0: requires candidate's ContMDiffAt at smul₀ 0 = 0.
     have hcand_cd' : ContMDiffAt 𝓘(ℝ, E) I 1
         (chartFlowCandidate (I := I) Φ p t')
         ((fun w : E => (1 / t') • w) (0 : E)) := by
@@ -306,15 +244,10 @@ theorem expMap_contMDiffAt_zero_of_uniformChartFlowBridge
         ((chartFlowCandidate (I := I) Φ p t') ∘ (fun w : E => (1 / t') • w))
         (0 : E) := hcand_cd'.comp (0 : E) hsmul_cda
     exact hcomp
-  -- Step 2: `F =ᶠ expMap g p` on a neighbourhood of `0`.
-  -- For `w` small, `w = t' • v` with `v = (1 / t') • w` (since t' ≠ 0).
-  -- So `expMap g p w = expMap g p (t' • v) = chartFlowCandidate Φ p t' v`.
-  -- For w near 0, v = (1/t') • w is in ball 0 ρ, so heq applies.
   have ht'_ne : t' ≠ 0 := ne_of_gt ht'_pos
   have hev :
       (fun v : E => (expMap (I := I) g p (show TangentSpace I p from v) : M))
         =ᶠ[𝓝 (0 : E)] F := by
-    -- We need `(1 / t') • w` in ball 0 ρ when w is small.
     have hsmul_cont : Continuous (fun w : E => (1 / t') • w) :=
       continuous_const.smul continuous_id
     have hsmul_at0_zero : (fun w : E => (1 / t') • w) (0 : E) = 0 := hval0
@@ -324,16 +257,10 @@ theorem expMap_contMDiffAt_zero_of_uniformChartFlowBridge
         exact Metric.ball_mem_nhds _ hρ_pos
       exact hsmul_cont.continuousAt.preimage_mem_nhds hnhd
     filter_upwards [hpre] with w hw
-    -- hw : (1 / t') • w ∈ Metric.ball (0 : E) ρ.
-    -- Apply heq at v := (1 / t') • w.
     have hheq := heq ((1 / t') • w) hw
-    -- hheq : expMap g p (t' • ((1 / t') • w)) = chartFlowCandidate Φ p t' ((1 / t') • w).
     have htv_eq_w : t' • ((1 / t') • w) = w := by
       rw [smul_smul, mul_one_div, div_self ht'_ne, one_smul]
-    -- Use htv_eq_w to rewrite the LHS of hheq.
     rw [htv_eq_w] at hheq
-    -- Now hheq : expMap g p w = chartFlowCandidate Φ p t' ((1 / t') • w).
-    -- Goal: expMap g p w = F w = chartFlowCandidate Φ p t' ((1 / t') • w).
     change (expMap (I := I) g p (show TangentSpace I p from w) : M) = F w
     rw [hF_def]
     exact hheq
@@ -355,14 +282,6 @@ theorem expMap_contMDiffAt_zero_exists
   expMap_contMDiffAt_zero_of_uniformChartFlowBridge (I := I) (g := g) (p := p) huniform
 
 end Headline
-
-/-! ## Discharging `UniformChartFlowBridge` at the pointwise level
-
-We record the pointwise base case: at `v = 0`, the equality
-`expMap g p 0 = chartFlowCandidate Φ p t' 0` holds when `t' = 0` (both
-sides are `p`). The uniform-in-`v` upgrade at `t' = 1` requires the
-chart-coordinate ODE uniqueness chain described in this file's header.
--/
 
 section UniformBridgePointwise
 

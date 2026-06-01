@@ -63,8 +63,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M]
 
-/-! ## Step 1: pointwise operator-norm bounds on the twist of a single tensor -/
-
 set_option linter.unusedSectionVars false in
 /-- Pointwise operator-norm bound on `chartRSTwist α b r s T`, as a continuous
 linear map `Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E`:
@@ -75,16 +73,12 @@ lemma chartRSTwist_opNorm_le
       ‖chartJ (I := I) (M := M) α b‖ ^ s *
         ‖chartJinv (I := I) (M := M) α b‖ ^ r * ‖T‖ := by
   classical
-  -- We prove: for every input `α' : Tensor0SModel r ℝ E`,
-  -- ‖(chartRSTwist α b r s T) α'‖ ≤ (‖chartJ‖^s * ‖chartJinv‖^r * ‖T‖) * ‖α'‖.
   refine ContinuousLinearMap.opNorm_le_bound _ ?_ ?_
   · have : (0 : ℝ) ≤ ‖chartJ (I := I) (M := M) α b‖ ^ s *
         ‖chartJinv (I := I) (M := M) α b‖ ^ r * ‖T‖ := by positivity
     exact this
   intro α'
-  -- Compute (chartRSTwist α b r s T) α' via `chartRSTwist_apply`.
   rw [chartRSTwist_apply]
-  -- Step A: ‖α'.compCLM chartJinv‖ ≤ ‖α'‖ * ‖chartJinv‖^r.
   have hA :
       ‖α'.compContinuousLinearMap
           (fun _ : Fin r => chartJinv (I := I) (M := M) α b)‖ ≤
@@ -92,12 +86,10 @@ lemma chartRSTwist_opNorm_le
     have h := ContinuousMultilinearMap.norm_compContinuousLinearMap_le
       α' (fun _ : Fin r => chartJinv (I := I) (M := M) α b)
     simpa [Finset.prod_const, Finset.card_univ, Fintype.card_fin] using h
-  -- Step B: ‖T (α'.compCLM chartJinv)‖ ≤ ‖T‖ * ‖α'.compCLM chartJinv‖.
   set u : Tensor0SModel r ℝ E :=
     α'.compContinuousLinearMap
       (fun _ : Fin r => chartJinv (I := I) (M := M) α b) with hu_def
   have hB : ‖T u‖ ≤ ‖T‖ * ‖u‖ := T.le_opNorm u
-  -- Step C: ‖(T u).compCLM chartJ‖ ≤ ‖T u‖ * ‖chartJ‖^s.
   have hC :
       ‖(T u).compContinuousLinearMap
           (fun _ : Fin s => chartJ (I := I) (M := M) α b)‖ ≤
@@ -105,7 +97,6 @@ lemma chartRSTwist_opNorm_le
     have h := ContinuousMultilinearMap.norm_compContinuousLinearMap_le
       (T u) (fun _ : Fin s => chartJ (I := I) (M := M) α b)
     simpa [Finset.prod_const, Finset.card_univ, Fintype.card_fin] using h
-  -- Combine.
   have hCsorted :
       ‖(T u).compContinuousLinearMap
           (fun _ : Fin s => chartJ (I := I) (M := M) α b)‖ ≤
@@ -128,7 +119,6 @@ lemma chartRSTwist_opNorm_le
         ‖chartJ (I := I) (M := M) α b‖ ^ s *
           (‖T‖ * (‖α'‖ * ‖chartJinv (I := I) (M := M) α b‖ ^ r)) :=
     hCsorted.trans <| mul_le_mul_of_nonneg_left h_T_le h_pow_nn
-  -- Reshuffle.
   have h_final :
       ‖chartJ (I := I) (M := M) α b‖ ^ s *
           (‖T‖ * (‖α'‖ * ‖chartJinv (I := I) (M := M) α b‖ ^ r)) =

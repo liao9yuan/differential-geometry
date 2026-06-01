@@ -1,9 +1,3 @@
-/-
-The flat (Lie-route) variational data for the conjugating family: existence of the
-raw flat variational identity, the Christoffel-correction equation relating its
-factor values, and the flat value-jet identity at the chart level. Skeleton stubs
-for the short-time-existence blueprint (GAP 2, flat variational data).
--/
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists
@@ -91,20 +85,13 @@ theorem flatProducerJet_eq_neg_rawFderiv_add_movingTriv
           + movingTrivCorrection (I := I) (Φ_fam t x)
               (X : ∀ y : M, TangentSpace I y)
               (mfderiv I I (Φ_fam t : M → M) x v)) := by
-  -- The producer's `RawVariationalIdentityFlat` is literally `HasDerivAt` of the orbit-pushforward
-  -- curve with the applied product-rule value `T' (dΦv) + P' v`.
   have hflat' : HasDerivAt (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E))
       (T' (mfderiv I I (Φ_fam t : M → M) x v) + P' v) t := hflat
-  -- The two `HasDerivAt`s are of the SAME curve, so the derivative values coincide.
   have hval := hflat'.unique hodejet
   rw [hval]
-  -- Split the trivialised flat derivative into raw flat `fderiv` + `D²φ`.
   exact flatLinearization_eq_rawFderiv_add_movingTriv (I := I) (Φ_fam t x)
     (X : ∀ y : M, TangentSpace I y) (mfderiv I I (Φ_fam t : M → M) x v) hRdiff hCdiff
 
--- `g_DT`/`g_bg` are vestigial mandated signature binders here: the flat per-slot identity is a
--- bare-flow / chart-smoothness statement that references no metric.  Silence the resulting
--- unused-variable linter on those binders only.
 set_option linter.unusedVariables false in
 theorem flat_raw_variational_identity
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
@@ -131,12 +118,6 @@ theorem flat_raw_variational_identity
       ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v : TangentSpace I x,
         RawVariationalIdentityFlat (I := I) Φ_fam t x v (T' t x v) (P' t x v) := by
   classical
-  -- For each `(t, x, v)` in the interior, the joint-smooth bare-field producer
-  -- `rawVariationalIdentityFlat_of_jointSmoothBareField` manufactures the flat per-slot identity
-  -- with concrete factor jets.  We pick, per point, the produced factor data via choice; the two
-  -- factor functions `T'`/`P'` are the choice readouts.  The producer is invoked on the uniform
-  -- two-sided window supplied by `hΦfam_ode`, with the per-point chart-source/chart-jet data.
-  -- Per-point existence of the flat identity (factors existentially quantified).
   have hpoint : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v : TangentSpace I x,
       ∃ Tv Pv : E →L[ℝ] E, RawVariationalIdentityFlat (I := I) Φ_fam t x v Tv Pv := by
     intro t ht x v
@@ -146,9 +127,6 @@ theorem flat_raw_variational_identity
       rawVariationalIdentityFlat_of_jointSmoothBareField (I := I) X hX hXauto Φ_fam t x v
         (hx_src t ht x) hT₀ hW hxW hode (horbit_cont t ht x).1 (horbit_cont t ht x).2 hG'
     exact ⟨_, _, hident⟩
-  -- Globalise: choose, for each `(t, x, v)`, the factor data.  The factor functions read the
-  -- choice at each point (`0` off the interior, irrelevant to the conclusion which only quantifies
-  -- over interior `t`).
   choose! Tv Pv hTv using hpoint
   exact ⟨Tv, Pv, fun t ht x v => hTv t ht x v⟩
 
@@ -191,7 +169,6 @@ theorem flat_christoffel_correction_eqn
                 (deTurckVF (I := I) (g_DT t) g_bg) (Φ_fam t x))
               (mfderiv I I (Φ_fam t : M → M) x v) := by
   intro t ht x v
-  -- The basepoint bridge `∇_w X = F(w) + Γ(w)` for the DeTurck field, at the orbit point.
   have hbridge :=
     leviCivita_basepoint_eq_rawFderiv_add_corrections (I := I) (g_DT t) (Φ_fam t x)
       ((deTurckVF (I := I) (g_DT t) g_bg :
@@ -200,7 +177,6 @@ theorem flat_christoffel_correction_eqn
       (hα t ht x)
       ((deTurckVF (I := I) (g_DT t) g_bg).mdifferentiableAt)
       (hRdiff t ht x) (hCdiff t ht x)
-  -- `negCovariantSlotValue = -(LeviCivita) = -((F) + Γ)`.
   rw [hjet t ht x v, negCovariantSlotValue, hbridge]
   abel
 

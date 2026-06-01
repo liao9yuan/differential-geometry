@@ -56,27 +56,12 @@ namespace QuasiLinear
 variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
   [CompleteSpace X]
 
-/-! ## Completeness of the path space
-
-`C(↑(Set.Icc 0 T), X)` is a complete metric space: the time interval
-`↑(Set.Icc 0 T)` is a compact space, and `X` is complete, so the
-isometry `ContinuousMap.isometryEquivBoundedOfCompact` to the always
-complete space of bounded continuous functions transports completeness. -/
-
 /-- The space of continuous maps from the compact interval
 `↑(Set.Icc 0 T)` to a Banach space `X` is complete. -/
 instance instCompleteSpaceContinuousMapIcc {T : ℝ} :
     CompleteSpace C(↑(Set.Icc (0 : ℝ) T), X) :=
   (ContinuousMap.isometryEquivBoundedOfCompact
     (↑(Set.Icc (0 : ℝ) T)) X).completeSpace
-
-/-! ## The Duhamel self-map on continuous paths
-
-To feed a continuous map `u : C(↑(Set.Icc 0 T), X)` into the nonlinear
-Duhamel map — whose forcing argument is an honest function `ℝ → X` — we
-extend it to all of `ℝ` by clamping the argument into `[0, T]` via
-`Set.IccExtend`. The extension is continuous and agrees with `u` on
-`[0, T]`. -/
 
 /-- The forcing path obtained from a continuous map on the time interval
 by clamping the argument into `[0, T]`. -/
@@ -126,14 +111,6 @@ theorem duhamelCM_apply (S : BoundedC0Semigroup X) (u₀ : X) {N : X → X}
       nlDuhamel S u₀ N (pathOfCM hT0 u) (t : ℝ) :=
   rfl
 
-/-! ## The contraction estimate
-
-For two continuous paths `u, v` the pointwise distance of their clamped
-forcings on `[0, t]` is bounded by the sup-distance `dist u v`; the
-contraction estimate `nlDuhamel_dist_le` then bounds the distance of
-their Duhamel images by `(L : ℝ) * T * dist u v`. When `(L : ℝ) * T < 1`
-this makes `duhamelCM` a contraction. -/
-
 /-- Pointwise `dist` bound for the Duhamel self-map: for any two
 continuous paths the distance of the Duhamel images at a time
 `t ∈ [0, T]` is bounded by `(L : ℝ) * T * dist u v`. -/
@@ -145,8 +122,6 @@ private theorem duhamelCM_dist_apply_le (S : BoundedC0Semigroup X)
       (L : ℝ) * T * dist u v := by
   obtain ⟨t, ht⟩ := t
   obtain ⟨ht0, htT⟩ := ht
-  -- The two clamped forcings agree, on `[0, t]`, with `u`/`v` up to a
-  -- pointwise `dist` bounded by the sup-distance `dist u v`.
   have h_forcing_bound : ∀ τ ∈ Set.Icc (0 : ℝ) t,
       ‖pathOfCM hT0 u τ - pathOfCM hT0 v τ‖ ≤ dist u v := by
     intro τ hτ
@@ -155,14 +130,12 @@ private theorem duhamelCM_dist_apply_le (S : BoundedC0Semigroup X)
     rw [pathOfCM_apply_mem hT0 u hτT, pathOfCM_apply_mem hT0 v hτT,
       ← dist_eq_norm]
     exact ContinuousMap.dist_apply_le_dist _
-  -- The nonlinear-Duhamel contraction estimate at time `t`.
   have h_t_le :
       ‖nlDuhamel S u₀ N (pathOfCM hT0 u) t -
           nlDuhamel S u₀ N (pathOfCM hT0 v) t‖ ≤
         (L : ℝ) * t * dist u v :=
     nlDuhamel_dist_le S u₀ hN (continuous_pathOfCM hT0 u)
       (continuous_pathOfCM hT0 v) ht0 h_forcing_bound
-  -- Replace the time `t ≤ T` by `T` in the bound.
   have h_dist_nn : (0 : ℝ) ≤ dist u v := dist_nonneg
   have hL_nn : (0 : ℝ) ≤ (L : ℝ) := L.coe_nonneg
   have h_mono : (L : ℝ) * t * dist u v ≤ (L : ℝ) * T * dist u v := by
@@ -202,21 +175,12 @@ theorem duhamelCM_contractingWith (S : BoundedC0Semigroup X) (u₀ : X)
       (duhamelCM S u₀ hN hT0) := by
   have hTL_nn : (0 : ℝ) ≤ (L : ℝ) * T := mul_nonneg L.coe_nonneg hT0
   refine ⟨?_, ?_⟩
-  · -- The constant is `< 1` as an element of `ℝ≥0`.
-    rw [← NNReal.coe_lt_coe]
+  · rw [← NNReal.coe_lt_coe]
     simpa using hTL
-  · -- `LipschitzWith` from the global `dist` bound.
-    refine LipschitzWith.of_dist_le_mul ?_
+  · refine LipschitzWith.of_dist_le_mul ?_
     intro u v
     have h := duhamelCM_dist_le S u₀ hN hT0 hTL_nn u v
     simpa using h
-
-/-! ## Existence
-
-The headline existence theorem. Choosing `T := 1 / (L + 1)` makes
-`(L : ℝ) * T = L / (L + 1) < 1` unconditionally; the Banach fixed-point
-theorem (`ContractingWith.fixedPoint`) then provides a fixed point of
-`duhamelCM`, whose `Set.IccExtend` is the mild solution. -/
 
 /-- **Short-time existence of a mild solution.**
 
@@ -237,7 +201,6 @@ theorem semilinear_mild_solution_existence (S : BoundedC0Semigroup X)
       u 0 = u₀ ∧
       ∀ t ∈ Set.Icc (0 : ℝ) T,
         u t = S t u₀ + ∫ τ in (0 : ℝ)..t, S (t - τ) (N (u τ)) := by
-  -- The existence time.
   set T : ℝ := 1 / ((L : ℝ) + 1) with hT_def
   have hLp1_pos : (0 : ℝ) < (L : ℝ) + 1 :=
     add_pos_of_nonneg_of_pos L.coe_nonneg one_pos
@@ -245,11 +208,9 @@ theorem semilinear_mild_solution_existence (S : BoundedC0Semigroup X)
     rw [hT_def]
     positivity
   have hT0 : (0 : ℝ) ≤ T := le_of_lt hT_pos
-  -- The contraction constant `(L : ℝ) * T = L / (L + 1)` is `< 1`.
   have hTL : (L : ℝ) * T < 1 := by
     rw [hT_def, mul_one_div, div_lt_one hLp1_pos]
     linarith
-  -- The Duhamel self-map is a contraction; take its fixed point.
   have h_contr := duhamelCM_contractingWith S u₀ hN hT0 hTL
   haveI : Nonempty (↑(Set.Icc (0 : ℝ) T)) :=
     ⟨⟨0, Set.left_mem_Icc.mpr hT0⟩⟩
@@ -258,12 +219,9 @@ theorem semilinear_mild_solution_existence (S : BoundedC0Semigroup X)
       with huStar_def
   have huStar_fix : duhamelCM S u₀ hN hT0 uStar = uStar :=
     (ContractingWith.fixedPoint_isFixedPt h_contr)
-  -- The mild solution is the `Set.IccExtend` of the fixed point.
   refine ⟨T, hT_pos, pathOfCM hT0 uStar, ?_, ?_, ?_⟩
-  · -- Continuity on `[0, T]`.
-    exact (continuous_pathOfCM hT0 uStar).continuousOn
-  · -- Initial condition `u 0 = u₀`.
-    have h0_mem : (0 : ℝ) ∈ Set.Icc (0 : ℝ) T :=
+  · exact (continuous_pathOfCM hT0 uStar).continuousOn
+  · have h0_mem : (0 : ℝ) ∈ Set.Icc (0 : ℝ) T :=
       Set.left_mem_Icc.mpr hT0
     rw [pathOfCM_apply_mem hT0 uStar h0_mem]
     have h_fix0 :
@@ -272,24 +230,14 @@ theorem semilinear_mild_solution_existence (S : BoundedC0Semigroup X)
       rw [huStar_fix]
     rw [← h_fix0, duhamelCM_apply]
     exact nlDuhamel_zero S u₀ N (pathOfCM hT0 uStar)
-  · -- The Duhamel integral equation on `[0, T]`.
-    intro t ht
+  · intro t ht
     rw [pathOfCM_apply_mem hT0 uStar ht]
     have h_fixt :
         (duhamelCM S u₀ hN hT0 uStar) ⟨t, ht⟩ = uStar ⟨t, ht⟩ := by
       rw [huStar_fix]
     rw [← h_fixt, duhamelCM_apply]
-    -- Unfold `nlDuhamel` / `duhamel` into the explicit Duhamel formula.
     unfold nlDuhamel duhamel
     rfl
-
-/-! ## Uniqueness
-
-Two continuous mild solutions on the same interval `[0, T]` (with
-`(L : ℝ) * T < 1`) both restrict to fixed points of the Duhamel
-self-map, hence coincide by uniqueness of the Banach fixed point. The
-key auxiliary fact is that the Duhamel value `duhamel S u₀ F t` depends
-on the forcing `F` only through its values on `[0, t]`. -/
 
 /-- The linear Duhamel value at time `t` depends on the forcing term `F`
 only through its values on `[0, t]`: if `F₁` and `F₂` agree on
@@ -335,10 +283,8 @@ private theorem isFixedPt_of_duhamel_solution (S : BoundedC0Semigroup X)
     (hu_eq : ∀ t ∈ Set.Icc (0 : ℝ) T,
       u t = S t u₀ + ∫ τ in (0 : ℝ)..t, S (t - τ) (N (u τ))) :
     duhamelCM S u₀ hN hT0 ⟨_, hu.restrict⟩ = ⟨_, hu.restrict⟩ := by
-  -- Two continuous maps agree iff they agree pointwise.
   ext t
   obtain ⟨t, ht⟩ := t
-  -- The clamped restriction agrees with `u` on `[0, t] ⊆ [0, T]`.
   have h_eqOn : Set.EqOn
       (pathOfCM hT0 (⟨_, hu.restrict⟩ : C(↑(Set.Icc (0 : ℝ) T), X)))
       u (Set.Icc 0 t) := by
@@ -347,8 +293,6 @@ private theorem isFixedPt_of_duhamel_solution (S : BoundedC0Semigroup X)
       ⟨hτ.1, le_trans hτ.2 ht.2⟩
     rw [pathOfCM_apply_mem hT0 _ hτT]
     rfl
-  -- Rewrite the Duhamel self-map value via `nlDuhamel_congr`, then use
-  -- the Duhamel integral equation satisfied by `u`.
   rw [duhamelCM_apply]
   have h_congr :
       nlDuhamel S u₀ N
@@ -380,24 +324,20 @@ theorem semilinear_mild_solution_unique (S : BoundedC0Semigroup X) (u₀ : X)
       v t = S t u₀ + ∫ τ in (0 : ℝ)..t, S (t - τ) (N (v τ))) :
     Set.EqOn u v (Set.Icc 0 T) := by
   have hT0 : (0 : ℝ) ≤ T := le_of_lt hT
-  -- The Duhamel self-map is a contraction at this `T`.
   have h_contr := duhamelCM_contractingWith S u₀ hN hT0 hTL
   haveI : Nonempty (↑(Set.Icc (0 : ℝ) T)) :=
     ⟨⟨0, Set.left_mem_Icc.mpr hT0⟩⟩
-  -- Both restrictions are fixed points of `duhamelCM`.
   have hu_fix :
       duhamelCM S u₀ hN hT0 ⟨_, hu.restrict⟩ = ⟨_, hu.restrict⟩ :=
     isFixedPt_of_duhamel_solution S u₀ hN hT0 hu hu_eq
   have hv_fix :
       duhamelCM S u₀ hN hT0 ⟨_, hv.restrict⟩ = ⟨_, hv.restrict⟩ :=
     isFixedPt_of_duhamel_solution S u₀ hN hT0 hv hv_eq
-  -- Uniqueness of the Banach fixed point identifies the two restrictions.
   have h_eq :
       (⟨_, hu.restrict⟩ : C(↑(Set.Icc (0 : ℝ) T), X)) =
         ⟨_, hv.restrict⟩ := by
     rw [ContractingWith.fixedPoint_unique h_contr hu_fix,
       ContractingWith.fixedPoint_unique h_contr hv_fix]
-  -- Translate the equality of continuous maps back to `EqOn` on `[0, T]`.
   intro t ht
   have h_ap := ContinuousMap.congr_fun h_eq ⟨t, ht⟩
   simpa using h_ap

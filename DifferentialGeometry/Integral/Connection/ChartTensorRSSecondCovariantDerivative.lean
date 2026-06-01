@@ -80,8 +80,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Smoothness of `covApply cov_RS X T` as a tensor section -/
-
 /-- Globally smooth `(r, s)`-tensor section `covApply cov_RS X T = b ↦
 cov_RS T b (X b)`, derived from globally smooth `T` and `X`. -/
 private lemma covApply_covRS_contMDiff
@@ -98,8 +96,6 @@ private lemma covApply_covRS_contMDiff
         (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
             (LeviCivita (I := I) g)) X T y)) := by
   classical
-  -- Bump T's smoothness witness from ∞ to (∞ + 1) for the `covApply_contMDiffOn`
-  -- input convention.
   have hT_plus : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
       ((∞ : WithTop ℕ∞) + 1)
       (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
@@ -117,8 +113,6 @@ private lemma covApply_covRS_contMDiff
         (LeviCivita (I := I) g)) hX hT_plus
   intro b
   exact hOn.contMDiffAt (Filter.univ_mem)
-
-/-! ## Chart-coordinate expression for the second covariant derivative -/
 
 /-- **Chart-coordinate expression for the second covariant derivative.**
 
@@ -181,7 +175,6 @@ theorem chartTensorRSSecondCovariantDerivative_eq_abstract
   letI _h_fib : FiberBundle (TensorRSModel r s ℝ E)
       (fun x : M => TensorRSSpace r s I x) :=
     tensorRSBundle_fiber r s
-  -- Smoothness witness for the section `covApply cov_RS X T`.
   have hCovApply_smooth :
       ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
         (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
@@ -189,24 +182,18 @@ theorem chartTensorRSSecondCovariantDerivative_eq_abstract
           (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
               (LeviCivita (I := I) g)) X.toFun T.toFun y)) :=
     covApply_covRS_contMDiff (I := I) g r s T.contMDiff X.contMDiff
-  -- Package the smooth section as a `Cₛ^∞⟮...⟯` element.
   set S : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
       fun b : M => TensorRSSpace r s I b⟯ :=
     { toFun := covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
         (LeviCivita (I := I) g)) X.toFun T.toFun
       contMDiff_toFun := hCovApply_smooth } with hS_def
-  -- The first-derivative agreement, applied to the smooth section `S` and the
-  -- outer vector field `X'`, gives the chart-coordinate expression for the
-  -- bundled `(r, s)`-tensor covariant derivative of `S` along `X'` at `y`.
   have hFirst :=
     chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet (I := I) (M := M)
       g r s α S X' (b := y) hy
-  -- `S.toFun = covApply cov_RS X.toFun T.toFun` by definition.
   have hS_toFun : S.toFun =
       covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
         (LeviCivita (I := I) g)) X.toFun T.toFun := by
     rw [hS_def]
-  -- Rewrite both sides of `hFirst` using `hS_toFun`, then flip equality.
   rw [hS_toFun] at hFirst
   exact hFirst.symm
 

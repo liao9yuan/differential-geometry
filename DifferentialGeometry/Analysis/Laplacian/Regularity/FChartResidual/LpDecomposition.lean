@@ -100,8 +100,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -110,13 +108,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## The CLM-level identification of the Leibniz residual
-
-`fHLeibnizGeneralResidualCLM g (chartAtlasPOU I M α) u_h` agrees with
-`fHLeibnizResidualLp g α u_h` (as defined in the FromDomainPow file).
-The definitions match definitionally up to the smoothness proof witness
-on `Δ_g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)`. -/
 
 /-- The Leibniz cross-term CLM and the residual Lp-class agree on
 `u_h : H1Compl g`, for `φ := chartAtlasPOU I M α`. -/
@@ -132,12 +123,7 @@ lemma fHLeibnizGeneralResidualCLM_eq_fHLeibnizResidualLp
           (H1ComplToLp (I := I) (M := M) g u_h) := by
   classical
   rw [fHLeibnizGeneralResidualCLM_apply]
-  -- The remaining `smoothMulLp` factor identifies as `laplacianOfChartPOU g α`.
-  -- `smoothLaplacianBundle g (chartAtlasPOU I M α) = laplacianOfChartPOU g α` by
-  -- definitional equality of underlying smooth scalars.
   rfl
-
-/-! ## The headline decomposition identity -/
 
 /-- **The manifold-side Lp decomposition for `fHLeibnizResidualLp`**.
 
@@ -166,13 +152,10 @@ theorem preimage_smoothMulH1Compl_eq_smoothMulLp_preimage_add_residual
         fHLeibnizGeneralResidualCLM (I := I) (M := M) g
           (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h := by
   classical
-  -- Step 1: `preimage⟨smoothMulH1Compl ρα u_h⟩ = fHLeibnizGeneral g ρα u_h hu_dom`.
   have h_preimage_smoothMulH1Compl :=
     laplacianDomain_preimage_smoothMulH1Compl (I := I) (M := M) g
       (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) hu_dom
-  -- Step 2: Unfold `fHLeibnizGeneral`.
   unfold fHLeibnizGeneral at h_preimage_smoothMulH1Compl
-  -- Step 3: Identify `H1ComplToLp u_h - laplacianOp ⟨u_h, hu_dom⟩` with `preimage⟨u_h, hu_dom⟩`.
   have h_diff_eq :
       H1ComplToLp (I := I) (M := M) g u_h -
         laplacianOp (I := I) (M := M) g ⟨u_h, hu_dom⟩ =
@@ -206,8 +189,6 @@ theorem fHLeibnizGeneralResidualCLM_eq_preimageDiff
   classical
   have h := preimage_smoothMulH1Compl_eq_smoothMulLp_preimage_add_residual
     (I := I) (M := M) g α hu_dom
-  -- h: preimage⟨smoothMulH1Compl ρα u_h⟩ = smoothMulLp ρα (preimage⟨u_h⟩) + fHLeibnizGeneralResidualCLM g ρα u_h.
-  -- Subtract smoothMulLp ρα (preimage⟨u_h⟩) from both sides.
   rw [h]
   abel
 

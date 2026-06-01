@@ -92,21 +92,12 @@ open DifferentialGeometry.Analysis.Laplacian.ChartH2NonSmooth
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Per-chart witness for non-smooth `H²` of the POU-cut chart-pushed function
-
-The natural target object for the chart-level non-smooth `H²` regularity output
-is per-chart membership of the POU-cut chart-pushed function in the iterated
-Euclidean Sobolev space `MemWkp 2 2` over the chart-target image. This packages
-that membership in a single record. -/
 
 /-- Per-chart `MemWkp 2 2` evidence for the POU-cut chart-pushed function on
 the chart-target image. The structure records the membership and is parametrised
@@ -173,14 +164,6 @@ theorem memLp_two {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
 
 end ChartH2NonSmoothPOUWitness
 
-/-! ## The manifold-level POU lift
-
-From per-chart `MemWkp 2 2` witnesses, the function lies in `MemWkpChart g 2 2`.
-The `MemWkpChart` predicate definitionally unfolds to a per-chart
-`MemWkp 2 2` quantification, so the lift is by direct unfolding. The presence
-of the witness structure is purely organisational, but it makes downstream
-quantitative bounds readable. -/
-
 /-- **Manifold-level `H²` lift via POU.** Given per-chart `MemWkp 2 2` evidence
 for the POU-cut chart-pushed function on every chart-target image (under the
 canonical atlas partition of unity), the manifold function lies in
@@ -202,13 +185,6 @@ theorem memWkpChart_one_of_chartPOUWitnesses
     DifferentialGeometry.Analysis.Sobolev.Chart.MemWkpChart
       (I := I) (M := M) g 1 2 u :=
   (memWkpChart_two_of_chartPOUWitnesses (I := I) (M := M) g h_witness).le_succ
-
-/-! ## Quantitative norm bound
-
-The chart-based norm `wkpNormChart g 2 2 u` decomposes as a `tsum` over chart
-points of the per-chart `wkpNorm 2 2 (chartPushed _ α u) (chartTargetEuclid α)`.
-Hence the `wkpNormChart` is bounded by the (extended-real) sum of the per-chart
-`wkpNorm` values from the chart witnesses. -/
 
 /-- The chart-based norm `wkpNormChart g 2 2 u` equals the canonical `tsum`
 over chart points of the per-chart `wkpNorm 2 2 (chartPushed _ α u)
@@ -257,34 +233,6 @@ theorem wkpNormChart_two_le_tsum_chart_norms
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
             (I := I) (M := M) α) :=
   le_of_eq (wkpNormChart_two_eq_tsum (I := I) (M := M) g u)
-
-/-! ## Schema: per-chart witness from chart-bilinear data and uniform DQ bound
-
-This section provides the *hypothesis-bearing* schema connecting the chart-level
-non-smooth weak-solution data structure plus the uniform difference-quotient
-bound to the per-chart `ChartH2NonSmoothPOUWitness`.
-
-The full constructor producing `ChartBilinearH1ComplData g α` and the uniform
-difference-quotient bound from a `laplacianDomain` element requires substantial
-analytical infrastructure:
-
-* extracting weak first partials of the chart-pulled `H1ComplToLp u_h` (i.e. an
-  `H1Compl g → H1Submodule g` bridge that is not part of the current
-  codebase),
-* the standard non-smooth Nirenberg cross-bound argument with absorption of the
-  leading term using uniform ellipticity of the chart-Gram matrix on a precompact
-  thickening of the test-function support,
-* a Leibniz-rule packaging that transforms the chart-pulled weak first partials
-  of `D.u_chart` (carried by the chart-bilinear data structure) into weak first
-  partials of `chartPushed (chartAtlasPOU I M) α u`, where `u : M → ℝ` is a
-  function representative of `H1ComplToLp u_h`,
-* an extension-by-zero argument that lifts weak partials defined on a precompact
-  open subdomain `Ω''` of `chartTargetEuclid α` (the output of
-  `h2_chart_loc_of_uniform_bound`) to weak partials on the full chart-target
-  image, using the fact that the POU-cut chart-pushed function vanishes outside
-  the chart-image of `tsupport (ρ_α)`.
-
-These pieces are formulated below as hypotheses on the chart-data witness. -/
 
 /-- The per-chart "POU bridge" data. Records:
 
@@ -391,14 +339,6 @@ theorem wkpNormChart_two_lt_top_of_chartH2NonSmoothBridgeData
   wkpNormChart_two_lt_top_of_chartPOUWitnesses (I := I) (M := M) g
     (fun α => (h_bridge α).chartH2NonSmoothPOUWitness_of_bridgeData)
 
-/-! ## The headline manifold-level hypothesis-bearing theorem
-
-The headline theorem packages the manifold-level non-smooth `H²` regularity
-statement in hypothesis-bearing form: it consumes a representative function,
-the per-chart `MemWkp 2 2` evidence (assembled from the chart-level non-smooth
-`H²` output via the Leibniz-rule + extension-by-zero packaging), and produces
-`MemWkpChart g 2 2 u` plus a quantitative norm bound. -/
-
 /-- **Headline manifold-level non-smooth `H²` regularity (hypothesis-bearing).**
 
 For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` and
@@ -462,13 +402,6 @@ theorem memWkpChart_two_of_laplacianDomain_with_norm
   · exact (memWkpChart_two_of_laplacianDomain (I := I) (M := M) g u_h hu_h u h_witness).1
   · exact wkpNormChart_two_eq_tsum (I := I) (M := M) g u
 
-/-! ## Bridge-data variant of the headline
-
-The bridge-data variant takes per-chart `ChartH2NonSmoothBridgeData` witnesses
-(each combining a chart-bilinear data structure, a uniform DQ bound, and a
-target `MemWkp 2 2` membership) instead of the bare per-chart `MemWkp 2 2`
-witnesses. -/
-
 /-- **Headline manifold-level non-smooth `H²` regularity, bridge-data form.**
 
 Variant of `memWkpChart_two_of_laplacianDomain` taking per-chart bridge-data
@@ -488,12 +421,6 @@ theorem memWkpChart_two_of_laplacianDomain_bridgeData
   refine ⟨?_, ?_⟩
   · exact memWkpChart_two_of_chartH2NonSmoothBridgeData (I := I) (M := M) g h_bridge
   · exact wkpNormChart_two_lt_top_of_chartH2NonSmoothBridgeData (I := I) (M := M) g h_bridge
-
-/-! ## Canonical function representative via `Lp.coeFn`
-
-For an element `u_h ∈ laplacianDomain g`, the canonical function representative
-of the L² class `H1ComplToLp u_h` is `Lp.coeFn`. This section packages the
-canonical form of the headline theorem using this representative. -/
 
 /-- The canonical function representative of `H1ComplToLp u_h` via `Lp.coeFn`.
 This is a measurable function `M → ℝ` whose `MemLp.toLp` recovers
@@ -529,12 +456,6 @@ theorem memWkpChart_two_of_laplacianDomain_canonical
       (laplacianDomain.lpRep (I := I) (M := M) g u_h) < ⊤ :=
   memWkpChart_two_of_laplacianDomain (I := I) (M := M) g u_h hu_h
     (laplacianDomain.lpRep (I := I) (M := M) g u_h) h_witness
-
-/-! ## Existential headline form
-
-For ergonomics, we package the existence of a function representative + per-chart
-witnesses as a single existential claim. The hypothesis-bearing form makes the
-data dependency on the chart-level non-smooth `H²` machinery explicit. -/
 
 /-- **Existential headline manifold-level non-smooth `H²` regularity.**
 

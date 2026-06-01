@@ -70,8 +70,6 @@ open DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqCauchyW22
 open DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqH1ComplTendsto
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -80,8 +78,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Order monotonicity `wkpNormChart 1 2 ≤ wkpNormChart 3 2` -/
 
 /-- The chart-based norm at order `1` is bounded by the chart-based norm at
 order `3`. -/
@@ -94,8 +90,6 @@ private lemma wkpNormChart_one_le_three
         wkpNormChart_le_succ (I := I) (M := M) g 1 2 u
     _ ≤ wkpNormChart (I := I) (M := M) g 3 2 u :=
         wkpNormChart_le_succ (I := I) (M := M) g 2 2 u
-
-/-! ## `SmoothScalar g`-Cauchy property of `smoothApproxSeqWkpThree` -/
 
 /-- The chart-`W^{3,2}` smooth approximator sequence is Cauchy in
 `SmoothScalar g`. -/
@@ -204,8 +198,6 @@ private theorem smoothApproxSeqWkpThree_cauchy_smoothScalar
   have hC_lt_Cp1 : C < Cp1 := by rw [hCp1_def]; linarith
   nlinarith [hε_pos]
 
-/-! ## Cauchy property of the lifted sequence in `H1Compl g` -/
-
 private theorem smoothToH1Compl_smoothApproxSeqWkpThree_cauchy
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -218,8 +210,6 @@ private theorem smoothToH1Compl_smoothApproxSeqWkpThree_cauchy
   exact h_cauchy_smooth.map
     (smoothToH1Compl (I := I) (M := M) g).uniformContinuous
 
-/-! ## Existence of a limit `u_*` in `H1Compl g` -/
-
 private theorem smoothToH1Compl_smoothApproxSeqWkpThree_has_limit
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -229,8 +219,6 @@ private theorem smoothToH1Compl_smoothApproxSeqWkpThree_has_limit
         (smoothApproxSeqWkpThree (I := I) (M := M) g hu_h n)) atTop (𝓝 u_star) :=
   cauchySeq_tendsto_of_complete
     (smoothToH1Compl_smoothApproxSeqWkpThree_cauchy (I := I) (M := M) g hu_h)
-
-/-! ## Manifold `L^2` convergence of `smoothApproxSeqWkpThree.toFun` -/
 
 private theorem eLpNorm_diff_smoothApproxSeqWkpThree_tendsto_zero
     (g : SmoothRiemannianMetric I M)
@@ -414,8 +402,6 @@ private theorem smoothToLp_smoothApproxSeqWkpThree_tendsto
     exact this
   linarith
 
-/-! ## Identification of the limit `u_*` with `u_h` via density -/
-
 set_option maxHeartbeats 800000 in
 private lemma inner_smoothToH1Compl_limit_eq_u_h_wkpThree
     (g : SmoothRiemannianMetric I M)
@@ -477,8 +463,6 @@ private lemma inner_smoothToH1Compl_limit_eq_u_h_wkpThree
     exact real_inner_comm _ _
   rw [h_LHS_eq, h_RHS_eq]
 
-/-! ## The headline H1Compl-tendsto theorem for `smoothApproxSeqWkpThree` -/
-
 /-- For `u_h ∈ laplacianDomainPow g 2`, the chart-`W^{3,2}` smooth approximator
 sequence converges to `u_h` in `H1Compl g`. -/
 theorem smoothApproxSeqWkpThree_tendsto_h1Compl
@@ -511,8 +495,6 @@ theorem smoothApproxSeqWkpThree_tendsto_h1Compl
     ((denseRange_smoothToH1Compl (I := I) (M := M) g).equalizer
       hL_cont hR_cont hLR_smooth) w
 
-/-! ## `eLpNorm ≤ wkpNorm 2 2` bridge (order-zero term) -/
-
 /-- The order-zero term `eLpNorm u 2 (volume.restrict Ω)` is bounded by
 `wkpNorm 2 2 u Ω`. -/
 private lemma eLpNorm_le_wkpNorm_two_two
@@ -532,8 +514,6 @@ private lemma eLpNorm_le_wkpNorm_two_two
       (fun i : Fin 0 => i.elim0)
   rw [h_iter_eq] at h_zero_le
   exact h_zero_le
-
-/-! ## Convergence in `eLpNorm 2` on `volume.restrict chartTarget` -/
 
 /-- If `wkpNorm 2 2 (u n - F_lim) Ω → 0`, then `eLpNorm 2 (u n - F_lim)` on
 `volume.restrict Ω` tends to zero. -/
@@ -557,8 +537,6 @@ private lemma eLpNorm_tendsto_zero_of_wkpNorm_two_two_tendsto_zero
     tendsto_const_nhds h_tendsto
     (fun _ => zero_le _)
     (fun n => eLpNorm_le_wkpNorm_two_two (fun y => u n y - F_lim y) Ω)
-
-/-! ## Mutual absolute continuity of the two restricted measures -/
 
 private lemma volume_restrict_chartTarget_absolutelyContinuous_weighted
     (g : SmoothRiemannianMetric I M) (α : M) :
@@ -595,8 +573,6 @@ private lemma volume_restrict_chartTarget_absolutelyContinuous_weighted
     densityOnEuclid_pos (I := I) g α hy_chart
   exact (ENNReal.ofReal_pos.mpr h_pos).ne'
 
-/-! ## AEStronglyMeasurable witnesses -/
-
 private lemma smoothFChartResidual_aestronglyMeasurable
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (μ : Measure EuclN) :
@@ -613,8 +589,6 @@ private lemma fChartResidual_aestronglyMeasurable
         (I := I) (M := M) g α u_h) μ := by
   unfold fChartResidual
   exact (Lp.stronglyMeasurable _).aestronglyMeasurable.mono_measure (le_refl _)
-
-/-! ## Subsequence-extraction lemmas -/
 
 private lemma exists_subseq_ae_volume_restrict
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -688,8 +662,6 @@ private lemma exists_subseq_ae_weighted_restrict
       h_aesm_n hF_aesm h_tendsto
   exact h_tim.exists_seq_tendsto_ae
 
-/-! ## Headline identification theorem -/
-
 /-- **Identification of the chart-target `W^{2,2}`-limit with `fChartResidual`.**
 
 For `u_h ∈ laplacianDomainPow g 2`, suppose `F_lim : EuclN → ℝ` is in
@@ -722,10 +694,6 @@ theorem smoothApproxSeqWkpThree_smoothFChartResidual_limit_eq_fChartResidual_w22
   intro F_lim h_F_lim_w2p h_wkp_tendsto
   set v : ℕ → SmoothScalar g := fun n =>
     smoothApproxSeqWkpThree (I := I) (M := M) g hu_h n with hv_def
-  -- AEStronglyMeasurable witnesses.
-  -- For `MemWkp 2 2`, the underlying `MemLp` membership at order zero is
-  -- accessed via the `MemWkp_zero` characterisation; we read off
-  -- `AEStronglyMeasurable F_lim` from this `MemLp 2`.
   have hF_lim_W1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 F_lim
       (chartTargetEuclid (I := I) (M := M) α) := h_F_lim_w2p.memW1p
   have hF_lim_memLp : MemLp F_lim 2
@@ -742,8 +710,6 @@ theorem smoothApproxSeqWkpThree_smoothFChartResidual_limit_eq_fChartResidual_w22
         ((chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α)) :=
     fChartResidual_aestronglyMeasurable (I := I) (M := M) g α u_h _
-  -- Step 1: chart-target `wkpNorm 2 2`-tendsto ⇒ `eLpNorm 2`-tendsto on
-  -- `volume.restrict chartTarget`.
   have h_eLpNorm_volume_tendsto :
       Tendsto (fun n =>
         eLpNorm (fun y =>
@@ -756,13 +722,10 @@ theorem smoothApproxSeqWkpThree_smoothFChartResidual_limit_eq_fChartResidual_w22
       (F_lim := F_lim)
       (Ω := chartTargetEuclid (I := I) (M := M) α)
       h_wkp_tendsto
-  -- Step 2: Manifold-side H1Compl-convergence of `smoothToH1Compl (v n)`.
   have h_h1Compl_tendsto : Tendsto (fun n =>
       smoothToH1Compl (I := I) (M := M) g (v n))
       atTop (𝓝 u_h) :=
     smoothApproxSeqWkpThree_tendsto_h1Compl (I := I) (M := M) g hu_h
-  -- Step 3: Apply existing Lp bridge to get `eLpNorm 2`-tendsto on the weighted
-  -- measure restricted to chartTarget.
   have h_eLpNorm_weighted_tendsto :
       Tendsto (fun n =>
         eLpNorm (fun y =>
@@ -774,12 +737,9 @@ theorem smoothApproxSeqWkpThree_smoothFChartResidual_limit_eq_fChartResidual_w22
         atTop (𝓝 0) :=
     smoothFChartResidual_tendsto_fChartResidual_lp_weighted
       (I := I) (M := M) g α v h_h1Compl_tendsto
-  -- Step 4: Extract a.e.-convergent subseq from Step 1.
   obtain ⟨σ, hσ_strict, hσ_ae⟩ :=
     exists_subseq_ae_volume_restrict (I := I) (M := M) g α
       (v := v) (F_lim := F_lim) hF_lim_aesm_volume h_eLpNorm_volume_tendsto
-  -- Step 5: Apply Step 3 to subseq `v ∘ σ`, then extract a.e. subseq on
-  -- weighted measure.
   have h_eLpNorm_weighted_subseq :
       Tendsto (fun n =>
         eLpNorm (fun y =>
@@ -796,8 +756,6 @@ theorem smoothApproxSeqWkpThree_smoothFChartResidual_limit_eq_fChartResidual_w22
       (F := DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fChartResidual
         (I := I) (M := M) g α u_h)
       hF_res_aesm_weighted h_eLpNorm_weighted_subseq
-  -- Step 6: combine the two a.e. statements via absolute continuity and
-  -- uniqueness of a.e. limits.
   have h_volume_ae_σ_τ :
       ∀ᵐ y ∂((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)),

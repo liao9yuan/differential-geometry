@@ -83,8 +83,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Half-space identification: closed half-space, open half-space, hyperplane -/
-
 /-- The *closed* upper half-space `{y : E | 0 ≤ y 0}`. -/
 def closedHalfSpace : Set E := {y : E | 0 ≤ y 0}
 
@@ -108,7 +106,6 @@ theorem openHalfSpace_subset_closedHalfSpace :
     openHalfSpace (d := d) ⊆ closedHalfSpace := by
   intro y hy
   change (0 : ℝ) ≤ y 0
-  -- `hy : y ∈ openHalfSpace` unfolds to `0 < y 0`.
   exact le_of_lt hy
 
 /-- The closed half-space is the union of the open half-space and the
@@ -148,10 +145,6 @@ theorem isClosed_boundaryHyperplane [NeZero d] :
 theorem volume_boundaryHyperplane_eq_zero [NeZero d] :
     (volume : Measure E) (boundaryHyperplane (d := d)) = 0 := by
   classical
-  -- The hyperplane is the kernel of the continuous-linear functional
-  -- `(EuclideanSpace.proj 0).toLinearMap`, hence a strict linear subspace
-  -- (the standard basis vector `e_0` is not in the kernel). Strict subspaces
-  -- of finite-dimensional real Banach spaces are Haar-null.
   set ker : Submodule ℝ E :=
     (EuclideanSpace.proj (0 : Fin d) :
       E →L[ℝ] ℝ).toLinearMap.ker with hker_def
@@ -186,8 +179,6 @@ theorem volume_boundaryHyperplane_eq_zero [NeZero d] :
   rw [h_one] at h_eval
   exact one_ne_zero (h_proj_zero.symm.trans h_eval).symm
 
-/-! ## The interior part of a half-space-friendly carrier -/
-
 /-- Given a carrier `Ω ⊆ E`, the *interior part* is the slice strictly above
 the boundary hyperplane: `Ω ∩ {y | 0 < y 0}`. For a half-space-friendly `Ω`
 (i.e., `Ω = U ∩ closedHalfSpace` for some open `U`), the interior part is
@@ -204,8 +195,6 @@ theorem interiorHalfSpace_subset (Ω : Set E) :
 /-- The interior part is contained in the open half-space. -/
 theorem interiorHalfSpace_subset_openHalfSpace (Ω : Set E) :
     interiorHalfSpace (d := d) Ω ⊆ openHalfSpace := inter_subset_right
-
-/-! ## Half-space-friendly carriers -/
 
 /-- `Ω` is *half-space-friendly* (or: half-space-relatively-open) when it is
 an open subset of `E` *intersected with* the closed half-space — i.e., it is
@@ -269,12 +258,6 @@ theorem interiorHalfSpace_isOpen [NeZero d]
   rw [interiorHalfSpace_eq_inter_openHalfSpace hU_eq]
   exact hU.inter (isOpen_openHalfSpace (d := d))
 
-/-! ## Measure-equality between the carrier and its interior part
-
-The set difference `Ω \ interiorHalfSpace Ω` is contained in the boundary
-hyperplane (a Lebesgue-null set), so the restricted Lebesgue measures
-coincide. -/
-
 /-- For a half-space-friendly `Ω`, the symmetric difference between `Ω` and
 its interior part is contained in the boundary hyperplane. -/
 theorem symmDiff_interiorHalfSpace_subset_boundaryHyperplane
@@ -293,9 +276,6 @@ equal almost everywhere with respect to Lebesgue measure. -/
 theorem ae_eq_interiorHalfSpace [NeZero d]
     {Ω : Set E} (hΩ : IsHalfSpaceRelOpen (d := d) Ω) :
     Ω =ᵐ[(volume : Measure E)] interiorHalfSpace (d := d) Ω := by
-  -- We use the symmetric-difference characterisation: two sets are
-  -- ae-equal iff their symmetric difference is null. Both `Ω \ interior`
-  -- (sits in the boundary hyperplane) and `interior \ Ω` (empty) are null.
   have h_diff1 : (volume : Measure E) (Ω \ interiorHalfSpace Ω) = 0 := by
     have hsub :=
       symmDiff_interiorHalfSpace_subset_boundaryHyperplane (d := d) hΩ
@@ -318,8 +298,6 @@ theorem volume_restrict_interiorHalfSpace_eq [NeZero d]
     (volume : Measure E).restrict Ω =
       (volume : Measure E).restrict (interiorHalfSpace (d := d) Ω) :=
   MeasureTheory.Measure.restrict_congr_set (ae_eq_interiorHalfSpace hΩ)
-
-/-! ## The Dirichlet half-space iterated Sobolev predicate -/
 
 /-- Iterated `W^{k,p}` membership predicate on a half-space-friendly domain.
 
@@ -365,8 +343,6 @@ theorem MemWkpHalfSpace.zero_iff_memLp_of_relOpen [NeZero d]
   rw [MemWkpHalfSpace.zero_iff_memLp,
       ← volume_restrict_interiorHalfSpace_eq hΩ]
 
-/-! ## Structural / monotonicity properties -/
-
 /-- `W^{k+1,p}_0(Ω) ⊆ W^{k,p}_0(Ω)`. -/
 theorem MemWkpHalfSpace.le_succ
     {k : ℕ} {p : ℝ≥0∞} {Ω : Set E} {u : E → ℝ}
@@ -398,8 +374,6 @@ theorem MemWkpHalfSpace.memLp_of_relOpen [NeZero d]
   rw [volume_restrict_interiorHalfSpace_eq hΩ]
   exact h.memLp
 
-/-! ## Membership of the zero function -/
-
 /-- The zero function lies in `W^{k,p}_0(Ω)` for any half-space-friendly
 carrier `Ω` and any `1 ≤ p`. -/
 theorem MemWkpHalfSpace_zero_fun [NeZero d]
@@ -407,12 +381,6 @@ theorem MemWkpHalfSpace_zero_fun [NeZero d]
     (hΩ : IsHalfSpaceRelOpen (d := d) Ω) :
     MemWkpHalfSpace (d := d) k p (fun _ : E => (0 : ℝ)) Ω :=
   MemWkp_zero_fun (d := d) hp (interiorHalfSpace_isOpen hΩ)
-
-/-! ## Algebraic closure
-
-All boundaryless algebraic-closure theorems transfer immediately, because
-`MemWkpHalfSpace` is *defined* as `MemWkp` on the open set
-`interiorHalfSpace Ω`, on which the boundaryless theory applies. -/
 
 /-- `MemWkpHalfSpace` is closed under addition. -/
 theorem MemWkpHalfSpace.add [NeZero d]
@@ -452,12 +420,6 @@ theorem MemWkpHalfSpace.sub [NeZero d]
     MemWkpHalfSpace (d := d) k p (fun x => u x - v x) Ω :=
   MemWkp.sub (d := d) hp (interiorHalfSpace_isOpen hΩ) hu hv
 
-/-! ## a.e.-equality invariance
-
-Both with respect to the volume measure restricted to the interior part *and*
-to the volume measure restricted to the carrier. The two are equivalent by
-`volume_restrict_interiorHalfSpace_eq`. -/
-
 /-- `MemWkpHalfSpace k p` is invariant under ae-equality on the interior
 part, for `1 ≤ p`. -/
 theorem MemWkpHalfSpace_congr_ae [NeZero d]
@@ -478,8 +440,6 @@ theorem MemWkpHalfSpace_congr_ae_of_carrier [NeZero d]
     MemWkpHalfSpace (d := d) k p u Ω ↔ MemWkpHalfSpace (d := d) k p v Ω := by
   rw [volume_restrict_interiorHalfSpace_eq hΩ] at huv
   exact MemWkpHalfSpace_congr_ae (d := d) hp hΩ huv
-
-/-! ## The half-space `W^{k,p}_0` norm -/
 
 /-- The half-space-Sobolev norm: the iterated `W^{k,p}` norm computed on the
 interior part. -/
@@ -545,25 +505,6 @@ theorem wkpNormHalfSpace_const_smul [NeZero d]
       ‖c‖ₑ * wkpNormHalfSpace (d := d) k p u Ω :=
   wkpNorm_const_smul (d := d) hp (interiorHalfSpace_isOpen hΩ) hu c
 
-/-! ## Bridge: smooth Fréchet derivatives are weak derivatives on the interior part
-
-For a smooth function `u`, its `i`-th Fréchet partial derivative
-(in DeGiorgi's standard-basis convention,
-`fun y => fderiv ℝ u y (EuclideanSpace.single i 1)`) is a weak partial
-derivative of `u` on the open interior part. This is the natural
-specialisation of `DeGiorgi.HasWeakPartialDeriv.of_contDiff` to the
-half-space-friendly setting.
-
-Combined with the `partialDerivWithin = fderiv` identity on the open
-interior part (provided by
-`DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.partialDerivWithin_eq_partialDeriv_of_isOpen`),
-this is the engineering bridge between the within-Fréchet partial used in
-chart-local divergence (which references `Module.finBasis ℝ E i`) and the
-weak partial used in the iterated Sobolev predicate (which references
-`EuclideanSpace.single i 1`). The two bases are not literally equal, but
-both yield weak partial derivatives in their respective conventions.
--/
-
 /-- The Fréchet partial derivative
 `y ↦ fderiv ℝ u y (EuclideanSpace.single i 1)` of a smooth function `u` is a
 weak partial derivative of `u` on the open interior part of a half-space-
@@ -587,8 +528,6 @@ theorem fderiv_memLp_of_smooth_compactSupport
     (hu_supp : HasCompactSupport u) (i : Fin d) :
     MemLp (fun x => (fderiv ℝ u x) (EuclideanSpace.single i 1)) p
       ((volume : Measure E).restrict (interiorHalfSpace Ω)) := by
-  -- The partial derivative of a smooth compactly supported function is
-  -- itself smooth and compactly supported, hence `MemLp` everywhere.
   have h_smooth : ContDiff ℝ ∞
       (fun x => (fderiv ℝ u x) (EuclideanSpace.single i 1)) := by
     have h_fderiv : ContDiff ℝ ∞ (fun x => fderiv ℝ u x) :=
@@ -598,7 +537,6 @@ theorem fderiv_memLp_of_smooth_compactSupport
   have h_supp : HasCompactSupport
       (fun x => (fderiv ℝ u x) (EuclideanSpace.single i 1)) :=
     hu_supp.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single i 1)
-  -- Apply `Continuous.memLp_of_hasCompactSupport`, then restrict.
   have h_global : MemLp
       (fun x => (fderiv ℝ u x) (EuclideanSpace.single i 1)) p volume :=
     h_smooth.continuous.memLp_of_hasCompactSupport h_supp
@@ -629,14 +567,6 @@ theorem memW1p_of_smooth_compactSupport_interiorHalfSpace
   exact fderiv_isWeakPartialDeriv_of_smooth_interiorHalfSpace hΩ
     (hu_smooth.of_le (by norm_cast)) i
 
-/-! ## Bridge: within-Fréchet derivative on the open interior part agrees
-with the ordinary Fréchet derivative
-
-This connects the chart-local divergence machinery (which uses the within-
-Fréchet partial `partialDerivWithin (interiorHalfSpace Ω) i u`) with the
-ordinary Fréchet derivative used by DeGiorgi's weak-derivative API. The two
-agree everywhere on the open interior part. -/
-
 /-- The within-Fréchet partial derivative on the open interior part equals
 the ordinary Fréchet partial derivative there. Direct re-export of
 `partialDerivWithin_eq_partialDeriv_of_isOpen` specialised to the half-space
@@ -651,16 +581,6 @@ theorem partialDerivWithin_interiorHalfSpace_eq_partialDeriv
         i u y :=
   DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.partialDerivWithin_eq_partialDeriv_of_isOpen
     (interiorHalfSpace_isOpen hΩ) hy
-
-/-! ## Compatibility with the canonical `EuclideanHalfSpace n` chart-target
-
-The canonical model with corners `modelWithCornersEuclideanHalfSpace n`
-assigns to each chart point `α : M` the *extended chart target*
-`(extChartAt I α).target`, which by general Mathlib theory equals
-`I.symm ⁻¹' (chartAt H α).target ∩ range I`. Since
-`range (modelWithCornersEuclideanHalfSpace n) = closedHalfSpace`, the chart
-targets *are* automatically half-space-friendly, with `U` equal to the
-chart-source preimage. -/
 
 section EuclideanHalfSpaceChartTargets
 
@@ -686,29 +606,14 @@ theorem extChartAt_target_isHalfSpaceRelOpen
     [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M] (α : M) :
     IsHalfSpaceRelOpen (d := n)
       (extChartAt (modelWithCornersEuclideanHalfSpace n) α).target := by
-  -- The chart-target identification:
-  -- `(extChartAt I α).target = I.symm ⁻¹' (chartAt H α).target ∩ range I`.
-  -- We use the model-range identification to rewrite
-  -- `range I = closedHalfSpace`.
   refine ⟨(modelWithCornersEuclideanHalfSpace n).symm ⁻¹'
       (chartAt (EuclideanHalfSpace n) α).target, ?_, ?_⟩
-  · -- The preimage under `I.symm` of an open set is open in
-    -- `EuclideanSpace ℝ (Fin n)`, since `I.symm` is continuous on
-    -- `EuclideanSpace ℝ (Fin n)`.
-    exact (chartAt (EuclideanHalfSpace n) α).open_target.preimage
+  · exact (chartAt (EuclideanHalfSpace n) α).open_target.preimage
       (modelWithCornersEuclideanHalfSpace n).continuous_symm
-  · -- The chart target equals the preimage intersected with the range,
-    -- which is `closedHalfSpace`.
-    rw [extChartAt_target,
+  · rw [extChartAt_target,
       range_modelWithCornersEuclideanHalfSpace_eq_closedHalfSpace]
 
 end EuclideanHalfSpaceChartTargets
-
-/-! ## Example: usability check
-
-The following examples confirm that the API can be instantiated on actual
-half-space chart targets without surprises.
--/
 
 section UsabilityCheck
 

@@ -86,17 +86,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Smoothness regularity of `(repr (raw T)) ∘ symm` on the chart-target
-image of the chart-`α` Levi-Civita good set
-
-For a smooth compactly supported `(r, s)`-tensor section `T`, the bundled
-raw tensor connection Laplacian `rawTensorConnLapSmooth g r s T` is itself a
-smooth compactly supported `(r, s)`-tensor section. Applying the same
-trivialization-as-CLM identity used for arbitrary `SmoothCcTensor` (see
-`reprT_contDiffOn_goodSet` in `RawTensorConnLapNormSqChartPulledReprBound.lean`)
-yields `ContDiffOn ℝ ∞` regularity of the chart-pulled representation on the
-chart-target image of the chart-`α` Levi-Civita good set. -/
-
 private lemma raw_reprT_contDiffOn_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) :
@@ -114,10 +103,6 @@ private lemma raw_reprT_contDiffOn_goodSet
   letI _h_fib : FiberBundle (TensorRSModel r s ℝ E)
       (fun x : M => TensorRSSpace r s I x) :=
     tensorRSBundle_fiber r s
-  -- Set `S := rawTensorConnLapSmooth g r s T : SmoothCcTensor g r s` and invoke
-  -- the existing template `reprT_contDiffOn_goodSet` (here we use a private
-  -- helper, replicated to avoid cross-file `private` access). The argument is
-  -- entirely formal once `S.toSection.contMDiff` is on hand.
   set S : SmoothCcTensor g r s := rawTensorConnLapSmooth (I := I) g r s T
   have hsmooth_total :
       ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -155,7 +140,6 @@ private lemma raw_reprT_contDiffOn_goodSet
         (fun y : M => TensorRSSpace r s I y) α).linearMapAt ℝ x
         (S.toSection x) = _
     rw [Bundle.Trivialization.linearMapAt_apply, if_pos hx_base]
-  -- Identify the chart-`α` Levi-Civita good set with the chart-`α` source.
   have h_good_eq_source :
       chartLeviCivitaGoodSet (I := I) α = (chartAt H α).source := by
     rw [chartLeviCivitaGoodSet_eq_extChartAt_source (I := I) α,

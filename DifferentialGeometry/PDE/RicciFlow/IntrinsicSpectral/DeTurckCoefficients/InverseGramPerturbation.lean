@@ -82,13 +82,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpa
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## The pure-matrix entrywise perturbation engine
-
-The matrix identity `A⁻¹ − B⁻¹ = A⁻¹ (B − A) B⁻¹` is bounded entrywise by
-expanding the double matrix product and majorising each of the `n²` terms
-`A⁻¹_{ip} (B − A)_{pq} B⁻¹_{qj}` using entrywise bounds on `A⁻¹`, `B⁻¹` and
-`B − A`. -/
-
 /-- **Entrywise perturbation bound for matrix inversion.**
 
 Let `A B : Matrix (Fin n) (Fin n) ℝ` be invertible, with all entries of their
@@ -101,18 +94,14 @@ theorem _root_.Matrix.inv_entry_sub_abs_le_of_entry_bound
     (hD : ∀ p q, |(B - A) p q| ≤ D) (i j : Fin n) :
     |A⁻¹ i j - B⁻¹ i j| ≤ (n : ℝ) ^ 2 * M ^ 2 * D := by
   classical
-  -- `M, D ≥ 0` from the bounds (each majorises an absolute value).
   have hM_nonneg : 0 ≤ M := le_trans (abs_nonneg _) (hMinvA i j)
   have hD_nonneg : 0 ≤ D :=
     le_trans (abs_nonneg ((B - A) i j)) (hD i j)
-  -- The unit hypotheses are equivalent (both true), so `inv_sub_inv` applies.
   have hAB : IsUnit A ↔ IsUnit B := ⟨fun _ => hB, fun _ => hA⟩
   have h_id : A⁻¹ - B⁻¹ = A⁻¹ * (B - A) * B⁻¹ := Matrix.inv_sub_inv hAB
-  -- Entry of the difference equals the entry of the product.
   have h_entry : A⁻¹ i j - B⁻¹ i j = (A⁻¹ * (B - A) * B⁻¹) i j := by
     have := congrArg (fun (X : Matrix (Fin n) (Fin n) ℝ) => X i j) h_id
     simpa using this
-  -- Expand the product entry as a double sum `∑ q, ∑ p, A⁻¹_{ip} (B−A)_{pq} B⁻¹_{qj}`.
   have h_expand : (A⁻¹ * (B - A) * B⁻¹) i j =
       ∑ q : Fin n, ∑ p : Fin n,
         A⁻¹ i p * (B - A) p q * B⁻¹ q j := by
@@ -120,7 +109,6 @@ theorem _root_.Matrix.inv_entry_sub_abs_le_of_entry_bound
     refine Finset.sum_congr rfl (fun q _ => ?_)
     rw [Matrix.mul_apply, Finset.sum_mul]
   rw [h_entry, h_expand]
-  -- Bound the double sum termwise.
   calc |∑ q : Fin n, ∑ p : Fin n, A⁻¹ i p * (B - A) p q * B⁻¹ q j|
       ≤ ∑ q : Fin n, |∑ p : Fin n, A⁻¹ i p * (B - A) p q * B⁻¹ q j| :=
         Finset.abs_sum_le_sum_abs _ _
@@ -146,14 +134,6 @@ theorem _root_.Matrix.inv_entry_sub_abs_le_of_entry_bound
         simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin,
           nsmul_eq_mul]
         ring
-
-/-! ## The chart-Gram difference magnitude
-
-The chart 0-jet of `g₁ − g₂` at `x` (in chart `α`) is captured by the entry
-`L¹` norm of the difference of the chart-Gram matrices.  This is built through
-the generic matrix entry-`L¹` helper `matrixEntryL1`, so that single-entry
-bounds reduce to a pure-matrix fact applied to the difference matrix as a term
-(no unfolding of the metric inner product). -/
 
 /-- The entry `L¹` norm of a square matrix: the sum of absolute values of all
 entries. -/
@@ -194,8 +174,6 @@ lemma chartGramMatrix_sub_entry_abs_le_gramDiffSup
     (chartGramMatrix g₁ α x - chartGramMatrix g₂ α x) p q
   rwa [Matrix.sub_apply] at h
 
-/-! ## Geometric per-point perturbation bound -/
-
 /-- **Per-point entrywise perturbation bound for the inverse chart-Gram
 matrix.**
 
@@ -219,21 +197,17 @@ theorem chartInvGramMatrix_entry_sub_abs_le
         chartInvGramMatrix (I := I) g₂ α x k l| ≤
       (Module.finrank ℝ E : ℝ) ^ 2 * M_b ^ 2 * D := by
   classical
-  -- Both Gram matrices are units on the base set (positive determinant).
   have hA_unit : IsUnit (chartGramMatrix g₁ α x) := by
     rw [Matrix.isUnit_iff_isUnit_det]
     exact isUnit_iff_ne_zero.mpr (ne_of_gt (chartGramMatrix_det_pos (I := I) g₁ α hx))
   have hB_unit : IsUnit (chartGramMatrix g₂ α x) := by
     rw [Matrix.isUnit_iff_isUnit_det]
     exact isUnit_iff_ne_zero.mpr (ne_of_gt (chartGramMatrix_det_pos (I := I) g₂ α hx))
-  -- Rephrase the entry bound on `B − A` for the matrix engine.
   have hD' : ∀ p q,
       |(chartGramMatrix g₂ α x - chartGramMatrix g₁ α x) p q| ≤ D := by
     intro p q
     rw [Matrix.sub_apply, abs_sub_comm]
     exact hD p q
-  -- The inverse chart-Gram matrix is `(chartGramMatrix g α x)⁻¹` definitionally;
-  -- `unfold` rewrites both the hypotheses and the goal syntactically.
   have hinvA : ∀ p q, |(chartGramMatrix g₁ α x)⁻¹ p q| ≤ M_b := by
     intro p q
     have := hM1 p q
@@ -268,12 +242,6 @@ theorem chartInvGramMatrix_entry_sub_abs_le_gramDiffSup
     (fun p q => chartGramMatrix_sub_entry_abs_le_gramDiffSup (I := I) (M := M)
       g₁ g₂ α x p q) k l
 
-/-! ## Uniform inverse-Gram entry bound on a compact subset of the chart source
-
-The inverse chart-Gram entries are continuous on the chart source; on a compact
-subset, the extreme-value theorem produces a single entry bound `M`, uniform in
-the point and in the chart kernel. -/
-
 /-- For a fixed metric `g` and chart base point `α`, the inverse chart-Gram
 entries are uniformly bounded (in absolute value) on any compact subset of the
 chart source. -/
@@ -283,8 +251,6 @@ lemma exists_chartInvGramMatrix_entry_bound_on_compact
     ∃ M_b : ℝ, 0 ≤ M_b ∧ ∀ x ∈ K, ∀ p q,
       |chartInvGramMatrix (I := I) g α x p q| ≤ M_b := by
   classical
-  -- The entry-`L¹` sum `chartInvGramMatrix_l1Sum` is continuous on the chart
-  -- source and dominates each entry; bound it on `K`.
   have h_cont : ContinuousOn
       (chartInvGramMatrix_l1Sum (I := I) (M := M) g α) (chartAt H α).source :=
     chartInvGramMatrix_l1Sum_continuousOn (I := I) (M := M) g α
@@ -292,14 +258,11 @@ lemma exists_chartInvGramMatrix_entry_bound_on_compact
       (chartInvGramMatrix_l1Sum (I := I) (M := M) g α) K := h_cont.mono hKsub
   by_cases h_empty : K = ∅
   · exact ⟨0, le_refl 0, fun x hx => absurd (h_empty ▸ hx) (Set.notMem_empty _)⟩
-  -- Bound the (continuous, non-negative) `L¹` sum on the compact `K`.
   obtain ⟨C, hC⟩ := hK.bddAbove_image h_cont_K
   refine ⟨max C 0, le_max_right _ _, ?_⟩
   intro x hx p q
   have h_l1_le : chartInvGramMatrix_l1Sum (I := I) (M := M) g α x ≤ C :=
     hC ⟨x, hx, rfl⟩
-  -- Each entry is dominated by the `L¹` sum (which is `matrixEntryL1` of the
-  -- inverse-Gram matrix, by definition).
   have h_l1_eq :
       chartInvGramMatrix_l1Sum (I := I) (M := M) g α x =
         matrixEntryL1 (chartInvGramMatrix (I := I) g α x) := rfl
@@ -309,8 +272,6 @@ lemma exists_chartInvGramMatrix_entry_bound_on_compact
     rw [h_l1_eq]
     exact abs_entry_le_matrixEntryL1 (chartInvGramMatrix (I := I) g α x) p q
   exact h_entry_le.trans (h_l1_le.trans (le_max_left _ _))
-
-/-! ## Uniform-over-compact headline -/
 
 /-- **Uniform Lipschitz dependence of the inverse chart-Gram matrix on the
 chart 0-jet of the metric difference, over a compact subset of the chart
@@ -336,17 +297,14 @@ theorem exists_chartInvGramMatrix_lipschitz_on_compact
           chartInvGramMatrix (I := I) g₂ α x k l| ≤
         C * chartGramDiffSup (I := I) (M := M) g₁ g₂ α x := by
   classical
-  -- Uniform entry bounds for both metrics on `K`.
   obtain ⟨M₁, hM₁_nn, hM₁⟩ :=
     exists_chartInvGramMatrix_entry_bound_on_compact (I := I) (M := M) g₁ α hK hKsub
   obtain ⟨M₂, hM₂_nn, hM₂⟩ :=
     exists_chartInvGramMatrix_entry_bound_on_compact (I := I) (M := M) g₂ α hK hKsub
   set M_b : ℝ := max M₁ M₂ with hM_def
   have hM_nn : 0 ≤ M_b := le_max_of_le_left hM₁_nn
-  -- The chart base set is the chart source (definitionally).
   have h_base_eq :
       (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source := rfl
-  -- The constant `C = n² · M² + 1` is strictly positive and majorises `n² · M²`.
   refine ⟨(Module.finrank ℝ E : ℝ) ^ 2 * M_b ^ 2 + 1, ?_, ?_⟩
   · have h_nn : 0 ≤ (Module.finrank ℝ E : ℝ) ^ 2 * M_b ^ 2 :=
       mul_nonneg (sq_nonneg _) (sq_nonneg _)
@@ -354,15 +312,12 @@ theorem exists_chartInvGramMatrix_lipschitz_on_compact
   intro x hx k l
   have hx_base : x ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [h_base_eq]; exact hKsub hx
-  -- Promote per-metric entry bounds to the common `M_b`.
   have hM1' : ∀ p q, |chartInvGramMatrix (I := I) g₁ α x p q| ≤ M_b :=
     fun p q => (hM₁ x hx p q).trans (le_max_left _ _)
   have hM2' : ∀ p q, |chartInvGramMatrix (I := I) g₂ α x p q| ≤ M_b :=
     fun p q => (hM₂ x hx p q).trans (le_max_right _ _)
-  -- Per-point bound with `M_b`.
   have h_pt := chartInvGramMatrix_entry_sub_abs_le_gramDiffSup
     (I := I) (M := M) g₁ g₂ α hx_base hM1' hM2' k l
-  -- Enlarge the constant from `n² · M²` to `n² · M² + 1`.
   have h_gram_nn : 0 ≤ chartGramDiffSup (I := I) (M := M) g₁ g₂ α x :=
     chartGramDiffSup_nonneg (I := I) (M := M) g₁ g₂ α x
   calc |chartInvGramMatrix (I := I) g₁ α x k l -

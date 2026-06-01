@@ -88,13 +88,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## (a) The abstract diagonal chain rule
-
-For a real-valued function `Q` of two real variables, jointly Fréchet
-differentiable within `(Ici 0) ×ˢ univ` at the diagonal point `(t, t)`, the
-diagonal restriction `s ↦ Q (s, s)` has within-set derivative the sum of the two
-partials. -/
-
 /-- **Abstract diagonal chain rule (single-point joint Fréchet hypothesis).**
 
 If `Q : ℝ × ℝ → ℝ` has the within-set Fréchet derivative `Q'` along
@@ -109,32 +102,19 @@ theorem evalForm_diagonal_hasDerivWithinAt_of_jointFDeriv
     (hQ : HasFDerivWithinAt Q Q' ((Set.Ici (0 : ℝ)) ×ˢ (Set.univ : Set ℝ)) (t, t)) :
     HasDerivWithinAt (fun s : ℝ => Q (s, s)) (Q' (1, 0) + Q' (0, 1))
       (Set.Ici (0 : ℝ)) t := by
-  -- The diagonal map `s ↦ (s, s)` has within-set derivative `(1, 1)`.
   have hδ : HasDerivWithinAt (fun s : ℝ => (s, s)) ((1 : ℝ), (1 : ℝ))
       (Set.Ici (0 : ℝ)) t :=
     (hasDerivWithinAt_id t (Set.Ici (0 : ℝ))).prodMk
       (hasDerivWithinAt_id t (Set.Ici (0 : ℝ)))
-  -- The diagonal maps `Ici 0` into `(Ici 0) ×ˢ univ`.
   have hmaps : Set.MapsTo (fun s : ℝ => (s, s)) (Set.Ici (0 : ℝ))
       ((Set.Ici (0 : ℝ)) ×ˢ (Set.univ : Set ℝ)) := fun s hs => ⟨hs, Set.mem_univ _⟩
-  -- Compose: the diagonal restriction has within-set derivative `Q' (1, 1)`.
   have hcomp : HasDerivWithinAt (Q ∘ fun s : ℝ => (s, s)) (Q' ((1 : ℝ), (1 : ℝ)))
       (Set.Ici (0 : ℝ)) t :=
     HasFDerivWithinAt.comp_hasDerivWithinAt_of_eq (f := fun s : ℝ => (s, s)) t hQ hδ
       hmaps (by simp)
-  -- Expand `Q' (1, 1) = Q' (1, 0) + Q' (0, 1)` by linearity.
   have hval : Q' ((1 : ℝ), (1 : ℝ)) = Q' (1, 0) + Q' (0, 1) := by
     rw [← map_add]; congr 1; ext <;> simp
   rwa [hval] at hcomp
-
-/-! ## (b) The two partials as axis-embedding compositions
-
-The first partial `Q'(1, 0)` is the within-set derivative of the frozen-second-
-variable curve `s₁ ↦ Q (s₁, t)`; the second partial `Q'(0, 1)` is the within-set
-derivative of the frozen-first-variable curve `s₂ ↦ Q (t, s₂)`.  Each is obtained
-by composing `Q` with the corresponding axis embedding.  Downstream these are
-*forced* (not assumed) to equal the geometric slot values by uniqueness of the
-within-set derivative on `Ici 0`. -/
 
 /-- **First partial (frozen second variable).**
 
@@ -188,8 +168,6 @@ theorem hasDerivWithinAt_Ici_unique
   have hu : UniqueDiffWithinAt ℝ (Set.Ici (0 : ℝ)) t := uniqueDiffOn_Ici (0 : ℝ) t ht
   rw [← ha.derivWithin hu, ← hb.derivWithin hu]
 
-/-! ## (c) The geometric two-variable evaluation map and its diagonal -/
-
 /-- The **scalar two-variable evaluation map** of the pullback evaluation form:
 the first variable carries the metric family `g_DT`, the second variable carries
 the moving image point `Φ_fam · x` and the moving pushforwards. Its *diagonal*
@@ -234,15 +212,6 @@ theorem evalFormTwoVar_snd
       = (fun s : ℝ => (g_DT t).inner (Φ_fam s x)
           (mfderiv I I (Φ_fam s : M → M) x v)
           (mfderiv I I (Φ_fam s : M → M) x w)) := rfl
-
-/-! ## (d) The geometric capstone: discharge the chain-rule regularity hypothesis
-
-Given the parabolic-solution metric-slot derivative (first partial, geometric data
-frozen), the moving-geometry slot derivative (second partial, metric frozen), and
-the single-point joint Fréchet differentiability of the scalar two-variable map,
-the diagonal (= evaluation form) has the additive within-set derivative `G' + L'`,
-exactly the shape consumed by the pullback chain rule.  The two partial values are
-*forced* to equal the two supplied slot values by uniqueness on `Ici 0`. -/
 
 /-- **Discharge of the chain-rule regularity hypothesis (`h_chain_eval` /
 `h_total_eval`).**
@@ -299,19 +268,15 @@ theorem deTurck_evalForm_chain_hasDerivWithinAt
         (mfderiv I I (Φ_fam s : M → M) x v)
         (mfderiv I I (Φ_fam s : M → M) x w)) (G' + L') (Set.Ici (0 : ℝ)) t := by
   set Q := evalFormTwoVar (I := I) g_DT Φ_fam x v w with hQ
-  -- Diagonal derivative `Q'(1,0) + Q'(0,1)`.
   have hdiag : HasDerivWithinAt (fun s : ℝ => Q (s, s)) (Q' (1, 0) + Q' (0, 1))
       (Set.Ici (0 : ℝ)) t :=
     evalForm_diagonal_hasDerivWithinAt_of_jointFDeriv Q t Q' h_joint
-  -- First partial `Q'(1,0)` is the metric-slot derivative (geometric data frozen).
   have hpart1 : HasDerivWithinAt (fun s : ℝ => Q (s, t)) (Q' (1, 0))
       (Set.Ici (0 : ℝ)) t :=
     evalForm_jointFDeriv_partial_fst Q t Q' h_joint
-  -- Second partial `Q'(0,1)` is the moving-geometry slot derivative (metric frozen).
   have hpart2 : HasDerivWithinAt (fun s : ℝ => Q (t, s)) (Q' (0, 1))
       (Set.Ici (0 : ℝ)) t :=
     evalForm_jointFDeriv_partial_snd Q t ht Q' h_joint
-  -- Identify the metric slot: `s ↦ Q (s, t)` is `h_metric`'s curve.
   have hmetric_eq : (fun s : ℝ => Q (s, t))
       = (fun s : ℝ => (g_DT s).inner (Φ_fam t x)
           (mfderiv I I (Φ_fam t : M → M) x v)
@@ -319,7 +284,6 @@ theorem deTurck_evalForm_chain_hasDerivWithinAt
     rw [hQ]; exact evalFormTwoVar_fst (I := I) g_DT Φ_fam t x v w
   have hG : Q' (1, 0) = G' :=
     hasDerivWithinAt_Ici_unique ht (hmetric_eq ▸ hpart1) h_metric
-  -- Identify the moving-geometry slot: `s ↦ Q (t, s)` is `h_push`'s curve.
   have hpush_eq : (fun s : ℝ => Q (t, s))
       = (fun s : ℝ => (g_DT t).inner (Φ_fam s x)
           (mfderiv I I (Φ_fam s : M → M) x v)
@@ -327,7 +291,6 @@ theorem deTurck_evalForm_chain_hasDerivWithinAt
     rw [hQ]; exact evalFormTwoVar_snd (I := I) g_DT Φ_fam t x v w
   have hL : Q' (0, 1) = L' :=
     hasDerivWithinAt_Ici_unique ht (hpush_eq ▸ hpart2) h_push
-  -- Substitute the partial values and rewrite the diagonal into the eval form.
   rw [hG, hL] at hdiag
   have hdiag_eq : (fun s : ℝ => Q (s, s))
       = (fun s : ℝ => (g_DT s).inner (Φ_fam s x)
@@ -335,37 +298,6 @@ theorem deTurck_evalForm_chain_hasDerivWithinAt
           (mfderiv I I (Φ_fam s : M → M) x w)) := by
     rw [hQ]; exact evalFormTwoVar_diag (I := I) g_DT Φ_fam x v w
   rwa [hdiag_eq] at hdiag
-
-/-! ## (e) The `h_total_eval`-shaped output, wired to the genuine inputs
-
-We now wire the abstract capstone to the genuine producers to emit precisely the
-`h_total_eval` hypothesis consumed by `hamilton_deturck_pullback_solves_ricci_flow`, with
-its additive value `((-2 Ric + 𝓛) + (-𝓛))`.
-
-Two distinct inputs feed the two diagonal partials:
-
-* the **metric slot** `Q(·, t)` (the *whole* geometric data — image point and
-  pushforwards — frozen at `t`, only the metric family varying) is exactly the
-  parabolic solution's pointwise time derivative
-  `deTurck_metric_slot_hasDerivWithinAt`, value `-2 Ric(g_DT t) + 𝓛`.  This is
-  genuinely provable from the parabolic solution and is supplied here through
-  `hDT_deriv`;
-
-* the **moving-geometry slot** `Q(t, ·)` (the metric frozen at `g_DT t`, the
-  *whole* geometric data — image point `Φ_fam s x` and pushforwards — moving along
-  the flow) is the time derivative of the fixed-metric pull-back
-  `((Φ_fam s)^*(g_DT t)).inner x v w`.  Its value is `-𝓛_{X_DT}(g_DT t)` by the
-  pull-back time-derivative formula and the flow condition `∂_s Φ_fam = -X ∘ Φ_fam`.
-  This moving-base time derivative is the genuine *smooth-in-initial-condition*
-  content that Mathlib's integral-curve API does not supply (only Lipschitz
-  IC-dependence is available); it is therefore exposed as a **separable
-  hypothesis** `h_push_moving`, never derived from the frozen-base variational
-  slot lemma (which computes a *different* function with a *different*, though
-  numerically equal at the Cartan level, status).
-
-The single-point joint Fréchet differentiability `h_joint` of the scalar
-two-variable evaluation map then assembles the two genuine partials into the
-diagonal derivative, with the partial values pinned by uniqueness on `Ici 0`. -/
 
 /-- **Discharge of `h_total_eval` (the chain-rule regularity hypothesis) from the
 genuine inputs.**
@@ -426,13 +358,8 @@ theorem deTurck_pullback_h_total_eval
               (deTurckVF (I := I) (g_DT t) g_bg) (Φ_fam t x)
               (mfderiv I I (Φ_fam t : M → M) x v)
               (mfderiv I I (Φ_fam t : M → M) x w))) (Set.Ici 0) t := by
-  -- Metric-slot derivative (DeTurck PDE, whole geometric data frozen at `t`).
-  -- `deTurck_metric_slot_hasDerivWithinAt` yields exactly the value
-  -- `-2 Ric(g_DT t) + 𝓛`, the metric-slot partial value `G'`.
   have h_metric := DifferentialGeometry.PDE.RicciFlow.deTurck_metric_slot_hasDerivWithinAt
     (I := I) g_bg g_DT T hDT_deriv Φ_fam t ht x v w
-  -- Assemble via the diagonal chain rule; the additive value is `G' + L'` with
-  -- `G'` the metric-slot value and `L'` the moving-geometry slot value `-𝓛`.
   exact deTurck_evalForm_chain_hasDerivWithinAt (I := I) g_DT Φ_fam t ht.1 x v w _ _
     h_metric h_push_moving h_joint
 

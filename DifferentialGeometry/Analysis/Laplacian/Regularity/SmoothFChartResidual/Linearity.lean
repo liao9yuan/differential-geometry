@@ -76,8 +76,6 @@ open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual
 open DifferentialGeometry.Analysis.Laplacian.GradInnerCLMLeibniz
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -86,8 +84,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Linearity of the constituent operators -/
 
 /-- For `v_diff v₁ v₂ : SmoothScalar g` with `v_diff.toFun = v₁.toFun -
 v₂.toFun`, we have `v_diff = v₁ - v₂` in `SmoothScalar g`. -/
@@ -124,11 +120,7 @@ private lemma fHLeibnizResidualLp_sub
         DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp
           (I := I) (M := M) g α u₂ := by
   classical
-  -- Both ingredients are continuous linear maps applied to `u_h`.
   unfold DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp
-  -- The first piece: -(2 • gradInnerCLM g ρα (u₁ - u₂)) =
-  --   -(2 • gradInnerCLM g ρα u₁) - -(2 • gradInnerCLM g ρα u₂)? No, we want a
-  -- straight `f (u₁-u₂) = f u₁ - f u₂` identity in the abelian-group of Lp.
   set ρα : C^∞⟮I, M; ℝ⟯ := chartAtlasPOU I M α with hρα_def
   set Δρα : C^∞⟮I, M; ℝ⟯ :=
     laplacianOfChartPOU (I := I) (M := M) g α with hΔρα_def
@@ -152,16 +144,8 @@ private lemma fHLeibnizResidualLp_sub
     rw [h_H1Compl_sub]
     exact map_sub (smoothMulLp (I := I) (M := M) g Δρα) _ _
   rw [h_grad_sub, h_lap_sub]
-  -- The remaining identity is purely in the abelian-group of Lp classes:
-  --   -(2 • (a - b)) - (c - d) = (-(2 • a) - c) - (-(2 • b) - d).
   rw [smul_sub, neg_sub]
   abel
-
-/-! ## Absolute continuity volume ≪ chartPulledWeightedMeasure on chartTarget
-
-This replicates the (private) `vol_abs_chartPulledWeighted_on_chartTarget`
-lemma from `DiffChartBilinearH1ComplFromDomainPow`, kept private here for
-file-local use. -/
 
 private lemma volume_restrict_absolutelyContinuous_chartPulledWeighted_restrict
     (g : SmoothRiemannianMetric I M) (α : M) :
@@ -197,8 +181,6 @@ private lemma volume_restrict_absolutelyContinuous_chartPulledWeighted_restrict
     densityOnEuclid_pos (I := I) g α hy_chart
   exact (ENNReal.ofReal_pos.mpr h_pos).ne'
 
-/-! ## Main result -/
-
 /-- **A.e. linearity of `smoothFChartResidual`**: for smooth scalars
 `v₁ v₂ v_diff : SmoothScalar g` with
 `v_diff.toFun = v₁.toFun - v₂.toFun`, the chart-pulled smooth Leibniz
@@ -222,11 +204,8 @@ theorem smoothFChartResidual_ae_sub
         DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
           (I := I) (M := M) g α v₂ y := by
   classical
-  -- Step 1: smoothToH1Compl g v_diff = smoothToH1Compl g v₁ - smoothToH1Compl g v₂.
   have h_smoothToH1Compl_sub :=
     smoothToH1Compl_eq_sub (I := I) (M := M) g v₁ v₂ v_diff h_diff
-  -- Step 2: fHLeibnizResidualLp on the difference equals difference of
-  -- fHLeibnizResidualLp values.
   have h_residual_sub_at :
       DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp
           (I := I) (M := M) g α
@@ -239,7 +218,6 @@ theorem smoothFChartResidual_ae_sub
             (smoothToH1Compl (I := I) (M := M) g v₂) := by
     rw [h_smoothToH1Compl_sub]
     exact fHLeibnizResidualLp_sub (I := I) (M := M) g α _ _
-  -- Step 3: Apply chartPushedRawLpFromLp to obtain an Lp-class identity.
   have h_chartPushed_eq :
       chartPushedRawLpFromLp (I := I) (M := M) g α
           (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp
@@ -253,7 +231,6 @@ theorem smoothFChartResidual_ae_sub
               (I := I) (M := M) g α
               (smoothToH1Compl (I := I) (M := M) g v₂)) := by
     rw [h_residual_sub_at]
-  -- Step 4: Take coeFn and apply chartPushedRawLpFromLp_coeFn_sub.
   have h_coeFn_sub :=
     chartPushedRawLpFromLp_coeFn_sub (I := I) (M := M) g α
       (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp
@@ -262,11 +239,6 @@ theorem smoothFChartResidual_ae_sub
       (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp
         (I := I) (M := M) g α
         (smoothToH1Compl (I := I) (M := M) g v₂))
-  -- h_coeFn_sub:
-  --   (chartPushedRawLpFromLp ... (F - G)).coeFn
-  --     =ᵐ[weighted.restrict chartTarget]
-  --   fun y => (chartPushedRawLpFromLp ... F).coeFn y - (chartPushedRawLpFromLp ... G).coeFn y.
-  -- Rewriting via h_chartPushed_eq:
   have h_residual_ae_weighted :
       ((chartPushedRawLpFromLp (I := I) (M := M) g α
           (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp
@@ -291,12 +263,9 @@ theorem smoothFChartResidual_ae_sub
             (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y := by
     rw [h_chartPushed_eq]
     exact h_coeFn_sub
-  -- Step 5: Transfer to volume.restrict chartTarget via absolute continuity.
   have h_vol_abs :=
     volume_restrict_absolutelyContinuous_chartPulledWeighted_restrict
       (I := I) (M := M) g α
-  -- Step 6: Unfold smoothFChartResidual and fChartResidual on each side to
-  -- match the chart-pulled Lp coeFn shape.
   unfold
     DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
     DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fChartResidual

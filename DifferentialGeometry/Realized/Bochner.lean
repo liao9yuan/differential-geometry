@@ -31,8 +31,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {Time : Type*}
 
-/-! ## Pointwise metric tensor norms -/
-
 section TensorInner
 
 variable [FiniteDimensional Real E]
@@ -188,8 +186,6 @@ theorem normSq02_eq_coord
 
 end TensorInner
 
-/-! ## General coordinate Bochner data -/
-
 section GeneralTensorNorm
 
 variable {Comp Dir : Type*} [Fintype Comp] [Fintype Dir]
@@ -311,8 +307,6 @@ theorem tensor_norm_laplacian_eq_of_bochner_components
   h t x
 
 end GeneralTensorNorm
-
-/-! ## Ricci-specific coordinate quantities -/
 
 section RicciNorm
 
@@ -468,4 +462,3 @@ end
 
 end Realized
 end DifferentialGeometry
-

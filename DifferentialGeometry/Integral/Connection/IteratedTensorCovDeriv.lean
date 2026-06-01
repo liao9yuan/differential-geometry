@@ -73,14 +73,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## A generic trilinear packaging `mkHom₃`
-
-`TensorialAt.mkHom₂` (Mathlib) packages a two-section operation, tensorial in each slot, into a
-continuous bilinear map.  We need the three-section analogue.  We build it by fixing the first
-slot via an extended fibre vector, calling `mkHom₂` on the remaining two, and assembling the
-first slot by hand as a `LinearMap` (the operation is fibre-linear in the first slot by
-tensoriality).  This mirrors the X-slot assembly used for `tensor02Cov`. -/
-
 section mkHom₃
 
 variable {F₁ : Type*} [NormedAddCommGroup F₁] [NormedSpace ℝ F₁] [FiniteDimensional ℝ F₁]
@@ -124,15 +116,12 @@ private noncomputable def mkHom₃FirstSlot
     rw [show y = σ₂ x from hσ₂x.symm, show z = σ₃ x from hσ₃x.symm]
     rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply]
     simp only [TensorialAt.mkHom₂_apply _ _ hσ₂ hσ₃]
-    -- First-slot tensoriality (the `add` field).
     have h1 : (FiberBundle.extend F₁ (v + v') : Π x : M, V₁ x) x = v + v' :=
       FiberBundle.extend_apply_self F₁ (v + v')
     have h2 : (FiberBundle.extend F₁ v : Π x : M, V₁ x) x = v :=
       FiberBundle.extend_apply_self F₁ v
     have h3 : (FiberBundle.extend F₁ v' : Π x : M, V₁ x) x = v' :=
       FiberBundle.extend_apply_self F₁ v'
-    -- Use pointwise dependence in the first slot to replace the extension of `v + v'` by the
-    -- sum of the extensions of `v` and `v'`, then apply the `add` field of tensoriality.
     set τ : Π x : M, V₁ x :=
       (FiberBundle.extend F₁ v : Π x : M, V₁ x) + FiberBundle.extend F₁ v' with hτ_def
     have hτ : MDiffAt (T% τ) x :=
@@ -206,11 +195,9 @@ theorem mkHom₃_apply
     (hσ₁ : MDiffAt (T% σ₁) x) (hσ₂ : MDiffAt (T% σ₂) x) (hσ₃ : MDiffAt (T% σ₃) x) :
     mkHom₃ Φ x hΦ₁ hΦ₂ hΦ₃ (σ₁ x) (σ₂ x) (σ₃ x) = Φ σ₁ σ₂ σ₃ := by
   classical
-  -- The trilinear value depends on the first slot only via its value at `x` (X-tensoriality).
   have hcoe : (mkHom₃ Φ x hΦ₁ hΦ₂ hΦ₃) (σ₁ x) =
       mkHom₃FirstSlot Φ x hΦ₁ hΦ₂ hΦ₃ (σ₁ x) := rfl
   rw [hcoe]
-  -- `mkHom₃FirstSlot ... (σ₁ x)` is the `mkHom₂` over `Φ (extend (σ₁ x)) · ·`.
   have hstep : (mkHom₃FirstSlot Φ x hΦ₁ hΦ₂ hΦ₃ (σ₁ x)) (σ₂ x) (σ₃ x) =
       Φ (FiberBundle.extend F₁ (σ₁ x)) σ₂ σ₃ := by
     change (TensorialAt.mkHom₂ (Φ (FiberBundle.extend F₁ (σ₁ x))) x
@@ -219,12 +206,9 @@ theorem mkHom₃_apply
       (σ₂ x) (σ₃ x) = _
     exact TensorialAt.mkHom₂_apply _ _ hσ₂ hσ₃
   rw [hstep]
-  -- Replace the extension of `σ₁ x` by `σ₁` (first slot is pointwise by tensoriality).
   exact (hΦ₁ σ₂ σ₃ hσ₂ hσ₃).pointwise (mdifferentiableAt_extend ..) hσ₁ (by simp)
 
 end mkHom₃
-
-/-! ## The (0,3)-tensor fibre bundle as local instances -/
 
 /-- Local instance: the (0,3)-tensor bundle is a fibre bundle. -/
 local instance tensor03FiberBundle :
@@ -254,14 +238,6 @@ def MDiffAtTensor03
       (E := fun x : M =>
         TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) b (T b)) x
 
-/-! ## The auxiliary scalar functional `Φ(X, Y, Z, W)`
-
-For tangent sections `X, Y, Z, W`, a (0,3)-tensor `T`, and a point `x`, set
-$$
-  \Phi(X, Y, Z, W) := X\bigl(T(Y, Z, W)\bigr)(x)
-    - T(x)(\nabla_X Y, Z, W) - T(x)(Y, \nabla_X Z, W) - T(x)(Y, Z, \nabla_X W).
-$$ -/
-
 /-- The auxiliary scalar functional for the (0,3)-tensor connection. -/
 def tensor03Scalar
     (cov : (Π x : M, TangentSpace I x) →
@@ -272,8 +248,6 @@ def tensor03Scalar
     - T x (cov Y x (X x)) (Z x) (W x)
     - T x (Y x) (cov Z x (X x)) (W x)
     - T x (Y x) (Z x) (cov W x (X x))
-
-/-! ## Differentiability of the trilinear pairing `b ↦ T b (Y b) (Z b) (W b)` -/
 
 /-- Differentiability of `b ↦ T b (Y b)` at `x` as a section of the (0,2)-tensor bundle. -/
 lemma mdifferentiableAt_tensor03_apply_one
@@ -321,8 +295,6 @@ lemma mdifferentiableAt_tensor03_pairing
       (mdifferentiableAt_tensor03_apply_two hT hY hZ) hW
   rw [mdifferentiableAt_totalSpace] at h2
   exact h2.2
-
-/-! ## Tensoriality of `tensor03Scalar` in each slot -/
 
 variable {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
 
@@ -579,8 +551,6 @@ lemma tensor03Scalar_tensorialAt_W
     simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.map_add]
     abel
 
-/-! ## Per-point construction and the unbundled (0,3)-tensor covariant derivative -/
-
 /-- The (Y, Z, W)-trilinear value at `x` for a fixed extended X-vector. -/
 private noncomputable def tensor03TrilinAt
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -717,7 +687,6 @@ lemma tensor03CovAt_apply_of_diff_extend
   classical
   rw [tensor03CovAt_apply_of_diff cov hT (X x)]
   rw [tensor03TrilinAt_apply_extend cov hT (X x) hY hZ hW]
-  -- The first slot depends only on `X x`; replace its extension by `X`.
   unfold tensor03Scalar
   have hext : (FiberBundle.extend E (X x) : Π x : M, TangentSpace I x) x = X x :=
     FiberBundle.extend_apply_self E (X x)
@@ -746,8 +715,6 @@ def tensor03CovFun
     (T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (x : M) :
     tensor03CovFun cov T x = tensor03CovAt cov T x := rfl
-
-/-! ## Connection axioms -/
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 400000 in
@@ -908,8 +875,6 @@ lemma tensor03CovFun_isCovariantDerivativeOn
     simp only [smul_eq_mul]
     ring
 
-/-! ## The bundled (0,3)-tensor covariant derivative -/
-
 /-- The **(0,3)-tensor covariant derivative** induced by a tangent-bundle covariant
 derivative. -/
 def tensor03Cov
@@ -947,12 +912,6 @@ theorem tensor03Cov_pairing
   unfold tensor03Scalar
   ring
 
-/-! ## The iterated (second) covariant derivative of a (0,2)-tensor
-
-`tensor02Cov cov` maps a (0,2)-tensor section to a (0,3)-valued operator section.  Reading that
-operator section as a genuine (0,3)-tensor section (the underlying types coincide), we apply
-`tensor03Cov cov` to obtain the **second covariant derivative**, a (0,4)-tensor section. -/
-
 /-- The iterated (second) covariant derivative `∇²` of a (0,2)-tensor section, as the bundled
 composite `tensor03Cov cov ∘ tensor02Cov cov`. -/
 def tensor02CovIterate
@@ -967,12 +926,6 @@ def tensor02CovIterate
     (T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) (x : M) :
     tensor02CovIterate cov T x =
       (tensor03Cov cov).toFun ((tensor02Cov cov).toFun T) x := rfl
-
-/-! ## Linearity of the (0,3)-tensor covariant derivative
-
-The connection axioms `IsCovariantDerivativeOn.add` / `.leibniz` give pointwise additivity,
-scalar-homogeneity, and subtractivity of `tensor03Cov` on differentiable (0,3)-tensor
-sections.  These mirror `metricDiff02Cov_eq_sub` for the (0,2) case. -/
 
 set_option maxHeartbeats 800000 in
 set_option synthInstance.maxHeartbeats 400000 in
@@ -1009,11 +962,9 @@ theorem tensor03Cov_sub
     (tensor03Cov cov).toFun (T - T') x =
       (tensor03Cov cov).toFun T x - (tensor03Cov cov).toFun T' x := by
   classical
-  -- `set` the (0,3)-connection so the unifier treats it opaquely (mirrors `metricDiff02Cov_eq_sub`).
   set D := tensor03Cov cov with hD_def
   have hcovOn := D.isCovariantDerivativeOnUniv
   have hT'neg : MDiffAtTensor03 (-T') x := mdifferentiableAt_neg_section hT'
-  -- `D (-T') = - D T'` from additivity and `D 0 = 0`.
   have hneg : D.toFun (-T') x = - D.toFun T' x := by
     have hsum : D.toFun (T' + (-T')) x = D.toFun T' x + D.toFun (-T') x :=
       hcovOn.add hT' hT'neg (Set.mem_univ x)
@@ -1026,14 +977,6 @@ theorem tensor03Cov_sub
       TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) =
       T + (-T') := sub_eq_add_neg T T'
   rw [hTsub, hadd, hneg, ← sub_eq_add_neg]
-
-/-! ## The (0,3) / (0,4) Riemannian-norm fibre bridges
-
-We identify the curried-CLM fibre `F →L … →L ℝ` of a (0,3)- / (0,4)-tensor with the model
-`ContinuousMultilinearMap`-fibre, by uncurrying one slot at a time and reusing the lower-order
-bridge.  Each step is the composite of a curry `LinearIsometryEquiv` and the postcomposition by
-the previous bridge isometry, hence the operator norm is preserved (constant `1`).  This mirrors
-`bilinFormToModelₗᵢ` (the (0,2) case). -/
 
 section NormBridge
 
@@ -1106,7 +1049,6 @@ theorem triFormToModel_apply (B : F →L[ℝ] F →L[ℝ] F →L[ℝ] ℝ) (v : 
     ContinuousLinearEquiv.arrowCongr_apply]
   simp only [ContinuousLinearEquiv.refl_symm, ContinuousLinearEquiv.refl_apply,
     LinearIsometryEquiv.coe_toContinuousLinearEquiv]
-  -- `biForm₂ToModelₗᵢ (B (v 0)) (tail v) = B (v 0) ((tail v) 0) ((tail v) 1)`.
   change (biForm₂ToModelₗᵢ F) (B (v 0)) (Fin.tail v) = _
   rw [show ⇑(biForm₂ToModelₗᵢ F) = ⇑(biForm₂ToModel F) from rfl, biForm₂ToModel_apply]
   rfl
@@ -1114,8 +1056,6 @@ theorem triFormToModel_apply (B : F →L[ℝ] F →L[ℝ] F →L[ℝ] ℝ) (v : 
 theorem triFormToModel_norm_map (B : F →L[ℝ] F →L[ℝ] F →L[ℝ] ℝ) :
     ‖triFormToModel F B‖ = ‖B‖ := by
   classical
-  -- `triFormToModel` is the composite of the curry isometry and postcomposition by the
-  -- isometry `biForm₂ToModelₗᵢ`; both preserve the norm.
   have h_curry : ‖triFormToModel F B‖ =
       ‖((ContinuousLinearEquiv.refl ℝ F).arrowCongr
           (biForm₂ToModelₗᵢ F).toContinuousLinearEquiv) B‖ := by
@@ -1124,7 +1064,6 @@ theorem triFormToModel_norm_map (B : F →L[ℝ] F →L[ℝ] F →L[ℝ] ℝ) :
         (biForm₂ToModelₗᵢ F).toContinuousLinearEquiv) B)‖ = _
     rw [(continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 3 => F) ℝ).symm.norm_map]
   rw [h_curry]
-  -- `arrowCongr refl e₂ B = e₂.toCLM.comp B`, and `e₂` is the isometry `biForm₂ToModelₗᵢ`.
   have hcomp : ((ContinuousLinearEquiv.refl ℝ F).arrowCongr
         (biForm₂ToModelₗᵢ F).toContinuousLinearEquiv) B =
       (biForm₂ToModelₗᵢ F).toLinearIsometry.toContinuousLinearMap.comp B := by

@@ -70,25 +70,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Topological support of a chart pushforward
-
-The chart-`α` pushforward of a function `M → ℝ` vanishes outside the chart-`α`
-image of the function's topological support; when that topological support is a
-compact subset of the chart source, the pushforward's topological support is
-contained in the compact chart-image. -/
 
 /-- The topological support of the chart-`α` pushforward of a function `u` whose
 topological support is a compact subset of the chart-`α` source is contained in
@@ -108,8 +95,6 @@ private lemma tsupport_chartPushedRaw_subset_chartImage
   intro y hy
   rw [Function.mem_support] at hy
   by_contra hy_off
-  -- `y` lies off the chart-image of `tsupport u`.  If `y` is in the chart
-  -- target the pushforward vanishes there; if not it vanishes by definition.
   have hy_off' : y ∉ (toEuclidean (E := E)) '' ((extChartAt I α) '' (tsupport u)) := by
     intro hy_in
     apply hy_off
@@ -120,17 +105,6 @@ private lemma tsupport_chartPushedRaw_subset_chartImage
       (I := I) (M := M) (u := u) α hy_target hy_off')
   · exact hy (chartPushedRaw_apply_of_notMem (I := I) (M := M) α u hy_target)
 
-/-! ## A quantitative chart-transition chain rule for non-smooth inputs
-
-The qualitative chain rule `MemWkp.comp_smoothDiffeoBoundedAtOrder` carries
-`W^{k,p}`-membership through a bounded chart-transition diffeomorphism for an
-arbitrary `W^{k,p}` input. Its proof approximates the input by smooth
-compactly-supported functions and passes to a `W^{k,p}` limit. The smooth chain
-rule `SmoothDiffeoBoundedAtOrder.wkpNorm_comp_smooth_le` is already quantitative,
-bounding the composition of a smooth function by the constant `wkpComp_const'`.
-The next lemma promotes the quantitative bound to the limit: the same constant
-governs the composition of an arbitrary `W^{k,p}` input. -/
-
 /-- The chart-transition chain-rule constant `wkpComp_const'` is positive: it is
 a product of a positive count of multi-indices, a positive factorial, a positive
 derivative power, a positive rpow of the inverse Jacobian lower bound and the
@@ -140,7 +114,6 @@ private lemma wkpComp_const'_pos
     (Φ : SmoothDiffeoBoundedAtOrder d Ω Ω' kmax) (k : ℕ) (p : ℝ≥0∞) :
     0 < Φ.wkpComp_const' k p := by
   unfold SmoothDiffeoBoundedAtOrder.wkpComp_const'
-  -- The count of multi-indices is positive: the order-`0` term equals `1`.
   have h_card_pos : (0 : ℝ) <
       (Finset.range (k + 1)).sum (fun j => (Fintype.card (Fin j → Fin d) : ℝ)) := by
     have h_zero_in : (0 : ℕ) ∈ Finset.range (k + 1) :=
@@ -199,7 +172,6 @@ private lemma wkpNorm_comp_smoothDiffeoBoundedAtOrder_le
   set K_const : ℝ := Φ.wkpComp_const' k p with hK_def
   have hK_pos : 0 < K_const := wkpComp_const'_pos Φ k p
   have hK_nonneg : 0 ≤ K_const := hK_pos.le
-  -- Step 1: choose a smooth compactly-supported approximating sequence.
   have h_approx : ∀ n : ℕ, ∃ ψ : EuclideanSpace ℝ (Fin d) → ℝ,
       ContDiff ℝ (⊤ : ℕ∞) ψ ∧ HasCompactSupport ψ ∧ tsupport ψ ⊆ Ω' ∧
       wkpNorm (d := d) k p (fun x => u x - ψ x) Ω' ≤
@@ -219,16 +191,13 @@ private lemma wkpNorm_comp_smoothDiffeoBoundedAtOrder_le
       wkpNorm (d := d) k p (fun x => u x - ψ n x) Ω' ≤
         ENNReal.ofReal ((1 : ℝ) / (n + 1 : ℝ)) := fun n =>
     (h_approx n).choose_spec.2.2.2
-  -- Each smooth approximant lies in `W^{k,p}(Ω')`.
   have hψ_mem_target : ∀ n, MemWkp (d := d) k p (ψ n) Ω' := fun n =>
     MemWkp_of_smooth_compactSupport
       (d := d) hΩ' (hψ_smooth n) (hψ_cpt n) (hψ_supp n) hp_one k
-  -- Step 2: each smooth composition `ψ_n ∘ Φ` lies in `W^{k,p}(Ω)`.
   have hψ_comp_mem : ∀ n, MemWkp (d := d) k p (fun x => ψ n (Φ.toFun x)) Ω :=
     fun n =>
       MemWkp.comp_smoothDiffeoBoundedAtOrder (d := d) k hk hp_one hp_top hΩ hΩ'
         Φ (hψ_mem_target n) (hψ_cpt n) (hψ_supp n)
-  -- Step 3: the sequence `ψ_n ∘ Φ` is Cauchy in `wkpNorm`.
   have h_cauchy : ∀ ε > 0, ∃ N : ℕ, ∀ m n, N ≤ m → N ≤ n →
       wkpNorm (d := d) k p
         (fun x => (ψ m (Φ.toFun x)) - (ψ n (Φ.toFun x))) Ω ≤
@@ -341,11 +310,9 @@ private lemma wkpNorm_comp_smoothDiffeoBoundedAtOrder_le
       _ = ε := by
             have h_pos : 0 < 2 * K_const := by positivity
             field_simp
-  -- Step 4: Banach completeness produces a `W^{k,p}` limit.
   obtain ⟨v, hv_mem, hv_tendsto⟩ :=
     MemWkp.exists_limit_of_wkpNorm_cauchy (d := d) hΩ k p hp_one hp_top
       hψ_comp_mem h_cauchy
-  -- Step 5: identify the limit `v` with `u ∘ Φ` almost everywhere.
   have h_Lp_close : ∀ n,
       eLpNorm (fun x => u (Φ.toFun x) - ψ n (Φ.toFun x)) p
         (volume.restrict Ω) ≤
@@ -510,15 +477,11 @@ private lemma wkpNorm_comp_smoothDiffeoBoundedAtOrder_le
     filter_upwards [h_diff_zero] with x hx
     have : v x - u (Φ.toFun x) = 0 := hx
     linarith
-  -- Step 6: transfer the norm bound from the limit to `u ∘ Φ`.
-  -- `wkpNorm (u ∘ Φ) Ω = wkpNorm v Ω`, and `wkpNorm v Ω` is bounded by passing
-  -- the smooth bound to the limit.
   have h_norm_uΦ_eq_v :
       wkpNorm (d := d) k p (fun x => u (Φ.toFun x)) Ω =
         wkpNorm (d := d) k p v Ω :=
     (wkpNorm_congr_ae (d := d) hp_one hΩ h_v_eq_uΦ).symm
   rw [h_norm_uΦ_eq_v]
-  -- Each smooth composition is bounded by the quantitative smooth chain rule.
   have h_smooth_bound : ∀ n,
       wkpNorm (d := d) k p (fun x => ψ n (Φ.toFun x)) Ω ≤
         ENNReal.ofReal K_const *
@@ -529,7 +492,6 @@ private lemma wkpNorm_comp_smoothDiffeoBoundedAtOrder_le
       k hk (hψ_smooth n) (hψ_cpt n) (hψ_supp n)
     refine h_smooth.trans ?_
     refine mul_le_mul_of_nonneg_left ?_ (zero_le _)
-    -- Reverse triangle: `wkpNorm ψ_n ≤ wkpNorm (ψ_n - u) + wkpNorm u`.
     have hψn_alg : (ψ n) = (fun x => (ψ n x - u x) + u x) := by funext x; ring
     have h_sub_mem : MemWkp (d := d) k p (fun x => ψ n x - u x) Ω' :=
       MemWkp.sub (d := d) hp_one hΩ' (hψ_mem_target n) hu
@@ -539,7 +501,6 @@ private lemma wkpNorm_comp_smoothDiffeoBoundedAtOrder_le
     rw [← hψn_alg] at h_tri
     refine h_tri.trans ?_
     refine add_le_add ?_ (le_refl _)
-    -- `wkpNorm (ψ_n - u) = wkpNorm (u - ψ_n)`.
     have h_neg_eq :
         wkpNorm (d := d) k p (fun x => ψ n x - u x) Ω' =
           wkpNorm (d := d) k p (fun x => u x - ψ n x) Ω' := by
@@ -548,7 +509,6 @@ private lemma wkpNorm_comp_smoothDiffeoBoundedAtOrder_le
       rw [h_eq_smul, wkpNorm_const_smul (d := d) hp_one hΩ' h_uψn_mem (-1)]
       simp
     rw [h_neg_eq]
-  -- Pass to the limit: the bound on `wkpNorm v` follows from `ge_of_tendsto`.
   have h_v_bound : ∀ n,
       wkpNorm (d := d) k p v Ω ≤
         wkpNorm (d := d) k p (fun x => v x - ψ n (Φ.toFun x)) Ω +
@@ -564,7 +524,6 @@ private lemma wkpNorm_comp_smoothDiffeoBoundedAtOrder_le
     have h_tri := wkpNorm_add_le (d := d) hp_one hΩ h_sub_mem (hψ_comp_mem n)
     rw [← hv_alg] at h_tri
     exact h_tri.trans (add_le_add (le_refl _) (h_smooth_bound n))
-  -- The right-hand side tends to `ENNReal.ofReal K_const · wkpNorm u Ω'`.
   have h_rhs_tendsto :
       Filter.Tendsto
         (fun n => wkpNorm (d := d) k p (fun x => v x - ψ n (Φ.toFun x)) Ω +
@@ -572,7 +531,6 @@ private lemma wkpNorm_comp_smoothDiffeoBoundedAtOrder_le
             (wkpNorm (d := d) k p (fun x => u x - ψ n x) Ω' +
               wkpNorm (d := d) k p u Ω'))
         atTop (𝓝 (ENNReal.ofReal K_const * wkpNorm (d := d) k p u Ω')) := by
-    -- First summand `→ 0`.
     have h_first_tendsto :
         Filter.Tendsto
           (fun n => wkpNorm (d := d) k p (fun x => v x - ψ n (Φ.toFun x)) Ω)
@@ -598,7 +556,6 @@ private lemma wkpNorm_comp_smoothDiffeoBoundedAtOrder_le
           (fun n => wkpNorm (d := d) k p
             (fun x => ψ n (Φ.toFun x) - v x) Ω) from funext h_norm_eq]
       exact hv_tendsto
-    -- The product summand `→ ENNReal.ofReal K_const · wkpNorm u Ω'`.
     have h_inner_tendsto :
         Filter.Tendsto
           (fun n => wkpNorm (d := d) k p (fun x => u x - ψ n x) Ω' +
@@ -608,7 +565,6 @@ private lemma wkpNorm_comp_smoothDiffeoBoundedAtOrder_le
           Filter.Tendsto
             (fun n => wkpNorm (d := d) k p (fun x => u x - ψ n x) Ω')
             atTop (𝓝 0) := by
-        -- Squeeze between `0` and the close bound `1/(n+1) → 0`.
         have h_close_tendsto :
             Filter.Tendsto
               (fun n : ℕ => ENNReal.ofReal ((1 : ℝ) / (n + 1 : ℝ)))
@@ -638,21 +594,6 @@ private lemma wkpNorm_comp_smoothDiffeoBoundedAtOrder_le
     have h_sum := h_first_tendsto.add h_prod_tendsto
     simpa using h_sum
   exact ge_of_tendsto h_rhs_tendsto (Filter.Eventually.of_forall h_v_bound)
-
-/-! ## A quantitative iterated-Sobolev norm bound for one transported summand
-
-The qualitative `chartTransitionTransportCLM_memWkp` records iterated Sobolev
-membership of one chart-transition transport of a partition-of-unity chart
-component. The next lemma is its explicit-norm twin: the same transport is
-controlled, in iterated Sobolev norm, by a constant times the iterated Sobolev
-norm of the partition-of-unity component.
-
-The transport equals, almost everywhere, the chart-`α` pushforward of the smooth
-bounded transport coefficient times the chart-transition precomposition of the
-partition-of-unity component. The proof follows the qualitative argument,
-replacing each membership step by its quantitative twin: the smooth-bounded
-multiplication bound, the quantitative chart-transition chain rule above, and
-the zero-extension norm equality. -/
 
 /-- **Quantitative iterated Sobolev bound for a transported chart component.**
 For chart base points `β`, `α`, component multi-indices `(P₀, Q)`, an order
@@ -685,7 +626,6 @@ private lemma wkpNorm_chartTransitionTransportCLM_le
           (fun y => (f : EuclN → ℝ) y)
           (chartTargetEuclid (I := I) (M := M) β) := by
   classical
-  -- Abbreviations.
   set d : ℕ := Module.finrank ℝ E with hd_def
   set cM : M → ℝ := transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q
     with hcM_def
@@ -694,8 +634,6 @@ private lemma wkpNorm_chartTransitionTransportCLM_le
   set Tβ : Set EuclN := chartTargetEuclid (I := I) (M := M) β with hTβ_def
   have hTα_open : IsOpen Tα := chartTargetEuclid_isOpen (I := I) (M := M) α
   have hTβ_open : IsOpen Tβ := chartTargetEuclid_isOpen (I := I) (M := M) β
-  -- The transport coefficient is globally smooth with compact support inside
-  -- both chart sources.
   have hcM_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ cM :=
     contMDiff_transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q
   have hcM_supp_α : tsupport cM ⊆ (chartAt H α).source :=
@@ -706,8 +644,6 @@ private lemma wkpNorm_chartTransitionTransportCLM_le
   have hKc_compact : IsCompact Kc := (isClosed_tsupport cM).isCompact
   have hKc_in_α : Kc ⊆ (chartAt H α).source := hcM_supp_α
   have hKc_in_β : Kc ⊆ (chartAt H β).source := hcM_supp_β
-  -- Global smoothness, compact support and a uniform iterated-derivative bound
-  -- for the chart-`α` pushforward of the transport coefficient.
   have hcE_smooth : ContDiff ℝ ∞ cE :=
     DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
       (I := I) (M := M) hcM_smooth hcM_supp_α
@@ -718,25 +654,20 @@ private lemma wkpNorm_chartTransitionTransportCLM_le
   obtain ⟨Ccoeff, hCcoeff_nn, hCcoeff_bound⟩ :=
     exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
       (d := d) hcE_smooth' hcE_cpt k
-  -- The chart-`α` pushforward of the transport coefficient is supported inside
-  -- the chart-`α` Euclidean image of `Kc`.
   have hcE_tsupp_subset :
       tsupport cE ⊆ (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) '' Kc :=
     tsupport_chartPushedRaw_subset_chartImage (I := I) (M := M) α hcM_supp_α
-  -- The bounded chart-transition diffeomorphism for the compact set `Kc`.
   obtain ⟨Ωαβ, Ωβα, hΩαβ_open, hΩβα_open, hΩαβ_subset_target,
     hΩβα_subset_target, _hΩαβ_overlap, _hΩβα_overlap, hKc_image_in_Ωαβ, Φ,
     hΦ_eq, _hΦ_inv_eq⟩ :=
     chartTransition_smoothDiffeoBoundedAtOrder_strict (I := I) (M := M)
       α β hKc_compact hKc_in_α hKc_in_β k
-  -- The chart-`α` Euclidean image of `Kc` is compact and contained in `Ωαβ`.
   set KEα : Set EuclN :=
     (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) '' Kc with hKEα_def
   have hKEα_compact : IsCompact KEα :=
     chartImage_isCompact_of_compact_in_source (I := I) (M := M) α hKc_compact hKc_in_α
   have hKEα_in_Ωαβ : KEα ⊆ Ωαβ := hKc_image_in_Ωαβ
   have hcE_tsupp_Ωαβ : tsupport cE ⊆ Ωαβ := hcE_tsupp_subset.trans hKEα_in_Ωαβ
-  -- The diffeomorphism image of `KEα` is compact and contained in `Ωβα`.
   set KEβ : Set EuclN := Φ.toFun '' KEα with hKEβ_def
   have hKEβ_compact : IsCompact KEβ :=
     hKEα_compact.image Φ.continuous_toFun
@@ -746,8 +677,6 @@ private lemma wkpNorm_chartTransitionTransportCLM_le
     have hy_Ωαβ : y ∈ Ωαβ := hKEα_in_Ωαβ hy
     rw [← hyz]
     exact Φ.bijOn.mapsTo hy_Ωαβ
-  -- A smooth chart-`β` cutoff `χ`, equal to `1` on a neighbourhood of `KEβ`,
-  -- compactly supported inside `Ωβα ∩ Tβ`.
   set Uβ : Set EuclN := Ωβα ∩ Tβ with hUβ_def
   have hUβ_open : IsOpen Uβ := hΩβα_open.inter hTβ_open
   have hKEβ_in_Uβ : KEβ ⊆ Uβ :=
@@ -757,50 +686,40 @@ private lemma wkpNorm_chartTransitionTransportCLM_le
     exists_smooth_cutoff_with_neighborhood (d := d) hKEβ_compact hUβ_open hKEβ_in_Uβ
   have hχ_supp_Ωβα : tsupport χ ⊆ Ωβα := fun y hy => (hχ_supp hy).1
   have hχ_supp_Tβ : tsupport χ ⊆ Tβ := fun y hy => (hχ_supp hy).2
-  -- A uniform iterated-derivative bound for the cutoff `χ`.
   obtain ⟨Cχ, hCχ_nn, hCχ_bound⟩ :=
     exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
       (d := d) (hχ_smooth : ContDiff ℝ (⊤ : ℕ∞) χ) hχ_cpt k
-  -- The quantitative Leibniz constant for multiplication by `χ` on `Tβ`.
   obtain ⟨Kχ, hKχ_pos, hKχ_bound⟩ :=
     wkpNorm_smul_smooth_bounded_le (d := d) k (p := (2 : ℝ≥0∞))
       (by norm_num) (by norm_num)
       hTβ_open (hχ_smooth : ContDiff ℝ (⊤ : ℕ∞) χ) hCχ_nn
       (fun j hj y _ => hCχ_bound y j hj)
-  -- The quantitative Leibniz constant for multiplication by `cE` on `Ωαβ`.
   obtain ⟨Kc', hKc'_pos, hKc'_bound⟩ :=
     wkpNorm_smul_smooth_bounded_le (d := d) k (p := (2 : ℝ≥0∞))
       (by norm_num) (by norm_num)
       hΩαβ_open hcE_smooth' hCcoeff_nn
       (fun j hj y _ => hCcoeff_bound y j hj)
-  -- The quantitative chart-transition chain-rule constant.
   set Kcomp : ℝ := Φ.wkpComp_const' k 2 with hKcomp_def
   have hKcomp_nn : 0 ≤ Kcomp := wkpComp_const'_nonneg Φ k 2
-  -- The combined constant.
   refine ⟨Kc' * (Kcomp * Kχ), by positivity, ?_⟩
   intro f hf
-  -- The localised partition-of-unity component `χ · f`.
   set T : EuclN → ℝ := fun y => (f : EuclN → ℝ) y with hT_def
   set v : EuclN → ℝ := fun y => χ y * T y with hv_def
   have hv_supp_χ : tsupport v ⊆ tsupport χ :=
     tsupport_smul_subset_left χ T
   have hv_supp_Ωβα : tsupport v ⊆ Ωβα := hv_supp_χ.trans hχ_supp_Ωβα
   have hv_cpt : HasCompactSupport v := hχ_cpt.mul_right
-  -- `χ · f` is `W^{k,2}`-regular on the chart-`β` target.
   have hv_memWkp_Tβ : MemWkp (d := d) k 2 v Tβ :=
     MemWkp.smul_smooth_bounded (d := d) k (by norm_num) hTβ_open
       (hχ_smooth : ContDiff ℝ (⊤ : ℕ∞) χ)
       (fun j hj y _ => hCχ_bound y j hj) hf
-  -- ... and on `Ωβα`.
   have hv_memWkp_Ωβα : MemWkp (d := d) k 2 v Ωβα :=
     MemWkp.mono_set (d := d) (by norm_num) hTβ_open hΩβα_open
       hΩβα_subset_target hv_memWkp_Tβ
-  -- The composition `(χ · f) ∘ Φ` is `W^{k,2}`-regular on `Ωαβ`.
   have hv_comp_memWkp_Ωαβ : MemWkp (d := d) k 2 (fun y => v (Φ.toFun y)) Ωαβ :=
     MemWkp.comp_smoothDiffeoBoundedAtOrder (d := d) k (le_refl k)
       (by norm_num) (by norm_num) hΩαβ_open hΩβα_open Φ
       hv_memWkp_Ωβα hv_cpt hv_supp_Ωβα
-  -- The transported function: `cE · ((χ · f) ∘ Φ)`.
   set w : EuclN → ℝ := fun y => cE y * v (Φ.toFun y) with hw_def
   have hw_memWkp_Ωαβ : MemWkp (d := d) k 2 w Ωαβ :=
     MemWkp.smul_smooth_bounded (d := d) k (by norm_num) hΩαβ_open
@@ -817,8 +736,6 @@ private lemma wkpNorm_chartTransitionTransportCLM_le
   have hw_supp_Ωαβ : tsupport w ⊆ Ωαβ := hw_supp_cE.trans hcE_tsupp_Ωαβ
   have hw_cpt : HasCompactSupport w :=
     hcE_cpt.of_isClosed_subset (isClosed_tsupport w) hw_supp_cE
-  -- The transport operator value agrees a.e. on `Tα` with
-  -- `cE · (f ∘ chartTransitionEuclid α β)`.
   have h_coeFn : (fun y => ((chartTransitionTransportCLM
         (I := I) (M := M) g r s β α P₀ Q f :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -827,7 +744,6 @@ private lemma wkpNorm_chartTransitionTransportCLM_le
         (f : EuclN → ℝ) (chartTransitionEuclid (I := I) (M := M) α β y)) :=
     chartTransitionTransportCLM_coeFn_aeEq
       (I := I) (M := M) g r s β α P₀ Q f
-  -- On `Tα` the transported function equals `w` everywhere.
   have h_pointwise : (fun y => cE y *
         (f : EuclN → ℝ) (chartTransitionEuclid (I := I) (M := M) α β y)) = w := by
     funext y
@@ -846,55 +762,42 @@ private lemma wkpNorm_chartTransitionTransportCLM_le
           (f : EuclN → ℝ) (Φ.toFun y) := by
         simp only [hv_def, hT_def, hχ_Φy, one_mul]
       simp only [hw_def, hT_eq, hv_Φy]
-  -- The transported function agrees a.e. with `w` on `Tα`.
   have h_ae : (fun y => ((chartTransitionTransportCLM
         (I := I) (M := M) g r s β α P₀ Q f :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
       =ᵐ[(volume : Measure EuclN).restrict Tα] w := by
     refine h_coeFn.trans ?_
     rw [h_pointwise]
-  -- `w` is `W^{k,2}`-regular on the chart-`α` target by extension by zero.
   have hw_memWkp_Tα : MemWkp (d := d) k 2 w Tα :=
     MemWkp.extend_zero (d := d) (by norm_num) (by norm_num)
       hΩαβ_open hTα_open hΩαβ_subset_target hw_memWkp_Ωαβ hw_supp_Ωαβ hw_cpt
-  -- Membership of the transport on the chart-`α` target: it agrees a.e. with
-  -- the `W^{k,2}`-regular function `w`.
   refine ⟨(MemWkp_congr_ae (d := d) (by norm_num) hTα_open h_ae).mpr hw_memWkp_Tα,
     ?_⟩
-  -- The iterated Sobolev norm is invariant under a.e.-equality, hence equals
-  -- the norm of `w`.
   rw [wkpNorm_congr_ae (d := d) (by norm_num) hTα_open h_ae]
-  -- `wkpNorm w Tα = wkpNorm w Ωαβ` since extension by zero leaves the norm
-  -- unchanged.
   have h_w_norm_extend :
       wkpNorm (d := d) k 2 w Tα = wkpNorm (d := d) k 2 w Ωαβ :=
     wkpNorm_extend_zero (d := d) (by norm_num) (by norm_num)
       hΩαβ_open hTα_open hΩαβ_subset_target hw_memWkp_Ωαβ hw_supp_Ωαβ hw_cpt
   rw [h_w_norm_extend]
-  -- `wkpNorm w Ωαβ ≤ ENNReal.ofReal Kc' · wkpNorm ((χ·f)∘Φ) Ωαβ`.
   have h_w_le_v_comp :
       wkpNorm (d := d) k 2 w Ωαβ ≤
         ENNReal.ofReal Kc' *
           wkpNorm (d := d) k 2 (fun y => v (Φ.toFun y)) Ωαβ := by
     have := hKc'_bound (u := fun y => v (Φ.toFun y)) hv_comp_memWkp_Ωαβ
-    -- `w = fun y => cE y * v (Φ.toFun y)`.
     have h_eq : (fun y => cE y * (fun y => v (Φ.toFun y)) y) = w := by
       funext y; rfl
     rwa [h_eq] at this
   refine h_w_le_v_comp.trans ?_
-  -- `wkpNorm ((χ·f)∘Φ) Ωαβ ≤ ENNReal.ofReal Kcomp · wkpNorm (χ·f) Ωβα`.
   have h_v_comp_le :
       wkpNorm (d := d) k 2 (fun y => v (Φ.toFun y)) Ωαβ ≤
         ENNReal.ofReal Kcomp * wkpNorm (d := d) k 2 v Ωβα :=
     wkpNorm_comp_smoothDiffeoBoundedAtOrder_le (d := d) k (le_refl k)
       (by norm_num) (by norm_num) hΩαβ_open hΩβα_open Φ
       hv_memWkp_Ωβα hv_cpt hv_supp_Ωβα
-  -- `wkpNorm (χ·f) Ωβα = wkpNorm (χ·f) Tβ` since `χ·f` is supported in `Ωβα`.
   have h_v_norm_extend :
       wkpNorm (d := d) k 2 v Tβ = wkpNorm (d := d) k 2 v Ωβα :=
     wkpNorm_extend_zero (d := d) (by norm_num) (by norm_num)
       hΩβα_open hTβ_open hΩβα_subset_target hv_memWkp_Ωβα hv_supp_Ωβα hv_cpt
-  -- `wkpNorm (χ·f) Tβ ≤ ENNReal.ofReal Kχ · wkpNorm f Tβ`.
   have h_v_le_f :
       wkpNorm (d := d) k 2 v Tβ ≤
         ENNReal.ofReal Kχ *
@@ -903,7 +806,6 @@ private lemma wkpNorm_chartTransitionTransportCLM_le
     have h_eq : (fun y => χ y * (fun y => (f : EuclN → ℝ) y) y) = v := by
       funext y; rfl
     rwa [h_eq] at this
-  -- Chain the three quantitative bounds.
   calc
     ENNReal.ofReal Kc' *
         wkpNorm (d := d) k 2 (fun y => v (Φ.toFun y)) Ωαβ
@@ -924,12 +826,6 @@ private lemma wkpNorm_chartTransitionTransportCLM_le
         rw [ENNReal.ofReal_mul hKc'_pos.le,
           ENNReal.ofReal_mul hKcomp_nn]
         ring
-
-/-! ## Finite-sum norm bound
-
-`wkpNorm` is subadditive over finite sums; for a double sum the bound is the sum
-of the inner-sum bounds, and each inner-sum bound is the sum of the per-summand
-bounds. -/
 
 /-- **`MemWkp` is closed under finite sums.** If every member of a family of
 functions indexed by a finite set is `W^{k,p}`-regular on an open set, then the
@@ -974,23 +870,18 @@ private lemma wkpNorm_double_sum_le
         (fun y => ∑ i ∈ S, ∑ j : κ, F i j y) Ω ≤
       ∑ i ∈ S, ∑ j : κ, wkpNorm (d := d) k p (F i j) Ω := by
   classical
-  -- The inner sum over `κ` for each fixed `i` is `W^{k,p}`-regular.
   have h_inner_mem : ∀ i ∈ S,
       MemWkp (d := d) k p (fun y => ∑ j : κ, F i j y) Ω := by
     intro i hi
     exact memWkp_finsetSum (d := d) hp hΩ (Finset.univ : Finset κ)
       (fun j => F i j) (fun j _ => hF i hi j)
-  -- Subadditivity over the outer sum.
   have h_outer := wkpNorm_sum_le (d := d) hp hΩ S
     (fun i y => ∑ j : κ, F i j y) h_inner_mem
   refine h_outer.trans ?_
-  -- Each inner-sum norm is bounded by the sum of the per-summand norms.
   refine Finset.sum_le_sum ?_
   intro i hi
   exact wkpNorm_sum_le (d := d) hp hΩ (Finset.univ : Finset κ)
     (fun j => F i j) (fun j _ => hF i hi j)
-
-/-! ## The quantitative cutoff ↔ partition-of-unity iterated-Sobolev bound -/
 
 /-- **The quantitative cutoff ↔ partition-of-unity iterated-Sobolev bound.** For
 a closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, an abstract `L²`
@@ -1037,16 +928,12 @@ theorem wkpNorm_tensorL2ChartComponentCutoff_le_of_pou
   set d : ℕ := Module.finrank ℝ E with hd_def
   set Tα : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hTα_def
   have hTα_open : IsOpen Tα := chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- Abbreviations for the doubly-indexed family of transported summands.
   set F : M → TensorCompIdx (E := E) r s → EuclN → ℝ :=
     fun β Q y =>
       ((chartTransitionTransportCLM (I := I) (M := M) g r s β α P₀ Q
           (tensorL2ChartComponent (I := I) (M := M) g r s u β Q) :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hF_def
-  -- For each `(β, Q)` choose the per-transport constant from the quantitative
-  -- per-summand bound, which also delivers `W^{k,2}`-regularity of the
-  -- transported summand.
   have h_per : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
       ∃ C : ℝ, 0 ≤ C ∧
         MemWkp (d := d) k 2 (F β Q) Tα ∧
@@ -1062,14 +949,9 @@ theorem wkpNorm_tensorL2ChartComponentCutoff_le_of_pou
     obtain ⟨h_mem, h_bound⟩ := hC_bound
       (tensorL2ChartComponent (I := I) (M := M) g r s u β Q) (h_pou β Q)
     exact ⟨C, hC_nn, h_mem, h_bound⟩
-  -- Each transported summand is itself `W^{k,2}`-regular (used for finite-sum
-  -- subadditivity).
   have hF_mem : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
       MemWkp (d := d) k 2 (F β Q) Tα :=
     fun β Q => (h_per β Q).choose_spec.2.1
-  -- The single global constant: the maximum of the per-transport constants over
-  -- the (finite) double index set, with `1` as a floor to keep it positive and
-  -- to dominate every individual constant.
   set S : Finset M := transportChartCenters (I := I) (M := M) α with hS_def
   set Cfun : M → TensorCompIdx (E := E) r s → ℝ :=
     fun β Q => (h_per β Q).choose with hCfun_def
@@ -1082,8 +964,6 @@ theorem wkpNorm_tensorL2ChartComponentCutoff_le_of_pou
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
             (chartTargetEuclid (I := I) (M := M) β) :=
     fun β Q => (h_per β Q).choose_spec.2.2
-  -- `C` is the supremum of the per-transport constants over the finite index
-  -- set, floored at `1`.
   set C : ℝ := 1 + ∑ β ∈ S, ∑ Q : TensorCompIdx (E := E) r s, Cfun β Q
     with hC_def
   have hC_nn : 0 ≤ C := by
@@ -1092,7 +972,6 @@ theorem wkpNorm_tensorL2ChartComponentCutoff_le_of_pou
       Finset.sum_nonneg (fun β _ =>
         Finset.sum_nonneg (fun Q _ => hCfun_nn β Q))
     linarith
-  -- `Cfun β Q ≤ C` for every `(β, Q)` with `β ∈ S`.
   have hCfun_le_C : ∀ β ∈ S, ∀ Q : TensorCompIdx (E := E) r s,
       Cfun β Q ≤ C := by
     intro β hβ Q
@@ -1113,8 +992,6 @@ theorem wkpNorm_tensorL2ChartComponentCutoff_le_of_pou
       exact h_inner.trans h_outer
     linarith
   refine ⟨C, hC_nn, ?_⟩
-  -- The cutoff component equals, a.e. on `Tα`, the finite double sum of the
-  -- transported partition-of-unity components.
   have h_decomp : (fun y => ((tensorL2ChartComponentCutoff
         (I := I) (M := M) g r s u α P₀ :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -1122,9 +999,7 @@ theorem wkpNorm_tensorL2ChartComponentCutoff_le_of_pou
       (fun y => ∑ β ∈ S, ∑ Q : TensorCompIdx (E := E) r s, F β Q y) :=
     tensorL2ChartComponentCutoff_ae_eq_pou_transport_sum
       (I := I) (M := M) g r s u α P₀
-  -- Transfer the iterated Sobolev norm along the a.e.-equality.
   rw [wkpNorm_congr_ae (d := d) (by norm_num) hTα_open h_decomp]
-  -- Subadditivity over the finite double sum.
   have h_double_le :
       wkpNorm (d := d) k 2
           (fun y => ∑ β ∈ S, ∑ Q : TensorCompIdx (E := E) r s, F β Q y) Tα ≤
@@ -1133,8 +1008,6 @@ theorem wkpNorm_tensorL2ChartComponentCutoff_le_of_pou
     wkpNorm_double_sum_le (d := d) (by norm_num) hTα_open S F
       (fun β _ Q => hF_mem β Q)
   refine h_double_le.trans ?_
-  -- Bound each transported-summand norm by `C` times the partition-of-unity
-  -- component norm.
   have h_each_le : ∀ β ∈ S, ∀ Q : TensorCompIdx (E := E) r s,
       wkpNorm (d := d) k 2 (F β Q) Tα ≤
         ENNReal.ofReal C *
@@ -1146,13 +1019,9 @@ theorem wkpNorm_tensorL2ChartComponentCutoff_le_of_pou
     refine (hCfun_bound β Q).trans ?_
     refine mul_le_mul_of_nonneg_right ?_ (zero_le _)
     exact ENNReal.ofReal_le_ofReal (hCfun_le_C β hβ Q)
-  -- Sum the per-summand bounds and pull `ENNReal.ofReal C` out of the double
-  -- sum.
   refine (Finset.sum_le_sum (fun β hβ =>
     Finset.sum_le_sum (fun Q _ => h_each_le β hβ Q))).trans ?_
-  -- `∑ β ∑ Q (ofReal C · norm) = ofReal C · ∑ β ∑ Q norm`.
   refine le_of_eq ?_
-  -- Pull `ENNReal.ofReal C` out of each inner sum, then out of the outer sum.
   have h_inner_factor : ∀ β ∈ S,
       (∑ Q : TensorCompIdx (E := E) r s,
         ENNReal.ofReal C *
@@ -1169,17 +1038,6 @@ theorem wkpNorm_tensorL2ChartComponentCutoff_le_of_pou
     intro β _
     rw [Finset.mul_sum]
   rw [Finset.sum_congr rfl h_inner_factor, ← Finset.mul_sum]
-
-/-! ## The input-uniform cutoff chart-component norm bound
-
-`wkpNorm_tensorL2ChartComponentCutoff_le_of_pou` produces, for each `L²` tensor
-element `u`, a constant `C` with the cutoff norm bound. The per-summand constants
-of that proof come from `wkpNorm_chartTransitionTransportCLM_le`, whose explicit
-constant depends only on the chart-transition geometry `(g, r, s, β, α, P₀, Q,
-k)` and not on the transported function. Hence a *single* constant `C` — built
-from those geometric per-transport constants and the multiplicity of the double
-sum — serves the cutoff bound for *every* `u` simultaneously. The
-input-uniform restatement hoists that constant before the `∀ u`. -/
 
 /-- **Input-uniform explicit norm bound for the cutoff tensor `L²` chart
 component.** A single nonnegative constant `C` — chart-transition geometric data,
@@ -1224,16 +1082,12 @@ theorem wkpNorm_tensorL2ChartComponentCutoff_le_of_pou_uniform
   set Tα : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hTα_def
   have hTα_open : IsOpen Tα := chartTargetEuclid_isOpen (I := I) (M := M) α
   set S : Finset M := transportChartCenters (I := I) (M := M) α with hS_def
-  -- The chart-transition transport family — `u`-independent.
   set F : TensorL2 r s g → M → TensorCompIdx (E := E) r s → EuclN → ℝ :=
     fun u β Q y =>
       ((chartTransitionTransportCLM (I := I) (M := M) g r s β α P₀ Q
           (tensorL2ChartComponent (I := I) (M := M) g r s u β Q) :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hF_def
-  -- The per-transport constant of `wkpNorm_chartTransitionTransportCLM_le` is
-  -- quantified uniformly over the transported function, so its `Classical.choice`
-  -- witness depends only on `(β, Q)` — not on the `L²` tensor element.
   set Cfun : M → TensorCompIdx (E := E) r s → ℝ :=
     fun β Q =>
       (wkpNorm_chartTransitionTransportCLM_le (I := I) (M := M)
@@ -1260,8 +1114,6 @@ theorem wkpNorm_tensorL2ChartComponentCutoff_le_of_pou_uniform
     (wkpNorm_chartTransitionTransportCLM_le (I := I) (M := M)
       g r s β α P₀ Q k).choose_spec
   have hCfun_nn : ∀ β Q, 0 ≤ Cfun β Q := fun β Q => (hCfun_spec β Q).1
-  -- The single global constant: the double sum of the per-transport constants
-  -- over the finite transport index set, floored at `1`.
   set C : ℝ := 1 + ∑ β ∈ S, ∑ Q : TensorCompIdx (E := E) r s, Cfun β Q
     with hC_def
   have hC_nn : 0 ≤ C := by
@@ -1284,8 +1136,6 @@ theorem wkpNorm_tensorL2ChartComponentCutoff_le_of_pou_uniform
         (fun β' _ => Finset.sum_nonneg (fun Q' _ => hCfun_nn β' Q')) hβ
     linarith [h_inner.trans h_outer]
   refine ⟨C, hC_nn, fun u h_pou => ?_⟩
-  -- For each `u`, the per-transport summand is `W^{k,2}` with the geometric
-  -- per-transport norm bound.
   have hF_spec : ∀ β Q,
       MemWkp (d := d) k 2 (F u β Q) Tα ∧
         wkpNorm (d := d) k 2 (F u β Q) Tα ≤
@@ -1299,8 +1149,6 @@ theorem wkpNorm_tensorL2ChartComponentCutoff_le_of_pou_uniform
       (h_pou β Q)
   have hF_mem : ∀ β Q, MemWkp (d := d) k 2 (F u β Q) Tα :=
     fun β Q => (hF_spec β Q).1
-  -- The cutoff component equals, a.e. on `Tα`, the finite double sum of the
-  -- chart-transition transports of the partition-of-unity components.
   have h_decomp : (fun y => ((tensorL2ChartComponentCutoff
         (I := I) (M := M) g r s u α P₀ :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -1309,7 +1157,6 @@ theorem wkpNorm_tensorL2ChartComponentCutoff_le_of_pou_uniform
     tensorL2ChartComponentCutoff_ae_eq_pou_transport_sum
       (I := I) (M := M) g r s u α P₀
   rw [wkpNorm_congr_ae (d := d) (by norm_num) hTα_open h_decomp]
-  -- Subadditivity over the finite double sum.
   have h_double_le :
       wkpNorm (d := d) k 2
           (fun y => ∑ β ∈ S, ∑ Q : TensorCompIdx (E := E) r s, F u β Q y) Tα ≤
@@ -1318,8 +1165,6 @@ theorem wkpNorm_tensorL2ChartComponentCutoff_le_of_pou_uniform
     wkpNorm_double_sum_le (d := d) (by norm_num) hTα_open S (F u)
       (fun β _ Q => hF_mem β Q)
   refine h_double_le.trans ?_
-  -- Bound each transported-summand norm by `C` times the partition-of-unity
-  -- component norm.
   have h_each_le : ∀ β ∈ S, ∀ Q : TensorCompIdx (E := E) r s,
       wkpNorm (d := d) k 2 (F u β Q) Tα ≤
         ENNReal.ofReal C *

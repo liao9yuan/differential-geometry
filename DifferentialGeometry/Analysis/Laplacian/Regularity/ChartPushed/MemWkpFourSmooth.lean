@@ -93,8 +93,6 @@ open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThree
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH2kBridge
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplH3
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -103,15 +101,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Support-aware `MemWkp` extension from a precompact open subdomain
-
-The cutoff-based extension lemma below mirrors `MemWkp_two_extend_via_cutoff`
-from `ChartPushedMemWkpThreeSmooth.lean`. It promotes a `MemWkp k 2`
-membership on a precompact open subdomain `Ω' ⊆ Ω` to the entire ambient
-open set `Ω`, provided the function vanishes a.e. on `Ω \ K` for some
-compact `K ⊆ Ω'`. The cutoff `η` is smooth, equals `1` on a neighborhood
-of `K`, and has pointwise topological support inside `Ω'`. -/
 
 /-- **Cutoff-based extension of `MemWkp k 2` from a precompact open
 subdomain.** A function in `MemWkp k 2` of an open precompact `Ω' ⊆ Ω`
@@ -218,17 +207,6 @@ private theorem MemWkp_two_extend_via_cutoff_aux
     (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open
     h_eta_u_ae_eq_u).mp h_eta_u_in_Ω
 
-/-! ## Chart-`H²` of the chosen second mixed weak partial on the full chart
-target
-
-Combine the chart-`H²` interior regularity from
-`twiceDerivedChartBilinear_memWkp_two_two_interior` with the cutoff-based
-extension lemma above. The chosen second mixed weak partial vanishes a.e.
-off `chartImagePOUTsupport α` (by
-`chosenSecondPartialChartPushedU_ae_zero_off_chartImagePOUTsupport`), and
-the interior regularity holds on a precompact open `Ω''` containing
-`chartImagePOUTsupport α`. -/
-
 /-- **Chart-`H²` of the chosen second mixed weak partial on the full chart
 target.**
 
@@ -275,7 +253,6 @@ theorem chosenSecondPartialChartPushedU_memWkp_two_two_of_twice_diff_identity
         (I := I) (M := M) g α u_h l₁ l₂)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- Interior MemWkp 2 2 on a precompact open Ω'' containing K_α.
   obtain ⟨Ω'', hΩ''_open, hK_α_in_Ω'', hΩ''_compact_closure,
     h_closureΩ''_in_chart, h_memWkp22_Ω''⟩ :=
     twiceDerivedChartBilinear_memWkp_two_two_interior
@@ -290,7 +267,6 @@ theorem chosenSecondPartialChartPushedU_memWkp_two_two_of_twice_diff_identity
       (I := I) (M := M) α
   have hΩ''_in_chart : Ω'' ⊆ chartTargetEuclid (I := I) (M := M) α :=
     subset_trans subset_closure h_closureΩ''_in_chart
-  -- The chosen second mixed weak partial is ae zero off K_α on the chart target.
   have h_ae_zero_off_K_α :
       ∀ᵐ y ∂((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α \ K_α)),
@@ -298,21 +274,9 @@ theorem chosenSecondPartialChartPushedU_memWkp_two_two_of_twice_diff_identity
           (I := I) (M := M) g α u_h l₁ l₂ y = 0 :=
     chosenSecondPartialChartPushedU_ae_zero_off_chartImagePOUTsupport
       (I := I) (M := M) g α hu_h l₁ l₂
-  -- Promote MemWkp 2 2 from Ω'' to the entire chart target.
   exact MemWkp_two_extend_via_cutoff_aux (E := E) 2
     h_chart_open hΩ''_open hΩ''_in_chart hK_α_compact hK_α_in_Ω''
     h_memWkp22_Ω'' h_ae_zero_off_K_α
-
-/-! ## Chart-`H³` of each chosen first weak partial on the full chart target
-
-Combine the chart-`H²` regularity of every chosen second mixed weak partial
-(per-pair hypothesis-bearing on the twice-differentiated identities) with
-the `MemWkp_succ` decomposition to obtain chart-`H³` of every chosen first
-weak partial.
-
-Crucially: the assembly is via
-`chartPushedChosenFirstPartial_memWkp_two_of_chartPushed_memWkp_three`-type
-reasoning, but at one Sobolev order higher. We use `MemWkp_succ` directly. -/
 
 /-- **Chart-`H³` of each chosen first weak partial on the full chart target.**
 
@@ -358,24 +322,9 @@ theorem chartPushedChosenFirstPartial_memWkp_three_two_of_twice_diff_identities
       (chartPushedChosenFirstPartial (I := I) (M := M) g α u_h l₁)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- MemWkp 3 2 of `chartPushedChosenFirstPartial g α u_h l₁` on the chart
-  -- target decomposes via MemWkp_succ at k = 2 into:
-  --   * MemW1p 2 of chartPushedChosenFirstPartial (unconditional)
-  --   * ∀ l₂, MemWkp 2 2 of (chosenWeakPartial' 2 l₂ chartPushedChosenFirstPartial
-  --       chartTarget) chartTarget
-  -- The inner chosen weak partial coincides definitionally with the chosen
-  -- second mixed partial `chosenSecondPartialChartPushedU g α u_h l₁ l₂`.
   refine ⟨chartPushedChosenFirstPartial_memW1p_two
     (I := I) (M := M) g α hu_h l₁, ?_⟩
   intro l₂
-  -- The chosen 2nd weak partial of chartPushedChosenFirstPartial g α u_h l₁
-  -- at direction l₂ is exactly chosenSecondPartialChartPushedU g α u_h l₁ l₂.
-  -- Hence we need MemWkp 2 2 of that function on the chart target.
-  -- This is the hypothesis-bearing per-pair chart-H² result above.
-  -- We rewrite the target to MemWkp 1 2 (chosenWeakPartial' 2 l₂ ⋯) ≃ MemW1p 2.
-  -- Actually we directly need MemWkp 2 2; obtained from
-  -- chosenSecondPartialChartPushedU_memWkp_two_two_of_twice_diff_identity,
-  -- and the chosen-partial value coincides by definition.
   have h_chosenSecond :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) 2 2
@@ -383,31 +332,11 @@ theorem chartPushedChosenFirstPartial_memWkp_three_two_of_twice_diff_identities
         (chartTargetEuclid (I := I) (M := M) α) :=
     chosenSecondPartialChartPushedU_memWkp_two_two_of_twice_diff_identity
       (I := I) (M := M) g α hu_h l₁ l₂ (h_twice_identities l₁ l₂)
-  -- Reduce by one order: MemWkp 2 2 v Ω ↔ MemWkp 1 2 v Ω at the level of the
-  -- inner chosen partial. We need MemWkp 2 2 (the *inner* chosen-2nd partial
-  -- of `chartPushedChosenFirstPartial`), but by definition this is
-  -- `chosenSecondPartialChartPushedU g α u_h l₁ l₂`.
-  -- Reflection check: `chosenSecondPartialChartPushedU g α u_h l₁ l₂ =
-  -- chosenWeakPartial' 2 l₂ (chosenWeakPartial' 2 l₁ (chartPushed POU ...)
-  --   chartTarget) chartTarget = chosenWeakPartial' 2 l₂
-  --   (chartPushedChosenFirstPartial g α u_h l₁) chartTarget`. This is rfl.
-  -- Hence the target unfolds to h_chosenSecond via `change`. We use a
-  -- structural reduction MemWkp 2 2 ↔ MemW1p 2 ∧ ∀ ..., but actually the
-  -- conclusion `MemWkp 2 2 (chosenWeakPartial' 2 l₂ chartPushedChosenFirstPartial)
-  -- chartTarget` is exactly `MemWkp 2 2 chosenSecondPartialChartPushedU
-  -- chartTarget` by rfl. So we just use `h_chosenSecond`.
   change DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
     (d := Module.finrank ℝ E) 2 2
     (chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h l₁ l₂)
     (chartTargetEuclid (I := I) (M := M) α)
   exact h_chosenSecond
-
-/-! ## Chart-`H⁴` of the chart-pushed function on the full chart target
-
-Assemble chart-`H⁴` of the chart-pushed function by applying `MemWkp_succ`
-at order `4`: chart-`H⁴` decomposes into `MemW1p 2` of the chart-pushed
-function (unconditional) and chart-`H³` of every chosen first weak partial
-(per-pair hypothesis-bearing). -/
 
 /-- **Chart-`H⁴` of the chart-pushed function on the full chart target.**
 
@@ -456,29 +385,15 @@ theorem chartPushed_memWkp_four_two_of_laplacianDomainPow_two_of_twice_diff_iden
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := by
   classical
-  -- MemWkp 4 2 = MemWkp (3+1) 2 decomposes via MemWkp_succ:
-  --   MemW1p 2 chartPushed ∧ ∀ l₁, MemWkp 3 2 (chosenWeakPartial' 2 l₁ chartPushed) chartTarget
-  -- The chosen weak partial in direction l₁ of the chart-pushed function is
-  -- exactly chartPushedChosenFirstPartial g α u_h l₁.
   refine ⟨chartPushed_memW1p_two_of_laplacianDomainPow_two
     (I := I) (M := M) g α hu_h, ?_⟩
   intro l₁
-  -- chosenWeakPartial' 2 l₁ (chartPushed POU u_h) chartTarget
-  --   = chartPushedChosenFirstPartial g α u_h l₁  (by definition)
   change DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
     (d := Module.finrank ℝ E) 3 2
     (chartPushedChosenFirstPartial (I := I) (M := M) g α u_h l₁)
     (chartTargetEuclid (I := I) (M := M) α)
   exact chartPushedChosenFirstPartial_memWkp_three_two_of_twice_diff_identities
     (I := I) (M := M) g α hu_h h_twice_identities l₁
-
-/-! ## Discharge of the `ChartSideH2kBridge g 2` predicate
-
-`ChartSideH2kBridge g 2 u` is the per-chart `MemWkp 4 2 (chartPushed POU α u)
-chartTarget` predicate. The chart-`H⁴` of the canonical function
-representative above is exactly this predicate, with the family of
-twice-differentiated variational identities now indexed by chart points
-`α : M`. -/
 
 /-- **Discharge of `ChartSideH2kBridge g 2` for the canonical function
 representative.**
@@ -522,15 +437,10 @@ theorem chartSideH2kBridge_two_of_twice_diff_identities
       (((H1ComplToLp (I := I) (M := M) g u_h :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ)) := by
   intro α
-  -- 2 * 2 = 4. The conclusion at α is exactly MemWkp 4 2 of the chart-pushed
-  -- function on chartTargetEuclid α (after the `2 * 2 = 4` rewrite).
   have h_eq : (2 : ℕ) * 2 = 4 := by norm_num
   rw [h_eq]
   exact chartPushed_memWkp_four_two_of_laplacianDomainPow_two_of_twice_diff_identities
     (I := I) (M := M) g α hu_h (h_twice_identities α)
-
-/-! ## Manifold-level discharge of `MemWkpChart g 4 2` from the family of
-twice-differentiated variational identities -/
 
 /-- **Manifold-level `MemWkpChart g 4 2` for `u_h ∈ laplacianDomainPow g 2`.**
 
@@ -576,7 +486,6 @@ theorem laplacianDomainPow_memWkpChart_four_two_of_twice_diff_identities
     (I := I) (M := M) g hu_h h_twice_identities
   have h := laplacianDomainPow_memWkpChart_2k_of_chartSideH2kBridge
     (I := I) (M := M) g 2 hu_h h_bridge
-  -- 2 * 2 = 4.
   have h_eq : (2 : ℕ) * 2 = 4 := by norm_num
   rw [h_eq] at h
   exact h

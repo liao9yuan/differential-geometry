@@ -54,12 +54,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -91,14 +85,9 @@ theorem tensorL2Inner_covGrad_eq_integral_tensorCovDerivPointwiseInner
         (covGrad (I := I) (M := M) g r s v).toFun =
       ∫ x, tensorCovDerivPointwiseInner (I := I) (M := M) g r s T v x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
-  -- `tensorL2Inner` is the integral of the pointwise `(r, s + 1)`-tensor inner
-  -- product of the two covariant-gradient sections; the integrand is the
-  -- pointwise metric-isometry bridge, read right-to-left.
   unfold tensorL2Inner
   refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall ?_)
   intro x
-  -- The model coercion `(covGrad g r s T).toFun x` is, definitionally,
-  -- `TensorRSSpace.toModel ((covGrad g r s T).toSection x)`.
   change tensorInnerPointwise (I := I) (M := M) g r (s + 1) x
       (TensorRSSpace.toModel
         ((covGrad (I := I) (M := M) g r s T).toSection x))

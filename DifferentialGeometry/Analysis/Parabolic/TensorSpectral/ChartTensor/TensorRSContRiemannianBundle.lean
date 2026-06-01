@@ -74,12 +74,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Chart-α `(r, s)`-inner CLM on the model fibre
-
-We package `chartTensorInnerPointwise_rs_model` as a continuous bilinear pairing
-on the model fibre `TensorRSModel r s ℝ E`, following the same pattern as
-`innerModelCLMRS` in `TensorRSRiemannianBundle.lean`. -/
-
 /-- Underlying bilinear `LinearMap` for the chart-α `(r, s)` inner product. -/
 private def chartInnerRSBilin
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M) :
@@ -151,13 +145,6 @@ def chartTensorInnerRSCLM
       chartTensorInnerPointwise_rs_model
         (I := I) (M := M) g r s α b T S := rfl
 
-/-! ## Operator-norm continuity of the chart-α CLM on the chart base set
-
-Applying `continuousAt_bilin_of_basis_continuousAt` with the canonical finite
-basis of `TensorRSModel r s ℝ E`, the operator-norm continuity reduces to
-scalar continuity on basis pairs, which follows from the smoothness theorem
-`chartTensorInnerPointwise_rs_model_contMDiffOn`. -/
-
 set_option linter.unusedSectionVars false in
 /-- Operator-norm continuity at each base-set point of the chart-α inner CLM
 section `b ↦ chartTensorInnerRSCLM g r s α b`. -/
@@ -167,16 +154,12 @@ lemma chartTensorInnerRSCLM_continuousAt_of_baseSet
     ContinuousAt
       (fun b : M => chartTensorInnerRSCLM (I := I) (M := M) g r s α b) b₀ := by
   classical
-  -- Apply Step 2 of `(0, s)`'s strategy with the canonical finite basis of
-  -- `TensorRSModel r s ℝ E`.
   set basis := Module.finBasis ℝ (TensorRSModel r s ℝ E) with hbasis_def
   refine continuousAt_bilin_of_basis_continuousAt
     (F := TensorRSModel r s ℝ E) (N := M) (v := basis)
     (u := fun b => chartTensorInnerRSCLM (I := I) (M := M) g r s α b)
     (x₀ := b₀) ?_
   intro i j
-  -- The scalar function is `ContMDiffOn ∞` on the chart-α base set; restrict to
-  -- a neighborhood of `b₀` and convert to `ContinuousAt`.
   have heq : (fun b : M =>
       chartTensorInnerRSCLM (I := I) (M := M) g r s α b (basis i) (basis j))
       = (fun b : M =>
@@ -195,18 +178,6 @@ lemma chartTensorInnerRSCLM_continuousAt_of_baseSet
   have hOpen : IsOpen (trivializationAt E (TangentSpace I) α).baseSet :=
     (trivializationAt E (TangentSpace I) α).open_baseSet
   exact hCont.continuousAt (hOpen.mem_nhds hb₀)
-
-/-! ## `inCoordinates` bridge
-
-The `inCoordinates` form of `tensorRSRiemannianInnerCLM g r s b` at the chart-α
-trivialisation pair, evaluated on test vectors `v, w : TensorRSModel r s ℝ E`,
-equals `chartTensorInnerRSCLM g r s α b v w` for `b` in the chart-α base set.
-
-The key identification: for `b ∈ baseSet`, the `(r, s)`-bundle inverse
-trivialisation `(triv_RS α).symm b v` equals the `chartRSTwist α b r s v` after
-toModel/ofModel transit; the bridge identity
-`chartTensorInnerPointwise_rs_model_eq_tensorInnerPointwise` then closes the
-identification. -/
 
 set_option linter.unusedSectionVars false in
 /-- For `v : TensorRSModel r s ℝ E` and `b` in the chart-α base set, the
@@ -227,11 +198,9 @@ private lemma toModel_trivAt_symm_eq_chartRSTwist
     (fun y : M => Tensor0SSpace r I y) α with her_def
   set es := trivializationAt (Tensor0SModel s ℝ E)
     (fun y : M => Tensor0SSpace s I y) α with hes_def
-  -- The (0, r) and (0, s) bundle base sets at α both contain b.
   have hb_r : b ∈ er.baseSet := hb
   have hb_s : b ∈ es.baseSet := hb
   have hb_RS : b ∈ eRS.baseSet := ⟨hb_r, hb_s⟩
-  -- Reduce the hom-bundle `symm` to the factor sandwich.
   have h_sym :
       (eRS.symm b v : Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b)
         = (es.symmL ℝ b).comp (v.comp (er.continuousLinearMapAt ℝ b)) :=
@@ -241,18 +210,11 @@ private lemma toModel_trivAt_symm_eq_chartRSTwist
       (F₂ := Tensor0SModel s ℝ E)
       (E₂ := fun y : M => Tensor0SSpace s I y)
       (e₁ := er) (e₂ := es) (b := b) hb_RS v
-  -- Show: both sides agree at every test α' : Tensor0SModel r ℝ E.
   refine ContinuousLinearMap.ext ?_
   intro α'
-  -- LHS unfolds as `toModel ((eRS.symm b v) (ofModel α'))` where ofModel acts
-  -- on the Tensor0SSpace fibre carrier (identity on the underlying multilinear
-  -- map). On the carrier level, `toModel` and `ofModel` are identity, so the
-  -- result equals `(eRS.symm b v applied as a CLM) α'`.
-  -- Use the factor sandwich.
   change (Tensor0SBundle.TensorRSSpace.toModel
       (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := r) (s := s) (x := b)
       (eRS.symm b v)) α' = chartRSTwist (I := I) (M := M) α b r s v α'
-  -- Unfold `toModel` via the arrowCongr structure.
   have htoModel_apply :
       (Tensor0SBundle.TensorRSSpace.toModel
         (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := r) (s := s) (x := b)
@@ -264,7 +226,6 @@ private lemma toModel_trivAt_symm_eq_chartRSTwist
             (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := r) (x := b) α')) := by
     rfl
   rw [htoModel_apply]
-  -- Apply the factor sandwich.
   have happ :
       ((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from eRS.symm b v)
         (Tensor0SBundle.Tensor0SSpace.ofModel
@@ -275,9 +236,7 @@ private lemma toModel_trivAt_symm_eq_chartRSTwist
             (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := r) (x := b) α') := by
     rw [h_sym]
   rw [happ]
-  -- Unfold the composition.
   simp only [ContinuousLinearMap.comp_apply]
-  -- Identify er.continuousLinearMapAt b (ofModel α') with α'.compCLM(chartJinv α b).
   have h_er :
       ((er.continuousLinearMapAt ℝ b)
         (Tensor0SBundle.Tensor0SSpace.ofModel
@@ -285,18 +244,14 @@ private lemma toModel_trivAt_symm_eq_chartRSTwist
             Tensor0SModel r ℝ E) =
       α'.compContinuousLinearMap
         (fun _ : Fin r => chartJinv (I := I) (M := M) α b) := by
-    -- `er.continuousLinearMapAt ℝ b T = T.compCLM (fun _, symmL b)` for
-    -- `T = ofModel α' ≅ α'` carrier-wise.
     have := triv_continuousLinearMapAt_eq_compContinuousLinearMap
       (I := I) (M := M) (s := r) (b₀ := α) (b := b) hb_r
       (T := show Bundle.continuousMultilinearMap ℝ r E (TangentSpace I) b from α')
     convert this using 1
   rw [h_er]
-  -- Now apply v to get an element of Tensor0SModel s ℝ E.
   set Tβ : Tensor0SModel s ℝ E :=
     v (α'.compContinuousLinearMap
         (fun _ : Fin r => chartJinv (I := I) (M := M) α b)) with hTβ_def
-  -- Identify es.symmL b (ofModel Tβ) with Tβ.compCLM(chartJ α b).
   have h_es :
       (Tensor0SBundle.Tensor0SSpace.toModel
         (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := s) (x := b)
@@ -304,16 +259,10 @@ private lemma toModel_trivAt_symm_eq_chartRSTwist
             Tensor0SModel s ℝ E) =
       Tβ.compContinuousLinearMap
         (fun _ : Fin s => chartJ (I := I) (M := M) α b) := by
-    -- `es.symmL ℝ b T = T.compCLM (fun _, continuousLinearMapAt b)` for
-    -- the multilinear bundle. The carrier `Tensor0SSpace s I b` is the same
-    -- as `Bundle.continuousMultilinearMap ℝ s E (TangentSpace I) b`.
     have :=
       Bundle.continuousMultilinearMap.triv_symmL_eq_compContinuousLinearMap
         (𝕜 := ℝ) (B := M) (F := E) (E := (TangentSpace I : M → Type _))
         (s := s) (x₀ := α) (x := b) hb_s Tβ
-    -- The `chartJ` here is `(triv E TangentSpace α).continuousLinearMapAt ℝ b`,
-    -- which equals our definition of `chartJ α b`.
-    -- The toModel of (es.symmL b T) is the same multilinear map on the carrier.
     have htoModel_eq :
         (Tensor0SBundle.Tensor0SSpace.toModel
           (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := s) (x := b)
@@ -325,25 +274,12 @@ private lemma toModel_trivAt_symm_eq_chartRSTwist
         (I := I) (M := M) s b _
     rw [htoModel_eq]
     convert this using 1
-  -- The toModel applied to (es.symmL b Tβ) — wait, Tβ is in Tensor0SModel,
-  -- not the bundle fibre. We need to first inject Tβ into Tensor0SSpace s I b
-  -- via ofModel, then apply es.symmL b.
-  -- Actually `es.symmL ℝ b : Tensor0SModel s ℝ E → Tensor0SSpace s I b` already.
-  -- The Tβ here is a model tensor, and we feed it directly to es.symmL b.
-  -- Then toModel of the result is what h_es computes.
-  -- Goal after rewrites: (toModel ((es.symmL b) Tβ)) = chartRSTwist ... α'
-  -- which equals (v (α'.compCLM chartJinv)).compCLM chartJ by chartRSTwist_apply.
   have h_lhs_simplify :
       Tensor0SBundle.Tensor0SSpace.toModel
         (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := s) (x := b)
         ((es.symmL ℝ b) (show Tensor0SSpace s I b from Tβ)) =
         Tβ.compContinuousLinearMap
           (fun _ : Fin s => chartJ (I := I) (M := M) α b) := h_es
-  -- The LHS of our goal (after the rewrites) is:
-  --   toModel ((es.symmL b) (v (α'.compCLM chartJinv)))
-  -- but Tβ := v(α'.compCLM chartJinv), so we need:
-  -- Note h_lhs_simplify uses Tβ on the input of es.symmL, but the actual goal
-  -- has v(α'.compCLM chartJinv). They are the same by Tβ_def.
   change Tensor0SBundle.Tensor0SSpace.toModel
       (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := s) (x := b)
       ((es.symmL ℝ b) Tβ) = chartRSTwist (I := I) (M := M) α b r s v α'
@@ -364,14 +300,9 @@ private lemma tensorRSRiemannianInnerCLM_at_trivAt_symm
           (fun y : M => TensorRSSpace r s I y) α).symm b w) =
       chartTensorInnerPointwise_rs_model
         (I := I) (M := M) g r s α b v w := by
-  -- Unfold the bundle inner via the model representation.
   rw [tensorRSRiemannianInnerCLM_apply]
-  -- The toModel images of the symm-trivialised representations equal the
-  -- chart-RS-twists by `toModel_trivAt_symm_eq_chartRSTwist`.
   rw [toModel_trivAt_symm_eq_chartRSTwist (I := I) (M := M) (E := E) r s α hb v]
   rw [toModel_trivAt_symm_eq_chartRSTwist (I := I) (M := M) (E := E) r s α hb w]
-  -- Bridge: `chartTensorInnerPointwise_rs_model ... v w =
-  --   tensorInnerPointwise g r s b (chartRSTwist α b r s v) (chartRSTwist α b r s w)`.
   exact (chartTensorInnerPointwise_rs_model_eq_tensorInnerPointwise
     (I := I) (M := M) g r s α hb v w).symm
 
@@ -394,17 +325,14 @@ lemma tensorRSRiemannianInnerCLM_inCoordinates_apply
       (fun b' : M => TensorRSSpace r s I b') α).baseSet := by
     rw [hom_trivializationAt_baseSet]
     exact ⟨hb, hb⟩
-  -- The third trivialization is the Trivial bundle's trivialization for ℝ.
   have hb_trivR :
       b ∈ (trivializationAt ℝ (Bundle.Trivial M ℝ) α).baseSet :=
     mem_univ _
-  -- The second trivialization for the dual bundle is valid at `b`.
   have hb_dual :
       b ∈ (trivializationAt (TensorRSModel r s ℝ E →L[ℝ] ℝ)
         (fun b' : M => TensorRSSpace r s I b' →L[ℝ] ℝ) α).baseSet := by
     rw [hom_trivializationAt_baseSet]
     exact ⟨hb', mem_univ _⟩
-  -- Apply `inCoordinates_apply_eq₂` with `F₃ = ℝ`, `E₃ = Bundle.Trivial M ℝ`.
   rw [inCoordinates_apply_eq₂ (𝕜 := ℝ)
     (F₁ := TensorRSModel r s ℝ E) (F₂ := TensorRSModel r s ℝ E)
     (F₃ := ℝ)
@@ -414,10 +342,6 @@ lemma tensorRSRiemannianInnerCLM_inCoordinates_apply
     (x₀ := α) (x := b)
     (ϕ := tensorRSRiemannianInnerCLM (I := I) (M := M) g r s b)
     (v := v) (w := w) hb' hb' hb_trivR]
-  -- After `inCoordinates_apply_eq₂`, the result is:
-  --   (triv ℝ Trivial α).linearMapAt b
-  --     ((innerCLM g r s b) ((triv_RS α).symm b v) ((triv_RS α).symm b w))
-  -- The `linearMapAt` on Trivial is `LinearMap.id`.
   have h_lm_id : ∀ y : ℝ,
       (trivializationAt ℝ (Bundle.Trivial M ℝ) α).linearMapAt ℝ b y = y := by
     intro y
@@ -425,12 +349,9 @@ lemma tensorRSRiemannianInnerCLM_inCoordinates_apply
     rw [(trivializationAt ℝ (Bundle.Trivial M ℝ) α).coe_linearMapAt_of_mem hmem]
     rfl
   rw [h_lm_id]
-  -- Apply the symm identification.
   rw [tensorRSRiemannianInnerCLM_at_trivAt_symm
     (I := I) (M := M) g r s α hb v w]
   rfl
-
-/-! ## Total-space-valued continuity on each chart base set -/
 
 set_option linter.unusedSectionVars false in
 /-- The bundle inner-product section for the `(r, s)`-tensor bundle is
@@ -441,7 +362,6 @@ theorem tensorRSRiemannianInnerCLM_continuousOn
       TotalSpace.mk' (TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E →L[ℝ] ℝ) b
         (tensorRSRiemannianInnerCLM (I := I) (M := M) g r s b))
       (chartAt H α).source := by
-  -- Convert to chart-α base set (the trivialization base set agrees).
   have hOpen : IsOpen (trivializationAt E (TangentSpace I) α).baseSet :=
     (trivializationAt E (TangentSpace I) α).open_baseSet
   rw [show (chartAt H α).source =
@@ -452,7 +372,6 @@ theorem tensorRSRiemannianInnerCLM_continuousOn
   apply ContinuousAt.continuousWithinAt
   rw [continuousAt_hom_bundle]
   refine ⟨continuousAt_id, ?_⟩
-  -- Now show ContinuousAt of the inCoordinates form.
   have hb₀_self : b₀ ∈ (trivializationAt E (TangentSpace I) b₀).baseSet :=
     FiberBundle.mem_baseSet_trivializationAt (F := E)
       (E := (TangentSpace I : M → Type _)) b₀
@@ -464,7 +383,6 @@ theorem tensorRSRiemannianInnerCLM_continuousOn
   have h_nhds : (trivializationAt E (TangentSpace I) b₀).baseSet ∈ 𝓝 b₀ :=
     hOpen_b₀.mem_nhds hb₀_self
   filter_upwards [h_nhds] with x hx
-  -- Goal: chartTensorInnerRSCLM g r s b₀ x = inCoordinates ... (innerCLM g r s x).
   refine ContinuousLinearMap.ext ?_
   intro v
   refine ContinuousLinearMap.ext ?_
@@ -491,13 +409,6 @@ end Parabolic
 end Analysis
 end DifferentialGeometry
 
-/-! ## `IsContinuousRiemannianBundle` typeclass instance for the `(r, s)`-tensor bundle
-
-We install the instance using the `Bundle.RiemannianBundle` typeclass on the
-`(r, s)`-tensor bundle (derived from `tensorRS_riemannianBundle`), bringing the
-per-fibre inner-product structure into scope via Mathlib's scoped instance
-machinery. -/
-
 namespace DifferentialGeometry.Tensor.TensorRSRiemannianBundleContinuous
 
 set_option backward.isDefEq.respectTransparency false
@@ -522,8 +433,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
-/-! ### Bedrock instances for `TensorRSSpace` -/
 
 instance tensorRSSpace_totalSpace_topologicalSpace (r s : ℕ) :
     TopologicalSpace (Bundle.TotalSpace (TensorRSModel r s ℝ E)

@@ -156,31 +156,18 @@ theorem rawTensorConnLap_eq_chart
   letI _h_fib : FiberBundle (TensorRSModel r s ℝ E)
       (fun x : M => TensorRSSpace r s I x) :=
     tensorRSBundle_fiber r s
-  -- Step 1: definitional restatement of `rawTensorConnLap` as a finite trace
-  -- against the smooth orthonormal frame at the centre `y`.
   rw [rawTensorConnLap_frame_trace (I := I) g r s T.toFun y]
-  -- Step 2: per-`i` rewrite of the first summand via the chart-coordinate
-  -- agreement for the second covariant derivative.
   refine Finset.sum_congr rfl ?_
   intro i _
-  -- Package `smoothOrthoFrame g y i` as a `Cₛ^∞⟮I; E, TangentSpace I⟯` section.
   set Bi : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
       smoothOrthoFrameAsSection (I := I) g y i with hBi_def
-  -- Chart-coordinate agreement for the second covariant derivative with
-  -- inner vector field `X = Bi` and outer vector field `X' = Bi`.
   have hSecond :=
     chartTensorRSSecondCovariantDerivative_eq_abstract
       (I := I) (M := M) g r s α T Bi Bi (y := y) hy
-  -- Rewrite `Bi.toFun = smoothOrthoFrame g y i` to align with the LHS.
   have hBi_toFun : Bi.toFun = smoothOrthoFrame (I := I) g y i := by
     rw [hBi_def]
     rfl
   rw [hBi_toFun] at hSecond
-  -- `hSecond` reads:
-  --   cov_RS (covApply cov_RS B_i T.toFun) y (B_i y) =
-  --     chartTensorRSCovariantDerivative r s g α
-  --       (covApply cov_RS B_i T.toFun) B_i y.
-  -- Rewrite the first summand of the LHS using `hSecond`.
   rw [hSecond]
 
 end Connection

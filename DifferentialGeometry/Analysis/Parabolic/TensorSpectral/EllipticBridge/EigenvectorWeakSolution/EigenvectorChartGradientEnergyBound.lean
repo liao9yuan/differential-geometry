@@ -113,15 +113,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## The eigen-equation and unit-norm facts for the eigenbasis vector
-
-The compactness witness `tensorResolventL2_isCompactOperator` selects
-the eigenbasis vector `tensorResolventEigenbasisVec` with no chart-
-selection hypothesis. Membership in the eigenspace, supplied by
-`tensorResolventEigenbasisVec_mem`, unfolds to the eigen-equation
-`tensorResolventL2 g r s φ = μ • φ`; orthonormality of the family supplies the
-unit norm. `[CompleteSpace E]` is derived locally from finite-dimensionality. -/
-
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- **Chart-locality-free eigen-equation.** The unconditional eigenbasis vector
 `tensorResolventEigenbasisVec (tensorResolventL2_isCompactOperator
@@ -161,17 +152,6 @@ private lemma norm_tensorResolventEigenbasisVec_eq_one
     (tensorResolventL2_isCompactOperator (I := I) (M := M)
       g r s)).norm_eq_one i
 
-/-! ## The energy identity for the eigenvector
-
-The defining variational identity of the resolvent, evaluated at the eigenbasis
-vector and at the test element `tensorResolvent g r s φ`, exhibits the squared
-`H¹` norm of `eigenvectorResolvent g r s i` as `μ` times the
-squared `L²` norm of the eigenbasis vector.
-
-The variational identity, eigen-equation, and unit-norm facts — in their
-`_ofCompact` / `_unconditional` forms — reproduce the energy identity for the
-unconditional eigenvector resolvent `eigenvectorResolvent`. -/
-
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- **The energy identity in squared form (chart-locality-free).** The squared
 `H¹` norm of `eigenvectorResolvent g r s i` equals
@@ -186,32 +166,25 @@ theorem eigenvectorResolvent_h1NormSq_eq
           (tensorResolventL2_isCompactOperator (I := I) (M := M)
             g r s) i‖ ^ 2 := by
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
-  -- Abbreviations: `φ` the unconditional eigenbasis vector, `Rφ` the resolvent
-  -- applied to it.
   set φ := tensorResolventEigenbasisVec (I := I) (M := M)
     (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s) i
     with hφ
   set Rφ := tensorResolvent (I := I) (M := M) g r s φ with hRφ
-  -- `eigenvectorResolvent … = Rφ` by definition.
   have h_eig :
       eigenvectorResolvent (I := I) (M := M) g r s i = Rφ := by
     rw [eigenvectorResolvent, hRφ, hφ]
   rw [h_eig]
-  -- The squared `H¹` norm is the `H¹` self-pairing.
   have h_self : ‖Rφ‖ ^ 2 = ⟪Rφ, Rφ⟫_ℝ := (real_inner_self_eq_norm_sq Rφ).symm
-  -- The variational identity at `f := φ`, `v := Rφ`.
   have h_var : ⟪Rφ, Rφ⟫_ℝ =
       ⟪TensorH1ComplToTensorL2 (I := I) (M := M) g r s Rφ, φ⟫_ℝ := by
     rw [hRφ]
     exact tensorResolvent_inner_eq_lpFunctional (I := I) (M := M) g r s φ
       (tensorResolvent (I := I) (M := M) g r s φ)
-  -- `TensorH1ComplToTensorL2 (tensorResolvent φ) = tensorResolventL2 φ = μ • φ`.
   have h_l2 : TensorH1ComplToTensorL2 (I := I) (M := M) g r s Rφ =
       i.fst.val • φ := by
     rw [hRφ, ← tensorResolventL2_apply (I := I) (M := M) g r s φ]
     exact tensorResolventL2_eigenbasisVec_eq
       (I := I) (M := M) g r s i
-  -- Assemble: `‖Rφ‖² = ⟪μ • φ, φ⟫ = μ · ‖φ‖²`.
   rw [h_self, h_var, h_l2, real_inner_smul_left, real_inner_self_eq_norm_sq]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
@@ -228,7 +201,6 @@ theorem eigenvectorResolvent_h1Norm_le
             g r s) i‖ := by
   have h_sq := eigenvectorResolvent_h1NormSq_eq
     (I := I) (M := M) g r s i
-  -- `μ > 0`: it is a resolvent eigenvalue of a unit eigenvector.
   have hμ_pos : 0 < i.fst.val :=
     (tensorResolvent_eigenvalue_mem_unit_interval (I := I) (M := M) g r s
       (tensorResolventEigenbasisVec_mem (I := I) (M := M)
@@ -241,14 +213,12 @@ theorem eigenvectorResolvent_h1Norm_le
         rw [h_zero, norm_zero] at h_norm
         exact one_ne_zero h_norm.symm)).1
   have hμ_nn : 0 ≤ i.fst.val := le_of_lt hμ_pos
-  -- The right-hand side is non-negative.
   have h_rhs_nn :
       0 ≤ Real.sqrt i.fst.val *
         ‖tensorResolventEigenbasisVec (I := I) (M := M)
           (tensorResolventL2_isCompactOperator (I := I) (M := M)
             g r s) i‖ :=
     mul_nonneg (Real.sqrt_nonneg _) (norm_nonneg _)
-  -- Compare squares: `‖Rφ‖² = μ · ‖φ‖² = (√μ · ‖φ‖)²`.
   have h_rhs_sq :
       (Real.sqrt i.fst.val *
           ‖tensorResolventEigenbasisVec (I := I) (M := M)
@@ -266,24 +236,7 @@ theorem eigenvectorResolvent_h1Norm_le
             (tensorResolventL2_isCompactOperator (I := I) (M := M)
               g r s) i‖) ^ 2 := by
     rw [h_rhs_sq]; exact le_of_eq h_sq
-  -- From `a² ≤ b²` and `0 ≤ b` conclude `a ≤ b` (here `a = ‖·‖ ≥ 0`).
   exact (abs_le_of_sq_le_sq' h_le_sq h_rhs_nn).2
-
-/-! ## The abstract gradient-energy bound
-
-The covariant gradient extended to the `H¹` completion, `tensorCovGradL2Compl`,
-is a continuous linear map of operator norm `≤ 1`. Composing the operator-norm
-bound with the energy identity controls the metric `L²` norm of the abstract
-covariant gradient of the eigenvector resolvent by the `√μ`-weighted `L²` norm
-of the eigenbasis vector. -/
-
-/-! ### Chart-locality-free twin of the abstract gradient-energy bound
-
-The covariant-gradient operator-norm bound `tensorCovGradL2Compl_apply_norm_le`
-carries no chart-selection hypothesis, so the same chaining reproduces the
-gradient-energy bound for the unconditional eigenvector resolvent
-`eigenvectorResolvent`, with the unconditional energy identity
-`eigenvectorResolvent_h1Norm_le`. -/
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- **The abstract gradient-energy bound (chart-locality-free).** For an
@@ -308,43 +261,25 @@ theorem tensorCovGradL2Compl_eigenvectorResolvent_l2Norm_le
         ‖tensorResolventEigenbasisVec (I := I) (M := M)
           (tensorResolventL2_isCompactOperator (I := I) (M := M)
             g r s) i‖ := by
-  -- The pointwise bound for the completion-extended covariant gradient: its
-  -- value at `eigenvectorResolvent …` is bounded by the `H¹` norm
-  -- of that argument. The bound carries no chart-selection hypothesis.
   have h_grad :
       ‖tensorCovGradL2Compl (I := I) (M := M) g r s
           (eigenvectorResolvent (I := I) (M := M) g r s i)‖ ≤
         ‖eigenvectorResolvent (I := I) (M := M) g r s i‖ :=
     tensorCovGradL2Compl_apply_norm_le (I := I) (M := M) g r s
       (eigenvectorResolvent (I := I) (M := M) g r s i)
-  -- Chain with the unconditional energy identity `‖eigenvectorResolvent …‖ ≤
-  -- √μ · ‖φ‖`.
   exact h_grad.trans
     (eigenvectorResolvent_h1Norm_le (I := I) (M := M) g r s i)
-
-/-! ## The chart-partial operator-norm bound and the `μ`-power identity
-
-The canonical chart-partial continuous linear map `eigenvectorChartPartialCLM
-g r s α P₀ k` controls, by the elementary operator-norm bound `‖T x‖ ≤ ‖T‖ ·
-‖x‖`, the chart-partial `L²` norm by the `H¹` norm of its argument. Its operator
-norm depends only on the geometric data `g r s α P₀ k`; it is the constant of
-the headline. The bound is combined with the energy identity through the scalar
-identity `μ⁻¹ · √μ = √(μ⁻¹)`, valid for `μ > 0`. -/
 
 /-- For a positive real `μ`, the rescaled square root satisfies
 `μ⁻¹ · √μ = √(μ⁻¹)`. -/
 private lemma inv_mul_sqrt_eq_sqrt_inv {μ : ℝ} (hμ : 0 < μ) :
     μ⁻¹ * Real.sqrt μ = Real.sqrt μ⁻¹ := by
-  -- `√μ > 0`, hence `√μ ≠ 0` and `μ ≠ 0`.
   have h_sqrt_pos : 0 < Real.sqrt μ := Real.sqrt_pos.mpr hμ
   have h_sqrt_ne : Real.sqrt μ ≠ 0 := ne_of_gt h_sqrt_pos
   have hμ_ne : μ ≠ 0 := ne_of_gt hμ
-  -- `√μ * √μ = μ`.
   have h_mul_self : Real.sqrt μ * Real.sqrt μ = μ :=
     Real.mul_self_sqrt (le_of_lt hμ)
-  -- Rewrite the right-hand side: `√(μ⁻¹) = (√μ)⁻¹`.
   rw [Real.sqrt_inv]
-  -- Clear all denominators; the resulting polynomial identity is `√μ * √μ = μ`.
   field_simp
   linarith [h_mul_self]
 
@@ -365,18 +300,6 @@ private lemma eigenvectorChartPartialCLM_norm_le
     ‖eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k x‖ ≤
       ‖eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k‖ * ‖x‖ :=
   (eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k).le_opNorm x
-
-/-! ## The headline chart-local gradient-energy estimate
-
-The weak `k`-th chart partial `eigenvectorChartWeakPartial g r s i
-α P₀ k` is the coercion-to-function of the `Lp` class
-`eigenvectorChartPartialLp`, itself `μ⁻¹` times the value of
-`eigenvectorChartPartialCLM` on the unconditional eigenvector resolvent. The
-`eLpNorm` over the Euclidean chart target therefore equals the `Lp` norm of that
-class; chaining `eLpNorm`–`Lp.norm_def`, the chart-partial operator-norm bound,
-the energy identity, and the `μ`-power identity produces the headline. The
-constant `C` is `‖eigenvectorChartPartialCLM g r s α P₀ k‖`, a chart-geometric
-quantity uniform over `i`. No chart-selection hypothesis. -/
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1600000 in
@@ -409,12 +332,9 @@ theorem eigenvectorChartWeakPartial_eLpNorm_le
                 g r s) i‖ := by
   classical
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
-  -- The constant: the operator norm of the canonical chart-partial CLM. It is a
-  -- chart-geometric quantity, independent of the eigenbasis index `i`.
   refine ⟨‖eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k‖,
     norm_nonneg (eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k),
     fun i => ?_⟩
-  -- `μ > 0`: it is a resolvent eigenvalue of the unit eigenbasis vector.
   have hμ_pos : 0 < i.fst.val :=
     (tensorResolvent_eigenvalue_mem_unit_interval (I := I) (M := M) g r s
       (tensorResolventEigenbasisVec_mem (I := I) (M := M)
@@ -426,9 +346,6 @@ theorem eigenvectorChartWeakPartial_eLpNorm_le
           (I := I) (M := M) g r s i
         rw [h_zero, norm_zero] at h_norm
         exact one_ne_zero h_norm.symm)).1
-  -- `eigenvectorChartWeakPartial` is the coercion-to-function of
-  -- the `Lp` class `eigenvectorChartPartialLp`; its `eLpNorm` over
-  -- the chart target is the `Lp` norm of that class.
   have h_eLp_eq :
       eLpNorm (eigenvectorChartWeakPartial (I := I) (M := M)
             g r s i α P₀ k) 2
@@ -438,8 +355,6 @@ theorem eigenvectorChartWeakPartial_eLpNorm_le
             g r s i α P₀ k :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
             EuclN → ℝ) 2 (chartL2Measure (I := I) (M := M) α) := rfl
-  -- The `eLpNorm` of the coercion is finite, so it equals `ENNReal.ofReal` of
-  -- the `Lp` norm of the class (`Lp.norm_def`).
   have h_eLp_ne_top :
       eLpNorm ((eigenvectorChartPartialLp (I := I) (M := M)
             g r s i α P₀ k :
@@ -456,8 +371,6 @@ theorem eigenvectorChartWeakPartial_eLpNorm_le
             g r s i α P₀ k‖ := by
     rw [Lp.norm_def (eigenvectorChartPartialLp (I := I) (M := M)
       g r s i α P₀ k), ENNReal.ofReal_toReal h_eLp_ne_top]
-  -- The `Lp`-norm bound: `‖eigenvectorChartPartialLp‖ ≤
-  --   C · √(μ⁻¹) · ‖φ‖`.
   have h_lp_bound :
       ‖eigenvectorChartPartialLp (I := I) (M := M)
           g r s i α P₀ k‖ ≤
@@ -466,13 +379,8 @@ theorem eigenvectorChartWeakPartial_eLpNorm_le
           ‖tensorResolventEigenbasisVec (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M)
               g r s) i‖ := by
-    -- `eigenvectorChartPartialLp = μ⁻¹ • eigenvectorChartPartialCLM
-    --   … (eigenvectorResolvent …)`.
     rw [eigenvectorChartPartialLp, norm_smul]
-    -- `‖μ⁻¹‖ = μ⁻¹` since `μ > 0`.
     rw [Real.norm_eq_abs, abs_of_pos (inv_pos.mpr hμ_pos)]
-    -- Chain: the chart-partial operator-norm bound, then the unconditional
-    -- energy identity, then the `μ`-power identity `μ⁻¹ · √μ = √(μ⁻¹)`.
     calc (i.fst.val)⁻¹ *
             ‖eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k
               (eigenvectorResolvent (I := I) (M := M)
@@ -512,7 +420,6 @@ theorem eigenvectorChartWeakPartial_eLpNorm_le
               (tensorResolventL2_isCompactOperator (I := I) (M := M)
                 g r s) i‖ := by
             rw [inv_mul_sqrt_eq_sqrt_inv hμ_pos]
-  -- Lift the real bound to `ℝ≥0∞` and split the product factor.
   have h_factor_nn :
       0 ≤ ‖eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k‖ *
         Real.sqrt (i.fst.val)⁻¹ :=

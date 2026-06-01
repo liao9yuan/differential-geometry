@@ -98,24 +98,12 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
   hiding chartTargetEuclid chartTargetEuclid_isOpen
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The reciprocal chart density
-
-The differentiated numerator is divided by the chart density; the reciprocal
-`1 / densityOnEuclid g α` is `C^∞` on the open chart target because the chart
-density is `C^∞` and strictly positive there. -/
 
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
@@ -130,25 +118,11 @@ private lemma one_div_densityOnEuclid_contDiffOn_chartTarget
   contDiffOn_const.div (densityOnEuclid_contDiffOn (I := I) g α)
     (fun _ hy => (densityOnEuclid_pos (I := I) g α hy).ne')
 
-/-! ## Chart-locality-free twins
-
-The remainder of this file ships the chart-locality-free twins of the iterated
-carrier structure and step, re-keyed onto the intrinsic-compactness eigenvector
-`tensorResolventEigenbasisVec (tensorResolventL2_isCompactOperator g r s) i`
-via the committed chart-locality-free iterated partials
-(`eigenvectorChartIteratedPartial`), differentiated right-hand side
-(`eigenvectorChartRHSDiff`), and differentiated numerator
-(`eigenvectorChartRHSDiffNumerator`). Each twin carries no
-chart-locality hypothesis: the index `i : TensorEigenIdx g r s` enters directly,
-and the proof bodies transfer verbatim from the chart-locality-bearing
-originals. -/
-
 /-- **Chart-locality-free standalone iterated divergence-form datum for the
-eigenvector chart component.** Chart-locality-free twin of
-`eigenvectorIteratedTensorChartBilinearData`, re-keyed onto the
-intrinsic-compactness eigenvector. The principal factor is the chart-locality-
-free recursive `m`-fold mixed weak partial
-`eigenvectorChartIteratedPartial`. -/
+eigenvector chart component.** Re-keyed onto the intrinsic-compactness
+eigenvector, the eigenvector/tensor mirror of the scalar campaign's
+`IteratedDiffChartBilinearData`. The principal factor is the chart-locality-free
+recursive `m`-fold mixed weak partial `eigenvectorChartIteratedPartial`. -/
 structure eigenvectorIteratedTensorChartBilinearData
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -189,8 +163,9 @@ structure eigenvectorIteratedTensorChartBilinearData
 namespace eigenvectorIteratedTensorChartBilinearData
 
 /-- Hypothesis-bearing abstract constructor for
-`eigenvectorIteratedTensorChartBilinearData`. Chart-locality-free
-twin of `eigenvectorIteratedTensorChartBilinearData.mk_from_hypotheses`. -/
+`eigenvectorIteratedTensorChartBilinearData`: assembles the datum from the
+direction multi-index, the effective `L²` source, its weighted-`L²` membership,
+and the level-`m` differentiated variational identity. -/
 def mk_from_hypotheses
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {i : TensorEigenIdx (I := I) (M := M) g r s}
@@ -230,11 +205,9 @@ def mk_from_hypotheses
 end eigenvectorIteratedTensorChartBilinearData
 
 /-- **Chart-locality-free polymorphic regularity bridge for the eigenvector
-iterated mixed partial.** Chart-locality-free twin of
-`eigenvectorChartIteratedPartial_memWkp_of_memWkp`: from chart-`H^{k+m}` of the
-chart-locality-free eigenvector chart component, every `m`-fold mixed weak
-partial `eigenvectorChartIteratedPartial g r s i α P₀ m dirs` lies
-in chart-`H^k`. -/
+iterated mixed partial.** From chart-`H^{k+m}` of the chart-locality-free
+eigenvector chart component, every `m`-fold mixed weak partial
+`eigenvectorChartIteratedPartial g r s i α P₀ m dirs` lies in chart-`H^k`. -/
 theorem eigenvectorChartIteratedPartial_memWkp_of_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -278,8 +251,10 @@ theorem eigenvectorChartIteratedPartial_memWkp_of_memWkp
       exact h_step
 
 /-- **Chart-locality-free global `MemW1p 2` of the eigenvector iterated mixed weak
-partial.** Chart-locality-free twin of
-`eigenvectorChartIteratedPartial_memW1p_of_memWkp`. -/
+partial.** From chart-`H^{m+1}` of the chart-locality-free eigenvector chart
+component, the `m`-fold mixed weak partial
+`eigenvectorChartIteratedPartial g r s i α P₀ m dirs` lies in `W^{1,2}` on the
+chart target. -/
 theorem eigenvectorChartIteratedPartial_memW1p_of_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -310,8 +285,10 @@ theorem eigenvectorChartIteratedPartial_memW1p_of_memWkp
   exact h_memWkp_1
 
 /-- **Chart-locality-free per-pair polymorphic integration by parts for the
-eigenvector iterated mixed partial.** Chart-locality-free twin of
-`eigenvector_per_pair_ibp`. -/
+eigenvector iterated mixed partial.** Moves the `l`-derivative off the test
+function `ψ`: the integral of `φ · (m-fold mixed partial) · ∂_l ψ` equals minus
+the sum of `∫ ∂_l φ · (m-fold mixed partial) · ψ` and
+`∫ φ · ((m+1)-fold mixed partial along `Fin.snoc dirs l`) · ψ`. -/
 theorem eigenvector_per_pair_ibp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -375,9 +352,10 @@ theorem eigenvector_per_pair_ibp
   exact h_ibp
 
 /-- **Chart-locality-free five-layer differentiated numerator at the inductive
-step.** Chart-locality-free twin of `eigenvectorChartIteratedStepNumerator`, with
-the recursive mixed weak partials re-keyed onto
-`eigenvectorChartIteratedPartial`. -/
+step.** The recursive mixed weak partials are keyed onto
+`eigenvectorChartIteratedPartial`; the five summed layers carry the `l`- and
+`b`-differentiations of the weighted inverse Gram, the density, and the previous
+effective source. -/
 def eigenvectorChartIteratedStepNumerator
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -386,14 +364,12 @@ def eigenvectorChartIteratedStepNumerator
     (fChartEffPrev : EuclN → ℝ)
     (l : Fin (Module.finrank ℝ E))
     (y : EuclN) : ℝ :=
-  -- Layer A: (∂_b ∂_l a_ab) · ((m+1)-fold mixed partial, index `Fin.cons a dirs`).
   (∑ a : Fin (Module.finrank ℝ E),
     ∑ b : Fin (Module.finrank ℝ E),
       (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b l) y)
           (EuclideanSpace.single b 1) *
         eigenvectorChartIteratedPartial (I := I) (M := M)
           g r s i α P₀ (m + 1) (Fin.cons a dirs) y)
-  -- Layer B: (∂_l a_ab) · (∂_b of the (m+1)-fold mixed partial, `Fin.cons a dirs`).
   + (∑ a : Fin (Module.finrank ℝ E),
       ∑ b : Fin (Module.finrank ℝ E),
         weightedInvGramDerivOnEuclid (I := I) g α a b l y *
@@ -401,19 +377,17 @@ def eigenvectorChartIteratedStepNumerator
             (eigenvectorChartIteratedPartial (I := I) (M := M)
               g r s i α P₀ (m + 1) (Fin.cons a dirs))
             (chartTargetEuclid (I := I) (M := M) α) y)
-  -- Layer C: -(∂_l c) · (m-fold mixed partial, index `dirs`).
   - densityDerivOnEuclid (I := I) g α l y *
       eigenvectorChartIteratedPartial (I := I) (M := M)
         g r s i α P₀ m dirs y
-  -- Layer D: (∂_l c) · fChartEffPrev.
   + densityDerivOnEuclid (I := I) g α l y * fChartEffPrev y
-  -- Layer E: c · (∂_l-weak-partial of fChartEffPrev).
   + densityOnEuclid (I := I) g α y *
       chosenWeakPartial' (d := Module.finrank ℝ E) 2 l
         fChartEffPrev (chartTargetEuclid (I := I) (M := M) α) y
 
-/-- Chart-locality-free twin of
-`eigenvectorChartIteratedStepNumerator_eq_rhsDiffNumerator`. -/
+/-- The standalone-step numerator at level `m` with separated extra direction `l`
+coincides with the level-`m` differentiated numerator
+`eigenvectorChartRHSDiffNumerator` at the snoc-extended index `Fin.snoc dirs l`. -/
 theorem eigenvectorChartIteratedStepNumerator_eq_rhsDiffNumerator
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -436,7 +410,9 @@ theorem eigenvectorChartIteratedStepNumerator_eq_rhsDiffNumerator
   rw [h_last, h_init]
 
 /-- **Chart-locality-free effective chart-pulled `L²` source at the inductive
-step.** Chart-locality-free twin of `eigenvectorChartIteratedStep`. -/
+step.** The indicator of `chartPouKernel α` of the step numerator
+`eigenvectorChartIteratedStepNumerator` divided by the chart density
+`densityOnEuclid g α`. -/
 def eigenvectorChartIteratedStep
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -449,7 +425,10 @@ def eigenvectorChartIteratedStep
         (I := I) (M := M) g r s i α P₀ m dirs fChartEffPrev l y /
       densityOnEuclid (I := I) g α y)
 
-/-- Chart-locality-free twin of `eigenvectorChartIteratedStep_eq_rhsDiff_succ`. -/
+/-- The standalone step, fed the level-`m` differentiated right-hand side
+`eigenvectorChartRHSDiff` as its previous source, coincides with the
+level-`(m+1)` differentiated right-hand side at the snoc-extended index
+`Fin.snoc dirs l`. -/
 theorem eigenvectorChartIteratedStep_eq_rhsDiff_succ
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -472,8 +451,8 @@ theorem eigenvectorChartIteratedStep_eq_rhsDiff_succ
     (eigenvectorChartRHSDiff (I := I) (M := M) g r s i α P₀ m dirs) l
   rw [h_num, h_init]
 
-/-- Chart-locality-free twin of
-`eigenvectorChartIteratedStep_eq_zero_off_chartPouKernel`. -/
+/-- The standalone step vanishes at any point outside `chartPouKernel α`, since
+it is the indicator of that set. -/
 theorem eigenvectorChartIteratedStep_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -486,8 +465,8 @@ theorem eigenvectorChartIteratedStep_eq_zero_off_chartPouKernel
         g r s i α P₀ m dirs fChartEffPrev l y = 0 := by
   rw [eigenvectorChartIteratedStep, Set.indicator_of_notMem hy]
 
-/-- Chart-locality-free twin of
-`eigenvectorChartIteratedStep_support_subset_chartPouKernel`. -/
+/-- The support of the standalone step is contained in `chartPouKernel α`, since
+it is the indicator of that set. -/
 theorem eigenvectorChartIteratedStep_support_subset_chartPouKernel
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {i : TensorEigenIdx (I := I) (M := M) g r s}
@@ -503,8 +482,10 @@ theorem eigenvectorChartIteratedStep_support_subset_chartPouKernel
   exact Set.support_indicator_subset
 
 /-- **Chart-locality-free weighted-`L²` regularity of the standalone-step
-effective source, unconditional.** Chart-locality-free twin of
-`eigenvectorChartIteratedStep_memLp_two_weighted`. -/
+effective source.** Given only the weighted-`L²` membership of the previous
+effective source `fChartEffPrev`, the standalone step
+`eigenvectorChartIteratedStep` is itself `MemLp 2` with respect to the
+chart-pulled weighted measure restricted to the chart target. -/
 theorem eigenvectorChartIteratedStep_memLp_two_weighted
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -569,8 +550,9 @@ theorem eigenvectorChartIteratedStep_memLp_two_weighted
         (I := I) (M := M) g r s i α P₀ m dirs fChartEffPrev l hy))
     h_plain
 
-/-- Chart-locality-free twin of
-`eigenvectorChartIteratedPartial_one_cons_elim0_eq`. -/
+/-- The level-`1` mixed weak partial along `Fin.cons a Fin.elim0` unfolds to the
+chosen weak `a`-partial `chosenWeakPartial'` of the eigenvector chart
+component. -/
 private lemma eigenvectorChartIteratedPartial_one_cons_elim0_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -585,11 +567,9 @@ private lemma eigenvectorChartIteratedPartial_one_cons_elim0_eq
     eigenvectorChartIteratedPartial_zero]
   rfl
 
-/-- Chart-locality-free twin of
-`eigenvectorChartWeakPartial_ae_eq_iteratedPartial_one`: the chart-locality-free
-candidate weak chart partial `eigenvectorChartWeakPartial` agrees
-a.e. on the chart target with the chart-locality-free level-`1` mixed weak
-partial along `Fin.cons a Fin.elim0`. -/
+/-- The chart-locality-free candidate weak chart partial
+`eigenvectorChartWeakPartial` agrees a.e. on the chart target with the
+chart-locality-free level-`1` mixed weak partial along `Fin.cons a Fin.elim0`. -/
 private lemma eigenvectorChartWeakPartial_ae_eq_iteratedPartial_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -603,8 +583,6 @@ private lemma eigenvectorChartWeakPartial_ae_eq_iteratedPartial_one
   classical
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- The chart component lies in `W^{1,2}(Ω)`: `eigenvectorChartWeakPartial`
-  -- is a genuine weak partial of it in every direction, and is itself `L²(Ω)`.
   have h_wp_isWeak : ∀ k : Fin (Module.finrank ℝ E),
       DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
         (eigenvectorChartWeakPartial (I := I) (M := M)
@@ -657,7 +635,6 @@ namespace eigenvectorIteratedTensorChartBilinearData
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- **The `m = 0` instance of
 `eigenvectorIteratedTensorChartBilinearData`.**
-Chart-locality-free twin of `eigenvectorIteratedTensorChartBilinearData.ofBase`.
 The effective `L²` source at level `0` is the chart-locality-free seven-term
 `eigenvectorChartRHS`. -/
 def ofBase
@@ -728,8 +705,6 @@ def ofBase
     exact h_id
 
 end eigenvectorIteratedTensorChartBilinearData
-
-/-! ## Sanity tests -/
 
 section ElaborationTests
 

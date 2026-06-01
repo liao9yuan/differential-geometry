@@ -54,8 +54,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Pointwise duality bridge -/
-
 /-- **Metric duality of the gradient with the differential.** For every smooth scalar
 function `f : M → ℝ` and every tangent vector `v : T_x M`,
 `g.inner x (gradFun g f x) v = mfderiv I 𝓘(ℝ, ℝ) f x v`.
@@ -104,13 +102,6 @@ theorem gradFun_unique
   rw [hw v]
   exact (gradFun_metricDual (I := I) g f x v).symm
 
-/-! ## Bridge with the cotangent flat map
-
-The cotangent section `metricFlat g X` (defined in `CotangentExtension`) sends a
-tangent-bundle section `X` to the cotangent-bundle section `b ↦ g.inner b (X b)`. Applying
-this to the gradient `gradFun g f` reproduces the differential `df` as a cotangent
-section. -/
-
 /-- Pointwise: `metricFlat g (gradFun g f)` agrees with the cotangent-section
 representation of the differential of `f`. -/
 theorem metricFlat_gradFun_apply
@@ -130,12 +121,7 @@ theorem metricFlat_gradFun_eq_extDerivFun
     metricFlat g (fun y => gradFun (I := I) g f y) x = extDerivFun (I := I) f x := by
   ext v
   rw [metricFlat_gradFun_apply (I := I) g f x v]
-  -- Both sides equal `mfderiv I 𝓘(ℝ, ℝ) f x v`. The right-hand side after `extDerivFun`
-  -- carries an `NormedSpace.fromTangentSpace` cast which, for the model space `ℝ`, is
-  -- the identity.
   rfl
-
-/-! ## Constants and linearity -/
 
 /-- The gradient of a constant function vanishes pointwise. -/
 @[simp] lemma gradFun_const
@@ -156,8 +142,6 @@ lemma gradFun_metricDual_extDerivFun
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (v : TangentSpace I x) :
     g.inner x (gradFun (I := I) g f x) v = extDerivFun (I := I) f x v := by
-  -- `extDerivFun f x v` is, by definition, `mfderiv f x v` after the trivial
-  -- `NormedSpace.fromTangentSpace` cast on the value side.
   rw [gradFun_metricDual (I := I) g f x v]
   rfl
 
@@ -171,9 +155,6 @@ theorem gradFun_add
   refine (gradFun_unique (I := I) g (fun y => f y + h y)
     (w := gradFun (I := I) g f x + gradFun (I := I) g h x) ?_).symm
   intro v
-  -- Both sides will be shown equal as elements of `ℝ` (via `extDerivFun`).
-  -- LHS: `g.inner x (grad f + grad h) v` distributes as
-  -- `extDerivFun f x v + extDerivFun h x v`.
   have h_left : g.inner x (gradFun (I := I) g f x + gradFun (I := I) g h x) v =
       extDerivFun (I := I) f x v + extDerivFun (I := I) h x v := by
     rw [show g.inner x (gradFun (I := I) g f x + gradFun (I := I) g h x) v =
@@ -181,8 +162,6 @@ theorem gradFun_add
         by rw [map_add, ContinuousLinearMap.add_apply]]
     rw [gradFun_metricDual_extDerivFun (I := I) g f x v,
         gradFun_metricDual_extDerivFun (I := I) g h x v]
-  -- RHS: `mfderiv (f + h) x v = extDerivFun (f + h) x v = extDerivFun f x v +
-  -- extDerivFun h x v`.
   have h_right :
       (mfderiv I 𝓘(ℝ, ℝ) (fun y : M => f y + h y) x v : ℝ) =
         extDerivFun (I := I) f x v + extDerivFun (I := I) h x v := by
@@ -204,39 +183,25 @@ theorem gradFun_const_smul
   refine (gradFun_unique (I := I) g (c • f)
     (w := c • gradFun (I := I) g f x) ?_).symm
   intro v
-  -- LHS: `g.inner x (c • grad f) v = c * extDerivFun f x v`.
   have h_left : g.inner x (c • gradFun (I := I) g f x) v =
       c * extDerivFun (I := I) f x v := by
     rw [show g.inner x (c • gradFun (I := I) g f x) v =
           c * g.inner x (gradFun (I := I) g f x) v from
         by rw [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]]
     rw [gradFun_metricDual_extDerivFun (I := I) g f x v]
-  -- RHS: `mfderiv (c • f) x v = c * extDerivFun f x v`.
   have h_right : (mfderiv I 𝓘(ℝ, ℝ) (c • f) x v : ℝ) =
       c * extDerivFun (I := I) f x v := by
-    -- `mfderiv (c • f) x = c • mfderiv f x`. Then apply both sides to `v`.
     have h := const_smul_mfderiv (I := I) (𝕜 := ℝ) (f := f) (z := x) hf c
-    -- Reformulate goal through `extDerivFun`, which has clean `ℝ`-typing.
     change extDerivFun (I := I) (c • f) x v = c * extDerivFun (I := I) f x v
-    -- `extDerivFun (c • f) = c • extDerivFun f` follows from `h` plus the definitional
-    -- structure of `extDerivFun = fromTangentSpace ∘L mfderiv`.
     suffices hsmul : extDerivFun (I := I) (c • f) x = c • extDerivFun (I := I) f x by
       rw [hsmul, ContinuousLinearMap.smul_apply, smul_eq_mul]
-    -- Prove the CLM equality.
     change (NormedSpace.fromTangentSpace ((c • f) x)).toContinuousLinearMap ∘L
             (mfderiv I 𝓘(ℝ, ℝ) (c • f) x) =
           c • ((NormedSpace.fromTangentSpace (f x)).toContinuousLinearMap ∘L
             mfderiv I 𝓘(ℝ, ℝ) f x)
     rw [h]
-    -- Both sides are `(fromTangentSpace _) ∘L (c • mfderiv f x)`.
     rfl
   rw [h_left, ← h_right]
-
-/-! ## Smoothness re-export
-
-The bridge re-exports the smoothness statements from `Geometry.Gradient` under
-this namespace. This is the entry point for the next-stage Hessian bridge, which uses the
-smooth section structure. -/
 
 /-- Under `[I.Boundaryless]`, the gradient of a smooth scalar function is smooth as a
 total-space section of the tangent bundle. -/

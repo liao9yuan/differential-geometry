@@ -65,8 +65,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## `ContDiffAt`-smoothness of the chart-pulled scalar components -/
-
 /-- Each chart-frame scalar component pulled back by `(extChartAt I α).symm`
 is `C^∞` (in particular `C^2`) at the chart-coord image of any chart-source
 point. -/
@@ -80,11 +78,8 @@ lemma tensorRepr_chart_pulled_component_contDiffAt
       (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx ∘
         (extChartAt I α).symm) (extChartAt I α b) := by
   classical
-  -- Smoothness on chart source.
   have hsmooth_on := tensorChartComponentRaw_contMDiffOn_chart_source
     (I := I) (M := M) g r s T α Idx Jdx
-  -- Compose with `(extChartAt I α).symm` (smooth on the chart target into
-  -- the chart source).
   have hsymm : ContMDiffOn 𝓘(ℝ, E) I ∞ (extChartAt I α).symm
       (extChartAt I α).target := contMDiffOn_extChartAt_symm (I := I) α
   have hmaps : Set.MapsTo (extChartAt I α).symm (extChartAt I α).target
@@ -97,15 +92,12 @@ lemma tensorRepr_chart_pulled_component_contDiffAt
       (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx ∘
         (extChartAt I α).symm) (extChartAt I α).target :=
     hsmooth_on.comp hsymm hmaps
-  -- `extChartAt I α b ∈ (extChartAt I α).target`.
   have hb_src : b ∈ (extChartAt I α).source :=
     (extChartAt_source (I := I) α).symm ▸ hb_chart
   have hb_target : extChartAt I α b ∈ (extChartAt I α).target :=
     (extChartAt I α).map_source hb_src
   have h_open_target : IsOpen (extChartAt I α).target :=
     isOpen_extChartAt_target (I := I) α
-  -- Promote `ContMDiffOn ∞` → `ContDiffOn ∞` on the open chart target,
-  -- then to `ContDiffAt 2` at the chart-coord point.
   have hcontDiffOn : ContDiffOn ℝ ∞
       (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx ∘
         (extChartAt I α).symm) (extChartAt I α).target :=
@@ -117,8 +109,6 @@ lemma tensorRepr_chart_pulled_component_contDiffAt
   have h2_le : (2 : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞) :=
     WithTop.coe_le_coe.mpr (le_top : (2 : ℕ∞) ≤ ⊤)
   exact hcd_at_inf.of_le h2_le
-
-/-! ## Per-summand norm bound -/
 
 /-- Norm bound on a single summand `(component_Idx_Jdx ∘ symm) y • basis`
 obtained from `iteratedFDeriv_smul_const_apply` and the bilinearity of
@@ -141,9 +131,6 @@ private lemma iteratedFDeriv_two_smul_const_norm_le
             ContinuousLinearMap.norm_id, one_mul]
     _ = ‖iteratedFDeriv ℝ 2 f y‖ * ‖v‖ := by rw [mul_comm]
 
-/-! ## Pointwise second-order bound on `‖iteratedFDeriv 2 (repr T ∘ symm)‖`
-by per-component second-order iterated derivatives -/
-
 /-- The chart-coordinate second iterated Fréchet derivative of the
 chart-pulled chart-α-trivialised representation of `T.toSection` at the
 chart-coord point `extChartAt I α b` has operator norm bounded by
@@ -165,7 +152,6 @@ lemma iteratedFDeriv_two_tensorRepr_opNorm_le_sum_iteratedFDeriv_components
                 Idx Jdx ∘ (extChartAt I α).symm) (extChartAt I α b)‖ *
             ‖tensorChartBasisElement (E := E) r s Idx Jdx‖ := by
   classical
-  -- Rewrite the chart-pulled `repr` as a finite sum of `(scalar ∘ symm) • basis`.
   have hψ_eq :
       (tensorRSChartE_section_repr (I := I) r s α
           (fun y : M => T.toSection y) ∘ (extChartAt I α).symm) =
@@ -201,11 +187,9 @@ lemma iteratedFDeriv_two_tensorRepr_opNorm_le_sum_iteratedFDeriv_components
     rw [hcomp_eq Idx Jdx]
     rfl
   rw [hψ_eq]
-  -- `ContDiffAt 2` of each scalar summand at the chart-coord point.
   have hcd_each := fun Idx Jdx =>
     tensorRepr_chart_pulled_component_contDiffAt
       (I := I) (M := M) g r s T α Idx Jdx hb_chart
-  -- Each per-summand `(scalar ∘ symm) • basis` is `ContDiffAt 2`.
   have hcd_summand : ∀ Idx : Fin r → Fin (Module.finrank ℝ E),
       ∀ Jdx : Fin s → Fin (Module.finrank ℝ E),
         ContDiffAt ℝ 2
@@ -215,7 +199,6 @@ lemma iteratedFDeriv_two_tensorRepr_opNorm_le_sum_iteratedFDeriv_components
               tensorChartBasisElement (E := E) r s Idx Jdx)
           (extChartAt I α b) := fun Idx Jdx =>
     (hcd_each Idx Jdx).smul_const _
-  -- The inner sum over `Jdx` is `ContDiffAt 2`.
   have hcd_inner_sum : ∀ Idx : Fin r → Fin (Module.finrank ℝ E),
       ContDiffAt ℝ 2
         (fun y : E => ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
@@ -224,9 +207,6 @@ lemma iteratedFDeriv_two_tensorRepr_opNorm_le_sum_iteratedFDeriv_components
             tensorChartBasisElement (E := E) r s Idx Jdx)
         (extChartAt I α b) := fun Idx =>
     ContDiffAt.sum (fun Jdx _ => hcd_summand Idx Jdx)
-  -- Apply `iteratedFDeriv_fun_sum_apply` to the outer sum, then to each inner
-  -- sum, decomposing the iterated derivative as a finite sum of iterated
-  -- derivatives of `(scalar ∘ symm) • basis`.
   rw [iteratedFDeriv_fun_sum_apply (fun Idx _ => hcd_inner_sum Idx)]
   refine le_trans (norm_sum_le _ _) ?_
   refine Finset.sum_le_sum ?_
@@ -236,8 +216,6 @@ lemma iteratedFDeriv_two_tensorRepr_opNorm_le_sum_iteratedFDeriv_components
   refine Finset.sum_le_sum ?_
   intro Jdx _
   exact iteratedFDeriv_two_smul_const_norm_le _ _ (hcd_each Idx Jdx)
-
-/-! ## Headline -/
 
 /-- **Headline bound.** For a smooth Riemannian manifold `(M, g)`, a
 chart-centre `α : M`, and a smooth compactly-supported
@@ -267,7 +245,6 @@ theorem iteratedFDeriv_two_tensorRSChartE_section_repr_opNorm_le_sum
                 (tensorChartComponentRaw (I := I) (M := M) g r s T α
                   Idx Jdx ∘ (extChartAt I α).symm) (extChartAt I α b)‖) := by
   classical
-  -- The constant: basis-element norm bound.
   set K_basis : ℝ := tensorChartBasisNormConstant (E := E) r s with hK_basis_def
   have hK_basis_nn : 0 ≤ K_basis :=
     tensorChartBasisNormConstant_nonneg (E := E) r s

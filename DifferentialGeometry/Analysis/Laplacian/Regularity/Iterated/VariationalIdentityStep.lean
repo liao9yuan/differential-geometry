@@ -45,8 +45,6 @@ open DifferentialGeometry.Analysis.Laplacian.IteratedVariationalIdentityStepScaf
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -55,8 +53,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Test-function helpers for the once-more-differentiated test factor `∂_l ψ` -/
 
 /-- The partial of a smooth function is smooth. -/
 private lemma contDiff_fderiv_apply_single
@@ -127,13 +123,6 @@ private lemma fderiv_apply_single_swap
         (EuclideanSpace.single l 1)
   rw [ContinuousLinearMap.flip_apply, ContinuousLinearMap.flip_apply]
   exact h_symm (EuclideanSpace.single j 1) (EuclideanSpace.single l 1)
-
-/-! ## Vanishing of chosen mixed partials ae off `chartImagePOUTsupport α`
-
-The base chart-pushed POU-cut representative of `u_h.coeFn` vanishes (in fact
-identically) off `chartImagePOUTsupport α`. We propagate this through the
-recursive definition of `chosenMthMixedPartialChartPushedU` using the open-
-subset weak-partial vanishing lemma. -/
 
 /-- If `u` is in `MemW1p p Ω` and `u =ᵐ 0` on an open subset `V ⊆ Ω`,
 then `chosenWeakPartial' p i u Ω =ᵐ 0` on `V`. -/
@@ -246,9 +235,7 @@ private lemma chosenMthMixedPartialChartPushedU_ae_zero_off_chartImagePOUTsuppor
           (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α
             ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ))
           (chartTargetEuclid (I := I) (M := M) α) := h_parent.le_succ
-      -- Inner: chosenMthMixed m (Fin.init idx) ae-zero off K_α.
       have h_inner_ae := ih h_parent_m (Fin.init idx)
-      -- Inner: chosenMthMixed m (Fin.init idx) ∈ MemW1p 2 chartTarget (from m+1 of parent).
       have h_inner_memWkp : MemWkp (d := Module.finrank ℝ E) 1 2
           (chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h m
             (Fin.init idx))
@@ -275,7 +262,6 @@ private lemma chosenMthMixedPartialChartPushedU_ae_zero_off_chartImagePOUTsuppor
       have h_diff_subset : chartTargetEuclid (I := I) (M := M) α \
           chartImagePOUTsupport (I := I) (M := M) α ⊆
             chartTargetEuclid (I := I) (M := M) α := fun _ hy => hy.1
-      -- Propagate to the (m+1)-mixed partial via chosenWeakPartial'_ae_zero_on_open_subset.
       have h_step :=
         chosenWeakPartial'_ae_zero_on_open_subset_of_ae_zero
           (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
@@ -284,8 +270,6 @@ private lemma chosenMthMixedPartialChartPushedU_ae_zero_off_chartImagePOUTsuppor
           h_inner_memW1p h_inner_ae (idx (Fin.last m))
       rw [chosenMthMixedPartialChartPushedU_succ]
       exact h_step
-
-/-! ## IBP for the previous-level effective source `fChartEff` in direction `l` -/
 
 /-- IBP for the previous-level effective source `fChartEff` (in `MemW1p 2`)
 multiplied by the density `c`, against the partial `∂_l ψ` of a smooth
@@ -432,8 +416,6 @@ private theorem ibp_density_fChartEffPrev
   rw [← hLHS_eq, ← hLeib1_eq, ← hLeib2_eq]
   exact h_ibp_ext
 
-/-! ## `Fin.snoc_cons` rewrite -/
-
 /-- For any element `i`, multi-index `dirs : Fin m → α`, and element `l`, we have
 `Fin.snoc (Fin.cons i dirs) l = Fin.cons i (Fin.snoc dirs l)`. -/
 private lemma snoc_cons_eq_cons_snoc {β : Type*} {m : ℕ}
@@ -441,14 +423,6 @@ private lemma snoc_cons_eq_cons_snoc {β : Type*} {m : ℕ}
     @Fin.snoc m.succ (fun _ => β) (Fin.cons i dirs) l =
       Fin.cons i (Fin.snoc dirs l) :=
   (Fin.cons_snoc_eq_snoc_cons (β := β) i dirs l).symm
-
-/-! ## Per-pair LHS principal IBP (in `l`) with Schwarz pre-step
-
-Combines:
-* Schwarz: `∂_j(∂_l ψ) = ∂_l(∂_j ψ)`.
-* `per_pair_ibp_chosenMthMixed` at level `(m+1)` with smooth coef
-  `weightedInvGramOnEuclid α i j`, IBP direction `l`, test factor `∂_j ψ`.
--/
 
 private theorem ibp_principal_pair
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -539,8 +513,6 @@ private theorem ibp_principal_pair
   rw [h_snoc_cons] at h_ibp
   exact h_ibp
 
-/-! ## LHS mass IBP (in `l`) -/
-
 private theorem ibp_mass
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g} (m : ℕ)
@@ -575,8 +547,6 @@ private theorem ibp_mass
     h_chart_H_m_plus_1
     (densityOnEuclid_contDiffOn (I := I) g α)
     hψ_smooth hψ_cs hψ_supp l
-
-/-! ## Inner-j IBP for the residual `∂_l a · M(m+1, cons i dirs) · ∂_j ψ` -/
 
 private theorem ibp_inner_j
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -623,8 +593,6 @@ private theorem ibp_inner_j
     snoc_cons_eq_cons_snoc (β := Fin (Module.finrank ℝ E)) i dirs j
   rw [h_snoc_cons] at h_ibp
   exact h_ibp
-
-/-! ## Triple-product integrability on `vol.restrict Ω` -/
 
 private lemma integrable_triple_helper
     {α : M} {K : Set EuclN}
@@ -687,8 +655,6 @@ private lemma integrable_triple_helper
   rw [h_reassoc] at full_int
   exact full_int.restrict
 
-/-! ## Headline polymorphic step -/
-
 set_option maxHeartbeats 4000000 in
 /-- **Polymorphic inductive step** of the iterated chart-bilinear variational
 identity: given a level-`m` instance `D_m`, the three regularity inputs
@@ -742,7 +708,6 @@ noncomputable def iteratedDiffChartBilinearData_step
       have hKα_in : Kα ⊆ Ω := chartImagePOUTsupport_subset_target (I := I) (M := M) α
       have hΩ_diff_Kα_open : IsOpen (Ω \ Kα) := hΩ_open.sdiff hKα_compact.isClosed
       have hΩ_diff_Kα_meas : MeasurableSet (Ω \ Kα) := hΩ_diff_Kα_open.measurableSet
-      -- Step 1: Apply the level-m identity to ψ_l = ∂_l ψ.
       set ψ_l : EuclN → ℝ := fun y =>
         (fderiv ℝ ψ y) (EuclideanSpace.single l 1) with hψ_l_def
       have hψ_l_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ_l :=
@@ -753,11 +718,6 @@ noncomputable def iteratedDiffChartBilinearData_step
         (tsupport_fderiv_apply_single_subset ψ l).trans hψ_supp
       have h_level_m :=
         D_m.m_diff_variational_identity ψ_l hψ_l_smooth hψ_l_cs hψ_l_supp
-      -- Step 2: Per-pair IBP rewriting.
-      -- For each (i, j), per_pair_ibp at level m+1 followed by per_pair_ibp at level m+1
-      -- gives the principal pair decomposition:
-      --   INT_LHS_m_pair i j = A_pair i j + B_pair i j - PR_pair i j
-      -- where A_pair, B_pair are atom integrals against ψ and PR_pair is against ∂_j ψ.
       set A_pair : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
         fun i j =>
           ∫ y in Ω,
@@ -808,12 +768,10 @@ noncomputable def iteratedDiffChartBilinearData_step
               + PR_pair i j) := h_pp
         rw [h_pp', h_inner]
         ring
-      -- Compact tsupport setup.
       set K : Set EuclN := tsupport ψ with hK_def
       have hK_compact : IsCompact K := hψ_cs
       have hK_meas : MeasurableSet K := (isClosed_tsupport ψ).measurableSet
       have hK_in : K ⊆ Ω := hψ_supp
-      -- Continuity helpers.
       have h_aij_cont : ∀ i j : Fin (Module.finrank ℝ E),
           ContinuousOn (weightedInvGramOnEuclid (I := I) g α i j) Ω :=
         fun i j => (weightedInvGramOnEuclid_contDiffOn (I := I) g α i j).continuousOn
@@ -863,14 +821,12 @@ noncomputable def iteratedDiffChartBilinearData_step
         fun j =>
           (tsupport_fderiv_apply_single_subset ψ_l j).trans
             (tsupport_fderiv_apply_single_subset ψ l)
-      -- K has finite volume.
       have hvolK_finite : (volume : Measure EuclN) K < (⊤ : ℝ≥0∞) :=
         hK_compact.measure_lt_top
       have hvolK_finite' : (volume.restrict K : Measure EuclN) Set.univ < (⊤ : ℝ≥0∞) := by
         rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter]
         exact hvolK_finite
       haveI : IsFiniteMeasure ((volume : Measure EuclN).restrict K) := ⟨hvolK_finite'⟩
-      -- Local L² integrability on K.
       have h_M_m_int : IntegrableOn
           (chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h m
             D_m.directions) K (volume : Measure EuclN) := by
@@ -921,7 +877,6 @@ noncomputable def iteratedDiffChartBilinearData_step
             ((volume : Measure EuclN).restrict K) := by
           rw [← h_eq]; exact h_global.restrict K
         exact h_K.integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
-      -- Sum-swap for INT_LHS_m_pair ∑ ∫ = ∫ ∑.
       have h_int_LHS_m_pair : ∀ i j : Fin (Module.finrank ℝ E),
           Integrable (fun y => weightedInvGramOnEuclid (I := I) g α i j y *
               chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h
@@ -1024,7 +979,6 @@ noncomputable def iteratedDiffChartBilinearData_step
               simp_rw [Finset.sum_neg_distrib (s :=
                 (Finset.univ : Finset (Fin (Module.finrank ℝ E))))]
               ring
-      -- Step 3: rewrite INT_LHS_mass_m_l via ibp_mass.
       have h_dens_fderiv_eq : ∀ y : EuclN,
           (fderiv ℝ (densityOnEuclid (I := I) g α) y) (EuclideanSpace.single l 1) =
             densityDerivOnEuclid (I := I) g α l y := fun _ => rfl
@@ -1049,7 +1003,6 @@ noncomputable def iteratedDiffChartBilinearData_step
             ∂(volume : Measure EuclN)) = _
         rw [hb]
         rfl
-      -- Step 4: rewrite INT_RHS_m_l via ibp_density_fChartEffPrev.
       set N_D : ℝ :=
         ∫ y in Ω, densityDerivOnEuclid (I := I) g α l y *
           D_m.fChartEff y * ψ y
@@ -1066,25 +1019,18 @@ noncomputable def iteratedDiffChartBilinearData_step
             ∂(volume : Measure EuclN)) = _
         rw [hb]
         rfl
-      -- Step 5: collect into one algebraic equation.
       have h_combine : (∑ i, ∑ j, PR_pair i j) + N_mass_new =
           (∑ i, ∑ j, A_pair i j) + (∑ i, ∑ j, B_pair i j) +
             (-N_C) + N_D + N_E := by
         have h := h_level_m'
         rw [h_swap_LHS_principal, h_sum_principal, h_mass_ibp, h_rhs_ibp] at h
         linarith
-      -- Step 6: identify (∑ A) + (∑ B) - N_C - N_D - N_E with
-      -- ∫ Ω, indicator Kα (fChartEffStepNumerator) · ψ.
-      -- Build I_step_RHS_target := ∫ Ω, c · fChartEffStep · ψ.
       set I_step_RHS : ℝ :=
         ∫ y in Ω,
           densityOnEuclid (I := I) g α y *
             fChartEffStep (I := I) (M := M) g α u_h m D_m.directions
               D_m.fChartEff l y * ψ y
           ∂(volume : Measure EuclN) with hI_step_RHS_def
-      -- The headline goal:
-      --   (∫ Σᵢⱼ a · M(m+2, cons i (snoc dirs l)) · ∂_jψ) + N_mass_new = I_step_RHS
-      -- The first integral (call it LHS_principal_new) equals ∑ᵢⱼ PR_pair i j.
       set LHS_principal_new : ℝ :=
         ∫ y in Ω,
           (∑ i : Fin (Module.finrank ℝ E),
@@ -1107,13 +1053,6 @@ noncomputable def iteratedDiffChartBilinearData_step
           (integrable_finset_sum _ (fun j _ => h_int_PR_pair i j)))]
         refine Finset.sum_congr rfl ?_; intro i _
         rw [integral_finset_sum _ (fun j _ => h_int_PR_pair i j)]
-      -- Step 7: Identify I_step_RHS = (∑ A) + (∑ B) - N_C - N_D - N_E.
-      -- Strategy: show ae-equality on vol.restrict Ω of
-      --   (c · fChartEffStep · ψ) = (fChartEffStepNumerator · ψ)
-      -- using h_fChartEff_ae_zero_off_K and chosen-mixed ae-zero-off-K_α.
-      -- Then expand the numerator integrand pointwise and split via linearity.
-      --
-      -- Vanishing of each chosen mixed partial off K_α.
       have h_M_m_ae :
           chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h m D_m.directions
             =ᵐ[(volume : Measure EuclN).restrict (Ω \ Kα)]
@@ -1141,7 +1080,6 @@ noncomputable def iteratedDiffChartBilinearData_step
             (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
             hΩ_open hΩ_diff_Kα_open (fun _ hy => hy.1)
             h_fChartEff_memW1p h_fChartEff_ae_zero_off_K l
-      -- ae-zero of fChartEffStepNumerator off Kα (on vol.restrict (Ω \ Kα)).
       have h_numer_ae_zero :
           ∀ᵐ y ∂((volume : Measure EuclN).restrict (Ω \ Kα)),
             fChartEffStepNumerator (I := I) (M := M) g α u_h m D_m.directions
@@ -1191,7 +1129,6 @@ noncomputable def iteratedDiffChartBilinearData_step
           rw [h_M_m2_j_y i j]; ring
         rw [h_A_zero, h_B_zero, h_M_m_y, h_fE_y, h_fE_wp_y]
         ring
-      -- I_step_RHS = ∫_Ω indicator Kα fChartEffStepNumerator · ψ.
       have h_step_RHS_eq_indicator :
           I_step_RHS =
           ∫ y in Ω,
@@ -1214,7 +1151,6 @@ noncomputable def iteratedDiffChartBilinearData_step
               fChartEffStep (I := I) (M := M) g α u_h m D_m.directions
                 D_m.fChartEff l y) * ψ y from rfl]
         rw [h_pt]
-      -- ∫_Ω indicator Kα f · ψ = ∫_Ω f · ψ (using f ae-zero off Kα).
       have h_indicator_eq_numerator :
           ∫ y in Ω,
             Set.indicator Kα
@@ -1239,14 +1175,12 @@ noncomputable def iteratedDiffChartBilinearData_step
         · rw [Set.indicator_of_notMem hy_Kα]
           have hy_diff : y ∈ Ω \ Kα := ⟨hy_Ω, hy_Kα⟩
           rw [hy hy_diff]
-      -- So I_step_RHS = ∫ Ω, fChartEffStepNumerator · ψ.
       have h_step_RHS_eq_num : I_step_RHS =
           ∫ y in Ω,
             fChartEffStepNumerator (I := I) (M := M) g α u_h m D_m.directions
               D_m.fChartEff l y * ψ y
             ∂(volume : Measure EuclN) := by
         rw [h_step_RHS_eq_indicator]; exact h_indicator_eq_numerator
-      -- Step 8: expand the numerator integrand and use linearity to compute I_step_RHS.
       have h_int_C : Integrable (fun y =>
           densityDerivOnEuclid (I := I) g α l y *
             chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h m
@@ -1265,14 +1199,12 @@ noncomputable def iteratedDiffChartBilinearData_step
           ((volume : Measure EuclN).restrict Ω) :=
         integrable_triple_helper (α := α) hK_compact hK_meas hK_in
           h_dens_cont h_fChartEff_wp_int hψ_cont hψ_supp_K
-      -- ∫ Ω, fChartEffStepNumerator · ψ = (∑ A) + (∑ B) - N_C - N_D - N_E.
       have h_numer_decomp :
           (∫ y in Ω,
             fChartEffStepNumerator (I := I) (M := M) g α u_h m D_m.directions
               D_m.fChartEff l y * ψ y
             ∂(volume : Measure EuclN)) =
           (∑ i, ∑ j, A_pair i j) + (∑ i, ∑ j, B_pair i j) - N_C + N_D + N_E := by
-        -- Define integrand atoms for clean splitting.
         set f_A : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
           ∑ j : Fin (Module.finrank ℝ E),
             (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l) y)
@@ -1326,7 +1258,6 @@ noncomputable def iteratedDiffChartBilinearData_step
         rw [MeasureTheory.integral_add h_sum_ABC hint_D]
         rw [MeasureTheory.integral_add h_sum_AB hint_C]
         rw [MeasureTheory.integral_add hint_A hint_B]
-        -- Now compute each of the 5 integrals.
         have h_int_f_A : (∫ y in Ω, f_A y ∂(volume : Measure EuclN)) =
             ∑ i, ∑ j, A_pair i j := by
           change (∫ y in Ω,
@@ -1365,7 +1296,6 @@ noncomputable def iteratedDiffChartBilinearData_step
         have h_int_f_E : (∫ y in Ω, f_E y ∂(volume : Measure EuclN)) = N_E := rfl
         rw [h_int_f_A, h_int_f_B, h_int_f_C, h_int_f_D, h_int_f_E]
         ring
-      -- Step 9: combine.
       change LHS_principal_new + N_mass_new = I_step_RHS
       rw [h_LHS_principal_new_eq, h_step_RHS_eq_num, h_numer_decomp]
       linarith)

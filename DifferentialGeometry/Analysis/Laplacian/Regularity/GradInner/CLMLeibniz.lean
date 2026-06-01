@@ -84,8 +84,6 @@ open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -94,15 +92,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## The bundled smooth scalar `|∇ρα|²_g`
-
-For a smooth `ρα : C^∞⟮I, M; ℝ⟯`, the pointwise squared metric norm of its
-gradient
-```
-|∇ρα|²_g(x) := g.inner x (gradFun g ρα x) (gradFun g ρα x)
-```
-is `C^∞` on `M`. We package it as a bundled smooth map. -/
 
 /-- The pointwise squared metric norm of `∇ρα`, packaged as a bundled smooth
 map `M → ℝ`. -/
@@ -117,16 +106,6 @@ noncomputable def gradRhoSqSmooth
     (gradRhoSqSmooth (I := I) (M := M) g ρα : M → ℝ) x =
       g.inner x (gradFun (I := I) g ρα x) (gradFun (I := I) g ρα x) := rfl
 
-/-! ## Pointwise smooth Leibniz identity
-
-For smooth `ρα` and `v ∈ SmoothScalar g`, we have the pointwise identity
-```
-ρα(x) · g(∇ρα(x), ∇v(x)) =
-  g(∇ρα(x), ∇(ρα · v)(x)) − |∇ρα|²_g(x) · v(x).
-```
-This follows directly from the gradient Leibniz rule
-`gradFun_smoothScalarMulFun` combined with the bilinearity of `g.inner`. -/
-
 /-- **Pointwise smooth Leibniz identity** for the gradient inner product. -/
 lemma gradInner_leibniz_pointwise
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
@@ -139,20 +118,12 @@ lemma gradInner_leibniz_pointwise
             (smoothScalarMulFun (I := I) (M := M) g ρα v).toFun x) -
         (gradRhoSqSmooth (I := I) (M := M) g ρα : M → ℝ) x * v.toFun x := by
   classical
-  -- Use `gradFun (ρα · v) = ρα · ∇v + v · ∇ρα`.
   have h_grad := gradFun_smoothScalarMulFun (I := I) (M := M) g ρα v x
   rw [h_grad]
-  -- Bilinearity of g.inner gives:
-  -- g.inner ∇ρα (ρα · ∇v + v · ∇ρα) = ρα · g.inner ∇ρα ∇v + v · g.inner ∇ρα ∇ρα.
   rw [ContinuousLinearMap.map_add, ContinuousLinearMap.map_smul,
     ContinuousLinearMap.map_smul]
-  -- Now both sides are tidy; simplify.
   simp only [smul_eq_mul, gradRhoSqSmooth_apply]
   ring
-
-/-! ## L²-class smooth Leibniz identity
-
-The pointwise identity transfers to an Lp-class identity: -/
 
 /-- **Smooth Leibniz identity at the Lp class level**: for smooth `v`,
 ```
@@ -170,9 +141,7 @@ theorem gradInner_leibniz_smooth_Lp
           (gradRhoSqSmooth (I := I) (M := M) g ρα)
           (smoothToLp (I := I) (M := M) g v) := by
   classical
-  -- Strategy: show ae-equality of both sides via Lp.ext.
   apply MeasureTheory.Lp.ext
-  -- LHS ae-equals: x ↦ ρα x · g.inner x ∇ρα ∇v.
   have h_lhs_aeEq : (smoothMulLp (I := I) (M := M) g ρα
         (gradInnerSmooth (I := I) (M := M) g ρα v) :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) =ᵐ[
@@ -186,7 +155,6 @@ theorem gradInner_leibniz_smooth_Lp
     refine h1.trans ?_
     filter_upwards [h2] with x hx
     rw [hx]
-  -- RHS ae-equals: x ↦ g.inner x ∇ρα ∇(ρα · v) − |∇ρα|²_g x · v x.
   have h_rhs1_aeEq : (gradInnerSmooth (I := I) (M := M) g ρα
         (smoothScalarMulFun (I := I) (M := M) g ρα v) :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) =ᵐ[
@@ -214,27 +182,18 @@ theorem gradInner_leibniz_smooth_Lp
     refine h1.trans ?_
     filter_upwards [h2] with x hx
     rw [hx]
-  -- Subtract: the difference is (RHS1 − RHS2) ae.
   have h_diff_coe := MeasureTheory.Lp.coeFn_sub
     (gradInnerSmooth (I := I) (M := M) g ρα
       (smoothScalarMulFun (I := I) (M := M) g ρα v))
     (smoothMulLp (I := I) (M := M) g
       (gradRhoSqSmooth (I := I) (M := M) g ρα)
       (smoothToLp (I := I) (M := M) g v))
-  -- Chain the ae-equalities and apply the pointwise identity.
   refine h_lhs_aeEq.trans ?_
   refine EventuallyEq.symm ?_
   filter_upwards [h_diff_coe, h_rhs1_aeEq, h_rhs2_aeEq]
     with x hx_diff hx_rhs1 hx_rhs2
   rw [hx_diff, Pi.sub_apply, hx_rhs1, hx_rhs2]
   exact (gradInner_leibniz_pointwise (I := I) (M := M) g ρα v x).symm
-
-/-! ## H¹Compl version
-
-Both sides of the Lp identity above are continuous linear maps from
-`H1Compl g` to `Lp ℝ 2 μ_g`. They agree on the smooth dense subspace by the
-smooth-case identity above. Hence they agree on all of `H1Compl g` by
-H¹Compl-density. -/
 
 /-- The LHS CLM: `u_h ↦ smoothMulLp g ρα (gradInnerCLM g ρα u_h)`. -/
 noncomputable def leibnizLhsCLM
@@ -271,8 +230,6 @@ noncomputable def leibnizRhsCLM
   unfold leibnizRhsCLM
   rfl
 
-/-! ## Smooth-case agreement of the two CLMs -/
-
 /-- **Smooth-case agreement**: `leibnizLhsCLM` and `leibnizRhsCLM` agree on
 `smoothToH1Compl g v` for every `v : SmoothScalar g`. -/
 private lemma leibnizCLM_agree_on_smooth
@@ -283,19 +240,10 @@ private lemma leibnizCLM_agree_on_smooth
           (smoothToH1Compl (I := I) (M := M) g v) := by
   classical
   rw [leibnizLhsCLM_apply, leibnizRhsCLM_apply]
-  -- LHS = smoothMulLp ρα (gradInnerCLM ρα (smoothToH1Compl v))
-  --     = smoothMulLp ρα (gradInnerSmooth ρα v)        (by gradInnerCLM_smoothToH1Compl).
   rw [gradInnerCLM_smoothToH1Compl]
-  -- RHS = gradInnerCLM ρα (smoothMulH1Compl ρα (smoothToH1Compl v))
-  --       - smoothMulLp (∇ρα²_g) (H1ComplToLp (smoothToH1Compl v))
-  --     = gradInnerCLM ρα (smoothToH1Compl (smoothScalarMulFun ρα v))
-  --       - smoothMulLp (∇ρα²_g) (smoothToLp v)        (by smoothMulH1Compl_smoothToH1Compl + H1ComplToLp).
   rw [smoothMulH1Compl_smoothToH1Compl, gradInnerCLM_smoothToH1Compl,
     H1ComplToLp_smoothToH1Compl]
-  -- Now both sides are pure Lp expressions; apply the smooth Lp identity.
   exact gradInner_leibniz_smooth_Lp (I := I) (M := M) g ρα v
-
-/-! ## Density extension -/
 
 /-- `smoothToH1Compl` has dense range. -/
 private lemma denseRange_smoothToH1Compl_aux
@@ -314,11 +262,8 @@ theorem leibnizLhsCLM_eq_leibnizRhsCLM
     leibnizLhsCLM (I := I) (M := M) g ρα =
       leibnizRhsCLM (I := I) (M := M) g ρα := by
   classical
-  -- Both sides are continuous linear maps that agree on the dense range of
-  -- `smoothToH1Compl`. Use `DenseRange.equalizer` at the function level.
   apply ContinuousLinearMap.ext
   intro u_h
-  -- Both sides are continuous functions of `u_h` (from CLM continuity).
   have h_eq_on_range :
       ∀ v : SmoothScalar g,
         (leibnizLhsCLM (I := I) (M := M) g ρα :
@@ -338,8 +283,6 @@ theorem leibnizLhsCLM_eq_leibnizRhsCLM
     funext v
     exact h_eq_on_range v
   exact congr_fun h_eq_funs u_h
-
-/-! ## Headline identity at the value level -/
 
 /-- **Headline Leibniz identity at `H1Compl g`**: for every `u_h ∈ H1Compl g`,
 ```
@@ -364,18 +307,6 @@ theorem gradInner_leibniz_H1Compl
   rw [leibnizLhsCLM_apply, leibnizRhsCLM_apply] at h
   exact h
 
-/-! ## Chart-pulled version of the Leibniz identity
-
-For applications to chart-side Sobolev regularity, we transfer the M-side
-identity through `chartPushedRawLpFromLp` to obtain a chart-pulled identity
-on `chartTargetEuclid α`. The chart-pulled LHS is the chart-pull of
-`ρα · g(∇ρα, ∇u_h)`, the chart-pulled RHS first term is the chart-pull of
-`g(∇ρα, ∇(ρα · u_h))`, and the chart-pulled RHS second term is the chart-pull
-of `|∇ρα|²_g · u_h`.
-
-The identity is `=ᵐ`-stated on the chart-pulled weighted measure restricted to
-`chartTargetEuclid α`. -/
-
 variable [NeZero (Module.finrank ℝ E)]
 
 /-- Chart-pulled-raw distribution over subtraction of Lp classes. -/
@@ -394,7 +325,6 @@ lemma chartPushedRawLpFromLp_coeFn_sub
           Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
             (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) := by
   classical
-  -- Approach: F - G ae-equals F.coeFn - G.coeFn on M.  Apply chartPushedRaw_aeEq_of_aeEq.
   have h_FG_coeFn := chartPushedRawLpFromLp_coeFn (I := I) (M := M) g α (F - G)
   have h_F_coeFn := chartPushedRawLpFromLp_coeFn (I := I) (M := M) g α F
   have h_G_coeFn := chartPushedRawLpFromLp_coeFn (I := I) (M := M) g α G
@@ -417,7 +347,6 @@ lemma chartPushedRawLpFromLp_coeFn_sub
       chartPushedRaw (I := I) α diffFun :=
     chartPushedRaw_aeEq_of_aeEq (I := I) (M := M) g α
       h_FG_meas hdiff_meas h_sub_coe
-  -- Pointwise: chartPushedRaw α diffFun = chartPushedRaw α F.coeFn - chartPushedRaw α G.coeFn.
   have h_chartPushedRaw_diff_pointwise :
       ∀ y : EuclN,
         chartPushedRaw (I := I) α diffFun y =
@@ -461,13 +390,11 @@ private lemma chartPushedRawLpFromLp_smoothMulLp_coeFn
   have h_smoothMulLp_coeFn := chartPushedRawLpFromLp_coeFn (I := I) (M := M) g α
     (smoothMulLp (I := I) (M := M) g φ F)
   have h_F_coeFn := chartPushedRawLpFromLp_coeFn (I := I) (M := M) g α F
-  -- M-side: smoothMulLp φ F coeFn ae equals φ · F.coeFn.
   have h_M_aeEq : ((smoothMulLp (I := I) (M := M) g φ F :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) =ᵐ[
         riemannianVolumeMeasure (I := I) (M := M) g]
       (fun x : M => (φ : M → ℝ) x * ((F : Lp ℝ 2 _) : M → ℝ) x) :=
     smoothMulLp_apply_coeFn (I := I) (M := M) g φ F
-  -- Apply chartPushedRaw_aeEq_of_aeEq.
   have hF_meas : Measurable ((F : Lp ℝ 2 _) : M → ℝ) :=
     (Lp.stronglyMeasurable F).measurable
   have h_smoothMulLp_meas :
@@ -487,7 +414,6 @@ private lemma chartPushedRawLpFromLp_smoothMulLp_coeFn
         (fun x : M => (φ : M → ℝ) x * ((F : Lp ℝ 2 _) : M → ℝ) x) :=
     chartPushedRaw_aeEq_of_aeEq (I := I) (M := M) g α
       h_smoothMulLp_meas h_prod_meas h_M_aeEq
-  -- Pointwise: chartPushedRaw α (φ · F.coeFn) y = chartPushedRaw α φ y · chartPushedRaw α F.coeFn y on chartTarget.
   have h_pointwise : ∀ y : EuclN,
       chartPushedRaw (I := I) α
           (fun x : M => (φ : M → ℝ) x * ((F : Lp ℝ 2 _) : M → ℝ) x) y =
@@ -510,8 +436,6 @@ private lemma chartPushedRawLpFromLp_smoothMulLp_coeFn
     with y hy_smoothMul hy_F hy_chart
   rw [hy_smoothMul, hy_chart, h_pointwise y]
   rw [← hy_F]
-
-/-! ### Chart-pulled headline identity -/
 
 /-- **Chart-pulled Leibniz identity**: chart-pulling the M-side identity
 `smoothMulLp ρα (gradInnerCLM ρα u_h) = gradInnerCLM ρα (smoothMulH1Compl ρα u_h)
@@ -543,11 +467,8 @@ theorem chartPushedRawLpFromLp_gradInner_leibniz_H1Compl
           Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
             (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) := by
   classical
-  -- Apply chartPushedRawLpFromLp to both sides of the M-side identity.
   have h_M_eq := gradInner_leibniz_H1Compl (I := I) (M := M) g ρα u_h
-  -- chartPushedRawLpFromLp is well-defined (functional).  Rewrite the LHS via h_M_eq.
   rw [h_M_eq]
-  -- Now LHS is chartPushedRawLpFromLp(RHS_M_side).  Apply distribution over subtraction.
   have h_sub_chartPushed := chartPushedRawLpFromLp_coeFn_sub
     (I := I) (M := M) g α
     (gradInnerCLM (I := I) (M := M) g ρα
@@ -555,22 +476,12 @@ theorem chartPushedRawLpFromLp_gradInner_leibniz_H1Compl
     (smoothMulLp (I := I) (M := M) g
       (gradRhoSqSmooth (I := I) (M := M) g ρα)
       (H1ComplToLp (I := I) (M := M) g u_h))
-  -- Also need: chartPushedRawLpFromLp(smoothMulLp φ F) coeFn = (φ ∘ symm) · (chartPushedRawLpFromLp F coeFn).
   have h_smoothMul_chartPushed := chartPushedRawLpFromLp_smoothMulLp_coeFn
     (I := I) (M := M) g α (gradRhoSqSmooth (I := I) (M := M) g ρα)
     (H1ComplToLp (I := I) (M := M) g u_h)
   filter_upwards [h_sub_chartPushed, h_smoothMul_chartPushed]
     with y hy_sub hy_smooth
   rw [hy_sub, hy_smooth]
-
-/-! ## Smooth-case chart formula application
-
-For smooth `v ∈ SmoothScalar g`, the chart-pulled-raw `gradInnerSmooth g ρα v`
-expands by the chart formula. Combined with the Leibniz identity, this gives
-the chart-pulled identity at the smooth level for `u_h = smoothToH1Compl v`.
-
-We restate the chart-pulled Leibniz identity in this special case for use in
-the H¹Compl extension argument. -/
 
 /-- The chart-pulled Leibniz identity, restated for smooth `v`. -/
 theorem chartPushedRawLpFromLp_gradInner_leibniz_smoothToH1Compl
@@ -596,20 +507,13 @@ theorem chartPushedRawLpFromLp_gradInner_leibniz_smoothToH1Compl
           Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
             (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) := by
   classical
-  -- Use the general chart-pulled identity applied to u_h = smoothToH1Compl v, then identify
-  -- gradInnerCLM ρα (smoothToH1Compl v) = gradInnerSmooth ρα v, smoothMulH1Compl ρα (smoothToH1Compl v)
-  -- = smoothToH1Compl (smoothScalarMulFun ρα v), and H1ComplToLp (smoothToH1Compl v) = smoothToLp v.
   have h_gen := chartPushedRawLpFromLp_gradInner_leibniz_H1Compl
     (I := I) (M := M) g α ρα (smoothToH1Compl (I := I) (M := M) g v)
-  -- Identify the three pieces.
   have h_grad_smooth : gradInnerCLM (I := I) (M := M) g ρα
         (smoothToH1Compl (I := I) (M := M) g v) =
       gradInnerSmooth (I := I) (M := M) g ρα v :=
     gradInnerCLM_smoothToH1Compl (I := I) (M := M) g ρα v
   rw [h_grad_smooth] at h_gen
-  -- gradInnerCLM ρα (smoothMulH1Compl ρα (smoothToH1Compl v))
-  -- = gradInnerCLM ρα (smoothToH1Compl (smoothScalarMulFun ρα v))
-  -- = gradInnerSmooth ρα (smoothScalarMulFun ρα v).
   have h_smoothMul_smooth : smoothMulH1Compl (I := I) (M := M) g ρα
         (smoothToH1Compl (I := I) (M := M) g v) =
       smoothToH1Compl (I := I) (M := M) g
@@ -623,7 +527,6 @@ theorem chartPushedRawLpFromLp_gradInner_leibniz_smoothToH1Compl
         (smoothScalarMulFun (I := I) (M := M) g ρα v) :=
     gradInnerCLM_smoothToH1Compl (I := I) (M := M) g ρα _
   rw [h_grad_smooth_2] at h_gen
-  -- H1ComplToLp (smoothToH1Compl v) = smoothToLp v.
   have h_H1ComplToLp_smooth : H1ComplToLp (I := I) (M := M) g
         (smoothToH1Compl (I := I) (M := M) g v) =
       smoothToLp (I := I) (M := M) g v :=

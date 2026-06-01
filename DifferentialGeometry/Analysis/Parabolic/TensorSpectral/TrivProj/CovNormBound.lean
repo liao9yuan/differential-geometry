@@ -60,15 +60,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## Per-direction chart-trivialisation norm bound
-
-For each direction `i`, the squared Euclidean norm of the inverse
-chart-`(α, b)`-twist applied to the model image of the covariant derivative
-along the chart-`α` basis fibre `chartBasisVecFiber α i b` is controlled by
-the bundle-fibre diagonal pointwise inner product on the model image. This
-is a one-line specialisation of Group A's primary headline composed with the
-bridge identity and the chart-twist round-trip. -/
-
 /-- **Per-direction chart-trivialisation norm bound on an arbitrary compact
 subset of the chart base set.** For a compact set `K_M` contained in the
 chart-`α` base set, every `b ∈ K_M`, and any model `(r, s)`-tensor `X`,
@@ -84,7 +75,6 @@ theorem chartRSTwistInv_sq_norm_le_const_mul_tensorInnerPointwise_on_compact
           ‖chartRSTwistInv (I := I) (M := M) α b r s X‖ ^ 2 ≤
             K * tensorInnerPointwise (I := I) (M := M) g r s b X X := by
   classical
-  -- Group A's primary headline on the chart-frame quadratic form.
   obtain ⟨K, hK_nn, h_chart⟩ :=
     chartTrivializationNorm_le_const_mul_chartTensorInnerPointwise_rs_model_on_compact
       (I := I) (M := M) (E := E) g r s α hK_M_compact hK_M_sub_baseSet
@@ -92,13 +82,11 @@ theorem chartRSTwistInv_sq_norm_le_const_mul_tensorInnerPointwise_on_compact
   intro b hb X
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     hK_M_sub_baseSet hb
-  -- Set `T := chartRSTwistInv α b r s X`. Apply the chart-frame bound at `T`.
   set T : TensorRSModel r s ℝ E :=
     chartRSTwistInv (I := I) (M := M) α b r s X with hT_def
   have h_T : ‖T‖ ^ 2 ≤ K *
       chartTensorInnerPointwise_rs_model (I := I) (M := M) g r s α b T T :=
     h_chart b hb T
-  -- Bridge: chart-frame quad on `T` equals bundle-fibre quad on `chartRSTwist α b T`.
   have h_bridge :
       chartTensorInnerPointwise_rs_model (I := I) (M := M) g r s α b T T =
         tensorInnerPointwise (I := I) (M := M) g r s b
@@ -106,14 +94,11 @@ theorem chartRSTwistInv_sq_norm_le_const_mul_tensorInnerPointwise_on_compact
           (chartRSTwist (I := I) (M := M) α b r s T) :=
     chartTensorInnerPointwise_rs_model_eq_tensorInnerPointwise
       (I := I) (M := M) g r s α hb_base T T
-  -- Round-trip: `chartRSTwist α b (chartRSTwistInv α b X) = X` on the base set.
   have h_round : chartRSTwist (I := I) (M := M) α b r s T = X := by
     rw [hT_def]
     exact chartRSTwist_chartRSTwistInv (I := I) (M := M) α hb_base r s X
   rw [h_bridge, h_round] at h_T
   exact h_T
-
-/-! ## Headline sum-over-directions bound -/
 
 /-- **Sum-over-directions bound on the chart-twist-inverted covariant
 derivative on an arbitrary compact subset of the chart base set.** For a closed
@@ -145,31 +130,25 @@ theorem exists_sum_chartRSTwistInv_cov_sq_norm_le_const_mul_tensorCovDerivPointw
                     (chartBasisVecFiber (I := I) α i b)))‖ ^ 2 ≤
           C * tensorCovDerivPointwiseInner (I := I) (M := M) g r s S S b := by
   classical
-  -- Per-direction chart-trivialisation norm bound (constant `K`).
   obtain ⟨K, hK_nn, h_per⟩ :=
     chartRSTwistInv_sq_norm_le_const_mul_tensorInnerPointwise_on_compact
       (I := I) (M := M) g r s α hK_M_compact hK_M_sub_baseSet
-  -- Diagonal-sum bound (constant `C'`).
   obtain ⟨C', hC'_nn, h_diag⟩ :=
     exists_sum_tensorInnerPointwise_cov_chartBasis_diagonal_le_const_mul_tensorCovDerivPointwiseInner_on_compact
       (I := I) (M := M) g r s α hK_M_compact hK_M_sub_baseSet
   refine ⟨K * C', mul_nonneg hK_nn hC'_nn, ?_⟩
   intro S b hb
-  -- Abbreviate `cov i := TensorRSSpace.toModel (∇S(b)(e_i' b))`.
   set cov : Fin (Module.finrank ℝ E) → TensorRSModel r s ℝ E := fun i =>
     TensorRSSpace.toModel
       (tensorCovDerivAt (I := I) (M := M) g r s S b
         (chartBasisVecFiber (I := I) α i b)) with hcov_def
-  -- Diagonal sum of bundle-fibre inner products at `cov i`.
   set D : ℝ :=
     ∑ i : Fin (Module.finrank ℝ E),
       tensorInnerPointwise (I := I) (M := M) g r s b (cov i) (cov i) with hD_def
-  -- The diagonal sum is bounded by `C' * tensorCovDerivPointwiseInner`.
   have h_D_le : D ≤ C' * tensorCovDerivPointwiseInner
       (I := I) (M := M) g r s S S b := by
     rw [hD_def]
     exact h_diag S hb
-  -- Per-direction sum bound: `∑ ‖chartRSTwistInv α b (cov i)‖^2 ≤ K * D`.
   have h_sum_le_KD :
       ∑ i : Fin (Module.finrank ℝ E),
           ‖chartRSTwistInv (I := I) (M := M) α b r s (cov i)‖ ^ 2 ≤
@@ -178,17 +157,14 @@ theorem exists_sum_chartRSTwistInv_cov_sq_norm_le_const_mul_tensorCovDerivPointw
     refine Finset.sum_le_sum ?_
     intro i _
     exact h_per hb (cov i)
-  -- Non-negativity of `K` plus the diagonal-sum bound chains the two estimates.
   have h_KD_le : K * D ≤
       K * (C' * tensorCovDerivPointwiseInner (I := I) (M := M) g r s S S b) :=
     mul_le_mul_of_nonneg_left h_D_le hK_nn
-  -- Combine and reshape `K * (C' * X) = (K * C') * X`.
   have h_assoc :
       K * (C' * tensorCovDerivPointwiseInner (I := I) (M := M) g r s S S b) =
         (K * C') *
           tensorCovDerivPointwiseInner (I := I) (M := M) g r s S S b := by
     ring
-  -- Conclude by transitivity.
   calc ∑ i : Fin (Module.finrank ℝ E),
         ‖chartRSTwistInv (I := I) (M := M) α b r s (cov i)‖ ^ 2
       ≤ K * D := h_sum_le_KD

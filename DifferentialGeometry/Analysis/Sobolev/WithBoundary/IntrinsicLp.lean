@@ -96,14 +96,10 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Pointwise bilinearity and Cauchy–Schwarz for `g.inner` -/
 
 private lemma g_inner_add_left
     (g : SmoothRiemannianMetric I M) (x : M) (v w y : TangentSpace I x) :
@@ -266,8 +262,6 @@ private lemma g_norm_neg
   rw [g_inner_neg_left g x v (-v), g_inner_neg_right g x v v]
   simp
 
-/-! ## Continuity infrastructure for the metric pairing on smooth sections -/
-
 private lemma continuous_g_inner_smooth_sections
     (g : SmoothRiemannianMetric I M)
     (G X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -326,8 +320,6 @@ private lemma continuous_integrable_of_compactSpace
     continuous_memLp_of_compactSpace g 1 hf
   exact memLp_one_iff_integrable.mp h_one
 
-/-! ## The weak Riemannian gradient predicate (`L^p` form, with boundary) -/
-
 /-- A function `G : M → E` (interpreted as a tangent section via the canonical
 `TangentSpace I x = E` definitional equality) is a **weak Riemannian
 gradient with boundary** of `u : M → ℝ` if:
@@ -381,8 +373,6 @@ lemma pairing_aestronglyMeasurable
 
 end HasWeakRiemannianGradLp_withBoundary
 
-/-! ## Definition of `MemW1pIntrinsicLp_withBoundary` -/
-
 /-- `MemW1pIntrinsicLp_withBoundary g p u` means:
 
 * `u : M → ℝ` is in `L^p` against the Riemannian volume measure;
@@ -404,8 +394,6 @@ lemma MemW1pIntrinsicLp_withBoundary.memLp_self
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} {u : M → ℝ}
     (h : MemW1pIntrinsicLp_withBoundary (I := I) (M := M) g p u) :
     MemLp u p (riemannianVolumeMeasure I M g) := h.1
-
-/-! ## Algebraic closure: zero -/
 
 /-- The zero `M → E` map is a weak `L^p` Riemannian gradient with boundary
 of the zero function. -/
@@ -458,24 +446,6 @@ theorem MemW1pIntrinsicLp_withBoundary.zero
   rw [hcongr]
   exact MemLp.zero
 
-/-! ## Smooth bridge for constant functions
-
-Every constant scalar function on a closed Riemannian manifold with smooth
-boundary lies in `MemW1pIntrinsicLp_withBoundary`. The witness is `G ≡ 0`,
-and the IBP identity holds because:
-* the LHS `∫ g.inner 0 (X x)` is identically zero;
-* the RHS `-∫ c · div_g^∂(X)` equals `-c · ∫ div_g^∂(X)`, and the integral of
-  the with-boundary divergence of an interior-supported compact-support
-  smooth tangent section vanishes by the with-boundary divergence theorem
-  (`integral_divergence_with_boundary_eq_zero_of_hasCompactSupport_of_interior_support`).
-
-This gives the basic case of the smooth bridge. The general smooth bridge —
-for arbitrary smooth `u` — requires additional infrastructure to establish
-the `L^p` membership of `√g(gradFun u, gradFun u)` in the with-boundary
-case (the `gradFun u` map is only known to be smooth on the manifold
-interior). The constant case suffices for the algebraic-closure layer of
-this file. -/
-
 /-- The zero `M → E` map is a weak `L^p` Riemannian gradient with boundary
 for any constant function. The IBP identity reduces to `0 = -c · ∫ div`,
 which holds because the integral of the with-boundary divergence of an
@@ -496,7 +466,6 @@ theorem HasWeakRiemannianGradLp_withBoundary.const
     rw [hcongr]
     exact aestronglyMeasurable_const
   · intro X hX hX_int
-    -- LHS is zero pointwise.
     have h_LHS : (fun x : M =>
         g.inner x ((fun _ : M => (0 : E)) x) (X x)) =
         (fun _ : M => (0 : ℝ)) := by
@@ -505,7 +474,6 @@ theorem HasWeakRiemannianGradLp_withBoundary.const
       exact g_inner_zero_left g x (X x)
     rw [h_LHS]
     rw [integral_zero]
-    -- RHS: `-∫ c · div_g^∂(X) = -c · ∫ div_g^∂(X) = -c · 0 = 0`.
     have hX' : HasCompactSupport (X : ∀ x, TangentSpace I x) := hX
     have hdiv_zero :
         ∫ x, divergence_g_with_boundary (I := I) g X x
@@ -533,10 +501,8 @@ theorem MemW1pIntrinsicLp_withBoundary_const
       (I := I) (M := M) g
   refine ⟨?_, (fun _ : M => (0 : E)),
     HasWeakRiemannianGradLp_withBoundary.const (I := I) (M := M) g c, ?_⟩
-  · -- A constant function is in `L^p` (continuous + finite measure).
-    exact continuous_memLp_of_compactSpace g p continuous_const
-  · -- `√g(0,0) = 0`.
-    have hcongr : (fun x : M => Real.sqrt
+  · exact continuous_memLp_of_compactSpace g p continuous_const
+  · have hcongr : (fun x : M => Real.sqrt
         (g.inner x ((fun _ : M => (0 : E)) x) ((fun _ : M => (0 : E)) x))) =
         (fun _ : M => (0 : ℝ)) := by
       funext x
@@ -545,8 +511,6 @@ theorem MemW1pIntrinsicLp_withBoundary_const
       exact Real.sqrt_zero
     rw [hcongr]
     exact MemLp.zero
-
-/-! ## Algebraic closure: addition (at the IBP-identity level) -/
 
 /-- Sum of two `L^p` weak Riemannian gradients with boundary. -/
 theorem HasWeakRiemannianGradLp_withBoundary.add
@@ -701,8 +665,6 @@ theorem HasWeakRiemannianGradLp_withBoundary.add
     intro x
     ring
 
-/-! ## Algebraic closure: scalar multiplication -/
-
 /-- A constant scalar multiple of a weak Riemannian gradient with boundary. -/
 theorem HasWeakRiemannianGradLp_withBoundary.const_smul
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
@@ -799,8 +761,6 @@ theorem MemW1pIntrinsicLp_withBoundary.const_smul
     rw [hcongr]
     exact hG_p.const_mul (|c|)
 
-/-! ## Algebraic closure: negation -/
-
 /-- The negation of a weak Riemannian gradient with boundary is a weak
 gradient of the negated function. -/
 theorem HasWeakRiemannianGradLp_withBoundary.neg
@@ -835,8 +795,6 @@ theorem MemW1pIntrinsicLp_withBoundary.neg
     funext x; ring
   rw [h_eq] at h
   exact h
-
-/-! ## Norm `w1pNormIntrinsicLp_withBoundary` -/
 
 /-- The `W^{1,p}_{int,Lp}` norm of `u` on a manifold with boundary. -/
 def w1pNormIntrinsicLp_withBoundary

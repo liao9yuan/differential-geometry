@@ -64,14 +64,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The subtype of nonzero resolvent eigenvalues -/
 
 /-- A nonzero "resolvent eigenvalue" of the L²-side tensor resolvent
 `R = tensorResolventL2 g r s`.
@@ -113,9 +109,6 @@ lemma hasEigenvalue
     (μ : TensorNonzeroResolventEigenvalue (I := I) (M := M) g r s) :
     Module.End.HasEigenvalue
       ((tensorResolventL2 (I := I) (M := M) g r s).toLinearMap) μ.val := by
-  -- `tensorResolventEigenspace g r s μ.val ≠ ⊥` unfolds to
-  -- `Module.End.eigenspace ... μ.val ≠ ⊥`, which is the definition of
-  -- `Module.End.HasEigenvalue`.
   have h : tensorResolventEigenspace (I := I) (M := M) g r s μ.val ≠ ⊥ :=
     μ.eigenspace_ne_bot
   unfold tensorResolventEigenspace at h
@@ -126,12 +119,6 @@ lemma hasEigenvalue
     (h : μ.val = ν.val) : μ = ν := Subtype.ext h
 
 end TensorNonzeroResolventEigenvalue
-
-/-! ## Countability of `TensorNonzeroResolventEigenvalue g r s`
-
-Given resolvent compactness, we exhibit the underlying set of nonzero
-eigenvalues as a countable union of finite shells `{|μ| ≥ 1/(n+1)}`, each
-of which is finite by `tensorResolvent_eigenvalues_finite_above`. -/
 
 /-- The underlying set of `TensorNonzeroResolventEigenvalue g r s`,
 written as a countable union over `n : ℕ` of the finite shells
@@ -147,7 +134,6 @@ private lemma nonzero_tensor_resolvent_eigenvalues_set_eq_iUnion
   ext μ
   constructor
   · rintro ⟨hμ_eig_ne, hμ_ne⟩
-    -- `tensorResolventEigenspace g r s μ ≠ ⊥` is `Module.End.HasEigenvalue _ μ`.
     have hμ_has : Module.End.HasEigenvalue
         ((tensorResolventL2 (I := I) (M := M) g r s).toLinearMap) μ := by
       unfold tensorResolventEigenspace at hμ_eig_ne
@@ -159,11 +145,9 @@ private lemma nonzero_tensor_resolvent_eigenvalues_set_eq_iUnion
   · rintro hμ_in_union
     obtain ⟨n, hμ_in_n⟩ := Set.mem_iUnion.mp hμ_in_union
     obtain ⟨hμ_eig, hμ_size⟩ := hμ_in_n
-    -- From `1/(n+1) > 0` and `1/(n+1) ≤ |μ|`, conclude `μ ≠ 0`.
     have h_pos : (0 : ℝ) < 1 / (n + 1) := by positivity
     have h_abs_pos : 0 < |μ| := lt_of_lt_of_le h_pos hμ_size
     have hμ_ne : μ ≠ 0 := abs_pos.mp h_abs_pos
-    -- `Module.End.HasEigenvalue` unfolds to `eigenspace ≠ ⊥`.
     have hμ_eig_ne : tensorResolventEigenspace
         (I := I) (M := M) g r s μ ≠ ⊥ := by
       unfold tensorResolventEigenspace
@@ -198,8 +182,6 @@ theorem TensorNonzeroResolventEigenvalue.countable_ofCompact
   exact (nonzero_tensor_resolvent_eigenvalues_set_countable
     (I := I) (M := M) g r s h_compact).to_subtype
 
-/-! ## Per-eigenspace finite-dimensionality -/
-
 /-- Per-eigenspace finite-dimensionality (HLCC-free), parameterized on
 resolvent compactness `h_compact`. -/
 @[reducible]
@@ -212,8 +194,6 @@ def TensorNonzeroResolventEigenvalue.finiteDimensional_ofCompact
       (tensorResolventEigenspace (I := I) (M := M) g r s μ.val) :=
   tensorResolventEigenspace_finiteDim
     (I := I) (M := M) g r s h_compact μ.val_ne_zero
-
-/-! ## Per-eigenspace orthonormal basis -/
 
 /-- The standard orthonormal basis of the (finite-dimensional) eigenspace
 of `R = tensorResolventL2 g r s` at a nonzero eigenvalue, HLCC-free
@@ -232,10 +212,6 @@ noncomputable def tensorResolventEigenspaceONB
     μ.finiteDimensional_ofCompact h_compact
   stdOrthonormalBasis ℝ
     (tensorResolventEigenspace (I := I) (M := M) g r s μ.val)
-
-/-! ## Orthogonality of the eigenspace family
-
-Standard consequence of self-adjointness of `R`. -/
 
 /-- The family of eigenspaces of `R = tensorResolventL2 g r s` indexed by
 nonzero eigenvalues is an orthogonal family in `TensorL2 r s g`. -/
@@ -265,8 +241,6 @@ theorem tensorResolventEigenspace_orthogonalFamily_nonzero
           (I := I) (M := M) g r s => μ.val) :=
     fun μ ν h => Subtype.ext h
   exact h_full.comp h_inj
-
-/-! ## Span identification: span of basis vectors equals iSup of eigenspaces -/
 
 /-- The sigma-indexed family of eigenbasis vectors, HLCC-free variant
 parameterized on resolvent compactness `h_compact`. -/
@@ -453,13 +427,6 @@ theorem span_tensorResolventEigenbasisVec_eq_iSup_eigenspace
     (tensorResolventEigenspace_le_span_tensorResolventEigenbasisVec
       (I := I) (M := M) h_compact)
 
-/-! ## Density: the orthogonal complement of the eigenbasis span is `⊥`
-
-The orthogonal complement of `iSup over all real μ` of the eigenspaces is
-trivial by `tensorResolventEigenspaces_iSup_orthogonal_eq_bot`. The zero
-eigenspace is `⊥` (resolvent compactness gives injectivity of `R`), so
-dropping it from the iSup is harmless. -/
-
 /-- The orthogonal complement of the supremum (over nonzero eigenvalues)
 of the resolvent eigenspaces is `⊥` (HLCC-free variant). -/
 theorem nonzero_iSup_tensorResolventEigenspace_orthogonal_eq_bot
@@ -524,8 +491,6 @@ theorem tensorResolventEigenbasisVec_span_orthogonal_eq_bot
   rw [span_tensorResolventEigenbasisVec_eq_iSup_eigenspace]
   exact nonzero_iSup_tensorResolventEigenspace_orthogonal_eq_bot
     (I := I) (M := M) h_compact
-
-/-! ## The sigma-indexed eigenbasis as a `HilbertBasis` -/
 
 /-- The sigma-indexed orthonormal Hilbert basis of `TensorL2 r s g`
 consisting of eigenvectors of `R = tensorResolventL2 g r s`, HLCC-free

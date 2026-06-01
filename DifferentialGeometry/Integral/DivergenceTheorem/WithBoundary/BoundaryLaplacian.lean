@@ -63,8 +63,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Definition of the boundary Laplacian -/
-
 /-- The boundary Laplacian `Δ^∂_g f` of a smooth scalar function
 `f : BoundaryManifold I M → ℝ` (with smoothness witness `hf`), defined as the
 ambient Laplace–Beltrami operator `Δ_g` of the induced metric on the boundary
@@ -88,8 +86,6 @@ induced metric. -/
     boundaryLaplacian (I := I) (M := M) g hf x =
       Δ_g (I := hI.boundaryI) (inducedMetric (I := I) (M := M) g) hf x := rfl
 
-/-! ## Smoothness -/
-
 /-- The boundary Laplacian of a smooth function is `C^∞`. -/
 theorem boundaryLaplacian_contMDiff
     [hI : HasSmoothBoundary E H I] [IsManifold I ∞ M] [T2Space M]
@@ -99,8 +95,6 @@ theorem boundaryLaplacian_contMDiff
     ContMDiff hI.boundaryI 𝓘(ℝ, ℝ) ∞
       (boundaryLaplacian (I := I) (M := M) g hf) :=
   Δ_g_contMDiff (I := hI.boundaryI) (inducedMetric (I := I) (M := M) g) hf
-
-/-! ## Linearity (sum rule) -/
 
 /-- The boundary Laplacian of a sum of smooth functions equals the sum of the
 boundary Laplacians. -/
@@ -116,8 +110,6 @@ theorem boundaryLaplacian_add
         boundaryLaplacian (I := I) (M := M) g hh x :=
   Δ_g_add (I := hI.boundaryI) (inducedMetric (I := I) (M := M) g) hf hh x
 
-/-! ## Behaviour on constants -/
-
 /-- The boundary Laplacian of a constant function vanishes. -/
 @[simp] theorem boundaryLaplacian_const
     [hI : HasSmoothBoundary E H I] [IsManifold I ∞ M] [T2Space M]
@@ -127,8 +119,6 @@ theorem boundaryLaplacian_add
       (contMDiff_const : ContMDiff hI.boundaryI 𝓘(ℝ, ℝ) ∞
         (fun _ : BoundaryManifold I M => c)) x = 0 :=
   Δ_g_const (I := hI.boundaryI) (inducedMetric (I := I) (M := M) g) c x
-
-/-! ## Vacuous case for boundaryless ambient model -/
 
 /-- When the ambient model `I` is boundaryless, the boundary topological model
 `hI.boundaryH` is empty (by `HasSmoothBoundary.boundaryH_isEmpty_of_boundaryless`)

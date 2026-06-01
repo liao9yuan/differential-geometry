@@ -67,8 +67,6 @@ open DifferentialGeometry.Analysis.Laplacian.DifferentiatedCrossTermIBP
 open DifferentialGeometry.Analysis.Laplacian.FChartResidualMemW1p
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -77,8 +75,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Smooth fixed-direction partial of a smooth function -/
 
 /-- For `ψ : EuclN → ℝ` globally smooth, its `l`-direction partial
 `y ↦ (fderiv ℝ ψ y) (EuclideanSpace.single l 1)` is also globally smooth. -/
@@ -111,8 +107,6 @@ private lemma tsupport_fderiv_apply_single_subset
       tsupport ψ :=
   tsupport_fderiv_apply_subset ℝ (EuclideanSpace.single l 1)
 
-/-! ## Schwarz symmetry: order of mixed partials commutes -/
-
 /-- Mixed partial derivatives commute for smooth functions: the Schwarz
 symmetry of the second derivative, transferred to a fixed pair of basis
 directions. -/
@@ -128,8 +122,6 @@ private lemma fderiv_apply_single_swap
   classical
   have h_diff_fderiv : Differentiable ℝ (fderiv ℝ ψ) :=
     ((contDiff_infty_iff_fderiv.1 hψ).2).differentiable (by simp)
-  -- Reduce both sides via `fderiv_clm_apply` (with the constant `u`-factor)
-  -- to `flip` applications of `fderiv (fderiv ψ)`.
   have h_flip_eq : ∀ k : Fin (Module.finrank ℝ E),
       fderiv ℝ
         (fun z : EuclN => (fderiv ℝ ψ z) (EuclideanSpace.single k 1)) y =
@@ -148,7 +140,6 @@ private lemma fderiv_apply_single_swap
       fderiv_const_apply (EuclideanSpace.single k (1 : ℝ))
     rw [h_step, h_const_fderiv]; simp
   rw [h_flip_eq l, h_flip_eq j]
-  -- Apply Schwarz symmetry.
   have h_symm : IsSymmSndFDerivAt ℝ ψ y := by
     have h_ge : minSmoothness ℝ 2 ≤ ((⊤ : ℕ∞) : WithTop ℕ∞) := by
       rw [minSmoothness_of_isRCLikeNormedField]; decide
@@ -159,8 +150,6 @@ private lemma fderiv_apply_single_swap
         (EuclideanSpace.single l 1)
   rw [ContinuousLinearMap.flip_apply, ContinuousLinearMap.flip_apply]
   exact h_symm (EuclideanSpace.single j 1) (EuclideanSpace.single l 1)
-
-/-! ## Helper: weak partial witnesses for the three IBP steps -/
 
 /-- The chart-pushed weak partial `(chartPushedWeakPartialLp ...).coeFn` (the
 field `D.base.weak_partial i`) is locally `MemLp 2` on every compact subset of
@@ -236,8 +225,6 @@ private lemma base_f_chart_locally_memLp
     h_weighted.smul_measure hc_ne_top
   exact h_smul.mono_measure h_le
 
-/-! ## Per-pair IBP identity for Term 1 -/
-
 private lemma term1_per_pair_ibp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -272,7 +259,6 @@ private lemma term1_per_pair_ibp
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
   have hΩ_meas : MeasurableSet Ω := hΩ_open.measurableSet
-  -- The "base" data and convenient abbreviations.
   set D_base := chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M)
     g α (laplacianDomainPow_succ_subset_laplacianDomain
       (I := I) (M := M) g 1 hu_h) with hD_def
@@ -280,7 +266,6 @@ private lemma term1_per_pair_ibp
   have hφ_chart : ContDiffOn ℝ (⊤ : ℕ∞) φ Ω :=
     weightedInvGramOnEuclid_contDiffOn (I := I) g α i j
   set v : EuclN → ℝ := D_base.weak_partial i with hv_def
-  -- v = (chartPushedWeakPartialLp ...).coeFn by definition.
   have hv_eq : v = ((chartPushedWeakPartialLp (I := I) (M := M) g α i
         (chartPushedPartialLipschitz_canonical (I := I) (M := M) g α i) u_h :
         Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -294,7 +279,6 @@ private lemma term1_per_pair_ibp
     rw [hv_eq]
     exact chosenSecondPartialChartPushedU_isWeakPartial_of_chartPushedWeakPartialLp
       (I := I) (M := M) g α hu_h i l'
-  -- Local L² witnesses.
   have hv_locMemLp : ∀ K' : Set EuclN, IsCompact K' → K' ⊆ Ω →
       MemLp v 2 ((volume : Measure EuclN).restrict K') := fun K' hK' hK'_in =>
     base_weak_partial_locally_memLp (I := I) (M := M) g α
@@ -306,15 +290,12 @@ private lemma term1_per_pair_ibp
     fun l' K' hK' hK'_in =>
       chosenSecondPartialChartPushedU_locally_memLp
         (I := I) (M := M) g α hu_h i l' hK' hK'_in
-  -- Compact tsupport.
   set K : Set EuclN := tsupport ψ with hK_def
   have hK_compact : IsCompact K := hψ_cs
   have hK_in : K ⊆ Ω := hψ_supp
-  -- Smooth global extension of φ on a neighborhood of K.
   obtain ⟨δ, φExt, hδ_pos, hδ_subset, hφExt_smooth, hφExt_eq⟩ :=
     exists_smooth_global_extension (I := I) (M := M) (φ := φ) α
       hφ_chart hK_compact hK_in
-  -- Build the test function ψ_test = ∂_j ψ.
   set ψ_test : EuclN → ℝ := fun y => (fderiv ℝ ψ y) (EuclideanSpace.single j 1)
     with hψ_test_def
   have hψ_test_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ_test :=
@@ -323,15 +304,12 @@ private lemma term1_per_pair_ibp
     hasCompactSupport_fderiv_apply_single (ψ := ψ) hψ_cs j
   have hψ_test_supp : tsupport ψ_test ⊆ Ω :=
     (tsupport_fderiv_apply_single_subset ψ j).trans hψ_supp
-  -- Apply IBP to (φExt, v, w) in direction l, against test function ψ_test.
   have h_ibp_ext :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.integral_smul_weak_partial_eq
       (d := Module.finrank ℝ E) (Ω := Ω) hΩ_open
       (φ := φExt) hφExt_smooth (v := v) (w := w)
       hv_locMemLp hw_locMemLp hw_isWeakPartial l
       (ψ := ψ_test) hψ_test_smooth hψ_test_cs hψ_test_supp
-  -- LHS replacement: φExt → φ on the chart target. Then Schwarz swap to bring
-  -- the integrand to the form of the goal.
   have h_fderiv_zero_outside_K_ψ : ∀ x ∉ K, fderiv ℝ ψ x = 0 :=
     fun x hx => by
       have h_compl_open : IsOpen (Kᶜ) := (isClosed_tsupport _).isOpen_compl
@@ -384,7 +362,6 @@ private lemma term1_per_pair_ibp
         change (fderiv ℝ ψ_test y) (EuclideanSpace.single l 1) = 0
         exact h1
       rw [h1, h2]; ring
-  -- φExt =ᶠ[𝓝 y] φ on a neighborhood of K, so fderiv equals on K.
   have h_fderiv_φExt_eq_φ_on_K : ∀ y ∈ K, ∀ l' : Fin (Module.finrank ℝ E),
       (fderiv ℝ φExt y) (EuclideanSpace.single l' 1) =
       (fderiv ℝ φ y) (EuclideanSpace.single l' 1) := fun y hy_K _ => by
@@ -399,15 +376,12 @@ private lemma term1_per_pair_ibp
   have h_fderiv_φ_eq_φ_deriv : ∀ y : EuclN,
       (fderiv ℝ φ y) (EuclideanSpace.single l 1) =
       weightedInvGramDerivOnEuclid (I := I) g α i j l y := fun _ => rfl
-  -- Pointwise zero-outside-K for `ψ_test` and `∂_j ψ`.
   have hψ_j_zero_outside_K : ∀ y, y ∉ K →
       (fderiv ℝ ψ y) (EuclideanSpace.single j 1) = 0 :=
     fun y hy => by rw [h_fderiv_zero_outside_K_ψ y hy]; simp
   have hψ_test_zero_outside_K : ∀ y, y ∉ K → ψ_test y = 0 := fun y hy => by
     change (fderiv ℝ ψ y) (EuclideanSpace.single j 1) = 0
     exact hψ_j_zero_outside_K y hy
-  -- The fderiv of ψ_test factor in the Leibniz term and the goal's coefficient
-  -- term shape only differ by the smooth coefficient.
   have hLeibniz1_eq :
       ∫ y in Ω, (fderiv ℝ φExt y) (EuclideanSpace.single l 1) * v y * ψ_test y
         ∂(volume : Measure EuclN) =
@@ -431,8 +405,6 @@ private lemma term1_per_pair_ibp
   rw [hLHS_eq] at h_ibp_ext
   rw [hLeibniz1_eq, hLeibniz2_eq] at h_ibp_ext
   exact h_ibp_ext
-
-/-! ## Term 1: doubly-summed IBP identity -/
 
 private lemma term1_double_sum_ibp
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -498,7 +470,6 @@ private lemma term1_double_sum_ibp
     rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter]
     exact hvolK_finite
   haveI : IsFiniteMeasure ((volume : Measure EuclN).restrict K) := ⟨hvolK_finite'⟩
-  -- Continuity helpers.
   have hψ_cont : Continuous ψ := hψ_smooth.continuous
   have hψl_smooth : ContDiff ℝ (⊤ : ℕ∞) ψl :=
     contDiff_fderiv_apply_single (ψ := ψ) hψ_smooth l
@@ -512,7 +483,6 @@ private lemma term1_double_sum_ibp
   have hψl_fderiv_j_cont : ∀ j : Fin (Module.finrank ℝ E),
       Continuous (fun y : EuclN => (fderiv ℝ ψl y) (EuclideanSpace.single j 1)) :=
     fun j => (hψl_smooth.continuous_fderiv (by simp)).clm_apply continuous_const
-  -- Support of `(fderiv ψl y)(single j 1)` inside K.
   have h_fderiv_zero_outside_K_ψ : ∀ z ∉ K, fderiv ℝ ψ z = 0 :=
     fun z hz => by
       have h_compl_open : IsOpen (Kᶜ) := (isClosed_tsupport _).isOpen_compl
@@ -531,14 +501,12 @@ private lemma term1_double_sum_ibp
         change (fderiv ℝ ψ y) (EuclideanSpace.single l 1) = 0
         rw [h_fderiv_zero_outside_K_ψ y hy]; simp
       rw [h_fderiv_eq]; simp
-  -- Continuity of A i j on Ω, hence on K.
   have h_A_cont_on : ∀ i j : Fin (Module.finrank ℝ E),
       ContinuousOn (A i j) Ω := fun i j =>
     (weightedInvGramOnEuclid_contDiffOn (I := I) g α i j).continuousOn
   have h_dA_cont_on : ∀ i j : Fin (Module.finrank ℝ E),
       ContinuousOn (dA i j) Ω := fun i j =>
     weightedInvGramDerivOnEuclid_continuousOn (I := I) g α i j l
-  -- Local-L² witnesses for v i and w i on K.
   have hv_locMemLp : ∀ i : Fin (Module.finrank ℝ E),
       MemLp (v i) 2 ((volume : Measure EuclN).restrict K) := fun i =>
     base_weak_partial_locally_memLp (I := I) (M := M) g α
@@ -552,8 +520,6 @@ private lemma term1_double_sum_ibp
     fun i => (hv_locMemLp i).integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
   have hw_int_K : ∀ i, IntegrableOn (w i) K (volume : Measure EuclN) :=
     fun i => (hw_locMemLp i).integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
-  -- Integrability helper: for continuous h with tsupport ⊆ K, and integrable u
-  -- on K, the product `u · h` is integrable on (volume.restrict Ω).
   have integrable_mul_compact :
       ∀ {u h₁ : EuclN → ℝ}, IntegrableOn u K (volume : Measure EuclN) →
         Continuous h₁ → tsupport h₁ ⊆ K →
@@ -580,10 +546,6 @@ private lemma term1_double_sum_ibp
     have full_int : Integrable (fun y => u y * h₁ y) (volume : Measure EuclN) := by
       rw [h_eq_ind]; exact ind_int
     exact full_int.restrict
-  -- Per-pair integrability via a single generic helper: for smooth coefficient
-  -- `a : EuclN → ℝ` on Ω, a smooth `ζ : EuclN → ℝ` with `fderiv ζ` vanishing
-  -- outside K, and integrable `u` on K, the product `a · u · (fderiv ζ y)(eⱼ)`
-  -- is integrable on `volume.restrict Ω`.
   have integrable_triple :
       ∀ {a : EuclN → ℝ} (ha_cont_on : ContinuousOn a Ω)
         {u : EuclN → ℝ} (hu_int : IntegrableOn u K (volume : Measure EuclN))
@@ -644,7 +606,6 @@ private lemma term1_double_sum_ibp
         ((volume : Measure EuclN).restrict Ω) := fun i j =>
     integrable_triple (h_A_cont_on i j) (hw_int_K i)
       h_fderiv_zero_outside_K_ψ hψ_fderiv_j_cont j
-  -- Generic ∫_Ω ∑_{i,j} F i j = ∑_{i,j} ∫_Ω F i j swap helper.
   have sum_swap :
       ∀ {F : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → EuclN → ℝ},
         (∀ i j, Integrable (F i j) ((volume : Measure EuclN).restrict Ω)) →
@@ -667,7 +628,6 @@ private lemma term1_double_sum_ibp
     (fderiv ℝ ψ y) (EuclideanSpace.single j 1)) h_int_RHS1_pair
   have hRHS2_sum_swap := sum_swap (F := fun i j y => A i j y * w i y *
     (fderiv ℝ ψ y) (EuclideanSpace.single j 1)) h_int_RHS2_pair
-  -- Per-pair IBP.
   have h_pair : ∀ (i j : Fin (Module.finrank ℝ E)),
       ∫ y in Ω, A i j y * v i y *
         (fderiv ℝ ψl y) (EuclideanSpace.single j 1)
@@ -682,7 +642,6 @@ private lemma term1_double_sum_ibp
     exact term1_per_pair_ibp (I := I) (M := M) g α hu_h l i j
       hψ_smooth hψ_cs hψ_supp
   rw [hLHS_sum_swap, hRHS1_sum_swap, hRHS2_sum_swap]
-  -- Now goal: ∑_{i,j} LHS_pair = -((∑_{i,j} RHS1_pair) + (∑_{i,j} RHS2_pair)).
   have hLHS_neg :
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
@@ -740,12 +699,6 @@ private lemma term1_double_sum_ibp
     rw [← neg_add]
   rw [hLHS_neg]
   exact h_distribute
-
-/-! ## Generic density-coefficient IBP helper
-
-For both Term 2 and Term 3 the IBP step has the same shape: smooth coefficient
-`densityOnEuclid g α`, a weakly differentiable factor `v` with weak partials
-`w`, against a smooth compactly supported test function `ψ`. -/
 
 private lemma density_coef_ibp
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -847,8 +800,6 @@ private lemma density_coef_ibp
   rw [hLeibniz1_eq, hLeibniz2_eq] at h_ibp_ext
   exact h_ibp_ext
 
-/-! ## Term 2 IBP -/
-
 private lemma term2_ibp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -891,8 +842,6 @@ private lemma term2_ibp
     exact base_weak_partial_locally_memLp (I := I) (M := M) g α
       (laplacianDomainPow_succ_subset_laplacianDomain
         (I := I) (M := M) g 1 hu_h) l' hK'_compact hK'_in
-
-/-! ## Term 3 IBP -/
 
 private lemma term3_ibp
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -950,8 +899,6 @@ private lemma term3_ibp
       exact Set.inter_eq_self_of_subset_left hK'_in
     rw [← h_eq]
     exact h_global.restrict K'
-
-/-! ## Headline: the differentiated variational identity holds unconditionally -/
 
 /-- **Unconditional differentiated chart-bilinear variational identity.**
 
@@ -1071,7 +1018,6 @@ theorem differentiated_variational_identity_holds
   set B_cross : ℝ := ∫ y in Ω,
     densityDerivOnEuclid (I := I) g α l y * D_base.f_chart y * ψ y
     ∂(volume : Measure EuclN) with hB_cross_def
-  -- IBP equations: T_k = -(cross_k + principal_k). Rearrange T1+T2=T3.
   have hT1' : T1 = -(A1_cross + A1_principal) := hT1
   have hT2' : T2 = -(A2_cross + A2_principal) := hT2
   have hT3' : T3 = -(B_cross + B_principal) := hT3

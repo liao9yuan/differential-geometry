@@ -72,22 +72,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Smoothness of the derived section `W := covApply cov₃ₐ X U`
-
-The unit-evaluated gradient field `U := unitGradField g T₀` is a smooth section of
-the abstract `(0, 3)`-tensor bundle (`contMDiff_unitGradField`). The abstract
-`(0, 3)`-tensor covariant derivative `cov₃ₐ := tensor0SCovariantDerivative I M 3
-(LeviCivita g)` is a `C^∞` covariant derivative, so the directional covariant
-derivative `covApply cov₃ₐ X U` of `U` along a smooth field `X` is again a smooth
-section (via `covApply_contMDiff`). Its slot-`0` curried Hom-bundle section is then
-smooth via `contMDiff_curriedSection_iff_section`. -/
 
 /-- **Smoothness of the derived section.** For a smooth tangent vector field `X`, the
 directional abstract `(0, 3)`-tensor covariant derivative `W := covApply cov₃ₐ X U`
@@ -103,14 +91,11 @@ lemma contMDiff_covApply_unitGradField
         (covApply (Tensor0SNabla.tensor0SCovariantDerivative I M 3 (LeviCivita (I := I) g)) X
           (unitGradField (I := I) (M := M) g T₀) y)) := by
   classical
-  -- The unit-evaluated gradient field `U` is smooth in `mk'` form.
   have hU : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 3 ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (Tensor0SModel 3 ℝ E)
         (E := fun z : M => Tensor0SSpace 3 I z) y
         (unitGradField (I := I) (M := M) g T₀ y)) :=
     contMDiff_unitGradField (I := I) (M := M) g T₀
-  -- `covApply_contMDiff` is stated in `T%` form; `T% σ` is definitionally the `mk'` form,
-  -- so the conclusion and hypothesis transfer by `exact`.
   exact covApply_contMDiff
     (cov := Tensor0SNabla.tensor0SCovariantDerivative I M 3 (LeviCivita (I := I) g)) hX hU
 
@@ -131,16 +116,6 @@ lemma contMDiff_curried_covApply_unitGradField
     (covApply (Tensor0SNabla.tensor0SCovariantDerivative I M 3 (LeviCivita (I := I) g)) X
       (unitGradField (I := I) (M := M) g T₀))).mp
     (contMDiff_covApply_unitGradField (I := I) (M := M) g T₀ hX)
-
-/-! ## The inner-level slot-`0` currying reading of the derived section
-
-The curried section of `W := covApply cov₃ₐ X U`, read along `Y`, is the slot-`0`
-naturality of `U` differentiated along `X`: `curriedSection W y (Y y) =
-tensor0S_curry 2 y (cov₃ₐ.toFun U y (X y)) (Y y)`, and the atomic one-level
-naturality `curry_abstract_covDeriv_unitGrad_unfold'` reads this as the abstract
-`(0, 2)` covariant derivative of `y ↦ (∇_{Y y} T₀)(y)(unit)` along `X` minus the
-slot-`0` Christoffel correction `(∇_{(∇^{TM}_X Y)(y)} T₀)(y)(unit)`. We record it as
-a section identity (pointwise in `y`). -/
 
 /-- **Inner-level slot-`0` currying reading of the derived section.** For smooth fields
 `X, Y`, the curried section of `W := covApply cov₃ₐ X U`, read along `Y`, is the
@@ -171,26 +146,9 @@ lemma curriedSection_covApply_unitGradField_eq
             (unitZeroSec (I := I) (M := M) y)) := by
   classical
   funext y
-  -- `curriedSection W y (Y y) = tensor0S_curry 2 y (W y) (Y y)`, and
-  -- `W y = cov₃ₐ.toFun U y (X y)`.
   rw [curriedSection_apply]
   rw [covApply_apply]
-  -- The atomic one-level naturality of `U` differentiated along `X`, read along `Y`.
   exact curry_abstract_covDeriv_unitGrad_unfold' (I := I) (M := M) g T₀ hX hY
-
-/-! ## The slot-`0` naturality, one level, for the derived section `W := covApply cov₃ₐ X U`
-
-The mirror of `curry_abstract_covDeriv_unitGrad_unfold'` for the once-differentiated
-section `W := covApply cov₃ₐ X U`. Applying `abstract_succ_covDeriv_unfold_at` to `W`
-(its curried-section smoothness is `contMDiff_curried_covApply_unitGradField`), the
-slot-`0` currying of `cov₃ₐ.toFun W x (Vfield x)`, read along the slot-`0` direction
-`Y x`, is the abstract `(0, 2)` covariant derivative of the inner-curried section
-`z ↦ curriedSection W z (Y z)` along `Vfield`, minus the slot-`0` Christoffel
-correction `curriedSection W x ((∇^{TM}_{Vfield} Y)(x))`.
-
-The inner-curried section is rewritten via `curriedSection_covApply_unitGradField_eq`
-into the explicit difference; the slot-`0` Christoffel correction `curriedSection W x
-(·)` is kept symbolic (it is itself a slot-`0` reading of `cov₃ₐ.toFun U x (X x)`). -/
 
 /-- **Slot-`0` naturality, one level, for the derived section.** With `W := covApply
 cov₃ₐ X U` the once-differentiated unit-evaluated gradient field, and smooth fields
@@ -227,7 +185,6 @@ lemma curry_abstract_covDeriv_covApply_unitGrad_unfold
             (unitGradField (I := I) (M := M) g T₀)) x
           ((LeviCivita (I := I) g).toFun Y x (Vfield x)) := by
   classical
-  -- `abstract_succ_covDeriv_unfold_at` for the smooth derived section `W`.
   exact abstract_succ_covDeriv_unfold_at (I := I) (M := M) g
     (covApply (Tensor0SNabla.tensor0SCovariantDerivative I M 3 (LeviCivita (I := I) g)) X
       (unitGradField (I := I) (M := M) g T₀))
@@ -236,16 +193,6 @@ lemma curry_abstract_covDeriv_covApply_unitGrad_unfold
       (by simp))
     ((hVfield x).mdifferentiableAt (by simp))
     ((hY x).mdifferentiableAt (by simp))
-
-/-! ## The double-unfold with the inner-curried section substituted
-
-Combining `curry_abstract_covDeriv_covApply_unitGrad_unfold` with the inner reading
-`curriedSection_covApply_unitGradField_eq`, the slot-`0` currying of
-`cov₃ₐ.toFun (covApply cov₃ₐ X U) x (Vfield x)`, read along `Y x`, has its outer
-`(0, 2)` covariant-derivative argument replaced by the explicit difference of the two
-inner abstract `(0, 2)` sections. This is the depth-`2` unfolded form, leaving only
-the outer abstract `(0, 2)` covariant derivative and the slot-`0` Christoffel
-correction symbolic. -/
 
 /-- **Double unfold, inner-curried section substituted.** With `W := covApply cov₃ₐ X U`,
 the slot-`0` currying of `cov₃ₐ.toFun W x (Vfield x)`, read along `Y x`, equals
@@ -287,7 +234,6 @@ lemma curry_abstract_covDeriv_covApply_unitGrad_unfold_inner
           ((LeviCivita (I := I) g).toFun Y x (Vfield x)) := by
   classical
   rw [curry_abstract_covDeriv_covApply_unitGrad_unfold (I := I) (M := M) g T₀ hX hVfield hY]
-  -- Rewrite the outer covariant-derivative's section argument by the inner reading.
   rw [curriedSection_covApply_unitGradField_eq (I := I) (M := M) g T₀ hX hY]
 
 end Connection

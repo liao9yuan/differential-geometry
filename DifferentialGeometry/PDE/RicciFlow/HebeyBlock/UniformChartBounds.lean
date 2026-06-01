@@ -245,8 +245,6 @@ private lemma opNorm_sq_le_basis_sum_sq
             |B (fun k => EuclideanSpace.basisFun
               (Fin (Module.finrank ℝ E)) ℝ (idx k))| ^ 2) := by ring
 
-/-! ## ContinuousOn for the integrand factors -/
-
 /-- The chart-target pullback of the partition-of-unity weight is `ContinuousOn`
 `chartTargetEuclid α`. -/
 private lemma pouPull_contOn (α : M) :
@@ -298,7 +296,6 @@ private lemma iteratedFDeriv_basisEval_contOn
   have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have h_cdOn := raw_pull_contDiffOn (I := I) (M := M) g r s T α Idx Jdx
-  -- continuity of iteratedFDeriv evaluated.
   have h_iter_contOn :
       ContinuousOn (iteratedFDeriv ℝ j
           (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx
@@ -398,8 +395,6 @@ private lemma hsIntegrand_aemeasurable
     (hsIntegrand_real_aestronglyMeasurable
       (I := I) (M := M) g r s T α Idx Jdx j basisIdx).aemeasurable
 
-/-! ## Per-(α, IJ, j) integral bound: PouSobolev integrand ≤ CE · Σ_basisIdx HsSobolev integrand -/
-
 /-- Per-(α, IJ, j) integral bound. -/
 private lemma per_alpha_j_integral_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -437,9 +432,6 @@ private lemma per_alpha_j_integral_bound
             ∂(volume :
               Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))) := by
   classical
-  -- LHS ≤ ∫⁻ y in target, ENNReal.ofReal (CE * Σ ...).
-  -- Then use lintegral_const_mul' and lintegral_finset_sum'.
-  -- Step 1: pointwise on chartTarget, bound the integrand.
   have h_pt : ∀ y ∈ chartTargetEuclid (I := I) (M := M) α,
       ENNReal.ofReal
         (((chartAtlasPOU I M α : M → ℝ)
@@ -492,7 +484,6 @@ private lemma per_alpha_j_integral_bound
     have hofReal_le : ENNReal.ofReal (ρ * normsqA) ≤
         ENNReal.ofReal (ρ * (CE * HSsum)) :=
       ENNReal.ofReal_le_ofReal hmul
-    -- Expand RHS of ofReal: ofReal (ρ * (CE * HSsum)) = ofReal CE * Σ ofReal (ρ * |B|²).
     have hCρhs_eq : ρ * (CE * HSsum) = CE * (ρ * HSsum) := by ring
     have hρHS_nn : 0 ≤ ρ * HSsum := mul_nonneg hρ_nn hHSsum_nn
     have h_per_term_nn : ∀ idx : Fin j → Fin (Module.finrank ℝ E),
@@ -523,7 +514,6 @@ private lemma per_alpha_j_integral_bound
           (fun idx _ => mul_nonneg hρ_nn (sq_nonneg _))]
     rw [h_ofReal_split] at hofReal_le
     exact hofReal_le
-  -- Step 2: Integrate the pointwise bound.
   have h_meas_set : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
   have h_set_le :
@@ -559,7 +549,6 @@ private lemma per_alpha_j_integral_bound
     by_cases hy : y ∈ chartTargetEuclid (I := I) (M := M) α
     · exact fun _ => h_pt y hy
     · intro hy'; exact absurd hy' hy
-  -- Step 3: Pull constant out and swap sum.
   have h_pull_const :
       (∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
           ENNReal.ofReal CE *
@@ -629,13 +618,10 @@ private lemma per_alpha_j_integral_bound
     intro basisIdx _
     exact hsIntegrand_aemeasurable
       (I := I) (M := M) g r s T α Idx Jdx j basisIdx
-  -- Combine.
   calc _
       ≤ _ := h_set_le
     _ = _ := h_pull_const
     _ = _ := by rw [h_swap_sum]
-
-/-! ## Main theorem -/
 
 /-- Existence of a non-negative absolute constant absorbing the
 chart-by-chart bounds on the metric, its inverse, and the Christoffel
@@ -691,7 +677,6 @@ theorem uniform_chart_bounds_from_compactness
     ‖((toEuclidean (E := E)) :
       E →L[ℝ] EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))‖ with hLnorm_def
   have hLnorm_nonneg : 0 ≤ Lnorm := norm_nonneg _
-  -- The dominating constant: 1 + Lnorm^(4k) dominates Lnorm^(2j) for j ≤ 2k.
   set CE : ℝ := 1 + Lnorm ^ (4 * k) with hCE_def
   have hCE_nonneg : 0 ≤ CE := by
     have h1 : (0 : ℝ) ≤ Lnorm ^ (4 * k) := pow_nonneg hLnorm_nonneg _
@@ -712,18 +697,14 @@ theorem uniform_chart_bounds_from_compactness
         pow_le_one₀ hLnorm_nonneg (le_of_lt hL_lt)
       have hpow_pos : (0 : ℝ) ≤ Lnorm ^ (4 * k) := pow_nonneg hLnorm_nonneg _
       linarith
-  -- The final constant.
   refine ⟨Real.sqrt CE, Real.sqrt_nonneg _, ?_⟩
   intro T
-  -- Finiteness of the HS norm.
   have hHs_lt_top :
       tensorPouSobolevHsNorm (I := I) (M := M) g k T < ⊤ :=
     tensorPouSobolevHsNorm_lt_top (I := I) (M := M) g k T
   have hHs_ne_top :
       tensorPouSobolevHsNorm (I := I) (M := M) g k T ≠ ⊤ := hHs_lt_top.ne
-  -- Unfold both norms.
   rw [tensorPouSobolevNorm_eq, tensorPouSobolevHsNorm_eq]
-  -- We work at the level of the tsums under the `^(1/2)`.
   set tsumPou : ℝ≥0∞ :=
     ∑' α : M,
       ∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -762,7 +743,6 @@ theorem uniform_chart_bounds_from_compactness
               ∂(volume :
                 Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
     with htsumHs_def
-  -- Main inequality: tsumPou ≤ ENNReal.ofReal CE * tsumHs.
   have h_main : tsumPou ≤ ENNReal.ofReal CE * tsumHs := by
     rw [htsumPou_def, htsumHs_def]
     rw [← ENNReal.tsum_mul_left]
@@ -773,11 +753,9 @@ theorem uniform_chart_bounds_from_compactness
     refine Finset.sum_le_sum (fun j hj => ?_)
     exact per_alpha_j_integral_bound
       (I := I) (M := M) g r s T α IJ.1 IJ.2 j CE (hCE_dom j hj) hCE_nonneg
-  -- Apply rpow to both sides, then convert to .toReal.
   have h_rpow_le : tsumPou ^ (1 / 2 : ℝ) ≤
       (ENNReal.ofReal CE * tsumHs) ^ (1 / 2 : ℝ) :=
     ENNReal.rpow_le_rpow h_main (by norm_num)
-  -- RHS computation: (ofReal CE * tsumHs)^(1/2) = ofReal (√CE) * tsumHs^(1/2).
   have h_split :
       (ENNReal.ofReal CE * tsumHs) ^ (1 / 2 : ℝ) =
         ENNReal.ofReal (Real.sqrt CE) * tsumHs ^ (1 / 2 : ℝ) := by
@@ -786,8 +764,6 @@ theorem uniform_chart_bounds_from_compactness
     rw [ENNReal.ofReal_rpow_of_nonneg hCE_nonneg (by norm_num : (0:ℝ) ≤ 1 / 2)]
     rw [← Real.sqrt_eq_rpow]
   rw [h_split] at h_rpow_le
-  -- Convert to .toReal.
-  -- Finiteness of tsumHs: it equals tensorPouSobolevHsNormSq, which is finite.
   have h_tsumHs_eq_normSq :
       tsumHs = tensorPouSobolevHsNormSq (I := I) (M := M) g k T := by
     rw [htsumHs_def]

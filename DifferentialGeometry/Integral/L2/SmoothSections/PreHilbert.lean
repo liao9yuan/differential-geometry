@@ -65,14 +65,10 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Canonical measurable-space and Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## `PreInnerProductSpace.Core` instance and derived instances -/
 
 section PreHilbert
 
@@ -87,16 +83,13 @@ noncomputable instance instPreInnerProductSpaceCore :
     PreInnerProductSpace.Core ℝ (SmoothCcTensor g r s) where
   inner S T := tensorL2Inner (I := I) (M := M) g r s S.toFun T.toFun
   conj_inner_symm S T := by
-    -- For ℝ, `conj` is the identity; the axiom reduces to symmetry.
     change (tensorL2Inner (I := I) (M := M) g r s T.toFun S.toFun : ℝ) =
       tensorL2Inner (I := I) (M := M) g r s S.toFun T.toFun
     exact tensorL2Inner_symm (I := I) (M := M) g r s T.toFun S.toFun
   re_inner_nonneg S := by
-    -- For ℝ, `re` is the identity.
     change (0 : ℝ) ≤ tensorL2Inner (I := I) (M := M) g r s S.toFun S.toFun
     exact tensorL2Inner_nonneg (I := I) (M := M) g r s S.toFun
   add_left S₁ S₂ T := by
-    -- `(S₁ + S₂).toFun = S₁.toFun + S₂.toFun` by `toFun_add`.
     change tensorL2Inner (I := I) (M := M) g r s (S₁ + S₂).toFun T.toFun =
       tensorL2Inner (I := I) (M := M) g r s S₁.toFun T.toFun +
         tensorL2Inner (I := I) (M := M) g r s S₂.toFun T.toFun
@@ -105,7 +98,6 @@ noncomputable instance instPreInnerProductSpaceCore :
       (SmoothCcTensor.integrable_inner_cross (I := I) (M := M) S₁ T)
       (SmoothCcTensor.integrable_inner_cross (I := I) (M := M) S₂ T)
   smul_left S T c := by
-    -- For ℝ, `conj c = c`. `(c • S).toFun = c • S.toFun` by `toFun_smul`.
     change tensorL2Inner (I := I) (M := M) g r s (c • S).toFun T.toFun =
       c * tensorL2Inner (I := I) (M := M) g r s S.toFun T.toFun
     rw [SmoothCcTensor.toFun_smul]
@@ -126,8 +118,6 @@ noncomputable instance instInnerProductSpace :
     InnerProductSpace ℝ (SmoothCcTensor g r s) :=
   InnerProductSpace.ofCore _
 
-/-! ## Helper unfolding lemmas -/
-
 set_option linter.unusedSectionVars false in
 /-- The inner product on `SmoothCcTensor g r s` is the global `L²`
 pairing of the underlying maps. -/
@@ -141,8 +131,6 @@ theorem SmoothCcTensor.norm_def (S : SmoothCcTensor g r s) :
     ‖S‖ = tensorL2Norm (I := I) (M := M) g r s S.toFun := rfl
 
 end PreHilbert
-
-/-! ## Materialisation tests for the instances -/
 
 section InstanceTests
 

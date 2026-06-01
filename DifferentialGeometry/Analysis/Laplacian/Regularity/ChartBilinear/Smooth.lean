@@ -84,16 +84,12 @@ open DifferentialGeometry.Analysis.Laplacian.ChartLocalLaplacian
 open DifferentialGeometry.Analysis.Laplacian.ChartMeasureEquiv
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Auxiliary infrastructure: the manifold-side test-function pull-back -/
 
 /-- The Euclidean image of `tsupport ψ` lifted to `M` via the chart-symm
 composition. Compact (under `[T2Space M]`), contained in the chart source. -/
@@ -258,7 +254,6 @@ private lemma chartTestPullback_contMDiff [T2Space M] (α : M)
       compose_psi_contMDiffOn_chart_source (I := I) (M := M) α hψ
     refine hcompose.congr ?_
     intro x hx
-    -- chartTestPullback I α ψ x = ψ (toEuclidean (extChartAt I α x)) on chart source.
     exact chartTestPullback_apply_of_mem (I := I) α ψ hx
   · intro y hy
     by_cases hy_src : y ∈ (chartAt H α).source
@@ -301,8 +296,6 @@ private lemma chartPullback_chartTestPullback_eq (α : M) (ψ : EuclN → ℝ)
   change ψ ((toEuclidean (E := E)) ((extChartAt I α) x)) = ψ y
   rw [h_right_inv, h_apply_inv]
 
-/-! ## Step 1: pointwise gradient inner-product identity -/
-
 /-- **Step 1.** Pointwise gradient inner-product identity for smooth functions
 in chart coordinates. For smooth `f, h`, on a chart base set point with
 chart-image in the chart target's interior, the metric inner product of the
@@ -324,15 +317,12 @@ theorem gradInner_eq_invGramMatrix_partials_smooth
     hf.mdifferentiable (by simp) x
   have hh_mdiff : MDifferentiableAt I 𝓘(ℝ, ℝ) h x :=
     hh.mdifferentiable (by simp) x
-  -- Replace gradFun by gradChartLocal at x.
   rw [← gradChartLocal_eq_gradFun (I := I) g α hf_mdiff hx hx_int]
   rw [← gradChartLocal_eq_gradFun (I := I) g α hh_mdiff hx hx_int]
-  -- Step A: expand gradChartLocal h at x as ∑ k, gradChartCoeff h k x • e_k.
   have h_grad_h_decomp : gradChartLocal (I := I) g α h x =
       ∑ k, gradChartCoeff (I := I) g α h k x •
         chartBasisVecFiber (I := I) α k x := by rfl
   rw [h_grad_h_decomp]
-  -- Step B: pull the sum out of the second slot of g.inner.
   have h_pull : g.inner x (gradChartLocal (I := I) g α f x)
         (∑ k : Fin (Module.finrank ℝ E),
           gradChartCoeff (I := I) g α h k x •
@@ -346,7 +336,6 @@ theorem gradInner_eq_invGramMatrix_partials_smooth
     intro k _
     rw [ContinuousLinearMap.map_smul, smul_eq_mul]
   rw [h_pull]
-  -- Step C: identify g.inner x (gradChartLocal f x) (e_k x) = ∂_k f̃ (φ x).
   have h_after_basis :
       ∑ k : Fin (Module.finrank ℝ E),
         gradChartCoeff (I := I) g α h k x *
@@ -359,7 +348,6 @@ theorem gradInner_eq_invGramMatrix_partials_smooth
     intro k _
     rw [inner_gradChartLocal_chartBasis (I := I) g α f hx k]
   rw [h_after_basis]
-  -- Step D: substitute gradChartCoeff h k = ∑ q, Ginv_{k,q} * ∂_q h̃.
   have h_substitute :
       ∑ k : Fin (Module.finrank ℝ E),
         gradChartCoeff (I := I) g α h k x *
@@ -371,10 +359,8 @@ theorem gradInner_eq_invGramMatrix_partials_smooth
           partialDeriv (E := E) k (scalarOnE (I := I) α f) (extChartAt I α x) := by
     refine Finset.sum_congr rfl ?_
     intro k _
-    -- gradChartCoeff h k x = ∑ q, Ginv_{k,q} * ∂_q h̃ by definition.
     rfl
   rw [h_substitute]
-  -- Step E: distribute and reorder via Finset.sum_comm.
   have h_distribute :
       ∑ k : Fin (Module.finrank ℝ E),
         (∑ q : Fin (Module.finrank ℝ E),
@@ -385,18 +371,13 @@ theorem gradInner_eq_invGramMatrix_partials_smooth
         chartInvGramMatrix (I := I) g α x i j *
           partialDeriv (E := E) i (scalarOnE (I := I) α f) (extChartAt I α x) *
           partialDeriv (E := E) j (scalarOnE (I := I) α h) (extChartAt I α x) := by
-    -- Renaming (k, q) → (i, j) doesn't change the sum, but we need to also
-    -- rewrite ∑ k (∑ q (Ginv_{k,q} * ∂_q h̃)) * ∂_k f̃ as the goal form.
     refine Finset.sum_congr rfl ?_
     intro i _
     rw [Finset.sum_mul]
     refine Finset.sum_congr rfl ?_
     intro j _
-    -- Goal: Ginv_{i,j} * ∂_j h̃ * ∂_i f̃ = Ginv_{i,j} * ∂_i f̃ * ∂_j h̃
     ring
   rw [h_distribute]
-
-/-! ## Step 2: chart-pulled pointwise identity -/
 
 /-- Chain rule on `chartPullback`: at any `y` in the open chart-target image,
 the Euclidean partial derivative of `chartPullback I α f` equals the
@@ -412,7 +393,6 @@ private lemma fderiv_chartPullback_eq_partialDeriv_scalarOnE
       partialDeriv (E := E) i (scalarOnE (I := I) α f)
         ((toEuclidean (E := E)).symm y) := by
   classical
-  -- On chartTargetEuclid α (open), chartPullback I α f = scalarOnE α f ∘ toEuclidean.symm.
   have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have h_eq_eventually :
@@ -426,7 +406,6 @@ private lemma fderiv_chartPullback_eq_partialDeriv_scalarOnE
           (fun z : EuclN => scalarOnE (I := I) α f ((toEuclidean (E := E)).symm z)) y :=
     Filter.EventuallyEq.fderiv_eq h_eq_eventually
   rw [h_fderiv_eq]
-  -- Use ContinuousLinearEquiv.comp_right_fderiv with iso = toEuclidean.symm.
   have h_eq_compose :
       (fun z : EuclN => scalarOnE (I := I) α f ((toEuclidean (E := E)).symm z)) =
         scalarOnE (I := I) α f ∘ ((toEuclidean (E := E)).symm) := by
@@ -434,7 +413,6 @@ private lemma fderiv_chartPullback_eq_partialDeriv_scalarOnE
   rw [h_eq_compose]
   rw [(toEuclidean (E := E)).symm.comp_right_fderiv]
   rw [ContinuousLinearMap.coe_comp', Function.comp_apply]
-  -- Need to identify (toEuclidean.symm : EuclN →L[ℝ] E) (single i 1) = chartModelBasis E i.
   have h_iso_apply :
       ((toEuclidean (E := E)).symm : EuclN →L[ℝ] E)
         (EuclideanSpace.single i (1 : ℝ)) = (chartModelBasis E) i := by
@@ -483,10 +461,8 @@ private theorem densityOnEuclid_inner_grad_eq_principalIntegrand
     exact extChartAt_target_subset_interior_of_boundaryless (I := I) α h_target
   have hψM : ContMDiff I 𝓘(ℝ, ℝ) ∞ (chartTestPullback (I := I) (M := M) α ψ) :=
     chartTestPullback_contMDiff (I := I) (M := M) α hψ hψ_cs hψ_supp
-  -- Apply Step 1 at x with f and h := chartTestPullback I α ψ.
   have h_step1 := gradInner_eq_invGramMatrix_partials_smooth
     (I := I) g α hf hψM hx_base hx_int
-  -- Multiply both sides by densityOnEuclid g α y.
   rw [h_step1]
   rw [show densityOnEuclid (I := I) g α y *
         ∑ i, ∑ j, chartInvGramMatrix (I := I) g α x i j *
@@ -509,12 +485,10 @@ private theorem densityOnEuclid_inner_grad_eq_principalIntegrand
     refine Finset.sum_congr rfl ?_
     intro j _
     ring
-  -- density * Ginv = weightedInvGramOnEuclid by definition.
   have h_weight_eq : ∀ i j : Fin (Module.finrank ℝ E),
       densityOnEuclid (I := I) g α y * chartInvGramMatrix (I := I) g α x i j =
         weightedInvGramOnEuclid (I := I) g α i j y := by
     intro i j; rfl
-  -- Identify partial derivatives via the chain rule for chartPullback.
   have hφx_eq : extChartAt I α x = (toEuclidean (E := E)).symm y := by
     rw [hx_def]; exact (extChartAt I α).right_inv h_target
   have h_partial_f : ∀ i : Fin (Module.finrank ℝ E),
@@ -530,9 +504,6 @@ private theorem densityOnEuclid_inner_grad_eq_principalIntegrand
         (extChartAt I α x) =
       fderiv ℝ ψ y (EuclideanSpace.single j (1 : ℝ)) := by
     intro j
-    -- Step 1: identify partialDeriv j (scalarOnE α (chartTestPullback ψ)) (extChartAt I α x)
-    --      = fderiv (chartPullback I α (chartTestPullback I α ψ)) y (single j 1)
-    -- via the chain-rule lemma `fderiv_chartPullback_eq_partialDeriv_scalarOnE`.
     have h1 : fderiv ℝ (chartPullback (I := I) α
             (chartTestPullback (I := I) (M := M) α ψ)) y
           (EuclideanSpace.single j (1 : ℝ)) =
@@ -541,7 +512,6 @@ private theorem densityOnEuclid_inner_grad_eq_principalIntegrand
           ((toEuclidean (E := E)).symm y) :=
       fderiv_chartPullback_eq_partialDeriv_scalarOnE
         (I := I) α (chartTestPullback (I := I) (M := M) α ψ) hy j
-    -- Step 2: chartPullback (chartTestPullback ψ) =ᶠ ψ near y, so their fderivs agree at y.
     have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
       chartTargetEuclid_isOpen (I := I) (M := M) α
     have h_ev : chartPullback (I := I) α (chartTestPullback (I := I) (M := M) α ψ)
@@ -552,19 +522,13 @@ private theorem densityOnEuclid_inner_grad_eq_principalIntegrand
         fderiv ℝ (chartPullback (I := I) α (chartTestPullback (I := I) (M := M) α ψ)) y =
           fderiv ℝ ψ y :=
       Filter.EventuallyEq.fderiv_eq h_ev
-    -- Combine.
     rw [hφx_eq, ← h1, h_fderiv_eq]
-  -- Now assemble: ∑ i j, (density * Ginv) * (∂_i scalarOnE f) * (∂_j scalarOnE testPull)
-  -- = ∑ i j, weightedInvGram * (fderiv chartPull y single i) * (fderiv ψ y single j)
-  -- = ∑ i j, B.a y i j * (...) (using hB_match) = principalIntegrand.
   unfold SmoothEllipticBilinearForm.principalIntegrand
   refine Finset.sum_congr rfl ?_
   intro i _
   refine Finset.sum_congr rfl ?_
   intro j _
   rw [h_weight_eq i j, h_partial_f i, h_partial_psi j, hB_match i j]
-
-/-! ## Step 3: integration via Green's identity (restricted ψ) -/
 
 /-- **Step 3, restricted version.** For ψ smooth with compact support and
 `tsupport ψ ⊆ chartTargetEuclid α`, the chart-pulled bilinear identity holds,
@@ -589,7 +553,6 @@ private theorem bilinear_identity_of_supp_in_chartTarget
     B.bilin (chartPullback (I := I) α f) ψ =
       ∫ y, negDensityLaplacianPullback (I := I) g hf α y * ψ y := by
   classical
-  -- Step (i): unfold B.bilin and use B.c = 0 to reduce to integral of principal.
   have h_zero : ∀ y : EuclN, B.c y * (chartPullback (I := I) α f) y * ψ y = 0 := by
     intro y; rw [hB_c]; simp
   have h_bilin_simplify :
@@ -604,14 +567,10 @@ private theorem bilinear_identity_of_supp_in_chartTarget
       B.principalIntegrand (chartPullback (I := I) α f) ψ y
     rw [h_zero y]; ring
   rw [h_bilin_simplify]
-  -- Step (ii.a): apply Green's identity with f and chartTestPullback ψ.
   have hψM : ContMDiff I 𝓘(ℝ, ℝ) ∞ (chartTestPullback (I := I) (M := M) α ψ) :=
     chartTestPullback_contMDiff (I := I) (M := M) α hψ hψ_cs hψ_supp
-  -- Green I (with f compactly supported, applied with f₁ := chartTestPullback ψ, h₁ := f):
-  -- ∫ <grad chartTestPull ψ, grad f> dμ_g = -∫ chartTestPull ψ * Δ_g f dμ_g.
   have h_green := green_first_integral_inner_grad_eq_neg_integral_smul_laplacian
     (I := I) g hψM hf hf_cs
-  -- Symmetry of metric → ∫ <grad f, grad chartTestPull ψ> = ∫ <grad chartTestPull ψ, grad f>.
   have h_LHS_swap_eq : ∀ x : M,
       g.inner x ((grad_g (I := I) g hf :
             Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
@@ -622,7 +581,6 @@ private theorem bilinear_identity_of_supp_in_chartTarget
           ((grad_g (I := I) g hf :
             Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) :=
     fun x => g.symm x _ _
-  -- Combined Green identity in our preferred orientation.
   have h_green_swap :
       ∫ x, g.inner x ((grad_g (I := I) g hf :
             Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
@@ -633,7 +591,6 @@ private theorem bilinear_identity_of_supp_in_chartTarget
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
     rw [MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall h_LHS_swap_eq)]
     exact h_green
-  -- Define u, v as functions to chart-pull.
   set u : M → ℝ := fun x => g.inner x
       ((grad_g (I := I) g hf :
           Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
@@ -641,7 +598,6 @@ private theorem bilinear_identity_of_supp_in_chartTarget
           Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) with hu_def
   set v : M → ℝ := fun x =>
       chartTestPullback (I := I) (M := M) α ψ x * Δ_g (I := I) g hf x with hv_def
-  -- Continuity / support of u and v.
   have hu_cont : Continuous u := by
     have h_eq_action : u = tangentSectionAction (I := I)
         (grad_g (I := I) g hψM) f := by
@@ -707,16 +663,12 @@ private theorem bilinear_identity_of_supp_in_chartTarget
     exact (closure_minimal h_supp_v (isClosed_tsupport _)).trans
       (chartTestPullback_tsupport_subset_chart_source
         (I := I) (M := M) α hψ_cs hψ_supp)
-  -- Chart-pull integrals.
   have h_pull_LHS :=
     integral_riemannianVolumeMeasure_eq_euclidean_chartTarget
       (I := I) (M := M) g α (f := u) hu_cont hu_supp
   have h_pull_RHS :=
     integral_riemannianVolumeMeasure_eq_euclidean_chartTarget
       (I := I) (M := M) g α (f := v) hv_cont hv_supp
-  -- Identify integrand on chartTargetEuclid α (LHS):
-  -- on K_main (= euclideanChartImageOfTsupport α f), use Step 2;
-  -- outside K_main (still in chartTargetEuclid α), both sides are 0.
   have h_LHS_integrand_eq : ∀ y ∈ chartTargetEuclid (I := I) (M := M) α,
       densityOnEuclid (I := I) g α y *
         u ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) =
@@ -726,14 +678,9 @@ private theorem bilinear_identity_of_supp_in_chartTarget
     · rw [hu_def]
       exact densityOnEuclid_inner_grad_eq_principalIntegrand
         (I := I) g α hf hψ hψ_cs hψ_supp B hy (hB_match y hy_in_Kmain)
-    · -- y ∉ K_main ⇒ x = (extChartAt I α).symm (toEuclidean.symm y) ∉ tsupport f.
-      -- So grad f x = 0, so u(x) = 0, so LHS = density · 0 = 0.
-      -- And ∂_i (chartPullback f) y = 0 (since y ∉ tsupport (chartPullback f) ⊆ K_main).
-      -- So principalIntegrand y = 0.
-      set x : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hx_def
+    · set x : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hx_def
       have h_target : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target :=
         toEuclidean_symm_mem_target (I := I) hy
-      -- Show x ∉ tsupport f.
       have hx_not_in_tsupp_f : x ∉ tsupport f := by
         intro hx_in
         apply hy_in_Kmain
@@ -741,7 +688,6 @@ private theorem bilinear_identity_of_supp_in_chartTarget
         · refine ⟨x, hx_in, rfl⟩
         · rw [hx_def, (extChartAt I α).right_inv h_target]
           exact (toEuclidean (E := E)).apply_symm_apply y
-      -- u(x) = g.inner x (grad_g hf x) (grad_g hψM x). grad_g hf x = 0 since x ∉ tsupport f.
       have h_grad_zero :
           ((grad_g (I := I) g hf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) =
             (0 : TangentSpace I x) := by
@@ -757,7 +703,6 @@ private theorem bilinear_identity_of_supp_in_chartTarget
           ((grad_g (I := I) g hψM : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) = 0
         rw [h_grad_zero, ContinuousLinearMap.map_zero]
         rfl
-      -- principalIntegrand: ∂_i (chartPullback f) y = 0 since y ∉ tsupport (chartPullback f) ⊆ K_main.
       have hy_not_in_chartPull_tsupp :
           y ∉ tsupport (chartPullback (I := I) α f) := fun h =>
         hy_in_Kmain (chartPullback_tsupport_subset (I := I) α hf_cs hf_supp h)
@@ -797,7 +742,6 @@ private theorem bilinear_identity_of_supp_in_chartTarget
     · exact (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
     · intro y hy
       exact h_LHS_integrand_eq y hy
-  -- Identify integrand on chartTargetEuclid α (RHS).
   have h_RHS_integrand_eq : ∀ y ∈ chartTargetEuclid (I := I) (M := M) α,
       densityOnEuclid (I := I) g α y *
         v ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) =
@@ -850,7 +794,6 @@ private theorem bilinear_identity_of_supp_in_chartTarget
     · exact (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
     · intro y hy
       exact h_RHS_integrand_eq y hy
-  -- Convert `Measure.map toEuclidean modelHaar` integrals to volume integrals.
   have hctE_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
   have h_LHS_volume :
@@ -869,8 +812,6 @@ private theorem bilinear_identity_of_supp_in_chartTarget
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
         -negDensityLaplacianPullback (I := I) g hf α y * ψ y ∂volume := by
     rw [map_toEuclidean_modelHaar_eq_volume]
-  -- Convert setIntegral on chartTargetEuclid α to integral over univ
-  -- (integrand vanishes outside chartTargetEuclid α).
   have h_principal_zero_off : ∀ y ∉ chartTargetEuclid (I := I) (M := M) α,
       B.principalIntegrand (chartPullback (I := I) α f) ψ y = 0 := by
     intro y hy_not
@@ -934,7 +875,6 @@ private theorem bilinear_identity_of_supp_in_chartTarget
     by_cases hy : y ∈ chartTargetEuclid (I := I) (M := M) α
     · rw [Set.indicator_of_mem hy]
     · rw [Set.indicator_of_notMem hy, h_negDens_zero_off y hy]
-  -- Combine.
   have h_LHS_M_to_volume :
       ∫ x, u x ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
       ∫ y, B.principalIntegrand (chartPullback (I := I) α f) ψ y ∂volume := by
@@ -948,7 +888,6 @@ private theorem bilinear_identity_of_supp_in_chartTarget
     rw [← h_LHS_M_to_volume, ← h_RHS_M_to_volume]
     exact h_green_swap
   rw [h_combine]
-  -- -∫ -F · ψ = ∫ F · ψ.
   rw [show (∫ y, -negDensityLaplacianPullback (I := I) g hf α y * ψ y ∂volume) =
         -∫ y, negDensityLaplacianPullback (I := I) g hf α y * ψ y ∂volume from ?_]
   · ring
@@ -956,8 +895,6 @@ private theorem bilinear_identity_of_supp_in_chartTarget
           (fun y => -(negDensityLaplacianPullback (I := I) g hf α y * ψ y)) from ?_]
     · rw [MeasureTheory.integral_neg]
     · funext y; ring
-
-/-! ## Cutoff reduction: from chartTarget-supported ψ to general ψ -/
 
 /-- The support of `negDensityLaplacianPullback g hf α` is contained in the
 Euclidean image of `tsupport f`. Argument parallel to
@@ -976,14 +913,12 @@ private lemma negDensityLaplacianPullback_support_subset
     set x : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hx_def
     have h_target : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target :=
       toEuclidean_symm_mem_target (I := I) hy_in
-    -- hy : -(densityOnEuclid g α y) * (Δ_g g hf x) ≠ 0.
     have h_lap_ne : (Δ_g (I := I) g hf) x ≠ 0 := by
       intro h0
       apply hy
       rw [h0]; ring
     have hx_in_tsupp_lap : x ∈ tsupport (Δ_g (I := I) g hf) :=
       subset_tsupport _ h_lap_ne
-    -- tsupport (Δ_g f) ⊆ tsupport (grad f) ⊆ tsupport f.
     have h_lap_supp_sub_grad :
         tsupport (Δ_g (I := I) g hf) ⊆ tsupport
           (fun x : M => ((grad_g (I := I) g hf :
@@ -1004,7 +939,6 @@ private lemma negDensityLaplacianPullback_support_subset
       exact closure_minimal h_subset (isClosed_tsupport _)
     have hx_in_tsupp_f : x ∈ tsupport f :=
       h_grad_supp_sub_tsupp_f (h_lap_supp_sub_grad hx_in_tsupp_lap)
-    -- y is the Euclidean image of (extChartAt I α x).
     refine ⟨(extChartAt I α) x, ?_, ?_⟩
     · refine ⟨x, hx_in_tsupp_f, rfl⟩
     · rw [hx_def]
@@ -1026,8 +960,7 @@ private lemma principalIntegrand_cutoff_eq
     B.principalIntegrand f ψ y = B.principalIntegrand f (fun z => ρ z * ψ z) y := by
   classical
   by_cases hy_in_U : y ∈ U
-  · -- Inside U, ρ = 1 in a neighborhood, so ∂_j (ρ ψ) = ∂_j ψ at y.
-    have h_ev : (fun z : EuclN => ρ z * ψ z) =ᶠ[𝓝 y] ψ := by
+  · have h_ev : (fun z : EuclN => ρ z * ψ z) =ᶠ[𝓝 y] ψ := by
       filter_upwards [hU_open.mem_nhds hy_in_U] with z hz
       rw [hρ_one_on_U z hz, one_mul]
     have h_fderiv_eq :
@@ -1039,8 +972,7 @@ private lemma principalIntegrand_cutoff_eq
     refine Finset.sum_congr rfl ?_
     intro j _
     rw [h_fderiv_eq]
-  · -- Outside U, y ∉ tsupport f, so ∂_i f y = 0.
-    have hy_not_supp : y ∉ tsupport f := fun hy_supp => hy_in_U (hU_cover hy_supp)
+  · have hy_not_supp : y ∉ tsupport f := fun hy_supp => hy_in_U (hU_cover hy_supp)
     have h_open_compl : IsOpen (tsupport f)ᶜ :=
       (isClosed_tsupport _).isOpen_compl
     have h_ev : f =ᶠ[𝓝 y] (fun _ : EuclN => (0 : ℝ)) := by
@@ -1085,9 +1017,6 @@ private theorem bilinear_identity_of_smooth
     B.bilin (chartPullback (I := I) α f) ψ =
       ∫ y, negDensityLaplacianPullback (I := I) g hf α y * ψ y := by
   classical
-  -- Step 1: build cutoff ρ that is 1 on a (compact) thickening of K_main,
-  -- supported in chartTargetEuclid α. K_main := euclideanChartImageOfTsupport α f.
-  -- This contains both tsupport (chartPullback f) and support negDensityLaplacianPullback.
   set K_main : Set EuclN := euclideanChartImageOfTsupport (I := I) (M := M) α f with hKmain_def
   have hK_main_compact : IsCompact K_main :=
     euclideanChartImageOfTsupport_isCompact (I := I) (M := M) α hf_cs hf_supp
@@ -1095,7 +1024,6 @@ private theorem bilinear_identity_of_smooth
     euclideanChartImageOfTsupport_subset_chartTargetEuclid (I := I) (M := M) α hf_supp
   have hOmega_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- Pick δ > 0 small enough that cthickening δ K_main ⊆ chartTargetEuclid α.
   obtain ⟨δ, hδ_pos, hδ⟩ :=
     hK_main_compact.exists_cthickening_subset_open hOmega_open hK_main_in_chart
   set K1 : Set EuclN := Metric.cthickening δ K_main with hK1_def
@@ -1105,23 +1033,18 @@ private theorem bilinear_identity_of_smooth
   have hKmain_in_U : K_main ⊆ U := Metric.self_subset_thickening hδ_pos K_main
   have hU_in_K1 : U ⊆ K1 := Metric.thickening_subset_cthickening δ K_main
   have hK1_in_chart : K1 ⊆ chartTargetEuclid (I := I) (M := M) α := hδ
-  -- Pick a cutoff ρ that is 1 on K1, with tsupport ρ ⊆ chartTargetEuclid α.
   obtain ⟨ρ, hρ_smooth, hρ_cs, _hρ_range, hρ_one, hρ_tsupp⟩ :=
     SmoothEllipticBilinearForm.exists_cutoff
       (d := Module.finrank ℝ E)
       (K := K1) (Ω' := chartTargetEuclid (I := I) (M := M) α)
       hK1_compact hOmega_open hK1_in_chart
-  -- ρ = 1 on K_main (since K_main ⊆ K1 where ρ = 1).
   have hρ_one_on_Kmain : ∀ y ∈ K_main, ρ y = 1 := fun y hy =>
     hρ_one y (hU_in_K1 (hKmain_in_U hy))
-  -- ρ is 1 on the open U (= thickening δ K_main) since U ⊆ K1.
   have hρ_one_on_U : ∀ y ∈ U, ρ y = 1 := fun y hy =>
     hρ_one y (hU_in_K1 hy)
-  -- tsupport (chartPullback f) ⊆ K_main.
   have hChartPull_tsupp_in_Kmain :
       tsupport (chartPullback (I := I) α f) ⊆ K_main :=
     chartPullback_tsupport_subset (I := I) α hf_cs hf_supp
-  -- Step 2: define ψ' := ρ ψ.
   set ψ' : EuclN → ℝ := fun y => ρ y * ψ y with hψ'_def
   have hψ'_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ' := hρ_smooth.mul hψ
   have hψ'_cs : HasCompactSupport ψ' := by
@@ -1137,17 +1060,14 @@ private theorem bilinear_identity_of_smooth
       change ρ y * ψ y = 0
       rw [h, zero_mul]
     exact (closure_minimal hs (isClosed_tsupport _)).trans hρ_tsupp
-  -- Step 3: apply the restricted version with ψ'.
   have h_step3 : B.bilin (chartPullback (I := I) α f) ψ' =
       ∫ y, negDensityLaplacianPullback (I := I) g hf α y * ψ' y :=
     bilinear_identity_of_supp_in_chartTarget
       (I := I) (M := M) g α hf hf_cs hf_supp B hB_c hB_match
       hψ'_smooth hψ'_cs hψ'_supp
-  -- Step 4: show LHS invariance: B.bilin (chartPullback f) ψ = B.bilin (chartPullback f) ψ'.
   have h_LHS_invariant :
       B.bilin (chartPullback (I := I) α f) ψ =
       B.bilin (chartPullback (I := I) α f) ψ' := by
-    -- Both sides reduce to ∫ y, principalIntegrand y (since B.c = 0).
     have h_zero : ∀ y : EuclN,
         B.c y * (chartPullback (I := I) α f) y * ψ y = 0 := by
       intro y; rw [hB_c]; simp
@@ -1179,12 +1099,9 @@ private theorem bilinear_identity_of_smooth
     rw [h_LHS_simplify, h_LHS_simplify']
     refine MeasureTheory.integral_congr_ae
       (Filter.Eventually.of_forall (fun y => ?_))
-    -- Apply principalIntegrand_cutoff_eq with U (open neighborhood of K_main ⊇ tsupport (chartPullback f)).
     have hU_cover : tsupport (chartPullback (I := I) α f) ⊆ U :=
       hChartPull_tsupp_in_Kmain.trans hKmain_in_U
     exact principalIntegrand_cutoff_eq B hU_open hU_cover hρ_one_on_U y
-  -- Step 5: show RHS invariance:
-  -- ∫ negDens · ψ = ∫ negDens · ψ'.
   have h_RHS_invariant :
       (∫ y, negDensityLaplacianPullback (I := I) g hf α y * ψ y) =
       ∫ y, negDensityLaplacianPullback (I := I) g hf α y * ψ' y := by
@@ -1192,7 +1109,6 @@ private theorem bilinear_identity_of_smooth
       (Filter.Eventually.of_forall (fun y => ?_))
     change negDensityLaplacianPullback (I := I) g hf α y * ψ y =
       negDensityLaplacianPullback (I := I) g hf α y * ψ' y
-    -- support negDens ⊆ K_main, ρ = 1 on K_main, so on support negDens, ρ ψ = ψ.
     by_cases hy_negDens_zero : negDensityLaplacianPullback (I := I) g hf α y = 0
     · rw [hy_negDens_zero]; ring
     · have hy_in_support : y ∈ Function.support
@@ -1203,10 +1119,7 @@ private theorem bilinear_identity_of_smooth
       change negDensityLaplacianPullback (I := I) g hf α y * ψ y =
           negDensityLaplacianPullback (I := I) g hf α y * (ρ y * ψ y)
       rw [hρ_y]; ring
-  -- Combine.
   rw [h_LHS_invariant, h_step3, h_RHS_invariant]
-
-/-! ## Headline theorem -/
 
 /-- **Chart-pulled smooth weak solution.** For a smooth Riemannian metric `g`
 on a closed (compact, boundaryless) smooth manifold `M`, a chart point

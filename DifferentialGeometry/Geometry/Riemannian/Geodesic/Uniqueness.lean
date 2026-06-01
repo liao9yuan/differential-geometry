@@ -57,13 +57,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Uniqueness at the level of lifted integral curves on `TangentBundle I M`
-
-Two local integral curves of the chart-fixed geodesic vector field that
-agree at `t₀` agree on a neighbourhood of `t₀`. Direct lift of Mathlib's
-`isMIntegralCurveAt_eventuallyEq_of_contMDiffAt_boundaryless`.
--/
-
 section ChartFixedUniqueness
 
 variable [I.Boundaryless] [CompleteSpace E]
@@ -82,7 +75,6 @@ theorem isMIntegralCurveAt_geodesicVectorFieldChart_eventuallyEq
     (hf₂ : IsMIntegralCurveAt f₂ (geodesicVectorFieldChart (I := I) g α) t₀)
     (h0 : f₁ t₀ = f₂ t₀) :
     f₁ =ᶠ[𝓝 t₀] f₂ := by
-  -- Smoothness of the chart-fixed geodesic vector field at `f₁ t₀`.
   have hsmooth_inf :
       ContMDiffAt I.tangent I.tangent.tangent ∞
         (fun p : TangentBundle I M =>
@@ -91,8 +83,6 @@ theorem isMIntegralCurveAt_geodesicVectorFieldChart_eventuallyEq
         (f₁ t₀) :=
     geodesicVectorFieldChart_contMDiffAt (I := I) g α
       (p₀ := f₁ t₀) hα_src
-  -- Downgrade `C^∞` to `C^1`, the regularity required by the Gronwall
-  -- uniqueness lemma.
   have hsmooth1 :
       ContMDiffAt I.tangent I.tangent.tangent 1
         (fun p : TangentBundle I M =>
@@ -100,8 +90,6 @@ theorem isMIntegralCurveAt_geodesicVectorFieldChart_eventuallyEq
             TangentBundle I.tangent (TangentBundle I M)))
         (f₁ t₀) :=
     hsmooth_inf.of_le (by exact_mod_cast (le_top : (1 : ℕ∞) ≤ ⊤))
-  -- Apply Mathlib's uniqueness theorem on the boundaryless manifold
-  -- `TangentBundle I M`, modelled on `I.tangent`.
   exact
     isMIntegralCurveAt_eventuallyEq_of_contMDiffAt_boundaryless
       (I := I.tangent) (M := TangentBundle I M)
@@ -129,22 +117,6 @@ theorem projectCurve_eventuallyEq_of_isMIntegralCurveAt_geodesicVectorFieldChart
 
 end ChartFixedUniqueness
 
-/-! ## Uniqueness at the `IsGeodesicAt` predicate level
-
-The predicate `IsGeodesicAt g γ t₀` packages a chart basepoint `α : M`
-and a lift `f : ℝ → TangentBundle I M`. The natural matching condition
-for two `IsGeodesicAt`-witnessed geodesics is therefore "same chart
-basepoint, same lift value at `t₀`". The former is required because the
-chart-fixed geodesic vector fields at two different basepoints are *not*
-the same vector field (Christoffel symbols are not tensorial); a true
-chart-invariant statement requires the moving-chart geodesic equation
-which is a separate downstream development.
-
-We record the uniqueness statement at the lift level (which is exactly
-what the predicate `IsGeodesicAt` exposes), and the corresponding
-base-curve statement.
--/
-
 section GeodesicUniqueness
 
 variable [I.Boundaryless] [CompleteSpace E]
@@ -164,7 +136,6 @@ theorem isGeodesicAt_eventuallyEq
     (hf₂ : IsMIntegralCurveAt f₂ (geodesicVectorFieldChart (I := I) g α) t₀)
     (h0 : f₁ t₀ = f₂ t₀) :
     γ₁ =ᶠ[𝓝 t₀] γ₂ := by
-  -- Convert source membership for `γ₁ t₀` to membership for `(f₁ t₀).proj`.
   have hα_src' : (f₁ t₀).proj ∈ (chartAt H α).source := by
     rw [hproj₁ t₀]; exact hα_src
   have hproj_eq :=
@@ -173,8 +144,6 @@ theorem isGeodesicAt_eventuallyEq
       (f₁ := f₁) (f₂ := f₂) hα_src' hf₁ hf₂ h0
   refine hproj_eq.mono ?_
   intro t ht
-  -- `projectCurve f₁ t = projectCurve f₂ t` rewrites to `γ₁ t = γ₂ t`
-  -- via the projection identities.
   rw [projectCurve_apply, projectCurve_apply] at ht
   rw [← hproj₁ t, ← hproj₂ t]; exact ht
 

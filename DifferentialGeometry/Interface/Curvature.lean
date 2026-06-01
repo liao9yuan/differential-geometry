@@ -40,11 +40,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Realized
 
-/-! ## Scalar curvature adapters
-
-The following convenience adapters expose the canonical smooth Ricci
-tensor as a plain function of two tangent vectors at a point. -/
-
 set_option linter.unusedSectionVars false in
 /-- One-line adapter packaging the bundled smooth Ricci tensor
 `ricciTensor g x : T_x M →L T_x M →L ℝ` as a plain real-valued function
@@ -75,17 +70,6 @@ theorem ricciBilinear_eq_trace_ricciEndo (g : DifferentialGeometry.Integral.Meas
 
 end Interface
 end DifferentialGeometry
-
-/-! ## Re-exports
-
-The following `export` declarations make the smooth-Ricci and bundled
-tensor-section primitives available directly under
-`DifferentialGeometry.Interface`. After
-`open DifferentialGeometry.Interface`, names such as `ricciTensor`,
-`ricciTensor_apply`, `ricciTensor_symm`, `ricciTensor_contMDiff`,
-`ricciEndo`, `Tensor02Section`, `Tensor04Section`, `Tensor13Section`,
-`Tensor02At`, `Tensor04At`, `Tensor13At`, `tensor02ToField`, and
-`tensor04ToField` resolve without further qualification. -/
 
 namespace DifferentialGeometry.Interface
 

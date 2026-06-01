@@ -78,8 +78,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Auxiliary slot-Christoffel factor bounds -/
-
 /-- Core slot-Christoffel bound: `max ‖Φ‖ 1 ≤ (max C_LC 1 + 1) * (1 + ‖X b‖)`,
 valid whenever `‖Φ‖ ≤ C_LC * ‖X b‖` and `C_LC, ‖X b‖ ≥ 0`. -/
 private lemma slot_factor_le_const_mul_one_plus_X

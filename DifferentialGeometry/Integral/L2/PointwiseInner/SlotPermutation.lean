@@ -59,13 +59,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## A `Fin.cons` index-pair collapse
-
-The recursion peels the first model slot. The arity-`s+1` sum over a model
-basis index `p : Fin n` together with a tail tuple `i : Fin s → Fin n`
-collapses to a single sum over an `(s+1)`-tuple `Fin.cons p i`, via the
-head/tail equivalence `Fin.consEquiv`. -/
-
 /-- Collapse a sum over a leading index together with a tail tuple into a
 single sum over `(s+1)`-tuples, using the head/tail splitting equivalence
 `Fin.consEquiv`. -/
@@ -81,13 +74,6 @@ private lemma sum_cons_collapse {n s : ℕ}
           change F pi.1 pi.2 = G ((Fin.consEquiv _) pi)
           rw [hF]; rfl)]
   rw [Fintype.sum_prod_type]
-
-/-! ## Explicit closed form of the pointwise `(0, s)` inner product
-
-The recursion defining `tensorInnerPointwise_0s` curries off the first
-slot and contracts it through the inverse Gram matrix. Iterating the
-recursion expresses the pointwise inner product as an explicit double sum
-over slot-index tuples. -/
 
 /-- **Explicit closed form** of the pointwise `(0, s)` inner product.
 Unfolding the recursion fully, the pointwise inner product is a double sum
@@ -109,15 +95,10 @@ theorem tensorInnerPointwise_0s_eq_sum
   classical
   induction s with
   | zero =>
-      -- For `s = 0`, both index tuples are the empty tuple and the empty
-      -- product is `1`; the double sum has a single term.
       rw [tensorInnerPointwise_0s_zero_arity]
       rw [Finset.sum_eq_single (fun a => Fin.elim0 a)]
       · rw [Finset.sum_eq_single (fun a => Fin.elim0 a)]
-        · -- The empty product is `1` and every `Fin 0`-tuple of model vectors
-          -- equals the empty tuple, so the single surviving term reduces to
-          -- `S _ * T _`.
-          have hSarg :
+        · have hSarg :
               (fun a => (chartModelBasis E)
                   ((fun a : Fin 0 => Fin.elim0 a) a)) =
                 (fun i : Fin 0 => Fin.elim0 i) :=
@@ -139,10 +120,7 @@ theorem tensorInnerPointwise_0s_eq_sum
         exact absurd (Finset.mem_univ _) hb
   | succ s ih =>
       set n := Module.finrank ℝ E with hn_def
-      -- Peel the first slot through the recursion.
       rw [tensorInnerPointwise_0s_succ]
-      -- Apply the inductive hypothesis to each curried inner pairing, and
-      -- re-express the curried evaluations as evaluations on `cons`-tuples.
       have hstep :
           ∀ p q : Fin n,
             (gramMatrixAt (I := I) (M := M) g x)⁻¹ p q *
@@ -166,7 +144,6 @@ theorem tensorInnerPointwise_0s_eq_sum
         rw [Finset.mul_sum]
         refine Finset.sum_congr rfl ?_
         intro j _
-        -- Rewrite the curried evaluations as evaluations on `cons`-tuples.
         have hS :
             (S.curryLeft ((chartModelBasis E) p))
                 (fun a => (chartModelBasis E) (i a))
@@ -189,7 +166,6 @@ theorem tensorInnerPointwise_0s_eq_sum
           refine Fin.cases ?_ ?_ a
           · simp
           · intro k; simp
-        -- Split the `(s+1)`-fold product off the leading slot.
         have hprod :
             (∏ a : Fin (s + 1),
                 (gramMatrixAt (I := I) (M := M) g x)⁻¹
@@ -202,14 +178,9 @@ theorem tensorInnerPointwise_0s_eq_sum
           simp
         rw [hS, hT, hprod]
         ring
-      -- Substitute and collapse the index pairs `(p, i)` and `(q, j)`.
       rw [Finset.sum_congr rfl (fun p _ =>
             Finset.sum_congr rfl (fun q _ => hstep p q))]
-      -- Commute the `q` and `i` sums so the leading slot index `p` sits next
-      -- to its tail tuple `i`, ready for the head/tail collapse.
       rw [Finset.sum_congr rfl (fun p _ => Finset.sum_comm)]
-      -- The summand now depends on `p`/`i` only through `Fin.cons p i` and on
-      -- `q`/`j` only through `Fin.cons q j`; collapse `(q, j)` then `(p, i)`.
       have hcollapse_inner :
           ∀ (p : Fin n) (i : Fin s → Fin n),
             ∑ q : Fin n,
@@ -245,7 +216,6 @@ theorem tensorInnerPointwise_0s_eq_sum
         rfl
       rw [Finset.sum_congr rfl (fun p _ =>
             Finset.sum_congr rfl (fun i _ => hcollapse_inner p i))]
-      -- Now collapse the outer pair `(p, i)` into a single `(s+1)`-tuple.
       have hcollapse_outer :
           ∑ p : Fin n,
             ∑ i : Fin s → Fin n,
@@ -276,12 +246,6 @@ theorem tensorInnerPointwise_0s_eq_sum
         rfl
       rw [hcollapse_outer]
 
-/-! ## Slot-permutation invariance
-
-With the explicit closed form in hand, a simultaneous permutation of the
-covariant slots of both arguments is a bijective reindexing of the double
-sum, hence leaves the pointwise inner product unchanged. -/
-
 /-- **Slot-permutation invariance of the pointwise `(0, s)` inner
 product.** Reindexing the `Fin s` covariant slots of *both* arguments by
 the same permutation `σ` via `ContinuousMultilinearMap.domDomCongr` leaves
@@ -298,10 +262,7 @@ theorem tensorInnerPointwise_0s_domDomCongr
       tensorInnerPointwise_0s (I := I) (M := M) s g x S T := by
   classical
   set n := Module.finrank ℝ E with hn_def
-  -- Pass to the explicit closed form on both sides.
   rw [tensorInnerPointwise_0s_eq_sum, tensorInnerPointwise_0s_eq_sum]
-  -- Rewrite each term so it depends on the index tuples only through
-  -- precomposition by `σ`.
   have hterm :
       ∀ i j : Fin s → Fin n,
         (∏ a : Fin s,
@@ -314,7 +275,6 @@ theorem tensorInnerPointwise_0s_domDomCongr
             S (fun a => (chartModelBasis E) ((i ∘ σ) a)) *
               T (fun a => (chartModelBasis E) ((j ∘ σ) a)) := by
     intro i j
-    -- The product term: reindex the slot product by `σ`.
     have hprod :
         (∏ a : Fin s,
             (gramMatrixAt (I := I) (M := M) g x)⁻¹ (i a) (j a))
@@ -324,7 +284,6 @@ theorem tensorInnerPointwise_0s_domDomCongr
       symm
       exact Equiv.prod_comp σ
         (fun a => (gramMatrixAt (I := I) (M := M) g x)⁻¹ (i a) (j a))
-    -- The tensor evaluations: `domDomCongr` precomposes by `σ`.
     have hS :
         (S.domDomCongr σ) (fun a => (chartModelBasis E) (i a))
           = S (fun a => (chartModelBasis E) ((i ∘ σ) a)) := by
@@ -338,8 +297,6 @@ theorem tensorInnerPointwise_0s_domDomCongr
     rw [hprod, hS, hT]
   rw [Finset.sum_congr rfl (fun i _ =>
         Finset.sum_congr rfl (fun j _ => hterm i j))]
-  -- The double sum is now a reindexing of the original by `i ↦ i ∘ σ` in
-  -- both arguments.  Reindex the outer sum, then the inner sum.
   have hreindex :
       ∀ K : (Fin s → Fin n) → ℝ,
         ∑ i : Fin s → Fin n, K (i ∘ σ) = ∑ i : Fin s → Fin n, K i := by

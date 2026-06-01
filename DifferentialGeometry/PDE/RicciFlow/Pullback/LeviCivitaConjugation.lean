@@ -15,7 +15,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
--- order 455: pullback-by-conjugation identifies the Levi-Civita connection
 /-- **Pullback-by-conjugation for the Levi-Civita connection.** Given a smooth
 Riemannian metric `g` on `M` and a diffeomorphism `Φ : M ≃ₘ⟮I, I⟯ M`, the Levi-Civita
 connection of the pullback metric `Φ*g` coincides with the conjugation-pullback
@@ -30,7 +29,6 @@ theorem levi_civita_pullback_conjugation
     LeviCivita (I := I) (Diffeomorph.pullbackMetric g Φ)
       = pullback_connection_construct g Φ := rfl
 
--- order 456: finalized form of pullback conjugation
 /-- **Finalized pullback-conjugation identity** for the Levi-Civita connection. This
 is the form consumed by downstream Riemann / Ricci pullback-conjugation theorems:
 the Levi-Civita connection of the pullback metric `Φ*g` is the same `CovariantDerivative`

@@ -149,10 +149,8 @@ theorem rawVariationalIdentity_of_manifoldFlowFamily
                 (X : ∀ y : M, TangentSpace I y) (Φ_fam t x))
               (mfderiv I I (Φ_fam t : M → M) x v)))) :
     RawVariationalIdentity (I := I) g X Φ_fam t x v := by
-  -- Discharge the orbit-continuity hypothesis from joint continuity.
   have hcontAt : ContinuousAt (fun s : ℝ => (Φ_fam s : M → M) x) t :=
     orbit_continuousAt_of_jointContinuous (I := I) Φ_fam t x hcont
-  -- Forward to the proven generic per-flow producer.
   exact rawVariationalIdentity_of_isLocalFlow (I := I) g X Φ_fam t x v Q d
     hDchart hcontAt hwitness hRdiff hCdiff hsplit
 

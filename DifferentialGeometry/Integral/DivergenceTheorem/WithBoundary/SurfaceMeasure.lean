@@ -56,12 +56,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
-/-! ## Canonical measurable-space and Borel-space instances
-
-File-local canonical Borel structures, matching those installed in
-`Integral/Measure/`. Declared `local` so they do not pollute external typeclass
-search. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -69,8 +63,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 private local instance : MeasurableSpace (BoundaryManifold I M) :=
   borel (BoundaryManifold I M)
 private local instance : BorelSpace (BoundaryManifold I M) := ⟨rfl⟩
-
-/-! ## The surface measure -/
 
 /-- Surface measure on the boundary of a Riemannian manifold-with-boundary.
 
@@ -96,8 +88,6 @@ lemma surfaceMeasure_def
     surfaceMeasure (I := I) (M := M) g =
       Measure.riemannianVolumeMeasure
         (I := hI.boundaryI) (M := BoundaryManifold I M) (inducedMetric g) := rfl
-
-/-! ## Standard measure-theoretic properties -/
 
 /-- The surface measure is positive on nonempty open subsets of the boundary. -/
 theorem surfaceMeasure_isOpenPosMeasure
@@ -138,13 +128,6 @@ theorem surfaceMeasure_isFiniteMeasureOnCompacts
   rw [surfaceMeasure_def]
   exact Measure.riemannianVolumeMeasure_isFiniteMeasureOnCompacts
     (I := hI.boundaryI) (M := BoundaryManifold I M) (inducedMetric g)
-
-/-! ## Boundaryless degeneracy
-
-When the ambient model `I` is itself boundaryless, the boundary topological model
-`hI.boundaryH` is empty (by `boundaryH_isEmpty_of_boundaryless`), and so is the
-boundary submanifold (by `BoundaryManifold.isEmpty_of_isEmpty_boundaryH`). Any
-measure on an empty type is identically zero. -/
 
 /-- When the ambient model `I` is boundaryless, the boundary submanifold
 `BoundaryManifold I M` is empty and the surface measure vanishes. -/

@@ -67,14 +67,6 @@ open scoped Manifold Topology ContDiff
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 
-/-! ## (A) The honest decomposition of the covariant inner CLM at the orbit point
-
-In the two-instance world (`E` carries a standalone `[NormedSpace ℝ E]` for the tangent-bundle
-charted space, plus `[InnerProductSpace ℝ E]`), the covariant inner CLM at the basepoint `α`
-decomposes into the flat raw `fderiv` and the two corrections.  The conclusion is an
-`E`-equation, so it crosses cleanly into the single-instance world consumed by
-`RawVariationalIdentity`. -/
-
 section Decomposition
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -123,31 +115,18 @@ theorem chartLeviCivitaInnerCLM_basepoint_eq_rawFderiv_add_corrections
         + christoffelCorrection (I := I) g α α
             (chartE_section_repr (I := I) α X α) w := by
   classical
-  -- Unfold the inner CLM: flat trivialised summand + metric Christoffel correction.
   rw [chartLeviCivitaInnerCLM_apply]
-  -- The trivialised flat summand is applied to `trivToE α α w = w` at the basepoint.
   have htriv_id : trivToE (I := I) α α w = w := by
-    -- `chartMovingTriv α (φ α) w = trivToE α (φ.symm (φ α)) w`; at the basepoint
-    -- `φ.symm (φ α) = α`, and the lemma states the result is `w`.
     have hbase := chartMovingTriv_basepoint (I := I) α w
     have hself : (extChartAt I α).symm (extChartAt I α α) = α :=
       (extChartAt I α).left_inv (mem_extChartAt_source (I := I) α)
     rw [chartMovingTriv, hself] at hbase
     exact hbase
   rw [htriv_id]
-  -- Apply the committed convention bridge to the trivialised flat summand.
   rw [chartLeviCivita_flat_summand_eq_rawRepr (I := I) α X w hRdiff hCdiff]
-  -- Reassociate to match `(raw + D²φ) + Γ`.
   rw [movingTrivCorrection]
 
 end Decomposition
-
-/-! ## (B) Reconstruction of the covariant `hQinner` from flat data (single-instance world)
-
-The covariant `hQinner` value equation required by `rawVariationalIdentity_of_chartFderiv_witness`
-is reconstructed from the **flat** Euclidean variational value together with the two correction
-values.  The connection-content decomposition (A) is invoked across the instance boundary as an
-`E`-equation, with the standalone normed-space instance supplied by `InnerProductSpace.toNormedSpace`. -/
 
 section Reconstruction
 
@@ -219,7 +198,6 @@ theorem hQinner_of_flat_value_and_corrections
   classical
   set α := Φ_fam t x with hα
   set w : E := mfderiv I I (Φ_fam t : M → M) x v with hw
-  -- The honest decomposition of the covariant inner CLM at the basepoint, applied to `w`.
   have hdecomp :
       chartLeviCivitaInnerCLM (I := I) g α (X : ∀ y : M, TangentSpace I y) α w
         = fderiv ℝ (chartRawRepr (I := I) α (X : ∀ y : M, TangentSpace I y))
@@ -229,18 +207,10 @@ theorem hQinner_of_flat_value_and_corrections
               (chartE_section_repr (I := I) α (X : ∀ y : M, TangentSpace I y) α) w :=
     chartLeviCivitaInnerCLM_basepoint_eq_rawFderiv_add_corrections (I := I) g α
       (X : ∀ y : M, TangentSpace I y) w hRdiff hCdiff
-  -- Rewrite the covariant target through the decomposition, then push `trivFromE` over the sum.
   rw [hcov, hdecomp, map_add, map_add, neg_add, neg_add]
-  -- `-a - b - c = -a + -b + -c`.
   abel
 
 end Reconstruction
-
-/-! ## (C) The per-flow producer (single-instance world)
-
-Assembles `RawVariationalIdentity` from the flat variational ODE data plus the covariant value
-equation reconstructed from the flat raw derivative and the two corrections (Part B), by
-feeding it into `rawVariationalIdentity_of_chartFderiv_witness`. -/
 
 section Producer
 
@@ -321,7 +291,6 @@ theorem rawVariationalIdentity_of_flatChartFderiv_witness
                 (X : ∀ y : M, TangentSpace I y) (Φ_fam t x))
               (mfderiv I I (Φ_fam t : M → M) x v))) :
     RawVariationalIdentity (I := I) g X Φ_fam t x v := by
-  -- Reconstruct the exact covariant `hQinner` from the flat-plus-correction value (Part B).
   have hQinner :
       Q (Dchart' d)
         = -trivFromE (I := I) (Φ_fam t x) (Φ_fam t x)
@@ -330,7 +299,6 @@ theorem rawVariationalIdentity_of_flatChartFderiv_witness
               (mfderiv I I (Φ_fam t : M → M) x v)) :=
     hQinner_of_flat_value_and_corrections (I := I) g X Φ_fam t x v Q Dchart' d
       hRdiff hCdiff hcov
-  -- Feed the exact covariant value equation into the committed per-flow producer.
   exact rawVariationalIdentity_of_chartFderiv_witness (I := I) g X Φ_fam t x v Q d
     hDchart hcontAt hwitness hQinner
 

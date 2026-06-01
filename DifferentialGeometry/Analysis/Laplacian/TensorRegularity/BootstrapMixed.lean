@@ -80,12 +80,6 @@ open DifferentialGeometry.Analysis.Sobolev.NirenbergCrossBounds
 open DifferentialGeometry.Analysis.Sobolev.NirenbergIteration
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-Match the convention in the surrounding tensor-regularity files: install the
-Borel σ-algebras locally, without leaking global instances onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -93,28 +87,11 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## Generic Sobolev-order arithmetic for the perturbed source
-
-The first headline `perturbedSource_memWkp_of_source_memWkp` is stated and
-proved in full generality for an arbitrary `SmoothEllipticBilinearForm B` over
-a finite-dimensional inner-product space. The arithmetic input — that
-`perturbedSource` loses one derivative on `f` and two on `u` — is independent of
-the manifold and of the tensor structure, so the development below works with
-`d : ℕ`, `[NeZero d]`, and `E := EuclideanSpace ℝ (Fin d)`. -/
-
 section GenericArithmetic
 
 variable {d : ℕ} [NeZero d]
 
 local notation "EE" => EuclideanSpace ℝ (Fin d)
-
-/-! ### A uniform iterated-derivative bound on a compact set
-
-`wkpNorm_smul_smooth_bounded_le` requires a uniform bound on the iterated
-derivatives of the smooth multiplier on the open set `Ω`. The coefficient
-functions of `B` are smooth but bounded only on compacts; the helper below
-supplies the uniform bound on any compact set — applied later to the precompact
-`closure Ω`. -/
 
 omit [NeZero d] in
 /-- For a smooth function `η : EE → ℝ` and a compact set `S`, the iterated
@@ -124,8 +101,6 @@ private theorem exists_uniform_iteratedFDeriv_bound_of_smooth_on_compact
     {S : Set EE} (hS : IsCompact S) (m : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ x ∈ S, ∀ j ≤ m, ‖iteratedFDeriv ℝ j η x‖ ≤ C := by
   classical
-  -- For each fixed order `j`, the iterated derivative is continuous, hence
-  -- bounded on the compact set `S`.
   have h_per_j : ∀ j : ℕ, ∃ Cj : ℝ, 0 ≤ Cj ∧
       ∀ x ∈ S, ‖iteratedFDeriv ℝ j η x‖ ≤ Cj := by
     intro j
@@ -136,7 +111,6 @@ private theorem exists_uniform_iteratedFDeriv_bound_of_smooth_on_compact
     refine ⟨max 0 Cj, le_max_left _ _, ?_⟩
     intro x hx
     exact (hCj x hx).trans (le_max_right _ _)
-  -- Take the maximum over the finitely many orders `j ≤ m`.
   let Cj : ℕ → ℝ := fun j => Classical.choose (h_per_j j)
   have hCj_nn : ∀ j, 0 ≤ Cj j := fun j => (Classical.choose_spec (h_per_j j)).1
   have hCj_bound : ∀ j, ∀ x ∈ S, ‖iteratedFDeriv ℝ j η x‖ ≤ Cj j := fun j =>
@@ -154,12 +128,6 @@ private theorem exists_uniform_iteratedFDeriv_bound_of_smooth_on_compact
     Finset.mem_range.mpr (Nat.lt_succ_of_le hj)
   exact le_trans (hCj_bound j x hx) (hC_ge j hj_mem)
 
-/-! ### Smooth iterated-derivative bound restricted to an open set
-
-The quantitative Leibniz lemma `wkpNorm_smul_smooth_bounded_le` consumes a
-bound `∀ j ≤ k, ∀ x ∈ Ω, ‖iteratedFDeriv ℝ j η x‖ ≤ C`. A bound on the larger
-compact `closure Ω` is in particular a bound on `Ω`, since `Ω ⊆ closure Ω`. -/
-
 omit [NeZero d] in
 /-- For a smooth `η` and a precompact open `Ω`, the iterated derivatives of `η`
 up to order `m` are uniformly bounded on `Ω`. -/
@@ -173,13 +141,6 @@ private theorem exists_uniform_iteratedFDeriv_bound_on_precompact_open
   refine ⟨C, hC_nn, ?_⟩
   intro j hj x hx
   exact hC_bound x (subset_closure hx) j hj
-
-/-! ### `MemWkp` and `wkpNorm` for a finite sum
-
-`perturbedSource` contains the double sum `∑_{i,j} ∂_j[(∂_l a^{ij})(∂_i u)]`.
-Neither `MemWkp` membership nor the `wkpNorm` triangle bound is available for a
-generic `Finset.sum` in the iterated-Sobolev API; the two helpers below close
-that gap by induction on the index finset. -/
 
 omit [NeZero d] in
 /-- A finite sum of `W^{k,2}` functions is again in `W^{k,2}`. -/
@@ -240,14 +201,12 @@ theorem wkpNorm_finset_sum_le
       have h_sum_mem : MemWkp (d := d) k 2 (fun x => ∑ b ∈ S, F b x) Ω :=
         memWkp_finset_sum (d := d) hΩ S F hF_S
       have h_ih := ih hF_S hκ_S hbound_S
-      -- Rewrite the sum over `insert a S` as `F a + ∑_{S}`.
       have h_eq :
           (fun x => ∑ b ∈ insert a S, F b x) =
             (fun x => F a x + ∑ b ∈ S, F b x) := by
         funext x
         rw [Finset.sum_insert ha]
       rw [h_eq]
-      -- Triangle inequality, then the per-term and inductive bounds.
       have h_tri :=
         wkpNorm_add_le (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ hF_a h_sum_mem
       refine h_tri.trans ?_
@@ -262,14 +221,6 @@ theorem wkpNorm_finset_sum_le
           (Finset.sum_nonneg hκ_S),
         add_mul]
 
-/-! ### The classical partial of a smooth `W^{k+1,2}` function
-
-`perturbedSource` is built from *classical* partials `∂_l f`, `∂_i u`, `∂_j`.
-For a smooth function the classical partial agrees a.e. on `Ω` with the chosen
-weak partial; the chosen weak partial of an element of `W^{k+1,2}` lies in
-`W^{k,2}` and has `wkpNorm` controlled by the `W^{k+1,2}` norm of the parent.
-The two lemmas below transfer those facts to the classical partial. -/
-
 /-- For a smooth `ψ` with `ψ ∈ W^{k+1,2}(Ω)` on an open `Ω`, the classical
 partial `∂_l ψ` lies in `W^{k,2}(Ω)`. -/
 theorem classicalPartial_memWkp_of_memWkp_succ
@@ -279,11 +230,9 @@ theorem classicalPartial_memWkp_of_memWkp_succ
     MemWkp (d := d) k 2
       (fun x => (fderiv ℝ ψ x) (EuclideanSpace.single l 1)) Ω := by
   classical
-  -- `ψ ∈ W^{1,2}(Ω)`, so the chosen weak partial agrees a.e. with `∂_l ψ`.
   have hψ_W1 : DeGiorgi.MemW1p (d := d) 2 ψ Ω := hψ.memW1p
   have h_ae := chosenWeakPartial_smooth_ae_eq (d := d)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ hψ_smooth hψ_W1 l
-  -- The chosen weak partial of `ψ ∈ W^{k+1,2}` lies in `W^{k,2}`.
   have h_chosen_mem : MemWkp (d := d) k 2 (chosenWeakPartial' 2 l ψ Ω) Ω :=
     hψ.chosenWeakPartial_mem l
   exact (MemWkp_congr_ae (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ h_ae).mp
@@ -302,17 +251,8 @@ theorem wkpNorm_classicalPartial_le
   have hψ_W1 : DeGiorgi.MemW1p (d := d) 2 ψ Ω := hψ.memW1p
   have h_ae := chosenWeakPartial_smooth_ae_eq (d := d)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ hψ_smooth hψ_W1 l
-  -- The `wkpNorm` is a.e.-invariant: rewrite `∂_l ψ` as the chosen weak partial.
   rw [← wkpNorm_congr_ae (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ h_ae]
-  -- The chosen-weak-partial comparison.
   exact wkpNorm_chosenWeakPartial_le_wkpNorm_succ (d := d) k hΩ ψ l
-
-/-! ### Smooth-multiplier estimate on a precompact open set
-
-Combining `exists_uniform_iteratedFDeriv_bound_on_precompact_open` with the
-order-polymorphic quantitative Leibniz lemma yields, for a smooth coefficient
-`η` on a precompact open `Ω`, a constant controlling `wkpNorm k 2 (η · u) Ω` in
-terms of `wkpNorm k 2 u Ω`. -/
 
 /-- For a smooth `η` on a precompact open `Ω` and any `k`, there is a constant
 `K ≥ 0` such that every `u ∈ W^{k,2}(Ω)` has `η · u ∈ W^{k,2}(Ω)` with
@@ -337,23 +277,6 @@ private theorem exists_wkpNorm_smul_smooth_le_on_precompact
     hΩ_open hη_smooth hC_bound hu
 
 end GenericArithmetic
-
-/-! ## The Sobolev-order arithmetic headline
-
-`perturbedSource B u f l` is a sum of three groups, treated with the helpers
-above:
-
-* `∂_l f` — the classical partial, one order below `f`
-  (`classicalPartial_memWkp_of_memWkp_succ`, `wkpNorm_classicalPartial_le`);
-
-* `(∂_l B.c) · u` — the smooth coefficient `∂_l B.c` times `u`; `B.c` is
-  smooth, so `∂_l B.c` is smooth and bounded on the precompact `closure Ω`
-  (`exists_wkpNorm_smul_smooth_le_on_precompact`). For `tensorPrincipalForm`
-  this term is identically `0`, but it is handled here in full generality;
-
-* `∑_{i,j} ∂_j[(∂_l B.a^{ij}) · (∂_i u)]` — the divergence term, two orders
-  below `u`; each smooth coefficient `∂_l B.a^{ij}` is bounded on `closure Ω`,
-  `∂_i u` is one order below `u`, `∂_j[…]` one order below the product. -/
 
 section ArithmeticHeadline
 
@@ -394,23 +317,17 @@ theorem perturbedSource_memWkp_of_source_memWkp
             (wkpNorm (d := d) (m + 1) 2 f Ω +
               wkpNorm (d := d) (m + 2) 2 u Ω) := by
   classical
-  -- ===== The location-uniform multiplier constants. =====
-  -- The smooth zeroth-order coefficient `∂_l B.c`.
   set dlc : EE → ℝ :=
     fun x => (fderiv ℝ B.c x) (EuclideanSpace.single l 1) with hdlc_def
   have hdlc_smooth : ContDiff ℝ (⊤ : ℕ∞) dlc :=
     contDiff_partial_eta (d := d) B.smooth_c l
-  -- The multiplier constant for `∂_l B.c` at order `m`, uniform in `u`.
   obtain ⟨K_c, hK_c_nn, hK_c_bound⟩ :=
     exists_wkpNorm_smul_smooth_le_on_precompact (d := d) m hΩ_open
       hΩ_compact_closure hdlc_smooth
-  -- The smooth coefficient `∂_l a^{ij}`.
   have h_dla_smooth : ∀ i j : Fin d, ContDiff ℝ (⊤ : ℕ∞)
       (fun y : EE =>
         (fderiv ℝ (fun z : EE => B.a z i j) y) (EuclideanSpace.single l 1)) :=
     fun i j => contDiff_partial_eta (d := d) (B.contDiff_a i j) l
-  -- The multiplier constant for `∂_l a^{ij}` at order `m+1`, uniform in `u`,
-  -- extracted as a per-pair family.
   have h_pair_data : ∀ i j : Fin d, ∃ K' : ℝ, 0 ≤ K' ∧
       ∀ {w : EE → ℝ}, MemWkp (d := d) (m + 1) 2 w Ω →
         MemWkp (d := d) (m + 1) 2
@@ -423,18 +340,14 @@ theorem perturbedSource_memWkp_of_source_memWkp
     exists_wkpNorm_smul_smooth_le_on_precompact (d := d) (m + 1) hΩ_open
       hΩ_compact_closure (h_dla_smooth i j)
   choose K_pair hK_pair_nn hK_pair_bound using h_pair_data
-  -- The aggregate divergence constant, uniform in `u` and `f`.
   set K_div : ℝ := ∑ i : Fin d, ∑ j : Fin d, K_pair i j with hKdiv_def
   have hK_div_nn : 0 ≤ K_div :=
     Finset.sum_nonneg
       (fun i _ => Finset.sum_nonneg (fun j _ => hK_pair_nn i j))
-  -- The aggregate constant: `K_c + K_div + 1`.
   refine ⟨K_c + K_div + 1, by positivity, ?_⟩
   intro u f hu_smooth _hu_cpt hf_smooth hu_memWkp hf_memWkp
-  -- The data norms, as a single `ℝ≥0∞` quantity.
   set D : ℝ≥0∞ :=
     wkpNorm (d := d) (m + 1) 2 f Ω + wkpNorm (d := d) (m + 2) 2 u Ω with hD_def
-  -- ===== Group A: the classical partial `∂_l f`. =====
   set termA : EE → ℝ :=
     fun x => (fderiv ℝ f x) (EuclideanSpace.single l 1) with hA_def
   have hA_mem : MemWkp (d := d) m 2 termA Ω :=
@@ -443,9 +356,7 @@ theorem perturbedSource_memWkp_of_source_memWkp
   have hA_norm : wkpNorm (d := d) m 2 termA Ω ≤ D := by
     have h := wkpNorm_classicalPartial_le (d := d) hΩ_open hf_smooth hf_memWkp l
     exact h.trans le_self_add
-  -- ===== Group B: the zeroth-order term `(∂_l B.c) · u`. =====
   set termB : EE → ℝ := fun x => dlc x * u x with hB_def
-  -- `u ∈ W^{m,2}` (dropping two orders from `W^{m+2,2}`).
   have hu_m : MemWkp (d := d) m 2 u Ω :=
     MemWkp.le_of_le (by omega) hu_memWkp
   have hB_mem : MemWkp (d := d) m 2 termB Ω := (hK_c_bound hu_m).1
@@ -453,12 +364,9 @@ theorem perturbedSource_memWkp_of_source_memWkp
       wkpNorm (d := d) m 2 termB Ω ≤ ENNReal.ofReal K_c * D := by
     refine (hK_c_bound hu_m).2.trans ?_
     refine mul_le_mul_of_nonneg_left ?_ (by positivity)
-    -- `wkpNorm m 2 u Ω ≤ wkpNorm (m+2) 2 u Ω ≤ D`.
     have h_mono : wkpNorm (d := d) m 2 u Ω ≤ wkpNorm (d := d) (m + 2) 2 u Ω :=
       wkpNorm_mono_order (d := d) (by omega) u Ω
     exact h_mono.trans le_add_self
-  -- ===== Group C: the divergence term `∑_{i,j} ∂_j[(∂_l a^{ij})(∂_i u)]`. =====
-  -- `∂_i u ∈ W^{m+1,2}(Ω)` (dropping one order from `W^{m+2,2}`).
   have h_diu_mem : ∀ i : Fin d, MemWkp (d := d) (m + 1) 2
       (fun x => (fderiv ℝ u x) (EuclideanSpace.single i 1)) Ω := fun i =>
     classicalPartial_memWkp_of_memWkp_succ (d := d) hΩ_open hu_smooth
@@ -468,7 +376,6 @@ theorem perturbedSource_memWkp_of_source_memWkp
           (fun x => (fderiv ℝ u x) (EuclideanSpace.single i 1)) Ω ≤
         wkpNorm (d := d) (m + 2) 2 u Ω := fun i =>
     wkpNorm_classicalPartial_le (d := d) hΩ_open hu_smooth hu_memWkp i
-  -- For each `(i, j)`, the membership of the inner product and the norm bound.
   have h_pair_mem : ∀ i j : Fin d, MemWkp (d := d) (m + 1) 2
       (fun y : EE =>
         (fderiv ℝ (fun z : EE => B.a z i j) y) (EuclideanSpace.single l 1) *
@@ -484,14 +391,12 @@ theorem perturbedSource_memWkp_of_source_memWkp
     intro i j
     refine (hK_pair_bound i j (h_diu_mem i)).2.trans ?_
     exact mul_le_mul_of_nonneg_left (h_diu_norm i) (by positivity)
-  -- The single divergence summand `∂_j[(∂_l a^{ij})(∂_i u)]` at order `m`.
   set termC_summand : Fin d → Fin d → EE → ℝ :=
     fun i j x =>
       (fderiv ℝ (fun y : EE =>
         (fderiv ℝ (fun z : EE => B.a z i j) y) (EuclideanSpace.single l 1) *
           (fderiv ℝ u y) (EuclideanSpace.single i 1)) x)
         (EuclideanSpace.single j 1) with hCsum_def
-  -- Each summand lies in `W^{m,2}` (classical `∂_j` of the `W^{m+1,2}` product).
   have hCsum_mem : ∀ i j : Fin d, MemWkp (d := d) m 2 (termC_summand i j) Ω := by
     intro i j
     have h_prod_smooth : ContDiff ℝ (⊤ : ℕ∞)
@@ -501,7 +406,6 @@ theorem perturbedSource_memWkp_of_source_memWkp
       (h_dla_smooth i j).mul (contDiff_partial_eta (d := d) hu_smooth i)
     exact classicalPartial_memWkp_of_memWkp_succ (d := d) hΩ_open
       h_prod_smooth (h_pair_mem i j) j
-  -- Each summand's `wkpNorm` is bounded by the product's `W^{m+1,2}` norm.
   have hCsum_norm : ∀ i j : Fin d,
       wkpNorm (d := d) m 2 (termC_summand i j) Ω ≤
         ENNReal.ofReal (K_pair i j) * wkpNorm (d := d) (m + 2) 2 u Ω := by
@@ -514,7 +418,6 @@ theorem perturbedSource_memWkp_of_source_memWkp
     have h_partial_le := wkpNorm_classicalPartial_le (d := d) hΩ_open
       h_prod_smooth (h_pair_mem i j) j
     exact h_partial_le.trans (h_pair_norm i j)
-  -- The inner sum over `j` for fixed `i`: `∑_j ∂_j[(∂_l a^{ij})(∂_i u)]`.
   set termC_row : Fin d → EE → ℝ :=
     fun i x => ∑ j : Fin d, termC_summand i j x with hCrow_def
   have hCrow_mem : ∀ i : Fin d, MemWkp (d := d) m 2 (termC_row i) Ω := fun i =>
@@ -528,7 +431,6 @@ theorem perturbedSource_memWkp_of_source_memWkp
       (fun j _ => hCsum_mem i j) (fun j => K_pair i j)
       (fun j _ => hK_pair_nn i j) (wkpNorm (d := d) (m + 2) 2 u Ω)
       (fun j _ => hCsum_norm i j)
-  -- The full divergence term `∑_i ∑_j ∂_j[(∂_l a^{ij})(∂_i u)]`.
   set termC : EE → ℝ := fun x => ∑ i : Fin d, termC_row i x with hC_def
   have hC_mem : MemWkp (d := d) m 2 termC Ω :=
     memWkp_finset_sum (d := d) hΩ_open Finset.univ termC_row
@@ -541,14 +443,12 @@ theorem perturbedSource_memWkp_of_source_memWkp
       (fun i _ => Finset.sum_nonneg (fun j _ => hK_pair_nn i j))
       (wkpNorm (d := d) (m + 2) 2 u Ω) (fun i _ => hCrow_norm i)
     rwa [hKdiv_def]
-  -- ===== Assemble: `perturbedSource = (termA − termB) + termC`. =====
   have h_pert_eq :
       perturbedSource (d := d) B u f l =
         (fun x => (termA x - termB x) + termC x) := by
     funext x
     unfold perturbedSource
     rfl
-  -- Membership of the full perturbed source.
   have h_AB_mem : MemWkp (d := d) m 2 (fun x => termA x - termB x) Ω :=
     MemWkp.sub (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open hA_mem hB_mem
   have h_pert_mem : MemWkp (d := d) m 2 (perturbedSource (d := d) B u f l) Ω := by
@@ -556,19 +456,15 @@ theorem perturbedSource_memWkp_of_source_memWkp
     exact MemWkp.add (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_AB_mem
       hC_mem
   refine ⟨h_pert_mem, ?_⟩
-  -- The aggregate constant `K_c + K_div + 1` is already fixed.
   rw [h_pert_eq]
-  -- Triangle: `wkpNorm ((A−B)+C) ≤ wkpNorm (A−B) + wkpNorm C`.
   have h_tri₁ :=
     wkpNorm_add_le (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_AB_mem
       hC_mem
-  -- Triangle: `wkpNorm (A−B) ≤ wkpNorm A + wkpNorm B`.
   have h_AB_eq : (fun x => termA x - termB x) =
       (fun x => termA x + (fun y => - termB y) x) := by
     funext x; ring
   have hnegB_mem : MemWkp (d := d) m 2 (fun y => - termB y) Ω :=
     MemWkp.neg (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open hB_mem
-  -- `wkpNorm m 2 (-termB) Ω = wkpNorm m 2 termB Ω`.
   have h_negB_norm :
       wkpNorm (d := d) m 2 (fun y => - termB y) Ω =
         wkpNorm (d := d) m 2 termB Ω := by
@@ -585,19 +481,14 @@ theorem perturbedSource_memWkp_of_source_memWkp
       hA_mem hnegB_mem
     rw [← h_AB_eq, h_negB_norm] at h
     exact h
-  -- Chain the two triangle inequalities.
   have h_combine :
       wkpNorm (d := d) m 2 (fun x => (termA x - termB x) + termC x) Ω ≤
         (wkpNorm (d := d) m 2 termA Ω + wkpNorm (d := d) m 2 termB Ω) +
           wkpNorm (d := d) m 2 termC Ω :=
     h_tri₁.trans (add_le_add h_tri₂ le_rfl)
   refine h_combine.trans ?_
-  -- Now bound each of the three pieces.
-  -- `wkpNorm A ≤ D = 1 · D`.
   have hA_final : wkpNorm (d := d) m 2 termA Ω ≤ ENNReal.ofReal 1 * D := by
     rw [ENNReal.ofReal_one, one_mul]; exact hA_norm
-  -- `wkpNorm B ≤ K_c · D`.
-  -- `wkpNorm C ≤ K_div · D`.
   have hC_final : wkpNorm (d := d) m 2 termC Ω ≤ ENNReal.ofReal K_div * D := by
     refine hC_norm.trans ?_
     refine mul_le_mul_of_nonneg_left ?_ (by positivity)
@@ -609,7 +500,6 @@ theorem perturbedSource_memWkp_of_source_memWkp
           ENNReal.ofReal K_div * D :=
     add_le_add (add_le_add hA_final hB_norm) hC_final
   refine h_sum_le.trans ?_
-  -- Collect the constants: `(1 + K_c + K_div) · D`.
   rw [← add_mul, ← add_mul,
     ← ENNReal.ofReal_add (by norm_num : (0 : ℝ) ≤ 1) hK_c_nn,
     ← ENNReal.ofReal_add (by positivity) hK_div_nn]
@@ -618,21 +508,6 @@ theorem perturbedSource_memWkp_of_source_memWkp
   ring
 
 end ArithmeticHeadline
-
-/-! ## The iterated perturbed source and the mixed-partial induction
-
-The single-step differentiated identity `partial_smooth_weak_solution` carries a
-smooth weak solution `(u, f)` of `B` to the smooth weak solution
-`(∂_l u, perturbedSource B u f l)` of the *same* `B`. Folding this step along a
-multi-index `idx : Fin m → Fin d` produces, after `m` steps, the iterated
-classical partial `iterClassicalPartial m idx u` as a smooth weak solution of
-`B` against the iterated perturbed source.
-
-`iterClassicalPartial` differentiates by the **head** `idx 0` first (innermost),
-then recurses on the tail; `iteratedPerturbedSource` is defined with the
-matching head-first recursion, so that `tensorComponent_iterated_partial_…`
-exhibits exactly `iterClassicalPartial m idx (tensorComponentEuclid …)` as the
-solution function. -/
 
 section IteratedSource
 
@@ -672,14 +547,6 @@ theorem iteratedPerturbedSource_succ
         (perturbedSource (d := d) B u f (idx 0))
         (fun i : Fin m => idx i.succ) := rfl
 
-/-! ### Smoothness of the perturbed source
-
-`partial_smooth_weak_solution` requires the source `f` to be smooth, so the
-mixed-partial induction must carry the smoothness of the source through every
-step. The perturbed source `perturbedSource B u f l` involves at most `∂_l f`,
-the smooth coefficients of `B`, and at most second derivatives of `u`; it is
-therefore `C^∞` whenever `u` and `f` are. -/
-
 /-- For smooth `u` and `f`, the perturbed source `perturbedSource B u f l` is
 `C^∞` (the coefficients of `B` are smooth by hypothesis). -/
 theorem contDiff_perturbedSource'
@@ -688,11 +555,9 @@ theorem contDiff_perturbedSource'
     (l : Fin d) :
     ContDiff ℝ (⊤ : ℕ∞) (perturbedSource (d := d) B u f l) := by
   unfold perturbedSource
-  -- Term 1: `∂_l f`.
   have h_dlf : ContDiff ℝ (⊤ : ℕ∞)
       (fun x : EE => (fderiv ℝ f x) (EuclideanSpace.single l 1)) :=
     contDiff_partial_eta (d := d) hf l
-  -- Term 2: `(∂_l B.c) · u`.
   have h_dlc : ContDiff ℝ (⊤ : ℕ∞)
       (fun x : EE => (fderiv ℝ B.c x) (EuclideanSpace.single l 1)) :=
     contDiff_partial_eta (d := d) B.smooth_c l
@@ -700,7 +565,6 @@ theorem contDiff_perturbedSource'
       (fun x : EE => (fderiv ℝ B.c x) (EuclideanSpace.single l 1) * u x) :=
     h_dlc.mul hu
   refine (h_dlf.sub h_dlc_u).add ?_
-  -- Term 3: the divergence of `(∂_l a^{ij})(∂_i u)`.
   refine ContDiff.sum ?_
   intro i _
   refine ContDiff.sum ?_
@@ -735,31 +599,20 @@ theorem iterated_partial_isSmoothWeakSolution
       simpa [iterClassicalPartial_zero, iteratedPerturbedSource_zero] using h_weak
   | succ m ih =>
       intro u f h_weak hf idx
-      -- One step: `∂_{idx 0} u` is a smooth weak solution of `B` against
-      -- `perturbedSource B u f (idx 0)`.
       have h_step :
           B.IsSmoothWeakSolution
             (fun y : EE => (fderiv ℝ u y) (EuclideanSpace.single (idx 0) 1))
             (perturbedSource (d := d) B u f (idx 0)) :=
         partial_smooth_weak_solution (d := d) (Ω := (Set.univ : Set EE))
           isOpen_univ B h_weak hf (idx 0)
-      -- The new source is smooth, so the induction hypothesis applies.
       have h_step_src_smooth :
           ContDiff ℝ (⊤ : ℕ∞) (perturbedSource (d := d) B u f (idx 0)) :=
         contDiff_perturbedSource' (d := d) B h_weak.1 hf (idx 0)
-      -- Recurse on the tail.
       have h_rec := ih h_step h_step_src_smooth (fun i : Fin m => idx i.succ)
       rw [iterClassicalPartial_succ, iteratedPerturbedSource_succ]
       exact h_rec
 
 end IteratedSource
-
-/-! ## The tensor-component mixed-partial induction
-
-Specialising `iterated_partial_isSmoothWeakSolution` to the base weak solution
-`tensorComponent_isSmoothWeakSolution` exhibits the iterated chart partial of
-the tensor chart component as a smooth weak solution of the tensor principal
-form. -/
 
 section TensorMixed
 
@@ -799,20 +652,17 @@ theorem tensorComponent_iterated_partial_isSmoothWeakSolution
         (tensorComponentWeakRHS (I := I) (M := M) g r s T F α hK hK_target P₀)
         idx) := by
   classical
-  -- The base chart-component weak equation.
   have h_base :
       (tensorPrincipalForm (I := I) (M := M) g α hK hK_target).IsSmoothWeakSolution
         (tensorComponentEuclid (I := I) (M := M) g r s T α P₀)
         (tensorComponentWeakRHS (I := I) (M := M) g r s T F α hK hK_target P₀) :=
     tensorComponent_isSmoothWeakSolution (I := I) (M := M)
       g r s T F α hK hK_target P₀ hT_supp hF_supp hT_K hweak
-  -- The base source `tensorComponentWeakRHS` is `C^∞`.
   have h_base_src_smooth :
       ContDiff ℝ (⊤ : ℕ∞)
         (tensorComponentWeakRHS (I := I) (M := M) g r s T F α hK hK_target P₀) :=
     tensorComponentWeakRHS_contDiff (I := I) (M := M)
       g r s T F α hK hK_target P₀ hT_supp hF_supp
-  -- Fold the single-step identity along the multi-index `idx`.
   exact iterated_partial_isSmoothWeakSolution (d := Module.finrank ℝ E)
     (tensorPrincipalForm (I := I) (M := M) g α hK hK_target) m h_base
     h_base_src_smooth idx

@@ -97,27 +97,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The partition-of-unity-weighted tensor section
-
-The chart-atlas partition-of-unity weight `chartAtlasPOU I M α` is a smooth
-real-valued function on `M`. The scalar product `chartAtlasPOU I M α • S` of
-this smooth function and a smooth section `S` of the `(r, s)`-tensor bundle is
-again a smooth section: this is `ContMDiff.smul_section`. Its support is
-contained in the support of `S`, hence still compact. The packaged
-`SmoothCcTensor` is `pouSmul g r s α S`. -/
 
 /-- The chart-atlas partition-of-unity weight `chartAtlasPOU I M α` times a
 smooth compactly-supported `(r, s)`-tensor section `S`, packaged as a smooth
@@ -130,23 +115,16 @@ noncomputable def pouSmul
     { toFun := fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x • S.toSection x
       contMDiff_toFun := by
-        -- The pointwise scalar product of a `C^∞` function and a `C^∞` section
-        -- is a `C^∞` section.
         exact ContMDiff.smul_section
           (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff S.toSection.contMDiff }
   hasCompactSupport := by
     classical
-    -- The underlying map of `chartAtlasPOU I M α • S` is
-    -- `fun x => chartAtlasPOU I M α x • S.toFun x`; it vanishes wherever
-    -- `S.toFun` vanishes, so its support sits inside `tsupport S.toFun`.
     refine HasCompactSupport.of_support_subset_isCompact S.hasCompactSupport ?_
     intro x hx
-    -- A point in the support of the scaled map is in the support of `S.toFun`.
     rw [Function.mem_support] at hx
     refine subset_tsupport S.toFun ?_
     rw [Function.mem_support]
     intro hS_zero
-    -- The underlying-map value at `x` is `chartAtlasPOU I M α x • S.toFun x`.
     apply hx
     change TensorRSSpace.toModel
       (((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x • S.toSection x) = 0
@@ -172,18 +150,6 @@ lemma pouSmul_toFun_apply
   rw [SmoothCcTensor.toFun_apply, pouSmul_toSection_apply,
     TensorRSSpace.toModel_smul]
   rfl
-
-/-! ## The raw chart component of the partition-of-unity-weighted section
-
-The trivialization-at-`α` projection `tensorTrivProj` is the trivialization's
-fibrewise continuous-linear map applied to the section value, and the
-chart-frame component projection `tensorChartComponentProjection` is itself a
-continuous linear functional. Both are therefore homogeneous: applied to the
-pointwise scalar-rescaled section `pouSmul g r s α S` they produce the scalar
-multiple of the values on `S`. Hence the raw chart component of
-`pouSmul g r s α S` is the partition-of-unity weight times the raw chart
-component of `S` — which is exactly the weighted chart component
-`tensorChartComponentPou` of `S`. -/
 
 /-- The trivialization-at-`α` projection of the partition-of-unity-weighted
 section is the partition-of-unity weight times the trivialization projection of
@@ -232,13 +198,6 @@ theorem tensorChartComponentRaw_pouSmul_eq_tensorChartComponentPou
   rw [tensorChartComponentRaw_smul_pou (I := I) (M := M) g r s α S Idx Jdx]
   rfl
 
-/-! ## The partition-of-unity-weighted section is chart-supported
-
-The chart-atlas partition of unity is subordinate to the chart cover, so the
-topological support of its weight at `α` lies inside the chart-`α` source.
-Multiplying a section by this weight confines its support to that of the
-weight, hence to the chart source. -/
-
 /-- **The partition-of-unity-weighted section is chart-supported.** The
 topological support of the underlying map of `pouSmul g r s α S` is contained
 in the chart-`α` source: the underlying map vanishes wherever the partition-of-
@@ -250,15 +209,12 @@ theorem pouSmul_tsupport_subset_chartSource
     tsupport (pouSmul (I := I) (M := M) g r s α S).toFun ⊆
       (chartAt H α).source := by
   classical
-  -- The support of `chartAtlasPOU I M α • S.toFun` sits inside the support of
-  -- the weight `chartAtlasPOU I M α`.
   have hfun_eq : (pouSmul (I := I) (M := M) g r s α S).toFun =
       fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x •
         S.toFun x := by
     funext x
     exact pouSmul_toFun_apply (I := I) (M := M) g r s α S x
   rw [hfun_eq]
-  -- The pointwise support inclusion.
   have h_supp_sub : Function.support
       (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x •
         S.toFun x) ⊆
@@ -268,20 +224,9 @@ theorem pouSmul_tsupport_subset_chartSource
     rw [Function.mem_support] at hx ⊢
     intro hweight_zero
     exact hx (by rw [hweight_zero, zero_smul])
-  -- Pass to closures and use subordinacy of the chart-atlas partition of unity.
   refine (closure_mono h_supp_sub).trans ?_
   exact (DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate
     I M) α
-
-/-! ## The weighted Euclidean chart component as a raw Euclidean chart component
-
-Pushing the manifold-side identity
-`tensorChartComponentRaw (pouSmul g r s α S) = tensorChartComponentPou S` to
-Euclidean space identifies the weighted Euclidean chart component of `S`,
-`tensorChartComponent g r s S α P₀.1 P₀.2`, with the raw Euclidean chart
-component of `pouSmul g r s α S`, `tensorComponentEuclid g r s (pouSmul …) α P₀`.
-This is the key substitution that turns the raw-component weak-solution
-headline into its partition-of-unity-weighted analogue. -/
 
 /-- **The weighted Euclidean chart component is a raw Euclidean chart component.**
 The partition-of-unity-weighted Euclidean chart component of `S` at the
@@ -296,15 +241,6 @@ theorem tensorChartComponent_eq_tensorComponentEuclid_pouSmul
   rw [tensorComponentEuclid_def, tensorChartComponent_def,
     tensorChartComponentRaw_pouSmul_eq_tensorChartComponentPou
       (I := I) (M := M) g r s α S P₀.1 P₀.2]
-
-/-! ## The partition-of-unity-weighted per-component weak-solution headline
-
-Substituting the partition-of-unity-weighted section `pouSmul g r s α S` for the
-solution section in `tensorComponent_isSmoothWeakSolution`, and rewriting its
-conclusion by `tensorChartComponent_eq_tensorComponentEuclid_pouSmul`, yields
-the headline for the canonical (partition-of-unity-weighted) chart component.
-The chart-source support hypothesis on the solution section is discharged by
-`pouSmul_tsupport_subset_chartSource`. -/
 
 /-- **The partition-of-unity-weighted per-component scalar weak-solution
 headline of the connection Laplacian.**
@@ -344,27 +280,20 @@ theorem tensorChartComponent_isSmoothWeakSolution
       (tensorComponentWeakRHS (I := I) (M := M) g r s
         (pouSmul (I := I) (M := M) g r s α S) F α hK hK_target P₀) := by
   classical
-  -- The weighted Euclidean chart component is the raw Euclidean chart component
-  -- of the partition-of-unity-weighted section.
   have hcomp_eq :
       tensorChartComponent (I := I) (M := M) g r s S α P₀.1 P₀.2 =
         tensorComponentEuclid (I := I) (M := M) g r s
           (pouSmul (I := I) (M := M) g r s α S) α P₀ :=
     tensorChartComponent_eq_tensorComponentEuclid_pouSmul
       (I := I) (M := M) g r s α S P₀
-  -- The chart-source support hypothesis on the solution section is automatic.
   have hpou_supp :
       tsupport (pouSmul (I := I) (M := M) g r s α S).toFun ⊆
         (chartAt H α).source :=
     pouSmul_tsupport_subset_chartSource (I := I) (M := M) g r s α S
-  -- The `K`-support hypothesis, transported to the raw Euclidean chart
-  -- component of `pouSmul g r s α S`.
   have hpou_K :
       tsupport (tensorComponentEuclid (I := I) (M := M) g r s
         (pouSmul (I := I) (M := M) g r s α S) α P₀) ⊆ K := by
     rw [← hcomp_eq]; exact hS_K
-  -- Rewrite the conclusion's first argument and apply the raw-component
-  -- weak-solution headline to the partition-of-unity-weighted section.
   rw [hcomp_eq]
   exact tensorComponent_isSmoothWeakSolution (I := I) (M := M) g r s
     (pouSmul (I := I) (M := M) g r s α S) F α hK hK_target P₀

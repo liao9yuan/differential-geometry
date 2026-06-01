@@ -54,11 +54,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EuN" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Smooth-cutoff infrastructure
-
-A smooth bump equal to `1` on a closed ball and supported in a slightly larger
-closed ball, with uniformly bounded iterated derivatives. -/
-
 /-- A smooth cutoff `χ` adapted to `ball x₀ (2 R)`: `χ = 1` on
 `closedBall x₀ R`, `tsupport χ ⊆ closedBall x₀ (3 R / 2) ⊂ ball x₀ (2 R)`,
 with `χ ∈ [0, 1]` and compact support. -/
@@ -151,21 +146,13 @@ private lemma cutoff_memWkp_two
   have h2R_pos : (0 : ℝ) < 2 * R := by linarith
   have hball_open : IsOpen (Metric.ball x₀ (2 * R)) := Metric.isOpen_ball
   have hp_one : (1 : ℝ≥0∞) ≤ 2 := by norm_num
-  -- Restrict `u` to the ball.
   have hu_ball : MemWkp (d := d) k 2 u (Metric.ball x₀ (2 * R)) :=
     MemWkp.mono_set (d := d) hp_one hΩ hball_open hball (hu k)
-  -- Uniform bound on the iterated derivatives of `χ` over orders `j ≤ k`.
   obtain ⟨C, _hC_nn, hC_bound⟩ :=
     exists_uniform_iteratedFDeriv_bound (d := d) hχ hχ_compact k
   have hχ_bound : ∀ j ≤ k, ∀ x ∈ Metric.ball x₀ (2 * R),
       ‖iteratedFDeriv ℝ j χ x‖ ≤ C := fun j hj x _ => hC_bound j hj x
   exact MemWkp.smul_smooth_bounded (d := d) k hp_one hball_open hχ hχ_bound hu_ball
-
-/-! ## The Gagliardo–Nirenberg–Sobolev tower to a super-critical exponent
-
-Starting from `MemWkp (m + 1 + s) (ofReal p)` with `p` regular at depth `s + 1`
-and `(s + 1) p > d`, finitely many sub-critical tower steps produce a
-super-critical exponent `q > d` at order `m + 1`. -/
 
 /-- The inductive tower driver. From `MemWkp (m + 1 + s) (ofReal p) f Ω` for a
 compactly-supported `f` with `tsupport f ⊆ Ω`, where `p` is regular at depth
@@ -184,7 +171,6 @@ private theorem tower_to_supercritical
   induction s with
   | zero =>
       intro p hp_one _hreg hkp f _hf_cpt _hf_supp hf
-      -- `s = 0`: order `m + 1`, and `(0 + 1) p = p > d`.
       have hp_dim : (d : ℝ) < p := by
         have : ((0 + 1 : ℕ) : ℝ) = 1 := by norm_num
         rw [this, one_mul] at hkp
@@ -192,11 +178,9 @@ private theorem tower_to_supercritical
       exact ⟨p, hp_one, hp_dim, by simpa using hf⟩
   | succ s ih =>
       intro p hp_one hreg hkp f hf_cpt hf_supp hf
-      -- Regularity at depth `s + 2` rules out the critical value `p = d`.
       have hp_ne_d : p ≠ (d : ℝ) := hreg.p_ne_n_of_one_le (by omega)
       rcases lt_or_gt_of_ne hp_ne_d with hp_lt | hp_gt
-      · -- Sub-critical: one tower step at order `m + 1 + s`.
-        have hp_pos : 0 < p := by linarith
+      · have hp_pos : 0 < p := by linarith
         have hf' : MemWkp (d := d) ((m + 1 + s) + 1) (ENNReal.ofReal p) f Ω := by
           have h_idx : m + 1 + (s + 1) = (m + 1 + s) + 1 := by ring
           rw [h_idx] at hf
@@ -204,7 +188,6 @@ private theorem tower_to_supercritical
         obtain ⟨h_mem_p1, _h_norm_p1⟩ :=
           TowerStep.MemWkp_subcritical_iterated (d := d) (m + 1 + s)
             hp_one hp_lt hΩ_open hf_cpt hf_supp hf'
-        -- Tower-step exponent `p₁ = d p / (d - p)`.
         set p_1 : ℝ := (d : ℝ) * p / ((d : ℝ) - p) with hp_1_def
         have hd_pos : 0 < (d : ℝ) := by exact_mod_cast NeZero.pos d
         have hd_p_pos : 0 < (d : ℝ) - p := by linarith
@@ -212,7 +195,6 @@ private theorem tower_to_supercritical
           rw [hp_1_def, le_div_iff₀ hd_p_pos]
           nlinarith [hp_pos]
         have hp_1_one : 1 ≤ p_1 := le_trans hp_one hp_1_ge_p
-        -- New super-critical inequality `(s + 1) p₁ > d`.
         have hkp_next : (d : ℝ) < ((s + 1 : ℕ) : ℝ) * p_1 := by
           have h_form : (d : ℝ) < ((s + 1 : ℕ) + 1 : ℝ) * p := by
             have hkp_cast : ((s + 1 + 1 : ℕ) : ℝ) * p =
@@ -223,19 +205,13 @@ private theorem tower_to_supercritical
             IterationCalc.kp1_real_gt_d_of_kp1p_gt_d d (s + 1) p hp_pos hp_lt h_form
           rw [hp_1_def]
           exact h_id
-        -- New regularity at depth `s + 1`.
         have hreg_p_1 : RegularExponent.IsRegular (d : ℝ) p_1 (s + 1) := by
           rw [hp_1_def]
           exact hreg.tower_step hp_one hp_lt
         have h_mem_p1' : MemWkp (d := d) (m + 1 + s) (ENNReal.ofReal p_1) f Ω := by
           rw [hp_1_def]; exact h_mem_p1
         exact ih hp_1_one hreg_p_1 hkp_next hf_cpt hf_supp h_mem_p1'
-      · -- Super-critical: drop the order from `m + 1 + (s + 1)` to `m + 1`.
-        exact ⟨p, hp_one, hp_gt, MemWkp.le_of_le (by omega) hf⟩
-
-/-! ## A `C^m` representative on a ball, for every order `m`
-
-Combining the cutoff, the regular-exponent choice, the tower, and Morrey. -/
+      · exact ⟨p, hp_one, hp_gt, MemWkp.le_of_le (by omega) hf⟩
 
 /-- For a function lying in `MemWkp k 2 u Ω` for every `k`, on an open set `Ω`,
 and a ball `ball x₀ (2 R) ⊆ Ω`, there is — for every order `m` — a `C^m`
@@ -253,15 +229,12 @@ private theorem exists_contDiff_m_rep_ball
   have hball_open : IsOpen (Metric.ball x₀ (2 * R)) := Metric.isOpen_ball
   have hd_pos : 0 < d := NeZero.pos d
   have hd_real_pos : (0 : ℝ) < (d : ℝ) := by exact_mod_cast hd_pos
-  -- Smooth cutoff `χ = 1` on `closedBall x₀ R`, supported in `ball x₀ (2 R)`.
   obtain ⟨χ, hχ_smooth, hχ_cpt, _hχ_range, hχ_one, hχ_supp⟩ :=
     exists_cutoff_ball (d := d) hR
   set v : EuN → ℝ := fun x => χ x * u x with hv_def
-  -- `χ · u` lies in `MemWkp k 2` on `ball x₀ (2 R)` for every `k`.
   have hv_memWkp : ∀ k : ℕ,
       MemWkp (d := d) k 2 v (Metric.ball x₀ (2 * R)) := fun k =>
     cutoff_memWkp_two (d := d) hR hχ_smooth hχ_cpt hΩ hball hu k
-  -- `tsupport v ⊆ closedBall x₀ (3 R / 2) ⊂ ball x₀ (2 R)`.
   have h_supp_subset : Function.support v ⊆ Function.support χ := by
     intro x hx
     have hvx : v x ≠ 0 := hx
@@ -282,9 +255,6 @@ private theorem exists_contDiff_m_rep_ball
     HasCompactSupport.of_support_subset_isCompact
       (isCompact_closedBall (x := x₀) (3 * R / 2))
       ((subset_tsupport _).trans hv_supp_closed)
-  -- Pick a regular exponent `p₀ ∈ [1, 2)` with `(d + 1) p₀ > d`.
-  -- The iteration depth is `d`: after `d` sub-critical steps the exponent
-  -- surpasses the dimension.
   have hs_max_succ_pos : 1 ≤ d + 1 := by omega
   have hp_2_strict : (1 : ℝ) < 2 := by norm_num
   have h_d_lt_kp_2 : (d : ℝ) < ((d + 1 : ℕ) : ℝ) * 2 := by
@@ -297,10 +267,8 @@ private theorem exists_contDiff_m_rep_ball
   obtain ⟨p₀, hp₀_one, hp₀_lt, h_d_lt_kp₀, hp₀_reg⟩ :=
     RegularExponent.exists_regular_exponent_below
       (d : ℝ) (d + 1) hs_max_succ_pos hp_2_strict h_d_lt_kp_2
-  -- `χ · u ∈ MemWkp (m + 1 + d) 2` on the ball.
   have hv_mem_two : MemWkp (d := d) (m + 1 + d) 2 v
       (Metric.ball x₀ (2 * R)) := hv_memWkp (m + 1 + d)
-  -- Lower the exponent from `2` to `ofReal p₀` (compact support → Hölder).
   have hp₀_le_two_enn : ENNReal.ofReal p₀ ≤ (2 : ℝ≥0∞) := by
     rw [show (2 : ℝ≥0∞) = ENNReal.ofReal 2 from by
       rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) from by norm_num, ENNReal.ofReal_natCast]; rfl]
@@ -314,16 +282,13 @@ private theorem exists_contDiff_m_rep_ball
       (m + 1 + d) hball_open Metric.isClosed_closedBall
       ((measure_closedBall_lt_top (x := x₀) (r := 3 * R / 2)).ne)
       hp₀_one_enn hp₀_le_two_enn hv_supp_closed hv_mem_two
-  -- Tower to a super-critical exponent `q > d` at order `m + 1`.
   obtain ⟨q, _hq_one, hq_dim, hv_mem_q⟩ :=
     tower_to_supercritical (d := d) hball_open m d hp₀_one hp₀_reg
       h_d_lt_kp₀ hv_cpt hv_supp_ball hv_mem_p₀
-  -- Morrey: a `C^m` representative of `v` on `ball x₀ ((2 R) / 4) = ball x₀ (R / 2)`.
   obtain ⟨f, hf_cdiff, hf_ae⟩ :=
     EuclideanMorrey.morrey_iteratedFDeriv_representative (d := d) (p := q)
       (x₀ := x₀) (R := 2 * R) (u := v) hq_dim h2R_pos m hv_mem_q
   refine ⟨f, hf_cdiff, ?_⟩
-  -- `u =ᵐ v` on `ball x₀ (R / 2)` (where `χ = 1`), and `v =ᵐ f` there.
   have h_ball_eq : Metric.ball x₀ (2 * R / 4) = Metric.ball x₀ (R / 2) := by
     congr 1; ring
   have hu_eq_v : u =ᵐ[volume.restrict (Metric.ball x₀ (R / 2))] v := by
@@ -353,23 +318,18 @@ private theorem exists_contDiffOn_top_rep_ball
   classical
   have hR2_pos : (0 : ℝ) < R / 2 := by linarith
   have h_ball_open : IsOpen (Metric.ball x₀ (R / 2)) := Metric.isOpen_ball
-  -- The order-`0` representative.
   obtain ⟨f₀, hf₀_cdiff, hf₀_ae⟩ :=
     exists_contDiff_m_rep_ball (d := d) hR hΩ hball hu 0
   refine ⟨f₀, ?_, hf₀_ae⟩
-  -- `C^∞` on the ball ⟺ `C^m` on the ball for every `m`.
   rw [contDiffOn_infty]
   intro m
-  -- Order-`m` representative.
   obtain ⟨fₘ, hfₘ_cdiff, hfₘ_ae⟩ :=
     exists_contDiff_m_rep_ball (d := d) hR hΩ hball hu m
-  -- `f₀ = fₘ` on the open ball: both continuous, both a.e.-equal to `u`.
   have h_ae_eq : f₀ =ᵐ[volume.restrict (Metric.ball x₀ (R / 2))] fₘ :=
     (hf₀_ae.symm).trans hfₘ_ae
   have h_eqOn : Set.EqOn f₀ fₘ (Metric.ball x₀ (R / 2)) :=
     MeasureTheory.Measure.eqOn_open_of_ae_eq h_ae_eq h_ball_open
       hf₀_cdiff.continuous.continuousOn hfₘ_cdiff.continuous.continuousOn
-  -- Transfer `C^m` from `fₘ` to `f₀` via the pointwise equality on the ball.
   refine (hfₘ_cdiff.contDiffOn (s := Metric.ball x₀ (R / 2))).congr ?_
   intro x hx
   exact h_eqOn hx
@@ -384,9 +344,7 @@ private theorem exists_contDiffOn_top_rep_nhd
         ContDiffOn ℝ (∞ : WithTop ℕ∞) f (Metric.ball x r) ∧
         u =ᵐ[volume.restrict (Metric.ball x r)] f := by
   classical
-  -- A ball `ball x ρ ⊆ Ω`.
   obtain ⟨ρ, hρ_pos, hρ_subset⟩ := Metric.isOpen_iff.mp hΩ x hx
-  -- Take `R := ρ / 4`, so `ball x (2 R) ⊆ ball x ρ ⊆ Ω`.
   set R : ℝ := ρ / 4 with hR_def
   have hR_pos : 0 < R := by rw [hR_def]; linarith
   have hball_subset : Metric.ball x (2 * R) ⊆ Ω := by
@@ -399,12 +357,6 @@ private theorem exists_contDiffOn_top_rep_nhd
     exists_contDiffOn_top_rep_ball (d := d) hR_pos hΩ hball_subset hu
   exact ⟨R / 2, by linarith, fun y hy => hball_subset (by
     rw [Metric.mem_ball] at hy ⊢; linarith), f, hf_cdiff, hf_ae⟩
-
-/-! ## Gluing the local representatives into a global `C^∞` representative
-
-The local `C^∞` representatives agree on their pairwise overlaps — being
-continuous and a.e.-equal to `u` — and so glue into a single global `C^∞`
-representative on `Ω`. -/
 
 /-- **Iterated Sobolev embedding to `C^∞` on Euclidean open sets.**
 
@@ -419,36 +371,28 @@ theorem contDiffOn_of_forall_memWkp_two
       ContDiffOn ℝ (∞ : WithTop ℕ∞) u_smooth Ω ∧
       u =ᵐ[volume.restrict Ω] u_smooth := by
   classical
-  -- For each point of `Ω`, choose a ball radius and a `C^∞` representative.
   have h_choice : ∀ x : Ω, ∃ r : ℝ, 0 < r ∧ Metric.ball (x : EuN) r ⊆ Ω ∧
       ∃ f : EuN → ℝ,
         ContDiffOn ℝ (∞ : WithTop ℕ∞) f (Metric.ball (x : EuN) r) ∧
         u =ᵐ[volume.restrict (Metric.ball (x : EuN) r)] f := fun x =>
     exists_contDiffOn_top_rep_nhd (d := d) hΩ hu x.2
   choose rad hrad_pos hball_subset frep hfrep_cdiff hfrep_ae using h_choice
-  -- The open cover of `Ω` by the chosen balls.
   set S : Ω → Set EuN := fun x => Metric.ball (x : EuN) (rad x) with hS_def
   have hS_open : ∀ x : Ω, IsOpen (S x) := fun x => Metric.isOpen_ball
   have hS_subset : ∀ x : Ω, S x ⊆ Ω := hball_subset
-  -- Each point of `Ω` lies in its own ball.
   have hx_mem_S : ∀ x : Ω, (x : EuN) ∈ S x := fun x => by
     rw [hS_def]; exact Metric.mem_ball_self (hrad_pos x)
   have hΩ_subset_iUnion : Ω ⊆ ⋃ x : Ω, S x := fun y hy =>
     Set.mem_iUnion.mpr ⟨⟨y, hy⟩, hx_mem_S ⟨y, hy⟩⟩
-  -- Continuity of each local representative on its ball.
   have hfrep_cont : ∀ x : Ω, ContinuousOn (frep x) (S x) := fun x =>
     (hfrep_cdiff x).continuousOn
-  -- Pairwise consistency on overlaps: the representatives agree where defined.
   have h_consistent : ∀ (x y : Ω) (z : EuN) (hzx : z ∈ S x) (hzy : z ∈ S y),
       frep x z = frep y z := by
     intro x y z hzx hzy
-    -- On the open overlap, both `frep x` and `frep y` are continuous and
-    -- a.e.-equal to `u`, hence equal everywhere.
     set W : Set EuN := S x ∩ S y with hW_def
     have hW_open : IsOpen W := (hS_open x).inter (hS_open y)
     have hW_sub_x : W ⊆ S x := Set.inter_subset_left
     have hW_sub_y : W ⊆ S y := Set.inter_subset_right
-    -- `u =ᵐ frep x` and `u =ᵐ frep y` on `W` (restricting from their balls).
     have hae_x : u =ᵐ[volume.restrict W] frep x :=
       ae_restrict_of_ae_restrict_of_subset hW_sub_x (hfrep_ae x)
     have hae_y : u =ᵐ[volume.restrict W] frep y :=
@@ -458,15 +402,12 @@ theorem contDiffOn_of_forall_memWkp_two
       MeasureTheory.Measure.eqOn_open_of_ae_eq hae_xy hW_open
         ((hfrep_cont x).mono hW_sub_x) ((hfrep_cont y).mono hW_sub_y)
     exact h_eqOn ⟨hzx, hzy⟩
-  -- Glue the local representatives over the cover of `Ω`.
   set gΩ : ↥Ω → ℝ :=
     Set.iUnionLift S (fun x z => frep x (z : EuN))
       (fun x y z hzx hzy => h_consistent x y z hzx hzy) Ω hΩ_subset_iUnion
     with hgΩ_def
-  -- Extend `gΩ` to a total function (by `0` outside `Ω`).
   set u_smooth : EuN → ℝ := fun y => if h : y ∈ Ω then gΩ ⟨y, h⟩ else 0
     with hu_smooth_def
-  -- On each ball, `u_smooth` agrees with the local representative `frep x`.
   have h_u_smooth_eq : ∀ (x : Ω) (z : EuN), z ∈ S x →
       u_smooth z = frep x z := by
     intro x z hz
@@ -477,36 +418,26 @@ theorem contDiffOn_of_forall_memWkp_two
     simp only [hz_Ω, dif_pos]
     exact h_lift
   refine ⟨u_smooth, ?_, ?_⟩
-  · -- `ContDiffOn ℝ ∞ u_smooth Ω`: locality, since near each point `u_smooth`
-    -- agrees with a `C^∞` representative.
-    refine contDiffOn_of_locally_contDiffOn ?_
+  · refine contDiffOn_of_locally_contDiffOn ?_
     intro y hy
     refine ⟨S ⟨y, hy⟩, hS_open ⟨y, hy⟩, hx_mem_S ⟨y, hy⟩, ?_⟩
-    -- `u_smooth = frep ⟨y, hy⟩` on `Ω ∩ S ⟨y, hy⟩`, and `frep` is `C^∞` there.
     refine ((hfrep_cdiff ⟨y, hy⟩).mono (Set.inter_subset_right)).congr ?_
     intro z hz
     exact h_u_smooth_eq ⟨y, hy⟩ z hz.2
-  · -- `u =ᵐ u_smooth` on `Ω`: patch the local a.e.-equalities over a
-    -- countable subcover.
-    -- A countable subcover of the open cover `{S x}`.
-    obtain ⟨T, hT_countable, hT_cover⟩ :=
+  · obtain ⟨T, hT_countable, hT_cover⟩ :=
       TopologicalSpace.isOpen_iUnion_countable S hS_open
-    -- `Ω ⊆ ⋃ x ∈ T, S x`.
     have hΩ_sub_biUnion : Ω ⊆ ⋃ x ∈ T, S x := by
       rw [hT_cover]; exact hΩ_subset_iUnion
-    -- `u =ᵐ u_smooth` on each `S x` for `x ∈ T`.
     have hae_each : ∀ x ∈ T, u =ᵐ[volume.restrict (S x)] u_smooth := by
       intro x _hxT
       have h1 : u =ᵐ[volume.restrict (S x)] frep x := hfrep_ae x
       refine h1.trans ?_
       refine (ae_restrict_iff' (hS_open x).measurableSet).mpr ?_
       exact Filter.Eventually.of_forall fun z hz => (h_u_smooth_eq x z hz).symm
-    -- Patch over the countable union `⋃ x ∈ T, S x`.
     have hae_biUnion :
         u =ᵐ[volume.restrict (⋃ x ∈ T, S x)] u_smooth :=
       (MeasureTheory.ae_eq_restrict_biUnion_iff S hT_countable u u_smooth).mpr
         hae_each
-    -- Restrict the a.e.-equality from `⋃ x ∈ T, S x` down to `Ω`.
     exact hae_biUnion.filter_mono
       (MeasureTheory.ae_mono (Measure.restrict_mono hΩ_sub_biUnion le_rfl))
 

@@ -55,8 +55,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## The compact overlap support `K_γα` -/
-
 /-- The compact "joint chart support" set
 `K_γα := tsupport ρ_γ ∩ tsupport ρ_α` for the canonical chart-atlas partition
 of unity. It is contained in both chart sources, by partition-of-unity
@@ -98,8 +96,6 @@ lemma crossChartCompact_isCompact
     IsCompact (crossChartCompact (I := I) (M := M) γ α) :=
   (crossChartCompact_isClosed (I := I) (M := M) γ α).isCompact
 
-/-! ## Chart-transition diffeomorphism extraction -/
-
 /-- **Helper**: For two charts `γ α` on a closed manifold, extract a per-order
 chart-transition diffeomorphism realising the chart transition `T_γα` on a
 neighbourhood of the chart-γ Euclidean image of `K_γα`, with derivative bounds
@@ -126,24 +122,6 @@ theorem cross_chart_diffeo_exists
     crossChartCompact_subset_chartAt_source_α (I := I) (M := M) γ α
   exact chartTransition_smoothDiffeoBoundedAtOrder (I := I) (M := M)
     γ α hK_compact hK_γ hK_α 1
-
-/-! ## Headline: per-pair cross-chart bound (existence form, partition-of-unity-empty case)
-
-The headline existence statement, restricted to the partition-of-unity-empty
-regime where `crossChartCompact γ α = ∅`. In this regime, under the canonical
-hypothesis `tsupport χ ⊆ chart-α image of tsupport ρ_α` used by the chart-
-density program, the chart-pushed function vanishes pointwise on the chart-γ
-Euclidean image, giving `wkpNorm = 0`, and the bound `LHS ≤ 1 * RHS` holds
-trivially.
-
-For arbitrary `χ` with the weaker hypothesis `tsupport χ ⊆ chartTargetEuclid α`,
-the empty-case chart-pushed function need not vanish pointwise, and the bound
-requires the chart-transition diffeomorphism's per-order chain rule combined
-with the partition-of-unity weight smoothness. The intermediate-regime closure
-is delivered as a follow-up infrastructure piece using `cross_chart_diffeo_exists`
-and the existing `SmoothDiffeoBoundedAtOrder.wkpNorm_comp_le` together with
-`MemWkp.smul_smooth_bounded`.
--/
 
 /-- **Headline (existence form, empty case)**: for two charts `γ α` on a
 closed Riemannian manifold `M` with `crossChartCompact γ α = ∅` and
@@ -185,7 +163,6 @@ theorem cross_chart_bound_empty
   classical
   refine ⟨1, one_pos, ?_⟩
   intro χ _hχ_smooth _hχ_cpt hχ_supp
-  -- The chart-pushed function vanishes pointwise on `EuclN`.
   have h_pushed_zero : chartPushed (I := I) (M := M)
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ
       (chartPullback I α χ) =
@@ -196,8 +173,7 @@ theorem cross_chart_bound_empty
     by_cases hρ_zero : (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M γ
         : C^∞⟮I, M; ℝ⟯) z = 0
     · rw [hρ_zero]; ring
-    · -- ρ_γ z ≠ 0 ⇒ z ∈ tsupport ρ_γ.
-      have hz_in_supp_γ : z ∈ tsupport
+    · have hz_in_supp_γ : z ∈ tsupport
           ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M γ
             : C^∞⟮I, M; ℝ⟯) : M → ℝ) := by
         have h_in : z ∈ Function.support
@@ -207,14 +183,12 @@ theorem cross_chart_bound_empty
         exact subset_tsupport _ h_in
       by_cases hpb_zero : chartPullback I α χ z = 0
       · rw [hpb_zero]; ring
-      · -- chartPullback I α χ z ≠ 0 ⇒ z ∈ chart-α source ∧ χ ∘ chart-α at z ≠ 0.
-        exfalso
+      · exfalso
         have hz_chartα : z ∈ (chartAt H α).source := by
           by_contra hcontra
           apply hpb_zero
           exact chartPullback_apply_of_notMem (I := I) (M := M) α χ hcontra
         rw [chartPullback_apply_of_mem (I := I) (M := M) α χ hz_chartα] at hpb_zero
-        -- χ value is nonzero, so the argument is in tsupport χ ⊆ chart-α image of tsupport ρ_α.
         have h_arg_in_tsupp : (toEuclidean (E := E)) (extChartAt I α z) ∈ tsupport χ := by
           have : (toEuclidean (E := E)) (extChartAt I α z) ∈ Function.support χ := by
             simp only [Function.mem_support, ne_eq]; exact hpb_zero
@@ -225,7 +199,6 @@ theorem cross_chart_bound_empty
                 ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
                   : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
           hχ_supp h_arg_in_tsupp
-        -- Recover preimage and identify with z via injectivity on chart-α source.
         obtain ⟨x', hx'_in_supp_α, hx'_eq⟩ := h_arg_in_chartα_img
         have hx'_chartα : x' ∈ (chartAt H α).source :=
           DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α

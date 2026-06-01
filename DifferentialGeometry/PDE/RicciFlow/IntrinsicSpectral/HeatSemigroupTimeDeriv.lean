@@ -69,8 +69,6 @@ namespace Parabolic
 variable {ι : Type*} {X : Type*} [NormedAddCommGroup X]
   [InnerProductSpace ℝ X] [CompleteSpace X]
 
-/-! ## Scalar parabolic time-decay bounds -/
-
 /-- **Parabolic time-decay of the differentiated heat factor.** For `a ≥ 0` and
 `t > 0`, `a · exp(-a t) ≤ 1 / (e · t)`. This is the elementary inequality that
 makes the differentiated spectral series — which carries the unbounded factor
@@ -78,18 +76,13 @@ makes the differentiated spectral series — which carries the unbounded factor
 constant `1/(e t)` that blows up only as `t → 0+`. -/
 theorem expFactorDeriv_le {a t : ℝ} (ht : 0 < t) :
     a * Real.exp (-a * t) ≤ 1 / (Real.exp 1 * t) := by
-  -- `e · (a t) ≤ exp (a t)` from `Real.exp_one_mul_le_exp`.
   have hbound : Real.exp 1 * (a * t) ≤ Real.exp (a * t) := Real.exp_one_mul_le_exp
   have hexp_pos : (0 : ℝ) < Real.exp (a * t) := Real.exp_pos _
-  -- Hence `a t ≤ exp(a t) / e`, i.e. `e a t ≤ exp(a t)`.
-  -- Multiply both sides of `a · exp(-a t) ≤ 1/(e t)` by `e t > 0`.
   have het_pos : (0 : ℝ) < Real.exp 1 * t := mul_pos (Real.exp_pos 1) ht
   rw [le_div_iff₀ het_pos]
-  -- Goal: `a * exp(-a t) * (e * t) ≤ 1`.
   have hexp_neg : Real.exp (-a * t) = (Real.exp (a * t))⁻¹ := by
     rw [← Real.exp_neg]; ring_nf
   rw [hexp_neg]
-  -- `a * (exp(a t))⁻¹ * (e * t) = (e * a * t) / exp(a t) ≤ exp(a t)/exp(a t) = 1`.
   rw [mul_comm (Real.exp 1) t]
   have hkey : a * (Real.exp (a * t))⁻¹ * (t * Real.exp 1) =
       (Real.exp 1 * (a * t)) * (Real.exp (a * t))⁻¹ := by ring
@@ -108,7 +101,6 @@ theorem abs_expFactorDeriv_le_of_ge {a τ s : ℝ} (ha : 0 ≤ a) (hτ : 0 < τ)
   have hnn : 0 ≤ a * Real.exp (-a * s) := mul_nonneg ha (Real.exp_pos _).le
   rw [abs_of_nonneg hnn]
   refine le_trans (expFactorDeriv_le hs_pos) ?_
-  -- `1/(e s) ≤ 1/(e τ)` since `e τ ≤ e s`.
   have heτ_pos : (0 : ℝ) < Real.exp 1 * τ := mul_pos (Real.exp_pos 1) hτ
   have hmono : Real.exp 1 * τ ≤ Real.exp 1 * s :=
     mul_le_mul_of_nonneg_left hs (Real.exp_pos 1).le
@@ -121,7 +113,6 @@ theorem expFactor_hasDerivAt (a t : ℝ) :
   have h1 : HasDerivAt (fun s : ℝ => -a * s) (-a) t := by
     simpa using (hasDerivAt_id t).const_mul (-a)
   have h2 := (Real.hasDerivAt_exp (-a * t)).comp t h1
-  -- `h2 : HasDerivAt (fun s => exp (-a * s)) (exp (-a*t) * (-a)) t`
   rw [mul_comm] at h2
   exact h2
 
@@ -140,7 +131,6 @@ theorem abs_expFactor_sub_le {a τ u w : ℝ} (ha : 0 ≤ a) (hτ : 0 < τ)
     (hu : τ ≤ u) (hw : τ ≤ w) :
     |Real.exp (-a * w) - Real.exp (-a * u)| ≤
       (1 / (Real.exp 1 * τ)) * |w - u| := by
-  -- Reduce to the real-valued MVT bound on the convex set `Ici τ`.
   have hconv : Convex ℝ (Ici τ) := convex_Ici τ
   have hdiff : ∀ x ∈ Ici τ, DifferentiableAt ℝ (fun s : ℝ => Real.exp (-a * s)) x :=
     fun x _ => (expFactor_hasDerivAt a x).differentiableAt
@@ -151,7 +141,6 @@ theorem abs_expFactor_sub_le {a τ u w : ℝ} (ha : 0 ≤ a) (hτ : 0 < τ)
     have hxτ : τ ≤ x := hx
     have := abs_expFactorDeriv_le_of_ge ha hτ hxτ
     rw [Real.norm_eq_abs]
-    -- `‖-a · exp(-a x)‖ = |a · exp(-a x)| ≤ 1/(e τ)`.
     rw [show (-a * Real.exp (-a * x)) = -(a * Real.exp (-a * x)) by ring, abs_neg]
     exact this
   have hmvt := Convex.norm_image_sub_le_of_norm_deriv_le
@@ -159,15 +148,6 @@ theorem abs_expFactor_sub_le {a τ u w : ℝ} (ha : 0 ≤ a) (hτ : 0 < τ)
     (mem_Ici.mpr hu) (mem_Ici.mpr hw)
   rw [Real.norm_eq_abs, Real.norm_eq_abs] at hmvt
   exact hmvt
-
-/-! ## The differentiated spectral series and its summability
-
-The candidate time-derivative of `S(t) v` is the spectrally-differentiated
-series carrying the per-mode factor `-(lam i) · exp(-(lam i) t)` (the derivative
-of the heat factor). Although this factor is unbounded in `i` for fixed `t`,
-the parabolic decay bound `|(lam i)·exp(-(lam i)t)| ≤ 1/(e t)` (for `t > 0`)
-dominates the differentiated coordinate family by `1/(e t)` times the
-square-summable original coordinate family. -/
 
 /-- The differentiated heat coefficient `i ↦ -(lam i) · exp(-(lam i) t)`, the
 time-derivative of `heatCoeff lam · i`. -/
@@ -231,8 +211,6 @@ lemma summable_heatDerivTerm (b : HilbertBasis ι ℝ X) {lam : ι → ℝ}
   rw [h_map_eq] at h_summable_V
   exact h_summable_V
 
-/-! ## The candidate time-derivative operator -/
-
 /-- **The time-derivative of the abstract spectral heat semigroup.** For `t : ℝ`
 and `v : X`, the spectrally-differentiated series
 
@@ -249,8 +227,6 @@ lemma abstractSpectralSemigroupDeriv_def (b : HilbertBasis ι ℝ X) (lam : ι �
     (t : ℝ) (v : X) :
     abstractSpectralSemigroupDeriv b lam t v =
       ∑' i : ι, heatDerivCoeff lam t i • ⟪b i, v⟫_ℝ • b i := rfl
-
-/-! ## The slope-minus-derivative as a single spectral series -/
 
 /-- The per-mode coefficient of the slope of `u ↦ S(u) v` between `t` and `s`,
 minus the candidate derivative coefficient at `t`:
@@ -271,11 +247,9 @@ private lemma slopeMinusDeriv_eq_tsum (b : HilbertBasis ι ℝ X) {lam : ι → 
   rw [abstractSpectralSemigroup_apply_of_nonneg b hlam hs,
     abstractSpectralSemigroup_apply_of_nonneg b hlam ht.le,
     abstractSpectralSemigroupDeriv_def]
-  -- Summability of the three series.
   have hSs := summable_heatTerm b hlam hs v
   have hSt := summable_heatTerm b hlam ht.le v
   have hSd := summable_heatDerivTerm b hlam ht v
-  -- The slope of the two semigroup series.
   have hslope : (s - t)⁻¹ • ((∑' i : ι, heatCoeff lam s i • ⟪b i, v⟫_ℝ • b i) -
         ∑' i : ι, heatCoeff lam t i • ⟪b i, v⟫_ℝ • b i) =
       ∑' i : ι, ((s - t)⁻¹ * (heatCoeff lam s i - heatCoeff lam t i)) •
@@ -285,7 +259,6 @@ private lemma slopeMinusDeriv_eq_tsum (b : HilbertBasis ι ℝ X) {lam : ι → 
     intro i
     rw [smul_sub]
     module
-  -- Combine the slope and the (negated) derivative series into one.
   rw [hslope]
   have hSslope : Summable (fun i : ι =>
       ((s - t)⁻¹ * (heatCoeff lam s i - heatCoeff lam t i)) • ⟪b i, v⟫_ℝ • b i) := by
@@ -299,28 +272,21 @@ private lemma slopeMinusDeriv_eq_tsum (b : HilbertBasis ι ℝ X) {lam : ι → 
   rw [slopeMinusDerivCoeff]
   module
 
-/-! ## Per-mode scalar convergence and uniform domination -/
-
 /-- **Per-mode scalar tendsto.** As `s → t`, the scalar slope-minus-derivative
 coefficient `slopeMinusDerivCoeff lam t s i` tends to `0`: this is exactly the
 statement that the heat factor `s ↦ exp(-(lam i) s)` has derivative
 `heatDerivCoeff lam t i` at `t`. -/
 private lemma slopeMinusDerivCoeff_tendsto (lam : ι → ℝ) (t : ℝ) (i : ι) :
     Tendsto (fun s : ℝ => slopeMinusDerivCoeff lam t s i) (𝓝[≠] t) (𝓝 0) := by
-  -- The heat factor `s ↦ exp(-(lam i) s)` has derivative `heatDerivCoeff` at `t`.
   have hderiv : HasDerivAt (fun s : ℝ => heatCoeff lam s i) (heatDerivCoeff lam t i) t := by
     have := expFactor_hasDerivAt (lam i) t
-    -- `heatCoeff lam s i = exp(-(lam i) * s)`, `heatDerivCoeff = -(lam i) * exp(...)`.
     exact this
-  -- The slope of a `HasDerivAt` function tends to the derivative.
   have hslope := hderiv.tendsto_slope
-  -- Rewrite `slope f t` as the explicit scalar slope.
   have hslope' : Tendsto (fun s : ℝ => (s - t)⁻¹ * (heatCoeff lam s i - heatCoeff lam t i))
       (𝓝[≠] t) (𝓝 (heatDerivCoeff lam t i)) := by
     refine hslope.congr ?_
     intro s
     rw [slope_def_field, div_eq_inv_mul]
-  -- Subtracting the constant `heatDerivCoeff` sends the limit to `0`.
   have := hslope'.sub (tendsto_const_nhds (x := heatDerivCoeff lam t i))
   simpa only [slopeMinusDerivCoeff, sub_self] using this
 
@@ -334,14 +300,12 @@ private lemma abs_slopeMinusDerivCoeff_le {lam : ι → ℝ} (hlam : ∀ i, 0 �
     {t s : ℝ} (ht : 0 < t) (hs_lo : t / 2 ≤ s) (hsne : s ≠ t) (i : ι) :
     |slopeMinusDerivCoeff lam t s i| ≤ 2 / (Real.exp 1 * (t / 2)) := by
   have hτ_pos : 0 < t / 2 := by linarith
-  -- Slope bound from the MVT Lipschitz estimate on `[t/2, ∞)`.
   have ht_lo : t / 2 ≤ t := by linarith
   have hslope_bound :
       |(s - t)⁻¹ * (heatCoeff lam s i - heatCoeff lam t i)| ≤ 1 / (Real.exp 1 * (t / 2)) := by
     rw [abs_mul, abs_inv]
     have hmvt := abs_expFactor_sub_le (a := lam i) (τ := t / 2) (u := t) (w := s)
       (hlam i) hτ_pos ht_lo hs_lo
-    -- `heatCoeff lam s i = exp(-(lam i) s)` etc.; rewrite the difference.
     have hcoeff_diff :
         |heatCoeff lam s i - heatCoeff lam t i| ≤
           (1 / (Real.exp 1 * (t / 2))) * |s - t| := by
@@ -352,14 +316,12 @@ private lemma abs_slopeMinusDerivCoeff_le {lam : ι → ℝ} (hlam : ∀ i, 0 �
     calc |heatCoeff lam s i - heatCoeff lam t i|
         ≤ (1 / (Real.exp 1 * (t / 2))) * |s - t| := hcoeff_diff
       _ = |s - t| * (1 / (Real.exp 1 * (t / 2))) := by ring
-  -- Derivative-coefficient bound from parabolic decay (it is `≤ 1/(e t) ≤ 1/(e (t/2))`).
   have hderiv_bound : |heatDerivCoeff lam t i| ≤ 1 / (Real.exp 1 * (t / 2)) := by
     refine le_trans (abs_heatDerivCoeff_le hlam ht i) ?_
     have het_pos : (0 : ℝ) < Real.exp 1 * (t / 2) := mul_pos (Real.exp_pos 1) hτ_pos
     have hmono : Real.exp 1 * (t / 2) ≤ Real.exp 1 * t :=
       mul_le_mul_of_nonneg_left (by linarith) (Real.exp_pos 1).le
     exact one_div_le_one_div_of_le het_pos hmono
-  -- Combine: `|slope - deriv| ≤ |slope| + |deriv| ≤ 2/(e (t/2))`.
   calc |slopeMinusDerivCoeff lam t s i|
       = |(s - t)⁻¹ * (heatCoeff lam s i - heatCoeff lam t i) - heatDerivCoeff lam t i| := by
         rw [slopeMinusDerivCoeff]
@@ -368,8 +330,6 @@ private lemma abs_slopeMinusDerivCoeff_le {lam : ι → ℝ} (hlam : ∀ i, 0 �
     _ ≤ 1 / (Real.exp 1 * (t / 2)) + 1 / (Real.exp 1 * (t / 2)) :=
         add_le_add hslope_bound hderiv_bound
     _ = 2 / (Real.exp 1 * (t / 2)) := by ring
-
-/-! ## The headline: time differentiability for `t > 0` -/
 
 /-- **Squared-norm of the slope-minus-derivative tends to `0`.** For `t > 0`, as
 `s → t`, `‖(s - t)⁻¹ • (S(s) v - S(t) v) - D(t) v‖² → 0`. This is the analytic
@@ -386,13 +346,10 @@ private theorem slopeMinusDeriv_normSq_tendsto_zero (b : HilbertBasis ι ℝ X)
       (𝓝[≠] t) (𝓝 0) := by
   set Cb : ℝ := (2 / (Real.exp 1 * (t / 2))) ^ 2 with hCb_def
   set bound : ι → ℝ := fun i => Cb * (⟪b i, v⟫_ℝ) ^ 2 with hbound_def
-  -- The real per-mode summand family.
   set fmode : ℝ → ι → ℝ := fun s i =>
     (slopeMinusDerivCoeff lam t s i * ⟪b i, v⟫_ℝ) ^ 2 with hfmode_def
-  -- `bound` is summable (Parseval).
   have hbound_summable : Summable bound := by
     rw [hbound_def]; exact (summable_basis_coeff_sq' b v).mul_left Cb
-  -- Per-mode: `fmode s i → 0` as `s → t`.
   have hpermode : ∀ i : ι, Tendsto (fun s : ℝ => fmode s i) (𝓝[≠] t) (𝓝 0) := by
     intro i
     rw [hfmode_def]
@@ -403,7 +360,6 @@ private theorem slopeMinusDeriv_normSq_tendsto_zero (b : HilbertBasis ι ℝ X)
     rw [zero_mul] at this
     have hsq := this.pow 2
     simpa using hsq
-  -- Eventual uniform domination on a punctured neighborhood inside `Ioo (t/2) (3t/2)`.
   have h_event : ∀ᶠ s : ℝ in 𝓝[≠] t,
       (‖(s - t)⁻¹ • (abstractSpectralSemigroup b hlam s v -
           abstractSpectralSemigroup b hlam t v) -
@@ -416,17 +372,13 @@ private theorem slopeMinusDeriv_normSq_tendsto_zero (b : HilbertBasis ι ℝ X)
     have hs_lo : t / 2 ≤ s := hs_Ioo.1.le
     have hsne : s ≠ t := hs_ne
     have hs_nn : 0 ≤ s := by linarith [hs_Ioo.1, ht]
-    -- The slope-minus-derivative as a spectral series.
     have heq := slopeMinusDeriv_eq_tsum b hlam ht hs_nn v
     refine ⟨?_, ?_⟩
-    · -- Parseval squared-norm.
-      rw [heq]
-      -- `∑' i, smdc_i • (⟪⟫ • bᵢ) = ∑' i, (smdc_i * ⟪⟫) • bᵢ`.
+    · rw [heq]
       have hrw : (fun i : ι => slopeMinusDerivCoeff lam t s i • ⟪b i, v⟫_ℝ • b i) =
           (fun i => (slopeMinusDerivCoeff lam t s i * ⟪b i, v⟫_ℝ) • b i) := by
         funext i; rw [mul_smul]
       rw [hrw]
-      -- Summability of the squared coefficient family (dominated by `bound`).
       have hf_sq_summable : Summable (fun i : ι =>
           (slopeMinusDerivCoeff lam t s i * ⟪b i, v⟫_ℝ) ^ 2) := by
         refine Summable.of_nonneg_of_le (fun i => sq_nonneg _) (fun i => ?_) hbound_summable
@@ -441,8 +393,7 @@ private theorem slopeMinusDeriv_normSq_tendsto_zero (b : HilbertBasis ι ℝ X)
           _ ≤ Cb * (⟪b i, v⟫_ℝ) ^ 2 :=
               mul_le_mul_of_nonneg_right hc_sq (sq_nonneg _)
       rw [orthonormal_norm_sq_eq_tsum_sq b _ hf_sq_summable]
-    · -- Uniform domination.
-      intro i
+    · intro i
       rw [hfmode_def, hbound_def]
       rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
       have hc := abs_slopeMinusDerivCoeff_le hlam ht hs_lo hsne i
@@ -454,12 +405,10 @@ private theorem slopeMinusDeriv_normSq_tendsto_zero (b : HilbertBasis ι ℝ X)
           = (slopeMinusDerivCoeff lam t s i) ^ 2 * (⟪b i, v⟫_ℝ) ^ 2 := by ring
         _ ≤ Cb * (⟪b i, v⟫_ℝ) ^ 2 :=
             mul_le_mul_of_nonneg_right hc_sq (sq_nonneg _)
-  -- Tannery's theorem: the limit of the sums is the sum of the (zero) limits.
   have h_tannery : Tendsto (fun s : ℝ => ∑' i, fmode s i) (𝓝[≠] t) (𝓝 (∑' i, (0 : ℝ))) :=
     tendsto_tsum_of_dominated_convergence hbound_summable hpermode
       (h_event.mono (fun s hs => hs.2))
   rw [tsum_zero] at h_tannery
-  -- Replace the squared norm by the tsum on the eventual set.
   refine h_tannery.congr' ?_
   filter_upwards [h_event] with s hs
   exact (hs.1).symm
@@ -483,9 +432,7 @@ theorem abstractSpectralSemigroup_hasDerivAt (b : HilbertBasis ι ℝ X)
     HasDerivAt (fun u : ℝ => abstractSpectralSemigroup b hlam u v)
       (abstractSpectralSemigroupDeriv b lam t v) t := by
   rw [hasDerivAt_iff_tendsto_slope]
-  -- `slope (S · v) t s - D t v → 0`, from the squared-norm limit.
   have hsq := slopeMinusDeriv_normSq_tendsto_zero b hlam ht v
-  -- `‖·‖ → 0` from `‖·‖² → 0`.
   have hnorm : Tendsto (fun s : ℝ =>
       ‖(s - t)⁻¹ • (abstractSpectralSemigroup b hlam s v -
           abstractSpectralSemigroup b hlam t v) -
@@ -495,13 +442,11 @@ theorem abstractSpectralSemigroup_hasDerivAt (b : HilbertBasis ι ℝ X)
     refine hsqrt.congr ?_
     intro s
     rw [Function.comp_apply, Real.sqrt_sq (norm_nonneg _)]
-  -- Convert norm-to-zero into the `X`-valued tendsto-to-`D t v`.
   have hX : Tendsto (fun s : ℝ =>
       (s - t)⁻¹ • (abstractSpectralSemigroup b hlam s v -
           abstractSpectralSemigroup b hlam t v) -
           abstractSpectralSemigroupDeriv b lam t v) (𝓝[≠] t) (𝓝 0) :=
     (tendsto_zero_iff_norm_tendsto_zero).mpr hnorm
-  -- Add the constant `D t v` back; identify with `slope`.
   have hX' := hX.add (tendsto_const_nhds
     (x := abstractSpectralSemigroupDeriv b lam t v))
   rw [zero_add] at hX'
@@ -511,15 +456,6 @@ theorem abstractSpectralSemigroup_hasDerivAt (b : HilbertBasis ι ℝ X)
 
 end Parabolic
 end Analysis
-
-/-! ## Concrete corollary: the intrinsic tensor heat semigroup is `C¹` in time
-
-Specialising the abstract result to the intrinsic tensor heat semigroup
-`tensorHeatSemigroup g r s` of the connection Laplacian on a closed
-Riemannian manifold yields the time-regularity half of parabolic interior
-smoothing for the geometric heat flow: for `t > 0` the `TensorL2`-valued map
-`t ↦ e^{tΔ_∇} u₀` is differentiable in time, with derivative the
-spectrally-differentiated (Laplacian-action) series. -/
 
 namespace PDE
 namespace RicciFlow

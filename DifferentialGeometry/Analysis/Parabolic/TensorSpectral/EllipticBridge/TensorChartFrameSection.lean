@@ -88,25 +88,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Global smoothness of a compactly-supported chart-target component function
-
-A component function smooth on the open Euclidean chart target and compactly
-supported strictly inside it is globally `C^∞`: on the open target it is the
-given smooth function, and off the closed support it vanishes — the
-extension-by-zero gluing of `contDiff_of_contDiffOn_chartTarget_zero_off`. -/
 
 /-- A chart-frame component function `C^∞` on the open Euclidean chart target,
 with topological support inside that target, is globally `C^∞`. -/
@@ -118,14 +105,6 @@ private lemma component_contDiff_of_contDiffOn (α : M)
   contDiff_of_contDiffOn_chartTarget_zero_off (I := I) (M := M) α
     (isClosed_tsupport f) hf_supp hf
     (fun _ hy => image_eq_zero_of_notMem_tsupport hy)
-
-/-! ## The manifold-side chart bump of a prescribed component function
-
-For a prescribed component function `u P`, the manifold-side pull-back
-`chartTestPullback α (u P)` is the scalar bump fed to `chartBasisTensorSection`.
-Its smoothness on the chart source and the containment of its topological
-support inside the chart source — the two `chartBasisTensorSection` hypotheses —
-are recorded here, both consequences of global `C^∞`-ness of `u P`. -/
 
 /-- The manifold-side chart bump `chartTestPullback α (u P)` is `C^∞` on the
 chart-`α` source. -/
@@ -146,15 +125,6 @@ private lemma componentBump_tsupport_subset
     (hf_supp : tsupport f ⊆ chartTargetEuclid (I := I) (M := M) α) :
     tsupport (chartTestPullback (I := I) α f) ⊆ (chartAt H α).source :=
   chartTestPullback_tsupport_subset_source (I := I) (M := M) α hf_cs hf_supp
-
-/-! ## Additivity of the raw chart-frame component over a finite sum of sections
-
-The trivialization projection `tensorTrivProj` is built from the bundle
-`continuousLinearMapAt`, and the chart-frame component projection
-`tensorChartComponentProjection` is a continuous linear map; the raw chart-frame
-component is therefore additive in the section argument, and the raw chart
-component of a finite sum of sections is the finite sum of the raw chart
-components. -/
 
 /-- The trivialization-projected scalar `tensorTrivProj` is additive over a
 finite sum of tensor sections. -/
@@ -198,14 +168,6 @@ private lemma tensorChartComponentRaw_sum
   unfold tensorChartComponentRaw
   rw [tensorTrivProj_sum (I := I) (M := M) g r s α t S b]
   exact map_sum (tensorChartComponentProjection (E := E) r s Idx Jdx) _ _
-
-/-! ## The chart-frame tensor section from prescribed component functions
-
-The assembled section is the finite sum, over component multi-indices
-`P : TensorCompIdx r s`, of the chart-`α`-frame constant basis sections cut off
-by the manifold-side pull-back `chartTestPullback α (u P)` of the prescribed
-component function `u P`. The summands are elements of the `ℝ`-module
-`SmoothCcTensor g r s`, so the finite sum stays inside it. -/
 
 /-- **The chart-`α`-frame tensor section from prescribed component functions.**
 For a chart center `α : M` and a family `u : TensorCompIdx r s → EuclN → ℝ` of
@@ -270,22 +232,18 @@ theorem tensorBundleSectionOfChartComponents_toSection_eq_zero_off_source
     (tensorBundleSectionOfChartComponents (I := I) (M := M) g r s α
         u hu hsupp).toSection x = 0 := by
   classical
-  -- Unfold into the finite sum of chart-basis sections.
   rw [tensorBundleSectionOfChartComponents_eq (I := I) (M := M) g r s α u hu hsupp]
-  -- Abbreviate the summand sections.
   set S : TensorCompIdx (E := E) r s → SmoothCcTensor g r s :=
     fun P => chartBasisTensorSection (I := I) (M := M) g r s α
       (chartTestPullback (I := I) α (u P))
       (componentBump_contMDiffOn (I := I) (M := M) α (hu P) (hsupp P).2)
       (componentBump_tsupport_subset (I := I) (M := M) α
         (hsupp P).1 (hsupp P).2) P with hS_def
-  -- The underlying section of the finite sum is the finite sum of the sections.
   have h_sum_section :
       (∑ P : TensorCompIdx (E := E) r s, S P).toSection =
         ∑ P : TensorCompIdx (E := E) r s, (S P).toSection :=
     map_sum (SmoothCcTensor.toSectionAddHom (I := I) (M := M) (g := g)
       (r := r) (s := s)) _ _
-  -- Evaluating the finite sum of sections at `x` is the finite sum of values.
   have h_coe : ⇑(∑ P : TensorCompIdx (E := E) r s, (S P).toSection) =
       ∑ P : TensorCompIdx (E := E) r s, ⇑(S P).toSection :=
     map_sum (ContMDiffSection.coeAddHom I (TensorRSModel r s ℝ E) ∞
@@ -297,23 +255,12 @@ theorem tensorBundleSectionOfChartComponents_toSection_eq_zero_off_source
     rw [Finset.sum_apply] at this
     exact this
   rw [h_eval]
-  -- Each summand section vanishes at `x`: the chart-pull bump is `0` there.
   refine Finset.sum_eq_zero (fun P _ => ?_)
   rw [hS_def, chartBasisTensorSection_toSection_apply (I := I) (M := M) g r s α
     (componentBump_contMDiffOn (I := I) (M := M) α (hu P) (hsupp P).2)
     (componentBump_tsupport_subset (I := I) (M := M) α
       (hsupp P).1 (hsupp P).2) P x,
     chartTestPullback_apply_of_notMem (I := I) α _ hx, zero_smul]
-
-/-! ## Recovery of the prescribed chart-frame components
-
-The raw chart-`α` frame scalar component of the assembled section recovers, on
-the Euclidean chart target, the prescribed component family `u`. Expanding the
-raw component of the finite sum (additivity), the raw component of the `P`-th
-summand is the chart-pushed bump times the Kronecker delta `[(Idx, Jdx) = P]`
-(`chartBasisTensorSection_chartComp`); only the diagonal term survives, and the
-chart-pushed bump of `chartTestPullback α (u P)` agrees with `u P` on the chart
-target (`chartPushedRaw_chartTestPullback_eqOn`). -/
 
 /-- **Recovery of the prescribed chart-frame components.** On the Euclidean
 chart target the raw chart-`α` frame scalar component of the assembled section
@@ -336,15 +283,10 @@ theorem tensorChartComponentRaw_tensorBundleSectionOfChartComponents
       u P y := by
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
   classical
-  -- Expand the assembled section into the finite sum of summands.
   rw [tensorBundleSectionOfChartComponents_eq (I := I) (M := M) g r s α
     u hu hsupp]
-  -- Additivity: the raw component of the finite sum is the sum of raw
-  -- components of the summands.
   rw [tensorChartComponentRaw_sum (I := I) (M := M) g r s α Finset.univ _
     P.1 P.2 ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))]
-  -- The raw component of the `Q`-th summand is the chart-pushed bump of
-  -- `chartTestPullback α (u Q)` times the Kronecker delta `[(P.1, P.2) = Q]`.
   have hterm : ∀ Q : TensorCompIdx (E := E) r s,
       tensorChartComponentRaw (I := I) (M := M) g r s
           (chartBasisTensorSection (I := I) (M := M) g r s α
@@ -362,15 +304,11 @@ theorem tensorChartComponentRaw_tensorBundleSectionOfChartComponents
         (hsupp Q).1 (hsupp Q).2)
       Q P.1 P.2 hy
   rw [Finset.sum_congr rfl (fun Q _ => hterm Q)]
-  -- Only the diagonal term `Q = (P.1, P.2) = P` survives.
   rw [Finset.sum_eq_single P]
-  · -- Diagonal term: the Kronecker delta is `1`.
-    rw [show ((P.1, P.2) : TensorCompIdx (E := E) r s) = P from Prod.ext rfl rfl]
+  · rw [show ((P.1, P.2) : TensorCompIdx (E := E) r s) = P from Prod.ext rfl rfl]
     rw [if_pos rfl, mul_one]
-    -- The chart-pushed bump of `chartTestPullback α (u P)` agrees with `u P`.
     exact chartPushedRaw_chartTestPullback_eqOn (I := I) (M := M) α (u P) hy
-  · -- Off-diagonal terms vanish: the Kronecker delta is `0`.
-    intro Q _ hne
+  · intro Q _ hne
     rw [show ((P.1, P.2) : TensorCompIdx (E := E) r s) = P from Prod.ext rfl rfl]
     rw [if_neg (fun h => hne h.symm), mul_zero]
   · intro hP

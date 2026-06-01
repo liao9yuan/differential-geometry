@@ -1,10 +1,3 @@
-/-
-The realize-layer transport from the carrier-scale spectral derivative to the
-geometric DeTurck–Ricci right-hand side: the carrier-scale realize-evaluate
-functional and its factorization, the push of the within-derivative through it,
-and the spectral→geometric reconciliation at the solution. Skeleton stubs for the
-short-time-existence blueprint (GAP 1, transport layer).
--/
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.LocalWeylInput
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeParabolic.BareLaplacianSpectralMatch
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
@@ -96,11 +89,6 @@ private theorem eigenRealizeEval_weight_summable
       tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
         (eigenRealizeEval (I := I) (M := M) g_bg i x v w *
           (tensorSobolevWeight (I := I) (M := M) i (a : ℝ))⁻¹) ^ 2) :=
-  -- The supercritical weighted summability of the per-eigenmode realize values is
-  -- exactly the second realize face of the single open pointwise local-Weyl input
-  -- `weyl_pointwise_diagonalKernel_bound_of_closed`. The summand here unfolds (through
-  -- the `eigenRealizeEval`/`eigenSmooth` abbreviations) to the node's summand
-  -- verbatim.
   ((weyl_pointwise_diagonalKernel_bound_of_closed (I := I) (M := M) g_bg 0 2).2 a ha).1 x v w
 
 /-- **The supercritical pointwise realize eigen-expansion (the single open
@@ -129,10 +117,6 @@ private theorem ccTensorBilinSymm_hasSum_eigenRealizeEval
             (Integral.L2.SmoothCcTensor.toL2 T) i *
           eigenRealizeEval (I := I) (M := M) g_bg i x v w)
       (ccTensorBilinSymm (I := I) g_bg T x v w) :=
-  -- The realize eigen-expansion is the third realize face of the single open
-  -- pointwise local-Weyl input. The summand unfolds (through `eigenRealizeEval`/
-  -- `eigenSmooth`) to the node's `coeff · eᵢ` summand verbatim, and the target is
-  -- the realize value `ccTensorBilinSymm g_bg T x v w`.
   ((weyl_pointwise_diagonalKernel_bound_of_closed (I := I) (M := M) g_bg 0 2).2 a ha).2 T x v w
 
 set_option linter.unusedVariables false in
@@ -150,26 +134,20 @@ theorem realize_eval_carrier_factorization
                 (Integral.L2.SmoothCcTensor.toL2 T_z) i) →
           ℓ_a z = ccTensorBilinSymm (I := I) g_bg T_z x v w := by
   classical
-  -- The fixed per-eigenmode realize values `eᵢ(x,v,w)`.
   set e : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
       (I := I) (M := M) g_bg 0 2 → ℝ :=
     fun i => eigenRealizeEval (I := I) (M := M) g_bg i x v w with he_def
-  -- The Riesz representative `w_rep ∈ Hᵃ`: coordinate `eᵢ · (1+λᵢ)^{-a}`. Its
-  -- weighted summability is exactly the supercritical on-diagonal kernel input.
   set w_rep : tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ) :=
     { coeff := fun i => e i * (tensorSobolevWeight (I := I) (M := M) i (a : ℝ))⁻¹
       weighted_summable :=
         eigenRealizeEval_weight_summable (I := I) (M := M) g_bg a ha x v w } with hw_rep_def
-  -- The carrier-scale functional is the inner product against `w_rep`.
   refine ⟨innerSL ℝ w_rep, ?_⟩
   intro T_z z hz
-  -- `ℓ_a z = ⟪w_rep, z⟫ = ∑ᵢ (1+λᵢ)^a · (eᵢ·(1+λᵢ)^{-a}) · z.coeff i = ∑ᵢ eᵢ · z.coeff i`.
   have hval : (innerSL ℝ w_rep) z = ∑' i, e i * z.coeff i := by
     rw [innerSL_apply_apply, tensorHs.inner_def]
     refine tsum_congr (fun i => ?_)
     have hw_pos : 0 < tensorSobolevWeight (I := I) (M := M) i (a : ℝ) :=
       tensorSobolevWeight_pos (I := I) (M := M) i (a : ℝ)
-    -- The `Hᵃ` coordinate of `w_rep` is `eᵢ · (1+λᵢ)^{-a}`; the weight cancels.
     have hwcoeff : w_rep.coeff i
         = e i * (tensorSobolevWeight (I := I) (M := M) i (a : ℝ))⁻¹ := rfl
     rw [hwcoeff,
@@ -179,8 +157,6 @@ theorem realize_eval_carrier_factorization
             (tensorSobolevWeight (I := I) (M := M) i (a : ℝ))⁻¹) * (e i * z.coeff i) by ring,
       mul_inv_cancel₀ hw_pos.ne', one_mul]
   rw [hval]
-  -- The pinning: with `z.coeff i = L²coeff(T_z) i`, the coordinate `tsum`
-  -- becomes the realize eigen-series, which sums to the realize value.
   have hcoeff : (fun i => e i * z.coeff i)
       = (fun i => tensorL2Coeff (I := I) (M := M)
             (hCompact (I := I) (M := M) g_bg)
@@ -210,22 +186,14 @@ theorem pointwise_deriv_through_realize
         (fun s : ℝ => (g_DT s).inner x v w)
         (ℓ_a (u_car' t)) (Set.Ici 0) t := by
   intro t ht
-  -- At every `s`, the metric value is the constant `g_bg.inner x v w` plus the
-  -- continuous-linear image `ℓ_a (u_car s)` of the carrier: combine `hreal` and
-  -- `hfactor`.
   have hval : ∀ s : ℝ,
       (g_DT s).inner x v w = g_bg.inner x v w + ℓ_a (u_car s) := by
     intro s
     rw [hreal s, hfactor s]
-  -- The carrier-scale derivative `hderiv t` pushed through the continuous-linear
-  -- `ℓ_a`: `ℓ_a` is its own Fréchet derivative, so composing gives the within-`Ici 0`
-  -- derivative `ℓ_a (u_car' t)` for `s ↦ ℓ_a (u_car s)`.
   have hℓderiv :
       HasDerivWithinAt (fun s : ℝ => ℓ_a (u_car s)) (ℓ_a (u_car' t))
         (Set.Ici 0) t :=
     ℓ_a.hasFDerivAt.comp_hasDerivWithinAt t (hderiv t ht)
-  -- Adding the constant `g_bg.inner x v w` preserves the derivative; then rewrite
-  -- the differentiated function back to `s ↦ (g_DT s).inner x v w` by `hval`.
   refine (hℓderiv.const_add (g_bg.inner x v w)).congr (fun s _ => ?_) ?_
   · exact hval s
   · exact hval t
@@ -316,13 +284,8 @@ theorem rhs_matches_deturck_at_solution
               (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ t)))
         = deTurckRicciRHS (I := I) g_bg (g_DT t) x v w := by
   intro t _ht
-  -- Abbreviate the carrier-scale included element fed to the nonlinearity.
   set uincl := tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
       (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ t) with huincl
-  -- The bare-Laplacian piece is `ℓ_a` evaluated at `scaleLaplacianFun (u₂ t)`; its
-  -- eigenbasis coordinates equal those of the raw connection-Laplacian smooth tensor
-  -- `rawTensorConnLapSmooth (T_s t)`, so `hℓ` identifies it with the geometric
-  -- realize-evaluation of that smooth tensor.
   have hcoeff_lap : ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
         (I := I) (M := M) g_bg 0 2,
       (scaleLaplacianFun (I := I) (M := M) (u₂ t)).coeff i =
@@ -338,10 +301,6 @@ theorem rhs_matches_deturck_at_solution
         (rawTensorConnLapSmooth (I := I) g_bg 0 2 (T_s t)) x v w :=
     hℓ (rawTensorConnLapSmooth (I := I) g_bg 0 2 (T_s t))
       (scaleLaplacianFun (I := I) (M := M) (u₂ t)) hcoeff_lap
-  -- The nonlinear piece is `ℓ_a (N_cont uincl)`; its coordinates are the `L²`
-  -- coordinates of `Nsec uincl` (`hN_coeff`), so `hℓ` identifies it with the
-  -- geometric realize-evaluation of `Nsec uincl`, which equals that of `repr uincl`
-  -- by `hNsec_realize`.
   have hcoeff_N : ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
         (I := I) (M := M) g_bg 0 2,
       (N_cont uincl).coeff i =
@@ -350,8 +309,6 @@ theorem rhs_matches_deturck_at_solution
   have hN : ℓ_a (N_cont uincl) =
       ccTensorBilinSymm (I := I) g_bg (repr uincl) x v w := by
     rw [hℓ (Nsec uincl) (N_cont uincl) hcoeff_N, hNsec_realize uincl x v w]
-  -- Split `ℓ_a` over the sum, identify both pieces, and close with `hNsec_geom`
-  -- (the principal-part / geometric-RHS match at `(t, x, v, w)`).
   rw [map_add, hlap, hN]
   exact hNsec_geom t x v w
 

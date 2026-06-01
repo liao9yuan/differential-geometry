@@ -32,8 +32,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Pointwise bound: iterated classical partial ≤ iteratedFDeriv -/
-
 /-- For a smooth function `f`, the absolute value of the iterated classical
 partial derivative along a multi-index `β` of order `j` is bounded above by
 the operator norm of the `j`-th iterated Fréchet derivative. -/
@@ -63,8 +61,6 @@ theorem norm_iterClassicalPartial_le_iteratedFDeriv :
       have h_step :=
         norm_iteratedFDeriv_partial_le (d := d) (η := f) hf (β 0) j x
       exact h_ih.trans h_step
-
-/-! ## Auxiliary lemmas re-derived locally for smooth + compactly supported -/
 
 /-- The chosen weak partial of a smooth function `ψ ∈ W^{1,p}(Ω)` agrees
 almost everywhere on `Ω` with the classical partial. -/
@@ -180,8 +176,6 @@ private theorem iterWeakPartial_smooth_ae_eq_iterClassicalPartial_local
         (fun i : Fin j => β i.succ) h_ae
       exact h_iter_congr.trans h_ih
 
-/-! ## Bounded iterated derivatives for smooth + compactly supported functions -/
-
 /-- For a smooth + compactly supported function `η` and a fixed natural number
 `k`, the iterated derivatives of `η` up to order `k` are uniformly bounded
 on all of `E`. -/
@@ -226,8 +220,6 @@ lemma exists_iter_deriv_bound_of_smooth_compactSupport
   · exact (hM_nonneg 0).trans (hMη_ge 0 (Nat.zero_le _))
   · intro i hi y
     exact (hM_spec i hi y).trans (hMη_ge i hi)
-
-/-! ## Smooth case: cutoff agreeing with `ψ ∘ Φ` on the source domain -/
 
 /-- For `ψ` smooth + compactly supported with `tsupport ψ ⊆ Ωtarget`, there
 exists a smooth cutoff `η` with `tsupport η ⊆ Ωsource` such that
@@ -302,12 +294,6 @@ private theorem comp_smooth_compactSupport_memWkp
     rw [h_eq_on_Ω x hx]
   exact (MemWkp_congr_ae (d := d) hp hΩ_open h_ae).mpr hg_mem
 
-/-! ## Pointwise iterated-derivative bound for `g = η · (ψ ∘ Φ.toFun)`
-
-We bound `‖iteratedFDeriv ℝ j g x‖` by a constant times the sum of
-`‖iteratedFDeriv ℝ n ψ (Φ.toFun x)‖` for `n ≤ k`. The constant is finite,
-depends only on `Φ`, the cutoff `η`, and `k`. -/
-
 /-- Pointwise sum form of the iterated chain-rule bound for `ψ ∘ Φ.toFun`. -/
 private lemma norm_iteratedFDeriv_comp_toFun_le_sum
     {Ωsource Ωtarget : Set E}
@@ -357,14 +343,12 @@ private lemma norm_iteratedFDeriv_cutoff_comp_le
   have hD_nonneg : 0 ≤ D := hD_pos.le
   set S_x : ℝ := ∑ n ∈ Finset.range (k + 1), ‖iteratedFDeriv ℝ n ψ (Φ.toFun x)‖ with hSx_def
   have hSx_nonneg : 0 ≤ S_x := Finset.sum_nonneg (fun n _ => norm_nonneg _)
-  -- Uniform pointwise bound for ψ ∘ Φ at order m ≤ k.
   have h_pt_psi_comp : ∀ m, m ≤ k → ∀ y : E,
       ‖iteratedFDeriv ℝ m (fun z => ψ (Φ.toFun z)) y‖ ≤
         (k.factorial : ℝ) * D ^ k *
           ∑ n ∈ Finset.range (k + 1), ‖iteratedFDeriv ℝ n ψ (Φ.toFun y)‖ := by
     intro m hm y
     have h_base := norm_iteratedFDeriv_comp_toFun_le_sum (d := d) Φ hψ_smooth m y
-    -- Bound m! ≤ k!, D^m ≤ D^k, and inner sum (range m+1) ≤ inner sum (range k+1).
     have h_fact_le : (m.factorial : ℝ) ≤ (k.factorial : ℝ) := by
       exact_mod_cast Nat.factorial_le hm
     have h_pow_le : D ^ m ≤ D ^ k :=
@@ -376,7 +360,6 @@ private lemma norm_iteratedFDeriv_cutoff_comp_le
       · intro n hn
         rw [Finset.mem_range] at hn ⊢; omega
       · intro _ _ _; exact norm_nonneg _
-    -- Combine.
     have h_fact_nn : (0 : ℝ) ≤ (m.factorial : ℝ) := by exact_mod_cast Nat.zero_le _
     have h_powm_nn : (0 : ℝ) ≤ D ^ m := pow_nonneg hD_nonneg m
     have h_sum_inner_nn : (0 : ℝ) ≤
@@ -385,7 +368,6 @@ private lemma norm_iteratedFDeriv_cutoff_comp_le
     have h_sum_outer_nn : (0 : ℝ) ≤
         ∑ n ∈ Finset.range (k + 1), ‖iteratedFDeriv ℝ n ψ (Φ.toFun y)‖ :=
       Finset.sum_nonneg (fun n _ => norm_nonneg _)
-    -- Step.
     have h_step1 :
         (m.factorial : ℝ) * D ^ m *
           ∑ n ∈ Finset.range (m + 1), ‖iteratedFDeriv ℝ n ψ (Φ.toFun y)‖ ≤
@@ -412,7 +394,6 @@ private lemma norm_iteratedFDeriv_cutoff_comp_le
         mul_nonneg (by exact_mod_cast Nat.zero_le _) (pow_nonneg hD_nonneg k)
       exact mul_le_mul_of_nonneg_left h_inner_sum_le h_kfact_pow_nn
     exact h_base.trans (h_step1.trans (h_step2.trans h_step3))
-  -- Apply the product rule for iterated Fréchet derivatives.
   have hcomp_smooth : ContDiff ℝ (⊤ : ℕ∞) (fun y : E => ψ (Φ.toFun y)) :=
     Φ.comp_toFun_contDiff hψ_smooth
   have hN : (j : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞) := by
@@ -420,7 +401,6 @@ private lemma norm_iteratedFDeriv_cutoff_comp_le
   have h_mul := norm_iteratedFDeriv_mul_le (𝕜 := ℝ)
     (f := η) (g := fun y : E => ψ (Φ.toFun y))
     hη_smooth hcomp_smooth (x := x) (n := j) hN
-  -- Bound each term by Mη · k! · D^k · S_x · (j choose i).
   have h_term_bound : ∀ i ∈ Finset.range (j + 1),
       (j.choose i : ℝ) *
         ‖iteratedFDeriv ℝ i η x‖ *
@@ -434,7 +414,6 @@ private lemma norm_iteratedFDeriv_cutoff_comp_le
     have h_psi_phi_bound :=
       h_pt_psi_comp (j - i) hji_le_k x
     have h_choose_ge : (0 : ℝ) ≤ (j.choose i : ℝ) := by exact_mod_cast Nat.zero_le _
-    -- Bound the product step by step.
     have h_step_a :
         (j.choose i : ℝ) * ‖iteratedFDeriv ℝ i η x‖ *
           ‖iteratedFDeriv ℝ (j - i) (fun y => ψ (Φ.toFun y)) x‖ ≤
@@ -458,7 +437,6 @@ private lemma norm_iteratedFDeriv_cutoff_comp_le
         (j.choose i : ℝ) * (Mη * (k.factorial : ℝ) * D ^ k * S_x) := by ring
     exact (h_step_a.trans h_step_b).trans h_combined.le
   have h_sum_le := Finset.sum_le_sum h_term_bound
-  -- Factor out the constant.
   have h_factor :
       ∑ i ∈ Finset.range (j + 1),
         (j.choose i : ℝ) * (Mη * (k.factorial : ℝ) * D ^ k * S_x) =
@@ -469,7 +447,6 @@ private lemma norm_iteratedFDeriv_cutoff_comp_le
         (Mη * (k.factorial : ℝ) * D ^ k * S_x) * (j.choose i : ℝ) := fun i _ => by ring
     rw [Finset.sum_congr rfl h_eq, ← Finset.mul_sum]
   rw [h_factor] at h_sum_le
-  -- Bound Σ_{i ≤ j} (j choose i) = 2^j ≤ 2^k.
   have h_sum_choose_eq :
       ∑ i ∈ Finset.range (j + 1), (j.choose i : ℝ) = (2 ^ j : ℝ) := by
     have h_nat : ∑ i ∈ Finset.range (j + 1), j.choose i = 2 ^ j :=
@@ -480,7 +457,6 @@ private lemma norm_iteratedFDeriv_cutoff_comp_le
   have h_sum_choose_le : ∑ i ∈ Finset.range (j + 1), (j.choose i : ℝ) ≤ (2 ^ k : ℝ) := by
     rw [h_sum_choose_eq]
     exact pow_le_pow_right₀ (by norm_num : (1 : ℝ) ≤ 2) hj
-  -- Combine.
   have h_factor_nn : (0 : ℝ) ≤ Mη * (k.factorial : ℝ) * D ^ k * S_x := by
     have h_kfact_nn : (0 : ℝ) ≤ (k.factorial : ℝ) := by exact_mod_cast Nat.zero_le _
     have h_pow_nn : (0 : ℝ) ≤ D ^ k := pow_nonneg hD_nonneg k
@@ -490,7 +466,6 @@ private lemma norm_iteratedFDeriv_cutoff_comp_le
         ∑ i ∈ Finset.range (j + 1), (j.choose i : ℝ) ≤
       (Mη * (k.factorial : ℝ) * D ^ k * S_x) * (2 ^ k : ℝ) :=
     mul_le_mul_of_nonneg_left h_sum_choose_le h_factor_nn
-  -- Final algebraic step: (Mη * k! * D^k * S_x) * 2^k ≤ (k+1) * 2^k * Mη * k! * D^k * S_x.
   have h_align :
       (Mη * (k.factorial : ℝ) * D ^ k * S_x) * (2 ^ k : ℝ) ≤
       ((k + 1 : ℕ) : ℝ) * (2 ^ k : ℝ) * Mη * (k.factorial : ℝ) * D ^ k * S_x := by
@@ -512,13 +487,6 @@ private lemma norm_iteratedFDeriv_cutoff_comp_le
     nlinarith
   exact h_mul.trans (h_sum_le.trans (h_factor_choose_le.trans h_align))
 
-/-! ## Basis expansion bound for continuous multilinear maps on `EuclideanSpace`
-
-For a continuous multilinear map `f : (EuclideanSpace ℝ (Fin d))^n →L ℝ`, the
-operator norm is bounded by the sum (over multi-indices `β : Fin n → Fin d`)
-of the absolute values of `f` evaluated at the standard basis tuples
-`(EuclideanSpace.single (β 0) 1, ..., EuclideanSpace.single (β (n-1)) 1)`. -/
-
 /-- Pointwise bound: any vector in `EuclideanSpace ℝ (Fin d)` has
 `|v i| ≤ ‖v‖` (since `‖v‖² = Σ |v i|²`). -/
 private lemma euclidean_coord_le_norm
@@ -531,7 +499,6 @@ private lemma euclidean_coord_le_norm
       (f := fun j : Fin d => (v j)^2)
       (fun j _ => sq_nonneg _) (Finset.mem_univ i)
     convert h_le
-  -- Conclude |v i| ≤ ‖v‖.
   have hv_norm_nn : 0 ≤ ‖v‖ := norm_nonneg _
   have h_abs_sq : |v i|^2 = (v i)^2 := sq_abs _
   rw [show |v i| = Real.sqrt ((v i)^2) from (Real.sqrt_sq_eq_abs _).symm]
@@ -547,38 +514,29 @@ private lemma continuousMultilinearMap_norm_le_sum_basis
     ‖f‖ ≤ ∑ β : Fin n → Fin d,
       |f (fun i : Fin n => EuclideanSpace.single (β i) (1 : ℝ))| := by
   classical
-  -- Apply opNorm_le_bound.
   set M : ℝ := ∑ β : Fin n → Fin d,
       |f (fun i : Fin n => EuclideanSpace.single (β i) (1 : ℝ))| with hM_def
   have hM_nonneg : 0 ≤ M :=
     Finset.sum_nonneg (fun β _ => abs_nonneg _)
   refine ContinuousMultilinearMap.opNorm_le_bound hM_nonneg ?_
   intro m
-  -- Goal: ‖f m‖ ≤ M * ∏ ‖m i‖.
-  -- Expand m_i = ∑_α (m_i α) • single α 1.
   have h_expand : ∀ i : Fin n, m i =
       ∑ α : Fin d, (m i α) • EuclideanSpace.single α (1 : ℝ) := by
     intro i
     have h := (EuclideanSpace.basisFun (Fin d) ℝ).sum_repr (m i)
-    -- h : ∑ α, (basisFun (Fin d) ℝ).repr (m i) α • basisFun (Fin d) ℝ α = m i.
-    -- Use basisFun_repr: (basisFun (Fin d) ℝ).repr (m i) α = m i α.
-    -- and basisFun_apply: basisFun (Fin d) ℝ α = EuclideanSpace.single α 1.
     rw [show (fun α : Fin d => (m i α) • EuclideanSpace.single α (1 : ℝ)) =
       (fun α : Fin d => (EuclideanSpace.basisFun (Fin d) ℝ).repr (m i) α •
         (EuclideanSpace.basisFun (Fin d) ℝ) α) from ?_, h]
     funext α
     rw [EuclideanSpace.basisFun_repr, EuclideanSpace.basisFun_apply]
-  -- f m = ∑_β (∏_i m_i (β_i)) * f(e_β).
   have h_f_expand :
       f m = ∑ β : Fin n → Fin d,
         (∏ i : Fin n, m i (β i)) *
           f (fun i : Fin n => EuclideanSpace.single (β i) (1 : ℝ)) := by
-    -- Use multilinearity to swap sum and f.
     have h_step1 : f m = f (fun i : Fin n =>
         ∑ α : Fin d, (m i α) • EuclideanSpace.single α (1 : ℝ)) := by
       congr; funext i; exact h_expand i
     rw [h_step1]
-    -- Use multilinearity of f via its underlying MultilinearMap.
     have h_mult_sum :
         (f.toMultilinearMap fun i : Fin n =>
           ∑ α : Fin d, (m i α) • EuclideanSpace.single α (1 : ℝ)) =
@@ -597,11 +555,9 @@ private lemma continuousMultilinearMap_norm_le_sum_basis
       (m := fun i : Fin n => EuclideanSpace.single (β i) (1 : ℝ))]
     rw [smul_eq_mul]
     rfl
-  -- Use h_f_expand to bound |f m|.
   rw [Real.norm_eq_abs]
   rw [h_f_expand]
   refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
-  -- ∑_β |(∏ m_i β_i) · f(e_β)| ≤ ∑_β (∏ |m_i β_i|) · |f(e_β)|.
   have h_inner_bound : ∀ β : Fin n → Fin d,
       |(∏ i : Fin n, m i (β i)) *
           f (fun i : Fin n => EuclideanSpace.single (β i) (1 : ℝ))| ≤
@@ -616,7 +572,6 @@ private lemma continuousMultilinearMap_norm_le_sum_basis
       · intro i _; exact euclidean_coord_le_norm (d := d) (m i) (β i)
     exact mul_le_mul_of_nonneg_right h_prod_le (abs_nonneg _)
   refine (Finset.sum_le_sum (fun β _ => h_inner_bound β)).trans ?_
-  -- ∑_β (∏ ‖m i‖) · |f(e_β)| = (∏ ‖m i‖) · ∑_β |f(e_β)| = (∏ ‖m i‖) · M.
   have h_factor :
       ∑ β : Fin n → Fin d,
         (∏ i : Fin n, ‖m i‖) *
@@ -635,17 +590,6 @@ private lemma norm_iteratedFDeriv_le_sum_basis
         |iteratedFDeriv ℝ n ψ y
           (fun i : Fin n => EuclideanSpace.single (β i) (1 : ℝ))| :=
   continuousMultilinearMap_norm_le_sum_basis (d := d) (iteratedFDeriv ℝ n ψ y)
-
-/-! ## Identification of `iteratedFDeriv` evaluations with iterated classical partials
-
-For a smooth function `f`, the value `iteratedFDeriv ℝ n f y (e_{β 0}, ..., e_{β (n-1)})`
-equals `iterClassicalPartial n (β ∘ Fin.rev) f y` — that is, the iterated
-classical partial along the reversed multi-index. Combined with the basis
-expansion bound, this gives a bound on `‖iteratedFDeriv ℝ n f y‖` in terms of
-the iterated classical partials.
-
-This is a generalization beyond two derivatives (which is `IsSymmSndFDerivAt`).
-The proof is by induction using `iteratedFDeriv_succ_apply_right`. -/
 
 /-- Generalised induction step: `iteratedFDeriv ℝ n` of a CLM-valued function
 `g : E → CLM(F, ℝ)`, evaluated at a tuple of basis vectors of `EuclideanSpace`,
@@ -681,7 +625,6 @@ private lemma iteratedFDeriv_basis_eq_iterClassicalPartial_rev :
       simp [iteratedFDeriv_zero_apply, iterClassicalPartial_zero]
   | succ n ih =>
       intro β f hf y
-      -- iteratedFDeriv (n+1) f y (...) = iteratedFDeriv n (fderiv f) y (init m) (m last).
       rw [show (fun i : Fin (n + 1) => EuclideanSpace.single (β i) (1 : ℝ)) =
         Fin.snoc (fun i : Fin n => EuclideanSpace.single (β i.castSucc) (1 : ℝ))
           (EuclideanSpace.single (β (Fin.last n)) (1 : ℝ)) by
@@ -691,42 +634,18 @@ private lemma iteratedFDeriv_basis_eq_iterClassicalPartial_rev :
         | cast j => simp]
       rw [iteratedFDeriv_succ_apply_right]
       rw [Fin.init_snoc, Fin.snoc_last]
-      -- Now we have: iteratedFDeriv n (fderiv f) y (e_{β.init}) (single (β last) 1).
       have hfd : ContDiff ℝ (⊤ : ℕ∞) (fderiv ℝ f) := by
         have hf_top : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) f := by simpa using hf
         have h := hf_top.fderiv_right (m := (⊤ : ℕ∞)) (by simp)
         simpa using h
-      -- Use iteratedFDeriv_clm_apply_basis to swap the order of "evaluation at v"
-      -- and "iteratedFDeriv".
       rw [iteratedFDeriv_clm_apply_basis (d := d)
         (g := fderiv ℝ f) hfd (EuclideanSpace.single (β (Fin.last n)) (1 : ℝ))
         (β := fun i : Fin n => β i.castSucc) y]
-      -- Apply IH to fun y' => (fderiv f y') (e_{β last 1}).
       have h_inner_smooth : ContDiff ℝ (⊤ : ℕ∞)
           (fun y' : E => (fderiv ℝ f y') (EuclideanSpace.single (β (Fin.last n)) (1 : ℝ))) :=
         hfd.clm_apply contDiff_const
       rw [ih (fun i : Fin n => β i.castSucc) h_inner_smooth y]
-      -- Now: iterClassicalPartial n (i.castSucc → β.rev) (fderiv f · e_{β last}) y
-      -- vs:  iterClassicalPartial (n+1) (i → β.rev) f y.
-      -- iterClassicalPartial (n+1) (β ∘ Fin.rev) f y
-      --   = iterClassicalPartial n ((β ∘ Fin.rev).tail) (∂_{(β ∘ Fin.rev) 0} f) y
-      --   = iterClassicalPartial n ((β ∘ Fin.rev).tail) (∂_{β (Fin.rev 0)} f) y
-      --   = iterClassicalPartial n ((β ∘ Fin.rev).tail) (∂_{β (Fin.last n)} f) y.
       rw [iterClassicalPartial_succ]
-      -- LHS (after applying IH): iterClassicalPartial n
-      --   ((fun i : Fin n => β i.castSucc) ∘ Fin.rev)
-      --   (∂_{β (Fin.last n)} f) y.
-      -- RHS: iterClassicalPartial n ((β ∘ Fin.rev).tail) (∂_{(β ∘ Fin.rev) 0} f) y.
-      -- Key identities:
-      --  ((β ∘ Fin.rev).tail) i = β ((i.succ).rev) = β (i.rev.castSucc)
-      --  ((fun j => β j.castSucc) ∘ Fin.rev) i = β ((Fin.rev i).castSucc) = β (i.rev.castSucc)
-      -- and (β ∘ Fin.rev) 0 = β (Fin.last n) (since Fin.rev 0 = last n).
-      -- We need:
-      --   iterClassicalPartial n (fun i => β i.rev.castSucc) (∂_{β (last n)} f) y
-      --   =
-      --   iterClassicalPartial n (fun i => β i.succ.rev) (∂_{β (rev 0)} f) y
-      -- Both indexings give the same multi-index since i.rev.castSucc = i.succ.rev,
-      -- and β (rev 0) = β (last n) since rev 0 = last n.
       have h_index_eq :
           (fun i : Fin n => β i.rev.castSucc) =
           (fun i : Fin n => β i.succ.rev) := by
@@ -743,16 +662,13 @@ private lemma norm_iteratedFDeriv_le_sum_iterClassicalPartial
     ‖iteratedFDeriv ℝ n f y‖ ≤
       ∑ β : Fin n → Fin d, |iterClassicalPartial (d := d) n β f y| := by
   classical
-  -- Step 1: ‖iteratedFDeriv n f y‖ ≤ ∑_β |iteratedFDeriv n f y (e_β)|.
   have h1 := norm_iteratedFDeriv_le_sum_basis (d := d) n (ψ := f) y
-  -- Step 2: |iteratedFDeriv n f y (e_β)| = |iterClassicalPartial n (β ∘ Fin.rev) f y|.
   have h2 : ∀ β : Fin n → Fin d,
       |iteratedFDeriv ℝ n f y
         (fun i : Fin n => EuclideanSpace.single (β i) (1 : ℝ))| =
       |iterClassicalPartial (d := d) n (fun i : Fin n => β i.rev) f y| := by
     intro β
     rw [iteratedFDeriv_basis_eq_iterClassicalPartial_rev (d := d) n β hf y]
-  -- Replace each summand using h2.
   have h3 : ∑ β : Fin n → Fin d,
       |iteratedFDeriv ℝ n f y
         (fun i : Fin n => EuclideanSpace.single (β i) (1 : ℝ))| =
@@ -760,12 +676,10 @@ private lemma norm_iteratedFDeriv_le_sum_iterClassicalPartial
         |iterClassicalPartial (d := d) n (fun i : Fin n => β i.rev) f y| :=
     Finset.sum_congr rfl (fun β _ => h2 β)
   rw [h3] at h1
-  -- Step 3: reindex via the involution β ↦ β ∘ Fin.rev.
   have h_equiv :
       ∑ β : Fin n → Fin d,
         |iterClassicalPartial (d := d) n (fun i : Fin n => β i.rev) f y| =
       ∑ β : Fin n → Fin d, |iterClassicalPartial (d := d) n β f y| := by
-    -- The map `β ↦ fun i => β i.rev` is its own inverse (involution).
     have h_invol : ∀ β : Fin n → Fin d,
         (fun i : Fin n => (fun j : Fin n => β j.rev) i.rev) = β := by
       intro β
@@ -788,12 +702,6 @@ private lemma norm_iteratedFDeriv_le_sum_iterClassicalPartial
   rw [h_equiv] at h1
   exact h1
 
-/-! ## L^p version: bound on `‖iteratedFDeriv n f‖` over Ω' for smooth f
-
-For smooth, compactly supported `f`, the L^p norm of `‖iteratedFDeriv ℝ n f‖`
-on any open set is bounded by the sum of L^p norms of the iterated classical
-partials. -/
-
 /-- L^p version of the bound `‖iteratedFDeriv n f y‖ ≤ Σ_β |iterClassicalPartial n β f y|`. -/
 private lemma eLpNorm_iteratedFDeriv_le_sum_iterClassicalPartial
     (n : ℕ) {p : ℝ≥0∞} (hp : 1 ≤ p)
@@ -803,11 +711,9 @@ private lemma eLpNorm_iteratedFDeriv_le_sum_iterClassicalPartial
       ∑ β : Fin n → Fin d,
         eLpNorm (iterClassicalPartial (d := d) n β f) p (volume.restrict Ω) := by
   classical
-  -- Pointwise bound.
   have h_pt : ∀ y, ‖iteratedFDeriv ℝ n f y‖ ≤
       ∑ β : Fin n → Fin d, |iterClassicalPartial (d := d) n β f y| :=
     fun y => norm_iteratedFDeriv_le_sum_iterClassicalPartial (d := d) n hf_smooth y
-  -- Convert to eLpNorm bound.
   have h_eLp_le :
       eLpNorm (fun y => ‖iteratedFDeriv ℝ n f y‖) p (volume.restrict Ω) ≤
       eLpNorm (fun y => ∑ β : Fin n → Fin d,
@@ -820,7 +726,6 @@ private lemma eLpNorm_iteratedFDeriv_le_sum_iterClassicalPartial
     · exact h_pt y
     · exact Finset.sum_nonneg (fun β _ => abs_nonneg _)
   refine h_eLp_le.trans ?_
-  -- eLpNorm of sum ≤ sum of eLpNorms (use eLpNorm_sum_le).
   have h_strong_meas : ∀ β : Fin n → Fin d,
       AEStronglyMeasurable
         (fun y => |iterClassicalPartial (d := d) n β f y|) (volume.restrict Ω) := by
@@ -832,7 +737,6 @@ private lemma eLpNorm_iteratedFDeriv_le_sum_iterClassicalPartial
         (iterClassicalPartial (d := d) n β f) (volume.restrict Ω) :=
       h_smooth.continuous.aestronglyMeasurable
     have h_norm := h_aem.norm
-    -- |g x| = ‖g x‖ for ℝ-valued g.
     refine h_norm.congr (Filter.Eventually.of_forall ?_)
     intro y
     exact (Real.norm_eq_abs _).symm
@@ -846,7 +750,6 @@ private lemma eLpNorm_iteratedFDeriv_le_sum_iterClassicalPartial
       (s := (Finset.univ : Finset (Fin n → Fin d)))
       (f := fun β y => |iterClassicalPartial (d := d) n β f y|)
       (fun β _ => h_strong_meas β) hp
-    -- Convert: eLpNorm of pointwise sum = eLpNorm of finset.sum
     have h_eq : (fun y => ∑ β : Fin n → Fin d,
         |iterClassicalPartial (d := d) n β f y|) =
         ((Finset.univ : Finset (Fin n → Fin d)).sum
@@ -856,17 +759,11 @@ private lemma eLpNorm_iteratedFDeriv_le_sum_iterClassicalPartial
     exact hsum
   refine h_triangle.trans ?_
   refine Finset.sum_le_sum (fun β _ => ?_)
-  -- eLpNorm of |g| is the same as eLpNorm of g (since ‖|g x|‖ = ‖g x‖ for ℝ-valued g).
   refine eLpNorm_mono_ae ?_
   refine Filter.Eventually.of_forall ?_
   intro y
   rw [Real.norm_eq_abs, abs_abs]
   exact le_of_eq rfl
-
-/-! ## Identification of `eLpNorm (‖iteratedFDeriv ℝ n ψ‖)` with `wkpNorm` for smooth ψ
-
-For smooth + compactly supported ψ with `tsupport ψ ⊆ Ω'`, the L^p norm
-of `‖iteratedFDeriv ℝ n ψ‖` over `Ω'` is bounded by `wkpNorm k p ψ Ω'`. -/
 
 lemma eLpNorm_iteratedFDeriv_le_wkpNorm
     {Ω : Set E} (hΩ_open : IsOpen Ω)
@@ -878,21 +775,18 @@ lemma eLpNorm_iteratedFDeriv_le_wkpNorm
       eLpNorm (fun y => ‖iteratedFDeriv ℝ n ψ y‖) p (volume.restrict Ω) ≤
     wkpNorm (d := d) k p ψ Ω := by
   classical
-  -- Bound each n-term by Σ_β eLpNorm (iterClassicalPartial n β ψ) p (vol.restrict Ω).
   have h_per_n : ∀ n, n ≤ k →
       eLpNorm (fun y => ‖iteratedFDeriv ℝ n ψ y‖) p (volume.restrict Ω) ≤
       ∑ β : Fin n → Fin d,
         eLpNorm (iterClassicalPartial (d := d) n β ψ) p (volume.restrict Ω) := fun n _ =>
     eLpNorm_iteratedFDeriv_le_sum_iterClassicalPartial (d := d) n hp_one
       hψ_smooth Ω
-  -- For smooth ψ with tsupport ⊆ Ω, iterWeakPartial p n β ψ =ᵐ iterClassicalPartial n β ψ.
   have h_iter_eq : ∀ n β,
       eLpNorm (iterClassicalPartial (d := d) n β ψ) p (volume.restrict Ω) =
       eLpNorm (iterWeakPartial (d := d) p n β ψ Ω) p (volume.restrict Ω) := fun n β => by
     refine eLpNorm_congr_ae ?_
     exact (iterWeakPartial_smooth_ae_eq_iterClassicalPartial_local
       (d := d) hp_one hΩ_open n β hψ_smooth hψ_cpt hψ_supp).symm
-  -- Combine.
   unfold wkpNorm
   refine Finset.sum_le_sum ?_
   intro n hn
@@ -907,20 +801,6 @@ end Sobolev
 end Analysis
 end DifferentialGeometry
 
-/-! ## Headline assembly: `MemWkp.comp_smoothDiffeoBounded`
-
-Final assembly of the higher-order chain rule for `W^{k,p}` under a smooth
-bounded diffeomorphism. The proof follows the strategy:
-
-1. Prove a quantitative `L^p` change-of-variables bound for any function.
-2. Prove that `iterWeakPartial j β (ψ ∘ Φ) Ω` agrees a.e. with the iterated
-   classical partial of `ψ ∘ Φ` on `vol.restrict Ω`, for smooth `ψ`
-   compactly supported with `tsupport ψ ⊆ Ω'`.
-3. Combine with the Faà di Bruno-style pointwise bound to obtain a uniform
-   `wkpNorm`-bound for the composition of smooth approximants.
-4. Use smooth density and Banach sequential completeness of `W^{k,p}` to
-   pass to the limit. -/
-
 namespace DifferentialGeometry
 namespace Analysis
 namespace Sobolev
@@ -929,8 +809,6 @@ namespace Euclidean
 variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
-
-/-! ### Step A: Quantitative `L^p` change-of-variables bound -/
 
 /-- Pointwise auxiliary used in the `L^p` change-of-variables bound. -/
 private lemma jacobian_lower_pointwise_bound
@@ -1007,7 +885,6 @@ theorem eLpNorm_comp_toFun_le_const
     rw [eLpNorm_eq_eLpNorm' hp_zero hp_top, hq_def]
     exact lintegral_rpow_enorm_eq_rpow_eLpNorm' hq_pos
   rw [h_LHS_pow_eq, h_RHS_pow_eq] at h_lint
-  -- Notation
   set A : ℝ≥0∞ := eLpNorm (fun x => f (Φ.toFun x)) p (volume.restrict Ω)
     with hA_def
   set B : ℝ≥0∞ := eLpNorm f p (volume.restrict Ω') with hB_def
@@ -1015,7 +892,6 @@ theorem eLpNorm_comp_toFun_le_const
   have hj_pos : 0 < j := by rw [hj_def]; exact ENNReal.ofReal_pos.mpr hjLB_pos
   have hj_ne_zero : j ≠ 0 := hj_pos.ne'
   have hj_ne_top : j ≠ ⊤ := by rw [hj_def]; exact ENNReal.ofReal_ne_top
-  -- A^q ≤ j⁻¹ * B^q.
   have h_Aq_le : A ^ q ≤ j⁻¹ * B ^ q := by
     have h1 : A ^ q = j⁻¹ * (j * A ^ q) := by
       rw [← mul_assoc, ENNReal.inv_mul_cancel hj_ne_zero hj_ne_top, one_mul]
@@ -1031,7 +907,6 @@ theorem eLpNorm_comp_toFun_le_const
     congr 1
     rw [← ENNReal.rpow_mul, mul_one_div, div_self hq_pos.ne', ENNReal.rpow_one]
   rw [h_LHS_simp, h_RHS_simp] at h_pow_le
-  -- Identify j⁻¹ = ENNReal.ofReal (1 / jLB).
   have h_inv_real : j⁻¹ = ENNReal.ofReal (1 / Φ.jacobian_lower_bound) := by
     change (ENNReal.ofReal Φ.jacobian_lower_bound)⁻¹ =
       ENNReal.ofReal (1 / Φ.jacobian_lower_bound)
@@ -1040,8 +915,6 @@ theorem eLpNorm_comp_toFun_le_const
       ENNReal.ofReal_rpow_of_pos
         (by positivity : (0 : ℝ) < 1 / Φ.jacobian_lower_bound)] at h_pow_le
   exact h_pow_le
-
-/-! ### Step B: Pointwise/a.e. equality for `iterWeakPartial (ψ ∘ Φ)` -/
 
 /-- For any open `Ω`, two smooth functions agreeing on `Ω` have the same
 iterated classical partials at every point of `Ω`. -/
@@ -1108,21 +981,17 @@ private theorem iterWeakPartial_comp_smooth_ae_eq_iterClassicalPartial
     HasCompactSupport.mul_right hη_cpt
   have hg_supp : tsupport g ⊆ Ω :=
     (tsupport_mul_subset_left (f := η) (g := comp_smooth)).trans hη_supp
-  -- (a) iterWeakPartial j β g Ω =ᵐ iterClassicalPartial j β g.
   have h_g_ae :=
     iterWeakPartial_smooth_ae_eq_iterClassicalPartial_local
       (d := d) hp_one hΩ j β hg_smooth hg_cpt hg_supp
-  -- (b) comp_smooth =ᵐ g on vol.restrict Ω.
   have h_comp_ae_g : comp_smooth =ᵐ[volume.restrict Ω] g := by
     refine (ae_restrict_iff' hΩ.measurableSet).mpr ?_
     refine Filter.Eventually.of_forall ?_
     intro x hx
     change ψ (Φ.toFun x) = η x * ψ (Φ.toFun x)
     rw [h_eq_on_Ω x hx]
-  -- (c) iterWeakPartial j β comp_smooth Ω =ᵐ iterWeakPartial j β g Ω.
   have h_weak_ae :=
     iterWeakPartial_ae_congr (d := d) hp_one hΩ j β h_comp_ae_g
-  -- (d) iterClassicalPartial j β g x = iterClassicalPartial j β comp_smooth x for x ∈ Ω.
   have h_classical_eqOn :
       Set.EqOn (iterClassicalPartial (d := d) j β g)
         (iterClassicalPartial (d := d) j β comp_smooth) Ω := by
@@ -1137,8 +1006,6 @@ private theorem iterWeakPartial_comp_smooth_ae_eq_iterClassicalPartial
   refine Filter.Eventually.of_forall ?_
   intro x hx
   exact h_classical_eqOn hx
-
-/-! ### Step C: `eLpNorm`-bounds for the composition's iterated derivatives -/
 
 /-- Pointwise bound of `‖iterClassicalPartial j β (ψ ∘ Φ) x‖` by an explicit
 constant times `Σ_{i ≤ k} ‖iteratedFDeriv ℝ i ψ (Φ x)‖`, valid for `j ≤ k`. -/
@@ -1212,11 +1079,9 @@ private lemma eLpNorm_iterWeakPartial_comp_le
             (fun x => ‖iteratedFDeriv ℝ n ψ (Φ.toFun x)‖) p
             (volume.restrict Ω) := by
   classical
-  -- Replace iterWeakPartial with iterClassicalPartial (a.e.).
   have h_eq := iterWeakPartial_comp_smooth_ae_eq_iterClassicalPartial
     (d := d) hp_one hΩ Φ j β hψ_smooth hψ_cpt hψ_supp
   rw [eLpNorm_congr_ae h_eq]
-  -- Pointwise bound.
   have h_pt := norm_iterClassicalPartial_comp_le_uniform
     (d := d) Φ hψ_smooth k j β hj
   set D := Φ.derivBoundMaxOne with hD_def
@@ -1226,7 +1091,6 @@ private lemma eLpNorm_iterWeakPartial_comp_le
     · exact_mod_cast Nat.zero_le _
     · exact pow_nonneg
         (lt_of_lt_of_le zero_lt_one Φ.derivBoundMaxOne_ge_one).le k
-  -- Pointwise: ‖iterClassicalPartial …‖ ≤ Const · S(x).
   have h_eLp_le :
       eLpNorm (iterClassicalPartial (d := d) j β
           (fun x => ψ (Φ.toFun x))) p (volume.restrict Ω) ≤
@@ -1244,7 +1108,6 @@ private lemma eLpNorm_iterWeakPartial_comp_le
     rw [abs_of_nonneg h_rhs_nonneg]
     exact (h_pt x).trans_eq rfl
   refine h_eLp_le.trans ?_
-  -- Pull out Const.
   have h_smul_eq : (fun x => Const *
       ∑ n ∈ Finset.range (k + 1), ‖iteratedFDeriv ℝ n ψ (Φ.toFun x)‖) =
       (Const : ℝ) • (fun x => ∑ n ∈ Finset.range (k + 1),
@@ -1255,7 +1118,6 @@ private lemma eLpNorm_iterWeakPartial_comp_le
     Real.enorm_of_nonneg hConst_nonneg
   rw [hConst_norm]
   refine mul_le_mul_of_nonneg_left ?_ (zero_le _)
-  -- eLpNorm of the sum ≤ sum of eLpNorms.
   have h_strong_meas : ∀ n ∈ Finset.range (k + 1),
       AEStronglyMeasurable
         (fun x => ‖iteratedFDeriv ℝ n ψ (Φ.toFun x)‖) (volume.restrict Ω) := by
@@ -1274,9 +1136,6 @@ private lemma eLpNorm_iterWeakPartial_comp_le
   rw [h_pointwise_eq]
   exact eLpNorm_sum_le h_strong_meas hp_one
 
-/-! ### Step D: bound `eLpNorm (‖iteratedFDeriv ℝ n ψ ∘ Φ‖)` over `Ω` by
-    `K_chg · eLpNorm (‖iteratedFDeriv ℝ n ψ‖)` over `Ω'` -/
-
 /-- For smooth `ψ`, the `L^p`-norm over `Ω` of `‖iteratedFDeriv n ψ ∘ Φ‖` is
 bounded by `K_chg` times the `L^p`-norm of `‖iteratedFDeriv n ψ‖` over `Ω'`. -/
 private lemma eLpNorm_iteratedFDeriv_comp_le
@@ -1291,8 +1150,6 @@ private lemma eLpNorm_iteratedFDeriv_comp_le
       eLpNorm (fun y => ‖iteratedFDeriv ℝ n ψ y‖) p (volume.restrict Ω') :=
   eLpNorm_comp_toFun_le_const (d := d) hp_one hp_top hΩ Φ
     (fun y => ‖iteratedFDeriv ℝ n ψ y‖)
-
-/-! ### Step E: `wkpNorm` bound for smooth ψ and final assembly -/
 
 /-- The "geometric" constant for the chain rule: combines factorials, the
 derivative bound, the Jacobian lower bound, and a count of multi-indices. -/
@@ -1386,7 +1243,6 @@ theorem wkpNorm_comp_smooth_le
   have hCardSum_nn : 0 ≤ CardSum :=
     Finset.sum_nonneg (fun j _ => by exact_mod_cast Nat.zero_le _)
   unfold wkpNorm
-  -- Bound each (j, β) summand by Comp_const · Kchg · (k+1) · wkpNorm.
   have h_each_jβ : ∀ j ∈ Finset.range (k + 1), ∀ β : Fin j → Fin d,
       eLpNorm
           (iterWeakPartial (d := d) p j β (fun x => ψ (Φ.toFun x)) Ω) p
@@ -1432,7 +1288,6 @@ theorem wkpNorm_comp_smooth_le
         (ENNReal.ofReal Kchg * wkpNorm (d := d) k p ψ Ω')) =
         ENNReal.ofReal Comp_const * ENNReal.ofReal Kchg *
           wkpNorm (d := d) k p ψ Ω' from by ring]
-  -- Sum over (j, β).
   have h_outer :
       ∑ j ∈ Finset.range (k + 1),
         ∑ β : Fin j → Fin d,
@@ -1449,7 +1304,6 @@ theorem wkpNorm_comp_smooth_le
     intro β _
     exact h_each_jβ j hj β
   refine h_outer.trans ?_
-  -- Pull constants out.
   have h_inner_const : ∀ j ∈ Finset.range (k + 1),
       (∑ _β : Fin j → Fin d,
           (ENNReal.ofReal Comp_const * ENNReal.ofReal Kchg *
@@ -1461,7 +1315,6 @@ theorem wkpNorm_comp_smooth_le
     rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
   rw [Finset.sum_congr rfl h_inner_const]
   rw [← Finset.sum_mul]
-  -- ∑ (Fintype.card (Fin j → Fin d) : ℝ≥0∞) = ENNReal.ofReal CardSum.
   have h_card_sum_eq :
       (∑ j ∈ Finset.range (k + 1),
           (Fintype.card (Fin j → Fin d) : ℝ≥0∞)) =
@@ -1477,10 +1330,6 @@ theorem wkpNorm_comp_smooth_le
     intro j _
     exact (ENNReal.ofReal_natCast _).symm
   rw [h_card_sum_eq]
-  -- Now LHS = ofReal CardSum * (ofReal Comp_const * ofReal Kchg * wkpNorm).
-  -- We want: ≤ ofReal (wkpComp_const Φ k p) * wkpNorm,
-  -- where wkpComp_const = CardSum · Comp_const · Kchg · (k+1).
-  -- So we need to multiply by (k+1) ≥ 1 on the LHS.
   have h_wc : wkpComp_const (d := d) Φ k p =
       CardSum * Comp_const * Kchg * ((k + 1 : ℕ) : ℝ) := rfl
   rw [h_wc]
@@ -1493,8 +1342,6 @@ theorem wkpNorm_comp_smooth_le
     rw [ENNReal.ofReal_mul (by positivity : (0 : ℝ) ≤ CardSum * Comp_const)]
     rw [ENNReal.ofReal_mul (by positivity : (0 : ℝ) ≤ CardSum)]
   rw [h_combine]
-  -- LHS: ofReal CardSum * (ofReal Comp_const * ofReal Kchg * wkpNorm)
-  -- RHS: (ofReal CardSum * ofReal Comp_const * ofReal Kchg * ofReal (k+1)) * wkpNorm.
   have h_LHS_eq :
       ENNReal.ofReal CardSum *
         (ENNReal.ofReal Comp_const * ENNReal.ofReal Kchg *
@@ -1507,15 +1354,12 @@ theorem wkpNorm_comp_smooth_le
   rw [h_k1_ennreal]
   have h_one_le : (1 : ℝ≥0∞) ≤ ((k + 1 : ℕ) : ℝ≥0∞) := by
     exact_mod_cast Nat.one_le_iff_ne_zero.mpr (Nat.succ_ne_zero k)
-  -- Want: A * B ≤ A * (k+1) * B (with A = ofReal CardSum * ofReal Comp_const * ofReal Kchg).
   set A := ENNReal.ofReal CardSum * ENNReal.ofReal Comp_const *
     ENNReal.ofReal Kchg with hA_def
   set W := wkpNorm (d := d) k p ψ Ω' with hW_def
   change A * W ≤ A * ((k + 1 : ℕ) : ℝ≥0∞) * W
   calc A * W = A * 1 * W := by ring
     _ ≤ A * ((k + 1 : ℕ) : ℝ≥0∞) * W := by gcongr
-
-/-! ### Headline -/
 
 /-- **Headline**: For a smooth bounded diffeomorphism `Φ : Ω → Ω'`, and a
 function `u ∈ W^{k,p}(Ω')` with compact support `tsupport u ⊆ Ω'`, the
@@ -1533,7 +1377,6 @@ theorem MemWkp.comp_smoothDiffeoBounded
   have hK_pos : 0 < K_const :=
     wkpComp_const_pos (d := d) Φ k p hp_one hp_top
   have hK_nonneg : 0 ≤ K_const := hK_pos.le
-  -- Step 1: choose smooth approximating sequence.
   have h_approx : ∀ n : ℕ, ∃ ψ : E → ℝ,
       ContDiff ℝ (⊤ : ℕ∞) ψ ∧ HasCompactSupport ψ ∧ tsupport ψ ⊆ Ω' ∧
       wkpNorm (d := d) k p (fun x => u x - ψ x) Ω' ≤
@@ -1556,19 +1399,16 @@ theorem MemWkp.comp_smoothDiffeoBounded
   have hψ_mem_target : ∀ n, MemWkp (d := d) k p (ψ n) Ω' := fun n =>
     MemWkp_of_smooth_compactSupport_local
       (d := d) hΩ' (hψ_smooth n) (hψ_cpt n) (hψ_supp n) hp_one k
-  -- Step 2: composition ψ_n ∘ Φ ∈ MemWkp k p Ω.
   have hψ_comp_mem : ∀ n, MemWkp (d := d) k p (fun x => ψ n (Φ.toFun x)) Ω :=
     fun n =>
       comp_smooth_compactSupport_memWkp (d := d) Φ hΩ
         (hψ_smooth n) (hψ_cpt n) (hψ_supp n) hp_one k
-  -- Step 3: Cauchy property of ψ_n ∘ Φ in wkpNorm (Step S1 + triangle).
   have h_cauchy : ∀ ε > 0, ∃ N : ℕ, ∀ m n, N ≤ m → N ≤ n →
       wkpNorm (d := d) k p
         (fun x => (ψ m (Φ.toFun x)) - (ψ n (Φ.toFun x))) Ω ≤
         ENNReal.ofReal ε := by
     intro ε hε
     have hε_K_pos : 0 < ε / (2 * K_const) := by positivity
-    -- Choose N0 so that 1/(N0+1) ≤ ε/(2·K_const).
     obtain ⟨N0, hN0_real⟩ := exists_nat_gt (1 / (ε / (2 * K_const)) - 1)
     have hN1_pos : (0 : ℝ) < (N0 : ℝ) + 1 := by
       have : 0 < 1 / (ε / (2 * K_const)) := by positivity
@@ -1582,7 +1422,6 @@ theorem MemWkp.comp_smoothDiffeoBounded
       linarith
     refine ⟨N0, ?_⟩
     intro m n hm hn
-    -- Define delta := ψ m - ψ n.
     let δ : E → ℝ := fun x => ψ m x - ψ n x
     have hδ_smooth : ContDiff ℝ (⊤ : ℕ∞) δ := (hψ_smooth m).sub (hψ_smooth n)
     have hδ_cpt : HasCompactSupport δ := (hψ_cpt m).sub (hψ_cpt n)
@@ -1603,15 +1442,12 @@ theorem MemWkp.comp_smoothDiffeoBounded
         refine (closure_mono h_supp_sub).trans ?_
         rw [closure_union]
       exact h_tsupp_sub.trans (Set.union_subset (hψ_supp m) (hψ_supp n))
-    -- Apply S1.
     have hS1 := wkpNorm_comp_smooth_le (d := d) hp_one hp_top hΩ hΩ'
       Φ k hδ_smooth hδ_cpt hδ_supp
-    -- δ x = (u x - ψ n x) - (u x - ψ m x).
     have h_δ_alg : δ = (fun x => (u x - ψ n x) - (u x - ψ m x)) := by
       funext x
       change ψ m x - ψ n x = u x - ψ n x - (u x - ψ m x)
       ring
-    -- Bound wkpNorm of δ by 2 / (N0+1).
     have h_uψn_mem : MemWkp (d := d) k p (fun x => u x - ψ n x) Ω' :=
       MemWkp.sub (d := d) hp_one hΩ' hu (hψ_mem_target n)
     have h_uψm_mem : MemWkp (d := d) k p (fun x => u x - ψ m x) Ω' :=
@@ -1638,7 +1474,6 @@ theorem MemWkp.comp_smoothDiffeoBounded
         rw [h_eq_smul, wkpNorm_const_smul (d := d) hp_one hΩ' h_uψm_mem (-1)]
         simp
       rw [h_neg_eq]
-    -- The two bounds.
     have hψm_close := hψ_close m
     have hψn_close := hψ_close n
     have h_n_le : ENNReal.ofReal ((1 : ℝ) / (n + 1 : ℝ)) ≤
@@ -1664,7 +1499,6 @@ theorem MemWkp.comp_smoothDiffeoBounded
       rw [h2]
       have h_pos : 0 ≤ (1 : ℝ) / (N0 + 1 : ℝ) := by positivity
       rw [ENNReal.ofReal_add h_pos h_pos]
-    -- Apply S1.
     have h_δcomp_eq : (fun x => δ (Φ.toFun x)) =
         (fun x => ψ m (Φ.toFun x) - ψ n (Φ.toFun x)) := by
       funext x; rfl
@@ -1681,12 +1515,9 @@ theorem MemWkp.comp_smoothDiffeoBounded
       _ = ε := by
             have h_pos : 0 < 2 * K_const := by positivity
             field_simp
-  -- Step 4: Banach completeness.
   obtain ⟨v, hv_mem, hv_tendsto⟩ :=
     MemWkp.exists_limit_of_wkpNorm_cauchy (d := d) hΩ k p hp_one hp_top
       hψ_comp_mem h_cauchy
-  -- Step 5: identify v =ᵐ u ∘ Φ.
-  -- ψ_n ∘ Φ → u ∘ Φ in eLpNorm via L^p chain rule.
   have h_Lp_close : ∀ n,
       eLpNorm (fun x => u (Φ.toFun x) - ψ n (Φ.toFun x)) p
         (volume.restrict Ω) ≤
@@ -1717,25 +1548,19 @@ theorem MemWkp.comp_smoothDiffeoBounded
     refine h_chg.trans ?_
     refine mul_le_mul_of_nonneg_left ?_ (zero_le _)
     exact h_eLp_le_wkp.trans (hψ_close n)
-  -- Tendsto: eLpNorm (u ∘ Φ - ψ n ∘ Φ) → 0.
   have h_uΦ_aestrong :
       AEStronglyMeasurable (fun x => u (Φ.toFun x)) (volume.restrict Ω) := by
     have hu_aestrong : AEStronglyMeasurable u (volume.restrict Ω') :=
       hu.memLp.aestronglyMeasurable
     exact hu_aestrong.comp_quasiMeasurePreserving Φ.toFun_quasiMeasurePreserving
-  -- Show eLpNorm (v - u ∘ Φ) p (vol.restrict Ω) = 0.
   have h_v_eq_uΦ : v =ᵐ[volume.restrict Ω] (fun x => u (Φ.toFun x)) := by
     have h_v_aestrong : AEStronglyMeasurable v (volume.restrict Ω) :=
       hv_mem.memLp.aestronglyMeasurable
     have hp_zero_ne : p ≠ 0 := by
       intro hpz; rw [hpz] at hp_one
       exact absurd hp_one (by norm_num)
-    -- The eLpNorm of the difference is zero.
     have h_zero :
         eLpNorm (fun x => v x - u (Φ.toFun x)) p (volume.restrict Ω) = 0 := by
-      -- For all n, eLpNorm (v - u ∘ Φ) ≤ eLpNorm (v - ψ n ∘ Φ) + eLpNorm (ψ n ∘ Φ - u ∘ Φ).
-      -- Each summand is bounded by something → 0.
-      -- First: bound by RHS_n.
       have h_bound : ∀ n,
           eLpNorm (fun x => v x - u (Φ.toFun x)) p (volume.restrict Ω) ≤
             wkpNorm (d := d) k p (fun x => v x - ψ n (Φ.toFun x)) Ω +
@@ -1747,7 +1572,6 @@ theorem MemWkp.comp_smoothDiffeoBounded
             (fun x => ψ n (Φ.toFun x)) (volume.restrict Ω) :=
           (hψ_smooth n).continuous.aestronglyMeasurable.comp_quasiMeasurePreserving
             Φ.toFun_quasiMeasurePreserving
-        -- Triangle.
         have h_decomp :
             (fun x => v x - u (Φ.toFun x)) = (fun x =>
               (v x - ψ n (Φ.toFun x)) + (ψ n (Φ.toFun x) - u (Φ.toFun x))) := by
@@ -1757,7 +1581,6 @@ theorem MemWkp.comp_smoothDiffeoBounded
           (h_v_aestrong.sub h_ψn_comp_aestrong)
           (h_ψn_comp_aestrong.sub h_uΦ_aestrong) hp_one
         refine h_tri.trans ?_
-        -- Bound first part by wkpNorm.
         have h_first :
             eLpNorm (fun x => v x - ψ n (Φ.toFun x)) p (volume.restrict Ω) ≤
               wkpNorm (d := d) k p (fun x => v x - ψ n (Φ.toFun x)) Ω := by
@@ -1795,13 +1618,11 @@ theorem MemWkp.comp_smoothDiffeoBounded
           rw [h_neg]
           exact h_Lp_close n
         exact add_le_add h_first h_second
-      -- Take n → ∞: RHS → 0.
       apply le_antisymm _ (zero_le _)
       have h_tendsto_first :
           Filter.Tendsto
             (fun n => wkpNorm (d := d) k p (fun x => v x - ψ n (Φ.toFun x)) Ω)
             atTop (𝓝 0) := by
-        -- v - ψ n ∘ Φ = -(ψ n ∘ Φ - v).
         have h_eq : ∀ n, (fun x => v x - ψ n (Φ.toFun x)) =
             (fun x => -(ψ n (Φ.toFun x) - v x)) := by
           intro n; funext x; ring
@@ -1810,7 +1631,6 @@ theorem MemWkp.comp_smoothDiffeoBounded
               wkpNorm (d := d) k p (fun x => ψ n (Φ.toFun x) - v x) Ω := by
           intro n
           rw [h_eq n]
-          -- wkpNorm (-f) = wkpNorm f.
           have hf_mem : MemWkp (d := d) k p
               (fun x => ψ n (Φ.toFun x) - v x) Ω :=
             MemWkp.sub (d := d) hp_one hΩ (hψ_comp_mem n) hv_mem
@@ -1855,7 +1675,6 @@ theorem MemWkp.comp_smoothDiffeoBounded
         have := h_tendsto_first.add h_tendsto_second
         simpa using this
       exact ge_of_tendsto h_tendsto_sum (Filter.Eventually.of_forall h_bound)
-    -- From eLpNorm = 0, deduce ae-equality.
     have h_diff_zero : (fun x => v x - u (Φ.toFun x)) =ᵐ[volume.restrict Ω]
         0 := by
       have h_aestrong := h_v_aestrong.sub h_uΦ_aestrong
@@ -1869,4 +1688,3 @@ end Euclidean
 end Sobolev
 end Analysis
 end DifferentialGeometry
-

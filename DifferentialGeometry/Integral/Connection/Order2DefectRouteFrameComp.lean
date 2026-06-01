@@ -94,15 +94,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## Curvature-contraction fibre bound for a `riemannSec` term
-
-The genuine Riemann-curvature summands of the third-order Weitzenböck defect have the form
-`riemannSec (tensorCov g 0 s) X Y Z x` with `X = Y` a `g_x`-orthonormal frame vector. Through
-`riemannSec_eq_riemannOp_smooth` this is the bundled curvature operator
-`riemannOp (tensorCov g 0 s) x (X x) (Y x) (Z x)`, and the imported Parseval fibre bound
-`exists_Cx_riemannianFiberNormSq_riemannOp_tensorCovS_le` controls its intrinsic fibre norm by
-the metric `g`-lengths of `X x, Y x` times the fibre norm of `Z x`. -/
-
 /-- **Per-point curvature-contraction fibre bound (rank `(0, 2)`).** For smooth tangent
 fields `X, Y` and the once-covariantly-differentiated section `Z := ∇_X T₀` of a smooth
 compactly-supported `(0, 2)`-tensor `T₀`, the intrinsic fibre norm of the genuine Riemann
@@ -157,27 +148,12 @@ theorem riemannSec_orthoFrame_covApply_fiberNormSq_le
       (X := smoothOrthoFrame (I := I) g x i) (Y := smoothOrthoFrame (I := I) g x i) x
       (smoothOrthoFrame_smooth (I := I) g x i) (smoothOrthoFrame_smooth (I := I) g x i)
   refine ⟨Cx, hCx_nonneg, ?_⟩
-  -- The `g_x`-orthonormal frame has unit `g`-length at the centre `x`.
   have hortho : g.inner x (smoothOrthoFrame (I := I) g x i x)
       (smoothOrthoFrame (I := I) g x i x) = 1 := by
     have := smoothOrthoFrame_orthonormal_at_center (I := I) g x i i
     simpa using this
   rw [hortho] at hbound
   simpa using hbound
-
-/-! ## The per-frame-pair section-level commutator (Ricci identity, frame form)
-
-The Route-`B` engine commutes the inner frame-trace covariant derivatives past an outer
-covariant direction by the **section-level Ricci identity** `covApply_covApply_eq_section`
-on the `(0, 2)`-tensor bundle: for smooth tangent fields `B, W` and a raw `(0, 2)`-tensor
-section `T`,
-```
-∇_B (∇_W T) = ∇_W (∇_B T) + ∇_{[B, W]} T + R(B, W) T.
-```
-Crucially the outer direction `W` is an honest smooth tangent field (a frame vector
-`smoothOrthoFrame g x a`), never an extension `smoothExtensionTangent` of a tangent vector
-off the base point: the commutator is exact at the section level, with the genuine Riemann
-curvature `R(B, W) T` and the frame-bracket correction `∇_{[B, W]} T` as the only defects. -/
 
 /-- **Per-frame-pair section commutator.** For the frame directions
 `B := smoothOrthoFrame g x i` and `W := smoothOrthoFrame g x a`, the iterated covariant

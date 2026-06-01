@@ -112,8 +112,6 @@ open DifferentialGeometry.Analysis.Laplacian.FChartResidualMemW1p
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -122,8 +120,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Test-function helpers: smoothness, compact support, support of derivatives -/
 
 /-- For `ψ : EuclN → ℝ` globally smooth, its `l`-direction partial
 `y ↦ (fderiv ℝ ψ y) (EuclideanSpace.single l 1)` is also globally smooth. -/
@@ -156,8 +152,6 @@ private lemma tsupport_fderiv_apply_single_subset
       tsupport ψ :=
   tsupport_fderiv_apply_subset ℝ (EuclideanSpace.single l 1)
 
-/-! ## ae-equality bridge: `base.weak_partial l₁ ≈ chartPushedChosenFirstPartial l₁` -/
-
 /-- The base first weak partial agrees a.e. with the chart-pushed chosen first
 weak partial on the volume measure restricted to the chart target. -/
 private lemma base_weak_partial_ae_eq_chartPushedChosenFirstPartial
@@ -187,8 +181,6 @@ private lemma base_weak_partial_memW1p
         (laplacianDomainPow_succ_subset_laplacianDomain
           (I := I) (M := M) g 1 hu_h)).weak_partial i)
       (chartTargetEuclid (I := I) (M := M) α) := by
-  -- The chart-pushed first chosen weak partial of `u_h` in coord i is in `MemW1p 2`,
-  -- which we obtain via the chart-pushed `MemWkp 2 2` regularity.
   have h_memWkp_2 : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 2 2
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
@@ -225,9 +217,6 @@ private lemma base_weak_partial_memW1p
       h_chosen_memWkp_1
   have hΩ_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- The ae-equality bridge:
-  -- base.weak_partial i =ᵐ chartPushedChosenFirstPartial g α u_h i
-  --   = chosenWeakPartial' 2 i (chartPushed POU α u_h.coeFn) Ω.
   exact (MemW1p_congr_ae hΩ_open
     (base_weak_partial_ae_eq_chartPushedChosenFirstPartial
       (I := I) (M := M) g α hu_h i)).mpr h_chosen
@@ -259,8 +248,6 @@ private lemma chosenWeakPartial'_base_weak_partial_ae_eq_chosenSecond
       (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_aeEq l₂
   exact h_congr
 
-/-! ## Smooth global extensions: a packaged helper -/
-
 /-- A smooth coefficient on `chartTargetEuclid α` has a smooth global
 extension that agrees with it on a neighborhood of any prescribed compact
 subset of the chart target. -/
@@ -276,11 +263,6 @@ private lemma exists_smooth_global_extension_chart
       (∀ y ∈ Metric.cthickening δ K, φExt y = φ y) :=
   exists_smooth_global_extension (I := I) (M := M) (φ := φ) α
     hφ_chart hK_compact hK_in
-
-/-! ## Local-`L²` regularity helpers
-The base scalar fields and their weak partials are locally `L²` on every
-compact subset of the chart target. These are repackaged here for use in the
-IBP applications. -/
 
 /-- Local-`L²` regularity of `base.u_chart`. -/
 private lemma base_u_chart_locally_memLp
@@ -373,8 +355,6 @@ private lemma chosenWeakPartial_base_wp_locally_memLp
   rw [← h_eq]
   exact h_global.restrict K
 
-/-! ## Schwarz commutativity helper -/
-
 /-- Schwarz symmetry of mixed partials for a smooth function. -/
 private lemma fderiv_apply_single_swap
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) (y : EuclN)
@@ -417,8 +397,6 @@ private lemma fderiv_apply_single_swap
   rw [ContinuousLinearMap.flip_apply, ContinuousLinearMap.flip_apply]
   exact h_symm (EuclideanSpace.single j 1) (EuclideanSpace.single l 1)
 
-/-! ## Pointwise vanishing of `fderiv ψ` off compact support -/
-
 /-- The Fréchet derivative of `ψ` vanishes pointwise outside `tsupport ψ`. -/
 private lemma fderiv_zero_outside_tsupport
     (ψ : EuclN → ℝ) (x : EuclN) (hx : x ∉ tsupport ψ) :
@@ -444,12 +422,6 @@ private lemma fderiv_partial_zero_outside_tsupport
     filter_upwards [h_compl_open.mem_nhds hx] with y hy
     rw [fderiv_zero_outside_tsupport ψ y hy]; simp
   rw [h_fderiv_eq]; simp
-
-/-! ## Per-pair IBP helpers — IBP in direction `l₂` against various bases
-
-These wrap the generic `integral_smul_weak_partial_eq` primitive with the
-chart-target smooth coefficient extension trick used elsewhere in this
-project. -/
 
 /-- Per-pair IBP: smooth coefficient `φ`, weak base `chosenSecond(i, l₁)` ∈ H¹,
 weak `l₂`-partial `chosenThird(i, l₁, l₂)`. Test factor `ψ`. -/
@@ -516,7 +488,6 @@ private lemma per_pair_ibp_chosenSecond
   have hΩ_meas : MeasurableSet Ω := hΩ_open.measurableSet
   have hK_in_thickening : K ⊆ Metric.cthickening δ K :=
     Metric.self_subset_cthickening _
-  -- Replace φExt → φ on Ω in each of the three integrals.
   have hLHS_eq :
       ∫ y in Ω, φExt y * v y *
           (fderiv ℝ ψ y) (EuclideanSpace.single l₂ 1)
@@ -975,7 +946,6 @@ private lemma per_pair_ibp_chosenFChartDeriv
   have hK_in : K ⊆ Ω := hψ_supp
   obtain ⟨δ, φExt, hδ_pos, hδ_subset, hφExt_smooth, hφExt_eq⟩ :=
     exists_smooth_global_extension_chart (φ := φ) hφ_chart hK_compact hK_in
-  -- Local memLp for v: from chosenFChartDeriv's global memLp restricted.
   have h_memW1p :=
     base_f_chart_memW1p_from_residual_memW1p (I := I) (M := M) g α hu_h
       (fChartResidual_memW1p_truly_unconditional (I := I) (M := M) g α hu_h)
@@ -1065,15 +1035,6 @@ private lemma per_pair_ibp_chosenFChartDeriv
   rw [hLeibniz1_eq, hLeibniz2_eq] at h_ibp_ext
   exact h_ibp_ext
 
-/-! ## Auxiliary: the chart-target principal LHS₂ term
-
-We collect the chart-target integral of `c · (chosenWeakPartial' 2 l₂
-(base.wp l₁)) · ψ` and identify it (modulo ae-equality on the chart-target)
-with the chart-target integral of `c · chosenSecond(l₁, l₂) · ψ`. The
-underlying ae-equality `chosenWeakPartial' 2 l₂ (base.wp l₁) =ᵐ
-chosenSecond(l₁, l₂)` is established in
-`chosenWeakPartial'_base_weak_partial_ae_eq_chosenSecond`. -/
-
 /-- The principal `LHS₂` integral admits two equivalent representations:
 the canonical chosenWeakPartial' of `base.wp l₁` and the canonical mixed
 second partial `chosenSecond(l₁, l₂)`. -/
@@ -1102,8 +1063,6 @@ private lemma integral_chosenWeakPartial_base_eq_integral_chosenSecond
   filter_upwards [h_aeEq] with y hy
   rw [hy]
 
-/-! ## File-local abbreviation for `chartImagePOUTsupport` -/
-
 private abbrev K_α (α : M) : Set EuclN :=
   chartImagePOUTsupport (I := I) (M := M) α
 
@@ -1126,13 +1085,6 @@ private lemma chartTarget_diff_K_α_subset_target (α : M) :
     chartTargetEuclid (I := I) (M := M) α \ K_α (I := I) (M := M) α ⊆
       chartTargetEuclid (I := I) (M := M) α := fun _ hy => hy.1
 
-/-! ## Vanishing of `chosenWeakPartial'` on an open subset where the base ae vanishes
-
-A direct adaptation of `chosenWeakPartial'_ae_zero_on_sdiff_tsupport`: if `u`
-is in `MemW1p p Ω` and `u =ᵐ 0` on an open subset `V ⊆ Ω` (with respect to
-`volume.restrict V`), then `chosenWeakPartial' p i u Ω =ᵐ 0` on `V`. The proof
-follows the uniqueness-on-the-restriction template. -/
-
 private lemma chosenWeakPartial'_ae_zero_on_open_subset_of_ae_zero
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω V : Set EuclN}
     (_hΩ : IsOpen Ω) (hV : IsOpen V) (hV_sub : V ⊆ Ω)
@@ -1144,7 +1096,6 @@ private lemma chosenWeakPartial'_ae_zero_on_open_subset_of_ae_zero
         (d := Module.finrank ℝ E) p i u Ω
       =ᵐ[(volume : Measure EuclN).restrict V] (fun _ : EuclN => (0 : ℝ)) := by
   classical
-  -- u ∈ MemW1p p V (restriction).
   have hu_V : DeGiorgi.MemW1p (d := Module.finrank ℝ E) p u V := by
     refine ⟨?_, ?_⟩
     · exact hu.1.mono_measure
@@ -1155,13 +1106,11 @@ private lemma chosenWeakPartial'_ae_zero_on_open_subset_of_ae_zero
       · exact hg_memLp.mono_measure
           (MeasureTheory.Measure.restrict_mono_set _ hV_sub)
       · exact DeGiorgi.HasWeakPartialDeriv.restrict hV hV_sub hg_weak
-  -- chosenWeakPartial' p i u V is a weak partial of u on V.
   have h_partial_V : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
       (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
         (d := Module.finrank ℝ E) p i u V) u V :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_isWeakPartial_of_mem
       hu_V i
-  -- chosenWeakPartial' p i u Ω is also a weak partial of u on V (by restriction).
   have h_partial_Ω : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
       (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
         (d := Module.finrank ℝ E) p i u Ω) u Ω :=
@@ -1171,15 +1120,12 @@ private lemma chosenWeakPartial'_ae_zero_on_open_subset_of_ae_zero
       (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
         (d := Module.finrank ℝ E) p i u Ω) u V :=
     DeGiorgi.HasWeakPartialDeriv.restrict hV hV_sub h_partial_Ω
-  -- chosenWeakPartial' p i u V =ᵐ 0 on V (by chosenWeakPartial'_ae_zero_of_ae_zero).
   have h_chosen_V_zero :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
         (d := Module.finrank ℝ E) p i u V
         =ᵐ[(volume : Measure EuclN).restrict V] (fun _ : EuclN => (0 : ℝ)) :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_ae_zero_of_ae_zero
       (d := Module.finrank ℝ E) hp hV hu_ae_zero_V i
-  -- Both chosenWeakPartial' p i u Ω and chosenWeakPartial' p i u V are weak
-  -- partials of u on V; both locally integrable.
   have hg_lp_Ω : MemLp
       (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
         (d := Module.finrank ℝ E) p i u Ω) p
@@ -1217,8 +1163,6 @@ private lemma chosenWeakPartial'_ae_zero_on_open_subset_of_ae_zero
       hg_loc_Ω_V hgV_loc
   exact h_unique.trans h_chosen_V_zero
 
-/-! ## Vanishing of `chartPushed POU α u_h.coeFn` ae off `K_α` -/
-
 private lemma chartPushed_u_h_ae_zero_off_K_α
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -1237,8 +1181,6 @@ private lemma chartPushed_u_h_ae_zero_off_K_α
   intro y hy
   exact DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed_eq_zero_off_chartImagePOUTsupport
     (I := I) (M := M) α _ hy.1 hy.2
-
-/-! ## Vanishing of the first chosen weak partial of `chartPushed u_h.coeFn` -/
 
 private lemma chosenWeakPartial_chartPushed_u_h_ae_zero_off_K_α
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -1265,8 +1207,6 @@ private lemma chosenWeakPartial_chartPushed_u_h_ae_zero_off_K_α
     (chartTarget_diff_K_α_subset_target (I := I) (M := M) α)
     h_w1p (chartPushed_u_h_ae_zero_off_K_α (I := I) (M := M) g α u_h) i
 
-/-! ## Vanishing of `chosenSecondPartialChartPushedU` ae off `K_α` -/
-
 private lemma chosenSecond_ae_zero_off_K_α
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -1279,8 +1219,6 @@ private lemma chosenSecond_ae_zero_off_K_α
   classical
   have hΩ_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- `chosenSecond u_h i l = chosenWeakPartial' 2 l (chosenWeakPartial' 2 i (chartPushed POU α u_h))`.
-  -- `chosenWeakPartial' 2 i (chartPushed POU α u_h)` is in MemW1p 2 (chartTarget α).
   set g_i : EuclN → ℝ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
       (d := Module.finrank ℝ E) 2 i
@@ -1305,13 +1243,11 @@ private lemma chosenSecond_ae_zero_off_K_α
     rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p]
       at h_step
     exact h_step
-  -- chosenSecondPartialChartPushedU g α u_h i l = chosenWeakPartial' 2 l g_i Ω.
   have h_unfold : chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l =
       DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
         (d := Module.finrank ℝ E) 2 l g_i
         (chartTargetEuclid (I := I) (M := M) α) := rfl
   rw [h_unfold]
-  -- g_i =ᵐ 0 on the chart-target minus K_α.
   have h_g_i_ae :=
     chosenWeakPartial_chartPushed_u_h_ae_zero_off_K_α
       (I := I) (M := M) g α hu_h i
@@ -1320,13 +1256,6 @@ private lemma chosenSecond_ae_zero_off_K_α
     (chartTarget_diff_K_α_isOpen (I := I) (M := M) α)
     (chartTarget_diff_K_α_subset_target (I := I) (M := M) α)
     h_g_i_memW1p h_g_i_ae l
-
-/-! ## Helper: weak partial of an ae-zero base function is ae-zero on the open subset
-
-If `f` is locally integrable on an open set `Ω`, `f = 0` ae on an open subset
-`U ⊆ Ω`, and `w` is a weak `i`-partial of `f` on `Ω` (with `w` locally
-integrable on `U`), then `w = 0` ae on `U`. The proof uses the fundamental
-lemma of the calculus of variations on `U`. -/
 
 private lemma weakPartial_ae_zero_on_open_subset_of_ae_zero
     {Ω U : Set EuclN} (hΩ_open : IsOpen Ω) (hU_open : IsOpen U)
@@ -1382,8 +1311,6 @@ private lemma weakPartial_ae_zero_on_open_subset_of_ae_zero
   filter_upwards [h_target] with y hy hy_U
   exact hy hy_U
 
-/-! ## Local integrability of an `MemLp 2`-locally function on `U := Ω \ K_α` -/
-
 private lemma locallyIntegrableOn_of_locally_memLp_two_chart
     (_g : SmoothRiemannianMetric I M) (α : M)
     {f : EuclN → ℝ}
@@ -1420,8 +1347,6 @@ private lemma locallyIntegrableOn_of_locally_memLp_two_chart
     (by linarith : 0 < r / 2))
   exact Metric.ball_subset_closedBall
 
-/-! ## Vanishing of `chosenThirdMixedPartialChartPushedU` ae off `K_α` -/
-
 private lemma chosenThird_ae_zero_off_K_α
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -1435,13 +1360,10 @@ private lemma chosenThird_ae_zero_off_K_α
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have hU_open := chartTarget_diff_K_α_isOpen (I := I) (M := M) α
   have hU_sub := chartTarget_diff_K_α_subset_target (I := I) (M := M) α
-  -- chosenThird i l j is a weak j-partial of chosenSecond i l on Ω.
   have h_isWeak :=
     chosenThirdMixedPartialChartPushedU_isWeakPartial
       (I := I) (M := M) g α hu_h i l j
-  -- chosenSecond i l ae vanishes on Ω \ K_α.
   have hf_ae := chosenSecond_ae_zero_off_K_α (I := I) (M := M) g α hu_h i l
-  -- chosenThird i l j is locally integrable on Ω \ K_α.
   have hw_li : LocallyIntegrableOn
       (chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l j)
       (chartTargetEuclid (I := I) (M := M) α \ K_α (I := I) (M := M) α)
@@ -1450,12 +1372,9 @@ private lemma chosenThird_ae_zero_off_K_α
       (fun K hK hK_in =>
         chosenThirdMixedPartialChartPushedU_locally_memLp
           (I := I) (M := M) g α hu_h i l j hK hK_in)
-  -- ae-zero conclusion via the helper.
   refine weakPartial_ae_zero_on_open_subset_of_ae_zero
     hΩ_open hU_open hU_sub (i := j) h_isWeak hw_li ?_
   exact hf_ae
-
-/-! ## Bridge: `base.u_chart =ᵐ chartPushed POU α u_h.coeFn` on `vol.restrict Ω` -/
 
 private lemma vol_restrict_chart_target_absCont_weighted (α : M)
     (g : SmoothRiemannianMetric I M) :
@@ -1537,14 +1456,6 @@ private lemma base_u_chart_ae_zero_off_K_α
   exact DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed_eq_zero_off_chartImagePOUTsupport
     (I := I) (M := M) α _ hy_diff.1 hy_diff.2
 
-/-! ## Vanishing of `base.weak_partial i` ae off `K_α`
-
-`base.weak_partial i` is a weak `i`-partial of `base.u_chart` on Ω. Since
-`base.u_chart` is ae zero on `Ω \ K_α` and `base.weak_partial i` is locally
-`L²` on every compact subset of Ω (hence locally integrable on `Ω \ K_α`),
-the weak-partial vanishing helper gives `base.weak_partial i = 0` ae on
-`Ω \ K_α`. -/
-
 private lemma base_weak_partial_ae_zero_off_K_α
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -1569,14 +1480,6 @@ private lemma base_weak_partial_ae_zero_off_K_α
   have hf_ae := base_u_chart_ae_zero_off_K_α (I := I) (M := M) g α hu_h
   exact weakPartial_ae_zero_on_open_subset_of_ae_zero
     hΩ_open hU_open hU_sub (i := i) h_isWeak hw_li hf_ae
-
-/-! ## Vanishing of `base.f_chart` ae off `K_α`
-
-This uses the chart-bilinear variational identity: for any ψ smooth-supported
-in Ω \ K_α, the LHS principal vanishes (since base.uc and base.wp vanish ae
-there), so `∫ c · base.fc · ψ = 0`. The fundamental lemma applied on Ω \ K_α
-(open) gives `c · base.fc = 0` ae on Ω \ K_α, and since `c > 0` on Ω this
-forces `base.fc = 0` ae on Ω \ K_α. -/
 
 private lemma base_f_chart_locally_memLp_helper
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -1648,7 +1551,6 @@ private lemma base_f_chart_ae_zero_off_K_α
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
   have hΩ_meas : MeasurableSet Ω := hΩ_open.measurableSet
   have hU_meas : MeasurableSet U := hU_open.measurableSet
-  -- Local integrability of c · D.f_chart on U.
   have h_density_contOn : ContinuousOn (densityOnEuclid (I := I) g α) Ω :=
     densityOnEuclid_continuousOn (I := I) g α
   have h_prod_locInt : LocallyIntegrableOn
@@ -1682,7 +1584,6 @@ private lemma base_f_chart_ae_zero_off_K_α
     apply Filter.mem_of_superset (Metric.ball_mem_nhds x
       (by linarith : 0 < r / 2))
     exact Metric.ball_subset_closedBall
-  -- ∫ x, ψ x • (c x · D.f_chart x) ∂vol = 0 for all ψ supported in U.
   have h_zero_for_test : ∀ ψ : EuclN → ℝ, ContDiff ℝ ∞ ψ → HasCompactSupport ψ →
       tsupport ψ ⊆ U →
       ∫ y, ψ y • (densityOnEuclid (I := I) g α y * D.f_chart y)
@@ -1703,7 +1604,6 @@ private lemma base_f_chart_ae_zero_off_K_α
       ∫ y in Ω,
         densityOnEuclid (I := I) g α y * D.f_chart y * ψ y
         ∂(volume : Measure EuclN) at h_var
-    -- LHS_principal = 0 (since weak_partials and ∂_jψ collectively give 0).
     have h_principal_zero :
         ∫ y in Ω,
           (∑ i : Fin (Module.finrank ℝ E),
@@ -1712,17 +1612,6 @@ private lemma base_f_chart_ae_zero_off_K_α
                 D.weak_partial i y *
                 (fderiv ℝ ψ y) (EuclideanSpace.single j 1))
           ∂(volume : Measure EuclN) = 0 := by
-      -- For laplacianDomain hu_h, base.weak_partial may not be ae-zero off K_α a priori.
-      -- But it IS, because it agrees with chartPushedChosenFirstPartial which vanishes.
-      -- However, we don't have the laplacianDomainPow hypothesis here; we only have
-      -- the laplacianDomain hypothesis. So the corresponding ae-zero fact is harder.
-      -- Workaround: since hu_h : laplacianDomain g, base.weak_partial i is the
-      -- chartPushedWeakPartialLp of u_h in direction i, which by the chart-pushed
-      -- weak partial limit construction equals chartPushedChosenFirstPartial =ᵐ
-      -- chosenWeakPartial' 2 i (chartPushed POU α u_h.coeFn).
-      -- For laplacianDomain (not laplacianDomainPow 2), chartPushed POU α u_h.coeFn
-      -- is in MemW1p 2 by chartPushed_memW1p_two_of_laplacianDomain.
-      -- We need that auxiliary lemma.
       have h_integrand_ae_zero :
           (fun y : EuclN => ∑ i : Fin (Module.finrank ℝ E),
             ∑ j : Fin (Module.finrank ℝ E),
@@ -1747,8 +1636,7 @@ private lemma base_f_chart_ae_zero_off_K_α
         · refine Finset.sum_eq_zero ?_; intro i _
           refine Finset.sum_eq_zero ?_; intro j _
           rw [hy i hy_U]; ring
-        · -- y ∉ U; ∂_jψ vanishes in a nbhd (since y ∉ tsupport ψ ⊆ U).
-          have h_y_not_in_supp : y ∉ tsupport ψ := fun h => hy_U (hψ_supp_U h)
+        · have h_y_not_in_supp : y ∉ tsupport ψ := fun h => hy_U (hψ_supp_U h)
           have h_compl_open : IsOpen (tsupport ψ)ᶜ :=
             (isClosed_tsupport _).isOpen_compl
           have h_zero_nbhd : ∀ᶠ z in 𝓝 y, ψ z = 0 := by
@@ -1783,13 +1671,10 @@ private lemma base_f_chart_ae_zero_off_K_α
           rw [hψ_y]; ring
       rw [MeasureTheory.integral_congr_ae h_integrand_ae_zero]; simp
     rw [h_principal_zero, h_mass_zero] at h_var
-    -- h_var : 0 + 0 = ∫_Ω c · D.f_chart · ψ
-    -- So ∫_Ω c · D.f_chart · ψ = 0.
     have h_fchart_int_zero :
         ∫ y in Ω, densityOnEuclid (I := I) g α y * D.f_chart y * ψ y
           ∂(volume : Measure EuclN) = 0 := by
       linarith
-    -- Convert ∫_Ω (...) · ψ to ∫ univ (...) (after extending vanishing off Ω).
     have h_vanish_off_Ω : ∀ x ∉ Ω, ψ x • (densityOnEuclid (I := I) g α x *
         D.f_chart x) = 0 := fun x hx => by
       have hx_supp : x ∉ tsupport ψ := fun h => hx (hψ_supp_chart h)
@@ -1799,11 +1684,9 @@ private lemma base_f_chart_ae_zero_off_K_α
       h_vanish_off_Ω]
     refine (MeasureTheory.setIntegral_congr_fun hΩ_meas ?_).trans h_fchart_int_zero
     intro x _hxΩ; simp [smul_eq_mul, mul_comm]
-  -- Apply the fundamental lemma on U: c · D.f_chart =ᵐ 0 on vol.
   have h_cf_vol : ∀ᵐ y ∂(volume : Measure EuclN),
       y ∈ U → densityOnEuclid (I := I) g α y * D.f_chart y = 0 :=
     hU_open.ae_eq_zero_of_integral_contDiff_smul_eq_zero h_prod_locInt h_zero_for_test
-  -- Since c > 0 on Ω, divide out.
   refine (ae_restrict_iff' hU_meas).mpr ?_
   filter_upwards [h_cf_vol] with y hy hy_U
   have h_pos : 0 < densityOnEuclid (I := I) g α y :=
@@ -1811,8 +1694,6 @@ private lemma base_f_chart_ae_zero_off_K_α
   have h_eq : densityOnEuclid (I := I) g α y * D.f_chart y = 0 := hy hy_U
   have h_ne : densityOnEuclid (I := I) g α y ≠ 0 := ne_of_gt h_pos
   exact (mul_eq_zero.mp h_eq).resolve_left h_ne
-
-/-! ## Vanishing of `chosenFChartDeriv` ae off `K_α` -/
 
 private lemma chosenFChartDeriv_ae_zero_off_K_α
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -1826,9 +1707,6 @@ private lemma chosenFChartDeriv_ae_zero_off_K_α
   have hΩ_open := chartTargetEuclid_isOpen (I := I) (M := M) α
   have hU_open := chartTarget_diff_K_α_isOpen (I := I) (M := M) α
   have hU_sub := chartTarget_diff_K_α_subset_target (I := I) (M := M) α
-  -- chosenFChartDeriv = chosenWeakPartial' 2 l base.f_chart Ω.
-  -- base.f_chart ∈ MemW1p (chartTarget α) under base_f_chart_memW1p hypothesis.
-  -- base.f_chart =ᵐ 0 on Ω \ K_α.
   have h_memW1p :=
     base_f_chart_memW1p_from_residual_memW1p (I := I) (M := M) g α hu_h
       (fChartResidual_memW1p_truly_unconditional (I := I) (M := M) g α hu_h)
@@ -1837,8 +1715,6 @@ private lemma chosenFChartDeriv_ae_zero_off_K_α
   exact chosenWeakPartial'_ae_zero_on_open_subset_of_ae_zero
     (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open hU_open hU_sub
     h_memW1p h_base_fc_ae l
-
-/-! ## Vanishing of `fChartDeriv2` ae off `K_α` -/
 
 private lemma fChartDeriv2_ae_zero_off_K_α
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -1856,7 +1732,6 @@ private lemma fChartDeriv2_ae_zero_off_K_α
   have hΩ_open := chartTargetEuclid_isOpen (I := I) (M := M) α
   have hU_open := chartTarget_diff_K_α_isOpen (I := I) (M := M) α
   have hU_sub := chartTarget_diff_K_α_subset_target (I := I) (M := M) α
-  -- fChartDeriv2 = chosenWeakPartial' 2 l₂ (chosenFChartDeriv l₁) Ω.
   have h_chosenFC_ae := chosenFChartDeriv_ae_zero_off_K_α
     (I := I) (M := M) g α hu_h l₁
   have h_chosen :
@@ -1870,7 +1745,6 @@ private lemma fChartDeriv2_ae_zero_off_K_α
     chosenWeakPartial'_ae_zero_on_open_subset_of_ae_zero
       (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open hU_open hU_sub
       h_chosenFChartDeriv_memW1p h_chosenFC_ae l₂
-  -- fChartDeriv2 unfolds to the chosenWeakPartial' expression by definition.
   change ∀ᵐ y ∂((volume : Measure EuclN).restrict
       (chartTargetEuclid (I := I) (M := M) α \ K_α (I := I) (M := M) α)),
       DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
@@ -1878,8 +1752,6 @@ private lemma fChartDeriv2_ae_zero_off_K_α
         (chosenFChartDeriv (I := I) (M := M) g α hu_h l₁)
         (chartTargetEuclid (I := I) (M := M) α) y = 0
   exact h_chosen
-
-/-! ## Vanishing of `fChartEffTwiceNumerator` ae off `K_α` -/
 
 private lemma fChartEffTwiceNumerator_ae_zero_off_K_α
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -1894,7 +1766,6 @@ private lemma fChartEffTwiceNumerator_ae_zero_off_K_α
       (chartTargetEuclid (I := I) (M := M) α \ K_α (I := I) (M := M) α)),
       fChartEffTwiceNumerator (I := I) (M := M) g α l₁ l₂ hu_h y = 0 := by
   classical
-  -- Combine vanishings of all summand-factors.
   have h_uc := base_u_chart_ae_zero_off_K_α (I := I) (M := M) g α
     (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)
   have h_fc := base_f_chart_ae_zero_off_K_α (I := I) (M := M) g α
@@ -1931,7 +1802,6 @@ private lemma fChartEffTwiceNumerator_ae_zero_off_K_α
       fChartDeriv2 (I := I) (M := M) g α hu_h l₁ l₂ y = 0 :=
     fChartDeriv2_ae_zero_off_K_α (I := I) (M := M) g α hu_h l₁ l₂
       h_chosenFChartDeriv_memW1p
-  -- Combine into ae-all-i, ae-all-(i,j), etc.
   have hU_meas : MeasurableSet
       (chartTargetEuclid (I := I) (M := M) α \ K_α (I := I) (M := M) α) :=
     (chartTarget_diff_K_α_isOpen (I := I) (M := M) α).measurableSet
@@ -1956,9 +1826,7 @@ private lemma fChartEffTwiceNumerator_ae_zero_off_K_α
   filter_upwards [h_uc, h_fc, h_wp_all, h_sec_all, h_third_l1_all, h_third_l2_all,
     h_fcDeriv l₁, h_fcDeriv l₂, h_fcDeriv2]
     with y hy_uc hy_fc hy_wp hy_sec hy_third1 hy_third2 hy_fcD1 hy_fcD2 hy_fcD12
-  -- Unfold the numerator and check each summand vanishes.
   unfold fChartEffTwiceNumerator
-  -- All double-sums vanish since one factor in each summand vanishes at y.
   have h_A1_zero :
       (∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
@@ -2016,8 +1884,6 @@ private lemma fChartEffTwiceNumerator_ae_zero_off_K_α
       hy_wp l₁, hy_wp l₂, hy_fcD1, hy_fcD2, hy_fcD12, hy_uc, hy_fc]
   ring
 
-/-! ## Integral identity: `∫_Ω num · ψ = ∫_Ω c · fChartEffTwice · ψ` -/
-
 private lemma integral_fChartEffTwiceNumerator_eq_integral_density_fChartEffTwice
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -2041,7 +1907,6 @@ private lemma integral_fChartEffTwiceNumerator_eq_integral_density_fChartEffTwic
     (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
   have hU_meas : MeasurableSet (Ω \ K_α (I := I) (M := M) α) :=
     hΩ_meas.diff (K_α_meas (I := I) (M := M) α)
-  -- Define the ae-equality on Ω.
   have h_ae_eq : (fun y : EuclN =>
       fChartEffTwiceNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y) =ᵐ[
       (volume : Measure EuclN).restrict Ω]
@@ -2064,8 +1929,6 @@ private lemma integral_fChartEffTwiceNumerator_eq_integral_density_fChartEffTwic
       have h_pt := density_mul_fChartEffTwice_eq_indicator_numerator
         (I := I) (M := M) g α l₁ l₂ hu_h y hy_Ω
       rw [Set.indicator_of_notMem hy_K] at h_pt
-      -- h_pt : densityOnEuclid g α y * fChartEffTwice g α l₁ l₂ hu_h y = 0.
-      -- Goal: num·ψ = c·fcEff·ψ; num = 0; c·fcEff = 0.
       rw [hy hy_diff]
       have h_rhs_zero :
           densityOnEuclid (I := I) g α y *
@@ -2077,14 +1940,6 @@ private lemma integral_fChartEffTwiceNumerator_eq_integral_density_fChartEffTwic
         rw [h_pt]; ring
       linarith
   exact MeasureTheory.integral_congr_ae h_ae_eq
-
-/-! ## Headline: the twice-differentiated variational identity holds
-
-The headline assembles the once-differentiated unconditional identity
-`differentiated_variational_identity_holds` applied to the test function
-`∂_{l₂} ψ`, followed by integration-by-parts in direction `l₂` (and a `j`-
-direction IBP for the cross-term) against each of the six base scalar fields
-appearing in the once-differentiated identity. -/
 
 set_option maxHeartbeats 4000000 in
 /-- **Twice-differentiated chart-bilinear variational identity** for
@@ -2119,7 +1974,6 @@ theorem twice_differentiated_variational_identity_holds
         fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
       ∂(volume : Measure EuclN) := by
   classical
-  -- Set up basic data.
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
   set D_base := chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M)
@@ -2128,7 +1982,6 @@ theorem twice_differentiated_variational_identity_holds
   have h_base_f_chart_memW1p :=
     base_f_chart_memW1p_from_residual_memW1p (I := I) (M := M) g α hu_h
       (fChartResidual_memW1p_truly_unconditional (I := I) (M := M) g α hu_h)
-  -- The test function ψl₂ = ∂_{l₂}ψ.
   set ψl₂ : EuclN → ℝ := fun y => (fderiv ℝ ψ y) (EuclideanSpace.single l₂ 1)
     with hψl₂_def
   have hψl₂_smooth : ContDiff ℝ (⊤ : ℕ∞) ψl₂ :=
@@ -2137,18 +1990,8 @@ theorem twice_differentiated_variational_identity_holds
     hasCompactSupport_fderiv_apply_single (ψ := ψ) hψ_cs l₂
   have hψl₂_supp : tsupport ψl₂ ⊆ Ω :=
     (tsupport_fderiv_apply_single_subset ψ l₂).trans hψ_supp
-  -- Apply the once-differentiated unconditional identity to ψl₂.
   have h_once := differentiated_variational_identity_holds
     (I := I) (M := M) g α hu_h l₁ hψl₂_smooth hψl₂_cs hψl₂_supp
-  -- Step 1: IBP for the LHS-principal A1 integral.
-  -- A1 = ∫ Σ a_{ij} · chosenSecond(i, l₁) · ∂_{j}(∂_{l₂}ψ).
-  -- After Schwarz: A1 = ∫ Σ a_{ij} · chosenSecond(i, l₁) · ∂_{l₂}(∂_jψ).
-  -- IBP in direction l₂ using per_pair_ibp_chosenSecond (ψ' = ∂_jψ, IBP-dir l₂).
-  -- Yields ∫ Σ a · chosenSecond(i,l₁) · ∂_j∂_{l₂}ψ
-  --     = -∫ Σ ∂_{l₂}a · chosenSecond(i,l₁) · ∂_jψ - ∫ Σ a · chosenThird(i,l₁,l₂) · ∂_jψ.
-  -- Then 2nd-order IBP on `-∫ Σ ∂_{l₂}a · chosenSecond(i,l₁) · ∂_jψ` in direction j
-  -- with smooth coef ∂_{l₂}a_{ij} = weightedInvGramDeriv g α i j l₂.
-  -- Establish each Schwarz pointwise equality then apply per_pair_ibp_chosenSecond.
   have h_schwarz_A1 : ∀ y : EuclN, ∀ i j : Fin (Module.finrank ℝ E),
       (fderiv ℝ ψl₂ y) (EuclideanSpace.single j 1) =
       (fderiv ℝ (fun z : EuclN => (fderiv ℝ ψ z) (EuclideanSpace.single j 1)) y)
@@ -2157,7 +2000,6 @@ theorem twice_differentiated_variational_identity_holds
     change (fderiv ℝ (fun z : EuclN => (fderiv ℝ ψ z) (EuclideanSpace.single l₂ 1)) y)
         (EuclideanSpace.single j 1) = _
     exact fderiv_apply_single_swap (ψ := ψ) hψ_smooth y j l₂
-  -- ψj = ∂_jψ, as a test function with same smoothness/support.
   set ψj : Fin (Module.finrank ℝ E) → EuclN → ℝ :=
     fun j y => (fderiv ℝ ψ y) (EuclideanSpace.single j 1) with hψj_def
   have hψj_smooth : ∀ j, ContDiff ℝ (⊤ : ℕ∞) (ψj j) := fun j =>
@@ -2166,8 +2008,6 @@ theorem twice_differentiated_variational_identity_holds
     hasCompactSupport_fderiv_apply_single (ψ := ψ) hψ_cs j
   have hψj_supp : ∀ j, tsupport (ψj j) ⊆ Ω := fun j =>
     (tsupport_fderiv_apply_single_subset ψ j).trans hψ_supp
-  -- IBP1: for each (i, j), apply per_pair_ibp_chosenSecond with φ = a_{ij},
-  -- IBP-direction l₂, and test ψ' = ψj j.
   have h_aij_contDiffOn : ∀ i j : Fin (Module.finrank ℝ E),
       ContDiffOn ℝ (⊤ : ℕ∞) (weightedInvGramOnEuclid (I := I) g α i j) Ω :=
     fun i j => weightedInvGramOnEuclid_contDiffOn (I := I) g α i j
@@ -2189,10 +2029,6 @@ theorem twice_differentiated_variational_identity_holds
               ∂(volume : Measure EuclN))) := fun i j =>
     per_pair_ibp_chosenSecond (I := I) (M := M) g α hu_h i l₁ l₂
       (h_aij_contDiffOn i j) (hψj_smooth j) (hψj_cs j) (hψj_supp j)
-  -- IBP2: 2nd-order IBP on `∫ ∂_{l₂}a_{ij} · chosenSecond(i, l₁) · ∂_jψ`
-  -- in direction j, smooth coef φ' = weightedInvGramDeriv g α i j l₂.
-  -- Result rewrites in terms of ∂_j (∂_{l₂}a_{ij}) = (fderiv ℝ φ' y)(single j 1)
-  -- and chosenThird(i, l₁, j).
   have h_daij_contDiffOn : ∀ i j : Fin (Module.finrank ℝ E),
       ContDiffOn ℝ (⊤ : ℕ∞)
         (weightedInvGramDerivOnEuclid (I := I) g α i j l₂) Ω :=
@@ -2215,8 +2051,6 @@ theorem twice_differentiated_variational_identity_holds
               ∂(volume : Measure EuclN))) := fun i j =>
     per_pair_ibp_chosenSecond (I := I) (M := M) g α hu_h i l₁ j
       (h_daij_contDiffOn i j) hψ_smooth hψ_cs hψ_supp
-  -- IBP2: for the LHS A2 integral ∫ c · base.wp(l₁) · ∂_{l₂}ψ.
-  -- Apply per_pair_ibp_base_weak_partial with smooth coef c = densityOnEuclid.
   have h_density_contDiffOn : ContDiffOn ℝ (⊤ : ℕ∞)
       (densityOnEuclid (I := I) g α) Ω :=
     densityOnEuclid_contDiffOn (I := I) g α
@@ -2236,8 +2070,6 @@ theorem twice_differentiated_variational_identity_holds
               ∂(volume : Measure EuclN))) :=
     per_pair_ibp_base_weak_partial (I := I) (M := M) g α hu_h l₁ l₂
       h_density_contDiffOn hψ_smooth hψ_cs hψ_supp
-  -- IBP3: B integral ∫ c · chosenFChartDeriv(l₁) · ∂_{l₂}ψ.
-  -- Apply per_pair_ibp_chosenFChartDeriv with c.
   have h_B :
       (∫ y in Ω, densityOnEuclid (I := I) g α y *
           chosenFChartDeriv (I := I) (M := M) g α hu_h l₁ y *
@@ -2254,8 +2086,6 @@ theorem twice_differentiated_variational_identity_holds
     per_pair_ibp_chosenFChartDeriv (I := I) (M := M) g α hu_h l₁ l₂
       h_chosenFChartDeriv_memW1p h_density_contDiffOn
       hψ_smooth hψ_cs hψ_supp
-  -- IBP4: C integral ∫ Σ ∂_{l₁}a_{ij} · base.wp(i) · ∂_{l₂}ψ.
-  -- Apply per_pair_ibp_base_weak_partial per pair with smooth coef ∂_{l₁}a_{ij}.
   have h_daij_l₁_contDiffOn : ∀ i j : Fin (Module.finrank ℝ E),
       ContDiffOn ℝ (⊤ : ℕ∞)
         (weightedInvGramDerivOnEuclid (I := I) g α i j l₁) Ω :=
@@ -2276,7 +2106,6 @@ theorem twice_differentiated_variational_identity_holds
               ∂(volume : Measure EuclN))) := fun i j =>
     per_pair_ibp_base_weak_partial (I := I) (M := M) g α hu_h i l₂
       (h_daij_l₁_contDiffOn i j) hψ_smooth hψ_cs hψ_supp
-  -- IBP5: D integral ∫ ∂_{l₁}c · base.u_chart · ∂_{l₂}ψ.
   have h_dc_l₁_contDiffOn :
       ContDiffOn ℝ (⊤ : ℕ∞) (densityDerivOnEuclid (I := I) g α l₁) Ω :=
     densityDerivOnEuclid_contDiffOn (I := I) g α l₁
@@ -2295,7 +2124,6 @@ theorem twice_differentiated_variational_identity_holds
               ∂(volume : Measure EuclN))) :=
     per_pair_ibp_base_u_chart (I := I) (M := M) g α hu_h l₂
       h_dc_l₁_contDiffOn hψ_smooth hψ_cs hψ_supp
-  -- IBP6: E integral ∫ ∂_{l₁}c · base.f_chart · ∂_{l₂}ψ.
   have h_E :
       (∫ y in Ω, densityDerivOnEuclid (I := I) g α l₁ y *
           D_base.f_chart y *
@@ -2311,15 +2139,6 @@ theorem twice_differentiated_variational_identity_holds
               ∂(volume : Measure EuclN))) :=
     per_pair_ibp_base_f_chart (I := I) (M := M) g α hu_h l₂
       h_dc_l₁_contDiffOn hψ_smooth hψ_cs hψ_supp
-  -- Now rewrite h_once. The once-diff identity has form A1 + A2 = B - C - D + E
-  -- with each integrand against `(fderiv ψl₂ y)(single j 1)`. We need to convert
-  -- the LHS A1 (against ψl₂) to its IBP form (against ψ).
-  -- Step: rewrite ψl₂ on each of A1, A2, B, C, D, E.
-  -- A1 in once-diff identity: ∫ Σ a_{ij} · chosenSecond(i,l₁) · ∂_j(ψl₂).
-  -- Schwarz: ∂_j(ψl₂)(y) = (fderiv ψl₂ y)(single j 1) =
-  --   (fderiv (fun z => (fderiv ψ z)(single l₂ 1)) y)(single j 1) =
-  --   (fderiv (fun z => (fderiv ψ z)(single j 1)) y)(single l₂ 1) =
-  --   (fderiv (ψj j) y)(single l₂ 1).
   have hA1_Schwarz : (∫ y in Ω,
       (∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
@@ -2338,7 +2157,6 @@ theorem twice_differentiated_variational_identity_holds
     refine Finset.sum_congr rfl ?_; intro i _
     refine Finset.sum_congr rfl ?_; intro j _
     rw [h_schwarz_A1 y i j]
-  -- C in once-diff identity has same Schwarz substitution.
   have hC_Schwarz : (∫ y in Ω,
       (∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
@@ -2357,10 +2175,6 @@ theorem twice_differentiated_variational_identity_holds
     refine Finset.sum_congr rfl ?_; intro i _
     refine Finset.sum_congr rfl ?_; intro j _
     rw [h_schwarz_A1 y i j]
-  -- Sum-integral swap helper (we use directly via integral_finset_sum).
-  -- For A1 in IBP form, we need to swap Σ_{ij} ∫ ... = ∫ Σ_{ij} ....
-  -- Show integrability of each pair, then apply integral_finset_sum.
-  -- First, compact tsupport and finite measure on K.
   set K : Set EuclN := tsupport ψ with hK_def
   have hK_compact : IsCompact K := hψ_cs
   have hK_in : K ⊆ Ω := hψ_supp
@@ -2372,7 +2186,6 @@ theorem twice_differentiated_variational_identity_holds
     rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter]
     exact hvolK_finite
   haveI : IsFiniteMeasure ((volume : Measure EuclN).restrict K) := ⟨hvolK_finite'⟩
-  -- Smoothness of ψj j and fderivs.
   have hψj_fderiv_cont : ∀ j k : Fin (Module.finrank ℝ E),
       Continuous (fun y : EuclN => (fderiv ℝ (ψj j) y) (EuclideanSpace.single k 1)) :=
     fun j k => ((hψj_smooth j).continuous_fderiv (by simp)).clm_apply
@@ -2380,12 +2193,10 @@ theorem twice_differentiated_variational_identity_holds
   have hψ_fderiv_cont : ∀ j : Fin (Module.finrank ℝ E),
       Continuous (fun y : EuclN => (fderiv ℝ ψ y) (EuclideanSpace.single j 1)) :=
     fun j => (hψ_smooth.continuous_fderiv (by simp)).clm_apply continuous_const
-  -- The fderiv of ψj j is zero outside K (similarly for ψ).
   have h_fderiv_zero_outside_K_ψ : ∀ z ∉ K, fderiv ℝ ψ z = 0 :=
     fun z hz => fderiv_zero_outside_tsupport ψ z hz
   have h_fderiv_zero_outside_K_ψj : ∀ j, ∀ z ∉ K, fderiv ℝ (ψj j) z = 0 :=
     fun j z hz => fderiv_partial_zero_outside_tsupport (ψ := ψ) z hz j
-  -- Continuity of various smooth coefficients on Ω.
   have h_aij_cont_on : ∀ i j, ContinuousOn (weightedInvGramOnEuclid
       (I := I) g α i j) Ω :=
     fun i j => (h_aij_contDiffOn i j).continuousOn
@@ -2408,8 +2219,6 @@ theorem twice_differentiated_variational_identity_holds
       (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₁) y)
         (EuclideanSpace.single l₂ 1)) Ω := fun i j =>
     weightedInvGramSecondDerivOnEuclid_continuousOn (I := I) g α i j l₁ l₂
-  -- Helper: integrability of `φ · u · h` on `(volume.restrict Ω)` for
-  -- φ continuous-on-Ω, u IntegrableOn K, and h continuous with tsupport ⊆ K.
   have integrable_triple :
       ∀ {a : EuclN → ℝ} (ha_cont_on : ContinuousOn a Ω)
         {u : EuclN → ℝ} (hu_int : IntegrableOn u K (volume : Measure EuclN))
@@ -2463,7 +2272,6 @@ theorem twice_differentiated_variational_identity_holds
       funext y; change u y * (a y * h₁ y) = _; ring
     rw [h_reassoc] at full_int
     exact full_int.restrict
-  -- Local-L² witnesses for chosenSecond and base.wp and chosenThird on K.
   have h_chosenSecond_int : ∀ i l : Fin (Module.finrank ℝ E),
       IntegrableOn (chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l)
         K (volume : Measure EuclN) :=
@@ -2480,7 +2288,6 @@ theorem twice_differentiated_variational_identity_holds
       IntegrableOn (D_base.weak_partial i) K (volume : Measure EuclN) :=
     fun i => (D_base.weak_partial_locally_memLp i K hK_compact hK_in).integrable
       (by norm_num : (1 : ℝ≥0∞) ≤ 2)
-  -- Per-pair integrabilities of all integrands appearing in the proof.
   have h_int_A1_pair : ∀ i j,
       Integrable (fun y => weightedInvGramOnEuclid (I := I) g α i j y *
           chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₁ y *
@@ -2529,7 +2336,6 @@ theorem twice_differentiated_variational_identity_holds
       exact hy this
     exact integrable_triple (h_daij_l₁_cont_on i j) (h_base_wp_int i)
       hh₁_cont hh₁_supp
-  -- Sum-integral swaps for A1 and C in their ψj form.
   have sum_swap_LHS_A1 :
       ∫ y in Ω,
         (∑ i : Fin (Module.finrank ℝ E),
@@ -2568,9 +2374,7 @@ theorem twice_differentiated_variational_identity_holds
     refine Finset.sum_congr rfl ?_
     intro i _
     rw [integral_finset_sum _ (fun j _ => h_int_C_pair i j)]
-  -- Apply Schwarz and sum-swap to rewrite the once-diff identity.
   rw [hA1_Schwarz, hC_Schwarz, sum_swap_LHS_A1, sum_swap_C] at h_once
-  -- Apply per-pair IBPs (LHS_A1 pair and C pair) inside the sums.
   have h_LHS_A1_after_IBP :
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
@@ -2616,79 +2420,31 @@ theorem twice_differentiated_variational_identity_holds
                 ∂(volume : Measure EuclN)))) := by
     refine Finset.sum_congr rfl ?_; intro i _
     refine Finset.sum_congr rfl ?_; intro j _
-    -- per_pair_ibp_base_weak_partial with smooth coef = weightedInvGramDerivOnEuclid g α i j l₁
-    -- and IBP-direction l₂, gives weak partial chosenSecond(i, l₂).
-    -- (Note: lemma applies via ψ' = ψj j as test.)
     exact per_pair_ibp_base_weak_partial (I := I) (M := M) g α hu_h i l₂
       (h_daij_l₁_contDiffOn i j) (hψj_smooth j) (hψj_cs j) (hψj_supp j)
-  -- Substitute IBP results into h_once.
   rw [h_LHS_A1_after_IBP, h_C_after_IBP, h_A2, h_B, h_D, h_E] at h_once
-  -- Now the LHS A1 sum has the form Σᵢⱼ -(X_ij + Y_ij). Split using Finset distrib.
-  -- Step: each ∫ Σᵢⱼ ... = Σᵢⱼ ∫ ... for the IBP-resultant ψj j terms.
-  -- We will define X_ij and Y_ij to be the two terms and distribute the negation.
-  -- After this point, all the principal integrals are in ψ-form (against ψ),
-  -- and the cross-derivative terms `∫ Σ a · chosenThird · ψj j = ∫ Σ a · chosenThird · ∂_jψ`.
-  -- These cross-terms after substitution Σᵢⱼ → ψ-form yield the headline LHS₁.
-  -- Move LHS principals to LHS and apply integral_fChartEffTwiceNumerator_eq_density_fChartEffTwice.
-  -- For the inner Σ_j ∂_jψ-form, swap with j-direction IBP per_pair_ibp_chosenSecond
-  -- (h_pair_A1_inner) applied for the LHS-A1-sub-1 piece. Then collect.
-  -- Detailed assembly: introduce variables for each named integral and do arithmetic.
-  -- A1_sub1_ij := ∫ ∂_{l₂}a_{ij} · chosenSecond(i, l₁) · ψj j = ∫ ∂_{l₂}a_{ij} · chosenSecond(i, l₁) · ∂_jψ
-  -- A1_sub2_ij := ∫ a_{ij} · chosenThird(i, l₁, l₂) · ψj j = ∫ a_{ij} · chosenThird(i, l₁, l₂) · ∂_jψ
-  -- C_sub1_ij  := ∫ ∂_{l₂}∂_{l₁}a_{ij} · base.wp i · ψj j = ∫ ∂_{l₂}∂_{l₁}a_{ij} · base.wp i · ∂_jψ
-  -- C_sub2_ij  := ∫ ∂_{l₁}a_{ij} · chosenSecond(i, l₂) · ψj j = ∫ ∂_{l₁}a_{ij} · chosenSecond(i, l₂) · ∂_jψ
-  -- where ψj j y = (fderiv ψ y)(single j 1) so the substitutions are by reflexivity.
-  -- Identify (fderiv (weightedInvGramOnEuclid g α i j) y)(single l₂ 1) with
-  -- weightedInvGramDerivOnEuclid g α i j l₂.
   have h_fderiv_aij_eq : ∀ y : EuclN, ∀ i j : Fin (Module.finrank ℝ E),
       (fderiv ℝ (weightedInvGramOnEuclid (I := I) g α i j) y)
         (EuclideanSpace.single l₂ 1) =
       weightedInvGramDerivOnEuclid (I := I) g α i j l₂ y :=
     fun _ _ _ => rfl
-  -- Identify (fderiv (weightedInvGramDerivOnEuclid g α i j l₁) y)(single l₂ 1) with
-  -- weightedInvGramSecondDerivOnEuclid g α i j l₁ l₂.
   have h_fderiv_daij_l₁_eq : ∀ y : EuclN, ∀ i j : Fin (Module.finrank ℝ E),
       (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₁) y)
         (EuclideanSpace.single l₂ 1) =
       weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂ y :=
     fun _ _ _ => rfl
-  -- Identify (fderiv (densityOnEuclid g α) y)(single l₂ 1) with densityDerivOnEuclid g α l₂.
   have h_fderiv_c_eq : ∀ y : EuclN,
       (fderiv ℝ (densityOnEuclid (I := I) g α) y)
         (EuclideanSpace.single l₂ 1) =
       densityDerivOnEuclid (I := I) g α l₂ y :=
     fun _ => rfl
-  -- Identify (fderiv (densityDerivOnEuclid g α l₁) y)(single l₂ 1) with densitySecondDeriv.
   have h_fderiv_dc_l₁_eq : ∀ y : EuclN,
       (fderiv ℝ (densityDerivOnEuclid (I := I) g α l₁) y)
         (EuclideanSpace.single l₂ 1) =
       densitySecondDerivOnEuclid (I := I) g α l₁ l₂ y :=
     fun _ => rfl
-  -- ψj j y = (fderiv ψ y)(single j 1) by definition.
   have h_ψj_eq : ∀ j : Fin (Module.finrank ℝ E), ∀ y : EuclN,
       ψj j y = (fderiv ℝ ψ y) (EuclideanSpace.single j 1) := fun _ _ => rfl
-  -- Rewrite the ψj j integrals to ∂_jψ form (by Eq.symm/ rfl).
-  -- First, identify integrals using rfl on the substitution h_fderiv_*_eq and h_ψj_eq.
-  -- The integrals inside `h_once` have `ψj j y` which already equals (fderiv ψ y)(single j 1).
-  -- So they are syntactically the same as the ∂_jψ form: no rewrite needed.
-  -- The integrals (fderiv (weightedInvGramOnEuclid g α i j) y)(single l₂ 1) ALSO equal
-  -- weightedInvGramDerivOnEuclid g α i j l₂ y, which is the headline form.
-  -- So all rewrites work via direct reflexivity.
-  -- Apply 2nd-order IBP to convert `∫ ∂_{l₂}a · chosenSecond(i, l₁) · ∂_jψ` to ψ-form.
-  -- This is h_pair_A1_inner applied per (i, j).
-  -- Now build sum-swaps for various Σᵢⱼ X_ij where ∂_jψ appears, i.e. for each
-  -- pair-IBP-output that lies in the ψj j-position. We'll need 4 sum-swaps total.
-  -- (For the LHS-A1 IBP and C IBP outputs, and possibly for the 2nd-order IBP outputs.)
-  -- Compute the 2nd-order IBP for h_pair_A1_inner-style.
-  -- Actually we'll lift the IBP for A1_sub1 (only) at the headline level.
-  -- For now `h_once` is in the form:
-  --   (∑ᵢⱼ -(X1_ij + Y1_ij))  + h_A2_form = h_B_form - (∑ᵢⱼ -(X2_ij + Y2_ij)) - h_D_form + h_E_form
-  -- where Y1_ij = ∫ a_{ij} · chosenThird(i,l₁,l₂) · ∂_jψ and Y2_ij = ∫ ∂_{l₁}a_{ij} · chosenSecond(i,l₂) · ∂_jψ.
-  -- And X1_ij = ∫ ∂_{l₂}a_{ij} · chosenSecond(i, l₁) · ∂_jψ (needs another IBP — h_pair_A1_inner).
-  -- And X2_ij = ∫ ∂_{l₂}∂_{l₁}a_{ij} · base.wp(i) · ∂_jψ (NOT IBP'd: stays as-is).
-  -- The headline LHS₁ = ∫ Σᵢⱼ a · chosenThird(i, l₁, l₂) · ∂_jψ = ∫ Σᵢⱼ Y1.
-  -- The headline LHS₂ = ∫ c · chosenSecond(l₁, l₂) · ψ = the 2nd integral in h_A2 (rearranged).
-  -- Apply h_pair_A1_inner to convert X1_ij to ψ-form.
   set h_pair_A1_inner_ext : ∀ i j : Fin (Module.finrank ℝ E),
       (∫ y in Ω, weightedInvGramDerivOnEuclid (I := I) g α i j l₂ y *
           chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₁ y *
@@ -2705,11 +2461,6 @@ theorem twice_differentiated_variational_identity_holds
                   (I := I) (M := M) g α u_h i l₁ j y *
                 ψ y
               ∂(volume : Measure EuclN))) := h_pair_A1_inner with hh_ext
-  -- For the ∂_jψ-form sums (LHS_A1 and C), swap Σᵢⱼ ∫ → ∫ Σᵢⱼ to consolidate.
-  -- First show integrability of each integrand inside the ψj j (= ∂_jψ) form.
-  -- Helper: integrability of Σᵢⱼ inside Ω.
-  -- The IBP-output integrals (∫ X1_ij), (∫ Y1_ij), (∫ X2_ij), (∫ Y2_ij) are all
-  -- integrable on (volume.restrict Ω) by triple-integrability.
   have h_int_X1_ij : ∀ i j,
       Integrable (fun y => (fderiv ℝ (weightedInvGramOnEuclid (I := I) g α i j) y)
             (EuclideanSpace.single l₂ 1) *
@@ -2753,7 +2504,6 @@ theorem twice_differentiated_variational_identity_holds
       tsupport_fderiv_apply_single_subset ψ j
     exact integrable_triple (h_daij_l₁_cont_on i j) (h_chosenSecond_int i l₂)
       hh₁_cont hh₁_supp
-  -- Sum-distribute the negation over each ∑ᵢⱼ (-(X + Y)).
   have h_sum_distrib_LHS_A1 :
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
@@ -2866,19 +2616,7 @@ theorem twice_differentiated_variational_identity_holds
     rw [Finset.sum_add_distrib]
     simp_rw [Finset.sum_neg_distrib (s :=
       (Finset.univ : Finset (Fin (Module.finrank ℝ E))))]
-  -- Now rewrite h_once: substitute the sum-distrib forms.
   rw [h_sum_distrib_LHS_A1, h_sum_distrib_C] at h_once
-  -- For each `∑ᵢⱼ ∫ X · ψj j` term (in IBP-output form), apply h_pair_A1_inner for X1
-  -- and rewrite ψj j to ∂_jψ via definitional rfl.
-  -- The Σᵢⱼ ∫ Y2_ij is the "RHS C.4" layer (4th cross term of C).
-  -- The Σᵢⱼ ∫ Y1_ij is the headline LHS₁ in ψ-form (matches what we want on the LHS).
-  -- The Σᵢⱼ ∫ X1_ij is the term to be further IBP'd via h_pair_A1_inner.
-  -- The Σᵢⱼ ∫ X2_ij is the "RHS C.1" layer (1st cross term of C, second-deriv).
-  -- The h_A2 yields: A2 = -(∂_{l₂}c · base.wp(l₁) + c · chosenSecond(l₁, l₂)).
-  -- The h_B yields: B = -(∂_{l₂}c · chosenFChartDeriv(l₁) + c · fChartDeriv2(l₁, l₂)).
-  -- The h_D yields: D = -(∂_{l₂}∂_{l₁}c · base.uc + ∂_{l₁}c · base.wp(l₂)).
-  -- The h_E yields: E = -(∂_{l₂}∂_{l₁}c · base.fc + ∂_{l₁}c · chosenFChartDeriv(l₂)).
-  -- Define each named integral, then arithmetic.
   set α1_sub1 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
     ∫ y in Ω,
       (fderiv ℝ (weightedInvGramOnEuclid (I := I) g α i j) y)
@@ -2902,27 +2640,6 @@ theorem twice_differentiated_variational_identity_holds
       chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₂ y *
       ψj j y
       ∂(volume : Measure EuclN) with hγ_sub2_def
-  -- After h_LHS_A1_after_IBP and h_C_after_IBP and h_sum_distrib_*, h_once becomes:
-  --   -( (Σᵢⱼ α1_sub1) + (Σᵢⱼ α1_sub2) )
-  --   + -((∫ ∂_{l₂}c · base.wp(l₁) · ψ) + (∫ c · chosenSecond(l₁, l₂) · ψ))
-  --   = -((∫ ∂_{l₂}c · chosenFChartDeriv(l₁) · ψ) + (∫ c · fChartDeriv2(l₁, l₂) · ψ))
-  --     - (-((Σᵢⱼ γ_sub1) + (Σᵢⱼ γ_sub2)))
-  --     - (-((∫ ∂_{l₂}∂_{l₁}c · base.uc · ψ) + (∫ ∂_{l₁}c · base.wp(l₂) · ψ)))
-  --     + -((∫ ∂_{l₂}∂_{l₁}c · base.fc · ψ) + (∫ ∂_{l₁}c · chosenFChartDeriv(l₂) · ψ))
-  -- Rearranging gives:
-  --   - (Σᵢⱼ α1_sub2) - (∫ c · chosenSecond(l₁, l₂) · ψ)  -- (these are the headline LHS)
-  --   = (∫ ∂_{l₂}c · chosenFChartDeriv(l₁) · ψ) + (∫ c · fChartDeriv2(l₁, l₂) · ψ)
-  --     - (Σᵢⱼ γ_sub1) - (Σᵢⱼ γ_sub2)
-  --     - (∫ ∂_{l₂}∂_{l₁}c · base.uc · ψ) - (∫ ∂_{l₁}c · base.wp(l₂) · ψ)
-  --     + (∫ ∂_{l₂}∂_{l₁}c · base.fc · ψ) + (∫ ∂_{l₁}c · chosenFChartDeriv(l₂) · ψ)
-  --     + (Σᵢⱼ α1_sub1) + (∫ ∂_{l₂}c · base.wp(l₁) · ψ)
-  -- ψj j y = (fderiv ψ y)(single j 1), so all α and γ are syntactically in ∂_jψ form.
-  -- Apply h_pair_A1_inner (extended) to convert α1_sub1 to ψ-form by IBP in j:
-  --   α1_sub1 i j = -(∫ ∂_j(∂_{l₂}a_{ij}) · chosenSecond(i, l₁) · ψ
-  --                + ∫ ∂_{l₂}a_{ij} · chosenThird(i, l₁, j) · ψ).
-  -- This decomposes α1_sub1 into two pieces matching A.1 and A.2 of the headline RHS.
-  -- Then collect to get the headline.
-  -- First identify α1_sub1 with the lemma's LHS via the fderiv identification.
   have hα1_sub1_inner_IBP_form : ∀ i j : Fin (Module.finrank ℝ E),
       α1_sub1 i j = -((∫ y in Ω,
             (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₂) y)
@@ -2953,7 +2670,6 @@ theorem twice_differentiated_variational_identity_holds
       rw [this]
     rw [this]
     exact h_pair_A1_inner i j
-  -- Sum-distribute over i and j: Σᵢⱼ α1_sub1 i j = Σᵢⱼ (... per pair ...).
   have h_sum_α1_sub1_IBP :
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E), α1_sub1 i j =
@@ -2973,7 +2689,6 @@ theorem twice_differentiated_variational_identity_holds
     refine Finset.sum_congr rfl ?_; intro i _
     refine Finset.sum_congr rfl ?_; intro j _
     exact hα1_sub1_inner_IBP_form i j
-  -- Now distribute the negation: Σᵢⱼ -(X + Y) = -(Σᵢⱼ X + Σᵢⱼ Y).
   have h_sum_α1_sub1_split :
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
@@ -3034,7 +2749,6 @@ theorem twice_differentiated_variational_identity_holds
     rw [Finset.sum_add_distrib]
     simp_rw [Finset.sum_neg_distrib (s :=
       (Finset.univ : Finset (Fin (Module.finrank ℝ E))))]
-  -- Combine the sum-α1_sub1 split with the IBP rewrite.
   have hSum_α1_sub1_final :
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E), α1_sub1 i j =
@@ -3054,9 +2768,6 @@ theorem twice_differentiated_variational_identity_holds
                 ψ y
                 ∂(volume : Measure EuclN))) := by
     rw [h_sum_α1_sub1_IBP, h_sum_α1_sub1_split]
-  -- Now consolidate sum-swap (going FROM Σᵢⱼ ∫ TO ∫ Σᵢⱼ) for the principal LHS₁ term
-  -- (∑ᵢⱼ α1_sub2 = ∫ Σᵢⱼ a · chosenThird(i,l₁,l₂) · ∂_jψ = the headline LHS₁).
-  -- Per-pair integrability: Y1 = h_int_Y1_ij; we have it.
   have hSwap_LHS1 :
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
@@ -3078,7 +2789,6 @@ theorem twice_differentiated_variational_identity_holds
     refine Finset.sum_congr rfl ?_
     intro i _
     rw [integral_finset_sum _ (fun j _ => h_int_Y1_ij i j)]
-  -- Substitute ψj j y = (fderiv ψ y)(single j 1) inside the consolidated integral.
   have hψj_consolidate_LHS1 :
       ∫ y in Ω,
         (∑ i : Fin (Module.finrank ℝ E),
@@ -3096,7 +2806,6 @@ theorem twice_differentiated_variational_identity_holds
                 (I := I) (M := M) g α u_h i l₁ l₂ y *
               (fderiv ℝ ψ y) (EuclideanSpace.single j 1))
         ∂(volume : Measure EuclN) := rfl
-  -- The headline LHS₁ in clean form:
   have h_LHS1_eq :
       (∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E), α1_sub2 i j) =
@@ -3117,117 +2826,6 @@ theorem twice_differentiated_variational_identity_holds
               ψj j y
               ∂(volume : Measure EuclN)) from rfl]
     rw [hSwap_LHS1]
-  -- Now everything is in place. h_once after the rewrites reads:
-  --   - ((Σᵢⱼ α1_sub1) + (Σᵢⱼ α1_sub2))
-  --   + -((∫ ∂_{l₂}c · base.wp(l₁) · ψ) + (∫ c · chosenSecond(l₁, l₂) · ψ))
-  --   = -((∫ ∂_{l₂}c · chosenFChartDeriv(l₁) · ψ) + (∫ c · fChartDeriv2(l₁, l₂) · ψ))
-  --     - (- ((Σᵢⱼ γ_sub1) + (Σᵢⱼ γ_sub2)))
-  --     - -((∫ ∂_{l₂}∂_{l₁}c · base.uc · ψ) + (∫ ∂_{l₁}c · base.wp(l₂) · ψ))
-  --     + -((∫ ∂_{l₂}∂_{l₁}c · base.fc · ψ) + (∫ ∂_{l₁}c · chosenFChartDeriv(l₂) · ψ))
-  -- The headline goal:
-  --   LHS₁ + (∫ c · chosenSecond(l₁,l₂) · ψ) = ∫ c · fChartEffTwice · ψ.
-  -- We use h_LHS1_eq to identify LHS₁ with (Σᵢⱼ α1_sub2).
-  -- We replace c · fChartEffTwice with c · fChartEffTwice via
-  -- integral_fChartEffTwiceNumerator_eq_integral_density_fChartEffTwice
-  -- on the RHS.
-  -- First, we recognise the RHS of the headline = ∫ Σᵢⱼ + everything else (from fChartEffTwiceNumerator).
-  -- Rather than doing the assembly inline, we'll algebraically rearrange h_once.
-  -- Specifically: from h_once, derive:
-  --   -(Σᵢⱼ α1_sub2) - (∫ c · chosenSecond(l₁,l₂) · ψ)
-  --     = -(Σᵢⱼ α1_sub1) - (∫ ∂_{l₂}c · base.wp(l₁) · ψ)
-  --       - (∫ ∂_{l₂}c · chosenFChartDeriv(l₁) · ψ) - (∫ c · fChartDeriv2(l₁,l₂) · ψ)
-  --       + (Σᵢⱼ γ_sub1) + (Σᵢⱼ γ_sub2)
-  --       + (∫ ∂_{l₂}∂_{l₁}c · base.uc · ψ) + (∫ ∂_{l₁}c · base.wp(l₂) · ψ)
-  --       - (∫ ∂_{l₂}∂_{l₁}c · base.fc · ψ) - (∫ ∂_{l₁}c · chosenFChartDeriv(l₂) · ψ)
-  -- Multiply by -1 (i.e. negate both sides):
-  --   (Σᵢⱼ α1_sub2) + (∫ c · chosenSecond(l₁,l₂) · ψ)
-  --     = (Σᵢⱼ α1_sub1) + (∫ ∂_{l₂}c · base.wp(l₁) · ψ)
-  --       + (∫ ∂_{l₂}c · chosenFChartDeriv(l₁) · ψ) + (∫ c · fChartDeriv2(l₁,l₂) · ψ)
-  --       - (Σᵢⱼ γ_sub1) - (Σᵢⱼ γ_sub2)
-  --       - (∫ ∂_{l₂}∂_{l₁}c · base.uc · ψ) - (∫ ∂_{l₁}c · base.wp(l₂) · ψ)
-  --       + (∫ ∂_{l₂}∂_{l₁}c · base.fc · ψ) + (∫ ∂_{l₁}c · chosenFChartDeriv(l₂) · ψ)
-  -- Now substitute (Σᵢⱼ α1_sub1) = -(Σᵢⱼ X_inner_1) - (Σᵢⱼ X_inner_2) where
-  -- X_inner_1 = ∫ ∂_j∂_{l₂}a_{ij} · chosenSecond(i, l₁) · ψ  (matches A.1 in numerator)
-  -- X_inner_2 = ∫ ∂_{l₂}a_{ij} · chosenThird(i, l₁, j) · ψ  (matches A.2 in numerator).
-  -- Result:
-  --   (Σᵢⱼ α1_sub2) + (∫ c · chosenSecond(l₁,l₂) · ψ)
-  --     = -(Σᵢⱼ X_inner_1) - (Σᵢⱼ X_inner_2) +
-  --       + (∫ ∂_{l₂}c · base.wp(l₁) · ψ)                        -- (A.3 negation pos)
-  --       + (∫ ∂_{l₂}c · chosenFChartDeriv(l₁) · ψ)              -- (B.1)
-  --       + (∫ c · fChartDeriv2(l₁,l₂) · ψ)                      -- (B.2)
-  --       - (Σᵢⱼ γ_sub1)                                          -- (C.1)
-  --       - (Σᵢⱼ γ_sub2)                                          -- (C.4 with shift?? — actually C.3)
-  --       - (∫ ∂_{l₂}∂_{l₁}c · base.uc · ψ)                       -- (D.1 negation)
-  --       - (∫ ∂_{l₁}c · base.wp(l₂) · ψ)                         -- (D.2 negation)
-  --       + (∫ ∂_{l₂}∂_{l₁}c · base.fc · ψ)                       -- (E.1)
-  --       + (∫ ∂_{l₁}c · chosenFChartDeriv(l₂) · ψ)               -- (E.2)
-  -- Comparing with fChartEffTwiceNumerator:
-  --   A.1 = ∂_j(∂_{l₂}a_{ij}) · chosenSecond(i, l₁)
-  --   A.2 = ∂_{l₂}a_{ij} · chosenThird(i, l₁, j)
-  --   A.3 = - ∂_{l₂}c · base.wp(l₁)
-  --   B.1 = ∂_{l₂}c · chosenFChartDeriv(l₁)
-  --   B.2 = c · fChartDeriv2(l₁, l₂)
-  --   C.1 = ∂_j(∂_{l₂}∂_{l₁}a_{ij}) · base.wp(i)
-  --   C.2 = ∂_{l₂}∂_{l₁}a_{ij} · chosenSecond(i, j)
-  --   C.3 = ∂_j(∂_{l₁}a_{ij}) · chosenSecond(i, l₂)
-  --   C.4 = ∂_{l₁}a_{ij} · chosenThird(i, l₂, j)
-  --   D.1 = - ∂_{l₂}∂_{l₁}c · base.uc
-  --   D.2 = - ∂_{l₁}c · base.wp(l₂)
-  --   E.1 = ∂_{l₂}∂_{l₁}c · base.fc
-  --   E.2 = ∂_{l₁}c · chosenFChartDeriv(l₂)
-  -- Looking at γ_sub1 and γ_sub2:
-  --   γ_sub1 i j = ∫ ∂_{l₂}∂_{l₁}a_{ij} · base.wp(i) · ∂_jψ
-  --   γ_sub2 i j = ∫ ∂_{l₁}a_{ij} · chosenSecond(i, l₂) · ∂_jψ
-  -- These are NOT in ψ-form. We need to apply per_pair_ibp_*_ on γ_sub1 and γ_sub2
-  -- to reduce them to ψ-form: a 2nd-order IBP for each.
-  -- For γ_sub1: per_pair_ibp_base_weak_partial with smooth coef ∂_{l₂}∂_{l₁}a_{ij} =
-  -- weightedInvGramSecondDerivOnEuclid g α i j l₁ l₂, IBP-direction j.
-  --   γ_sub1 i j = -∫ ∂_j(∂_{l₂}∂_{l₁}a_{ij}) · base.wp(i) · ψ
-  --              - ∫ ∂_{l₂}∂_{l₁}a_{ij} · chosenSecond(i, j) · ψ
-  --              = -(C.1 + C.2)
-  -- For γ_sub2: per_pair_ibp_chosenSecond with smooth coef ∂_{l₁}a_{ij} =
-  -- weightedInvGramDerivOnEuclid g α i j l₁, IBP-direction j, weak base
-  -- chosenSecond(i, l₂) ∈ H¹ with weak partial chosenThird(i, l₂, j).
-  --   γ_sub2 i j = -∫ ∂_j(∂_{l₁}a_{ij}) · chosenSecond(i, l₂) · ψ
-  --              - ∫ ∂_{l₁}a_{ij} · chosenThird(i, l₂, j) · ψ
-  --              = -(C.3 + C.4)
-  -- So Σᵢⱼ γ_sub1 = -Σᵢⱼ (C.1 i j + C.2 i j) = -Σᵢⱼ C.1 - Σᵢⱼ C.2.
-  -- And Σᵢⱼ γ_sub2 = -Σᵢⱼ (C.3 i j + C.4 i j) = -Σᵢⱼ C.3 - Σᵢⱼ C.4.
-  -- Substituting:
-  --   -(Σᵢⱼ γ_sub1) = Σᵢⱼ C.1 + Σᵢⱼ C.2
-  --   -(Σᵢⱼ γ_sub2) = Σᵢⱼ C.3 + Σᵢⱼ C.4
-  -- The headline RHS = ∫ Σᵢⱼ all terms of fChartEffTwiceNumerator · ψ = ∫ c · fChartEffTwice · ψ.
-  -- So the equation we derive:
-  --   (Σᵢⱼ α1_sub2) + (∫ c · chosenSecond(l₁,l₂) · ψ)
-  --     = -(Σᵢⱼ X_inner_1) - (Σᵢⱼ X_inner_2)        -- = -A.1 - A.2 in numerator? No:
-  --       + (∫ ∂_{l₂}c · base.wp(l₁) · ψ)            -- = -A.3 (since A.3 = -∂_{l₂}c · base.wp(l₁))
-  --       + (∫ ∂_{l₂}c · chosenFChartDeriv(l₁) · ψ)  -- = B.1
-  --       + (∫ c · fChartDeriv2(l₁,l₂) · ψ)          -- = B.2
-  --       + Σᵢⱼ C.1 + Σᵢⱼ C.2 + Σᵢⱼ C.3 + Σᵢⱼ C.4   -- = C.1 + C.2 + C.3 + C.4
-  --       - (∫ ∂_{l₂}∂_{l₁}c · base.uc · ψ)          -- = D.1 (D.1 = -∂_{l₂}∂_{l₁}c · base.uc)? No:
-  --                                                  --   D.1 = -∂_{l₂}∂_{l₁}c · base.uc, so -D.1 = ∂_{l₂}∂_{l₁}c · base.uc.
-  --                                                  -- Wait we have `-(∫ ∂_{l₂}∂_{l₁}c · base.uc · ψ)`, i.e. `- ∫ ∂_{l₂}∂_{l₁}c · base.uc · ψ`.
-  --                                                  -- D.1 contribution to numerator = `-∂_{l₂}∂_{l₁}c · base.uc`, so its integral is `- ∫ ∂_{l₂}∂_{l₁}c · base.uc · ψ`. MATCH.
-  --       - (∫ ∂_{l₁}c · base.wp(l₂) · ψ)            -- = D.2 (D.2 contribution = -∂_{l₁}c · base.wp(l₂)).
-  --       + (∫ ∂_{l₂}∂_{l₁}c · base.fc · ψ)          -- = E.1
-  --       + (∫ ∂_{l₁}c · chosenFChartDeriv(l₂) · ψ)  -- = E.2
-  -- Now -X_inner_1 = -∂_j(∂_{l₂}a_{ij}) · chosenSecond(i, l₁) = -A.1.
-  -- And -X_inner_2 = -∂_{l₂}a_{ij} · chosenThird(i, l₁, j) = -A.2.
-  -- But headline RHS = ∫ Σ(A.1 + A.2 + A.3 + B.1 + B.2 + C.1 + ... + E.2). Hmm sign mismatch on A.1 and A.2.
-  -- Actually the IBP gave: α1_sub1 = -(∫ X_inner_1 + ∫ X_inner_2). And in h_once, the
-  -- LHS principal has -(Σᵢⱼ α1_sub1 + Σᵢⱼ α1_sub2). Substituting Σᵢⱼ α1_sub1 = -(Σᵢⱼ X_inner_1 + Σᵢⱼ X_inner_2):
-  --   - (-(Σᵢⱼ X_inner_1 + Σᵢⱼ X_inner_2)) - (Σᵢⱼ α1_sub2)
-  --   = (Σᵢⱼ X_inner_1) + (Σᵢⱼ X_inner_2) - (Σᵢⱼ α1_sub2)
-  -- So the LHS of h_once becomes (after substitution):
-  --   (Σᵢⱼ X_inner_1) + (Σᵢⱼ X_inner_2) - (Σᵢⱼ α1_sub2)
-  --   - (∫ ∂_{l₂}c · base.wp(l₁) · ψ) - (∫ c · chosenSecond(l₁, l₂) · ψ)
-  -- Move headline LHS to its own side: ∫ c · chosenSecond(l₁,l₂) · ψ and -(Σᵢⱼ α1_sub2)
-  -- swap sides: equivalent equation:
-  --   (Σᵢⱼ X_inner_1) + (Σᵢⱼ X_inner_2) + (Σᵢⱼ α1_sub2) [headline LHS_1 is THIS via sign flip]
-  --   - (∫ ∂_{l₂}c · base.wp(l₁) · ψ) - (∫ c · chosenSecond(l₁, l₂) · ψ)
-  --   - (Σᵢⱼ α1_sub2) - (∫ c · chosenSecond(l₁,l₂) · ψ)   -- (we negate to move)
-  -- Hmm I'm getting confused. Let me just do raw arithmetic via the named integrals.
-  -- Let me redo systematically with named ℝ-valued variables for every integral.
   set I_lhs1_target : ℝ :=
     ∫ y in Ω,
       (∑ i : Fin (Module.finrank ℝ E),
@@ -3245,7 +2843,6 @@ theorem twice_differentiated_variational_identity_holds
     ∫ y in Ω, densityOnEuclid (I := I) g α y *
       fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
       ∂(volume : Measure EuclN) with hI_rhs_def
-  -- Per-pair X_inner_1 i j and X_inner_2 i j.
   set X1 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
     ∫ y in Ω,
       (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₂) y)
@@ -3258,7 +2855,6 @@ theorem twice_differentiated_variational_identity_holds
       chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l₁ j y *
       ψ y
       ∂(volume : Measure EuclN) with hX2_def
-  -- Per-pair γ_sub1 ψ-form via 2nd-order IBP: γ_sub1 i j = -(C1 i j + C2 i j).
   set C1 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
     ∫ y in Ω,
       (fderiv ℝ (weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂) y)
@@ -3279,7 +2875,6 @@ theorem twice_differentiated_variational_identity_holds
     ∫ y in Ω, weightedInvGramDerivOnEuclid (I := I) g α i j l₁ y *
       chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l₂ j y * ψ y
       ∂(volume : Measure EuclN) with hC4_def
-  -- For γ_sub1 IBP: smooth coef = weightedInvGramSecondDerivOnEuclid g α i j l₁ l₂.
   have h_d2aij_contDiffOn : ∀ i j : Fin (Module.finrank ℝ E),
       ContDiffOn ℝ (⊤ : ℕ∞)
         (weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂) Ω :=
@@ -3301,8 +2896,6 @@ theorem twice_differentiated_variational_identity_holds
     rw [h_rewrite]
     exact per_pair_ibp_base_weak_partial (I := I) (M := M) g α hu_h i j
       (h_d2aij_contDiffOn i j) hψ_smooth hψ_cs hψ_supp
-  -- For γ_sub2 IBP: smooth coef = weightedInvGramDerivOnEuclid g α i j l₁, IBP-dir j,
-  -- weak base chosenSecond(i, l₂) ∈ H¹ with weak partial chosenThird(i, l₂, j).
   have h_γ_sub2_IBP : ∀ i j : Fin (Module.finrank ℝ E),
       γ_sub2 i j = -(C3 i j + C4 i j) := by
     intro i j
@@ -3320,7 +2913,6 @@ theorem twice_differentiated_variational_identity_holds
     rw [h_rewrite]
     exact per_pair_ibp_chosenSecond (I := I) (M := M) g α hu_h i l₂ j
       (h_daij_l₁_contDiffOn i j) hψ_smooth hψ_cs hψ_supp
-  -- Sum-distribute h_γ_sub1_IBP and h_γ_sub2_IBP.
   have h_sumγ_sub1 :
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E), γ_sub1 i j =
@@ -3371,18 +2963,12 @@ theorem twice_differentiated_variational_identity_holds
           simp_rw [Finset.sum_neg_distrib (s :=
             (Finset.univ : Finset (Fin (Module.finrank ℝ E))))]
           ring
-  -- Sum-swap for the various Σᵢⱼ ∫ ... = ∫ Σᵢⱼ ... in ψ-form (X1, X2, C1, C2, C3, C4).
-  -- These are needed to ultimately consolidate into a single integral, but for the
-  -- arithmetic we can keep them as Σᵢⱼ.
-  -- Now also consolidate the headline LHS₁ identification:
   have h_α1_sub2_eq : α1_sub2 = fun i j =>
     ∫ y in Ω, weightedInvGramOnEuclid (I := I) g α i j y *
       chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l₁ l₂ y *
       (fderiv ℝ ψ y) (EuclideanSpace.single j 1)
       ∂(volume : Measure EuclN) := by
     funext i j; rfl
-  -- ψj j y = (fderiv ℝ ψ y)(single j 1) by definition.
-  -- Establish I_lhs1_target via integral_finset_sum.
   have h_lhs1_swap_to_sum :
       (∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
@@ -3416,23 +3002,6 @@ theorem twice_differentiated_variational_identity_holds
       (∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E), α1_sub2 i j) = I_lhs1_target := by
     rw [h_α1_sub2_eq]; exact h_lhs1_swap_to_sum
-  -- Now connect numerator-form integrals to fChartEffTwiceNumerator.
-  -- Define each of the 13 named integrals against ψ:
-  -- N_A1 := ∫ Σᵢⱼ ∂_j(∂_{l₂}a_{ij}) · chosenSecond(i, l₁) · ψ = Σᵢⱼ X1 i j.
-  -- N_A2 := ∫ Σᵢⱼ ∂_{l₂}a_{ij} · chosenThird(i, l₁, j) · ψ = Σᵢⱼ X2 i j.
-  -- N_A3 := ∫ -(∂_{l₂}c · base.wp(l₁)) · ψ = - ∫ ∂_{l₂}c · base.wp(l₁) · ψ.
-  -- N_B1 := ∫ ∂_{l₂}c · chosenFChartDeriv(l₁) · ψ.
-  -- N_B2 := ∫ c · fChartDeriv2(l₁, l₂) · ψ.
-  -- N_C1 := ∫ Σᵢⱼ ∂_j(∂_{l₂}∂_{l₁}a_{ij}) · base.wp(i) · ψ = Σᵢⱼ C1 i j.
-  -- N_C2 := ∫ Σᵢⱼ ∂_{l₂}∂_{l₁}a_{ij} · chosenSecond(i, j) · ψ = Σᵢⱼ C2 i j.
-  -- N_C3 := ∫ Σᵢⱼ ∂_j(∂_{l₁}a_{ij}) · chosenSecond(i, l₂) · ψ = Σᵢⱼ C3 i j.
-  -- N_C4 := ∫ Σᵢⱼ ∂_{l₁}a_{ij} · chosenThird(i, l₂, j) · ψ = Σᵢⱼ C4 i j.
-  -- N_D1 := ∫ -(∂_{l₂}∂_{l₁}c · base.uc) · ψ.
-  -- N_D2 := ∫ -(∂_{l₁}c · base.wp(l₂)) · ψ.
-  -- N_E1 := ∫ ∂_{l₂}∂_{l₁}c · base.fc · ψ.
-  -- N_E2 := ∫ ∂_{l₁}c · chosenFChartDeriv(l₂) · ψ.
-  -- The named atoms use the fderiv form (matching how h_A2/h_B/h_D/h_E produce
-  -- their output after IBP).
   set N_A3 : ℝ := ∫ y in Ω,
     (fderiv ℝ (densityOnEuclid (I := I) g α) y) (EuclideanSpace.single l₂ 1) *
     D_base.weak_partial l₁ y * ψ y ∂(volume : Measure EuclN) with hN_A3_def
@@ -3454,86 +3023,28 @@ theorem twice_differentiated_variational_identity_holds
   set N_E2 : ℝ := ∫ y in Ω, densityDerivOnEuclid (I := I) g α l₁ y *
     chosenFChartDeriv (I := I) (M := M) g α hu_h l₂ y * ψ y
     ∂(volume : Measure EuclN) with hN_E2_def
-  -- Identify h_A2, h_B, h_D, h_E in terms of N_*.
-  -- h_A2: ∫ c · base.wp(l₁) · ∂_{l₂}ψ = -(N_A3 + I_lhs2_target).
   have h_A2_named :
       (∫ y in Ω, densityOnEuclid (I := I) g α y * D_base.weak_partial l₁ y *
         (fderiv ℝ ψ y) (EuclideanSpace.single l₂ 1) ∂(volume : Measure EuclN))
       = -(N_A3 + I_lhs2_target) := h_A2
-  -- h_B: ∫ c · chosenFChartDeriv(l₁) · ∂_{l₂}ψ = -(N_B1 + N_B2).
   have h_B_named :
       (∫ y in Ω, densityOnEuclid (I := I) g α y *
         chosenFChartDeriv (I := I) (M := M) g α hu_h l₁ y *
         (fderiv ℝ ψ y) (EuclideanSpace.single l₂ 1) ∂(volume : Measure EuclN))
       = -(N_B1 + N_B2) := h_B
-  -- h_D: ∫ ∂_{l₁}c · base.uc · ∂_{l₂}ψ = -(N_D1 + N_D2).
   have h_D_named :
       (∫ y in Ω, densityDerivOnEuclid (I := I) g α l₁ y * D_base.u_chart y *
         (fderiv ℝ ψ y) (EuclideanSpace.single l₂ 1) ∂(volume : Measure EuclN))
       = -(N_D1 + N_D2) := h_D
-  -- h_E: ∫ ∂_{l₁}c · base.fc · ∂_{l₂}ψ = -(N_E1 + N_E2).
   have h_E_named :
       (∫ y in Ω, densityDerivOnEuclid (I := I) g α l₁ y * D_base.f_chart y *
         (fderiv ℝ ψ y) (EuclideanSpace.single l₂ 1) ∂(volume : Measure EuclN))
       = -(N_E1 + N_E2) := h_E
-  -- Now h_once has the form (after all substitutions):
-  --   (Σᵢⱼ α1_sub1 + Σᵢⱼ α1_sub2 = -X-Y, and h_A2_named, etc):
-  --   -((∑ α1_sub1) + (∑ α1_sub2)) + (-(N_A3 + I_lhs2)) = -(N_B1 + N_B2) -
-  --     (-((Σγ_sub1) + (Σγ_sub2))) - (-(N_D1 + N_D2)) + (-(N_E1 + N_E2))
-  -- Now substitute (Σα1_sub2) = I_lhs1_target, (Σα1_sub1) = -((Σi,j X1) + (Σi,j X2))
-  -- (from hSum_α1_sub1_final), and the γ-IBP equalities.
-  -- The 6 integrals in h_once, looking at what they actually are now in h_once:
-  -- h_once is the once-diff identity but with all rewrites applied:
-  -- ∑ ... = ∑ ... where each is a per-pair sum-of-IBPs.
-  -- Specifically, the form of h_once after the rw's:
-  --   (Σᵢⱼ -(α1_sub1' + α1_sub2')) (Schwarz/sum-swap+h_LHS_A1_after_IBP applied)
-  --   distributed via h_sum_distrib_LHS_A1 to -((Σᵢⱼ X) + (Σᵢⱼ Y)) form;
-  --   + h_A2 (now in -(N_A3 + I_lhs2) form)
-  --   = h_B (now in -(N_B1 + N_B2) form)
-  --     - (Σᵢⱼ -(γ_sub1 + γ_sub2)) (Schwarz/sum-swap+h_C_after_IBP), distributed via
-  --       h_sum_distrib_C to -((Σᵢⱼ γ_sub1) + (Σᵢⱼ γ_sub2)) form;
-  --     - h_D (now -(N_D1 + N_D2) form)
-  --     + h_E (now -(N_E1 + N_E2) form)
-  -- Let me write the simplified form algebraically.
-  -- Note: from the per-pair lemmas, both α1_sub1 (i,j) and α1_sub2 (i,j) appear in
-  -- h_LHS_A1_after_IBP exactly as 'sum-distrib-LHS_A1' rearranged.
-  -- Combining hSum_α1_sub1_final and h_sumγ_sub1, h_sumγ_sub2:
-  -- The equation h_once now reads:
-  --   - ( (Σᵢⱼ α1_sub1) + (Σᵢⱼ α1_sub2) ) + (- (N_A3 + I_lhs2_target))
-  --     = (- (N_B1 + N_B2)) - (- ((Σᵢⱼ γ_sub1) + (Σᵢⱼ γ_sub2))) - (- (N_D1 + N_D2))
-  --       + (- (N_E1 + N_E2))
-  -- Simplifying signs:
-  --   - (Σᵢⱼ α1_sub1) - (Σᵢⱼ α1_sub2) - N_A3 - I_lhs2_target
-  --     = - N_B1 - N_B2 + (Σᵢⱼ γ_sub1) + (Σᵢⱼ γ_sub2) + N_D1 + N_D2 - N_E1 - N_E2
-  -- Substitute hSum_α1_sub1_final: (Σᵢⱼ α1_sub1) = - (∑X1) - (∑X2).
-  -- Substitute h_sumγ_sub1: (Σᵢⱼ γ_sub1) = - (∑C1) - (∑C2).
-  -- Substitute h_sumγ_sub2: (Σᵢⱼ γ_sub2) = - (∑C3) - (∑C4).
-  -- Substitute h_α1_sub2_to_lhs1: (Σᵢⱼ α1_sub2) = I_lhs1_target.
-  -- Result:
-  --   (∑X1) + (∑X2) - I_lhs1_target - N_A3 - I_lhs2_target
-  --     = - N_B1 - N_B2 - (∑C1) - (∑C2) - (∑C3) - (∑C4) + N_D1 + N_D2 - N_E1 - N_E2
-  -- Rearrange:
-  --   I_lhs1_target + I_lhs2_target = (∑X1) + (∑X2) - N_A3 + N_B1 + N_B2
-  --     + (∑C1) + (∑C2) + (∑C3) + (∑C4) - N_D1 - N_D2 + N_E1 + N_E2
-  -- This equals ∫ fChartEffTwiceNumerator g α l₁ l₂ hu_h · ψ.
-  -- Then apply integral_fChartEffTwiceNumerator_eq_integral_density_fChartEffTwice.
-  -- Build ∫ fChartEffTwiceNumerator · ψ.
   set I_num : ℝ := ∫ y in Ω,
     fChartEffTwiceNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
     ∂(volume : Measure EuclN) with hI_num_def
-  -- Show I_num equals the sum of 13 named integrals.
-  -- Apply integral_finset_sum and additivity of integrals.
-  -- Each of the 13 terms of fChartEffTwiceNumerator is integrable on (vol.restrict Ω):
-  -- We need integrability witnesses; for the layered sum we use linearity of integral
-  -- with respect to addition. We can use integral_add, integral_sub, integral_neg.
-  -- But this is tedious. Instead, we expand fChartEffTwiceNumerator in the integrand
-  -- and use the linearity.
-  -- Approach: show that I_num = the algebraic sum by using `integral_congr_ae` against
-  -- the explicit pointwise rewrite, then split into the 13 integrals using linearity.
-  -- For each integrand we need to verify integrability on Ω.
   have h_psi_cont : Continuous ψ := hψ_smooth.continuous
   have h_psi_supp : tsupport ψ ⊆ K := le_refl _
-  -- Local L² of base.u_chart, base.f_chart, base.weak_partial i on K.
   have h_base_uc_int : IntegrableOn D_base.u_chart K (volume : Measure EuclN) :=
     (base_u_chart_locally_memLp (I := I) (M := M) g α
       (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)
@@ -3575,7 +3086,6 @@ theorem twice_differentiated_variational_identity_holds
         (chosenFChartDeriv (I := I) (M := M) g α hu_h l₁) Ω) 2 _
       rw [← h_K_eq]; exact h_global.restrict K
     exact h_memLp_K.integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
-  -- Continuity of the various smooth coefficients on Ω.
   have h_c_cont_on : ContinuousOn (densityOnEuclid (I := I) g α) Ω :=
     h_density_contDiffOn.continuousOn
   have h_dc_l₁_cont_on : ContinuousOn (densityDerivOnEuclid (I := I) g α l₁) Ω :=
@@ -3588,8 +3098,6 @@ theorem twice_differentiated_variational_identity_holds
   have h_d2aij_cont_on : ∀ i j, ContinuousOn
       (weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂) Ω :=
     fun i j => weightedInvGramSecondDerivOnEuclid_continuousOn (I := I) g α i j l₁ l₂
-  -- Generic helper: integrability of `a · u · ψ` on (vol.restrict Ω) when a is
-  -- continuous-on Ω, u is IntegrableOn K, ψ is continuous with tsupport ⊆ K.
   have integrable_triple_psi :
       ∀ {a : EuclN → ℝ}, ContinuousOn a Ω →
         ∀ {u : EuclN → ℝ}, IntegrableOn u K (volume : Measure EuclN) →
@@ -3603,11 +3111,6 @@ theorem twice_differentiated_variational_identity_holds
         Integrable (fun y => a y * u y * ψ y)
           ((volume : Measure EuclN).restrict Ω) :=
     @integrable_triple_psi
-  -- Establish I_num = the algebraic sum of 13 named integrals.
-  -- We do this by `integral_congr_ae` + linearity over fChartEffTwiceNumerator's def.
-  -- The fChartEffTwiceNumerator is a sum/diff of 13 product-terms.
-  -- Apply pointwise unfold and use integral_finset_sum on the inner Σᵢⱼ.
-  -- Build each per-pair integrability:
   have h_int_C1_pair : ∀ i j,
       Integrable (fun y => (fderiv ℝ (weightedInvGramSecondDerivOnEuclid
             (I := I) g α i j l₁ l₂) y) (EuclideanSpace.single j 1) *
@@ -3616,8 +3119,6 @@ theorem twice_differentiated_variational_identity_holds
     have h_ai_cont_on : ContinuousOn (fun y =>
         (fderiv ℝ (weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂) y)
           (EuclideanSpace.single j 1)) Ω := by
-      -- This is the third-order weight; its smoothness on Ω comes from contDiffOn of
-      -- weightedInvGramSecondDerivOnEuclid.
       have h_smooth := h_d2aij_contDiffOn i j
       have h_open : IsOpen Ω := hΩ_open
       have h_fderiv : ContDiffOn ℝ ∞ (fun y => fderiv ℝ
@@ -3663,17 +3164,6 @@ theorem twice_differentiated_variational_identity_holds
           chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l₁ j y * ψ y)
         ((volume : Measure EuclN).restrict Ω) := fun i j =>
     integrable_triple_psi (h_daij_cont_on i j) (h_chosenThird_int i l₁ j)
-  -- Now show I_num equals the algebraic sum of 13 integrals.
-  -- The sum (over Ω) of fChartEffTwiceNumerator(y)·ψ(y) splits by linearity into 13
-  -- integrals corresponding to the 13 layers of fChartEffTwiceNumerator.
-  -- We'll prove this by `integral_congr_ae` (no actual ae needed, just pointwise unfold)
-  -- followed by repeated `integral_add` and `integral_sub`.
-  -- Build the sum of 13 in a normal form. Let S := (∑X1) + (∑X2) - N_A3 + N_B1 + N_B2
-  --                                       + (∑C1) + (∑C2) + (∑C3) + (∑C4)
-  --                                       - N_D1 - N_D2 + N_E1 + N_E2.
-  -- Show I_num = S.
-  -- This is a 13-term integral additivity argument. For brevity, expand
-  -- fChartEffTwiceNumerator pointwise and apply linearity of the integral over Ω.
   have h_I_num_decomp : I_num =
       (∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E), X1 i j) +
@@ -3693,7 +3183,6 @@ theorem twice_differentiated_variational_identity_holds
     change (∫ y in Ω,
         fChartEffTwiceNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
         ∂(volume : Measure EuclN)) = _
-    -- Expand the integrand using fChartEffTwiceNumerator's def, then linearity.
     have h_integrand_eq : ∀ y : EuclN,
         fChartEffTwiceNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y =
         (∑ i : Fin (Module.finrank ℝ E),
@@ -3745,15 +3234,9 @@ theorem twice_differentiated_variational_identity_holds
           chosenFChartDeriv (I := I) (M := M) g α hu_h l₂ y * ψ y := by
       intro y
       unfold fChartEffTwiceNumerator
-      -- Distribute the · ψ y over each summand and each inner Σ.
-      -- The outer structure of fChartEffTwiceNumerator y * ψ y splits via add/sub/neg-mul,
-      -- and the inner Σ-mul-ψ y splits via Finset.sum_mul.
       simp only [add_mul, sub_mul, Finset.sum_mul]
       ring
     rw [setIntegral_congr_fun hΩ_open.measurableSet (fun y _ => h_integrand_eq y)]
-    -- Decompose ∫ Σ(13 functions) into Σ ∫ via 12 chained add splits.
-    -- For each split we provide the integrability witnesses inline.
-    -- Pre-package each integrand and its integrability as named local facts.
     set int_A1 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
       ∑ j : Fin (Module.finrank ℝ E),
         (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₂) y)
@@ -3807,7 +3290,6 @@ theorem twice_differentiated_variational_identity_holds
     set int_E2 : EuclN → ℝ := fun y =>
       densityDerivOnEuclid (I := I) g α l₁ y *
         chosenFChartDeriv (I := I) (M := M) g α hu_h l₂ y * ψ y with hint_E2_def
-    -- Integrability witnesses for each of the 13 functions on `vol.restrict Ω`.
     have hint_A1 : Integrable int_A1 ((volume : Measure EuclN).restrict Ω) :=
       integrable_finset_sum _ (fun i _ =>
         integrable_finset_sum _ (fun j _ => h_int_X1_named i j))
@@ -3840,9 +3322,6 @@ theorem twice_differentiated_variational_identity_holds
       integrable_triple_psi h_d2c_cont_on h_base_fc_int
     have hint_E2 : Integrable int_E2 ((volume : Measure EuclN).restrict Ω) :=
       integrable_triple_psi h_dc_l₁_cont_on (h_chosenFChartDeriv_int l₂)
-    -- Rewrite ∫ (int_A1 + int_A2 + ... + int_E2) = Σ ∫ int_*.
-    -- The goal has the sum in associativity order matching h_integrand_eq.
-    -- We split iteratively, starting from the outermost +.
     have hint_sum_A1A2 :
         Integrable (fun y => int_A1 y + int_A2 y)
           ((volume : Measure EuclN).restrict Ω) := hint_A1.add hint_A2
@@ -3883,7 +3362,6 @@ theorem twice_differentiated_variational_identity_holds
         Integrable (fun y => int_A1 y + int_A2 y + int_A3 y + int_B1 y + int_B2 y +
           int_C1 y + int_C2 y + int_C3 y + int_C4 y + int_D1 y + int_D2 y + int_E1 y)
           ((volume : Measure EuclN).restrict Ω) := hint_sum_through_D2.add hint_E1
-    -- Apply integral_add iteratively to split the goal.
     have h_int_split :
         (∫ y in Ω, int_A1 y + int_A2 y + int_A3 y + int_B1 y + int_B2 y +
             int_C1 y + int_C2 y + int_C3 y + int_C4 y + int_D1 y + int_D2 y +
@@ -3913,7 +3391,6 @@ theorem twice_differentiated_variational_identity_holds
       rw [MeasureTheory.integral_add hint_sum_through_A3 hint_B1]
       rw [MeasureTheory.integral_add hint_sum_A1A2 hint_A3]
       rw [MeasureTheory.integral_add hint_A1 hint_A2]
-    -- Identify each integral with its named atomic value.
     have eq_intA1 : (∫ y in Ω, int_A1 y ∂(volume : Measure EuclN)) =
         ∑ i : Fin (Module.finrank ℝ E),
           ∑ j : Fin (Module.finrank ℝ E), X1 i j := by
@@ -4047,40 +3524,24 @@ theorem twice_differentiated_variational_identity_holds
 
     have eq_intE1 : (∫ y in Ω, int_E1 y ∂(volume : Measure EuclN)) = N_E1 := rfl
     have eq_intE2 : (∫ y in Ω, int_E2 y ∂(volume : Measure EuclN)) = N_E2 := rfl
-    -- Combine the per-integral equalities with the split.
     rw [h_int_split, eq_intA1, eq_intA2, eq_intA3, eq_intB1, eq_intB2,
       eq_intC1, eq_intC2, eq_intC3, eq_intC4, eq_intD1, eq_intD2, eq_intE1, eq_intE2]
-  -- Now use integral_fChartEffTwiceNumerator_eq_integral_density_fChartEffTwice.
   have h_I_num_eq_rhs :=
     integral_fChartEffTwiceNumerator_eq_integral_density_fChartEffTwice
       (I := I) (M := M) g α hu_h l₁ l₂ h_chosenFChartDeriv_memW1p ψ
   rw [show I_num = ∫ y in chartTargetEuclid (I := I) (M := M) α,
         fChartEffTwiceNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
         ∂(volume : Measure EuclN) from rfl] at h_I_num_decomp
-  -- The goal: I_lhs1_target + I_lhs2_target = I_rhs_target.
   change I_lhs1_target + I_lhs2_target = I_rhs_target
-  -- Derive from h_once via the algebraic substitutions + I_num arithmetic.
-  -- The h_once equation, after Schwarz/sum-swap/IBP rewrites, reads:
-  --   -((∑α1_sub1) + (∑α1_sub2)) + -(N_A3 + I_lhs2_target)
-  --   = -(N_B1 + N_B2) - -((∑γ_sub1) + (∑γ_sub2)) - -(N_D1 + N_D2) + -(N_E1 + N_E2)
-  -- Simplify h_once by substituting hSum_α1_sub1_final, h_sumγ_sub1, h_sumγ_sub2, h_α1_sub2_to_lhs1.
-  -- The integrals in h_once are already in N_*-shape definitionally (the IBP outputs are
-  -- written with `(fderiv c)(single l₂ 1)`, which matches our updated N_A3, N_B1, N_D1, N_E1).
   rw [hSum_α1_sub1_final, h_sumγ_sub1, h_sumγ_sub2, h_α1_sub2_to_lhs1] at h_once
-  -- I_num expressed in terms of named.
-  -- The goal `I_lhs1_target + I_lhs2_target = I_rhs_target` reduces by `h_I_num_eq_rhs`
-  -- to `I_lhs1_target + I_lhs2_target = I_num` (after rewrite).
   change I_lhs1_target + I_lhs2_target =
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
         densityOnEuclid (I := I) g α y *
           fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
         ∂(volume : Measure EuclN)
   rw [← h_I_num_eq_rhs]
-  -- After h_I_num_decomp, I_num = the algebraic sum. Substitute.
   rw [h_I_num_decomp]
-  -- h_once now is a linear equation in the named atoms. Solve.
   linarith
-  -- end of theorem
 
 end TwiceDifferentiatedVariationalIdentity
 end Laplacian

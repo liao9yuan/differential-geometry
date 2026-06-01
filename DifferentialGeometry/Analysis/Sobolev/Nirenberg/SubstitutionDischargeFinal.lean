@@ -65,22 +65,12 @@ open DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeSmoothApprox
 open DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeIBPExpand
 open DifferentialGeometry.Analysis.Sobolev.SubstitutionNonSmoothChartBilinear
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Section A: Reduction to the trivial `h = 0` case
-
-For `h = 0`, every term in the symbolic six-tuple vanishes:
-- `diffQuot k 0 _ = 0` ⇒ `principal`, `cross_1`, `cross_2`, `cross_3` all zero.
-- `standardNirenbergTest k 0 η _ = 0` ⇒ `c_term`, `f_term` zero.
-
-The identity becomes `0 = 0`, trivially. -/
 
 /-- For `h = 0`, the principal term vanishes. -/
 private lemma principalTerm_chartBilinear_zero_h
@@ -262,11 +252,6 @@ private lemma chartBilinear_substitution_identity_zero_h
     f_term_chartBilinear_zero_h, c_term_chartBilinear_zero_h]
   ring
 
-/-! ## Section B: Reduction at empty `K_0`
-
-When `K_0 = ∅`, since `tsupport η ⊆ K_0 = ∅`, we have `η ≡ 0` and every
-term in the symbolic six-tuple vanishes. -/
-
 private lemma chartBilinear_substitution_identity_K_0_empty
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -278,7 +263,6 @@ private lemma chartBilinear_substitution_identity_K_0_empty
     chartBilinear_LHS (I := I) (M := M) D K_0 η k h =
     chartBilinear_RHS (I := I) (M := M) D K_0 η k h := by
   classical
-  -- Since tsupport η ⊆ K_0 = ∅, we have tsupport η = ∅, so η ≡ 0.
   have hη_zero : η = 0 := by
     have h_supp_empty : tsupport η = ∅ := by
       rw [hK_0_empty] at hη_supp_in_K_0
@@ -288,7 +272,6 @@ private lemma chartBilinear_substitution_identity_K_0_empty
     have hx_in_supp : x ∈ tsupport η := subset_tsupport η hηx
     rw [h_supp_empty] at hx_in_supp
     exact hx_in_supp
-  -- With η = 0, standardNirenbergTest k h 0 _ = 0.
   have h_test_zero : standardNirenbergTest
       (d := Module.finrank ℝ E) k h η D.u_chart = 0 := by
     rw [hη_zero]
@@ -300,22 +283,12 @@ private lemma chartBilinear_substitution_identity_K_0_empty
     cross_2_term_chartBilinear cross_3_term_chartBilinear
     c_term_chartBilinear f_term_chartBilinear
   rw [hK_0_empty]
-  -- Empty K_0: ∫_K_0 _ = 0.
   simp only [Measure.restrict_empty, integral_zero_measure, Finset.sum_const,
     Finset.card_univ, smul_zero, zero_add]
-  -- For c_term and f_term (cthickening |h| ∅ = ∅): also zero.
   have h_cthick_empty : Metric.cthickening |h| (∅ : Set EuclN) = ∅ :=
     Metric.cthickening_empty |h|
   rw [h_cthick_empty]
   simp [Measure.restrict_empty, integral_zero_measure]
-
-/-! ## Section C: Routing through the existing hypothesis-bearing chain
-
-For the substantive case (`h ≠ 0`, `K_0` non-empty), the chart-bilinear
-substitution identity `chartBilinear_LHS = chartBilinear_RHS` is supplied
-through the existing hypothesis-bearing theorem
-`nirenberg_substitution_identity_chartBilinear_compact`, with the
-algebraic identity assembled from the IBPExpand chain. -/
 
 /-- **Wrapped chart-bilinear substitution identity (hypothesis-bearing).**
 
@@ -343,14 +316,6 @@ theorem chartBilinear_substitution_identity_with_hypothesis
   nirenberg_substitution_identity_chartBilinear_compact (I := I) (M := M)
     D hK_0_compact hK_0_in hη hη_supp hη_supp_in_K_0 k hh hh_le h_thick
     h_substitution_identity_holds
-
-/-! ## Section D: Composite headline (with-hypothesis fallback)
-
-The unconditional headline cannot be delivered without further analytic
-discharge of the gradient L²-convergence in the smooth-approximation
-argument. We therefore deliver the headline as a routing through the
-existing hypothesis-bearing chain, which absorbs the trivial reductions
-inside its body. -/
 
 set_option linter.unusedVariables false in
 /-- **Chart-bilinear substitution identity (composite headline).**
@@ -390,11 +355,6 @@ theorem chartBilinear_substitution_identity_holds_composite
     · exact chartBilinear_substitution_identity_K_0_empty (I := I) (M := M)
         D hK_0_empty η hη_supp_in_K_0 k h
     · exact h_substitution_identity_holds hh hK_0_empty
-
-/-! ## Section E: Trivial-case unconditional headlines
-
-These are the unconditional headlines for the trivial reductions, with
-no algebraic-identity hypothesis. -/
 
 /-- **Unconditional `h = 0` chart-bilinear substitution identity.**
 

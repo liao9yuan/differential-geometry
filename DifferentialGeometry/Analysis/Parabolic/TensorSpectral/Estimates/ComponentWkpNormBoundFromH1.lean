@@ -62,8 +62,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] := EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## Headline uniform-in-`S` `wkpNormChart` bound -/
-
 /-- **Headline uniform-in-`(S, Idx, Jdx)` chart-Sobolev `W^{1,2}` bound.**
 Conditional on a uniform-in-`(S, Idx, Jdx)` `L²` bound for the manifold-
 side gradient of the chart-frame scalar component, the chart-based
@@ -97,11 +95,9 @@ theorem tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm
   classical
   have hp_one : (1 : ℝ≥0∞) ≤ 2 := by norm_num
   have hp_top : (2 : ℝ≥0∞) ≠ (⊤ : ℝ≥0∞) := by norm_num
-  -- Manifold-side L² envelope for the component scalar (depends on `α`).
   obtain ⟨C_L2, hC_L2_nn, h_L2⟩ :=
     tensorChartComponentScalar_eLpNorm_le_uniform
       (I := I) (M := M) (E := E) g r s α
-  -- Helper turning `tensorL2Norm S.toCcTensor.toFun` into `‖S‖₊`.
   have h_L2_apply : ∀ (S : SmoothCcTensorH1 g r s)
       (Idx : Fin r → Fin (Module.finrank ℝ E))
       (Jdx : Fin s → Fin (Module.finrank ℝ E)),
@@ -127,7 +123,6 @@ theorem tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm
       exact_mod_cast h_nnreal
     rw [h_eq] at hB
     exact hB.trans (mul_le_mul_of_nonneg_left h_l2_le_h1 (by exact zero_le _))
-  -- Per-`β` `wkpNorm 1 2` bound, uniform in `S, Idx, Jdx`.
   have hper_β : ∀ β : M, ∃ C : ℝ, 0 ≤ C ∧
       ∀ (S : SmoothCcTensorH1 g r s)
         (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -140,15 +135,12 @@ theorem tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm
             (chartTargetEuclid (I := I) (M := M) β) ≤
           ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞) := by
     intro β
-    -- L² piece (parametric in `β`).
     obtain ⟨C₀, hC₀_nn, hC₀_le⟩ :=
       eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm
         (I := I) (M := M) g r s α β
-    -- Generic Frechet envelope on push chart `β`, for any smooth `u : M → ℝ`.
     obtain ⟨C_env, hC_env_nn, h_env⟩ :=
       DifferentialGeometry.Analysis.Sobolev.EquivalenceReverse.eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul
         (I := I) (M := M) g β (p := (2 : ℝ≥0∞)) hp_one hp_top
-    -- Per-direction partial L² bound (parametric in `β`, derived inline).
     have hper_k : ∀ k : Fin (Module.finrank ℝ E),
         ∀ (S : SmoothCcTensorH1 g r s)
           (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -214,7 +206,6 @@ theorem tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm
               rw [(ENNReal.ofReal_mul hC_env_nn).symm]
       rw [hu_def] at hMain
       exact hMain
-    -- Aggregate L² piece + partial-sum piece into a per-β constant.
     set N : ℕ := Fintype.card (Fin (Module.finrank ℝ E))
     refine ⟨C₀ + (N : ℝ) * (C_env * (C_L2 + C_grad)),
       add_nonneg hC₀_nn (mul_nonneg (Nat.cast_nonneg _)
@@ -252,7 +243,6 @@ theorem tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm
         _ = (N : ℝ≥0∞) * (ENNReal.ofReal (C_env * (C_L2 + C_grad)) *
               (‖S‖₊ : ℝ≥0∞)) := by
               rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
-    -- Combine and repackage as `ENNReal.ofReal (...) * (‖S‖₊ : ℝ≥0∞)`.
     refine (add_le_add h0 h1).trans ?_
     have hN_ofReal : (N : ℝ≥0∞) = ENNReal.ofReal (N : ℝ) := by
       rw [ENNReal.ofReal_natCast]
@@ -277,7 +267,6 @@ theorem tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm
               (‖S‖₊ : ℝ≥0∞) := by
             rw [(ENNReal.ofReal_add hC₀_nn
               (mul_nonneg (Nat.cast_nonneg _) hC_env_total_nn)).symm]
-  -- Aggregate per-`β` constants over `chartAtlasPOU_finset`.
   set finS : Finset M := chartAtlasPOU_finset (I := I) (M := M) with hfinS_def
   choose Cβ hCβ_nn hCβ_le using hper_β
   refine ⟨∑ β ∈ finS, Cβ β, Finset.sum_nonneg (fun β _ => hCβ_nn β), ?_⟩

@@ -75,17 +75,12 @@ open DifferentialGeometry.Analysis.Laplacian.ManifoldH2NonSmooth
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Chart-local `H²` regularity bound from chart-bilinear data and the
-unconditional uniform difference-quotient bound -/
 
 /-- **Chart-local `H²` regularity from chart-bilinear data and the
 unconditional uniform difference-quotient bound.**
@@ -134,14 +129,12 @@ theorem chartH2_localBound_of_laplacianDomain
   classical
   set D := chartBilinearH1ComplData_of_laplacianDomain
     (I := I) (M := M) g α hu_h with hD_def
-  -- Step 1: Apply the unconditional uniform difference-quotient bound.
   obtain ⟨M_bound, hM_nn, h_uniform_bd⟩ :=
     chartBilinearH1Compl_uniform_diffQuot_bound_of_data
       (I := I) (M := M) (g := g) (α := α) D
       hη hη_supp hη_range hN h_fderiv_eta
       hΩ' hΩ'_chart hΩ'_compact hη_in_Ω' (R₀ := 1) one_pos hh_supp_in_Ω'
       hη_one_on_Ω'' hΩ''_open.measurableSet
-  -- Step 2: Apply h2_chart_loc_of_uniform_bound with h₀ = 1.
   have hh₀ : (0 : ℝ) < 1 := by norm_num
   have h_h2 :=
     h2_chart_loc_of_uniform_bound
@@ -149,14 +142,6 @@ theorem chartH2_localBound_of_laplacianDomain
       hΩ''_open hΩ''_compact_closure hh₀ h_room
       hM_nn h_uniform_bd
   exact ⟨M_bound, hM_nn, h_h2⟩
-
-/-! ## Manifold-level non-smooth `H²` regularity for `laplacianDomain g`,
-chart-bilinear / Nirenberg route
-
-Re-export of `laplacianDomain_memWkpChart_two` with documentation pointing to
-the chart-local `H²` regularity output `chartH2_localBound_of_laplacianDomain`
-as the natural per-chart input. This is the canonical chart-bilinear /
-Nirenberg form of the headline. -/
 
 /-- **Manifold-level non-smooth `H²` regularity for `laplacianDomain g`,
 chart-bilinear / Nirenberg route.**

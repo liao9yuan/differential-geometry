@@ -90,8 +90,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The partition-of-unity-weighted chart-Sobolev norm -/
-
 /-- The partition-of-unity-weighted chart-Sobolev norm of a smooth
 compactly-supported `(r, s)`-tensor section `T` at regularity order `2k`.
 
@@ -156,8 +154,6 @@ theorem tensorPouSobolevNorm_nonneg
     0 ≤ tensorPouSobolevNorm (I := I) (M := M) g k T :=
   zero_le _
 
-/-! ## Vanishing at the zero tensor section -/
-
 /-- The raw chart-frame scalar component of the zero tensor section is the
 zero function on `M`. Follows from `tensorChartComponentRaw_smul` applied with
 the zero scalar. -/
@@ -167,22 +163,14 @@ private lemma tensorChartComponentRaw_zero_section
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
     tensorChartComponentRaw (I := I) (M := M) g r s
         (0 : SmoothCcTensor g r s) α Idx Jdx = (fun _ : M => 0) := by
-  -- `(0 : SmoothCcTensor) = (0 : ℝ) • 0`, and homogeneity gives `0 • _ = 0`
-  -- pointwise; we read off the function-level equality.
   classical
   funext x
-  -- Use the additivity of the raw component with `S₁ = S₂ = 0`:
-  -- `raw (0 + 0) = raw 0 + raw 0`, so `raw 0 = raw 0 + raw 0`, hence `raw 0 = 0`.
   have h := tensorChartComponent_smul (I := I) (M := M) g r s (0 : ℝ)
     (0 : SmoothCcTensor g r s) α Idx Jdx
-  -- Rather than chase the bundled chart component, derive it directly from
-  -- the linearity of `tensorTrivProj` and the projection.
   unfold tensorChartComponentRaw
-  -- `tensorTrivProj g r s 0 α x = 0`, so the projection of `0` is `0`.
   have h0 : (trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ x
           ((0 : SmoothCcTensor g r s).toSection x) = 0 := by
-    -- `(0 : SmoothCcTensor g r s).toSection x = 0` and CLM-at preserves `0`.
     have hsec : (0 : SmoothCcTensor g r s).toSection x = 0 := by rfl
     rw [hsec]
     exact map_zero _
@@ -216,7 +204,6 @@ theorem tensorPouSobolevNorm_zero_section
         (0 : SmoothCcTensor g r s) = 0 := by
   classical
   rw [tensorPouSobolevNorm_eq]
-  -- The integrand is identically zero on every chart, so the tsum is zero.
   have htsum :
       (∑' α : M,
         ∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -255,18 +242,14 @@ theorem tensorPouSobolevNorm_zero_section
       intro IJ _
       refine Finset.sum_eq_zero ?_
       intro j _
-      -- The raw chart component of the zero section, composed with the
-      -- chart inverse, is the zero function on `E`.
       have hraw := tensorChartComponentRaw_comp_zero_section
         (I := I) (M := M) g r s α IJ.1 IJ.2
-      -- Therefore its iterated derivative is the zero multilinear map.
       have hiter : iteratedFDeriv ℝ j
           (tensorChartComponentRaw (I := I) (M := M) g r s
               (0 : SmoothCcTensor g r s) α IJ.1 IJ.2
             ∘ (extChartAt I α).symm) = 0 := by
         rw [hraw]
         exact iteratedFDeriv_fun_zero
-      -- The integrand becomes `ENNReal.ofReal (… * 0) = 0`.
       have hintegrand_zero :
           (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
             ENNReal.ofReal
@@ -286,10 +269,7 @@ theorem tensorPouSobolevNorm_zero_section
     rw [tsum_congr hpt]
     exact tsum_zero
   rw [htsum]
-  -- `(0 : ℝ≥0∞) ^ (1/2 : ℝ) = 0`.
   exact ENNReal.zero_rpow_of_pos (by norm_num)
-
-/-! ## Monotonicity in the regularity order `k` -/
 
 /-- The partition-of-unity-weighted chart-Sobolev norm is monotone in the
 regularity order: passing from order `2k` to order `2(k+1)` cannot decrease the
@@ -302,10 +282,8 @@ theorem tensorPouSobolevNorm_le_succ
       tensorPouSobolevNorm (I := I) (M := M) g (k + 1) T := by
   classical
   rw [tensorPouSobolevNorm_eq, tensorPouSobolevNorm_eq]
-  -- It suffices to compare the underlying tsums; the `^ (1/2 : ℝ)` is monotone.
   have hrange : Finset.range (2 * k + 1) ⊆ Finset.range (2 * (k + 1) + 1) :=
     Finset.range_subset_range.mpr (by omega)
-  -- Per-chart contribution at `(k+1)` dominates the contribution at `k`.
   have hper_chart : ∀ α : M,
       (∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
           (Fin s → Fin (Module.finrank ℝ E)),
@@ -342,7 +320,6 @@ theorem tensorPouSobolevNorm_le_succ
     intro IJ _
     exact Finset.sum_le_sum_of_subset_of_nonneg hrange
       (by intro j _ _; exact zero_le _)
-  -- Aggregate over the chart `tsum`.
   have htsum_le :
       (∑' α : M,
         ∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -376,7 +353,6 @@ theorem tensorPouSobolevNorm_le_succ
                   Measure (EuclideanSpace ℝ
                     (Fin (Module.finrank ℝ E))))) := by
     exact ENNReal.tsum_le_tsum hper_chart
-  -- The `^ (1/2 : ℝ)` map on `ℝ≥0∞` is monotone for non-negative exponents.
   exact ENNReal.rpow_le_rpow htsum_le (by norm_num)
 
 #print axioms tensorPouSobolevNorm

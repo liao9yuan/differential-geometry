@@ -83,20 +83,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Pointwise bound including the partition-of-unity factor
-
-The headline of the companion module gives the sum-over-directions estimate
-only on `tsupport ρ_α`. To obtain a global pointwise bound suitable for
-integration over all of `M`, we multiply the LHS by `ρ_α(b)`: inside
-`tsupport ρ_α` we use `0 ≤ ρ_α ≤ 1`; outside, `ρ_α(b) = 0` makes the LHS
-vanish, while the RHS remains non-negative. -/
 
 private lemma chartWeight_mul_sum_chartRSTwistInv_cov_sq_norm_le_const_mul_tensorCovDerivPointwiseInner
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -137,9 +127,7 @@ private lemma chartWeight_mul_sum_chartRSTwistInv_cov_sq_norm_le_const_mul_tenso
     rw [hQ_def]
     exact tensorCovDerivPointwiseInner_nonneg (I := I) (M := M) g r s S b
   by_cases hb : b ∈ K_M
-  · -- Inside `K_M`: chain `SqSum ≤ C · Q` from the headline with
-    -- `w b ^ 2 ≤ 1` from `0 ≤ w b ≤ 1`.
-    have hw_b_nn : 0 ≤ w b := hw_nn b
+  · have hw_b_nn : 0 ≤ w b := hw_nn b
     have hw_b_le_one : w b ≤ 1 := hw_le_one b
     have hw_sq_le_one : w b ^ 2 ≤ 1 := by
       have hsq : w b * w b ≤ 1 * 1 :=
@@ -154,20 +142,13 @@ private lemma chartWeight_mul_sum_chartRSTwistInv_cov_sq_norm_le_const_mul_tenso
         ≤ 1 * (C * Q) :=
           mul_le_mul hw_sq_le_one hSqSum_le hSqSum_nn (by linarith)
       _ = C * Q := one_mul _
-  · -- Outside `K_M`: `b ∉ tsupport w`, so `w b = 0` and LHS = 0.
-    have hw_zero : w b = 0 := by
+  · have hw_zero : w b = 0 := by
       by_contra hne
       exact hb (hw_supp (subset_tsupport _ hne))
     have hLHS_zero : w b ^ 2 * SqSum = 0 := by
       rw [hw_zero]; ring
     rw [hLHS_zero]
     exact mul_nonneg hC_nn hQ_nn
-
-/-! ## `eLpNorm` conversion helpers (private, file-local)
-
-Mirrors of the helpers in `ComponentL2BoundUniform`: convert
-`(eLpNorm f 2 μ)^2` to a lintegral of `‖f x‖ₑ^2`, bound it by
-`ENNReal.ofReal (∫ |f x|^2 dμ)`, then take square roots. -/
 
 private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq
     {α : Type*} [MeasurableSpace α] (μ : Measure α) (f : α → ℝ) :
@@ -212,15 +193,11 @@ private lemma eLpNorm_two_le_ofReal_sqrt
   rw [sqrt_ofReal_eq_ofReal_sqrt hS] at h_pow
   exact h_pow
 
-/-! ## Coercion helper for `nnnorm` ↔ `ofReal` -/
-
 private lemma coe_nnnorm_eq_ofReal_norm {X : Type*} [SeminormedAddCommGroup X]
     (x : X) :
     (‖x‖₊ : ℝ≥0∞) = ENNReal.ofReal ‖x‖ := by
   rw [show ((‖x‖₊ : ℝ≥0∞)) = ‖x‖ₑ from (enorm_eq_nnnorm x).symm,
     ← ofReal_norm_eq_enorm x]
-
-/-! ## Integrated bound: the gradient term integrates below the `H^1` norm-sq -/
 
 private lemma integral_tensorCovDerivPointwiseInner_le_h1NormSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -230,7 +207,6 @@ private lemma integral_tensorCovDerivPointwiseInner_le_h1NormSq
       ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤
       ‖S‖ ^ 2 := by
   classical
-  -- Expand `‖S‖^2 = tensorH1Inner = tensorL2Inner + ∫ grad`.
   have h_norm_sq :
       ‖S‖ ^ 2 =
         tensorH1Inner (I := I) (M := M) g r s S.toCcTensor S.toCcTensor :=
@@ -244,12 +220,6 @@ private lemma integral_tensorCovDerivPointwiseInner_le_h1NormSq
     exact tensorInnerPointwise_nonneg (I := I) (M := M) g r s b _
   rw [h_norm_sq, tensorH1Inner_def]
   linarith
-
-/-! ## Headline integrated bound
-
-The squared `L^2(volume)` seminorm of the partition-of-unity-weighted
-Euclidean norm of the sum-over-directions of the chart-twist-inverted
-covariant derivative is controlled by `C · ‖S‖^2`. -/
 
 private lemma sq_eLpNorm_chartWeight_mul_sqrt_sum_le_const_mul_h1NormSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -279,7 +249,6 @@ private lemma sq_eLpNorm_chartWeight_mul_sqrt_sum_le_const_mul_h1NormSq
       hw_supp
   refine ⟨C, hC_nn, ?_⟩
   intro S
-  -- Set notation for the integrand and the measure.
   set ρ : M → ℝ := w with hρ_def
   set SqSum : M → ℝ := fun b : M =>
     ∑ i : Fin (Module.finrank ℝ E),
@@ -289,14 +258,12 @@ private lemma sq_eLpNorm_chartWeight_mul_sqrt_sum_le_const_mul_h1NormSq
               (chartBasisVecFiber (I := I) α i b)))‖ ^ 2 with hSqSum_def
   set f : M → ℝ := fun b : M => ρ b * Real.sqrt (SqSum b) with hf_def
   set μ : Measure M := riemannianVolumeMeasure (I := I) (M := M) g with hμ_def
-  -- Pointwise non-negativity of `SqSum`.
   have hSqSum_nn : ∀ b : M, 0 ≤ SqSum b := by
     intro b
     rw [hSqSum_def]
     refine Finset.sum_nonneg ?_
     intro i _
     exact sq_nonneg _
-  -- Pointwise: `(ρ b * √SqSum b)^2 = ρ b^2 * SqSum b ≤ C * tensorCovDerivPointwiseInner`.
   have h_pt_sq : ∀ b : M, (f b) ^ 2 ≤
       C * tensorCovDerivPointwiseInner (I := I) (M := M) g r s
         S.toCcTensor S.toCcTensor b := by
@@ -306,7 +273,6 @@ private lemma sq_eLpNorm_chartWeight_mul_sqrt_sum_le_const_mul_h1NormSq
       rw [show Real.sqrt (SqSum b) ^ 2 = SqSum b from Real.sq_sqrt (hSqSum_nn b)]
     rw [h_eq]
     exact h_pt S.toCcTensor b
-  -- ENNReal-valued pointwise bound.
   have h_pt_enn : ∀ b : M,
       (‖f b‖ₑ : ℝ≥0∞) ^ 2 ≤
         ENNReal.ofReal (C * tensorCovDerivPointwiseInner
@@ -316,9 +282,7 @@ private lemma sq_eLpNorm_chartWeight_mul_sqrt_sum_le_const_mul_h1NormSq
       rw [Real.enorm_eq_ofReal_abs, ← ENNReal.ofReal_pow (abs_nonneg _) 2,
         sq_abs]]
     exact ENNReal.ofReal_le_ofReal (h_pt_sq b)
-  -- Convert `(eLpNorm f 2 μ)^2` to a lintegral.
   rw [sq_eLpNorm_two_eq_lintegral_enorm_sq μ f]
-  -- Bound the lintegral by the lintegral of the RHS.
   have h_grad_int :
       Integrable (tensorCovDerivPointwiseInner
         (I := I) (M := M) g r s S.toCcTensor S.toCcTensor) μ :=
@@ -343,7 +307,6 @@ private lemma sq_eLpNorm_chartWeight_mul_sqrt_sum_le_const_mul_h1NormSq
           (I := I) (M := M) g r s S.toCcTensor S.toCcTensor b) ∂μ := by
     refine lintegral_mono_ae ?_
     filter_upwards with b using h_pt_enn b
-  -- Convert the RHS lintegral to `ofReal` of an integral.
   have h_lint_eq :
       ∫⁻ b, ENNReal.ofReal (C * tensorCovDerivPointwiseInner
         (I := I) (M := M) g r s S.toCcTensor S.toCcTensor b) ∂μ =
@@ -352,7 +315,6 @@ private lemma sq_eLpNorm_chartWeight_mul_sqrt_sum_le_const_mul_h1NormSq
     (MeasureTheory.ofReal_integral_eq_lintegral_ofReal
       h_C_smul_int h_C_smul_nn).symm
   rw [h_lint_eq] at h_lint_le
-  -- Pull `C` out of the integral.
   have h_int_const_mul :
       ∫ b, C * tensorCovDerivPointwiseInner
         (I := I) (M := M) g r s S.toCcTensor S.toCcTensor b ∂μ =
@@ -360,7 +322,6 @@ private lemma sq_eLpNorm_chartWeight_mul_sqrt_sum_le_const_mul_h1NormSq
           (I := I) (M := M) g r s S.toCcTensor S.toCcTensor b ∂μ :=
     integral_const_mul _ _
   rw [h_int_const_mul] at h_lint_le
-  -- Bound `∫ grad ≤ ‖S‖^2` and reassemble.
   have h_int_le :
       ∫ b, tensorCovDerivPointwiseInner
         (I := I) (M := M) g r s S.toCcTensor S.toCcTensor b ∂μ ≤
@@ -376,14 +337,6 @@ private lemma sq_eLpNorm_chartWeight_mul_sqrt_sum_le_const_mul_h1NormSq
     refine ENNReal.ofReal_le_ofReal ?_
     exact mul_le_mul_of_nonneg_left h_int_le hC_nn
   exact h_lint_le.trans h_RHS_le
-
-/-! ## Headline `L^2` estimate
-
-The `L^2(riemannianVolumeMeasure g)` seminorm of the partition-of-unity-
-weighted Euclidean norm of the sum-over-directions of the chart-twist-
-inverted covariant derivative is uniformly bounded by `ENNReal.ofReal (√C)`
-times the `H^1` seminorm of `S`, for a constant `C` depending only on
-`(g, r, s, α)`. -/
 
 /-- **Headline `L²` integration of the chart-twist-inverted covariant
 derivative norm sum, for an arbitrary `[0, 1]`-valued chart-supported weight.**
@@ -432,12 +385,10 @@ theorem exists_eLpNorm_chartWeight_mul_sqrt_sum_chartRSTwistInv_cov_norm_sq_le_c
       hw_supp
   refine ⟨Real.sqrt C, Real.sqrt_nonneg _, ?_⟩
   intro S
-  -- `C · ‖S‖^2 ≥ 0`; take sqrt-form of the squared bound.
   set T : ℝ := C * ‖S‖ ^ 2 with hT_def
   have hT_nn : 0 ≤ T := mul_nonneg hC_nn (sq_nonneg _)
   have h_eLpNorm_le :=
     eLpNorm_two_le_ofReal_sqrt hT_nn (h_sq S)
-  -- `√(C · ‖S‖^2) = √C · ‖S‖`.
   have hS_nn : 0 ≤ ‖S‖ := norm_nonneg _
   have h_sqrt_factor :
       Real.sqrt T = Real.sqrt C * ‖S‖ := by
@@ -446,7 +397,6 @@ theorem exists_eLpNorm_chartWeight_mul_sqrt_sum_chartRSTwistInv_cov_norm_sq_le_c
       Real.sqrt_mul_self hS_nn]
   rw [h_sqrt_factor,
     ENNReal.ofReal_mul (Real.sqrt_nonneg _)] at h_eLpNorm_le
-  -- Convert `ENNReal.ofReal ‖S‖ = (‖S‖₊ : ℝ≥0∞)`.
   rw [show ENNReal.ofReal ‖S‖ = (‖S‖₊ : ℝ≥0∞) from
     (coe_nnnorm_eq_ofReal_norm S).symm] at h_eLpNorm_le
   exact h_eLpNorm_le

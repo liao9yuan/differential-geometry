@@ -99,8 +99,6 @@ open DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapFinal
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH2kBridge
 open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpFour
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -109,13 +107,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Downward monotonicity of `laplacianDomainPow`
-
-The monotonicity of the iterated Laplacian domain in the order: for `j ≤ k`,
-`laplacianDomainPow g k ⊆ laplacianDomainPow g j`. This follows from the
-resolvent composition law `iteratedResolventL2 g (n + 1) = resolventL2 g ∘L
-iteratedResolventL2 g n`. -/
 
 /-- **Downward monotonicity of `laplacianDomainPow`.** For any `j ≤ k`, the
 iterated Laplacian domain at level `k` is contained in the one at level `j`. -/
@@ -138,8 +129,7 @@ theorem laplacianDomainPow_le_of_le
         rw [DifferentialGeometry.Analysis.Laplacian.laplacianDomainPow_succ_mem_iff] at hu_h
         obtain ⟨f, hf⟩ := hu_h
         by_cases h_jd_zero : j + d = 0
-        · -- j + d = 0, so the goal is u_h ∈ laplacianDomainPow g 0 = ⊤.
-          rw [h_jd_zero]
+        · rw [h_jd_zero]
           rw [DifferentialGeometry.Analysis.Laplacian.laplacianDomainPow_zero]
           exact Submodule.mem_top
         · obtain ⟨n, hn⟩ : ∃ n : ℕ, j + d = n + 1 :=
@@ -168,12 +158,6 @@ theorem laplacianDomainPow_le_of_le
             rw [DifferentialGeometry.Analysis.Laplacian.iteratedResolventL2_succ_apply]
           rw [h1, h2]
       exact ih hu_h_jd
-
-/-! ## Polymorphic chart-`H^{2k}` of the chart-pushed function
-
-For `k ≤ 2`, the chart-`H^{2k}` discharge for the canonical function
-representative of any `u_h ∈ laplacianDomainPow g k` is unconditional via
-the existing infrastructure. The polymorphic headline is delivered below. -/
 
 /-- **Polymorphic chart-`H^{2k}` of the chart-pushed function for
 `u_h ∈ laplacianDomainPow g k`** (`k ≤ 2`, unconditional).
@@ -221,27 +205,6 @@ theorem memWkpChart_two_k_of_laplacianDomainPow_le_two
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) :=
   memWkpChart_unconditional_of_laplacianDomainPow_le_two
     (I := I) (M := M) g hk hu_h
-
-/-! ## Polymorphic-in-`k` chart-`H^{2k}` of the chart-pushed function
-(arbitrary `k`)
-
-The polymorphic-in-`k` chart-`H^{2k}` headline for arbitrary `k` is the
-strongest deliverable unconditional fact from the existing infrastructure:
-the chart-`H^{2 · min(k, 2)}` regularity, which coincides with chart-`H^{2k}`
-for `k ≤ 2` and falls back to chart-`H⁴` for `k ≥ 2`.
-
-For `k ≥ 3`, the polymorphic chart-`H^{2k}` regularity at the exact order
-`2k` requires the coupled outer/inner inductive descent through the chain
-of per-step boosts, with the inductive hypothesis at level `k - 1`
-supplying both chart-`H^{2k-2}` of `u_h.coeFn` and chart-`H^{2k-2}` of the
-`(1 - Δ_g)`-preimage. The chain output is the chart-`H^{2k}` regularity at
-outer level `k`.
-
-The recursion terminates at the chart-`H⁴` unconditional anchor for `k = 2`.
-
-The polymorphic headline below is delivered for the truncated `min(k, 2)`
-order, which matches the unconditional fact for `k ≤ 2` and continues as
-chart-`H⁴` for higher `k`. -/
 
 /-- **Polymorphic chart-`H^{2 · min(k, 2)}` of the chart-pushed function for
 `u_h ∈ laplacianDomainPow g k`.**
@@ -305,8 +268,6 @@ theorem memWkpChart_two_k_of_laplacianDomainPow_min_two
   exact memWkpChart_two_k_of_laplacianDomainPow_le_two
     (I := I) (M := M) g h_min_le_2 hu_h_min
 
-/-! ## Manifold-level lift with finite chart-based norm -/
-
 /-- **Manifold-level `MemWkpChart g (2 · min(k, 2)) 2` together with finite
 chart-based norm** for `u_h ∈ laplacianDomainPow g k`. -/
 theorem laplacianDomainPow_memWkpChart_two_k
@@ -327,13 +288,6 @@ theorem laplacianDomainPow_memWkpChart_two_k
   refine ⟨h_mem, ?_⟩
   exact DifferentialGeometry.Analysis.Sobolev.Chart.wkpNormChart_lt_top_of_memWkpChart
     (I := I) (M := M) g (k := 2 * min k 2) (p := 2) (by norm_num) h_mem
-
-/-! ## Polymorphic-in-`k` chart-`H^{2k}` headline (full statement)
-
-The polymorphic chart-`H^{2k}` headline at the exact order `2k` for arbitrary
-`k` is delivered as a conditional discharge against the `ChartSideH2kBridge
-g k` predicate. The predicate is unconditional for `k ≤ 2` (delivered above)
-and is the input to the bridge-driven framework for `k ≥ 3`. -/
 
 /-- **Polymorphic chart-`H^{2k}` of the chart-pushed function for arbitrary
 `k`**, with the bridge `ChartSideH2kBridge g k` as the conditional input.

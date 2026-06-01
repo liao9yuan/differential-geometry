@@ -43,18 +43,10 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Local pointwise spectral bound
-
-We re-introduce the bound `λ^k · exp(-λ t) ≤ (k/t)^k · e^{-k}` for use in
-the Taylor-remainder argument; the private constant from
-`SpectralBounds.lean` is not exported. -/
 
 /-- Local copy of the constant `(k/t)^k · e^{-k}`. -/
 private noncomputable def tensorHeatPowerCoeffBoundCalc (k : ℕ) (t : ℝ) : ℝ :=
@@ -131,11 +123,6 @@ private lemma tensor_lambda_pow_mul_exp_le_calc
   rw [h_rhs_eq] at h_pow_le
   exact h_pow_le
 
-/-! ## Uniform spectral Taylor remainder
-
-The pointwise Taylor remainder bound on the spectrum, the key ingredient
-for the operator-norm time-derivative of the tensor heat power family. -/
-
 /-- Uniform spectral Taylor estimate: for `λ ≥ 0`, `0 < t`, `|h| ≤ t/2`
 and `k : ℕ`, `|λ^k · (exp(-λ(t+h)) - exp(-λ t) + λ h · exp(-λ t))| ≤ K ·
 h²` where `K = tensorHeatPowerCoeffBoundCalc (k+2) (t/2)`. -/
@@ -154,7 +141,6 @@ private lemma tensor_exp_neg_taylor_bound
       Real.exp_add]
     ring
   rw [h_factor]
-  -- Taylor remainder bound: `|exp s - 1 - s| ≤ s² · exp |s|`.
   have h_taylor : ∀ s : ℝ, |Real.exp s - 1 - s| ≤ s ^ 2 * Real.exp |s| := by
     intro s
     have hc :=

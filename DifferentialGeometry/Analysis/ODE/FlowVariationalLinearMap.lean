@@ -59,13 +59,6 @@ namespace Flow
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
-/-! ## Orbit-equality lemma
-
-Both the original local flow `Φ` and the first projection of the augmented local
-flow `aΦ` are solutions of the original ODE `y' = f t y` with initial value `x`
-at time `t₀`.  By Picard–Lindelöf uniqueness applied locally near `t₀`, they
-agree on a neighbourhood of `t₀`. -/
-
 section OrbitEquality
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ}
@@ -96,13 +89,10 @@ theorem orbit_eq_of_augFlow_isLocalFlow
     (ht₀_Φ : t₀ ∈ Ioo tmin tmax) (ht₀_a : t₀ ∈ Ioo tmin_a tmax_a) :
     (fun s => Φ ⟨x, s⟩) =ᶠ[𝓝 t₀]
       (fun s => (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), s⟩).1) := by
-  -- The "ambient" Lipschitz constant for `f` at `(t₀, x)`.
   have hcd_at : ContDiffAt ℝ 1 (uncurry f) (t₀, x) :=
     hf_C1.contDiffAt (IsOpen.mem_nhds isOpen_univ (mem_univ _))
   obtain ⟨K, sNhd, hsNhd, hl⟩ := hcd_at.exists_lipschitzOnWith
-  -- Shrink to a metric ball around `(t₀, x)` inside the Lipschitz neighbourhood.
   obtain ⟨ρ_Lip, hρ_Lip_pos, hρ_Lip_sub⟩ := Metric.mem_nhds_iff.mp hsNhd
-  -- The two orbits.
   set α_Φ : ℝ → E := fun s => Φ ⟨x, s⟩ with hα_Φ_def
   set α_a : ℝ → E := fun s => (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), s⟩).1
     with hα_a_def
@@ -110,7 +100,6 @@ theorem orbit_eq_of_augFlow_isLocalFlow
   have hα_a_init : α_a t₀ = x := by
     change (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), t₀⟩).1 = x
     rw [haΦ.apply_initial _ hx_a]
-  -- Continuity of `α_Φ` at `t₀`.
   have hIcc_nhds_Φ : Icc tmin tmax ∈ 𝓝 t₀ :=
     Filter.mem_of_superset (isOpen_Ioo.mem_nhds ht₀_Φ) Ioo_subset_Icc_self
   have hIcc_nhds_a : Icc tmin_a tmax_a ∈ 𝓝 t₀ :=
@@ -118,7 +107,6 @@ theorem orbit_eq_of_augFlow_isLocalFlow
   have hα_Φ_cont_on : ContinuousOn α_Φ (Icc tmin tmax) := hΦ.orbit_continuousOn x hx_Φ
   have hα_Φ_cont : ContinuousAt α_Φ t₀ :=
     hα_Φ_cont_on.continuousAt hIcc_nhds_Φ
-  -- Continuity of `α_a` at `t₀`.
   have h_orbit_cont_on : ContinuousOn
       (fun s => aΦ ⟨(x, ContinuousLinearMap.id ℝ E), s⟩)
       (Icc tmin_a tmax_a) :=
@@ -128,20 +116,17 @@ theorem orbit_eq_of_augFlow_isLocalFlow
         (fun s => aΦ ⟨(x, ContinuousLinearMap.id ℝ E), s⟩) t₀ :=
       h_orbit_cont_on.continuousAt hIcc_nhds_a
     exact continuous_fst.continuousAt.comp h_pair_cont_at
-  -- The set `S := ball x (ρ_Lip / 2)`.
   set ρ' : ℝ := ρ_Lip / 2 with hρ'_def
   have hρ'_pos : 0 < ρ' := by positivity
   have hρ'_lt_Lip : ρ' < ρ_Lip := by rw [hρ'_def]; linarith
   set S : Set E := ball x ρ' with hS_def
   have hS_nhds_x : S ∈ 𝓝 x := ball_mem_nhds x hρ'_pos
-  -- Eventually near `t₀`: `α_Φ t ∈ S` and `α_a t ∈ S`.
   have hα_Φ_eventually : ∀ᶠ t in 𝓝 t₀, α_Φ t ∈ S := by
     have h := hα_Φ_cont (show S ∈ 𝓝 (α_Φ t₀) by rw [hα_Φ_init]; exact hS_nhds_x)
     exact h
   have hα_a_eventually : ∀ᶠ t in 𝓝 t₀, α_a t ∈ S := by
     have h := hα_a_cont (show S ∈ 𝓝 (α_a t₀) by rw [hα_a_init]; exact hS_nhds_x)
     exact h
-  -- Eventually near `t₀`: `f t` is `K`-Lipschitz on `S`.
   have h_v_lip_event : ∀ᶠ t in 𝓝 t₀, LipschitzOnWith K (f t) S := by
     rw [eventually_iff_exists_mem]
     refine ⟨ball t₀ ρ', ball_mem_nhds t₀ hρ'_pos, ?_⟩
@@ -171,7 +156,6 @@ theorem orbit_eq_of_augFlow_isLocalFlow
     rw [hdist_eq] at hd
     change dist (uncurry f (t, y₁)) (uncurry f (t, y₂)) ≤ K * dist y₁ y₂
     exact hd
-  -- Derivative hypotheses for `α_Φ` and `α_a` near `t₀`.
   have hα_Φ_deriv_event : ∀ᶠ t in 𝓝 t₀,
       HasDerivAt α_Φ (f t (α_Φ t)) t ∧ α_Φ t ∈ S := by
     have h_int : Ioo tmin tmax ∈ 𝓝 t₀ := isOpen_Ioo.mem_nhds ht₀_Φ
@@ -203,7 +187,6 @@ theorem orbit_eq_of_augFlow_isLocalFlow
         (fun s => aΦ ⟨(x, ContinuousLinearMap.id ℝ E), s⟩)
         (augVF f t (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), t⟩)) t :=
       h_orbit_dw.hasDerivAt hIcc_a_nhds_t
-    -- Project to the first component via `ContinuousLinearMap.fst`.
     have h_fst_fd : HasFDerivAt
         (fun p : E × (E →L[ℝ] E) => p.1)
         (ContinuousLinearMap.fst ℝ E (E →L[ℝ] E))
@@ -213,7 +196,6 @@ theorem orbit_eq_of_augFlow_isLocalFlow
         ((ContinuousLinearMap.fst ℝ E (E →L[ℝ] E))
           (augVF f t (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), t⟩))) t :=
       h_fst_fd.comp_hasDerivAt t h_orbit_at
-    -- `fst (augVF f t (a, b)) = f t a`.
     have h_first_eq :
         (ContinuousLinearMap.fst ℝ E (E →L[ℝ] E))
           (augVF f t (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), t⟩))
@@ -223,21 +205,12 @@ theorem orbit_eq_of_augFlow_isLocalFlow
       rfl
     rw [h_first_eq] at h_comp
     exact h_comp
-  -- Apply `ODE_solution_unique_of_eventually`.
   have h_init_eq : α_Φ t₀ = α_a t₀ := by rw [hα_Φ_init, hα_a_init]
   exact ODE_solution_unique_of_eventually
     (K := K) (v := fun t y => f t y) (s := fun _ => S)
     h_v_lip_event hα_Φ_deriv_event hα_a_deriv_event h_init_eq
 
 end OrbitEquality
-
-/-! ## Smoothness inheritance for the projection
-
-The function `Y(x, t) := (aΦ ⟨(x, id), t⟩).2` (i.e. `fromAugFlow aΦ`) inherits
-joint smoothness from the augmented flow `aΦ`.  This is a direct repackaging of
-`contDiffOn_fromAugFlow` and reduces the joint `C^1`-smoothness of `Y` to that
-of `aΦ`, which is in turn delivered by `contDiffOn_flow_of_isLocalFlow` applied
-to the augmented system. -/
 
 section SmoothnessInheritance
 
@@ -257,7 +230,6 @@ theorem contDiffOn_fromAugFlow_inherits
           (ρ_a : ℝ)) ×ˢ Ioo (t₀ - T_a) (t₀ + T_a))) :
     ContDiffOn ℝ 1 (fromAugFlow aΦ)
       ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)) := by
-  -- Embedding `(x, t) ↦ ((x, id), t)` maps the small neighbourhood into the large.
   set p₀ : E × (E →L[ℝ] E) := (x₀, ContinuousLinearMap.id ℝ E) with hp₀_def
   set U : Set (E × ℝ) := ball x₀ (ρ : ℝ) ×ˢ Ioo (t₀ - T) (t₀ + T) with hU_def
   set U_a : Set ((E × (E →L[ℝ] E)) × ℝ) :=
@@ -279,15 +251,6 @@ theorem contDiffOn_fromAugFlow_inherits
   exact contDiffOn_fromAugFlow (k := (1 : ℕ∞)) (Ω := U_a) (U := U) haΦ_C1 hmap
 
 end SmoothnessInheritance
-
-/-! ## Orbit-equality on a closed interval
-
-Strengthening `orbit_eq_of_augFlow_isLocalFlow`: under the same hypotheses, plus a
-uniform Lipschitz bound for `f` on a slab `closedBall x₀ r₀ ⊆ E` that contains both
-orbits on the closed interval `Icc (t₀ - T) (t₀ + T)`, the two orbit projections agree
-on the entire closed interval (not merely on a neighbourhood of `t₀`).  The proof
-specialises `ODE_solution_unique_of_mem_Icc` to the original ODE `y' = f t y` with
-the uniform Lipschitz constant supplied on the slab. -/
 
 section OrbitEqualityIcc
 
@@ -321,7 +284,6 @@ theorem orbit_eq_Icc_of_augFlow_isLocalFlow
     EqOn (fun s => Φ ⟨x, s⟩)
       (fun s => (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), s⟩).1)
       (Icc (t₀ - T) (t₀ + T)) := by
-  -- Both orbits satisfy the original ODE.
   set α_Φ : ℝ → E := fun s => Φ ⟨x, s⟩ with hα_Φ_def
   set α_a : ℝ → E := fun s => (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), s⟩).1
     with hα_a_def
@@ -339,15 +301,12 @@ theorem orbit_eq_Icc_of_augFlow_isLocalFlow
     have h_fst_cont : ContinuousOn α_a (Icc tmin_a tmax_a) :=
       continuous_fst.continuousOn.comp h_pair_cont (fun _ _ => mem_univ _)
     exact h_fst_cont.mono hT_sub_a
-  -- Derivative at every interior point.
   have hα_Φ_deriv : ∀ s ∈ Ioo (t₀ - T) (t₀ + T),
       HasDerivAt α_Φ (f s (α_Φ s)) s := by
     intro s hs
     have h_in_Icc_Φ : s ∈ Icc tmin tmax := hT_sub_Φ (Ioo_subset_Icc_self hs)
     have h_dw : HasDerivWithinAt (fun u => Φ ⟨x, u⟩) (f s (Φ ⟨x, s⟩))
         (Icc tmin tmax) s := hΦ.hasDerivWithinAt x hx_Φ s h_in_Icc_Φ
-    -- Promote to HasDerivAt using the fact that s ∈ Ioo (t₀ - T) (t₀ + T) ⊆ Icc tmin tmax.
-    -- The latter set is in 𝓝 s because Ioo (t₀ - T) (t₀ + T) is open and contained in it.
     have h_nhds : Icc tmin tmax ∈ 𝓝 s :=
       Filter.mem_of_superset (isOpen_Ioo.mem_nhds hs)
         (fun u hu => hT_sub_Φ (Ioo_subset_Icc_self hu))
@@ -368,7 +327,6 @@ theorem orbit_eq_Icc_of_augFlow_isLocalFlow
         (fun u => aΦ ⟨(x, ContinuousLinearMap.id ℝ E), u⟩)
         (augVF f s (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), s⟩)) s :=
       h_orbit_dw.hasDerivAt h_nhds
-    -- Project to first component.
     have h_fst_fd : HasFDerivAt
         (fun p : E × (E →L[ℝ] E) => p.1)
         (ContinuousLinearMap.fst ℝ E (E →L[ℝ] E))
@@ -384,9 +342,7 @@ theorem orbit_eq_Icc_of_augFlow_isLocalFlow
         = f s (α_a s) := rfl
     rw [h_first_eq] at h_comp
     exact h_comp
-  -- Initial value agreement.
   have h_init_eq : α_Φ t₀ = α_a t₀ := by rw [hα_Φ_init, hα_a_init]
-  -- Apply ODE uniqueness on the closed interval.
   exact ODE_solution_unique_of_mem_Icc
     (v := fun t y => f t y)
     (s := fun _ => closedBall x₀ r₀)
@@ -401,25 +357,6 @@ theorem orbit_eq_Icc_of_augFlow_isLocalFlow
     h_init_eq
 
 end OrbitEqualityIcc
-
-/-! ## Smoothness-clause witness of the level-1 variational-flow projection
-
-The construction: build the augmented flow `aΦ` on `E × (E →L[ℝ] E)` via
-`exists_isLocalFlow_augVF_of_C2`, apply `contDiffOn_flow_of_isLocalFlow_of_contDiff`
-to `aΦ` to get joint `C^1`-smoothness of `aΦ` on an open neighbourhood (using closed-ball
-compactness in finite dimensions to extract the uniform operator-norm bound on the
-augmented linearization), and inherit this smoothness to the projection
-`Y := fromAugFlow aΦ` via `contDiffOn_fromAugFlow_inherits`.
-
-This produces the **smoothness clause** of the `IsVariationalFlowProjection hΦ T ρ Y 1`
-witness, namely `ContDiffOn ℝ 1 Y ((ball x₀ ρ) ×ˢ Ioo (t₀ - T) (t₀ + T))`, together
-with positive `T` and `ρ`.  The remaining `fderiv_eq` clause requires
-`Icc (t₀ - T) (t₀ + T) ⊆ Icc tmin tmax` (so that the orbit `Φ ⟨x, ·⟩` is differentiable
-on the slab), which in turn requires `t₀ ∈ Ioo tmin tmax` for positivity of `T`.  In
-the natural usage downstream, `Φ` is constructed via `exists_isLocalFlow_of_contDiffOn_univ`
-which always yields a positive interior; the headline below produces a positive
-witness `(T, ρ, Y)` regardless, with the augmented-flow's positive `ε_aug` driving
-the inner time width. -/
 
 section LevelOneSmoothnessClause
 
@@ -448,17 +385,14 @@ theorem exists_contDiffOn_fromAugFlow_one_of_C2
       (aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)),
       ContDiffOn ℝ 1 (fromAugFlow aΦ)
         ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)) := by
-  -- Step 1: get the augmented flow.
   set p₀ : E × (E →L[ℝ] E) := (x₀, ContinuousLinearMap.id ℝ E) with hp₀_def
   obtain ⟨R_aug, ε_aug, hR_aug_pos, hε_aug_pos, aΦ, haΦ⟩ :=
     exists_isLocalFlow_augVF_of_C2 hf_C2 t₀ p₀
-  -- Step 2: extract the C^1 regularity of `augVF f`.
   have hf_succ : ContDiffOn ℝ ((1 : ℕ∞) + 1) (uncurry f) (Set.univ : Set (ℝ × E)) := by
     simpa using hf_C2
   have h_augVF_C1 : ContDiffOn ℝ 1 (uncurry (augVF f))
       (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) :=
     augVF_uncurry_contDiff (k := (1 : ℕ∞)) hf_succ
-  -- Step 3: pick the outer slab for compactness-based M extraction.
   set R_a_out : ℝ := (R_aug : ℝ) / 2 with hR_a_out_def
   have hR_aug_R : (0 : ℝ) < (R_aug : ℝ) := by exact_mod_cast hR_aug_pos
   have hR_a_out_pos : 0 < R_a_out := by rw [hR_a_out_def]; linarith
@@ -471,7 +405,6 @@ theorem exists_contDiffOn_fromAugFlow_one_of_C2
     refine Set.prod_mono ?_ ?_
     · exact closedBall_subset_closedBall (le_of_lt hR_a_out_lt)
     · exact Icc_subset_Icc (by linarith) (by linarith)
-  -- Step 4: extract M_aug via finite-dim compactness + continuity.
   have hpartial_a : ContDiffOn ℝ 0 (fun p : ℝ × (E × (E →L[ℝ] E)) =>
       fderiv ℝ (augVF f p.1) p.2)
       (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) :=
@@ -511,11 +444,9 @@ theorem exists_contDiffOn_fromAugFlow_one_of_C2
   have hM_aug_pre_nn : 0 ≤ M_aug_pre := norm_nonneg _
   have hM_aug_pre_bd : ∀ q ∈ Slab, ‖fderiv ℝ (augVF f q.2) (aΦ q)‖ ≤ M_aug_pre :=
     fun q hq => hqmax hq
-  -- Step 5: pick nested params for the augmented system.
   set M_aug : ℝ := M_aug_pre + 1 with hM_aug_def
   have hM_aug_nn : 0 ≤ M_aug := by rw [hM_aug_def]; linarith
   have hM_aug_pos : 0 < M_aug := by rw [hM_aug_def]; linarith
-  -- Pick T_a_mid' strictly less than T_a_out with `M_aug * T_a_mid' < 1`.
   set T_a_mid' : ℝ := min (T_a_out * 3 / 4) (1 / (2 * M_aug)) with hT_a_mid'_def
   have hT_a_mid'_pos : 0 < T_a_mid' := by
     refine lt_min ?_ ?_
@@ -535,7 +466,6 @@ theorem exists_contDiffOn_fromAugFlow_one_of_C2
   set T_a : ℝ := T_a_mid' / 2 with hT_a_def
   have hT_a_pos : 0 < T_a := by rw [hT_a_def]; linarith
   have hT_a_lt_mid' : T_a < T_a_mid' := by rw [hT_a_def]; linarith
-  -- Spatial nesting: R_a < R_a_mid < R_a_out.
   set R_a_mid : ℝ := R_a_out * 3 / 4 with hR_a_mid_def
   have hR_a_mid_pos : 0 < R_a_mid := by rw [hR_a_mid_def]; positivity
   have hR_a_mid_lt_out : R_a_mid < R_a_out := by rw [hR_a_mid_def]; linarith
@@ -559,7 +489,6 @@ theorem exists_contDiffOn_fromAugFlow_one_of_C2
     linarith
   have hR_a_out_le_R_aug : (R_a_outN : ℝ) ≤ (R_aug : ℝ) := by
     rw [hR_a_outN_eq, hR_a_out_def]; linarith
-  -- Convert bound on Slab into the form needed.
   have hA_bd_a : ∀ p ∈ closedBall p₀ (R_a_outN : ℝ),
       ∀ τ ∈ Icc (t₀ - T_a_out) (t₀ + T_a_out),
         ‖fderiv ℝ (augVF f τ) (aΦ ⟨p, τ⟩)‖ ≤ M_aug := by
@@ -570,7 +499,6 @@ theorem exists_contDiffOn_fromAugFlow_one_of_C2
     linarith
   have hsub_a : Icc (t₀ - T_a_out) (t₀ + T_a_out) ⊆ Icc (t₀ - ε_aug) (t₀ + ε_aug) :=
     Icc_subset_Icc (by linarith) (by linarith)
-  -- Apply V.2.c.2 to `aΦ` for the augmented system to get joint C^1.
   have h_aug_C1 : ContDiffOn ℝ 1 aΦ ((ball p₀ (R_aN : ℝ))
       ×ˢ Ioo (t₀ - T_a) (t₀ + T_a)) := by
     have hk_aug : (1 : ℕ∞) ≤ 1 := le_refl _
@@ -584,9 +512,6 @@ theorem exists_contDiffOn_fromAugFlow_one_of_C2
     · rw [hR_a_midN_eq, hR_a_outN_eq]; linarith [hR_a_mid_lt_out]
     · exact hρρ_aux
     · exact hR_a_out_le_R_aug
-  -- Step 6: inherit C^1 smoothness to the projection.
-  -- Pick T and ρ strictly less than (T_a, R_a) so that ball x₀ ρ × Ioo (t₀ - T) (t₀ + T)
-  -- maps into ball p₀ R_a × Ioo (t₀ - T_a) (t₀ + T_a) via the (x, t) ↦ ((x, id), t) embedding.
   set T : ℝ := T_a / 2 with hT_def
   have hT_pos : 0 < T := by rw [hT_def]; linarith
   have hT_le_T_a : T ≤ T_a := by rw [hT_def]; linarith
@@ -596,24 +521,11 @@ theorem exists_contDiffOn_fromAugFlow_one_of_C2
   set ρN : ℝ≥0 := ⟨ρ, le_of_lt hρ_pos⟩ with hρN_def
   have hρN_eq : (ρN : ℝ) = ρ := rfl
   have hρN_le_R_aN : (ρN : ℝ) ≤ (R_aN : ℝ) := by rw [hρN_eq, hR_aN_eq]; exact hρ_le_R_a
-  -- Apply smoothness inheritance.
   refine ⟨T, ρN, hT_pos, hρ_pos, aΦ, ?_⟩
   refine contDiffOn_fromAugFlow_inherits (ρ_a := R_aN) (ρ := ρN) (T_a := T_a) (T := T)
     hρN_le_R_aN hT_le_T_a h_aug_C1
 
 end LevelOneSmoothnessClause
-
-/-! ## Congruence of the variational linear map under orbit equality
-
-The variational linear map `variationalLinearMapAt(α, t)` depends on `α` only through the
-values `fderiv ℝ (f s) (α s)` for `s ∈ Icc (t₀ - T) (t₀ + T)`.  If two reference curves
-`α₁, α₂` agree pointwise on this closed interval, then the two variational linear maps at
-any `t ∈ Icc (t₀ - T) (t₀ + T)` are equal as continuous linear maps.
-
-This is the key ingredient that lets us identify
-`(aΦ ⟨(x, id), t⟩).2 = variationalLinearMapAt(α := Φ ⟨x, ·⟩, t)`:
-the augmented-flow lemma gives the identity along its own central orbit, and orbit equality
-transfers it to `Φ`'s orbit. -/
 
 section VariationalLinearMapCongr
 
@@ -634,10 +546,8 @@ theorem variationalLinearMapAt_congr_of_eqOn
       = variationalLinearMapAt (f := f) (α := α₂) (t₀ := t₀) hT hM hMT hA_cont_2 hA_bd_2 ht := by
   apply ContinuousLinearMap.ext
   intro δ
-  -- Both `variationalSolutionFun(αᵢ) δ` are valid solutions along their respective orbits.
   have h_sol_1 := variationalSolutionFun_isSolution hT hM hMT hA_cont_1 hA_bd_1 δ
   have h_sol_2 := variationalSolutionFun_isSolution hT hM hMT hA_cont_2 hA_bd_2 δ
-  -- The α₂-solution `y₂` is also an α₁-solution because the linearizations agree on Icc.
   set y₂ : ℝ → E := variationalSolutionFun hT hM hMT hA_cont_2 hA_bd_2 δ
   have h_sol_2_as_1 : IsVariationalSolutionOn f α₁ δ t₀ y₂ (Icc (t₀ - T) (t₀ + T)) := by
     refine ⟨h_sol_2.initial, fun s hs => ?_⟩
@@ -645,27 +555,11 @@ theorem variationalLinearMapAt_congr_of_eqOn
     have hα_eq : α₁ s = α₂ s := h_eq hs
     rw [hα_eq]
     exact h_dw
-  -- Uniqueness on Icc: the α₁-solutions y₁ and y₂ agree on Icc.
   have h_eq_y := IsVariationalSolutionOn.unique_Icc hT hA_cont_1 h_sol_1 h_sol_2_as_1
   rw [variationalLinearMapAt_apply, variationalLinearMapAt_apply]
   exact h_eq_y ht
 
 end VariationalLinearMapCongr
-
-/-! ## Coproduct identity helper
-
-Auxiliary theorem extracted from the coproduct-identity portion of the level-1
-witness.  Given the original local flow `Φ`, a local flow `aΦ` of the augmented
-vector field `augVF f`, joint `C^1`-smoothness of `f`, and finite-dimensionality
-of `E`, there exists a strictly-interior open neighbourhood of `(x₀, t₀)` on
-which the coproduct identity
-`fderiv ℝ Φ q = (fromAugFlow aΦ q).coprod (timePieceFn f Φ q)` holds.
-
-The proof is independent of the smoothness level of `aΦ`: only continuity of
-`aΦ` (provided by `IsLocalFlow`) is used.  This makes the helper directly
-reusable for higher-regularity variational projection witnesses, where `aΦ` is
-constructed with stronger smoothness but the coproduct identity is established
-the same way. -/
 
 section CoproductHelper
 
@@ -695,14 +589,11 @@ theorem fderiv_Phi_eq_coprod_fromAugFlow_aux
       ∀ q ∈ (Metric.ball x₀ (ρ : ℝ)) ×ˢ Set.Ioo (t₀ - T) (t₀ + T),
         fderiv ℝ Φ q = (fromAugFlow aΦ q).coprod (timePieceFn f Φ q) := by
   classical
-  -- Bookkeeping for the augmented base point.
   set p₀ : E × (E →L[ℝ] E) := (x₀, ContinuousLinearMap.id ℝ E) with hp₀_def
-  -- Width-positivity for the time and augmented-time intervals.
   have ht₀_minus_tmin : 0 < t₀ - tmin := by linarith [ht₀_Ioo.1]
   have htmax_minus_t₀ : 0 < tmax - t₀ := by linarith [ht₀_Ioo.2]
   have ht₀_minus_tmin_a : 0 < t₀ - tmin_a := by linarith [ht₀_a_Ioo.1]
   have htmax_a_minus_t₀ : 0 < tmax_a - t₀ := by linarith [ht₀_a_Ioo.2]
-  -- Outer time width: half of the smallest interior margin.
   set T_outer : ℝ := min (min (t₀ - tmin) (tmax - t₀))
       (min (t₀ - tmin_a) (tmax_a - t₀)) / 2 with hT_outer_def
   have hT_outer_pos : 0 < T_outer := by
@@ -738,14 +629,12 @@ theorem fderiv_Phi_eq_coprod_fromAugFlow_aux
     Icc_subset_Icc (by linarith) (by linarith)
   have hsub_outer_aug : Icc (t₀ - T_outer) (t₀ + T_outer) ⊆ Icc tmin_a tmax_a :=
     Icc_subset_Icc (by linarith) (by linarith)
-  -- Outer spatial radii ρ_outer = r/2 and R_aug_out = R_aug/2.
   set ρ_outer : ℝ := (r : ℝ) / 2 with hρ_outer_def
   have hρ_outer_pos : 0 < ρ_outer := by rw [hρ_outer_def]; linarith
   have hρ_outer_le_r : ρ_outer ≤ (r : ℝ) := by rw [hρ_outer_def]; linarith
   set R_aug_out : ℝ := (R_aug : ℝ) / 2 with hR_aug_out_def
   have hR_aug_out_pos : 0 < R_aug_out := by rw [hR_aug_out_def]; linarith
   have hR_aug_out_lt : R_aug_out < (R_aug : ℝ) := by rw [hR_aug_out_def]; linarith
-  -- Slabs.
   set Slab_a_outer : Set ((E × (E →L[ℝ] E)) × ℝ) :=
     closedBall p₀ R_aug_out ×ˢ Icc (t₀ - T_outer) (t₀ + T_outer) with hSlab_a_outer_def
   have hSlab_a_outer_cpt : IsCompact Slab_a_outer :=
@@ -758,12 +647,10 @@ theorem fderiv_Phi_eq_coprod_fromAugFlow_aux
     refine Set.prod_mono ?_ ?_
     · exact closedBall_subset_closedBall (le_of_lt hR_aug_out_lt)
     · exact hsub_outer_aug
-  -- Continuity of `aΦ` on the slab.
   have haΦ_cont_full : ContinuousOn aΦ
       (closedBall p₀ (R_aug : ℝ) ×ˢ Icc tmin_a tmax_a) := haΦ.continuousOn
   have haΦ_cont : ContinuousOn aΦ Slab_a_outer :=
     haΦ_cont_full.mono hslab_aug_sub
-  -- Phase 5: aΦ-image radius `R_aΦ_image_pre`.
   have h_aΦ_norm_cont : ContinuousOn (fun q : (E × (E →L[ℝ] E)) × ℝ => ‖(aΦ q).1 - x₀‖)
       Slab_a_outer := by
     have h_fst_cont : ContinuousOn (fun q : (E × (E →L[ℝ] E)) × ℝ => (aΦ q).1) Slab_a_outer :=
@@ -777,7 +664,6 @@ theorem fderiv_Phi_eq_coprod_fromAugFlow_aux
   have hR_aΦ_image_pre_nn : 0 ≤ R_aΦ_image_pre := norm_nonneg _
   have hR_aΦ_image_pre_bd : ∀ q ∈ Slab_a_outer, ‖(aΦ q).1 - x₀‖ ≤ R_aΦ_image_pre :=
     fun q hq => hqmax_R hq
-  -- Phase 6: Φ-image radius `R_Φ_image_pre`.
   set Slab_Φ_outer : Set (E × ℝ) :=
     closedBall x₀ ρ_outer ×ˢ Icc (t₀ - T_outer) (t₀ + T_outer) with hSlab_Φ_outer_def
   have hSlab_Φ_outer_cpt : IsCompact Slab_Φ_outer :=
@@ -800,7 +686,6 @@ theorem fderiv_Phi_eq_coprod_fromAugFlow_aux
   have hR_Φ_image_pre_nn : 0 ≤ R_Φ_image_pre := norm_nonneg _
   have hR_Φ_image_pre_bd : ∀ p ∈ Slab_Φ_outer, ‖Φ p - x₀‖ ≤ R_Φ_image_pre :=
     fun p hp => hpmax_R hp
-  -- Phase 7: unified Lipschitz radius `r₀_lip` and Lipschitz constant `K_orig`.
   set r₀_lip : ℝ := max R_aΦ_image_pre R_Φ_image_pre + 1 with hr₀_lip_def
   have hr₀_lip_pos : 0 < r₀_lip := by
     rw [hr₀_lip_def]
@@ -839,7 +724,6 @@ theorem fderiv_Phi_eq_coprod_fromAugFlow_aux
   have hK_orig_nn : 0 ≤ K_orig := le_of_lt hK_orig_pos
   set K_origN : ℝ≥0 := ⟨K_orig, hK_orig_nn⟩ with hK_origN_def
   have hK_origN_eq : (K_origN : ℝ) = K_orig := rfl
-  -- Phase 8: mid time width `T_mid` with `K_orig · T_mid < 1`.
   set T_mid : ℝ := min (T_outer * 3 / 4) (1 / (2 * K_orig)) with hT_mid_def
   have hT_mid_pos : 0 < T_mid := by
     refine lt_min ?_ ?_
@@ -855,7 +739,6 @@ theorem fderiv_Phi_eq_coprod_fromAugFlow_aux
       mul_le_mul_of_nonneg_left h1 hK_orig_nn
     have h3 : K_orig * (1 / (2 * K_orig)) = 1 / 2 := by field_simp
     linarith
-  -- Phase 9: final time width `T_final < T_mid` and final spatial radius `ρ_final`.
   set T_final : ℝ := T_mid / 2 with hT_final_def
   have hT_final_pos : 0 < T_final := by rw [hT_final_def]; linarith
   have hT_final_lt_mid : T_final < T_mid := by rw [hT_final_def]; linarith
@@ -875,7 +758,6 @@ theorem fderiv_Phi_eq_coprod_fromAugFlow_aux
   have hρ_final_le_R_aug_out : ρ_final ≤ R_aug_out := by linarith
   set ρ_finalN : ℝ≥0 := ⟨ρ_final, le_of_lt hρ_final_pos⟩ with hρ_finalN_def
   have hρ_finalN_eq : (ρ_finalN : ℝ) = ρ_final := rfl
-  -- Phase 11: assemble the coproduct identity at each `q ∈ ball x₀ ρ_final × Ioo`.
   refine ⟨T_final, ρ_finalN, hT_final_pos, hρ_final_pos, ?_⟩
   intro q hq
   rcases hq with ⟨hq_x, hq_t⟩
@@ -898,7 +780,6 @@ theorem fderiv_Phi_eq_coprod_fromAugFlow_aux
     closedBall_subset_closedBall (le_of_lt hR_aug_out_lt) hx_id_closed_R_aug_out
   have ht_Ioo_final : t ∈ Ioo (t₀ - T_final) (t₀ + T_final) := hq_t
   have ht_Icc_final : t ∈ Icc (t₀ - T_final) (t₀ + T_final) := Ioo_subset_Icc_self ht_Ioo_final
-  -- Phase 11.A: orbit-equality on Icc (t₀ - T_final) (t₀ + T_final).
   have hsub_final_outer : Icc (t₀ - T_final) (t₀ + T_final) ⊆ Icc (t₀ - T_outer) (t₀ + T_outer) :=
     Icc_subset_Icc (by linarith) (by linarith)
   have hsub_final_orig : Icc (t₀ - T_final) (t₀ + T_final) ⊆ Icc tmin tmax :=
@@ -953,7 +834,6 @@ theorem fderiv_Phi_eq_coprod_fromAugFlow_aux
     orbit_eq_Icc_of_augFlow_isLocalFlow hΦ haΦ hx_closed_r hx_id_closed_R_aug
       hsub_final_orig hsub_final_aug ht₀_Ioo_final
       (r₀ := r₀_lip) (K := K_origN) h_Φ_in_r₀ h_aΦ_fst_in_r₀ h_lip_on_r₀
-  -- Phase 11.B: identify `(aΦ⟨(x, id), t⟩).2 = variationalLinearMapAt(α := Φ⟨x, ·⟩, t)`.
   have hA_cont_orbit_a : ContinuousOn (fun s : ℝ => fderiv ℝ (f s)
       ((aΦ ⟨(x, ContinuousLinearMap.id ℝ E), s⟩).1)) (Icc (t₀ - T_final) (t₀ + T_final)) := by
     have h_pair_cont : ContinuousOn (fun s : ℝ => (s, (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), s⟩).1))
@@ -1035,7 +915,6 @@ theorem fderiv_Phi_eq_coprod_fromAugFlow_aux
       = variationalLinearMapAt (f := f) (α := fun s => Φ ⟨x, s⟩) (t₀ := t₀)
           hT_final_pos hK_orig_nn h_KT_final hA_cont_orbit_Φ hA_bd_orbit_Φ ht_Icc_final := by
     rw [h_aΦ_snd_eq, h_var_congr]
-  -- Phase 11.C: joint Fréchet derivative formula for Φ at (x, t).
   set ρ_outerN : ℝ≥0 := ⟨ρ_outer, le_of_lt hρ_outer_pos⟩
   set r'_φ : ℝ≥0 := ⟨ρ_outer / 2, by positivity⟩
   have hr'_φ_pos : (0 : ℝ) < (r'_φ : ℝ) := by change 0 < ρ_outer / 2; linarith
@@ -1108,23 +987,6 @@ theorem fderiv_Phi_eq_coprod_fromAugFlow_aux
 
 end CoproductHelper
 
-/-! ## The full level-1 variational-flow projection witness
-
-The headline theorem `exists_isVariationalFlowProjection_one_of_C2` combines:
-* the joint `C^1` smoothness of `Y := fromAugFlow aΦ` on a strictly-interior open
-  neighbourhood of `(x₀, t₀)`, established by running `contDiffOn_flow_of_isLocalFlow_of_contDiff`
-  on the augmented system `(augVF f, aΦ)` and inheriting via `contDiffOn_fromAugFlow_inherits`;
-* the coproduct identity `fderiv ℝ Φ q = (Y q).coprod (timePieceFn f Φ q)`, obtained by
-  combining the joint Fréchet derivative formula `hasFDerivAt_flow_jointly_at` with the orbit
-  equality on a closed interval (built from continuity of `Φ` and `aΦ` plus uniform
-  Lipschitz of `f`, all extracted from finite-dim compactness) and the variational
-  identification `augFlow_snd_eq_variationalLinearMapAt`.
-
-**On hypotheses.**  The headline carries two mathematical hypotheses beyond joint `C²` of
-`f` and finite dimensionality of `E`: `ht₀_Ioo : t₀ ∈ Ioo tmin tmax` (so a positive-width
-interior interval exists) and `hr_pos : 0 < (r : ℝ)` (so the joint Fréchet derivative
-formula applies on a nontrivial spatial ball). -/
-
 section LevelOneFullWitness
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
@@ -1151,7 +1013,6 @@ theorem exists_isVariationalFlowProjection_one_of_C2
       (Y : E × ℝ → (E →L[ℝ] E)),
       IsVariationalFlowProjection hΦ T ρ Y 1 := by
   classical
-  -- ## Phase 1: augmented flow `aΦ` from joint C² of `f`.
   set p₀ : E × (E →L[ℝ] E) := (x₀, ContinuousLinearMap.id ℝ E) with hp₀_def
   obtain ⟨R_aug, ε_aug, hR_aug_pos, hε_aug_pos, aΦ, haΦ⟩ :=
     exists_isLocalFlow_augVF_of_C2 hf_C2 t₀ p₀
@@ -1165,9 +1026,6 @@ theorem exists_isVariationalFlowProjection_one_of_C2
   have h_augVF_C1 : ContDiffOn ℝ 1 (uncurry (augVF f))
       (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) :=
     augVF_uncurry_contDiff (k := (1 : ℕ∞)) hf_succ
-  -- ## Phase 2: pick the outer time width T_outer for which:
-  -- (i) Icc(t₀-T_outer, t₀+T_outer) ⊆ Icc tmin tmax;
-  -- (ii) Icc(t₀-T_outer, t₀+T_outer) ⊆ Icc(t₀-ε_aug, t₀+ε_aug).
   have ht₀_minus_tmin : 0 < t₀ - tmin := by linarith [ht₀_Ioo.1]
   have htmax_minus_t₀ : 0 < tmax - t₀ := by linarith [ht₀_Ioo.2]
   set T_outer : ℝ := min (ε_aug / 2) (min (t₀ - tmin) (tmax - t₀)) / 2 with hT_outer_def
@@ -1197,17 +1055,12 @@ theorem exists_isVariationalFlowProjection_one_of_C2
     Icc_subset_Icc (by linarith) (by linarith)
   have hsub_outer_aug : Icc (t₀ - T_outer) (t₀ + T_outer) ⊆ Icc (t₀ - ε_aug) (t₀ + ε_aug) :=
     Icc_subset_Icc (by linarith) (by linarith)
-  -- ## Phase 3: pick outer spatial radii ρ_outer ≤ r/2 (for Φ-orbit lookup) and
-  -- R_aug_out := R_aug/2 (for aΦ-orbit lookup).
   set ρ_outer : ℝ := (r : ℝ) / 2 with hρ_outer_def
   have hρ_outer_pos : 0 < ρ_outer := by rw [hρ_outer_def]; linarith
   have hρ_outer_le_r : ρ_outer ≤ (r : ℝ) := by rw [hρ_outer_def]; linarith
   set R_aug_out : ℝ := (R_aug : ℝ) / 2 with hR_aug_out_def
   have hR_aug_out_pos : 0 < R_aug_out := by rw [hR_aug_out_def]; linarith
   have hR_aug_out_lt : R_aug_out < (R_aug : ℝ) := by rw [hR_aug_out_def]; linarith
-  -- Embedding: (x, t) ↦ ((x, id), t) maps closedBall x₀ ρ_outer × Icc ↪ closedBall p₀ R_aug_out × Icc
-  -- requires ρ_outer ≤ R_aug_out. (We'll instead use a smaller ρ later.)
-  -- Slab_a_outer for augmented: closedBall p₀ R_aug_out × Icc(t₀-T_outer, t₀+T_outer).
   set Slab_a_outer : Set ((E × (E →L[ℝ] E)) × ℝ) :=
     closedBall p₀ R_aug_out ×ˢ Icc (t₀ - T_outer) (t₀ + T_outer) with hSlab_a_outer_def
   have hSlab_a_outer_cpt : IsCompact Slab_a_outer :=
@@ -1220,7 +1073,6 @@ theorem exists_isVariationalFlowProjection_one_of_C2
     refine Set.prod_mono ?_ ?_
     · exact closedBall_subset_closedBall (le_of_lt hR_aug_out_lt)
     · exact hsub_outer_aug
-  -- ## Phase 4: extract M_aug for augmented operator-norm bound.
   have hpartial_a : ContDiffOn ℝ 0 (fun p : ℝ × (E × (E →L[ℝ] E)) =>
       fderiv ℝ (augVF f p.1) p.2)
       (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) :=
@@ -1256,7 +1108,6 @@ theorem exists_isVariationalFlowProjection_one_of_C2
   set M_aug : ℝ := M_aug_pre + 1 with hM_aug_def
   have hM_aug_nn : 0 ≤ M_aug := by rw [hM_aug_def]; linarith
   have hM_aug_pos : 0 < M_aug := by rw [hM_aug_def]; linarith
-  -- ## Phase 5: extract R_image bound for aΦ-image on Slab_a_outer (orbit-containment).
   have h_aΦ_norm_cont : ContinuousOn (fun q : (E × (E →L[ℝ] E)) × ℝ => ‖(aΦ q).1 - x₀‖)
       Slab_a_outer := by
     have h_fst_cont : ContinuousOn (fun q : (E × (E →L[ℝ] E)) × ℝ => (aΦ q).1) Slab_a_outer :=
@@ -1270,7 +1121,6 @@ theorem exists_isVariationalFlowProjection_one_of_C2
   have hR_aΦ_image_pre_nn : 0 ≤ R_aΦ_image_pre := norm_nonneg _
   have hR_aΦ_image_pre_bd : ∀ q ∈ Slab_a_outer, ‖(aΦ q).1 - x₀‖ ≤ R_aΦ_image_pre :=
     fun q hq => hqmax_R hq
-  -- ## Phase 6: extract R_Φ_image bound for Φ-image on closedBall x₀ ρ_outer × Icc.
   set Slab_Φ_outer : Set (E × ℝ) :=
     closedBall x₀ ρ_outer ×ˢ Icc (t₀ - T_outer) (t₀ + T_outer) with hSlab_Φ_outer_def
   have hSlab_Φ_outer_cpt : IsCompact Slab_Φ_outer :=
@@ -1293,7 +1143,6 @@ theorem exists_isVariationalFlowProjection_one_of_C2
   have hR_Φ_image_pre_nn : 0 ≤ R_Φ_image_pre := norm_nonneg _
   have hR_Φ_image_pre_bd : ∀ p ∈ Slab_Φ_outer, ‖Φ p - x₀‖ ≤ R_Φ_image_pre :=
     fun p hp => hpmax_R hp
-  -- ## Phase 7: pick the unified Lipschitz ball radius `r₀_lip` and extract K_orig.
   set r₀_lip : ℝ := max R_aΦ_image_pre R_Φ_image_pre + 1 with hr₀_lip_def
   have hr₀_lip_pos : 0 < r₀_lip := by
     rw [hr₀_lip_def]
@@ -1308,14 +1157,12 @@ theorem exists_isVariationalFlowProjection_one_of_C2
     rw [hr₀_lip_def]
     have : R_Φ_image_pre ≤ max R_aΦ_image_pre R_Φ_image_pre := le_max_right _ _
     linarith
-  -- Slab_f: Icc(t₀-T_outer, t₀+T_outer) × closedBall x₀ r₀_lip (compact in finite dim).
   set Slab_f : Set (ℝ × E) :=
     Icc (t₀ - T_outer) (t₀ + T_outer) ×ˢ closedBall x₀ r₀_lip with hSlab_f_def
   have hSlab_f_cpt : IsCompact Slab_f :=
     isCompact_Icc.prod (isCompact_closedBall x₀ r₀_lip)
   have hSlab_f_ne : Slab_f.Nonempty :=
     ⟨(t₀, x₀), ⟨by linarith, by linarith⟩, Metric.mem_closedBall_self (le_of_lt hr₀_lip_pos)⟩
-  -- `fderiv ℝ (f τ) z` is continuous on Slab_f.
   have hpartial_f : ContDiffOn ℝ 0 (fun p : ℝ × E => fderiv ℝ (f p.1) p.2)
       (Set.univ : Set (ℝ × E)) :=
     contDiffOn_partial_fderiv_of_succ (f := f) (k := (0 : ℕ∞))
@@ -1334,7 +1181,6 @@ theorem exists_isVariationalFlowProjection_one_of_C2
   have hK_orig_nn : 0 ≤ K_orig := le_of_lt hK_orig_pos
   set K_origN : ℝ≥0 := ⟨K_orig, hK_orig_nn⟩ with hK_origN_def
   have hK_origN_eq : (K_origN : ℝ) = K_orig := rfl
-  -- ## Phase 8: pick T_mid for orbit-equality: K_orig · T_mid < 1 and T_mid < T_outer.
   set T_mid : ℝ := min (T_outer * 3 / 4) (1 / (2 * K_orig)) with hT_mid_def
   have hT_mid_pos : 0 < T_mid := by
     refine lt_min ?_ ?_
@@ -1350,7 +1196,6 @@ theorem exists_isVariationalFlowProjection_one_of_C2
       mul_le_mul_of_nonneg_left h1 hK_orig_nn
     have h3 : K_orig * (1 / (2 * K_orig)) = 1 / 2 := by field_simp
     linarith
-  -- Also: M_aug · T_mid'_a < 1 with T_mid'_a from augmented system: same pattern.
   set T_a_mid : ℝ := min (T_outer * 3 / 4) (1 / (2 * M_aug)) with hT_a_mid_def
   have hT_a_mid_pos : 0 < T_a_mid := by
     refine lt_min ?_ ?_
@@ -1366,7 +1211,6 @@ theorem exists_isVariationalFlowProjection_one_of_C2
       mul_le_mul_of_nonneg_left h1 hM_aug_nn
     have h3 : M_aug * (1 / (2 * M_aug)) = 1 / 2 := by field_simp
     linarith
-  -- ## Phase 9: pick T_final < min(T_mid, T_a_mid) and ρ_final < min(ρ_outer, R_aug_out)/4.
   set T_final : ℝ := min T_mid T_a_mid / 2 with hT_final_def
   have hT_final_pos : 0 < T_final := by
     rw [hT_final_def]
@@ -1379,8 +1223,6 @@ theorem exists_isVariationalFlowProjection_one_of_C2
     rw [hT_final_def]
     have : min T_mid T_a_mid ≤ T_a_mid := min_le_right _ _
     linarith
-  -- ρ_final: must be ≤ ρ_outer (for closedBall x₀ ρ_final ⊆ closedBall x₀ ρ_outer ⊆ closedBall x₀ r),
-  -- ≤ R_aug_out (for embedding into augmented ball), and ≤ ρ_outer · 1/4 (with `hr' := ρ_outer/2`).
   set ρ_final : ℝ := min ρ_outer R_aug_out / 8 with hρ_final_def
   have hρ_final_pos : 0 < ρ_final := by
     rw [hρ_final_def]
@@ -1397,9 +1239,6 @@ theorem exists_isVariationalFlowProjection_one_of_C2
   have hρ_final_le_R_aug_out : ρ_final ≤ R_aug_out := by linarith
   set ρ_finalN : ℝ≥0 := ⟨ρ_final, le_of_lt hρ_final_pos⟩ with hρ_finalN_def
   have hρ_finalN_eq : (ρ_finalN : ℝ) = ρ_final := rfl
-  -- ## Phase 10: smoothness of Y on (ball x₀ ρ_final) × Ioo(t₀-T_final, t₀+T_final).
-  -- Use the EXISTING nested-3-layer pattern to get aΦ smoothness, then inherit to Y.
-  -- For the nesting: R_a_outN := R_aug_outN; R_a_midN := R_aug_out * 3/4; R_aN := R_aug_out * 1/2.
   set R_a_mid : ℝ := R_aug_out * 3 / 4 with hR_a_mid_def
   have hR_a_mid_pos : 0 < R_a_mid := by rw [hR_a_mid_def]; positivity
   have hR_a_mid_lt_out : R_a_mid < R_aug_out := by rw [hR_a_mid_def]; linarith
@@ -1424,9 +1263,6 @@ theorem exists_isVariationalFlowProjection_one_of_C2
     linarith
   have hR_a_out_le_R_aug : (R_a_outN : ℝ) ≤ (R_aug : ℝ) := by
     rw [hR_a_outN_eq, hR_aug_out_def]; linarith
-  -- For augmented Phase-9 inner: T_a_inner from contDiffOn_flow lemma's slab.  We use T_a_mid
-  -- (already nested) and pick T_a_inner < T_a_mid.  We unify with T_final by using T_final ≤ T_a_mid/2.
-  -- Actually contDiffOn_flow_of_isLocalFlow_of_contDiff has its own three-layer; pass T_outer, T_a_mid, T_final.
   have hA_bd_a : ∀ p ∈ closedBall p₀ (R_a_outN : ℝ),
       ∀ τ ∈ Icc (t₀ - T_outer) (t₀ + T_outer),
         ‖fderiv ℝ (augVF f τ) (aΦ ⟨p, τ⟩)‖ ≤ M_aug := by
@@ -1450,25 +1286,18 @@ theorem exists_isVariationalFlowProjection_one_of_C2
     · rw [hR_a_midN_eq, hR_a_outN_eq]; linarith
     · exact hρρ_aux
     · exact hR_a_out_le_R_aug
-  -- Inherit smoothness to Y := fromAugFlow aΦ on (ball x₀ ρ_final) × Ioo.
-  -- Need ρ_finalN ≤ R_aN.
   have hρ_finalN_le_R_aN : (ρ_finalN : ℝ) ≤ (R_aN : ℝ) := by
     rw [hρ_finalN_eq, hR_aN_eq, hR_a_def]
-    -- ρ_final ≤ R_aug_out / 8 ≤ R_aug_out / 2 = R_a
     have h1 : ρ_final ≤ R_aug_out / 8 := hρ_final_le_R_aug_out_8
     linarith
   have h_Y_smooth : ContDiffOn ℝ 1 (fromAugFlow aΦ)
       ((ball x₀ (ρ_finalN : ℝ)) ×ˢ Ioo (t₀ - T_final) (t₀ + T_final)) :=
     contDiffOn_fromAugFlow_inherits (ρ_a := R_aN) (ρ := ρ_finalN) (T_a := T_final) (T := T_final)
       hρ_finalN_le_R_aN (le_refl _) h_aug_C1
-  -- ## Phase 11: invoke the coproduct-identity helper and intersect its neighbourhood with
-  -- the smoothness neighbourhood from Phase 10.
   have ht₀_a_Ioo : t₀ ∈ Ioo (t₀ - ε_aug) (t₀ + ε_aug) :=
     ⟨by linarith, by linarith⟩
   obtain ⟨T_help, ρ_help, hT_help_pos, hρ_help_pos, h_help⟩ :=
     fderiv_Phi_eq_coprod_fromAugFlow_aux (Φ := Φ) hΦ hf_C1 ht₀_Ioo hr_pos haΦ ht₀_a_Ioo hR_aug_R
-  -- The effective time width / spatial radius for the level-1 witness: the min of
-  -- Phase 10's smoothness widths and the helper's coproduct widths.
   set T_eff : ℝ := min T_final T_help with hT_eff_def
   have hT_eff_pos : 0 < T_eff := lt_min hT_final_pos hT_help_pos
   have hT_eff_le_final : T_eff ≤ T_final := min_le_left _ _
@@ -1483,7 +1312,6 @@ theorem exists_isVariationalFlowProjection_one_of_C2
     rw [hρ_effN_eq]; exact hρ_eff_le_finalN
   have hρ_effN_le_help : (ρ_effN : ℝ) ≤ (ρ_help : ℝ) := by
     rw [hρ_effN_eq]; exact hρ_eff_le_help
-  -- Containment of the effective neighbourhood in Phase 10's smoothness neighbourhood.
   have h_eff_sub_smooth : (ball x₀ (ρ_effN : ℝ)) ×ˢ Ioo (t₀ - T_eff) (t₀ + T_eff)
       ⊆ (ball x₀ (ρ_finalN : ℝ)) ×ˢ Ioo (t₀ - T_final) (t₀ + T_final) := by
     refine Set.prod_mono ?_ ?_
@@ -1493,7 +1321,6 @@ theorem exists_isVariationalFlowProjection_one_of_C2
     · intro s hs
       rcases hs with ⟨h1, h2⟩
       refine ⟨?_, ?_⟩ <;> linarith
-  -- Containment of the effective neighbourhood in the helper's coproduct neighbourhood.
   have h_eff_sub_help : (ball x₀ (ρ_effN : ℝ)) ×ˢ Ioo (t₀ - T_eff) (t₀ + T_eff)
       ⊆ (ball x₀ (ρ_help : ℝ)) ×ˢ Ioo (t₀ - T_help) (t₀ + T_help) := by
     refine Set.prod_mono ?_ ?_
@@ -1503,24 +1330,12 @@ theorem exists_isVariationalFlowProjection_one_of_C2
     · intro s hs
       rcases hs with ⟨h1, h2⟩
       refine ⟨?_, ?_⟩ <;> linarith
-  -- Final assembly: produce the witness with the effective `T_eff` and `ρ_effN`.
   refine ⟨T_eff, ρ_effN, hT_eff_pos, hρ_eff_pos, fromAugFlow aΦ, ?_⟩
   refine { contDiffOn := h_Y_smooth.mono h_eff_sub_smooth, fderiv_eq := ?_ }
   intro q hq
   exact h_help q (h_eff_sub_help hq)
 
 end LevelOneFullWitness
-
-/-! ## Inductive successor step for the variational-flow projection witness
-
-Given a variational-flow projection witness at level `n` for the *augmented* local
-flow `aΦ` of `augVF f`, build a witness at level `n+1` for the original local flow
-`Φ` of `f`.  The smoothness clause is upgraded using `contDiffOn_flow_of_isVariationalFlowProjection_top`
-applied to `aΦ` (giving `ContDiffOn (n+1) aΦ`), and the projection `fromAugFlow aΦ`
-inherits this regularity via `contDiffOn_fromAugFlow`.  The coproduct-identity clause
-is supplied by `fderiv_Phi_eq_coprod_fromAugFlow_aux`, which depends only on
-continuity of `aΦ` and joint `C^1` of `f`.  The two open neighbourhoods are
-intersected to a common one carrying both clauses. -/
 
 section SuccStepWitness
 
@@ -1568,7 +1383,6 @@ theorem exists_isVariationalFlowProjection_succ_C_step
       (Y : E × ℝ → (E →L[ℝ] E)),
       IsVariationalFlowProjection hΦ T ρ Y ((n : ℕ∞) + 1) := by
   classical
-  -- ## Phase 1: regularity bookkeeping for `f` and `augVF f`.
   set p₀ : E × (E →L[ℝ] E) := (x₀, ContinuousLinearMap.id ℝ E) with hp₀_def
   have hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)) := by
     refine hf_C.of_le ?_
@@ -1577,7 +1391,6 @@ theorem exists_isVariationalFlowProjection_succ_C_step
       have h3 : (2 : WithTop ℕ∞) ≤ ((n : ℕ∞) : WithTop ℕ∞) + 2 := le_add_self
       exact le_trans h2 h3
     exact h1
-  -- `uncurry (augVF f)` is `C^{n+1}`, since `uncurry f` is `C^{n+2} = (n+1)+1`.
   have hf_Cn_plus_2_as_succ : ContDiffOn ℝ (((n : ℕ∞) + 1) + 1) (uncurry f)
       (Set.univ : Set (ℝ × E)) := by
     have h_eq_wt :
@@ -1590,12 +1403,6 @@ theorem exists_isVariationalFlowProjection_succ_C_step
   have h_augVF_Cn_plus_1 : ContDiffOn ℝ ((n : ℕ∞) + 1) (uncurry (augVF f))
       (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) :=
     augVF_uncurry_contDiff (k := ((n : ℕ∞) + 1)) hf_Cn_plus_2_as_succ
-  -- ## Phase 2: shrink the IH open set to a strictly-interior neighbourhood of `t₀`
-  -- that fits inside both `Icc tmin_a tmax_a` and `closedBall p₀ R_aug` (after we
-  -- pick the augmented three-layer nesting).  Concretely we will pick T_inner, ρ_inner
-  -- with `T_inner ≤ T_ih`, `ρ_inner ≤ ρ_ih`, strictly less than time / spatial outer
-  -- bounds for the augmented flow.
-  -- First: outer time width for `augVF f` that fits inside `Icc tmin_a tmax_a`.
   have ht₀_minus_tmin_a : 0 < t₀ - tmin_a := by linarith [ht₀_a_Ioo.1]
   have htmax_a_minus_t₀ : 0 < tmax_a - t₀ := by linarith [ht₀_a_Ioo.2]
   set T_a_out : ℝ := min (t₀ - tmin_a) (tmax_a - t₀) / 2 with hT_a_out_def
@@ -1611,15 +1418,12 @@ theorem exists_isVariationalFlowProjection_succ_C_step
     linarith
   have hsub_T_a_out_aug : Icc (t₀ - T_a_out) (t₀ + T_a_out) ⊆ Icc tmin_a tmax_a :=
     Icc_subset_Icc (by linarith) (by linarith)
-  -- Outer spatial radius for the augmented flow.
   set R_a_out : ℝ := (R_aug : ℝ) / 2 with hR_a_out_def
   have hR_a_out_pos : 0 < R_a_out := by rw [hR_a_out_def]; linarith
   have hR_a_out_lt : R_a_out < (R_aug : ℝ) := by rw [hR_a_out_def]; linarith
-  -- Mid spatial radius.
   set R_a_mid : ℝ := R_a_out * 3 / 4 with hR_a_mid_def
   have hR_a_mid_pos : 0 < R_a_mid := by rw [hR_a_mid_def]; positivity
   have hR_a_mid_lt_out : R_a_mid < R_a_out := by rw [hR_a_mid_def]; linarith
-  -- Inner spatial radius `R_a`: chosen `≤ ρ_ih` so the IH covers it, and `< R_a_mid`.
   set R_a : ℝ := min R_a_mid (ρ_ih : ℝ) / 2 with hR_a_def
   have hR_a_pos : 0 < R_a := by
     rw [hR_a_def]; refine div_pos (lt_min hR_a_mid_pos _hρ_ih_pos) (by norm_num)
@@ -1646,8 +1450,6 @@ theorem exists_isVariationalFlowProjection_succ_C_step
     linarith
   have hR_a_out_le_R_aug : (R_a_outN : ℝ) ≤ (R_aug : ℝ) := by
     rw [hR_a_outN_eq, hR_a_out_def]; linarith
-  -- ## Phase 3: extract uniform operator-norm bound `M_aug` for `fderiv (augVF f τ) (aΦ ⟨p, τ⟩)`
-  -- on the outer slab `closedBall p₀ R_a_out × Icc (t₀ - T_a_out) (t₀ + T_a_out)`.
   set Slab_a : Set ((E × (E →L[ℝ] E)) × ℝ) :=
     closedBall p₀ R_a_out ×ˢ Icc (t₀ - T_a_out) (t₀ + T_a_out)
   have hSlab_a_cpt : IsCompact Slab_a :=
@@ -1690,7 +1492,6 @@ theorem exists_isVariationalFlowProjection_succ_C_step
   set M_aug : ℝ := M_aug_pre + 1 with hM_aug_def
   have hM_aug_nn : 0 ≤ M_aug := by rw [hM_aug_def]; linarith
   have hM_aug_pos : 0 < M_aug := by rw [hM_aug_def]; linarith
-  -- Pick `T_a_mid` strictly less than `T_a_out` with `M_aug · T_a_mid < 1`.
   set T_a_mid : ℝ := min (T_a_out * 3 / 4) (1 / (2 * M_aug)) with hT_a_mid_def
   have hT_a_mid_pos : 0 < T_a_mid := by
     refine lt_min ?_ ?_
@@ -1706,7 +1507,6 @@ theorem exists_isVariationalFlowProjection_succ_C_step
       mul_le_mul_of_nonneg_left h1 hM_aug_nn
     have h3 : M_aug * (1 / (2 * M_aug)) = 1 / 2 := by field_simp
     linarith
-  -- Inner time `T_a := min(T_a_mid, T_ih) / 2`.
   set T_a : ℝ := min T_a_mid T_ih / 2 with hT_a_def
   have hT_a_pos : 0 < T_a := by
     rw [hT_a_def]; refine div_pos (lt_min hT_a_mid_pos _hT_ih_pos) (by norm_num)
@@ -1718,7 +1518,6 @@ theorem exists_isVariationalFlowProjection_succ_C_step
     rw [hT_a_def]
     have h1 : min T_a_mid T_ih ≤ T_ih := min_le_right _ _
     linarith
-  -- Convert the bound `M_aug_pre` into the `hA_bd` shape required by the projection lemma.
   have hA_bd_a : ∀ p ∈ closedBall p₀ (R_a_outN : ℝ),
       ∀ τ ∈ Icc (t₀ - T_a_out) (t₀ + T_a_out),
         ‖fderiv ℝ (augVF f τ) (aΦ ⟨p, τ⟩)‖ ≤ M_aug := by
@@ -1728,8 +1527,6 @@ theorem exists_isVariationalFlowProjection_succ_C_step
       rw [hR_a_outN_eq] at hp; exact hp
     have h_pre : ‖fderiv ℝ (augVF f τ) (aΦ ⟨p, τ⟩)‖ ≤ M_aug_pre := hM_aug_pre_bd _ hq_in
     linarith
-  -- ## Phase 4: shrink the IH from `(T_ih, ρ_ih)` to `(T_a, R_aN)`.
-  -- The shrunk IH lives on `ball p₀ R_aN × Ioo (t₀ - T_a) (t₀ + T_a)`.
   have hR_aN_le_ρ_ih : (R_aN : ℝ) ≤ (ρ_ih : ℝ) := by rw [hR_aN_eq]; exact hR_a_le_ρ_ih
   have h_shrink_sub : (ball p₀ (R_aN : ℝ)) ×ˢ Ioo (t₀ - T_a) (t₀ + T_a)
       ⊆ (ball p₀ (ρ_ih : ℝ)) ×ˢ Ioo (t₀ - T_ih) (t₀ + T_ih) := by
@@ -1744,9 +1541,6 @@ theorem exists_isVariationalFlowProjection_succ_C_step
     refine
     { contDiffOn := hY_ih.contDiffOn.mono h_shrink_sub,
       fderiv_eq := fun q hq => hY_ih.fderiv_eq q (h_shrink_sub hq) }
-  -- ## Phase 5: apply `contDiffOn_flow_of_isVariationalFlowProjection_top` to `aΦ` with
-  -- k = n+1 and the shrunk IH at level n.  Conclusion: `aΦ` is `ContDiffOn (n+1)` on
-  -- `ball p₀ R_aN × Ioo (t₀ - T_a) (t₀ + T_a)`.
   have hk_pos : (1 : ℕ) ≤ n + 1 := by omega
   have hk_minus_one : ((n + 1 - 1 : ℕ) : ℕ∞) = (n : ℕ∞) := by
     have : n + 1 - 1 = n := by omega
@@ -1764,20 +1558,16 @@ theorem exists_isVariationalFlowProjection_succ_C_step
     · rw [hR_a_midN_eq, hR_a_outN_eq]; linarith
     · exact hρρ_aux
     · exact hR_a_out_le_R_aug
-    · -- `uncurry (augVF f)` is `ContDiffOn ((n + 1 : ℕ) : ℕ∞)`.
-      have h_eq_succ : (((n + 1 : ℕ) : ℕ∞) : WithTop ℕ∞) =
+    · have h_eq_succ : (((n + 1 : ℕ) : ℕ∞) : WithTop ℕ∞) =
           ((n : ℕ∞) : WithTop ℕ∞) + 1 := by push_cast; ring
       rw [h_eq_succ]
       exact h_augVF_Cn_plus_1
-  -- Rewrite the level to the `(n : ℕ∞) + 1` shape.
   have h_aug_Cn_plus_1' : ContDiffOn ℝ ((n : ℕ∞) + 1) aΦ
       ((ball p₀ (R_aN : ℝ)) ×ˢ Ioo (t₀ - T_a) (t₀ + T_a)) := by
     have h_eq_succ : (((n + 1 : ℕ) : ℕ∞) : WithTop ℕ∞) =
         ((n : ℕ∞) : WithTop ℕ∞) + 1 := by push_cast; ring
     rw [← h_eq_succ]
     exact h_aug_Cn_plus_1
-  -- ## Phase 6: inherit smoothness to `Y := fromAugFlow aΦ` via `contDiffOn_fromAugFlow`.
-  -- Embedding `(x, t) ↦ ((x, id), t)` maps `ball x₀ R_aN × Ioo` into `ball p₀ R_aN × Ioo`.
   set U_E : Set (E × ℝ) := ball x₀ (R_aN : ℝ) ×ˢ Ioo (t₀ - T_a) (t₀ + T_a) with hU_E_def
   set U_a : Set ((E × (E →L[ℝ] E)) × ℝ) :=
     ball p₀ (R_aN : ℝ) ×ˢ Ioo (t₀ - T_a) (t₀ + T_a) with hU_a_def
@@ -1795,10 +1585,8 @@ theorem exists_isVariationalFlowProjection_succ_C_step
   have h_Y_smooth : ContDiffOn ℝ ((n : ℕ∞) + 1) (fromAugFlow aΦ) U_E :=
     contDiffOn_fromAugFlow (k := ((n : ℕ∞) + 1)) (Ω := U_a) (U := U_E)
       h_aug_Cn_plus_1' hmap
-  -- ## Phase 7: invoke the coproduct-identity helper and intersect the two neighbourhoods.
   obtain ⟨T_help, ρ_help, hT_help_pos, hρ_help_pos, h_help⟩ :=
     fderiv_Phi_eq_coprod_fromAugFlow_aux (Φ := Φ) hΦ hf_C1 ht₀_Ioo hr_pos haΦ ht₀_a_Ioo hR_aug_pos
-  -- Effective time width / spatial radius.
   set T_eff : ℝ := min T_a T_help with hT_eff_def
   have hT_eff_pos : 0 < T_eff := lt_min hT_a_pos hT_help_pos
   have hT_eff_le_T_a : T_eff ≤ T_a := min_le_left _ _
@@ -1811,7 +1599,6 @@ theorem exists_isVariationalFlowProjection_succ_C_step
   have hρ_eff_le_help : ρ_eff ≤ (ρ_help : ℝ) := min_le_right _ _
   have hρ_effN_le_R_a : (ρ_effN : ℝ) ≤ (R_aN : ℝ) := by rw [hρ_effN_eq]; exact hρ_eff_le_R_a
   have hρ_effN_le_help : (ρ_effN : ℝ) ≤ (ρ_help : ℝ) := by rw [hρ_effN_eq]; exact hρ_eff_le_help
-  -- Containment of the effective neighbourhood in the smoothness neighbourhood `U_E`.
   have h_eff_sub_smooth : (ball x₀ (ρ_effN : ℝ)) ×ˢ Ioo (t₀ - T_eff) (t₀ + T_eff) ⊆ U_E := by
     rw [hU_E_def]
     refine Set.prod_mono ?_ ?_
@@ -1821,7 +1608,6 @@ theorem exists_isVariationalFlowProjection_succ_C_step
     · intro s hs
       rcases hs with ⟨h1, h2⟩
       refine ⟨?_, ?_⟩ <;> linarith
-  -- Containment of the effective neighbourhood in the helper's coproduct-identity neighbourhood.
   have h_eff_sub_help : (ball x₀ (ρ_effN : ℝ)) ×ˢ Ioo (t₀ - T_eff) (t₀ + T_eff)
       ⊆ (ball x₀ (ρ_help : ℝ)) ×ˢ Ioo (t₀ - T_help) (t₀ + T_help) := by
     refine Set.prod_mono ?_ ?_
@@ -1831,28 +1617,12 @@ theorem exists_isVariationalFlowProjection_succ_C_step
     · intro s hs
       rcases hs with ⟨h1, h2⟩
       refine ⟨?_, ?_⟩ <;> linarith
-  -- ## Final assembly.
   refine ⟨T_eff, ρ_effN, hT_eff_pos, hρ_eff_pos, fromAugFlow aΦ, ?_⟩
   refine { contDiffOn := h_Y_smooth.mono h_eff_sub_smooth, fderiv_eq := ?_ }
   intro q hq
   exact h_help q (h_eff_sub_help hq)
 
 end SuccStepWitness
-
-/-! ## The level-0 variational-flow projection witness from joint `C^1` of `f`
-
-At level `0`, the smoothness clause reduces to joint continuity of `Y` on the
-open neighbourhood, and the augmented-flow construction is not required:
-the spatial piece can be read off directly from the joint Fréchet derivative
-of `Φ` via the inverse of `ContinuousLinearMap.coprodEquivL`, which is itself
-a continuous linear map.  Joint continuity of `fderiv ℝ Φ` is then supplied by
-`continuousOn_fderiv_flow_of_isLocalFlow`, and the coproduct identity for
-`fderiv ℝ Φ` is supplied pointwise by `hasFDerivAt_flow_jointly_at`.
-
-Both ingredients consume the same nested three-layer Lipschitz / Fréchet setup
-on `(T_out, T_mid, T)` and `(ρ_out, ρ_mid, ρ)`, built by extracting a uniform
-operator-norm bound on the spatial linearization `(τ, y) ↦ fderiv ℝ (f τ) y`
-from finite-dimensional compactness of a closed-ball × closed-interval slab. -/
 
 section LevelZeroFullWitness
 
@@ -1885,11 +1655,9 @@ theorem exists_isVariationalFlowProjection_zero_of_C1
       (Y : E × ℝ → (E →L[ℝ] E)),
       IsVariationalFlowProjection hΦ T ρ Y (0 : ℕ∞) := by
   classical
-  -- The coproduct equivalence and its components, used throughout.
   set CE : ((E →L[ℝ] E) × (ℝ →L[ℝ] E)) ≃L[ℝ] ((E × ℝ) →L[ℝ] E) :=
     ContinuousLinearMap.coprodEquivL (𝕜 := ℝ) (E := E) (F := ℝ) (G := E) ℝ
     with hCE_def
-  -- Phase 1: outer time width `T_outer` with `Icc(t₀±T_outer) ⊆ Icc tmin tmax`.
   have ht₀_minus_tmin : 0 < t₀ - tmin := by linarith [ht₀_Ioo.1]
   have htmax_minus_t₀ : 0 < tmax - t₀ := by linarith [ht₀_Ioo.2]
   set T_outer : ℝ := min (t₀ - tmin) (tmax - t₀) / 2 with hT_outer_def
@@ -1906,13 +1674,11 @@ theorem exists_isVariationalFlowProjection_zero_of_C1
     linarith
   have hsub_outer_orig : Icc (t₀ - T_outer) (t₀ + T_outer) ⊆ Icc tmin tmax :=
     Icc_subset_Icc (by linarith) (by linarith)
-  -- Phase 2: outer spatial radius ρ_outer = r/2.
   set ρ_outer : ℝ := (r : ℝ) / 2 with hρ_outer_def
   have hρ_outer_pos : 0 < ρ_outer := by rw [hρ_outer_def]; linarith
   have hρ_outer_le_r : ρ_outer ≤ (r : ℝ) := by rw [hρ_outer_def]; linarith
   set ρ_outerN : ℝ≥0 := ⟨ρ_outer, le_of_lt hρ_outer_pos⟩ with hρ_outerN_def
   have hρ_outerN_eq : (ρ_outerN : ℝ) = ρ_outer := rfl
-  -- Phase 3: Φ-image radius on the slab `closedBall x₀ ρ_outer ×ˢ Icc (t₀-T_outer) (t₀+T_outer)`.
   set Slab_Φ_outer : Set (E × ℝ) :=
     closedBall x₀ ρ_outer ×ˢ Icc (t₀ - T_outer) (t₀ + T_outer) with hSlab_Φ_outer_def
   have hSlab_Φ_outer_cpt : IsCompact Slab_Φ_outer :=
@@ -1936,7 +1702,6 @@ theorem exists_isVariationalFlowProjection_zero_of_C1
   have hR_Φ_image_pre_nn : 0 ≤ R_Φ_image_pre := norm_nonneg _
   have hR_Φ_image_pre_bd : ∀ p ∈ Slab_Φ_outer, ‖Φ p - x₀‖ ≤ R_Φ_image_pre :=
     fun p hp => hpmax_R hp
-  -- Phase 4: unified Lipschitz radius and Lipschitz constant for `f`.
   set r₀_lip : ℝ := R_Φ_image_pre + 1 with hr₀_lip_def
   have hr₀_lip_pos : 0 < r₀_lip := by rw [hr₀_lip_def]; linarith
   have hr₀_lip_ge_Φ : R_Φ_image_pre ≤ r₀_lip := by rw [hr₀_lip_def]; linarith
@@ -1962,7 +1727,6 @@ theorem exists_isVariationalFlowProjection_zero_of_C1
   set K_orig : ℝ := K_pre + 1 with hK_orig_def
   have hK_orig_pos : 0 < K_orig := by rw [hK_orig_def]; linarith
   have hK_orig_nn : 0 ≤ K_orig := le_of_lt hK_orig_pos
-  -- Phase 5: pick `T_mid < T_outer` with `K_orig · T_mid < 1`, and `T_final < T_mid`.
   set T_mid : ℝ := min (T_outer * 3 / 4) (1 / (2 * K_orig)) with hT_mid_def
   have hT_mid_pos : 0 < T_mid := by
     refine lt_min ?_ ?_
@@ -1981,7 +1745,6 @@ theorem exists_isVariationalFlowProjection_zero_of_C1
   set T_final : ℝ := T_mid / 2 with hT_final_def
   have hT_final_pos : 0 < T_final := by rw [hT_final_def]; linarith
   have hT_final_lt_mid : T_final < T_mid := by rw [hT_final_def]; linarith
-  -- Phase 6: nested spatial radii `ρ_mid_N`, `ρ_N`, slack `r'_N` for the Fréchet hypotheses.
   set ρ_mid : ℝ := ρ_outer * 3 / 4 with hρ_mid_def
   have hρ_mid_pos : 0 < ρ_mid := by rw [hρ_mid_def]; positivity
   have hρ_mid_lt_outer : ρ_mid < ρ_outer := by rw [hρ_mid_def]; linarith
@@ -2013,7 +1776,6 @@ theorem exists_isVariationalFlowProjection_zero_of_C1
     have h1 : (ρ_midN : ℝ) + (r'_φ : ℝ) ≤ (ρ_outerN : ℝ) + (r'_φ : ℝ) := by
       linarith [hρ_midN_lt_outerN]
     linarith [hρρ'_φ_outer]
-  -- Phase 7: uniform `hA_bd` on `closedBall x₀ ρ_outer × Icc (t₀ - T_outer) (t₀ + T_outer)`.
   have hA_bd_outer : ∀ x ∈ closedBall x₀ (ρ_outerN : ℝ),
       ∀ τ ∈ Icc (t₀ - T_outer) (t₀ + T_outer),
         ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩)‖ ≤ K_orig := by
@@ -2031,15 +1793,12 @@ theorem exists_isVariationalFlowProjection_zero_of_C1
     have h_pair_in_f : ((τ, Φ ⟨x, τ⟩) : ℝ × E) ∈ Slab_f := ⟨hτ, h_orbit_in_r₀⟩
     have h_pre : ‖fderiv ℝ (f τ) (Φ ⟨x, τ⟩)‖ ≤ K_pre := hK_pre_bd _ h_pair_in_f
     linarith
-  -- Phase 8: smoothness clause via `continuousOn_fderiv_flow_of_isLocalFlow`.
   have h_fderiv_cont : ContinuousOn (fderiv ℝ Φ)
       ((ball x₀ (ρ_innerN : ℝ)) ×ˢ Ioo (t₀ - T_final) (t₀ + T_final)) :=
     continuousOn_fderiv_flow_of_isLocalFlow hΦ hf_C1
       hT_final_pos hT_final_lt_mid hT_mid_lt_outer hK_orig_nn hKT_mid hsub_outer_orig
       hr'_φ_pos hρ_innerN_lt_midN hρ_midN_lt_outerN hρρ'_φ hρ_outerN_le_r hA_bd_outer
-  -- The candidate `Y` extracts the spatial piece via the inverse of `coprodEquivL`.
   set Y : E × ℝ → (E →L[ℝ] E) := fun q => (CE.symm (fderiv ℝ Φ q)).1 with hY_def
-  -- Continuity of `Y`: compose `fderiv ℝ Φ` with the continuous `CE.symm` and `Prod.fst`.
   have hY_cont : ContinuousOn Y
       ((ball x₀ (ρ_innerN : ℝ)) ×ˢ Ioo (t₀ - T_final) (t₀ + T_final)) := by
     have h1 : ContinuousOn (fun q => CE.symm (fderiv ℝ Φ q))
@@ -2049,31 +1808,25 @@ theorem exists_isVariationalFlowProjection_zero_of_C1
   have hY_C0 : ContDiffOn ℝ 0 Y
       ((ball x₀ (ρ_innerN : ℝ)) ×ˢ Ioo (t₀ - T_final) (t₀ + T_final)) :=
     contDiffOn_zero.mpr hY_cont
-  -- Phase 9: pointwise coproduct identity for `fderiv ℝ Φ` via `hasFDerivAt_flow_jointly_at`.
   have h_fderiv_eq : ∀ q ∈ ((ball x₀ (ρ_innerN : ℝ)) ×ˢ Ioo (t₀ - T_final) (t₀ + T_final)),
       fderiv ℝ Φ q = (Y q).coprod (timePieceFn f Φ q) := by
     intro q hq
     rcases hq with ⟨hq_x, hq_t⟩
     obtain ⟨x, t⟩ := q
     rw [mem_ball] at hq_x
-    -- `x ∈ closedBall x₀ ρ_inner ⊆ closedBall x₀ ρ_mid ⊆ closedBall x₀ ρ_outer`.
     have hx_cb_inner : x ∈ closedBall x₀ (ρ_innerN : ℝ) := mem_closedBall.mpr (le_of_lt hq_x)
     have hx_cb_mid : x ∈ closedBall x₀ (ρ_midN : ℝ) :=
       closedBall_subset_closedBall (le_of_lt hρ_innerN_lt_midN) hx_cb_inner
     have hx_cb_outer : x ∈ closedBall x₀ (ρ_outerN : ℝ) :=
       closedBall_subset_closedBall (le_of_lt hρ_midN_lt_outerN) hx_cb_mid
-    -- `t ∈ Ioo (t₀ - T_final) (t₀ + T_final) ⊂ Ioo (t₀ - T_mid) (t₀ + T_mid)`.
     have ht_Ioo_mid : t ∈ Ioo (t₀ - T_mid) (t₀ + T_mid) := by
       refine ⟨?_, ?_⟩
       · linarith [hq_t.1, hT_final_lt_mid]
       · linarith [hq_t.2, hT_final_lt_mid]
-    -- The mid-level subset `Icc (t₀-T_mid) (t₀+T_mid) ⊆ Icc tmin tmax` is needed by
-    -- `hasFDerivAt_flow_jointly_at`.
     have hsub_mid_orig : Icc (t₀ - T_mid) (t₀ + T_mid) ⊆ Icc tmin tmax := by
       have hsub_mid_outer : Icc (t₀ - T_mid) (t₀ + T_mid) ⊆ Icc (t₀ - T_outer) (t₀ + T_outer) :=
         Icc_subset_Icc (by linarith) (by linarith)
       exact hsub_mid_outer.trans hsub_outer_orig
-    -- Restrict the uniform bound to `closedBall x₀ ρ_outer × Icc (t₀-T_mid) (t₀+T_mid)`.
     have hA_bd_mid : ∀ y ∈ closedBall x₀ (ρ_outerN : ℝ),
         ∀ τ ∈ Icc (t₀ - T_mid) (t₀ + T_mid),
           ‖fderiv ℝ (f τ) (Φ ⟨y, τ⟩)‖ ≤ K_orig := by
@@ -2083,7 +1836,6 @@ theorem exists_isVariationalFlowProjection_zero_of_C1
         · linarith [hτ.1, hT_mid_lt_outer]
         · linarith [hτ.2, hT_mid_lt_outer]
       exact hA_bd_outer y hy τ hτ_outer
-    -- Apply the joint Fréchet derivative formula at `(x, t)`.
     have h_fd := hasFDerivAt_flow_jointly_at (ρ := ρ_outerN) hΦ hf_C1
       hT_mid_pos hK_orig_nn hKT_mid hsub_mid_orig hr'_φ_pos hρρ'_φ_outer hA_bd_mid
       hx_cb_outer ht_Ioo_mid
@@ -2100,10 +1852,8 @@ theorem exists_isVariationalFlowProjection_zero_of_C1
             (fun τ hτ => hA_bd_mid x hx_cb_outer τ hτ)
             (Ioo_subset_Icc_self ht_Ioo_mid)).coprod
           ((ContinuousLinearMap.id ℝ ℝ).smulRight (f t (Φ ⟨x, t⟩))) := h_fd.fderiv
-    -- Identify the time piece of the coproduct with `timePieceFn`.
     have h_timePiece_eq : (ContinuousLinearMap.id ℝ ℝ).smulRight (f t (Φ ⟨x, t⟩))
         = timePieceFn f Φ (x, t) := rfl
-    -- Abbreviate the spatial-piece part.
     set Lmap : E →L[ℝ] E :=
       variationalLinearMapAt (f := f) (α := fun s => Φ ⟨x, s⟩) (t₀ := t₀)
         hT_mid_pos hK_orig_nn hKT_mid
@@ -2119,7 +1869,6 @@ theorem exists_isVariationalFlowProjection_zero_of_C1
     set Lti : ℝ →L[ℝ] E := (ContinuousLinearMap.id ℝ ℝ).smulRight (f t (Φ ⟨x, t⟩))
       with hLti_def
     have hfd_eq' : fderiv ℝ Φ (x, t) = Lmap.coprod Lti := hfd_eq
-    -- Decompose `fderiv ℝ Φ (x, t)` via the inverse coproduct equivalence.
     have hCE_apply : CE (Lmap, Lti) = Lmap.coprod Lti := rfl
     have hCE_inv : CE.symm (Lmap.coprod Lti) = (Lmap, Lti) := by
       rw [← hCE_apply]
@@ -2128,21 +1877,10 @@ theorem exists_isVariationalFlowProjection_zero_of_C1
       change (CE.symm (fderiv ℝ Φ (x, t))).1 = Lmap
       rw [hfd_eq', hCE_inv]
     rw [hfd_eq', hY_eq, ← h_timePiece_eq]
-  -- Final assembly.
   refine ⟨T_final, ρ_innerN, hT_final_pos, hρ_inner_pos, Y, ?_⟩
   refine { contDiffOn := hY_C0, fderiv_eq := h_fderiv_eq }
 
 end LevelZeroFullWitness
-
-/-! ## The parameterized `C^{k+1}` variational-flow projection witness
-
-Combining the level-0 base case `exists_isVariationalFlowProjection_zero_of_C1`
-and the inductive successor step `exists_isVariationalFlowProjection_succ_C_step`,
-we obtain a variational-flow projection at every level `k : ℕ` from joint
-`C^{k+1}` regularity of `f`.  The induction is over `k`, and at each step the
-inductive hypothesis is applied to the augmented flow `aΦ` of `augVF f` on the
-augmented Banach space `E × (E →L[ℝ] E)`, so we package the statement as a
-universally-quantified auxiliary lemma over the Banach-space parameter `E`. -/
 
 section ParameterizedCkWitness
 
@@ -2171,9 +1909,6 @@ theorem exists_isVariationalFlowProjection_of_C
       (Y : E × ℝ → (E →L[ℝ] E)),
       IsVariationalFlowProjection hΦ T ρ Y (k : ℕ∞) := by
   classical
-  -- Package the statement as a universally-quantified claim over the Banach-space
-  -- parameter `E`, so that the inductive step can specialize it to
-  -- `E × (E →L[ℝ] E)` for the augmented flow.
   suffices haux : ∀ (k : ℕ) (E : Type _) [NormedAddCommGroup E] [NormedSpace ℝ E]
       [CompleteSpace E] [FiniteDimensional ℝ E]
       {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ}
@@ -2192,22 +1927,17 @@ theorem exists_isVariationalFlowProjection_of_C
   induction k with
   | zero =>
       intro E _ _ _ _ f t₀ x₀ r tmin tmax Φ hΦ ht₀_Ioo hr_pos hf_C
-      -- `(0 : ℕ∞) + 1 = 1` definitionally, so `hf_C : ContDiffOn ℝ 1 (uncurry f) univ`.
       have hf_C1 : ContDiffOn ℝ 1 (Function.uncurry f) (Set.univ : Set (ℝ × E)) := by
         simpa using hf_C
       have h_witness := exists_isVariationalFlowProjection_zero_of_C1
         hΦ ht₀_Ioo hr_pos hf_C1
-      -- The witness lives at level `(0 : ℕ∞)`, which is what we need (since `((0 : ℕ) : ℕ∞) = 0`).
       obtain ⟨T, ρ, hT, hρ, Y, hY⟩ := h_witness
       refine ⟨T, ρ, hT, hρ, Y, ?_⟩
-      -- `((0 : ℕ) : ℕ∞) = 0` and the predicate matches.
       have h_zero : ((0 : ℕ) : ℕ∞) = (0 : ℕ∞) := by norm_cast
       rw [h_zero]
       exact hY
   | succ n IH =>
       intro E _ _ _ _ f t₀ x₀ r tmin tmax Φ hΦ ht₀_Ioo hr_pos hf_C
-      -- `hf_C : ContDiffOn ℝ (((n+1 : ℕ) : ℕ∞) + 1) (uncurry f) univ`.
-      -- Re-cast to the `(n : ℕ∞) + 2` shape required by the successor step.
       have h_eq_succ_plus_one : (((n + 1 : ℕ) : ℕ∞) + 1 : WithTop ℕ∞) =
           ((n : ℕ∞) + 2 : WithTop ℕ∞) := by push_cast; ring
       have hf_Cn_plus_2 : ContDiffOn ℝ ((n : ℕ∞) + 2)
@@ -2215,15 +1945,11 @@ theorem exists_isVariationalFlowProjection_of_C
         have := hf_C
         rw [h_eq_succ_plus_one] at this
         exact this
-      -- Derive joint `C^1` of `f` for building `aΦ` via Picard–Lindelöf.
       have hf_C1 : ContDiffOn ℝ 1 (Function.uncurry f) (Set.univ : Set (ℝ × E)) := by
         refine hf_Cn_plus_2.of_le ?_
         have h1 : (1 : WithTop ℕ∞) ≤ 2 := by decide
         have h2 : (2 : WithTop ℕ∞) ≤ ((n : ℕ∞) : WithTop ℕ∞) + 2 := le_add_self
         exact le_trans h1 h2
-      -- `uncurry (augVF f)` is `ContDiffOn ℝ ((n : ℕ∞) + 1)` since `uncurry f` is
-      -- `ContDiffOn ℝ ((n : ℕ∞) + 2) = ((n+1 : ℕ∞) + 1)`.  This rearrangement
-      -- mirrors the one inside `exists_isVariationalFlowProjection_succ_C_step`.
       have hf_Cn_plus_2_as_succ : ContDiffOn ℝ (((n : ℕ∞) + 1) + 1)
           (Function.uncurry f) (Set.univ : Set (ℝ × E)) := by
         have h_eq_wt :
@@ -2237,8 +1963,6 @@ theorem exists_isVariationalFlowProjection_of_C
           ContDiffOn ℝ ((n : ℕ∞) + 1) (Function.uncurry (augVF f))
             (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) :=
         augVF_uncurry_contDiff (k := ((n : ℕ∞) + 1)) hf_Cn_plus_2_as_succ
-      -- Build the augmented flow `aΦ` from joint `C^1` of `augVF f` (the `((n : ℕ∞) + 1)`-
-      -- regularity downgraded to `1`).
       have h_augVF_C1 : ContDiffOn ℝ 1 (Function.uncurry (augVF f))
           (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) := by
         refine h_augVF_Cn_plus_1.of_le ?_
@@ -2250,13 +1974,11 @@ theorem exists_isVariationalFlowProjection_of_C
       have hR_aug_R : (0 : ℝ) < (R_aug : ℝ) := by exact_mod_cast hR_aug_pos
       have ht₀_a_Ioo : t₀ ∈ Set.Ioo (t₀ - ε_aug) (t₀ + ε_aug) :=
         ⟨by linarith, by linarith⟩
-      -- Apply IH on `(augVF f, aΦ)` at level `n`, over the Banach space `E × (E →L[ℝ] E)`.
       have hIH := IH (E × (E →L[ℝ] E)) (f := augVF f) (t₀ := t₀)
         (x₀ := (x₀, ContinuousLinearMap.id ℝ E)) (r := R_aug)
         (tmin := t₀ - ε_aug) (tmax := t₀ + ε_aug) (Φ := aΦ)
         haΦ ht₀_a_Ioo hR_aug_R h_augVF_Cn_plus_1
       obtain ⟨T_ih, ρ_ih, hT_ih_pos, hρ_ih_pos, Y_ih, hY_ih⟩ := hIH
-      -- Plug into the successor step.
       have h_succ := exists_isVariationalFlowProjection_succ_C_step
         (f := f) (t₀ := t₀) (x₀ := x₀) (r := r) (tmin := tmin) (tmax := tmax)
         (Φ := Φ) hΦ ht₀_Ioo hr_pos n hf_Cn_plus_2
@@ -2266,7 +1988,6 @@ theorem exists_isVariationalFlowProjection_of_C
         hT_ih_pos hρ_ih_pos hY_ih
       obtain ⟨T, ρ, hT, hρ, Y, hY⟩ := h_succ
       refine ⟨T, ρ, hT, hρ, Y, ?_⟩
-      -- Adjust the level: `((n+1 : ℕ) : ℕ∞) = (n : ℕ∞) + 1`.
       have h_lvl : ((n + 1 : ℕ) : ℕ∞) = (n : ℕ∞) + 1 := by push_cast; ring
       rw [h_lvl]
       exact hY

@@ -69,23 +69,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Finite-sum closure of iterated Sobolev membership
-
-`MemWkp k p` is closed under addition and contains the zero function, hence is
-closed under arbitrary finite sums. -/
 
 /-- **`MemWkp` is closed under finite sums.** If every member of a family of
 functions indexed by a finite set is `W^{k,p}`-regular on an open set, then the
@@ -117,13 +106,6 @@ private lemma memWkp_finsetSum
       rw [h_eq]
       exact h_add
 
-/-! ## Topological support of a chart pushforward
-
-The chart-`α` pushforward of a function `M → ℝ` vanishes outside the chart-`α`
-image of the function's topological support; when that topological support is a
-compact subset of the chart source, the pushforward's topological support is
-contained in the compact chart-image. -/
-
 /-- The topological support of the chart-`α` pushforward of a function `u` whose
 topological support is a compact subset of the chart-`α` source is contained in
 the chart-`α` Euclidean image of `tsupport u`. -/
@@ -142,8 +124,6 @@ private lemma tsupport_chartPushedRaw_subset_chartImage
   intro y hy
   rw [Function.mem_support] at hy
   by_contra hy_off
-  -- `y` lies off the chart-image of `tsupport u`.  If `y` is in the chart
-  -- target the pushforward vanishes there; if not it vanishes by definition.
   have hy_off' : y ∉ (toEuclidean (E := E)) '' ((extChartAt I α) '' (tsupport u)) := by
     intro hy_in
     apply hy_off
@@ -153,15 +133,6 @@ private lemma tsupport_chartPushedRaw_subset_chartImage
   · exact hy (chartPushedRaw_eq_zero_off_image_tsupport
       (I := I) (M := M) (u := u) α hy_target hy_off')
   · exact hy (chartPushedRaw_apply_of_notMem (I := I) (M := M) α u hy_target)
-
-/-! ## Iterated Sobolev regularity of one transported summand
-
-The core lemma: the chart-transition transport of a partition-of-unity chart
-component is `W^{k,2}`-regular as soon as that partition-of-unity component is.
-The argument localises the partition-of-unity component by a smooth chart-`β`
-cutoff, transfers `W^{k,2}`-regularity through the bounded chart-transition
-diffeomorphism, multiplies by the smooth bounded transport coefficient and
-extends by zero. -/
 
 /-- **Iterated Sobolev regularity of a transported chart component.** For chart
 base points `β`, `α`, component multi-indices `(P₀, Q)` and an `L²` class `f` on
@@ -183,7 +154,6 @@ private lemma chartTransitionTransportCLM_memWkp
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- Abbreviations.
   set d : ℕ := Module.finrank ℝ E with hd_def
   set cM : M → ℝ := transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q
     with hcM_def
@@ -193,8 +163,6 @@ private lemma chartTransitionTransportCLM_memWkp
   set Tβ : Set EuclN := chartTargetEuclid (I := I) (M := M) β with hTβ_def
   have hTα_open : IsOpen Tα := chartTargetEuclid_isOpen (I := I) (M := M) α
   have hTβ_open : IsOpen Tβ := chartTargetEuclid_isOpen (I := I) (M := M) β
-  -- The transport coefficient is globally smooth, has compact support inside
-  -- both chart sources, and its closed support is a compact subset of each.
   have hcM_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ cM :=
     contMDiff_transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q
   have hcM_supp_α : tsupport cM ⊆ (chartAt H α).source :=
@@ -205,8 +173,6 @@ private lemma chartTransitionTransportCLM_memWkp
   have hKc_compact : IsCompact Kc := (isClosed_tsupport cM).isCompact
   have hKc_in_α : Kc ⊆ (chartAt H α).source := hcM_supp_α
   have hKc_in_β : Kc ⊆ (chartAt H β).source := hcM_supp_β
-  -- Global smoothness, compact support and a uniform iterated-derivative bound
-  -- for the chart-`α` pushforward of the transport coefficient.
   have hcE_smooth : ContDiff ℝ ∞ cE :=
     DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
       (I := I) (M := M) hcM_smooth hcM_supp_α
@@ -217,26 +183,20 @@ private lemma chartTransitionTransportCLM_memWkp
   obtain ⟨Ccoeff, _hCcoeff_nn, hCcoeff_bound⟩ :=
     exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
       (d := d) hcE_smooth' hcE_cpt k
-  -- The chart-`α` pushforward of the transport coefficient is supported inside
-  -- the chart-`α` Euclidean image of `Kc`.
   have hcE_tsupp_subset :
       tsupport cE ⊆ (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) '' Kc :=
     tsupport_chartPushedRaw_subset_chartImage (I := I) (M := M) α hcM_supp_α
-  -- The bounded chart-transition diffeomorphism for the compact set `Kc`.
   obtain ⟨Ωαβ, Ωβα, hΩαβ_open, hΩβα_open, hΩαβ_subset_target,
     hΩβα_subset_target, _hΩαβ_overlap, _hΩβα_overlap, hKc_image_in_Ωαβ, Φ,
     hΦ_eq, _hΦ_inv_eq⟩ :=
     chartTransition_smoothDiffeoBoundedAtOrder_strict (I := I) (M := M)
       α β hKc_compact hKc_in_α hKc_in_β k
-  -- The chart-`α` Euclidean image of `Kc` is compact and contained in `Ωαβ`.
   set KEα : Set EuclN :=
     (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) '' Kc with hKEα_def
   have hKEα_compact : IsCompact KEα :=
     chartImage_isCompact_of_compact_in_source (I := I) (M := M) α hKc_compact hKc_in_α
   have hKEα_in_Ωαβ : KEα ⊆ Ωαβ := hKc_image_in_Ωαβ
-  -- `tsupport cE ⊆ Ωαβ`, hence also `⊆ Tα`.
   have hcE_tsupp_Ωαβ : tsupport cE ⊆ Ωαβ := hcE_tsupp_subset.trans hKEα_in_Ωαβ
-  -- The diffeomorphism image of `KEα` is compact and contained in `Ωβα`.
   set KEβ : Set EuclN := Φ.toFun '' KEα with hKEβ_def
   have hKEβ_compact : IsCompact KEβ :=
     hKEα_compact.image Φ.continuous_toFun
@@ -246,8 +206,6 @@ private lemma chartTransitionTransportCLM_memWkp
     have hy_Ωαβ : y ∈ Ωαβ := hKEα_in_Ωαβ hy
     rw [← hyz]
     exact Φ.bijOn.mapsTo hy_Ωαβ
-  -- A smooth chart-`β` cutoff `χ`, equal to `1` on a neighbourhood of `KEβ`,
-  -- compactly supported inside `Ωβα ∩ Tβ`.
   set Uβ : Set EuclN := Ωβα ∩ Tβ with hUβ_def
   have hUβ_open : IsOpen Uβ := hΩβα_open.inter hTβ_open
   have hKEβ_in_Uβ : KEβ ⊆ Uβ :=
@@ -257,13 +215,11 @@ private lemma chartTransitionTransportCLM_memWkp
     exists_smooth_cutoff_with_neighborhood (d := d) hKEβ_compact hUβ_open hKEβ_in_Uβ
   have hχ_supp_Ωβα : tsupport χ ⊆ Ωβα := fun y hy => (hχ_supp hy).1
   have hχ_supp_Tβ : tsupport χ ⊆ Tβ := fun y hy => (hχ_supp hy).2
-  -- The localised partition-of-unity component `χ · f`.
   set v : EuclN → ℝ := fun y => χ y * T y with hv_def
   have hv_supp_χ : tsupport v ⊆ tsupport χ :=
     tsupport_smul_subset_left χ T
   have hv_supp_Ωβα : tsupport v ⊆ Ωβα := hv_supp_χ.trans hχ_supp_Ωβα
   have hv_cpt : HasCompactSupport v := hχ_cpt.mul_right
-  -- `χ · f` is `W^{k,2}`-regular on the chart-`β` target, hence on `Ωβα`.
   obtain ⟨Cχ, _hCχ_nn, hCχ_bound⟩ :=
     exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
       (d := d) (hχ_smooth : ContDiff ℝ (⊤ : ℕ∞) χ) hχ_cpt k
@@ -274,18 +230,14 @@ private lemma chartTransitionTransportCLM_memWkp
   have hv_memWkp_Ωβα : MemWkp (d := d) k 2 v Ωβα :=
     MemWkp.mono_set (d := d) (by norm_num) hTβ_open hΩβα_open
       hΩβα_subset_target hv_memWkp_Tβ
-  -- The chain rule: `(χ · f) ∘ Φ.toFun` is `W^{k,2}`-regular on `Ωαβ`.
   have hv_comp_memWkp_Ωαβ : MemWkp (d := d) k 2 (fun y => v (Φ.toFun y)) Ωαβ :=
     MemWkp.comp_smoothDiffeoBoundedAtOrder (d := d) k (le_refl k)
       (by norm_num) (by norm_num) hΩαβ_open hΩβα_open Φ
       hv_memWkp_Ωβα hv_cpt hv_supp_Ωβα
-  -- The transported function: `cE · ((χ · f) ∘ Φ.toFun)` is `W^{k,2}`-regular
-  -- on `Ωαβ`.
   set w : EuclN → ℝ := fun y => cE y * v (Φ.toFun y) with hw_def
   have hw_memWkp_Ωαβ : MemWkp (d := d) k 2 w Ωαβ :=
     MemWkp.smul_smooth_bounded (d := d) k (by norm_num) hΩαβ_open
       hcE_smooth' (fun j hj y _ => hCcoeff_bound y j hj) hv_comp_memWkp_Ωαβ
-  -- `w` has topological support inside `Ωαβ` and is compactly supported.
   have hw_supp_cE : tsupport w ⊆ tsupport cE := by
     refine closure_mono ?_
     intro y hy
@@ -298,12 +250,9 @@ private lemma chartTransitionTransportCLM_memWkp
   have hw_supp_Ωαβ : tsupport w ⊆ Ωαβ := hw_supp_cE.trans hcE_tsupp_Ωαβ
   have hw_cpt : HasCompactSupport w :=
     hcE_cpt.of_isClosed_subset (isClosed_tsupport w) hw_supp_cE
-  -- Extension by zero: `w` is `W^{k,2}`-regular on the chart-`α` target.
   have hw_memWkp_Tα : MemWkp (d := d) k 2 w Tα :=
     MemWkp.extend_zero (d := d) (by norm_num) (by norm_num)
       hΩαβ_open hTα_open hΩαβ_subset_target hw_memWkp_Ωαβ hw_supp_Ωαβ hw_cpt
-  -- The transport operator value agrees a.e. on the chart-`α` target with
-  -- `cE · (f ∘ chartTransitionEuclid α β)`.
   have h_coeFn : (fun y => ((chartTransitionTransportCLM
         (I := I) (M := M) g r s β α P₀ Q f :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -312,32 +261,24 @@ private lemma chartTransitionTransportCLM_memWkp
         (f : EuclN → ℝ) (chartTransitionEuclid (I := I) (M := M) α β y)) :=
     chartTransitionTransportCLM_coeFn_aeEq
       (I := I) (M := M) g r s β α P₀ Q f
-  -- On the chart-`α` target the transported function equals `w` everywhere:
-  -- wherever the transport coefficient pushforward is nonzero the chart
-  -- transition agrees with `Φ.toFun` and `χ` equals `1`.
   have h_pointwise : (fun y => cE y *
         (f : EuclN → ℝ) (chartTransitionEuclid (I := I) (M := M) α β y)) = w := by
     funext y
     by_cases hcE_zero : cE y = 0
     · simp only [hw_def, hcE_zero, zero_mul]
-    · -- `y` lies in the closed support of `cE`, hence in `KEα ⊆ Ωαβ`.
-      have hy_tsupp_cE : y ∈ tsupport cE :=
+    · have hy_tsupp_cE : y ∈ tsupport cE :=
         subset_tsupport cE (Function.mem_support.mpr hcE_zero)
       have hy_KEα : y ∈ KEα := hcE_tsupp_subset hy_tsupp_cE
       have hy_Ωαβ : y ∈ Ωαβ := hKEα_in_Ωαβ hy_KEα
-      -- On `Ωαβ` the chart transition agrees with `Φ.toFun`.
       have hT_eq : chartTransitionEuclid (I := I) (M := M) α β y = Φ.toFun y :=
         (hΦ_eq y hy_Ωαβ).symm
-      -- `Φ.toFun y` lies in `KEβ`, where the cutoff `χ` equals `1`.
       have hΦy_KEβ : Φ.toFun y ∈ KEβ := ⟨y, hy_KEα, rfl⟩
       have hχ_Φy : χ (Φ.toFun y) = 1 :=
         hχ_one (Φ.toFun y) (Metric.self_subset_cthickening KEβ hΦy_KEβ)
-      -- Assemble.
       have hv_Φy : v (Φ.toFun y) =
           (f : EuclN → ℝ) (Φ.toFun y) := by
         simp only [hv_def, hT_def, hχ_Φy, one_mul]
       simp only [hw_def, hT_eq, hv_Φy]
-  -- Conclude by transporting `MemWkp w` along the a.e.-equality.
   have h_ae : (fun y => ((chartTransitionTransportCLM
         (I := I) (M := M) g r s β α P₀ Q f :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -345,8 +286,6 @@ private lemma chartTransitionTransportCLM_memWkp
     refine h_coeFn.trans ?_
     rw [h_pointwise]
   exact (MemWkp_congr_ae (d := d) (by norm_num) hTα_open h_ae).mpr hw_memWkp_Tα
-
-/-! ## The cutoff ↔ partition-of-unity iterated-Sobolev bridge -/
 
 /-- **The cutoff ↔ partition-of-unity iterated-Sobolev bridge.** For a closed
 Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, an abstract `L²` tensor
@@ -378,9 +317,6 @@ theorem tensorL2ChartComponentCutoff_memWkp_of_pou
   set d : ℕ := Module.finrank ℝ E with hd_def
   set Tα : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hTα_def
   have hTα_open : IsOpen Tα := chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- The cutoff component equals, almost everywhere on the chart-`α` target, the
-  -- finite double sum of chart-transition transports of the partition-of-unity
-  -- components.
   have h_decomp : (fun y => ((tensorL2ChartComponentCutoff
         (I := I) (M := M) g r s u α P₀ :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -392,11 +328,7 @@ theorem tensorL2ChartComponentCutoff_memWkp_of_pou
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) :=
     tensorL2ChartComponentCutoff_ae_eq_pou_transport_sum
       (I := I) (M := M) g r s u α P₀
-  -- It therefore suffices to establish iterated Sobolev regularity of the
-  -- double sum.
   refine (MemWkp_congr_ae (d := d) (by norm_num) hTα_open h_decomp).mpr ?_
-  -- The double sum is a finite sum over the transport chart centres of finite
-  -- sums over the component multi-indices.
   refine memWkp_finsetSum (d := d) (by norm_num) hTα_open
     (transportChartCenters (I := I) (M := M) α)
     (fun β y => ∑ Q : TensorCompIdx (E := E) r s,
@@ -404,8 +336,6 @@ theorem tensorL2ChartComponentCutoff_memWkp_of_pou
           (tensorL2ChartComponent (I := I) (M := M) g r s u β Q) :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
     (fun β _ => ?_)
-  -- Each chart-centre summand is itself a finite sum over component
-  -- multi-indices.
   refine memWkp_finsetSum (d := d) (by norm_num) hTα_open
     (Finset.univ : Finset (TensorCompIdx (E := E) r s))
     (fun Q y =>
@@ -413,8 +343,6 @@ theorem tensorL2ChartComponentCutoff_memWkp_of_pou
           (tensorL2ChartComponent (I := I) (M := M) g r s u β Q) :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
     (fun Q _ => ?_)
-  -- Each transported partition-of-unity component is iterated Sobolev regular
-  -- by the per-summand transport regularity lemma.
   exact chartTransitionTransportCLM_memWkp (I := I) (M := M) g r s β α P₀ Q k
     (tensorL2ChartComponent (I := I) (M := M) g r s u β Q) (h_pou β Q)
 

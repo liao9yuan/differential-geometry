@@ -95,13 +95,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## The engine-application driver
-
-For a genuine first-order remainder `N : H^{a+1} → Hᵃ` Lipschitz on a closed ball
-about the initial datum, we feed the intrinsic resolvent-compactness witness
-`tensorResolventL2_isCompactOperator` to the unconditional locally-
-Lipschitz small-time engine. -/
-
 /-- **Strong short-time existence for a Ricci–DeTurck first-order remainder.**
 
 Let `(M, g_bg)` be a closed Riemannian manifold (compact, boundaryless,
@@ -172,16 +165,6 @@ theorem deTurckRemainder_strong_shortTime_exists
     (tensorResolventL2_isCompactOperator (I := I) (M := M) g_bg 0 2)
     u₀ hN
 
-/-! ## The fully unconditional continuous-linear case
-
-A continuous **linear** first-order remainder `R : H^{a+1} →L[ℝ] Hᵃ` is globally
-Lipschitz with constant `‖R‖₊`, hence (restricting to any ball) locally Lipschitz.
-Feeding it to the driver above yields a strong solution **without** any further
-analytic hypothesis: the entire pipeline closes from the continuous-linearity of
-`R` and the intrinsic resolvent compactness.  This is the abstract shape of the
-gauge-cancelled DeTurck remainder, which is first order and — once realized —
-continuous and (on a bounded ball) Lipschitz. -/
-
 /-- **Strong short-time existence for a continuous-linear first-order remainder
 (fully unconditional).**
 
@@ -226,8 +209,6 @@ theorem firstOrderRemainderCLM_strong_shortTime_exists
                       (show (a + 1) ≤ a + 2 by linarith) u₀) (1 : ℝ))
                     from (R.lipschitz).lipschitzOnWith))
                 (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce) := by
-  -- The global Lipschitz bound of the continuous linear remainder, restricted to
-  -- the radius-`1` ball about the included initial datum.
   have hN : LipschitzOnWith (‖R‖₊) (⇑R) (Metric.closedBall
       (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
         (show (a + 1) ≤ a + 2 by linarith) u₀) (1 : ℝ)) :=

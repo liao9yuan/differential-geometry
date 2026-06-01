@@ -68,13 +68,9 @@ theorem deturckvf_chart_smooth_in_g_jet
           (deTurckVF (I := I) g g_bg
             : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) k x)
       (chartAt H α).source := by
-  -- `chartCoeff α X k` is smooth on `(trivializationAt E (TangentSpace I) α).baseSet`
-  -- for any smooth section `X` (`chartCoeff_contMDiffOn`); apply with
-  -- `X := deTurckVF g g_bg`, then rewrite the base set as the chart source.
   have h := chartCoeff_contMDiffOn (I := I) α
     (deTurckVF (I := I) g g_bg
       : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) k
-  -- `(trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source` is `rfl`.
   exact h
 
 /-- **Each chart component of `deTurckVF g g_bg` is smooth on the chart source**
@@ -91,10 +87,6 @@ theorem deturckvf_chart_component_smooth_in_g_input
           (deTurckVF (I := I) g g_bg
             : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) k x)
       (chartAt H α).source :=
-  -- Identical to `deturckvf_chart_smooth_in_g_jet`: discharged by
-  -- `chartCoeff_contMDiffOn` applied to the smooth section `deTurckVF g g_bg`,
-  -- using `(trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source`
-  -- (definitionally).
   chartCoeff_contMDiffOn (I := I) α
     (deTurckVF (I := I) g g_bg
       : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) k
@@ -146,49 +138,35 @@ theorem liederivmetric_chart_component_smooth_in_g_w_input
           (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x))
       (chartAt H α).source := by
   classical
-  -- Strategy parallels `chartRicci_affine_in_d2g`.  At every `x₀ ∈ chart-α source`,
-  -- extend the chart-α frame `chartFrameVec α k` to global smooth tangent sections `S k`
-  -- agreeing on a neighbourhood of `x₀`, then use the Cartan formula
-  --   `(𝓛_W g)(v, w) = g(∇_v W, w) + g(v, ∇_w W)`
-  -- (`cartan_formula_for_lie_deriv_metric`) to rewrite the pairing as a sum of two
-  -- smooth scalars; transfer back to the chart-frame expression via `eventuallyEq`.
   intro x₀ hx₀
-  -- The chart-α frame, as a TotalSpace section, is smooth on the chart source.
   have h_frame_on : ∀ k : Fin (Module.finrank ℝ E),
       ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
         (fun b : M => TotalSpace.mk' E b (chartFrameVec (I := I) α k b))
         (chartAt H α).source := fun k => by
     have h := chartAlphaFrame_section_contMDiffOn (I := I) α k
     exact h
-  -- Extend the family to global smooth sections agreeing on a nbhd of `x₀`.
   obtain ⟨S, hS_eq⟩ :=
     exists_contMDiffSection_eqOn_nhd
       (s := fun k : Fin (Module.finrank ℝ E) => fun b : M => chartFrameVec (I := I) α k b)
       (u := (chartAt H α).source) (p := x₀)
       h_frame_on ((chartAt H α).open_source) hx₀
-  -- Each `S k` is a smooth global tangent section.
   have hSk_smooth : ∀ k : Fin (Module.finrank ℝ E),
       ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
         (fun b : M => TotalSpace.mk' E b ((S k) b : TangentSpace I b)) :=
     fun k => (S k).contMDiff
-  -- Smoothness of `W` as a tangent-bundle section.
   have hW_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun b : M => TotalSpace.mk' E b (W b : TangentSpace I b)) := W.contMDiff
-  -- Upgrade `W`'s smoothness to the `(∞ + 1)` clause required by
-  -- `LeviCivita_section_contMDiffOn_univ` (note `(⊤ : ℕ∞) + 1 = ⊤`).
   have hW_smooth' : ContMDiffOn I (I.prod 𝓘(ℝ, E))
       ((∞ : WithTop ℕ∞) + 1)
       (fun b : M => TotalSpace.mk' E b (W b : TangentSpace I b)) Set.univ := by
     have : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1)
         (fun b : M => TotalSpace.mk' E b (W b : TangentSpace I b)) := by simpa using hW_smooth
     exact this.contMDiffOn
-  -- Smoothness of the Levi-Civita Hom-bundle section `b ↦ (LC g) W b : T_b M →L[ℝ] T_b M`.
   have h_LCWop : ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
       (fun b : M => TotalSpace.mk' (E →L[ℝ] E)
         (E := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)
         b ((LeviCivita (I := I) g).toFun (fun b : M => W b) b)) Set.univ :=
     LeviCivita_section_contMDiffOn_univ (I := I) g hW_smooth'
-  -- Smoothness of `b ↦ (LC g W) b (S k b)` as a tangent-bundle section, on `univ`.
   have h_LCWS : ∀ k : Fin (Module.finrank ℝ E),
       ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
         (fun b : M => TotalSpace.mk' E
@@ -209,9 +187,6 @@ theorem liederivmetric_chart_component_smooth_in_g_w_input
       (ϕ := fun b => (LeviCivita (I := I) g).toFun (fun b : M => W b) b)
       (v := fun b => S k b)
       hop_at hSk_at
-  -- Smoothness of the metric pairing `b ↦ g.inner b (X b) (Y b)` for smooth tangent
-  -- sections `X, Y`.  This is a direct chain via `clm_bundle_apply` against the smooth
-  -- metric `g`.
   have h_inner :
       ∀ {X Y : Π b : M, TangentSpace I b},
         ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -224,7 +199,6 @@ theorem liederivmetric_chart_component_smooth_in_g_w_input
         (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
           (E := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
           b (g.inner b)) := g.contMDiff
-    -- Apply g.inner to X to get a smooth cotangent section (T_b M →L[ℝ] ℝ).
     have hgX : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) ∞
         (fun b : M => TotalSpace.mk' (E →L[ℝ] ℝ)
           (E := fun x : M => TangentSpace I x →L[ℝ] ℝ) b (g.inner b (X b))) :=
@@ -233,10 +207,7 @@ theorem liederivmetric_chart_component_smooth_in_g_w_input
         (E₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
         (b := fun b : M => b)
         (ϕ := fun b => g.inner b) (v := fun b => X b) hg hX
-    -- Pair with Y.
     exact cotangentCov_pairing_contMDiff hgX hY
-  -- Smoothness of each Cartan summand `b ↦ g.inner b (LC g W b (S i b)) (S j b)` and
-  -- `b ↦ g.inner b (S i b) (LC g W b (S j b))` globally on `M`.
   have h_summand1 : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun b : M => g.inner b
         ((LeviCivita (I := I) g).toFun (fun b : M => W b) b (S i b)) (S j b)) :=
@@ -245,14 +216,12 @@ theorem liederivmetric_chart_component_smooth_in_g_w_input
       (fun b : M => g.inner b (S i b)
         ((LeviCivita (I := I) g).toFun (fun b : M => W b) b (S j b))) :=
     h_inner (hSk_smooth i) (h_LCWS j)
-  -- Their sum is globally smooth.
   have h_sum_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun b : M =>
         g.inner b ((LeviCivita (I := I) g).toFun (fun b : M => W b) b (S i b)) (S j b)
         + g.inner b (S i b)
             ((LeviCivita (I := I) g).toFun (fun b : M => W b) b (S j b))) :=
     h_summand1.add h_summand2
-  -- The Cartan formula identifies the pairing with this sum, at each `b`.
   have h_cartan_pair : ∀ b : M,
       lieDerivMetric (I := I) g W b (S i b) (S j b) =
         g.inner b ((LeviCivita (I := I) g).toFun (fun b : M => W b) b (S i b)) (S j b)
@@ -261,7 +230,6 @@ theorem liederivmetric_chart_component_smooth_in_g_w_input
     intro b
     exact DifferentialGeometry.PDE.RicciFlow.Pullback.cartan_formula_for_lie_deriv_metric
       (I := I) g W b (S i b) (S j b)
-  -- Hence `b ↦ lieDerivMetric g W b (S i b) (S j b)` is globally smooth.
   have h_pair_S_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun b : M => lieDerivMetric (I := I) g W b (S i b) (S j b)) := by
     have h_congr : (fun b : M => lieDerivMetric (I := I) g W b (S i b) (S j b)) =
@@ -271,10 +239,8 @@ theorem liederivmetric_chart_component_smooth_in_g_w_input
               ((LeviCivita (I := I) g).toFun (fun b : M => W b) b (S j b))) :=
       funext h_cartan_pair
     rw [h_congr]; exact h_sum_smooth
-  -- ContMDiffAt at `x₀` from the global smoothness.
   have h_pair_S_at : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
       (fun b : M => lieDerivMetric (I := I) g W b (S i b) (S j b)) x₀ := h_pair_S_smooth x₀
-  -- Transfer to the chart-α-frame expression via `eventuallyEq` on a nbhd of `x₀`.
   have h_chart_at : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
       (fun x : M => lieDerivMetric (I := I) g W x
         (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x)) x₀ := by
@@ -303,43 +269,27 @@ theorem chartRicci_affine_in_d2g
           (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x))
       (chartAt H α).source := by
   classical
-  -- Strategy: for each `x₀ ∈ chart-α source`, the chart-α frame vectors `chartFrameVec α k`
-  -- are smooth on the chart source; extend them to global smooth tangent sections via
-  -- `exists_contMDiffSection_eqOn_nhd`, then apply `ricciTensor_pairing_contMDiff` to
-  -- those global sections and transfer back via `eventuallyEq` on a nbhd of `x₀`.
   intro x₀ hx₀
-  -- The chart-α frame, as a TotalSpace section, is smooth on the chart source.
-  -- `chartAlphaFrame_section_contMDiffOn α k` gives smoothness of
-  -- `fun b => TotalSpace.mk' E b ((triv α).symmL ℝ b (chartModelBasis E k))`,
-  -- which is definitionally `fun b => TotalSpace.mk' E b (chartFrameVec α k b)`.
   have h_frame_on : ∀ k : Fin (Module.finrank ℝ E),
       ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
         (fun b : M => TotalSpace.mk' E b (chartFrameVec (I := I) α k b))
         (chartAt H α).source := fun k => by
     have h := chartAlphaFrame_section_contMDiffOn (I := I) α k
-    -- `chartFrameVec α k b = (triv α).symmL ℝ b (chartModelBasis E k)` by definition.
     exact h
-  -- Extend the family `(chartFrameVec α k)_{k}` to global smooth sections agreeing on a
-  -- nbhd of `x₀`.
   obtain ⟨S, hS_eq⟩ :=
     exists_contMDiffSection_eqOn_nhd
       (s := fun k : Fin (Module.finrank ℝ E) => fun b : M => chartFrameVec (I := I) α k b)
       (u := (chartAt H α).source) (p := x₀)
       h_frame_on ((chartAt H α).open_source) hx₀
-  -- Each `S k` is a smooth global tangent section.
   have hSk_smooth : ∀ k : Fin (Module.finrank ℝ E),
       ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (fun b : M => TotalSpace.mk' E b ((S k) b : TangentSpace I b))
         := fun k => (S k).contMDiff
-  -- By `ricciTensor_pairing_contMDiff`, the scalar `b ↦ ricciTensor g b (S i b) (S j b)`
-  -- is globally smooth.
   have h_scalar :
       ContMDiff I 𝓘(ℝ, ℝ) ∞
         (fun b : M => ricciTensor (I := I) g b ((S i) b) ((S j) b)) :=
     ricciTensor_pairing_contMDiff (I := I) g (hSk_smooth i) (hSk_smooth j)
-  -- So in particular `ContMDiffAt` at `x₀`.
   have h_scalar_at : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
       (fun b : M => ricciTensor (I := I) g b ((S i) b) ((S j) b)) x₀ := h_scalar x₀
-  -- Transfer to the chart-α-frame expression via `eventuallyEq` on a nbhd of `x₀`.
   have h_chart_at : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
       (fun x : M => ricciTensor (I := I) g x
         (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x)) x₀ := by
@@ -363,12 +313,6 @@ theorem combine_smoothness_of_summands
         deTurckRicciRHS (I := I) g_bg g x
           (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x))
       (chartAt H α).source := by
-  -- `deTurckRicciRHS g_bg g x = (-2) • ricciTensor g x + lieDerivMetricClm g W x`
-  -- where `W := deTurckVF g g_bg`.  Evaluated on the chart-`α`-pushforward frame:
-  -- `... e_i^α(x) e_j^α(x) = -2 * ricciTensor g x e_i^α(x) e_j^α(x)
-  --     + lieDerivMetric g W x e_i^α(x) e_j^α(x)`.
-  -- Each scalar summand is smooth on the chart source by `chartRicci_affine_in_d2g`
-  -- (Ricci) and `liederivmetric_chart_component_smooth_in_g_w_input` (Lie deriv).
   set W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     DifferentialGeometry.PDE.DeTurck.deTurckVF (I := I)
       (smoothRiemannianMetricToInfty (I := I) g)
@@ -383,9 +327,6 @@ theorem combine_smoothness_of_summands
         (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x))
       (chartAt H α).source :=
     liederivmetric_chart_component_smooth_in_g_w_input (I := I) g W α i j
-  -- The scalar formula `deTurckRicciRHS g_bg g x e_i^α(x) e_j^α(x)
-  --     = -2 * ricciTensor g x e_i^α(x) e_j^α(x)
-  --       + lieDerivMetric g W x e_i^α(x) e_j^α(x)`.
   have h_unfold : ∀ x : M,
       deTurckRicciRHS (I := I) g_bg g x
           (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x) =
@@ -394,7 +335,6 @@ theorem combine_smoothness_of_summands
           + lieDerivMetric (I := I) g W x
               (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x) := by
     intro x
-    -- Unfold `deTurckRicciRHS` and evaluate the CLM operations pointwise.
     change ((-2 : ℝ) • ricciTensor (I := I)
             (smoothRiemannianMetricToInfty (I := I) g) x +
           lieDerivMetricClm (I := I) g W x)
@@ -407,7 +347,6 @@ theorem combine_smoothness_of_summands
       ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply,
       smul_eq_mul]
     rfl
-  -- Conclude via `ContMDiffOn.congr` against the sum of the two smooth pieces.
   refine ContMDiffOn.congr ?_ (fun x _ => (h_unfold x).symm)
   exact ((contMDiffOn_const (c := (-2 : ℝ))).mul hRic).add hLie
 
@@ -431,7 +370,6 @@ theorem linearity_in_second_derivatives
         deTurckRicciRHS (I := I) g_bg g x
           (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x))
       (chartAt H α).source :=
-  -- Identical conclusion to `combine_smoothness_of_summands`; reuse directly.
   combine_smoothness_of_summands (I := I) g_bg g α i j
 
 /-- The Ricci–DeTurck right-hand side `deTurckRicciRHS g_bg` has the smooth quasi-linear
@@ -454,16 +392,9 @@ theorem deTurckRicciRHS_isSmoothQuasilinear
     IsSmoothQuasilinearMetricRHS (I := I)
       (deTurckRicciRHS (I := I) g_bg) := by
   refine ⟨?_, ?_⟩
-  · -- (C1) chart smoothness of `x ↦ deTurckRicciRHS g_bg g x (e_i^α x) (e_j^α x)`
-    -- on every chart source: assembled by `combine_smoothness_of_summands`,
-    -- whose conclusion uses `chartFrameVec α i x` definitionally equal to
-    -- `(trivializationAt E (TangentSpace I) α).symmL ℝ x (chartModelBasis E i)`.
-    intro g α i j
+  · intro g α i j
     exact combine_smoothness_of_summands (I := I) g_bg g α i j
-  · -- (C2) strict parabolicity at every metric.  The Ricci–DeTurck principal symbol
-    -- is the isotropic symbol `−|ξ|²_g · id`, which `isStrictlyParabolic_isotropic_-
-    -- deTurckSymbolCoeff` certifies as strictly parabolic.
-    intro g
+  · intro g
     refine
       ⟨DifferentialGeometry.PDE.DeTurck.isotropicSymbol
           (fun x : M => TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)

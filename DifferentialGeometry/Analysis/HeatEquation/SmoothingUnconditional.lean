@@ -67,23 +67,12 @@ open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH2kBridge
 open DifferentialGeometry.Analysis.Laplacian.ChartSideH2kBridge
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Unconditional chart-side bridge family for the heat output
-
-For every `k : ℕ`, the chart-side `H^{2k}` bridge for the canonical function
-representative of `heatSemigroup g t u_0` holds unconditionally. This is the
-composition of `heatSemigroup_mem_laplacianDomainPow_all` (producing an
-`H1Compl`-lift in `laplacianDomainPow g k` with matching `Lp` image) with
-`chartSideH2kBridge_of_laplacianDomainPow_unconditional` (discharging the
-bridge on every such lift). -/
 
 /-- **Unconditional chart-side `H^{2k}` bridge for the heat output.**
 
@@ -98,16 +87,12 @@ theorem chartSideH2kBridge_heat_unconditional
     ChartSideH2kBridge (I := I) (M := M) g k
       (((heatSemigroup (I := I) (M := M) g t u_0 :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ)) := by
-  -- Step 1: produce an H1Compl lift of heatSemigroup g t u_0 in
-  -- laplacianDomainPow g k.
   obtain ⟨u_h, hu_h_mem, hu_h_eq⟩ :=
     heatSemigroup_mem_laplacianDomainPow_all
       (I := I) (M := M) g ht u_0 k
-  -- Step 2: discharge the bridge on the lift, unconditionally.
   have h_bridge_lift :=
     chartSideH2kBridge_of_laplacianDomainPow_unconditional
       (I := I) (M := M) g k hu_h_mem
-  -- Step 3: rewrite the bridge target via `H1ComplToLp g u_h = heatSemigroup g t u_0`.
   have h_coe : ((H1ComplToLp (I := I) (M := M) g u_h :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) =
       ((heatSemigroup (I := I) (M := M) g t u_0 :
@@ -115,8 +100,6 @@ theorem chartSideH2kBridge_heat_unconditional
     rw [hu_h_eq]
   rw [h_coe] at h_bridge_lift
   exact h_bridge_lift
-
-/-! ## Headline (1): unconditional spatial smoothing -/
 
 /-- **Smoothing of the heat semigroup on a closed manifold**.
 
@@ -142,8 +125,6 @@ theorem heatSemigroup_smooth_representative_of_closed
   intro k
   exact chartSideH2kBridge_heat_unconditional
     (I := I) (M := M) g ht u_0 k
-
-/-! ## Headline (2): combined unconditional space-time smoothing -/
 
 /-- **Truly unconditional combined space-time smoothing endpoint of the
 heat semigroup**.

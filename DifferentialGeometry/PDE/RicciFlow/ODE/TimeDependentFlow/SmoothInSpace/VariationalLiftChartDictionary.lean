@@ -68,14 +68,6 @@ open scoped Manifold Topology ContDiff
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 
-/-! ## (A) The dictionary (two-instance world)
-
-Parts 1–4's eventual-agreement assembly are stated in the world where `E` carries both a
-standalone `[NormedSpace ℝ E]` (needed for the tangent-bundle charted space underlying
-`mfderiv` of charts and the trivializations) and `[InnerProductSpace ℝ E]`.  Their conclusions
-are equalities of `E`-valued objects, so they cross cleanly into the single-instance world of
-`RawVariationalIdentity`. -/
-
 section Dictionary
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -83,15 +75,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
-
-/-! ## Part 1: the trivialized-reading = chart-derivative core
-
-The single genuinely-new identity: at a smooth self-map `F`, the chart-`α` trivialization of
-the manifold pushforward equals the chart-coordinate Fréchet derivative of the
-chart-`α`-conjugated map.  The moving target chart of Mathlib's `mfderiv` is absorbed into the
-`trivToE α (F x)` reading, which is *correct* because `trivToE α y = mfderiv (extChartAt I α) y`
-on the chart source.  This is `mfderiv_comp` plus
-`TangentBundle.continuousLinearMapAt_trivializationAt`. -/
 
 /-- **Trivialized pushforward equals chart-coordinate Fréchet derivative.**
 
@@ -109,29 +92,18 @@ theorem trivToE_mfderiv_eq_chartFderiv_apply
     (hFx : F x ∈ (chartAt H α).source) :
     trivToE (I := I) α (F x) (mfderiv I I F x v)
       = mfderiv I 𝓘(ℝ, E) (fun y => extChartAt I α (F y)) x v := by
-  -- The chart trivialization at `α`, applied at `F x`, is `mfderiv (extChartAt I α) (F x)`.
   have htriv : trivToE (I := I) α (F x)
       = mfderiv I 𝓘(ℝ, E) (extChartAt I α) (F x) :=
     TangentBundle.continuousLinearMapAt_trivializationAt (I := I) hFx
-  -- `extChartAt I α` is manifold-differentiable at `F x`.
   have hext : MDifferentiableAt I 𝓘(ℝ, E) (extChartAt I α) (F x) :=
     mdifferentiableAt_extChartAt (I := I) hFx
-  -- Chain rule for the composition `(extChartAt I α) ∘ F`.
   have hchain :
       mfderiv I 𝓘(ℝ, E) (extChartAt I α ∘ F) x
         = (mfderiv I 𝓘(ℝ, E) (extChartAt I α) (F x)).comp (mfderiv I I F x) :=
     mfderiv_comp x hext hF
-  -- Apply both sides at `v`.
   rw [htriv]
   have happ := congrArg (fun L : TangentSpace I x →L[ℝ] _ => L v) hchain
   simpa [ContinuousLinearMap.comp_apply, Function.comp] using happ.symm
-
-/-! ## Part 2: the raw-value reading
-
-Round-tripping the trivialized reading through `trivFromE α (F x)` on the base set produces the
-*raw* fibre value `(mfderiv I I F x v : E)` as a chart-coordinate Fréchet derivative transported
-by the inverse target trivialization.  This is the `=ᶠ[𝓝 t]` reading consumed by `hagree`,
-shown here as the per-time pointwise equation. -/
 
 /-- **Raw pushforward value as transported chart-coordinate derivative
 (`mfderiv_flow_eq_chartFderiv_apply`).**
@@ -153,11 +125,9 @@ theorem mfderiv_flow_eq_chartFderiv_apply
     mfderiv I I F x v
       = trivFromE (I := I) α (F x)
           (mfderiv I 𝓘(ℝ, E) (fun y => extChartAt I α (F y)) x v) := by
-  -- `F x` lies in the trivialization base set (= chart source) at `α`.
   have hbase : F x ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [TangentBundle.trivializationAt_baseSet]
     exact hFx
-  -- Apply the dictionary, then round-trip.
   have hdict := trivToE_mfderiv_eq_chartFderiv_apply (I := I) F α v hF hFx
   calc
     mfderiv I I F x v
@@ -167,13 +137,6 @@ theorem mfderiv_flow_eq_chartFderiv_apply
     _ = trivFromE (I := I) α (F x)
             (mfderiv I 𝓘(ℝ, E) (fun y => extChartAt I α (F y)) x v) := by
           rw [hdict]
-
-/-! ## Part 3: eventual chart membership of the moving orbit
-
-The orbit `s ↦ Φ_fam s x` is continuous at `t` and `Φ_fam t x = α`, so for `s` near `t` the
-orbit point `Φ_fam s x` stays in the fixed chart source of `α`.  This is the eventual condition
-that turns the per-time reading `mfderiv_flow_eq_chartFderiv_apply` into the `=ᶠ[𝓝 t]` family
-required by `hagree`. -/
 
 /-- **Continuity of the orbit at a fixed time.**
 
@@ -198,26 +161,9 @@ theorem flow_orbit_eventually_mem_chartAt_source
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (x : M)
     (hcontAt : ContinuousAt (fun s : ℝ => (Φ_fam s : M → M) x) t) :
     ∀ᶠ s : ℝ in 𝓝 t, (Φ_fam s : M → M) x ∈ (chartAt H (Φ_fam t x)).source := by
-  -- The chart source at `α := Φ_fam t x` is an open neighbourhood of `α`.
   have hsrc_mem : (chartAt H (Φ_fam t x)).source ∈ 𝓝 (Φ_fam t x) :=
     (chartAt H (Φ_fam t x)).open_source.mem_nhds (mem_chart_source H (Φ_fam t x))
-  -- Pull back through the continuous orbit map.
   exact hcontAt.eventually_mem hsrc_mem
-
-/-! ## Part 4: the assembled `hagree` family and the per-flow `RawVariationalIdentity` producer
-
-Combining Parts 2 and 3, the eventual chart-reading equality is exactly the `hagree` hypothesis
-of `rawVariationalIdentity_of_chartFlow_innerCLM`, with the time-independent `Q` and `d`
-supplied by the caller's chart-flow data and the chart-coordinate operator `Dchart` carrying the
-moving inverse target trivialization.  This part packages the eventual equality and re-exports
-the per-flow producer.
-
-The honest accounting: the moving inverse target trivialization `trivFromE α (Φ_fam s x)` cannot
-be a single time-independent `Q` for a general flow; it is the caller's responsibility (per
-flow) to supply the chart-coordinate operator `Dchart` and the fixed `Q`, `d` such that
-`Q (Dchart s d) = trivFromE α (Φ_fam s x) (mfderiv (extChartAt I α ∘ Φ_fam s) x v)` for `s`
-near `t`.  Part 4 records the precise target equation that `Dchart`, `Q`, `d` must satisfy and,
-given a witness of that equation, assembles the `=ᶠ[𝓝 t]` agreement. -/
 
 /-- **The eventual chart-reading agreement from a chart-coordinate witness.**
 
@@ -245,11 +191,8 @@ theorem hagree_of_chartFderiv_witness
       =ᶠ[𝓝 t] (fun s : ℝ => Q (Dchart s d))) :
     (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E))
       =ᶠ[𝓝 t] (fun s : ℝ => Q (Dchart s d)) := by
-  -- Eventual chart membership of the moving orbit point in the fixed chart source at `α`.
   have hmem := flow_orbit_eventually_mem_chartAt_source (I := I) Φ_fam t x hcontAt
-  -- Each `Φ_fam s` is manifold-differentiable everywhere (it is a diffeomorphism).
   have hinfty : (∞ : WithTop ℕ∞) ≠ 0 := by decide
-  -- Combine: read the manifold pushforward through the chart, then use the witness.
   have hstep : (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E))
       =ᶠ[𝓝 t] (fun s : ℝ =>
         trivFromE (I := I) (Φ_fam t x) ((Φ_fam s : M → M) x)
@@ -261,14 +204,6 @@ theorem hagree_of_chartFderiv_witness
   exact hstep.trans hwitness
 
 end Dictionary
-
-/-! ## (B) The per-flow producer (single-instance world)
-
-The combinator `rawVariationalIdentity_of_chartFlow_innerCLM` and the predicate
-`RawVariationalIdentity` are elaborated in the `[InnerProductSpace ℝ E]`-only world (no
-standalone `[NormedSpace ℝ E]` variable, to avoid the instance diamond on `E`).  The producer
-runs there; the dictionary lemma `hagree_of_chartFderiv_witness` is called across the boundary,
-its `NormedSpace ℝ E` argument supplied by `InnerProductSpace.toNormedSpace`. -/
 
 section Producer
 
@@ -313,10 +248,8 @@ theorem rawVariationalIdentity_of_chartFderiv_witness
             (X : ∀ x : M, TangentSpace I x) (Φ_fam t x)
             (mfderiv I I (Φ_fam t : M → M) x v))) :
     RawVariationalIdentity (I := I) g X Φ_fam t x v := by
-  -- Assemble the eventual chart-reading agreement (Parts 2–3).
   have hagree :=
     hagree_of_chartFderiv_witness (I := I) Φ_fam t x v Q d Dchart hcontAt hwitness
-  -- Feed into the covariant-value-closed combinator.
   exact rawVariationalIdentity_of_chartFlow_innerCLM (I := I) g X Φ_fam t x v Q d
     hDchart hagree hQinner
 

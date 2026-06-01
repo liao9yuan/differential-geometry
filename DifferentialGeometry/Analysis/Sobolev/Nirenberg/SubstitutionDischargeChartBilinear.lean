@@ -75,16 +75,12 @@ open DifferentialGeometry.Analysis.Sobolev.NirenbergDiffQuotTestFunction
 open DifferentialGeometry.Analysis.Sobolev.NirenbergSubstitution
 open DifferentialGeometry.Analysis.Sobolev.SubstitutionNonSmoothChartBilinear
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Section A: Pointwise discrete product rule -/
 
 /-- The pointwise application of the discrete product rule:
 `D_h^k(f · g)(x) = (translate k h f)(x) · (D_h^k g)(x) + (D_h^k f)(x) · g(x)`.
@@ -103,8 +99,6 @@ lemma diffQuot_mul_apply
   DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.diffQuot_coeff_apply
     (d := Module.finrank ℝ E) k h f g x
 
-/-! ## Section B: Localised IBP rearrangement -/
-
 /-- A rearranged form of the localised discrete IBP identity:
 `∫ F · D_{-h}^k G = -∫ (D_h^k F) · G` for `F` continuous and `G` smooth
 with compact support, `h ≠ 0`. -/
@@ -122,8 +116,6 @@ lemma integral_F_diffQuot_neg_eq_neg_integral_diffQuot_F
     DifferentialGeometry.Analysis.Sobolev.NirenbergSubstitution.integral_diffQuot_mul_eq_neg_integral_mul_diffQuot_locally_supported
       (d := Module.finrank ℝ E) (k := k) (f := F) (g := G) hh hF_cont
       hG_smooth hG_supp
-  -- h_ibp : ∫ (D_h F) · G = -∫ F · (D_{-h} G).
-  -- We want: ∫ F · (D_{-h} G) = -∫ (D_h F) · G.
   linarith [h_ibp]
 
 end SubstitutionDischargeChartBilinear

@@ -71,12 +71,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## Elementary `Finset`-norm bounds used in the bridge
-
-These are pure `SeminormedAddCommGroup` inequalities — triangle and the
-power-mean / Cauchy–Schwarz with the constant-`1` family. They are derived
-self-containedly here, without any chart, manifold, or metric input. -/
-
 /-- For a finite indexing set `s : Finset ι` and a `SeminormedAddCommGroup`-valued
 family `x : ι → X`, the square of the norm of the sum is bounded by `|s|`
 times the sum of squared norms:
@@ -128,13 +122,6 @@ private lemma intrinsic_norm_sq_neg_sum_add_sum_le_two_mul
     linarith
   exact h_sq.trans h_abc
 
-/-! ## The intrinsic bridge inequality
-
-The squared fiber norm of the signed sum of input/output slot corrections is
-bounded by a constant multiple of the Euclidean sum of squared individual
-slot-correction fiber norms — uniformly on the partition-of-unity support
-`tsupport ρ_α` and uniformly in the chart-basis direction `k`. -/
-
 variable (I M) in
 /-- **Intrinsic bridge inequality.** For each chart base point `α : M`, each
 chart-basis direction `k : Fin (Module.finrank ℝ E)`, every point
@@ -176,15 +163,11 @@ theorem intrinsicG1G3BridgePouTsupport
                     (fun b' => S.toSection b')
                     (chartBasisVecFiber (I := I) α k) b l‖ ^ 2)) := by
   classical
-  -- The bridge constant: `C_bridge := 2 · (r + s)`. Purely combinatorial,
-  -- arising from `(a + b)² ≤ 2 (a² + b²)` followed by the power-mean
-  -- inequality on each Fin-sum and the domination `2r ≤ 2(r+s)`, `2s ≤ 2(r+s)`.
   set C_bridge : ℝ := 2 * ((r : ℝ) + s) with hC_bridge_def
   have hC_bridge_nn : 0 ≤ C_bridge := by
     rw [hC_bridge_def]; positivity
   refine ⟨C_bridge, hC_bridge_nn, ?_⟩
   intro S k b _hb
-  -- Convenient abbreviations for the slot-correction families.
   set a : Fin r → TensorRSSpace r s I b := fun i =>
     chartTensorRSInputSlotCorrection (I := I) r s g α
       (fun b' => S.toSection b') (chartBasisVecFiber (I := I) α k) b i
@@ -193,12 +176,10 @@ theorem intrinsicG1G3BridgePouTsupport
     chartTensorRSOutputSlotCorrection (I := I) r s g α
       (fun b' => S.toSection b') (chartBasisVecFiber (I := I) α k) b l
     with hc_def
-  -- Step 1: `‖−Σa + Σc‖² ≤ 2 (‖Σa‖² + ‖Σc‖²)` (triangle + binary squared).
   have h_X_sq_split :
       ‖- (∑ i : Fin r, a i) + (∑ l : Fin s, c l)‖ ^ 2 ≤
         2 * (‖∑ i : Fin r, a i‖ ^ 2 + ‖∑ l : Fin s, c l‖ ^ 2) :=
     intrinsic_norm_sq_neg_sum_add_sum_le_two_mul (r' := r) (s' := s) a c
-  -- Step 2: `‖Σa‖² ≤ r · Σ‖a‖²` and `‖Σc‖² ≤ s · Σ‖c‖²` (power-mean).
   have h_sum_a_sq :
       ‖∑ i : Fin r, a i‖ ^ 2 ≤ (r : ℝ) * ∑ i : Fin r, ‖a i‖ ^ 2 := by
     have h := intrinsic_sum_norm_sq_le_card_mul_sum_norm_sq
@@ -215,12 +196,10 @@ theorem intrinsicG1G3BridgePouTsupport
       rw [Finset.card_univ, Fintype.card_fin]
     rw [hcard] at h
     exact h
-  -- Non-negativity helpers for the sum-of-squares Fin-sums.
   have h_a_sum_nn : 0 ≤ ∑ i : Fin r, ‖a i‖ ^ 2 :=
     Finset.sum_nonneg (fun _ _ => sq_nonneg _)
   have h_c_sum_nn : 0 ≤ ∑ l : Fin s, ‖c l‖ ^ 2 :=
     Finset.sum_nonneg (fun _ _ => sq_nonneg _)
-  -- Step 3: chain Step 1 + Step 2 to get `≤ 2r · Σ‖a‖² + 2s · Σ‖c‖²`.
   have h_X_sq_bound :
       ‖- (∑ i : Fin r, a i) + (∑ l : Fin s, c l)‖ ^ 2 ≤
         2 * (r : ℝ) * (∑ i : Fin r, ‖a i‖ ^ 2) +
@@ -243,7 +222,6 @@ theorem intrinsicG1G3BridgePouTsupport
             2 * (s : ℝ) * (∑ l : Fin s, ‖c l‖ ^ 2) := by ring
     rw [h_rw] at h1
     exact h1
-  -- Step 4: dominate `2r · A + 2s · B ≤ 2(r+s) · (A + B)` for non-neg `A`, `B`.
   have h_r_2_le : 2 * (r : ℝ) ≤ 2 * ((r : ℝ) + s) := by
     have : (0 : ℝ) ≤ (s : ℝ) := by positivity
     linarith
@@ -269,14 +247,7 @@ theorem intrinsicG1G3BridgePouTsupport
       rw [hC_bridge_def]; ring
     rw [h_split]
     linarith
-  -- Conclude by chaining Step 3 and Step 4.
   exact h_X_sq_bound.trans h_dominate
-
-/-! ## `H¹` variant of the intrinsic bridge inequality
-
-Same intrinsic bridge inequality, formulated for the `H^1` wrapper
-`SmoothCcTensorH1`. Specialised by applying the underlying `SmoothCcTensor`
-theorem to `S.toCcTensor`. -/
 
 variable (I M) in
 /-- **`H¹` variant of the intrinsic bridge inequality.** Same shape as
@@ -314,8 +285,6 @@ end PDE
 end DifferentialGeometry
 
 end
-
-/-! ## Sanity check: axioms used by the headlines. -/
 
 open DifferentialGeometry.PDE.RicciFlow.HebeyBlock in
 #print axioms intrinsicG1G3BridgePouTsupport

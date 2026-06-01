@@ -75,22 +75,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The metric-compatibility intertwining of the partial metric trace
-
-The partial metric trace `metricTrace2 g r s (tensorSecondCovDeriv g r s) T` is the rough Laplacian
-`Δ_∇ T` read as the diagonal frame trace of the second covariant derivative
-(`rawTensorConnLap_eq_metricTrace2`). The directional covariant derivative of this trace passes
-through the `x`-frozen frame sum: the trace agrees near `x` with the fixed-frame diagonal sum, whose
-covariant derivative distributes over the finite frame sum without any moving-frame derivative. The
-single coefficient identity that discharges the moving-frame correction (the term differentiating
-the metric coefficient of the `g`-weighted reading) is the cometric skew core. -/
 
 /-- **The metric-compatibility intertwining of the partial metric trace (directional form).** With
 `Bᵢ := smoothOrthoFrame g x i`, the outer covariant derivative of the partial metric trace of the
@@ -118,19 +106,16 @@ theorem metricTrace2_covDeriv_comm
           (fun y : M => tensorSecondCovDeriv (I := I) g r s
             (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i)
             (fun z : M => T.toSection z) y) x w := by
-  -- Smoothness of the underlying section (total-space form).
   have hT : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun z : M => TensorRSSpace r s I z) y (T.toSection y)) :=
     T.toSection.contMDiff
-  -- The metric-trace section is, pointwise, the rough Laplacian section.
   rw [show (fun y : M => metricTrace2 (I := I) g r s (tensorSecondCovDeriv (I := I) g r s)
         (fun z : M => T.toSection z) y) =
       (fun y : M => rawTensorConnLap (I := I) g r s (fun z : M => T.toSection z) y) from by
     funext y
     exact (rawTensorConnLap_eq_metricTrace2 (I := I) g r s
       (fun z : M => T.toSection z) y).symm]
-  -- The gradient-slot Leibniz commutation: the moving frame is discharged.
   exact covDeriv_rawConnLap_eq_frozenFrameTrace_sum (I := I) g r s hT x w
 
 /-- **The metric-compatibility intertwining of the partial metric trace (continuous-linear-map

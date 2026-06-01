@@ -93,19 +93,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Smoothness of `tensorTrivProj` on the chart source
-
-`tensorChartComponentRaw` factors as `tensorChartComponentProjection` applied
-to `tensorTrivProj`. The smoothness of `tensorTrivProj` on the chart source
-is established in `ChartComponents.lean` as a `private` lemma; we re-prove it
-here for downstream access. -/
 
 /-- The trivialization-at-`α` projection of `S.toSection` is smooth on the
 chart source. -/
@@ -148,17 +139,6 @@ lemma tensorTrivProj_contMDiffOn_chart_source
       (fun y : M => TensorRSSpace r s I y) α).linearMapAt ℝ x (S.toSection x) = _
   rw [Bundle.Trivialization.linearMapAt_apply, if_pos hx_base]
 
-/-! ## Manifold-derivative bridge for `tensorTrivProj`
-
-The chart-trivialised tensor function `tensorTrivProj g r s S α : M →
-TensorRSModel r s ℝ E` is smooth on the chart source (above). At an
-interior point of the chart target, we bridge from `MDifferentiableAt` to
-ordinary `DifferentiableAt` of the pull-back through `(extChartAt I α).symm`.
-
-This is the tensor-valued analogue of
-`mdifferentiableAt_section_iff_chartE_fderiv` (which handles the
-tangent-bundle case via `chartE_section_repr`). -/
-
 /-- `MDifferentiableAt` of `tensorTrivProj g r s S α` at a chart-source
 point. -/
 lemma mdifferentiableAt_tensorTrivProj
@@ -186,9 +166,6 @@ lemma differentiableAt_tensorTrivProj_pullback
       (tensorTrivProj (I := I) (M := M) g r s S α ∘ (extChartAt I α).symm)
       (extChartAt I α b) := by
   classical
-  -- We use the bridge through MDifferentiability:
-  --   `MDifferentiableAt I 𝓘(ℝ, V) f b`
-  --   ↔ `MDifferentiableWithinAt 𝓘(ℝ, E) 𝓘(ℝ, V) (f ∘ φ.symm) (range I) (φ b)`.
   set fE : M → TensorRSModel r s ℝ E :=
     tensorTrivProj (I := I) (M := M) g r s S α
   set φ : PartialEquiv M E := extChartAt I α
@@ -198,7 +175,6 @@ lemma differentiableAt_tensorTrivProj_pullback
     have hb_src' : b ∈ (extChartAt I α).source := by
       rw [extChartAt_source]; exact hb_chart
     exact hb_src'
-  -- The bridging step:
   have hbridge :
       MDifferentiableAt I (𝓘(ℝ, TensorRSModel r s ℝ E)) fE b ↔
         MDifferentiableWithinAt (𝓘(ℝ, E)) (𝓘(ℝ, TensorRSModel r s ℝ E))
@@ -208,8 +184,6 @@ lemma differentiableAt_tensorTrivProj_pullback
       MDifferentiableWithinAt (𝓘(ℝ, E)) (𝓘(ℝ, TensorRSModel r s ℝ E))
         (fE ∘ φ.symm) (range I) (φ b) :=
     hbridge.mp hf_at
-  -- At an interior point of the chart target, `range I` is a neighborhood,
-  -- so within-at differentiability collapses to ordinary differentiability.
   have htgt : (extChartAt I α).target ⊆ range I :=
     extChartAt_target_subset_range α
   have hint_open : IsOpen (interior ((extChartAt I α).target : Set E)) :=
@@ -219,15 +193,6 @@ lemma differentiableAt_tensorTrivProj_pullback
       (interior_subset.trans htgt)
   rw [mdifferentiableWithinAt_iff_differentiableWithinAt] at hwithin
   exact hwithin.differentiableAt hrange_nhds
-
-/-! ## Chain-rule decomposition for `tensorTrivProj`
-
-We prove that the manifold derivative of `tensorTrivProj g r s S α` at a
-chart-source point `b` (along a tangent vector `v`) equals the Fréchet
-derivative of the chart pull-back evaluated at the canonical trivialisation
-image of `v` (the model-space coordinate of `v`).
-
-This is the tensor-valued analogue of `mfderiv_section_eq_chartE_fderiv`. -/
 
 /-- **Manifold derivative of `tensorTrivProj` in chart coordinates.** At a
 point `b` in the chart source whose chart image lies in the interior of the
@@ -300,8 +265,6 @@ theorem mfderiv_tensorTrivProj_eq_chart_fderiv
   rw [htriv_eq]
   rfl
 
-/-! ## `HasFDerivAt` form for `tensorTrivProj ∘ (extChartAt I α).symm` -/
-
 /-- **HasFDerivAt for the chart-pulled-back `tensorTrivProj`.** At an interior
 chart-target point, the function
 `tensorTrivProj g r s S α ∘ (extChartAt I α).symm` has Fréchet derivative
@@ -321,14 +284,6 @@ theorem tensorTrivProj_chart_pullback_hasFDerivAt
       (extChartAt I α b) :=
   (differentiableAt_tensorTrivProj_pullback (I := I) (M := M) g r s S α
     hb_chart hb_int).hasFDerivAt
-
-/-! ## `HasFDerivAt` for the chart pull-back of `tensorChartComponentRaw`
-
-The scalar chart component is the composition of the CLM
-`tensorChartComponentProjection r s Idx Jdx` with `tensorTrivProj`. So the
-chain rule applies in the form: the Fréchet derivative of the scalar pull-back
-is the (constant) projection CLM composed with the Fréchet derivative of the
-tensor pull-back. -/
 
 /-- The chart pull-back of `tensorChartComponentRaw` equals
 `tensorChartComponentProjection r s Idx Jdx` applied to the chart pull-back
@@ -368,15 +323,11 @@ theorem tensorChartComponentRaw_chart_pullback_hasFDerivAt
           (extChartAt I α b)))
       (extChartAt I α b) := by
   classical
-  -- Use the factorisation through `tensorTrivProj`.
   have hfact := tensorChartComponentRaw_pullback_eq
     (I := I) (M := M) g r s S α Idx Jdx
   rw [hfact]
-  -- The tensor pull-back has the expected Fréchet derivative.
   have htriv := tensorTrivProj_chart_pullback_hasFDerivAt
     (I := I) (M := M) g r s S α hb_chart hb_int
-  -- The CLM `tensorChartComponentProjection` has Fréchet derivative equal to
-  -- itself. Chain rule gives the composition.
   have hCLM_hasFDeriv :
       HasFDerivAt (tensorChartComponentProjection (E := E) r s Idx Jdx)
         ((tensorChartComponentProjection (E := E) r s Idx Jdx) :
@@ -385,8 +336,6 @@ theorem tensorChartComponentRaw_chart_pullback_hasFDerivAt
           (extChartAt I α b)) :=
     (tensorChartComponentProjection (E := E) r s Idx Jdx).hasFDerivAt
   exact HasFDerivAt.comp (extChartAt I α b) hCLM_hasFDeriv htriv
-
-/-! ## Fréchet derivative formula for the chart-pulled-back component -/
 
 /-- **Fréchet derivative of the chart-pulled-back component, formula form.**
 The `fderiv` of `tensorChartComponentRaw g r s S α Idx Jdx ∘ (extChartAt I α).symm`
@@ -409,17 +358,6 @@ theorem tensorChartComponentRaw_chart_pullback_fderiv
           (extChartAt I α b)) :=
   (tensorChartComponentRaw_chart_pullback_hasFDerivAt
     (I := I) (M := M) g r s S α Idx Jdx hb_chart hb_int).fderiv
-
-/-! ## Headline partial-derivative formula
-
-The headline formula explicitly identifies the partial derivative
-`(fderiv ℝ (component ∘ symm)(φ b)) e_k` — the `k`-th partial derivative of
-the chart-pulled-back scalar component — with the projection
-`tensorChartComponentProjection r s Idx Jdx` applied to the `k`-th partial
-derivative of the chart-pulled-back tensor function `tensorTrivProj ∘ symm`.
-
-This is the form used downstream when integrating `eLpNorm` of partial
-derivatives of chart components. -/
 
 /-- **Headline partial-derivative formula.** For `b` in the chart source at
 `α` with `extChartAt I α b` in the interior of the chart target, the `k`-th
@@ -450,15 +388,6 @@ theorem tensorChartComponentRaw_partial_decomp
     (I := I) (M := M) g r s S α Idx Jdx hb_chart hb_int]
   rfl
 
-/-! ## Manifold-derivative form of the partial-decomposition formula
-
-The manifold derivative `mfderiv I 𝓘(ℝ) (tensorChartComponentRaw …) b` is
-identified with the composition of the component projection and the
-chart-trivialised manifold derivative of `tensorTrivProj`. This is the form
-most directly comparable to a covariant-derivative chart-coordinate
-expression: the partial derivative at the point `b` of a scalar component is
-the projection of `mfderiv (tensorTrivProj) b` to that component. -/
-
 /-- **Manifold-derivative form of the partial-decomposition formula.** The
 manifold derivative `mfderiv I 𝓘(ℝ) (tensorChartComponentRaw g r s S α Idx
 Jdx) b` applied to a tangent vector `v` equals the component projection
@@ -477,35 +406,24 @@ theorem tensorChartComponentRaw_mfderiv_decomp
         ((mfderiv I (𝓘(ℝ, TensorRSModel r s ℝ E))
           (tensorTrivProj (I := I) (M := M) g r s S α) b) v) := by
   classical
-  -- The scalar component is the CLM `projection` composed with the tensor
-  -- function. The chain rule for `mfderiv` of `CLM ∘ smooth function` gives
-  -- the formula directly.
   set fE : M → TensorRSModel r s ℝ E :=
     tensorTrivProj (I := I) (M := M) g r s S α
   set P : TensorRSModel r s ℝ E →L[ℝ] ℝ :=
     tensorChartComponentProjection (E := E) r s Idx Jdx
-  -- Express the LHS as the manifold derivative of `P ∘ fE` and apply
-  -- `ContinuousLinearMap.mfderiv_comp_left`-style chain rule.
   have hf_mdiff : MDifferentiableAt I (𝓘(ℝ, TensorRSModel r s ℝ E)) fE b :=
     mdifferentiableAt_tensorTrivProj (I := I) (M := M) g r s S α hb_chart
-  -- `P` is a CLM, so it is `MDifferentiable` everywhere.
   have hP_mdiff : MDifferentiableAt (𝓘(ℝ, TensorRSModel r s ℝ E)) (𝓘(ℝ, ℝ))
       (P : TensorRSModel r s ℝ E → ℝ) (fE b) := by
     have hP_diff : ContMDiff (𝓘(ℝ, TensorRSModel r s ℝ E)) (𝓘(ℝ, ℝ)) ∞
         (P : TensorRSModel r s ℝ E → ℝ) := P.contMDiff
     exact (hP_diff.contMDiffAt).mdifferentiableAt (by simp)
-  -- The identity `tensorChartComponentRaw = P ∘ fE`.
   have hcomp_eq :
       tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx =
         (P : TensorRSModel r s ℝ E → ℝ) ∘ fE := by
     funext x
     rfl
-  -- Compute the manifold derivative via `mfderiv_comp`.
   rw [hcomp_eq]
   rw [mfderiv_comp b hP_mdiff hf_mdiff]
-  -- `mfderiv` of a CLM at any point equals the CLM (as a linear map between
-  -- model spaces, since `𝓘(ℝ, V).tangentSpace y = V`).
-  -- For a CLM `P` between normed spaces, `mfderiv P x = P` as a linear map.
   have hP_fderiv : fderiv ℝ (P : TensorRSModel r s ℝ E → ℝ) (fE b) =
       (P : TensorRSModel r s ℝ E →L[ℝ] ℝ) :=
     P.fderiv (x := fE b)
@@ -515,19 +433,8 @@ theorem tensorChartComponentRaw_mfderiv_decomp
         fderiv ℝ (P : TensorRSModel r s ℝ E → ℝ) (fE b) :=
     mfderiv_eq_fderiv (𝕜 := ℝ) (E := TensorRSModel r s ℝ E) (E' := ℝ)
       (f := (P : TensorRSModel r s ℝ E → ℝ)) (x := fE b)
-  -- After `rw [mfderiv_comp]`, the LHS reads
-  --   `(mfderiv P (fE b)).comp (mfderiv fE b) v`.
-  -- Rewrite `mfderiv P (fE b)` to `P` via `hP_eq` and `hP_fderiv`.
   rw [hP_eq, hP_fderiv]
   rfl
-
-/-! ## Sample expansion: relating the headline formula to a chart-frame
-basis tangent vector
-
-A direct consequence of the manifold-derivative form: feeding the tangent
-vector `chartBasisVecFiber α k b` (the `k`-th chart-frame tangent vector at
-`b`) into the manifold-derivative form gives the "`k`-th chart-frame partial
-derivative" of the scalar chart component. -/
 
 /-- **`k`-th chart-frame partial of the scalar chart component.** Feeding the
 `k`-th chart-frame tangent vector at `b` into the manifold derivative of

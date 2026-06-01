@@ -89,18 +89,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## The per-slot conjugation CLM family
-
-For each input slot `i : Fin r` (or output slot `j : Fin s`) we define a
-`E →L[ℝ] E` factor: at the substituted slot it is the chart-`α`-conjugate of
-the Levi-Civita parallel CLM, and at every other slot it is the identity.
-
-The conjugate `chartJ α b ∘L Φ ∘L chartJinv α b` is the model-side image of
-`Φ : E →L[ℝ] E` (using the definitional identification `TangentSpace I b = E`)
-under the chart-`(α, b)`-twist of `Φ` viewed at the diagonal hom-fibre. The
-substituted-slot case below specialises to `Φ := chartLeviCivitaParallelCLM
-g α b B`. -/
-
 /-- The per-input-slot conjugation CLM: the chart-`α`-conjugate of the
 Levi-Civita parallel CLM at slot `k`, the identity at every other slot. -/
 def slotInputConjCLM (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
@@ -157,14 +145,6 @@ def slotOutputConjCLM (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
   unfold slotOutputConjCLM
   simp [h]
 
-/-! ## The kernel CLMs
-
-The kernel sends `S : TensorRSModel r s ℝ E = Tensor0SModel r ℝ E →L[ℝ]
-Tensor0SModel s ℝ E` to the slot-corrected form of `S`. The input kernel
-post-precomposes on the input side; the output kernel left-postcomposes on
-the output side. Both use `ContinuousMultilinearMap.compContinuousLinearMapL`
-applied to the slot-conjugation family. -/
-
 /-- The model-side precomposition CLM induced by the input-slot
 conjugation family. -/
 def inputSlotPrecompCLM (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
@@ -215,11 +195,6 @@ def outputSlotChartKernel (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     outputSlotChartKernel (I := I) g r s α B l b S =
       (outputSlotPostcompCLM (I := I) g s α B l b).comp S := rfl
 
-/-! ## Factorisation identities
-
-We show that the chart-`α`-trivialised slot correction equals the kernel
-applied to the chart-`α`-trivialised tensor section value `T b`. -/
-
 /-- Identity relating the slot-conjugated precomposition on the model side
 to the bundle-side slot-substitution after composing with `chartJ` on input.
 
@@ -243,12 +218,6 @@ private lemma slotInputConjCLM_compCLM_compCLM_chartJ
           (chartLeviCivitaParallelCLM (I := I) g α b B) i)) := by
   classical
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := hb
-  -- Reduce: it suffices to show the two slot families agree pointwise after
-  -- composition with chartJ. Both sides equal `α'.compCLM (per-slot families)`,
-  -- and we identify the slot families.
-  -- Family 1: `fun i => slotInputConjCLM ... i ∘ chartJ`.
-  -- Family 2: `fun i => chartJ ∘ tangentSlotCLM ... i`.
-  -- These are equal CLMs E →L E for each i (on baseSet) by the per-slot identity.
   have hfamily :
       (fun i : Fin r => (slotInputConjCLM (I := I) g r α B k b i).comp
           (chartJ (I := I) (M := M) α b)) =
@@ -259,12 +228,8 @@ private lemma slotInputConjCLM_compCLM_compCLM_chartJ
     by_cases hik : i = k
     · subst hik
       rw [slotInputConjCLM_self, tangentSlotCLM_self]
-      -- LHS: (chartJ ∘ Φ ∘ chartJinv) ∘ chartJ = chartJ ∘ Φ ∘ (chartJinv ∘ chartJ) = chartJ ∘ Φ.
-      -- RHS: chartJ ∘ Φ.
       refine ContinuousLinearMap.ext ?_
       intro x
-      -- Both sides definitionally `chartJ (Φ (chartJinv (chartJ x)))` and `chartJ (Φ x)`.
-      -- chartJinv (chartJ x) = x on baseSet.
       change chartJ (I := I) (M := M) α b
           ((chartLeviCivitaParallelCLM (I := I) g α b B)
             (chartJinv (I := I) (M := M) α b
@@ -274,18 +239,12 @@ private lemma slotInputConjCLM_compCLM_compCLM_chartJ
       rw [chartJinv_chartJ_self (I := I) (M := M) α hb_base]
     · rw [slotInputConjCLM_other (I := I) g r α B k b hik,
         tangentSlotCLM_other (I := I) r k _ hik]
-      -- LHS: id ∘ chartJ = chartJ; RHS: chartJ ∘ id = chartJ.
       refine ContinuousLinearMap.ext ?_
       intro x
       change chartJ (I := I) (M := M) α b x = chartJ (I := I) (M := M) α b x
       rfl
-  -- Now use `compContinuousLinearMap_compContinuousLinearMap`-style: the LHS is
-  -- `(α'.compCLM slotInputConjCLM).compCLM (fun _ => chartJ)`. Combine the two
-  -- precompositions into a single compCLM with the composed family.
   refine ContinuousMultilinearMap.ext ?_
   intro v
-  -- Establish the per-tuple equality directly: evaluate both sides as α' on
-  -- the composed family applied pointwise to v.
   have h_lhs_eq :
       (((α'.compContinuousLinearMap
             (slotInputConjCLM (I := I) g r α B k b)).compContinuousLinearMap
@@ -294,11 +253,7 @@ private lemma slotInputConjCLM_compCLM_compCLM_chartJ
         (slotInputConjCLM (I := I) g r α B k b i) (chartJ (I := I) (M := M) α b (v i))) := by
     rw [ContinuousMultilinearMap.compContinuousLinearMap_apply,
       ContinuousMultilinearMap.compContinuousLinearMap_apply]
-  -- Direct route: both sides equal `α' (fun i => chartJ ((tangentSlotCLM ... i)(v i)))`
-  -- by the per-slot equality. We derive the slot-equality first.
   rw [h_lhs_eq]
-  -- Goal: α' (fun i => slotInputConjCLM ... i (chartJ (v i))) = compCLM α' (...) v
-  -- Use that compCLM equals α' applied to the composed family at v.
   have hfam_at_v : (fun i : Fin r =>
       (slotInputConjCLM (I := I) g r α B k b i) (chartJ (I := I) (M := M) α b (v i))) =
       (fun i : Fin r => (chartJ (I := I) (M := M) α b)
@@ -310,8 +265,6 @@ private lemma slotInputConjCLM_compCLM_compCLM_chartJ
     simp only [ContinuousLinearMap.comp_apply] at h_at_v
     exact h_at_v
   rw [hfam_at_v]
-  -- Goal: α' (chartJ ∘ tangentSlotCLM ... applied to v) = compCLM α' (...) v
-  -- This is `compCLM_apply.symm`.
   exact (ContinuousMultilinearMap.compContinuousLinearMap_apply _ _ _).symm
 
 /-- Identity relating the slot-conjugated postcomposition on the model side
@@ -334,10 +287,6 @@ private lemma slotOutputConjCLM_compose_chartJinv
   by_cases hjl : j = l
   · subst hjl
     rw [slotOutputConjCLM_self, tangentSlotCLM_self]
-    -- LHS = chartJinv (chartJ (chartLeviCivitaParallelCLM (chartJinv (m j))))
-    -- RHS = chartLeviCivitaParallelCLM (chartJinv (m j))
-    -- Unfold the `comp` action: chartJ.comp(parallel.comp(chartJinv)) applied to m_j
-    -- equals chartJ(parallel(chartJinv(m_j))).
     change chartJinv (I := I) (M := M) α b
         (chartJ (I := I) (M := M) α b
           ((chartLeviCivitaParallelCLM (I := I) g α b B)
@@ -346,8 +295,6 @@ private lemma slotOutputConjCLM_compose_chartJinv
   · rw [slotOutputConjCLM_other (I := I) g s α B l b hjl,
       tangentSlotCLM_other (I := I) s l _ hjl]
     rw [ContinuousLinearMap.id_apply, ContinuousLinearMap.id_apply]
-
-/-! ### Headline factorisation: input slot -/
 
 /-- **Kernel factorisation of the chart-`α`-trivialised input-slot
 Christoffel correction.**
@@ -378,7 +325,6 @@ theorem chartTensorRSInputSlotCorrection_chart_kernel_factorization
   have hRHS_bridge :=
     triv_continuousLinearMapAt_eq_chartRSTwistInv_toModel (I := I) (M := M)
       r s α hb (T b)
-  -- Compute both sides at `(α', w)` to a common normal form.
   have hLHS_eval :
       ((trivializationAt (TensorRSModel r s ℝ E)
           (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
@@ -421,7 +367,6 @@ theorem chartTensorRSInputSlotCorrection_chart_kernel_factorization
       rfl
     rw [hsubst] at h_apply
     exact h_apply
-  -- Step 2: compute the RHS.
   have hRHS_eval :
       ((inputSlotChartKernel (I := I) g r s α B k b)
         ((trivializationAt (TensorRSModel r s ℝ E)
@@ -454,8 +399,6 @@ theorem chartTensorRSInputSlotCorrection_chart_kernel_factorization
     rfl
   exact hLHS_eval.trans hRHS_eval.symm
 
-/-! ### Headline factorisation: output slot -/
-
 /-- **Kernel factorisation of the chart-`α`-trivialised output-slot
 Christoffel correction.**
 
@@ -485,7 +428,6 @@ theorem chartTensorRSOutputSlotCorrection_chart_kernel_factorization
   have hRHS_bridge :=
     triv_continuousLinearMapAt_eq_chartRSTwistInv_toModel (I := I) (M := M)
       r s α hb (T b)
-  -- Step 1: compute LHS = (T b)(α'.compCLM chartJ) (fun j => Ψ_l j (chartJinv (m j))).
   have hLHS_eval :
       ((trivializationAt (TensorRSModel r s ℝ E)
           (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
@@ -502,14 +444,10 @@ theorem chartTensorRSOutputSlotCorrection_chart_kernel_factorization
             (chartJinv (I := I) (M := M) α b (m j))) := by
     rw [hLHS_bridge, chartRSTwistInv_apply]
     simp only [ContinuousMultilinearMap.compContinuousLinearMap_apply]
-    -- (toModel OSC) at function level = OSC = (substCLM Ψ_l).comp(T b).
-    -- ((substCLM Ψ_l).comp(T b)) (α'.compCLM chartJ) = substCLM Ψ_l ((T b)(α'.compCLM chartJ)).
-    -- Then evaluate at (chartJinv ∘ m) gives the formula.
     exact chartTensorRSOutputSlotCorrection_apply (I := I) r s g α T B b l
       (α'.compContinuousLinearMap
         (fun _ : Fin r => chartJ (I := I) (M := M) α b))
       (fun j : Fin s => chartJinv (I := I) (M := M) α b (m j))
-  -- Step 2: compute RHS to the same expression.
   have hRHS_eval :
       ((outputSlotChartKernel (I := I) g r s α B l b)
         ((trivializationAt (TensorRSModel r s ℝ E)
@@ -527,42 +465,15 @@ theorem chartTensorRSOutputSlotCorrection_chart_kernel_factorization
     rw [outputSlotChartKernel_apply]
     rw [ContinuousLinearMap.comp_apply]
     rw [hRHS_bridge]
-    -- outputSlotPostcompCLM = compCLML (slotOutputConjCLM) applied to RHS-CMM.
     unfold outputSlotPostcompCLM
     rw [ContinuousMultilinearMap.compContinuousLinearMapL_apply]
-    -- Now: ((chartRSTwistInv (toModel T b) α').compCLM slotOutputConjCLM) m.
     rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
     rw [chartRSTwistInv_apply]
     rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
-    -- Now: (toModel T b)(α'.compCLM chartJ) (fun j => chartJinv (slotOutputConjCLM j (m j))).
     congr 1
     funext j
     exact slotOutputConjCLM_compose_chartJinv (I := I) (M := M) g s α B hb l m j
   exact hLHS_eval.trans hRHS_eval.symm
-
-/-! ## Chart-pulled smoothness of the kernels
-
-The kernel is a CLM-valued function of `b`. To express its smoothness in the
-form requested by downstream consumers, we work with the chart-pulled
-representation `y : E ↦ inputSlotChartKernel ... (symm y)`, evaluated at
-`extChartAt I α b`, and show it is `ContDiffAt ℝ ∞` on the chart-α
-Levi-Civita good set image.
-
-The strategy: the kernel is built from the slot-conjugation CLM via
-continuous-linear operations (`compContinuousLinearMapL`, `compL`,
-`compL.flip`). Each of these is a continuous map of CLMs and preserves
-smoothness. The base smoothness ingredient is the chart-pulled smoothness
-of `b ↦ slotInputConjCLM g r α B k b i` for each `i : Fin r` (and the
-analogous output-side variant).
-
-For `i ≠ k` the conjugation is the constant `id_E`, hence trivially smooth.
-For `i = k` the conjugation is the hom-bundle-trivialised image of
-`chartLeviCivitaParallelCLM g α b B`, which by
-`chartLeviCivitaParallelCLM_trivImage_eq_christoffelCorrectionCLM` agrees on
-the chart source with `christoffelCorrectionCLM g α B b`, which is
-chart-source `ContMDiffOn ∞` by `christoffelCorrectionCLM_contMDiffOn_chartSource`. -/
-
-/-! ### The conjugation = christoffelCorrectionCLM identity on the chart source -/
 
 /-- On the chart-`α` source, the chart-`α`-conjugation
 `chartJ α b ∘L chartLeviCivitaParallelCLM g α b X ∘L chartJinv α b` agrees
@@ -579,29 +490,19 @@ private lemma chartLCConj_eq_christoffelCorrectionCLM
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := hb
   refine ContinuousLinearMap.ext ?_
   intro w
-  -- LHS: ((chartJ).comp((parallel).comp(chartJinv))) w
-  -- Step 1: unfold the outer `.comp`.
   rw [ContinuousLinearMap.comp_apply]
-  -- Goal: chartJ ((parallel).comp(chartJinv) w) = christoffelCorrectionCLM g α X b w
-  -- Step 2: unfold the inner `.comp` by switching to a definitionally-equal form.
   change chartJ (I := I) (M := M) α b
       ((chartLeviCivitaParallelCLM (I := I) g α b X)
         (chartJinv (I := I) (M := M) α b w)) = _
-  -- Use the parallel CLM evaluation formula.
   rw [chartLeviCivitaParallelCLM_apply (I := I) g α b X
     (chartJinv (I := I) (M := M) α b w)]
-  -- LHS now: chartJ (trivFromE (christoffelCorrection ...)).
-  -- chartJ α b = trivToE α b definitionally; use `trivToE_trivFromE` to collapse.
   change trivToE (I := I) α b
       (trivFromE (I := I) α b
         (christoffelCorrection (I := I) g α b
           (trivToE (I := I) α b (X b))
           (chartJinv (I := I) (M := M) α b w))) = _
   rw [trivToE_trivFromE (I := I) α hb_base]
-  -- Identify with christoffelCorrectionCLM.
   exact christoffelCorrection_eq_christoffelCorrectionCLM (I := I) g α X hb_base w
-
-/-! ### Chart-pulled smoothness of the slot-conjugation CLM family -/
 
 /-- Chart-pulled smoothness of the chart-`α`-conjugation
 `chartJ α (symm y) ∘L chartLeviCivitaParallelCLM g α (symm y) B ∘L chartJinv α (symm y)`
@@ -616,8 +517,6 @@ private lemma chartLCConj_contMDiffOn_chartSource
             (chartJinv (I := I) (M := M) α b)))
       ((chartAt H α).source) := by
   classical
-  -- Use the public `christoffelCorrectionCLM_contMDiffOn` (on the good set,
-  -- which equals the chart source under [I.Boundaryless]).
   have hB_total : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => TotalSpace.mk' E
         (E := fun y : M => TangentSpace I y) x (B.toFun x)) := B.contMDiff
@@ -639,8 +538,6 @@ private lemma chartLCConj_contMDiffOn_chartSource
   refine hχ.congr ?_
   intro b hb
   exact chartLCConj_eq_christoffelCorrectionCLM (I := I) (M := M) g α B.toFun hb
-
-/-! ### Chart-target smoothness via extChartAt symm -/
 
 /-- The chart-target image of the chart-`α` Levi-Civita good set is open. -/
 private lemma goodSet_image_isOpen (α : M) :
@@ -677,20 +574,13 @@ private lemma chartLCConj_chart_pulled_contDiffOn
             (chartJinv (I := I) (M := M) α ((extChartAt I α).symm y))))
       ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) := by
   classical
-  -- We have ContMDiffOn on chart-source. Compose with extChartAt.symm and
-  -- transfer to ContDiffOn on the chart-target image using the standard
-  -- chartE_pullback pattern (see `chartE_pullback_contDiffOn_goodSet`).
   have hcm := chartLCConj_contMDiffOn_chartSource (I := I) (M := M) g α B
-  -- Strategy: pointwise. For each y in the image, write y = extChartAt I α b
-  -- for some b ∈ goodSet, then ContMDiff at b composed with smoothness of
-  -- extChartAt.symm at φ b gives ContDiff at y.
   set hgood_open : IsOpen (chartLeviCivitaGoodSet (I := I) α) :=
     chartLeviCivitaGoodSet_isOpen (I := I) α
   intro y hy
   rcases hy with ⟨x, hxS, rfl⟩
   have hx_src : x ∈ (chartAt H α).source :=
     chartLeviCivitaGoodSet_mem_chartAt_source (I := I) hxS
-  -- ContMDiffAt the M-function at x.
   set F : M → E →L[ℝ] E := fun b : M =>
     (chartJ (I := I) (M := M) α b).comp
       ((chartLeviCivitaParallelCLM (I := I) g α b B.toFun).comp
@@ -699,7 +589,6 @@ private lemma chartLCConj_chart_pulled_contDiffOn
     have hopen_src : IsOpen (chartAt H α).source :=
       (chartAt H α).open_source
     exact hcm.contMDiffAt (hopen_src.mem_nhds hx_src)
-  -- ContMDiffAt of extChartAt.symm at φ x.
   set φ := extChartAt I α
   have hxφ_src : x ∈ φ.source := by rw [extChartAt_source]; exact hx_src
   have hxφ_tgt : φ x ∈ φ.target := φ.map_source hxφ_src
@@ -741,8 +630,6 @@ private lemma chartLCConj_chart_pulled_contDiffAt
   exact (chartLCConj_chart_pulled_contDiffOn (I := I) (M := M) g α B).contDiffAt
     (hOpen.mem_nhds hmem)
 
-/-! ### Chart-pulled smoothness of the slot-conjugation family -/
-
 /-- Chart-pulled `ContDiffAt` smoothness of each slot of the input slot
 conjugation family at a chart-good-set point. -/
 private lemma slotInputConjCLM_chart_pulled_contDiffAt
@@ -757,7 +644,6 @@ private lemma slotInputConjCLM_chart_pulled_contDiffAt
   classical
   by_cases hik : i = k
   · subst hik
-    -- slotInputConjCLM ... i (= k after subst) = chartJ ∘ parallelCLM ∘ chartJinv (smooth).
     have heq : (fun y : E =>
         slotInputConjCLM (I := I) g r α B.toFun i ((extChartAt I α).symm y) i) =
       (fun y : E =>
@@ -769,8 +655,7 @@ private lemma slotInputConjCLM_chart_pulled_contDiffAt
       exact slotInputConjCLM_self (I := I) g r α B.toFun i ((extChartAt I α).symm y)
     rw [heq]
     exact chartLCConj_chart_pulled_contDiffAt (I := I) (M := M) g α B hb
-  · -- slotInputConjCLM ... i = id_E (constant).
-    have heq : (fun y : E =>
+  · have heq : (fun y : E =>
         slotInputConjCLM (I := I) g r α B.toFun k ((extChartAt I α).symm y) i) =
       (fun _ : E => ContinuousLinearMap.id ℝ E) := by
       funext y
@@ -811,12 +696,6 @@ private lemma slotOutputConjCLM_chart_pulled_contDiffAt
     rw [heq]
     exact contDiffAt_const
 
-/-! ### Smoothness of `compContinuousLinearMapL` of a smooth family
-
-`compContinuousLinearMapL` is a continuous linear (hence smooth) functional
-in the `f` argument; we use this to lift smoothness of each slot factor to
-smoothness of the entire `compContinuousLinearMapL`-bundle. -/
-
 /-- Smoothness of the chart-pulled `inputSlotPrecompCLM` at a good-set point. -/
 private lemma inputSlotPrecompCLM_chart_pulled_contDiffAt
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
@@ -828,16 +707,11 @@ private lemma inputSlotPrecompCLM_chart_pulled_contDiffAt
           ((extChartAt I α).symm y))
       (extChartAt I α b) := by
   classical
-  -- The map `Φ ↦ compContinuousLinearMapL Φ` is the underlying function of
-  -- the continuous multilinear map `compContinuousLinearMapContinuousMultilinear`.
-  -- Smoothness follows by composing the smoothness of each slot via
-  -- the CMM-as-function smoothness.
   set hmulti : ContinuousMultilinearMap ℝ (fun _ : Fin r => E →L[ℝ] E)
       ((ContinuousMultilinearMap ℝ (fun _ : Fin r => E) ℝ) →L[ℝ]
         ContinuousMultilinearMap ℝ (fun _ : Fin r => E) ℝ) :=
     ContinuousMultilinearMap.compContinuousLinearMapContinuousMultilinear
       ℝ (fun _ : Fin r => E) (fun _ : Fin r => E) ℝ with hmulti_def
-  -- Smoothness of the pi-bundle of slot factors.
   have hpi : ContDiffAt ℝ ∞
       (fun y : E =>
         fun i : Fin r => slotInputConjCLM (I := I) g r α B.toFun k
@@ -847,13 +721,8 @@ private lemma inputSlotPrecompCLM_chart_pulled_contDiffAt
     intro i
     exact slotInputConjCLM_chart_pulled_contDiffAt (I := I) (M := M)
       g r α B k hb i
-  -- Continuous multilinear map composed with smooth pi-tuple is smooth.
   have hcomposed :=
     (hmulti.contDiff (𝕜 := ℝ)).contDiffAt.comp (x := extChartAt I α b) hpi
-  -- `hcomposed` is smooth function `y ↦ hmulti (slot family)`.
-  -- The applied form of `compContinuousLinearMapContinuousMultilinear ... f`
-  -- is `compContinuousLinearMapL f` by the simp lemma generated by
-  -- `@[simps! apply_apply]`. Establish this once and rewrite.
   have h_eval :
       ∀ y : E,
         (hmulti
@@ -864,16 +733,8 @@ private lemma inputSlotPrecompCLM_chart_pulled_contDiffAt
         inputSlotPrecompCLM (I := I) g r α B.toFun k
           ((extChartAt I α).symm y) := by
     intro y
-    -- Both sides are CLMs `CMM ... → CMM ...`. Apply ext.
     refine ContinuousLinearMap.ext ?_
     intro w
-    -- LHS = (compCLMContMultilinear ... slotConjFamily) w
-    --     = (compCLML slotConjFamily) w
-    --     = w.compCLM slotConjFamily
-    -- RHS = inputSlotPrecompCLM (symm y) (w)
-    --     = compCLML (slotInputConjCLM ... (symm y)) w
-    --     = w.compCLM slotConjFamily
-    -- Both are definitionally equal.
     rfl
   refine hcomposed.congr_of_eventuallyEq ?_
   refine Filter.Eventually.of_forall ?_
@@ -925,8 +786,6 @@ private lemma outputSlotPostcompCLM_chart_pulled_contDiffAt
   intro y
   exact h_eval y
 
-/-! ### Headlines: chart-pulled smoothness of the kernels -/
-
 /-- **Chart-pulled smoothness of the input-slot kernel.**
 
 The chart-pulled input-slot kernel `y ↦ inputSlotChartKernel g r s α B k
@@ -941,12 +800,8 @@ theorem inputSlotChartKernel_contDiffAt_chart_pulled
                       ((extChartAt I α).symm y))
       (extChartAt I α b) := by
   classical
-  -- inputSlotChartKernel = (compL).flip (inputSlotPrecompCLM).
-  -- This is a continuous linear map applied to inputSlotPrecompCLM.
-  -- Smoothness of compL_flip ∘ inputSlotPrecompCLM follows.
   have h_precomp := inputSlotPrecompCLM_chart_pulled_contDiffAt
     (I := I) (M := M) g r α B k hb
-  -- Apply the continuous linear map `(compL).flip` (smooth) to h_precomp.
   set L : (Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel r ℝ E) →L[ℝ]
       ((Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E) →L[ℝ]
         (Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E)) :=
@@ -986,16 +841,6 @@ theorem outputSlotChartKernel_contDiffAt_chart_pulled
   refine Filter.Eventually.of_forall ?_
   intro y
   rfl
-
-/-! ## Uniform op-norm bounds on `tsupport ∩ goodSet`
-
-The op-norm of `inputSlotChartKernel ... b` is bounded by the op-norm of
-`inputSlotPrecompCLM ... b`, which in turn is bounded by `∏ ‖slotInputConjCLM
-... b i‖ ≤ (max ‖chartJ‖^2 · ‖chartLeviCivitaParallelCLM‖) ^ 1 · 1^(r-1) =
-‖chartJ‖^2 · ‖chartLeviCivitaParallelCLM‖`. Each of the three factors admits
-a uniform bound on the POU tsupport. -/
-
-/-! ### Op-norm of the conjugation -/
 
 /-- Op-norm bound on the chart-`α`-conjugation
 `chartJ α b ∘L chartLeviCivitaParallelCLM g α b X ∘L chartJinv α b`. -/
@@ -1119,8 +964,6 @@ private lemma outputSlotPostcompCLM_opNorm_le (g : SmoothRiemannianMetric I M)
       (𝕜 := ℝ) (E := fun _ : Fin s => E) ℝ _) ?_
   exact slotOutputConjCLM_prod_opNorm_le (I := I) (M := M) g s α B l b
 
-/-! ### Op-norm of the kernel CLMs -/
-
 /-- Op-norm bound on `inputSlotChartKernel`. -/
 private lemma inputSlotChartKernel_opNorm_le (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (α : M) (B : Π b' : M, TangentSpace I b') (k : Fin r) (b : M) :
@@ -1128,7 +971,6 @@ private lemma inputSlotChartKernel_opNorm_le (g : SmoothRiemannianMetric I M)
       ‖inputSlotPrecompCLM (I := I) g r α B k b‖ := by
   classical
   unfold inputSlotChartKernel
-  -- ‖compL.flip P‖ ≤ ‖compL.flip‖ * ‖P‖ ≤ ‖compL‖ * ‖P‖ ≤ 1 * ‖P‖ = ‖P‖.
   refine le_trans ((ContinuousLinearMap.compL ℝ (Tensor0SModel r ℝ E)
     (Tensor0SModel r ℝ E) (Tensor0SModel s ℝ E)).flip.le_opNorm _) ?_
   rw [ContinuousLinearMap.opNorm_flip]
@@ -1146,7 +988,6 @@ private lemma outputSlotChartKernel_opNorm_le (g : SmoothRiemannianMetric I M)
       ‖outputSlotPostcompCLM (I := I) g s α B l b‖ := by
   classical
   unfold outputSlotChartKernel
-  -- ‖compL Q‖ ≤ ‖compL‖ * ‖Q‖ ≤ 1 * ‖Q‖ = ‖Q‖.
   refine le_trans ((ContinuousLinearMap.compL ℝ (Tensor0SModel r ℝ E)
     (Tensor0SModel s ℝ E) (Tensor0SModel s ℝ E)).le_opNorm _) ?_
   have h_le := ContinuousLinearMap.norm_compL_le (𝕜 := ℝ)
@@ -1155,13 +996,6 @@ private lemma outputSlotChartKernel_opNorm_le (g : SmoothRiemannianMetric I M)
   have h_nn : 0 ≤ ‖outputSlotPostcompCLM (I := I) g s α B l b‖ := norm_nonneg _
   refine le_trans (mul_le_mul_of_nonneg_right h_le h_nn) ?_
   rw [one_mul]
-
-/-! ## Uniform fderiv bounds on `tsupport ∩ goodSet`
-
-The chart-pulled kernel is `ContDiffOn ℝ ∞` on the open chart-target image
-of the chart-`α` Levi-Civita good set. Hence its Fréchet-derivative is
-continuous on that open set, and uniformly bounded on the closed compact
-image of the POU tsupport ∩ good set. -/
 
 /-- **Chart-pulled `ContDiffOn` smoothness of `inputSlotChartKernel`** on the
 chart-target image of the chart-`α` Levi-Civita good set. -/
@@ -1173,8 +1007,6 @@ theorem inputSlotChartKernel_chart_pulled_contDiffOn
                       ((extChartAt I α).symm y))
       ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) := by
   classical
-  -- inputSlotChartKernel = (compL).flip (inputSlotPrecompCLM), so smooth
-  -- chart-pulled follows from smoothness of inputSlotPrecompCLM chart-pulled.
   set L : (Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel r ℝ E) →L[ℝ]
       ((Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E) →L[ℝ]
         (Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E)) :=
@@ -1229,8 +1061,6 @@ theorem outputSlotChartKernel_chart_pulled_contDiffOn
     rfl
   exact h_at.contDiffWithinAt
 
-/-! ### Continuity of the chart-pulled fderiv on the open good-set image -/
-
 private lemma inputSlotChartKernel_fderiv_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (k : Fin r) :
@@ -1271,8 +1101,6 @@ private lemma outputSlotChartKernel_fderiv_continuousOn
     exact hcd.fderiv_of_isOpen hOpen h_le
   exact continuous_norm.comp_continuousOn hfd_cd.continuousOn
 
-/-! ### Uniform fderiv bound on POU tsupport ∩ goodSet -/
-
 /-- **Uniform Fréchet-derivative op-norm bound for the chart-pulled
 input-slot kernel.** -/
 theorem inputSlotChartKernel_fderiv_opNorm_uniform_on_pouTsupport
@@ -1287,16 +1115,12 @@ theorem inputSlotChartKernel_fderiv_opNorm_uniform_on_pouTsupport
                             ((extChartAt I α).symm y))
             (extChartAt I α b)‖ ≤ K := by
   classical
-  -- The fderiv bound follows from continuity of fderiv on the open good-set
-  -- image.
   set K_set : Set M := tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) with hK_set_def
   have hK_compact : IsCompact K_set :=
     pouTsupport_isCompact (I := I) (M := M) α
-  -- Continuity on the open image; restrict via continuous extChartAt.
   have hcont := inputSlotChartKernel_fderiv_continuousOn (I := I) (M := M)
     g r s α B k
-  -- Map K_set into the good-set image via extChartAt.
   have hK_sub : K_set ⊆ (chartAt H α).source :=
     (chartAtlasPOU_isSubordinate I M) α
   have hK_sub_good : K_set ⊆ chartLeviCivitaGoodSet (I := I) α := by

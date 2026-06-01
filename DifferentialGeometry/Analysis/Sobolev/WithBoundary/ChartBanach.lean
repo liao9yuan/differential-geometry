@@ -36,8 +36,6 @@ variable {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanHalfSpace n) M]
   [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M]
 
-/-! ## Real-valued chart-based Sobolev norm -/
-
 /-- Real-valued (`ℝ≥0∞.toReal`) version of the chart-based half-space-Sobolev
 norm. -/
 def wkpNormChartReal
@@ -117,8 +115,6 @@ lemma wkpNormChartReal_const_smul
   unfold wkpNormChartReal
   rw [wkpNormChart_const_smul (n := n) (M := M) g hp c hu]
   rw [ENNReal.toReal_mul, toReal_enorm]
-
-/-! ## `Norm` and `SeminormedAddCommGroup` instances on `WkpChart` -/
 
 /-- The underlying `M → ℝ` function of an element `u : WkpChart g k p hp`.
 Implementation: `WkpChart` is by definition the submodule subtype, so we
@@ -248,8 +244,6 @@ instance instNormedSpaceRealWkpChart
     rw [wkpChartFun_smul]
     rw [wkpNormChart_const_smul (n := n) (M := M) g hp c hu_mem]
     rw [ENNReal.toReal_mul, toReal_enorm]
-
-/-! ## Normed quotient via `SeparationQuotient` -/
 
 /-- The `SeparationQuotient` of `WkpChart g k p hp` is a `NormedAddCommGroup`
 (automatically inherited from the seminormed structure). -/

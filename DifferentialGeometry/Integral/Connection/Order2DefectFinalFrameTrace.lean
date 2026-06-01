@@ -58,21 +58,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Additivity of the second covariant derivative and of the partial metric trace
-
-The intrinsic partial metric trace `metricTrace2 g r s (tensorSecondCovDeriv g r s)` is additive in
-the traced section argument, because the second covariant derivative `tensorSecondCovDeriv` is
-additive in its tensor argument (the underlying `(r, s)`-tensor covariant derivative is a genuine
-covariant derivative, so it satisfies the Leibniz / additivity laws of `IsCovariantDerivativeOn`).
-This additivity is the linearity that lets the canonical commutator defect be presented as a single
-metric trace of a *difference* of two third-order tensor fields. -/
 
 /-- **Additivity of the second covariant derivative in the tensor argument.** For smooth tangent
 fields `X, Y` and two raw `(r, s)`-tensor sections `T, T'` whose total-space liftings and
@@ -100,7 +89,6 @@ theorem tensorSecondCovDeriv_add
   classical
   set cov := tensorCov (I := I) g r s with hcov_def
   have hcov_loc := cov.isCovariantDerivativeOn (s := (Set.univ : Set M))
-  -- Differentiability witnesses at `x`, in the explicit total-space form `T%` expands to.
   have hTd : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
       (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun z : M => TensorRSSpace r s I z) y (T y)) x :=
@@ -109,7 +97,6 @@ theorem tensorSecondCovDeriv_add
       (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun z : M => TensorRSSpace r s I z) y (T' y)) x :=
     (hT' x).mdifferentiableAt (by simp)
-  -- The once-covariantly-differentiated sections are smooth, hence differentiable at `x`.
   have hcovT : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
       (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun z : M => TensorRSSpace r s I z) y (covApply cov Y T y)) x :=
@@ -118,7 +105,6 @@ theorem tensorSecondCovDeriv_add
       (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun z : M => TensorRSSpace r s I z) y (covApply cov Y T' y)) x :=
     (covApplyRS_contMDiff (I := I) g r s hT' hY x).mdifferentiableAt (by simp)
-  -- `covApply cov Y (T + T') = covApply cov Y T + covApply cov Y T'`, pointwise from additivity.
   have hcovApply_add : covApply cov Y (fun y : M => T y + T' y) =
       fun y : M => covApply cov Y T y + covApply cov Y T' y := by
     funext y
@@ -135,13 +121,11 @@ theorem tensorSecondCovDeriv_add
       exact hcov_loc.add (σ := T) (σ' := T') hTy hT'y
     change cov.toFun (fun z : M => T z + T' z) y (Y y) = _
     rw [hadd_y]; rfl
-  -- The iterated covariant term is additive.
   have hiter : cov.toFun (covApply cov Y (fun y : M => T y + T' y)) x =
       cov.toFun (covApply cov Y T) x + cov.toFun (covApply cov Y T') x := by
     rw [hcovApply_add]
     change cov.toFun ((covApply cov Y T) + (covApply cov Y T')) x = _
     exact hcov_loc.add (σ := covApply cov Y T) (σ' := covApply cov Y T') hcovT hcovT'
-  -- The Christoffel-correction term is additive.
   have hchrist : cov.toFun (fun y : M => T y + T' y) x = cov.toFun T x + cov.toFun T' x := by
     change cov.toFun (T + T') x = cov.toFun T x + cov.toFun T' x
     exact hcov_loc.add (σ := T) (σ' := T') hTd hT'd

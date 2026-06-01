@@ -65,14 +65,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Canonical measurable-space and Borel-space instances on `E` and `M`
-
-These are file-local instances that equip any finite-dimensional real normed space `E`
-with its Borel σ-algebra and any topological manifold `M` with the Borel σ-algebra
-induced from its topology. They are declared `local` so they do not leak into calling
-files as global instances; callers that need to interact with the measures defined below
-should install matching instances in their own scope. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -83,16 +75,6 @@ specialised to smoothness `∞`. -/
 abbrev SmoothRiemannianMetric (I : ModelWithCorners ℝ E H) (M : Type*)
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] : Type _ :=
   Bundle.ContMDiffRiemannianMetric I ∞ E (TangentSpace I : M → Type _)
-
-/-! ## A fixed model-space basis transferred from `EuclideanSpace`
-
-The chart-local frame is built from a fixed algebraic basis of the model space `E`. We
-choose this basis to be the image of the standard `EuclideanSpace` basis under the
-canonical continuous-linear equivalence `toEuclidean.symm : EuclideanSpace ℝ (Fin n) ≃L[ℝ] E`.
-This choice (rather than a generic `Module.finBasis ℝ E`) ensures that pulling Euclidean
-partial-derivative computations through the chart consistently uses the same algebraic
-basis on both sides.
--/
 
 /-- The fixed model-space basis used throughout the chart-local construction. It is the
 image of the standard `EuclideanSpace.basisFun` under the inverse of the canonical
@@ -118,8 +100,6 @@ downstream proofs should rely on the simp lemma `chartModelBasis_apply` (and
       (toEuclidean (E := E)).symm (EuclideanSpace.single i (1 : ℝ))
   simp [OrthonormalBasis.coe_toBasis,
     EuclideanSpace.basisFun_apply (𝕜 := ℝ) (ι := Fin (Module.finrank ℝ E))]
-
-/-! ## Tangent-bundle sections from a fixed model-space basis -/
 
 /-- The `i`-th pointwise tangent vector of the chart-local frame attached to `x₀`. For `x`
 in the trivialization base set this is the image of the `i`-th model-space basis vector
@@ -188,8 +168,6 @@ lemma chartAlphaFrame_section_contMDiffOn
         ((trivializationAt E (TangentSpace I) α).symmL ℝ b
           (chartModelBasis E i)))
       (chartAt H α).source := by
-  -- Pointwise the section equals `chartBasisVec α i` — the only difference is
-  -- `symmL ℝ b v` vs `symm b v`, which agree as values (by `coe_symmₗ`).
   have h_funext :
       (fun b : M => TotalSpace.mk' E b
           ((trivializationAt E (TangentSpace I) α).symmL ℝ b
@@ -198,18 +176,12 @@ lemma chartAlphaFrame_section_contMDiffOn
     funext b
     rfl
   rw [h_funext]
-  -- `chartBasisVec_contMDiffOn` gives smoothness on `(triv α).baseSet`; rewrite
-  -- to the chart-`α` source via `TangentBundle.trivializationAt_baseSet`.
   have h_base := chartBasisVec_contMDiffOn (I := I) α i
   have h_baseSet :
       (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source :=
     TangentBundle.trivializationAt_baseSet (I := I) α
   rw [h_baseSet] at h_base
-  -- `I.tangent` is an `abbrev` for `I.prod 𝓘(ℝ, E)`, so the model spaces match
-  -- definitionally.
   exact h_base
-
-/-! ## Fiberwise basis from the trivialization -/
 
 /-- The chart-basis family at a point `x ∈ triv.baseSet` is a basis of `TangentSpace I x`,
 obtained by transporting the fixed model-space basis through the continuous linear
@@ -243,8 +215,6 @@ lemma chartBasisFamily_linearIndependent (x₀ : M) {x : M}
     exact chartBasisFamily_apply (I := I) x₀ hx i
   rw [← hcongr]
   exact h
-
-/-! ## The Gram matrix of the chart-basis family -/
 
 /-- The Gram matrix of the chart-basis family at `x` under `g.inner x`. -/
 def chartGramMatrix (g : SmoothRiemannianMetric I M) (x₀ : M) (x : M) :
@@ -284,7 +254,6 @@ lemma chartGramMatrix_dotProduct_mulVec
       g.inner x
         (∑ i, c i • chartBasisVecFiber (I := I) x₀ i x)
         (∑ j, c j • chartBasisVecFiber (I := I) x₀ j x) := by
-  -- Direct bilinear expansion via `map_sum` and `map_smul`.
   have hexpand' :
       g.inner x
           (∑ i, c i • chartBasisVecFiber (I := I) x₀ i x)
@@ -293,7 +262,6 @@ lemma chartGramMatrix_dotProduct_mulVec
             g.inner x
               (chartBasisVecFiber (I := I) x₀ i x)
               (chartBasisVecFiber (I := I) x₀ j x) := by
-    -- Left linearity: pull the ∑ᵢ cᵢ • vᵢ out.
     have hL :
         g.inner x (∑ i, c i • chartBasisVecFiber (I := I) x₀ i x)
           = ∑ i, c i • g.inner x (chartBasisVecFiber (I := I) x₀ i x) := by
@@ -301,15 +269,11 @@ lemma chartGramMatrix_dotProduct_mulVec
       refine Finset.sum_congr rfl ?_
       intro i _
       rw [map_smul]
-    -- Apply both sides at `∑ⱼ cⱼ • vⱼ`.
     rw [hL]
     rw [ContinuousLinearMap.sum_apply]
     refine Finset.sum_congr rfl ?_
     intro i _
-    -- Goal: `(c i • g.inner x vᵢ) (∑ⱼ cⱼ • vⱼ) = ∑ⱼ (c i * c j) * g.inner x vᵢ vⱼ`.
     rw [ContinuousLinearMap.smul_apply]
-    -- Now goal: `c i • (g.inner x vᵢ) (∑ⱼ cⱼ • vⱼ) = ∑ⱼ (c i * c j) * g.inner x vᵢ vⱼ`.
-    -- Right linearity on the right argument.
     have hR :
         g.inner x (chartBasisVecFiber (I := I) x₀ i x)
             (∑ j, c j • chartBasisVecFiber (I := I) x₀ j x)
@@ -326,14 +290,12 @@ lemma chartGramMatrix_dotProduct_mulVec
     intro j _
     ring
   rw [hexpand']
-  -- Now the left-hand side.
   simp only [dotProduct, Matrix.mulVec, chartGramMatrix_apply, Pi.star_apply, star_trivial]
   refine Finset.sum_congr rfl ?_
   intro i _
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl ?_
   intro j _
-  -- Goal: `c i * (A i j * c j) = (c i * c j) * A i j` where `A i j = g.inner x vᵢ vⱼ`.
   ring
 
 /-- The Gram matrix of the chart-basis family is positive-definite on the base set. -/
@@ -363,8 +325,6 @@ lemma chartGramMatrix_det_pos
     0 < (chartGramMatrix g x₀ x).det :=
   (chartGramMatrix_posDef (I := I) g x₀ hx).det_pos
 
-/-! ## The chart-local density -/
-
 /-- The chart-local density at `x` is `√(det (Gram matrix at x))`. -/
 def chartDensity (g : SmoothRiemannianMetric I M) (x₀ : M) : M → ℝ :=
   fun x => Real.sqrt (chartGramMatrix g x₀ x).det
@@ -375,8 +335,6 @@ lemma chartDensity_pos
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
     0 < chartDensity g x₀ x :=
   Real.sqrt_pos.mpr (chartGramMatrix_det_pos (I := I) g x₀ hx)
-
-/-! ## Smoothness of the Gram matrix entries and density -/
 
 /-- Each Gram-matrix entry is smooth on the trivialization base set. Proof: the inner
 product evaluated at two smooth sections is smooth, via `ContMDiffOn.clm_bundle_apply₂`
@@ -429,7 +387,6 @@ lemma chartGramMatrix_det_contMDiffOn
       (fun x => (chartGramMatrix g x₀ x).det)
       (trivializationAt E (TangentSpace I) x₀).baseSet := by
   classical
-  -- `det A = ∑_{σ} sign σ • ∏_i A (σ i) i`
   have hexp :
       (fun x : M => (chartGramMatrix g x₀ x).det)
         = (fun x : M =>
@@ -457,12 +414,9 @@ lemma chartDensity_contMDiffOn
   have hsqrt : ContDiffAt ℝ ∞ Real.sqrt
       (chartGramMatrix (I := I) g x₀ x).det :=
     Real.contDiffAt_sqrt hpos_ne
-  -- Apply `ContDiffAt.comp_contMDiffWithinAt` with the right target.
   have := hsqrt.comp_contMDiffWithinAt (f :=
       fun y : M => (chartGramMatrix (I := I) g x₀ y).det) hdet
   exact this
-
-/-! ## The chart-local measure -/
 
 /-- The canonical additive Haar measure on the model space `E`, obtained from the
 basis `chartModelBasis E`. Serves as the reference measure on the chart target.
@@ -495,7 +449,6 @@ theorem map_toEuclidean_modelHaar_eq_volume :
   classical
   letI : MeasurableSpace E := borel E
   haveI : BorelSpace E := ⟨rfl⟩
-  -- `map toEuclidean modelHaar = (chartModelBasis.map toEuclidean).addHaar`.
   have h₁ :
       MeasureTheory.Measure.map (toEuclidean (E := E))
           (modelHaar (E := E)) =
@@ -505,7 +458,6 @@ theorem map_toEuclidean_modelHaar_eq_volume :
     exact Module.Basis.map_addHaar (chartModelBasis E)
       (toEuclidean (E := E))
   rw [h₁]
-  -- The basis-map cancellation: `chartModelBasis.map toEuclidean = basisFun.toBasis`.
   have hcancel :
       (chartModelBasis E).map (toEuclidean (E := E)).toLinearEquiv
         = (EuclideanSpace.basisFun (Fin (Module.finrank ℝ E)) ℝ).toBasis := by

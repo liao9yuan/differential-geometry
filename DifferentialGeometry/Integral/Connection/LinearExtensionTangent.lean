@@ -51,13 +51,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## The coordinate-constant vector field
-
-The tangent trivialization centred at `x`, `triv := trivializationAt E (TangentSpace I) x`,
-identifies the fibre `T_y M` with the model space `E` for `y` in its base set (which equals
-`(chartAt H x).source`).  Reading off the `triv`-coordinate of `w` at `x` and re-injecting
-that *constant* coordinate at every base point `y` produces the coordinate-constant field. -/
-
 /-- The `triv`-coordinate of `w : T_x M` in the model space, where
 `triv := trivializationAt E (TangentSpace I) x`. -/
 def tangentCoord (x : M) (w : TangentSpace I x) : E :=
@@ -105,12 +98,6 @@ lemma coordExtensionTangent_map_smul (x : M) (c : ℝ) (w : TangentSpace I x) (b
       c • coordExtensionTangent (I := I) x w b := by
   simp only [coordExtensionTangent_apply, tangentCoord_smul, map_smul]
 
-/-! ## Smoothness of the coordinate-constant field on the chart source
-
-The argument mirrors `chartBasisVec_contMDiffOn`: viewed as a section, the coordinate-constant
-field has constant `triv`-coordinate `tangentCoord x w`, so it is smooth on the base set of the
-trivialization. -/
-
 /-- The coordinate-constant field, as a total-space section, is `C^∞` on the base set of the
 trivialization at `x`. -/
 lemma coordExtensionTangent_contMDiffOn (x : M) (w : TangentSpace I x) :
@@ -123,14 +110,12 @@ lemma coordExtensionTangent_contMDiffOn (x : M) (w : TangentSpace I x) :
       (IB := I) (n := ∞)
       (s := fun b => coordExtensionTangent (I := I) x w b)
   refine hiff.mpr ?_
-  -- The `triv`-coordinate is the constant `tangentCoord x w` on the base set.
   have hconst : ContMDiffOn I 𝓘(ℝ, E) ∞
       (fun _ : M => tangentCoord (I := I) x w)
       (trivializationAt E (TangentSpace I) x).baseSet :=
     contMDiffOn_const
   refine hconst.congr ?_
   intro b hb
-  -- `(triv ⟨b, coordExtensionTangent x w b⟩).2 = tangentCoord x w` on the base set.
   change (trivializationAt E (TangentSpace I) x
       ⟨b, coordExtensionTangent (I := I) x w b⟩).2 = tangentCoord (I := I) x w
   have happ :
@@ -141,10 +126,7 @@ lemma coordExtensionTangent_contMDiffOn (x : M) (w : TangentSpace I x) :
     have h := (trivializationAt E (TangentSpace I) x).apply_mk_symm hb
       (tangentCoord (I := I) x w)
     simpa using congrArg Prod.snd h
-  -- `symmL ℝ b v = symm b v` definitionally (the `toFun` field of `symmL`).
   simpa [coordExtensionTangent, Trivialization.symmL_apply] using happ
-
-/-! ## The bump function and the controlled extension -/
 
 /-- A choice of smooth bump function centred at `x`, used to cut off the coordinate-constant
 field to a globally smooth section.  Its support lies in the chart source, and it equals `1`
@@ -163,8 +145,6 @@ def linearExtensionTangent (x : M) (w : TangentSpace I x) :
     linearExtensionTangent (I := I) x w b =
       (linExtBump (I := I) x : M → ℝ) b • coordExtensionTangent (I := I) x w b := rfl
 
-/-! ### The extension recovers `w` at the base point -/
-
 /-- The bump equals `1` at its centre `x`. -/
 lemma linExtBump_eq_one (x : M) : (linExtBump (I := I) x : M → ℝ) x = 1 :=
   (linExtBump (I := I) x).eq_one
@@ -174,8 +154,6 @@ theorem linearExtensionTangent_eq (x : M) (w : TangentSpace I x) :
     linearExtensionTangent (I := I) x w x = w := by
   rw [linearExtensionTangent_apply, linExtBump_eq_one, one_smul,
     coordExtensionTangent_self]
-
-/-! ### `ℝ`-linearity in `w` -/
 
 /-- **Homogeneity:** `linearExtensionTangent x 0 = 0`. -/
 theorem linearExtensionTangent_map_zero (x : M) :
@@ -192,31 +170,23 @@ theorem linearExtensionTangent_map_smul (x : M) (c : ℝ) (w : TangentSpace I x)
   rw [Pi.smul_apply, linearExtensionTangent_apply, linearExtensionTangent_apply,
     coordExtensionTangent_map_smul, smul_comm]
 
-/-! ### `C^∞` smoothness -/
-
 /-- **Smoothness:** `b ↦ linearExtensionTangent x w b` is a `C^∞` tangent-bundle section. -/
 theorem linearExtensionTangent_smooth [T2Space M] (x : M) (w : TangentSpace I x) :
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (linearExtensionTangent (I := I) x w)) := by
   classical
   set u : Set M := (chartAt H x).source with hu_def
   set ψ : M → ℝ := (linExtBump (I := I) x : M → ℝ) with hψ_def
-  -- The bump is `C^∞` on `u`.
   have hψ_smooth : ContMDiffOn I 𝓘(ℝ) ∞ ψ u :=
     (linExtBump (I := I) x).contMDiff.contMDiffOn
-  -- `u` is open.
   have hu_open : IsOpen u := (chartAt H x).open_source
-  -- `tsupport ψ ⊆ u`.
   have hψ_tsupport : tsupport ψ ⊆ u :=
     (linExtBump (I := I) x).tsupport_subset_chartAt_source
-  -- The coordinate-constant field is `C^∞` on `u` (= base set).
   have hs_smooth : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
       (T% (fun b : M => coordExtensionTangent (I := I) x w b)) u := by
     rw [show u = (trivializationAt E (TangentSpace I) x).baseSet from rfl]
     exact coordExtensionTangent_contMDiffOn (I := I) x w
-  -- Combine via `ContMDiffOn.smul_section_of_tsupport`.
   have h := ContMDiffOn.smul_section_of_tsupport (𝕜 := ℝ) (n := ∞)
     (V := TangentSpace I) hψ_smooth hu_open hψ_tsupport hs_smooth
-  -- Identify `(ψ • coordExtensionTangent x w)` with `linearExtensionTangent x w`.
   have h_eq : (fun b : M => TotalSpace.mk' E (E := TangentSpace I) b
         (linearExtensionTangent (I := I) x w b)) =
       (fun b : M => TotalSpace.mk' E (E := TangentSpace I) b
@@ -227,18 +197,6 @@ theorem linearExtensionTangent_smooth [T2Space M] (x : M) (w : TangentSpace I x)
     rw [linearExtensionTangent_apply]
   rw [h_eq]
   exact h
-
-/-! ## Reduction of the covariant derivative at the basepoint to the pure Christoffel term
-
-The chart-trivialised representation of the controlled extension, read in the *self-chart*
-centred at `x`, is **locally constant** near `x`: the bump equals `1` near `x` and the
-coordinate-constant field has constant `triv x`-representation `tangentCoord x w`.  Hence its
-Fréchet derivative vanishes, and the chart-Levi-Civita value at `x` collapses to the pure
-Christoffel correction `christoffelCorrection g x x (tangentCoord x w)`.
-
-This isolates the genuinely metric-dependent content of the covariant `1`-jet of the
-controlled extension: the bump contributes nothing at `x`, so `∇_v (linearExtensionTangent x w)`
-at `x` is exactly the metric Christoffel contraction of `v` with `w`. -/
 
 section Reduction
 
@@ -263,14 +221,12 @@ lemma chartE_section_repr_linearExtensionTangent_eventuallyEq_const
     chartE_section_repr (I := I) x (linearExtensionTangent (I := I) x w)
       =ᶠ[𝓝 x] (fun _ : M => tangentCoord (I := I) x w) := by
   classical
-  -- The neighbourhood on which the bump is `1` and `b` is in the base set.
   have h1 : {b : M | (linExtBump (I := I) x : M → ℝ) b = 1} ∈ 𝓝 x :=
     (linExtBump (I := I) x).eventuallyEq_one
   have h2 : (trivializationAt E (TangentSpace I) x).baseSet ∈ 𝓝 x := by
     rw [show (trivializationAt E (TangentSpace I) x).baseSet = (chartAt H x).source from rfl]
     exact (chartAt H x).open_source.mem_nhds (mem_chart_source H x)
   filter_upwards [h1, h2] with b hb1 hb2
-  -- On this set, `W b = coordExtensionTangent x w b`, so the chart-repr is `tangentCoord x w`.
   have hWb : linearExtensionTangent (I := I) x w b =
       coordExtensionTangent (I := I) x w b := by
     rw [linearExtensionTangent_apply, hb1, one_smul]
@@ -287,13 +243,10 @@ lemma fderiv_chartE_section_repr_linearExtensionTangent_eq_zero
     fderiv ℝ (chartE_section_repr (I := I) x (linearExtensionTangent (I := I) x w)
         ∘ (extChartAt I x).symm) (extChartAt I x x) = 0 := by
   classical
-  -- The pullback is eventually constant near `extChartAt I x x`.
   have hconst :
       (chartE_section_repr (I := I) x (linearExtensionTangent (I := I) x w)
           ∘ (extChartAt I x).symm)
         =ᶠ[𝓝 (extChartAt I x x)] (fun _ : E => tangentCoord (I := I) x w) := by
-    -- Pull the `𝓝 x`-eventual equality back through the continuous `(extChartAt I x).symm`,
-    -- using `(extChartAt I x).symm (extChartAt I x x) = x`.
     have hsymm_cont : ContinuousAt (extChartAt I x).symm (extChartAt I x x) :=
       continuousAt_extChartAt_symm x
     have hsymm_pt : (extChartAt I x).symm (extChartAt I x x) = x :=
@@ -329,19 +282,14 @@ theorem covApply_linearExtensionTangent_basepoint_eq
     self_mem_chartLeviCivitaGoodSet (I := I) (α := x)
   have hMDiff : MDiffAt (T% (linearExtensionTangent (I := I) x w)) x :=
     (linearExtensionTangent_smooth (I := I) x w).mdifferentiableAt (by norm_num)
-  -- Pass to the self-chart Levi-Civita formula.
   rw [LeviCivita_chart_apply (I := I) g x hself hMDiff v]
   rw [chartLeviCivita_apply (I := I) g x (linearExtensionTangent (I := I) x w) hself v]
-  -- The Fréchet-derivative term vanishes (the chart-repr is locally constant near `x`).
   rw [fderiv_chartE_section_repr_linearExtensionTangent_eq_zero (I := I) x w]
-  -- The chart-repr value at `x` is `tangentCoord x w`: it is `trivToE x x (W x) = trivToE x x w`,
-  -- which is `tangentCoord x w` by definition.
   have hreprx : chartE_section_repr (I := I) x (linearExtensionTangent (I := I) x w) x =
       tangentCoord (I := I) x w := by
     rw [chartE_section_repr_eq_trivToE, linearExtensionTangent_eq]
     rfl
   rw [hreprx]
-  -- The `fderiv = 0` term applied to anything is `0`, leaving the Christoffel term.
   simp
 
 end Reduction

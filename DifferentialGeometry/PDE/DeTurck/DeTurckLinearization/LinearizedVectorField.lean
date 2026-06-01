@@ -91,8 +91,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## The principal part of the linearized DeTurck vector field -/
-
 set_option linter.unusedVariables false in
 /-- The `k`-th chart-coordinate component of the **principal part of the
 linearized DeTurck vector field** of the evolving metric `g` against the
@@ -131,15 +129,6 @@ def chartLinearizedDeTurckVFPrincipal (g g' : SmoothRiemannianMetric I M) (α : 
         chartInvGramOnE (I := I) g α a b y *
           chartLinearizedChristoffelPrincipal (I := I) g α h a b k y := rfl
 
-/-! ## Independence from the background metric
-
-The defining sum `∑_{a,b} G(g)^{ab} · (DΓ)^k{}_{ab}[h]` mentions only the
-evolving metric `g` and the perturbation `h`; the background metric `g'` appears
-only in the (unused) parameter slot.  Mathematically, the background Christoffel
-symbol `Γ^k{}_{ab}(g')` is `g`-independent, so it drops out of the linearization
-in `g` — the principal part of `D(g ↦ W^k(g))[h]` is the same for every choice
-of background metric. -/
-
 /-- **The principal part of the linearized DeTurck vector field is independent
 of the background metric.**  Replacing the background metric `g'` by any other
 metric `g''` leaves the principal part unchanged: the defining sum does not
@@ -149,14 +138,6 @@ theorem chartLinearizedDeTurckVFPrincipal_background_indep
     (h : ChartMetricPerturbation E) (k : Fin (Module.finrank ℝ E)) (y : E) :
     chartLinearizedDeTurckVFPrincipal (I := I) g g' α h k y =
       chartLinearizedDeTurckVFPrincipal (I := I) g g'' α h k y := rfl
-
-/-! ## Linearity in the perturbation direction
-
-The principal part is `ℝ`-linear in the perturbation `h`: additive over a sum of
-perturbations, homogeneous under a real-scalar multiple, and zero on the zero
-perturbation.  Each follows by pushing the corresponding linearity lemma for
-`chartLinearizedChristoffelPrincipal` through the metric-`g` trace
-`∑_{a,b} G(g)^{ab} · (-)`. -/
 
 /-- The principal part of the linearized DeTurck vector field vanishes on the
 zero perturbation: every principal linearized Christoffel summand is zero. -/
@@ -191,8 +172,6 @@ theorem chartLinearizedDeTurckVFPrincipal_add
   classical
   rw [chartLinearizedDeTurckVFPrincipal_def, chartLinearizedDeTurckVFPrincipal_def,
     chartLinearizedDeTurckVFPrincipal_def]
-  -- Split the `(h₁ + h₂)` sum into the `h₁` sum plus the `h₂` sum, summand by
-  -- summand, using additivity of the principal linearized Christoffel part.
   rw [← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl (fun a _ => ?_)
   rw [← Finset.sum_add_distrib]
@@ -211,25 +190,12 @@ theorem chartLinearizedDeTurckVFPrincipal_smul
   classical
   rw [chartLinearizedDeTurckVFPrincipal_def, chartLinearizedDeTurckVFPrincipal_def,
     smul_eq_mul]
-  -- Pull the scalar `c` out of the double sum, summand by summand, using scalar
-  -- homogeneity of the principal linearized Christoffel part.
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl (fun a _ => ?_)
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl (fun b _ => ?_)
   rw [chartLinearizedChristoffelPrincipal_smul, smul_eq_mul]
   ring
-
-/-! ## Smoothness of the principal part
-
-The inverse Gram entries `chartInvGramOnE g α a b` are `C^∞` on the chart target,
-and the principal linearized Christoffel parts
-`chartLinearizedChristoffelPrincipal g α h a b k` are `C^∞` on the chart target
-as well (`chartLinearizedChristoffelPrincipal_contDiffOn`).  The principal part
-of the linearized DeTurck vector field is a finite sum of products of these,
-hence `C^∞` on the chart target; we record the form on the chart-target interior
-because a later symbol step differentiates the principal part once more in chart
-coordinates over an open set. -/
 
 /-- **Smoothness of the principal part of the linearized DeTurck vector field.**
 As a function of the chart-coordinate point `y`, `(DW)^k_{\mathrm{principal}}[h]`
@@ -240,7 +206,6 @@ theorem chartLinearizedDeTurckVFPrincipal_contDiffOn_interior
     ContDiffOn ℝ ∞ (chartLinearizedDeTurckVFPrincipal (I := I) g g' α h k)
       (interior (extChartAt I α).target) := by
   classical
-  -- Rewrite the principal part as the explicit double sum as a function of `y`.
   have hrewrite : chartLinearizedDeTurckVFPrincipal (I := I) g g' α h k =
       fun y : E =>
         ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
@@ -249,26 +214,12 @@ theorem chartLinearizedDeTurckVFPrincipal_contDiffOn_interior
     funext y
     rw [chartLinearizedDeTurckVFPrincipal_def]
   rw [hrewrite]
-  -- A finite double sum of `C^∞` summands is `C^∞`.
   refine ContDiffOn.sum (fun a _ => ?_)
   refine ContDiffOn.sum (fun b _ => ?_)
-  -- Each summand `G^{ab} · (DΓ)^k_{ab}[h]` is a product of `C^∞` factors on the
-  -- chart-target interior.
   refine ContDiffOn.mul ?_ ?_
-  · -- The inverse Gram entry is `C^∞` on the chart target, hence on its interior.
-    exact (chartInvGramOnE_contDiffOn (I := I) g α a b).mono interior_subset
-  · -- The principal linearized Christoffel part is `C^∞` on the chart target,
-    -- hence on its interior.
-    exact (chartLinearizedChristoffelPrincipal_contDiffOn (I := I) g α h a b k).mono
+  · exact (chartInvGramOnE_contDiffOn (I := I) g α a b).mono interior_subset
+  · exact (chartLinearizedChristoffelPrincipal_contDiffOn (I := I) g α h a b k).mono
       interior_subset
-
-/-! ## Differentiability corollaries
-
-A later symbol step differentiates the principal part `(DW)^k_{\mathrm{principal}}`
-via `partialDeriv`, which needs `C^∞`-smoothness — equivalently, differentiability
-of all orders — on the chart-target interior.  We record the corollaries in the
-two forms a downstream step consumes: `DifferentiableOn` on the open interior and
-`DifferentiableAt` at each interior point. -/
 
 /-- **The principal part of the linearized DeTurck vector field is
 differentiable on the chart-target interior.**  An immediate corollary of

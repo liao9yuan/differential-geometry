@@ -97,8 +97,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The degree-`0` term is the spectral norm -/
-
 /-- The degree-`0` summand of the `C^m` embedding's right-hand side is the
 spectral norm `‖T.toHs (2k)‖`: at `j = 0` the iterated covariant derivative is
 `T` itself, and `2 (k - 0) = 2k`. -/
@@ -108,15 +106,6 @@ spectral norm `‖T.toHs (2k)‖`: at `j = 0` the iterated covariant derivative 
       ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) T‖ := by
   unfold iteratedCovGradSobolevNorm
   simp
-
-/-! ## Monotonicity of the completion norm in the regularity order
-
-The intrinsic `H^σ` completion norm `‖T'.toHs σ‖` of a fixed smooth
-compactly-supported tensor section equals `(tensorPouSobolevHsNorm g σ T').toReal`
-(`tensorPouSobolevHilbert_norm_eq`).  The Hilbert-Schmidt chart-Sobolev norm is
-monotone in `σ` (`tensorPouSobolevHsNorm_le_succ`) and finite
-(`tensorPouSobolevHsNorm_lt_top`), so its real part is monotone, giving
-monotonicity of the completion norm. -/
 
 /-- The completion norm `‖T'.toHs σ‖` is monotone passing from order `σ` to order
 `σ + 1`. -/
@@ -137,7 +126,6 @@ theorem toHs_norm_mono_order
     (T' : SmoothCcTensor g r s) :
     ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) σ T'‖ ≤
       ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) τ T'‖ := by
-  -- Induct on the gap `τ = σ + d`; the gap form discards the order hypothesis.
   obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hστ
   clear hστ
   induction d with
@@ -146,8 +134,6 @@ theorem toHs_norm_mono_order
       refine le_trans ih ?_
       rw [show σ + (d + 1) = (σ + d) + 1 from by ring]
       exact toHs_norm_le_succ (I := I) (M := M) g (σ + d) T'
-
-/-! ## Step 1: reduce the per-degree order `2(k - j)` to the top order `2k` -/
 
 /-- **Order reduction to the top order.** The per-degree summand
 `‖∇^j T‖_{H^{2(k-j)}}` of the `C^m` embedding's right-hand side is bounded by the
@@ -162,16 +148,6 @@ theorem iteratedCovGradSobolevNorm_le_topOrder
   unfold iteratedCovGradSobolevNorm
   exact toHs_norm_mono_order (I := I) (M := M) g
     (by omega : 2 * (k - j) ≤ 2 * k) (iteratedCovGrad g r s j T)
-
-/-! ## The collapse engine
-
-Given the fixed-top-order rank-reduction bounds (step 2 above, the documented
-analytic core), the `C^m` embedding's per-degree right-hand side collapses to a
-single multiple of the spectral norm `‖T.toHs (2k)‖`.  The hypothesis is a family
-of single-rank Sobolev-norm inequalities — one per degree `j ≤ m`, all at the
-common top order `2k` — and is structurally distinct from the fibre-norm-sum
-conclusion: the proof combines it (via step 1) with the already-established `C^m`
-embedding `iteratedCovGrad_toSobolev_embedding_Cm`. -/
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
@@ -211,20 +187,15 @@ theorem iteratedCovGrad_toSobolev_embedding_Cm_collapsed
     iteratedCovGrad_toSobolev_embedding_Cm (I := I) (M := M) g r s k m h_super
   refine ⟨C, hC_pos, ?_⟩
   intro T x
-  -- Abbreviation for the spectral norm.
   set N : ℝ := ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) T‖ with hN_def
   have hN_nn : 0 ≤ N := norm_nonneg _
-  -- Each per-degree Sobolev norm is `≤ Cred · N` (order reduction + rank
-  -- reduction).
   have h_perdeg : ∀ j ∈ Finset.range (m + 1),
       iteratedCovGradSobolevNorm g r s k j T ≤ Cred * N := by
     intro j hj
     exact le_trans
       (iteratedCovGradSobolevNorm_le_topOrder (I := I) (M := M) g r s k j T)
       (h_rank T j hj)
-  -- The fibre-norm sum is `≤ C · ∑_j ‖∇^j T‖_{H^{2(k-j)}}` (the `C^m` embedding).
   refine le_trans (hC T x) ?_
-  -- Bound the sum of per-degree Sobolev norms by `(m+1) · Cred · N`.
   have h_sum_le :
       (∑ j ∈ Finset.range (m + 1), iteratedCovGradSobolevNorm g r s k j T) ≤
         (m + 1 : ℝ) * Cred * N := by
@@ -238,8 +209,6 @@ theorem iteratedCovGrad_toSobolev_embedding_Cm_collapsed
       ≤ C * ((m + 1 : ℝ) * Cred * N) :=
         mul_le_mul_of_nonneg_left h_sum_le (le_of_lt hC_pos)
     _ = C * ((m + 1 : ℝ) * Cred) * N := by ring
-
-/-! ## The `C²`, `(0, 2)`-tensor instance -/
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in

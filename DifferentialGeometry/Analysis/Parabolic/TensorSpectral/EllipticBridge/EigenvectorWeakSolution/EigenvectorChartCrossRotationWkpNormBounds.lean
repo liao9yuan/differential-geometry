@@ -83,12 +83,6 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -101,18 +95,6 @@ section CrossRotationWkpNormBounds
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
 
-/-! ### The double-sum collection lemma
-
-The cutoff bound delivers a finite double sum, over the transport chart centres
-`β ∈ S` and the component multi-indices `Q'`, of the order-`K` `wkpNorm` of the
-covariant-gradient chart components. Bounding each summand by an explicit
-constant times the per-centre aggregate and folding the `Q'`-summation
-multiplicity into the constant collapses the double sum to a constant times the
-single sum, over `β ∈ S`, of the per-centre aggregates. -/
-
--- The collection step is established purely from `Finset` subadditivity and
--- arithmetic of `ℝ≥0∞`; the manifold-completeness and closed-manifold instances
--- enter only through the types of the chart objects.
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 /-- A finite double-indexed family of order-`K` `wkpNorm`s, each bounded by
@@ -130,8 +112,6 @@ private lemma wkpNorm_doubleSum_le_const_mul_aggregateSum
       (∑ j ∈ S, ∑ q : κ, W j q)
         ≤ ENNReal.ofReal C * ∑ j ∈ S, aggr j := by
   classical
-  -- A single nonnegative constant dominating every per-summand constant: the
-  -- sum of all of them, floored at `1`.
   set Csup : ℝ := 1 + ∑ j ∈ S, ∑ q : κ, Cf j q with hCsup_def
   have hCsup_nn : 0 ≤ Csup := by
     rw [hCsup_def]
@@ -149,26 +129,19 @@ private lemma wkpNorm_doubleSum_le_const_mul_aggregateSum
       Finset.single_le_sum (f := fun j' => ∑ q' : κ, Cf j' q')
         (fun j' hj' => Finset.sum_nonneg (fun q' _ => hCf_nn j' hj' q')) hj
     linarith [h_inner.trans h_outer]
-  -- The headline constant: the uniform per-summand bound times the
-  -- `κ`-cardinality.
   refine ⟨Csup * (Fintype.card κ), by positivity, ?_⟩
-  -- Bound each summand by the uniform constant times the per-centre aggregate.
   have h_each : ∀ j ∈ S, ∀ q : κ,
       W j q ≤ ENNReal.ofReal Csup * aggr j := by
     intro j hj q
     refine (h_bd j hj q).trans ?_
     exact mul_le_mul_of_nonneg_right
       (ENNReal.ofReal_le_ofReal (hCf_le_Csup j hj q)) (zero_le _)
-  -- Sum the per-summand bounds; the inner sum over `κ` of a constant is the
-  -- cardinality times the constant.
   have h_inner_const : ∀ j ∈ S,
       (∑ q : κ, W j q)
         ≤ (Fintype.card κ : ℝ≥0∞) * (ENNReal.ofReal Csup * aggr j) := by
     intro j hj
     refine (Finset.sum_le_sum (fun q _ => h_each j hj q)).trans ?_
     rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
-  -- Reassemble: pull the cardinality and the constant out of the outer sum.
-  -- `ENNReal.ofReal Csup * Fintype.card κ = ENNReal.ofReal (Csup * card)`.
   have h_const_eq : (Fintype.card κ : ℝ≥0∞) * ENNReal.ofReal Csup
       = ENNReal.ofReal (Csup * (Fintype.card κ)) := by
     rw [mul_comm Csup, ENNReal.ofReal_mul (by positivity : (0 : ℝ) ≤ _),
@@ -184,50 +157,11 @@ private lemma wkpNorm_doubleSum_le_const_mul_aggregateSum
 
 end CrossRotationWkpNormBounds
 
-/-! ## Eigenbasis-uniform companions
-
-The two headlines above each `∃`-bind their explicit constant `C` *after* the
-eigenbasis index `i`, so `C` is allowed to vary with `i`. The downstream
-bounded-operator endpoint instead needs a *single* constant working for every
-`i` simultaneously — the `∀ i` quantifier moved *inside* the `∃ C`.
-
-Such an eigenbasis-uniform restatement is not derivable from its per-`i`
-original — it carries its own proof, which is the per-`i` proof with the
-constant witness hoisted before the `∀ i`. The hoist succeeds because every
-per-`i` ingredient already has an eigenbasis-uniform companion:
-
-* the cutoff-component bound `wkpNorm_tensorL2ChartComponentCutoff_le_of_pou`
-  is *input-uniform* — its constant is chart-transition geometric data,
-  independent of the abstract `L²` element, hence of `i`;
-* the covariant-gradient chart-component bound
-  `eigenvectorCovGrad_pou_wkpNorm_le` has the eigenbasis-uniform companion
-  `eigenvectorCovGrad_pou_wkpNorm_le_uniform`, whose constant is *purely
-  geometric* — the `‖μ‖ · μ⁻¹` cancellation removes the eigenvalue factor — so
-  no residual `(i.fst.val)⁻¹` appears.
-
-Consequently both eigenbasis-uniform headlines take the plain
-`∃ C, 0 ≤ C ∧ ∀ i, … ≤ ENNReal.ofReal C * …` shape, with no exposed eigenvalue
-factor. -/
-
 section CrossRotationWkpNormBoundsUniform
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (K : ℕ)
 
-/-! ### The eigenbasis-uniform double-sum collection lemma
-
-`wkpNorm_doubleSum_le_const_mul_aggregateSum` collapses, for one fixed `i`, a
-finite double sum to a constant times the single sum of per-centre aggregates;
-its per-summand constants come from `eigenvectorCovGrad_pou_wkpNorm_le`. The
-eigenbasis-uniform companion `eigenvectorCovGrad_pou_wkpNorm_le_uniform`
-delivers a *single* geometric per-summand constant, independent of `i`, so the
-collapsed headline constant is itself `i`-independent. The following lemma is
-the eigenbasis-indexed restatement: the per-summand constant family `Cf` is
-`i`-independent, and the collapsed constant is hoisted before the `∀ i`. -/
-
--- The collection step is established purely from `Finset` subadditivity and
--- arithmetic of `ℝ≥0∞`; the manifold-completeness and closed-manifold instances
--- enter only through the types of the chart objects.
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 /-- Eigenbasis-uniform double-sum collection. A finite double-indexed family of
@@ -248,8 +182,6 @@ private lemma wkpNorm_doubleSum_le_const_mul_aggregateSum_uniform
         (∑ j ∈ S, ∑ q : κ, W d j q)
           ≤ ENNReal.ofReal C * ∑ j ∈ S, aggr d j := by
   classical
-  -- A single nonnegative constant dominating every per-summand constant: the
-  -- sum of all of them, floored at `1`. It is `δ`-independent.
   set Csup : ℝ := 1 + ∑ j ∈ S, ∑ q : κ, Cf j q with hCsup_def
   have hCsup_nn : 0 ≤ Csup := by
     rw [hCsup_def]
@@ -267,26 +199,19 @@ private lemma wkpNorm_doubleSum_le_const_mul_aggregateSum_uniform
       Finset.single_le_sum (f := fun j' => ∑ q' : κ, Cf j' q')
         (fun j' hj' => Finset.sum_nonneg (fun q' _ => hCf_nn j' hj' q')) hj
     linarith [h_inner.trans h_outer]
-  -- The headline constant: the uniform per-summand bound times the
-  -- `κ`-cardinality. It does not depend on `δ`, so it is hoisted here.
   refine ⟨Csup * (Fintype.card κ), by positivity, fun d => ?_⟩
-  -- Bound each summand by the uniform constant times the per-centre aggregate.
   have h_each : ∀ j ∈ S, ∀ q : κ,
       W d j q ≤ ENNReal.ofReal Csup * aggr d j := by
     intro j hj q
     refine (h_bd d j hj q).trans ?_
     exact mul_le_mul_of_nonneg_right
       (ENNReal.ofReal_le_ofReal (hCf_le_Csup j hj q)) (zero_le _)
-  -- Sum the per-summand bounds; the inner sum over `κ` of a constant is the
-  -- cardinality times the constant.
   have h_inner_const : ∀ j ∈ S,
       (∑ q : κ, W d j q)
         ≤ (Fintype.card κ : ℝ≥0∞) * (ENNReal.ofReal Csup * aggr d j) := by
     intro j hj
     refine (Finset.sum_le_sum (fun q _ => h_each j hj q)).trans ?_
     rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
-  -- Reassemble: pull the cardinality and the constant out of the outer sum.
-  -- `ENNReal.ofReal Csup * Fintype.card κ = ENNReal.ofReal (Csup * card)`.
   have h_const_eq : (Fintype.card κ : ℝ≥0∞) * ENNReal.ofReal Csup
       = ENNReal.ofReal (Csup * (Fintype.card κ)) := by
     rw [mul_comm Csup, ENNReal.ofReal_mul (by positivity : (0 : ℝ) ≤ _),
@@ -301,26 +226,6 @@ private lemma wkpNorm_doubleSum_le_const_mul_aggregateSum_uniform
           rw [h_const_eq]
 
 end CrossRotationWkpNormBoundsUniform
-
-/-! ## Chart-locality-free restatements
-
-The cross-right `wkpNorm` bounds above carry the chart-selection hypothesis
-`h_atlas` only through the limit object `crossRightLimitComponent`, which is built
-from the eigenvector resolvent `eigenvectorResolvent`. The limit object has a
-chart-locality-free twin `crossRightLimitComponent` — keyed on the
-eigenvector resolvent `eigenvectorResolvent`, itself built from the
-eigenbasis vector
-`tensorResolventEigenbasisVec (tensorResolventL2_isCompactOperator g r s) i`
-selected at the unconditional compactness witness. By definition this twin is the
-cutoff Euclidean chart component, at `(α, P)`, of the abstract `L²` element
-`TensorH1ComplToTensorL2 g r s (eigenvectorResolvent g r s i)` — the
-resolvent inclusion itself. The foundational cutoff `wkpNorm` bound
-`wkpNorm_tensorL2ChartComponentCutoff_le_of_pou` (and its eigenbasis-uniform,
-input-uniform companion `…_uniform`) quantifies over an arbitrary abstract `L²`
-element, so it applies verbatim to the chart-locality-free limit object, with no
-chart-selection hypothesis. The cross-right proof bodies transfer verbatim, with
-the resolvent inclusion of `eigenvectorResolvent` replaced by that of
-`eigenvectorResolvent`. -/
 
 section CrossRightWkpNormBoundUnconditional
 
@@ -377,9 +282,6 @@ theorem wkpNorm_crossRightLimitComponent_le
                     EuclN → ℝ) y)
                 (chartTargetEuclid (I := I) (M := M) β) := by
   classical
-  -- Rewrite the limit object as the cutoff component of the resolvent
-  -- inclusion, then apply the foundational cutoff bound directly: its `h_pou`
-  -- hypothesis is exactly the order-`K` `MemWkp` regularity supplied here.
   have h_unfold : (fun y => ((crossRightLimitComponent (I := I)
         (M := M) g r s i α P :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -456,17 +358,10 @@ theorem wkpNorm_crossRightLimitComponent_le_uniform
                       EuclN → ℝ) y)
                   (chartTargetEuclid (I := I) (M := M) β) := by
   classical
-  -- The input-uniform cutoff bound: a single constant `C`, chart-transition
-  -- geometric data independent of the abstract `L²` element — hence of `i` —
-  -- is hoisted before the `∀ i`.
   obtain ⟨C, hC_nn, hC_bd⟩ :=
     wkpNorm_tensorL2ChartComponentCutoff_le_of_pou_uniform (I := I) (M := M)
       g r s α P K
   refine ⟨C, hC_nn, fun i => ?_⟩
-  -- Rewrite the limit object as the cutoff component of the resolvent
-  -- inclusion, then apply the input-uniform cutoff bound at that abstract `L²`
-  -- element: its `h_pou` hypothesis is exactly the order-`K` `MemWkp`
-  -- regularity supplied here for the index `i`.
   have h_unfold : (fun y => ((crossRightLimitComponent (I := I)
         (M := M) g r s i α P :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -483,30 +378,6 @@ theorem wkpNorm_crossRightLimitComponent_le_uniform
     (h_pou i)
 
 end CrossRightWkpNormBoundUniformUnconditional
-
-/-! ## Chart-locality-free restatements — the cross-left limit object
-
-The cross-left `wkpNorm` bounds carry the chart-selection hypothesis `h_atlas`
-only through the limit object `crossLeftLimitComponent`, which is built from the
-eigenvector resolvent `eigenvectorResolvent`. The limit object has a
-chart-locality-free twin `crossLeftLimitComponent` — keyed on the
-eigenvector resolvent `eigenvectorResolvent`, itself built from the
-eigenbasis vector
-`tensorResolventEigenbasisVec (tensorResolventL2_isCompactOperator g r s) i`
-selected at the unconditional compactness witness. By definition this twin is the
-cutoff Euclidean chart component, at `(α, P)`, of the abstract `L²` element
-`tensorCovGradL2Compl g r s (eigenvectorResolvent g r s i)`. The
-foundational cutoff `wkpNorm` bound `wkpNorm_tensorL2ChartComponentCutoff_le_of_pou`
-(and its eigenbasis-uniform, input-uniform companion `…_uniform`) quantifies over
-an arbitrary abstract `L²` element, so it applies verbatim to the
-chart-locality-free limit object; the covariant-gradient chart-component
-reduction enters through the chart-locality-free covariant-gradient twins
-`eigenvectorCovGrad_pou_memWkp`,
-`eigenvectorCovGrad_pou_wkpNorm_le`, and (for the uniform headline)
-`eigenvectorCovGrad_pou_wkpNorm_le_uniform`. The cross-left proof
-bodies transfer verbatim, with the resolvent inclusion of `eigenvectorResolvent`
-replaced by that of `eigenvectorResolvent` and every per-centre
-aggregate written out explicitly. -/
 
 section CrossRotationWkpNormBoundsUnconditional
 
@@ -578,8 +449,6 @@ theorem wkpNorm_crossLeftLimitComponent_le
                           EuclN → ℝ) y)
                       (chartTargetEuclid (I := I) (M := M) β')) := by
   classical
-  -- The per-centre order-`(K+1)` resolvent-inclusion aggregate, written out
-  -- explicitly (the chart-locality-free analogue of `covGradResAggregate`).
   set aggr : M → ℝ≥0∞ := fun β =>
     (∑ Q : TensorCompIdx (E := E) r s,
         wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
@@ -600,9 +469,6 @@ theorem wkpNorm_crossLeftLimitComponent_le
                   EuclN → ℝ) y)
               (chartTargetEuclid (I := I) (M := M) β')
     with haggr_def
-  -- Step 1: the cutoff bound reduces the order-`K` `wkpNorm` of the limit object
-  -- to a finite double sum of covariant-gradient chart-component norms; the
-  -- `MemWkp` premises are the chart-locality-free covariant-gradient memberships.
   obtain ⟨C₀, hC₀_nn, hC₀_bd⟩ :=
     wkpNorm_tensorL2ChartComponentCutoff_le_of_pou (I := I) (M := M)
       g r (s + 1)
@@ -611,8 +477,6 @@ theorem wkpNorm_crossLeftLimitComponent_le
       α P K
       (fun β Q' => eigenvectorCovGrad_pou_memWkp (I := I) (M := M)
         g r s i K h_pou β Q')
-  -- Step 2: each covariant-gradient chart-component norm is bounded by an
-  -- explicit constant times the per-centre order-`(K+1)` aggregate.
   have h_per : ∀ (β : M) (Q' : TensorCompIdx (E := E) r (s + 1)),
       ∃ C : ℝ, 0 ≤ C ∧
         wkpNorm (d := Module.finrank ℝ E) K 2
@@ -625,8 +489,6 @@ theorem wkpNorm_crossLeftLimitComponent_le
           ≤ ENNReal.ofReal C * aggr β :=
     fun β Q' => eigenvectorCovGrad_pou_wkpNorm_le (I := I) (M := M)
       g r s i K h_pou β Q'
-  -- Step 3: collect the double sum into a constant times the single sum, over
-  -- the transport chart centres, of the per-centre aggregates.
   obtain ⟨C₁, hC₁_nn, hC₁_bd⟩ :=
     wkpNorm_doubleSum_le_const_mul_aggregateSum
       (transportChartCenters (I := I) (M := M) α)
@@ -641,9 +503,7 @@ theorem wkpNorm_crossLeftLimitComponent_le
       (fun β Q' => (h_per β Q').choose)
       (fun β _ Q' => (h_per β Q').choose_spec.1)
       (fun β _ Q' => (h_per β Q').choose_spec.2)
-  -- Assemble: the headline constant is `C₀ * C₁`.
   refine ⟨C₀ * C₁, by positivity, ?_⟩
-  -- Chain the two reductions and pull the constant `C₀ * C₁` together.
   have h_chain : wkpNorm (d := Module.finrank ℝ E) K 2
         (fun y => ((crossLeftLimitComponent (I := I) (M := M)
             g r s i α P :
@@ -652,7 +512,6 @@ theorem wkpNorm_crossLeftLimitComponent_le
       ≤ ENNReal.ofReal C₀ *
         (ENNReal.ofReal C₁ *
           ∑ β ∈ transportChartCenters (I := I) (M := M) α, aggr β) := by
-    -- Rewrite the limit object as the cutoff component, then chain.
     have h_unfold : (fun y => ((crossLeftLimitComponent (I := I)
           (M := M) g r s i α P :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -744,9 +603,6 @@ theorem wkpNorm_crossLeftLimitComponent_le_uniform
                             EuclN → ℝ) y)
                         (chartTargetEuclid (I := I) (M := M) β')) := by
   classical
-  -- The per-centre order-`(K+1)` resolvent-inclusion aggregate, written out
-  -- explicitly (the chart-locality-free analogue of `covGradResAggregate`),
-  -- parametrised by the eigenbasis index `i`.
   set aggr : TensorEigenIdx (I := I) (M := M) g r s → M → ℝ≥0∞ := fun i β =>
     (∑ Q : TensorCompIdx (E := E) r s,
         wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
@@ -767,16 +623,9 @@ theorem wkpNorm_crossLeftLimitComponent_le_uniform
                   EuclN → ℝ) y)
               (chartTargetEuclid (I := I) (M := M) β')
     with haggr_def
-  -- Step 1: the input-uniform cutoff bound — its constant `C₀` is
-  -- chart-transition geometric data, independent of the abstract `L²` element
-  -- and hence of `i`; it is hoisted here, before the `∀ i`.
   obtain ⟨C₀, hC₀_nn, hC₀_bd⟩ :=
     wkpNorm_tensorL2ChartComponentCutoff_le_of_pou_uniform (I := I) (M := M)
       g r (s + 1) α P K
-  -- Step 2: the eigenbasis-uniform covariant-gradient chart-component bound,
-  -- invoked at each `(β, Q')`. Because its `h_pou` hypothesis is itself uniform
-  -- over `i`, the resulting per-summand constant — extracted as the
-  -- `Classical.choice` witness — depends only on `(β, Q')`, not on `i`.
   set Cf : M → TensorCompIdx (E := E) r (s + 1) → ℝ :=
     fun β Q' =>
       (eigenvectorCovGrad_pou_wkpNorm_le_uniform (I := I) (M := M)
@@ -797,10 +646,6 @@ theorem wkpNorm_crossLeftLimitComponent_le_uniform
     fun β Q' =>
       (eigenvectorCovGrad_pou_wkpNorm_le_uniform (I := I) (M := M)
         g r s K h_pou β Q').choose_spec
-  -- Step 3: collect the cutoff bound's double sum into a constant times the
-  -- single sum, over the transport chart centres, of the per-centre aggregates.
-  -- The per-summand constant family `Cf` is `i`-independent, so the
-  -- eigenbasis-uniform collection lemma hoists the collapsed constant `C₁`.
   obtain ⟨C₁, hC₁_nn, hC₁_bd⟩ :=
     wkpNorm_doubleSum_le_const_mul_aggregateSum_uniform
       (δ := TensorEigenIdx (I := I) (M := M) g r s)
@@ -816,9 +661,7 @@ theorem wkpNorm_crossLeftLimitComponent_le_uniform
       (fun β Q' => Cf β Q')
       (fun β _ Q' => (hCf_spec β Q').1)
       (fun i β _ Q' => (hCf_spec β Q').2 i)
-  -- Assemble: the headline constant is `C₀ * C₁`, hoisted before the `∀ i`.
   refine ⟨C₀ * C₁, by positivity, fun i => ?_⟩
-  -- Chain the two reductions and pull the constant `C₀ * C₁` together.
   have h_chain : wkpNorm (d := Module.finrank ℝ E) K 2
         (fun y => ((crossLeftLimitComponent (I := I) (M := M)
             g r s i α P :
@@ -827,7 +670,6 @@ theorem wkpNorm_crossLeftLimitComponent_le_uniform
       ≤ ENNReal.ofReal C₀ *
         (ENNReal.ofReal C₁ *
           ∑ β ∈ transportChartCenters (I := I) (M := M) α, aggr i β) := by
-    -- Rewrite the limit object as the cutoff component, then chain.
     have h_unfold : (fun y => ((crossLeftLimitComponent (I := I)
           (M := M) g r s i α P :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -839,9 +681,6 @@ theorem wkpNorm_crossLeftLimitComponent_le_uniform
             EuclN → ℝ) y) := by
       rw [crossLeftLimitComponent]
     rw [h_unfold]
-    -- The cutoff bound applied to the covariant-gradient `L²` element, whose
-    -- partition-of-unity chart components are `MemWkp` by
-    -- `eigenvectorCovGrad_pou_memWkp`.
     refine (hC₀_bd
       (tensorCovGradL2Compl (I := I) (M := M) g r s
         (eigenvectorResolvent (I := I) (M := M) g r s i))

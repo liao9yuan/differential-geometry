@@ -51,23 +51,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## The pointwise gradient-inner-product function
-
-For smooth `ρα` and smooth `v : SmoothScalar g`, the pointwise gradient
-inner product
-`x ↦ g.inner x (gradFun g ρα x) (gradFun g v.toFun x)`
-is smooth on `M`, hence continuous, hence (on a compact manifold) bounded
-and in `Lp` of every order.
--/
 
 /-- Continuity of the pointwise gradient inner product
 `x ↦ g.inner x (gradFun g ρα x) (gradFun g v.toFun x)` for smooth `ρα`
@@ -77,10 +66,8 @@ lemma gradInnerSmooth_continuous
     (v : SmoothScalar g) :
     Continuous (fun x : M =>
       g.inner x (gradFun (I := I) g ρα x) (gradFun (I := I) g v.toFun x)) := by
-  -- The two gradients package as smooth tangent sections via `grad_g`.
   have h := TangentBundle.continuous_g_inner_of_smooth_sections (I := I) (M := M) g
     (grad_g (I := I) g ρα.contMDiff) (grad_g (I := I) g v.smooth)
-  -- `grad_g g (·).contMDiff x = gradFun g (·) x` definitionally.
   refine h.congr ?_
   intro x
   change g.inner x ((grad_g (I := I) g ρα.contMDiff :
@@ -102,8 +89,6 @@ lemma gradInnerSmooth_memLp_two
     riemannianVolumeMeasure_isFiniteMeasureOnCompacts (I := I) (M := M) g
   exact (gradInnerSmooth_continuous (I := I) (M := M) g ρα v).memLp_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
-
-/-! ## The L²-class of the pointwise gradient inner product -/
 
 /-- The L²-class of the pointwise gradient inner product
 `x ↦ g.inner x (gradFun g ρα x) (gradFun g v.toFun x)` for smooth `ρα`
@@ -132,8 +117,6 @@ lemma gradInnerSmooth_coeFn
         (gradFun (I := I) g v.toFun x)) :=
   MemLp.coeFn_toLp _
 
-/-! ## Linearity in `v` -/
-
 /-- Pointwise additivity of the gradient inner product in the second slot. -/
 lemma gradInnerSmooth_pt_add
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
@@ -142,7 +125,6 @@ lemma gradInnerSmooth_pt_add
         (gradFun (I := I) g (v + w).toFun x) =
       g.inner x (gradFun (I := I) g ρα x) (gradFun (I := I) g v.toFun x) +
         g.inner x (gradFun (I := I) g ρα x) (gradFun (I := I) g w.toFun x) := by
-  -- (v + w).toFun = v.toFun + w.toFun definitionally.
   have hgrad_add : gradFun (I := I) g (v + w).toFun x =
       gradFun (I := I) g v.toFun x + gradFun (I := I) g w.toFun x := by
     have hfun : (v + w).toFun = v.toFun + w.toFun := rfl
@@ -158,7 +140,6 @@ lemma gradInnerSmooth_pt_smul
     g.inner x (gradFun (I := I) g ρα x)
         (gradFun (I := I) g (c • v).toFun x) =
       c * g.inner x (gradFun (I := I) g ρα x) (gradFun (I := I) g v.toFun x) := by
-  -- The smooth-section gradient of `c • v` equals `c • grad v` pointwise.
   have hgrad_smul : gradFun (I := I) g (c • v).toFun x =
       c • gradFun (I := I) g v.toFun x := by
     have h := SmoothScalar.grad_g_smul_apply (I := I) (g := g) c v x
@@ -175,7 +156,6 @@ theorem gradInnerSmooth_add
       gradInnerSmooth (I := I) (M := M) g ρα v +
         gradInnerSmooth (I := I) (M := M) g ρα w := by
   apply MeasureTheory.Lp.ext
-  -- The Lp coercion of the sum equals the sum of coercions a.e.
   have h_sum_coe := MeasureTheory.Lp.coeFn_add
     (gradInnerSmooth (I := I) (M := M) g ρα v)
     (gradInnerSmooth (I := I) (M := M) g ρα w)
@@ -185,8 +165,6 @@ theorem gradInnerSmooth_add
   refine h_lhs.trans ?_
   refine EventuallyEq.symm ?_
   filter_upwards [h_sum_coe, h_v, h_w] with x h_sum h_v_eq h_w_eq
-  -- `h_sum : (gradInnerSmooth(v) + gradInnerSmooth(w)) x = gradInnerSmooth(v) x + gradInnerSmooth(w) x`.
-  -- `h_v_eq, h_w_eq` rewrite the individual coercions to the pointwise gradient inner products.
   rw [h_sum, Pi.add_apply, h_v_eq, h_w_eq]
   exact (gradInnerSmooth_pt_add (I := I) (M := M) g ρα v w x).symm
 
@@ -207,8 +185,6 @@ theorem gradInnerSmooth_smul
   rw [h_smul, Pi.smul_apply, h_v_eq, smul_eq_mul]
   exact (gradInnerSmooth_pt_smul (I := I) (M := M) g ρα c v x).symm
 
-/-! ## Linearity packaging -/
-
 /-- The `gradInnerSmooth` map packaged as a linear map. -/
 noncomputable def gradInnerSmoothLin
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) :
@@ -222,13 +198,6 @@ noncomputable def gradInnerSmoothLin
     (v : SmoothScalar g) :
     gradInnerSmoothLin (I := I) (M := M) g ρα v =
       gradInnerSmooth (I := I) (M := M) g ρα v := rfl
-
-/-! ## Sup-norm of the smooth gradient `|grad ρα|_g`
-
-On a compact manifold, the continuous function
-`x ↦ Real.sqrt (g.inner x (gradFun g ρα x) (gradFun g ρα x))` attains a
-finite supremum, which we denote `gradSupBound g ρα`.
--/
 
 /-- Existence of a non-negative sup bound on the metric `g`-norm of the
 gradient of `ρα`. -/
@@ -272,8 +241,6 @@ lemma sqrt_inner_grad_self_le_gradSupBound
   (Classical.choose_spec
     (exists_gradSupBound (I := I) (M := M) g ρα)).2 x
 
-/-! ## The pointwise Cauchy–Schwarz bound -/
-
 /-- Pointwise Cauchy–Schwarz for the metric inner product:
 `|g(grad ρα x, grad v x)| ≤ √g(grad ρα, grad ρα) · √g(grad v, grad v)`. -/
 lemma abs_gradInner_le_sqrt_mul_sqrt
@@ -301,8 +268,6 @@ lemma abs_gradInner_le_gradSupBound_mul_sqrt
       (gradFun (I := I) g v.toFun x)) := Real.sqrt_nonneg _
   exact h1.trans (mul_le_mul_of_nonneg_right h2 h_sqrt_v_nn)
 
-/-! ## L²-norm bound -/
-
 /-- The squared `Lp ℝ 2` norm of `gradInnerSmooth ρα v` equals
 `∫ |g(grad ρα, grad v)|² dμ_g`. -/
 lemma norm_gradInnerSmooth_sq
@@ -312,10 +277,8 @@ lemma norm_gradInnerSmooth_sq
       ∫ x, (g.inner x (gradFun (I := I) g ρα x)
             (gradFun (I := I) g v.toFun x)) ^ 2
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
-  -- Use `real_inner_self_eq_norm_sq` on `Lp ℝ 2`: `⟨f, f⟩ = ‖f‖²`.
   have h := real_inner_self_eq_norm_sq (gradInnerSmooth (I := I) (M := M) g ρα v)
   rw [L2.inner_def (𝕜 := ℝ)] at h
-  -- Rewrite the integrand a.e. via the coercion identity.
   have hae_coe := gradInnerSmooth_coeFn (I := I) (M := M) g ρα v
   have hae : (fun a : M =>
         @inner ℝ _ _
@@ -329,7 +292,6 @@ lemma norm_gradInnerSmooth_sq
           (gradFun (I := I) g v.toFun a)) ^ 2) := by
     filter_upwards [hae_coe] with a hae_a
     rw [hae_a]
-    -- For ℝ, `⟨a, a⟩_ℝ = a * a`.
     rw [show (g.inner a (gradFun (I := I) g ρα a)
           (gradFun (I := I) g v.toFun a)) ^ 2 =
         g.inner a (gradFun (I := I) g ρα a)
@@ -349,7 +311,6 @@ lemma sq_gradInner_le_gradSupBound_sq_mul
       gradSupBound (I := I) (M := M) g ρα ^ 2 *
         g.inner x (gradFun (I := I) g v.toFun x)
           (gradFun (I := I) g v.toFun x) := by
-  -- `|g(grad ρα, grad v)|² ≤ (gradSupBound · √g(grad v, grad v))²`.
   have h_abs := abs_gradInner_le_gradSupBound_mul_sqrt (I := I) (M := M) g ρα v x
   have h_abs_nn : 0 ≤ |g.inner x (gradFun (I := I) g ρα x)
       (gradFun (I := I) g v.toFun x)| := abs_nonneg _
@@ -358,7 +319,6 @@ lemma sq_gradInner_le_gradSupBound_sq_mul
         (gradFun (I := I) g v.toFun x)) :=
     mul_nonneg (gradSupBound_nonneg (I := I) (M := M) g ρα) (Real.sqrt_nonneg _)
   have h_sq := mul_self_le_mul_self h_abs_nn h_abs
-  -- `|·|² = ·²`.
   have h_lhs_sq : |g.inner x (gradFun (I := I) g ρα x)
         (gradFun (I := I) g v.toFun x)| *
       |g.inner x (gradFun (I := I) g ρα x)
@@ -366,7 +326,6 @@ lemma sq_gradInner_le_gradSupBound_sq_mul
       (g.inner x (gradFun (I := I) g ρα x)
         (gradFun (I := I) g v.toFun x)) ^ 2 := by
     rw [← sq, sq_abs]
-  -- `(gradSupBound · √g_v_v)² = gradSupBound² · g_v_v`.
   have h_v_self_nn : 0 ≤ g.inner x (gradFun (I := I) g v.toFun x)
       (gradFun (I := I) g v.toFun x) :=
     metric_inner_self_nonneg (I := I) (M := M) g x _
@@ -401,7 +360,6 @@ lemma norm_gradInnerSmooth_sq_le_gradSupBound_sq_mul_integral
             (gradFun (I := I) g v.toFun x)
           ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
   rw [norm_gradInnerSmooth_sq]
-  -- Pointwise bound.
   have hpt : ∀ x : M,
       (g.inner x (gradFun (I := I) g ρα x)
           (gradFun (I := I) g v.toFun x)) ^ 2 ≤
@@ -409,8 +367,6 @@ lemma norm_gradInnerSmooth_sq_le_gradSupBound_sq_mul_integral
         g.inner x (gradFun (I := I) g v.toFun x)
           (gradFun (I := I) g v.toFun x) :=
     sq_gradInner_le_gradSupBound_sq_mul (I := I) (M := M) g ρα v
-  -- Both sides are integrable. The LHS is the L²-norm-squared integrand;
-  -- the RHS is `gradSupBound² · g(grad v, grad v)`.
   haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
   have hLHS_int : Integrable (fun x : M =>
@@ -422,7 +378,6 @@ lemma norm_gradInnerSmooth_sq_le_gradSupBound_sq_mul_integral
           (gradFun (I := I) g v.toFun x)) ^ 2) :=
       (gradInnerSmooth_continuous (I := I) (M := M) g ρα v).pow 2
     exact hcont.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
-  -- Integrability of `g(grad v, grad v)`.
   have hRHS_int : Integrable (fun x : M =>
       g.inner x (gradFun (I := I) g v.toFun x)
         (gradFun (I := I) g v.toFun x))
@@ -455,14 +410,10 @@ lemma integral_inner_grad_self_le_h1_norm_sq
         (gradFun (I := I) g v.toFun x)
       ∂(riemannianVolumeMeasure (I := I) (M := M) g)) ≤
     ‖v‖ ^ 2 := by
-  -- The pre-H¹ self-pairing equals `‖v‖²` and bounds the gradient integral.
   rw [SmoothScalar.norm_sq_eq_inner_self]
   unfold smoothScalarH1Inner
-  -- LHS = ∫ g(grad, grad)·, RHS = ∫ v² + ∫ g(grad, grad). Both terms non-negative.
   have h_l2_nonneg :=
     SmoothScalar.integral_mul_self_nonneg (I := I) (M := M) (g := g) v
-  -- The grad term in the unfolded `smoothScalarH1Inner` uses `grad_g g v.smooth`,
-  -- which on each point `x` equals `gradFun g v.toFun x` definitionally.
   have h_grad_eq :
       (∫ x, g.inner x ((grad_g (I := I) g v.smooth :
             Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
@@ -474,8 +425,6 @@ lemma integral_inner_grad_self_le_h1_norm_sq
         ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
     refine integral_congr_ae (Filter.Eventually.of_forall ?_)
     intro x
-    -- `grad_g_apply` identifies `(grad_g g v.smooth) x = gradFun g v.toFun x`,
-    -- but the simp lemma fires already; we use `rfl` at the head.
     rfl
   linarith [h_grad_eq]
 
@@ -486,7 +435,6 @@ theorem norm_gradInnerSmooth_le
     (v : SmoothScalar g) :
     ‖gradInnerSmooth (I := I) (M := M) g ρα v‖ ≤
       gradSupBound (I := I) (M := M) g ρα * ‖v‖ := by
-  -- Compare squared norms.
   have h_sq : ‖gradInnerSmooth (I := I) (M := M) g ρα v‖ ^ 2 ≤
       (gradSupBound (I := I) (M := M) g ρα * ‖v‖) ^ 2 := by
     calc ‖gradInnerSmooth (I := I) (M := M) g ρα v‖ ^ 2
@@ -516,8 +464,6 @@ theorem gradInnerSmooth_norm_le
     gradSupBound_nonneg (I := I) (M := M) g ρα,
     norm_gradInnerSmooth_le (I := I) (M := M) g ρα⟩
 
-/-! ## Continuous linear map on smooth scalars -/
-
 /-- The pointwise gradient inner product against `ρα`, packaged as a
 continuous linear map `SmoothScalar g →L[ℝ] Lp ℝ 2 μ_g`. -/
 noncomputable def gradInnerCLMOnSmooth
@@ -532,8 +478,6 @@ noncomputable def gradInnerCLMOnSmooth
     (v : SmoothScalar g) :
     gradInnerCLMOnSmooth (I := I) (M := M) g ρα v =
       gradInnerSmooth (I := I) (M := M) g ρα v := rfl
-
-/-! ## Continuous linear extension to `H1Compl` -/
 
 /-- The smooth-inclusion `toComplL` has dense range. -/
 private lemma denseRange_toComplL_smoothScalar
@@ -581,8 +525,6 @@ construction on the dense range of `smoothToH1Compl`. -/
     (e := UniformSpace.Completion.toComplL)
     (denseRange_toComplL_smoothScalar (I := I) (M := M) g)
     (isUniformInducing_toComplL_smoothScalar (I := I) (M := M) g) v
-  -- `h` rewrites `extend ... ((toComplL) v) = (gradInnerCLMOnSmooth) v`.
-  -- `smoothToH1Compl g = toComplL` definitionally, so the LHS matches.
   exact h
 
 end Laplacian

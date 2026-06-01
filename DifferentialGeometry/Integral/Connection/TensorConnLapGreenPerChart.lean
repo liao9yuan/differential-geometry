@@ -89,20 +89,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Per-direction smooth covariant-derivative sections of the chart-`α` frame
-
-For the chart-`α` frame direction `i`, write `Bᵢ = chartFrameNormGlobalSmooth g α i`.
-The first directional covariant derivative section `∇_{Bᵢ}T` of a smooth
-`(0, 2)`-tensor section `T` is `covDerivAlongVFSection g T Bᵢ`
-(`TensorConnLapSecondOrderIBP`), and `∇_{Bᵢ}(∇_{Bᵢ}T)` is the same operation
-applied twice. -/
 
 /-- The chart-`α` frame direction `i` as a smooth tangent vector field. -/
 def frameVF
@@ -156,14 +146,6 @@ def perDirWeight
       * tangentSectionAction (I := I) (frameVF (I := I) (M := M) g α i)
           ((chartAtlasPOU I M α : M → ℝ)) b
 
-/-! ## Integrability of the per-direction integrands on a closed manifold
-
-Each per-direction integrand is continuous with compact support (on a closed
-manifold every continuous function has compact support), hence integrable
-against the Riemannian volume measure. The two inner-product integrands are
-smooth by `tensorInnerScalar_contMDiff`; the divergence and weight factors are
-smooth by `divergence_g_contMDiff` and `tangentSectionAction_contMDiff`. -/
-
 private lemma perDirCross_continuous
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (α : M)
@@ -210,8 +192,6 @@ private lemma perDir_integrable_of_continuous
   Continuous.integrable_of_hasCompactSupport_riemannianVolumeMeasure
     (I := I) g hf (HasCompactSupport.of_compactSpace _)
 
-/-! ## Diagonal-frame reduction at orthonormality points -/
-
 /-- **Diagonal-frame reduction at orthonormality points.** On the intersection
 of the chart-`α` partition-of-unity tsupport with the chart-`α` Levi-Civita good
 set, the inverse-Gram-weighted Dirichlet integrand
@@ -234,7 +214,6 @@ private theorem tensorCovDerivPointwiseInner_eq_perDirCross_sum_on_support
       ∑ i : Fin (Module.finrank ℝ E),
         perDirCross (I := I) (M := M) g T v α i b := by
   classical
-  -- Orthonormality of the chart-`α` frame at `b` on the intersection.
   have hB_orth : ∀ i j : Fin (Module.finrank ℝ E),
       g.inner b
           ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b)
@@ -243,35 +222,24 @@ private theorem tensorCovDerivPointwiseInner_eq_perDirCross_sum_on_support
     fun i j =>
       chartFrameNormGlobalSmooth_orthonormal_on_pouTsupportGoodSet
         (I := I) (M := M) g α hb i j
-  -- The diagonal-frame reduction with this frame.
   rw [tensorCovDerivPointwiseInner_eq_lowered_orthoFrame_diag_sum_two
     (I := I) (M := M) g T v b
     (fun i : Fin (Module.finrank ℝ E) =>
       (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun)
     hB_orth]
-  -- Match each diagonal summand with the mixed `perDirCross`.
   refine Finset.sum_congr rfl (fun i _ => ?_)
-  -- LHS summand: `tensorInnerPointwise_0s (0+2) g b (lowered ∇T) (lowered ∇v)`,
-  -- evaluated at `B i b`. RHS: `tensorInnerScalar g 0 2 (∇T) (∇v) b`.
   unfold perDirCross frameVF
-  -- `tensorInnerScalar g 0 2 W S b = tensorInnerPointwise_0s (0+2) g b (lift W) (lift S)`.
   rw [tensorInnerScalar_apply,
     tensorInnerPointwise_eq_liftedTensorSection_inner (I := I) (M := M) g 0 2
       (covDerivAlongVFSection (I := I) (M := M) g T.toSection
         (chartFrameNormGlobalSmooth (I := I) (M := M) g α i))
       (covDerivAlongVFSection (I := I) (M := M) g v.toSection
         (chartFrameNormGlobalSmooth (I := I) (M := M) g α i)) b]
-  -- `toModel (lift (∇_B S) b) = toModel (loweredCovDerivAt g 0 2 S b (B b))`
-  --                          = toModel (loweredCovDerivAlongVF g 0 2 S B b)`.
   rw [toModel_liftedTensorSection_covDerivAlongVFSection (I := I) (M := M) g T.toSection
       (chartFrameNormGlobalSmooth (I := I) (M := M) g α i) b,
     toModel_liftedTensorSection_covDerivAlongVFSection (I := I) (M := M) g v.toSection
       (chartFrameNormGlobalSmooth (I := I) (M := M) g α i) b]
-  -- The diagonal-reduction summand uses `loweredCovDerivAt g 0 2 · b (B b)`, which
-  -- is `loweredCovDerivAlongVF g 0 2 · B b` definitionally.
   rfl
-
-/-! ## Per-direction weighted Dirichlet integration-by-parts rearrangement -/
 
 /-- **Per-direction weighted Dirichlet integration-by-parts rearrangement.**
 For each chart-`α` frame direction `i`,
@@ -307,11 +275,8 @@ private theorem integral_pou_perDirCross_eq
     chartFrameNormGlobalSmooth (I := I) (M := M) g α i with hB_def
   set ρ : M → ℝ := (chartAtlasPOU I M α : M → ℝ) with hρ_def
   have hρ : ContMDiff I 𝓘(ℝ) ∞ ρ := (chartAtlasPOU I M α).contMDiff
-  -- The committed weighted IBP identity.
   have hIBP := integral_weighted_secondOrder_combined_eq_neg_weightDeriv
     (I := I) (M := M) g T.toSection v.toSection B ρ hρ
-  -- Recast the combined LHS integrand of `hIBP` as `ρ·(perDirSecond + perDirCross + perDirDiv)`
-  -- and the RHS integrand as `perDirWeight`.
   have hLHS_pt : ∀ b : M,
       ρ b * (tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g b
               (Tensor0SSpace.toModel
@@ -332,7 +297,6 @@ private theorem integral_pou_perDirCross_eq
           + ρ b * perDirCross (I := I) (M := M) g T v α i b
           + ρ b * perDirDiv (I := I) (M := M) g T v α i b := by
     intro b
-    -- A summand = perDirSecond b.
     have hA : tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g b
               (Tensor0SSpace.toModel
                 (loweredCovDerivAlongVF (I := I) (M := M) g 0 2
@@ -354,7 +318,6 @@ private theorem integral_pou_perDirCross_eq
           (chartFrameNormGlobalSmooth (I := I) (M := M) g α i))
         (chartFrameNormGlobalSmooth (I := I) (M := M) g α i) b]
       rfl
-    -- C summand = perDirCross b.
     have hC : tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g b
               (Tensor0SSpace.toModel
                 (liftedTensorSection (I := I) (M := M) g 0 2
@@ -375,7 +338,6 @@ private theorem integral_pou_perDirCross_eq
         toModel_liftedTensorSection_covDerivAlongVFSection (I := I) (M := M) g v.toSection
           (chartFrameNormGlobalSmooth (I := I) (M := M) g α i) b]
       rfl
-    -- D summand = perDirDiv b.
     have hD : tensorInnerScalar (I := I) (M := M) g 0 2
                 (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) v.toSection b
               * divergence_g (I := I) g B b =
@@ -390,7 +352,6 @@ private theorem integral_pou_perDirCross_eq
     intro b; unfold perDirWeight frameVF; rw [hB_def, hρ_def]
   rw [integral_congr_ae (Filter.Eventually.of_forall hLHS_pt)] at hIBP
   rw [integral_congr_ae (Filter.Eventually.of_forall hRHS_pt)] at hIBP
-  -- Integrability of the three `ρ · perDir·` LHS summands.
   have hρ_cont : Continuous ρ := hρ.continuous
   have h_int_second : Integrable
       (fun b : M => ρ b * perDirSecond (I := I) (M := M) g T v α i b) μ :=
@@ -404,10 +365,6 @@ private theorem integral_pou_perDirCross_eq
       (fun b : M => ρ b * perDirDiv (I := I) (M := M) g T v α i b) μ :=
     perDir_integrable_of_continuous (I := I) g
       (hρ_cont.mul (perDirDiv_continuous (I := I) (M := M) g T v α i))
-  -- Split the LHS integral of `hIBP` into the three summands. The combined
-  -- integrand is the `Pi`-level sum of the three smooth, integrable functions.
-  -- Two integral-additivity steps with explicit summand functions (no higher-order
-  -- unification): first peel off the `ρ · perDirDiv` term, then split the `second + cross`.
   have hadd1 :
       ∫ b, ((ρ b * perDirSecond (I := I) (M := M) g T v α i b
               + ρ b * perDirCross (I := I) (M := M) g T v α i b)
@@ -437,18 +394,8 @@ private theorem integral_pou_perDirCross_eq
         + (∫ b, ρ b * perDirCross (I := I) (M := M) g T v α i b ∂μ)
         + (∫ b, ρ b * perDirDiv (I := I) (M := M) g T v α i b ∂μ) := by
     rw [hadd1, hadd2]
-  -- `hIBP` after `h3` reads:
-  --   (∫ ρ·second) + (∫ ρ·cross) + (∫ ρ·div) = -(∫ perDirWeight).
   rw [h3] at hIBP
-  -- Solve for `∫ ρ·cross`.
   linarith [hIBP]
-
-/-! ## The weighted Dirichlet integrand reduces to the chart frame cross-sum
-
-Integrating the `ρ_α`-weighted Dirichlet integrand against the Riemannian volume
-equals integrating the `ρ_α`-weighted chart-`α` frame cross-sum. Pointwise this
-is the diagonal-frame reduction on the support (where the chart-`α` frame is
-orthonormal), extended off the support by `ρ_α = 0`. -/
 
 /-- **`ρ_α`-weighted Dirichlet integrand equals the `ρ_α`-weighted frame
 cross-sum pointwise.** For every base point `b`,
@@ -471,8 +418,7 @@ private theorem pou_tensorCovDerivPointwiseInner_eq_perDirCross_sum
   classical
   by_cases hb_supp : b ∈ tsupport
       (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
-  · -- On the tsupport: derive good-set membership, then the diagonal reduction.
-    have hb_chartSrc : b ∈ (chartAt H α).source :=
+  · have hb_chartSrc : b ∈ (chartAt H α).source :=
       (chartAtlasPOU_isSubordinate (I := I) (M := M) α) hb_supp
     have hb_extSrc : b ∈ (extChartAt I α).source := by
       rw [extChartAt_source_eq_chartAt_source]; exact hb_chartSrc
@@ -483,8 +429,7 @@ private theorem pou_tensorCovDerivPointwiseInner_eq_perDirCross_sum
           chartLeviCivitaGoodSet (I := I) α := ⟨hb_supp, hb_good⟩
     rw [tensorCovDerivPointwiseInner_eq_perDirCross_sum_on_support
       (I := I) (M := M) g T v α hb_inter]
-  · -- Off the tsupport: `ρ_α b = 0`.
-    have hp0 : (chartAtlasPOU I M α : M → ℝ) b = 0 :=
+  · have hp0 : (chartAtlasPOU I M α : M → ℝ) b = 0 :=
       image_eq_zero_of_notMem_tsupport hb_supp
     rw [hp0, zero_mul, zero_mul]
 
@@ -502,10 +447,8 @@ private theorem integral_pou_tensorCovDerivPointwiseInner_eq_frame_sum
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
   classical
   set μ := riemannianVolumeMeasure (I := I) (M := M) g with hμ_def
-  -- Pointwise reduce the integrand to the `ρ_α`-weighted frame cross-sum.
   rw [integral_congr_ae (Filter.Eventually.of_forall
     (pou_tensorCovDerivPointwiseInner_eq_perDirCross_sum (I := I) (M := M) g T v α))]
-  -- Distribute the weight inside the finite frame sum, then interchange `∫∑ = ∑∫`.
   have hdist : ∀ b : M,
       (chartAtlasPOU I M α : M → ℝ) b
           * ∑ i : Fin (Module.finrank ℝ E), perDirCross (I := I) (M := M) g T v α i b =
@@ -513,14 +456,11 @@ private theorem integral_pou_tensorCovDerivPointwiseInner_eq_frame_sum
           (chartAtlasPOU I M α : M → ℝ) b * perDirCross (I := I) (M := M) g T v α i b := by
     intro b; rw [Finset.mul_sum]
   rw [integral_congr_ae (Filter.Eventually.of_forall hdist)]
-  -- Each `ρ_α · perDirCross α i` is integrable.
   have hρ_cont : Continuous ((chartAtlasPOU I M α : M → ℝ)) :=
     (chartAtlasPOU I M α).contMDiff.continuous
   refine MeasureTheory.integral_finset_sum (Finset.univ) (fun i _ => ?_)
   exact perDir_integrable_of_continuous (I := I) g
     (hρ_cont.mul (perDirCross_continuous (I := I) (M := M) g T v α i))
-
-/-! ## The per-chart weighted Green identity (Dirichlet ↔ second-order frame sum) -/
 
 /-- **Per-chart weighted Green identity for the `(0, 2)` connection Laplacian.**
 For a single chart base point `α`, the `ρ_α`-weighted integral of the Dirichlet
@@ -565,12 +505,9 @@ theorem integral_pou_tensorCovDerivPointwiseInner_eq_neg_second_div_weight
           ∫ b, perDirWeight (I := I) (M := M) g T v α i b
             ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
   classical
-  -- Reduce the weighted Dirichlet integral to the frame cross-sum.
   rw [integral_pou_tensorCovDerivPointwiseInner_eq_frame_sum (I := I) (M := M) g T v α]
-  -- Per-direction weighted IBP rearrangement.
   rw [Finset.sum_congr rfl (fun i _ =>
     integral_pou_perDirCross_eq (I := I) (M := M) g T v α i)]
-  -- Distribute the finite sum over the three negated summands.
   rw [Finset.sum_sub_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
 
 end Connection

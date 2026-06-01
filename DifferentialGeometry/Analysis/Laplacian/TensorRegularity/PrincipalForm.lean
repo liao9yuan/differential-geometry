@@ -84,16 +84,6 @@ open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## The chart-pulled volume-weighted inverse Gram matrix as a single object
-
-The Euclidean chart primitive `weightedInvGramEuclid g α k l` (from
-`ChartPrimitives.lean`) and the metric-extension pull-back
-`weightedInvGramOnEuclid g α k l` (from `MetricExtension.lean`) are two names
-for the same function: both evaluate the chart density and the chart inverse
-Gram matrix at `(extChartAt I α).symm (toEuclidean.symm y)` and multiply. We
-record their definitional equality so the metric-extension agreement statement
-can be phrased directly in terms of `weightedInvGramEuclid`. -/
-
 /-- The Euclidean chart primitive `weightedInvGramEuclid g α k l` coincides with
 the metric-extension pull-back `weightedInvGramOnEuclid g α k l`. Both are the
 volume-weighted inverse Gram entry `√(det g) · gᵏˡ` in chart-Euclidean
@@ -104,15 +94,6 @@ theorem weightedInvGramEuclid_eq_weightedInvGramOnEuclid
     weightedInvGramEuclid (I := I) g α k l =
       weightedInvGramOnEuclid (I := I) g α k l :=
   rfl
-
-/-! ## Existence of the principal-part divergence-form data
-
-Specialising `exists_smooth_metric_extension` to a chosen compact
-`K ⊆ chartTargetEuclid α`, we obtain a `SmoothEllipticBilinearForm` on
-`Set.univ` whose principal coefficient agrees on `K` with the volume-weighted
-inverse Gram matrix and whose zeroth-order coefficient vanishes. We isolate
-exactly this `∃ B, …` payload so the principal-part form can be defined by a
-single `Classical.choose`. -/
 
 /-- Existence of the divergence-form data for the component-diagonal principal
 part: a `SmoothEllipticBilinearForm` on `Set.univ : Set EuclN` whose principal
@@ -132,8 +113,6 @@ theorem exists_tensorPrincipalForm
   obtain ⟨_, _, _, _, _, B, hB_agree, hB_c⟩ :=
     exists_smooth_metric_extension (I := I) (M := M) g α hK hK_target
   exact ⟨B, hB_agree, hB_c⟩
-
-/-! ## The principal-part elliptic bilinear form -/
 
 /-- **The principal-part elliptic bilinear form for tensor sections.**
 
@@ -172,14 +151,6 @@ theorem tensorPrincipalForm_spec
         (fun _ : EuclN => (0 : ℝ)) :=
   Classical.choose_spec (exists_tensorPrincipalForm (I := I) (M := M) g α hK hK_target)
 
-/-! ## The coefficient bridge
-
-The two lemmas below are the channel through which downstream component-by-
-component elliptic-regularity arguments read off the coefficients of
-`tensorPrincipalForm`: on the chart-Euclidean compact `K`, the principal
-coefficient is the volume-weighted inverse Gram matrix, and the zeroth-order
-coefficient is everywhere `0`. -/
-
 /-- **Coefficient bridge (principal part).** On the compact `K ⊆ chartTargetEuclid α`,
 the principal coefficient matrix of `tensorPrincipalForm` agrees entrywise with
 `weightedInvGramEuclid g α` — the volume-weighted inverse Gram matrix
@@ -217,15 +188,6 @@ theorem tensorPrincipalForm_c_apply
     (tensorPrincipalForm (I := I) (M := M) g α hK hK_target).c y = 0 := by
   rw [tensorPrincipalForm_c (I := I) (M := M) g α hK hK_target]
 
-/-! ## Identification with the scalar Laplace–Beltrami principal part
-
-The principal part of the tensor connection Laplacian is component-diagonal and,
-on each component, equals the principal part of the scalar Laplace–Beltrami
-operator. The next lemma records this at the level of divergence-form data:
-`tensorPrincipalForm` *is* a `SmoothEllipticBilinearForm` obtained from the
-scalar metric extension, satisfying its agreement-on-`K` / `c = 0`
-characterisation. -/
-
 /-- **Identification with the scalar principal part.** `tensorPrincipalForm` is a
 `SmoothEllipticBilinearForm` produced by the scalar metric extension
 `exists_smooth_metric_extension`: it agrees on `K` with `weightedInvGramEuclid`
@@ -244,13 +206,6 @@ theorem tensorPrincipalForm_eq_scalar_metric_form
       B.c = (fun _ : EuclN => (0 : ℝ)) :=
   ⟨tensorPrincipalForm (I := I) (M := M) g α hK hK_target, rfl,
     tensorPrincipalForm_spec (I := I) (M := M) g α hK hK_target⟩
-
-/-! ## Symmetry and uniform ellipticity
-
-The principal coefficient matrix of `tensorPrincipalForm` is symmetric and
-uniformly elliptic; both facts are carried by the `SmoothEllipticBilinearForm`
-structure. We re-expose them under explicit names so downstream files do not
-need to unfold the structure projection. -/
 
 /-- The principal coefficient matrix of `tensorPrincipalForm` is symmetric:
 `a y i j = a y j i` for all `y, i, j`. -/

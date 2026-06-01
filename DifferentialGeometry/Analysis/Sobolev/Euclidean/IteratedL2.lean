@@ -39,8 +39,6 @@ variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Index helpers -/
-
 /-- Sigma type indexing all multi-indices of order `j ≤ k` for the iterated
 weak partial derivatives. -/
 abbrev wkpIdx (k d : ℕ) : Type := (j : Fin (k + 1)) × (Fin j.val → Fin d)
@@ -58,8 +56,6 @@ theorem wkpIndexCardL2_eq_card (k d : ℕ) :
     ext j; simp [Finset.mem_range, Finset.mem_image, Fin.exists_iff, Finset.mem_univ]]
   rw [Finset.sum_image (fun i _ j _ hij => Fin.val_inj.mp hij)]
   simp [Fintype.card_pi, Fintype.card_fin, Fin.sum_univ_eq_sum_range]
-
-/-! ## The squared `L²`-Sobolev norm -/
 
 /-- The squared `L²`-convention Sobolev norm of order `k`: the sum of
 squared `L²(Ω)` norms of all iterated weak partials of order `≤ k`. -/
@@ -87,8 +83,6 @@ theorem wkpNormL2_eq_rpow
     wkpNormL2 (d := d) k u Ω =
       wkpNormL2Sq (d := d) k u Ω ^ ((1 : ℝ) / 2) := rfl
 
-/-! ## Reindexing via the Sigma type -/
-
 /-- The `L²` Sobolev norm sum reindexed via the Sigma type. -/
 theorem wkpNormL2Sq_eq_sigma_sum
     (k : ℕ) (u : E → ℝ) (Ω : Set E) :
@@ -101,7 +95,6 @@ theorem wkpNormL2Sq_eq_sigma_sum
   rw [show (Finset.range (k + 1)) = (Finset.univ : Finset (Fin (k + 1))).image Fin.val by
     ext j; simp [Finset.mem_range, Finset.mem_image, Fin.exists_iff, Finset.mem_univ]]
   rw [Finset.sum_image (fun i _ j _ hij => Fin.val_inj.mp hij)]
-  -- Now rewrite ∑ i : Fin (k+1), ∑ β, ... = ∑ a : wkpIdx k d, ...
   rw [← Finset.univ_sigma_univ (κ := fun (i : Fin (k + 1)) => (Fin i.val → Fin d))]
   rw [Finset.sum_sigma]
 
@@ -119,8 +112,6 @@ theorem wkpNorm_two_eq_sigma_sum
   rw [Finset.sum_image (fun i _ j _ hij => Fin.val_inj.mp hij)]
   rw [← Finset.univ_sigma_univ (κ := fun (i : Fin (k + 1)) => (Fin i.val → Fin d))]
   rw [Finset.sum_sigma]
-
-/-! ## Order-zero values -/
 
 /-- `wkpNormL2Sq 0 u Ω = (eLpNorm u 2 (volume.restrict Ω))²`. -/
 theorem wkpNormL2Sq_zero
@@ -140,8 +131,6 @@ theorem wkpNormL2Sq_zero
           eLpNorm (iterWeakPartial (d := d) (2 : ℝ≥0∞) 0 α u Ω) 2
               (volume.restrict Ω) ^ (2 : ℕ))]
   simp [iterWeakPartial_zero]
-
-/-! ## The `L²`-Sobolev inner product -/
 
 /-- The `L²`-convention Sobolev inner product of order `k`:
 `⟨u, v⟩_{W^{k,2}} = ∑_{|β| ≤ k} ∫_Ω (∂^β u)(∂^β v) dx`. -/
@@ -177,8 +166,6 @@ theorem wkpInnerL2_eq_sigma_sum
   rw [← Finset.univ_sigma_univ (κ := fun (i : Fin (k + 1)) => (Fin i.val → Fin d))]
   rw [Finset.sum_sigma]
 
-/-! ## Closure under arithmetic for `wkpNormL2Sq` and `wkpNormL2` -/
-
 /-- `wkpNormL2Sq k 0 Ω = 0`. -/
 theorem wkpNormL2Sq_zero_fun_zero
     {k : ℕ} {Ω : Set E} (hΩ : IsOpen Ω) :
@@ -203,8 +190,6 @@ theorem wkpNormL2_zero_fun_zero
   unfold wkpNormL2
   rw [wkpNormL2Sq_zero_fun_zero (d := d) hΩ]
   exact ENNReal.zero_rpow_of_pos (by norm_num : (0 : ℝ) < 1 / 2)
-
-/-! ## Finiteness for `MemWkp k 2 u Ω` -/
 
 /-- For `u ∈ W^{k,2}(Ω)`, the squared `L²`-Sobolev norm is finite. -/
 theorem wkpNormL2Sq_lt_top_of_memWkp
@@ -232,8 +217,6 @@ theorem wkpNormL2_lt_top_of_memWkp
   exact ENNReal.rpow_lt_top_of_nonneg (by norm_num : (0 : ℝ) ≤ 1 / 2)
     (wkpNormL2Sq_lt_top_of_memWkp (d := d) h).ne
 
-/-! ## ae-invariance -/
-
 /-- `wkpNormL2Sq` is invariant under ae-equality on `volume.restrict Ω`
 for open `Ω`. -/
 theorem wkpNormL2Sq_congr_ae
@@ -260,8 +243,6 @@ theorem wkpNormL2_congr_ae
   unfold wkpNormL2
   rw [wkpNormL2Sq_congr_ae (d := d) hΩ huv]
 
-/-! ## `wkpNormL2 ^ 2 = wkpNormL2Sq` -/
-
 /-- Squaring `wkpNormL2` recovers `wkpNormL2Sq`. -/
 theorem wkpNormL2_sq_eq_wkpNormL2Sq
     (k : ℕ) (u : E → ℝ) (Ω : Set E) :
@@ -273,8 +254,6 @@ theorem wkpNormL2_sq_eq_wkpNormL2Sq
   rw [show ((1 : ℝ) / 2) * ((2 : ℕ) : ℝ) = 1 by norm_num]
   rw [ENNReal.rpow_one]
 
-/-! ## Helper: ENNReal/Real conversion lemma -/
-
 /-- `wkpNormL2 k u Ω = ENNReal.ofReal √((wkpNormL2Sq k u Ω).toReal)`
 when `wkpNormL2Sq k u Ω` is finite. -/
 private theorem wkpNormL2_eq_ofReal_sqrt_toReal
@@ -283,7 +262,6 @@ private theorem wkpNormL2_eq_ofReal_sqrt_toReal
     wkpNormL2 (d := d) k u Ω =
       ENNReal.ofReal (Real.sqrt (wkpNormL2Sq (d := d) k u Ω).toReal) := by
   unfold wkpNormL2
-  -- `(stuff).toReal ^ (1/2) = sqrt (stuff).toReal`. Need to bridge ENNReal.rpow with `.toReal`.
   have h_toReal_pow :
       (wkpNormL2Sq (d := d) k u Ω) ^ ((1 : ℝ) / 2) =
         ENNReal.ofReal ((wkpNormL2Sq (d := d) k u Ω).toReal ^ ((1 : ℝ) / 2)) := by
@@ -296,8 +274,6 @@ private theorem wkpNormL2_eq_ofReal_sqrt_toReal
       Real.sqrt (wkpNormL2Sq (d := d) k u Ω).toReal by
     rw [Real.sqrt_eq_rpow]]
 
-/-! ## Triangle inequality for `wkpNormL2` (Minkowski / Euclidean triangle) -/
-
 /-- The triangle inequality for `wkpNormL2`. Each summand `(eLpNorm (∂^β (u + v)) 2)²`
 is bounded by `(eLpNorm (∂^β u) 2 + eLpNorm (∂^β v) 2)²` (via the Minkowski inequality on
 `L²(Ω)`); then we apply the Euclidean triangle inequality on the finite-dimensional sum. -/
@@ -308,7 +284,6 @@ theorem wkpNormL2_add_le
     wkpNormL2 (d := d) k (fun x => u x + v x) Ω ≤
       wkpNormL2 (d := d) k u Ω + wkpNormL2 (d := d) k v Ω := by
   classical
-  -- Per-multi-index `L²` norms (over `wkpIdx k d`).
   set f : wkpIdx k d → ℝ≥0∞ := fun a =>
     eLpNorm (iterWeakPartial (d := d) (2 : ℝ≥0∞) a.1.val a.2 u Ω) 2 (volume.restrict Ω)
     with hf_def
@@ -319,7 +294,6 @@ theorem wkpNormL2_add_le
     eLpNorm (iterWeakPartial (d := d) (2 : ℝ≥0∞) a.1.val a.2
         (fun x => u x + v x) Ω) 2 (volume.restrict Ω)
     with hh_def
-  -- Per-summand triangle: h a ≤ f a + g a.
   have h_per_a : ∀ a : wkpIdx k d, h a ≤ f a + g a := by
     intro a
     obtain ⟨⟨j, hj⟩, β⟩ := a
@@ -342,7 +316,6 @@ theorem wkpNormL2_add_le
       funext x; simp [Pi.add_apply]
     rw [hEq] at htr
     exact htr
-  -- Finiteness for f, g.
   have h_finiteness_f : ∀ a : wkpIdx k d, f a < ∞ := by
     intro a
     obtain ⟨⟨j, hj⟩, β⟩ := a
@@ -359,7 +332,6 @@ theorem wkpNormL2_add_le
     lt_of_le_of_lt (h_per_a a)
       (lt_of_le_of_ne le_top
         (ENNReal.add_ne_top.mpr ⟨(h_finiteness_f a).ne, (h_finiteness_g a).ne⟩))
-  -- Real-valued projections.
   let fR : wkpIdx k d → ℝ := fun a => (f a).toReal
   let gR : wkpIdx k d → ℝ := fun a => (g a).toReal
   let hR : wkpIdx k d → ℝ := fun a => (h a).toReal
@@ -374,13 +346,9 @@ theorem wkpNormL2_add_le
     have h_lhs_le := ENNReal.toReal_mono h_rhs_ne h_lhs
     rw [ENNReal.toReal_add (h_finiteness_f a).ne (h_finiteness_g a).ne] at h_lhs_le
     exact h_lhs_le
-  -- Direct Minkowski on a finite index set. We need
-  -- (Σ a, hR a²)^{1/2} ≤ (Σ a, fR a²)^{1/2} + (Σ a, gR a²)^{1/2},
-  -- where hR a ≤ fR a + gR a for each a.
   have h_triangle :
       Real.sqrt (∑ a : wkpIdx k d, hR a ^ 2) ≤
         Real.sqrt (∑ a : wkpIdx k d, fR a ^ 2) + Real.sqrt (∑ a : wkpIdx k d, gR a ^ 2) := by
-    -- Use `EuclideanSpace ℝ (wkpIdx k d)`-norm via the standard triangle.
     let FR : EuclideanSpace ℝ (wkpIdx k d) := WithLp.toLp 2 fR
     let GR : EuclideanSpace ℝ (wkpIdx k d) := WithLp.toLp 2 gR
     let HR : EuclideanSpace ℝ (wkpIdx k d) := WithLp.toLp 2 hR
@@ -405,7 +373,6 @@ theorem wkpNormL2_add_le
       refine Finset.sum_congr rfl ?_
       intro a _
       rw [Real.norm_eq_abs, sq_abs, hHR_apply]
-    -- ‖HR‖ ≤ ‖FR + GR‖ since |HR a| ≤ |(FR + GR) a| componentwise.
     have h_componentwise : ∀ a, ‖HR a‖ ≤ ‖(FR + GR) a‖ := by
       intro a
       rw [Real.norm_eq_abs, Real.norm_eq_abs,
@@ -426,7 +393,6 @@ theorem wkpNormL2_add_le
     have h_lp_triangle : ‖FR + GR‖ ≤ ‖FR‖ + ‖GR‖ := norm_add_le FR GR
     rw [← h_norm_HR, ← h_norm_FR, ← h_norm_GR]
     linarith
-  -- Translate back to ENNReal.
   have hu_v : MemWkp (d := d) k 2 (fun x => u x + v x) Ω :=
     MemWkp.add (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ hu hv
   have hSq_uv_ne : wkpNormL2Sq (d := d) k (fun x => u x + v x) Ω ≠ ∞ :=
@@ -463,7 +429,6 @@ theorem wkpNormL2_add_le
   rw [hSq_uv_toReal, hSq_u_toReal, hSq_v_toReal]
   rw [← ENNReal.ofReal_add (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)]
   apply ENNReal.ofReal_le_ofReal
-  -- Real.sqrt (∑ hR²) ≤ Real.sqrt (∑ fR²) + Real.sqrt (∑ gR²)
   exact h_triangle
 
 /-- Scalar multiplication identity for `wkpNormL2Sq`. -/
@@ -507,8 +472,6 @@ theorem wkpNormL2_const_smul
   rw [← ENNReal.rpow_mul]
   norm_num
 
-/-! ## Norm equivalence between `wkpNorm` (linear-sum) and `wkpNormL2` (Euclidean) -/
-
 /-- Equivalence inequality 1: `wkpNormL2 ≤ wkpNorm` at `p = 2`.
 This uses that `√(∑ a_i²) ≤ ∑ a_i` for nonneg `a_i`. -/
 theorem wkpNormL2_le_wkpNorm
@@ -527,7 +490,6 @@ theorem wkpNormL2_le_wkpNorm
     exact (iterWeakPartial_memLp_of_memWkp (d := d) (p := (2 : ℝ≥0∞)) h_uWj β).eLpNorm_lt_top
   let fR : wkpIdx k d → ℝ := fun a => (f a).toReal
   have hfR_nonneg : ∀ a : wkpIdx k d, 0 ≤ fR a := fun a => ENNReal.toReal_nonneg
-  -- (Σ fR a²) ≤ (Σ fR a)² since fR a ≥ 0.
   have h_real : Real.sqrt (∑ a : wkpIdx k d, fR a ^ 2) ≤ ∑ a : wkpIdx k d, fR a := by
     have h_aux : ∀ a ∈ (Finset.univ : Finset (wkpIdx k d)), fR a ^ 2 ≤ fR a * (∑ b, fR b) := by
       intro a _
@@ -588,7 +550,6 @@ theorem wkpNorm_le_sqrt_card_mul_wkpNormL2
     exact (iterWeakPartial_memLp_of_memWkp (d := d) (p := (2 : ℝ≥0∞)) h_uWj β).eLpNorm_lt_top
   let fR : wkpIdx k d → ℝ := fun a => (f a).toReal
   have hfR_nonneg : ∀ a : wkpIdx k d, 0 ≤ fR a := fun a => ENNReal.toReal_nonneg
-  -- Cauchy-Schwarz: (Σ fR a)² ≤ N · Σ fR a².
   have h_real : (∑ a : wkpIdx k d, fR a) ≤
       Real.sqrt (Fintype.card (wkpIdx k d) : ℝ) * Real.sqrt (∑ a : wkpIdx k d, fR a ^ 2) := by
     have h_CS : (∑ a : wkpIdx k d, fR a) ^ 2 ≤
@@ -629,8 +590,6 @@ theorem wkpNorm_le_sqrt_card_mul_wkpNormL2
   rw [← ENNReal.ofReal_mul (Real.sqrt_nonneg _)]
   exact ENNReal.ofReal_le_ofReal h_real
 
-/-! ## Properties of the `L²`-Sobolev inner product -/
-
 /-- The `L²`-Sobolev inner product is symmetric. -/
 theorem wkpInnerL2_comm
     (k : ℕ) (u v : E → ℝ) (Ω : Set E) :
@@ -668,14 +627,11 @@ theorem wkpInnerL2_add_left
   have h_u₁Wj : MemWkp (d := d) j 2 u₁ Ω := MemWkp.le_of_le hj_le hu₁
   have h_u₂Wj : MemWkp (d := d) j 2 u₂ Ω := MemWkp.le_of_le hj_le hu₂
   have h_vWj : MemWkp (d := d) j 2 v Ω := MemWkp.le_of_le hj_le hv
-  -- Iterated partials are ae-additive.
   have h_iter_add_ae :=
     iterWeakPartial_add_ae (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ β h_u₁Wj h_u₂Wj
-  -- L² × L² ⊆ L¹ for the integrand.
   have h_iter_u₁ := iterWeakPartial_memLp_of_memWkp (d := d) (p := (2 : ℝ≥0∞)) h_u₁Wj β
   have h_iter_u₂ := iterWeakPartial_memLp_of_memWkp (d := d) (p := (2 : ℝ≥0∞)) h_u₂Wj β
   have h_iter_v := iterWeakPartial_memLp_of_memWkp (d := d) (p := (2 : ℝ≥0∞)) h_vWj β
-  -- ∫ (∂^β (u₁ + u₂)) (∂^β v) = ∫ (∂^β u₁ + ∂^β u₂) (∂^β v) = ∫ (∂^β u₁) (∂^β v) + ∫ (∂^β u₂) (∂^β v).
   have h_int_eq :
       ∫ x in Ω,
         iterWeakPartial (d := d) (2 : ℝ≥0∞) j β (fun x => u₁ x + u₂ x) Ω x *
@@ -688,7 +644,6 @@ theorem wkpInnerL2_add_left
     filter_upwards [h_iter_add_ae] with x hx
     rw [hx]
   rw [h_int_eq]
-  -- Linearity of integral.
   have h_int₁ : Integrable (fun x =>
       iterWeakPartial (d := d) (2 : ℝ≥0∞) j β u₁ Ω x *
         iterWeakPartial (d := d) (2 : ℝ≥0∞) j β v Ω x) (volume.restrict Ω) :=
@@ -726,7 +681,6 @@ theorem wkpInnerL2_smul_left
   intro β _
   have hj_le : j ≤ k := by rw [Finset.mem_range] at hj; omega
   have h_uWj : MemWkp (d := d) j 2 u Ω := MemWkp.le_of_le hj_le hu
-  -- Iterated partials are ae-multiplicative.
   have h_iter_smul_ae :=
     iterWeakPartial_const_smul_ae (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ β h_uWj c
   rw [show (∫ x in Ω,
@@ -775,7 +729,6 @@ theorem wkpNormL2Sq_toReal_eq_wkpInnerL2_self
       have hj_le : j ≤ k := by rw [Finset.mem_range] at hj; omega
       have h_uWj : MemWkp (d := d) j 2 u Ω := MemWkp.le_of_le hj_le hu
       have h_iter := iterWeakPartial_memLp_of_memWkp (d := d) (p := (2 : ℝ≥0∞)) h_uWj β
-      -- (eLpNorm _ 2)^2 = ENNReal.ofReal (∫ |·|²); .toReal gives ∫ |·|² = ∫ ·²
       rw [ENNReal.toReal_pow]
       rw [MemLp.eLpNorm_eq_integral_rpow_norm
           (two_ne_zero) (ENNReal.ofNat_ne_top) h_iter]
@@ -800,7 +753,6 @@ theorem wkpNormL2Sq_toReal_eq_wkpInnerL2_self
         rw [show ((2 : ℝ)⁻¹ * ((2 : ℕ) : ℝ)) = 1 by norm_num]
         rw [Real.rpow_one]
       rw [h_pow_eq]
-      -- ∫ ‖f‖^(2:ℝ) = ∫ f * f for real f.
       refine integral_congr_ae ?_
       filter_upwards with x
       rw [Real.norm_eq_abs, show ((2 : ℝ) : ℝ) = ((2 : ℕ) : ℝ) by norm_num,

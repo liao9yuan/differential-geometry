@@ -85,27 +85,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-Match the convention in the surrounding chart-local Laplacian files: install
-the Borel σ-algebras locally, without leaking global instances onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The bump-independent chart coefficient
-
-The Euclidean chart component `tensorComponentEuclid g r s F α P`
-(`WeakSolution.lean`) is the chart-pushed raw chart-frame scalar component of
-the source `F` at the component multi-index `P`. Coupling it to the chart-frame
-tensor-metric Gram `covChartMetricGram` and then rotating through the inverse
-Gram column `covChartMetricGramInv · Q P₀` produces the bump-independent chart
-coefficient. -/
 
 /-- **The bump-independent chart coefficient of the `L²` source pairing.** For
 a smooth source `(r, s)`-tensor section `F`, a chart center `α`, and a
@@ -144,14 +129,6 @@ lemma sourcePairingCoeff_def
             covChartMetricGram (I := I) (M := M) g r s α P Q y *
               tensorComponentEuclid (I := I) (M := M) g r s F α P y := rfl
 
-/-! ### Smoothness of the bump-independent chart coefficient
-
-Each constituent of `sourcePairingCoeff` is `C^∞` on the Euclidean chart
-target: the inverse-Gram entries (`covChartMetricGramInv_entry_contDiffOn`), the
-Gram entries (`covChartMetricGram_contDiffOn`), and the Euclidean chart
-component of the source `F` (`tensorComponentEuclid_contDiffOn`). A finite sum
-and product of `ContDiffOn ℝ ∞` functions is `ContDiffOn ℝ ∞`. -/
-
 /-- **The bump-independent chart coefficient is `ContDiffOn ℝ ∞` on the
 Euclidean chart target.** Each inverse-Gram entry, each Gram entry, and the
 Euclidean chart component of `F` are `C^∞` on the chart target; finite sums and
@@ -163,27 +140,13 @@ theorem sourcePairingCoeff_contDiffOn
     ContDiffOn ℝ ∞ (sourcePairingCoeff (I := I) (M := M) g r s F α P₀)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- `sourcePairingCoeff` is a finite sum over `Q`.
   refine ContDiffOn.sum (fun Q _ => ?_)
-  -- Each summand is `(inverse-Gram entry) · (a finite sum over P)`.
   refine ContDiffOn.mul ?_ ?_
-  · -- The inverse-Gram column entry is `C^∞`.
-    exact covChartMetricGramInv_entry_contDiffOn (I := I) (M := M) g r s α Q P₀
-  · -- The inner sum over `P`.
-    refine ContDiffOn.sum (fun P _ => ?_)
-    -- Each inner summand is `(Gram entry) · (Euclidean chart component of F)`.
+  · exact covChartMetricGramInv_entry_contDiffOn (I := I) (M := M) g r s α Q P₀
+  · refine ContDiffOn.sum (fun P _ => ?_)
     refine ContDiffOn.mul ?_ ?_
     · exact covChartMetricGram_contDiffOn (I := I) (M := M) g r s α P Q
     · exact tensorComponentEuclid_contDiffOn (I := I) (M := M) g r s F α P
-
-/-! ## The rotated test section as a finite sum of chart-frame basis sections
-
-The rotated test section `rotatedTestSection g r s α P₀ χ` is, by definition, a
-`Finset`-sum over component multi-indices `Q` of chart-frame constant basis
-tensor sections, each cut off by the chart-pulled inverse-Gram column entry
-times `χ`. The function-level coercion `SmoothCcTensor.toFun` is additive, so
-the underlying map of the rotated test section is the pointwise finite sum of
-the underlying maps of the summands. -/
 
 /-- The bump cutting the `Q`-th summand of the rotated test section: the
 chart-pulled inverse-Gram column entry `gramInvWeight g r s α P₀ Q` times the
@@ -250,16 +213,6 @@ private lemma rotatedTestSection_toFun_apply
   exact smoothCcTensor_finsetSum_toFun_apply (I := I) (M := M) g r s
     Finset.univ _ x
 
-/-! ## Vanishing of the integrand off the bump support
-
-The chart-frame constant basis section `rotatedSummand … Q` has, as its
-underlying section value at `x`, the bump `rotatedSummandBump … Q` at `x` times
-the chart-frame constant basis fiber section. Wherever the scalar bump `χ`
-vanishes the bump `rotatedSummandBump … Q` vanishes, hence the section value
-vanishes; the pointwise tensor inner product is then `0`. Summing over `Q`, the
-`L²` source-pairing integrand vanishes off the support of `χ`, and so its
-topological support sits inside the chart source. -/
-
 /-- The underlying-map value of the `Q`-th rotated summand at `x` is the bump
 `rotatedSummandBump … Q x` times the canonical model image of the chart-frame
 constant basis fiber section. -/
@@ -273,11 +226,7 @@ private lemma rotatedSummand_toFun_apply
       TensorRSSpace.toModel
         (rotatedSummandBump (I := I) (M := M) g r s α P₀ Q χ x •
           chartBasisFiberSection (I := I) (M := M) r s α Q x) := by
-  -- Unfold the summand and its bump to the underlying chart-frame basis
-  -- section.
   unfold rotatedSummand rotatedSummandBump
-  -- `toFun = toModel ∘ toSection`, and the basis section's underlying section
-  -- at `x` is the bump value at `x` times `chartBasisFiberSection … x`.
   rw [SmoothCcTensor.toFun_apply,
     chartBasisTensorSection_toSection_apply (I := I) (M := M) g r s α
       (gramInvWeight_mul_bump_contMDiffOn (I := I) (M := M) g r s α P₀ Q hχs)
@@ -293,7 +242,6 @@ private lemma rotatedSummand_toFun_eq_zero_of_bump_eq_zero
     (Q : CompIdx E r s) {x : M} (hx : χ x = 0) :
     (rotatedSummand (I := I) (M := M) g r s α P₀ hχs hχt Q).toFun x = 0 := by
   rw [rotatedSummand_toFun_apply (I := I) (M := M) g r s α P₀ hχs hχt Q x]
-  -- The bump value is `gramInvWeight … · χ x = gramInvWeight … · 0 = 0`.
   have hbump : rotatedSummandBump (I := I) (M := M) g r s α P₀ Q χ x = 0 := by
     unfold rotatedSummandBump
     rw [hx, mul_zero]
@@ -346,22 +294,13 @@ private lemma sourcePairingIntegrand_tsupport_subset
             ((rotatedTestSection (I := I) (M := M) g r s α P₀ χ hχs hχt).toFun
               x)) ⊆
       (chartAt H α).source := by
-  -- The integrand's support sits inside `tsupport χ`, which the hypothesis
-  -- places inside the chart source.
   refine (closure_minimal ?_ (isClosed_tsupport χ)).trans hχt
   intro x hx
   rw [Function.mem_support] at hx
-  -- Off `tsupport χ` the bump `χ x` vanishes, hence the integrand vanishes.
   by_contra hx_notsupp
   exact hx (sourcePairingIntegrand_eq_zero_of_bump_eq_zero (I := I) (M := M)
     g r s F α P₀ hχs hχt
     (image_eq_zero_of_notMem_tsupport hx_notsupp))
-
-/-! ## Continuity of the source-pairing integrand
-
-The `L²` source-pairing integrand `x ↦ ⟨F(x), (rotated test section)(x)⟩` is the
-cross pointwise tensor inner product of two `SmoothCcTensor`s, hence continuous
-by `continuous_inner_cross`. -/
 
 /-- The `L²` source-pairing integrand is continuous on `M`. -/
 private lemma sourcePairingIntegrand_continuous
@@ -378,14 +317,6 @@ private lemma sourcePairingIntegrand_continuous
   DifferentialGeometry.Integral.L2.SmoothCcTensor.continuous_inner_cross
     (I := I) (M := M)
     F (rotatedTestSection (I := I) (M := M) g r s α P₀ χ hχs hχt)
-
-/-! ## The chart-coordinate integrand factorisation
-
-On the Euclidean chart target the pointwise integrand
-`⟨F(b), (rotated test section)(b)⟩`, read at the chart-source preimage
-`b = (extChartAt I α).symm (toEuclidean.symm y)`, factors as the chart-pushed
-bump `chartPushedRaw I α χ y` times the bump-independent coefficient
-`sourcePairingCoeff g r s F α P₀ y`. -/
 
 /-- The bridge between the wrapped raw-component projection of the source `F`'s
 section value and its raw chart-frame scalar component: both unfold to the
@@ -420,7 +351,6 @@ private lemma wrappedComponentProj_rotatedSummand_section
       chartPushedRaw I α (rotatedSummandBump (I := I) (M := M) g r s α P₀ Q χ)
           y *
         (if (Idx, Jdx) = Q then (1 : ℝ) else 0) := by
-  -- The wrapped projection of a section value is the raw chart component.
   rw [wrappedComponentProj_apply]
   rw [show tensorChartComponentProjection (E := E) r s Idx Jdx
         ((trivializationAt (TensorRSModel r s ℝ E)
@@ -431,7 +361,6 @@ private lemma wrappedComponentProj_rotatedSummand_section
       tensorChartComponentRaw (I := I) (M := M) g r s
           (rotatedSummand (I := I) (M := M) g r s α P₀ hχs hχt Q) α Idx Jdx
           ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) from rfl]
-  -- The raw chart component of the chart-frame constant basis section.
   exact chartBasisTensorSection_chartComp (I := I) (M := M) g r s α
     (gramInvWeight_mul_bump_contMDiffOn (I := I) (M := M) g r s α P₀ Q hχs)
     (gramInvWeight_mul_bump_tsupport (I := I) (M := M) g r s α P₀ Q hχt)
@@ -447,11 +376,8 @@ private lemma chartPushedRaw_rotatedSummandBump_eq
     chartPushedRaw I α (rotatedSummandBump (I := I) (M := M) g r s α P₀ Q χ) y =
       covChartMetricGramInv (I := I) (M := M) g r s α y Q P₀ *
         chartPushedRaw I α χ y := by
-  -- On the chart target the chart-pushed raw function is the function read at
-  -- the chart-source preimage.
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy]
   unfold rotatedSummandBump
-  -- `gramInvWeight … Q (symm (symm y)) = covChartMetricGramInv … y Q P₀`.
   have hb_eq : (toEuclidean (E := E))
       ((extChartAt I α)
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) = y := by
@@ -490,12 +416,9 @@ private lemma tensorInnerPointwise_F_rotatedSummand_chart
           covChartMetricGram (I := I) (M := M) g r s α P Q y *
             tensorComponentEuclid (I := I) (M := M) g r s F α P y := by
   classical
-  -- Notation: `b` is the chart-source preimage of `y`.
   set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
   have hb_chart : b ∈ (chartAt H α).source :=
     symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy
-  -- Both `F.toFun b` and the summand's `toFun b` are `toModel` of section
-  -- values; apply the bundle-fibre component expansion.
   rw [show F.toFun b = TensorRSSpace.toModel (F.toSection b) from rfl]
   rw [show (rotatedSummand (I := I) (M := M) g r s α P₀ hχs hχt Q).toFun b =
       TensorRSSpace.toModel
@@ -504,7 +427,6 @@ private lemma tensorInnerPointwise_F_rotatedSummand_chart
   rw [tensorInnerPointwise_toModel_eq_component_sum (I := I) (M := M)
     g r s α hb_chart (F.toSection b)
     ((rotatedSummand (I := I) (M := M) g r s α P₀ hχs hχt Q).toSection b)]
-  -- Rewrite each factor of every term.
   have hterm : ∀ P Q' : CompIdx E r s,
       chartTensorInnerPointwise_rs_model (I := I) (M := M) g r s α b
             (tensorChartBasisElement (E := E) r s P.1 P.2)
@@ -520,26 +442,21 @@ private lemma tensorInnerPointwise_F_rotatedSummand_chart
                 (rotatedSummandBump (I := I) (M := M) g r s α P₀ Q χ) y *
               (if (Q'.1, Q'.2) = Q then (1 : ℝ) else 0))) := by
     intro P Q'
-    -- The Gram-on-basis factor is `covChartMetricGram`.
     rw [show chartTensorInnerPointwise_rs_model (I := I) (M := M) g r s α b
           (tensorChartBasisElement (E := E) r s P.1 P.2)
           (tensorChartBasisElement (E := E) r s Q'.1 Q'.2) =
         covChartMetricGram (I := I) (M := M) g r s α P Q' y from by
       rw [covChartMetricGram_def, ← hb_def]]
-    -- The wrapped projection of `F`'s section value is the raw chart component;
-    -- its chart-pushed value at `y` is `tensorComponentEuclid`.
     rw [wrappedComponentProj_F_section_eq_tensorChartComponentRaw
       (I := I) (M := M) g r s F α b P.1 P.2]
     rw [show tensorChartComponentRaw (I := I) (M := M) g r s F α P.1 P.2 b =
         tensorComponentEuclid (I := I) (M := M) g r s F α P y from by
       rw [tensorComponentEuclid_apply_of_mem (I := I) (M := M) g r s F α P hy,
         hb_def]]
-    -- The wrapped projection of the summand's section value.
     rw [wrappedComponentProj_rotatedSummand_section (I := I) (M := M)
       g r s α P₀ hχs hχt Q Q'.1 Q'.2 hy]
   rw [Finset.sum_congr rfl (fun P _ => Finset.sum_congr rfl
     (fun Q' _ => hterm P Q'))]
-  -- The inner sum over `Q'` collapses to the single term `Q' = Q`.
   have hcollapse : ∀ P : CompIdx E r s,
       (∑ Q' : CompIdx E r s,
           covChartMetricGram (I := I) (M := M) g r s α P Q' y *
@@ -553,20 +470,16 @@ private lemma tensorInnerPointwise_F_rotatedSummand_chart
               (rotatedSummandBump (I := I) (M := M) g r s α P₀ Q χ) y) := by
     intro P
     rw [Finset.sum_eq_single Q]
-    · -- Diagonal term: the Kronecker delta is `1`.
-      rw [show ((Q.1, Q.2) : CompIdx E r s) = Q from Prod.ext rfl rfl,
+    · rw [show ((Q.1, Q.2) : CompIdx E r s) = Q from Prod.ext rfl rfl,
         if_pos rfl, mul_one]
-    · -- Off-diagonal terms vanish.
-      intro Q' _ hne
+    · intro Q' _ hne
       rw [if_neg (fun h => hne (Prod.ext (congrArg Prod.fst h)
         (congrArg Prod.snd h))), mul_zero, mul_zero, mul_zero]
     · intro hQ
       exact absurd (Finset.mem_univ Q) hQ
   rw [Finset.sum_congr rfl (fun P _ => hcollapse P)]
-  -- The chart-pushed summand bump is the inverse-Gram-weighted chart bump.
   rw [chartPushedRaw_rotatedSummandBump_eq (I := I) (M := M) g r s α P₀ Q
     (χ := χ) hy]
-  -- Pull the common factor out of the sum over `P`.
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl (fun P _ => ?_)
   ring
@@ -592,9 +505,7 @@ private lemma tensorInnerPointwise_F_rotatedTestSection_chart
         y := by
   classical
   set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
-  -- Expand the rotated test section's underlying map as a finite sum.
   rw [rotatedTestSection_toFun_apply (I := I) (M := M) g r s α P₀ hχs hχt b]
-  -- The pointwise inner product is additive over the finite sum.
   have hadd :
       tensorInnerPointwise (I := I) (M := M) g r s b (F.toFun b)
           (∑ Q : CompIdx E r s,
@@ -611,25 +522,12 @@ private lemma tensorInnerPointwise_F_rotatedTestSection_chart
         rw [Finset.sum_insert hQ, Finset.sum_insert hQ,
           tensorInnerPointwise_add_right, ih]
   rw [hadd]
-  -- Each summand factorises by the per-summand chart factorisation.
   rw [Finset.sum_congr rfl (fun Q _ =>
     tensorInnerPointwise_F_rotatedSummand_chart (I := I) (M := M) g r s F α P₀
       hχs hχt Q hy)]
-  -- Collect the finite sum into `chartPushedRaw I α χ y · sourcePairingCoeff`.
   rw [sourcePairingCoeff_def, Finset.mul_sum]
   refine Finset.sum_congr rfl (fun Q _ => ?_)
   ring
-
-/-! ## The headline: chart factorisation of the `L²` source pairing
-
-The `L²` pairing of the source `F` against the rotated test section is the
-Bochner integral of the pointwise integrand `⟨F, (rotated test section)⟩`
-against the Riemannian volume measure. The integrand is continuous and
-chart-supported (it vanishes off the support of `χ`); the chart-pulled volume
-identity `integral_riemannianVolumeMeasure_eq_euclidean_chartTarget` rewrites
-the integral as a chart-Euclidean integral of `densityOnEuclid g α` times the
-chart-coordinate integrand, which factors as `chartPushedRaw I α χ ·
-sourcePairingCoeff g r s F α P₀`. -/
 
 /-- **Chart factorisation of the `L²` source pairing.** For a smooth source
 `(r, s)`-tensor section `F` on a closed Riemannian manifold `(M, g)`, a chart
@@ -662,13 +560,11 @@ theorem tensorL2Inner_rotatedTestSection_chart_pull
         ∂(MeasureTheory.Measure.map (toEuclidean : E → EuclN)
             (modelHaar (E := E))) := by
   classical
-  -- `tensorL2Inner` is the Bochner integral of the pointwise integrand.
   rw [show tensorL2Inner (I := I) (M := M) g r s F.toFun
         (rotatedTestSection (I := I) (M := M) g r s α P₀ χ hχs hχt).toFun =
       ∫ x, tensorInnerPointwise (I := I) (M := M) g r s x (F.toFun x)
           ((rotatedTestSection (I := I) (M := M) g r s α P₀ χ hχs hχt).toFun x)
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) from rfl]
-  -- The integrand is continuous and chart-supported.
   have hcont : Continuous
       (fun x : M =>
         tensorInnerPointwise (I := I) (M := M) g r s x (F.toFun x)
@@ -683,11 +579,8 @@ theorem tensorL2Inner_rotatedTestSection_chart_pull
       (chartAt H α).source :=
     sourcePairingIntegrand_tsupport_subset (I := I) (M := M) g r s F α P₀ hχs
       hχt
-  -- Pull the global integral to the Euclidean chart target.
   rw [integral_riemannianVolumeMeasure_eq_euclidean_chartTarget
     (I := I) (M := M) g α hcont hsupp]
-  -- On the chart target rewrite the chart-pulled integrand by the
-  -- chart-coordinate factorisation.
   have hctE_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) α).measurableSet

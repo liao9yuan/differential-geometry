@@ -106,7 +106,6 @@ theorem tensorChartComponentRaw_rawTensorConnLap_eq_chart_frame_trace_sum
                   (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b
                   ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b)))) := by
   classical
-  -- (1) Frame trace identity for the raw operator at `b`.
   have hExp :
       rawTensorConnLap (I := I) g r s
           (fun z : M => T₀.toSection z) b =
@@ -116,7 +115,6 @@ theorem tensorChartComponentRaw_rawTensorConnLap_eq_chart_frame_trace_sum
           (fun z : M => T₀.toSection z) b :=
     rawTensorConnLap_via_chartFrameNormGlobalSmooth
       (I := I) (M := M) g r s T₀ α hb
-  -- (2) Defining identity for the fixed-frame variant: a finite sum over `i`.
   have hSum :
       rawTensorConnLap_fixedFrame (I := I) g r s
           (fun i : Fin (Module.finrank ℝ E) =>
@@ -140,7 +138,6 @@ theorem tensorChartComponentRaw_rawTensorConnLap_eq_chart_frame_trace_sum
       (fun i : Fin (Module.finrank ℝ E) =>
         (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun)
       (fun z : M => T₀.toSection z) b
-  -- (3) Combine (1) and (2): expand the raw operator at `b` as a finite sum.
   have hRaw_sum :
       rawTensorConnLap (I := I) g r s
           (fun z : M => T₀.toSection z) b =
@@ -159,13 +156,10 @@ theorem tensorChartComponentRaw_rawTensorConnLap_eq_chart_frame_trace_sum
                 (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b
                 ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b))) :=
     hExp.trans hSum
-  -- (4) Compose the trivialization-CLM with the chart component projection.
   set L : TensorRSSpace r s I b →L[ℝ] ℝ :=
     (tensorChartComponentProjection (E := E) r s Idx Jdx).comp
       ((trivializationAt (TensorRSModel r s ℝ E)
           (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b) with hL
-  -- (5) Apply `L` to both sides of `hRaw_sum`; on the right-hand side,
-  -- linearity of `L` distributes through the finite sum.
   have hApply : L (rawTensorConnLap (I := I) g r s
         (fun z : M => T₀.toSection z) b) =
       L (∑ i : Fin (Module.finrank ℝ E),
@@ -183,10 +177,7 @@ theorem tensorChartComponentRaw_rawTensorConnLap_eq_chart_frame_trace_sum
                 (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b
                 ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b)))) :=
     congrArg L hRaw_sum
-  -- (6) Distribute `L` through the finite sum on the RHS.
   rw [map_sum] at hApply
-  -- (7) Unfold `L` on both sides via `ContinuousLinearMap.coe_comp'` /
-  -- `ContinuousLinearMap.comp_apply` and conclude.
   simpa [hL, ContinuousLinearMap.comp_apply] using hApply
 
 section

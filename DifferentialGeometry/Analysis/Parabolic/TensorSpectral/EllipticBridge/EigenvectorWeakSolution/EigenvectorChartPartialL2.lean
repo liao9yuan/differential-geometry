@@ -110,28 +110,12 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The chart component of a smooth section lies in `W^{1,2}` of the chart target
-
-The Euclidean chart component `tensorChartComponent g r s S.toCcTensor α Idx Jdx`
-of a smooth compactly-supported `H¹` section is, by construction, the chart
-push-forward of a globally smooth compactly-supported manifold scalar field; it
-is therefore globally `C^∞` on the Euclidean model space, with compact support
-inside the Euclidean chart target. Such a function lies in `W^{1,2}` of the chart
-target. This is the membership hypothesis required by every chosen-weak-partial
-identity below. -/
 
 /-- The Euclidean chart component is globally `C^∞` on the Euclidean model
 space. -/
@@ -204,15 +188,6 @@ lemma tensorChartComponent_memW1p
       hp_one 1
   exact MemWkp.one_iff_memW1p.mp h_W1
 
-/-! ## The chosen weak chart partial of a smooth section as an `L²` class
-
-For a fixed chart-coordinate direction `k`, the chosen weak `k`-th chart partial
-`chosenWeakPartial' 2 k (tensorChartComponent g r s S.toCcTensor α Idx Jdx)
-(chartTargetEuclid α)` is, by `chosenWeakPartial'_memLp_of_mem` applied to the
-`W^{1,2}` membership above, in `L²` of the Euclidean `L²` reference measure
-`chartL2Measure α = volume.restrict (chartTargetEuclid α)`. Its `L²` class is the
-element `smoothChartPartialLp g r s S α P₀ k`. -/
-
 /-- The chosen weak `k`-th chart partial of the Euclidean chart component is in
 `MemLp 2` of the Euclidean `L²` reference measure of the chart. -/
 lemma chosenWeakPartial'_tensorChartComponent_memLp
@@ -257,14 +232,6 @@ private lemma smoothChartPartialLp_coeFn
   unfold smoothChartPartialLp
   exact MemLp.coeFn_toLp _
 
-/-! ### Linearity of the chosen-weak-chart-partial `L²` class
-
-`tensorChartComponent` is `ℝ`-linear in the section `S` (`tensorChartComponent_add`,
-`tensorChartComponent_smul`); `chosenWeakPartial'` is almost-everywhere additive
-and `ℝ`-homogeneous (`chosenWeakPartial'_add_ae`, `chosenWeakPartial'_const_smul_ae`).
-Combining the two, the chosen-weak-chart-partial `L²` class is `ℝ`-linear in
-`S`. -/
-
 private lemma smoothChartPartialLp_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensorH1 g r s) (α : M)
@@ -275,7 +242,6 @@ private lemma smoothChartPartialLp_add
         smoothChartPartialLp (I := I) (M := M) g r s S₂ α P₀ k := by
   classical
   apply Lp.ext
-  -- The chart component of a sum is the sum of the chart components.
   have h_fun :
       tensorChartComponent (I := I) (M := M) g r s
           (S₁ + S₂).toCcTensor α P₀.1 P₀.2 =
@@ -287,7 +253,6 @@ private lemma smoothChartPartialLp_add
       tensorChartComponent_add (I := I) (M := M)
         g r s S₁.toCcTensor S₂.toCcTensor α P₀.1 P₀.2]
     rfl
-  -- The chosen weak partial of the sum is `=ᵐ` the sum of chosen weak partials.
   have hΩ_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have hp_one : (1 : ℝ≥0∞) ≤ 2 := by norm_num
@@ -310,7 +275,6 @@ private lemma smoothChartPartialLp_add
     exact chosenWeakPartial'_add_ae (d := Module.finrank ℝ E) hp_one hΩ_open
       (tensorChartComponent_memW1p (I := I) (M := M) g r s S₁ α P₀.1 P₀.2)
       (tensorChartComponent_memW1p (I := I) (M := M) g r s S₂ α P₀.1 P₀.2) k
-  -- Assemble the `coeFn` chain.
   refine (smoothChartPartialLp_coeFn
     (I := I) (M := M) g r s (S₁ + S₂) α P₀ k).trans (h_partial_ae.trans ?_)
   have h_add :=
@@ -330,7 +294,6 @@ private lemma smoothChartPartialLp_smul
       c • smoothChartPartialLp (I := I) (M := M) g r s S α P₀ k := by
   classical
   apply Lp.ext
-  -- The chart component of a scalar multiple is the scalar multiple.
   have h_fun :
       tensorChartComponent (I := I) (M := M) g r s
           (c • S).toCcTensor α P₀.1 P₀.2 =
@@ -340,7 +303,6 @@ private lemma smoothChartPartialLp_smul
       tensorChartComponent_smul (I := I) (M := M)
         g r s c S.toCcTensor α P₀.1 P₀.2]
     rfl
-  -- The chosen weak partial of `c * u` is `=ᵐ` `c *` the chosen weak partial.
   have hΩ_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have hp_one : (1 : ℝ≥0∞) ≤ 2 := by norm_num
@@ -357,21 +319,14 @@ private lemma smoothChartPartialLp_smul
     rw [chartL2Measure, h_fun]
     exact chosenWeakPartial'_const_smul_ae (d := Module.finrank ℝ E) hp_one hΩ_open
       (tensorChartComponent_memW1p (I := I) (M := M) g r s S α P₀.1 P₀.2) c k
-  -- Assemble the `coeFn` chain.
   refine (smoothChartPartialLp_coeFn
     (I := I) (M := M) g r s (c • S) α P₀ k).trans (h_partial_ae.trans ?_)
   have h_smul :=
     Lp.coeFn_smul c (smoothChartPartialLp (I := I) (M := M) g r s S α P₀ k)
-  -- `c * ·` and `c • ·` agree on `ℝ`.
   refine Filter.EventuallyEq.trans ?_ h_smul.symm
   filter_upwards [smoothChartPartialLp_coeFn
     (I := I) (M := M) g r s S α P₀ k] with y hy
   rw [Pi.smul_apply, hy, smul_eq_mul]
-
-/-! ## The bounded `ℝ`-linear map `SmoothCcTensorH1 → Lp`
-
-The chosen-weak-chart-partial `L²` class assembles into a `ℝ`-linear map; the
-uniform chart-partial `L²` bound makes it a continuous linear map. -/
 
 /-- The `ℝ`-linear map sending a smooth compactly-supported `H¹` tensor section
 to the `L²` class of the chosen weak `k`-th chart partial of its Euclidean chart
@@ -409,15 +364,12 @@ private lemma smoothChartPartialLpLin_norm_le
       ∀ S : SmoothCcTensorH1 g r s,
         ‖smoothChartPartialLpLin (I := I) (M := M) g r s α P₀ k S‖ ≤ C * ‖S‖ := by
   classical
-  -- The uniform summed chart-partial `L²` bound.
   obtain ⟨C, hC_nn, h_bound⟩ :=
     exists_const_sum_eLpNorm_chosenWeakPartial'_tensorChartComponent_le_uniform
       (I := I) (M := M) g r s α
   refine ⟨C, hC_nn, ?_⟩
   intro S
-  -- The full summed bound for this section.
   have h_sum := h_bound S P₀.1 P₀.2
-  -- A single summand is bounded by the sum (all summands are non-negative).
   have h_single :
       eLpNorm (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
           (tensorChartComponent (I := I) (M := M)
@@ -441,7 +393,6 @@ private lemma smoothChartPartialLpLin_norm_le
           ((volume : Measure EuclN).restrict
             (chartTargetEuclid (I := I) (M := M) α)))
       (fun j _ => zero_le _) (Finset.mem_univ k)
-  -- The per-direction `eLpNorm` bound.
   have h_eLp :
       eLpNorm (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
           (tensorChartComponent (I := I) (M := M)
@@ -451,7 +402,6 @@ private lemma smoothChartPartialLpLin_norm_le
       ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞) := by
     rw [chartL2Measure]
     exact h_single.trans h_sum
-  -- Pass to real parts.
   have h_norm_eq :
       ‖smoothChartPartialLpLin (I := I) (M := M) g r s α P₀ k S‖ =
         (eLpNorm (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
@@ -497,14 +447,6 @@ private def smoothChartPartialLpCLM
     (S : SmoothCcTensorH1 g r s) :
     smoothChartPartialLpCLM (I := I) (M := M) g r s α P₀ k S =
       smoothChartPartialLp (I := I) (M := M) g r s S α P₀ k := rfl
-
-/-! ## The canonical chart partial as a continuous linear map on the `H¹` completion
-
-The chart-partial `L²` map assembles, by continuous linear extension along the
-dense embedding `SmoothCcTensorH1 g r s ↪ TensorH1Compl g r s`, into a continuous
-linear map on the `H¹` completion. The codomain `Lp ℝ 2 (chartL2Measure α)` is a
-complete normed space, so the extension exists and is the unique continuous
-linear map agreeing with the chart-partial `L²` map on smooth sections. -/
 
 /-- The canonical embedding `SmoothCcTensorH1 g r s ↪ TensorH1Compl g r s` is
 uniform-inducing. -/
@@ -563,20 +505,6 @@ theorem eigenvectorChartPartialCLM_smoothToTensorH1Compl
     (denseRange_smoothToTensorH1Compl (I := I) (M := M) g r s)
     (isUniformInducing_smoothToTensorH1Compl (I := I) (M := M) g r s) S]
   rfl
-
-/-! ## The candidate weak chart partial of the eigenvector chart component
-
-The candidate weak `k`-th chart partial of the eigenvector chart component is
-`μ⁻¹` times the value of `eigenvectorChartPartialCLM` on the eigenvector
-resolvent `eigenvectorResolvent g r s i`, where `μ := i.fst.val`
-is the associated nonzero resolvent eigenvalue. The `μ⁻¹`-rescaling matches the
-convention of `EigenvectorChartComponentL2.lean`, where the eigenvector chart
-component itself is `μ⁻¹` times the chart component of the `L²`-coercion of the
-eigenvector resolvent. The canonical chart-partial map
-`eigenvectorChartPartialCLM` is built from the dense smooth-section embedding and
-needs no further input; the eigenvector resolvent and its smooth approximating
-sequence are supplied by `eigenvectorResolvent` and
-`eigenvectorSmoothApprox`. -/
 
 /-- **The candidate weak `k`-th chart partial of an eigenvector chart
 component.** For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an

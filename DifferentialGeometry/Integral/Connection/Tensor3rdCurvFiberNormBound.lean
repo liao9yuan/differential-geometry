@@ -64,19 +64,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## A rank-`(r, s)` curvature-value frame scalar from the generic pointwise witness
-
-The committed metric-frame scalar `riemannianFrameScalar` is pinned to rank `(0, 2)`. The
-underlying canonical witness `riemannianFiberNormSq_le_pointwise_witness` is, however,
-fully generic in `(r, s)`: it provides, for any `(r, s)`-tensor `T` at `b`, a nonnegative
-real bounding factor `B` with `riemannianFiberNormSq g r s b T ≤ ‖T‖² · B`. We package the
-existence of such a factor at a fully-applied curvature value into a single nonnegative
-scalar `curvValueFrameScalar`, the rank-`(r, s)` generalisation of `riemannianFrameScalar²`.
-
-We first repackage the witness into the `‖·‖² · factor` shape with the factor exposed as a
-single nonnegative scalar (folding away the `metric-inner-op-norm`/`ambient-frame` product
-internals, which is the form the curvature `L²` control consumes). -/
-
 /-- The generic canonical pointwise bound, repackaged so the bounding factor is a single
 nonnegative scalar: for any `(r, s)`-tensor `T` at `x`, there is a nonnegative real `B` with
 `riemannianFiberNormSq g r s x T ≤ ‖T‖² · B`. The witness bounding factor is a product of
@@ -88,7 +75,6 @@ lemma exists_fiberNormSq_le_factor
       riemannianFiberNormSq (I := I) (M := M) g r s x T ≤ ‖T‖ ^ 2 * B := by
   obtain ⟨Ab, hAb_nonneg, hbound⟩ :=
     riemannianFiberNormSq_le_pointwise_witness (I := I) (M := M) g r s x T
-  -- `hbound : riemannianFiberNormSq … ≤ ‖T‖² · (m^(2r) · Ab^(r+s))`, the factor is nonneg.
   refine ⟨_, ?_, hbound⟩
   refine mul_nonneg (pow_nonneg ?_ _) (pow_nonneg hAb_nonneg _)
   unfold metricInnerOpNorm
@@ -109,11 +95,6 @@ lemma curvValueFrameScalar_nonneg
   (exists_fiberNormSq_le_factor (I := I) (M := M) g r s x
     (riemannOp (tensorCov (I := I) g r s) x v w T)).choose_spec.1
 
-/-! ## The canonical pointwise comparison for the rank-`(r, s)` curvature value
-
-We record the rank-`(r, s)` analogue of the committed `(0, 2)` witness comparison
-`riemannianFiberNormSq_riemannOp_tensorCov_le_witness`. -/
-
 /-- **Canonical pointwise comparison at a curvature value.** For the bundled tensor
 curvature operator `R := riemannOp (tensorCov g r s)`, tangent vectors `v, w` and an
 `(r, s)`-tensor `T`, the intrinsic Riemannian fibre norm of the curvature value
@@ -129,8 +110,6 @@ theorem riemannOp_tensorCov_fiberNormSq_le_frameScalar
         curvValueFrameScalar (I := I) (M := M) g r s x v w T :=
   (exists_fiberNormSq_le_factor (I := I) (M := M) g r s x
     (riemannOp (tensorCov (I := I) g r s) x v w T)).choose_spec.2
-
-/-! ## The explicit per-point bounding scalar and its non-negativity -/
 
 /-- The explicit per-point bounding scalar for the intrinsic fibre norm of the curvature
 contraction applied to the fields `X, Y, Z` at `x`:
@@ -163,13 +142,6 @@ theorem riemannOp_tensorCov_fiberNormSq_le_boundSq
       curvContractionFiberNormBoundSq (I := I) (M := M) g r s X Y Z x :=
   riemannOp_tensorCov_fiberNormSq_le_frameScalar (I := I) (M := M) g r s x
     (X x) (Y x) (Z x)
-
-/-! ## The uniform per-point bound on a closed manifold
-
-When the explicit per-point bounding scalar `curvContractionFiberNormBoundSq` is bounded
-above over `M` (the standard metric-coercivity / curvature-boundedness fact on a compact
-manifold, exposed here as an explicit hypothesis), the intrinsic fibre norm of the curvature
-contraction is uniformly bounded by a single nonnegative constant. -/
 
 /-- **Uniform fibre-norm bound for the curvature contraction on a closed manifold.** Let `g`
 be a smooth Riemannian metric on a closed manifold `M`, and fix smooth vector fields `X, Y`

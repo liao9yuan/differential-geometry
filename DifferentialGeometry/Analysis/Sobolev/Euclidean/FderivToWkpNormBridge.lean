@@ -32,8 +32,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Pointwise expansion of the Fréchet derivative -/
-
 /-- For `w : EuclideanSpace ℝ (Fin d)`, the norm is bounded by the sum of the
 absolute values of the components. -/
 private lemma euclN_norm_le_sum_components_norms (w : EuclN) :
@@ -93,8 +91,6 @@ private lemma norm_fderiv_le_sum_partials
   intro i _
   simp
 
-/-! ## `L²` bound on the Fréchet-derivative norm by a sum of partial `L²` norms -/
-
 /-- For smooth `ψ : EuclN → ℝ` and any measure `μ`, the `L^q` norm of
 `‖fderiv ℝ ψ‖` is bounded by the sum over coordinate directions of the
 `L^q` norms of the directional partials. -/
@@ -148,8 +144,6 @@ private lemma eLpNorm_norm_fderiv_le_sum_eLpNorm_partials
   intro i _
   rw [eLpNorm_norm]
 
-/-! ## Classical partial = chosen weak partial a.e. for smooth + compact-support inputs -/
-
 /-- For a smooth function `ψ` with compact support strictly inside an open set
 `Ω`, the `i`-th classical partial derivative agrees a.e. (under
 `volume.restrict Ω`) with `chosenWeakPartial' q i ψ Ω`. -/
@@ -190,8 +184,6 @@ private lemma classical_partial_ae_eq_chosenWeakPartial
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq (Ω := Ω) hΩ_open
     h_classical_isWeak h_chosen_isWeak h_classical_loc h_chosen_loc
 
-/-! ## Identifying the `j = 1` block of `wkpNorm` -/
-
 /-- The order-one contribution to `wkpNorm` decomposed as a sum over
 `β : Fin 1 → Fin d` equals the sum over `i : Fin d` of the `L^q` norms of the
 chosen weak partials. -/
@@ -231,8 +223,6 @@ private lemma wkpNorm_order_one_block_eq_sum_partials
       eLpNorm (chosenWeakPartial' (d := d) q i ψ Ω) q (volume.restrict Ω))
     (fun _ => rfl)
 
-/-! ## Sum of partial `L²` norms ≤ `wkpNorm 2 2` -/
-
 /-- The sum over coordinate directions of the `L²` norms of the chosen weak
 partials of `ψ` on an open set `Ω` is bounded by `wkpNorm 2 2 ψ Ω`. -/
 private lemma sum_eLpNorm_chosenWeakPartial_le_wkpNorm_two
@@ -242,7 +232,6 @@ private lemma sum_eLpNorm_chosenWeakPartial_le_wkpNorm_two
           (volume.restrict Ω)) ≤
       wkpNorm (d := d) 2 2 ψ Ω := by
   classical
-  -- Use the `wkpNorm_eq_sum` decomposition for `k = 2`, `p = 2`.
   have hWkpEq :
       wkpNorm (d := d) 2 2 ψ Ω =
         ∑ j ∈ Finset.range 3,
@@ -251,10 +240,8 @@ private lemma sum_eLpNorm_chosenWeakPartial_le_wkpNorm_two
               (volume.restrict Ω) := by
     have h := wkpNorm_eq_sum (d := d) 2 (2 : ℝ≥0∞) ψ Ω
     simpa using h
-  -- Identify the `j = 1` block of the sum as `∑ i, eLpNorm chosenWeakPartial`.
   have hJ1Block := wkpNorm_order_one_block_eq_sum_partials
     (d := d) (q := (2 : ℝ≥0∞)) ψ Ω
-  -- Expand `Finset.range 3 = {0, 1, 2}` step by step.
   have h_range3 :
       ∑ j ∈ Finset.range 3,
         ∑ β : Fin j → Fin d,
@@ -273,8 +260,6 @@ private lemma sum_eLpNorm_chosenWeakPartial_le_wkpNorm_two
         show (2 : ℕ) = 1 + 1 from rfl, Finset.sum_range_succ,
         Finset.sum_range_one]
   rw [hWkpEq, h_range3, ← hJ1Block]
-  -- Goal: ∑ β (Fin 1 → Fin d), eLpNorm iterWeakPartial 2 1 β ψ Ω ≤
-  --        J0 + ∑ β (Fin 1 → Fin d), eLpNorm iterWeakPartial 2 1 β ψ Ω + J2.
   have hJ0_nonneg :
       0 ≤ (∑ β : Fin 0 → Fin d,
           eLpNorm (iterWeakPartial (d := d) (2 : ℝ≥0∞) 0 β ψ Ω) 2
@@ -304,8 +289,6 @@ private lemma sum_eLpNorm_chosenWeakPartial_le_wkpNorm_two
                   (volume.restrict Ω)) :=
           le_add_of_nonneg_right hJ2_nonneg
 
-/-! ## The headline -/
-
 /-- **Fréchet-derivative `L²` bound by `wkpNorm 2 2`.** For a smooth function
 `u : EuclideanSpace ℝ (Fin d) → ℝ` with compact support strictly inside an
 open set `Ω`, the `L²` norm of `y ↦ ‖fderiv ℝ u y‖` (restricted to `Ω`) is
@@ -322,11 +305,9 @@ theorem chartTarget_fderiv_eLpNorm_le_wkpNorm_two
   classical
   have hq_one : (1 : ℝ≥0∞) ≤ 2 := by
     exact_mod_cast (by norm_num : (1 : ℕ) ≤ 2)
-  -- Step 1: bound the Fréchet-derivative `L²` norm by the sum of partial `L²` norms.
   have h_grad_le :=
     eLpNorm_norm_fderiv_le_sum_eLpNorm_partials (d := d)
       (q := (2 : ℝ≥0∞)) hq_one (μ := volume.restrict Ω) hu_smooth
-  -- Step 2: rewrite each partial `L²` norm using the classical-vs-weak agreement.
   have h_each_eq : ∀ i : Fin d,
       eLpNorm (fun y : EuclN => (fderiv ℝ u y) (EuclideanSpace.single i 1)) 2
         (volume.restrict Ω) =
@@ -343,13 +324,9 @@ theorem chartTarget_fderiv_eLpNorm_le_wkpNorm_two
           eLpNorm (chosenWeakPartial' (d := d) (2 : ℝ≥0∞) i u Ω) 2
             (volume.restrict Ω) :=
     Finset.sum_congr rfl (fun i _ => h_each_eq i)
-  -- Step 3: bound the sum of partial `L²` norms by `wkpNorm 2 2 u Ω`.
   have h_le_wkp :=
     sum_eLpNorm_chosenWeakPartial_le_wkpNorm_two (d := d) Ω u
-  -- Combine.
   exact h_grad_le.trans (le_of_eq h_step |>.trans h_le_wkp)
-
-/-! ## Sum of partial `L²` norms ≤ `wkpNorm 1 2` -/
 
 /-- The sum over coordinate directions of the `L²` norms of the chosen weak
 partials of `ψ` on an open set `Ω` is bounded by `wkpNorm 1 2 ψ Ω`. -/
@@ -360,7 +337,6 @@ private lemma sum_eLpNorm_chosenWeakPartial_le_wkpNorm_one_two
           (volume.restrict Ω)) ≤
       wkpNorm (d := d) 1 2 ψ Ω := by
   classical
-  -- Use the `wkpNorm_eq_sum` decomposition for `k = 1`, `p = 2`.
   have hWkpEq :
       wkpNorm (d := d) 1 2 ψ Ω =
         ∑ j ∈ Finset.range 2,
@@ -369,10 +345,8 @@ private lemma sum_eLpNorm_chosenWeakPartial_le_wkpNorm_one_two
               (volume.restrict Ω) := by
     have h := wkpNorm_eq_sum (d := d) 1 (2 : ℝ≥0∞) ψ Ω
     simpa using h
-  -- Identify the `j = 1` block of the sum as `∑ i, eLpNorm chosenWeakPartial`.
   have hJ1Block := wkpNorm_order_one_block_eq_sum_partials
     (d := d) (q := (2 : ℝ≥0∞)) ψ Ω
-  -- Expand `Finset.range 2 = {0, 1}`.
   have h_range2 :
       ∑ j ∈ Finset.range 2,
         ∑ β : Fin j → Fin d,
@@ -387,8 +361,6 @@ private lemma sum_eLpNorm_chosenWeakPartial_le_wkpNorm_one_two
     rw [show (2 : ℕ) = 1 + 1 from rfl, Finset.sum_range_succ,
         Finset.sum_range_one]
   rw [hWkpEq, h_range2, ← hJ1Block]
-  -- Goal: ∑_β (Fin 1 → Fin d) eLpNorm iterWeakPartial 2 1 β ≤
-  --         J0 + ∑_β (Fin 1 → Fin d) eLpNorm iterWeakPartial 2 1 β.
   have hJ0_nonneg :
       0 ≤ (∑ β : Fin 0 → Fin d,
           eLpNorm (iterWeakPartial (d := d) (2 : ℝ≥0∞) 0 β ψ Ω) 2
@@ -411,11 +383,9 @@ theorem chartTarget_fderiv_eLpNorm_le_wkpNorm_one_two
   classical
   have hq_one : (1 : ℝ≥0∞) ≤ 2 := by
     exact_mod_cast (by norm_num : (1 : ℕ) ≤ 2)
-  -- Step 1: bound the Fréchet-derivative `L²` norm by the sum of partial `L²` norms.
   have h_grad_le :=
     eLpNorm_norm_fderiv_le_sum_eLpNorm_partials (d := d)
       (q := (2 : ℝ≥0∞)) hq_one (μ := volume.restrict Ω) hu_smooth
-  -- Step 2: rewrite each partial `L²` norm using the classical-vs-weak agreement.
   have h_each_eq : ∀ i : Fin d,
       eLpNorm (fun y : EuclN => (fderiv ℝ u y) (EuclideanSpace.single i 1)) 2
         (volume.restrict Ω) =
@@ -432,10 +402,8 @@ theorem chartTarget_fderiv_eLpNorm_le_wkpNorm_one_two
           eLpNorm (chosenWeakPartial' (d := d) (2 : ℝ≥0∞) i u Ω) 2
             (volume.restrict Ω) :=
     Finset.sum_congr rfl (fun i _ => h_each_eq i)
-  -- Step 3: bound the sum of partial `L²` norms by `wkpNorm 1 2 u Ω`.
   have h_le_wkp :=
     sum_eLpNorm_chosenWeakPartial_le_wkpNorm_one_two (d := d) Ω u
-  -- Combine.
   exact h_grad_le.trans (le_of_eq h_step |>.trans h_le_wkp)
 
 end Euclidean

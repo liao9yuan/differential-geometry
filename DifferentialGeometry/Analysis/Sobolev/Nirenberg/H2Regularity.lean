@@ -36,8 +36,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Part A: the absorbed (uniform) Nirenberg estimate -/
-
 /-- **Uniform `L²` Nirenberg estimate** for the absorbed form of the master
 inequality. After moving the `(B.lam / 2) · I` term to the left in
 `nirenberg_master_inequality_after_young`, dividing by `B.lam / 2 > 0`
@@ -102,8 +100,6 @@ theorem uniform_nirenberg_estimate
   rw [h_assoc] at h_mul
   rw [← hC_def] at h_mul
   exact h_mul
-
-/-! ## Auxiliary lemmas for `H²` regularity -/
 
 omit [NeZero d] in
 /-- The classical second partial derivative of a smooth function `u` is
@@ -190,9 +186,6 @@ private lemma memLp_two_continuous_compact_closure
   rw [Real.norm_eq_abs]
   exact h.trans (le_max_left _ _)
 
-/-! ## Part B: Existence of weak second partial derivatives,
-with quantitative bound -/
-
 /-- **Interior `H²` regularity for smooth weak solutions.**
 
 For each pair `(i, k) : Fin d × Fin d`, the function `∂_i u : E → ℝ` admits
@@ -232,11 +225,8 @@ theorem h2_loc_smooth_solution
               ∫ x in Ω', (u x)^2 ∂(volume : Measure E) +
               ∫ x in Ω', (f x)^2 ∂(volume : Measure E)) := by
   classical
-  -- Step 1: Geometric setup, independent of the solution data and the
-  -- direction pair. `K := closure Ω''`.
   set K : Set E := closure Ω'' with hK_def
   have hK_compact : IsCompact K := hΩ''_compact_closure
-  -- η : ≡ 1 on K, supp η ⊆ thickening (3/4) K.
   have h_K_in_thick34 : K ⊆ Metric.thickening (3/4) K :=
     Metric.self_subset_thickening (by norm_num) K
   have h_thick34_open : IsOpen (Metric.thickening (3/4 : ℝ) K) :=
@@ -246,7 +236,6 @@ theorem h2_loc_smooth_solution
     SmoothEllipticBilinearForm.exists_cutoff_with_fderiv_bound (d := d)
       (K := K) (Ω' := Metric.thickening (3/4) K)
       hK_compact h_thick34_open h_K_in_thick34
-  -- Define Ω' := thickening 2 K (open). closure Ω' ⊆ cthickening 2 K ⊆ Ω.
   set Ω' : Set E := Metric.thickening 2 K with hΩ'_def
   have hΩ'_open : IsOpen Ω' := Metric.isOpen_thickening
   have hΩ'_K_subset : K ⊆ Ω' := by
@@ -260,7 +249,6 @@ theorem h2_loc_smooth_solution
   have hΩ'_closure_compact : IsCompact (closure Ω') :=
     hK_compact.cthickening (r := 2) |>.of_isClosed_subset isClosed_closure
       hΩ'_closure_in_cthickening
-  -- Verify tsupport η ⊆ Ω' and cthickening 1 (tsupport η) ⊆ Ω' for |h| ≤ 1.
   have hη_tsupport_in_thick34 : tsupport η ⊆ Metric.cthickening (3/4) K :=
     hη_tsupport_in.trans (Metric.thickening_subset_cthickening _ _)
   have hη_tsupport_in_Ω' : tsupport η ⊆ Ω' := by
@@ -272,12 +260,8 @@ theorem h2_loc_smooth_solution
     refine subset_trans (Metric.cthickening_mono hh_le _) ?_
     refine subset_trans (Metric.cthickening_subset_of_subset 1 hη_tsupport_in_thick34) ?_
     refine subset_trans (Metric.cthickening_cthickening_subset (by norm_num) (by norm_num) K) ?_
-    -- cthickening (1 + 3/4) K ⊆ thickening 2 K = Ω'.
     rw [hΩ'_def]
     exact Metric.cthickening_subset_thickening' (by norm_num) (by norm_num) K
-  -- Step 2: For every direction `k'`, the uniform Nirenberg estimate produces a
-  -- constant that does not depend on the solution data `(u, f)`. Assemble these
-  -- finitely many constants into a single one valid for every direction.
   have h_unif : ∀ k' : Fin d, ∃ C : ℝ, 0 ≤ C ∧
       ∀ {u f : E → ℝ}, B.IsSmoothWeakSolution u f →
         (∀ {Ω' : Set E}, IsCompact (closure Ω') →
@@ -297,8 +281,6 @@ theorem h2_loc_smooth_solution
       hη_range hN_nn h_fderiv_eta hΩ'_open hΩ'_closure_in_Ω hΩ'_closure_compact
       hη_tsupport_in_Ω' (R₀ := 1) hh_supp_in_Ω' k'
   choose Cfun hCfun_nn hCfun using h_unif
-  -- The single constant: the sum over all directions. It dominates each
-  -- per-direction constant and is nonnegative.
   set C : ℝ := ∑ k' : Fin d, Cfun k' with hC_def
   have hC_nn : 0 ≤ C := by
     rw [hC_def]
@@ -310,7 +292,6 @@ theorem h2_loc_smooth_solution
       (fun k' _ => hCfun_nn k') (Finset.mem_univ k')
   refine ⟨C, hC_nn, ?_⟩
   intro u f h_weak hf_l2_loc i k
-  -- The classical k-partial of ∂_i u serves as the weak partial.
   have hu : ContDiff ℝ (⊤ : ℕ∞) u := h_weak.1
   set g : E → ℝ := fun y =>
     (fderiv ℝ
@@ -320,30 +301,17 @@ theorem h2_loc_smooth_solution
       DeGiorgi.HasWeakPartialDeriv (d := d) k g
         (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single i 1)) Ω'' :=
     weak_kdi_partial_of_smooth (d := d) hu hΩ'' i k
-  -- g is smooth.
   have hg_smooth : ContDiff ℝ (⊤ : ℕ∞) g := contDiff_kdi_partial (d := d) hu i k
   have hg_cont : Continuous g := hg_smooth.continuous
-  -- g ∈ L²(volume.restrict Ω'') via continuity + compact closure.
   have hg_memLp : MemLp g 2 (volume.restrict Ω'') :=
     memLp_two_continuous_compact_closure (d := d) hg_cont hΩ''
       hΩ''_compact_closure
-  -- The per-direction uniform Nirenberg estimate, specialised to `(u, f)`.
-  -- Abbreviate the per-direction constant; it is dominated by `C`.
   set C₀ : ℝ := Cfun k with hC₀_def
   have hC₀_nn : 0 ≤ C₀ := hCfun_nn k
   have hC₀_le_C : C₀ ≤ C := hCfun_le_C k
-  -- Provide the existential output.
   refine ⟨g, hg_memLp, h_weak_partial, Ω', hΩ'_open, ?_, hΩ'_closure_in_Ω,
     hΩ'_closure_compact, ?_⟩
-  · -- closure Ω'' ⊆ Ω'.
-    -- We have hΩ'_K_subset : K ⊆ Ω' and K := closure Ω'' (by definition).
-    exact hΩ'_K_subset
-  -- Construct the bound via Fatou.
-  -- Plan: ∫_{Ω''} g² ≤ ∫ η² · ∑_j (∂_k ∂_j u)² (since η ≡ 1 on K ⊇ Ω'')
-  -- = limit_{h→0} ∫ η² · ∑_j (D_h^k ∂_j u)²  (DCT or similar)
-  -- ≤ liminf_n  via Fatou (lower semicontinuity)
-  -- ≤ C₀ · RHS_real (uniformly).
-  -- Use sequence h_n = 1/(n+1).
+  · exact hΩ'_K_subset
   have h_seq : ∀ n : ℕ, (1 : ℝ) / (n + 1) ≠ 0 := by
     intro n
     refine div_ne_zero one_ne_zero ?_
@@ -358,10 +326,8 @@ theorem h2_loc_smooth_solution
     intro n
     rw [abs_of_pos (h_seq_pos n)]
     exact h_seq_le_one n
-  -- Tendsto h_n → 0.
   have h_seq_tendsto : Tendsto (fun n : ℕ => (1 : ℝ) / (n + 1)) atTop (𝓝 0) :=
     tendsto_one_div_add_atTop_nhds_zero_nat (𝕜 := ℝ)
-  -- Pointwise convergence of D_{h_n}^k ∂_i u to ∂_k ∂_i u for each i.
   have h_partial_C1 : ∀ j : Fin d, ContDiff ℝ 1
       (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single j 1)) := by
     intro j
@@ -372,7 +338,6 @@ theorem h2_loc_smooth_solution
       (ContinuousLinearMap.apply ℝ ℝ
         (EuclideanSpace.single j (1 : ℝ))).contDiff
     exact (h_apply_smooth.comp h_fderiv_smooth).of_le (by norm_cast)
-  -- For each j, x: D_h^k(∂_j u)(x) → (fderiv ℝ (∂_j u) x)(e_k) as h → 0.
   have h_diffQuot_tendsto : ∀ (j : Fin d) (x : E),
       Tendsto (fun n : ℕ =>
           DifferentialGeometry.Analysis.Sobolev.diffQuot k
@@ -393,10 +358,6 @@ theorem h2_loc_smooth_solution
       intro n
       exact h_seq n
     exact h_tendsto_h0.comp h_seq_in_punctured
-  -- For each x, define q_n(x) = ∑_j (D_{h_n}^k ∂_j u(x))² and q(x) = ∑_j (g_j(x))².
-  -- We have q_n(x) → q(x) pointwise.
-  -- Apply Fatou: ∫_{Ω''} q ≤ liminf ∫_{Ω''} q_n ≤ C₀ · RHS_real.
-  -- Then ∫_{Ω''} g² = ∫_{Ω''} (g_i)² ≤ ∫_{Ω''} ∑_j g_j² = ∫_{Ω''} q ≤ C₀ · RHS_real.
   have h_pointwise_converges : ∀ x : E,
       Tendsto (fun n : ℕ => ∑ j : Fin d,
           DifferentialGeometry.Analysis.Sobolev.diffQuot k ((1 : ℝ) / (n + 1))
@@ -410,27 +371,17 @@ theorem h2_loc_smooth_solution
     intro j _
     have h := h_diffQuot_tendsto j x
     exact h.pow 2
-  -- LintegralForm: ∫⁻ |g|ₑ² over Ω'' ≤ C₀ · RHS_real (in ENNReal).
-  -- Step 5a: Show ∫⁻ ‖q_n^{1/2}‖ₑ² over Ω'' ≤ ENNReal.ofReal (C₀ · RHS_real).
-  -- Hmm, q_n is sum of squares, so already nonneg. Use directly.
-  -- Actually: q_n ≥ 0, so (1_{Ω''} q_n) is measurable nonneg.
-  -- ∫⁻_{Ω''} (q_n) ≤ ∫⁻ η² · q_n ≤ ENNReal.ofReal (C₀ · RHS_real).
-  -- The inequality 1_{Ω''} ≤ η² holds because η ≡ 1 on Ω'' ⊆ K.
-  -- So 1_{Ω''} ≤ η² pointwise, hence (1_{Ω''}) · q_n ≤ η² · q_n.
-  -- Thus ∫⁻_{Ω''} q_n = ∫⁻ 1_{Ω''} · q_n ≤ ∫⁻ η² · q_n.
   set RHS_real : ℝ := ∫ x in Ω',
       ∑ j : Fin d, ((fderiv ℝ u x) (EuclideanSpace.single j 1))^2
     ∂(volume : Measure E) +
     ∫ x in Ω', (u x)^2 ∂(volume : Measure E) +
     ∫ x in Ω', (f x)^2 ∂(volume : Measure E) with hRHS_real_def
-  -- Show RHS_real ≥ 0.
   have hRHS_real_nn : 0 ≤ RHS_real := by
     rw [hRHS_real_def]
     refine add_nonneg (add_nonneg ?_ ?_) ?_
     · exact integral_nonneg (fun x => Finset.sum_nonneg (fun _ _ => sq_nonneg _))
     · exact integral_nonneg (fun x => sq_nonneg _)
     · exact integral_nonneg (fun x => sq_nonneg _)
-  -- For each n, the bound from Part A.
   have hC₀_n : ∀ n : ℕ, ∫ x, (η x)^2 *
       ∑ j : Fin d, DifferentialGeometry.Analysis.Sobolev.diffQuot k
         ((1 : ℝ) / (n + 1))
@@ -439,9 +390,6 @@ theorem h2_loc_smooth_solution
     intro n
     rw [hRHS_real_def]
     exact hCfun k h_weak hf_l2_loc (h_seq n) (h_seq_abs_le_one n)
-  -- Pointwise: 1_{Ω''}(x) ≤ η²(x) for all x ∈ E.
-  -- For x ∈ Ω''  ⊆ closure Ω'' = K, η(x) = 1. So η²(x) = 1 = 1_{Ω''}(x).
-  -- For x ∉ Ω'', 1_{Ω''}(x) = 0 ≤ η²(x).
   have h_indicator_le_eta_sq : ∀ x : E,
       (Ω''.indicator (fun _ => (1 : ℝ)) x) ≤ (η x)^2 := by
     intro x
@@ -453,7 +401,6 @@ theorem h2_loc_smooth_solution
       norm_num
     · rw [Set.indicator_of_notMem hx]
       exact sq_nonneg _
-  -- So ∫_{Ω''} q_n ≤ ∫ η² · q_n.
   have h_int_Ω''_le_int_eta_sq : ∀ n : ℕ,
       ∫ x in Ω'',
         ∑ j : Fin d, DifferentialGeometry.Analysis.Sobolev.diffQuot k
@@ -466,7 +413,6 @@ theorem h2_loc_smooth_solution
           (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single j 1)) x ^ 2
         ∂(volume : Measure E) := by
     intro n
-    -- ∫_{Ω''} f = ∫ 1_{Ω''} f. Then 1_{Ω''} ≤ η², so 1_{Ω''} f ≤ η² f (since f nonneg).
     have h_q_nn : ∀ x : E, 0 ≤ ∑ j : Fin d,
         DifferentialGeometry.Analysis.Sobolev.diffQuot k
           ((1 : ℝ) / (n + 1))
@@ -491,12 +437,7 @@ theorem h2_loc_smooth_solution
         exact h_q_nn x
       · rw [Set.indicator_of_notMem hx]
         exact le_refl 0
-    · -- η² · q_n is integrable.
-      -- The integral ∫ η² · q_n is bounded above by the Part A bound,
-      -- which is finite. So η² · q_n is integrable provided we know it.
-      -- η² is continuous compactly supported, q_n is continuous. Their product
-      -- has compact support in supp η. So integrable.
-      have h_eta_sq_cont : Continuous (fun x : E => (η x)^2) :=
+    · have h_eta_sq_cont : Continuous (fun x : E => (η x)^2) :=
         hη_smooth.continuous.pow 2
       have h_q_n_cont : Continuous (fun x : E => ∑ j : Fin d,
           DifferentialGeometry.Analysis.Sobolev.diffQuot k
@@ -539,12 +480,9 @@ theorem h2_loc_smooth_solution
     · refine Filter.Eventually.of_forall ?_
       intro x
       by_cases hx : x ∈ Ω''
-      · -- On Ω'', η = 1, so the indicator and η² · q_n agree.
-        have hx_in_K : x ∈ K := subset_closure hx
+      · have hx_in_K : x ∈ K := subset_closure hx
         have hηx : η x = 1 := hη_one_on_K x hx_in_K
         rw [Set.indicator_of_mem hx]
-        -- After indicator_of_mem: goal is (∑ j, ...) ≤ η² * (∑ j, ...).
-        -- Use η = 1 ⇒ η² = 1.
         have h1 : (η x) ^ 2 * (∑ j : Fin d,
             DifferentialGeometry.Analysis.Sobolev.diffQuot k ((1 : ℝ) / (n + 1))
               (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single j 1)) x ^ 2) =
@@ -555,7 +493,6 @@ theorem h2_loc_smooth_solution
         linarith [h1, h_q_nn x]
       · rw [Set.indicator_of_notMem hx]
         refine mul_nonneg (sq_nonneg _) (h_q_nn x)
-  -- Combine: ∫_{Ω''} q_n ≤ C₀ · RHS_real.
   have h_int_Ω''_q_n_bound : ∀ n : ℕ,
       ∫ x in Ω'',
         ∑ j : Fin d, DifferentialGeometry.Analysis.Sobolev.diffQuot k
@@ -563,10 +500,6 @@ theorem h2_loc_smooth_solution
           (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single j 1)) x ^ 2
         ∂(volume : Measure E) ≤ C₀ * RHS_real :=
     fun n => (h_int_Ω''_le_int_eta_sq n).trans (hC₀_n n)
-  -- Apply Fatou's lemma on Ω''.
-  -- Convert real integrals to lintegrals via ENNReal.ofReal.
-  -- ∫_{Ω''} q ≤ liminf ∫_{Ω''} q_n.
-  -- Define enorm versions.
   set q : E → ℝ := fun x => ∑ j : Fin d, ((fderiv ℝ
         (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single j 1)) x)
       (EuclideanSpace.single k 1))^2 with hq_def
@@ -579,25 +512,20 @@ theorem h2_loc_smooth_solution
     fun x => Finset.sum_nonneg (fun _ _ => sq_nonneg _)
   have hq_n_nn : ∀ n x, 0 ≤ q_n n x :=
     fun n x => Finset.sum_nonneg (fun _ _ => sq_nonneg _)
-  -- Pointwise convergence: q_n x → q x.
   have h_q_n_tendsto_q : ∀ x : E, Tendsto (fun n => q_n n x) atTop (𝓝 (q x)) := by
     intro x
     have h := h_pointwise_converges x
     rw [hq_n_def, hq_def]
     exact h
-  -- Define the lintegral versions.
-  -- ∫⁻_{Ω''} ENNReal.ofReal (q_n n x) ≤ ENNReal.ofReal (C₀ · RHS_real).
   have h_lint_q_n_bound : ∀ n : ℕ,
       ∫⁻ x in Ω'', ENNReal.ofReal (q_n n x) ∂(volume : Measure E) ≤
         ENNReal.ofReal (C₀ * RHS_real) := by
     intro n
     have h_int_le : ∫ x in Ω'', q_n n x ∂(volume : Measure E) ≤ C₀ * RHS_real :=
       h_int_Ω''_q_n_bound n
-    -- ∫⁻ ENNReal.ofReal q_n = ENNReal.ofReal (∫ q_n) when integrable & nonneg.
     have h_q_n_nn_ae : 0 ≤ᵐ[volume.restrict Ω''] q_n n :=
       Filter.Eventually.of_forall (hq_n_nn n)
     have h_q_n_int : Integrable (q_n n) (volume.restrict Ω'') := by
-      -- q_n is continuous, Ω'' has compact closure, so q_n is bounded on closure Ω''.
       have hq_n_cont : Continuous (q_n n) := by
         rw [hq_n_def]
         refine continuous_finset_sum Finset.univ ?_
@@ -618,7 +546,6 @@ theorem h2_loc_smooth_solution
           DifferentialGeometry.Analysis.Sobolev.continuous_diffQuot_of_continuous
             (d := d) k _ h_partial_smooth_j.continuous
         exact h_dq_cont.pow 2
-      -- IsFiniteMeasure (volume.restrict Ω'')
       have h_volume_lt_top : volume Ω'' < ⊤ :=
         lt_of_le_of_lt (measure_mono subset_closure)
           hΩ''_compact_closure.measure_lt_top
@@ -626,7 +553,6 @@ theorem h2_loc_smooth_solution
         refine ⟨?_⟩
         rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter]
         exact h_volume_lt_top
-      -- q_n is bounded on closure Ω'' (compact).
       obtain ⟨M, hM⟩ := hΩ''_compact_closure.bddAbove_image hq_n_cont.abs.continuousOn
       have h_q_n_bound : ∀ x ∈ closure Ω'', |q_n n x| ≤ max M 0 := by
         intro x hx
@@ -646,8 +572,6 @@ theorem h2_loc_smooth_solution
       ofReal_integral_eq_lintegral_ofReal h_q_n_int h_q_n_nn_ae |>.symm
     rw [h_int_eq]
     exact ENNReal.ofReal_le_ofReal h_int_le
-  -- Apply Fatou: ∫⁻_{Ω''} ENNReal.ofReal q ≤ liminf ∫⁻_{Ω''} ENNReal.ofReal q_n.
-  -- We need q_n's `ENNReal.ofReal` versions to be measurable. q_n is continuous → measurable.
   have hq_n_meas : ∀ n : ℕ, Measurable (fun x : E => ENNReal.ofReal (q_n n x)) := by
     intro n
     have hq_n_cont : Continuous (q_n n) := by
@@ -671,17 +595,14 @@ theorem h2_loc_smooth_solution
           (d := d) k _ h_partial_smooth_j.continuous
       exact h_dq_cont.pow 2
     exact ENNReal.measurable_ofReal.comp hq_n_cont.measurable
-  -- Pointwise: ENNReal.ofReal (q_n n x) → ENNReal.ofReal (q x).
   have h_ofReal_tendsto : ∀ x : E, Tendsto (fun n => ENNReal.ofReal (q_n n x))
       atTop (𝓝 (ENNReal.ofReal (q x))) := by
     intro x
     exact ENNReal.tendsto_ofReal (h_q_n_tendsto_q x)
-  -- liminf (fun n => ENNReal.ofReal (q_n n x)) = ENNReal.ofReal (q x).
   have h_liminf_eq : ∀ x : E,
       liminf (fun n => ENNReal.ofReal (q_n n x)) atTop = ENNReal.ofReal (q x) := by
     intro x
     exact (h_ofReal_tendsto x).liminf_eq
-  -- ∫⁻_{Ω''} ENNReal.ofReal (q x) = ∫⁻_{Ω''} liminf_n ENNReal.ofReal (q_n n x).
   have h_lint_q_eq_liminf :
       ∫⁻ x in Ω'', ENNReal.ofReal (q x) ∂(volume : Measure E) =
         ∫⁻ x in Ω'', liminf (fun n => ENNReal.ofReal (q_n n x)) atTop
@@ -690,27 +611,21 @@ theorem h2_loc_smooth_solution
     refine Filter.Eventually.of_forall ?_
     intro x
     exact (h_liminf_eq x).symm
-  -- Apply Fatou on Ω''.
   have h_fatou : ∫⁻ x in Ω'', liminf (fun n => ENNReal.ofReal (q_n n x)) atTop
         ∂(volume : Measure E) ≤
       liminf (fun n => ∫⁻ x in Ω'', ENNReal.ofReal (q_n n x)
           ∂(volume : Measure E)) atTop :=
     lintegral_liminf_le (fun n => hq_n_meas n)
-  -- The liminf of a sequence with constant upper bound K is ≤ K.
   have h_liminf_bound :
       liminf (fun n => ∫⁻ x in Ω'', ENNReal.ofReal (q_n n x)
           ∂(volume : Measure E)) atTop ≤ ENNReal.ofReal (C₀ * RHS_real) := by
     refine liminf_le_of_frequently_le' ?_
     exact Filter.Eventually.frequently
       (Filter.Eventually.of_forall h_lint_q_n_bound)
-  -- So ∫⁻_{Ω''} ENNReal.ofReal (q x) ≤ ENNReal.ofReal (C₀ · RHS_real).
   have h_lint_q_bound : ∫⁻ x in Ω'', ENNReal.ofReal (q x)
         ∂(volume : Measure E) ≤ ENNReal.ofReal (C₀ * RHS_real) := by
     rw [h_lint_q_eq_liminf]
     exact h_fatou.trans h_liminf_bound
-  -- Now relate to ∫_{Ω''} g².
-  -- We have q ≥ g² since g² ≤ ∑_j g_j² where g_i = g.
-  -- Specifically: g x = (the i-th term of q's summands).
   have h_g_sq_le_q : ∀ x : E, g x ^ 2 ≤ q x := by
     intro x
     rw [hq_def, hg_def]
@@ -720,7 +635,6 @@ theorem h2_loc_smooth_solution
         (EuclideanSpace.single k 1))^2) ?_ (Finset.mem_univ i)
     intro j _
     exact sq_nonneg _
-  -- ∫⁻_{Ω''} ENNReal.ofReal (g²) ≤ ∫⁻_{Ω''} ENNReal.ofReal q ≤ ENNReal.ofReal (C₀ · RHS_real).
   have h_lint_g_sq_le : ∫⁻ x in Ω'', ENNReal.ofReal (g x ^ 2)
         ∂(volume : Measure E) ≤ ENNReal.ofReal (C₀ * RHS_real) := by
     refine le_trans ?_ h_lint_q_bound
@@ -735,12 +649,8 @@ theorem h2_loc_smooth_solution
     refine Filter.Eventually.of_forall ?_
     intro x _
     exact ENNReal.ofReal_le_ofReal (h_g_sq_le_q x)
-  -- Convert to real integral form.
-  -- ∫_{Ω''} g² = ENNReal.toReal (∫⁻_{Ω''} ENNReal.ofReal (g²)) for nonneg integrable.
-  -- Actually we just need ∫_{Ω''} g² ≤ C₀ · RHS_real.
   have hg_sq_nn : ∀ x : E, 0 ≤ g x ^ 2 := fun x => sq_nonneg _
   have hg_sq_int : Integrable (fun x => g x ^ 2) (volume.restrict Ω'') := by
-    -- g is continuous, Ω'' has compact closure, so g² is bounded on closure Ω''.
     have h_g_sq_cont : Continuous (fun x : E => g x ^ 2) := hg_cont.pow 2
     have h_volume_lt_top : volume Ω'' < ⊤ :=
       lt_of_le_of_lt (measure_mono subset_closure)
@@ -768,13 +678,10 @@ theorem h2_loc_smooth_solution
         ∂(volume : Measure E) =
       ENNReal.ofReal (∫ x in Ω'', g x ^ 2 ∂(volume : Measure E)) :=
     ofReal_integral_eq_lintegral_ofReal hg_sq_int hg_sq_nn_ae |>.symm
-  -- Conclude: ENNReal.ofReal (∫_{Ω''} g²) ≤ ENNReal.ofReal (C₀ · RHS_real).
   rw [h_int_eq] at h_lint_g_sq_le
-  -- Convert ENNReal.ofReal a ≤ ENNReal.ofReal b → a ≤ b (for nonneg b).
   have hC₀_RHS_nn : 0 ≤ C₀ * RHS_real := mul_nonneg hC₀_nn hRHS_real_nn
   have h_int_le_C₀ : ∫ x in Ω'', g x ^ 2 ∂(volume : Measure E) ≤ C₀ * RHS_real :=
     (ENNReal.ofReal_le_ofReal_iff hC₀_RHS_nn).mp h_lint_g_sq_le
-  -- Upgrade the per-direction constant `C₀` to the global constant `C`.
   exact h_int_le_C₀.trans (mul_le_mul_of_nonneg_right hC₀_le_C hRHS_real_nn)
 
 end DifferentialGeometry.Analysis.Sobolev.NirenbergCrossBounds

@@ -106,8 +106,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace (EuclideanSpace ℝ (Fin n)) :=
   borel _
 private local instance : BorelSpace (EuclideanSpace ℝ (Fin n)) := ⟨rfl⟩
@@ -121,19 +119,6 @@ private abbrev I_half (n : ℕ) [NeZero n] :
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-! ## Vanishing of the boundary face sum for an interior-supported gradient
-
-A boundary-face-sum vanishing lemma generalising
-`green_first_with_boundary_face_sum_eq_zero_of_interior_support` to allow
-the multiplier `f` to be a *full* smooth scalar (no support restriction).
-The interior-support hypothesis on the section is what carries the
-proof; the multiplier's support plays no role in the divergence-theorem
-computation.
-
-The proof inlines the same `Y := smoothSmul f hf (∇h_section)` /
-divergence-theorem argument as
-`green_first_with_boundary_face_sum_eq_zero_of_interior_support`,
-omitting the unused `hf_int` premise. -/
 private theorem boundaryFaceSum_smoothSmul_grad_eq_zero_of_h_interior_support
     (g : SmoothRiemannianMetric (I_half n) M)
     {f h : M → ℝ}
@@ -150,9 +135,7 @@ private theorem boundaryFaceSum_smoothSmul_grad_eq_zero_of_h_interior_support
   set Y : Cₛ^∞⟮I_half n; EuclideanSpace ℝ (Fin n),
       (TangentSpace (I_half n) : M → Type _)⟯ :=
     smoothSmul (I := I_half n) f hf X with hY_def
-  -- `Y` has compact support (compact `M`).
   have hY_cs : HasCompactSupport Y := HasCompactSupport.of_compactSpace _
-  -- `Y` has interior support: inherited from `X`'s interior support.
   have hX_int : tsupport (X : ∀ x, TangentSpace (I_half n) x) ⊆
       (I_half n).interior M :=
     tsupport_grad_g_with_boundary_section_subset_interior
@@ -160,27 +143,15 @@ private theorem boundaryFaceSum_smoothSmul_grad_eq_zero_of_h_interior_support
   have hY_int : tsupport (Y : ∀ x, TangentSpace (I_half n) x) ⊆
       (I_half n).interior M :=
     tsupport_smoothSmul_subset_interior (I := I_half n) hf X hX_int
-  -- The integral of the with-boundary divergence of an interior-supported
-  -- compactly-supported smooth tangent section vanishes.
   have h_div_Y_zero :
       ∫ x, divergence_g_with_boundary (I := I_half n) g Y x
           ∂(riemannianVolumeMeasure (I := I_half n) (M := M) g) = 0 :=
     integral_divergence_with_boundary_eq_zero_of_hasCompactSupport_of_interior_support
       (I := I_half n) g Y hY_cs hY_int
-  -- The global Stokes theorem identifies this integral with the boundary
-  -- face sum.
   have h_stokes :=
     integral_divergence_with_boundary_eq_boundaryFaceSum (I := I_half n) g Y
   rw [h_div_Y_zero] at h_stokes
   exact h_stokes.symm
-
-/-! ## L² class of `(u - Δ_g_with_boundary u)` for full smooth scalars
-
-For a full smooth scalar `u : FullSmoothScalar g` whose underlying
-function has interior topological support, the function
-`x ↦ u.toFun x - Δ_g_with_boundary g u.smooth hu_int x` is continuous on
-`M` and supported in a compact subset of `M` (since `M` itself is
-compact); hence it lies in `MemLp 2`. -/
 
 /-- Continuity on a closed manifold-with-boundary of `u - Δ_g_with_boundary u`
 for a full smooth scalar `u` whose underlying function has interior
@@ -215,20 +186,6 @@ noncomputable def FullSmoothScalar.oneSubLapFullClassicalLp
     Lp ℝ 2 (riemannianVolumeMeasure (I := I_half n) (M := M) g) :=
   (u.oneSubLap_memLp_of_interior_support hu_int).toLp _
 
-/-! ## H¹ inner product on full smooth scalars expressed via `(1 - Δ_g)`
-
-For `u` with interior support and `v` a full smooth scalar, Green's
-first identity (with-boundary, full-test-multiplier form) combined with
-vanishing of the boundary face sum on an interior-supported gradient
-section yields
-$$
-\int g(\nabla u, \nabla v)\,d\mu_g
-   \;=\;
--\int v \cdot \Delta_g^{(\partial)}\,u\,d\mu_g.
-$$
-Adding `∫ u·v` on both sides recovers the H¹ inner product as an L²
-inner product against `(u - \Delta_g u)`. -/
-
 /-- The Green-identity computation for full smooth `v` against an
 interior-supported full smooth `u`:
 `fullSmoothScalarH1Inner u v = ∫ (u - Δ_g_with_boundary u) · v dμ_g`. -/
@@ -244,9 +201,6 @@ theorem fullSmoothScalarH1Inner_eq_integral_oneSubLap_mul_of_interior_support
   classical
   haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I_half n) (M := M) g) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I_half n) (M := M) g
-  -- Apply Green's first identity with `f := v.toFun` (full smooth)
-  -- and `h := u.toFun` (interior-supported). The boundary face sum on the
-  -- right-hand side vanishes thanks to the interior-supported gradient section.
   have h_green : ∫ x, g.inner x (gradFun (I := I_half n) g v.toFun x)
             (gradFun (I := I_half n) g u.toFun x)
           ∂(riemannianVolumeMeasure (I := I_half n) (M := M) g) +
@@ -257,14 +211,12 @@ theorem fullSmoothScalarH1Inner_eq_integral_oneSubLap_mul_of_interior_support
         (smoothSmul (I := I_half n) v.toFun v.smooth
           (grad_g_with_boundary_section (I := I_half n) g u.smooth hu_int)) :=
     green_first_with_boundary (I := I_half n) g v.smooth u.smooth hu_int
-  -- The boundary face sum vanishes: the gradient section is interior-supported.
   have h_face : boundaryFaceSum (I := I_half n) g
         (smoothSmul (I := I_half n) v.toFun v.smooth
           (grad_g_with_boundary_section (I := I_half n) g u.smooth hu_int)) = 0 :=
     boundaryFaceSum_smoothSmul_grad_eq_zero_of_h_interior_support
       (g := g) v.smooth u.smooth hu_int
   rw [h_face] at h_green
-  -- Symmetry of the metric: `∫ ⟨∇v, ∇u⟩ = ∫ ⟨∇u, ∇v⟩`.
   have h_symm : ∀ x : M,
       g.inner x (gradFun (I := I_half n) g v.toFun x)
         (gradFun (I := I_half n) g u.toFun x) =
@@ -280,7 +232,6 @@ theorem fullSmoothScalarH1Inner_eq_integral_oneSubLap_mul_of_interior_support
           ∂(riemannianVolumeMeasure (I := I_half n) (M := M) g) :=
     integral_congr_ae (Filter.Eventually.of_forall h_symm)
   rw [h_int_symm] at h_green
-  -- Hence `∫ ⟨∇u, ∇v⟩ = -∫ v · Δu`.
   have h_grad_eq :
       ∫ x, g.inner x (gradFun (I := I_half n) g u.toFun x)
             (gradFun (I := I_half n) g v.toFun x)
@@ -289,9 +240,7 @@ theorem fullSmoothScalarH1Inner_eq_integral_oneSubLap_mul_of_interior_support
               Δ_g_with_boundary (I := I_half n) g u.smooth hu_int x
             ∂(riemannianVolumeMeasure (I := I_half n) (M := M) g) := by
     linarith
-  -- Combine into the H¹ inner product.
   unfold fullSmoothScalarH1Inner
-  -- Continuity / integrability of the products needed below.
   have hΔu_cont : Continuous
       (Δ_g_with_boundary (I := I_half n) g u.smooth hu_int) :=
     Δ_g_with_boundary_continuous (I := I_half n) g u.smooth hu_int
@@ -307,7 +256,6 @@ theorem fullSmoothScalarH1Inner_eq_integral_oneSubLap_mul_of_interior_support
       (riemannianVolumeMeasure (I := I_half n) (M := M) g) :=
     (hv_cont.mul hΔu_cont).integrable_of_hasCompactSupport
       (HasCompactSupport.of_compactSpace _)
-  -- Pointwise: `(u - Δu) · v = u · v - v · Δu`.
   have hpt : ∀ x : M,
       (u.toFun x -
           Δ_g_with_boundary (I := I_half n) g u.smooth hu_int x) *
@@ -339,7 +287,6 @@ theorem fullSmoothScalarH1Inner_eq_lpInner_oneSubLap_of_interior_support
   rw [fullSmoothScalarH1Inner_eq_integral_oneSubLap_mul_of_interior_support
     (u := u) (v := v) hu_int]
   rw [MeasureTheory.L2.inner_def (𝕜 := ℝ)]
-  -- a.e.-rewrite the integrands.
   have hae_lhs :
       (u.oneSubLapFullClassicalLp hu_int :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I_half n) (M := M) g)) =ᵐ[
@@ -367,8 +314,6 @@ theorem fullSmoothScalarH1Inner_eq_lpInner_oneSubLap_of_interior_support
             Δ_g_with_boundary (I := I_half n) g u.smooth hu_int x)
       from RCLike.inner_apply _ _]
   ring
-
-/-! ## Variational identity at smooth lifts -/
 
 /-- Inner product on `H1ComplFullNeumann g` of two smooth lifts equals
 the smooth H¹ inner product. -/
@@ -411,8 +356,6 @@ theorem fullSmoothScalar_bilin_eq_lpFunctional_smooth_of_interior_support
     H1ComplFullNeumannToLp_smoothToH1ComplFullNeumann]
   exact real_inner_comm _ _
 
-/-! ## Density of `smoothToH1ComplFullNeumann` -/
-
 /-- The image of the smooth-inclusion is dense in the H¹ Hilbert
 completion. -/
 theorem denseRange_smoothToH1ComplFullNeumann
@@ -425,8 +368,6 @@ theorem denseRange_smoothToH1ComplFullNeumann
         UniformSpace.Completion (FullSmoothScalar g)) from
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.denseRange_coe
-
-/-! ## Smooth bridge -/
 
 /-- The bilinear form on the smooth lift of an interior-supported
 `u : FullSmoothScalar g` agrees with the L² functional of

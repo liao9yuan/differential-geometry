@@ -75,21 +75,12 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Laplacian
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## Pointwise spectral bound
-
-For `λ ≥ 0`, `t > 0` and `k ≥ 1`, the elementary inequality
-`λ^k · exp(-λ · t) ≤ (k/t)^k · exp(-k)` holds: writing `f(λ) = λ^k e^{-λt}`,
-`f` attains its global maximum on `[0, ∞)` at `λ = k/t`, with value
-`(k/t)^k e^{-k}`. -/
 
 /-- The constant `(k/t)^k · exp(-k)`, the global max of `λ ↦ λ^k e^{-λt}` on
 `[0, ∞)` for `k ≥ 1` and `t > 0`. -/
@@ -123,12 +114,10 @@ private lemma lambda_pow_mul_exp_le
     linarith
   have hk_real_pos : (0 : ℝ) < (k : ℝ) := by exact_mod_cast hk_pos
   have h_tk_pos : (0 : ℝ) < t / k := div_pos ht hk_real_pos
-  -- Step 1: `lam * exp(-(t/k) * lam) ≤ (k/t) * e^{-1}`.
   have h_aux : lam * Real.exp (-((t / (k : ℝ)) * lam)) ≤
       (k / t : ℝ) * Real.exp (-1) := by
     set s : ℝ := (t / k : ℝ) * lam with hs_def
     have hs_nn : 0 ≤ s := mul_nonneg h_tk_pos.le hlam
-    -- `s * exp(-s) ≤ exp(-1)` for s ≥ 0.
     have hs_bound : s * Real.exp (-s) ≤ Real.exp (-1) := by
       have h1 : s ≤ Real.exp (s - 1) := by
         have h := Real.add_one_le_exp (s - 1)
@@ -153,13 +142,11 @@ private lemma lambda_pow_mul_exp_le
         = (k / t : ℝ) * (s * Real.exp (-s)) := by ring
       _ ≤ (k / t : ℝ) * Real.exp (-1) :=
             mul_le_mul_of_nonneg_left hs_bound h_kt_nn
-  -- Step 2: take the k-th power.
   have h_lhs_nn : 0 ≤ lam * Real.exp (-((t / (k : ℝ)) * lam)) :=
     mul_nonneg hlam (Real.exp_pos _).le
   have h_pow_le : (lam * Real.exp (-((t / (k : ℝ)) * lam))) ^ k ≤
       ((k / t : ℝ) * Real.exp (-1)) ^ k :=
     pow_le_pow_left₀ h_lhs_nn h_aux k
-  -- Step 3: rewrite into the desired form.
   have h_lhs_eq : (lam * Real.exp (-((t / (k : ℝ)) * lam))) ^ k =
       lam ^ k * Real.exp (-(lam * t)) := by
     rw [mul_pow, ← Real.exp_nat_mul]
@@ -185,11 +172,6 @@ private lemma lambda_pow_mul_exp_sq_le
   have h_le : lam ^ k * Real.exp (-(lam * t)) ≤ heatPowerCoeffBound k t :=
     lambda_pow_mul_exp_le k ht hlam
   exact pow_le_pow_left₀ h_lhs_nn h_le 2
-
-/-! ## Square-summability of the heat-power-weighted basis coefficients
-
-For `t > 0` and every `k`, the family `λ_i^k · exp(-λ_i t) · ⟪b i, u⟫` has
-square-summable absolute values, controlled by the uniform bound. -/
 
 /-- For `0 < t` and every `k`, `(λ_i^k · exp(-λ_i t) · ⟪b i, u⟫)²` is
 summable. -/
@@ -281,8 +263,6 @@ private lemma summable_heatPowerTerm
   rw [h_map_eq] at h_summable_V
   exact h_summable_V
 
-/-! ## L² norm bound for the heat-power series -/
-
 /-- For `0 < t`, the squared L² norm of the heat-power series is bounded by
 `((k/t)^k · exp(-k))² · ‖u‖²`. -/
 private lemma norm_sq_heatPowerTerm_sum_le
@@ -295,7 +275,6 @@ private lemma norm_sq_heatPowerTerm_sum_le
           resolventHilbertEigenbasisSigma (I := I) (M := M) g i‖ ^ 2 ≤
       (heatPowerCoeffBound k t) ^ 2 * ‖u‖ ^ 2 := by
   set b := resolventHilbertEigenbasisSigma (I := I) (M := M) g
-  -- Reform.
   have h_summand_eq :
       (fun i : EigenIdx (I := I) (M := M) g =>
         ((EigenIdx.lambda (I := I) (M := M) i) ^ k *
@@ -312,7 +291,6 @@ private lemma norm_sq_heatPowerTerm_sum_le
         Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t) *
       ⟪b i, u⟫_ℝ
   have hC_nn : 0 ≤ heatPowerCoeffBound k t := heatPowerCoeffBound_nonneg k ht
-  -- Pointwise bound (f i)² ≤ C² ⟪b i, u⟫².
   have h_f_sq_le : ∀ i, (f i) ^ 2 ≤
       (heatPowerCoeffBound k t) ^ 2 * (⟪b i, u⟫_ℝ) ^ 2 := by
     intro i
@@ -350,7 +328,6 @@ private lemma norm_sq_heatPowerTerm_sum_le
   have h_norm_sq_eq := orthonormal_norm_sq_eq_tsum_sq (I := I) (M := M) g f h_summable_f_sq
   change ‖∑' i, f i • b i‖ ^ 2 ≤ _
   rw [h_norm_sq_eq]
-  -- Bound the sum.
   have h_dom : ∑' i : EigenIdx (I := I) (M := M) g, (f i) ^ 2 ≤
       (heatPowerCoeffBound k t) ^ 2 *
         ∑' i, (⟪b i, u⟫_ℝ) ^ 2 := by
@@ -390,8 +367,6 @@ private lemma norm_heatPowerTerm_sum_le
   rw [← h_rhs_sq] at h_sq
   have h_rhs_nn : 0 ≤ heatPowerCoeffBound k t * ‖u‖ := mul_nonneg hC_nn h_u_nn
   exact (abs_le_of_sq_le_sq' h_sq h_rhs_nn).2
-
-/-! ## Underlying linear map and CLM packaging -/
 
 /-- The underlying function of `heatPower g k t` for `0 < t`. -/
 private noncomputable def heatPowerFun
@@ -474,8 +449,6 @@ private lemma heatPowerFun_smul
   rw [h_sum_eq]
   exact (summable_heatPowerTerm (I := I) (M := M) g k ht u).tsum_const_smul c
 
-/-! ## The `heatPower` CLM -/
-
 /-- The spectral power `heatPower g k t = (-Δ_g)^k · e^{t Δ_g}` on
 `Lp ℝ 2 μ_g`.
 
@@ -488,9 +461,7 @@ noncomputable def heatPower
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) →L[ℝ]
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) := by
   by_cases hk : k = 0
-  · -- For k = 0: heatPower g 0 t = heatSemigroup g t.
-    exact heatSemigroup (I := I) (M := M) g t
-  -- For k ≥ 1: positive-time branch via the spectral series, else 0.
+  · exact heatSemigroup (I := I) (M := M) g t
   by_cases ht : 0 < t
   · refine LinearMap.mkContinuous
       { toFun := heatPowerFun (I := I) (M := M) g k t
@@ -501,15 +472,11 @@ noncomputable def heatPower
     exact norm_heatPowerTerm_sum_le (I := I) (M := M) g k ht u
   · exact 0
 
-/-! ## Identification at `k = 0` -/
-
 /-- `heatPower g 0 t = heatSemigroup g t` for every `t : ℝ`. -/
 theorem heatPower_zero (g : SmoothRiemannianMetric I M) (t : ℝ) :
     heatPower (I := I) (M := M) g 0 t = heatSemigroup (I := I) (M := M) g t := by
   unfold heatPower
   rw [dif_pos rfl]
-
-/-! ## Application formulas -/
 
 /-- For `k ≥ 1` and `t > 0`, `heatPower g k t u` is the explicit spectral
 series. -/
@@ -553,8 +520,6 @@ theorem heatPower_apply_of_pos
     intro i; rw [pow_zero, one_mul]
   · exact heatPower_apply_of_pos_one_le (I := I) (M := M) g hk_pos ht u
 
-/-! ## Operator-norm bound -/
-
 /-- For `k ≥ 1` and `0 < t`, `‖heatPower g k t‖ ≤ (k/t)^k · exp(-k)`. -/
 theorem heatPower_opNorm_le
     (g : SmoothRiemannianMetric I M) {k : ℕ} (hk : 1 ≤ k) {t : ℝ} (ht : 0 < t) :
@@ -565,8 +530,6 @@ theorem heatPower_opNorm_le
   rw [dif_neg hk_ne, dif_pos ht]
   have hC_nn : 0 ≤ heatPowerCoeffBound k t := heatPowerCoeffBound_nonneg k ht
   exact LinearMap.mkContinuous_norm_le _ hC_nn _
-
-/-! ## Action on basis vectors -/
 
 /-- For `0 < t`, `heatPower g k t (b i) = λ_i^k · exp(-λ_i t) • b i`. -/
 theorem heatPower_apply_basis_pos
@@ -611,8 +574,6 @@ theorem heatPower_apply_basis_pos
     funext j; exact h_summand_eq j
   rw [h_sum_eq]
   rw [tsum_ite_eq i]
-
-/-! ## Self-adjointness for `0 < t` -/
 
 /-- For `0 < t`, `heatPower g k t` is self-adjoint. -/
 theorem heatPower_isSelfAdjoint (g : SmoothRiemannianMetric I M) (k : ℕ)
@@ -716,8 +677,6 @@ theorem heatPower_isSelfAdjoint (g : SmoothRiemannianMetric I M) (k : ℕ)
     exact h_inner_hsum'.tsum_eq.symm
   rw [h_lhs, h_rhs]
 
-/-! ## Composition law -/
-
 /-- Right-composition: `heatPower g k t ∘L heatSemigroup g s =
 heatPower g k (t + s)`, valid for `0 < t` and `0 ≤ s`. -/
 theorem heatPower_comp_heatSemigroup
@@ -733,7 +692,6 @@ theorem heatPower_comp_heatSemigroup
   rw [ContinuousLinearMap.comp_apply,
       heatSemigroup_apply_of_nonneg (I := I) (M := M) g hs u,
       heatPower_apply_of_pos (I := I) (M := M) g k hts_pos]
-  -- Pull `heatPower g k t` inside the tsum.
   have h_summable_s := summable_heatTerm (I := I) (M := M) g hs u
   have h_pull :
       heatPower (I := I) (M := M) g k t
@@ -751,16 +709,12 @@ theorem heatPower_comp_heatSemigroup
   intro i
   rw [(heatPower (I := I) (M := M) g k t).map_smul,
       (heatPower (I := I) (M := M) g k t).map_smul]
-  -- heatPower g k t (b i) = λ^k * exp(-λ t) • b i.
   have h_basis_apply :
       heatPower (I := I) (M := M) g k t (b i) =
       ((EigenIdx.lambda (I := I) (M := M) i) ^ k *
           Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t)) • b i :=
     heatPower_apply_basis_pos (I := I) (M := M) g k ht i
   rw [h_basis_apply]
-  -- Goal: `exp(-λs) • ⟪b i, u⟫ • λ^k * exp(-λt) • b i =
-  --          (λ^k * exp(-λ(t+s)) * ⟪b i, u⟫) • b i`.
-  -- Combine all scalars on each side; then use `congr 1` and `ring` after exp_add.
   rw [show (Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * s) •
         (⟪b i, u⟫_ℝ • ((EigenIdx.lambda (I := I) (M := M) i) ^ k *
           Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t)) • b i)) =
@@ -802,7 +756,6 @@ theorem heatSemigroup_comp_heatPower
   rw [ContinuousLinearMap.comp_apply,
       heatPower_apply_of_pos (I := I) (M := M) g k ht u,
       heatPower_apply_of_pos (I := I) (M := M) g k hts_pos]
-  -- Pull `heatSemigroup g s` inside the tsum.
   have h_summable_t := summable_heatPowerTerm (I := I) (M := M) g k ht u
   have h_pull :
       heatSemigroup (I := I) (M := M) g s
@@ -822,7 +775,6 @@ theorem heatSemigroup_comp_heatPower
   intro i
   rw [(heatSemigroup (I := I) (M := M) g s).map_smul,
       (heatSemigroup (I := I) (M := M) g s).map_smul]
-  -- heatSemigroup g s (b i) = exp(-λ s) • b i.
   have h_basis_apply :
       heatSemigroup (I := I) (M := M) g s (b i) =
       Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * s) • b i := by
@@ -833,8 +785,6 @@ theorem heatSemigroup_comp_heatPower
     rw [h_eq] at hh
     exact hh
   rw [h_basis_apply]
-  -- Goal: `λ^k * exp(-λt) • ⟪b i, u⟫ • exp(-λs) • b i =
-  --         (λ^k * exp(-λ(t+s)) * ⟪b i, u⟫) • b i`.
   rw [show (((EigenIdx.lambda (I := I) (M := M) i) ^ k *
             Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t)) •
           (⟪b i, u⟫_ℝ • Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * s) •
@@ -862,14 +812,6 @@ theorem heatSemigroup_comp_heatPower
   rw [h_exp_add]
   ring
 
-/-! ## Time differentiability
-
-We prove that `s ↦ heatPower g k s` is differentiable at every `t > 0` in
-the operator-norm topology, with derivative `-heatPower g (k+1) t`. The
-key ingredient is a uniform Taylor remainder bound on the spectrum, which
-gives a Lipschitz-type estimate on the difference quotient, controlled by a
-finite spectral supremum. -/
-
 /-- Uniform spectral Taylor estimate: for `λ ≥ 0`, `0 < t`, `|h| ≤ t/2` and
 `k : ℕ`,
 `|λ^k · (exp(-λ(t+h)) - exp(-λ t)) - λ^k · (-λ h · exp(-λ t))| ≤ K · |h|²`
@@ -880,16 +822,6 @@ private lemma exp_neg_taylor_bound
     |lam ^ k * (Real.exp (-(lam * (t + h))) - Real.exp (-(lam * t)) +
         lam * h * Real.exp (-(lam * t)))| ≤
       heatPowerCoeffBound (k + 2) (t / 2) * h ^ 2 := by
-  -- Set s = -lam * h, so we want the Taylor remainder of `s ↦ exp(s)` at 0.
-  -- The identity:
-  --   exp(-lam (t+h)) - exp(-lam t) + lam h · exp(-lam t)
-  --     = exp(-lam t) · (exp(-lam h) - 1 + lam h)
-  -- And `|exp(s) - 1 - s| ≤ s² · exp |s|` for any real `s` (Mathlib).
-  -- Apply with `s = -lam h`, so `|exp(-lam h) - 1 + lam h| ≤ (lam h)² · exp(lam |h|)`.
-  -- The full bound is `lam^k · exp(-lam t) · (lam h)² · exp(lam |h|)`
-  --                = `lam^{k+2} · exp(-(lam (t - |h|))) · h²`.
-  -- For `|h| ≤ t/2`, `t - |h| ≥ t/2`, and `lam^{k+2} · exp(-lam · t/2) ≤
-  -- heatPowerCoeffBound (k+2) (t/2)` by `lambda_pow_mul_exp_le`.
   have h_factor :
       Real.exp (-(lam * (t + h))) - Real.exp (-(lam * t)) +
           lam * h * Real.exp (-(lam * t)) =
@@ -900,22 +832,16 @@ private lemma exp_neg_taylor_bound
       Real.exp_add]
     ring
   rw [h_factor]
-  -- Apply `Complex.norm_exp_sub_sum_le_norm_mul_exp` for `n = 2`.
-  -- It gives: `‖exp z - (1 + z)‖ ≤ ‖z‖² · exp ‖z‖` for complex z.
-  -- We translate to real via casting.
   have h_taylor : ∀ s : ℝ, |Real.exp s - 1 - s| ≤ s ^ 2 * Real.exp |s| := by
     intro s
     have hc :=
       Complex.norm_exp_sub_sum_le_norm_mul_exp (s : ℂ) 2
-    -- `∑_{m<2} z^m / m! = 1 + z`. Verify:
     have h_sum : ∑ m ∈ Finset.range 2, (s : ℂ) ^ m / (m.factorial : ℂ) =
         1 + (s : ℂ) := by
       simp [Finset.sum_range_succ, Nat.factorial]
     rw [h_sum] at hc
-    -- hc : ‖exp s - (1 + s)‖ ≤ ‖s‖² · exp ‖s‖
     have hc' : ‖Complex.exp (s : ℂ) - (1 + (s : ℂ))‖ ≤
         ‖(s : ℂ)‖ ^ 2 * Real.exp ‖(s : ℂ)‖ := hc
-    -- Convert to real.
     have h_eq : Complex.exp (s : ℂ) - (1 + (s : ℂ)) =
         ((Real.exp s - 1 - s : ℝ) : ℂ) := by
       have h_exp_real : Complex.exp (s : ℂ) = ((Real.exp s : ℝ) : ℂ) :=
@@ -942,9 +868,7 @@ private lemma exp_neg_taylor_bound
   have h_lam_h_abs : |lam * h| = lam * |h| := by
     rw [abs_mul, abs_of_nonneg hlam]
   rw [h_neg_sq, h_neg_abs, h_lam_h_abs] at h_step1
-  -- Step: bound the full expression.
   have h_exp_t_pos : 0 < Real.exp (-(lam * t)) := Real.exp_pos _
-  -- Main bound: |exp(-lam t) · ψ| ≤ exp(-lam t) · |ψ| ≤ exp(-lam t) · (lam h)² · exp(lam|h|).
   rw [show lam ^ k * (Real.exp (-(lam * t)) *
       (Real.exp (-(lam * h)) - 1 - (-(lam * h)))) =
       Real.exp (-(lam * t)) *
@@ -953,7 +877,6 @@ private lemma exp_neg_taylor_bound
   rw [abs_of_pos h_exp_t_pos]
   rw [abs_mul]
   rw [show |lam ^ k| = lam ^ k from abs_of_nonneg (pow_nonneg hlam k)]
-  -- Goal: `exp(-lam t) * (lam^k * |...|) ≤ heatPowerCoeffBound (k+2) (t/2) * h²`.
   have h_step2 :
       Real.exp (-(lam * t)) *
         (lam ^ k * |Real.exp (-(lam * h)) - 1 - (-(lam * h))|) ≤
@@ -962,16 +885,11 @@ private lemma exp_neg_taylor_bound
     apply mul_le_mul_of_nonneg_left _ h_exp_t_pos.le
     apply mul_le_mul_of_nonneg_left h_step1 (pow_nonneg hlam k)
   refine le_trans h_step2 ?_
-  -- Now: exp(-lam t) · lam^k · (lam h)² · exp(lam |h|)
-  --      = lam^{k+2} · h² · exp(lam |h| - lam t)
-  --      = lam^{k+2} · h² · exp(-lam (t - |h|)).
-  -- For |h| ≤ t/2: t - |h| ≥ t/2, so exp(-lam(t - |h|)) ≤ exp(-lam · t/2).
   have h_t_minus_h_pos : 0 < t - |h| := by
     have ht_half_pos : 0 < t / 2 := by linarith
     have : |h| ≤ t / 2 := hh
     linarith
   have h_t_minus_h_ge : t / 2 ≤ t - |h| := by linarith
-  -- Combine exp factors:
   have h_combine : Real.exp (-(lam * t)) *
       (lam ^ k * ((lam * h) ^ 2 * Real.exp (lam * |h|))) =
       lam ^ (k + 2) * h ^ 2 * Real.exp (-(lam * (t - |h|))) := by
@@ -981,7 +899,6 @@ private lemma exp_neg_taylor_bound
     rw [pow_add]
     ring
   rw [h_combine]
-  -- Now: lam^{k+2} · h² · exp(-lam(t-|h|)) ≤ heatPowerCoeffBound (k+2) (t/2) · h².
   have h_lam_pow_exp_le :
       lam ^ (k + 2) * Real.exp (-(lam * (t - |h|))) ≤
         lam ^ (k + 2) * Real.exp (-(lam * (t / 2))) := by
@@ -993,7 +910,6 @@ private lemma exp_neg_taylor_bound
       linarith
     exact this
   have h_h_sq_nn : 0 ≤ h ^ 2 := sq_nonneg _
-  -- Multiply by h².
   have h_step3 : lam ^ (k + 2) * h ^ 2 * Real.exp (-(lam * (t - |h|))) ≤
       lam ^ (k + 2) * Real.exp (-(lam * (t / 2))) * h ^ 2 := by
     have hp : lam ^ (k + 2) * h ^ 2 * Real.exp (-(lam * (t - |h|))) =
@@ -1001,7 +917,6 @@ private lemma exp_neg_taylor_bound
     rw [hp]
     exact mul_le_mul_of_nonneg_right h_lam_pow_exp_le h_h_sq_nn
   refine le_trans h_step3 ?_
-  -- Last step: lam^{k+2} · exp(-lam · t/2) ≤ heatPowerCoeffBound (k+2) (t/2).
   have h_t2_pos : 0 < t / 2 := by linarith
   have h_final :
       lam ^ (k + 2) * Real.exp (-(lam * (t / 2))) ≤
@@ -1022,21 +937,17 @@ private lemma norm_heatPower_taylor_remainder
         h • heatPower (I := I) (M := M) g (k + 1) t u‖ ≤
       heatPowerCoeffBound (k + 2) (t / 2) * h ^ 2 * ‖u‖ := by
   set b := resolventHilbertEigenbasisSigma (I := I) (M := M) g
-  -- Boundary: t > 0, t + h > 0 (since |h| ≤ t/2 < t).
   have h_th_pos : 0 < t + h := by
     have : -h ≤ t / 2 := by
       have := abs_le.mp hh
       linarith [this.1]
     linarith
-  -- Express each term as a tsum and combine.
   rw [heatPower_apply_of_pos (I := I) (M := M) g k h_th_pos u,
       heatPower_apply_of_pos (I := I) (M := M) g k ht u,
       heatPower_apply_of_pos (I := I) (M := M) g (k + 1) ht u]
-  -- Now everything is a tsum. Combine using HasSum subtraction/addition.
   have h_sum_th := summable_heatPowerTerm (I := I) (M := M) g k h_th_pos u
   have h_sum_t := summable_heatPowerTerm (I := I) (M := M) g k ht u
   have h_sum_t1 := summable_heatPowerTerm (I := I) (M := M) g (k + 1) ht u
-  -- Combined: ∑' (A i - B i + h • C i) = total
   set A : EigenIdx (I := I) (M := M) g →
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) := fun i =>
     ((EigenIdx.lambda (I := I) (M := M) i) ^ k *
@@ -1052,7 +963,6 @@ private lemma norm_heatPower_taylor_remainder
     ((EigenIdx.lambda (I := I) (M := M) i) ^ (k + 1) *
         Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t)) •
       ⟪b i, u⟫_ℝ • b i with hC_def
-  -- The combined HasSum:
   have h_hsum_combined :
       HasSum (fun i => A i - B i + h • C i)
         ((∑' i, A i) - (∑' i, B i) + h • (∑' i, C i)) := by
@@ -1060,10 +970,6 @@ private lemma norm_heatPower_taylor_remainder
     have hB := h_sum_t.hasSum
     have hC := h_sum_t1.hasSum
     exact (hA.sub hB).add (hC.const_smul h)
-  -- Combined summand: (A i - B i + h • C i) =
-  --   (λ^k · (exp(-λ(t+h)) - exp(-λt)) + h · λ^{k+1} · exp(-λt)) • ⟪b i, u⟫ • b i.
-  -- Note: A i - B i + h • C i = ψ_i • ⟪b i, u⟫ • b i where
-  --   ψ_i = λ^k · (exp(-λ(t+h)) - exp(-λt)) + h · λ^{k+1} · exp(-λt).
   set ψ : EigenIdx (I := I) (M := M) g → ℝ := fun i =>
     (EigenIdx.lambda (I := I) (M := M) i) ^ k *
         (Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * (t + h)) -
@@ -1074,7 +980,6 @@ private lemma norm_heatPower_taylor_remainder
       A i - B i + h • C i = ψ i • ⟪b i, u⟫_ℝ • b i := by
     intro i
     simp only [hA_def, hB_def, hC_def, hψ_def]
-    -- Convert h • (... • v) to (h * ...) • v.
     rw [show h • ((EigenIdx.lambda (I := I) (M := M) i) ^ (k + 1) *
             Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t)) •
             ⟪b i, u⟫_ℝ • b i =
@@ -1088,7 +993,6 @@ private lemma norm_heatPower_taylor_remainder
       (∑' i : EigenIdx (I := I) (M := M) g, (A i - B i + h • C i)) =
       ∑' i : EigenIdx (I := I) (M := M) g, ψ i • ⟪b i, u⟫_ℝ • b i :=
     tsum_congr h_combined_eq
-  -- The expression ∑' A - ∑' B + h • ∑' C equals ∑' (A - B + h • C):
   have h_combined_sum :
       (∑' i, A i) - (∑' i, B i) + h • (∑' i, C i) =
       ∑' i : EigenIdx (I := I) (M := M) g, ψ i • ⟪b i, u⟫_ℝ • b i := by
@@ -1097,11 +1001,6 @@ private lemma norm_heatPower_taylor_remainder
     exact h_combined_sum_eq
   rw [show ((∑' i, A i) : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
       - (∑' i, B i) + h • (∑' i, C i) = _ from h_combined_sum]
-  -- Now bound ‖∑' i, ψ i • ⟪b i, u⟫ • b i‖.
-  -- Key: ψ_i = λ^k · (exp(-λ(t+h)) - exp(-λt)) + h · λ^{k+1} · exp(-λt)
-  --        = -λ^k · (exp(-λ(t+h)) - exp(-λ t) + λ h · exp(-λ t))?
-  -- Actually: ψ_i = λ^k · [exp(-λ(t+h)) - exp(-λt) + λ h · exp(-λ t)].
-  -- And exp_neg_taylor_bound bounds |λ^k · ...| ≤ heatPowerCoeffBound (k+2) (t/2) · h².
   have h_psi_bound : ∀ i, |ψ i| ≤ heatPowerCoeffBound (k + 2) (t / 2) * h ^ 2 := by
     intro i
     simp only [hψ_def]
@@ -1109,12 +1008,9 @@ private lemma norm_heatPower_taylor_remainder
       lambda_nonneg (I := I) (M := M) i
     have h_taylor := exp_neg_taylor_bound
       (k := k) (t := t) ht (h := h) hh hlam
-    -- Convert `Real.exp (-x * y)` to `Real.exp (-(x * y))` (semantically equal).
     have h_paren_eq : ∀ x y : ℝ,
         Real.exp (-x * y) = Real.exp (-(x * y)) := by
       intro x y; congr 1; ring
-    -- Goal: |λ^k · (exp(-λ·(t+h)) - exp(-λ·t)) + h · λ^(k+1) · exp(-λ·t)| ≤ C·h².
-    -- Reform the LHS to match `h_taylor`.
     have h_lhs_eq :
         (EigenIdx.lambda (I := I) (M := M) i) ^ k *
             (Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * (t + h)) -
@@ -1132,24 +1028,17 @@ private lemma norm_heatPower_taylor_remainder
       ring
     rw [h_lhs_eq]
     exact h_taylor
-  -- Now we need to bound ‖∑' i, ψ_i • ⟪b i, u⟫ • b i‖ in L².
-  -- Observe that the Taylor remainder bound on |ψ_i| means ψ_i^2 is uniformly
-  -- bounded by (heatPowerCoeffBound (k+2) (t/2) * h²)².
-  -- Then by Parseval: ‖∑' ψ_i ⟪b i, u⟫ b_i‖² = ∑' (ψ_i ⟪b i, u⟫)²
-  --   ≤ (heatPowerCoeffBound (k+2) (t/2) * h²)² · ‖u‖².
   set Cψ : ℝ := heatPowerCoeffBound (k + 2) (t / 2) * h ^ 2 with hCψ_def
   have hCψ_nn : 0 ≤ Cψ := by
     simp only [hCψ_def]
     apply mul_nonneg
     · exact heatPowerCoeffBound_nonneg (k + 2) (by linarith : (0 : ℝ) < t / 2)
     · exact sq_nonneg _
-  -- Reform.
   have h_summand_eq :
       (fun i : EigenIdx (I := I) (M := M) g => ψ i • ⟪b i, u⟫_ℝ • b i) =
       (fun i => (ψ i * ⟪b i, u⟫_ℝ) • b i) := by
     funext i; rw [mul_smul]
   rw [h_summand_eq]
-  -- ψ_i^2 ≤ Cψ^2.
   have h_psi_sq_le : ∀ i, (ψ i) ^ 2 ≤ Cψ ^ 2 := by
     intro i
     have h_abs := h_psi_bound i
@@ -1159,7 +1048,6 @@ private lemma norm_heatPower_taylor_remainder
       rw [h_sq_eq]
       exact pow_le_pow_left₀ h_abs_nn h_abs 2
     exact h_sq_le
-  -- (ψ_i · ⟪b i, u⟫)² ≤ Cψ² · ⟪b i, u⟫².
   have h_f_sq_le : ∀ i, (ψ i * ⟪b i, u⟫_ℝ) ^ 2 ≤ Cψ ^ 2 * (⟪b i, u⟫_ℝ) ^ 2 := by
     intro i
     have h_inner_sq_nn : 0 ≤ (⟪b i, u⟫_ℝ) ^ 2 := sq_nonneg _
@@ -1167,18 +1055,15 @@ private lemma norm_heatPower_taylor_remainder
         = (ψ i) ^ 2 * (⟪b i, u⟫_ℝ) ^ 2 := by ring
       _ ≤ Cψ ^ 2 * (⟪b i, u⟫_ℝ) ^ 2 :=
             mul_le_mul_of_nonneg_right (h_psi_sq_le i) h_inner_sq_nn
-  -- Summability of (ψ_i ⟪b i, u⟫)².
   have h_summable_f_sq :
       Summable (fun i : EigenIdx (I := I) (M := M) g =>
         (ψ i * ⟪b i, u⟫_ℝ) ^ 2) := by
     refine Summable.of_nonneg_of_le ?_ h_f_sq_le
       ((summable_basis_coeff_sq (I := I) (M := M) g u).mul_left (Cψ ^ 2))
     intro i; positivity
-  -- Apply orthonormal_norm_sq_eq.
   have h_norm_sq_eq := orthonormal_norm_sq_eq_tsum_sq (I := I) (M := M) g
     (fun i => ψ i * ⟪b i, u⟫_ℝ) h_summable_f_sq
   change ‖∑' i, (ψ i * ⟪b i, u⟫_ℝ) • b i‖ ≤ Cψ * ‖u‖
-  -- Bound ‖...‖ ≤ Cψ · ‖u‖ via squared form.
   have h_norm_sq_le : ‖∑' i, (ψ i * ⟪b i, u⟫_ℝ) • b i‖ ^ 2 ≤
       Cψ ^ 2 * ‖u‖ ^ 2 := by
     rw [h_norm_sq_eq]
@@ -1194,14 +1079,11 @@ private lemma norm_heatPower_taylor_remainder
       exact h_step
     refine le_trans h_dom ?_
     rw [parseval_norm_sq (I := I) (M := M) g u]
-  -- Final bound.
   have h_lhs_nn : 0 ≤ ‖∑' i, (ψ i * ⟪b i, u⟫_ℝ) • b i‖ := norm_nonneg _
   have h_rhs_nn : 0 ≤ Cψ * ‖u‖ := mul_nonneg hCψ_nn (norm_nonneg _)
   have h_rhs_sq : (Cψ * ‖u‖) ^ 2 = Cψ ^ 2 * ‖u‖ ^ 2 := by ring
   rw [← h_rhs_sq] at h_norm_sq_le
   exact (abs_le_of_sq_le_sq' h_norm_sq_le h_rhs_nn).2
-
-/-! ## Operator-norm differentiability -/
 
 /-- For `0 < t`, `s ↦ heatPower g k s` has operator-norm derivative
 `-heatPower g (k+1) t` at `t`. -/
@@ -1209,17 +1091,7 @@ theorem hasDerivAt_heatPower
     (g : SmoothRiemannianMetric I M) (k : ℕ) {t : ℝ} (ht : 0 < t) :
     HasDerivAt (fun s : ℝ => heatPower (I := I) (M := M) g k s)
       (-heatPower (I := I) (M := M) g (k + 1) t) t := by
-  -- We use `hasDerivAt_iff_isLittleO`. The statement reduces to:
-  -- `(heatPower g k (t + h) - heatPower g k t - h • (-heatPower g (k+1) t)) / |h| → 0`
-  -- as `h → 0`.
-  -- Equivalently: there exists C such that for |h| ≤ t/2,
-  -- `‖heatPower g k (t+h) - heatPower g k t + h • heatPower g (k+1) t‖_op ≤ C · |h|²`.
-  -- This follows from `norm_heatPower_taylor_remainder` (operator-norm version).
-  --
-  -- Step 1: Translate to `HasDerivAt` via `hasDerivAt_iff_isLittleO_nhds_zero`.
   rw [hasDerivAt_iff_isLittleO_nhds_zero]
-  -- Goal: (fun h => heatPower (t + h) - heatPower t - h • (-heatPower (k+1) t))
-  --       =o[𝓝 0] fun h => h
   rw [Asymptotics.isLittleO_iff]
   intro ε hε
   have ht2_pos : (0 : ℝ) < t / 2 := by linarith
@@ -1241,7 +1113,6 @@ theorem hasDerivAt_heatPower
   have h_abs_lt_eC : |h| < ε / (C + 1) := by
     have := min_le_right (t / 2) (ε / (C + 1))
     linarith [hh]
-  -- The key estimate: bound the operator-norm of the remainder.
   have h_op_bound :
       ‖heatPower (I := I) (M := M) g k (t + h) -
           heatPower (I := I) (M := M) g k t -
@@ -1271,7 +1142,6 @@ theorem hasDerivAt_heatPower
     rw [show C * h ^ 2 * ‖u‖ =
         (heatPowerCoeffBound (k + 2) (t / 2) * h ^ 2) * ‖u‖ from rfl]
     exact h_taylor
-  -- Convert to the 'isLittleO' form with `≤ ε * ‖h‖`.
   refine le_trans h_op_bound ?_
   have h_h2_eq : h ^ 2 = |h| * |h| := by
     rw [sq]; rw [show h * h = |h| * |h| from by rw [← abs_mul]; rw [abs_mul_self]]
@@ -1294,14 +1164,11 @@ theorem hasDerivAt_heatSemigroup
     HasDerivAt (fun s : ℝ => heatSemigroup (I := I) (M := M) g s)
       (-heatPower (I := I) (M := M) g 1 t) t := by
   have h := hasDerivAt_heatPower (I := I) (M := M) g 0 ht
-  -- `heatPower g 0 s = heatSemigroup g s` for every s, so the function is the same.
   have h_funext : (fun s : ℝ => heatPower (I := I) (M := M) g 0 s) =
       (fun s : ℝ => heatSemigroup (I := I) (M := M) g s) := by
     funext s; exact heatPower_zero (I := I) (M := M) g s
   rw [h_funext] at h
   exact h
-
-/-! ## Iterated derivatives and `C^∞` on `(0, ∞)` -/
 
 /-- The `j`-th iterated derivative of `s ↦ heatSemigroup g s` at any `t > 0`
 in operator norm is `(-1)^j • heatPower g j t`. We state this directly in
@@ -1349,7 +1216,6 @@ theorem iteratedDerivWithin_heatSemigroup_Ioi
       iteratedDerivWithin j
           (fun s : ℝ => heatSemigroup (I := I) (M := M) g s) (Set.Ioi 0) t =
         (-1 : ℝ) ^ j • heatPower (I := I) (M := M) g j t := by
-  -- Induction on j. We use `iteratedDerivWithin_succ` style.
   intro j
   induction j with
   | zero =>
@@ -1358,19 +1224,9 @@ theorem iteratedDerivWithin_heatSemigroup_Ioi
     rw [heatPower_zero]
   | succ j ih =>
     intro t ht
-    -- iteratedDerivWithin (j+1) ... t = derivWithin (iteratedDerivWithin j ...) (Ioi 0) t.
-    -- Apply ih to identify the iterate.
-    -- We need to use the fact that `Set.Ioi 0` is `UniqueDiffOn` so iteratedDerivWithin
-    -- agrees with iteratedDeriv.
     have hOi_unique : UniqueDiffOn ℝ (Set.Ioi (0 : ℝ)) := uniqueDiffOn_Ioi 0
     have ht_mem : t ∈ Set.Ioi (0 : ℝ) := ht
-    -- Apply iteratedDerivWithin_succ.
     rw [iteratedDerivWithin_succ]
-    -- iteratedDerivWithin j+1 = derivWithin (iteratedDerivWithin j) (Ioi 0).
-    -- We need the function `iteratedDerivWithin j ... (Ioi 0)` to be C¹ at t.
-    -- By induction, it equals `(-1)^j • heatPower g j s` on (Ioi 0).
-    -- So its derivative at t (restricted to Ioi 0) equals `(-1)^j • -heatPower g (j+1) t`.
-    -- Use `derivWithin_congr` after rewriting.
     have h_eq_on : Set.EqOn
         (iteratedDerivWithin j (fun s : ℝ =>
           heatSemigroup (I := I) (M := M) g s) (Set.Ioi 0))
@@ -1378,7 +1234,6 @@ theorem iteratedDerivWithin_heatSemigroup_Ioi
         (Set.Ioi 0) := by
       intro s hs
       exact ih hs
-    -- Use derivWithin_congr to substitute.
     have h_dw_eq :
         derivWithin (iteratedDerivWithin j
           (fun s : ℝ => heatSemigroup (I := I) (M := M) g s) (Set.Ioi 0))
@@ -1387,7 +1242,6 @@ theorem iteratedDerivWithin_heatSemigroup_Ioi
           heatPower (I := I) (M := M) g j s) (Set.Ioi 0) t :=
       derivWithin_congr h_eq_on (h_eq_on ht_mem)
     rw [h_dw_eq]
-    -- Now compute derivWithin of `s ↦ (-1)^j • heatPower g j s`.
     have hd : HasDerivAt
         (fun s : ℝ => (-1 : ℝ) ^ j • heatPower (I := I) (M := M) g j s)
         ((-1 : ℝ) ^ j • -heatPower (I := I) (M := M) g (j + 1) t) t := by
@@ -1402,7 +1256,6 @@ theorem iteratedDerivWithin_heatSemigroup_Ioi
     have h_unique : UniqueDiffWithinAt ℝ (Set.Ioi (0 : ℝ)) t :=
       hOi_unique t ht
     rw [hd_within.derivWithin h_unique]
-    -- Goal: (-1)^j • -heatPower g (j+1) t = (-1)^(j+1) • heatPower g (j+1) t.
     rw [pow_succ]
     rw [show (-1 : ℝ) ^ j * -1 = -((-1 : ℝ) ^ j) from by ring]
     rw [neg_smul, smul_neg]
@@ -1412,35 +1265,24 @@ theorem contDiffOn_heatPower_Ioi
     (g : SmoothRiemannianMetric I M) (k : ℕ) :
     ContDiffOn ℝ ∞ (fun s : ℝ => heatPower (I := I) (M := M) g k s)
       (Set.Ioi 0) := by
-  -- We show ContDiffOn n for all n, using induction on n via
-  -- `contDiffOn_succ_iff_derivWithin`.
   rw [contDiffOn_infty]
   intro n
-  -- Induction on n: build C^n via successive differentiations, each yielding -heatPower (k+1).
   induction n generalizing k with
   | zero =>
-    -- C^0 = continuous.
     change ContDiffOn ℝ 0 (fun s : ℝ => heatPower (I := I) (M := M) g k s)
       (Set.Ioi 0)
     rw [contDiffOn_zero]
     exact continuousOn_heatPower_Ioi (I := I) (M := M) g k
   | succ n ih =>
-    -- For natural-number `n`, `(↑n : WithTop ℕ∞)` is not `ω`, so the
-    -- analyticity conjunct in `contDiffOn_succ_iff_derivWithin` is vacuous.
     rw [show ((n + 1 : ℕ) : WithTop ℕ∞) = (n : WithTop ℕ∞) + 1 from by
         push_cast; rfl]
     rw [contDiffOn_succ_iff_derivWithin (uniqueDiffOn_Ioi 0)]
     refine ⟨?_, ?_, ?_⟩
-    · -- Differentiable on Ioi 0.
-      exact (differentiableOn_heatPower_Ioi (I := I) (M := M) g k)
+    · exact (differentiableOn_heatPower_Ioi (I := I) (M := M) g k)
     · intro h_omega
-      -- `(↑n : WithTop ℕ∞) ≠ ω`, contradiction.
       exfalso
       simp at h_omega
-    · -- The derivWithin is C^n. Since derivWithin (heatPower g k) (Ioi 0) s
-      -- equals -heatPower g (k+1) s on Ioi 0, and -heatPower g (k+1) s
-      -- is C^n on Ioi 0 by IH.
-      have h_deriv_eq : Set.EqOn
+    · have h_deriv_eq : Set.EqOn
           (derivWithin (fun s : ℝ => heatPower (I := I) (M := M) g k s)
             (Set.Ioi 0))
           (fun s : ℝ => -heatPower (I := I) (M := M) g (k + 1) s)
@@ -1455,7 +1297,6 @@ theorem contDiffOn_heatPower_Ioi
           hd.hasDerivWithinAt
         rw [hd_within.derivWithin ((uniqueDiffOn_Ioi 0) s hs)]
       apply ContDiffOn.congr _ h_deriv_eq
-      -- -heatPower g (k+1) s is C^n.
       have h_neg : (fun s : ℝ => -heatPower (I := I) (M := M) g (k + 1) s) =
           (fun s : ℝ => -1 • heatPower (I := I) (M := M) g (k + 1) s) := by
         funext s; rw [neg_one_smul]

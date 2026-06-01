@@ -58,13 +58,6 @@ theorem time_dependent_vf_pointwise_local_flow
             HasDerivWithinAt (flow y)
               ((X t ((chartAt H x₀).symm (I.symm (flow y t)))) : E)
               (Set.Icc (0 : ℝ) T) t) := by
-  -- Direct specialisation of the chart-α-local Picard theorem to the
-  -- single base point `x₀ : M`. The chart `chartAt H x₀` plays the role of
-  -- the `chartAt H α` in `time_dependent_vf_chart_local_picard_with_lipschitz`;
-  -- the continuity and chart-Lipschitz hypotheses transfer verbatim, and the
-  -- conclusion (a chart-coordinate flow `flow : E → ℝ → E` on a closed ball
-  -- around `(chartAt H x₀) x₀` with the chart-coordinate ODE) is precisely
-  -- the chart-α-local Picard output.
   obtain ⟨T, hT_pos, r', hr'_pos, flow, hflow⟩ :=
     time_dependent_vf_chart_local_picard_with_lipschitz X x₀ hCont hLip
   exact ⟨T, hT_pos, r', hr'_pos, flow, hflow⟩

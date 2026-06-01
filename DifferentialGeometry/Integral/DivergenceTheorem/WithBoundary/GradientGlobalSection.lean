@@ -84,14 +84,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Block A — chart-coefficient smoothness on the full chart source
-
-The within-partial `partialDerivWithin (extChartAt I α).target j (scalarOnE α f)`
-is `ContDiffOn ℝ ∞` on the full chart target `(extChartAt I α).target` (not
-merely on its interior). Composing with the chart map `extChartAt I α`, smooth
-on the chart source mapping into the target, gives smoothness of the
-chart-coefficient on the entire chart source. -/
-
 /-- The within-partial of the chart pullback, viewed as a manifold-smooth
 function `E → ℝ` on the chart target — including boundary points. -/
 private lemma partialDerivWithin_scalarOnE_contMDiffOn_target
@@ -141,9 +133,7 @@ lemma gradChartCoeffWithin_contMDiffOn_full
   classical
   refine contMDiffOn_finset_sum (fun j _ => ?_)
   refine ContMDiffOn.mul ?_ ?_
-  · -- `chartInvGramMatrix g α x i j` is smooth on the chart base set,
-    -- which equals the chart source.
-    have h1 : ContMDiffOn I 𝓘(ℝ) ∞
+  · have h1 : ContMDiffOn I 𝓘(ℝ) ∞
         (fun x => chartInvGramMatrix (I := I) g α x i j)
         (trivializationAt E (TangentSpace I) α).baseSet :=
       chartInvGramMatrix_entry_contMDiffOn (I := I) g α i j
@@ -151,10 +141,7 @@ lemma gradChartCoeffWithin_contMDiffOn_full
     intro x hx
     rw [trivializationAt_baseSet_eq_chartAt_source]
     exact hx
-  · -- The within-partial `partialDerivWithin (extChartAt I α).target j (scalarOnE α f)`
-    -- is `C^∞` on the **entire** chart target, then composed with `extChartAt I α`
-    -- (smooth on chart source mapping into target) to get smoothness on the chart source.
-    have hpartialM : ContMDiffOn 𝓘(ℝ, E) 𝓘(ℝ) ∞
+  · have hpartialM : ContMDiffOn 𝓘(ℝ, E) 𝓘(ℝ) ∞
         (partialDerivWithin (E := E) (extChartAt I α).target j
           (scalarOnE (I := I) α f))
         (extChartAt I α).target :=
@@ -166,8 +153,6 @@ lemma gradChartCoeffWithin_contMDiffOn_full
         (extChartAt I α : M → E) ⁻¹' (extChartAt I α).target :=
       chart_source_subset_preimage_target (I := I) α
     exact hpartialM.comp hchart hsubset
-
-/-! ## Block B — total-space smoothness of the chart-local representation -/
 
 /-- The chart-local within-representation `gradChartLocalWithin g α f`, viewed
 as a tangent-bundle total-space section, is `C^∞` on the **entire** chart
@@ -199,8 +184,6 @@ lemma gradChartLocalWithin_contMDiffOn_total_full
     intro i
     exact (hcoeff i).smul_section (hbasis i)
   exact ContMDiffOn.sum_section (fun i _ => hsmul i)
-
-/-! ## Block C — smoothness of the intrinsic gradient on every chart source -/
 
 /-- On the chart source `(chartAt H α).source`, the intrinsic gradient
 `gradFun g f` agrees pointwise with the chart-local within-formula
@@ -236,8 +219,6 @@ lemma gradFun_contMDiffOn_chart_source_full
     TotalSpace.mk' E y (gradChartLocalWithin (I := I) g α f y)
   rw [h]
 
-/-! ## Block D — global smoothness of the gradient as a tangent-bundle section -/
-
 /-- The intrinsic gradient `gradFun g f`, viewed as a tangent-bundle
 total-space section, is `C^∞` on **all of `M`** — including boundary points.
 The proof is local-to-global via `contMDiffOn_of_locally_contMDiffOn` applied
@@ -252,8 +233,6 @@ theorem gradFun_contMDiff_total_full
   intro x _
   refine ⟨(chartAt H x).source, (chartAt H x).open_source,
     mem_chart_source H x, ?_⟩
-  -- The intersection `univ ∩ (chartAt H x).source` simplifies to
-  -- `(chartAt H x).source`.
   have hsm := gradFun_contMDiffOn_chart_source_full
     (I := I) g x hf
   have hset_eq : univ ∩ (chartAt H x).source = (chartAt H x).source :=
@@ -265,14 +244,6 @@ end WithBoundary
 end DivergenceTheorem
 end Integral
 end DifferentialGeometry
-
-/-! ## Public theorems specialised to the half-space model
-
-The headline statements use the canonical Euclidean half-space model
-`modelWithCornersEuclideanHalfSpace n`, matching the closed-half-space H¹
-infrastructure. The underlying smoothness argument is general and works for
-any smooth-manifold model `I`; the half-space specialisation is purely a
-packaging choice that matches the downstream API. -/
 
 namespace DifferentialGeometry
 namespace Integral

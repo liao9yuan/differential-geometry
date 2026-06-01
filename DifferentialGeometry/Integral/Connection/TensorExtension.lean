@@ -90,16 +90,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## The (0,2)-tensor fibre bundle as a local instance
-
-The (0,2)-tensor fibre type `fun x : M ↦ TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ` is the
-iterated `Hom`-bundle. The corresponding `FiberBundle`, `VectorBundle`, and
-`ContMDiffVectorBundle` instances exist globally in Mathlib (via the generic `Hom`-bundle
-construction applied iteratively), but the `T%` macro for converting a section to its
-total-space embedding uses `getLocalInstances`, which only sees instances introduced via
-`[...]` arguments. We therefore register the required instances locally as `local` instances
-to make them findable by the macro within this section. -/
-
 /-- Local instance: the (0,2)-tensor bundle is a fibre bundle with model fibre
 `E →L[ℝ] E →L[ℝ] ℝ`. -/
 local instance tensor02FiberBundle :
@@ -119,11 +109,6 @@ local instance tensor02ContMDiffVectorBundle :
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) I :=
   inferInstance
 
-/-! ## A predicate for differentiability of (0,2)-tensor sections
-
-The Mathlib `T%` macro requires a local `FiberBundle` instance. We use the explicit
-total-space embedding throughout, packaged as the predicate `MDiffAtTensor02 T x` below. -/
-
 /-- The "(0,2)-tensor-bundle section is differentiable" predicate, in the explicit
 total-space-embedding form. -/
 def MDiffAtTensor02
@@ -131,16 +116,6 @@ def MDiffAtTensor02
   MDifferentiableAt I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ))
     (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
       (E := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) b (T b)) x
-
-/-! ## The auxiliary scalar functional `Φ(X, Y, Z)`
-
-For sections `X, Y, Z` of the tangent bundle, a (0,2)-tensor `T`, and a point `x`, we set
-$$
-  \Phi(X, Y, Z) := X\bigl(T(Y, Z)\bigr)(x) - T(x)\bigl(\nabla_X Y\,(x), Z(x)\bigr)
-    - T(x)\bigl(Y(x), \nabla_X Z\,(x)\bigr).
-$$
-When `T`, `Y`, `Z` are differentiable at `x`, the function `b ↦ T b (Y b) (Z b)` is a
-differentiable scalar function. The other terms are well-defined for any inputs. -/
 
 /-- The auxiliary scalar functional for the (0,2)-tensor connection. -/
 def tensor02Scalar
@@ -163,8 +138,6 @@ lemma tensor02Scalar_def
         - T x (cov Y x (X x)) (Z x)
         - T x (Y x) (cov Z x (X x)) := rfl
 
-/-! ## Differentiability of the bilinear pairing `b ↦ T b (Y b) (Z b)` -/
-
 /-- Differentiability of `b ↦ T b (Y b)` at `x` as a section of the cotangent bundle, from
 differentiability of `T` (as a (0,2)-tensor section) and `Y`. -/
 lemma mdifferentiableAt_tensor02_apply_one
@@ -174,7 +147,6 @@ lemma mdifferentiableAt_tensor02_apply_one
     MDifferentiableAt I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ))
       (fun b : M => TotalSpace.mk' (E →L[ℝ] ℝ)
         (E := fun x : M => TangentSpace I x →L[ℝ] ℝ) b (T b (Y b))) x := by
-  -- Apply `MDifferentiableAt.clm_bundle_apply` with target the cotangent bundle.
   exact MDifferentiableAt.clm_bundle_apply
     (E₁ := fun x : M => TangentSpace I x)
     (E₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
@@ -187,9 +159,7 @@ lemma mdifferentiableAt_tensor02_pairing
     {Y Z : Π x : M, TangentSpace I x} {x : M}
     (hT : MDiffAtTensor02 T x) (hY : MDiffAt (T% Y) x) (hZ : MDiffAt (T% Z) x) :
     MDifferentiableAt I 𝓘(ℝ, ℝ) (fun b : M => T b (Y b) (Z b)) x := by
-  -- Step 1: `b ↦ T b (Y b)` is a differentiable cotangent-bundle section at `x`.
   have h1 := mdifferentiableAt_tensor02_apply_one hT hY
-  -- Step 2: pair against `Z` to get a differentiable scalar (target is trivial bundle ℝ).
   have h2 : MDifferentiableAt I (I.prod 𝓘(ℝ, ℝ))
       (fun m => TotalSpace.mk' ℝ (E := fun _ : M => ℝ) m (T m (Y m) (Z m))) x :=
     MDifferentiableAt.clm_bundle_apply
@@ -199,11 +169,6 @@ lemma mdifferentiableAt_tensor02_pairing
       (ϕ := fun b => T b (Y b)) (v := fun b => Z b) h1 hZ
   rw [mdifferentiableAt_totalSpace] at h2
   exact h2.2
-
-/-! ## Tensoriality of `tensor02Scalar` in X, Y, Z
-
-For each of the three slots, the operation is `C^∞(M)`-linear at `x`. We prove these as
-`TensorialAt` instances. -/
 
 variable {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
 
@@ -223,7 +188,6 @@ lemma tensor02Scalar_tensorialAt_X
     unfold tensor02Scalar
     have hfX : (f • X) x = f x • X x := rfl
     rw [hfX]
-    -- Each piece: extDerivFun is linear in v, cov is linear in v, T is linear in each slot.
     rw [(extDerivFun (I := I) (fun b => T b (Y b) (Z b)) x).map_smul]
     rw [(cov.toFun Y x).map_smul, (cov.toFun Z x).map_smul]
     rw [(T x).map_smul, ContinuousLinearMap.smul_apply,
@@ -234,9 +198,7 @@ lemma tensor02Scalar_tensorialAt_X
     unfold tensor02Scalar
     have hXX' : (X + X') x = X x + X' x := rfl
     rw [hXX']
-    -- extDerivFun is linear; cov is linear (in v) so cov Y x (X x + X' x) = cov Y x (X x) + cov Y x (X' x).
     rw [map_add, (cov.toFun Y x).map_add, (cov.toFun Z x).map_add]
-    -- T x (a + b) = T x a + T x b
     rw [(T x).map_add, ContinuousLinearMap.add_apply,
         ContinuousLinearMap.map_add]
     abel
@@ -347,12 +309,10 @@ lemma tensor02Scalar_tensorialAt_Z
         ContinuousLinearMap.smulRight_apply]
     have h_gZ_x : (g • Z) x = g x • Z x := rfl
     rw [h_gZ_x]
-    -- (T x (Y x)) (a • _) -> a • (T x (Y x)) _
     rw [ContinuousLinearMap.map_smul, ContinuousLinearMap.map_add,
         ContinuousLinearMap.map_smul, (T x (Y x)).map_smul]
     have hhx : h x = T x (Y x) (Z x) := rfl
     rw [hhx]
-    -- Final scalar identity: distribute and reorganise.
     simp only [smul_eq_mul]
     ring
   add {Z Z'} hZ hZ' := by
@@ -386,16 +346,6 @@ lemma tensor02Scalar_tensorialAt_Z
     have h_ZZ' : (Z + Z') x = Z x + Z' x := rfl
     rw [h_ZZ', ContinuousLinearMap.map_add]
     abel
-
-/-! ## Per-point construction of the (0,2)-tensor connection's value
-
-For each `x : M` and each `T` differentiable at `x`, we build the value
-`tensor02CovAt cov T x : T_x M →L[ℝ] T_x M →L[ℝ] T_x M →L[ℝ] ℝ`.
-
-* The inner two slots `(Y, Z)` come from `TensorialAt.mkHom₂`, applied to `tensor02Scalar`
-  with `X` fixed (extended from a fibre vector).
-* The outer slot `X` is built by hand using `LinearMap.mk` and `toContinuousLinearMap`,
-  using the X-tensoriality lemma. -/
 
 /-- The (Y, Z)-bilinear value at `x` for a fixed extended X-vector. -/
 private noncomputable def tensor02BilinAt
@@ -438,22 +388,17 @@ private noncomputable def tensor02XSlot
   map_add' v v' := by
     classical
     ext y z
-    -- Build smooth extensions for `Y` and `Z`.
     set Y : Π x : M, TangentSpace I x := FiberBundle.extend E y
     set Z : Π x : M, TangentSpace I x := FiberBundle.extend E z
     have hY : MDiffAt (T% Y) x := mdifferentiableAt_extend ..
     have hZ : MDiffAt (T% Z) x := mdifferentiableAt_extend ..
     have hYx : Y x = y := FiberBundle.extend_apply_self E y
     have hZx : Z x = z := FiberBundle.extend_apply_self E z
-    -- Substitute y → Y x, z → Z x, and apply the bilinear add to peel off (Z x).
     rw [show y = Y x from hYx.symm, show z = Z x from hZx.symm]
-    -- The RHS expands via `add_apply` (twice) to a sum of scalars.
     rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply]
-    -- Rewrite each `tensor02BilinAt cov hT _ (Y x) (Z x)` by `tensor02Scalar`.
     rw [tensor02BilinAt_apply_extend cov hT (v + v') hY hZ,
         tensor02BilinAt_apply_extend cov hT v hY hZ,
         tensor02BilinAt_apply_extend cov hT v' hY hZ]
-    -- `extend (v + v') x = v + v'`, etc., by `FiberBundle.extend_apply_self`.
     have h1 : (FiberBundle.extend E (v + v') : Π x : M, TangentSpace I x) x = v + v' :=
       FiberBundle.extend_apply_self E (v + v')
     have h2 : (FiberBundle.extend E v : Π x : M, TangentSpace I x) x = v :=
@@ -526,7 +471,6 @@ lemma tensor02CovAt_apply_of_diff_extend
   classical
   rw [tensor02CovAt_apply_of_diff cov hT (X x)]
   rw [tensor02BilinAt_apply_extend cov hT (X x) hY hZ]
-  -- Both sides depend on the X-argument only via its value at `x`, by X-tensoriality.
   unfold tensor02Scalar
   have hext : (FiberBundle.extend E (X x) : Π x : M, TangentSpace I x) x = X x :=
     FiberBundle.extend_apply_self E (X x)
@@ -542,8 +486,6 @@ lemma tensor02CovAt_apply_of_diff_extend
   unfold tensor02CovAt
   rw [dif_neg hT]
 
-/-! ## The unbundled (0,2)-tensor covariant derivative -/
-
 /-- The (0,2)-tensor covariant derivative as an unbundled map of sections. -/
 def tensor02CovFun
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) :
@@ -556,8 +498,6 @@ def tensor02CovFun
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) (x : M) :
     tensor02CovFun cov T x = tensor02CovAt cov T x := rfl
-
-/-! ## Connection axioms (additivity in `T`, Leibniz over scalar multiplication) -/
 
 set_option maxHeartbeats 800000 in
 /-- The (0,2)-tensor covariant derivative satisfies `IsCovariantDerivativeOn _ Set.univ`. -/
@@ -600,7 +540,6 @@ lemma tensor02CovFun_isCovariantDerivativeOn
     rw [tensor02CovAt_apply_of_diff_extend cov hsum_T hX hY hZ,
         tensor02CovAt_apply_of_diff_extend cov hT_t hX hY hZ,
         tensor02CovAt_apply_of_diff_extend cov hT'_t hX hY hZ]
-    -- Show `tensor02Scalar (T + T') = tensor02Scalar T + tensor02Scalar T'`.
     change extDerivFun (I := I) (fun b => (T + T') b (Y b) (Z b)) x (X x)
         - (T + T') x (cov.toFun Y x (X x)) (Z x)
         - (T + T') x (Y x) (cov.toFun Z x (X x)) =
@@ -659,16 +598,12 @@ lemma tensor02CovFun_isCovariantDerivativeOn
         show z = Z x from hZx.symm]
     rw [tensor02CovFun_apply, tensor02CovFun_apply]
     rw [tensor02CovAt_apply_of_diff_extend cov hsum_T hX hY hZ]
-    -- RHS unfolds to `g x • tensor02CovAt cov T x + (extDerivFun g x).smulRight (T x)` applied
-    -- to `(X x) (Y x) (Z x)`.
     rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
         ContinuousLinearMap.smulRight_apply,
         ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
         ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
         ContinuousLinearMap.smul_apply]
     rw [tensor02CovAt_apply_of_diff_extend cov hT_t hX hY hZ]
-    -- Show: `tensor02Scalar cov (g • T) x X Y Z =
-    --        g x • tensor02Scalar cov T x X Y Z + (extDerivFun g x (X x)) • T x (Y x) (Z x)`.
     change extDerivFun (I := I) (fun b => (g • T) b (Y b) (Z b)) x (X x)
         - (g • T) x (cov.toFun Y x (X x)) (Z x)
         - (g • T) x (Y x) (cov.toFun Z x (X x)) =
@@ -699,8 +634,6 @@ lemma tensor02CovFun_isCovariantDerivativeOn
     rw [hhx]
     simp only [smul_eq_mul]
     ring
-
-/-! ## The bundled (0,2)-tensor covariant derivative -/
 
 /-- The **(0,2)-tensor covariant derivative** induced by a tangent-bundle covariant
 derivative, as a bundled `CovariantDerivative I (E →L[ℝ] E →L[ℝ] ℝ)` on the (0,2)-tensor
@@ -740,48 +673,7 @@ theorem tensor02Cov_pairing
   unfold tensor02Scalar
   ring
 
-/-! ## Smoothness of the (0,2)-tensor covariant derivative — *deferred*
-
-The expected smoothness statement is:
-```
-instance tensor02Cov_isContMDiff
-    (cov : CovariantDerivative I E (TangentSpace I))
-    [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞] :
-    CovariantDerivative.ContMDiffCovariantDerivative (tensor02Cov cov) ∞
-```
-i.e. the induced (0,2)-tensor covariant derivative inherits `C^∞` smoothness from `cov`.
-
-The proof structure is identical to the cotangent case (`cotangentCov_isContMDiff`):
-
-1. Reduce smoothness of the operator section `x ↦ ⟨x, (tensor02Cov cov T) x⟩` of
-   `Hom(TM, T*M ⊗ T*M)` to: for every smooth tangent section `Y`, the section
-   `x ↦ ⟨x, (tensor02Cov cov T x)(Y x)⟩` of `T*M ⊗ T*M` is smooth.
-2. Iterate: for every smooth `Z`, the section `x ↦ ⟨x, (tensor02Cov cov T x)(Y x)(Z x)⟩` of
-   `T*M` is smooth. And once more: for every smooth `W` (degenerate, since the value is
-   already a scalar), the scalar `x ↦ ((tensor02Cov cov T x)(Y x))(Z x)` is smooth.
-3. Express the scalar via `tensor02Scalar`, then verify smoothness of each of the three
-   summands using `clm_bundle_apply` to combine smooth (0,2)/cotangent sections with smooth
-   tangent sections, and `mfderiv_const` for `extDerivFun` of a smooth scalar.
-
-The "operator-to-bundle-section" bridge (the inner-loop step "every smooth Y gives a smooth
-T*M section ⇒ Hom-bundle section is smooth") and the smoothness of `extDerivFun` of a smooth
-scalar are both proven privately inside `CotangentExtension.lean` for the cotangent case
-(see `cotangentCov_clmSection_smooth_aux` and `cotangentCov_extDerivFun_smooth` therein).
-Reproducing those bridge lemmas in this file (or refactoring them out of `CotangentExtension`
-into a shared module) is straightforward but adds substantial length.
-
-We therefore defer the smoothness instance to a follow-up file. The mathematical content of
-this file (definition, connection axioms, defining identity, `∇g = 0` corollary, abstract
-Hessian) is independent of the smoothness instance and stands on its own. -/
-
-/-! ### Section ContMDiff for SigmaCompact + T2 manifolds -/
-
 variable [SigmaCompactSpace M] [T2Space M]
-
-/-! ## The metric as a (0,2)-tensor section, and `∇g = 0`
-
-We package the smooth Riemannian metric `g` as a smooth global section of the (0,2)-tensor
-bundle and verify that the Levi-Civita connection annihilates it. -/
 
 variable [BoundarylessManifold I M]
 
@@ -799,7 +691,6 @@ def metricTensor02 (g : SmoothRiemannianMetric I M) :
 lemma metricTensor02_mdiff
     (g : SmoothRiemannianMetric I M) (x : M) :
     MDiffAtTensor02 (metricTensor02 (I := I) g) x := by
-  -- `g.contMDiff` provides smoothness of `b ↦ ⟨b, g.inner b⟩` as a (0,2)-section.
   have hg : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun (x : M) => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) b
@@ -812,7 +703,6 @@ theorem tensor02Cov_metric_zero
     (g : SmoothRiemannianMetric I M) (x : M) (v y z : TangentSpace I x) :
     ((tensor02Cov (LeviCivita (I := I) g)).toFun (metricTensor02 (I := I) g) x v) y z = 0 := by
   classical
-  -- Build smooth extensions of y, z.
   set Y : Π x : M, TangentSpace I x := FiberBundle.extend E y
   set Z : Π x : M, TangentSpace I x := FiberBundle.extend E z
   have hY : MDiffAt (T% Y) x := mdifferentiableAt_extend ..
@@ -820,47 +710,26 @@ theorem tensor02Cov_metric_zero
   have hYx : Y x = y := by simp [Y]
   have hZx : Z x = z := by simp [Z]
   rw [show y = Y x from hYx.symm, show z = Z x from hZx.symm]
-  -- Apply the defining identity, then identify with metric compatibility.
   have hT : MDiffAtTensor02 (metricTensor02 (I := I) g) x :=
     metricTensor02_mdiff (I := I) g x
   have hpair :=
     tensor02Cov_pairing (LeviCivita (I := I) g) hT hY hZ v
-  -- The LHS equation: `extDerivFun (b ↦ metricTensor02 g b (Y b) (Z b)) x v = ...`.
-  -- Substitute `metricTensor02 g b = g.inner b`.
   have hpair_eq : (fun b : M => (metricTensor02 (I := I) g) b (Y b) (Z b)) =
       (fun b : M => g.inner b (Y b) (Z b)) := by
     funext b; rfl
   rw [hpair_eq] at hpair
-  -- Apply metric compatibility of the Levi-Civita connection.
   have hMC :=
     (LeviCivita_isMetricCompatible (I := I) g) hY hZ (Set.mem_univ x) v
-  -- `extDerivFun = mfderiv` for ℝ-valued functions (the cast is the identity).
   have hext_eq : extDerivFun (I := I) (fun b => g.inner b (Y b) (Z b)) x v =
       (mfderiv I 𝓘(ℝ) (fun b : M => g.inner b (Y b) (Z b)) x) v := rfl
   rw [hext_eq] at hpair
-  -- Identify the trailing two terms in `hpair` with the two terms in `hMC`.
   have h_match_one : (metricTensor02 (I := I) g) x ((LeviCivita (I := I) g).toFun Y x v) (Z x) =
       g.inner x ((LeviCivita (I := I) g).toFun Y x v) (Z x) := rfl
   have h_match_two : (metricTensor02 (I := I) g) x (Y x) ((LeviCivita (I := I) g).toFun Z x v) =
       g.inner x (Y x) ((LeviCivita (I := I) g).toFun Z x v) := rfl
   rw [h_match_one, h_match_two] at hpair
-  -- Now both `hpair` and `hMC` express the same scalar in two ways. Subtract.
   have heq := hpair.symm.trans hMC
-  -- `heq : A + B + C = B + C`, so `A = 0`.
   linear_combination heq
-
-/-! ## The abstract Hessian as `∇²f`
-
-For a smooth scalar `f : M → ℝ`, the abstract Hessian is the (0,2)-tensor obtained by applying
-the cotangent connection to `df`:
-$$
-  \mathrm{Hess}\,f\,(v, w) := (\nabla_v\,df)(w),
-$$
-where `df : Π x, TangentSpace I x →L[ℝ] ℝ` is the exterior derivative of `f`.
-
-We use the cotangent extension `cotangentCov (LeviCivita g)` directly. Symmetry of the
-Hessian (which uses torsion-freeness of Levi-Civita and a Schwarz-style identity for the
-second mfderiv of `f`) is left as a downstream theorem; see the file docstring. -/
 
 /-- The abstract Hessian of a scalar `f : M → ℝ`, as a (0,2)-tensor at each point `x`, defined
 via the cotangent connection: `(v, w) ↦ (cotangentCov (LeviCivita g) (extDerivFun f) x v) w`. -/
@@ -874,15 +743,6 @@ def abstractHessian
     abstractHessian (I := I) g f x v w =
       ((cotangentCov (LeviCivita (I := I) g)).toFun
         (extDerivFun (I := I) f) x v) w := rfl
-
-/-! ## Smoothness of the (0,2)-tensor covariant derivative
-
-We prove that whenever the underlying tangent-bundle covariant derivative `cov` is `C^∞`,
-the induced (0,2)-tensor covariant derivative `tensor02Cov cov` is `C^∞`. The argument
-mirrors the cotangent case: three iterated applications of the operator-to-bundle bridge
-`cotangentCov_clmSection_smooth_aux` reduce the target to a scalar function, which is
-then handled by combining `cotangentCov_extDerivFun_smooth` with `cotangentCov_covApply_smooth`
-and `ContMDiff.clm_bundle_apply` for each of the three summands of `tensor02Scalar`. -/
 
 /-- Smoothness of `b ↦ T b (Y b)` as a section of the cotangent bundle, from smoothness of
 the (0,2)-tensor section `T` and the tangent section `Y`. This is the smoothness analogue of
@@ -934,7 +794,6 @@ private theorem tensor02Cov_triple_apply_smooth
     (Y Z W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun x => (((tensor02Cov cov).toFun T x (Y x)) (Z x)) (W x)) := by
-  -- Express via `tensor02CovAt_apply_of_diff_extend` as the `tensor02Scalar` formula.
   have h_eq : ∀ x : M,
       (((tensor02Cov cov).toFun T x (Y x)) (Z x)) (W x) =
         extDerivFun (I := I) (fun b => T b (Z b) (W b)) x (Y x)
@@ -952,16 +811,13 @@ private theorem tensor02Cov_triple_apply_smooth
     rw [tensor02Cov_toFun, tensor02CovFun_apply]
     rw [h]
     rfl
-  -- (i) `b ↦ T b (Z b) (W b)` is smooth scalar.
   have h_pair_TZW : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun b : M => T b (Z b) (W b)) :=
     tensor02Cov_pairing_contMDiff hT Z.contMDiff W.contMDiff
-  -- (ii) `extDerivFun (b ↦ T b (Z b) (W b))` is smooth as a `T*M`-section.
   have h_extDeriv : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) ∞
       (fun x => TotalSpace.mk' (E →L[ℝ] ℝ)
         (E := fun x : M => TangentSpace I x →L[ℝ] (Bundle.Trivial M ℝ) x)
         x (extDerivFun (I := I) (fun b => T b (Z b) (W b)) x)) :=
     cotangentCov_extDerivFun_smooth h_pair_TZW
-  -- (iii) `b ↦ extDerivFun (...) b (Y b)` smooth scalar.
   have h_extDeriv_Y : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun x => extDerivFun (I := I) (fun b => T b (Z b) (W b)) x (Y x)) := by
     have hap : ContMDiff I (I.prod 𝓘(ℝ, ℝ)) ∞
@@ -975,8 +831,6 @@ private theorem tensor02Cov_triple_apply_smooth
         (v := fun x => Y x) h_extDeriv Y.contMDiff
     intro x
     exact (contMDiffAt_section (F := ℝ) (E := Bundle.Trivial M ℝ) x).mp (hap x)
-  -- (iv) `b ↦ cov.toFun Z b` smooth `Hom(TM, TM)`-section, applied to `Y` gives smooth
-  -- tangent section `b ↦ cov.toFun Z b (Y b)`.
   have h_covZ : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
       (fun x => TotalSpace.mk' (E →L[ℝ] E)
         (E := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x) x
@@ -989,11 +843,9 @@ private theorem tensor02Cov_triple_apply_smooth
       (E₂ := fun x : M => TangentSpace I x)
       (b := fun x : M => x)
       (ϕ := fun x => cov.toFun Z x) (v := fun x => Y x) h_covZ Y.contMDiff
-  -- (v) `b ↦ T b (cov.toFun Z b (Y b)) (W b)` smooth scalar.
   have h_T_covZY_W : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun x => T x (cov.toFun Z x (Y x)) (W x)) :=
     tensor02Cov_pairing_contMDiff hT h_covZY W.contMDiff
-  -- (vi) Symmetric: `b ↦ T b (Z b) (cov.toFun W b (Y b))` smooth scalar.
   have h_covW : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
       (fun x => TotalSpace.mk' (E →L[ℝ] E)
         (E := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x) x
@@ -1009,7 +861,6 @@ private theorem tensor02Cov_triple_apply_smooth
   have h_T_Z_covWY : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun x => T x (Z x) (cov.toFun W x (Y x))) :=
     tensor02Cov_pairing_contMDiff hT Z.contMDiff h_covWY
-  -- Combine: the alternating sum is smooth.
   have h_combined : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun x => extDerivFun (I := I) (fun b => T b (Z b) (W b)) x (Y x)
         - T x (cov.toFun Z x (Y x)) (W x)
@@ -1037,10 +888,6 @@ instance tensor02Cov_isContMDiff
           have h_le : (∞ : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) + 1 := by
             rw [ENat.coe_top_add_one]
           exact contMDiffOn_univ.mp (hT.of_le h_le)
-        -- **Outermost bridge**: smoothness of `tensor02Cov cov T` as a section of
-        -- `Hom(TM, T*M ⊗ T*M) = Hom(TM, Hom(TM, Hom(TM, ℝ)))` follows from: for every smooth
-        -- tangent section `Y`, the section `x ↦ ⟨x, (tensor02Cov cov T x)(Y x)⟩` of
-        -- `Hom(TM, Hom(TM, ℝ))` is smooth.
         have hglobal : ContMDiff I
             (I.prod 𝓘(ℝ, E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ)))) ∞
             (fun x : M => TotalSpace.mk'
@@ -1053,18 +900,10 @@ instance tensor02Cov_isContMDiff
               (TangentSpace I x →L[ℝ] ℝ))
             (φ := fun x => (tensor02Cov cov).toFun T x)
           intro Y
-          -- **Middle bridge**: smoothness of `x ↦ ⟨x, (tensor02Cov cov T x)(Y x)⟩` as a
-          -- section of `Hom(TM, Hom(TM, ℝ))` follows from: for every smooth tangent section
-          -- `Z`, the section `x ↦ ⟨x, (tensor02Cov cov T x)(Y x)(Z x)⟩` of `Hom(TM, ℝ)` is
-          -- smooth.
           apply cotangentCov_clmSection_smooth_aux
             (V₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
             (φ := fun x => (tensor02Cov cov).toFun T x (Y x))
           intro Z
-          -- **Innermost bridge**: smoothness of `x ↦ ⟨x, (tensor02Cov cov T x)(Y x)(Z x)⟩` as
-          -- a section of `T*M = Hom(TM, Bundle.Trivial M ℝ)` follows from: for every smooth
-          -- tangent section `W`, the scalar `x ↦ ((tensor02Cov cov T x)(Y x)(Z x))(W x)` is
-          -- smooth.
           apply cotangentCov_clmSection_smooth_aux
             (V₂ := fun _ : M => ℝ)
             (φ := fun x => ((tensor02Cov cov).toFun T x (Y x)) (Z x))
@@ -1082,15 +921,6 @@ instance tensor02Cov_isContMDiff
           rfl
         exact hglobal.contMDiffOn }
 
-/-! ## Symmetry of the abstract Hessian
-
-For a `C²` scalar `f : M → ℝ`, the abstract Hessian is symmetric:
-`abstractHessian g f x v w = abstractHessian g f x w v`. The proof combines the dual-pairing
-identity for the cotangent extension with the torsion-free property of the Levi-Civita
-connection (so that `cov_V W - cov_W V = [V, W]`) and the foundation identity
-`extDerivFun f x ([V, W]_x) = X(Y f) - Y(X f)` (with the directional derivatives written as
-`extDerivFun (b ↦ extDerivFun f b (W b)) x (V x)` etc.). -/
-
 /-- **Symmetry of the abstract Hessian.** For a function `f : M → ℝ` that is `C²` at `x`,
 the abstract Hessian is symmetric in its two tangent slots:
 `abstractHessian g f x v w = abstractHessian g f x w v`. -/
@@ -1099,27 +929,21 @@ theorem abstractHessian_symm
     {f : M → ℝ} {x : M} (hf : ContMDiffAt I 𝓘(ℝ) 2 f x) (v w : TangentSpace I x) :
     abstractHessian (I := I) g f x v w = abstractHessian (I := I) g f x w v := by
   classical
-  -- Smooth extensions of `v, w` to global tangent sections.
   set V : Π x : M, TangentSpace I x := FiberBundle.extend E v with hV_def
   set W : Π x : M, TangentSpace I x := FiberBundle.extend E w with hW_def
   have hV : MDiffAt (T% V) x := mdifferentiableAt_extend ..
   have hW : MDiffAt (T% W) x := mdifferentiableAt_extend ..
   have hVx : V x = v := by simp [V]
   have hWx : W x = w := by simp [W]
-  -- Smoothness of the cotangent section `extDerivFun f` near x: from `f` being `C²` at `x`,
-  -- the value `extDerivFun f` is `MDiffAt` as a cotangent section. We package it via the
-  -- model-fibre coordinate of `mfderiv-coord`, which is `C¹` and hence `MDiffAt`.
   have hf_cmd1 : ContMDiffAt I 𝓘(ℝ, E →L[ℝ] ℝ) 1
       (inTangentCoordinates I 𝓘(ℝ, ℝ) id f (mfderiv I 𝓘(ℝ, ℝ) f) x) x := by
     have := hf.mfderiv_const (m := 1) (le_refl _)
     simpa using this
   have hθ : MDiffAtCotangent (extDerivFun (I := I) f) x := by
-    -- Unfold `MDiffAtCotangent` to the explicit total-space embedding statement.
     change MDifferentiableAt I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ))
       (fun b : M => TotalSpace.mk' (E →L[ℝ] ℝ)
         (E := fun x : M => TangentSpace I x →L[ℝ] ℝ) b
         (extDerivFun (I := I) f b)) x
-    -- Use `mdifferentiableAt_hom_bundle` to reduce to the `inTangentCoordinates` form.
     rw [mdifferentiableAt_hom_bundle]
     refine ⟨mdifferentiableAt_id, ?_⟩
     have hcoord_mdiff : MDifferentiableAt I 𝓘(ℝ, E →L[ℝ] ℝ)
@@ -1127,39 +951,23 @@ theorem abstractHessian_symm
       hf_cmd1.mdifferentiableAt (by norm_num)
     refine hcoord_mdiff.congr_of_eventuallyEq ?_
     filter_upwards with y
-    -- Both reduce to `mfderiv f y` post-composed with chart-trivialisation identifications;
-    -- in the trivial bundle, the trivialisation is the identity in the model fibre.
     simp only [inTangentCoordinates, ContinuousLinearMap.inCoordinates,
       Bundle.Trivial.fiberBundle_trivializationAt',
       Bundle.Trivial.continuousLinearMapAt_trivialization,
       TangentBundle.continuousLinearMapAt_model_space,
       extDerivFun, id_eq]
     rfl
-  -- Apply the dual-pairing identity twice (with W as the second arg, then with V).
   have hpair_v :=
     cotangentCov_dualPairing (LeviCivita (I := I) g) hθ hW v
   have hpair_w :=
     cotangentCov_dualPairing (LeviCivita (I := I) g) hθ hV w
-  -- Substitute via abstractHessian_apply (with W x and V x evaluated by their extensions).
-  -- abstractHessian g f x v w = (cotangentCov ... v) w
-  -- = (extDerivFun (b => θ b (W b)) x v) - θ x (cov W x v)   -- using W x = w
-  -- abstractHessian g f x w v
-  -- = (extDerivFun (b => θ b (V b)) x w) - θ x (cov V x w)   -- using V x = v
-  -- (with θ = extDerivFun f)
-  -- The pairing functions reduce to `extDerivFun f b (W b)` and `extDerivFun f b (V b)`.
   have hH_v : abstractHessian (I := I) g f x v w =
       extDerivFun (I := I) (fun b => extDerivFun (I := I) f b (W b)) x v -
         extDerivFun (I := I) f x ((LeviCivita (I := I) g).toFun W x v) := by
-    -- abstractHessian g f x v w = ((cotangentCov ... f x) v) w
-    -- substitute w = W x.
     change ((cotangentCov (LeviCivita (I := I) g)).toFun
       (extDerivFun (I := I) f) x v) w = _
     rw [show w = W x from hWx.symm]
-    -- Use hpair_v to rewrite `extDerivFun (b => extDerivFun f b (W b)) x v`.
-    -- hpair_v : extDerivFun (b => θ b (W b)) x v
-    --             = ((cotangentCov ...) θ x v) (W x) + θ x (cov W x v)
     have := hpair_v
-    -- Rearrange.
     linarith [this]
   have hH_w : abstractHessian (I := I) g f x w v =
       extDerivFun (I := I) (fun b => extDerivFun (I := I) f b (V b)) x w -
@@ -1169,24 +977,14 @@ theorem abstractHessian_symm
     rw [show v = V x from hVx.symm]
     have := hpair_w
     linarith [this]
-  -- Subtract the two: the directional-derivative difference equals
-  -- `extDerivFun f x ([V, W]_x)` by the foundation identity, and the connection difference
-  -- equals `[V, W]_x` by torsion-freeness, so the two pieces cancel.
   rw [hH_v, hH_w]
-  -- The chart-interior hypothesis is automatic from `BoundarylessManifold I M`.
   have hx_int : extChartAt I x x ∈ interior ((extChartAt I x).target : Set E) :=
     (I.isInteriorPoint_iff (x := x)).mp BoundarylessManifold.isInteriorPoint
-  -- Foundation identity:
-  --   extDerivFun f x ([V, W]_x)
-  --     = extDerivFun (b => extDerivFun f b (W b)) x (V x) -
-  --       extDerivFun (b => extDerivFun f b (V b)) x (W x).
   have hfound :
       extDerivFun (I := I) f x (VectorField.mlieBracket I V W x) =
         extDerivFun (I := I) (fun b => extDerivFun (I := I) f b (W b)) x (V x) -
           extDerivFun (I := I) (fun b => extDerivFun (I := I) f b (V b)) x (W x) :=
     extDerivFun_apply_mlieBracket hV hW hf hx_int
-  -- Torsion-free identity:
-  --   cov_V W - cov_W V = [V, W]_x at differentiable points V, W.
   have htor : (LeviCivita (I := I) g).torsion = 0 :=
     LeviCivita_torsion_eq_zero (I := I) g
   have hbr :
@@ -1195,15 +993,8 @@ theorem abstractHessian_symm
       VectorField.mlieBracket I V W x :=
     (CovariantDerivative.torsion_eq_zero_iff
       (cov := LeviCivita (I := I) g)).mp htor hV hW
-  -- Substitute V x = v, W x = w in the foundation identity.
   rw [hVx, hWx] at hfound
-  -- Substitute V x = v, W x = w in the torsion-free identity.
   rw [hVx, hWx] at hbr
-  -- Express the connection-difference scalar via the foundation identity.
-  -- LHS (after rw) - RHS (after rw) = (Yfderiv at v - Xfderiv at w)
-  --                                   - (extDerivFun f x (cov W x v)
-  --                                      - extDerivFun f x (cov V x w))
-  -- Using `map_sub` on the linear `extDerivFun f x` and the torsion identity:
   have hcov_diff :
       extDerivFun (I := I) f x ((LeviCivita (I := I) g).toFun W x v) -
         extDerivFun (I := I) f x ((LeviCivita (I := I) g).toFun V x w) =

@@ -61,20 +61,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
   [BoundarylessManifold I M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The metric-lowered directional covariant derivative along a vector field
-
-For a smooth `(r, s)`-tensor section `S` and a smooth tangent vector field `X`,
-the assignment `y ↦ loweredCovDerivAt g r s S y (X y)` coincides with
-`covApply (tensor0SCovariantDerivative … (r + s) …) X (liftedTensorSection …)`,
-the covariant derivative of the lifted `(0, r + s)`-tensor section in the
-direction `X`. This is a smooth section of the `(0, r + s)`-tensor bundle. -/
 
 /-- The metric-lowered directional covariant derivative of a smooth
 `(r, s)`-tensor section `S` along a smooth tangent vector field `X`, as a raw
@@ -115,7 +105,6 @@ lemma loweredCovDerivAlongVFraw_contMDiff
   classical
   set cov := tensor0SCovariantDerivative I M (r + s) (LeviCivita (I := I) g)
     with hcov_def
-  -- Smoothness of the lifted section, bumped to `∞ + 1 = ∞`.
   have hLift : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel (r + s) ℝ E))
       ((∞ : WithTop ℕ∞) + 1)
       (fun y : M => TotalSpace.mk' (Tensor0SModel (r + s) ℝ E)
@@ -123,11 +112,9 @@ lemma loweredCovDerivAlongVFraw_contMDiff
         (liftedTensorSection (I := I) (M := M) g r s S y)) := by
     rw [show ((∞ : WithTop ℕ∞) + 1) = ∞ from rfl]
     exact liftedTensorSection_contMDiff (I := I) (M := M) g r s S
-  -- Smoothness of the vector field `X` in total-space form.
   have hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun y : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) y (X y)) :=
     X.contMDiff
-  -- `covApply_contMDiffOn` on `Set.univ`.
   have hOn : ContMDiffOn I (I.prod 𝓘(ℝ, Tensor0SModel (r + s) ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (Tensor0SModel (r + s) ℝ E)
         (E := fun z : M => Tensor0SSpace (r + s) I z) y
@@ -153,13 +140,11 @@ lemma loweredCovDerivAlongVFraw_eq_zero_off_tsupport
   classical
   set cov := tensor0SCovariantDerivative I M (r + s) (LeviCivita (I := I) g)
     with hcov_def
-  -- From `y ∉ tsupport (toModel ∘ S)`, the section `S` vanishes on an open nbhd.
   have hS_eq : (fun b : M => TensorRSSpace.toModel (S b)) =ᶠ[𝓝 y] 0 :=
     notMem_tsupport_iff_eventuallyEq.mp hy
   rw [Filter.eventuallyEq_iff_exists_mem] at hS_eq
   obtain ⟨V, hV_nhds, hV_eq⟩ := hS_eq
   obtain ⟨U, hUV, hU_open, hyU⟩ := mem_nhds_iff.mp hV_nhds
-  -- On `U` the lifted section is the zero section.
   have hLift_zero : ∀ b ∈ U,
       liftedTensorSection (I := I) (M := M) g r s S b = 0 := by
     intro b hbU
@@ -172,14 +157,12 @@ lemma loweredCovDerivAlongVFraw_eq_zero_off_tsupport
       exact TensorRSSpace.toModel_injective this
     rw [liftedTensorSection_apply, hS_b_zero, TensorRSSpace.toModel_zero, map_zero]
     rfl
-  -- Differentiability of the lifted section at `y` (from global smoothness).
   have hLift_diff_y : MDifferentiableAt I (I.prod 𝓘(ℝ, Tensor0SModel (r + s) ℝ E))
       (fun z : M => TotalSpace.mk' (Tensor0SModel (r + s) ℝ E)
         (E := fun w : M => Tensor0SSpace (r + s) I w) z
         (liftedTensorSection (I := I) (M := M) g r s S z)) y :=
     ((liftedTensorSection_contMDiff (I := I) (M := M) g r s S) y).mdifferentiableAt
       (by simp)
-  -- Locality of `cov`: it vanishes at `y` because the lifted section vanishes on `U`.
   have hcov_zero : cov.toFun
       (liftedTensorSection (I := I) (M := M) g r s S) y = 0 := by
     have hU_nhds : U ∈ 𝓝 y := hU_open.mem_nhds hyU
@@ -201,7 +184,6 @@ lemma loweredCovDerivAlongVFraw_eq_zero_off_tsupport
         (Filter.univ_mem) hT_eq
     rw [h_eq]
     exact congrArg (fun φ => φ y) cov.zero
-  -- The value of the lowered directional derivative is `cov.toFun lift y (X y) = 0`.
   change loweredCovDerivAt (I := I) (M := M) g r s S y (X y) = 0
   rw [loweredCovDerivAt_def]
   change cov.toFun (liftedTensorSection (I := I) (M := M) g r s S) y (X y) = 0
@@ -226,8 +208,6 @@ lemma loweredCovDerivAlongVFraw_hasCompactSupport
   rw [loweredCovDerivAlongVFraw_eq_zero_off_tsupport (I := I) (M := M) g r s S X hynot,
     Tensor0SSpace.toModel_zero]
 
-/-! ## The bundled smooth section -/
-
 /-- **The lowered directional covariant derivative along a vector field, bundled
 as a smooth section.** For a smooth `(r, s)`-tensor section `S` and a smooth
 tangent vector field `X`, the section `y ↦ loweredCovDerivAt g r s S y (X y)` is
@@ -248,13 +228,6 @@ def loweredCovDerivAlongVF
     loweredCovDerivAlongVF (I := I) (M := M) g r s S X y =
       loweredCovDerivAt (I := I) (M := M) g r s S y (X y) := rfl
 
-/-! ## Smoothness of the inner-product scalar
-
-For two smooth `(r, s)`-tensor sections `W`, `S`, the pointwise metric inner
-product `y ↦ ⟨W y, S y⟩` is smooth. This is the only hypothesis the combined
-covariant integration-by-parts identity actually requires, and it is discharged
-here from the unconditional inner-product smoothness theorem. -/
-
 /-- **Smoothness of the inner-product scalar.** For smooth `(r, s)`-tensor
 sections `W`, `S`, the scalar `tensorInnerScalar g r s W S` is `C^∞`. -/
 lemma tensorInnerScalar_contMDiff
@@ -264,14 +237,6 @@ lemma tensorInnerScalar_contMDiff
       (tensorInnerScalar (I := I) (M := M) g r s W S) :=
   DifferentialGeometry.Tensor.tensorInnerPointwise_contMDiff_of_mdiff
     (I := I) (M := M) g r s W S
-
-/-! ## The directional covariant integration-by-parts identity (self-contained)
-
-The combined covariant integration-by-parts identity from
-`CovariantIntegrationByParts.lean` requires no externally supplied integrability
-hypotheses — only smoothness of the inner-product scalar, which we now discharge.
-We restate it with the two covariant cross terms written through the bundled
-lowered directional-derivative sections of this file. -/
 
 /-- **Directional covariant integration by parts (combined, self-contained).**
 For a closed smooth Riemannian manifold `(M, g)`, ranks `(r, s)`, a smooth

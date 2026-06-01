@@ -79,29 +79,16 @@ open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Laplacian.Spectral
 open DifferentialGeometry.Analysis.SpectralBounds
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The heat coefficient function
-
-The per-eigenvalue scalar action of the heat semigroup. -/
 
 /-- The per-eigenvalue heat coefficient applied to a scalar:
 `heatCoeffFun i t c = exp(−λᵢ t) · c`. -/
 def heatCoeffFun {g : SmoothRiemannianMetric I M}
     (i : EigenIdx (I := I) (M := M) g) (t : ℝ) (c : ℝ) : ℝ :=
   Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t) * c
-
-/-! ## The heat-weight comparison
-
-The key spectral inequality: at any pair of exponents `a`, `b` and any
-positive time `t`, the squared `Hᵇ`-weight of the heat-rescaled
-coordinate is bounded by a `λ`-uniform multiple of the `Hᵃ`-weight of
-the original coordinate. -/
 
 /-- For `0 < t` and any pair of exponents `a`, `b`, the squared `Hᵇ`-weight
 of the heat-rescaled coordinate is bounded by a `λ`-uniform multiple of
@@ -123,7 +110,6 @@ private lemma heatHk_weight_term_le {g : SmoothRiemannianMetric I M}
   set K : ℝ :=
     max 1 (spectralSmoothingConst (b - a) * (min t 1) ^ (-(b - a))) with hK_def
   have hK_ge_one : (1 : ℝ) ≤ K := le_max_left _ _
-  -- The Sobolev weight ratio.
   have h_weight_split :
       scalarSobolevWeight (I := I) (M := M) i b =
         scalarSobolevWeight (I := I) (M := M) i a *
@@ -132,15 +118,12 @@ private lemma heatHk_weight_term_le {g : SmoothRiemannianMetric I M}
     rw [hlam_def, ← Real.rpow_add hbase_pos]
     congr 1
     ring
-  -- Bound `(1+λ)^{b-a} · exp(-2λt)`.
   have h_pe_le :
       (1 + lam) ^ (b - a) *
           Real.exp (-(lam * t) * 2) ≤ K := by
     rcases le_or_gt 0 (b - a) with hba | hba
-    · -- `b ≥ a`: scalar smoothing bound at truncated time `min t 1`.
-      have h_arg : -(lam * t) * 2 = -(2 * lam * t) := by ring
+    · have h_arg : -(lam * t) * 2 = -(2 * lam * t) := by ring
       rw [h_arg]
-      -- Use the truncated-time version through `min t 1`.
       set t' : ℝ := min t 1 with ht'_def
       have ht'_pos : 0 < t' := lt_min ht one_pos
       have ht'_le_one : t' ≤ 1 := min_le_right _ _
@@ -162,8 +145,7 @@ private lemma heatHk_weight_term_le {g : SmoothRiemannianMetric I M}
               mul_le_mul_of_nonneg_left h_exp_mono hbase_nn
         _ ≤ spectralSmoothingConst (b - a) * t' ^ (-(b - a)) := h_at_t'
         _ ≤ K := le_max_right _ _
-    · -- `b < a`: weight `(1+λ)^{b-a} ≤ 1`, heat coeff `≤ 1`.
-      have h_w_le_one : (1 + lam) ^ (b - a) ≤ 1 :=
+    · have h_w_le_one : (1 + lam) ^ (b - a) ≤ 1 :=
         Real.rpow_le_one_of_one_le_of_nonpos (by linarith) hba.le
       have h_exp_le_one : Real.exp (-(lam * t) * 2) ≤ 1 := by
         rw [Real.exp_le_one_iff]
@@ -176,7 +158,6 @@ private lemma heatHk_weight_term_le {g : SmoothRiemannianMetric I M}
                 (Real.exp_pos _).le (by norm_num)
         _ = 1 := by norm_num
         _ ≤ K := hK_ge_one
-  -- assemble.
   have hwa_nn : 0 ≤ scalarSobolevWeight (I := I) (M := M) i a :=
     scalarSobolevWeight_nonneg (I := I) (M := M) i a
   have hexp_sq :
@@ -199,8 +180,6 @@ private lemma heatHk_weight_term_le {g : SmoothRiemannianMetric I M}
           have : 0 ≤ c ^ 2 := sq_nonneg c
           positivity
     _ = K * (scalarSobolevWeight (I := I) (M := M) i a * c ^ 2) := by ring
-
-/-! ## The heat-rescaled coordinate family -/
 
 namespace scalarHs
 
@@ -371,7 +350,6 @@ lemma norm_heatHkFun_le_smoothing {a b : ℝ} (hab : a ≤ b) {t : ℝ}
       _ = (spectralSmoothingConst (b - a) * t ^ (-(b - a))) *
             ∑' i, (scalarSobolevWeight (I := I) (M := M) i a *
               (T.coeff i) ^ 2) := h_tsum_factor
-  -- `(√C · t^{-(b-a)/2})² = C · t^{-(b-a)}`.
   have h_rhs_sq :
       (Real.sqrt (spectralSmoothingConst (b - a)) * t ^ (-((b - a) / 2))) ^ 2 =
         spectralSmoothingConst (b - a) * t ^ (-(b - a)) := by
@@ -476,8 +454,6 @@ lemma norm_heatHkFun_le_self {a : ℝ} {t : ℝ} (ht : 0 < t)
 
 end scalarHs
 
-/-! ## The scalar heat semigroup on the spectral Sobolev scale -/
-
 /-- The scalar heat semigroup `e^{t Δ_g}` as a continuous linear map on
 the spectral Sobolev scale, for `0 < t`.
 
@@ -496,8 +472,6 @@ def heatSemigroupHs {g : SmoothRiemannianMetric I M}
         scalarHs.heatHkFun_smul (I := I) (M := M) b ht c T }
     (max 1 (spectralSmoothingConst (b - a) * (min t 1) ^ (-(b - a))))
     (fun T => by
-      -- A coarse `λ`-uniform bound suffices to make the operator
-      -- continuous; the sharp short-time gain is proved separately.
       change ‖scalarHs.heatHkFun (I := I) (M := M) b ht T‖ ≤ _
       set K : ℝ :=
         max 1 (spectralSmoothingConst (b - a) * (min t 1) ^ (-(b - a)))
@@ -633,8 +607,6 @@ theorem heatSemigroupHs_opNorm_le_one {g : SmoothRiemannianMetric I M}
   rw [heatSemigroupHs_apply, one_mul]
   exact scalarHs.norm_heatHkFun_le_self (I := I) (M := M) ht T
 
-/-! ## The semigroup law on the scale -/
-
 /-- **Semigroup law on the spectral Sobolev scale.** For `t, s > 0`, the
 spectral-scale heat semigroup satisfies `e^{(t+s)Δ} = e^{tΔ} ∘ e^{sΔ}`,
 as continuous linear endomorphisms of any fixed `Hᵃ`. -/
@@ -659,13 +631,6 @@ theorem heatSemigroupHs_add {g : SmoothRiemannianMetric I M}
   rw [h_exp_add]
   ring
 
-/-! ## Consistency with the `L²` heat semigroup
-
-At `a = b = 0`, the spectral Sobolev space `H⁰` is isometrically the
-`L²` Hilbert space (`scalarHsZeroEquivL2`), and `heatSemigroupHs` agrees
-there with the `L²` heat semigroup `heatSemigroup`. The bridge is the
-diagonal action of both operators on the eigenbasis. -/
-
 /-- The `L²` eigenbasis coordinate of `heatSemigroup g t u` at `i` is
 `exp(−λᵢ t)` times the `i`-th coordinate of `u`, for `t ≥ 0`. -/
 private theorem scalarL2Coeff_heatSemigroup
@@ -679,7 +644,6 @@ private theorem scalarL2Coeff_heatSemigroup
         scalarL2Coeff (I := I) (M := M) u i := by
   classical
   set b := resolventHilbertEigenbasisSigma (I := I) (M := M) g with hb
-  -- The `i`-th coordinate of any `L²` vector `v` is `⟪b i, v⟫_ℝ`.
   have h_coeff_as_inner :
       ∀ v : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g),
         scalarL2Coeff (I := I) (M := M) v i = ⟪b i, v⟫_ℝ := by
@@ -687,10 +651,8 @@ private theorem scalarL2Coeff_heatSemigroup
     unfold scalarL2Coeff
     exact HilbertBasis.repr_apply_apply _ _ _
   rw [h_coeff_as_inner, h_coeff_as_inner]
-  -- Expand the heat semigroup as its eigenbasis series.
   rw [DifferentialGeometry.Analysis.HeatEquation.heatSemigroup_apply_of_nonneg
         (I := I) (M := M) g ht u]
-  -- The inner product against `b i` of the series is the `i`-th term.
   have h_summable :=
     DifferentialGeometry.Analysis.HeatEquation.summable_heatTerm
       (I := I) (M := M) g ht u
@@ -741,7 +703,6 @@ private theorem scalarL2Coeff_heatSemigroup
     rw [tsum_ite_eq i]
   have h_eq := h_inner_hsum'.tsum_eq
   rw [h_tsum_ite] at h_eq
-  -- LHS `⟪b i, ∑' ...⟫` equals the `i`-th term.
   change (innerSL ℝ (b i))
       (∑' j, Real.exp
             (-(EigenIdx.lambda (I := I) (M := M) j) * t) •
@@ -761,12 +722,9 @@ theorem heatSemigroupHs_zeroEquivL2_apply
         (I := I) (M := M) g t
         (scalarHsZeroEquivL2 (I := I) (M := M) g T) := by
   classical
-  -- Compare `L²` eigenbasis coordinates; the eigenbasis representation
-  -- is injective.
   refine (resolventHilbertEigenbasisSigma
     (I := I) (M := M) g).repr.injective ?_
   ext i
-  -- LHS coordinate.
   have hlhs : ((resolventHilbertEigenbasisSigma
         (I := I) (M := M) g).repr
       (scalarHsZeroEquivL2 (I := I) (M := M) g
@@ -779,7 +737,6 @@ theorem heatSemigroupHs_zeroEquivL2_apply
         (a := 0) (b := 0) T) i
     rw [heatSemigroupHs_coeff] at h
     simpa only [scalarL2Coeff] using h
-  -- RHS coordinate.
   have hrhs : ((resolventHilbertEigenbasisSigma
         (I := I) (M := M) g).repr
       (DifferentialGeometry.Analysis.HeatEquation.heatSemigroup
@@ -805,7 +762,6 @@ theorem heatSemigroupHs_zeroEquivL2 {g : SmoothRiemannianMetric I M}
           (scalarHsZeroEquivL2 (I := I) (M := M) g).toLinearIsometry.toContinuousLinearMap) =
       heatSemigroupHs (I := I) (M := M) (g := g) ht (a := 0) (b := 0) := by
   refine ContinuousLinearMap.ext (fun T => ?_)
-  -- Unfold the composition on the left.
   change (scalarHsZeroEquivL2 (I := I) (M := M) g).symm
       (DifferentialGeometry.Analysis.HeatEquation.heatSemigroup
         (I := I) (M := M) g t

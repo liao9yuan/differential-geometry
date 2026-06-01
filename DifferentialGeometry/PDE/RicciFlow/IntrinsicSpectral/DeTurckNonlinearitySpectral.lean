@@ -103,15 +103,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## Step 1a — the available half of the realization: `H^{a+2} → TensorL2`
-
-This is the first leg of the realization `tensorHs → tensor field`.  It is a
-genuine, chart-locality-free continuous linear map.  Its image
-is an honest `L²` tensor with the prescribed eigenbasis coordinates; what is
-*not* available is its further promotion to a `SmoothRiemannianMetric` (the
-gate, below).  We expose it for `(0,2)`-tensors and order `a + 2`, the
-relevant case for a metric perturbation `h = g − g_bg`. -/
-
 /-- The realization-to-`L²` continuous linear map of a metric perturbation
 in the order-`(a+2)` spectral Sobolev space of `(0,2)`-tensors.
 
@@ -158,19 +149,6 @@ coordinate of `u`: the realization is faithful on coordinates. -/
       (tensorResolventL2 (I := I) (M := M) g_bg 0 2)) :
     realizeToL2 (I := I) (M := M) g_bg a h_compact 0 = 0 :=
   map_zero _
-
-/-! ## Step 2 — the order bookkeeping: a first-order remainder lands in `H^a`
-
-The geometric remainder `h ↦ deTurckRicciRHS g_bg (g_bg + h) − Δ_∇ h` is, by
-the principal-part cancellation, a **first-order** operator in `h`: its
-top-order part is the second-order Laplacian that has been subtracted off, so
-only first derivatives of `h` survive.  A first-order operator drops the
-Sobolev scale by exactly one, mapping `H^{a+2}` continuously into `H^{a+1}`.
-Since `a + 1 ≥ a`, the result lies in `H^a` via the (norm-non-increasing)
-scale inclusion.  This subsection formalizes the **scale bookkeeping**
-`H^{a+1} ⊆ H^a` that the geometric remainder must compose with to target the
-engine's codomain `H^a`; the geometric `H^{a+2} → H^{a+1}` step is the
-analytic content gated below. -/
 
 /-- The continuous linear inclusion `H^{a+1} →L[ℝ] H^a` of `(0,2)`-tensor
 fields.  This is the order-bookkeeping step: a first-order operator out of

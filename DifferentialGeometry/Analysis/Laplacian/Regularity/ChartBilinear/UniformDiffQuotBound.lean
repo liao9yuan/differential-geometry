@@ -84,16 +84,12 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 open DifferentialGeometry.Analysis.Sobolev.NirenbergCrossBoundsNonSmooth
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Algebraic helpers: pointwise comparison and lintegral conversion -/
 
 /-- Pointwise: `f i x ^ 2 ≤ ∑_l f l x ^ 2`. -/
 private lemma sq_le_finset_sum_sq
@@ -201,8 +197,6 @@ private lemma eLpNorm_two_le_ofReal_sqrt
   rw [sqrt_ofReal_eq_ofReal_sqrt hS] at h_pow
   exact h_pow
 
-/-! ## Headline theorem -/
-
 /-- **Uniform-in-`h` per-`(i, k)` `L²(Ω'')` bound on the difference
 quotient of the chart-pulled weak partial derivatives.**
 
@@ -265,8 +259,6 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound
       Metric.cthickening |h| (tsupport η) ⊆ Ω')
     (hη_one_on_Ω'' : ∀ x ∈ Ω'', η x = 1)
     (hΩ''_meas : MeasurableSet Ω'')
-    -- The non-smooth Fréchet–Kolmogorov bound on `D_h^k u_g`.
-    -- Discharged downstream from `u_g ∈ H¹` via the FK lemma.
     (h_FK_diffQuot_u_bound :
       ∀ (k : Fin (Module.finrank ℝ E)),
       ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
@@ -275,8 +267,6 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound
           ∂(volume : Measure EuclN) ≤
           ∫ x in Ω', ∑ l : Fin (Module.finrank ℝ E), ((g_g l) x) ^ 2
             ∂(volume : Measure EuclN))
-    -- The L² bound on the standard Nirenberg test function.
-    -- Discharged downstream via Minkowski + Fréchet–Kolmogorov.
     (h_v_test_sq_bound :
       ∀ (k : Fin (Module.finrank ℝ E)),
       ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
@@ -289,9 +279,6 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound
           2 * ∫ x, (η x)^2 *
               (DifferentialGeometry.Analysis.Sobolev.diffQuot k h (g_g k) x)^2
             ∂(volume : Measure EuclN))
-    -- The non-smooth analogue of the master inequality. Discharged
-    -- downstream by mollification + the substitution identity for weak
-    -- solutions.
     (h_master_nonsmooth :
       ∀ (k : Fin (Module.finrank ℝ E)),
       ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
@@ -338,8 +325,6 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound
             ((volume : Measure EuclN).restrict Ω'')
           ≤ ENNReal.ofReal (M_bound i k)) := by
   classical
-  -- Step 1: Apply nirenberg_diffQuot_g_localL2_bound for each k. This
-  -- yields a constant C_k and the localised sum bound on Ω''.
   have h_per_k :
       ∀ (k : Fin (Module.finrank ℝ E)),
       ∃ C_k : ℝ, 0 ≤ C_k ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
@@ -359,11 +344,6 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound
       (h_FK_diffQuot_u_bound k)
       (h_v_test_sq_bound k)
       (h_master_nonsmooth k)
-  -- Step 2: From the per-k sum bound, extract per-(i,k) eLpNorm bound.
-  -- The bound is:  (λ/2) ∫_{Ω''} ∑_l (D_h^k g_l)² ≤ C_k · G_total.
-  -- ⇒ ∫_{Ω''} ∑_l (D_h^k g_l)² ≤ (2/λ) · C_k · G_total =: S_k.
-  -- For each i: ∫_{Ω''} (D_h^k g_i)² ≤ ∫_{Ω''} ∑_l ≤ S_k.
-  -- ⇒ eLpNorm (D_h^k g_i) 2 (vol.restrict Ω'') ≤ √S_k.
   set G_total : ℝ :=
     (∫ x in Ω', ∑ l : Fin (Module.finrank ℝ E), ((g_g l) x) ^ 2
       ∂(volume : Measure EuclN) +
@@ -381,7 +361,6 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound
       intro x; exact sq_nonneg _
   have hlam_pos : 0 < B.lam := B.hlam_pos
   have hlam_half_pos : 0 < B.lam / 2 := by linarith
-  -- Use Classical.choose to extract C_k for each k.
   let CkChoice : Fin (Module.finrank ℝ E) → ℝ := fun k => Classical.choose (h_per_k k)
   have CkChoice_spec : ∀ k, 0 ≤ CkChoice k ∧
       ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
@@ -390,7 +369,6 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound
               DifferentialGeometry.Analysis.Sobolev.diffQuot k h (g_g l) x ^ 2
           ∂(volume : Measure EuclN) ≤
           CkChoice k * G_total := fun k => Classical.choose_spec (h_per_k k)
-  -- Define M_bound i k := √((2/λ) · CkChoice k · G_total).
   set M_bound : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
     fun _ k => Real.sqrt ((2 / B.lam) * CkChoice k * G_total) with hM_bound_def
   refine ⟨M_bound, ?_, ?_⟩
@@ -423,7 +401,6 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound
           (2 / B.lam) * (CkChoice k * G_total) := by ring
       rw [h_rhs_eq]
       exact mul_le_mul_of_nonneg_left hk_spec h_factor.le
-    -- Establish integrability of ∑_l (D_h^k g_l)² on (vol.restrict Ω'').
     have h_per_l_int :
         ∀ l : Fin (Module.finrank ℝ E),
           Integrable
@@ -462,7 +439,6 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound
               (d := Module.finrank ℝ E) k h (g_g l) y)^2) x) := by
         funext x; rfl
       rw [h_eq]; exact h_aux
-    -- Apply the per-component sum-to-eLpNorm conversion.
     have h_per_i_sq :
         (eLpNorm (DifferentialGeometry.Analysis.Sobolev.diffQuot
           (d := Module.finrank ℝ E) k h (g_g i)) 2
@@ -536,8 +512,6 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_quantitative
       Metric.cthickening |h| (tsupport η) ⊆ Ω')
     (hη_one_on_Ω'' : ∀ x ∈ Ω'', η x = 1)
     (hΩ''_meas : MeasurableSet Ω'')
-    -- The non-smooth Fréchet–Kolmogorov bound on `D_h^k u_g`.
-    -- Discharged downstream from `u_g ∈ H¹` via the FK lemma.
     (h_FK_diffQuot_u_bound :
       ∀ (k : Fin (Module.finrank ℝ E)),
       ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
@@ -546,8 +520,6 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_quantitative
           ∂(volume : Measure EuclN) ≤
           ∫ x in Ω', ∑ l : Fin (Module.finrank ℝ E), ((g_g l) x) ^ 2
             ∂(volume : Measure EuclN))
-    -- The L² bound on the standard Nirenberg test function.
-    -- Discharged downstream via Minkowski + Fréchet–Kolmogorov.
     (h_v_test_sq_bound :
       ∀ (k : Fin (Module.finrank ℝ E)),
       ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
@@ -560,9 +532,6 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_quantitative
           2 * ∫ x, (η x)^2 *
               (DifferentialGeometry.Analysis.Sobolev.diffQuot k h (g_g k) x)^2
             ∂(volume : Measure EuclN))
-    -- The non-smooth analogue of the master inequality. Discharged
-    -- downstream by mollification + the substitution identity for weak
-    -- solutions.
     (h_master_nonsmooth :
       ∀ (k : Fin (Module.finrank ℝ E)),
       ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
@@ -613,10 +582,6 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_quantitative
               ∫ x in Ω', (f_g x)^2 ∂(volume : Measure EuclN)))) := by
   classical
   intro i k h hh hh_le
-  -- Step 1: Apply the *quantitative* localised non-smooth absorbing
-  -- inequality. It yields the explicit constant
-  -- `nirenbergMasterYoungConstant B N hΩ'_compact k` and the localised
-  -- sum bound on Ω''.
   have habs_pos : 0 < |h| := hh
   have hh_ne : h ≠ 0 := abs_ne_zero.mp (ne_of_gt habs_pos)
   have hk_spec :
@@ -636,11 +601,6 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_quantitative
       (h_FK_diffQuot_u_bound k)
       (h_v_test_sq_bound k)
       (h_master_nonsmooth k) hh_ne hh_le
-  -- Step 2: From the per-k sum bound, extract the per-(i,k) eLpNorm bound.
-  -- The bound is:  (λ/2) ∫_{Ω''} ∑_l (D_h^k g_l)² ≤ C · G_total.
-  -- ⇒ ∫_{Ω''} ∑_l (D_h^k g_l)² ≤ (2/λ) · C · G_total =: S.
-  -- For each i: ∫_{Ω''} (D_h^k g_i)² ≤ ∫_{Ω''} ∑_l ≤ S.
-  -- ⇒ eLpNorm (D_h^k g_i) 2 (vol.restrict Ω'') ≤ √S.
   set G_total : ℝ :=
     (∫ x in Ω', ∑ l : Fin (Module.finrank ℝ E), ((g_g l) x) ^ 2
       ∂(volume : Measure EuclN) +
@@ -687,7 +647,6 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_quantitative
       ring
     rw [h_rhs_eq]
     exact mul_le_mul_of_nonneg_left hk_spec h_factor.le
-  -- Establish integrability of ∑_l (D_h^k g_l)² on (vol.restrict Ω'').
   have h_per_l_int :
       ∀ l : Fin (Module.finrank ℝ E),
         Integrable
@@ -726,7 +685,6 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_quantitative
             (d := Module.finrank ℝ E) k h (g_g l) y)^2) x) := by
       funext x; rfl
     rw [h_eq]; exact h_aux
-  -- Apply the per-component sum-to-eLpNorm conversion.
   have h_per_i_sq :
       (eLpNorm (DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h (g_g i)) 2
@@ -738,7 +696,6 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_quantitative
       (fun l => DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h (g_g l)) h_sum_int i ?_
     exact h_sumInt_le_S
-  -- The headline RHS unfolds (definitionally, via `set`) to `√S`.
   exact eLpNorm_two_le_ofReal_sqrt hS_nn h_per_i_sq
 
 end ChartBilinearUniformDiffQuotBound

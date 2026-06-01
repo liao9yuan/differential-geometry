@@ -45,16 +45,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
-/-! ## Short-time existence for the quasi-linear tensor heat equation
-
-Instantiating the abstract semilinear existence theorem
-`semilinear_mild_solution_existence` with the intrinsic tensor heat semigroup
-and a globally Lipschitz nonlinearity yields a continuous short-time mild
-solution of the quasi-linear tensor heat equation. The abstract Duhamel
-terms `S t u₀` and `S (t - τ) (N (u τ))` unfold definitionally — the
-`toFun` field of `tensorBoundedC0Semigroup` *is* the intrinsic
-tensor heat semigroup — to the concrete heat-semigroup applications. -/
-
 /-- **Short-time existence of a mild solution of the quasi-linear tensor
 heat equation (chart-selection-free).**
 
@@ -77,24 +67,13 @@ theorem tensor_quasilinear_heat_mild_solution_existence_intrinsic
         u t = tensorHeatSemigroup g r s t T_0 +
           ∫ τ in (0:ℝ)..t,
             tensorHeatSemigroup g r s (t - τ) (N (u τ)) := by
-  -- Apply the abstract semilinear existence theorem to the intrinsic
-  -- tensor heat semigroup.
   obtain ⟨T, hT_pos, u, hu_cont, hu_zero, hu_eq⟩ :=
     semilinear_mild_solution_existence
       (tensorBoundedC0Semigroup (I := I) (M := M) g r s) T_0 hN
   refine ⟨T, hT_pos, u, hu_cont, hu_zero, ?_⟩
-  -- The abstract Duhamel terms coincide with the concrete heat-semigroup
-  -- applications by definition of `tensorBoundedC0Semigroup`.
   intro t ht
   have h := hu_eq t ht
   simpa only [tensorBoundedC0Semigroup_intrinsic_apply] using h
-
-/-! ## Uniqueness for the quasi-linear tensor heat equation
-
-Instantiating the abstract semilinear uniqueness theorem
-`semilinear_mild_solution_unique` with the intrinsic tensor heat semigroup:
-two continuous mild solutions on the same interval `[0, T]` with
-`(L : ℝ) * T < 1` coincide. -/
 
 /-- **Uniqueness of the mild solution of the quasi-linear tensor heat
 equation (chart-selection-free).**
@@ -118,8 +97,6 @@ theorem tensor_quasilinear_parabolic_unique
         ∫ τ in (0:ℝ)..t,
           tensorHeatSemigroup g r s (t - τ) (N (v τ))) :
     Set.EqOn u v (Set.Icc 0 T) := by
-  -- Translate the concrete Duhamel equations into the abstract form
-  -- expected by `semilinear_mild_solution_unique`, then apply it.
   refine semilinear_mild_solution_unique
     (tensorBoundedC0Semigroup (I := I) (M := M) g r s) T_0 hN
     hT hTL hu hv ?_ ?_

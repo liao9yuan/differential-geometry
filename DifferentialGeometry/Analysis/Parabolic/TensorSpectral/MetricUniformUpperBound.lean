@@ -75,14 +75,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M]
 
-/-! ## Step 1: equality of trivialisation symm CLMs on the locality neighbourhood
-
-If `chartAt H b = chartAt H b₀`, then the `achart` values at `b` and at
-`b₀` are equal as subtypes of the atlas (proof irrelevance on the second
-component), and consequently the inverse chart-Jacobian centred at `b₀`
-evaluated at `b` equals the coordinate change `coordChange (achart H b₀)
-(achart H b₀) b`, which is the identity by `coordChange_self`. -/
-
 private lemma achart_eq_of_chartAt_eq {b b₀ : M}
     (h_chart : chartAt H b = chartAt H b₀) :
     achart H b = achart H b₀ := by
@@ -105,11 +97,6 @@ private lemma chartJinv_eq_id_of_chartAt_eq
   rw [tangentBundleCore_baseSet, coe_achart]
   exact hb
 
-/-! ## Step 2: rewriting `g.inner b v v` as `chartGramBilin g b₀ b v v`
-
-On the locality neighbourhood `U_{b₀}`, the inverse chart-Jacobian is the
-identity, so `chartGramBilin g b₀ b v v = g.inner b v v` for all `v : E`. -/
-
 /-- On the locality neighbourhood, the bundle metric quadratic form coincides
 with the chart-Gram bilinear quadratic form centred at `b₀`. -/
 private lemma g_inner_eq_chartGramBilin_of_chartAt_eq
@@ -121,14 +108,6 @@ private lemma g_inner_eq_chartGramBilin_of_chartAt_eq
   rw [chartGramBilin_eq_innerJinv (I := I) (M := M) g b₀ b v v]
   rw [chartJinv_eq_id_of_chartAt_eq (I := I) (M := M) h_chart hb]
   rfl
-
-/-! ## Step 3: continuity of `b ↦ chartGramBilin g b₀ b` on the chart base set
-
-The chart-Gram bilinear form is, as a function of `b`, a finite sum of
-matrix-entry-times-constant-CLM terms. Each matrix entry is smooth in `b`
-on the chart base set, and finite sums and scalar-CLM products preserve
-continuity, so the resulting CLM-valued function is continuous on the
-chart base set. -/
 
 private lemma chartGramBilin_continuousOn_chartSource
     (g : SmoothRiemannianMetric I M) (b₀ : M) :
@@ -155,16 +134,12 @@ private lemma chartGramBilin_continuousOn_chartSource
     exact hsmooth.continuousOn
   exact h_entry.smul continuousOn_const
 
-/-! ## Step 4: operator-norm continuity of `b ↦ ‖chartGramBilin g b₀ b‖` -/
-
 private lemma chartGramBilin_norm_continuousOn
     (g : SmoothRiemannianMetric I M) (b₀ : M) :
     ContinuousOn (fun b : M => ‖chartGramBilin (I := I) (M := M) g b₀ b‖)
       (chartAt H b₀).source :=
   continuous_norm.comp_continuousOn
     (chartGramBilin_continuousOn_chartSource (I := I) (M := M) g b₀)
-
-/-! ## Step 5: pointwise upper bound on the locality neighbourhood -/
 
 private lemma g_inner_le_chartGramBilin_norm_sq
     (g : SmoothRiemannianMetric I M) {b b₀ : M}
@@ -184,8 +159,6 @@ private lemma g_inner_le_chartGramBilin_norm_sq
       ≤ |chartGramBilin (I := I) (M := M) g b₀ b v v| := le_abs_self _
     _ ≤ ‖chartGramBilin (I := I) (M := M) g b₀ b‖ * ‖v‖ * ‖v‖ := h_abs_le
     _ = ‖chartGramBilin (I := I) (M := M) g b₀ b‖ * ‖v‖ ^ 2 := by ring
-
-/-! ## Step 6: uniform pointwise bound on a compact subset of the chart source -/
 
 private lemma exists_norm_bound_on_compact_subset_of_chartSource
     (g : SmoothRiemannianMetric I M) (b₀ : M)
@@ -209,20 +182,6 @@ private lemma exists_norm_bound_on_compact_subset_of_chartSource
   have h1 : ‖chartGramBilin (I := I) (M := M) g b₀ b‖ ≤ C :=
     hC ⟨b, hb, rfl⟩
   exact h1.trans (le_max_left _ _)
-
-/-! ## Unconditional chart-Gram bound
-
-The chart-Gram quadratic form is, by the always-true bridge identity
-`chartGramBilin_eq_innerJinv`, the `chartJinv α b`-pullback of the bundle
-metric:
-`chartGramBilin g α b v v = g.inner b (chartJinv α b v) (chartJinv α b v)`,
-so it is non-negative everywhere and coincides with `g.inner b v v` exactly
-where `chartJinv α b = id`. We obtain an unconditional uniform upper bound by
-stating the conclusion directly for the chart-Gram quadratic form and using the
-continuity of `b ↦ chartGramBilin g α b` on the chart source. No finite-atlas
-hypothesis and no compactness/boundaryless typeclass on `M` is required: the
-argument is a single application of the extreme-value theorem on a compact
-subset of one chart source. -/
 
 /-- The chart-Gram quadratic form is non-negative: it is the
 `chartJinv α b`-pullback of the bundle metric, which is non-negative by
@@ -269,21 +228,13 @@ theorem g_inner_sqrt_uniform_upper_bound_on_compact
     ∃ K : ℝ, 0 < K ∧ ∀ b ∈ K_base, ∀ v : E,
       Real.sqrt (chartGramBilin (I := I) (M := M) g α b v v) ≤ K * ‖v‖ := by
   classical
-  -- Uniform operator-norm bound for `b ↦ chartGramBilin g α b` on `K_base`,
-  -- via the (unconditional) continuity of `b ↦ chartGramBilin g α b` on the
-  -- chart source. We re-key `exists_norm_bound_on_compact_subset_of_chartSource`
-  -- onto the *centre* `α` itself: the continuity lemma
-  -- `chartGramBilin_continuousOn_chartSource` already produces an op-norm bound
-  -- on any compact subset of `(chartAt H α).source`, with no locality input.
   obtain ⟨C, hC_nn, h_norm_bound⟩ :=
     exists_norm_bound_on_compact_subset_of_chartSource
       (I := I) (M := M) g α hK_base hK_sub
-  -- Take `K := √C + 1`; strictly positive and majorises `√(chartGramBilin …)`.
   refine ⟨Real.sqrt C + 1, ?_, ?_⟩
   · have h_sqrt_nn : 0 ≤ Real.sqrt C := Real.sqrt_nonneg _
     linarith
   intro b hb v
-  -- Pointwise quadratic-form bound at `b`.
   have h_norm_le : ‖chartGramBilin (I := I) (M := M) g α b‖ ≤ C :=
     h_norm_bound b hb
   have h_norm_sq_nn : 0 ≤ ‖v‖ ^ 2 := sq_nonneg _
@@ -291,7 +242,6 @@ theorem g_inner_sqrt_uniform_upper_bound_on_compact
       chartGramBilin (I := I) (M := M) g α b v v ≤ C * ‖v‖ ^ 2 := by
     refine (chartGramBilin_self_le_norm_sq (I := I) (M := M) g α b v).trans ?_
     exact mul_le_mul_of_nonneg_right h_norm_le h_norm_sq_nn
-  -- Take square roots.
   have h_norm_nn : 0 ≤ ‖v‖ := norm_nonneg _
   have h_sqrt_le :
       Real.sqrt (chartGramBilin (I := I) (M := M) g α b v v) ≤

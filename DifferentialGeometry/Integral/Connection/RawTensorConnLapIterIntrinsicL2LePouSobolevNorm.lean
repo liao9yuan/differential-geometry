@@ -81,19 +81,16 @@ theorem rawTensorConnLapIter_intrinsicL2_le_tensorPouSobolevNorm_sq_one
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤
         C * (tensorPouSobolevNorm (I := I) (M := M) g 1 T) ^ 2 := by
   classical
-  -- Obtain the constant from the base headline.
   obtain ⟨C, hC_ne_top, hbound⟩ :=
     rawTensorConnLap_intrinsicL2_le_tensorPouSobolevNorm_sq (I := I) (M := M) g r s
   refine ⟨C, hC_ne_top, ?_⟩
   intro T
-  -- Pointwise: the first iterate's underlying section equals `rawTensorConnLap` of T.
   have h_iter_section : ∀ x : M,
       (rawTensorConnLapIter (I := I) g r s 1 T).toSection x =
         rawTensorConnLap (I := I) g r s (fun z : M => T.toSection z) x := by
     intro x
     rw [rawTensorConnLapIter_one]
     exact rawTensorConnLapSmooth_toSection_apply (I := I) g r s T x
-  -- Rewrite the LHS integrand via the pointwise identity, then apply the base bound.
   have h_integral_eq :
       ∫⁻ b, ENNReal.ofReal
           (riemannianFiberNormSq (I := I) (M := M) g r s b
@@ -115,8 +112,6 @@ end Integral
 end DifferentialGeometry
 
 end
-
-/-! ## Sanity check: axioms used by the headline. -/
 
 open DifferentialGeometry.Integral.Connection in
 #print axioms rawTensorConnLapIter_intrinsicL2_le_tensorPouSobolevNorm_sq_one

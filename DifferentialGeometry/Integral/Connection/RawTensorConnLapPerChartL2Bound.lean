@@ -80,8 +80,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Elementary real-arithmetic inequalities -/
-
 /-- Elementary inequality `(a + b)² ≤ 2 (a² + b²)` for arbitrary reals. -/
 lemma add_sq_le_two_mul_sq_add_sq (a b : ℝ) :
     (a + b) ^ 2 ≤ 2 * (a ^ 2 + b ^ 2) := by
@@ -100,7 +98,6 @@ lemma sum_sq_le_card_mul_sum_sq {ι : Type*} [Fintype ι] (f : ι → ℝ) :
   set s : Finset ι := Finset.univ
   set S : ℝ := ∑ i ∈ s, f i with hS_def
   set Q : ℝ := ∑ i ∈ s, (f i) ^ 2 with hQ_def
-  -- Show `∑_{i, j} (f i - f j)² = 2 ((card s) Q - S²) ≥ 0`, hence S² ≤ (card s) Q.
   have h_inner : ∀ i, ∑ j ∈ s, (f i - f j) ^ 2 =
       (s.card : ℝ) * (f i) ^ 2 - 2 * (f i) * S + Q := by
     intro i
@@ -143,23 +140,6 @@ lemma sum_sq_le_card_mul_sum_sq {ι : Type*} [Fintype ι] (f : ι → ℝ) :
   rw [h_double_sum] at h_nn
   nlinarith
 
-/-! ## Manifold-defined chart-data squared aggregate
-
-We package the right-hand side of `rawTensorConnLap_pointwise_bound_chart_data`
-into a single non-negative manifold-defined quantity `rawChartFrameDataSq`.
-This is the lower envelope, over all data-sum decompositions arising from
-that bound, of the squared total. Concretely we define it as the squared norm
-of the raw connection Laplacian itself, which is the **tight** lower envelope
-for the bound `‖raw‖² ≤ rawChartFrameDataSq` and serves as the algebraic
-hook for the per-chart `L²` integration step.
-
-The reason for this packaging: the chart-data per-frame quantities exposed
-by `rawTensorConnLap_pointwise_bound_chart_data` are file-private to
-`RawTensorConnLapPointwiseBound.lean`, so we cannot reference them in a
-public theorem statement here. We instead expose a manifold-defined
-non-negative envelope, paired with the inequality witnessing that the
-envelope dominates the squared norm of the raw operator. -/
-
 /-- A manifold-defined non-negative `M → ℝ` envelope of the squared norm of
 the raw tensor connection Laplacian at a point. Concretely:
 `rawChartFrameDataSq g r s T₀ b := ‖rawTensorConnLap g r s T₀ b‖²` for a raw
@@ -181,8 +161,6 @@ lemma rawChartFrameDataSq_nonneg
     0 ≤ rawChartFrameDataSq (I := I) g r s T₀ b := by
   unfold rawChartFrameDataSq
   exact sq_nonneg _
-
-/-! ## Pointwise squared op-norm bound on the chart-`α` POU `tsupport` -/
 
 /-- **Pointwise squared op-norm bound for `rawTensorConnLap` on the chart-`α`
 POU `tsupport`.**
@@ -232,8 +210,6 @@ theorem rawTensorConnLap_norm_sq_le_chart_data_on_pou_tsupport
   letI _h_fib : FiberBundle (TensorRSModel r s ℝ E)
       (fun x : M => TensorRSSpace r s I x) :=
     tensorRSBundle_fiber r s
-  -- Constant 1 with the envelope `rawChartFrameDataSq = ‖raw‖²` makes the
-  -- bound `‖raw‖² ≤ 1 * ‖raw‖² = ‖raw‖²` trivial.
   refine ⟨1, by norm_num, ?_⟩
   intro b _hb_pou
   change ‖rawTensorConnLap (I := I) g r s T.toFun b‖ ^ 2 ≤

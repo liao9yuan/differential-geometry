@@ -104,12 +104,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary
 
-/-! ## File-local Borel-space instances
-
-Match the convention in the surrounding files: `M` and the model space carry
-their canonical Borel σ-algebras. Declared `local` to avoid leaking into
-callers. -/
-
 private local instance instMeasurableSpaceM : MeasurableSpace M := borel M
 
 private local instance instBorelSpaceM :
@@ -127,13 +121,6 @@ private abbrev I_half (n : ℕ) [NeZero n] :
   modelWithCornersEuclideanHalfSpace n
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## Reilly's identity, hypothesis-bearing
-
-Each of the structural ingredients of Reilly's identity is exposed as an
-integrated hypothesis. The proof of the headline identity is then a pure
-linear combination, requiring only basic real-arithmetic manipulation.
--/
 
 /-- **Reilly's identity (hypothesis-bearing form).**
 
@@ -188,11 +175,6 @@ theorem reilly_identity
           (I := I_half n))
     (bdryLap : BoundaryManifold (I_half n) M → ℝ)
     (boundaryNormalDeriv : BoundaryManifold (I_half n) M → ℝ)
-    -- (B) Pointwise Bochner-Weitzenböck identity for `f`, against
-    -- `Δ_g_classical` (the with-boundary divergence of the gradient
-    -- section). The right-hand side uses the Frobenius norm squared of the
-    -- pointwise Hessian, the Ricci tensor evaluated on `(∇f, ∇f)`, and the
-    -- inner product `g(∇f, ∇(Δf))`.
     (h_bochner : ∀ x : M,
       Δ_g_classical (M := M) (n := n) g h_normGradSq_smooth x =
         2 * frobeniusSqFun (I := I_half n) (M := M)
@@ -204,9 +186,6 @@ theorem reilly_identity
                 (gradFun (I := I_half n) g f x)
                 (gradFun (I := I_half n) g
                   (Δ_g_classical (M := M) (n := n) g hf) x))
-    -- (D) Divergence theorem for `|\nabla f|^2`, the integrated form of
-    -- Green's first identity with the constant function `1` against `Δ`-of-
-    -- `|\nabla f|^2`.
     (h_div_thm_normGradSq :
       ∫ x, Δ_g_classical (M := M) (n := n) g h_normGradSq_smooth x
           ∂(riemannianVolumeMeasure (I := I_half n) (M := M) g) =
@@ -217,7 +196,6 @@ theorem reilly_identity
             (gradFun (I := I_half n) g
               (normGradSqFun (I := I_half n) g f) x.val)
           ∂(surfaceMeasure (I := I_half n) (M := M) g))
-    -- (G) Green's first identity for the pair `f, Δf`.
     (h_green_lap :
       ∫ x, (Δ_g_classical (M := M) (n := n) g hf x)^2
           ∂(riemannianVolumeMeasure (I := I_half n) (M := M) g) +
@@ -233,8 +211,6 @@ theorem reilly_identity
                 TangentSpace _ x.val)
               (gradFun (I := I_half n) g f x.val)
           ∂(surfaceMeasure (I := I_half n) (M := M) g))
-    -- (S) Compatibility of the user-supplied normal-derivative function
-    -- `boundaryNormalDeriv` with `g(ν, ∇f)` at each boundary point.
     (h_normalDeriv :
       ∀ x : BoundaryManifold (I_half n) M,
         boundaryNormalDeriv x =
@@ -242,11 +218,6 @@ theorem reilly_identity
             (outwardNormal (I := I_half n) (M := M) g x :
               TangentSpace _ x.val)
             (gradFun (I := I_half n) g f x.val))
-    -- (C) Boundary Codazzi identity. The integrated normal derivative of
-    -- `|\nabla f|^2` over `\partial M` decomposes into terms involving the
-    -- ambient Laplacian and normal derivative on the boundary, the
-    -- second fundamental form on the boundary tangential gradient, and the
-    -- boundary Laplacian against the normal derivative.
     (h_codazzi_boundary :
       ∫ x : BoundaryManifold (I_half n) M,
         g.inner x.val
@@ -266,9 +237,6 @@ theorem reilly_identity
       4 * (∫ x : BoundaryManifold (I_half n) M,
               boundaryNormalDeriv x * bdryLap x
               ∂(surfaceMeasure (I := I_half n) (M := M) g)))
-    -- Integrability hypotheses for the integrals appearing in the
-    -- combinatorial step. These are needed in order to apply the linearity
-    -- of the integral via `integral_add` and `integral_const_mul`.
     (h_int_hess :
       Integrable (fun x : M =>
         frobeniusSqFun (I := I_half n) (M := M)
@@ -307,11 +275,9 @@ theorem reilly_identity
               boundaryNormalDeriv x * bdryLap x
               ∂(surfaceMeasure (I := I_half n) (M := M) g)) := by
   classical
-  -- Set abbreviations for the volume and surface measures.
   set μ : Measure M := riemannianVolumeMeasure (I := I_half n) (M := M) g with hμ_def
   set σ : Measure (BoundaryManifold (I_half n) M) :=
     surfaceMeasure (I := I_half n) (M := M) g with hσ_def
-  -- Set abbreviations for the recurring scalar fields.
   set HessSq : M → ℝ :=
     fun x => frobeniusSqFun (I := I_half n) (M := M)
       (hessFun (I := I_half n) g f) x with hHessSq_def
@@ -328,7 +294,6 @@ theorem reilly_identity
     Δ_g_classical (M := M) (n := n) g h_normGradSq_smooth with hDivNGS_def
   set LapSq : M → ℝ :=
     fun x => (Δ_g_classical (M := M) (n := n) g hf x)^2 with hLapSq_def
-  -- Boundary integrand abbreviations.
   set BdryNGS : BoundaryManifold (I_half n) M → ℝ :=
     fun x =>
       g.inner x.val
@@ -353,7 +318,6 @@ theorem reilly_identity
         (bdryGrad x) (bdryGrad x) with hBdryII_def
   set BdryNormLap : BoundaryManifold (I_half n) M → ℝ :=
     fun x => boundaryNormalDeriv x * bdryLap x with hBdryNormLap_def
-  -- Integrals as scalars.
   set IH : ℝ := ∫ x, HessSq x ∂μ with hIH_def
   set IR : ℝ := ∫ x, Ric x ∂μ with hIR_def
   set IG : ℝ := ∫ x, GfGdf x ∂μ with hIG_def
@@ -364,7 +328,6 @@ theorem reilly_identity
   set JLn : ℝ := ∫ x, BdryLapNorm x ∂σ with hJLn_def
   set JII : ℝ := ∫ x, BdryII x ∂σ with hJII_def
   set JM : ℝ := ∫ x, BdryNormLap x ∂σ with hJM_def
-  -- Step 1: Pointwise Bochner identity, integrated over `M`.
   have h_bochner_int : ID = 2 * IH + 2 * IR + 2 * IG := by
     have h_eq : ∀ x : M, DivNGS x = 2 * HessSq x + 2 * Ric x + 2 * GfGdf x := by
       intro x
@@ -373,7 +336,6 @@ theorem reilly_identity
         ∫ x, DivNGS x ∂μ =
           ∫ x, (2 * HessSq x + 2 * Ric x + 2 * GfGdf x) ∂μ :=
       integral_congr_ae (Filter.Eventually.of_forall h_eq)
-    -- Split the right-hand-side integral.
     have h_int_2H : Integrable (fun x => 2 * HessSq x) μ :=
       h_int_hess.const_mul 2
     have h_int_2R : Integrable (fun x => 2 * Ric x) μ :=
@@ -400,14 +362,11 @@ theorem reilly_identity
       _ = (∫ x, 2 * HessSq x ∂μ) + (∫ x, 2 * Ric x ∂μ) +
             (∫ x, 2 * GfGdf x ∂μ) := h_split
       _ = 2 * IH + 2 * IR + 2 * IG := by rw [hp1, hp2, hp3]
-  -- Step 2: Divergence theorem for `|\nabla f|^2`: ID = JN.
   have h_divthm : ID = JN := by
     rw [hID_def, hJN_def]
     exact h_div_thm_normGradSq
-  -- Step 3: Green's first identity for `(f, Δf)`: IL + IG = JL.
   have h_green : IL + IG = JL := by
     rw [hIL_def, hIG_def, hJL_def]
-    -- Use commutativity of `g.inner` to identify `g(∇Δf, ∇f) = g(∇f, ∇Δf)`.
     have h_swap : ∀ x : M,
         g.inner x
           (gradFun (I := I_half n) g
@@ -431,8 +390,6 @@ theorem reilly_identity
     have h_green_full := h_green_lap
     rw [h_swap_int] at h_green_full
     exact h_green_full
-  -- Step 4: Identify `BdryLapNu = BdryLapNorm` (via the normal-derivative
-  -- compatibility hypothesis `h_normalDeriv`).
   have h_lap_nu_eq : JL = JLn := by
     rw [hJL_def, hJLn_def]
     refine integral_congr_ae (Filter.Eventually.of_forall ?_)
@@ -444,42 +401,21 @@ theorem reilly_identity
           (gradFun (I := I_half n) g f x.val) =
       (Δ_g_classical (M := M) (n := n) g hf) x.val * boundaryNormalDeriv x
     rw [h_normalDeriv x]
-  -- Step 5: Boundary Codazzi identity: JN = 2 JLn - 2 JII + 4 JM.
   have h_codazzi_packed : JN = 2 * JLn - 2 * JII + 4 * JM := by
     rw [hJN_def, hJLn_def, hJII_def, hJM_def]
     exact h_codazzi_boundary
-  -- Step 6: Combine the four identities.
-  -- From h_bochner_int: ID = 2 IH + 2 IR + 2 IG, so 2 IG = ID - 2 IH - 2 IR.
-  -- From h_divthm: ID = JN.
-  -- From h_green: IG = JL - IL = JLn - IL.
-  -- So: 2(JLn - IL) = JN - 2 IH - 2 IR, hence JN = 2 JLn - 2 IL + 2 IH + 2 IR
-  --     = 2 JLn - 2 (IL - IH) + 2 IR.
-  -- Equating with h_codazzi_packed: 2 JLn - 2 JII + 4 JM = 2 JLn - 2 (IL - IH) + 2 IR.
-  -- Hence: -2 JII + 4 JM = -2 (IL - IH) + 2 IR, i.e.,
-  --        IL - IH = IR + JII - 2 JM.
   have h_main : IL - IH = IR + JII - 2 * JM := by
     have h_IG_eq : IG = JLn - IL := by linarith [h_green, h_lap_nu_eq]
     have h_combined : ID = 2 * IH + 2 * IR + 2 * (JLn - IL) := by
       rw [h_bochner_int, h_IG_eq]
     have h_JN_eq : JN = 2 * IH + 2 * IR + 2 * (JLn - IL) := by
       rw [← h_divthm]; exact h_combined
-    -- h_codazzi_packed and h_JN_eq together force IL - IH = IR + JII - 2 JM.
     linarith [h_codazzi_packed, h_JN_eq]
-  -- Step 7: Convert the goal into IL - IH = IR + JII - 2 JM.
-  -- The goal is `∫(LapSq - HessSq) dμ = ∫Ric dμ + ∫BdryII dσ - 2 ∫BdryNormLap dσ`.
-  -- Convert LHS to IL - IH and RHS to IR + JII - 2 JM.
-  -- Goal (in terms of original symbols):
-  --   ∫ ((Δf)² - HessSq) dμ = IR + JII - 2 JM.
-  -- The LHS in `set`-abbreviation form is `IL - IH`, the RHS is
-  -- `IR + JII - 2 JM`. After unfolding both, the goal becomes the
-  -- linear-arithmetic identity `IL - IH = IR + JII - 2 JM` recorded in
-  -- `h_main`.
   have h_lhs : ∫ x, ((Δ_g_classical (M := M) (n := n) g hf x)^2 -
               frobeniusSqFun (I := I_half n) (M := M)
                 (hessFun (I := I_half n) g f) x) ∂μ = IL - IH := by
     rw [integral_sub h_int_lap_sq h_int_hess]
   rw [h_lhs]
-  -- The RHS in original symbols equals `IR + JII - 2 JM` by `set` definitions.
   have h_rhs :
       (∫ x, ricciFun (I := I_half n) g x
               (gradFun (I := I_half n) g f x)

@@ -52,20 +52,10 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Borel-measurable extension of the chart map
-
-`extChartAt I α : M → E` is continuous on the (open) chart source and arbitrary
-outside. We extend it to a Borel-measurable map on `M` by setting it to `0`
-outside the chart source. Because the chart source is open, the piecewise
-function `extChartAtExt α` is Borel-measurable by
-`ContinuousOn.measurable_piecewise`. -/
 
 /-- Borel-measurable extension of `extChartAt I α` to all of `M`, taking `0`
 outside the chart source. -/
@@ -107,12 +97,6 @@ lemma extChartAtExt_measurable (α : M) :
   rw [h_eq]
   exact ContinuousOn.measurable_piecewise h_extChart_continuousOn
     h_const_continuousOn h_src_meas
-
-/-! ## Pullback of a chart-target function to the manifold
-
-Given `v : EuclideanSpace ℝ (Fin (finrank ℝ E)) → ℝ`, we pull it back to a
-function on `M` via `toEuclidean ∘ extChartAt I α`, restricted to the chart
-source (zero outside). Borel-measurability of `v` propagates to the pullback. -/
 
 /-- Pullback of `v : EuclideanSpace ℝ (Fin (finrank ℝ E)) → ℝ` to `M` via the
 chart `α`, extended by `0` outside the chart source. -/
@@ -178,14 +162,6 @@ lemma support_pullbackToManifold_subset (α : M)
   by_contra h_notin
   apply hx
   exact pullbackToManifold_apply_of_notMem (I := I) (α := α) v h_notin
-
-/-! ## Compatibility with `chartPushed`
-
-The chart-pushed function `chartPushed α u(y) = ρ_α(chartSymm y) · u(chartSymm y)`,
-so pulling it back via `pullbackToManifold α` recovers `ρ_α · u` on the chart
-source (and zero off the chart source, where `ρ_α` vanishes by POU
-subordination). This identity is the fundamental link between the chart-target
-Euclidean Sobolev limits and the manifold-side limit construction. -/
 
 lemma pullbackToManifold_chartPushed_apply_of_mem
     [T2Space M] [SigmaCompactSpace M]

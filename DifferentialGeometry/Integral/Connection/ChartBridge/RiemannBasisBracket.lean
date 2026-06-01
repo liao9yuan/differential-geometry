@@ -142,27 +142,6 @@ theorem mlieBracket_chartBasisVec_self_eq_zero (x₀ : M)
   rw [lieBracketWithin_const_const]
   exact ContinuousLinearMap.map_zero _
 
-/-! ## Globally-smooth chart-basis extensions and the bracket-free Riemann reduction
-
-The chart-basis sections `chartBasisVecFiber x i` are smooth only on the trivialization
-base set, so they are not directly admissible as inputs to the *global*-smoothness API of
-the abstract Riemann operator (`riemannOp_apply_smooth`, `covApply_contMDiffOn`). We remedy
-this by bump-extending them to *globally* smooth sections that agree with the chart-basis
-sections on a neighborhood of the base point `x`. Neighborhood agreement is exactly what is
-needed to:
-
-* recover the basis value `e_i` at `x` (pointwise agreement);
-* transfer the chart-basis bracket vanishing (`mlieBracket_chartBasisVec_self_eq_zero`,
-  established above) to the extensions, since the manifold Lie bracket is a local operator;
-* identify `riemannOp (LeviCivita g) x (e_j) (e_k) (e_i)` with the section-level Riemann
-  formula `riemannSec` evaluated on the extensions.
-
-Combining these, the section-level Riemann formula on the extensions drops its
-`∇_{[X, Y]} Z` correction term, yielding the **bracket-free reduction** of the abstract
-Riemann operator on the canonical basis triple. This is the entry point for the iterated
-chart-Christoffel identification.
--/
-
 /-- At the chart basepoint, the canonical tangent-bundle trivialization CLM is the
 identity on `T_x M`. This is the manifold fact `continuousLinearMapAt_trivializationAt`
 specialised to the diagonal, composed with `mfderiv_extChartAt_self`. -/
@@ -213,22 +192,16 @@ theorem exists_smooth_chartBasisExtension (x : M) :
       (∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (X i))) ∧
         (∀ᶠ b in 𝓝 x, ∀ i, X i b = chartBasisVecFiber (I := I) x i b) := by
   classical
-  -- Each chart-basis section is `C^∞` on the trivialization base set, an open neighborhood
-  -- of `x`. Apply the bump-extension lemma.
   have hbase_open : IsOpen (trivializationAt E (TangentSpace I) x).baseSet :=
     (trivializationAt E (TangentSpace I) x).open_baseSet
   have hx_base : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
     mem_baseSet_trivializationAt E (TangentSpace I) x
-  -- Smoothness of each carrier `fun b => chartBasisVecFiber x i b` on the base set,
-  -- as a `ℕ∞`-degree `⊤ = ∞` smoothness (matching the frame-extension lemma's `n : ℕ∞`).
   have hs : ∀ i : Fin (Module.finrank ℝ E),
       ContMDiffOn I (I.prod 𝓘(ℝ, E)) ((⊤ : ℕ∞) : WithTop ℕ∞)
         (T% (fun b : M => chartBasisVecFiber (I := I) x i b))
         (trivializationAt E (TangentSpace I) x).baseSet := by
     intro i
     have h := chartBasisVec_contMDiffOn (I := I) x i
-    -- `chartBasisVec x i = T% (fun b => chartBasisVecFiber x i b)` definitionally, and
-    -- `∞ = ((⊤ : ℕ∞) : WithTop ℕ∞)`.
     simpa using h
   obtain ⟨s', hs'⟩ :=
     exists_contMDiffSection_eqOn_nhd (I := I) (V := TangentSpace I) (n := (⊤ : ℕ∞))
@@ -264,13 +237,10 @@ theorem LeviCivita_chartBasisVec_neighborhood_formula
         (LeviCivita (I := I) g).toFun
           (Connection.covApply (LeviCivita (I := I) g) (X j) (X i)) x (X k x) := by
   classical
-  -- Pointwise agreement at `x`: `X i x = chartBasisVecFiber x i x = (chartModelBasis E) i`.
   have hXx : ∀ i, X i x = (chartModelBasis E) i := by
     intro i
     have hb : ∀ i, X i x = chartBasisVecFiber (I := I) x i x := hXnhds.self_of_nhds
     rw [hb i, chartBasisVecFiber_self_aux (I := I) x i]
-  -- Step 1: `riemannOp ... = riemannSec (LeviCivita g) (X j) (X k) (X i) x`.
-  -- Replace each basis vector by `X _ x`, then apply `riemannOp_apply_smooth`.
   have hsec : riemannOp (cov := LeviCivita (I := I) g) x
       ((chartModelBasis E) j) ((chartModelBasis E) k) ((chartModelBasis E) i) =
       riemannSec (LeviCivita (I := I) g) (X j) (X k) (X i) x := by
@@ -279,9 +249,6 @@ theorem LeviCivita_chartBasisVec_neighborhood_formula
         show ((chartModelBasis E) i : TangentSpace I x) = X i x from (hXx i).symm]
     exact riemannOp_apply_smooth (cov := LeviCivita (I := I) g) (hX j) (hX k) (hX i)
   rw [hsec, riemannSec_def]
-  -- Step 2: the bracket term `∇_{[X_j, X_k]} X_i (x)` vanishes.
-  -- The bracket `mlieBracket I (X j) (X k) x` agrees with the chart-basis bracket at `x`
-  -- by neighborhood agreement, and the latter is `0` by leaf A.
   have hXj_eq : (X j) =ᶠ[𝓝 x] chartBasisVecFiber (I := I) x j := by
     filter_upwards [hXnhds] with b hb using hb j
   have hXk_eq : (X k) =ᶠ[𝓝 x] chartBasisVecFiber (I := I) x k := by
@@ -291,18 +258,7 @@ theorem LeviCivita_chartBasisVec_neighborhood_formula
     rw [Filter.EventuallyEq.mlieBracket_vectorField_eq (I := I) hXj_eq hXk_eq]
     exact mlieBracket_chartBasisVec_self_eq_zero (I := I) x j k
   rw [hbracket]
-  -- The third term of `riemannSec` is `cov.toFun (X i) x 0 = 0`.
   rw [ContinuousLinearMap.map_zero, sub_zero]
-
-/-! ## Iterated chart-Christoffel expansion of the abstract Riemann operator
-
-We discharge the deep basis-coordinate identity by iterating the chart-Christoffel formula
-for `LeviCivita g` twice, starting from the bracket-free reduction
-`LeviCivita_chartBasisVec_neighborhood_formula`. The intermediate section
-`covApply (LeviCivita g) (X k) (X i)` has, near `x`, the chart-coordinate representation
-`∑_m Γ^m{}_{ki}(φ ·) • e_m` (first Christoffel layer); differentiating once more (second
-layer) and re-applying the Christoffel correction yields the chart Riemann tensor after a
-`chartChristoffel_symm` reindexing. -/
 
 open DifferentialGeometry.Integral.DivergenceTheorem
 
@@ -692,9 +648,6 @@ theorem chartRiemannBasisIdentity_LeviCivita [I.Boundaryless]
   have hXx : ∀ p, X p x = (chartModelBasis E) p := by
     intro p
     rw [hXnhds.self_of_nhds p, chartBasisVecFiber_self_aux (I := I) x p]
-  -- The Riemann operator value as an explicit model-basis combination, with the chart
-  -- Riemann entries as coefficients. We prove this vector identity first, then read off
-  -- the `l`-coordinate.
   have hvec :
       (LeviCivita (I := I) g).toFun
           (Connection.covApply (LeviCivita (I := I) g) (X k) (X i)) x (X j x) -
@@ -706,7 +659,6 @@ theorem chartRiemannBasisIdentity_LeviCivita [I.Boundaryless]
     rw [hXx j, hXx k]
     rw [LeviCivita_covApply_secondLayer (I := I) g x i j k hX hXnhds]
     rw [LeviCivita_covApply_secondLayer (I := I) g x i k j hX hXnhds]
-    -- Merge the difference of the two model-basis sums.
     refine Eq.trans (Finset.sum_sub_distrib (s := Finset.univ)
       (f := fun l' : Fin (Module.finrank ℝ E) =>
         (partialDeriv (E := E) j (chartChristoffel (I := I) g x k i l')
@@ -726,12 +678,10 @@ theorem chartRiemannBasisIdentity_LeviCivita [I.Boundaryless]
     rw [← sub_smul]
     refine congrArg (fun t : ℝ => t • (chartModelBasis E) l') ?_
     rw [chartRiemannTensor_def]
-    -- Reindex the partial-derivative lower indices via `chartChristoffel_symm`.
     rw [show chartChristoffel (I := I) g x k i l' = chartChristoffel (I := I) g x i k l' from
       funext (fun y => chartChristoffel_symm (I := I) g x k i l' y)]
     rw [show chartChristoffel (I := I) g x j i l' = chartChristoffel (I := I) g x i j l' from
       funext (fun y => chartChristoffel_symm (I := I) g x j i l' y)]
-    -- Reindex the product-sum factors via `chartChristoffel_symm`, then close by `ring`.
     rw [show (∑ m : Fin (Module.finrank ℝ E),
           chartChristoffel (I := I) g x j m l' (extChartAt I x x) *
             chartChristoffel (I := I) g x k i m (extChartAt I x x)) =

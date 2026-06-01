@@ -59,9 +59,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Bounds on the Euclidean partial derivatives by the iterated Fréchet
-derivative operator norms. -/
-
 /-- For a scalar function `f` on the Euclidean model space, the squared single
 Euclidean partial `∂_m f y` is bounded by the operator norm squared of
 `fderiv ℝ f y`. (No differentiability hypothesis is needed: when `f` is not
@@ -88,8 +85,6 @@ private lemma euclidPartial_sq_le_fderiv_sq
       |euclidPartial (E := E) m f y| ^ 2 := (sq_abs _).symm
   rw [h_sq]
   exact pow_le_pow_left₀ (abs_nonneg _) h_abs 2
-
-/-! ## Headline -/
 
 /-- **Uniform-in-`T₀` bound on the squared chart-`α` `(Idx, Jdx)` raw scalar
 component of the raw tensor connection Laplacian.**
@@ -141,15 +136,12 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
                          T₀ α Idx' Jdx')
                        ((toEuclidean (E := E)) ((extChartAt I α) b))) ^ 2)) := by
   classical
-  -- Local notation: dimension `n`, cardinalities of the multi-index sums.
   let n : ℕ := Module.finrank ℝ E
   have hn_def : n = Module.finrank ℝ E := rfl
   let cardI : ℕ := Fintype.card (Fin r → Fin (Module.finrank ℝ E))
   have hcardI_def : cardI = Fintype.card (Fin r → Fin (Module.finrank ℝ E)) := rfl
   let cardJ : ℕ := Fintype.card (Fin s → Fin (Module.finrank ℝ E))
   have hcardJ_def : cardJ = Fintype.card (Fin s → Fin (Module.finrank ℝ E)) := rfl
-  -- The compact subset of `chartTargetEuclid α`: the chart-`α` image of the
-  -- partition-of-unity tsupport, transferred to the Euclidean chart target.
   set K_set : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
     (fun b : M => (toEuclidean (E := E)) ((extChartAt I α) b)) ''
       tsupport (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
@@ -158,11 +150,9 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
     pouTsupport_image_isCompact (I := I) (M := M) α
   have hK_sub : K_set ⊆ chartTargetEuclid (I := I) (M := M) α :=
     pouTsupport_image_subset_chartTargetEuclid (I := I) (M := M) α
-  -- Apply the `T₀`-linear formula.
   obtain ⟨C_2, C_1, C_0, hC2_cd, hC1_cd, hC0_cd, hformula⟩ :=
     rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
       (I := I) (M := M) g r s α idx jdx
-  -- Pre-extract per-coefficient sup-bounds on `K_set`.
   have h_each_C2 : ∀ kl : Fin n × Fin n, ∃ C : ℝ, 0 ≤ C ∧
       ∀ y ∈ K_set, |C_2 kl.1 kl.2 y| ≤ C := by
     intro kl
@@ -183,7 +173,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
     exact exists_sup_bound_of_contDiffOn_on_compact_subset hK_compact hK_sub
       (hC0_cd p.1 p.2)
   choose C0_fn hC0_fn_nn hC0_fn_bd using h_each_C0
-  -- Take uniform sups across the (finite) index sets.
   set B2 : ℝ :=
     (Finset.univ : Finset (Fin n × Fin n)).sup' Finset.univ_nonempty C2_fn
     with hB2_def
@@ -231,30 +220,23 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
       (Finset.le_sup'_of_le C0_fn
         (Finset.mem_univ (⟨I', J'⟩ : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E))))
         (le_refl _))
-  -- The big universal constant. Each block contributes a non-negative quantity,
-  -- and the total absorbs all three.
   refine ⟨3 * ((n : ℝ) ^ 4 * B2 ^ 2 +
       (cardI : ℝ) * (cardJ : ℝ) * (n : ℝ) ^ 2 * B1 ^ 2 +
       (cardI : ℝ) * (cardJ : ℝ) * B0 ^ 2),
     by positivity, ?_⟩
   intro T₀ b hb_inter
-  -- Apply the `T₀`-linear identity at `b`.
   have hidentity := hformula T₀ hb_inter
-  -- Abbreviate the chart-Euclidean image of `b`.
   set y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) :=
     (toEuclidean (E := E)) ((extChartAt I α) b) with hy_def
-  -- `y ∈ K_set` since `b ∈ tsupport (POU α)`.
   have hb_tsupp : b ∈ tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) := hb_inter.1
   have hy_K : y ∈ K_set := ⟨b, hb_tsupp, rfl⟩
-  -- Membership of `y` in the open chart-Euclidean target (used for `ContDiffAt`).
   have hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α := hK_sub hy_K
   have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) α
   have hy_mem_nhds : (chartTargetEuclid (I := I) (M := M) α) ∈ nhds y :=
     h_open.mem_nhds hy_target
-  -- Shorthand for the three RHS pieces.
   set lhs : ℝ := tensorChartComponentRaw (I := I) (M := M) g r s
       (rawTensorConnLapSmooth (I := I) g r s T₀) α idx jdx b with hlhs_def
   set Block2 : ℝ := ∑ k : Fin n, ∑ l : Fin n,
@@ -277,11 +259,9 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
         chartPushedRaw I α
           (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J') y
     with hBlock0_def
-  -- The identity: `lhs = Block2 + Block1 + Block0`.
   have h_lhs_eq : lhs = Block2 + Block1 + Block0 := by
     simp only [hlhs_def, hBlock2_def, hBlock1_def, hBlock0_def, hy_def]
     exact hidentity
-  -- Shorthand for per-multi-index RHS summand pieces.
   set N_iter : (Fin r → Fin (Module.finrank ℝ E)) → (Fin s → Fin (Module.finrank ℝ E)) → ℝ :=
     fun I' J' =>
       ‖iteratedFDeriv ℝ 2
@@ -312,7 +292,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
     with hBigSum_def
   have hBigSum_nn : 0 ≤ BigSum :=
     Finset.sum_nonneg (fun _ _ => Finset.sum_nonneg (fun _ _ => hH_nn _ _))
-  -- `ContDiffAt` for the chart-pushed raw component family.
   have h_chartPushed_cd_at_2 : ∀ (I' : Fin r → Fin (Module.finrank ℝ E)) (J' : Fin s → Fin (Module.finrank ℝ E)),
       ContDiffAt ℝ 2 (chartPushedRaw I α
         (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J')) y := by
@@ -323,9 +302,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
         (I := I) (M := M) g r s T₀ α I' J').contDiffAt hy_mem_nhds
     apply h_inf.of_le
     decide
-  -- ============================================================
-  -- Step A. Bound `Block2² ≤ n⁴ · B2² · N_iter idx jdx²`.
-  -- ============================================================
   set f_ij : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
     chartPushedRaw I α
       (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α idx jdx)
@@ -395,9 +371,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
     have : ((n : ℝ) ^ 2 * B2 * ‖iteratedFDeriv ℝ 2 f_ij y‖) ^ 2 =
         (n : ℝ) ^ 4 * B2 ^ 2 * ‖iteratedFDeriv ℝ 2 f_ij y‖ ^ 2 := by ring
     rw [this]
-  -- ============================================================
-  -- Step B. Bound `Block1²`.
-  -- ============================================================
   have h_Block1_abs : |Block1| ≤
       B1 * ((n : ℝ) *
         ∑ I' : Fin r → Fin (Module.finrank ℝ E), ∑ J' : Fin s → Fin (Module.finrank ℝ E), N_fd I' J') := by
@@ -509,9 +482,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
             B1 * N_fd I' J' := h_sum_le
       _ = B1 * ((n : ℝ) *
             ∑ I' : Fin r → Fin (Module.finrank ℝ E), ∑ J' : Fin s → Fin (Module.finrank ℝ E), N_fd I' J') := h_rewrite
-  -- ============================================================
-  -- Step C. Bound `Block0²`.
-  -- ============================================================
   have h_Block0_abs : |Block0| ≤
       B0 * (∑ I' : Fin r → Fin (Module.finrank ℝ E), ∑ J' : Fin s → Fin (Module.finrank ℝ E), |R0 I' J'|) := by
     have h_each : ∀ (I' : Fin r → Fin (Module.finrank ℝ E)) (J' : Fin s → Fin (Module.finrank ℝ E)),
@@ -545,16 +515,11 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
             B0 * |R0 I' J'| := h_sum_le
       _ = B0 * (∑ I' : Fin r → Fin (Module.finrank ℝ E), ∑ J' : Fin s → Fin (Module.finrank ℝ E), |R0 I' J'|) :=
           h_sum_factor
-  -- ============================================================
-  -- Step D. Aggregate via the standard `(a+b+c)² ≤ 3(a²+b²+c²)` trick,
-  -- followed by Cauchy-Schwarz and constant-bookkeeping.
-  -- ============================================================
   have h_lhs_sq_le : lhs ^ 2 ≤
       3 * (Block2 ^ 2 + Block1 ^ 2 + Block0 ^ 2) := by
     rw [h_lhs_eq]
     nlinarith [sq_nonneg (Block2 - Block1), sq_nonneg (Block2 - Block0),
       sq_nonneg (Block1 - Block0)]
-  -- Per-block CS bounds reducing to the unified RHS sums.
   set S_iter : ℝ := ∑ I' : Fin r → Fin (Module.finrank ℝ E), ∑ J' : Fin s → Fin (Module.finrank ℝ E),
       (N_iter I' J') ^ 2 with hS_iter_def
   set S_fd : ℝ := ∑ I' : Fin r → Fin (Module.finrank ℝ E), ∑ J' : Fin s → Fin (Module.finrank ℝ E),
@@ -567,11 +532,9 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
     Finset.sum_nonneg (fun _ _ => Finset.sum_nonneg (fun _ _ => sq_nonneg _))
   have hS_raw_nn : 0 ≤ S_raw :=
     Finset.sum_nonneg (fun _ _ => Finset.sum_nonneg (fun _ _ => sq_nonneg _))
-  -- `BigSum = S_iter + S_fd + S_raw`.
   have hBigSum_eq : BigSum = S_iter + S_fd + S_raw := by
     simp only [hBigSum_def, hH_def, hS_iter_def, hS_fd_def, hS_raw_def,
       ← Finset.sum_add_distrib]
-  -- Bound `‖iterFD 2 f_ij y‖² ≤ S_iter` (single summand of nonneg sum).
   have h_iter_dom_f_ij :
       ‖iteratedFDeriv ℝ 2 f_ij y‖ ^ 2 ≤ S_iter := by
     have h_le_inner :
@@ -591,15 +554,12 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
       simp only [hf_ij_def, hN_iter_def]
     rw [h_eq_LHS]
     exact h_le_inner.trans h_le_outer
-  -- `Block2² ≤ n⁴ · B2² · S_iter`.
   have h_Block2_via_S : Block2 ^ 2 ≤ (n : ℝ) ^ 4 * B2 ^ 2 * S_iter := by
     have h_nn : 0 ≤ (n : ℝ) ^ 4 * B2 ^ 2 := by positivity
     exact h_Block2_sq.trans
       (mul_le_mul_of_nonneg_left h_iter_dom_f_ij h_nn)
-  -- `Block1² ≤ cardI · cardJ · n² · B1² · S_fd` via Cauchy-Schwarz.
   have h_Block1_via_S : Block1 ^ 2 ≤
       (cardI : ℝ) * (cardJ : ℝ) * (n : ℝ) ^ 2 * B1 ^ 2 * S_fd := by
-    -- Step 1: `Block1² ≤ (B1 · n · Σ N_fd)²`.
     have hN_fd_sum_nn :
         0 ≤ ∑ I' : Fin r → Fin (Module.finrank ℝ E), ∑ J' : Fin s → Fin (Module.finrank ℝ E), N_fd I' J' :=
       Finset.sum_nonneg (fun _ _ =>
@@ -609,7 +569,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
           ∑ I' : Fin r → Fin (Module.finrank ℝ E), ∑ J' : Fin s → Fin (Module.finrank ℝ E), N_fd I' J')) ^ 2 := by
       rw [show Block1 ^ 2 = |Block1| ^ 2 from (sq_abs _).symm]
       exact pow_le_pow_left₀ (abs_nonneg _) h_Block1_abs 2
-    -- Step 2: Cauchy-Schwarz on the double sum: `(Σ N_fd)² ≤ (cardI · cardJ) · Σ N_fd²`.
     have h_cs : (∑ I' : Fin r → Fin (Module.finrank ℝ E), ∑ J' : Fin s → Fin (Module.finrank ℝ E), N_fd I' J') ^ 2 ≤
         ((cardI : ℝ) * (cardJ : ℝ)) * S_fd := by
       have h_card :
@@ -644,7 +603,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
       rw [h_const_eq] at h_cs_simple
       rw [h_card] at h_cs_simple
       exact h_cs_simple
-    -- Combine.
     have h_expand : (B1 * ((n : ℝ) *
         ∑ I' : Fin r → Fin (Module.finrank ℝ E), ∑ J' : Fin s → Fin (Module.finrank ℝ E), N_fd I' J')) ^ 2 =
         B1 ^ 2 * (n : ℝ) ^ 2 *
@@ -660,7 +618,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
             have h_nn : 0 ≤ B1 ^ 2 * (n : ℝ) ^ 2 := by positivity
             exact mul_le_mul_of_nonneg_left h_cs h_nn
       _ = (cardI : ℝ) * (cardJ : ℝ) * (n : ℝ) ^ 2 * B1 ^ 2 * S_fd := by ring
-  -- `Block0² ≤ cardI · cardJ · B0² · S_raw` via Cauchy-Schwarz.
   have h_Block0_via_S : Block0 ^ 2 ≤
       (cardI : ℝ) * (cardJ : ℝ) * B0 ^ 2 * S_raw := by
     have h_step1 : Block0 ^ 2 ≤
@@ -723,17 +680,12 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
             have h_nn : 0 ≤ B0 ^ 2 := sq_nonneg _
             exact mul_le_mul_of_nonneg_left h_cs h_nn
       _ = (cardI : ℝ) * (cardJ : ℝ) * B0 ^ 2 * S_raw := by ring
-  -- ============================================================
-  -- Step E. Final combine.
-  -- ============================================================
-  -- `S_*` ≤ BigSum.
   have h_S_iter_le_BigSum : S_iter ≤ BigSum := by
     rw [hBigSum_eq]; linarith [hS_fd_nn, hS_raw_nn]
   have h_S_fd_le_BigSum : S_fd ≤ BigSum := by
     rw [hBigSum_eq]; linarith [hS_iter_nn, hS_raw_nn]
   have h_S_raw_le_BigSum : S_raw ≤ BigSum := by
     rw [hBigSum_eq]; linarith [hS_iter_nn, hS_fd_nn]
-  -- Block bounds via BigSum.
   have h_Block2_BigSum : Block2 ^ 2 ≤ (n : ℝ) ^ 4 * B2 ^ 2 * BigSum := by
     have h_nn : 0 ≤ (n : ℝ) ^ 4 * B2 ^ 2 := by positivity
     exact h_Block2_via_S.trans
@@ -749,7 +701,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
     have h_nn : 0 ≤ (cardI : ℝ) * (cardJ : ℝ) * B0 ^ 2 := by positivity
     exact h_Block0_via_S.trans
       (mul_le_mul_of_nonneg_left h_S_raw_le_BigSum h_nn)
-  -- Sum the three block bounds.
   have h_sum_blocks : Block2 ^ 2 + Block1 ^ 2 + Block0 ^ 2 ≤
       ((n : ℝ) ^ 4 * B2 ^ 2 +
         (cardI : ℝ) * (cardJ : ℝ) * (n : ℝ) ^ 2 * B1 ^ 2 +
@@ -762,7 +713,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
       (cardI : ℝ) * (cardJ : ℝ) * B0 ^ 2 * BigSum := by ring
     rw [h_expand]
     linarith
-  -- Final calc.
   have h_final : lhs ^ 2 ≤
       3 * ((n : ℝ) ^ 4 * B2 ^ 2 +
         (cardI : ℝ) * (cardJ : ℝ) * (n : ℝ) ^ 2 * B1 ^ 2 +
@@ -777,7 +727,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
       _ = 3 * ((n : ℝ) ^ 4 * B2 ^ 2 +
             (cardI : ℝ) * (cardJ : ℝ) * (n : ℝ) ^ 2 * B1 ^ 2 +
             (cardI : ℝ) * (cardJ : ℝ) * B0 ^ 2) * BigSum := by ring
-  -- The current goal matches `lhs ^ 2 ≤ K * BigSum` definitionally.
   exact h_final
 
 section

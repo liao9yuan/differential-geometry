@@ -43,14 +43,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Subtraction lemma for the scalar component -/
 
 /-- The chart-frame scalar component intertwines pointwise subtraction. -/
 lemma tensorChartComponentScalar_sub
@@ -63,7 +59,6 @@ lemma tensorChartComponentScalar_sub
           g r s S₁ α Idx Jdx x -
         tensorChartComponentScalar (I := I) (M := M)
           g r s S₂ α Idx Jdx x) := by
-  -- Rewrite `S₁ - S₂` as `S₁ + ((-1 : ℝ) • S₂)` and chain `_add` and `_smul`.
   have h_sub_eq : S₁ - S₂ = S₁ + ((-1 : ℝ) • S₂) := by
     rw [neg_one_smul]; abel
   rw [h_sub_eq]
@@ -73,8 +68,6 @@ lemma tensorChartComponentScalar_sub
   rw [tensorChartComponentScalar_smul (I := I) (M := M)
     g r s (-1 : ℝ) S₂ α Idx Jdx]
   ring
-
-/-! ## Measurability of scalar components -/
 
 private lemma tensorChartComponentScalar_aestronglyMeasurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -86,8 +79,6 @@ private lemma tensorChartComponentScalar_aestronglyMeasurable
       (riemannianVolumeMeasure (I := I) (M := M) g) :=
   (tensorChartComponentScalar_contMDiff (I := I) (M := M)
     g r s S α Idx Jdx).continuous.aestronglyMeasurable
-
-/-! ## Triangle bound on a component difference via a common `L²` limit -/
 
 private lemma eLpNorm_diff_le_via_common_limit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -123,7 +114,6 @@ private lemma eLpNorm_diff_le_via_common_limit
     tensorChartComponentScalar_aestronglyMeasurable
       (I := I) (M := M) g r s S₂ α Idx Jdx
   have h_u : AEStronglyMeasurable u_lim μ := h_lim_memLp.1
-  -- Rewrite `f₁ - f₂ = (f₁ - u_lim) - (f₂ - u_lim)` pointwise.
   have h_eq : (fun b => f₁ b - f₂ b) =
       (fun b => f₁ b - u_lim b) - (fun b => f₂ b - u_lim b) := by
     funext b
@@ -132,8 +122,6 @@ private lemma eLpNorm_diff_le_via_common_limit
   rw [h_eq]
   have hp : (1 : ℝ≥0∞) ≤ 2 := by norm_num
   exact eLpNorm_sub_le (hf₁.sub h_u) (hf₂.sub h_u) hp
-
-/-! ## Per-triple convergence of `eLpNorm` of component differences to zero -/
 
 private lemma eLpNorm_diff_tendsto_zero_of_tendsto_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -160,7 +148,6 @@ private lemma eLpNorm_diff_tendsto_zero_of_tendsto_zero
             tensorChartComponentScalar (I := I) (M := M)
               g r s (S (φ j)).toCcTensor α Idx Jdx b)
           2 (riemannianVolumeMeasure (I := I) (M := M) g) ≤ ε := by
-  -- Pick `N` so that each term beyond `N` is `≤ ε / 2`.
   have hε_half : (0 : ℝ≥0∞) < ε / 2 := ENNReal.div_pos hε.ne' (by norm_num)
   have h_eventually :
       ∀ᶠ j in Filter.atTop, eLpNorm
@@ -196,8 +183,6 @@ private lemma eLpNorm_diff_tendsto_zero_of_tendsto_zero
   have h_half : ε / 2 + ε / 2 = ε := ENNReal.add_halves ε
   exact h_tri.trans (h_sum.trans (le_of_eq h_half))
 
-/-! ## Tensor `L²` Cauchy property via the per-triple convergence -/
-
 /-- The squared `L²` norm of a tensor section difference is bounded by
 a uniform constant times the sum of squared `eLpNorm` differences of
 the chart-frame scalar components. -/
@@ -223,23 +208,17 @@ private lemma tensorL2_diff_sq_le_const_mul_sum_componentDiff_sq
       (I := I) (M := M) g r s
   refine ⟨C, hC_nn, ?_⟩
   intro S₁ S₂
-  -- Apply the headline to `S₁ - S₂` and rewrite the component scalar
-  -- under the `_sub` linearity.
   have h := h_bound (S₁ - S₂)
   rw [SmoothCcTensor.norm_def]
   refine h.trans ?_
   refine mul_le_mul_of_nonneg_left ?_ hC_nn
-  -- Rewrite each summand using `tensorChartComponentScalar_sub`.
   refine Finset.sum_le_sum fun α _ => ?_
   refine Finset.sum_le_sum fun Idx _ => ?_
   refine Finset.sum_le_sum fun Jdx _ => ?_
-  -- The two sides agree by congruence under `tensorChartComponentScalar_sub`.
   have h_sub :=
     tensorChartComponentScalar_sub (I := I) (M := M)
       g r s S₁ S₂ α Idx Jdx
   rw [h_sub]
-
-/-! ## Cauchy property of the diagonalised subsequence -/
 
 /-- The diagonal subsequence (viewed through the underlying
 `SmoothCcTensor`) is Cauchy in the tensor `L²` Hilbert space. -/
@@ -272,7 +251,6 @@ private lemma cauchySeq_tensorL2_of_componentBounded
   set K : ℕ := Sf.card *
       ((Finset.univ : Finset (Fin r → Fin (Module.finrank ℝ E))).card) *
       ((Finset.univ : Finset (Fin s → Fin (Module.finrank ℝ E))).card)
-  -- Per-component `δ > 0` chosen so that `C * K * δ² ≤ (ε/2)²`.
   set δ : ℝ := (ε / 2) / Real.sqrt ((C + 1) * (K + 1 : ℝ))
   have hCK_pos : 0 < (C + 1) * (K + 1 : ℝ) :=
     mul_pos (by linarith) (by positivity)
@@ -282,7 +260,6 @@ private lemma cauchySeq_tensorL2_of_componentBounded
   have hδ_pos : 0 < δ := div_pos hε_half_pos h_sqrt_pos
   have hδ_ennreal_pos : (0 : ℝ≥0∞) < ENNReal.ofReal δ := by
     rw [ENNReal.ofReal_pos]; exact hδ_pos
-  -- Per-triple convergence gives an `N(α, Idx, Jdx)` for each triple.
   have h_per_N : ∀ α ∈ Sf,
       ∀ (Idx : Fin r → Fin (Module.finrank ℝ E))
         (Jdx : Fin s → Fin (Module.finrank ℝ E)),
@@ -301,7 +278,6 @@ private lemma cauchySeq_tensorL2_of_componentBounded
       (I := I) (M := M) g r s (S := S) α Idx Jdx (φ := φ)
       (u_lim := u_lim) hu_lim_memLp h_tendsto
       (ENNReal.ofReal δ) hδ_ennreal_pos
-  -- Choose `N` as the max over the (finite) triple set.
   let triples : Finset (M × (Fin r → Fin (Module.finrank ℝ E)) ×
       (Fin s → Fin (Module.finrank ℝ E))) :=
     Sf ×ˢ ((Finset.univ : Finset (Fin r → Fin (Module.finrank ℝ E))) ×ˢ
@@ -315,8 +291,6 @@ private lemma cauchySeq_tensorL2_of_componentBounded
   let Nmax : ℕ := triples.attach.sup (fun ⟨t, ht⟩ => N t ht)
   refine ⟨Nmax, ?_⟩
   intro i hi j hj
-  -- Pass `dist (coe S₁) (coe S₂)` through to `‖S₁ - S₂‖` via the
-  -- coercion-additivity and norm-preservation of the completion.
   rw [dist_eq_norm,
     show ((S (φ i)).toCcTensor : TensorL2 r s g) -
             ((S (φ j)).toCcTensor : TensorL2 r s g) =
@@ -326,7 +300,6 @@ private lemma cauchySeq_tensorL2_of_componentBounded
     UniformSpace.Completion.norm_coe]
   have h_norm_sq_le :=
     h_const_bound (S (φ i)).toCcTensor (S (φ j)).toCcTensor
-  -- The triple sum of a constant `δ²` equals `K · δ²`.
   have h_K_delta_sq_eq :
       ∑ _α ∈ Sf, ∑ _Idx : Fin r → Fin (Module.finrank ℝ E),
           ∑ _Jdx : Fin s → Fin (Module.finrank ℝ E), δ ^ 2 =
@@ -356,7 +329,6 @@ private lemma cauchySeq_tensorL2_of_componentBounded
     refine Finset.sum_le_sum fun α hα => ?_
     refine Finset.sum_le_sum fun Idx _ => ?_
     refine Finset.sum_le_sum fun Jdx _ => ?_
-    -- Apply the per-triple bound.
     have ht_mem : (α, Idx, Jdx) ∈ triples :=
       Finset.mem_product.mpr ⟨hα,
         Finset.mem_product.mpr ⟨Finset.mem_univ _, Finset.mem_univ _⟩⟩
@@ -367,7 +339,6 @@ private lemma cauchySeq_tensorL2_of_componentBounded
       simpa [Nmax] using this
     have h_eLp_le := hN (α, Idx, Jdx) ht_mem i
       (h_N_le_Nmax.trans hi) j (h_N_le_Nmax.trans hj)
-    -- Convert the ENN bound to a real bound on toReal.
     have h_toReal_le : (eLpNorm
         (fun b => tensorChartComponentScalar (I := I) (M := M)
             g r s (S (φ i)).toCcTensor α Idx Jdx b -
@@ -377,7 +348,6 @@ private lemma cauchySeq_tensorL2_of_componentBounded
       have := ENNReal.toReal_mono ENNReal.ofReal_ne_top h_eLp_le
       rw [ENNReal.toReal_ofReal hδ_pos.le] at this
       exact this
-    -- And it is non-negative.
     have h_toReal_nn : 0 ≤ (eLpNorm
         (fun b => tensorChartComponentScalar (I := I) (M := M)
             g r s (S (φ i)).toCcTensor α Idx Jdx b -
@@ -386,23 +356,17 @@ private lemma cauchySeq_tensorL2_of_componentBounded
         (riemannianVolumeMeasure (I := I) (M := M) g)).toReal :=
       ENNReal.toReal_nonneg
     nlinarith [h_toReal_le, h_toReal_nn, hδ_pos.le, sq_nonneg δ]
-  -- Combine the bounds.
   have h_norm_sq_le' :
       ‖((S (φ i)).toCcTensor - (S (φ j)).toCcTensor :
           SmoothCcTensor g r s)‖ ^ 2 ≤ C * ((K : ℝ) * δ ^ 2) := by
     refine h_norm_sq_le.trans ?_
     exact mul_le_mul_of_nonneg_left h_sum_le hC_nn
-  -- Bound `C * (K * δ²) < ε²`.
   have h_norm_lt : ‖((S (φ i)).toCcTensor - (S (φ j)).toCcTensor :
       SmoothCcTensor g r s)‖ < ε := by
     have h_norm_nn : 0 ≤ ‖((S (φ i)).toCcTensor - (S (φ j)).toCcTensor :
         SmoothCcTensor g r s)‖ := norm_nonneg _
-    -- It is enough to show the squared bound `‖·‖² < ε²`.
     have h_eps_sq_pos : 0 < ε ^ 2 := sq_pos_of_pos hε
     have h_target_sq : C * ((K : ℝ) * δ ^ 2) ≤ (ε / 2) ^ 2 := by
-      -- `δ = (ε / 2) / √((C+1)(K+1))`, so `δ² = (ε/2)² / ((C+1)(K+1))`.
-      -- Then `C K δ² = C K (ε/2)² / ((C+1)(K+1)) ≤ (ε/2)²` since
-      -- `C K ≤ (C+1)(K+1)`.
       have hδ_sq : δ ^ 2 = (ε / 2) ^ 2 / ((C + 1) * (K + 1 : ℝ)) := by
         change ((ε / 2) / Real.sqrt ((C + 1) * (K + 1 : ℝ))) ^ 2 =
           (ε / 2) ^ 2 / ((C + 1) * (K + 1 : ℝ))
@@ -422,14 +386,11 @@ private lemma cauchySeq_tensorL2_of_componentBounded
     have h_sq_le : ‖((S (φ i)).toCcTensor - (S (φ j)).toCcTensor :
         SmoothCcTensor g r s)‖ ^ 2 ≤ (ε / 2) ^ 2 :=
       h_norm_sq_le'.trans h_target_sq
-    -- Square root: `‖x‖ ≤ ε/2 < ε`.
     have h_norm_le : ‖((S (φ i)).toCcTensor - (S (φ j)).toCcTensor :
         SmoothCcTensor g r s)‖ ≤ ε / 2 :=
       abs_le_of_sq_le_sq' h_sq_le hε_half_pos.le |>.2
     linarith [h_norm_le, hε.le]
   exact h_norm_lt
-
-/-! ## Headline theorem -/
 
 /-- **Headline theorem.** For a closed Riemannian manifold `(M, g)` and a
 sequence `S : ℕ → SmoothCcTensorH1 g r s` of smooth compactly-supported
@@ -462,8 +423,6 @@ theorem tensorH1Compl_to_tensorL2_relatively_compact
       (I := I) (M := M) g r s (S := S) (R := R) hu_bdd
   obtain ⟨T_lim, h_tendsto_T⟩ := cauchySeq_tendsto_of_complete h_cauchy
   refine ⟨φ, hφ_mono, T_lim, ?_⟩
-  -- Rewrite each subsequence term via the bridge
-  -- `TensorH1ComplToTensorL2 (smoothToTensorH1Compl S) = (S.toCcTensor : TensorL2)`.
   have h_norm_tendsto : Filter.Tendsto
       (fun j => ‖((S (φ j)).toCcTensor : TensorL2 r s g) - T_lim‖)
       Filter.atTop (𝓝 0) :=

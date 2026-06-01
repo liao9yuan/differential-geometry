@@ -33,14 +33,10 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Auxiliary: image of a compact subset of the chart source under `extChartAt` -/
 
 /-- If `K ⊆ (chartAt H α).source` is compact, then `(extChartAt I α) '' K`
 is compact in `E` and contained in the chart target. -/
@@ -74,8 +70,6 @@ lemma image_extChartAt_tsupport_subset_image_K
   rintro y ⟨x, hx, rfl⟩
   exact ⟨x, hu_supp hx, rfl⟩
 
-/-! ## Forward bridge with a uniform constant on `K ⊆ M` -/
-
 /-- Forward bridge inequality at the level of `eLpNorm`s with a uniform
 constant. The constant `C` depends only on `α`, `g`, and a fixed compact
 `K ⊆ (chartAt H α).source` of `M`, and is uniform in `u` with `tsupport u ⊆ K`. -/
@@ -96,8 +90,7 @@ theorem eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw_uniform_of
                   (chartTargetEuclid (I := I) (M := M) α)) := by
   classical
   by_cases hK_ne : K.Nonempty
-  · -- Apply the existing E-side uniform theorem with K_E = (extChartAt I α) '' K.
-    obtain ⟨hK_E_compact, hK_E_sub_target⟩ :=
+  · obtain ⟨hK_E_compact, hK_E_sub_target⟩ :=
       image_extChartAt_compact_subset_target_of_subset
         (I := I) (M := M) (K := K) (α := α) hK_compact hK_sub
     have hK_E_ne : ((extChartAt I α) '' K).Nonempty := hK_ne.image _
@@ -111,8 +104,7 @@ theorem eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw_uniform_of
       image_extChartAt_tsupport_subset_image_K (I := I) (u := u) (K := K) (α := α)
         hu_supp
     exact hC_bnd hu_meas hu_chart_supp hu_K_E
-  · -- K is empty: tsupport u ⊆ K = ∅ ⟹ u = 0 ⟹ both eLpNorms are 0.
-    rw [Set.not_nonempty_iff_eq_empty] at hK_ne
+  · rw [Set.not_nonempty_iff_eq_empty] at hK_ne
     refine ⟨1, one_pos, ?_⟩
     intro u _ hu_supp
     have hu_supp_empty : tsupport u ⊆ ∅ := by rw [← hK_ne]; exact hu_supp
@@ -123,8 +115,6 @@ theorem eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw_uniform_of
       exact image_eq_zero_of_notMem_tsupport hx_notsupp
     rw [hu_zero, eLpNorm_zero]
     exact zero_le _
-
-/-! ## Reverse bridge with a uniform constant on `K ⊆ M` -/
 
 /-- Reverse bridge inequality at the level of `eLpNorm`s with a uniform
 constant. The constant `C` depends only on `α`, `g`, and a fixed compact
@@ -146,8 +136,7 @@ theorem eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of
                   (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)) := by
   classical
   by_cases hK_ne : K.Nonempty
-  · -- Apply the E-side uniform reverse theorem with K_E = (extChartAt I α) '' K.
-    obtain ⟨hK_E_compact, hK_E_sub_target⟩ :=
+  · obtain ⟨hK_E_compact, hK_E_sub_target⟩ :=
       image_extChartAt_compact_subset_target_of_subset
         (I := I) (M := M) (K := K) (α := α) hK_compact hK_sub
     have hK_E_ne : ((extChartAt I α) '' K).Nonempty := hK_ne.image _
@@ -161,8 +150,7 @@ theorem eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of
       image_extChartAt_tsupport_subset_image_K (I := I) (u := u) (K := K) (α := α)
         hu_supp
     exact hC_bnd hu_meas hu_chart_supp hu_K_E
-  · -- K is empty: tsupport u ⊆ K = ∅ ⟹ u = 0 ⟹ chartPushedRaw u = 0 ⟹ LHS = 0.
-    rw [Set.not_nonempty_iff_eq_empty] at hK_ne
+  · rw [Set.not_nonempty_iff_eq_empty] at hK_ne
     refine ⟨1, one_pos, ?_⟩
     intro u _ hu_supp
     have hu_supp_empty : tsupport u ⊆ ∅ := by rw [← hK_ne]; exact hu_supp
@@ -171,7 +159,6 @@ theorem eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of
       funext x
       have hx_notsupp : x ∉ tsupport u := by rw [hu_supp_eq]; simp
       exact image_eq_zero_of_notMem_tsupport hx_notsupp
-    -- chartPushedRaw I α 0 = 0 pointwise.
     have hchartPushedRaw_zero :
         chartPushedRaw I α u = (fun _ => (0 : ℝ)) := by
       rw [hu_zero]

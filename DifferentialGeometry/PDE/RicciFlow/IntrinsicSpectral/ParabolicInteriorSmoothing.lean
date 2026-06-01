@@ -95,22 +95,12 @@ open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ} {a : ℝ} {T : ℝ}
-
-/-! ## The per-mode mass families
-
-After the spatial spectral decomposition the `Hᶜ`-Sobolev mass of a time-`L²`
-field decouples mode by mode: the `i`-th contribution is the weight `(1 + λᵢ)ᶜ`
-times the `L²(0,T)` mass `‖timeModeCoeff f i‖²` of the `i`-th eigen-coordinate.
-Summability of this family over the spectrum is exactly membership of the field
-in `L²([0,T]; Hᶜ)`. -/
 
 /-- The per-mode **forcing mass** at spatial Sobolev order `c`:
 `(1 + λᵢ)ᶜ · ‖timeModeCoeff f i‖²`, the `i`-th contribution to the squared
@@ -142,15 +132,6 @@ lemma solFieldMass_nonneg (hT : 0 ≤ T)
     0 ≤ solFieldMass (I := I) (M := M) hT f c i :=
   mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i c) (sq_nonneg _)
 
-/-! ## The one-step two-derivative gain at the mass level
-
-The per-mode two-derivative-gain bound `weighted_solModeCoeff_le`
-(`solFieldMass f (c + 2) i ≤ (1 + T)² · forcingMass f c i`) dominates the
-solution-mass family at order `c + 2` by `(1 + T)²` times the forcing-mass
-family at order `c`.  Summability of the latter therefore forces summability of
-the former: the Duhamel solution gains two spatial Sobolev orders over its
-forcing, uniformly across the spectrum. -/
-
 /-- **The per-mode two-derivative gain.**  For `0 ≤ T`,
 
   `solFieldMass f (c + 2) i ≤ (1 + T)² · forcingMass f c i`
@@ -162,19 +143,12 @@ theorem solFieldMass_le_forcingMass (hT : 0 ≤ T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     solFieldMass (I := I) (M := M) hT f (c + 2) i ≤
       (1 + T) ^ 2 * forcingMass (I := I) (M := M) f c i := by
-  -- Re-expand `weighted_solModeCoeff_le` (stated with the generic forcing order
-  -- written `a`); the bound is uniform in that order, so it applies at `c`.
   have hbound :
       tensorSobolevWeight (I := I) (M := M) i (c + 2) *
           ‖solModeCoeff (I := I) (M := M) (a := a) hT f i‖ ^ 2 ≤
         (1 + T) ^ 2 * (tensorSobolevWeight (I := I) (M := M) i c *
           ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2) := by
-    -- `weighted_solModeCoeff_le` proves exactly this with `c` in place of `a`.
     have h := weighted_solModeCoeff_le (I := I) (M := M) (a := a) hT f i
-    -- The statement of `weighted_solModeCoeff_le` uses the *forcing's* scale `a`
-    -- for the weight only as a dummy exponent; the per-mode inequality
-    -- `(1 + λ)^{c+2}·‖φ‖² ≤ (1 + T)²·(1 + λ)ᶜ·‖f‖²` follows from the same
-    -- algebraic chain.  We redo it directly to be order-agnostic.
     have hperMode := one_add_lambda_mul_norm_solModeCoeff_le (I := I) (M := M)
       (a := a) hT f i
     set lam := TensorEigenIdx.lambda (I := I) (M := M) i with hlam_def
@@ -184,14 +158,12 @@ theorem solFieldMass_le_forcingMass (hT : 0 ≤ T)
       tensorSobolevWeight_nonneg (I := I) (M := M) i c
     have hsol_nn : 0 ≤ ‖solModeCoeff (I := I) (M := M) (a := a) hT f i‖ :=
       norm_nonneg _
-    -- `(1 + λ)^{c+2} = (1 + λ)ᶜ · (1 + λ)²`.
     have hweight_split :
         tensorSobolevWeight (I := I) (M := M) i (c + 2) =
           tensorSobolevWeight (I := I) (M := M) i c * (1 + lam) ^ 2 := by
       rw [tensorSobolevWeight, tensorSobolevWeight, hlam_def,
         Real.rpow_add hbase_pos,
         show ((2 : ℝ)) = ((2 : ℕ) : ℝ) from by norm_num, Real.rpow_natCast]
-    -- The squared per-mode estimate `((1 + λ)·‖φ‖)² ≤ ((1 + T)·‖f‖)²`.
     have hsq : ((1 + lam) *
           ‖solModeCoeff (I := I) (M := M) (a := a) hT f i‖) ^ 2 ≤
         ((1 + T) * ‖timeModeCoeff (I := I) (M := M) f i‖) ^ 2 := by
@@ -228,21 +200,6 @@ theorem solFieldMass_summable_of_forcingMass_summable (hT : 0 ≤ T)
     (fun i => solFieldMass_le_forcingMass (I := I) (M := M) hT f c i)
     (hf.mul_left ((1 + T) ^ 2))
 
-/-! ## The net one-order bootstrap step
-
-The two-derivative gain alone does not improve regularity: it merely says the
-solution is two orders above the forcing.  The improvement comes from coupling
-it with the **first-order loss** of the nonlinearity.  For a solution `u` of the
-quasilinear equation `∂_t u = Δ_∇ u + N(u)`, the forcing is `f = N(u)`, and `N`
-first-order means `‖N(u)‖_{Hᶜ} ≲ ‖u‖_{H^{c+1}}`: in integrated, per-mode form,
-the forcing masses at order `c` are summable whenever the *solution* masses at
-order `c + 1` are.  This is the hypothesis `hcouple` below — a genuine property
-of the operator `N`, not the conclusion of the bootstrap.
-
-Composing: solution masses summable at order `c + 1`  ⟹ (first-order coupling)
-forcing masses summable at order `c`  ⟹ (two-derivative gain) solution masses
-summable at order `c + 2`.  Net gain: `c + 1 ↦ c + 2`. -/
-
 /-- **The net one-order bootstrap step.**  Suppose the forcing `f` and the
 solution-field of `f` are coupled by the first-order loss of the nonlinearity:
 for every order `d`, if the solution masses at order `d + 1` are summable then
@@ -262,12 +219,6 @@ theorem solFieldMass_summable_succ (hT : 0 ≤ T)
     Summable (solFieldMass (I := I) (M := M) hT f (c + 2)) :=
   solFieldMass_summable_of_forcingMass_summable (I := I) (M := M) hT f c
     (hcouple c hc)
-
-/-! ## The all-orders bootstrap
-
-Iterating the net one-order step from the base regularity `b` reaches every
-order `b + n`, `n : ℕ`.  This is a straightforward induction on `n`, the only
-analytic input being the per-step gain `solFieldMass_summable_succ`. -/
 
 /-- **The all-orders interior-smoothing bootstrap (mass level).**  Suppose:
 
@@ -292,7 +243,6 @@ theorem solFieldMass_summable_bootstrap (hT : 0 ≤ T)
   induction n with
   | zero => simpa using hbase
   | succ k ih =>
-    -- `b + (k + 1) = (b + k − 1) + 2` and `b + k = (b + k − 1) + 1`.
     have hstep := solFieldMass_summable_succ (I := I) (M := M) hT f (b + k - 1)
       hcouple
     have hrw1 : (b + (k : ℝ) - 1) + 1 = b + (k : ℝ) := by ring
@@ -315,16 +265,13 @@ theorem solFieldMass_summable_all (hT : 0 ≤ T)
     (hbase : Summable (solFieldMass (I := I) (M := M) hT f b)) :
     ∀ σ : ℝ, Summable (solFieldMass (I := I) (M := M) hT f σ) := by
   intro σ
-  -- Choose `n : ℕ` with `b + n ≥ σ`.
   obtain ⟨n, hn⟩ := exists_nat_ge (σ - b)
   have hσ_le : σ ≤ b + n := by linarith
   have hgain := solFieldMass_summable_bootstrap (I := I) (M := M) hT f
     hcouple hbase n
-  -- Dominate the order-`σ` masses by the order-`(b + n)` masses.
   refine Summable.of_nonneg_of_le
     (fun i => solFieldMass_nonneg (I := I) (M := M) hT f σ i)
     (fun i => ?_) hgain
-  -- `(1 + λᵢ)^σ ≤ (1 + λᵢ)^{b+n}` since `σ ≤ b + n` and `1 + λᵢ ≥ 1`.
   have hbase_ge : (1 : ℝ) ≤ 1 + TensorEigenIdx.lambda (I := I) (M := M) i :=
     one_le_one_add_lambda (I := I) (M := M) i
   have hwle : tensorSobolevWeight (I := I) (M := M) i σ ≤
@@ -332,15 +279,6 @@ theorem solFieldMass_summable_all (hT : 0 ≤ T)
     Real.rpow_le_rpow_of_exponent_le hbase_ge hσ_le
   simpa only [solFieldMass] using
     mul_le_mul_of_nonneg_right hwle (sq_nonneg _)
-
-/-! ## The headline interior-smoothing statement
-
-The all-orders mass summability is exactly membership of the Duhamel solution
-field in `L²([0,T]; Hˢ)` for *every* spatial Sobolev order `σ`.  We package it
-as the existence, for each `σ ≥ 0`, of an honest time-`L²` field at scale `σ`
-whose eigen-coordinates are the solution coordinates `i ↦ solModeCoeff hT f i`.
-This is the precise statement that the solution lies in
-`L²((0,T]; ⋂_σ Hˢ)` — spatial smoothness in the interior. -/
 
 /-- The order-`σ` solution-field synthesised from the per-mode solution
 coordinates `i ↦ solModeCoeff hT f i`, available once the order-`σ` masses are

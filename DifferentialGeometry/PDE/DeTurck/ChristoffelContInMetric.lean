@@ -60,8 +60,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## Determinant continuity in the metric -/
-
 /-- **Determinant of the chart Gram matrix is continuous in the metric.**
 
 If at the chart point `y` each chart-Gram entry `t ↦ chartGramOnE (g_DT t) α i j y`
@@ -76,7 +74,6 @@ theorem chartGramOnE_det_continuous_in_metric_at
       (fun t : ℝ => (Matrix.of fun i j => chartGramOnE (I := I) (g_DT t) α i j y).det)
       s := by
   classical
-  -- Rewrite the determinant via the Leibniz permutation expansion.
   have hrewrite :
       (fun t : ℝ => (Matrix.of fun i j => chartGramOnE (I := I) (g_DT t) α i j y).det)
         = fun t : ℝ =>
@@ -88,18 +85,13 @@ theorem chartGramOnE_det_continuous_in_metric_at
     rw [Matrix.det_apply]
     simp [Units.smul_def]
   rw [hrewrite]
-  -- A finite sum of continuous summands.
   refine continuousOn_finset_sum _ (fun σ _ => ?_)
   refine ContinuousOn.mul continuousOn_const ?_
-  -- A finite product of continuous factors.
   refine continuousOn_finset_prod _ (fun k _ => ?_)
-  -- Each factor is `chartGramOnE (g_DT t) α (σ k) k y`, continuous by hypothesis.
   have h := h_entry (σ k) k
   refine h.congr ?_
   intro t _
   rfl
-
-/-! ## Adjugate continuity in the metric -/
 
 /-- **Each adjugate entry of the chart Gram matrix is continuous in the metric.**
 
@@ -118,7 +110,6 @@ theorem chartGramOnE_adjugate_continuous_in_metric_at
         (Matrix.of fun a b => chartGramOnE (I := I) (g_DT t) α a b y).adjugate i j)
       s := by
   classical
-  -- `adjugate A i j = det (A.updateRow j (Pi.single i 1))`.
   have hrewrite :
       (fun t : ℝ =>
           (Matrix.of fun a b => chartGramOnE (I := I) (g_DT t) α a b y).adjugate i j)
@@ -136,8 +127,7 @@ theorem chartGramOnE_adjugate_continuous_in_metric_at
   refine ContinuousOn.mul continuousOn_const ?_
   refine continuousOn_finset_prod _ (fun k _ => ?_)
   by_cases hσk : σ k = j
-  · -- Replaced row: constant standard-basis vector.
-    have heq :
+  · have heq :
         (fun t : ℝ =>
             ((Matrix.of fun a b => chartGramOnE (I := I) (g_DT t) α a b y).updateRow j
               (Pi.single i (1 : ℝ))) (σ k) k)
@@ -147,8 +137,7 @@ theorem chartGramOnE_adjugate_continuous_in_metric_at
       rw [hσk, Matrix.updateRow_self]
     rw [heq]
     exact continuousOn_const
-  · -- Untouched row: a Gram-entry, continuous by hypothesis.
-    have heq :
+  · have heq :
         (fun t : ℝ =>
             ((Matrix.of fun a b => chartGramOnE (I := I) (g_DT t) α a b y).updateRow j
               (Pi.single i (1 : ℝ))) (σ k) k)
@@ -161,15 +150,6 @@ theorem chartGramOnE_adjugate_continuous_in_metric_at
     refine h.congr ?_
     intro t _
     rfl
-
-/-! ## Inverse Gram matrix continuity in the metric
-
-The inverse Gram matrix `G⁻¹ i j = (det G)⁻¹ · adjugate G i j` (Cramer's rule)
-is continuous in `t` whenever the entries are continuous and `det G ≠ 0`.
-
-The non-vanishing condition is supplied by positive-definiteness of `g_DT t` at
-the chart point, which we package as the chart-`α` base-set membership of the
-corresponding manifold point `x := (extChartAt I α).symm y`. -/
 
 /-- **The chart inverse Gram entry is continuous in the metric.**
 
@@ -187,8 +167,6 @@ theorem chartInvGramOnE_continuous_in_metric_at
     (i j : Fin (Module.finrank ℝ E)) :
     ContinuousOn (fun t : ℝ => chartInvGramOnE (I := I) (g_DT t) α i j y) s := by
   classical
-  -- The chart Gram matrix here equals the `Matrix.of`-version of `chartGramOnE`.
-  -- For brevity, abbreviate.
   set Gmat : ℝ → Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
     fun t => Matrix.of fun a b => chartGramOnE (I := I) (g_DT t) α a b y with hGmat_def
   have hGmat_eq : ∀ t, Gmat t = chartGramMatrix (I := I) (g_DT t) α
@@ -198,18 +176,12 @@ theorem chartInvGramOnE_continuous_in_metric_at
     rw [hGmat_def]
     simp only [Matrix.of_apply]
     rw [chartGramOnE_def]
-  -- Rewrite `chartInvGramOnE` via Cramer's rule.
-  -- `chartInvGramOnE (g_DT t) α i j y = chartInvGramMatrix (g_DT t) α ((extChartAt I α).symm y) i j`
-  -- and on the base set this is `(det G)⁻¹ * adjugate G i j` for `G = chartGramMatrix (g_DT t) α ...`.
   have hcongr : ∀ t ∈ s,
       chartInvGramOnE (I := I) (g_DT t) α i j y =
         ((Gmat t).det)⁻¹ * (Gmat t).adjugate i j := by
     intro t _
-    -- Unfold to `chartInvGramMatrix` at the corresponding manifold point.
     rw [chartInvGramOnE_def]
-    -- Apply Cramer's rule. `chartInvGramMatrix g α x = (chartGramMatrix g α x)⁻¹`.
     unfold chartInvGramMatrix
-    -- Positivity: `(chartGramMatrix (g_DT t) α x).det > 0`.
     have hpos := chartGramMatrix_det_pos (I := I) (g_DT t) α hx
     have hdet_ne : (chartGramMatrix (I := I) (g_DT t) α
         ((extChartAt I α).symm y)).det ≠ 0 := ne_of_gt hpos
@@ -221,15 +193,11 @@ theorem chartInvGramOnE_continuous_in_metric_at
       ((Gmat t).det)⁻¹ * (Gmat t).adjugate i j
     rw [Matrix.smul_apply, smul_eq_mul]
     rw [hGmat_eq t]
-    -- Need `Ring.inverse a = a⁻¹` for `a : ℝ`.
     congr 1
     exact Ring.inverse_eq_inv _
-  -- Continuity of the Cramer expression.
   refine ContinuousOn.congr ?_ hcongr
   refine ContinuousOn.mul ?_ ?_
-  · -- `(det · )⁻¹` is continuous on `s` because the determinant is non-vanishing and continuous.
-    -- Apply `ContinuousOn.inv₀`.
-    have hdet_cont : ContinuousOn (fun t : ℝ => (Gmat t).det) s := by
+  · have hdet_cont : ContinuousOn (fun t : ℝ => (Gmat t).det) s := by
       have h := chartGramOnE_det_continuous_in_metric_at (I := I) g_DT α y s h_entry
       exact h
     refine hdet_cont.inv₀ ?_
@@ -240,15 +208,7 @@ theorem chartInvGramOnE_continuous_in_metric_at
       rw [hGmat_eq t]
     rw [this]
     exact ne_of_gt hpos
-  · -- The adjugate entry is continuous on `s` by the previous lemma.
-    exact chartGramOnE_adjugate_continuous_in_metric_at (I := I) g_DT α y s h_entry i j
-
-/-! ## Christoffel-symbol continuity in the metric
-
-`chartChristoffel (g_DT t) α a b k y` is a finite sum of products of (a) an
-inverse-Gram entry, continuous in `t` by `chartInvGramOnE_continuous_in_metric_at`,
-and (b) partial derivatives of chart Gram entries, continuous in `t` by hypothesis.
-The whole expression is therefore continuous in `t`. -/
+  · exact chartGramOnE_adjugate_continuous_in_metric_at (I := I) g_DT α y s h_entry i j
 
 /-- **The chart Christoffel symbol is continuous in the metric.**
 
@@ -272,7 +232,6 @@ theorem chartChristoffel_continuous_in_metric_at
     (a b k : Fin (Module.finrank ℝ E)) :
     ContinuousOn (fun t : ℝ => chartChristoffel (I := I) (g_DT t) α a b k y) s := by
   classical
-  -- Expand the Christoffel definition.
   have hrewrite : (fun t : ℝ => chartChristoffel (I := I) (g_DT t) α a b k y) =
       fun t : ℝ =>
         (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
@@ -283,33 +242,21 @@ theorem chartChristoffel_continuous_in_metric_at
     funext t
     rw [chartChristoffel_def]
   rw [hrewrite]
-  -- A constant times a finite sum, each summand continuous.
   refine ContinuousOn.mul continuousOn_const ?_
   refine continuousOn_finset_sum _ (fun l _ => ?_)
   refine ContinuousOn.mul ?_ ?_
-  · -- The inverse Gram entry, viewed at the manifold point `(extChartAt I α).symm y`.
-    -- Rewrite as `chartInvGramOnE (g_DT t) α k l y` and use the previous lemma.
-    have hcongr : (fun t : ℝ => chartInvGramMatrix (I := I) (g_DT t) α
+  · have hcongr : (fun t : ℝ => chartInvGramMatrix (I := I) (g_DT t) α
             ((extChartAt I α).symm y) k l)
         = fun t : ℝ => chartInvGramOnE (I := I) (g_DT t) α k l y := by
       funext t
       rfl
     rw [hcongr]
     exact chartInvGramOnE_continuous_in_metric_at (I := I) g_DT α y s h_entry hx k l
-  · -- The bracket of three partial derivatives, each continuous in `t` by hypothesis.
-    refine ContinuousOn.sub ?_ ?_
+  · refine ContinuousOn.sub ?_ ?_
     · refine ContinuousOn.add ?_ ?_
       · exact h_partial a l b
       · exact h_partial b l a
     · exact h_partial l a b
-
-/-! ## Chart-coordinate DeTurck-VF component continuity in the metric
-
-`chartDeTurckVFComp g g' α k y = ∑_{a,b} G(g)^{ab}(y) · (Γ^k_{ab}(g)(y) − Γ^k_{ab}(g')(y))`,
-a finite double sum whose factors are (a) the chart inverse Gram entry of `g_DT t`,
-and (b) the difference of `g_DT t`-Christoffel and a fixed background Christoffel
-of `g'`.  Both are continuous in `t` (the background Christoffel is constant in
-`t`), so the whole expression is continuous in `t`. -/
 
 /-- **The chart-coordinate DeTurck-VF component is continuous in the evolving
 metric.**
@@ -333,7 +280,6 @@ theorem chartDeTurckVFComp_continuous_in_metric_at
       (fun t : ℝ =>
         DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT t) g' α k y) s := by
   classical
-  -- Expand the chart-component definition.
   have hrewrite :
       (fun t : ℝ => DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT t) g' α k y)
         = fun t : ℝ =>
@@ -344,15 +290,11 @@ theorem chartDeTurckVFComp_continuous_in_metric_at
     funext t
     rw [DeTurckLinearization.chartDeTurckVFComp_def]
   rw [hrewrite]
-  -- A finite double sum of products.
   refine continuousOn_finset_sum _ (fun a _ => ?_)
   refine continuousOn_finset_sum _ (fun b _ => ?_)
-  -- Inverse Gram entry × (Christoffel(g_DT t) − Christoffel(g'))
   refine ContinuousOn.mul ?_ ?_
-  · -- Inverse Gram entry, continuous in `t`.
-    exact chartInvGramOnE_continuous_in_metric_at (I := I) g_DT α y s h_entry hx a b
-  · -- Christoffel difference: first term varies in `t`, second is constant.
-    refine ContinuousOn.sub ?_ ?_
+  · exact chartInvGramOnE_continuous_in_metric_at (I := I) g_DT α y s h_entry hx a b
+  · refine ContinuousOn.sub ?_ ?_
     · exact chartChristoffel_continuous_in_metric_at (I := I) g_DT α y s h_entry h_partial hx a b k
     · exact continuousOn_const
 

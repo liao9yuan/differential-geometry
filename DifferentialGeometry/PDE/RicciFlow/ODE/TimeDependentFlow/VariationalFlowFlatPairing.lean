@@ -177,42 +177,28 @@ theorem variational_flow_flat_pairing_hasDerivAt
           (mfderiv I I (Φ_fam t : M → M) x w)
         + metricTransportResidual (I := I) g X Φ_fam t x v w) t := by
   classical
-  -- Abbreviations (the basepoint, the two frozen pushforwards, the two flat slot values).
-  -- All tangent-position abbreviations are typed `TangentSpace I α` (= `E` definitionally),
-  -- so the additive instance matches `g.inner α`'s domain throughout (avoiding the
-  -- `TangentSpace I α = E` additive-instance diamond in `map_add`/`map_neg`).
   set α := Φ_fam t x with hα
   set dΦv : TangentSpace I α := mfderiv I I (Φ_fam t : M → M) x v with hdΦv
   set dΦw : TangentSpace I α := mfderiv I I (Φ_fam t : M → M) x w with hdΦw
   set Vflat : TangentSpace I α := T'v dΦv + P'v v with hVflat
   set Wflat : TangentSpace I α := T'w dΦw + P'w w with hWflat
   set Xα : E := chartE_section_repr (I := I) α (X : ∀ y : M, TangentSpace I y) α with hXα
-  -- The covariant per-slot values and the basepoint Christoffel corrections.
   set nablaV : TangentSpace I α :=
     (LeviCivita (I := I) g) (X : ∀ y : M, TangentSpace I y) α dΦv with hnablaV
   set nablaW : TangentSpace I α :=
     (LeviCivita (I := I) g) (X : ∀ y : M, TangentSpace I y) α dΦw with hnablaW
   set Cv : TangentSpace I α := christoffelCorrection (I := I) g α α Xα dΦv with hCv
   set Cw : TangentSpace I α := christoffelCorrection (I := I) g α α Xα dΦw with hCw
-  -- Restate the per-slot flat-to-covariant residuals in the abbreviated form
-  -- (`negCovariantSlotValue g X Φ_fam t x v = -nablaV` by definition).  The `set Vflat`
-  -- has already folded the LHS of `hcorr_v`/`hcorr_w` to `Vflat`/`Wflat`.
   have hcorr_v' : Vflat = -nablaV + Cv := by
     rw [hcorr_v]; rfl
   have hcorr_w' : Wflat = -nablaW + Cw := by
     rw [hcorr_w]; rfl
-  -- The genuine derivative of the frozen-metric moving-pushforward inner product is the
-  -- flat product rule against the fixed bilinear form `g.inner α`.
   have h_total :=
     variational_flow_inner_total_derivative (I := I) g Φ_fam t x v w Vflat Wflat hv_flat hw_flat
-  -- The product-rule derivative value is `g_α(Vflat, dΦw) + g_α(dΦv, Wflat)`.
-  -- Identify that value with `-lieDerivMetric + metricTransportResidual`.
   have hval :
       g.inner α Vflat dΦw + g.inner α dΦv Wflat
         = -lieDerivMetric (I := I) g X α dΦv dΦw
           + metricTransportResidual (I := I) g X Φ_fam t x v w := by
-    -- Slot-1: `g_α(Vflat, dΦw) = -g_α(∇V, dΦw) + g_α(Cv, dΦw)`.
-    -- Bilinearity of `g.inner α` in the first slot, with `Vflat = -nablaV + Cv`.
     have hbil1 : (g.inner α) (-nablaV + Cv)
         = -(g.inner α) nablaV + (g.inner α) Cv := by
       rw [ContinuousLinearMap.map_add (g.inner α) _ _,
@@ -221,24 +207,20 @@ theorem variational_flow_flat_pairing_hasDerivAt
         = -g.inner α nablaV dΦw + g.inner α Cv dΦw := by
       rw [hcorr_v', hbil1, ContinuousLinearMap.add_apply,
         ContinuousLinearMap.neg_apply]
-    -- Slot-2: `g_α(dΦv, Wflat) = -g_α(dΦv, ∇W) + g_α(dΦv, Cw)`.
     have hslot2 : g.inner α dΦv Wflat
         = -g.inner α dΦv nablaW + g.inner α dΦv Cw := by
       rw [hcorr_w', ContinuousLinearMap.map_add (g.inner α dΦv) _ _,
         ContinuousLinearMap.map_neg (g.inner α dΦv) _]
-    -- The Cartan value: `-(g_α(∇V,dΦw) + g_α(dΦv,∇W)) = -lieDerivMetric`.
     have hcartan :
         -g.inner α nablaV dΦw + -g.inner α dΦv nablaW
           = -lieDerivMetric (I := I) g X α dΦv dΦw := by
       rw [hnablaV, hnablaW]
       exact (neg_lieDerivMetric_eq_neg_killing_sum (I := I) g X α dΦv dΦw).symm
-    -- The residual is the symmetric Christoffel pairing.
     have hres : g.inner α Cv dΦw + g.inner α dΦv Cw
         = metricTransportResidual (I := I) g X Φ_fam t x v w := by
       rw [metricTransportResidual, hCv, hCw, hXα]
     rw [hslot1, hslot2, ← hcartan, ← hres]
     ring
-  -- Transport the derivative value.
   rwa [hval] at h_total
 
 /-- **Flat-route pushforward-slot derivative (within-set form).**

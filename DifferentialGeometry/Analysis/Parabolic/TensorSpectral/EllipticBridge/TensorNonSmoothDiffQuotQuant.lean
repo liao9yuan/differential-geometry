@@ -71,33 +71,12 @@ open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.ChartH2NonSmooth
 open DifferentialGeometry.Analysis.Sobolev
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Headline: quantitative non-smooth interior `H²` regularity for a tensor
-chart component
-
-The chart `P₀`-component of a non-smooth `(r, s)`-tensor field, packaged as
-`TensorChartBilinearH1ComplData g r s α P₀`, is by construction a thin wrapper
-around the scalar divergence-form data `toChartData : ChartBilinearH1ComplData g α`.
-The projections `D.weak_partial`, `D.u_chart`, `D.f_chart` are definitionally
-the corresponding fields of `D.toChartData`, and the per-component variational
-identity uses the scalar principal symbol `weightedInvGramOnEuclid g α`. Hence
-the scalar quantitative interior-regularity engine
-`h2_chart_loc_of_data_quantitative` applies verbatim to `D.toChartData`, and
-its conclusion — the explicit-constant Nirenberg extraction of weak second
-partials in `L²(Ω'')` with the chart-geometric constant `C_geom` — transports
-to the tensor data structure without any new analysis. -/
 
 /-- **Quantitative non-smooth interior `H²`/`W^{2,2}_loc` regularity for a
 tensor chart component.**
@@ -168,23 +147,13 @@ theorem tensor_h2_chart_loc_of_data_quantitative
               + (eLpNorm D.f_chart 2
                   ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2)) := by
   classical
-  -- The scalar quantitative engine produces a chart-geometric constant
-  -- `C_geom`, uniform over the scalar bilinear data, depending only on the
-  -- chart geometry (`g`, `α`, `Ω'`, `η`), never on `D`.
   obtain ⟨C_geom, hC_geom_nn, hC_geom⟩ := h2_chart_loc_of_data_quantitative
     (I := I) (M := M) (g := g) (α := α)
     hη hη_supp hη_range hN h_fderiv_eta hΩ' hΩ'_chart hΩ'_compact
     hη_in_Ω' hR₀_pos hh_supp_in_Ω' hη_one_on_Ω'' hΩ''_open hΩ''_compact_closure
     h_room
-  -- The tensor projections `D.weak_partial`, `D.u_chart`, `D.f_chart` are
-  -- definitionally the corresponding fields of `D.toChartData`, so the scalar
-  -- quantitative conclusion applies verbatim to the underlying scalar data
-  -- structure, and the `DATA` energy expression matches by definitional
-  -- unfolding.
   refine ⟨C_geom, hC_geom_nn, fun D i k => ?_⟩
   exact hC_geom D.toChartData i k
-
-/-! ## Sanity tests -/
 
 section ElaborationTests
 

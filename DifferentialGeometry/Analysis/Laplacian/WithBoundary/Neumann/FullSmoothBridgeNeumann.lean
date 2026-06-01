@@ -79,8 +79,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace (EuclideanSpace ℝ (Fin n)) :=
   borel _
 private local instance : BorelSpace (EuclideanSpace ℝ (Fin n)) := ⟨rfl⟩
@@ -93,27 +91,6 @@ private abbrev I_half (n : ℕ) [NeZero n] :
   modelWithCornersEuclideanHalfSpace n
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## A continuous partition-of-unity representative for the with-boundary
-divergence
-
-The with-boundary divergence `divergence_g_with_boundary g X` is smooth on
-the manifold interior `(I_half n).interior M` (by
-`divergence_g_with_boundary_contMDiffOn_interior`) but is not in general
-globally continuous on the closed half-space-modelled
-manifold-with-boundary. To package it as an L² class, we exhibit a
-globally continuous a.e.-equivalent representative through the
-chart-atlas partition of unity:
-$$
-\mathrm{divergence\_g\_with\_boundary\_pou}\,g\,X\,x
-   \;=\;
-\sum_{\alpha \in \mathcal{S}}
-   (\mathrm{localDivergenceWithin}\,g\,\alpha\,X\,x)\cdot\rho_\alpha(x),
-$$
-where the sum is over the (finite) support `chartAtlasPOU_finset`. Each
-summand is continuous on `M` (continuous on the chart source where
-`ρ_α` is supported, and identically zero outside its tsupport), so the
-finite sum is globally continuous on the compact manifold. -/
 
 /-- The chart-α local-divergence summand
 `x ↦ localDivergenceWithin g α X x · ((chartAtlasPOU I M) α : M → ℝ) x`,
@@ -184,15 +161,6 @@ lemma divergence_g_with_boundary_pou_continuous
   exact continuous_finset_sum _ (fun α _ =>
     localDivergenceWithin_mul_pou_continuous (n := n) (M := M) g α X)
 
-/-! ## A.e. equality of the with-boundary divergence with the POU sum
-
-Modulo the boundary set (which has chart-local measure zero), the chart-α
-summand of the volume measure decomposition agrees with
-`localDivergenceWithin g α X · ρ_α` by Voss–Weyl on the manifold interior.
-Summing over the finite support and applying the partition-of-unity
-sum-to-one identity collapses the sum to `divergence_g_with_boundary g X`
-a.e. -/
-
 /-- Per-α a.e. equality of `divergence_g_with_boundary g X · ρ_α` with
 `localDivergenceWithin g α X · ρ_α` against `chartLocalMeasure g α`. The
 exception set is contained in the chart-α boundary, which has
@@ -257,31 +225,23 @@ lemma divergence_g_with_boundary_ae_pou
   set ρ : SmoothPartitionOfUnity M (I_half n) M (univ : Set M) :=
     chartAtlasPOU (I_half n) M with hρ_def
   set S : Finset M := chartAtlasPOU_finset (I := I_half n) (M := M) with hS_def
-  -- Decompose the volume measure as a finite sum of POU-weighted chart-local
-  -- measures.
   have hVol_eq :
       (riemannianVolumeMeasure (I := I_half n) (M := M) g) =
         ∑ α ∈ S,
           (chartLocalMeasure (I := I_half n) g α).withDensity
             (fun x : M => ENNReal.ofReal ((ρ α : M → ℝ) x)) := by
     rw [hS_def]; exact riemannianVolumeMeasure_eq_finset_sum (I := I_half n) (M := M) g
-  -- Reduce to per-α equality via the volume-measure decomposition.
   refine (Filter.EventuallyEq.refl _ _).trans ?_
   show (fun x : M => divergence_g_with_boundary (I := I_half n) g X x)
       =ᵐ[riemannianVolumeMeasure (I := I_half n) (M := M) g]
       divergence_g_with_boundary_pou (n := n) (M := M) g X
   rw [hVol_eq]
   rw [Filter.EventuallyEq, ae_finsetSum_measure_iff]
-  -- Per-α: a.e. equality against `(chartLocalMeasure α).withDensity ρα`.
   intro α _hα
-  -- Convert via `ae_withDensity_iff`.
   have hρα_meas : Measurable
       (fun y : M => ENNReal.ofReal ((ρ α : M → ℝ) y)) :=
     ENNReal.measurable_ofReal.comp (ρ α).contMDiff.continuous.measurable
   rw [ae_withDensity_iff hρα_meas]
-  -- Goal: ∀ᵐ x ∂(chartLocalMeasure α), (ENNReal.ofReal (ρα x) ≠ 0) →
-  --   divergence_g_with_boundary g X x = divergence_g_with_boundary_pou g X x.
-  -- Use the per-α a.e.-equality of the POU-weighted divergence.
   have hae_per_α :
       (fun x : M => divergence_g_with_boundary (I := I_half n) g X x *
           ((chartAtlasPOU (I_half n) M) α : M → ℝ) x)
@@ -289,10 +249,6 @@ lemma divergence_g_with_boundary_ae_pou
         (fun x : M => localDivergenceWithin (I := I_half n) g α X x *
           ((chartAtlasPOU (I_half n) M) α : M → ℝ) x) :=
     divergence_g_with_boundary_mul_pou_chart_local_ae (n := n) (M := M) g α X
-  -- Need to upgrade this to: at points where `ρα ≠ 0`, the values agree.
-  -- Strategy: the bad set above (chart source ∩ boundary M) plus where the
-  -- POU sum doesn't collapse to 1.
-  -- Use the chart-α-boundary measure-zero argument directly.
   have hsupp_each :
       tsupport ((ρ α : M → ℝ)) ⊆
         (chartAt (EuclideanHalfSpace n) α).source := by
@@ -309,26 +265,13 @@ lemma divergence_g_with_boundary_ae_pou
   apply MeasureTheory.measure_mono_null _ h_bad_measzero
   intro x hx
   simp only [Set.mem_setOf_eq] at hx
-  -- hx : ¬ (ENNReal.ofReal (ρα x) ≠ 0 → divergence_g_with_boundary g X x =
-  --   divergence_g_with_boundary_pou g X x)
   rw [Classical.not_imp] at hx
   obtain ⟨hρne, hne⟩ := hx
-  -- Show x ∈ bad: chart source ∩ boundary M.
   by_cases hx_chart : x ∈ (chartAt (EuclideanHalfSpace n) α).source
   · by_cases hx_int : x ∈ (I_half n).interior M
     · exfalso
       apply hne
-      -- divergence_g_with_boundary_pou g X x =
-      --   ∑ β ∈ S, localDivergenceWithin g β X x · ρβ(x).
-      -- For x in interior, `divergence_g_with_boundary g X x =
-      --   localDivergenceWithin g β X x` for any β with x ∈ chart β source
-      -- (Voss–Weyl). For β with `ρβ(x) ≠ 0`, we have x ∈ tsupport ρβ ⊆
-      -- chart β source. So the sum becomes
-      --   ∑ β ∈ S, divergence_g_with_boundary g X x · ρβ(x) =
-      --   divergence_g_with_boundary g X x · (∑ β ρβ(x)) =
-      --   divergence_g_with_boundary g X x · 1.
       unfold divergence_g_with_boundary_pou
-      -- Show: ∑ β, localDiv g β X x · ρβ(x) = divergence_g_with_boundary g X x
       have h_sum_collapse : ∑ β ∈ S,
             localDivergenceWithin (I := I_half n) g β X x *
               ((chartAtlasPOU (I_half n) M) β : M → ℝ) x =
@@ -356,7 +299,6 @@ lemma divergence_g_with_boundary_ae_pou
             rw [hd_eq]
         rw [Finset.sum_congr rfl h_each]
         rw [← Finset.mul_sum]
-        -- ∑ β, ρβ(x) = 1 (sum-to-one for chartAtlasPOU on `univ`).
         have h_supp_subset :
             Function.support (fun β : M => (ρ β : M → ℝ) x) ⊆ (S : Set M) := by
           intro β hβ
@@ -379,7 +321,6 @@ lemma divergence_g_with_boundary_ae_pou
       exact hx_int
   · exfalso
     apply hρne
-    -- x ∉ chart source ⇒ ρα(x) = 0
     have hx_nots : x ∉ tsupport ((ρ α : M → ℝ)) :=
       fun h => hx_chart (hsupp_each h)
     have hρ_zero : ((chartAtlasPOU (I_half n) M) α : M → ℝ) x = 0 := by
@@ -387,16 +328,6 @@ lemma divergence_g_with_boundary_ae_pou
       exact hx_nots (subset_tsupport _ hne')
     rw [hρ_zero]
     simp
-
-/-! ## L² class of `(u - Δ_g_classical u)` for full smooth scalars
-
-For a full smooth scalar `u : FullSmoothScalar g`, the function
-`x ↦ u.toFun x - Δ_g_classical g u.smooth x` may not be globally
-continuous, but it equals a.e. (against the canonical Riemannian volume
-measure) the continuous function
-`x ↦ u.toFun x - divergence_g_with_boundary_pou g (∇u) x`. The L² class
-is built via the latter (continuous, compact-supported, hence in
-`MemLp 2`). -/
 
 /-- The continuous representative of `u - Δ_g_classical u`. -/
 noncomputable def FullSmoothScalar.oneSubLapClassicalRep
@@ -466,18 +397,6 @@ lemma FullSmoothScalar.oneSubLapClassicalLp_ae_oneSubLap
         (grad_g_full_section (M := M) (n := n) g u.smooth) x from rfl]
   rw [hpou_x]
 
-/-! ## H¹ inner product on full smooth scalars expressed via `(1 - Δ_g)`,
-under the Neumann condition
-
-For full smooth `u, v` with the Neumann condition `g(ν, ∇u) = 0` on
-`∂M`, Green's first identity (`green_first_eq_boundary_surface_integral`) reduces to
-$$
-\int g(\nabla u, \nabla v)\,d\mu_g
-   \;=\;
--\int v \cdot \Delta_g\,u\,d\mu_g.
-$$
-Adding `∫ u·v` recovers `⟨u, v⟩_{H^1} = ∫ v · (u - Δ_g u)`. -/
-
 /-- The Green-identity computation for full smooth `v` against a full
 smooth `u` satisfying the Neumann boundary condition `g(ν, ∇u) = 0` on
 `∂M`. -/
@@ -516,13 +435,8 @@ theorem fullSmoothScalarH1Inner_eq_integral_oneSubLapClassical_mul_neumann
       (riemannianVolumeMeasure (I := I_half n) (M := M) g) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
       (I := I_half n) (M := M) g
-  -- Apply Green's first identity (full smooth) with `f := v.toFun`,
-  -- `h := u.toFun`. The right-hand side is the boundary surface integral
-  -- of `v · g(ν, ∇u) dS`, which vanishes pointwise by the Neumann
-  -- condition on `u`.
   have h_green :=
     green_first_eq_boundary_surface_integral (M := M) (n := n) g v.smooth u.smooth h_chart_iden h_int
-  -- Boundary integrand vanishes pointwise.
   have h_bdy_zero : ∀ x : (I_half n).boundary M,
       v.toFun x.val *
         g.inner x.val
@@ -531,7 +445,6 @@ theorem fullSmoothScalarH1Inner_eq_integral_oneSubLapClassical_mul_neumann
           (gradFun (I := I_half n) g u.toFun x.val) = 0 := by
     intro x
     rw [h_neumann x, mul_zero]
-  -- Hence the boundary integral is zero.
   have h_bdy_int_zero :
       ∫ x : (I_half n).boundary M,
           v.toFun x.val *
@@ -549,7 +462,6 @@ theorem fullSmoothScalarH1Inner_eq_integral_oneSubLapClassical_mul_neumann
         (fun _ : (I_half n).boundary M => (0 : ℝ)) from funext h_bdy_zero]
     exact integral_zero _ _
   rw [h_bdy_int_zero] at h_green
-  -- h_green: ∫ ⟨∇v, ∇u⟩ + ∫ v · Δu = 0. Rewrite ⟨∇v, ∇u⟩ = ⟨∇u, ∇v⟩.
   have h_symm : ∀ x : M,
       g.inner x (gradFun (I := I_half n) g v.toFun x)
         (gradFun (I := I_half n) g u.toFun x) =
@@ -565,7 +477,6 @@ theorem fullSmoothScalarH1Inner_eq_integral_oneSubLapClassical_mul_neumann
           ∂(riemannianVolumeMeasure (I := I_half n) (M := M) g) :=
     integral_congr_ae (Filter.Eventually.of_forall h_symm)
   rw [h_int_symm] at h_green
-  -- Hence ∫ ⟨∇u, ∇v⟩ = -∫ v · Δu.
   have h_grad_eq :
       ∫ x, g.inner x (gradFun (I := I_half n) g u.toFun x)
             (gradFun (I := I_half n) g v.toFun x)
@@ -574,16 +485,13 @@ theorem fullSmoothScalarH1Inner_eq_integral_oneSubLapClassical_mul_neumann
               Δ_g_classical (M := M) (n := n) g u.smooth x
             ∂(riemannianVolumeMeasure (I := I_half n) (M := M) g) := by
     linarith
-  -- Combine into the H¹ inner product.
   unfold fullSmoothScalarH1Inner
-  -- Continuity / integrability of the products needed below.
   have hu_cont : Continuous u.toFun := u.smooth.continuous
   have hv_cont : Continuous v.toFun := v.smooth.continuous
   have h_uv_int : Integrable (fun x : M => u.toFun x * v.toFun x)
       (riemannianVolumeMeasure (I := I_half n) (M := M) g) :=
     (hu_cont.mul hv_cont).integrable_of_hasCompactSupport
       (HasCompactSupport.of_compactSpace _)
-  -- Continuity of `v · Δ_g_classical u` via the POU representative.
   have hΔu_pou_cont : Continuous
       (divergence_g_with_boundary_pou (n := n) (M := M) g
         (grad_g_full_section (M := M) (n := n) g u.smooth)) :=
@@ -595,7 +503,6 @@ theorem fullSmoothScalarH1Inner_eq_integral_oneSubLapClassical_mul_neumann
       (riemannianVolumeMeasure (I := I_half n) (M := M) g) :=
     (hv_cont.mul hΔu_pou_cont).integrable_of_hasCompactSupport
       (HasCompactSupport.of_compactSpace _)
-  -- A.e. equality of `v · Δ_g_classical u` with `v · POU representative`.
   have hpou_ae :
       (fun x : M => Δ_g_classical (M := M) (n := n) g u.smooth x)
         =ᵐ[riemannianVolumeMeasure (I := I_half n) (M := M) g]
@@ -609,7 +516,6 @@ theorem fullSmoothScalarH1Inner_eq_integral_oneSubLapClassical_mul_neumann
     refine hvΔu_pou_int.congr ?_
     filter_upwards [hpou_ae] with x hx
     rw [hx]
-  -- Pointwise: `(u - Δu) · v = u · v - v · Δu`.
   have hpt : ∀ x : M,
       (u.toFun x -
           Δ_g_classical (M := M) (n := n) g u.smooth x) *
@@ -663,7 +569,6 @@ theorem fullSmoothScalarH1Inner_eq_lpInner_oneSubLapClassical_neumann
   rw [fullSmoothScalarH1Inner_eq_integral_oneSubLapClassical_mul_neumann
     (u := u) (v := v) h_neumann h_chart_iden h_int]
   rw [MeasureTheory.L2.inner_def (𝕜 := ℝ)]
-  -- a.e.-rewrite the integrands.
   have hae_lhs := u.oneSubLapClassicalLp_ae_oneSubLap
   have hae_rhs : (smoothToLpFullNeumann g v :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I_half n) (M := M) g)) =ᵐ[
@@ -684,8 +589,6 @@ theorem fullSmoothScalarH1Inner_eq_lpInner_oneSubLapClassical_neumann
             Δ_g_classical (M := M) (n := n) g u.smooth x)
       from RCLike.inner_apply _ _]
   ring
-
-/-! ## Variational identity at smooth lifts -/
 
 /-- The variational identity at smooth test functions, under the Neumann
 condition on `u`. -/
@@ -725,8 +628,6 @@ theorem fullSmoothScalar_bilin_eq_lpFunctional_smooth_neumann
   rw [lpFunctionalCLMFullNeumann_apply,
     H1ComplFullNeumannToLp_smoothToH1ComplFullNeumann]
   exact real_inner_comm _ _
-
-/-! ## Smooth bridge -/
 
 /-- The bilinear form on the smooth lift of `u : FullSmoothScalar g` with
 the Neumann condition agrees with the L² functional of

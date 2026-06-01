@@ -84,8 +84,6 @@ open DifferentialGeometry.Analysis.Laplacian.DifferentiatedCrossTermIBP
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -94,8 +92,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Canonical chosen third mixed weak partial -/
 
 /-- The canonical chosen weak `j`-partial of the second mixed partial
 `chosenSecondPartialChartPushedU g α u_h i l` on the chart target. By
@@ -112,14 +108,6 @@ noncomputable def chosenThirdMixedPartialChartPushedU
     (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
       (I := I) (M := M) α)
 
-/-! ## Headline H¹ regularity of the chosen second mixed partial
-
-For `u_h ∈ laplacianDomainPow g 2`, the canonical chart-pushed
-representative lies in `MemWkp 3 2` on the chart target. Unfolding the
-iterated definition twice via `MemWkp_succ` yields, for every coordinate
-pair `(i, l)`, the `MemW1p 2` (= `MemWkp 1 2`, = `H¹`) regularity of the
-chosen second mixed partial. This is the key downstream input. -/
-
 /-- The chosen second mixed partial `chosenSecondPartialChartPushedU g α u_h i l`
 lies in `MemW1p 2 (chartTargetEuclid α)` unconditionally for
 `u_h ∈ laplacianDomainPow g 2`. -/
@@ -132,7 +120,6 @@ theorem chosenSecondPartialChartPushedU_memW1p_two_of_laplacianDomainPow_two
       (chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l)
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := by
-  -- The chart-pushed function lies in `MemWkp 3 2` on the chart target.
   have h_memWkp_3 : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 3 2
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
@@ -143,7 +130,6 @@ theorem chosenSecondPartialChartPushedU_memW1p_two_of_laplacianDomainPow_two
         (I := I) (M := M) α) :=
     chartPushed_memWkp_three_two_of_laplacianDomainPow_two
       (I := I) (M := M) g α hu_h
-  -- Step 1: `chosenWeakPartial' 2 i (chartPushed _) ∈ MemWkp 2 2 Ω`.
   have h_inner_memWkp_2 : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 2 2
       (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
@@ -155,7 +141,6 @@ theorem chosenSecondPartialChartPushedU_memW1p_two_of_laplacianDomainPow_two
           (I := I) (M := M) α))
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := h_memWkp_3.chosenWeakPartial_mem i
-  -- Step 2: `chosenWeakPartial' 2 l (above) ∈ MemWkp 1 2 Ω = MemW1p 2 Ω`.
   have h_outer_memWkp_1 : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 1 2
       (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
@@ -171,7 +156,6 @@ theorem chosenSecondPartialChartPushedU_memW1p_two_of_laplacianDomainPow_two
           (I := I) (M := M) α))
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := h_inner_memWkp_2.chosenWeakPartial_mem l
-  -- Convert `MemWkp 1 2` to `MemW1p 2` and unfold the second partial.
   have h_step :
       DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
         (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
@@ -189,13 +173,7 @@ theorem chosenSecondPartialChartPushedU_memW1p_two_of_laplacianDomainPow_two
           (I := I) (M := M) α) :=
     (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p).mp
       h_outer_memWkp_1
-  -- The double-iterated chosen weak partial is, definitionally, the second
-  -- mixed partial.
-  -- `chosenSecondPartialChartPushedU g α u_h i l := chosenWeakPartial' 2 l
-  --   (chosenWeakPartial' 2 i (chartPushed POU α u_h.coeFn) Ω) Ω`.
   exact h_step
-
-/-! ## Weak-partial identification of the chosen third mixed partial -/
 
 /-- The chosen third mixed partial `chosenThirdMixedPartialChartPushedU g α u_h i l j`
 is a weak `j`-partial of `chosenSecondPartialChartPushedU g α u_h i l` on
@@ -214,8 +192,6 @@ theorem chosenThirdMixedPartialChartPushedU_isWeakPartial
     (chosenSecondPartialChartPushedU_memW1p_two_of_laplacianDomainPow_two
       (I := I) (M := M) g α hu_h i l) j
 
-/-! ## Global `L²` regularity of the chosen third mixed partial -/
-
 /-- The chosen third mixed partial lies in `MemLp 2 (volume.restrict
 chartTargetEuclid α)` unconditionally for `u_h ∈ laplacianDomainPow g 2`. -/
 theorem chosenThirdMixedPartialChartPushedU_memLp_two
@@ -231,8 +207,6 @@ theorem chosenThirdMixedPartialChartPushedU_memLp_two
     (chosenSecondPartialChartPushedU_memW1p_two_of_laplacianDomainPow_two
       (I := I) (M := M) g α hu_h i l) j
 
-/-! ## Local `L²` regularity on compact subsets of the chart target -/
-
 /-- The chosen third mixed partial lies in `MemLp 2 (volume.restrict K)` for
 every compact `K ⊆ chartTargetEuclid α`, unconditionally for
 `u_h ∈ laplacianDomainPow g 2`. -/
@@ -246,7 +220,6 @@ theorem chosenThirdMixedPartialChartPushedU_locally_memLp
       (I := I) (M := M) α) :
     MemLp (chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l j) 2
       ((volume : Measure EuclN).restrict K) := by
-  -- From global `MemLp 2 (vol.restrict chartTarget)`, restrict further to `K`.
   have h_global := chosenThirdMixedPartialChartPushedU_memLp_two
     (I := I) (M := M) g α hu_h i l j
   have hK_meas : MeasurableSet K := hK_compact.isClosed.measurableSet
@@ -264,22 +237,6 @@ theorem chosenThirdMixedPartialChartPushedU_locally_memLp
     exact Set.inter_eq_self_of_subset_left hK_in
   rw [← h_eq]
   exact h_global.restrict K
-
-/-! ## Per-pair second-order IBP identity
-
-For fixed indices `i, l, j`, and a smooth global coefficient on the chart
-target (a `ContDiffOn ℝ ∞ φ chartTargetEuclid` function), the per-pair
-integration-by-parts identity is obtained by applying
-`Sobolev.Euclidean.integral_smul_weak_partial_eq` to
-
-* weak base function `v := chosenSecondPartialChartPushedU g α u_h i l`,
-* weak partials `w j' := chosenThirdMixedPartialChartPushedU g α u_h i l j'`,
-* smooth scalar coefficient `φ` (extended globally via
-  `exists_smooth_global_extension` so that the IBP primitive applies),
-* test function `ψ` with `tsupport ψ ⊆ chartTargetEuclid α`.
-
-The integrals against the global extension are equal to the integrals against
-the original `φ` by `setIntegral_congr_fun`. -/
 
 /-- Per-pair integration-by-parts identity for the second-order cross-derivative
 term. For fixed indices `i, l, j`, smooth coefficient `φ : EuclN → ℝ`
@@ -324,59 +281,48 @@ theorem cross_derivative_term_ibp_second_order_single
             ψ y
           ∂(volume : Measure EuclN))) := by
   classical
-  -- Abbreviate the open chart target.
   set Ω : Set EuclN := DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
     (I := I) (M := M) α with hΩ_def
   have hΩ_open : IsOpen Ω :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) α
-  -- The weakly differentiable base function `v` (second mixed partial).
   set v : EuclN → ℝ :=
     chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l
     with hv_def
-  -- The weak partials of `v` in each direction `j'`.
   set w : Fin (Module.finrank ℝ E) → EuclN → ℝ :=
     fun j' => chosenThirdMixedPartialChartPushedU
       (I := I) (M := M) g α u_h i l j' with hw_def
-  -- `w j'` is a weak `j'`-partial of `v` on `Ω`.
   have hw_isWeakPartial : ∀ j' : Fin (Module.finrank ℝ E),
       DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) j' (w j') v Ω :=
     fun j' =>
       chosenThirdMixedPartialChartPushedU_isWeakPartial
         (I := I) (M := M) g α hu_h i l j'
-  -- The compact set `K := tsupport ψ`, contained in `Ω`.
   set K : Set EuclN := tsupport ψ with hK_def
   have hK_compact : IsCompact K := hψ_cs
   have hK_in : K ⊆ Ω := hψ_supp
-  -- Smooth global extension of `φ` on a neighborhood of `K`.
   obtain ⟨δ, φExt, hδ_pos, hδ_subset, hφExt_smooth, hφExt_eq⟩ :=
     DifferentialGeometry.Analysis.Laplacian.DifferentiatedCrossTermIBP.exists_smooth_global_extension
       (I := I) (M := M) (φ := φ) α hφ_chart hK_compact hK_in
-  -- Local-`L²` regularity of `v` on every compact subset of `Ω`.
   have hv_locMemLp : ∀ K' : Set EuclN, IsCompact K' → K' ⊆ Ω →
       MemLp v 2 ((volume : Measure EuclN).restrict K') := by
     intro K' hK'_compact hK'_in
     exact chosenSecondPartialChartPushedU_locally_memLp
       (I := I) (M := M) g α hu_h i l hK'_compact hK'_in
-  -- Local-`L²` regularity of `w j'` on every compact subset of `Ω`.
   have hw_locMemLp : ∀ (j' : Fin (Module.finrank ℝ E)) (K' : Set EuclN),
       IsCompact K' → K' ⊆ Ω →
       MemLp (w j') 2 ((volume : Measure EuclN).restrict K') := by
     intro j' K' hK'_compact hK'_in
     exact chosenThirdMixedPartialChartPushedU_locally_memLp
       (I := I) (M := M) g α hu_h i l j' hK'_compact hK'_in
-  -- Apply the generic IBP primitive to `(φExt, v, w)` in direction `j`.
   have h_ibp_ext :=
     Sobolev.Euclidean.integral_smul_weak_partial_eq
       (d := Module.finrank ℝ E) (Ω := Ω) hΩ_open
       (φ := φExt) hφExt_smooth (v := v) (w := w)
       hv_locMemLp hw_locMemLp hw_isWeakPartial j
       (ψ := ψ) hψ_smooth hψ_cs hψ_supp
-  -- Replace `φExt` by `φ` everywhere on `Ω` in the integrals.
   have hΩ_meas : MeasurableSet Ω := hΩ_open.measurableSet
   have hK_in_thickening : K ⊆ Metric.cthickening δ K :=
     Metric.self_subset_cthickening _
-  -- The fderiv of ψ vanishes outside tsupport ψ.
   have h_fderiv_zero_outside_K : ∀ x ∉ K, fderiv ℝ ψ x = 0 := by
     intro x hx
     have h_compl_open : IsOpen (Kᶜ) := (isClosed_tsupport _).isOpen_compl
@@ -389,7 +335,6 @@ theorem cross_derivative_term_ibp_second_order_single
       filter_upwards [hψ_zero_nbhd] with y hy
       rw [hy]
     rw [hψ_const_zero]; simp
-  -- (i) LHS replacement: replace φExt by φ in `∫ φ · v · ∂_jψ`.
   have hLHS_eq :
       ∫ y in Ω, φExt y * v y *
           (fderiv ℝ ψ y) (EuclideanSpace.single j 1) ∂(volume : Measure EuclN) =
@@ -400,8 +345,6 @@ theorem cross_derivative_term_ibp_second_order_single
     · rw [hφExt_eq y (hK_in_thickening hy_K)]
     · rw [h_fderiv_zero_outside_K y hy_K]
       simp
-  -- (ii) First Leibniz-term replacement.
-  -- `fderiv φExt y = fderiv φ y` on a neighborhood of K.
   have h_fderiv_φExt_eq_φ_on_K : ∀ y ∈ K, ∀ j' : Fin (Module.finrank ℝ E),
       (fderiv ℝ φExt y) (EuclideanSpace.single j' 1) =
       (fderiv ℝ φ y) (EuclideanSpace.single j' 1) := by
@@ -431,7 +374,6 @@ theorem cross_derivative_term_ibp_second_order_single
     · rw [h_fderiv_φExt_eq_φ_on_K y hy_K j]
     · have hψy : ψ y = 0 := image_eq_zero_of_notMem_tsupport hy_K
       rw [hψy]; ring
-  -- (iii) Second Leibniz-term replacement: `φExt` to `φ` in `∫ φ · w j · ψ`.
   have hLeibniz2_eq :
       ∫ y in Ω, φExt y * w j y * ψ y ∂(volume : Measure EuclN) =
       ∫ y in Ω, φ y * w j y * ψ y ∂(volume : Measure EuclN) := by
@@ -440,19 +382,8 @@ theorem cross_derivative_term_ibp_second_order_single
     · rw [hφExt_eq y (hK_in_thickening hy_K)]
     · have hψy : ψ y = 0 := image_eq_zero_of_notMem_tsupport hy_K
       rw [hψy]; ring
-  -- Combine.
   rw [← hLHS_eq, ← hLeibniz1_eq, ← hLeibniz2_eq]
   exact h_ibp_ext
-
-/-! ## Aggregate doubly-summed second-order IBP identity
-
-For an arbitrary smooth `(i, j)`-indexed coefficient `A : Fin n → Fin n → EuclN → ℝ`
-that is `ContDiffOn ℝ ∞` on `chartTargetEuclid α` (for every `i, j`), the
-doubly-summed cross-derivative term against the second mixed partial in the
-direction `l` admits the integration-by-parts identity below. The smooth
-coefficient `A` is polymorphic: typical instantiations are
-`weightedInvGramDerivOnEuclid g α i j l` (single-derivative) or
-`weightedInvGramSecondDerivOnEuclid g α i j l₁ l₂` (second-derivative). -/
 
 /-- **Doubly-summed second-order IBP identity for the cross-derivative term.**
 
@@ -520,7 +451,6 @@ theorem cross_derivative_term_ibp_second_order
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) α
   have hΩ_meas : MeasurableSet Ω := hΩ_open.measurableSet
-  -- Abbreviations.
   set v : Fin (Module.finrank ℝ E) → EuclN → ℝ := fun i =>
     chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l
     with hv_def
@@ -530,7 +460,6 @@ theorem cross_derivative_term_ibp_second_order
   set u₃ : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → EuclN → ℝ :=
     fun i j' => chosenThirdMixedPartialChartPushedU
       (I := I) (M := M) g α u_h i l j' with hu₃_def
-  -- Per-pair IBP identity.
   have h_pair : ∀ (i j : Fin (Module.finrank ℝ E)),
       ∫ y in Ω, A i j y * v i y *
           (fderiv ℝ ψ y) (EuclideanSpace.single j 1) ∂(volume : Measure EuclN) =
@@ -540,7 +469,6 @@ theorem cross_derivative_term_ibp_second_order
     have h := cross_derivative_term_ibp_second_order_single
       (I := I) (M := M) g α hu_h i l j (hA_chart i j) hψ_smooth hψ_cs hψ_supp
     exact h
-  -- Integrability prerequisites for swapping the sum and the integral.
   set K : Set EuclN := tsupport ψ with hK_def
   have hK_compact : IsCompact K := hψ_cs
   have hK_in : K ⊆ Ω := hψ_supp
@@ -551,12 +479,10 @@ theorem cross_derivative_term_ibp_second_order
     rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter]
     exact hvolK_finite
   haveI : IsFiniteMeasure ((volume : Measure EuclN).restrict K) := ⟨hvolK_finite'⟩
-  -- Continuity / boundedness data.
   have hψ_cont : Continuous ψ := hψ_smooth.continuous
   have hψ_fderiv_j_cont : ∀ j : Fin (Module.finrank ℝ E),
       Continuous (fun y : EuclN => (fderiv ℝ ψ y) (EuclideanSpace.single j 1)) :=
     fun j => (hψ_smooth.continuous_fderiv (by simp)).clm_apply continuous_const
-  -- The fderiv of ψ vanishes outside `K = tsupport ψ`.
   have h_fderiv_zero_outside_K : ∀ x ∉ K, fderiv ℝ ψ x = 0 := by
     intro x hx
     have h_compl_open : IsOpen (Kᶜ) := (isClosed_tsupport _).isOpen_compl
@@ -569,10 +495,8 @@ theorem cross_derivative_term_ibp_second_order
       filter_upwards [hψ_zero_nbhd] with y hy
       rw [hy]
     rw [hψ_const_zero]; simp
-  -- Continuity helpers for the coefficients.
   have h_A_cont_on : ∀ i j : Fin (Module.finrank ℝ E),
       ContinuousOn (A i j) Ω := fun i j => (hA_chart i j).continuousOn
-  -- Local-L² for v i on K.
   have hv_locMemLp_K : ∀ i : Fin (Module.finrank ℝ E),
       MemLp (v i) 2 ((volume : Measure EuclN).restrict K) := fun i =>
     chosenSecondPartialChartPushedU_locally_memLp
@@ -580,7 +504,6 @@ theorem cross_derivative_term_ibp_second_order
   have hv_int_K : ∀ i : Fin (Module.finrank ℝ E),
       IntegrableOn (v i) K (volume : Measure EuclN) :=
     fun i => (hv_locMemLp_K i).integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
-  -- Continuity helper for the derivative coefficients dA i j j'.
   have h_dA_cont_on : ∀ i j j' : Fin (Module.finrank ℝ E),
       ContinuousOn (dA i j j') Ω := by
     intro i j j'
@@ -593,7 +516,6 @@ theorem cross_derivative_term_ibp_second_order
       (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single j' (1 : ℝ))).contDiff
     have h := h_eval.contDiffOn.comp h_fderiv_diff (mapsTo_univ _ _)
     exact h.continuousOn
-  -- Local-L² for u₃ i j' on K.
   have hu₃_locMemLp_K : ∀ (i j' : Fin (Module.finrank ℝ E)),
       MemLp (u₃ i j') 2 ((volume : Measure EuclN).restrict K) := fun i j' =>
     chosenThirdMixedPartialChartPushedU_locally_memLp
@@ -601,8 +523,6 @@ theorem cross_derivative_term_ibp_second_order
   have hu₃_int_K : ∀ (i j' : Fin (Module.finrank ℝ E)),
       IntegrableOn (u₃ i j') K (volume : Measure EuclN) := fun i j' =>
     (hu₃_locMemLp_K i j').integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
-  -- Integrability helpers: for continuous `h₁ : EuclN → ℝ` with tsupport ⊆ K,
-  -- f · h₁ is integrable on `volume.restrict Ω` when `f` is integrable on K.
   have integrable_mul_compact_v :
       ∀ {i : Fin (Module.finrank ℝ E)} {h₁ : EuclN → ℝ},
         Continuous h₁ → tsupport h₁ ⊆ K →
@@ -655,7 +575,6 @@ theorem cross_derivative_term_ibp_second_order
     have full_int : Integrable (fun y => u₃ i j' y * h₁ y) (volume : Measure EuclN) := by
       rw [h_eq_ind]; exact ind_int
     exact full_int.restrict
-  -- LHS per-pair integrand: y ↦ A i j y * v i y * ∂_jψ y.
   have h_int_LHS_pair : ∀ i j : Fin (Module.finrank ℝ E),
       Integrable (fun y => A i j y * v i y *
         (fderiv ℝ ψ y) (EuclideanSpace.single j 1))
@@ -698,7 +617,6 @@ theorem cross_derivative_term_ibp_second_order
       ring
     rw [← h_eq]
     exact h_int
-  -- RHS pair 1: dA i j j · v i · ψ.
   have h_int_RHS1_pair : ∀ i j : Fin (Module.finrank ℝ E),
       Integrable (fun y => dA i j j y * v i y * ψ y)
         ((volume : Measure EuclN).restrict Ω) := by
@@ -734,7 +652,6 @@ theorem cross_derivative_term_ibp_second_order
       ring
     rw [← h_eq]
     exact h_int
-  -- RHS pair 2: A i j · u₃ i j · ψ.
   have h_int_RHS2_pair : ∀ i j : Fin (Module.finrank ℝ E),
       Integrable (fun y => A i j y * u₃ i j y * ψ y)
         ((volume : Measure EuclN).restrict Ω) := by
@@ -770,7 +687,6 @@ theorem cross_derivative_term_ibp_second_order
       ring
     rw [← h_eq]
     exact h_int
-  -- Swap ∫∑ ↔ ∑∫ on each integrated double-sum.
   have hLHS_sum_swap :
       ∫ y in Ω,
         (∑ i : Fin (Module.finrank ℝ E),
@@ -819,7 +735,6 @@ theorem cross_derivative_term_ibp_second_order
     intro i _
     rw [integral_finset_sum _ (fun j _ => h_int_RHS2_pair i j)]
   rw [hLHS_sum_swap, hRHS1_sum_swap, hRHS2_sum_swap]
-  -- Apply h_pair pointwise.
   have hLHS_neg :
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
@@ -837,7 +752,6 @@ theorem cross_derivative_term_ibp_second_order
     refine Finset.sum_congr rfl ?_
     intro j _
     exact h_pair i j
-  -- Distribute the negation out of the double sums.
   set X : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
     fun i j => ∫ y in Ω, dA i j j y * v i y * ψ y ∂(volume : Measure EuclN)
     with hX_def

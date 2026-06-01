@@ -87,8 +87,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## The DeTurck right-hand side, evaluated -/
-
 /-- **Evaluation of the DeTurck right-hand side.** The continuous bilinear form
 `deTurckRicciRHS g_bg g x`, applied to `(v, w)`, equals
 `-2 · Ric(g) x v w + 𝓛_{X_DT} g x v w`, where `X_DT = deTurckVF g g_bg` is the
@@ -99,17 +97,12 @@ theorem deTurckRicciRHS_apply
     deTurckRicciRHS (I := I) g_bg g x v w
       = (-2 : ℝ) * ricciTensor (I := I) g x v w
         + lieDerivMetric (I := I) g (deTurckVF (I := I) g g_bg) x v w := by
-  -- Unfold `deTurckRicciRHS` and push the application through the sum and scalar.
   unfold deTurckRicciRHS
   rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply,
       ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply]
-  -- The CLM upgrade of the Lie derivative agrees with the underlying evaluation,
-  -- and `smoothRiemannianMetricToInfty` is the identity bridge.
   rw [lieDerivMetricClm_apply]
   simp only [smul_eq_mul]
   rfl
-
-/-! ## The metric-slot derivative from the DeTurck PDE -/
 
 /-- **Metric-slot derivative (DeTurck PDE, frozen image point and pushforwards).**
 
@@ -138,13 +131,9 @@ theorem deTurck_metric_slot_hasDerivWithinAt
             (deTurckVF (I := I) (g_DT t) g_bg) (Φ_fam t x)
             (mfderiv I I (Φ_fam t : M → M) x v)
             (mfderiv I I (Φ_fam t : M → M) x w)) (Set.Ici 0) t := by
-  -- Instantiate the DeTurck PDE at the frozen image point and pushforward pair,
-  -- then rewrite the right-hand side by `deTurckRicciRHS_apply`.
   have h := hDT_deriv t ht (Φ_fam t x)
     (mfderiv I I (Φ_fam t : M → M) x v) (mfderiv I I (Φ_fam t : M → M) x w)
   rwa [deTurckRicciRHS_apply] at h
-
-/-! ## The pushforward-slot derivative from the raw variational identities -/
 
 /-- **Pushforward-slot derivative (variational flow, frozen metric).**
 
@@ -171,12 +160,8 @@ theorem deTurck_pushforward_slot_hasDerivWithinAt
           (deTurckVF (I := I) (g_DT t) g_bg) (Φ_fam t x)
           (mfderiv I I (Φ_fam t : M → M) x v)
           (mfderiv I I (Φ_fam t : M → M) x w)) (Set.Ici 0) t :=
-  -- The two-sided `HasDerivAt` from the variational reduction restricts to the
-  -- one-sided `HasDerivWithinAt (Ici 0)`.
   (variational_flow_feeds_cartan_witness (I := I) (g_DT t)
     (deTurckVF (I := I) (g_DT t) g_bg) Φ_fam t x v w hv_raw hw_raw).hasDerivWithinAt
-
-/-! ## The within-set value identification (Cartan cancellation + Ricci naturality) -/
 
 /-- **Value identification (within-set).**
 
@@ -214,7 +199,6 @@ theorem deTurck_pullback_eval_value_hasDerivWithinAt
       (fun s : ℝ => (Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s)).inner x v w)
       ((-2 : ℝ) * ricciTensor (I := I)
         (Diffeomorph.pullbackMetric (g_DT t) (Φ_fam t)) x v w) (Set.Ici 0) t := by
-  -- Abbreviate the Lie / Ricci values.
   set L : ℝ := lieDerivMetric (I := I) (g_DT t)
       (deTurckVF (I := I) (g_DT t) g_bg) (Φ_fam t x)
       (mfderiv I I (Φ_fam t : M → M) x v)
@@ -224,16 +208,12 @@ theorem deTurck_pullback_eval_value_hasDerivWithinAt
       (mfderiv I I (Φ_fam t : M → M) x w) with hR_DT_def
   set R_fam : ℝ := ricciTensor (I := I)
       (Diffeomorph.pullbackMetric (g_DT t) (Φ_fam t)) x v w with hR_fam_def
-  -- Cartan cancellation: the Lie term cancels.
   have h_cancel : (((-2 : ℝ) * R_DT + L) + (-L)) = (-2 : ℝ) * R_DT := by ring
-  -- Ricci naturality: transport `Ric(g_DT t)` at `Φ_fam t x` to `Ric(g_fam t)` at `x`.
   have h_ric_nat : R_DT = R_fam := by
     rw [hR_fam_def, hR_DT_def]
     exact (ricci_tensor_pullback_natural_under_diffeomorphism (I := I) (g_DT t) (Φ_fam t) x v w).symm
-  -- Identify the value of `h_total_eval` with `-2 R_fam`.
   have h_value : (((-2 : ℝ) * R_DT + L) + (-L)) = (-2 : ℝ) * R_fam := by
     rw [h_cancel, h_ric_nat]
-  -- Transport the value, then transport the evaluation form to the bundled form.
   have h_eval' : HasDerivWithinAt
       (fun s : ℝ => (g_DT s).inner (Φ_fam s x)
         (mfderiv I I (Φ_fam s : M → M) x v)
@@ -241,10 +221,7 @@ theorem deTurck_pullback_eval_value_hasDerivWithinAt
       ((-2 : ℝ) * R_fam) (Set.Ici 0) t := by
     convert h_total_eval using 1
     exact h_value.symm
-  -- Transport across the pullback evaluation-formula identity.
   exact pullbackMetric_inner_hasDerivWithinAt_of_eval (I := I) g_DT Φ_fam x v w h_eval'
-
-/-! ## The headline assembly -/
 
 /-- **Hamilton–DeTurck pullback theorem (pointwise within-set form).**
 
@@ -287,9 +264,6 @@ theorem hamilton_deturck_pullback_solves_ricci_flow
     (hv_raw : ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v : TangentSpace I x,
       RawVariationalIdentity (I := I) (g_DT t)
         (deTurckVF (I := I) (g_DT t) g_bg) Φ_fam t x v)
-    -- The additive chain rule: the joint evaluation-form derivative equals the
-    -- sum of the metric-slot derivative (DeTurck RHS) and the pushforward-slot
-    -- derivative (`-𝓛_{X_DT} g_DT`).
     (h_total_eval : ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
       HasDerivWithinAt
         (fun s : ℝ => (g_DT s).inner (Φ_fam s x)
@@ -311,13 +285,10 @@ theorem hamilton_deturck_pullback_solves_ricci_flow
       (fun s : ℝ => (Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s)).inner x v w)
       ((-2 : ℝ) * ricciTensor (I := I)
         (Diffeomorph.pullbackMetric (g_DT t) (Φ_fam t)) x v w) (Set.Ici 0) t := by
-  -- Document the two genuinely-proved slot pieces (used to justify the value
-  -- shape of `h_total_eval`; the additive assembly is the supplied chain rule).
   have _h_metric := deTurck_metric_slot_hasDerivWithinAt (I := I)
     g_bg g_DT T hDT_deriv Φ_fam t ht x v w
   have _h_push := deTurck_pushforward_slot_hasDerivWithinAt (I := I)
     g_bg g_DT Φ_fam t x v w (hv_raw t ht x v) (hv_raw t ht x w)
-  -- Apply the value identification (Cartan cancellation + Ricci naturality).
   exact deTurck_pullback_eval_value_hasDerivWithinAt (I := I)
     g_bg g_DT Φ_fam t x v w (h_total_eval t ht x v w)
 

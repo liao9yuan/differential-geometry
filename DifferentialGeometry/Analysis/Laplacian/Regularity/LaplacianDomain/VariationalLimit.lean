@@ -87,8 +87,6 @@ open DifferentialGeometry.Analysis.Laplacian.ChartPushedWeakPartialOnVolume
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -97,8 +95,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## The partition-of-unity-cut smooth scalar `ρ_α · v` -/
 
 /-- The chart-supported smooth scalar `ρ_α · v`, used to invoke the smooth
 weak-solution identity. -/
@@ -151,12 +147,6 @@ private lemma chartPullback_pouScalar_eq_chartPushed
   rw [chartPullback_apply_of_mem (I := I) α _ hy]
   rfl
 
-/-! ## Per-`n` smooth chart-bilinear identity
-
-For `v : SmoothScalar g`, applying `chart_pulled_smooth_weak_solution` to the
-chart-supported smooth function `(pouScalar α v).toFun = ρ_α · v.toFun` yields
-the chart-bilinear identity in the precise form needed for limit-passage. -/
-
 /-- Per-`n` smooth chart-bilinear identity: for any smooth test function `ψ`
 with `tsupport ψ ⊆ chartTargetEuclid α`,
 
@@ -186,7 +176,6 @@ private theorem smooth_principal_identity
         ψ y
       ∂(volume : Measure EuclN) := by
   classical
-  -- Apply chart_pulled_smooth_weak_solution to f := (pouScalar α v).toFun.
   set f : M → ℝ := (pouScalar (I := I) (M := M) α v).toFun with hf_def
   have hf_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ f := (pouScalar (I := I) (M := M) α v).smooth
   have hf_cs : HasCompactSupport f :=
@@ -195,23 +184,17 @@ private theorem smooth_principal_identity
     pouScalar_tsupport_subset_chartSource (I := I) (M := M) α v
   obtain ⟨B, hB_match, hB_c, hB_solv⟩ :=
     chart_pulled_smooth_weak_solution (I := I) (M := M) g α hf_smooth hf_cs hf_supp
-  -- B.bilin (chartPullback I α f) ψ = ∫_univ negDensityLaplacianPullback ... · ψ.
   obtain ⟨_hB_cd, hB_solv⟩ := hB_solv
   have h_bilin : B.bilin (chartPullback (I := I) α f) ψ =
       ∫ y in (Set.univ : Set EuclN),
         negDensityLaplacianPullback (I := I) g hf_smooth α y * ψ y :=
     hB_solv ψ hψ hψ_cs (Set.subset_univ _)
-  -- Convert ∫_univ to ∫.
   rw [MeasureTheory.setIntegral_univ] at h_bilin
-  -- Step 1: reduce LHS to integral of principal integrand over chartTarget.
-  -- B.c = 0, B.bilin = ∫_univ principalIntegrand.
-  -- Principal integrand is supported in tsupport (chartPullback I α f) ⊆ K_main ⊆ chartTarget.
   set K_main : Set EuclN :=
     euclideanChartImageOfTsupport (I := I) (M := M) α f with hK_main_def
   have hK_main_subset_target :
       K_main ⊆ chartTargetEuclid (I := I) (M := M) α :=
     euclideanChartImageOfTsupport_subset_chartTargetEuclid (I := I) (M := M) α hf_supp
-  -- Use the simplification: B.bilin = ∫_univ principalIntegrand since B.c = 0.
   have h_bilin_univ : B.bilin (chartPullback (I := I) α f) ψ =
       ∫ y, B.principalIntegrand (chartPullback (I := I) α f) ψ y := by
     unfold SmoothEllipticBilinearForm.bilin
@@ -223,9 +206,6 @@ private theorem smooth_principal_identity
       B.principalIntegrand (chartPullback (I := I) α f) ψ y
     rw [hB_c]; simp
   rw [h_bilin_univ] at h_bilin
-  -- Step 2: simplify principalIntegrand on chartTarget using hB_match on K_main.
-  -- Outside K_main, ∂_i(chartPullback I α f) = 0, so principalIntegrand = 0.
-  -- Hence we can restrict integration to K_main, then to chartTarget.
   have h_chartPull_tsupp_in_K_main :
       tsupport (chartPullback (I := I) α f) ⊆ K_main :=
     chartPullback_tsupport_subset (I := I) α hf_cs hf_supp
@@ -258,7 +238,6 @@ private theorem smooth_principal_identity
     intro y hy
     rw [negDensityLaplacianPullback_apply_of_notMem (I := I) g hf_smooth α hy]
     ring
-  -- Step 3: convert ∫_univ B.principalIntegrand to ∫_chartTarget B.principalIntegrand.
   have h_chartTarget_meas :
       MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     (Sobolev.Chart.chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
@@ -274,7 +253,6 @@ private theorem smooth_principal_identity
       change B.principalIntegrand (chartPullback (I := I) α f) ψ y = 0
       exact h_principal_zero_off_K_main y
         (fun h => hy (hK_main_subset_target h))
-  -- Step 4: convert RHS ∫_univ negDens · ψ to ∫_chartTarget negDens · ψ.
   have h_RHS_set :
       ∫ y, negDensityLaplacianPullback (I := I) g hf_smooth α y * ψ y =
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
@@ -287,10 +265,6 @@ private theorem smooth_principal_identity
     · rw [Set.indicator_of_notMem hy]
       change negDensityLaplacianPullback (I := I) g hf_smooth α y * ψ y = 0
       exact h_negDens_zero_off y hy
-  -- Step 5: pointwise identification of principalIntegrand on chartTarget.
-  -- On chartTarget α: ∂_i (chartPullback I α f) = chartPushedPartial g α i v (where f = ρα·v.toFun).
-  -- B.a = weightedInvGram on K_main, and outside K_main on chartTarget the
-  -- partial = 0 anyway, so the principal integrand equals the desired sum.
   have h_principalIntegrand_eq :
       ∀ y ∈ chartTargetEuclid (I := I) (M := M) α,
         B.principalIntegrand (chartPullback (I := I) α f) ψ y =
@@ -300,15 +274,12 @@ private theorem smooth_principal_identity
             (fderiv ℝ ψ y) (EuclideanSpace.single j 1) := by
     intro y hy
     by_cases hy_K : y ∈ K_main
-    · -- Inside K_main: B.a matches weightedInvGram.
-      unfold SmoothEllipticBilinearForm.principalIntegrand
+    · unfold SmoothEllipticBilinearForm.principalIntegrand
       refine Finset.sum_congr rfl ?_
       intro i _
       refine Finset.sum_congr rfl ?_
       intro j _
       rw [hB_match y hy_K i j]
-      -- Now need: ∂_i (chartPullback I α f) = chartPushedPartial g α i v at y.
-      -- chartPullback I α f =ᶠ chartPushed POU α v.toFun on chartTarget (open).
       have hOpen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
         Sobolev.Chart.chartTargetEuclid_isOpen (I := I) (M := M) α
       have h_ev :
@@ -321,7 +292,6 @@ private theorem smooth_principal_identity
             fderiv ℝ (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α v.toFun) y :=
         Filter.EventuallyEq.fderiv_eq h_ev
       rw [h_fderiv]
-      -- chartPushedPartial = fderiv (chartPushed POU α v.toFun) y (single i 1).
       change weightedInvGramOnEuclid g α i j y *
           (fderiv ℝ _ y) (EuclideanSpace.single i 1) *
           (fderiv ℝ ψ y) (EuclideanSpace.single j 1) =
@@ -329,13 +299,10 @@ private theorem smooth_principal_identity
           chartPushedPartial g α i v y *
           (fderiv ℝ ψ y) (EuclideanSpace.single j 1)
       rw [chartPushedPartial_def]
-    · -- Outside K_main: principalIntegrand = 0, and ∂_i (chartPushed POU α v) = 0.
-      have h_principal_zero :
+    · have h_principal_zero :
           B.principalIntegrand (chartPullback (I := I) α f) ψ y = 0 :=
         h_principal_zero_off_K_main y hy_K
       rw [h_principal_zero]
-      -- ∂_i (chartPushed POU α v.toFun) y = ∂_i (chartPullback I α f) y = 0 since
-      -- y ∉ tsupport(chartPullback I α f) ⊆ K_main.
       have hy_not_supp : y ∉ tsupport (chartPullback (I := I) α f) := fun h =>
         hy_K (h_chartPull_tsupp_in_K_main h)
       have h_compl_open : IsOpen (tsupport (chartPullback (I := I) α f))ᶜ :=
@@ -373,7 +340,6 @@ private theorem smooth_principal_identity
           (0 : EuclN →L[ℝ] ℝ) (EuclideanSpace.single i 1) *
           (fderiv ℝ ψ y) (EuclideanSpace.single j 1) = 0
       rw [ContinuousLinearMap.zero_apply]; ring
-  -- Step 6: identify negDensityLaplacianPullback on chartTarget.
   have h_negDens_eq :
       ∀ y ∈ chartTargetEuclid (I := I) (M := M) α,
         negDensityLaplacianPullback (I := I) g hf_smooth α y * ψ y =
@@ -383,8 +349,6 @@ private theorem smooth_principal_identity
     intro y hy
     rw [negDensityLaplacianPullback_apply_of_mem (I := I) g hf_smooth α hy]
     ring
-  -- Step 7: assemble.
-  -- LHS = ∫_chartTarget principal = ∫_chartTarget ∑_{i,j} ...
   have h_LHS_final :
       ∫ y, B.principalIntegrand (chartPullback (I := I) α f) ψ y =
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
@@ -395,7 +359,6 @@ private theorem smooth_principal_identity
     rw [h_LHS_set]
     apply MeasureTheory.setIntegral_congr_fun h_chartTarget_meas
     exact h_principalIntegrand_eq
-  -- RHS = ∫_chartTarget negDens · ψ = -∫_chartTarget density · Δ_g f (symm) · ψ.
   have h_RHS_final :
       ∫ y, negDensityLaplacianPullback (I := I) g hf_smooth α y * ψ y =
       -∫ y in chartTargetEuclid (I := I) (M := M) α,
@@ -415,23 +378,7 @@ private theorem smooth_principal_identity
     · apply MeasureTheory.setIntegral_congr_fun h_chartTarget_meas
       intro y hy
       exact h_negDens_eq y hy
-  -- Final assembly: LHS = -RHS via h_bilin chain.
   rw [← h_LHS_final, h_bilin, h_RHS_final]
-
-/-! ## Per-`n` form of the variational identity for smooth scalars
-
-Adding the manifold-side mass term `∫ density·(ρ_α·v_n)(symm)·ψ` to both sides
-of `smooth_principal_identity` converts the identity to its u/f form:
-
-```
-LHS_principal + ∫ density·chartPushed POU α v_n·ψ
-  = ∫ density·(ρ_α·v_n - Δ_g(ρ_α·v_n))(symm)·ψ.
-```
-
-The right-hand side equals `∫ density · chartPullback I α H_n · ψ` on
-`chartTargetEuclid α`, where `H_n := (1-Δ_g)(ρ_α·v_n)` is a smooth function on
-`M`. By the Leibniz rule, `H_n` equals the smooth-case representative of
-`fHLeibniz_smoothToH1Compl` from `LeibnizCompensatedFh`. -/
 
 /-- For a smooth scalar `v` and a chart point `α`, the chart-pushed function
 agrees on `chartTargetEuclid α` with the chart-pull of `(pouScalar α v).toFun`. -/
@@ -484,7 +431,6 @@ private lemma integrable_density_pull_mul_test
   have h_chartTarget_meas :
       MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     (Sobolev.Chart.chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
-  -- The indicator of chartTarget extends the integrand to a globally continuous, compactly-supported function.
   have h_global_cont : Continuous (fun y : EuclN =>
       (chartTargetEuclid (I := I) (M := M) α).indicator
         (fun z => densityOnEuclid (I := I) g α z *
@@ -596,13 +542,9 @@ private theorem smooth_full_identity
   classical
   have h_principal :=
     smooth_principal_identity (I := I) (M := M) α v hψ hψ_cs hψ_supp
-  -- We want: principal + ∫ density·chartPushed·ψ = ∫ density·(ρα·v - Δ_g(ρα·v))(symm)·ψ.
-  -- Setup: chartPushed POU α v.toFun(y) = (pouScalar α v).toFun(symm) on chartTarget.
   set f_pou : M → ℝ := (pouScalar (I := I) (M := M) α v).toFun with hf_pou_def
   set H : M → ℝ := f_pou -
       Δ_g (I := I) g (pouScalar (I := I) (M := M) α v).smooth with hH_def
-  -- chartPushed POU α v.toFun(y) = f_pou(symm) on chartTarget — by definition.
-  -- Rewrite ∫ density · chartPushed POU α v · ψ on chartTarget.
   have h_chartTarget_meas :
       MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     (Sobolev.Chart.chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
@@ -614,11 +556,7 @@ private theorem smooth_full_identity
         densityOnEuclid (I := I) g α y *
           f_pou ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) * ψ y :=
     rfl
-  -- Combine: principal_integrand = -∫ density·Δ_g(ρα·v)(symm)·ψ; u_mass = ∫ density·(ρα·v)(symm)·ψ.
-  -- Sum: principal + u_mass = ∫ density·(ρα·v - Δ_g(ρα·v))(symm)·ψ = ∫ density·H(symm)·ψ.
   rw [h_u_mass_eq, h_principal]
-  -- Goal: -∫ density·Δ_g(ρα·v)(symm)·ψ + ∫ density·(ρα·v)(symm)·ψ = ∫ density·H(symm)·ψ.
-  -- RHS = ∫ density · ((ρα·v) - Δ_g(ρα·v))(symm) · ψ = LHS by linearity of integral.
   have h_density_cont : ContinuousOn (densityOnEuclid (I := I) g α)
       (chartTargetEuclid (I := I) (M := M) α) :=
     (densityOnEuclid_contDiffOn (I := I) g α).continuousOn
@@ -627,7 +565,6 @@ private theorem smooth_full_identity
       (extChartAt I α).symm ((toEuclidean (E := E)).symm y))
       (chartTargetEuclid (I := I) (M := M) α) :=
     (contMDiffOn_chart_symm (I := I) (M := M) α).continuousOn
-  -- ρ_α · v is continuous on M, hence its pullback is continuous on chartTarget.
   have hf_pou_cont : Continuous f_pou :=
     (pouScalar (I := I) (M := M) α v).smooth.continuous
   have h_pull_f_cont :
@@ -644,8 +581,6 @@ private theorem smooth_full_identity
           ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
         (chartTargetEuclid (I := I) (M := M) α) :=
     h_Δ_cont.continuousOn.comp h_symm_cont (Set.mapsTo_univ _ _)
-  -- The integrals are finite (compact-support integrands).
-  -- Integrability of the chart-supported pieces.
   have hint_f : IntegrableOn (fun y : EuclN =>
       densityOnEuclid (I := I) g α y *
         f_pou ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) * ψ y)
@@ -659,7 +594,6 @@ private theorem smooth_full_identity
       (chartTargetEuclid (I := I) (M := M) α) volume :=
     integrable_density_pull_mul_test (I := I) (M := M) α
       h_Δ_cont hψ_cont hψ_cs hψ_supp
-  -- We expand the RHS integrand: oneSubLapClassical.toFun = f_pou - Δ_g f_pou_smooth.
   have h_RHS_split : ∫ y in chartTargetEuclid (I := I) (M := M) α,
       densityOnEuclid (I := I) g α y *
         (pouScalar (I := I) (M := M) α v).oneSubLapClassical.toFun
@@ -688,12 +622,6 @@ private theorem smooth_full_identity
   rw [h_RHS_split]
   ring
 
-/-! ## L²-convergence reductions for limit-passage
-
-The headline limit-passage theorem requires that, as `v_n → u_h` in `H1Compl g`,
-each of the three integrals in the variational identity converges to its
-non-smooth limit. We use Cauchy-Schwarz / bounded-functional arguments. -/
-
 /-- Boundedness of the multiplier `m(y) = invGram_ij(y) · (fderiv ψ y)(e_j)` on
 the chart target. On `tsupport ψ`, the inverse-Gram entry is bounded (smooth on
 chartTarget, restricted to a compact subset of it). Outside `tsupport ψ`, the
@@ -707,10 +635,6 @@ private lemma exists_bound_for_invGram_mul_fderiv_psi
       |invGramOnEuclid (I := I) g α i j y *
         (fderiv ℝ ψ y) (EuclideanSpace.single j 1)| ≤ M := by
   classical
-  -- invGramOnEuclid g α i j is smooth on chartTarget (in particular continuous on
-  -- tsupport ψ ⊆ chartTarget compact). fderiv ψ is continuous globally.
-  -- The product (invGram · ∂_j ψ) vanishes outside tsupport ψ. On tsupport ψ
-  -- both factors are bounded.
   have h_invGram_contOn : ContinuousOn
       (fun y : EuclN => invGramOnEuclid (I := I) g α i j y)
       (chartTargetEuclid (I := I) (M := M) α) :=
@@ -729,7 +653,6 @@ private lemma exists_bound_for_invGram_mul_fderiv_psi
         (fderiv ℝ ψ y) (EuclideanSpace.single j 1))
       (tsupport ψ) :=
     h_invGram_contOn_supp.mul h_fderiv_cont.continuousOn
-  -- Bounded on tsupport ψ (compact).
   obtain ⟨M, _hM⟩ := (hψ_cs : IsCompact (tsupport ψ)).bddAbove_image h_prod_contOn.abs
   refine ⟨max M 0, le_max_right _ _, fun y => ?_⟩
   by_cases hy : y ∈ tsupport ψ
@@ -738,8 +661,7 @@ private lemma exists_bound_for_invGram_mul_fderiv_psi
       apply _hM
       exact ⟨y, hy, rfl⟩
     exact this.trans (le_max_left _ _)
-  · -- Outside tsupport ψ, fderiv ψ = 0.
-    have hy_not : y ∉ Function.support (fderiv ℝ ψ) := by
+  · have hy_not : y ∉ Function.support (fderiv ℝ ψ) := by
       intro h
       apply hy
       have h_supp : Function.support (fderiv ℝ ψ) ⊆ tsupport ψ := support_fderiv_subset ℝ
@@ -762,21 +684,18 @@ private lemma tendsto_inner_integral
     Tendsto (fun n => ∫ a, (m : β → ℝ) a * (g n : β → ℝ) a ∂μ)
       atTop (𝓝 (∫ a, (m : β → ℝ) a * (g_lim : β → ℝ) a ∂μ)) := by
   classical
-  -- Convert `‖g_n - g_lim‖ → 0` to `g_n → g_lim` in Lp.
   have h_dist_tendsto : Tendsto (fun n => dist (g n) g_lim) atTop (𝓝 0) := by
     have h_eq : (fun n => dist (g n) g_lim) = (fun n => ‖g n - g_lim‖) := by
       funext n; rw [dist_eq_norm]
     rw [h_eq]; exact h_tendsto
   have h_g_tendsto : Tendsto g atTop (𝓝 g_lim) :=
     tendsto_iff_dist_tendsto_zero.mpr h_dist_tendsto
-  -- Express `∫ m · f dμ` as `⟨m, f⟩_ℝ` (L² inner product).
   have h_inner_eq : ∀ (f : Lp ℝ 2 μ),
       ∫ a, (m : β → ℝ) a * (f : β → ℝ) a ∂μ = ⟪m, f⟫_ℝ := by
     intro f
     rw [L2.inner_def (𝕜 := ℝ) m f]
     refine integral_congr_ae ?_
     refine Filter.Eventually.of_forall (fun a => ?_)
-    -- For ℝ-inner product, `⟨x, y⟩_ℝ = y * x` (via `RCLike.inner_apply`).
     change (m : β → ℝ) a * (f : β → ℝ) a = @inner ℝ _ _ ((m : β → ℝ) a) ((f : β → ℝ) a)
     rw [show @inner ℝ _ _ ((m : β → ℝ) a) ((f : β → ℝ) a) =
         (f : β → ℝ) a * (m : β → ℝ) a from RCLike.inner_apply _ _]
@@ -785,51 +704,8 @@ private lemma tendsto_inner_integral
   have h_funeq : (fun n => ∫ a, (m : β → ℝ) a * (g n : β → ℝ) a ∂μ) =
       (fun n => ⟪m, g n⟫_ℝ) := funext (fun n => h_inner_eq (g n))
   rw [h_funeq]
-  -- Continuity of L² inner product in the right argument.
   exact (continuous_inner.tendsto (m, g_lim)).comp
     (Filter.Tendsto.prodMk_nhds tendsto_const_nhds h_g_tendsto)
-
-/-! ## Headline theorem
-
-The variational identity for `u_h ∈ laplacianDomain g` is obtained from the
-per-`n` smooth identity `smooth_full_identity` by passing to the limit in the
-smooth approximating sequence. -/
-
-/-! **Variational identity for `u_h ∈ laplacianDomain g`** in the form expected
-by `ChartBilinearH1ComplData`, expressed via:
-
-* `u_chart := chartPushed (chartAtlasPOU I M) α (((H1ComplToLp u_h : Lp _) :
-  M → ℝ))` — the chart-pushed L²-class of `u_h`;
-* `weak_partial i := (chartPushedWeakPartialLp g α i (canonical) u_h :
-  Lp _) : EuclN → ℝ` — the chart-pushed weak `i`-th partial of `u_h`,
-  constructed via the H¹-Lipschitz extension;
-* `f_chart := chartPullback I α (((fHLeibniz g α u_h hu_h : Lp _) :
-  M → ℝ))` — the chart-pull of the Leibniz-compensated `L²`-class.
-
-This is the natural mathematical form coming from the smooth-case identity in
-`smooth_full_identity`: the chart-supported smooth function
-`(pouScalar α v).toFun = ρ_α · v.toFun` yields per-`n`
-
-```
-LHS_principal_n + ∫ density · chartPushed POU α v_n.toFun · ψ
-  = ∫ density · ((pouScalar α v_n).oneSubLapClassical.toFun)(symm) · ψ.
-```
-
-The right-hand side `(pouScalar α v_n).oneSubLapClassical.toFun(x) =
-ρ_α(x) · v_n(x) - Δ_g(ρ_α · v_n)(x)` expands by the Leibniz rule to the
-manifold-side representative of `fHLeibniz_smoothToH1Compl`. Passing to the
-limit `v_n → u_h` in `H1Compl g` (which preserves all three integrals by L²
-inner-product continuity), the identity extends to `u_h ∈ laplacianDomain g`.
-
-The convergence step exploits:
-1. L²-continuity of `chartPushedWeakPartialLp _ u_h` in `u_h`;
-2. L²-continuity of `H1ComplToLp` and the chart-push;
-3. L²-continuity of `fHLeibniz _ _ _ hu_h` in `u_h` (which factors through
-   `smoothMulLp`, `gradInnerCLM`, `laplacianOp` — each L²-continuous).
-
-The full proof requires substantial measure-theoretic plumbing to discharge
-each integral-convergence step; we record the headline identity at the per-`n`
-smooth level via `smooth_full_identity`. -/
 
 /-- **Variational identity for smooth scalars** (public form of
 `smooth_full_identity`).

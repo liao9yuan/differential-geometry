@@ -83,13 +83,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Step 1: pointwise equality on the good-set image
-
-The chart-pulled slot correction equals `kernel · F` on a neighborhood of
-`extChartAt I α b`, allowing us to swap the iterated Fréchet derivative
-via `Filter.EventuallyEq.iteratedFDeriv_eq`. The same pointwise equality
-that drives the order-1 bound also drives the order-2 bound. -/
-
 /-- Pointwise equality between the chart-pulled input-slot correction and the
 chart-kernel applied to `tensorRSChartE_section_repr`, on a neighbourhood of
 `extChartAt I α b`. Repackages
@@ -200,8 +193,6 @@ private lemma output_slot_pulled_eq_kernel_repr_eventually
       (tensorRSChartE_section_repr (I := I) r s α
         (fun y' : M => T.toSection y') ((extChartAt I α).symm y))
   exact h_factor
-
-/-! ## Step 2: uniform iteratedFDeriv-2 bound on the kernel over POU tsupport -/
 
 /-- Continuity on the open chart-target image of the chart-`α` Levi-Civita
 good set of `‖iteratedFDeriv ℝ 2 (kernel ∘ symm)‖`, where `kernel` is the

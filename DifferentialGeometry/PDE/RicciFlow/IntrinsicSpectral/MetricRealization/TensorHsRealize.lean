@@ -90,8 +90,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The smooth multilinear field underlying a `(0,2)`-tensor section -/
-
 /-- The smooth `(0,2)`-multilinear field obtained from a smooth `(0,2)`-tensor
 section by evaluating its mixed-bundle fibre at the canonical unit
 `(0,0)`-tensor. This is `MixedSection.toMultilinearSection` of the underlying
@@ -109,8 +107,6 @@ def ccTensorMultilinear (g : SmoothRiemannianMetric I M)
         (ContinuousMultilinearMap.constOfIsEmpty ℝ
           (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) :=
   rfl
-
-/-! ## The bilinear form extracted from a `(0,2)`-tensor section -/
 
 /-- The model `(0,2)`-multilinear value of the smooth tensor section at `x`: the
 `ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) ℝ` underlying
@@ -140,14 +136,6 @@ theorem ccTensorBilin_apply (g : SmoothRiemannianMetric I M)
     ccTensorBilin (I := I) g T x v w =
       ccTensorModel (I := I) g T x ![v, w] :=
   bilinFormToModel_symm_apply E (ccTensorModel (I := I) g T x) v w
-
-/-! ## Smoothness of the extracted bilinear `Hom`-section
-
-The per-tangent-section scalar `x ↦ ccTensorBilin T x (Y x) (W x)` is the
-`(0,2)`-tensor evaluation `x ↦ toModel (ccTensorMultilinear T x) ![Y x, W x]`,
-which is `C^∞` by `TensorMultilinear.contMDiff_section_apply`.  Lifting per-section
-scalar smoothness to `Hom`-bundle smoothness is `cotangentCov_clmSection_smooth_aux`,
-applied twice (once per tangent slot), exactly as in `perturbedInner_contMDiff`. -/
 
 /-- For two smooth tangent sections `Y, W`, the scalar
 `x ↦ ccTensorBilin T x (Y x) (W x)` is `C^∞`.
@@ -210,8 +198,6 @@ theorem ccTensorBilin_contMDiff (g : SmoothRiemannianMetric I M)
       ⟨y, ccTensorBilin (I := I) g T y (Y y) (W y)⟩).2
   rfl
 
-/-! ## The fibrewise symmetrization -/
-
 /-- The fibrewise symmetrization `½ (h x v w + h x w v)` of the extracted bilinear
 form. As a metric perturbation must be symmetric, we symmetrize the extracted
 form, which preserves smoothness and does not increase the `g`-fibre operator
@@ -248,8 +234,6 @@ theorem ccTensorBilinSymm_contMDiff (g : SmoothRiemannianMetric I M)
         (E := fun b : M => TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ)
         b (ccTensorBilinSymm (I := I) g T b)) := by
   classical
-  -- The symmetrized section equals `½ (h + flip h)`; smoothness from the per-
-  -- tangent-section scalar form, lifted by `cotangentCov_clmSection_smooth_aux`.
   apply cotangentCov_clmSection_smooth_aux
     (V₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
     (φ := fun x : M => ccTensorBilinSymm (I := I) g T x)
@@ -258,7 +242,6 @@ theorem ccTensorBilinSymm_contMDiff (g : SmoothRiemannianMetric I M)
     (V₂ := fun _ : M => ℝ)
     (φ := fun x : M => ccTensorBilinSymm (I := I) g T x (Y x))
   intro W
-  -- `x ↦ ccTensorBilinSymm T x (Y x) (W x) = ½ (h x (Y x) (W x) + h x (W x) (Y x))`.
   have h_scalar : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun x : M => ccTensorBilinSymm (I := I) g T x (Y x) (W x)) := by
     have h_eq : (fun x : M => ccTensorBilinSymm (I := I) g T x (Y x) (W x))
@@ -278,13 +261,6 @@ theorem ccTensorBilinSymm_contMDiff (g : SmoothRiemannianMetric I M)
     (trivializationAt ℝ (Bundle.Trivial M ℝ) x
       ⟨y, ccTensorBilinSymm (I := I) g T y (Y y) (W y)⟩).2
   rfl
-
-/-! ## Assembly into a smooth Riemannian metric
-
-Given a smooth `(0,2)`-tensor section `T` whose symmetrization is uniformly
-`g`-fibre small with constant `< 1`, the symmetrized form is a symmetric,
-smooth, `g`-fibre-small bilinear `Hom`-section, hence `g + ccTensorBilinSymm T`
-assembles into a `SmoothRiemannianMetric` via `perturbedMetric`. -/
 
 /-- **The realized smooth metric `g + h_sym`.**  For a smooth `(0,2)`-tensor
 section `T` whose symmetrization `ccTensorBilinSymm T` satisfies the `g`-fibre
@@ -335,15 +311,6 @@ theorem exists_smooth_metric_of_smooth_tensor_small
   ⟨tensorSectionRealizeMetric (I := I) g T hδ'_lt hδ',
     fun x v w => tensorSectionRealizeMetric_inner (I := I) g T hδ'_lt hδ' x v w⟩
 
-/-! ## Linearity in the tensor section, and the scaling of the smallness constant
-
-The extraction `ccTensorBilin` (and hence its symmetrization) is `ℝ`-linear in
-the tensor section `T`, because each stage — the section evaluation
-`MixedSection.toMultilinearSection`, the model coercion `Tensor0SSpace.toModel`,
-and the inverse fibre isometry `bilinFormToModel.symm` — is `ℝ`-linear. Scaling
-the section by `c` therefore scales the smallness constant `δ` by `|c|`, so any
-smooth section can be rescaled to satisfy `gFibreOpBound … δ` with `δ < 1`. -/
-
 /-- The underlying multilinear field `ccTensorMultilinear` is `ℝ`-homogeneous in
 the tensor section. -/
 theorem ccTensorMultilinear_smul (g : SmoothRiemannianMetric I M)
@@ -352,7 +319,6 @@ theorem ccTensorMultilinear_smul (g : SmoothRiemannianMetric I M)
       = c • (ccTensorMultilinear (I := I) g T x : Tensor0SSpace 2 I x) := by
   unfold ccTensorMultilinear
   rw [SmoothCcTensor.toSection_smul]
-  -- `toMultilinearSection (c • s) x = (c • s) x (const 1) = c • (s x (const 1))`.
   change ((c • T.toSection) x)
       (ContinuousMultilinearMap.constOfIsEmpty ℝ
         (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))
@@ -395,13 +361,6 @@ theorem gFibreOpBound_ccTensorBilinSymm_smul (g : SmoothRiemannianMetric I M)
         mul_le_mul_of_nonneg_left hb (abs_nonneg c)
     _ = |c| * δ * Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w) := by ring
 
-/-! ## Realization directly from a finitely-supported spectral Sobolev element
-
-The chart-locality-free smooth representative `tensorHsSmoothRepr`
-of a finitely-supported element `u : tensorHs g 0 2 σ` is a
-`SmoothCcTensor g 0 2`; feeding it to the extraction above realizes the metric
-perturbation directly from the spectral data. -/
-
 /-- The symmetric smooth bilinear `Hom`-section realized from a finitely-supported
 spectral Sobolev `(0,2)` element `u`, via its chart-locality-free smooth
 representative. -/
@@ -437,16 +396,6 @@ theorem exists_smooth_metric_of_tensorHs_small
   exists_smooth_metric_of_smooth_tensor_small (I := I) g_bg
     (Analysis.Parabolic.TensorSpectral.tensorHsSmoothRepr
       (I := I) (M := M) u hu_fs) hδ'_lt hδ'
-
-/-! ## The substantive realization map
-
-We package the genuine realization into a *total* map
-`tensorHs g_bg 0 2 ((a : ℝ) + 2) → SmoothRiemannianMetric I M`: on a
-finitely-supported element whose extracted symmetric form is `g_bg`-fibre small
-with constant `< 1` (the inputs for which `g_bg + h` is an honest smooth
-metric), it returns the genuinely realized perturbed metric `g_bg + h_sym`; on
-all other inputs it returns the background metric `g_bg`. This map *realizes*
-`g_bg + h` exactly on the validity domain (`realizeMetricMap_eq_of_small`). -/
 
 open scoped Classical in
 /-- **The substantive realization map.**  Sends `u : H^{a+2}` to the genuine
@@ -485,9 +434,6 @@ theorem realizeMetricMap_eq_of_small (g_bg : SmoothRiemannianMetric I M) (a : �
         (tensorHsBilinSymm (I := I) g_bg u hu_fs) δ' :=
     ⟨hu_fs, δ', hδ'_lt, hδ'⟩
   rw [realizeMetricMap, dif_pos hex]
-  -- The chosen finite-support witness yields the same smooth representative
-  -- (finite support is a proposition, so all witnesses coincide by proof
-  -- irrelevance), and the realized metric's inner product is `g_bg + h_sym`.
   rw [tensorSectionRealizeMetric_inner]
   rfl
 

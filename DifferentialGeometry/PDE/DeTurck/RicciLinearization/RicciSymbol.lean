@@ -61,19 +61,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## The output bilinear form reconstructed from the symbol components
-
-Given the input bilinear form `t`, the linearized-Ricci symbol produces an output
-bilinear form `s` on the fibre.  Its chart components are the four-term symbol formula
-`ricciSymbolComp g x ξ t i k`, and `s` is reconstructed from them by
-$$s(v, w) = \sum_{i,k} v_i\, w_k\, \sigma_{ik}(\xi)(t),$$
-the model-basis components being `v_i = (chartModelBasis E).repr v i`.
-
-The reconstruction is bilinear in `(v, w)`: each summand `v_i w_k σ_{ik}` is the product
-of the two linear coordinate functionals `v ↦ v_i`, `w ↦ w_k` with the constant
-`σ_{ik}(ξ)(t)`, so additivity and homogeneity in each slot are immediate from linearity
-of `(chartModelBasis E).repr` together with finite-sum distributivity. -/
-
 section Output
 
 /-- Additivity of a single model-basis coordinate of a model vector.  It is the
@@ -193,14 +180,6 @@ lemma ricciSymbolOutput_smul (g : SmoothRiemannianMetric I M) (x : M) (ξ : E) (
 
 end Output
 
-/-! ## The bundled linearized-Ricci symbol
-
-`ricciSymbol g` is the `TensorSymbol I M`: at each base point `x` and covector `ξ` the
-fibrewise linear endomorphism `t ↦ ricciSymbolOutput g x ξ t` of the `(0,2)`-tensor
-fibre.  The endomorphism is `ℝ`-linear in `t` by `ricciSymbolOutput_add` /
-`ricciSymbolOutput_smul`, which in turn come from the component-level `ℝ`-linearity
-`ricciSymbolComp_add` / `ricciSymbolComp_smul`. -/
-
 section Bundle
 
 /-- The **bundled linearized-Ricci principal symbol** as a `TensorSymbol I M`.
@@ -245,9 +224,7 @@ theorem ricciSymbol_apply_apply (g : SmoothRiemannianMetric I M) (x : M) (ξ : E
       ricciSymbolComp (I := I) g x ξ t i k := by
   classical
   rw [ricciSymbol_apply, ricciSymbolOutput_apply_apply]
-  -- The coordinates of a basis vector are the Kronecker delta `Finsupp.single`.
   rw [(chartModelBasis E).repr_self, (chartModelBasis E).repr_self]
-  -- Collapse the outer sum at `i` and the inner sum at `k`.
   rw [Finset.sum_eq_single i]
   · rw [Finset.sum_eq_single k]
     · rw [Finsupp.single_eq_same, Finsupp.single_eq_same]

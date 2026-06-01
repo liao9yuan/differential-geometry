@@ -82,16 +82,12 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Algebraic helper: the `L²`-norm / squared-integral identity -/
 
 /-- For `v ∈ L²(μ)` real-valued, the square of `eLpNorm v 2 μ` equals
 `ENNReal.ofReal (∫ v²)`. A local re-derivation of the standard identity. -/
@@ -100,7 +96,6 @@ private lemma sq_eLpNorm_two_eq_ofReal_integral_sq
     (hv : MemLp v 2 μ) :
     (eLpNorm v 2 μ) ^ 2 = ENNReal.ofReal (∫ x, v x ^ 2 ∂μ) := by
   classical
-  -- `(eLpNorm v 2 μ) ^ 2 = ∫⁻ ‖v‖ₑ ^ 2 ∂μ`.
   have h_sq_lintegral :
       (eLpNorm v 2 μ) ^ 2 = ∫⁻ x, (‖v x‖ₑ : ℝ≥0∞) ^ 2 ∂μ := by
     rw [eLpNorm_eq_lintegral_rpow_enorm_toReal
@@ -115,7 +110,6 @@ private lemma sq_eLpNorm_two_eq_ofReal_integral_sq
     rw [h_inner_eq, ← ENNReal.rpow_natCast _ 2, ← ENNReal.rpow_mul]
     norm_num
   rw [h_sq_lintegral]
-  -- `∫⁻ ‖v‖ₑ ^ 2 = ∫⁻ ENNReal.ofReal (v ^ 2) = ENNReal.ofReal (∫ v ^ 2)`.
   have h_pt : ∀ x : α, (‖v x‖ₑ : ℝ≥0∞) ^ 2 = ENNReal.ofReal (v x ^ 2) := by
     intro x
     rw [← Real.enorm_eq_ofReal (sq_nonneg _)]
@@ -143,8 +137,6 @@ private lemma integral_sq_eq_eLpNorm_two_toReal_sq
   rw [h_sq] at h_toReal
   rw [ENNReal.toReal_ofReal h_int_nn] at h_toReal
   exact h_toReal
-
-/-! ## Pointwise comparison helpers -/
 
 /-- The principal cutoff-extension integrand is dominated pointwise:
 `((∂_l χ) · u + χ · w)² ≤ 2 M_∂χ² · u² + 2 M_χ² · w²`. -/
@@ -194,8 +186,6 @@ private lemma memLp_cutoff_mul
       abs_of_nonneg hM_χ_nn]
     exact mul_le_mul_of_nonneg_right (hM_χ_bd x) (abs_nonneg _)
   exact MemLp.mono (hv.const_mul M_χ) (hχ_aesm.mul hv.aestronglyMeasurable) h_pt_le
-
-/-! ## Headline theorem -/
 
 /-- **`G_total` is bounded by the divergence-form data's own `L²` norms.**
 
@@ -264,9 +254,6 @@ theorem gTotal_le_data_eLpNorm
           (eLpNorm fSrc 2
             ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2) := by
   classical
-  -- We work with `n := finrank ℝ E` and the restricted reference measure
-  -- written out explicitly, to keep the `EuclN` notation stable.
-  -- `χ` and its partials are continuous, hence a.e.-strongly-measurable.
   have hχ_cont : Continuous χ := hχ_smooth.continuous
   have hχ_fderiv_cont : Continuous (fderiv ℝ χ) :=
     hχ_smooth.continuous_fderiv (by decide : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)
@@ -280,26 +267,21 @@ theorem gTotal_le_data_eLpNorm
       (fun x => (fderiv ℝ χ x) (EuclideanSpace.single l 1))
       ((volume : Measure EuclN).restrict (closure Ω')) := fun l =>
     (hχ_partial_cont l).aestronglyMeasurable
-  -- Measurability of `closure Ω'`.
   have hΩ'_closure_meas : MeasurableSet (closure Ω') := isClosed_closure.measurableSet
-  -- `L²(closure Ω')` memberships of the data, in plain-volume form.
   have hu_l2 : MemLp D.u_chart 2
       ((volume : Measure EuclN).restrict (closure Ω')) :=
     memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure (I := I) (M := M)
       D.u_chart_memLp_weighted hΩ'_closure_compact hΩ'_closure_meas hΩ'_closure_in
-  -- `L²(closure Ω')` membership of the free source `fSrc`, supplied directly.
   have hf_l2 : MemLp fSrc 2
       ((volume : Measure EuclN).restrict (closure Ω')) := hfSrc
   have hwp_l2 : ∀ l : Fin (Module.finrank ℝ E), MemLp (D.weak_partial l) 2
       ((volume : Measure EuclN).restrict (closure Ω')) := fun l =>
     D.weak_partial_locally_memLp l (closure Ω') hΩ'_closure_compact hΩ'_closure_in
-  -- Sup-bound nonnegativity.
   have hM_χ_nn : 0 ≤ M_χ := le_trans (abs_nonneg _) (hM_χ_bd 0)
   have hM_dχ_nn : 0 ≤ M_dχ := by
     obtain ⟨l⟩ : Nonempty (Fin (Module.finrank ℝ E)) :=
       ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩⟩
     exact le_trans (abs_nonneg _) (hM_dχ_bd l 0)
-  -- Abbreviations for the three squared-`L²`-norm quantities (`toReal`).
   set Sw : ℝ := ∑ l : Fin (Module.finrank ℝ E),
       (eLpNorm (D.weak_partial l) 2
         ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2 with hSw_def
@@ -311,7 +293,6 @@ theorem gTotal_le_data_eLpNorm
     rw [hSw_def]; exact Finset.sum_nonneg (fun _ _ => sq_nonneg _)
   have hSu_nn : 0 ≤ Su := by rw [hSu_def]; exact sq_nonneg _
   have hSf_nn : 0 ≤ Sf := by rw [hSf_def]; exact sq_nonneg _
-  -- `∫_{closure Ω'} v²` rewritten as the squared `L²` norm, per datum.
   have hu_int_closure :
       ∫ x in closure Ω', (D.u_chart x) ^ 2 ∂(volume : Measure EuclN) = Su := by
     rw [hSu_def]
@@ -325,18 +306,12 @@ theorem gTotal_le_data_eLpNorm
         (eLpNorm (D.weak_partial l) 2
           ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2 := fun l =>
     integral_sq_eq_eLpNorm_two_toReal_sq (hwp_l2 l)
-  -- ====================================================================
-  -- The cutoff extensions and their `L²(closure Ω')` memberships.
-  -- ====================================================================
-  -- `χ · D.u_chart ∈ L²(closure Ω')`.
   have hug_l2 : MemLp (fun x => χ x * D.u_chart x) 2
       ((volume : Measure EuclN).restrict (closure Ω')) :=
     memLp_cutoff_mul hM_χ_nn hM_χ_bd hχ_aesm hu_l2
-  -- `χ · fSrc ∈ L²(closure Ω')`.
   have hfg_l2 : MemLp (fun x => χ x * fSrc x) 2
       ((volume : Measure EuclN).restrict (closure Ω')) :=
     memLp_cutoff_mul hM_χ_nn hM_χ_bd hχ_aesm hf_l2
-  -- `(∂_l χ) · D.u_chart + χ · D.weak_partial l ∈ L²(closure Ω')`.
   have hgg_l2 : ∀ l : Fin (Module.finrank ℝ E), MemLp (fun x =>
       (fderiv ℝ χ x) (EuclideanSpace.single l 1) * D.u_chart x +
         χ x * D.weak_partial l x) 2
@@ -350,10 +325,6 @@ theorem gTotal_le_data_eLpNorm
         ((volume : Measure EuclN).restrict (closure Ω')) :=
       memLp_cutoff_mul hM_χ_nn hM_χ_bd hχ_aesm (hwp_l2 l)
     exact h_term1.add h_term2
-  -- ====================================================================
-  -- Step 1: dominate each `Ω'`-integral by the `closure Ω'`-integral.
-  -- ====================================================================
-  -- Squared cutoff-extension integrands: integrable on `closure Ω'`.
   have h_each_gg_int : ∀ l : Fin (Module.finrank ℝ E), IntegrableOn (fun x =>
       ((fderiv ℝ χ x) (EuclideanSpace.single l 1) * D.u_chart x +
         χ x * D.weak_partial l x) ^ 2) (closure Ω') (volume : Measure EuclN) := by
@@ -384,7 +355,6 @@ theorem gTotal_le_data_eLpNorm
       (closure Ω') (volume : Measure EuclN) := by
     have := hfg_l2.integrable_sq
     simpa [IntegrableOn, pow_two] using this
-  -- Domain monotonicity `∫_{Ω'} ≤ ∫_{closure Ω'}` for each of the three terms.
   have h_principal_mono :
       (∫ x in Ω', ∑ l : Fin (Module.finrank ℝ E),
         ((fderiv ℝ χ x) (EuclideanSpace.single l 1) * D.u_chart x +
@@ -408,10 +378,6 @@ theorem gTotal_le_data_eLpNorm
     setIntegral_mono_set h_fg_sq_int
       (Filter.Eventually.of_forall (fun x => sq_nonneg _))
       (Filter.Eventually.of_forall subset_closure)
-  -- ====================================================================
-  -- Step 2: bound the principal-sum integral over `closure Ω'`.
-  -- ====================================================================
-  -- Pointwise sum bound.
   have h_pt_sum : ∀ x : EuclN,
       (∑ l : Fin (Module.finrank ℝ E),
         ((fderiv ℝ χ x) (EuclideanSpace.single l 1) * D.u_chart x +
@@ -441,7 +407,6 @@ theorem gTotal_le_data_eLpNorm
       _ = 2 * (Module.finrank ℝ E : ℝ) * M_dχ ^ 2 * (D.u_chart x) ^ 2 +
             2 * M_χ ^ 2 * (∑ l : Fin (Module.finrank ℝ E),
               (D.weak_partial l x) ^ 2) := by ring
-  -- Integrability of the pointwise-bounding RHS on `closure Ω'`.
   have h_u_sq_int : IntegrableOn (fun x => (D.u_chart x) ^ 2)
       (closure Ω') (volume : Measure EuclN) := by
     have := hu_l2.integrable_sq
@@ -477,7 +442,6 @@ theorem gTotal_le_data_eLpNorm
     Integrable.add
       (h_u_sq_int.integrable.const_mul (2 * (Module.finrank ℝ E : ℝ) * M_dχ ^ 2))
       (h_wp_sum_sq_int.integrable.const_mul (2 * M_χ ^ 2))
-  -- Integrate the pointwise bound over `closure Ω'`.
   have h_principal_closure_le :
       (∫ x in closure Ω', ∑ l : Fin (Module.finrank ℝ E),
         ((fderiv ℝ χ x) (EuclideanSpace.single l 1) * D.u_chart x +
@@ -492,7 +456,6 @@ theorem gTotal_le_data_eLpNorm
         (fun x => Finset.sum_nonneg (fun _ _ => sq_nonneg _)))
       h_rhs_int.integrable
       (Filter.Eventually.of_forall h_pt_sum)
-  -- Evaluate the RHS integral.
   have h_rhs_eval :
       (∫ x in closure Ω',
         (2 * (Module.finrank ℝ E : ℝ) * M_dχ ^ 2 * (D.u_chart x) ^ 2 +
@@ -503,7 +466,6 @@ theorem gTotal_le_data_eLpNorm
     rw [integral_add (h_u_sq_int.integrable.const_mul _)
       (h_wp_sum_sq_int.integrable.const_mul _)]
     rw [integral_const_mul, integral_const_mul, hu_int_closure]
-    -- `∫ ∑_l w_l² = ∑_l ∫ w_l²`.
     have h_sum_swap :
         (∫ x in closure Ω', ∑ l : Fin (Module.finrank ℝ E),
           (D.weak_partial l x) ^ 2 ∂(volume : Measure EuclN)) =
@@ -517,17 +479,12 @@ theorem gTotal_le_data_eLpNorm
       rw [hSw_def]
       exact Finset.sum_congr rfl (fun l _ => hwp_int_closure l)
     rw [h_sum_eq]
-  -- Combine: principal `Ω'`-integral ≤ `2 n M_∂χ² Su + 2 M_χ² Sw`.
   have h_principal_final :
       (∫ x in Ω', ∑ l : Fin (Module.finrank ℝ E),
         ((fderiv ℝ χ x) (EuclideanSpace.single l 1) * D.u_chart x +
           χ x * D.weak_partial l x) ^ 2 ∂(volume : Measure EuclN)) ≤
       2 * (Module.finrank ℝ E : ℝ) * M_dχ ^ 2 * Su + 2 * M_χ ^ 2 * Sw :=
     le_trans h_principal_mono (le_trans h_principal_closure_le (le_of_eq h_rhs_eval))
-  -- ====================================================================
-  -- Step 3: bound the `u_g` and `f_g` integrals over `Ω'`.
-  -- ====================================================================
-  -- `χ · v` squared, pointwise: `(χ·v)² ≤ M_χ² · v²`.
   have h_χmul_pt : ∀ (v : EuclN → ℝ) (x : EuclN),
       (χ x * v x) ^ 2 ≤ M_χ ^ 2 * (v x) ^ 2 := by
     intro v x
@@ -566,10 +523,6 @@ theorem gTotal_le_data_eLpNorm
   have h_fg_final :
       (∫ x in Ω', (χ x * fSrc x) ^ 2 ∂(volume : Measure EuclN)) ≤
       M_χ ^ 2 * Sf := le_trans h_fg_mono h_fg_closure_le
-  -- ====================================================================
-  -- Step 4: assemble and absorb into the explicit constant `C_χ`.
-  -- ====================================================================
-  -- Sum the three term bounds.
   have h_sum_bound :
       (∫ x in Ω', ∑ l : Fin (Module.finrank ℝ E),
           ((fderiv ℝ χ x) (EuclideanSpace.single l 1) * D.u_chart x +
@@ -581,28 +534,22 @@ theorem gTotal_le_data_eLpNorm
     have := add_le_add (add_le_add h_principal_final h_ug_final) h_fg_final
     linarith [this]
   refine le_trans h_sum_bound ?_
-  -- It remains to absorb the explicit sum into `C_χ · (Sw + Su + Sf)`.
   set Cχ : ℝ :=
     2 * ((Module.finrank ℝ E : ℝ) + 1) * (M_χ ^ 2 + M_dχ ^ 2 + 1) with hCχ_def
   have hn_nn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := Nat.cast_nonneg _
-  -- Coefficient-wise domination, using `Sw, Su, Sf ≥ 0`.
-  -- `Sw` coefficient: `2 M_χ² ≤ Cχ`.
   have h_coeff_w : 2 * M_χ ^ 2 ≤ Cχ := by
     rw [hCχ_def]
     nlinarith [sq_nonneg M_χ, sq_nonneg M_dχ, hn_nn,
       mul_nonneg hn_nn (sq_nonneg M_χ)]
-  -- `Su` coefficient: `2 n M_∂χ² + M_χ² ≤ Cχ`.
   have h_coeff_u :
       2 * (Module.finrank ℝ E : ℝ) * M_dχ ^ 2 + M_χ ^ 2 ≤ Cχ := by
     rw [hCχ_def]
     nlinarith [sq_nonneg M_χ, sq_nonneg M_dχ, hn_nn,
       mul_nonneg hn_nn (sq_nonneg M_dχ), mul_nonneg hn_nn (sq_nonneg M_χ)]
-  -- `Sf` coefficient: `M_χ² ≤ Cχ`.
   have h_coeff_f : M_χ ^ 2 ≤ Cχ := by
     rw [hCχ_def]
     nlinarith [sq_nonneg M_χ, sq_nonneg M_dχ, hn_nn,
       mul_nonneg hn_nn (sq_nonneg M_χ)]
-  -- Final assembly: `(2nM∂χ²Su + 2Mχ²Sw) + Mχ²Su + Mχ²Sf ≤ Cχ·(Sw+Su+Sf)`.
   have h_final :
       (2 * (Module.finrank ℝ E : ℝ) * M_dχ ^ 2 * Su + 2 * M_χ ^ 2 * Sw) +
         M_χ ^ 2 * Su + M_χ ^ 2 * Sf ≤ Cχ * (Sw + Su + Sf) := by
@@ -620,23 +567,11 @@ theorem gTotal_le_data_eLpNorm
       mul_le_mul_of_nonneg_right h_coeff_f hSf_nn
     have h_expand : Cχ * (Sw + Su + Sf) = Cχ * Sw + Cχ * Su + Cχ * Sf := by ring
     linarith [h_w_term, h_u_term, h_f_term, h_expand]
-  -- Conclude.
   calc (2 * (Module.finrank ℝ E : ℝ) * M_dχ ^ 2 * Su + 2 * M_χ ^ 2 * Sw) +
         M_χ ^ 2 * Su + M_χ ^ 2 * Sf
       ≤ Cχ * (Sw + Su + Sf) := h_final
     _ = (2 * ((Module.finrank ℝ E : ℝ) + 1) * (M_χ ^ 2 + M_dχ ^ 2 + 1)) *
           (Sw + Su + Sf) := by rw [hCχ_def]
-
-/-! ## Density-reconciliation helper
-
-The downstream consumer of `gTotal_le_data_eLpNorm` instantiates the free
-source as `fun x => densityOnEuclid g α x · f x` for an `L²`-loc `f`,
-because the chart-pulled bilinear form carries a volume-density factor.
-Since `densityOnEuclid g α` is smooth — hence continuous — on the chart
-target, it is bounded on the compact `closure Ω'`. The four declarations
-below name an explicit sup bound `chartDensitySup` for `|density|` over
-`closure Ω'`, and trade the `density · f` norm for the `f` norm with the
-explicit constant `chartDensitySup²`. -/
 
 /-- An explicit real upper bound for `|densityOnEuclid g α|` over
 `closure Ω'`: the supremum of the image of `closure Ω'` under
@@ -670,8 +605,6 @@ lemma abs_densityOnEuclid_le_chartDensitySup
     {x : EuclN} (hx : x ∈ closure Ω') :
     |densityOnEuclid (I := I) g α x| ≤
       chartDensitySup (I := I) (M := M) g α Ω' := by
-  -- `|densityOnEuclid g α|` is continuous on `closure Ω'`, hence the
-  -- compact image is bounded above, so the membership gives `≤ sSup`.
   have h_dens_contOn : ContinuousOn (densityOnEuclid (I := I) g α)
       (closure Ω') :=
     ((densityOnEuclid_contDiffOn (I := I) g α).continuousOn).mono hΩ'_closure_in
@@ -698,20 +631,15 @@ lemma densityWeightedSource_memLp
   classical
   have hΩ'_closure_meas : MeasurableSet (closure Ω') :=
     isClosed_closure.measurableSet
-  -- `densityOnEuclid g α` is continuous on `closure Ω'`.
   have h_dens_contOn : ContinuousOn (densityOnEuclid (I := I) g α)
       (closure Ω') :=
     ((densityOnEuclid_contDiffOn (I := I) g α).continuousOn).mono hΩ'_closure_in
-  -- a.e.-strong-measurability of `densityOnEuclid g α` for the restricted
-  -- measure, from continuity on the measurable closure.
   have h_dens_aesm : AEStronglyMeasurable (densityOnEuclid (I := I) g α)
       ((volume : Measure EuclN).restrict (closure Ω')) :=
     h_dens_contOn.aestronglyMeasurable hΩ'_closure_meas
-  -- pointwise bound `|density x| ≤ chartDensitySup` on `closure Ω'`.
   set Mden : ℝ := chartDensitySup (I := I) (M := M) g α Ω' with hMden_def
   have hMden_nn : 0 ≤ Mden :=
     chartDensitySup_nonneg (I := I) (M := M) g α Ω'
-  -- `‖density·f‖ ≤ ‖Mden · f‖` a.e. on the restricted measure.
   have h_pt_le : ∀ᵐ x ∂((volume : Measure EuclN).restrict (closure Ω')),
       ‖densityOnEuclid (I := I) g α x * f x‖ ≤ ‖Mden * f x‖ := by
     refine ae_restrict_of_forall_mem hΩ'_closure_meas ?_
@@ -747,7 +675,6 @@ lemma densityWeightedSource_eLpNorm_sq_le
   set Mden : ℝ := chartDensitySup (I := I) (M := M) g α Ω' with hMden_def
   have hMden_nn : 0 ≤ Mden :=
     chartDensitySup_nonneg (I := I) (M := M) g α Ω'
-  -- pointwise: `‖density·f‖ ≤ ‖Mden • f‖` a.e. on `μ`.
   have h_pt_le : ∀ᵐ x ∂μ,
       ‖densityOnEuclid (I := I) g α x * f x‖ ≤ ‖(Mden • f) x‖ := by
     rw [hμ_def]
@@ -760,14 +687,12 @@ lemma densityWeightedSource_eLpNorm_sq_le
       abs_densityOnEuclid_le_chartDensitySup
         hΩ'_closure_compact hΩ'_closure_in hx
     exact mul_le_mul_of_nonneg_right h_dens_bd (abs_nonneg _)
-  -- `eLpNorm (density·f) ≤ eLpNorm (Mden • f) = ‖Mden‖ₑ · eLpNorm f`.
   have h_eLp_le :
       eLpNorm (fun x => densityOnEuclid (I := I) g α x * f x) 2 μ ≤
         (‖Mden‖ₑ : ℝ≥0∞) * eLpNorm f 2 μ := by
     calc eLpNorm (fun x => densityOnEuclid (I := I) g α x * f x) 2 μ
         ≤ eLpNorm (Mden • f) 2 μ := eLpNorm_mono_ae h_pt_le
       _ = (‖Mden‖ₑ : ℝ≥0∞) * eLpNorm f 2 μ := eLpNorm_const_smul Mden f 2 μ
-  -- Pass to `toReal` and square.
   have h_eLpf_ne_top : eLpNorm f 2 μ ≠ (⊤ : ℝ≥0∞) := by
     rw [hμ_def]; exact hf.2.ne
   have h_toReal_le :
@@ -779,7 +704,6 @@ lemma densityWeightedSource_eLpNorm_sq_le
         exact ENNReal.mul_ne_top ENNReal.coe_ne_top hf.2.ne) h_eLp_le
     rwa [ENNReal.toReal_mul, toReal_enorm, Real.norm_eq_abs,
       abs_of_nonneg hMden_nn] at h_mono
-  -- Square the nonnegative inequality.
   have h_lhs_nn : 0 ≤
       (eLpNorm (fun x => densityOnEuclid (I := I) g α x * f x) 2 μ).toReal :=
     ENNReal.toReal_nonneg

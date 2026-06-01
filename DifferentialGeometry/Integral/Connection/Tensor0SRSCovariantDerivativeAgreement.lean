@@ -87,20 +87,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Unit-evaluation intertwines the two `(0, s)` covariant derivatives
-
-The directional `(r = 0, s)`-tensor covariant derivative of a smooth section `σ`,
-applied to the parallel unit `(0, 0)`-tensor, equals the abstract `(0, s)`-tensor
-covariant derivative of the unit-evaluated section `y ↦ σ y (unit)`. The Hom-bundle
-product rule against the `∇`-parallel unit `(0, 0)`-section has no correction term;
-this is the `s`-general form of `covDeriv_unit_eval_eq`. -/
 
 /-- **Unit-evaluation commutes with the `(0, s)`-rank covariant derivative.** For an
 arbitrary smooth `Cₛ^∞` `(r = 0, s)`-tensor section `σ` and tangent vector `v`, the
@@ -135,13 +125,6 @@ theorem tensorRSCovariantDerivative_zeroS_unit_eval
       (LeviCivita (I := I) g) x v]
   rw [map_zero, sub_zero]
 
-/-! ## The canonical scalar-reader lift `Tensor0SSpace s → TensorRSSpace 0 s`
-
-The fibre `Tensor0SSpace 0 I x` is canonically `≃L[ℝ] ℝ` via `tensor0Iso`. Pre-composing
-with the resulting scalar-reader gives a continuous-linear lift `Tensor0SSpace s I x →L[ℝ]
-TensorRSSpace 0 s I x`, namely `T ↦ (tensor0Iso x).smulRight T`, whose value at the unit
-`(0, 0)`-tensor returns `T` (because the unit reads to the scalar `1`). -/
-
 /-- The canonical fibrewise lift of an abstract `(0, s)`-tensor `T : Tensor0SSpace s I x`
 to a `(0, s)`-rank `(r = 0, s)`-tensor `TensorRSSpace 0 s I x = Tensor0SSpace 0 I x →L[ℝ]
 Tensor0SSpace s I x`: the `(0, 0)`-input is read to a scalar via `tensor0Iso` and used to
@@ -174,13 +157,6 @@ so `unitScalarRSLift x T (unit) = 1 • T = T`. -/
     simpa [scalarFn_apply, unitZeroSec_apply] using this
   rw [hscalar, one_smul]
 
-/-! ## Headline global agreement
-
-For a smooth abstract `(0, s)`-tensor section `S`, lifting fibrewise by
-`unitScalarRSLift` produces a smooth `(0, s)`-rank `(r = 0, s)`-tensor section whose
-unit-evaluation recovers `S`. Combining with `tensorRSCovariantDerivative_zeroS_unit_eval`
-identifies the abstract `(0, s)` covariant derivative with the `(0, s)`-rank one. -/
-
 /-- The fibrewise lift of a section, `y ↦ unitScalarRSLift y (S y)`. -/
 noncomputable def unitScalarRSLiftSection {s : ℕ} (S : Π y : M, Tensor0SSpace s I y) :
     Π y : M, TensorRSSpace 0 s I y :=
@@ -211,13 +187,6 @@ theorem unitScalarRSLiftSection_apply_at_section {s : ℕ}
   rw [unitScalarRSLiftSection_apply, unitScalarRSLift_apply]
   rfl
 
-/-! ### Smoothness of the lift
-
-For each smooth `(0, 0)`-section `Y`, the section `y ↦ (lift S) y (Y y) = scalarFn Y y • S y`
-is the scalar-multiple of a smooth `(0, s)`-section by a smooth scalar function, hence
-smooth. The CLM-bundle smoothness bridge `contMDiff_clm_section_of_pointwise` lifts this to
-smoothness of the lifted Hom-bundle section. -/
-
 /-- **Smoothness of the lift.** If `S` is a smooth `(0, s)`-tensor section, then the lifted
 `(r = 0, s)`-tensor section `unitScalarRSLiftSection S` is smooth. -/
 theorem contMDiff_unitScalarRSLiftSection {s : ℕ}
@@ -229,16 +198,12 @@ theorem contMDiff_unitScalarRSLiftSection {s : ℕ}
       (fun y : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
         (E := fun z : M => TensorRSSpace 0 s I z) y
         (unitScalarRSLiftSection (I := I) (M := M) S y)) := by
-  -- `TensorRSModel 0 s ℝ E = Tensor0SModel 0 ℝ E →L[ℝ] Tensor0SModel s ℝ E` and
-  -- `TensorRSSpace 0 s I y = Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y`, so the
-  -- goal is exactly the CLM-bundle smoothness of the Hom-bundle section.
   apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
     (V₁ := fun y : M => Tensor0SSpace 0 I y)
     (V₂ := fun y : M => Tensor0SSpace s I y)
     (φ := fun y : M => (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from
       unitScalarRSLiftSection (I := I) (M := M) S y))
   intro Y
-  -- For each smooth `(0, 0)`-section `Y`, the applied section is `scalarFn Y • S`.
   have hscalar : ContMDiff I 𝓘(ℝ, ℝ) ∞ (scalarFn (I := I) (M := M) (fun y => Y y)) :=
     (contMDiff_scalarFn_iff_section (I := I) (M := M) (fun y => Y y)).mpr Y.contMDiff
   have hsmul : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel s ℝ E)) ∞
@@ -246,7 +211,6 @@ theorem contMDiff_unitScalarRSLiftSection {s : ℕ}
         (E := fun z : M => Tensor0SSpace s I z) y
         (scalarFn (I := I) (M := M) (fun y => Y y) y • S y)) :=
     ContMDiff.smul_section hscalar hS
-  -- Rewrite the lifted-section-applied-to-`Y` value to `scalarFn Y • S`.
   have hpt : (fun y : M => TotalSpace.mk' (Tensor0SModel s ℝ E)
         (E := fun z : M => Tensor0SSpace s I z) y
         ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from
@@ -292,10 +256,8 @@ theorem tensor0SCovariantDerivative_eq_tensorRSCovariantDerivative
           (fun y : M => unitScalarRSLiftCₛ (I := I) (M := M) S y) x v)
         (unitZeroSec (I := I) (M := M) x) := by
   classical
-  -- Apply the unit-evaluation intertwining to the lifted section `lift S`.
   rw [tensorRSCovariantDerivative_zeroS_unit_eval (I := I) (M := M) g s
     (unitScalarRSLiftCₛ (I := I) (M := M) S) x v]
-  -- The unit-evaluated lifted section is `S`, so the abstract derivative is `∇^{(0,s)} S`.
   have hsec : (fun y : M =>
         (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from
           unitScalarRSLiftCₛ (I := I) (M := M) S y)

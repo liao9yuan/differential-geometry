@@ -78,27 +78,12 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
   hiding chartTargetEuclid chartTargetEuclid_isOpen
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Chart-locality-free twins
-
-The declarations below re-establish the differentiated-right-hand-side regularity
-results on the intrinsic compact-operator eigenbasis
-`tensorResolventEigenbasisVec (tensorResolventL2_isCompactOperator
-g r s) i`, dropping the chart-selection hypothesis carried by their originals. The
-regularity input `h_pou` is correspondingly keyed on the chart-locality-free
-eigenvector resolvent `eigenvectorResolvent`. -/
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- Chart-locality-free twin of `eigenvectorChartComponentFun_memWkp_of_pou`.
@@ -126,7 +111,6 @@ private lemma eigenvectorChartComponentFun_memWkp_of_pou
   classical
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- `MemWkp N 2` of the resolvent-coercion chart component, from `h_pou`.
   have h_res : MemWkp (d := Module.finrank ℝ E) N 2
       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
           (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
@@ -134,9 +118,6 @@ private lemma eigenvectorChartComponentFun_memWkp_of_pou
           α P₀ : Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
       Ω :=
     h_pou α P₀
-  -- The eigenvector chart component is `μ⁻¹` times the resolvent-coercion chart
-  -- component (`eigenvector_chartComponent_eq`). Pass to `coeFn`
-  -- and rescale.
   have h_chart_eq := eigenvector_chartComponent_eq (I := I) (M := M)
     g r s i α P₀
   have h_ae : (eigenvectorChartComponentFun (I := I) (M := M)
@@ -147,20 +128,11 @@ private lemma eigenvectorChartComponentFun_memWkp_of_pou
           (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
             (eigenvectorResolvent (I := I) (M := M) g r s i))
           α P₀ : Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) := by
-    -- `Lp.coeFn_smul`: the coercion of the rescaled `L²` element is `μ⁻¹ •` the
-    -- coercion of the original `L²` element, almost everywhere. Rewriting the
-    -- rescaled resolvent element back as the eigenvector element via
-    -- `eigenvector_chartComponent_eq` exhibits the eigenvector
-    -- chart-component coercion as `μ⁻¹ •` the resolvent-coercion chart component.
     have h_smul := Lp.coeFn_smul (i.fst.val)⁻¹
       (tensorL2ChartComponent (I := I) (M := M) g r s
         (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
           (eigenvectorResolvent (I := I) (M := M) g r s i)) α P₀)
     rw [← h_chart_eq] at h_smul
-    -- `eigenvectorChartComponentFun` is, by definition, the
-    -- coercion-to-function of the eigenvector chart-component `L²` element;
-    -- `chartL2Measure α = volume.restrict Ω` absorbs the measure. The pointwise
-    -- `•`-to-`*` step (`Pi.smul_apply`, `smul_eq_mul`) finishes.
     filter_upwards [h_smul] with y hy
     change ((tensorL2ChartComponent (I := I) (M := M) g r s
         (tensorResolventEigenbasisVec (I := I) (M := M)
@@ -168,7 +140,6 @@ private lemma eigenvectorChartComponentFun_memWkp_of_pou
           i) α P₀ :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y = _
     rw [hy, Pi.smul_apply, smul_eq_mul]
-  -- `MemWkp N 2` is scalar-invariant.
   exact (MemWkp_congr_ae (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae).mpr
     (MemWkp.const_smul (d := Module.finrank ℝ E)
@@ -192,12 +163,10 @@ private lemma eigenvectorChartRHSDiff_ae_zero_off_chartPouKernel
           chartPouKernel (I := I) (M := M) α)] (fun _ : EuclN => (0 : ℝ)) := by
   cases m with
   | zero =>
-      -- Level `0`: the seven-term `eigenvectorChartRHS`.
       rw [eigenvectorChartRHSDiff_zero]
       exact eigenvectorChartRHS_ae_zero_off_chartPouKernel
         (I := I) (M := M) g r s i α P₀
   | succ m =>
-      -- Level `m + 1`: the indicator of the kernel, zero pointwise off it.
       have hV_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α \
           chartPouKernel (I := I) (M := M) α) :=
         (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet.diff
@@ -246,15 +215,9 @@ theorem eigenvectorChartRHSDiff_memWkp
       (eigenvectorChartRHSDiff (I := I) (M := M) g r s i α P₀ m l)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- Induction on `m`, with `K` and the direction multi-index `l` generalised so
-  -- the inductive hypothesis can be invoked at `K + 1`.
   induction m generalizing K with
   | zero =>
-      -- Level `0`: the differentiated right-hand side is
-      -- `eigenvectorChartRHS`.
       rw [eigenvectorChartRHSDiff_zero]
-      -- `eigenvectorChartRHS_memWkp` needs `h_pou` at order `K + 1`;
-      -- this theorem's `h_pou` is at order `0 + 1 + K = K + 1`.
       have h_pou' : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
           MemWkp (d := Module.finrank ℝ E) (K + 1) 2
             (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
@@ -270,7 +233,6 @@ theorem eigenvectorChartRHSDiff_memWkp
       exact eigenvectorChartRHS_memWkp (I := I) (M := M)
         g r s i α P₀ K h_pou'
   | succ m ih =>
-      -- Level `m + 1`: write `l = Fin.snoc (Fin.init l) (l (Fin.last m))`.
       have h_snoc :
           eigenvectorChartRHSDiff (I := I) (M := M)
               g r s i α P₀ (m + 1) l =
@@ -279,14 +241,8 @@ theorem eigenvectorChartRHSDiff_memWkp
               (Fin.snoc (Fin.init l) (l (Fin.last m))) := by
         rw [Fin.snoc_init_self]
       rw [h_snoc]
-      -- The standalone-step identity (used backwards): the level-`(m+1)`
-      -- right-hand side at `Fin.snoc dirs l₀` is the standalone inductive step
-      -- over the level-`m` right-hand side.
       rw [← eigenvectorChartIteratedStep_eq_rhsDiff_succ
         (I := I) (M := M) g r s i α P₀ m (Fin.init l) (l (Fin.last m))]
-      -- Apply the per-step regularity propagator.
-      -- Hypothesis (a): the eigenvector chart component is `MemWkp (m + 2 + K) 2`.
-      -- This theorem's `h_pou` is at order `(m + 1) + 1 + K = m + 2 + K`.
       have h_pou_comp : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
           MemWkp (d := Module.finrank ℝ E) (m + 2 + K) 2
             (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
@@ -305,9 +261,6 @@ theorem eigenvectorChartRHSDiff_memWkp
           (chartTargetEuclid (I := I) (M := M) α) :=
         eigenvectorChartComponentFun_memWkp_of_pou (I := I) (M := M)
           g r s i (m + 2 + K) h_pou_comp α P₀
-      -- Hypothesis (b): the level-`m` right-hand side is `MemWkp (K + 1) 2` —
-      -- the inductive hypothesis at order `K + 1`. Its `h_pou` requirement is at
-      -- order `m + 1 + (K + 1) = m + 2 + K`, supplied by `h_pou`.
       have h_pou_prev : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
           MemWkp (d := Module.finrank ℝ E) (m + 1 + (K + 1)) 2
             (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
@@ -325,7 +278,6 @@ theorem eigenvectorChartRHSDiff_memWkp
             g r s i α P₀ m (Fin.init l))
           (chartTargetEuclid (I := I) (M := M) α) :=
         ih (K + 1) (Fin.init l) h_pou_prev
-      -- Hypothesis (c): the level-`m` right-hand side is ae-zero off the kernel.
       have h_prev_ae_zero :
           eigenvectorChartRHSDiff (I := I) (M := M)
               g r s i α P₀ m (Fin.init l)
@@ -335,7 +287,6 @@ theorem eigenvectorChartRHSDiff_memWkp
             (fun _ : EuclN => (0 : ℝ)) :=
         eigenvectorChartRHSDiff_ae_zero_off_chartPouKernel
           (I := I) (M := M) g r s i α P₀ m (Fin.init l)
-      -- Conclude via the per-step regularity propagator.
       exact eigenvectorChartIteratedStep_memWkp_K_two (I := I) (M := M)
         g r s i α P₀ m K (Fin.init l)
         (fChartEffPrev := eigenvectorChartRHSDiff (I := I) (M := M)
@@ -369,8 +320,6 @@ theorem eigenvectorChartRHSDiff_memW1p
     DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
       (eigenvectorChartRHSDiff (I := I) (M := M) g r s i α P₀ m l)
       (chartTargetEuclid (I := I) (M := M) α) := by
-  -- `eigenvectorChartRHSDiff_memWkp` at `K = 1`: its `h_pou`
-  -- requirement is at order `m + 1 + 1 = m + 2`, matching this theorem's `h_pou`.
   have h_pou' : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) (m + 1 + 1) 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
@@ -389,8 +338,6 @@ theorem eigenvectorChartRHSDiff_memW1p
       g r s i α P₀ m 1 l h_pou'
   rw [MemWkp.one_iff_memW1p] at h_memWkp
   exact h_memWkp
-
-/-! ## Sanity tests (chart-locality-free) -/
 
 section ElaborationTestsUnconditional
 

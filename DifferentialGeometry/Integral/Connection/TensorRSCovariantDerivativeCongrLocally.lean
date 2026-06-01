@@ -80,12 +80,8 @@ theorem tensorRSCovariantDerivative_congr_of_eventuallyEq
         (LeviCivita (I := I) g)).toFun σ x =
       (TensorRSNabla.tensorRSCovariantDerivative I M r s
         (LeviCivita (I := I) g)).toFun σ' x := by
-  -- Bundled `(r, s)`-tensor covariant derivative.
   set cov := TensorRSNabla.tensorRSCovariantDerivative I M r s
     (LeviCivita (I := I) g) with hcov_def
-  -- Mathlib's `congr_of_eventuallyEq` on the universal-set
-  -- `IsCovariantDerivativeOn` structure carried by the bundled
-  -- covariant derivative.
   exact cov.isCovariantDerivativeOnUniv.congr_of_eventuallyEq
     (σ := σ) (σ' := σ') (x := x)
     hσ hσ' Filter.univ_mem hagree

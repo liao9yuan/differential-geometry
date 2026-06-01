@@ -48,8 +48,6 @@ open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 variable {ι : Type*} {X : Type*} [NormedAddCommGroup X]
   [InnerProductSpace ℝ X] [CompleteSpace X]
 
-/-! ## The heat coefficient and its elementary bounds -/
-
 /-- The per-eigenvalue heat coefficient `exp(-(lam i) · t)`. -/
 def heatCoeff (lam : ι → ℝ) (t : ℝ) (i : ι) : ℝ :=
   Real.exp (-(lam i) * t)
@@ -75,8 +73,6 @@ private lemma heatCoeff_sq_le_one {lam : ι → ℝ}
     (heatCoeff lam t i) ^ 2 ≤ 1 := by
   obtain ⟨h_pos, h_le⟩ := heatCoeff_mem_unit_interval hlam ht i
   nlinarith [sq_nonneg (heatCoeff lam t i - 1), h_pos.le]
-
-/-! ## Parseval and summability -/
 
 /-- Parseval-type square-summability of the basis Fourier coefficients. -/
 private lemma summable_basis_coeff_sq (b : HilbertBasis ι ℝ X) (v : X) :
@@ -156,8 +152,6 @@ lemma summable_heatTerm (b : HilbertBasis ι ℝ X) {lam : ι → ℝ}
   rw [h_map_eq] at h_summable_V
   exact h_summable_V
 
-/-! ## Orthonormal `ℓ²`-isometry identity -/
-
 /-- For square-summable `f`, the orthonormal expansion `∑' i, f i • b i`
 has squared norm `∑' i, (f i)²`. -/
 lemma orthonormal_norm_sq_eq_tsum_sq (b : HilbertBasis ι ℝ X)
@@ -202,8 +196,6 @@ lemma orthonormal_norm_sq_eq_tsum_sq (b : HilbertBasis ι ℝ X)
     h_iso_apply.symm
   rw [h_eq1, h_iso_norm, h_lp_norm_sq]
 
-/-! ## Operator-norm bound on the heat series -/
-
 /-- For `t ≥ 0`, the squared norm of the heat series is `≤ ‖v‖²`. -/
 private lemma norm_sq_heatTerm_sum_le (b : HilbertBasis ι ℝ X) {lam : ι → ℝ}
     (hlam : ∀ i, 0 ≤ lam i) {t : ℝ} (ht : 0 ≤ t) (v : X) :
@@ -244,8 +236,6 @@ private lemma norm_heatTerm_sum_le (b : HilbertBasis ι ℝ X) {lam : ι → ℝ
   have h_sq := norm_sq_heatTerm_sum_le b hlam ht v
   exact (abs_le_of_sq_le_sq' h_sq (norm_nonneg v)).2
 
-/-! ## The underlying linear map -/
-
 /-- The underlying function of the abstract spectral heat semigroup. -/
 private def abstractSpectralSemigroupFun (b : HilbertBasis ι ℝ X)
     (lam : ι → ℝ) (t : ℝ) (v : X) : X :=
@@ -278,8 +268,6 @@ private lemma abstractSpectralSemigroupFun_smul (b : HilbertBasis ι ℝ X)
     congr 1; ring
   rw [h_sum_eq]
   exact (summable_heatTerm b hlam ht v).tsum_const_smul c
-
-/-! ## The semigroup CLM -/
 
 /-- The abstract spectral heat semigroup `S(t)` built from a Hilbert basis
 `b` of eigenvectors and a non-negative eigenvalue family `lam`.
@@ -315,8 +303,6 @@ theorem abstractSpectralSemigroup_of_neg (b : HilbertBasis ι ℝ X)
   unfold abstractSpectralSemigroup
   rw [dif_neg (not_le.mpr ht)]
 
-/-! ## Property 1: operator norm `≤ 1` -/
-
 /-- The operator norm of `S(t)` is `≤ 1` for every `t : ℝ`. -/
 theorem abstractSpectralSemigroup_opNorm_le_one (b : HilbertBasis ι ℝ X)
     {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i) (t : ℝ) :
@@ -326,8 +312,6 @@ theorem abstractSpectralSemigroup_opNorm_le_one (b : HilbertBasis ι ℝ X)
   · rw [dif_pos ht]
     exact LinearMap.mkContinuous_norm_le _ zero_le_one _
   · rw [dif_neg ht, norm_zero]; exact zero_le_one
-
-/-! ## Diagonal action on basis vectors -/
 
 /-- `S(t)` acts diagonally on basis vectors: `S(t) (b i) = exp(-(lam i) t) • b i`. -/
 theorem abstractSpectralSemigroup_apply_basis (b : HilbertBasis ι ℝ X)

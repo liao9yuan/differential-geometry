@@ -208,8 +208,6 @@ theorem inner0S_differential1FormFun_eq_gradNormSq
   rw [inner0S_differential1FormFun_pair_eq_grad_inner]
   rfl
 
-/-! ## Named Bochner frontier hypotheses -/
-
 /-- The one-form norm product rule at a point.
 
 Mathematically this is

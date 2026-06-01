@@ -66,14 +66,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Continuity of the chart-local within-partial of a chart pullback
-
-The within-partial of `scalarOnE α f` on the chart target
-`(extChartAt I α).target` is `ContDiffOn ℝ ∞` (via
-`partialDerivWithin_contDiffOn_top_of_uniqueDiffOn`), hence continuous on the
-target. Composing with the chart map `extChartAt I α` (continuous on the chart
-source) gives a continuous function on the chart source. -/
-
 set_option linter.unusedSectionVars false in
 /-- The within-partial of the chart pullback is continuous on the full chart
 target. -/
@@ -126,8 +118,6 @@ private lemma partialDerivWithin_scalarOnE_extChartAt_continuousOn_source
     exact (extChartAt I α).map_source hxsrc
   exact hpartial.comp hchart hmaps
 
-/-! ## Continuity of the chart-coefficient on the chart source -/
-
 set_option linter.unusedSectionVars false in
 /-- Each chart-coefficient `gradChartCoeffWithin g α f i` is continuous on the
 chart source `(chartAt H α).source`, including boundary points. The expression
@@ -150,9 +140,7 @@ private lemma gradChartCoeffWithin_continuousOn_source
   refine ContinuousOn.congr ?_ heq
   refine continuousOn_finset_sum _ (fun j _ => ?_)
   refine ContinuousOn.mul ?_ ?_
-  · -- `chartInvGramMatrix g α y i j` is smooth on the chart base set
-    -- (= chart source).
-    have h1 : ContMDiffOn I 𝓘(ℝ) ∞
+  · have h1 : ContMDiffOn I 𝓘(ℝ) ∞
         (fun y => chartInvGramMatrix (I := I) g α y i j)
         (trivializationAt E (TangentSpace I) α).baseSet :=
       chartInvGramMatrix_entry_contMDiffOn (I := I) g α i j
@@ -181,13 +169,6 @@ private lemma chartGramMatrix_entry_continuousOn_source
   rw [trivializationAt_baseSet_eq_chartAt_source]
   exact hy
 
-/-! ## Bilinear expansion of the metric pairing on the chart-basis frame
-
-For two gradients written in the chart-basis frame, the metric pairing
-expands by bilinearity into
-`g.inner y (∑ᵢ aᵢ eᵢ) (∑ⱼ bⱼ eⱼ) = ∑ᵢ ∑ⱼ aᵢ bⱼ (g.inner y eᵢ eⱼ)`,
-where `g.inner y eᵢ eⱼ = chartGramMatrix g α y i j` definitionally. -/
-
 set_option linter.unusedSectionVars false in
 /-- Bilinear expansion of the metric pairing on two chart-local representations
 of gradients. The computation is a direct application of the metric's
@@ -204,7 +185,6 @@ private lemma g_inner_gradChartLocalWithin_expand
               chartGramMatrix (I := I) g α y i j := by
   classical
   unfold gradChartLocalWithin
-  -- Step 1: pull the left-hand sum out (left-linearity of `g.inner y · ·`).
   rw [show
         g.inner y (∑ i : Fin (Module.finrank ℝ E),
             gradChartCoeffWithin (I := I) g α f i y •
@@ -219,8 +199,7 @@ private lemma g_inner_gradChartLocalWithin_expand
                 gradChartCoeffWithin (I := I) g α h j y •
                   chartBasisVecFiber (I := I) α j y) from ?_]
   swap
-  · -- Distribute the outer sum and pull the scalar out.
-    rw [show g.inner y (∑ i : Fin (Module.finrank ℝ E),
+  · rw [show g.inner y (∑ i : Fin (Module.finrank ℝ E),
               gradChartCoeffWithin (I := I) g α f i y •
                 chartBasisVecFiber (I := I) α i y) =
             ∑ i : Fin (Module.finrank ℝ E),
@@ -234,7 +213,6 @@ private lemma g_inner_gradChartLocalWithin_expand
       refine Finset.sum_congr rfl ?_
       intro i _
       rw [map_smul]
-  -- Step 2: distribute the inner sum (right-linearity of each fibre map).
   refine Finset.sum_congr rfl ?_
   intro i _
   rw [show (g.inner y (chartBasisVecFiber (I := I) α i y))
@@ -256,12 +234,6 @@ private lemma g_inner_gradChartLocalWithin_expand
     rw [map_smul]
     rfl
 
-/-! ## Continuity of `g.inner x (gradFun g f x) (gradFun g h x)` on a chart
-
-The chart-source-local continuity follows from the bilinear expansion together
-with the continuity of each chart-coefficient and each chart-Gram-matrix entry
-on the chart source. -/
-
 set_option linter.unusedSectionVars false in
 /-- The metric pairing `g.inner x (gradFun g f x) (gradFun g h x)` is
 continuous on the chart source `(chartAt H α).source`. The proof rewrites
@@ -276,7 +248,6 @@ private lemma g_inner_gradFun_gradFun_continuousOn_chart_source
       (fun y : M => g.inner y (gradFun (I := I) g f y) (gradFun (I := I) g h y))
       (chartAt H α).source := by
   classical
-  -- Step 1: rewrite each `gradFun` via `gradChartLocalWithin_eq_gradFun`.
   have h_rewrite : ∀ y ∈ (chartAt H α).source,
       g.inner y (gradFun (I := I) g f y) (gradFun (I := I) g h y) =
         g.inner y (gradChartLocalWithin (I := I) g α f y)
@@ -285,21 +256,14 @@ private lemma g_inner_gradFun_gradFun_continuousOn_chart_source
     rw [(gradChartLocalWithin_eq_gradFun (I := I) g α hf hy)]
     rw [(gradChartLocalWithin_eq_gradFun (I := I) g α hh hy)]
   refine ContinuousOn.congr ?_ (fun y hy => h_rewrite y hy)
-  -- Step 2: apply the bilinear expansion (pointwise identity, no hypothesis).
   refine ContinuousOn.congr (s := (chartAt H α).source) ?_
     (fun y _ => g_inner_gradChartLocalWithin_expand (I := I) g α f h y)
-  -- Step 3: each summand is a product of continuous functions on the source.
   refine continuousOn_finset_sum _ (fun i _ => ?_)
   refine continuousOn_finset_sum _ (fun j _ => ?_)
-  -- The summand is `(gradChartCoeffWithin g α f i) y *
-  --                 (gradChartCoeffWithin g α h j) y *
-  --                 (chartGramMatrix g α · i j) y`.
   refine ContinuousOn.mul (ContinuousOn.mul ?_ ?_) ?_
   · exact gradChartCoeffWithin_continuousOn_source (I := I) g α hf i
   · exact gradChartCoeffWithin_continuousOn_source (I := I) g α hh j
   · exact chartGramMatrix_entry_continuousOn_source (I := I) g α i j
-
-/-! ## Global continuity (general model `I`) -/
 
 set_option linter.unusedSectionVars false in
 /-- For any smooth scalars `f, h : M → ℝ` on a smooth manifold `(M, g)` whose
@@ -326,14 +290,6 @@ end WithBoundary
 end DivergenceTheorem
 end Integral
 end DifferentialGeometry
-
-/-! ## Public theorems specialised to the half-space model
-
-The headline statements use the canonical Euclidean half-space model
-`modelWithCornersEuclideanHalfSpace n`, matching the closed-half-space H¹
-infrastructure. The underlying continuity argument is general and works for
-any smooth-manifold model `I`; the half-space specialisation is purely a
-packaging choice. -/
 
 namespace DifferentialGeometry
 namespace Integral
@@ -391,12 +347,6 @@ theorem bddAbove_g_inner_gradFun_gradFun_of_compactSpace
         (gradFun (I := modelWithCornersEuclideanHalfSpace n) g h x)) :=
     continuous_g_inner_gradFun_gradFun (n := n) (M := M) g hf hh
   exact (isCompact_range hcont).bddAbove
-
-/-! ### Local Borel-space instances on `M`
-
-Required only for the `Integrable` statement against `riemannianVolumeMeasure`,
-and only inside the body of the `integrable_*` theorem. They do not appear in
-the public signature. -/
 
 private local instance instMeasurableSpaceM_gradContinuity :
     MeasurableSpace M := borel M

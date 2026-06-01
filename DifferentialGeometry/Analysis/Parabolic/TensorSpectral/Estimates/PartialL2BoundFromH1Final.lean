@@ -93,33 +93,13 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## Local abbreviation -/
-
 private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] := EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Uniform `L^2` envelope for the chart-component scalar
-
-The manifold-side `L^2` seminorm of the chart-component scalar
-`tensorChartComponentScalar g r s S.toCcTensor α Idx Jdx` is bounded
-uniformly in `(S, Idx, Jdx)` by a single constant times `(‖S‖₊ : ℝ≥0∞)`.
-This packages the chain
-
-* `tensorChartComponentScalar_eLpNorm_le_uniform` — manifold `L^2` uniform
-  in `(S, Idx, Jdx)`, controlled by `ENNReal.ofReal (tensorL2Norm g r s
-  S.toCcTensor.toFun)`;
-* the identity `ENNReal.ofReal (tensorL2Norm g r s S.toCcTensor.toFun)
-  = (‖S.toCcTensor‖₊ : ℝ≥0∞)` from `H1Compl` aggregate machinery;
-* `SmoothCcTensorH1.l2Norm_le_h1Norm` — `‖S.toCcTensor‖ ≤ ‖S‖` on smooth
-  compactly-supported sections.
--/
 
 private lemma exists_eLpNorm_tensorChartComponentScalar_le_const_mul_h1Norm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
@@ -137,7 +117,6 @@ private lemma exists_eLpNorm_tensorChartComponentScalar_le_const_mul_h1Norm
       (I := I) (M := M) (E := E) g r s α
   refine ⟨C₂, hC₂_nn, ?_⟩
   intro S Idx Jdx
-  -- Manifold `L^2` uniform-in-`(S, Idx, Jdx)` bound.
   have hB :
       eLpNorm (tensorChartComponentScalar (I := I) (M := M)
             g r s S.toCcTensor α Idx Jdx) 2
@@ -146,7 +125,6 @@ private lemma exists_eLpNorm_tensorChartComponentScalar_le_const_mul_h1Norm
           ENNReal.ofReal
             (tensorL2Norm (I := I) (M := M) g r s S.toCcTensor.toFun) :=
     h_man S.toCcTensor Idx Jdx
-  -- Convert `ENNReal.ofReal (tensorL2Norm ...) = (‖S.toCcTensor‖₊ : ℝ≥0∞)`.
   have h_eq :
       ENNReal.ofReal
           (tensorL2Norm (I := I) (M := M) g r s S.toCcTensor.toFun) =
@@ -160,7 +138,6 @@ private lemma exists_eLpNorm_tensorChartComponentScalar_le_const_mul_h1Norm
         (enorm_eq_nnnorm _).symm, ← ofReal_norm_eq_enorm _]
     rw [h_nnnorm_ofReal, h_norm_eq]
   rw [h_eq] at hB
-  -- Dominate by `(‖S‖₊ : ℝ≥0∞)` via `l2Norm_le_h1Norm` on smooth sections.
   have h_l2_le_h1 :
       (‖S.toCcTensor‖₊ : ℝ≥0∞) ≤ (‖S‖₊ : ℝ≥0∞) := by
     have h_real : ‖S.toCcTensor‖ ≤ ‖S‖ :=
@@ -174,15 +151,6 @@ private lemma exists_eLpNorm_tensorChartComponentScalar_le_const_mul_h1Norm
         ENNReal.ofReal C₂ * (‖S‖₊ : ℝ≥0∞) :=
     hB.trans (mul_le_mul_of_nonneg_left h_l2_le_h1 (by exact zero_le _))
   exact hB'
-
-/-! ## Headline uniform `L^2` partial bound
-
-The headline theorem combines the `chosenWeakPartial'` ↔ `fderiv` bridge with
-the generic `eLpNorm` envelope `eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul`,
-the manifold `L^2` uniform envelope above, and the gradient `L^2` hypothesis.
-The hypothesis is supplied by the chart Christoffel `L^2` package in companion
-modules.
--/
 
 /-- **Headline uniform-in-`S` `L^2` partial bound.** Conditional on a uniform-
 in-`(S, Idx, Jdx)` `L^2` bound for the gradient norm of the chart-component
@@ -226,21 +194,17 @@ theorem exists_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar
             (volume.restrict (chartTargetEuclid (I := I) (M := M) α)) ≤
           ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞) := by
   classical
-  -- Step 1: extract the generic `eLpNorm` envelope constant `C_env`.
   have hp_one : (1 : ℝ≥0∞) ≤ 2 := by norm_num
   have hp_top : (2 : ℝ≥0∞) ≠ (⊤ : ℝ≥0∞) := by norm_num
   obtain ⟨C_env, hC_env_nn, h_env⟩ :=
     DifferentialGeometry.Analysis.Sobolev.EquivalenceReverse.eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul
       (I := I) (M := M) g α (p := (2 : ℝ≥0∞)) hp_one hp_top
-  -- Step 2: extract the manifold `L^2` envelope constant `C_L2`.
   obtain ⟨C_L2, hC_L2_nn, h_L2⟩ :=
     exists_eLpNorm_tensorChartComponentScalar_le_const_mul_h1Norm
       (I := I) (M := M) g r s α
-  -- The final constant: `C := C_env * (C_L2 + C_grad)`.
   refine ⟨C_env * (C_L2 + C_grad),
     mul_nonneg hC_env_nn (add_nonneg hC_L2_nn hC_grad_nn), ?_⟩
   intro S Idx Jdx
-  -- Notation.
   set u : M → ℝ :=
     tensorChartComponentScalar (I := I) (M := M)
       g r s S.toCcTensor α Idx Jdx with hu_def
@@ -248,9 +212,7 @@ theorem exists_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar
   set μE : Measure (EuclN E) :=
     (volume : Measure (EuclN E)).restrict
       (chartTargetEuclid (I := I) (M := M) α) with hμE_def
-  -- The bound on `‖S.toCcTensor‖`.
   set NS : ℝ≥0∞ := (‖S‖₊ : ℝ≥0∞) with hNS_def
-  -- Step 3: bridge `eLpNorm(chosenWeakPartial)` = `eLpNorm(fderiv chartSmoothExt _)`.
   have hu_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ u := by
     rw [hu_def]
     exact tensorChartComponentScalar_contMDiff
@@ -269,7 +231,6 @@ theorem exists_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar
               (EuclideanSpace.single k (1 : ℝ))) 2 μE :=
     eLpNorm_chosenWeakPartial'_chartPushed_eq_eLpNorm_fderiv_chartSmoothExt
       (I := I) (M := M) (α := α) (u := u) hu_smooth k
-  -- Step 4: apply the generic Frechet `eLpNorm` envelope.
   have h_env_apply :
       eLpNorm
           (fun y : EuclN E => fderiv ℝ
@@ -284,7 +245,6 @@ theorem exists_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar
                   (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u x)
                   (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u x))) 2 μM) :=
     h_env hu_smooth k
-  -- Step 5: bound the `L^2` and gradient `L^2` envelopes by `‖S‖₊`.
   have h_L2_apply :
       eLpNorm u 2 μM ≤ ENNReal.ofReal C_L2 * NS := by
     rw [hu_def, hμM_def, hNS_def]
@@ -297,7 +257,6 @@ theorem exists_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar
         ENNReal.ofReal C_grad * NS := by
     rw [hu_def, hμM_def, hNS_def]
     exact hC_grad_bound S Idx Jdx
-  -- Step 6: combine into the headline.
   have h_inner_sum :
       eLpNorm u 2 μM +
         eLpNorm (fun x : M => Real.sqrt
@@ -314,7 +273,6 @@ theorem exists_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar
       ENNReal.ofReal C_L2 + ENNReal.ofReal C_grad =
         ENNReal.ofReal (C_L2 + C_grad) :=
     (ENNReal.ofReal_add hC_L2_nn hC_grad_nn).symm
-  -- Chain the bounds.
   have h_main :
       eLpNorm
           (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
@@ -349,15 +307,12 @@ theorem exists_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar
       _ = ENNReal.ofReal C_env *
             (ENNReal.ofReal (C_L2 + C_grad) * NS) := by
           rw [h_ofReal_add]
-  -- Final algebra: regroup `(C_env) * (ofReal (C_L2 + C_grad) * NS) = ofReal
-  -- (C_env * (C_L2 + C_grad)) * NS`.
   have h_C_sum_nn : 0 ≤ C_L2 + C_grad := add_nonneg hC_L2_nn hC_grad_nn
   have h_C_prod_eq :
       ENNReal.ofReal C_env * ENNReal.ofReal (C_L2 + C_grad) =
         ENNReal.ofReal (C_env * (C_L2 + C_grad)) :=
     (ENNReal.ofReal_mul hC_env_nn).symm
   rw [hu_def] at h_main
-  -- Massage the final form using associativity.
   have h_final_form :
       ENNReal.ofReal C_env * (ENNReal.ofReal (C_L2 + C_grad) * NS) =
         ENNReal.ofReal (C_env * (C_L2 + C_grad)) * NS := by

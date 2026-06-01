@@ -110,21 +110,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The frame-trace discrepancy
-
-The curried unit-evaluation of `Δ_∇(∇T₀) = rawTensorConnLapSmooth g 0 3 (covGrad g 0 2 T₀)`
-is the left-hand side of the slot-`0` matching `slot0FrameTraceMatching`; the **bare**
-fixed-frame iterated trace `∑ᵢ ∇_{Bᵢ}∇_{Bᵢ}(∇_W T₀)(x)(unit)` is its right-hand side. Those
-two genuinely differ — the rough Laplacian carries the Christoffel correction
-`−∑ᵢ ∇_{(∇_{Bᵢ}Bᵢ)}(·)`, and the bare iterated trace differentiates the fixed extension `W`.
-Their difference is the discrepancy. -/
 
 /-- **The frame-trace discrepancy.** With `Δ_∇(∇T₀) = rawTensorConnLapSmooth g 0 3
 (covGrad g 0 2 T₀)`, `B_i := smoothOrthoFrame g x i`, and `W := smoothExtensionTangent x w`,
@@ -173,17 +162,6 @@ lemma covGradRoughLapTraceDiscrepancy_def
               (smoothOrthoFrame (I := I) g x i x))
           (unitZeroSec (I := I) (M := M) x) := rfl
 
-/-! ## The headline unconditional curried curvature-defect identity
-
-Solving the proved frame-trace swap
-`frame_trace_thirdW_eq_covGrad_rawConnLap_sub_residual_add_curv`
-(`CovGradRoughLapCommutatorClose3.lean`) for the gradient-of-Laplacian reading,
-```
-(∇(Δ_∇T₀) curried) = (bare iterated trace) + residual − Tensor3rdCurv,
-```
-and substituting into the definition `covGradRoughLapCurv = Δ_∇(∇T₀) − ∇(Δ_∇ T₀)` gives the
-unconditional decomposition. No curvature cancellation is re-derived. -/
-
 /-- **Headline: the unconditional curried curvature-defect identity.** The curried
 unit-`(0, 0)`-evaluation of the canonical commutator defect
 `covGradRoughLapCurv g T₀ = Δ_∇(∇T₀) − ∇(Δ_∇ T₀)`, along the gradient direction `w`, equals the
@@ -215,7 +193,6 @@ theorem covGradRoughLapCurv_curry_eq_discrepancy_add_curv_sub_residual
             (fun y : M => T₀.toSection y) x)
           (unitZeroSec (I := I) (M := M) x) -
         covGradRoughLapMovingFrameResidual (I := I) (M := M) g T₀ x w := by
-  -- The defect's underlying section is the difference of the two `(0, 3)` sections.
   have hdef : (covGradRoughLapCurv (I := I) (M := M) g T₀).toSection x =
       (rawTensorConnLapSmooth (I := I) g 0 3
           (covGrad (I := I) (M := M) g 0 2 T₀)).toSection x -
@@ -223,18 +200,12 @@ theorem covGradRoughLapCurv_curry_eq_discrepancy_add_curv_sub_residual
           (rawTensorConnLapSmooth (I := I) g 0 2 T₀)).toSection x := by
     rw [covGradRoughLapCurv, SmoothCcTensor.toSection_sub]; rfl
   rw [hdef]
-  -- Distribute the unit-evaluation and the slot-`0` curry along `w` over the difference.
   rw [ContinuousLinearMap.sub_apply, map_sub, ContinuousLinearMap.sub_apply]
-  -- The `∇(Δ_∇ T₀)` term: the slot-`0` curry of the gradient is the directional derivative.
   rw [covGrad_rawConnLap_unit_eval_curry (I := I) (M := M) g T₀ x w]
-  -- The frame-trace swap (re-read through `covGrad_rawConnLap_unit_eval_curry`): the bare
-  -- iterated trace equals `(∇_w Δ_∇T₀)(unit) − residual + Tensor3rdCurv(unit)`.
   have hswap := frame_trace_thirdW_eq_covGrad_rawConnLap_sub_residual_add_curv
     (I := I) (M := M) g T₀ x w
   rw [covGrad_rawConnLap_unit_eval_curry (I := I) (M := M) g T₀ x w] at hswap
-  -- The discrepancy unfolds to its definition.
   rw [covGradRoughLapTraceDiscrepancy_def (I := I) (M := M) g T₀ x w]
-  -- Solve the swap for the bare iterated trace and substitute; the goal closes by `abel`.
   rw [hswap]
   abel
 

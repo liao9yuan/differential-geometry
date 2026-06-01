@@ -47,8 +47,6 @@ variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {F : Type uF} [NormedAddCommGroup F] [NormedSpace ℝ F]
 variable {G : Type uG} [NormedAddCommGroup G] [NormedSpace ℝ G]
 
-/-! ## A flat derivative bound feeds the `D ^ i` shape required by Mathlib -/
-
 /-- If a single number `D ≥ 1` bounds `‖∂^i g x‖`, then it also bounds it in the
 `D ^ i` shape (for `1 ≤ i`), because `D ^ i ≥ D` when `D ≥ 1` and `1 ≤ i`. -/
 private theorem norm_le_pow_of_le_of_one_le
@@ -57,8 +55,6 @@ private theorem norm_le_pow_of_le_of_one_le
   refine ha.trans ?_
   calc D = D ^ 1 := (pow_one D).symm
     _ ≤ D ^ i := pow_le_pow_right₀ hD1 hi
-
-/-! ## Pointwise polynomial envelope -/
 
 /-- Faà di Bruno-style envelope, sharp `max`-form.
 
@@ -110,13 +106,6 @@ theorem norm_iteratedFDeriv_comp_le_envelope
     mul_nonneg (by positivity) hCf0
   exact mul_le_mul_of_nonneg_left hpow hcoef_nonneg
 
-/-! ## Uniform-on-compact version
-
-For a compact set `K`, continuity of the iterated derivatives lets us extract a
-*single* constant bounding each `‖∂^i f‖` over the compact image `g '' K` and
-each `‖∂^i g‖` over `K`. Plugging the worst case (max over `0 ≤ i ≤ n`) into the
-pointwise envelope gives a uniform bound on `K`. -/
-
 /-- The supremum, over `i ≤ n` and `y ∈ A`, of `‖iteratedFDeriv ℝ i h y‖`,
 realized as an explicit constant. Existence relies on compactness of `A` plus
 continuity of each iterated derivative (finite max over `i`). -/
@@ -126,14 +115,11 @@ private theorem exists_uniform_iteratedFDeriv_bound
     {A : Set E} (hA : IsCompact A) (hAne : A.Nonempty) {n : ℕ} (hn : (n : WithTop ℕ∞) ≤ N) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ i, i ≤ n → ∀ y ∈ A, ‖iteratedFDeriv ℝ i h y‖ ≤ C := by
   classical
-  -- For each `i ≤ n`, the function `y ↦ ‖∂^i h y‖` is continuous, hence attains
-  -- a maximum `Mi` on the compact set `A`.
   have hcont : ∀ i, i ≤ n → Continuous fun y => iteratedFDeriv ℝ i h y := by
     intro i hi
     have hin : (i : WithTop ℕ∞) ≤ N :=
       le_trans (by exact_mod_cast (Nat.cast_le.mpr hi : (i : ℕ∞) ≤ (n : ℕ∞))) hn
     exact (hh.of_le hin).continuous_iteratedFDeriv (m := i) le_rfl
-  -- Collect, for each `i ≤ n`, a maximizer and its value.
   have hmax : ∀ i, i ≤ n → ∃ Mi : ℝ, 0 ≤ Mi ∧ ∀ y ∈ A, ‖iteratedFDeriv ℝ i h y‖ ≤ Mi := by
     intro i hi
     obtain ⟨z, hzA, hzmax⟩ :=
@@ -141,7 +127,6 @@ private theorem exists_uniform_iteratedFDeriv_bound
     refine ⟨‖iteratedFDeriv ℝ i h z‖, norm_nonneg _, ?_⟩
     intro y hy
     exact hzmax hy
-  -- Take the maximum of the `Mi` over `i ∈ Finset.range (n+1)`.
   choose Mi hMi0 hMib using hmax
   let C : ℝ := (Finset.range (n + 1)).sup' (by simp) fun i =>
     if hi : i ≤ n then Mi i hi else 0
@@ -172,13 +157,10 @@ theorem norm_iteratedFDeriv_comp_le_on_compact
     (hf : ContDiff ℝ N f) (hg : ContDiff ℝ N g) (hn : (n : WithTop ℕ∞) ≤ N)
     {K : Set E} (hK : IsCompact K) (hKne : K.Nonempty) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ x ∈ K, ‖iteratedFDeriv ℝ n (f ∘ g) x‖ ≤ C := by
-  -- The image `g '' K` is compact and nonempty.
   have hgK : IsCompact (g '' K) := hK.image hg.continuous
   have hgKne : (g '' K).Nonempty := hKne.image g
-  -- Uniform bound `Cf` for the derivatives of `f` over `g '' K`.
   obtain ⟨Cf, hCf0, hCfb⟩ :=
     exists_uniform_iteratedFDeriv_bound (E := F) hf hgK hgKne hn
-  -- Uniform bound `Cg` for the derivatives of `g` over `K`.
   obtain ⟨Cg, hCg0, hCgb⟩ :=
     exists_uniform_iteratedFDeriv_bound (E := E) hg hK hKne hn
   refine ⟨n ! * Cf * (1 + Cg) ^ n, ?_, ?_⟩
@@ -186,10 +168,8 @@ theorem norm_iteratedFDeriv_comp_le_on_compact
     have hpow : (0 : ℝ) ≤ (1 + Cg) ^ n := by positivity
     exact mul_nonneg this hpow
   · intro x hx
-    -- The derivatives of `f` are bounded at `g x` (which lies in `g '' K`).
     have hCf : ∀ i, i ≤ n → ‖iteratedFDeriv ℝ i f (g x)‖ ≤ Cf := fun i hi =>
       hCfb i hi (g x) (mem_image_of_mem g hx)
-    -- The derivatives of `g` are bounded at `x ∈ K`.
     have hCg : ∀ i, 1 ≤ i → i ≤ n → ‖iteratedFDeriv ℝ i g x‖ ≤ Cg := fun i _ hi =>
       hCgb i hi x hx
     exact norm_iteratedFDeriv_comp_le_envelope hf hg hn x hCf0 hCg0 hCf hCg

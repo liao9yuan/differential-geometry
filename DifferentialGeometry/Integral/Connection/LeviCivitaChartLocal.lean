@@ -64,8 +64,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## The good set -/
-
 /-- The open *good set* at `α` on which the chart-local Levi-Civita
 construction is well-defined: the intersection of the chart source, the
 trivialization base set at `α`, and the preimage under `extChartAt I α` of the
@@ -83,17 +81,9 @@ lemma chartLeviCivitaGoodSet_isOpen (α : M) :
   set S₂ : Set M := (trivializationAt E (TangentSpace I) α).baseSet
   set S₃ : Set M :=
     (extChartAt I α) ⁻¹' interior ((extChartAt I α).target : Set E)
-  -- `S₁` is open: chart sources are open.
   have hS₁ : IsOpen S₁ := isOpen_extChartAt_source α
-  -- `S₂` is open: trivialization base sets are open.
   have hS₂ : IsOpen S₂ := (trivializationAt E (TangentSpace I) α).open_baseSet
-  -- `S₃` is open: continuity of `extChartAt I α` on its source plus openness of
-  -- `interior _` gives a relative open in `S₁`; but we need it open in `M`.
-  -- We show `S₃ = S₁ ∩ S₃` ∪ (M \ S₁); after intersecting with `S₁` later in the
-  -- definition we don't need `S₃` itself to be open in `M`. Take the joint:
   have hcap_open : IsOpen (S₁ ∩ S₃) := by
-    -- This is the preimage under `extChartAt I α` (continuous on `S₁`) of the
-    -- open set `interior target`, intersected with `S₁`.
     have hcont : ContinuousOn (extChartAt I α) S₁ := continuousOn_extChartAt α
     have hopen_int : IsOpen (interior ((extChartAt I α).target : Set E)) :=
       isOpen_interior
@@ -102,7 +92,6 @@ lemma chartLeviCivitaGoodSet_isOpen (α : M) :
           S₁ ∩ (extChartAt I α) ⁻¹' interior ((extChartAt I α).target : Set E) := rfl
     rw [hpre]
     exact hcont.isOpen_inter_preimage hS₁ hopen_int
-  -- Now `chartLeviCivitaGoodSet α = S₁ ∩ S₂ ∩ S₃ = (S₁ ∩ S₃) ∩ S₂`.
   have heq : chartLeviCivitaGoodSet (I := I) α = (S₁ ∩ S₃) ∩ S₂ := by
     ext x
     simp only [chartLeviCivitaGoodSet, S₁, S₂, S₃, Set.mem_inter_iff]
@@ -145,13 +134,6 @@ lemma chartLeviCivitaGoodSet_extChartAt_mem_interior {α x : M}
     extChartAt I α x ∈ interior ((extChartAt I α).target : Set E) :=
   ((mem_chartLeviCivitaGoodSet_iff.mp hx)).2.2
 
-/-! ## The Christoffel-correction CLM
-
-The Christoffel-correction term in the chart-local Levi-Civita formula,
-expressed as a continuous linear map in its tangent-vector argument. The
-"section component" `Y : E` is fixed; the linearity is in the input
-`v : TangentSpace I x` (acting through `trivToE α x v ∈ E`). -/
-
 /-- The Christoffel-correction CLM at a good-set point `x`, as a function of
 `Y : E` representing the section's chart-trivialised value. The map sends
 `v ↦ ∑ᵢⱼₖ (b.repr (trivToE α x v))ᵢ * (b.repr Y)ⱼ * Γᵏᵢⱼ(φ x) • eₖ`. -/
@@ -181,30 +163,19 @@ lemma christoffelCorrection_apply
               (chartModelBasis E) k := by
   classical
   unfold christoffelCorrection
-  -- Iteratively apply `ContinuousLinearMap.sum_apply` and pointwise
-  -- `smulRight_apply` reductions.
   rw [ContinuousLinearMap.sum_apply]
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [ContinuousLinearMap.sum_apply]
   refine Finset.sum_congr rfl (fun j _ => ?_)
   rw [ContinuousLinearMap.sum_apply]
   refine Finset.sum_congr rfl (fun k _ => ?_)
-  -- The `smulRight` step:
-  -- `((b.coord i).toCLM.comp (trivToE α x)).smulRight (...) v`
-  -- `= ((b.coord i).toCLM.comp (trivToE α x)) v • (...)`
-  -- `= ((b.coord i) (trivToE α x v)) • (...)`
-  -- `= ((b.repr (trivToE α x v)) i) • (...)`.
   rw [ContinuousLinearMap.smulRight_apply]
   rw [ContinuousLinearMap.comp_apply]
-  -- `((b.coord i).toContinuousLinearMap (trivToE α x v)) = (b.coord i) (trivToE α x v) = (b.repr (trivToE α x v)) i`.
   have hcoord : ((chartModelBasis E).coord i).toContinuousLinearMap
       (trivToE (I := I) α x v) =
         ((chartModelBasis E).repr (trivToE (I := I) α x v)) i := by
     rfl
   rw [hcoord]
-  -- Now the goal is:
-  -- `((b.repr (trivToE α x v)) i) • ((b.repr Y j * Γ^k_{ij}) • e_k)
-  --  = (b.repr (trivToE α x v)) i * (b.repr Y) j * Γ^k_{ij} • e_k`
   rw [smul_smul, ← mul_assoc]
 
 /-- Additivity of `christoffelCorrection` in the section component `Y`. -/
@@ -223,13 +194,11 @@ lemma christoffelCorrection_add
   refine Finset.sum_congr rfl (fun j _ => ?_)
   rw [← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl (fun k _ => ?_)
-  -- Linearity of `b.repr` in `Y`.
   have hrepr : ((chartModelBasis E).repr (Y + Y')) j =
       ((chartModelBasis E).repr Y) j +
         ((chartModelBasis E).repr Y') j := by
     rw [map_add]; rfl
   rw [hrepr]
-  -- Goal: `(a * (b₁ + b₂) * c) • d = (a * b₁ * c) • d + (a * b₂ * c) • d`.
   rw [show ((chartModelBasis E).repr (trivToE (I := I) α x v)) i *
         (((chartModelBasis E).repr Y) j + ((chartModelBasis E).repr Y') j) *
         chartChristoffel (I := I) g α i j k (extChartAt I α x) =
@@ -260,7 +229,6 @@ lemma christoffelCorrection_smul
       c * ((chartModelBasis E).repr Y) j := by
     rw [map_smul]; rfl
   rw [hrepr]
-  -- Goal: `(a * (c * b) * d) • e = c • ((a * b * d) • e)`.
   rw [show ((chartModelBasis E).repr (trivToE (I := I) α x v)) i *
         (c * ((chartModelBasis E).repr Y) j) *
         chartChristoffel (I := I) g α i j k (extChartAt I α x) =
@@ -268,8 +236,6 @@ lemma christoffelCorrection_smul
           ((chartModelBasis E).repr Y) j *
           chartChristoffel (I := I) g α i j k (extChartAt I α x)) by ring]
   rw [← smul_smul]
-
-/-! ## The chart-local Levi-Civita CLM -/
 
 /-- The "inner CLM" of the chart-local Levi-Civita derivative at a good-set
 point: the sum of the chart-pulled-back Fréchet derivative of the section's
@@ -333,11 +299,6 @@ lemma chartLeviCivita_apply (g : SmoothRiemannianMetric I M)
   rw [ContinuousLinearMap.comp_apply]
   rw [chartLeviCivitaInnerCLM_apply]
 
-/-! ## Differentiability bridge
-
-We extract the `DifferentiableAt`-of-the-chart-pullback from the
-`MDiffAt`-of-the-section hypothesis at a good-set point. -/
-
 /-- At a good-set point, `MDiffAt (T% σ) x` implies
 `DifferentiableAt ℝ (chartE_section_repr α σ ∘ (extChartAt I α).symm) (extChartAt I α x)`. -/
 lemma differentiableAt_chartE_pullback_of_MDiff
@@ -352,8 +313,6 @@ lemma differentiableAt_chartE_pullback_of_MDiff
     (chartLeviCivitaGoodSet_mem_baseSet (I := I) hx)
     (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx)).mp hσ
 
-/-! ## Additivity axiom -/
-
 /-- **Additivity of `chartLeviCivita`.** For sections `σ σ'` differentiable at
 a good-set point, `chartLeviCivita g α (σ + σ') x = chartLeviCivita g α σ x +
 chartLeviCivita g α σ' x` (as CLMs). -/
@@ -364,24 +323,14 @@ lemma chartLeviCivita_add (g : SmoothRiemannianMetric I M) (α : M)
     chartLeviCivita (I := I) g α (σ + σ') x =
       chartLeviCivita (I := I) g α σ x + chartLeviCivita (I := I) g α σ' x := by
   classical
-  -- Reduce to pointwise CLM equality.
   apply ContinuousLinearMap.ext
   intro v
-  -- Unfold via `chartLeviCivita_apply` on both sides.
   rw [chartLeviCivita_apply (I := I) g α (σ + σ') hx v]
   rw [ContinuousLinearMap.add_apply,
       chartLeviCivita_apply (I := I) g α σ hx v,
       chartLeviCivita_apply (I := I) g α σ' hx v]
-  -- Now we need:
-  -- `trivFromE α x [ fderiv (rep_(σ+σ') ∘ φ⁻¹)(φ x) (triv v)
-  --                + Christoffel(rep_(σ+σ') x) v ]
-  --  = trivFromE α x [ fderiv (rep_σ ∘ φ⁻¹)(φ x) (triv v) + Christoffel(rep_σ x) v ]
-  --  + trivFromE α x [ fderiv (rep_σ' ∘ φ⁻¹)(φ x) (triv v) + Christoffel(rep_σ' x) v ]`
-  -- Use the linearity of `trivFromE` and combine the brackets.
   rw [← map_add]
   congr 1
-  -- The function-level identity:
-  -- `chartE_section_repr α (σ + σ') ∘ φ⁻¹ = (chartE_section_repr α σ ∘ φ⁻¹) + (chartE_section_repr α σ' ∘ φ⁻¹)`
   have hsum_pull :
       (chartE_section_repr (I := I) α (σ + σ') ∘ (extChartAt I α).symm) =
         (chartE_section_repr (I := I) α σ ∘ (extChartAt I α).symm) +
@@ -391,7 +340,6 @@ lemma chartLeviCivita_add (g : SmoothRiemannianMetric I M) (α : M)
       chartE_section_repr (I := I) α σ ((extChartAt I α).symm y) +
         chartE_section_repr (I := I) α σ' ((extChartAt I α).symm y)
     exact chartE_section_repr_add (I := I) α σ σ' ((extChartAt I α).symm y)
-  -- Apply `fderiv_add` on the chart pullback at `(extChartAt I α x)`.
   have hdiff_σ : DifferentiableAt ℝ
       (chartE_section_repr (I := I) α σ ∘ (extChartAt I α).symm)
       (extChartAt I α x) :=
@@ -400,7 +348,6 @@ lemma chartLeviCivita_add (g : SmoothRiemannianMetric I M) (α : M)
       (chartE_section_repr (I := I) α σ' ∘ (extChartAt I α).symm)
       (extChartAt I α x) :=
     differentiableAt_chartE_pullback_of_MDiff (I := I) α hx hσ'
-  -- Rewrite the LHS fderiv using `hsum_pull` and `fderiv_add`.
   have hfderiv_split :
       fderiv ℝ
           (chartE_section_repr (I := I) α (σ + σ') ∘ (extChartAt I α).symm)
@@ -413,23 +360,18 @@ lemma chartLeviCivita_add (g : SmoothRiemannianMetric I M) (α : M)
               (extChartAt I α x) := by
     rw [hsum_pull]
     exact fderiv_add hdiff_σ hdiff_σ'
-  -- Rewrite the LHS Christoffel-section component using `chartE_section_repr_add`.
   have hsec_add :
       chartE_section_repr (I := I) α (σ + σ') x =
         chartE_section_repr (I := I) α σ x +
           chartE_section_repr (I := I) α σ' x :=
     chartE_section_repr_add (I := I) α σ σ' x
-  -- Combine.
   rw [hfderiv_split]
   rw [hsec_add]
   rw [christoffelCorrection_add (I := I) g α x
         (chartE_section_repr (I := I) α σ x)
         (chartE_section_repr (I := I) α σ' x) v]
-  -- Goal now: `(A + B) (triv v) + (C + D) = (A (triv v) + C) + (B (triv v) + D)`.
   rw [ContinuousLinearMap.add_apply]
   abel
-
-/-! ## Leibniz axiom -/
 
 /-- **Leibniz rule for `chartLeviCivita`.** For a section `σ` and a scalar
 function `f` differentiable at a good-set point, `chartLeviCivita g α (f • σ) x
@@ -457,26 +399,19 @@ lemma chartLeviCivita_leibniz (g : SmoothRiemannianMetric I M) (α : M)
   classical
   apply ContinuousLinearMap.ext
   intro v
-  -- LHS: unfold via `chartLeviCivita_apply`.
   rw [chartLeviCivita_apply (I := I) g α (f • σ) hx v]
-  -- RHS: unfold via `chartLeviCivita_apply` and CLM operations.
   rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
       chartLeviCivita_apply (I := I) g α σ hx v,
       ContinuousLinearMap.smulRight_apply]
-  -- Identify the `f • σ` chart-pullback with `(f ∘ φ.symm) • (σ̃ ∘ φ.symm)`.
   have hsmul_pull :
       (chartE_section_repr (I := I) α (f • σ) ∘ (extChartAt I α).symm) =
         ((f ∘ (extChartAt I α).symm) •
           (chartE_section_repr (I := I) α σ ∘ (extChartAt I α).symm)) := by
     funext y
-    -- LHS at y: `chartE_section_repr α (f • σ) (φ.symm y)`.
-    -- Use `chartE_section_repr_smul_function` to rewrite.
-    -- `(f • σ) z = f z • σ z` by `Pi.smul_apply`.
     have heq :
         chartE_section_repr (I := I) α (f • σ) ((extChartAt I α).symm y) =
           f ((extChartAt I α).symm y) •
             chartE_section_repr (I := I) α σ ((extChartAt I α).symm y) := by
-      -- `(f • σ) z = f z • σ z` is `rfl` for the `Pi.instSMul` instance.
       have hpt :
           chartE_section_repr (I := I) α
               (fun z => f z • σ z)
@@ -486,26 +421,16 @@ lemma chartLeviCivita_leibniz (g : SmoothRiemannianMetric I M) (α : M)
         chartE_section_repr_smul_function (I := I) α f σ
           ((extChartAt I α).symm y)
       exact hpt
-    -- `(f ∘ φ.symm) • (σ̃ ∘ φ.symm) y = (f ∘ φ.symm) y • (σ̃ ∘ φ.symm) y`.
-    -- Both sides match by `heq`.
     change chartE_section_repr (I := I) α (f • σ) ((extChartAt I α).symm y) =
       f ((extChartAt I α).symm y) •
         chartE_section_repr (I := I) α σ ((extChartAt I α).symm y)
     exact heq
-  -- Apply `fderiv_smul` on the chart pullback at `(extChartAt I α x)`.
   have hdiff_σ : DifferentiableAt ℝ
       (chartE_section_repr (I := I) α σ ∘ (extChartAt I α).symm)
       (extChartAt I α x) :=
     differentiableAt_chartE_pullback_of_MDiff (I := I) α hx hσ
-  -- `f` MDifferentiable at `x` and `φ.symm` MDifferentiable at `φ x` give
-  -- `f ∘ φ.symm` MDifferentiable at `φ x`, hence (vector-space target)
-  -- `DifferentiableAt`.
   have hdiff_f : DifferentiableAt ℝ (f ∘ (extChartAt I α).symm)
       (extChartAt I α x) := by
-    -- We get this from `mdifferentiableAt_iff_pullback_of_mem_source`-style
-    -- reasoning, but a cleaner path: `f = (f ∘ φ.symm) ∘ φ` near `x`, with
-    -- `φ.symm (φ x) = x`. Re-derive via the chain rule from `mfderiv_scalar`.
-    -- Use `MDifferentiableAt 𝓘(ℝ,E) 𝓘(ℝ) (f ∘ φ.symm)` at `φ x`, then convert.
     have hxsrc : x ∈ (extChartAt I α).source := by
       have := chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hx
       simpa using this
@@ -537,7 +462,6 @@ lemma chartLeviCivita_leibniz (g : SmoothRiemannianMetric I M) (α : M)
         (extChartAt I α x) :=
       hf_within.mdifferentiableAt hrange_nhds
     exact hf_at.differentiableAt
-  -- Compute the LHS fderiv using `fderiv_smul` and `hsmul_pull`.
   have hfderiv_split :
       fderiv ℝ
           (chartE_section_repr (I := I) α (f • σ) ∘ (extChartAt I α).symm)
@@ -551,13 +475,11 @@ lemma chartLeviCivita_leibniz (g : SmoothRiemannianMetric I M) (α : M)
                 (extChartAt I α x)) := by
     rw [hsmul_pull]
     exact fderiv_smul hdiff_f hdiff_σ
-  -- Identify `(extChartAt I α).symm (extChartAt I α x) = x`.
   have hxsrc : x ∈ (extChartAt I α).source := by
     have := chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hx
     simpa using this
   have hxφ_inv : (extChartAt I α).symm (extChartAt I α x) = x :=
     (extChartAt I α).left_inv hxsrc
-  -- `(f ∘ φ.symm)(φ x) = f x` and `(σ̃ ∘ φ.symm)(φ x) = σ̃ x`.
   have hfφ : (f ∘ (extChartAt I α).symm) (extChartAt I α x) = f x := by
     change f ((extChartAt I α).symm (extChartAt I α x)) = f x
     rw [hxφ_inv]
@@ -568,7 +490,6 @@ lemma chartLeviCivita_leibniz (g : SmoothRiemannianMetric I M) (α : M)
       chartE_section_repr (I := I) α σ x
     rw [hxφ_inv]
   rw [hfφ, hσφ] at hfderiv_split
-  -- Apply at `(trivToE α x v)`.
   have hLfd_apply :
       fderiv ℝ
           (chartE_section_repr (I := I) α (f • σ) ∘ (extChartAt I α).symm)
@@ -582,7 +503,6 @@ lemma chartLeviCivita_leibniz (g : SmoothRiemannianMetric I M) (α : M)
     rw [hfderiv_split]
     rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
         ContinuousLinearMap.smulRight_apply]
-  -- Identify the Christoffel piece: scaling by `f x`.
   have hsec_smul :
       chartE_section_repr (I := I) α (f • σ) x =
         f x • chartE_section_repr (I := I) α σ x :=
@@ -593,7 +513,6 @@ lemma chartLeviCivita_leibniz (g : SmoothRiemannianMetric I M) (α : M)
         f x • christoffelCorrection (I := I) g α x
             (chartE_section_repr (I := I) α σ x) v := by
     rw [hsec_smul, christoffelCorrection_smul]
-  -- Bridge the chart-pulled-back fderiv of `f` to the manifold derivative.
   have hxsrc_chart : x ∈ (chartAt H α).source :=
     chartLeviCivitaGoodSet_mem_chartAt_source (I := I) hx
   have hxint :
@@ -604,29 +523,9 @@ lemma chartLeviCivita_leibniz (g : SmoothRiemannianMetric I M) (α : M)
         fderiv ℝ (f ∘ (extChartAt I α).symm) (extChartAt I α x)
           (trivToE (I := I) α x v) :=
     mfderiv_scalar_eq_chart_fderiv (I := I) α f hxsrc_chart hxint hf v
-  -- `extDerivFun f x v = mfderiv I 𝓘(ℝ) f x v`.
-  -- `extDerivFun f x = fromTangentSpace ∘L (mfderiv f x)`, and
-  -- `fromTangentSpace` is the identity on `TangentSpace 𝓘(ℝ,ℝ) (f x) ≃ ℝ`.
   have hextDeriv :
       extDerivFun (I := I) f x v = (mfderiv I 𝓘(ℝ) f x) v := rfl
-  -- Now combine. The full LHS is:
-  -- `trivFromE α x (LHS_fderiv + Christoffel_(f • σ))`
-  -- which we expand as:
-  -- `trivFromE α x ([f x • fderiv σ + (mfderiv f) v • σ̃ x] + f x • Christoffel_σ)`
-  -- which equals:
-  -- `f x • trivFromE α x (fderiv σ + Christoffel_σ) + (mfderiv f) v • trivFromE α x (σ̃ x)`
-  -- and `trivFromE α x (σ̃ x) = σ x`.
-  -- Substitute everything inside `trivFromE α x (...)`.
-  -- First, rewrite the additive structure inside the trivFromE.
   rw [hLfd_apply, hChristoffel_lhs]
-  -- Goal (with abbreviations introduced via `let`):
-  -- `trivFromE α x ((f x • A + D • σ̃ x) + f x • C) =
-  --   f x • trivFromE α x (A + C) + (extDerivFun f x v) • σ x`,
-  -- where `A := fderiv (σ̃ ∘ φ.symm)(φ x)(triv v)`,
-  --       `D := fderiv (f ∘ φ.symm)(φ x)(triv v)`,
-  --       `C := christoffelCorrection ...`.
-  -- We perform the bracket reorganisation, distribute trivFromE, then
-  -- identify `trivFromE α x (σ̃ x) = σ x` and `D = extDerivFun f x v`.
   have hreorg :
       (f x • fderiv ℝ (chartE_section_repr (I := I) α σ ∘ (extChartAt I α).symm)
           (extChartAt I α x) (trivToE (I := I) α x v) +
@@ -642,24 +541,15 @@ lemma chartLeviCivita_leibniz (g : SmoothRiemannianMetric I M) (α : M)
         (trivToE (I := I) α x v) • chartE_section_repr (I := I) α σ x := by
     rw [smul_add]; abel
   rw [hreorg]
-  -- Distribute trivFromE over the sum and over the scalar:
   rw [map_add, map_smul, map_smul]
-  -- Goal:
-  -- `f x • trivFromE α x (A + C) + D • trivFromE α x (σ̃ x)
-  --  = f x • trivFromE α x (A + C) + (extDerivFun f x v) • σ x`.
   congr 1
-  -- We need `D • trivFromE α x (σ̃ x) = (extDerivFun f x v) • σ x`.
-  -- Identify `trivFromE α x (σ̃ x) = σ x` via the round-trip.
   have htriv_round :
       trivFromE (I := I) α x (chartE_section_repr (I := I) α σ x) = σ x := by
     rw [chartE_section_repr_eq_trivToE]
     exact trivFromE_trivToE (I := I) α
       (chartLeviCivitaGoodSet_mem_baseSet (I := I) hx) (σ x)
   rw [htriv_round]
-  -- Identify `D = (mfderiv I 𝓘(ℝ) f x) v = extDerivFun f x v`.
   rw [← hmf_to_fderiv, ← hextDeriv]
-
-/-! ## `IsCovariantDerivativeOn` properties -/
 
 /-- **The chart-local Levi-Civita satisfies `IsCovariantDerivativeOn`** on the
 good set at `α`. -/

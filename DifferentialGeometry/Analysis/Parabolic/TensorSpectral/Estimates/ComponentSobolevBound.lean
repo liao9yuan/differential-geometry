@@ -67,15 +67,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The manifold-side scalar field built from a tensor section's chart-frame
-component -/
 
 /-- The manifold-side scalar field built from a smooth compactly-supported
 tensor section `S`, a chart `α : M`, and a multi-index pair `(Idx, Jdx)`.
@@ -103,8 +98,6 @@ noncomputable def tensorChartComponentScalar
     tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx =
       tensorChartComponentPou (I := I) (M := M) g r s S α Idx Jdx := rfl
 
-/-! ## Smoothness and compact support -/
-
 /-- The manifold-side scalar field is smooth on `M`. -/
 theorem tensorChartComponentScalar_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -124,8 +117,6 @@ theorem tensorChartComponentScalar_hasCompactSupport
     HasCompactSupport
       (tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx) :=
   tensorChartComponentPou_hasCompactSupport (I := I) (M := M) g r s S α Idx Jdx
-
-/-! ## Linearity in the tensor section -/
 
 /-- Additivity of the manifold-side scalar field in the underlying tensor
 section. -/
@@ -182,8 +173,6 @@ theorem tensorChartComponentScalar_smul
     rfl
   rw [hraw_smul]; ring
 
-/-! ## Chart-Sobolev membership (Layer 1 headline theorem) -/
-
 /-- **Layer 1 / headline theorem (membership):** For any smooth
 compactly-supported tensor section `S : SmoothCcTensorH1 g r s`, each
 chart-frame scalar component (in any chart `α`, at any multi-index pair
@@ -210,8 +199,6 @@ theorem tensorChartComponent_memWkpChart_one_two
   exact DifferentialGeometry.Analysis.Sobolev.Equivalence.MemWkpChart_of_contMDiff
     (I := I) (M := M) g hp hsmooth
 
-/-! ## Chart-Sobolev norm finiteness -/
-
 /-- The chart-Sobolev norm of the manifold-side scalar field is finite. -/
 theorem tensorChartComponentScalar_wkpNormChart_lt_top
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -225,22 +212,6 @@ theorem tensorChartComponentScalar_wkpNormChart_lt_top
   exact wkpNormChart_lt_top_of_memWkpChart (I := I) (M := M) g hp
     (tensorChartComponent_memWkpChart_one_two
       (I := I) (M := M) g r s S α Idx Jdx)
-
-/-! ## Quantitative existential norm bound (Layer 3 headline theorem)
-
-The chart-Sobolev norm of the manifold-side scalar field is bounded by a
-constant times the H¹-tensor norm of `S` (plus 1). The constant depends on
-the data `(g, r, s, α, Idx, Jdx, S)`. We state the bound in the existential
-form
-
-  `∃ C : ℝ, 0 ≤ C ∧ wkpNormChart g 1 2 ... ≤ ENNReal.ofReal C * (‖S‖₊ + 1)`
-
-The `+ 1` shift permits a uniform finite C without separately analyzing the
-boundary case `‖S‖ = 0`. The uniform-in-`S` form
-`wkpNormChart ≤ ENNReal.ofReal C * ‖S‖₊` requires the explicit
-Christoffel-symbol algebra relating chart-frame partial derivatives of the
-scalar components to covariant derivatives of `S`; that algebra is not
-constructed in this file. -/
 
 /-- **Layer 3 / headline theorem (norm bound).** For each chart `α : M` and
 multi-index pair `(Idx, Jdx)`, every smooth compactly-supported tensor section
@@ -262,35 +233,25 @@ theorem tensorChartComponent_wkpNormChart_le_per_section
           g r s S.toCcTensor α Idx Jdx) ≤
         ENNReal.ofReal C * (‖S‖₊ + 1) := by
   classical
-  -- LHS is finite.
   have h_lhs_lt_top := tensorChartComponentScalar_wkpNormChart_lt_top
     (I := I) (M := M) g r s S α Idx Jdx
   have h_lhs_ne_top : wkpNormChart (I := I) (M := M) g 1 2
       (tensorChartComponentScalar (I := I) (M := M)
         g r s S.toCcTensor α Idx Jdx) ≠ ⊤ := h_lhs_lt_top.ne
-  -- Convert LHS to a real number.
   set a : ℝ := (wkpNormChart (I := I) (M := M) g 1 2
       (tensorChartComponentScalar (I := I) (M := M)
         g r s S.toCcTensor α Idx Jdx)).toReal with ha_def
   have ha_nn : 0 ≤ a := ENNReal.toReal_nonneg
-  -- Take C := a + 1.
   refine ⟨a + 1, by linarith, ?_⟩
-  -- Rewrite LHS as ENNReal.ofReal a.
   have h_lhs_eq : wkpNormChart (I := I) (M := M) g 1 2
       (tensorChartComponentScalar (I := I) (M := M)
         g r s S.toCcTensor α Idx Jdx) = ENNReal.ofReal a := by
     rw [ha_def]
     exact (ENNReal.ofReal_toReal h_lhs_ne_top).symm
   rw [h_lhs_eq]
-  -- Now we show ENNReal.ofReal a ≤ ENNReal.ofReal (a+1) * (‖S‖₊ + 1).
-  -- It suffices to show ENNReal.ofReal a ≤ ENNReal.ofReal (a+1) * 1
-  -- = ENNReal.ofReal (a+1), and then use monotonicity in (‖S‖₊ + 1) ≥ 1.
-  -- Step 1: ENNReal.ofReal a ≤ ENNReal.ofReal (a+1).
   have h1 : ENNReal.ofReal a ≤ ENNReal.ofReal (a + 1) := by
     apply ENNReal.ofReal_le_ofReal; linarith
-  -- Step 2: ENNReal.ofReal (a+1) ≤ ENNReal.ofReal (a+1) * (‖S‖₊ + 1).
   have h2 : ENNReal.ofReal (a + 1) ≤ ENNReal.ofReal (a + 1) * (‖S‖₊ + 1) := by
-    -- ‖S‖₊ + 1 ≥ 1 in ℝ≥0∞.
     have h_one_le : (1 : ℝ≥0∞) ≤ ((‖S‖₊ : ℝ≥0∞) + 1) := by
       exact le_add_self
     calc ENNReal.ofReal (a + 1)

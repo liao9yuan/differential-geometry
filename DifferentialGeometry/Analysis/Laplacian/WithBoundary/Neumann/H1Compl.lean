@@ -133,8 +133,6 @@ theorem smoothToH1ComplNeumann_eq_resolventNeumann_oneSubLap
     smoothToH1ComplNeumann g u = resolventNeumann g u.oneSubLapClassicalLp :=
   smoothToH1ComplInterior_eq_resolventInterior_oneSubLap u
 
-/-! ## Sanity test -/
-
 example (g : SmoothRiemannianMetric (I_half n) M) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I_half n) (M := M) g) →L[ℝ]
       H1ComplNeumann g :=

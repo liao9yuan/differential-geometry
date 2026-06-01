@@ -79,19 +79,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The smooth-scalar-weighted tensor section
-
-A smooth real-valued function `ζ : C^∞⟮I, M; ℝ⟯` on `M` times a smooth
-compactly-supported `(r, s)`-tensor section `w` is again a smooth section:
-this is `ContMDiff.smul_section`. Its support sits inside `tsupport w.toFun`,
-hence is still compact. The packaged `SmoothCcTensor` is `scalarSmul g r s ζ w`. -/
 
 /-- The smooth real-valued function `ζ` times a smooth compactly-supported
 `(r, s)`-tensor section `w`, packaged as a smooth compactly-supported tensor
@@ -103,21 +94,15 @@ noncomputable def scalarSmul
   toSection :=
     { toFun := fun x : M => (ζ : M → ℝ) x • w.toSection x
       contMDiff_toFun := by
-        -- The pointwise scalar product of a `C^∞` function and a `C^∞` section
-        -- is a `C^∞` section.
         exact ContMDiff.smul_section ζ.contMDiff w.toSection.contMDiff }
   hasCompactSupport := by
     classical
-    -- The underlying map of `ζ • w` is `fun x => ζ x • w.toFun x`; it vanishes
-    -- wherever `w.toFun` vanishes, so its support sits inside `tsupport w.toFun`.
     refine HasCompactSupport.of_support_subset_isCompact w.hasCompactSupport ?_
     intro x hx
-    -- A point in the support of the scaled map is in the support of `w.toFun`.
     rw [Function.mem_support] at hx
     refine subset_tsupport w.toFun ?_
     rw [Function.mem_support]
     intro hw_zero
-    -- The underlying-map value at `x` is `ζ x • w.toFun x`.
     apply hx
     change TensorRSSpace.toModel ((ζ : M → ℝ) x • w.toSection x) = 0
     rw [TensorRSSpace.toModel_smul,
@@ -143,14 +128,6 @@ of `ζ` and the underlying map of `w`. -/
     TensorRSSpace.toModel_smul]
   rfl
 
-/-! ## The pointwise covariant Leibniz rule
-
-`tensorCovDerivAt g r s S x v` is the bundled `(r, s)`-tensor covariant
-derivative applied to `S.toSection`. The bundled covariant derivative satisfies
-`IsCovariantDerivativeOn … Set.univ`, hence its `leibniz` field. Applied to the
-smooth scalar `ζ` and the smooth section `w.toSection` it yields the genuine
-non-constant Leibniz rule, with the derivative-of-`ζ` term retained. -/
-
 /-- **The pointwise covariant Leibniz rule.** For a smooth real-valued function
 `ζ` and a smooth compactly-supported `(r, s)`-tensor section `w`, the directional
 covariant derivative of the smooth-scalar-weighted section `ζ • w` at a point
@@ -168,22 +145,17 @@ theorem tensorCovDerivAt_scalarSmul
         (scalarSmul (I := I) (M := M) g r s ζ w) x v =
       (ζ : M → ℝ) x • tensorCovDerivAt (I := I) (M := M) g r s w x v +
         (extDerivFun (I := I) (ζ : M → ℝ) x v) • w.toSection x := by
-  -- Unfold both sides to the bundled `(r, s)`-tensor covariant derivative.
   unfold tensorCovDerivAt
-  -- The underlying section of `ζ • w` is `(⇑ζ) • (fun y => w.toSection y)`.
   have hpt : (fun y : M => (scalarSmul (I := I) (M := M) g r s ζ w).toSection y) =
       (fun y : M => (ζ : M → ℝ) y) • (fun y : M => w.toSection y) := by
     funext y
     rw [scalarSmul_toSection_apply]
     rfl
   rw [hpt]
-  -- `ζ`, seen as a function `M → ℝ`, is manifold-differentiable at `x`.
   have hζ_mdiff : MDiffAt (fun y : M => (ζ : M → ℝ) y) x :=
     (ζ.contMDiff.mdifferentiable (by norm_num)).mdifferentiableAt
-  -- `w.toSection` is manifold-differentiable at `x` in total-space form.
   have hw_mdiff :=
     (w.toSection.contMDiff.mdifferentiable (by norm_num)).mdifferentiableAt (x := x)
-  -- The Leibniz field of the bundled covariant derivative.
   have hcov_leibniz :=
     (tensorRSCovariantDerivative I M r s
         (LeviCivita (I := I) g)).isCovariantDerivativeOn.leibniz
@@ -192,29 +164,11 @@ theorem tensorCovDerivAt_scalarSmul
       (hσ := hw_mdiff)
       (hg := hζ_mdiff)
       (hx := (by trivial : x ∈ (Set.univ : Set M)))
-  -- Rewrite the LHS as the bundled covariant derivative of `(⇑ζ) • w.toSection`.
   change (tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)).toFun
       ((fun y : M => (ζ : M → ℝ) y) • fun y : M => w.toSection y) x v = _
   rw [hcov_leibniz]
-  -- After `leibniz` the value is
-  -- `(ζ x • cov σ x + (extDerivFun ζ x).smulRight (σ x))` applied to `v`.
-  -- The first term is `ζ x • cov σ x v`; the second is `(extDerivFun ζ x v) • σ x`
-  -- by `ContinuousLinearMap.smulRight_apply`.
   rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
     ContinuousLinearMap.smulRight_apply]
-
-/-! ## The Leibniz identity for the pointwise covariant-derivative inner product
-
-`tensorCovDerivPointwiseInner g r s S T x` is the inverse-Gram-weighted double
-sum, over the canonical model-fibre basis `chartModelBasis E`, of the pointwise
-`(r, s)`-tensor inner product `tensorInnerPointwise` of the covariant gradients
-`tensorCovDerivAt … S` and `tensorCovDerivAt … T`.
-
-Substituting `tensorCovDerivAt_scalarSmul` into the gradients of a
-smooth-scalar-weighted section produces, besides the `ζ`-scaled genuine-gradient
-term, a term carrying the factor `extDerivFun ζ x (chartModelBasis E ·)` —
-i.e. the `dζ`-contracted term. We package those `dζ`-contracted terms as the two
-explicit cross terms below. -/
 
 /-- The explicit cross term `⟨∇w, dζ ⊗ S⟩` of the Leibniz identity for the
 pointwise covariant-derivative inner product. The `dζ ⊗ S` factor contributes,
@@ -312,15 +266,11 @@ private lemma tensorCovDerivPointwiseInner_scalarSmul_left_summand
               (TensorRSSpace.toModel
                 (tensorCovDerivAt (I := I) (M := M) g r s S x
                   ((chartModelBasis E) j)))) := by
-  -- Apply the pointwise covariant Leibniz rule to the first gradient slot.
   rw [tensorCovDerivAt_scalarSmul (I := I) (M := M) g r s ζ w x
     ((chartModelBasis E) i)]
-  -- `toModel` of the sum / scalar multiple (both `toModel_smul` occurrences).
   simp only [TensorRSSpace.toModel_add, TensorRSSpace.toModel_smul]
-  -- `toModel (w.toSection x) = w.toFun x`.
   have hwx : TensorRSSpace.toModel (w.toSection x) = w.toFun x := rfl
   rw [hwx]
-  -- Bilinearity of `tensorInnerPointwise` in the first argument.
   rw [tensorInnerPointwise_add_left]
   simp only [tensorInnerPointwise_smul_left]
   ring
@@ -357,15 +307,11 @@ private lemma tensorCovDerivPointwiseInner_scalarSmul_right_summand
                 (tensorCovDerivAt (I := I) (M := M) g r s w x
                   ((chartModelBasis E) i)))
               (S.toFun x)) := by
-  -- Apply the pointwise covariant Leibniz rule to the second gradient slot.
   rw [tensorCovDerivAt_scalarSmul (I := I) (M := M) g r s ζ S x
     ((chartModelBasis E) j)]
-  -- `toModel` of the sum / scalar multiple (both `toModel_smul` occurrences).
   simp only [TensorRSSpace.toModel_add, TensorRSSpace.toModel_smul]
-  -- `toModel (S.toSection x) = S.toFun x`.
   have hSx : TensorRSSpace.toModel (S.toSection x) = S.toFun x := rfl
   rw [hSx]
-  -- Bilinearity of `tensorInnerPointwise` in the second argument.
   rw [tensorInnerPointwise_add_right]
   simp only [tensorInnerPointwise_smul_right]
   ring
@@ -423,7 +369,6 @@ theorem tensorCovDerivPointwiseInner_scalarSmul_left
         tensorCovDerivCrossLeft (I := I) (M := M) g r s ζ w S x +
         tensorCovDerivCrossRight (I := I) (M := M) g r s ζ w S x := by
   classical
-  -- Expand the left-hand side summand by summand via the Leibniz rule.
   have hLHS :
       tensorCovDerivPointwiseInner (I := I) (M := M) g r s
           (scalarSmul (I := I) (M := M) g r s ζ w) S x =
@@ -447,7 +392,6 @@ theorem tensorCovDerivPointwiseInner_scalarSmul_left
     intro j _
     exact tensorCovDerivPointwiseInner_scalarSmul_left_summand
       (I := I) (M := M) g r s ζ w S x i j
-  -- Expand `tensorCovDerivPointwiseInner w (ζ • S)` summand by summand likewise.
   have hRHS :
       tensorCovDerivPointwiseInner (I := I) (M := M) g r s w
           (scalarSmul (I := I) (M := M) g r s ζ S) x =
@@ -471,7 +415,6 @@ theorem tensorCovDerivPointwiseInner_scalarSmul_left
     intro j _
     exact tensorCovDerivPointwiseInner_scalarSmul_right_summand
       (I := I) (M := M) g r s ζ w S x i j
-  -- Combine: both expansions share the common `ζ`-scaled genuine-gradient sum.
   rw [hLHS, hRHS]
   ring
 

@@ -86,16 +86,12 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## Auxiliary: `laplacianDomainPow g 2` membership decomposition -/
 
 /-- For `u_h ∈ laplacianDomainPow g 2`, the `Lp`-preimage
 `laplacianDomain.preimage` of `u_h` equals `H1ComplToLp g w_h` for some
@@ -110,33 +106,20 @@ theorem laplacianDomainPow_two_preimage_eq
         laplacianDomain.preimage (I := I) (M := M) g
           ⟨u_h, laplacianDomainPow_succ_subset_laplacianDomain
             (I := I) (M := M) g 1 hu_h⟩ := by
-  -- u_h ∈ laplacianDomainPow g 2 = range(resolvent ∘ resolventL2).
   rw [show (2 : ℕ) = 1 + 1 from rfl] at hu_h
   rw [laplacianDomainPow_succ_mem_iff] at hu_h
   obtain ⟨f, hf⟩ := hu_h
   rw [iteratedResolventL2_one] at hf
-  -- hf : u_h = resolvent g (resolventL2 g f).
-  -- Let w_h := resolvent g f. Then w_h ∈ laplacianDomain g.
   refine ⟨resolvent (I := I) (M := M) g f, ?_, ?_⟩
   · rw [laplacianDomain_mem_iff]
     exact ⟨f, rfl⟩
-  · -- Need: H1ComplToLp g (resolvent g f) = preimage of u_h.
-    -- u_h = resolvent g (resolventL2 g f). And resolventL2 g f = H1ComplToLp g (resolvent g f).
-    -- So u_h = resolvent g (H1ComplToLp g (resolvent g f)) = (resolvent ∘ H1ComplToLp)(resolvent g f).
-    -- Hence preimage u_h = H1ComplToLp g (resolvent g f).
-    -- We use resolvent_injective and resolvent_laplacianDomain_preimage_eq.
-    have h_resolventL2_apply : resolventL2 (I := I) (M := M) g f =
+  · have h_resolventL2_apply : resolventL2 (I := I) (M := M) g f =
         H1ComplToLp (I := I) (M := M) g (resolvent (I := I) (M := M) g f) := by
-      -- By definition: resolventL2 g = H1ComplToLp g ∘L resolvent g.
       rfl
-    -- Apply resolvent_injective to bridge the preimage equation.
     apply resolvent_injective (I := I) (M := M) g
     rw [resolvent_laplacianDomain_preimage_eq]
-    -- Goal: resolvent g (H1ComplToLp g (resolvent g f)) = u_h.
     rw [← h_resolventL2_apply]
     exact hf.symm
-
-/-! ## Headline: two-sided `H²` regularity for `laplacianDomainPow g 2` -/
 
 /-- **Two-sided `H²` regularity for `u_h ∈ laplacianDomainPow g 2`.**
 
@@ -157,7 +140,6 @@ theorem laplacianDomainPow_two_h2_plus_rhs_h2
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2) :
-    -- `H²` regularity of `u`:
     (DifferentialGeometry.Analysis.Sobolev.Chart.MemWkpChart
         (I := I) (M := M) g 2 2
         ((H1ComplToLp (I := I) (M := M) g u_h :
@@ -166,7 +148,6 @@ theorem laplacianDomainPow_two_h2_plus_rhs_h2
         (I := I) (M := M) g 2 2
         ((H1ComplToLp (I := I) (M := M) g u_h :
           Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) < ⊤) ∧
-    -- `H²` regularity of the `Lp` preimage (i.e. `(1 - Δ_g) u_h`):
     (DifferentialGeometry.Analysis.Sobolev.Chart.MemWkpChart
         (I := I) (M := M) g 2 2
         ((laplacianDomain.preimage (I := I) (M := M) g
@@ -179,29 +160,22 @@ theorem laplacianDomainPow_two_h2_plus_rhs_h2
             ⟨u_h, laplacianDomainPow_succ_subset_laplacianDomain
               (I := I) (M := M) g 1 hu_h⟩ :
           Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) < ⊤) := by
-  -- First half: H² regularity of u_h. By laplacianDomainPow_one, u_h ∈ laplacianDomain g
-  -- (since laplacianDomainPow g 2 ⊆ laplacianDomain g).
   have hu_h_dom : u_h ∈ laplacianDomain (I := I) (M := M) g :=
     laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h
   have hu_h_in_pow_one : u_h ∈ laplacianDomainPow (I := I) (M := M) g 1 := by
     rw [laplacianDomainPow_one]; exact hu_h_dom
   have h_u_h2 := iteratedH2Regularity_one (I := I) (M := M) g hu_h_in_pow_one
-  -- Second half: H² regularity of the preimage. Decompose u_h.
   obtain ⟨w_h, hw_h_dom, hw_h_eq⟩ :=
     laplacianDomainPow_two_preimage_eq (I := I) (M := M) g hu_h
   have hw_h_in_pow_one : w_h ∈ laplacianDomainPow (I := I) (M := M) g 1 := by
     rw [laplacianDomainPow_one]; exact hw_h_dom
   have h_w_h2 := iteratedH2Regularity_one (I := I) (M := M) g hw_h_in_pow_one
-  -- The preimage of u_h equals H1ComplToLp g w_h.
-  -- Hence MemWkpChart of preimage ↔ MemWkpChart of H1ComplToLp w_h.
   refine ⟨h_u_h2, ?_⟩
   rw [show (laplacianDomain.preimage (I := I) (M := M) g
         ⟨u_h, laplacianDomainPow_succ_subset_laplacianDomain
           (I := I) (M := M) g 1 hu_h⟩) =
       H1ComplToLp (I := I) (M := M) g w_h from hw_h_eq.symm]
   exact h_w_h2
-
-/-! ## Same statement at the `Lp` class level, restated unambiguously -/
 
 /-- Restated form. The first conjunct is the same as `iteratedH2Regularity_one`
 applied to `u_h`. The second conjunct says: the canonical function

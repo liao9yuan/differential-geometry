@@ -117,21 +117,12 @@ open DifferentialGeometry.Analysis.Laplacian.MetricExtension
   hiding chartTargetEuclid chartTargetEuclid_isOpen
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The order-`K` `wkpNorm`-graded bound for the differentiated chart
-right-hand side -/
 
 section MainBound
 
@@ -163,17 +154,6 @@ private lemma eigenIdx_val_le_one
     (I := I) (M := M) g r s hu_in hu_ne).2
 
 end MainBound
-
-/-! ## Chart-locality-free twins
-
-The declarations below are the chart-locality-free twins of the
-partition-of-unity-keyed declarations above. Each proves the same statement
-without the chart-selection hypothesis `h_atlas`, re-keyed onto the intrinsic
-compact-operator eigenbasis (`tensorResolventEigenbasisVec` at the
-intrinsic compactness witness `tensorResolventL2_isCompactOperator`).
-The aggregate twins are **data**; the bound twins carry their own proofs,
-structurally identical to the originals with the chart-locality-free siblings
-substituted throughout. -/
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- Chart-locality-free twin of `rhsZeroAggregate`. -/
@@ -335,13 +315,11 @@ private lemma iteratedPartial_memWkp_two_add
           g r s i α P₀ j idx)
         (chartTargetEuclid (I := I) (M := M) α) := by
   intro j idx
-  -- The eigenvector chart component has interior `W^{(2 + K) + j, 2}` regularity.
   have h_comp : MemWkp (d := Module.finrank ℝ E) ((2 + K) + j) 2
       (eigenvectorChartComponentFun (I := I) (M := M) g r s i α P₀)
       (chartTargetEuclid (I := I) (M := M) α) :=
     eigenvector_chartComponent_memWkp_arbitrary (I := I) (M := M)
       g r s i ((2 + K) + j) α P₀
-  -- The polymorphic bridge transfers it to the `j`-fold mixed weak partial.
   exact eigenvectorChartIteratedPartial_memWkp_of_memWkp (I := I)
     (M := M) g r s i α P₀ j (2 + K) h_comp idx
 
@@ -367,21 +345,14 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le
           diffRHSAggregate (I := I) (M := M)
             g r s i α P₀ m K l := by
   classical
-  -- The resolvent eigenvalue lies in `(0, 1]`; its reciprocal is `≥ 1`.
   have hμ_pos : 0 < i.fst.val := eigenIdx_val_pos (I := I) (M := M) g r s i
   have hμ_le_one : i.fst.val ≤ 1 := eigenIdx_val_le_one (I := I) (M := M) g r s i
   have hμ_inv_nn : 0 ≤ (i.fst.val)⁻¹ := le_of_lt (inv_pos.mpr hμ_pos)
   have hμ_inv_ge_one : (1 : ℝ) ≤ (i.fst.val)⁻¹ := by
     rw [le_inv_comm₀ (by norm_num) hμ_pos]; simpa using hμ_le_one
-  -- Induction on `m`, with `K` and the direction multi-index `l` generalised so
-  -- the inductive hypothesis can be invoked at `K + 1`.
   induction m generalizing K with
   | zero =>
-      -- Level `0`: the differentiated right-hand side is
-      -- `eigenvectorChartRHS`.
       rw [eigenvectorChartRHSDiff_zero]
-      -- `eigenvectorChartRHS_wkpNorm_le` needs `h_pou` at order
-      -- `K + 1`; this theorem's `h_pou` is at order `0 + 1 + K = K + 1`.
       have h_pou' : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
           MemWkp (d := Module.finrank ℝ E) (K + 1) 2
             (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
@@ -397,9 +368,6 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le
       obtain ⟨C, hC_nn, hC_bd⟩ := eigenvectorChartRHS_wkpNorm_le
         (I := I) (M := M) g r s i α P₀ K h_pou'
       refine ⟨C, hC_nn, ?_⟩
-      -- The level-`0` aggregate is, by definition, `rhsZeroAggregate`,
-      -- which is definitionally the parenthesised right-hand side of
-      -- `eigenvectorChartRHS_wkpNorm_le`.
       rw [diffRHSAggregate_zero]
       show wkpNorm (d := Module.finrank ℝ E) K 2
           (eigenvectorChartRHS (I := I) (M := M) g r s i α P₀)
@@ -408,7 +376,6 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le
           rhsZeroAggregate (I := I) (M := M) g r s i α P₀ K
       exact hC_bd
   | succ m ih =>
-      -- Level `m + 1`: write `l = Fin.snoc (Fin.init l) (l (Fin.last m))`.
       have h_snoc :
           eigenvectorChartRHSDiff (I := I) (M := M)
               g r s i α P₀ (m + 1) l =
@@ -417,11 +384,8 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le
               (Fin.snoc (Fin.init l) (l (Fin.last m))) := by
         rw [Fin.snoc_init_self]
       rw [h_snoc]
-      -- The standalone-step identity (used backwards).
       rw [← eigenvectorChartIteratedStep_eq_rhsDiff_succ (I := I)
         (M := M) g r s i α P₀ m (Fin.init l) (l (Fin.last m))]
-      -- Hypothesis (a): the order-`(2 + K)` iterated-weak-partial regularity —
-      -- supplied unconditionally.
       have h_iter : ∀ (j : ℕ) (idx : Fin j → Fin (Module.finrank ℝ E)),
           MemWkp (d := Module.finrank ℝ E) (2 + K) 2
             (eigenvectorChartIteratedPartial (I := I) (M := M)
@@ -429,8 +393,6 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le
             (chartTargetEuclid (I := I) (M := M) α) :=
         iteratedPartial_memWkp_two_add (I := I) (M := M)
           g r s i α P₀ K
-      -- Hypothesis (b): the level-`m` right-hand side is `MemWkp (K + 1) 2` —
-      -- the qualitative headline at order `K + 1`.
       have h_pou_prev : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
           MemWkp (d := Module.finrank ℝ E) (m + 1 + (K + 1)) 2
             (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
@@ -449,7 +411,6 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le
           (chartTargetEuclid (I := I) (M := M) α) :=
         eigenvectorChartRHSDiff_memWkp (I := I) (M := M)
           g r s i α P₀ m (K + 1) (Fin.init l) h_pou_prev
-      -- Hypothesis (c): the level-`m` right-hand side is ae-zero off the kernel.
       have h_prev_zero :
           eigenvectorChartRHSDiff (I := I) (M := M)
               g r s i α P₀ m (Fin.init l)
@@ -459,26 +420,20 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le
             (fun _ : EuclN => (0 : ℝ)) :=
         rhsDiff_ae_zero_off_chartPouKernel (I := I) (M := M)
           g r s i α P₀ m (Fin.init l)
-      -- The step `wkpNorm` bound at level `m`.
       obtain ⟨Cstep, hCstep_nn, hCstep_bd⟩ :=
         eigenvectorChartIteratedStep_wkpNorm_le (I := I) (M := M)
           g r s i α P₀ m K (Fin.init l)
           (fChartEffPrev := eigenvectorChartRHSDiff (I := I) (M := M)
             g r s i α P₀ m (Fin.init l))
           (l (Fin.last m)) h_iter h_prev h_prev_zero
-      -- The inductive hypothesis at order `K + 1` and direction `Fin.init l`.
       obtain ⟨Cih, hCih_nn, hCih_bd⟩ := ih (K + 1) (Fin.init l) h_pou_prev
-      -- The headline constant: `max Cstep (2 * Cstep * Cih)`.
       refine ⟨max Cstep (2 * Cstep * Cih), le_max_of_le_left hCstep_nn, ?_⟩
-      -- Abbreviations for the head and the inductive aggregate.
       set H := diffRHSHead (I := I) (M := M) g r s i α P₀ m K
         (Fin.snoc (Fin.init l) (l (Fin.last m))) with hH_def
       set D := diffRHSAggregate (I := I) (M := M)
         g r s i α P₀ m (K + 1) (Fin.init l) with hD_def
       set Pprev := eigenvectorChartRHSDiff (I := I) (M := M)
         g r s i α P₀ m (Fin.init l) with hPprev_def
-      -- The differentiated-numerator aggregate `diffNumeratorAggregateK`
-      -- splits as `diffRHSHead + wkpNorm (K + 1) Pprev + wkpNorm K Pprev`.
       have h_num_split :
           diffNumeratorAggregateK (I := I) (M := M)
               g r s i α P₀ m K
@@ -490,14 +445,12 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le
                   (chartTargetEuclid (I := I) (M := M) α) := by
         rw [hH_def]; rfl
       rw [h_num_split] at hCstep_bd
-      -- The order-`K` `wkpNorm` of `Pprev` is `≤` its order-`(K + 1)` `wkpNorm`.
       have h_prev_mono :
           wkpNorm (d := Module.finrank ℝ E) K 2 Pprev
               (chartTargetEuclid (I := I) (M := M) α)
             ≤ wkpNorm (d := Module.finrank ℝ E) (K + 1) 2 Pprev
                 (chartTargetEuclid (I := I) (M := M) α) :=
         wkpNorm_mono_order (d := Module.finrank ℝ E) (Nat.le_succ K) _ _
-      -- The inductive hypothesis bound on `wkpNorm (K + 1) Pprev`.
       have h_ih_bd :
           wkpNorm (d := Module.finrank ℝ E) (K + 1) 2 Pprev
               (chartTargetEuclid (I := I) (M := M) α)
@@ -511,7 +464,6 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le
               (chartTargetEuclid (I := I) (M := M) α)
             ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * Cih) * D :=
         le_trans h_prev_mono h_ih_bd
-      -- Bound the differentiated-numerator aggregate.
       have h_aggr_le :
           H
               + wkpNorm (d := Module.finrank ℝ E) (K + 1) 2 Pprev
@@ -521,7 +473,6 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le
             ≤ H + ENNReal.ofReal ((i.fst.val)⁻¹ * Cih) * D
                 + ENNReal.ofReal ((i.fst.val)⁻¹ * Cih) * D :=
         add_le_add (add_le_add (le_refl H) h_prev_succ_le) h_prev_K_le
-      -- Chain the step bound through the aggregate bound.
       have h_step_chained :
           wkpNorm (d := Module.finrank ℝ E) K 2
               (eigenvectorChartIteratedStep (I := I) (M := M)
@@ -532,27 +483,22 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le
                 + ENNReal.ofReal ((i.fst.val)⁻¹ * Cih) * D) :=
         le_trans hCstep_bd (mul_le_mul' (le_refl _) h_aggr_le)
       refine le_trans h_step_chained ?_
-      -- The level-`(m+1)` aggregate (at the original `l`) is `H + D`.
       have h_target_aggr :
           diffRHSAggregate (I := I) (M := M)
               g r s i α P₀ (m + 1) K l
             = H + D := by
         rw [diffRHSAggregate_succ, hH_def, hD_def, Fin.snoc_init_self]
       rw [h_target_aggr]
-      -- Set `C' := max Cstep (2 * Cstep * Cih)`.
       set C' : ℝ := max Cstep (2 * Cstep * Cih) with hC'_def
       have hCih_nn' : 0 ≤ Cih := hCih_nn
       have hC'_nn : 0 ≤ C' := le_max_of_le_left hCstep_nn
-      -- Distribute both products over `+`.
       rw [mul_add, mul_add, mul_add, add_assoc]
-      -- The `H` summand: `ofReal Cstep * H ≤ ofReal (μ⁻¹ C') * H`.
       have h_head_le :
           ENNReal.ofReal Cstep * H
             ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * C') * H := by
         gcongr
         have h1 : Cstep ≤ C' := le_max_left _ _
         nlinarith [h1, hμ_inv_ge_one, hC'_nn, hCstep_nn]
-      -- Each `D` summand.
       have h_tail_one :
           ENNReal.ofReal Cstep * (ENNReal.ofReal ((i.fst.val)⁻¹ * Cih) * D)
             ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * C' / 2) * D := by
@@ -561,7 +507,6 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le
         have h2C : 2 * Cstep * Cih ≤ C' := le_max_right _ _
         have h_cs_ci_nn : 0 ≤ Cstep * Cih := mul_nonneg hCstep_nn hCih_nn'
         nlinarith [h2C, hμ_inv_ge_one, hμ_inv_nn, h_cs_ci_nn]
-      -- The two `D` summands recombine into `ofReal(μ⁻¹ C') * D`.
       have h_tail_combine :
           ENNReal.ofReal ((i.fst.val)⁻¹ * C' / 2) * D
               + ENNReal.ofReal ((i.fst.val)⁻¹ * C' / 2) * D
@@ -602,13 +547,8 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le_uniform
             diffRHSAggregate (I := I) (M := M)
               g r s i α P₀ m K l := by
   classical
-  -- Induction on `m`, with `K` generalised so the inductive hypothesis can be
-  -- invoked at `K + 1`. The existential constant `∃ C` is produced *before* the
-  -- `∀ i`, with `C` not mentioning `i`.
   induction m generalizing K with
   | zero =>
-      -- Level `0`: the differentiated right-hand side is
-      -- `eigenvectorChartRHS`.
       have h_pou' : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
           (β : M) (Q : TensorCompIdx (E := E) r s),
           MemWkp (d := Module.finrank ℝ E) (K + 1) 2
@@ -622,15 +562,11 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le_uniform
         have h_idx : (0 : ℕ) + 1 + K = K + 1 := by omega
         rw [← h_idx]
         exact h_pou i β Q
-      -- The eigenbasis-uniform level-`0` constant — `i`-free.
       obtain ⟨C, hC_nn, hC_bd⟩ := eigenvectorChartRHS_wkpNorm_le_uniform
         (I := I) (M := M) g r s α P₀ K h_pou'
       refine ⟨C, hC_nn, fun i => ?_⟩
-      -- Reduce to `eigenvectorChartRHS` and the level-`0` aggregate.
       rw [eigenvectorChartRHSDiff_zero,
         diffRHSAggregate_zero]
-      -- `rhsZeroAggregate` is definitionally the parenthesised
-      -- right-hand side of `eigenvectorChartRHS_wkpNorm_le_uniform`.
       show wkpNorm (d := Module.finrank ℝ E) K 2
           (eigenvectorChartRHS (I := I) (M := M) g r s i α P₀)
           (chartTargetEuclid (I := I) (M := M) α)
@@ -638,12 +574,9 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le_uniform
           rhsZeroAggregate (I := I) (M := M) g r s i α P₀ K
       exact hC_bd i
   | succ m ih =>
-      -- Level `m + 1`. The previous-level effective right-hand side, as a
-      -- function of the eigenbasis index, fed to the uniform step bound.
       set fPrev : TensorEigenIdx (I := I) (M := M) g r s → EuclN → ℝ :=
         fun i => eigenvectorChartRHSDiff (I := I) (M := M)
           g r s i α P₀ m (Fin.init l) with hfPrev_def
-      -- `h_pou` at order `m + 1 + (K + 1) = m + 2 + K`, phrased uniformly.
       have h_pou_prev : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
           (β : M) (Q : TensorCompIdx (E := E) r s),
           MemWkp (d := Module.finrank ℝ E) (m + 1 + (K + 1)) 2
@@ -657,8 +590,6 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le_uniform
         have h_idx : m + 1 + (K + 1) = m + 1 + 1 + K := by omega
         rw [h_idx]
         exact h_pou i β Q
-      -- Hypothesis (a): the order-`(2 + K)` iterated-weak-partial regularity —
-      -- supplied unconditionally for every `i`.
       have h_iter : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
           (j : ℕ) (idx : Fin j → Fin (Module.finrank ℝ E)),
           MemWkp (d := Module.finrank ℝ E) (2 + K) 2
@@ -667,8 +598,6 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le_uniform
             (chartTargetEuclid (I := I) (M := M) α) :=
         fun i => iteratedPartial_memWkp_two_add (I := I) (M := M)
           g r s i α P₀ K
-      -- Hypothesis (b): the level-`m` right-hand side `fPrev i` is
-      -- `MemWkp (K + 1) 2` for every `i`.
       have h_prev : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
           MemWkp (d := Module.finrank ℝ E) (K + 1) 2 (fPrev i)
             (chartTargetEuclid (I := I) (M := M) α) := by
@@ -676,8 +605,6 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le_uniform
         rw [hfPrev_def]
         exact eigenvectorChartRHSDiff_memWkp (I := I) (M := M)
           g r s i α P₀ m (K + 1) (Fin.init l) (h_pou_prev i)
-      -- Hypothesis (c): the level-`m` right-hand side `fPrev i` is ae-zero off
-      -- the partition-of-unity kernel for every `i`.
       have h_prev_zero : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
           (fPrev i) =ᵐ[(volume : Measure EuclN).restrict
               (chartTargetEuclid (I := I) (M := M) α \
@@ -687,25 +614,19 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le_uniform
         rw [hfPrev_def]
         exact rhsDiff_ae_zero_off_chartPouKernel (I := I) (M := M)
           g r s i α P₀ m (Fin.init l)
-      -- The eigenbasis-uniform step constant `Cstep` — `i`-free.
       obtain ⟨Cstep, hCstep_nn, hCstep_bd⟩ :=
         eigenvectorChartIteratedStep_wkpNorm_le_uniform (I := I)
           (M := M) g r s α P₀ m K (Fin.init l) (l (Fin.last m))
           (fChartEffPrev := fPrev) h_iter h_prev h_prev_zero
-      -- The inductive constant `Cih` at order `K + 1` and direction `Fin.init l`
-      -- — `i`-free by the inductive hypothesis.
       obtain ⟨Cih, hCih_nn, hCih_bd⟩ := ih (K + 1) (Fin.init l) h_pou_prev
-      -- The headline constant `max Cstep (2 * Cstep * Cih)` — `i`-free.
       refine ⟨max Cstep (2 * Cstep * Cih), le_max_of_le_left hCstep_nn,
         fun i => ?_⟩
-      -- The per-`i` argument: the resolvent eigenvalue lies in `(0, 1]`.
       have hμ_pos : 0 < i.fst.val := eigenIdx_val_pos (I := I) (M := M) g r s i
       have hμ_le_one : i.fst.val ≤ 1 :=
         eigenIdx_val_le_one (I := I) (M := M) g r s i
       have hμ_inv_nn : 0 ≤ (i.fst.val)⁻¹ := le_of_lt (inv_pos.mpr hμ_pos)
       have hμ_inv_ge_one : (1 : ℝ) ≤ (i.fst.val)⁻¹ := by
         rw [le_inv_comm₀ (by norm_num) hμ_pos]; simpa using hμ_le_one
-      -- Write `l = Fin.snoc (Fin.init l) (l (Fin.last m))`.
       have h_snoc :
           eigenvectorChartRHSDiff (I := I) (M := M)
               g r s i α P₀ (m + 1) l =
@@ -714,22 +635,17 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le_uniform
               (Fin.snoc (Fin.init l) (l (Fin.last m))) := by
         rw [Fin.snoc_init_self]
       rw [h_snoc]
-      -- The standalone-step identity (used backwards).
       rw [← eigenvectorChartIteratedStep_eq_rhsDiff_succ (I := I)
         (M := M) g r s i α P₀ m (Fin.init l) (l (Fin.last m))]
-      -- Abbreviations for the head and the inductive aggregate.
       set H := diffRHSHead (I := I) (M := M) g r s i α P₀ m K
         (Fin.snoc (Fin.init l) (l (Fin.last m))) with hH_def
       set D := diffRHSAggregate (I := I) (M := M)
         g r s i α P₀ m (K + 1) (Fin.init l) with hD_def
       set Pprev := eigenvectorChartRHSDiff (I := I) (M := M)
         g r s i α P₀ m (Fin.init l) with hPprev_def
-      -- The step bound at the index `i`. `fPrev i` is definitionally `Pprev`.
       have hCstep_bd_i := hCstep_bd i
       have hfPrev_i : fPrev i = Pprev := by rw [hfPrev_def, hPprev_def]
       rw [hfPrev_i] at hCstep_bd_i
-      -- The differentiated-numerator aggregate splits as
-      -- `diffRHSHead + wkpNorm (K + 1) Pprev + wkpNorm K Pprev`.
       have h_num_split :
           diffNumeratorAggregateK (I := I) (M := M)
               g r s i α P₀ m K
@@ -741,14 +657,12 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le_uniform
                   (chartTargetEuclid (I := I) (M := M) α) := by
         rw [hH_def]; rfl
       rw [h_num_split] at hCstep_bd_i
-      -- The order-`K` `wkpNorm` of `Pprev` is `≤` its order-`(K + 1)` `wkpNorm`.
       have h_prev_mono :
           wkpNorm (d := Module.finrank ℝ E) K 2 Pprev
               (chartTargetEuclid (I := I) (M := M) α)
             ≤ wkpNorm (d := Module.finrank ℝ E) (K + 1) 2 Pprev
                 (chartTargetEuclid (I := I) (M := M) α) :=
         wkpNorm_mono_order (d := Module.finrank ℝ E) (Nat.le_succ K) _ _
-      -- The inductive hypothesis bound on `wkpNorm (K + 1) Pprev`.
       have h_ih_bd :
           wkpNorm (d := Module.finrank ℝ E) (K + 1) 2 Pprev
               (chartTargetEuclid (I := I) (M := M) α)
@@ -758,7 +672,6 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le_uniform
               (chartTargetEuclid (I := I) (M := M) α)
             ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * Cih) * D :=
         le_trans h_prev_mono h_ih_bd
-      -- Bound the differentiated-numerator aggregate.
       have h_aggr_le :
           H
               + wkpNorm (d := Module.finrank ℝ E) (K + 1) 2 Pprev
@@ -768,7 +681,6 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le_uniform
             ≤ H + ENNReal.ofReal ((i.fst.val)⁻¹ * Cih) * D
                 + ENNReal.ofReal ((i.fst.val)⁻¹ * Cih) * D :=
         add_le_add (add_le_add (le_refl H) h_ih_bd) h_prev_K_le
-      -- Chain the step bound through the aggregate bound.
       have h_step_chained :
           wkpNorm (d := Module.finrank ℝ E) K 2
               (eigenvectorChartIteratedStep (I := I) (M := M)
@@ -779,27 +691,22 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le_uniform
                 + ENNReal.ofReal ((i.fst.val)⁻¹ * Cih) * D) :=
         le_trans hCstep_bd_i (mul_le_mul' (le_refl _) h_aggr_le)
       refine le_trans h_step_chained ?_
-      -- The level-`(m+1)` aggregate (at the original `l`) is `H + D`.
       have h_target_aggr :
           diffRHSAggregate (I := I) (M := M)
               g r s i α P₀ (m + 1) K l
             = H + D := by
         rw [diffRHSAggregate_succ, hH_def, hD_def, Fin.snoc_init_self]
       rw [h_target_aggr]
-      -- Set `C' := max Cstep (2 * Cstep * Cih)`.
       set C' : ℝ := max Cstep (2 * Cstep * Cih) with hC'_def
       have hCih_nn' : 0 ≤ Cih := hCih_nn
       have hC'_nn : 0 ≤ C' := le_max_of_le_left hCstep_nn
-      -- Distribute both products over `+`.
       rw [mul_add, mul_add, mul_add, add_assoc]
-      -- The `H` summand: `ofReal Cstep * H ≤ ofReal (μ⁻¹ C') * H`.
       have h_head_le :
           ENNReal.ofReal Cstep * H
             ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * C') * H := by
         gcongr
         have h1 : Cstep ≤ C' := le_max_left _ _
         nlinarith [h1, hμ_inv_ge_one, hC'_nn, hCstep_nn]
-      -- Each `D` summand.
       have h_tail_one :
           ENNReal.ofReal Cstep * (ENNReal.ofReal ((i.fst.val)⁻¹ * Cih) * D)
             ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * C' / 2) * D := by
@@ -808,7 +715,6 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le_uniform
         have h2C : 2 * Cstep * Cih ≤ C' := le_max_right _ _
         have h_cs_ci_nn : 0 ≤ Cstep * Cih := mul_nonneg hCstep_nn hCih_nn'
         nlinarith [h2C, hμ_inv_ge_one, hμ_inv_nn, h_cs_ci_nn]
-      -- The two `D` summands recombine into `ofReal(μ⁻¹ C') * D`.
       have h_tail_combine :
           ENNReal.ofReal ((i.fst.val)⁻¹ * C' / 2) * D
               + ENNReal.ofReal ((i.fst.val)⁻¹ * C' / 2) * D
@@ -848,7 +754,6 @@ theorem eigenvectorChartRHSDiff_eLpNorm_le
   obtain ⟨C, hC_nn, hC_bd⟩ := eigenvectorChartRHSDiff_wkpNorm_le
     (I := I) (M := M) g r s i α P₀ m 0 l h_pou
   refine ⟨C, hC_nn, ?_⟩
-  -- `wkpNorm 0 2 f Ω = eLpNorm f 2 (volume.restrict Ω)`.
   rwa [wkpNorm_zero (d := Module.finrank ℝ E)] at hC_bd
 
 /-- Chart-locality-free twin of `eigenvectorChartRHSDiff_eLpNorm_le_uniform`. -/
@@ -876,7 +781,6 @@ theorem eigenvectorChartRHSDiff_eLpNorm_le_uniform
   obtain ⟨C, hC_nn, hC_bd⟩ := eigenvectorChartRHSDiff_wkpNorm_le_uniform
     (I := I) (M := M) g r s α P₀ m 0 l h_pou
   refine ⟨C, hC_nn, fun i => ?_⟩
-  -- `wkpNorm 0 2 f Ω = eLpNorm f 2 (volume.restrict Ω)`.
   have hC_bd_i := hC_bd i
   rwa [wkpNorm_zero (d := Module.finrank ℝ E)] at hC_bd_i
 

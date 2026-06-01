@@ -131,27 +131,23 @@ theorem tensorChartComponentScalar_embedding_C0
   classical
   letI : MeasurableSpace M := borel M
   haveI : BorelSpace M := ⟨rfl⟩
-  -- The chart-frame scalar component is smooth on `M`.
   have h_smooth :
       ContMDiff I 𝓘(ℝ, ℝ) ∞
         (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar
           (I := I) (M := M) g r s T α Idx Jdx) :=
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar_contMDiff
       (I := I) (M := M) g r s T α Idx Jdx
-  -- Smooth ⇒ measurable.
   have h_meas :
       Measurable
         (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar
           (I := I) (M := M) g r s T α Idx Jdx) :=
     h_smooth.continuous.measurable
-  -- Smooth ⇒ chart-`W^{k,2}` membership at order `k`.
   have h_mem :
       DifferentialGeometry.Analysis.Sobolev.Chart.MemWkpChart (I := I) (M := M) g k 2
         (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar
           (I := I) (M := M) g r s T α Idx Jdx) :=
     DifferentialGeometry.Analysis.Sobolev.Chart.memWkpChart_of_contMDiff_k
       (I := I) (M := M) g (p := 2) (by norm_num) k h_smooth
-  -- Apply the scalar Hilbert-Sobolev embedding `H^k ↪ C⁰` for `2k > n`.
   exact DifferentialGeometry.Analysis.Sobolev.Chart.sobolev_embedding_chart_C0_Hk
     (I := I) (M := M) g hk hreg h_meas h_mem
 
@@ -189,11 +185,9 @@ theorem tensorFiberNorm_sq_le_chartCenterComponents
             (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw
               (I := I) (M := M) g r s T x Idx Jdx x) ^ 2 := by
   classical
-  -- The bundle-fibre norm is the model-fibre norm of `toModel (T.toSection x)`.
   set Tmod : TensorRSModel r s ℝ E :=
     TensorRSSpace.toModel (𝕜 := ℝ) (I := I) (T.toSection x) with hTmod_def
   have h_norm_eq : ‖T.toSection x‖ = ‖Tmod‖ := rfl
-  -- At the chart centre `x`, the raw component is the projection of `Tmod`.
   have h_raw_eq : ∀ (Idx : Fin r → Fin (Module.finrank ℝ E))
       (Jdx : Fin s → Fin (Module.finrank ℝ E)),
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentProjection
@@ -203,12 +197,10 @@ theorem tensorFiberNorm_sq_le_chartCenterComponents
     intro Idx Jdx
     rw [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw_def]
     congr 1
-    -- `tensorTrivProj g r s T x x = triv_x.CLM_x (T.toSection x) = toModel (...)`.
     symm
     rw [hTmod_def]
     exact DifferentialGeometry.PDE.RicciFlow.HebeyBlock.triv_eq_toModel_at_chartCenter
       (I := I) r s x (T.toSection x)
-  -- Apply the exposed algebraic fibre-norm recovery to `Tmod`.
   have h_alg :=
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorRSModel_norm_sq_le_sum_projection_sq
       (E := E) r s Tmod

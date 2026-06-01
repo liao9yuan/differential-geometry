@@ -96,8 +96,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The raw chart-component Sobolev norm -/
-
 /-- The `W^{2k, 2}` norm of a smooth compactly-supported `(r, s)`-tensor section
 built from the **raw** (POU-unweighted) chart-frame scalar components.
 
@@ -157,7 +155,6 @@ theorem wkpNormChartRaw_zero_section
   intro Idx _
   refine Finset.sum_eq_zero ?_
   intro Jdx _
-  -- The raw chart component of the zero section is the zero function on `M`.
   have hraw_zero :
       tensorChartComponentRaw (I := I) (M := M) g r s
         (0 : SmoothCcTensor g r s) α Idx Jdx = (fun _ : M => (0 : ℝ)) := by
@@ -170,7 +167,6 @@ theorem wkpNormChartRaw_zero_section
       rw [hsec, map_zero]
     rw [hzero, map_zero]
   rw [hraw_zero]
-  -- `chartPushedRaw α 0 = 0` on Euclidean space.
   have hpush_zero :
       chartPushedRaw (I := I) (M := M) α (fun _ : M => (0 : ℝ)) =
         (fun _ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) => (0 : ℝ)) := by
@@ -183,15 +179,6 @@ theorem wkpNormChartRaw_zero_section
   exact wkpNorm_zero_fun_zero (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
-
-/-! ## Pointwise factorisation of `chartPushedRaw` on a product
-
-The Euclidean push-forward `chartPushedRaw I α (ρ · u)` of a pointwise product
-of two scalar functions on the manifold splits as the product of two
-Euclidean-side smooth-extensions / push-forwards. The first factor is the
-**global** smooth-extension `chartSmoothExt α ρ`; the second is the raw
-push-forward `chartPushedRaw I α u`. On the chart-target image both LHS and
-RHS equal `ρ(x) * u(x)`; off the target image both vanish. -/
 
 /-- **Pointwise factorisation.** For any scalar functions `ρ u : M → ℝ` and
 chart base point `α : M`, the pointwise identity
@@ -207,13 +194,11 @@ theorem chartPushedRaw_mul_eq_chartSmoothExt_mul_chartPushedRaw
         chartPushedRaw (I := I) (M := M) α u y := by
   classical
   by_cases hy : y ∈ chartTargetEuclid (I := I) (M := M) α
-  · -- Inside the chart-target image: both sides are `ρ(x) * u(x)`.
-    rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy]
+  · rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy]
     rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α u hy]
     have hsymm : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
       rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
       exact hy
-    -- Unfold chartSmoothExt:
     change (ρ ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
         (u ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) =
       (if (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target then
@@ -221,8 +206,7 @@ theorem chartPushedRaw_mul_eq_chartSmoothExt_mul_chartPushedRaw
        else 0) *
       u ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
     rw [if_pos hsymm]
-  · -- Outside the chart-target image: both sides are zero.
-    rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy]
+  · rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy]
     rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α u hy]
     rw [mul_zero]
 
@@ -255,7 +239,6 @@ theorem tensorChartComp_eq_chartSmoothExt_mul_chartPushedRaw_raw
             (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx) y) := by
   classical
   rw [tensorChartComp_def, tensorChartComponent_def]
-  -- `tensorChartComponentPou α Idx Jdx x = ρ_α x * raw α Idx Jdx x`.
   have hPouRaw : (tensorChartComponentPou (I := I) (M := M) g r s T α Idx Jdx) =
       (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x *
         tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx x) := by
@@ -265,8 +248,6 @@ theorem tensorChartComp_eq_chartSmoothExt_mul_chartPushedRaw_raw
     (I := I) (M := M) α
     (((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ))
     (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx)
-
-/-! ## Collapse of the `wtwokTwoNorm` tsum to a finite sum -/
 
 /-- Off `chartAtlasPOU_finset`, the POU weight vanishes identically, so the
 POU-weighted chart-pushed tensor scalar component `tensorChartComp` is the
@@ -281,11 +262,9 @@ theorem tensorChartComp_eq_zero_of_notMem_chartAtlasPOU_finset
       (fun _ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) => (0 : ℝ)) := by
   classical
   rw [tensorChartComp_def, tensorChartComponent_def]
-  -- POU vanishes identically off the finite support set.
   have hpou_zero : ∀ x : M,
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 0 := fun x =>
     chartAtlasPOU_weight_zero_of_notMem (I := I) (M := M) hα x
-  -- Hence `tensorChartComponentPou` vanishes identically.
   have hpou_comp_zero :
       (tensorChartComponentPou (I := I) (M := M) g r s T α Idx Jdx) =
       (fun _ : M => (0 : ℝ)) := by
@@ -294,7 +273,6 @@ theorem tensorChartComp_eq_zero_of_notMem_chartAtlasPOU_finset
     rw [hpou_zero x]
     ring
   rw [hpou_comp_zero]
-  -- `chartPushedRaw α 0 = 0` on Euclidean space.
   funext y
   classical
   by_cases hy : y ∈ chartTargetEuclid (I := I) (M := M) α
@@ -332,8 +310,6 @@ theorem wtwokTwoNorm_eq_finsum_chartAtlasPOU
               (chartTargetEuclid (I := I) (M := M) α) := by
   classical
   unfold wtwokTwoNorm
-  -- Off `chartAtlasPOU_finset`, each summand is zero (POU vanishes ⇒
-  -- chart component vanishes ⇒ wkpNorm vanishes).
   refine tsum_eq_sum ?_
   intro α hα
   refine Finset.sum_eq_zero ?_
@@ -342,14 +318,6 @@ theorem wtwokTwoNorm_eq_finsum_chartAtlasPOU
   intro Jdx _
   exact wkpNorm_tensorChartComp_eq_zero_of_notMem_chartAtlasPOU_finset
     (I := I) (M := M) g r s k T hα Idx Jdx
-
-/-! ## Smooth-multiplier data for the Leibniz bridge
-
-The multiplier `chartSmoothExt α (chartAtlasPOU I M α)` is globally `C^∞` and
-has compact support on the Euclidean ambient space. Its iterated derivatives
-up to any finite order are therefore uniformly bounded. This packaging gives
-direct access to the analytic data needed for the quantitative-Leibniz bound
-`wkpNorm_smul_smooth_bounded_le` per chart. -/
 
 /-- The smooth POU multiplier `chartSmoothExt α (chartAtlasPOU I M α)` is
 globally `C^∞` on the Euclidean ambient space. -/
@@ -384,18 +352,6 @@ theorem exists_iteratedFDeriv_bound_chartSmoothExt_chartAtlasPOU
     (d := Module.finrank ℝ E)
     (chartSmoothExt_chartAtlasPOU_contDiff (I := I) (M := M) α)
     (chartSmoothExt_chartAtlasPOU_hasCompactSupport (I := I) (M := M) α) m
-
-/-! ## Per-chart Leibniz multiplier bound
-
-For each chart base point `α : M` and each regularity order `k`, the
-quantitative-Leibniz bound `wkpNorm_smul_smooth_bounded_le` applied with
-multiplier `η = chartSmoothExt α (chartAtlasPOU I M α)` yields a positive
-constant `K_α,k` (independent of the function being multiplied) such that for
-every `MemWkp (2 * k) 2` function `u` on the chart target, the `wkpNorm` of
-`η · u` is bounded by `K_α,k` times the `wkpNorm` of `u`. Combined with the
-pointwise factorisation `tensorChartComp = η · chartPushedRaw α raw`, this
-delivers the per-chart Leibniz step linking `wtwokTwoNorm` term-by-term to
-`wkpNormChartRaw`. -/
 
 /-- **Per-chart Leibniz multiplier constant.** For each chart base point
 `α : M` and each regularity order `k`, there exists a positive constant
@@ -439,20 +395,6 @@ theorem exists_per_chart_leibniz_multiplier_bound
       (ENNReal.ofNat_ne_top : (2 : ℝ≥0∞) ≠ (⊤ : ℝ≥0∞))
       hΩ_open hη_smooth hC_nn hη_bound_on_Ω
   exact ⟨K, hK_pos, fun {u} hu => hK_bound hu⟩
-
-/-! ## Connection between `tensorChartComp` smoothness and the bridge
-
-The smooth-multiplier bound combined with the pointwise factorisation
-`tensorChartComp = chartSmoothExt(POU) · chartPushedRaw(raw)` gives the
-per-chart-and-component Leibniz transfer that underlies the Sobolev-norm
-inequality `wtwokTwoNorm ≤ C · wkpNormChartRaw`. The transfer requires
-`MemWkp` of the raw chart-pushed component on the chart target; the
-infrastructure to establish that membership unconditionally lives in a
-companion bridge file (which uses smooth cutoffs to identify the raw
-chart-pushed component on the chart target with a globally smooth
-compactly-supported function in a neighbourhood of any compact subset
-of the chart target). This file ships the underlying analytic data and
-the structural lemmas. -/
 
 /-- **Conditional per-chart-and-component Leibniz step.** With `MemWkp` of
 the raw chart-pushed component supplied as a hypothesis, the per-chart

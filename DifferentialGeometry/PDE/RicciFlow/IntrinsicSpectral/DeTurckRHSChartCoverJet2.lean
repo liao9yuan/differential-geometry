@@ -69,8 +69,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## Chart-centre membership and the minimal compact piece -/
-
 set_option linter.unusedSectionVars false in
 /-- For a boundaryless model the chart-`α` target is open, so its interior is the
 target itself; the chart-centre image `extChartAt I α α` lies in that interior. -/
@@ -109,8 +107,6 @@ theorem abstractRHSFrameComponent_diff_abs_le_jet2_chartCenter
       (singleton_chartCenter_subset_interior_target (I := I) α)
   exact ⟨C, hC_pos, fun i j => hC (extChartAt I α α) (Set.mem_singleton _) i j⟩
 
-/-! ## Finite chart-source cover of a compact manifold -/
-
 set_option linter.unusedSectionVars false in
 /-- **Finite chart-source cover.**  On a compact manifold every point lies in its
 own chart source, so the chart sources form an open cover; by compactness there
@@ -118,25 +114,16 @@ is a finite set of chart centres `s : Finset M` whose chart sources cover `M`. -
 theorem exists_finite_chartSource_cover :
     ∃ s : Finset M, (⋃ α ∈ s, (chartAt H α).source) = Set.univ := by
   classical
-  -- The chart sources form an open cover of `M`.
   have hcover : (⋃ α : M, (chartAt H α).source) = Set.univ := by
     refine Set.eq_univ_of_forall (fun x => ?_)
     exact Set.mem_iUnion.mpr ⟨x, mem_chart_source H x⟩
   have hopen : ∀ α : M, IsOpen ((chartAt H α).source) := fun α => (chartAt H α).open_source
-  -- Compactness extracts a finite subcover.
   obtain ⟨s, hs⟩ :=
     IsCompact.elim_finite_subcover (isCompact_univ (X := M))
       (fun α : M => (chartAt H α).source) hopen
       (by rw [hcover])
   refine ⟨s, Set.eq_univ_of_univ_subset ?_⟩
   simpa using hs
-
-/-! ## The manifold-uniform constant over a finite chart family
-
-For a chosen finite family of `(chart centre, compact piece)` pairs, the per-chart
-`2`-jet Lipschitz constants are dominated by a single manifold constant — their
-finite maximum, made strictly positive.  This is the combinatorial packaging that
-turns the local atom into a global Lipschitz coefficient. -/
 
 set_option linter.unusedSectionVars false in
 /-- **Manifold-uniform constant for the frame-component `2`-jet bound over a finite
@@ -165,20 +152,15 @@ theorem exists_uniform_const_RHSFrameComponent_diff_jet2_on_finset
           (chartFrameVec (I := I) (α c) j ((extChartAt I (α c)).symm y))| ≤
         C * chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ (α c) y := by
   classical
-  -- Per-index atom: choose `C c > 0` and the bound on `K c`.
   choose C hC_pos hC using fun (c : ι) (hc : c ∈ t) =>
     abstractRHSFrameComponent_diff_abs_le_jet2 (I := I) g_bg g₁ g₂ (α c)
       (hK c hc) (hKsub c hc)
-  -- The uniform constant: `1 +` the finite sum of all per-index constants.
   refine ⟨1 + ∑ c ∈ t.attach, C c.1 c.2, ?_, ?_⟩
-  · -- Strictly positive: `1 +` a sum of positive (hence non-negative) terms.
-    have hsum_nn : 0 ≤ ∑ c ∈ t.attach, C c.1 c.2 :=
+  · have hsum_nn : 0 ≤ ∑ c ∈ t.attach, C c.1 c.2 :=
       Finset.sum_nonneg (fun c _ => (hC_pos c.1 c.2).le)
     linarith
   intro c hc y hy i j
-  -- The per-index bound with constant `C c hc`.
   have hbound := hC c hc y hy i j
-  -- The per-index constant is `≤` the uniform constant.
   have hjet2_nn : 0 ≤ chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ (α c) y :=
     chartMetricJet2DiffSup_nonneg _ _ _ _
   have hCc_le : C c hc ≤ 1 + ∑ d ∈ t.attach, C d.1 d.2 := by

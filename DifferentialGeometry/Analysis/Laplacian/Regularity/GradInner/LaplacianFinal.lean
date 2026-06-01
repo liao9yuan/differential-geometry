@@ -118,21 +118,12 @@ open DifferentialGeometry.Analysis.Laplacian.HessianPairingChart
 open DifferentialGeometry.Analysis.Laplacian.RicciPairingCLM
 open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianVariational
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## The variational-identity-conditional regularity theorem
-
-The cleanest packaging of the regularity result for arbitrary
-`u_h ∈ laplacianDomainPow g 2` is the variational-identity-conditional form:
-given that `gradInnerCLM g φ u_h` agrees with `H1ComplToLp(resolvent g (Bochner candidate))`
-as an `Lp 2`-class, the membership conclusion follows. -/
 
 /-- The explicit `H1Compl` witness in `laplacianDomain g` whose `H1ComplToLp` image
 equals `gradInnerCLM g φ u_h`, constructed from the variational-identity
@@ -184,14 +175,6 @@ theorem gradInnerCLM_imageLap_witness_eq_resolvent_candidate
         (gradInnerLaplacianCandidateUnconditional
           (I := I) (M := M) g φ hu_h) := rfl
 
-/-! ## Forward + reverse equivalence: variational identity ↔ image membership
-
-A subtle point about Lax-Milgram: the variational identity is **forward-equivalent**
-to the image membership (i.e., if the identity holds, the membership follows).
-The reverse — image membership implies the identity — would require uniqueness
-arguments at the H1Compl level via `resolvent_injective`, and gives a partial
-converse. We provide both directions. -/
-
 /-- The variational identity hypothesis implies image membership (forward). -/
 theorem variational_identity_implies_mem_image
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
@@ -208,19 +191,6 @@ theorem variational_identity_implies_mem_image
         (laplacianDomain (I := I) (M := M) g : Set (H1Compl g)) :=
   gradInnerCLM_eq_H1ComplToLp_resolvent_of_variational
     (I := I) (M := M) g φ hu_h hvar_id
-
-/-! ## The smooth-case regularity theorem via the unconditional candidate
-
-For smooth `v ∈ SmoothScalar g`, with `u_h := smoothToH1Compl v` and
-`hu_h := smoothToH1Compl_mem_laplacianDomainPow_two g v`, the smooth-case
-resolvent characterisation
-`gradInnerCLM g φ (smoothToH1Compl v) =
-  H1ComplToLp(resolvent g (smoothToLp((gradInnerSmoothBundle g φ v).oneSubLapClassical)))`
-holds unconditionally (via the smooth bridge for smoothToH1Compl).
-
-To bridge to the unconditional candidate's resolvent, we need
-`smoothCandidate_identification_target g φ v`, which equates the two Lp
-classes. The smooth-case regularity theorem then follows directly. -/
 
 /-- The smooth-case variational identity, given the smooth-case candidate
 identification. -/
@@ -263,13 +233,6 @@ theorem gradInnerCLM_smoothCase_mem_image_laplacianDomain
         (laplacianDomain (I := I) (M := M) g : Set (H1Compl g)) :=
   gradInnerCLM_mem_image_laplacianDomain_smooth (I := I) (M := M) g φ v
 
-/-! ## Iterated-closure form of the smooth-case regularity theorem
-
-The image membership statement is equivalent (by the established
-`smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image`) to the iterated-closure
-statement `smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2`. We re-export the
-smooth-case form. -/
-
 /-- **Smooth-case iterated closure** (unconditional). For smooth `v`,
 `smoothMulH1Compl g φ (smoothToH1Compl v) ∈ laplacianDomainPow g 2`. -/
 theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_unconditional
@@ -279,11 +242,6 @@ theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_unconditiona
       laplacianDomainPow (I := I) (M := M) g 2 :=
   smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two
     (I := I) (M := M) g φ v
-
-/-! ## Equivalence: image membership ↔ iterated closure
-
-The two forms of the regularity statement are equivalent via the
-`smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image` equivalence. We re-export. -/
 
 /-- **The iterated-closure ↔ image-membership equivalence** for
 `u_h ∈ laplacianDomainPow g 2`. -/
@@ -299,11 +257,6 @@ theorem mem_image_laplacianDomain_iff_smoothMulH1Compl_mem_pow_two
   rw [← smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image
     (I := I) (M := M) g φ hu_h]
 
-/-! ## The iterated-closure-conditional headline theorem
-
-Given the iterated closure `smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2`,
-the image membership follows directly. -/
-
 /-- **The headline regularity theorem, iterated-closure form**. Given
 `smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2`, the image membership follows. -/
 theorem gradInnerCLM_mem_image_laplacianDomain_of_iteratedClosure
@@ -318,15 +271,6 @@ theorem gradInnerCLM_mem_image_laplacianDomain_of_iteratedClosure
   gradInnerCLM_mem_image_of_smoothMulH1Compl_mem_pow_two
     (I := I) (M := M) g φ hu_h h_sM
 
-/-! ## Headline equivalence form connecting to candidate's resolvent
-
-The chain of reductions: the iterated-closure statement is equivalent to the
-image-membership statement; the image-membership is implied by the variational
-identity, which is implied (in the smooth case) by the candidate identification.
-
-We package the equivalence "image-membership ↔ iterated-closure", and the
-chain "variational identity → image-membership → iterated-closure". -/
-
 /-- **The headline equivalence**, packaging the iterated-closure ↔ image-membership
 identification with the variational-identity-conditional consequence. -/
 theorem smoothMulH1Compl_mem_pow_two_iff_via_candidate_resolvent
@@ -340,8 +284,6 @@ theorem smoothMulH1Compl_mem_pow_two_iff_via_candidate_resolvent
         (laplacianDomain (I := I) (M := M) g : Set (H1Compl g)) :=
   smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image
     (I := I) (M := M) g φ hu_h
-
-/-! ## Hypothesis-bearing form of the iterated-closure conclusion -/
 
 /-- **The iterated-closure conclusion, variational-identity form**. Given the
 variational identity for the unconditional candidate, conclude the iterated

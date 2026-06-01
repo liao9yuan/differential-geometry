@@ -87,21 +87,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The single-step order-dropping bound (analytic core)
-
-One covariant derivative raises the chart-component Fréchet-derivative order by
-exactly one, so it costs exactly one Sobolev order.  Concretely, the
-Hilbert-Schmidt chart-Sobolev norm `tensorPouSobolevHsNorm g σ` of the
-covariant gradient `covGrad g r s T` (an `(r, s + 1)`-tensor) is bounded by a
-constant multiple of the *one-higher-order* norm `tensorPouSobolevHsNorm g (σ+1)`
-of `T`.
-
-This is the chart-coordinate statement that the raw `(r, s + 1)`-components of
-`covGrad T` read `∂(comp_T) + Γ·comp_T` (formula `tensorChartComponentRaw_covGrad`),
-whose order-`2σ` derivatives are dominated, via the Leibniz product rule and the
-uniform `C^•` Christoffel data of the compact manifold, by the order-`(2σ + 1)`
-derivatives of the raw components of `T`. -/
-
 open DifferentialGeometry.Analysis.Sobolev.Chart
   DifferentialGeometry.Analysis.Laplacian.TensorRegularity in
 /-- On the Euclidean chart target, the EuclN-pulled raw `(r, s + 1)`-component of
@@ -129,15 +114,6 @@ private lemma covGradCompPull_eqOn
       (chartTargetEuclid (I := I) (M := M) α) := by
   intro y hy
   exact tensorChartComponentRaw_covGrad (I := I) (M := M) g r s T α Idx Jdx hy
-
-/-! ### The analytic core: per-chart operator-norm and integrand bounds
-
-The proof of the single-step bound rests on a pointwise (in `y`) operator-norm
-comparison on the compact partition-of-unity kernel `chartImagePOUTsupport α`,
-together with the Hilbert-Schmidt ↔ operator-norm conversions
-`ContinuousMultilinearMap.opNorm_sq_le_sum_sq_basisEval` (operator ≤ HS) and
-`ContinuousMultilinearMap.le_opNorm` (basis-evaluation ≤ operator).  We work
-with file-local Borel structures on `E` and `M`. -/
 
 section AnalyticCore
 
@@ -178,8 +154,6 @@ private lemma rawPull_contDiffOn (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞ (rawPull (I := I) (M := M) g r s T α Idx Jdx)
       (chartTargetEuclid (I := I) (M := M) α) := by
-  -- On the chart target, `rawPull = chartPushedRaw I α (raw component)`, which
-  -- is `C^∞` there by `chartPushedRaw_tensorChartComponentRaw_contDiffOn`.
   refine (chartPushedRaw_tensorChartComponentRaw_contDiffOn (I := I) (M := M)
     g r s T α Idx Jdx).congr (fun y hy => ?_)
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy]
@@ -267,8 +241,6 @@ private lemma euclidPartial_term_iteratedFDeriv_norm_le
       ‖iteratedFDeriv ℝ (j + 1)
         (rawPull (I := I) (M := M) g r s T α Idx Jdx') y‖ := by
   set u : EuclN → ℝ := rawPull (I := I) (M := M) g r s T α Idx Jdx' with hu_def
-  -- Replace `euclidPartial m (chartPushedRaw …) z` by `fderiv u z (single m 1)`
-  -- in a neighbourhood of `y`, then use locality of `iteratedFDeriv`.
   have h_ev :
       (fun z =>
           euclidPartial (E := E) m
@@ -289,7 +261,6 @@ private lemma euclidPartial_term_iteratedFDeriv_norm_le
     filter_upwards [h_fderiv_ev] with z hz
     simp only [euclidPartial_def, hz]
   rw [(Filter.EventuallyEq.iteratedFDeriv ℝ h_ev j).self_of_nhds]
-  -- `‖D^j (fun z => (fderiv u z) (single m 1)) y‖ ≤ ‖single m 1‖ · ‖D^j (fderiv u) y‖`.
   have h_cdAt : ContDiffAt ℝ ∞ u y :=
     rawPull_contDiffAt (I := I) (M := M) g r s T α Idx Jdx' hy
   have h_fderiv_cdAt : ContDiffAt ℝ (∞ : WithTop ℕ∞) (fun z => fderiv ℝ u z) y := by
@@ -333,7 +304,6 @@ private lemma exists_iteratedFDeriv_norm_bound_on_compact
       ‖iteratedFDeriv ℝ l f y‖ ≤ C := by
   classical
   have h_uniq : UniqueDiffOn ℝ s := hs.uniqueDiffOn
-  -- Per-order bound from continuity on the compact set.
   have h_per_order : ∀ l : ℕ, ∃ Cl : ℝ, 0 ≤ Cl ∧ ∀ y ∈ K,
       ‖iteratedFDeriv ℝ l f y‖ ≤ Cl := by
     intro l
@@ -351,7 +321,6 @@ private lemma exists_iteratedFDeriv_norm_bound_on_compact
       rwa [iteratedFDerivWithin_of_isOpen (𝕜 := ℝ) (f := f) l hs (hKs hy)] at h₁
     · exact ⟨0, le_refl _, fun y hy => absurd ⟨y, hy⟩ hKne⟩
   choose Cl hCl_nn hCl using h_per_order
-  -- Take the maximum over the finite range of orders.
   refine ⟨(Finset.range (N + 1)).sup' ⟨0, Finset.mem_range.mpr (Nat.succ_pos N)⟩ Cl, ?_, ?_⟩
   · exact le_trans (hCl_nn 0)
       (Finset.le_sup' Cl (Finset.mem_range.mpr (Nat.succ_pos N)))
@@ -383,8 +352,6 @@ private lemma exists_lowerOrderCoeff_uniform_bound
     chartImagePOUTsupport_subset_target (I := I) (M := M) α
   have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- A per-index bound from the generic compact-bound lemma, indexed by the
-  -- finite tuple `(m, Idx, Jdx', p)`.
   have h_per : ∀ (w : Fin (Module.finrank ℝ E) ×
       (Fin r → Fin (Module.finrank ℝ E)) ×
       (Fin s → Fin (Module.finrank ℝ E)) ×
@@ -398,8 +365,6 @@ private lemma exists_lowerOrderCoeff_uniform_bound
       (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M) g r s α w.1 w.2.1
         w.2.2.2.1 w.2.2.1 w.2.2.2.2)
       h_open hK_compact hK_sub N
-  -- (`w.1 = m`, `w.2.1 = Idx`, `w.2.2.1 = Jdx'`, `w.2.2.2 = p`;
-  -- the coefficient reads `g r s α m Idx p.1 Jdx' p.2`.)
   choose Cw hCw_nn hCw using h_per
   refine ⟨(Finset.univ : Finset (Fin (Module.finrank ℝ E) ×
       (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -440,8 +405,6 @@ private lemma lowerOrderTerm_iteratedFDeriv_norm_le
   set s_set : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hs_set
   have h_open : IsOpen s_set := chartTargetEuclid_isOpen (I := I) (M := M) α
   have h_uniq : UniqueDiffOn ℝ s_set := h_open.uniqueDiffOn
-  -- The lower-order term, as a function of `z`, is the finite sum over `p` of
-  -- `coeff_p z * rawPull_p z`.
   set Lfun : EuclN → ℝ := fun z =>
     ∑ p : (Fin r → Fin (Module.finrank ℝ E)) ×
           (Fin s → Fin (Module.finrank ℝ E)),
@@ -453,9 +416,7 @@ private lemma lowerOrderTerm_iteratedFDeriv_norm_le
     rw [hLfun_def, covDerivLowerOrderTerm_def]
     rfl
   rw [hL_eq]
-  -- Convert plain `iteratedFDeriv` to `iteratedFDerivWithin` on the open target.
   rw [← iteratedFDerivWithin_of_isOpen (𝕜 := ℝ) (f := Lfun) j h_open hy]
-  -- Smoothness of each factor at interior points (as `ContDiffWithinAt`).
   have h_coeff_cdwa : ∀ p : (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin s → Fin (Module.finrank ℝ E)),
       ContDiffWithinAt ℝ j
@@ -475,11 +436,8 @@ private lemma lowerOrderTerm_iteratedFDeriv_norm_le
         (fun z => covDerivLowerOrderCoeff (I := I) (M := M) g r s α m Idx p.1 Jdx' p.2 z *
           rawPull (I := I) (M := M) g r s T α p.1 p.2 z) s_set y := fun p =>
     (h_coeff_cdwa p).mul (h_raw_cdwa p)
-  -- The iterated within-derivative of the finite sum splits over `p`.
   rw [iteratedFDerivWithin_fun_sum_apply h_uniq hy (fun p _ => h_prod_cdwa p)]
-  -- Triangle inequality over the finite `p`-sum.
   refine le_trans (norm_sum_le _ _) (Finset.sum_le_sum (fun p _ => ?_))
-  -- Per-`p`: the Leibniz product bound.
   have h_coeff_cdon : ContDiffOn ℝ j
       (covDerivLowerOrderCoeff (I := I) (M := M) g r s α m Idx p.1 Jdx' p.2) s_set :=
     (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M) g r s α m Idx p.1
@@ -490,7 +448,6 @@ private lemma lowerOrderTerm_iteratedFDeriv_norm_le
       (by exact_mod_cast le_top)
   have hmul := norm_iteratedFDerivWithin_mul_le h_coeff_cdon h_raw_cdon h_uniq hy
     (le_refl (j : WithTop ℕ∞))
-  -- Convert each within-derivative on the open set to the global derivative.
   refine le_trans hmul (le_of_eq ?_)
   refine Finset.sum_congr rfl (fun l _ => ?_)
   rw [iteratedFDerivWithin_of_isOpen (𝕜 := ℝ)
@@ -510,16 +467,13 @@ private lemma pouPull_eq_zero_off_kernel (α : M) (y : EuclN)
   classical
   set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
   by_contra hne
-  -- `b ∈ support ρ_α ⊆ tsupport ρ_α`.
   have hb_supp : b ∈ tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
     subset_tsupport _ (by simpa [Function.mem_support] using hne)
-  -- `y` lies in the chart target, so the round-trip recovers it.
   have hy_pre : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
     rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
     exact hy
   have h_round : (extChartAt I α) b = (toEuclidean (E := E)).symm y := by
     rw [hb_def]; exact (extChartAt I α).right_inv hy_pre
-  -- Hence `y ∈ chartImagePOUTsupport α`, contradicting `hy_off`.
   apply hy_off
   refine ⟨(extChartAt I α) b, ⟨b, hb_supp, rfl⟩, ?_⟩
   rw [h_round]; simp
@@ -560,9 +514,7 @@ private lemma covGrad_component_iteratedFDeriv_norm_le
   classical
   have hy : y ∈ chartTargetEuclid (I := I) (M := M) α :=
     chartImagePOUTsupport_subset_target (I := I) (M := M) α hy_K
-  -- Identify the iterated derivative via the chart-component formula and split.
   rw [covGrad_iteratedFDeriv_eq (I := I) (M := M) g r s T α Idx Jdx j hy]
-  -- The two terms are each `ContDiffAt y`, so the order-`j` derivative is additive.
   set fE : EuclN → ℝ := fun z =>
     euclidPartial (E := E) (Jdx 0)
       (chartPushedRaw I α
@@ -572,7 +524,6 @@ private lemma covGrad_component_iteratedFDeriv_norm_le
     covDerivLowerOrderTerm (I := I) (M := M) g r s T α (Jdx 0) Idx
       (Matrix.vecTail Jdx) z with hfL_def
   have h_cdAt_fE : ContDiffAt ℝ ∞ fE y := by
-    -- `fE` is eventually equal near `y` to `fun z => fderiv u z (single (Jdx 0) 1)`.
     set u : EuclN → ℝ := rawPull (I := I) (M := M) g r s T α Idx (Matrix.vecTail Jdx)
       with hu_def
     have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
@@ -605,7 +556,6 @@ private lemma covGrad_component_iteratedFDeriv_norm_le
     rw [hfL_def]
     have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
       chartTargetEuclid_isOpen (I := I) (M := M) α
-    -- `covDerivLowerOrderTerm` is `C^∞` on the chart target.
     have h_cdOn := covDerivComponent_lowerOrder_contDiffOn (I := I) (M := M)
       g r s T α (Jdx 0) Idx (Matrix.vecTail Jdx)
       (fun Idx' Jdx' => chartPushedRaw_tensorChartComponentRaw_contDiffOn
@@ -625,7 +575,6 @@ private lemma covGrad_component_iteratedFDeriv_norm_le
             (Matrix.vecTail Jdx))) z
       + covDerivLowerOrderTerm (I := I) (M := M) g r s T α (Jdx 0) Idx
           (Matrix.vecTail Jdx) z) = fun z => fE z + fL z from rfl, h_add]
-  -- Triangle inequality, then the two term bounds.
   refine le_trans (norm_add_le _ _) ?_
   have h_euclid := euclidPartial_term_iteratedFDeriv_norm_le (I := I) (M := M)
     g r s T α Idx (Jdx 0) (Matrix.vecTail Jdx) j hy
@@ -633,8 +582,7 @@ private lemma covGrad_component_iteratedFDeriv_norm_le
     g r s T α (Jdx 0) Idx (Matrix.vecTail Jdx) j hy
   refine add_le_add ?_ ?_
   · exact h_euclid
-  · -- Bound the lower-order Leibniz sum by `Γbd · (∑ binomial · ‖D^{j-l} rawPull‖)`.
-    refine le_trans h_lower ?_
+  · refine le_trans h_lower ?_
     rw [Finset.mul_sum]
     refine Finset.sum_le_sum (fun p _ => ?_)
     rw [Finset.mul_sum]
@@ -647,7 +595,6 @@ private lemma covGrad_component_iteratedFDeriv_norm_le
     have h_raw_nn : 0 ≤ ‖iteratedFDeriv ℝ (j - l)
         (rawPull (I := I) (M := M) g r s T α p.1 p.2) y‖ := norm_nonneg _
     have h_choose_nn : 0 ≤ (j.choose l : ℝ) := by positivity
-    -- `C(j,l) · ‖D^l coeff‖ · ‖D^{j-l} raw‖ ≤ C(j,l) · (Γbd · ‖D^{j-l} raw‖)`.
     calc (j.choose l : ℝ) *
             ‖iteratedFDeriv ℝ l
               (covDerivLowerOrderCoeff (I := I) (M := M) g r s α (Jdx 0) Idx p.1
@@ -696,7 +643,6 @@ private lemma rawPull_iteratedFDeriv_norm_sq_le_rhsHsContent
     ‖iteratedFDeriv ℝ l (rawPull (I := I) (M := M) g r s T α q.1 q.2) y‖ ^ 2 ≤
       rhsHsContent (I := I) (M := M) g r s σ T α y := by
   classical
-  -- Abbreviate the basis-evaluation squared sum at `(q', l')`.
   set basisSum : ((Fin r → Fin (Module.finrank ℝ E)) ×
       (Fin s → Fin (Module.finrank ℝ E))) → ℕ → ℝ :=
     fun q' l' => ∑ bIdx : Fin l' → Fin (Module.finrank ℝ E),
@@ -705,26 +651,22 @@ private lemma rawPull_iteratedFDeriv_norm_sq_le_rhsHsContent
             (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2 with hbasisSum_def
   have hbasisSum_nn : ∀ q' l', 0 ≤ basisSum q' l' :=
     fun q' l' => Finset.sum_nonneg (fun _ _ => sq_nonneg _)
-  -- Operator ≤ Hilbert-Schmidt for the order-`l` derivative multilinear map.
   have h_op : ‖iteratedFDeriv ℝ l (rawPull (I := I) (M := M) g r s T α q.1 q.2) y‖ ^ 2 ≤
       basisSum q l :=
     ContinuousMultilinearMap.opNorm_sq_le_sum_sq_basisEval
       (EuclideanSpace.basisFun (Fin (Module.finrank ℝ E)) ℝ)
       (iteratedFDeriv ℝ l (rawPull (I := I) (M := M) g r s T α q.1 q.2) y)
   refine le_trans h_op ?_
-  -- `rhsHsContent = ∑_{q'} ∑_{l' ∈ range} basisSum q' l'`.
   have h_unfold : rhsHsContent (I := I) (M := M) g r s σ T α y =
       ∑ q' : (Fin r → Fin (Module.finrank ℝ E)) ×
             (Fin s → Fin (Module.finrank ℝ E)),
         ∑ l' ∈ Finset.range (2 * (σ + 1) + 1), basisSum q' l' := rfl
   rw [h_unfold]
   have hl_mem : l ∈ Finset.range (2 * (σ + 1) + 1) := Finset.mem_range.mpr (by omega)
-  -- Inner: `basisSum q l ≤ ∑_{l'} basisSum q l'`.
   have h_inner : basisSum q l ≤ ∑ l' ∈ Finset.range (2 * (σ + 1) + 1), basisSum q l' :=
     Finset.single_le_sum (f := fun l' => basisSum q l')
       (fun l' _ => hbasisSum_nn q l') hl_mem
   refine le_trans h_inner ?_
-  -- Outer: the `q`-summand ≤ the `q`-sum.
   exact Finset.single_le_sum
     (f := fun q' => ∑ l' ∈ Finset.range (2 * (σ + 1) + 1), basisSum q' l')
     (fun q' _ => Finset.sum_nonneg (fun l' _ => hbasisSum_nn q' l'))
@@ -761,27 +703,22 @@ private lemma covGradComp_basisSum_le_rhsHsContent
           (Fin s → Fin (Module.finrank ℝ E))) : ℝ) * (2 : ℝ) ^ (2 * σ)) ^ 2 *
         rhsHsContent (I := I) (M := M) g r s σ T α y := by
   classical
-  -- Local abbreviations (kept defeq, no goal-folding).
   let n : ℕ := Module.finrank ℝ E
   let Np : ℕ := Fintype.card ((Fin r → Fin n) × (Fin s → Fin n))
   let R : ℝ := rhsHsContent (I := I) (M := M) g r s σ T α y
   have hR_nn : 0 ≤ R := rhsHsContent_nonneg (I := I) (M := M) g r s σ T α y
   have hsqrtR_nn : 0 ≤ Real.sqrt R := Real.sqrt_nonneg _
-  -- The covariant-gradient component operator norm.
   let F : EuclN → ℝ := rawPull (I := I) (M := M) g r (s + 1)
     (covGrad (I := I) (M := M) g r s T) α Idx Jdx
   let Fop : ℝ := ‖iteratedFDeriv ℝ j F y‖
-  -- Step 1: operator-norm bound `Fop ≤ B0 · sqrt R`.
   let B0 : ℝ := 1 + Γbd * (Np : ℝ) * (2 : ℝ) ^ (2 * σ)
   have hB0_nn : 0 ≤ B0 := by
     have : 0 ≤ Γbd * (Np : ℝ) * (2 : ℝ) ^ (2 * σ) := by positivity
     change 0 ≤ 1 + Γbd * (Np : ℝ) * (2 : ℝ) ^ (2 * σ); linarith
   have hFop_le : Fop ≤ B0 * Real.sqrt R := by
-    -- Combined operator-norm bound (over `K_α`).
     have h_comb := covGrad_component_iteratedFDeriv_norm_le (I := I) (M := M)
       g r s T α Γbd hΓbd_nn Idx Jdx j
       (fun m Idx0 Jdx0 p l hl z hz => hΓ m Idx0 Jdx0 p l (by omega) z hz) hy_K
-    -- Each raw-derivative norm `≤ sqrt R`.
     have h_lead : ‖iteratedFDeriv ℝ (j + 1)
         (rawPull (I := I) (M := M) g r s T α Idx (Matrix.vecTail Jdx)) y‖ ≤ Real.sqrt R := by
       have hsq := rawPull_iteratedFDeriv_norm_sq_le_rhsHsContent (I := I) (M := M)
@@ -792,14 +729,12 @@ private lemma covGradComp_basisSum_le_rhsHsContent
               (rawPull (I := I) (M := M) g r s T α Idx (Matrix.vecTail Jdx)) y‖ ^ 2) := by
             rw [Real.sqrt_sq (norm_nonneg _)]
         _ ≤ Real.sqrt R := Real.sqrt_le_sqrt hsq
-    -- Bound the lower-order Leibniz sum.
     have h_low_le : (∑ p : (Fin r → Fin n) × (Fin s → Fin n),
         ∑ l ∈ Finset.range (j + 1),
           (j.choose l : ℝ) *
             ‖iteratedFDeriv ℝ (j - l)
               (rawPull (I := I) (M := M) g r s T α p.1 p.2) y‖) ≤
         (Np : ℝ) * (2 : ℝ) ^ (2 * σ) * Real.sqrt R := by
-      -- Each summand `C(j,l) ‖D^{j-l} raw‖ ≤ C(j,l) · sqrt R`.
       have h_per : ∀ p : (Fin r → Fin n) × (Fin s → Fin n),
           (∑ l ∈ Finset.range (j + 1),
             (j.choose l : ℝ) *
@@ -824,7 +759,6 @@ private lemma covGradComp_basisSum_le_rhsHsContent
                   rw [Real.sqrt_sq (norm_nonneg _)]
               _ ≤ Real.sqrt R := Real.sqrt_le_sqrt hsq
           exact mul_le_mul_of_nonneg_left hraw_le (by positivity)
-        -- `∑_l C(j,l) = 2^j ≤ 2^{2σ}`.
         have h2 : (∑ l ∈ Finset.range (j + 1), (j.choose l : ℝ)) = (2 : ℝ) ^ j := by
           rw [← Nat.cast_sum, Nat.sum_range_choose]; push_cast; ring
         calc (∑ l ∈ Finset.range (j + 1),
@@ -846,7 +780,6 @@ private lemma covGradComp_basisSum_le_rhsHsContent
             Finset.sum_le_sum (fun p _ => h_per p)
         _ = (Np : ℝ) * (2 : ℝ) ^ (2 * σ) * Real.sqrt R := by
             rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]; ring
-    -- Combine: Fop ≤ sqrt R + Γbd · (Np·2^{2σ}·sqrt R) = B0 · sqrt R.
     calc Fop ≤ ‖iteratedFDeriv ℝ (j + 1)
             (rawPull (I := I) (M := M) g r s T α Idx (Matrix.vecTail Jdx)) y‖ +
           Γbd * ∑ p : (Fin r → Fin n) × (Fin s → Fin n),
@@ -859,14 +792,12 @@ private lemma covGradComp_basisSum_le_rhsHsContent
           exact mul_le_mul_of_nonneg_left h_low_le hΓbd_nn
       _ = B0 * Real.sqrt R := by
           change _ = (1 + Γbd * (Np : ℝ) * (2 : ℝ) ^ (2 * σ)) * Real.sqrt R; ring
-  -- Step 2: `Fop² ≤ B0² · R`.
   have hFop_sq_le : Fop ^ 2 ≤ B0 ^ 2 * R := by
     have h1 : Fop ^ 2 ≤ (B0 * Real.sqrt R) ^ 2 :=
       pow_le_pow_left₀ (norm_nonneg _) hFop_le 2
     calc Fop ^ 2 ≤ (B0 * Real.sqrt R) ^ 2 := h1
       _ = B0 ^ 2 * (Real.sqrt R ^ 2) := by ring
       _ = B0 ^ 2 * R := by rw [Real.sq_sqrt hR_nn]
-  -- Step 3: each basis-evaluation `|D^j F (bIdx)| ≤ Fop`, sum over `n^j ≤ n^{2σ}` tuples.
   have h_eval_le : ∀ bIdx : Fin j → Fin n,
       |(iteratedFDeriv ℝ j F y)
           (fun i => EuclideanSpace.basisFun (Fin n) ℝ (bIdx i))| ^ 2 ≤ Fop ^ 2 := by
@@ -904,7 +835,6 @@ private lemma covGradComp_basisSum_le_rhsHsContent
             exact_mod_cast this
           exact pow_le_pow_right₀ hn1 hj
       _ = (n : ℝ) ^ (2 * σ) * B0 ^ 2 * R := by ring
-  -- The abbreviations are definitionally the goal's explicit forms.
   exact key
 
 /-- The atlas-uniform combined constant `Creal := (#multi-index pairs) ·
@@ -973,8 +903,7 @@ private lemma covGrad_pointwise_integrand_le
     Finset.sum_nonneg (fun _ _ => Finset.sum_nonneg
       (fun _ _ => Finset.sum_nonneg (fun _ _ => sq_nonneg _)))
   by_cases hyK : y ∈ chartImagePOUTsupport (I := I) (M := M) α
-  · -- On the compact kernel, sum the per-component-and-order bound.
-    have h_LHSsum_le : LHSsum ≤ combinedConst E r s σ Γbd * R := by
+  · have h_LHSsum_le : LHSsum ≤ combinedConst E r s σ Γbd * R := by
       have h_perIJ : ∀ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
             (Fin (s + 1) → Fin (Module.finrank ℝ E)),
           (∑ j ∈ Finset.range (2 * σ + 1),
@@ -1025,8 +954,7 @@ private lemma covGrad_pointwise_integrand_le
     calc ρ * LHSsum ≤ ρ * (combinedConst E r s σ Γbd * R) :=
           mul_le_mul_of_nonneg_left h_LHSsum_le hρ_nn
       _ = combinedConst E r s σ Γbd * (ρ * R) := by ring
-  · -- Off the kernel, `ρ = 0`, so both sides vanish.
-    have hρ0 : ρ = 0 :=
+  · have hρ0 : ρ = 0 :=
       pouPull_eq_zero_off_kernel (I := I) (M := M) α y hy hyK
     rw [hρ0]; simp
 
@@ -1069,7 +997,6 @@ private lemma rawPullIntegrand_aemeasurable
       ((volume : Measure EuclN).restrict (chartTargetEuclid (I := I) (M := M) α)) := by
   have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- Continuity of the iterated-derivative basis-evaluation on the open target.
   have h_iter_contOn :
       ContinuousOn (iteratedFDeriv ℝ l (rawPull (I := I) (M := M) g r s T α q.1 q.2))
         (chartTargetEuclid (I := I) (M := M) α) := by
@@ -1127,7 +1054,6 @@ private lemma sumIntegrals_eq_integral_sum
                         (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2))
         ∂(volume : Measure EuclN) := by
   classical
-  -- Combine the integrals inside-out: innermost `∑_bIdx`, then `∑_j`, then `∑_IJ`.
   have h_bIdx : ∀ (IJ : (Fin r' → Fin (Module.finrank ℝ E)) ×
         (Fin s' → Fin (Module.finrank ℝ E))) (j : ℕ),
       (∑ bIdx : Fin j → Fin (Module.finrank ℝ E),
@@ -1196,7 +1122,6 @@ private lemma sumIntegrals_eq_integral_sum
       refine h.congr (Filter.EventuallyEq.of_eq (funext (fun y => ?_)))
       rw [Finset.sum_apply]
     rw [MeasureTheory.lintegral_finset_sum' _ hmeas]
-  -- Assemble: rewrite the innermost and middle combinations, then the outer one.
   calc (∑ IJ : (Fin r' → Fin (Module.finrank ℝ E)) ×
           (Fin s' → Fin (Module.finrank ℝ E)),
         ∑ j ∈ Finset.range K,
@@ -1356,13 +1281,9 @@ private lemma covGrad_per_alpha_inner_bound
   simp only
   have hCmax_nn_aux : 0 ≤ combinedConst E r s σ Γmax :=
     combinedConst_nonneg (E := E) r s σ hΓmax_nn
-  -- Fold the raw-component compositions into `rawPull` so the integral-combine
-  -- lemma applies syntactically.
   simp only [rawPull_eq (I := I) (M := M)]
   by_cases hα : α ∈ chartAtlasPOU_activeFinset I M
-  · -- Active chart: integrate the pointwise bound.
-    -- The Christoffel bound on `K_α` holds with `Γmax`.
-    have hΓ : ∀ (m : Fin (Module.finrank ℝ E))
+  · have hΓ : ∀ (m : Fin (Module.finrank ℝ E))
         (Idx0 : Fin r → Fin (Module.finrank ℝ E))
         (Jdx0 : Fin s → Fin (Module.finrank ℝ E))
         (p : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -1373,12 +1294,9 @@ private lemma covGrad_per_alpha_inner_bound
             ≤ Γmax :=
       fun m Idx0 Jdx0 p l hl z hz =>
         (hΓfun α m Idx0 Jdx0 p l hl z hz).trans (hΓmax_ge α hα)
-    -- LHS inner = integral of the covGrad full Hilbert-Schmidt content.
     rw [sumIntegrals_eq_integral_sum (I := I) (M := M) g r (s + 1)
       (covGrad (I := I) (M := M) g r s T) α (2 * σ + 1)]
-    -- RHS inner = integral of the order-`(σ+1)` content of `T`.
     rw [sumIntegrals_eq_integral_sum (I := I) (M := M) g r s T α (2 * (σ + 1) + 1)]
-    -- Pointwise integrand bound, then pull out the constant `Cmax`.
     rw [hCmax_def]
     rw [show (∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
         ENNReal.ofReal
@@ -1399,13 +1317,11 @@ private lemma covGrad_per_alpha_inner_bound
                 ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
               rhsHsContent (I := I) (M := M) g r s σ T α y)
           ∂(volume : Measure EuclN) from rfl]
-    -- Move `ofReal Cmax` inside the integral as a factor.
     rw [← MeasureTheory.lintegral_const_mul' _ _
       (ENNReal.ofReal_ne_top (r := combinedConst E r s σ Γmax))]
     refine setLIntegral_mono_ae'
       (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
       (Filter.Eventually.of_forall (fun y hy => ?_))
-    -- Pointwise: `ofReal(ρ·covGradHsSum) ≤ ofReal Cmax · ofReal(ρ·rhsHsContent)`.
     have hpt := covGrad_pointwise_integrand_le (I := I) (M := M) g r s σ T α
       Γmax hΓmax_nn hΓ hy
     have h_rhs_nn : 0 ≤ ((chartAtlasPOU I M α : M → ℝ)
@@ -1415,8 +1331,7 @@ private lemma covGrad_per_alpha_inner_bound
         (rhsHsContent_nonneg (I := I) (M := M) g r s σ T α y)
     rw [← ENNReal.ofReal_mul hCmax_nn_aux]
     exact ENNReal.ofReal_le_ofReal hpt
-  · -- Inactive chart: the partition-of-unity weight is identically `0`.
-    have hρ0 : ∀ x : M, ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 0 :=
+  · have hρ0 : ∀ x : M, ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 0 :=
       chartAtlasPOU_eq_zero_of_notMem_activeFinset (I := I) (M := M) hα
     have hzero : (∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
           (Fin (s + 1) → Fin (Module.finrank ℝ E)),
@@ -1478,7 +1393,6 @@ theorem exists_covGrad_tensorPouSobolevHsNorm_le
           ENNReal.ofReal C *
             tensorPouSobolevHsNorm (I := I) (M := M) g (σ + 1) T := by
   classical
-  -- A uniform Christoffel-coefficient bound `Γ(α)` on each active chart kernel.
   have hΓexists : ∀ α : M, ∃ Γ : ℝ, 0 ≤ Γ ∧
       ∀ (m : Fin (Module.finrank ℝ E))
         (Idx0 : Fin r → Fin (Module.finrank ℝ E))
@@ -1490,21 +1404,15 @@ theorem exists_covGrad_tensorPouSobolevHsNorm_le
             (covDerivLowerOrderCoeff (I := I) (M := M) g r s α m Idx0 p.1 Jdx0 p.2) z‖ ≤ Γ :=
     fun α => exists_lowerOrderCoeff_uniform_bound (I := I) (M := M) g r s α (2 * σ)
   choose Γfun hΓfun_nn hΓfun using hΓexists
-  -- The atlas-uniform Christoffel bound over the (finite) active chart support:
-  -- a sum of the per-chart non-negative bounds dominates each one.
   set actF : Finset M := chartAtlasPOU_activeFinset I M with hactF_def
   set Γmax : ℝ := ∑ α ∈ actF, Γfun α with hΓmax_def
   have hΓmax_nn : 0 ≤ Γmax := Finset.sum_nonneg (fun α _ => hΓfun_nn α)
   have hΓmax_ge : ∀ α ∈ actF, Γfun α ≤ Γmax :=
     fun α hα => Finset.single_le_sum (fun β _ => hΓfun_nn β) hα
-  -- The atlas-uniform combined constant.
   set Cmax : ℝ := combinedConst E r s σ Γmax with hCmax_def
   have hCmax_nn : 0 ≤ Cmax := combinedConst_nonneg (E := E) r s σ hΓmax_nn
   refine ⟨Real.sqrt Cmax, Real.sqrt_nonneg _, fun T => ?_⟩
-  -- Local Borel-space instances for the lintegral manipulations are already
-  -- in scope from the section.  Reduce both norms to the `rpow (1/2)` form.
   rw [tensorPouSobolevHsNorm_eq, tensorPouSobolevHsNorm_eq]
-  -- Per-chart inner sums.
   set lhsInner : M → ℝ≥0∞ := fun α =>
     ∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin (s + 1) → Fin (Module.finrank ℝ E)),
@@ -1540,7 +1448,6 @@ theorem exists_covGrad_tensorPouSobolevHsNorm_le
                     (fun i => EuclideanSpace.basisFun
                       (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2)
             ∂(volume : Measure EuclN) with hrhsInner_def
-  -- Main inequality at the level of the `tsum`s under the `rpow (1/2)`.
   have h_main : (∑' α : M, lhsInner α) ≤
       ENNReal.ofReal Cmax * ∑' α : M, rhsInner α := by
     rw [← ENNReal.tsum_mul_left]
@@ -1548,7 +1455,6 @@ theorem exists_covGrad_tensorPouSobolevHsNorm_le
     exact covGrad_per_alpha_inner_bound (I := I) (M := M) g r s σ T α
       Γfun Γmax hΓmax_nn (fun α' => hΓfun_nn α') hΓfun hΓmax_ge Cmax hCmax_def
       hlhsInner_def hrhsInner_def
-  -- Apply `rpow (1/2)` and split.
   have h_rpow : (∑' α : M, lhsInner α) ^ (1 / 2 : ℝ) ≤
       (ENNReal.ofReal Cmax * ∑' α : M, rhsInner α) ^ (1 / 2 : ℝ) :=
     ENNReal.rpow_le_rpow h_main (by norm_num)
@@ -1576,9 +1482,7 @@ theorem covGrad_toHs_norm_le
   obtain ⟨C, hC_nn, hC⟩ :=
     exists_covGrad_tensorPouSobolevHsNorm_le (I := I) (M := M) g r s σ
   refine ⟨C, hC_nn, fun T => ?_⟩
-  -- Rewrite both completion norms via `tensorPouSobolevHilbert_norm_eq`.
   rw [tensorPouSobolevHilbert_norm_eq, tensorPouSobolevHilbert_norm_eq]
-  -- The HS-norm inequality transports to `.toReal` (both sides finite).
   have hle := hC T
   have h_rhs_ne_top :
       ENNReal.ofReal C *
@@ -1595,11 +1499,6 @@ theorem covGrad_toHs_norm_le
         rw [ENNReal.toReal_mul]
     _ = C * (tensorPouSobolevHsNorm (I := I) (M := M) g (σ + 1) T).toReal := by
         rw [ENNReal.toReal_ofReal hC_nn]
-
-/-! ## The iterated order-dropping bound
-
-Iterating the single step `j` times: `‖∇^j T‖_{H^σ} ≤ C_j · ‖T‖_{H^{σ+j}}`.
-Each covariant slot costs one Sobolev order, so `j` slots cost `j` orders. -/
 
 /-- **The iterated order-dropping completion-norm bound.** For each degree `j`
 there is a non-negative constant `C` such that for every order `σ` and every
@@ -1620,18 +1519,12 @@ theorem iteratedCovGrad_toHs_norm_le
       refine ⟨1, zero_le_one, fun T => ?_⟩
       simp only [iteratedCovGrad_zero, Nat.add_zero, one_mul, le_refl]
   | succ j ih =>
-      -- IH on degree `j` at order `σ + 1`.
       obtain ⟨Cj, hCj_nn, hCj⟩ := ih (σ + 1)
-      -- Single-step bound for the `(r, s + j)`-tensor `∇^j T` at order `σ`.
       obtain ⟨C1, hC1_nn, hC1⟩ :=
         covGrad_toHs_norm_le (I := I) (M := M) g r (s + j) σ
       refine ⟨C1 * Cj, mul_nonneg hC1_nn hCj_nn, fun T => ?_⟩
-      -- `∇^{j+1} T = covGrad (∇^j T)`.
       have hstep := hC1 (iteratedCovGrad g r s j T)
-      -- `‖(∇^j T).toHs (σ+1)‖ ≤ Cj · ‖T.toHs (σ+1+j)‖`.
       have hih := hCj T
-      -- Chain the two bounds; reconcile the valence index `s + (j + 1)` and the
-      -- order index `σ + 1 + j = σ + (j + 1)`.
       have hval : s + (j + 1) = (s + j) + 1 := by ring
       have hord : σ + 1 + j = σ + (j + 1) := by ring
       calc ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s + (j + 1)) σ
@@ -1649,15 +1542,6 @@ theorem iteratedCovGrad_toHs_norm_le
               ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (σ + (j + 1)) T‖ := by
             rw [hord]; ring
 
-/-! ## The per-degree reduction at the natural order
-
-The per-degree summand of the `C^m` embedding is
-`iteratedCovGradSobolevNorm g r s k j T = ‖(∇^j T).toHs (2(k - j))‖`, taken at the
-*natural* lowered order `2(k - j)`.  The iterated order-dropping bound costs the
-base tensor `T` exactly `j` extra orders, i.e. `‖T.toHs (2(k - j) + j)‖`.  Since
-`2(k - j) + j = 2k - j ≤ 2k` (for `j ≤ k`), order monotonicity `toHs_norm_mono_order`
-collapses this back to `‖T.toHs (2k)‖`.  No order inflation occurs. -/
-
 /-- **The per-degree reduction at the natural order.** For each degree `j ≤ k`
 there is a non-negative constant `C` such that for every smooth
 compactly-supported `(r, s)`-tensor section `T`, the per-degree summand of the
@@ -1672,12 +1556,8 @@ theorem iteratedCovGradSobolevNorm_le_baseSpectral
   obtain ⟨C, hC_nn, hC⟩ :=
     iteratedCovGrad_toHs_norm_le (I := I) (M := M) g r s j (2 * (k - j))
   refine ⟨C, hC_nn, fun T => ?_⟩
-  -- The iterated bound at order `σ := 2(k - j)`: `‖(∇^j T).toHs (2(k-j))‖ ≤
-  -- C · ‖T.toHs (2(k-j) + j)‖`.
   have hstep := hC T
-  -- Order arithmetic: `2(k - j) + j = 2k - j ≤ 2k` (since `j ≤ k`).
   have hord_le : 2 * (k - j) + j ≤ 2 * k := by omega
-  -- Monotonicity in the order index lifts `‖T.toHs (2(k-j)+j)‖` to `‖T.toHs (2k)‖`.
   have hmono :
       ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * (k - j) + j) T‖ ≤
         ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) T‖ :=
@@ -1689,8 +1569,6 @@ theorem iteratedCovGradSobolevNorm_le_baseSpectral
         hstep
     _ ≤ C * ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) T‖ :=
         mul_le_mul_of_nonneg_left hmono hC_nn
-
-/-! ## The unconditional collapsed `C^m` embedding -/
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
@@ -1718,12 +1596,9 @@ theorem iteratedCovGrad_toSobolev_embedding_Cm_unconditional
             ‖(iteratedCovGrad g r s j T).toSection x‖)) ≤
           C * ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) T‖ := by
   classical
-  -- The `C^m` embedding controlling the fibre-norm sum by the per-degree norms.
   obtain ⟨C0, hC0_pos, hC0⟩ :=
     iteratedCovGrad_toSobolev_embedding_Cm (I := I) (M := M) g r s k m h_super
-  -- `m ≤ k` from the superharmonic threshold.
   have hmk : m ≤ k := by omega
-  -- A per-degree base-spectral constant for each `j ∈ range (m + 1)` (so `j ≤ m ≤ k`).
   have h_perdeg : ∀ j : ℕ, ∃ Cj : ℝ, 0 ≤ Cj ∧ (j ≤ m →
       ∀ T : SmoothCcTensor g r s,
         iteratedCovGradSobolevNorm g r s k j T ≤
@@ -1736,14 +1611,12 @@ theorem iteratedCovGrad_toSobolev_embedding_Cm_unconditional
       exact ⟨Cj, hCj_nn, fun _ => hCj⟩
     · exact ⟨0, le_refl 0, fun h => absurd h hjm⟩
   choose Cfun hCfun_nn hCfun using h_perdeg
-  -- The aggregate per-degree constant.
   set Csum : ℝ := ∑ j ∈ Finset.range (m + 1), Cfun j with hCsum_def
   have hCsum_nn : 0 ≤ Csum :=
     Finset.sum_nonneg (fun j _ => hCfun_nn j)
   refine ⟨C0 * (Csum + 1), by positivity, fun T x => ?_⟩
   set N : ℝ := ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) T‖ with hN_def
   have hN_nn : 0 ≤ N := norm_nonneg _
-  -- Bound the sum of per-degree Sobolev norms by `Csum · N`.
   have h_sum_le :
       (∑ j ∈ Finset.range (m + 1), iteratedCovGradSobolevNorm g r s k j T) ≤
         Csum * N := by
@@ -1751,14 +1624,11 @@ theorem iteratedCovGrad_toSobolev_embedding_Cm_unconditional
     refine Finset.sum_le_sum (fun j hj => ?_)
     have hjm : j ≤ m := by have := Finset.mem_range.mp hj; omega
     exact hCfun j hjm T
-  -- Chain the `C^m` embedding with the per-degree base-spectral reduction.
   refine le_trans (hC0 T x) ?_
   calc C0 * ∑ j ∈ Finset.range (m + 1), iteratedCovGradSobolevNorm g r s k j T
       ≤ C0 * (Csum * N) :=
         mul_le_mul_of_nonneg_left h_sum_le (le_of_lt hC0_pos)
     _ ≤ C0 * (Csum + 1) * N := by nlinarith [hN_nn, hC0_pos.le, hCsum_nn]
-
-/-! ## The unconditional `C²`, `(0, 2)`-tensor instance -/
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in

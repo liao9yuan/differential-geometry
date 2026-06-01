@@ -125,11 +125,9 @@ theorem tensorFiberNorm_sq_le_chartAlphaComponents_on_compact
   classical
   letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
-  -- Uniform-on-`K` op-norm distortion factor for the inverse trivialisation.
   obtain ⟨C₀, hC₀_pos, hC₀_bound⟩ :=
     tensorRSChartFiberFromModel_opNorm_isBounded_on_compact_unconditional
       (I := I) (M := M) g r s α hK hKsub
-  -- The finite-basis recovery constant `B := midxPairCard · tensorChartBasisNormConstant²`.
   set B : ℝ :=
     midxPairCard (E := E) r s *
       (tensorChartBasisNormConstant (E := E) r s) ^ 2 with hB_def
@@ -137,23 +135,19 @@ theorem tensorFiberNorm_sq_le_chartAlphaComponents_on_compact
     rw [hB_def]
     exact mul_nonneg (midxPairCard_nonneg (E := E) r s)
       (sq_nonneg _)
-  -- Combined constant. `+ 1` guarantees strict positivity even if `B = 0`.
   refine ⟨C₀ ^ 2 * B + 1, by positivity, ?_⟩
   intro T x hxK
-  -- `x` lies in the chart-`α` source, hence in the `(r,s)`-trivialisation base set.
   have hx_src : x ∈ (chartAt H α).source := hKsub hxK
   have hx_tan_α : x ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [TangentBundle.trivializationAt_baseSet (𝕜 := ℝ) (I := I) α]; exact hx_src
   have hx_α_RS : x ∈ (trivializationAt (TensorRSModel r s ℝ E)
       (fun y : M => TensorRSSpace r s I y) α).baseSet := ⟨hx_tan_α, hx_tan_α⟩
-  -- The chart-`α` trivialisation of the section value, viewed in the model fibre.
   set v : TensorRSModel r s ℝ E :=
     tensorTrivProj (I := I) (M := M) g r s T α x with hv_def
   have hv_eq :
       v = (trivializationAt (TensorRSModel r s ℝ E)
           (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ x
             (T.toSection x) := rfl
-  -- Inverse-trivialisation recovery: `(triv α).symmL x v = T.toSection x`.
   have h_recover :
       (trivializationAt (TensorRSModel r s ℝ E)
           (fun y : M => TensorRSSpace r s I y) α).symmL ℝ x v =
@@ -162,11 +156,9 @@ theorem tensorFiberNorm_sq_le_chartAlphaComponents_on_compact
     exact Trivialization.symmL_continuousLinearMapAt
       (trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α) hx_α_RS (T.toSection x)
-  -- Op-norm step: `‖T.toSection x‖ ≤ C₀ · ‖v‖`.
   have h_opnorm : ‖T.toSection x‖ ≤ C₀ * ‖v‖ := by
     have h := hC₀_bound x hxK v
     rwa [h_recover] at h
-  -- Finite-basis recovery: `‖v‖² ≤ B · ∑_{IJ} (raw)²`.
   have h_alg :
       ‖v‖ ^ 2 ≤
         B *
@@ -175,7 +167,6 @@ theorem tensorFiberNorm_sq_le_chartAlphaComponents_on_compact
               (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx x) ^ 2 := by
     have h_base :=
       tensorRSModel_norm_sq_le_sum_projection_sq (E := E) r s v
-    -- Identify each projection of `v` with the raw chart-`α` component.
     have h_proj_eq : ∀ (Idx : Fin r → Fin (Module.finrank ℝ E))
         (Jdx : Fin s → Fin (Module.finrank ℝ E)),
         tensorChartComponentProjection (E := E) r s Idx Jdx v =
@@ -193,7 +184,6 @@ theorem tensorFiberNorm_sq_le_chartAlphaComponents_on_compact
               ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
                 (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx x) ^ 2 := by
           simp only [hB_def, h_proj_eq]
-  -- Combine. Square the op-norm step and chain with the basis recovery.
   set RawSq : ℝ :=
     ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
       ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
@@ -204,7 +194,6 @@ theorem tensorFiberNorm_sq_le_chartAlphaComponents_on_compact
     exact Finset.sum_nonneg (fun _ _ => Finset.sum_nonneg (fun _ _ => sq_nonneg _))
   have h_sec_nn : 0 ≤ ‖T.toSection x‖ := norm_nonneg _
   have hC₀_nn : 0 ≤ C₀ := le_of_lt hC₀_pos
-  -- `‖T.toSection x‖² ≤ (C₀ · ‖v‖)² = C₀² · ‖v‖² ≤ C₀² · B · RawSq`.
   have h_sq_op : ‖T.toSection x‖ ^ 2 ≤ (C₀ * ‖v‖) ^ 2 := by
     have hCv_nn : 0 ≤ C₀ * ‖v‖ := mul_nonneg hC₀_nn (norm_nonneg _)
     have := mul_le_mul h_opnorm h_opnorm h_sec_nn hCv_nn
@@ -217,7 +206,6 @@ theorem tensorFiberNorm_sq_le_chartAlphaComponents_on_compact
           have h_alg' : ‖v‖ ^ 2 ≤ B * RawSq := by rw [hRawSq_def]; exact h_alg
           exact mul_le_mul_of_nonneg_left h_alg' (sq_nonneg C₀)
       _ = C₀ ^ 2 * B * RawSq := by ring
-  -- Slack from the `+ 1` term is nonnegative.
   have h_slack : C₀ ^ 2 * B * RawSq ≤ (C₀ ^ 2 * B + 1) * RawSq := by
     have h1 : C₀ ^ 2 * B * RawSq + 0 ≤ C₀ ^ 2 * B * RawSq + 1 * RawSq := by
       have : (0 : ℝ) ≤ 1 * RawSq := by simpa using hRawSq_nn

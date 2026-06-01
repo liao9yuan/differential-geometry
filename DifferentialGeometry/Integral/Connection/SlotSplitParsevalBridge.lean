@@ -147,10 +147,6 @@ theorem riemannianFiberNormSq_succ_eq_sum_slot0Curry
           riemannianFiberNormSq (I := I) (M := M) g 0 s x
             (slot0Curry (I := I) (M := M) g x s e K₀ T a) := by
   classical
-  -- Build the `g`-orthonormal frame inline, so it is *literally* `stdOrthonormalBasis`; then
-  -- the `riemannianFiberNormSq` representation as the frame double-sum holds by `rfl` at
-  -- *both* ranks `s` and `s+1` simultaneously (it is the definitional unfolding of
-  -- `riemannianFiberNormSq`).
   let cd : InnerProductSpace.Core ℝ (TangentSpace I x) := g.toRiemannianMetric.toCore x
   have hc : ContinuousAt (fun v : TangentSpace I x => cd.inner v v) 0 :=
     g.toRiemannianMetric.continuousAt x

@@ -71,14 +71,10 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicLp
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicH1Lp
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## File-local bilinearity helpers (re-stated from `IntrinsicH1Lp.lean`) -/
 
 private lemma g_inner_zero_left
     (g : SmoothRiemannianMetric I M) (x : M) (y : TangentSpace I x) :
@@ -208,16 +204,12 @@ private lemma g_norm_const_smul
   rw [show c * (c * g.inner x v v) = c ^ 2 * g.inner x v v from by ring]
   rw [Real.sqrt_mul (sq_nonneg c), Real.sqrt_sq_eq_abs]
 
-/-! ## The ambient L²-product Hilbert space -/
-
 /-- Notation for the ambient Hilbert space on which the H¹ inner product is
 realized as the L²-product inner product. -/
 abbrev H1Bundle [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) : Type _ :=
   WithLp 2 ((Lp ℝ 2 (riemannianVolumeMeasure I M g)) ×
     (Lp E 2 (riemannianVolumeMeasure I M g)))
-
-/-! ## The intrinsic H¹ submodule -/
 
 /-- A pair `(u, G) ∈ Lp ℝ 2 μ_g × Lp E 2 μ_g` is an `H¹`-pair when:
 
@@ -244,8 +236,7 @@ theorem zero (g : SmoothRiemannianMetric I M) :
       (0 : Lp ℝ 2 (riemannianVolumeMeasure I M g))
       (0 : Lp E 2 (riemannianVolumeMeasure I M g)) := by
   refine ⟨?_, ?_, ?_⟩
-  · -- HasWeakRiemannianGradLp via a.e.-congruence with the literal zero functions.
-    have h0u : (fun x : M => ((0 : Lp ℝ 2 (riemannianVolumeMeasure I M g)) : M → ℝ) x)
+  · have h0u : (fun x : M => ((0 : Lp ℝ 2 (riemannianVolumeMeasure I M g)) : M → ℝ) x)
         =ᵐ[riemannianVolumeMeasure I M g] (fun _ : M => (0 : ℝ)) := by
       have h := Lp.coeFn_zero (E := ℝ) (μ := riemannianVolumeMeasure I M g)
         (p := (2 : ℝ≥0∞))
@@ -299,8 +290,7 @@ theorem add (g : SmoothRiemannianMetric I M)
   obtain ⟨hG_weak, hG_p, hG_pair⟩ := hu
   obtain ⟨hG'_weak, hG'_p, hG'_pair⟩ := hv
   refine ⟨?_, ?_, ?_⟩
-  · -- IBP for the sum.
-    have h_sum_G : (fun x : M => ((G + G' : Lp E 2 (riemannianVolumeMeasure I M g)) :
+  · have h_sum_G : (fun x : M => ((G + G' : Lp E 2 (riemannianVolumeMeasure I M g)) :
           M → E) x) =ᵐ[riemannianVolumeMeasure I M g]
         (fun x : M => (G : M → E) x + (G' : M → E) x) := by
       filter_upwards [Lp.coeFn_add G G'] with x hx; exact hx
@@ -315,13 +305,11 @@ theorem add (g : SmoothRiemannianMetric I M)
         hG_weak hG'_weak (Lp.memLp u) (Lp.memLp v) hG_p hG'_p
     exact hasWeakRiemannianGradLp_congr_ae (I := I) (M := M) (g := g)
       h_sum_u.symm h_sum_G.symm h_add
-  · -- L² norm control on the metric g-norm of (G + G').
-    have h_sum_G : (fun x : M => ((G + G' : Lp E 2 (riemannianVolumeMeasure I M g)) :
+  · have h_sum_G : (fun x : M => ((G + G' : Lp E 2 (riemannianVolumeMeasure I M g)) :
           M → E) x) =ᵐ[riemannianVolumeMeasure I M g]
         (fun x : M => (G : M → E) x + (G' : M → E) x) := by
       filter_upwards [Lp.coeFn_add G G'] with x hx; exact hx
     refine memLp_g_norm_congr_ae (I := I) (M := M) (g := g) (p := 2) h_sum_G.symm ?_
-    -- We use the same argument as in MemH1Lp.add: bilinear expansion + AESM clause.
     have hAESM : AEStronglyMeasurable
         (fun x : M => Real.sqrt
           (g.inner x ((fun y : M => (G : M → E) y + (G' : M → E) y) x)
@@ -406,8 +394,7 @@ theorem add (g : SmoothRiemannianMetric I M)
       Real.norm_eq_abs (Real.sqrt _ + Real.sqrt _),
       abs_of_nonneg hLHS_nn, abs_of_nonneg hRHS_nn]
     exact h_tri
-  · -- PairAEMeasurable of the summed Lp witness.
-    have h_sum_G : (fun x : M => ((G + G' : Lp E 2 (riemannianVolumeMeasure I M g)) :
+  · have h_sum_G : (fun x : M => ((G + G' : Lp E 2 (riemannianVolumeMeasure I M g)) :
           M → E) x) =ᵐ[riemannianVolumeMeasure I M g]
         (fun x : M => (G : M → E) x + (G' : M → E) x) := by
       filter_upwards [Lp.coeFn_add G G'] with x hx; exact hx
@@ -427,8 +414,7 @@ theorem const_smul (g : SmoothRiemannianMetric I M) (c : ℝ)
       (I := I) (M := M) g
   obtain ⟨hG_weak, hG_p, hG_pair⟩ := hu
   refine ⟨?_, ?_, ?_⟩
-  · -- Transfer representative of `(c • G : Lp E 2)` to `c • G` (pointwise scalar).
-    have h_smul_G : (fun x : M => ((c • G : Lp E 2 (riemannianVolumeMeasure I M g)) :
+  · have h_smul_G : (fun x : M => ((c • G : Lp E 2 (riemannianVolumeMeasure I M g)) :
           M → E) x) =ᵐ[riemannianVolumeMeasure I M g]
         (fun x : M => c • (G : M → E) x) := by
       filter_upwards [Lp.coeFn_smul c G] with x hx; exact hx
@@ -477,7 +463,6 @@ def H1IntrinsicSubmodule
   carrier := { p : H1Bundle (I := I) (M := M) g |
     IsH1Pair (I := I) (M := M) g (WithLp.ofLp p).1 (WithLp.ofLp p).2 }
   add_mem' {p q} hp hq := by
-    -- WithLp.ofLp (p + q) = WithLp.ofLp p + WithLp.ofLp q.
     change IsH1Pair (I := I) (M := M) g (WithLp.ofLp (p + q)).1 (WithLp.ofLp (p + q)).2
     have hofLp_add : WithLp.ofLp (p + q) = WithLp.ofLp p + WithLp.ofLp q := by
       simp
@@ -523,7 +508,6 @@ def toLp (g : SmoothRiemannianMetric I M) :
     H1Intrinsic (I := I) (M := M) g →ₗ[ℝ] Lp ℝ 2 (riemannianVolumeMeasure I M g) where
   toFun u := (WithLp.ofLp (u : H1Bundle (I := I) (M := M) g)).1
   map_add' u v := by
-    -- ofLp distributes over `+`.
     change (WithLp.ofLp ((u + v : H1Intrinsic (I := I) (M := M) g) :
         H1Bundle (I := I) (M := M) g)).1 = _
     have h : (WithLp.ofLp ((u + v : H1Intrinsic (I := I) (M := M) g) :

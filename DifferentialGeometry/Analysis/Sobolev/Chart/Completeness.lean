@@ -34,8 +34,6 @@ section
 
 variable [NeZero (Module.finrank ℝ E)]
 
-/-! ## Step 1: From `CauchySeq` to ENNReal-form Cauchy bound -/
-
 /-- The chart-based seminorm satisfies: a `CauchySeq` of `WkpChart` elements
 yields the εδ-Cauchy condition in `wkpNormChart` (ENNReal-valued). -/
 private theorem wkpNormChart_cauchy_of_seminormCauchySeq
@@ -72,8 +70,6 @@ private theorem wkpNormChart_cauchy_of_seminormCauchySeq
       (fun x => wkpChartFun (f m) x - wkpChartFun (f n) x) ≠ ⊤ := h_lt_top.ne
   rw [← ENNReal.ofReal_toReal h_ne_top]
   exact ENNReal.ofReal_le_ofReal hdist.le
-
-/-! ## Step 2: Chart-by-chart Cauchy on each chart target -/
 
 /-- For each chart `α`, the chart-pushed sequence is `wkpNorm`-Cauchy on
 `chartTargetEuclid α`. -/
@@ -133,8 +129,6 @@ private theorem chartPushed_cauchy_of_wkpNormChart_cauchy
     ENNReal.le_tsum α
   exact le_trans h_summand_le_tsum h_le
 
-/-! ## Step 3: For each chart, get a `wkpNorm`-limit -/
-
 /-- For each chart `α`, the chart-pushed sequence has a `wkpNorm`-limit which
 is itself in `MemWkp k p` of `chartTargetEuclid α`. -/
 private theorem exists_chart_limit
@@ -174,8 +168,6 @@ private theorem exists_chart_limit
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.exists_limit_of_wkpNorm_cauchy
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     k p hp_one hp_top h_chart_mem h_chart_cauchy
-
-/-! ## Step 4: TendstoInMeasure on each chart -/
 
 /-- The chart-pushed sequence converges in measure on each chart target. -/
 private theorem chartPushed_tendstoInMeasure
@@ -241,8 +233,6 @@ private theorem chartPushed_tendstoInMeasure
     h_v_mem.memLp.aestronglyMeasurable
   exact tendstoInMeasure_of_tendsto_eLpNorm_of_ne_top hp_zero hp_top
     h_aesm_seq h_aesm_lim h_eLp
-
-/-! ## Step 5: A.e. pointwise subsequence on each chart -/
 
 /-- For each chart `α`, there is a strict subsequence along which the
 chart-pushed `wkpChartFun (f n)` converges pointwise a.e. on the chart

@@ -47,14 +47,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## Part 1: locality with a raw `ContMDiff` hypothesis
-
-The locality lemma `rawTensorConnLap_eq_zero_of_eventually_zero` in
-`TensorConnLaplacian.lean` takes its smoothness witnesses as `MDifferentiableAt`
-hypotheses on the total-space form. Many callers have only a global `ContMDiff`
-witness on the raw section. This intermediate lemma adapts the locality result
-to that hypothesis. -/
-
 /-- **Locality of `rawTensorConnLap` (raw `ContMDiff` hypothesis).** If a raw
 `(r, s)`-tensor section `T : Π b : M, TensorRSSpace r s I b` is smooth in the
 total-space sense and vanishes on a neighbourhood of `b`, then the raw
@@ -68,20 +60,14 @@ theorem rawTensorConnLap_eq_zero_of_eventually_zero_contMDiff [CompleteSpace E]
     (b : M) (h_zero_nhd : ∀ᶠ x in 𝓝 b, T x = 0) :
     rawTensorConnLap (I := I) g r s T b = 0 := by
   classical
-  -- Extract an open neighbourhood `U` of `b` on which `T = 0`.
   rw [Filter.eventually_iff_exists_mem] at h_zero_nhd
   obtain ⟨V, hV_nhds, hV_eq⟩ := h_zero_nhd
   obtain ⟨U, hUV, hU_open, hbU⟩ := mem_nhds_iff.mp hV_nhds
   have hT_zero_U : ∀ y ∈ U, T y = 0 := fun y hyU => hV_eq y (hUV hyU)
-  -- Smoothness witness for `T` at `b` (and at every other point) follows from
-  -- the global `ContMDiff` hypothesis.
   have hT_diff_b : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
       (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun w : M => TensorRSSpace r s I w) z (T z)) b :=
     (hT_smooth b).mdifferentiableAt (by simp)
-  -- Smoothness witness for `covApply cov (smoothOrthoFrame g b i) T` at `b`.
-  -- This requires `cov` of `T` against a smooth tangent-bundle section, and
-  -- follows from `covApply_contMDiffOn` applied to `T` bumped to `∞ + 1 = ∞`.
   have hcov_diff_b : ∀ i : Fin (Module.finrank ℝ E),
       MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
         (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
@@ -92,14 +78,12 @@ theorem rawTensorConnLap_eq_zero_of_eventually_zero_contMDiff [CompleteSpace E]
     intro i
     set cov := TensorRSNabla.tensorRSCovariantDerivative I M r s
       (LeviCivita (I := I) g) with hcov_def
-    -- Bump `T`'s smoothness from `∞` to `∞ + 1 = ∞` (in `WithTop ℕ∞`).
     have hT_plus : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
         ((∞ : WithTop ℕ∞) + 1)
         (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
           (E := fun z : M => TensorRSSpace r s I z) y (T y)) := by
       rw [show ((∞ : WithTop ℕ∞) + 1) = ∞ from rfl]
       exact hT_smooth
-    -- Smoothness of `covApply cov (smoothOrthoFrame g b i) T`.
     have h_covApply :
         ContMDiffOn I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
           (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
@@ -113,17 +97,8 @@ theorem rawTensorConnLap_eq_zero_of_eventually_zero_contMDiff [CompleteSpace E]
           (covApply cov (smoothOrthoFrame (I := I) g b i) T y)) b :=
       h_covApply.contMDiffAt (Filter.univ_mem)
     exact h_at.mdifferentiableAt (by simp)
-  -- Apply the locality lemma from `TensorConnLaplacian.lean`.
   exact rawTensorConnLap_eq_zero_of_eventually_zero (I := I) g r s
     (T := T) (U := U) hU_open hbU hT_zero_U hT_diff_b hcov_diff_b
-
-/-! ## Part 2: tsupport subset
-
-The pointwise locality result upgrades to a topological-support inclusion at
-the level of the model image: a point outside the closure of the support of
-`T` (as a model-valued function) is outside the support of the connection
-Laplacian. This is the natural compactness-preservation tool for use with
-manifold integration. -/
 
 /-- **Topological-support subset for `rawTensorConnLap` (raw `ContMDiff`
 hypothesis).** The topological support of the model image of
@@ -139,20 +114,12 @@ theorem rawTensorConnLap_tsupport_subset [CompleteSpace E]
         (rawTensorConnLap (I := I) g r s T b)) ⊆
       tsupport (fun b : M => TensorRSSpace.toModel (T b)) := by
   classical
-  -- `tsupport f = closure (Function.support f)`. The RHS is already closed
-  -- (`isClosed_tsupport`), so it suffices to show
-  -- `Function.support (rawLap) ⊆ tsupport T` and apply `closure_minimal`.
   refine closure_minimal ?_ (isClosed_tsupport _)
   intro x hx
-  -- `hx : x ∈ Function.support (b ↦ toModel (rawTensorConnLap … b))`.
-  -- We show `x ∈ tsupport (b ↦ toModel (T b))` by contradiction.
   by_contra hxnot
   apply hx
-  -- From `x ∉ tsupport (b ↦ toModel (T b))`, `toModel ∘ T` vanishes
-  -- eventually near `x`.
   have hT_eq : (fun b : M => TensorRSSpace.toModel (T b)) =ᶠ[𝓝 x] 0 :=
     notMem_tsupport_iff_eventuallyEq.mp hxnot
-  -- Promote the eventual model-level vanishing to `T y = 0` eventually.
   have h_zero_nhd : ∀ᶠ y in 𝓝 x, T y = 0 := by
     filter_upwards [hT_eq] with y hy
     have h_model_zero : TensorRSSpace.toModel (T y) = 0 := by
@@ -161,11 +128,9 @@ theorem rawTensorConnLap_tsupport_subset [CompleteSpace E]
         TensorRSSpace.toModel (0 : TensorRSSpace r s I y) := by
       rw [h_model_zero, TensorRSSpace.toModel_zero]
     exact TensorRSSpace.toModel_injective h_model_zero'
-  -- Apply Part 1.
   have h_zero : rawTensorConnLap (I := I) g r s T x = 0 :=
     rawTensorConnLap_eq_zero_of_eventually_zero_contMDiff (I := I) g r s
       T hT_smooth x h_zero_nhd
-  -- And `toModel` of zero is zero.
   change TensorRSSpace.toModel
     (rawTensorConnLap (I := I) g r s T x) = 0
   rw [h_zero, TensorRSSpace.toModel_zero]

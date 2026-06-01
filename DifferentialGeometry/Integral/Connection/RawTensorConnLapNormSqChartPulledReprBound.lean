@@ -68,13 +68,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Arithmetic squared bound -/
-
 private lemma sq_add_three_le_three_mul_sum_sq (a b c : ℝ) :
     (a + b + c) ^ 2 ≤ 3 * (a ^ 2 + b ^ 2 + c ^ 2) := by
   nlinarith [sq_nonneg (a - b), sq_nonneg (b - c), sq_nonneg (a - c)]
-
-/-! ## Smoothness of `repr T ∘ symm` on the chart-target image of the good set -/
 
 /-- Smoothness on the chart-target image of the chart-`α` Levi-Civita good set
 of the chart-pulled tensor representation. -/
@@ -202,9 +198,6 @@ private lemma fderiv_reprT_differentiableAt_chart_point
       (extChartAt I α b) :=
     (hfd_cd.differentiableOn hne) (extChartAt I α b) hx_mem
   exact hwithin.differentiableAt (hU_open.mem_nhds hx_mem)
-
-/-! ## Uniform fibre-norm bound on the `fderiv` of the chart-pulled
-representation of `chartFrameNormGlobalSmooth g α i` -/
 
 /-- Uniform bound on
 `‖fderiv ℝ (chartE_section_repr α B.toFun ∘ (extChartAt I α).symm) (extChartAt I α b)‖`

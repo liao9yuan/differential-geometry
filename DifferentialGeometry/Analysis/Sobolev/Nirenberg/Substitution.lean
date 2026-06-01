@@ -51,8 +51,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Section 1: Localised discrete integration by parts -/
-
 omit [NeZero d] in
 /-- Localised discrete integration by parts: for continuous `f` and
 compactly supported smooth `g`, and `h ≠ 0`,
@@ -72,24 +70,19 @@ theorem integral_diffQuot_mul_eq_neg_integral_mul_diffQuot_locally_supported
     (hg_supp : HasCompactSupport g) :
     ∫ x, diffQuot k h f x * g x ∂(volume : Measure E) =
       -∫ x, f x * diffQuot k (-h) g x ∂(volume : Measure E) := by
-  -- Notation.
   set e : E := EuclideanSpace.single k (1 : ℝ) with he
   have hnh : (-h) ≠ 0 := neg_ne_zero.mpr hh
-  -- Continuity of `g`.
   have hg_cont : Continuous g := hg_smooth.continuous
-  -- Continuity / compact support of `D_{-h}^k g`.
   have h_diffQuot_neg_g_cont : Continuous (diffQuot k (-h) g) :=
     continuous_diffQuot_of_continuous (d := d) k (-h) hg_cont
   have h_diffQuot_neg_g_supp : HasCompactSupport (diffQuot k (-h) g) :=
     hasCompactSupport_diffQuot_of_hasCompactSupport (d := d) hg_supp k (-h)
-  -- Continuity / compact support of `translate k h f` and similar.
   have h_translate_h_f_cont : Continuous (translate k h f) :=
     continuous_translate (d := d) k h hf_continuous
   have h_translate_neg_h_g_cont : Continuous (translate k (-h) g) :=
     continuous_translate (d := d) k (-h) hg_cont
   have h_translate_neg_h_g_supp : HasCompactSupport (translate k (-h) g) :=
     hasCompactSupport_translate_of_hasCompactSupport (d := d) hg_supp k (-h)
-  -- Integrability statements.
   have hfg_int : Integrable (fun x => f x * g x) volume := by
     have hcont : Continuous (fun x : E => f x * g x) := hf_continuous.mul hg_cont
     have hsupp : HasCompactSupport (fun x : E => f x * g x) :=
@@ -109,7 +102,6 @@ theorem integral_diffQuot_mul_eq_neg_integral_mul_diffQuot_locally_supported
     have hsupp : HasCompactSupport (fun x : E => f x * translate k (-h) g x) :=
       h_translate_neg_h_g_supp.mul_left
     exact hcont.integrable_of_hasCompactSupport hsupp
-  -- Pointwise identifications (same as in the global L² version).
   have hLHS_pointwise : ∀ x : E,
       diffQuot k h f x * g x =
         (translate k h f x * g x - f x * g x) / h := by
@@ -130,7 +122,6 @@ theorem integral_diffQuot_mul_eq_neg_integral_mul_diffQuot_locally_supported
     change f x * ((g (x + (-h) • e) - g x) / (-h)) =
       (f x * g (x + (-h) • e) - f x * g x) / (-h)
     rw [mul_div_assoc', mul_sub]
-  -- Decompositions of integrals.
   have hLHS_decomp :
       ∫ x, diffQuot k h f x * g x ∂(volume : Measure E) =
         ((∫ x, translate k h f x * g x ∂(volume : Measure E)) -
@@ -147,8 +138,6 @@ theorem integral_diffQuot_mul_eq_neg_integral_mul_diffQuot_locally_supported
         (fun x => (f x * translate k (-h) g x - f x * g x) / (-h)) := by
       ext x; exact hRHS_pointwise x
     rw [heq_fun, integral_div, integral_sub h_f_translate_g_int hfg_int]
-  -- Translation identity converting `∫ f(x + h e) g(x)` to
-  -- `∫ f(x) g(x - h e)` via the substitution `x ↦ x + (-h) • e`.
   have h_subst :
       ∫ x, f (x + h • e) * g x ∂(volume : Measure E) =
         ∫ x, f x * g (x + (-h) • e) ∂(volume : Measure E) := by
@@ -171,7 +160,6 @@ theorem integral_diffQuot_mul_eq_neg_integral_mul_diffQuot_locally_supported
           ∂(volume : Measure E) from hint.symm]
     refine integral_congr_ae ?_
     filter_upwards with x using hsimp x
-  -- Translates relate to `translate`.
   have hLHS_subst :
       ∫ x, translate k h f x * g x ∂(volume : Measure E) =
         ∫ x, f x * translate k (-h) g x ∂(volume : Measure E) := by
@@ -191,12 +179,8 @@ theorem integral_diffQuot_mul_eq_neg_integral_mul_diffQuot_locally_supported
         f x * g (x + (-h) • e)
       rfl
     rw [h1, h2, h_subst]
-  -- Combine everything.
   rw [hLHS_decomp, hRHS_decomp, hLHS_subst]
-  -- Now: ((A - B)/h) = -((A - B)/(-h)). Use `div_neg`.
   rw [div_neg, neg_neg]
-
-/-! ## Section 2: Admissibility of the test function -/
 
 omit [NeZero d] in
 /-- The interior-regularity test function `v_test = D_{-h}^k(η² · D_h^k u)`
@@ -221,8 +205,6 @@ theorem nirenbergTestFunction_is_admissible_test
   · exact contDiff_nirenbergTestFunction (d := d) hη hu k hh
   · exact hasCompactSupport_nirenbergTestFunction (d := d) hη_supp k h
   · exact (tsupport_nirenbergTestFunction_subset (d := d) η u k h).trans hh_supp
-
-/-! ## Section 3: Per-pair discrete IBP for the principal part -/
 
 omit [NeZero d] in
 /-- Pointwise: for smooth `g`, the directional derivative
@@ -261,7 +243,6 @@ theorem integral_a_partial_u_partial_diffQuot_eq
           ((fderiv ℝ (fun y : E => η y ^ 2 * diffQuot k h u y) x)
             (EuclideanSpace.single j 1))
         ∂(volume : Measure E) := by
-  -- Set `g := y ↦ η y² · D_h^k u y`, smooth (since h ≠ 0).
   set g : E → ℝ := fun y : E => η y ^ 2 * diffQuot k h u y with hg_def
   have hnh : (-h) ≠ 0 := neg_ne_zero.mpr hh
   have hg_smooth : ContDiff ℝ (⊤ : ℕ∞) g := by
@@ -269,7 +250,6 @@ theorem integral_a_partial_u_partial_diffQuot_eq
     have h_diffQuot_u : ContDiff ℝ (⊤ : ℕ∞) (diffQuot k h u) :=
       contDiff_diffQuot_of_contDiff (d := d) hu k hh
     exact h_eta_sq.mul h_diffQuot_u
-  -- `g` has compact support coming from `η`.
   have hg_supp : HasCompactSupport g := by
     have h_eta_sq_supp : HasCompactSupport (fun y : E => η y ^ 2) := by
       have heq : (fun y : E => η y ^ 2) = (fun y : E => η y * η y) := by
@@ -277,8 +257,6 @@ theorem integral_a_partial_u_partial_diffQuot_eq
       rw [heq]
       exact hη_supp.mul_right
     exact h_eta_sq_supp.mul_right
-  -- Define the coefficient `f := y ↦ B.a y i j · (fderiv ℝ u y)(e_i)`,
-  -- continuous everywhere.
   set f : E → ℝ := fun y : E =>
     B.a y i j * ((fderiv ℝ u y) (EuclideanSpace.single i 1)) with hf_def
   have hf_cont : Continuous f := by
@@ -287,13 +265,7 @@ theorem integral_a_partial_u_partial_diffQuot_eq
         Continuous (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single i 1)) :=
       (hu.continuous_fderiv (by simp)).clm_apply continuous_const
     exact h_a_cont.mul h_partial_u_cont
-  -- Step 1. Identify `nirenbergTestFunction k h η u = diffQuot k (-h) g`.
   have h_test_eq : nirenbergTestFunction k h η u = diffQuot k (-h) g := rfl
-  -- Step 2. The directional derivative of the test function:
-  --   ∂_j (D_{-h}^k g) = D_{-h}^k (∂_j g).
-  -- Inside the LHS integrand, replace `(fderiv ℝ v_test x)(e_j)` by
-  -- `diffQuot k (-h) (∂_j g) x`. Then we have on LHS:
-  --   ∫ f x * D_{-h}^k(∂_j g)(x) dx.
   have h_LHS_rewrite :
       (fun x : E =>
           B.a x i j *
@@ -305,26 +277,12 @@ theorem integral_a_partial_u_partial_diffQuot_eq
             (fun y : E => (fderiv ℝ g y) (EuclideanSpace.single j 1)) x := by
     funext x
     rw [h_test_eq]
-    -- Apply `fderiv_diffQuot_apply_eq_diffQuot_partial` to `g` with step `-h`.
     rw [fderiv_diffQuot_apply_eq_diffQuot_partial (d := d) hg_smooth k j hnh x]
-  -- Step 3. Apply the localised IBP with
-  --   `f` continuous, `G := ∂_j g` smooth compactly supported.
-  -- We use IBP in the direction `k` with step `h`:
-  --   ∫ (D_h^k f) · G = -∫ f · D_{-h}^k G.
-  -- Setting `G := ∂_j g`, we get the desired equation up to handling the
-  -- LHS rewrite.
-  -- First, smoothness and compact support of `∂_j g`.
   have hG_smooth :
       ContDiff ℝ (⊤ : ℕ∞)
         (fun y : E => (fderiv ℝ g y) (EuclideanSpace.single j 1)) := by
-    -- (fderiv ℝ g) is `C^∞` because `g` is `C^∞`.
-    -- We use `ContDiff.fderiv_apply` which takes the derivative and applies.
-    -- A direct way: `g` smooth ⇒ `fderiv ℝ g` is smooth (`hg_smooth.fderiv`),
-    -- then composed with constant evaluation `· (e_j)`.
     have h_fderiv_smooth : ContDiff ℝ (⊤ : ℕ∞) (fderiv ℝ g) := by
       exact hg_smooth.fderiv_right (m := (⊤ : ℕ∞)) (by simp)
-    -- Apply the CLM evaluation `f ↦ f (e_j)`.
-    -- The map `T ↦ T (e_j)` is a continuous linear map `(E →L[ℝ] ℝ) →L[ℝ] ℝ`.
     have h_apply_smooth :
         ContDiff ℝ (⊤ : ℕ∞)
           (fun T : E →L[ℝ] ℝ => T (EuclideanSpace.single j 1)) := by
@@ -335,7 +293,6 @@ theorem integral_a_partial_u_partial_diffQuot_eq
       HasCompactSupport
         (fun y : E => (fderiv ℝ g y) (EuclideanSpace.single j 1)) :=
     hg_supp.fderiv_apply (𝕜 := ℝ) _
-  -- Localised IBP: ∫ (D_h^k f) · G = -∫ f · D_{-h}^k G.
   have h_IBP :
       ∫ x, diffQuot k h f x *
           (fun y : E => (fderiv ℝ g y) (EuclideanSpace.single j 1)) x
@@ -345,27 +302,7 @@ theorem integral_a_partial_u_partial_diffQuot_eq
             ∂(volume : Measure E) := by
     exact integral_diffQuot_mul_eq_neg_integral_mul_diffQuot_locally_supported
       (d := d) k hh hf_cont hG_smooth hG_supp
-  -- Step 4. Express RHS of the goal in terms of the integrand from h_IBP.
-  -- We need:
-  --   ∫ D_h^k f · ((fderiv ℝ g) (single j 1))
-  -- Using h_IBP, this equals
-  --   -∫ f · D_{-h}^k (∂_j g)
-  -- which equals (by h_LHS_rewrite)
-  --   -∫ a^{ij} ∂_i u · ∂_j (D_{-h}^k g)
-  --   = -∫ a^{ij} ∂_i u · ∂_j v_test.
-  -- We just need to massage the RHS form in the goal.
-  -- Goal RHS:
-  --   -∫ D_h^k(f) x * (fderiv ℝ g x)(single j 1) dx (after rewriting ∂_j g via
-  -- the partial fderiv form).
-  -- Explicitly, write the goal RHS integrand `(fderiv ℝ g x)(single j 1)` is
-  -- the partial derivative of `g` at `x` in direction `e_j`.
   rw [h_LHS_rewrite]
-  -- Now, the goal becomes:
-  --   ∫ f x * D_{-h}^k(∂_j g) x = -∫ D_h^k(f) x * (fderiv ℝ g x)(e_j) dx
-  -- (after taking out the negation).
-  -- From h_IBP:
-  --   ∫ D_h^k(f) · (∂_j g) = -∫ f · D_{-h}^k(∂_j g)
-  -- So `∫ f · D_{-h}^k(∂_j g) = -∫ D_h^k(f) · (∂_j g)`.
   have hLHS_eq :
       ∫ x, f x * diffQuot k (-h)
             (fun y : E => (fderiv ℝ g y) (EuclideanSpace.single j 1)) x
@@ -375,8 +312,6 @@ theorem integral_a_partial_u_partial_diffQuot_eq
             ∂(volume : Measure E) := by
     linarith
   rw [hLHS_eq]
-
-/-! ## Section 4: Sum-integral commutativity for the principal integrand -/
 
 /-- Sum-integral commutation for the principal integrand of a smooth elliptic
 divergence-form bilinear form, applied to smooth `u` and smooth compactly
@@ -393,20 +328,16 @@ theorem integral_principalIntegrand_eq_sum_integral
   classical
   have hu_C1 : ContDiff ℝ 1 u := hu.of_le (by norm_cast)
   have hv_C1 : ContDiff ℝ 1 v := hv.of_le (by norm_cast)
-  -- Continuity of each summand.
   have h_partial_u_cont : ∀ i : Fin d,
       Continuous (fun x : E => (fderiv ℝ u x) (EuclideanSpace.single i 1)) :=
     fun i => (hu_C1.continuous_fderiv (by norm_num)).clm_apply continuous_const
   have h_partial_v_cont : ∀ j : Fin d,
       Continuous (fun x : E => (fderiv ℝ v x) (EuclideanSpace.single j 1)) :=
     fun j => (hv_C1.continuous_fderiv (by norm_num)).clm_apply continuous_const
-  -- Compact support of `(fderiv v x)(e_j)`.
   have h_partial_v_supp : ∀ j : Fin d,
       HasCompactSupport
         (fun x : E => (fderiv ℝ v x) (EuclideanSpace.single j 1)) :=
     fun j => hv_supp.fderiv_apply (𝕜 := ℝ) _
-  -- Each summand `(i, j)` is integrable: the factor `(fderiv v x)(e_j)` is
-  -- continuous compactly supported, and the rest is continuous.
   have h_pair_int : ∀ i j : Fin d,
       Integrable (fun x : E =>
         B.a x i j * ((fderiv ℝ u x) (EuclideanSpace.single i 1)) *
@@ -425,11 +356,8 @@ theorem integral_principalIntegrand_eq_sum_integral
         (fun x : E =>
           B.a x i j * ((fderiv ℝ u x) (EuclideanSpace.single i 1)) *
             ((fderiv ℝ v x) (EuclideanSpace.single j 1))) := by
-      -- factor as ((B.a x i j * (fderiv u x e_i)) * (fderiv v x e_j))
       exact (h_partial_v_supp j).mul_left
     exact h2.integrable_of_hasCompactSupport h_supp
-  -- Sum out integrals using `integral_finset_sum`.
-  -- First, equality: principal integrand = ∑_{i, j} (a^{ij} ∂_i u ∂_j v).
   have h_eq_fun :
       (fun x : E => B.principalIntegrand u v x) =
         fun x : E =>
@@ -439,8 +367,6 @@ theorem integral_principalIntegrand_eq_sum_integral
     funext x
     rfl
   rw [h_eq_fun]
-  -- Apply `integral_finset_sum` twice.
-  -- ∫ ∑_{i} F_i = ∑_{i} ∫ F_i, valid when each F_i is integrable.
   have h_inner_int : ∀ i : Fin d,
       Integrable (fun x : E =>
         ∑ j : Fin d,
@@ -469,8 +395,6 @@ theorem integral_principalIntegrand_eq_sum_integral
             ((fderiv ℝ v z) (EuclideanSpace.single j 1))) y from rfl]
   rw [integral_finset_sum _ (fun j _ => h_pair_int i j)]
 
-/-! ## Section 5: Headline substitution identity -/
-
 /-- The headline substitution identity. Substitute the test function
 `v_test = D_{-h}^k(η² · D_h^k u)` into the weak-solution identity
 `B(u, v_test) = ⟨f, v_test⟩`, apply discrete IBP to the principal part, and
@@ -498,39 +422,21 @@ theorem nirenberg_substitution_identity
     = ∫ x in Ω, f x * nirenbergTestFunction k h η u x := by
   classical
   have hu : ContDiff ℝ (⊤ : ℕ∞) u := h_weak.1
-  -- Step 1. Show that the test function is admissible.
   obtain ⟨h_v_smooth, h_v_supp, h_v_tsupp⟩ :=
     nirenbergTestFunction_is_admissible_test (d := d) hη hη_supp hu k hh hh_supp
-  -- Step 2. Apply the weak-solution identity.
-  -- B.bilin u v_test = ∫_Ω f · v_test.
   have h_bilin : B.bilin u (nirenbergTestFunction k h η u) =
       ∫ x in Ω, f x * nirenbergTestFunction k h η u x :=
     h_weak.2 (nirenbergTestFunction k h η u) h_v_smooth h_v_supp h_v_tsupp
-  -- Step 3. Unfold `B.bilin`:
-  -- B.bilin u v = ∫_Ω (B.principalIntegrand u v + B.c · u · v).
   have h_bilin_unfold :
       B.bilin u (nirenbergTestFunction k h η u) =
         ∫ x in Ω, B.principalIntegrand u (nirenbergTestFunction k h η u) x +
           B.c x * u x * (nirenbergTestFunction k h η u) x := rfl
-  -- Step 4. The integrand is supported in tsupport v_test ⊆ Ω, hence
-  -- the integral over Ω equals integral over univ for the v_test factor.
-  -- We split the integral into principal + zeroth-order parts.
-  -- For both pieces, the integrand is continuous and compactly supported on E
-  -- with support inside Ω, so ∫_Ω = ∫_E.
-  -- Continuity & compact support of pieces:
-  -- - principal integrand u v_test: continuous, supported in tsupport v_test
-  --   (since fderiv v_test vanishes outside tsupport v_test).
-  -- - c · u · v_test: continuous, supported in tsupport v_test.
-  -- - f · v_test: continuous, supported in tsupport v_test.
   have h_v_C1 : ContDiff ℝ 1 (nirenbergTestFunction k h η u) :=
     h_v_smooth.of_le (by norm_cast)
   have hu_C1 : ContDiff ℝ 1 u := hu.of_le (by norm_cast)
   have h_principal_cont :
       Continuous (B.principalIntegrand u (nirenbergTestFunction k h η u)) :=
     B.continuous_principalIntegrand hu_C1 h_v_C1
-  -- Compact support of principal integrand: the integrand factors a `∂_j v_test`
-  -- which has support inside `tsupport v_test`, so the whole integrand has
-  -- compact support.
   have h_partial_v_supp : ∀ j : Fin d,
       HasCompactSupport
         (fun x : E =>
@@ -539,26 +445,18 @@ theorem nirenberg_substitution_identity
     fun j => h_v_supp.fderiv_apply (𝕜 := ℝ) _
   have h_principal_supp :
       HasCompactSupport (B.principalIntegrand u (nirenbergTestFunction k h η u)) := by
-    -- principal integrand = ∑_{i, j} a^{ij} (∂_i u) (∂_j v_test).
-    -- Each summand has compact support coming from `∂_j v_test`.
-    -- The sum of compactly supported functions is compactly supported.
     unfold SmoothEllipticBilinearForm.principalIntegrand
-    -- We show the support of the sum is inside tsupport v_test.
     refine HasCompactSupport.intro (K := tsupport (nirenbergTestFunction k h η u))
       (h_v_supp) ?_
     intro x hx
-    -- For x ∉ tsupport v_test, fderiv v_test x = 0, so ∂_j v_test = 0 for all j.
-    -- Hence the inner sum vanishes, and so the outer sum vanishes.
     have h_fderiv_v_zero : fderiv ℝ (nirenbergTestFunction k h η u) x = 0 :=
       fderiv_of_notMem_tsupport (𝕜 := ℝ) hx
     refine Finset.sum_eq_zero ?_
     intro i _
     refine Finset.sum_eq_zero ?_
     intro j _
-    -- B.a x i j * (∂_i u x) * (∂_j v_test x) = ... * 0 = 0.
     rw [h_fderiv_v_zero]
     simp
-  -- The function `B.c x * u x * v_test x` has compact support in tsupport v_test.
   have h_c_u_v_cont :
       Continuous
         (fun x : E => B.c x * u x * (nirenbergTestFunction k h η u) x) :=
@@ -567,7 +465,6 @@ theorem nirenberg_substitution_identity
       HasCompactSupport
         (fun x : E => B.c x * u x * (nirenbergTestFunction k h η u) x) :=
     h_v_supp.mul_left
-  -- The bilin integrand has compact support inside tsupport v_test, hence in Ω.
   have h_bilin_integrand_cont :
       Continuous
         (fun x : E =>
@@ -580,20 +477,14 @@ theorem nirenberg_substitution_identity
           B.principalIntegrand u (nirenbergTestFunction k h η u) x +
             B.c x * u x * (nirenbergTestFunction k h η u) x) :=
     h_principal_supp.add h_c_u_v_supp
-  -- The bilin integrand is supported in tsupport v_test ⊆ Ω.
   have h_bilin_integrand_tsupport :
       tsupport
         (fun x : E =>
           B.principalIntegrand u (nirenbergTestFunction k h η u) x +
             B.c x * u x * (nirenbergTestFunction k h η u) x) ⊆ Ω := by
-    -- The function vanishes outside tsupport v_test (use continuity arg.):
-    -- if x ∉ tsupport v_test, then v_test x = 0 and fderiv v_test x = 0.
-    -- Hence both principal and lower-order pieces vanish.
     refine subset_trans ?_ h_v_tsupp
-    -- support of (P + Q) ⊆ support P ∪ support Q ⊆ tsupport v_test ∪ tsupport v_test = tsupport v_test.
     refine closure_minimal ?_ isClosed_closure
     intro x hx
-    -- x ∈ support of the sum ⇒ the sum is nonzero ⇒ either P or Q is nonzero.
     have h_or :
         B.principalIntegrand u (nirenbergTestFunction k h η u) x ≠ 0 ∨
           B.c x * u x * (nirenbergTestFunction k h η u) x ≠ 0 := by
@@ -606,9 +497,6 @@ theorem nirenberg_substitution_identity
       rw [not_not.mp hb1, not_not.mp hb2, add_zero]
     cases h_or with
     | inl hP =>
-      -- Principal nonzero ⇒ x ∈ support of principal ⊆ tsupport v_test.
-      -- A direct argument: principal = ∑_{i j} a^{ij} ∂_i u ∂_j v_test;
-      -- if x ∉ tsupport v_test, fderiv v_test x = 0, sum = 0.
       by_contra hx_not
       apply hP
       unfold SmoothEllipticBilinearForm.principalIntegrand
@@ -621,41 +509,24 @@ theorem nirenberg_substitution_identity
       rw [h_fderiv_v_zero]
       simp
     | inr hQ =>
-      -- c·u·v_test ≠ 0 at x ⇒ v_test x ≠ 0 ⇒ x ∈ support v_test ⊆ tsupport v_test.
       have hv_ne : (nirenbergTestFunction k h η u) x ≠ 0 := by
         intro hv0
         apply hQ
         rw [hv0, mul_zero]
       have hv_supp : x ∈ Function.support (nirenbergTestFunction k h η u) := hv_ne
       exact subset_closure hv_supp
-  -- The function `f · v_test` has compact support in tsupport v_test ⊆ Ω.
-  -- (We don't need continuity of `f`; only that the integrand has support in
-  -- tsupport v_test ⊆ Ω.)
-  -- We use: if a function `F` vanishes outside `Ω`, then `∫_Ω F = ∫_E F`.
-  -- More directly: ∫_Ω F = ∫_E F · 1_Ω = ∫_E F (when F vanishes outside Ω).
-  -- For our context, both `bilin integrand` and `f · v_test` vanish outside
-  -- `tsupport v_test ⊆ Ω`, so we can pass freely.
-  -- Step 5: Convert ∫_Ω (bilin integrand) = ∫_E (bilin integrand) by extending
-  -- the integrand to be zero outside Ω.
-  -- Mathlib's `setIntegral_eq_integral_of_forall_compl_eq_zero` / similar:
-  -- if `f x = 0` for `x ∉ s`, then `∫ x in s, f x = ∫ x, f x`. We use the
-  -- compact-support version `setIntegral_eq_integral_of_hasCompactSupport`.
   have h_bilin_to_univ :
       ∫ x in Ω, B.principalIntegrand u (nirenbergTestFunction k h η u) x +
             B.c x * u x * (nirenbergTestFunction k h η u) x =
         ∫ x, B.principalIntegrand u (nirenbergTestFunction k h η u) x +
             B.c x * u x * (nirenbergTestFunction k h η u) x
           ∂(volume : Measure E) := by
-    -- The integrand vanishes outside `tsupport v_test ⊆ Ω`, so vanishes
-    -- outside Ω.
     have h_zero_compl : ∀ x ∉ Ω,
         B.principalIntegrand u (nirenbergTestFunction k h η u) x +
             B.c x * u x * (nirenbergTestFunction k h η u) x = 0 := by
       intro x hx
-      -- x ∉ Ω ⇒ x ∉ tsupport v_test (since tsupport v_test ⊆ Ω).
       have hx_not : x ∉ tsupport (nirenbergTestFunction k h η u) := by
         intro hx_in; exact hx (h_v_tsupp hx_in)
-      -- v_test vanishes outside its tsupport, and so does its fderiv.
       have hv_zero : (nirenbergTestFunction k h η u) x = 0 :=
         image_eq_zero_of_notMem_tsupport hx_not
       have h_fderiv_v_zero : fderiv ℝ (nirenbergTestFunction k h η u) x = 0 :=
@@ -665,7 +536,6 @@ theorem nirenberg_substitution_identity
       unfold SmoothEllipticBilinearForm.principalIntegrand
       rw [h_fderiv_v_zero, hv_zero]
       simp
-    -- Use `setIntegral_eq_integral_of_forall_compl_eq_zero`.
     have h := setIntegral_eq_integral_of_forall_compl_eq_zero
       (μ := (volume : Measure E)) (s := Ω)
       (f := fun x => B.principalIntegrand u (nirenbergTestFunction k h η u) x +
@@ -685,7 +555,6 @@ theorem nirenberg_substitution_identity
     exact setIntegral_eq_integral_of_forall_compl_eq_zero
       (μ := (volume : Measure E)) (s := Ω)
       (f := fun x => f x * nirenbergTestFunction k h η u x) h_zero_compl
-  -- We also need to push `∫_Ω B.c · u · v_test = ∫_E B.c · u · v_test`:
   have h_c_u_v_to_univ :
       ∫ x in Ω, B.c x * u x * nirenbergTestFunction k h η u x =
         ∫ x, B.c x * u x * nirenbergTestFunction k h η u x
@@ -701,7 +570,6 @@ theorem nirenberg_substitution_identity
     exact setIntegral_eq_integral_of_forall_compl_eq_zero
       (μ := (volume : Measure E)) (s := Ω)
       (f := fun x => B.c x * u x * nirenbergTestFunction k h η u x) h_zero_compl
-  -- Step 6: Likewise: ∫_Ω (P + Q) = ∫ P + ∫ Q (E-wide), using integrability.
   have h_principal_int :
       Integrable (B.principalIntegrand u (nirenbergTestFunction k h η u))
         volume :=
@@ -710,7 +578,6 @@ theorem nirenberg_substitution_identity
       Integrable
         (fun x => B.c x * u x * nirenbergTestFunction k h η u x) volume :=
     h_c_u_v_cont.integrable_of_hasCompactSupport h_c_u_v_supp
-  -- Combine `h_bilin_to_univ` with `integral_add`.
   have h_bilin_split :
       ∫ x, B.principalIntegrand u (nirenbergTestFunction k h η u) x +
           B.c x * u x * (nirenbergTestFunction k h η u) x
@@ -720,7 +587,6 @@ theorem nirenberg_substitution_identity
           ∫ x, B.c x * u x * nirenbergTestFunction k h η u x
             ∂(volume : Measure E) :=
     integral_add h_principal_int h_c_u_v_int
-  -- Step 7: Apply sum-integral commutation.
   have h_sum_int :
       ∫ x, B.principalIntegrand u (nirenbergTestFunction k h η u) x
         ∂(volume : Measure E) =
@@ -730,7 +596,6 @@ theorem nirenberg_substitution_identity
             (EuclideanSpace.single j 1))
         ∂(volume : Measure E) :=
     integral_principalIntegrand_eq_sum_integral (d := d) B hu h_v_smooth h_v_supp
-  -- Step 8: Apply per-pair IBP.
   have h_pair_IBP : ∀ i j : Fin d,
       ∫ x, B.a x i j *
           ((fderiv ℝ u x) (EuclideanSpace.single i 1)) *
@@ -745,27 +610,6 @@ theorem nirenberg_substitution_identity
     intro i j
     exact integral_a_partial_u_partial_diffQuot_eq (d := d) B hu hη hη_supp
       i j k hh
-  -- Combine all of these:
-  -- LHS of goal: -∑_{i, j} ∫ D_h^k(a^{ij} ∂_i u) · ∂_j(η² D_h^k u) +
-  --              ∫_Ω c · u · v_test
-  -- We aim to show this equals `∫_Ω f · v_test`.
-  --
-  -- We have:
-  -- (a) B.bilin u v_test = ∫_Ω f · v_test                            [h_bilin]
-  -- (b) B.bilin u v_test = ∫_Ω (P + Q)                              [h_bilin_unfold]
-  -- (c) ∫_Ω (P + Q) = ∫_E (P + Q) = ∫_E P + ∫_E Q
-  -- (d) ∫_E P = ∑_{i, j} ∫ a^{ij} ∂_i u ∂_j v_test                  [h_sum_int]
-  -- (e) ∫ a^{ij} ∂_i u ∂_j v_test = -∫ D_h^k(a^{ij} ∂_i u) · ∂_j(η² D_h^k u)
-  --                                                                  [h_pair_IBP]
-  -- (f) ∫_E Q = ∫_Ω Q                                                [h_c_u_v_to_univ]
-  -- (g) ∫_E (f · v_test) = ∫_Ω (f · v_test)                          [h_f_v_to_univ]
-  -- Putting together:
-  --   ∫_Ω f · v_test = ∫_E (P + Q) = ∑_{i j} ∫ a^{ij} ... ∂_j v_test + ∫_Ω Q
-  --                  = -∑_{i j} ∫ D_h^k(a^{ij} ∂_i u) · ∂_j(η² D_h^k u) + ∫_Ω Q
-  -- So:
-  --   -∑_{i j} ∫ D_h^k(a^{ij} ∂_i u) · ∂_j(η² D_h^k u) + ∫_Ω Q = ∫_Ω f · v_test.
-  -- This is exactly the goal.
-  -- Now let's chain.
   have hSwap_sum_neg :
       ∑ i : Fin d, ∑ j : Fin d, ∫ x, B.a x i j *
           ((fderiv ℝ u x) (EuclideanSpace.single i 1)) *
@@ -778,7 +622,6 @@ theorem nirenberg_substitution_identity
             ((fderiv ℝ (fun y : E => η y ^ 2 * diffQuot k h u y) x)
               (EuclideanSpace.single j 1))
           ∂(volume : Measure E) := by
-    -- ∑ i ∑ j (-X_{i j}) = -∑ i ∑ j X_{i j}.
     rw [show
       (∑ i : Fin d, ∑ j : Fin d, ∫ x, B.a x i j *
             ((fderiv ℝ u x) (EuclideanSpace.single i 1)) *
@@ -800,7 +643,6 @@ theorem nirenberg_substitution_identity
       refine Finset.sum_congr rfl ?_
       intro j _
       exact h_pair_IBP i j
-  -- Compute ∫_Ω f · v_test by chaining.
   have h_chain :
       ∫ x in Ω, f x * nirenbergTestFunction k h η u x =
         -∑ i : Fin d, ∑ j : Fin d,
@@ -810,7 +652,6 @@ theorem nirenberg_substitution_identity
                 (EuclideanSpace.single j 1))
             ∂(volume : Measure E) +
           ∫ x in Ω, B.c x * u x * nirenbergTestFunction k h η u x := by
-    -- Using h_bilin and h_bilin_unfold.
     rw [← h_bilin, h_bilin_unfold, h_bilin_to_univ, h_bilin_split, h_sum_int,
       hSwap_sum_neg, h_c_u_v_to_univ]
   linarith

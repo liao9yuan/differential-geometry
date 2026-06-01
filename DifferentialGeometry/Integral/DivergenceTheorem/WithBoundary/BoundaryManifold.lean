@@ -71,17 +71,12 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
-/-! ## Auxiliary lemma: the smoothness exponent `∞` is nonzero -/
-
 /-- The smoothness exponent `∞` (i.e., `((⊤ : ℕ∞) : WithTop ℕ∞)`) is not
 equal to `0`. -/
 private lemma infty_ne_zero_withTopENat : (∞ : WithTop ℕ∞) ≠ 0 := by
   intro h
-  -- `∞ = ↑(⊤ : ℕ∞)`, so `∞ = 0 = ↑(0 : ℕ∞)` reduces to `⊤ = 0` in `ℕ∞`.
   have h' : ((⊤ : ℕ∞) : WithTop ℕ∞) = ((0 : ℕ∞) : WithTop ℕ∞) := h
   exact ENat.top_ne_zero (WithTop.coe_eq_coe.mp h')
-
-/-! ## The boundary as a topological subtype -/
 
 variable (I) (M) in
 /-- The boundary of a manifold `M` modelled on `(E, H, I)`, viewed as a
@@ -126,13 +121,6 @@ instance instT2Space [T2Space M] : T2Space (BoundaryManifold I M) :=
 
 end BoundaryManifold
 
-/-! ## The boundary parameterisation lemma
-
-Below we formalise the equivalence between the image of `inclH` in `H` and
-the `H`-valued chart image of boundary points, via the `I`-injectivity and
-the typeclass range identity.
--/
-
 namespace HasSmoothBoundary
 
 variable (I)
@@ -156,20 +144,10 @@ theorem mem_range_inclH_iff (h : H) :
 
 end HasSmoothBoundary
 
-/-! ## The boundary chart at a point
-
-We now construct, for each boundary point, an `OpenPartialHomeomorph`
-between an open subset of `BoundaryManifold I M` and an open subset of
-`hI.boundaryH`. The construction is independent of the smooth-manifold
-structure: only topological data is used.
--/
-
 namespace BoundaryManifold
 
 variable [hI : HasSmoothBoundary E H I]
 variable [IsManifold I ∞ M]
-
-/-! ### Chart source and target -/
 
 /-- Source of the boundary chart at `x : BoundaryManifold I M`: the boundary
 points whose underlying manifold image lies in the source of the ambient
@@ -199,13 +177,6 @@ theorem isOpen_boundaryChartTarget (x : BoundaryManifold I M) :
   unfold boundaryChartTarget
   exact (chartAt H (x : M)).open_target.preimage hI.inclH_continuous
 
-/-! ### Chart functions
-
-We build the chart's forward and inverse maps via `Function.invFun hI.inclH`.
-This requires `Nonempty hI.boundaryH`; we install a local `Nonempty` instance
-on every nonempty `BoundaryManifold` source argument.
--/
-
 /-- The forward map of the boundary chart at `x`: send a boundary point
 `y` to the unique `z : boundaryH` with `inclH z = chartAt H x y`. The
 `Function.invFun`-based selection agrees with the unique preimage on the
@@ -227,14 +198,6 @@ def boundaryChartInvFun (x : BoundaryManifold I M)
   else
     x
 
-/-! ### Domain conditions
-
-The key fact: for any boundary point `y` and any chart `chartAt H x.val`
-whose source contains `y`, the chart image `chartAt H x.val y.val` is in
-the image of `inclH`. Equivalently, `I (chartAt H x.val y.val)` lies in
-`frontier (Set.range I)`.
--/
-
 /-- For a boundary point `y` in the source of `chartAt H x.val`, the chart
 image `chartAt H x.val y.val` lies in the model-level boundary
 `frontier (Set.range I)`. This is the chart-independent characterisation
@@ -249,31 +212,21 @@ theorem extChart_mem_frontier_of_mem_source
   have hAtlas : chartAt H (x : M) ∈ atlas H M := chart_mem_atlas H _
   have h_iff := ModelWithCorners.isBoundaryPoint_iff_of_mem_atlas
     (I := I) (n := ∞) hOne hAtlas hy
-  -- `h_iff : IsBoundaryPoint y.val ↔ extend ... ∈ frontier (extend.target)`.
   have hyEx : (chartAt H (x : M)).extend I (y : M) ∈
       frontier ((chartAt H (x : M)).extend I).target := h_iff.mp hyx
-  -- `extend (chartAt H x.val) I = I ∘ chartAt H x.val` by definition.
   have hExtend : (chartAt H (x : M)).extend I (y : M) = I (chartAt H (x : M) (y : M)) := rfl
   rw [hExtend] at hyEx
-  -- Now show that frontier of extend.target relates to frontier of `range I`.
-  -- The point `I (chartAt H x.val y.val)` is in the `extend.target`, hence in `range I`.
-  -- Frontier of `extend.target` ⊆ frontier of `range I` since `extend.target` is the trace
-  -- on `range I` of an open set in `E`.
   by_contra hC
-  -- If not in frontier (range I), then either in interior or in complement of closure.
-  -- Since the point is in `range I` (hence closure), it must be in interior.
   have hInRange : I (chartAt H (x : M) (y : M)) ∈ Set.range I := mem_range_self _
   have hClosure : I (chartAt H (x : M) (y : M)) ∈ closure (Set.range I) := subset_closure hInRange
   have hC' : I (chartAt H (x : M) (y : M)) ∉ frontier (Set.range I) := hC
   rw [frontier, Set.mem_diff] at hC'
   push Not at hC'
   have hI_int : I (chartAt H (x : M) (y : M)) ∈ interior (Set.range I) := hC' hClosure
-  -- Now use `mem_interior_extend_target`.
   have h_target_int :
       I (chartAt H (x : M) (y : M)) ∈ interior ((chartAt H (x : M)).extend I).target :=
     (chartAt H (x : M)).mem_interior_extend_target
       ((chartAt H (x : M)).map_source hy) hI_int
-  -- Frontier and interior are disjoint.
   exact (disjoint_interior_frontier
       (s := ((chartAt H (x : M)).extend I).target)).le_bot
     (show I (chartAt H (x : M) (y : M)) ∈ _ ∩ _ from ⟨h_target_int, hyEx⟩)
@@ -305,7 +258,6 @@ theorem boundaryChartInvFun_val_of_mem_target
     ((boundaryChartInvFun (I := I) x z) : M) =
       (chartAt H (x : M)).symm (hI.inclH z) := by
   unfold boundaryChartInvFun
-  -- We need: `(chartAt H x.val).symm (inclH z) ∈ I.boundary M`.
   have hz_target : hI.inclH z ∈ (chartAt H (x : M)).target := hz
   have h_pre_in_source : (chartAt H (x : M)).symm (hI.inclH z) ∈
       (chartAt H (x : M)).source := (chartAt H (x : M)).map_target hz_target
@@ -317,7 +269,6 @@ theorem boundaryChartInvFun_val_of_mem_target
         frontier (Set.range I) := by
     rw [h_chart_eq]
     exact (HasSmoothBoundary.mem_range_inclH_iff (I := I) _).mp ⟨z, rfl⟩
-  -- Convert back to `IsBoundaryPoint`.
   have hOne : (∞ : WithTop ℕ∞) ≠ 0 := infty_ne_zero_withTopENat
   have hAtlas : chartAt H (x : M) ∈ atlas H M := chart_mem_atlas H _
   have h_iff := ModelWithCorners.isBoundaryPoint_iff_of_mem_atlas
@@ -325,15 +276,11 @@ theorem boundaryChartInvFun_val_of_mem_target
   have hExtendEq :
       (chartAt H (x : M)).extend I ((chartAt H (x : M)).symm (hI.inclH z)) =
         I (chartAt H (x : M) ((chartAt H (x : M)).symm (hI.inclH z))) := rfl
-  -- Show extend-frontier-membership.
   have hExtFrontier :
       (chartAt H (x : M)).extend I ((chartAt H (x : M)).symm (hI.inclH z)) ∈
         frontier ((chartAt H (x : M)).extend I).target := by
     rw [hExtendEq]
     by_contra hC
-    -- The point is in `extend.target`, hence in `range I`. If not in frontier of extend.target,
-    -- it's in interior of extend.target, hence (by interior_extend_target_subset_interior_range)
-    -- in interior of `range I`, contradicting `h_image_in_frontier`.
     have h_in_target :
         I (chartAt H (x : M) ((chartAt H (x : M)).symm (hI.inclH z))) ∈
           ((chartAt H (x : M)).extend I).target := by
@@ -405,17 +352,11 @@ theorem boundaryChart_right_inv [Nonempty hI.boundaryH]
   rw [(chartAt H (x : M)).right_inv hz]
   exact Function.leftInverse_invFun hI.inclH_injective z
 
-/-! ### Continuity of the chart maps -/
-
 /-- The forward map is continuous on the chart source. -/
 theorem continuousOn_boundaryChartFun [Nonempty hI.boundaryH]
     (x : BoundaryManifold I M) :
     ContinuousOn (boundaryChartFun (I := I) x) (boundaryChartSource (I := I) x) := by
-  -- Use `IsInducing.continuousOn_iff` for `inclH` to reduce to continuity of
-  -- `inclH ∘ boundaryChartFun x`, which on the source equals the ambient chart.
   rw [hI.inclH_isInducing.continuousOn_iff]
-  -- Goal: ContinuousOn (inclH ∘ boundaryChartFun x) (boundaryChartSource x).
-  -- The known-continuous function is `chartAt H x.val ∘ Subtype.val`.
   have h_cont :
       ContinuousOn (fun y : BoundaryManifold I M => chartAt H (x : M) (y : M))
         (boundaryChartSource (I := I) x) :=
@@ -423,7 +364,6 @@ theorem continuousOn_boundaryChartFun [Nonempty hI.boundaryH]
       continuous_subtype_val.continuousOn (fun _ hy => hy)
   refine h_cont.congr ?_
   intro y hy
-  -- Need: `(inclH ∘ boundaryChartFun x) y = chartAt H x.val y.val`.
   change (hI.inclH ∘ boundaryChartFun (I := I) x) y = chartAt H (x : M) (y : M)
   simp only [Function.comp_apply]
   exact inclH_boundaryChartFun_apply (I := I) (x := x) (y := y) hy
@@ -432,18 +372,10 @@ theorem continuousOn_boundaryChartFun [Nonempty hI.boundaryH]
 theorem continuousOn_boundaryChartInvFun
     (x : BoundaryManifold I M) :
     ContinuousOn (boundaryChartInvFun (I := I) x) (boundaryChartTarget (I := I) x) := by
-  -- Continuity of `f : H' → BoundaryManifold I M` is determined by continuity of
-  -- `Subtype.val ∘ f` (since `BoundaryManifold I M` has the subtype topology).
-  -- Convert to the within-the-target restricted form to use `Continuous.subtype_mk`.
   rw [continuousOn_iff_continuous_restrict]
-  -- Now goal: `Continuous ((target).restrict (boundaryChartInvFun x))`.
-  -- We exhibit the underlying continuous map `(chartAt H x.val).symm ∘ inclH ∘ Subtype.val`
-  -- and lift via `Continuous.subtype_mk`.
   have h_underlying : Continuous
       (fun w : (boundaryChartTarget (I := I) x) =>
         (chartAt H (x : M)).symm (hI.inclH (w : hI.boundaryH))) := by
-    -- `(chartAt H x.val).symm` is continuous on its target; the composition with
-    -- `inclH ∘ Subtype.val` is continuous on the boundary chart target.
     have h_chart_symm_on : ContinuousOn (chartAt H (x : M)).symm
         (chartAt H (x : M)).target := (chartAt H (x : M)).continuousOn_symm
     have h_inclH_subtype : Continuous
@@ -451,40 +383,25 @@ theorem continuousOn_boundaryChartInvFun
       hI.inclH_continuous.comp continuous_subtype_val
     have h_maps : ∀ u : (boundaryChartTarget (I := I) x),
         hI.inclH (u : hI.boundaryH) ∈ (chartAt H (x : M)).target := fun u => u.2
-    -- Use `ContinuousOn.comp_continuous` to convert to a `Continuous` statement.
     exact h_chart_symm_on.comp_continuous h_inclH_subtype h_maps
-  -- Boundary-membership condition for the underlying values.
   have h_in_boundary : ∀ w : (boundaryChartTarget (I := I) x),
       (chartAt H (x : M)).symm (hI.inclH (w : hI.boundaryH)) ∈ I.boundary M := by
     intro w
     have hz : (w : hI.boundaryH) ∈ boundaryChartTarget (I := I) x := w.2
     have h_invFun_val :=
       boundaryChartInvFun_val_of_mem_target (I := I) x hz
-    -- `boundaryChartInvFun x w` is in `BoundaryManifold I M`, so its underlying
-    -- value is in `I.boundary M`.
     have hb : ((boundaryChartInvFun (I := I) x w) : M) ∈ I.boundary M :=
       (boundaryChartInvFun (I := I) x w).2
     rw [← h_invFun_val]
     exact hb
-  -- Lift to a continuous map into `BoundaryManifold I M`.
   have h_lifted : Continuous fun w : (boundaryChartTarget (I := I) x) =>
       (⟨(chartAt H (x : M)).symm (hI.inclH (w : hI.boundaryH)),
         h_in_boundary w⟩ : BoundaryManifold I M) :=
     h_underlying.subtype_mk h_in_boundary
-  -- The restricted `boundaryChartInvFun x` agrees with this lifted map.
   refine h_lifted.congr ?_
   intro w
-  -- `h_lifted` evaluated at `w` is `⟨(chartAt H x.val).symm (inclH w.val), _⟩`,
-  -- while the restricted `boundaryChartInvFun x` is `boundaryChartInvFun x w.val`.
-  -- Both have the same underlying value by `boundaryChartInvFun_val_of_mem_target`.
   apply ext
-  -- Goal (modulo `Subtype.val`): the underlying values match.
-  -- The two underlying expressions are
-  -- `(chartAt H x.val).symm (inclH w.val)` (the lifted form) and
-  -- `Subtype.val (boundaryChartInvFun x w.val)` (the restricted form).
   exact (boundaryChartInvFun_val_of_mem_target (I := I) x w.2).symm
-
-/-! ### The boundary chart as an `OpenPartialHomeomorph` -/
 
 /-- The boundary chart at `x : BoundaryManifold I M`, as an
 `OpenPartialHomeomorph` from `BoundaryManifold I M` to `hI.boundaryH`.
@@ -541,12 +458,6 @@ theorem inclH_boundaryChart_apply [Nonempty hI.boundaryH]
   change hI.inclH (boundaryChartFun (I := I) x y) = chartAt H (x : M) (y : M)
   exact inclH_boundaryChartFun_apply (I := I) (x := x) (y := y) hy
 
-/-! ### The vacuous boundary case
-
-When `IsEmpty hI.boundaryH`, by the typeclass range identity the boundary
-set `I.boundary M` is empty, hence `BoundaryManifold I M` is empty.
--/
-
 /-- When `boundaryH` is empty, so is `BoundaryManifold I M`: a boundary
 point of `M` produces a frontier point of `range I`, which by the range
 identity must be in `range (I ∘ inclH)` — empty since `boundaryH` is
@@ -562,15 +473,6 @@ theorem isEmpty_of_isEmpty_boundaryH [IsEmpty hI.boundaryH] :
   obtain ⟨z, _⟩ := h_ext
   exact IsEmpty.false z
 
-/-! ## The `ChartedSpace` instance
-
-The atlas of the boundary, in either the inhabited or empty cases, is the
-range of `boundaryChart`. To access `boundaryChart` uniformly we use a default
-chart function `defaultChart` defined for any point of `BoundaryManifold I M`,
-which falls back to a constant when the boundary topological model is empty
-(in which case the boundary set is itself empty and the chart is never
-applied). -/
-
 /-- A "boundary chart" function whose range we use as the boundary atlas. When
 `hI.boundaryH` is nonempty, this is exactly the previously defined
 `boundaryChart`. When `hI.boundaryH` is empty, it is forced to a constant
@@ -582,11 +484,8 @@ def defaultBoundaryChart (x : BoundaryManifold I M) :
   by_cases h : Nonempty hI.boundaryH
   · haveI : Nonempty hI.boundaryH := h
     exact boundaryChart (I := I) x
-  · -- `BoundaryManifold I M` is empty in this branch, so any chart is fine; use
-    -- the trivially empty chart on the empty set.
-    haveI hEmpty : IsEmpty hI.boundaryH := not_nonempty_iff.mp h
+  · haveI hEmpty : IsEmpty hI.boundaryH := not_nonempty_iff.mp h
     haveI : IsEmpty (BoundaryManifold I M) := isEmpty_of_isEmpty_boundaryH (I := I)
-    -- Construct an "empty" partial homeomorphism: source = ∅, target = ∅.
     exact
       { toFun := fun w => (IsEmpty.false w).elim
         invFun := fun z => (hEmpty.false z).elim
@@ -621,8 +520,7 @@ instance chartedSpace : ChartedSpace hI.boundaryH (BoundaryManifold I M) where
       change x ∈ (boundaryChart (I := I) x).source
       rw [boundaryChart_source_eq]
       exact mem_boundaryChartSource_self (I := I) x
-    · -- `BoundaryManifold I M` is empty in this case.
-      haveI : IsEmpty hI.boundaryH := not_nonempty_iff.mp h
+    · haveI : IsEmpty hI.boundaryH := not_nonempty_iff.mp h
       haveI : IsEmpty (BoundaryManifold I M) := isEmpty_of_isEmpty_boundaryH (I := I)
       exact (IsEmpty.false x).elim
   chart_mem_atlas := fun x => ⟨x, rfl⟩
@@ -632,8 +530,6 @@ instance chartedSpace : ChartedSpace hI.boundaryH (BoundaryManifold I M) where
 theorem chartedSpace_atlas :
     @atlas hI.boundaryH _ (BoundaryManifold I M) _ chartedSpace =
       Set.range (fun x : BoundaryManifold I M => defaultBoundaryChart (I := I) x) := rfl
-
-/-! ## Sanity properties -/
 
 /-- The image of `BoundaryManifold I M` in `M` is the set `I.boundary M`. -/
 theorem range_coe_eq_boundary :
@@ -651,17 +547,7 @@ instance instSigmaCompactSpace [SigmaCompactSpace M] :
   have hOne : (∞ : WithTop ℕ∞) ≠ 0 := infty_ne_zero_withTopENat
   have h_closed : IsClosed (I.boundary M) :=
     ModelWithCorners.isClosed_boundary (I := I) (n := ∞) hOne
-  -- `BoundaryManifold I M = {x : M // x ∈ I.boundary M}` is the subtype.
-  -- `IsClosed.sigmaCompactSpace` gives `SigmaCompactSpace (boundary I M : Set M)`.
   exact h_closed.sigmaCompactSpace
-
-/-! ## Smoothness of boundary chart transitions
-
-We now upgrade the `ChartedSpace` structure on `BoundaryManifold I M` to a
-full `IsManifold hI.boundaryI ∞ (BoundaryManifold I M)`. The argument
-factors any boundary transition map (read in `hI.boundaryE` via `boundaryI`)
-through the ambient transition map (read in `E` via `I`), which is smooth
-on its source by `[IsManifold I ∞ M]`. -/
 
 /-- The composite `inclH ∘ boundaryChart x` agrees with the ambient chart
 `chartAt H x.val ∘ Subtype.val`, on the source of the boundary chart. This
@@ -680,7 +566,6 @@ theorem inclH_boundaryChart_symm_apply [Nonempty hI.boundaryH]
     (x : BoundaryManifold I M)
     {z : hI.boundaryH} (hz : z ∈ boundaryChartTarget (I := I) x) :
     chartAt H (x : M) ((boundaryChart (I := I) x).symm z : M) = hI.inclH z := by
-  -- The underlying value of the inverse is `(chartAt H x.val).symm (inclH z)`.
   have h_val : ((boundaryChart (I := I) x).symm z : M) =
       (chartAt H (x : M)).symm (hI.inclH z) := by
     change ((boundaryChartInvFun (I := I) x z) : M) =
@@ -705,18 +590,13 @@ theorem inclH_boundaryChart_trans_apply [Nonempty hI.boundaryH]
     hI.inclH ((boundaryChart (I := I) x).toFun ((boundaryChart (I := I) x').symm z)) =
       chartAt H (x : M)
         ((chartAt H (x' : M)).symm (hI.inclH z)) := by
-  -- Apply the chart-target identity for `(boundaryChart x').symm`.
   have h1 : chartAt H (x' : M) (((boundaryChart (I := I) x').symm z) : M) =
       hI.inclH z := inclH_boundaryChart_symm_apply (I := I) x' hz_target
-  -- Apply the chart-source identity for `(boundaryChart x).toFun`.
   have h2 : hI.inclH ((boundaryChart (I := I) x).toFun
         ((boundaryChart (I := I) x').symm z)) =
       chartAt H (x : M) (((boundaryChart (I := I) x').symm z) : M) :=
     inclH_boundaryChart_apply (I := I) x _ hz_source
   rw [h2]
-  -- Need: `chartAt H x.val (((boundaryChart x').symm z).val) =
-  -- chartAt H x.val ((chartAt H x'.val).symm (inclH z))`.
-  -- This follows from h1 and (chartAt H x'.val).right_inv.
   have h3 : (((boundaryChart (I := I) x').symm z) : M) =
       (chartAt H (x' : M)).symm (hI.inclH z) := by
     change ((boundaryChartInvFun (I := I) x' z) : M) =
@@ -742,8 +622,6 @@ theorem boundaryI_trans_eq_projE_extend [Nonempty hI.boundaryH]
       hI.projE ((chartAt H (x : M)).extend I
         (((chartAt H (x' : M)).extend I).symm
           (I (hI.inclH (hI.boundaryI.symm e))))) := by
-  -- Compute `(chartAt H x'.val).extend I).symm (I (inclH (boundaryI.symm e)))`.
-  -- `((chart).extend I).symm = (chart).symm ∘ I.symm`, so applied to `I y` gives `(chart).symm y`.
   set y : H := hI.inclH (hI.boundaryI.symm e) with hy_def
   have h_extend_symm :
       ((chartAt H (x' : M)).extend I).symm (I y) =
@@ -751,22 +629,17 @@ theorem boundaryI_trans_eq_projE_extend [Nonempty hI.boundaryH]
     change (chartAt H (x' : M)).symm (I.symm (I y)) = (chartAt H (x' : M)).symm y
     rw [I.left_inv y]
   rw [h_extend_symm]
-  -- And `(chartAt H x.val).extend I) y' = I (chartAt H x.val y')`.
   have h_extend :
       (chartAt H (x : M)).extend I ((chartAt H (x' : M)).symm y) =
         I (chartAt H (x : M) ((chartAt H (x' : M)).symm y)) := rfl
   rw [h_extend]
-  -- Now use coordinate compatibility `proj_inclH_compat` and the `inclH_boundaryChart_trans_apply`.
   have h_inclH_trans :
       hI.inclH ((boundaryChart (I := I) x).toFun
           ((boundaryChart (I := I) x').symm (hI.boundaryI.symm e))) =
         chartAt H (x : M) ((chartAt H (x' : M)).symm y) := by
-    -- Substitute y = inclH (boundaryI.symm e) and apply the trans-apply lemma.
     have := inclH_boundaryChart_trans_apply (I := I) x x'
       (z := hI.boundaryI.symm e) hz_target hz_source
-    -- The result equals the desired RHS.
     convert this using 2
-  -- Now apply `proj_inclH_compat`.
   have h_proj :
       hI.projE (I (hI.inclH ((boundaryChart (I := I) x).toFun
           ((boundaryChart (I := I) x').symm (hI.boundaryI.symm e))))) =
@@ -785,27 +658,17 @@ theorem contDiffOn_boundaryChart_trans [Nonempty hI.boundaryH]
       (hI.boundaryI.symm ⁻¹'
         ((boundaryChart (I := I) x').symm ≫ₕ boundaryChart (I := I) x).source ∩
         Set.range hI.boundaryI) := by
-  -- Boundaryless boundary => range boundaryI = univ.
   have h_range_univ : Set.range hI.boundaryI = Set.univ := hI.boundaryI.range_eq_univ
-  -- Set up the ambient transition map.
   set TE : E → E := fun w =>
     (chartAt H (x : M)).extend I
       (((chartAt H (x' : M)).extend I).symm w)
-  -- The ambient transition is smooth on its source by `[IsManifold I ∞ M]`.
   have hAtlasA : chartAt H (x : M) ∈ atlas H M := chart_mem_atlas H _
   have hAtlasA' : chartAt H (x' : M) ∈ atlas H M := chart_mem_atlas H _
   have hT_ambient_trans : (chartAt H (x' : M)).symm ≫ₕ chartAt H (x : M) ∈
       contDiffGroupoid ∞ I :=
     StructureGroupoid.compatible (contDiffGroupoid ∞ I) hAtlasA' hAtlasA
-  -- Extract the pregroupoid property: smoothness of the chart transition.
   have hT_ambient_property := mem_groupoid_of_pregroupoid.mp hT_ambient_trans
   obtain ⟨h_TE_smooth, _⟩ := hT_ambient_property
-  -- Unfold the pregroupoid property.
-  -- `h_TE_smooth : ContDiffOn ℝ ∞ (I ∘ ((chartAt H x'.val).symm ≫ₕ chartAt H x.val) ∘ I.symm)
-  --                (I.symm ⁻¹' ((chartAt H x'.val).symm ≫ₕ chartAt H x.val).source ∩ range I)`.
-  -- The map `I ∘ ((chartAt H x'.val).symm ≫ₕ chartAt H x.val) ∘ I.symm` equals our `TE`
-  -- (modulo the ambient extend factorization).
-  -- Build the smooth source set in `E`.
   set S_ambient : Set E :=
     I.symm ⁻¹' ((chartAt H (x' : M)).symm ≫ₕ chartAt H (x : M)).source ∩ Set.range I
     with hS_ambient_def
@@ -813,36 +676,28 @@ theorem contDiffOn_boundaryChart_trans [Nonempty hI.boundaryH]
       ContDiffOn ℝ ∞
         ((I : H → E) ∘ ((chartAt H (x' : M)).symm ≫ₕ chartAt H (x : M)) ∘ I.symm)
         S_ambient := h_TE_smooth
-  -- Express `TE = I ∘ ((chartAt H x'.val).symm ≫ₕ chartAt H x.val) ∘ I.symm`.
   have hTE_eq : (fun w => (chartAt H (x : M)).extend I
           (((chartAt H (x' : M)).extend I).symm w)) =
       ((I : H → E) ∘ ((chartAt H (x' : M)).symm ≫ₕ chartAt H (x : M)) ∘ I.symm) := by
     funext w
     simp only [Function.comp_apply, OpenPartialHomeomorph.extend_coe,
       OpenPartialHomeomorph.extend_coe_symm, OpenPartialHomeomorph.coe_trans]
-  -- Smoothness of TE on S_ambient.
   have hTE_smooth : ContDiffOn ℝ ∞ TE S_ambient := by
     rw [show TE = (fun w => (chartAt H (x : M)).extend I
         (((chartAt H (x' : M)).extend I).symm w)) from rfl, hTE_eq]
     exact hT_ambient
-  -- Now build the source set in `boundaryE` via `boundaryI.symm`.
   set S_boundary : Set hI.boundaryE :=
     hI.boundaryI.symm ⁻¹'
       ((boundaryChart (I := I) x').symm ≫ₕ boundaryChart (I := I) x).source ∩
       Set.range hI.boundaryI with hS_boundary_def
-  -- Map: `S_boundary` → `E` via `I ∘ inclH ∘ boundaryI.symm` lands in `S_ambient`.
   have hMaps : Set.MapsTo
       (fun e : hI.boundaryE => I (hI.inclH (hI.boundaryI.symm e)))
       S_boundary S_ambient := by
     intro e he
-    -- `he : e ∈ boundaryI.symm ⁻¹' ... ∩ range boundaryI`.
     have he_src : hI.boundaryI.symm e ∈
         ((boundaryChart (I := I) x').symm ≫ₕ boundaryChart (I := I) x).source := he.1
-    -- Unfold the trans source.
     rw [OpenPartialHomeomorph.trans_source] at he_src
     obtain ⟨he_target, he_src_in_chart⟩ := he_src
-    -- `he_target : boundaryI.symm e ∈ (boundaryChart x').symm.source`,
-    -- equivalently ∈ (boundaryChart x').target.
     have he_target' : hI.boundaryI.symm e ∈ (boundaryChart (I := I) x').target := he_target
     have he_src_in_chart' :
         (boundaryChart (I := I) x').symm (hI.boundaryI.symm e) ∈
@@ -852,42 +707,33 @@ theorem contDiffOn_boundaryChart_trans [Nonempty hI.boundaryH]
     have h_inclH_target : hI.inclH (hI.boundaryI.symm e) ∈ (chartAt H (x' : M)).target :=
       he_target'
     refine ⟨?_, mem_range_self _⟩
-    -- Need: `I.symm (I (inclH (boundaryI.symm e))) ∈ ((chartAt x').symm ≫ₕ chartAt x).source`.
     rw [Set.mem_preimage]
     rw [I.left_inv]
-    -- The trans source unfolds.
     rw [OpenPartialHomeomorph.trans_source]
     refine ⟨?_, ?_⟩
-    · -- `inclH (boundaryI.symm e) ∈ (chartAt x').symm.source = (chartAt x').target`.
-      exact h_inclH_target
-    · -- `(chartAt x').symm (inclH (boundaryI.symm e)) ∈ (chartAt x).source`.
-      have h_val_eq : ((boundaryChart (I := I) x').symm (hI.boundaryI.symm e) : M) =
+    · exact h_inclH_target
+    · have h_val_eq : ((boundaryChart (I := I) x').symm (hI.boundaryI.symm e) : M) =
           (chartAt H (x' : M)).symm (hI.inclH (hI.boundaryI.symm e)) := by
         change ((boundaryChartInvFun (I := I) x' (hI.boundaryI.symm e)) : M) =
             (chartAt H (x' : M)).symm (hI.inclH (hI.boundaryI.symm e))
         exact boundaryChartInvFun_val_of_mem_target (I := I) x' he_target
       rw [Set.mem_preimage, ← h_val_eq]
       exact he_src_in_chart'
-  -- The composite `I ∘ inclH ∘ boundaryI.symm : boundaryE → E` is C^∞.
   have h_inner_smooth : ContDiff ℝ ∞
       (fun e : hI.boundaryE => I (hI.inclH (hI.boundaryI.symm e))) :=
     hI.I_inclH_boundaryI_symm_contDiff
-  -- Composition: `TE ∘ (I ∘ inclH ∘ boundaryI.symm)` is C^∞ on S_boundary.
   have h_TE_comp : ContDiffOn ℝ ∞
       (fun e : hI.boundaryE => TE (I (hI.inclH (hI.boundaryI.symm e))))
       S_boundary :=
     hTE_smooth.comp h_inner_smooth.contDiffOn hMaps
-  -- Apply the projection `projE`.
   have h_proj_smooth : ContDiff ℝ ∞ hI.projE := hI.projE_contDiff
   have h_full : ContDiffOn ℝ ∞
       (fun e : hI.boundaryE =>
         hI.projE (TE (I (hI.inclH (hI.boundaryI.symm e)))))
       S_boundary :=
     h_proj_smooth.contDiffOn.comp h_TE_comp (Set.mapsTo_univ _ _)
-  -- Now show that on S_boundary, our target function equals the smooth one.
   refine h_full.congr ?_
   intro e he
-  -- Goal: read-in-`boundaryE` transition equals `projE (TE (I (inclH (boundaryI.symm e))))`.
   have he_src : hI.boundaryI.symm e ∈
       ((boundaryChart (I := I) x').symm ≫ₕ boundaryChart (I := I) x).source := he.1
   rw [OpenPartialHomeomorph.trans_source] at he_src
@@ -898,13 +744,10 @@ theorem contDiffOn_boundaryChart_trans [Nonempty hI.boundaryH]
       (boundaryChart (I := I) x').symm (hI.boundaryI.symm e) ∈
         (boundaryChart (I := I) x).source := he_src_in_chart
   rw [boundaryChart_source_eq] at he_src_in_chart'
-  -- Apply the factorization theorem.
   have h_factor := boundaryI_trans_eq_projE_extend (I := I) x x'
     (e := e) he_target' he_src_in_chart'
-  -- Goal LHS unfolds to `boundaryI ∘ ((boundaryChart x').symm ≫ₕ boundaryChart x) ∘ boundaryI.symm`.
   change hI.boundaryI (((boundaryChart (I := I) x').symm ≫ₕ boundaryChart (I := I) x)
       (hI.boundaryI.symm e)) = hI.projE (TE (I (hI.inclH (hI.boundaryI.symm e))))
-  -- The `≫ₕ` unfolds to function composition.
   rw [OpenPartialHomeomorph.coe_trans, Function.comp_apply]
   exact h_factor
 
@@ -912,26 +755,19 @@ theorem contDiffOn_boundaryChart_trans [Nonempty hI.boundaryH]
 manifold and the smoothness fields of `HasSmoothBoundary`. -/
 instance isManifold : IsManifold hI.boundaryI ∞ (BoundaryManifold I M) := by
   by_cases h : Nonempty hI.boundaryH
-  · -- Nonempty boundary case.
-    haveI hN : Nonempty hI.boundaryH := h
+  · haveI hN : Nonempty hI.boundaryH := h
     apply isManifold_of_contDiffOn
     intro e e' he he'
-    -- Both `e` and `e'` are in the atlas, hence of the form `defaultBoundaryChart x`
-    -- which equals `boundaryChart x`.
     rw [chartedSpace_atlas (I := I) (M := M)] at he he'
     obtain ⟨x', hx'⟩ := he
     obtain ⟨x, hx⟩ := he'
-    -- Beta-reduce the lambdas in the goal hypotheses.
     simp only at hx hx'
-    -- Replace `defaultBoundaryChart` by `boundaryChart` using the equality.
     rw [defaultBoundaryChart_eq_boundaryChart (I := I) x'] at hx'
     rw [defaultBoundaryChart_eq_boundaryChart (I := I) x] at hx
     subst hx'
     subst hx
-    -- Apply the smoothness lemma.
     exact contDiffOn_boundaryChart_trans (I := I) x x'
-  · -- Empty boundary: BoundaryManifold I M is empty, use the empty instance.
-    haveI : IsEmpty hI.boundaryH := not_nonempty_iff.mp h
+  · haveI : IsEmpty hI.boundaryH := not_nonempty_iff.mp h
     haveI : IsEmpty (BoundaryManifold I M) := isEmpty_of_isEmpty_boundaryH (I := I)
     infer_instance
 

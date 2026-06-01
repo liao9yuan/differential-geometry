@@ -69,12 +69,6 @@ open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-Match the convention in the surrounding tensor-regularity files: install the
-Borel σ-algebras locally, without leaking global instances onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -88,15 +82,6 @@ variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
 /-- The local dimension of the chart, as a natural number. -/
 local notation "dimE" => Module.finrank ℝ E
-
-/-! ### The source-pairing group
-
-The source-pairing group `densityOnEuclid · sourcePairingCoeff` is, on the chart
-target, the finite sum over component-multi-index pairs `(Q, P)` of the smooth
-chart coefficient `densityOnEuclid · gramInvEntry · covChartMetricGram` times the
-chart component `tensorComponentEuclid F P`. Its `W^{m,2}` norm is therefore
-bounded by the `W^{m,2}` norms of the chart components of `F`, with a uniform
-constant. -/
 
 /-- **The `W^{m,2}` bound for the source-pairing group.** There is a constant
 `Kc ≥ 0`, depending only on the geometric data, such that for every
@@ -125,7 +110,6 @@ private lemma exists_densityMul_sourcePairingCoeff_wkpNorm_le
               wkpNorm (d := dimE) m 2
                 (tensorComponentEuclid (I := I) (M := M) g r s F α P) Ω'' := by
   classical
-  -- The chart coefficient family, indexed by pairs `(Q, P)`.
   set cF : CompIdx E r s × CompIdx E r s → EuclN → ℝ :=
     fun a y => densityOnEuclid (I := I) g α y *
       gramInvEntry (I := I) (M := M) g r s α a.1 P₀ y *
@@ -141,7 +125,6 @@ private lemma exists_densityMul_sourcePairingCoeff_wkpNorm_le
       Finset.univ cF hcF_cd
   refine ⟨Kc, hKc_nn, ?_⟩
   intro F hF_supp hF_K Ω'' hΩ''_open hΩ''_target
-  -- The chart-component family of `F`.
   set vF : CompIdx E r s × CompIdx E r s → EuclN → ℝ :=
     fun a => tensorComponentEuclid (I := I) (M := M) g r s F α a.2 with hvF_def
   have hvF_cd : ∀ a ∈ (Finset.univ : Finset (CompIdx E r s × CompIdx E r s)),
@@ -152,7 +135,6 @@ private lemma exists_densityMul_sourcePairingCoeff_wkpNorm_le
     tensorComponentEuclid_hasCompactSupport (I := I) (M := M) g r s F α a.2 hF_supp
   have hvF_K : ∀ a ∈ (Finset.univ : Finset (CompIdx E r s × CompIdx E r s)),
       tsupport (vF a) ⊆ K := fun a _ => hF_K a.2
-  -- Each term norm is bounded by the full sum of the `F`-component norms.
   have hvF_bd : ∀ a ∈ (Finset.univ : Finset (CompIdx E r s × CompIdx E r s)),
       wkpNorm (d := dimE) m 2 (vF a) Ω'' ≤
         ∑ P : CompIdx E r s, wkpNorm (d := dimE) m 2
@@ -164,7 +146,6 @@ private lemma exists_densityMul_sourcePairingCoeff_wkpNorm_le
       (fun P _ => zero_le _) (Finset.mem_univ a.2)
   obtain ⟨h_sum_mem, h_sum_le⟩ :=
     hKc hvF_cd hvF_cpt hvF_K hΩ''_open hΩ''_target hvF_bd
-  -- On the chart target the group equals the finite chart-coefficient sum.
   have h_eqOn : Set.EqOn
       (fun y => densityOnEuclid (I := I) g α y *
         sourcePairingCoeff (I := I) (M := M) g r s F α P₀ y)
@@ -194,15 +175,6 @@ private lemma exists_densityMul_sourcePairingCoeff_wkpNorm_le
     hΩ''_open h_ae]
   exact h_sum_le
 
-/-! ### The principal-rotation group
-
-The principal-rotation group `densityOnEuclid · covPrincipalRotationCoeff` is, on
-the chart target, the finite sum over index tuples `(P, Q, k, l)` of a smooth
-chart coefficient times the chart-Euclidean partial `∂_k` of the chart component
-`tensorComponentEuclid T P`. Because each summand carries a single chart-Euclidean
-partial of a `T`-component, the group costs one Sobolev order: its `W^{m,2}` norm
-is bounded by the `W^{m+1,2}` norms of the chart components of `T`. -/
-
 /-- **The `W^{m,2}` bound for the principal-rotation group.** There is a constant
 `Kc ≥ 0`, depending only on the geometric data, such that for every
 chart-supported smooth compactly-supported solution `T` whose chart components
@@ -230,9 +202,7 @@ private lemma exists_densityMul_covPrincipalRotationCoeff_wkpNorm_le
               wkpNorm (d := dimE) (m + 1) 2
                 (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'' := by
   classical
-  -- Index tuples `(P, Q, k, l)`.
   set Idx := CompIdx E r s × CompIdx E r s × Fin dimE × Fin dimE
-  -- The chart coefficient family.
   set cT : Idx → EuclN → ℝ :=
     fun a y => densityOnEuclid (I := I) g α y *
       covChartMetricGram (I := I) (M := M) g r s α a.1 a.2.1 y *
@@ -252,7 +222,6 @@ private lemma exists_densityMul_covPrincipalRotationCoeff_wkpNorm_le
       Finset.univ cT hcT_cd
   refine ⟨Kc, hKc_nn, ?_⟩
   intro T hT_supp hT_K Ω'' hΩ''_open hΩ''_target
-  -- The chart-partial-component family of `T`: `∂_k` of the `P`-component.
   set vT : Idx → EuclN → ℝ :=
     fun a => euclidPartial (E := E) a.2.2.1
       (tensorComponentEuclid (I := I) (M := M) g r s T α a.1) with hvT_def
@@ -265,7 +234,6 @@ private lemma exists_densityMul_covPrincipalRotationCoeff_wkpNorm_le
     fun a _ => euclidPartial_hasCompactSupport (E := E) hK (hT_K a.1) a.2.2.1
   have hvT_K : ∀ a ∈ (Finset.univ : Finset Idx), tsupport (vT a) ⊆ K :=
     fun a _ => (euclidPartial_tsupport_subset (E := E) a.2.2.1).trans (hT_K a.1)
-  -- Each chart partial costs one Sobolev order against the `T`-component norm.
   have hvT_bd : ∀ a ∈ (Finset.univ : Finset Idx),
       wkpNorm (d := dimE) m 2 (vT a) Ω'' ≤
         ∑ P : CompIdx E r s, wkpNorm (d := dimE) (m + 1) 2
@@ -285,7 +253,6 @@ private lemma exists_densityMul_covPrincipalRotationCoeff_wkpNorm_le
       (fun P _ => zero_le _) (Finset.mem_univ a.1)
   obtain ⟨h_sum_mem, h_sum_le⟩ :=
     hKc hvT_cd hvT_cpt hvT_K hΩ''_open hΩ''_target hvT_bd
-  -- On the chart target the group equals the finite chart-coefficient sum.
   have h_eqOn : Set.EqOn
       (fun y => densityOnEuclid (I := I) g α y *
         covPrincipalRotationCoeff (I := I) (M := M) g r s T α P₀ y)
@@ -319,17 +286,6 @@ private lemma exists_densityMul_covPrincipalRotationCoeff_wkpNorm_le
     hΩ''_open h_ae]
   exact h_sum_le
 
-/-! ### The lower-order value group
-
-The lower-order value group `densityOnEuclid · covLowerOrderRotationValueCoeff`
-splits, on the chart target, into a **chart-partial channel** — a finite sum of a
-smooth chart coefficient times the chart-Euclidean partial `∂_k` of a
-`T`-component — and a **value channel** — a finite sum (collecting the two
-undifferentiated Christoffel-correction contributions, with the Christoffel
-correction itself expanded into chart components) of a smooth chart coefficient
-times an undifferentiated `T`-component. Both channels are controlled by the
-`W^{m+1,2}` norms of the chart components of `T`. -/
-
 /-- **The `W^{m,2}` bound for the lower-order value group.** There is a constant
 `Kc ≥ 0`, depending only on the geometric data, such that for every
 chart-supported smooth compactly-supported solution `T` whose chart components
@@ -361,14 +317,12 @@ private lemma exists_densityMul_covLowerOrderRotationValueCoeff_wkpNorm_le
   classical
   set IdxA := CompIdx E r s × CompIdx E r s × Fin dimE × Fin dimE
   set IdxBC := CompIdx E r s × CompIdx E r s × Fin dimE × Fin dimE × CompIdx E r s
-  -- The chart-partial-channel coefficient family.
   set cA : IdxA → EuclN → ℝ :=
     fun a y => densityOnEuclid (I := I) g α y *
       covChartMetricGram (I := I) (M := M) g r s α a.1 a.2.1 y *
       chartInvGramEuclid (I := I) g α a.2.2.1 a.2.2.2 y *
       lowerOrderRotationLOCoeff (I := I) (M := M) g r s α P₀ a.2.2.2 a.2.1 y
       with hcA_def
-  -- The value-channel coefficient family.
   set cBC : IdxBC → EuclN → ℝ :=
     fun a y => densityOnEuclid (I := I) g α y *
       covChartMetricGram (I := I) (M := M) g r s α a.1 a.2.1 y *
@@ -416,7 +370,6 @@ private lemma exists_densityMul_covLowerOrderRotationValueCoeff_wkpNorm_le
       (by simpa using hT_comp_cd P)
       (tensorComponentEuclid_hasCompactSupport (I := I) (M := M)
         g r s T α P hT_supp) (by norm_num : (1 : ℝ≥0∞) ≤ 2) (m + 1)
-  -- The chart-partial-channel term family.
   set vA : IdxA → EuclN → ℝ :=
     fun a => euclidPartial (E := E) a.2.2.1
       (tensorComponentEuclid (I := I) (M := M) g r s T α a.1) with hvA_def
@@ -437,7 +390,6 @@ private lemma exists_densityMul_covLowerOrderRotationValueCoeff_wkpNorm_le
       (f := fun P => wkpNorm (d := dimE) (m + 1) 2
         (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'')
       (fun P _ => zero_le _) (Finset.mem_univ a.1)
-  -- The value-channel term family.
   set vBC : IdxBC → EuclN → ℝ :=
     fun a => tensorComponentEuclid (I := I) (M := M) g r s T α a.2.2.2.2
       with hvBC_def
@@ -463,7 +415,6 @@ private lemma exists_densityMul_covLowerOrderRotationValueCoeff_wkpNorm_le
     hKcA hvA_cd hvA_cpt hvA_K hΩ''_open hΩ''_target hvA_bd
   obtain ⟨hBC_mem, hBC_le⟩ :=
     hKcBC hvBC_cd hvBC_cpt hvBC_K hΩ''_open hΩ''_target hvBC_bd
-  -- On the chart target the group is the sum of the two channels.
   have h_eqOn : Set.EqOn
       (fun y => densityOnEuclid (I := I) g α y *
         covLowerOrderRotationValueCoeff (I := I) (M := M) g r s T α P₀ y)
@@ -494,14 +445,9 @@ private lemma exists_densityMul_covLowerOrderRotationValueCoeff_wkpNorm_le
       Finset.mul_sum, ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl fun P _ => Finset.sum_congr rfl fun Q _ =>
       Finset.sum_congr rfl fun k _ => Finset.sum_congr rfl fun l _ => ?_
-    -- Expand the Christoffel correction into chart components and fold the
-    -- partial-channel push-forward into its chart-component notation.
     rw [covDerivLowerOrderTerm_eq_sum_componentEuclid (I := I) (M := M)
       g r s T α k P.1 P.2 hy,
       ← tensorComponentEuclid_def (I := I) (M := M) g r s T α P]
-    -- Regroup the summand: the partial-channel term plus the value channel,
-    -- with the inner sum over `p` factored out (`∑ p, Y p` is treated as an
-    -- atom by `ring`).
     rw [show densityOnEuclid (I := I) g α y *
         (covChartMetricGram (I := I) (M := M) g r s α P Q y *
           (chartInvGramEuclid (I := I) g α k l y *
@@ -537,7 +483,6 @@ private lemma exists_densityMul_covLowerOrderRotationValueCoeff_wkpNorm_le
                   (gramInvEntry (I := I) (M := M) g r s α Q P₀) y +
                 lowerOrderRotationLOCoeff (I := I) (M := M)
                   g r s α P₀ l Q y)) from by ring]
-    -- Distribute the scalars into the inner sum and match termwise in `p`.
     rw [Finset.sum_mul, Finset.mul_sum]
     refine congrArg₂ (· + ·) (by ring) (Finset.sum_congr rfl fun p _ => by ring)
   have h_ae : (fun y => densityOnEuclid (I := I) g α y *
@@ -558,16 +503,6 @@ private lemma exists_densityMul_covLowerOrderRotationValueCoeff_wkpNorm_le
     hΩ''_open hA_mem hBC_mem).trans ?_
   rw [ENNReal.ofReal_add hKcA_nn hKcBC_nn, add_mul]
   exact add_le_add hA_le hBC_le
-
-/-! ### The gradient group
-
-The gradient group `∑_l ∂_l (weightedGradCoeff l)` is the chart-Euclidean
-divergence of the density-weighted lower-order gradient coefficient. For each
-chart direction `l`, the coefficient `weightedGradCoeff l` is, on the chart
-target, a finite sum of a smooth chart coefficient times an undifferentiated
-`T`-component; the chart-Euclidean partials of these finite sums therefore cost
-one Sobolev order, so the gradient group's `W^{m,2}` norm is bounded by the
-`W^{m+1,2}` norms of the chart components of `T`. -/
 
 /-- For a chart direction `l` the chart coefficient family of `weightedGradCoeff
 l`, indexed by tuples `(P, Q, k, p)`. -/
@@ -666,8 +601,6 @@ private lemma exists_gradientGroup_wkpNorm_le
               wkpNorm (d := dimE) (m + 1) 2
                 (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'' := by
   classical
-  -- A per-direction multiplier constant for the order-`(m+1)` chart-coefficient
-  -- sum, uniform in `T`.
   have hper : ∀ l : Fin dimE, ∃ Kl : ℝ, 0 ≤ Kl ∧ ∀ {v : (CompIdx E r s ×
       CompIdx E r s × Fin dimE × CompIdx E r s) → EuclN → ℝ},
       (∀ a ∈ (Finset.univ : Finset _), ContDiff ℝ ∞ (v a)) →
@@ -700,13 +633,11 @@ private lemma exists_gradientGroup_wkpNorm_le
       HasCompactSupport (tensorComponentEuclid (I := I) (M := M) g r s T α P) :=
     fun P => tensorComponentEuclid_hasCompactSupport (I := I) (M := M)
       g r s T α P hT_supp
-  -- The globally `C^∞` chart-coefficient realization of `weightedGradCoeff l`.
   set Wext : Fin dimE → EuclN → ℝ :=
     fun l y => ∑ a : CompIdx E r s × CompIdx E r s × Fin dimE × CompIdx E r s,
       weightedGradChartCoeff (I := I) (M := M) g r s α P₀ l a y *
         tensorComponentEuclid (I := I) (M := M) g r s T α a.2.2.2 y
     with hWext_def
-  -- `Wext l` is the chart-coefficient sum evaluated at the `T`-component family.
   have h_comp_cd : ∀ (l : Fin dimE) (a : CompIdx E r s × CompIdx E r s ×
       Fin dimE × CompIdx E r s) (_ : a ∈ (Finset.univ : Finset _)),
       ContDiff ℝ ∞ (fun y => tensorComponentEuclid (I := I) (M := M)
@@ -737,7 +668,6 @@ private lemma exists_gradientGroup_wkpNorm_le
     memWkp_of_smooth_compactSupport_anyOpen (d := dimE) hΩ''_open
       (by simpa using hWext_cd l) (hWext_cpt l)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) (m + 1)
-  -- The component-norm bound for the chart-coefficient sum at order `m + 1`.
   have h_comp_bd : ∀ (l : Fin dimE) (a : CompIdx E r s × CompIdx E r s ×
       Fin dimE × CompIdx E r s) (_ : a ∈ (Finset.univ : Finset _)),
       wkpNorm (d := dimE) (m + 1) 2
@@ -749,7 +679,6 @@ private lemma exists_gradientGroup_wkpNorm_le
       (f := fun P => wkpNorm (d := dimE) (m + 1) 2
         (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'')
       (fun P _ => zero_le _) (Finset.mem_univ a.2.2.2)
-  -- `Wext l` lies in `W^{m+1,2}` with the chart-coefficient-sum bound.
   have hWext_bd : ∀ l : Fin dimE,
       wkpNorm (d := dimE) (m + 1) 2 (Wext l) Ω'' ≤
         ENNReal.ofReal (Kl l) *
@@ -757,7 +686,6 @@ private lemma exists_gradientGroup_wkpNorm_le
             (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'' :=
     fun l => (hKl l (h_comp_cd l) (h_comp_cpt l) (h_comp_K l)
       hΩ''_open hΩ''_target (h_comp_bd l)).2
-  -- Each `∂_l (weightedGradCoeff l)` agrees on `Ω''` with `∂_l (Wext l)`.
   have h_partial_eqOn : ∀ l : Fin dimE, Set.EqOn
       (euclidPartial (E := E) l
         (weightedGradCoeff (I := I) (M := M) g r s T α P₀ l))
@@ -767,7 +695,6 @@ private lemma exists_gradientGroup_wkpNorm_le
     intro z hz
     exact (weightedGradCoeff_eq_chartCoeffSum (I := I) (M := M)
       g r s T α P₀ l (hΩ''_target hz)).trans (by rw [hWext_def])
-  -- The whole gradient group agrees on `Ω''` with `∑_l ∂_l (Wext l)`.
   have h_eqOn : Set.EqOn
       (fun y => ∑ l : Fin dimE, euclidPartial (E := E) l
         (weightedGradCoeff (I := I) (M := M) g r s T α P₀ l) y)
@@ -779,7 +706,6 @@ private lemma exists_gradientGroup_wkpNorm_le
       =ᵐ[volume.restrict Ω'']
       (fun y => ∑ l : Fin dimE, euclidPartial (E := E) l (Wext l) y) :=
     eqOn_open_imp_ae_restrict (E := E) hΩ''_open h_eqOn
-  -- Membership and the per-direction order-drop bound.
   have h_partial_mem : ∀ l : Fin dimE,
       MemWkp (d := dimE) m 2 (euclidPartial (E := E) l (Wext l)) Ω'' :=
     fun l => memWkp_euclidPartial (E := E) hΩ''_open (hWext_cd l)
@@ -805,16 +731,6 @@ private lemma exists_gradientGroup_wkpNorm_le
       (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'')
     h_partial_le).trans ?_
   rw [ENNReal.ofReal_sum_of_nonneg (fun l _ => hKl_nn l)]
-
-/-! ### The quantitative Sobolev bound for the per-component weak source
-
-Collecting the four coefficient-group bounds gives the headline estimate: the
-iterated `W^{m,2}` norm of the per-component weak right-hand side
-`tensorComponentWeakRHS` over a precompact open subdomain `Ω''` of the chart
-target is bounded by the `W^{m,2}` norms of the chart components of the source
-`F` and the `W^{m+1,2}` norms of the chart components of the solution `T`, with a
-constant that depends only on the geometric data — uniform in `T`, `F` and
-`Ω''`. -/
 
 /-- **The quantitative `W^{m,2}` bound for the per-component weak source.** For
 fixed geometric data — a smooth Riemannian metric `g` on a closed manifold, a
@@ -861,7 +777,6 @@ theorem tensorComponentWeakRHS_wkpNorm_le
               wkpNorm (d := dimE) (m + 1) 2
                 (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'') := by
   classical
-  -- The four coefficient-group bounds, each with a constant uniform in `T, F`.
   obtain ⟨Kc1, hKc1_nn, hKc1⟩ :=
     exists_densityMul_sourcePairingCoeff_wkpNorm_le (I := I) (M := M)
       g r s α hK hK_target m P₀
@@ -876,7 +791,6 @@ theorem tensorComponentWeakRHS_wkpNorm_le
       g r s α hK hK_target m P₀
   refine ⟨Kc1 + Kc2 + Kc3 + Kc4, by positivity, ?_⟩
   intro T F hT_supp hF_supp hT_K hF_K Ω'' hΩ''_open hΩ''_target
-  -- Abbreviations for the four coefficient groups.
   set G1 : EuclN → ℝ := fun y => densityOnEuclid (I := I) g α y *
     sourcePairingCoeff (I := I) (M := M) g r s F α P₀ y with hG1_def
   set G2 : EuclN → ℝ := fun y => densityOnEuclid (I := I) g α y *
@@ -890,7 +804,6 @@ theorem tensorComponentWeakRHS_wkpNorm_le
   obtain ⟨hG2_mem, hG2_le⟩ := hKc2 hT_supp hT_K hΩ''_open hΩ''_target
   obtain ⟨hG3_mem, hG3_le⟩ := hKc3 hT_supp hT_K hΩ''_open hΩ''_target
   obtain ⟨hG4_mem, hG4_le⟩ := hKc4 hT_supp hT_K hΩ''_open hΩ''_target
-  -- On the chart target the source equals `G1 - G2 - G3 + G4`.
   have h_eqOn : Set.EqOn
       (tensorComponentWeakRHS (I := I) (M := M) g r s T F α hK hK_target P₀)
       (fun y => G1 y + (-G2 y) + (-G3 y) + G4 y)
@@ -905,7 +818,6 @@ theorem tensorComponentWeakRHS_wkpNorm_le
       =ᵐ[volume.restrict Ω'']
       (fun y => G1 y + (-G2 y) + (-G3 y) + G4 y) :=
     eqOn_open_imp_ae_restrict (E := E) hΩ''_open (h_eqOn.mono hΩ''_target)
-  -- Membership of the negated groups and the partial sums.
   have hnG2_mem : MemWkp (d := dimE) m 2 (fun y => -G2 y) Ω'' :=
     MemWkp.neg (d := dimE) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ''_open hG2_mem
   have hnG3_mem : MemWkp (d := dimE) m 2 (fun y => -G3 y) Ω'' :=
@@ -918,7 +830,6 @@ theorem tensorComponentWeakRHS_wkpNorm_le
       (fun y => G1 y + (-G2 y) + (-G3 y)) Ω'' :=
     MemWkp.add (d := dimE) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ''_open
       h12_mem hnG3_mem
-  -- The negated-group norms equal the group norms.
   have h_enorm_negOne : ‖(-1 : ℝ)‖ₑ = 1 := by
     rw [show (-1 : ℝ) = -(1 : ℝ) from rfl, enorm_neg, enorm_one]
   have hnG2_norm : wkpNorm (d := dimE) m 2 (fun y => -G2 y) Ω'' =
@@ -931,7 +842,6 @@ theorem tensorComponentWeakRHS_wkpNorm_le
     rw [show (fun y => -G3 y) = (fun y => (-1 : ℝ) * G3 y) by funext y; ring,
       wkpNorm_const_smul (d := dimE) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
         hΩ''_open hG3_mem (-1), h_enorm_negOne, one_mul]
-  -- The triangle inequality across the four groups.
   rw [wkpNorm_congr_ae (d := dimE) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     hΩ''_open h_ae]
   have h_tri :
@@ -950,18 +860,15 @@ theorem tensorComponentWeakRHS_wkpNorm_le
       hΩ''_open hG1_mem hnG2_mem).trans ?_
     rw [hnG2_norm]
   refine h_tri.trans ?_
-  -- Bound each group by the headline right-hand side.
   set SF : ℝ≥0∞ := ∑ Q : CompIdx E r s, wkpNorm (d := dimE) m 2
     (tensorComponentEuclid (I := I) (M := M) g r s F α Q) Ω'' with hSF_def
   set ST : ℝ≥0∞ := ∑ P : CompIdx E r s, wkpNorm (d := dimE) (m + 1) 2
     (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'' with hST_def
   have hsum : Kc1 + Kc2 + Kc3 + Kc4 ≥ 0 := by positivity
-  -- The group-1 bound, lifted to the aggregate constant.
   have hG1_final : wkpNorm (d := dimE) m 2 G1 Ω'' ≤
       ENNReal.ofReal (Kc1 + Kc2 + Kc3 + Kc4) * SF := by
     refine hG1_le.trans (mul_le_mul_of_nonneg_right ?_ (zero_le _))
     exact ENNReal.ofReal_le_ofReal (by linarith)
-  -- The groups 2, 3, 4 bounds, combined.
   have hG234_final :
       wkpNorm (d := dimE) m 2 G2 Ω'' + wkpNorm (d := dimE) m 2 G3 Ω'' +
         wkpNorm (d := dimE) m 2 G4 Ω'' ≤
@@ -971,7 +878,6 @@ theorem tensorComponentWeakRHS_wkpNorm_le
       ← ENNReal.ofReal_add (by positivity) hKc4_nn]
     exact mul_le_mul_of_nonneg_right
       (ENNReal.ofReal_le_ofReal (by linarith)) (zero_le _)
-  -- Assemble: the aggregate constant times the sum of the two component sums.
   calc wkpNorm (d := dimE) m 2 G1 Ω'' + wkpNorm (d := dimE) m 2 G2 Ω'' +
         wkpNorm (d := dimE) m 2 G3 Ω'' + wkpNorm (d := dimE) m 2 G4 Ω''
       = wkpNorm (d := dimE) m 2 G1 Ω'' +

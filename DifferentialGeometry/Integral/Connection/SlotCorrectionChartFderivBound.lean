@@ -74,9 +74,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Step 1: smoothness of `R(y) = (tensorRSChartE_section_repr r s α T ∘ symm) y`
-on the chart-target image of the chart-`α` Levi-Civita good set -/
-
 /-- Smoothness on the chart-target image of the chart-`α` Levi-Civita good set
 of the chart-pulled tensor representation
 `tensorRSChartE_section_repr r s α T ∘ (extChartAt I α).symm`. -/
@@ -88,10 +85,6 @@ lemma R_contDiffOn_goodSet
           (fun y : M => T.toSection y) ∘ (extChartAt I α).symm)
       ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) := by
   classical
-  -- `tensorRSChartE_section_repr r s α T.toSection` is smooth on the chart
-  -- source as a function `M → TensorRSModel r s ℝ E`, by
-  -- `Trivialization.contMDiffOn_section_baseSet_iff` applied to the smoothness
-  -- of `T.toSection` (which is `(T.toSection).contMDiff`).
   have hsmooth_total :
       ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
         (fun x : M =>
@@ -128,8 +121,6 @@ lemma R_contDiffOn_goodSet
         (fun y : M => TensorRSSpace r s I y) α).linearMapAt ℝ x
         (T.toSection x) = _
     rw [Bundle.Trivialization.linearMapAt_apply, if_pos hx_base]
-  -- Transfer to chart-target image via composition with `extChartAt I α .symm`.
-  -- This is the standard `chartE_pullback`-style pattern.
   have h_good_eq_source :
       chartLeviCivitaGoodSet (I := I) α = (chartAt H α).source := by
     rw [chartLeviCivitaGoodSet_eq_extChartAt_source (I := I) α,
@@ -140,7 +131,6 @@ lemma R_contDiffOn_goodSet
           (fun y : M => T.toSection y) b)
         (chartLeviCivitaGoodSet (I := I) α) := by
     rw [h_good_eq_source]; exact hcm_on_source
-  -- Now compose with `extChartAt I α .symm`.
   set hgood_open : IsOpen (chartLeviCivitaGoodSet (I := I) α) :=
     chartLeviCivitaGoodSet_isOpen (I := I) α
   intro y hy
@@ -175,10 +165,6 @@ lemma R_contDiffOn_goodSet
   exact interior_subset
     (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx'_good)
 
-/-! ## Step 2: chart-pulled equality of the slot correction and the kernel
-factorisation, transferred to an `fderiv` equality through
-`Filter.EventuallyEq.fderiv_eq`. -/
-
 /-- Pointwise equality between the chart-pulled input-slot correction and the
 chart-kernel applied to `tensorRSChartE_section_repr`, on a neighbourhood of
 the chart target image of a point `b ∈ chartLeviCivitaGoodSet α`. -/
@@ -200,8 +186,6 @@ private lemma input_slot_pulled_eq_kernel_eventually
           (tensorRSChartE_section_repr (I := I) r s α
             (fun y' : M => T.toSection y') ((extChartAt I α).symm y))) := by
   classical
-  -- It suffices to check pointwise equality on the open neighbourhood
-  -- `(extChartAt I α) '' chartLeviCivitaGoodSet α` of `extChartAt I α b`.
   have hU_open :
       IsOpen ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) :=
     chartLeviCivitaGoodSet_image_isOpen (I := I) α
@@ -212,23 +196,18 @@ private lemma input_slot_pulled_eq_kernel_eventually
   refine Filter.eventually_of_mem (hU_open.mem_nhds hmem) ?_
   intro y hy
   rcases hy with ⟨x, hx_good, hxy⟩
-  -- `(extChartAt I α).symm y = x` since y = (extChartAt I α) x and x ∈ source.
   have hx_src : x ∈ (chartAt H α).source :=
     chartLeviCivitaGoodSet_mem_chartAt_source (I := I) hx_good
   have hx_extsrc : x ∈ (extChartAt I α).source := by
     rw [extChartAt_source]; exact hx_src
   have hx_inv : (extChartAt I α).symm y = x := by
     rw [← hxy]; exact (extChartAt I α).left_inv hx_extsrc
-  -- Apply the kernel factorisation at `(symm y) = x ∈ chartSource`.
   have h_factor :=
     chartTensorRSInputSlotCorrection_chart_kernel_factorization
       (I := I) (M := M) g r s α
       (fun b' : M => T.toSection b') B.toFun
       (b := (extChartAt I α).symm y)
       (by rw [hx_inv]; exact hx_src) k
-  -- LHS = (triv).cLMA (symm y) (slot correction)
-  --     = kernel(symm y) (triv (T (symm y)))
-  --     = kernel(symm y) (repr T (symm y)).
   change (trivializationAt (TensorRSModel r s ℝ E)
         (fun y' : M => TensorRSSpace r s I y') α).continuousLinearMapAt ℝ
       ((extChartAt I α).symm y)

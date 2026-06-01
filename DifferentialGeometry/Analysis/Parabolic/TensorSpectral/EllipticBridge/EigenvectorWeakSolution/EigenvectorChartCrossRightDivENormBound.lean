@@ -81,12 +81,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -94,21 +88,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## The per-summand weighted-`eLpNorm` bound
-
-Every three-fold-sum summand of `crossRightGradCoeffDivLimit` is a product
-`Set.indicator (chartPouKernel α) c · w` of a kernel-indicator-cut coefficient
-with an `L²` atom. The coefficient `c` is `C^∞` on the open chart target and
-vanishes off the compact partition-of-unity kernel; hence the kernel indicator is
-the identity and `c` is globally bounded by its sup over the compact kernel. A
-pointwise norm domination then bounds the summand's weighted `eLpNorm` by an
-explicit constant times the atom's weighted `eLpNorm`. -/
-
 section PerSummandBound
 
--- The `eLpNorm` estimate is established by a pointwise almost-everywhere
--- domination; the closed-manifold instances enter only through the *type* of
--- the chart-pulled weighted measure and play no role in the proof term.
 set_option linter.unusedSectionVars false in
 /-- **Per-summand weighted-`eLpNorm` bound.** Let `c : EuclN → ℝ` be `C^∞` on the
 open chart target `chartTargetEuclid α`, and let `w : EuclN → ℝ` be arbitrary.
@@ -148,19 +129,15 @@ private lemma eLpNorm_indicatorPou_mul_le
   set μw : Measure EuclN :=
     (chartPulledWeightedMeasure (I := I) g α).restrict
       (chartTargetEuclid (I := I) (M := M) α) with hμw_def
-  -- The `C^∞` coefficient is bounded on the compact kernel by a nonnegative `C`.
   obtain ⟨C, hC_nn, hC_bd⟩ :=
     exists_bound_on_chartPouKernel (I := I) (M := M) α hc
   refine ⟨C, hC_nn, ?_⟩
-  -- The kernel-indicator cut of `c` is globally bounded by `C`: on the kernel
-  -- `‖c y‖ ≤ C`; off it both the indicator cut and `c` itself vanish.
   have hci_bd : ∀ y : EuclN,
       ‖Set.indicator (chartPouKernel (I := I) (M := M) α) c y‖ ≤ C := by
     intro y
     by_cases hy : y ∈ chartPouKernel (I := I) (M := M) α
     · rw [Set.indicator_of_mem hy]; exact hC_bd y hy
     · rw [Set.indicator_of_notMem hy, norm_zero]; exact hC_nn
-  -- Pointwise norm domination `‖(indicator c) · w‖ ≤ ‖C • w‖`.
   have h_dom : ∀ᵐ y ∂μw,
       ‖Set.indicator (chartPouKernel (I := I) (M := M) α) c y * w y‖ ≤
         ‖(C : ℝ) • w y‖ := by
@@ -173,15 +150,12 @@ private lemma eLpNorm_indicatorPou_mul_le
       rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg hC_nn]
     rw [hlhs, hrhs]
     exact mul_le_mul_of_nonneg_right (hci_bd y) (norm_nonneg _)
-  -- Monotonicity of `eLpNorm` under the a.e. norm domination.
   have h_mono :
       eLpNorm
           (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α) c y * w y)
           2 μw
         ≤ eLpNorm (fun y => (C : ℝ) • w y) 2 μw :=
     eLpNorm_mono_ae (μ := μw) h_dom
-  -- Homogeneity of `eLpNorm` under scalar multiplication, with `‖C‖ₑ` rewritten
-  -- to `ENNReal.ofReal C` (valid since `C ≥ 0`).
   have h_smul :
       eLpNorm (fun y => (C : ℝ) • w y) 2 μw
         = ENNReal.ofReal C * eLpNorm w 2 μw := by
@@ -232,19 +206,15 @@ private lemma eLpNorm_indicatorPou_mul_le_uniform
   set μw : Measure EuclN :=
     (chartPulledWeightedMeasure (I := I) g α).restrict
       (chartTargetEuclid (I := I) (M := M) α) with hμw_def
-  -- The `C^∞` coefficient is bounded on the compact kernel by a nonnegative `C`;
-  -- this sup constant does not depend on `w`.
   obtain ⟨C, hC_nn, hC_bd⟩ :=
     exists_bound_on_chartPouKernel (I := I) (M := M) α hc
   refine ⟨C, hC_nn, fun w => ?_⟩
-  -- The kernel-indicator cut of `c` is globally bounded by `C`.
   have hci_bd : ∀ y : EuclN,
       ‖Set.indicator (chartPouKernel (I := I) (M := M) α) c y‖ ≤ C := by
     intro y
     by_cases hy : y ∈ chartPouKernel (I := I) (M := M) α
     · rw [Set.indicator_of_mem hy]; exact hC_bd y hy
     · rw [Set.indicator_of_notMem hy, norm_zero]; exact hC_nn
-  -- Pointwise norm domination `‖(indicator c) · w‖ ≤ ‖C • w‖`.
   have h_dom : ∀ᵐ y ∂μw,
       ‖Set.indicator (chartPouKernel (I := I) (M := M) α) c y * w y‖ ≤
         ‖(C : ℝ) • w y‖ := by
@@ -257,14 +227,12 @@ private lemma eLpNorm_indicatorPou_mul_le_uniform
       rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg hC_nn]
     rw [hlhs, hrhs]
     exact mul_le_mul_of_nonneg_right (hci_bd y) (norm_nonneg _)
-  -- Monotonicity of `eLpNorm` under the a.e. norm domination.
   have h_mono :
       eLpNorm
           (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α) c y * w y)
           2 μw
         ≤ eLpNorm (fun y => (C : ℝ) • w y) 2 μw :=
     eLpNorm_mono_ae (μ := μw) h_dom
-  -- Homogeneity of `eLpNorm` under scalar multiplication.
   have h_smul :
       eLpNorm (fun y => (C : ℝ) • w y) 2 μw
         = ENNReal.ofReal C * eLpNorm w 2 μw := by
@@ -279,13 +247,6 @@ private lemma eLpNorm_indicatorPou_mul_le_uniform
     _ = ENNReal.ofReal C * eLpNorm w 2 μw := h_smul
 
 end PerSummandBound
-
-/-! ## Almost-everywhere measurability transfer to the weighted measure
-
-The chart-pulled weighted measure restricted to the chart target is absolutely
-continuous with respect to the plain Lebesgue volume restricted there — i.e. with
-respect to the chart `L²` measure. Almost-everywhere strong measurability is
-preserved along that absolute continuity. -/
 
 section MeasurabilityTransfer
 
@@ -306,13 +267,6 @@ private lemma aestronglyMeasurable_weighted_of_chartL2
       g α)
 
 end MeasurabilityTransfer
-
-/-! ## A uniform bound across a finite family of summand coefficients
-
-For each chart direction `l` and component-pair `(P, Q)`, the per-summand bound
-`eLpNorm_indicatorPou_mul_le` yields a constant controlling that summand. Since
-the indexing triples form a finite type, the sum of all those constants is a
-single nonnegative constant bounding *every* summand simultaneously. -/
 
 section UniformConstant
 
@@ -335,8 +289,6 @@ private lemma exists_uniform_eLpNorm_bound
     (Finset.single_le_sum (fun k _ => hCf_nn k) (Finset.mem_univ j))
 
 end UniformConstant
-
-/-! ## The explicit-norm bound for the cross-right gradient-divergence limit -/
 
 section MainBound
 
@@ -381,13 +333,9 @@ theorem eLpNorm_crossRightGradCoeffDivLimit_le_uniform
                       ((chartPulledWeightedMeasure (I := I) g α).restrict
                         (chartTargetEuclid (I := I) (M := M) α)))) := by
   classical
-  -- The triple-index type for the two three-fold sums.
   set ι : Type _ :=
     Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s ×
       TensorCompIdx (E := E) r s with hι_def
-  -- Per-triple uniform constants — `i`-free: the per-summand `C^∞` factors
-  -- (`crossRightDivFactor` and its chart-Euclidean partial) do not depend on
-  -- `i`, so their kernel-sup constants do not either.
   choose CcompF hCcompF_nn hCcompF using
     (fun j : ι => eLpNorm_indicatorPou_mul_le_uniform (I := I) (M := M) g α
       (euclidPartial_crossRightDivFactor_contDiffOn (I := I) (M := M)
@@ -396,7 +344,6 @@ theorem eLpNorm_crossRightGradCoeffDivLimit_le_uniform
     (fun j : ι => eLpNorm_indicatorPou_mul_le_uniform (I := I) (M := M) g α
       (crossRightDivFactor_contDiffOn (I := I) (M := M)
         g r s α P₀ j.1 j.2.1 j.2.2))
-  -- The uniform headline constant — `i`-free.
   refine ⟨max ((Fintype.card ι : ℝ) * ∑ j : ι, CcompF j)
       ((Fintype.card ι : ℝ) * ∑ j : ι, CpartF j),
     le_max_of_le_left (mul_nonneg (by positivity)
@@ -404,7 +351,6 @@ theorem eLpNorm_crossRightGradCoeffDivLimit_le_uniform
   set μw : Measure EuclN :=
     (chartPulledWeightedMeasure (I := I) g α).restrict
       (chartTargetEuclid (I := I) (M := M) α) with hμw_def
-  -- Abbreviations for the two atom families and the two `eLpNorm`-sum targets.
   set Acomp : TensorCompIdx (E := E) r s → EuclN → ℝ :=
     fun P => ((crossRightLimitComponent (I := I) (M := M)
       g r s i α P :
@@ -418,19 +364,15 @@ theorem eLpNorm_crossRightGradCoeffDivLimit_le_uniform
   set Sumpart : ℝ≥0∞ :=
     ∑ P : TensorCompIdx (E := E) r s,
       ∑ l : Fin (Module.finrank ℝ E), eLpNorm (Apart P l) 2 μw with hSumpart_def
-  -- The component-atom-group summand, as a function indexed by `(l, P, Q)`.
   set summandComp : ι → EuclN → ℝ :=
     fun j y => Set.indicator (chartPouKernel (I := I) (M := M) α)
         (euclidPartial (E := E) j.1
           (crossRightDivFactor (I := I) (M := M) g r s α P₀ j.1 j.2.1 j.2.2)) y *
       Acomp j.2.1 y with hsummandComp_def
-  -- The chart-partial-atom-group summand, as a function indexed by `(l, P, Q)`.
   set summandPart : ι → EuclN → ℝ :=
     fun j y => Set.indicator (chartPouKernel (I := I) (M := M) α)
         (crossRightDivFactor (I := I) (M := M) g r s α P₀ j.1 j.2.1 j.2.2) y *
       Apart j.2.1 j.1 y with hsummandPart_def
-  -- The uniform constants `Ccomp`, `Cpart` and the per-triple bounds for this
-  -- `i`: every per-triple constant is dominated by the corresponding sum.
   set Ccomp : ℝ := ∑ j : ι, CcompF j with hCcomp_def
   set Cpart : ℝ := ∑ j : ι, CpartF j with hCpart_def
   have hCcomp_nn : 0 ≤ Ccomp :=
@@ -453,7 +395,6 @@ theorem eLpNorm_crossRightGradCoeffDivLimit_le_uniform
     gcongr
     rw [hCpart_def]
     exact Finset.single_le_sum (fun k _ => hCpartF_nn k) (Finset.mem_univ j)
-  -- The atoms are `AEStronglyMeasurable` for `μw`, hence so is every summand.
   have hAcomp_meas : ∀ P : TensorCompIdx (E := E) r s,
       AEStronglyMeasurable (Acomp P) μw := by
     intro P
@@ -485,8 +426,6 @@ theorem eLpNorm_crossRightGradCoeffDivLimit_le_uniform
       (aestronglyMeasurable_indicator_mul (I := I) (M := M) α
         (crossRightDivFactor_contDiffOn (I := I) (M := M)
           g r s α P₀ j.1 j.2.1 j.2.2))
-  -- `crossRightGradCoeffDivLimit` is the sum of the two three-fold
-  -- sums of functions; rewrite the pointwise nested sums as single `Finset.sum`s.
   have h_funcA :
       (fun y => ∑ l : Fin (Module.finrank ℝ E),
           ∑ P : TensorCompIdx (E := E) r s,
@@ -540,7 +479,6 @@ theorem eLpNorm_crossRightGradCoeffDivLimit_le_uniform
           (Finset.univ : Finset (TensorCompIdx (E := E) r s)) from
       (Finset.univ_product_univ).symm]
     rw [Finset.sum_product]
-  -- The triangle inequality: across the two three-fold sums, then within each.
   have h_triangle :
       eLpNorm (crossRightGradCoeffDivLimit (I := I) (M := M)
           g r s i α P₀) 2 μw
@@ -557,7 +495,6 @@ theorem eLpNorm_crossRightGradCoeffDivLimit_le_uniform
     · exact Finset.aestronglyMeasurable_sum _ (fun j _ => hsummandPart_meas j)
     · exact eLpNorm_sum_le (fun j _ => hsummandComp_meas j) (by norm_num)
     · exact eLpNorm_sum_le (fun j _ => hsummandPart_meas j) (by norm_num)
-  -- The component-atom-group sum.
   have h_groupA :
       (∑ j : ι, eLpNorm (summandComp j) 2 μw)
         ≤ ENNReal.ofReal ((Fintype.card ι : ℝ) * Ccomp) * Sumcomp := by
@@ -571,7 +508,6 @@ theorem eLpNorm_crossRightGradCoeffDivLimit_le_uniform
     refine le_trans (Finset.sum_le_sum (fun j _ => h_each j)) ?_
     rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
     rw [ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_natCast, mul_assoc]
-  -- The chart-partial-atom-group sum.
   have h_groupB :
       (∑ j : ι, eLpNorm (summandPart j) 2 μw)
         ≤ ENNReal.ofReal ((Fintype.card ι : ℝ) * Cpart) * Sumpart := by
@@ -589,7 +525,6 @@ theorem eLpNorm_crossRightGradCoeffDivLimit_le_uniform
     refine le_trans (Finset.sum_le_sum (fun j _ => h_each j)) ?_
     rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
     rw [ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_natCast, mul_assoc]
-  -- The two group constants are dominated by their max.
   have hCcomp_le :
       ENNReal.ofReal ((Fintype.card ι : ℝ) * Ccomp) ≤
         ENNReal.ofReal

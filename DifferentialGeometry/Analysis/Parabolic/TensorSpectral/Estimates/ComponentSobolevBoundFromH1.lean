@@ -94,18 +94,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Inlined helper: `|ρ_α(x) · u(x)| ≤ |u(x)|`
-
-Mirror of the private helper `abs_pou_mul_le_abs` in `ChartIntrinsicL2Bridge`,
-exposed locally in this file so we can build a uniform-in-`u` reverse
-bridge. The pointwise estimate uses `0 ≤ ρ_α ≤ 1` at every point. -/
 
 private lemma abs_pou_mul_le_abs_local
     (β : M) (u : M → ℝ) (x : M) :
@@ -126,14 +118,6 @@ private lemma abs_pou_mul_le_abs_local
       ≤ 1 * |u x| := by gcongr
     _ = |u x| := one_mul _
 
-/-! ## Auxiliary: a uniform-in-`u` form of the chart-pushed `L^2` bridge
-
-The chart-pushed bridge `eLpNorm_chartPushed_le_const_mul_eLpNorm_riemannianVolumeMeasure`
-already supplies a constant `C ≥ 0` that depends only on `(g, β)` and is
-uniform in `u` (the proof uses the underlying universal reverse bridge once).
-We expose this as a standalone lemma here in the form needed downstream: a
-single witness `C` such that every measurable `u : M → ℝ` enjoys the bound. -/
-
 theorem eLpNorm_chartPushed_le_const_mul_eLpNorm_riemannianVolumeMeasure_uniform
     (g : SmoothRiemannianMetric I M) (β : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -146,8 +130,6 @@ theorem eLpNorm_chartPushed_le_const_mul_eLpNorm_riemannianVolumeMeasure_uniform
           ENNReal.ofReal C *
             eLpNorm u 2 (riemannianVolumeMeasure (I := I) (M := M) g) := by
   classical
-  -- The underlying universal reverse bridge constant on `chartPushedRaw`,
-  -- delivered by `eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of_subset`.
   set ρ : C^∞⟮I, M; ℝ⟯ :=
     DifferentialGeometry.Integral.Measure.chartAtlasPOU I M β with hρ_def
   set Kβ : Set M := tsupport ((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ) with hKβ_def
@@ -161,7 +143,6 @@ theorem eLpNorm_chartPushed_le_const_mul_eLpNorm_riemannianVolumeMeasure_uniform
       (I := I) (M := M) g β hKβ_compact hKβ_sub hp_one hp_top
   refine ⟨C, hC_pos.le, ?_⟩
   intro u hu_meas
-  -- Mirror the construction in `eLpNorm_chartPushed_le_const_mul_eLpNorm_riemannianVolumeMeasure`.
   set f : M → ℝ := fun x : M => ((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x * u x with hf_def
   have hρ_cont : Continuous ((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
     (ρ.contMDiff).continuous
@@ -192,22 +173,9 @@ theorem eLpNorm_chartPushed_le_const_mul_eLpNorm_riemannianVolumeMeasure_uniform
   rw [h_norm_f, h_norm_u]
   exact abs_pou_mul_le_abs_local (I := I) (M := M) β u x
 
-/-! ## Auxiliary: convert `ENNReal.ofReal (tensorL2Norm S.toCcTensor.toFun)`
-to `(‖S‖₊ : ℝ≥0∞)`.
-
-The `L²` seminorm on `SmoothCcTensor g r s` is, by construction, the real
-square root of the `L²` inner product on `S.toFun`; this is recorded in
-`Integral/L2/SmoothSections/PreHilbert.lean` as
-`‖S‖ = tensorL2Norm g r s S.toFun`. We trade the real-valued bound from
-`ComponentL2BoundUniform` for an `ℝ≥0∞` bound in terms of `‖S.toCcTensor‖₊`,
-then invoke `l2Norm_le_h1Norm` from `H1Compl.lean` to upgrade to `‖S‖₊` (the
-H^1 seminorm of `S` viewed as an element of `SmoothCcTensorH1`). -/
-
 private lemma coe_nnnorm_eq_ofReal_norm {X : Type*} [SeminormedAddCommGroup X]
     (x : X) :
     (‖x‖₊ : ℝ≥0∞) = ENNReal.ofReal ‖x‖ := by
-  -- `(‖x‖₊ : ℝ≥0∞) = ‖x‖ₑ` by `enorm_eq_nnnorm` (reflexive in `ℝ≥0∞`).
-  -- `‖x‖ₑ = ENNReal.ofReal ‖x‖` by `ofReal_norm_eq_enorm`.
   rw [show ((‖x‖₊ : ℝ≥0∞)) = ‖x‖ₑ from (enorm_eq_nnnorm x).symm,
     ← ofReal_norm_eq_enorm x]
 
@@ -229,9 +197,6 @@ private lemma nnnorm_toCcTensor_le_nnnorm
     SmoothCcTensorH1.l2Norm_le_h1Norm (I := I) (M := M) S
   rw [coe_nnnorm_eq_ofReal_norm, coe_nnnorm_eq_ofReal_norm]
   exact ENNReal.ofReal_le_ofReal h_real
-
-/-! ## Headline chart-pushed `L^2` bound (uniform in `S`, multi-indices,
-component chart `α`, push chart `β`) -/
 
 /-- **Headline `L^2`-piece bound (uniform in `S` and in multi-indices, fixed
 charts `α, β`).**
@@ -280,25 +245,20 @@ theorem eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm
               (chartTargetEuclid (I := I) (M := M) β)) ≤
           ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞) := by
   classical
-  -- Chart-pushed `L^2` reverse bridge constant `C₁`, depending only on `(g, β)`.
   obtain ⟨C₁, hC₁_nn, hC₁_uniform⟩ :=
     eLpNorm_chartPushed_le_const_mul_eLpNorm_riemannianVolumeMeasure_uniform
       (I := I) (M := M) g β
-  -- Manifold-side L² uniform-in-`(S, Idx, Jdx)` constant `C₂`,
-  -- depending only on `(g, r, s, α)`.
   obtain ⟨C₂, hC₂_nn, h_man⟩ :=
     tensorChartComponentScalar_eLpNorm_le_uniform
       (I := I) (M := M) (E := E) g r s α
   refine ⟨C₁ * C₂, mul_nonneg hC₁_nn hC₂_nn, ?_⟩
   intro S Idx Jdx
-  -- Set up notation for the manifold-side scalar field `u`.
   set u : M → ℝ :=
     tensorChartComponentScalar (I := I) (M := M) g r s S.toCcTensor α Idx Jdx
     with hu_def
   have hu_meas : Measurable u :=
     (tensorChartComponentScalar_contMDiff (I := I) (M := M)
       g r s S.toCcTensor α Idx Jdx).continuous.measurable
-  -- Step A: invoke the chart-pushed reverse bridge.
   have hA :
       eLpNorm
           (chartPushed (I := I) (M := M) (chartAtlasPOU I M) β u) 2
@@ -308,7 +268,6 @@ theorem eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm
         ENNReal.ofReal C₁ *
           eLpNorm u 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
     hC₁_uniform u hu_meas
-  -- Step B: invoke the manifold-side `L²` uniform bound.
   have hB :
       eLpNorm u 2 (riemannianVolumeMeasure (I := I) (M := M) g) ≤
         ENNReal.ofReal C₂ *
@@ -316,7 +275,6 @@ theorem eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm
             (tensorL2Norm (I := I) (M := M) g r s S.toCcTensor.toFun) := by
     rw [hu_def]
     exact h_man S.toCcTensor Idx Jdx
-  -- Step C: chain A and B.
   have hAB :
       eLpNorm
           (chartPushed (I := I) (M := M) (chartAtlasPOU I M) β u) 2
@@ -339,8 +297,6 @@ theorem eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm
               ENNReal.ofReal
                 (tensorL2Norm (I := I) (M := M) g r s S.toCcTensor.toFun)) :=
           mul_le_mul_of_nonneg_left hB (by exact zero_le _)
-  -- Step D: convert `ofReal (tensorL2Norm S.toCcTensor.toFun) = ‖S.toCcTensor‖₊`,
-  -- then dominate by `‖S‖₊` via `H1Compl.l2Norm_le_h1Norm`.
   have h_eq :
       ENNReal.ofReal
           (tensorL2Norm (I := I) (M := M) g r s S.toCcTensor.toFun) =
@@ -352,7 +308,6 @@ theorem eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm
     nnnorm_toCcTensor_le_nnnorm (I := I) (M := M) g r s S
   refine hAB.trans ?_
   rw [h_eq]
-  -- Reassociate to expose `ENNReal.ofReal (C₁ * C₂)` as the leading factor.
   calc ENNReal.ofReal C₁ *
           (ENNReal.ofReal C₂ * (‖S.toCcTensor‖₊ : ℝ≥0∞))
       = (ENNReal.ofReal C₁ * ENNReal.ofReal C₂) *
@@ -362,8 +317,6 @@ theorem eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm
         rw [(ENNReal.ofReal_mul hC₁_nn).symm]
     _ ≤ ENNReal.ofReal (C₁ * C₂) * (‖S‖₊ : ℝ≥0∞) :=
         mul_le_mul_of_nonneg_left h_le (by exact zero_le _)
-
-/-! ## Packaged form: closure over `S` -/
 
 /-- Functional packaging: for fixed `(g, r, s, α, β)`, the chart-pushed
 `L²` seminorm of the scalar component is uniformly controlled across the

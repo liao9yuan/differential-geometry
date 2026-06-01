@@ -98,27 +98,12 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Almost-everywhere support of an `L²`-limit
-
-An `L²`-convergent sequence converges in measure, hence has a subsequence
-converging almost everywhere; if every term of the sequence vanishes almost
-everywhere off a closed set `K`, the almost-everywhere limit vanishes off `K`
-almost everywhere too. This is the propagation principle used to control the
-support of the continuous-linear-map-extended chart components, which are
-`L²`-limits of concrete chart components supported in a compact chart kernel. -/
 
 /-- **Almost-everywhere support of an `L²`-limit.** If `F n → glim` in
 `Lp ℝ 2 μ` and each `F n` vanishes almost everywhere off a closed set `K`, then
@@ -129,28 +114,16 @@ lemma ae_eq_zero_off_of_tendsto_Lp
     (h_tendsto : Filter.Tendsto F atTop (𝓝 glim)) :
     ∀ᵐ y ∂μ, y ∉ K → (glim : EuclN → ℝ) y = 0 := by
   classical
-  -- `L²`-convergence implies convergence in measure.
   have h_inMeasure : TendstoInMeasure μ (fun n => (F n : EuclN → ℝ)) atTop
       (glim : EuclN → ℝ) :=
     tendstoInMeasure_of_tendsto_Lp (p := 2) h_tendsto
-  -- Hence an almost-everywhere-convergent subsequence.
   obtain ⟨ns, _hns_mono, h_ae⟩ := h_inMeasure.exists_seq_tendsto_ae
-  -- Each term of the subsequence vanishes a.e. off `K`; intersect over `i`.
   have hF_sub : ∀ᵐ y ∂μ, ∀ i : ℕ, y ∉ K → (F (ns i) : EuclN → ℝ) y = 0 :=
     ae_all_iff.mpr (fun i => hF (ns i))
-  -- Combine the a.e.-convergence with the a.e.-vanishing of the subsequence.
   filter_upwards [h_ae, hF_sub] with y h_lim h_zero hy
-  -- The subsequence at `y` is identically zero, so its limit `glim y` is zero.
   have h_const : Filter.Tendsto (fun i => (F (ns i) : EuclN → ℝ) y) atTop (𝓝 0) := by
     refine Filter.Tendsto.congr (fun i => (h_zero i hy).symm) tendsto_const_nhds
   exact tendsto_nhds_unique h_lim h_const
-
-/-! ## The chart-pulled weighted measure dominated on a compact subset
-
-On any compact subset `K ⊆ chartTargetEuclid α` the density `densityOnEuclid g α`
-is bounded above by a positive constant, so the chart-pulled weighted measure
-restricted to `K` is dominated by that constant times `volume` restricted to
-`K`. -/
 
 /-- On a compact subset `K ⊆ chartTargetEuclid α`, the chart-pulled weighted
 measure restricted to `K` is dominated by a positive scalar multiple of `volume`
@@ -171,7 +144,6 @@ private lemma chartPulledWeightedMeasure_restrict_le_volume_of_compact
   rw [Measure.restrict_apply hA, Measure.smul_apply, Measure.restrict_apply hA]
   unfold chartPulledWeightedMeasure
   rw [withDensity_apply _ (hA.inter hK_meas)]
-  -- The density is bounded above by `c_max` on `A ∩ K`.
   have h_pointwise_bd :
       ∫⁻ y in A ∩ K,
           ENNReal.ofReal (densityOnEuclid (I := I) g α y)
@@ -186,13 +158,6 @@ private lemma chartPulledWeightedMeasure_restrict_le_volume_of_compact
     MeasureTheory.setLIntegral_const _ _
   rw [smul_eq_mul]
   exact h_pointwise_bd.trans (le_of_eq h_const_eval)
-
-/-! ## The general weighted-`L²` upgrade
-
-The headline upgrade lemma: an `L²` function with respect to the plain Lebesgue
-measure on `chartTargetEuclid α`, vanishing almost everywhere off a compact
-subset `K` of the chart target, is `L²` with respect to the chart-pulled
-weighted measure restricted to `chartTargetEuclid α`. -/
 
 /-- **Weighted-`L²` upgrade from compact a.e.-support.** Let `w : EuclN → ℝ` be
 `MemLp 2` with respect to the plain Lebesgue volume restricted to
@@ -219,53 +184,30 @@ theorem memLp_chartPulledWeightedMeasure_of_memLp_volume_of_ae_zero_off_compact
       (chartTargetEuclid (I := I) (M := M) α)) := by
   classical
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
-  -- The weighted restricted measure is absolutely continuous w.r.t. the plain
-  -- restricted volume.
   have h_abs : (chartPulledWeightedMeasure (I := I) g α).restrict Ω ≪
       (volume : Measure EuclN).restrict Ω := by
     unfold chartPulledWeightedMeasure
     exact (withDensity_absolutelyContinuous (volume : Measure EuclN) _).restrict Ω
-  -- `w` vanishes a.e. off `K` w.r.t. the weighted restricted measure.
   have hwK' : ∀ᵐ y ∂((chartPulledWeightedMeasure (I := I) g α).restrict Ω),
       y ∉ K → w y = 0 :=
     h_abs.ae_le hwK
-  -- Hence `w` agrees a.e. with `K.indicator w` w.r.t. the weighted measure.
   have h_ind : w =ᵐ[(chartPulledWeightedMeasure (I := I) g α).restrict Ω]
       K.indicator w := by
     filter_upwards [hwK'] with y hy
     by_cases hyK : y ∈ K
     · rw [Set.indicator_of_mem hyK]
     · rw [Set.indicator_of_notMem hyK, hy hyK]
-  -- It therefore suffices to show `MemLp (K.indicator w)` w.r.t. the weighted
-  -- restricted measure.
   refine MemLp.ae_eq h_ind.symm ?_
-  -- `MemLp (K.indicator w)` is `MemLp w` w.r.t. the weighted measure restricted
-  -- to `K`.
   rw [memLp_indicator_iff_restrict hK_meas]
-  -- The weighted measure restricted to `Ω` then to `K` is the weighted measure
-  -- restricted to `K` (because `K ⊆ Ω`).
   rw [Measure.restrict_restrict hK_meas, Set.inter_eq_self_of_subset_left hK_in]
-  -- Dominate the weighted measure on `K` by a multiple of `volume`.
   obtain ⟨c, _hc_pos, h_le⟩ :=
     chartPulledWeightedMeasure_restrict_le_volume_of_compact (I := I) (M := M)
       α hK_compact hK_meas hK_in
-  -- `MemLp w` w.r.t. `volume` restricted to `K` (subset of `Ω`).
   have hw_K : MemLp w 2 ((volume : Measure EuclN).restrict K) := by
     refine hw.mono_measure ?_
     rw [hΩ_def]
     exact Measure.restrict_mono hK_in le_rfl
   exact hw_K.of_measure_le_smul (c := ENNReal.ofReal c) ENNReal.ofReal_ne_top h_le
-
-/-! ## The canonical Euclidean chart component is a.e. kernel-supported
-
-The canonical Euclidean chart component `tensorL2ChartComponent g r s u α P₀` of
-an abstract `L²` element `u` is the continuous linear extension, along the dense
-embedding of smooth sections, of the chart-component `L²` map. On a smooth
-section it recovers the concrete chart component `tensorChartComponent`, which
-vanishes off the compact partition-of-unity kernel `chartPouKernel α`. Picking a
-smooth sequence converging to `u` and propagating the support through the
-`L²`-limit shows the canonical chart component of *any* `u` is a.e. supported in
-`chartPouKernel α`. -/
 
 /-- For any abstract `L²` element `u`, the canonical Euclidean chart component
 `tensorL2ChartComponent g r s u α P₀` vanishes almost everywhere off the compact
@@ -278,8 +220,6 @@ lemma tensorL2ChartComponent_ae_zero_off_chartPouKernel
         (tensorL2ChartComponent (I := I) (M := M) g r s u α P₀ :
           EuclN → ℝ) y = 0 := by
   classical
-  -- Smooth sections are dense in the `L²` Hilbert space: pick a sequence whose
-  -- `L²`-images converge to `u`.
   have h_dense : DenseRange
       (fun S : SmoothCcTensor g r s => (S : TensorL2 r s g)) := by
     have h := UniformSpace.Completion.denseRange_coe
@@ -289,9 +229,7 @@ lemma tensorL2ChartComponent_ae_zero_off_chartPouKernel
       (fun S : SmoothCcTensor g r s => (S : TensorL2 r s g))) := h_dense u
   obtain ⟨x, hx_range, hx_tendsto⟩ :=
     mem_closure_iff_seq_limit.mp h_mem
-  -- Choose smooth-section preimages of the approximating sequence.
   choose S hS using hx_range
-  -- The chart components of the approximants converge to that of `u`.
   have h_comp_tendsto : Filter.Tendsto
       (fun n => tensorL2ChartComponent (I := I) (M := M) g r s
         ((S n : TensorL2 r s g)) α P₀)
@@ -301,22 +239,18 @@ lemma tensorL2ChartComponent_ae_zero_off_chartPouKernel
       g r s α P₀).tendsto u).comp hx_tendsto
     refine Filter.Tendsto.congr (fun n => ?_) h_clm
     simp only [Function.comp_apply, hS n]
-  -- Each approximant chart component vanishes a.e. off the kernel.
   have h_term : ∀ n : ℕ,
       ∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
         y ∉ chartPouKernel (I := I) (M := M) α →
           (tensorL2ChartComponent (I := I) (M := M) g r s
             ((S n : TensorL2 r s g)) α P₀ : EuclN → ℝ) y = 0 := by
     intro n
-    -- The canonical chart component of a smooth section agrees a.e. with the
-    -- concrete `tensorChartComponent`, which vanishes off the kernel.
     have h_ae := tensorL2ChartComponent_smoothToTensorL2_coeFn
       (I := I) (M := M) g r s (S n) α P₀
     filter_upwards [h_ae] with y hy hyK
     rw [hy]
     exact tensorChartComponent_eq_zero_off_chartPouKernel
       (I := I) (M := M) g r s (S n) α P₀.1 P₀.2 hyK
-  -- Propagate the support through the `L²`-limit.
   exact ae_eq_zero_off_of_tendsto_Lp h_term h_comp_tendsto
 
 /-- For any abstract `L²` element `u`, the canonical Euclidean chart component
@@ -337,14 +271,11 @@ theorem tensorL2ChartComponent_memLp_weighted
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
   classical
-  -- The canonical chart component is `MemLp 2` of the plain `L²` reference
-  -- measure of the chart (it is an `Lp` element).
   have h_plain : MemLp (fun y => (tensorL2ChartComponent (I := I) (M := M)
       g r s u α P₀ : EuclN → ℝ) y) 2
       ((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)) :=
     Lp.memLp (tensorL2ChartComponent (I := I) (M := M) g r s u α P₀)
-  -- It is a.e. supported in the compact partition-of-unity kernel.
   exact memLp_chartPulledWeightedMeasure_of_memLp_volume_of_ae_zero_off_compact
     (I := I) (M := M) g α
     (chartPouKernel_isCompact (I := I) (M := M) α)
@@ -353,16 +284,6 @@ theorem tensorL2ChartComponent_memLp_weighted
     (tensorL2ChartComponent_ae_zero_off_chartPouKernel
       (I := I) (M := M) g r s u α P₀)
     h_plain
-
-/-! ## The cutoff Euclidean chart component is a.e. kernel-supported
-
-The cutoff Euclidean chart component `tensorL2ChartComponentCutoff g r s u α P₀`
-is the continuous linear extension of the cutoff chart-component `L²` map. On a
-smooth section it recovers the concrete `cutoffComponentEuclid`, which is the
-chart push-forward of the chart-kernel-cutoff-weighted scalar component. The
-latter vanishes off the closed support of the chart-kernel cutoff, whose chart
-image is the compact kernel `cutoffChartKernel α`; the chart push-forward
-therefore vanishes off the `toEuclidean`-image of that kernel. -/
 
 /-- The `toEuclidean`-image of the compact chart-kernel-cutoff kernel: the
 compact subset of the Euclidean chart target in which every cutoff Euclidean
@@ -397,30 +318,22 @@ private lemma cutoffComponentEuclid_eq_zero_off_cutoffChartKernelEuclid
     cutoffComponentEuclid (I := I) (M := M) g r s S α Idx Jdx y = 0 := by
   classical
   by_cases htar : y ∈ chartTargetEuclid (I := I) (M := M) α
-  · -- On the chart target the cutoff component reads the cutoff scalar at the
-    -- chart-source preimage; that scalar vanishes off the cutoff support.
-    rw [cutoffComponentEuclid_apply_of_mem (I := I) (M := M) g r s S α Idx Jdx
+  · rw [cutoffComponentEuclid_apply_of_mem (I := I) (M := M) g r s S α Idx Jdx
       htar]
-    -- The chart-source preimage of `y`.
     set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
-    -- `b` is not in the closed support of the cutoff scalar component.
     have hb_notin : b ∉ tsupport (cutoffComponentScalar (I := I) (M := M)
         g r s S α Idx Jdx) := by
       intro hb_supp
-      -- Otherwise its chart image lands in `cutoffChartKernel α`, hence `y` in
-      -- `cutoffChartKernelEuclid α` — a contradiction.
       apply hy
       refine ⟨extChartAt I α b, ?_, ?_⟩
       · exact cutoffComponentScalar_chartImage_subset_kernel
           (I := I) (M := M) g r s S α Idx Jdx ⟨b, hb_supp, rfl⟩
-      · -- `toEuclidean (extChartAt I α b) = y`.
-        have hmem : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target :=
+      · have hmem : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target :=
           DifferentialGeometry.Analysis.Laplacian.MetricExtension.toEuclidean_symm_mem_target
             (I := I) (M := M) htar
         rw [hb_def, (extChartAt I α).right_inv hmem, toEuclidean.apply_symm_apply]
     exact image_eq_zero_of_notMem_tsupport hb_notin
-  · -- Off the chart target the cutoff component vanishes outright.
-    exact cutoffComponentEuclid_apply_of_notMem (I := I) (M := M) g r s S α
+  · exact cutoffComponentEuclid_apply_of_notMem (I := I) (M := M) g r s S α
       Idx Jdx htar
 
 /-- For any abstract `L²` element `u`, the cutoff Euclidean chart component
@@ -434,14 +347,12 @@ lemma tensorL2ChartComponentCutoff_ae_zero_off_cutoffChartKernelEuclid
         (tensorL2ChartComponentCutoff (I := I) (M := M) g r s u α P₀ :
           EuclN → ℝ) y = 0 := by
   classical
-  -- Smooth sections are dense in the `L²` Hilbert space.
   have h_dense : DenseRange
       (fun S : SmoothCcTensor g r s => (S : TensorL2 r s g)) :=
     UniformSpace.Completion.denseRange_coe (α := SmoothCcTensor g r s)
   obtain ⟨x, hx_range, hx_tendsto⟩ :=
     mem_closure_iff_seq_limit.mp (h_dense u)
   choose S hS using hx_range
-  -- The cutoff chart components of the approximants converge to that of `u`.
   have h_comp_tendsto : Filter.Tendsto
       (fun n => tensorL2ChartComponentCutoff (I := I) (M := M) g r s
         ((S n : TensorL2 r s g)) α P₀)
@@ -452,7 +363,6 @@ lemma tensorL2ChartComponentCutoff_ae_zero_off_cutoffChartKernelEuclid
         P₀).continuous.tendsto u).comp hx_tendsto
     refine Filter.Tendsto.congr (fun n => ?_) h_clm
     simp only [Function.comp_apply, hS n, tensorL2ChartComponentCutoffCLM_apply]
-  -- Each approximant cutoff chart component vanishes a.e. off the kernel.
   have h_term : ∀ n : ℕ,
       ∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
         y ∉ cutoffChartKernelEuclid (I := I) (M := M) α →
@@ -498,13 +408,6 @@ theorem tensorL2ChartComponentCutoff_memLp_weighted
       (I := I) (M := M) g r s u α P₀)
     h_plain
 
-/-! ## Weighted-`L²` membership of the cross-Leibniz limit objects
-
-The cross-left and cross-right limit objects are, by definition, cutoff
-Euclidean chart components of abstract `L²` elements; their weighted-`L²`
-membership is the corresponding instance of
-`tensorL2ChartComponentCutoff_memLp_weighted`. -/
-
 /-- **Weighted-`L²` membership of the cross-left limit object
 (chart-locality-free).** Chart-locality-free twin of
 `crossLeftLimitComponent_memLp_weighted`: the cross-left limit
@@ -543,14 +446,6 @@ theorem crossRightLimitComponent_memLp_weighted_unconditional
     (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
       (eigenvectorResolvent (I := I) (M := M) g r s i))
     α P
-
-/-! ## Weighted-`L²` membership of the three lower-order coefficient limits
-
-The lower-order coefficient limit objects are explicit finite sums in which
-every summand carries an `indicator (chartPouKernel α)` factor; each therefore
-vanishes **pointwise** off the compact partition-of-unity kernel
-`chartPouKernel α`. Combined with their `MemLp 2 (chartL2Measure α)` membership,
-the general upgrade lemma yields weighted-`L²` membership. -/
 
 /-- The principal rotation coefficient limit vanishes pointwise off the compact
 partition-of-unity kernel `chartPouKernel α` (chart-locality-free). Every summand
@@ -702,16 +597,6 @@ theorem weightedGradCoeffDivLimit_memLp_weighted_unconditional
         (I := I) (M := M) g r s i α P₀ l hy))
     h_plain
 
-/-! ## Weighted-`L²` closure under a `C^∞`-coefficient product
-
-The chart-Euclidean right-hand side of the eigenvector weak-solution assembly is
-a finite sum of products of a `C^∞`-on-the-chart-target coefficient and a
-chart-component limit object. The lemma below closes weighted `L²` under such a
-product: if the second factor is weighted-`MemLp` and (almost everywhere, for
-the weighted measure) vanishes off a compact subset of the chart target, then
-the `C^∞`-coefficient product is again weighted-`MemLp`. On the compact subset
-the `C^∞` coefficient is bounded; off it the product vanishes a.e. -/
-
 /-- **Weighted-`L²` closure under a `C^∞`-coefficient product.** Let
 `c : EuclN → ℝ` be `C^∞` on the open chart target `chartTargetEuclid α`, let
 `w : EuclN → ℝ` be `MemLp 2` with respect to the chart-pulled weighted measure
@@ -745,7 +630,6 @@ theorem memLp_weighted_contDiffOn_mul
   set μw : Measure EuclN :=
     (chartPulledWeightedMeasure (I := I) g α).restrict
       (chartTargetEuclid (I := I) (M := M) α) with hμw_def
-  -- The `C^∞` coefficient is bounded on the compact `K` by a nonnegative `C`.
   have hcontOn_K : ContinuousOn c K := hc.continuousOn.mono hK_in
   have hbdd : ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ K, ‖c y‖ ≤ C := by
     by_cases hK_empty : K = ∅
@@ -755,29 +639,23 @@ theorem memLp_weighted_contDiffOn_mul
       exact ⟨max C₀ 0, le_max_right _ _,
         fun y hy => (hC₀ ⟨y, hy, rfl⟩).trans (le_max_left _ _)⟩
   obtain ⟨C, hC_nn, hC_bd⟩ := hbdd
-  -- `K.indicator c` is globally bounded by `C`.
   have hci_bd : ∀ y : EuclN, ‖K.indicator c y‖ ≤ C := by
     intro y
     by_cases hy : y ∈ K
     · rw [Set.indicator_of_mem hy]; exact hC_bd y hy
     · rw [Set.indicator_of_notMem hy, norm_zero]; exact hC_nn
-  -- `K.indicator c` is `AEStronglyMeasurable` for the weighted restricted measure.
   have hc_meas : AEStronglyMeasurable (K.indicator c) μw := by
     have hmeas_restr : AEStronglyMeasurable c (μw.restrict K) := by
       rw [hμw_def, Measure.restrict_restrict hK_meas,
         Set.inter_eq_self_of_subset_left hK_in]
-      -- Restrict the chart-pulled weighted measure to `K`, then read `c`'s
-      -- continuity on `K` as `AEStronglyMeasurable`.
       exact hcontOn_K.aestronglyMeasurable hK_meas
     exact (aestronglyMeasurable_indicator_iff hK_meas).mpr hmeas_restr
-  -- `c * w` agrees a.e. (weighted) with `(K.indicator c) * w`.
   have h_prod_eq : (fun y => c y * w y) =ᵐ[μw]
       (fun y => K.indicator c y * w y) := by
     filter_upwards [hw_zero] with y hy
     by_cases hyK : y ∈ K
     · rw [Set.indicator_of_mem hyK]
     · rw [Set.indicator_of_notMem hyK, hy hyK, mul_zero, mul_zero]
-  -- `(K.indicator c) * w` is weighted-`MemLp`: bounded measurable × `L²`.
   have h_bdd_mul : MemLp (fun y => K.indicator c y * w y) 2 μw := by
     refine ⟨hc_meas.mul hw.1, ?_⟩
     have hpt : ∀ y : EuclN, ‖K.indicator c y * w y‖ ≤ ‖(C : ℝ) • w y‖ := by
@@ -790,18 +668,6 @@ theorem memLp_weighted_contDiffOn_mul
       exact mul_le_mul_of_nonneg_right (hci_bd y) (norm_nonneg _)
     exact lt_of_le_of_lt (eLpNorm_mono (μ := μw) hpt) (hw.const_smul (C : ℝ)).2
   exact MemLp.ae_eq h_prod_eq.symm h_bdd_mul
-
-/-! ## Weighted a.e.-vanishing of the chart-component limit objects
-
-Each chart-component limit object building the chart-Euclidean right-hand side
-of the eigenvector weak-solution assembly vanishes — almost everywhere with
-respect to the chart-pulled weighted measure restricted to `chartTargetEuclid α`
-— off a compact subset of the chart target. For the canonical / cutoff Euclidean
-chart components this is the weighted-measure transfer of the plain-volume
-a.e.-vanishing established above (the weighted restricted measure is absolutely
-continuous with respect to the plain restricted volume); for the three
-lower-order coefficient limits it is the weighted-measure form of the pointwise
-vanishing established above. -/
 
 /-- The chart-pulled weighted measure restricted to `chartTargetEuclid α` is
 absolutely continuous with respect to the plain Lebesgue volume restricted to
@@ -849,25 +715,6 @@ lemma tensorL2ChartComponentCutoff_ae_zero_off_cutoffChartKernelEuclid_weighted
     (tensorL2ChartComponentCutoff_ae_zero_off_cutoffChartKernelEuclid
       (I := I) (M := M) g r s u α P₀)
 
-/-! ## Weighted data for the chart-component limit atom (chart-locality-free)
-
-The chart-component limit atom `componentLpLimit g r s i α P` is, by
-definition, `i.fst.val` times the canonical Euclidean chart component
-`tensorL2ChartComponent g r s uVec α P` of the intrinsic-compactness eigenvector
-
-```
-uVec := tensorResolventEigenbasisVec
-          (tensorResolventL2_isCompactOperator g r s) i.
-```
-
-That canonical chart component is weighted-`MemLp 2` for any abstract `L²`
-element (`tensorL2ChartComponent_memLp_weighted`) and vanishes almost everywhere
-off the compact partition-of-unity kernel `chartPouKernel α`
-(`tensorL2ChartComponent_ae_zero_off_chartPouKernel_weighted`); rescaling by the
-scalar `i.fst.val` preserves both properties. The chart-locality-free twins below
-re-key the two atom facts onto `componentLpLimit`, mirroring the
-cross-left / cross-right unconditional twins above. -/
-
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- **Off-kernel vanishing of the chart-component limit atom
 (chart-locality-free).** The chart-component limit atom
@@ -889,12 +736,10 @@ lemma componentLpLimit_ae_zero_off_chartPouKernel_weighted_unconditional
         ((componentLpLimit (I := I) (M := M) g r s i α P :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y = 0 := by
   classical
-  -- The intrinsic-compactness eigenvector, as an abstract `L²` element.
   set uVec :=
     tensorResolventEigenbasisVec (I := I) (M := M)
       (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s) i
     with huVec_def
-  -- `componentLpLimit = i.fst.val • tensorL2ChartComponent uVec`.
   have h_smul_w : (fun y => ((componentLpLimit (I := I) (M := M)
         g r s i α P :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -906,7 +751,6 @@ lemma componentLpLimit_ae_zero_off_chartPouKernel_weighted_unconditional
     (chartPulledWeightedMeasure_restrict_absolutelyContinuous (I := I) (M := M)
       g α).ae_le
       (by rw [componentLpLimit]; exact Lp.coeFn_smul i.fst.val _)
-  -- The canonical chart component vanishes a.e. (weighted) off the kernel.
   have h_comp_zero := tensorL2ChartComponent_ae_zero_off_chartPouKernel_weighted
     (I := I) (M := M) g r s uVec α P
   filter_upwards [h_smul_w, h_comp_zero] with y hy hy_zero hyK
@@ -932,19 +776,15 @@ lemma componentLpLimit_memLp_weighted_unconditional
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
   classical
-  -- The intrinsic-compactness eigenvector, as an abstract `L²` element.
   set uVec :=
     tensorResolventEigenbasisVec (I := I) (M := M)
       (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s) i
     with huVec_def
-  -- The canonical Euclidean chart component is weighted-`MemLp 2`.
   have h_comp : MemLp (fun y => (tensorL2ChartComponent (I := I) (M := M)
       g r s uVec α P : EuclN → ℝ) y) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)) :=
     tensorL2ChartComponent_memLp_weighted (I := I) (M := M) g r s uVec α P
-  -- `componentLpLimit = i.fst.val • tensorL2ChartComponent uVec`,
-  -- and the scalar multiple preserves weighted-`MemLp 2`.
   have h_smul : (fun y => ((componentLpLimit (I := I) (M := M)
         g r s i α P :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -957,8 +797,6 @@ lemma componentLpLimit_memLp_weighted_unconditional
       g α).ae_le
       (by rw [componentLpLimit]; exact Lp.coeFn_smul i.fst.val _)
   exact (h_comp.const_smul i.fst.val).ae_eq h_smul.symm
-
-/-! ## Sanity tests -/
 
 section ElaborationTests
 

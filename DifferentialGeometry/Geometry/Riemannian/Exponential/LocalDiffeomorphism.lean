@@ -258,7 +258,6 @@ private theorem exists_nice_open_nhds
     apply hu_smooth_on.mono
     intro v hv
     exact hu_open_sub hv.1.1.2
-  -- expMap U ⊆ extChartAt source.
   have hU_extSrc : ∀ v ∈ U,
       (expMap (I := I) g p (show TangentSpace I p from v) : M)
         ∈ (extChartAt I p).source := by
@@ -269,7 +268,6 @@ private theorem exists_nice_open_nhds
           ⁻¹' (extChartAt I p).source) ∩ u_open := by
       rw [hw_open_eq]; exact hv_wu
     exact hv_inv.1
-  -- chartedExpAt U ⊆ W.
   have hU_chartedExp_W : chartedExpAt (I := I) g p '' U ⊆ W := by
     rintro y ⟨v, hv, rfl⟩
     have hv_wIFT : v ∈ w_chart ∩ (chartedExpAtIFTHomeomorph (I := I) g p).source :=
@@ -280,8 +278,6 @@ private theorem exists_nice_open_nhds
     exact hv_inv.1
   exact ⟨U, W, hU_isOpen, h0U, hU_sub_IFT, hU_smooth, hU_extSrc, hW_open, hW_sub_target,
     hW_smooth, hU_chartedExp_W⟩
-
-/-! ## Naming the chosen `U` and `W` -/
 
 /-- A choice of open neighborhood `U` of `0 : E`. -/
 private def niceSource (g : SmoothRiemannianMetric I M) (p : M) : Set E :=
@@ -346,8 +342,6 @@ private lemma chartedExp_niceSource_sub_niceSymmDomain
       niceSymmDomain (I := I) g p :=
   (niceSource_spec (I := I) g p).2.2.2.2.2.2.2.2
 
-/-! ## The target in `M` -/
-
 /-- The target in `M`: image of `niceSource g p` under `expMap g p`. -/
 private def niceTarget (g : SmoothRiemannianMetric I M) (p : M) : Set M :=
   (fun v : E => (expMap (I := I) g p (show TangentSpace I p from v) : M))
@@ -383,7 +377,6 @@ private lemma niceTarget_eq_source_inter_preimage
   · rintro ⟨hq_src, hq_pre⟩
     rcases hq_pre with ⟨v, hv, hwv⟩
     refine ⟨v, hv, ?_⟩
-    -- hwv : chartedExpAt v = ext q.
     have h_eq : (extChartAt I p) q =
         (extChartAt I p)
           (expMap (I := I) g p (show TangentSpace I p from v)) := by
@@ -422,12 +415,9 @@ private lemma extChartAt_niceTarget_sub_niceSymmDomain
   classical
   rintro w ⟨q, hq, rfl⟩
   rcases hq with ⟨v, hv, rfl⟩
-  -- (extChartAt I p) (expMap g p v) = chartedExpAt v ∈ chartedExp '' niceSource ⊆ niceSymmDomain.
   have hin : chartedExpAt (I := I) g p v ∈ niceSymmDomain (I := I) g p := by
     exact chartedExp_niceSource_sub_niceSymmDomain (I := I) g p ⟨v, hv, rfl⟩
   exact hin
-
-/-! ## The inverse map -/
 
 /-- The candidate local inverse: chart, then IFT inverse. -/
 private def niceInvFun (g : SmoothRiemannianMetric I M) (p : M) : M → E :=
@@ -475,40 +465,28 @@ private lemma niceInvFun_right_inv
     expMap (I := I) g p (show TangentSpace I p from v)
   rw [niceInvFun_left_inv (I := I) g p hv]
 
-/-! ## Smoothness of `expMap` and its inverse on the nice sets -/
-
 /-- The inverse `niceInvFun g p` is `ContMDiffOn I 𝓘(ℝ, E) 1` on `niceTarget`. -/
 private lemma niceInvFun_contMDiffOn
     (g : SmoothRiemannianMetric I M) (p : M) :
     ContMDiffOn I 𝓘(ℝ, E) 1 (niceInvFun (I := I) g p) (niceTarget (I := I) g p) := by
   classical
-  -- niceInvFun = (Φ_chart.symm) ∘ (extChartAt I p).
-  -- 1. (extChartAt I p) is ContMDiffOn I 𝓘(ℝ, E) 1 on chartAt H p.source.
   have hext : ContMDiffOn I 𝓘(ℝ, E) 1 (extChartAt I p) (chartAt H p).source :=
     contMDiffOn_extChartAt (I := I) (x := p) (n := 1)
   have hext_on : ContMDiffOn I 𝓘(ℝ, E) 1 (extChartAt I p) (niceTarget (I := I) g p) :=
     hext.mono (niceTarget_sub_chartSource (I := I) g p)
-  -- 2. (Φ_chart.symm) is ContDiffOn ℝ 1 on niceSymmDomain (open in E).
   have hsymm_contDiff : ContDiffOn ℝ 1 (chartedExpAtIFTHomeomorph (I := I) g p).symm
       (niceSymmDomain (I := I) g p) := niceSymmDomain_contDiffOn (I := I) g p
-  -- Convert to ContMDiffOn.
   have hsymm_contMDiff : ContMDiffOn 𝓘(ℝ, E) 𝓘(ℝ, E) 1
       (chartedExpAtIFTHomeomorph (I := I) g p).symm
       (niceSymmDomain (I := I) g p) := by
     rw [contMDiffOn_iff_contDiffOn]
     exact hsymm_contDiff
-  -- 3. Compose: (Φ_chart.symm) ∘ (extChartAt I p) maps niceTarget to E.
-  --    Use ContMDiffOn.comp.
-  -- ContMDiffOn.comp signature: hf : ContMDiffOn s, hg : ContMDiffOn t, maps_to s → t (after preimage)
   have hmaps : MapsTo (extChartAt I p) (niceTarget (I := I) g p)
       (niceSymmDomain (I := I) g p) := by
     intro q hq
     exact extChartAt_niceTarget_sub_niceSymmDomain (I := I) g p ⟨q, hq, rfl⟩
   have := hsymm_contMDiff.comp hext_on hmaps
-  -- The composition is niceInvFun.
   exact this
-
-/-! ## The `PartialDiffeomorph` and the headline -/
 
 /-- The exponential map at `p`, packaged as a partial diffeomorphism
 realising it on `niceSource g p`. -/

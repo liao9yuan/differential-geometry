@@ -92,15 +92,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## The smooth metric realized from an order-`(a+1)` spectral element
-
-We realize a finitely-supported `u : tensorHs g_bg 0 2 ((a:ℝ)+1)` at its own
-Sobolev order: its chart-locality-free smooth representative
-`tensorHsSmoothRepr u hu_fs` is a `SmoothCcTensor g_bg 0 2`, from
-which the symmetric extracted bilinear form `tensorHsBilinSymm` is built.  When
-that form is `g_bg`-fibre small with constant `< 1`, the assembled
-`g_bg + h_sym` is a genuine `SmoothRiemannianMetric`. -/
-
 /-- The validity-domain predicate for realizing `u : H^{a+1}` as a metric
 perturbation: `u` is finitely supported and its extracted symmetric bilinear
 form is `g_bg`-fibre small with some constant `< 1` (so `g_bg + h_sym` is an
@@ -150,12 +141,6 @@ theorem realizeMetricAt_of_not_realizable (g_bg : SmoothRiemannianMetric I M)
   classical
   rw [realizeMetricAt, dif_neg hu]
 
-/-! ## The geometric remainder as a smooth compactly-supported tensor section
-
-On the validity domain, the geometric remainder section is
-`deTurckRHSSection g_bg (g_bg + h_sym(u)) − Δ_∇ T_u`, re-tagged to the background
-metric; off the validity domain it is the zero section. -/
-
 open scoped Classical in
 /-- The geometric Ricci–DeTurck remainder as a smooth compactly-supported
 `(0,2)`-tensor section, re-tagged by the background metric `g_bg`.
@@ -181,13 +166,6 @@ def deTurckRemainderSection (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
             (I := I) (M := M) u h.choose)
   else
     0
-
-/-! ## The geometric DeTurck nonlinearity on the spectral Sobolev scale
-
-The eigenbasis coordinates of the geometric remainder section are weighted
-square-summable at *every* real order (`smoothCcTensor_tensorL2Coeff_weighted_summable`,
-prerequisite (A)).  Packaging the order-`a` coordinates with that witness gives the
-order-`a` spectral Sobolev element `N(u)`. -/
 
 /-- The intrinsic resolvent-compactness witness for the rank-`(0,2)` tensor
 resolvent on the closed manifold `(M, g_bg)`. -/

@@ -74,14 +74,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The constant unit `(0, 0)`-section -/
 
 /-- The constant unit `(0, 0)`-tensor `ofModel (constOfIsEmpty 1)` as a smooth
 section of the `(0, 0)`-tensor bundle. Its scalar function is the constant `1`,
@@ -96,14 +92,6 @@ noncomputable def unitZeroSec :
     unitZeroSec (I := I) (M := M) y =
       Tensor0SSpace.ofModel
         (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ)) := rfl
-
-/-! ## The unit-evaluated gradient section
-
-Evaluating the `(0, 3)`-tensor `(covGrad g 0 2 T₀)(y)` at the unit `(0, 0)`-tensor
-gives a `(0, 3)`-valued (i.e. `Tensor0SSpace 3`-valued) section of `M`. Its
-`toModel` value on a `Fin 3`-tuple `(v 0, v 1, v 2)` reads the tangent direction
-`v 0` off the leftmost slot and returns the directional covariant derivative
-`∇^{(0,2)}_{v 0} T₀` evaluated on the tail tuple `(v 1, v 2)`. -/
 
 /-- **Unit-evaluation of the covariant gradient.** Evaluating the
 `(0, 3)`-tensor `(covGrad g 0 2 T₀)(y)` at the unit `(0, 0)`-tensor and on a
@@ -123,22 +111,8 @@ lemma covGrad_apply_unit_eval
           tensorCovDerivAt (I := I) (M := M) g 0 2 T₀ y (v 0))
           (unitZeroSec (I := I) (M := M) y))
         (Matrix.vecTail v) := by
-  -- This is the `(0, 2)`-rank instance of `covGrad_toSection_apply_eval`,
-  -- specialised to `D := unit (0, 0)`-tensor; `s + 1 = 3`.
   exact covGrad_toSection_apply_eval (I := I) (M := M) g 0 2 T₀ y
     (unitZeroSec (I := I) (M := M) y) v
-
-/-! ## The parallel-transport reduction
-
-The value of the `(0, 3)`-tensor covariant derivative of `covGrad g 0 2 T₀`
-along `v` is a continuous linear map `T^{(0,0)} →L T^{(0,3)}`. Applied to the
-unit `(0, 0)`-tensor, the product rule `tensorRSCovariantDerivative_apply`
-expresses it as the `(0, 3)`-tensor covariant derivative of the unit-evaluated
-gradient section minus a correction term proportional to the covariant
-derivative of the unit `(0, 0)`-section. The latter vanishes — the unit section
-is `∇`-parallel — so the directional covariant derivative of `covGrad g 0 2 T₀`,
-read off the unit `(0, 0)`-tensor, is exactly the `(0, 3)`-tensor covariant
-derivative of the unit-evaluated gradient section. -/
 
 /-- **Parallel-transport reduction.** The directional `(0, 3)`-tensor covariant
 derivative of `covGrad g 0 2 T₀` along `v`, applied to the unit `(0, 0)`-tensor,
@@ -164,12 +138,9 @@ lemma covGrad_covDeriv_at_unit_eq
             (unitZeroSec (I := I) (M := M) y))
         x v := by
   classical
-  -- The product rule for the `(0, 3) = (0, 0)→(0, 3)` tensor covariant derivative,
-  -- specialised to `r = 0`, `s = 3`, section `covGrad T₀`, and `(0, 0)`-section `unit`.
   rw [tensorRSCovariantDerivative_apply (I := I) (M := M) 0 3
     (LeviCivita (I := I) g) (covGrad (I := I) (M := M) g 0 2 T₀).toSection
     (unitZeroSec (I := I) (M := M)) x v]
-  -- The covariant derivative of the constant unit `(0, 0)`-section vanishes.
   rw [show (Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g)
         (fun y : M => unitZeroSec (I := I) (M := M) y) x v) = 0 from
     tensor0SCovariantDerivative_unitZero_eq_zero (I := I) (M := M)

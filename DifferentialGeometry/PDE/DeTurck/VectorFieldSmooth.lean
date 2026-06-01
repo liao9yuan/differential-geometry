@@ -72,15 +72,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## The bump cutoff: smoothness of the connection-difference tensor with both
-section slots merely smooth on an open set
-
-`connDiff_contMDiffOn` (in `ConnectionDifference.lean`) requires the
-differentiated section slot to be globally `C^∞`.  We lift this restriction
-with a smooth bump cutoff: smoothness being a local property, it is enough to
-prove `ContMDiffAt` at each point of the open set, and near such a point the
-globally smooth cut-off section `χ • σ` agrees with `σ`. -/
-
 /-- **A smooth bump function near `x₀` with support inside an open set `U`.**
 
 For a point `x₀` of an open set `U`, the set `U` is a neighbourhood of `x₀`, so
@@ -91,8 +82,6 @@ private lemma exists_bump_tsupport_subset {U : Set M} (hU : IsOpen U) {x₀ : M}
     (hx₀ : x₀ ∈ U) :
     ∃ χ : SmoothBumpFunction I x₀, tsupport (χ : M → ℝ) ⊆ U := by
   have hUnhds : U ∈ 𝓝 x₀ := hU.mem_nhds hx₀
-  -- `SmoothBumpFunction.nhds_basis_support` exhibits the bumps with
-  -- `tsupport ⊆ U` as a basis of `𝓝 x₀`; in particular such a bump exists.
   exact (SmoothBumpFunction.nhds_basis_support (I := I) (c := x₀) hUnhds).ex_mem
 
 /-- **Smoothness of the connection-difference tensor with both section slots
@@ -118,33 +107,24 @@ theorem connDiff_contMDiffOn_local (g g' : SmoothRiemannianMetric I M)
         (⟨x, connDiff (I := I) g g' x (σ x) (τ x)⟩ :
           TotalSpace E (TangentSpace I))) U := by
   classical
-  -- Smoothness is local: prove `ContMDiffAt` at each point of `U`.
   intro x₀ hx₀
-  -- A smooth bump `χ` centred at `x₀`, equal to `1` near `x₀`, supported in `U`.
   obtain ⟨χ, hχ_tsupport⟩ := exists_bump_tsupport_subset (I := I) hU hx₀
   set ψ : M → ℝ := (χ : M → ℝ) with hψ_def
-  -- The bump is globally `C^∞`, hence `C^∞` on `U`.
   have hψ_smooth : ContMDiffOn I 𝓘(ℝ) ∞ ψ U :=
     χ.contMDiff.contMDiffOn
-  -- The cut-off section `ψ • σ` is globally `C^∞`, by `smul_section_of_tsupport`.
   have hcut : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (ψ • σ)) :=
     ContMDiffOn.smul_section_of_tsupport (𝕜 := ℝ) (n := ∞)
       (V := fun x : M => TangentSpace I x) hψ_smooth hU hχ_tsupport hσ
-  -- Apply `connDiff_contMDiffOn` with the globally smooth section `ψ • σ` in the
-  -- differentiated slot and `τ` (smooth on `U`) in the direction slot.
   have hConn : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M =>
         (⟨x, connDiff (I := I) g g' x ((ψ • σ) x) (τ x)⟩ :
           TotalSpace E (TangentSpace I))) U :=
     connDiff_contMDiffOn (I := I) g g' hcut hτ
-  -- `U` is open, so the `ContMDiffOn`-value at `x₀` upgrades to `ContMDiffAt`.
   have hConnAt : ContMDiffAt I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M =>
         (⟨x, connDiff (I := I) g g' x ((ψ • σ) x) (τ x)⟩ :
           TotalSpace E (TangentSpace I))) x₀ :=
     (hConn x₀ hx₀).contMDiffAt (hU.mem_nhds hx₀)
-  -- On the open neighbourhood where `ψ ≡ 1`, the cut section equals `σ`, so the
-  -- `connDiff`-value (and the whole total-space point) is unchanged.
   have hψ_one : ψ =ᶠ[𝓝 x₀] (1 : M → ℝ) := χ.eventuallyEq_one
   have heventuallyEq :
       (fun x : M =>
@@ -154,7 +134,6 @@ theorem connDiff_contMDiffOn_local (g g' : SmoothRiemannianMetric I M)
         (⟨x, connDiff (I := I) g g' x ((ψ • σ) x) (τ x)⟩ :
           TotalSpace E (TangentSpace I))) := by
     refine hψ_one.mono (fun x hx => ?_)
-    -- `hx : ψ x = (1 : M → ℝ) x`, i.e. `ψ x = 1`.
     have hx1 : ψ x = 1 := by simpa using hx
     have hσx : (ψ • σ) x = σ x := by
       change ψ x • σ x = σ x
@@ -162,21 +141,12 @@ theorem connDiff_contMDiffOn_local (g g' : SmoothRiemannianMetric I M)
     change (⟨x, connDiff (I := I) g g' x (σ x) (τ x)⟩ : TotalSpace E (TangentSpace I)) =
       ⟨x, connDiff (I := I) g g' x ((ψ • σ) x) (τ x)⟩
     rw [hσx]
-  -- Transfer `ContMDiffAt` along the eventual equality.
   have hGoalAt : ContMDiffAt I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M =>
         (⟨x, connDiff (I := I) g g' x (σ x) (τ x)⟩ :
           TotalSpace E (TangentSpace I))) x₀ :=
     hConnAt.congr_of_eventuallyEq heventuallyEq
   exact hGoalAt.contMDiffWithinAt
-
-/-! ## Smoothness of the chart-local DeTurck representative
-
-In the chart at a basepoint `α`, the chart-local representative
-`deTurckChartLocal g g' α` is a finite double sum
-`∑_{j,k} G^{jk} • A(e_j, e_k)`.  Each scalar factor `G^{jk}` is `C^∞` on the
-chart base set, and each `A(e_j, e_k)` is `C^∞` there by
-`connDiff_contMDiffOn_local`; the double sum is therefore `C^∞`. -/
 
 /-- For coordinate frame vectors `e_j = chartBasisVecFiber α j` of the chart at
 `α`, the vector field `x ↦ connDiff g g' x (e_j x) (e_k x)` is a smooth
@@ -194,12 +164,9 @@ private lemma connDiff_chartBasis_contMDiffOn (g g' : SmoothRiemannianMetric I M
             (chartBasisVecFiber (I := I) α k x)⟩ :
           TotalSpace E (TangentSpace I)))
       (chartAt H α).source := by
-  -- The chart source is open.
   have hopen : IsOpen ((chartAt H α).source) := (chartAt H α).open_source
-  -- The trivialization base set at `α` coincides with the chart-`α` source.
   have hbase : (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source :=
     trivializationAt_baseSet_eq_chartAt_source α
-  -- Each coordinate frame vector is a smooth section on the chart source.
   have hframe : ∀ i : Fin (Module.finrank ℝ E),
       ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
         (T% (fun x : M => chartBasisVecFiber (I := I) α i x))
@@ -208,7 +175,6 @@ private lemma connDiff_chartBasis_contMDiffOn (g g' : SmoothRiemannianMetric I M
     have h := chartBasisVec_contMDiffOn (I := I) α i
     rw [hbase] at h
     exact h
-  -- Apply the localized connection-difference smoothness lemma.
   exact connDiff_contMDiffOn_local (I := I) g g' hopen (hframe j) (hframe k)
 
 /-- Each inverse-Gram-matrix entry `x ↦ chartInvGramMatrix g α x j k` is `C^∞`
@@ -238,13 +204,11 @@ theorem deTurckChartLocal_contMDiffOn (g g' : SmoothRiemannianMetric I M) (α : 
       (fun x : M => TotalSpace.mk' E x (deTurckChartLocal (I := I) g g' α x))
       (chartAt H α).source := by
   classical
-  -- Each scalar coefficient `G^{jk}` is `C^∞` on the chart source.
   have hcoeff : ∀ j k : Fin (Module.finrank ℝ E),
       ContMDiffOn I 𝓘(ℝ) ∞
         (fun x : M => chartInvGramMatrix (I := I) g α x j k)
         (chartAt H α).source :=
     fun j k => chartInvGramMatrix_entry_contMDiffOn_source (I := I) g α j k
-  -- Each `connDiff`-on-frame term is a `C^∞` tangent-bundle section on the source.
   have hterm : ∀ j k : Fin (Module.finrank ℝ E),
       ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
         (fun x : M =>
@@ -254,7 +218,6 @@ theorem deTurckChartLocal_contMDiffOn (g g' : SmoothRiemannianMetric I M) (α : 
             TotalSpace E (TangentSpace I)))
         (chartAt H α).source :=
     fun j k => connDiff_chartBasis_contMDiffOn (I := I) g g' α j k
-  -- Scaling each smooth section by the smooth scalar coefficient.
   have hsmul : ∀ j k : Fin (Module.finrank ℝ E),
       ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
         (fun x : M => TotalSpace.mk' E x
@@ -264,7 +227,6 @@ theorem deTurckChartLocal_contMDiffOn (g g' : SmoothRiemannianMetric I M) (α : 
               (chartBasisVecFiber (I := I) α k x)))
         (chartAt H α).source :=
     fun j k => (hcoeff j k).smul_section (hterm j k)
-  -- The inner sum over `k`, for each fixed `j`.
   have hinner : ∀ j : Fin (Module.finrank ℝ E),
       ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
         (fun x : M => TotalSpace.mk' E x
@@ -275,7 +237,6 @@ theorem deTurckChartLocal_contMDiffOn (g g' : SmoothRiemannianMetric I M) (α : 
                 (chartBasisVecFiber (I := I) α k x)))
         (chartAt H α).source :=
     fun j => ContMDiffOn.sum_section (fun k _ => hsmul j k)
-  -- The outer sum over `j` is the chart-local DeTurck representative.
   have houter : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => TotalSpace.mk' E x
         (∑ j : Fin (Module.finrank ℝ E),
@@ -286,11 +247,8 @@ theorem deTurckChartLocal_contMDiffOn (g g' : SmoothRiemannianMetric I M) (α : 
                 (chartBasisVecFiber (I := I) α k x)))
       (chartAt H α).source :=
     ContMDiffOn.sum_section (fun j _ => hinner j)
-  -- This double sum is exactly `deTurckChartLocal g g' α`.
   refine houter.congr (fun x _hx => ?_)
   rw [deTurckChartLocal_def]
-
-/-! ## The DeTurck vector field is a smooth global section -/
 
 /-- **The DeTurck vector field is a smooth global tangent-bundle section.**
 
@@ -308,27 +266,20 @@ theorem deTurckFun_contMDiff_total (g g' : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => TotalSpace.mk' E x (deTurckFun (I := I) g g' x)) := by
   intro x
-  -- The chart at `x` contains `x` in its (open) source.
   have hx_src : x ∈ (chartAt H x).source := mem_chart_source H x
   have hsrc_open : IsOpen ((chartAt H x).source) := (chartAt H x).open_source
-  -- The chart-`x` representative is a smooth section on the chart-`x` source.
   have hsmooth_local : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
       (fun y : M => TotalSpace.mk' E y (deTurckChartLocal (I := I) g g' x y))
       (chartAt H x).source :=
     deTurckChartLocal_contMDiffOn (I := I) g g' x
-  -- On the chart-`x` source, the chart-`x` representative equals the canonical
-  -- DeTurck vector field.
   have hsmooth_local2 : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
       (fun y : M => TotalSpace.mk' E y (deTurckFun (I := I) g g' y))
       (chartAt H x).source := by
     refine hsmooth_local.congr (fun y hy => ?_)
-    -- `deTurckChartLocal_eq_deTurckFun_of_mem_source` gives the chart-independence.
     have h := deTurckChartLocal_eq_deTurckFun_of_mem_source (I := I) g g' x hy
     change TotalSpace.mk' E y (deTurckFun (I := I) g g' y) =
       TotalSpace.mk' E y (deTurckChartLocal (I := I) g g' x y)
     rw [h]
-  -- The chart source is an open neighbourhood of `x`, so `ContMDiffOn` upgrades
-  -- to `ContMDiffAt`.
   exact (hsmooth_local2 x hx_src).contMDiffAt (hsrc_open.mem_nhds hx_src)
 
 end DeTurck

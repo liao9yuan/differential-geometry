@@ -83,18 +83,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The chart-locality-free smooth eigenvector abbreviation
-
-For brevity, `eigenSmooth g i := eigenvectorSmooth g 0 2 i` is the
-chart-locality-free smooth representative of the resolvent eigenbasis vector at
-eigen-index `i`. -/
 
 variable (g : SmoothRiemannianMetric I M)
 
@@ -103,8 +95,6 @@ vector at eigen-index `i`, as a smooth compactly-supported `(0, 2)`-tensor. -/
 abbrev eigenSmooth
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) : SmoothCcTensor g 0 2 :=
   eigenvectorSmooth (I := I) (M := M) g 0 2 i
-
-/-! ## The finite eigen-combination -/
 
 /-- **The finite eigen-combination.** For a finite set `F` of eigen-indices and a
 real coefficient family `c`, the finite sum `∑_{i ∈ F} c i • eᵢ` of the smooth
@@ -122,12 +112,6 @@ lemma finiteEigenCombo_eq
     finiteEigenCombo (I := I) (M := M) g F c =
       ∑ i ∈ F, c i • eigenSmooth (I := I) (M := M) g i := rfl
 
-/-! ## Smoothness
-
-The underlying section of `finiteEigenCombo` is `C^∞`: it is the
-`SmoothCcTensor`-bundled finite sum of smooth sections, and the smoothness datum
-is exactly the one carried by the `SmoothCcTensor` structure. -/
-
 /-- **The finite eigen-combination is `C^∞`.** The underlying tensor section of
 `finiteEigenCombo F c` is a `C^∞` section of the `(0, 2)`-tensor bundle. -/
 theorem finiteEigenCombo_contMDiff
@@ -138,12 +122,6 @@ theorem finiteEigenCombo_contMDiff
         TotalSpace.mk' (TensorRSModel 0 2 ℝ E) x
           ((finiteEigenCombo (I := I) (M := M) g F c).toSection x)) :=
   (finiteEigenCombo (I := I) (M := M) g F c).toSection.contMDiff
-
-/-! ## The `L²` image of the finite eigen-combination
-
-The continuous-linear `L²` embedding `toL2` commutes with the finite sum and the
-scalar multiplications, so the `L²` image of `finiteEigenCombo F c` is the finite
-combination of the resolvent eigenbasis vectors. -/
 
 /-- The compactness witness used throughout: the chart-locality-free compactness
 of the L²-side tensor resolvent at rank `(0, 2)`. -/
@@ -165,12 +143,6 @@ theorem finiteEigenCombo_toL2
   rw [map_smul, SmoothCcTensor.toL2_apply,
     eigenvectorSmooth_toL2 (I := I) (M := M) g 0 2 i]
 
-/-! ## The eigenbasis-coordinate of the finite eigen-combination
-
-The `i`-th eigenbasis coordinate of a single eigenvector `bⱼ` is the orthonormality
-indicator `⟪bᵢ, bⱼ⟫ = δᵢⱼ`; summing over `F` gives the indicator-weighted
-coefficient. -/
-
 open scoped Classical in
 /-- The `i`-th eigenbasis coordinate of the smooth eigenvector representative `eⱼ`
 is the orthonormality indicator: `cᵢ(eⱼ) = if i = j then 1 else 0`.
@@ -184,15 +156,12 @@ theorem tensorL2Coeff_ofCompact_eigenSmooth
         ((eigenSmooth (I := I) (M := M) g j : TensorL2 0 2 g)) i =
       (if i = j then (1 : ℝ) else 0) := by
   classical
-  -- The Hilbert eigenbasis abbreviation.
   set b := tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
     (hCompact (I := I) (M := M) g) with hb_def
-  -- `(eⱼ : L²) = b j`: the smooth eigenvector's `L²` image is the eigenbasis vector.
   have hbj : (eigenSmooth (I := I) (M := M) g j : TensorL2 0 2 g) = b j := by
     rw [hb_def, tensorResolventHilbertEigenbasisSigma_apply
       (I := I) (M := M) (hCompact (I := I) (M := M) g) j,
       eigenvectorSmooth_toL2 (I := I) (M := M) g 0 2 j]
-  -- The coordinate is `⟪b i, b j⟫`; apply orthonormality.
   rw [tensorL2Coeff_eq_inner, hbj]
   have horth := b.orthonormal
   rw [orthonormal_iff_ite] at horth
@@ -210,11 +179,8 @@ theorem finiteEigenCombo_tensorL2Coeff
         ((finiteEigenCombo (I := I) (M := M) g F c : TensorL2 0 2 g)) i =
       (if i ∈ F then c i else 0) := by
   classical
-  -- The coordinate is the inner product against the eigenbasis vector `b i`; it
-  -- distributes over the finite combination of `L²` images.
   rw [tensorL2Coeff_eq_inner, finiteEigenCombo_toL2,
     inner_sum]
-  -- each inner term: `⟪b i, c j • bⱼ⟫ = c j · (if i = j then 1 else 0)`.
   have h_term : ∀ j ∈ F,
       (inner ℝ
           (tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
@@ -224,7 +190,6 @@ theorem finiteEigenCombo_tensorL2Coeff
         (if i = j then c j else 0) := by
     intro j _
     rw [inner_smul_right]
-    -- `⟪b i, bⱼ⟫ = if i = j then 1 else 0` (orthonormality), since `bⱼ = b j`.
     rw [show tensorResolventEigenbasisVec (I := I) (M := M)
             (hCompact (I := I) (M := M) g) j =
           tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
@@ -237,7 +202,6 @@ theorem finiteEigenCombo_tensorL2Coeff
     rw [horth i j]
     by_cases h : i = j <;> simp [h]
   rw [Finset.sum_congr rfl h_term]
-  -- `∑_{j ∈ F} (if i = j then c j else 0) = if i ∈ F then c i else 0`.
   by_cases hiF : i ∈ F
   · rw [Finset.sum_eq_single i]
     · simp [hiF]
@@ -247,15 +211,6 @@ theorem finiteEigenCombo_tensorL2Coeff
   · rw [if_neg hiF, Finset.sum_eq_zero]
     intro j hj
     rw [if_neg (fun h => hiF (by rw [h]; exact hj))]
-
-/-! ## The smooth weak-solution identity
-
-The finite eigen-combination `u = finiteEigenCombo F c` is a smooth weak solution
-of the connection Laplacian against the source `-Δ_∇ u`, in the exact shape
-`∫_M ⟨∇u, ∇v⟩ dμ_g = ⟨-Δ_∇ u, v⟩_{L²}` consumed by the all-orders interior
-regularity engine. The identity is the connection-Laplacian Green identity (at
-rank `(0, 2)`, discharged unconditionally by `loweringIntertwiner_two`) combined
-with the metric-isometry covariant-gradient pairing bridge. -/
 
 /-- **The smooth weak-solution identity.** For the finite eigen-combination
 `u = finiteEigenCombo F c` and any smooth compactly-supported test tensor `v`, the
@@ -277,14 +232,10 @@ theorem finiteEigenCombo_weakSolution
         (- rawTensorConnLapSmooth (I := I) g 0 2
             (finiteEigenCombo (I := I) (M := M) g F c)).toFun v.toFun := by
   set u : SmoothCcTensor g 0 2 := finiteEigenCombo (I := I) (M := M) g F c with hu
-  -- LHS = `⟪∇u, ∇v⟫_{L²}` by the covariant-gradient pairing bridge.
   rw [(tensorL2Inner_covGrad_eq_integral_tensorCovDerivPointwiseInner
         (I := I) (M := M) g 0 2 u v).symm]
-  -- `⟪∇u, ∇v⟫_{L²} = -⟪Δ_∇ u, v⟫_{L²}` by the connection-Laplacian Green identity.
   rw [tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_two
     (I := I) (M := M) g u v]
-  -- `⟪-Δ_∇ u, v⟫ = -⟪Δ_∇ u, v⟫`: the source's underlying map is the pointwise
-  -- `(-1)`-scaling of `(Δ_∇ u).toFun`.
   rw [show (- rawTensorConnLapSmooth (I := I) g 0 2 u).toFun =
         (-1 : ℝ) • (rawTensorConnLapSmooth (I := I) g 0 2 u).toFun by
       funext x
@@ -293,14 +244,6 @@ theorem finiteEigenCombo_weakSolution
         TensorRSSpace.toModel_neg, neg_one_smul]]
   rw [tensorL2Inner_smul_left]
   ring
-
-/-! ## The `L²`-coordinate eigen-equation
-
-The honest spectral content of `Δ_∇` acting on the finite eigen-combination is the
-`L²`-coordinate identity `cᵢ(Δ_∇ u) = -λᵢ · cᵢ(u)`. (The strong pointwise
-eigen-equation `Δ_∇ eⱼ = -λⱼ eⱼ` is *not* used: only its `L²`-coordinate shadow is
-needed, and that follows from the established per-step identity for `(1 - Δ_∇)` via
-`Δ_∇ = id - (1 - Δ_∇)`.) -/
 
 /-- **The `L²`-coordinate eigen-equation for `Δ_∇`.** For any smooth
 compactly-supported `(0, 2)`-tensor `T`, applying the rough connection Laplacian
@@ -318,21 +261,17 @@ theorem rawConnLapSmooth_tensorL2Coeff
       (- TensorEigenIdx.lambda (I := I) (M := M) i) *
         tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
           (SmoothCcTensor.toL2 T) i := by
-  -- `Δ_∇ T = T - (1 - Δ_∇) T`, so `toL2 (Δ_∇ T) = toL2 T - toL2 ((1 - Δ_∇) T)`.
   have h_split :
       rawTensorConnLapSmooth (I := I) g 0 2 T =
         T - oneMinusConnLapSmooth (I := I) g 0 2 T := by
     rw [show oneMinusConnLapSmooth (I := I) g 0 2 T =
           T - rawTensorConnLapSmooth (I := I) g 0 2 T from rfl]
     abel
-  -- The coordinate functional is `⟪b i, ·⟫`; it distributes over the difference.
   rw [h_split, map_sub, tensorL2Coeff_eq_inner, inner_sub_right,
     ← tensorL2Coeff_eq_inner, ← tensorL2Coeff_eq_inner,
     tensorL2Coeff_ofCompact_oneMinusConnLapSmooth
       (I := I) (M := M) g (hCompact (I := I) (M := M) g) T i]
   ring
-
-/-! ## Iterated `L²`-coordinate eigen-equation -/
 
 /-- **The iterated `L²`-coordinate eigen-equation.** The `i`-th eigenbasis
 coordinate of `Δ_∇^j T` is `(-λᵢ)^j · cᵢ(T)`. -/
@@ -351,13 +290,6 @@ theorem rawConnLapIter_tensorL2Coeff
         rawConnLapSmooth_tensorL2Coeff (I := I) (M := M) g
           (rawTensorConnLapIter (I := I) g 0 2 j T) i, ih, pow_succ]
       ring
-
-/-! ## The `L²`-norm identities (orthogonality without `|F|`-blowup)
-
-Parseval expresses the squared `L²` norm of any `L²` element as the (a priori
-infinite) sum of its squared eigenbasis coordinates. For the finite eigen-combination
-and its Laplacian iterates the coordinates are supported on `F`, so the sum
-collapses to a finite sum over `F` with no cross-terms. -/
 
 open scoped Classical in
 /-- The eigenbasis coordinate of `Δ_∇^j (finiteEigenCombo F c)` is supported on
@@ -396,10 +328,8 @@ theorem finiteEigenCombo_iterRawConnLap_l2NormSq
       ∑ i ∈ F,
         (TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * j) * (c i) ^ 2 := by
   classical
-  -- Parseval: squared `L²` norm = sum of squared coordinates.
   rw [← tensorParseval_l2Coeff_ofCompact_sq (I := I) (M := M)
     (hCompact (I := I) (M := M) g)]
-  -- The coordinate family is supported on `F`; collapse the tsum to `∑_{i ∈ F}`.
   rw [tsum_eq_sum (s := F) (f := fun i =>
       (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
         (SmoothCcTensor.toL2
@@ -408,7 +338,6 @@ theorem finiteEigenCombo_iterRawConnLap_l2NormSq
   · refine Finset.sum_congr rfl (fun i hi => ?_)
     rw [finiteEigenCombo_iterRawConnLap_tensorL2Coeff (I := I) (M := M) g F c j i,
       if_pos hi, mul_pow, ← pow_mul, mul_comm j 2]
-    -- `(-λᵢ)^(2j) = λᵢ^(2j)` since the exponent is even.
     rw [(even_two_mul j).neg_pow (TensorEigenIdx.lambda (I := I) (M := M) i)]
   · intro b hb
     simp only [finiteEigenCombo_iterRawConnLap_tensorL2Coeff
@@ -429,13 +358,6 @@ theorem finiteEigenCombo_l2NormSq
   refine Finset.sum_congr rfl (fun i _ => ?_)
   simp
 
-/-! ## The `Hˢ`-norm identity
-
-Packaging the finite eigen-combination's eigenbasis coordinates into a spectral
-`Hˢ` element, its squared `Hˢ` norm is the weighted finite sum
-`∑_{i ∈ F} (1 + λᵢ)^σ · (c i)²`, by the coordinate-space Parseval identity
-`norm_sq_eq_tsum` of `tensorHs` and the indicator support of the coordinates. -/
-
 open scoped Classical in
 /-- The `Hˢ`-spectral element whose eigenbasis coordinates are the indicator
 `(if i ∈ F then c i else 0)` — the coordinates of `finiteEigenCombo F c`. -/
@@ -446,8 +368,6 @@ def finiteEigenComboHs
   coeff i := if i ∈ F then c i else 0
   weighted_summable := by
     classical
-    -- The weighted-square family vanishes off `F`, hence is summable (finitely
-    -- supported).
     refine summable_of_ne_finset_zero (s := F) ?_
     intro i hiF
     rw [if_neg hiF]

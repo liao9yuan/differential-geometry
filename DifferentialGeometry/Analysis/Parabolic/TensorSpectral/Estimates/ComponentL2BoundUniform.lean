@@ -71,21 +71,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Bundle-fibre diagonal of `tensorTrivProj` folds back to the bundle inner
-
-On the chart base set, the chart-frame diagonal quadratic form on
-`tensorTrivProj S α b` agrees with the bundle-fibre diagonal quadratic
-form on `S.toFun b`. This combines the `tensorTrivProj`/`chartRSTwistInv`
-bridge with the `chartTensorInnerPointwise_rs_model`/`tensorInnerPointwise`
-bridge composed with the forward round-trip
-`chartRSTwist (chartRSTwistInv T) = T`. -/
 
 lemma chartTensorInner_tensorTrivProj_eq_tensorInner_toFun
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -127,14 +116,6 @@ lemma tensorTrivProj_norm_sq_le_const_mul_tensorInner
   rwa [chartTensorInner_tensorTrivProj_eq_tensorInner_toFun
     (I := I) (M := M) g r s α S hb_base] at h
 
-/-! ## Uniform-in-multi-index operator-norm bound on the chart projections
-
-Each multi-index projection
-`tensorChartComponentProjection r s Idx Jdx : TensorRSModel r s ℝ E →L[ℝ] ℝ`
-is a continuous linear functional and so satisfies `|P_IJ T| ≤ ‖P_IJ‖ · ‖T‖`.
-Summing the operator norms over the (finite) multi-index set gives a uniform
-constant that bounds every individual `‖P_IJ‖`. -/
-
 /-- A uniform operator-norm bound on the chart-frame multi-index projections:
 for every `(Idx, Jdx)`, `‖P_IJ‖ ≤ C_proj`. -/
 noncomputable def chartComponentProjectionUniformBound (r s : ℕ) : ℝ :=
@@ -152,9 +133,6 @@ lemma tensorChartComponentProjection_norm_le_uniform (r s : ℕ)
     ‖tensorChartComponentProjection (E := E) r s Idx Jdx‖ ≤
       chartComponentProjectionUniformBound (E := E) r s := by
   classical
-  -- The uniform bound is the sum of norms over the universal multi-index Finset.
-  -- Decompose `Finset.univ = {(Idx, Jdx)} ∪ rest`, where rest = univ \ {(Idx, Jdx)};
-  -- the LHS equals the first summand and the second summand is nonneg.
   set V : Finset ((Fin r → Fin (Module.finrank ℝ E)) ×
                   (Fin s → Fin (Module.finrank ℝ E))) := Finset.univ
   have hmem : (Idx, Jdx) ∈ V := Finset.mem_univ _
@@ -171,14 +149,6 @@ lemma tensorChartComponentProjection_norm_le_uniform (r s : ℕ)
         ‖tensorChartComponentProjection (E := E) r s p.1 p.2‖ :=
     Finset.sum_nonneg (fun _ _ => norm_nonneg _)
   linarith
-
-/-! ## Pointwise bound on the chart-frame scalar component
-
-The scalar component `tensorChartComponentScalar g r s S α Idx Jdx` is
-`POU(b) * P_IJ(tensorTrivProj S α b)`. Combining the projection operator-norm
-bound, the `‖tensorTrivProj‖²` chart-frame quadratic-form bound, and the
-`POU(b)² ≤ 1` estimate produces a uniform pointwise bound by
-`(C_proj² · K) · tensorInnerPointwise g r s b (S.toFun b) (S.toFun b)`. -/
 
 lemma tensorChartComponentScalar_sq_le_const_mul_tensorInner
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
@@ -209,20 +179,16 @@ lemma tensorChartComponentScalar_sq_le_const_mul_tensorInner
   have hQ_nn : 0 ≤ tensorInnerPointwise (I := I) (M := M) g r s b
       (S.toFun b) (S.toFun b) :=
     tensorInnerPointwise_nonneg (I := I) (M := M) g r s b _
-  -- `tensorChartComponentScalar = ρ * (P_IJ T)`.
   have hsc_eq : tensorChartComponentScalar (I := I) (M := M)
       g r s S α Idx Jdx b = ρ b * P_IJ T := rfl
   by_cases hb : b ∈ tsupport ρ
-  · -- Inside `tsupport ρ`: apply the chain.
-    have hρ_nn : 0 ≤ ρ b := (chartAtlasPOU I M).nonneg α b
+  · have hρ_nn : 0 ≤ ρ b := (chartAtlasPOU I M).nonneg α b
     have hρ_le_one : ρ b ≤ 1 := (chartAtlasPOU I M).le_one α b
-    -- `|P_IJ T| ≤ C_proj · ‖T‖`.
     have h_proj_le : ‖P_IJ T‖ ≤ C_proj * ‖T‖ :=
       (ContinuousLinearMap.le_opNorm _ _).trans
         (mul_le_mul_of_nonneg_right
           (tensorChartComponentProjection_norm_le_uniform (E := E) r s Idx Jdx)
           (norm_nonneg _))
-    -- Square it: `(P_IJ T)² ≤ C_proj² · ‖T‖²`.
     have h_proj_sq_le : (P_IJ T) ^ 2 ≤ C_proj ^ 2 * ‖T‖ ^ 2 := by
       have h_abs : (P_IJ T) ^ 2 = ‖P_IJ T‖ ^ 2 := by
         rw [Real.norm_eq_abs, sq_abs]
@@ -232,11 +198,9 @@ lemma tensorChartComponentScalar_sq_le_const_mul_tensorInner
         ring
       have h_lhs : ‖P_IJ T‖ * ‖P_IJ T‖ = ‖P_IJ T‖ ^ 2 := by rw [sq]
       linarith [hsq, h_lhs.symm.le, h_rhs.symm.le, h_lhs.le, h_rhs.le]
-    -- `‖T‖² ≤ K · tensorInner(S.toFun, S.toFun)`.
     have h_triv_sq_le : ‖T‖ ^ 2 ≤ K *
         tensorInnerPointwise (I := I) (M := M) g r s b
           (S.toFun b) (S.toFun b) := h_norm S b hb
-    -- Combine: `(P_IJ T)² ≤ C_proj² · K · tensorInner`.
     have hC_proj_sq_nn : 0 ≤ C_proj ^ 2 := sq_nonneg _
     have h_chain_sq : (P_IJ T) ^ 2 ≤
         C_proj ^ 2 *
@@ -244,7 +208,6 @@ lemma tensorChartComponentScalar_sq_le_const_mul_tensorInner
               (S.toFun b) (S.toFun b)) := by
       have h_mul := mul_le_mul_of_nonneg_left h_triv_sq_le hC_proj_sq_nn
       exact h_proj_sq_le.trans h_mul
-    -- Multiply in `ρ b² ≤ 1`.
     have h_ρ_sq_le_one : ρ b ^ 2 ≤ 1 := by
       have h := mul_le_mul hρ_le_one hρ_le_one hρ_nn (by linarith)
       rw [sq]; linarith
@@ -272,8 +235,7 @@ lemma tensorChartComponentScalar_sq_le_const_mul_tensorInner
             tensorInnerPointwise (I := I) (M := M) g r s b
               (S.toFun b) (S.toFun b) := by ring
     linarith [h_factored, h_rhs_rearr.le, h_rhs_rearr.symm.le]
-  · -- Outside `tsupport ρ`: `ρ b = 0`, so scalar is zero, and RHS ≥ 0.
-    have hρ_zero : ρ b = 0 := by
+  · have hρ_zero : ρ b = 0 := by
       by_contra hne
       exact hb (subset_tsupport _ hne)
     rw [hsc_eq, hρ_zero, zero_mul]
@@ -294,14 +256,6 @@ lemma tensorChartComponentScalar_sq_le_const_mul_tensorInner
     have hzero_sq : (0 : ℝ) ^ 2 = 0 := by ring
     rw [hzero_sq]
     exact h_RHS_nn
-
-/-! ## `eLpNorm` conversion helpers (private, file-local)
-
-We follow the pattern of `ChartBilinearUniformDiffQuotBound`'s eLpNorm
-helpers: convert `(eLpNorm f 2 μ)^2` to a lintegral of `‖f x‖ₑ ^ 2`, bound
-it by `ENNReal.ofReal (∫ |f x|² dμ)` after a pointwise comparison, then
-take square roots.
--/
 
 private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq
     {α : Type*} [MeasurableSpace α] (μ : Measure α) (f : α → ℝ) :
@@ -346,12 +300,6 @@ private lemma eLpNorm_two_le_ofReal_sqrt
   rw [sqrt_ofReal_eq_ofReal_sqrt hS] at h_pow
   exact h_pow
 
-/-! ## Integrated `L²` bound
-
-Integrate the pointwise quadratic bound against
-`riemannianVolumeMeasure g`; the right-hand side is
-`(C_proj^2 K) · tensorL2Inner g r s S.toFun S.toFun`. -/
-
 private lemma sq_eLpNorm_two_le_const_mul_tensorL2Inner
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -372,7 +320,6 @@ private lemma sq_eLpNorm_two_le_const_mul_tensorL2Inner
   set f : M → ℝ := tensorChartComponentScalar (I := I) (M := M)
     g r s S α Idx Jdx
   set μ : Measure M := riemannianVolumeMeasure (I := I) (M := M) g
-  -- Pointwise ENNReal bound.
   have h_pt_enn : ∀ b : M,
       (‖f b‖ₑ : ℝ≥0∞) ^ 2 ≤
         ENNReal.ofReal (C * tensorInnerPointwise (I := I) (M := M)
@@ -382,7 +329,6 @@ private lemma sq_eLpNorm_two_le_const_mul_tensorL2Inner
       rw [Real.enorm_eq_ofReal_abs, ← ENNReal.ofReal_pow (abs_nonneg _) 2,
         sq_abs]]
     exact ENNReal.ofReal_le_ofReal (h_pt S Idx Jdx b)
-  -- Integrability of the RHS integrand.
   have h_inner_int := SmoothCcTensor.integrable_inner_cross
     (I := I) (M := M) (g := g) (r := r) (s := s) S S
   have h_C_smul_int :
@@ -397,7 +343,6 @@ private lemma sq_eLpNorm_two_le_const_mul_tensorL2Inner
     intro b
     exact mul_nonneg hC_nn
       (tensorInnerPointwise_nonneg (I := I) (M := M) g r s b _)
-  -- Convert `(eLpNorm f 2 μ)^2` and bound the lintegral.
   rw [sq_eLpNorm_two_eq_lintegral_enorm_sq μ f]
   have h_lint_le :
       ∫⁻ b, (‖f b‖ₑ : ℝ≥0∞) ^ 2 ∂μ ≤
@@ -421,12 +366,6 @@ private lemma sq_eLpNorm_two_le_const_mul_tensorL2Inner
     rw [integral_const_mul]
   rw [h_int_const_mul] at h_lint_le
   exact h_lint_le
-
-/-! ## Headline uniform `L²` bound
-
-The chart-frame scalar component has `L²` norm bounded uniformly in
-`(S, Idx, Jdx)` by a constant depending only on `(g, r, s, α)` times
-`tensorL2Norm g r s S.toFun`. -/
 
 /-- **Headline theorem (uniform `L²` bound for chart-frame scalar
 components).** For each chart `α : M` and ranks `(r, s)`, there is a
@@ -455,7 +394,6 @@ theorem tensorChartComponentScalar_eLpNorm_le_uniform
       (I := I) (M := M) (E := E) g r s α
   refine ⟨Real.sqrt C, Real.sqrt_nonneg _, ?_⟩
   intro S Idx Jdx
-  -- `tensorL2Inner S S = (tensorL2Norm S.toFun)²` since the inner is non-negative.
   have h_inner_nn :
       0 ≤ tensorL2Inner (I := I) (M := M) g r s S.toFun S.toFun := by
     unfold tensorL2Inner
@@ -472,7 +410,6 @@ theorem tensorChartComponentScalar_eLpNorm_le_uniform
   have hS_total_nn : 0 ≤ S_total := mul_nonneg hC_nn h_inner_nn
   have h_eLpNorm_le :=
     eLpNorm_two_le_ofReal_sqrt hS_total_nn (h_sq S Idx Jdx)
-  -- `√(C · ‖S‖²) = √C · ‖S‖`.
   have h_sqrt_factor :
       Real.sqrt S_total = Real.sqrt C *
         tensorL2Norm (I := I) (M := M) g r s S.toFun := by

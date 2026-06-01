@@ -139,28 +139,12 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
   hiding chartTargetEuclid chartTargetEuclid_isOpen
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Unconditional `L²` membership of the canonical chosen weak partial
-
-The canonical chosen weak partial `chosenWeakPartial' 2 k w Ω` is a **total**
-function: when `w ∉ W^{1,2}(Ω)` it is the zero function
-(`chosenWeakPartial'_of_not_mem`). It is therefore `MemLp 2 (volume.restrict Ω)`
-for *every* `w` — either it is a genuine weak partial of a `W^{1,2}` element
-(`chosenWeakPartial'_memLp_of_mem`) or it is `0`. This unconditional `L²`
-membership is the mechanism by which the differentiated right-hand side avoids
-any regularity hypothesis. -/
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 /-- **Unconditional `L²` membership of the canonical chosen weak partial.** For
@@ -179,13 +163,6 @@ private lemma chosenWeakPartial'_memLp_volume_unconditional
   · rw [chosenWeakPartial'_of_not_mem hw k]
     exact MemLp.zero
 
-/-! ## The compact partition-of-unity kernel and the reciprocal chart density
-
-The differentiated right-hand side is supported in the compact
-partition-of-unity kernel `chartPouKernel α`, on which the reciprocal chart
-density `1 / densityOnEuclid g α` — `C^∞` and strictly positive on the open
-chart target — is `C^∞` and bounded. -/
-
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
 /-- The reciprocal `1 / densityOnEuclid g α` of the chart density is `C^∞` on the
@@ -198,15 +175,6 @@ private lemma one_div_densityOnEuclid_contDiffOn'
       (chartTargetEuclid (I := I) (M := M) α) :=
   contDiffOn_const.div (densityOnEuclid_contDiffOn (I := I) g α)
     (fun _ hy => (densityOnEuclid_pos (I := I) g α hy).ne')
-
-/-! ## Weighted-`L²` membership of the differentiated numerator
-
-Each of the five layers of the differentiated numerator is `MemLp 2` of the
-plain Lebesgue volume restricted to the compact partition-of-unity kernel
-`chartPouKernel α`. The proof multiplies a `C^∞`-on-the-chart-target coefficient
-(bounded on the compact kernel) by a factor that is unconditionally `MemLp 2` of
-the restricted volume — either an `m`-fold mixed weak partial, the canonical
-chosen weak partial of one, or the level-`m` differentiated right-hand side. -/
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
@@ -227,7 +195,6 @@ lemma memLp_volume_compact_contDiffOn_mul
     (hw : MemLp w 2 ((volume : Measure EuclN).restrict K)) :
     MemLp (fun y => c y * w y) 2 ((volume : Measure EuclN).restrict K) := by
   classical
-  -- `c` is continuous on `K`, hence bounded there by a nonnegative `C`.
   have hc_contOn_K : ContinuousOn c K := hc.continuousOn.mono hK_in
   have hbdd : ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ K, ‖c y‖ ≤ C := by
     by_cases hK_empty : K = ∅
@@ -236,16 +203,12 @@ lemma memLp_volume_compact_contDiffOn_mul
       exact ⟨max C₀ 0, le_max_right _ _,
         fun y hy => (hC₀ ⟨y, hy, rfl⟩).trans (le_max_left _ _)⟩
   obtain ⟨C, hC_nn, hC_bd⟩ := hbdd
-  -- `c` is `AEStronglyMeasurable` for the restricted volume.
   have hc_meas : AEStronglyMeasurable c
       ((volume : Measure EuclN).restrict K) :=
     hc_contOn_K.aestronglyMeasurable hK_meas
-  -- `c` is a.e. bounded by `C` on `K`.
   have hc_ae_bd : ∀ᵐ y ∂((volume : Measure EuclN).restrict K), ‖c y‖ ≤ C :=
     (ae_restrict_iff' hK_meas).mpr (Filter.Eventually.of_forall hC_bd)
-  -- bounded-measurable × `L²` is `L²`.
   refine ⟨hc_meas.mul hw.1, ?_⟩
-  -- The product is a.e. dominated in norm by `C • w`.
   have hpt : ∀ᵐ y ∂((volume : Measure EuclN).restrict K),
       ‖c y * w y‖ ≤ ‖(C : ℝ) • w y‖ := by
     filter_upwards [hc_ae_bd] with y hy
@@ -256,23 +219,6 @@ lemma memLp_volume_compact_contDiffOn_mul
   exact lt_of_le_of_lt
     (eLpNorm_mono_ae (μ := (volume : Measure EuclN).restrict K) hpt)
     (hw.const_smul (C : ℝ)).2
-
-/-! ## Chart-locality-free iterated-regularity recursion
-
-The iterated partial recursion and the differentiated right-hand side are keyed
-on the intrinsic compactness witness, re-keying the underlying eigenbasis vector
-onto
-`tensorResolventEigenbasisVec (tensorResolventL2_isCompactOperator g r s) i`.
-The level-`0` leaves are the committed `_unconditional` objects
-`eigenvectorChartRHS` and `eigenvectorChartRHS_memLp_weighted`. -/
-
-/-! ### The chart-locality-free level-`0` chart component
-
-The canonical eigenvector chart `P₀`-component, re-keyed onto the intrinsic
-compactness witness: the coercion-to-function of the `Lp` element
-`tensorL2ChartComponent g r s (tensorResolventEigenbasisVec …) α P₀`.
-This is the term-1 component of `eigenvectorChartRHS`, and the
-level-`0` leaf of the chart-locality-free iterated partial recursion. -/
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- The chart `P₀`-component of the resolvent eigenvector, chart-locality-free:
@@ -309,8 +255,6 @@ lemma eigenvectorChartComponentFun_memLp_volume
       (tensorResolventL2_isCompactOperator (I := I) (M := M)
         g r s) i) α P₀)
   exact h
-
-/-! ### The chart-locality-free recursive `m`-fold mixed weak partial -/
 
 /-- The recursive `m`-fold mixed weak partial of the eigenvector chart component
 in the directions `l : Fin m → Fin n`, via `chosenWeakPartial'`, chart-locality-
@@ -404,8 +348,6 @@ private lemma eigenvectorChartIteratedPartial_memLp_volume_compact
   rw [← h_eq]
   exact h_global.restrict K
 
-/-! ### The chart-locality-free five-layer differentiated numerator -/
-
 /-- The five-layer differentiated numerator at level `m + 1`, chart-locality-free.
 Chart-locality-free twin of `eigenvectorChartRHSDiffNumerator`, with the recursive
 `m`-fold mixed weak partials re-keyed onto
@@ -416,7 +358,6 @@ def eigenvectorChartRHSDiffNumerator
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
     (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
     (fChartEffPrev : EuclN → ℝ) (y : EuclN) : ℝ :=
-  -- Layer A: (∂_b ∂_{lₙ} a_ab) · ((m+1)-fold mixed partial, index `cons a init`).
   (∑ a : Fin (Module.finrank ℝ E),
     ∑ b : Fin (Module.finrank ℝ E),
       (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b
@@ -424,7 +365,6 @@ def eigenvectorChartRHSDiffNumerator
           (EuclideanSpace.single b 1) *
         eigenvectorChartIteratedPartial (I := I) (M := M)
           g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)) y)
-  -- Layer B: (∂_{lₙ} a_ab) · (∂_b of the (m+1)-fold mixed partial, `cons a init`).
   + (∑ a : Fin (Module.finrank ℝ E),
       ∑ b : Fin (Module.finrank ℝ E),
         weightedInvGramDerivOnEuclid (I := I) g α a b (l (Fin.last m)) y *
@@ -432,13 +372,10 @@ def eigenvectorChartRHSDiffNumerator
             (eigenvectorChartIteratedPartial (I := I) (M := M)
               g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
             (chartTargetEuclid (I := I) (M := M) α) y)
-  -- Layer C: -(∂_{lₙ} c) · (m-fold mixed partial, index `Fin.init l`).
   - densityDerivOnEuclid (I := I) g α (l (Fin.last m)) y *
       eigenvectorChartIteratedPartial (I := I) (M := M)
         g r s i α P₀ m (Fin.init l) y
-  -- Layer D: (∂_{lₙ} c) · fChartEffPrev.
   + densityDerivOnEuclid (I := I) g α (l (Fin.last m)) y * fChartEffPrev y
-  -- Layer E: c · (∂_{lₙ}-weak-partial of fChartEffPrev).
   + densityOnEuclid (I := I) g α y *
       chosenWeakPartial' (d := Module.finrank ℝ E) 2 (l (Fin.last m))
         fChartEffPrev (chartTargetEuclid (I := I) (M := M) α) y
@@ -471,7 +408,6 @@ lemma eigenvectorChartRHSDiffNumerator_memLp_volume_compact
   have h_prev_K : MemLp fChartEffPrev 2 ((volume : Measure EuclN).restrict K) :=
     memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure
       (g := g) (α := α) h_prev hK_compact hK_meas hK_in
-  -- Layer A.
   have hA : MemLp (fun y => ∑ a : Fin (Module.finrank ℝ E),
       ∑ b : Fin (Module.finrank ℝ E),
         (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b
@@ -506,7 +442,6 @@ lemma eigenvectorChartRHSDiffNumerator_memLp_volume_compact
       (eigenvectorChartIteratedPartial_memLp_volume_compact
         (I := I) (M := M) g r s i α P₀ (m + 1)
         (Fin.cons a (Fin.init l)) hK_meas hK_in)
-  -- Layer B.
   have hB : MemLp (fun y => ∑ a : Fin (Module.finrank ℝ E),
       ∑ b : Fin (Module.finrank ℝ E),
         weightedInvGramDerivOnEuclid (I := I) g α a b (l (Fin.last m)) y *
@@ -531,7 +466,6 @@ lemma eigenvectorChartRHSDiffNumerator_memLp_volume_compact
       exact Set.inter_eq_self_of_subset_left hK_in
     rw [← h_eq]
     exact h_global.restrict K
-  -- Layer C.
   have hC : MemLp (fun y =>
       densityDerivOnEuclid (I := I) g α (l (Fin.last m)) y *
         eigenvectorChartIteratedPartial (I := I) (M := M)
@@ -543,7 +477,6 @@ lemma eigenvectorChartRHSDiffNumerator_memLp_volume_compact
       (eigenvectorChartIteratedPartial_memLp_volume_compact
         (I := I) (M := M) g r s i α P₀ m (Fin.init l)
         hK_meas hK_in)
-  -- Layer D.
   have hD : MemLp (fun y =>
       densityDerivOnEuclid (I := I) g α (l (Fin.last m)) y *
         fChartEffPrev y) 2
@@ -551,7 +484,6 @@ lemma eigenvectorChartRHSDiffNumerator_memLp_volume_compact
     memLp_volume_compact_contDiffOn_mul (I := I) (M := M) α
       (densityDerivOnEuclid_contDiffOn (I := I) g α (l (Fin.last m)))
       hK_compact hK_meas hK_in h_prev_K
-  -- Layer E.
   have hE : MemLp (fun y =>
       densityOnEuclid (I := I) g α y *
         chosenWeakPartial' (d := Module.finrank ℝ E) 2 (l (Fin.last m))
@@ -569,13 +501,10 @@ lemma eigenvectorChartRHSDiffNumerator_memLp_volume_compact
       exact Set.inter_eq_self_of_subset_left hK_in
     rw [← h_eq]
     exact h_global.restrict K
-  -- Assemble: the numerator is `A + B - C + D + E`.
   have h_total := ((((hA.add hB).sub hC).add hD).add hE)
   refine h_total.ae_eq (Filter.Eventually.of_forall (fun y => ?_))
   simp only [eigenvectorChartRHSDiffNumerator, Pi.add_apply,
     Pi.sub_apply]
-
-/-! ### The chart-locality-free level-`m` differentiated right-hand side -/
 
 /-- **The level-`m` differentiated right-hand side of the eigenvector chart
 variational identity** (chart-locality-free). Chart-locality-free twin of

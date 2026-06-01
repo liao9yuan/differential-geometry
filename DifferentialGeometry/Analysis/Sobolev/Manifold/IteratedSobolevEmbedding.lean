@@ -45,14 +45,10 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Order monotonicity for `wkpNorm` -/
 
 namespace EuclideanIterated
 
@@ -106,8 +102,6 @@ theorem chosenWeakPartial'_cross_exponent_ae_eq
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ_open h_p_isWeak h_q_isWeak
     h_p_loc h_q_loc
 
-/-! ## Recursive decomposition of `wkpNorm` -/
-
 open DifferentialGeometry.Analysis.Sobolev.Euclidean in
 /-- The recursive decomposition of `wkpNorm`:
 `wkpNorm (k+1) p u Ω = eLpNorm u p + ∑_i wkpNorm k p (chosenWeakPartial' p i u Ω) Ω`. -/
@@ -118,20 +112,11 @@ theorem wkpNorm_succ_eq
         ∑ i : Fin d,
           wkpNorm (d := d) k p (chosenWeakPartial' p i u Ω) Ω := by
   classical
-  -- Unfold both sides as sums of `eLpNorm` of `iterWeakPartial`.
   unfold wkpNorm
-  -- LHS: ∑_{j=0}^{k+1} ∑_{α : Fin j → Fin d} eLpNorm (iterWeakPartial p j α u Ω) p
-  -- Split off j=0 term using Finset.sum_range_succ' (which moves j=0 out at the start).
   rw [Finset.sum_range_succ' (n := k + 1)
       (f := fun j =>
         ∑ α : Fin j → Fin d,
           eLpNorm (iterWeakPartial (d := d) p j α u Ω) p (volume.restrict Ω))]
-  -- After Finset.sum_range_succ', LHS = (∑_{j=0..k} ...with shift...) + (j=0 term)
-  -- The j=0 term is: ∑ α : Fin 0 → Fin d, eLpNorm (iterWeakPartial p 0 α u Ω) p
-  --                = eLpNorm u p (volume.restrict Ω) (since Fin 0 → Fin d is unique)
-  -- The shifted sum: ∑_{j=0..k} ∑_{α : Fin (j+1) → Fin d} eLpNorm (iterWeakPartial p (j+1) α u Ω) p
-  -- We show this equals ∑_i wkpNorm k p (chosenWeakPartial' p i u Ω) Ω.
-  -- Step 1: Compute the j=0 term.
   have h_zero_term :
       (∑ α : Fin 0 → Fin d,
           eLpNorm (iterWeakPartial (d := d) p 0 α u Ω) p (volume.restrict Ω)) =
@@ -146,26 +131,15 @@ theorem wkpNorm_succ_eq
             eLpNorm (iterWeakPartial (d := d) p 0 α u Ω) p (volume.restrict Ω))]
     simp [iterWeakPartial_zero]
   rw [h_zero_term, add_comm]
-  -- Now both sides have the form: eLpNorm u p + (sum over i / sum over j+1).
-  -- Goal: ∑_{j ∈ range (k+1)} ∑_{α : Fin (j+1) → Fin d} eLpNorm (iterWeakPartial (j+1) α u Ω) p
-  --     = ∑_{i : Fin d} ∑_{j ∈ range (k+1)} ∑_{α' : Fin j → Fin d} eLpNorm (iterWeakPartial j α' (chosenWeakPartial' p i u Ω) Ω) p
   congr 1
-  -- Use Finset.sum_comm to swap sums, and reindex via Fin.consEquiv.
-  -- Strategy: rewrite each j-term using the (Fin (j+1) → Fin d) ≃ Fin d × (Fin j → Fin d) equiv,
-  -- then swap sums.
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl ?_
   intro j _
-  -- Goal: ∑_{α : Fin (j+1) → Fin d} eLpNorm (iterWeakPartial p (j+1) α u Ω) p
-  --     = ∑_i ∑_{α' : Fin j → Fin d} eLpNorm (iterWeakPartial p j α' (chosenWeakPartial' p i u Ω) Ω) p
-  -- Reindex via the equivalence (Fin d) × (Fin j → Fin d) ≃ (Fin (j+1) → Fin d)
-  -- given by (i, α') ↦ Fin.cons i α'.
   have h_unfold : ∀ α : Fin (j + 1) → Fin d,
       iterWeakPartial (d := d) p (j + 1) α u Ω =
         iterWeakPartial (d := d) p j (fun i : Fin j => α i.succ)
           (chosenWeakPartial' p (α 0) u Ω) Ω :=
     fun α => iterWeakPartial_succ p j α u Ω
-  -- Sum over (Fin (j+1) → Fin d) factors as sum over (Fin d) × (Fin j → Fin d).
   let e : Fin d × (Fin j → Fin d) ≃ (Fin (j + 1) → Fin d) :=
     { toFun := fun p => Fin.cons p.1 p.2
       invFun := fun α => (α 0, fun i : Fin j => α i.succ)
@@ -183,7 +157,6 @@ theorem wkpNorm_succ_eq
           change (Fin.cons (α 0) (fun i : Fin j => α i.succ) : Fin (j + 1) → Fin d) k.succ
             = α k.succ
           rw [Fin.cons_succ] }
-  -- Reindex the sum.
   rw [show
       ∑ α : Fin (j + 1) → Fin d,
         eLpNorm (iterWeakPartial (d := d) p (j + 1) α u Ω) p (volume.restrict Ω) =
@@ -195,7 +168,6 @@ theorem wkpNorm_succ_eq
       (fun α => eLpNorm (iterWeakPartial (d := d) p (j + 1) α u Ω) p
         (volume.restrict Ω))
       (fun _ => rfl)).symm]
-  -- Now ∑_{p' : Fin d × (Fin j → Fin d)} ... = ∑_i ∑_{α'} ... by Finset.sum_product'.
   rw [show
       ∑ p' : Fin d × (Fin j → Fin d),
         eLpNorm (iterWeakPartial (d := d) p (j + 1) (e p') u Ω) p (volume.restrict Ω) =
@@ -206,7 +178,6 @@ theorem wkpNorm_succ_eq
   intro i _
   refine Finset.sum_congr rfl ?_
   intro α' _
-  -- e (i, α') = Fin.cons i α'; (Fin.cons i α') 0 = i, (Fin.cons i α').tail = α'.
   have hcons_zero : (Fin.cons i α' : Fin (j + 1) → Fin d) 0 = i := Fin.cons_zero _ _
   have hcons_succ : ∀ k : Fin j, (Fin.cons i α' : Fin (j + 1) → Fin d) k.succ = α' k :=
     fun k => Fin.cons_succ _ _ _
@@ -230,9 +201,6 @@ theorem wkpNorm_chosenWeakPartial_le_wkpNorm_succ
       wkpNorm (d := d) (k + 1) p u Ω := by
   classical
   rw [wkpNorm_succ_eq (d := d) k p u Ω]
-  -- wkpNorm k p (chosenWeakPartial' p i u Ω) Ω
-  --   ≤ ∑_i wkpNorm k p (chosenWeakPartial' p i u Ω) Ω
-  --   ≤ eLpNorm u p + ∑_i wkpNorm k p (chosenWeakPartial' p i u Ω) Ω
   have h_single : wkpNorm (d := d) k p (chosenWeakPartial' p i u Ω) Ω ≤
       ∑ i : Fin d, wkpNorm (d := d) k p (chosenWeakPartial' p i u Ω) Ω :=
     Finset.single_le_sum
@@ -275,13 +243,6 @@ theorem MemWkpChart.le_one
     MemWkpChart (I := I) (M := M) g 1 p u :=
   MemWkpChart.le_of_le hk h
 
-/-! ## Super-critical case `p > n`: direct application of manifold Morrey
-
-When `p > n`, the manifold Morrey embedding immediately gives a continuous
-representative whose sup-norm is controlled by `wkpNormChart g 1 p u`. By order
-monotonicity, the same control holds with the higher-order norm
-`wkpNormChart g k p u`. -/
-
 /-- For `p > n`, the iterated chart-Sobolev embedding follows directly from the
 order-1 manifold Morrey embedding via order monotonicity of `wkpNormChart`. -/
 theorem iterated_sobolev_embedding_chart_C0_supercritical
@@ -320,10 +281,6 @@ theorem iterated_sobolev_embedding_chart_C0_supercritical
     ENNReal.toReal_mono h_k_lt_top.ne h_norm_le
   exact mul_le_mul_of_nonneg_left h_toReal_le hC_nn
 
-/-! ## Sub-critical Sobolev exponent `p_1 = n*p/(n-p)`
-
-Auxiliary definitions and basic inequalities. -/
-
 namespace TowerStep
 
 variable {d : ℕ} [NeZero d]
@@ -351,17 +308,6 @@ lemma pOne_ge_p {p : ℝ} (hp_one : 1 ≤ p) (hp_dim : p < (d : ℝ)) :
 lemma pOne_ge_one {p : ℝ} (hp_one : 1 ≤ p) (hp_dim : p < (d : ℝ)) :
     1 ≤ pOne d p :=
   le_trans hp_one (pOne_ge_p hp_one hp_dim)
-
-/-! ## Subcritical iterated Sobolev embedding step
-
-Constants and the induction. We define recursively the constant
-`subcriticalConstant k d p` and prove that for any `f ∈ MemWkp (k+1) p f Ω`
-with compact support and `tsupport f ⊆ Ω` (where `Ω` is open in
-`EuclideanSpace ℝ (Fin d)` and `1 ≤ p < d`):
-
-* `f ∈ MemWkp k p_1 f Ω`, where `p_1 = pOne d p = d*p/(d-p)`.
-* `wkpNorm k p_1 f Ω ≤ subcriticalConstant k d p · wkpNorm (k+1) p f Ω`.
--/
 
 /-- The base subcritical Sobolev constant: `C_gns d p · d`. -/
 noncomputable def subcriticalConstantBase (d : ℕ) [NeZero d] (p : ℝ) : ℝ :=
@@ -394,8 +340,6 @@ lemma subcriticalConstant_nonneg (k d : ℕ) [NeZero d] (p : ℝ) :
       exact add_nonneg (subcriticalConstantBase_nonneg d p)
         (mul_nonneg (Nat.cast_nonneg _) ih)
 
-/-! ### Inductive subcritical embedding -/
-
 local notation "EuN" => EuclideanSpace ℝ (Fin d)
 
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
@@ -418,10 +362,8 @@ theorem MemWkp_subcritical_iterated
           ENNReal.ofReal (subcriticalConstant k d p) *
             wkpNorm (d := d) (k + 1) (ENNReal.ofReal p) f Ω := by
   classical
-  -- Notation for the two exponents.
   set p_enn : ℝ≥0∞ := ENNReal.ofReal p with hp_enn_def
   set p_1_enn : ℝ≥0∞ := ENNReal.ofReal (pOne d p) with hp_1_enn_def
-  -- Basic properties.
   have hp_pos : 0 < p := by linarith
   have hp_1_pos : 0 < pOne d p := pOne_pos hp_one hp_dim
   have hp_1_one : 1 ≤ pOne d p := pOne_ge_one hp_one hp_dim
@@ -429,30 +371,21 @@ theorem MemWkp_subcritical_iterated
     rw [hp_enn_def, ← ENNReal.ofReal_one]; exact ENNReal.ofReal_le_ofReal hp_one
   have hp_1_enn_one : (1 : ℝ≥0∞) ≤ p_1_enn := by
     rw [hp_1_enn_def, ← ENNReal.ofReal_one]; exact ENNReal.ofReal_le_ofReal hp_1_one
-  -- Induction on k.
   induction k with
   | zero =>
-      -- Base case k = 0: the existing subcritical embedding.
       intro f hf_compact hf_supp hf
-      -- Reduce MemWkp 0 p_1 f Ω to MemLp p_1 f Ω.
-      -- Reduce wkpNorm 0 p_1 f Ω to eLpNorm f p_1 (volume.restrict Ω).
       have h_subcritical :
           eLpNorm f p_1_enn (volume.restrict Ω) ≤
             ENNReal.ofReal (DeGiorgi.C_gns d p) * (d : ℝ≥0∞) *
               wkpNorm (d := d) 1 p_enn f Ω := by
         have h := eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp (d := d)
           hp_one hp_dim hΩ_open (f := f) hf hf_compact hf_supp
-        -- The RHS in the source is `ofReal (C_gns d p) * d * wkpNorm 1 p f Ω`,
-        -- and the LHS is `eLpNorm f (ofReal (d*p/(d-p))) (volume.restrict Ω)`.
-        -- Match the exponent: `pOne d p = d*p/(d-p)` by definition.
         change eLpNorm f (ENNReal.ofReal ((d : ℝ) * p / ((d : ℝ) - p)))
           (volume.restrict Ω) ≤ _ at h
-        -- Convert pOne d p to (d*p/(d-p)).
         have hpOne_eq : pOne d p = (d : ℝ) * p / ((d : ℝ) - p) := rfl
         rw [show p_1_enn = ENNReal.ofReal ((d : ℝ) * p / ((d : ℝ) - p)) from by
           rw [hp_1_enn_def, hpOne_eq]]
         exact h
-      -- Build MemLp p_1 f Ω from the bound and aestronglyMeasurable.
       have hf_W1p : DeGiorgi.MemW1p p_enn f Ω := MemWkp.one_iff_memW1p.mp hf
       have hf_aem : AEStronglyMeasurable f (volume.restrict Ω) := hf.memLp.aestronglyMeasurable
       have h_eLp_lt_top : eLpNorm f p_1_enn (volume.restrict Ω) < ⊤ := by
@@ -466,14 +399,11 @@ theorem MemWkp_subcritical_iterated
       have hf_memLp_p1 : MemLp f p_1_enn (volume.restrict Ω) :=
         ⟨hf_aem, h_eLp_lt_top⟩
       refine ⟨?_, ?_⟩
-      · -- MemWkp 0 p_1 f Ω ↔ MemLp p_1 f Ω.
-        rw [MemWkp_zero]
+      · rw [MemWkp_zero]
         exact hf_memLp_p1
-      · -- wkpNorm 0 p_1 f Ω = eLpNorm f p_1 ≤ Const0 * wkpNorm 1 p f Ω.
-        rw [wkpNorm_zero]
+      · rw [wkpNorm_zero]
         rw [subcriticalConstant_zero]
         unfold subcriticalConstantBase
-        -- Rewrite ENNReal.ofReal of a product as a product.
         have hC_nn : 0 ≤ DeGiorgi.C_gns d p := DeGiorgi.C_gns_nonneg d p
         have hd_nn : 0 ≤ (d : ℝ) := Nat.cast_nonneg _
         rw [show ENNReal.ofReal (DeGiorgi.C_gns d p * (d : ℝ)) =
@@ -482,27 +412,18 @@ theorem MemWkp_subcritical_iterated
         exact h_subcritical
   | succ k ih =>
       intro f hf_compact hf_supp hf
-      -- f ∈ MemWkp (k+2) p f Ω. Goal: f ∈ MemWkp (k+1) p_1 f Ω with norm bound.
-      -- Set K = tsupport f (compact, ⊆ Ω, closed).
       set K : Set EuN := tsupport f with hK_def
       have hK_compact : IsCompact K := hf_compact
       have hK_closed : IsClosed K := isClosed_tsupport f
       have hKΩ : K ⊆ Ω := hf_supp
-      -- f ∈ MemWkp 1 p ⊆ MemW1p p.
       have hf_W1p : DeGiorgi.MemW1p p_enn f Ω := hf.memW1p
-      -- For each i, define g_i = K.indicator (chosenWeakPartial' p i f Ω).
-      -- This g_i has compact support and =ᵐ chosenWeakPartial' p i f Ω.
-      -- Step (1): From the base case (k=0), get f ∈ MemLp p_1 with norm bound.
       have h_base :
           MemWkp (d := d) 0 p_1_enn f Ω ∧
             wkpNorm (d := d) 0 p_1_enn f Ω ≤
               ENNReal.ofReal (subcriticalConstant 0 d p) *
                 wkpNorm (d := d) 1 p_enn f Ω := by
-        -- Apply the k=0 case.
         have hf1 : MemWkp (d := d) 1 p_enn f Ω :=
           MemWkp.le_of_le (Nat.succ_le_succ (Nat.zero_le _)) hf
-        -- Use the base-case branch directly. We can reproduce the proof inline.
-        -- Reduce MemWkp 0 p_1 f Ω to MemLp p_1 f Ω.
         have h_subcritical :
             eLpNorm f p_1_enn (volume.restrict Ω) ≤
               ENNReal.ofReal (DeGiorgi.C_gns d p) * (d : ℝ≥0∞) *
@@ -533,18 +454,13 @@ theorem MemWkp_subcritical_iterated
               ENNReal.ofReal (DeGiorgi.C_gns d p) * (d : ℝ≥0∞) from by
             rw [ENNReal.ofReal_mul hC_nn, ENNReal.ofReal_natCast]]
           exact h_subcritical
-      -- Step (2): For each i, apply IH to g_i and get a bound.
-      -- Define g_i := K.indicator (chosenWeakPartial' p i f Ω).
-      -- We will use `iteratedZeroExtension`-based properties.
       let g : Fin d → EuN → ℝ :=
         fun i => K.indicator (chosenWeakPartial' p_enn i f Ω)
-      -- Equality with iteratedZeroExtension (for ae-eq and tsupport bounds).
       have hg_eq_iter : ∀ i,
           g i = iteratedZeroExtension (d := d) p_enn Ω K 1 (fun _ : Fin 1 => i) f := by
         intro i
         change K.indicator (chosenWeakPartial' p_enn i f Ω) = _
         rw [iteratedZeroExtension_one]
-      -- tsupport bound (≤ K) from public lemma applied via hg_eq_iter.
       have hg_supp : ∀ i, tsupport (g i) ⊆ K := by
         intro i
         rw [hg_eq_iter i]
@@ -554,13 +470,9 @@ theorem MemWkp_subcritical_iterated
         intro i
         exact hK_compact.of_isClosed_subset (isClosed_tsupport _) (hg_supp i)
       have hg_supp_Ω : ∀ i, tsupport (g i) ⊆ Ω := fun i => (hg_supp i).trans hKΩ
-      -- chosenWeakPartial' p i f Ω ∈ MemWkp (k+1) p Ω.
       have hf_chosen_mem : ∀ i,
           MemWkp (d := d) (k + 1) p_enn (chosenWeakPartial' p_enn i f Ω) Ω :=
         fun i => hf.chosenWeakPartial_mem i
-      -- g_i =ᵐ chosenWeakPartial' p i f Ω on volume.restrict Ω.
-      -- Use the public iteratedZeroExtension_ae_eq_iterWeakPartial result.
-      -- iterWeakPartial p 1 ![i] f Ω = chosenWeakPartial' p i f Ω.
       have h_iterWP_one : ∀ i,
           iterWeakPartial (d := d) p_enn 1 (fun _ : Fin 1 => i) f Ω
             = chosenWeakPartial' p_enn i f Ω := by
@@ -574,27 +486,22 @@ theorem MemWkp_subcritical_iterated
         have h := iteratedZeroExtension_ae_eq_iterWeakPartial (d := d) hp_enn_one
           hΩ_open hK_closed 1 (k + 1 + 1) (by omega : 1 ≤ k + 1 + 1)
           (fun _ : Fin 1 => i) (u := f) hf (subset_refl _)
-        -- h: iteratedZeroExtension... =ᵐ iterWeakPartial p 1 ![i] f Ω
         rw [h_iterWP_one] at h
         exact h
-      -- g_i ∈ MemWkp (k+1) p Ω.
       have hg_mem_kplus1 : ∀ i,
           MemWkp (d := d) (k + 1) p_enn (g i) Ω := by
         intro i
         exact (MemWkp_congr_ae (d := d) hp_enn_one hΩ_open (hg_ae i)).mpr (hf_chosen_mem i)
-      -- Apply IH (note: ih is the inductive hypothesis for k, but applied to g i).
       have h_ih_g : ∀ i,
           MemWkp (d := d) k p_1_enn (g i) Ω ∧
             wkpNorm (d := d) k p_1_enn (g i) Ω ≤
               ENNReal.ofReal (subcriticalConstant k d p) *
                 wkpNorm (d := d) (k + 1) p_enn (g i) Ω :=
         fun i => ih (hg_compact i) (hg_supp_Ω i) (hg_mem_kplus1 i)
-      -- chosenWeakPartial' p i f Ω ∈ MemWkp k p_1 Ω (by congr_ae).
       have hf_chosen_mem_p1 : ∀ i,
           MemWkp (d := d) k p_1_enn (chosenWeakPartial' p_enn i f Ω) Ω := by
         intro i
         exact (MemWkp_congr_ae (d := d) hp_1_enn_one hΩ_open (hg_ae i)).mp (h_ih_g i).1
-      -- wkpNorm k p_1 (chosenWeakPartial' p i f Ω) Ω = wkpNorm k p_1 (g i) Ω.
       have h_wkp_eq : ∀ i,
           wkpNorm (d := d) k p_1_enn (chosenWeakPartial' p_enn i f Ω) Ω =
             wkpNorm (d := d) k p_1_enn (g i) Ω := fun i =>
@@ -603,41 +510,24 @@ theorem MemWkp_subcritical_iterated
           wkpNorm (d := d) (k + 1) p_enn (chosenWeakPartial' p_enn i f Ω) Ω =
             wkpNorm (d := d) (k + 1) p_enn (g i) Ω := fun i =>
         (wkpNorm_congr_ae (d := d) hp_enn_one hΩ_open (hg_ae i)).symm
-      -- We need: f ∈ MemW1p p_1 Ω (with the chosen partial as witness).
       have hf_W1p_p1 : DeGiorgi.MemW1p p_1_enn f Ω := by
         refine ⟨?_, ?_⟩
-        · -- f ∈ MemLp p_1 Ω, from base case.
-          exact h_base.1
-        · -- For each i, ∃ g, MemLp g p_1 ∧ HasWeakPartialDeriv i g f Ω.
-          intro i
+        · exact h_base.1
+        · intro i
           refine ⟨chosenWeakPartial' p_enn i f Ω, ?_, ?_⟩
           · exact (hf_chosen_mem_p1 i).memLp
           · exact chosenWeakPartial'_isWeakPartial_of_mem hf_W1p i
-      -- Now show f ∈ MemWkp (k+1) p_1 Ω.
       have hf_mem_p1 : MemWkp (d := d) (k + 1) p_1_enn f Ω := by
         rw [MemWkp_succ]
         refine ⟨hf_W1p_p1, ?_⟩
         intro i
-        -- chosenWeakPartial' p_1 i f Ω =ᵐ chosenWeakPartial' p i f Ω (cross-exponent).
         have h_cross : chosenWeakPartial' p_1_enn i f Ω
             =ᵐ[volume.restrict Ω] chosenWeakPartial' p_enn i f Ω :=
           chosenWeakPartial'_cross_exponent_ae_eq (d := d)
             hp_1_enn_one hp_enn_one hΩ_open hf_W1p_p1 hf_W1p i
         exact (MemWkp_congr_ae (d := d) hp_1_enn_one hΩ_open h_cross).mpr (hf_chosen_mem_p1 i)
       refine ⟨hf_mem_p1, ?_⟩
-      -- Norm bound.
-      -- wkpNorm (k+1) p_1 f Ω
-      --  = eLpNorm f p_1 + ∑_i wkpNorm k p_1 (chosenWeakPartial' p_1 i f Ω) Ω
-      --  = eLpNorm f p_1 + ∑_i wkpNorm k p_1 (chosenWeakPartial' p i f Ω) Ω (by cross-exp)
-      --  = eLpNorm f p_1 + ∑_i wkpNorm k p_1 (g i) Ω (by congr_ae)
-      --  ≤ Const0 * wkpNorm 1 p f Ω + ∑_i ConstK_k * wkpNorm (k+1) p (g i) Ω (base + ih)
-      --  = Const0 * wkpNorm 1 p f Ω + ∑_i ConstK_k * wkpNorm (k+1) p (chosenWeakPartial' p i f Ω) Ω
-      --  ≤ Const0 * wkpNorm (k+2) p f Ω + ∑_i ConstK_k * wkpNorm (k+2) p f Ω (sub-sum bounds)
-      --  = (Const0 + d * ConstK_k) * wkpNorm (k+2) p f Ω.
       rw [wkpNorm_succ_eq (d := d) k p_1_enn f Ω]
-      -- Replace eLpNorm f p_1 (vol.restrict Ω) using h_base norm bound (in wkpNorm 0 p_1 form).
-      -- Actually h_base.2 gives: wkpNorm 0 p_1 f Ω ≤ Const0 * wkpNorm 1 p f Ω.
-      -- And wkpNorm 0 p_1 f Ω = eLpNorm f p_1.
       have h_eLp_bound :
           eLpNorm f p_1_enn (volume.restrict Ω) ≤
             ENNReal.ofReal (subcriticalConstantBase d p) *
@@ -645,33 +535,22 @@ theorem MemWkp_subcritical_iterated
         have h := h_base.2
         rw [wkpNorm_zero, subcriticalConstant_zero] at h
         exact h
-      -- Each sum term, bounded by `Const_k * wkpNorm (k+1+1) p_enn f Ω`.
       have h_sum_term_bound : ∀ i,
           wkpNorm (d := d) k p_1_enn (chosenWeakPartial' p_1_enn i f Ω) Ω ≤
             ENNReal.ofReal (subcriticalConstant k d p) *
               wkpNorm (d := d) (k + 1 + 1) p_enn f Ω := by
         intro i
-        -- chosenWeakPartial' p_1 i f Ω =ᵐ chosenWeakPartial' p i f Ω.
         have h_cross : chosenWeakPartial' p_1_enn i f Ω
             =ᵐ[volume.restrict Ω] chosenWeakPartial' p_enn i f Ω :=
           chosenWeakPartial'_cross_exponent_ae_eq (d := d)
             hp_1_enn_one hp_enn_one hΩ_open hf_W1p_p1 hf_W1p i
-        -- wkpNorm k p_1 (chosenWeakPartial' p_1 i f Ω) Ω
-        --   = wkpNorm k p_1 (chosenWeakPartial' p i f Ω) Ω (by cross-exp ae-eq)
-        --   = wkpNorm k p_1 (g i) Ω (by g =ᵐ chosenWeakPartial')
-        --   ≤ ConstK * wkpNorm (k+1) p (g i) Ω (by IH)
-        --   = ConstK * wkpNorm (k+1) p (chosenWeakPartial' p i f Ω) Ω
-        --   ≤ ConstK * wkpNorm (k+2) p f Ω.
         rw [wkpNorm_congr_ae (d := d) hp_1_enn_one hΩ_open h_cross]
         rw [h_wkp_eq i]
-        -- wkpNorm k p_1 (g i) Ω ≤ Const_k * wkpNorm (k+1) p (g i) Ω
         refine le_trans (h_ih_g i).2 ?_
         rw [← h_wkp_eq_p i]
-        -- ConstK * wkpNorm (k+1) p (chosenWeakPartial' p i f Ω) Ω ≤ ConstK * wkpNorm (k+1+1) p f Ω
         gcongr
         exact wkpNorm_chosenWeakPartial_le_wkpNorm_succ (d := d)
           (k + 1) p_enn f Ω i
-      -- Sum the per-i bound.
       have h_sum_bound :
           ∑ i : Fin d,
             wkpNorm (d := d) k p_1_enn (chosenWeakPartial' p_1_enn i f Ω) Ω ≤
@@ -688,8 +567,6 @@ theorem MemWkp_subcritical_iterated
                 wkpNorm (d := d) (k + 1 + 1) p_enn f Ω) := by
         rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin]
         rw [nsmul_eq_mul]
-      -- Bound for eLpNorm:
-      -- eLpNorm f p_1 ≤ Const0 * wkpNorm 1 p f Ω ≤ Const0 * wkpNorm (k+1+1) p f Ω.
       have h_eLp_full : eLpNorm f p_1_enn (volume.restrict Ω) ≤
           ENNReal.ofReal (subcriticalConstantBase d p) *
             wkpNorm (d := d) (k + 1 + 1) p_enn f Ω := by
@@ -697,7 +574,6 @@ theorem MemWkp_subcritical_iterated
         gcongr
         exact wkpNorm_mono_order (d := d) (by omega : 1 ≤ k + 1 + 1)
           (p := p_enn) (f := f) (Ω := Ω)
-      -- Combine.
       calc
         eLpNorm f p_1_enn (volume.restrict Ω) +
             ∑ i : Fin d, wkpNorm (d := d) k p_1_enn (chosenWeakPartial' p_1_enn i f Ω) Ω
@@ -725,8 +601,6 @@ theorem MemWkp_subcritical_iterated
               rw [ENNReal.ofReal_mul (Nat.cast_nonneg _)]
               rw [ENNReal.ofReal_natCast]
 
-/-! ### Headline statement -/
-
 /-- The headline pure-Euclidean iterated subcritical Sobolev embedding step.
 For every `f` with `MemWkp (k+1) p f Ω`, compact support, and `tsupport f ⊆ Ω`:
 * `f ∈ MemWkp k p_1 f Ω`, where `p_1 = d*p/(d-p)`.
@@ -747,7 +621,6 @@ theorem MemWkp_succ_subcritical_step
   obtain ⟨h_mem, h_norm⟩ :=
     MemWkp_subcritical_iterated (d := d) k hp_one hp_dim hΩ_open
       hf_compact hf_supp hf
-  -- pOne d p = (d : ℝ) * p / ((d : ℝ) - p) by definition.
   have hpOne_eq : pOne d p = (d : ℝ) * p / ((d : ℝ) - p) := rfl
   refine ⟨?_, ?_⟩
   · rw [show (ENNReal.ofReal ((d : ℝ) * p / ((d : ℝ) - p))) =
@@ -759,14 +632,6 @@ theorem MemWkp_succ_subcritical_step
     exact h_norm
 
 end TowerStep
-
-/-! ## Chart-level helpers for lifting the Euclidean tower step to the manifold
-
-These helpers replicate (and generalize to higher order `k`) the per-chart
-infrastructure already used for the order-1 sub-critical embedding:
-namely, that for `u : M → ℝ`, the chart-pushed-raw of `(ρ_α · u)` has compact
-support inside `chartTargetEuclid α`, and its iterated Euclidean Sobolev
-membership / norm is governed by `MemWkpChart g k p u`. -/
 
 namespace ChartTower
 
@@ -937,14 +802,6 @@ private lemma wkpNorm_chartPushedRaw_pou_mul_eq_chartPushed
 
 end ChartTower
 
-/-! ## Theorem A: chart-level lift of the Euclidean sub-critical tower step
-
-For each chart `α`, the chart-pushed function `chartPushedRaw I α (ρ_α · u)`
-has compact support inside `chartTargetEuclid α`, so the pure-Euclidean
-`MemWkp_succ_subcritical_step` applies. The `α`-uniform constant
-`subcriticalConstant k d p` (depending only on `k`, `d = finrank ℝ E`, and `p`)
-allows us to sum across `α` and lift the bound to the manifold level. -/
-
 /-- Theorem A: chart-level sub-critical tower step. Given `u ∈ W^{k+1, p}_chart(M)`
 on a closed Riemannian manifold modelled on a finite-dim inner-product space `E`
 with `finrank ℝ E ≥ 1` and `1 ≤ p < finrank ℝ E`, the function `u` lies in
@@ -999,19 +856,14 @@ theorem wkpNormChart_succ_subcritical_step
   have hp_1_real_one : 1 ≤ p_1_real := le_trans hp_one hp_1_real_ge_p
   have hp_1_enn_one : (1 : ℝ≥0∞) ≤ p_1_enn := by
     rw [hp_1_enn_def, ← ENNReal.ofReal_one]; exact ENNReal.ofReal_le_ofReal hp_1_real_one
-  -- The sub-critical constant from the Euclidean step (uniform across charts).
   set C : ℝ := TowerStep.subcriticalConstant k d p with hC_def
   have hC_nn : 0 ≤ C := TowerStep.subcriticalConstant_nonneg k d p
   refine ⟨C, hC_nn, ?_⟩
   intro u hu
-  -- Step 1: Per-chart application of the Euclidean tower step.
-  -- For each α, chartPushedRaw I α (ρ_α u) ∈ MemWkp (k+1) p with compact support
-  -- inside chartTargetEuclid α. Apply the Euclidean step.
   set f : M → EuclideanSpace ℝ (Fin d) → ℝ := fun α =>
     chartPushedRaw (I := I) (M := M) α
       (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) x * u x) with hf_def
-  -- Per-chart properties.
   have hf_compact : ∀ α : M, HasCompactSupport (f α) := fun α =>
     ChartTower.hasCompactSupport_chartPushedRaw_pou_mul (I := I) (M := M) α u
   have hf_supp : ∀ α : M,
@@ -1022,7 +874,6 @@ theorem wkpNormChart_succ_subcritical_step
         (k + 1) p_enn (f α) (chartTargetEuclid (I := I) (M := M) α) := fun α =>
     ChartTower.memWkp_chartPushedRaw_pou_mul_of_memWkpChart (I := I) (M := M) g
       (k := k + 1) hp_enn_one hu α
-  -- Apply the Euclidean step to each f α.
   have h_step : ∀ α : M,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp (d := d) k p_1_enn
         (f α) (chartTargetEuclid (I := I) (M := M) α) ∧
@@ -1035,21 +886,12 @@ theorem wkpNormChart_succ_subcritical_step
     have hp_dim_d : p < (d : ℝ) := by rw [hd_def]; exact hp_dim
     have hOpen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
       chartTargetEuclid_isOpen (I := I) (M := M) α
-    -- Apply MemWkp_succ_subcritical_step.
     have h := TowerStep.MemWkp_succ_subcritical_step (d := d)
       hp_one hp_dim_d hOpen (hf_compact α) (hf_supp α) (hf_memWkp α)
     obtain ⟨h_mem, C', hC'_nn, h_norm⟩ := h
-    -- The norm bound has constant C' coming from `MemWkp_succ_subcritical_step`,
-    -- which is `subcriticalConstant k d p` (which equals our C).
-    -- Looking at MemWkp_succ_subcritical_step, the C is `subcriticalConstant k d p`.
-    -- We need to identify these constants. The proof of MemWkp_succ_subcritical_step
-    -- explicitly chooses C = subcriticalConstant k d p, but it's hidden in the spec
-    -- as ∃ C. So we extract it differently — apply MemWkp_subcritical_iterated directly.
-    -- Re-derive: use MemWkp_subcritical_iterated which gives explicit subcriticalConstant.
     have h_iter := TowerStep.MemWkp_subcritical_iterated (d := d) k hp_one hp_dim_d
       hOpen (hf_compact α) (hf_supp α) (hf_memWkp α)
     obtain ⟨h_mem', h_norm'⟩ := h_iter
-    -- The exponent `pOne d p = (d : ℝ) * p / ((d : ℝ) - p) = p_1_real`.
     have h_pOne_eq : TowerStep.pOne d p = p_1_real := by
       rw [TowerStep.pOne, hp_1_real_def]
     refine ⟨?_, ?_⟩
@@ -1057,7 +899,6 @@ theorem wkpNormChart_succ_subcritical_step
       exact h_mem'
     · rw [hp_1_enn_def, ← h_pOne_eq, hC_def, hp_enn_def]
       exact h_norm'
-  -- Step 2: Convert chartPushedRaw norm to chartPushed norm (for both k and k+1).
   have h_norm_raw_eq_pushed_p_1 : ∀ α : M,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm (d := d) k p_1_enn
           (f α) (chartTargetEuclid (I := I) (M := M) α) =
@@ -1076,7 +917,6 @@ theorem wkpNormChart_succ_subcritical_step
           (chartTargetEuclid (I := I) (M := M) α) := fun α =>
     ChartTower.wkpNorm_chartPushedRaw_pou_mul_eq_chartPushed (I := I) (M := M) g
       (k := k + 1) hp_enn_one u α
-  -- Step 3: Per-chart, MemWkp k p_1 (chartPushed ρ α u) follows from MemWkp k p_1 (f α).
   have h_mem_pushed : ∀ α : M,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp (d := d) k p_1_enn
         (chartPushed (I := I) (M := M)
@@ -1095,9 +935,7 @@ theorem wkpNormChart_succ_subcritical_step
       chartTargetEuclid_isOpen (I := I) (M := M) α
     exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
       (d := d) hp_1_enn_one hOpen h_ae).mp (h_step α).1
-  -- Step 4: u ∈ MemWkpChart g k p_1.
   have h_mem_chart : MemWkpChart (I := I) (M := M) g k p_1_enn u := h_mem_pushed
-  -- Step 5: norm bound on the manifold.
   have h_per_chart_norm : ∀ α : M,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm (d := d) k p_1_enn
           (chartPushed (I := I) (M := M)
@@ -1111,11 +949,8 @@ theorem wkpNormChart_succ_subcritical_step
     intro α
     rw [← h_norm_raw_eq_pushed_p_1 α, ← h_norm_raw_eq_pushed_p α]
     exact (h_step α).2
-  -- Step 6: Sum across α via tsum.
   refine ⟨h_mem_chart, ?_⟩
-  -- wkpNormChart g k p_1 u = ∑'_α wkpNorm k p_1 (chartPushed ρ α u) (chartTargetEuclid α).
   unfold wkpNormChart
-  -- Goal: ∑'_α (...) ≤ ENNReal.ofReal C * (∑'_α (... at k+1, p)).
   rw [show ENNReal.ofReal C * ∑' α : M,
         DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm (d := d) (k + 1) p_enn
           (chartPushed (I := I) (M := M)
@@ -1129,13 +964,6 @@ theorem wkpNormChart_succ_subcritical_step
       (ENNReal.tsum_mul_left).symm]
   refine ENNReal.tsum_le_tsum h_per_chart_norm
 
-/-! ## Termination of the iteration
-
-For the iterated embedding `(k+1)p > n` ⟹ `kp_1 > n`. This is the key
-algebraic identity: if `p < n` and `(k+1)p > n`, then `p_1 = np/(n-p)` satisfies
-`kp_1 > n`. This will allow us to either fall back to Morrey (if `p_1 > n`) or
-recurse (if `p_1 ≤ n`). -/
-
 namespace IterationCalc
 
 /-- The fundamental identity: if `0 < p < n` and `(k+1)p > n`, then
@@ -1144,20 +972,15 @@ private lemma kp1_gt_n_of_kp1p_gt_n
     (n : ℝ) (k : ℕ) (p : ℝ) (hp_pos : 0 < p) (hp_dim : p < n)
     (hkp : n < (k + 1 : ℝ) * p) :
     n < (k : ℝ) * (n * p / (n - p)) := by
-  -- Equivalent form: kp/(n-p) > 1 ⟺ kp > n - p ⟺ (k+1)p > n.
   have hn_pos : 0 < n := lt_of_lt_of_le hp_pos hp_dim.le
   have hn_p_pos : 0 < n - p := by linarith
-  -- Claim: (k : ℝ) * p > n - p, equivalent to k*p > n - p.
   have hkp_gt : (k : ℝ) * p > n - p := by
     have : (k + 1 : ℝ) * p = (k : ℝ) * p + p := by ring
     linarith [hkp]
-  -- (k : ℝ) * (n * p / (n - p)) = n * (k * p) / (n - p).
   have h_eq : (k : ℝ) * (n * p / (n - p)) = n * ((k : ℝ) * p) / (n - p) := by
     field_simp
   rw [h_eq]
-  -- Want: n < n * ((k : ℝ) * p) / (n - p).
   rw [lt_div_iff₀ hn_p_pos]
-  -- Want: n * (n - p) < n * ((k : ℝ) * p).
   have h_factor : n * ((k : ℝ) * p) - n * (n - p) = n * ((k : ℝ) * p - (n - p)) := by
     ring
   nlinarith [hkp_gt, hn_pos]
@@ -1171,13 +994,6 @@ lemma kp1_real_gt_d_of_kp1p_gt_d
   kp1_gt_n_of_kp1p_gt_n (d : ℝ) k p hp_pos hp_dim hkp
 
 end IterationCalc
-
-/-! ## Theorem B: main iterated chart-Sobolev embedding
-
-Strategy: induction on `k`. For each `k`, we case-split on whether `p > n`
-(super-critical: apply Morrey directly) or `p ≤ n` (sub-critical: lift via
-the tower step to the higher exponent `p_1 = np/(n-p)`, then apply the
-inductive hypothesis at `(k − 1, p_1)` since `(k − 1) · p_1 > n`). -/
 
 namespace IteratedC0
 
@@ -1219,19 +1035,14 @@ private theorem succ_subcritical_step
         Statement (I := I) (M := M) g (k + 1) p u := by
   classical
   intro u hu_meas hu
-  -- Apply the sub-critical chart-tower step.
   obtain ⟨C_step, hC_step_nn, h_step⟩ :=
     wkpNormChart_succ_subcritical_step (I := I) (M := M) g (k := k) hp_one hp_dim
   obtain ⟨h_mem_p1, h_norm_p1⟩ := h_step hu
-  -- Apply the IH at (k, p_1).
   obtain ⟨ũ, C_IH, hũ_cont, hC_IH_nn, hũ_ae, hũ_bound⟩ :=
     hu_meas_persists hu_meas h_mem_p1
   refine ⟨ũ, C_IH * C_step, hũ_cont, mul_nonneg hC_IH_nn hC_step_nn, hũ_ae, ?_⟩
   intro x
-  -- ‖ũ x‖ ≤ C_IH * (wkpNormChart g k p_1 u).toReal ≤ C_IH * C_step *
-  --   (wkpNormChart g (k+1) p u).toReal
   refine (hũ_bound x).trans ?_
-  -- (wkpNormChart g k p_1 u).toReal ≤ C_step * (wkpNormChart g (k+1) p u).toReal
   have h_wkp_kplus1_lt_top :
       wkpNormChart (I := I) (M := M) g (k + 1) (ENNReal.ofReal p) u < ⊤ := by
     have hp_enn_one : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p := by
@@ -1272,7 +1083,6 @@ private theorem succ_subcritical_step
     ENNReal.mul_lt_top ENNReal.ofReal_lt_top h_wkp_kplus1_lt_top
   have h_toReal_le := ENNReal.toReal_mono h_C_wkp_lt_top.ne h_norm_p1
   rw [ENNReal.toReal_mul, ENNReal.toReal_ofReal hC_step_nn] at h_toReal_le
-  -- h_toReal_le : (wkpNormChart g k p_1 u).toReal ≤ C_step * (wkpNormChart g (k+1) p u).toReal.
   calc C_IH *
         (wkpNormChart (I := I) (M := M) g k
           (ENNReal.ofReal ((Module.finrank ℝ E : ℝ) * p /
@@ -1285,15 +1095,6 @@ private theorem succ_subcritical_step
         ring
 
 end IteratedC0
-
-/-! ## Regular exponents
-
-An exponent `p > 0` is "regular at depth `k`" with respect to dimension `n`
-if the iteration ladder `p, n p / (n − p), n p₁ / (n − p₁), …` never hits the
-Sobolev critical value `n` within the first `k` iterations. Concretely,
-`p` is regular at depth `k` iff `m · p ≠ n` for all `m ∈ {1, …, k}`. The
-borderline cases `m · p = n` correspond to `p = n / m` and require Trudinger /
-Hölder embeddings beyond the present scope. -/
 
 namespace RegularExponent
 
@@ -1332,18 +1133,11 @@ lemma IsRegular.tower_step
     (hp_one : 1 ≤ p) (hp_lt : p < n) (h : IsRegular n p (k + 1)) :
     IsRegular n (n * p / (n - p)) k := by
   intro m hm hm_le
-  -- We need: m * (n*p/(n-p)) ≠ n.
-  -- Compute: m * (np/(n-p)) = mnp/(n-p). Equal to n iff mnp = n(n-p) iff
-  -- (m+1)p = n.
-  -- So m * p_1 ≠ n ⟺ (m+1) p ≠ n.
   have hp_pos : 0 < p := by linarith
   have hd_pos : 0 < n := lt_of_lt_of_le hp_pos hp_lt.le
   have hd_p_pos : 0 < n - p := by linarith
-  -- Translate: (m+1) p ≠ n.
   have h_succ : ((m + 1 : ℕ) : ℝ) * p ≠ n := h (m + 1) (by omega) (by omega)
   intro h_eq
-  -- h_eq : (m : ℝ) * (n * p / (n - p)) = n.
-  -- Solve: m n p = n (n - p), so (m+1) p = n.
   have h_eq' : (m : ℝ) * (n * p) = n * (n - p) := by
     have : (m : ℝ) * (n * p / (n - p)) * (n - p) = n * (n - p) := by
       rw [h_eq]
@@ -1351,14 +1145,8 @@ lemma IsRegular.tower_step
         (m : ℝ) * (n * p) by
       field_simp] at this
     exact this
-  -- Derive (m+1) p = n.
   have h_eq2 : ((m + 1 : ℕ) : ℝ) * p = n := by
     have h_mul : (m : ℝ) * (n * p) = n * (n - p) := h_eq'
-    -- (m : ℝ) * (n * p) = n * (n - p)
-    -- mn p = n^2 - np
-    -- mn p + np = n^2
-    -- n p (m + 1) = n^2
-    -- p (m + 1) = n  (dividing by n which is positive)
     have hn_ne : n ≠ 0 := hd_pos.ne'
     push_cast
     have : (m : ℝ) * (n * p) + n * p = n * (n - p) + n * p := by rw [h_mul]
@@ -1366,11 +1154,6 @@ lemma IsRegular.tower_step
   exact h_succ h_eq2
 
 end RegularExponent
-
-/-! ## Inductive proof of the iterated chart-Sobolev embedding
-
-We prove the headline embedding by induction on `k`, assuming the exponent
-ladder regularity condition `IsRegular n p (k + 1)`. -/
 
 namespace IteratedC0
 
@@ -1396,7 +1179,6 @@ private theorem statement_holds_aux :
   intro k
   induction k with
   | zero =>
-      -- Base case k = 0: kp + p = (0 + 1) * p = p > n, super-critical regime.
       intro E _ _ _ H _ I M _ _ _ _ _ _ _ _ g p hp_one _hreg hkp u hu_meas hu
       have hp_dim : (Module.finrank ℝ E : ℝ) < p := by
         have : ((0 : ℕ) + 1 : ℝ) * p = p := by ring
@@ -1405,62 +1187,42 @@ private theorem statement_holds_aux :
         (k := 1) (Nat.le_refl 1) hp_one hp_dim hu_meas hu
   | succ k ih =>
       intro E _ _ _ H _ I M _ _ _ _ _ _ _ _ g p hp_one hreg hkp u hu_meas hu
-      -- We are at order (k + 2) and want to embed at p with (k+2)p > n.
-      -- Regularity: p ≠ n / m for m ∈ [1, k+2]. So p ≠ n at start.
       have hp_ne_n : p ≠ (Module.finrank ℝ E : ℝ) :=
         hreg.p_ne_n_of_one_le (by omega)
-      -- Case split: either p > n (super-critical) or p < n (sub-critical).
       rcases lt_or_gt_of_ne hp_ne_n with hp_lt | hp_gt
-      · -- Sub-critical with p < n: apply the chart-tower step + IH.
-        have hp_pos : 0 < p := by linarith
-        -- Tower step.
+      · have hp_pos : 0 < p := by linarith
         obtain ⟨C_step, hC_step_nn, h_step⟩ :=
           wkpNormChart_succ_subcritical_step (I := I) (M := M) g (k := k + 1)
             hp_one hp_lt
         obtain ⟨h_mem_p1, h_norm_p1⟩ := h_step hu
-        -- Define p_1.
         set p_1 : ℝ := (Module.finrank ℝ E : ℝ) * p /
           ((Module.finrank ℝ E : ℝ) - p) with hp_1_def
         have hd_pos : 0 < (Module.finrank ℝ E : ℝ) := by
           have : 0 < Module.finrank ℝ E := NeZero.pos _
           exact_mod_cast this
         have hd_p_pos : 0 < (Module.finrank ℝ E : ℝ) - p := by linarith
-        -- p_1 ≥ p ≥ 1.
         have hp_1_ge_p : p ≤ p_1 := by
           rw [hp_1_def, le_div_iff₀ hd_p_pos]
           nlinarith [hp_pos]
         have hp_1_one : 1 ≤ p_1 := le_trans hp_one hp_1_ge_p
-        -- (k + 1) p_1 > n.
-        -- We have hkp : (Module.finrank ℝ E : ℝ) < ((k + 1 : ℕ) + 1 : ℝ) * p.
-        -- The lemma `kp1_real_gt_d_of_kp1p_gt_d (Module.finrank ℝ E) (k + 1) p`
-        -- expects hypothesis `(Module.finrank ℝ E : ℝ) < ((k + 1) + 1 : ℝ) * p`.
         have h_id := IterationCalc.kp1_real_gt_d_of_kp1p_gt_d
           (Module.finrank ℝ E) (k + 1) p hp_pos hp_lt (by
-            -- Goal: (Module.finrank ℝ E : ℝ) < ((k + 1 : ℕ) + 1 : ℝ) * p.
-            -- hkp (induction succ case) : (Module.finrank ℝ E : ℝ) <
-            --   ((Nat.succ k : ℕ) + 1 : ℝ) * p, i.e. (k + 1 + 1 : ℝ) * p.
             push_cast at hkp ⊢
             linarith)
-        -- h_id : (Module.finrank ℝ E : ℝ) < ((k + 1 : ℕ) : ℝ) * (n p / (n - p)).
-        -- IH expects (Module.finrank ℝ E : ℝ) < ((k : ℕ) + 1 : ℝ) * p_1.
         have h_id_cast : (Module.finrank ℝ E : ℝ) <
             ((k : ℕ) + 1 : ℝ) * p_1 := by
           rw [hp_1_def]
           push_cast at h_id
           linarith
-        -- Regularity of p_1 at depth k+1.
         have hreg_p_1 : RegularExponent.IsRegular (Module.finrank ℝ E : ℝ) p_1 (k + 1) := by
           rw [hp_1_def]
           exact hreg.tower_step hp_one hp_lt
-        -- u is measurable; apply IH.
         have h_IH := ih (E := E) (H := H) (I := I) (M := M) g hp_1_one hreg_p_1
           h_id_cast hu_meas h_mem_p1
-        -- h_IH : Statement g (k+1) p_1 u.
         obtain ⟨ũ, C_IH, hũ_cont, hC_IH_nn, hũ_ae, hũ_bound⟩ := h_IH
         refine ⟨ũ, C_IH * C_step, hũ_cont, mul_nonneg hC_IH_nn hC_step_nn, hũ_ae, ?_⟩
         intro x
         refine (hũ_bound x).trans ?_
-        -- (wkpNormChart g (k+1) p_1 u).toReal ≤ C_step * (wkpNormChart g (k+2) p u).toReal.
         have hp_enn_one : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p := by
           rw [show (1 : ℝ≥0∞) = ENNReal.ofReal 1 from by simp]
           exact ENNReal.ofReal_le_ofReal hp_one
@@ -1478,8 +1240,6 @@ private theorem statement_holds_aux :
         have h_C_wkp_lt_top : ENNReal.ofReal C_step *
             wkpNormChart (I := I) (M := M) g (k + 1 + 1) (ENNReal.ofReal p) u < ⊤ :=
           ENNReal.mul_lt_top ENNReal.ofReal_lt_top h_wkp_kp2_lt_top
-        -- h_norm_p1 says wkpNormChart g (k+1) p_1 u ≤ ofReal C_step *
-        --   wkpNormChart g (k+2) p u. Take toReal.
         have h_norm_p1' :
             wkpNormChart (I := I) (M := M) g (k + 1)
               (ENNReal.ofReal p_1) u ≤
@@ -1489,7 +1249,6 @@ private theorem statement_holds_aux :
           exact h_norm_p1
         have h_toReal_le := ENNReal.toReal_mono h_C_wkp_lt_top.ne h_norm_p1'
         rw [ENNReal.toReal_mul, ENNReal.toReal_ofReal hC_step_nn] at h_toReal_le
-        -- Apply.
         calc C_IH *
               (wkpNormChart (I := I) (M := M) g (k + 1) (ENNReal.ofReal p_1) u).toReal
             ≤ C_IH * (C_step *
@@ -1498,22 +1257,10 @@ private theorem statement_holds_aux :
           _ = C_IH * C_step *
               (wkpNormChart (I := I) (M := M) g (k + 1 + 1) (ENNReal.ofReal p) u).toReal := by
               ring
-      · -- Super-critical: p > n. Apply Morrey at order k+2.
-        exact iterated_sobolev_embedding_chart_C0_supercritical (I := I) (M := M) g
+      · exact iterated_sobolev_embedding_chart_C0_supercritical (I := I) (M := M) g
           (k := k + 2) (by omega) hp_one hp_gt hu_meas hu
 
 end IteratedC0
-
-/-! ## Theorem B: main iterated chart-Sobolev embedding
-
-The headline statement: a measurable function `u ∈ W^{k,p}_chart(M)` on a
-closed Riemannian manifold modelled on a finite-dim inner-product space `E`
-of dimension `n ≥ 1` admits a continuous representative `ũ` whenever
-`k ≥ 1`, `1 ≤ p`, and `kp > n` (with the regularity condition that `p`
-avoids the Sobolev borderline values `n / m` for `m ∈ {1, …, k}`). The
-sup-norm of `ũ` is bounded by `C · (wkpNormChart g k p u).toReal` for a
-constant `C ≥ 0` depending only on the metric, the canonical chart-atlas POU,
-the order `k`, and the exponent `p`. -/
 
 theorem iterated_sobolev_embedding_chart_C0
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
@@ -1535,16 +1282,12 @@ theorem iterated_sobolev_embedding_chart_C0
       (∀ x : M, ‖ũ x‖ ≤ C *
         (wkpNormChart (I := I) (M := M) g k (ENNReal.ofReal p) u).toReal) := by
   classical
-  -- Reduce k to k = j + 1 with j ≥ 0.
   obtain ⟨j, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (by omega : k ≠ 0)
-  -- Hypothesis at k = j + 1 = succ j.
   have hkp' : (Module.finrank ℝ E : ℝ) < (j + 1 : ℝ) * p := by
     have : ((j + 1 : ℕ) : ℝ) = (j + 1 : ℝ) := by push_cast; ring
     rw [this] at hkp
     exact hkp
   exact IteratedC0.statement_holds_aux j g hp_one hreg hkp' hu_meas hu
-
-/-! ## Theorem C: `H^k = W^{k, 2}` specialization -/
 
 /-- The Hilbert-Sobolev `C^0` embedding on a closed Riemannian manifold:
 when `n < 2k` (with `n = finrank ℝ E`), every measurable function `u` with
@@ -1576,12 +1319,10 @@ theorem sobolev_embedding_chart_C0_Hk
       (∀ x : M, ‖ũ x‖ ≤ C *
         (wkpNormChart (I := I) (M := M) g k 2 u).toReal) := by
   classical
-  -- Translate the hypotheses to the form expected by `iterated_sobolev_embedding_chart_C0`.
   have hk_pos : 1 ≤ k := by
     by_contra h_not
     have h_not' : k = 0 := by omega
     rw [h_not'] at hk
-    -- 2 * 0 = 0, so Module.finrank ℝ E < 0, contradicting NeZero.pos.
     have hd_pos : 0 < Module.finrank ℝ E := NeZero.pos _
     omega
   have hp_one : (1 : ℝ) ≤ 2 := by norm_num
@@ -1590,7 +1331,6 @@ theorem sobolev_embedding_chart_C0_Hk
     have h2k : ((2 * k : ℕ) : ℝ) = (k : ℝ) * 2 := by push_cast; ring
     rw [h2k] at this
     exact this
-  -- The hypothesis `hu` uses `(2 : ℝ≥0∞)` literally; convert to `ENNReal.ofReal 2`.
   have h_two_eq : (2 : ℝ≥0∞) = ENNReal.ofReal 2 := by
     rw [show (2 : ℝ) = (2 : ℕ) from by norm_num]
     rw [ENNReal.ofReal_natCast]
@@ -1603,12 +1343,6 @@ theorem sobolev_embedding_chart_C0_Hk
   intro x
   rw [h_two_eq]
   exact hũ_bound x
-
-/-! ## Existence of a regular exponent strictly below `p`
-
-Given any `p > 1` with `kp > n`, we exhibit a regular `p' < p` (with `p' ≥ 1`
-and `kp' > n`) by avoiding the finite set of borderline exponents
-`{n / m : m ∈ {1, …, k}}` within an open interval just below `p`. -/
 
 namespace RegularExponent
 
@@ -1696,16 +1430,6 @@ lemma exists_regular_exponent_below
 
 end RegularExponent
 
-/-! ## Pure-Euclidean monotonicity of `MemWkp` under exponent decrease
-
-For a function `f : EuclideanSpace ℝ (Fin d) → ℝ` whose `tsupport` lies inside
-a closed set `K ⊆ Ω` of finite Lebesgue measure (with `Ω` open), `MemWkp` is
-preserved when decreasing the exponent: `MemWkp k p f Ω → MemWkp k p' f Ω`
-for `1 ≤ p' ≤ p`. The mechanism is the Hölder embedding
-`L^p(K) ⊆ L^{p'}(K)` for compact-support functions, applied recursively
-through the chain of chosen weak partials, each of which ae-vanishes outside
-`tsupport f ⊆ K`. -/
-
 namespace EuclideanIteratedMonoExp
 
 variable {d : ℕ} [NeZero d]
@@ -1734,18 +1458,13 @@ private lemma ae_eq_indicator_of_ae_zero_off_subset
   classical
   have hΩ_meas : MeasurableSet Ω := hΩ_open.measurableSet
   have hΩK_meas : MeasurableSet (Ω \ K) := hΩ_meas.diff hK_meas
-  -- Transfer ae-zero from Ω \ S to Ω \ K via subset, then convert to plain ae form.
   have h_ae_zero_diffK : ∀ᵐ x ∂((MeasureTheory.volume :
       MeasureTheory.Measure EuN).restrict (Ω \ K)), g x = 0 := by
     have h := MeasureTheory.ae_restrict_of_ae_restrict_of_subset
       (s := Ω \ K) (t := Ω \ S)
       (diff_K_subset_diff_subset (Ω := Ω) hSK) hg_ae_zero
-    -- h : g =ᶠ[ae(vol.restrict (Ω \ K))] (fun _ => 0)
-    -- Convert: this is exactly `∀ᵐ x ∂..., g x = 0`.
     exact h
-  -- Convert volume.restrict (Ω \ K) ae-zero to volume.restrict Ω with x ∈ Ω \ K → g x = 0.
   rw [MeasureTheory.ae_restrict_iff' hΩK_meas] at h_ae_zero_diffK
-  -- Now h_ae_zero_diffK : ∀ᵐ x ∂vol, x ∈ Ω \ K → g x = 0.
   rw [Filter.EventuallyEq, MeasureTheory.ae_restrict_iff' hΩ_meas]
   filter_upwards [h_ae_zero_diffK] with x hx hx_Ω
   by_cases h_in_K : x ∈ K
@@ -1792,7 +1511,6 @@ theorem memWkp_mono_exponent_of_tsupport_subset
       ((MeasureTheory.volume : MeasureTheory.Measure EuN).restrict Ω) K ≠ ⊤ :=
     ne_top_of_le_ne_top hK_meas_lt_top
       (MeasureTheory.Measure.restrict_apply_le _ _)
-  -- Helper: ae-equality to indicator implies MemLp transfer.
   have memLp_mono : ∀ {q q' : ℝ≥0∞} (_hq_le : q' ≤ q) {h : EuN → ℝ},
       h =ᵐ[(MeasureTheory.volume : MeasureTheory.Measure EuN).restrict Ω]
         K.indicator h →
@@ -1811,7 +1529,6 @@ theorem memWkp_mono_exponent_of_tsupport_subset
       h_clean_memLp_q.mono_exponent_of_measure_support_ne_top h_zero_off
         hKΩ_meas_lt_top hq_le
     exact (MeasureTheory.memLp_congr_ae h_eq).mpr h_clean_memLp_q'
-  -- Helper: tsupport (K.indicator g) ⊆ K (using K closed).
   have indicator_tsupport_subset : ∀ (g : EuN → ℝ),
       tsupport (K.indicator g) ⊆ K := by
     intro g
@@ -1824,7 +1541,6 @@ theorem memWkp_mono_exponent_of_tsupport_subset
         = closure (Function.support (K.indicator g)) := rfl
       _ ⊆ closure K := closure_mono h_supp_sub
       _ = K := hK_closed.closure_eq
-  -- Helper: f =ᵐ K.indicator f when tsupport f ⊆ K (literal pointwise).
   have ae_eq_indicator_of_tsupport : ∀ {h : EuN → ℝ}, tsupport h ⊆ K →
       h =ᵐ[(MeasureTheory.volume : MeasureTheory.Measure EuN).restrict Ω]
         K.indicator h := by
@@ -1882,14 +1598,6 @@ theorem memWkp_mono_exponent_of_tsupport_subset
       exact (MemWkp_congr_ae (d := d) hp'_one hΩ_open h_cross_ae).mpr hg_p_memWkp_p'
 
 end EuclideanIteratedMonoExp
-
-/-! ## Chart-level transfer: `MemWkpChart g k p u → MemWkpChart g k p' u`
-
-Lifting the Euclidean monotonicity to the chart-based predicate
-`MemWkpChart`. The chart-pushed function `chartPushed ρ α u` is ae-equal
-(on `volume.restrict (chartTargetEuclid α)`) to `chartPushedRaw I α (ρ_α u)`,
-which has compact support in the toEuclidean image of
-`(extChartAt I α) '' (tsupport ρ_α)`. -/
 
 namespace ChartLevelMonoExp
 
@@ -1949,8 +1657,6 @@ theorem memWkp_chartPushed_mono_exponent [CompactSpace M]
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- Step 1: chart-pushed-raw of ρ_α · u has tsupport ⊆ carrierK α and ae-equals
-  --         chartPushed ρ α u on volume.restrict (chartTargetEuclid α).
   have h_target_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have h_chartRaw_tsupport :
@@ -1959,7 +1665,6 @@ theorem memWkp_chartPushed_mono_exponent [CompactSpace M]
           : C^∞⟮I, M; ℝ⟯) x * u x)) ⊆
         carrierK (I := I) (M := M) α :=
     tsupport_chartPushedRaw_pou_mul_subset_carrier (I := I) (M := M) α u
-  -- Step 2: get MemWkp k p (chartPushedRaw I α (ρ_α u)) from MemWkpChart.
   have hp_one : (1 : ℝ≥0∞) ≤ p := le_trans hp'_one hp'_le_p
   have h_chartRaw_memWkp_p :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
@@ -1971,7 +1676,6 @@ theorem memWkp_chartPushed_mono_exponent [CompactSpace M]
         (chartTargetEuclid (I := I) (M := M) α) :=
     ChartTower.memWkp_chartPushedRaw_pou_mul_of_memWkpChart
       (I := I) (M := M) g hp_one hu α
-  -- Step 3: apply EuclideanIteratedMonoExp.memWkp_mono_exponent_of_tsupport_subset.
   have h_chartRaw_memWkp_p' :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E)
@@ -1985,7 +1689,6 @@ theorem memWkp_chartPushed_mono_exponent [CompactSpace M]
       (carrierK_isClosed (I := I) (M := M) α)
       (carrierK_volume_lt_top (I := I) (M := M) α)
       hp'_one hp'_le_p h_chartRaw_tsupport h_chartRaw_memWkp_p
-  -- Step 4: transfer back to chartPushed via ae-equality.
   have h_ae : chartPushed (I := I) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u
       =ᵐ[(MeasureTheory.volume :
@@ -2013,24 +1716,6 @@ theorem memWkpChart_mono_exponent [CompactSpace M]
   exact memWkp_chartPushed_mono_exponent (I := I) (M := M) g hp'_one hp'_le_p hu α
 
 end ChartLevelMonoExp
-
-/-! ## Unconditional iterated Sobolev embedding (perturbation-reachable cases)
-
-Removing the `RegularExponent.IsRegular` hypothesis: when `kp > n` and the
-exponent is regular, we apply the existing iterated theorem directly. When
-the exponent is irregular and `1 < p`, we perturb `p` slightly downward to
-a regular `p' ∈ [1, p)` with `kp' > n`, lift the membership via the
-per-chart Hölder embedding, apply the existing theorem at `p'`, and pull
-back the norm bound. When `p = 1` and `n ≥ 2`, an initial sub-critical step
-lifts to a higher exponent before perturbation.
-
-The case `p = 1, n = 1, k ≥ 2` is a one-dimensional borderline that the
-perturbation strategy cannot reach (the sub-critical step requires
-`p < n`). Mathematically the result holds via 1D Sobolev / AC theory, but
-formalisation lies outside the perturbation infrastructure delivered here.
-The theorem below carries the side condition `2 ≤ Module.finrank ℝ E ∨
-1 < p` to exclude this corner; in typical Ricci-flow / Poincaré
-applications (n ≥ 3), this hypothesis is automatically satisfied. -/
 
 /-- Iterated Sobolev embedding on a closed Riemannian manifold without the
 exponent regularity hypothesis. For `kp > n` (with `k ≥ 1`, `p ≥ 1`) and
@@ -2188,8 +1873,7 @@ theorem iterated_sobolev_embedding_chart_C0_unconditional
         have h_bnd := hũ_bound₁ x
         rw [hN_p'_zero, mul_zero] at h_bnd
         exact h_bnd
-    · -- p = 1.
-      have hp_eq_one : p = 1 := le_antisymm (by linarith) hp_one
+    · have hp_eq_one : p = 1 := le_antisymm (by linarith) hp_one
       subst hp_eq_one
       have h_finrank_pos : 0 < Module.finrank ℝ E := NeZero.pos _
       have h_n_ge_two : 2 ≤ Module.finrank ℝ E := by

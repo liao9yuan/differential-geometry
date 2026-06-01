@@ -86,27 +86,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The Christoffel-correction tracing identity for the weighted approximant
-
-The zeroth-order Christoffel correction `covDerivLowerOrderTerm` of the
-partition-of-unity-weighted approximant `Tₙ := pouSmul g r s α S` collapses, on
-the chart target, to a finite `C^∞`-coefficient-weighted sum of the canonical
-Euclidean chart components: the raw chart component of `Tₙ` is the
-partition-of-unity-weighted chart component, whose value at the chart preimage
-is the canonical Euclidean chart component. -/
 
 /-- On the Euclidean chart target, the zeroth-order Christoffel correction of
 the partition-of-unity-weighted approximant is the finite linear combination,
@@ -133,20 +118,6 @@ private lemma covDerivLowerOrderTerm_pouSmul_eqOn
     tensorChartComponent_def,
     chartPushedRaw_apply_of_mem (I := I) (M := M) α
       (tensorChartComponentPou (I := I) (M := M) g r s S α p.1 p.2) hy]
-
-/-! ## Chart-locality-free twins
-
-The `h_atlas` in the development above keys only the eigenbasis vector behind
-`eigenvectorSmoothApprox` / `tensorResolventEigenbasisVec` and the chart-component
-limit object `componentLpLimit`. Re-keying onto the chart-locality-free eigenbasis
-selector `tensorResolventEigenbasisVec` (via the compact-operator
-witness `tensorResolventL2_isCompactOperator`) and the committed
-`_unconditional` companion objects drops `h_atlas` entirely. The Christoffel
-tracing identity `covDerivLowerOrderTerm_pouSmul_eqOn`, the bounded-factor `L²`
-machinery (`tendsto_toLp_finsetSum`, `memLp_indicatorFactor_mul_lp`,
-`covDerivLowerOrderCoeff_contDiffOn`), and the finite-sum assembly carry no
-`h_atlas`, so they are reused verbatim. `[CompleteSpace E]` is a section
-hypothesis. -/
 
 /-- Chart-locality-free twin of `covDerivLowerOrderTerm_pouSmul_memLp`. -/
 theorem covDerivLowerOrderTerm_pouSmul_memLp
@@ -261,7 +232,6 @@ private theorem covDerivLowerOrderTerm_pouSmul_tendsto
       (𝓝 ((covGradChristoffelUnscaledLimit_memLp (I := I) (M := M)
         g r s i α P₀ k).toLp _)) := by
   classical
-  -- The genuine `n`-th summand and the limiting summand, indexed by `p`.
   have hf : ∀ (p : TensorCompIdx (E := E) r s) (n : ℕ),
       MemLp (fun y => covDerivLowerOrderCoeff (I := I) (M := M)
             g r s α k P₀.1 p.1 P₀.2 p.2 y *
@@ -283,7 +253,6 @@ private theorem covDerivLowerOrderTerm_pouSmul_tendsto
       (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M)
         g r s α k P₀.1 p.1 P₀.2 p.2)
       (componentLpLimit (I := I) (M := M) g r s i α p)
-  -- Per-summand `L²`-convergence: a chart-component summand.
   have h_tendsto : ∀ p : TensorCompIdx (E := E) r s,
       Filter.Tendsto (fun n => (hf p n).toLp _) atTop
         (𝓝 ((hflim p).toLp _)) := fun p =>
@@ -291,8 +260,6 @@ private theorem covDerivLowerOrderTerm_pouSmul_tendsto
       (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M)
         g r s α k P₀.1 p.1 P₀.2 p.2)
       (fun n => hf p n) (hflim p)
-  -- The Christoffel correction is, on the chart target, the finite sum of the
-  -- genuine summands.
   have hFn_eq : ∀ n : ℕ,
       covDerivLowerOrderTerm (I := I) (M := M) g r s
           (pouSmul (I := I) (M := M) g r s α
@@ -313,8 +280,6 @@ private theorem covDerivLowerOrderTerm_pouSmul_tendsto
       covDerivLowerOrderTerm_pouSmul_eqOn (I := I) (M := M) g r s α
         (eigenvectorSmoothApprox (I := I) (M := M)
           g r s i n).toCcTensor k P₀.1 P₀.2 hy)
-  -- The un-rescaled limit function is, definitionally, the finite sum of the
-  -- limiting summands.
   have hFlim_eq :
       covGradChristoffelUnscaledLimit (I := I) (M := M)
           g r s i α P₀ k
@@ -352,8 +317,6 @@ private lemma smul_componentLpLimit_coeFn_ae
           EuclN → ℝ) y) := by
   classical
   have hμ_ne : i.fst.val ≠ 0 := i.fst.val_ne_zero
-  -- `μ⁻¹ • componentLpLimit = tensorL2ChartComponent φ` as `Lp`
-  -- elements.
   have h_lp_eq :
       (i.fst.val)⁻¹ • componentLpLimit (I := I) (M := M)
           g r s i α p =
@@ -362,8 +325,6 @@ private lemma smul_componentLpLimit_coeFn_ae
             (tensorResolventL2_isCompactOperator (I := I) (M := M)
               g r s) i) α p := by
     rw [componentLpLimit, smul_smul, inv_mul_cancel₀ hμ_ne, one_smul]
-  -- The `coeFn` of the scalar multiple is `μ⁻¹ •` the `coeFn`, almost
-  -- everywhere; combine with the `coeFn` of the `Lp` equality.
   refine (Lp.coeFn_smul (i.fst.val)⁻¹
     (componentLpLimit (I := I) (M := M) g r s i α p)).symm.trans ?_
   exact Filter.EventuallyEq.of_eq
@@ -384,16 +345,12 @@ private lemma smul_unscaledLimit_toLp_eq
         g r s i α P₀ k).toLp _ := by
   classical
   apply Lp.ext
-  -- The underlying functions agree almost everywhere.
   refine (Lp.coeFn_smul (i.fst.val)⁻¹
     ((covGradChristoffelUnscaledLimit_memLp (I := I) (M := M)
       g r s i α P₀ k).toLp _)).trans ?_
   refine Filter.EventuallyEq.trans ?_
     (MemLp.coeFn_toLp (covGradChristoffelLimit_memLp (I := I) (M := M)
       g r s i α P₀ k)).symm
-  -- Gather the finitely many per-`p` a.e. identities into a single
-  -- a.e.-quantified statement, so each summand may be rewritten after
-  -- `filter_upwards`.
   have h_all : ∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
       ∀ p : TensorCompIdx (E := E) r s,
         (i.fst.val)⁻¹ *
@@ -410,13 +367,9 @@ private lemma smul_unscaledLimit_toLp_eq
   filter_upwards [MemLp.coeFn_toLp (covGradChristoffelUnscaledLimit_memLp
     (I := I) (M := M) g r s i α P₀ k), h_all] with y hy hy_all
   rw [Pi.smul_apply, hy]
-  -- Distribute `μ⁻¹` across the finite sum and match summand by summand.
   rw [covGradChristoffelUnscaledLimit,
     covGradChristoffelLimit, smul_eq_mul, Finset.mul_sum]
   refine Finset.sum_congr rfl (fun p _ => ?_)
-  -- Reassociate the product so the `μ⁻¹` factor multiplies
-  -- `componentLpLimit`, then apply the per-`p` a.e. identity
-  -- (valid at `y` by `hy_all`).
   rw [mul_left_comm, hy_all p]
 
 /-- **Chart-locality-free twin of `covGradChristoffel_tendsto`.** The
@@ -444,11 +397,9 @@ theorem covGradChristoffel_tendsto
         (covGradChristoffelLimit (I := I) (M := M)
           g r s i α P₀ k))) := by
   classical
-  -- Rescale the un-rescaled convergence by the continuous map `μ⁻¹ • ·`.
   have h_smul :=
     (covDerivLowerOrderTerm_pouSmul_tendsto (I := I) (M := M)
       g r s i α P₀ k).const_smul (i.fst.val)⁻¹
-  -- Identify the rescaled limit with the headline limit function.
   rwa [smul_unscaledLimit_toLp_eq (I := I) (M := M)
     g r s i α P₀ k] at h_smul
 

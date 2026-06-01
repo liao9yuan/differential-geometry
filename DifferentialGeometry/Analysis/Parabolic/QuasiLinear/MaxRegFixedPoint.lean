@@ -103,20 +103,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 variable {a : ℝ} {T : ℝ}
 
-/-! ## The Nemytskii operator
-
-For a Lipschitz nonlinearity `N : H^{a+2} → Hᵃ`, pointwise composition with `N`
-sends a time-`L²` field to a time-`L²` field with the same Lipschitz constant.
-The two analytic facts behind the construction are:
-
-* **`L²`-membership.**  `N` Lipschitz gives `‖N x‖ ≤ ‖N 0‖ + L‖x‖`; for a
-  square-integrable `f` on the finite time interval the bound makes `N ∘ f`
-  square-integrable.  `N` need not fix `0`, so the membership is obtained by
-  splitting `N` into the `0`-fixing Lipschitz part `x ↦ N x − N 0` and the
-  constant `N 0`.
-* **The Lipschitz bound.**  The pointwise estimate `‖N x − N y‖ ≤ L‖x − y‖`,
-  squared and integrated in time, yields `‖N∘f − N∘f'‖²_{L²} ≤ L²‖f − f'‖²`. -/
-
 section Nemytskii
 
 variable {L : ℝ≥0}
@@ -131,20 +117,15 @@ constant `N 0` (square-integrable on a finite measure space). -/
 theorem memLp_comp_nemytskii (hN : LipschitzWith L N)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s (a + 2)) T) :
     MemLp (fun t => N (f t)) 2 (timeMeasure T) := by
-  -- The `0`-fixing Lipschitz part `Ñ x = N x − N 0`, with constant `L` (the
-  -- constant function is Lipschitz with constant `0`, and `L + 0 = L`).
   have hshift : LipschitzWith L (fun x => N x - N 0) := by
     have hsubL := hN.sub (LipschitzWith.const (N 0))
     rwa [add_zero] at hsubL
   have hshift0 : (fun x => N x - N 0) (0 : tensorHs (I := I) (M := M) g r s
       (a + 2)) = 0 := by simp
-  -- `Ñ ∘ ⇑f` is `MemLp` by `LipschitzWith.comp_memLp`.
   have hcomp : MemLp ((fun x => N x - N 0) ∘ fun t => f t) 2 (timeMeasure T) :=
     hshift.comp_memLp hshift0 (Lp.memLp f)
-  -- The constant `N 0` is `MemLp` on the finite time measure.
   have hconst : MemLp (fun _ : ℝ => N 0) 2 (timeMeasure T) :=
     memLp_const (N 0)
-  -- `N (f t) = (N (f t) − N 0) + N 0`, so `MemLp` transfers along this equality.
   have hsum : MemLp (fun t => (N (f t) - N 0) + N 0) 2 (timeMeasure T) :=
     hcomp.add hconst
   have hfun : (fun t => N (f t)) =
@@ -186,10 +167,8 @@ theorem nemytskii_dist_sq_le (hN : LipschitzWith L N)
     (f f' : timeL2 (tensorHs (I := I) (M := M) g r s (a + 2)) T) :
     ‖nemytskii (I := I) (M := M) hN f - nemytskii (I := I) (M := M) hN f'‖ ^ 2 ≤
       (L : ℝ) ^ 2 * ‖f - f'‖ ^ 2 := by
-  -- Both norms are integrals of pointwise squared norms over `[0,T]`.
   rw [TimeSobolev.norm_sq_eq_integral, TimeSobolev.norm_sq_eq_integral,
     ← MeasureTheory.integral_const_mul]
-  -- The difference of Nemytskii images is a.e. `t ↦ N (f t) − N (f' t)`.
   have hdiff : ⇑(nemytskii (I := I) (M := M) hN f -
         nemytskii (I := I) (M := M) hN f') =ᵐ[timeMeasure T]
       fun t => N (f t) - N (f' t) := by
@@ -199,26 +178,19 @@ theorem nemytskii_dist_sq_le (hN : LipschitzWith L N)
     have hf' := nemytskii_coeFn (I := I) (M := M) hN f'
     filter_upwards [hsub, hf, hf'] with t ht htf htf'
     rw [ht, Pi.sub_apply, htf, htf']
-  -- The difference of the two fields is a.e. `t ↦ f t − f' t`.
   have hfdiff : ⇑(f - f') =ᵐ[timeMeasure T] fun t => f t - f' t :=
     Lp.coeFn_sub f f'
-  -- Square-integrability of the pointwise squared norm of the field difference.
   have hint_fdiff : Integrable (fun t => ‖(f - f') t‖ ^ 2) (timeMeasure T) :=
     (memLp_two_iff_integrable_sq_norm
       (Lp.aestronglyMeasurable (f - f'))).mp (Lp.memLp (f - f'))
-  -- Integrand-wise pointwise bound `‖N(f t)−N(f' t)‖² ≤ L²‖f t−f' t‖²`, then
-  -- integrate the inequality.
   refine integral_mono_ae ?_ ?_ ?_
-  · -- `t ↦ ‖(nemytskii f − nemytskii f') t‖²` is integrable.
-    exact (memLp_two_iff_integrable_sq_norm
+  · exact (memLp_two_iff_integrable_sq_norm
       (Lp.aestronglyMeasurable (nemytskii (I := I) (M := M) hN f -
         nemytskii (I := I) (M := M) hN f'))).mp
       (Lp.memLp (nemytskii (I := I) (M := M) hN f -
         nemytskii (I := I) (M := M) hN f'))
-  · -- `t ↦ L²·‖(f − f') t‖²` is integrable.
-    exact hint_fdiff.const_mul ((L : ℝ) ^ 2)
-  · -- The pointwise inequality, holding almost everywhere.
-    filter_upwards [hdiff, hfdiff] with t ht htf
+  · exact hint_fdiff.const_mul ((L : ℝ) ^ 2)
+  · filter_upwards [hdiff, hfdiff] with t ht htf
     rw [ht]
     have hlip : ‖N (f t) - N (f' t)‖ ≤ (L : ℝ) * ‖f t - f' t‖ := by
       rw [← dist_eq_norm, ← dist_eq_norm]
@@ -242,7 +214,6 @@ theorem nemytskii_lipschitzWith (hN : LipschitzWith L N) :
     LipschitzWith L (nemytskii (I := I) (M := M) (T := T) hN) := by
   refine LipschitzWith.of_dist_le_mul (fun f f' => ?_)
   rw [dist_eq_norm, dist_eq_norm]
-  -- Take square roots of the squared Lipschitz estimate.
   have hsq := nemytskii_dist_sq_le (I := I) (M := M) hN f f'
   have hrhs_nn : 0 ≤ (L : ℝ) * ‖f - f'‖ := mul_nonneg L.coe_nonneg (norm_nonneg _)
   have hsq' : ‖nemytskii (I := I) (M := M) hN f -
@@ -252,16 +223,6 @@ theorem nemytskii_lipschitzWith (hN : LipschitzWith L N) :
   rwa [Real.sqrt_sq (norm_nonneg _), Real.sqrt_sq hrhs_nn] at h
 
 end Nemytskii
-
-/-! ## Additivity of the maximal-regularity solution field
-
-The maximal-regularity solution field `maximalRegularitySolField` — the
-`H^{a+2}`-valued Duhamel solution of `∂_t u = Δ_∇ u + f`, `u(0) = 0` — is
-additive in the forcing term.  Like the time-derivative field
-(`maximalRegularityDerivField_add`), additivity holds mode by mode: the per-mode
-solution coordinate `solModeCoeff` is the composition of the linear maps
-`timeModeCoeff` and `perModeConvL2`.  This is the algebraic identity that lets
-the homogeneous part cancel in the difference of two Duhamel images. -/
 
 /-- Chart-locality-free version of `maximalRegularitySolField_add`,
 parameterized on resolvent compactness `h_compact`. -/
@@ -298,15 +259,6 @@ theorem maximalRegularitySolField_sub (hT : 0 ≤ T)
   rw [sub_add_cancel] at hadd
   rw [hadd, add_sub_cancel_right]
 
-/-! ## The `H^{a+2}`-field contraction estimate of the affine Duhamel map
-
-For a fixed initial datum the homogeneous part of the affine Duhamel map cancels
-in a difference of two `H^{a+2}`-valued fields, leaving the difference of the
-maximal-regularity solution fields.  The two-derivative-gain bound
-`maximalRegularityOp_norm_Ha2_le` (`‖·‖ ≤ (1 + T)‖·‖`) then controls it by the
-`L²([0,T]; Hᵃ)` distance of the forcings.  This is the estimate the
-forcing-space fixed point feeds through the Nemytskii operator. -/
-
 /-- Chart-locality-free version of `maxRegDuhamelSolField_sub`, parameterized on
 resolvent compactness `h_compact`. -/
 theorem maxRegDuhamelSolField_sub (hT : 0 < T) (hT1 : T ≤ 1)
@@ -339,14 +291,6 @@ theorem maxRegDuhamelSolField_dist_le (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact := h_compact) (a := a) hT hT1 u₀ gforce gforce']
   exact maximalRegularityOp_norm_Ha2_le (I := I) (M := M)
     (h_compact := h_compact) (a := a) hT hT1 (gforce - gforce')
-
-/-! ## The forcing-space fixed-point map
-
-The quasi-linear Duhamel map `Φ(g) = N ∘ (maxRegDuhamelSolField … u₀ g)`: it
-sends a forcing `g ∈ L²([0,T]; Hᵃ)` to the pointwise composition of `N` with the
-`H^{a+2}`-valued Duhamel solution field of `g`.  A fixed point `g⋆ = Φ(g⋆)`
-reproduces the nonlinearity, `g⋆ = N ∘ (field of the Duhamel solution)`, and the
-associated Duhamel image is a strong solution of the quasi-linear equation. -/
 
 section FixedPoint
 
@@ -460,16 +404,6 @@ theorem quasilinearDuhamelMap_contracting (hT : 0 < T) (hT1 : T ≤ 1)
 
 end FixedPoint
 
-/-! ## Strong existence and uniqueness
-
-The headline theorem.  Under the smallness hypothesis `2·L < 1` the
-forcing-space map `Φ` is a contraction; the Banach fixed-point theorem
-(`ContractingWith.fixedPoint`) supplies a unique fixed point `g⋆`, and the
-affine Duhamel image `u⋆ = maxRegDuhamelMap … u₀ g⋆` is the strong solution.
-The fixed-point equation `g⋆ = N ∘ (field of u⋆)` is exactly what converts the
-linear equation `∂_t u⋆ = Δ_∇ u⋆ + g⋆` (`maxRegDuhamelMap_timeDeriv_eq`) into
-the quasi-linear equation `∂_t u⋆ = Δ_∇ u⋆ + N(field of u⋆)`. -/
-
 /-- **Chart-locality-free strong existence for the quasi-linear tensor heat
 equation.**
 
@@ -515,7 +449,6 @@ theorem quasilinear_strong_existence {L : ℝ≥0}
             nemytskii (I := I) (M := M) hN
               (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀
                 gforce) := by
-  -- The forcing-space map is a contraction; take its Banach fixed point.
   have hcontr := quasilinearDuhamelMap_contracting (I := I) (M := M)
     (h_compact := h_compact) (a := a) hT hT1 u₀ hN hL
   set gStar := ContractingWith.fixedPoint
@@ -531,12 +464,9 @@ theorem quasilinear_strong_existence {L : ℝ≥0}
       gStar, hgStar_fix]
   refine ⟨maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gStar,
     gStar, rfl, hgStar_eq, ?_, ?_⟩
-  · -- Initial condition: the trace of the Duhamel image is `u₀`.
-    exact maxRegDuhamelMap_trace0 (I := I) (M := M) (a := a) (T := T)
+  · exact maxRegDuhamelMap_trace0 (I := I) (M := M) (a := a) (T := T)
       hT hT1 u₀ gStar
-  · -- The equation `∂_t u = Δ_∇ (field) + N(field)` via the chart-locality-free
-    -- linear heat-equation lemma and the fixed-point equation.
-    rw [maxRegDuhamelMap_timeDeriv_eq (I := I) (M := M)
+  · rw [maxRegDuhamelMap_timeDeriv_eq (I := I) (M := M)
       (h_compact := h_compact) (a := a) (T := T) hT hT1 u₀ gStar]
     exact congrArg₂ (· + ·) rfl hgStar_eq
 

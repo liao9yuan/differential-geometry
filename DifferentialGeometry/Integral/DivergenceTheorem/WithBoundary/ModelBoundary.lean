@@ -78,8 +78,6 @@ namespace Integral
 namespace DivergenceTheorem
 namespace WithBoundary
 
-/-! ## The `HasSmoothBoundary` typeclass -/
-
 /-- A model with corners `I : ModelWithCorners ℝ E H` has a *smooth boundary*
 when it admits a smaller, boundaryless model `J : ModelWithCorners ℝ E' H'`
 together with a topological embedding `inclH : H' → H` and a continuous
@@ -224,14 +222,6 @@ class HasSmoothBoundary
     ∀ [_h : FiniteDimensional ℝ E],
       Module.finrank ℝ boundaryE + 1 = Module.finrank ℝ E
 
-/-! ## Re-exported instances on the boundary model
-
-The bracket-instance fields of `HasSmoothBoundary` are re-exported here as
-standalone `instance` declarations (rather than via `attribute [instance]` on
-the projections) so that the typeclass system can find them when only the
-projection types `hI.boundaryE` / `hI.boundaryH` / `hI.boundaryI` appear.
--/
-
 /-- Normed-additive-group structure on the boundary model space. -/
 instance HasSmoothBoundary.instNormedAddCommGroupBoundaryE
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -274,8 +264,6 @@ instance HasSmoothBoundary.instBoundarylessBoundaryI
     {I : ModelWithCorners ℝ E H} [hI : HasSmoothBoundary E H I] :
     hI.boundaryI.Boundaryless := hI.boundaryIBoundaryless
 
-/-! ## Convenience accessors -/
-
 namespace HasSmoothBoundary
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -294,8 +282,6 @@ abbreviation. -/
 abbrev boundaryModel
     (I : ModelWithCorners ℝ E H) [hI : HasSmoothBoundary E H I] :
     ModelWithCorners ℝ hI.boundaryE hI.boundaryH := hI.boundaryI
-
-/-! ## Topological properties of the inclusion -/
 
 section Inclusion
 
@@ -318,8 +304,6 @@ theorem injective_I_inclH : Function.Injective (I ∘ hI.inclH) :=
   I.injective.comp hI.inclH_injective
 
 end Inclusion
-
-/-! ## Range / frontier identities -/
 
 section Range
 
@@ -356,8 +340,6 @@ theorem frontier_range_eq_range_I_inclH :
 
 end Range
 
-/-! ## Coordinate-compatibility identities -/
-
 section Compat
 
 variable (I : ModelWithCorners ℝ E H) [hI : HasSmoothBoundary E H I]
@@ -374,8 +356,6 @@ theorem projE_comp_I_comp_inclH :
   simpa [Function.comp] using hI.proj_inclH_compat x
 
 end Compat
-
-/-! ## Topological corollaries -/
 
 section TopologicalDerived
 
@@ -403,12 +383,6 @@ theorem isClosed_frontier_range :
 
 end TopologicalDerived
 
-/-! ## Smoothness-style corollaries
-
-The following lemmas capture topological consequences of `HasSmoothBoundary`
-that act as building blocks for the downstream charted-space construction on
-`boundary I M`. -/
-
 section EmbeddingDerived
 
 variable (I : ModelWithCorners ℝ E H) [hI : HasSmoothBoundary E H I]
@@ -417,7 +391,6 @@ variable (I : ModelWithCorners ℝ E H) [hI : HasSmoothBoundary E H I]
 of an embedding (the model with corners `I`) with an inducing map (`inclH`)
 is again inducing. -/
 theorem isInducing_I_inclH : IsInducing (I ∘ hI.inclH) := by
-  -- `I` is a closed embedding, hence inducing.
   have hI_inducing : IsInducing (I : H → E) := I.isClosedEmbedding.isEmbedding.isInducing
   exact hI_inducing.comp hI.inclH_isInducing
 
@@ -434,12 +407,6 @@ theorem isClosedEmbedding_I_inclH : IsClosedEmbedding (I ∘ hI.inclH) where
   isClosed_range := hI.inclH_isClosed_image
 
 end EmbeddingDerived
-
-/-! ## Smoothness corollaries
-
-The following lemmas package the smoothness fields `projE_contDiff` and
-`I_inclH_boundaryI_symm_contDiff` into convenient forms used to lift the
-boundary chart structure to a smooth manifold. -/
 
 section SmoothnessDerived
 
@@ -466,13 +433,6 @@ theorem I_inclH_boundaryI_symm_contDiffOn (s : Set hI.boundaryE) :
   hI.I_inclH_boundaryI_symm_contDiff.contDiffOn
 
 end SmoothnessDerived
-
-/-! ## Null-set corollaries of the boundary's codimension-one property
-
-The following lemmas package the typeclass field `range_frontier_basis_addHaar_zero`
-into convenient forms. The first is a direct re-export, kept as a stand-alone
-lemma so downstream files can reference it without exposing the typeclass
-projection. The second specialises to a chart-target intersection. -/
 
 section NullSetDerived
 
@@ -518,18 +478,6 @@ theorem subset_range_frontier_basisAddHaar_volume_zero
 
 end NullSetDerived
 
-/-! ## Vacuous case for boundaryless models
-
-When `I` is itself boundaryless (`[I.Boundaryless]`), the model-level boundary
-`frontier (Set.range I)` is empty. The combination of `range_I_inclH` and an
-empty frontier forces `boundaryH` to be empty as well. This is recorded as a
-remark only — instantiating `HasSmoothBoundary` for a boundaryless model is
-not required by downstream code.
-
-The lemma below is provided to support the (rare) downstream use case in
-which one wishes to *also* instantiate `HasSmoothBoundary` for a boundaryless
-model: the lemma shows that any candidate `boundaryH` must be uninhabited. -/
-
 section Boundaryless
 
 variable (I : ModelWithCorners ℝ E H) [hI : HasSmoothBoundary E H I]
@@ -539,14 +487,11 @@ empty. -/
 theorem boundaryH_isEmpty_of_boundaryless [I.Boundaryless] :
     IsEmpty hI.boundaryH := by
   refine ⟨fun x => ?_⟩
-  -- `I (inclH x)` is in `range (I ∘ inclH) = frontier (range I)`, but the
-  -- boundary is empty since `range I = univ`.
   have h_in : I (hI.inclH x) ∈ Set.range (I ∘ hI.inclH) := ⟨x, rfl⟩
   rw [hI.range_I_inclH] at h_in
   rw [show frontier (Set.range I) = ∅ from ?_] at h_in
   · exact (Set.notMem_empty _ h_in)
-  · -- `range I = univ` for boundaryless models, hence `frontier univ = ∅`.
-    rw [I.range_eq_univ, frontier_univ]
+  · rw [I.range_eq_univ, frontier_univ]
 
 end Boundaryless
 

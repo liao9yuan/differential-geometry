@@ -52,27 +52,17 @@ vector field along `Φ.symm`. -/
 private lemma pushforward_eq_mpullback_symm
     (Φ : M ≃ₘ⟮I, I⟯ M) (V : ∀ x : M, TangentSpace I x) (x : M) :
     Diffeomorph.pushforward Φ V x = VectorField.mpullback I I (⇑Φ.symm) V x := by
-  -- We show that `(mfderiv Φ.symm x).inverse = mfderiv Φ (Φ.symm x)` by exhibiting a
-  -- two-sided inverse. Then both `pushforward` and `mpullback` reduce to the same value.
-  -- The `▸` in `Diffeomorph.pushforward` is trivial because `TangentSpace I _ = E` definitionally.
   have hinv : (mfderiv I I (⇑Φ.symm) x).inverse = mfderiv I I (⇑Φ) (Φ.symm x) := by
     apply ContinuousLinearMap.inverse_eq
-    · -- `(mfderiv Φ.symm x).comp (mfderiv Φ (Φ.symm x)) = id`.
-      have h := mfderiv_symm_comp_self Φ (Φ.symm x)
+    · have h := mfderiv_symm_comp_self Φ (Φ.symm x)
       have hap : Φ (Φ.symm x) = x := Φ.apply_symm_apply x
       rw [hap] at h
       exact h
     · exact mfderiv_self_comp_symm Φ x
-  -- Now unfold and apply.
   change (Φ.apply_symm_apply x ▸ (mfderiv I I (⇑Φ) (Φ.symm x)) (V (Φ.symm x))
         : TangentSpace I x)
         = (mfderiv I I (⇑Φ.symm) x).inverse (V (Φ.symm x))
   rw [hinv]
-  -- Goal: `Φ.apply_symm_apply x ▸ (mfderiv Φ (Φ.symm x)) (V (Φ.symm x))
-  --        = (mfderiv Φ (Φ.symm x)) (V (Φ.symm x))`.
-  -- Both sides have type `TangentSpace I x = E`. The LHS uses an `Eq.rec` to transport from
-  -- `TangentSpace I (Φ (Φ.symm x)) = E` to `TangentSpace I x = E`. Definitionally equal, but
-  -- not syntactically `rfl`. We use `eqRec_heq` + `eq_of_heq`.
   refine eq_of_heq ?_
   exact eqRec_heq (φ := fun z => TangentSpace I z) (Φ.apply_symm_apply x)
     ((mfderiv I I (⇑Φ) (Φ.symm x)) (V (Φ.symm x)))
@@ -94,7 +84,6 @@ theorem mlie_bracket_pullback_naturality
     mlieBracket I (Diffeomorph.pushforward Φ X) (Diffeomorph.pushforward Φ Y) x
       = Diffeomorph.pushforward Φ (mlieBracket I X Y) x := by
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
-  -- Replace each pushforward by mpullback along Φ.symm.
   have hpf_eq : ∀ V : ∀ x : M, TangentSpace I x,
       (Diffeomorph.pushforward Φ V : ∀ x : M, TangentSpace I x)
         = (VectorField.mpullback I I (⇑Φ.symm) V : ∀ x : M, TangentSpace I x) := by
@@ -102,7 +91,6 @@ theorem mlie_bracket_pullback_naturality
     exact pushforward_eq_mpullback_symm Φ V z
   rw [hpf_eq X, hpf_eq Y, hpf_eq (mlieBracket I X Y)]
   have hΦsymm_smooth : ContMDiffAt I I ∞ (⇑Φ.symm) x := Φ.symm.contMDiffAt
-  -- `mpullback_mlieBracket` needs `IsManifold I (minSmoothness ℝ 2) M`.
   haveI : IsManifold I (minSmoothness ℝ (2 : WithTop ℕ∞)) M := by
     rw [minSmoothness_of_isRCLikeNormedField]
     infer_instance

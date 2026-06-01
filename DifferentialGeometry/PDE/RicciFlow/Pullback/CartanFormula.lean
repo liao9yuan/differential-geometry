@@ -60,8 +60,6 @@ theorem metric_compat_coord_identity
   exact
     partialDeriv_chartGramOnE_eq_chartChristoffel_sum (I := I) g α i j k hint
 
-/-! ## Local helpers: trivialization at the basepoint is the identity -/
-
 private lemma cartan_trivToE_self_apply (x : M) (v : TangentSpace I x) :
     trivToE (I := I) x x v = v := by
   classical
@@ -82,8 +80,6 @@ private lemma cartan_trivFromE_self_apply (x : M) (w : E) :
     FiberBundle.mem_baseSet_trivializationAt' x
   have h := trivToE_trivFromE (I := I) x hbase w
   rwa [cartan_trivToE_self_apply (I := I) x (trivFromE (I := I) x x w)] at h
-
-/-! ## (a) helper: chart-pullback identification -/
 
 /-- On a neighborhood of `extChartAt I x x`, `chartCoeffOnE x W i` equals the
 composition of the linear coord functional `b.coord i` with the chart pullback of
@@ -134,11 +130,6 @@ private lemma differentiableAt_chartE_pullback_self
   have hW_at : MDiffAt (T% fun y => W y) x := W.mdifferentiableAt
   exact differentiableAt_chartE_pullback_of_MDiff (I := I) x hx_good hW_at
 
-/-! ## (a) Christoffel expansion at α := x
-
-We prove the expansion at the basepoint `α := x`, where the trivialization is the
-identity, so the chart-`x` reading reduces to the canonical model-basis reading. -/
-
 /-- **Chart-Christoffel expansion of the covariant derivative of a vector field
 at the basepoint chart.** -/
 theorem chart_christoffel_expansion_of_nabla_on_vf
@@ -163,19 +154,16 @@ theorem chart_christoffel_expansion_of_nabla_on_vf
   have hx_base : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hx_good
   have hW_at : MDiffAt (T% fun y => W y) x := W.mdifferentiableAt
-  -- Step 1: LeviCivita ↝ chartLeviCivita ↝ explicit chart formula.
   have hLC_apply :
       (LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x v =
         chartLeviCivita (I := I) g x (W : ∀ x : M, TangentSpace I x) x v :=
     LeviCivita_chart_apply (I := I) g x hx_good hW_at v
   rw [hLC_apply]
   rw [chartLeviCivita_apply (I := I) g x (W : ∀ x : M, TangentSpace I x) hx_good v]
-  -- Step 2: trivFromE x x = id, so peel off trivFromE.
   rw [cartan_trivFromE_self_apply (I := I) x _]
   rw [map_add, Finsupp.add_apply]
   congr 1
-  · -- fderiv piece: chain rule + b.coord linearity + chartCoeffOnE bridge.
-    rw [cartan_trivToE_self_apply (I := I) x v]
+  · rw [cartan_trivToE_self_apply (I := I) x v]
     set u : E := v with hu_def
     set F : E → E := chartE_section_repr (I := I) x (W : ∀ x : M, TangentSpace I x) ∘
         (extChartAt I x).symm with hF_def
@@ -189,10 +177,7 @@ theorem chart_christoffel_expansion_of_nabla_on_vf
       rw [map_sum]
       refine Finset.sum_congr rfl (fun j _ => ?_)
       rw [(fderiv ℝ F (extChartAt I x x)).map_smul]
-    -- LHS via hfderiv_sum:
-    -- b.repr (∑ j, (b.repr u) j • fderiv F ...e_j) i = ∑ j, (b.repr u) j • (b.repr (fderiv F ...e_j)) i.
     rw [hfderiv_sum]
-    -- b.repr applied to Finset.sum: use map_sum then Finsupp coord application is sum of coords.
     rw [show
       ((chartModelBasis E).repr
         (∑ j : Fin (Module.finrank ℝ E), ((chartModelBasis E).repr u) j •
@@ -206,7 +191,6 @@ theorem chart_christoffel_expansion_of_nabla_on_vf
         Pi.smul_apply, smul_eq_mul]]
     refine Finset.sum_congr rfl (fun j _ => ?_)
     congr 1
-    -- b.repr Y i = (b.coord i) Y ; chain rule on (b.coord i) ∘ F.
     rw [show ((chartModelBasis E).repr (fderiv ℝ F (extChartAt I x x)
           ((chartModelBasis E) j))) i =
         (((chartModelBasis E).coord i).toContinuousLinearMap)
@@ -220,11 +204,9 @@ theorem chart_christoffel_expansion_of_nabla_on_vf
     unfold partialDeriv
     have hev := chartCoeffOnE_self_eq_basis_comp_pullback_eventuallyEq (I := I) W x i
     rw [hev.fderiv_eq]
-  · -- Christoffel piece: expand + collapse δ + identify with chartCoeff.
-    rw [christoffelCorrection_apply (I := I) g x x
+  · rw [christoffelCorrection_apply (I := I) g x x
           (chartE_section_repr (I := I) x (W : ∀ x : M, TangentSpace I x) x) v]
     rw [cartan_trivToE_self_apply (I := I) x v]
-    -- Pull b.repr through the triple sum.
     rw [show ((chartModelBasis E).repr
           (∑ i' : Fin (Module.finrank ℝ E),
             ∑ j' : Fin (Module.finrank ℝ E),
@@ -246,7 +228,6 @@ theorem chart_christoffel_expansion_of_nabla_on_vf
                 ((chartModelBasis E).repr ((chartModelBasis E) k')) i from by
       simp only [map_sum, map_smul, Finsupp.coe_finset_sum, Finset.sum_apply,
         Finsupp.coe_smul, Pi.smul_apply, smul_eq_mul]]
-    -- Collapse k'-sum: only k' = i contributes.
     have hrepr_basis : ∀ (r s : Fin (Module.finrank ℝ E)),
         ((chartModelBasis E).repr ((chartModelBasis E) r)) s =
           if r = s then (1 : ℝ) else 0 := by
@@ -293,7 +274,6 @@ theorem chart_christoffel_expansion_of_nabla_on_vf
               (chartE_section_repr (I := I) x
                 (W : ∀ x : M, TangentSpace I x) x)) j'
       from Finset.sum_congr rfl (fun i' _ => Finset.sum_congr rfl (fun j' _ => hkc i' j'))]
-    -- b.repr (chartE_section_repr x W x) j' = chartCoeff x W j' x.
     have hrepr_chartCoeff : ∀ (j' : Fin (Module.finrank ℝ E)),
         ((chartModelBasis E).repr
           (chartE_section_repr (I := I) x
@@ -305,8 +285,6 @@ theorem chart_christoffel_expansion_of_nabla_on_vf
       rfl
     refine Finset.sum_congr rfl (fun i' _ => Finset.sum_congr rfl (fun j' _ => ?_))
     rw [hrepr_chartCoeff j']
-
-/-! ## (b) Cartan formula in chart coordinates at α := x -/
 
 /-- **Cartan formula in chart coordinates (at the basepoint).** -/
 theorem cartan_formula_chart_algebra
@@ -371,7 +349,6 @@ theorem cartan_formula_chart_algebra
       (fun l _ hl => by rw [if_neg hl]; ring)
       (fun hm => (hm (Finset.mem_univ k)).elim)]
     simp
-  -- Substitute δ-collapses on RHS.
   conv_rhs =>
     rw [show
       (∑ k : Fin (Module.finrank ℝ E),
@@ -405,7 +382,6 @@ theorem cartan_formula_chart_algebra
         rw [← Finset.sum_add_distrib]
         refine Finset.sum_congr rfl (fun k _ => ?_)
         rw [hcoll2 k, mul_add]]
-  -- Split convective via hmc.
   rw [show
     (∑ k : Fin (Module.finrank ℝ E),
       chartCoeff (I := I) x W k x *
@@ -419,7 +395,6 @@ theorem cartan_formula_chart_algebra
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [hmc k, mul_add]]
-  -- Reshape H1 and H2 to match B and D.
   have hreshape_H1 :
       (∑ k : Fin (Module.finrank ℝ E),
         chartCoeff (I := I) x W k x *
@@ -493,8 +468,6 @@ theorem cartan_formula_chart_algebra
   rw [hreshape_H1, hreshape_H2]
   ring
 
-/-! ## (c) The Cartan formula -/
-
 /-- **Cartan formula for the Lie derivative of a Riemannian metric.**
 
 For a smooth Riemannian metric `g` on `M`, a smooth tangent vector field `W`, a
@@ -534,7 +507,6 @@ theorem cartan_formula_for_lie_deriv_metric
       chartLieDerivMetricMatrix (I := I) g W x i j x)
     from Finset.sum_congr rfl (fun i _ =>
       Finset.sum_congr rfl (fun j _ => by rw [hLDM_eq]))]
-  -- Apply (b) inside the bilinear sum.
   rw [show
     (∑ i, ∑ j, ((chartModelBasis E).repr v) i *
       ((chartModelBasis E).repr w) j *
@@ -554,7 +526,6 @@ theorem cartan_formula_for_lie_deriv_metric
     from Finset.sum_congr rfl (fun i _ =>
       Finset.sum_congr rfl (fun j _ => by
         rw [cartan_formula_chart_algebra (I := I) g W i j x]))]
-  -- Collapse δ-sums inside.
   have hcoll : ∀ (a : Fin (Module.finrank ℝ E)) (k : Fin (Module.finrank ℝ E)),
       (∑ l : Fin (Module.finrank ℝ E),
         partialDeriv (E := E) a (chartCoeffOnE (I := I) x W k) (extChartAt I x x) *
@@ -565,7 +536,6 @@ theorem cartan_formula_for_lie_deriv_metric
       (fun l _ hl => by rw [if_neg hl]; ring)
       (fun hm => (hm (Finset.mem_univ k)).elim)]
     simp
-  -- Now distribute LHS into 4 pieces L1..L4.
   rw [show
     (∑ i, ∑ j, ((chartModelBasis E).repr v) i *
       ((chartModelBasis E).repr w) j *
@@ -579,30 +549,25 @@ theorem cartan_formula_for_lie_deriv_metric
               (extChartAt I x x) * (if l = k then (1 : ℝ) else 0))
             + (∑ l, chartChristoffel (I := I) g x j l k (extChartAt I x x) *
                 chartCoeff (I := I) x W l x))))) =
-    -- L1
     (∑ i, ∑ j, ∑ k,
       ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
         chartGramMatrix (I := I) g x x k j *
         partialDeriv (E := E) i (chartCoeffOnE (I := I) x W k) (extChartAt I x x))
-    -- L2
     + (∑ i, ∑ j, ∑ k, ∑ l,
       ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
         chartGramMatrix (I := I) g x x k j *
         chartChristoffel (I := I) g x i l k (extChartAt I x x) *
         chartCoeff (I := I) x W l x)
-    -- L3
     + (∑ i, ∑ j, ∑ k,
       ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
         chartGramMatrix (I := I) g x x i k *
         partialDeriv (E := E) j (chartCoeffOnE (I := I) x W k) (extChartAt I x x))
-    -- L4
     + (∑ i, ∑ j, ∑ k, ∑ l,
       ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
         chartGramMatrix (I := I) g x x i k *
         chartChristoffel (I := I) g x j l k (extChartAt I x x) *
         chartCoeff (I := I) x W l x)
     from by
-      -- 4-piece decomposition.
       rw [show
         (∑ i, ∑ j, ((chartModelBasis E).repr v) i *
           ((chartModelBasis E).repr w) j *
@@ -636,7 +601,6 @@ theorem cartan_formula_for_lie_deriv_metric
           rw [← Finset.sum_add_distrib]
           refine Finset.sum_congr rfl (fun j _ => ?_)
           rw [mul_add]]
-      -- Split each half into ∂-piece + Γ-piece.
       rw [show
         (∑ i, ∑ j, ((chartModelBasis E).repr v) i *
           ((chartModelBasis E).repr w) j *
@@ -662,8 +626,6 @@ theorem cartan_formula_for_lie_deriv_metric
           rw [Finset.mul_sum, ← Finset.sum_add_distrib]
           refine Finset.sum_congr rfl (fun k _ => ?_)
           rw [hcoll i k]
-          -- Goal: v*w*(G*(∂ + ∑ l Γ*W)) = v*w*G*∂ + ∑ l, v*w*G*Γ*W.
-          -- Distribute the inner +, the v*w*G into the +, and ∑.
           rw [show
               ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
                 (chartGramMatrix (I := I) g x x k j *
@@ -728,7 +690,6 @@ theorem cartan_formula_for_lie_deriv_metric
             · rw [Finset.mul_sum, Finset.mul_sum]
               refine Finset.sum_congr rfl (fun l _ => by ring)]]
       ring]
-  -- Now RHS.
   have hRHS1 :
       g.inner x ((LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x v) w =
       ∑ i : Fin (Module.finrank ℝ E),
@@ -792,7 +753,6 @@ theorem cartan_formula_for_lie_deriv_metric
     from Finset.sum_congr rfl (fun i _ =>
       Finset.sum_congr rfl (fun j _ => by
         rw [htrivId v, htrivId _, hgram i j]))]
-  -- Apply (a) for (b.repr LC) i expansion.
   rw [show
     (∑ i, ∑ j,
       ((chartModelBasis E).repr
@@ -835,7 +795,6 @@ theorem cartan_formula_for_lie_deriv_metric
     from Finset.sum_congr rfl (fun i _ =>
       Finset.sum_congr rfl (fun j _ => by
         rw [chart_christoffel_expansion_of_nabla_on_vf (I := I) g W x w j]))]
-  -- Distribute RHS into R1+R2+R3+R4.
   rw [show
     (∑ i, ∑ j,
       ((∑ j' : Fin (Module.finrank ℝ E),
@@ -954,7 +913,6 @@ theorem cartan_formula_for_lie_deriv_metric
       rw [← Finset.sum_add_distrib]
       refine Finset.sum_congr rfl (fun i _ => ?_)
       rw [← Finset.sum_add_distrib]]
-  -- Match L_p with R_p by reindexing.
   have hL1_eq_R1 :
       (∑ i, ∑ j, ∑ k,
         ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
@@ -965,8 +923,6 @@ theorem cartan_formula_for_lie_deriv_metric
           partialDeriv (E := E) j' (chartCoeffOnE (I := I) x W i) (extChartAt I x x) *
           ((chartModelBasis E).repr w) j *
           chartGramMatrix (I := I) g x x i j) := by
-    -- Bijection: i_L → j'_R, j_L → j_R, k_L → i_R.
-    -- Reindex RHS to read ∑ j' ∑ j ∑ i (so that the outermost matches LHS's i_L = j'_R).
     rw [show
       (∑ i, ∑ j, ∑ j',
         ((chartModelBasis E).repr v) j' *
@@ -978,9 +934,6 @@ theorem cartan_formula_for_lie_deriv_metric
           partialDeriv (E := E) j' (chartCoeffOnE (I := I) x W i) (extChartAt I x x) *
           ((chartModelBasis E).repr w) j *
           chartGramMatrix (I := I) g x x i j) from by
-      -- ∑ i ∑ j ∑ j' = ∑ j' ∑ i ∑ j (3-cycle: 1->3->2->1)
-      -- Start: ∑ i ∑ j ∑ j'
-      -- Swap inner (j, j'): ∑ i ∑ j' ∑ j
       rw [show (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
             ∑ j' : Fin (Module.finrank ℝ E),
             ((chartModelBasis E).repr v) j' *
@@ -993,9 +946,7 @@ theorem cartan_formula_for_lie_deriv_metric
               ((chartModelBasis E).repr w) j *
               chartGramMatrix (I := I) g x x i j) from
         Finset.sum_congr rfl (fun _ _ => Finset.sum_comm)]
-      -- Swap outer (i, j'): ∑ j' ∑ i ∑ j
       rw [Finset.sum_comm]
-      -- Swap inner (i, j): ∑ j' ∑ j ∑ i
       refine Finset.sum_congr rfl (fun _ _ => ?_)
       rw [Finset.sum_comm]]
     refine Finset.sum_congr rfl (fun iL _ => Finset.sum_congr rfl
@@ -1010,10 +961,7 @@ theorem cartan_formula_for_lie_deriv_metric
           (((chartModelBasis E).repr w) j' *
             partialDeriv (E := E) j' (chartCoeffOnE (I := I) x W j) (extChartAt I x x)) *
           chartGramMatrix (I := I) g x x i j) := by
-    -- Bijection: i_L → i_R, j_L → j'_R, k_L → j_R.
     refine Finset.sum_congr rfl (fun iL _ => ?_)
-    -- Now LHS: ∑ j ∑ k Y(iL, j, k); RHS: ∑ j ∑ j' X(iL, j, j').
-    -- Swap j and j' on RHS to get ∑ j' ∑ j; then relabel j'→j_L, j→k_L.
     conv_rhs => rw [Finset.sum_comm]
     refine Finset.sum_congr rfl (fun jL _ => Finset.sum_congr rfl (fun kL _ => by ring))
   have hL2_eq_R2 :
@@ -1028,7 +976,6 @@ theorem cartan_formula_for_lie_deriv_metric
           chartCoeff (I := I) x W k x *
           ((chartModelBasis E).repr w) j *
           chartGramMatrix (I := I) g x x i j) := by
-    -- Bijection: i_L → j'_R, j_L → j_R, k_L → i_R, l_L → k_R.
     rw [show
       (∑ i, ∑ j, ∑ j', ∑ k,
         ((chartModelBasis E).repr v) j' *
@@ -1074,10 +1021,7 @@ theorem cartan_formula_for_lie_deriv_metric
             chartChristoffel (I := I) g x j' k j (extChartAt I x x) *
             chartCoeff (I := I) x W k x) *
           chartGramMatrix (I := I) g x x i j) := by
-    -- Bijection: i_L → i_R, j_L → j'_R, k_L → j_R, l_L → k_R.
     refine Finset.sum_congr rfl (fun iL _ => ?_)
-    -- At fixed i_L = i_R = iL. LHS: ∑ j ∑ k ∑ l, ...; RHS: ∑ j ∑ j' ∑ k, ...
-    -- Swap j and j' on RHS to bring j' outer.
     conv_rhs => rw [Finset.sum_comm]
     refine Finset.sum_congr rfl (fun jL _ => Finset.sum_congr rfl
       (fun kL _ => Finset.sum_congr rfl (fun lL _ => by ring)))

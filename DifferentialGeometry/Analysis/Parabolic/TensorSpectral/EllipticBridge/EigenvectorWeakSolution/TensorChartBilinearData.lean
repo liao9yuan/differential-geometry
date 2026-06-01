@@ -97,28 +97,12 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The chart-bilinear divergence-form data for a tensor chart component
-
-The per-component scalar elliptic identity satisfied by a chart `P₀`-component
-of an `(r, s)`-tensor field has principal symbol `weightedInvGramOnEuclid g α`
-and zeroth-order density `densityOnEuclid g α` — exactly the divergence-form
-data of the scalar structure `ChartBilinearH1ComplData g α`. The tensor
-per-component data is therefore that scalar structure together with the
-semantic ranks `(r, s)` and component multi-index `P₀` recording which component
-of which tensor field it describes. -/
 
 /-- **Chart-bilinear divergence-form data for one chart `P₀`-component of a
 non-smooth `(r, s)`-tensor field.**
@@ -170,12 +154,6 @@ namespace TensorChartBilinearH1ComplData
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-! ## Component projections
-
-The fields of the underlying scalar structure `toChartData` are re-exposed as
-projections on `TensorChartBilinearH1ComplData`, so downstream producers and
-consumers do not need to unfold the `toChartData` wrapper. -/
-
 /-- The chart-pulled scalar `P₀`-component of the non-smooth tensor field. -/
 def u_chart {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
     {P₀ : TensorCompIdx (E := E) r s}
@@ -211,11 +189,6 @@ def weak_partial {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
     {P₀ : TensorCompIdx (E := E) r s}
     (D : TensorChartBilinearH1ComplData (I := I) (M := M) g r s α P₀) :
     D.weak_partial = D.toChartData.weak_partial := rfl
-
-/-! ## Integrability projections
-
-The weighted / local `L²` integrability of the chart component, the right-hand
-side, and the weak partials, re-exposed from the underlying scalar structure. -/
 
 /-- The chart component `u_chart` is `MemLp 2` with respect to the chart-pulled
 weighted measure restricted to `chartTargetEuclid α`. -/
@@ -259,13 +232,6 @@ lemma weak_partial_isWeakPartial {g : SmoothRiemannianMetric I M} {r s : ℕ}
       (chartTargetEuclid (I := I) (M := M) α) :=
   D.toChartData.weak_partial_isWeakPartial i
 
-/-! ## The per-component chart-bilinear variational identity
-
-The density-weighted variational identity carried by `toChartData`, re-exposed
-on the tensor data structure. Its principal symbol is `weightedInvGramOnEuclid g α`
-and its zeroth-order density is `densityOnEuclid g α`: the divergence-form data
-of the scalar Laplace–Beltrami operator. -/
-
 /-- The density-weighted per-component variational identity, re-exposed from the
 underlying scalar structure. -/
 lemma variational_identity {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
@@ -287,13 +253,6 @@ lemma variational_identity {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
       densityOnEuclid (I := I) g α y * D.f_chart y * ψ y
       ∂(volume : Measure EuclN) :=
   D.toChartData.variational_identity ψ hψ hψ_cs hψ_supp
-
-/-! ## Conversion: weighted `MemLp` to plain `MemLp` on compact subdomains
-
-On any compact subset `K ⊆ chartTargetEuclid α` the density `densityOnEuclid g α`
-is bounded below by a positive constant, so weighted `MemLp 2` on
-`chartTargetEuclid α` implies plain `MemLp 2` on `K`. This is the tensor
-re-export of `memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure`. -/
 
 /-- Weighted `MemLp 2` of the chart component on `chartTargetEuclid α` converts
 to plain `MemLp 2` on any compact subset `K ⊆ chartTargetEuclid α`. -/
@@ -318,12 +277,6 @@ lemma memLp_volume_restrict_f_chart {g : SmoothRiemannianMetric I M} {r s : ℕ}
     D.f_chart_memLp_weighted hK_compact hK_meas hK_in
 
 end TensorChartBilinearH1ComplData
-
-/-! ## Headline ergonomics theorem
-
-The tensor analogue of the scalar `chart_bilinear_identity_h1Compl`: given the
-data `D`, the density-weighted per-component variational identity holds for
-every smooth test function with topological support inside the chart target. -/
 
 /-- **Per-component chart-bilinear identity for a non-smooth tensor chart
 component.** Given the chart-bilinear divergence-form data `D` for one chart
@@ -366,8 +319,6 @@ theorem tensor_chart_bilinear_identity_h1Compl
       densityOnEuclid (I := I) g α y * D.f_chart y * ψ y
       ∂(volume : Measure EuclN) :=
   D.variational_identity ψ hψ hψ_cs hψ_supp
-
-/-! ## Sanity tests -/
 
 section ElaborationTests
 

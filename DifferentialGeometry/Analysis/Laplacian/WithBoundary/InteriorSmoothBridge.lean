@@ -63,8 +63,6 @@ private abbrev I_half (n : ℕ) [NeZero n] :
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-! ## L² class of `(u - Δ_g_with_boundary u)` -/
-
 /-- The function `u - Δ_g_with_boundary u` is continuous on a compact `M`,
 hence `MemLp 2` against the (finite) Riemannian volume measure. -/
 lemma InteriorSmoothScalar.oneSubLap_continuous
@@ -91,15 +89,6 @@ noncomputable def InteriorSmoothScalar.oneSubLapClassicalLp
     Lp ℝ 2 (riemannianVolumeMeasure (I := I_half n) (M := M) g) :=
   u.oneSubLap_memLp.toLp _
 
-/-! ## Identity from Green's first identity (with boundary, interior support)
-
-For interior-supported smooth `u, v`, the with-boundary Green's first identity
-gives `∫ g(grad u, grad v) = -∫ v · Δ_g_with_boundary u`. Hence
-
-  ⟨u, v⟩_{H¹} = ∫ u·v + ∫ g(grad u, grad v) = ∫ (u - Δ_g_with_boundary u) · v.
-
-This is the analogue of the boundaryless `smoothScalarH1Inner_eq_integral_oneSubLap_mul`. -/
-
 /-- The Green-identity computation: the H¹ inner product equals an L²
 inner product against `(u - Δ_g_with_boundary u)`. -/
 theorem interiorSmoothScalarH1Inner_eq_integral_oneSubLap_mul
@@ -112,12 +101,8 @@ theorem interiorSmoothScalarH1Inner_eq_integral_oneSubLap_mul
   unfold interiorSmoothScalarH1Inner
   haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I_half n) (M := M) g) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I_half n) (M := M) g
-  -- Apply with-boundary Green's first identity (`integral_inner_grad_eq_neg_integral_smul_laplacian_with_boundary`):
-  --   `∫ g(grad v, grad u) = -∫ v · Δ_g_with_boundary u`.
-  -- Then symmetry of the metric gives `∫ g(grad u, grad v) = ∫ g(grad v, grad u)`.
   have hu_supp : HasCompactSupport u.toFun := HasCompactSupport.of_compactSpace _
   have hv_supp : HasCompactSupport v.toFun := HasCompactSupport.of_compactSpace _
-  -- Green's first identity (with boundary): `(f, h) = (v, u)`, `h = u` interior-supp + cs.
   have hgreen :
       ∫ x, g.inner x (gradFun (I := I_half n) g v.toFun x)
             (gradFun (I := I_half n) g u.toFun x)
@@ -126,7 +111,6 @@ theorem interiorSmoothScalarH1Inner_eq_integral_oneSubLap_mul
           ∂(riemannianVolumeMeasure (I := I_half n) (M := M) g) :=
     integral_inner_grad_eq_neg_integral_smul_laplacian_with_boundary
       (I := I_half n) g v.smooth u.smooth v.interior_support u.interior_support hu_supp
-  -- Symmetry of g: `∫ g(grad u, grad v) = ∫ g(grad v, grad u)`.
   have hsymm :
       (∫ x, g.inner x (gradFun (I := I_half n) g u.toFun x)
             (gradFun (I := I_half n) g v.toFun x)
@@ -137,8 +121,6 @@ theorem interiorSmoothScalarH1Inner_eq_integral_oneSubLap_mul
     refine integral_congr_ae (Filter.Eventually.of_forall ?_)
     intro x
     exact g.symm x _ _
-  -- Rewrite the gradient term in the H¹ inner product (which uses
-  -- `grad_g_with_boundary_section`'s pointwise value, equal to `gradFun`).
   have hsec_eq : (fun x : M => g.inner x
         ((grad_g_with_boundary_section
             (I := I_half n) g u.smooth u.interior_support :
@@ -155,7 +137,6 @@ theorem interiorSmoothScalarH1Inner_eq_integral_oneSubLap_mul
     rfl
   rw [hsec_eq]
   rw [hsymm, hgreen]
-  -- Now combine: `∫ u·v + (-∫ v · Δu) = ∫ (u - Δu) · v`.
   have hΔu_cont : Continuous
       (Δ_g_with_boundary (I := I_half n) g u.smooth u.interior_support) :=
     Δ_g_with_boundary_continuous (I := I_half n) g u.smooth u.interior_support
@@ -195,13 +176,11 @@ theorem interiorSmoothScalarH1Inner_eq_lpInner_oneSubLap
   rw [interiorSmoothScalarH1Inner_eq_integral_oneSubLap_mul]
   rw [MeasureTheory.L2.inner_def
     (𝕜 := ℝ)]
-  -- a.e.-rewrite the integrands.
   have hae_lhs : (u.oneSubLapClassicalLp :
       Lp ℝ 2 (riemannianVolumeMeasure (I := I_half n) (M := M) g)) =ᵐ[
       riemannianVolumeMeasure (I := I_half n) (M := M) g]
       (fun x : M =>
         u.toFun x - Δ_g_with_boundary (I := I_half n) g u.smooth u.interior_support x) := by
-    -- `oneSubLapClassicalLp = u.oneSubLap_memLp.toLp _`.
     exact MemLp.coeFn_toLp u.oneSubLap_memLp
   have hae_rhs : (smoothToLpInterior g v :
       Lp ℝ 2 (riemannianVolumeMeasure (I := I_half n) (M := M) g)) =ᵐ[
@@ -211,8 +190,6 @@ theorem interiorSmoothScalarH1Inner_eq_lpInner_oneSubLap
   refine integral_congr_ae ?_
   filter_upwards [hae_lhs, hae_rhs] with x hl hr
   rw [hl, hr]
-  -- LHS: `(u.toFun x - Δu x) * v.toFun x`.
-  -- RHS: `⟨..., v.toFun x⟩_ℝ = v.toFun x * (u.toFun x - Δu x)`.
   show (u.toFun x - Δ_g_with_boundary (I := I_half n) g u.smooth u.interior_support x) *
       v.toFun x = _
   rw [show @inner ℝ _ _
@@ -222,8 +199,6 @@ theorem interiorSmoothScalarH1Inner_eq_lpInner_oneSubLap
         (u.toFun x - Δ_g_with_boundary (I := I_half n) g u.smooth u.interior_support x)
       from RCLike.inner_apply _ _]
   ring
-
-/-! ## Variational identity for smooth lifts -/
 
 /-- Inner product on `H1ComplInterior g` of two smooth lifts equals the smooth
 H¹ inner product. -/
@@ -257,8 +232,6 @@ theorem interiorSmoothScalar_bilin_eq_lpFunctional_smooth
   rw [lpFunctionalCLMInterior_apply, H1ComplInteriorToLp_smoothToH1ComplInterior]
   exact real_inner_comm _ _
 
-/-! ## Density of `smoothToH1ComplInterior` -/
-
 theorem denseRange_smoothToH1ComplInterior
     (g : SmoothRiemannianMetric (I_half n) M) :
     DenseRange (smoothToH1ComplInterior g) := by
@@ -269,8 +242,6 @@ theorem denseRange_smoothToH1ComplInterior
         UniformSpace.Completion (InteriorSmoothScalar g)) from
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.denseRange_coe
-
-/-! ## Smooth bridge -/
 
 theorem smoothToH1ComplInterior_bilin_eq_lpFunctional
     {g : SmoothRiemannianMetric (I_half n) M}

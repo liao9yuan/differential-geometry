@@ -67,20 +67,10 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Forward Gram Rayleigh lower bound on POU tsupport
-
-The chart-frame Gram matrix `chartGramMatrix g α b` is positive-definite at every
-point of the chart base set, with continuous entries in `b`. By the extreme-value
-theorem on the compact product of the POU tsupport and the unit sphere in
-`Fin n → ℝ`, the Rayleigh quotient `(ξ^⊤ G ξ) / |ξ|²` attains a strictly positive
-minimum, which is the required lower bound. -/
 
 private lemma sphere_isCompact_forward :
     IsCompact {ξ : Fin (Module.finrank ℝ E) → ℝ |
@@ -308,8 +298,6 @@ private lemma exists_chartGramMatrix_quadForm_lower_bound_on_pouTsupport
     (pouTsupport_isCompact (I := I) (M := M) α)
     (pouTsupport_subset_baseSet (I := I) (M := M) α)
 
-/-! ## Strengthened witness lemma exposing g-orthonormality of the basis -/
-
 /-- A strengthened witness for `riemannianFiberNormSq`: there exists a basis
 `e : Fin n → TangentSpace I b` of `TangentSpace I b` such that:
 - `n = Module.finrank ℝ (TangentSpace I b)`;
@@ -351,8 +339,6 @@ private lemma riemannianFiberNormSq_eq_sum_witness_orthonormal
     exact hite
   · rfl
 
-/-! ## Helper: bound on `Σ_j A i j²` from g-orthonormality -/
-
 /-- If `e i = ∑_j A_ij • chartBasisVecFiber α j b` and `g.inner b (e i) (e i) = 1`,
 then `∑_j A_ij² ≤ 1/c` where `c` is the forward Gram lower bound. -/
 private lemma sum_sq_repr_le_inv_c
@@ -388,8 +374,6 @@ private lemma sum_sq_repr_le_inv_c
     field_simp
   rw [h_simpl] at h_div
   exact h_div
-
-/-! ## Inner-CMM multilinear expansion in the chart-basis family -/
 
 /-- For `b` in the trivialization base set, the covariant tuple
 `mkPiAlgebra ∘ g.inner ∘ (e ∘ K)` expands as a sum over `Fin r → Fin n` of
@@ -480,8 +464,6 @@ private lemma tensor0S_apply_eJ_expand_repr
   rw [ContinuousMultilinearMap.map_smul_univ]
   rw [smul_eq_mul]
 
-/-! ## Per-summand Cauchy-Schwarz bound -/
-
 private lemma fiberNormSqSummand_at_eg_le_chartAlpha_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {b : M}
     (α : M)
@@ -506,7 +488,6 @@ private lemma fiberNormSqSummand_at_eg_le_chartAlpha_sum
               (fun i : Fin (Module.finrank ℝ E) =>
                 chartBasisVecFiber (I := I) α i b) I' J') := by
   classical
-  -- Stage A (Cov expansion).
   have h_cov_expand :=
     mkPiAlgebra_inner_eK_expand_repr (I := I) (M := M) g α hb_base r e K A hA
   have h_T_apply :
@@ -548,7 +529,6 @@ private lemma fiberNormSqSummand_at_eg_le_chartAlpha_sum
     rw [ContinuousMultilinearMap.smul_apply, smul_eq_mul]
     rw [tensor0S_apply_eJ_expand_repr (I := I) (M := M) (s := s) e α A hA _ J]
     rw [Finset.mul_sum]
-  -- Cauchy-Schwarz pairing.
   set Yfn : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)) → ℝ :=
     fun p =>
       (((T : Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b)
@@ -567,7 +547,6 @@ private lemma fiberNormSqSummand_at_eg_le_chartAlpha_sum
         ∑ p : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)),
           αfn p * Yfn p := by
     rw [h_XKJ_eq]
-    -- Convert RHS: ∑ p : A × B, ... = ∑ p ∈ univ ×ˢ univ, ... = ∑ I', ∑ J', ...
     rw [show (Finset.univ : Finset ((Fin r → Fin (Module.finrank ℝ E)) ×
             (Fin s → Fin (Module.finrank ℝ E)))) =
           (Finset.univ : Finset (Fin r → Fin (Module.finrank ℝ E))) ×ˢ
@@ -591,7 +570,6 @@ private lemma fiberNormSqSummand_at_eg_le_chartAlpha_sum
           Yfn p ^ 2) := by
     rw [h_XKJ_as_sum]
     exact Finset.sum_mul_sq_le_sq_mul_sq (R := ℝ) _ αfn Yfn
-  -- Split αfn² as product of two sums.
   have h_α_sq_split :
       (∑ p : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)),
         αfn p ^ 2) =
@@ -619,7 +597,6 @@ private lemma fiberNormSqSummand_at_eg_le_chartAlpha_sum
       rw [hαfn_def, mul_pow]
     rw [h_expand]
     rw [Finset.sum_mul_sum]
-  -- Convert sums of squares of products to products of sums of squares.
   have h_prod_sum_K :
       ∑ I' : Fin r → Fin (Module.finrank ℝ E),
         (∏ k : Fin r, A (K k) (I' k)) ^ 2 =
@@ -672,7 +649,6 @@ private lemma fiberNormSqSummand_at_eg_le_chartAlpha_sum
       _ = ∏ l : Fin s, ∑ m : Fin (Module.finrank ℝ E), A (J l) m ^ 2 := h_sum_prod
   rw [h_prod_sum_K, h_prod_sum_J] at h_α_sq_split
   rw [h_α_sq_split] at h_CS
-  -- Expand Yfn² sum.
   have h_Y_sum_split :
       (∑ p : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)),
         Yfn p ^ 2) =
@@ -682,7 +658,6 @@ private lemma fiberNormSqSummand_at_eg_le_chartAlpha_sum
     rw [← Finset.univ_product_univ]
     rw [Finset.sum_product]
   rw [h_Y_sum_split] at h_CS
-  -- Identify Yfn (I', J')² = fiberNormSqSummand.
   have h_Y_eq_summand :
       ∀ I' : Fin r → Fin (Module.finrank ℝ E),
         ∀ J' : Fin s → Fin (Module.finrank ℝ E),
@@ -707,13 +682,11 @@ private lemma fiberNormSqSummand_at_eg_le_chartAlpha_sum
     refine Finset.sum_congr rfl (fun J' _ => ?_)
     exact h_Y_eq_summand I' J'
   rw [h_Y_double_eq] at h_CS
-  -- Rewrite the goal LHS as XKJ².
   have h_target_eq :
       fiberNormSqSummand (I := I) (M := M) g b r s T n e K J = XKJ ^ 2 := by
     unfold fiberNormSqSummand
     rfl
   rw [h_target_eq]
-  -- Algebraic rearrangement to match the goal shape.
   have hgoal_eq :
       (∏ k : Fin r, ∑ l : Fin (Module.finrank ℝ E), A (K k) l ^ 2) *
         ((∏ l : Fin s, ∑ m : Fin (Module.finrank ℝ E), A (J l) m ^ 2) *
@@ -734,12 +707,8 @@ private lemma fiberNormSqSummand_at_eg_le_chartAlpha_sum
   rw [hgoal_eq]
   exact h_CS
 
-/-! ## Helper: identify finrank of `TangentSpace I b` with `Module.finrank ℝ E` -/
-
 private lemma finrank_tangentSpace_eq (b : M) :
     Module.finrank ℝ (TangentSpace I b) = Module.finrank ℝ E := rfl
-
-/-! ## Headline -/
 
 /-- **`riemannianFiberNormSq` is bounded by chart-`α`-frame summands on POU tsupport.**
 
@@ -802,10 +771,7 @@ theorem riemannianFiberNormSq_le_chartAlpha_summand_sum_on_pouTsupport
   obtain ⟨n', e, hn', he_orth, h_eq⟩ :=
     riemannianFiberNormSq_eq_sum_witness_orthonormal (I := I) (M := M)
       g r s b (S.toSection b)
-  -- `n' = Module.finrank ℝ (TangentSpace I b) = Module.finrank ℝ E = n`.
-  -- Substitute n' away.
   subst hn'
-  -- The remaining proof uses `Module.finrank ℝ (TangentSpace I b)` (which is `n`).
   set Bfam := chartBasisFamily (I := I) α hb_base with hBfam_def
   set A : Fin (Module.finrank ℝ (TangentSpace I b)) → Fin (Module.finrank ℝ E) → ℝ :=
     fun i j => Bfam.repr (e i) j with hA_def
@@ -835,17 +801,11 @@ theorem riemannianFiberNormSq_le_chartAlpha_summand_sum_on_pouTsupport
           ∑ j : Fin (Module.finrank ℝ E),
             ∑ k : Fin (Module.finrank ℝ E),
               chartGramMatrix (I := I) g α b j k * A i j * A i k := by
-      -- Reuse the existing identity `chartGramMatrix_dotProduct_mulVec` after substituting e i.
       have h_ei : e i = ∑ j : Fin (Module.finrank ℝ E),
           A i j • chartBasisVecFiber (I := I) α j b := hA_expand i
       rw [h_ei]
-      -- g.inner b (∑ A•v_j) (∑ A•v_k) = ∑ j ∑ k, (A i j * A i k) * G_{jk}
-      -- which equals ∑ j ∑ k, G_{jk} * A i j * A i k.
       have hdotmul := chartGramMatrix_dotProduct_mulVec (I := I) g α b (A i)
-      -- hdotmul : star (A i) ⬝ᵥ (chartGramMatrix g α b) *ᵥ (A i) =
-      --             g.inner b (∑ j, A i j • v j) (∑ k, A i k • v k)
       rw [← hdotmul]
-      -- Goal: star (A i) ⬝ᵥ G *ᵥ (A i) = ∑ j, ∑ k, G_{j,k} * A i j * A i k.
       simp only [dotProduct, Matrix.mulVec, Pi.star_apply, star_trivial]
       refine Finset.sum_congr rfl (fun j _ => ?_)
       rw [Finset.mul_sum]
@@ -858,8 +818,6 @@ theorem riemannianFiberNormSq_le_chartAlpha_summand_sum_on_pouTsupport
       rw [← h_expand_inner]; exact h_one
     exact sum_sq_repr_le_inv_c (I := I) (M := M) g α hc_pos hG_lower hb (A i) hA_one
   rw [h_eq]
-  -- Goal: ∑_K ∑_J fiberNormSqSummand g b r s T (finrank ℝ (TangentSpace I b)) e K J ≤ C * Σ.
-  -- Per-(K, J) bound.
   have h_inner_sum_nn :
       0 ≤ ∑ I' : Fin r → Fin (Module.finrank ℝ E),
         ∑ J' : Fin s → Fin (Module.finrank ℝ E),
@@ -924,7 +882,6 @@ theorem riemannianFiberNormSq_le_chartAlpha_summand_sum_on_pouTsupport
         rw [Finset.prod_const, Finset.card_univ, Fintype.card_fin]
       rw [h_const_prod] at h_prod_le
       exact h_prod_le
-    -- Combine into product-of-three.
     have h_prod_J_sum_nn :
         0 ≤ (∏ l : Fin s,
           ∑ m : Fin (Module.finrank ℝ E), A (J l) m ^ 2) * RHSinner := by
@@ -957,7 +914,6 @@ theorem riemannianFiberNormSq_le_chartAlpha_summand_sum_on_pouTsupport
           ((1 : ℝ) / c) ^ r * ((1 : ℝ) / c) ^ s * RHSinner := by ring
     rw [h_alg] at h_combined
     exact h_combined
-  -- Sum the per-(K, J) bound.
   have h_sum_le :
       (∑ K : Fin r → Fin (Module.finrank ℝ (TangentSpace I b)),
           ∑ J : Fin s → Fin (Module.finrank ℝ (TangentSpace I b)),
@@ -970,21 +926,16 @@ theorem riemannianFiberNormSq_le_chartAlpha_summand_sum_on_pouTsupport
     refine Finset.sum_le_sum (fun J _ => ?_)
     exact h_per_KJ K J
   refine h_sum_le.trans ?_
-  -- Compute the right-hand sum of constants.
-  -- (n_t := Module.finrank ℝ (TangentSpace I b))
   set nt : ℕ := Module.finrank ℝ (TangentSpace I b) with hnt_def
   have hnt_eq_n : nt = n := by
     rw [hnt_def, hn_def]
     rfl
-  -- ∑ K, ∑ J, const = (Fintype.card (Fin r → Fin nt)) * (Fintype.card (Fin s → Fin nt)) * const
-  -- = n^r * n^s * const.
   have h_card_K : (Finset.univ : Finset (Fin r → Fin nt)).card = nt ^ r := by
     rw [Finset.card_univ]
     rw [Fintype.card_fun, Fintype.card_fin, Fintype.card_fin]
   have h_card_J : (Finset.univ : Finset (Fin s → Fin nt)).card = nt ^ s := by
     rw [Finset.card_univ]
     rw [Fintype.card_fun, Fintype.card_fin, Fintype.card_fin]
-  -- Step: ∑ _J, const = nt^s • const.
   have h_inner_const :
       ∀ _K : Fin r → Fin nt,
         (∑ _J : Fin s → Fin nt,
@@ -1000,15 +951,12 @@ theorem riemannianFiberNormSq_le_chartAlpha_summand_sum_on_pouTsupport
         (((nt ^ s : ℕ) : ℝ) * (((1 : ℝ) / c) ^ r * ((1 : ℝ) / c) ^ s * RHSinner)) := by
     rw [Finset.sum_const, h_card_K]
     rw [nsmul_eq_mul]
-  -- Combine to bring the sum to closed form.
   have h_rhs_compute :
       (∑ _K : Fin r → Fin nt,
         ∑ _J : Fin s → Fin nt,
           ((1 : ℝ) / c) ^ r * ((1 : ℝ) / c) ^ s * RHSinner) =
       ((nt ^ r : ℕ) : ℝ) *
         (((nt ^ s : ℕ) : ℝ) * (((1 : ℝ) / c) ^ r * ((1 : ℝ) / c) ^ s * RHSinner)) := by
-    -- First, replace the inner sum by the constant form.
-    -- The set `{_J : Fin s → Fin nt}` has cardinality nt^s; `Finset.sum_const` applies.
     have h_inner_eq :
         (∑ _K : Fin r → Fin nt,
           ∑ _J : Fin s → Fin nt,
@@ -1017,8 +965,6 @@ theorem riemannianFiberNormSq_le_chartAlpha_summand_sum_on_pouTsupport
           ((nt ^ s : ℕ) : ℝ) * (((1 : ℝ) / c) ^ r * ((1 : ℝ) / c) ^ s * RHSinner) :=
       Finset.sum_congr rfl (fun K _ => h_inner_const K)
     rw [h_inner_eq, h_outer_const]
-  -- The sum-of-constants in the main bound's LHS equals the closed form from h_rhs_compute,
-  -- modulo the binder name (K vs _K). We close the final inequality via Eq.le and ring.
   rw [hnt_eq_n] at h_rhs_compute
   have h_final_alg :
       ((n ^ r : ℕ) : ℝ) *
@@ -1031,7 +977,6 @@ theorem riemannianFiberNormSq_le_chartAlpha_summand_sum_on_pouTsupport
       pow_add _ _ _
     rw [hpow_split]
     ring
-  -- The LHS sum (∑ K, ∑ _J, c-expr) is bound-variable-renamed; use Eq.le.
   exact le_of_eq (h_rhs_compute.trans h_final_alg)
 
 end Connection
@@ -1039,8 +984,6 @@ end Integral
 end DifferentialGeometry
 
 end
-
-/-! ## Sanity check: axioms used by the headline. -/
 
 open DifferentialGeometry.Integral.Connection in
 #print axioms riemannianFiberNormSq_le_chartAlpha_summand_sum_on_pouTsupport

@@ -77,8 +77,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ### `hdiffeo`: each smooth-bijective time-slice is a diffeomorphism -/
-
 /--
 **Single time-slice diffeomorphism witness.** If, at time `t`, the forward flow
 `Φ t` and the reverse flow `Ψ t` are each `C^∞` self-maps of `M` and are
@@ -96,13 +94,11 @@ theorem time_dependent_vf_diffeomorph_slice_of_smooth_bijective
     (hΦ_smooth : ContMDiff I I ∞ Φ) (hΨ_smooth : ContMDiff I I ∞ Ψ)
     (hΨΦ : ∀ x : M, Ψ (Φ x) = x) (hΦΨ : ∀ x : M, Φ (Ψ x) = x) :
     ∃ d : M ≃ₘ⟮I, I⟯ M, (∀ x : M, d x = Φ x) ∧ (∀ x : M, d.symm x = Ψ x) := by
-  -- Build the underlying equivalence from the two-sided inverse.
   let e : M ≃ M :=
     { toFun := Φ
       invFun := Ψ
       left_inv := fun x => hΨΦ x
       right_inv := fun x => hΦΨ x }
-  -- Upgrade to a diffeomorphism with the two smoothness witnesses.
   exact ⟨⟨e, hΦ_smooth, hΨ_smooth⟩, fun _ => rfl, fun _ => rfl⟩
 
 /--
@@ -133,8 +129,6 @@ theorem time_dependent_vf_hdiffeo_of_smooth_bijective
       (Φ t) (Ψ t) (hΦ_smooth t ht htT) (hΨ_smooth t ht htT)
       (fun x => hΨΦ t hmem x) (fun x => hΦΨ t hmem x)
   exact ⟨d, hd_fwd⟩
-
-/-! ### `hflow`: the chart-`α`-transported manifold flow ODE -/
 
 /--
 **Transported-velocity `hflow` producer (per point / per chart).** For the
@@ -174,21 +168,16 @@ theorem time_dependent_vf_hflow_transported_of_chartLocal
       ((mfderivWithin 𝓘(ℝ, E) I (extChartAt I α).symm (Set.range I)
           (hper.flow (I ((chartAt H α) x)) t)) ∘L
         ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t (Φ t x)))) := by
-  -- Rewrite `Φ s x` to its chart-`α`-coordinate representation pointwise.
   have hcurve : (fun s : ℝ => Φ s x) =
       fun s : ℝ => (chartAt H α).symm
         (I.symm (hper.flow (I ((chartAt H α) x)) s)) := by
     funext s; exact hΦ_repr s
-  -- The velocity's base point `Φ t x` equals the chart-`α` pull-back at time `t`.
   have hbase : Φ t x =
       (chartAt H α).symm (I.symm (hper.flow (I ((chartAt H α) x)) t)) :=
     hΦ_repr t
   rw [hcurve, hbase]
-  -- Apply the chart-bridge from `ManifoldFlowFamily.lean`.
   exact manifoldFlow_hasMFDerivWithinAt_of_chartLocal X α x hper hxU t ht hconf
     htgt_t
-
-/-! ### Composition into the diffeomorphism family -/
 
 /--
 **Diffeomorphism family from smooth, mutually-inverse chart-cover flows.**
@@ -223,19 +212,15 @@ theorem time_dependent_vf_diffeomorph_family_of_smooth_bijective
       Φ_fam 0 = Diffeomorph.refl I M ∞ ∧
       (∀ t : ℝ, 0 < t → t < T → ∀ x : M, Φ_fam t x = Φ t x) := by
   classical
-  -- Produce the per-time diffeomorphism witnesses.
   have hdiffeo : ∀ t, 0 < t → t < T → ∃ d : M ≃ₘ⟮I, I⟯ M, ∀ x : M, d x = Φ t x :=
     time_dependent_vf_hdiffeo_of_smooth_bijective Φ Ψ T hΦ_smooth hΨ_smooth hΨΦ hΦΨ
-  -- Assemble the family: chosen diffeomorphism on `(0, T)`, identity elsewhere.
   refine ⟨fun t =>
     if h : 0 < t ∧ t < T then (hdiffeo t h.1 h.2).choose else Diffeomorph.refl I M ∞,
     ?_, ?_⟩
-  · -- `Φ_fam 0 = refl`: `0` fails the `0 < t` guard.
-    have h0 : ¬ (0 < (0 : ℝ) ∧ (0 : ℝ) < T) := by
+  · have h0 : ¬ (0 < (0 : ℝ) ∧ (0 : ℝ) < T) := by
       rintro ⟨h, _⟩; exact (lt_irrefl 0) h
     simp only [h0, dif_neg, not_false_iff]
-  · -- Agreement on `(0, T)`.
-    intro t ht htT x
+  · intro t ht htT x
     have hguard : 0 < t ∧ t < T := ⟨ht, htT⟩
     simp only [hguard, dif_pos, and_self]
     exact (hdiffeo t ht htT).choose_spec x

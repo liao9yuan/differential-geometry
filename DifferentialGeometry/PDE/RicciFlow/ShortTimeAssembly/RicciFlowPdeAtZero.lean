@@ -1,10 +1,3 @@
-/-
-The `t = 0` one-sided Ricci-flow derivative by continuity extension, plus the
-supporting continuity helpers: interior-`Ici`-derivative to ordinary derivative,
-continuity of the pulled-back inner product and Ricci tensor in time, and
-continuity of Ricci in the metric-time variable. Skeleton stubs for the
-short-time-existence blueprint (GAP 2, `t = 0` extension).
--/
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.Pullback.RicciNaturality
@@ -58,15 +51,10 @@ theorem interior_ici_deriv_to_ordinary
     (h_int : ∀ t ∈ Set.Ioo (0 : ℝ) T, HasDerivWithinAt f (e t) (Set.Ici 0) t) :
     DifferentiableOn ℝ f (Set.Ioo 0 T) ∧
       (∀ t ∈ Set.Ioo (0 : ℝ) T, deriv f t = e t) := by
-  -- On the open interval `Ioo 0 T`, the within-`Ici 0` derivative restricts to a
-  -- within-`Ioo 0 T` derivative (since `Ioo 0 T ⊆ Ici 0`); openness then identifies
-  -- `derivWithin` with the ordinary `deriv` and gives `differentiableOn`.
   have hsub : Set.Ioo (0 : ℝ) T ⊆ Set.Ici (0 : ℝ) := fun y hy => le_of_lt hy.1
-  -- The restricted within-`Ioo 0 T` derivative at every interior point.
   have h_within : ∀ t ∈ Set.Ioo (0 : ℝ) T,
       HasDerivWithinAt f (e t) (Set.Ioo 0 T) t := fun t ht => (h_int t ht).mono hsub
   refine ⟨fun t ht => (h_within t ht).differentiableWithinAt, fun t ht => ?_⟩
-  -- `deriv f t = derivWithin f (Ioo 0 T) t` by openness, and the latter equals `e t`.
   have hopen : IsOpen (Set.Ioo (0 : ℝ) T) := isOpen_Ioo
   rw [← derivWithin_of_isOpen hopen ht]
   exact (h_within t ht).derivWithin (hopen.uniqueDiffWithinAt ht)
@@ -83,39 +71,18 @@ theorem ricci_flow_pde_at_zero
       ((-2) * ricciTensor (I := I) (g_fam t) x v w) (Set.Ici 0) t) :
     HasDerivWithinAt (fun s : ℝ => (g_fam s).inner x v w)
       ((-2) * ricciTensor (I := I) (g_fam 0) x v w) (Set.Ici 0) 0 := by
-  -- Abbreviations for the inner-product and Ricci-RHS families.
   set f : ℝ → ℝ := fun s : ℝ => (g_fam s).inner x v w with hf
   set e : ℝ → ℝ := fun s : ℝ => (-2) * ricciTensor (I := I) (g_fam s) x v w with he
-  -- The interior data, transported to the present `f`/`e` notation.
   have h_int : ∀ t ∈ Set.Ioo (0 : ℝ) T, HasDerivWithinAt f (e t) (Set.Ici 0) t :=
     h_interior
-  -- The interior `Ici`-derivatives upgrade to ordinary derivatives on `Ioo 0 T`,
-  -- and `deriv f = e` there.
   obtain ⟨h_diff, h_derivEq⟩ := interior_ici_deriv_to_ordinary f e h_int
-  -- We apply the continuity-extension theorem with the open interior interval as the
-  -- right-neighbourhood witness.
   refine hasDerivWithinAt_Ici_of_tendsto_deriv (s := Set.Ioo 0 T) h_diff ?_ ?_ ?_
-  · -- `f` is right-continuous at `0` along `Ioo 0 T`: restrict the `Ico 0 T` continuity.
-    have h0 : (0 : ℝ) ∈ Set.Ico (0 : ℝ) T := ⟨le_rfl, hT⟩
+  · have h0 : (0 : ℝ) ∈ Set.Ico (0 : ℝ) T := ⟨le_rfl, hT⟩
     exact (h_cont.continuousWithinAt h0).mono Set.Ioo_subset_Ico_self
-  · -- `Ioo 0 T` is a right-neighbourhood of `0`.
-    exact Ioo_mem_nhdsGT hT
-  · -- The derivative converges to `e 0` from the right: `deriv f =ᶠ e` on `Ioo 0 T`,
-    -- which is in `𝓝[>] 0`, and `e` is right-continuous at `0` by hypothesis.
-    have h_eventuallyEq : (fun s : ℝ => deriv f s) =ᶠ[nhdsWithin 0 (Set.Ioi 0)] e :=
+  · exact Ioo_mem_nhdsGT hT
+  · have h_eventuallyEq : (fun s : ℝ => deriv f s) =ᶠ[nhdsWithin 0 (Set.Ioi 0)] e :=
       Filter.eventuallyEq_of_mem (Ioo_mem_nhdsGT hT) h_derivEq
     exact (h_ric_cont.tendsto).congr' h_eventuallyEq.symm
-
-/-! ## Chart-coordinate Gram-data continuity-in-time converters
-
-The hypothesis `hC2` of `ricci_continuous_in_metric_time` controls the continuity in
-time of the iterated Fréchet derivatives `iteratedFDeriv ℝ k (chartGramOnE (g_DT s) α i j)`
-of the chart-Gram entries, for `k ≤ 2`, at a chart point.  The chart-Christoffel /
-chart-Riemann / chart-Ricci continuity chain instead consumes the directional
-`partialDeriv` data (the `0`-, `1`- and `2`-jet chart-Gram entries in basis directions).
-These private lemmas convert the `iteratedFDeriv`-jet continuity into the directional
-`partialDeriv` continuity, using the standard `iteratedFDeriv`-to-directional identities
-and the boundedness (hence continuity) of the multilinear evaluation map. -/
 
 namespace RicciContInMetricAux
 
@@ -144,7 +111,6 @@ private lemma fderiv_chartGramOnE_diffAt_int
     (chartGramOnE_contDiffOn (I := I) g α i j).mono interior_subset
   have hcdAt : ContDiffAt ℝ ∞ (chartGramOnE (I := I) g α i j) y :=
     hcd.contDiffAt (isOpen_interior.mem_nhds hy)
-  -- `C^∞` gives the derivative map is `C^∞`, hence differentiable.
   have hderiv := hcdAt.fderiv_right (m := ∞) le_rfl
   exact hderiv.differentiableAt (by simp)
 
@@ -156,7 +122,6 @@ private lemma partialDeriv_partialDeriv_chartGramOnE_eq_iteratedFDeriv_two
     partialDeriv (E := E) m (partialDeriv (E := E) l (chartGramOnE (I := I) g α i j)) y =
       iteratedFDeriv ℝ 2 (chartGramOnE (I := I) g α i j) y
         ![(chartModelBasis E) m, (chartModelBasis E) l] := by
-  -- `partialDeriv l f = fun z => fderiv f z (e_l)`; differentiate once more in direction `e_m`.
   have hl : (partialDeriv (E := E) l (chartGramOnE (I := I) g α i j))
       = fun z : E => fderiv ℝ (chartGramOnE (I := I) g α i j) z ((chartModelBasis E) l) := by
     funext z; rfl
@@ -231,7 +196,6 @@ private lemma gramBracket_continuous_of_hC2
       ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 1
         (chartGramOnE (I := I) (g_DT t) α a b) y) s) :
     ContinuousOn (fun t : ℝ => gramBracket (I := I) (g_DT t) α i j l y) s := by
-  -- `gramBracket = ∂_i G_{lj} + ∂_j G_{li} − ∂_l G_{ij}`.
   have heq : (fun t : ℝ => gramBracket (I := I) (g_DT t) α i j l y)
       = fun t : ℝ =>
           partialDeriv (E := E) i (chartGramOnE (I := I) (g_DT t) α l j) y +
@@ -254,7 +218,6 @@ private lemma gramBracketDeriv_continuous_of_hC2
       ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 2
         (chartGramOnE (I := I) (g_DT t) α a b) y) s) :
     ContinuousOn (fun t : ℝ => gramBracketDeriv (I := I) (g_DT t) α m i j l y) s := by
-  -- `gramBracketDeriv = ∂_m∂_i G_{lj} + ∂_m∂_j G_{li} − ∂_m∂_l G_{ij}`.
   have heq : (fun t : ℝ => gramBracketDeriv (I := I) (g_DT t) α m i j l y)
       = fun t : ℝ =>
           partialDeriv (E := E) m
@@ -291,11 +254,9 @@ private lemma partialDeriv_chartInvGramOnE_continuous_of_hC2
     ContinuousOn (fun t : ℝ =>
       partialDeriv (E := E) m (chartInvGramOnE (I := I) (g_DT t) α k l) y) s := by
   classical
-  -- Chart-Gram entry continuity from the `0`-jet, used by the inverse-Gram lemma.
   have hentry : ∀ a b : Fin (Module.finrank ℝ E),
       ContinuousOn (fun t : ℝ => chartGramOnE (I := I) (g_DT t) α a b y) s :=
     fun a b => chartGramOnE_continuous_of_hC2 (I := I) g_DT α a b y s (h0 a b)
-  -- Closed form `∂_m G^{kl} = −∑_{a,b} G^{ka} G^{bl} ∂_m G_{ab}`.
   have heq : ∀ t ∈ s,
       partialDeriv (E := E) m (chartInvGramOnE (I := I) (g_DT t) α k l) y =
         -∑ a : Fin (Module.finrank ℝ E),
@@ -334,11 +295,9 @@ private lemma partialDeriv_chartChristoffel_continuous_of_hC2
     ContinuousOn (fun t : ℝ =>
       partialDeriv (E := E) m (chartChristoffel (I := I) (g_DT t) α i j k) y) s := by
   classical
-  -- Chart-Gram entry continuity from the `0`-jet (used by `chartInvGramOnE` continuity).
   have hentry : ∀ a b : Fin (Module.finrank ℝ E),
       ContinuousOn (fun t : ℝ => chartGramOnE (I := I) (g_DT t) α a b y) s :=
     fun a b => chartGramOnE_continuous_of_hC2 (I := I) g_DT α a b y s (h0 a b)
-  -- Leibniz expansion `∂_m Γ = ½ ∑_l (∂_m G^{kl}·S_{ij,l} + G^{kl}·∂_m S_{ij,l})`.
   have heq : ∀ t ∈ s,
       partialDeriv (E := E) m (chartChristoffel (I := I) (g_DT t) α i j k) y =
         (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
@@ -378,7 +337,6 @@ private lemma chartRiemannTensor_continuous_of_hC2
     ContinuousOn (fun t : ℝ =>
       chartRiemannTensor (I := I) (g_DT t) α i j k r y) s := by
   classical
-  -- `R = ∂_j Γ_{ikr} − ∂_k Γ_{ijr} + ∑_n (Γ_{jnr}·Γ_{ikn} − Γ_{knr}·Γ_{ijn})`.
   have heq : (fun t : ℝ => chartRiemannTensor (I := I) (g_DT t) α i j k r y)
       = fun t : ℝ =>
           partialDeriv (E := E) j (chartChristoffel (I := I) (g_DT t) α i k r) y -
@@ -435,16 +393,6 @@ private lemma chartRicciTensor_continuous_of_hC2
   exact chartRiemannTensor_continuous_of_hC2 (I := I) g_DT α i j k j hy s hx h0 h1 h2
 
 end RicciContInMetricAux
-
-/-! ## Joint (metric-time × chart-point) chart-Ricci continuity
-
-For the moving-basepoint Ricci tensor we need continuity of the chart-Ricci entry
-`chartRicciTensor (g_DT s) α p q (extChartAt I α y)` jointly in `(s, y)` (then composed with
-the continuous orbit `s ↦ Φ_fam s x`).  The chart-Gram → inverse-Gram → Christoffel →
-Riemann → Ricci algebraic chain is identical to the time-only chain in `RicciContInMetricAux`,
-but with the time-parameter `t : ℝ` replaced by the pair `q : ℝ × M` and the chart point by
-`extChartAt I α q.2`; positivity / interior membership are supplied by `q.2` lying in the
-chart-`α` Levi-Civita good set.  These private lemmas rebuild that chain jointly. -/
 
 namespace RicciContJointAux
 
@@ -837,17 +785,6 @@ private lemma jointRicci_continuousOn
 
 end RicciContJointAux
 
-/-! ## Moving-basepoint pushforward chart-coordinate continuity
-
-The bundled pullback inner product and pullback Ricci tensor both reduce, via the clean
-naturality identities `pullbackMetric_inner_eq_inner_mfderiv` / `ricci_tensor_pullback_natural_under_diffeomorphism`,
-to quantities evaluated at the *moving* point `Φ_fam s x` on the *moving* pushforward
-vectors `mfderiv (Φ_fam s) x v`.  Reading these off in a fixed chart `α` requires the
-chart-`α` trivialization coordinate `(triv α).continuousLinearMapAt (Φ_fam s x) (dΦ_s v)`,
-whose continuity in `s` is the genuine flow-smooth-dependence datum: it follows from the
-*total-space* (bundle) continuity of `s ↦ ⟨Φ_fam s x, dΦ_s v⟩` composed with the
-on-source continuity of the trivialization.  These private helpers package that reduction. -/
-
 namespace MovingPushforwardAux
 
 /-- Chart-`α` trivialization-coordinate continuity-within-at of the moving pushforward,
@@ -940,12 +877,10 @@ private lemma ricci_moving_chart_sum
     ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ y vy)) p with hbv
   set bw : Fin (Module.finrank ℝ E) → ℝ := fun q => ((chartModelBasis E).repr
     ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ y wy)) q with hbw
-  -- Decompose `vy`, `wy` in the chart-`α` frame.
   have hvy : vy = ∑ p : Fin (Module.finrank ℝ E), bv p • chartBasisVecFiber (I := I) α p y :=
     chartBasisVecFiber_recompose (I := I) α hbase vy
   have hwy : wy = ∑ q : Fin (Module.finrank ℝ E), bw q • chartBasisVecFiber (I := I) α q y :=
     chartBasisVecFiber_recompose (I := I) α hbase wy
-  -- Bilinearity of `ricciTensor g y`: distribute the first slot, then the second.
   conv_lhs => rw [hvy, hwy]
   rw [map_sum (ricciTensor (I := I) g y), ContinuousLinearMap.sum_apply]
   refine Finset.sum_congr rfl (fun p _ => ?_)
@@ -953,15 +888,11 @@ private lemma ricci_moving_chart_sum
   rw [map_sum (ricciTensor (I := I) g y (chartBasisVecFiber (I := I) α p y)), Finset.mul_sum]
   refine Finset.sum_congr rfl (fun q _ => ?_)
   rw [map_smul, smul_eq_mul]
-  -- The frame-pair Ricci value is a chart-Ricci entry.
   rw [ricciTensor_chartBasisVec_alpha_eq (I := I) g α p q hy]
   ring
 
 end MovingPushforwardAux
 
--- The positivity binder `hT : 0 < T` is a mandated signature input but is not consumed:
--- continuity is established pointwise at each `s₀ ∈ Set.Ico 0 T` (the half-open set already
--- encodes the relevant range), so `0 < T` is never needed.  Silence the binder linter.
 set_option linter.unusedVariables false in
 theorem gfam_inner_continuous_on
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ) (hT : 0 < T)
@@ -974,11 +905,6 @@ theorem gfam_inner_continuous_on
         (Set.Icc 0 T ×ˢ Set.univ))
     (hΦ_orbit : ∀ y : M,
       ContinuousOn (fun s : ℝ => (Φ_fam s : M → M) y) (Set.Ico 0 T))
-    -- GENUINE FLOW-SMOOTH-DEPENDENCE DATUM (total-space / bundle continuity of the moving
-    -- pushforward).  Stronger than the raw model-fibre value `(mfderiv … : E)`: it tracks the
-    -- moving basepoint `Φ_fam s x` coherently with the fibre datum inside the tangent bundle,
-    -- which is precisely what is needed to read off the *fixed*-chart-`α` coordinate of the
-    -- pushforward.  Dischargeable from the joint-`C∞` flow (a separate node owns the flow side).
     (hΦ_total : ∀ (y : M) (u : TangentSpace I y),
       ContinuousOn
         (fun s : ℝ => (TotalSpace.mk' E ((Φ_fam s : M → M) y)
@@ -988,23 +914,16 @@ theorem gfam_inner_continuous_on
       (Set.Ico 0 T) := by
   classical
   open MovingPushforwardAux in
-  -- The bundled pullback inner product equals `(g_DT s).inner (Φ_fam s x) (dΦ_s v) (dΦ_s w)`
-  -- via the clean identity `pullbackMetric_inner_funext`.
   rw [pullbackMetric_inner_funext g_DT Φ_fam x v w]
-  -- Pointwise within-`Ico 0 T` continuity at each `s₀`, in the chart `α := Φ_fam s₀ x`.
   intro s₀ hs₀
   set α : M := (Φ_fam s₀ : M → M) x with hα
   set e := trivializationAt E (TangentSpace I) α with he
-  -- `Φ_fam s₀ x = α` lies in its own base set and (ext)chart source.
   have hbase0 : (Φ_fam s₀ : M → M) x ∈ e.baseSet := by
     rw [he, hα]; exact FiberBundle.mem_baseSet_trivializationAt E (TangentSpace I) α
   have hsrc0 : (Φ_fam s₀ : M → M) x ∈ (extChartAt I α).source := by
     rw [hα]; exact mem_extChartAt_source (I := I) α
-  -- Orbit continuity within `Ico 0 T` at `s₀`.
   have horbit : ContinuousWithinAt (fun s : ℝ => (Φ_fam s : M → M) x) (Set.Ico 0 T) s₀ :=
     (hΦ_orbit x).continuousWithinAt hs₀
-  -- The trivialization-coordinate factors `repr (clmAt (Φ_fam s x) (dΦ_s ·)) ·`, continuous
-  -- in `s` from the bundle continuity `hΦ_total` (via `moving_chartCoord_continuousWithinAt`).
   have hcoordV : ∀ i : Fin (Module.finrank ℝ E),
       ContinuousWithinAt
         (fun s : ℝ => ((chartModelBasis E).repr
@@ -1021,8 +940,6 @@ theorem gfam_inner_continuous_on
     fun j => repr_continuousWithinAt
       (moving_chartCoord_continuousWithinAt Φ_fam x w α (Set.Ico 0 T) s₀
         hbase0 horbit ((hΦ_total x w).continuousWithinAt hs₀)) j
-  -- The chart-Gram factor `chartGramOnE (g_DT s) α i j (extChartAt I α (Φ_fam s x))`,
-  -- continuous in `s` from the joint continuity `hg_joint α i j` along `s ↦ (s, Φ_fam s x)`.
   have hgram : ∀ i j : Fin (Module.finrank ℝ E),
       ContinuousWithinAt
         (fun s : ℝ => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT s) α i j
@@ -1041,8 +958,6 @@ theorem gfam_inner_continuous_on
       (hg_joint α i j).continuousWithinAt (hmaps hs₀)
     have hcomp := hg.comp_of_eq hpair hmaps rfl
     simpa only [Function.comp_def] using hcomp
-  -- Rewrite the moving-frame inner product as the chart-`α` bilinear sum, eventually within
-  -- `Ico 0 T` (where the orbit stays in base set & chart source), and at `s₀`.
   have hsum : ∀ s, (Φ_fam s : M → M) x ∈ e.baseSet →
       (Φ_fam s : M → M) x ∈ (extChartAt I α).source →
       (g_DT s).inner ((Φ_fam s : M → M) x)
@@ -1059,7 +974,6 @@ theorem gfam_inner_continuous_on
     intro s hb hsr
     exact g_inner_eq_chart_sum (I := I) (g_DT s) α hb hsr
       (mfderiv I I (Φ_fam s : M → M) x v) (mfderiv I I (Φ_fam s : M → M) x w)
-  -- The chart-`α` bilinear sum is continuous within `Ico 0 T` at `s₀`.
   have hsumcont : ContinuousWithinAt
       (fun s : ℝ => ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
         ((chartModelBasis E).repr
@@ -1073,10 +987,8 @@ theorem gfam_inner_continuous_on
     refine cwa_finset_sum _ (fun i _ => ?_)
     refine cwa_finset_sum _ (fun j _ => ?_)
     exact ((hcoordV i).mul (hcoordW j)).mul (hgram i j)
-  -- Transfer continuity from the sum to the inner product via eventual equality.
   refine hsumcont.congr_of_eventuallyEq ?_ ?_
-  · -- eventually-within: orbit in base set & chart source near `s₀`.
-    have hbnhds : e.baseSet ∈ nhds ((Φ_fam s₀ : M → M) x) := e.open_baseSet.mem_nhds hbase0
+  · have hbnhds : e.baseSet ∈ nhds ((Φ_fam s₀ : M → M) x) := e.open_baseSet.mem_nhds hbase0
     have hsrcnhds : (extChartAt I α).source ∈ nhds ((Φ_fam s₀ : M → M) x) :=
       (isOpen_extChartAt_source (I := I) α).mem_nhds hsrc0
     have hpb : (fun s : ℝ => (Φ_fam s : M → M) x) ⁻¹' e.baseSet ∈ nhdsWithin s₀ (Set.Ico 0 T) :=
@@ -1088,8 +1000,6 @@ theorem gfam_inner_continuous_on
     exact hsum s hb hsr
   · exact hsum s₀ hbase0 hsrc0
 
--- As in `gfam_inner_continuous_on`, the positivity binder `hT : 0 < T` is mandated but unused
--- (the argument is pointwise on `Set.Ico 0 T`); silence the binder linter.
 set_option linter.unusedVariables false in
 theorem ricci_gfam_continuous_on
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ) (hT : 0 < T)
@@ -1102,10 +1012,6 @@ theorem ricci_gfam_continuous_on
           (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α))
     (hΦ0 : ∀ y : M,
       ContinuousOn (fun s : ℝ => (Φ_fam s : M → M) y) (Set.Ico 0 T))
-    -- GENUINE FLOW-SMOOTH-DEPENDENCE DATUM (total-space / bundle continuity of the moving
-    -- pushforward), as in `gfam_inner_continuous_on`: it tracks the moving basepoint
-    -- `Φ_fam s x` coherently with the fibre datum, which is what reads off the fixed-chart-`α`
-    -- frame coordinate of the pushforward.  Dischargeable from the joint-`C∞` flow.
     (hΦ_total : ∀ (y : M) (u : TangentSpace I y),
       ContinuousOn
         (fun s : ℝ => (TotalSpace.mk' E ((Φ_fam s : M → M) y)
@@ -1116,10 +1022,6 @@ theorem ricci_gfam_continuous_on
       (Set.Ico 0 T) := by
   classical
   open MovingPushforwardAux RicciContJointAux in
-  -- Reduce the pullback-metric Ricci tensor to the moving-frame form via the CLEAN
-  -- naturality identity `ricci_tensor_pullback_natural_under_diffeomorphism`:
-  --   `ricciTensor (Φ_s^* g_DT s) x v w
-  --      = ricciTensor (g_DT s) (Φ_fam s x) (dΦ_s v) (dΦ_s w)`.
   have hnat : (fun s : ℝ => ricciTensor (I := I)
         (Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s)) x v w)
       = fun s : ℝ => ricciTensor (I := I) (g_DT s) (Φ_fam s x)
@@ -1128,19 +1030,15 @@ theorem ricci_gfam_continuous_on
     funext s
     exact ricci_tensor_pullback_natural_under_diffeomorphism (I := I) (g_DT s) (Φ_fam s) x v w
   rw [hnat]
-  -- Pointwise within-`Ico 0 T` continuity at each `s₀`, in the chart `α := Φ_fam s₀ x`.
   intro s₀ hs₀
   set α : M := (Φ_fam s₀ : M → M) x with hα
   set e := trivializationAt E (TangentSpace I) α with he
-  -- `Φ_fam s₀ x = α` lies in its own good set / base set.
   have hgood0 : (Φ_fam s₀ : M → M) x ∈ chartLeviCivitaGoodSet (I := I) α := by
     rw [hα]; exact self_mem_chartLeviCivitaGoodSet (I := I) (α := α)
   have hbase0 : (Φ_fam s₀ : M → M) x ∈ e.baseSet := by
     rw [he, hα]; exact FiberBundle.mem_baseSet_trivializationAt E (TangentSpace I) α
-  -- Orbit continuity within `Ico 0 T` at `s₀`.
   have horbit : ContinuousWithinAt (fun s : ℝ => (Φ_fam s : M → M) x) (Set.Ico 0 T) s₀ :=
     (hΦ0 x).continuousWithinAt hs₀
-  -- The trivialization-coordinate (frame) factors, continuous from the bundle datum.
   have hcoordV : ∀ p : Fin (Module.finrank ℝ E),
       ContinuousWithinAt
         (fun s : ℝ => ((chartModelBasis E).repr
@@ -1157,19 +1055,13 @@ theorem ricci_gfam_continuous_on
     fun q => repr_continuousWithinAt
       (moving_chartCoord_continuousWithinAt Φ_fam x w α (Set.Ico 0 T) s₀
         hbase0 horbit ((hΦ_total x w).continuousWithinAt hs₀)) q
-  -- The chart-Ricci factor `chartRicciTensor (g_DT s) α p q (extChartAt I α (Φ_fam s x))`,
-  -- continuous in `s` via the joint chart-Ricci chain along the continuous orbit (which stays
-  -- in the open good set near `s₀`).  Window: the pair-set `Sp := Ico 0 T ×ˢ goodSet α`
-  -- restricted to the orbit; we evaluate at orbit points in the good set.
   set Sp : Set (ℝ × M) := Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α with hSp
   have hgoodSp : ∀ qp ∈ Sp, qp.2 ∈ chartLeviCivitaGoodSet (I := I) α := fun qp hqp => hqp.2
-  -- The joint jets are continuous on `Sp` from `hC2`.
   have hjet : ∀ (k : ℕ), k ≤ 2 → ∀ a b : Fin (Module.finrank ℝ E),
       ContinuousOn (fun qp : ℝ × M => iteratedFDeriv ℝ k
         (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT qp.1) α a b)
         (extChartAt I α qp.2)) Sp :=
     fun k hk a b => hC2 α a b k hk
-  -- Joint chart-Ricci entry continuity on `Sp`, then composed with the orbit pair-map.
   have hric : ∀ p q : Fin (Module.finrank ℝ E),
       ContinuousWithinAt
         (fun s : ℝ => chartRicciTensor (I := I) (g_DT s) α p q
@@ -1180,7 +1072,6 @@ theorem ricci_gfam_continuous_on
     have hpair : ContinuousWithinAt (fun s : ℝ => (s, (Φ_fam s : M → M) x))
         (Set.Ico 0 T) s₀ :=
       continuousWithinAt_id.prodMk horbit
-    -- Eventually-within: the orbit pair lies in `Sp`.
     have hpre : (fun s : ℝ => (s, (Φ_fam s : M → M) x)) ⁻¹' Sp ∈ nhdsWithin s₀ (Set.Ico 0 T) := by
       have hgnhds : chartLeviCivitaGoodSet (I := I) α ∈ nhds ((Φ_fam s₀ : M → M) x) :=
         (chartLeviCivitaGoodSet_isOpen (I := I) α).mem_nhds hgood0
@@ -1194,8 +1085,6 @@ theorem ricci_gfam_continuous_on
     have hcomp := (hjoint.continuousWithinAt hpt0).comp_of_preimage_mem_nhdsWithin_of_eq
       hpair hpre rfl
     simpa only [Function.comp_def] using hcomp
-  -- Expand the moving-frame Ricci tensor as the chart-`α` bilinear sum eventually within
-  -- `Ico 0 T` (where the orbit stays in the good set), and at `s₀`.
   have hsum : ∀ s, (Φ_fam s : M → M) x ∈ chartLeviCivitaGoodSet (I := I) α →
       ricciTensor (I := I) (g_DT s) ((Φ_fam s : M → M) x)
           (mfderiv I I (Φ_fam s : M → M) x v) (mfderiv I I (Φ_fam s : M → M) x w)
@@ -1210,7 +1099,6 @@ theorem ricci_gfam_continuous_on
     intro s hg
     exact ricci_moving_chart_sum (I := I) (g_DT s) α hg
       (mfderiv I I (Φ_fam s : M → M) x v) (mfderiv I I (Φ_fam s : M → M) x w)
-  -- The chart-`α` bilinear sum is continuous within `Ico 0 T` at `s₀`.
   have hsumcont : ContinuousWithinAt
       (fun s : ℝ => ∑ p : Fin (Module.finrank ℝ E), ∑ q : Fin (Module.finrank ℝ E),
         ((chartModelBasis E).repr
@@ -1224,7 +1112,6 @@ theorem ricci_gfam_continuous_on
     refine cwa_finset_sum _ (fun p _ => ?_)
     refine cwa_finset_sum _ (fun q _ => ?_)
     exact ((hcoordV p).mul (hcoordW q)).mul (hric p q)
-  -- Transfer continuity from the sum to the Ricci tensor via eventual equality.
   refine hsumcont.congr_of_eventuallyEq ?_ ?_
   · have hgnhds : chartLeviCivitaGoodSet (I := I) α ∈ nhds ((Φ_fam s₀ : M → M) x) :=
       (chartLeviCivitaGoodSet_isOpen (I := I) α).mem_nhds hgood0
@@ -1235,11 +1122,6 @@ theorem ricci_gfam_continuous_on
     exact hsum s hg
   · exact hsum s₀ hgood0
 
--- `hval` (the chart-`0`-jet metric value continuity) is a mandated signature input that
--- the parent `deturck_solution_c2_continuous_icc0` supplies; the chart-Ricci continuity
--- chain reconstructs the full Ricci tensor from the chart-`2`-jet data `hC2` alone (the
--- `0`-jet value is already controlled by `hC2`'s `k = 0` instance), so `hval` is not
--- consumed in the proof.  Silence the resulting unused-binder linter on this binder only.
 set_option linter.unusedVariables false in
 theorem ricci_continuous_in_metric_time
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ) (x : M) (v w : TangentSpace I x)
@@ -1255,7 +1137,6 @@ theorem ricci_continuous_in_metric_time
     ContinuousOn (fun s : ℝ => ricciTensor (I := I) (g_DT s) x v w) (Set.Icc 0 T) := by
   classical
   open RicciContInMetricAux in
-  -- Chart at the basepoint itself; `x` lies in its Levi-Civita good set.
   have hxgood : x ∈ chartLeviCivitaGoodSet (I := I) x :=
     self_mem_chartLeviCivitaGoodSet (I := I) (α := x)
   have hx_int : extChartAt I x x ∈ interior ((extChartAt I x).target : Set E) :=
@@ -1264,7 +1145,6 @@ theorem ricci_continuous_in_metric_time
       (trivializationAt E (TangentSpace I) x).baseSet := by
     rw [(extChartAt I x).left_inv (chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hxgood)]
     exact chartLeviCivitaGoodSet_mem_baseSet (I := I) hxgood
-  -- The `k`-jet chart-Gram time-continuity at the self-chart point, repackaged per order.
   have h0 : ∀ a b : Fin (Module.finrank ℝ E),
       ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 0
         (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) x a b)
@@ -1280,8 +1160,6 @@ theorem ricci_continuous_in_metric_time
         (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) x a b)
         (extChartAt I x x)) (Set.Icc 0 T) :=
     fun a b => hC2 x x hxgood a b 2 (by norm_num)
-  -- Chart-coordinate expansion of the abstract Ricci tensor (constant-coefficient sum
-  -- over the chart-Ricci entries) via the unconditional chart-Riemann basis identity.
   have hbridge : ∀ t : ℝ,
       ricciTensor (I := I) (g_DT t) x v w =
         ∑ i : Fin (Module.finrank ℝ E),

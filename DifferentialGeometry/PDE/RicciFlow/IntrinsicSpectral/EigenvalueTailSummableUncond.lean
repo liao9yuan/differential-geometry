@@ -38,12 +38,6 @@ namespace PDE
 namespace RicciFlow
 namespace IntrinsicSpectral
 
-/-! ## The abstract dyadic counting → summability converter
-
-The converter is stated and proved with no reference to the geometric setting: it
-applies to any nonnegative weight family `w : ι → ℝ` with `w i ≥ 1` admitting a
-dyadic polynomial counting bound. -/
-
 /-- **Dyadic counting ⟹ summability.**
 
 Let `w : ι → ℝ` with `w i ≥ 1`. Suppose there is a family of finsets `count n`
@@ -64,12 +58,10 @@ theorem counting_summable_dyadic {ι : Type*} (w : ι → ℝ) (hw : ∀ i, 1 �
   set p : ℝ := (q : ℝ) + 2 with hp_def
   have hp_nn : (0 : ℝ) ≤ p := by rw [hp_def]; positivity
   set f : ι → ℝ := fun i => (w i) ^ (-p) with hf_def
-  -- The dyadic shell index of `i`.
   set shell : ι → ℕ := fun i => Nat.log 2 ⌊w i⌋₊ with hshell_def
   have hwpos : ∀ i, 0 < w i := fun i => lt_of_lt_of_le one_pos (hw i)
   have hwnn : ∀ i, 0 ≤ w i := fun i => (hwpos i).le
   have hfloor1 : ∀ i, 1 ≤ ⌊w i⌋₊ := fun i => (Nat.one_le_floor_iff (w i)).mpr (hw i)
-  -- Shell lower bound: `2^{shell i} ≤ w i`.
   have h_lower : ∀ i, (2 : ℝ) ^ (shell i) ≤ w i := by
     intro i
     have h1 : 2 ^ (shell i) ≤ ⌊w i⌋₊ :=
@@ -77,7 +69,6 @@ theorem counting_summable_dyadic {ι : Type*} (w : ι → ℝ) (hw : ∀ i, 1 �
     calc (2 : ℝ) ^ (shell i) = ((2 ^ (shell i) : ℕ) : ℝ) := by push_cast; ring
       _ ≤ (⌊w i⌋₊ : ℝ) := by exact_mod_cast h1
       _ ≤ w i := Nat.floor_le (hwnn i)
-  -- Shell upper bound: `w i < 2^{shell i + 1}`.
   have h_upper : ∀ i, w i < 2 ^ (shell i + 1) := by
     intro i
     have h0 : ⌊w i⌋₊ < 2 ^ (shell i + 1) :=
@@ -89,9 +80,7 @@ theorem counting_summable_dyadic {ι : Type*} (w : ι → ℝ) (hw : ∀ i, 1 �
         _ ≤ ((2 ^ (shell i + 1) : ℕ) : ℝ) := by exact_mod_cast h1
         _ = (2 : ℝ) ^ (shell i + 1) := by push_cast; ring
     linarith
-  -- Hence `i ∈ count (shell i)`.
   have h_mem_count : ∀ i, i ∈ count (shell i) := fun i => hcount_mem (shell i) i (h_upper i)
-  -- Per-element bound: `f i ≤ 2^{-(shell i)·p}`.
   have hf_nn : ∀ i, 0 ≤ f i := fun i => Real.rpow_nonneg (hwnn i) _
   have hf_le : ∀ i, f i ≤ (2 : ℝ) ^ (-(shell i : ℝ) * p) := by
     intro i
@@ -103,23 +92,18 @@ theorem counting_summable_dyadic {ι : Type*} (w : ι → ℝ) (hw : ∀ i, 1 �
     rw [← Real.rpow_natCast (2 : ℝ) (shell i),
       ← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 2)]
     ring_nf
-  -- The geometric dominating sequence over shells.
   set g : ℕ → ℝ := fun m => A * 2 ^ q * (2 : ℝ) ^ (-(2 : ℝ) * m) with hg_def
-  -- `Summable g`.  Rewrite the summand as the geometric `(1/4)^m`.
   have hsummand_eq : (fun m : ℕ => (2 : ℝ) ^ (-(2 : ℝ) * m)) = fun m : ℕ => ((1 : ℝ) / 4) ^ m := by
     funext m
-    -- `2^(-2·m) = (2^(-2))^m = (1/4)^m`.
     have hbase : (2 : ℝ) ^ (-(2 : ℝ)) = (1 : ℝ) / 4 := by
       rw [show (-(2 : ℝ)) = -((2 : ℕ) : ℝ) by norm_num,
         Real.rpow_neg (by norm_num), Real.rpow_natCast]
       norm_num
     rw [show (-(2 : ℝ) * (m : ℝ)) = ((m : ℝ) * (-(2 : ℝ))) by ring,
       Real.rpow_natCast_mul (by norm_num : (0 : ℝ) ≤ 2)]
-    -- now goal: `((2 : ℝ) ^ m) ^ (-(2 : ℝ)) = (1 / 4) ^ m`
     have h2m_pos : (0 : ℝ) < (2 : ℝ) ^ m := by positivity
     rw [show (-(2 : ℝ)) = -((2 : ℕ) : ℝ) by norm_num,
       Real.rpow_neg h2m_pos.le, Real.rpow_natCast]
-    -- goal: `(((2 : ℝ) ^ m) ^ 2)⁻¹ = (1 / 4) ^ m`
     rw [← pow_mul, mul_comm m 2, pow_mul, ← inv_pow]
     norm_num
   have hbase_summable : Summable (fun m : ℕ => (2 : ℝ) ^ (-(2 : ℝ) * m)) := by
@@ -127,19 +111,14 @@ theorem counting_summable_dyadic {ι : Type*} (w : ι → ℝ) (hw : ∀ i, 1 �
     exact summable_geometric_of_lt_one (by norm_num) (by norm_num)
   have hg_summable : Summable g := hbase_summable.mul_left (A * 2 ^ q)
   have hg_nn : ∀ m, 0 ≤ g m := fun m => by rw [hg_def]; positivity
-  -- The uniform finite-partial-sum bound, via dyadic partition of `u`.
   refine summable_of_sum_le (c := ∑' m, g m) hf_nn (fun u => ?_)
-  -- `∑_{i∈u} f i ≤ ∑_{m ∈ image shell} (per-shell bound) ≤ ∑' m, g m`.
-  -- Group `u` by the shell index.
   have hpartition :
       ∑ m ∈ u.image shell, ∑ i ∈ u with shell i = m, f i = ∑ i ∈ u, f i :=
     Finset.sum_fiberwise_of_maps_to (fun i hi => Finset.mem_image_of_mem shell hi) f
   rw [← hpartition]
-  -- Each fiber sum is bounded by `g m`.
   have hfiber : ∀ m ∈ u.image shell,
       ∑ i ∈ u with shell i = m, f i ≤ g m := by
     intro m _hm
-    -- on the fiber, `f i ≤ 2^{-m·p}`, and the fiber has `≤ #(count m)` elements.
     have hbound_each : ∀ i ∈ u.filter (fun i => shell i = m),
         f i ≤ (2 : ℝ) ^ (-(m : ℝ) * p) := by
       intro i hi
@@ -166,29 +145,19 @@ theorem counting_summable_dyadic {ι : Type*} (w : ι → ℝ) (hw : ∀ i, 1 �
             (Real.rpow_nonneg (by norm_num) _)
       _ = g m := by
           simp only [hg_def, hp_def]
-          -- `A·2^{(m+1)q}·2^{-m(q+2)} = A·2^q·2^{-2m}`.
           have h2pos : (0:ℝ) < 2 := by norm_num
-          -- Rewrite every `2^_` as a single `rpow` and combine the exponents.
           have h2q : (2 : ℝ) ^ ((m + 1) * q) = (2 : ℝ) ^ (((m : ℝ) * q + q) : ℝ) := by
             rw [← Real.rpow_natCast (2 : ℝ) ((m + 1) * q)]
             congr 1
             push_cast
             ring
           have h2qcast : (2 : ℝ) ^ q = (2 : ℝ) ^ ((q : ℝ)) := (Real.rpow_natCast 2 q).symm
-          -- Combine the left-hand `2^_·2^_` and the right-hand `2^_·2^_`.
           have hexpL : ((m : ℝ) * q + q) + (-(m : ℝ) * (q + 2)) = (q : ℝ) + (-2 * (m : ℝ)) := by
             ring
           rw [h2q, h2qcast, mul_assoc A, mul_assoc A,
             ← Real.rpow_add h2pos, ← Real.rpow_add h2pos, hexpL]
   refine (Finset.sum_le_sum hfiber).trans ?_
-  -- `∑_{m ∈ image} g m ≤ ∑' m, g m`.
   exact hg_summable.sum_le_tsum _ (fun m _ => hg_nn m)
-
-/-! ## The geometric specialization
-
-We now specialize the abstract converter to the tensor eigen-index set. The
-weight is `w i = 1 + λᵢ ≥ 1`, and the conclusion is exactly the
-`EigenvalueTailSummable` predicate at the explicit exponent `p = q + 2`. -/
 
 open MetricRealization
 open DifferentialGeometry.Analysis.Parabolic

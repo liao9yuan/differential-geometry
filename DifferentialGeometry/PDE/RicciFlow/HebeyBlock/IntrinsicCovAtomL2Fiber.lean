@@ -81,8 +81,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## Compact `tsupport` facts (re-derived locally) -/
-
 /-- The `tsupport` of the chart-atlas partition-of-unity weight at `α` is
 compact (closed in a compact ambient space). -/
 private lemma covAtom_pouTsupport_isCompact (α : M) :
@@ -113,8 +111,6 @@ private lemma covAtom_mem_baseSet_of_mem_chartSource
     change b ∈ (trivializationAt E (TangentSpace I) α).baseSet
     rw [DifferentialGeometry.Integral.Measure.trivializationAt_baseSet_eq_chartAt_source]
     exact hb
-
-/-! ## Headline: fibre-norm covariant-derivative atom `L²` bound -/
 
 set_option synthInstance.maxHeartbeats 800000 in
 attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
@@ -160,12 +156,9 @@ theorem exists_eLpNorm_pou_mul_sum_fiber_chart_cov_le_const_mul_h1Norm
   classical
   letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
-  -- Existing model-norm covariant-derivative atom `L²` bound.
   obtain ⟨Cg2, hCg2_nn, hG2⟩ :=
     exists_eLpNorm_sq_pou_mul_sum_triv_chart_cov_le_const_mul_h1NormSq
       (I := I) (M := M) g r s α
-  -- Unconditional uniform op-norm bound on the chart-`α` inverse
-  -- trivialisation over the compact `tsupport ρ_α`.
   have hK_cpt :
       IsCompact (tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
@@ -181,7 +174,6 @@ theorem exists_eLpNorm_pou_mul_sum_fiber_chart_cov_le_const_mul_h1Norm
   have hCop_nn : 0 ≤ Cop := le_of_lt hCop_pos
   refine ⟨Cop * Cg2, mul_nonneg hCop_nn hCg2_nn, ?_⟩
   intro S _Idx _Jdx
-  -- Names for the two atom integrands.
   set gF : M → ℝ := fun b : M =>
     ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
       Real.sqrt
@@ -200,19 +192,16 @@ theorem exists_eLpNorm_pou_mul_sum_fiber_chart_cov_le_const_mul_h1Norm
               (fun b' => S.toCcTensor.toSection b')
               (chartBasisVecFiber (I := I) α k) b)‖ ^ 2)
     with hgM_def
-  -- Pointwise: `gF b ≤ Cop · gM b`, everywhere.
   have h_ptwise : ∀ b : M, gF b ≤ Cop * gM b := by
     intro b
     by_cases hb : b ∈ tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
-    · -- On the `tsupport`: use the op-norm round-trip per `k`.
-      have hb_chart : b ∈ (chartAt H α).source := hK_sub hb
+    · have hb_chart : b ∈ (chartAt H α).source := hK_sub hb
       have hb_base : b ∈ (trivializationAt (TensorRSModel r s ℝ E)
           (fun y : M => TensorRSSpace r s I y) α).baseSet :=
         covAtom_mem_baseSet_of_mem_chartSource (I := I) (M := M) r s α hb_chart
       have hρ_nn : 0 ≤ ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b :=
         (chartAtlasPOU I M).nonneg α b
-      -- Per-`k` fibre-norm bound by the model-norm atom.
       have h_per_k : ∀ k : Fin (Module.finrank ℝ E),
           ‖chartTensorRSCovariantDerivative (I := I) r s g α
               (fun b' => S.toCcTensor.toSection b')
@@ -232,7 +221,6 @@ theorem exists_eLpNorm_pou_mul_sum_fiber_chart_cov_le_const_mul_h1Norm
           (trivializationAt (TensorRSModel r s ℝ E)
               (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b X
           with hv_def
-        -- Round-trip: `symmL (continuousLinearMapAt X) = X`.
         have h_roundtrip :
             ((trivializationAt (TensorRSModel r s ℝ E)
                 (fun y : M => TensorRSSpace r s I y) α).symmL ℝ b v :
@@ -241,20 +229,17 @@ theorem exists_eLpNorm_pou_mul_sum_fiber_chart_cov_le_const_mul_h1Norm
           exact (trivializationAt (TensorRSModel r s ℝ E)
               (fun y : M => TensorRSSpace r s I y) α).symmL_continuousLinearMapAt
             (R := ℝ) hb_base X
-        -- Inverse-trivialisation op-norm bound at `v`.
         have h_op : ‖((trivializationAt (TensorRSModel r s ℝ E)
               (fun y : M => TensorRSSpace r s I y) α).symmL ℝ b v :
               TensorRSSpace r s I b)‖ ≤ Cop * ‖v‖ :=
           hCop_bound b hb v
         rw [h_roundtrip] at h_op
-        -- Square the bound `‖X‖ ≤ Cop · ‖v‖`.
         have hX_nn : 0 ≤ ‖X‖ := norm_nonneg _
         have h_sq := mul_self_le_mul_self hX_nn h_op
         have h_lhs : ‖X‖ * ‖X‖ = ‖X‖ ^ 2 := by rw [sq]
         have h_rhs : (Cop * ‖v‖) * (Cop * ‖v‖) = Cop ^ 2 * ‖v‖ ^ 2 := by ring
         rw [hv_def] at h_sq ⊢
         nlinarith [h_sq, h_lhs, h_rhs]
-      -- Sum the per-`k` bounds and take square roots.
       have h_sum_le :
           (∑ k : Fin (Module.finrank ℝ E),
             ‖chartTensorRSCovariantDerivative (I := I) r s g α
@@ -269,7 +254,6 @@ theorem exists_eLpNorm_pou_mul_sum_fiber_chart_cov_le_const_mul_h1Norm
                     (chartBasisVecFiber (I := I) α k) b)‖ ^ 2) := by
         rw [Finset.mul_sum]
         exact Finset.sum_le_sum (fun k _ => h_per_k k)
-      -- `√(Σ fib²) ≤ Cop · √(Σ model²)`.
       have h_sumF_nn :
           0 ≤ ∑ k : Fin (Module.finrank ℝ E),
             ‖chartTensorRSCovariantDerivative (I := I) r s g α
@@ -300,7 +284,6 @@ theorem exists_eLpNorm_pou_mul_sum_fiber_chart_cov_le_const_mul_h1Norm
                       (chartBasisVecFiber (I := I) α k) b)‖ ^ 2) := by
         have h1 := Real.sqrt_le_sqrt h_sum_le
         rwa [Real.sqrt_mul (sq_nonneg Cop), Real.sqrt_sq hCop_nn] at h1
-      -- Multiply by the non-negative weight `ρ_α(b)`.
       have h_mul :=
         mul_le_mul_of_nonneg_left h_sqrt_le hρ_nn
       rw [hgF_def, hgM_def]
@@ -330,36 +313,30 @@ theorem exists_eLpNorm_pou_mul_sum_fiber_chart_cov_le_const_mul_h1Norm
                         (chartTensorRSCovariantDerivative (I := I) r s g α
                           (fun b' => S.toCcTensor.toSection b')
                           (chartBasisVecFiber (I := I) α k) b)‖ ^ 2)) := by ring
-    · -- Off the `tsupport`: `ρ_α(b) = 0`, so both sides vanish.
-      have hρ_zero : ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b = 0 := by
+    · have hρ_zero : ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b = 0 := by
         by_contra hne
         exact hb (subset_tsupport _ hne)
       simp only [hgF_def, hgM_def, hρ_zero, zero_mul, mul_zero, le_refl]
-  -- Non-negativity of `gF` for the `eLpNorm_mono_real` reduction.
   have hgF_nn : ∀ b : M, 0 ≤ gF b := by
     intro b
     rw [hgF_def]
     exact mul_nonneg ((chartAtlasPOU I M).nonneg α b)
       (Real.sqrt_nonneg _)
-  -- `eLpNorm gF ≤ eLpNorm (Cop • gM)`.
   have h_mono :
       eLpNorm gF 2 (riemannianVolumeMeasure (I := I) (M := M) g) ≤
         eLpNorm (Cop • gM) 2 (riemannianVolumeMeasure (I := I) (M := M) g) := by
     refine eLpNorm_mono_real (fun b => ?_)
     rw [Real.norm_of_nonneg (hgF_nn b)]
     simpa [Pi.smul_apply, smul_eq_mul] using h_ptwise b
-  -- `eLpNorm (Cop • gM) = ENNReal.ofReal Cop · eLpNorm gM`.
   have h_smul :
       eLpNorm (Cop • gM) 2 (riemannianVolumeMeasure (I := I) (M := M) g) =
         ENNReal.ofReal Cop *
           eLpNorm gM 2 (riemannianVolumeMeasure (I := I) (M := M) g) := by
     rw [eLpNorm_const_smul Cop gM, Real.enorm_eq_ofReal hCop_nn]
-  -- The model-norm atom `L²` bound (rephrased through `gM`).
   have hG2' :
       eLpNorm gM 2 (riemannianVolumeMeasure (I := I) (M := M) g) ≤
         ENNReal.ofReal Cg2 * (‖S‖₊ : ℝ≥0∞) := by
     rw [hgM_def]; exact hG2 S
-  -- Chain everything.
   calc eLpNorm gF 2 (riemannianVolumeMeasure (I := I) (M := M) g)
       ≤ eLpNorm (Cop • gM) 2 (riemannianVolumeMeasure (I := I) (M := M) g) := h_mono
     _ = ENNReal.ofReal Cop *

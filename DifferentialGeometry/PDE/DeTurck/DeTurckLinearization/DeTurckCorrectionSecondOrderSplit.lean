@@ -83,14 +83,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## Index-block abbreviations
-
-The double Leibniz expansion of `∂_d[(DW)^k_{\mathrm{principal}}]` produces, for each
-lower index pair `(a, b)`, three `l`-sum blocks.  We name the two of them that carry a
-chart derivative of `h` directly under their own `∂`: the pure `∂²h` block and the
-`(∂G)(∂h)` block.  Naming them keeps the nested-sum expressions of the
-principal-symbol expression and the remainder shallow. -/
-
 set_option linter.unusedVariables false in
 /-- The **`∂²h` index block** of the double Leibniz expansion: for the outer
 chart-derivative direction `d`, the lower index pair `(a, b)`, the upper index `k`,
@@ -148,19 +140,6 @@ def chartDeTurckCorrGramDerivBlock (g g' : SmoothRiemannianMetric I M) (α : M)
           (partialDeriv (E := E) a (h l b) y +
            partialDeriv (E := E) b (h l a) y -
            partialDeriv (E := E) l (h a b) y) := rfl
-
-/-! ## The pure `∂²h` principal-symbol expression
-
-`chartDeTurckCorrPrincipalSymbolExpr` is the pure `∂²h` content of
-`chartDeTurckCorrSecondOrderPart`.  It is obtained by Leibniz-expanding the outer
-chart derivative `∂_d[(DW)^k_{\mathrm{principal}}]` twice and retaining only the
-branch where both chart derivatives fall on a component field of `h`.  The principal
-part of the linearized DeTurck vector field is
-`(DW)^k_{\mathrm{principal}}[h](y) = ∑_{a,b} G^{ab}(y)·(DΓ)^k{}_{ab}[h](y)`; the pure
-`∂²h` branch of `∂_d[(DW)^k_{\mathrm{principal}}]` is therefore
-`∑_{a,b} G^{ab}·[σ]^k{}_{ab}[h](d)`, with `[σ]^k{}_{ab}[h](d)` the `∂²h` index block
-`chartDeTurckCorrHessBlock`.  Contracting against the chart Gram factors of the two
-deformation terms gives the principal-symbol expression. -/
 
 /-- The **pure `∂²h` principal-symbol expression** of the second-order part of the
 linearized DeTurck-correction operator, in the chart at `α`, in the perturbation
@@ -236,21 +215,6 @@ lemma chartDeTurckCorrPrincipalSymbolExpr_eq_explicit
   rw [chartDeTurckCorrPrincipalSymbolExpr_def]
   simp only [chartDeTurckCorrHessBlock_def]
 
-/-! ## The genuinely-first-order remainder
-
-`chartDeTurckCorrFirstOrderRemainder` collects the complementary branches of the
-double Leibniz expansion: those where the outer chart derivative `∂_d` lands on an
-inverse-Gram factor.  There are two such branches per `k`:
-
-* `∂_d` on the inverse-Gram trace factor `G^{ab}`: produces
-  `∑_{a,b}(∂_d G^{ab})·(DΓ)^k{}_{ab}[h]`, where `(DΓ)^k{}_{ab}[h] =
-  chartLinearizedChristoffelPrincipal g α h a b k` already carries exactly one chart
-  derivative of `h`;
-* `∂_d` on the internal inverse-Gram factor `G^{kl}` of the principal linearized
-  Christoffel part: produces `∑_{a,b} G^{ab}·[ρ]^k{}_{ab}[h](d)`, where
-  `[ρ]^k{}_{ab}[h](d) = chartDeTurckCorrGramDerivBlock g g' α h d a b k` is the
-  `(∂G)(∂h)` index block, again carrying exactly one chart derivative of `h`. -/
-
 /-- The **genuinely-first-order remainder** of the second-order part of the linearized
 DeTurck-correction operator.  Once the pure `∂²h` principal-symbol expression
 `chartDeTurckCorrPrincipalSymbolExpr` is extracted from
@@ -313,15 +277,6 @@ def chartDeTurckCorrFirstOrderRemainder (g g' : SmoothRiemannianMetric I M) (α 
                 chartInvGramOnE (I := I) g α a b y *
                   chartDeTurckCorrGramDerivBlock (I := I) g g' α h j a b k y))) := rfl
 
-/-! ## The Leibniz expansion of the outer chart derivative
-
-The technical lemma `partialDeriv_chartLinearizedDeTurckVFPrincipal_expanded` expands
-`∂_d[(DW)^k_{\mathrm{principal}}]` once for the inverse-Gram trace factor `G^{ab}` and
-once for the principal linearized Christoffel part `(DΓ)^k{}_{ab}[h]` it contains.  The
-result is sorted into the `∂²h` index block `chartDeTurckCorrHessBlock` and the two
-inverse-Gram branches (one with `∂_d G^{ab}`, one packaged into the `(∂G)(∂h)` index
-block `chartDeTurckCorrGramDerivBlock`). -/
-
 /-- **The fully-expanded outer chart derivative of the principal part of the
 linearized DeTurck vector field.**  Leibniz-expanding `∂_d[(DW)^k_{\mathrm{principal}}]`
 across the metric-`g` trace and then across the principal linearized Christoffel part,
@@ -345,10 +300,7 @@ lemma partialDeriv_chartLinearizedDeTurckVFPrincipal_expanded
           chartInvGramOnE (I := I) g α a b y *
             chartDeTurckCorrHessBlock (I := I) g g' α h d a b k y)) := by
   classical
-  -- Leibniz-expand the outer derivative across the metric-`g` trace.
   rw [partialDeriv_chartLinearizedDeTurckVFPrincipal (I := I) g g' α h k d hy]
-  -- Each `(a, b)` summand is `(∂_d G^{ab})·(DΓ)^k{}_{ab} + G^{ab}·∂_d[(DΓ)^k{}_{ab}]`;
-  -- split the double sum into the two corresponding double sums.
   rw [show (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         (partialDeriv (E := E) d (chartInvGramOnE (I := I) g α a b) y *
             chartLinearizedChristoffelPrincipal (I := I) g α h a b k y +
@@ -368,16 +320,12 @@ lemma partialDeriv_chartLinearizedDeTurckVFPrincipal_expanded
     refine Finset.sum_congr rfl (fun a _ => ?_)
     rw [← Finset.sum_add_distrib]]
   congr 1
-  -- Expand the principal linearized Christoffel part's outer derivative, then sort it
-  -- into the `(∂G)(∂h)` index block and the `∂²h` index block.
   rw [← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl (fun a _ => ?_)
   rw [← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl (fun b _ => ?_)
   rw [partialDeriv_chartLinearizedChristoffelPrincipal (I := I) g α h a b k d hy,
     chartDeTurckCorrGramDerivBlock_def, chartDeTurckCorrHessBlock_def]
-  -- The bracketed `∂_d[(DΓ)^k{}_{ab}]` is `½∑_l[(∂_d G^{kl})·(∂h) + G^{kl}·(∂²h)]`;
-  -- distribute `G^{ab}·½∑_l(·)` over the `l`-sum's `(A + B)` split.
   rw [show ((1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
           (partialDeriv (E := E) d (chartInvGramOnE (I := I) g α k l) y *
               (partialDeriv (E := E) a (h l b) y +
@@ -400,19 +348,6 @@ lemma partialDeriv_chartLinearizedDeTurckVFPrincipal_expanded
     rw [Finset.sum_add_distrib, mul_add]]
   ring
 
-/-! ## The rigorous split
-
-The deliverable identity: `chartDeTurckCorrSecondOrderPart`, the literal
-chart-derivative combination, equals the pure `∂²h` principal-symbol expression
-`chartDeTurckCorrPrincipalSymbolExpr` plus the genuinely-first-order remainder
-`chartDeTurckCorrFirstOrderRemainder`.
-
-The proof Leibniz-expands `∂_d[(DW)^k_{\mathrm{principal}}]` via
-`partialDeriv_chartLinearizedDeTurckVFPrincipal_expanded`; every resulting summand is
-sorted into the `∂²h` block (which assembles into the principal-symbol expression) or
-one of the two inverse-Gram branches (which assemble into the remainder).  The sorting
-is purely the distributivity of `Finset.sum` over addition together with `ring`. -/
-
 /-- **The principal-symbol / remainder split of the second-order DeTurck-correction
 part.**  At chart-interior points, the literal chart-derivative combination
 `chartDeTurckCorrSecondOrderPart` splits as the pure `∂²h` principal-symbol expression
@@ -434,7 +369,6 @@ theorem chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder
   classical
   rw [chartDeTurckCorrSecondOrderPart_def, chartDeTurckCorrPrincipalSymbolExpr_def,
     chartDeTurckCorrFirstOrderRemainder_def]
-  -- Expand each `k`-summand's outer derivative `∂_i[(DW)^k]` and `∂_j[(DW)^k]`.
   have hexp : ∀ (d k : Fin (Module.finrank ℝ E)),
       partialDeriv (E := E) d
           (fun y' => chartLinearizedDeTurckVFPrincipal (I := I) g g' α h k y') y =
@@ -449,8 +383,6 @@ theorem chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder
               chartDeTurckCorrHessBlock (I := I) g g' α h d a b k y)) :=
     fun d k => partialDeriv_chartLinearizedDeTurckVFPrincipal_expanded
       (I := I) g g' α h k d hy
-  -- Substitute the expansion into the first `k`-sum and split into the principal block
-  -- and the remainder block.
   have hsum1 : (∑ k : Fin (Module.finrank ℝ E),
         chartGramOnE (I := I) g α k j y *
           partialDeriv (E := E) i
@@ -472,7 +404,6 @@ theorem chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [hexp i k]
     ring
-  -- Likewise for the second `k`-sum.
   have hsum2 : (∑ k : Fin (Module.finrank ℝ E),
         chartGramOnE (I := I) g α i k y *
           partialDeriv (E := E) j
@@ -517,17 +448,6 @@ theorem chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_
     extChartAt_target_subset_interior_of_boundaryless (I := I) α hx_target
   exact chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder
     (I := I) g g' α h i j hx_int
-
-/-! ## First-order character of the remainder
-
-The remainder `chartDeTurckCorrFirstOrderRemainder` carries **exactly one** chart
-derivative of any component field of `h`.  We make this precise by exhibiting it as a
-finite sum of terms each syntactically of the form `(coefficient)·partialDeriv _
-(h _ _) _`, where the coefficient does not involve `h` at all.  The principal
-linearized Christoffel part `chartLinearizedChristoffelPrincipal g α h a b k` that
-appears in the inverse-Gram-trace branch is itself first order in `h`; we unfold it,
-and the `(∂G)(∂h)` index block, to their explicit `½∑_l (·)·(∂h)` formulas so that
-every occurrence of `h` is visibly under a single `partialDeriv`. -/
 
 /-- **The first-order remainder, exhibited as a sum of first-order terms.**  The
 remainder `chartDeTurckCorrFirstOrderRemainder` is a finite sum of terms, each a
@@ -599,20 +519,16 @@ theorem chartDeTurckCorrFirstOrderRemainder_eq_first_order_sum
                     partialDeriv (E := E) l (h a b) y)))) := by
   classical
   rw [chartDeTurckCorrFirstOrderRemainder_def]
-  -- Match the two `k`-sums summand by summand.
   congr 1
   · refine Finset.sum_congr rfl (fun k _ => ?_)
     congr 1
     congr 1
-    · -- Inverse-Gram-trace branch: unfold `chartLinearizedChristoffelPrincipal` to its
-      -- explicit `½∑_l G^{kl}·(∂h)` formula, then push `(∂_i G^{ab})·` inside.
-      refine Finset.sum_congr rfl (fun a _ => ?_)
+    · refine Finset.sum_congr rfl (fun a _ => ?_)
       refine Finset.sum_congr rfl (fun b _ => ?_)
       rw [chartLinearizedChristoffelPrincipal_def, Finset.mul_sum, Finset.mul_sum]
       refine Finset.sum_congr rfl (fun l _ => ?_)
       ring
-    · -- Internal-inverse-Gram branch: unfold the `(∂G)(∂h)` index block, push weights in.
-      refine Finset.sum_congr rfl (fun a _ => ?_)
+    · refine Finset.sum_congr rfl (fun a _ => ?_)
       refine Finset.sum_congr rfl (fun b _ => ?_)
       rw [chartDeTurckCorrGramDerivBlock_def, Finset.mul_sum, Finset.mul_sum]
       refine Finset.sum_congr rfl (fun l _ => ?_)
@@ -630,14 +546,6 @@ theorem chartDeTurckCorrFirstOrderRemainder_eq_first_order_sum
       rw [chartDeTurckCorrGramDerivBlock_def, Finset.mul_sum, Finset.mul_sum]
       refine Finset.sum_congr rfl (fun l _ => ?_)
       ring
-
-/-! ## Linearity of the index blocks in the perturbation direction
-
-The `∂²h` index block and the `(∂G)(∂h)` index block are `ℝ`-linear in the
-perturbation `h`: additive over a sum of perturbations, homogeneous under a real-scalar
-multiple, and zero on the zero perturbation.  These are read off the explicit formulas
-through the `partialDeriv` algebra; the principal-symbol expression and the remainder
-inherit their linearity from these blocks. -/
 
 section BlockLinearity
 
@@ -843,15 +751,6 @@ lemma chartDeTurckCorrGramDerivBlock_smul
 
 end BlockLinearity
 
-/-! ## Linearity of the principal-symbol expression and the remainder
-
-Both the pure `∂²h` principal-symbol expression and the first-order remainder are
-`ℝ`-linear in the perturbation `h`.  Linearity is now immediate from the linearity of
-the `∂²h` and `(∂G)(∂h)` index blocks proved above, pushed through the metric-`g`
-trace and the deformation Gram factors. -/
-
-/-! ### Linearity of the principal-symbol expression -/
-
 /-- The pure `∂²h` principal-symbol expression vanishes on the zero perturbation. -/
 @[simp] lemma chartDeTurckCorrPrincipalSymbolExpr_zero
     (g g' : SmoothRiemannianMetric I M) (α : M)
@@ -990,8 +889,6 @@ theorem chartDeTurckCorrPrincipalSymbolExpr_smul
     rw [hscale j k]; ring]
   ring
 
-/-! ### Linearity of the first-order remainder -/
-
 /-- The first-order remainder vanishes on the zero perturbation. -/
 @[simp] lemma chartDeTurckCorrFirstOrderRemainder_zero
     (g g' : SmoothRiemannianMetric I M) (α : M)
@@ -1031,7 +928,6 @@ theorem chartDeTurckCorrFirstOrderRemainder_add
   classical
   rw [chartDeTurckCorrFirstOrderRemainder_def, chartDeTurckCorrFirstOrderRemainder_def,
     chartDeTurckCorrFirstOrderRemainder_def]
-  -- The inverse-Gram-trace branch splits additively.
   have hA : ∀ (d k : Fin (Module.finrank ℝ E)),
       (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
           partialDeriv (E := E) d (chartInvGramOnE (I := I) g α a b) y *
@@ -1049,7 +945,6 @@ theorem chartDeTurckCorrFirstOrderRemainder_add
     refine Finset.sum_congr rfl (fun b _ => ?_)
     rw [chartLinearizedChristoffelPrincipal_add]
     ring
-  -- The internal-inverse-Gram branch splits additively.
   have hB : ∀ (d k : Fin (Module.finrank ℝ E)),
       (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
           chartInvGramOnE (I := I) g α a b y *
@@ -1133,7 +1028,6 @@ theorem chartDeTurckCorrFirstOrderRemainder_smul
   classical
   rw [chartDeTurckCorrFirstOrderRemainder_def, chartDeTurckCorrFirstOrderRemainder_def,
     smul_eq_mul]
-  -- The inverse-Gram-trace branch scales by `c`.
   have hA : ∀ (d k : Fin (Module.finrank ℝ E)),
       (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
           partialDeriv (E := E) d (chartInvGramOnE (I := I) g α a b) y *
@@ -1148,7 +1042,6 @@ theorem chartDeTurckCorrFirstOrderRemainder_smul
     refine Finset.sum_congr rfl (fun b _ => ?_)
     rw [chartLinearizedChristoffelPrincipal_smul, smul_eq_mul]
     ring
-  -- The internal-inverse-Gram branch scales by `c`.
   have hB : ∀ (d k : Fin (Module.finrank ℝ E)),
       (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
           chartInvGramOnE (I := I) g α a b y *
@@ -1203,15 +1096,6 @@ theorem chartDeTurckCorrFirstOrderRemainder_smul
     rw [hA j k, hB j k]; ring]
   ring
 
-/-! ## Symmetry of the principal-symbol expression
-
-The pure `∂²h` principal-symbol expression is symmetric in the index pair `(i, j)`.
-This is the linearized analogue of the symmetry of the DeTurck-correction tensor.  The
-symmetry is term-by-term clean: under `i ↔ j` the two big `k`-sums of
-`chartDeTurckCorrPrincipalSymbolExpr` are interchanged, and the chart Gram factors
-`g_{kj}`, `g_{ik}` match after the symmetry `g_{kj} = g_{jk}`, `g_{ik} = g_{ki}` of the
-Gram matrix.  No Schwarz symmetry of the mixed partials is needed. -/
-
 /-- **Symmetry of the pure `∂²h` principal-symbol expression** in the index pair
 `(i, j)`.  Swapping `i ↔ j` interchanges the two `k`-sums of
 `chartDeTurckCorrPrincipalSymbolExpr`; the chart Gram factors `g_{kj}`, `g_{ik}` agree
@@ -1224,8 +1108,6 @@ theorem chartDeTurckCorrPrincipalSymbolExpr_symm
       chartDeTurckCorrPrincipalSymbolExpr (I := I) g g' α h j i y := by
   classical
   rw [chartDeTurckCorrPrincipalSymbolExpr_def, chartDeTurckCorrPrincipalSymbolExpr_def]
-  -- `Symbol(j, i)` has the same two `k`-sums as `Symbol(i, j)` with the order swapped;
-  -- the Gram factors agree after `chartGramOnE_symm`.
   rw [add_comm]
   congr 1
   · refine Finset.sum_congr rfl (fun k _ => ?_)

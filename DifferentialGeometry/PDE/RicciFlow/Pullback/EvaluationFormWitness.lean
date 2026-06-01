@@ -130,7 +130,6 @@ theorem deTurck_pullback_eval_form_derivative_witness
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
     (t : ℝ) (x : M) (v w : TangentSpace I x)
     (Lpush : ℝ)
-    -- (H1) DeTurck PDE at fixed image point and pushforward pair.
     (h_DT_PDE : HasDerivAt
       (fun s : ℝ => (g_DT s).inner (Φ_fam t x)
         (mfderiv I I (Φ_fam t : M → M) x v)
@@ -143,19 +142,16 @@ theorem deTurck_pullback_eval_form_derivative_witness
             (Φ_fam t x)
             (mfderiv I I (Φ_fam t : M → M) x v)
             (mfderiv I I (Φ_fam t : M → M) x w)) t)
-    -- (H2) Combined pushforward-variation derivative.
     (h_pushforward_total : HasDerivAt
       (fun s : ℝ => (g_DT t).inner (Φ_fam s x)
         (mfderiv I I (Φ_fam s : M → M) x v)
         (mfderiv I I (Φ_fam s : M → M) x w))
       Lpush t)
-    -- (H3) Substantive Cartan-Lie cancellation propositional identity.
     (h_cartan_cancellation :
       Lpush = - lieDerivMetric (I := I) (g_DT t)
         (deTurckVF (I := I) (g_DT t) g_bg) (Φ_fam t x)
         (mfderiv I I (Φ_fam t : M → M) x v)
         (mfderiv I I (Φ_fam t : M → M) x w))
-    -- (H4) Total evaluation-form derivative.
     (h_total_eval : HasDerivAt
       (fun s : ℝ => (g_DT s).inner (Φ_fam s x)
         (mfderiv I I (Φ_fam s : M → M) x v)
@@ -175,11 +171,7 @@ theorem deTurck_pullback_eval_form_derivative_witness
         (mfderiv I I (Φ_fam s : M → M) x w))
       ((-2 : ℝ) *
         ricciTensor (I := I) (Diffeomorph.pullbackMetric (g_DT t) (Φ_fam t)) x v w) t := by
-  -- Document the per-piece derivative witnesses (used implicitly in the
-  -- consumer's chain-rule assembly that produced `h_total_eval`).
   let _ := h_DT_PDE; let _ := h_pushforward_total
-  -- Identify the symbolic `Lpush` with the negative Lie-derivative value via
-  -- the Cartan cancellation hypothesis.
   set L : ℝ := lieDerivMetric (I := I) (g_DT t)
       (deTurckVF (I := I) (g_DT t) g_bg) (Φ_fam t x)
       (mfderiv I I (Φ_fam t : M → M) x v)
@@ -189,20 +181,16 @@ theorem deTurck_pullback_eval_form_derivative_witness
       (mfderiv I I (Φ_fam t : M → M) x w) with hR_DT_def
   set R_fam : ℝ := ricciTensor (I := I)
       (Diffeomorph.pullbackMetric (g_DT t) (Φ_fam t)) x v w with hR_fam_def
-  -- Substantive cancellation: `((-2)*R_DT + L) + Lpush = -2 * R_DT`.
   have h_cancel :
       (((-2 : ℝ) * R_DT + L) + Lpush) = (-2 : ℝ) * R_DT := by
     rw [h_cartan_cancellation]
     ring
-  -- Substantive Ricci-naturality transport: `R_DT = R_fam`.
   have h_ric_nat : R_DT = R_fam := by
     rw [hR_fam_def, hR_DT_def]
     exact (ricci_tensor_pullback_natural_under_diffeomorphism (I := I) (g_DT t) (Φ_fam t) x v w).symm
-  -- Assemble the value:
   have h_value :
       (((-2 : ℝ) * R_DT + L) + Lpush) = (-2 : ℝ) * R_fam := by
     rw [h_cancel, h_ric_nat]
-  -- Transport the `HasDerivAt` via the value identification.
   have h_total_eval' :
       HasDerivAt
         (fun s : ℝ => (g_DT s).inner (Φ_fam s x)

@@ -40,15 +40,11 @@ namespace DifferentialGeometry
 namespace Analysis
 namespace Sobolev
 
-/-! ## Helper public Euclidean lemmas -/
-
 namespace Euclidean
 
 variable {d : ℕ}
 
 local notation "EucD" => EuclideanSpace ℝ (Fin d)
-
-/-! ### `MemWkp` membership for smooth + compactly supported functions -/
 
 /-- Public re-derivation: the chosen weak partial of a smooth function with a
 `MemW1p` hypothesis agrees a.e. with the classical partial. -/
@@ -127,8 +123,6 @@ theorem MemWkp_of_smooth_compactSupport_pub
       have h_ih_classical := ih h_classical_smooth h_classical_cpt h_classical_supp
       exact (MemWkp_congr_ae (d := d) hp hΩ_open h_ae).mpr h_ih_classical
 
-/-! ### Non-smooth quantitative chain rule helper -/
-
 variable [NeZero d]
 
 /-- **Non-smooth quantitative chain rule** for `SmoothDiffeoBoundedAtOrder`.
@@ -157,7 +151,6 @@ theorem SmoothDiffeoBoundedAtOrder.wkpNorm_comp_le
         wkpNorm (d := d) k p u Ω' := by
   classical
   set K_const : ℝ := Φ.wkpComp_const' k p with hK_def
-  -- Positivity of K_const, derived inline since wkpComp_const'_pos is private.
   have hK_pos : 0 < K_const := by
     have hp_zero : p ≠ 0 := by
       intro hpz; rw [hpz] at hp_one
@@ -191,7 +184,6 @@ theorem SmoothDiffeoBoundedAtOrder.wkpNorm_comp_le
     have h_k1_pos : (0 : ℝ) < ((k + 1 : ℕ) : ℝ) := by exact_mod_cast Nat.zero_lt_succ k
     positivity
   have hK_nonneg : 0 ≤ K_const := hK_pos.le
-  -- Step 1: smooth approximating sequence (ψ_n) via existing density theorem.
   have h_approx : ∀ n : ℕ, ∃ ψ : EucD → ℝ,
       ContDiff ℝ (⊤ : ℕ∞) ψ ∧ HasCompactSupport ψ ∧ tsupport ψ ⊆ Ω' ∧
       wkpNorm (d := d) k p (fun x => u x - ψ x) Ω' ≤
@@ -214,11 +206,9 @@ theorem SmoothDiffeoBoundedAtOrder.wkpNorm_comp_le
   have hψ_mem : ∀ n, MemWkp (d := d) k p (ψ n) Ω' := fun n =>
     MemWkp_of_smooth_compactSupport_pub (d := d) hΩ' (hψ_smooth n) (hψ_cpt n)
       (hψ_supp n) hp_one k
-  -- Step 2: each ψ_n ∘ Φ ∈ MemWkp k p Ω, via the existing public chain rule.
   have hψ_comp_mem : ∀ n, MemWkp (d := d) k p (fun x => ψ n (Φ.toFun x)) Ω :=
     fun n => MemWkp.comp_smoothDiffeoBoundedAtOrder
       (d := d) k hk hp_one hp_top hΩ hΩ' Φ (hψ_mem n) (hψ_cpt n) (hψ_supp n)
-  -- Step 3: Cauchy property of (ψ_n ∘ Φ).
   have h_cauchy : ∀ ε > 0, ∃ N : ℕ, ∀ m n, N ≤ m → N ≤ n →
       wkpNorm (d := d) k p
         (fun x => (ψ m (Φ.toFun x)) - (ψ n (Φ.toFun x))) Ω ≤
@@ -331,11 +321,9 @@ theorem SmoothDiffeoBoundedAtOrder.wkpNorm_comp_le
       _ = ε := by
             have h_pos : 0 < 2 * K_const := by positivity
             field_simp
-  -- Step 4: Banach completeness gives a limit vΦ.
   obtain ⟨vΦ, hvΦ_mem, hvΦ_tendsto⟩ :=
     MemWkp.exists_limit_of_wkpNorm_cauchy (d := d) hΩ k p hp_one hp_top
       hψ_comp_mem h_cauchy
-  -- Step 5: Identify vΦ =ᵐ u ∘ Φ.
   have h_Lp_close : ∀ n,
       eLpNorm (fun x => u (Φ.toFun x) - ψ n (Φ.toFun x)) p
         (volume.restrict Ω) ≤
@@ -500,7 +488,6 @@ theorem SmoothDiffeoBoundedAtOrder.wkpNorm_comp_le
     filter_upwards [h_diff_zero] with x hx
     have : vΦ x - u (Φ.toFun x) = 0 := hx
     linarith
-  -- Step 6: Bound wkpNorm(u ∘ Φ) using the smooth bound + tendsto.
   have h_uΦ_eq_vΦ : (fun x => u (Φ.toFun x)) =ᵐ[volume.restrict Ω] vΦ :=
     h_vΦ_eq_uΦ.symm
   have h_norm_eq :
@@ -508,12 +495,7 @@ theorem SmoothDiffeoBoundedAtOrder.wkpNorm_comp_le
         wkpNorm (d := d) k p vΦ Ω :=
     wkpNorm_congr_ae (d := d) hp_one hΩ h_uΦ_eq_vΦ
   rw [h_norm_eq]
-  -- Now want: wkpNorm vΦ Ω ≤ K_const * wkpNorm u Ω'.
-  -- We bound: for all n, wkpNorm vΦ ≤ wkpNorm(vΦ - ψ_n ∘ Φ) + wkpNorm(ψ_n ∘ Φ).
-  -- The second is ≤ K_const * wkpNorm(ψ_n) ≤ K_const * (wkpNorm(u) + 1/(n+1)).
-  -- The first → 0, the K * 1/(n+1) → 0, so wkpNorm vΦ ≤ K * wkpNorm u.
   set RHS : ℝ≥0∞ := ENNReal.ofReal K_const * wkpNorm (d := d) k p u Ω' with hRHS_def
-  -- Bound: wkpNorm vΦ ≤ RHS + wkpNorm(vΦ - ψ_n ∘ Φ) + ofReal(K_const) * ofReal(1/(n+1)).
   have h_bound2 : ∀ n,
       wkpNorm (d := d) k p vΦ Ω ≤
         wkpNorm (d := d) k p (fun x => vΦ x - ψ n (Φ.toFun x)) Ω +
@@ -529,14 +511,11 @@ theorem SmoothDiffeoBoundedAtOrder.wkpNorm_comp_le
       MemWkp.sub (d := d) hp_one hΩ hvΦ_mem h_ψcomp_mem
     have h_fun_eq : vΦ = fun x => (vΦ x - ψ n (Φ.toFun x)) + ψ n (Φ.toFun x) := by
       funext x; ring
-    -- Rewrite the goal using the function equality.
     conv_lhs => rw [h_fun_eq]
     have h_tri := wkpNorm_add_le (d := d) hp_one hΩ h_diff_mem h_ψcomp_mem
     refine h_tri.trans ?_
-    -- wkpNorm(ψ_n ∘ Φ) ≤ K_const * wkpNorm(ψ_n) ≤ K_const * (wkpNorm(u) + ofReal(1/(n+1))).
     have h_smooth_bound := Φ.wkpNorm_comp_smooth_le hp_one hp_top hΩ hΩ' k hk
       (hψ_smooth n) (hψ_cpt n) (hψ_supp n)
-    -- wkpNorm(ψ_n) Ω' ≤ wkpNorm(u) + wkpNorm(u - ψ_n) ≤ wkpNorm(u) + ofReal(1/(n+1)).
     have h_ψn_le_u : wkpNorm (d := d) k p (ψ n) Ω' ≤
         wkpNorm (d := d) k p u Ω' + ENNReal.ofReal ((1 : ℝ) / (n + 1 : ℝ)) := by
       have h_neg_uψn_mem : MemWkp (d := d) k p (fun x => ψ n x - u x) Ω' := by
@@ -571,15 +550,10 @@ theorem SmoothDiffeoBoundedAtOrder.wkpNorm_comp_le
             (wkpNorm (d := d) k p u Ω' + ENNReal.ofReal ((1 : ℝ) / (n + 1 : ℝ))) := by
       refine h_smooth_bound.trans ?_
       exact mul_le_mul_of_nonneg_left h_ψn_le_u (zero_le _)
-    -- Now: wkpNorm(vΦ - ψ_n ∘ Φ) + wkpNorm(ψ_n ∘ Φ) ≤
-    --   first + (RHS + K_const * ofReal(1/(n+1))).
-    -- Rearrange the target: first + K_const * ofReal(1/(n+1)) + RHS.
     refine le_trans (add_le_add (le_refl _) h_bound_ψn) ?_
     rw [mul_add]
     have h_eq_RHS : ENNReal.ofReal K_const * wkpNorm (d := d) k p u Ω' = RHS := rfl
     rw [h_eq_RHS]
-    -- LHS: A + (RHS + B), RHS: A + B + RHS where A := first, B := K * ofReal(1/(n+1)).
-    -- These are equal by commutativity/associativity.
     have h_rearr :
         wkpNorm (d := d) k p (fun x => vΦ x - ψ n (Φ.toFun x)) Ω +
             (RHS + ENNReal.ofReal K_const * ENNReal.ofReal ((1 : ℝ) / (n + 1 : ℝ))) =
@@ -587,7 +561,6 @@ theorem SmoothDiffeoBoundedAtOrder.wkpNorm_comp_le
             ENNReal.ofReal K_const * ENNReal.ofReal ((1 : ℝ) / (n + 1 : ℝ)) +
             RHS := by ring
     rw [h_rearr]
-  -- Take limit n → ∞: the first two terms → 0.
   have h_tendsto_first :
       Filter.Tendsto
         (fun n => wkpNorm (d := d) k p (fun x => vΦ x - ψ n (Φ.toFun x)) Ω)
@@ -640,7 +613,6 @@ theorem SmoothDiffeoBoundedAtOrder.wkpNorm_comp_le
         atTop (𝓝 0) := by
     have := h_tendsto_first.add h_tendsto_second
     simpa using this
-  -- Add the constant RHS to the convergent quantity.
   have h_tendsto_rhs :
       Filter.Tendsto
         (fun n =>
@@ -653,19 +625,6 @@ theorem SmoothDiffeoBoundedAtOrder.wkpNorm_comp_le
   exact ge_of_tendsto h_tendsto_rhs (Filter.Eventually.of_forall h_bound2)
 
 end Euclidean
-
-/-! ## The headline manifold-side smooth-density theorem
-
-This section delivers the manifold-side smooth-density theorem
-`contMDiff_dense_in_WkpChart` for closed manifolds, building on:
-
-- The Euclidean smooth density `MemWkp.exists_smooth_compactSupport_approx`
-  applied per-chart;
-- The chart-pullback global smoothness `chartPullback_contMDiff`;
-- The non-smooth quantitative chain rule helper above (for cross-chart
-  contributions) combined with the chart-transition diffeomorphism
-  `chartTransition_smoothDiffeoBoundedAtOrder`.
--/
 
 namespace Chart
 
@@ -680,8 +639,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ### Auxiliary: chart-pushed image of `chartPullback` and POU support -/
 
 /-- The chart-pushed image of `chartPullback I α χ` at chart `α`: the same as
 `ρ_α · χ` on `chartTargetEuclid α`. -/

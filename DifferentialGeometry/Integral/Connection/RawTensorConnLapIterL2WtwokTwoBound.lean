@@ -56,8 +56,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Bundled `SmoothCcTensor → SmoothCcTensor` raw connection Laplacian -/
-
 /-- **Bundled raw connection Laplacian on `SmoothCcTensor`.** Packages
 `rawTensorConnLap` as a function `SmoothCcTensor g r s → SmoothCcTensor g r s`,
 relying on the unconditional smoothness witness
@@ -78,8 +76,6 @@ noncomputable def rawTensorConnLapSmooth
       rawTensorConnLap (I := I) g r s (fun z : M => T.toSection z) x := by
   unfold rawTensorConnLapSmooth
   exact tensorConnLaplacian_of_contMDiff_toFun (I := I) g r s T _ x
-
-/-! ## The `k`-fold iterate of `rawTensorConnLapSmooth` -/
 
 /-- **`k`-fold iterate of the bundled raw connection Laplacian.** Defined by
 recursion on `k`: `0` ↦ identity; `(k+1)` ↦ apply `rawTensorConnLapSmooth`

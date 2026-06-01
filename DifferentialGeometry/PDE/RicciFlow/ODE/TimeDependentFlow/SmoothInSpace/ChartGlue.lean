@@ -94,16 +94,12 @@ theorem manifold_contMDiffAt_of_chart_smooth_flow
     (hflow_in_target :
       I.symm (flow (I ((chartAt H α) x)) t) ∈ (chartAt H α).target) :
     ContMDiffAt I I ∞ (Φ t) x := by
-  -- Suppress unused-variable warnings for hypotheses that are part of the
-  -- public signature but unused inside the proof body.
   have _hT := hT
   have _hr' := hr'
   have _hρ := hρ
   have _hρ_le := hρ_le
-  -- The chart-conjugated formula.
   let Ψ : M → M := fun y => (chartAt H α).symm
     (I.symm (flow (I ((chartAt H α) y)) t))
-  -- Open neighborhood of `x` on which `Φ t = Ψ`.
   let U : Set M := (chartAt H α).source ∩
     (fun y : M => I ((chartAt H α) y)) ⁻¹'
       Metric.ball (I ((chartAt H α) α)) ρ
@@ -118,19 +114,13 @@ theorem manifold_contMDiffAt_of_chart_smooth_flow
     obtain ⟨hy_src, hy_ball⟩ := hy
     exact hΦ_eq t ht y hy_src hy_ball
   have hEqEv : Φ t =ᶠ[𝓝 x] Ψ := Filter.eventuallyEq_of_mem hUnhds hEqOn
-  -- Smoothness of `Ψ` at `x` via the chain rule.
-  -- (1) `chartAt H α : M → H` smooth at `x`.
   have h_chart : ContMDiffAt I I ∞ (chartAt H α) x :=
     contMDiffAt_of_mem_maximalAtlas (chart_mem_maximalAtlas α) hx_src
-  -- (2) `I : H → E` is globally smooth.
   have h_I : ContMDiffAt I 𝓘(ℝ, E) ∞ I ((chartAt H α) x) :=
     (contMDiff_model (I := I)).contMDiffAt
-  -- (3) Composition gives `I ∘ chart : M → E` smooth at `x`.
   have h_I_chart : ContMDiffAt I 𝓘(ℝ, E) ∞
       (fun y : M => I ((chartAt H α) y)) x :=
     h_I.comp x h_chart
-  -- (4) Partial application: `(fun y => flow y t) : E → E` is `ContDiffAt`
-  -- at `I (chartAt H α x)`.
   have h_flow_y : ContDiffAt ℝ ∞ (fun y : E => flow y t)
       (I ((chartAt H α) x)) := by
     have hmem : ((I ((chartAt H α) x), t) : E × ℝ) ∈
@@ -150,21 +140,15 @@ theorem manifold_contMDiffAt_of_chart_smooth_flow
         (I ((chartAt H α) x)) :=
       ContDiffAt.comp (I ((chartAt H α) x)) h_uncurry_at h_mk
     exact h_comp
-  -- (5) Convert (4) to `ContMDiffAt` in the model-with-corners sense.
   have h_flow_y_M : ContMDiffAt 𝓘(ℝ, E) 𝓘(ℝ, E) ∞ (fun y : E => flow y t)
       (I ((chartAt H α) x)) := h_flow_y.contMDiffAt
-  -- (6) `I.symm : E → H` is globally `ContMDiff` under `[I.Boundaryless]`,
-  -- since `range I = univ`.
   have h_I_symm : ContMDiff 𝓘(ℝ, E) I ∞ (I.symm : E → H) := by
     rw [← contMDiffOn_univ, ← I.range_eq_univ]
     exact contMDiffOn_model_symm
-  -- (7) `(chartAt H α).symm : H → M` smooth at the point
-  -- `I.symm (flow (I (chartAt H α x)) t)` (which lies in `target`).
   have h_chart_symm : ContMDiffAt I I ∞ (chartAt H α).symm
       (I.symm (flow (I ((chartAt H α) x)) t)) :=
     (contMDiffOn_chart_symm (I := I) (x := α)).contMDiffAt
       ((chartAt H α).open_target.mem_nhds hflow_in_target)
-  -- (8) Chain (5)–(7) with `h_I_chart` from (3).
   have h_step1 : ContMDiffAt I 𝓘(ℝ, E) ∞
       (fun y : M => flow (I ((chartAt H α) y)) t) x :=
     h_flow_y_M.comp x h_I_chart

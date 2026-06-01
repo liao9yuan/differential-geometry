@@ -120,20 +120,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The frame-free pointwise presentation of the defect
-
-The canonical commutator defect `covGradRoughLapCurv g T₀` is, by definition, the difference of
-two `(0, 3)`-tensor fields (`CovGradRoughLapCommutatorClose3.lean`). Its underlying section value
-at a point `x` is therefore the difference of the two section values, by the subtraction structure
-on `SmoothCcTensor` (`SmoothCcTensor.toSection_sub`). We record this as the frame-free starting
-point of the curvature reconciliation. -/
 
 /-- **Frame-free pointwise presentation of the defect.** The underlying section value of the
 canonical commutator defect at `x` is the difference of the rough Laplacian of the gradient
@@ -175,16 +165,6 @@ theorem rawTensorConnLap_gradTensor_toSection_eq_frame_trace
   exact rawTensorConnLap_eq_frame_trace_secondCovDeriv (I := I) g 0 3
     (fun y : M => (covGrad (I := I) (M := M) g 0 2 T₀).toSection y) x
 
-/-! ## STEP 4 — the genuine off-diagonal Ricci identity for the gradient tensor
-
-The reorder of the gradient slot of `∇T₀` past a frame slot is a covariant-derivative commutator
-at rank `(0, 3)`. By the pointwise tensor Ricci identity
-`tensorSecondCovDeriv_antisymm_eq_riemannOp` (`TensorRicciCommutator.lean`), the antisymmetric
-pair-swap of the second covariant derivative of the gradient tensor `S := ∇T₀` is the bundled
-Riemann curvature operator on the fibre values. The curvature is honestly **off-diagonal**: for
-two distinct directions `X, Y` it is the nonzero `R_x(X, Y)`, *not* the degenerate diagonal
-`R_x(X, X) = 0`. This is the genuine third-order Weitzenböck curvature term. -/
-
 /-- **STEP 4 (off-diagonal Ricci identity for the gradient tensor).** Let `S := ∇T₀ =
 covGrad g 0 2 T₀` be the rank-`(0, 3)` gradient tensor of `T₀`. For smooth tangent fields
 `X, Y`, the antisymmetric pair-swap of the second covariant derivative of `S` is the bundled
@@ -211,15 +191,6 @@ theorem secondCovDeriv_gradTensor_antisymm_eq_riemannOp
   tensorSecondCovDeriv_antisymm_eq_riemannOp (I := I) g 0 3
     (T := fun y : M => (covGrad (I := I) (M := M) g 0 2 T₀).toSection y)
     hX hY (covGrad_contMDiff_mk' (I := I) (M := M) g T₀)
-
-/-! ## STEP 5 — the off-diagonal curvature fibre bound
-
-The curvature contraction produced by STEP 4 has intrinsic Riemannian fibre norm controlled by
-the per-point curvature constant times the metric lengths of the two directions times the fibre
-norm of the contracted tensor. The imported `(0, 3)` Parseval fibre bound
-`exists_Cx_riemannianFiberNormSq_riemannOp_tensorCovS_le` provides exactly this control for
-**general** directions `v, w` — so the **off-diagonal** pair `(Bᵢ, Bⱼ)` with `i ≠ j` is covered,
-not merely the degenerate diagonal. -/
 
 /-- **STEP 5 (off-diagonal curvature fibre bound, general directions).** For **any** tangent
 vectors `v, w` (in particular the off-diagonal frame pair `v = Bᵢ`, `w = Bⱼ` with `i ≠ j`), the
@@ -268,7 +239,6 @@ theorem riemannOp_gradTensor_offDiag_frame_fiberNormSq_le
   obtain ⟨Cx, hCx_nonneg, hbound⟩ :=
     riemannOp_gradTensor_offDiag_fiberNormSq_le (I := I) (M := M) g T₀ x
   refine ⟨Cx, hCx_nonneg, fun i j => ?_⟩
-  -- The self inner products of the orthonormal frame are `1`.
   have hii : g.inner x (smoothOrthoFrame (I := I) g x i x)
       (smoothOrthoFrame (I := I) g x i x) = 1 := by
     have := smoothOrthoFrame_orthonormal_at_center (I := I) g x i i
@@ -280,7 +250,6 @@ theorem riemannOp_gradTensor_offDiag_frame_fiberNormSq_le
   have h := hbound (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x j x)
   rw [hii, hjj] at h
   simpa using h
-
 
 end Connection
 

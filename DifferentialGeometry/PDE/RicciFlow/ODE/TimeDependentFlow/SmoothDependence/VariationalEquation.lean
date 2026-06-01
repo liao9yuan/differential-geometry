@@ -25,12 +25,9 @@ theorem time_block_eq_comp_inr
     (hΦdiff : DifferentiableAt ℝ Φ (x, t)) :
     (fderiv ℝ Φ (x, t)).comp (ContinuousLinearMap.inr ℝ E ℝ)
       = timePieceFn f Φ (x, t) := by
-  -- Both sides are CLMs `ℝ →L[ℝ] E`; reduce equality to agreement at the scalar `1`.
   refine ContinuousLinearMap.ext_ring ?_
-  -- LHS at `1`: `fderiv ℝ Φ (x, t) (inr ℝ E ℝ 1)`; RHS at `1`: `(1 : ℝ) • f t (Φ (x, t))`.
   simp only [ContinuousLinearMap.comp_apply, timePieceFn_apply,
     ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.id_apply, one_smul]
-  -- The remaining goal is the verified applied-at-1 flow-ODE identity.
   exact flow_joint_fderiv_inr_eq hΦ hx ht hΦdiff
 
 theorem fderiv_flow_eq_spatialBlock_coprod_timePiece
@@ -42,14 +39,8 @@ theorem fderiv_flow_eq_spatialBlock_coprod_timePiece
     (hΦdiff : DifferentiableAt ℝ Φ (x, t)) :
     fderiv ℝ Φ (x, t)
       = (fderiv ℝ (fun y => Φ (y, t)) x).coprod (timePieceFn f Φ (x, t)) := by
-  -- Rewrite the two coproduct blocks of the RHS into the canonical inl/inr blocks of
-  -- `fderiv ℝ Φ (x, t)`: the spatial block is its inl-precomposition (verified infra
-  -- `partial_spatial_fderiv_eq_comp_inl`), the time block its inr-precomposition (the
-  -- proven sibling `time_block_eq_comp_inr`).
   rw [partial_spatial_fderiv_eq_comp_inl hΦdiff,
     ← time_block_eq_comp_inr hΦ hx ht hΦdiff]
-  -- The goal is now `fderiv ℝ Φ (x, t) = (… ∘L inl).coprod (… ∘L inr)`, the Mathlib
-  -- inl/inr coproduct reconstruction of any CLM on a product.
   exact (ContinuousLinearMap.coprod_comp_inl_inr (fderiv ℝ Φ (x, t))).symm
 
 theorem fderiv_spatialSlice_initial_eq_id
@@ -66,8 +57,6 @@ theorem fderiv_spatialSlice_initial_eq_id
     Filter.eventuallyEq_of_mem hball heqon
   rw [heq.fderiv_eq, fderiv_id']
 
-/-! ## H2 — variational-equation characterization of `∂Φ/∂x₀` (headline) -/
-
 theorem h2_variationalEquation_spatialDerivative_of_contDiff
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [CompleteSpace E] [FiniteDimensional ℝ E]
@@ -83,38 +72,27 @@ theorem h2_variationalEquation_spatialDerivative_of_contDiff
         (∀ x ∈ Metric.ball x₀ (ρ : ℝ), ∀ t ∈ Set.Ioo (t₀ - T) (t₀ + T),
           HasDerivAt (fun s => W (x, s))
             ((fderiv ℝ (f t) (Φ (x, t))).comp (W (x, t))) t) := by
-  -- Smooth-local-flow producer: jointly-`C^∞` field `f` ⇒ a Picard local flow `Φ`,
-  -- jointly `C^∞` on a strictly interior open box `ball x₀ ρ ×ˢ Ioo (t₀-T) (t₀+T)`.
   obtain ⟨r, ε, hr, hε, Φ, hΦ, ρ, T, hρ, hT, hρr, hTε, hΦsmooth⟩ :=
     exists_isLocalFlow_contDiffOn_top (f := f) (t₀ := t₀) (x₀ := x₀) hf
-  -- The smoothness box `U` (open), and the spatial-slice derivative `W`.
   set U : Set (E × ℝ) := Metric.ball x₀ ρ ×ˢ Set.Ioo (t₀ - T) (t₀ + T) with hU
   have hUopen : IsOpen U := Metric.isOpen_ball.prod isOpen_Ioo
   set W : E × ℝ → (E →L[ℝ] E) := fun q => fderiv ℝ (fun y => Φ (y, q.2)) q.1 with hW
-  -- Repackage the smoothness radius as a non-negative real.
   refine ⟨r, ε, hr, hε, Φ, hΦ, T, ⟨ρ, hρ.le⟩, hT, hρ, W, ?_, ?_, ?_⟩
-  -- The coercion `(⟨ρ, _⟩ : ℝ≥0) : ℝ` is definitionally `ρ`, so the existential boxes
-  -- below are literally `ball x₀ ρ ×ˢ Ioo (t₀-T) (t₀+T) = U`.
-  · -- Clause (1): the coproduct block reconstruction of `fderiv Φ`.
-    rintro ⟨x, t⟩ hq
+  · rintro ⟨x, t⟩ hq
     rw [Set.mem_prod] at hq
     obtain ⟨hxρ, htT⟩ := hq
-    -- `(x, t) ∈ U`, hence `Φ` is differentiable there (smooth on the open `U`).
     have hxsU : (x, t) ∈ U := Set.mem_prod.mpr ⟨hxρ, htT⟩
     have hΦdiff : DifferentiableAt ℝ Φ (x, t) :=
       (hΦsmooth.contDiffAt (hUopen.mem_nhds hxsU)).differentiableAt (by simp)
-    -- Radius/horizon inclusions to reach the flow's natural domain.
     have hxr : x ∈ Metric.closedBall x₀ (r : ℝ) :=
       Metric.ball_subset_closedBall (Metric.ball_subset_ball hρr hxρ)
     have htε : t ∈ Set.Ioo (t₀ - ε) (t₀ + ε) :=
       Set.Ioo_subset_Ioo (by linarith) (by linarith) htT
     exact fderiv_flow_eq_spatialBlock_coprod_timePiece hΦ hxr htε hΦdiff
-  · -- Clause (2): the initial-condition identity `W (x, t₀) = id`.
-    intro x hxρ
+  · intro x hxρ
     have hxr : x ∈ Metric.ball x₀ (r : ℝ) := Metric.ball_subset_ball hρr hxρ
     exact fderiv_spatialSlice_initial_eq_id hΦ hxr
-  · -- Clause (3): the operator-valued variational ODE for the slice derivative.
-    intro x hxρ t htT
+  · intro x hxρ t htT
     have hxsU : (x, t) ∈ U := Set.mem_prod.mpr ⟨hxρ, htT⟩
     have hxr : x ∈ Metric.ball x₀ (r : ℝ) := Metric.ball_subset_ball hρr hxρ
     have htε : t ∈ Set.Ioo (t₀ - ε) (t₀ + ε) :=

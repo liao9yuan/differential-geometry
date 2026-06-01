@@ -64,20 +64,16 @@ theorem time_dependent_vf_flow_bijective_and_inverse_smooth
         (∀ x : M, ∃ α : M, ∀ s : ℝ,
           Ψ s x = (chartAt H α).symm
             (I.symm ((hperNeg α).flow (I ((chartAt H α) x)) s))) := by
-  -- Apply the chart-cover global-flow glue to `X` and to `-X`.
   obtain ⟨T_fwd, hT_fwd_pos, S_fwd, _hCover_fwd, Φ, hΦ_init, hΦ_repr⟩ :=
     time_dependent_vf_global_flow_glue X hper
   obtain ⟨T_rev, hT_rev_pos, S_rev, _hCover_rev, Ψ, hΨ_init, hΨ_repr⟩ :=
     time_dependent_vf_global_flow_glue (fun t x => -(X t x)) hperNeg
-  -- Take the common horizon `T = min T_fwd T_rev`.
   refine ⟨min T_fwd T_rev, lt_min hT_fwd_pos hT_rev_pos, Φ, Ψ,
     hΦ_init, hΨ_init, ?_, ?_⟩
-  · -- Forward-flow chart-α-coord representation: extract from `hΦ_repr`.
-    intro x
+  · intro x
     obtain ⟨α, _hαS, _hxU, hrepr⟩ := hΦ_repr x
     exact ⟨α, hrepr⟩
-  · -- Reverse-flow chart-α-coord representation: extract from `hΨ_repr`.
-    intro x
+  · intro x
     obtain ⟨α, _hαS, _hxU, hrepr⟩ := hΨ_repr x
     exact ⟨α, hrepr⟩
 

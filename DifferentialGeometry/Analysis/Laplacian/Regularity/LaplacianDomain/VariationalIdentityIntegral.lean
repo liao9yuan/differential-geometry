@@ -76,8 +76,6 @@ open DifferentialGeometry.Analysis.Laplacian.H1ComplGradientH1LipschitzBound
 open DifferentialGeometry.Analysis.Laplacian.H1ComplToLpChartBridge
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -86,12 +84,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## Finiteness of the chart-pulled weighted measure on compact subsets
-
-The chart-pulled weighted measure is finite on every compact subset of
-`chartTargetEuclid α`, since `densityOnEuclid g α` is continuous on the
-open chart target. -/
 
 private lemma chartPulledWeightedMeasure_lt_top_of_compact_subset
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -139,8 +131,6 @@ private lemma chartPulledWeightedMeasure_restrict_lt_top_of_compact_subset
   exact chartPulledWeightedMeasure_lt_top_of_compact_subset
     (I := I) (M := M) g α hK_compact hK_in
 
-/-! ## MemLp 2 for bounded continuous compactly-supported functions -/
-
 lemma continuous_compactSupport_memLp_chartPulledWeighted_restrict
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : EuclN → ℝ} (hf_cont : Continuous f) (hf_cs : HasCompactSupport f)
@@ -167,8 +157,6 @@ lemma continuous_compactSupport_memLp_chartPulledWeighted_restrict
       (I := I) (M := M) g α hf_cs hf_supp).ne
   refine h_top.mono_exponent_of_measure_support_ne_top h_zero_off h_supp_finite ?_
   exact le_top
-
-/-! ## The principal multiplier `P_i ψ y := ∑_j invGramOnEuclid · ∂_j ψ` -/
 
 private def principalMultiplier
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -296,8 +284,6 @@ private lemma principalMultiplierLp_coeFn
   unfold principalMultiplierLp
   exact MemLp.coeFn_toLp _
 
-/-! ## The mass multiplier `ψ` itself -/
-
 private noncomputable def massMultiplierLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ}
@@ -322,14 +308,6 @@ private lemma massMultiplierLp_coeFn
   unfold massMultiplierLp
   exact MemLp.coeFn_toLp _
 
-/-! ## Change-of-measure: integrals against chart-pulled-weighted vs volume
-
-For an integrand `A` on `chartTargetEuclid α`, the integral
-`∫_chartTarget A ∂(chart-pulled-weighted)` equals
-`∫_chartTarget density(y) · A(y) ∂volume`. This follows from the definition
-`chart-pulled-weighted = volume.withDensity (ofReal density)` and the
-positivity of `density` on `chartTargetEuclid α`. -/
-
 private lemma densityOnEuclid_aemeasurable_restrict_chartTarget
     (g : SmoothRiemannianMetric I M) (α : M) :
     AEMeasurable (fun y : EuclN => ENNReal.ofReal (densityOnEuclid (I := I) g α y))
@@ -337,7 +315,6 @@ private lemma densityOnEuclid_aemeasurable_restrict_chartTarget
         (chartTargetEuclid (I := I) (M := M) α)) := by
   classical
   refine ENNReal.measurable_ofReal.comp_aemeasurable ?_
-  -- density is continuous on chartTargetEuclid α (open), so AEMeasurable on restrict.
   exact (densityOnEuclid_continuousOn (I := I) g α).aemeasurable
     (Sobolev.Chart.chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
 
@@ -367,9 +344,6 @@ lemma setIntegral_chartPulledWeighted_eq_setIntegral_density_mul_volume
       (densityOnEuclid_aemeasurable_restrict_chartTarget (I := I) (M := M) g α)
       (densityOnEuclid_lt_top_ae_restrict_chartTarget (I := I) (M := M) g α)
       f h_target_meas]
-  -- The integrals over `chartTarget` of `(ofReal density y).toReal • f y` and
-  -- `density y * f y` agree, since on `chartTarget`, density y > 0, hence
-  -- (ofReal density y).toReal = density y.
   refine MeasureTheory.setIntegral_congr_fun h_target_meas (fun y hy => ?_)
   have hy_pos : 0 < densityOnEuclid (I := I) g α y :=
     densityOnEuclid_pos (I := I) g α hy
@@ -379,14 +353,6 @@ lemma setIntegral_chartPulledWeighted_eq_setIntegral_density_mul_volume
   rw [show (ENNReal.ofReal (densityOnEuclid (I := I) g α y)).toReal • f y =
       (ENNReal.ofReal (densityOnEuclid (I := I) g α y)).toReal * f y from rfl]
   rw [this]
-
-/-! ## Inner-product representation of the smooth-case LHS integrals
-
-For a smooth scalar `v : SmoothScalar g`, the smooth-case LHS principal
-integral (the `∂_i v · ∂_j ψ` cross term, summed over `i, j`) and the
-smooth-case LHS mass integral (`∫ density · chartPushed POU α v · ψ ∂vol`)
-are each expressible as `Lp 2 ((weighted).restrict chartTarget)` inner
-products. -/
 
 /-- The smooth-case LHS principal integrand for a fixed `i`, expressed as the
 integral of `P_i ψ · ∂_i v` against the chart-pulled weighted measure
@@ -409,7 +375,6 @@ private lemma smooth_lhs_principal_per_i_integral_eq_weighted
   classical
   have h_meas_chartTarget : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     (Sobolev.Chart.chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
-  -- Step 1: pointwise rewrite of the integrand on chartTarget.
   have h_pointwise : ∀ y ∈ chartTargetEuclid (I := I) (M := M) α,
       (∑ j : Fin (Module.finrank ℝ E),
           weightedInvGramOnEuclid (I := I) g α i j y *
@@ -424,7 +389,6 @@ private lemma smooth_lhs_principal_per_i_integral_eq_weighted
         weightedInvGramOnEuclid (I := I) g α i j y =
           densityOnEuclid (I := I) g α y * invGramOnEuclid (I := I) g α i j y :=
       fun j => rfl
-    -- Substitute each weighted entry.
     have h_each : ∀ j : Fin (Module.finrank ℝ E),
         weightedInvGramOnEuclid (I := I) g α i j y *
             chartPushedPartial (I := I) (M := M) g α i v y *
@@ -437,13 +401,9 @@ private lemma smooth_lhs_principal_per_i_integral_eq_weighted
       rw [h_w j]
       ring
     rw [Finset.sum_congr rfl (fun j _ => h_each j)]
-    -- Now LHS = ∑_j density * (invGram_{ij} * ∂_j ψ) * ∂_i v.
-    -- RHS = density * (∑_j invGram_{ij} * ∂_j ψ) * ∂_i v.
     rw [← Finset.sum_mul, ← Finset.mul_sum]
     ring
-  -- Step 2: rewrite the volume integral to ∫_chartTarget density · (P_i · ∂_i v) ∂vol.
   rw [MeasureTheory.setIntegral_congr_fun h_meas_chartTarget h_pointwise]
-  -- Step 3: convert ∫_chartTarget density · X ∂vol to ∫_chartTarget X ∂(weighted).
   rw [← setIntegral_chartPulledWeighted_eq_setIntegral_density_mul_volume
     (I := I) (M := M) g α
     (fun y => principalMultiplier (I := I) (M := M) g α i ψ y *
@@ -468,10 +428,7 @@ private lemma smooth_lhs_principal_per_i_eq_inner
           (chartPushedPartial_memLp (I := I) (M := M) g α i v)⟫_ℝ := by
   classical
   rw [smooth_lhs_principal_per_i_integral_eq_weighted (I := I) (M := M) g α i hψ v]
-  -- Now: ∫ y, P_i ψ y * chartPushedPartial v y ∂(weighted.restrict).
-  -- This is the inner product on Lp ℝ 2 (weighted.restrict).
   rw [L2.inner_def (𝕜 := ℝ)]
-  -- Replace P_i ψ_lp and chartPushedPartialLp by their a.e.-representatives.
   refine MeasureTheory.integral_congr_ae ?_
   have h_P := principalMultiplierLp_coeFn (I := I) (M := M) g α i hψ hψ_cs hψ_supp
   have h_C : ((chartPushedPartialLp (I := I) (M := M) g α i v
@@ -484,11 +441,6 @@ private lemma smooth_lhs_principal_per_i_eq_inner
     unfold chartPushedPartialLp
     exact MemLp.coeFn_toLp _
   filter_upwards [h_P, h_C] with y h_Py h_Cy
-  -- Inner product of real-valued Lp at a point y is multiplication.
-  -- h_Py rewrites the principalMultiplierLp coeFn pointwise; h_Cy similarly for chartPushedPartialLp.
-  -- The RHS of the integral congruence is `⟨P_lp y, C_lp y⟩_ℝ = P_lp y * C_lp y` definitionally.
-  -- After substitution: principalMultiplier ψ y * chartPushedPartial v y = (P_lp y) * (C_lp y).
-  -- For reals, ⟨x, y⟩_ℝ = y * x.
   rw [show @inner ℝ _ _
       (((principalMultiplierLp (I := I) (M := M) g α i hψ hψ_cs hψ_supp :
           Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -506,8 +458,6 @@ private lemma smooth_lhs_principal_per_i_eq_inner
             (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) from rfl]
   rw [h_Py, h_Cy]
   ring
-
-/-! ## The chart-pushed Lp class for `Lp ℝ 2 μ_g` -/
 
 /-- For any `u : Lp ℝ 2 μ_g`, the chart-pushed function
 `chartPushed (chartAtlasPOU I M) α u.coeFn` is in `MemLp 2` of the
@@ -544,7 +494,6 @@ lemma chartPushedLpFromLp_tendsto
     Tendsto (fun n => chartPushedLpFromLp (I := I) (M := M) g α (u n))
       atTop (𝓝 (chartPushedLpFromLp (I := I) (M := M) g α u_lim)) := by
   classical
-  -- Convert Lp-tendsto to eLpNorm-of-diff-tendsto-zero.
   have h_norm_tendsto :
       Tendsto (fun n => ‖u n - u_lim‖) atTop (𝓝 0) := by
     have h_sub : Tendsto (fun n => u n - u_lim) atTop (𝓝 0) := by
@@ -552,7 +501,6 @@ lemma chartPushedLpFromLp_tendsto
       simpa using this
     simpa using (continuous_norm.tendsto (0 :
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))).comp h_sub
-  -- Convert ‖u n - u_lim‖ to eLpNorm.
   have h_eLpNorm_eq : ∀ n,
       eLpNorm (((u n - u_lim) : Lp ℝ 2 _) : M → ℝ) 2
         (riemannianVolumeMeasure (I := I) (M := M) g) =
@@ -561,7 +509,6 @@ lemma chartPushedLpFromLp_tendsto
     rw [Lp.norm_def]
     rw [ENNReal.ofReal_toReal
       ((Lp.memLp (u n - u_lim)).eLpNorm_lt_top.ne)]
-  -- eLpNorm of difference tends to 0.
   have h_eLpNorm_tendsto :
       Tendsto (fun n => eLpNorm (((u n - u_lim) : Lp ℝ 2 _) : M → ℝ) 2
         (riemannianVolumeMeasure (I := I) (M := M) g)) atTop (𝓝 0) := by
@@ -573,14 +520,12 @@ lemma chartPushedLpFromLp_tendsto
     have h_comp := (ENNReal.continuous_ofReal.tendsto 0).comp h_norm_tendsto
     simp only [Function.comp_def, ENNReal.ofReal_zero] at h_comp
     exact h_comp
-  -- Coercion: u n.coeFn → u_lim.coeFn in eLpNorm sense.
   have h_aeEq : ∀ n, (((u n - u_lim) : Lp ℝ 2 _) : M → ℝ) =ᵐ[
         riemannianVolumeMeasure (I := I) (M := M) g]
       (fun x => ((u n : Lp ℝ 2 _) : M → ℝ) x -
         ((u_lim : Lp ℝ 2 _) : M → ℝ) x) := by
     intro n
     have := MeasureTheory.Lp.coeFn_sub (u n) u_lim
-    -- (a - b).coeFn =ᵐ a.coeFn - b.coeFn (pointwise sub).
     filter_upwards [this] with x hx
     exact hx
   have h_diff_tendsto :
@@ -596,7 +541,6 @@ lemma chartPushedLpFromLp_tendsto
       exact MeasureTheory.eLpNorm_congr_ae (h_aeEq n).symm
     rw [h_funeq]
     exact h_eLpNorm_tendsto
-  -- Apply chartPushed_tendsto_chartPulledWeightedMeasure.
   have hu_meas : ∀ n, Measurable ((u n : Lp ℝ 2 _) : M → ℝ) := fun n =>
     (Lp.stronglyMeasurable (u n)).measurable
   have hu_lim_meas : Measurable ((u_lim : Lp ℝ 2 _) : M → ℝ) :=
@@ -604,7 +548,6 @@ lemma chartPushedLpFromLp_tendsto
   have h_chartPushed_eLp_tendsto :=
     chartPushed_tendsto_chartPulledWeightedMeasure (I := I) (M := M) g α
       hu_meas hu_lim_meas h_diff_tendsto
-  -- Now convert eLpNorm-tendsto-zero of chart-pushed diffs to Lp-tendsto.
   rw [tendsto_iff_dist_tendsto_zero]
   have h_dist_eq : ∀ n,
       dist (chartPushedLpFromLp (I := I) (M := M) g α (u n))
@@ -659,13 +602,6 @@ lemma chartPushedLpFromLp_tendsto
     simpa using h_comp
   exact h_toReal_tendsto
 
-/-! ## Smooth-case representation of LHS mass
-
-The smooth-case LHS mass integrand `density · chartPushed POU α v.toFun · ψ`
-equals `chartPushed POU α v.toFun · ψ` against the chart-pulled weighted
-measure restricted to chartTarget. This is in turn an `Lp 2` inner product
-between `massMultiplierLp ψ` and `chartPushedLpFromLp (smoothToLp v)`. -/
-
 private lemma smooth_lhs_mass_integral_eq_weighted
     (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) (ψ : EuclN → ℝ) :
@@ -716,22 +652,15 @@ private lemma chartPushedLpFromLp_smoothToLp_aeEq
   classical
   have h_lp_coeFn := chartPushedLpFromLp_coeFn (I := I) (M := M) g α
     (smoothToLp (I := I) (M := M) g v)
-  -- (smoothToLp g v).coeFn =ᵐ[μ_g] v.toFun.
   have h_smooth_coe : ((smoothToLp (I := I) (M := M) g v :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) =ᵐ[
         riemannianVolumeMeasure (I := I) (M := M) g] v.toFun :=
     MemLp.coeFn_toLp v.memLp_two
   refine h_lp_coeFn.trans ?_
-  -- Now need: chartPushed POU α (smoothToLp v).coeFn =ᵐ chartPushed POU α v.toFun
-  -- on (chart-pulled-weighted).restrict chartTarget.
-  -- The chart-push is linear in the function argument; for a.e.-equal `u₁ =ᵐ[μ_g] u₂`,
-  -- the chart-pushed difference has eLpNorm 0 on the chart-pulled-weighted restrict.
-  -- We package this via the existing `eLpNorm_chartPushed_chartPulledWeightedMeasure_restrict_le`.
   have h_meas_lp_coe : Measurable
       ((smoothToLp (I := I) (M := M) g v : Lp ℝ 2 _) : M → ℝ) :=
     (Lp.stronglyMeasurable _).measurable
   have h_meas_v : Measurable v.toFun := v.smooth.continuous.measurable
-  -- eLpNorm of the diff on μ_g is 0.
   have h_zero_μg : eLpNorm
         (fun x : M => ((smoothToLp (I := I) (M := M) g v :
               Lp ℝ 2 _) : M → ℝ) x - v.toFun x) 2
@@ -742,7 +671,6 @@ private lemma chartPushedLpFromLp_smoothToLp_aeEq
     filter_upwards [h_smooth_coe] with x hx
     change ((smoothToLp (I := I) (M := M) g v : Lp ℝ 2 _) : M → ℝ) x - v.toFun x = 0
     rw [hx, sub_self]
-  -- eLpNorm bound: eLpNorm (chartPushed_diff) ≤ C · eLpNorm (diff).
   obtain ⟨C, _hC_pos, hC_bnd⟩ :=
     eLpNorm_chartPushed_chartPulledWeightedMeasure_restrict_le (I := I) (M := M) g α
       (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2) (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)
@@ -751,7 +679,6 @@ private lemma chartPushedLpFromLp_smoothToLp_aeEq
             Lp ℝ 2 _) : M → ℝ) x - v.toFun x) :=
     h_meas_lp_coe.sub h_meas_v
   have h_diff_bound := hC_bnd h_sub_meas
-  -- Rewrite the chart-pushed of (u - v.toFun) as chart-pushed(u) - chart-pushed(v).
   have h_chart_diff :
         DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed (I := I) (M := M)
           (chartAtlasPOU I M) α
@@ -768,7 +695,6 @@ private lemma chartPushedLpFromLp_smoothToLp_aeEq
     ring
   rw [h_chart_diff] at h_diff_bound
   rw [h_zero_μg, mul_zero] at h_diff_bound
-  -- h_diff_bound: eLpNorm (chart-pushed diff) ≤ 0, so = 0.
   have h_chart_eLpNorm_zero : eLpNorm
       (fun y =>
         DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed (I := I) (M := M)
@@ -779,7 +705,6 @@ private lemma chartPushedLpFromLp_smoothToLp_aeEq
         ((chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α)) = 0 :=
     le_antisymm h_diff_bound (zero_le _)
-  -- From eLpNorm = 0, get a.e. zero.
   have h_aestrong : AEStronglyMeasurable (fun y =>
       DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed (I := I) (M := M)
         (chartAtlasPOU I M) α (((smoothToLp (I := I) (M := M) g v :
@@ -826,7 +751,6 @@ private lemma smooth_lhs_mass_eq_inner
   have h_ψ := massMultiplierLp_coeFn (I := I) (M := M) g α hψ hψ_cs hψ_supp
   have h_C := chartPushedLpFromLp_smoothToLp_aeEq (I := I) (M := M) g α v
   filter_upwards [h_ψ, h_C] with y h_ψy h_Cy
-  -- Real inner product: ⟨x, y⟩ = y * x.
   rw [show @inner ℝ _ _
       (((massMultiplierLp (I := I) (M := M) g α hψ hψ_cs hψ_supp :
           Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -843,8 +767,6 @@ private lemma smooth_lhs_mass_eq_inner
           Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
             (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) from rfl]
   rw [h_ψy, h_Cy]
-
-/-! ## Limit-passage of the LHS principal and LHS mass integrals -/
 
 /-- For a smooth approximating sequence `v_n → u_h` in `H1Compl g`, the
 per-`i` smooth-case LHS principal integrals converge to the corresponding
@@ -869,7 +791,6 @@ private lemma smooth_lhs_principal_per_i_tendsto
         chartPushedWeakPartialLp (I := I) (M := M) g α i
           (chartPushedPartialLipschitz_canonical (I := I) (M := M) g α i) u_h⟫_ℝ) := by
   classical
-  -- Rewrite each smooth-case integral as an inner product.
   have h_per_n : ∀ n,
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
           (∑ j : Fin (Module.finrank ℝ E),
@@ -881,10 +802,6 @@ private lemma smooth_lhs_principal_per_i_tendsto
           chartPushedPartialLp (I := I) (M := M) g α i (v n)
             (chartPushedPartial_memLp (I := I) (M := M) g α i (v n))⟫_ℝ := fun n =>
     smooth_lhs_principal_per_i_eq_inner (I := I) (M := M) g α i hψ hψ_cs hψ_supp (v n)
-  -- The inner product is continuous in the second argument; chartPushedWeakPartialLp
-  -- is continuous in u_h; for smooth v_n, chartPushedWeakPartialLp (smoothToH1Compl v_n)
-  -- = chartPushedPartialLp v_n.
-  -- So the inner products of LHS converge to the target.
   have h_smooth_case_eq : ∀ n,
       chartPushedPartialLp (I := I) (M := M) g α i (v n)
           (chartPushedPartial_memLp (I := I) (M := M) g α i (v n)) =
@@ -911,7 +828,6 @@ private lemma smooth_lhs_principal_per_i_tendsto
         chartPushedWeakPartialLp (I := I) (M := M) g α i
           (chartPushedPartialLipschitz_canonical (I := I) (M := M) g α i) u_h⟫_ℝ) :=
     Filter.Tendsto.inner tendsto_const_nhds h_cwpL_tendsto
-  -- Rewrite the sequence to match.
   rw [show (fun n =>
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
           (∑ j : Fin (Module.finrank ℝ E),
@@ -949,7 +865,6 @@ private lemma smooth_lhs_mass_tendsto
         chartPushedLpFromLp (I := I) (M := M) g α
           (H1ComplToLp (I := I) (M := M) g u_h)⟫_ℝ) := by
   classical
-  -- Rewrite each smooth-case integral as an inner product.
   have h_per_n : ∀ n,
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
           densityOnEuclid (I := I) g α y *
@@ -960,12 +875,9 @@ private lemma smooth_lhs_mass_tendsto
           chartPushedLpFromLp (I := I) (M := M) g α
             (smoothToLp (I := I) (M := M) g (v n))⟫_ℝ := fun n =>
     smooth_lhs_mass_eq_inner (I := I) (M := M) g α hψ hψ_cs hψ_supp (v n)
-  -- smoothToLp v_n → H1ComplToLp u_h in Lp ℝ 2 μ_g.
   have h_lp_tendsto : Tendsto (fun n => smoothToLp (I := I) (M := M) g (v n))
       atTop (𝓝 (H1ComplToLp (I := I) (M := M) g u_h)) :=
     smoothToLp_tendsto_H1ComplToLp_of_h1_tendsto (I := I) (M := M) g h_tendsto
-  -- chartPushedLpFromLp ∘ smoothToLp v_n → chartPushedLpFromLp ∘ H1ComplToLp u_h
-  -- by the Lp continuity of chartPushedLpFromLp.
   have h_cPL_tendsto :
       Tendsto (fun n => chartPushedLpFromLp (I := I) (M := M) g α
           (smoothToLp (I := I) (M := M) g (v n))) atTop
@@ -1017,7 +929,6 @@ private lemma general_lhs_principal_per_i_eq_inner
   classical
   have h_meas_chartTarget : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     (Sobolev.Chart.chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
-  -- Pointwise rewrite of the integrand on chartTarget.
   have h_pointwise : ∀ y ∈ chartTargetEuclid (I := I) (M := M) α,
       (∑ j : Fin (Module.finrank ℝ E),
           weightedInvGramOnEuclid (I := I) g α i j y *
@@ -1107,7 +1018,6 @@ private lemma general_lhs_mass_eq_inner
   classical
   have h_meas_chartTarget : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     (Sobolev.Chart.chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
-  -- Convert: ∫ density · X · ψ ∂vol = ∫ X · ψ ∂(weighted, restrict).
   rw [show ∫ y in chartTargetEuclid (I := I) (M := M) α,
         densityOnEuclid (I := I) g α y *
           DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed (I := I) (M := M)
@@ -1228,10 +1138,8 @@ private lemma general_lhs_principal_eq_sum_inner
     (chartTargetEuclid (I := I) (M := M) α)
   have h_meas_chartTarget : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     (Sobolev.Chart.chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
-  -- Step a: pointwise rewrite of the integrand.
   rw [MeasureTheory.setIntegral_congr_fun h_meas_chartTarget
     (fun y hy => general_lhs_principal_full_integrand_pointwise (I := I) (M := M) g α u_h hy)]
-  -- Step b: change of measure ∫ density · _ ∂vol = ∫ _ ∂(weighted, restrict).
   rw [← setIntegral_chartPulledWeighted_eq_setIntegral_density_mul_volume
     (I := I) (M := M) g α
     (fun y => ∑ i : Fin (Module.finrank ℝ E),
@@ -1239,7 +1147,6 @@ private lemma general_lhs_principal_eq_sum_inner
         ((chartPushedWeakPartialLp (I := I) (M := M) g α i
           (chartPushedPartialLipschitz_canonical (I := I) (M := M) g α i) u_h :
           Lp ℝ 2 _) : EuclN → ℝ) y)]
-  -- Step c: integrability of each summand.
   have h_per_i_integrable : ∀ i : Fin (Module.finrank ℝ E),
       Integrable (fun y =>
         principalMultiplier (I := I) (M := M) g α i ψ y *
@@ -1261,10 +1168,7 @@ private lemma general_lhs_principal_eq_sum_inner
       Lp.memLp _
     exact MemLp.integrable_mul h_P h_C
   rw [MeasureTheory.integral_finset_sum _ (fun i _ => h_per_i_integrable i)]
-  -- Step d: identify each per-i integral with the inner product.
   refine Finset.sum_congr rfl fun i _ => ?_
-  -- ∫ P_i · partial ∂μ = ⟨P_i_lp, chartPushedWeakPartialLp_i u_h⟩.
-  -- Use L2.inner_def and the a.e. coercion.
   rw [L2.inner_def (𝕜 := ℝ)]
   refine MeasureTheory.integral_congr_ae ?_
   have h_P := principalMultiplierLp_coeFn (I := I) (M := M) g α i hψ hψ_cs hψ_supp
@@ -1286,15 +1190,6 @@ private lemma general_lhs_principal_eq_sum_inner
             (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) from rfl]
   rw [h_Py]
   ring
-
-/-! ## RHS limit-passage: smooth case → general case via the bilinear bypass
-
-The RHS smooth-case integral
-`∫_chartTarget density · (pouScalar α v_n).oneSubLap.toFun(symm y) · ψ dy`
-equals `chartPulledIntegralCLM g α (density · ψ) (fHLeibniz (smoothToH1Compl v_n) _)`
-via `smoothToLp_pouScalar_oneSubLap_eq_fHLeibniz` and
-`chartPulledIntegralCLM_smoothToLp`. The general-case limit follows by
-combining the three bilinear-bypass tendsto lemmas. -/
 
 private lemma rhs_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz_general
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -1318,8 +1213,6 @@ private lemma rhs_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz_general
         (densityPsi_supp (I := I) (M := M) (g := g) (α := α) hψ_supp)
         (fHLeibniz (I := I) (M := M) g α u_h hu_h))) := by
   classical
-  -- Step 1: rewrite the smooth-case integral as
-  --   chartPulledIntegralCLM g α (density · ψ) (smoothToLp (pouScalar α v_n).oneSubLap).
   have h_eq_smooth : ∀ n,
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
           densityOnEuclid (I := I) g α y *
@@ -1339,8 +1232,6 @@ private lemma rhs_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz_general
       (Sobolev.Chart.chartTargetEuclid_isOpen
         (I := I) (M := M) α).measurableSet (fun y _ => ?_)
     ring
-  -- Step 2: by smoothToLp_pouScalar_oneSubLap_eq_fHLeibniz, the smoothToLp class
-  -- equals fHLeibniz (smoothToH1Compl v_n) _.
   have h_eq_fHLeibniz_smooth : ∀ n,
       smoothToLp (I := I) (M := M) g
           (pouScalar (I := I) (M := M) α (v n)).oneSubLapClassical =
@@ -1348,9 +1239,6 @@ private lemma rhs_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz_general
           (smoothToH1Compl (I := I) (M := M) g (v n))
           (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) (v n)) :=
     fun n => smoothToLp_pouScalar_oneSubLap_eq_fHLeibniz (I := I) (M := M) g α (v n)
-  -- Step 3: chartPulledIntegralCLM applied to fHLeibniz (smoothToH1Compl v_n) _ is linear in
-  -- the fHLeibniz argument; expanding using fHLeibniz_smoothToH1Compl gives a sum of three
-  -- chartPulledIntegralCLM applications, each of which tendsto its general-case counterpart.
   have h_fHLeibniz_eq : ∀ n,
       chartPulledIntegralCLM (I := I) (M := M) g α
           (densityPsi_cont (I := I) (M := M) (g := g) (α := α) hψ hψ_supp)
@@ -1382,7 +1270,6 @@ private lemma rhs_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz_general
     rw [h_eq_fHLeibniz_smooth n, fHLeibniz_smoothToH1Compl]
     simp only [ContinuousLinearMap.map_sub, ContinuousLinearMap.map_smul,
       smul_eq_mul]
-  -- Step 4: the three bilinear-bypass limits.
   have h_lim_1 := chartPulledIntegralCLM_smoothMulLp_oneSubLap_tendsto
     (I := I) (M := M) g α hψ hψ_cs hψ_supp hu_h h_v_tendsto
   have h_lim_2 := chartPulledIntegralCLM_gradInnerSmooth_tendsto
@@ -1433,8 +1320,6 @@ private lemma rhs_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz_general
               (H1ComplToLp (I := I) (M := M) g u_h)))) := by
     refine (h_lim_1.sub ?_).sub h_lim_3
     exact (tendsto_const_nhds.mul h_lim_2 : Tendsto _ _ _)
-  -- Step 5: the limit matches the chart-pulled-integral CLM applied to fHLeibniz u_h hu_h
-  -- via the linearity-only `laplacianDomain_variational_identity_clm_form` theorem.
   have h_target_eq :
       chartPulledIntegralCLM (I := I) (M := M) g α
             (densityPsi_cont (I := I) (M := M) (g := g) (α := α) hψ hψ_supp)
@@ -1464,7 +1349,6 @@ private lemma rhs_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz_general
           (fHLeibniz (I := I) (M := M) g α u_h hu_h) :=
     laplacianDomain_variational_identity_clm_form
       (I := I) (M := M) g α hu_h hψ hψ_cs hψ_supp
-  -- Step 6: combine.
   rw [show (fun n =>
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
         densityOnEuclid (I := I) g α y *
@@ -1495,8 +1379,6 @@ private lemma rhs_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz_general
     funext n; rw [h_eq_smooth n, h_fHLeibniz_eq n]]
   rw [← h_target_eq]
   exact h_sum_lim
-
-/-! ## Public form-B headline -/
 
 /-- **The substantive form-B chart-pulled variational identity.**
 
@@ -1546,10 +1428,8 @@ theorem laplacianDomain_variational_identity_general
       (densityPsi_supp (I := I) (M := M) (g := g) (α := α) hψ_supp)
       (fHLeibniz (I := I) (M := M) g α u_h hu_h) := by
   classical
-  -- Step 1: pick a smooth approximating sequence v_n → u_h.
   obtain ⟨v, h_v_tendsto⟩ :=
     exists_smooth_approx_seq (I := I) (M := M) g u_h
-  -- Step 2: smooth-case identity for each v_n.
   have h_smooth_case : ∀ n,
       (∫ y in chartTargetEuclid (I := I) (M := M) α,
         (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
@@ -1569,7 +1449,6 @@ theorem laplacianDomain_variational_identity_general
           ψ y ∂(volume : Measure EuclN) := fun n =>
     laplacianDomain_variational_identity_smooth_case (I := I) (M := M) g α (v n)
       hψ hψ_cs hψ_supp
-  -- Step 3: LHS principal converges via sum of per-i convergences.
   have h_per_i_tendsto : ∀ i : Fin (Module.finrank ℝ E),
       Tendsto (fun n =>
         ∫ y in chartTargetEuclid (I := I) (M := M) α,
@@ -1582,8 +1461,6 @@ theorem laplacianDomain_variational_identity_general
         chartPushedWeakPartialLp (I := I) (M := M) g α i
           (chartPushedPartialLipschitz_canonical (I := I) (M := M) g α i) u_h⟫_ℝ) :=
     fun i => smooth_lhs_principal_per_i_tendsto (I := I) (M := M) g α i hψ hψ_cs hψ_supp h_v_tendsto
-  -- The full LHS principal integral converges via sum of per-i convergences plus a
-  -- single sum-integral swap on the smooth side.
   have h_swap_n : ∀ n,
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
           (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
@@ -1599,20 +1476,8 @@ theorem laplacianDomain_variational_identity_general
                 (fderiv ℝ ψ y) (EuclideanSpace.single j 1))
             ∂(volume : Measure EuclN) := by
     intro n
-    -- Apply integral_finset_sum to swap ∫ and ∑_i. Need integrability per-i.
-    -- The per-i integrand on chartTarget equals (via the change-of-measure) the L²
-    -- inner product `⟨P_i ψ_lp, chartPushedPartialLp v_n⟩`, which IS an integral against
-    -- the chart-pulled-weighted measure restricted to chartTarget. We use this to
-    -- avoid proving integrability directly.
-    -- Plan: rewrite each per-i integral via smooth_lhs_principal_per_i_integral_eq_weighted,
-    -- to bring everything to ∂(weighted).restrict chartTarget; then linearity of integral
-    -- on that measure (where each factor is MemLp 2) handles the swap.
-    -- It's simpler to invoke the per-i integral identity for both sides and apply the
-    -- swap on the chart-pulled-weighted-restricted measure where each `P_i · ∂_i v` is
-    -- integrable (Hölder).
     set μ := (chartPulledWeightedMeasure (I := I) g α).restrict
       (chartTargetEuclid (I := I) (M := M) α)
-    -- Step a: per-i integral on the volume side = ∫ P_i ψ · ∂_i v_n ∂μ.
     have h_per_i_eq : ∀ i : Fin (Module.finrank ℝ E),
         ∫ y in chartTargetEuclid (I := I) (M := M) α,
           (∑ j : Fin (Module.finrank ℝ E),
@@ -1623,9 +1488,6 @@ theorem laplacianDomain_variational_identity_general
           ∫ y, principalMultiplier (I := I) (M := M) g α i ψ y *
               chartPushedPartial (I := I) (M := M) g α i (v n) y ∂μ := fun i =>
       smooth_lhs_principal_per_i_integral_eq_weighted (I := I) (M := M) g α i hψ (v n)
-    -- Step b: also the full double-sum integral on the volume side equals the integral
-    -- of `∑_i (P_i · ∂_i v_n)` on the μ side, via the same change-of-measure argument
-    -- applied with the outer summation.
     have h_full_eq :
         ∫ y in chartTargetEuclid (I := I) (M := M) α,
             (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
@@ -1638,7 +1500,6 @@ theorem laplacianDomain_variational_identity_general
               chartPushedPartial (I := I) (M := M) g α i (v n) y ∂μ := by
       have h_meas_chartTarget : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
         (Sobolev.Chart.chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
-      -- Pointwise: the double sum on chartTarget equals density · (∑_i P_i · ∂_i v_n).
       have h_pointwise : ∀ y ∈ chartTargetEuclid (I := I) (M := M) α,
           (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
             weightedInvGramOnEuclid (I := I) g α i j y *
@@ -1682,7 +1543,6 @@ theorem laplacianDomain_variational_identity_general
         (fun y => ∑ i : Fin (Module.finrank ℝ E),
           principalMultiplier (I := I) (M := M) g α i ψ y *
             chartPushedPartial (I := I) (M := M) g α i (v n) y)]
-    -- Step c: on the μ side, swap ∫ and ∑_i.
     have h_per_i_memLp_P : ∀ i : Fin (Module.finrank ℝ E),
         MemLp (principalMultiplier (I := I) (M := M) g α i ψ) 2 μ :=
       fun i => continuous_compactSupport_memLp_chartPulledWeighted_restrict
@@ -1700,13 +1560,11 @@ theorem laplacianDomain_variational_identity_general
       intro i
       have h_P := h_per_i_memLp_P i
       have h_C := h_per_i_memLp_C i
-      -- Cauchy-Schwarz: ‖P · C‖_{L¹} ≤ ‖P‖_{L²} · ‖C‖_{L²}, both finite ⇒ integrable.
       exact MemLp.integrable_mul h_P h_C
     rw [h_full_eq]
     rw [MeasureTheory.integral_finset_sum _ (fun i _ => h_per_i_integrable i)]
     refine Finset.sum_congr rfl (fun i _ => ?_)
     exact (h_per_i_eq i).symm
-  -- The full LHS principal limit is the sum of per-i limits.
   have h_lhs_principal_tendsto : Tendsto (fun n =>
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
         (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
@@ -1718,7 +1576,6 @@ theorem laplacianDomain_variational_identity_general
       ⟪principalMultiplierLp (I := I) (M := M) g α i hψ hψ_cs hψ_supp,
         chartPushedWeakPartialLp (I := I) (M := M) g α i
           (chartPushedPartialLipschitz_canonical (I := I) (M := M) g α i) u_h⟫_ℝ)) := by
-    -- Combine h_swap_n with sum-of-per-i convergences.
     rw [show (fun n =>
         ∫ y in chartTargetEuclid (I := I) (M := M) α,
           (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
@@ -1734,16 +1591,11 @@ theorem laplacianDomain_variational_identity_general
               (fderiv ℝ ψ y) (EuclideanSpace.single j 1))
           ∂(volume : Measure EuclN)) from funext h_swap_n]
     exact tendsto_finset_sum _ (fun i _ => h_per_i_tendsto i)
-  -- LHS mass converges.
   have h_lhs_mass_tendsto :=
     smooth_lhs_mass_tendsto (I := I) (M := M) g α hψ hψ_cs hψ_supp h_v_tendsto
-  -- RHS converges via the bilinear bypass.
   have h_rhs_tendsto := rhs_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz_general
     (I := I) (M := M) g α hψ hψ_cs hψ_supp hu_h h_v_tendsto
-  -- Sum of LHS-principal and LHS-mass converges to the sum of limits.
   have h_lhs_sum_tendsto := h_lhs_principal_tendsto.add h_lhs_mass_tendsto
-  -- By the smooth-case identity, this matches the RHS convergence:
-  -- per-n, LHS_n = RHS_n.
   have h_smooth_eq_fun : (fun n =>
       ((∫ y in chartTargetEuclid (I := I) (M := M) α,
         (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
@@ -1762,11 +1614,6 @@ theorem laplacianDomain_variational_identity_general
           ((pouScalar (I := I) (M := M) α (v n)).oneSubLapClassical.toFun)
             ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) *
           ψ y ∂(volume : Measure EuclN) := funext h_smooth_case
-  -- LHS limit is the sum limit. We need LHS limit = RHS limit, i.e., the two
-  -- limits coincide via the smooth-case equation per-n.
-  -- LHS_n + Mass_n converges to (sum of principal + mass limits).
-  -- RHS_n converges to chartPulledIntegralCLM (fHLeibniz u_h hu_h).
-  -- By smooth-case equation, LHS_n + Mass_n = RHS_n. Take limits.
   have h_LHS_eq_RHS_lim : (∑ i : Fin (Module.finrank ℝ E),
         ⟪principalMultiplierLp (I := I) (M := M) g α i hψ hψ_cs hψ_supp,
           chartPushedWeakPartialLp (I := I) (M := M) g α i
@@ -1779,8 +1626,6 @@ theorem laplacianDomain_variational_identity_general
       (densityPsi_cs (I := I) (M := M) (g := g) (α := α) hψ_cs)
       (densityPsi_supp (I := I) (M := M) (g := g) (α := α) hψ_supp)
       (fHLeibniz (I := I) (M := M) g α u_h hu_h) := by
-    -- By the smooth-case identity, the LHS sequence equals the RHS sequence;
-    -- so they have the same limit. h_lhs_sum_tendsto and h_rhs_tendsto.
     have h_seq_eq : (fun n =>
         (∫ y in chartTargetEuclid (I := I) (M := M) α,
           (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
@@ -1820,8 +1665,6 @@ theorem laplacianDomain_variational_identity_general
             (H1ComplToLp (I := I) (M := M) g u_h)⟫_ℝ)) := h_lhs_sum_tendsto
     rw [h_seq_eq] at h_lhs_lim
     exact tendsto_nhds_unique h_lhs_lim h_rhs_tendsto
-  -- Now substitute the LHS_principal_general and LHS_mass_general representations.
-  -- We need: form-B LHS = ∑_i ⟨P_i ψ_lp, chartPushedWeakPartialLp u_h⟩ + ⟨ψ_lp, chartPushedLpFromLp u_h⟩.
   rw [general_lhs_principal_eq_sum_inner (I := I) (M := M) g α hψ hψ_cs hψ_supp u_h,
     general_lhs_mass_eq_inner (I := I) (M := M) g α hψ hψ_cs hψ_supp u_h]
   exact h_LHS_eq_RHS_lim

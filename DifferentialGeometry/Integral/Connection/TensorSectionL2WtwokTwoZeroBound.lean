@@ -81,19 +81,10 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 local notation "EuclN" =>
   EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## POU-weighted chart-target aggregate for the underlying tensor section
-
-We package the right-hand side of the POU-weighted manifold L²-bound into a
-single manifold-defined non-negative `ℝ≥0∞`-valued aggregate, mirroring
-`chartSobolevRawNormPou` but with `T.toSection` in place of
-`rawTensorConnLap T.toSection`. -/
 
 /-- **POU-weighted chart-target aggregate for the tensor section.** For a
 smooth Riemannian manifold `(M, g)`, ranks `(r, s)`, and a smooth
@@ -130,13 +121,6 @@ noncomputable def chartSobolevSectionNormPou
                 (fun b : M => T.toSection b) y)
           ∂(volume : Measure EuclN) := rfl
 
-/-! ## Cauchy–Schwarz: pointwise bound on `‖T.toSection b‖²`
-
-For each point `b : M`, the squared model-fibre norm of `T.toSection b` is
-bounded above by `(card chartAtlasPOU_finset) · Σ_α ρ_α(b)² · ‖T.toSection b‖²`.
-This follows from `Σ_α ρ_α(b) = 1` and the elementary finset Cauchy–Schwarz
-inequality `(Σ_α a_α)² ≤ N · Σ_α a_α²`. -/
-
 private lemma normSq_section_le_card_mul_sum_pou_sq_mul_normSq
     {r s : ℕ} (T : Π b : M, TensorRSSpace r s I b) (x : M) :
     (‖T x‖ ^ 2 : ℝ) ≤
@@ -149,18 +133,13 @@ private lemma normSq_section_le_card_mul_sum_pou_sq_mul_normSq
   set sset : Finset M := chartAtlasPOU_finset (I := I) (M := M) with hs_def
   have hv_nn : 0 ≤ v := norm_nonneg _
   have hv_sq_nn : 0 ≤ v ^ 2 := sq_nonneg _
-  -- POU sum equals one at `x`.
   have h_sum :=
     chartAtlasPOU_finset_sum_eq_one (I := I) (M := M) x
-  -- `v² = (Σ ρ_α · v)²` since `Σ ρ_α = 1`.
   have hv_sq_eq :
       v ^ 2 = (∑ α ∈ sset, (chartAtlasPOU I M α : M → ℝ) x * v) ^ 2 := by
     have heq : ∑ α ∈ sset, (chartAtlasPOU I M α : M → ℝ) x * v = v := by
       rw [← Finset.sum_mul, h_sum, one_mul]
     rw [heq]
-  -- Apply finset Cauchy–Schwarz: `(Σ a_α)² ≤ N · Σ a_α²` with `a_α = ρ_α · v`.
-  -- The lemma `sum_finset_sq_le_card_mul_sum_sq` lives in the bridge file but
-  -- we restate it inline via `Finset.sum_mul_sq_le_sq_mul_sq` for clarity.
   have hCS : (∑ α ∈ sset, (chartAtlasPOU I M α : M → ℝ) x * v) ^ 2 ≤
       (sset.card : ℝ) *
         ∑ α ∈ sset, ((chartAtlasPOU I M α : M → ℝ) x * v) ^ 2 := by
@@ -171,23 +150,15 @@ private lemma normSq_section_le_card_mul_sum_pou_sq_mul_normSq
     have h_sum_one : (∑ _α ∈ sset, (1 : ℝ)) = (sset.card : ℝ) := by simp
     rw [h_sum_one] at hbase
     convert hbase using 1
-  -- Rewrite each `(ρ_α · v)² = ρ_α² · v²`.
   have h_factor_eq : ∑ α ∈ sset, ((chartAtlasPOU I M α : M → ℝ) x * v) ^ 2 =
       ∑ α ∈ sset, ((chartAtlasPOU I M α : M → ℝ) x) ^ 2 * v ^ 2 :=
     Finset.sum_congr rfl (fun α _ => by ring)
   rw [h_factor_eq] at hCS
-  -- Combine: `v² = (Σ ρ_α · v)² ≤ N · Σ ρ_α² · v²`.
   calc (‖T x‖ ^ 2 : ℝ)
       = v ^ 2 := rfl
     _ = (∑ α ∈ sset, (chartAtlasPOU I M α : M → ℝ) x * v) ^ 2 := hv_sq_eq
     _ ≤ (sset.card : ℝ) *
           ∑ α ∈ sset, ((chartAtlasPOU I M α : M → ℝ) x) ^ 2 * v ^ 2 := hCS
-
-/-! ## Per-α chart-pushforward of `∫_M ρ_α² · ‖T.toSection‖² dμ_g`
-
-For each `α ∈ chartAtlasPOU_finset I M`, the manifold integral of
-`ρ_α² · ‖T.toSection‖²` against `μ_g` equals the chart-target integral against
-`volume`, weighted by `chartDensity g α` and the Haar factor `c_E`. -/
 
 private lemma manifold_lintegral_pou_sq_section_normSq_eq_chartTarget
     {r s : ℕ} (g : SmoothRiemannianMetric I M)
@@ -223,7 +194,6 @@ private lemma manifold_lintegral_pou_sq_section_normSq_eq_chartTarget
   have hF_meas : Measurable F := by
     rw [hF_def]
     exact ENNReal.measurable_ofReal.comp (hρ_sq_meas.mul hsec_meas)
-  -- `F` is supported in `(chartAt H α).source`.
   have hF_supp : ∀ x : M, x ∉ (chartAt H α).source → F x = 0 := by
     intro x hx
     have hρ_zero : (chartAtlasPOU I M α : M → ℝ) x = 0 := by
@@ -244,11 +214,6 @@ private lemma manifold_lintegral_pou_sq_section_normSq_eq_chartTarget
   rw [chartLocalMeasure_lintegral_via_chartTargetEuclid
       (I := I) (M := M) g α hF_meas]
 
-/-! ## Bridge to `pushedNormSq` for `T.toSection`
-
-On the chart-target image, `‖T.toSection (symm.symm y)‖²` equals
-`tensorTrivProjPushedNormSq g r s α (fun b => T.toSection b) y`. -/
-
 private lemma section_normSq_apply_eq_pushedNormSq
     {r s : ℕ} (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g r s)
@@ -262,17 +227,7 @@ private lemma section_normSq_apply_eq_pushedNormSq
   rw [tensorTrivProjPushedNormSq_apply_of_mem
       (I := I) (M := M) g r s α
       (fun b : M => T.toSection b) hy]
-  -- `‖TensorRSSpace.toModel X‖ = ‖X‖` by the induced norm.
   rfl
-
-/-! ## Per-α density × POU² uniform bound (reused argument)
-
-We reuse the density bound `density_pou_sq_le` from the existing raw bridge
-file inline (the proof is identical to that of the raw analog, replacing the
-raw connection Laplacian by `T.toSection`). The bound is symbolic: it does
-not depend on which scalar `‖·‖² function` is multiplied — it only bounds
-`chartDensity g α (symm.symm y) · ρ_α(symm.symm y)²` by
-`(chartDensitySupPou g α + 1) · ρ_α(symm.symm y)²` on the chart target. -/
 
 private lemma density_pou_sq_le_section
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -316,12 +271,6 @@ private lemma density_pou_sq_le_section
       linarith
     exact mul_le_mul_of_nonneg_right hbound hρ_sq_nn
 
-/-! ## Bridge 1: manifold L² ≤ Const · POU section aggregate
-
-Following the proof of `rawTensorConnLap_L2NormSq_le_chartSobolevRawNormPou`,
-we bound the manifold L² of `‖T.toSection‖²` by a constant multiple of the
-POU-weighted chart-target aggregate `chartSobolevSectionNormPou`. -/
-
 theorem tensorSection_L2NormSq_le_chartSobolevSectionNormPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -344,7 +293,6 @@ theorem tensorSection_L2NormSq_le_chartSobolevSectionNormPou
   have hMα_nn : ∀ α : M, 0 ≤ Mα α := fun α =>
     chartDensitySupPou_nonneg (I := I) (M := M) g α
   set C : ℝ := chartSobolevRawNormPouBridgeConstant (I := I) (M := M) g with hC_def
-  -- `enorm² = ofReal ‖·‖²` rewrite.
   have henorm_sq :
       (fun x : M => (‖T.toSection x‖ₑ : ℝ≥0∞) ^ 2) =
         (fun x : M => ENNReal.ofReal (‖T.toSection x‖ ^ 2)) := by
@@ -353,7 +301,6 @@ theorem tensorSection_L2NormSq_le_chartSobolevSectionNormPou
       (ofReal_norm _).symm
     rw [hen, ← ENNReal.ofReal_pow (norm_nonneg _) 2]
   rw [henorm_sq]
-  -- Step 1: pointwise Cauchy–Schwarz bound.
   have h_pointwise : ∀ x : M,
       ENNReal.ofReal (‖T.toSection x‖ ^ 2) ≤
         ENNReal.ofReal ((N : ℝ) *
@@ -364,7 +311,6 @@ theorem tensorSection_L2NormSq_le_chartSobolevSectionNormPou
     have hle := normSq_section_le_card_mul_sum_pou_sq_mul_normSq
       (I := I) (M := M) (r := r) (s := s) (fun b => T.toSection b) x
     refine ENNReal.ofReal_le_ofReal hle
-  -- Step 2: integrate.
   have h_int_le :
       ∫⁻ x, ENNReal.ofReal (‖T.toSection x‖ ^ 2)
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤
@@ -374,7 +320,6 @@ theorem tensorSection_L2NormSq_le_chartSobolevSectionNormPou
                 ‖T.toSection x‖ ^ 2)
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
     MeasureTheory.lintegral_mono h_pointwise
-  -- Step 3: split the RHS.
   have h_nn_each : ∀ x : M, ∀ α ∈ Sfin,
       0 ≤ ((chartAtlasPOU I M α : M → ℝ) x) ^ 2 * ‖T.toSection x‖ ^ 2 := by
     intro x α _
@@ -446,7 +391,6 @@ theorem tensorSection_L2NormSq_le_chartSobolevSectionNormPou
                 hρ_cont.measurable
               exact ENNReal.measurable_ofReal.comp
                 ((hρ_meas.pow_const 2).mul hsec_meas))
-  -- Step 4: per-α push-forward bound.
   have h_per_alpha : ∀ α ∈ Sfin,
       ∫⁻ x, ENNReal.ofReal
             (((chartAtlasPOU I M α : M → ℝ) x) ^ 2 * ‖T.toSection x‖ ^ 2)
@@ -467,7 +411,6 @@ theorem tensorSection_L2NormSq_le_chartSobolevSectionNormPou
       exact hα_mem.mono (subset_tsupport _)
     rw [manifold_lintegral_pou_sq_section_normSq_eq_chartTarget
       (I := I) (M := M) g T hsec_meas α]
-    -- Pointwise bound on `chartTargetEuclid α`.
     have hpt_bound : ∀ y, y ∈ chartTargetEuclid (I := I) (M := M) α →
         ENNReal.ofReal
             (chartDensity g α
@@ -685,7 +628,6 @@ theorem tensorSection_L2NormSq_le_chartSobolevSectionNormPou
             rw [ENNReal.ofReal_mul (NNReal.coe_nonneg _)]
             congr 1
             rw [ENNReal.ofReal_coe_nnreal]
-  -- Step 5: combine.
   set Sum_pou : Finset M → ℝ := fun s =>
     ∑ β ∈ s, (Mα β + 1) with hSum_pou_def
   set C_inner : ℝ := cE * Sum_pou Sfin with hC_inner_def

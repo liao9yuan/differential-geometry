@@ -83,8 +83,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 variable [CompleteSpace E]
 
-/-! ## The curvature contraction as a smooth compactly-supported section -/
-
 /-- **The curvature contraction `R(X, Y) Z` as a smooth section.** For smooth global tangent
 fields `X, Y` and a smooth compactly-supported `(0, s)`-tensor section `Z`, the section-level
 Riemann curvature `b ↦ riemannSec (tensorCov g 0 s) X Y Z b` is smooth
@@ -133,8 +131,6 @@ theorem curvatureContraction_toSection_apply
   exact riemannSec_eq_riemannOp_smooth (cov := tensorCov (I := I) g 0 s) hX hY
     Z.toSection.contMDiff
 
-/-! ## The uniform curvature bound `‖R‖_∞` -/
-
 set_option linter.unusedSectionVars false in
 /-- **Uniform curvature fibre-norm bound `‖R‖_∞`.** For smooth global tangent fields `X, Y`
 and a smooth compactly-supported `(0, s)`-tensor section `Z` on a closed Riemannian manifold,
@@ -165,8 +161,6 @@ theorem exists_uniform_riemannianFiberNormSq_riemannOp_bound
   have hx := hK x
   rwa [curvatureContraction_toSection_apply (I := I) (M := M) g s Z hX hY x] at hx
 
-/-! ## The differentiated curvature `∇R` as a smooth section -/
-
 /-- **The covariant gradient of the curvature contraction `∇(R(X, Y) Z)`.** Applying the
 section-level covariant gradient `covGrad g 0 s` to the smooth curvature-contraction section
 `curvatureContraction g s Z hX hY` produces a smooth compactly-supported
@@ -194,8 +188,6 @@ lemma covGradCurvatureContraction_toSection
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y)) :
     (covGradCurvatureContraction (I := I) (M := M) g s Z hX hY).toSection =
       (covGrad g 0 s (curvatureContraction (I := I) (M := M) g s Z hX hY)).toSection := rfl
-
-/-! ## The uniform differentiated-curvature bound `‖∇R‖_∞` -/
 
 set_option linter.unusedSectionVars false in
 /-- **Uniform differentiated-curvature fibre-norm bound `‖∇R‖_∞`.** For smooth global tangent

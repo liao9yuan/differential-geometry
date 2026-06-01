@@ -98,13 +98,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 variable {a : ℝ} {T : ℝ}
 
-/-! ## The homogeneous-part time-`L²` defect at the `H^{a+1}` scale
-
-The homogeneous heat flow `e^{tΔ_∇} u₀`, viewed in `L²([0,T]; H^{a+1})`, has
-`i`-th eigen-coordinate `t ↦ e^{−λᵢ t} · cᵢ`.  Its defect against the
-constant `ι u₀` (whose `i`-th eigen-coordinate is the constant `cᵢ`) is the
-per-mode scalar function `t ↦ (e^{−λᵢ t} − 1) · cᵢ`. -/
-
 /-- The `i`-th time-mode coordinate of the constant field `const T (ι u₀)` is
 the constant scalar field `const T cᵢ`, `cᵢ = u₀.coeff i`: the inclusion
 `H^{a+2} ↪ H^{a+1}` preserves the eigen-coordinates, and the time-mode
@@ -144,12 +137,10 @@ theorem timeModeCoeff_homog_sub_const_coeFn
               (show (a + 1) ≤ a + 2 by linarith) u₀)) i) =ᵐ[timeMeasure T]
       fun t => (Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) - 1) *
         u₀.coeff i := by
-  -- The first summand: `homModeCoeff u₀ i`, represented by `t ↦ e^{−λᵢ t} cᵢ`.
   have hhom : timeModeCoeff (I := I) (M := M)
       (maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T u₀) i =
         homModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i :=
     maxRegHomogeneousSolFieldHa1_timeModeCoeff (I := I) (M := M) (a := a) hT u₀ i
-  -- The second summand: `timeModeCoeff (-const …) i = - const cᵢ`.
   have hneg : timeModeCoeff (I := I) (M := M)
       (-TimeSobolev.const T
         (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
@@ -172,7 +163,6 @@ theorem timeModeCoeff_homog_sub_const_coeFn
           (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
             (show (a + 1) ≤ a + 2 by linarith) u₀)) from by rw [sub_eq_add_neg],
     timeModeCoeff_add (I := I) (M := M), hhom, hneg]
-  -- Now both pieces have continuous-function representatives.
   have hmode : ⇑(homModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i) =ᵐ[timeMeasure T]
       fun t => Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
         u₀.coeff i :=
@@ -197,13 +187,11 @@ theorem norm_timeModeCoeff_homog_sub_const_sq_le
             (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
               (show (a + 1) ≤ a + 2 by linarith) u₀)) i‖ ^ 2 ≤
       T * (u₀.coeff i) ^ 2 := by
-  -- The defect coordinate agrees a.e. with the continuous defect function.
   set fdiff : ℝ → ℝ :=
     fun t => (Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) - 1) *
       u₀.coeff i with hfdiff_def
   have hcont : Continuous fdiff := by rw [hfdiff_def]; fun_prop
   have hae := timeModeCoeff_homog_sub_const_coeFn (I := I) (M := M) u₀ hT i
-  -- Replace the coordinate by `ofContinuousOn fdiff`, equal a.e.
   have heq : timeModeCoeff (I := I) (M := M)
         (maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T u₀ -
           TimeSobolev.const T
@@ -214,7 +202,6 @@ theorem norm_timeModeCoeff_homog_sub_const_sq_le
     refine Lp.ext ?_
     exact hae.trans (TimeSobolev.coeFn_ofContinuousOn _).symm
   rw [heq]
-  -- Pointwise bound `|fdiff t| ≤ |cᵢ|` from `0 < e^{−λt} ≤ 1` on `[0,T]`.
   have hbound : ‖TimeSobolev.ofContinuousOn (X := ℝ) (T := T) (f := fdiff)
         (hcont.continuousOn)‖ ≤ Real.sqrt T * |u₀.coeff i| := by
     refine TimeSobolev.norm_ofContinuousOn_le_of_bound _ (fun t ht => ?_)
@@ -231,7 +218,6 @@ theorem norm_timeModeCoeff_homog_sub_const_sq_le
         ≤ 1 * |u₀.coeff i| :=
           mul_le_mul_of_nonneg_right habs_le (abs_nonneg _)
       _ = |u₀.coeff i| := one_mul _
-  -- Square the norm bound.
   have hrhs_nonneg : 0 ≤ Real.sqrt T * |u₀.coeff i| :=
     mul_nonneg (Real.sqrt_nonneg _) (abs_nonneg _)
   have hsq : ‖TimeSobolev.ofContinuousOn (X := ℝ) (T := T) (f := fdiff)
@@ -265,14 +251,11 @@ theorem maxRegHomogeneousSolFieldHa1_sub_const_norm_le
           (show (a + 1) ≤ a + 2 by linarith) u₀‖ := by
   set ιu₀ := tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
     (show (a + 1) ≤ a + 2 by linarith) u₀ with hιu₀
-  -- Compare with the constant field `const T (ι u₀)` at the `H^{a+1}` scale,
-  -- mode by mode, with comparison constant `C = 1`.
   rw [show Real.sqrt T * ‖ιu₀‖ = 1 * ‖TimeSobolev.const T ιu₀‖ by
     rw [TimeSobolev.norm_const, one_mul]]
   refine norm_le_of_weighted_perMode_le (I := I) (M := M)
     (a := a + 1) (b := a + 1)
     (h_compact := h_compact) (C := 1) (by norm_num) _ _ (fun i => ?_)
-  -- `(1+λᵢ)^{a+1} ‖defect i‖² ≤ 1² · (1+λᵢ)^{a+1} ‖const cᵢ‖²`.
   have hdefect := norm_timeModeCoeff_homog_sub_const_sq_le (I := I) (M := M) u₀ hT i
   have hconst : timeModeCoeff (I := I) (M := M) (TimeSobolev.const T ιu₀) i =
       TimeSobolev.const T (u₀.coeff i) :=
@@ -285,8 +268,6 @@ theorem maxRegHomogeneousSolFieldHa1_sub_const_norm_le
     tensorSobolevWeight_nonneg (I := I) (M := M) i (a + 1)
   rw [one_pow, one_mul, hconst_norm]
   exact mul_le_mul_of_nonneg_left hdefect hw_nonneg
-
-/-! ## The full field time-`L²` defect and continuity at `0` -/
 
 /-- **The full `H^{a+1}`-view Duhamel field time-`L²` defect bound.**  For the
 forcing `gforce ∈ L²([0,T]; Hᵃ)`, in the `L²([0,T]; H^{a+1})` norm the Duhamel
@@ -314,7 +295,6 @@ theorem maxRegDuhamelSolFieldHa1_sub_const_norm_le_ofCompact (hT : 0 < T) (hT1 :
         2 * Real.sqrt T * ‖gforce‖ := by
   set ιu₀ := tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
     (show (a + 1) ≤ a + 2 by linarith) u₀ with hιu₀
-  -- Split the field as homogeneous + Duhamel, regroup against the constant.
   have hsplit : maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce -
         TimeSobolev.const T ιu₀ =
       (maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T u₀ -
@@ -355,30 +335,25 @@ theorem maxRegDuhamelSolFieldHa1_tendsto_const_ofCompact
               (show (a + 1) ≤ a + 2 by linarith) u₀)‖ ≤ ε := by
   set ιu₀ := tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
     (show (a + 1) ≤ a + 2 by linarith) u₀ with hιu₀
-  -- Coefficient of `√T` in the defect bound: `M := ‖ι u₀‖ + 2 max(B,0)`.
   set Mcoef := ‖ιu₀‖ + 2 * max B 0 with hMcoef
   have hMcoef_nonneg : 0 ≤ Mcoef := by
     have : 0 ≤ 2 * max B 0 := by positivity
     positivity
-  -- Choose `T₀` so that `√T₀ · M ≤ ε`, i.e. `T₀ ≤ (ε / (M + 1))²`, and `T₀ ≤ 1`.
   refine ⟨min 1 ((ε / (Mcoef + 1)) ^ 2), ?_, ?_⟩
   · have hden : 0 < Mcoef + 1 := by positivity
     have : 0 < (ε / (Mcoef + 1)) ^ 2 := by positivity
     exact lt_min one_pos this
   intro T hT hT1 hTT₀ gforce hgB
   have hden : 0 < Mcoef + 1 := by positivity
-  -- `√T ≤ ε / (M + 1)`.
   have hT_le : T ≤ (ε / (Mcoef + 1)) ^ 2 := le_trans hTT₀ (min_le_right _ _)
   have hsqrtT_le : Real.sqrt T ≤ ε / (Mcoef + 1) := by
     rw [show ε / (Mcoef + 1) = Real.sqrt ((ε / (Mcoef + 1)) ^ 2) from
       (Real.sqrt_sq (by positivity)).symm]
     exact Real.sqrt_le_sqrt hT_le
   have hsqrtT_nonneg : 0 ≤ Real.sqrt T := Real.sqrt_nonneg _
-  -- Apply the defect bound and dominate the bound by `√T · M ≤ ε`.
   refine le_trans (maxRegDuhamelSolFieldHa1_sub_const_norm_le_ofCompact (I := I) (M := M)
     (h_compact := h_compact) (a := a) hT hT1 u₀ gforce) ?_
   have hgforce_le : ‖gforce‖ ≤ max B 0 := le_trans hgB (le_max_left _ _)
-  -- `√T·‖ι u₀‖ + 2√T·‖gforce‖ ≤ √T · M`.
   have hcombine : Real.sqrt T * ‖ιu₀‖ + 2 * Real.sqrt T * ‖gforce‖ ≤
       Real.sqrt T * Mcoef := by
     rw [hMcoef, mul_add]
@@ -386,7 +361,6 @@ theorem maxRegDuhamelSolFieldHa1_tendsto_const_ofCompact
     rw [show Real.sqrt T * (2 * max B 0) = 2 * Real.sqrt T * max B 0 by ring]
     exact mul_le_mul_of_nonneg_left hgforce_le (by positivity)
   refine le_trans hcombine ?_
-  -- `√T · M ≤ (ε/(M+1)) · M ≤ ε`.
   calc Real.sqrt T * Mcoef
       ≤ (ε / (Mcoef + 1)) * Mcoef :=
         mul_le_mul_of_nonneg_right hsqrtT_le hMcoef_nonneg

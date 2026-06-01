@@ -78,14 +78,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## (A) The Euclidean variational ODE from the chart-coordinate Picard flow
-
-The chart-coordinate flow `Φ_eucl z s := ΦE (z, s)` is the chart-`α` reading of the bare
-geometric flow.  It is a Picard `IsLocalFlow` datum (delivered by the smooth-dependence
-construction `exists_isLocalFlow_contDiffOn_top` on the chart-pushforward cutoff field), jointly
-`C^∞` on a strictly interior open box.  Its spatial Fréchet-derivative curve therefore carries
-the Euclidean operator-valued variational ODE — exactly the discharge's `heucl`. -/
-
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
 /-- **`heucl` for the bare-flow chart-coordinate reading.**
@@ -108,15 +100,6 @@ theorem heucl_of_bareFlow
       ((fderiv ℝ (f t) (ΦE (extChartAt I (Φ_fam t x) x, t))).comp
         (fderiv ℝ (fun z => ΦE (z, t)) (extChartAt I (Φ_fam t x) x))) t :=
   heucl_factorODE_of_isLocalFlow (I := I) hΦE hf hUopen hΦsmooth (Φ_fam t x) x hxsU hx ht
-
-/-! ## (B) `RawVariationalIdentityFlat` from the bare-flow geometric chart-`α` realisation
-
-The bare-flow geometric realisation `hreal` reads `Φ_fam` in the *target* chart `α := Φ_fam t x`
-as the chart-coordinate flow `Φ_eucl z s := ΦE (z, s)` conjugated by the chart, with the
-chart-coordinate value confined to the chart target.  Composing the section-D discharge with the
-Euclidean variational ODE of Part (A), the moving-trivialisation orbit jet, and the chart-orbit
-velocity, this yields `RawVariationalIdentityFlat` for the concrete bare-flow `Φ_fam` — with no
-`hcompat`. -/
 
 /-- **`RawVariationalIdentityFlat` for the concrete bare-flow `Φ_fam`.**
 
@@ -167,19 +150,15 @@ theorem rawVariationalIdentityFlat_of_bareFlow
           (fderiv ℝ (fun z => ΦE (z, t)) (extChartAt I (Φ_fam t x) x))).comp
         (trivToE (I := I) (Φ_fam t x) x)) := by
   classical
-  -- The chart-coordinate flow in the discharge's `Φ_eucl : E → ℝ → E` shape.
   set Φ_eucl : E → ℝ → E := fun z s => ΦE (z, s) with hΦeucl
-  -- (1) `heucl` from Part (A): the Euclidean operator-valued variational ODE.
   have heucl : HasDerivAt
       (fun s : ℝ => fderiv ℝ (fun z => Φ_eucl z s) (extChartAt I (Φ_fam t x) x))
       ((fderiv ℝ (f t) (ΦE (extChartAt I (Φ_fam t x) x, t))).comp
         (fderiv ℝ (fun z => ΦE (z, t)) (extChartAt I (Φ_fam t x) x))) t :=
     heucl_of_bareFlow (I := I) hΦE hf hUopen hΦsmooth Φ_fam x hxsU hx ht
-  -- (2) `heucl_diff`: per-time spatial differentiability of `Φ_eucl` near `t`, from joint `C^∞`.
   have heucl_diff : ∀ᶠ s : ℝ in 𝓝 t,
       DifferentiableAt ℝ (fun z => Φ_eucl z s) (extChartAt I (Φ_fam t x) x) := by
     filter_upwards [hUtimeOpen] with s hsU
-    -- `ΦE` is `C^∞` at `(extChartAt I α x, s)`; the spatial slice is differentiable.
     have hΦE_at : ContDiffAt ℝ ∞ ΦE (extChartAt I (Φ_fam t x) x, s) :=
       hΦsmooth.contDiffAt (hUopen.mem_nhds hsU)
     have hincl : ContDiffAt ℝ ∞ (fun z : E => (z, s)) (extChartAt I (Φ_fam t x) x) :=
@@ -187,13 +166,11 @@ theorem rawVariationalIdentityFlat_of_bareFlow
     have hslice : ContDiffAt ℝ ∞ (fun z => ΦE (z, s)) (extChartAt I (Φ_fam t x) x) :=
       hΦE_at.comp (extChartAt I (Φ_fam t x) x) hincl
     exact hslice.differentiableAt (by simp)
-  -- (3) `hagree` from the bare-flow geometric chart-`α` realisation `hreal`.
   have hagree :
       ∀ᶠ s : ℝ in 𝓝 t,
         (fun y => extChartAt I (Φ_fam t x) ((Φ_fam s : M → M) y))
           =ᶠ[𝓝 x] (fun y => Φ_eucl (extChartAt I (Φ_fam t x) y) s) :=
     hagree_of_spatial_chart_realisation (I := I) Φ_fam (Φ_fam t x) x t Φ_eucl hreal
-  -- (4) The target-chart orbit velocity `hc` from the orbit realisation in `hreal`.
   have hreal_orbit : ∀ᶠ s : ℝ in 𝓝 t,
       extChartAt I (Φ_fam t x) ((Φ_fam s : M → M) x) = Φ_eucl (extChartAt I (Φ_fam t x) x) s := by
     filter_upwards [hreal] with s hs
@@ -204,21 +181,12 @@ theorem rawVariationalIdentityFlat_of_bareFlow
     refine hc_eucl.congr_of_eventuallyEq ?_
     filter_upwards [hreal_orbit] with s hs
     exact hs
-  -- (5) The moving-trivialisation orbit jet `hg` from `hGfd` and the velocity `hc`.
   have hg : HasDerivAt
       (fun s : ℝ => chartMovingTriv (I := I) (Φ_fam t x)
         (extChartAt I (Φ_fam t x) ((Φ_fam s : M → M) x))) (G' velChart) t :=
     chartMovingTriv_orbit_hasDerivAt_of_chartJet (I := I) Φ_fam (Φ_fam t x) x t hGfd hc
-  -- (6) Route into the discharge `rawVariationalIdentityFlat_of_chart_realisation`.
   exact rawVariationalIdentityFlat_of_chart_realisation (I := I) Φ_fam x t v
     Φ_eucl hx_src heucl heucl_diff hagree hg hcontAt
-
-/-! ## (C) The paired residual for the concrete bare flow
-
-Composing two slot-`v`/`w` applications of `rawVariationalIdentityFlat_of_bareFlow` with the
-discharge's paired-residual headline `variational_flow_flat_paired_residual_of_chart_realisation`
-gives the headline frozen-metric moving-pushforward inner-product variation derivative for the
-bare flow, with the `hcompat`-conditioned moving-chart reconciliation entirely removed. -/
 
 /-- **The paired residual for the concrete bare flow `Φ_fam`.**
 
@@ -255,21 +223,18 @@ theorem variational_flow_flat_paired_residual_of_bareFlow
     (hGfd : HasFDerivAt (fun z => chartMovingTriv (I := I) (Φ_fam t x) z) G'
       (extChartAt I (Φ_fam t x) ((Φ_fam t : M → M) x)))
     (hcontAt : ContinuousAt (fun s : ℝ => (Φ_fam s : M → M) x) t)
-    -- slot `v`
     (hreal_v : ∀ᶠ s : ℝ in 𝓝 t, ∀ᶠ y : M in 𝓝 x,
       (Φ_fam s : M → M) y
           = (extChartAt I (Φ_fam t x)).symm (ΦE (extChartAt I (Φ_fam t x) y, s))
         ∧ ΦE (extChartAt I (Φ_fam t x) y, s) ∈ (extChartAt I (Φ_fam t x)).target)
     (hc_eucl_v : HasDerivAt
       (fun s : ℝ => ΦE (extChartAt I (Φ_fam t x) x, s)) velChart_v t)
-    -- slot `w`
     (hreal_w : ∀ᶠ s : ℝ in 𝓝 t, ∀ᶠ y : M in 𝓝 x,
       (Φ_fam s : M → M) y
           = (extChartAt I (Φ_fam t x)).symm (ΦE (extChartAt I (Φ_fam t x) y, s))
         ∧ ΦE (extChartAt I (Φ_fam t x) y, s) ∈ (extChartAt I (Φ_fam t x)).target)
     (hc_eucl_w : HasDerivAt
       (fun s : ℝ => ΦE (extChartAt I (Φ_fam t x) x, s)) velChart_w t)
-    -- basepoint bridge / flat-value data
     (hα : (Φ_fam t x) ∈ chartLeviCivitaGoodSet (I := I) (Φ_fam t x))
     (hRdiff : DifferentiableAt ℝ
       (chartRawRepr (I := I) (Φ_fam t x) (X : ∀ y : M, TangentSpace I y))
@@ -313,12 +278,10 @@ theorem variational_flow_flat_paired_residual_of_bareFlow
           (mfderiv I I (Φ_fam t : M → M) x v)
           (mfderiv I I (Φ_fam t : M → M) x w)
         + metricTransportResidual (I := I) g X Φ_fam t x v w) t := by
-  -- The two slot `RawVariationalIdentityFlat` data via the bare-flow discharge.
   have hv_flat := rawVariationalIdentityFlat_of_bareFlow (I := I) Φ_fam t x v
     hΦE hf hUopen hΦsmooth hxsU hx ht hUtimeOpen hx_src hreal_v hc_eucl_v hGfd hcontAt
   have hw_flat := rawVariationalIdentityFlat_of_bareFlow (I := I) Φ_fam t x w
     hΦE hf hUopen hΦsmooth hxsU hx ht hUtimeOpen hx_src hreal_w hc_eucl_w hGfd hcontAt
-  -- Route the two flat data into the discharge's paired-residual headline.
   exact variational_flow_flat_paired_residual_of_chart_realisation (I := I) g X Φ_fam t x v w
     _ _ _ _ hv_flat hw_flat hα hRdiff hCdiff hflatval_v hflatval_w
 

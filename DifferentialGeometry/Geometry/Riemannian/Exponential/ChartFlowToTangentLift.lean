@@ -97,8 +97,6 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Definition of the manifold lift -/
-
 section Definition
 
 /-- The manifold-valued lift of the chart-pushed flow orbit: invert the
@@ -116,13 +114,6 @@ def chartFlowOrbitLift (Φ : (E × E) × ℝ → E × E) (p : M) (v : E) :
         (Φ (((extChartAt I p p, v) : E × E), s)) := rfl
 
 end Definition
-
-/-! ## Inverse chart-of-`TM` evaluation at chart-target-interior points
-
-For a pair `z ∈ (interior (extChartAt I p).target) ×ˢ univ`, the inverse
-of the chart of `TM` at `⟨p, 0⟩` admits an explicit description: its
-projection is `(extChartAt I p).symm z.1` and lies in
-`(chartAt H p).source`. -/
 
 section InverseChart
 
@@ -217,8 +208,6 @@ lemma chartAt_source_of_extChartAt_tangent_zero_symm
 
 end InverseChart
 
-/-! ## Initial value of the lift -/
-
 section InitialValue
 
 variable [I.Boundaryless]
@@ -234,13 +223,11 @@ theorem chartFlowOrbitLift_zero
   classical
   unfold chartFlowOrbitLift
   rw [hΦ_init]
-  -- Apply the chart-of-TM identification at ⟨p, 0⟩ in reverse on ⟨p, v⟩.
   set q : TangentBundle I M := (⟨p, v⟩ : TangentBundle I M) with hq_def
   have hp_src : p ∈ (chartAt H p).source := mem_chart_source H p
   have hq_proj_src : q.proj ∈ (chartAt H p).source := hp_src
   have hch :=
     extChartAt_tangent_zero_apply_chartFiber (I := I) p (p := q) hq_proj_src
-  -- chartFiberCoord p ⟨p, v⟩ = v (same proof as in ChartIdentification).
   have hfiber : chartFiberCoord (I := I) p q = v := by
     rw [hq_def]
     change (trivializationAt E (TangentSpace I) p
@@ -288,8 +275,6 @@ theorem chartFlowOrbitLift_zero
 
 end InitialValue
 
-/-! ## Projection of the lift -/
-
 section ProjectionIdentity
 
 variable [I.Boundaryless]
@@ -317,8 +302,6 @@ theorem chartFlowOrbitLift_proj_mem_chartAt_source
   exact chartAt_source_of_extChartAt_tangent_zero_symm (I := I) p hΦ_target
 
 end ProjectionIdentity
-
-/-! ## Chart-pushed lift identity -/
 
 section ChartPushLiftIdentification
 
@@ -351,8 +334,6 @@ theorem chartFlowOrbitLift_chartPushLift_eq
 
 end ChartPushLiftIdentification
 
-/-! ## Continuity of the lift -/
-
 section Continuity
 
 variable [I.Boundaryless]
@@ -384,14 +365,6 @@ theorem chartFlowOrbitLift_continuousOn
 
 end Continuity
 
-/-! ## Manifold integral-curve property at `0`
-
-For each `v ∈ ball (0 : E) ρ`, the manifold lift `F_v` agrees with the
-R.C per-`v` manifold integral curve `f_v` on a `v`-dependent
-neighbourhood of `0`. Consequently `F_v` itself is `IsMIntegralCurveAt`
-of the chart-fixed geodesic vector field at `0`, with initial value
-`⟨p, v⟩`. -/
-
 section IntegralCurveAtZero
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
@@ -421,22 +394,16 @@ theorem exists_chartFlowOrbitLift_eventuallyEq_isMIntegralCurveAt_zero
       IsMIntegralCurveAt g_v (geodesicVectorFieldChart (I := I) g p) 0 ∧
       g_v =ᶠ[𝓝 (0 : ℝ)] chartFlowOrbitLift (I := I) Φ p v := by
   classical
-  -- Step 1: invoke Picard-Lindelöf existence to obtain a local lift `g_v`
-  -- with `g_v 0 = ⟨p, v⟩` and `IsMIntegralCurveAt g_v (gvfChart g p) 0`.
   obtain ⟨g_v, hg0, hg_int⟩ :=
     Geodesic.exists_isMIntegralCurveAt_geodesicVectorFieldChart
       (I := I) (g := g) (p := p) (v := v)
   refine ⟨g_v, hg0, hg_int, ?_⟩
-  -- Step 2: identify g_v with F_v near 0 via chart-coord ODE uniqueness.
-  -- F_v 0 = ⟨p, v⟩ = g_v 0.
   have hF0 : chartFlowOrbitLift (I := I) Φ p v 0 = (⟨p, v⟩ : TangentBundle I M) :=
     chartFlowOrbitLift_zero (I := I) p v hΦ_init
-  -- chart-pushed lift of g_v (base 0) satisfies the chart-phase ODE near 0.
   have hg_proj0 : (g_v 0).proj = p := by rw [hg0]
   have hd_g_phase :=
     chartPushLift_eventually_hasDerivAt_chartPhaseVF_and_target_interior
       (I := I) (g := g) (α := p) (f := g_v) hg_proj0 hg_int
-  -- Initial chart-pushed value: chartPushLift g_v 0 0 = (x₀, v).
   have hc_g0 : chartPushLift (I := I) g_v 0 0 = ((extChartAt I p p, v) : E × E) := by
     have h := chartPushLift_self_pair (I := I) g_v 0
     rw [h]
@@ -472,11 +439,9 @@ theorem exists_chartFlowOrbitLift_eventuallyEq_isMIntegralCurveAt_zero
         exact congrFun hcoe v
       rw [← happly, hcore_at]
     rw [hfiber0]
-  -- Initial orbit value: Φ((x₀, v), 0) = (x₀, v).
   have hΦorbit_zero :
       (fun s' : ℝ => Φ (((extChartAt I p p, v) : E × E), s')) 0 =
         ((extChartAt I p p, v) : E × E) := hΦ_init
-  -- Chart-coord uniqueness eventually-equal form.
   have hbase_interior : ((extChartAt I p p, v) : E × E) ∈
       (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E) := by
     have hp_extsrc : p ∈ (extChartAt I p).source := by
@@ -490,20 +455,10 @@ theorem exists_chartFlowOrbitLift_eventuallyEq_isMIntegralCurveAt_zero
     (c₂ := fun s' : ℝ => Φ (((extChartAt I p p, v) : E × E), s'))
     (z₀ := ((extChartAt I p p, v) : E × E))
     hbase_interior hc_g0 hΦorbit_zero hd_g_phase hΦ_chart_phase
-  -- Translate hcd_eq into g_v =ᶠ[𝓝 0] F_v.
-  -- chartPushLift g_v 0 s = extChartAt I.tangent (g_v 0) (g_v s).
-  -- For s near 0, (g_v s).proj near p, so the chart of TM at g_v 0 = ⟨p, v⟩
-  -- equals chart at ⟨p, 0⟩ (only depends on projection).
   have hchart_eq :
       extChartAt I.tangent (g_v 0) =
         extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M) := by
     rw [extChartAt_tangent_eq_at_proj (I := I) (g_v 0), hg0]
-  -- Also need: F_v s = (extChartAt I.tangent ⟨p, 0⟩).symm (Φ((x₀, v), s)).
-  -- This is the definition of F_v.
-  -- And: (g_v s) lies in the source of the chart at ⟨p, 0⟩ when (g_v s).proj is in chart source of p.
-  -- We use: extChartAt I.tangent ⟨p, 0⟩ (g_v s) = chartPushLift g_v 0 s = Φ((x₀, v), s) eventually.
-  -- Then applying .symm yields g_v s = F_v s eventually.
-  -- Set up the eventual source membership for g_v.
   have hπ_cont : Continuous
       (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
     FiberBundle.continuous_proj E (TangentSpace I)
@@ -518,13 +473,8 @@ theorem exists_chartFlowOrbitLift_eventuallyEq_isMIntegralCurveAt_zero
     apply hcomp0.preimage_mem_nhds
     rw [hg_proj0]; exact hp_nhds
   filter_upwards [hcd_eq, hsrc_nhds] with s hs_eq hs_src
-  -- hs_eq : chartPushLift g_v 0 s = Φ((x₀, v), s).
-  -- Goal: g_v s = F_v s = (extChartAt I.tangent ⟨p, 0⟩).symm (Φ((x₀, v), s)).
-  -- chartPushLift g_v 0 s = extChartAt I.tangent (g_v 0) (g_v s).
   unfold chartPushLift at hs_eq
   rw [hchart_eq] at hs_eq
-  -- hs_eq : extChartAt I.tangent ⟨p, 0⟩ (g_v s) = Φ((x₀, v), s).
-  -- Apply .symm. We need (g_v s) ∈ source.
   have hg_src : g_v s ∈ (chartAt (ModelProd H E)
       (⟨p, (0 : E)⟩ : TangentBundle I M)).source :=
     (mem_chartAt_modelProd_zero_source_iff (I := I) p (g_v s)).mpr hs_src
@@ -535,7 +485,6 @@ theorem exists_chartFlowOrbitLift_eventuallyEq_isMIntegralCurveAt_zero
       (extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M)).symm
         (extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M) (g_v s)) = g_v s :=
     (extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M)).left_inv hg_extsrc
-  -- Compose with hs_eq.
   unfold chartFlowOrbitLift
   rw [← hs_eq]
   exact hleft.symm
@@ -562,26 +511,14 @@ theorem chartFlowOrbitLift_isMIntegralCurveAt_zero
   obtain ⟨g_v, _hg0, hg_int, hg_eq⟩ :=
     exists_chartFlowOrbitLift_eventuallyEq_isMIntegralCurveAt_zero
       (I := I) (g := g) (p := p) (v := v) (Φ := Φ) hΦ_init hΦ_chart_phase
-  -- Transport IsMIntegralCurveAt g_v ... 0 to F_v via the eventual equality.
   rw [IsMIntegralCurveAt] at hg_int ⊢
   filter_upwards [hg_int, hg_eq, hg_eq.eventually_nhds] with s hs_int hs_eq hs_eq_nhds
-  -- hs_int : HasMFDerivAt% g_v s ((1 : ℝ →L[ℝ] ℝ).smulRight (gvfChart g p (g_v s)))
-  -- hs_eq : g_v s = F_v s
-  -- hs_eq_nhds : ∀ᶠ x in 𝓝 s, g_v x = F_v x
-  -- Goal: HasMFDerivAt% F_v s ((1 : ℝ →L[ℝ] ℝ).smulRight (gvfChart g p (F_v s)))
   rw [← hs_eq]
   refine hs_int.congr_of_eventuallyEq ?_
-  -- Need F_v =ᶠ[𝓝 s] g_v, i.e., ∀ᶠ x in 𝓝 s, F_v x = g_v x.
   filter_upwards [hs_eq_nhds] with x hx
   exact hx.symm
 
 end IntegralCurveAtZero
-
-/-! ## Headline packaging on the uniform interval
-
-We package the chart-coordinate uniform existence (`R.C`) together with
-the manifold integral-curve property at `0` proved above, producing a
-single uniform data block consumed by R.D.2 / R.D.3. -/
 
 section HeadlineUniform
 
@@ -635,23 +572,17 @@ theorem exists_chartFlowOrbitLift_data_uniform
         IsMIntegralCurveAt (chartFlowOrbitLift (I := I) Φ p v)
           (geodesicVectorFieldChart (I := I) g p) 0) := by
   classical
-  -- Invoke R.C's uniform chart-coord existence.
   obtain ⟨ρ, T, Φ, hρ_pos, hT_pos, hΦ_init, hΦ_target, hΦ_phase, _hF_data⟩ :=
     exists_uniform_existence_interval (I := I) (g := g) (p := p)
   refine ⟨ρ, T, Φ, hρ_pos, hT_pos, hΦ_init, hΦ_target, hΦ_phase, ?_, ?_, ?_, ?_⟩
-  · -- Initial value of the manifold lift.
-    intro v hv
+  · intro v hv
     exact chartFlowOrbitLift_zero (I := I) p v (hΦ_init v hv)
-  · -- Projection identity on Icc (-T) T.
-    intro v hv s hs
+  · intro v hv s hs
     exact chartFlowOrbitLift_proj (I := I) p v s (hΦ_target v hv s hs)
-  · -- Chart-pushed lift identity on Icc (-T) T.
-    intro v hv s hs
+  · intro v hv s hs
     exact chartFlowOrbitLift_chartPushLift_eq (I := I) p v s
       (hΦ_init v hv) (hΦ_target v hv s hs)
-  · -- Manifold integral-curve property at 0.
-    intro v hv
-    -- Build the chart-phase ODE + chart-target-interior eventually-near-0 hypothesis.
+  · intro v hv
     have hΦ_phase_ev : ∀ᶠ s in 𝓝 (0 : ℝ),
         HasDerivAt (fun s' : ℝ => Φ (((extChartAt I p p, v) : E × E), s'))
           (chartPhaseVF (I := I) g p

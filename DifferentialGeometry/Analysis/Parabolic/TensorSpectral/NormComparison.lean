@@ -103,8 +103,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Step 2: forward chart-Jacobian on chart-`α` basis fibres -/
-
 /-- The forward chart-Jacobian `chartJ α b` applied to the chart-`α` basis
 fibre `chartBasisVecFiber α i b` is the constant model basis vector
 `chartModelBasis E i` on the chart-`α` base set; hence trivially continuous
@@ -124,8 +122,6 @@ theorem chartJ_apply_chartBasisVecFiber_continuousOn
       ((chartModelBasis E) i)
   refine ContinuousOn.congr ?_ (fun b hb => heq b hb)
   exact continuousOn_const
-
-/-! ## Step 3: metric pairing on chart-`α` basis-fibre pairs -/
 
 /-- The metric pairing of two chart-`α` basis fibres is continuous on the
 chart-`α` base set. This is the `ContinuousOn` projection of the chart-Gram
@@ -149,8 +145,6 @@ theorem metric_inner_chartBasisFibers_continuousOn
   refine hcont.congr ?_
   intro b _
   exact (chartGramMatrix_apply g α b i j).symm
-
-/-! ## Step 4: separable `(0, r)`-form evaluated at chart-basis-fibre tuples -/
 
 /-- The separable `(0, r)`-form built on chart-`α` basis fibres, evaluated
 on another chart-`α` basis-fibre tuple, is continuous on the chart-`α` base
@@ -180,8 +174,6 @@ theorem separableFormAt_chartBasisFibers_eval_continuousOn
   exact metric_inner_chartBasisFibers_continuousOn (I := I) (M := M) g α
     (Idx k) (Jdx k)
 
-/-! ## Step 5: continuous bundle sections produced by the trivialisation symm -/
-
 /-- For any fixed model vector `v : E`, the symm-image section
 `b ↦ TotalSpace.mk' E b ((triv α).symm b v)` is continuous on the
 chart-`α` base set, as a total-space-valued function. This follows from
@@ -193,14 +185,12 @@ theorem triv_symm_apply_const_continuousOn_baseSet
       (fun b : M => TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) b
         ((trivializationAt E (TangentSpace I) α).symm b v))
       (trivializationAt E (TangentSpace I) α).baseSet := by
-  -- The total-space-valued symm map is continuous on `baseSet ×ˢ univ`.
   have hsymm :
       ContinuousOn
         (fun z : M × E => TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
           z.1 ((trivializationAt E (TangentSpace I) α).symm z.1 z.2))
         ((trivializationAt E (TangentSpace I) α).baseSet ×ˢ Set.univ) :=
     (trivializationAt E (TangentSpace I) α).continuousOn_symm
-  -- Compose with `b ↦ (b, v) : M → M × E`.
   have hcomp : Continuous (fun b : M => (b, v)) :=
     continuous_id.prodMk continuous_const
   have hmaps :
@@ -224,20 +214,6 @@ theorem chartBasisVec_continuousOn_baseSet
   exact triv_symm_apply_const_continuousOn_baseSet (I := I) (M := M) α
     ((chartModelBasis E) k)
 
-/-! ## Step 6: diamond-cleaned `ContinuousOn` of the metric inner product
-
-The Mathlib lemma `ContinuousOn.inner_bundle` requires an
-`IsContinuousRiemannianBundle E (TangentSpace I)` instance on the
-tangent bundle. The project's `SmoothRiemannianMetric I M` provides this
-through Mathlib's `RiemannianBundle` mechanism, but installing the
-mechanism on the tangent bundle creates a diamond with the project's
-default `tangentSpace_normedAddCommGroup` / `tangentSpace_normedSpace`
-instances. We resolve the diamond locally on a private auxiliary lemma
-using `attribute [-instance]`, mirroring the `Continuous`-variant
-`Tensor/RSTensor/TangentRiemannian.lean::continuous_g_inner_aux`. The
-scalar `M → ℝ` conclusion is independent of the disabled instances and
-survives outside the local scope. -/
-
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 private lemma continuousOn_g_inner_aux
@@ -248,9 +224,6 @@ private lemma continuousOn_g_inner_aux
     (hw : ContinuousOn (fun x : M => TotalSpace.mk' E
       (E := (TangentSpace I : M → Type _)) x (w x)) s) :
     ContinuousOn (fun b : M => g.inner b (v b) (w b)) s := by
-  -- Install Mathlib's `RiemannianBundle` derived from `g`. Going through
-  -- `toContinuousRiemannianMetric` makes the `IsContinuousRiemannianBundle`
-  -- instance discoverable by typeclass inference.
   letI cg : Bundle.ContinuousRiemannianMetric E (TangentSpace I : M → Type _) :=
     g.toContinuousRiemannianMetric
   letI rb : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
@@ -276,13 +249,6 @@ theorem metric_inner_sections_continuousOn
     ContinuousOn (fun b : M => g.inner b (v b) (w b)) s :=
   continuousOn_g_inner_aux (I := I) (M := M) g hv hw
 
-/-! ## Step 7: metric inner of a chart-basis fibre and a symm-image fibre
-
-The metric pairing
-`g.inner b (chartBasisVecFiber α k b) ((triv α).symm b v)`
-is continuous on the chart-`α` base set, for any fixed `k` and `v : E`.
-This combines Step 5 (continuity of each section) with Step 6. -/
-
 /-- The metric pairing of the chart-`α` basis fibre and the symm-image of a
 constant model vector is continuous on the chart-`α` base set. -/
 theorem metric_inner_chartBasisFiber_trivSymm_continuousOn
@@ -302,8 +268,6 @@ theorem metric_inner_chartBasisFiber_trivSymm_continuousOn
         ((trivializationAt E (TangentSpace I) α).symm b v))
       (trivializationAt E (TangentSpace I) α).baseSet :=
     triv_symm_apply_const_continuousOn_baseSet (I := I) (M := M) α v
-  -- The chart-basis section `chartBasisVec α k` has fibre value
-  -- `chartBasisVecFiber α k b`. Unfold and apply Step 6.
   have h := metric_inner_sections_continuousOn (I := I) (M := M) (E := E) g
     (v := fun b => chartBasisVecFiber (I := I) α k b)
     (w := fun b => (trivializationAt E (TangentSpace I) α).symm b v)
@@ -335,17 +299,6 @@ theorem metric_inner_trivSymm_trivSymm_continuousOn
     (w := fun b => (trivializationAt E (TangentSpace I) α).symm b w)
     (s := (trivializationAt E (TangentSpace I) α).baseSet) hX hY
 
-/-! ## Headline pointwise norm comparison on `tsupport(POU_α)`
-
-The uniform positive lower bound `chartTensorInnerPointwise_rs_model g r s α b T T ≥ ε`
-for `‖T‖ = 1` (delivered upstream as `exists_chartTensorInnerPointwise_rs_model_lower_bound_on_pouTsupport`)
-rescales by bilinearity to the homogeneous-degree-two estimate
-`‖T‖² ≤ ε⁻¹ · chartTensorInnerPointwise_rs_model g r s α b T T`
-for every `T`, valid uniformly on the closed support of the chart-atlas
-partition-of-unity weight at `α`. Composing with the bridge identity
-`chartTensorInnerPointwise_rs_model_eq_tensorInnerPointwise` produces a parallel
-bundle-form comparison through the chart-`(α, b)`-twist. -/
-
 section HeadlineNormComparison
 
 variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -373,7 +326,6 @@ lemma sq_norm_le_inv_eps_mul_chartTensorInnerPointwise_rs_model_on_compact
           chartTensorInnerPointwise_rs_model (I := I) (M := M) g r s α b T T := by
   classical
   intro b hb T
-  -- `K_M ⊆ baseSet`: gives non-negativity of the diagonal.
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     hK_M_sub_baseSet hb
   have hQ_nn : 0 ≤ chartTensorInnerPointwise_rs_model
@@ -381,16 +333,12 @@ lemma sq_norm_le_inv_eps_mul_chartTensorInnerPointwise_rs_model_on_compact
     chartTensorInnerPointwise_rs_model_nonneg
       (I := I) (M := M) g r s α hb_base T
   by_cases hT0 : T = 0
-  · -- The zero tensor: both sides are zero.
-    subst hT0
-    -- `‖(0 : TensorRSModel r s ℝ E)‖ = 0` and the quadratic form vanishes.
+  · subst hT0
     have h_left : ‖(0 : TensorRSModel r s ℝ E)‖ ^ 2 = 0 := by
       simp
     have h_right : chartTensorInnerPointwise_rs_model
         (I := I) (M := M) g r s α b (0 : TensorRSModel r s ℝ E)
           (0 : TensorRSModel r s ℝ E) = 0 := by
-      -- Rewrite the first `0` as `(0 : ℝ) • (0 : TensorRSModel r s ℝ E)` and
-      -- pull the scalar out using `_smul_left`.
       have h_zero_smul :
           chartTensorInnerPointwise_rs_model
             (I := I) (M := M) g r s α b
@@ -419,23 +367,17 @@ lemma sq_norm_le_inv_eps_mul_chartTensorInnerPointwise_rs_model_on_compact
               h_zero_smul
         _ = 0 := by ring
     rw [h_left, h_right, mul_zero]
-  · -- Non-zero tensor: rescale by `‖T‖` and apply the unit-sphere bound.
-    have hT_ne : ‖T‖ ≠ 0 := norm_ne_zero_iff.mpr hT0
+  · have hT_ne : ‖T‖ ≠ 0 := norm_ne_zero_iff.mpr hT0
     have hT_pos : 0 < ‖T‖ := (norm_pos_iff).mpr hT0
-    -- The unit-norm rescaling `T' := ‖T‖⁻¹ • T` has norm one. Use the explicit
-    -- `NormedSpace`-derived `NormSMulClass` instance to compute the norm.
     letI : NormSMulClass ℝ (TensorRSModel r s ℝ E) :=
       NormedSpace.toNormSMulClass
     set T' : TensorRSModel r s ℝ E := ‖T‖⁻¹ • T with hT'_def
     have hT'_norm : ‖T'‖ = 1 := by
       rw [hT'_def, norm_smul, norm_inv, Real.norm_eq_abs, abs_of_pos hT_pos]
       field_simp
-    -- The lower bound at `T'`.
     have h_T' : ε ≤ chartTensorInnerPointwise_rs_model
         (I := I) (M := M) g r s α b T' T' :=
       h_lb b hb T' hT'_norm
-    -- Bilinearity: `chartTensorInnerPointwise_rs_model g r s α b T' T' =
-    --   (‖T‖⁻¹ * ‖T‖⁻¹) * chartTensorInnerPointwise_rs_model g r s α b T T`.
     have h_bilin :
         chartTensorInnerPointwise_rs_model (I := I) (M := M) g r s α b T' T' =
           (‖T‖⁻¹ * ‖T‖⁻¹) *
@@ -448,14 +390,12 @@ lemma sq_norm_le_inv_eps_mul_chartTensorInnerPointwise_rs_model_on_compact
         (I := I) (M := M) g r s α b ‖T‖⁻¹ T T]
       ring
     rw [h_bilin] at h_T'
-    -- Multiply both sides by `‖T‖²`. Both factors are non-negative.
     have h_sq_pos : 0 < ‖T‖ ^ 2 := by positivity
     have h_mul : ε * ‖T‖ ^ 2 ≤
         ((‖T‖⁻¹ * ‖T‖⁻¹) *
           chartTensorInnerPointwise_rs_model
             (I := I) (M := M) g r s α b T T) * ‖T‖ ^ 2 :=
       mul_le_mul_of_nonneg_right h_T' (le_of_lt h_sq_pos)
-    -- Simplify the RHS to `chartTensorInnerPointwise_rs_model g r s α b T T`.
     have h_rhs :
         ((‖T‖⁻¹ * ‖T‖⁻¹) *
           chartTensorInnerPointwise_rs_model
@@ -466,8 +406,6 @@ lemma sq_norm_le_inv_eps_mul_chartTensorInnerPointwise_rs_model_on_compact
       rw [h_sq_eq]
       field_simp
     rw [h_rhs] at h_mul
-    -- From `ε * ‖T‖² ≤ Q`, divide by `ε > 0` to obtain `‖T‖² ≤ ε⁻¹ * Q`.
-    -- Use `(le_div_iff₀ hε)` to rewrite the target.
     rw [show ε⁻¹ * chartTensorInnerPointwise_rs_model
         (I := I) (M := M) g r s α b T T =
         chartTensorInnerPointwise_rs_model
@@ -494,12 +432,10 @@ theorem chartTrivializationNorm_le_const_mul_chartTensorInnerPointwise_rs_model_
           ‖T‖ ^ 2 ≤ K * chartTensorInnerPointwise_rs_model
             (I := I) (M := M) g r s α b T T := by
   classical
-  -- Extract the uniform positive lower bound on the unit sphere.
   obtain ⟨ε, hε_pos, h_lb⟩ :=
     exists_chartTensorInnerPointwise_rs_model_lower_bound_on_compact
       (I := I) (M := M) g r s α hK_M_compact hK_M_sub_baseSet
   refine ⟨ε⁻¹, le_of_lt (inv_pos.mpr hε_pos), ?_⟩
-  -- Apply the rescaling lemma.
   exact sq_norm_le_inv_eps_mul_chartTensorInnerPointwise_rs_model_on_compact
     (I := I) (M := M) g r s α hK_M_sub_baseSet hε_pos h_lb
 
@@ -548,7 +484,6 @@ theorem chartTrivializationNorm_le_const_mul_tensorInnerPointwise_chartRSTwist_o
             (chartRSTwist (I := I) (M := M) α b r s T)
             (chartRSTwist (I := I) (M := M) α b r s T) := by
   classical
-  -- Reduce to the chart-frame form and rewrite via the bridge identity.
   obtain ⟨K, hK_nn, h_chart⟩ :=
     chartTrivializationNorm_le_const_mul_chartTensorInnerPointwise_rs_model_on_compact
       (I := I) (M := M) g r s α hK_M_compact hK_M_sub_baseSet

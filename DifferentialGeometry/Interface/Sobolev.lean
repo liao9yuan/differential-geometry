@@ -42,8 +42,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-/-! ## Scalar adapters -/
-
 /-- One-line adapter from a smooth real-valued function `f : M → ℝ` (with
 smoothness witness `hf`) to its image in the H¹ Hilbert completion
 `H1Compl g`. -/
@@ -72,14 +70,6 @@ set_option linter.unusedSectionVars false in
 
 end Interface
 end DifferentialGeometry
-
-/-! ## Re-exports
-
-The following `export` declarations make the scalar and tensor primitives
-available directly under `DifferentialGeometry.Interface`. After
-`open DifferentialGeometry.Interface`, names such as `H1Compl`,
-`smoothToH1Compl`, `H1ComplToLp`, `TensorH1Compl`, `smoothToTensorH1Compl`,
-and `TensorH1ComplToTensorL2` resolve without further qualification. -/
 
 namespace DifferentialGeometry.Interface
 

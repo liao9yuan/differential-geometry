@@ -59,19 +59,12 @@ open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open DifferentialGeometry.Analysis.Laplacian.GradInnerLpIdentity
 open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianCandidate
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## The smooth Ricci pairing as an `Lp` class
-
-We reuse the definition of `smoothRicciPairingLp` from
-`GradInnerLaplacianCandidate.lean`. -/
 
 /-- The L²-class of the smooth Ricci pairing
 `b ↦ ricciTensor g b (∇φ b) (∇v b)` for smooth `v`. Alias for
@@ -99,8 +92,6 @@ lemma ricciPairingSmooth_coeFn
         ricciTensor (I := I) g b
           (gradFun (I := I) g φ b) (gradFun (I := I) g v.toFun b)) :=
   smoothRicciPairingLp_coeFn (I := I) (M := M) g φ v
-
-/-! ## Linearity of `ricciPairingSmooth` in `v` -/
 
 /-- Pointwise additivity of the Ricci pairing in the second slot. -/
 lemma ricciPairingSmooth_pt_add
@@ -174,8 +165,6 @@ theorem ricciPairingSmooth_smul
   rw [h_smul, Pi.smul_apply, h_v_eq, smul_eq_mul]
   exact (ricciPairingSmooth_pt_smul (I := I) (M := M) g φ c v b).symm
 
-/-! ## Linearity packaging -/
-
 /-- The `ricciPairingSmooth` map packaged as a linear map. -/
 noncomputable def ricciPairingSmoothLin
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
@@ -190,21 +179,6 @@ noncomputable def ricciPairingSmoothLin
     (v : SmoothScalar g) :
     ricciPairingSmoothLin (I := I) (M := M) g φ v =
       ricciPairingSmooth (I := I) (M := M) g φ v := rfl
-
-/-! ## The hypothesis-bearing CLM
-
-A continuous linear extension of `ricciPairingSmoothLin` requires an explicit
-Lipschitz constant `C` such that
-`‖ricciPairingSmooth g φ v‖_{L²} ≤ C · ‖v‖`
-for all smooth `v`. The mathematical proof of existence uses compactness of
-`M`, smoothness of `g` and `φ`, and the operator norm bound on the bilinear
-Ricci tensor. We expose this existence as an `axiomatic-free` hypothesis
-`ricciPairingCLM_lipschitz_bound` so that the CLM construction is decoupled
-from the bound's proof.
-
-The CLM-on-smooth-with-bound constructor `ricciPairingCLMOnSmoothOfBound`
-takes the bound and produces the CLM. The (default) `ricciPairingCLMOnSmooth`
-uses the existence form of the bound. -/
 
 /-- Hypothesis-bearing CLM on smooth scalars: given a Lipschitz bound `C ≥ 0`,
 produces a continuous linear map `SmoothScalar g →L[ℝ] Lp ℝ 2 μ_g`. -/
@@ -224,8 +198,6 @@ noncomputable def ricciPairingCLMOnSmoothOfBound
     (v : SmoothScalar g) :
     ricciPairingCLMOnSmoothOfBound (I := I) (M := M) g φ C hC_nn hC_bound v =
       ricciPairingSmooth (I := I) (M := M) g φ v := rfl
-
-/-! ## CLM extension to `H1Compl` (hypothesis-bearing) -/
 
 /-- The smooth-inclusion `toComplL` has dense range. -/
 private lemma denseRange_toComplL_smoothScalar
@@ -279,34 +251,6 @@ on the dense range of `smoothToH1Compl`. -/
     (denseRange_toComplL_smoothScalar (I := I) (M := M) g)
     (isUniformInducing_toComplL_smoothScalar (I := I) (M := M) g) v
 
-/-! ## Existence of the Lipschitz bound
-
-The Lipschitz bound
-`‖ricciPairingSmooth g φ v‖_{L²} ≤ C · ‖v‖`
-for some `C ≥ 0` and all smooth `v` follows mathematically from:
-
-* The pointwise CS-style bound
-  `|ricciTensor g b (∇φ b) (∇v b)|² ≤ K(b)² · g(∇v, ∇v)(b)`
-  where `K(b)` is the `g`-Riesz dual norm of the cotangent vector
-  `ricciTensor g b (∇φ b, ·) : T_b M →L[ℝ] ℝ`.
-* `K(b)` is continuous in `b` (since `ricciTensor` and `∇φ` are smooth, and
-  the inverse metric `g⁻¹` is smooth as a smooth bundle map), hence bounded
-  on the compact manifold `M` by some constant `M_g(φ)`.
-* `∫ g(∇v, ∇v) dμ_g ≤ ‖v‖²_{H¹}` (the standard pre-H¹ bound).
-
-Combining: `‖ricciPairingSmooth g φ v‖²_{L²} ≤ M_g(φ)² · ‖v‖²_{H¹}`.
-
-Constructing the constant `M_g(φ)` rigorously requires the Riesz dual of
-`ricciTensor g b (∇φ b, ·)` as a smooth bundle map plus the supremum on
-the compact manifold. This is substantial (~500-1000 lines of bundle
-infrastructure for the metric Riesz dual at the section level).
-
-In the present module, we expose `ricciPairingCLMOfBound` as the
-hypothesis-bearing CLM constructor, taking the Lipschitz constant `C` and
-the corresponding bound as explicit inputs. Follow-up work will
-construct `C` unconditionally via the section-level metric Riesz dual
-infrastructure. -/
-
 /-- For each smooth `v`, the L² norm of `ricciPairingSmooth g φ v` is
 non-negative. -/
 lemma ricciPairingSmooth_norm_nonneg
@@ -321,15 +265,6 @@ lemma smoothRicciPairing_continuous
     Continuous (fun b : M => ricciTensor (I := I) g b
       (gradFun (I := I) g φ b) (gradFun (I := I) g v.toFun b)) :=
   (smoothRicciPairing_contMDiff (I := I) (M := M) g φ v).continuous
-
-/-! ## Unconditional Lipschitz bound via finite chart cover
-
-Using the global sup bound on `g_b(R(b), R(b))` from `RicciDualNorm`, we
-establish the L² Lipschitz bound
-
-`‖ricciPairingSmooth g φ v‖_{L²} ≤ √C · ‖v‖_{H¹}`
-
-unconditionally, where `C` is the global sup of `g(R, R)`. -/
 
 open DifferentialGeometry.Analysis.Laplacian.RicciDualNorm
 
@@ -377,7 +312,6 @@ lemma ricciPairing_sq_le_C_mul_grad
     (ricciTensor (I := I) g b
         (gradFun (I := I) g φ b) (gradFun (I := I) g v.toFun b)) ^ 2 ≤
       C * g.inner b (gradFun (I := I) g v.toFun b) (gradFun (I := I) g v.toFun b) := by
-  -- Pointwise CS bound: ≤ g(R, R) * g(∇v, ∇v).
   have h_cs := ricciPairing_cs_sq (I := I) g φ b (gradFun (I := I) g v.toFun b)
   have h_grad_nn : 0 ≤ g.inner b (gradFun (I := I) g v.toFun b)
       (gradFun (I := I) g v.toFun b) :=
@@ -399,17 +333,13 @@ lemma ricciPairingSmooth_norm_sq_le
       g.inner b (ricciSharp (I := I) g φ b) (ricciSharp (I := I) g φ b) ≤ C)
     (v : SmoothScalar g) :
     ‖ricciPairingSmooth (I := I) (M := M) g φ v‖ ^ 2 ≤ C * ‖v‖ ^ 2 := by
-  -- Step 1: norm-squared = integral of squared pointwise pairing.
   rw [ricciPairingSmooth_norm_sq (I := I) (M := M) g φ v]
-  -- Step 2: bound pointwise (Ric pair)² ≤ C · g(∇v, ∇v) via h_pt.
   have h_pt : ∀ b : M,
       (ricciTensor (I := I) g b (gradFun (I := I) g φ b)
           (gradFun (I := I) g v.toFun b)) ^ 2 ≤
         C * g.inner b (gradFun (I := I) g v.toFun b)
             (gradFun (I := I) g v.toFun b) := fun b =>
     ricciPairing_sq_le_C_mul_grad (I := I) (M := M) g φ hC_bound v b
-  -- Step 3: integrate the bound.
-  -- Need integrability of both sides; we get it from continuity + compact M.
   haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
   have hLHS_cont : Continuous (fun b : M =>
@@ -422,10 +352,8 @@ lemma ricciPairingSmooth_norm_sq_le
       (riemannianVolumeMeasure (I := I) (M := M) g) :=
     hLHS_cont.integrable_of_hasCompactSupport
       (HasCompactSupport.of_compactSpace _)
-  -- Integrability of g(∇v, ∇v).
   have hgrad_cont : Continuous (fun b : M =>
       g.inner b (gradFun (I := I) g v.toFun b) (gradFun (I := I) g v.toFun b)) := by
-    -- gradInnerSmooth_continuous with v = ⟨v.toFun, v.smooth⟩.
     exact gradInnerSmooth_continuous (I := I) (M := M) g
       ⟨v.toFun, v.smooth⟩ v
   have hgrad_int : Integrable (fun b : M =>
@@ -440,9 +368,7 @@ lemma ricciPairingSmooth_norm_sq_le
   have h_int_le := integral_mono_ae hLHS_int hRHS_int
     (Filter.Eventually.of_forall h_pt)
   rw [integral_const_mul] at h_int_le
-  -- Step 4: bound ∫ g(∇v, ∇v) by ‖v‖²_{H¹} via standard pre-H¹ identity.
   have h_grad_int_le := integral_inner_grad_self_le_h1_norm_sq (g := g) v
-  -- Combine: ∫ (Ric pair)² ≤ C · ∫ g(∇v, ∇v) ≤ C · ‖v‖².
   exact le_trans h_int_le (mul_le_mul_of_nonneg_left h_grad_int_le hC_nn)
 
 /-- L² norm bound: `‖ricciPairingSmooth g φ v‖ ≤ √C · ‖v‖_{H¹}`. -/
@@ -477,8 +403,6 @@ theorem exists_ricciPairing_lipschitz_bound
   refine ⟨Real.sqrt C_sq, Real.sqrt_nonneg _, ?_⟩
   intro v
   exact ricciPairingSmooth_norm_le (I := I) (M := M) g φ hC_sq_nn hC_bound v
-
-/-! ## The unconditional Ricci pairing CLM -/
 
 /-- The unconditional Ricci pairing CLM on smooth scalars:
 `SmoothScalar g →L[ℝ] Lp ℝ 2 μ_g`. -/

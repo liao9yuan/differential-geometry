@@ -67,8 +67,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Definition -/
-
 /-- Global divergence operator on a smooth Riemannian manifold (possibly with
 boundary). At each point `x`, evaluated using the chart-local within-divergence
 in the chart at `x`. On manifold-interior points, this agrees with the
@@ -87,8 +85,6 @@ def divergence_g_with_boundary
     divergence_g_with_boundary (I := I) g X x =
       localDivergenceWithin (I := I) g x X x := rfl
 
-/-! ## Voss–Weyl identity for the with-boundary divergence (in interior) -/
-
 /-- Voss–Weyl-type identity: in any chart at `α`, the global with-boundary
 divergence equals the chart-α local within-divergence at any **interior** point
 `x` in the chart source. This is the manifold-interior chart-invariance
@@ -99,12 +95,9 @@ theorem voss_weyl_divergence_with_boundary_formula [T2Space M]
     {x : M} (hx_α : x ∈ (chartAt H α).source) (hx_int : x ∈ I.interior M) :
     divergence_g_with_boundary (I := I) g X x =
       localDivergenceWithin (I := I) g α X x := by
-  -- Unfold the global divergence and apply chart invariance with `β := x`.
   unfold divergence_g_with_boundary
   exact localDivergenceWithin_chart_invariance
     (I := I) g x α X (mem_chart_source H x) hx_α hx_int
-
-/-! ## Agreement with boundaryless `divergence_g` on the interior -/
 
 /-- On `I.interior M`, the with-boundary divergence agrees with the
 boundaryless `divergence_g`. This is automatic at every interior point because
@@ -116,26 +109,10 @@ theorem divergence_g_with_boundary_eq_divergence_g_of_isInteriorPoint
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     {x : M} (hx_int : x ∈ I.interior M) :
     divergence_g_with_boundary (I := I) g X x = divergence_g (I := I) g X x := by
-  -- Both sides unfold to chart-local divergences in the chart at `x`.
-  -- `divergence_g_with_boundary g X x = localDivergenceWithin g x X x`
-  -- `divergence_g g X x = localDivergence g x X x`
-  -- These agree at interior points by the bridge lemma.
   unfold divergence_g_with_boundary
   rw [divergence_g_def]
   exact localDivergenceWithin_eq_localDivergence_of_isInteriorPoint
     (I := I) g x X (mem_chart_source H x) hx_int
-
-/-! ## Smoothness on the manifold interior
-
-The strategy is local-to-global. At every `x ∈ I.interior M`, the open
-neighborhood `(chartAt H x).source ∩ I.interior M` consists of interior points
-inside the chart source at `x`. By `voss_weyl_divergence_with_boundary_formula`,
-on this neighborhood the global function agrees with the chart-α local
-within-divergence at `α := x`, which is `C^∞` on the full chart base set by
-`localDivergenceWithin_contMDiffOn`.
-
-We prove smoothness on each such open neighborhood, then assemble via
-`contMDiffOn_of_locally_contMDiffOn`. -/
 
 /-- The interior of the manifold is open. Direct application of
 `ModelWithCorners.isOpen_interior` at `n = ∞` (which satisfies `n ≠ 0`). -/
@@ -165,7 +142,6 @@ private lemma divergence_g_with_boundary_eq_localDivergenceWithin_on_chart
       divergence_g_with_boundary (I := I) g X y =
         localDivergenceWithin (I := I) g x X y := by
   intro y hy
-  -- `y ∈ (chartAt H x).source` and `y ∈ I.interior M`; apply Voss–Weyl with α := x.
   exact voss_weyl_divergence_with_boundary_formula
     (I := I) g x X hy.1 hy.2
 
@@ -188,10 +164,8 @@ private lemma divergence_g_with_boundary_contMDiffOn_chart_inter_interior
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     ContMDiffOn I 𝓘(ℝ) ∞ (divergence_g_with_boundary (I := I) g X)
       ((chartAt H x).source ∩ I.interior M) := by
-  -- Smoothness of the chart-`x` local within-divergence on this set.
   have hsmooth :=
     localDivergenceWithin_contMDiffOn_chart_inter_interior (I := I) g X x
-  -- Agreement of the two functions on this set.
   have hcongr := divergence_g_with_boundary_eq_localDivergenceWithin_on_chart
     (I := I) g X x
   exact hsmooth.congr hcongr
@@ -206,21 +180,16 @@ theorem divergence_g_with_boundary_contMDiffOn_interior [T2Space M]
       (I.interior M) := by
   refine contMDiffOn_of_locally_contMDiffOn ?_
   intro x hx_int
-  -- Open neighborhood of `x` inside the chart source, intersected with the interior.
   refine ⟨(chartAt H x).source, ?_, ?_, ?_⟩
   · exact (chartAt H x).open_source
   · exact mem_chart_source H x
-  · -- `I.interior M ∩ (chartAt H x).source = (chartAt H x).source ∩ I.interior M`.
-    have hsm := divergence_g_with_boundary_contMDiffOn_chart_inter_interior
+  · have hsm := divergence_g_with_boundary_contMDiffOn_chart_inter_interior
       (I := I) g X x
-    -- Rewrite the intersection to match.
     have hset_eq : I.interior M ∩ (chartAt H x).source =
         (chartAt H x).source ∩ I.interior M := by
       rw [Set.inter_comm]
     rw [hset_eq]
     exact hsm
-
-/-! ## Continuity on the interior (corollary) -/
 
 /-- The with-boundary divergence is continuous on `I.interior M`. Direct
 corollary of `divergence_g_with_boundary_contMDiffOn_interior`. -/

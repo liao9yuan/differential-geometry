@@ -60,8 +60,6 @@ open DifferentialGeometry.Analysis.Laplacian.MemW1pFChartResidualFull
 open DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqH1ComplTendsto
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -70,8 +68,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## `eLpNorm ≤ wkpNorm` bridge (order-zero term) -/
 
 /-- The order-zero term `eLpNorm u 2 (volume.restrict Ω)` is bounded by
 `wkpNorm 1 2 u Ω`. -/
@@ -92,9 +88,6 @@ private lemma eLpNorm_le_wkpNorm_one_two
       (fun i : Fin 0 => i.elim0)
   rw [h_iter_eq] at h_zero_le
   exact h_zero_le
-
-/-! ## Convergence in `eLpNorm 2` on `volume.restrict chartTarget` from the
-chart-target `wkpNorm 1 2`-convergence hypothesis -/
 
 /-- If `wkpNorm 1 2 (u n - F_lim) Ω → 0`, then `eLpNorm 2 (u n - F_lim)` on
 `volume.restrict Ω` tends to zero. -/
@@ -118,8 +111,6 @@ private lemma eLpNorm_tendsto_zero_of_wkpNorm_one_two_tendsto_zero
     tendsto_const_nhds h_tendsto
     (fun _ => zero_le _)
     (fun n => eLpNorm_le_wkpNorm_one_two (fun y => u n y - F_lim y) Ω)
-
-/-! ## Mutual absolute continuity of the two restricted measures -/
 
 /-- The plain volume restricted to `chartTargetEuclid α` is absolutely continuous
 w.r.t. the chart-pulled weighted measure restricted to `chartTargetEuclid α`.
@@ -160,8 +151,6 @@ private lemma volume_restrict_chartTarget_absolutelyContinuous_weighted
     densityOnEuclid_pos (I := I) g α hy_chart
   exact (ENNReal.ofReal_pos.mpr h_pos).ne'
 
-/-! ## AEStronglyMeasurable witnesses -/
-
 /-- `smoothFChartResidual g α v` is `AEStronglyMeasurable` w.r.t. any measure,
 since it is the coeFn of an `Lp` element. -/
 private lemma smoothFChartResidual_aestronglyMeasurable
@@ -181,8 +170,6 @@ private lemma fChartResidual_aestronglyMeasurable
         (I := I) (M := M) g α u_h) μ := by
   unfold fChartResidual
   exact (Lp.stronglyMeasurable _).aestronglyMeasurable.mono_measure (le_refl _)
-
-/-! ## Subsequence-extraction lemmas -/
 
 /-- Given an `eLpNorm 2`-convergence to `F_lim` on `volume.restrict chartTarget`,
 extract an a.e.-convergent subsequence on `volume.restrict chartTarget`. -/
@@ -261,8 +248,6 @@ private lemma exists_subseq_ae_weighted_restrict
       h_aesm_n hF_aesm h_tendsto
   exact h_tim.exists_seq_tendsto_ae
 
-/-! ## Headline identification theorem -/
-
 /-- **Identification of the chart-target `W^{1,2}`-limit with `fChartResidual`.**
 
 For `u_h ∈ laplacianDomainPow g 2`, suppose `F_lim : EuclN → ℝ` is in
@@ -292,10 +277,8 @@ theorem smoothApproxSeq_smoothFChartResidual_limit_eq_fChartResidual
           (I := I) (M := M) g α u_h := by
   classical
   intro F_lim h_F_lim_w1p h_wkp_tendsto
-  -- Abbreviation for the smooth-approximator sequence.
   set v : ℕ → SmoothScalar g := fun n =>
     smoothApproxSeq (I := I) (M := M) g hu_h n with hv_def
-  -- AEStronglyMeasurable witnesses for `F_lim` and `fChartResidual u_h`.
   have hF_lim_memLp : MemLp F_lim 2
       ((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := h_F_lim_w1p.1
@@ -310,8 +293,6 @@ theorem smoothApproxSeq_smoothFChartResidual_limit_eq_fChartResidual
         ((chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α)) :=
     fChartResidual_aestronglyMeasurable (I := I) (M := M) g α u_h _
-  -- Step 1: From the chart-target `wkpNorm 1 2`-tendsto, get `eLpNorm 2`-tendsto
-  -- on `volume.restrict chartTarget`.
   have h_eLpNorm_volume_tendsto :
       Tendsto (fun n =>
         eLpNorm (fun y =>
@@ -324,13 +305,10 @@ theorem smoothApproxSeq_smoothFChartResidual_limit_eq_fChartResidual
       (F_lim := F_lim)
       (Ω := chartTargetEuclid (I := I) (M := M) α)
       h_wkp_tendsto
-  -- Step 2: Manifold-side: `smoothToH1Compl (v n) → u_h` in `H1Compl g`.
   have h_h1Compl_tendsto : Tendsto (fun n =>
       smoothToH1Compl (I := I) (M := M) g (v n))
       atTop (𝓝 u_h) :=
     smoothApproxSeq_tendsto_h1Compl (I := I) (M := M) g hu_h
-  -- Step 3: Apply the weighted-Lp residual-convergence lemma to get
-  -- `eLpNorm 2`-tendsto on `weighted.restrict chartTarget`.
   have h_eLpNorm_weighted_tendsto :
       Tendsto (fun n =>
         eLpNorm (fun y =>
@@ -342,12 +320,9 @@ theorem smoothApproxSeq_smoothFChartResidual_limit_eq_fChartResidual
         atTop (𝓝 0) :=
     smoothFChartResidual_tendsto_fChartResidual_lp_weighted
       (I := I) (M := M) g α v h_h1Compl_tendsto
-  -- Step 4: Extract a.e.-convergent subseq from Step 1.
   obtain ⟨σ, hσ_strict, hσ_ae⟩ :=
     exists_subseq_ae_volume_restrict (I := I) (M := M) g α
       (v := v) (F_lim := F_lim) hF_lim_aesm_volume h_eLpNorm_volume_tendsto
-  -- Step 5: Apply Step 3 to the subsequence `v ∘ σ` and extract a further
-  -- a.e.-convergent subseq from the weighted-measure tendsto.
   have h_eLpNorm_weighted_subseq :
       Tendsto (fun n =>
         eLpNorm (fun y =>
@@ -364,14 +339,6 @@ theorem smoothApproxSeq_smoothFChartResidual_limit_eq_fChartResidual
       (F := DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fChartResidual
         (I := I) (M := M) g α u_h)
       hF_res_aesm_weighted h_eLpNorm_weighted_subseq
-  -- Step 6: The subseq `σ ∘ τ` satisfies:
-  --   (A) `smoothFChartResidual (v (σ (τ n))) → F_lim` a.e. on volume.restrict chartTarget
-  --       (subseq of σ).
-  --   (B) `smoothFChartResidual (v (σ (τ n))) → fChartResidual u_h` a.e. on
-  --       weighted.restrict chartTarget (from Step 5).
-  -- Both transfer to a.e. on volume.restrict chartTarget via absolute
-  -- continuity, then uniqueness of a.e. limit gives the headline.
-  -- (A): subsequence of the volume-side a.e. statement.
   have h_volume_ae_σ_τ :
       ∀ᵐ y ∂((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)),
@@ -379,10 +346,7 @@ theorem smoothApproxSeq_smoothFChartResidual_limit_eq_fChartResidual
           smoothFChartResidual (I := I) (M := M) g α (v (σ (τ n))) y) atTop
           (𝓝 (F_lim y)) := by
     filter_upwards [hσ_ae] with y hy
-    -- hy : Tendsto (fun n => smoothFChartResidual (v (σ n)) y) atTop (𝓝 (F_lim y)).
-    -- Apply τ to the indexing.
     exact hy.comp hτ_strict.tendsto_atTop
-  -- (B): transfer weighted a.e. statement to volume via absolute continuity.
   have h_vol_abs : (volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α) ≪
       (chartPulledWeightedMeasure (I := I) g α).restrict
@@ -397,7 +361,6 @@ theorem smoothApproxSeq_smoothFChartResidual_limit_eq_fChartResidual
           (𝓝 ((DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fChartResidual
               (I := I) (M := M) g α u_h) y)) :=
     h_vol_abs.ae_le hτ_ae
-  -- Step 7: Uniqueness of a.e. limit gives `F_lim =ᵐ fChartResidual u_h`.
   filter_upwards [h_volume_ae_σ_τ, h_volume_ae_σ_τ_fChart]
     with y h_to_Flim h_to_fChart
   exact tendsto_nhds_unique h_to_Flim h_to_fChart

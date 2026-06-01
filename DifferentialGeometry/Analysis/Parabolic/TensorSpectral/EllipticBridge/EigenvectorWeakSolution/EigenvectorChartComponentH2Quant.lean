@@ -68,28 +68,12 @@ open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.ChartH2NonSmooth
 open DifferentialGeometry.Analysis.Sobolev
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Headline (chart-locality-free twin)
-
-The chart-locality-free twin of `eigenvector_chartComponent_h2_quantitative`.
-It re-keys the quantitative tensor non-smooth interior-`H²` engine onto the
-chart-locality-free eigenvector chart-bilinear divergence-form data
-`eigenvectorTensorChartBilinearData g r s ι α P₀`, which is built
-from the chart-locality-free eigenbasis vector
-`tensorResolventEigenbasisVec (tensorResolventL2_isCompactOperator g r s) ι`.
-No `HasLocallyConstantChartAt` / atlas hypothesis appears. -/
 
 /-- **Quantitative non-smooth interior `H²`/`W^{2,2}_loc` regularity for the
 eigenvector chart component (chart-locality-free).**
@@ -159,17 +143,12 @@ theorem eigenvector_chartComponent_h2_quantitative
                     g r s ι α P₀).f_chart 2
                   ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2)) := by
   classical
-  -- The quantitative tensor engine produces a chart-geometric constant
-  -- `C_geom`, uniform over **every** `TensorChartBilinearH1ComplData`,
-  -- depending only on the chart geometry (`g`, `α`, `Ω'`, `η`).
   obtain ⟨C_geom, hC_geom_nn, hC_geom⟩ :=
     tensor_h2_chart_loc_of_data_quantitative (I := I) (M := M) (g := g)
       (α := α) (r := r) (s := s) (P₀ := P₀)
       hη hη_supp hη_range hN h_fderiv_eta hΩ' hΩ'_chart hΩ'_compact
       hη_in_Ω' hR₀_pos hh_supp_in_Ω' hη_one_on_Ω'' hΩ''_open
       hΩ''_compact_closure h_room
-  -- Specialise the uniform-over-`D` conclusion to the chart-locality-free
-  -- eigenvector chart-bilinear data structure.
   exact ⟨C_geom, hC_geom_nn,
     fun i k => hC_geom
       (eigenvectorTensorChartBilinearData (I := I) (M := M)

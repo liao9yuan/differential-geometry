@@ -62,17 +62,10 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Canonical measurable-space and Borel-space instances on `E` and `M`
-
-File-local canonical Borel structures, matching those in the other `Measure` files.
-Declared `local` so they do not pollute external typeclass search. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The time-parameterised Riemannian volume measure -/
 
 /-- Given a smoothly-time-parameterised Riemannian metric family, the associated
 family of Riemannian volume measures on `M`. -/
@@ -87,23 +80,6 @@ lemma riemannianMeasureFamily_def
     (g_fam : ℝ → SmoothRiemannianMetric I M) (t : ℝ) :
     riemannianMeasureFamily (I := I) (M := M) g_fam t =
       riemannianVolumeMeasure (I := I) (M := M) (g_fam t) := rfl
-
-/-! ## Weak regularity interfaces for time-varying metric families
-
-Rather than committing to a joint-smoothness hypothesis on `(t, x) ↦ g_t(x)`, the
-volume-variation machinery below is phrased in terms of two minimal interfaces:
-
-* `MetricFamilyRegularAt g_fam t₀` — encapsulates, for a family of Riemannian
-  metrics `g_fam : ℝ → SmoothRiemannianMetric I M` and a base time `t₀`,
-  exactly the pointwise-in-time differentiability plus joint `(t, x)`-continuity
-  data required. No joint smoothness in `(t, x)` is imposed at this level.
-
-* `FunctionRegularAt f t₀` — the analogue for a time-varying function
-  `f : ℝ → M → ℝ`.
-
-Downstream users with a genuinely jointly-smooth family may package the required
-regularity via a thin separate bridge file; the engine itself sees only the two
-interfaces above. -/
 
 /-- Minimum regularity interface for a time-varying Riemannian metric family at a
 base time. Encapsulates exactly the pointwise time-differentiability and joint
@@ -167,18 +143,6 @@ structure FunctionRegularAt (f : ℝ → M → ℝ) (t₀ : ℝ) : Prop where
   continuous_deriv_joint :
     Continuous (fun p : ℝ × M => deriv (fun s : ℝ => f s p.2) p.1)
 
-/-! ## Jacobi's formula for the determinant of a smooth matrix family
-
-We develop the time-derivative of `t ↦ (G t).det` in full generality, for any
-smooth family `G : ℝ → Matrix n n ℝ` whose entries each have a derivative at
-the base point. The derivation is elementary: we expand the determinant via
-`Matrix.det_apply'` and apply the product rule `HasDerivAt.finset_prod`
-componentwise.
-
-Throughout this section, `n` is an arbitrary index type with `Fintype n` and
-`DecidableEq n`. Concretely, in the application `n = Fin (Module.finrank ℝ E)`.
--/
-
 section Jacobi
 
 variable {n : Type*} [Fintype n] [DecidableEq n]
@@ -223,7 +187,6 @@ theorem hasDerivAt_det_of_entries
     intro σ _
     have hprod := hasDerivAt_prod_of_entries (n := n) G G' t hG σ
     have hmul := hprod.const_mul (((Equiv.Perm.sign σ : ℤ) : ℝ))
-    -- Replace `smul` inside the sum by `mul` on `ℝ` (they coincide).
     have hsum_eq :
         ((Equiv.Perm.sign σ : ℤ) : ℝ) *
             ∑ k, (∏ i ∈ Finset.univ.erase k, G t (σ i) i) • G' (σ k) k
@@ -234,8 +197,6 @@ theorem hasDerivAt_det_of_entries
     exact hmul
   exact HasDerivAt.fun_sum hterm
 
-/-! ### Identification of the permutation-sum with trace-of-adjugate -/
-
 /-- Key algebraic identity: the Leibniz-product derivative sum equals
 `trace (adjugate A · B)`. Proof via the cofactor expansion of `adjugate A i j`
 combined with swapping the order of the σ- and k-summations. -/
@@ -245,13 +206,11 @@ theorem perm_sum_eq_trace_adjugate_mul
         ∑ k, (∏ i ∈ Finset.univ.erase k, A (σ i) i) * B (σ k) k)
       = trace (adjugate A * B) := by
   classical
-  -- Expand the trace.
   have hrhs :
       trace (adjugate A * B)
         = ∑ k, ∑ v, adjugate A k v * B v k := by
     simp [Matrix.trace, Matrix.mul_apply, Matrix.diag]
   rw [hrhs]
-  -- Distribute the scalar factor inside the permutation sum, then swap sums.
   have hLHS_rewrite :
       (∑ σ : Equiv.Perm n, ((Equiv.Perm.sign σ : ℤ) : ℝ) *
           ∑ k, (∏ i ∈ Finset.univ.erase k, A (σ i) i) * B (σ k) k)
@@ -262,10 +221,8 @@ theorem perm_sum_eq_trace_adjugate_mul
     intro σ _
     rw [Finset.mul_sum]
   rw [hLHS_rewrite, Finset.sum_comm]
-  -- Goal: `∑ k, ∑ σ, sign σ * (…(σ) * B (σ k) k) = ∑ k, ∑ v, adjugate A k v * B v k`.
   refine Finset.sum_congr rfl ?_
   intro k _
-  -- Partition σ by the fibre `σ k = v`.
   have hpart :
       (Finset.univ : Finset (Equiv.Perm n)) =
         Finset.univ.biUnion fun v : n =>
@@ -282,11 +239,8 @@ theorem perm_sum_eq_trace_adjugate_mul
     rw [Finset.mem_filter] at hσv hσw
     exact hvw (hσv.2.symm.trans hσw.2)
   rw [hpart, Finset.sum_biUnion hdisj]
-  -- Now: ∑ v, ∑_{σ : σ k = v} sign σ * (∏_{i≠k} A(σi, i) * B (σ k) k)
-  --    = ∑ v, adjugate A k v * B v k.
   refine Finset.sum_congr rfl ?_
   intro v _
-  -- On the filter `σ k = v`, we can pull out `B v k` from the sum.
   have hBpull :
       (∑ σ ∈ (Finset.univ : Finset (Equiv.Perm n)).filter fun σ => σ k = v,
           ((Equiv.Perm.sign σ : ℤ) : ℝ) *
@@ -301,15 +255,11 @@ theorem perm_sum_eq_trace_adjugate_mul
     rw [hσ.2]
     ring
   rw [hBpull]
-  -- Remaining: the signed sum equals `adjugate A k v`. Use `adjugate_apply`.
   congr 1
   rw [adjugate_apply, Matrix.det_apply']
-  -- Split the det-expansion sum (over all permutations) using
-  -- `Finset.sum_filter_add_sum_filter_not`.
   rw [← Finset.sum_filter_add_sum_filter_not
     (s := (Finset.univ : Finset (Equiv.Perm n)))
     (p := fun τ => τ k = v)]
-  -- The "τ k ≠ v" piece vanishes.
   have hsecond :
       ∀ τ ∈ (Finset.univ : Finset (Equiv.Perm n)).filter fun τ => ¬ τ k = v,
         ((Equiv.Perm.sign τ : ℤ) : ℝ) *
@@ -337,14 +287,10 @@ theorem perm_sum_eq_trace_adjugate_mul
       Finset.prod_eq_zero (Finset.mem_univ (τ⁻¹ v)) hzero
     rw [hprod_zero, mul_zero]
   rw [Finset.sum_eq_zero hsecond, add_zero]
-  -- Swap sides to match the signed sum on the LHS.
   symm
-  -- First piece: show ∀ τ with τ k = v,
-  -- `∏ i, (A.updateRow v (Pi.single k 1)) (τ i) i = ∏ i ∈ univ.erase k, A (τ i) i`.
   refine Finset.sum_congr rfl ?_
   intro τ hτ
   rw [Finset.mem_filter] at hτ
-  -- Split product at index k.
   have hsplit_prod :
       (∏ i, (A.updateRow v (Pi.single k 1)) (τ i) i)
         = (A.updateRow v (Pi.single k 1)) (τ k) k *
@@ -354,13 +300,11 @@ theorem perm_sum_eq_trace_adjugate_mul
       (fun i => (A.updateRow v (Pi.single k 1)) (τ i) i)
       (Finset.mem_univ k)).symm
   rw [hsplit_prod]
-  -- (A.updateRow v ...)(τ k) k = (Pi.single k 1) k = 1 since τ k = v.
   have h_topfactor :
       (A.updateRow v (Pi.single k 1)) (τ k) k = 1 := by
     rw [hτ.2, Matrix.updateRow_self]
     simp
   rw [h_topfactor, one_mul]
-  -- For i ≠ k, show the entry equals A (τ i) i.
   have hrest :
       (∏ i ∈ Finset.univ.erase k, (A.updateRow v (Pi.single k 1)) (τ i) i)
         = ∏ i ∈ Finset.univ.erase k, A (τ i) i := by
@@ -400,7 +344,6 @@ theorem hasDerivAt_det_eq_trace_adjugate_mul
 lemma adjugate_eq_det_smul_inv
     {A : Matrix n n ℝ} (h : IsUnit A.det) :
     adjugate A = A.det • A⁻¹ := by
-  -- `A⁻¹ = A.det⁻¹ʳ • adjugate A`, so `A.det • A⁻¹ = A.det * A.det⁻¹ʳ • adj A = adj A`.
   rw [Matrix.inv_def]
   rw [smul_smul]
   rw [Ring.mul_inverse_cancel _ h]
@@ -415,7 +358,6 @@ theorem hasDerivAt_det_eq_det_mul_trace_inv_mul
     HasDerivAt (fun t => (G t).det)
       ((G t).det * trace ((G t)⁻¹ * G')) t := by
   have h := hasDerivAt_det_eq_trace_adjugate_mul (n := n) G G' t hG
-  -- Rewrite `adjugate (G t) * G'` using `adjugate = det • inv`.
   have hadj := adjugate_eq_det_smul_inv (n := n) (A := G t) hunit
   have hrewrite : trace (adjugate (G t) * G') = (G t).det * trace ((G t)⁻¹ * G') := by
     rw [hadj]
@@ -424,8 +366,6 @@ theorem hasDerivAt_det_eq_det_mul_trace_inv_mul
     rfl
   rw [hrewrite] at h
   exact h
-
-/-! ### Chain rule with `Real.sqrt` -/
 
 /-- Chain-rule version: derivative of `t ↦ √(det G(t))` at a time where the
 determinant is nonzero, in permutation-sum form. -/
@@ -459,14 +399,10 @@ theorem hasDerivAt_sqrt_det_eq_half_trace_inv_mul
   have hsqrt : HasDerivAt Real.sqrt (1 / (2 * Real.sqrt (G t).det)) (G t).det :=
     Real.hasDerivAt_sqrt hne
   have hcomp := hsqrt.comp t hdet
-  -- `hcomp : HasDerivAt (√ ∘ (fun s => (G s).det))
-  --   ((1 / (2 * √(G t).det)) * ((G t).det * trace ((G t)⁻¹ * G'))) t`.
-  -- Arithmetic: `(1/(2*√d)) * (d * x) = x * √d / 2` since `d / √d = √d`.
   have hsqrt_ne : Real.sqrt (G t).det ≠ 0 := Real.sqrt_ne_zero'.mpr hpos
   have hkey :
       (1 / (2 * Real.sqrt (G t).det)) * ((G t).det * trace ((G t)⁻¹ * G'))
         = (1 / 2) * trace ((G t)⁻¹ * G') * Real.sqrt (G t).det := by
-    -- Simplify `(G t).det / √(G t).det = √(G t).det`.
     have hdiv : (G t).det / Real.sqrt (G t).det = Real.sqrt (G t).det := by
       rw [eq_comm, eq_div_iff hsqrt_ne]
       exact Real.mul_self_sqrt hpos.le
@@ -481,13 +417,6 @@ theorem hasDerivAt_sqrt_det_eq_half_trace_inv_mul
   simpa [Function.comp] using hcomp
 
 end Jacobi
-
-/-! ## Application to the chart-local density
-
-We specialise the abstract Jacobi formula to the concrete Gram-matrix family
-`Gfam t x := chartGramMatrix (g_fam t) x₀ x` arising from a time-parameterised
-Riemannian metric family on `M`, at a fixed base point `x₀` and a fixed
-evaluation point `x` in the chart source. -/
 
 section ChartDensityFamily
 
@@ -543,7 +472,6 @@ theorem hasDerivAt_chartDensityFamily_eq_half_trace_inv_mul
   have hderiv := hasDerivAt_sqrt_det_eq_half_trace_inv_mul
     (G := chartGramMatrixFamily (I := I) g_fam x₀ x)
     (G' := Gprime) (t := t) hEntries hpos
-  -- Convert the goal to the `sqrt det` form.
   have hfun :
       (fun s => chartDensityFamily (I := I) g_fam x₀ x s)
         = (fun s => Real.sqrt (chartGramMatrixFamily (I := I) g_fam x₀ x s).det) := by
@@ -553,19 +481,6 @@ theorem hasDerivAt_chartDensityFamily_eq_half_trace_inv_mul
   exact hderiv
 
 end ChartDensityFamily
-
-/-! ## Coordinate-invariant metric trace of the time-derivative
-
-Given a time-parameterised Riemannian metric family and a point `x : M`, we
-define the intrinsic scalar `tr_g(∂_t g)(x)`, computed as the trace
-`trace (G⁻¹ · G')` where `G t = chartGramMatrix (g_fam t) x x` uses the chart
-source at `x` itself as the basis chart (so `x` is always in the base set, and
-the canonical choice avoids any well-definedness issue).
-
-Note: the definition uses `deriv`, which returns `0` whenever the underlying
-function is not differentiable at the base time. Consequently the definition
-is total and requires no regularity hypothesis; callers supply regularity only
-where they need the concrete identification `deriv = ∂_t G`. -/
 
 variable (I) in
 /-- The metric trace `tr_g(∂_t g)(x)` at time `t`, computed in the canonical
@@ -587,13 +502,6 @@ lemma traceTimeDerivMetric_eq
         (Matrix.of fun i j =>
           deriv (fun s => chartGramMatrix (I := I) (g_fam s) x x i j) t)) := rfl
 
-/-! ## Bochner integral representation of the chart-local measure
-
-The Bochner-valued analogue of `chartLocalMeasure_lintegral`. Given a bounded
-continuous real-valued function on `M`, its Bochner integral against the
-chart-local measure expands as a Bochner integral on the model space against
-the restricted canonical Haar measure. -/
-
 /-- Bochner integral characterisation of the chart-local measure for a
 measurable, integrable real-valued function. -/
 theorem integral_chartLocalMeasure
@@ -606,19 +514,16 @@ theorem integral_chartLocalMeasure
           ∂(modelHaar (E := E)) := by
   have htarget_meas : MeasurableSet (extChartAt I x₀).target :=
     measurableSet_extChartAt_target (I := I) x₀
-  -- Set up the two-step measure as `Measure.map symm (withDensity (…))`.
   set μ₀ : MeasureTheory.Measure E :=
     (modelHaar (E := E)).restrict (extChartAt I x₀).target with hμ₀
   set w : E → ℝ≥0∞ :=
     fun y => ENNReal.ofReal
       (chartDensity g x₀ ((extChartAt I x₀).symm y)) with hw
   set μ₁ : MeasureTheory.Measure E := μ₀.withDensity w with hμ₁
-  -- Step 1: unfold `chartLocalMeasure` to `Measure.map symm μ₁`.
   have h_unfold :
       chartLocalMeasure (I := I) g x₀ =
         MeasureTheory.Measure.map (extChartAt I x₀).symm μ₁ := rfl
   rw [h_unfold]
-  -- Step 2: use `integral_map` for the pushforward step.
   have haem_symm : AEMeasurable ((extChartAt I x₀).symm) μ₁ := by
     have haem_base : AEMeasurable ((extChartAt I x₀).symm) μ₀ :=
       aemeasurable_extChartAt_symm_restrict_target (I := I) (E := E) x₀
@@ -630,7 +535,6 @@ theorem integral_chartLocalMeasure
         = ∫ y, h ((extChartAt I x₀).symm y) ∂μ₁ := by
     exact MeasureTheory.integral_map haem_symm hh_meas.aestronglyMeasurable
   rw [h_integral_map]
-  -- Step 3: use `integral_withDensity_eq_integral_toReal_smul₀`.
   have hwd_aem : AEMeasurable w μ₀ :=
     aemeasurable_chartDensity_symm_pullback (I := I) g x₀
   have hw_lt_top : ∀ᵐ y ∂μ₀, w y < (⊤ : ℝ≥0∞) := by
@@ -644,7 +548,6 @@ theorem integral_chartLocalMeasure
         (f := w) hwd_aem hw_lt_top
         (g := fun y : E => h ((extChartAt I x₀).symm y))
   rw [h_withDensity]
-  -- Step 4: unfold w.toReal = chartDensity (…), using density_nonneg.
   have hw_toReal : ∀ y ∈ (extChartAt I x₀).target,
       (w y).toReal = chartDensity g x₀ ((extChartAt I x₀).symm y) := by
     intro y hy
@@ -659,7 +562,6 @@ theorem integral_chartLocalMeasure
     change (ENNReal.ofReal (chartDensity g x₀ ((extChartAt I x₀).symm y))).toReal
         = chartDensity g x₀ ((extChartAt I x₀).symm y)
     exact ENNReal.toReal_ofReal hpos.le
-  -- Step 5: convert `∫ y ∂μ₀` to `∫ y in target` and pointwise rewrite.
   have h_restrict :
       ∫ y, (w y).toReal • h ((extChartAt I x₀).symm y) ∂μ₀
         = ∫ y in (extChartAt I x₀).target,
@@ -669,11 +571,6 @@ theorem integral_chartLocalMeasure
   rw [h_restrict]
   refine setIntegral_congr_fun htarget_meas (fun y hy => ?_)
   rw [hw_toReal y hy, smul_eq_mul]
-
-/-! ## Finite-support form of the chart atlas POU on a compact manifold
-
-On a compact `M`, the chart-atlas POU has finite nonempty support, hence its
-tsum-based glue formula is a Finset sum. -/
 
 /-- On a compact manifold, the set of indices where the chart-atlas POU has
 nonempty support is finite. -/
@@ -723,17 +620,6 @@ lemma chartAtlasPOU_withDensity_zero_of_notMem
     simp
   rw [hzero, MeasureTheory.withDensity_zero]
 
-/-! ## Chart-local parametric `HasDerivAt` for the model-space integral
-
-The core parametric derivative lemma used in the volume-variation formula,
-stated chart-locally on the model space side (before pushing forward to `M`).
-Given an integrand `F : ℝ → E → ℝ` depending smoothly on a parameter `t`, with
-pointwise time derivative `F'`, bound `b : E → ℝ` dominating `F'` on a
-neighborhood of `t₀`, and the relevant measurability and integrability
-hypotheses, we obtain both integrability of `F' t₀` and the parametric
-`HasDerivAt` formula. This is the direct wrapper of
-`hasDerivAt_integral_of_dominated_loc_of_deriv_le` specialised to the
-real-valued setting used below. -/
 theorem hasDerivAt_setIntegral_model
     (target : Set E) (_htarget_meas : MeasurableSet target)
     {F : ℝ → E → ℝ} (F' : ℝ → E → ℝ) {b : E → ℝ}
@@ -751,12 +637,10 @@ theorem hasDerivAt_setIntegral_model
     Integrable (F' t₀) ((modelHaar (E := E)).restrict target) ∧
       HasDerivAt (fun t => ∫ y in target, F t y ∂(modelHaar (E := E)))
         (∫ y in target, F' t₀ y ∂(modelHaar (E := E))) t₀ := by
-  -- Apply the Mathlib theorem.
   have := hasDerivAt_integral_of_dominated_loc_of_deriv_le
     (𝕜 := ℝ) (α := E) (E := ℝ) (μ := (modelHaar (E := E)).restrict target)
     (F := F) (F' := F') (x₀ := t₀) (s := s) (bound := b)
     hs hF_meas hF_int hF'_meas h_bound h_bound_int h_diff
-  -- Reinterpret the integrals as set integrals.
   refine ⟨this.1, ?_⟩
   have hfun : (fun t => ∫ y, F t y ∂((modelHaar (E := E)).restrict target))
       = fun t => ∫ y in target, F t y ∂(modelHaar (E := E)) := by
@@ -766,12 +650,6 @@ theorem hasDerivAt_setIntegral_model
       = ∫ y in target, F' t₀ y ∂(modelHaar (E := E)) := rfl
   rw [← hfun, ← hfun']
   exact this.2
-
-/-! ## Pointwise time differentiability of Gram matrix entries
-
-Each Gram-matrix entry is assumed (via `MetricFamilyRegularAt`) to be
-time-differentiable at the base point, with derivative obtained by taking the
-classical `deriv` at that point. -/
 
 /-- Each Gram-matrix entry has a time derivative at every point, equal to its
 classical `deriv`. This is simply a restatement of the
@@ -786,16 +664,6 @@ lemma hasDerivAt_chartGramMatrix_entry
     HasDerivAt (fun s => chartGramMatrix (I := I) (g_fam s) x₀ x i j)
       (deriv (fun s => chartGramMatrix (I := I) (g_fam s) x₀ x i j) t) t :=
   hreg.hasDerivAt_chartGramMatrix x₀ i j hx t
-
-/-! ## Chart-invariance of the metric trace of the time derivative
-
-The intrinsic scalar `traceTimeDerivMetric gFam t x = trace(G_x⁻¹ · ∂_t G_x)`,
-computed in the canonical chart at `x` itself, coincides with the same trace
-computed in any other chart whose base set contains `x`. The proof uses the
-matrix pullback `G_{x₁}(x) = Jᵀ · G_{x₀}(x) · J` with `J` time-independent
-(the chart-transition Jacobian depends only on the manifold structure), so
-`∂_t G_{x₁} = Jᵀ · ∂_t G_{x₀} · J`, and the invariance of trace under
-conjugation yields the conclusion. -/
 
 section ChartInvarianceOfTraceTimeDeriv
 
@@ -815,55 +683,42 @@ lemma deriv_chartGramMatrix_pullback
             deriv (fun s => chartGramMatrix (I := I) (g_fam s) x₀ x i j) t) *
           transitionMatrix (I := I) x₀ x₁ x := by
   classical
-  -- Abbreviations.
   set n := Fin (Module.finrank ℝ E) with hn_def
   set J : Matrix n n ℝ := transitionMatrix (I := I) x₀ x₁ x with hJ_def
-  -- Entry-wise pullback formula (time-dependent).
   have hentry : ∀ (t₀ : ℝ) (i j : n),
       chartGramMatrix (I := I) (g_fam t₀) x₁ x i j
         = ∑ k, ∑ l, J k i * J l j *
             chartGramMatrix (I := I) (g_fam t₀) x₀ x k l := by
     intro t₀ i j
     exact chartGramMatrix_pullback_eq_sum (I := I) (g_fam t₀) x₀ x₁ hx0 hx1 i j
-  -- For each (i, j), the time derivative of `s ↦ G_{x₁}(x) i j` equals the
-  -- matrix product entry.
   ext i j
-  -- Entry-level HasDerivAt for G_{x₀}.
   have hG0_entry : ∀ k l : n,
       HasDerivAt (fun s => chartGramMatrix (I := I) (g_fam s) x₀ x k l)
         (deriv (fun s => chartGramMatrix (I := I) (g_fam s) x₀ x k l) t) t := by
     intro k l
     exact hasDerivAt_chartGramMatrix_entry (I := I) (M := M) hreg x₀ hx0 k l t
-  -- Form the linear combination: G_{x₁}(x) i j = ∑_{k,l} J_{k,i} J_{l,j} G_{x₀}(x) k l.
-  -- Its derivative is the same linear combination of the entry derivatives.
   have hsum_hasDeriv :
       HasDerivAt
         (fun s => ∑ k : n, ∑ l : n, J k i * J l j *
             chartGramMatrix (I := I) (g_fam s) x₀ x k l)
         (∑ k : n, ∑ l : n, J k i * J l j *
             deriv (fun s => chartGramMatrix (I := I) (g_fam s) x₀ x k l) t) t := by
-    -- Outer sum.
     refine HasDerivAt.fun_sum (fun k _ => ?_)
-    -- Inner sum.
     refine HasDerivAt.fun_sum (fun l _ => ?_)
-    -- Constant (J k i * J l j) times a differentiable function.
     have hcm := (hG0_entry k l).const_mul (J k i * J l j)
     exact hcm
-  -- The function `s ↦ G_{x₁}(x) i j s` equals the linear combination.
   have hfun_eq :
       (fun s => chartGramMatrix (I := I) (g_fam s) x₁ x i j)
         = (fun s => ∑ k : n, ∑ l : n, J k i * J l j *
             chartGramMatrix (I := I) (g_fam s) x₀ x k l) := by
     funext s
     exact hentry s i j
-  -- Transport: deriv of the LHS equals deriv of the linear combination.
   have hderiv_eq :
       deriv (fun s => chartGramMatrix (I := I) (g_fam s) x₁ x i j) t
         = ∑ k : n, ∑ l : n, J k i * J l j *
             deriv (fun s => chartGramMatrix (I := I) (g_fam s) x₀ x k l) t := by
     rw [hfun_eq]
     exact hsum_hasDeriv.deriv
-  -- Now compute the matrix-product entry and match.
   change deriv (fun s => chartGramMatrix (I := I) (g_fam s) x₁ x i j) t
       = (Jᵀ *
           (Matrix.of fun i j : n =>
@@ -871,9 +726,6 @@ lemma deriv_chartGramMatrix_pullback
           J) i j
   rw [hderiv_eq]
   simp only [Matrix.mul_apply, Matrix.transpose_apply, Matrix.of_apply]
-  -- LHS: ∑_k ∑_l J[k,i] · J[l,j] · G'[k,l]
-  -- RHS: ∑_p (∑_q J[q,i] · G'[q,p]) · J[p,j]
-  -- These match via sum_comm (swap k ↔ p).
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [Finset.sum_mul]
@@ -889,9 +741,6 @@ lemma transitionMatrix_mul_reverse
     (hx1 : x ∈ (trivializationAt E (TangentSpace I) x₁).baseSet) :
     transitionMatrix (I := I) x₀ x₁ x * transitionMatrix (I := I) x₁ x₀ x = 1 := by
   classical
-  -- The transition matrix sends coordinate vectors via `tangentCoordChange x₁ x₀`.
-  -- Composing gives `tangentCoordChange x₀ x₀ = id` on the overlap.
-  -- Work entry-wise.
   ext i j
   have hx0' : x ∈ (extChartAt I x₀).source := by
     rw [extChartAt_source]
@@ -901,7 +750,6 @@ lemma transitionMatrix_mul_reverse
     exact hx1
   have hmem : x ∈ (extChartAt I x₀).source ∩ (extChartAt I x₁).source ∩
       (extChartAt I x₀).source := ⟨⟨hx0', hx1'⟩, hx0'⟩
-  -- Key identity on the basis vectors: tang x₁ x₀ ∘ tang x₀ x₁ = tang x₀ x₀ = id.
   have hcomp : ∀ i : Fin (Module.finrank ℝ E),
       (tangentCoordChange I x₁ x₀ x) ((tangentCoordChange I x₀ x₁ x)
           ((chartModelBasis E) i))
@@ -914,20 +762,15 @@ lemma transitionMatrix_mul_reverse
     have hself := tangentCoordChange_self (I := I) (x := x₀) (z := x)
       (v := (chartModelBasis E) i) hx0'
     exact hself
-  -- Now compute the matrix product entry.
   change (transitionMatrix (I := I) x₀ x₁ x *
       transitionMatrix (I := I) x₁ x₀ x) i j = (1 : Matrix _ _ _) i j
   simp only [Matrix.mul_apply, transitionMatrix_apply, Matrix.one_apply]
-  -- Apply `chartModelBasis_repr_sum` to `tangentCoordChange x₀ x₁ (e j)`, then apply
-  -- `tangentCoordChange x₁ x₀`. The composition is `tangentCoordChange x₀ x₀ = id`,
-  -- so we recover `e j = ∑ k, repr(tang x₀ x₁ (e j)) k • tang x₁ x₀ (e k)`.
   have hexp :
       (tangentCoordChange I x₀ x₁ x) ((chartModelBasis E) j)
         = ∑ k, (chartModelBasis E).repr
             ((tangentCoordChange I x₀ x₁ x) ((chartModelBasis E) j)) k
           • (chartModelBasis E) k :=
     chartModelBasis_repr_sum (tangentCoordChange I x₀ x₁ x) j
-  -- Apply `tangentCoordChange x₁ x₀` (linear).
   have hlin :
       (tangentCoordChange I x₁ x₀ x)
           (∑ k, (chartModelBasis E).repr
@@ -942,18 +785,15 @@ lemma transitionMatrix_mul_reverse
   have heval : (tangentCoordChange I x₁ x₀ x) ((tangentCoordChange I x₀ x₁ x)
       ((chartModelBasis E) j))
       = (chartModelBasis E) j := hcomp j
-  -- Rewrite heval using hexp and hlin.
   have heval' :
       ∑ k, (chartModelBasis E).repr
             ((tangentCoordChange I x₀ x₁ x) ((chartModelBasis E) j)) k
           • (tangentCoordChange I x₁ x₀ x) ((chartModelBasis E) k)
         = (chartModelBasis E) j := by
     rw [← hlin, ← hexp]; exact heval
-  -- Take repr on both sides, at index i.
   have happ := congrArg ((chartModelBasis E).repr · i) heval'
   simp only [map_sum, Finsupp.coe_finset_sum, Finset.sum_apply,
     map_smul, Finsupp.smul_apply, smul_eq_mul] at happ
-  -- Split the conclusion by cases i = j.
   have hrhs : ((chartModelBasis E).repr ((chartModelBasis E) j)) i
                 = if i = j then (1 : ℝ) else 0 := by
     rw [(chartModelBasis E).repr_self, Finsupp.single_apply]
@@ -963,7 +803,6 @@ lemma transitionMatrix_mul_reverse
   rw [← hrhs]
   rw [← happ]
   refine Finset.sum_congr rfl (fun k _ => ?_)
-  -- The two sums differ only by a factor-order swap (commutative mul).
   exact mul_comm _ _
 
 /-- The transition matrix (as an element of the matrix ring) has a two-sided
@@ -973,8 +812,6 @@ lemma transitionMatrix_isUnit
     (hx0 : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
     (hx1 : x ∈ (trivializationAt E (TangentSpace I) x₁).baseSet) :
     IsUnit (transitionMatrix (I := I) x₀ x₁ x) := by
-  -- `transitionMatrix x₁ x₀ x * transitionMatrix x₀ x₁ x = 1` gives
-  -- `det _ * det _ = 1`, hence `IsUnit (det _)`, hence `IsUnit _`.
   have hleft : transitionMatrix (I := I) x₁ x₀ x *
       transitionMatrix (I := I) x₀ x₁ x = 1 :=
     transitionMatrix_mul_reverse (I := I) x₁ x₀ hx1 hx0
@@ -1008,55 +845,41 @@ lemma trace_chartGramMatrix_inv_deriv_chart_independent
       deriv (fun s => chartGramMatrix (I := I) (g_fam s) x₀ x i j) t with hdG0_def
   set dG₁ : Matrix n n ℝ := Matrix.of fun i j : n =>
       deriv (fun s => chartGramMatrix (I := I) (g_fam s) x₁ x i j) t with hdG1_def
-  -- The Gram matrix pullback at time t.
   have hG1_eq : G₁ = Jᵀ * G₀ * J :=
     chartGramMatrix_pullback_eq_mul (I := I) (g_fam t) x₀ x₁ hx0 hx1
-  -- The time-derivative pullback.
   have hdG1_eq : dG₁ = Jᵀ * dG₀ * J :=
     deriv_chartGramMatrix_pullback (I := I) (M := M) hreg x₀ x₁ hx0 hx1
-  -- J is a unit.
   have hJ_unit : IsUnit J :=
     transitionMatrix_isUnit (I := I) x₀ x₁ hx0 hx1
-  -- G₀ is a unit (its determinant is positive).
   have hG0_unit : IsUnit G₀ := by
     rw [Matrix.isUnit_iff_isUnit_det]
     have hpos : 0 < G₀.det := chartGramMatrix_det_pos (I := I) (g_fam t) x₀ hx0
     exact (ne_of_gt hpos).isUnit
-  -- Jᵀ is a unit.
   have hJT_unit : IsUnit Jᵀ := by
     rw [Matrix.isUnit_iff_isUnit_det, Matrix.det_transpose]
     exact (Matrix.isUnit_iff_isUnit_det _).mp hJ_unit
-  -- `J` has nonzero determinant.
   have hJ_det : IsUnit J.det := (Matrix.isUnit_iff_isUnit_det _).mp hJ_unit
   have hJT_det : IsUnit (Jᵀ).det := by
     rw [Matrix.det_transpose]; exact hJ_det
-  -- Inverse of Jᵀ * G₀ * J.
   have hinv : G₁⁻¹ = J⁻¹ * G₀⁻¹ * (Jᵀ)⁻¹ := by
     rw [hG1_eq]
     rw [Matrix.mul_inv_rev, Matrix.mul_inv_rev]
     simp only [Matrix.mul_assoc]
   have hJTinv : (Jᵀ)⁻¹ * Jᵀ = 1 := Matrix.nonsing_inv_mul _ hJT_det
   have hJinvJ : J * J⁻¹ = 1 := Matrix.mul_nonsing_inv _ hJ_det
-  -- Strategy: expand trace(G₁⁻¹ * dG₁), use hinv + hdG1_eq, collapse
-  -- (Jᵀ⁻¹ * Jᵀ) = 1, use cyclic trace to move the final `J` around.
   have hgoal :
       Matrix.trace (G₁⁻¹ * dG₁) = Matrix.trace (G₀⁻¹ * dG₀) := by
     rw [hinv, hdG1_eq]
-    -- trace ((J⁻¹ * G₀⁻¹ * Jᵀ⁻¹) * (Jᵀ * dG₀ * J))
-    -- Rewrite to align Jᵀ⁻¹ and Jᵀ.
     have hrw1 :
         (J⁻¹ * G₀⁻¹ * (Jᵀ)⁻¹) * (Jᵀ * dG₀ * J)
           = J⁻¹ * G₀⁻¹ * ((Jᵀ)⁻¹ * Jᵀ) * dG₀ * J := by
       simp only [Matrix.mul_assoc]
     rw [hrw1]
     rw [hJTinv]
-    -- trace (J⁻¹ * G₀⁻¹ * 1 * dG₀ * J) = trace (J⁻¹ * G₀⁻¹ * dG₀ * J)
     rw [Matrix.mul_one]
-    -- cyclic: trace (A * J) = trace (J * A)
     rw [show J⁻¹ * G₀⁻¹ * dG₀ * J = (J⁻¹ * G₀⁻¹ * dG₀) * J from by
       simp only [Matrix.mul_assoc]]
     rw [Matrix.trace_mul_comm]
-    -- trace (J * (J⁻¹ * G₀⁻¹ * dG₀)) = trace ((J * J⁻¹) * G₀⁻¹ * dG₀)
     rw [show J * (J⁻¹ * G₀⁻¹ * dG₀) = (J * J⁻¹) * G₀⁻¹ * dG₀ from by
       simp only [← Matrix.mul_assoc]]
     rw [hJinvJ]
@@ -1078,14 +901,11 @@ lemma traceTimeDerivMetric_eq_trace_chartGramMatrix
       (Matrix.of fun i j : Fin (Module.finrank ℝ E) =>
         deriv (fun s => chartGramMatrix (I := I) (g_fam s) α x i j) t)) := by
   have hxx : x ∈ (trivializationAt E (TangentSpace I) x).baseSet := by
-    -- `x` lies in the base set of its own chart.
     change x ∈ (chartAt H x).source
     exact mem_chart_source _ _
   rw [traceTimeDerivMetric_eq]
   exact trace_chartGramMatrix_inv_deriv_chart_independent
     (I := I) (M := M) hreg x α hxx hxα
-
-/-! ## Finite-sum decomposition of the Riemannian volume measure on compact M -/
 
 /-- On a compact manifold, the canonical Riemannian volume measure equals the
 finite sum of POU-weighted chart-local measures over the finite support set. -/
@@ -1097,17 +917,14 @@ theorem riemannianVolumeMeasure_eq_finset_sum
         (chartLocalMeasure (I := I) g α).withDensity
           (fun x : M => ENNReal.ofReal ((chartAtlasPOU I M) α x)) := by
   rw [riemannianVolumeMeasure_def, riemannianMeasure_def]
-  -- Split sum via `Finset` / complement.
   set S : Finset M := chartAtlasPOU_finset (I := I) (M := M) with hS
   set f : M → MeasureTheory.Measure M := fun α =>
       (chartLocalMeasure (I := I) g α).withDensity
         (fun x : M => ENNReal.ofReal ((chartAtlasPOU I M) α x)) with hf
-  -- Split Measure.sum over M = sum over S ⊔ Sᶜ.
   have hsplit : ((MeasureTheory.Measure.sum fun i : (S : Set M) => f i) +
       MeasureTheory.Measure.sum (fun i : ↥((S : Set M)ᶜ) => f i)) =
       MeasureTheory.Measure.sum f :=
     MeasureTheory.Measure.sum_add_sum_compl (S : Set M) f
-  -- The complement sum is zero.
   have hcompl : MeasureTheory.Measure.sum (fun i : ↥((S : Set M)ᶜ) => f i) = 0 := by
     have hzero : ∀ i : ↥((S : Set M)ᶜ), f i = 0 := by
       intro i
@@ -1116,16 +933,8 @@ theorem riemannianVolumeMeasure_eq_finset_sum
     ext t ht
     rw [MeasureTheory.Measure.sum_apply _ ht]
     simp [hzero]
-  -- Combine.
   rw [← hsplit, hcompl, add_zero]
   exact MeasureTheory.Measure.sum_coe_finset S f
-
-/-! ## Bochner integral against the Riemannian volume measure: finite-sum form
-
-On a compact manifold, the Bochner integral of a continuous function
-`h : M → ℝ` against the canonical Riemannian volume measure decomposes as a
-finite sum over the chart-atlas POU support. Each summand is the Bochner
-integral of `h` against the POU-weighted chart-local measure at `α`. -/
 
 theorem integral_riemannianVolumeMeasure_eq_finset_sum
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -1138,14 +947,11 @@ theorem integral_riemannianVolumeMeasure_eq_finset_sum
             ∂((chartLocalMeasure (I := I) g α).withDensity
               (fun y : M => ENNReal.ofReal ((chartAtlasPOU I M) α y))) := by
   classical
-  -- The Riemannian measure, written as a finite sum of withDensity measures.
   have hVol_eq :=
     riemannianVolumeMeasure_eq_finset_sum (I := I) (M := M) g
-  -- Integrability of h for each summand.
   haveI hFin :
       MeasureTheory.IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
-  -- Bound `|h|` by the sup norm.
   obtain ⟨C, hC⟩ : ∃ C, ∀ x, ‖h x‖ ≤ C := by
     have hCpt := (isCompact_univ (X := M)).image hh_cont.norm
     obtain ⟨C, hCmem⟩ := hCpt.bddAbove
@@ -1165,22 +971,9 @@ theorem integral_riemannianVolumeMeasure_eq_finset_sum
         (fun y : M => ENNReal.ofReal ((chartAtlasPOU I M) β y)))
       (s := chartAtlasPOU_finset (I := I) (M := M))
       (fun _ _ => Measure.zero_le _) hα
-  -- Conclude using integral_finset_sum_measure.
   conv_lhs => rw [hVol_eq]
   exact integral_finset_sum_measure hsummand_int
 
-/-! ## Global `HasDerivAt` for the integral of a time-parameterised function
-against the Riemannian volume measure — finite-sum assembly
-
-The global parametric derivative theorem, expressed as the assembly of
-chart-local parametric derivatives over the finite POU-support set. Given the
-chart-local `HasDerivAt` statements for each `α` in the finite-support Finset,
-the global `HasDerivAt` for `t ↦ ∫ x, f t x ∂volume_t` follows by linearity of
-`HasDerivAt.fun_finset_sum`.
-
-This formulation cleanly separates the analytic kernel (the chart-local
-parametric differentiation and bound construction) from the global measure
-assembly (which is pure linear algebra). -/
 theorem volume_variation_formula_from_chart_derivs
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -1203,19 +996,6 @@ theorem volume_variation_formula_from_chart_derivs
   rw [← hα_sum_val]
   exact HasDerivAt.fun_sum hα_deriv
 
-/-!
-### Global volume variation formula: finite-sum form
-
-The theorem `volume_variation_formula` as a `HasDerivAt` at a single point
-`t`, under `[CompactSpace M]`. The global integral of a smooth time-family
-`f : ℝ → M → ℝ` against the Riemannian volume measure is given by a finite
-sum over the chart-atlas POU support: each summand is the integral of `f t`
-against the POU-weighted chart-local measure.
-
-This identity, combined with the chart-local parametric `HasDerivAt` given by
-`hasDerivAt_setIntegral_model` applied to each chart, yields the global
-`HasDerivAt` for `t ↦ ∫ x, f t x ∂riemannianMeasureFamily gFam t`.
--/
 theorem integral_riemannianMeasureFamily_eq_finset_sum
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -1258,7 +1038,6 @@ theorem volume_variation_formula
       (fun s : ℝ =>
         ∫ x, f s x ∂(riemannianMeasureFamily (I := I) (M := M) g_fam s))
       Iglobal t := by
-  -- Key: rewrite the LHS as the finite sum via `integral_…_eq_finset_sum`, pointwise in s.
   have hfun :
       (fun s : ℝ =>
           ∫ x, f s x ∂(riemannianMeasureFamily (I := I) (M := M) g_fam s))
@@ -1273,22 +1052,6 @@ theorem volume_variation_formula
   refine HasDerivAt.congr_of_eventuallyEq ?_ hfun
   exact volume_variation_formula_from_chart_derivs (I := I) (M := M)
     g_fam f t Iα Iglobal hα_deriv hα_sum_val
-
-/-! ## Clean signature: explicit derivative form of the volume variation formula
-
-Below, we package the general volume variation formula into an explicit form
-where the derivative of `t ↦ ∫ f t d(μ_t)` is exhibited as the integral of
-`(∂_t f + ½ · tr_g(∂_t g) · f)` against the (Riemannian volume) measure at the
-base time. The derivation proceeds through three reusable lemmas:
-
-1. A pointwise product-rule `HasDerivAt` for the chart-local integrand
-   `s ↦ f s x · ρ_α x · density_α(gFam s, x)`, expressing the derivative in
-   terms of `deriv (f · x) t`, `ρ_α x`, the density, and
-   `traceTimeDerivMetric gFam t x`.
-2. A per-chart variant `per_chart_integrand_hasDerivAt` isolating the
-   pointwise derivative on the chart base set.
-3. The clean global theorem `first_variation_of_volume`, which
-   exhibits the global derivative integrand explicitly. -/
 
 section CleanVolumeVariation
 
@@ -1318,13 +1081,11 @@ lemma per_chart_integrand_hasDerivAt
         chartDensity (I := I) (g_fam t) α x) t := by
   classical
   set n := Fin (Module.finrank ℝ E) with hn_def
-  -- Gram-entry-wise HasDerivAt at `α`, evaluated at `x`.
   have hG : ∀ i j : n,
       HasDerivAt (fun s => chartGramMatrixFamily (I := I) g_fam α x s i j)
         (deriv (fun s => chartGramMatrixFamily (I := I) g_fam α x s i j) t) t := by
     intro i j
     exact hasDerivAt_chartGramMatrix_entry (I := I) (M := M) hreg α hxα i j t
-  -- The density `chartDensity (g_fam ·) α x` has the half-trace form derivative.
   have hdensity_deriv :
       HasDerivAt
         (fun s : ℝ => chartDensity (I := I) (g_fam s) α x)
@@ -1340,46 +1101,36 @@ lemma per_chart_integrand_hasDerivAt
       (by
         intro i j
         exact hG i j)
-    -- `chartDensityFamily g_fam α x` is defeq to `chartDensity (g_fam ·) α x`.
     change HasDerivAt (fun s => chartDensity (I := I) (g_fam s) α x) _ t
     exact this
-  -- Rewrite the density-derivative constant using chart-invariance.
   have htrace :
       Matrix.trace ((chartGramMatrixFamily (I := I) g_fam α x t)⁻¹ *
         (Matrix.of fun i j : n =>
           deriv (fun s => chartGramMatrixFamily (I := I) g_fam α x s i j) t))
         = traceTimeDerivMetric (I := I) g_fam t x := by
-    -- By definition, chartGramMatrixFamily = chartGramMatrix (g_fam ·) α x.
     change Matrix.trace ((chartGramMatrix (I := I) (g_fam t) α x)⁻¹ *
         (Matrix.of fun i j : n =>
           deriv (fun s => chartGramMatrix (I := I) (g_fam s) α x i j) t))
       = traceTimeDerivMetric (I := I) g_fam t x
     rw [traceTimeDerivMetric_eq_trace_chartGramMatrix
       (I := I) (M := M) hreg α hxα]
-  -- Also, `chartDensity (g_fam t) α x = √(det G_t α x)`.
   have hdensity_val :
       chartDensity (I := I) (g_fam t) α x
         = Real.sqrt (chartGramMatrixFamily (I := I) g_fam α x t).det := by
     rfl
-  -- Rewrite the density-derivative constant cleanly.
   have hdensity_deriv' :
       HasDerivAt
         (fun s : ℝ => chartDensity (I := I) (g_fam s) α x)
         ((1 / 2) * traceTimeDerivMetric (I := I) g_fam t x *
           chartDensity (I := I) (g_fam t) α x) t := by
     rw [hdensity_val]
-    -- Apply the rewrite on the HasDerivAt's RHS.
     have := hdensity_deriv
     rw [htrace] at this
     exact this
-  -- Combine: `(f s x * ρ x) * density s` via product rule.
-  -- First: `HasDerivAt (fun s => f s x * ρ x) (deriv_f * ρ x) t` (ρ x is constant in s).
   have hfρ : HasDerivAt (fun s : ℝ => f s x * ρ x)
       (deriv (fun s : ℝ => f s x) t * ρ x) t :=
     hf.mul_const (ρ x)
-  -- Now the product rule on `(f · · ρ x) * density`.
   have hprod := hfρ.mul hdensity_deriv'
-  -- Algebraic reorganization to match the stated derivative.
   have halgebra :
       (deriv (fun s : ℝ => f s x) t * ρ x) *
           chartDensity (I := I) (g_fam t) α x
@@ -1410,13 +1161,10 @@ theorem chartLocal_weighted_finset_sum_eq_riemannianMeasure_integral
           ∂(chartLocalMeasure (I := I) (g_fam t) α)
       = ∫ x, h x ∂(riemannianMeasureFamily (I := I) (M := M) g_fam t) := by
   classical
-  -- Reduce to the finset-sum identity for the Riemannian volume measure.
   rw [riemannianMeasureFamily_def]
   rw [integral_riemannianVolumeMeasure_eq_finset_sum (I := I) (M := M)
       (g_fam t) h hh_cont]
-  -- Pointwise, each summand matches up via `integral_withDensity`.
   refine Finset.sum_congr rfl (fun α _ => ?_)
-  -- `∫ h ∂(cLM.withDensity (ofReal ρ_α)) = ∫ (ofReal ρ_α).toReal • h ∂cLM = ∫ ρ_α • h ∂cLM`.
   set ρ : M → ℝ := fun x => (chartAtlasPOU I M) α x with hρ_def
   have hρ_cont : Continuous ρ := ((chartAtlasPOU I M) α).contMDiff.continuous
   have hρ_nonneg : ∀ x, 0 ≤ ρ x := fun x => (chartAtlasPOU I M).nonneg _ _
@@ -1436,7 +1184,6 @@ theorem chartLocal_weighted_finset_sum_eq_riemannianMeasure_integral
       (μ := chartLocalMeasure (I := I) (g_fam t) α)
       (f := fun y : M => ENNReal.ofReal (ρ y)) hρ_ae hρ_lt_top
       (g := h)
-  -- Simplify `(ENNReal.ofReal (ρ x)).toReal = ρ x` using nonnegativity.
   have htoReal : ∀ x, (ENNReal.ofReal (ρ x)).toReal = ρ x := fun x =>
     ENNReal.toReal_ofReal (hρ_nonneg x)
   have hsmul : ∀ x, (ENNReal.ofReal (ρ x)).toReal • h x = h x * ρ x := fun x => by
@@ -1492,36 +1239,22 @@ theorem volume_variation_formula_clean_of_chart_derivs
               (1/2) * traceTimeDerivMetric (I := I) g_fam t x * f t x)
           ∂(riemannianMeasureFamily (I := I) (M := M) g_fam t))
       t := by
-  -- Set the abbreviation `Iα α := ∫ (deriv f + ½ trace * f) * ρ α d(cLM α)`.
   set h : M → ℝ :=
       fun x => deriv (fun s : ℝ => f s x) t +
         (1/2) * traceTimeDerivMetric (I := I) g_fam t x * f t x with hh_def
   set Iα : M → ℝ := fun α =>
       ∫ x, h x * (chartAtlasPOU I M) α x
           ∂(chartLocalMeasure (I := I) (g_fam t) α) with hIα_def
-  -- Set the global value.
   set Iglobal : ℝ :=
       ∫ x, h x
           ∂(riemannianMeasureFamily (I := I) (M := M) g_fam t) with hIglobal_def
-  -- Sum identity via the helper lemma.
   have hSum : ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M), Iα α = Iglobal := by
     exact chartLocal_weighted_finset_sum_eq_riemannianMeasure_integral
       (I := I) (M := M) g_fam t h hh_cont
-  -- Apply the general-form formula.
   refine volume_variation_formula (I := I) (M := M)
     g_fam f t Iα Iglobal hf_cont ?_ hSum
   intro α hα
   exact hα_deriv_explicit α hα
-
-
-
-/-! ## Continuity of `traceTimeDerivMetric` in the spatial variable
-
-The function `x ↦ traceTimeDerivMetric g_fam t x` is continuous on `M`. This is
-established by showing continuity on each chart base set, using the
-chart-invariance identity to replace the canonical `x`-chart by a fixed `α`-chart,
-combined with the joint continuity data packaged in `MetricFamilyRegularAt`.
--/
 
 section TraceTimeDerivMetricContinuous
 
@@ -1551,7 +1284,6 @@ lemma continuousOn_traceTimeDerivMetric_on_base
         deriv (fun s : ℝ => chartGramMatrix (I := I) (g_fam s) α p.2 i j) p.1)
       (Set.univ ×ˢ (trivializationAt E (TangentSpace I) α).baseSet) := fun i j =>
     hreg.continuousOn_deriv_chartGramMatrix α i j
-  -- Det continuous.
   have h_det_cont : ContinuousOn
       (fun p : ℝ × M => (chartGramMatrix (I := I) (g_fam p.1) α p.2).det)
       (Set.univ ×ˢ (trivializationAt E (TangentSpace I) α).baseSet) := by
@@ -1568,7 +1300,6 @@ lemma continuousOn_traceTimeDerivMetric_on_base
     refine ContinuousOn.mul continuousOn_const ?_
     refine continuousOn_finset_prod _ (fun i _ => ?_)
     exact hG_joint (σ i) i
-  -- Adjugate entry continuous.
   have h_adj_cont : ∀ k v : n, ContinuousOn
       (fun p : ℝ × M => (chartGramMatrix (I := I) (g_fam p.1) α p.2).adjugate k v)
       (Set.univ ×ˢ (trivializationAt E (TangentSpace I) α).baseSet) := by
@@ -1620,13 +1351,11 @@ lemma continuousOn_traceTimeDerivMetric_on_base
         rw [Matrix.updateRow_apply]
         exact if_neg hiv
       rw [hnonrow]; exact hG_joint (σ i) i
-  -- Det nonzero on domain.
   have h_det_ne_zero : ∀ p ∈ (Set.univ ×ˢ (trivializationAt E (TangentSpace I) α).baseSet
         : Set (ℝ × M)),
       (chartGramMatrix (I := I) (g_fam p.1) α p.2).det ≠ 0 := by
     intro p hp
     exact ne_of_gt (chartGramMatrix_det_pos (I := I) (g_fam p.1) α hp.2)
-  -- Inverse entries continuous.
   have h_inv_cont : ∀ i j : n, ContinuousOn
       (fun p : ℝ × M => ((chartGramMatrix (I := I) (g_fam p.1) α p.2)⁻¹) i j)
       (Set.univ ×ˢ (trivializationAt E (TangentSpace I) α).baseSet) := by
@@ -1647,7 +1376,6 @@ lemma continuousOn_traceTimeDerivMetric_on_base
     rw [hfn_eq]
     refine ContinuousOn.mul ?_ (h_adj_cont i j)
     exact h_det_cont.inv₀ h_det_ne_zero
-  -- Product entry continuous.
   have h_prod_cont : ∀ i j : n, ContinuousOn
       (fun p : ℝ × M =>
         ((chartGramMatrix (I := I) (g_fam p.1) α p.2)⁻¹ *
@@ -1670,7 +1398,6 @@ lemma continuousOn_traceTimeDerivMetric_on_base
     rw [hfun]
     refine continuousOn_finset_sum _ (fun k _ => ?_)
     exact (h_inv_cont i k).mul (hdG_joint k j)
-  -- Trace is diagonal sum.
   have htrace_eq : ∀ p : ℝ × M,
       Matrix.trace ((chartGramMatrix (I := I) (g_fam p.1) α p.2)⁻¹ *
           Matrix.of fun i j : n =>
@@ -1703,15 +1430,12 @@ lemma traceTimeDerivMetric_continuous
   classical
   refine continuous_iff_continuousAt.mpr (fun x₀ => ?_)
   set n := Fin (Module.finrank ℝ E) with hn_def
-  -- On the α := x₀-chart base set, `traceTimeDerivMetric g_fam t x` equals the chart
-  -- formula using the x₀-chart. The x₀-chart base set contains x₀ and is open.
   set α : M := x₀
   have hα_base_open : IsOpen (trivializationAt E (TangentSpace I) α).baseSet :=
     (trivializationAt E (TangentSpace I) α).open_baseSet
   have hx₀_base : x₀ ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     change x₀ ∈ (chartAt H x₀).source
     exact mem_chart_source _ _
-  -- Joint continuity of the trace-form expression on univ ×ˢ base_α.
   have h_joint : ContinuousOn
       (fun p : ℝ × M => Matrix.trace
         ((chartGramMatrix (I := I) (g_fam p.1) α p.2)⁻¹ *
@@ -1719,7 +1443,6 @@ lemma traceTimeDerivMetric_continuous
             deriv (fun s => chartGramMatrix (I := I) (g_fam s) α p.2 i j) p.1)))
       (Set.univ ×ˢ (trivializationAt E (TangentSpace I) α).baseSet) :=
     continuousOn_traceTimeDerivMetric_on_base (I := I) (M := M) hreg α
-  -- Slice at fixed t.
   have h_slice : ContinuousOn
       (fun x : M => Matrix.trace
         ((chartGramMatrix (I := I) (g_fam t) α x)⁻¹ *
@@ -1731,7 +1454,6 @@ lemma traceTimeDerivMetric_continuous
         (Set.univ ×ˢ (trivializationAt E (TangentSpace I) α).baseSet) :=
       ⟨Set.mem_univ _, hx⟩
     have h_at := (h_joint (t, x) hp)
-    -- Restrict to the slice {t} × base_α, then transfer to the x-slice.
     have hincl_cont : Continuous (fun y : M => ((t, y) : ℝ × M)) :=
       continuous_const.prodMk continuous_id
     have hincl_mapsTo : Set.MapsTo (fun y : M => ((t, y) : ℝ × M))
@@ -1739,7 +1461,6 @@ lemma traceTimeDerivMetric_continuous
         (Set.univ ×ˢ (trivializationAt E (TangentSpace I) α).baseSet) :=
       fun y hy => ⟨Set.mem_univ _, hy⟩
     exact h_at.comp hincl_cont.continuousWithinAt hincl_mapsTo
-  -- On base_α, traceTimeDerivMetric g_fam t x = trace form at α.
   have hev : (fun x : M => traceTimeDerivMetric (I := I) g_fam t x) =ᶠ[𝓝 x₀]
       (fun x : M => Matrix.trace
         ((chartGramMatrix (I := I) (g_fam t) α x)⁻¹ *
@@ -1841,12 +1562,6 @@ lemma continuousOn_chartTrace_form_of_base_pullback
 
 end TraceTimeDerivMetricContinuous
 
-/-! ## The per-chart parametric HasDerivAt lemma
-
-Assembly of `hasDerivAt_setIntegral_model` and `per_chart_integrand_hasDerivAt`
-into the single per-chart HasDerivAt needed to apply
-`volume_variation_formula_clean_of_chart_derivs`. -/
-
 section PerChartHasDerivAt
 
 variable {g_fam : ℝ → SmoothRiemannianMetric I M}
@@ -1858,9 +1573,6 @@ private lemma chartDensity_nonneg_of_base
   exact Real.sqrt_nonneg _
 
 set_option maxHeartbeats 16000000 in
--- The proof below assembles several measure-theoretic sub-lemmas with joint
--- continuity / differentiability arguments; the combined elaboration load exceeds
--- the default heartbeats budget.
 /-- Per-chart parametric `HasDerivAt`: the chart-local integral
 `s ↦ ∫ x, f s x ∂(chartLocalMeasure (g_fam s) α).withDensity (ofReal ρ_α)` has a
 derivative at `t` given by the explicit formula
@@ -1880,7 +1592,6 @@ lemma per_chart_hasDerivAt
             (chartAtlasPOU I M) α x
           ∂(chartLocalMeasure (I := I) (g_fam t) α)) t := by
   classical
-  -- Setup.
   set n := Fin (Module.finrank ℝ E) with hn_def
   set ρα : M → ℝ := fun x => (chartAtlasPOU I M) α x with hρα_def
   set μₐ : MeasureTheory.Measure M := chartLocalMeasure (I := I) (g_fam t) α with hμα_def
@@ -1888,67 +1599,50 @@ lemma per_chart_hasDerivAt
   set symm : E → M := fun y => (extChartAt I α).symm y with hsymm_def
   have htarget_meas : MeasurableSet target :=
     measurableSet_extChartAt_target (I := I) α
-  -- Continuity facts for ρα, f, density, and the combined integrand.
   have hρα_cont : Continuous ρα := ((chartAtlasPOU I M) α).contMDiff.continuous
   have hρα_nonneg : ∀ x, 0 ≤ ρα x := fun x => (chartAtlasPOU I M).nonneg _ _
   have hρα_le_one : ∀ x, ρα x ≤ 1 := fun x => (chartAtlasPOU I M).le_one _ _
   have hρα_subord : tsupport ρα ⊆ (chartAt H α).source :=
     (chartAtlasPOU_isSubordinate I M) α
-  -- tsupport is compact on compact M (tsupport is closed, compact space).
   have hρα_tsupport_compact : IsCompact (tsupport ρα) := isClosed_tsupport ρα |>.isCompact
-  -- Continuity of `f` on `ℝ × M`.
   have hf_cont_joint : Continuous (fun p : ℝ × M => f p.1 p.2) := hf.continuous_joint
-  -- The slice `f t ·`.
   have hft_cont : Continuous (f t) := by
     have : Continuous ((fun p : ℝ × M => f p.1 p.2) ∘ (fun x : M => (t, x))) := by
       refine hf_cont_joint.comp ?_
       exact continuous_const.prodMk continuous_id
     exact this
-  -- Joint continuity of deriv in (s, y).
   have h_deriv_cont_joint_M : Continuous
       (fun p : ℝ × M => deriv (fun s : ℝ => f s p.2) p.1) :=
     hf.continuous_deriv_joint
-  -- Continuity of deriv (f · ·) t.
   have h_deriv_cont : Continuous (fun x : M => deriv (fun s : ℝ => f s x) t) := by
     have : Continuous ((fun p : ℝ × M => deriv (fun s : ℝ => f s p.2) p.1)
         ∘ (fun x : M => (t, x))) :=
       h_deriv_cont_joint_M.comp (continuous_const.prodMk continuous_id)
     exact this
-  -- Continuity of traceTimeDerivMetric t ·.
   have h_tr_cont : Continuous (fun x : M => traceTimeDerivMetric (I := I) g_fam t x) :=
     traceTimeDerivMetric_continuous (I := I) (M := M) hreg
-  -- Continuity of the Riemannian density on the α-base set.
   have h_density_contOn : ContinuousOn
       (fun x : M => chartDensity (I := I) (g_fam t) α x)
       (trivializationAt E (TangentSpace I) α).baseSet :=
     chartDensity_continuousOn (I := I) (g_fam t) α
-  -- The map symm : E → M is continuous on target.
   have h_symm_contOn : ContinuousOn symm target :=
     continuousOn_extChartAt_symm (I := I) α
-  -- The chart symm maps target into the chart source (= trivialization base set).
   have h_symm_maps : ∀ y ∈ target, symm y ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     intro y hy
     have hsrc : symm y ∈ (extChartAt I α).source := (extChartAt I α).map_target hy
     rw [extChartAt_source_eq_chartAt_source (I := I)] at hsrc
     exact hsrc
-  -- Bound on M.
   obtain ⟨Cf, hCf⟩ : ∃ C, ∀ x, ‖f t x‖ ≤ C := by
     have hIm := (isCompact_univ (X := M)).image hft_cont.norm
     obtain ⟨C, hC⟩ := hIm.bddAbove
     exact ⟨C, fun x => hC ⟨x, Set.mem_univ _, rfl⟩⟩
-  -- Step 1: Use the explicit product form of the integrand.
-  -- On target, the integral of `f s` against the withDensity-measure equals
-  -- ∫ y in target, density * (ρα * f s) ∂modelHaar.
-  -- We work with Fmdl s y := f s (symm y) * ρα (symm y) * chartDensity (g_fam s) α (symm y).
   set Fmdl : ℝ → E → ℝ := fun s y =>
     f s (symm y) * ρα (symm y) * chartDensity (I := I) (g_fam s) α (symm y)
-  -- The derivative of Fmdl in s at t, given by per_chart_integrand_hasDerivAt.
   set Fprim : ℝ → E → ℝ := fun s y =>
     (deriv (fun r : ℝ => f r (symm y)) s +
       (1/2) * traceTimeDerivMetric (I := I) g_fam s (symm y) *
         f s (symm y)) * ρα (symm y) *
       chartDensity (I := I) (g_fam s) α (symm y)
-  -- Pointwise derivative on target.
   have hH'_deriv : ∀ᵐ y ∂((modelHaar (E := E)).restrict target),
       ∀ s ∈ (Set.univ : Set ℝ), HasDerivAt (fun r => Fmdl r y) (Fprim s y) s := by
     refine (MeasureTheory.ae_restrict_iff' htarget_meas).mpr ?_
@@ -1956,18 +1650,12 @@ lemma per_chart_hasDerivAt
     intro s _
     have hsym_base : symm y ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
       h_symm_maps y hy
-    -- `fun r => f r (symm y)` has derivative (deriv ...) s (pointwise regularity).
     have hslice : HasDerivAt (fun r : ℝ => f r (symm y))
         (deriv (fun r : ℝ => f r (symm y)) s) s :=
       hf.hasDerivAt_time (symm y) s
     have hpcd := per_chart_integrand_hasDerivAt
       (I := I) (M := M) (t := s) (hreg.at_any s) α (x := symm y) hsym_base f ρα hslice
     exact hpcd
-  -- Bounds.
-  -- Strategy: build a bound `b : E → ℝ` such that for `s ∈ ball t 1` (nbhd of t),
-  -- `‖Fprim s y‖ ≤ b y` on target.
-  -- We bound `Fprim` on the compact `K'_α := (extChartAt I α) '' tsupport ρα`, and zero
-  -- outside (since `symm y ∉ tsupport ρα` implies `ρα (symm y) = 0`, hence `Fprim s y = 0`).
   set K : Set M := tsupport ρα
   set K' : Set E := (extChartAt I α) '' K
   have hK_compact : IsCompact K := hρα_tsupport_compact
@@ -1978,57 +1666,16 @@ lemma per_chart_hasDerivAt
       rw [← extChartAt_source_eq_chartAt_source (I := I)] at this
       exact this))
   have hK'_meas : MeasurableSet K' := hK'_compact.measurableSet
-  -- measure of K' finite.
   have hK'_meas_lt_top : (modelHaar (E := E)) K' < ⊤ :=
     hK'_compact.measure_lt_top
-  -- Bound constants:
-  -- |Fprim s y| ≤ |deriv + 1/2 trace f| * |ρα| * |density|. On K' (= image of tsupport),
-  -- each factor is bounded (by continuity on compact set).
-  -- Compute: for `s ∈ ball t 1`, everything involves only `s` — but our bound `h_bound` must
-  -- be uniform over all `s ∈ ball t 1`. Issue: `(deriv (f · y) s)`, `trace g_fam s y`,
-  -- `density (g_fam s) α y`, and `f s y` all depend on `s`.
-  -- Uniform bound requires joint continuity in `(s, y)` on `[t-1, t+1] × K'`.
-  -- Simpler: use the simple bound coming from continuous joint maps on compact sets.
-  -- Joint continuity of `deriv (f · ·) ·` in `(s, y)`?  This is the issue.
-  -- To sidestep, apply the parametric integral theorem with `s := {t}` (a degenerate slice —
-  -- but Mathlib's theorem requires `s` a nhd). We use the joint continuity of
-  -- `(s, y) ↦ Fprim s y` on `ball t 1 × K'`, bound by the `isCompact.bddAbove_image ‖·‖`.
-  -- Jointly in `(s, y)`:
-  --   - `f : ℝ × M → ℝ` is continuous (joint, from hf).
-  --   - `deriv (f · y) s` is jointly continuous in `(s, y)` — this requires
-  --     continuity of `fderiv` in the base point, which is the analogue of
-  --     `continuous_deriv_slice` but in both arguments.
-  --   - `traceTimeDerivMetric g_fam s y` is jointly continuous in `(s, y)` — another
-  --     joint fact.
-  --   - `chartDensity (g_fam s) α y` is jointly continuous on `ℝ × base_α`.
-  -- We punt on the JOINT derivative-continuity question by using the following
-  -- dominance: take `s ∈ {t}` via `s := Set.univ`, use `deriv (f · y) · = deriv (f · y)`
-  -- pointwise — but Mathlib's theorem needs the dependency on `s`.
-  -- Alternative: observe that the derivative is continuous in the joint `(s, y)`
-  -- argument via the same construction as `continuous_deriv_slice`.
-  -- The joint partial-derivative `(s, y) ↦ ∂_s f s y` is continuous: it equals
-  -- `fderiv ((fun p => f p.1 p.2) ∘ (fun p => (p.1, p.2))) p (1, 0)`, and `fderiv`
-  -- is continuous. We use `partial_deriv_cont`, proven below inline.
   have h_deriv_cont_joint : Continuous
       (fun p : ℝ × M => deriv (fun s : ℝ => f s p.2) p.1) :=
     hf.continuous_deriv_joint
-  -- Joint continuity of `(s, y) ↦ traceTimeDerivMetric g_fam s y` at fixed `(t, y)`?
-  -- For our bound we just need uniformity on `ball t 1 × K'`, but since we don't have
-  -- `traceTimeDerivMetric` continuously dependent on `s` easily, we bound it simpler:
-  -- use the joint continuity of `chartGramMatrix` entries and their time-derivatives,
-  -- pull back via the α-chart using chart-invariance. This is substantial work.
-  -- Simpler path: bound `|Fprim|` on `[t-1, t+1] × K'` by continuity of the individual
-  -- factors.
-  -- Let's bound each factor independently on a compact set.
-  -- Define: q (s, y) := Fprim s y on `Ω := Set.Icc (t - 1) (t + 1) ×ˢ K'`.
-  -- We argue Fprim itself is continuous on Ω as a function of (s, y).
   set I₁ : Set ℝ := Set.Icc (t - 1) (t + 1)
   have hI₁_compact : IsCompact I₁ := isCompact_Icc
   have ht_interior : t ∈ Set.Ioo (t - 1 : ℝ) (t + 1) := by
     refine ⟨?_, ?_⟩ <;> linarith
   have ht_in_I₁ : t ∈ I₁ := ⟨by linarith, by linarith⟩
-  -- ball t 1 is an open nbhd of t contained in Ioo, and its closure ⊆ I₁.
-  -- We use the open ball.
   set ball_s : Set ℝ := Metric.ball t 1
   have hballs_nhd : ball_s ∈ 𝓝 t := Metric.ball_mem_nhds _ one_pos
   have hballs_sub_I₁ : ball_s ⊆ I₁ := by
@@ -2037,14 +1684,8 @@ lemma per_chart_hasDerivAt
     refine ⟨?_, ?_⟩
     · have := (abs_lt.mp hs').1; linarith
     · have := (abs_lt.mp hs').2; linarith
-  -- Define the closed bound domain.
   set Ω : Set (ℝ × E) := I₁ ×ˢ K'
   have hΩ_compact : IsCompact Ω := hI₁_compact.prod hK'_compact
-  -- Continuity of Fmdl on ℝ × E (full domain, pushing through symm).
-  -- But symm is only defined on target; outside target, Fmdl still makes sense
-  -- (symm is total — PartialEquiv), but not necessarily continuous.
-  -- Let's restrict to target.
-  -- Actually we only need bound on Ω ∩ (ℝ × target) = I₁ ×ˢ K' since K' ⊆ target.
   have hK'_sub_target : K' ⊆ target := by
     intro y hy
     obtain ⟨x, hxK, hx_eq⟩ := hy
@@ -2054,24 +1695,8 @@ lemma per_chart_hasDerivAt
       exact this
     rw [← hx_eq]
     exact (extChartAt I α).map_source hx_src
-  -- Prove: on Ω, |Fprim s y| ≤ C₀ for some constant C₀.
-  -- Fprim s y on K' (where symm y ∈ (chartAt H α).source ⊆ base_α since we're on target_α after
-  -- intersection):
-  -- Each of the factors is continuous on Ω:
-  -- (1) `(s, y) ↦ f s (symm y)` = `(fun p => f p.1 p.2) ∘ (s, symm y)`: continuous where
-  -- symm is continuous on K' ⊆ target.
-  -- (2) `ρα (symm y)`: continuous in y on K'.
-  -- (3) `density (g_fam s) α (symm y)`: continuous jointly on ball_s × K' because
-  -- `chartDensity_contMDiff_family` yields joint ContMDiff on `univ ×ˢ base_α`.
-  -- (4) `deriv (f · (symm y)) s`: joint continuity from `h_deriv_cont_joint`.
-  -- (5) `traceTimeDerivMetric g_fam s (symm y)`: we need joint continuity in (s, y).
-  -- We handle (5) directly via the chart-α expression:
-  -- On `base_α`, `traceTimeDerivMetric g_fam s x = trace((G_s α x)⁻¹ * dG_s α x)`,
-  -- each entry jointly ContMDiff and ContDiff in (s, x). Proved in the `TraceTime...` section.
-  -- For simplicity, we derive a crude constant bound using continuity on Ω:
   have h_Fprim_continuousOn_Ω :
       ContinuousOn (fun p : ℝ × E => Fprim p.1 p.2) (I₁ ×ˢ K') := by
-    -- We work directly: on K' ⊆ target, symm is continuous. And for y ∈ K', symm y ∈ base_α.
     have h_symm_contOn_K' : ContinuousOn symm K' := h_symm_contOn.mono hK'_sub_target
     have h_symm_pair_contOn :
         ContinuousOn (fun p : ℝ × E => (p.1, symm p.2)) (I₁ ×ˢ K') := by
@@ -2079,15 +1704,12 @@ lemma per_chart_hasDerivAt
       refine h_symm_contOn_K'.comp continuousOn_snd ?_
       intro p hp
       exact hp.2
-    -- (1) f (s, symm y) continuous on I₁ ×ˢ K'.
     have hf_comp : ContinuousOn (fun p : ℝ × E => f p.1 (symm p.2)) (I₁ ×ˢ K') := by
       exact hf_cont_joint.continuousOn.comp h_symm_pair_contOn (fun _ _ => Set.mem_univ _)
-    -- (2) ρα (symm y) continuous.
     have hρα_comp : ContinuousOn (fun p : ℝ × E => ρα (symm p.2)) (I₁ ×ˢ K') := by
       have : ContinuousOn (fun y : E => ρα (symm y)) K' := by
         exact hρα_cont.continuousOn.comp h_symm_contOn_K' (fun _ _ => Set.mem_univ _)
       exact (this.comp continuousOn_snd (fun _ hp => hp.2))
-    -- (3) chartDensity (g_fam ·) α (symm ·) continuous in (s, y).
     have hdensity_comp : ContinuousOn
         (fun p : ℝ × E => chartDensity (I := I) (g_fam p.1) α (symm p.2))
         (I₁ ×ˢ K') := by
@@ -2102,12 +1724,10 @@ lemma per_chart_hasDerivAt
         refine ⟨Set.mem_univ _, ?_⟩
         exact h_symm_maps p.2 (hK'_sub_target hp.2)
       exact h_joint_cont.comp h_symm_pair_contOn hmaps
-    -- (4) deriv (f · ·) · joint continuous.
     have h_deriv_comp : ContinuousOn
         (fun p : ℝ × E => deriv (fun r : ℝ => f r (symm p.2)) p.1) (I₁ ×ˢ K') := by
       exact h_deriv_cont_joint.continuousOn.comp h_symm_pair_contOn
         (fun _ _ => Set.mem_univ _)
-    -- (5) traceTimeDerivMetric joint — go via the chart-α trace form directly.
     have h_symm_pair_mapsTo : Set.MapsTo (fun p : ℝ × E => ((p.1, symm p.2) : ℝ × M))
         (I₁ ×ˢ K')
         (Set.univ ×ˢ (trivializationAt E (TangentSpace I) α).baseSet) := fun p hp =>
@@ -2129,8 +1749,6 @@ lemma per_chart_hasDerivAt
         h_symm_maps p.2 (hK'_sub_target hp.2)
       exact traceTimeDerivMetric_eq_trace_chartGramMatrix
         (I := I) (M := M) (t := p.1) (hreg.at_any p.1) α hsym_base
-    -- Fprim p.1 p.2 is `(deriv + 1/2 * trace * f) * ρ * density` by `rfl`.
-    -- Assemble directly via the product rule.
     change ContinuousOn (fun p : ℝ × E =>
         (deriv (fun r : ℝ => f r (symm p.2)) p.1 +
             (1/2) * traceTimeDerivMetric (I := I) g_fam p.1 (symm p.2) *
@@ -2141,22 +1759,18 @@ lemma per_chart_hasDerivAt
     refine ContinuousOn.mul ?_ hf_comp
     refine ContinuousOn.mul continuousOn_const ?_
     exact h_tr_comp
-  -- Bound.
   obtain ⟨CH, hCH⟩ : ∃ C, ∀ p ∈ (I₁ ×ˢ K'), |Fprim p.1 p.2| ≤ C := by
     classical
     by_cases hne' : (I₁ ×ˢ K' : Set (ℝ × E)).Nonempty
-    · -- Use sup of |Fprim| on compact Ω.
-      have hΩne : Ω.Nonempty := hne'
+    · have hΩne : Ω.Nonempty := hne'
       have h_abs_cont : ContinuousOn (fun p : ℝ × E => |Fprim p.1 p.2|) Ω :=
         h_Fprim_continuousOn_Ω.abs
       have hbdd := hΩ_compact.bddAbove_image h_abs_cont
       obtain ⟨C, hC⟩ := hbdd
       refine ⟨C, fun p hp => ?_⟩
       exact hC ⟨p, hp, rfl⟩
-    · -- Empty Ω: trivially any C works.
-      refine ⟨0, fun p hp => ?_⟩
+    · refine ⟨0, fun p hp => ?_⟩
       exact (hne' ⟨p, hp⟩).elim
-  -- Define b := |CH| · indicator K' 1.
   set C₀ : ℝ := |CH|
   set b : E → ℝ := fun y => C₀ * (K'.indicator (fun _ : E => (1 : ℝ))) y with hb_def
   have hb_nonneg : ∀ y, 0 ≤ b y := by
@@ -2165,7 +1779,6 @@ lemma per_chart_hasDerivAt
       Set.indicator_nonneg (fun _ _ => zero_le_one) _
     exact mul_nonneg (abs_nonneg _) h_ind_nonneg
   have hb_integrable : Integrable b ((modelHaar (E := E)).restrict target) := by
-    -- `b = C₀ • indicator K'`, K' is measurable with finite measure, so indicator is integrable.
     have h_ind_int : Integrable (K'.indicator (fun _ : E => (1 : ℝ)))
         ((modelHaar (E := E)).restrict target) := by
       have h_rest_int : Integrable (K'.indicator (fun _ : E => (1 : ℝ))) (modelHaar (E := E)) := by
@@ -2174,30 +1787,23 @@ lemma per_chart_hasDerivAt
       exact h_rest_int.restrict
     have := h_ind_int.const_mul C₀
     simpa [b, smul_eq_mul] using this
-  -- Bound property.
   have h_bound_prop : ∀ᵐ y ∂((modelHaar (E := E)).restrict target),
       ∀ s ∈ ball_s, ‖Fprim s y‖ ≤ b y := by
     refine (MeasureTheory.ae_restrict_iff' htarget_meas).mpr ?_
     refine Filter.Eventually.of_forall (fun y hy => ?_)
     intro s hs
     by_cases hyK' : y ∈ K'
-    · -- `y ∈ K'`, `s ∈ ball_s ⊆ I₁`, both in Ω.
-      have hp : (s, y) ∈ (I₁ ×ˢ K' : Set (ℝ × E)) := ⟨hballs_sub_I₁ hs, hyK'⟩
+    · have hp : (s, y) ∈ (I₁ ×ˢ K' : Set (ℝ × E)) := ⟨hballs_sub_I₁ hs, hyK'⟩
       have hbound := hCH (s, y) hp
       have hby : b y = C₀ := by
         simp [b, Set.indicator_of_mem hyK']
       rw [Real.norm_eq_abs, hby]
       have : |Fprim s y| ≤ CH := hbound
-      -- We need |Fprim s y| ≤ C₀ = |CH|. Since |Fprim s y| ≤ CH ≤ |CH|:
       refine this.trans ?_
       exact le_abs_self _
-    · -- y ∉ K'. Then symm y ∉ tsupport ρα. Hence ρα (symm y) = 0, so Fprim s y = 0.
-      have h_symm_y_not_in : symm y ∉ K := by
+    · have h_symm_y_not_in : symm y ∉ K := by
         intro hsymInK
         exact hyK' ⟨symm y, hsymInK, by
-          -- Need ec (symm y) = y; but we don't necessarily know y ∈ target.
-          -- But we need to deal with that too. If y ∉ target, then ρ-factor is the only thing
-          -- saving us. But here we're in the ae_restrict_iff' branch where `y ∈ target`.
           exact (extChartAt I α).right_inv hy⟩
       have hρ_zero : ρα (symm y) = 0 := by
         by_contra h
@@ -2212,12 +1818,9 @@ lemma per_chart_hasDerivAt
       rw [hH'_zero]
       have hby_nonneg : 0 ≤ b y := hb_nonneg y
       simpa using hby_nonneg
-  -- Measurability of F at t and F' at t.
   have hH_meas_at_t : ∀ᶠ s in 𝓝 t,
       AEStronglyMeasurable (Fmdl s) ((modelHaar (E := E)).restrict target) := by
     refine Filter.Eventually.of_forall (fun s => ?_)
-    -- On target, Fmdl s y = f s (symm y) * ρα (symm y) * density (g_fam s) α (symm y).
-    -- All factors continuous on target.
     have h_symm_contOn_target : ContinuousOn symm target := h_symm_contOn
     have h_f_s_comp_contOn : ContinuousOn (fun y : E => f s (symm y)) target := by
       have hf_s_cont : Continuous (f s) := by
@@ -2237,20 +1840,9 @@ lemma per_chart_hasDerivAt
         chartDensity_continuousOn (I := I) (g_fam s) α
       exact h_density_s.comp h_symm_contOn_target h_symm_maps
     have h_H_s_contOn : ContinuousOn (Fmdl s) target := by
-      -- Fmdl s y = f s (symm y) * ρα (symm y) * density (g_fam s) α (symm y)
       exact (h_f_s_comp_contOn.mul h_ρα_comp_contOn).mul h_density_comp_contOn
     exact (h_H_s_contOn.aestronglyMeasurable htarget_meas)
   have hH_int_at_t : Integrable (Fmdl t) ((modelHaar (E := E)).restrict target) := by
-    -- Bounded by a constant on target (via compact tsupport of ρα).
-    -- |Fmdl t y| = |f t (symm y)| * |ρα (symm y)| * |density (g_fam t) α (symm y)|.
-    -- For y ∉ K', symm y ∉ tsupport ρα ⇒ ρα (symm y) = 0 ⇒ Fmdl t y = 0.
-    -- For y ∈ K', |Fmdl t y| bounded by Cf * 1 * sup_density.
-    -- We give Fmdl t as K'.indicator of a bounded continuous function.
-    -- Use `Integrable.mono` with a bound.
-    -- Construct Fmdl (t) restricted to K'.
-    -- Approach: use `h_Fprim_continuousOn_Ω` analogue for Fmdl t.
-    -- Actually simpler: Fmdl t equals Fprim_indicator * indicator_K' where Fmdl is bounded on Ω.
-    -- Let's bound via continuity on compact K' and Fmdl t ≡ 0 outside K' (modulo target).
     have h_Ht_cont_K' : ContinuousOn (Fmdl t) K' := by
       have h_symm_contOn_K' : ContinuousOn symm K' := h_symm_contOn.mono hK'_sub_target
       have hf_cont : Continuous (f t) := by
@@ -2268,7 +1860,6 @@ lemma per_chart_hasDerivAt
         intro y hy
         exact h_symm_maps y (hK'_sub_target hy)
       exact (h_f_comp.mul h_ρα_comp).mul h_density_comp
-    -- Bound on K' by sup.
     obtain ⟨C_Fmdl, hC_H⟩ : ∃ C, ∀ y ∈ K', |Fmdl t y| ≤ C := by
       by_cases hK'_ne : K'.Nonempty
       · have h_abs_cont : ContinuousOn (fun y : E => |Fmdl t y|) K' := h_Ht_cont_K'.abs
@@ -2277,7 +1868,6 @@ lemma per_chart_hasDerivAt
         exact hC ⟨y, hy, rfl⟩
       · refine ⟨0, fun y hy => ?_⟩
         exact absurd ⟨y, hy⟩ hK'_ne
-    -- Fmdl t is zero outside K' (in target). Use `K'.indicator (fun _ => max C_Fmdl 0)` as dominant.
     have hH_t_vanish : ∀ y ∈ target, y ∉ K' → Fmdl t y = 0 := by
       intro y hy_tg hy_not
       have : symm y ∉ K := by
@@ -2293,10 +1883,8 @@ lemma per_chart_hasDerivAt
         exact this (subset_tsupport _ (show symm y ∈ Function.support ρα from h))
       change f t (symm y) * ρα (symm y) * chartDensity (I := I) (g_fam t) α (symm y) = 0
       rw [hρ_zero, mul_zero, zero_mul]
-    -- Construct a dominating function.
     set C_Fprim : ℝ := max C_Fmdl 0
     have hC_Fprim_nonneg : 0 ≤ C_Fprim := le_max_right _ _
-    -- Mono with `fun y => C_Fprim * K'.indicator 1 y`.
     have h_domHt : ∀ᵐ y ∂((modelHaar (E := E)).restrict target),
         ‖Fmdl t y‖ ≤ C_Fprim * K'.indicator (fun _ : E => (1 : ℝ)) y := by
       refine (MeasureTheory.ae_restrict_iff' htarget_meas).mpr ?_
@@ -2318,7 +1906,6 @@ lemma per_chart_hasDerivAt
           exact integrableOn_const (hs := ne_of_lt hK'_meas_lt_top)
         exact h_rest_int.restrict
       simpa [smul_eq_mul] using h_ind_int.const_mul C_Fprim
-    -- Measurability of Fmdl t.
     have h_meas_Ht : AEStronglyMeasurable (Fmdl t) ((modelHaar (E := E)).restrict target) := by
       have h_symm_contOn_target : ContinuousOn symm target := h_symm_contOn
       have hf_cont : Continuous (f t) := by
@@ -2337,21 +1924,12 @@ lemma per_chart_hasDerivAt
     exact h_bound_int'.mono' h_meas_Ht h_domHt
   have hH'_meas_at_t : AEStronglyMeasurable (Fprim t)
       ((modelHaar (E := E)).restrict target) := by
-    -- Fprim t is continuous on K' (and 0 off K' target-ae).
-    -- We represent Fprim t = K'.indicator (Fprim_main t ·) + 0 off-K' modulo null.
-    -- We use the bound: Fprim t equals a function that is continuous on K' and 0 outside tsupport-pullback.
-    -- Simpler: since Fprim t = if symm y ∈ base then _ else 0, and we work ae on target,
-    -- provide a ae-strongly-measurable witness.
-    -- Use the fact Fprim is ContinuousOn (I₁ ×ˢ K') at the slice t.
     have h_t_in_I₁ : t ∈ I₁ := ht_in_I₁
-    -- Slice: `fun y => Fprim t y` on K'.
     have h_Ht'_cont_K' : ContinuousOn (fun y : E => Fprim t y) K' := by
       have := h_Fprim_continuousOn_Ω
       have : ContinuousOn (fun p : ℝ × E => Fprim p.1 p.2) (I₁ ×ˢ K') := this
-      -- Slice by fixing p.1 := t.
       intro y hy
       have hp : (t, y) ∈ (I₁ ×ˢ K') := ⟨h_t_in_I₁, hy⟩
-      -- ContinuousOn at (t, y) → ContinuousAt within K' at y via composition with constant map.
       have hat : ContinuousWithinAt (fun p : ℝ × E => Fprim p.1 p.2) (I₁ ×ˢ K') (t, y) :=
         this (t, y) hp
       have hincl_cont : Continuous (fun e : E => (t, e)) :=
@@ -2359,11 +1937,6 @@ lemma per_chart_hasDerivAt
       have hincl_mapsTo : Set.MapsTo (fun e : E => (t, e)) K' (I₁ ×ˢ K') :=
         fun e he => ⟨h_t_in_I₁, he⟩
       exact hat.comp hincl_cont.continuousWithinAt hincl_mapsTo
-    -- Off K' ∩ target, Fprim t vanishes. Fprim t is not necessarily continuous on all of target.
-    -- But target = (K' ∩ target) ∪ (target \ K'), both measurable.
-    -- Fprim t is strongly measurable on both: continuous on K' ∩ target ⊆ K', and 0 on target \ K'.
-    -- Build via piecewise.
-    -- Fprim t = K'.indicator (fun y => Fprim t y) modulo off-K' where Fprim t may be nonzero only if `symm y ∈ base` AND outside K', but ρα = 0 then, so Fprim t = 0.
     have h_Ht'_zero_off : ∀ y ∈ target, y ∉ K' → Fprim t y = 0 := by
       intro y hy hyK'
       have h_symm_y_not_K : symm y ∉ K := by
@@ -2380,8 +1953,6 @@ lemma per_chart_hasDerivAt
             f t (symm y)) * ρα (symm y) *
           chartDensity (I := I) (g_fam t) α (symm y) = 0
       rw [hρ_zero, mul_zero, zero_mul]
-    -- Build `Fprim t` as `K'.indicator ∘ F + (target \ K').indicator ∘ 0`, using piecewise.
-    -- Use `Indicator.aestronglyMeasurable` and continuity.
     have h_ind_Ht : Fprim t =ᵐ[(modelHaar (E := E)).restrict target]
         K'.indicator (fun y => Fprim t y) := by
       refine (MeasureTheory.ae_restrict_iff' htarget_meas).mpr ?_
@@ -2391,7 +1962,6 @@ lemma per_chart_hasDerivAt
       · rw [Set.indicator_of_notMem hyK']
         exact h_Ht'_zero_off y hy hyK'
     refine AEStronglyMeasurable.congr ?_ h_ind_Ht.symm
-    -- K'.indicator of a function continuous on K'.
     have h_ind_meas : AEStronglyMeasurable
         (K'.indicator (fun y : E => Fprim t y))
         ((modelHaar (E := E)).restrict target) := by
@@ -2404,7 +1974,6 @@ lemma per_chart_hasDerivAt
         exact h_restrict
       exact this.restrict
     exact h_ind_meas
-  -- Apply hasDerivAt_setIntegral_model.
   have h_s_mem : ball_s ∈ 𝓝 t := hballs_nhd
   have h_diff_ballsupersed : ∀ᵐ y ∂((modelHaar (E := E)).restrict target),
       ∀ s ∈ ball_s, HasDerivAt (fun r => Fmdl r y) (Fprim s y) s := by
@@ -2415,23 +1984,17 @@ lemma per_chart_hasDerivAt
     (F := Fmdl) (F' := Fprim) (b := b) t (s := ball_s) h_s_mem hH_meas_at_t hH_int_at_t
     hH'_meas_at_t h_bound_prop hb_integrable h_diff_ballsupersed
   obtain ⟨_, h_inner⟩ := h_setInt
-  -- Convert `∫ y in target, Fmdl t y ∂modelHaar` and `∫ y in target, Fprim t y ∂modelHaar`
-  -- back to integrals against the withDensity chart-local measure.
-  -- LHS: `fun s => ∫ y in target, Fmdl s y ∂modelHaar = fun s => ∫ x, f s x ∂(withDensity)`.
   have h_lhs_eq : ∀ s : ℝ,
       (∫ y in target, Fmdl s y ∂(modelHaar (E := E)))
         = ∫ x, f s x
             ∂((chartLocalMeasure (I := I) (g_fam s) α).withDensity
                 (fun y : M => ENNReal.ofReal (ρα y))) := by
     intro s
-    -- chain: withDensity → ∫ scale • integrand → ∫ ρα · f s d(clm)
-    -- then applying integral_chartLocalMeasure to get the target-side integral.
     have hρα_meas : AEMeasurable (fun y : M => ENNReal.ofReal (ρα y))
         (chartLocalMeasure (I := I) (g_fam s) α) :=
       (ENNReal.measurable_ofReal.comp hρα_cont.measurable).aemeasurable
     have hρα_lt_top : ∀ᵐ y ∂(chartLocalMeasure (I := I) (g_fam s) α),
         ENNReal.ofReal (ρα y) < ⊤ := Filter.Eventually.of_forall (fun _ => by simp)
-    -- LHS unfold using withDensity.
     have h_withD :
         ∫ x, f s x
           ∂((chartLocalMeasure (I := I) (g_fam s) α).withDensity
@@ -2442,12 +2005,10 @@ lemma per_chart_hasDerivAt
         (μ := chartLocalMeasure (I := I) (g_fam s) α)
         (f := fun y : M => ENNReal.ofReal (ρα y)) hρα_meas hρα_lt_top
         (g := f s)
-    -- Convert smul to mul.
     have h_smul_eq : (fun x : M =>
         (ENNReal.ofReal (ρα x)).toReal • f s x) = fun x : M => f s x * ρα x := by
       funext x
       rw [ENNReal.toReal_ofReal (hρα_nonneg x), smul_eq_mul, mul_comm]
-    -- Apply `integral_chartLocalMeasure` with h_fn := fun x => f s x * ρα x.
     have hfs_cont : Continuous (f s) := by
       have : Continuous ((fun p : ℝ × M => f p.1 p.2) ∘ (fun x : M => (s, x))) := by
         refine hf_cont_joint.comp ?_
@@ -2457,9 +2018,7 @@ lemma per_chart_hasDerivAt
       (hfs_cont.mul hρα_cont).measurable
     have h_ICLM := integral_chartLocalMeasure (I := I) (M := M) (g_fam s) α
       (fun x => f s x * ρα x) h_fρ_meas
-    -- Stitch together.
     rw [h_withD, h_smul_eq, h_ICLM]
-    -- Rearrange integrand on RHS.
     have h_integrand_eq : (fun y : E =>
         chartDensity (I := I) (g_fam s) α (symm y) * (f s (symm y) * ρα (symm y)))
           = fun y : E => Fmdl s y := by
@@ -2470,16 +2029,12 @@ lemma per_chart_hasDerivAt
             chartDensity (I := I) (g_fam s) α ((extChartAt I α).symm y)
       ring
     rw [h_integrand_eq]
-  -- RHS: `∫ y in target, Fprim t y ∂modelHaar = ∫ x, (∂_t f + 1/2 trace * f) * ρα ∂(clm g_fam t α)`.
   have h_rhs_eq :
       (∫ y in target, Fprim t y ∂(modelHaar (E := E)))
         = ∫ x, (deriv (fun s : ℝ => f s x) t
               + (1/2) * traceTimeDerivMetric (I := I) g_fam t x * f t x) *
               ρα x
             ∂(chartLocalMeasure (I := I) (g_fam t) α) := by
-    -- On target ae, Fprim t y = density * (...) * ρα(symm y).
-    -- Use `integral_chartLocalMeasure` on g := fun x => (...) * ρα x.
-    -- First: set g.
     set gFn : M → ℝ := fun x =>
       (deriv (fun s : ℝ => f s x) t +
         (1/2) * traceTimeDerivMetric (I := I) g_fam t x * f t x) * ρα x
@@ -2490,12 +2045,9 @@ lemma per_chart_hasDerivAt
       exact (continuous_const.mul h_tr_cont)
     have hg_meas : Measurable gFn := hg_cont.measurable
     have h_ICLM := integral_chartLocalMeasure (I := I) (M := M) (g_fam t) α gFn hg_meas
-    -- Right side: integral against modelHaar over target.
     rw [h_ICLM]
-    -- Compare the two integrals via pointwise equality modulo zero-sets.
     refine MeasureTheory.setIntegral_congr_ae htarget_meas ?_
     refine Filter.Eventually.of_forall (fun y hy => ?_)
-    -- Fprim t y equals the RHS integrand.
     change (deriv (fun r : ℝ => f r (symm y)) t +
             (1/2) * traceTimeDerivMetric (I := I) g_fam t (symm y) *
               f t (symm y)) * ρα (symm y) *
@@ -2508,7 +2060,6 @@ lemma per_chart_hasDerivAt
           (1/2) * traceTimeDerivMetric (I := I) g_fam t (symm y) *
             f t (symm y)) * ρα (symm y))
     ring
-  -- Combine.
   rw [show (fun s : ℝ => ∫ x, f s x
         ∂((chartLocalMeasure (I := I) (g_fam s) α).withDensity
             (fun y : M => ENNReal.ofReal (ρα y))))
@@ -2519,8 +2070,6 @@ lemma per_chart_hasDerivAt
     exact (h_lhs_eq s).symm
 
 end PerChartHasDerivAt
-
-/-! ## The clean volume variation formula -/
 
 section CleanTheorem
 
@@ -2551,28 +2100,23 @@ theorem first_variation_of_volume
               + (1/2) * traceTimeDerivMetric (I := I) g_fam t₀ x * f t₀ x)
           ∂(riemannianMeasureFamily (I := I) (M := M) g_fam t₀))
       t₀ := by
-  -- Joint continuity of f.
   have hf_cont_joint : Continuous (fun p : ℝ × M => f p.1 p.2) := hf.continuous_joint
-  -- Continuity of `f s` for every `s`.
   have hf_cont : ∀ᶠ s in 𝓝 t₀, Continuous (f s) := by
     refine Filter.Eventually.of_forall (fun s => ?_)
     have : Continuous ((fun p : ℝ × M => f p.1 p.2) ∘ (fun x : M => (s, x))) := by
       refine hf_cont_joint.comp ?_
       exact continuous_const.prodMk continuous_id
     exact this
-  -- Continuity of `f t₀`.
   have hft₀_cont : Continuous (f t₀) := by
     have : Continuous ((fun p : ℝ × M => f p.1 p.2) ∘ (fun x : M => (t₀, x))) := by
       refine hf_cont_joint.comp ?_
       exact continuous_const.prodMk continuous_id
     exact this
-  -- Continuity of `deriv (f · x) t₀` in `x`.
   have h_deriv_cont : Continuous (fun x : M => deriv (fun s : ℝ => f s x) t₀) := by
     have : Continuous ((fun p : ℝ × M => deriv (fun s : ℝ => f s p.2) p.1)
         ∘ (fun x : M => (t₀, x))) :=
       hf.continuous_deriv_joint.comp (continuous_const.prodMk continuous_id)
     exact this
-  -- Continuity of the RHS integrand.
   have hh_cont : Continuous (fun x : M =>
       deriv (fun s : ℝ => f s x) t₀ +
       (1/2) * traceTimeDerivMetric (I := I) g_fam t₀ x * f t₀ x) := by
@@ -2580,7 +2124,6 @@ theorem first_variation_of_volume
     refine Continuous.mul ?_ hft₀_cont
     refine Continuous.mul continuous_const ?_
     exact traceTimeDerivMetric_continuous (I := I) (M := M) hg
-  -- Apply the clean-of-chart-derivs helper, providing per-chart HasDerivAt.
   refine volume_variation_formula_clean_of_chart_derivs
     (I := I) (M := M) g_fam f t₀ hf_cont hh_cont ?_
   intro α hα

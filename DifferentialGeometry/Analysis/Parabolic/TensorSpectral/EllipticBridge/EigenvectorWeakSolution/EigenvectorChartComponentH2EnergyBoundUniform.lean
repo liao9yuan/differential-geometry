@@ -63,8 +63,6 @@ open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -72,28 +70,10 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## Bridge between the two `chartTargetEuclid` definitions
-
-The chart target set `toEuclidean '' (extChartAt I α).target` is defined twice
-in the codebase — once in `Sobolev.Chart` (the one used in this file's
-signatures), once in `Laplacian.MetricExtension` (the one used by the
-`eigenvectorChartComponentFun_ae_zero_off_chartPouKernel` lemma). The two are
-the same set on the nose. -/
-
 private lemma chartTargetEuclid_eq (α : M) :
     (chartTargetEuclid (I := I) (M := M) α : Set EuclN) =
       DifferentialGeometry.Analysis.Laplacian.MetricExtension.chartTargetEuclid
         (I := I) (M := M) α := rfl
-
-/-! ## The partition-of-unity kernel vanishes on inactive chart base points
-
-If `α : M` is *inactive* — meaning `chartAtlasPOU I M α` is identically zero —
-then the closed support of that weight is empty, and consequently the
-partition-of-unity kernel `chartPouKernel α` itself is empty. The eigenvector
-chart component then vanishes almost everywhere on the entire chart target,
-because the committed `eigenvectorChartComponentFun_ae_zero_off_chartPouKernel`
-gives a.e.-vanishing on `chartTargetEuclid α \ chartPouKernel α =
-chartTargetEuclid α \ ∅ = chartTargetEuclid α`. -/
 
 /-- The partition-of-unity kernel `chartPouKernel α` is empty whenever
 `chartAtlasPOU I M α` is identically zero. -/
@@ -125,18 +105,6 @@ private lemma chartPouKernel_eq_empty_of_notMem_activeFinset
   chartPouKernel_eq_empty_of_pou_zero
     (chartAtlasPOU_eq_zero_of_notMem_activeFinset (I := I) (M := M) hα)
 
-/-! ## Chart-locality-free order-2 Sobolev energy bound
-
-These declarations prove the chart-base-uniform order-2 Sobolev energy bound
-without any chart-selection hypothesis, re-keying the eigenvector chart
-component onto the chart-locality-free `eigenvectorChartComponentFun_unconditional`
-and the intrinsic compact-operator eigenbasis vector
-`tensorResolventEigenbasisVec (tensorResolventL2_isCompactOperator
-g r s) i`. The per-`(α, P₀)` Sobolev energy bound routes through the committed
-upstream `eigenvector_chartComponent_wkpNorm_two_energy_le`, whose
-chart component `(eigenvectorTensorChartBilinearData g r s i α P₀).u_chart`
-is definitionally `eigenvectorChartComponentFun_unconditional g r s i α P₀`. -/
-
 /-- Chart-locality-free twin of
 `eigenvectorChartComponentFun_ae_zero_of_notMem_activeFinset`. -/
 private lemma eigenvectorChartComponentFun_ae_zero_of_notMem_activeFinset
@@ -151,18 +119,9 @@ private lemma eigenvectorChartComponentFun_ae_zero_of_notMem_activeFinset
   have h_kernel_empty :
       chartPouKernel (I := I) (M := M) α = (∅ : Set EuclN) :=
     chartPouKernel_eq_empty_of_notMem_activeFinset (I := I) (M := M) hα
-  -- The committed a.e.-vanishing on
-  -- `MetricExtension.chartTargetEuclid α \ chartPouKernel α`.
   have h_ae := eigenvectorChartComponentFun_ae_zero_off_chartPouKernel
     (I := I) (M := M) g r s i α P₀
-  -- Bridge the two `chartTargetEuclid` namespaces (they are propositionally
-  -- equal on the nose).
   have h_target_eq := chartTargetEuclid_eq (I := I) (M := M) α
-  -- Rewrite the restriction set: with the kernel empty, the difference is the
-  -- whole chart target. (`eigenvectorChartComponentFun` is, by
-  -- definition, `eigenvectorChartComponentFun_unconditional`, hence `h_ae`
-  -- discharges the goal up to the empty-kernel set rewrite and the
-  -- `chartTargetEuclid` namespace bridge.)
   have h_set_eq :
       DifferentialGeometry.Analysis.Laplacian.MetricExtension.chartTargetEuclid
             (I := I) (M := M) α \
@@ -242,10 +201,6 @@ private lemma perAlphaPCConstant_bound
           ‖tensorResolventEigenbasisVec (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M)
               g r s) i‖ :=
-  -- The upstream twin's chart component
-  -- `(eigenvectorTensorChartBilinearData g r s i α P₀).u_chart`
-  -- is definitionally `eigenvectorChartComponentFun_unconditional g r s i α P₀`,
-  -- so the `Classical.choose_spec` bound discharges the goal directly.
   (Classical.choose_spec
     (eigenvector_chartComponent_wkpNorm_two_energy_le
       (I := I) (M := M) g r s α P₀)).2 i
@@ -278,7 +233,6 @@ private lemma perAlphaPCConstant_le_totalActivePCConstant
       totalActivePCConstant (I := I) (M := M) g r s := by
   classical
   unfold totalActivePCConstant
-  -- First peel off the outer α-sum.
   have h_inner_le :
       perAlphaPCConstant (I := I) (M := M) g r s α P₀ ≤
         ∑ Q : TensorCompIdx (E := E) r s,
@@ -340,9 +294,7 @@ theorem eigenvector_chartComponent_wkpNorm_two_energy_le_uniform_β_unconditiona
     totalActivePCConstant_nonneg (I := I) (M := M) g r s, ?_⟩
   intro α P₀ i
   by_cases hα : α ∈ chartAtlasPOU_activeFinset I M
-  · -- Active case: chain the per-`(α, P₀)` bound with the upper bound by the
-    -- total active constant.
-    have h_per :=
+  · have h_per :=
       perAlphaPCConstant_bound (I := I) (M := M) g r s α P₀ i
     have h_C_le :
         perAlphaPCConstant (I := I) (M := M) g r s α P₀ ≤
@@ -406,9 +358,7 @@ theorem eigenvector_chartComponent_wkpNorm_two_energy_le_uniform_β_unconditiona
                 g r s) i‖ :=
       mul_le_mul_of_nonneg_right h_const_le (zero_le _)
     exact h_per.trans h_envelope
-  · -- Inactive case: the chart component is a.e. zero on the chart target, so
-    -- the `wkpNorm` is zero.
-    have h_zero :=
+  · have h_zero :=
       wkpNorm_two_eigenvectorChartComponentFun_eq_zero_of_notMem_activeFinset
         (I := I) (M := M) g r s i hα P₀
     rw [h_zero]

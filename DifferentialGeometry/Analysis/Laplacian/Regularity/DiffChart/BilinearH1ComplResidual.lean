@@ -60,8 +60,6 @@ open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualMemW1p
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -70,19 +68,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Smooth-case unconditional constructor
-
-For `u_h := smoothToH1Compl g v` with smooth `v : SmoothScalar g`, the
-`MemW1p 2 fChartResidual chartTargetEuclid α` hypothesis is discharged
-unconditionally via `memW1p_fChartResidual_smoothToH1Compl`. The
-constructor below packages this discharge with the differentiated
-variational identity hypothesis (the only remaining input), removing the
-need for any residual `MemW1p` hypothesis.
-
-The membership `smoothToH1Compl v ∈ laplacianDomainPow g 2` is automatic
-via `smoothToH1Compl_mem_laplacianDomainPow_two`, so the constructor
-takes only the smooth scalar (not the membership proof). -/
 
 /-- **Smooth-case unconditional constructor for `DiffChartBilinearH1ComplData
 g α`**.
@@ -156,40 +141,6 @@ noncomputable def diffChartBilinearH1ComplData_of_smoothToH1Compl_unconditional
     (memW1p_fChartResidual_smoothToH1Compl (I := I) (M := M) g α v)
     h_identity
 
-/-! ## W^{1,2}-chart-target Cauchy density discharge of `MemW1p 2 fChartResidual`
-
-For arbitrary `u_h ∈ laplacianDomainPow g 2`, the discharge of
-`MemW1p 2 fChartResidual chartTargetEuclid α` reduces to a W^{1,2}
-chart-target Cauchy hypothesis on the smooth-approximator residuals.
-The chain:
-
-1. Take smooth `v_n : SmoothScalar g` with `smoothToH1Compl v_n → u_h` in
-   `H1Compl`. (Exists by `exists_smoothApprox_seq`.)
-2. For each `n`, `memW1p_fChartResidual_smoothToH1Compl` gives the smooth-
-   case discharge `fChartResidual(smoothToH1Compl v_n) ∈ MemW1p 2
-   chartTargetEuclid α`.
-3. If the sequence `fChartResidual(smoothToH1Compl v_n)` is Cauchy in
-   the chart-target `wkpNorm 1 2`, then by `MemWkp.exists_limit_of_wkpNorm_cauchy`
-   the limit `F_lim` is in `MemW1p 2 chartTargetEuclid α`.
-4. By `chartPushedRawLpFromLp_tendsto`, `fChartResidual(smoothToH1Compl
-   v_n) → fChartResidual(u_h)` in `Lp 2 (chartPulledWeightedMeasure
-   .restrict chartTargetEuclid α)`. The weighted measure is absolutely
-   continuous w.r.t. the chart-target volume measure (density > 0), and
-   conversely the chart-target volume measure has bounded density
-   (since the chart-target is contained in the image of a compact set
-   under the chart map, hence the volume is bounded). Thus
-   eLpNorm-convergence transfers between the two measures on
-   chartTargetEuclid α.
-5. Identification: `F_lim =ᵐ fChartResidual(u_h)` on `volume.restrict
-   chartTargetEuclid α`. Hence by `MemW1p_congr_ae`, `MemW1p 2
-   fChartResidual(u_h) chartTargetEuclid α`.
-
-The Cauchy hypothesis in step 3 captures the "elliptic regularity"
-content: it asserts that the W^{1,2}-chart-norm of the residual is
-controlled along the approximation sequence. In classical analysis this
-follows from spectral / Galerkin density of smooth functions in the
-H²-graph-norm domain. -/
-
 /-- For `v : SmoothScalar g`, the smooth-case chart-pulled residual
 function in `MemW1p 2 chartTargetEuclid α` form. -/
 noncomputable def smoothFChartResidual
@@ -225,22 +176,13 @@ lemma smoothFChartResidual_tendsto_fChartResidual_lp_weighted
           (chartTargetEuclid (I := I) (M := M) α)))
       atTop (𝓝 0) := by
   classical
-  -- Step 1: fHLeibnizResidualLp(smoothToH1Compl v_n) → fHLeibnizResidualLp(u_h) in Lp.
-  -- fHLeibnizResidualLp involves gradInnerCLM ρα (·) and smoothMulLp Δρα (H1ComplToLp ·);
-  -- both are continuous in H1Compl.
-  -- The unfolding:
-  --   fHLeibnizResidualLp g α x = -((2:ℝ) • gradInnerCLM g ρα x) - smoothMulLp g Δρα (H1ComplToLp g x).
   have h_residual_tendsto : Tendsto (fun n =>
       DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp
         (I := I) (M := M) g α (smoothToH1Compl (I := I) (M := M) g (v n)))
       atTop (𝓝 (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp
         (I := I) (M := M) g α u_h)) := by
-    -- Define LinearMap_residual : H1Compl g →L[ℝ] Lp ℝ 2 μ_g as
-    --   x ↦ -((2:ℝ) • gradInnerCLM g ρα x) - smoothMulLp g Δρα (H1ComplToLp g x).
-    -- It's continuous (CLM composition). Apply tendsto.
     set ρα : C^∞⟮I, M; ℝ⟯ := chartAtlasPOU I M α
     set Δρα : C^∞⟮I, M; ℝ⟯ := laplacianOfChartPOU (I := I) (M := M) g α
-    -- Two pieces: A := -((2:ℝ) • gradInnerCLM g ρα x), B := smoothMulLp g Δρα (H1ComplToLp g x).
     have h_A : Tendsto (fun n => -((2 : ℝ) •
         gradInnerCLM (I := I) (M := M) g ρα
           (smoothToH1Compl (I := I) (M := M) g (v n))))
@@ -282,7 +224,6 @@ lemma smoothFChartResidual_tendsto_fChartResidual_lp_weighted
             (H1ComplToLp (I := I) (M := M) g u_h))) :=
       h_A.sub h_B
     convert h_sub using 1
-  -- Step 2: chartPushedRawLpFromLp preserves Lp-tendsto.
   have h_chartPulled_tendsto : Tendsto (fun n =>
       chartPushedRawLpFromLp (I := I) (M := M) g α
         (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp
@@ -292,7 +233,6 @@ lemma smoothFChartResidual_tendsto_fChartResidual_lp_weighted
           (I := I) (M := M) g α u_h))) :=
     DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData.chartPushedRawLpFromLp_tendsto
       (I := I) (M := M) g α h_residual_tendsto
-  -- Step 3: Lp-tendsto in chart-pulled weighted measure converts to eLpNorm-tendsto-zero.
   have h_norm_tendsto : Tendsto (fun n =>
       ‖chartPushedRawLpFromLp (I := I) (M := M) g α
         (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp
@@ -317,7 +257,6 @@ lemma smoothFChartResidual_tendsto_fChartResidual_lp_weighted
     simpa using (continuous_norm.tendsto (0 :
       Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)))).comp h_sub
-  -- Step 4: Convert ‖_‖ to eLpNorm-tendsto-zero of the underlying functions.
   have h_two_ne_zero : (2 : ℝ≥0∞) ≠ 0 := by norm_num
   have h_two_ne_top : (2 : ℝ≥0∞) ≠ ⊤ := by norm_num
   have h_eLpNorm_eq : ∀ n,
@@ -375,7 +314,6 @@ lemma smoothFChartResidual_tendsto_fChartResidual_lp_weighted
     have h_ofReal_zero : ENNReal.ofReal (0 : ℝ) = 0 := by simp
     rw [show (0 : ℝ≥0∞) = ENNReal.ofReal 0 from h_ofReal_zero.symm]
     exact ENNReal.tendsto_ofReal h_norm_tendsto
-  -- Step 5: Convert eLpNorm of Lp-class diff to eLpNorm of underlying-function diff.
   have h_subFun_aeEq : ∀ n,
       ((chartPushedRawLpFromLp (I := I) (M := M) g α
           (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp
@@ -400,43 +338,9 @@ lemma smoothFChartResidual_tendsto_fChartResidual_lp_weighted
     filter_upwards [h_sub_coe] with y hy
     rw [hy]
     rfl
-  -- Now combine: eLpNorm of (Lp.coeFn) =ᵐ eLpNorm of (target ae-equal function).
   convert h_eLp_tendsto using 1
   funext n
   exact eLpNorm_congr_ae (h_subFun_aeEq n).symm
-
-/-! ## Volume-norm version of the chart-pulled residual convergence
-
-The Lp-convergence in the chart-pulled weighted measure on
-`chartTargetEuclid α` transfers to Lp-convergence in the plain
-volume measure on `chartTargetEuclid α`, via the absolute continuity
-`volume.restrict chartTarget ≪ weighted.restrict chartTarget` and the
-reverse `weighted.restrict chartTarget ≪ volume.restrict chartTarget`
-(both directions hold because the density is strictly positive and
-bounded above on `chartTargetEuclid α`).
-
-The conversion of the Lp-norm bound (from weighted to volume): bounded
-above density gives `‖f‖_L²(weighted) ≤ M^{1/2} · ‖f‖_L²(volume)` where
-`M = sup density`. The reverse `‖f‖_L²(volume) ≤ c^{-1/2} · ‖f‖_L²(weighted)`
-requires `density ≥ c > 0` on chart target. On a closed manifold the
-density may approach 0 near the chart-target boundary, so the reverse
-direction does NOT hold globally on chartTarget. However, the convergence
-direction we need is **volume eLpNorm → 0 from weighted eLpNorm → 0**,
-which would require the second inequality. This is the obstruction. -/
-
-/-! ## W^{1,2}-chart-target density discharge
-
-For arbitrary `u_h ∈ laplacianDomainPow g 2`, if the chart-pulled residual
-sequence `smoothFChartResidual g α (v n)` is Cauchy in `wkpNorm 1 2` on
-`chartTargetEuclid α` (with the plain volume measure), then its `wkpNorm`-
-limit is in `MemW1p 2 chartTargetEuclid α`. The Cauchy hypothesis captures
-the elliptic regularity content of the discharge.
-
-This formulation provides a **clean separation** between:
-* The chart-pulled W^{1,2} regularity of the residual (the hypothesis).
-* The W^{1,2}-completeness machinery (`MemWkp.exists_limit_of_wkpNorm_cauchy`).
-* The ae-identification of the limit with `fChartResidual(u_h)` (provided
-  by the Cauchy hypothesis upon identification of the eLpNorm-limit). -/
 
 /-- For `u_h ∈ laplacianDomainPow g 2`, given a smooth approximator
 sequence `v : ℕ → SmoothScalar g` with H¹Compl convergence, plus a
@@ -485,14 +389,6 @@ theorem memW1p_fChartResidual_of_wkpNorm_cauchy_and_lim_eq
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     h_F_lim_aeEq).mp h_F_lim_w1p
 
-/-! ## Cleanest density-form discharge using `MemWkp.exists_limit_of_wkpNorm_cauchy`
-
-If we only need the `wkpNorm`-Cauchy hypothesis (without manually
-identifying the limit), we can invoke
-`MemWkp.exists_limit_of_wkpNorm_cauchy` to extract a limit
-`F_lim ∈ MemW1p 2` automatically, and then need the identification only
-to claim `F_lim =ᵐ fChartResidual(u_h)`. -/
-
 /-- **Density-form discharge via the W^{1,2}-Cauchy hypothesis and the
 identification of the Cauchy limit.**
 
@@ -530,7 +426,6 @@ theorem memW1p_fChartResidual_of_wkpNorm_cauchy_identification
         (I := I) (M := M) g α u_h)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- Step 1: Apply MemWkp.exists_limit_of_wkpNorm_cauchy to the W^{1,2}-Cauchy sequence.
   have h_smooth_W1p : ∀ n,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) 1 2
@@ -548,20 +443,10 @@ theorem memW1p_fChartResidual_of_wkpNorm_cauchy_identification
   have hF_lim_W1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 F_lim
       (chartTargetEuclid (I := I) (M := M) α) :=
     (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p).mp hF_lim_memWkp
-  -- Step 2: Use identification hypothesis to conclude F_lim =ᵐ fChartResidual(u_h).
   have hF_lim_aeEq := h_identification F_lim hF_lim_W1p hF_lim_tendsto
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemW1p_congr_ae
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     hF_lim_aeEq).mp hF_lim_W1p
-
-/-! ## The W^{1,2}-density-form constructor for `DiffChartBilinearH1ComplData g α`
-
-This constructor takes the W^{1,2}-Cauchy hypothesis on the smooth-
-approximator chart-pulled residuals + the identification hypothesis,
-discharges the `MemW1p 2 fChartResidual` requirement of the
-`_via_residual` constructor automatically, and produces a
-`DiffChartBilinearH1ComplData g α` instance for any `u_h ∈
-laplacianDomainPow g 2`. -/
 
 /-- **W^{1,2}-density-form constructor for `DiffChartBilinearH1ComplData
 g α` from `u_h ∈ laplacianDomainPow g 2`**.

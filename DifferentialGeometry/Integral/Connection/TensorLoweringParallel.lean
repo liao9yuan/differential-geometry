@@ -80,8 +80,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## The rank-`0` separable form is the metric-independent unit tensor -/
-
 omit [InnerProductSpace ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
@@ -97,13 +95,6 @@ lemma separableFormAt_zero
   rw [separableFormAt_apply]
   simp
 
-/-! ## The index-lowering map detects the zero tensor
-
-The pointwise metric-induced inner product is positive definite, so the
-index-lowering map `lowerAllUpperIndices g r s x` is injective: this is
-`lowerAllUpperIndices_injective`. We record the resulting kernel
-characterisation. -/
-
 omit [InnerProductSpace ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
@@ -118,14 +109,6 @@ lemma lowerAllUpperIndices_eq_zero_iff
   · exact lowerAllUpperIndices_injective (I := I) (M := M) g r s x
       (h.trans (map_zero _).symm)
   · rw [h, map_zero]
-
-/-! ## The index-lowering map as a continuous linear equivalence
-
-The source `TensorRSModel r s ℝ E` and the target `Tensor0SModel (r + s) ℝ E` are
-finite-dimensional `ℝ`-vector spaces of the *same* dimension `(finrank ℝ E) ^ (r + s)`.
-A non-degenerate metric lowers indices injectively, so the lowering map — an
-injective continuous-linear map between finite-dimensional spaces of equal
-dimension — is bijective, hence a continuous linear equivalence. -/
 
 omit [InnerProductSpace ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
@@ -168,9 +151,6 @@ all-index *raising* map. -/
 def lowerAllUpperIndicesEquiv
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
     TensorRSModel r s ℝ E ≃L[ℝ] Tensor0SModel (r + s) ℝ E :=
-  -- The linear-equivalence form built from bijectivity, upgraded to a
-  -- continuous linear equivalence: both directions are linear maps between
-  -- finite-dimensional `ℝ`-spaces, hence continuous.
   (LinearEquiv.ofBijective
       (lowerAllUpperIndices (I := I) (M := M) g r s x).toLinearMap
       (lowerAllUpperIndices_bijective (I := I) (M := M) g r s x)).toContinuousLinearEquiv
@@ -227,14 +207,6 @@ lemma lowerAllUpperIndicesEquiv_apply_symm_apply
   have h := (lowerAllUpperIndicesEquiv (I := I) (M := M) g r s x).apply_symm_apply U
   rwa [lowerAllUpperIndicesEquiv_apply] at h
 
-/-! ## The metric-lowered section through the index-lowering equivalence
-
-The metric-lowered `(0, r + s)`-tensor section `liftedTensorSection g r s S`
-(`Integral/Connection/TensorRSMetricCompatible.lean`) is, fibrewise, the
-index-lowering equivalence applied to the model coercion of `S`. We record this
-identification, and the resulting recovery of `S` from its lift through the
-fibrewise inverse of the index-lowering equivalence. -/
-
 /-- The model coercion of the metric-lowered section `liftedTensorSection g r s S`
 at `y` is the index-lowering equivalence `lowerAllUpperIndicesEquiv g r s y`
 applied to the model coercion of `S y`. -/
@@ -258,17 +230,6 @@ lemma toModel_eq_symm_liftedTensorSection
         (Tensor0SSpace.toModel (liftedTensorSection (I := I) (M := M) g r s S y)) := by
   rw [toModel_liftedTensorSection_eq_equiv,
     ContinuousLinearEquiv.symm_apply_apply]
-
-/-! ## The rank-`0` connection-intertwining identity
-
-The Levi-Civita-induced `(r, s)`-tensor connection is intertwined with the
-covariant-rank-`(0, r + s)` connection by index lowering. At rank `r = 0` the
-lowering map carries no metric content — it is the evaluation of an
-`(r, s) = (0, s)`-tensor at the metric-independent unit `(0, 0)`-tensor — so the
-intertwining is a *direct* consequence of the proved product rule
-`tensorRSCovariantDerivative_apply` together with the parallelism of the
-constant unit `(0, 0)`-section (`tensor0SCovariantDerivative_unitZero_eq_zero`).
-No use of `∇g = 0` is required at rank `0`. -/
 
 omit [InnerProductSpace ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)] in
@@ -296,15 +257,12 @@ lemma toModel_tensorRS_apply
     Tensor0SSpace.toModel
         ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from T) D) =
       TensorRSSpace.toModel T (Tensor0SSpace.toModel D) := by
-  -- `TensorRSSpace.toModel = arrowCongr (cle_r) (cle_s)`, whose action is
-  -- `T ↦ cle_s ∘ T ∘ cle_r.symm`. Apply this to `cle_r D` and round-trip.
   change Tensor0SSpace.toModel
       ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from T) D) =
     ((tensor0SSpace_continuousLinearEquiv (I := I) r x).arrowCongr
         (tensor0SSpace_continuousLinearEquiv (I := I) s x) T)
       (Tensor0SSpace.toModel D)
   rw [ContinuousLinearEquiv.arrowCongr_apply]
-  -- `cle_r.symm (toModel D) = cle_r.symm (cle_r D) = D`.
   have hD : (tensor0SSpace_continuousLinearEquiv (I := I) r x).symm
       (Tensor0SSpace.toModel D) = D :=
     (tensor0SSpace_continuousLinearEquiv (I := I) r x).symm_apply_apply D
@@ -323,7 +281,6 @@ lemma liftedTensorSection_zero_eq_apply_unit
         (Tensor0SSpace.ofModel
           (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ))) =
       liftedTensorSection (I := I) (M := M) g 0 2 S y := by
-  -- Both sides agree after `toModel`, which is injective; prove the model equation.
   refine Tensor0SSpace.toModel_injective ?_
   change Tensor0SSpace.toModel
       ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace (0 + 2) I y from S y)
@@ -331,17 +288,13 @@ lemma liftedTensorSection_zero_eq_apply_unit
           (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ)))) =
     Tensor0SSpace.toModel (liftedTensorSection (I := I) (M := M) g 0 2 S y)
   rw [toModel_liftedTensorSection]
-  -- LHS: `toModel (S y (unit)) = toModel (S y) (toModel unit) = toModel (S y) (constOfIsEmpty 1)`.
   rw [toModel_tensorRS_apply (I := I) (M := M) 0 2 y (S y)
     (Tensor0SSpace.ofModel
       (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ)))]
   rw [Tensor0SSpace.toModel_ofModel]
-  -- RHS: `lowerAllUpperIndices g 0 2 y (toModel (S y))`. Evaluate both at a tuple.
   refine ContinuousMultilinearMap.ext (fun u => ?_)
   rw [lowerAllUpperIndices_apply]
-  -- `separableFormAt g y 0 _ = constOfIsEmpty 1`, and `natAdd 0 j = j` reindexes the tuple.
   rw [separableFormAt_zero]
-  -- The last-`2` reindex `fun j => u (Fin.natAdd 0 j)` is `u` (since `Fin.natAdd 0 j = j`).
   congr 1
   funext j
   exact congrArg u (Fin.ext (by simp))
@@ -371,23 +324,18 @@ theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt
         (TensorRSSpace.toModel
           (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g) S x v)) := by
   classical
-  -- The constant unit `(0, 0)`-section.
   let unitSec : Cₛ^∞⟮I; Tensor0SModel 0 ℝ E, (fun y : M => Tensor0SSpace 0 I y)⟯ :=
     ⟨fun _ : M => Tensor0SSpace.ofModel
         (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ)),
       contMDiff_unitZeroSection (I := I) (M := M)⟩
-  -- The underlying function of `unitSec` is the constant unit `(0, 0)`-tensor.
   have hcoe : (fun y : M => unitSec y) =
       fun _ : M => Tensor0SSpace.ofModel
         (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ)) := rfl
-  -- `toModel (unitSec x) = constOfIsEmpty 1`.
   have hunit_model : Tensor0SSpace.toModel (unitSec x) =
       ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ) := by
     change Tensor0SSpace.toModel (Tensor0SSpace.ofModel
       (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ))) = _
     rw [Tensor0SSpace.toModel_ofModel]
-  -- Step A: the genuine `(0, 2)`-covariant derivative, lowered, equals its
-  -- evaluation at the unit `(0, 0)`-tensor — model-side.
   have hlowerA :
       lowerAllUpperIndices (I := I) (M := M) g 0 2 x
           (TensorRSSpace.toModel
@@ -398,7 +346,6 @@ theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt
             (unitSec x)) := by
     rw [toModel_tensorRS_apply (I := I) (M := M) 0 2 x
       (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g) S x v) (unitSec x)]
-    -- `lowerAllUpperIndices g 0 2 x U` evaluated equals `U (constOfIsEmpty 1) (reindex)`.
     rw [hunit_model]
     refine ContinuousMultilinearMap.ext (fun u => ?_)
     rw [lowerAllUpperIndices_apply, separableFormAt_zero]
@@ -406,22 +353,15 @@ theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt
     funext j
     exact congrArg u (Fin.ext (by simp))
   rw [hlowerA]
-  -- Step B: the product rule. `(∇^{(0,2)}_v S)(unitSec x)
-  --   = ∇^{(0,2)}_v (fun y => S y (unitSec y)) x v - S x (∇^{(0,0)}_v unitSec x v)`.
   rw [tensorRSCovariantDerivative_apply (I := I) (M := M) 0 2
     (LeviCivita (I := I) g) S unitSec x v]
-  -- `∇^{(0,0)}_v unitSec x v = 0`, so the second term vanishes.
   rw [show (Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g)
         (fun y : M => unitSec y) x v) = 0 from by
     rw [hcoe]
     exact tensor0SCovariantDerivative_unitZero_eq_zero (I := I) (M := M)
       (LeviCivita (I := I) g) x v]
   rw [map_zero, sub_zero]
-  -- `fun y => S y (unitSec y) = liftedTensorSection g 0 2 S` as a function,
-  -- so the `(0, 2)`-covariant derivative is `loweredCovDerivAt g 0 2 S x v`.
   rw [loweredCovDerivAt_def]
-  -- The two section arguments coincide pointwise; the connection index `0 + 2 = 2`
-  -- agrees definitionally.
   have hsec : (fun y : M =>
         (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace (0 + 2) I y from S y) (unitSec y)) =
       liftedTensorSection (I := I) (M := M) g 0 2 S := by

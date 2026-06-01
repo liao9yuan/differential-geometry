@@ -70,22 +70,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Part A — chart-of-`TM` identification at `⟨α, 0⟩`
-
-The extended chart of `TM` at a base point `q : TM` is, by
-`FiberBundle.extChartAt`, the composition of the trivialisation at
-`q.proj` with the product of the base extended chart at `q.proj` and the
-identity on the model fibre. Evaluated on a point `p : TM` whose
-projection lies in the trivialisation base set, the chart returns the
-pair `(extChartAt I q.proj p.proj, (triv (q.proj) p).2)`.
-
-The fibre component `(triv b₀ p).2`, when `p.proj ∈ trivBaseSet`,
-equals `triv.continuousLinearMapAt ℝ p.proj p.snd`. This is the
-fibre-linear identification: the trivialisation acts as a continuous
-linear map on the fibre when the base point is in the trivialisation's
-base set.
--/
-
 section ChartOfTM
 
 /-- **Chart-of-`TM` identification at a base point `q`, fibre component.**
@@ -98,32 +82,23 @@ theorem extChartAt_tangent_apply_snd
     (extChartAt I.tangent q p).2 =
       (trivializationAt E (TangentSpace I) q.proj).continuousLinearMapAt ℝ p.proj p.snd := by
   classical
-  -- The base set of `trivializationAt E (TangentSpace I) q.proj`
-  -- equals `(chartAt H q.proj).source`.
   have hp_base : p.proj ∈ (trivializationAt E (TangentSpace I) q.proj).baseSet := by
     rw [TangentBundle.trivializationAt_baseSet]
     exact hp
-  -- `coe_linearMapAt_of_mem` gives the function shape at p.proj.
   have hcoe :=
     (trivializationAt E (TangentSpace I) q.proj).coe_linearMapAt_of_mem
       (R := ℝ) hp_base
-  -- Apply the relation pointwise to `p.snd`.
   have hcoe_at :
       (trivializationAt E (TangentSpace I) q.proj).linearMapAt ℝ p.proj p.snd =
       (trivializationAt E (TangentSpace I) q.proj p).2 := by
     have h := congrFun hcoe p.snd
-    -- p = ⟨p.proj, p.snd⟩ definitionally.
     exact h
-  -- Unfold the chart-of-TM via `FiberBundle.extChartAt`. The second component
-  -- is `(triv p).2`.
   have hext : extChartAt I.tangent q p =
       ((extChartAt I q.proj) (trivializationAt E (TangentSpace I) q.proj p).1,
         (trivializationAt E (TangentSpace I) q.proj p).2) := by
     rw [FiberBundle.extChartAt]
     rfl
   rw [hext]
-  -- The fibre component is `(triv p).2 = linearMapAt p.proj p.snd
-  -- = continuousLinearMapAt p.proj p.snd`.
   change (trivializationAt E (TangentSpace I) q.proj p).2 = _
   rw [← hcoe_at]
   rfl
@@ -143,7 +118,6 @@ theorem extChartAt_tangent_apply_fst
     rw [FiberBundle.extChartAt]
     rfl
   rw [hext]
-  -- First component: `(triv p).1 = p.proj`.
   have hp1 : (trivializationAt E (TangentSpace I) q.proj p).1 = p.proj :=
     TangentBundle.trivializationAt_fst _ _
   rw [hp1]
@@ -159,15 +133,11 @@ theorem extChartAt_tangent_zero_apply
       (extChartAt I α p.proj,
         (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ p.proj p.snd) := by
   classical
-  -- Apply Prod.ext combining the base and fibre identifications.
   apply Prod.ext
-  · -- First component: use `extChartAt_tangent_apply_fst` at q = ⟨α, 0⟩.
-    have h := extChartAt_tangent_apply_fst (I := I)
+  · have h := extChartAt_tangent_apply_fst (I := I)
       (q := (⟨α, (0 : E)⟩ : TangentBundle I M)) (p := p) (by exact hp)
-    -- (⟨α, 0⟩).proj = α definitionally.
     exact h
-  · -- Second component: use `extChartAt_tangent_apply_snd` at q = ⟨α, 0⟩.
-    have h := extChartAt_tangent_apply_snd (I := I)
+  · have h := extChartAt_tangent_apply_snd (I := I)
       (q := (⟨α, (0 : E)⟩ : TangentBundle I M)) (p := p) (by exact hp)
     exact h
 
@@ -183,31 +153,17 @@ theorem extChartAt_tangent_zero_apply_chartFiber
       (extChartAt I α p.proj, chartFiberCoord (I := I) α p) := by
   classical
   apply Prod.ext
-  · -- First component:
-    exact extChartAt_tangent_apply_fst (I := I)
+  · exact extChartAt_tangent_apply_fst (I := I)
       (q := (⟨α, (0 : E)⟩ : TangentBundle I M)) (p := p) hp
-  · -- Second component:
-    have hext : extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M) p =
+  · have hext : extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M) p =
         ((extChartAt I α) (trivializationAt E (TangentSpace I) α p).1,
           (trivializationAt E (TangentSpace I) α p).2) := by
       rw [FiberBundle.extChartAt]
       rfl
     rw [hext]
-    -- `(triv α p).2 = chartFiberCoord α p` by definition.
     rfl
 
 end ChartOfTM
-
-/-! ## Part B — chart-pushed lift decomposition
-
-The chart of `TM` depends only on `.proj`; hence `extChartAt I.tangent q`
-depends only on `q.proj`. In particular, for any chart basepoint `q`
-with `q.proj = α`, we have
-`extChartAt I.tangent q = extChartAt I.tangent ⟨α, 0⟩`, and the chart-of-`TM`
-identification at `⟨α, 0⟩` applies verbatim. This is the key
-observation that links `chartPushLift` (which uses
-`extChartAt I.tangent (f t₀)`) to the chart-product form needed by
-`chartPhaseVF`. -/
 
 section ChartPushLiftDecomposition
 
@@ -220,9 +176,6 @@ theorem extChartAt_tangent_eq_at_proj
     extChartAt I.tangent q =
       extChartAt I.tangent (⟨q.proj, (0 : E)⟩ : TangentBundle I M) := by
   classical
-  -- Both are built from `FiberBundle.extChartAt`, which only references
-  -- `(·).proj`. The right-hand side has `q.proj = q.proj`, so the two
-  -- partial equivs agree.
   rw [FiberBundle.extChartAt, FiberBundle.extChartAt]
 
 /-- **Chart-pushed lift decomposition.** For a curve `f : ℝ → TM` and a
@@ -276,37 +229,14 @@ theorem chartPushLift_self_apply_at_zero_section
     chartPushLift (I := I) f t₀ t₀ = (extChartAt I α α, (0 : E)) := by
   classical
   rw [chartPushLift_self_pair (I := I) f t₀]
-  -- (f t₀).proj = α, and chartFiberCoord α ⟨α, 0⟩ = 0 by
-  -- `chartFiberCoord_self_zero`.
   have hproj : (f t₀).proj = α := by rw [hf]
   rw [hproj]
-  -- Goal: (extChartAt I α α, chartFiberCoord α (f t₀)) = (extChartAt I α α, 0).
   have hfiber : chartFiberCoord (I := I) α (f t₀) = (0 : E) := by
     rw [hf]
     exact chartFiberCoord_self_zero (I := I) α
   rw [hfiber]
 
 end ChartPushLiftDecomposition
-
-/-! ## Part C — chart-pushed flow ↔ maximal-geodesic identification
-
-The chart-pushed lift `chartPushLift f 0` of a maximal-geodesic witness
-`(γ, f)`, when its derivative satisfies the chart-phase ODE form (i.e.
-`chartPushVF g α f 0 t = chartPhaseVF g α (chartPushLift f 0 t)`
-eventually), produces a chart-coordinate solution of the chart-phase
-ODE matching the chart-pushed-flow's orbit. Combined with the existing
-infrastructure
-`exists_chartFlow_orbit_eq_chartPhase_solution_eventually` from
-`Bridge.lean`, this gives the **headline identification**:
-
-> On a neighbourhood of `0`, the chart-pushed flow's projection
-> `(extChartAt I p).symm (Φ((extChartAt I p p, v_chart), t)).1` agrees
-> with `(f t).proj`, which (when `f` lifts a maximal geodesic) equals
-> `maximalGeodesic g p v t`.
-
-This file delivers the headline as a packaged theorem
-`chartPushedFlow_eq_maximalGeodesic_eventually`, conditional on the
-chart-phase-ODE hypothesis on the chart-pushed lift. -/
 
 section HeadlineBridge
 
@@ -337,46 +267,33 @@ theorem chartPushedFlow_eq_lift_proj_eventually
       (∀ᶠ t in 𝓝 (0 : ℝ),
         (f t).proj = chartFlowGeodesicCurve (I := I) Φ p v_chart t) := by
   classical
-  -- Set up the chart-coordinate companion `c t := chartPushLift f 0 t`.
   set c : ℝ → E × E := chartPushLift (I := I) f 0 with hc_def
-  -- Initial value of c: (extChartAt I p p, v_chart).
   have hc0 : c 0 = ((extChartAt I p p, v_chart) : E × E) := by
     have hf0_src : (f 0).proj ∈ (chartAt H p).source := by
       rw [hf0_proj]; exact mem_chart_source H p
     rw [hc_def, chartPushLift_eq_pair (I := I) 0 0]
-    · -- (f 0).proj = p, chartFiberCoord p (f 0) = v_chart.
-      have hproj : (f 0).proj = p := hf0_proj
+    · have hproj : (f 0).proj = p := hf0_proj
       rw [hproj, hf0_fiber]
-    · -- (f 0).proj = p ∈ chart source of (f 0).proj = chart source of p.
-      rw [hf0_proj]; exact mem_chart_source H p
-  -- Apply the chart-coord uniqueness against the chart-flow.
+    · rw [hf0_proj]; exact mem_chart_source H p
   obtain ⟨Φ, hΦ_init, hc_eq_orbit⟩ :=
     exists_chartFlow_orbit_eq_chartPhase_solution_eventually
       (I := I) (g := g) (p := p) (v_chart := v_chart) (c := c) hc0 hd
   refine ⟨Φ, hΦ_init, ?_⟩
-  -- Show: ∀ᶠ t in 𝓝 0, (f t).proj = chartFlowGeodesicCurve Φ p v_chart t.
   filter_upwards [hc_eq_orbit, hf_chart_src_eventually] with t ht_eq ht_src
-  -- ht_eq : c t = Φ ((extChartAt I p p, v_chart), t).
-  -- chartFlowGeodesicCurve Φ p v_chart t = (extChartAt I p).symm (Φ ((extChartAt I p p, v_chart), t)).1.
-  -- First component of c t is extChartAt I p (f t).proj (by chartPushLift_fst).
   have hc_fst : (c t).1 = extChartAt I p (f t).proj := by
     rw [hc_def]
     have h := chartPushLift_fst (I := I) (f := f) 0 t ?_
-    · -- (f 0).proj = p, so this gives extChartAt I p (f t).proj.
-      rw [show (f 0).proj = p from hf0_proj] at h
+    · rw [show (f 0).proj = p from hf0_proj] at h
       exact h
     · rw [hf0_proj]; exact ht_src
-  -- Hence Φ((extChartAt I p p, v_chart), t).1 = extChartAt I p (f t).proj.
   have h_orbit_fst :
       (Φ (((extChartAt I p p, v_chart) : E × E), t)).1 =
         extChartAt I p (f t).proj := by
     have := congrArg Prod.fst ht_eq
     rw [hc_fst] at this
     exact this.symm
-  -- Apply (extChartAt I p).symm.
   unfold chartFlowGeodesicCurve chartFlowOrbit
   rw [h_orbit_fst]
-  -- left_inv on extChartAt source (= chart source).
   have ht_src' : (f t).proj ∈ (extChartAt I p).source := by
     rw [extChartAt_source]; exact ht_src
   exact ((extChartAt I p).left_inv ht_src').symm
@@ -408,43 +325,22 @@ theorem chartPushedFlow_eq_witness_curve_eventually
       (∀ᶠ t in 𝓝 (0 : ℝ),
         γ t = chartFlowGeodesicCurve (I := I) Φ p v_chart t) := by
   classical
-  -- We reduce to chartPushedFlow_eq_lift_proj_eventually after providing
-  -- the auxiliary hypotheses.
   have hf0_proj : (f 0).proj = p := by rw [hf0]
   have hf0_fiber : chartFiberCoord (I := I) p (f 0) = v_chart := by
     rw [hf0]
-    -- Goal: chartFiberCoord α ⟨α, v_chart⟩ = v_chart, i.e.
-    --   (trivAt α ⟨α, v_chart⟩).2 = v_chart.
-    -- By `TangentBundle.continuousLinearMapAt_trivializationAt_eq_core` at b₀ = b = p,
-    -- the continuousLinearMapAt equals the core coordChange.
-    -- The core coordChange at (achart H p) (achart H p) p equals
-    -- `tangentCoordChange I p p p`, which by `tangentCoordChange_self` is the identity.
-    -- The fibre component `(triv ⟨p, v⟩).2 = continuousLinearMapAt ℝ p v` on baseSet.
     change (trivializationAt E (TangentSpace I) p
         (⟨p, v_chart⟩ : TangentBundle I M)).2 = v_chart
-    -- Use `tangentBundleCore.localTriv_continuousLinearMapAt`.
-    -- For `i = j = achart H p`, the localTriv is the trivializationAt p,
-    -- and the coordChange is the identity by `tangentCoordChange_self`.
     have hp_mem : p ∈ (chartAt H p).source := mem_chart_source H p
     have hp_src : p ∈ (extChartAt I p).source := by
       rw [extChartAt_source]; exact hp_mem
-    -- `Trivialization.continuousLinearMapAt_apply` lets us identify
-    -- `triv.continuousLinearMapAt ℝ p v = (triv ⟨p, v⟩).2` on baseSet.
     have hbase : p ∈ (trivializationAt E (TangentSpace I) p).baseSet := by
       rw [TangentBundle.trivializationAt_baseSet]
       exact hp_mem
-    -- continuousLinearMapAt_apply (= linearMapAt_apply via coe):
-    -- `(triv.continuousLinearMapAt R p) v = (triv ⟨p, v⟩).2` (when p ∈ baseSet).
-    -- Then use `continuousLinearMapAt_trivializationAt_eq_core` to identify
-    -- the CLM as `coordChange p p`, and `tangentCoordChange_self` to identify
-    -- it with the identity.
     have hcore :
         (trivializationAt E (TangentSpace I) p).continuousLinearMapAt ℝ p =
         (tangentBundleCore I M).coordChange (achart H p) (achart H p) p :=
       TangentBundle.continuousLinearMapAt_trivializationAt_eq_core (𝕜 := ℝ)
         (b₀ := p) (b := p) hp_mem
-    -- core coordChange = tangentCoordChange I p p p (definitionally).
-    -- tangentCoordChange_self gives id.
     have hself : ∀ v : E, tangentCoordChange I p p p v = v :=
       fun v => tangentCoordChange_self (I := I) (x := p) (z := p) (v := v) hp_src
     have hcore_at :
@@ -452,7 +348,6 @@ theorem chartPushedFlow_eq_witness_curve_eventually
         v_chart := by
       rw [hcore]
       exact hself v_chart
-    -- Now relate `continuousLinearMapAt p v_chart` to `(triv ⟨p, v_chart⟩).2`.
     have happly :
         ((trivializationAt E (TangentSpace I) p).continuousLinearMapAt ℝ p) v_chart =
         (trivializationAt E (TangentSpace I) p
@@ -463,12 +358,9 @@ theorem chartPushedFlow_eq_witness_curve_eventually
           (R := ℝ) hbase
       exact congrFun hcoe v_chart
     rw [← happly, hcore_at]
-  -- Eventually (f t).proj ∈ (chartAt H p).source.
   have hf_cont_at0 : ContinuousAt f 0 := hf_int_at0.continuousAt
   have hf_chart_src_eventually : ∀ᶠ t in 𝓝 (0 : ℝ),
       (f t).proj ∈ (chartAt H p).source := by
-    -- (f 0).proj = p ∈ chart source of p; continuity of (f ·).proj at 0
-    -- gives the preimage as a nbhd.
     have hπ_cont : Continuous
         (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
       FiberBundle.continuous_proj E (TangentSpace I)
@@ -483,7 +375,6 @@ theorem chartPushedFlow_eq_witness_curve_eventually
       rw [hpf0]
       exact hp_nhds
     exact this
-  -- Apply chartPushedFlow_eq_lift_proj_eventually.
   obtain ⟨Φ, hΦ_init, hev⟩ :=
     chartPushedFlow_eq_lift_proj_eventually
       (I := I) (g := g) (p := p) (v_chart := v_chart) (f := f)
@@ -492,15 +383,6 @@ theorem chartPushedFlow_eq_witness_curve_eventually
   filter_upwards [hev] with t ht
   rw [← hproj t]
   exact ht
-
-/-! ### Maximal-geodesic headline closure
-
-We package the **closure of the bridge headline** in a form that closes
-to `maximalGeodesicChosenCurve` (the canonical local-witness curve). The
-identification with `maximalGeodesic g p v` itself follows from the
-chosen-curve identification together with ODE-uniqueness along the
-preconnected witness interval; that further step uses the Uniqueness
-module and is left for a downstream substep. -/
 
 /-- **Bridge headline against `maximalGeodesicChosenCurve`.** Given a
 maximal-geodesic witness at some `t₁`, and a lift `f` that

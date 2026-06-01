@@ -45,8 +45,6 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## `α`-uniform `L²` bound for `tensorChartComponentScalar` -/
-
 section ScalarUniform
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -55,14 +53,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ### File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ### Finitely many `α : M` have non-empty `support(POU_α)` -/
 
 /-- On a compact manifold, only finitely many partition-of-unity centres
 have non-empty support. We package the set of such centres as a `Finset M`. -/
@@ -96,8 +90,6 @@ lemma chartAtlasPOU_eq_zero_of_notMem_activeFinset
   rw [Set.not_nonempty_iff_eq_empty, Function.support_eq_empty_iff] at h_empty
   have := congrFun h_empty x
   simpa using this
-
-/-! ### The scalar component vanishes when `POU_α` vanishes -/
 
 lemma tensorChartComponentScalar_eq_zero_of_pou_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -133,8 +125,6 @@ private lemma eLpNorm_tensorChartComponentScalar_eq_zero_of_inactive
       (I := I) (M := M) g r s α h_zero S Idx Jdx
   rw [h_scalar_zero]
   exact eLpNorm_zero
-
-/-! ### Per-`α` constants and their sum over the active finset -/
 
 private noncomputable def perAlphaConstant
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) : ℝ :=
@@ -196,8 +186,6 @@ private lemma perAlphaConstant_le_totalActiveConstant
       perAlphaConstant_nonneg (I := I) (M := M) g r s β)
   linarith
 
-/-! ### `α`-uniform bound on `SmoothCcTensor` -/
-
 private theorem tensorChartComponentScalar_eLpNorm_le_smoothCcTensor
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C₀ : ℝ, 0 ≤ C₀ ∧
@@ -241,8 +229,6 @@ private theorem tensorChartComponentScalar_eLpNorm_le_smoothCcTensor
   · rw [eLpNorm_tensorChartComponentScalar_eq_zero_of_inactive
       (I := I) (M := M) g r s hα S Idx Jdx]
     exact zero_le _
-
-/-! ### Conversion of the right-hand side to `‖S‖₊` for `SmoothCcTensorH1` -/
 
 private lemma tensorL2Norm_eq_norm_toCcTensor
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -289,8 +275,6 @@ private lemma ofReal_tensorL2Norm_le_norm_ennreal
     SmoothCcTensorH1.l2Norm_le_h1Norm (I := I) (M := M) S
   rw [coe_nnnorm_eq_ofReal_norm_scalar S]
   exact ENNReal.ofReal_le_ofReal h_l2_le_h1
-
-/-! ### Headline `α`-uniform `L²` bound on `SmoothCcTensorH1` -/
 
 /-- **Headline theorem (α-uniform L² bound for chart-frame scalar
 components).** -/
@@ -345,8 +329,6 @@ theorem tensorChartComponentScalar_eLpNorm_le_forall
 
 end ScalarUniform
 
-/-! ## `α`-uniform `L²` bound on the gradient self-inner integrand -/
-
 section GradUniform
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -359,8 +341,6 @@ private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ### Vanishing of the gradient self-inner integrand on inactive centres -/
 
 private lemma sqrt_g_inner_gradFun_eq_zero_of_scalar_zero
     (g : SmoothRiemannianMetric I M)
@@ -420,8 +400,6 @@ private lemma eLpNorm_sqrt_g_inner_gradFun_eq_zero_of_inactive
 
 end GradUniform
 
-/-! ## Unconditional uniform chart-Sobolev `W^{1,2}` bound -/
-
 section ChartSobolev
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -434,8 +412,6 @@ private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ### Vanishing of `wkpNormChart` on inactive centres -/
 
 private lemma wkpNormChart_tensorChartComponentScalar_eq_zero_of_inactive
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

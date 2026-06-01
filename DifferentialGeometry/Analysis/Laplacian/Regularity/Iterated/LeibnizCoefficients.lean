@@ -82,8 +82,6 @@ open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.DiffTwiceChartBilinearH1Compl
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -92,8 +90,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Polymorphic `m`-fold mixed Frechet derivatives -/
 
 /-- The `m`-fold mixed Frechet derivative of `weightedInvGramOnEuclid g α i j`
 in the directions encoded by `idx : Fin m → Fin n`. Recursive definition:
@@ -121,8 +117,6 @@ noncomputable def densityMthDerivOnEuclid
       (fderiv ℝ
           (densityMthDerivOnEuclid g α m (Fin.init idx)) y)
         (EuclideanSpace.single (idx (Fin.last m)) 1)
-
-/-! ## Definitional unfolding -/
 
 /-- Definitional unfolding at `m = 0`: the polymorphic derivative reduces to
 the underlying weighted-inverse-Gram coefficient. -/
@@ -162,8 +156,6 @@ theorem densityMthDerivOnEuclid_succ
             g α m (Fin.init idx)) y)
         (EuclideanSpace.single (idx (Fin.last m)) 1) := rfl
 
-/-! ## Compatibility with the hard-coded `m = 1` first-derivative version -/
-
 /-- The `m = 1` instance: for any `idx : Fin 1 → Fin n`, the polymorphic
 mixed Frechet derivative agrees on the nose with
 `weightedInvGramDerivOnEuclid g α i j (idx 0)`. -/
@@ -174,10 +166,6 @@ theorem weightedInvGramMthDerivOnEuclid_one_eq_weightedInvGramDerivOnEuclid
     weightedInvGramMthDerivOnEuclid (I := I) (M := M) g α i j 1 idx =
       weightedInvGramDerivOnEuclid (I := I) g α i j (idx 0) := by
   funext y
-  -- Both sides reduce to
-  -- `fderiv ℝ (weightedInvGramOnEuclid g α i j) y (EuclideanSpace.single (idx 0) 1)`
-  -- by definitional unfolding: the polymorphic `m = 0` inner function is the
-  -- underlying coefficient, and `Fin.last 0 = 0` in `Fin 1`.
   rfl
 
 /-- The `m = 1` instance: for any `idx : Fin 1 → Fin n`, the polymorphic
@@ -190,8 +178,6 @@ theorem densityMthDerivOnEuclid_one_eq_densityDerivOnEuclid
   funext y
   rfl
 
-/-! ## Compatibility with the hard-coded `m = 2` second-derivative version -/
-
 /-- The `m = 2` instance: for any `idx : Fin 2 → Fin n`, the polymorphic
 mixed Frechet derivative agrees on the nose with
 `weightedInvGramSecondDerivOnEuclid g α i j (idx 0) (idx 1)`. -/
@@ -202,19 +188,13 @@ theorem weightedInvGramMthDerivOnEuclid_two_eq_weightedInvGramSecondDerivOnEucli
     weightedInvGramMthDerivOnEuclid (I := I) (M := M) g α i j 2 idx =
       weightedInvGramSecondDerivOnEuclid (I := I) g α i j (idx 0) (idx 1) := by
   funext y
-  -- Unfold one step: outermost direction is `idx (Fin.last 1) = idx 1`.
   rw [weightedInvGramMthDerivOnEuclid_succ]
-  -- `Fin.last 1 = 1`.
   have h_last_1 : (Fin.last 1 : Fin 2) = 1 := rfl
   rw [h_last_1]
-  -- The inner polymorphic derivative at `m = 1` collapses to
-  -- `weightedInvGramDerivOnEuclid g α i j (Fin.init idx 0)`.
   rw [weightedInvGramMthDerivOnEuclid_one_eq_weightedInvGramDerivOnEuclid]
-  -- `Fin.init idx 0 = idx 0`.
   have h_init_0 : (Fin.init idx) 0 = idx 0 := by
     simp [Fin.init]
   rw [h_init_0]
-  -- Both sides are now the same `fderiv` expression.
   rfl
 
 /-- The `m = 2` instance: for any `idx : Fin 2 → Fin n`, the polymorphic
@@ -235,8 +215,6 @@ theorem densityMthDerivOnEuclid_two_eq_densitySecondDerivOnEuclid
   rw [h_init_0]
   rfl
 
-/-! ## Polymorphic smoothness -/
-
 /-- Polymorphic smoothness of the `m`-fold mixed Frechet derivative of
 `weightedInvGramOnEuclid g α i j` on the open chart target. Proof is by
 induction on `m`: the base case is the smoothness of
@@ -252,7 +230,6 @@ lemma weightedInvGramMthDerivOnEuclid_contDiffOn
       (chartTargetEuclid (I := I) (M := M) α) := by
   induction m with
   | zero =>
-      -- The `m = 0` polymorphic derivative is the underlying coefficient.
       have h_eq : weightedInvGramMthDerivOnEuclid (I := I) (M := M)
           g α i j 0 idx = weightedInvGramOnEuclid (I := I) g α i j := by
         funext y
@@ -261,8 +238,6 @@ lemma weightedInvGramMthDerivOnEuclid_contDiffOn
       rw [h_eq]
       exact weightedInvGramOnEuclid_contDiffOn (I := I) g α i j
   | succ m ih =>
-      -- Inductive step: the inner `m`-fold derivative on `Fin.init idx` is
-      -- `C^∞` on the open chart target by the IH.
       have h_inner :
           ContDiffOn ℝ ∞ (weightedInvGramMthDerivOnEuclid (I := I) (M := M)
             g α i j m (Fin.init idx))
@@ -270,20 +245,17 @@ lemma weightedInvGramMthDerivOnEuclid_contDiffOn
         ih (Fin.init idx)
       have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
         chartTargetEuclid_isOpen (I := I) (M := M) α
-      -- The Frechet derivative of a smooth function on an open set is smooth.
       have h_fderiv :
           ContDiffOn ℝ ∞ (fun y => fderiv ℝ
             (weightedInvGramMthDerivOnEuclid (I := I) (M := M)
               g α i j m (Fin.init idx)) y)
             (chartTargetEuclid (I := I) (M := M) α) :=
         ((contDiffOn_infty_iff_fderiv_of_isOpen h_open).1 h_inner).2
-      -- Post-compose with the smooth linear evaluation map.
       have h_eval : ContDiff ℝ ∞
           (fun (L : EuclN →L[ℝ] ℝ) =>
             L (EuclideanSpace.single (idx (Fin.last m)) 1)) :=
         (ContinuousLinearMap.apply ℝ ℝ
           (EuclideanSpace.single (idx (Fin.last m)) (1 : ℝ))).contDiff
-      -- The polymorphic derivative at `m + 1` is exactly this composition.
       have h_eq : weightedInvGramMthDerivOnEuclid (I := I) (M := M)
           g α i j (m + 1) idx =
           (fun y => (fderiv ℝ
@@ -343,8 +315,6 @@ lemma densityMthDerivOnEuclid_contDiffOn
       rw [h_eq]
       exact h_eval.contDiffOn.comp h_fderiv (mapsTo_univ _ _)
 
-/-! ## Polymorphic continuity -/
-
 /-- Continuity wrapper for `weightedInvGramMthDerivOnEuclid` on the chart
 target. -/
 lemma weightedInvGramMthDerivOnEuclid_continuousOn
@@ -365,8 +335,6 @@ lemma densityMthDerivOnEuclid_continuousOn
       (chartTargetEuclid (I := I) (M := M) α) :=
   (densityMthDerivOnEuclid_contDiffOn
     (I := I) (M := M) g α m idx).continuousOn
-
-/-! ## Polymorphic boundedness on compact subsets -/
 
 /-- The polymorphic Leibniz cross-coefficient
 `weightedInvGramMthDerivOnEuclid` is bounded on every compact subset of

@@ -79,8 +79,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Identification of `‖fderiv (fderiv F)‖` with `‖iteratedFDeriv 2 F‖` -/
-
 /-- The operator norm of `fderiv ℝ (fderiv ℝ F) x` equals the norm of
 `iteratedFDeriv ℝ 2 F x`. -/
 private lemma norm_fderiv_fderiv_eq_iteratedFDeriv_two
@@ -94,9 +92,6 @@ private lemma norm_fderiv_fderiv_eq_iteratedFDeriv_two
       = ‖iteratedFDeriv ℝ 2 F x‖ :=
     norm_iteratedFDeriv_fderiv (𝕜 := ℝ) (f := F) (x := x) (n := 1)
   rw [h1, h2]
-
-/-! ## Step 1: smoothness of `u(y) = (chartE_section_repr α B ∘ symm) y` on
-the chart-target image of the chart-α Levi-Civita good set -/
 
 /-- Smoothness on the chart-target image of the chart-α Levi-Civita good set of
 the chart-pulled representation `chartE_section_repr α B ∘ symm`. -/
@@ -114,9 +109,6 @@ private lemma u_contDiffOn_goodSet
       (chartLeviCivitaGoodSet (I := I) α) := hB_total.contMDiffOn
   exact chartE_pullback_contDiffOn_goodSet (I := I) α hB_on
 
-/-! ## Step 2: POU tsupport lies in chart-α Levi-Civita good set, hence its
-extChartAt image lies in the good-set image. -/
-
 /-- Under `[I.Boundaryless]`, the chart-α Levi-Civita good set equals the
 chart source. -/
 private lemma pouTsupport_subset_goodSet (α : M) :
@@ -129,9 +121,6 @@ private lemma pouTsupport_subset_goodSet (α : M) :
     (I := I) α
   rw [h_eq, extChartAt_source_eq_chartAt_source (I := I)]
   exact (chartAtlasPOU_isSubordinate I M) α hb
-
-/-! ## Step 3: uniform op-norm bound on `fderiv u` and on `u` over the
-POU tsupport (chart-target image) -/
 
 /-- Uniform op-norm bound on `fderiv ℝ u` and on `u`, evaluated at
 `extChartAt I α b` for `b` in the POU tsupport. -/
@@ -150,7 +139,6 @@ private lemma u_and_fderiv_u_bound
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) with hK_set_def
   have hK_compact : IsCompact K_set :=
     pouTsupport_isCompact (I := I) (M := M) α
-  -- Smoothness of `u` on the chart-target image of the good set (open).
   have hU_open : IsOpen
       ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) :=
     chartLeviCivitaGoodSet_image_isOpen (I := I) α
@@ -158,13 +146,11 @@ private lemma u_and_fderiv_u_bound
       (chartE_section_repr (I := I) α B.toFun ∘ (extChartAt I α).symm)
       ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) :=
     u_contDiffOn_goodSet (I := I) α B
-  -- Smoothness of `fderiv u` on the same open set.
   have hfd_cd : ContDiffOn ℝ ∞
       (fderiv ℝ (chartE_section_repr (I := I) α B.toFun ∘ (extChartAt I α).symm))
       ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) := by
     have h_le : (∞ : WithTop ℕ∞) + 1 ≤ ∞ := by rw [ENat.coe_top_add_one]
     exact hu_cd.fderiv_of_isOpen hU_open h_le
-  -- Continuity of `‖u‖` and `‖fderiv u‖` on the open image.
   have hcont_u : ContinuousOn (fun y : E =>
       ‖(chartE_section_repr (I := I) α B.toFun ∘ (extChartAt I α).symm) y‖)
       ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) :=
@@ -173,7 +159,6 @@ private lemma u_and_fderiv_u_bound
       ‖fderiv ℝ (chartE_section_repr (I := I) α B.toFun ∘ (extChartAt I α).symm) y‖)
       ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) :=
     continuous_norm.comp_continuousOn hfd_cd.continuousOn
-  -- Map K_set into the good-set image via extChartAt.
   have hφ_cm : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I α) (chartAt H α).source :=
     contMDiffOn_extChartAt (I := I) (n := ∞) (x := α)
   have hK_sub : K_set ⊆ (chartAt H α).source :=
@@ -194,7 +179,6 @@ private lemma u_and_fderiv_u_bound
         (chartE_section_repr (I := I) α B.toFun ∘ (extChartAt I α).symm)
         (extChartAt I α b)‖) K_set :=
     hcont_fd.comp hφ_cont hmaps
-  -- Bounded above on compact K_set.
   obtain ⟨Cu, hCu_mem⟩ := hK_compact.bddAbove_image hcont_u_M
   obtain ⟨Cfd, hCfd_mem⟩ := hK_compact.bddAbove_image hcont_fd_M
   refine ⟨max (max Cu Cfd) 0, le_max_right _ _, ?_⟩
@@ -204,8 +188,6 @@ private lemma u_and_fderiv_u_bound
     exact le_trans (le_trans h1 (le_max_right _ _)) (le_max_left _ _)
   · have h1 := hCu_mem ⟨b, hb, rfl⟩
     exact le_trans (le_trans h1 (le_max_left _ _)) (le_max_left _ _)
-
-/-! ## Headline -/
 
 /-- **Bound on the Fréchet derivative of the chart-pulled intrinsic piece of
 the first covariant derivative.**
@@ -268,7 +250,6 @@ theorem intrinsic_piece_fderiv_bound
   set u : E → E :=
     chartE_section_repr (I := I) α B.toFun ∘ (extChartAt I α).symm with hu_def
   set x : E := extChartAt I α b with hx_def
-  -- Differentiability of `u` at `x`.
   have hb_good : b ∈ chartLeviCivitaGoodSet (I := I) α := hb.2
   have hx_mem :
       x ∈ (extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α :=
@@ -287,11 +268,9 @@ theorem intrinsic_piece_fderiv_bound
       (hU_open.mem_nhds hx_mem)
   set c : E → (E →L[ℝ] TensorRSModel r s ℝ E) := fderiv ℝ F with hc_def
   have hc_diff : DifferentiableAt ℝ c x := hF2_diff
-  -- Apply `fderiv_clm_apply`.
   have h_clm : fderiv ℝ (fun y : E => c y (u y)) x
       = (c x).comp (fderiv ℝ u x) + (fderiv ℝ c x).flip (u x) :=
     fderiv_clm_apply hc_diff hu_diff
-  -- Rewrite goal LHS as `fderiv (y ↦ c y (u y)) x`.
   have h_goalLHS_fn : (fun y : E =>
         fderiv ℝ (tensorRSChartE_section_repr (I := I) r s α
             (fun y' : M => T.toSection y') ∘ (extChartAt I α).symm) y
@@ -300,7 +279,6 @@ theorem intrinsic_piece_fderiv_bound
       (fun y : E => c y (u y)) := by
     funext y; rfl
   rw [h_goalLHS_fn]
-  -- Norm bound from `fderiv_clm_apply` formula.
   have h_norm_le :
       ‖fderiv ℝ (fun y : E => c y (u y)) x‖ ≤
         ‖c x‖ * ‖fderiv ℝ u x‖ + ‖fderiv ℝ c x‖ * ‖u x‖ := by
@@ -315,7 +293,6 @@ theorem intrinsic_piece_fderiv_bound
       rw [ContinuousLinearMap.opNorm_flip] at h2a
       exact h2a
     linarith
-  -- Identify `‖fderiv c x‖ = ‖iteratedFDeriv 2 F x‖`.
   have h_iter : ‖fderiv ℝ c x‖ = ‖iteratedFDeriv ℝ 2 F x‖ := by
     rw [hc_def]
     exact norm_fderiv_fderiv_eq_iteratedFDeriv_two
@@ -323,9 +300,7 @@ theorem intrinsic_piece_fderiv_bound
   rw [h_iter] at h_norm_le
   have h_c_norm : ‖c x‖ = ‖fderiv ℝ F x‖ := by rw [hc_def]
   rw [h_c_norm] at h_norm_le
-  -- Bounds on `‖u x‖` and `‖fderiv u x‖`.
   obtain ⟨hfd_le, hu_le⟩ := hC_bound b hb.1
-  -- Combine.
   set N1 : ℝ := ‖iteratedFDeriv ℝ 2 F x‖ with hN1_def
   set N2 : ℝ := ‖fderiv ℝ F x‖ with hN2_def
   have hN1_nn : 0 ≤ N1 := norm_nonneg _

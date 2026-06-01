@@ -89,12 +89,6 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
   hiding chartTargetEuclid chartTargetEuclid_isOpen
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -103,14 +97,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## Test-function helpers for the once-more-differentiated test factor `∂_l ψ`
-
-The differentiated identity is obtained by applying the level-`0` variational
-identity to the test function `ψ_l := ∂_l ψ`. The following lemmas record that
-`ψ_l` is again a smooth compactly supported test function with topological
-support inside the chart target, and that mixed second partials commute
-(Schwarz symmetry). -/
 
 /-- The partial `∂_l ψ` of a smooth function is smooth. -/
 private lemma contDiff_partial
@@ -184,13 +170,6 @@ private lemma partial_swap
   rw [ContinuousLinearMap.flip_apply, ContinuousLinearMap.flip_apply]
   exact h_symm (EuclideanSpace.single j 1) (EuclideanSpace.single l 1)
 
-/-! ## `MemW1p`-to-local-`MemLp` plumbing
-
-The Euclidean integration-by-parts primitive `integral_smul_weak_partial_eq`
-consumes *local* `L²` integrability of the weakly differentiable factor and of
-its weak partials. The lemma below converts a global `MemW1p 2 Ω` membership
-into the per-compact-subset local `MemLp 2` it needs. -/
-
 /-- A function in `MemLp 2 (volume.restrict Ω)` is in `MemLp 2
 (volume.restrict K)` for every compact `K ⊆ Ω`. -/
 private lemma memLp_restrict_of_memLp_restrict
@@ -206,16 +185,6 @@ private lemma memLp_restrict_of_memLp_restrict
     exact Set.inter_eq_self_of_subset_left hK_in
   rw [← h_eq]
   exact hf.restrict K
-
-/-! ## Smooth global extension of a chart-target smooth coefficient
-
-The Euclidean integration-by-parts primitive consumes a *globally* smooth
-coefficient. The principal symbol `weightedInvGramOnEuclid g α` (and the other
-chart coefficients) are only smooth on the open chart target, with junk values
-elsewhere. The lemma below extends any chart-target-smooth coefficient to a
-globally smooth representative agreeing with it on a neighbourhood of a
-prescribed compact subset of the chart target — by multiplying by a smooth
-cutoff equal to `1` on that neighbourhood. -/
 
 /-- Smooth global extension of a function `φ` that is `ContDiffOn` of any order
 on the open chart target, agreeing with `φ` on a neighbourhood of a prescribed
@@ -239,9 +208,7 @@ private lemma exists_smooth_global_extension
       (d := Module.finrank ℝ E) hK_compact
       (chartTargetEuclid_isOpen (I := I) (M := M) α) hK_in
   refine ⟨δ, fun y => η y * φ y, hδ_pos, hδ_subset, ?_, ?_⟩
-  · -- `η · φ` is globally smooth: smooth on `tsupport η ⊆ chartTarget`, and
-    -- `≡ 0` (hence smooth) on the open complement of `tsupport η`.
-    have h_open_chart : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
+  · have h_open_chart : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
       chartTargetEuclid_isOpen (I := I) (M := M) α
     have h_open_compl : IsOpen ((tsupport η)ᶜ) :=
       (isClosed_tsupport _).isOpen_compl
@@ -259,17 +226,6 @@ private lemma exists_smooth_global_extension
   · intro y hy
     change η y * φ y = φ y
     rw [hη_one y hy, one_mul]
-
-/-! ## The generic per-pair integration-by-parts primitive
-
-The core reusable engine: for any function `v` on the open chart target with
-`MemW1p 2`, and any smooth chart-target scalar coefficient `φ`, integrating the
-product `φ · v · ∂_l ψ` by parts in direction `l` shifts the derivative onto
-`φ` and onto the `l`-th chosen weak partial of `v`. This is the generic
-analogue of the scalar campaign's `per_pair_ibp_chosenMthMixed`: there the
-weakly differentiable factor was the hardcoded representative
-`chosenMthMixedPartialChartPushedU`; here it is an arbitrary `MemW1p 2`
-function. -/
 
 /-- **Generic per-pair integration by parts on the chart target.** For a
 function `v` lying in `W^{1,2}` of the open chart target `Ω = chartTargetEuclid α`
@@ -317,15 +273,12 @@ theorem generic_per_pair_ibp
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
   have hΩ_meas : MeasurableSet Ω := hΩ_open.measurableSet
-  -- The weak partials of `v`: the chosen weak partial in each direction.
   set w : Fin (Module.finrank ℝ E) → EuclN → ℝ := fun j =>
     chosenWeakPartial' (d := Module.finrank ℝ E) 2 j v Ω with hw_def
-  -- Local `L²` integrability of `v`.
   have h_v_memLp : MemLp v 2 ((volume : Measure EuclN).restrict Ω) := hv.1
   have hv_locMemLp : ∀ K' : Set EuclN, IsCompact K' → K' ⊆ Ω →
       MemLp v 2 ((volume : Measure EuclN).restrict K') := fun K' hK'c hK'i =>
     memLp_restrict_of_memLp_restrict h_v_memLp hK'c hK'i
-  -- Each `w j` is a weak `j`-partial of `v` and lies in `MemLp 2`.
   have hw_global : ∀ j : Fin (Module.finrank ℝ E),
       MemLp (w j) 2 ((volume : Measure EuclN).restrict Ω) := fun j =>
     chosenWeakPartial'_memLp_of_mem hv j
@@ -336,25 +289,20 @@ theorem generic_per_pair_ibp
   have hw_isWeakPartial : ∀ j : Fin (Module.finrank ℝ E),
       DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) j (w j) v Ω :=
     fun j => chosenWeakPartial'_isWeakPartial_of_mem hv j
-  -- Compact tsupport of the test factor.
   set K : Set EuclN := tsupport ψ with hK_def
   have hK_compact : IsCompact K := hψ_cs
   have hK_in : K ⊆ Ω := hψ_supp
-  -- Smooth global extension of `φ`.
   obtain ⟨δ, φExt, hδ_pos, hδ_subset, hφExt_smooth, hφExt_eq⟩ :=
     exists_smooth_global_extension (I := I) (M := M) (φ := φ) α hφ_chart
       hK_compact hK_in
-  -- Apply the generic Euclidean IBP primitive to `(φExt, v, w)` in direction `l`.
   have h_ibp_ext :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.integral_smul_weak_partial_eq
       (d := Module.finrank ℝ E) (Ω := Ω) hΩ_open
       (φ := φExt) hφExt_smooth (v := v) (w := w)
       hv_locMemLp hw_locMemLp hw_isWeakPartial l
       (ψ := ψ) hψ_smooth hψ_cs hψ_supp
-  -- Replace `φExt` by `φ` on `Ω` in every integral.
   have hK_in_thick : K ⊆ Metric.cthickening δ K :=
     Metric.self_subset_cthickening _
-  -- `fderiv ψ` vanishes outside `tsupport ψ`.
   have h_fderiv_zero : ∀ x ∉ K, fderiv ℝ ψ x = 0 := by
     intro x hx
     have h_compl_open : IsOpen (Kᶜ) := (isClosed_tsupport _).isOpen_compl
@@ -366,10 +314,8 @@ theorem generic_per_pair_ibp
       filter_upwards [hψ_zero_nbhd] with y hy
       rw [hy]
     rw [hψ_const_zero]; simp
-  -- ψ vanishes outside `tsupport ψ`.
   have h_ψ_zero : ∀ x ∉ K, ψ x = 0 :=
     fun x hx => image_eq_zero_of_notMem_tsupport hx
-  -- LHS replacement: `∫_Ω φExt · v · ∂_lψ = ∫_Ω φ · v · ∂_lψ`.
   have hLHS_eq :
       ∫ y in Ω, φExt y * v y *
           (fderiv ℝ ψ y) (EuclideanSpace.single l 1) ∂(volume : Measure EuclN) =
@@ -379,7 +325,6 @@ theorem generic_per_pair_ibp
     by_cases hy_K : y ∈ K
     · rw [hφExt_eq y (hK_in_thick hy_K)]
     · rw [h_fderiv_zero y hy_K]; simp
-  -- `fderiv φExt = fderiv φ` on `K` (both agree on a neighbourhood).
   have h_fderiv_φExt_eq_φ : ∀ y ∈ K,
       (fderiv ℝ φExt y) (EuclideanSpace.single l 1) =
       (fderiv ℝ φ y) (EuclideanSpace.single l 1) := by
@@ -395,7 +340,6 @@ theorem generic_per_pair_ibp
       filter_upwards [h_nbhd] with z hz
       exact hφExt_eq z (h_thick_sub hz)
     rw [Filter.EventuallyEq.fderiv_eq h_eq_nbhd]
-  -- First Leibniz integral: `∫_Ω (∂_l φExt) · v · ψ = ∫_Ω (∂_l φ) · v · ψ`.
   have hLeib1_eq :
       ∫ y in Ω, (fderiv ℝ φExt y) (EuclideanSpace.single l 1) * v y * ψ y
         ∂(volume : Measure EuclN) =
@@ -405,7 +349,6 @@ theorem generic_per_pair_ibp
     by_cases hy_K : y ∈ K
     · rw [h_fderiv_φExt_eq_φ y hy_K]
     · rw [h_ψ_zero y hy_K]; ring
-  -- Second Leibniz integral: `∫_Ω φExt · w l · ψ = ∫_Ω φ · w l · ψ`.
   have hLeib2_eq :
       ∫ y in Ω, φExt y * w l y * ψ y ∂(volume : Measure EuclN) =
       ∫ y in Ω, φ y * w l y * ψ y ∂(volume : Measure EuclN) := by
@@ -415,12 +358,6 @@ theorem generic_per_pair_ibp
     · rw [h_ψ_zero y hy_K]; ring
   rw [← hLHS_eq, ← hLeib1_eq, ← hLeib2_eq]
   exact h_ibp_ext
-
-/-! ## The differentiated variational source
-
-The right-hand side of the differentiated identity, recorded as an explicit
-pointwise function on `EuclN`. It collects the five contributions produced by
-integrating by parts once more in direction `l`. -/
 
 /-- The differentiated right-hand side of the chart-bilinear variational
 identity, after one integration by parts in direction `l`.
@@ -464,14 +401,6 @@ def diffVariationalSource
       chosenWeakPartial' (d := Module.finrank ℝ E) 2 l D.f_chart
         (chartTargetEuclid (I := I) (M := M) α) y
 
-/-! ## Triple-product integrability on the chart target
-
-The differentiated identity is an equation between sums of integrals of
-triple products `coefficient · weak-factor · test-factor`. Each such product is
-integrable on `volume.restrict Ω` because the coefficient is continuous, the
-weak factor is locally `L²` (hence locally integrable), and the test factor is
-continuous with compact support. -/
-
 /-- Triple-product integrability: `a · u · h` is integrable on
 `volume.restrict Ω` when `a` is continuous on `Ω`, `u` is `MemLp 2` on every
 compact subset of `Ω`, and `h` is continuous with `tsupport h ⊆ Ω` compact. -/
@@ -491,16 +420,13 @@ private lemma integrable_triple
   have hK_meas : MeasurableSet K := (isClosed_tsupport h).measurableSet
   have hK_in : K ⊆ Ω := hh_supp
   have hK_closed : IsClosed K := hK_compact.isClosed
-  -- `K` has finite volume.
   have hvolK_finite' :
       ((volume : Measure EuclN).restrict K) Set.univ < (⊤ : ℝ≥0∞) := by
     rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter]
     exact hK_compact.measure_lt_top
   haveI : IsFiniteMeasure ((volume : Measure EuclN).restrict K) := ⟨hvolK_finite'⟩
-  -- `u` is integrable on `K`.
   have hu_int_K : IntegrableOn u K (volume : Measure EuclN) :=
     (hu K hK_compact hK_in).integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
-  -- `a · h` is continuous with support inside `K`.
   set ah : EuclN → ℝ := fun y => a y * h y with hah_def
   have hah_supp : tsupport ah ⊆ K := by
     refine closure_minimal (fun y hy => ?_) hK_closed
@@ -517,7 +443,6 @@ private lemma integrable_triple
         have hh_z : h z = 0 := image_eq_zero_of_notMem_tsupport hz
         simp [hah_def, hh_z]
       rw [continuousAt_congr h_eq_zero]; exact continuousAt_const
-  -- `u · (a · h)` is integrable on `K`, then extended by zero off `K`.
   have hu_ah_int_K : IntegrableOn (fun y => u y * ah y) K
       (volume : Measure EuclN) :=
     hu_int_K.mul_continuousOn hah_cont.continuousOn hK_compact
@@ -539,11 +464,6 @@ private lemma integrable_triple
     funext y; simp only [hah_def]; ring
   rw [h_reassoc] at full_int
   exact full_int.restrict
-
-/-! ## The generic Leibniz-commutator integration-by-parts step
-
-The headline of the module: the differentiated variational identity for a
-generic scalar `ChartBilinearH1ComplData`. -/
 
 set_option maxHeartbeats 1600000 in
 /-- **Generic Leibniz-commutator integration-by-parts step.**
@@ -609,7 +529,6 @@ theorem chartBilinear_diff_variational_identity
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
   have hΩ_meas : MeasurableSet Ω := hΩ_open.measurableSet
-  -- The once-more-differentiated test factor `ψ_l := ∂_l ψ`.
   set ψ_l : EuclN → ℝ := fun y =>
     (fderiv ℝ ψ y) (EuclideanSpace.single l 1) with hψ_l_def
   have hψ_l_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ_l :=
@@ -618,9 +537,7 @@ theorem chartBilinear_diff_variational_identity
     hasCompactSupport_partial (ψ := ψ) hψ_cs l
   have hψ_l_supp : tsupport ψ_l ⊆ Ω :=
     (tsupport_partial_subset ψ l).trans hψ_supp
-  -- Step 1: the level-0 variational identity applied to `ψ_l`.
   have h_level0 := D.variational_identity ψ_l hψ_l_smooth hψ_l_cs hψ_l_supp
-  -- Smoothness / continuity helpers for the coefficients.
   have h_a_cont : ∀ i j : Fin (Module.finrank ℝ E),
       ContinuousOn (weightedInvGramOnEuclid (I := I) g α i j) Ω :=
     fun i j => (weightedInvGramOnEuclid_contDiffOn (I := I) g α i j).continuousOn
@@ -632,7 +549,6 @@ theorem chartBilinear_diff_variational_identity
     densityOnEuclid_continuousOn (I := I) g α
   have h_dens_deriv_cont : ContinuousOn (densityDerivOnEuclid (I := I) g α l) Ω :=
     (densityDerivOnEuclid_contDiffOn (I := I) g α l).continuousOn
-  -- `∂_j` of `weightedInvGramDerivOnEuclid` is continuous on `Ω`.
   have h_da_fderiv_cont : ∀ i j : Fin (Module.finrank ℝ E),
       ContinuousOn (fun y : EuclN =>
         (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l) y)
@@ -651,7 +567,6 @@ theorem chartBilinear_diff_variational_identity
         (fun (L : EuclN →L[ℝ] ℝ) => L (EuclideanSpace.single j 1)) :=
       (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single j (1 : ℝ))).contDiff
     exact (h_eval.contDiffOn.comp h_fderiv_diff (mapsTo_univ _ _)).continuousOn
-  -- Continuity / support of the test factors.
   have hψ_cont : Continuous ψ := hψ_smooth.continuous
   have hψ_partial_cont : ∀ j : Fin (Module.finrank ℝ E),
       Continuous (fun y : EuclN => (fderiv ℝ ψ y) (EuclideanSpace.single j 1)) :=
@@ -673,7 +588,6 @@ theorem chartBilinear_diff_variational_identity
   have hψ_l_partial_supp : ∀ j : Fin (Module.finrank ℝ E),
       tsupport (fun y : EuclN => (fderiv ℝ ψ_l y) (EuclideanSpace.single j 1)) ⊆ Ω :=
     fun j => (tsupport_partial_subset ψ_l j).trans hψ_l_supp
-  -- Local `L²` integrability of the various weak factors on `Ω`.
   have h_u_loc : ∀ K : Set EuclN, IsCompact K → K ⊆ Ω →
       MemLp D.u_chart 2 ((volume : Measure EuclN).restrict K) :=
     fun K hKc hKi => memLp_restrict_of_memLp_restrict h_u_memW1p.1 hKc hKi
@@ -703,10 +617,6 @@ theorem chartBilinear_diff_variational_identity
     fun K hKc hKi =>
       memLp_restrict_of_memLp_restrict
         (chosenWeakPartial'_memLp_of_mem h_u_memW1p l) hKc hKi
-  -- Step 2: per-pair principal IBP. For each `(i, j)`:
-  --   ∫ a_ij · (wp i) · ∂_j ψ_l
-  --     = A_ij + B_ij - PR_ij
-  -- where `A`, `B` are integrals against `ψ` and `PR` against `∂_j ψ`.
   set A_pair : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
     fun i j =>
       ∫ y in Ω,
@@ -734,12 +644,9 @@ theorem chartBilinear_diff_variational_identity
           D.weak_partial i y *
           (fderiv ℝ ψ_l y) (EuclideanSpace.single j 1)
         ∂(volume : Measure EuclN) with hLHS_m_pair_def
-  -- The principal-pair decomposition.
   have h_principal_pair : ∀ i j : Fin (Module.finrank ℝ E),
       LHS_m_pair i j = A_pair i j + B_pair i j - PR_pair i j := by
     intro i j
-    -- IBP of the principal: smooth coef `a_ij`, weak factor `wp i`, direction `l`.
-    -- Schwarz pre-step: `∂_j ψ_l = ∂_l (∂_j ψ)`.
     set ψ_j : EuclN → ℝ := fun y =>
       (fderiv ℝ ψ y) (EuclideanSpace.single j 1) with hψ_j_def
     have hψ_j_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ_j :=
@@ -748,7 +655,6 @@ theorem chartBilinear_diff_variational_identity
       hasCompactSupport_partial (ψ := ψ) hψ_cs j
     have hψ_j_supp : tsupport ψ_j ⊆ Ω :=
       (tsupport_partial_subset ψ j).trans hψ_supp
-    -- Rewrite the LHS principal pair via Schwarz.
     have h_lhs_schwarz : LHS_m_pair i j =
         ∫ y in Ω,
           weightedInvGramOnEuclid (I := I) g α i j y *
@@ -762,34 +668,21 @@ theorem chartBilinear_diff_variational_identity
           ∂(volume : Measure EuclN)) = _
       refine setIntegral_congr_fun hΩ_meas (fun y _ => ?_)
       rw [partial_swap (ψ := ψ) hψ_smooth y j l]
-    -- IBP in `l` of `a_ij · (wp i) · ∂_l ψ_j`.
     have h_pp := generic_per_pair_ibp (I := I) (M := M) α
       (h_wp_memW1p i)
       (weightedInvGramOnEuclid_contDiffOn (I := I) g α i j)
       hψ_j_smooth hψ_j_cs hψ_j_supp l
-    -- IBP in `j` of `(∂_l a_ij) · (wp i) · ∂_j ψ`.
     have h_inner := generic_per_pair_ibp (I := I) (M := M) α
       (h_wp_memW1p i)
       (weightedInvGramDerivOnEuclid_contDiffOn (I := I) g α i j l)
       hψ_smooth hψ_cs hψ_supp j
-    -- `h_pp` rewrites `LHS_m_pair i j` (via Schwarz) into
-    --   -((∫ (∂_l a_ij) · (wp i) · ψ_j) + PR_ij),
-    -- where the Leibniz coefficient `(fderiv (a_ij) y)(e_l)` is, definitionally,
-    -- `weightedInvGramDerivOnEuclid g α i j l y`.
-    -- `h_inner` rewrites `∫ (weightedInvGramDerivOnEuclid g α i j l) · (wp i) · ∂_j ψ`
-    -- into `-(A_ij + B_ij)`. Since `ψ_j = ∂_j ψ`, the two cancel as below.
     have h_pp' : LHS_m_pair i j =
         -((∫ y in Ω,
             weightedInvGramDerivOnEuclid (I := I) g α i j l y *
               D.weak_partial i y * ψ_j y
             ∂(volume : Measure EuclN)) + PR_pair i j) := by
       rw [h_lhs_schwarz]
-      -- `h_pp` is `… = -((∫ (fderiv a_ij)(e_l) · v · ψ_j) + (∫ a_ij · (∂_l v) · ψ_j))`;
-      -- the first coefficient is definitionally `weightedInvGramDerivOnEuclid`, and
-      -- the second integral is definitionally `PR_pair i j`.
       exact h_pp
-    -- `∫ (weightedInvGramDerivOnEuclid g α i j l) · (wp i) · ψ_j` with
-    -- `ψ_j = ∂_j ψ` is the LHS of `h_inner`.
     have h_inner' :
         (∫ y in Ω,
             weightedInvGramDerivOnEuclid (I := I) g α i j l y *
@@ -798,9 +691,6 @@ theorem chartBilinear_diff_variational_identity
         -(A_pair i j + B_pair i j) := h_inner
     rw [h_pp', h_inner']
     ring
-  -- Continuity of `∂_l weightedInvGramOnEuclid` agrees with
-  -- `weightedInvGramDerivOnEuclid` (so `h_da_cont` covers the A-term coefficient).
-  -- Integrability of the per-pair atoms.
   have h_int_LHS : ∀ i j : Fin (Module.finrank ℝ E),
       Integrable (fun y => weightedInvGramOnEuclid (I := I) g α i j y *
           D.weak_partial i y *
@@ -831,7 +721,6 @@ theorem chartBilinear_diff_variational_identity
         ((volume : Measure EuclN).restrict Ω) := fun i j =>
     integrable_triple hΩ_open (h_a_cont i j) (h_wp_wp_loc i l)
       (hψ_partial_cont j) (hψ_partial_cs j) (hψ_partial_supp j)
-  -- Step 3: sum-swap the principal LHS, `∑∫ = ∫∑`.
   set LHS_principal0 : ℝ :=
     ∫ y in Ω,
       (∑ i : Fin (Module.finrank ℝ E),
@@ -861,7 +750,6 @@ theorem chartBilinear_diff_variational_identity
       (integrable_finset_sum _ (fun j _ => h_int_LHS i j)))]
     refine Finset.sum_congr rfl ?_; intro i _
     rw [integral_finset_sum _ (fun j _ => h_int_LHS i j)]
-  -- `∑∑ LHS_m_pair = ∑∑ A + ∑∑ B - ∑∑ PR`.
   have h_sum_principal :
       ∑ i, ∑ j, LHS_m_pair i j =
       (∑ i, ∑ j, A_pair i j) + (∑ i, ∑ j, B_pair i j) -
@@ -892,7 +780,6 @@ theorem chartBilinear_diff_variational_identity
           simp_rw [Finset.sum_neg_distrib (s :=
             (Finset.univ : Finset (Fin (Module.finrank ℝ E))))]
           ring
-  -- Step 4: IBP of the mass term `∫ density · u_chart · ∂_l ψ`.
   set N_C : ℝ :=
     ∫ y in Ω, densityDerivOnEuclid (I := I) g α l y *
       D.u_chart y * ψ y ∂(volume : Measure EuclN) with hN_C_def
@@ -908,7 +795,6 @@ theorem chartBilinear_diff_variational_identity
         ∂(volume : Measure EuclN)) = _
     rw [hb]
     rfl
-  -- Step 5: IBP of the RHS term `∫ density · f_chart · ∂_l ψ`.
   set N_D : ℝ :=
     ∫ y in Ω, densityDerivOnEuclid (I := I) g α l y *
       D.f_chart y * ψ y ∂(volume : Measure EuclN) with hN_D_def
@@ -924,14 +810,11 @@ theorem chartBilinear_diff_variational_identity
         ∂(volume : Measure EuclN)) = _
     rw [hb]
     rfl
-  -- Step 6: collect the algebraic identity.
-  --   (∑∑ PR) + N_mass_C2 = (∑∑ A) + (∑∑ B) - N_C + N_D + N_E.
   have h_combine : (∑ i, ∑ j, PR_pair i j) + N_mass_C2 =
       (∑ i, ∑ j, A_pair i j) + (∑ i, ∑ j, B_pair i j) - N_C + N_D + N_E := by
     have h := h_level0'
     rw [h_swap_principal0, h_sum_principal, h_mass_ibp, h_rhs_ibp] at h
     linarith
-  -- Step 7: the goal LHS principal is `∑∑ PR_pair`.
   set goal_LHS_principal : ℝ :=
     ∫ y in Ω,
       (∑ i : Fin (Module.finrank ℝ E),
@@ -952,15 +835,12 @@ theorem chartBilinear_diff_variational_identity
       (integrable_finset_sum _ (fun j _ => h_int_PR i j)))]
     refine Finset.sum_congr rfl ?_; intro i _
     rw [integral_finset_sum _ (fun j _ => h_int_PR i j)]
-  -- Step 8: the goal RHS `∫ diffVariationalSource · ψ` decomposes as
-  --   (∑∑ A) + (∑∑ B) - N_C + N_D + N_E.
   set goal_RHS : ℝ :=
     ∫ y in Ω,
       diffVariationalSource (I := I) (M := M) g α D l y * ψ y
       ∂(volume : Measure EuclN) with hgoal_RHS_def
   have h_goal_RHS_decomp : goal_RHS =
       (∑ i, ∑ j, A_pair i j) + (∑ i, ∑ j, B_pair i j) - N_C + N_D + N_E := by
-    -- Atoms.
     set f_A : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
       ∑ j : Fin (Module.finrank ℝ E),
         (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l) y)
@@ -978,7 +858,6 @@ theorem chartBilinear_diff_variational_identity
       densityOnEuclid (I := I) g α y *
         chosenWeakPartial' (d := Module.finrank ℝ E) 2 l D.f_chart Ω y *
         ψ y with hf_E_def
-    -- The differentiated source integrand decomposes pointwise.
     have h_integrand_eq : ∀ y : EuclN,
         diffVariationalSource (I := I) (M := M) g α D l y * ψ y =
         f_A y + f_B y + f_C y + f_D y + f_E y := by
@@ -991,7 +870,6 @@ theorem chartBilinear_diff_variational_identity
         diffVariationalSource (I := I) (M := M) g α D l y * ψ y
         ∂(volume : Measure EuclN) from rfl,
       setIntegral_congr_fun hΩ_meas (fun y _ => h_integrand_eq y)]
-    -- Integrability of the atoms.
     have hint_A : Integrable f_A ((volume : Measure EuclN).restrict Ω) :=
       integrable_finset_sum _ (fun i _ =>
         integrable_finset_sum _ (fun j _ => h_int_A i j))
@@ -1017,7 +895,6 @@ theorem chartBilinear_diff_variational_identity
     rw [MeasureTheory.integral_add h_sum_ABC hint_D]
     rw [MeasureTheory.integral_add h_sum_AB hint_C]
     rw [MeasureTheory.integral_add hint_A hint_B]
-    -- Each of the five integrals.
     have h_int_f_A : (∫ y in Ω, f_A y ∂(volume : Measure EuclN)) =
         ∑ i, ∑ j, A_pair i j := by
       change (∫ y in Ω,
@@ -1052,15 +929,9 @@ theorem chartBilinear_diff_variational_identity
     have h_int_f_E : (∫ y in Ω, f_E y ∂(volume : Measure EuclN)) = N_E := rfl
     rw [h_int_f_A, h_int_f_B, h_int_f_C, h_int_f_D, h_int_f_E]
     ring
-  -- Step 9: assemble the goal.
   change goal_LHS_principal + N_mass_C2 = goal_RHS
   rw [h_goal_principal_eq, h_goal_RHS_decomp]
   linarith [h_combine]
-
-/-! ## The tensor wrapper
-
-The same Leibniz-commutator integration-by-parts step, stated for the tensor
-chart-component data structure `TensorChartBilinearH1ComplData`. -/
 
 /-- The differentiated right-hand side for a tensor chart-component datum, i.e.
 `diffVariationalSource` applied to the underlying scalar chart data. This is the

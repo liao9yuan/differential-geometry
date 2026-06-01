@@ -40,13 +40,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## The scalar identification used throughout
-
-For each `s : ℝ`, the pullback inner product unfolds to the inner product of
-`g_fam s` at the moving point, applied to the manifold derivatives of `Φ_fam s`
-on each slot.  This is `pullback_metric_evaluation_formula` quantified over
-`s`, used here as a pointwise function equality. -/
-
 /-- **Scalar evaluation identity for the time-parametrised pullback metric.**
 For every `s : ℝ`, the bundled `pullbackMetric` inner product at `(x, v, w)`
 equals the metric-family inner product evaluated at `Φ_fam s x` on the
@@ -59,7 +52,6 @@ theorem pullbackMetric_inner_eq_inner_mfderiv
       = (g_fam s).inner (Φ_fam s x)
           (mfderiv I I (Φ_fam s : M → M) x v)
           (mfderiv I I (Φ_fam s : M → M) x w) := by
-  -- Reduce to `Diffeomorph.pullbackInner` and unfold by the comp/precomp expression.
   change Diffeomorph.pullbackInner (g_fam s) (Φ_fam s) x v w
       = (g_fam s).inner (Φ_fam s x)
           (mfderiv I I (Φ_fam s : M → M) x v)
@@ -80,8 +72,6 @@ theorem pullbackMetric_inner_funext
           (mfderiv I I (Φ_fam s : M → M) x w)) := by
   funext s
   exact pullbackMetric_inner_eq_inner_mfderiv g_fam Φ_fam x v w s
-
-/-! ## Transport of `HasDerivWithinAt` and `HasDerivAt` -/
 
 /-- **Transport `HasDerivWithinAt` from the evaluation-formula form to the
 bundled pullback form.**
@@ -111,9 +101,6 @@ theorem pullbackMetric_inner_hasDerivWithinAt_of_eval
     HasDerivWithinAt
       (fun u : ℝ => (Diffeomorph.pullbackMetric (g_fam u) (Φ_fam u)).inner x v w)
       G' s t := by
-  -- The two functions agree at every point of ℝ, hence in particular on `s`
-  -- and at `t`. Transport `h_eval` across this equality with
-  -- `HasDerivWithinAt.congr`.
   refine h_eval.congr ?_ ?_
   · intro u _
     exact (pullbackMetric_inner_eq_inner_mfderiv g_fam Φ_fam x v w u).symm
@@ -181,7 +168,6 @@ theorem pullbackMetric_inner_hasDerivAt_of_eval
     HasDerivAt
       (fun u : ℝ => (Diffeomorph.pullbackMetric (g_fam u) (Φ_fam u)).inner x v w)
       G' t := by
-  -- `HasDerivAt` is `HasDerivWithinAt _ _ Set.univ`. Apply the within-set transport.
   rw [← hasDerivWithinAt_univ] at h_eval ⊢
   exact pullbackMetric_inner_hasDerivWithinAt_of_eval g_fam Φ_fam x v w h_eval
 
@@ -219,18 +205,6 @@ theorem pullbackMetric_inner_hasDerivAt_iff
       G' t :=
   ⟨pullbackMetric_inner_hasDerivAt_to_eval g_fam Φ_fam x v w,
     pullbackMetric_inner_hasDerivAt_of_eval g_fam Φ_fam x v w⟩
-
-/-! ## Composition primitive: product rule on the evaluation side
-
-When the consumer has a product-rule decomposition of the evaluation form into
-three pieces — the intrinsic time derivative `G'` of `g_fam` at the fixed image
-point with the fixed pushforwards, the first-slot variation `A'` and the
-second-slot variation `B'` — the total derivative `G' + A' + B'` transports
-to the bundled pullback side.
-
-This packages the typical use site: a downstream caller pieces together the
-three derivatives by Mathlib's product/chain rule on the evaluation form, and
-then this lemma exports the total to the pullback form. -/
 
 /-- **Three-piece product-rule transport (within-set).**
 

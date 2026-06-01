@@ -80,9 +80,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M]
 
-/-! ## Step 1: identifying `(triv b₀).symmL b` and `(triv b₀).clmAt b` with the
-identity on the locality neighbourhood of `b₀` -/
-
 /-- If `chartAt H b = chartAt H b₀`, the corresponding `achart` values agree
 as subtypes. -/
 private lemma achart_eq_of_chartAt_eq {b b₀ : M}
@@ -119,9 +116,6 @@ private lemma trivb₀_clmAt_eq_id_of_chartAt_eq
   rw [tangentBundleCore_baseSet, coe_achart]
   exact hb
 
-/-! ## Step 2: continuity of the `coordChangeL` CLM family on chart-source
-intersections -/
-
 /-- The map `b ↦ (triv b₀).coordChangeL ℝ (triv α) b` is `ContMDiffOn` on
 `(chartAt H b₀).source ∩ (chartAt H α).source`, hence continuous. -/
 private lemma continuousOn_coordChangeL_b₀_α (b₀ α : M) :
@@ -148,9 +142,6 @@ private lemma continuousOn_coordChangeL_b₀_α (b₀ α : M) :
   rw [h_base_b₀, h_base_α] at h_smooth
   exact h_smooth.continuousOn
 
-/-! ## Step 3: identifying `coordChangeL` action with the bare CLM expressions on
-the locality neighbourhood -/
-
 /-- On the locality neighbourhood `U` of `b₀` (inside `(chart α).source`), the
 `coordChangeL` CLM `(triv b₀).coordChangeL ℝ (triv α) b` equals
 `chartJ α b`. -/
@@ -169,7 +160,6 @@ private lemma coordChangeL_eq_chartJ_of_locality
   have hb_α' : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [TangentBundle.trivializationAt_baseSet (𝕜 := ℝ) (I := I) α]
     exact hb_α
-  -- Use Mathlib's `coordChangeL_apply`: maps to `(triv α).clmAt b ((triv b₀).symmL b v)`.
   have h_apply :
       ((trivializationAt E (TangentSpace I) b₀).coordChangeL ℝ
         (trivializationAt E (TangentSpace I) α) b : E →L[ℝ] E) v =
@@ -184,7 +174,6 @@ private lemma coordChangeL_eq_chartJ_of_locality
         Bundle.Trivialization.coe_linearMapAt_of_mem _ hb_α',
         Bundle.Trivialization.symmL_apply]
   rw [h_apply]
-  -- Now use `(triv b₀).symmL b = id` on the locality nbd.
   have h_symmL_id := trivb₀_symmL_eq_id_of_chartAt_eq (I := I) (M := M)
     h_chart hb_b₀
   have h_eq : (trivializationAt E (TangentSpace I) b₀).symmL ℝ b v = v := by
@@ -238,9 +227,6 @@ private lemma coordChangeL_eq_chartJinv_of_locality
   rw [h_eq]
   rfl
 
-/-! ## Step 5: continuity of `b ↦ chartJ α b` and `b ↦ chartJinv α b` on the
-refined locality neighbourhood -/
-
 private lemma chartJ_continuousOn_loc
     (α b₀ : M)
     {U : Set M}
@@ -287,8 +273,6 @@ private lemma chartJinv_continuousOn_loc
     exact (coordChangeL_eq_chartJinv_of_locality (I := I) (M := M) α
       (hU_sub_α hb) (hU_sub_b₀ hb) (hU_const b hb)).symm
   exact h_coord_cont.congr h_eq
-
-/-! ## Step 6: bound on a compact set from continuity -/
 
 private lemma exists_opNorm_bound_on_compact_of_continuousOn
     (f : M → E →L[ℝ] E)

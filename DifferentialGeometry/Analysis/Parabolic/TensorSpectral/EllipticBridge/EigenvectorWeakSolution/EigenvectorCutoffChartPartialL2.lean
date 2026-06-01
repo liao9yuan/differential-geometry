@@ -92,27 +92,12 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The cutoff chart component of a smooth section lies in `W^{1,2}` of the chart target
-
-The cutoff Euclidean chart component `cutoffComponentEuclid g r s S.toCcTensor α
-Idx Jdx` of a smooth compactly-supported `H¹` section is, by construction, the
-chart push-forward of a globally smooth compactly-supported manifold scalar
-field; it is therefore globally `C^∞` on the Euclidean model space, with compact
-support inside the Euclidean chart target. Such a function lies in `W^{1,2}` of
-the chart target. -/
 
 /-- The cutoff Euclidean chart component is globally `C^∞` on the Euclidean
 model space. -/
@@ -187,15 +172,6 @@ lemma cutoffComponentEuclid_memW1p
       hp_one 1
   exact MemWkp.one_iff_memW1p.mp h_W1
 
-/-! ## The chosen weak cutoff chart partial of a smooth section as an `L²` class
-
-For a fixed chart-coordinate direction `k`, the chosen weak `k`-th chart partial
-`chosenWeakPartial' 2 k (cutoffComponentEuclid g r s S.toCcTensor α Idx Jdx)
-(chartTargetEuclid α)` is, by `chosenWeakPartial'_memLp_of_mem` applied to the
-`W^{1,2}` membership above, in `L²` of the Euclidean `L²` reference measure
-`chartL2Measure α = volume.restrict (chartTargetEuclid α)`. Its `L²` class is the
-element `smoothCutoffChartPartialLp g r s S α P₀ k`. -/
-
 /-- The chosen weak `k`-th chart partial of the cutoff Euclidean chart component
 is in `MemLp 2` of the Euclidean `L²` reference measure of the chart. -/
 lemma chosenWeakPartial'_cutoffComponentEuclid_memLp
@@ -240,14 +216,6 @@ private lemma smoothCutoffChartPartialLp_coeFn
   unfold smoothCutoffChartPartialLp
   exact MemLp.coeFn_toLp _
 
-/-! ### Linearity of the chosen-weak-cutoff-chart-partial `L²` class
-
-`cutoffComponentEuclid` is `ℝ`-linear in the section `S` (`cutoffComponentEuclid_add`,
-`cutoffComponentEuclid_smul`); `chosenWeakPartial'` is almost-everywhere additive
-and `ℝ`-homogeneous (`chosenWeakPartial'_add_ae`, `chosenWeakPartial'_const_smul_ae`).
-Combining the two, the chosen-weak-cutoff-chart-partial `L²` class is `ℝ`-linear
-in `S`. -/
-
 private lemma smoothCutoffChartPartialLp_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensorH1 g r s) (α : M)
@@ -258,7 +226,6 @@ private lemma smoothCutoffChartPartialLp_add
         smoothCutoffChartPartialLp (I := I) (M := M) g r s S₂ α P₀ k := by
   classical
   apply Lp.ext
-  -- The cutoff chart component of a sum is the sum of the cutoff components.
   have h_fun :
       cutoffComponentEuclid (I := I) (M := M) g r s
           (S₁ + S₂).toCcTensor α P₀.1 P₀.2 =
@@ -269,7 +236,6 @@ private lemma smoothCutoffChartPartialLp_add
     rw [SmoothCcTensorH1.toCcTensor_add,
       cutoffComponentEuclid_add (I := I) (M := M)
         g r s S₁.toCcTensor S₂.toCcTensor α P₀.1 P₀.2]
-  -- The chosen weak partial of the sum is `=ᵐ` the sum of chosen weak partials.
   have hΩ_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have hp_one : (1 : ℝ≥0∞) ≤ 2 := by norm_num
@@ -311,7 +277,6 @@ private lemma smoothCutoffChartPartialLp_smul
       c • smoothCutoffChartPartialLp (I := I) (M := M) g r s S α P₀ k := by
   classical
   apply Lp.ext
-  -- The cutoff chart component of a scalar multiple is the scalar multiple.
   have h_fun :
       cutoffComponentEuclid (I := I) (M := M) g r s
           (c • S).toCcTensor α P₀.1 P₀.2 =
@@ -320,7 +285,6 @@ private lemma smoothCutoffChartPartialLp_smul
     rw [SmoothCcTensorH1.toCcTensor_smul,
       cutoffComponentEuclid_smul (I := I) (M := M)
         g r s c S.toCcTensor α P₀.1 P₀.2]
-  -- The chosen weak partial of `c • u` is `=ᵐ` `c •` the chosen weak partial.
   have hΩ_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have hp_one : (1 : ℝ≥0∞) ≤ 2 := by norm_num
@@ -352,11 +316,6 @@ private lemma smoothCutoffChartPartialLp_smul
   filter_upwards [smoothCutoffChartPartialLp_coeFn
     (I := I) (M := M) g r s S α P₀ k] with y hy
   rw [Pi.smul_apply, hy, smul_eq_mul]
-
-/-! ## The bounded `ℝ`-linear map `SmoothCcTensorH1 → Lp`
-
-The chosen-weak-cutoff-chart-partial `L²` class assembles into a `ℝ`-linear map;
-the cutoff uniform chart-partial `L²` bound makes it a continuous linear map. -/
 
 /-- The `ℝ`-linear map sending a smooth compactly-supported `H¹` tensor section
 to the `L²` class of the chosen weak `k`-th chart partial of its cutoff
@@ -481,12 +440,6 @@ private def smoothCutoffChartPartialLpCLM
     smoothCutoffChartPartialLpCLM (I := I) (M := M) g r s α P₀ k S =
       smoothCutoffChartPartialLp (I := I) (M := M) g r s S α P₀ k := rfl
 
-/-! ## The canonical cutoff chart partial as a continuous linear map on the `H¹` completion
-
-The cutoff chart-partial `L²` map assembles, by continuous linear extension
-along the dense embedding `SmoothCcTensorH1 g r s ↪ TensorH1Compl g r s`, into a
-continuous linear map on the `H¹` completion. -/
-
 /-- The canonical embedding `SmoothCcTensorH1 g r s ↪ TensorH1Compl g r s` is
 uniform-inducing. -/
 private lemma isUniformInducing_smoothToTensorH1Compl'
@@ -541,12 +494,6 @@ theorem eigenvectorCutoffChartPartialCLM_smoothToTensorH1Compl
     (denseRange_smoothToTensorH1Compl (I := I) (M := M) g r s)
     (isUniformInducing_smoothToTensorH1Compl' (I := I) (M := M) g r s) S]
   rfl
-
-/-! ## Chart-locality-free twins
-
-`h_atlas` enters only through the eigenvector resolvent and its canonical smooth
-approximating sequence, both of which have chart-locality-free twins. The cutoff
-chart-partial map `eigenvectorCutoffChartPartialCLM` carries no `h_atlas`. -/
 
 /-- **The candidate weak `k`-th cutoff chart partial of an eigenvector chart
 component (chart-locality-free).** Chart-locality-free twin of

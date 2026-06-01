@@ -93,24 +93,12 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
   hiding chartTargetEuclid chartTargetEuclid_isOpen
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Chart-locality-free interior regularity
-
-The interior-regularity bootstrap is keyed onto the intrinsic compact-operator
-eigenbasis
-`tensorResolventEigenbasisVec (tensorResolventL2_isCompactOperator g r s)`. -/
 
 section Unconditional
 
@@ -133,13 +121,8 @@ private lemma resolventChartComponent_memWkp_of_componentFun
   classical
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- `eigenvector_chartComponent_eq`: the eigenvector
-  -- chart-component element equals `i.fst.val⁻¹ •` the resolvent-coercion
-  -- chart-component element.
   have h_chart_eq := eigenvector_chartComponent_eq (I := I) (M := M)
     g r s i α P₀
-  -- The resolvent-coercion chart component is `i.fst.val •` the eigenvector
-  -- chart component, almost everywhere on `Ω`.
   have h_ae :
       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
           (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
@@ -155,7 +138,6 @@ private lemma resolventChartComponent_memWkp_of_componentFun
           (tensorResolventL2_isCompactOperator (I := I) (M := M)
             g r s) i) α P₀)
     have hμ_ne : i.fst.val ≠ 0 := i.fst.val_ne_zero
-    -- `i.fst.val • (eigenvector element) = resolvent-coercion element`.
     have h_back :
         i.fst.val •
             tensorL2ChartComponent (I := I) (M := M) g r s
@@ -172,7 +154,6 @@ private lemma resolventChartComponent_memWkp_of_componentFun
     filter_upwards [h_smul] with y hy
     rw [hy, Pi.smul_apply, smul_eq_mul]
     rfl
-  -- `MemWkp N 2` is scalar-invariant: scale the eigenvector chart component.
   exact (MemWkp_congr_ae (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae).mpr
     (MemWkp.const_smul (d := Module.finrank ℝ E)
@@ -187,22 +168,18 @@ private lemma eigenvector_chartComponent_memWkp_global
       (eigenvectorChartComponentFun (I := I) (M := M) g r s i α P₀)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- The compact partition-of-unity kernel and its enclosing open chart target.
   set K : Set EuclN := chartPouKernel (I := I) (M := M) α with hK_def
   have hK_compact : IsCompact K := chartPouKernel_isCompact (I := I) (M := M) α
   have hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α :=
     chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
   have h_chart_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- A closed thickening of `K` of radius `R_α` inside the chart target.
   obtain ⟨R_α, hR_α_pos, hR_α_subset⟩ :=
     hK_compact.exists_cthickening_subset_open h_chart_open hK_in
-  -- The precompact interior subdomain `Ω'' := thickening (R_α / 2) K`.
   set Ω'' : Set EuclN := Metric.thickening (R_α / 2) K with hΩ''_def
   have hΩ''_open : IsOpen Ω'' := Metric.isOpen_thickening
   have h_half_pos : 0 < R_α / 2 := by positivity
   have hK_in_Ω'' : K ⊆ Ω'' := Metric.self_subset_thickening h_half_pos K
-  -- `closure Ω'' ⊆ cthickening (R_α / 2) K ⊆ cthickening R_α K ⊆ chart target`.
   have h_closureΩ''_sub : closure Ω'' ⊆ Metric.cthickening (R_α / 2) K :=
     closure_minimal (Metric.thickening_subset_cthickening _ _)
       Metric.isClosed_cthickening
@@ -215,7 +192,6 @@ private lemma eigenvector_chartComponent_memWkp_global
     h_closureΩ''_sub.trans h_cthick_half_in_chart
   have hΩ''_compact_closure : IsCompact (closure Ω'') :=
     hK_compact.cthickening.of_isClosed_subset isClosed_closure h_closureΩ''_sub
-  -- The difference-quotient room radius `R₀ := R_α / 4`.
   set R₀ : ℝ := R_α / 4 with hR₀_def
   have hR₀_pos : 0 < R₀ := by positivity
   have h_room : Metric.cthickening R₀ (closure Ω'') ⊆
@@ -233,16 +209,12 @@ private lemma eigenvector_chartComponent_memWkp_global
       have hle : R₀ + R_α / 2 ≤ R_α := by rw [hR₀_def]; linarith
       exact Metric.cthickening_mono hle K
     exact ((h1.trans h2).trans h3).trans hR_α_subset
-  -- The order-2 interior engine on the interior subdomain `Ω''`. Its conclusion
-  -- is `MemWkp 2 2` of the coercion `EuclN → ℝ` of the eigenvector chart
-  -- component, which is definitionally `eigenvectorChartComponentFun`.
   have h_interior :
       MemWkp (d := Module.finrank ℝ E) 2 2
         (eigenvectorChartComponentFun (I := I) (M := M) g r s i α P₀)
         Ω'' :=
     eigenvector_chartComponent_memWkp g r s i α P₀
       hΩ''_open hΩ''_compact_closure hR₀_pos h_room
-  -- The eigenvector chart component is globally `L²` on the chart target.
   have h_global_Lp :
       MemLp (eigenvectorChartComponentFun (I := I) (M := M)
         g r s i α P₀) 2
@@ -250,14 +222,12 @@ private lemma eigenvector_chartComponent_memWkp_global
           (chartTargetEuclid (I := I) (M := M) α)) :=
     eigenvectorChartComponentFun_memLp_volume
       (I := I) (M := M) g r s i α P₀
-  -- The eigenvector chart component vanishes a.e. off the compact kernel `K`.
   have h_ae_zero :
       eigenvectorChartComponentFun (I := I) (M := M) g r s i α P₀
         =ᵐ[(volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α \ K)] 0 :=
     eigenvectorChartComponentFun_ae_zero_off_chartPouKernel
       (I := I) (M := M) g r s i α P₀
-  -- Promote the interior `W^{2,2}(Ω'')` to global `W^{2,2}` of the chart target.
   exact MemWkp_of_memWkp_precompact_of_ae_zero_off_compact
     (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)
@@ -275,23 +245,17 @@ private theorem eigenvector_chartComponent_memWkp_pm
   intro m
   induction m with
   | zero =>
-      -- Base `P_0`: the globalised order-2 regularity.
       intro α P₀
       exact eigenvector_chartComponent_memWkp_global
         (I := I) (M := M) g r s i α P₀
   | succ m ih =>
-      -- Step `P_m → P_{m+1}`.
       intro α P₀
       classical
-      -- `P_m` for the current `(α, P₀)`, at order `m + 2`.
       have h_pm : MemWkp (d := Module.finrank ℝ E) (m + 2) 2
           (eigenvectorChartComponentFun (I := I) (M := M)
             g r s i α P₀)
           (chartTargetEuclid (I := I) (M := M) α) :=
         ih α P₀
-      -- The `h_pou` regularity input for the carrier-builder: at every order
-      -- `j + 2` for `j < m + 1` and every `(β, Q)`, the resolvent-coercion
-      -- chart component lies in `MemWkp (j + 2) 2`.
       have h_pou : ∀ (j : ℕ), j < m + 1 → ∀ (β : M)
           (Q : TensorCompIdx (E := E) r s),
           MemWkp (d := Module.finrank ℝ E) (j + 2) 2
@@ -302,7 +266,6 @@ private theorem eigenvector_chartComponent_memWkp_pm
               EuclN → ℝ) y)
             (chartTargetEuclid (I := I) (M := M) β) := by
         intro j hj β Q
-        -- `P_m` at `(β, Q)`, order `m + 2`, dropped to order `j + 2`.
         have h_pm_βQ : MemWkp (d := Module.finrank ℝ E) (m + 2) 2
             (eigenvectorChartComponentFun (I := I) (M := M)
               g r s i β Q)
@@ -316,8 +279,6 @@ private theorem eigenvector_chartComponent_memWkp_pm
             (by omega : j + 2 ≤ m + 2) h_pm_βQ
         exact resolventChartComponent_memWkp_of_componentFun
           (I := I) (M := M) g r s i (j + 2) β Q h_drop
-      -- `h_top_memWkp_two`: global `W^{2,2}` of every `(m + 1)`-fold mixed weak
-      -- partial of the chart component.
       have h_top_memWkp_two :
           ∀ (idx : Fin (m + 1) → Fin (Module.finrank ℝ E)),
             MemWkp (d := Module.finrank ℝ E) 2 2
@@ -325,15 +286,11 @@ private theorem eigenvector_chartComponent_memWkp_pm
                 g r s i α P₀ (m + 1) idx)
               (chartTargetEuclid (I := I) (M := M) α) := by
         intro idx
-        -- The level-`(m + 1)` carrier with direction field `idx`.
         obtain ⟨D, hD_dir, _hD_fChartEff⟩ :=
           exists_eigenvectorIteratedCarrier (I := I) (M := M)
             g r s i α P₀ (m + 1) idx h_pou
-        -- The carrier-to-`W^{2,2}` engine, with parent regularity `P_m`.
         exact eigenvectorChartIteratedPartial_memWkp_two_two
           (I := I) (M := M) g r s i α P₀ idx D hD_dir h_pm
-      -- `h_intermediate_w1p`: global `W^{1,2}` of every `j`-fold mixed weak
-      -- partial of the chart component for `j ≤ m + 1`.
       have h_intermediate_w1p :
           ∀ (j : ℕ), j ≤ m + 1 →
             ∀ (idx : Fin j → Fin (Module.finrank ℝ E)),
@@ -342,8 +299,6 @@ private theorem eigenvector_chartComponent_memWkp_pm
                   g r s i α P₀ j idx)
                 (chartTargetEuclid (I := I) (M := M) α) := by
         intro j hj idx
-        -- The polymorphic bridge at `k = 1` needs the chart component at order
-        -- `1 + j`. `P_m` (order `m + 2`) dropped to order `1 + j ≤ m + 2`.
         have h_parent : MemWkp (d := Module.finrank ℝ E) (1 + j) 2
             (eigenvectorChartComponentFun (I := I) (M := M)
               g r s i α P₀)
@@ -352,8 +307,6 @@ private theorem eigenvector_chartComponent_memWkp_pm
             (by omega : 1 + j ≤ m + 2) h_pm
         exact eigenvectorChartIteratedPartial_memWkp_of_memWkp
           (I := I) (M := M) g r s i α P₀ j 1 h_parent idx
-      -- The structural order-raiser at level `m + 1`: chart-`H^{(m+1)+2}` of
-      -- the chart component.
       have h_raised : MemWkp (d := Module.finrank ℝ E) ((m + 1) + 2) 2
           (eigenvectorChartComponentFun (I := I) (M := M)
             g r s i α P₀)
@@ -371,13 +324,11 @@ theorem eigenvector_chartComponent_memWkp_arbitrary
     MemWkp (d := Module.finrank ℝ E) k 2
       (eigenvectorChartComponentFun (I := I) (M := M) g r s i α P₀)
       (chartTargetEuclid (I := I) (M := M) α) := by
-  -- `P_k`: the chart component lies in `MemWkp (k + 2) 2`.
   have h_pk : MemWkp (d := Module.finrank ℝ E) (k + 2) 2
       (eigenvectorChartComponentFun (I := I) (M := M) g r s i α P₀)
       (chartTargetEuclid (I := I) (M := M) α) :=
     eigenvector_chartComponent_memWkp_pm
       (I := I) (M := M) g r s i k α P₀
-  -- Drop the order from `k + 2` to `k` by downward monotonicity.
   exact MemWkp.le_of_le (d := Module.finrank ℝ E)
     (by omega : k ≤ k + 2) h_pk
 

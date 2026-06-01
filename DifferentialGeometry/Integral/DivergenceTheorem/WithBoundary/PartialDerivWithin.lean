@@ -86,8 +86,6 @@ namespace WithBoundary
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Definition -/
-
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [Module.Finite ℝ E] [FiniteDimensional ℝ E]
 
@@ -111,8 +109,6 @@ derivative evaluated on the model-basis vector. -/
     partialDerivWithin (E := E) s i u y =
       fderivWithin ℝ u s y ((chartModelBasis E) i) := rfl
 
-/-! ## Block A — comparison with the Fréchet partial derivative -/
-
 section ComparisonWithFDeriv
 
 variable {s : Set E} {i : Fin (Module.finrank ℝ E)} {u : E → ℝ} {y : E}
@@ -131,8 +127,6 @@ equals the Fréchet partial derivative. Strictly generalises
 lemma partialDerivWithin_eq_partialDeriv_of_mem_interior
     (hy : y ∈ interior s) :
     partialDerivWithin (E := E) s i u y = partialDeriv (E := E) i u y := by
-  -- `s ∈ 𝓝 y` because `interior s` is an open neighbourhood of `y` contained
-  -- in `s`.
   have hnhds : s ∈ 𝓝 y :=
     Filter.mem_of_superset (isOpen_interior.mem_nhds hy) interior_subset
   unfold partialDerivWithin partialDeriv
@@ -164,14 +158,6 @@ lemma partialDerivWithin_eq_fderivWithin_basis
       fderivWithin ℝ u s y ((chartModelBasis E) i) := rfl
 
 end ComparisonWithFDeriv
-
-/-! ## Block B — smoothness propagation
-
-The within-derivative `fderivWithin ℝ u s` of a `ContDiffOn ℝ n u s` function
-is itself `ContDiffOn ℝ m` on `s` for any `m + 1 ≤ n` and any `s` with
-`UniqueDiffOn ℝ s`. Composing with the continuous evaluation map
-`L ↦ L (basis i)` (a continuous linear functional, hence `C^∞`) yields the
-corresponding smoothness statement for `partialDerivWithin`. -/
 
 section Smoothness
 
@@ -219,14 +205,6 @@ lemma partialDerivWithin_contDiffOn_top_of_isOpen
 
 end Smoothness
 
-/-! ## Block B' — pointwise algebraic identities (Leibniz)
-
-These are the within-derivative versions of the elementary Leibniz rules.
-Each requires the standard hypotheses: a unique-diff base point and
-within-differentiability of the operands. They will be used downstream by
-the with-boundary chart-local divergence formula in expanding products of the
-form `chartCoeffOnE α X i · * chartDensityOnE g α ·`. -/
-
 section LeibnizIdentities
 
 variable {s : Set E} {y : E} {i : Fin (Module.finrank ℝ E)}
@@ -254,8 +232,6 @@ lemma partialDerivWithin_smul (c : E → ℝ) (u : E → ℝ)
         partialDerivWithin (E := E) s i c y • u y := by
   unfold partialDerivWithin
   rw [fderivWithin_fun_smul hs hc hu]
-  -- `(c y • dF + dC.smulRight u y) (basis i)`
-  -- = `c y • dF (basis i) + (dC (basis i)) • u y`
   simp [ContinuousLinearMap.smulRight_apply, smul_eq_mul, mul_comm]
 
 /-- Leibniz product rule for the within-partial derivative of a product of
@@ -273,8 +249,6 @@ lemma partialDerivWithin_mul (u v : E → ℝ)
     smul_eq_mul]
 
 end LeibnizIdentities
-
-/-! ## Block C — chart-target specialisations -/
 
 section ChartTarget
 

@@ -83,8 +83,6 @@ open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThree
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -93,8 +91,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## File-local abbreviations -/
 
 private abbrev K_α (α : M) : Set EuclN :=
   chartImagePOUTsupport (I := I) (M := M) α
@@ -118,11 +114,6 @@ private lemma chartTarget_diff_K_α_subset_target (α : M) :
     chartTargetEuclid (I := I) (M := M) α \ K_α (I := I) (M := M) α ⊆
       chartTargetEuclid (I := I) (M := M) α := fun _ hy => hy.1
 
-/-! ## Helper: weak partial of an ae-zero function is ae-zero on the open subset
-
-If `f` is locally integrable on an open set `Ω`, `f = 0` ae on an open
-subset `U ⊆ Ω`, and `w` is a weak `i`-partial of `f` on `Ω` (with `w`
-locally integrable on `U`), then `w = 0` ae on `U`. -/
 private lemma weakPartial_ae_zero_on_open_of_ae_zero_on_open
     {Ω U : Set EuclN} (hΩ_open : IsOpen Ω) (hU_open : IsOpen U)
     (hU_sub : U ⊆ Ω)
@@ -134,26 +125,21 @@ private lemma weakPartial_ae_zero_on_open_of_ae_zero_on_open
     ∀ᵐ y ∂((volume : Measure EuclN).restrict U), w y = 0 := by
   classical
   have hU_meas : MeasurableSet U := hU_open.measurableSet
-  -- Convert `f =ᵐ_{vol.restrict U} 0` to `∀ᵐ y ∂vol, y ∈ U → f y = 0`.
   have hf_ae_zero_vol : ∀ᵐ y ∂(volume : Measure EuclN), y ∈ U → f y = 0 := by
     rw [← ae_restrict_iff' hU_meas]; exact hf_ae_zero
-  -- Show that `∀ᵐ y ∂vol, y ∈ U → w y = 0`.
   have h_target : ∀ᵐ y ∂(volume : Measure EuclN), y ∈ U → w y = 0 := by
     apply hU_open.ae_eq_zero_of_integral_contDiff_smul_eq_zero hw_li
     intro ψ hψ_smooth hψ_cs hψ_supp
     have hψ_supp_Ω : tsupport ψ ⊆ Ω := hψ_supp.trans hU_sub
     have hΩ_meas : MeasurableSet Ω := hΩ_open.measurableSet
     have h_weak := hw_isWeak ψ hψ_smooth hψ_cs hψ_supp_Ω
-    -- LHS of weak partial identity:
-    --   ∫_Ω f · ∂_iψ = 0 (since f = 0 ae on U and ∂_iψ = 0 on Ω \ U).
     have h_f_supp_ae : ∀ᵐ y ∂((volume : Measure EuclN).restrict Ω),
         f y * (fderiv ℝ ψ y) (EuclideanSpace.single i 1) = 0 := by
       refine (ae_restrict_iff' hΩ_meas).mpr ?_
       filter_upwards [hf_ae_zero_vol] with y hy _hyΩ
       by_cases hy_U : y ∈ U
       · rw [hy hy_U]; ring
-      · -- y ∉ U; ψ vanishes in a nbhd of y (since y ∉ tsupport ψ ⊆ U).
-        have h_compl_open : IsOpen ((tsupport ψ)ᶜ) :=
+      · have h_compl_open : IsOpen ((tsupport ψ)ᶜ) :=
           (isClosed_tsupport _).isOpen_compl
         have h_y_not_supp : y ∉ tsupport ψ := fun h => hy_U (hψ_supp h)
         have h_zero_nbhd : ∀ᶠ z in 𝓝 y, ψ z = 0 := by
@@ -170,7 +156,6 @@ private lemma weakPartial_ae_zero_on_open_of_ae_zero_on_open
     rw [h_zero_lhs] at h_weak
     have h_rhs_zero :
         ∫ y in Ω, w y * ψ y ∂(volume : Measure EuclN) = 0 := by linarith
-    -- Convert ∫_Ω w · ψ to ∫ ψ • w (= ∫ x, ψ x • w x).
     have h_vanish_off_Ω : ∀ x ∉ Ω, ψ x • w x = 0 := fun x hx => by
       have hx_supp : x ∉ tsupport ψ := fun h => hx (hψ_supp_Ω h)
       have hψ_x : ψ x = 0 := image_eq_zero_of_notMem_tsupport hx_supp
@@ -182,8 +167,6 @@ private lemma weakPartial_ae_zero_on_open_of_ae_zero_on_open
   refine (ae_restrict_iff' hU_meas).mpr ?_
   filter_upwards [h_target] with y hy hy_U
   exact hy hy_U
-
-/-! ## ae-zero of base fields on `Ω \ K_α` -/
 
 private lemma vol_restrict_complement_absCont_chartTarget (α : M) :
     (volume : Measure EuclN).restrict
@@ -265,8 +248,6 @@ private lemma base_u_chart_ae_zero_off_K_α
   rw [hy hy_diff]
   exact chartPushed_eq_zero_off_chartImagePOUTsupport (I := I) (M := M) α _
     hy_diff.1 hy_diff.2
-
-/-! ## Local-`L²` regularity of various Lp-class chart-pulled fields on `Ω \ K_α` -/
 
 set_option linter.unusedVariables false in
 /-- Auxiliary: a function in `MemLp 2` of `volume.restrict (chartTargetEuclid α)`
@@ -350,8 +331,6 @@ private lemma locallyIntegrableOn_of_locally_memLp_two
     (by linarith : 0 < r / 2))
   exact Metric.ball_subset_closedBall
 
-/-! ### Helper: continuous-on-target coefficient is `MemLp ∞` on compact subset -/
-
 set_option linter.unusedVariables false in
 /-- A continuous-on-`chartTargetEuclid α` real function is in `MemLp ∞` of
 `volume.restrict K` for every compact `K ⊆ chartTargetEuclid α`. -/
@@ -389,8 +368,6 @@ private lemma memLp_top_of_continuousOn_on_compact
   apply ENNReal.ofReal_le_ofReal
   exact hy.trans (le_max_left _ _)
 
-/-! ### `D.base.weak_partial i` vanishes ae on `Ω \ K_α` -/
-
 /-- `D.base.weak_partial i` is ae zero on the chart-target complement of `K_α`. -/
 lemma base_weak_partial_ae_zero_off_K_α
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -419,8 +396,6 @@ lemma base_weak_partial_ae_zero_off_K_α
   exact weakPartial_ae_zero_on_open_of_ae_zero_on_open
     hΩ_open hU_open hU_sub (i := i) h_isWeak hw_li hf_ae
 
-/-! ### `chosenSecondPartialChartPushedU` vanishes ae on `Ω \ K_α` -/
-
 /-- The first chosen weak partial of `chartPushed POU α u_h.coeFn` is ae zero
 on the chart-target complement of `K_α`. -/
 private lemma chartPushed_first_weak_partial_ae_zero_off_K_α
@@ -436,7 +411,6 @@ private lemma chartPushed_first_weak_partial_ae_zero_off_K_α
           ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ))
         (chartTargetEuclid (I := I) (M := M) α) y = 0 := by
   classical
-  -- chartPushed POU α u_h.coeFn ∈ MemW1p 2 chartTarget α.
   have h_w1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
       (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α
         ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ))
@@ -446,7 +420,6 @@ private lemma chartPushed_first_weak_partial_ae_zero_off_K_α
   have h_isWeak :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_isWeakPartial_of_mem
       h_w1p i
-  -- chartPushed POU α u_h.coeFn vanishes pointwise on chartTarget \ K_α.
   have h_pushed_zero : ∀ᵐ y ∂((volume : Measure EuclN).restrict
       (chartTargetEuclid (I := I) (M := M) α \ K_α (I := I) (M := M) α)),
       chartPushed (I := I) (M := M) (chartAtlasPOU I M) α
@@ -518,8 +491,6 @@ private lemma chosenSecondPartialChartPushedU_ae_zero_off_K_α
   exact weakPartial_ae_zero_on_open_of_ae_zero_on_open
     hΩ_open hU_open hU_sub (i := j) h_isWeak hw_li h_g_i_ae_zero
 
-/-! ### `D.base.f_chart` vanishes ae on `Ω \ K_α` -/
-
 /-- Local-`L²` regularity of `D.base.f_chart` on every compact subset of
 `chartTargetEuclid α`. -/
 private lemma base_f_chart_locally_memLp
@@ -569,15 +540,11 @@ lemma base_f_chart_ae_zero_off_K_α
   have hU_meas : MeasurableSet U := hU_open.measurableSet
   have hK_meas : MeasurableSet (K_α (I := I) (M := M) α) :=
     K_α_meas (I := I) (M := M) α
-  -- Local integrability of D.f_chart on U.
   have h_fc_li : LocallyIntegrableOn D.f_chart U
       (volume : Measure EuclN) :=
     locallyIntegrableOn_of_locally_memLp_two (g := g) (α := α) (f := D.f_chart)
       (fun K' hK' hK'_in => base_f_chart_locally_memLp (I := I) (M := M) g α
         hu_h hK' hK'_in)
-  -- Use base variational identity to show ∫_U c · D.f_chart · ψ = 0 for all ψ.
-  -- Then use ae_eq_zero_of_integral_contDiff_smul_eq_zero with c > 0.
-  -- First: the integrand c · D.f_chart is locally integrable on U.
   have h_density_contOn : ContinuousOn (densityOnEuclid (I := I) g α) Ω :=
     densityOnEuclid_continuousOn (I := I) g α
   have h_prod_locInt : LocallyIntegrableOn
@@ -612,7 +579,6 @@ lemma base_f_chart_ae_zero_off_K_α
     apply Filter.mem_of_superset (Metric.ball_mem_nhds x
       (by linarith : 0 < r / 2))
     exact Metric.ball_subset_closedBall
-  -- Now show ∫ x, ψ x • (c x · D.f_chart x) ∂vol = 0 for all ψ supported in U.
   have h_zero_for_test : ∀ ψ : EuclN → ℝ, ContDiff ℝ ∞ ψ → HasCompactSupport ψ →
       tsupport ψ ⊆ U →
       ∫ y, ψ y • (densityOnEuclid (I := I) g α y * D.f_chart y)
@@ -620,7 +586,6 @@ lemma base_f_chart_ae_zero_off_K_α
     intro ψ hψ_smooth hψ_cs hψ_supp_U
     have hψ_supp_chart : tsupport ψ ⊆ Ω := hψ_supp_U.trans hU_sub
     have h_var := D.variational_identity ψ hψ_smooth hψ_cs hψ_supp_chart
-    -- Rewrite using the chartTargetEuclid alias.
     change (∫ y in Ω,
         (∑ i : Fin (Module.finrank ℝ E),
           ∑ j : Fin (Module.finrank ℝ E),
@@ -634,7 +599,6 @@ lemma base_f_chart_ae_zero_off_K_α
       ∫ y in Ω,
         densityOnEuclid (I := I) g α y * D.f_chart y * ψ y
         ∂(volume : Measure EuclN) at h_var
-    -- LHS_principal = 0.
     have h_principal_zero :
         ∫ y in Ω,
           (∑ i : Fin (Module.finrank ℝ E),
@@ -667,8 +631,7 @@ lemma base_f_chart_ae_zero_off_K_α
         · refine Finset.sum_eq_zero ?_; intro i _
           refine Finset.sum_eq_zero ?_; intro j _
           rw [hy i hy_U]; ring
-        · -- y ∉ U; ∂_jψ vanishes in a nbhd.
-          have h_y_not_in_supp : y ∉ tsupport ψ := fun h => hy_U (hψ_supp_U h)
+        · have h_y_not_in_supp : y ∉ tsupport ψ := fun h => hy_U (hψ_supp_U h)
           have h_compl_open : IsOpen (tsupport ψ)ᶜ :=
             (isClosed_tsupport _).isOpen_compl
           have h_zero_nbhd : ∀ᶠ z in 𝓝 y, ψ z = 0 := by
@@ -715,12 +678,10 @@ lemma base_f_chart_ae_zero_off_K_α
         densityOnEuclid (I := I) g α y * D.f_chart y * ψ y) by
       funext y; simp [smul_eq_mul, mul_comm]]
     exact h_var.symm
-  -- Apply open-set fundamental lemma to c · D.f_chart on U.
   have h_cf_ae_zero : ∀ᵐ y ∂(volume : Measure EuclN), y ∈ U →
       densityOnEuclid (I := I) g α y * D.f_chart y = 0 :=
     hU_open.ae_eq_zero_of_integral_contDiff_smul_eq_zero h_prod_locInt
       h_zero_for_test
-  -- Convert to D.f_chart = 0 using density > 0.
   have h_target_ae : ∀ᵐ y ∂(volume : Measure EuclN),
       y ∈ U → D.f_chart y = 0 := by
     filter_upwards [h_cf_ae_zero] with y hy hy_U
@@ -731,8 +692,6 @@ lemma base_f_chart_ae_zero_off_K_α
   refine (ae_restrict_iff' hU_meas).mpr ?_
   filter_upwards [h_target_ae] with y hy hy_U
   exact hy hy_U
-
-/-! ### `chosenFChartDeriv` vanishes ae on `Ω \ K_α` -/
 
 /-- `chosenFChartDeriv` is ae zero on the chart-target complement of `K_α`. -/
 private lemma chosenFChartDeriv_ae_zero_off_K_α
@@ -764,8 +723,6 @@ private lemma chosenFChartDeriv_ae_zero_off_K_α
     (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)
   exact weakPartial_ae_zero_on_open_of_ae_zero_on_open
     hΩ_open hU_open hU_sub (i := l) h_isWeak hw_li h_base_fc_ae
-
-/-! ## `fChartEffNumerator` vanishes ae on `Ω \ K_α` -/
 
 /-- `fChartEffNumerator g α l hu_h` is ae zero on the chart-target complement
 of `K_α`. -/
@@ -839,8 +796,6 @@ private lemma fChartEffNumerator_ae_zero_off_K_α
     rw [hy_cspu i j]; ring
   rw [hy_fcd, hy_uc, hy_fc, h_sum_wp_zero, h_sum_cspu_zero]; ring
 
-/-! ## Stage C: integration identity -/
-
 /-- Integration equality: `∫_{chartTarget} fChartEffNumerator · ψ` equals
 `∫_{chartTarget} c · fChartEff · ψ`, via Stage B and the indicator structure of
 `fChartEff`. -/
@@ -889,8 +844,6 @@ private lemma integral_fChartEffNumerator_eq_integral_density_fChartEff
       rw [h_pt]
   exact MeasureTheory.integral_congr_ae h_ae_eq
 
-/-! ## Headline: the derived variational identity holds unconditionally -/
-
 /-- **Unconditional derived chart-bilinear variational identity.**
 
 For `u_h ∈ laplacianDomainPow g 2`, chart base point `α`, coordinate direction
@@ -926,13 +879,10 @@ theorem derived_variational_identity_holds
         fChartEff (I := I) (M := M) g α l hu_h y * ψ y
       ∂(volume : Measure EuclN) := by
   classical
-  -- Step 1: differentiated identity.
   have h_diff := differentiated_variational_identity_holds
     (I := I) (M := M) g α hu_h l hψ_smooth hψ_cs hψ_supp
-  -- Step 2: cross-derivative IBP.
   have h_cross := cross_derivative_term_ibp (I := I) (M := M) g α hu_h l
     hψ_smooth hψ_cs hψ_supp
-  -- Abbreviations and integrals.
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α
   set D_base := chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M)
     g α (laplacianDomainPow_succ_subset_laplacianDomain
@@ -977,26 +927,14 @@ theorem derived_variational_identity_holds
         weightedInvGramDerivOnEuclid (I := I) g α i j l y *
           chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i j y * ψ y)
     ∂(volume : Measure EuclN)
-  -- The differentiated identity gives LHS_p + LHS_m = T3 - A1_cross - A2_cross + B_cross.
   have h_diff' : LHS_p + LHS_m = T3 - A1_cross - A2_cross + B_cross := h_diff
-  -- The cross IBP gives A1_cross = -(I_partials + I_cspu).
   have h_cross' : A1_cross = -(I_partials + I_cspu) := h_cross
   have h_combined : LHS_p + LHS_m = T3 + I_partials + I_cspu - A2_cross + B_cross := by
     rw [h_diff', h_cross']; ring
-  -- Now show T3 + I_partials + I_cspu - A2_cross + B_cross = ∫_Ω fChartEffNumerator · ψ.
   have h_RHS_eq_num : T3 + I_partials + I_cspu - A2_cross + B_cross =
       ∫ y in Ω,
         fChartEffNumerator (I := I) (M := M) g α l hu_h y * ψ y
         ∂(volume : Measure EuclN) := by
-    -- Use integrability + linearity. Each piece of fChartEffNumerator is
-    -- locally L² on K = tsupport ψ, so multiplied by ψ (continuous, supported
-    -- in K) it is integrable. The sum-integral identity follows.
-    -- Approach: rewrite the integral as ∫_K_∪Ω ... and use that each summand
-    -- of fChartEffNumerator times ψ is integrable; then split via integral_sub
-    -- and integral_add.
-    -- The integrand of ∫_Ω fChartEffNumerator y · ψ y is identifiable as a
-    -- pointwise sum (by definition of fChartEffNumerator), so by linearity
-    -- (if all pieces are integrable), we can split into a sum of integrals.
     set K : Set EuclN := tsupport ψ
     have hψ_cont : Continuous ψ := hψ_smooth.continuous
     have hK_compact : IsCompact K := hψ_cs
@@ -1005,13 +943,6 @@ theorem derived_variational_identity_holds
     have hΩ_meas : MeasurableSet Ω :=
       (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
     have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
-    -- Each summand of fChartEffNumerator times ψ is integrable on Ω.
-    -- We use the following structure: for a function f with `MemLp 2 (vol.restrict K')`
-    -- for every compact K' ⊆ Ω (or for K' = K, which is what we need), and
-    -- ψ continuous bounded with support in K, the product f · ψ is integrable on Ω.
-    -- Generic helper: integrability of f · ψ on Ω when f is locally L² on K and
-    -- ψ is continuous with support in K.
-    -- Apply for each summand.
     have h_sum_distrib_ψ : ∀ (F : Fin (Module.finrank ℝ E) →
           Fin (Module.finrank ℝ E) → ℝ) (z : ℝ),
         (∑ i, ∑ j, F i j) * z = ∑ i, ∑ j, F i j * z := by
@@ -1046,9 +977,6 @@ theorem derived_variational_identity_holds
             (I := I) (M := M) g α u_h i j y) (ψ y)]
       ring
     rw [h_integrand_eq]
-    -- Integrability of each piece.
-    -- For brevity, we define an integrability helper for "g_function · ψ"
-    -- when g_function is locally L² on K and ψ is continuous with support in K.
     have hK_finite : (volume : Measure EuclN) K < ⊤ := hK_compact.measure_lt_top
     haveI : IsFiniteMeasure ((volume : Measure EuclN).restrict K) := by
       refine ⟨?_⟩
@@ -1083,12 +1011,6 @@ theorem derived_variational_identity_holds
       have h_full : Integrable (fun y => f y * ψ y) (volume : Measure EuclN) := by
         rw [h_eq_ind]; exact h_ind_int
       exact h_full.restrict
-    -- 1. T3-integrand integrability: c · chosenFChartDeriv · ψ. c is bounded
-    --    continuous on K, chosenFChartDeriv is MemLp 2 on chartTarget (hence on K).
-    -- For now, we'll combine `c` (bounded) into the test function ψ' := c · ψ.
-    -- Or simpler: the chosenFChartDeriv times ψ is integrable; then multiply by c
-    -- continuous bounded.
-    -- Let's introduce these as needed.
     have h_memW1p :=
       base_f_chart_memW1p_from_residual_memW1p (I := I) (M := M) g α hu_h
         (fChartResidual_memW1p_truly_unconditional (I := I) (M := M) g α hu_h)
@@ -1108,8 +1030,6 @@ theorem derived_variational_identity_holds
         congr 1
         exact Set.inter_eq_self_of_subset_left hK'_in
       rw [← h_restrict_eq]; exact h_global.restrict K'
-    -- Multiply by c (continuous on Ω, bounded on K), still MemLp 2 on K.
-    -- For "density · chosenFChartDeriv" integrable with ψ:
     have h_T3_int : Integrable (fun y => densityOnEuclid (I := I) g α y *
         chosenFChartDeriv (I := I) (M := M) g α hu_h l y * ψ y)
         ((volume : Measure EuclN).restrict Ω) := by
@@ -1119,18 +1039,11 @@ theorem derived_variational_identity_holds
       have h_density_memLp_top := memLp_top_of_continuousOn_on_compact
         (g := g) (α := α) (densityOnEuclid_continuousOn (I := I) g α) hK' hK'_in
       exact MemLp.mul' (p := ∞) (q := 2) (r := 2) h_fc_K h_density_memLp_top
-    -- 2. Similar integrability for I_partials-integrand, I_cspu-integrand,
-    -- A2_cross-integrand, B_cross-integrand. Each is a sum of pieces of the
-    -- form: continuous-on-K × (locally MemLp 2 on K) × ψ.
     have h_partials_int : Integrable (fun y => (∑ i, ∑ j,
           (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l) y)
               (EuclideanSpace.single j 1) *
           D_base.weak_partial i y * ψ y))
         ((volume : Measure EuclN).restrict Ω) := by
-      -- D_base.weak_partial i is locally MemLp 2 on K (from D_base structure).
-      -- weightedInvGramDeriv coefficients are continuous on Ω (smooth).
-      -- The product is locally MemLp 2; multiplied by ψ (continuous, supported
-      -- in K), integrable on Ω.
       have h_pair_int : ∀ i j : Fin (Module.finrank ℝ E),
           Integrable (fun y => (fderiv ℝ (weightedInvGramDerivOnEuclid
             (I := I) g α i j l) y) (EuclideanSpace.single j 1) *
@@ -1157,7 +1070,6 @@ theorem derived_variational_identity_holds
         have h_coef_memLp_top := memLp_top_of_continuousOn_on_compact
           (g := g) (α := α) h_coef_contOn hK' hK'_in
         exact MemLp.mul' (p := ∞) (q := 2) (r := 2) h_wp_K h_coef_memLp_top
-      -- Sum of integrables is integrable.
       have h_inner : ∀ i, Integrable (fun y => ∑ j, (fderiv ℝ
             (weightedInvGramDerivOnEuclid (I := I) g α i j l) y)
               (EuclideanSpace.single j 1) *
@@ -1220,11 +1132,6 @@ theorem derived_variational_identity_holds
         (g := g) (α := α)
         (densityDerivOnEuclid_continuousOn (I := I) g α l) hK' hK'_in
       exact MemLp.mul' (p := ∞) (q := 2) (r := 2) h_fc_K h_coef_memLp_top
-    -- Now apply linearity via integral_add / integral_sub iteratively.
-    -- Goal: T3 + I_partials + I_cspu - A2_cross + B_cross =
-    --   ∫_Ω (f1 + f2 + f3 - f4 + f5) ∂vol, where the sum f1..f5 unrolled.
-    -- Strategy: rewrite the RHS step-by-step using linearity, ending with
-    --   T3 + I_partials + I_cspu - A2_cross + B_cross.
     have h_step1 : Integrable (fun y =>
         densityOnEuclid (I := I) g α y *
           chosenFChartDeriv (I := I) (M := M) g α hu_h l y * ψ y +
@@ -1259,9 +1166,6 @@ theorem derived_variational_identity_holds
         (densityDerivOnEuclid (I := I) g α l y *
           D_base.u_chart y * ψ y))
         ((volume : Measure EuclN).restrict Ω) := h_step2.sub h_A2_int
-    -- Apply linearity. Use the fact that the RHS integrand is a Pi-level sum.
-    -- ∫ (f1 + f2 + f3 - f4 + f5) = ∫f1 + ∫f2 + ∫f3 - ∫f4 + ∫f5 = T3 + I_partials + ...
-    -- Convert h_T3_int etc. to Pi-form versions matching the RHS.
     have h_T3_pi : Integrable (fun y => densityOnEuclid (I := I) g α y *
         chosenFChartDeriv (I := I) (M := M) g α hu_h l y * ψ y)
         ((volume : Measure EuclN).restrict Ω) := h_T3_int
@@ -1287,8 +1191,6 @@ theorem derived_variational_identity_holds
   exact integral_fChartEffNumerator_eq_integral_density_fChartEff
     (I := I) (M := M) g α l hu_h ψ
 
-/-! ## Truly unconditional packaged `ChartBilinearH1ComplData` -/
-
 set_option linter.unusedVariables false in
 /-- **Truly unconditional once-differentiated chart-bilinear data.**
 
@@ -1305,8 +1207,6 @@ noncomputable def derivedChartBilinearH1ComplDataUnconditional
     (fun ψ hψ hψ_cs hψ_supp =>
       derived_variational_identity_holds (I := I) (M := M) g α l hu_h
         hψ hψ_cs hψ_supp)
-
-/-! ## Public-facing ae-zero of the chosen second mixed partial -/
 
 /-- **Public reformulation: `chosenSecondPartialChartPushedU` vanishes ae on the
 chart-target complement of `chartImagePOUTsupport α`.**

@@ -55,8 +55,6 @@ variable
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
-/-! ## Partial evaluation of an `(r, s)`-tensor section -/
-
 /-- The pointwise partial evaluation of an `(r, s)`-tensor section `T` at a
 `(0, r)`-tensor section `w`. At a point `b ∈ M`, this is the value of `T b`
 (viewed as a CLM `Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b`) applied to
@@ -74,8 +72,6 @@ noncomputable def tensorPartialEval (r s : ℕ)
     tensorPartialEval (I := I) (M := M) r s T w b =
       (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b) (w b) := rfl
 
-/-! ## The "evaluate at a fixed input" CLM on the model fibre -/
-
 /-- The "evaluate at a fixed `(0, r)`-tensor model input" CLM: sends a model
 fibre `D : TensorRSModel r s ℝ E` to `D D_α ∈ Tensor0SModel s ℝ E`. -/
 noncomputable def tensorRSEvalAtCLM (r s : ℕ) (D_α : Tensor0SModel r ℝ E) :
@@ -88,12 +84,6 @@ noncomputable def tensorRSEvalAtCLM (r s : ℕ) (D_α : Tensor0SModel r ℝ E) :
   classical
   unfold tensorRSEvalAtCLM
   rfl
-
-/-! ## Hom-bundle trivialisation formulas in the `(r, s)` case
-
-We package the Hom-bundle trivialisation action on a fibre value as a pair of
-identities: one for the `continuousLinearMapAt` direction (chart-α-trivialised
-representation) and one for the `symmL` direction (fibre right-inverse). -/
 
 /-- On the chart-α trivialisation base set, the chart-α-trivialised
 `(r, s)`-tensor representation of a fibre `T_b`, applied to a model fibre input
@@ -110,15 +100,12 @@ theorem tensorRSChartE_section_repr_apply_model (r s : ℕ) (α : M)
           ((trivializationAt (Tensor0SModel r ℝ E)
             (fun y : M => Tensor0SSpace r I y) α).symmL ℝ b D)) := by
   classical
-  -- Notation: the (r, s)-Hom trivialisation at α and its (0, r), (0, s) factors.
   set eRS := trivializationAt (TensorRSModel r s ℝ E)
     (fun y : M => TensorRSSpace r s I y) α with heRS_def
   set er := trivializationAt (Tensor0SModel r ℝ E)
     (fun y : M => Tensor0SSpace r I y) α with her_def
   set es := trivializationAt (Tensor0SModel s ℝ E)
     (fun y : M => Tensor0SSpace s I y) α with hes_def
-  -- The Hom-bundle base set is the intersection of the two factor base sets;
-  -- both factor base sets are the underlying tangent base set definitionally.
   have hbase_RS : b ∈ eRS.baseSet := by
     change b ∈ er.baseSet ∩ es.baseSet
     refine ⟨?_, ?_⟩
@@ -126,13 +113,11 @@ theorem tensorRSChartE_section_repr_apply_model (r s : ℕ) (α : M)
       exact hb
     · change b ∈ (trivializationAt E (TangentSpace I) α).baseSet
       exact hb
-  -- Reduce `continuousLinearMapAt` to the trivialisation projection on the base set.
   have hcoeRS := eRS.coe_linearMapAt_of_mem (R := ℝ) hbase_RS
   unfold tensorRSChartE_section_repr
   change (eRS.linearMapAt ℝ b (T b)) D = _
   rw [show (eRS.linearMapAt ℝ b (T b)) = (eRS ⟨b, T b⟩).2 from
         congrFun hcoeRS (T b)]
-  -- Identify with the Hom-bundle pretrivialisation formula.
   have hHom :
       eRS ⟨b, T b⟩
         = ⟨b, ((es.continuousLinearMapAt ℝ b
@@ -141,7 +126,6 @@ theorem tensorRSChartE_section_repr_apply_model (r s : ℕ) (α : M)
                 ((er.symmL ℝ b)
                   : Tensor0SModel r ℝ E →L[ℝ] Tensor0SSpace r I b)))⟩ := rfl
   rw [hHom]
-  -- The `.2` projection reads off the composition; evaluate at `D`.
   change ((es.continuousLinearMapAt ℝ b
         : Tensor0SSpace s I b →L[ℝ] Tensor0SModel s ℝ E).comp
       ((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b).comp
@@ -176,9 +160,6 @@ theorem tensorRSChartFiberFromModel_apply_at (r s : ℕ) (α : M) {b : M}
       exact hb
     · change b ∈ (trivializationAt E (TangentSpace I) α).baseSet
       exact hb
-  -- The Hom-bundle `symmL` formula: on the base set,
-  -- `eRS.symmL b D = es.symmL b ∘L D ∘L er.continuousLinearMapAt b`.
-  -- Apply Mathlib's `continuousLinearMap_symm_apply'` lemma.
   have hHomSymm : (eRS.symmL ℝ b D : Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b) =
       (es.symmL ℝ b).comp (D.comp (er.continuousLinearMapAt ℝ b)) := by
     have h := _root_.Bundle.Pretrivialization.continuousLinearMap_symm_apply'
@@ -187,10 +168,7 @@ theorem tensorRSChartFiberFromModel_apply_at (r s : ℕ) (α : M) {b : M}
       (F₂ := Tensor0SModel s ℝ E)
       (E₂ := fun y : M => Tensor0SSpace s I y)
       (e₁ := er) (e₂ := es) (b := b) hbase_RS D
-    -- `eRS.symmL b D = eRS.symm b D = continuousLinearMap.symm b D`.
     change (eRS.symm b D : Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b) = _
-    -- The (r, s) Hom-bundle trivialisation at α is built from the Pretrivialization
-    -- `continuousLinearMap` formula at the (0, r), (0, s) factor trivialisations.
     rw [show (eRS.symm b D : Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b) =
           ((_root_.Bundle.Pretrivialization.continuousLinearMap (𝕜₁ := ℝ) (𝕜₂ := ℝ)
             (σ := RingHom.id ℝ) (F₁ := Tensor0SModel r ℝ E)
@@ -203,15 +181,6 @@ theorem tensorRSChartFiberFromModel_apply_at (r s : ℕ) (α : M) {b : M}
   change (eRS.symmL ℝ b D : Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b) α_input = _
   rw [hHomSymm]
   rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
-
-/-! ## Pointwise function-level identity on the base set
-
-On the chart-α trivialisation base set at a base point `b'`, the
-chart-α-trivialised representation of the partial evaluation
-`b' ↦ T b' (chartTensor0SParallelExtend r α b α_input b')` (as a
-`(0, s)`-tensor section) equals the chart-α-trivialised representation of
-`T` (as an `(r, s)`-tensor section) at `b'`, applied to the fixed model fibre
-input `D_α := e_r.continuousLinearMapAt b α_input`. -/
 
 theorem tensor0SChartE_section_repr_tensorPartialEval_eq_tensorRS_repr_apply
     (r s : ℕ) (α : M) (T : Π b' : M, TensorRSSpace r s I b')
@@ -230,11 +199,9 @@ theorem tensor0SChartE_section_repr_tensorPartialEval_eq_tensorRS_repr_apply
   set es := trivializationAt (Tensor0SModel s ℝ E)
     (fun y : M => Tensor0SSpace s I y) α with hes_def
   set D_α : Tensor0SModel r ℝ E := er.continuousLinearMapAt ℝ b α_input with hDα_def
-  -- The chart-parallel extension at `b'` equals `er.symmL b' D_α` on the base set.
   have hPE_at_b' :
       chartTensor0SParallelExtend (I := I) r α b α_input b' =
         er.symmL ℝ b' D_α := rfl
-  -- LHS: unfold to `es.continuousLinearMapAt b' (T b' (PE b'))`.
   have hLHS_unfold :
       tensor0SChartE_section_repr (I := I) s α
           (tensorPartialEval (I := I) (M := M) r s T
@@ -246,10 +213,7 @@ theorem tensor0SChartE_section_repr_tensorPartialEval_eq_tensorRS_repr_apply
     rw [tensorPartialEval_apply]
   rw [hLHS_unfold]
   rw [hPE_at_b']
-  -- RHS: use `tensorRSChartE_section_repr_apply_model` at `b'`.
   rw [tensorRSChartE_section_repr_apply_model (I := I) r s α T (b := b') hb' D_α]
-
-/-! ## Eventually-equality through the chart pullback -/
 
 /-- The chart pullback of the chart-α-trivialised `(0, s)`-tensor representation
 of `tensorPartialEval r s T (chartTensor0SParallelExtend r α b α_input)` agrees,
@@ -286,13 +250,10 @@ theorem tensorPartialEval_chartPullback_eventually_eq_evalAt_chartPullback
     exact hcont_symm.preimage_mem_nhds (hBase_open.mem_nhds hmem)
   filter_upwards [Filter.inter_mem hU_int hBase_pre] with y hy
   obtain ⟨_, hyBase⟩ := hy
-  -- Pointwise: the equality of the chart-α-trivialised representations at `b' = φ.symm y`.
   rw [Function.comp_apply, Function.comp_apply]
   rw [tensorRSEvalAtCLM_apply]
   exact tensor0SChartE_section_repr_tensorPartialEval_eq_tensorRS_repr_apply
     (I := I) r s α T (b := b) hb_base α_input (b' := φ.symm y) hyBase
-
-/-! ## Fréchet-derivative chain rule -/
 
 /-- The Fréchet derivative of the chart pullback of the
 chart-α-trivialised `(0, s)`-tensor representation of the partial evaluation
@@ -331,8 +292,6 @@ theorem fderiv_tensorPartialEval_chartPullback_eq_comp_evalAt
       (x := (tensorRSChartE_section_repr (I := I) r s α T ∘
         (extChartAt I α).symm) (extChartAt I α b))).comp
     (extChartAt I α b) hT.hasFDerivAt).fderiv
-
-/-! ## Headline factorisation theorem -/
 
 /-- **Curry factorisation of the `(r, s)`-intrinsic chart Fréchet derivative.**
 On the chart Levi-Civita good set, applying the intrinsic chart Fréchet
@@ -379,7 +338,6 @@ theorem tensorRSIntrinsicChartCLM_factor_via_tensorPartialEval
     (fun y : M => Tensor0SSpace s I y) α with hes_def
   set D_α : Tensor0SModel r ℝ E := er.continuousLinearMapAt ℝ b α_input with hDα_def
   set w_E : E := trivToE (I := I) α b (X b) with hwE_def
-  -- LHS reduction.
   have hLHS_unfold :
       (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from
         tensorRSIntrinsicChartCLM (I := I) r s α T b (X b)) α_input =
@@ -388,13 +346,11 @@ theorem tensorRSIntrinsicChartCLM_factor_via_tensorPartialEval
             (tensorRSChartE_section_repr (I := I) r s α T ∘ (extChartAt I α).symm)
             (extChartAt I α b) w_E D_α) := by
     rw [tensorRSIntrinsicChartCLM_apply (I := I) r s α T b (X b)]
-    -- Apply the Hom-bundle `symmL` formula on the base set.
     rw [tensorRSChartFiberFromModel_apply_at (I := I) r s α hb_base
       (fderiv ℝ
         (tensorRSChartE_section_repr (I := I) r s α T ∘ (extChartAt I α).symm)
         (extChartAt I α b) (trivToE (I := I) α b (X b))) α_input]
   rw [hLHS_unfold]
-  -- RHS reduction.
   have hRHS_unfold :
       tensor0SIntrinsicChartCLM (I := I) s α
           (tensorPartialEval (I := I) (M := M) r s T
@@ -408,10 +364,8 @@ theorem tensorRSIntrinsicChartCLM_factor_via_tensorPartialEval
               (extChartAt I α).symm)
             (extChartAt I α b) w_E) := by
     rw [tensor0SIntrinsicChartCLM_apply (I := I) s α _ b (X b)]
-    -- `tensor0SChartFiberFromModel s α b` is `es.symmL ℝ b` by definition.
     rfl
   rw [hRHS_unfold]
-  -- Connect via the chain-rule factorisation through `tensorRSEvalAtCLM D_α`.
   have hfderivEq := fderiv_tensorPartialEval_chartPullback_eq_comp_evalAt
     (I := I) (M := M) r s α T (b := b) α_input hb_src hb_tgt hb_base hT
   have hfderiv_at_wE :

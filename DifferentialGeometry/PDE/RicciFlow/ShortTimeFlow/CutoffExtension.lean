@@ -1,9 +1,3 @@
-/-
-Global cutoff extension of the interior jointly-smooth field to a globally smooth
-autonomized field, and the joint-`C∞` ⇒ autonomized-`C¹` predicate for the
-cutoff. Skeleton stubs for the short-time-existence blueprint (GAP 2, field
-globalization).
--/
 import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormChainRule
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRemainderStrongExists
@@ -154,12 +148,10 @@ theorem smul_tangentMap_global
   set V : Set (ℝ × M) := (tsupport (fun q : ℝ × M => η q.1))ᶜ with hV
   have hUopen : IsOpen U := isOpen_Ioo.prod isOpen_univ
   have hVopen : IsOpen V := (isClosed_tsupport _).isOpen_compl
-  -- On the interior window the scaled map is smooth by the per-point smul lemma.
   have honU : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M =>
         (TotalSpace.mk' E q.2 (η q.1 • X q.1 q.2) : TangentBundle I M)) U :=
     fun q hq => smul_tangentMap_cmdwa X η (hηsm.contMDiffOn q hq) (hX q hq)
-  -- Off the support the scaled map is the zero section composed with the base projection.
   have honV : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M =>
         (TotalSpace.mk' E q.2 (η q.1 • X q.1 q.2) : TangentBundle I M)) V := by
@@ -185,8 +177,6 @@ theorem smul_tangentMap_global
 end CutoffExtensionAux
 
 open CutoffExtensionAux in
--- `hab' : a < b` is the structural ordering of the matching window; the cutoff radius
--- only needs `0 < a` and `b < T`, so the hypothesis is carried but not consumed here.
 set_option linter.unusedVariables false in
 theorem interior_field_global_cutoff_extension
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ)
@@ -199,7 +189,6 @@ theorem interior_field_global_cutoff_extension
       ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
         (fun q : ℝ × M => (TotalSpace.mk' E q.2 (Xt q.1 q.2) : TangentBundle I M)) ∧
       AutonomizedFieldJointC1 (I := I) Xt := by
-  -- A radius small enough that `[a - 2δ, b + 2δ] ⊆ (0, T)`.
   set δ : ℝ := min a (T - b) / 3 with hδ_def
   have hTb : 0 < T - b := by linarith
   have hmin_pos : 0 < min a (T - b) := lt_min hab hTb
@@ -216,13 +205,10 @@ theorem interior_field_global_cutoff_extension
     have : 2 * (min a (T - b) / 3) ≤ 2 * ((T - b) / 3) :=
       mul_le_mul_of_nonneg_left (by linarith) (by norm_num)
     linarith
-  -- The cutoff field.
   refine ⟨fun s x => cutoffEta a b δ s • X_DT s x, δ, hδ_pos, ?_, ?_, ?_⟩
-  · -- Matching: on `(a - δ, b + δ)` the cutoff is `1`.
-    intro s hs x
+  · intro s hs x
     simp only [cutoffEta_eq_one a b δ s hδ_pos hs, one_smul]
-  · -- Global smoothness via the supported-cutoff scaling lemma.
-    have hηsm : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+  · have hηsm : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
         (fun q : ℝ × M => cutoffEta a b δ q.1) := cutoffEta_section_contMDiff a b δ
     have htsupp : tsupport (fun q : ℝ × M => cutoffEta a b δ q.1) ⊆
         Set.Ioo (0 : ℝ) T ×ˢ (Set.univ : Set M) := by
@@ -237,8 +223,7 @@ theorem interior_field_global_cutoff_extension
       refine Set.prod_mono (fun x hx => ?_) (subset_refl _)
       exact ⟨by linarith [hx.1], by linarith [hx.2]⟩
     exact smul_tangentMap_global X_DT (cutoffEta a b δ) T hηsm hint htsupp
-  · -- The autonomized predicate from the global joint smoothness just established.
-    have hsm : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+  · have hsm : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
         (fun q : ℝ × M =>
           (TotalSpace.mk' E q.2 (cutoffEta a b δ q.1 • X_DT q.1 q.2) :
             TangentBundle I M)) := by

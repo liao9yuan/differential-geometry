@@ -54,14 +54,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Squared submultiplicativity (input slot) -/
 
 private lemma chartTensorRSInputSlotCorrection_norm_sq_le_of_F_bound
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α : M)
@@ -88,8 +84,6 @@ private lemma chartTensorRSInputSlotCorrection_norm_sq_le_of_F_bound
   have h_expand : (M_F * ‖T b‖) ^ 2 = M_F ^ 2 * ‖T b‖ ^ 2 := by ring
   linarith
 
-/-! ## Squared operator-norm submultiplicativity (output slot) -/
-
 private lemma chartTensorRSOutputSlotCorrection_norm_sq_le_of_F_bound
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -115,20 +109,10 @@ private lemma chartTensorRSOutputSlotCorrection_norm_sq_le_of_F_bound
   have h_expand : (M_F * ‖T b‖) ^ 2 = M_F ^ 2 * ‖T b‖ ^ 2 := by ring
   linarith
 
-/-! ## Bundle-fibre norm identification
-
-The bundle-fibre norm `‖S.toSection b‖` coincides definitionally with the
-model norm `‖S.toFun b‖` since `S.toFun b = TensorRSSpace.toModel
-(S.toSection b)` by definition of `SmoothCcTensor.toFun`, and the
-`TensorRSSpace` normed-group instance is induced from the model norm
-along `tensorRSSpace_continuousLinearEquiv = TensorRSSpace.toModel`. -/
-
 private lemma section_norm_eq_toFun_norm
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) (b : M) :
     ‖S.toSection b‖ = ‖S.toFun b‖ := rfl
-
-/-! ## Headline assembly -/
 
 /-- **Pointwise sum bound for the Christoffel slot corrections, parametrised
 by a slot-substitution sup bound and a section-side `tensorInnerPointwise`
@@ -184,15 +168,12 @@ theorem exists_sum_chart_christoffel_correction_norm_sq_le_const_mul_tensorInner
             C * tensorInnerPointwise (I := I) (M := M) g r s b
               (S.toFun b) (S.toFun b) := by
   classical
-  -- Choose `C = ((r : ℝ) + (s : ℝ)) * M_F ^ 2 * K_S`.
   refine ⟨((r : ℝ) + (s : ℝ)) * M_F ^ 2 * K_S, ?_, ?_⟩
   · positivity
   intro S b hb
-  -- Section-side bound: `‖S.toSection b‖² ≤ K_S * tensorInner`.
   have h_sec : ‖S.toSection b‖ ^ 2 ≤
       K_S * tensorInnerPointwise (I := I) (M := M) g r s b
         (S.toFun b) (S.toFun b) := hK_S_bound S hb
-  -- Per-input-slot squared bound.
   have h_in_each : ∀ k : Fin r,
       ‖chartTensorRSInputSlotCorrection (I := I) r s g α
           (fun b' => S.toSection b') X b k‖ ^ 2 ≤
@@ -201,7 +182,6 @@ theorem exists_sum_chart_christoffel_correction_norm_sq_le_const_mul_tensorInner
     exact chartTensorRSInputSlotCorrection_norm_sq_le_of_F_bound
       (I := I) r s g α (fun b' => S.toSection b') X b k
       (hM_F_input S hb k)
-  -- Per-output-slot squared bound.
   have h_out_each : ∀ l : Fin s,
       ‖chartTensorRSOutputSlotCorrection (I := I) r s g α
           (fun b' => S.toSection b') X b l‖ ^ 2 ≤
@@ -210,7 +190,6 @@ theorem exists_sum_chart_christoffel_correction_norm_sq_le_const_mul_tensorInner
     exact chartTensorRSOutputSlotCorrection_norm_sq_le_of_F_bound
       (I := I) r s g α (fun b' => S.toSection b') X b l
       (hM_F_output S hb l)
-  -- Sum the per-slot bounds over `Fin r`.
   have h_in_sum : (∑ k : Fin r,
         ‖chartTensorRSInputSlotCorrection (I := I) r s g α
             (fun b' => S.toSection b') X b k‖ ^ 2) ≤
@@ -226,7 +205,6 @@ theorem exists_sum_chart_christoffel_correction_norm_sq_le_const_mul_tensorInner
       rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin]
       simp [nsmul_eq_mul]
     linarith
-  -- Sum the per-slot bounds over `Fin s`.
   have h_out_sum : (∑ l : Fin s,
         ‖chartTensorRSOutputSlotCorrection (I := I) r s g α
             (fun b' => S.toSection b') X b l‖ ^ 2) ≤
@@ -242,7 +220,6 @@ theorem exists_sum_chart_christoffel_correction_norm_sq_le_const_mul_tensorInner
       rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin]
       simp [nsmul_eq_mul]
     linarith
-  -- Combine.
   have h_combined :
       ((∑ k : Fin r,
           ‖chartTensorRSInputSlotCorrection (I := I) r s g α
@@ -255,7 +232,6 @@ theorem exists_sum_chart_christoffel_correction_norm_sq_le_const_mul_tensorInner
         (r : ℝ) * (M_F ^ 2 * ‖S.toSection b‖ ^ 2) +
           (s : ℝ) * (M_F ^ 2 * ‖S.toSection b‖ ^ 2) := by ring
     linarith
-  -- Chain with the section bound.
   have h_M_F_sq_nn : 0 ≤ M_F ^ 2 := sq_nonneg _
   have h_rs_M_F_nn : 0 ≤ ((r : ℝ) + (s : ℝ)) * M_F ^ 2 := by positivity
   have h_chain :

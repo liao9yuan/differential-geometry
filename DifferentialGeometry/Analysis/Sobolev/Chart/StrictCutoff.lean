@@ -43,8 +43,6 @@ variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Closedness / disjointness of the two separation sets -/
-
 /-- The complement of the chart source is closed. -/
 private lemma isClosed_compl_chartAt_source_aux (α : M) :
     IsClosed ((chartAt H α).sourceᶜ) :=
@@ -69,8 +67,6 @@ private lemma disjoint_complSource_tsupport_chartAtlasPOU_aux (α : M) :
       (tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :=
   Set.disjoint_compl_left_iff_subset.mpr
     (tsupport_chartAtlasPOU_subset_aux (I := I) α)
-
-/-! ## The smooth strict cutoff -/
 
 /-- Bundled `C^∞` smooth strict cutoff at chart-atlas index `α`. It is a smooth
 function `M → ℝ` valued in `[0, 1]`, equal to `0` on an *open neighborhood* of
@@ -110,8 +106,6 @@ private lemma chartStrictCutoff_eq_bundled (α : M) :
     chartStrictCutoff (I := I) α =
       ((chartStrictCutoffBundled (I := I) α : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
   rfl
-
-/-! ## Public API -/
 
 /-- The smooth strict cutoff function is smooth. -/
 theorem chartStrictCutoff_contMDiff (α : M) :
@@ -168,32 +162,23 @@ hence `support (cutoff) ⊆ Uᶜ`, and `Uᶜ` is closed, so
 theorem chartStrictCutoff_tsupport_subset (α : M) :
     tsupport (chartStrictCutoff (I := I) α) ⊆ (chartAt H α).source := by
   classical
-  -- Extract an open neighborhood `U ⊇ (chartAt H α).sourceᶜ` on which cutoff
-  -- vanishes.
   have hev : ∀ᶠ x in 𝓝ˢ ((chartAt H α).sourceᶜ),
       chartStrictCutoff (I := I) α x = 0 :=
     chartStrictCutoff_eventually_zero_nhdsSet_compl_source (I := I) α
-  -- Unpack the eventually-in-neighborhood-set statement.
   rw [eventually_nhdsSet_iff_exists] at hev
   obtain ⟨U, hUopen, hUsub, hUzero⟩ := hev
-  -- `support (cutoff) ⊆ Uᶜ`, and `Uᶜ` is closed.
   have hUcomp : IsClosed (Uᶜ) := hUopen.isClosed_compl
   have hsupp_sub : Function.support (chartStrictCutoff (I := I) α) ⊆ Uᶜ := by
     intro x hx
     by_contra hxU
-    -- `x ∈ U`, so cutoff vanishes at `x`, contradicting `x ∈ support`.
     have hxU' : x ∈ U := by
       simpa using hxU
     exact hx (hUzero x hxU')
-  -- `tsupport = closure support ⊆ Uᶜ` (since `Uᶜ` is closed).
   have htsupp_sub : tsupport (chartStrictCutoff (I := I) α) ⊆ Uᶜ :=
     closure_minimal hsupp_sub hUcomp
-  -- And `Uᶜ ⊆ source`, because `U ⊇ (chartAt H α).sourceᶜ`, hence
-  -- `Uᶜ ⊆ ((chartAt H α).sourceᶜ)ᶜ = (chartAt H α).source`.
   have hUcomp_sub : Uᶜ ⊆ (chartAt H α).source := by
     intro x hx
     by_contra hx_not
-    -- `x ∉ source` means `x ∈ (chartAt H α).sourceᶜ ⊆ U`, contradicting `x ∈ Uᶜ`.
     have : x ∈ U := hUsub hx_not
     exact hx this
   exact htsupp_sub.trans hUcomp_sub

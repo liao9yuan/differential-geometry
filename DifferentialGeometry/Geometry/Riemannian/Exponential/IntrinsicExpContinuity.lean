@@ -92,13 +92,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
 variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
-/-! ## 1. Compactness of the intrinsic geodesic arc
-
-The arc `[0, 1] ∋ t ↦ intrinsicGeodesic g hEnorm p v t` has compact image: it is
-the continuous image of the compact unit interval, and the intrinsic geodesic is
-*genuinely* continuous on all of `ℝ` (`intrinsicGeodesic_continuous`, proved as a
-half-line glue of cross-chart extensions in `IntrinsicExp.lean`). -/
-
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Compactness of the intrinsic geodesic arc.** The image of the unit time
@@ -118,14 +111,6 @@ theorem intrinsicGeodesic_compactArc
     IsCompact (intrinsicGeodesic (I := I) g hEnorm p v '' Set.Icc (0 : ℝ) 1) :=
   isCompact_Icc.image_of_continuousOn
     (intrinsicGeodesic_continuous (I := I) g hEnorm p v).continuousOn
-
-/-! ## 2. Finite chart cover of the time interval
-
-The arc image is compact; the chart sources `(chartAt H q).source` form an open
-cover of `M`, hence of the arc.  Pulling back along the *continuous* arc gives an
-open cover of the compact time interval `[0, 1] ⊆ ℝ`; the Lebesgue-number lemma
-on the metric space `ℝ` produces a uniform mesh `δ > 0` so that every time
-subinterval of length `< δ` carries the arc into a single chart source. -/
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -152,26 +137,21 @@ theorem intrinsicGeodesic_arc_lebesgue_mesh
   classical
   set γ : ℝ → M := intrinsicGeodesic (I := I) g hEnorm p v with hγ_def
   have hγ_cont : Continuous γ := intrinsicGeodesic_continuous (I := I) g hEnorm p v
-  -- The open cover of the time interval: preimages of chart sources.
   set c : M → Set ℝ := fun q => γ ⁻¹' (chartAt H q).source with hc_def
   have hc_open : ∀ q : M, IsOpen (c q) := by
     intro q
     exact (chartAt H q).open_source.preimage hγ_cont
-  -- The chart sources cover the arc, so their preimages cover `[0, 1]`.
   have hc_cover : Set.Icc (0 : ℝ) 1 ⊆ ⋃ q : M, c q := by
     intro t _ht
     refine Set.mem_iUnion.mpr ⟨γ t, ?_⟩
-    -- `γ t ∈ (chartAt H (γ t)).source` is the canonical chart-source membership.
     simp only [hc_def, Set.mem_preimage]
     exact mem_chart_source H (γ t)
-  -- Lebesgue-number lemma on the compact metric set `[0, 1] ⊆ ℝ`.
   obtain ⟨δ, hδ_pos, hδ⟩ :=
     lebesgue_number_lemma_of_metric (s := Set.Icc (0 : ℝ) 1) (c := c)
       isCompact_Icc hc_open hc_cover
   refine ⟨δ, hδ_pos, ?_⟩
   intro t ht
   obtain ⟨q, hq⟩ := hδ t ht
-  -- `Metric.ball t δ ⊆ c q = γ ⁻¹' (chartAt H q).source`.
   refine ⟨q, ?_⟩
   intro s hs
   have : s ∈ c q := hq hs
@@ -202,8 +182,6 @@ theorem intrinsicGeodesic_arc_finite_chart_cover
   classical
   obtain ⟨δ, hδ_pos, hδ⟩ :=
     intrinsicGeodesic_arc_lebesgue_mesh (I := I) g hEnorm p v
-  -- Choose, for each time `t ∈ [0, 1]`, a chart base point `q t` whose source
-  -- absorbs the whole `δ`-ball of `t` under the arc.
   have hq_choice : ∀ t : Set.Icc (0 : ℝ) 1, ∃ q : M,
       ∀ r ∈ Metric.ball (t : ℝ) δ,
         intrinsicGeodesic (I := I) g hEnorm p v r ∈ (chartAt H q).source := by
@@ -211,9 +189,6 @@ theorem intrinsicGeodesic_arc_finite_chart_cover
     obtain ⟨q, hq⟩ := hδ (t : ℝ) t.2
     exact ⟨q, hq⟩
   choose q hq using hq_choice
-  -- The `δ`-balls centred at points of `[0, 1]` cover `[0, 1]` (each `t` is in
-  -- its own ball), and `[0, 1]` is compact, so a finite subfamily covers it.
-  -- Phrase the cover indexed by the subtype `Set.Icc 0 1`.
   set U : (Set.Icc (0 : ℝ) 1) → Set ℝ := fun t => Metric.ball (t : ℝ) δ with hU_def
   have hU_open : ∀ t, IsOpen (U t) := fun t => Metric.isOpen_ball
   have hcover : Set.Icc (0 : ℝ) 1 ⊆ ⋃ t, U t := by
@@ -224,29 +199,11 @@ theorem intrinsicGeodesic_arc_finite_chart_cover
   obtain ⟨s, hs⟩ :=
     isCompact_Icc.elim_finite_subcover U hU_open hcover
   refine ⟨δ, q, s, hδ_pos, ?_, ?_⟩
-  · -- `hs : Icc 0 1 ⊆ ⋃ t ∈ s, U t`; rewrite `U t = ball t δ`.
-    intro r hr
+  · intro r hr
     have := hs hr
     simpa only [hU_def] using this
   · intro t r hr
     exact hq t r hr
-
-/-! ## 2b. Converse lift: from the moving-foot geodesic equation to a
-chart-centred integral curve
-
-The intrinsic geodesic exposes its data only through the *moving-foot*
-geodesic equation `HasGeodesicEquationAt g γ t` (`intrinsicGeodesic_isGeodesic`).
-The per-chart re-based flow machinery, by contrast, consumes a chart-`γ(t)`-
-centred *integral curve* on `TM` — the structure produced by
-`Geodesic.bm_c_gc_cross_vf_projection_uniqueness` from an `IsGeodesicAt`
-witness.
-
-The genuine missing link is therefore the converse direction:
-`HasGeodesicEquationAt g γ t → ` (a chart-`γ(t)`-centred integral curve whose
-projection agrees with `γ` near `t`).  We build it here by Picard–Lindelöf at
-the foot `γ t` with the chart velocity, plus chart-coordinate second-order ODE
-uniqueness (reduced to the first-order chart-phase system on `E × E` and
-discharged by the proven uniqueness `chartPhaseVF_orbit_uniqueness`). -/
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -283,19 +240,15 @@ theorem intrinsicGeodesic_hasGeodesicEquationAt_to_lift
       IsMIntegralCurveAt f₁ (geodesicVectorFieldChart (I := I) g (γ t)) t ∧
       γ =ᶠ[𝓝 t] (fun s => (f₁ s).proj) := by
   classical
-  -- Fixed chart basepoint `y := γ t`, and chart velocity `v`.
   set y : M := γ t with hy_def
   set v : E := deriv
     (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) y γ) t
     with hv_def
-  -- Build the chart-`y`-centred integral curve `f₁` with `f₁ t = ⟨y, v⟩`.
   obtain ⟨f₁, hf₁_init, hf₁⟩ := exists_chartCenteredLift_at (I := I) g y v t
   have hf₁_proj_t : (f₁ t).proj = y := by rw [hf₁_init]
   refine ⟨f₁, by rw [hf₁_proj_t], by rw [hy_def] at hf₁ ⊢; exact hf₁, ?_⟩
-  -- Abbreviation: the fixed-`y`-chart curve of `γ`.
   set w : ℝ → E :=
     DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) y γ with hw_def
-  -- (A) The `γ`-side chart-phase solution `c₁ s := (w s, deriv w s)`.
   set c₁ : ℝ → E × E := fun s => (w s, deriv w s) with hc₁_def
   have hy_src : y ∈ (chartAt H y).source := mem_chart_source H y
   have hγ_src_ev : ∀ᶠ s in 𝓝 t, γ s ∈ (chartAt H y).source := by
@@ -333,7 +286,6 @@ theorem intrinsicGeodesic_hasGeodesicEquationAt_to_lift
       rw [this]
       exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
         (I := I) y hp_target
-  -- (B) The `f₁`-side chart-phase solution `c₂ := chartPushLift f₁ t`.
   set c₂ : ℝ → E × E := chartPushLift (I := I) f₁ t with hc₂_def
   have hπ_cont : Continuous (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
     FiberBundle.continuous_proj E (TangentSpace I)
@@ -364,7 +316,6 @@ theorem intrinsicGeodesic_hasGeodesicEquationAt_to_lift
         (extChartAt I y).map_source hp_ext_src
       exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
         (I := I) y hp_target
-  -- (C) Match at `t`: both `c₁ t` and `c₂ t` equal `(extChartAt I y y, v)`.
   have hc₁_t : c₁ t = (extChartAt I y y, v) := by
     have hwt : w t = extChartAt I y y := by simp [hw_def, hy_def]
     have hvt : deriv w t = v := by rw [hv_def, hw_def]
@@ -384,11 +335,9 @@ theorem intrinsicGeodesic_hasGeodesicEquationAt_to_lift
       (extChartAt I y).map_source hp_ext_src
     exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) y hp_target
-  -- (D) Chart-phase ODE uniqueness re-centred at `t`: `c₁ =ᶠ c₂`.
   have hceq : c₁ =ᶠ[𝓝 t] c₂ :=
     chartPhaseVF_orbit_uniqueness_at (I := I) (g := g) (q := y)
       hz₀_int hc₁_t hc₂_t hc₁_phase hc₂_phase
-  -- (E) Project the first-component equality back to `γ =ᶠ projectCurve f₁`.
   have hfst : ∀ᶠ s in 𝓝 t, extChartAt I y (γ s) = extChartAt I y (f₁ s).proj := by
     filter_upwards [hceq, hf_src_ev] with s hs hsrc
     have h1 : (c₁ s).1 = extChartAt I y (γ s) := by simp [hc₁_def, hw_def]
@@ -402,96 +351,6 @@ theorem intrinsicGeodesic_hasGeodesicEquationAt_to_lift
   have hf_es : (f₁ s).proj ∈ (extChartAt I y).source := by
     rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hfs
   exact (extChartAt I y).injOn hγ_es hf_es heq
-
-/-! ## 3. Joint continuity of the chained flow (the analytic residual)
-
-The single remaining analytic input is the *uniform-in-`v`* joint continuity of
-`(v, t) ↦ intrinsicGeodesic g hEnorm p v t` on a small ball `ball v₀ ρ ×ˢ [0, 1]`.
-This is the genuine cross-chart-chained continuity-in-initial-conditions of the
-geodesic flow.
-
-### Sub-lemma decomposition of `intrinsicGeodesic_jointContinuity`
-
-Fix `v₀ : T_p M`.  Set `γ₀ := intrinsicGeodesic g hEnorm p v₀` and let
-`δ, q, s` be the finite chart cover of `[0, 1]` from
-`intrinsicGeodesic_arc_finite_chart_cover`, with mesh times `t₀ = 0 < t₁ < … <
-t_N` and chart base points `α_k := q tₖ` so that `γ₀([tₖ, tₖ₊₁]) ⊆ (chartAt H
-α_k).source`.
-
-1.  **Per-chart re-based continuous flow.** On the `k`-th subinterval, re-base the
-    chart-phase flow at the foot `γ₀(tₖ)` via the proven cross-chart re-basing
-    `Geodesic.bm_c_gc_cross_vf_projection_uniqueness`
-    (`Geodesic/CrossVFReduction.lean`, no `sorry`) combined with the per-chart
-    joint-`C¹` flow `SmoothFlow.exists_chartPhase_contDiffOn_isLocalFlow_combined`.
-    This yields a flow `Φ_k : (E × E) × ℝ → E × E`, jointly continuous in
-    `(z, t)`, and a radius `ρ_k > 0` such that for the phase initial condition
-    `z_w` (depending continuously on the manifold velocity `w` at `γ₀(tₖ)`) the
-    projection `proj(Φ_k(z_w, t - tₖ))` is a geodesic at `γ₀(tₖ)` with launch
-    velocity `w`.
-
-    Signature of the sub-lemma:
-    ```
-    perChartReContinuousFlow :
-      IsGeodesicAt g γ₀ tₖ → ∃ (Φ_k) (ρ_k T_k > 0),
-        ContinuousOn (fun (zt) => proj (Φ_k zt)) (ball z₀ ρ_k ×ˢ Ioo (-T_k) T_k) ∧
-        (∀ z ∈ ball z₀ ρ_k, ∀ τ ∈ Ioo (-T_k) T_k,
-          IsMIntegralCurveAt (lift Φ_k z) (geodesicVectorFieldChart g (γ₀ tₖ)) 0)
-    ```
-    (the chart-flow datum at `γ₀ tₖ` is the converse direction from the
-    moving-foot geodesic equation to a chart-`γ₀(tₖ)`-centred integral curve
-    matching `γ₀` near `tₖ`, recorded — fully proven and axiom-clean — as
-    `intrinsicGeodesic_hasGeodesicEquationAt_to_lift` above, which is the mirror
-    of `Geodesic.bm_c_gc_cross_vf_projection_uniqueness` but starting from
-    `IsGeodesic` rather than `IsGeodesicAt`).
-
-2.  **Uniqueness identification.** For `v` near `v₀`, the intrinsic geodesic
-    `intrinsicGeodesic g hEnorm p v` and the re-based flow projection agree on a
-    neighbourhood of each `tₖ`, by geodesic uniqueness with prescribed initial
-    data `isGeodesicAt_eventuallyEq_of_lift_eq` (`Geodesic/Uniqueness.lean`, no
-    `sorry`).  Continuity of `v ↦ (initial phase datum at γ₀(tₖ))` propagates
-    through `Φ_k`'s joint continuity, giving continuity of
-    `(v, t) ↦ intrinsicGeodesic g hEnorm p v t` on `ball v₀ ρ_k ×ˢ (tₖ-ε, tₖ+ε)`.
-
-    Signature of the sub-lemma:
-    ```
-    perChartIntrinsicContinuity :
-      ∃ ρ_k T_k > 0, ContinuousOn
-        (fun (vt : T_p M × ℝ) => intrinsicGeodesic g hEnorm p vt.1 vt.2)
-        (ball v₀ ρ_k ×ˢ Ioo (tₖ - T_k) (tₖ + T_k))
-    ```
-
-3.  **Junction gluing.** At each junction `tₖ₊₁` the launch velocity of the
-    `k`-th flow equals the initial velocity of the `(k+1)`-th flow (continuity of
-    the velocity, the `C¹`-in-time regularity `intrinsicGeodesic_contMDiffOn`),
-    so the per-chart windows of step 2 overlap; taking `ρ := min_k ρ_k` and
-    pasting the finitely many overlapping `ContinuousOn` pieces (compatible on
-    overlaps, finite union, `ContinuousOn.union` / locally-on-an-open-cover
-    gluing) yields joint continuity on `ball v₀ ρ ×ˢ [0, 1]`.
-
-The chaining is *uniform in `v`* precisely because the `min_k ρ_k` ball is chosen
-after the finite chart cover is fixed (the cover is determined by `γ₀ = γ_{v₀}`,
-not by `v`), and the per-chart radii `ρ_k` are positive.  This is the same
-uniform-in-`v` cross-junction joint continuity that the chart-fixed
-`bm_c_expMap_chainedFlow_joint_continuity` carries as its residual, but here it is
-*true* on all of `[0, 1]` (not just on a small ball) because the underlying object
-is the genuine complete geodesic. -/
-
-/-! ### Foot-varying per-chart flow projection
-
-The existing `chartFlowOrbitLift` (`Exponential/ChartFlowToTangentLift.lean`) fixes
-both the chart centre `α` and the phase basepoint at `(extChartAt I α α, v)`,
-i.e. the foot is the chart centre.  For the cross-junction gluing the foot
-`intrinsicGeodesic g p v tₖ` *varies* with `v`, so we need a version of the lift
-in which the phase initial point `z ∈ E × E` is an explicit parameter (the foot's
-chart coordinate paired with its chart velocity coordinate), both continuous in
-`v`.  We package the resulting *flow projection* and its joint continuity here.
-
-`flowProj α Φ z s := (extChartAt I α).symm (Φ (z, s)).1` is the base-manifold
-projection of the chart-`α`-centred phase flow `Φ` started at the phase point `z`,
-evaluated after running for time `s`.  Whenever `(Φ (z, s)).1` stays in the
-(open) chart target `(extChartAt I α).target`, this projection is continuous
-jointly in `(z, s)` because `Φ` is and `(extChartAt I α).symm` is continuous on
-its target. -/
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -520,8 +379,6 @@ private theorem flowProj_continuousOn
     ContinuousOn (fun nτ : N × ℝ => flowProj (I := I) α Φ (z nτ.1) nτ.2)
       (S ×ˢ Set.Ioo (-T) T) := by
   classical
-  -- The phase map `(n, τ) ↦ (z n, τ)` is continuous on `S ×ˢ Ioo (-T) T` and lands
-  -- in `ball z₀ ρ ×ˢ Ioo (-T) T`.
   have hpair_cont : ContinuousOn (fun nτ : N × ℝ => (z nτ.1, nτ.2))
       (S ×ˢ Set.Ioo (-T) T) := by
     refine ContinuousOn.prodMk ?_ ?_
@@ -531,15 +388,12 @@ private theorem flowProj_continuousOn
       (S ×ˢ Set.Ioo (-T) T) ((Metric.ball z₀ ρ) ×ˢ Set.Ioo (-T) T) := by
     intro nτ hnτ
     exact ⟨hz_ball nτ.1 hnτ.1, hnτ.2⟩
-  -- `Φ ∘ (phase map)` is continuous on `S ×ˢ Ioo (-T) T`.
   have hΦcomp : ContinuousOn (fun nτ : N × ℝ => Φ (z nτ.1, nτ.2))
       (S ×ˢ Set.Ioo (-T) T) :=
     hΦ.comp hpair_cont hpair_maps
-  -- Take the first component, which is continuous.
   have hfst : ContinuousOn (fun nτ : N × ℝ => (Φ (z nτ.1, nτ.2)).1)
       (S ×ˢ Set.Ioo (-T) T) :=
     (continuous_fst.comp_continuousOn hΦcomp)
-  -- Compose with `(extChartAt I α).symm`, continuous on `(extChartAt I α).target`.
   have hsymm : ContinuousOn (extChartAt I α).symm (extChartAt I α).target :=
     continuousOn_extChartAt_symm (I := I) α
   have hmaps : Set.MapsTo (fun nτ : N × ℝ => (Φ (z nτ.1, nτ.2)).1)
@@ -588,8 +442,6 @@ private theorem perChart_jointContinuity_of_flowIdentifiedOn
         intrinsicGeodesic (I := I) g hEnorm p vt.1 vt.2)
       ((Metric.ball v₀ r) ×ˢ Set.Ioo (tₖ - ε) (tₖ + ε)) := by
   classical
-  -- The time-shift homeomorphism `t ↦ t - tₖ` maps the window
-  -- `Ioo (tₖ - ε) (tₖ + ε)` onto `Ioo (-ε) ε`.
   have hshift_cont : ContinuousOn (fun vt : TangentSpace I p × ℝ => (vt.1, vt.2 - tₖ))
       ((Metric.ball v₀ r) ×ˢ Set.Ioo (tₖ - ε) (tₖ + ε)) :=
     (continuousOn_fst).prodMk ((continuousOn_snd).sub continuousOn_const)
@@ -600,7 +452,6 @@ private theorem perChart_jointContinuity_of_flowIdentifiedOn
     refine ⟨hvt.1, ?_, ?_⟩
     · exact lt_sub_iff_add_lt.mpr (by linarith [hvt.2.1])
     · exact sub_lt_iff_lt_add.mpr (by linarith [hvt.2.2])
-  -- The flow projection is jointly continuous on `ball v₀ r ×ˢ Ioo (-ε) ε`.
   have hbase_cont : ContinuousOn
       (fun vτ : TangentSpace I p × ℝ => flowProj (I := I) α Φ (z vτ.1) vτ.2)
       ((Metric.ball v₀ r) ×ˢ Set.Ioo (-ε) ε) := by
@@ -610,28 +461,13 @@ private theorem perChart_jointContinuity_of_flowIdentifiedOn
     exact flowProj_continuousOn (I := I) (α := α) (Φ := Φ) (z₀ := z₀)
       (ρ := ρ) (T := ε) (z := z) (S := Metric.ball v₀ r)
       hΦ' hz_cont hz_ball htgt
-  -- Compose: `(v, t) ↦ flowProj α Φ (z v) (t - tₖ)` is continuous on the window.
   have hcomp_cont : ContinuousOn
       (fun vt : TangentSpace I p × ℝ => flowProj (I := I) α Φ (z vt.1) (vt.2 - tₖ))
       ((Metric.ball v₀ r) ×ˢ Set.Ioo (tₖ - ε) (tₖ + ε)) :=
     hbase_cont.comp hshift_cont hshift_maps
-  -- Rewrite via the identification.
   apply hcomp_cont.congr
   intro vt hvt
   exact hident vt.1 hvt.1 vt.2 hvt.2
-
-/-! ### General uniform confinement of a parameter-varying flow orbit
-
-The per-junction phase point `z v` varies with `v` (both the chart-coordinate of
-the *foot* `intrinsicGeodesic g hEnorm p v tₖ` and its chart velocity move with
-`v`); only at the base velocity does it sit at the flow's centre `z₀`.  The
-following purely-topological lemma extracts, from joint continuity of the flow
-`Φ` at the base phase-point–time `(z₀, 0)` together with continuity of the
-phase-parameter map `z` at `v₀` (with `z v₀ = z₀`), a *uniform* window
-`ball v₀ r' ×ˢ Ioo (-T') T'` on which the orbit `Φ (z v, s)` stays inside any
-prescribed neighbourhood `W` of `z₀`.  This is the foot-varying generalisation of
-`Exponential.exists_uniform_orbit_in_inner_ball` (which fixes the foot at the
-chart centre and varies only the velocity). -/
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -654,7 +490,6 @@ private theorem flowOrbit_uniform_confinement
       (∀ v ∈ S, z v ∈ Metric.ball z₀ ρ_f) ∧
       (∀ v ∈ S, ∀ s ∈ Set.Ioo (-T') T', Φ (z v, s) ∈ W) := by
   classical
-  -- The flow domain is open and contains `(z₀, 0)`.
   have h_open : IsOpen ((Metric.ball z₀ ρ_f) ×ˢ Set.Ioo (-T_f) T_f) :=
     Metric.isOpen_ball.prod isOpen_Ioo
   have hz₀0_mem : ((z₀, (0 : ℝ)) : (E × E) × ℝ) ∈
@@ -662,7 +497,6 @@ private theorem flowOrbit_uniform_confinement
     ⟨Metric.mem_ball_self hρ_f, ⟨by linarith, hT_f⟩⟩
   have hΦ_contAt : ContinuousAt Φ ((z₀, (0 : ℝ)) : (E × E) × ℝ) :=
     hΦ.continuousAt (h_open.mem_nhds hz₀0_mem)
-  -- The composite `(v, s) ↦ Φ (z v, s)` is continuous at `(v₀, 0)`.
   have hpair_contAt : ContinuousAt (fun ws : N × ℝ => ((z ws.1, ws.2) : (E × E) × ℝ))
       ((v₀, (0 : ℝ)) : N × ℝ) :=
     (hz_cont.comp continuousAt_fst).prodMk continuousAt_snd
@@ -672,7 +506,6 @@ private theorem flowOrbit_uniform_confinement
       rw [hz0]
     refine ContinuousAt.comp ?_ hpair_contAt
     rw [hval]; exact hΦ_contAt
-  -- `W` and `ball z₀ ρ_f` are neighbourhoods of `z₀ = Φ (z₀, 0)`.
   have hW_nhds : W ∈ 𝓝 (Φ ((z₀, (0 : ℝ)) : (E × E) × ℝ)) := by rw [hΦ0]; exact hW
   have h_orbit_preim : (fun ws : N × ℝ => Φ ((z ws.1, ws.2) : (E × E) × ℝ)) ⁻¹' W ∈
       𝓝 ((v₀, (0 : ℝ)) : N × ℝ) := by
@@ -680,19 +513,15 @@ private theorem flowOrbit_uniform_confinement
     have hval : Φ ((z v₀, (0 : ℝ)) : (E × E) × ℝ) = Φ ((z₀, (0 : ℝ)) : (E × E) × ℝ) := by
       rw [hz0]
     rw [hval]; exact hW_nhds
-  -- The parameter-side preimage of `ball z₀ ρ_f` under `z` is a neighbourhood of `v₀`.
   have hz_preim : z ⁻¹' (Metric.ball z₀ ρ_f) ∈ 𝓝 v₀ := by
     apply hz_cont.preimage_mem_nhds
     rw [hz0]; exact Metric.ball_mem_nhds _ hρ_f
-  -- Extract a product neighbourhood `S₀ ×ˢ V₀ ⊆ orbit-preimage of W`.
   obtain ⟨S₁, V₁, hS₁_open, hS₁_mem, hV₁_open, hV₁_mem, h_sub⟩ :=
     mem_nhds_prod_iff'.mp h_orbit_preim
-  -- Intersect the parameter side with the `ball z₀ ρ_f`-preimage neighbourhood.
   obtain ⟨S₂, hS₂_sub, hS₂_open, hv₀_S₂⟩ := _root_.mem_nhds_iff.mp hz_preim
   set S : Set N := S₁ ∩ S₂ with hS_def
   have hS_open : IsOpen S := hS₁_open.inter hS₂_open
   have hv₀_S : v₀ ∈ S := ⟨hS₁_mem, hv₀_S₂⟩
-  -- Time side: shrink `V₁` to `Ioo (-T') T'` with `T' < T_f`.
   obtain ⟨T₀, hT₀_pos, hT₀_sub⟩ := Metric.isOpen_iff.mp hV₁_open (0 : ℝ) hV₁_mem
   set T' : ℝ := min T₀ T_f / 2 with hT'_def
   have hT'_pos : 0 < T' := by
@@ -714,19 +543,6 @@ private theorem flowOrbit_uniform_confinement
     have hs_V₁ : s ∈ V₁ := hIoo_sub_V₁ hs
     have hpair : (v, s) ∈ S₁ ×ˢ V₁ := ⟨hv_S₁, hs_V₁⟩
     exact h_sub hpair
-
-/-! ### Geodesic-side fixed-chart phase ODE on a window
-
-For the uniform identification we need the *geodesic side* expressed in a single
-*fixed* chart `α` (the junction chart centre, generally distinct from the moving
-foot).  The fixed-chart curve `s ↦ extChartAt I α (γ s)` paired with its
-time-derivative satisfies the genuine chart-phase ODE `chartPhaseVF g α` wherever
-`γ` stays in the chart-`α` source — this is the fixed-chart reading of the
-moving-foot geodesic equation, supplied pointwise by
-`Geodesic.hasGeodesicEquationAt_fixedChart_eventually_hasDerivAt` (first-order
-differentiability companion) and
-`Geodesic.hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity` (second-order
-velocity ODE). -/
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -768,19 +584,16 @@ private theorem geodesic_chartPhaseVF_on_open
   intro s hs
   have hsU_nhds : U ∈ 𝓝 s := hU_open.mem_nhds hs
   have hs_src : γ s ∈ (chartAt H α).source := hγ_src s hs
-  -- First-order differentiability of the fixed-chart curve near `s`.
   have hev_first : ∀ᶠ r in 𝓝 s, HasDerivAt w (deriv w r) r :=
     DifferentialGeometry.Geometry.Riemannian.Geodesic.hasGeodesicEquationAt_fixedChart_eventually_hasDerivAt
       (I := I) g α hγ_cont.continuousAt hs_src (hγ s)
   have hfirst : HasDerivAt w (deriv w s) s := hev_first.self_of_nhds
-  -- Second-order velocity ODE at `s`.
   have hsecond : HasDerivAt (deriv w)
       (- chartChristoffelContraction (I := I) g α (deriv w s) (deriv w s) (w s)) s :=
     DifferentialGeometry.Geometry.Riemannian.Geodesic.hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity
       (I := I) g α hγ_cont.continuousAt hs_src (hγ s)
   refine ⟨?_, ?_⟩
-  · -- Combine into the phase ODE.
-    have hpair : HasDerivAt
+  · have hpair : HasDerivAt
         (fun r : ℝ => (w r, deriv w r))
         ((deriv w s,
           - chartChristoffelContraction (I := I) g α (deriv w s) (deriv w s) (w s))) s :=
@@ -790,8 +603,7 @@ private theorem geodesic_chartPhaseVF_on_open
           - chartChristoffelContraction (I := I) g α (deriv w s) (deriv w s) (w s)) := by
       simp only [chartPhaseVF_apply]
     rw [hrhs]; exact hpair
-  · -- Chart-target interior membership.
-    have hp_ext_src : γ s ∈ (extChartAt I α).source := by
+  · have hp_ext_src : γ s ∈ (extChartAt I α).source := by
       rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hs_src
     have hp_target : extChartAt I α (γ s) ∈ (extChartAt I α).target :=
       (extChartAt I α).map_source hp_ext_src
@@ -799,29 +611,6 @@ private theorem geodesic_chartPhaseVF_on_open
     rw [hval]
     exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) α hp_target
-
-/-! ### Per-junction uniform geodesic↔flow identification (the residual bootstrap)
-
-The genuine analytic content of the assembly is the *uniform-in-`v`* identification
-of the intrinsic geodesic with a foot-varying chart-phase flow projection on a
-window `ball v₀ r ×ˢ Ioo (tₖ - T') (tₖ + T')`.  The following producer supplies
-that identification from the per-junction data: a chart centre `α`, a jointly-`C¹`
-per-chart flow `Φ` (from
-`Geodesic.SmoothFlow.exists_chartPhase_contDiffOn_isLocalFlow_combined`), the
-continuous-in-`v` phase point `z v` (chart-coordinate of the foot
-`intrinsicGeodesic g hEnorm p v tₖ` paired with its chart velocity), uniform
-confinement of both the geodesic and the flow orbit to a compact ball inside the
-chart-target interior, and the matching of initial phase data at `tₖ`.
-
-`chartPhaseVF_orbit_uniqueness_uniform_Ioo` then identifies the two chart-phase
-solutions on the *whole* window (uniqueness on the compact confinement ball over
-the entire `Ioo`), and projecting the first-component equality through
-`(extChartAt I α).symm` yields the geodesic↔`flowProj` identification `hident`.
-
-The hypotheses are genuine geometric inputs (confinement of the actual geodesic /
-flow orbit to a ball, and matching initial data), **not** the continuity
-conclusion; in particular the confinement is a true geometric fact about the
-specific curves, not a packaging of the joint-continuity goal. -/
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -879,19 +668,14 @@ private theorem perJunction_flowIdentification
   set w : ℝ → E :=
     DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α γ
     with hw_def
-  -- The geodesic-side phase curve, time-shifted to be centred at `tₖ`.
   set c₁ : ℝ → E × E := fun s => (w (tₖ + s), deriv w (tₖ + s)) with hc₁_def
-  -- The flow-side phase curve.
   set c₂ : ℝ → E × E := fun s => Φ (z v, s) with hc₂_def
-  -- Open window `U := Ioo (tₖ - T') (tₖ + T')` on which the geodesic is in chart `α`.
   set U : Set ℝ := Set.Ioo (tₖ - T') (tₖ + T') with hU_def
   have hU_open : IsOpen U := isOpen_Ioo
   have hsrc_U : ∀ s ∈ U, γ s ∈ (chartAt H α).source := by
     intro s hsU; exact hgeo_src v hv s hsU
-  -- Geodesic-side phase ODE on `U` (in the fixed chart `α`).
   have hgeo_phase := geodesic_chartPhaseVF_on_open (I := I) (g := g) (α := α) (γ := γ)
     hγ_geo hγ_cont hU_open hsrc_U
-  -- `c₁` satisfies `chartPhaseVF g α` on `Ioo (-T') T'` (via the time shift `s ↦ tₖ + s`).
   have hc₁_phase : ∀ s ∈ Set.Ioo (-T') T',
       HasDerivAt c₁ (chartPhaseVF (I := I) g α (c₁ s)) s := by
     intro s hs
@@ -899,23 +683,18 @@ private theorem perJunction_flowIdentification
       rw [hU_def, Set.mem_Ioo]
       exact ⟨by linarith [hs.1], by linarith [hs.2]⟩
     obtain ⟨hder, _⟩ := hgeo_phase (tₖ + s) htks
-    -- `hder : HasDerivAt (fun r => (w r, deriv w r)) (chartPhaseVF g α (w (tₖ+s), deriv w (tₖ+s))) (tₖ+s)`.
     have hshift : HasDerivAt (fun r : ℝ => tₖ + r) 1 s := by
       simpa using (hasDerivAt_id s).const_add tₖ
     have hcomp := hder.scomp s hshift
     simp only [one_smul] at hcomp
-    -- `hcomp : HasDerivAt ((fun r => (w r, deriv w r)) ∘ (fun r => tₖ + r)) (...) s`.
-    -- The composition equals `c₁` and the right-hand side equals `chartPhaseVF g α (c₁ s)`.
     have hfun : ((fun r : ℝ => ((w r, deriv w r) : E × E)) ∘ fun r : ℝ => tₖ + r) = c₁ := by
       funext r; simp only [Function.comp_apply, hc₁_def]
     rw [hfun] at hcomp
     have hrhs : c₁ s = ((w (tₖ + s), deriv w (tₖ + s)) : E × E) := by rw [hc₁_def]
     rw [hrhs]; exact hcomp
-  -- `c₂` satisfies `chartPhaseVF g α` on `Ioo (-T') T'`.
   have hc₂_phase : ∀ s ∈ Set.Ioo (-T') T',
       HasDerivAt c₂ (chartPhaseVF (I := I) g α (c₂ s)) s := by
     intro s hs; exact hΦ_phase v hv s hs
-  -- Both confined to `closedBall z₀ R`.
   have hc₁_in : ∀ s ∈ Set.Ioo (-T') T', c₁ s ∈ Metric.closedBall z₀ R := by
     intro s hs
     have htks : tₖ + s ∈ U := by
@@ -925,23 +704,19 @@ private theorem perJunction_flowIdentification
     rw [hc₁_def]; exact this
   have hc₂_in : ∀ s ∈ Set.Ioo (-T') T', c₂ s ∈ Metric.closedBall z₀ R := by
     intro s hs; exact hΦ_in v hv s hs
-  -- Match at `0`.
   have hc₁_zero : c₁ 0 = z v := by
     rw [hc₁_def]; simp only [add_zero]; exact hinit v hv
   have hc₂_zero : c₂ 0 = z v := by rw [hc₂_def]; exact hΦinit v hv
   have hmatch : c₁ 0 = c₂ 0 := by rw [hc₁_zero, hc₂_zero]
-  -- Uniform-in-parameter chart-phase ODE uniqueness on the compact ball.
   have heq : ∀ s ∈ Set.Ioo (-T') T', c₁ s = c₂ s :=
     chartPhaseVF_orbit_uniqueness_uniform_Ioo_closedBall (I := I) g α
       hball hT'_pos hc₁_phase hc₂_phase hc₁_in hc₂_in hmatch
-  -- Evaluate at `s := t - tₖ ∈ Ioo (-T') T'`.
   have hs_mem : (t - tₖ) ∈ Set.Ioo (-T') T' := by
     rw [Set.mem_Ioo]
     refine ⟨?_, ?_⟩
     · have := ht.1; rw [Set.mem_Ioo] at ht; linarith [ht.1]
     · rw [Set.mem_Ioo] at ht; linarith [ht.2]
   have hfst := congrArg Prod.fst (heq (t - tₖ) hs_mem)
-  -- `(c₁ (t-tₖ)).1 = w (tₖ + (t - tₖ)) = w t = extChartAt I α (γ t)`.
   have hc₁_fst : (c₁ (t - tₖ)).1 = extChartAt I α (γ t) := by
     rw [hc₁_def]
     simp only []
@@ -949,14 +724,11 @@ private theorem perJunction_flowIdentification
     simp only [DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve_def]
   have hc₂_fst : (c₂ (t - tₖ)).1 = (Φ (z v, t - tₖ)).1 := by rw [hc₂_def]
   rw [hc₁_fst, hc₂_fst] at hfst
-  -- `hfst : extChartAt I α (γ t) = (Φ (z v, t - tₖ)).1`.
-  -- Now `flowProj α Φ (z v) (t - tₖ) = (extChartAt I α).symm (Φ (z v, t - tₖ)).1`.
   have hγ_es : γ t ∈ (extChartAt I α).source := by
     rw [extChartAt_source_eq_chartAt_source (I := I)]
     exact hsrc_U t ht
   have hsymm : (extChartAt I α).symm (extChartAt I α (γ t)) = γ t :=
     (extChartAt I α).left_inv hγ_es
-  -- Goal (after `set γ`): `γ t = flowProj α Φ (z v) (t - tₖ)`.
   rw [flowProj, ← hfst, hsymm]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
@@ -1065,7 +837,6 @@ private theorem perJunction_phaseIdentification
     · have := ht.1; rw [Set.mem_Ioo] at ht; linarith [ht.1]
     · rw [Set.mem_Ioo] at ht; linarith [ht.2]
   have hpair := heq (t - tₖ) hs_mem
-  -- `c₁ (t - tₖ) = (w t, deriv w t)` and `c₂ (t - tₖ) = Φ (z v, t - tₖ)`.
   have hc₁_eval : c₁ (t - tₖ) =
       ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α γ t,
         deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α γ) t)
@@ -1077,33 +848,6 @@ private theorem perJunction_phaseIdentification
   rw [hc₁_eval, hc₂_eval] at hpair
   exact hpair
 
-/-! ### Per-junction window producer (full assembly of the fully-proven inputs)
-
-The following packages the three fully-proven per-junction producers
-(`flowOrbit_uniform_confinement`, `perJunction_flowIdentification`,
-`perChart_jointContinuity_of_flowIdentifiedOn`) together with the per-chart
-joint-`C¹` phase flow `Φ` of
-`Geodesic.exists_chartPhase_contDiffOn_isLocalFlow_combined` into a single
-*window* of joint continuity around a junction `tₖ`.
-
-Its inputs are exactly the two genuinely cross-junction data the finite-cover
-induction must propagate, supplied here as hypotheses (neither is the continuity
-conclusion):
-
-* `hz_cont`/`hz0` — continuity in `v` of the phase point
-  `z v = (extChartAt I α (γ_v tₖ), deriv (chartCurve α γ_v) tₖ)`, with
-  `z v₀` equal to the flow centre `(x₀, w₀)`;
-* `hgeo` — uniform-in-`v` confinement of the geodesic to the chart `α` source and
-  of its fixed-`α`-chart phase curve to the inner ball, on a window around `tₖ`,
-  together with the matching of the geodesic's phase point at `tₖ` to `z v`.
-
-The chart `α`, the flow `Φ`, and the inner-ball confinement of the flow orbit are
-constructed *internally*: the orbit confinement comes from
-`flowOrbit_uniform_confinement` (taking `W := ball (x₀, w₀) b.rIn`), and on the
-inner ball the cutoff field equals the genuine `chartPhaseVF`, so the orbit solves
-the chart-phase ODE; `perJunction_flowIdentification` then identifies the geodesic
-with the flow projection and `perChart_jointContinuity_of_flowIdentifiedOn`
-delivers joint continuity on the window. -/
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 private theorem intrinsicGeodesic_window_of_junction_data
@@ -1118,7 +862,6 @@ private theorem intrinsicGeodesic_window_of_junction_data
     (hx₀ : x₀ ∈ interior (extChartAt I α).target)
     {z : TangentSpace I p → E × E} {tₖ : ℝ} {rz : ℝ} (hrz : 0 < rz)
     (hz_cont : ContinuousOn z (Metric.ball v₀ rz)) (hz0 : z v₀ = (x₀, w₀))
-    -- Geodesic-side confinement on *some* window around `tₖ`, supplied per bump.
     (hgeo : ∀ (b : ContDiffBump ((x₀, w₀) : E × E)),
       Metric.closedBall ((x₀, w₀) : E × E) b.rOut ⊆
         (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) →
@@ -1143,17 +886,13 @@ private theorem intrinsicGeodesic_window_of_junction_data
           intrinsicGeodesic (I := I) g hEnorm p vt.1 vt.2)
         ((Metric.ball v₀ r) ×ˢ Set.Ioo (tₖ - ε) (tₖ + ε)) := by
   classical
-  -- The per-chart joint-`C¹` phase flow `Φ` centred at the base phase point.
   obtain ⟨b, rPL, εPL, ρΦ, TΦ, Φ, hrPL, hεPL, hρΦ, hTΦ, hb_sub, hΦ_loc, hΦ_C1,
       hΦ_init0⟩ :=
     Geodesic.exists_chartPhase_contDiffOn_isLocalFlow_combined (I := I) (M := M)
       (g := g) (α := α) (x₀ := x₀) (v₀ := w₀) hx₀
-  -- Continuity of `Φ` on the joint-`C¹` neighbourhood.
   have hΦ_cont : ContinuousOn Φ
       ((Metric.ball ((x₀, w₀) : E × E) ρΦ) ×ˢ Set.Ioo (-TΦ) TΦ) :=
     hΦ_C1.continuousOn
-  -- The confinement spatial radius `ρf := min ρΦ rPL` (≤ both the joint-`C¹` ball
-  -- and the Picard ball), and time horizon `Tcap := min TΦ εPL`.
   have hrPL_pos : (0 : ℝ) < (rPL : ℝ) := by exact_mod_cast hrPL
   set ρf : ℝ := min ρΦ (rPL : ℝ) with hρf_def
   have hρf_pos : 0 < ρf := lt_min hρΦ hrPL_pos
@@ -1163,23 +902,18 @@ private theorem intrinsicGeodesic_window_of_junction_data
   have hTcap_pos : 0 < Tcap := lt_min hTΦ hεPL
   have hTcap_le_TΦ : Tcap ≤ TΦ := min_le_left _ _
   have hTcap_le_εPL : Tcap ≤ εPL := min_le_right _ _
-  -- Restrict `Φ`-continuity to the smaller spatial ball and horizon.
   have hΦ_cont' : ContinuousOn Φ
       ((Metric.ball ((x₀, w₀) : E × E) ρf) ×ˢ Set.Ioo (-Tcap) Tcap) :=
     hΦ_cont.mono (Set.prod_mono (Metric.ball_subset_ball hρf_le_ρΦ)
       (Set.Ioo_subset_Ioo (by linarith [hTcap_le_TΦ]) hTcap_le_TΦ))
-  -- Continuity of `z` at `v₀` (from the `ContinuousOn` on `ball v₀ rz`).
   have hz_contAt : ContinuousAt z v₀ :=
     hz_cont.continuousAt (Metric.ball_mem_nhds _ hrz)
-  -- Inner-ball neighbourhood of the centre.
   have hW_nhds : Metric.ball ((x₀, w₀) : E × E) b.rIn ∈ 𝓝 ((x₀, w₀) : E × E) :=
     Metric.ball_mem_nhds _ b.rIn_pos
-  -- Uniform confinement of the orbit to the inner ball.
   obtain ⟨S, T', hS_open, hv₀_S, hT'_pos, hT'_lt_Tcap, hz_ball_S, horbit_in⟩ :=
     flowOrbit_uniform_confinement (Φ := Φ) (z₀ := (x₀, w₀)) (ρ_f := ρf) (T_f := Tcap)
       (z := z) (v₀ := v₀) (W := Metric.ball ((x₀, w₀) : E × E) b.rIn)
       hρf_pos hTcap_pos hΦ_cont' hΦ_init0 hz_contAt hz0 hW_nhds
-  -- Pick an open `ball v₀ r₀ ⊆ S`, then shrink to `r := min r₀ rz`.
   obtain ⟨r₀, hr₀_pos, hr₀_sub⟩ := Metric.isOpen_iff.mp hS_open v₀ hv₀_S
   set r : ℝ := min r₀ rz with hr_def
   have hr_pos : 0 < r := lt_min hr₀_pos hrz
@@ -1187,12 +921,10 @@ private theorem intrinsicGeodesic_window_of_junction_data
   have hr_le_rz : r ≤ rz := min_le_right _ _
   have hr_sub : Metric.ball v₀ r ⊆ S :=
     subset_trans (Metric.ball_subset_ball hr_le_r₀) hr₀_sub
-  -- Geometric facts about the bump radii.
   have hrIn_le_rOut : b.rIn ≤ b.rOut := le_of_lt b.rIn_lt_rOut
   have hballIn_sub_target : Metric.closedBall ((x₀, w₀) : E × E) b.rIn ⊆
       (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) :=
     subset_trans (Metric.closedBall_subset_closedBall hrIn_le_rOut) hb_sub
-  -- `z v ∈ ball z₀ ρf ⊆ ball z₀ ρΦ` and `z v ∈ closedBall z₀ rPL` for `v ∈ ball v₀ r`.
   have hz_ball_ρf : ∀ v ∈ Metric.ball v₀ r, z v ∈ Metric.ball ((x₀, w₀) : E × E) ρf :=
     fun v hv => hz_ball_S v (hr_sub hv)
   have hz_ball_r : ∀ v ∈ Metric.ball v₀ r, z v ∈ Metric.ball ((x₀, w₀) : E × E) ρΦ :=
@@ -1204,36 +936,28 @@ private theorem intrinsicGeodesic_window_of_junction_data
     rw [Metric.mem_ball] at this
     rw [Metric.mem_closedBall]
     exact le_of_lt (lt_of_lt_of_le this hρf_le_rPL)
-  -- `Φ (z v, 0) = z v` for `v ∈ ball v₀ r` (Picard initial law).
   have hΦinit : ∀ v ∈ Metric.ball v₀ r, Φ (z v, 0) = z v := by
     intro v hv
     exact hΦ_loc.apply_initial (z v) (hz_PL v hv)
-  -- The flow-orbit stays in `closedBall z₀ b.rIn` on `Ioo (-T') T'`.
   have hΦ_in : ∀ v ∈ Metric.ball v₀ r, ∀ s ∈ Set.Ioo (-T') T',
       Φ (z v, s) ∈ Metric.closedBall ((x₀, w₀) : E × E) b.rIn := by
     intro v hv s hs
     exact Metric.ball_subset_closedBall (horbit_in v (hr_sub hv) s hs)
-  -- `z v ∈ ball z₀ b.rIn` (orbit at `s = 0` is `z v`, which lies in the inner ball).
   have hz_ball_rIn : ∀ v ∈ Metric.ball v₀ r,
       z v ∈ Metric.ball ((x₀, w₀) : E × E) b.rIn := by
     intro v hv
     have h0 : (0 : ℝ) ∈ Set.Ioo (-T') T' := ⟨by linarith, hT'_pos⟩
     have := horbit_in v (hr_sub hv) 0 h0
     rwa [hΦinit v hv] at this
-  -- The flow-orbit ODE on `Ioo (-T') T'`: confined to the inner ball, the cutoff
-  -- field equals `chartPhaseVF`, so the orbit solves the genuine chart-phase ODE.
   have hT'_le_εPL : T' ≤ εPL := le_of_lt (lt_of_lt_of_le hT'_lt_Tcap hTcap_le_εPL)
   have hΦ_phase : ∀ v ∈ Metric.ball v₀ r, ∀ s ∈ Set.Ioo (-T') T',
       HasDerivAt (fun τ => Φ (z v, τ))
         (chartPhaseVF (I := I) g α (Φ (z v, s))) s := by
     intro v hv s hs
-    -- The flow's defining within-derivative at `s` over `Icc (-εPL) εPL`, value the
-    -- cutoff field at the orbit point.
     have hs_Icc : s ∈ Set.Icc (-εPL) εPL := by
       rw [Set.mem_Icc]
       exact ⟨by linarith [hs.1, hT'_le_εPL], by linarith [hs.2, hT'_le_εPL]⟩
     have hd := hΦ_loc.hasDerivWithinAt (z v) (hz_PL v hv) s hs_Icc
-    -- Upgrade `HasDerivWithinAt` on `Icc` to `HasDerivAt` at the interior point `s`.
     have hIoo_nhds : Set.Ioo (-εPL) εPL ∈ 𝓝 s := by
       apply isOpen_Ioo.mem_nhds
       rw [Set.mem_Ioo]
@@ -1243,7 +967,6 @@ private theorem intrinsicGeodesic_window_of_junction_data
     have hd' : HasDerivAt (fun τ => Φ (z v, τ))
         (chartPhaseVFTime (I := I) g α (x₀, w₀) b s (Φ (z v, s))) s :=
       hd.hasDerivAt hIcc_nhds
-    -- On the inner ball, the cutoff field equals `chartPhaseVF`.
     have horbit_inner : Φ (z v, s) ∈ Metric.closedBall ((x₀, w₀) : E × E) b.rIn :=
       hΦ_in v hv s hs
     have hcutoff_eq :
@@ -1252,10 +975,8 @@ private theorem intrinsicGeodesic_window_of_junction_data
       rw [chartPhaseVFTime_apply]
       exact chartPhaseVFCutoff_eq_of_mem_closedBall (I := I) g α (x₀, w₀) b horbit_inner
     rwa [hcutoff_eq] at hd'
-  -- The geodesic-side confinement window from the hypothesis `hgeo`.
   obtain ⟨rgeo, εgeo, hrgeo_pos, hεgeo_pos, _hrgeo_le, _hz_geo, hgeo_src0, hgeo_in0,
       hinit0⟩ := hgeo b hb_sub
-  -- The final window: radius `rfin := min r rgeo`, horizon `Tfin := min T' εgeo`.
   set rfin : ℝ := min r rgeo with hrfin_def
   have hrfin_pos : 0 < rfin := lt_min hr_pos hrgeo_pos
   have hrfin_le_r : rfin ≤ r := min_le_left _ _
@@ -1264,7 +985,6 @@ private theorem intrinsicGeodesic_window_of_junction_data
   have hTfin_pos : 0 < Tfin := lt_min hT'_pos hεgeo_pos
   have hTfin_le_T' : Tfin ≤ T' := min_le_left _ _
   have hTfin_le_εgeo : Tfin ≤ εgeo := min_le_right _ _
-  -- Shrinking inclusions on the parameter ball and the time interval.
   have hball_sub : Metric.ball v₀ rfin ⊆ Metric.ball v₀ r :=
     Metric.ball_subset_ball hrfin_le_r
   have hball_sub_geo : Metric.ball v₀ rfin ⊆ Metric.ball v₀ rgeo :=
@@ -1275,7 +995,6 @@ private theorem intrinsicGeodesic_window_of_junction_data
       s ∈ Set.Ioo (tₖ - εgeo) (tₖ + εgeo) := by
     intro s hs
     exact Set.Ioo_subset_Ioo (by linarith) (by linarith) hs
-  -- Re-derive the per-junction inputs on the final window.
   have hΦ_phase' : ∀ v ∈ Metric.ball v₀ rfin, ∀ s ∈ Set.Ioo (-Tfin) Tfin,
       HasDerivAt (fun τ => Φ (z v, τ))
         (chartPhaseVF (I := I) g α (Φ (z v, s))) s :=
@@ -1301,12 +1020,10 @@ private theorem intrinsicGeodesic_window_of_junction_data
     fun v hv => hinit0 v (hball_sub_geo hv)
   have hΦinit' : ∀ v ∈ Metric.ball v₀ rfin, Φ (z v, 0) = z v :=
     fun v hv => hΦinit v (hball_sub hv)
-  -- Identify the geodesic with the flow projection on the final window.
   have hident := perJunction_flowIdentification (I := I) g hEnorm p v₀
     (α := α) (Φ := Φ) (z₀ := (x₀, w₀)) (z := z) (tₖ := tₖ) (r := rfin) (R := b.rIn)
     (T' := Tfin) hTfin_pos hballIn_sub_target hΦ_phase' hΦ_in' hgeo_src hgeo_in hinit
     hΦinit'
-  -- Deliver joint continuity on the final window.
   refine ⟨rfin, Tfin, hrfin_pos, hTfin_pos, ?_⟩
   have htgt : ∀ v ∈ Metric.ball v₀ rfin, ∀ τ ∈ Set.Ioo (-Tfin) Tfin,
       (Φ (z v, τ)).1 ∈ (extChartAt I α).target := by
@@ -1324,25 +1041,6 @@ private theorem intrinsicGeodesic_window_of_junction_data
     (ρ := ρΦ) (T := TΦ) (le_of_lt (lt_of_lt_of_le
       (lt_of_le_of_lt hTfin_le_T' hT'_lt_Tcap) hTcap_le_TΦ))
     hΦ_cont hz_cont_r hz_ball_rfin htgt hident
-
-/-! ### Phase-point continuity: the velocity bridge and the foot-varying lift
-
-The junction data feeding `intrinsicGeodesic_window_of_junction_data` requires the
-phase-point map
-`z v := (chartCurve α γ_v t, deriv (chartCurve α γ_v) t)`
-to be continuous in `v`.  The first component is `extChartAt I α (γ_v t)` — a
-continuous image of the foot `γ_v t`; the second component is the *chart-`α`
-velocity*, which by the chain rule equals the trivialization-`α` coordinate of the
-intrinsic velocity vector `mfderiv γ_v t (1)`.
-
-We package these two facts as a single identity: the phase point `z v` equals the
-chart-`⟨α, 0⟩`-product reading of the *velocity tangent-bundle point*
-`liftPt v t := ⟨γ_v t, mfderiv γ_v t (1)⟩`.  Phase-point continuity then reduces to
-continuity of `v ↦ liftPt v t` as a point of `TM` (the chart-of-`TM` product map is
-continuous on the chart source), which is a chart-independent statement.  The
-foot-varying tangent-bundle lift, in turn, is produced by inverting the chart of
-`TM` at `⟨α, 0⟩` applied to the foot-varying phase flow, exactly as in
-`chartFlowOrbitLift` but with a varying phase basepoint. -/
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -1393,14 +1091,12 @@ private theorem chartFiberCoord_intrinsicVelocityLift
         (intrinsicGeodesic (I := I) g hEnorm p v)) s := by
   classical
   set γ : ℝ → M := intrinsicGeodesic (I := I) g hEnorm p v with hγ_def
-  -- `γ` is `C¹`, hence `MDifferentiableAt` at `s`.
   have hγ_mdiff : MDifferentiableAt 𝓘(ℝ, ℝ) I γ s := by
     have hcm : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ Set.univ :=
       intrinsicGeodesic_contMDiffOn (I := I) g hEnorm p v
     have hcmAt : ContMDiffAt 𝓘(ℝ, ℝ) I 1 γ s :=
       (hcm s (Set.mem_univ s)).contMDiffAt Filter.univ_mem
     exact hcmAt.mdifferentiableAt (by norm_num)
-  -- `chartFiberCoord α (liftPt) = (triv α).continuousLinearMapAt (mfderiv γ s 1)`.
   have hfiber :
       chartFiberCoord (I := I) α (intrinsicVelocityLift (I := I) g hEnorm p v s) =
         ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ s))
@@ -1412,7 +1108,6 @@ private theorem chartFiberCoord_intrinsicVelocityLift
     rw [chartFiberCoord_def]
     change (trivializationAt E (TangentSpace I) α
       (intrinsicVelocityLift (I := I) g hEnorm p v s)).2 = _
-    -- The lift is `⟨γ s, mfderiv γ s 1⟩`; its `triv`-fibre is `linearMapAt (γ s) (mfderiv γ s 1)`.
     have hsnd : (trivializationAt E (TangentSpace I) α
         (intrinsicVelocityLift (I := I) g hEnorm p v s)).2 =
         (trivializationAt E (TangentSpace I) α).linearMapAt ℝ (γ s)
@@ -1422,10 +1117,8 @@ private theorem chartFiberCoord_intrinsicVelocityLift
     rw [hsnd]
     rfl
   rw [hfiber]
-  -- Chain rule: `(triv α).continuousLinearMapAt (mfderiv γ s 1) = fderiv (extChartAt α ∘ γ) s 1`.
   rw [MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
     (I := I) (M := M) (γ := γ) hγ_mdiff α hs]
-  -- `fderiv (extChartAt α ∘ γ) s 1 = deriv (chartCurve α γ) s` (definitional).
   rfl
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
@@ -1449,27 +1142,18 @@ private theorem phasePoint_eq_extChartAt_tangent_intrinsicVelocityLift
       extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)
         (intrinsicVelocityLift (I := I) g hEnorm p v s) := by
   classical
-  -- `liftPt v s`'s projection is the foot, which lies in chart-`α` source.
   have hproj : (intrinsicVelocityLift (I := I) g hEnorm p v s).proj ∈
       (chartAt H α).source := hs
-  -- The chart-of-`TM` product expansion at `⟨α, 0⟩`.
   rw [extChartAt_tangent_zero_apply (I := I) α hproj]
-  -- First component: `extChartAt α (liftPt v s).proj = chartCurve α γ_v s`.
-  -- Second component: the trivialization coordinate = chart velocity (velocity bridge).
   refine Prod.ext ?_ ?_
   · simp only [intrinsicVelocityLift_proj,
       DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve_def]
-  · -- `(triv α).continuousLinearMapAt (γ s) (liftPt v s).snd = chartFiberCoord α (liftPt v s)`.
-    have h := chartFiberCoord_intrinsicVelocityLift (I := I) g hEnorm p v α s hs
+  · have h := chartFiberCoord_intrinsicVelocityLift (I := I) g hEnorm p v α s hs
     rw [chartFiberCoord_def] at h
-    -- The fibre component of the chart-of-TM reading is exactly `(triv α).continuousLinearMapAt …`.
     rw [← h]
-    -- Both sides are `(triv α).continuousLinearMapAt (γ s) (mfderiv γ s 1)` resp.
-    -- `(triv α (liftPt v s)).2`; identify via `extChartAt_tangent_apply_snd`.
     have hsnd := extChartAt_tangent_apply_snd (I := I)
       (q := (⟨α, (0 : E)⟩ : TangentBundle I M))
       (p := intrinsicVelocityLift (I := I) g hEnorm p v s) hproj
-    -- `(triv α (liftPt)).2 = (triv α).continuousLinearMapAt (liftPt).proj (liftPt).snd`.
     exact hsnd
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
@@ -1520,7 +1204,6 @@ private theorem intrinsicVelocityLift_window_of_junction_data
           intrinsicVelocityLift (I := I) g hEnorm p vt.1 vt.2)
         ((Metric.ball v₀ r) ×ˢ Set.Ioo (tₖ - ε) (tₖ + ε)) := by
   classical
-  -- The per-chart joint-`C¹` phase flow `Φ` centred at the base phase point.
   obtain ⟨b, rPL, εPL, ρΦ, TΦ, Φ, hrPL, hεPL, hρΦ, hTΦ, hb_sub, hΦ_loc, hΦ_C1,
       hΦ_init0⟩ :=
     Geodesic.exists_chartPhase_contDiffOn_isLocalFlow_combined (I := I) (M := M)
@@ -1612,7 +1295,6 @@ private theorem intrinsicVelocityLift_window_of_junction_data
     rwa [hcutoff_eq] at hd'
   obtain ⟨rgeo, εgeo, hrgeo_pos, hεgeo_pos, _hrgeo_le, _hz_geo, hgeo_src0, hgeo_in0,
       hinit0⟩ := hgeo b hb_sub
-  -- The final window: radius `rfin := min r rgeo`, horizon `Tfin := min T' εgeo`.
   set rfin : ℝ := min r rgeo with hrfin_def
   have hrfin_pos : 0 < rfin := lt_min hr_pos hrgeo_pos
   have hrfin_le_r : rfin ≤ r := min_le_left _ _
@@ -1631,7 +1313,6 @@ private theorem intrinsicVelocityLift_window_of_junction_data
       s ∈ Set.Ioo (tₖ - εgeo) (tₖ + εgeo) := by
     intro s hs
     exact Set.Ioo_subset_Ioo (by linarith) (by linarith) hs
-  -- Re-derive the per-junction inputs on the final window.
   have hΦ_phase' : ∀ v ∈ Metric.ball v₀ rfin, ∀ s ∈ Set.Ioo (-Tfin) Tfin,
       HasDerivAt (fun τ => Φ (z v, τ))
         (chartPhaseVF (I := I) g α (Φ (z v, s))) s :=
@@ -1657,20 +1338,17 @@ private theorem intrinsicVelocityLift_window_of_junction_data
     fun v hv => hinit0 v (hball_sub_geo hv)
   have hΦinit' : ∀ v ∈ Metric.ball v₀ rfin, Φ (z v, 0) = z v :=
     fun v hv => hΦinit v (hball_sub hv)
-  -- Full-phase identification: the geodesic phase pair equals the flow orbit.
   have hpair_ident := perJunction_phaseIdentification (I := I) g hEnorm p v₀
     (α := α) (Φ := Φ) (z₀ := (x₀, w₀)) (z := z) (tₖ := tₖ) (r := rfin) (R := b.rIn)
     (T' := Tfin) hTfin_pos hballIn_sub_target hΦ_phase' hΦ_in' hgeo_src hgeo_in hinit
     hΦinit'
   refine ⟨rfin, Tfin, hrfin_pos, hTfin_pos, ?_⟩
-  -- The orbit's first component stays in the chart target (inner ball confinement).
   have htgt : ∀ v ∈ Metric.ball v₀ rfin, ∀ τ ∈ Set.Ioo (-Tfin) Tfin,
       Φ (z v, τ) ∈ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) := by
     intro v hv τ hτ
     exact hballIn_sub_target (hΦ_in' v hv τ hτ)
   have hz_cont_r : ContinuousOn z (Metric.ball v₀ rfin) :=
     hz_cont.mono (Metric.ball_subset_ball (le_trans hrfin_le_r hr_le_rz))
-  -- The time-shift `t ↦ t - tₖ` maps the window onto `Ioo (-Tfin) Tfin`.
   have hshift_cont : ContinuousOn (fun vt : TangentSpace I p × ℝ => (vt.1, vt.2 - tₖ))
       ((Metric.ball v₀ rfin) ×ˢ Set.Ioo (tₖ - Tfin) (tₖ + Tfin)) :=
     (continuousOn_fst).prodMk ((continuousOn_snd).sub continuousOn_const)
@@ -1681,7 +1359,6 @@ private theorem intrinsicVelocityLift_window_of_junction_data
     refine ⟨hvt.1, ?_, ?_⟩
     · exact lt_sub_iff_add_lt.mpr (by linarith [hvt.2.1])
     · exact sub_lt_iff_lt_add.mpr (by linarith [hvt.2.2])
-  -- The flow-orbit map `(v, τ) ↦ Φ (z v, τ)` is jointly continuous on the shifted window.
   have hTfin_lt_TΦ : Tfin < TΦ :=
     lt_of_le_of_lt hTfin_le_T' (lt_of_lt_of_le hT'_lt_Tcap hTcap_le_TΦ)
   have hΦorbit_cont : ContinuousOn
@@ -1703,37 +1380,31 @@ private theorem intrinsicVelocityLift_window_of_junction_data
       intro vτ hvτ
       exact ⟨hz_ball_r vτ.1 (hball_sub hvτ.1), hvτ.2⟩
     exact hΦ_cont''.comp hpair_cont hpair_maps
-  -- The chart-of-`TM` inverse at `⟨α, 0⟩` is continuous on its target.
   have hsymm_cont : ContinuousOn
       (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).symm
       (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).target :=
     continuousOn_extChartAt_symm (I := I.tangent)
       (⟨α, (0 : E)⟩ : TangentBundle I M)
-  -- The orbit lands in the chart-of-`TM` target.
   have horbit_maps : Set.MapsTo
       (fun vτ : TangentSpace I p × ℝ => Φ (z vτ.1, vτ.2))
       ((Metric.ball v₀ rfin) ×ˢ Set.Ioo (-Tfin) Tfin)
       (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).target := by
     intro vτ hvτ
     exact mem_extChartAt_tangent_zero_target (I := I) α (htgt vτ.1 hvτ.1 vτ.2 hvτ.2)
-  -- `(v, τ) ↦ (extChartAt I.tangent ⟨α,0⟩).symm (Φ (z v, τ))` is jointly continuous.
   have hlift_orbit_cont : ContinuousOn
       (fun vτ : TangentSpace I p × ℝ =>
         (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).symm
           (Φ (z vτ.1, vτ.2)))
       ((Metric.ball v₀ rfin) ×ˢ Set.Ioo (-Tfin) Tfin) :=
     hsymm_cont.comp hΦorbit_cont horbit_maps
-  -- Compose with the time shift.
   have hcomp_cont : ContinuousOn
       (fun vt : TangentSpace I p × ℝ =>
         (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).symm
           (Φ (z vt.1, vt.2 - tₖ)))
       ((Metric.ball v₀ rfin) ×ˢ Set.Ioo (tₖ - Tfin) (tₖ + Tfin)) :=
     hlift_orbit_cont.comp hshift_cont hshift_maps
-  -- Rewrite via the velocity-lift identification on the window.
   apply hcomp_cont.congr
   rintro ⟨v, s⟩ ⟨hv, hs⟩
-  -- On the window, `liftPt v s = (extChartAt I.tangent ⟨α,0⟩).symm (Φ (z v, s - tₖ))`.
   have hgeo_src_s : intrinsicGeodesic (I := I) g hEnorm p v s ∈ (chartAt H α).source :=
     hgeo_src v hv s hs
   have hphase :
@@ -1742,14 +1413,11 @@ private theorem intrinsicVelocityLift_window_of_junction_data
         deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
           (intrinsicGeodesic (I := I) g hEnorm p v)) s) : E × E) =
         Φ (z v, s - tₖ) := hpair_ident v hv s hs
-  -- The phase pair equals the chart-of-`TM` reading of the lift.
   have hbridge := phasePoint_eq_extChartAt_tangent_intrinsicVelocityLift
     (I := I) g hEnorm p v α s hgeo_src_s
-  -- So the chart-of-`TM` reading of the lift equals `Φ (z v, s - tₖ)`.
   have hread : extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)
       (intrinsicVelocityLift (I := I) g hEnorm p v s) = Φ (z v, s - tₖ) := by
     rw [← hbridge]; exact hphase
-  -- The lift is the chart-of-`TM` inverse of that reading.
   have hlift_mem : intrinsicVelocityLift (I := I) g hEnorm p v s ∈
       (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).source := by
     rw [extChartAt_source]
@@ -1765,17 +1433,6 @@ private theorem intrinsicVelocityLift_window_of_junction_data
     _ = (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).symm
           (Φ (z v, s - tₖ)) := by rw [hread]
 
-/-! ### Finite-cover assembly: from local time-windows to a uniform ball
-
-The per-junction producer `perChart_jointContinuity_of_flowIdentifiedOn` yields
-joint continuity on a *local* window `ball v₀ r ×ˢ Ioo (t - ε) (t + ε)` around
-each time `t ∈ [0, 1]`.  The following purely-topological lemma assembles these
-local windows into a single `ContinuousOn` on `ball v₀ ρ ×ˢ [0, 1]` for a uniform
-`ρ > 0`: the open `ε`-balls in time cover the compact `[0, 1]`, a finite subcover
-fixes finitely many windows, `ρ` is the minimum of the finitely many radii, and
-the windows glue because joint continuity is a local property (each point of the
-product lies in some window, whose `ContinuousOn` restricts to a
-`ContinuousWithinAt`). -/
 private theorem continuousOn_ball_prod_Icc_of_local_windows
     {V : Type*} [PseudoMetricSpace V] {Y : Type*} [TopologicalSpace Y]
     (v₀ : V) (f : V × ℝ → Y)
@@ -1784,9 +1441,7 @@ private theorem continuousOn_ball_prod_Icc_of_local_windows
     ∃ ρ : ℝ, 0 < ρ ∧
       ContinuousOn f ((Metric.ball v₀ ρ) ×ˢ Set.Icc (0 : ℝ) 1) := by
   classical
-  -- Choose the window data per time.
   choose! r ε hr hε hcont using H
-  -- The open `ε`-balls cover the compact `[0, 1]`.
   set U : Set.Icc (0 : ℝ) 1 → Set ℝ := fun t => Metric.ball (t : ℝ) (ε t) with hU
   have hUopen : ∀ t, IsOpen (U t) := fun _ => Metric.isOpen_ball
   have hcover : Set.Icc (0 : ℝ) 1 ⊆ ⋃ t, U t := by
@@ -1795,7 +1450,6 @@ private theorem continuousOn_ball_prod_Icc_of_local_windows
     simp only [hU]
     exact Metric.mem_ball_self (hε x hx)
   obtain ⟨S, hS⟩ := isCompact_Icc.elim_finite_subcover U hUopen hcover
-  -- `S` is nonempty (else `[0, 1] ⊆ ∅`, contradicting `0 ∈ [0, 1]`).
   have hSne : S.Nonempty := by
     by_contra h
     rw [Finset.not_nonempty_iff_eq_empty] at h
@@ -1805,7 +1459,6 @@ private theorem continuousOn_ball_prod_Icc_of_local_windows
     rw [Set.mem_iUnion₂] at hmem
     obtain ⟨t, ht, _⟩ := hmem
     exact (Finset.notMem_empty t) ht
-  -- The uniform radius: the minimum of the finitely many `r` over `S` (positive).
   set ρ : ℝ := S.inf' hSne (fun t => r (t : ℝ)) with hρ
   have hρpos : 0 < ρ := by
     rw [hρ, Finset.lt_inf'_iff]
@@ -1815,12 +1468,9 @@ private theorem continuousOn_ball_prod_Icc_of_local_windows
     intro t ht
     rw [hρ]; exact Finset.inf'_le _ ht
   refine ⟨ρ, hρpos, ?_⟩
-  -- Prove `ContinuousOn` pointwise.
   rintro ⟨v, x⟩ ⟨hv, hx⟩
-  -- The point's time lies in some chosen window's `ε`-ball.
   obtain ⟨t, ht_S, hW_eq⟩ := Set.mem_iUnion₂.mp (hS hx)
   simp only [hU] at hW_eq
-  -- The window on which `f` is continuous.
   set Wt : Set (V × ℝ) :=
     (Metric.ball v₀ (r (t : ℝ))) ×ˢ Set.Ioo ((t : ℝ) - ε (t : ℝ)) ((t : ℝ) + ε (t : ℝ))
     with hWt
@@ -1831,7 +1481,6 @@ private theorem continuousOn_ball_prod_Icc_of_local_windows
   have hv_Wt : v ∈ Metric.ball v₀ (r (t : ℝ)) :=
     Metric.ball_subset_ball (hρ_le t ht_S) hv
   have hcwa : ContinuousWithinAt f Wt (v, x) := hcontWt _ ⟨hv_Wt, hx_Ioo⟩
-  -- An open neighbourhood of `(v, x)` contained in `Wt`.
   set N : Set (V × ℝ) := (Metric.ball v₀ ρ) ×ˢ (Metric.ball (t : ℝ) (ε (t : ℝ))) with hN
   have hN_open : IsOpen N := Metric.isOpen_ball.prod Metric.isOpen_ball
   have hpt_N : (v, x) ∈ N := ⟨hv, by
@@ -1897,22 +1546,18 @@ private theorem intrinsicGeodesic_junctionData_of_lift_continuousOn
           deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
             (intrinsicGeodesic (I := I) g hEnorm p v)) t) : E × E) = z v)) := by
   classical
-  -- Abbreviation for the lift and the chart-of-`TM` reading.
   set L : TangentSpace I p × ℝ → TangentBundle I M :=
     fun vs => intrinsicVelocityLift (I := I) g hEnorm p vs.1 vs.2 with hL_def
   set W : Set (TangentSpace I p × ℝ) := (Metric.ball v₀ r₀) ×ˢ Set.Ioo a c with hW_def
   have hW_open : IsOpen W := Metric.isOpen_ball.prod isOpen_Ioo
   have hpt_W : ((v₀, t) : TangentSpace I p × ℝ) ∈ W := ⟨Metric.mem_ball_self hr₀, ht_mem⟩
-  -- The foot `(v, s) ↦ γ_v s = (L (v, s)).proj` is jointly continuous on `W`.
   have hπ_cont : Continuous (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
     FiberBundle.continuous_proj E (TangentSpace I)
   have hfoot_cont : ContinuousOn
       (fun vs : TangentSpace I p × ℝ => (L vs).proj) W :=
     hπ_cont.comp_continuousOn hlift_cont
-  -- `γ_{v₀} t ∈ chart α source` (hypothesis); pull back the (open) source.
   have hfoot_v₀t : (L ((v₀, t) : TangentSpace I p × ℝ)).proj =
       intrinsicGeodesic (I := I) g hEnorm p v₀ t := rfl
-  -- `(v, s) ↦ γ_v s ∈ chart α source` is open, contains `(v₀, t)`: find sub-window.
   have hpreim_open : IsOpen
       (W ∩ (fun vs : TangentSpace I p × ℝ => (L vs).proj) ⁻¹' (chartAt H α).source) :=
     hfoot_cont.isOpen_inter_preimage hW_open (chartAt H α).open_source
@@ -1936,7 +1581,6 @@ private theorem intrinsicGeodesic_junctionData_of_lift_continuousOn
       rw [Real.dist_eq, abs_lt]; constructor <;> linarith [hs.1, hs.2]
     calc max (dist v v₀) (dist s t) < δ / 2 := max_lt hv hsdist
       _ < δ := by linarith
-  -- On the sub-window, `γ_v s ∈ chart α source` and `(v, s) ∈ W`.
   have hsrc_mem : ∀ v ∈ Metric.ball v₀ rsrc, ∀ s ∈ Set.Ioo (t - εsrc) (t + εsrc),
       intrinsicGeodesic (I := I) g hEnorm p v s ∈ (chartAt H α).source := by
     intro v hv s hs
@@ -1946,7 +1590,6 @@ private theorem intrinsicGeodesic_junctionData_of_lift_continuousOn
       ((v, s) : TangentSpace I p × ℝ) ∈ W := by
     intro v hv s hs
     exact (hsrc_sub (Set.mk_mem_prod hv hs)).1
-  -- The chart-of-`TM` reading of the lift, continuous on the sub-window.
   set phaseRead : TangentSpace I p × ℝ → E × E :=
     fun vs => extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M) (L vs)
     with hphaseRead_def
@@ -1954,7 +1597,6 @@ private theorem intrinsicGeodesic_junctionData_of_lift_continuousOn
     (Metric.ball v₀ rsrc) ×ˢ Set.Ioo (t - εsrc) (t + εsrc) with hWsub_def
   have hWsub_sub_W : Wsub ⊆ W := by
     rintro ⟨v, s⟩ ⟨hv, hs⟩; exact hsubW v hv s hs
-  -- `extChartAt I.tangent ⟨α,0⟩` continuous on its source; the lift lands in source.
   have hext_cont : ContinuousOn (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M))
       (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).source :=
     continuousOn_extChartAt (I := I.tangent) (⟨α, (0 : E)⟩ : TangentBundle I M)
@@ -1969,7 +1611,6 @@ private theorem intrinsicGeodesic_junctionData_of_lift_continuousOn
   have hphaseRead_cont : ContinuousOn phaseRead Wsub := by
     refine hext_cont.comp (hlift_cont.mono hWsub_sub_W) ?_
     exact hL_mem_src
-  -- The phase point equals the reading on the sub-window (`phasePoint` bridge).
   have hphase_eq : ∀ v ∈ Metric.ball v₀ rsrc, ∀ s ∈ Set.Ioo (t - εsrc) (t + εsrc),
       ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
           (intrinsicGeodesic (I := I) g hEnorm p v) s,
@@ -1978,12 +1619,10 @@ private theorem intrinsicGeodesic_junctionData_of_lift_continuousOn
     intro v hv s hs
     exact phasePoint_eq_extChartAt_tangent_intrinsicVelocityLift (I := I) g hEnorm p v α s
       (hsrc_mem v hv s hs)
-  -- `z` continuity: `z v = phaseRead (v, t)` on `ball v₀ rsrc` (slice at `s = t`).
   have ht_mem_εsrc : t ∈ Set.Ioo (t - εsrc) (t + εsrc) := ⟨by linarith, by linarith⟩
   have hz_slice : ∀ v ∈ Metric.ball v₀ rsrc, z v = phaseRead (v, t) := by
     intro v hv
     rw [hz]; exact hphase_eq v hv t ht_mem_εsrc
-  -- Slice map `v ↦ (v, t)` continuous into `Wsub`.
   have hslice_cont : ContinuousOn (fun v : TangentSpace I p => ((v, t) : TangentSpace I p × ℝ))
       (Metric.ball v₀ rsrc) :=
     continuousOn_id.prodMk continuousOn_const
@@ -1993,28 +1632,21 @@ private theorem intrinsicGeodesic_junctionData_of_lift_continuousOn
   have hz_cont_rsrc : ContinuousOn z (Metric.ball v₀ rsrc) := by
     apply ContinuousOn.congr (hphaseRead_cont.comp hslice_cont hslice_maps)
     intro v hv; exact hz_slice v hv
-  -- The base reading at `(v₀, t)` is `(x₀, w₀) = z v₀`.
   have hbase_read : phaseRead (v₀, t) = (x₀, w₀) := by
     rw [← hz_slice v₀ (Metric.mem_ball_self hrsrc_pos), hz0]
   refine ⟨rsrc, hrsrc_pos, hz_cont_rsrc, ?_⟩
-  -- The `hgeo` family: for each bump `b`, produce `rgeo, εgeo` by continuity.
   intro b _hb_sub
-  -- `phaseRead` is continuous at `(v₀, t)` with value `(x₀, w₀)`; its preimage of the
-  -- inner ball is a neighbourhood of `(v₀, t)`.
   have hphaseRead_contAt : ContinuousWithinAt phaseRead Wsub ((v₀, t) : TangentSpace I p × ℝ) :=
     hphaseRead_cont _ ⟨Metric.mem_ball_self hrsrc_pos, ht_mem_εsrc⟩
-  -- `Wsub` is a neighbourhood of `(v₀, t)`; upgrade to `ContinuousAt`.
   have hWsub_open : IsOpen Wsub := Metric.isOpen_ball.prod isOpen_Ioo
   have hWsub_nhds : Wsub ∈ 𝓝 ((v₀, t) : TangentSpace I p × ℝ) :=
     hWsub_open.mem_nhds ⟨Metric.mem_ball_self hrsrc_pos, ht_mem_εsrc⟩
   have hphaseRead_contAt' : ContinuousAt phaseRead ((v₀, t) : TangentSpace I p × ℝ) :=
     hphaseRead_contAt.continuousAt hWsub_nhds
-  -- Preimage of `ball (x₀,w₀) b.rIn` under `phaseRead` is a nbhd of `(v₀, t)`.
   have hpreim_nhds : phaseRead ⁻¹' (Metric.ball ((x₀, w₀) : E × E) b.rIn) ∈
       𝓝 ((v₀, t) : TangentSpace I p × ℝ) := by
     apply hphaseRead_contAt'.preimage_mem_nhds
     rw [hbase_read]; exact Metric.ball_mem_nhds _ b.rIn_pos
-  -- Extract a product window `ball v₀ rgeo ×ˢ Ioo (t-εgeo) (t+εgeo)` inside the nbhd ∩ Wsub.
   have hinter_nhds : (phaseRead ⁻¹' (Metric.ball ((x₀, w₀) : E × E) b.rIn) ∩ Wsub) ∈
       𝓝 ((v₀, t) : TangentSpace I p × ℝ) :=
     Filter.inter_mem hpreim_nhds hWsub_nhds
@@ -2028,8 +1660,6 @@ private theorem intrinsicGeodesic_junctionData_of_lift_continuousOn
   have hεgeo_pos : 0 < εgeo := lt_min (by linarith) hεsrc_pos
   have hrgeo_le_rsrc : rgeo ≤ rsrc := min_le_right _ _
   have hεgeo_le_εsrc : εgeo ≤ εsrc := min_le_right _ _
-  -- The window `ball v₀ rgeo ×ˢ Ioo (t-εgeo) (t+εgeo)` is inside `O`, hence the inner-ball
-  -- preimage and `Wsub`.
   have hwindow_sub : ∀ v ∈ Metric.ball v₀ rgeo, ∀ s ∈ Set.Ioo (t - εgeo) (t + εgeo),
       ((v, s) : TangentSpace I p × ℝ) ∈ O := by
     intro v hv s hs
@@ -2053,19 +1683,16 @@ private theorem intrinsicGeodesic_junctionData_of_lift_continuousOn
     exact hsrc_mem v (Metric.ball_subset_ball hrgeo_le_rsrc hv) s
       (Set.Ioo_subset_Ioo (by linarith [hεgeo_le_εsrc]) (by linarith [hεgeo_le_εsrc]) hs)
   refine ⟨rgeo, εgeo, hrgeo_pos, hεgeo_pos, hrgeo_le_rsrc, ?_, hwindow_src, ?_, ?_⟩
-  · -- `z v ∈ ball b.rIn` for `v ∈ ball rgeo` (the `s = t` slice).
-    intro v hv
+  · intro v hv
     have ht_geo : t ∈ Set.Ioo (t - εgeo) (t + εgeo) := ⟨by linarith, by linarith⟩
     have hread := hwindow_inner v hv t ht_geo
     rwa [← hz_slice v (Metric.ball_subset_ball hrgeo_le_rsrc hv)] at hread
-  · -- The phase pair at `s` lies in `closedBall b.rIn`.
-    intro v hv s hs
+  · intro v hv s hs
     have hread := hwindow_inner v hv s hs
     rw [← hphase_eq v (Metric.ball_subset_ball hrgeo_le_rsrc hv) s
       (Set.Ioo_subset_Ioo (by linarith [hεgeo_le_εsrc]) (by linarith [hεgeo_le_εsrc]) hs)] at hread
     exact Metric.ball_subset_closedBall hread
-  · -- The phase pair at `t` equals `z v` (definitional, via `hz`).
-    intro v hv
+  · intro v hv
     rw [hz]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
@@ -2096,7 +1723,6 @@ private theorem intrinsicVelocityLift_continuousOn_step
           intrinsicVelocityLift (I := I) g hEnorm p vs.1 vs.2)
         ((Metric.ball v₀ r') ×ˢ Set.Ioo (τ - ε') (τ + ε')) := by
   classical
-  -- Chart centre and phase point at `τ`.
   set α : M := intrinsicGeodesic (I := I) g hEnorm p v₀ τ with hα_def
   set z : TangentSpace I p → E × E :=
     fun v =>
@@ -2119,14 +1745,12 @@ private theorem intrinsicVelocityLift_continuousOn_step
     exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) α htgt
   have hz0 : z v₀ = (x₀, w₀) := by rw [hx₀_def, hw₀_def]
-  -- Extract the junction data at `τ` from the local lift continuity.
   have hα_src : intrinsicGeodesic (I := I) g hEnorm p v₀ τ ∈ (chartAt H α).source := by
     rw [← hα_def]; exact mem_chart_source H α
   obtain ⟨rz, hrz, hz_cont, hgeo⟩ :=
     intrinsicGeodesic_junctionData_of_lift_continuousOn (I := I) g hEnorm p v₀ τ
       (α := α) hα_src (z := z) hz_def (x₀ := x₀) (w₀ := w₀) hx₀_def hw₀_def hx₀ hz0
       hr₀ hτ_mem hlift_cont
-  -- Feed it to the velocity-lift window producer.
   exact intrinsicVelocityLift_window_of_junction_data (I := I) g hEnorm p v₀ α
     (x₀ := x₀) (w₀ := w₀) hx₀ (z := z) (tₖ := τ) (rz := rz) hrz hz_cont hz0 hgeo
 
@@ -2194,19 +1818,12 @@ theorem intrinsicGeodesic_jointContinuity
         (fun vt : TangentSpace I p × ℝ =>
           intrinsicGeodesic (I := I) g hEnorm p vt.1 vt.2)
         ((Metric.ball v₀ ρ) ×ˢ Set.Icc (0 : ℝ) 1) := by
-  -- Joint continuity is local in time; by `continuousOn_ball_prod_Icc_of_local_windows`
-  -- it suffices to produce, at every base time `t ∈ [0, 1]`, a window
-  -- `ball v₀ r ×ˢ Ioo (t - ε) (t + ε)` of joint continuity, with a uniform ball
-  -- radius then extracted from the finite subcover of `[0, 1]`.
   classical
-  -- `E` is finite-dimensional real normed, hence complete.
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
   refine continuousOn_ball_prod_Icc_of_local_windows (V := TangentSpace I p) v₀
     (fun vt => intrinsicGeodesic (I := I) g hEnorm p vt.1 vt.2) ?_
   intro t ht
-  -- The junction chart is centred at the base-velocity foot `α := γ_{v₀} t`.
   set α : M := intrinsicGeodesic (I := I) g hEnorm p v₀ t with hα_def
-  -- The phase-point map `z v := (chart-coord of foot γ_v t, chart velocity of γ_v at t)`.
   set z : TangentSpace I p → E × E :=
     fun v =>
       ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
@@ -2216,8 +1833,6 @@ theorem intrinsicGeodesic_jointContinuity
     with hz_def
   set x₀ : E := (z v₀).1 with hx₀_def
   set w₀ : E := (z v₀).2 with hw₀_def
-  -- The base phase point's first component is `extChartAt I α α` (since `γ_{v₀} t = α`),
-  -- which lies in the chart-target interior by boundarylessness.
   have hα_foot : intrinsicGeodesic (I := I) g hEnorm p v₀ t = α := rfl
   have hx₀_eq : x₀ = extChartAt I α α := by
     rw [hx₀_def, hz_def]
@@ -2231,10 +1846,6 @@ theorem intrinsicGeodesic_jointContinuity
     exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) α htgt
   have hz0 : z v₀ = (x₀, w₀) := by rw [hx₀_def, hw₀_def]
-  -- The window now follows from the per-junction producer once the two genuinely
-  -- cross-junction data — continuity of the phase point `z` in `v` near `v₀`, and
-  -- the uniform geodesic-side confinement at the junction — are supplied.
-  -- These are the residual content of the finite-cover induction.
   obtain ⟨rz, hrz, hz_cont, hgeo⟩ :
       ∃ rz : ℝ, 0 < rz ∧ ContinuousOn z (Metric.ball v₀ rz) ∧
       (∀ (b : ContDiffBump ((x₀, w₀) : E × E)),
@@ -2255,20 +1866,9 @@ theorem intrinsicGeodesic_jointContinuity
               (intrinsicGeodesic (I := I) g hEnorm p v) t,
             deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
               (intrinsicGeodesic (I := I) g hEnorm p v)) t) : E × E) = z v)) := by
-    -- RESIDUAL (the cross-junction accumulation).  The phase-point map `z` is
-    -- continuous in `v` near `v₀`, and the geodesic stays uniformly (in `v`) in the
-    -- chart-`α` source with its phase curve confined to the inner ball, by the
-    -- velocity-lift accumulation `intrinsicVelocityLift_jointContinuity` (the global
-    -- joint continuity of `(v, s) ↦ intrinsicVelocityLift g hEnorm p v s`) combined
-    -- with the junction-data extraction
-    -- `intrinsicGeodesic_junctionData_of_lift_continuousOn`.  The accumulation is the
-    -- single remaining analytic input; everything downstream
-    -- (`intrinsicGeodesic_window_of_junction_data` and below) is fully proven.
     sorry
   exact intrinsicGeodesic_window_of_junction_data (I := I) g hEnorm p v₀ α
     (x₀ := x₀) (w₀ := w₀) hx₀ (z := z) (tₖ := t) (rz := rz) hrz hz_cont hz0 hgeo
-
-/-! ## 4. Continuity of the intrinsic exponential map -/
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -2297,34 +1897,25 @@ theorem expMapIntrinsic_continuous_of_jointContinuity
           intrinsicGeodesic (I := I) g hEnorm p vt.1 vt.2)
         ((Metric.ball v₀ ρ) ×ˢ Set.Icc (0 : ℝ) 1)) :
     Continuous (fun v : TangentSpace I p => expMapIntrinsic (I := I) g hEnorm p v) := by
-  -- Continuity is pointwise: prove `ContinuousAt (expMapIntrinsic g hEnorm p) v₀`
-  -- for each `v₀`.
   rw [continuous_iff_continuousAt]
   intro v₀
-  -- Joint continuity of `(v, t) ↦ intrinsicGeodesic g hEnorm p v t` on a
-  -- neighbourhood ball of `v₀` times `[0, 1]`.
   obtain ⟨ρ, hρ, hcont⟩ := hjoint v₀
-  -- The slice map `v ↦ (v, 1)` is continuous and lands in the domain.
   set F : TangentSpace I p × ℝ → M :=
     fun vt => intrinsicGeodesic (I := I) g hEnorm p vt.1 vt.2 with hF_def
   set sl : TangentSpace I p → TangentSpace I p × ℝ := fun v => (v, 1) with hsl_def
-  -- `expMapIntrinsic g hEnorm p = F ∘ sl` (definitionally).
   have hcomp_eq :
       (fun v : TangentSpace I p => expMapIntrinsic (I := I) g hEnorm p v) = F ∘ sl := by
     funext v
     simp only [Function.comp_apply, hF_def, hsl_def, expMapIntrinsic]
   rw [hcomp_eq]
-  -- `sl` is continuous and maps `ball v₀ ρ` into `ball v₀ ρ ×ˢ [0, 1]`.
   have hsl_cont : Continuous sl := by
     rw [hsl_def]; exact continuous_id.prodMk continuous_const
   have hsl_maps : Set.MapsTo sl (Metric.ball v₀ ρ)
       ((Metric.ball v₀ ρ) ×ˢ Set.Icc (0 : ℝ) 1) := by
     intro v hv
     exact ⟨hv, ⟨zero_le_one, le_refl 1⟩⟩
-  -- `ball v₀ ρ` is a neighbourhood of `v₀`.
   have hball_nhds : Metric.ball v₀ ρ ∈ 𝓝 v₀ :=
     Metric.isOpen_ball.mem_nhds (Metric.mem_ball_self hρ)
-  -- `F ∘ sl` is continuous within `ball v₀ ρ` at `v₀`, hence continuous at `v₀`.
   have hcw : ContinuousWithinAt (F ∘ sl) (Metric.ball v₀ ρ) v₀ := by
     apply ContinuousOn.continuousWithinAt _ (Metric.mem_ball_self hρ)
     exact hcont.comp hsl_cont.continuousOn hsl_maps

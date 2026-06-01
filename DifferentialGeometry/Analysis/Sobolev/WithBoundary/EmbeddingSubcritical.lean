@@ -99,12 +99,7 @@ namespace WithBoundary
 
 variable {n : ℕ} [NeZero n]
 
-/-! ## Local notation -/
-
 local notation "EuN" => EuclideanSpace ℝ (Fin n)
-
-/-! ## Connecting `wkpNormHalfSpace` and `MemWkpHalfSpace` to the boundaryless
-counterparts on the open interior part -/
 
 /-- By definition, the half-space-Dirichlet `wkpNormHalfSpace k p u Ω` equals
 the boundaryless `wkpNorm k p u (interiorHalfSpace Ω)`. -/
@@ -127,9 +122,6 @@ theorem memWkpHalfSpace_iff_memWkp_interiorHalfSpace
         (d := n) k p u
         (DifferentialGeometry.Analysis.Sobolev.Euclidean.interiorHalfSpace Ω) :=
   Iff.rfl
-
-/-! ## The per-chart Euclidean sub-critical Sobolev embedding on half-space-
-relatively-open carriers -/
 
 /-- **Per-chart Euclidean sub-critical Sobolev embedding on a half-space-
 relatively-open carrier.**
@@ -161,9 +153,6 @@ theorem eLpNorm_p_star_le_const_mul_wkpNormHalfSpace_of_memWkpHalfSpace
       ENNReal.ofReal (DeGiorgi.C_gns n p) * (n : ℝ≥0∞) *
         DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormHalfSpace
           (d := n) 1 (ENNReal.ofReal p) f Ω := by
-  -- The half-space membership is by definition `MemWkp` on the open interior
-  -- part; the half-space norm is by definition the `wkpNorm` on the open
-  -- interior part. Apply the boundaryless theorem.
   have hΩ_int_open :
       IsOpen (DifferentialGeometry.Analysis.Sobolev.Euclidean.interiorHalfSpace
         (d := n) Ω) :=
@@ -171,13 +160,7 @@ theorem eLpNorm_p_star_le_const_mul_wkpNormHalfSpace_of_memWkpHalfSpace
   have h_main :=
     DifferentialGeometry.Analysis.Sobolev.Chart.EuclideanSubcritical.eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
       (d := n) hp_one hp_dim hΩ_int_open hf hf_compact hf_supp
-  -- The conclusion is exactly the bound over `volume.restrict (interiorHalfSpace)`,
-  -- in terms of `wkpNorm` on `interiorHalfSpace`. Rewrite this as
-  -- `wkpNormHalfSpace`. The two are definitionally equal.
   exact h_main
-
-/-! ## Smooth-input variant: the per-chart bound for smooth, compactly-supported
-functions with `tsupport` in the open interior part -/
 
 /-- **Per-chart Euclidean sub-critical Sobolev embedding for smooth inputs.**
 
@@ -204,8 +187,6 @@ theorem eLpNorm_p_star_smooth_le_const_mul_wkpNormHalfSpace
       ENNReal.ofReal (DeGiorgi.C_gns n p) * (n : ℝ≥0∞) *
         DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormHalfSpace
           (d := n) 1 (ENNReal.ofReal p) f Ω := by
-  -- A smooth function with compact support inside the open interior part is
-  -- in `MemWkpHalfSpace = MemWkp` on the open interior part.
   have hΩ_int_open :
       IsOpen (DifferentialGeometry.Analysis.Sobolev.Euclidean.interiorHalfSpace
         (d := n) Ω) :=
@@ -221,13 +202,6 @@ theorem eLpNorm_p_star_smooth_le_const_mul_wkpNormHalfSpace
       (d := n) hΩ_int_open hf_smooth hf_compact hf_supp hp_enn_one 1
   exact eLpNorm_p_star_le_const_mul_wkpNormHalfSpace_of_memWkpHalfSpace
     (n := n) hp_one hp_dim hΩ hf_mem hf_compact hf_supp
-
-/-! ## Per-chart bound applied to chart targets
-
-For a manifold `M` modelled on the canonical Euclidean half-space, every chart
-target `chartTargetEuclid α` is half-space-relatively-open. The Sobolev bounds
-above apply directly to chart-pushed functions whose `tsupport` lies in the
-open interior part of the chart target. -/
 
 variable {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanHalfSpace n) M]
@@ -309,13 +283,6 @@ theorem chartTargetEuclid_eLpNorm_p_star_le_const_mul_wkpNormHalfSpace_of_memWkp
     (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α)
     hf hf_compact hf_supp
 
-/-! ## Chart-pushed analogue: per-chart bounds on `chartPushed`
-
-For `u : M → ℝ`, the chart-pushed function `chartPushed ρ_α α u` is the
-manifold-to-Euclidean transfer of `ρ_α u`. When this chart-pushed function is
-smooth, compactly-supported, and has `tsupport` in the open interior of the
-chart target, the per-chart bounds above apply directly. -/
-
 /-- **Per-chart bound for the chart-pushed function.**
 
 For smooth, compactly-supported chart-pushed functions whose `tsupport` lies
@@ -355,7 +322,6 @@ theorem chartPushed_eLpNorm_p_star_smooth_le_const_mul_wkpNormHalfSpace
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU
               (modelWithCornersEuclideanHalfSpace n) M) α u)
           (chartTargetEuclid (n := n) (M := M) α) := by
-  -- Erase the unused metric.
   let _ := g
   exact chartTargetEuclid_eLpNorm_p_star_smooth_le_const_mul_wkpNormHalfSpace
     (n := n) (M := M) hp_one hp_dim α hf_smooth hf_compact hf_supp
@@ -395,13 +361,6 @@ theorem chartPushed_eLpNorm_p_star_le_const_mul_wkpNormHalfSpace_of_memWkpChart
           (chartTargetEuclid (n := n) (M := M) α) :=
   chartTargetEuclid_eLpNorm_p_star_le_const_mul_wkpNormHalfSpace_of_memWkpHalfSpace
     (n := n) (M := M) hp_one hp_dim α (hu α) hf_compact hf_supp
-
-/-! ## Chart-pushed bound summed over the canonical chart-atlas POU
-
-For a compact `M`, the canonical chart-atlas POU `chartAtlasPOU I M` is a
-locally-finite POU and the `wkpNormChart` is a finite tsum (in fact a finite
-sum) over `M`. Summing the per-chart sub-critical Sobolev bound gives a sum
-of L^{p*} norms on the chart side bounded by `wkpNormChart`. -/
 
 /-- **Summed per-chart bound: smooth-input case.**
 
@@ -444,7 +403,6 @@ theorem chartPushed_sum_eLpNorm_p_star_smooth_le_const_mul_wkpNormChart
       ENNReal.ofReal (DeGiorgi.C_gns n p) * (n : ℝ≥0∞) *
         wkpNormChart (n := n) (M := M) g 1 (ENNReal.ofReal p) u := by
   classical
-  -- Each per-chart bound and sum termwise.
   set C : ℝ≥0∞ := ENNReal.ofReal (DeGiorgi.C_gns n p) * (n : ℝ≥0∞) with hC_def
   have h_per : ∀ α : M,
       eLpNorm
@@ -464,9 +422,7 @@ theorem chartPushed_sum_eLpNorm_p_star_smooth_le_const_mul_wkpNormChart
             (chartTargetEuclid (n := n) (M := M) α) := fun α =>
     chartPushed_eLpNorm_p_star_smooth_le_const_mul_wkpNormHalfSpace
       (n := n) (M := M) g hp_one hp_dim α (h_smooth α) (h_compact α) (h_supp α)
-  -- Sum the per-chart bounds.
   have h_sum := ENNReal.tsum_le_tsum h_per
-  -- The tsum on the RHS factors out C.
   have h_factor : ∑' α : M, C *
         DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormHalfSpace
           (d := n) 1 (ENNReal.ofReal p)

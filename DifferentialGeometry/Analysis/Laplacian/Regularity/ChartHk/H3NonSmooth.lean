@@ -98,17 +98,12 @@ open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.ChartH2NonSmooth
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Headline: per-chart H³ regularity via supplied derived data and a
-uniform difference-quotient bound on the derivative -/
 
 /-- **Per-chart `H³` regularity for `u_chart_deriv` via a supplied derived
 `ChartBilinearH1ComplData` and a uniform difference-quotient bound.**
@@ -162,7 +157,6 @@ theorem h3_chart_loc_of_diff_data_and_uniform_bound
       eLpNorm g_ik 2 ((volume : Measure EuclN).restrict Ω'') ≤
         ENNReal.ofReal (M_bound i k) := by
   classical
-  -- Reduce directly to the existing per-chart H² machinery applied to D_deriv.
   intro i k
   exact h2_chart_loc_of_uniform_bound (I := I) (M := M)
     (g := g) (α := α) D_deriv
@@ -202,7 +196,6 @@ theorem h3_chart_loc_weak_partial_deriv_of_diff_data_and_uniform_bound
         ENNReal.ofReal (M_bound i k) := by
   classical
   intro i k
-  -- Use h_weak_partial_eq to bridge the conclusion via D_deriv.weak_partial.
   have h_uniform_bd' :
       ∀ (i' : Fin (Module.finrank ℝ E)) (k' : Fin (Module.finrank ℝ E))
         (h : ℝ), 0 < |h| → |h| ≤ h₀ →
@@ -219,15 +212,9 @@ theorem h3_chart_loc_weak_partial_deriv_of_diff_data_and_uniform_bound
       (g := g) (α := α) D D_deriv h_u_chart_eq h_weak_partial_eq
       hΩ''_open hΩ''_compact_closure hh₀ h_room hM_nn h_uniform_bd' i k
   refine ⟨g_ik, hg_ik_memLp, ?_, hg_ik_norm⟩
-  -- HasWeakPartialDeriv: D_deriv.weak_partial = D.weak_partial_deriv.
   have h_eq := h_weak_partial_eq i
-  -- The DeGiorgi.HasWeakPartialDeriv predicate depends on the function value
-  -- of the input, not just its symbolic name. Rewrite through h_eq.
   intro φ hφ_smooth hφ_supp hφ_sub
   have h_id := hg_ik_partial φ hφ_smooth hφ_supp hφ_sub
-  -- h_id : ∫ x in Ω'', g_ik x * fderiv ψ x k = -∫ x in Ω'', D_deriv.weak_partial i x * fderiv ψ x k
-  -- We need : ... with D.weak_partial_deriv i instead.
-  -- They are equal as functions by h_eq.
   rw [show D.weak_partial_deriv i = D_deriv.weak_partial i from h_eq.symm]
   exact h_id
 

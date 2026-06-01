@@ -80,23 +80,12 @@ open DifferentialGeometry.Analysis.Laplacian.MetricExtension
   hiding chartTargetEuclid chartTargetEuclid_isOpen
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Per-`Finset`-sum collapse
-
-A finite indexed family bounded, summand-by-summand, by `ENNReal.ofReal Cⱼ * A`
-sums to `ENNReal.ofReal (∑ Cⱼ) * A`. -/
 
 omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)] [TopologicalSpace H] [TopologicalSpace M]
@@ -113,15 +102,6 @@ private lemma finsetSum_eNNReal_ofReal_mul_le
     _ = (∑ j ∈ s, ENNReal.ofReal (C j)) * A := by rw [Finset.sum_mul]
     _ = ENNReal.ofReal (∑ j ∈ s, C j) * A := by
         rw [ENNReal.ofReal_sum_of_nonneg hC]
-
-/-! ## Chart-locality-free twins
-
-The declarations below carry no chart-locality / parallelizability assumption:
-every eigenbasis-keyed object is keyed onto the intrinsic compact-operator
-eigenbasis
-`tensorResolventEigenbasisVec` (with compactness witness
-`tensorResolventL2_isCompactOperator`). They are mathematically the
-same bounds with no parallelizability / locally-constant-chart assumption. -/
 
 section Unconditional
 
@@ -278,11 +258,9 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
                 (tensorResolventL2_isCompactOperator (I := I) (M := M)
                   g r s) i‖ := by
   classical
-  -- The uniform `μ⁻¹`-prefactor bound by the seven-summand source aggregate.
   obtain ⟨Crhs, hCrhs_nn, hCrhs_bd⟩ :=
     eigenvectorChartRHS_wkpNorm_le_uniform (I := I) (M := M)
       g r s α P₀ K h_pou
-  -- Destructure the seven uniform input hypotheses.
   obtain ⟨Ceig, hCeig_nn, hCeig_bd⟩ := h_eig
   obtain ⟨CresH, hCresH_nn, hCresH_bd⟩ := h_resHigh
   obtain ⟨CresL, hCresL_nn, hCresL_bd⟩ := h_resLow
@@ -353,7 +331,6 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
       ‖tensorResolventEigenbasisVec (I := I) (M := M)
         (tensorResolventL2_isCompactOperator (I := I) (M := M)
           g r s) i‖ with hRhs_def
-  -- Summand 1: the bare eigenvector chart component.
   have hS1 :
       wkpNorm (d := Module.finrank ℝ E) K 2
           (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
@@ -363,7 +340,6 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
           (chartTargetEuclid (I := I) (M := M) α)
         ≤ ENNReal.ofReal Ceig * Rhs := hCeig_bd i
-  -- Summand 2: the cross-Leibniz transport double sum.
   have hS2_inner : ∀ β ∈ transportChartCenters (I := I) (M := M) α,
       ((∑ Q : TensorCompIdx (E := E) r s,
             wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
@@ -569,7 +545,6 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
         ((transportChartCenters (I := I) (M := M) β).card : ℝ) * Cqtot)
       Rhs h_perβ_nn hS2_inner
     exact h_sum.trans_eq (by rw [hCmid_def])
-  -- Summand 3: the cross-right transport sum at order `K`.
   have hS3 : (∑ β ∈ transportChartCenters (I := I) (M := M) α,
         ∑ Q : TensorCompIdx (E := E) r s,
           wkpNorm (d := Module.finrank ℝ E) K 2
@@ -637,7 +612,6 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
       Rhs (fun _ _ => hQ_nn) h_perβ
     rw [Finset.sum_const, nsmul_eq_mul] at h_sum
     exact h_sum.trans_eq (by rw [hClow_def, hTCard_def])
-  -- Summand 4: the chart-partial double sum.
   have hS4 : (∑ P : TensorCompIdx (E := E) r s,
         ∑ k : Fin (Module.finrank ℝ E),
           wkpNorm (d := Module.finrank ℝ E) K 2
@@ -695,7 +669,6 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
       Rhs (fun _ _ => hk_nn) h_perP
     rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ] at h_sum
     exact h_sum.trans_eq (by rw [hCpar'_def])
-  -- Summand 5: the chart-component sum.
   have hS5 : (∑ p : TensorCompIdx (E := E) r s,
         wkpNorm (d := Module.finrank ℝ E) K 2
           (fun y => ((componentLpLimit (I := I) (M := M)
@@ -723,7 +696,6 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
       (fun _p => Ccom) Rhs (fun _ _ => hCcom_nn) h_each
     rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ] at h_sum
     exact h_sum.trans_eq (by rw [hCcom'_def])
-  -- Summand 6: the cross-right limit component sum.
   have hS6 : (∑ P : TensorCompIdx (E := E) r s,
         wkpNorm (d := Module.finrank ℝ E) K 2
           (fun y => ((crossRightLimitComponent (I := I) (M := M)
@@ -751,7 +723,6 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
       (fun _P => CcR) Rhs (fun _ _ => hCcR_nn) h_each
     rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ] at h_sum
     exact h_sum.trans_eq (by rw [hCcR'_def])
-  -- Summand 7: the cutoff chart-partial double sum.
   have hS7 : (∑ P : TensorCompIdx (E := E) r s,
         ∑ l : Fin (Module.finrank ℝ E),
           wkpNorm (d := Module.finrank ℝ E) K 2
@@ -809,7 +780,6 @@ theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
       Rhs (fun _ _ => hk_nn) h_perP
     rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ] at h_sum
     exact h_sum.trans_eq (by rw [hCcut'_def])
-  -- The full seven-summand aggregate is bounded by `ofReal Cagg * Rhs`.
   have h_aggr_total :
       wkpNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s

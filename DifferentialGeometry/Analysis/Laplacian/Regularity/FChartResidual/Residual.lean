@@ -72,8 +72,6 @@ open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual
 open DifferentialGeometry.Analysis.Laplacian.MemW1pFChartResidualFull
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -82,8 +80,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Smooth-case `MemW1p` for each approximator -/
 
 /-- For each `n`, the chart-pulled smooth residual of the `n`-th approximator
 is in `MemW1p 2 chartTargetEuclid α`. -/
@@ -113,14 +109,6 @@ theorem smoothApproxSeq_smoothFChartResidual_memWkp
       (chartTargetEuclid (I := I) (M := M) α) := by
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p]
   exact smoothApproxSeq_smoothFChartResidual_memW1p (I := I) (M := M) g α hu_h n
-
-/-! ## Packaged form of the parent discharge
-
-We expose `fChartResidual_memW1p_unconditional` in a single packaged form,
-parametrized by the chart-W^{1,2}-Cauchy + identification hypothesis on
-the smooth-approximator residual sequence. The packaged form is identical
-in mathematical content to the parent theorem, with the inputs re-stated
-for ergonomic downstream consumption. -/
 
 /-- **Packaged `MemW1p 2` discharge of `fChartResidual g α u_h`** from the
 chart-W^{1,2}-Cauchy and identification hypotheses on the smooth-

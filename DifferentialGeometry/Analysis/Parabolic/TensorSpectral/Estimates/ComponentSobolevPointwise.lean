@@ -74,18 +74,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Elementary squared-triangle inequalities
-
-The following helpers are used to convert linear-combination identities for
-the chart-frame tensor-pull-back derivative into squared-norm bounds. They
-live as private lemmas to avoid polluting the public namespace. -/
 
 /-- The elementary inequality `(a + b)² ≤ 2 a² + 2 b²` for real numbers. -/
 private lemma sq_add_le_two_mul_sq_add_sq (a b : ℝ) :
@@ -99,7 +91,6 @@ private lemma sq_add_le_two_mul_sq_add_sq (a b : ℝ) :
 private lemma norm_add_sq_le_two_mul_sq_add_sq
     {F : Type*} [SeminormedAddCommGroup F] (u v : F) :
     ‖u + v‖ ^ 2 ≤ 2 * ‖u‖ ^ 2 + 2 * ‖v‖ ^ 2 := by
-  -- `‖u + v‖ ≤ ‖u‖ + ‖v‖`, both sides non-negative; squaring preserves order.
   have htri : ‖u + v‖ ≤ ‖u‖ + ‖v‖ := norm_add_le u v
   have hsum_nn : 0 ≤ ‖u‖ + ‖v‖ := by positivity
   have huv_nn : 0 ≤ ‖u + v‖ := norm_nonneg _
@@ -109,14 +100,6 @@ private lemma norm_add_sq_le_two_mul_sq_add_sq
     have h_rhs : (‖u‖ + ‖v‖) * (‖u‖ + ‖v‖) = (‖u‖ + ‖v‖) ^ 2 := by rw [sq]
     linarith [this, h_lhs.symm.le, h_lhs.le, h_rhs.symm.le, h_rhs.le]
   exact hsq.trans (sq_add_le_two_mul_sq_add_sq _ _)
-
-/-! ## Headline pointwise partial-derivative bound (operator-norm form)
-
-The scalar pull-back is the projection of the tensor pull-back. Applying the
-chain rule and the operator-norm inequality on the projection, the squared
-partial in any direction `w` is bounded by the squared operator norm of the
-tensor pull-back's derivative, times the squared norm of `w`, times the
-squared norm of the (constant) projection. -/
 
 /-- **Operator-norm form of the pointwise partial-derivative bound.** On the
 chart-α Levi-Civita good set, for any direction `w : E`, the squared partial
@@ -142,58 +125,44 @@ theorem fderiv_tensorChartComponentRaw_pullback_norm_sq_le
             (tensorTrivProj (I := I) (M := M) g r s S α ∘ (extChartAt I α).symm)
             (extChartAt I α b)‖ ^ 2 * ‖w‖ ^ 2 := by
   classical
-  -- Chain rule: fderiv (component ∘ φ.symm) = proj.comp (fderiv (triv ∘ φ.symm)).
   have hb_chart : b ∈ (chartAt H α).source :=
     chartLeviCivitaGoodSet_mem_chartAt_source (I := I) hb
   have hb_int : extChartAt I α b ∈ interior ((extChartAt I α).target : Set E) :=
     chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hb
   have hchain := tensorChartComponentRaw_partial_decomp
     (I := I) (M := M) g r s α S hb_chart hb_int Idx Jdx w
-  -- Set names for clarity.
   set P : TensorRSModel r s ℝ E →L[ℝ] ℝ :=
     tensorChartComponentProjection (E := E) r s Idx Jdx with hP_def
   set F : E →L[ℝ] TensorRSModel r s ℝ E :=
     fderiv ℝ
       (tensorTrivProj (I := I) (M := M) g r s S α ∘ (extChartAt I α).symm)
       (extChartAt I α b) with hF_def
-  -- `fderiv (component ∘ φ.symm)(φ b) w = P (F w)`.
   have hchain' :
       fderiv ℝ
           (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx ∘
             (extChartAt I α).symm)
           (extChartAt I α b) w = P (F w) := hchain
   rw [hchain']
-  -- `(P (F w)) ^ 2 = ‖P (F w)‖²` (real values).
   have habs_sq : (P (F w)) ^ 2 = ‖P (F w)‖ ^ 2 := by
     rw [Real.norm_eq_abs, sq_abs]
   rw [habs_sq]
-  -- `‖P (F w)‖ ≤ ‖P‖ · ‖F w‖ ≤ ‖P‖ · ‖F‖ · ‖w‖`.
   have hP_norm : ‖P (F w)‖ ≤ ‖P‖ * ‖F w‖ := P.le_opNorm (F w)
   have hF_norm : ‖F w‖ ≤ ‖F‖ * ‖w‖ := F.le_opNorm w
   have hP_nn : 0 ≤ ‖P‖ := norm_nonneg _
   have hF_nn : 0 ≤ ‖F‖ := norm_nonneg _
   have hw_nn : 0 ≤ ‖w‖ := norm_nonneg _
   have hPFw_nn : 0 ≤ ‖P (F w)‖ := norm_nonneg _
-  -- Combine: `‖P (F w)‖ ≤ ‖P‖ · ‖F‖ · ‖w‖`.
   have hcomb : ‖P (F w)‖ ≤ ‖P‖ * ‖F‖ * ‖w‖ := by
     have h1 : ‖P‖ * ‖F w‖ ≤ ‖P‖ * (‖F‖ * ‖w‖) :=
       mul_le_mul_of_nonneg_left hF_norm hP_nn
     have h2 : ‖P‖ * (‖F‖ * ‖w‖) = ‖P‖ * ‖F‖ * ‖w‖ := by ring
     linarith [hP_norm, h1, h2.le, h2.symm.le]
-  -- Square both sides; everything is non-negative.
   have hrhs_nn : 0 ≤ ‖P‖ * ‖F‖ * ‖w‖ := by positivity
   have hsq := mul_self_le_mul_self hPFw_nn hcomb
   have hlhs_sq : ‖P (F w)‖ * ‖P (F w)‖ = ‖P (F w)‖ ^ 2 := by rw [sq]
   have hrhs_sq : (‖P‖ * ‖F‖ * ‖w‖) * (‖P‖ * ‖F‖ * ‖w‖) =
       ‖P‖ ^ 2 * ‖F‖ ^ 2 * ‖w‖ ^ 2 := by ring
   linarith [hsq, hlhs_sq.symm.le, hlhs_sq.le, hrhs_sq.symm.le, hrhs_sq.le]
-
-/-! ## Uniform-in-multi-index form of the operator-norm bound
-
-Bounding the projection operator norm by the uniform-in-multi-index constant
-`chartComponentProjectionUniformBound` removes the dependence of the constant
-on `(Idx, Jdx)`. The squared form is `C_proj² · ‖fderiv (triv ∘ φ.symm)‖_op²
-· ‖w‖²`. -/
 
 /-- **Uniform-in-multi-index pointwise partial-derivative bound.** -/
 theorem fderiv_tensorChartComponentRaw_pullback_norm_sq_le_uniform
@@ -213,7 +182,6 @@ theorem fderiv_tensorChartComponentRaw_pullback_norm_sq_le_uniform
   classical
   have h := fderiv_tensorChartComponentRaw_pullback_norm_sq_le
     (I := I) (M := M) g r s α S Idx Jdx hb w
-  -- Upgrade the projection operator-norm factor to the uniform bound.
   set Pnorm : ℝ := ‖tensorChartComponentProjection (E := E) r s Idx Jdx‖
   set Cproj : ℝ := chartComponentProjectionUniformBound (E := E) r s
   set Fnorm : ℝ := ‖fderiv ℝ
@@ -231,34 +199,12 @@ theorem fderiv_tensorChartComponentRaw_pullback_norm_sq_le_uniform
     linarith [this, h_lhs.symm.le, h_lhs.le, h_rhs.symm.le, h_rhs.le]
   have hFsq_nn : 0 ≤ Fnorm ^ 2 := sq_nonneg _
   have hwsq_nn : 0 ≤ ‖w‖ ^ 2 := sq_nonneg _
-  -- The RHS upgrade is by multiplying both sides by the non-negative factors.
   have hrhs_le : Pnorm ^ 2 * Fnorm ^ 2 * ‖w‖ ^ 2 ≤
       Cproj ^ 2 * Fnorm ^ 2 * ‖w‖ ^ 2 := by
     have h1 : Pnorm ^ 2 * Fnorm ^ 2 ≤ Cproj ^ 2 * Fnorm ^ 2 :=
       mul_le_mul_of_nonneg_right hPsq_le hFsq_nn
     exact mul_le_mul_of_nonneg_right h1 hwsq_nn
   linarith
-
-/-! ## Two-term Layer-E split on the tensor pull-back
-
-The Layer E `fderiv_tensorTrivProj_pullback_apply_eq_chart_pushforward_cov`
-identifies `fderiv (triv ∘ φ.symm)(φ b) w` as `triv.continuousLinearMapAt ℝ b`
-applied to the sum
-
-```
-chartTensorRSCovariantDerivative r s g α S.toSection X b
-  - Σ_k chartTensorRSInputSlotCorrection ... k
-  + Σ_l chartTensorRSOutputSlotCorrection ... l
-```
-
-for any smooth tangent vector field `X` with `X b = trivFromE α b w`.
-
-A square-norm bound on the RHS uses the elementary inequality
-`‖A + B‖² ≤ 2 ‖A‖² + 2 ‖B‖²` and yields a two-term split: one term
-controlling the chart-frame intrinsic covariant derivative, one controlling
-the Christoffel-correction sum. This is the entry point for combining the
-gradient comparison (Group A at `(r, s+1)`) and the Christoffel sup bound
-(`ChristoffelBound.lean`) downstream. -/
 
 /-- **Two-term Layer-E split (squared norm).** On the chart-α Levi-Civita
 good set, for any tangent vector field `X : Π b', TangentSpace I b'` with
@@ -289,14 +235,9 @@ theorem fderiv_tensorTrivProj_pullback_apply_norm_sq_two_term_split
                     chartTensorRSOutputSlotCorrection (I := I) r s g α
                       (fun b' => S.toSection b') X b l))‖ ^ 2 := by
   classical
-  -- Layer E decomposition.
   have hdec := fderiv_tensorTrivProj_pullback_apply_eq_chart_pushforward_cov
     (I := I) (M := M) g r s α S X hb w hXb
   rw [hdec]
-  -- The trivialization CLM consumes elements of `TensorRSSpace r s I b`
-  -- (the bundle fibre) and outputs elements of `TensorRSModel r s ℝ E`
-  -- (the model). Both the covariant-derivative piece and the Christoffel
-  -- corrections are bundle-fibre valued, so the algebra goes through.
   set A : TensorRSSpace r s I b :=
     chartTensorRSCovariantDerivative (I := I) r s g α
       (fun b' => S.toSection b') X b with hA_def
@@ -307,7 +248,6 @@ theorem fderiv_tensorTrivProj_pullback_apply_norm_sq_two_term_split
       + (∑ l : Fin s,
           chartTensorRSOutputSlotCorrection (I := I) r s g α
             (fun b' => S.toSection b') X b l) with hB_def
-  -- We need to rewrite `A - (∑ in) + (∑ out)` as `A + B`.
   have h_split : A - (∑ k : Fin r,
         chartTensorRSInputSlotCorrection (I := I) r s g α
           (fun b' => S.toSection b') X b k)
@@ -317,17 +257,9 @@ theorem fderiv_tensorTrivProj_pullback_apply_norm_sq_two_term_split
     rw [hB_def]
     abel
   rw [h_split]
-  -- Apply the trivialization CLM and use linearity to split.
   rw [((trivializationAt (TensorRSModel r s ℝ E)
       (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b).map_add]
-  -- Now bound by the two-term square inequality.
   exact norm_add_sq_le_two_mul_sq_add_sq _ _
-
-/-! ## Combined two-term split on the scalar component partial
-
-Composing the two-term split on `fderiv (triv ∘ φ.symm)` with the chain-rule
-through the projection gives the headline two-term split for the squared
-partial of the scalar pull-back. -/
 
 /-- **Combined two-term split.** On the chart-α Levi-Civita good set, for any
 tangent vector field `X` with `X b = trivFromE α b w`, the squared partial of
@@ -367,7 +299,6 @@ theorem fderiv_tensorChartComponentRaw_pullback_norm_sq_two_term_split
                   chartTensorRSOutputSlotCorrection (I := I) r s g α
                     (fun b' => S.toSection b') X b l))‖ ^ 2 := by
   classical
-  -- Chain rule: fderiv (component ∘ φ.symm) = proj.comp (fderiv (triv ∘ φ.symm)).
   have hb_chart : b ∈ (chartAt H α).source :=
     chartLeviCivitaGoodSet_mem_chartAt_source (I := I) hb
   have hb_int : extChartAt I α b ∈ interior ((extChartAt I α).target : Set E) :=
@@ -379,18 +310,15 @@ theorem fderiv_tensorChartComponentRaw_pullback_norm_sq_two_term_split
   set F : TensorRSModel r s ℝ E := fderiv ℝ
       (tensorTrivProj (I := I) (M := M) g r s S α ∘ (extChartAt I α).symm)
       (extChartAt I α b) w with hF_def
-  -- Rewrite LHS as `(P F)²`.
   have hchain' :
       fderiv ℝ
           (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx ∘
             (extChartAt I α).symm)
           (extChartAt I α b) w = P F := hchain
   rw [hchain']
-  -- `(P F)² = ‖P F‖²` (real values).
   have habs_sq : (P F) ^ 2 = ‖P F‖ ^ 2 := by
     rw [Real.norm_eq_abs, sq_abs]
   rw [habs_sq]
-  -- `‖P F‖² ≤ ‖P‖² · ‖F‖²`.
   have hPF_le : ‖P F‖ ≤ ‖P‖ * ‖F‖ := P.le_opNorm F
   have hP_nn : 0 ≤ ‖P‖ := norm_nonneg _
   have hF_nn : 0 ≤ ‖F‖ := norm_nonneg _
@@ -400,10 +328,8 @@ theorem fderiv_tensorChartComponentRaw_pullback_norm_sq_two_term_split
     have h_lhs : ‖P F‖ * ‖P F‖ = ‖P F‖ ^ 2 := by rw [sq]
     have h_rhs : (‖P‖ * ‖F‖) * (‖P‖ * ‖F‖) = ‖P‖ ^ 2 * ‖F‖ ^ 2 := by ring
     linarith [h, h_lhs.symm.le, h_lhs.le, h_rhs.symm.le, h_rhs.le]
-  -- `‖F‖² ≤ 2 ‖triv(cov)‖² + 2 ‖triv(christ)‖²`.
   have hF_split := fderiv_tensorTrivProj_pullback_apply_norm_sq_two_term_split
     (I := I) (M := M) g r s α S X hb w hXb
-  -- Combine.
   set Tcov : ℝ := ‖(trivializationAt (TensorRSModel r s ℝ E)
       (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
     (chartTensorRSCovariantDerivative (I := I) r s g α
@@ -418,23 +344,13 @@ theorem fderiv_tensorChartComponentRaw_pullback_norm_sq_two_term_split
             (fun b' => S.toSection b') X b l))‖ with hTchr_def
   have hF_split' : ‖F‖ ^ 2 ≤ 2 * Tcov ^ 2 + 2 * Tchr ^ 2 := hF_split
   have hPsq_nn : 0 ≤ ‖P‖ ^ 2 := sq_nonneg _
-  -- Multiply by ‖P‖².
   have h_mul : ‖P‖ ^ 2 * ‖F‖ ^ 2 ≤ ‖P‖ ^ 2 * (2 * Tcov ^ 2 + 2 * Tchr ^ 2) :=
     mul_le_mul_of_nonneg_left hF_split' hPsq_nn
-  -- Combine with `hsq_PF`.
   have h_chain : ‖P F‖ ^ 2 ≤ ‖P‖ ^ 2 * (2 * Tcov ^ 2 + 2 * Tchr ^ 2) :=
     hsq_PF.trans h_mul
-  -- Rearrange the RHS.
   have h_rhs_eq : ‖P‖ ^ 2 * (2 * Tcov ^ 2 + 2 * Tchr ^ 2) =
       2 * ‖P‖ ^ 2 * Tcov ^ 2 + 2 * ‖P‖ ^ 2 * Tchr ^ 2 := by ring
   linarith [h_chain, h_rhs_eq.symm.le, h_rhs_eq.le]
-
-/-! ## Packaged existential form
-
-The polished form has a single non-negative constant depending only on
-`(r, s)` and bounds the squared partial uniformly across `(Idx, Jdx)`
-multi-indices, every direction `w`, and every section `S`. This is the form
-downstream H^1 estimates consume. -/
 
 /-- **Polished headline.** Existence form of the operator-norm pointwise
 partial-derivative bound. There is a non-negative constant `C`, depending
@@ -462,8 +378,6 @@ theorem exists_const_fderiv_tensorChartComponentRaw_pullback_norm_sq_le
   intro S Idx Jdx b hb w
   exact fderiv_tensorChartComponentRaw_pullback_norm_sq_le_uniform
     (I := I) (M := M) g r s α S Idx Jdx hb w
-
-/-! ## Sanity check -/
 
 example (g : SmoothRiemannianMetric I M) (α : M) (S : SmoothCcTensor g 1 2)
     (Idx : Fin 1 → Fin (Module.finrank ℝ E))

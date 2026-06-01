@@ -74,25 +74,12 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The compact Euclidean cutoff kernel
-
-The cutoff Euclidean chart component vanishes outside the chart image of the
-compact support of the chart-kernel cutoff. Pushing that compact chart image
-through `toEuclidean` produces the compact subset of `EuclN` confining every
-cutoff Euclidean chart component. -/
 
 /-- The Euclidean image of the compact cutoff chart kernel: the compact subset of
 `EuclN` outside which every cutoff Euclidean chart component vanishes. -/
@@ -134,10 +121,8 @@ private lemma cutoffComponentEuclid_support_subset_cutoffKernelEuclid
   have hy_ne : cutoffComponentEuclid (I := I) (M := M) g r s S α P₀.1 P₀.2 y ≠ 0 :=
     hy
   by_cases hy_in : y ∈ chartTargetEuclid (I := I) (M := M) α
-  · -- On the chart target the component reads the cutoff scalar at the preimage.
-    rw [cutoffComponentEuclid_apply_of_mem (I := I) (M := M)
+  · rw [cutoffComponentEuclid_apply_of_mem (I := I) (M := M)
       g r s S α P₀.1 P₀.2 hy_in] at hy_ne
-    -- The chart preimage of `y` lies in the support of the cutoff scalar.
     have hp_supp : (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈
         Function.support
           (cutoffComponentScalar (I := I) (M := M) g r s S α P₀.1 P₀.2) :=
@@ -146,7 +131,6 @@ private lemma cutoffComponentEuclid_support_subset_cutoffKernelEuclid
         tsupport
           (cutoffComponentScalar (I := I) (M := M) g r s S α P₀.1 P₀.2) :=
       subset_tsupport _ hp_supp
-    -- Its chart image lands in the compact cutoff chart kernel.
     have hx_kernel :
         (extChartAt I α)
             ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) ∈
@@ -154,27 +138,15 @@ private lemma cutoffComponentEuclid_support_subset_cutoffKernelEuclid
       cutoffComponentScalar_chartImage_subset_kernel
         (I := I) (M := M) g r s S α P₀.1 P₀.2
         ⟨_, hp_tsupp, rfl⟩
-    -- On the chart target `extChartAt ∘ extChartAt.symm` is the identity.
     have hy_tgt : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target :=
       toEuclidean_symm_mem_target (I := I) hy_in
     rw [(extChartAt I α).right_inv hy_tgt] at hx_kernel
-    -- Transfer the kernel membership through `toEuclidean`.
     refine ⟨(toEuclidean (E := E)).symm y, hx_kernel, ?_⟩
     exact (toEuclidean (E := E)).apply_symm_apply y
-  · -- Off the chart target the chart-pushforward vanishes, contradicting `hy`.
-    exact absurd
+  · exact absurd
       (cutoffComponentEuclid_apply_of_notMem (I := I) (M := M)
         g r s S α P₀.1 P₀.2 hy_in)
       hy_ne
-
-/-! ## On-compact density bound
-
-On a compact subset of the Euclidean chart target the chart-density
-`densityOnEuclid g α` is bounded above by a positive constant. Consequently, for
-a function supported in such a compact subset, the `eLpNorm` against the
-chart-pulled weighted measure restricted to the chart target is bounded by a
-constant times the `eLpNorm` against plain Lebesgue volume restricted to the
-chart target. -/
 
 set_option linter.unusedSectionVars false in
 /-- For a function supported in a subset `K` of the Euclidean chart target on
@@ -203,10 +175,8 @@ private lemma eLpNorm_chartPulledWeighted_restrict_le_of_support_subset
   have hS_meas : MeasurableSet S := hS_open.measurableSet
   rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num) (by norm_num)]
   rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num) (by norm_num)]
-  -- `(2 : ℝ≥0∞).toReal = 2`.
   have h2 : (2 : ℝ≥0∞).toReal = 2 := by norm_num
   rw [h2]
-  -- Bound the `lintegral` of the enorm-power against the weighted measure.
   have h_lint_le :
       ∫⁻ y, ‖f y‖ₑ ^ (2 : ℝ)
           ∂((chartPulledWeightedMeasure (I := I) g α).restrict S) ≤
@@ -240,22 +210,10 @@ private lemma eLpNorm_chartPulledWeighted_restrict_le_of_support_subset
             ENNReal.ofReal densitySup :=
         ENNReal.ofReal_le_ofReal (hdensitySup_bd y hy_in)
       gcongr
-  -- Take the `(1 / 2)`-th power and distribute the constant.
   refine le_trans (ENNReal.rpow_le_rpow h_lint_le (by positivity)) ?_
   rw [ENNReal.mul_rpow_of_nonneg _ _ (by positivity : (0 : ℝ) ≤ 1 / 2)]
   gcongr
   rw [← ENNReal.ofReal_rpow_of_pos hdensitySup_pos]
-
-/-! ## The restriction continuous linear map
-
-For a measurable subset `s` of the chart target, restricting an
-`Lp ℝ 2 (chartL2Measure α)` class to `s` produces an
-`Lp ℝ 2 ((chartL2Measure α).restrict s)` class. Since the restricted measure is
-dominated by `chartL2Measure α`, restriction is a norm-nonincreasing linear map,
-hence continuous. The cutoff chart component of every smooth section restricts to
-the zero class on the complement of the cutoff kernel; continuity and density
-then propagate that vanishing to the cutoff chart component of every abstract
-element. -/
 
 /-- The restriction linear map sending an `Lp ℝ 2 (chartL2Measure α)` class to
 its restriction as an `Lp ℝ 2 ((chartL2Measure α).restrict s)` class. -/
@@ -265,8 +223,6 @@ private def chartL2RestrictLin (α : M) (s : Set EuclN) :
   toFun lp :=
     ((Lp.memLp lp).restrict s).toLp (lp : EuclN → ℝ)
   map_add' lp₁ lp₂ := by
-    -- Both sides are `toLp` of almost-everywhere-equal functions on the
-    -- restricted measure.
     rw [show (((Lp.memLp lp₁).restrict s).toLp ((lp₁ : EuclN → ℝ)) +
           ((Lp.memLp lp₂).restrict s).toLp ((lp₂ : EuclN → ℝ))) =
         (((Lp.memLp lp₁).restrict s).add ((Lp.memLp lp₂).restrict s)).toLp
@@ -290,10 +246,8 @@ private lemma chartL2RestrictLin_norm_le (α : M) (s : Set EuclN)
     ‖chartL2RestrictLin (I := I) (M := M) α s lp‖ ≤ 1 * ‖lp‖ := by
   classical
   rw [one_mul]
-  -- The restricted norm is the `eLpNorm` against the restricted measure.
   rw [chartL2RestrictLin, LinearMap.coe_mk, AddHom.coe_mk,
     Lp.norm_toLp, Lp.norm_def]
-  -- `eLpNorm` is monotone in the measure: the restricted measure is smaller.
   refine ENNReal.toReal_mono (Lp.eLpNorm_ne_top lp) ?_
   exact eLpNorm_mono_measure _ Measure.restrict_le_self
 
@@ -325,12 +279,6 @@ private lemma chartL2RestrictCLM_eq_zero_iff (α : M) (s : Set EuclN)
   · intro h
     exact (MemLp.coeFn_toLp _).trans h
 
-/-! ## Off-kernel vanishing of the cutoff chart component
-
-The composite `chartL2RestrictCLM ∘ tensorL2ChartComponentCutoffCLM`, restricting
-to the complement of the cutoff kernel, is a continuous linear map vanishing on
-the dense subspace of smooth sections, hence identically zero. -/
-
 /-- The cutoff chart component of a smooth section, restricted to the complement
 of the cutoff kernel, is the zero `Lp` class: the smooth-section component
 `cutoffComponentEuclid` is supported in the cutoff kernel. -/
@@ -344,12 +292,8 @@ private lemma chartL2RestrictCLM_tensorL2ChartComponentCutoff_smooth_eq_zero
           (SmoothCcTensor.toL2 (g := g) (r := r) (s := s) S))
       = 0 := by
   classical
-  -- It suffices to show the cutoff chart component vanishes a.e. off the kernel.
   have hKcompl_meas : MeasurableSet (cutoffKernelEuclid (I := I) (M := M) α)ᶜ :=
     (cutoffKernelEuclid_measurableSet (I := I) (M := M) α).compl
-  -- The cutoff chart component vanishes almost everywhere off the cutoff kernel:
-  -- on a smooth section it agrees a.e. with the concrete `cutoffComponentEuclid`,
-  -- which is supported in the kernel.
   have h_ae :
       ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
           (S : TensorL2 r s g) α P₀ :
@@ -371,7 +315,6 @@ private lemma chartL2RestrictCLM_tensorL2ChartComponentCutoff_smooth_eq_zero
         (cutoffComponentEuclid_support_subset_cutoffKernelEuclid
           (I := I) (M := M) g r s S α P₀ hne)
     simpa using hy_zero
-  -- Convert the almost-everywhere vanishing into the zero `Lp` class.
   rw [tensorL2ChartComponentCutoffCLM_apply, SmoothCcTensor.toL2_apply]
   exact (chartL2RestrictCLM_eq_zero_iff (I := I) (M := M) α
     (cutoffKernelEuclid (I := I) (M := M) α)ᶜ
@@ -396,19 +339,16 @@ private lemma tensorL2ChartComponentCutoff_aeEq_zero_off_cutoffKernel
       =ᵐ[(chartL2Measure (I := I) (M := M) α).restrict
         (cutoffKernelEuclid (I := I) (M := M) α)ᶜ] 0 := by
   classical
-  -- The composite restriction-of-the-chart-component CLM is zero by density.
   have h_zero :
       chartL2RestrictCLM (I := I) (M := M) α
           (cutoffKernelEuclid (I := I) (M := M) α)ᶜ
           (tensorL2ChartComponentCutoffCLM (I := I) (M := M) g r s α P₀ u)
         = 0 := by
-    -- The composite continuous linear map vanishes on the dense smooth range.
     refine DenseRange.induction_on
       (SmoothCcTensor.denseRange_toL2
         (g := g) (r := r) (s := s))
       u ?_ ?_
-    · -- The vanishing locus is closed: preimage of `{0}` under a continuous map.
-      exact isClosed_eq
+    · exact isClosed_eq
         ((chartL2RestrictCLM (I := I) (M := M) α
             (cutoffKernelEuclid (I := I) (M := M) α)ᶜ).continuous.comp
           (tensorL2ChartComponentCutoffCLM
@@ -417,15 +357,12 @@ private lemma tensorL2ChartComponentCutoff_aeEq_zero_off_cutoffKernel
     · intro S
       exact chartL2RestrictCLM_tensorL2ChartComponentCutoff_smooth_eq_zero
         (I := I) (M := M) g r s S α P₀
-  -- Translate `chartL2RestrictCLM … = 0` into the almost-everywhere identity.
   have h_eq := (chartL2RestrictCLM_eq_zero_iff (I := I) (M := M) α
     (cutoffKernelEuclid (I := I) (M := M) α)ᶜ
     (tensorL2ChartComponentCutoffCLM
       (I := I) (M := M) g r s α P₀ u)).mp h_zero
   rw [tensorL2ChartComponentCutoffCLM_apply] at h_eq
   exact h_eq
-
-/-! ## The quantitative weighted-`eLpNorm` bound -/
 
 /-- **A quantitative weighted-`eLpNorm` bound for the cutoff Euclidean chart
 component.** For a closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, an
@@ -452,8 +389,6 @@ theorem eLpNorm_tensorL2ChartComponentCutoff_le
             (chartTargetEuclid (I := I) (M := M) α))
         ≤ ENNReal.ofReal C * ENNReal.ofReal ‖u‖ := by
   classical
-  -- Abbreviations: the chart component's `Lp` class, its coerced representative,
-  -- the compact cutoff kernel and its complement.
   set w : Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) :=
     tensorL2ChartComponentCutoff (I := I) (M := M) g r s u α P₀ with hw_def
   set f : EuclN → ℝ := (w : EuclN → ℝ) with hf_def
@@ -464,27 +399,20 @@ theorem eLpNorm_tensorL2ChartComponentCutoff_le
     cutoffKernelEuclid_measurableSet (I := I) (M := M) α
   have hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α :=
     cutoffKernelEuclid_subset_chartTargetEuclid (I := I) (M := M) α
-  -- An upper bound for the chart-density on the compact cutoff kernel.
   obtain ⟨_c_min, c_max, _hc_min_pos, hc_le, h_dens_bd⟩ :=
     densityOnEuclid_bounded_on_compact (I := I) (M := M) g α hK_compact hK_in
   have hc_max_pos : 0 < c_max := lt_of_lt_of_le _hc_min_pos hc_le
-  -- The operator norm of the cutoff-chart-component continuous linear map.
   set Cop : ℝ := ‖tensorL2ChartComponentCutoffCLM (I := I) (M := M) g r s α P₀‖
     with hCop_def
   have hCop_nn : 0 ≤ Cop :=
     norm_nonneg (tensorL2ChartComponentCutoffCLM (I := I) (M := M) g r s α P₀)
-  -- The headline constant.
   refine ⟨c_max ^ (1 / (2 : ℝ)) * Cop,
     mul_nonneg (Real.rpow_nonneg hc_max_pos.le _) hCop_nn, ?_⟩
-  -- Replace `f` by its kernel-indicator: they agree a.e. on `chartL2Measure α`,
-  -- and the indicator is genuinely supported in the compact kernel.
   set fK : EuclN → ℝ := K.indicator f with hfK_def
-  -- `f` and `fK` agree almost everywhere on `chartL2Measure α`.
   have h_off : f =ᵐ[(chartL2Measure (I := I) (M := M) α).restrict Kᶜ] 0 :=
     tensorL2ChartComponentCutoff_aeEq_zero_off_cutoffKernel
       (I := I) (M := M) g r s u α P₀
   have hf_aeEq_fK : f =ᵐ[chartL2Measure (I := I) (M := M) α] fK := by
-    -- Off `K` both sides vanish; on `K` the indicator is the identity.
     rw [hfK_def]
     have hKcompl_meas : MeasurableSet Kᶜ := hK_meas.compl
     have h_off' : ∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
@@ -495,17 +423,11 @@ theorem eLpNorm_tensorL2ChartComponentCutoff_le
     by_cases hyK : y ∈ K
     · rw [Set.indicator_of_mem hyK]
     · rw [Set.indicator_of_notMem hyK, hy (by simpa using hyK)]
-  -- `fK` is genuinely supported inside the compact kernel.
   have hfK_supp : Function.support fK ⊆ K := by
     rw [hfK_def]; exact Set.support_indicator_subset
-  -- The weighted `eLpNorm` of `f` equals that of `fK` (a.e.-congruence: the
-  -- restricted weighted measure is dominated by `chartL2Measure α`).
   have h_wabs : (chartPulledWeightedMeasure (I := I) g α).restrict
       (chartTargetEuclid (I := I) (M := M) α) ≪
         chartL2Measure (I := I) (M := M) α := by
-    -- `chartL2Measure α = volume.restrict chartTarget`; the weighted measure is
-    -- `volume.withDensity _`, which is absolutely continuous w.r.t. `volume`,
-    -- and absolute continuity is preserved under restriction.
     have h_cl2 : chartL2Measure (I := I) (M := M) α =
         (volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α) := rfl
@@ -518,20 +440,16 @@ theorem eLpNorm_tensorL2ChartComponentCutoff_le
   have hf_aeEq_fK_w : f =ᵐ[(chartPulledWeightedMeasure (I := I) g α).restrict
       (chartTargetEuclid (I := I) (M := M) α)] fK :=
     h_wabs.ae_eq hf_aeEq_fK
-  -- Likewise the plain-volume `eLpNorm` of `f` equals that of `fK`.
   have hf_aeEq_fK_v : f =ᵐ[(volume : Measure EuclN).restrict
       (chartTargetEuclid (I := I) (M := M) α)] fK := hf_aeEq_fK
-  -- The chart `L²` norm of `w` is the real part of its `chartL2Measure`-`eLpNorm`.
   have hf_eLpNorm_eq : eLpNorm f 2 (chartL2Measure (I := I) (M := M) α) =
       ‖w‖ₑ := by
     rw [hf_def, Lp.enorm_def]
-  -- Operator-norm bound on the chart component.
   have hw_op : ‖w‖ ≤ Cop * ‖u‖ := by
     rw [hw_def, hCop_def,
       ← tensorL2ChartComponentCutoffCLM_apply (I := I) (M := M) g r s α P₀ u]
     exact (tensorL2ChartComponentCutoffCLM
       (I := I) (M := M) g r s α P₀).le_opNorm u
-  -- Assemble the bound.
   calc eLpNorm f 2
           ((chartPulledWeightedMeasure (I := I) g α).restrict
             (chartTargetEuclid (I := I) (M := M) α))
@@ -599,24 +517,18 @@ theorem eLpNorm_tensorL2ChartComponentCutoff_le_uniform
     cutoffKernelEuclid_measurableSet (I := I) (M := M) α
   have hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α :=
     cutoffKernelEuclid_subset_chartTargetEuclid (I := I) (M := M) α
-  -- An upper bound for the chart-density on the compact cutoff kernel.
   obtain ⟨_c_min, c_max, _hc_min_pos, hc_le, h_dens_bd⟩ :=
     densityOnEuclid_bounded_on_compact (I := I) (M := M) g α hK_compact hK_in
   have hc_max_pos : 0 < c_max := lt_of_lt_of_le _hc_min_pos hc_le
-  -- The operator norm of the cutoff-chart-component continuous linear map.
   set Cop : ℝ := ‖tensorL2ChartComponentCutoffCLM (I := I) (M := M) g r s α P₀‖
     with hCop_def
   have hCop_nn : 0 ≤ Cop :=
     norm_nonneg (tensorL2ChartComponentCutoffCLM (I := I) (M := M) g r s α P₀)
-  -- The uniform headline constant — extracted before the universally
-  -- quantified `u`.
   refine ⟨c_max ^ (1 / (2 : ℝ)) * Cop,
     mul_nonneg (Real.rpow_nonneg hc_max_pos.le _) hCop_nn, fun u => ?_⟩
-  -- Abbreviations: the chart component's `Lp` class and its representative.
   set w : Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) :=
     tensorL2ChartComponentCutoff (I := I) (M := M) g r s u α P₀ with hw_def
   set f : EuclN → ℝ := (w : EuclN → ℝ) with hf_def
-  -- Replace `f` by its kernel-indicator: they agree a.e. on `chartL2Measure α`.
   set fK : EuclN → ℝ := K.indicator f with hfK_def
   have h_off : f =ᵐ[(chartL2Measure (I := I) (M := M) α).restrict Kᶜ] 0 :=
     tensorL2ChartComponentCutoff_aeEq_zero_off_cutoffKernel
@@ -634,7 +546,6 @@ theorem eLpNorm_tensorL2ChartComponentCutoff_le_uniform
     · rw [Set.indicator_of_notMem hyK, hy (by simpa using hyK)]
   have hfK_supp : Function.support fK ⊆ K := by
     rw [hfK_def]; exact Set.support_indicator_subset
-  -- The weighted `eLpNorm` of `f` equals that of `fK`.
   have h_wabs : (chartPulledWeightedMeasure (I := I) g α).restrict
       (chartTargetEuclid (I := I) (M := M) α) ≪
         chartL2Measure (I := I) (M := M) α := by
@@ -655,13 +566,11 @@ theorem eLpNorm_tensorL2ChartComponentCutoff_le_uniform
   have hf_eLpNorm_eq : eLpNorm f 2 (chartL2Measure (I := I) (M := M) α) =
       ‖w‖ₑ := by
     rw [hf_def, Lp.enorm_def]
-  -- Operator-norm bound on the chart component.
   have hw_op : ‖w‖ ≤ Cop * ‖u‖ := by
     rw [hw_def, hCop_def,
       ← tensorL2ChartComponentCutoffCLM_apply (I := I) (M := M) g r s α P₀ u]
     exact (tensorL2ChartComponentCutoffCLM
       (I := I) (M := M) g r s α P₀).le_opNorm u
-  -- Assemble the bound.
   calc eLpNorm f 2
           ((chartPulledWeightedMeasure (I := I) g α).restrict
             (chartTargetEuclid (I := I) (M := M) α))

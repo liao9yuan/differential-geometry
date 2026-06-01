@@ -65,8 +65,6 @@ namespace Integral
 namespace DivergenceTheorem
 namespace WithBoundary
 
-/-! ## The orientation typeclass -/
-
 /-- Chart-transition orientation preservation.
 
 For a smooth manifold-with-boundary `M` modelled on `(E, H, I)` with
@@ -113,8 +111,6 @@ where
         inwardCoordAt (M := M) α₀ y - c • inwardCoordAt (M := M) α₁ y ∈
           Set.range (dincl (M := M) y).toLinearMap
 
-/-! ## Convenience accessors -/
-
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -144,13 +140,6 @@ theorem inwardCoord_chart_consistent_self (α : BoundaryManifold I M)
   refine ⟨1, by norm_num, ?_⟩
   simp only [one_smul, sub_self]
   exact ⟨0, map_zero _⟩
-
-/-! ## Chart-invariance of the parameterised outward unit normal
-
-Under the orientation typeclass `[HasOrientableBoundary M]`, the parameterised
-outward unit normal `outwardNormalAt α g y` is independent of the chart base
-point `α : BoundaryManifold I M` (so long as `y` is in the chart source of
-`α`). This is the key correctness property of the construction. -/
 
 /-- **Chart-invariance of the parameterised outward unit normal.** Under the
 orientation typeclass, the parameterised outward unit normal at a boundary
@@ -184,26 +173,11 @@ theorem outwardNormalAt_eq_outwardNormal_on_chart
     {y : BoundaryManifold I M}
     (hy : (y : M) ∈ (chartAt H (α₀ : M)).source) :
     outwardNormalAt (M := M) g α₀ y = outwardNormal (M := M) g y := by
-  -- Apply chart-invariance with α₁ := y. The chart at y trivially contains y.
   have hy_self : (y : M) ∈ (chartAt H (y : M)).source := mem_chart_source H (y : M)
   have h_chart_inv :
       outwardNormalAt (M := M) g α₀ y = outwardNormalAt (M := M) g y y :=
     outwardNormalAt_chart_invariance (M := M) g α₀ y hy hy_self
   rw [h_chart_inv, outwardNormalAt_self]
-
-/-! ## Continuity and smoothness of the global outward unit normal section
-
-Under the orientation typeclass, the section
-`y ↦ TotalSpace.mk' E (boundaryInclusion I M y) (outwardNormal g y)` of the
-ambient tangent bundle along the boundary inclusion is `C^∞` (and hence
-continuous).
-
-The proof reduces global smoothness to chart-α-local smoothness via the chart
-neighbourhood pull-back: for each base point `x₀`, on the open neighbourhood
-`{y | (y : M) ∈ chart at x₀.M source}` (which contains `x₀`), the global
-section coincides with the chart-α-local section parameterised by `x₀`. The
-chart-α-local section is smooth at `x₀` by `outwardNormalAt_section_contMDiffAt`,
-and this transfers to the global section via `ContMDiffAt.congr_of_eventuallyEq`. -/
 
 /-- **Smoothness of the global outward unit normal as a bundle section.** The
 section `y ↦ TotalSpace.mk' E (boundaryInclusion I M y) (outwardNormal g y)`
@@ -217,14 +191,10 @@ theorem outwardNormal_contMDiff
         TotalSpace.mk' E (boundaryInclusion I M x)
           (outwardNormal (M := M) g x)) := by
   intro x₀
-  -- The chart-α-local section at base point `x₀` is smooth at `x₀`.
   have h_smooth_at : ContMDiffAt hI.boundaryI (I.prod 𝓘(ℝ, E)) ∞
       (fun b : BoundaryManifold I M =>
         TotalSpace.mk' E (b : M) (outwardNormalAt (M := M) g x₀ b)) x₀ :=
     outwardNormalAt_section_contMDiffAt (M := M) g x₀
-  -- On a neighbourhood of `x₀` (the pull-back of the chart source at `x₀.M`,
-  -- which is open and contains `x₀`), the chart-α-local section coincides with
-  -- the global section.
   set U : Set (BoundaryManifold I M) :=
     Subtype.val ⁻¹' (chartAt H (x₀ : M)).source with hU_def
   have hU_open : IsOpen U :=
@@ -233,9 +203,6 @@ theorem outwardNormal_contMDiff
     change (x₀ : M) ∈ (chartAt H (x₀ : M)).source
     exact mem_chart_source H (x₀ : M)
   have hU_nhds : U ∈ 𝓝 x₀ := hU_open.mem_nhds hU_mem
-  -- The two bundle sections coincide on `U`. The eventual equality is
-  -- oriented so that the chart-α-local form (the "known smooth" right-hand
-  -- side of `ContMDiffAt.congr_of_eventuallyEq`) appears on the right.
   have h_eventually :
       (fun b : BoundaryManifold I M =>
           TotalSpace.mk' E (boundaryInclusion I M b)
@@ -244,14 +211,11 @@ theorem outwardNormal_contMDiff
           TotalSpace.mk' E (b : M) (outwardNormalAt (M := M) g x₀ b)) := by
     refine Filter.eventually_of_mem hU_nhds ?_
     intro b hb_mem
-    -- `hb_mem : (b : M) ∈ (chartAt H (x₀ : M)).source`.
     have h_eq : outwardNormalAt (M := M) g x₀ b = outwardNormal (M := M) g b :=
       outwardNormalAt_eq_outwardNormal_on_chart (M := M) g x₀ hb_mem
-    -- `boundaryInclusion I M b = (b : M)` by definition.
     change TotalSpace.mk' E (boundaryInclusion I M b) (outwardNormal (M := M) g b) =
         TotalSpace.mk' E (b : M) (outwardNormalAt (M := M) g x₀ b)
     simp only [boundaryInclusion_apply, h_eq]
-  -- Transfer smoothness via `congr_of_eventuallyEq`.
   exact h_smooth_at.congr_of_eventuallyEq h_eventually
 
 /-- **Continuity of the global outward unit normal as a bundle section.** The

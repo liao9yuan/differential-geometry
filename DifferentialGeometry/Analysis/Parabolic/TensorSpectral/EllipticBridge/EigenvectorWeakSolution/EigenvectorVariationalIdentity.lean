@@ -90,25 +90,12 @@ open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 open DifferentialGeometry.Analysis.Laplacian.ChartLocalLaplacian
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## `L²`-pairing convergence
-
-If a sequence `g n` converges to `g_lim` in `Lp ℝ 2 μ` and `m ∈ Lp ℝ 2 μ` is
-fixed, then the real integrals `∫ m · g n dμ` converge to `∫ m · g_lim dμ`. The
-`L²` inner product is continuous, and the integral of the pointwise product is
-the real `L²` inner product. -/
 
 /-- **Convergence of an `L²` integral against a fixed test element.** For a
 sequence `g : ℕ → Lp ℝ 2 μ` converging to `g_lim` and a fixed `m : Lp ℝ 2 μ`,
@@ -135,15 +122,6 @@ private lemma tendsto_lp_inner_integral
       (fun n => ⟪m, g n⟫_ℝ) from funext (fun n => h_inner_eq (g n))]
   exact (continuous_inner.tendsto (m, g_lim)).comp
     (Filter.Tendsto.prodMk_nhds tendsto_const_nhds h_tendsto)
-
-/-! ## The partition-of-unity-weighted canonical smooth approximant
-
-`eigenvectorPouApprox g r s h_atlas i α n` is the partition-of-unity-weighted
-`n`-th canonical smooth `H¹`-approximant `pouSmul g r s α
-(eigenvectorSmoothApprox g r s h_atlas i n).toCcTensor`; it is a smooth
-compactly-supported `(r, s)`-tensor section supported inside the chart-`α`
-source, the section the source-free per-approximant chart bilinear identity is
-applied to. -/
 
 /-- **The partition-of-unity-weighted `n`-th canonical smooth approximant
 (chart-locality-free).** Chart-locality-free twin of `eigenvectorPouApprox`,
@@ -196,14 +174,6 @@ private lemma test_memLp
     MemLp ψ 2 (chartL2Measure (I := I) (M := M) α) := by
   rw [chartL2Measure]
   exact (hψ.continuous.memLp_of_hasCompactSupport hψ_cs).restrict _
-
-/-! ## The `n → ∞` limit of the principal-rotation source term
-
-The principal-rotation source term `∫ y, densityOnEuclid g α y ·
-covPrincipalRotationCoeff g r s Tₙ α P₀ y · ψ y ∂volume` of the source-free
-chart bilinear identity, evaluated at the partition-of-unity-weighted canonical
-smooth approximants `Tₙ`, converges to its chart-density-weighted limit built
-from `covPrincipalRotationCoeffLimit`. -/
 
 /-- **The `n → ∞` limit of the principal-rotation source term
 (chart-locality-free).** Chart-locality-free twin of
@@ -292,8 +262,6 @@ theorem covPrincipalRotationCoeff_source_tendsto
   rw [h_int_lim] at h_main
   exact h_main.congr (fun n => h_int_n n)
 
-/-! ## The `n → ∞` limit of the lower-order rotation value source term -/
-
 /-- **The `n → ∞` limit of the lower-order rotation value source term
 (chart-locality-free).** Chart-locality-free twin of
 `covLowerOrderRotationValueCoeff_source_tendsto`. -/
@@ -380,8 +348,6 @@ theorem covLowerOrderRotationValueCoeff_source_tendsto
   have h_main := tendsto_lp_inner_integral (μ := μch) m h_tendsto_lp
   rw [h_int_lim] at h_main
   exact h_main.congr (fun n => h_int_n n)
-
-/-! ## The `n → ∞` limit of the lower-order gradient divergence source term -/
 
 /-- **The `n → ∞` limit of the lower-order gradient divergence source term
 (chart-locality-free).** Chart-locality-free twin of
@@ -485,20 +451,6 @@ theorem weightedGradCoeffDivSum_source_tendsto
   rw [h_int_lim] at h_main
   exact h_main.congr (fun n => h_int_n n)
 
-
-
-
-
-/-! ## The principal-symbol test element
-
-The `i`-th *principal-symbol test element* `principalSymbolTest g α ψ i` is the
-inverse-Gram-weighted derivative combination `∑ⱼ weightedInvGramOnEuclid g α i j
-· ∂ⱼψ`. It is the fixed `Lp ℝ 2 (chartL2Measure α)` element against which the
-`L²`-classed chart-Euclidean partials of the approximant chart components are
-paired in the principal part of the chart bilinear form: it is `C^∞` on the open
-chart target (a finite combination of `C^∞` factors) and compactly supported, so
-it is `MemLp 2` with respect to the chart-`L²` measure. -/
-
 /-- The `i`-th principal-symbol test element `∑ⱼ weightedInvGramOnEuclid g α i j ·
 ∂ⱼψ`, a function `EuclN → ℝ`. -/
 private def principalSymbolTest
@@ -521,8 +473,6 @@ private lemma principalSymbolTest_memLp
     MemLp (principalSymbolTest (I := I) (M := M) g α ψ i') 2
       (chartL2Measure (I := I) (M := M) α) := by
   classical
-  -- The chart-Euclidean partial of `ψ`, as a smooth compactly-supported
-  -- function with topological support inside the chart target.
   have hdψ_cd : ∀ j : Fin (Module.finrank ℝ E),
       ContDiff ℝ ∞ (euclidPartial (E := E) j ψ) :=
     fun j => euclidPartial_contDiff (E := E) hψ j
@@ -544,7 +494,6 @@ private lemma principalSymbolTest_memLp
     rw [Function.mem_support] at hz
     by_contra hz'
     exact hz (euclidPartial_zero_off_tsupport j hz')
-  -- The weighted inverse-Gram entry, `C^∞` on the chart target.
   have hgram : ∀ j : Fin (Module.finrank ℝ E), ContDiffOn ℝ ∞
       (fun y => weightedInvGramOnEuclid (I := I) g α i' j y)
       (chartTargetEuclid (I := I) (M := M) α) := by
@@ -553,7 +502,6 @@ private lemma principalSymbolTest_memLp
     intro y _
     rw [weightedInvGramEuclid_eq_weightedInvGramOnEuclid (I := I) (M := M)
       g α i' j]
-  -- `principalSymbolTest` agrees pointwise with the `euclidPartial`-form sum.
   have hpst_eq : principalSymbolTest (I := I) (M := M) g α ψ i' =
       fun y => ∑ j : Fin (Module.finrank ℝ E),
         weightedInvGramOnEuclid (I := I) g α i' j y *
@@ -577,18 +525,9 @@ private lemma principalSymbolTest_memLp
     exact hcd.continuous.memLp_of_hasCompactSupport hcs
   exact hsum_memLp.restrict _
 
-
 set_option linter.style.show false in
 
 set_option linter.style.show false in
-/-! ## The inverse-Gram-rotated chart test section attached to `ψ`
-
-For a chart-supported smooth Euclidean test function `ψ`, the inverse-Gram-rotated
-test section `eigenvectorRotatedTestSection g r s α P₀ ψ` is the rotated test
-section of the manifold-side chart pullback `chartTestPullback I α ψ`. It is the
-fixed smooth `(r, s)`-tensor section against which the per-approximant chart
-bilinear identity's source-term Dirichlet pairing is taken. -/
-
 /-- The inverse-Gram-rotated chart test section
 `rotatedTestSection g r s α P₀ (chartTestPullback I α ψ)` attached to a
 chart-supported smooth Euclidean test function `ψ`. -/
@@ -645,9 +584,6 @@ private lemma eigenvectorRotatedTestSection_tsupport_subset
   intro b hb
   rw [Function.mem_support] at hb
   by_contra hb_notin
-  -- The underlying field of `rotatedTestSection` is the finite sum, over `Q`, of
-  -- the underlying fields of the chart-basis tensor sections; each summand
-  -- vanishes off the chart source.
   refine hb ?_
   rw [eigenvectorRotatedTestSection, rotatedTestSection]
   rw [show (∑ Q : CompIdx E r s,
@@ -677,19 +613,9 @@ private lemma eigenvectorRotatedTestSection_tsupport_subset
             rw [Finset.sum_insert hQ, Finset.sum_insert hQ,
               SmoothCcTensor.toFun_add, Pi.add_apply, ih]]
   refine Finset.sum_eq_zero (fun Q _ => ?_)
-  -- The `Q`-summand vanishes at `b`: the cut-off bump factor `χ b` vanishes
-  -- off the closed support of the chart pullback `χ`.
   rw [SmoothCcTensor.toFun_apply, chartBasisTensorSection_toSection_apply,
     image_eq_zero_of_notMem_tsupport hb_notin, mul_zero, zero_smul,
     Tensor0SBundle.TensorRSSpace.toModel_zero]
-
-
-/-! ## A general `C^∞`-coefficient test element
-
-The cross-Leibniz chart-pull limits pair the convergent cutoff chart components
-against a fixed test element of the form `densityOnEuclid g α · c · ψ`, with `c`
-a `C^∞`-on-the-chart-target coefficient. The next lemma packages, once, that such
-a product is `MemLp 2` with respect to the chart-`L²` measure. -/
 
 /-- The product `densityOnEuclid g α · c · ψ` of the chart density, a coefficient
 `c` that is `C^∞` on the open chart target, and a chart-supported smooth test
@@ -717,23 +643,6 @@ private lemma density_coeff_test_memLp
   rw [chartL2Measure]
   exact (hcd.continuous.memLp_of_hasCompactSupport hcs).restrict _
 
-
-
-
-
-
-/-! ## The source-term covariant-Leibniz split of an approximant
-
-The partition-of-unity-weighted approximant `Tₙ := eigenvectorPouApprox g r s
-h_atlas i α n` is the chart-atlas-partition-of-unity scalar product `pouSmul g r
-s α (wₙ).toCcTensor`, which is the smooth-scalar product `scalarSmul g r s
-(chartAtlasPOU I M α) (wₙ).toCcTensor`. The covariant-Leibniz rule
-`tensorCovDerivPointwiseInner_scalarSmul_left` therefore splits the
-source-term Dirichlet integrand of the per-approximant chart bilinear identity,
-evaluated at `Tₙ`, into the genuine-gradient main-Dirichlet integrand of `wₙ`
-against the smooth-scalar-weighted rotated test section, corrected by the two
-explicit cross terms. -/
-
 /-- The chart-atlas-partition-of-unity scalar product `pouSmul g r s α S` is the
 smooth-scalar product `scalarSmul g r s (chartAtlasPOU I M α) S`: both are the
 pointwise scalar product of the chart-atlas partition-of-unity weight and `S`. -/
@@ -742,15 +651,6 @@ private lemma pouSmul_eq_scalarSmul
     (S : SmoothCcTensor g r s) :
     pouSmul (I := I) (M := M) g r s α S =
       scalarSmul (I := I) (M := M) g r s (chartAtlasPOU I M α) S := rfl
-
-
-/-! ## Integrability of the chart right-hand-side limit terms
-
-Each term of the chart-Euclidean right-hand side `eigenvectorChartRHS` is, paired
-with the chart density and a chart-supported test function, integrable with
-respect to the chart-pulled volume restricted to the chart target: a chart-`L²`
-limit object — `MemLp 2` of the chart-`L²` measure by its companion-file lemma —
-times the `C^∞`-coefficient test element `densityOnEuclid g α · c · ψ`. -/
 
 /-- The chart density times a chart-`L²` limit object times a chart-supported
 smooth test function is integrable with respect to the chart-pulled volume
@@ -814,18 +714,6 @@ private lemma density_coeff_memLp2_test_integrable
   refine Filter.Eventually.of_forall (fun y => ?_)
   simp only []
   ring
-
-
-
-/-! ## Chart-locality-free twins
-
-Chart-locality-free `_unconditional` twins of the helper lemmas and the headline
-variational identity, re-keyed onto the chart-locality-free smooth approximant
-`eigenvectorSmoothApprox` / partition-of-unity-weighted approximant
-`eigenvectorPouApprox`, the chart-locality-free candidate weak
-chart partial / right-hand side / limit objects, and the chart-locality-free
-eigenbasis vector `tensorResolventEigenbasisVec` at the unconditional
-resolvent-compactness witness `tensorResolventL2_isCompactOperator`. -/
 
 /-- Chart-locality-free twin of
 `eigenvectorPouApprox_component_tsupport_subset`. -/
@@ -1685,11 +1573,9 @@ private lemma eigenvectorMainDir_tendsto
     tensorResolventEigenbasisVec (I := I) (M := M)
       (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s) i
     with hφ_def
-  -- The fixed test section as a smooth compactly-supported `H¹` section.
   set Sh1 : SmoothCcTensorH1 g r s :=
     ⟨pouSmul (I := I) (M := M) g r s α vRot⟩ with hSh1_def
   have hSh1_to : Sh1.toCcTensor = pouSmul (I := I) (M := M) g r s α vRot := rfl
-  -- The chart-locality-free approximating sequence and its `H¹`-convergence.
   have hw_tendsto :
       Filter.Tendsto
         (fun n => smoothToTensorH1Compl (I := I) (M := M) g r s
@@ -1697,17 +1583,14 @@ private lemma eigenvectorMainDir_tendsto
         atTop
         (𝓝 (eigenvectorResolvent (I := I) (M := M) g r s i)) :=
     eigenvectorSmoothApprox_tendsto (I := I) (M := M) g r s i
-  -- The Dirichlet-convergence of the canonical approximating sequence.
   have h_dir :=
     smoothApprox_dirichlet_tendsto (I := I) (M := M) g r s i Sh1
       hw_tendsto
-  -- `⟪R, sToH1 Sh1⟫ = ⟪Sh1.toCcTensor, φ⟫` by the eigenvector weak equation.
   have h_weak :
       ⟪eigenvectorResolvent (I := I) (M := M) g r s i,
           smoothToTensorH1Compl (I := I) (M := M) g r s Sh1⟫_ℝ =
         ⟪(Sh1.toCcTensor : TensorL2 r s g), φ⟫_ℝ :=
     eigenWeakEquation (I := I) (M := M) g r s i Sh1
-  -- `TensorH1ComplToTensorL2 R = μ • φ`.
   have h_resolvent :
       TensorH1ComplToTensorL2 (I := I) (M := M) g r s
           (eigenvectorResolvent (I := I) (M := M) g r s i) =
@@ -1723,7 +1606,6 @@ private lemma eigenvectorMainDir_tendsto
         i.fst.val * ⟪(Sh1.toCcTensor : TensorL2 r s g), φ⟫_ℝ := by
     rw [h_resolvent, inner_smul_left, starRingEnd_apply, star_trivial,
       real_inner_comm]
-  -- Assemble the main-Dirichlet closed-form limit.
   have h_md_eq :
       ⟪eigenvectorResolvent (I := I) (M := M) g r s i,
             smoothToTensorH1Compl (I := I) (M := M) g r s Sh1⟫_ℝ -
@@ -1735,7 +1617,6 @@ private lemma eigenvectorMainDir_tendsto
               TensorL2 r s g), φ⟫_ℝ := by
     rw [h_weak, h_l2part, hSh1_to]; ring
   rw [h_md_eq] at h_dir
-  -- The `L²` pairing as a chart-Euclidean integral.
   have h_pull :
       ⟪((pouSmul (I := I) (M := M) g r s α vRot : SmoothCcTensor g r s) :
           TensorL2 r s g), φ⟫_ℝ =
@@ -1751,7 +1632,6 @@ private lemma eigenvectorMainDir_tendsto
       g r s α φ vRot
       (eigenvectorRotatedTestSection_tsupport_subset (I := I) (M := M)
         g r s α P₀ hψ hψ_cs hψ_supp)
-  -- The chart-Euclidean integrand collapses to `densityOnEuclid · u_chart · ψ`.
   have h_collapse :
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
           densityOnEuclid (I := I) g α y *
@@ -3621,7 +3501,6 @@ theorem eigenvectorChartVariationalIdentity
               g r s i α P₀ y * ψ y) from by ring]
       rw [mul_one_div, div_self (densityOnEuclid_pos (I := I) g α hy).ne',
         one_mul]
-    -- The seven bracket integrand pieces, named as functions.
     set fU : EuclN → ℝ := fun y => densityOnEuclid (I := I) g α y *
       ((tensorL2ChartComponent (I := I) (M := M) g r s φ α P₀ :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y * ψ y
@@ -3659,10 +3538,6 @@ theorem eigenvectorChartVariationalIdentity
       ((1 / densityOnEuclid (I := I) g α y) *
         crossRightGradCoeffDivLimit (I := I) (M := M)
           g r s i α P₀ y) * ψ y with hfCRGD_def
-    -- Peel the bracket integral one term at a time by Bochner additivity. The
-    -- integrability facts and the goal are now all stated through `fU … fCRGD`
-    -- (the `set` tactic folded them); each step pins the flat bracket on its
-    -- left so the additivity rewrites match.
     have e1 : (∫ y in chartTargetEuclid (I := I) (M := M) α,
           (fU y - fCL y + fCRV y - fPRC y - fLOV y + fGD y - fCRGD y)
           ∂(volume : Measure EuclN)) =
@@ -3732,14 +3607,6 @@ theorem eigenvectorChartVariationalIdentity
     rw [mul_add, ← mul_assoc, ← mul_assoc, inv_mul_cancel₀ hμ_ne, one_mul,
       one_mul]]
 
-/-! ## The chart-bilinear divergence-form data of the eigenvector chart component
-(chart-locality-free)
-
-Assembling the chart-locality-free eigenvector chart `P₀`-component into the
-chart-bilinear divergence-form data structure `TensorChartBilinearH1ComplData
-g r s α P₀`, using the chart-locality-free helper lemmas and the chart-locality-
-free headline variational identity assembled above. -/
-
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- **The chart-bilinear divergence-form data of the eigenvector chart
 component (chart-locality-free).** Chart-locality-free twin of
@@ -3794,8 +3661,6 @@ def eigenvectorTensorChartBilinearData
      variational_identity := fun _ψ hψ hψ_cs hψ_supp =>
        eigenvectorChartVariationalIdentity (I := I) (M := M)
          g r s i α P₀ hψ hψ_cs hψ_supp }⟩
-
-/-! ## Sanity tests -/
 
 section ElaborationTests
 

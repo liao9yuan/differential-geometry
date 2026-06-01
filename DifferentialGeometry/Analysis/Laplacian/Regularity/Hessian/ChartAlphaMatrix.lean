@@ -43,16 +43,12 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Laplacian.HessianChartInvariance
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Chart-α matrix identity, in the `chartAlphaMatrixIdentity` Prop form -/
 
 /-- **Discharge of `chartAlphaMatrixIdentity` on the chart-α source.** For a
 smooth scalar `f : M → ℝ`, a chart base point `α : M`, and a manifold point
@@ -69,13 +65,6 @@ theorem chartAlphaMatrixIdentity_holds_chartSource
   classical
   intro i j
   exact chartAlphaMatrixIdentity_holds (I := I) g α hf hx i j
-
-/-! ## The symmetry-swap auxiliary, unconditionally
-
-The swap auxiliary used in the polarization identity for the chart-α Frobenius
-pairing. The identity
-`∑ ijkl 2 G(i,k) G(j,l) Hf'(i,j) Hf(k,l) = ∑ ijkl 2 G(i,k) G(j,l) Hf(i,j) Hf'(k,l)`
-follows by relabeling `(i,j,k,l) ↦ (k,l,i,j)` and using G-symmetry. -/
 
 /-- **The chart-α symmetry-swap auxiliary, unconditional.** For smooth `f, f'`
 and `x ∈ (chartAt H α).source`, the swap identity holds. -/
@@ -128,7 +117,6 @@ theorem chartAlpha_swap_aux_holds
       ∑ i : Fin n, ∑ j, ∑ k, ∑ l,
         2 * (G i k * G j l * Hf i j * Hf' k l) := rfl
   rw [h_LHS_abbr, h_RHS_abbr]
-  -- Reorder LHS: ∑ i ∑ j ∑ k ∑ l → ∑ k ∑ l ∑ i ∑ j.
   have h_LHS_reorder1 :
       (∑ i : Fin n, ∑ j, ∑ k, ∑ l,
         2 * (G i k * G j l * Hf' i j * Hf k l)) =

@@ -74,13 +74,11 @@ evaluated at `α`, routed through `continuousLinearMapAt_trivializationAt_eq_cor
 lemma trivToE_basepoint (α : M) (v : TangentSpace I α) :
     trivToE (I := I) α α v = v := by
   classical
-  -- `trivToE α α = coordChange (achart α) (achart α) α`.
   have hcore : trivToE (I := I) α α
       = (tangentBundleCore I M).coordChange (achart H α) (achart H α) α :=
     TangentBundle.continuousLinearMapAt_trivializationAt_eq_core (I := I) (M := M)
       (b₀ := α) (b := α) (mem_chart_source H α)
   rw [hcore]
-  -- `coordChange (achart α) (achart α) α = id` on the base set (which contains `α`).
   exact (tangentBundleCore I M).coordChange_self (achart H α) α
     (by rw [tangentBundleCore_baseSet]; exact mem_chart_source H α) v
 
@@ -109,7 +107,6 @@ theorem christoffelCorrection_basepoint_apply
               (chartModelBasis E) k := by
   classical
   rw [christoffelCorrection_apply]
-  -- `trivToE α α w = w` at the basepoint.
   rw [trivToE_basepoint (I := I) α w]
 
 /-- **Slot symmetry of the metric Christoffel correction at the basepoint.**
@@ -135,12 +132,7 @@ theorem christoffelCorrection_basepoint_symm
     christoffelCorrection (I := I) g α α Y w =
       christoffelCorrection (I := I) g α α w Y := by
   classical
-  -- The general torsion-free symmetry with `v := w`, `w := Y`:
-  --   `christoffelCorrection g α α (trivToE α α Y) w
-  --      = christoffelCorrection g α α (trivToE α α w) Y`.
   have hsym := christoffelCorrection_symm_cancel (I := I) g α α w Y
-  -- `hsym : christoffelCorrection g α α (trivToE α α Y) w
-  --           = christoffelCorrection g α α (trivToE α α w) Y`.
   rw [trivToE_basepoint (I := I) α Y, trivToE_basepoint (I := I) α w] at hsym
   exact hsym
 

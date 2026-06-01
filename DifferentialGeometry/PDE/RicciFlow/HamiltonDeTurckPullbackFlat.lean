@@ -89,11 +89,9 @@ theorem hamiltonDeTurck_pullback_isRicciFlow_flat
       HasDerivWithinAt (fun s : ℝ => (g_DT s).inner x v w)
         (deTurckRicciRHS (I := I) g_bg (g_DT t) x v w) (Set.Ici 0) t)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
-    -- Flat per-slot identities, parametrised by the factor-ODE derivative values.
     (T' P' : ℝ → ∀ x : M, TangentSpace I x → (E →L[ℝ] E))
     (hv_flat : ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v : TangentSpace I x,
       RawVariationalIdentityFlat (I := I) Φ_fam t x v (T' t x v) (P' t x v))
-    -- Per-slot flat-to-covariant Christoffel-residual `E`-equations.
     (hcorr : ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v : TangentSpace I x,
       (T' t x v) (mfderiv I I (Φ_fam t : M → M) x v) + (P' t x v) v
         = negCovariantSlotValue (I := I) (g_DT t)
@@ -103,7 +101,6 @@ theorem hamiltonDeTurck_pullback_isRicciFlow_flat
                 (deTurckVF (I := I) (g_DT t) g_bg : ∀ y : M, TangentSpace I y)
                 (Φ_fam t x))
               (mfderiv I I (Φ_fam t : M → M) x v))
-    -- The base-point-motion datum: the directional metric derivative along the orbit.
     (hbase : ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
       HasDerivWithinAt
         (fun s : ℝ => (g_DT t).inner ((Φ_fam s : M → M) x)
@@ -111,7 +108,6 @@ theorem hamiltonDeTurck_pullback_isRicciFlow_flat
           (mfderiv I I (Φ_fam t : M → M) x w))
         (-metricTransportResidual (I := I) (g_DT t)
             (deTurckVF (I := I) (g_DT t) g_bg) Φ_fam t x v w) (Set.Ici 0) t)
-    -- The three-piece additive chain rule (same total value as the committed version).
     (h_total_eval : ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
       HasDerivWithinAt
         (fun s : ℝ => (g_DT s).inner (Φ_fam s x)
@@ -133,19 +129,13 @@ theorem hamiltonDeTurck_pullback_isRicciFlow_flat
       (fun s : ℝ => (Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s)).inner x v w)
       ((-2 : ℝ) * ricciTensor (I := I)
         (Diffeomorph.pullbackMetric (g_DT t) (Φ_fam t)) x v w) (Set.Ici 0) t := by
-  -- Document the three genuinely-proved honest pieces (justify the three-piece split that
-  -- produced `h_total_eval`; the additive assembly is the supplied chain rule).
-  -- (1) Metric-family piece (the DeTurck PDE at frozen image point and pushforwards).
   have _h_metric := deTurck_metric_slot_hasDerivWithinAt (I := I)
     g_bg g_DT T hDT_deriv Φ_fam t ht x v w
-  -- (2) Base-point-motion piece (the directional metric derivative along the orbit).
   have _h_base := hbase t ht x v w
-  -- (3) Pushforward-kinetic piece (honest flat-route value `-𝓛 X g + metricTransportResidual`).
   have _h_push := variational_flow_flat_pairing_hasDerivWithinAt (I := I)
     (g_DT t) (deTurckVF (I := I) (g_DT t) g_bg) Φ_fam t x v w
     (T' t x v) (P' t x v) (T' t x w) (P' t x w)
     (hv_flat t ht x v) (hv_flat t ht x w) (hcorr t ht x v) (hcorr t ht x w)
-  -- Apply the committed value identification (Cartan cancellation + Ricci naturality).
   exact deTurck_pullback_eval_value_hasDerivWithinAt (I := I)
     g_bg g_DT Φ_fam t x v w (h_total_eval t ht x v w)
 

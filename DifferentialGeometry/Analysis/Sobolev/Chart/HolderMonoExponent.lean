@@ -48,8 +48,6 @@ variable [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
 
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## Compact carrier and its measure -/
-
 /-- The compact carrier inside the chart target image (under `toEuclidean`):
 the image of `tsupport (POU_α)` under the chart-α-map. -/
 private noncomputable def K (α : M) :
@@ -81,8 +79,6 @@ private lemma K_subset_target [CompactSpace M] (α : M) :
   (ChartTower.toEuclidean_extChartAt_tsupport_pou_compact_subset
     (I := I) (M := M) α).2
 
-/-! ## The chart-pushed-raw function and its tsupport -/
-
 /-- The raw chart pushforward of `(POU_α · u)`. -/
 private noncomputable def fRaw (α : M) (u : M → ℝ) :
     EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
@@ -104,8 +100,6 @@ private lemma chartPushed_ae_eq_fRaw [CompactSpace M] (α : M) (u : M → ℝ) :
       fRaw (I := I) (M := M) α u :=
   chartPushed_eq_chartPushedRaw_pou_ae (I := I) (M := M)
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u
-
-/-! ## Cross-exponent ae-equality of iterated weak partials -/
 
 /-- For `f` with `MemWkp j p f Ω` and `MemWkp j p' f Ω`, every iterated weak
 partial of order `j` at exponent `p` is ae-equal to the one at exponent
@@ -157,8 +151,6 @@ private lemma iterWeakPartial_cross_exponent_ae_eq
       have h_bridge2 := ih (f := chosenWeakPartial' (d := d) p' (β 0) f Ω)
         hg_memWkp_p_of_p' hg_memWkp_p' (fun i : Fin j => β i.succ)
       exact h_bridge1.trans h_bridge2
-
-/-! ## Iterated weak partials ae-vanish off the support -/
 
 /-- For `f` in `MemWkp j p Ω` with `tsupport f ⊆ K` (closed K), the iterated
 weak partial of order `j` ae-vanishes on `Ω \ K`. -/
@@ -272,8 +264,6 @@ private lemma iterWeakPartial_ae_zero_on_sdiff_K
           (s := Ω \ K) (t := Ω) (Set.diff_subset) h_iter_g_vs_gK_onΩ
       exact h_iter_g_vs_gK_onΩK.trans h_iter_gK
 
-/-! ## Indicator-form ae-equality of iterated weak partials -/
-
 private lemma iterWeakPartial_ae_eq_indicator
     {d : ℕ} [NeZero d]
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -295,7 +285,6 @@ private lemma iterWeakPartial_ae_eq_indicator
       (fun _ => (0 : ℝ)) :=
     iterWeakPartial_ae_zero_on_sdiff_K (d := d) hp_one hΩ_open hK_closed
       hf_supp hf_mem β
-  -- Convert h_zero_off from EventuallyEq form to ae-x form.
   have h_zero_off' : ∀ᵐ x ∂((MeasureTheory.volume :
         MeasureTheory.Measure (EuclideanSpace ℝ (Fin d))).restrict (Ω \ K)),
       iterWeakPartial (d := d) p j β f Ω x = 0 := by
@@ -309,8 +298,6 @@ private lemma iterWeakPartial_ae_eq_indicator
   · have hx_diff : x ∈ Ω \ K := ⟨hx_Ω, h_in_K⟩
     have hfx : iterWeakPartial (d := d) p j β f Ω x = 0 := hx hx_diff
     simp [Set.indicator_of_notMem h_in_K, hfx]
-
-/-! ## The per-(j, β) Hölder bound -/
 
 /-- For `f ∈ MemWkp k p Ω ∩ MemWkp k p' Ω` with `tsupport f ⊆ K` (closed K of
 finite volume, K ⊆ Ω, Ω open), and for `1 ≤ p' ≤ p`, the `L^{p'}`-norm of
@@ -422,8 +409,6 @@ private lemma eLpNorm_iterWeakPartial_mono_exponent
     rw [Measure.restrict_apply MeasurableSet.univ]
     simp
   rw [h_meas_univ_K] at h_holder
-  -- After the rewrites, the goal uses (vol.restrict K) on both sides.
-  -- Apply h_holder with mul_comm.
   calc eLpNorm (iterWeakPartial (d := d) p j β f Ω) p'
         ((MeasureTheory.volume :
             MeasureTheory.Measure (EuclideanSpace ℝ (Fin d))).restrict K)
@@ -436,8 +421,6 @@ private lemma eLpNorm_iterWeakPartial_mono_exponent
             ((MeasureTheory.volume :
                 MeasureTheory.Measure (EuclideanSpace ℝ (Fin d))).restrict K) := by
         rw [mul_comm]
-
-/-! ## Non-negativity of the volume-rpow exponent -/
 
 private lemma exponent_nonneg
     {p p' : ℝ≥0∞} (hp_one : 1 ≤ p) (hp'_one : 1 ≤ p')
@@ -461,8 +444,6 @@ private lemma exponent_nonneg
   have h_inv : 1 / p.toReal ≤ 1 / p'.toReal :=
     one_div_le_one_div_of_le hp'_pos hp'_le_real
   linarith
-
-/-! ## Per-chart wkpNorm Hölder bound — main theorem -/
 
 /-- For a single chart `α` on a closed manifold, the chart-pushed function
 `chartPushed POU α u` of a function `u` in `MemWkpChart g k p u` has its
@@ -489,7 +470,6 @@ theorem wkpNorm_chartPushed_mono_exponent_holder
                   (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
                 (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- Setup.
   set Ω : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
     chartTargetEuclid (I := I) (M := M) α with hΩ_def
   set Kset : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
@@ -523,7 +503,6 @@ theorem wkpNorm_chartPushed_mono_exponent_holder
     exact fRaw_tsupport_subset_K (I := I) (M := M) α u
   have h_Cenn_eq_ofReal : Cenn = ENNReal.ofReal Cenn.toReal := by
     rw [ENNReal.ofReal_toReal hCenn_ne_top]
-  -- 1. wkpNorm at p' (and p) of f equals wkpNorm at p' (and p) of fR.
   have h_wkpNorm_p'_eq : wkpNorm (d := Module.finrank ℝ E) k p' f Ω =
       wkpNorm (d := Module.finrank ℝ E) k p' fR Ω :=
     wkpNorm_congr_ae (d := Module.finrank ℝ E) hp'_one hΩ_open h_f_eq_fR
@@ -531,7 +510,6 @@ theorem wkpNorm_chartPushed_mono_exponent_holder
       wkpNorm (d := Module.finrank ℝ E) k p fR Ω :=
     wkpNorm_congr_ae (d := Module.finrank ℝ E) hp_one hΩ_open h_f_eq_fR
   rw [h_wkpNorm_p'_eq, h_wkpNorm_p_eq]
-  -- 2. MemWkp k p fR Ω and MemWkp k p' fR Ω.
   have h_fR_memWkp_p : MemWkp (d := Module.finrank ℝ E) k p fR Ω := by
     rw [hfR_def]
     exact ChartTower.memWkp_chartPushedRaw_pou_mul_of_memWkpChart
@@ -541,11 +519,9 @@ theorem wkpNorm_chartPushed_mono_exponent_holder
       intro h
       rw [h] at hp'_le_p
       exact hp_top (top_le_iff.mp hp'_le_p)
-    -- Apply the existing mono-exponent transfer for the chartPushedRaw / chart target.
     exact EuclideanIteratedMonoExp.memWkp_mono_exponent_of_tsupport_subset
       (d := Module.finrank ℝ E) k hΩ_open hK_closed hK_vol_lt_top
       hp'_one hp'_le_p h_fR_supp h_fR_memWkp_p
-  -- 3. Per-(j, β) bound and sum.
   rw [show (DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
       (d := Module.finrank ℝ E) k p' fR Ω) =
       ∑ j ∈ Finset.range (k + 1),
@@ -562,7 +538,6 @@ theorem wkpNorm_chartPushed_mono_exponent_holder
             ((MeasureTheory.volume :
                 MeasureTheory.Measure
                   (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict Ω) from rfl]
-  -- Distribute the ENNReal.ofReal Cenn.toReal across the double sum.
   rw [Finset.mul_sum]
   refine Finset.sum_le_sum ?_
   intro j hj
@@ -574,8 +549,6 @@ theorem wkpNorm_chartPushed_mono_exponent_holder
   have h_per := eLpNorm_iterWeakPartial_mono_exponent
     (d := Module.finrank ℝ E) hΩ_open hK_closed hK_subset
     hp_one hp'_one hp'_le_p h_fR_memWkp_p h_fR_memWkp_p' h_fR_supp hj_le_k β
-  -- Convert from Cenn (= volume Kset ^ δ) to ENNReal.ofReal Cenn.toReal.
-  -- They are equal since Cenn ≠ ⊤.
   have h_Cenn_id : MeasureTheory.volume Kset ^ (1 / p'.toReal - 1 / p.toReal) =
       ENNReal.ofReal Cenn.toReal := by
     rw [← hδ_def, ← hCenn_def, ← h_Cenn_eq_ofReal]

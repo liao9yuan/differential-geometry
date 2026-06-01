@@ -86,25 +86,12 @@ open DifferentialGeometry.Analysis.Laplacian.MetricExtension
   hiding chartTargetEuclid chartTargetEuclid_isOpen
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The chart-pulled weighted measure dominated on the partition-of-unity kernel
-
-On the compact partition-of-unity kernel `chartPouKernel α ⊆ chartTargetEuclid α`
-the chart density `densityOnEuclid g α` is bounded above, so the chart-pulled
-weighted measure restricted to the kernel is dominated by a positive scalar
-multiple of `volume` restricted to the kernel. -/
 
 /-- On the compact partition-of-unity kernel `chartPouKernel α`, the chart-pulled
 weighted measure restricted to the kernel is dominated by a nonnegative scalar
@@ -124,17 +111,14 @@ private lemma chartPulledWeightedMeasure_restrict_le_volume_on_chartPouKernel
     chartPouKernel_measurableSet (I := I) (M := M) α
   have hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α :=
     chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
-  -- The density is bounded above by a positive constant on the compact kernel.
   obtain ⟨_c_min, c_max, hc_min_pos, hc_le, h_bd⟩ :=
     densityOnEuclid_bounded_on_compact (I := I) (M := M) g α hK_compact hK_in
   refine ⟨c_max, le_of_lt (lt_of_lt_of_le hc_min_pos hc_le), ?_⟩
-  -- Compare the two measures by evaluating on measurable sets.
   refine Measure.le_iff.2 ?_
   intro A hA
   rw [Measure.restrict_apply hA, Measure.smul_apply, Measure.restrict_apply hA]
   unfold chartPulledWeightedMeasure
   rw [withDensity_apply _ (hA.inter hK_meas)]
-  -- The density is `≤ c_max` pointwise on `A ∩ K`.
   have h_pointwise_bd :
       ∫⁻ y in A ∩ K,
           ENNReal.ofReal (densityOnEuclid (I := I) g α y)
@@ -149,13 +133,6 @@ private lemma chartPulledWeightedMeasure_restrict_le_volume_on_chartPouKernel
     MeasureTheory.setLIntegral_const _ _
   rw [smul_eq_mul]
   exact h_pointwise_bd.trans (le_of_eq h_const_eval)
-
-/-! ## The weighted-versus-volume `eLpNorm` comparison
-
-For a function vanishing almost everywhere off the compact partition-of-unity
-kernel `chartPouKernel α`, the weighted `L²`-norm against the chart-pulled
-weighted measure restricted to the chart target is bounded by a nonnegative
-constant times the plain-volume `L²`-norm restricted to the chart target. -/
 
 omit [CompleteSpace E] in
 /-- **Weighted-versus-volume `eLpNorm` comparison on the kernel.** Let
@@ -192,28 +169,22 @@ private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel
   have hK_in : K ⊆ Ω := chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
   have hV_meas : MeasurableSet (Ω \ K) := hΩ_open.measurableSet.diff hK_meas
-  -- Recast the off-kernel a.e.-vanishing as a pointwise implication on `Ω`.
   have hf' : ∀ᵐ y ∂((volume : Measure EuclN).restrict Ω),
       y ∉ K → f y = 0 := by
     rw [Filter.EventuallyEq, ae_restrict_iff' hV_meas] at hf
     rw [ae_restrict_iff' hΩ_open.measurableSet]
     filter_upwards [hf] with y hy hy_Ω hy_K
     exact hy ⟨hy_Ω, hy_K⟩
-  -- Domination of the weighted measure on `K`.
   obtain ⟨c, hc_nn, hc_le⟩ :=
     chartPulledWeightedMeasure_restrict_le_volume_on_chartPouKernel
       (I := I) (M := M) g α
   refine ⟨Real.sqrt c, Real.sqrt_nonneg _, ?_⟩
-  -- The weighted measure restricted to `Ω` is absolutely continuous w.r.t. the
-  -- plain volume restricted to `Ω`.
   have h_abs : (chartPulledWeightedMeasure (I := I) g α).restrict Ω ≪
       (volume : Measure EuclN).restrict Ω := by
     unfold chartPulledWeightedMeasure
     exact (withDensity_absolutelyContinuous (volume : Measure EuclN) _).restrict Ω
-  -- `f` vanishes a.e. off `K` for the weighted restricted measure too.
   have hf_w : ∀ᵐ y ∂((chartPulledWeightedMeasure (I := I) g α).restrict Ω),
       y ∉ K → f y = 0 := h_abs.ae_le hf'
-  -- `f` agrees a.e. with `K.indicator f` for both measures.
   have h_ind_w : f =ᵐ[(chartPulledWeightedMeasure (I := I) g α).restrict Ω]
       K.indicator f := by
     filter_upwards [hf_w] with y hy
@@ -225,14 +196,11 @@ private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel
     by_cases hyK : y ∈ K
     · rw [Set.indicator_of_mem hyK]
     · rw [Set.indicator_of_notMem hyK, hy hyK]
-  -- Rewrite both `eLpNorm`s through the indicator.
   rw [eLpNorm_congr_ae h_ind_w, eLpNorm_congr_ae h_ind_v,
     eLpNorm_indicator_eq_eLpNorm_restrict hK_meas,
     eLpNorm_indicator_eq_eLpNorm_restrict hK_meas]
-  -- `(μ.restrict Ω).restrict K = μ.restrict K` because `K ⊆ Ω`.
   rw [Measure.restrict_restrict_of_subset hK_in,
     Measure.restrict_restrict_of_subset hK_in]
-  -- Dominate the weighted measure on `K`, then split the scalar.
   have h_mono :
       eLpNorm f 2 ((chartPulledWeightedMeasure (I := I) g α).restrict K)
         ≤ eLpNorm f 2
@@ -240,11 +208,9 @@ private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel
     eLpNorm_mono_measure f hc_le
   refine h_mono.trans ?_
   rw [eLpNorm_smul_measure_of_ne_top (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)]
-  -- `(1 / 2 : ℝ≥0∞).toReal = 1 / 2`.
   have h_toReal : ((1 / 2 : ℝ≥0∞).toReal : ℝ) = (1 : ℝ) / 2 := by
     rw [show (1 / 2 : ℝ≥0∞) = (1 : ℝ≥0∞) / 2 from rfl]; simp
   rw [h_toReal]
-  -- `ENNReal.ofReal c ^ (1 / 2) = ENNReal.ofReal (√c)`.
   have h_pow_eq : ENNReal.ofReal c ^ ((1 : ℝ) / 2) =
       ENNReal.ofReal (Real.sqrt c) := by
     rw [Real.sqrt_eq_rpow, ← ENNReal.ofReal_rpow_of_nonneg hc_nn (by positivity)]
@@ -289,14 +255,10 @@ private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel_unifo
   have hK_in : K ⊆ Ω := chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
   have hV_meas : MeasurableSet (Ω \ K) := hΩ_open.measurableSet.diff hK_meas
-  -- Domination of the weighted measure on `K`: the constant `c` is `i`-free,
-  -- so the witness `√c` can be hoisted before the index.
   obtain ⟨c, hc_nn, hc_le⟩ :=
     chartPulledWeightedMeasure_restrict_le_volume_on_chartPouKernel
       (I := I) (M := M) g α
   refine ⟨Real.sqrt c, Real.sqrt_nonneg _, fun i => ?_⟩
-  -- Recast the off-kernel a.e.-vanishing of `f i` as a pointwise implication
-  -- on `Ω`.
   have hf' : ∀ᵐ y ∂((volume : Measure EuclN).restrict Ω),
       y ∉ K → f i y = 0 := by
     have hf_i := hf i
@@ -304,16 +266,12 @@ private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel_unifo
     rw [ae_restrict_iff' hΩ_open.measurableSet]
     filter_upwards [hf_i] with y hy hy_Ω hy_K
     exact hy ⟨hy_Ω, hy_K⟩
-  -- The weighted measure restricted to `Ω` is absolutely continuous w.r.t. the
-  -- plain volume restricted to `Ω`.
   have h_abs : (chartPulledWeightedMeasure (I := I) g α).restrict Ω ≪
       (volume : Measure EuclN).restrict Ω := by
     unfold chartPulledWeightedMeasure
     exact (withDensity_absolutelyContinuous (volume : Measure EuclN) _).restrict Ω
-  -- `f i` vanishes a.e. off `K` for the weighted restricted measure too.
   have hf_w : ∀ᵐ y ∂((chartPulledWeightedMeasure (I := I) g α).restrict Ω),
       y ∉ K → f i y = 0 := h_abs.ae_le hf'
-  -- `f i` agrees a.e. with `K.indicator (f i)` for both measures.
   have h_ind_w : f i =ᵐ[(chartPulledWeightedMeasure (I := I) g α).restrict Ω]
       K.indicator (f i) := by
     filter_upwards [hf_w] with y hy
@@ -325,14 +283,11 @@ private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel_unifo
     by_cases hyK : y ∈ K
     · rw [Set.indicator_of_mem hyK]
     · rw [Set.indicator_of_notMem hyK, hy hyK]
-  -- Rewrite both `eLpNorm`s through the indicator.
   rw [eLpNorm_congr_ae h_ind_w, eLpNorm_congr_ae h_ind_v,
     eLpNorm_indicator_eq_eLpNorm_restrict hK_meas,
     eLpNorm_indicator_eq_eLpNorm_restrict hK_meas]
-  -- `(μ.restrict Ω).restrict K = μ.restrict K` because `K ⊆ Ω`.
   rw [Measure.restrict_restrict_of_subset hK_in,
     Measure.restrict_restrict_of_subset hK_in]
-  -- Dominate the weighted measure on `K`, then split the scalar.
   have h_mono :
       eLpNorm (f i) 2 ((chartPulledWeightedMeasure (I := I) g α).restrict K)
         ≤ eLpNorm (f i) 2
@@ -340,25 +295,13 @@ private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel_unifo
     eLpNorm_mono_measure (f i) hc_le
   refine h_mono.trans ?_
   rw [eLpNorm_smul_measure_of_ne_top (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)]
-  -- `(1 / 2 : ℝ≥0∞).toReal = 1 / 2`.
   have h_toReal : ((1 / 2 : ℝ≥0∞).toReal : ℝ) = (1 : ℝ) / 2 := by
     rw [show (1 / 2 : ℝ≥0∞) = (1 : ℝ≥0∞) / 2 from rfl]; simp
   rw [h_toReal]
-  -- `ENNReal.ofReal c ^ (1 / 2) = ENNReal.ofReal (√c)`.
   have h_pow_eq : ENNReal.ofReal c ^ ((1 : ℝ) / 2) =
       ENNReal.ofReal (Real.sqrt c) := by
     rw [Real.sqrt_eq_rpow, ← ENNReal.ofReal_rpow_of_nonneg hc_nn (by positivity)]
   rw [h_pow_eq, smul_eq_mul]
-
-/-! ## Chart-locality-free twins
-
-The declarations below re-key the chart-locality-conditional results above onto
-the intrinsic compact-operator eigenbasis, eliminating the
-`HasLocallyConstantChartAt` hypothesis. Each twin is a faithful re-keying of its
-original: the eigenbasis vector is supplied by
-`tensorResolventEigenbasisVec` fed the intrinsic compactness witness
-`tensorResolventL2_isCompactOperator g r s`, and every chart-locality
-dependency is replaced by its previously-established `_unconditional` twin. -/
 
 section MainBoundUnconditional
 
@@ -395,7 +338,6 @@ theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le
           diffRHSAggregate (I := I) (M := M)
             g r s i α P₀ m 0 directions := by
   classical
-  -- The carrier's `f_chart` is, definitionally, `D_m.fChartEff`.
   have h_f_chart_eq :
       (eigenvectorIteratedTensorChartBilinearData_toData
           (I := I) (M := M) g r s i α P₀ D_m h_parent).f_chart =
@@ -406,7 +348,6 @@ theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le
         g r s i α P₀ m directions
     exact h_fChartEff
   rw [h_f_chart_eq]
-  -- The level-`m` right-hand side vanishes a.e. off the compact kernel.
   have h_ae_zero :
       eigenvectorChartRHSDiff (I := I) (M := M)
           g r s i α P₀ m directions
@@ -415,19 +356,13 @@ theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le
             chartPouKernel (I := I) (M := M) α)] (fun _ : EuclN => (0 : ℝ)) :=
     rhsDiff_ae_zero_off_chartPouKernel (I := I) (M := M)
       g r s i α P₀ m directions
-  -- The weighted-versus-volume `eLpNorm` comparison.
   obtain ⟨Ccmp, hCcmp_nn, hCcmp_bd⟩ :=
     eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel
       (I := I) (M := M) g α h_ae_zero
-  -- The plain-volume weighted-`eLpNorm` bound for the differentiated right-hand
-  -- side: `eigenvectorChartRHSDiff_eLpNorm_le` needs `h_pou` at
-  -- order `m + 1`.
   obtain ⟨Cvol, hCvol_nn, hCvol_bd⟩ :=
     eigenvectorChartRHSDiff_eLpNorm_le (I := I) (M := M)
       g r s i α P₀ m directions h_pou
-  -- Assemble: the headline constant is `Ccmp · Cvol`.
   refine ⟨Ccmp * Cvol, mul_nonneg hCcmp_nn hCvol_nn, ?_⟩
-  -- Chain the comparison through the plain-volume bound.
   calc
     eLpNorm (eigenvectorChartRHSDiff (I := I) (M := M)
             g r s i α P₀ m directions) 2
@@ -484,9 +419,6 @@ theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le_uniform
             diffRHSAggregate (I := I) (M := M)
               g r s i α P₀ m 0 directions := by
   classical
-  -- The level-`m` right-hand side vanishes a.e. off the compact kernel — this
-  -- holds for every eigenbasis index, so it furnishes the function family fed
-  -- to the eigenbasis-uniform comparison.
   have h_ae_zero :
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
         eigenvectorChartRHSDiff (I := I) (M := M)
@@ -496,21 +428,15 @@ theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le_uniform
               chartPouKernel (I := I) (M := M) α)] (fun _ : EuclN => (0 : ℝ)) :=
     fun i => rhsDiff_ae_zero_off_chartPouKernel (I := I) (M := M)
       g r s i α P₀ m directions
-  -- The eigenbasis-uniform weighted-versus-volume `eLpNorm` comparison — its
-  -- constant depends only on `g` and `α`, so it is hoisted before `intro i`.
   obtain ⟨Ccmp, hCcmp_nn, hCcmp_bd⟩ :=
     eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel_uniform
       (I := I) (M := M)
       (ι := TensorEigenIdx (I := I) (M := M) g r s) g α h_ae_zero
-  -- The eigenbasis-uniform plain-volume weighted-`eLpNorm` bound for the
-  -- differentiated right-hand side — its constant is likewise `i`-free.
   obtain ⟨Cvol, hCvol_nn, hCvol_bd⟩ :=
     eigenvectorChartRHSDiff_eLpNorm_le_uniform (I := I) (M := M)
       g r s α P₀ m directions h_pou
-  -- Assemble: the headline constant is `Ccmp · Cvol`.
   refine ⟨Ccmp * Cvol, mul_nonneg hCcmp_nn hCvol_nn, ?_⟩
   intro i D_m h_fChartEff h_parent
-  -- The carrier's `f_chart` is, definitionally, `D_m.fChartEff`.
   have h_f_chart_eq :
       (eigenvectorIteratedTensorChartBilinearData_toData
           (I := I) (M := M) g r s i α P₀ D_m h_parent).f_chart =
@@ -521,8 +447,6 @@ theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le_uniform
         g r s i α P₀ m directions
     exact h_fChartEff
   rw [h_f_chart_eq]
-  -- Chain the eigenbasis-uniform comparison through the eigenbasis-uniform
-  -- plain-volume bound, both specialised at `i`.
   calc
     eLpNorm (eigenvectorChartRHSDiff (I := I) (M := M)
             g r s i α P₀ m directions) 2
@@ -547,8 +471,6 @@ theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le_uniform
 
 end MainBoundUnconditional
 
-/-! ## Chart-locality-free finiteness of the order-`K` aggregate -/
-
 /-- Chart-locality-free twin of `diffRHSHead_ne_top`. -/
 private lemma diffRHSHead_ne_top
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -558,9 +480,6 @@ private lemma diffRHSHead_ne_top
     diffRHSHead (I := I) (M := M) g r s i α P₀ m K l
       ≠ (⊤ : ℝ≥0∞) := by
   classical
-  -- Chart-locality-free order-`N` regularity of every iterated weak partial:
-  -- the eigenvector chart component lies in `MemWkp (N + j) 2` for every `j`
-  -- and `N`, and the polymorphic bridge transfers it.
   have h_iter : ∀ (N j : ℕ) (idx : Fin j → Fin (Module.finrank ℝ E)),
       MemWkp (d := Module.finrank ℝ E) N 2
         (eigenvectorChartIteratedPartial (I := I) (M := M)
@@ -576,12 +495,10 @@ private lemma diffRHSHead_ne_top
       (I := I) (M := M) g r s i α P₀ j N h_comp idx
   rw [diffRHSHead]
   refine ENNReal.add_ne_top.mpr ⟨?_, ?_⟩
-  · -- The first piece is a finite sum of `wkpNorm`s of iterated weak partials.
-    refine ne_of_lt (ENNReal.sum_lt_top.mpr (fun a _ => ?_))
+  · refine ne_of_lt (ENNReal.sum_lt_top.mpr (fun a _ => ?_))
     exact wkpNorm_lt_top_of_memWkp (d := Module.finrank ℝ E)
       (h_iter (2 + K) (m + 1) (Fin.cons a (Fin.init l)))
-  · -- The second piece is a single `wkpNorm` of an iterated weak partial.
-    exact ne_of_lt (wkpNorm_lt_top_of_memWkp (d := Module.finrank ℝ E)
+  · exact ne_of_lt (wkpNorm_lt_top_of_memWkp (d := Module.finrank ℝ E)
       (h_iter (2 + K) m (Fin.init l)))
 
 /-- Chart-locality-free twin of `rhsZeroAggregate_ne_top`. -/
@@ -600,51 +517,37 @@ private lemma rhsZeroAggregate_ne_top
       ≠ (⊤ : ℝ≥0∞) := by
   classical
   rw [rhsZeroAggregate]
-  -- Discharge the seven-term sum piece by piece.
   refine ENNReal.add_ne_top.mpr ⟨ENNReal.add_ne_top.mpr
     ⟨ENNReal.add_ne_top.mpr ⟨ENNReal.add_ne_top.mpr ⟨ENNReal.add_ne_top.mpr
       ⟨ENNReal.add_ne_top.mpr ⟨?_, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩
-  · -- Summand 1: the eigenvector chart component at order `K` — unconditional.
-    exact ne_of_lt (wkpNorm_lt_top_of_memWkp (d := Module.finrank ℝ E)
+  · exact ne_of_lt (wkpNorm_lt_top_of_memWkp (d := Module.finrank ℝ E)
       (eigenvector_chartComponent_memWkp_arbitrary (I := I) (M := M)
         g r s i K α P₀))
-  · -- Summand 2: the transport double-sum of resolvent-coercion chart components
-    -- at order `K + 1`, each finite directly from `h_pou`.
-    refine ne_of_lt (ENNReal.sum_lt_top.mpr (fun β _ =>
+  · refine ne_of_lt (ENNReal.sum_lt_top.mpr (fun β _ =>
       ENNReal.add_lt_top.mpr ⟨ENNReal.sum_lt_top.mpr (fun Q _ => ?_),
         ENNReal.sum_lt_top.mpr (fun β' _ =>
           ENNReal.sum_lt_top.mpr (fun Q _ => ?_))⟩))
     · exact wkpNorm_lt_top_of_memWkp (d := Module.finrank ℝ E) (h_pou β Q)
     · exact wkpNorm_lt_top_of_memWkp (d := Module.finrank ℝ E) (h_pou β' Q)
-  · -- Summand 3: the transport sum of resolvent-coercion chart components at
-    -- order `K`, each obtained from `h_pou` by dropping the order.
-    refine ne_of_lt (ENNReal.sum_lt_top.mpr (fun β _ =>
+  · refine ne_of_lt (ENNReal.sum_lt_top.mpr (fun β _ =>
       ENNReal.sum_lt_top.mpr (fun Q _ => ?_)))
     exact wkpNorm_lt_top_of_memWkp (d := Module.finrank ℝ E)
       (MemWkp.le_of_le (d := Module.finrank ℝ E)
         (by omega : K ≤ K + 1) (h_pou β Q))
-  · -- Summand 4: the chart-partial atoms `partialLpLimit` at
-    -- order `K`.
-    refine ne_of_lt (ENNReal.sum_lt_top.mpr (fun P _ =>
+  · refine ne_of_lt (ENNReal.sum_lt_top.mpr (fun P _ =>
       ENNReal.sum_lt_top.mpr (fun k _ => ?_)))
     exact wkpNorm_lt_top_of_memWkp (d := Module.finrank ℝ E)
       (partialLpLimit_memWkp (I := I) (M := M)
         g r s i α P k K h_pou)
-  · -- Summand 5: the chart-component atoms `componentLpLimit` at
-    -- order `K`.
-    refine ne_of_lt (ENNReal.sum_lt_top.mpr (fun p _ => ?_))
+  · refine ne_of_lt (ENNReal.sum_lt_top.mpr (fun p _ => ?_))
     exact wkpNorm_lt_top_of_memWkp (d := Module.finrank ℝ E)
       (componentLpLimit_memWkp (I := I) (M := M)
         g r s i α p K h_pou)
-  · -- Summand 6: the cutoff cross-right limit objects
-    -- `crossRightLimitComponent` at order `K`.
-    refine ne_of_lt (ENNReal.sum_lt_top.mpr (fun P _ => ?_))
+  · refine ne_of_lt (ENNReal.sum_lt_top.mpr (fun P _ => ?_))
     exact wkpNorm_lt_top_of_memWkp (d := Module.finrank ℝ E)
       (crossRightLimitComponent_memWkp (I := I) (M := M)
         g r s i α P K h_pou)
-  · -- Summand 7: the cutoff chart-partial atoms `cutoffPartialLpLimit`
-    -- at order `K`.
-    refine ne_of_lt (ENNReal.sum_lt_top.mpr (fun P _ =>
+  · refine ne_of_lt (ENNReal.sum_lt_top.mpr (fun P _ =>
       ENNReal.sum_lt_top.mpr (fun l _ => ?_)))
     exact wkpNorm_lt_top_of_memWkp (d := Module.finrank ℝ E)
       (cutoffPartialLpLimit_memWkp (I := I) (M := M)
@@ -668,12 +571,9 @@ theorem diffRHSAggregate_ne_top
   classical
   induction m generalizing K with
   | zero =>
-      -- Level `0`: the order-`K` seven-term aggregate `rhsZeroAggregate`.
       rw [show diffRHSAggregate (I := I) (M := M)
           g r s i α P₀ 0 K l =
         rhsZeroAggregate (I := I) (M := M) g r s i α P₀ K from rfl]
-      -- `rhsZeroAggregate_ne_top` needs `h_pou` at order `K + 1`;
-      -- this theorem's `h_pou` is at order `0 + 1 + K = K + 1`.
       have h_pou' : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
           MemWkp (d := Module.finrank ℝ E) (K + 1) 2
             (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
@@ -690,8 +590,6 @@ theorem diffRHSAggregate_ne_top
       exact rhsZeroAggregate_ne_top (I := I) (M := M)
         g r s i α P₀ K h_pou'
   | succ m ih =>
-      -- Level `m + 1`: `diffRHSHead` plus the level-`m` aggregate
-      -- at order `K + 1`.
       rw [show diffRHSAggregate (I := I) (M := M)
             g r s i α P₀ (m + 1) K l =
           diffRHSHead (I := I) (M := M) g r s i α P₀ m K l +
@@ -700,9 +598,7 @@ theorem diffRHSAggregate_ne_top
       refine ENNReal.add_ne_top.mpr ⟨?_, ?_⟩
       · exact diffRHSHead_ne_top (I := I) (M := M)
           g r s i α P₀ m K l
-      · -- The inductive hypothesis at order `K + 1` needs `h_pou` at order
-        -- `m + 1 + (K + 1) = m + 1 + 1 + K`, supplied by this theorem's `h_pou`.
-        have h_pou_prev : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
+      · have h_pou_prev : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
             MemWkp (d := Module.finrank ℝ E) (m + 1 + (K + 1)) 2
               (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                   (TensorH1ComplToTensorL2 (I := I) (M := M) g r s

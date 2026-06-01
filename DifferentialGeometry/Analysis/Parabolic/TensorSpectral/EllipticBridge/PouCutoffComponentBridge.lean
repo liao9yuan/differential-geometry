@@ -87,26 +87,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The chart-pushed partition-of-unity weight
-
-The chart-`α` pushforward of the canonical partition-of-unity weight
-`chartAtlasPOU α` is the bounded measurable multiplier appearing on the right
-of the bridge. The partition-of-unity weight is `[0, 1]`-valued; its chart-`α`
-pushforward inherits the pointwise bound `0 ≤ · ≤ 1` on the chart target and is
-identically `0` off it. -/
 
 /-- The chart-`α` pushforward of the canonical partition-of-unity weight
 `chartAtlasPOU α`. On the Euclidean chart target it reads the partition-of-unity
@@ -156,13 +142,6 @@ private lemma chartPushedPouWeight_aestronglyMeasurable (α : M) :
     AEStronglyMeasurable (chartPushedPouWeight (I := I) (M := M) α)
       (chartL2Measure (I := I) (M := M) α) :=
   (chartPushedPouWeight_measurable (I := I) (M := M) α).aestronglyMeasurable
-
-/-! ## The bounded `L²`-multiplier by the chart-pushed partition-of-unity weight
-
-Multiplication by the `[0, 1]`-valued bounded measurable function
-`chartPushedPouWeight α` sends an `L²` class to an `L²` class with `L²` norm
-bounded by the `L²` norm of the input. The construction assembles into a
-continuous linear self-map of `Lp ℝ 2 (chartL2Measure α)`. -/
 
 /-- The product of the chart-pushed partition-of-unity weight with an `L²`
 function is `L²`: the weight is bounded by `1`, so the product is dominated by
@@ -310,14 +289,6 @@ private lemma boundedPouMulLpCLM_coeFn
   rw [boundedPouMulLpCLM_apply]
   exact boundedPouMulLp_coeFn (I := I) (M := M) α f
 
-/-! ## The manifold-side pointwise identity
-
-On the manifold, the partition-of-unity weight times the raw chart-frame scalar
-component equals the partition-of-unity weight times (the chart-kernel cutoff
-times the raw component). Where the weight is nonzero the point lies in the
-weight's topological support, so the cutoff equals `1`; where the weight
-vanishes both sides vanish. -/
-
 /-- For every point `x` of the manifold, the partition-of-unity weight at `α`
 times any real value `v` equals the partition-of-unity weight at `α` times the
 chart-kernel cutoff at `α` times `v`.
@@ -334,9 +305,7 @@ private lemma pou_smul_eq_pou_smul_cutoff_smul
   classical
   by_cases hρ : ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 0
   · rw [hρ, zero_mul, zero_mul]
-  · -- The weight is nonzero: `x` lies in its topological support, where the
-    -- chart-kernel cutoff equals `1`.
-    have hx_supp : x ∈
+  · have hx_supp : x ∈
         tsupport
           (fun y : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) y) :=
       subset_tsupport _ hρ
@@ -360,12 +329,6 @@ private lemma tensorChartComponentPou_eq_pou_mul_cutoffComponentScalar
   unfold tensorChartComponentPou cutoffComponentScalar
   exact pou_smul_eq_pou_smul_cutoff_smul (I := I) (M := M) α x
     (tensorChartComponentRaw (I := I) (M := M) g r s S α P₀.1 P₀.2 x)
-
-/-! ## The Euclidean pointwise identity
-
-Pushing the manifold-side identity through the chart map: the Euclidean chart
-component equals, pointwise, the chart-pushed partition-of-unity weight times the
-cutoff Euclidean chart component. -/
 
 /-- The chart-`α` pushforward of a pointwise product where the first factor is
 `chartAtlasPOU α` is, pointwise on Euclidean space, the chart-pushed
@@ -398,11 +361,7 @@ private lemma tensorChartComponent_eq_chartPushedPouWeight_mul_cutoffComponentEu
       chartPushedPouWeight (I := I) (M := M) α y *
         cutoffComponentEuclid (I := I) (M := M) g r s S α P₀.1 P₀.2 y := by
   classical
-  -- The Euclidean chart component is the chart-`α` pushforward of the
-  -- partition-of-unity-weighted scalar field.
   rw [tensorChartComponent_def, cutoffComponentEuclid_eq_chartPushedRaw]
-  -- The partition-of-unity-weighted scalar field decomposes pointwise as the
-  -- partition-of-unity weight times the cutoff scalar field.
   have h_scalar :
       tensorChartComponentPou (I := I) (M := M) g r s S α P₀.1 P₀.2 =
         fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x *
@@ -413,12 +372,6 @@ private lemma tensorChartComponent_eq_chartPushedPouWeight_mul_cutoffComponentEu
   rw [h_scalar]
   exact chartPushedRaw_pou_mul_eq_chartPushedPouWeight_mul (I := I) (M := M) α
     (cutoffComponentScalar (I := I) (M := M) g r s S α P₀.1 P₀.2) y
-
-/-! ## The smooth-section bridge identity
-
-On a smooth compactly-supported section the partition-of-unity chart component
-equals, as an `L²` class, the bounded partition-of-unity `L²`-multiplier applied
-to the cutoff chart component. -/
 
 /-- **The smooth-section bridge identity.** For a smooth compactly-supported
 `(r, s)`-tensor section `S`, the partition-of-unity chart component of its image
@@ -435,28 +388,17 @@ private lemma tensorL2ChartComponent_smooth_eq_boundedPouMul_cutoff
           (S : TensorL2 r s g) α P₀) := by
   classical
   apply Lp.ext
-  -- The left side agrees a.e. with the concrete Euclidean chart component.
   refine (tensorL2ChartComponent_smoothToTensorL2_coeFn
     (I := I) (M := M) g r s S α P₀).trans ?_
-  -- The right side: the multiplier representative times the cutoff
-  -- representative, which is a.e. the cutoff Euclidean chart component.
   refine Filter.EventuallyEq.symm (Filter.EventuallyEq.trans
     (boundedPouMulLpCLM_coeFn (I := I) (M := M) α
       (tensorL2ChartComponentCutoff (I := I) (M := M) g r s
         (S : TensorL2 r s g) α P₀)) ?_)
-  -- Pass to the cutoff Euclidean chart component and apply the pointwise
-  -- Euclidean identity.
   filter_upwards [tensorL2ChartComponentCutoff_smoothToTensorL2_coeFn
     (I := I) (M := M) g r s S α P₀] with y hy
   rw [hy]
   exact (tensorChartComponent_eq_chartPushedPouWeight_mul_cutoffComponentEuclid
     (I := I) (M := M) g r s S α P₀ y).symm
-
-/-! ## Continuity of the two sides as functions of the abstract `L²` element
-
-Both the partition-of-unity chart component and the bounded-multiplier image of
-the cutoff chart component are continuous functions of the abstract `L²`
-element: each is a composition of continuous linear maps. -/
 
 /-- The bounded-multiplier image of the cutoff chart component is a continuous
 function of the abstract `L²` element: it is the composition of the bounded
@@ -482,12 +424,6 @@ private lemma continuous_boundedPouMul_cutoff
   exact (boundedPouMulLpCLM (I := I) (M := M) α).continuous.comp
     (tensorL2ChartComponentCutoffCLM (I := I) (M := M) g r s α P₀).continuous
 
-/-! ## The abstract bridge
-
-Both sides of the bridge are continuous functions of the abstract `L²` element
-and agree on the dense range of the smooth-section embedding, hence agree
-everywhere. -/
-
 /-- **The abstract partition-of-unity ↔ cutoff bridge (as `L²` classes).** For an
 arbitrary abstract `L²` tensor element `u : TensorL2 r s g`, the
 partition-of-unity chart `P₀`-component of `u` equals — as an element of
@@ -506,7 +442,6 @@ private lemma tensorL2ChartComponent_eq_boundedPouMul_cutoff
       boundedPouMulLpCLM (I := I) (M := M) α
         (tensorL2ChartComponentCutoff (I := I) (M := M) g r s u α P₀) := by
   classical
-  -- Both sides as functions of the abstract `L²` element.
   set lhs : TensorL2 r s g → Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) :=
     fun v => tensorL2ChartComponent (I := I) (M := M) g r s v α P₀
     with hlhs_def
@@ -516,16 +451,12 @@ private lemma tensorL2ChartComponent_eq_boundedPouMul_cutoff
     with hrhs_def
   suffices h_eq : lhs = rhs by
     exact congrFun h_eq u
-  -- The left side is continuous (a continuous linear map).
   have h_lhs_cont : Continuous lhs := by
     rw [hlhs_def]
     exact continuous_tensorL2ChartComponent (I := I) (M := M) g r s α P₀
-  -- The right side is continuous (a composition of continuous linear maps).
   have h_rhs_cont : Continuous rhs := by
     rw [hrhs_def]
     exact continuous_boundedPouMul_cutoff (I := I) (M := M) g r s α P₀
-  -- The two functions agree on the dense range of the smooth-section
-  -- embedding `(↑) : SmoothCcTensor g r s → TensorL2 r s g`.
   have h_denseRange :
       DenseRange ((↑) : SmoothCcTensor g r s → TensorL2 r s g) :=
     UniformSpace.Completion.denseRange_coe
@@ -534,8 +465,6 @@ private lemma tensorL2ChartComponent_eq_boundedPouMul_cutoff
   rw [Function.comp_apply, Function.comp_apply, hlhs_def, hrhs_def]
   exact tensorL2ChartComponent_smooth_eq_boundedPouMul_cutoff
     (I := I) (M := M) g r s S α P₀
-
-/-! ## The headline a.e.-identities -/
 
 /-- **The partition-of-unity ↔ cutoff chart-component bridge.** For an arbitrary
 abstract `L²` tensor element `u : TensorL2 r s g`, a chart base point `α` and a
@@ -560,11 +489,8 @@ theorem tensorL2ChartComponent_eq_chartPushedPou_mul_cutoff
         ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s u α P₀ :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) := by
   classical
-  -- Rewrite the left side by the equality of `L²` classes.
   rw [tensorL2ChartComponent_eq_boundedPouMul_cutoff (I := I) (M := M)
     g r s u α P₀]
-  -- The representative of the bounded-multiplier image is a.e. the chart-pushed
-  -- partition-of-unity weight times the cutoff representative.
   exact boundedPouMulLpCLM_coeFn (I := I) (M := M) α
     (tensorL2ChartComponentCutoff (I := I) (M := M) g r s u α P₀)
 
@@ -595,15 +521,11 @@ theorem tensorL2ChartComponent_ae_eq_pou_transport_sum
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
               EuclN → ℝ) y) := by
   classical
-  -- Start from the partition-of-unity ↔ cutoff bridge.
   refine (tensorL2ChartComponent_eq_chartPushedPou_mul_cutoff
     (I := I) (M := M) g r s u α P₀).trans ?_
-  -- Rewrite the cutoff factor by its transport decomposition.
   filter_upwards [tensorL2ChartComponentCutoff_ae_eq_pou_transport_sum
     (I := I) (M := M) g r s u α P₀] with y hy
   rw [hy]
-
-/-! ## Sanity tests -/
 
 section ElaborationTests
 

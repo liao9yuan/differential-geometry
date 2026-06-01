@@ -161,13 +161,11 @@ lemma chartCloseTriv_basepoint
   classical
   unfold chartCloseTriv
   set α : M := Φ_fam t x with hα
-  -- `trivFromE α α = symmL ℝ α = coordChange (achart α) (achart α) α`.
   have hcore : trivFromE (I := I) α α
       = (tangentBundleCore I M).coordChange (achart H α) (achart H α) α :=
     TangentBundle.symmL_trivializationAt_eq_core (I := I) (M := M)
       (b₀ := α) (b := α) (mem_chart_source H α)
   rw [hcore]
-  -- `coordChange (achart α) (achart α) α = id` on the base set (which contains `α`).
   exact (tangentBundleCore I M).coordChange_self (achart H α) α
     (by rw [tangentBundleCore_baseSet]; exact mem_chart_source H α) w
 
@@ -199,14 +197,12 @@ theorem chartCloseDop_hasDerivAt_clm_comp
     HasDerivAt (chartCloseDop (I := I) Φ_fam α x)
       (T'.comp (chartCloseFderiv (I := I) Φ_fam α x t)
         + (chartCloseTriv (I := I) Φ_fam α x t).comp P') t := by
-  -- `chartCloseDop s = (chartCloseTriv s).comp (chartCloseFderiv s)` definitionally.
   have hcomp : (fun s : ℝ =>
         (chartCloseTriv (I := I) Φ_fam α x s).comp
           (chartCloseFderiv (I := I) Φ_fam α x s))
       = chartCloseDop (I := I) Φ_fam α x := by
     funext s
     exact (chartCloseDop_eq_comp (I := I) Φ_fam α x s).symm
-  -- CLM-composition product rule.
   have := hT.clm_comp hP
   rwa [hcomp] at this
 
@@ -240,12 +236,9 @@ theorem chartCloseDop_deriv_basepoint_apply
   classical
   rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.comp_apply,
       ContinuousLinearMap.comp_apply]
-  -- Second summand: `chartCloseTriv Φ_fam α x t = 𝟙`, so it reads `P' v`.
   rw [chartCloseTriv_basepoint (I := I) Φ_fam t x (P' v)]
-  -- First summand: `chartCloseFderiv Φ_fam α x t v = chartCloseDop … t v = mfderiv (Φ_fam t) x v`.
   have hPv : chartCloseFderiv (I := I) Φ_fam (Φ_fam t x) x t v
       = mfderiv I I (Φ_fam t : M → M) x v := by
-    -- `chartCloseDop … t v = trivFromE α α (chartCloseFderiv … t v)` and `trivFromE α α = 𝟙`.
     have hdop : chartCloseDop (I := I) Φ_fam (Φ_fam t x) x t v
         = chartCloseFderiv (I := I) Φ_fam (Φ_fam t x) x t v := by
       rw [chartCloseDop_apply]
@@ -304,10 +297,7 @@ theorem rawVariationalIdentity_of_orbitODE_factors
                 (X : ∀ y : M, TangentSpace I y) (Φ_fam t x))
               (mfderiv I I (Φ_fam t : M → M) x v)))) :
     RawVariationalIdentity (I := I) g X Φ_fam t x v := by
-  -- The product-rule operator ODE for `chartCloseDop` (this file's headline).
   have hDchart := chartCloseDop_hasDerivAt_clm_comp (I := I) Φ_fam (Φ_fam t x) x t hT hP
-  -- Feed into the committed per-flow connector; `hsplit` is the (false-in-general,
-  -- hence genuinely-input) metric value equation.
   exact rawVariationalIdentity_of_manifoldFlowFamily_chartClose (I := I) g X Φ_fam t x v
     hcont hDchart hRdiff hCdiff hsplit
 

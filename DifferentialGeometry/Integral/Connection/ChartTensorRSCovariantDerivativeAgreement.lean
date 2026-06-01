@@ -56,8 +56,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Auxiliary differentiability bridge -/
-
 /-- Manifold-differentiability of the partial evaluation
 `tensorPartialEval r s T (chartTensor0SParallelExtend r α b α_input)` at the
 basepoint `b`, given pointwise differentiability of `T` and good-set
@@ -97,8 +95,6 @@ private lemma tensorSectionMDiffAt_tensorPartialEval
     (v := fun y : M => chartTensor0SParallelExtend (I := I) r α b α_input y)
     hT_at hW_at
 
-/-! ## Self-evaluation of the chart-parallel extension at the basepoint -/
-
 /-- On the chart-α trivialisation base set at `b`, the chart-parallel extension
 of `α_input` evaluated at `b` itself equals `α_input`. -/
 private lemma chartTensor0SParallelExtend_at_self
@@ -120,8 +116,6 @@ private lemma chartTensor0SParallelExtend_at_self
       (fun y : M => Tensor0SSpace r I y) α).symmL_continuousLinearMapAt
     (R := ℝ) hb_base_tensor α_input
 
-/-! ## Input-slot identity -/
-
 /-- The `(0, r)`-slot-`k` Christoffel correction of the chart-parallel
 extension of `α_input` at `b`, viewed as an element of `Tensor0SSpace r I b`,
 equals (up to underlying-CMLM evaluation) the value
@@ -138,24 +132,16 @@ private lemma chartTensor0SSlotCorrection_chartTensor0SParallelExtend_eq
             then chartLeviCivitaParallelCLM (I := I) g α b X
             else ContinuousLinearMap.id ℝ (TangentSpace I b)) α_input := by
   classical
-  -- Both elements are `Tensor0SSpace r I b`. Use `tensor0SSpace_ext` to
-  -- reduce to evaluation at every tuple `m`.
   apply tensor0SSpace_ext
   intro m
-  -- LHS evaluation via `chartTensor0SSlotCorrection_apply`.
   rw [chartTensor0SSlotCorrection_apply (I := I) r g α
     (chartTensor0SParallelExtend (I := I) r α b α_input) X b k m]
-  -- Now LHS = `(parallel_extend ... b) (fun i => slotCLM r k Φ i (m i))`.
-  -- Substitute `parallel_extend ... b = α_input`.
   rw [chartTensor0SParallelExtend_at_self (I := I) r α (b := b) hb_base α_input]
-  -- RHS via `tensorSlotSubstCLM_apply`.
   rw [tensorSlotSubstCLM_apply (I := I) r b
       (fun i : Fin r => if i = k
           then chartLeviCivitaParallelCLM (I := I) g α b X
           else ContinuousLinearMap.id ℝ (TangentSpace I b))
       α_input m]
-  -- Both sides are now
-  -- `α_input (fun i => (if i = k then Φ else id) i (m i))`.
   rfl
 
 /-- The composition `T b ∘ (chartTensor0SSlotCorrection r g α w X b k)`,
@@ -173,15 +159,10 @@ private lemma tensorRSInputSlotCorrection_eq_compose_chartTensor0SSlotCorrection
       (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from
         chartTensorRSInputSlotCorrection (I := I) r s g α T X b k) α_input := by
   classical
-  -- Step 1: rewrite the slot correction value to `tensorSlotSubstCLM`.
   rw [chartTensor0SSlotCorrection_chartTensor0SParallelExtend_eq
     (I := I) r g α X (b := b) hb_base α_input k]
-  -- Step 2: unfold `chartTensorRSInputSlotCorrection` and apply.
   unfold chartTensorRSInputSlotCorrection
-  -- `(T b).comp (tensorSlotSubstCLM ...) α_input = T b (tensorSlotSubstCLM ... α_input)`.
   rfl
-
-/-! ## Output-slot identity -/
 
 /-- On the chart-α trivialisation base set, the `(0, s)`-slot-`l` Christoffel
 correction of the partial evaluation, evaluated at a tuple `m`, equals the
@@ -205,13 +186,9 @@ private lemma chartTensor0SSlotCorrection_partialEval_eq_chartTensorRSOutputSlot
           chartTensorRSOutputSlotCorrection (I := I) r s g α T X b l)
           α_input) m := by
   classical
-  -- LHS evaluation.
   rw [chartTensor0SSlotCorrection_apply (I := I) s g α
     (tensorPartialEval (I := I) (M := M) r s T
       (chartTensor0SParallelExtend (I := I) r α b α_input)) X b l m]
-  -- LHS = `(tensorPartialEval ... b) (fun i => slotCLM s l Φ i (m i))`.
-  -- `tensorPartialEval r s T w b = T b (w b)` (definitional).
-  -- Substitute `w b = α_input`.
   have hPE_at_b :
       chartTensor0SParallelExtend (I := I) r α b α_input b = α_input :=
     chartTensor0SParallelExtend_at_self (I := I) r α (b := b) hb_base α_input
@@ -221,14 +198,9 @@ private lemma chartTensor0SSlotCorrection_partialEval_eq_chartTensorRSOutputSlot
       (chartTensor0SParallelExtend (I := I) r α b α_input b))
     (fun i : Fin s => _) = _
   rw [hPE_at_b]
-  -- RHS evaluation via `chartTensorRSOutputSlotCorrection_apply`.
   rw [chartTensorRSOutputSlotCorrection_apply (I := I) r s g α T X b l
     α_input m]
-  -- Both sides now have the form
-  --   `(T b α_input) (fun i => (if i = l then Φ else id) i (m i))`.
   rfl
-
-/-! ## Headline agreement -/
 
 /-- The chart-frame `(r, s)`-tensor covariant derivative
 `chartTensorRSCovariantDerivative r s g α T X` agrees, at any point `b` of the
@@ -267,7 +239,6 @@ theorem chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet
   letI _h_fib : FiberBundle (TensorRSModel r s ℝ E)
       (fun x : M => TensorRSSpace r s I x) :=
     tensorRSBundle_fiber r s
-  -- Pointwise differentiability of `T` and `X` at `b`.
   have hT_at :
       MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
         (fun b' : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
@@ -278,7 +249,6 @@ theorem chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet
         (fun b' : M => TotalSpace.mk' E
           (E := fun x : M => TangentSpace I x) b' (X.toFun b')) b :=
     X.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
-  -- Chart-pullback differentiability of `T` (needed for D.3.a curry-factor).
   have hT_pull :
       DifferentiableAt ℝ
         (tensorRSChartE_section_repr (I := I) r s α T.toFun ∘ (extChartAt I α).symm)
@@ -333,37 +303,29 @@ theorem chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet
         (interior_subset.trans htgt_subset)
     rw [mdifferentiableWithinAt_iff_differentiableWithinAt] at hwithin
     exact hwithin.differentiableAt hrange_nhds
-  -- Good-set membership lemmas.
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
-  -- Reduce to equality at every `α_input ∈ Tensor0SSpace r I b`.
   apply ContinuousLinearMap.ext
   intro α_input
-  -- Use `w := chartTensor0SParallelExtend r α b α_input` for the (0, r) input.
   set w : Π b' : M, Tensor0SSpace r I b' :=
     chartTensor0SParallelExtend (I := I) r α b α_input with hw_def
-  -- Differentiability of `w` at `b`.
   have hw_at :
       MDifferentiableAt I (I.prod 𝓘(ℝ, Tensor0SModel r ℝ E))
         (fun y : M => TotalSpace.mk' (Tensor0SModel r ℝ E)
           (E := fun z : M => Tensor0SSpace r I z) y (w y)) b :=
     chartTensor0SParallelExtend_mdifferentiableAt (I := I) r α hb α_input
-  -- `w b = α_input` (on base set).
   have hwb_eq : w b = α_input :=
     chartTensor0SParallelExtend_at_self (I := I) r α (b := b) hb_base α_input
-  -- Differentiability of the partial-eval section at `b`.
   have hPartialEval_at : TensorSectionMDiffAt (I := I) s
       (tensorPartialEval (I := I) (M := M) r s T.toFun w) b :=
     tensorSectionMDiffAt_tensorPartialEval (I := I) r s α T.toFun hb α_input
       hT_at
-  -- RHS Psi formula via function-level apply.
   have hRHS_psi :=
     TensorRSNabla.tensorRSCovariantDerivative_apply_of_mdifferentiableAt
       (I := I) (M := M) r s (LeviCivita (I := I) g) T.toFun w X.toFun
       (x := b) hT_at hw_at hX_at
   rw [hwb_eq] at hRHS_psi
   rw [hRHS_psi]
-  -- Identify the pairing `b' ↦ T b' (w b')` as `tensorPartialEval r s T w b'`.
   have hpartialEval_def :
       (fun y : M =>
         (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from T.toFun y)
@@ -371,7 +333,6 @@ theorem chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet
         tensorPartialEval (I := I) (M := M) r s T.toFun w := by
     funext y; rfl
   rw [hpartialEval_def]
-  -- Layer B (0, s) agreement for `partialEval` at `b`.
   have hLayerB_first :
       Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)
         (tensorPartialEval (I := I) (M := M) r s T.toFun w) b (X.toFun b) =
@@ -385,7 +346,6 @@ theorem chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet
             (tensorPartialEval (I := I) (M := M) r (n + 1) T.toFun w)
             X.toFun hb hPartialEval_at hX_at).symm
   rw [hLayerB_first]
-  -- Layer B (0, r) agreement for `w` at `b`.
   have hLayerB_second :
       Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g) w b
         (X.toFun b) =
@@ -399,10 +359,8 @@ theorem chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet
       exact (chartTensor0SCovariantDerivative_eq_abstract_succ_aux
             (I := I) (M := M) g α n w X.toFun hb hw_at_n hX_at).symm
   rw [hLayerB_second]
-  -- D.2: chart-frame cov on chart-parallel extension equals `- ∑_k slot_corr`.
   rw [chartTensor0SCovariantDerivative_chartTensor0SParallelExtend
       (I := I) g r α hb α_input X.toFun]
-  -- `T b (- ∑_k ...) = - ∑_k T b (slot_corr_k)`.
   have h_T_neg_sum :
       (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T.toFun b)
         (-(∑ k : Fin r,
@@ -414,7 +372,6 @@ theorem chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet
     rw [map_sum (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from
       T.toFun b)]
   rw [h_T_neg_sum]
-  -- Input-slot identity.
   have h_input_id : ∀ k : Fin r,
       (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T.toFun b)
         (chartTensor0SSlotCorrection (I := I) r g α w X.toFun b k) =
@@ -433,15 +390,10 @@ theorem chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet
           α_input :=
     Finset.sum_congr rfl (fun k _ => h_input_id k)
   rw [h_input_sum]
-  -- Now LHS = `chartTensorRSCovariantDerivative ... α_input` (by CLM-ext);
-  -- RHS = `chart0S_cov_(0,s)(partialEval) - (- ∑_k input_slot_k α_input)`.
-  -- Reduce both sides to a CMLM by evaluating at `m`.
   apply tensor0SSpace_ext
   intro m
   rw [chartTensorRSCovariantDerivative_apply (I := I) r s g α T.toFun X.toFun b
       α_input m]
-  -- The RHS subtraction `... - -(∑ k input_slot α_input)` rewrites to addition.
-  -- Then evaluate at `m`.
   have hCMLM_subtract :
       (show ContinuousMultilinearMap ℝ
           (fun _ : Fin s => TangentSpace I b) ℝ from
@@ -482,7 +434,6 @@ theorem chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet
               α_input) m from rfl]
     rw [ContinuousMultilinearMap.sum_apply]
   rw [hCMLM_subtract]
-  -- Decompose chart-frame (0, s)-cov on partial-eval.
   have h_chart0S_decomp :
       (show ContinuousMultilinearMap ℝ
           (fun _ : Fin s => TangentSpace I b) ℝ from
@@ -498,9 +449,7 @@ theorem chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet
               chartTensorRSOutputSlotCorrection (I := I) r s g α T.toFun X.toFun b l)
               α_input) m := by
     rcases s with _ | n
-    · -- s = 0: empty output-slot sum; intrinsic via D.3.a + rank-0 mfderiv bridge.
-      simp only [Finset.sum_empty, Finset.univ_eq_empty, sub_zero]
-      -- Reduce `m` to the empty tuple.
+    · simp only [Finset.sum_empty, Finset.univ_eq_empty, sub_zero]
       have hm_empty : m = fun i : Fin 0 => Fin.elim0 i := by
         funext i; exact i.elim0
       rw [hm_empty]
@@ -516,8 +465,7 @@ theorem chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet
           hb hPartialEval_at (X.toFun b)
       rw [← hRank0_bridge]
       rw [hCurryFactor]
-    · -- s = n + 1: succ apply, then output-slot identity & D.3.a.
-      rw [chartTensor0SCovariantDerivative_succ_apply (I := I) n g α
+    · rw [chartTensor0SCovariantDerivative_succ_apply (I := I) n g α
           (tensorPartialEval (I := I) (M := M) r (n + 1) T.toFun w) X.toFun b m]
       have hCurryFactor :=
         tensorRSIntrinsicChartCLM_factor_via_tensorPartialEval
@@ -564,7 +512,6 @@ theorem chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet
         Finset.sum_congr rfl (fun l _ => h_slot_l_id l)
       rw [h_slot_sum]
   rw [h_chart0S_decomp]
-  -- Final reorganisation: both sides match modulo `abel`.
   abel
 
 end Connection

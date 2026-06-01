@@ -70,8 +70,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## Equality of integrals against test functions in the interior overlap -/
-
 /-- For any smooth `φ` with compact tsupport inside the interior overlap of
 `α, β`'s chart sources, the integrals of
 `localDivergenceWithin g α X · φ` against `chartLocalMeasure g α` and of
@@ -96,8 +94,6 @@ theorem integral_localDivergenceWithin_eq_of_interior_overlap_support [T2Space M
   set U : Set M := (chartAt H α).source ∩ (chartAt H β).source with hU_def
   have hU_open : IsOpen U := IsOpen.inter (chartAt H α).open_source (chartAt H β).open_source
   have hU_meas : MeasurableSet U := hU_open.measurableSet
-  -- `tangentSectionAction X φ` vanishes outside the support of φ (which is
-  -- contained in U).
   have htsa_supp : ∀ x ∉ U, tangentSectionAction (I := I) X φ x = 0 := by
     intro x hx
     have hxsupp : x ∉ tsupport φ := fun h => hx (hφ_supp h)
@@ -136,13 +132,6 @@ theorem integral_localDivergenceWithin_eq_of_interior_overlap_support [T2Space M
           ∂((chartLocalMeasure (I := I) g β).restrict U) from rfl]
   rw [h_meas_eq]
 
-/-! ## Pointwise chart-invariance via density on the interior overlap
-
-We need positivity of the chart-local measure `chartLocalMeasure g α` on a
-nonempty open subset `V ⊆ (chartAt H α).source` containing a manifold-interior
-point. The proof inlines the strategy of the private helper
-`chartLocalMeasure_open_pos_of_mem` from `Measure/Properties.lean`. -/
-
 /-- A chart-local measure is positive on every nonempty open subset of the
 chart source that contains a manifold-interior point. -/
 private lemma chartLocalMeasure_open_pos_of_interior_mem
@@ -153,7 +142,6 @@ private lemma chartLocalMeasure_open_pos_of_interior_mem
     0 < chartLocalMeasure (I := I) g α V := by
   classical
   have hVmeas : MeasurableSet V := hVopen.measurableSet
-  -- `extChartAt I α x₁ ∈ interior (range I)` from `x₁ ∈ I.interior M`.
   have hx₁_chart : x₁ ∈ (chartAt H α).source := hVsub hx₁V
   have hx₁_target_int : extChartAt I α x₁ ∈ interior (extChartAt I α).target :=
     extChartAt_mem_interior_target_of_isInteriorPoint
@@ -163,7 +151,6 @@ private lemma chartLocalMeasure_open_pos_of_interior_mem
       change interior ((chartAt H α).extend I).target ⊆ _
       exact OpenPartialHomeomorph.interior_extend_target_subset_interior_range _
     exact h_subset hx₁_target_int
-  -- Reduce `chartLocalMeasure V` via `chartLocalMeasure_lintegral`.
   have hind_meas : Measurable (V.indicator (fun _ : M => (1 : ℝ≥0∞))) :=
     (measurable_const).indicator hVmeas
   have hlint := chartLocalMeasure_lintegral (I := I) g α hind_meas
@@ -228,7 +215,6 @@ private lemma chartLocalMeasure_open_pos_of_interior_mem
           V.indicator (fun _ => (1 : ℝ≥0∞)) ((extChartAt I α).symm y)
             ∂(modelHaar (E := E)) = 0 :=
     le_antisymm (not_lt.mp h0') (zero_le _)
-  -- Then the integrand is a.e. 0 on W. But it's > 0 on W (everywhere).
   have haem_density_T : AEMeasurable
       (fun y : E => chartDensity g α ((extChartAt I α).symm y))
       ((modelHaar (E := E)).restrict (extChartAt I α).target) := by
@@ -283,8 +269,6 @@ private lemma chartLocalMeasure_open_pos_of_interior_mem
     exact measure_eq_zero_iff_ae_notMem.mpr hyNotW
   exact (ne_of_gt hW_pos) hW_zero
 
-/-! ## Smooth bumps and continuous-positivity tooling -/
-
 /-- If `f` is continuous on an open `U`, `f x > 0` at some `x ∈ U`, then there
 is an open neighborhood `V` of `x` (with `V ⊆ U`) on which `f > f(x)/2`. -/
 private lemma exists_open_nbhd_positive
@@ -318,8 +302,6 @@ private lemma exists_smooth_bump_in_open [T2Space M]
   · intro y; exact f.nonneg
   · rw [f.eq_one]; exact one_pos
 
-/-! ## Chart invariance: positive case (helper) -/
-
 /-- The interior of the manifold is open. -/
 private lemma isOpen_interior_M : IsOpen (I.interior M) :=
   I.isOpen_interior (M := M) (n := ∞) (by exact (by decide : (∞ : WithTop ℕ∞) ≠ 0))
@@ -338,7 +320,6 @@ private theorem localDivergenceWithin_chart_invariance_pos [T2Space M]
       localDivergenceWithin (I := I) g β X x) :
     False := by
   classical
-  -- The base set is the interior overlap of the two chart sources.
   set U : Set M := (chartAt H α).source ∩ (chartAt H β).source ∩ I.interior M
     with hU_def
   have hUopen : IsOpen U := by
@@ -354,13 +335,10 @@ private theorem localDivergenceWithin_chart_invariance_pos [T2Space M]
     refine (localDivergenceWithin_continuousOn (I := I) g β X).mono ?_
     intro x' hx'; exact hx'.1.2
   have hΔ_contOn : ContinuousOn Δ U := hα_contOn.sub hβ_contOn
-  -- Find an open V ⊆ U with x ∈ V and Δ y > Δ x / 2 on V.
   obtain ⟨V, hVopen, hxV, hVU, hΔ_pos⟩ :=
     exists_open_nbhd_positive (M := M) hUopen hΔ_contOn hxU hΔpos
-  -- Pick a smooth bump φ supported in V with φ ≥ 0 and φ x > 0.
   obtain ⟨φ, hφ_smooth, hφ_compactSupp, hφ_supp, hφ_nonneg, hφx_pos⟩ :=
     exists_smooth_bump_in_open (I := I) hVopen hxV
-  -- Derive the support hypotheses we need.
   have hsupp_overlap : tsupport φ ⊆
       (chartAt H α).source ∩ (chartAt H β).source := by
     intro y hy
@@ -368,12 +346,9 @@ private theorem localDivergenceWithin_chart_invariance_pos [T2Space M]
   have hsupp_int : tsupport φ ⊆ I.interior M := by
     intro y hy
     exact (hVU (hφ_supp hy)).2
-  -- IBP integral equality.
   have hint_eq := integral_localDivergenceWithin_eq_of_interior_overlap_support
     (I := I) g α β X hφ_smooth hφ_compactSupp hsupp_overlap hsupp_int
-  -- Chart-local-measure restriction equality.
   have hrestrict_eq := chartLocalMeasure_restrict_overlap_eq (I := I) g α β
-  -- Express ∫ div_β · φ dμ_β = ∫ div_β · φ dμ_α.
   set Uoverlap : Set M := (chartAt H α).source ∩ (chartAt H β).source
     with hUoverlap_def
   have hsupp_in_overlap : tsupport φ ⊆ Uoverlap := hsupp_overlap
@@ -404,7 +379,6 @@ private theorem localDivergenceWithin_chart_invariance_pos [T2Space M]
         ∫ y, localDivergenceWithin (I := I) g β X y * φ y
           ∂((chartLocalMeasure (I := I) g α).restrict Uoverlap)
     rw [← hrestrict_eq]
-  -- Integrability of div_α · φ and div_β · φ.
   have hsupp_α_chart : tsupport φ ⊆ (chartAt H α).source :=
     hsupp_overlap.trans Set.inter_subset_left
   have hsupp_β_chart : tsupport φ ⊆ (chartAt H β).source :=
@@ -544,7 +518,6 @@ private theorem localDivergenceWithin_chart_invariance_pos [T2Space M]
             rw [lintegral_indicator (isClosed_tsupport _).measurableSet]
             rw [setLIntegral_const, one_mul]
       _ < ⊤ := ENNReal.mul_lt_top ENNReal.ofReal_lt_top hμ_supp_bound
-  -- ∫ Δ · φ dμ_α = 0 by IBP-equality.
   have hΔ_int_zero :
       ∫ y, Δ y * φ y ∂(chartLocalMeasure (I := I) g α) = 0 := by
     have hexpand : (fun y => Δ y * φ y) =
@@ -553,7 +526,6 @@ private theorem localDivergenceWithin_chart_invariance_pos [T2Space M]
       funext y; simp [Δ, sub_mul]
     rw [hexpand, integral_sub h1_int h2_int, hint_eq, ← hβ_int_via_restrict]
     ring
-  -- ∫ Δ · φ dμ_α > 0 (positivity).
   have hΔ_int_pos :
       0 < ∫ y, Δ y * φ y ∂(chartLocalMeasure (I := I) g α) := by
     have hV_sub_α : V ⊆ (chartAt H α).source := by
@@ -566,11 +538,9 @@ private theorem localDivergenceWithin_chart_invariance_pos [T2Space M]
         hxV hφx_pos
     have hV₀_sub_α : V₀ ⊆ (chartAt H α).source := hV₀_sub_V.trans hV_sub_α
     have hV₀_int : x ∈ V₀ := hxV₀
-    -- For positivity of `chartLocalMeasure α V₀`, use `x ∈ I.interior M` (we have hx_int) and `x ∈ V₀`.
     have hμ_V₀_pos : 0 < chartLocalMeasure (I := I) g α V₀ :=
       chartLocalMeasure_open_pos_of_interior_mem (I := I) g α hV₀_open hxV₀ hV₀_sub_α
         hx_int
-    -- Find K compact, x ∈ interior K ⊆ K ⊆ V₀.
     have hLC : LocallyCompactSpace M := by
       have _hE : ProperSpace E := FiniteDimensional.proper ℝ E
       have _hH : LocallyCompactSpace H := I.locallyCompactSpace
@@ -652,8 +622,6 @@ private theorem localDivergenceWithin_chart_invariance_pos [T2Space M]
       _ ≤ ∫ y in V₁, Δ y * φ y ∂(chartLocalMeasure (I := I) g α) := hLB_V₁
       _ ≤ ∫ y, Δ y * φ y ∂(chartLocalMeasure (I := I) g α) := hLB_total
   linarith
-
-/-! ## Main theorem -/
 
 /-- **Chart invariance of `localDivergenceWithin`.** For any two base points
 `α β : M` and any `x` in the **interior overlap** of their chart sources, the

@@ -64,17 +64,10 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Canonical measurable-space and Borel-space instances on `E` and `M`
-
-File-local Borel structures, matching the other files in this directory.
-Declared `local` so they do not leak into external typeclass search. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The dense embedding of smooth sections into the `L²` Hilbert space -/
 
 namespace SmoothCcTensor
 
@@ -111,8 +104,6 @@ set_option linter.unusedSectionVars false in
 the metric `L²` Hilbert space: a textbook density statement. -/
 theorem denseRange_toL2 :
     DenseRange (toL2 (g := g) (r := r) (s := s)) := by
-  -- Reduce to density of the canonical coercion
-  -- `SmoothCcTensor g r s → Completion (SmoothCcTensor g r s)`.
   have hcoe : (toL2 (g := g) (r := r) (s := s) :
         SmoothCcTensor g r s → TensorL2 r s g) =
       ((↑) : SmoothCcTensor g r s →
@@ -129,7 +120,6 @@ the textbook fact that the inclusion of smooth, compactly-supported
 sections into `L²` is an isometry on representatives. -/
 @[simp] theorem norm_toL2 (S : SmoothCcTensor g r s) :
     ‖toL2 (g := g) (r := r) (s := s) S‖ = ‖S‖ := by
-  -- Reduce to the canonical coercion and use `Completion.norm_coe`.
   have h := toL2_apply (g := g) (r := r) (s := s) S
   rw [show ‖toL2 (g := g) (r := r) (s := s) S‖ =
         ‖(S : UniformSpace.Completion (SmoothCcTensor g r s))‖ from
@@ -144,8 +134,6 @@ inner-product isometry on representatives. -/
 @[simp] theorem inner_toL2 (S T : SmoothCcTensor g r s) :
     ⟪toL2 (g := g) (r := r) (s := s) S,
         toL2 (g := g) (r := r) (s := s) T⟫_ℝ = ⟪S, T⟫_ℝ := by
-  -- Reduce both arguments to the canonical coercion and use
-  -- `Completion.inner_coe`.
   have hS := toL2_apply (g := g) (r := r) (s := s) S
   have hT := toL2_apply (g := g) (r := r) (s := s) T
   rw [show (⟪toL2 (g := g) (r := r) (s := s) S,

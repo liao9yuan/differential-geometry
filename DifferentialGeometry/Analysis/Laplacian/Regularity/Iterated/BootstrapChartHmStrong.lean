@@ -102,8 +102,6 @@ open DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapCanonical
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH2kBridge
 open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpFour
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -112,12 +110,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Bridge-side downward monotonicity
-
-The chart-side `H^{2k}` bridge at level `k` implies the chart-side `H^{2j}`
-bridge at every lower level `j ≤ k` (by simple `MemWkp.le_of_le` at every
-chart point). This is the polymorphic descent step on the bridge predicate. -/
 
 /-- **Downward monotonicity of the chart-side bridge.** From the
 `ChartSideH2kBridge g k u` predicate, the lower-order bridge
@@ -129,18 +121,8 @@ theorem chartSideH2kBridge_mono_of_le
     ChartSideH2kBridge (I := I) (M := M) g j u := by
   intro α
   have h := h_bridge α
-  -- `MemWkp (2k) 2 u Ω → MemWkp (2j) 2 u Ω` since `2j ≤ 2k`.
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.le_of_le
     (by omega : 2 * j ≤ 2 * k) h
-
-/-! ## Strong-induction inner bootstrap (bridge-driven)
-
-The chart-side `H^{2k}` bridge encapsulates the polymorphic per-chart
-`MemWkp (2k) 2` regularity of the chart-pushed parent. Combined with the
-existing per-step boost machinery, this bridge yields chart-`H^j` regularity
-of the chart-pushed parent at every `j ≤ 2k`. The strong-induction inner
-bootstrap below packages this together with the polymorphic regularity bridge
-on chosen mixed partials. -/
 
 /-- **Chart-`H^j` of the chart-pushed parent from the chart-side bridge.**
 For any `j ≤ 2k`, the bridge yields chart-`H^j` of the chart-pushed parent
@@ -183,7 +165,6 @@ theorem chosenMthMixed_memWkp_two_two_of_chartSideH2kBridge
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := by
   classical
-  -- chart-H^{m+2} of the parent (from the bridge with j = m+2 ≤ 2k).
   have h_parent : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) (m + 2) 2
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
@@ -194,7 +175,6 @@ theorem chosenMthMixed_memWkp_two_two_of_chartSideH2kBridge
         (I := I) (M := M) α) :=
     chartPushed_memWkp_j_of_chartSideH2kBridge_at
       (I := I) (M := M) g α (k := k) (j := m + 2) hm h_bridge
-  -- Polymorphic bridge with k = 2 and m: chart-H^{m+2} parent → MemWkp 2 2 of m-mixed.
   have h_parent' : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) (2 + m) 2
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
@@ -208,27 +188,6 @@ theorem chosenMthMixed_memWkp_two_two_of_chartSideH2kBridge
     exact h_parent
   exact chosenMthMixedPartialChartPushedU_memWkp_of_chartPushed_memWkp
     (I := I) (M := M) g α u_h m 2 h_parent' idx
-
-/-! ## Synthesis: chart-`H^{2k}` from the chart-side bridge
-
-Given the chart-side `H^{2k}` bridge for the canonical function
-representative of `u_h ∈ laplacianDomainPow g k`, the chart-pushed POU-cut
-representative lies in `MemWkp (2k) 2` of the chart target at every chart
-point. This is the bridge-driven form of the polymorphic-in-`k` headline.
-
-The strong-induction inner bootstrap follows from iterated application of
-the per-step boost `chartPushed_memWkp_m_plus_two_step` (which lifts
-chart-`H^{m+1}` to chart-`H^{m+2}` given chart-`H²` of every `m`-mixed
-partial), combined with the chart-side bridge's polymorphic regularity
-output at every order `j ≤ 2k`.
-
-In bridge-driven form, the inner inductive descent is short-circuited: the
-bridge supplies chart-`H^{2k}` of the parent directly at every chart point.
-The polymorphic regularity bridge then yields chart-`H²` of every chosen
-`m`-mixed partial, and the per-step boost lifts chart-`H^{m+1}` to
-chart-`H^{m+2}`. This consistency cross-check confirms the strong-induction
-synthesis: the bridge-driven form is equivalent to the iterated per-step
-form, and both yield chart-`H^{2k}` at the chart target. -/
 
 /-- **Strong-induction synthesis: chart-`H^{2k}` of the chart-pushed parent
 from the chart-side bridge.** For any `k : ℕ` and any
@@ -298,14 +257,6 @@ theorem memWkpChart_two_k_of_laplacianDomainPow_bridge
   exact chartPushed_memWkp_two_k_of_laplacianDomainPow_bridge
     (I := I) (M := M) g α k hu_h h_bridge
 
-/-! ## Unconditional discharge for `k ≤ 2`
-
-The chart-side bridge is unconditional for `k ≤ 2` via the existing
-infrastructure: `k = 0` from `chartSideH2kBridge_zero`, `k = 1` from
-`iteratedH2Regularity_one`, `k = 2` from
-`chartPushed_memWkp_four_two_of_laplacianDomainPow_two`. We package the
-chart-`H^{2k}` discharge for `k ≤ 2` from the inner synthesis. -/
-
 /-- **Unconditional chart-`H^{2k}` of the chart-pushed parent for `k ≤ 2`,
 obtained from the strong-induction synthesis with the unconditional
 chart-side bridge.** -/
@@ -321,7 +272,6 @@ theorem chartPushed_memWkp_two_k_unconditional_of_le_two
           Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ))
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := by
-  -- Use the unconditional chart-side bridge for k ≤ 2.
   have h_bridge :=
     chartSideH2kBridge_unconditional_of_laplacianDomainPow_le_two
       (I := I) (M := M) g hk hu_h
@@ -342,13 +292,6 @@ theorem memWkpChart_two_k_unconditional_of_le_two
   intro α
   exact chartPushed_memWkp_two_k_unconditional_of_le_two
     (I := I) (M := M) g α hk hu_h
-
-/-! ## Truncated polymorphic-in-`k` headline (`min(k, 2)`)
-
-For arbitrary `k : ℕ`, the chart-`H^{2 · min(k, 2)}` regularity of the
-chart-pushed parent is unconditional. This is the polymorphic-in-`k` form
-which matches chart-`H^{2k}` exactly for `k ≤ 2` and falls back to chart-`H⁴`
-for `k ≥ 3`. -/
 
 /-- **Polymorphic-in-`k` chart-`H^{2 · min(k, 2)}` of the chart-pushed parent
 for arbitrary `k`, unconditional.** Combines the strong-induction synthesis
@@ -386,15 +329,6 @@ theorem memWkpChart_two_min_k_two
   exact chartPushed_memWkp_two_min_k_two
     (I := I) (M := M) g α k hu_h
 
-/-! ## Per-step propagator: from the bridge at level `k`, the chart-`H^{m+2}`
-boost holds for every `m + 1 ≤ 2k - 1`
-
-The per-step boost `chartPushed_memWkp_succ_step` from the parent module
-lifts chart-`H^{m+1}` of the chart-pushed parent to chart-`H^{m+2}`, given
-chart-`H²` of every chosen `m`-mixed partial. The latter follows from the
-chart-side bridge at level `k` provided `m + 2 ≤ 2k`. We package this as a
-single propagator. -/
-
 /-- **Per-step chart-`H^{m+2}` boost from the chart-side bridge.** Given
 the chart-side `H^{2k}` bridge with `m + 2 ≤ 2k`, the chart-pushed parent
 lies in chart-`H^{m+2}` at every chart point.
@@ -418,7 +352,6 @@ theorem chartPushed_memWkp_succ_step_of_chartSideH2kBridge
           Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ))
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := by
-  -- chart-H^{m+1} of the parent from the bridge.
   have h_chart_H_m_plus_1 : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) (m + 1) 2
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
@@ -429,7 +362,6 @@ theorem chartPushed_memWkp_succ_step_of_chartSideH2kBridge
         (I := I) (M := M) α) :=
     chartPushed_memWkp_j_of_chartSideH2kBridge_at
       (I := I) (M := M) g α (k := k) (j := m + 1) (by omega) h_bridge
-  -- MemWkp 2 2 of every chosen m-mixed partial from the bridge.
   have h_top_memWkp_two : ∀ (idx : Fin m → Fin (Module.finrank ℝ E)),
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) 2 2
@@ -438,16 +370,8 @@ theorem chartPushed_memWkp_succ_step_of_chartSideH2kBridge
           (I := I) (M := M) α) :=
     fun idx => chosenMthMixed_memWkp_two_two_of_chartSideH2kBridge
       (I := I) (M := M) g α (k := k) (m := m) hm h_bridge idx
-  -- Apply the per-step boost.
   exact chartPushed_memWkp_m_plus_two_step
     (I := I) (M := M) g α u_h m h_chart_H_m_plus_1 h_top_memWkp_two
-
-/-! ## Two-sided chart-`H^{2(k+1)}` synthesis (bridge-driven)
-
-For `u_h ∈ laplacianDomainPow g (k+1)`, the `(1-Δ)`-preimage of `u_h` (as
-an `Lp` element) admits a chart-side `H^{2(k+1)}` bridge in tandem with the
-bridge for `u_h` itself. The two-sided form packages both bridges and
-delivers chart-`H^{2(k+1)}` regularity for both function representatives. -/
 
 /-- **Two-sided chart-`H^{2(k+1)}` synthesis from two chart-side bridges.**
 For `u_h ∈ laplacianDomainPow g (k+1)`, given chart-side `H^{2(k+1)}`
@@ -487,22 +411,7 @@ theorem chartPushed_memWkp_two_k_plus_two_two_sided_of_chartSideBridges
   refine ⟨?_, ?_⟩
   · exact chartPushed_memWkp_two_k_of_laplacianDomainPow_bridge
       (I := I) (M := M) g α (k + 1) hu_h h_bridge_u
-  · -- The `(1-Δ)` preimage's chart-H^{2(k+1)} is just the bridge applied at α.
-    exact h_bridge_rhs α
-
-/-! ## Synthesis of the chart-side bridge for the `(1-Δ)` preimage
-
-For `u_h ∈ laplacianDomainPow g (k+1)`, the `(1-Δ_g)` preimage of `u_h` (as
-an `Lp` element) lies in the range of `iteratedResolventL2 g k`, hence
-corresponds via the canonical lift to an element of `laplacianDomainPow g k`.
-If the chart-side `H^{2k}` bridge holds for every `u' ∈ laplacianDomainPow g k`,
-then the chart-side `H^{2k}` bridge for the `(1-Δ)`-preimage follows by
-applying the bridge to a representative lift.
-
-This synthesis step is the outer descent on `k` of the polymorphic-in-`k`
-chart-`H^{2k}` headline. The chart-side bridge for the `(1-Δ)`-preimage at
-level `k` is supplied externally (the descent is conditional on the per-level
-discharge of the chart-side bridge at every intermediate level `j ≤ k`). -/
+  · exact h_bridge_rhs α
 
 /-- **Conditional chart-side bridge synthesis for the `(1-Δ)`-preimage.**
 
@@ -534,25 +443,6 @@ theorem memWkpChart_two_k_of_preimage_chartSideBridge
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) := by
   intro α
   exact h_bridge_rhs α
-
-/-! ## Compactness of the bridge chain
-
-The polymorphic-in-`k` chart-`H^{2k}` headline is delivered for arbitrary
-`k` via the chart-side bridge predicate `ChartSideH2kBridge g k u_h.coeFn`.
-The bridge predicate, taken across the `laplacianDomainPow g k` filtration,
-encapsulates the per-chart `MemWkp (2k) 2` regularity of every canonical
-function representative.
-
-The strong-induction synthesis is bridge-driven: each chart-`H^{2k}`
-regularity at level `k` is delivered conditionally on the chart-side bridge
-at level `k`. The chart-side bridges at levels `0, 1, 2` are unconditional;
-at levels `k ≥ 3`, the chart-side bridges are the conditional input.
-
-The polymorphic chart-`H^{2 · min(k, 2)}` headline is the strongest
-unconditional fact that follows from the present strong-induction
-synthesis without additional infrastructure: the chart-`H⁴` discharge at
-the `k = 2` anchor, combined with the downward monotonicity of
-`laplacianDomainPow`. -/
 
 end IteratedChartHmBootstrapStrongInduction
 end Laplacian

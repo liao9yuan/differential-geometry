@@ -81,21 +81,10 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Transporting `Hˢ` elements along an equality of exponents
-
-The carrier `tensorHs g r s σ` depends on `σ` only through
-the summability witness; the coordinate family `coeff` lives in the
-`σ`-independent type `TensorEigenIdx g r s → ℝ`. When two exponents are
-propositionally equal, `tensorHs.cast` rebuilds an element with the same
-coordinates at the other exponent — used below to make the fractional
-powers' target scales line up definitionally. -/
 
 namespace tensorHs
 
@@ -168,12 +157,6 @@ def castEquiv {σ τ : ℝ} (h : σ = τ) :
 
 end tensorHs
 
-/-! ## Multiplicativity of the Sobolev weight in the exponent
-
-The weight `(1 + λᵢ)^σ` is an `rpow` with base `1 + λᵢ ≥ 1 > 0`, so it
-satisfies the exponent-addition law. These are the only spectral facts
-the fractional power needs. -/
-
 namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -210,14 +193,6 @@ lemma tensorSobolevWeight_sub (i : TensorEigenIdx (I := I) (M := M) g r s)
 
 end tensorHs
 
-/-! ## The fractional-power coordinate family
-
-The fractional power multiplies coordinate `i` by `(1 + λᵢ)^θ`. The key
-algebraic fact is that this carries the `Hˢ` weighting to the
-`H^{σ−2θ}` weighting:
-
-  `(1 + λᵢ)^{σ−2θ} · ((1 + λᵢ)^θ · cᵢ)² = (1 + λᵢ)^σ · cᵢ²`. -/
-
 namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -232,8 +207,6 @@ lemma fractionalPower_weight_term (i : TensorEigenIdx (I := I) (M := M) g r s)
       tensorSobolevWeight (I := I) (M := M) i σ * c ^ 2 := by
   have hw_pos : 0 < tensorSobolevWeight (I := I) (M := M) i θ :=
     tensorSobolevWeight_pos (I := I) (M := M) i θ
-  -- `(σ - 2θ) + (θ + θ) = σ`, so the two `θ`-weights and the
-  -- `(σ-2θ)`-weight collapse to the `σ`-weight.
   have hsum : (σ - 2 * θ) + (θ + θ) = σ := by ring
   calc
     tensorSobolevWeight (I := I) (M := M) i (σ - 2 * θ) *
@@ -310,8 +283,6 @@ lemma fractionalPowerFun_smul {σ : ℝ} (θ : ℝ) (c : ℝ)
 lemma norm_fractionalPowerFun {σ : ℝ} (θ : ℝ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
     ‖fractionalPowerFun (I := I) (M := M) θ T‖ = ‖T‖ := by
-  -- Compare squared norms: term-by-term they agree by the weight
-  -- transfer identity, hence so do the `tsum`s.
   have h_target_sq : ‖fractionalPowerFun (I := I) (M := M) θ T‖ ^ 2 =
       ∑' i, tensorSobolevWeight (I := I) (M := M) i (σ - 2 * θ) *
         (tensorSobolevWeight (I := I) (M := M) i θ * T.coeff i) ^ 2 := by
@@ -336,8 +307,6 @@ lemma norm_fractionalPowerFun {σ : ℝ} (θ : ℝ)
   rwa [Real.sqrt_sq h1, Real.sqrt_sq h2] at this
 
 end tensorHs
-
-/-! ## The fractional power as a continuous linear operator -/
 
 /-- The fractional power `(1 − Δ_∇)^θ` of the shifted rough Laplacian,
 as a continuous linear operator on the spectral Sobolev scale. It
@@ -404,8 +373,6 @@ theorem tensorFractionalPower_inner {g : SmoothRiemannianMetric I M}
     (inner ℝ (tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) θ S)
         (tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) θ T) : ℝ) =
       inner ℝ S T := by
-  -- The weighted inner-product series match term-by-term:
-  -- `(1+λ)^{σ-2θ}·((1+λ)^θ a)·((1+λ)^θ b) = (1+λ)^σ·a·b`.
   rw [tensorHs.inner_def, tensorHs.inner_def]
   refine tsum_congr (fun i => ?_)
   simp only [tensorFractionalPower_coeff]
@@ -428,13 +395,6 @@ theorem tensorFractionalPower_inner {g : SmoothRiemannianMetric I M}
             i (σ - 2 * θ) (θ + θ)]
     _ = tensorSobolevWeight (I := I) (M := M) i σ *
           (S.coeff i * T.coeff i) := by rw [hsum]
-
-/-! ## The group law `(1 − Δ_∇)^θ ∘ (1 − Δ_∇)^φ = (1 − Δ_∇)^{θ+φ}`
-
-The fractional powers form a one-parameter group: composition adds the
-exponents and the zeroth power is the identity. Diagrammatically, the
-scales line up — `(1−Δ)^φ : Hˢ → H^{σ−2φ}` then
-`(1−Δ)^θ : H^{σ−2φ} → H^{σ−2φ−2θ} = H^{σ−2(θ+φ)}`. -/
 
 /-- The fractional power at exponent `0` fixes the coordinate family:
 the weight `(1 + λᵢ)^0 = 1`. The target scale is `σ − 2·0`, so this is
@@ -481,13 +441,6 @@ theorem tensorFractionalPower_add_apply {g : SmoothRiemannianMetric I M}
     tensorHs.cast_coeff, tensorFractionalPower_coeff,
     tensorHs.tensorSobolevWeight_add (I := I) (M := M) i θ φ]
   ring
-
-/-! ## The fractional power as a linear isometric equivalence
-
-`(1 − Δ_∇)^θ` is invertible, with inverse `(1 − Δ_∇)^{−θ}`. Packaged as
-a `LinearIsometryEquiv`, it realises the abstract fact that the spectral
-Sobolev spaces `Hˢ` and `H^{σ−2θ}` are isometrically isomorphic. The
-inversion identity is `(1+λ)^θ · ((1+λ)^{−θ} · c) = c`. -/
 
 /-- The fractional power `(1 − Δ_∇)^θ` packaged as a linear isometric
 equivalence `Hˢ ≃ₗᵢ[ℝ] H^{σ−2θ}`. The forward map is the spectral
@@ -570,15 +523,6 @@ theorem tensorFractionalPowerEquiv_norm {g : SmoothRiemannianMetric I M}
     (θ σ : ℝ) (T : tensorHs (I := I) (M := M) g r s σ) :
     ‖tensorFractionalPowerEquiv (I := I) (M := M) (g := g) (r := r) (s := s) θ σ T‖ = ‖T‖ :=
   tensorHs.norm_fractionalPowerFun (I := I) (M := M) θ T
-
-/-! ## The scale shift `Λˢ` by exactly `s`
-
-`tensorFractionalPower θ` shifts the scale by `2θ`. The companion
-operator that shifts by *exactly* `s` is `Λˢ := (1 − Δ_∇)^{s/2}`,
-multiplying the coordinate by `(1 + λᵢ)^{s/2}`. It maps `Hˢ`
-isometrically to `H^{σ−s}`. Concretely it is `tensorFractionalPower`
-at exponent `s/2`, with the target scale `σ − 2·(s/2)` rewritten to the
-on-the-nose `σ − s`. -/
 
 namespace tensorHs
 
@@ -744,13 +688,6 @@ scale is `σ − 0`, so this is stated coordinatewise. -/
       T.coeff i := by
   rw [tensorLambdaPower_coeff, zero_div, tensorSobolevWeight_zero, one_mul]
 
-/-! ## Interaction with the Sobolev-scale inclusion
-
-The fractional power and the scale inclusion `tensorHsInclusion`
-(`Hˢ ↪ Hᵗ` for `τ ≤ σ`) both act on coordinate families, so they
-commute: applying `(1 − Δ_∇)^θ` then including, or including then
-applying `(1 − Δ_∇)^θ`, gives the same coordinate family. -/
-
 /-- The fractional power commutes with the Sobolev-scale inclusion: for
 `τ ≤ σ`, including `Hˢ ↪ Hᵗ` then applying `(1 − Δ_∇)^θ` agrees with
 applying `(1 − Δ_∇)^θ` then including `H^{σ−2θ} ↪ H^{τ−2θ}`. Both routes
@@ -786,13 +723,6 @@ theorem tensorFractionalPower_comp_tensorHsInclusion
   refine ContinuousLinearMap.ext (fun T => ?_)
   rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
   exact tensorFractionalPower_tensorHsInclusion (I := I) (M := M) θ hτσ T
-
-/-! ## The Sobolev scales are mutually isometrically isomorphic
-
-A direct corollary of the fractional-power equivalence: for any two
-exponents `σ`, `τ`, the spectral Sobolev spaces `Hˢ` and `Hᵗ` are
-isometrically isomorphic. The isomorphism is `(1 − Δ_∇)^{(σ−τ)/2}`,
-which by the scale convention drops the scale by exactly `σ − τ`. -/
 
 /-- For any two exponents `σ` and `τ`, the spectral Sobolev spaces `Hˢ`
 and `Hᵗ` are isometrically isomorphic. The witnessing equivalence is the
@@ -837,8 +767,6 @@ theorem tensorHsEquivOfFractionalPower_norm
       ‖T‖ :=
   (tensorHsEquivOfFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s)
     σ τ).norm_map T
-
-/-! ## Sanity tests -/
 
 example {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (θ : ℝ) {σ : ℝ} :

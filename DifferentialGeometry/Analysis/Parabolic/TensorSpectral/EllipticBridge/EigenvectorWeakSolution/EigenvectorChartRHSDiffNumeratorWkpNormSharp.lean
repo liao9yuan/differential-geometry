@@ -80,24 +80,12 @@ open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Cutoff-based smooth-coefficient `wkpNorm` bound, factor-uniform
-
-A local re-implementation of the factor-uniform cutoff Leibniz bound: for
-a coefficient `coef` that is `C^∞` on the open chart target, there is a
-single nonnegative constant `C` — depending only on `coef` and the order
-`K` — such that for *every* `factor` that lies in `W^{K, 2}` on the chart
-target and ae-vanishes off the compact partition-of-unity kernel, the
-product `coef · factor` lies in `W^{K, 2}` on the chart target and has
-`wkpNorm K 2 (coef · factor) ≤ ENNReal.ofReal C · wkpNorm K 2 factor`. -/
 
 lemma sharp_wkpNorm_coef_mul_factor_le_uniform
     (α : M) (K : ℕ)
@@ -249,8 +237,6 @@ lemma sharp_wkpNorm_coef_mul_factor_le_uniform
   rw [h_norm_eq]
   exact hKc_bd hfactor_memWkp
 
-/-! ## Local finite-sum helpers for `MemWkp K 2` and `wkpNorm K 2` -/
-
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 /-- A finite-`Finset` sum of `MemWkp K 2` functions on an open set is also
 `MemWkp K 2`. Mirrors the public `BootstrapMixed.memWkp_finset_sum` but is
@@ -310,8 +296,6 @@ private lemma sharp_wkpNorm_sub_le
     simp
   rw [h_neg_eq]
 
-/-! ## The layer-`A` coefficient -/
-
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 /-- The layer-`A` coefficient `∂_b (weightedInvGramDerivOnEuclid g α a b lₙ)`
 is `C^∞` on the open chart target. -/
@@ -339,14 +323,6 @@ private lemma sharp_layerA_coeff_contDiffOn
       (fun (L : EuclN →L[ℝ] ℝ) => L (EuclideanSpace.single b 1)) :=
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single b (1 : ℝ))).contDiff
   exact h_eval.contDiffOn.comp h_fderiv (mapsTo_univ _ _)
-
-/-! ## Chart-locality-free twins
-
-The sharp `wkpNorm`-graded bounds below are stated unconditionally — without any
-chart-locality hypothesis — by re-keying the eigenbasis vectors onto the intrinsic
-compact-operator eigenbasis
-`tensorResolventEigenbasisVec … (tensorResolventL2_isCompactOperator g r s)`.
--/
 
 /-- Chart-locality-free twin of `sharp_eigen_inv_one_le`. -/
 lemma sharp_eigen_inv_one_le

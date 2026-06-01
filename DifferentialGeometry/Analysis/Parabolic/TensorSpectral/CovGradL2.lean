@@ -90,26 +90,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The `L²` self-pairing of the covariant gradient
-
-The squared `L²` seminorm of the section-level covariant gradient
-`covGrad g r s S` is the `L²` self-pairing of its underlying section field.
-By the definition of `tensorL2Inner` as the integral of the pointwise tensor
-inner product, and the metric-isometry bridge
-`tensorCovDerivPointwiseInner_eq_tensorInnerPointwise_grad`, this integral
-coincides with the integrated covariant-gradient (Dirichlet) term
-`tensorCovDerivPointwiseInner g r s S S`. -/
 
 /-- The `L²` self-pairing of the covariant gradient of a smooth
 compactly-supported `(r, s)`-tensor section `S` equals the integral of the
@@ -126,16 +110,9 @@ private lemma tensorL2Inner_covGrad_self_eq_dirichlet
         (covGrad (I := I) (M := M) g r s S).toFun =
       ∫ x, tensorCovDerivPointwiseInner (I := I) (M := M) g r s S S x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
-  -- `tensorL2Inner` is the integral of the pointwise `(r, s + 1)`-tensor
-  -- inner product; the integrand is the metric-isometry bridge applied
-  -- pointwise.
   unfold tensorL2Inner
   refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall ?_)
   intro x
-  -- Beta-reduce the integrand; `(covGrad g r s S).toFun x = toModel
-  -- ((covGrad g r s S).toSection x)` definitionally. The metric-isometry
-  -- bridge, read right-to-left, identifies the integrand with the Dirichlet
-  -- summand.
   change tensorInnerPointwise (I := I) (M := M) g r (s + 1) x
       (TensorRSSpace.toModel
         ((covGrad (I := I) (M := M) g r s S).toSection x))
@@ -144,15 +121,6 @@ private lemma tensorL2Inner_covGrad_self_eq_dirichlet
     tensorCovDerivPointwiseInner (I := I) (M := M) g r s S S x
   exact (tensorCovDerivPointwiseInner_eq_tensorInnerPointwise_grad
     (I := I) (M := M) g r s S S x).symm
-
-/-! ## The operator-norm bound: `L²(s+1)` norm of `covGrad` ≤ `H¹` norm
-
-The squared metric `L²` norm of the completion-coercion of
-`covGrad g r s S.toCcTensor` equals the `L²` self-pairing of the underlying
-section, which by the previous lemma is the integrated Dirichlet term. The
-`H¹` self-pairing of `S` is, by `tensorH1Inner_def`, the `L²` self-pairing
-plus this same Dirichlet term; since the `L²` part is non-negative, the
-Dirichlet term is bounded above by `‖S‖²_{H¹}`. -/
 
 set_option linter.unusedSectionVars false in
 /-- The squared metric `L²` norm of the completion-coercion of the covariant
@@ -163,7 +131,6 @@ private lemma covGrad_l2NormSq_le_h1NormSq
     (S : SmoothCcTensorH1 g r s) :
     ‖((covGrad (I := I) (M := M) g r s S.toCcTensor : SmoothCcTensor g r (s + 1)) :
         TensorL2 r (s + 1) g)‖ ^ 2 ≤ ‖S‖ ^ 2 := by
-  -- The completion embedding preserves the norm.
   have h_coe_norm :
       ‖((covGrad (I := I) (M := M) g r s S.toCcTensor :
             SmoothCcTensor g r (s + 1)) : TensorL2 r (s + 1) g)‖ =
@@ -171,17 +138,11 @@ private lemma covGrad_l2NormSq_le_h1NormSq
           SmoothCcTensor g r (s + 1))‖ :=
     UniformSpace.Completion.norm_coe _
   rw [h_coe_norm]
-  -- The squared `L²` seminorm is the `L²` self-pairing of the underlying
-  -- section field.
   rw [SmoothCcTensor.norm_sq_eq_inner_self (I := I) (M := M)
     (covGrad (I := I) (M := M) g r s S.toCcTensor)]
-  -- The `L²` self-pairing is the integrated Dirichlet term.
   rw [tensorL2Inner_covGrad_self_eq_dirichlet (I := I) (M := M) g r s S.toCcTensor]
-  -- The squared `H¹` seminorm of `S` is the `H¹` self-pairing.
   rw [SmoothCcTensorH1.norm_sq_eq_inner_self (I := I) (M := M) S]
-  -- The `H¹` self-pairing is the `L²` self-pairing plus the Dirichlet term.
   rw [tensorH1Inner_def]
-  -- The `L²` self-pairing of the underlying section field is non-negative.
   have h_l2_nonneg :
       0 ≤ tensorL2Inner (I := I) (M := M) g r s
             S.toCcTensor.toFun S.toCcTensor.toFun :=
@@ -212,13 +173,6 @@ private lemma covGrad_l2Norm_le_one_mul_h1Norm
   rw [one_mul]
   exact covGrad_l2Norm_le_h1Norm (I := I) (M := M) g r s S
 
-/-! ## The covariant gradient as a linear map `H¹ → L²(s+1)`
-
-The covariant gradient `w ↦ (covGrad g r s w.toCcTensor : TensorL2 r (s + 1) g)`
-is `ℝ`-linear: `covGrad` is additive and `ℝ`-homogeneous in the section
-(`covGrad_add`, `covGrad_smul`), and the completion embedding
-`SmoothCcTensor g r (s + 1) → TensorL2 r (s + 1) g` is `ℝ`-linear. -/
-
 /-- The `ℝ`-linear map from smooth compactly-supported `H¹` tensor sections to
 the one-rank-higher metric `L²` Hilbert space, sending `w` to the metric
 `L²`-coercion of the section-level covariant gradient
@@ -230,7 +184,6 @@ noncomputable def covGradL2Lin
     ((covGrad (I := I) (M := M) g r s w.toCcTensor :
         SmoothCcTensor g r (s + 1)) : TensorL2 r (s + 1) g)
   map_add' w₁ w₂ := by
-    -- `(w₁ + w₂).toCcTensor = w₁.toCcTensor + w₂.toCcTensor`.
     change ((covGrad (I := I) (M := M) g r s (w₁ + w₂).toCcTensor :
           SmoothCcTensor g r (s + 1)) : TensorL2 r (s + 1) g) =
         ((covGrad (I := I) (M := M) g r s w₁.toCcTensor :
@@ -241,7 +194,6 @@ noncomputable def covGradL2Lin
       covGrad_add (I := I) (M := M) g r s w₁.toCcTensor w₂.toCcTensor]
     exact UniformSpace.Completion.coe_add _ _
   map_smul' c w := by
-    -- `(c • w).toCcTensor = c • w.toCcTensor`.
     change ((covGrad (I := I) (M := M) g r s (c • w).toCcTensor :
           SmoothCcTensor g r (s + 1)) : TensorL2 r (s + 1) g) =
         c • ((covGrad (I := I) (M := M) g r s w.toCcTensor :
@@ -267,8 +219,6 @@ private lemma covGradL2Lin_norm_le
   rw [covGradL2Lin_apply]
   exact covGrad_l2Norm_le_one_mul_h1Norm (I := I) (M := M) g r s w
 
-/-! ## The covariant gradient as a bounded operator `H¹ → L²(s+1)` -/
-
 /-- **The covariant gradient as a bounded `H¹ → L²` operator.** The covariant
 gradient of a smooth compactly-supported `H¹` tensor section, as a continuous
 linear map from the `H¹` pre-Hilbert space of `(r, s)`-tensor sections into
@@ -292,14 +242,6 @@ noncomputable def tensorCovGradL2
     tensorCovGradL2 (I := I) (M := M) g r s w =
       ((covGrad (I := I) (M := M) g r s w.toCcTensor :
         SmoothCcTensor g r (s + 1)) : TensorL2 r (s + 1) g) := rfl
-
-/-! ## The covariant gradient extended to the `H¹` completion
-
-The completion embedding `smoothToTensorH1Compl : SmoothCcTensorH1 g r s →L[ℝ]
-TensorH1Compl g r s` has dense range and is uniform-inducing; the codomain
-`TensorL2 r (s + 1) g` is a Hilbert space, hence complete. Therefore
-`ContinuousLinearMap.extend` yields the unique continuous linear extension of
-`tensorCovGradL2` to the `H¹` completion. -/
 
 /-- The completion embedding `smoothToTensorH1Compl g r s` has dense range. -/
 private lemma denseRange_smoothToTensorH1Compl
@@ -372,15 +314,6 @@ theorem tensorCovGradL2Compl_smoothToTensorH1Compl_eq_coe
   rw [tensorCovGradL2Compl_smoothToTensorH1Compl (I := I) (M := M) g r s w,
     tensorCovGradL2_apply]
 
-/-! ## The operator-norm bound `‖·‖ ≤ 1`
-
-The covariant-gradient operator on smooth sections is assembled by
-`LinearMap.mkContinuous` with bound `1`; hence its operator norm is `≤ 1`.
-Its continuous linear extension to the `H¹` completion satisfies the same
-pointwise bound `‖tensorCovGradL2Compl g r s x‖ ≤ ‖x‖`: the bound holds on the
-dense range of the completion embedding (where the extended operator recovers
-`tensorCovGradL2 g r s`), and the inequality is a closed condition. -/
-
 set_option linter.unusedSectionVars false in
 /-- **The operator-norm bound for the covariant-gradient operator.** The
 bounded covariant-gradient operator `tensorCovGradL2 g r s` on smooth
@@ -406,25 +339,21 @@ theorem tensorCovGradL2Compl_apply_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (x : TensorH1Compl g r s) :
     ‖tensorCovGradL2Compl (I := I) (M := M) g r s x‖ ≤ ‖x‖ := by
-  -- The bound is a closed condition in `x`.
   have h_closed :
       IsClosed {y : TensorH1Compl g r s |
         ‖tensorCovGradL2Compl (I := I) (M := M) g r s y‖ ≤ ‖y‖} :=
     isClosed_le
       ((tensorCovGradL2Compl (I := I) (M := M) g r s).continuous.norm)
       continuous_norm
-  -- The bound holds on the dense range of the completion embedding.
   have h_dense :
       ∀ w : SmoothCcTensorH1 g r s,
         ‖tensorCovGradL2Compl (I := I) (M := M) g r s
             (smoothToTensorH1Compl (I := I) (M := M) g r s w)‖ ≤
           ‖smoothToTensorH1Compl (I := I) (M := M) g r s w‖ := by
     intro w
-    -- The completion embedding preserves the `H¹` norm.
     have h_rhs :
         ‖smoothToTensorH1Compl (I := I) (M := M) g r s w‖ = ‖w‖ := by
       rw [smoothToTensorH1Compl_apply, UniformSpace.Completion.norm_coe]
-    -- On a smooth section the extended operator recovers `tensorCovGradL2`.
     have h_lhs :
         tensorCovGradL2Compl (I := I) (M := M) g r s
             (smoothToTensorH1Compl (I := I) (M := M) g r s w) =
@@ -434,7 +363,6 @@ theorem tensorCovGradL2Compl_apply_norm_le
         g r s w
     rw [h_lhs, h_rhs]
     exact covGrad_l2Norm_le_h1Norm (I := I) (M := M) g r s w
-  -- A closed set containing a dense subset is everything.
   exact (denseRange_smoothToTensorH1Compl (I := I) (M := M) g r s).induction_on
     x h_closed h_dense
 
@@ -454,20 +382,6 @@ theorem tensorCovGradL2Compl_opNorm_le_one
       rw [one_mul]
       exact tensorCovGradL2Compl_apply_norm_le (I := I) (M := M) g r s x)
 
-/-! ## The smooth-case pairing formula
-
-For a fixed smooth compactly-supported `(r, s + 1)`-tensor section `T`, the
-metric `L²` inner product of the covariant gradient `tensorCovGradL2 g r s w`
-with the `L²`-coercion of `T` is the integral of the pointwise tensor inner
-product of the section-level covariant gradient `covGrad g r s w.toCcTensor`
-with `T` against the Riemannian volume measure.
-
-The `L²` inner product on `TensorL2` is `UniformSpace.Completion`'s inherited
-inner product; on coercions of smooth sections it is the pre-Hilbert `L²`
-inner product `tensorL2Inner` (via `UniformSpace.Completion.inner_coe` and
-`SmoothCcTensor.inner_def`), itself the integral of the pointwise tensor inner
-product. -/
-
 set_option linter.unusedSectionVars false in
 /-- **The smooth-case pairing formula for the covariant-gradient operator.**
 For a smooth compactly-supported `H¹` tensor section `w` and a fixed smooth
@@ -484,18 +398,11 @@ theorem tensorCovGradL2_inner_smooth
           ((covGrad (I := I) (M := M) g r s w.toCcTensor).toFun x)
           (T.toFun x)
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
-  -- Rewrite the covariant-gradient operator value as the completion-coercion
-  -- of the smooth section-level covariant gradient.
   rw [tensorCovGradL2_apply]
-  -- The `L²` inner product of two coercions of smooth sections is the
-  -- pre-Hilbert `L²` inner product of the underlying sections.
   rw [UniformSpace.Completion.inner_coe,
     SmoothCcTensor.inner_def
       (covGrad (I := I) (M := M) g r s w.toCcTensor) T]
-  -- `tensorL2Inner` is the integral of the pointwise tensor inner product.
   rfl
-
-/-! ## Sanity tests -/
 
 section ElaborationTests
 

@@ -58,13 +58,6 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 
-/-! ## The chart image of the POU support: compactness and target containment
-
-The set `extChartAt I α '' (tsupport (chartAtlasPOU I M α))` is the natural
-compact "kernel" inside `(extChartAt I α).target` on which the Christoffel
-symbols need to be controlled. We isolate compactness and target-containment
-as standalone lemmas. -/
-
 /-- The chart image of the closed support of the canonical POU weight at `α`
 is compact on a closed manifold. -/
 theorem chartImage_pouTsupport_isCompact
@@ -73,17 +66,14 @@ theorem chartImage_pouTsupport_isCompact
       (tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x))) := by
   classical
-  -- `tsupport (POU α)` is closed (always) and compact (closed in compact M).
   have h_tsupp_compact : IsCompact (tsupport
       (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
     (isClosed_tsupport _).isCompact
-  -- Subordinacy: `tsupport (POU α) ⊆ (chartAt H α).source`.
   have h_tsupp_sub_src :
       tsupport (fun x : M =>
           ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
         (chartAt H α).source :=
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M) α
-  -- Same as containment in `(extChartAt I α).source` (these sets are equal).
   have h_tsupp_sub_extSrc :
       tsupport (fun x : M =>
           ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
@@ -91,13 +81,11 @@ theorem chartImage_pouTsupport_isCompact
     intro x hx
     rw [extChartAt_source]
     exact h_tsupp_sub_src hx
-  -- `extChartAt I α` is continuous on its source, hence on `tsupport (POU α)`.
   have h_cont :
       ContinuousOn (extChartAt I α : M → E)
         (tsupport (fun x : M =>
           ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
     (continuousOn_extChartAt α).mono h_tsupp_sub_extSrc
-  -- Continuous image of compact is compact.
   exact h_tsupp_compact.image_of_continuousOn h_cont
 
 /-- The chart image of `tsupport (POU α)` is contained in `(extChartAt I α).target`. -/
@@ -109,7 +97,6 @@ theorem chartImage_pouTsupport_subset_target
       (extChartAt I α).target := by
   classical
   rintro y ⟨x, hx, rfl⟩
-  -- `x ∈ tsupport (POU α) ⊆ chart source = extChartAt source`.
   have h_tsupp_sub_src :
       tsupport (fun x : M =>
           ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
@@ -129,13 +116,10 @@ theorem chartImage_pouTsupport_subset_interior_target
       (tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) ⊆
       interior ((extChartAt I α).target : Set E) := by
-  -- The target is open under boundaryless, so target = interior target.
   have h_open : IsOpen ((extChartAt I α).target : Set E) :=
     isOpen_extChartAt_target (I := I) α
   rw [h_open.interior_eq]
   exact chartImage_pouTsupport_subset_target (I := I) (M := M) α
-
-/-! ## The headline uniform Christoffel bound -/
 
 /-- **Uniform sup bound for the chart-α Christoffel symbols on an arbitrary
 compact subset of `interior ((extChartAt I α).target)`.**
@@ -156,7 +140,6 @@ theorem chartChristoffel_bdd_on_compact
         ∀ i j k : Fin (Module.finrank ℝ E),
           |chartChristoffel (I := I) g α i j k y| ≤ C := by
   classical
-  -- For each `(i, j, k)`, `chartChristoffel g α i j k` is continuous on `K`.
   have h_cont :
       ∀ i j k : Fin (Module.finrank ℝ E),
         ContinuousOn (fun y : E => |chartChristoffel (I := I) g α i j k y|) K := by
@@ -173,7 +156,6 @@ theorem chartChristoffel_bdd_on_compact
         ContinuousOn (chartChristoffel (I := I) g α i j k) K :=
       h_cont_int.mono hK_sub_interior
     exact continuous_abs.continuousOn.comp h_cont_K (mapsTo_image _ _)
-  -- For each `(i, j, k)`, get a sup bound `C_{ijk}` on `K`.
   have h_bound :
       ∀ i j k : Fin (Module.finrank ℝ E),
         ∃ Cijk : ℝ, 0 ≤ Cijk ∧
@@ -191,12 +173,7 @@ theorem chartChristoffel_bdd_on_compact
         rw [Set.not_nonempty_iff_eq_empty] at hKne
         rw [hKne]
         exact Set.notMem_empty y)
-  -- Choose a witness for each `(i, j, k)` and take the maximum.
   choose Cijk hCijk_nonneg hCijk_bd using h_bound
-  -- Maximum of `Cijk i j k` over the finite product `Fin n × Fin n × Fin n`,
-  -- plus `0` to ensure non-negativity even if the index set is empty (it is
-  -- not, since `[NeZero (Module.finrank ℝ E)]`, but the extra `0` keeps the
-  -- proof robust).
   set s : Finset (Fin (Module.finrank ℝ E) ×
       Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)) :=
     Finset.univ with hs_def
@@ -208,18 +185,15 @@ theorem chartChristoffel_bdd_on_compact
       exact ⟨⟨this.some, this.some, this.some⟩⟩)
       (fun p => Cijk p.1 p.2.1 p.2.2) with hC_def
   refine ⟨C, ?_, ?_⟩
-  · -- `0 ≤ C`: each summand `Cijk i j k ≥ 0`, so the `sup'` is `≥ 0`.
-    have hne : s.Nonempty := by
+  · have hne : s.Nonempty := by
       refine Finset.univ_nonempty_iff.mpr ?_
       have : Nonempty (Fin (Module.finrank ℝ E)) :=
         ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩⟩
       exact ⟨⟨this.some, this.some, this.some⟩⟩
-    -- Pick any element `p₀ ∈ s` and use `Cijk p₀.1 p₀.2.1 p₀.2.2 ≤ sup' s _`.
     obtain ⟨p₀, hp₀_mem⟩ := hne
     refine (hCijk_nonneg p₀.1 p₀.2.1 p₀.2.2).trans ?_
     exact Finset.le_sup' (fun p => Cijk p.1 p.2.1 p.2.2) hp₀_mem
-  · -- Each entry is bounded by `Cijk i j k`, which is `≤ C := sup' s _`.
-    intro y hy i j k
+  · intro y hy i j k
     refine (hCijk_bd i j k y hy).trans ?_
     have hp_mem : (i, j, k) ∈ s := Finset.mem_univ _
     exact Finset.le_sup' (fun p => Cijk p.1 p.2.1 p.2.2) hp_mem

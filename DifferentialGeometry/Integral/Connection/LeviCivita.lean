@@ -84,8 +84,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Self-membership of the chart-local good set -/
-
 /-- Every point `α : M` lies in its own chart-local good set
 `chartLeviCivitaGoodSet α`. The first two conjuncts (membership in the chart source
 and in the trivialization base set at `α`) are the defining "centred-at-`α`"
@@ -98,9 +96,7 @@ lemma self_mem_chartLeviCivitaGoodSet (α : M) :
   refine mem_chartLeviCivitaGoodSet_iff.mpr ⟨?_, ?_, ?_⟩
   · exact mem_extChartAt_source α
   · exact FiberBundle.mem_baseSet_trivializationAt' α
-  · -- `extChartAt I α α ∈ interior ((extChartAt I α).target : Set E)`
-    -- This is the defining property of an interior point.
-    have hint : I.IsInteriorPoint α := BoundarylessManifold.isInteriorPoint
+  · have hint : I.IsInteriorPoint α := BoundarylessManifold.isInteriorPoint
     exact (ModelWithCorners.isInteriorPoint_iff).mp hint
 
 /-- The family `{chartLeviCivitaGoodSet α | α : M}` covers `M`. -/
@@ -111,13 +107,6 @@ lemma iUnion_chartLeviCivitaGoodSet :
   intro x
   refine mem_iUnion.mpr ⟨x, ?_⟩
   exact self_mem_chartLeviCivitaGoodSet (I := I) (α := x)
-
-/-! ## Chart-overlap consistency
-
-For two basepoints `α, β : M`, on the overlap `chartLeviCivitaGoodSet α ∩
-chartLeviCivitaGoodSet β` both `chartLeviCivita g α` and `chartLeviCivita g β` are
-torsion-free and metric-compatible (chart-local properties). By the Koszul local
-uniqueness, they agree pointwise on differentiable inputs over the overlap. -/
 
 /-- **Chart-overlap consistency** for the chart-local Levi-Civita derivatives. On any
 point `x` lying in both `chartLeviCivitaGoodSet α` and `chartLeviCivitaGoodSet β`, and
@@ -132,14 +121,11 @@ lemma chartLeviCivita_chart_overlap
     chartLeviCivita (I := I) g α Y x v =
       chartLeviCivita (I := I) g β Y x v := by
   classical
-  -- Smooth global tangent section `X` with `X x = v`.
   obtain ⟨X, hXx⟩ := ContMDiffSection.exists_eq_at (I := I) (n := (⊤ : ℕ∞))
     (F := E) (V := (TangentSpace I : M → Type _)) x v
   have hX : MDiffAt (T% fun y => X y) x := X.mdifferentiableAt
-  -- Set up the torsion-free equations on the singleton-overlap point set `{x}`.
   set s : Set M := {x} with hs
   have hxs : x ∈ s := rfl
-  -- Torsion-free for `chartLeviCivita g α` on `{x}` (restrict from the good set at α).
   have hTFα : ∀ ⦃A B : Π y : M, TangentSpace I y⦄ ⦃y : M⦄,
       MDiffAt (T% A) y → MDiffAt (T% B) y → y ∈ s →
       chartLeviCivita (I := I) g α B y (A y) -
@@ -158,29 +144,18 @@ lemma chartLeviCivita_chart_overlap
     have hyx : y = x := hy
     subst hyx
     exact chartLeviCivita_torsion_free_on (I := I) g β hA hB hxβ
-  -- Metric-compatibility on `{x}` (restrict from the good set).
   have hMCα : IsMetricCompatibleOn (chartLeviCivita (I := I) g α) g s :=
     (chartLeviCivita_isMetricCompatibleOn (I := I) g α).mono
       (by intro y hy; have : y = x := hy; subst this; exact hxα)
   have hMCβ : IsMetricCompatibleOn (chartLeviCivita (I := I) g β) g s :=
     (chartLeviCivita_isMetricCompatibleOn (I := I) g β).mono
       (by intro y hy; have : y = x := hy; subst this; exact hxβ)
-  -- Apply Koszul local uniqueness.
   have hloc :
       chartLeviCivita (I := I) g α Y x (X x) =
         chartLeviCivita (I := I) g β Y x (X x) :=
     koszul_local_uniqueness (s := s)
       hTFα hTFβ hMCα hMCβ hX hY hxs
-  -- Replace `X x` by `v`.
   simpa [hXx] using hloc
-
-/-! ## The stitched Levi-Civita function
-
-The stitched Levi-Civita function selects, at each `x : M`, the chart-local
-Levi-Civita derivative based at `x` itself. This is well-defined for all `x : M` by
-`self_mem_chartLeviCivitaGoodSet`. By chart-overlap consistency, on differentiable
-sections it agrees with `chartLeviCivita g α` whenever `x ∈ chartLeviCivitaGoodSet α`.
--/
 
 /-- The stitched Levi-Civita function: at each `x : M` it is the chart-local
 Levi-Civita derivative at `x` itself, evaluated at `x`. -/
@@ -200,16 +175,8 @@ lemma leviCivitaStitched_eq_chart
     leviCivitaStitched (I := I) g Y x v =
       chartLeviCivita (I := I) g α Y x v := by
   unfold leviCivitaStitched
-  -- `chartLeviCivita g x σ x v = chartLeviCivita g α σ x v` by chart-overlap consistency.
   exact chartLeviCivita_chart_overlap (I := I) g x α
     (self_mem_chartLeviCivitaGoodSet (I := I) (α := x)) hxα hY v
-
-/-! ## `IsCovariantDerivativeOn` axioms for the stitched function
-
-We package the additivity and Leibniz axioms as standalone lemmas with explicit
-section / scalar / point arguments, then assemble the `IsCovariantDerivativeOn`
-structure from them. This avoids the implicit-binder name shadowing inside the
-`where`-clause syntax of structures. -/
 
 /-- Additivity of the stitched function on a chart-local good set. -/
 lemma leviCivitaStitched_add_on_goodSet
@@ -250,7 +217,6 @@ lemma leviCivitaStitched_leibniz_on_goodSet
   rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
       ContinuousLinearMap.smulRight_apply,
       ← leviCivitaStitched_eq_chart (I := I) g α hx hσ v]
-  -- Now both sides have the same shape after one more `add_apply`/`smul_apply` on RHS.
   simp [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
         ContinuousLinearMap.smulRight_apply]
 
@@ -274,8 +240,6 @@ lemma leviCivitaStitched_isCovariantDerivativeOn_univ
   rw [← iUnion_chartLeviCivitaGoodSet (I := I) (M := M)]
   exact IsCovariantDerivativeOn.iUnion (s := fun α => chartLeviCivitaGoodSet (I := I) α)
     (fun α => leviCivitaStitched_isCovariantDerivativeOn (I := I) g α)
-
-/-! ## The bundled Levi-Civita covariant derivative -/
 
 /-- The **Levi-Civita covariant derivative** on the tangent bundle of a smooth
 Riemannian manifold, as a bundled `CovariantDerivative I E (TangentSpace I)`. The
@@ -304,8 +268,6 @@ theorem LeviCivita_chart_apply (g : SmoothRiemannianMetric I M) (α : M)
   rw [LeviCivita_toFun]
   exact leviCivitaStitched_eq_chart (I := I) g α hx hσ v
 
-/-! ## Torsion-free property -/
-
 /-- The bundled Levi-Civita covariant derivative is **torsion-free**: its torsion
 tensor vanishes identically. This follows from the chart-local torsion-free identity
 and the chart-overlap formula. -/
@@ -314,16 +276,11 @@ theorem LeviCivita_torsion_eq_zero (g : SmoothRiemannianMetric I M) :
   classical
   rw [CovariantDerivative.torsion_eq_zero_iff]
   intro X Y x hX hY
-  -- Use the chart at `x` itself.
   have hx : x ∈ chartLeviCivitaGoodSet (I := I) x :=
     self_mem_chartLeviCivitaGoodSet (I := I) (α := x)
-  -- Identify both `LeviCivita`-values with their chart-local counterparts at `x`.
   rw [LeviCivita_chart_apply (I := I) g x hx hY (X x),
       LeviCivita_chart_apply (I := I) g x hx hX (Y x)]
-  -- Apply the chart-local torsion-free identity at the basepoint `x`.
   exact chartLeviCivita_torsion_free_on (I := I) g x hX hY hx
-
-/-! ## Metric compatibility -/
 
 /-- The bundled Levi-Civita covariant derivative is **metric-compatible** with `g`.
 This follows from gluing the chart-local metric-compatibility via
@@ -333,20 +290,14 @@ differentiable inputs). -/
 theorem LeviCivita_isMetricCompatible (g : SmoothRiemannianMetric I M) :
     IsMetricCompatible (LeviCivita (I := I) g) g := by
   classical
-  -- Unfold to `IsMetricCompatibleOn ... Set.univ`, then express univ as the cover.
   change IsMetricCompatibleOn (LeviCivita (I := I) g).toFun g Set.univ
   rw [show (Set.univ : Set M) = ⋃ α : M, chartLeviCivitaGoodSet (I := I) α from
     (iUnion_chartLeviCivitaGoodSet (I := I) (M := M)).symm]
   refine IsMetricCompatibleOn.iUnion (s := fun α => chartLeviCivitaGoodSet (I := I) α) ?_
   intro α Y Z x hY hZ hxα v
-  -- On each chart-local good set, `LeviCivita.toFun = chartLeviCivita g α` on
-  -- differentiable inputs. The chart-local metric compatibility transfers
-  -- through this identification.
   rw [LeviCivita_chart_apply (I := I) g α hxα hY v,
       LeviCivita_chart_apply (I := I) g α hxα hZ v]
   exact chartLeviCivita_isMetricCompatibleOn (I := I) g α hY hZ hxα v
-
-/-! ## Smoothness -/
 
 /-- Local-to-global smoothness of the Levi-Civita as a section of `Hom(TM, TM)`:
 for any smooth tangent-bundle section `σ`, the section `fun x => (LeviCivita g) σ x`
@@ -366,19 +317,15 @@ lemma LeviCivita_section_contMDiffOn_univ (g : SmoothRiemannianMetric I M)
   refine ⟨chartLeviCivitaGoodSet (I := I) x,
     chartLeviCivitaGoodSet_isOpen (I := I) x,
     self_mem_chartLeviCivitaGoodSet (I := I) (α := x), ?_⟩
-  -- Restrict `hσ` to the chart-local good set.
   have hσ_on : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1) (T% σ)
       (chartLeviCivitaGoodSet (I := I) x) :=
     hσ.mono (Set.subset_univ _)
-  -- Get smoothness of `chartLeviCivita g x σ` on the good set at `x`.
   have hchart :=
     (chartLeviCivita_contMDiffCovariantDerivativeOn (I := I) g x).contMDiff
       (σ := σ) hσ_on
-  -- The functions agree on (univ ∩ goodSet x) = goodSet x.
   rw [Set.univ_inter]
   refine hchart.congr ?_
   intro y hy
-  -- `σ` is MDiffAt at `y` from global smoothness.
   have hσ_at : MDiffAt (T% σ) y := by
     have h1 : ContMDiffAt I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1) (T% σ) y :=
       hσ.contMDiffAt Filter.univ_mem
@@ -387,8 +334,6 @@ lemma LeviCivita_section_contMDiffOn_univ (g : SmoothRiemannianMetric I M)
         rw [ENat.coe_top_add_one]
       exact h1.of_le h_le
     exact h2.mdifferentiableAt (by simp)
-  -- Goal: `⟨y, (LeviCivita g).toFun σ y⟩ = ⟨y, chartLeviCivita g x σ y⟩` (in TotalSpace).
-  -- The base components are equal (both `y`), and we identify the fibre components.
   have hfib :
       (LeviCivita (I := I) g).toFun σ y = chartLeviCivita (I := I) g x σ y := by
     apply ContinuousLinearMap.ext
@@ -403,8 +348,6 @@ instance LeviCivita_isContMDiff (g : SmoothRiemannianMetric I M) :
     CovariantDerivative.ContMDiffCovariantDerivative (LeviCivita (I := I) g) ∞ where
   contMDiff :=
     { contMDiff := fun hσ => LeviCivita_section_contMDiffOn_univ (I := I) g hσ }
-
-/-! ## Pointwise uniqueness on differentiable inputs -/
 
 /-- **Uniqueness of the Levi-Civita covariant derivative.** Any other torsion-free
 metric-compatible covariant derivative on the tangent bundle agrees pointwise with

@@ -70,14 +70,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## Chart-coordinate bridges for the inverse Gram matrix
-
-`chartRicciSecondOrderPrincipalSymbol` uses the chart-target field `chartInvGramOnE g x`
-evaluated at the chart image `extChartAt I x x`, whereas `raisedCovectorComp` and
-`metricCovectorNormSq` are stated through the matrix `chartInvGramMatrix g x x`.  The two
-agree, because `extChartAt I x` carries `x` back to `x`:
-`(extChartAt I x).symm (extChartAt I x x) = x`. -/
-
 section InvGramBridge
 
 /-- The chart-target inverse Gram field of `g`, in the chart at `x`, evaluated at the
@@ -103,17 +95,6 @@ lemma chartInvGramMatrix_self_symm (g : SmoothRiemannianMetric I M) (x : M)
   rwa [star_trivial] at hentry
 
 end InvGramBridge
-
-/-! ## Components and contractions of a fibre bilinear form
-
-The principal symbol acts on an *input bilinear form* `t`, a fibre element of the
-`(0,2)`-tensor bundle at `x`, i.e. an element of
-`TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ`.  Its chart components are obtained by
-evaluating `t` on the model basis vectors `chartModelBasis E`; the resulting numbers
-`t_{cd}` are the quantities the substituted derivatives `∂_c∂_d h ↦ ξ_cξ_d` multiply.
-
-The two scalar contractions of `t` against the chart inverse metric used by the closed
-form are the metric trace `tr_g t` and the index-raised contraction `∑_l ξ^l t_{lk}`. -/
 
 section FibreForm
 
@@ -326,16 +307,6 @@ lemma raisedFormContractionSnd_eq_of_symm (g : SmoothRiemannianMetric I M) (x : 
 
 end FibreForm
 
-/-! ## The principal symbol's component
-
-`ricciSymbolComp` is the `(i, k)` component of the linearized-Ricci principal symbol.  It
-has the **same four-term shape** as `chartRicciSecondOrderPrincipalSymbol`, with each
-iterated derivative `∂_a∂_b h_{cd}` replaced by the symbol substitution `ξ_a ξ_b · t_{cd}`
-(`ξ_a = (chartModelBasis E).repr ξ a`, `t_{cd} = formComp x t c d`).  The chart inverse
-Gram matrix and index placement are kept exactly as in
-`chartRicciSecondOrderPrincipalSymbol`, evaluated at the chart image `extChartAt I x x` of
-the base point. -/
-
 section SymbolComponent
 
 /-- The `(i, k)` component of the **linearized-Ricci principal symbol**, applied to the
@@ -386,25 +357,6 @@ def ricciSymbolComp (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
                 formComp (I := I) x t l j) := rfl
 
 end SymbolComponent
-
-/-! ## The classical closed form
-
-We contract the inverse Gram matrix in `ricciSymbolComp`.  Distributing the inner
-four-term bracket over the double sum splits the symbol component into four double sums.
-Each is contracted into one classical term:
-
-* `∑_{j,l} G^{jl} ξ_jξ_i t_{lk}` — factor `ξ_i`, recognise `∑_j G^{jl} ξ_j = ξ^l`
-  (`raisedCovectorComp`, using symmetry of `G`), giving `ξ_i · ∑_l ξ^l t_{lk}`;
-* `∑_{j,l} G^{jl} ξ_kξ_l t_{ij}` — factor `ξ_k`, recognise `∑_l G^{jl} ξ_l = ξ^j`,
-  giving `ξ_k · ∑_j ξ^j t_{ij}`;
-* `∑_{j,l} G^{jl} ξ_jξ_l t_{ik}` — factor `t_{ik}`, recognise
-  `∑_{j,l} G^{jl} ξ_jξ_l = |ξ|²_g` (`metricCovectorNormSq`), giving `|ξ|²_g · t_{ik}`;
-* `∑_{j,l} G^{jl} ξ_kξ_i t_{lj}` — factor `ξ_kξ_i`, recognise
-  `∑_{j,l} G^{jl} t_{lj} = tr_g t` (`formMetricTrace`, using symmetry of `G`), giving
-  `ξ_kξ_i · tr_g t`.
-
-The four contraction lemmas are proved first; the closed-form theorem then assembles
-them. -/
 
 section ClosedForm
 
@@ -566,8 +518,6 @@ private lemma ricciSymbol_doubleSum_split (g : SmoothRiemannianMetric I M) (x : 
             chartInvGramMatrix (I := I) g x x j l *
               ((chartModelBasis E).repr ξ k * (chartModelBasis E).repr ξ i *
                 formComp (I := I) x t l j)) := by
-  -- Distribute the frozen coefficient `G^{jl}` over the four-term bracket, so the inner
-  -- summand becomes a literal four-term combination `GA + GB − GC − GD`.
   have hdist : ∀ j l : Fin (Module.finrank ℝ E),
       chartInvGramMatrix (I := I) g x x j l *
           ((chartModelBasis E).repr ξ j * (chartModelBasis E).repr ξ i *
@@ -590,7 +540,6 @@ private lemma ricciSymbol_doubleSum_split (g : SmoothRiemannianMetric I M) (x : 
           chartInvGramMatrix (I := I) g x x j l *
             ((chartModelBasis E).repr ξ k * (chartModelBasis E).repr ξ i *
               formComp (I := I) x t l j) := fun j l => by ring
-  -- Per-`j` row equality: distribute the bracket and peel the inner `∑_l` into four.
   have hrow : ∀ j : Fin (Module.finrank ℝ E),
       (∑ l : Fin (Module.finrank ℝ E),
           chartInvGramMatrix (I := I) g x x j l *
@@ -621,7 +570,6 @@ private lemma ricciSymbol_doubleSum_split (g : SmoothRiemannianMetric I M) (x : 
     intro j
     rw [Finset.sum_congr rfl (fun l (_ : l ∈ Finset.univ) => hdist j l),
       Finset.sum_sub_distrib, Finset.sum_sub_distrib, Finset.sum_add_distrib]
-  -- Outer splitting: rewrite each `j`-row by `hrow`, then peel the outer `∑_j` into four.
   rw [Finset.sum_congr rfl (fun j (_ : j ∈ Finset.univ) => hrow j),
     Finset.sum_sub_distrib, Finset.sum_sub_distrib, Finset.sum_add_distrib]
 
@@ -656,7 +604,6 @@ theorem ricciSymbolComp_eq_closedForm (g : SmoothRiemannianMetric I M) (x : M) (
         (1 / 2 : ℝ) * ((chartModelBasis E).repr ξ i *
           (chartModelBasis E).repr ξ k * formMetricTrace (I := I) g x t) := by
   rw [ricciSymbolComp_def]
-  -- Replace the chart-target inverse Gram field by the chart inverse Gram matrix.
   have hgram : ∀ j l : Fin (Module.finrank ℝ E),
       chartInvGramOnE (I := I) g x j l (extChartAt I x x) =
         chartInvGramMatrix (I := I) g x x j l :=
@@ -686,21 +633,12 @@ theorem ricciSymbolComp_eq_closedForm (g : SmoothRiemannianMetric I M) (x : M) (
     refine Finset.sum_congr rfl (fun j _ => ?_)
     refine Finset.sum_congr rfl (fun l _ => ?_)
     rw [hgram j l]]
-  -- Split the double sum into the four contracted terms and contract each.
   rw [ricciSymbol_doubleSum_split (I := I) g x ξ t i k,
     sum_term_one (I := I) g x ξ t i k, sum_term_two (I := I) g x ξ t i k,
     sum_term_three (I := I) g x ξ t i k, sum_term_four (I := I) g x ξ t i k]
   ring
 
 end ClosedForm
-
-/-! ## Linearity of the symbol component in the input bilinear form
-
-The principal symbol is, by construction, an `ℝ`-linear endomorphism of the tensor fibre.
-We record the component-level linearity directly from the closed form: each of the four
-classical terms is linear in `t` (`raisedFormContraction`, `raisedFormContractionSnd`,
-`formComp`, `formMetricTrace` are all linear in `t`), so their `½`-weighted combination
-is. -/
 
 section Linearity
 
@@ -750,15 +688,6 @@ theorem ricciSymbolComp_smul (g : SmoothRiemannianMetric I M) (x : M) (ξ : E) (
 
 end Linearity
 
-/-! ## Symmetry of the symbol component on a symmetric input
-
-The linearized Ricci tensor is symmetric, and so is its principal symbol: on a symmetric
-input bilinear form `t` (`t v w = t w v`) the symbol component satisfies
-`σ_{ik}(ξ)(t) = σ_{ki}(ξ)(t)`.  We prove it from the closed form: on a symmetric input the
-two raised contractions coincide (`raisedFormContractionSnd_eq_of_symm`), the `i ↔ k` swap
-then interchanges the two raised-contraction terms, fixes the `|ξ|²_g` term once
-`t_{ik} = t_{ki}`, and fixes the trace term. -/
-
 section Symmetry
 
 /-- **The linearized-Ricci symbol component is symmetric on a symmetric input.**  For an
@@ -778,7 +707,6 @@ theorem ricciSymbolComp_symm (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
       ricciSymbolComp (I := I) g x ξ t k i := by
   rw [ricciSymbolComp_eq_closedForm (I := I) g x ξ t i k,
     ricciSymbolComp_eq_closedForm (I := I) g x ξ t k i]
-  -- On a symmetric input the second-slot raised contraction equals the first-slot one.
   rw [raisedFormContractionSnd_eq_of_symm (I := I) g x ξ t ht i,
     raisedFormContractionSnd_eq_of_symm (I := I) g x ξ t ht k,
     formComp_symm (I := I) x t ht i k]

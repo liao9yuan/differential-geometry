@@ -104,13 +104,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## The basis-coordinate identification predicate
-
-We package the deep chart-Christoffel identification of the abstract Riemann CLM with the
-chart Riemann CLM as a hypothesis-bearing predicate at each point. The predicate asserts
-that the basis-coordinate values of `riemannOp (LeviCivita g) x` on the canonical model
-basis match the chart-coordinate Riemann entries `R^l{}_{ijk}(g, x)(ϕ_x x)`. -/
-
 /-- The basis-coordinate identification of the abstract Riemann operator and the chart
 Riemann tensor at `x`: for every four-tuple `(i, j, k, l)`, the `l`-th coordinate of
 `riemannOp (LeviCivita g) x e_j e_k e_i` equals the chart-coordinate Riemann entry
@@ -140,21 +133,13 @@ theorem chartRiemannBasisIdentity_iff (g : SmoothRiemannianMetric I M) (x : M) :
   classical
   constructor
   · intro h i j k
-    -- Two vectors are equal iff their basis representations are equal.
     apply (chartModelBasis E).repr.injective
     ext l
     rw [h i j k]
-    -- RHS: compute b.repr (chartRiemannCLM x e_j e_k e_i) l via chartRiemannCLM_repr_basis.
     rw [chartRiemannCLM_repr_basis (I := I) g x i j k l]
   · intro h i j k l
     rw [h i j k]
     rw [chartRiemannCLM_repr_basis (I := I) g x i j k l]
-
-/-! ## Trilinear extension of the basis identification
-
-Under the basis-coordinate identification, the abstract Riemann CLM agrees with the chart
-Riemann CLM as trilinear maps. The proof decomposes each input vector in the canonical
-model basis and uses trilinearity of both sides. -/
 
 /-- **Trilinear bridge.** Under the basis-coordinate identification, the abstract Riemann
 operator `riemannOp (LeviCivita g) x` and the chart Riemann CLM `chartRiemannCLM g x`
@@ -167,24 +152,19 @@ theorem riemannOp_eq_chartRiemannCLM_apply_of_basis_identity
     riemannOp (cov := LeviCivita (I := I) g) x v w u =
       chartRiemannCLM (I := I) g x v w u := by
   classical
-  -- Both sides are trilinear in (v, w, u). Decompose each input in the model basis and
-  -- match term by term on the basis triple via the iff form of the hypothesis.
   set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E with hb_def
   have hbasis := (chartRiemannBasisIdentity_iff (I := I) g x).mp h
-  -- Decompose v, w, u in the basis.
   have hv : v = ∑ j : Fin (Module.finrank ℝ E), b.repr v j • b j :=
     (Module.Basis.sum_repr b v).symm
   have hw : w = ∑ k : Fin (Module.finrank ℝ E), b.repr w k • b k :=
     (Module.Basis.sum_repr b w).symm
   have hu : u = ∑ i : Fin (Module.finrank ℝ E), b.repr u i • b i :=
     (Module.Basis.sum_repr b u).symm
-  -- Expand `riemannOp x v w u` via trilinearity.
   have hLHS : riemannOp (cov := LeviCivita (I := I) g) x v w u =
       ∑ j : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
         ∑ i : Fin (Module.finrank ℝ E),
           (b.repr v j * b.repr w k * b.repr u i) •
             riemannOp (cov := LeviCivita (I := I) g) x (b j) (b k) (b i) := by
-    -- Step 1: linearise in the first slot via `Module.Basis.sum_repr`.
     have h1 : riemannOp (cov := LeviCivita (I := I) g) x v =
         ∑ j : Fin (Module.finrank ℝ E),
           b.repr v j • riemannOp (cov := LeviCivita (I := I) g) x (b j) := by
@@ -197,7 +177,6 @@ theorem riemannOp_eq_chartRiemannCLM_apply_of_basis_identity
       rw [map_sum f]
       refine Finset.sum_congr rfl fun j _ => ?_
       exact f.map_smul (b.repr v j) (b j)
-    -- Step 2: apply to w; linearise in the second slot.
     have h2 : riemannOp (cov := LeviCivita (I := I) g) x v w =
         ∑ j : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
           (b.repr v j * b.repr w k) •
@@ -221,7 +200,6 @@ theorem riemannOp_eq_chartRiemannCLM_apply_of_basis_identity
       rw [h_inner, Finset.smul_sum]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [smul_smul]
-    -- Step 3: apply to u; linearise in the third slot.
     rw [h2]
     rw [ContinuousLinearMap.sum_apply]
     refine Finset.sum_congr rfl fun j _ => ?_
@@ -247,7 +225,6 @@ theorem riemannOp_eq_chartRiemannCLM_apply_of_basis_identity
     rw [h_inner, Finset.smul_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [smul_smul]
-  -- Now expand the RHS `chartRiemannCLM x v w u` symmetrically.
   have hRHS : chartRiemannCLM (I := I) g x v w u =
       ∑ j : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
         ∑ i : Fin (Module.finrank ℝ E),
@@ -298,8 +275,6 @@ theorem riemannOp_eq_chartRiemannCLM_apply_of_basis_identity
         ∑ i : Fin (Module.finrank ℝ E),
           b.repr u i • chartRiemannCLM (I := I) g x (b j) (b k) (b i) := by
       conv_lhs => rw [hu]
-      -- The two-slot-applied chartRiemannCLM is a CLM `T_x M →L T_x M`. Apply `map_sum`
-      -- through the explicit hom-class instance.
       set f : TangentSpace I x →L[ℝ] TangentSpace I x :=
         chartRiemannCLM (I := I) g x (b j) (b k) with hf_def
       change f (∑ i : Fin (Module.finrank ℝ E), b.repr u i • b i) =
@@ -315,14 +290,6 @@ theorem riemannOp_eq_chartRiemannCLM_apply_of_basis_identity
   refine Finset.sum_congr rfl fun k _ => ?_
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [hbasis i j k]
-
-/-! ## Basis-coordinate Ricci identification (swap form)
-
-Combining `ricciTensor_apply_basisSum` with the trilinear bridge gives the basis-sum
-expansion of the abstract Ricci tensor in terms of the chart-Riemann entries. The
-resulting sum pairs `(v, w)` with the chart Ricci entries `Rc_{i,k}` in *swapped* index
-order, reflecting the convention difference between the abstract trace and the chart
-contraction. -/
 
 /-- **Basis expansion of the abstract Ricci tensor via the chart Ricci entries (swap
 form).** Under the basis-coordinate identification, the abstract Ricci tensor admits the
@@ -343,18 +310,12 @@ theorem ricciTensor_eq_chartRicciSwap_of_basis_identity
             chartRicciTensor (I := I) g x i k (extChartAt I x x) := by
   classical
   set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E with hb_def
-  -- Step 1: rewrite ricciTensor via the basis-sum trace formula.
   rw [ricciTensor_apply_basisSum]
-  -- Step 2: each summand `b.repr (riemannOp x e_t v w) t` equals
-  -- `b.repr (chartRiemannCLM x e_t v w) t` by the trilinear bridge.
   have hrewrite_term : ∀ t : Fin (Module.finrank ℝ E),
       (b.repr (riemannOp (cov := LeviCivita (I := I) g) x (b t) v w)) t =
         (b.repr (chartRiemannCLM (I := I) g x (b t) v w)) t := by
     intro t
     rw [riemannOp_eq_chartRiemannCLM_apply_of_basis_identity (I := I) g x h (b t) v w]
-  -- Step 3: compute `b.repr (chartRiemannCLM x e_t v w) t` via the quadruple sum.
-  -- chartRiemannCLM x e_t v w = ∑ i j k l (b.repr w i * b.repr (e_t) j * b.repr v k * R^l_{ijk}) • e_l
-  -- Then b.repr ... t = ∑ i k δ_{tj=t}-collapsed: ∑ i k w^i * v^k * R^t_{i, t, k}.
   have h_chart_term : ∀ t : Fin (Module.finrank ℝ E),
       (b.repr (chartRiemannCLM (I := I) g x (b t) v w)) t =
         ∑ i : Fin (Module.finrank ℝ E),
@@ -362,35 +323,22 @@ theorem ricciTensor_eq_chartRicciSwap_of_basis_identity
             (b.repr w) i * (b.repr v) k *
               chartRiemannTensor (I := I) g x i t k t (extChartAt I x x) := by
     intro t
-    -- Expand `chartRiemannCLM x e_t v w` via `chartRiemannCLM_apply`.
     rw [chartRiemannCLM_apply]
-    -- The sum: ∑ i j k l (b.repr w i * b.repr (e_t) j * b.repr v k * R^l_{ijk}) • e_l.
-    -- b.repr (∑ ... • e_l) t = ∑ ... * δ_{lt} — collapse l = t.
     rw [map_sum]; rw [Finsupp.coe_finset_sum]; rw [Finset.sum_apply]
-    -- Move the collapsing l = t inside.
-    -- We collapse the inner-most l-sum first.
-    -- Goal: ∑_i (b.repr (∑_j ∑_k ∑_l c_ijkl • e_l) t) = ∑_i ∑_k w^i v^k R^t_{itk}.
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_sum]; rw [Finsupp.coe_finset_sum]; rw [Finset.sum_apply]
-    -- Goal: ∑_j (b.repr (∑_k ∑_l c_ijkl • e_l) t) = (the i-summand on RHS).
-    -- We collapse the j-sum to j = t (since b.repr (e_t) j = δ_{tj}).
-    -- First expand:
-    -- A small helper: compute `b.repr (c • b l) t = c * (if l = t then 1 else 0)`.
     have h_smul_repr : ∀ (c : ℝ) (l : Fin (Module.finrank ℝ E)),
         ((b.repr (c • (b l : E))) t : ℝ) = c * (if l = t then (1 : ℝ) else 0) := by
       intro c l
       rw [LinearEquiv.map_smul, Finsupp.smul_apply, smul_eq_mul]
       rw [Module.Basis.repr_self_apply]
     rw [Finset.sum_eq_single t]
-    · -- At j = t: the inner k, l sums remain; collapse l = t.
-      rw [map_sum]; rw [Finsupp.coe_finset_sum]; rw [Finset.sum_apply]
+    · rw [map_sum]; rw [Finsupp.coe_finset_sum]; rw [Finset.sum_apply]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [map_sum]; rw [Finsupp.coe_finset_sum]; rw [Finset.sum_apply]
       rw [Finset.sum_eq_single t]
-      · -- At l = t: collapse `b.repr (c • e_t) t` to `c * 1 = c`.
-        rw [h_smul_repr]
+      · rw [h_smul_repr]
         rw [if_pos rfl, mul_one]
-        -- Now compute `b.repr (e_t) t = 1` inside the coefficient `c`.
         rw [show ((b.repr (b t)) t : ℝ) = 1 by
           rw [Module.Basis.repr_self_apply]; rw [if_pos rfl]]
         ring
@@ -400,7 +348,6 @@ theorem ricciTensor_eq_chartRicciSwap_of_basis_identity
       · intro hl
         exact absurd (Finset.mem_univ t) hl
     · intro j _ hj_ne
-      -- At j ≠ t: `b.repr (e_t) j = 0`, so the product is 0.
       rw [map_sum]; rw [Finsupp.coe_finset_sum]; rw [Finset.sum_apply]
       apply Finset.sum_eq_zero
       intro k _
@@ -408,15 +355,12 @@ theorem ricciTensor_eq_chartRicciSwap_of_basis_identity
       apply Finset.sum_eq_zero
       intro l _
       rw [h_smul_repr]
-      -- The coefficient contains `b.repr (e_t) j = if t = j then 1 else 0`. Since
-      -- `j ≠ t`, we have `t ≠ j`, hence the value is 0.
       have htj : ¬ (t = j) := fun h => hj_ne h.symm
       rw [show ((b.repr (b t)) j : ℝ) = 0 by
         rw [Module.Basis.repr_self_apply]; rw [if_neg htj]]
       ring
     · intro hj
       exact absurd (Finset.mem_univ t) hj
-  -- Combine.
   have h_combined : ∀ t : Fin (Module.finrank ℝ E),
       (b.repr (riemannOp (cov := LeviCivita (I := I) g) x (b t) v w)) t =
         ∑ i : Fin (Module.finrank ℝ E),
@@ -425,15 +369,11 @@ theorem ricciTensor_eq_chartRicciSwap_of_basis_identity
               chartRiemannTensor (I := I) g x i t k t (extChartAt I x x) := by
     intro t
     rw [hrewrite_term t, h_chart_term t]
-  -- Now sum over t.
   rw [Finset.sum_congr rfl (fun t _ => h_combined t)]
-  -- Goal: ∑ t ∑ i ∑ k (w^i * v^k * R^t_{itk}) = ∑ i ∑ k v^k * w^i * Rc_{i, k}.
-  -- Reorder: bring the t-sum innermost, then identify ∑ t R^t_{itk} = Rc_{i, k}.
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun k _ => ?_
-  -- ∑ t (w^i * v^k * R^t_{itk}) = (v^k * w^i) * Rc_{i,k}.
   rw [chartRicciTensor_def, Finset.mul_sum]
   refine Finset.sum_congr rfl fun t _ => ?_
   ring
@@ -449,9 +389,6 @@ theorem ricciFun_eq_ricciTensor_swap_of_basis_identity
     ricciFun (I := I) g x v w = ricciTensor (I := I) g x w v := by
   classical
   rw [ricciFun_apply, ricciTensor_eq_chartRicciSwap_of_basis_identity (I := I) g x h]
-  -- LHS: ∑ i ∑ k v^i * w^k * Rc_{i, k}.
-  -- RHS (with v ↔ w swapped): ∑ i' ∑ k' w^{k'} * v^{i'} * Rc_{i', k'}.
-  -- The two are equal term by term up to (i ↔ i', k ↔ k') and a commutativity of *.
   refine Finset.sum_congr rfl fun i _ => ?_
   refine Finset.sum_congr rfl fun k _ => ?_
   ring
@@ -468,7 +405,6 @@ theorem ricciFun_eq_ricciTensor_of_basis_identity [I.Boundaryless]
     (v w : TangentSpace I x) :
     ricciFun (I := I) g x v w = ricciTensor (I := I) g x v w := by
   classical
-  -- Combine the swap form with Ricci symmetry via the abstract `ricciTensor_symm`.
   rw [ricciFun_eq_ricciTensor_swap_of_basis_identity (I := I) g x h v w]
   exact ricciTensor_symm (I := I) g x w v
 

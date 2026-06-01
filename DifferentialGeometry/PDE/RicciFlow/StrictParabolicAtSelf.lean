@@ -71,14 +71,10 @@ theorem deTurckRicciRHS_principal_symbol_equals_deTurckSymbol
         (DifferentialGeometry.PDE.DeTurck.deTurckSymbolCoeff (I := I) g₀) x ξ t
       = - DifferentialGeometry.PDE.DeTurck.deTurckSymbol (I := I) g₀ g_bg x ξ t := by
   classical
-  -- LHS: isotropic value `(deTurckSymbolCoeff g₀ x ξ) • t = (-|ξ|²_{g₀}) • t`.
   rw [DifferentialGeometry.PDE.DeTurck.isotropicSymbol_apply_apply,
     DifferentialGeometry.PDE.DeTurck.deTurckSymbolCoeff_apply]
-  -- RHS, via `deTurckSymbol_apply_eq_smul_of_symm`, is `|ξ|²_{g₀} • t`.
-  -- So both sides simplify to `(-|ξ|²_{g₀}) • t`.
   rw [DifferentialGeometry.PDE.DeTurck.deTurckSymbol_apply_eq_smul_of_symm
     (I := I) g₀ g_bg x ξ t ht]
-  -- `(-a) • t = -(a • t)`.
   rw [neg_smul]
 
 /-- **Bridge from a principal-symbol witness to strict parabolicity of the metric RHS.**

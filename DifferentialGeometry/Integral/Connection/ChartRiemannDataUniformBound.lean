@@ -68,8 +68,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## The Euclidean-pushed chart Riemann data and its smoothness -/
-
 /-- The chart-`α` Riemann coefficient `R^l{}_{ijk}(g, α)` viewed as a function on
 the standard Euclidean model space, by precomposition with `toEuclidean.symm`.
 This is the Euclidean-side analogue of `chartChristoffelEuclid` for the
@@ -97,7 +95,6 @@ private lemma partialDeriv_contDiffOn_interior_of_contDiffOn
   have hfderiv : ContDiffOn ℝ ∞ (fderiv ℝ f)
       (interior ((extChartAt I α).target : Set E)) :=
     hf.fderiv_of_isOpen isOpen_interior (by rw [ENat.coe_top_add_one])
-  -- `partialDeriv a f y = fderiv ℝ f y (chartModelBasis E a)` (a CLM evaluation).
   have hrw : (partialDeriv (E := E) a f) =
       fun y => fderiv ℝ f y ((chartModelBasis E) a) := rfl
   rw [hrw]
@@ -113,18 +110,15 @@ theorem chartRiemannTensor_contDiffOn_interior
       (interior ((extChartAt I α).target : Set E)) := by
   classical
   set U : Set E := interior ((extChartAt I α).target : Set E) with hU_def
-  -- Christoffel symbols are `C^∞` on `U`.
   have hΓ : ∀ p q r : Fin (Module.finrank ℝ E),
       ContDiffOn ℝ ∞ (chartChristoffel (I := I) g α p q r) U :=
     fun p q r => chartChristoffel_contDiffOn_interior (I := I) g α p q r
-  -- The two `∂Γ` terms are `C^∞` on `U`.
   have hdΓ1 : ContDiffOn ℝ ∞
       (partialDeriv (E := E) j (chartChristoffel (I := I) g α i k l)) U :=
     partialDeriv_contDiffOn_interior_of_contDiffOn (I := I) α (hΓ i k l) j
   have hdΓ2 : ContDiffOn ℝ ∞
       (partialDeriv (E := E) k (chartChristoffel (I := I) g α i j l)) U :=
     partialDeriv_contDiffOn_interior_of_contDiffOn (I := I) α (hΓ i j l) k
-  -- The `ΓΓ` sum is `C^∞` on `U`.
   have hΓΓ : ContDiffOn ℝ ∞
       (fun y : E => ∑ m : Fin (Module.finrank ℝ E),
         (chartChristoffel (I := I) g α j m l y *
@@ -133,7 +127,6 @@ theorem chartRiemannTensor_contDiffOn_interior
             chartChristoffel (I := I) g α i j m y)) U := by
     refine ContDiffOn.sum (fun m _ => ?_)
     exact ((hΓ j m l).mul (hΓ i k m)).sub ((hΓ k m l).mul (hΓ i j m))
-  -- Assemble via the definitional unfolding `chartRiemannTensor_def`.
   have hrw : (chartRiemannTensor (I := I) g α i j k l) =
       fun y : E =>
         (partialDeriv (E := E) j (chartChristoffel (I := I) g α i k l) y -
@@ -157,11 +150,9 @@ theorem chartRiemannEuclid_contDiffOn [I.Boundaryless]
     ContDiffOn ℝ ∞ (chartRiemannEuclid (I := I) g α i j k l)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- `chartRiemannTensor` is `C^∞` on the interior of the `E`-chart target.
   have hE_int : ContDiffOn ℝ ∞ (chartRiemannTensor (I := I) g α i j k l)
       (interior ((extChartAt I α).target : Set E)) :=
     chartRiemannTensor_contDiffOn_interior (I := I) g α i j k l
-  -- Under `[I.Boundaryless]` the `E`-chart target is open, hence equals its interior.
   have htarget_open : IsOpen ((extChartAt I α).target : Set E) :=
     isOpen_extChartAt_target (I := I) α
   have hE : ContDiffOn ℝ ∞ (chartRiemannTensor (I := I) g α i j k l)
@@ -170,7 +161,6 @@ theorem chartRiemannEuclid_contDiffOn [I.Boundaryless]
         interior ((extChartAt I α).target : Set E) from
       htarget_open.interior_eq.symm]
     exact hE_int
-  -- Compose with `toEuclidean.symm`, landing in the `E`-chart target.
   have hcomp :
       ContDiffOn ℝ ∞
         (chartRiemannTensor (I := I) g α i j k l ∘
@@ -183,8 +173,6 @@ theorem chartRiemannEuclid_contDiffOn [I.Boundaryless]
       exact DifferentialGeometry.Analysis.Laplacian.MetricExtension.toEuclidean_symm_mem_target
         (I := I) (M := M) hy
   exact hcomp
-
-/-! ## The uniform bound over a single chart-`α` partition-of-unity tsupport -/
 
 /-- **Uniform bound on the chart-`α` Riemann data over the chart-`α`
 partition-of-unity tsupport.**
@@ -219,7 +207,6 @@ theorem exists_chartRiemannData_uniform_bound_pouTsupport
           |chartRiemannTensor (I := I) g α i j k l ((extChartAt I α) b)| ≤ C := by
   classical
   set n : ℕ := Module.finrank ℝ E with hn_def
-  -- The compact subset of `chartTargetEuclid α`.
   set K_set : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
     (fun b : M => (toEuclidean (E := E)) ((extChartAt I α) b)) ''
       tsupport (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
@@ -228,7 +215,6 @@ theorem exists_chartRiemannData_uniform_bound_pouTsupport
     pouTsupport_image_isCompact (I := I) (M := M) α
   have hK_sub : K_set ⊆ chartTargetEuclid (I := I) (M := M) α :=
     pouTsupport_image_subset_chartTargetEuclid (I := I) (M := M) α
-  -- Per-index sup-bound on `chartRiemannEuclid g α i j k l` over `K_set`.
   have h_each : ∀ q : (Fin n × Fin n) × (Fin n × Fin n), ∃ C : ℝ, 0 ≤ C ∧
       ∀ y ∈ K_set,
         |chartRiemannEuclid (I := I) g α q.1.1 q.1.2 q.2.1 q.2.2 y| ≤ C := by
@@ -236,7 +222,6 @@ theorem exists_chartRiemannData_uniform_bound_pouTsupport
     exact exists_sup_bound_of_contDiffOn_on_compact_subset hK_compact hK_sub
       (chartRiemannEuclid_contDiffOn (I := I) (M := M) g α q.1.1 q.1.2 q.2.1 q.2.2)
   choose C_fn hC_fn_nn hC_fn_bd using h_each
-  -- Take the finite sup across the (finite) chart-index quadruple set.
   set C : ℝ :=
     (Finset.univ : Finset ((Fin n × Fin n) × (Fin n × Fin n))).sup'
       Finset.univ_nonempty C_fn with hC_def
@@ -247,20 +232,16 @@ theorem exists_chartRiemannData_uniform_bound_pouTsupport
       (Finset.le_sup'_of_le C_fn (Finset.mem_univ q₀) (le_refl _))
   refine ⟨C, hC_nn, ?_⟩
   intro b hb_inter i j k l
-  -- The chart-Euclidean image of `b` lies in `K_set`.
   have hb_tsupp : b ∈ tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) := hb_inter.1
   set y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) :=
     (toEuclidean (E := E)) ((extChartAt I α) b) with hy_def
   have hy_K : y ∈ K_set := ⟨b, hb_tsupp, rfl⟩
-  -- `chartRiemannEuclid … y = chartRiemannTensor … (ϕ_α b)` since
-  -- `toEuclidean.symm (toEuclidean z) = z`.
   have hval : chartRiemannEuclid (I := I) g α i j k l y =
       chartRiemannTensor (I := I) g α i j k l ((extChartAt I α) b) := by
     rw [chartRiemannEuclid_def, hy_def]
     congr 1
     exact toEuclidean.symm_apply_apply ((extChartAt I α) b)
-  -- Apply the per-index sup-bound and upgrade to the global sup `C`.
   have hbd_q := hC_fn_bd ((i, j), (k, l)) y hy_K
   have hq_le : C_fn ((i, j), (k, l)) ≤ C :=
     Finset.le_sup'_of_le C_fn (Finset.mem_univ ((i, j), (k, l))) (le_refl _)
@@ -268,8 +249,6 @@ theorem exists_chartRiemannData_uniform_bound_pouTsupport
       = |chartRiemannEuclid (I := I) g α i j k l y| := by rw [hval]
     _ ≤ C_fn ((i, j), (k, l)) := hbd_q
     _ ≤ C := hq_le
-
-/-! ## The uniform bound over the finite partition-of-unity index set -/
 
 /-- **Uniform-over-compact-`M` bound on the chart-`α` Riemann data.**
 
@@ -302,7 +281,6 @@ theorem exists_chartRiemannData_uniform_bound_compact
             |chartRiemannTensor (I := I) g α i j k l ((extChartAt I α) b)| ≤
               C_g := by
   classical
-  -- Per-chart constant.
   have h_each : ∀ α : M, ∃ C : ℝ, 0 ≤ C ∧
       ∀ {b : M},
         b ∈ tsupport (fun x : M =>
@@ -313,18 +291,13 @@ theorem exists_chartRiemannData_uniform_bound_compact
     fun α => exists_chartRiemannData_uniform_bound_pouTsupport (I := I) (M := M) g α
   choose C_fn hC_fn_nn hC_fn_bd using h_each
   set S : Finset M := chartAtlasPOU_finset (I := I) (M := M) with hS_def
-  -- The single uniform constant: the sum of the per-chart constants over `S`.
-  -- A sum of non-negatives dominates each individual summand (all others
-  -- being non-negative), so this avoids any non-emptiness hypothesis on `S`.
   set C_g : ℝ := ∑ α ∈ S, C_fn α with hC_g_def
   have hC_g_nn : 0 ≤ C_g :=
     Finset.sum_nonneg (fun α _ => hC_fn_nn α)
   refine ⟨C_g, hC_g_nn, ?_⟩
   intro α hα b hb_inter i j k l
-  -- The per-chart constant `C_fn α` bounds the chart-`α` Riemann data at `b`.
   have hbd : |chartRiemannTensor (I := I) g α i j k l ((extChartAt I α) b)| ≤
       C_fn α := hC_fn_bd α hb_inter i j k l
-  -- And `C_fn α ≤ C_g`, since `α ∈ S` and the other summands are non-negative.
   have hα_S : α ∈ S := hα
   have h_le : C_fn α ≤ C_g := by
     rw [hC_g_def]

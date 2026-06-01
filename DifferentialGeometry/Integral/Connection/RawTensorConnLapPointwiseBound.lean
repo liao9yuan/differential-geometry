@@ -141,18 +141,6 @@ lemma chartFrameData_nonneg
     linarith
   exact mul_nonneg h2 h3
 
-/-! ## Combined chart-data-only pointwise bound
-
-By bounding each `ΓPiece i = ‖cov_RS T b ((LeviCivita g) B_i b (B_i b))‖`
-through `rawTensorConnLap_2ndApplication_opNorm_bound` (with the smooth
-section `X := smoothOrthoFrame g α i`), we eliminate the residual abstract
-`cov_RS` term in favour of a chart-data expression involving only
-`T`, its chart-pulled Fréchet derivative, and the inner Γ-vector
-`(LeviCivita g) B_i b (B_i b)`. The resulting bound is fully chart-based:
-the right-hand side is a finite sum of chart-data quantities indexed by the
-frame, with constants depending only on `r`, `s`, the metric `g`, the chart
-at `α`, and the locality hypothesis. -/
-
 /-- The pointwise per-frame-index "second-application chart-data" expression
 appearing on the right-hand side of the bound on the second contribution to
 `rawTensorConnLap`. For a raw `(r, s)`-tensor section `T₀`, a chart-centre

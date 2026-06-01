@@ -72,21 +72,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Rank-0 helper: vanishing of the scalar manifold-Fréchet derivative
-
-For `r = 0`, the chart-frame covariant derivative of the chart-α-parallel
-extension reduces, after evaluation at the unique empty tuple, to the
-manifold-Fréchet derivative of the scalar function
-`b' ↦ (T_parallel b') (Fin.elim0)`. This scalar function is locally constant
-on the chart pullback (because the trivialised representation of the parallel
-extension is locally constant), so its manifold-Fréchet derivative vanishes.
-
-The proof factors through the explicit chart-pullback identification
-`mfderiv_scalar_eq_chart_fderiv`, which expresses the manifold-Fréchet
-derivative as a chart-pullback Fréchet derivative. Local constancy of the
-chart pullback is then immediate from D.1
-(`chartTensor0SParallelExtend_repr_eventuallyEq_const`). -/
-
 /-- The scalar evaluation `b' ↦ (T_parallel b') (Fin.elim0)` of the chart-α-
 parallel extension of a rank-0 tensor `T₀` is locally constant near `b` (in
 the chart pullback). -/
@@ -104,14 +89,10 @@ private lemma chartTensor0SParallelExtend_zero_scalar_pullback_eventuallyEq
             (fun y : M => Tensor0SSpace 0 I y) α).continuousLinearMapAt ℝ b T₀)
           (fun i : Fin 0 => Fin.elim0 i)) := by
   classical
-  -- D.1 gives a neighbourhood of `extChartAt I α b` on which the chart
-  -- pullback of the trivialised representation is the constant
-  -- `e.continuousLinearMapAt ℝ b T₀`.
   have hpull :=
     chartTensor0SParallelExtend_repr_eventuallyEq_const (I := I) (r := 0) α hb T₀
   set e := trivializationAt (Tensor0SModel 0 ℝ E)
     (fun y : M => Tensor0SSpace 0 I y) α with he_def
-  -- Membership and openness facts.
   have hU_open : IsOpen e.baseSet := e.open_baseSet
   have hb_U : b ∈ e.baseSet :=
     chartLeviCivitaGoodSet_mem_tensor0S_baseSet (I := I) (r := 0) hb
@@ -133,41 +114,24 @@ private lemma chartTensor0SParallelExtend_zero_scalar_pullback_eventuallyEq
   have hint_nhds : interior ((extChartAt I α).target : Set E) ∈
       𝓝 (extChartAt I α b) :=
     hint_open.mem_nhds hb_int
-  -- On the intersection of the two neighbourhoods, the scalar pullback agrees
-  -- with the constant trivialised-representation pullback (which is itself the
-  -- constant `e.continuousLinearMapAt ℝ b T₀`).
   filter_upwards [hU_preim_nhds, hint_nhds, hpull] with y hy_U _hy_int hy_repr
-  -- Notation.
   set b' : M := (extChartAt I α).symm y with hb'_def
   have hb'_U : b' ∈ e.baseSet := hy_U
-  -- Unfold the LHS at `y`.
   change (show ContinuousMultilinearMap ℝ
         (fun _ : Fin 0 => TangentSpace I b') ℝ from
       chartTensor0SParallelExtend (I := I) 0 α b T₀ b')
       (fun i : Fin 0 => Fin.elim0 i) =
     (e.continuousLinearMapAt ℝ b T₀) (fun i : Fin 0 => Fin.elim0 i)
-  -- Use the tuple identity to rewrite via the trivialised representation.
   have happly :=
     tensor0SChartE_section_repr_apply_tuple (I := I) (n := 0) α
       (T := chartTensor0SParallelExtend (I := I) 0 α b T₀) hb'_U
       (fun i : Fin 0 => Fin.elim0 i)
-  -- `happly` reads:
-  --   `(repr b') (fun i => Fin.elim0 i) = (T_parallel b') (fun i => trivFromE α b' (Fin.elim0 i))`.
-  -- The RHS-tuple `fun i => trivFromE α b' (Fin.elim0 i)` equals `fun i => Fin.elim0 i`
-  -- since the index `i : Fin 0` is impossible.
   have htuple_eq :
       (fun i : Fin 0 => trivFromE (I := I) α b' (Fin.elim0 i)) =
         (fun i : Fin 0 => Fin.elim0 i) := by
     funext i; exact i.elim0
   rw [htuple_eq] at happly
-  -- `happly : (repr b') (Fin.elim0) = (T_parallel b') (Fin.elim0)`.
-  -- So `(T_parallel b') (Fin.elim0) = (repr b') (Fin.elim0)`.
   rw [← happly]
-  -- Substitute `hy_repr` which says `repr b' = e.continuousLinearMapAt ℝ b T₀`
-  -- (after unfolding the composition).
-  -- `hy_repr` as given: `(tensor0SChartE_section_repr 0 α T_parallel ∘ φ.symm) y
-  --   = e.continuousLinearMapAt ℝ b T₀`.
-  -- Equivalently: `tensor0SChartE_section_repr 0 α T_parallel b' = e.continuousLinearMapAt ℝ b T₀`.
   change (tensor0SChartE_section_repr (I := I) 0 α
         (chartTensor0SParallelExtend (I := I) 0 α b T₀) b')
       (fun i : Fin 0 => Fin.elim0 i) =
@@ -191,9 +155,6 @@ private lemma chartTensor0SParallelExtend_zero_scalar_apply
           (fun y : M => Tensor0SSpace 0 I y) α).continuousLinearMapAt ℝ b T₀)
         (fun i : Fin 0 => Fin.elim0 i) := by
   classical
-  -- Equivalent of the base-set identity used in
-  -- `chartTensor0SE_section_repr_chartTensor0SParallelExtend`.
-  -- Convert `hb'` to the tangent-space base set for the tuple-evaluation lemma.
   have hb'_tan : b' ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     change b' ∈ (trivializationAt (Tensor0SModel 0 ℝ E)
       (fun y : M => Tensor0SSpace 0 I y) α).baseSet
@@ -207,13 +168,9 @@ private lemma chartTensor0SParallelExtend_zero_scalar_apply
         (fun i : Fin 0 => Fin.elim0 i) := by
     funext i; exact i.elim0
   rw [htuple_eq] at happly
-  -- `happly : (repr b') Fin.elim0 = (T_parallel b') Fin.elim0`.
   rw [← happly]
-  -- The trivialised representation of the parallel extension on the base set
-  -- equals `e.continuousLinearMapAt ℝ b T₀`.
   have hrepr := chartTensor0SE_section_repr_chartTensor0SParallelExtend
     (I := I) 0 α b T₀ hb'
-  -- `hrepr : tensor0SChartE_section_repr 0 α T_parallel b' = e.continuousLinearMapAt ℝ b T₀`.
   change (tensor0SChartE_section_repr (I := I) 0 α
         (chartTensor0SParallelExtend (I := I) 0 α b T₀) b')
       (fun i : Fin 0 => Fin.elim0 i) =
@@ -239,10 +196,8 @@ private lemma chartTensor0SParallelExtend_zero_scalar_mdifferentiableAt
   have hb_U : b ∈ e.baseSet :=
     chartLeviCivitaGoodSet_mem_tensor0S_baseSet (I := I) (r := 0) hb
   have hbase_nhds : e.baseSet ∈ 𝓝 b := e.open_baseSet.mem_nhds hb_U
-  -- Define the constant target value.
   set c : ℝ := (e.continuousLinearMapAt ℝ b T₀)
     (fun i : Fin 0 => Fin.elim0 i) with hc_def
-  -- Scalar function is locally the constant `c`.
   have hev :
       (fun b' : M =>
         (show ContinuousMultilinearMap ℝ
@@ -273,7 +228,6 @@ private lemma chartTensor0SParallelExtend_zero_scalar_mfderiv_eq_zero
         (fun _ : Fin 0 => TangentSpace I b') ℝ from
       chartTensor0SParallelExtend (I := I) 0 α b T₀ b')
       (fun i : Fin 0 => Fin.elim0 i)
-  -- The chart pullback of `scalarFn` is locally constant near `φ b`.
   have hev : scalarFn ∘ φ.symm =ᶠ[𝓝 (φ b)]
       (fun _ : E =>
         ((trivializationAt (Tensor0SModel 0 ℝ E)
@@ -285,24 +239,16 @@ private lemma chartTensor0SParallelExtend_zero_scalar_mfderiv_eq_zero
     chartLeviCivitaGoodSet_mem_chartAt_source (I := I) hb
   have hb_tgt_int : φ b ∈ interior (φ.target : Set E) :=
     chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hb
-  -- The chart-pullback Fréchet derivative is zero.
   have hFderiv : fderiv ℝ (scalarFn ∘ φ.symm) (φ b) = 0 := by
     rw [Filter.EventuallyEq.fderiv_eq hev]
     exact fderiv_const_apply _
-  -- The scalar function is `MDifferentiableAt I 𝓘(ℝ) ... b` (by local
-  -- constancy).
   have hscalarFn_at : MDifferentiableAt I 𝓘(ℝ) scalarFn b :=
     chartTensor0SParallelExtend_zero_scalar_mdifferentiableAt
       (I := I) α hb T₀
-  -- Apply the chart bridge `mfderiv_scalar_eq_chart_fderiv`.
-  -- `hkey : mfderiv I 𝓘(ℝ) scalarFn b v
-  --   = fderiv ℝ (scalarFn ∘ φ.symm) (φ b) (trivToE α b v)`.
   have hkey := mfderiv_scalar_eq_chart_fderiv (I := I) α scalarFn (x := b)
     hb_src_chart hb_tgt_int hscalarFn_at v
   rw [hkey, hFderiv]
   rfl
-
-/-! ## Rank-0 case of the headline identity -/
 
 /-- **Rank-0 case.** For `b` on the chart-α Levi-Civita good set, the
 chart-frame `(0, 0)`-tensor covariant derivative of the chart-α-parallel
@@ -319,17 +265,13 @@ theorem chartTensor0SCovariantDerivative_chartTensor0SParallelExtend_zero
           chartTensor0SSlotCorrection (I := I) 0 g α
             (chartTensor0SParallelExtend (I := I) 0 α b T₀) X b k) := by
   classical
-  -- Both sides are zero. The RHS is the negation of an empty sum over `Fin 0`.
   have hRHS_zero :
       (∑ k : Fin 0,
         chartTensor0SSlotCorrection (I := I) 0 g α
           (chartTensor0SParallelExtend (I := I) 0 α b T₀) X b k) =
       (0 : Tensor0SSpace 0 I b) := by
-    -- The index set `(Finset.univ : Finset (Fin 0))` is empty.
     apply Finset.sum_of_isEmpty
   rw [hRHS_zero, neg_zero]
-  -- LHS: by CMLM extensionality on `Fin 0`, the value equals
-  -- `mfderiv ... b (X b)`, which is zero.
   apply ContinuousMultilinearMap.ext
   intro m
   have hm : m = (fun i : Fin 0 => Fin.elim0 i) := by
@@ -338,20 +280,11 @@ theorem chartTensor0SCovariantDerivative_chartTensor0SParallelExtend_zero
   rw [chartTensor0SCovariantDerivative_zero_apply (I := I) g α
       (chartTensor0SParallelExtend (I := I) 0 α b T₀) X b
       (fun i : Fin 0 => Fin.elim0 i)]
-  -- The zero side: `(0 : Tensor0SSpace 0 I b) Fin.elim0 = 0`.
   change mfderiv I 𝓘(ℝ) _ b (X b) = (0 : Tensor0SSpace 0 I b)
       (fun i : Fin 0 => Fin.elim0 i)
   rw [ContinuousMultilinearMap.zero_apply]
   exact chartTensor0SParallelExtend_zero_scalar_mfderiv_eq_zero
     (I := I) α hb T₀ (X b)
-
-/-! ## Rank `s + 1` case via vanishing of the intrinsic chart Fréchet piece
-
-For `r = s + 1`, the chart-frame covariant derivative decomposes (definitionally)
-as `tensor0SIntrinsicChartCLM (s + 1) α T b (X b) - ∑ k, slot k`. The intrinsic
-piece is built from `fderiv (tensor0SChartE_section_repr ... ∘ (extChartAt I α).symm)`,
-which is the zero CLM on the chart-α-parallel extension by D.1
-(`chartTensor0SParallelExtend_repr_pullback_fderiv_eq_zero`). -/
 
 /-- **Vanishing of the intrinsic chart Fréchet piece on a chart-parallel
 extension.** For `b` on the chart-α Levi-Civita good set, the intrinsic
@@ -384,11 +317,8 @@ theorem chartTensor0SCovariantDerivative_chartTensor0SParallelExtend_succ
           chartTensor0SSlotCorrection (I := I) (s + 1) g α
             (chartTensor0SParallelExtend (I := I) (s + 1) α b T₀) X b k) := by
   classical
-  -- Unfold the chart-frame covariant derivative at `s + 1`.
   rw [chartTensor0SCovariantDerivative_succ (I := I) s g α
       (chartTensor0SParallelExtend (I := I) (s + 1) α b T₀) X b]
-  -- Show the intrinsic chart Fréchet derivative term vanishes when applied
-  -- to `X b`.
   have hintr : tensor0SIntrinsicChartCLM (I := I) (s + 1) α
       (chartTensor0SParallelExtend (I := I) (s + 1) α b T₀) b (X b) = 0 := by
     rw [tensor0SIntrinsicChartCLM_chartTensor0SParallelExtend_eq_zero
@@ -396,12 +326,6 @@ theorem chartTensor0SCovariantDerivative_chartTensor0SParallelExtend_succ
     rfl
   rw [hintr]
   rw [zero_sub]
-
-/-! ## Headline theorem combining both ranks
-
-The headline theorem is the case-split on `r`: rank zero gives a trivial
-identity (both sides are zero), rank `s + 1` gives the genuine slot-sum
-reduction. -/
 
 /-- **Headline.** For a smooth Riemannian manifold `(M, g)`, a chart center
 `α : M`, a basepoint `b : M` on the chart-α Levi-Civita good set, a

@@ -120,13 +120,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 variable {a : ℝ} {T : ℝ}
 
-/-! ## The recentred radial retraction onto a closed `H^{a+1}`-ball
-
-For a centre `c` and radius `R`, the map `v ↦ c + ballRetraction R (v − c)` is the
-metric projection onto the closed ball `closedBall c R`.  It is the nonexpansive
-`ballRetraction` conjugated by the isometric translation `v ↦ v − c`, hence:
-globally `1`-Lipschitz, lands in `closedBall c R`, and fixes `closedBall c R`. -/
-
 section Recentre
 
 variable {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X]
@@ -141,11 +134,9 @@ noncomputable def recenteredBallRetraction (c : X) (R : ℝ) (v : X) : X :=
 `ballRetraction` conjugated by the isometric shift `v ↦ v − c`. -/
 theorem recenteredBallRetraction_lipschitzWith {R : ℝ} (hR : 0 ≤ R) (c : X) :
     LipschitzWith 1 (recenteredBallRetraction c R) := by
-  -- `v ↦ v − c` is an isometry, hence `1`-Lipschitz.
   have hshift : LipschitzWith 1 (fun v : X => v - c) :=
     LipschitzWith.of_dist_le_mul fun x y => by
       rw [NNReal.coe_one, one_mul, dist_sub_right]
-  -- `w ↦ c + w` is an isometry, hence `1`-Lipschitz.
   have hadd : LipschitzWith 1 (fun w : X => c + w) :=
     LipschitzWith.of_dist_le_mul fun x y => by
       rw [NNReal.coe_one, one_mul, dist_add_left]
@@ -173,14 +164,6 @@ theorem recenteredBallRetraction_eq_self_of_mem {R : ℝ} {c v : X}
   rw [recenteredBallRetraction, ballRetraction_eq_self_of_mem hv, add_sub_cancel]
 
 end Recentre
-
-/-! ## The truncated nonlinearity
-
-Given a nonlinearity `N : H^{a+1} → Hᵃ` and a centre `u₀'` together with a radius
-`R`, the **truncated nonlinearity** `Ñ_R := N ∘ ρ`, where `ρ` is the recentred
-radial retraction onto `closedBall u₀' R`, is *globally* Lipschitz with the
-*local* Lipschitz constant of `N` on that ball, and agrees with `N` on the
-ball. -/
 
 section Truncation
 
@@ -229,12 +212,6 @@ theorem truncatedNonlin_lipschitzWith {L_R : ℝ≥0}
 
 end Truncation
 
-/-! ## Truncated small-time strong existence
-
-The small-time engine applied to the globally-Lipschitz truncated nonlinearity.
-This is unconditional: it produces a strong solution of the *truncated* equation
-`∂_t u = Δ_∇ u + Ñ_R(u)` for the explicit horizon `smallTimeHorizon L_R`. -/
-
 /-- **Truncated small-time strong existence.**  For a locally-Lipschitz
 nonlinearity `N` — specifically, `LipschitzOnWith L_R N (closedBall u₀' R)` where
 `u₀' = ι(u₀)` is the inclusion of the initial datum into `H^{a+1}` — the
@@ -273,12 +250,6 @@ theorem quasilinear_strong_existence_truncated_smallTime_ofCompact
     (h_compact := h_compact) u₀
     (truncatedNonlin_lipschitzWith (I := I) (M := M) hR hN)
 
-/-! ## The reduction to the genuine nonlinearity
-
-On the event that the `H^{a+1}`-view solution field stays a.e. in the ball, the
-truncated Nemytskii forcing `t ↦ Ñ_R(field t)` agrees a.e. with the genuine
-nonlinear forcing `t ↦ N(field t)`, because `Ñ_R = N` on the ball. -/
-
 /-- **The truncated forcing agrees a.e. with the genuine nonlinear forcing on the
 stays-in-ball event.**  If the `H^{a+1}`-view field `field` lies, for a.e. `t`,
 in `closedBall u₀' R`, then the truncated Nemytskii image
@@ -299,8 +270,6 @@ theorem nemytskiiHa1_truncated_eqOn_ball
     (truncatedNonlin_lipschitzWith (I := I) (M := M) hR hN) field
   filter_upwards [hcoe, hball] with t ht htmem
   rw [ht, truncatedNonlin_eq_of_mem (I := I) (M := M) htmem]
-
-/-! ## The locally-Lipschitz small-time cutoff -/
 
 /-- **Small-time strong existence for a locally Lipschitz nonlinearity — the
 cutoff.**
@@ -365,24 +334,15 @@ theorem de_simon_quasilinear_tensor_heat_short_time_existence_locally_lipschitz_
                 (truncatedNonlin_lipschitzWith (I := I) (M := M) hR hN)
                 (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀
                   gforce) := by
-  -- The horizon is that of the truncated globally-Lipschitz engine.
   refine ⟨smallTimeHorizon L_R, smallTimeHorizon_pos L_R, ?_⟩
   intro T hT hTR hT1 gforce hfix hstay
-  -- The candidate solution is the affine Duhamel image of the (fixed) forcing.
   refine ⟨maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce, rfl, ?_, ?_, ?_⟩
-  · -- The forcing is the truncated Nemytskii image of the field (`hfix`), which
-    -- on the stays-in-ball event is represented a.e. by `t ↦ N(field t)`.
-    -- Rewrite only the left-hand `gforce` (the fixed-point value), keeping the
-    -- field's `gforce` argument intact.
-    conv_lhs => rw [hfix]
+  · conv_lhs => rw [hfix]
     exact nemytskiiHa1_truncated_eqOn_ball (I := I) (M := M) hR hN
       (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce) hstay
-  · -- Initial condition `u(0) = u₀`.
-    exact maxRegDuhamelMap_trace0 (I := I) (M := M) (a := a) (T := T)
+  · exact maxRegDuhamelMap_trace0 (I := I) (M := M) (a := a) (T := T)
       hT hT1 u₀ gforce
-  · -- The equation `∂_t u = Δ_∇ (field_{a+2}) + Ñ_R(field_{a+1})`, where the
-    -- forcing along the field is reproduced by the fixed-point equation `hfix`.
-    rw [maxRegDuhamelMap_timeDeriv_eq (I := I) (M := M)
+  · rw [maxRegDuhamelMap_timeDeriv_eq (I := I) (M := M)
       (h_compact := h_compact) (a := a) (T := T) hT hT1 u₀ gforce]
     exact congrArg₂ (· + ·) rfl hfix
 

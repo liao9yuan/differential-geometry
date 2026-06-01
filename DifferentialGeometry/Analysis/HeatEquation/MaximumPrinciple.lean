@@ -62,8 +62,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Auxiliary linear algebra: trace bound for `M H` with `M` PSD and `H` NSD -/
-
 /-- Pure linear-algebra: spectral entry formula for a Hermitian real matrix.
 For a real Hermitian matrix `A`, the entries decompose as
 `A_{ij} = ∑ k, U_{ik} * λ_k * U_{jk}`, where `U` is the eigenvector unitary
@@ -76,7 +74,6 @@ private lemma isHermitian_real_entry
           hA.eigenvalues k *
           (hA.eigenvectorUnitary : Matrix n n ℝ) j k := by
   classical
-  -- The spectral theorem gives `A = U * diag (RCLike.ofReal ∘ λ) * star U`.
   have hspec : A = ((hA.eigenvectorUnitary : Matrix n n ℝ) *
       (Matrix.diagonal hA.eigenvalues) *
         star (hA.eigenvectorUnitary : Matrix n n ℝ)) := by
@@ -86,10 +83,8 @@ private lemma isHermitian_real_entry
       funext k; simp
     rw [hcomp] at h
     exact h
-  -- Extract the (i, j) entry.
   have h := congr_fun (congr_fun hspec i) j
   rw [h]
-  -- Compute the entry.
   rw [Matrix.mul_apply]
   refine Finset.sum_congr rfl ?_
   intro k _
@@ -119,11 +114,9 @@ private lemma sum_posSemidef_mul_neg_semidef_le_zero
   have h_lambda_nn : ∀ k : n, 0 ≤ hM.isHermitian.eigenvalues k :=
     fun k => Matrix.PosSemidef.eigenvalues_nonneg hM k
   let U : Matrix n n ℝ := (hM.isHermitian.eigenvectorUnitary : Matrix n n ℝ)
-  -- Substitute the spectral entry formula and rearrange.
   have h1 : ∑ i, ∑ j, M i j * H i j =
       ∑ k, hM.isHermitian.eigenvalues k *
         (∑ i, ∑ j, U i k * U j k * H i j) := by
-    -- Use the entry formula `M_{ij} = ∑ k, U_{ik} λ_k U_{jk}` and rearrange.
     have step1 : ∀ i j : n, M i j * H i j =
         ∑ k, hM.isHermitian.eigenvalues k * (U i k * U j k * H i j) := by
       intros i j
@@ -132,7 +125,6 @@ private lemma sum_posSemidef_mul_neg_semidef_le_zero
       refine Finset.sum_congr rfl ?_
       intros k _
       ring
-    -- Apply step1 entry-wise.
     have step2 : ∑ i, ∑ j, M i j * H i j =
         ∑ i, ∑ j, ∑ k,
           hM.isHermitian.eigenvalues k * (U i k * U j k * H i j) := by
@@ -142,11 +134,9 @@ private lemma sum_posSemidef_mul_neg_semidef_le_zero
       intros j _
       exact step1 i j
     rw [step2]
-    -- Swap sums: ∑ i ∑ j ∑ k F i j k → ∑ k ∑ i ∑ j F i j k.
     rw [Finset.sum_comm_cycle (s := Finset.univ) (t := Finset.univ) (u := Finset.univ)
         (f := fun i j k =>
           hM.isHermitian.eigenvalues k * (U i k * U j k * H i j))]
-    -- Now factor `λ_k` out and ring.
     refine Finset.sum_congr rfl ?_
     intros k _
     rw [Finset.mul_sum]
@@ -154,10 +144,8 @@ private lemma sum_posSemidef_mul_neg_semidef_le_zero
     intros i _
     rw [Finset.mul_sum]
   rw [h1]
-  -- Now show ∑ k λ_k * (∑ ij U_{ik} U_{jk} H_{ij}) ≤ 0.
   apply Finset.sum_nonpos
   intro k _
-  -- Recognize the inner sum as `b_k ⬝ᵥ (H *ᵥ b_k)`.
   have h_quad : ∑ i, ∑ j, U i k * U j k * H i j =
       (fun i => U i k) ⬝ᵥ (H *ᵥ (fun i => U i k)) := by
     rw [dotProduct]
@@ -169,8 +157,6 @@ private lemma sum_posSemidef_mul_neg_semidef_le_zero
     ring
   rw [h_quad]
   exact mul_nonpos_of_nonneg_of_nonpos (h_lambda_nn k) (hH_neg _)
-
-/-! ## Auxiliary 1D fact: second derivative non-positive at a local max -/
 
 /-- If `g : ℝ → ℝ` is `C²` at `0` and has a local max at `0`, then the second
 derivative at `0` is non-positive. -/
@@ -225,7 +211,6 @@ private lemma deriv_deriv_nonpos_of_isLocalMax_at_zero
     intro x hx
     rw [interior_Icc] at hx
     exact hderiv_pos x hx
-  -- `IsLocalMax g 0` gives a metric ball where `g x ≤ g 0`.
   rw [show (IsLocalMax g 0) = (∀ᶠ x in 𝓝 (0 : ℝ), g x ≤ g 0) from rfl,
     Metric.eventually_nhds_iff] at hg_max
   obtain ⟨δ, hδ_pos, hδ_le⟩ := hg_max
@@ -240,8 +225,6 @@ private lemma deriv_deriv_nonpos_of_isLocalMax_at_zero
   have ht_le_g0 : g t ≤ g 0 := hδ_le ht_in_ball
   have ht_lt : g 0 < g t := hMono (left_mem_Icc.mpr (le_of_lt hε_pos)) ht_in_Icc ht_pos
   linarith
-
-/-! ## Auxiliary: Hessian as bilinear form is negative semi-definite at a max -/
 
 /-- The second Fréchet derivative of a `C²` function `ftilde : E → ℝ` at a local
 maximum `y₀` satisfies `(fderiv ℝ (fderiv ℝ ftilde) y₀ v) v ≤ 0` for every
@@ -261,21 +244,17 @@ private lemma sndFDeriv_apply_self_nonpos_of_isLocalMax
     rw [hg_eq]
     refine ContDiffAt.comp 0 ?_ (hφ_smooth.contDiffAt.of_le ?_)
     · rw [hφ_zero]; exact hf_C2
-    · -- (2 : WithTop ℕ∞) ≤ ∞.
-      have h1 : (2 : WithTop ℕ∞) = ((2 : ℕ∞) : WithTop ℕ∞) := by norm_cast
+    · have h1 : (2 : WithTop ℕ∞) = ((2 : ℕ∞) : WithTop ℕ∞) := by norm_cast
       have h2 : ((⊤ : ℕ∞) : WithTop ℕ∞) = (∞ : WithTop ℕ∞) := rfl
       rw [h1]
       exact_mod_cast (le_top : (2 : ℕ∞) ≤ (⊤ : ℕ∞))
   have hφ_cont : Continuous φ := hφ_smooth.continuous
   have hg_max : IsLocalMax g 0 := by
-    -- `IsLocalMax g 0 = ∀ᶠ t in 𝓝 0, g t ≤ g 0`. We use that `g = ftilde ∘ φ`
-    -- and `φ` is continuous at 0 with `φ 0 = y₀`.
     have hf_max_filter : ∀ᶠ y in 𝓝 y₀, ftilde y ≤ ftilde y₀ := hf_max
     have h_pre : ∀ᶠ t in 𝓝 (0 : ℝ), φ t ∈ {y | ftilde y ≤ ftilde y₀} := by
       have : Tendsto φ (𝓝 0) (𝓝 y₀) := by
         rw [← hφ_zero]; exact hφ_cont.continuousAt
       exact this hf_max_filter
-    -- Conclude.
     change ∀ᶠ t in 𝓝 (0 : ℝ), g t ≤ g 0
     have hg_eval0 : g 0 = ftilde y₀ := by
       change ftilde (φ 0) = ftilde y₀
@@ -284,7 +263,6 @@ private lemma sndFDeriv_apply_self_nonpos_of_isLocalMax
     exact h_pre
   have h_g_2nd : deriv (deriv g) 0 ≤ 0 :=
     deriv_deriv_nonpos_of_isLocalMax_at_zero hg_max hg_C2
-  -- Now identify `(deriv (deriv g)) 0 = (fderiv (fderiv ftilde) y₀ v) v`.
   obtain ⟨w, hw_nhd, hw_C2⟩ := hf_C2.contDiffOn (n := 2) le_rfl
     (by intro h; exfalso; revert h; decide)
   have hw_open : interior w ∈ 𝓝 y₀ := interior_mem_nhds.mpr hw_nhd
@@ -340,8 +318,6 @@ private lemma sndFDeriv_apply_self_nonpos_of_isLocalMax
   rw [h_deriv_deriv_g_eq, h_chain.deriv] at h_g_2nd
   exact h_g_2nd
 
-/-! ## Bilinear-form expansion via the canonical basis -/
-
 /-- Pointwise expansion: `(fderiv ℝ (fderiv ℝ ftilde) y₀ v) v = ∑_{ij}
 v(i) · v(j) · ∂_i ∂_j ftilde(y₀)`, where `v(i) := (b.repr v) i` are the components
 of `v` in the canonical basis `b := chartModelBasis E`. -/
@@ -354,7 +330,6 @@ private lemma sndFDeriv_apply_self_eq_sum_of_basis
           ((chartModelBasis E).repr v) j *
           partialDeriv (E := E) i (partialDeriv (E := E) j ftilde) y₀ := by
   classical
-  -- ∂_i ∂_j ftilde y₀ = (fderiv (fderiv ftilde) y₀ e_i) e_j.
   have h_outer_inner : ∀ i j : Fin (Module.finrank ℝ E),
       partialDeriv (E := E) i (partialDeriv (E := E) j ftilde) y₀ =
         (fderiv ℝ (fderiv ℝ ftilde) y₀ ((chartModelBasis E) i))
@@ -374,7 +349,6 @@ private lemma sndFDeriv_apply_self_eq_sum_of_basis
     rw [hcomp_fderiv]
     rw [L_j.fderiv]
     rfl
-  -- Now compute the bilinear form.
   set b := chartModelBasis E with hb_def
   set B : E →L[ℝ] E →L[ℝ] ℝ := fderiv ℝ (fderiv ℝ ftilde) y₀ with hB_def
   have hv_decomp : v = ∑ i : Fin (Module.finrank ℝ E),
@@ -384,9 +358,6 @@ private lemma sndFDeriv_apply_self_eq_sum_of_basis
   have h_bil : B v v =
       ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
         (b.repr v) i * (b.repr v) j * (B (b i) (b j)) := by
-    -- LHS = `B v v`. Use linearity in each argument.
-    -- Step 1: B (∑ i, c i • b i) v = ∑ i, c i • (B (b i)) v.
-    -- Step 2: (B (b i)) (∑ j, c j • b j) = ∑ j, c j • (B (b i)) (b j).
     have step1 : B v = ∑ i : Fin (Module.finrank ℝ E),
         (b.repr v) i • (B (b i)) := by
       conv_lhs => rw [hv_decomp]
@@ -403,7 +374,6 @@ private lemma sndFDeriv_apply_self_eq_sum_of_basis
       refine Finset.sum_congr rfl ?_
       intro j _
       rw [map_smul]
-    -- Apply step1 first.
     calc B v v = (∑ i, (b.repr v) i • (B (b i))) v := by
             rw [step1]
       _ = ∑ i, (b.repr v) i • ((B (b i)) v) := by
@@ -427,8 +397,6 @@ private lemma sndFDeriv_apply_self_eq_sum_of_basis
   refine Finset.sum_congr rfl ?_
   intros j _
   rw [h_outer_inner i j]
-
-/-! ## Chart Hessian quadratic form is non-positive at a max -/
 
 /-- For a smooth function `f` on a closed manifold attaining its max at
 `x_max`, the chart-Hessian matrix `H_{ij} = chartHessianTensor g x_max f i j x_max`
@@ -461,7 +429,6 @@ private lemma chartHessianTensor_quad_form_nonpos_at_max
   have hftilde_C2_at : ContDiffAt ℝ 2 ftilde y₀ := by
     have h := (hftilde_smooth_on.contDiffAt hy₀_target_nhds)
     refine h.of_le ?_
-    -- (2 : WithTop ℕ∞) ≤ ∞
     have h1 : (2 : WithTop ℕ∞) = ((2 : ℕ∞) : WithTop ℕ∞) := by norm_cast
     rw [h1]
     exact_mod_cast (le_top : (2 : ℕ∞) ≤ (⊤ : ℕ∞))
@@ -474,15 +441,12 @@ private lemma chartHessianTensor_quad_form_nonpos_at_max
       rw [(extChartAt I α).left_inv hx_in_extSrc]
     rw [h1]
     exact h_max _
-  -- Partial derivatives of `ftilde` vanish at `y₀` (since `ftilde` has local max at `y₀`,
-  -- which is interior to chart target).
   have h_partial_zero : ∀ k : Fin (Module.finrank ℝ E),
       partialDeriv (E := E) k ftilde y₀ = 0 := by
     intro k
     have hfderiv_zero : fderiv ℝ ftilde y₀ = 0 := hftilde_max.fderiv_eq_zero
     rw [partialDeriv, hfderiv_zero]
     rfl
-  -- Chart Hessian at max equals iterated partial derivative.
   have h_hessian_at_max : ∀ i j : Fin (Module.finrank ℝ E),
       chartHessianTensor (I := I) g α f i j x_max =
         chartIteratedPartialDeriv (I := I) α f i j y₀ := by
@@ -499,7 +463,6 @@ private lemma chartHessianTensor_quad_form_nonpos_at_max
       rw [show (scalarOnE (I := I) α f) = ftilde from rfl, h_partial_zero k]
       ring
     rw [h_christ_term, sub_zero]
-  -- Construct `v ∈ E` with components `c`.
   set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E with hb_def
   set v : E := ∑ i : Fin (Module.finrank ℝ E), c i • b i with hv_def
   have h_repr_v : ∀ k : Fin (Module.finrank ℝ E), (b.repr v) k = c k := by
@@ -517,7 +480,6 @@ private lemma chartHessianTensor_quad_form_nonpos_at_max
       simp
     · intro hk
       exact absurd (Finset.mem_univ k) hk
-  -- Rewrite the chart-Hessian quadratic form as a Fréchet bilinear form on `v`.
   have h1 : ∑ i, ∑ j, c i * c j *
       chartHessianTensor (I := I) g α f i j x_max =
       ∑ i, ∑ j, (b.repr v) i * (b.repr v) j *
@@ -540,8 +502,6 @@ private lemma chartHessianTensor_quad_form_nonpos_at_max
     (sndFDeriv_apply_self_eq_sum_of_basis hftilde_fderiv_diff v).symm
   rw [h2]
   exact sndFDeriv_apply_self_nonpos_of_isLocalMax hftilde_max hftilde_C2_at v
-
-/-! ## Headline auxiliary lemma: `Δ_g f x_max ≤ 0` at a spatial maximum -/
 
 /-- **Δ ≤ 0 at a spatial maximum.** Let `(M, g)` be a closed Riemannian
 manifold and `f : M → ℝ` smooth. If `f` attains its maximum at `x_max`, then
@@ -599,8 +559,6 @@ theorem laplacian_nonpos_at_max
   rw [← h_eq]
   exact h_main
 
-/-! ## The weak parabolic maximum principle on a closed manifold -/
-
 section MaxPrinciple
 
 variable [I.Boundaryless] [T2Space M] [CompactSpace M]
@@ -630,19 +588,10 @@ theorem weak_maximum_principle_of_closed
     (h_init : ∀ x : M, u 0 x ≤ 0) :
     ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ x : M, u t x ≤ 0 := by
   classical
-  -- Strategy. For every `δ > 0` and every `t ∈ Ico 0 T`, we will show
-  -- `u t x ≤ δ * (t + 1)`. Then take `δ → 0` to get `u t x ≤ 0` on `Ico 0 T`,
-  -- and use joint continuity in `t` to extend to `t = T`.
-  -- The intermediate step uses the perturbation `v_δ := u - δ*(t + 1)` on
-  -- `[0, T - η] × M` for small `η > 0`.
-  --
-  -- Auxiliary claim: `∀ δ > 0, ∀ η ∈ (0, T), ∀ t ∈ Icc 0 (T - η), ∀ x,
-  --                  u t x ≤ δ * (t + 1)`.
   have key : ∀ {δ : ℝ}, 0 < δ → ∀ {η : ℝ}, 0 < η → η < T →
       ∀ t ∈ Set.Icc (0 : ℝ) (T - η), ∀ x : M, u t x ≤ δ * (t + 1) := by
     intros δ hδ η hη hηT
     intros t ht x
-    -- Set up `v_δ := u - δ(t+1)` on `K = Icc 0 (T - η) × M`.
     set K : Set (ℝ × M) := Set.Icc (0 : ℝ) (T - η) ×ˢ (Set.univ : Set M) with hK_def
     have hK_compact : IsCompact K :=
       (isCompact_Icc (a := (0 : ℝ)) (b := T - η)).prod (CompactSpace.isCompact_univ)
@@ -659,8 +608,6 @@ theorem weak_maximum_principle_of_closed
       refine continuous_const.continuousOn.mul ?_
       exact (continuous_fst.add continuous_const).continuousOn
     obtain ⟨p₀, hp₀_mem, hp₀_max⟩ := hK_compact.exists_isMaxOn hK_nonempty hv_cont
-    -- We claim `v_δ p₀ ≤ 0`. Then `v_δ (t₀, x) ≤ v_δ p₀ ≤ 0`, giving
-    -- `u t₀ x ≤ δ (t₀ + 1)`.
     suffices h_max_nonpos : v_δ p₀ ≤ 0 by
       have hmem : (t, x) ∈ K := Set.mk_mem_prod ht (Set.mem_univ x)
       have h := hp₀_max hmem
@@ -670,10 +617,8 @@ theorem weak_maximum_principle_of_closed
           _ ≤ v_δ p₀ := h
           _ ≤ 0 := h_max_nonpos
       linarith
-    -- Suppose for contradiction `v_δ p₀ > 0`.
     by_contra h_pos
     push Not at h_pos
-    -- Then `p₀.1 ≠ 0` (else v_δ ≤ -δ).
     have hp₀_t_pos : 0 < p₀.1 := by
       by_contra h_neg
       push Not at h_neg
@@ -684,10 +629,8 @@ theorem weak_maximum_principle_of_closed
         rw [hv_at, hp_t_zero]
         linarith
       linarith
-    -- So `p₀.1 ∈ Ioc 0 (T - η)`, hence in `Ioo 0 T`.
     have hp₀_t_lt_T : p₀.1 < T := lt_of_le_of_lt hp₀_mem.1.2 (by linarith)
     have hp₀_t_Ioo : p₀.1 ∈ Set.Ioo (0 : ℝ) T := ⟨hp₀_t_pos, hp₀_t_lt_T⟩
-    -- Step: `x₀ := p₀.2` is a spatial max of `u(p₀.1, ·)`.
     have h_spatial_max : ∀ y : M, u p₀.1 y ≤ u p₀.1 p₀.2 := by
       intro y
       have hmem_y : (p₀.1, y) ∈ K := Set.mk_mem_prod hp₀_mem.1 (Set.mem_univ y)
@@ -696,28 +639,16 @@ theorem weak_maximum_principle_of_closed
       have hv2 : v_δ p₀ = u p₀.1 p₀.2 - δ * (p₀.1 + 1) := rfl
       rw [hv1, hv2] at h
       linarith
-    -- Step: `Δ_g (u p₀.1) p₀.2 ≤ 0` (by laplacian_nonpos_at_max).
     have h_laplacian_nonpos :
         Δ_g (I := I) g (hu_smooth p₀.1) p₀.2 ≤ 0 :=
       laplacian_nonpos_at_max (I := I) g (hu_smooth p₀.1) h_spatial_max
-    -- Step: `Du p₀.1 p₀.2 ≥ δ` (from time-max analysis).
-    -- Set `f(s) := v_δ(s, p₀.2)` on `Icc 0 (T - η)`. `f` is `IsMaxOn` at p₀.1.
-    -- We need `f'(p₀.1) ≥ 0`. Compute: `f'(s) = Du s p₀.2 - δ` for `s ∈ Ioo 0 T`.
-    -- So we need: `Du p₀.1 p₀.2 ≥ δ`.
-    --
-    -- Apply `IsLocalMaxOn.hasFDerivWithinAt_nonpos` with
-    -- `s := Set.Icc 0 (T - η)`, `a := p₀.1`, `y := -(p₀.1 / 2)`.
-    -- The pos tangent cone contains `-(p₀.1/2)` since the segment from `p₀.1`
-    -- to `p₀.1/2` is in `Icc 0 (T - η)`.
     have h_y_in_cone : -(p₀.1 / 2) ∈ posTangentConeAt
         (Set.Icc (0 : ℝ) (T - η)) p₀.1 := by
       have h := mem_posTangentConeAt_of_segment_subset
         (x := p₀.1) (y := -(p₀.1 / 2))
         (s := Set.Icc (0 : ℝ) (T - η)) ?_
       · exact h
-      -- segment from p₀.1 to p₀.1 + (-(p₀.1/2)) = p₀.1/2 is in Icc 0 (T - η).
-      · -- Use `segment_eq_Icc` for ordered points.
-        have h_segment_eq :
+      · have h_segment_eq :
             segment ℝ p₀.1 (p₀.1 + -(p₀.1 / 2)) = Set.Icc (p₀.1 / 2) p₀.1 := by
           have h_le : p₀.1 + -(p₀.1 / 2) ≤ p₀.1 := by linarith
           rw [segment_symm]
@@ -728,8 +659,6 @@ theorem weak_maximum_principle_of_closed
         intro y hy
         refine ⟨by linarith [hy.1, hp₀_t_pos], ?_⟩
         exact le_trans hy.2 hp₀_mem.1.2
-    -- Set `f := λ s, u s p₀.2 - δ * (s + 1)`.
-    -- We have `IsMaxOn f (Icc 0 (T - η)) p₀.1`. Hence `IsLocalMaxOn f ...`.
     set f : ℝ → ℝ := fun s => u s p₀.2 - δ * (s + 1) with hf_def
     have h_isMaxOn : IsMaxOn f (Set.Icc (0 : ℝ) (T - η)) p₀.1 := by
       intro s hs
@@ -743,7 +672,6 @@ theorem weak_maximum_principle_of_closed
       linarith
     have h_isLocalMaxOn : IsLocalMaxOn f (Set.Icc (0 : ℝ) (T - η)) p₀.1 :=
       h_isMaxOn.localize
-    -- `f` has derivative `Du p₀.1 p₀.2 - δ` at `p₀.1`.
     have hf_deriv : HasDerivAt f (Du p₀.1 p₀.2 - δ) p₀.1 := by
       have h1 : HasDerivAt (fun s : ℝ => u s p₀.2) (Du p₀.1 p₀.2) p₀.1 :=
         h_t_diff p₀.1 hp₀_t_Ioo p₀.2
@@ -759,11 +687,8 @@ theorem weak_maximum_principle_of_closed
         (ContinuousLinearMap.toSpanSingleton ℝ (Du p₀.1 p₀.2 - δ))
         (Set.Icc (0 : ℝ) (T - η)) p₀.1 :=
       hf_hasFDeriv.hasFDerivWithinAt
-    -- Apply Fermat's theorem in cone form.
     have h_fermat := h_isLocalMaxOn.hasFDerivWithinAt_nonpos
       hf_hasFDerivWithin h_y_in_cone
-    -- `(toSpanSingleton ℝ (Du p₀.1 p₀.2 - δ)) (-(p₀.1/2)) = (Du p₀.1 p₀.2 - δ) * (-(p₀.1/2))`.
-    -- This is `≤ 0`. Since `-(p₀.1/2) < 0`, we get `Du p₀.1 p₀.2 - δ ≥ 0`.
     have h_eval : (ContinuousLinearMap.toSpanSingleton ℝ (Du p₀.1 p₀.2 - δ))
         (-(p₀.1 / 2)) = (-(p₀.1 / 2)) * (Du p₀.1 p₀.2 - δ) := by
       simp [ContinuousLinearMap.toSpanSingleton_apply, mul_comm]
@@ -772,19 +697,15 @@ theorem weak_maximum_principle_of_closed
     have h_Du_ge_delta : Du p₀.1 p₀.2 - δ ≥ 0 := by
       by_contra h_lt
       push Not at h_lt
-      -- (-(p₀.1/2)) * (Du - δ) > 0 if both factors negative.
       have h_pos_prod : 0 < -(p₀.1 / 2) * (Du p₀.1 p₀.2 - δ) :=
         mul_pos_of_neg_of_neg h_neg_div h_lt
       linarith
-    -- Combining: `Du p₀.1 p₀.2 ≥ δ` and `Du ≤ Δ_g u` and `Δ_g u ≤ 0`.
     have h_chain : δ ≤ 0 := by
       have h_Du_le_lap := h_ineq p₀.1 hp₀_t_Ioo p₀.2
       linarith
     linarith
-  -- Step 2: For `t ∈ Ico 0 T`, take `η := T - t > 0` and `δ → 0` in `key`.
   have step_Ico : ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, u t x ≤ 0 := by
     intros t ht x
-    -- For every `δ > 0`, `u t x ≤ δ * (t + 1)`. Take δ → 0.
     have h_ineq_delta : ∀ δ > (0 : ℝ), u t x ≤ δ * (t + 1) := by
       intros δ hδ
       set η := (T - t) / 2 with hη_def
@@ -802,11 +723,9 @@ theorem weak_maximum_principle_of_closed
         have : t = T - (T - t) := by ring
         nlinarith [ht.2]
       exact key hδ hη_pos hη_lt_T t h_t_in x
-    -- Pass to the limit δ → 0.
     have : u t x ≤ 0 := by
       by_contra h_lt
       push Not at h_lt
-      -- `u t x > 0` so for `δ := u t x / (t + 1) / 2 > 0`, `u t x > δ * (t + 1)`.
       have h_t_nonneg : 0 ≤ t := ht.1
       have h_pos : 0 < t + 1 := by linarith
       set δ : ℝ := u t x / (2 * (t + 1)) with hδ_def
@@ -821,33 +740,19 @@ theorem weak_maximum_principle_of_closed
         exact h_ineq_delta δ hδ_pos
       linarith
     exact this
-  -- Step 3: For `t = T`: by joint continuity in `(t, x)` on `[0, T] × M`.
   intros t ht x
   rcases eq_or_lt_of_le ht.2 with htT | htT
-  · -- `t = T`. Use sequential continuity: take `t_n := T - 1/(n+1)`.
-    -- For `n` large enough, `t_n ∈ Ico 0 T` so `u t_n x ≤ 0`. Pass to limit.
-    have h_t_eq : t = T := htT
-    -- We show `u T x ≤ 0` by sequential continuity.
-    -- Direct Filter approach. We show `u T x ≤ 0` using:
-    -- (a) Continuity of `s ↦ u s x` at `T` from below (joint continuity);
-    -- (b) `u s x ≤ 0` for `s ∈ [0, T)` (from `step_Ico`).
+  · have h_t_eq : t = T := htT
     rw [h_t_eq]
-    -- We'll show `u T x ≤ 0` by Tendsto + ineq.
     have hT_in : (T, x) ∈ Set.Icc (0 : ℝ) T ×ˢ (Set.univ : Set M) :=
       ⟨right_mem_Icc.mpr (le_of_lt hT), Set.mem_univ x⟩
     have h_cont_at := hu_cont (T, x) hT_in
-    -- Tendsto of `s ↦ u s x` along `𝓝[<] T` to `u T x`.
     have h_tend : Filter.Tendsto (fun s : ℝ => u s x)
         (𝓝[<] T) (𝓝 (u T x)) := by
-      -- Build the source filter `𝓝[Icc 0 T ×ˢ univ] (T, x)` and pull back via
-      -- `(s, x)`.
-      -- Strategy: combine (a) `s → T` in `𝓝[<] T` ⟹ `(s, x) → (T, x)` in `𝓝 (T, x)`,
-      -- and (b) for s sufficiently close to T from below, `(s, x) ∈ Icc 0 T ×ˢ univ`.
       have h_pair : Filter.Tendsto (fun s : ℝ => (s, x))
           (𝓝[<] T) (𝓝 (T, x)) := by
         refine Filter.Tendsto.prodMk_nhds ?_ tendsto_const_nhds
         exact nhdsWithin_le_nhds
-      -- For `s ∈ Ioo 0 T ⊂ Iio T`, `(s, x) ∈ Icc 0 T ×ˢ univ`.
       have h_evt : ∀ᶠ s in 𝓝[<] T,
           (s, x) ∈ Set.Icc (0 : ℝ) T ×ˢ (Set.univ : Set M) := by
         have h0 : Set.Ioi (0 : ℝ) ∈ 𝓝 T := Ioi_mem_nhds hT
@@ -859,18 +764,14 @@ theorem weak_maximum_principle_of_closed
         rw [tendsto_nhdsWithin_iff]
         exact ⟨h_pair, h_evt⟩
       exact h_cont_at.tendsto.comp h_pair_within
-    -- Combine with `u s x ≤ 0` for `s` near `T` from below.
     have h_evt_le : ∀ᶠ s in 𝓝[<] T, u s x ≤ 0 := by
       have h0 : Set.Ioi (0 : ℝ) ∈ 𝓝 T := Ioi_mem_nhds hT
       have h0' : Set.Ioi (0 : ℝ) ∈ 𝓝[<] T := nhdsWithin_le_nhds h0
       filter_upwards [h0', self_mem_nhdsWithin] with s hs hs_lt
       exact step_Ico s ⟨le_of_lt hs, hs_lt⟩ x
-    -- `𝓝[<] T` is non-trivial (since T > 0).
     have h_neBot : (𝓝[<] T).NeBot := nhdsLT_neBot_of_exists_lt ⟨0, hT⟩
-    -- Conclude `u T x ≤ 0`.
     exact le_of_tendsto h_tend h_evt_le
-  · -- `t < T`, so `t ∈ Ico 0 T`.
-    have h_t_in_Ico : t ∈ Set.Ico (0 : ℝ) T := ⟨ht.1, htT⟩
+  · have h_t_in_Ico : t ∈ Set.Ico (0 : ℝ) T := ⟨ht.1, htT⟩
     exact step_Ico t h_t_in_Ico x
 
 end MaxPrinciple

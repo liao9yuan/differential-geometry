@@ -88,12 +88,6 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 
-/-! ## Generic scalar order-raisers (Euclidean, unconditional)
-
-These are pure Sobolev-arithmetic facts about smooth functions on an open subset
-of `EuclideanSpace ℝ (Fin d)`; they are independent of the manifold setting and
-form the order-by-order assembly used by the headline. -/
-
 section GenericRaiser
 
 variable {d : ℕ} [NeZero d]
@@ -120,8 +114,6 @@ theorem memWkp_succ_of_classicalPartial_memWkp
     MemWkp (d := d) (k + 1) 2 u Ω := by
   classical
   rw [MemWkp_succ]
-  -- The `MemW1p` part: `u ∈ L²` and each classical partial is an `L²` weak
-  -- partial (the smooth function's classical partial is its weak partial).
   have hu_W1 : DeGiorgi.MemW1p (d := d) 2 u Ω := by
     refine ⟨hu_L2, fun i => ?_⟩
     refine ⟨fun x => (fderiv ℝ u x) (EuclideanSpace.single i 1), ?_, ?_⟩
@@ -129,8 +121,6 @@ theorem memWkp_succ_of_classicalPartial_memWkp
     · exact DeGiorgi.HasWeakPartialDeriv.of_contDiff hΩ_open
         (hu_smooth.of_le (by norm_cast))
   refine ⟨hu_W1, fun i => ?_⟩
-  -- For smooth `u`, the chosen weak partial agrees a.e. with the classical one,
-  -- so `W^{k,2}` of the classical partial transfers to the chosen weak partial.
   have h_ae := chosenWeakPartial_smooth_ae_eq (d := d)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open hu_smooth hu_W1 i
   exact (MemWkp_congr_ae (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae).mpr
@@ -158,26 +148,18 @@ theorem memWkp_of_iterClassicalPartial_memWkp_two
   classical
   induction m generalizing u with
   | zero =>
-      -- `iterClassicalPartial 0 _ u = u`; the hypothesis is `u ∈ W^{2,2}`.
       simpa [iterClassicalPartial_zero] using h_top (fun i : Fin 0 => i.elim0)
   | succ m ih =>
-      -- `u ∈ L²(Ω)` from `u ∈ W^{m+1,2}(Ω)`.
       have hu_L2 : MemLp u 2 (volume.restrict Ω) := hu_Wm.memLp
-      -- Each classical partial `∂_l u` lies in `W^{m+2,2}(Ω)` by the induction
-      -- hypothesis: it is smooth, lies in `W^{m,2}(Ω)` (from `u ∈ W^{m+1,2}`),
-      -- and its `m`-fold partials are the `(m+1)`-fold partials of `u`.
       have h_du : ∀ l : Fin d,
           MemWkp (d := d) (m + 2) 2
             (fun x => (fderiv ℝ u x) (EuclideanSpace.single l 1)) Ω := by
         intro l
         refine ih ?_ ?_ ?_
         · exact contDiff_partial_eta (d := d) hu_smooth l
-        · -- `∂_l u ∈ W^{m,2}(Ω)` from `u ∈ W^{m+1,2}(Ω)`.
-          exact classicalPartial_memWkp_of_memWkp_succ (d := d) hΩ_open
+        · exact classicalPartial_memWkp_of_memWkp_succ (d := d) hΩ_open
             hu_smooth hu_Wm l
         · intro idx
-          -- `iterClassicalPartial m idx (∂_l u) =
-          --   iterClassicalPartial (m+1) (cons l idx) u`.
           have h_eq :
               iterClassicalPartial (d := d) m idx
                   (fun x => (fderiv ℝ u x) (EuclideanSpace.single l 1)) =
@@ -187,22 +169,13 @@ theorem memWkp_of_iterClassicalPartial_memWkp_two
             simp only [Fin.cons_zero, Fin.cons_succ]
           rw [h_eq]
           exact h_top (Fin.cons l idx)
-      -- Raise the order: `u ∈ W^{(m+2)+1,2}(Ω) = W^{(m+1)+2,2}(Ω)`.
       have h_raised : MemWkp (d := d) ((m + 2) + 1) 2 u Ω :=
         memWkp_succ_of_classicalPartial_memWkp (d := d) (m + 2) hΩ_open
           hu_smooth hu_L2 h_du
-      -- `(m + 2) + 1 = (m + 1) + 2`.
       have h_idx : (m + 2) + 1 = (m + 1) + 2 := by ring
       rwa [h_idx] at h_raised
 
 end GenericRaiser
-
-/-! ## The unconditional all-orders interior tensor regularity
-
-We now specialise the generic scalar bootstrap to the connection-Laplacian
-weak-solution chart component, taking `B := tensorPrincipalForm g α hK hK_target`
-and using the iterated weak-solution identity to feed the scalar interior `H²`
-engine at every order. -/
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
@@ -211,8 +184,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ### File-local Borel-space instances on `E` and `M` -/
 
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
@@ -256,42 +227,35 @@ theorem iterClassicalPartial_memWkp_two_of_weakSolution
         (tensorComponentEuclid (I := I) (M := M) g r s T α P₀)) Ω'' := by
   classical
   set B := tensorPrincipalForm (I := I) (M := M) g α hK hK_target with hB_def
-  -- The base chart component, smooth and compactly supported.
   set u : EuclN → ℝ := tensorComponentEuclid (I := I) (M := M) g r s T α P₀
     with hu_def
   set RHS : EuclN → ℝ :=
     tensorComponentWeakRHS (I := I) (M := M) g r s T F α hK hK_target P₀
     with hRHS_def
-  -- The iterated partial is a smooth weak solution of `B`.
   have h_weak_sol :
       B.IsSmoothWeakSolution
         (iterClassicalPartial (d := Module.finrank ℝ E) m idx u)
         (iteratedPerturbedSource (d := Module.finrank ℝ E) B m u RHS idx) :=
     tensorComponent_iterated_partial_isSmoothWeakSolution (I := I) (M := M)
       g r s T F α hK hK_target P₀ hT_supp hF_supp hT_K hweak m idx
-  -- Base smoothness and compact support of the chart component.
   have hu_cd : ContDiff ℝ (⊤ : ℕ∞) u :=
     tensorComponentEuclid_contDiff (I := I) (M := M) g r s T α P₀ hT_supp
   have hu_cpt : HasCompactSupport u :=
     tensorComponentEuclid_hasCompactSupport (I := I) (M := M) g r s T α P₀ hT_supp
-  -- The base perturbed source is smooth and compactly supported.
   have hRHS_cd : ContDiff ℝ (⊤ : ℕ∞) RHS :=
     tensorComponentWeakRHS_contDiff (I := I) (M := M) g r s T F α hK hK_target P₀
       hT_supp hF_supp
   have hRHS_cpt : HasCompactSupport RHS :=
     tensorComponentWeakRHS_hasCompactSupport (I := I) (M := M) g r s T F α hK
       hK_target P₀ hT_supp hF_supp hT_K hweak
-  -- The iterated solution is smooth and compactly supported.
   have h_w_cpt :
       HasCompactSupport (iterClassicalPartial (d := Module.finrank ℝ E) m idx u) :=
     hasCompactSupport_iterClassicalPartial (d := Module.finrank ℝ E) m idx hu_cpt
-  -- The iterated perturbed source is smooth and compactly supported.
   have h_s_cd : ContDiff ℝ (⊤ : ℕ∞)
       (iteratedPerturbedSource (d := Module.finrank ℝ E) B m u RHS idx) :=
     contDiff_iteratedPerturbedSource (d := Module.finrank ℝ E) B m hu_cd hRHS_cd idx
   have h_s_cpt : HasCompactSupport
       (iteratedPerturbedSource (d := Module.finrank ℝ E) B m u RHS idx) := by
-    -- Supported in the union of the (compact) supports of `u` and `RHS`.
     have h_sub :
         tsupport (iteratedPerturbedSource (d := Module.finrank ℝ E) B m u RHS idx)
           ⊆ tsupport u ∪ tsupport RHS :=
@@ -301,7 +265,6 @@ theorem iterClassicalPartial_memWkp_two_of_weakSolution
     exact HasCompactSupport.of_support_subset_isCompact
       (hu_cpt.union hRHS_cpt)
       ((subset_tsupport _).trans h_sub)
-  -- The scalar interior `H²` engine.
   obtain ⟨C, _hC_nn, h_engine⟩ :=
     smooth_cc_h2_loc_memWkp_two (d := Module.finrank ℝ E) B hΩ''_open
       hΩ''_compact_closure
@@ -348,29 +311,17 @@ theorem tensorComponent_memWkp_allOrders_interior
     with hu_def
   have hu_cd : ContDiff ℝ (⊤ : ℕ∞) u :=
     tensorComponentEuclid_contDiff (I := I) (M := M) g r s T α P₀ hT_supp
-  -- The `W^{m,2}` anchor at order `m := 2k`: the chart component lies in
-  -- `W^{2k,2}` on `Ω''`. This is itself obtained from the generic bootstrap one
-  -- step down, anchored recursively; we prove the auxiliary `MemWkp (2j) 2`
-  -- statement for all `j ≤ k` by strong recursion through the bootstrap, but it
-  -- is cleaner to feed the bootstrap directly with the `W^{2k,2}` anchor from a
-  -- single auxiliary induction on the order.
-  -- Auxiliary: `u ∈ MemWkp (2 * j) 2 Ω''` for every `j : ℕ`.
   have h_even : ∀ j : ℕ,
       MemWkp (d := Module.finrank ℝ E) (2 * j) 2 u Ω'' := by
     intro j
     induction j with
     | zero =>
-        -- `MemWkp 0 2 u Ω'' = MemLp u 2 (volume.restrict Ω'')`; `u` is continuous
-        -- and globally compactly supported, hence in `L²` of every (restricted)
-        -- measure — no support-inside-`Ω''` condition is needed.
         rw [Nat.mul_zero, MemWkp_zero]
         have hu_cpt : HasCompactSupport u :=
           tensorComponentEuclid_hasCompactSupport (I := I) (M := M)
             g r s T α P₀ hT_supp
         exact (Continuous.memLp_of_hasCompactSupport hu_cd.continuous hu_cpt).restrict Ω''
     | succ j ih =>
-        -- From `u ∈ W^{2j,2}` and all `2j`-fold partials in `W^{2,2}`, the
-        -- generic bootstrap gives `u ∈ W^{2j+2,2} = W^{2(j+1),2}`.
         have h_step :
             MemWkp (d := Module.finrank ℝ E) (2 * j + 2) 2 u Ω'' :=
           memWkp_of_iterClassicalPartial_memWkp_two (d := Module.finrank ℝ E)
@@ -380,45 +331,11 @@ theorem tensorComponent_memWkp_allOrders_interior
               hT_K hweak hΩ''_open hΩ''_compact_closure (2 * j) idx)
         have h_idx : 2 * j + 2 = 2 * (j + 1) := by ring
         rwa [h_idx] at h_step
-  -- Specialise the bootstrap once more at order `2k`: `u ∈ W^{2k+2,2}`.
   exact memWkp_of_iterClassicalPartial_memWkp_two (d := Module.finrank ℝ E)
     (2 * k) hΩ''_open hu_cd (h_even k)
     (fun idx => iterClassicalPartial_memWkp_two_of_weakSolution
       (I := I) (M := M) g r s T F α hK hK_target P₀ hT_supp hF_supp
       hT_K hweak hΩ''_open hΩ''_compact_closure (2 * k) idx)
-
-/-! ## Position of this engine in the spectral smooth-representative gate
-
-The downstream spectral programme reduces "a tensor in `⋂_σ Hˢ` has a genuine
-`C^∞` representative" (the predicate `SpectralSmoothRealizesAsSmooth` of the PDE
-layer) to two unconditional analytic ingredients:
-
-1. an **all-orders, chart-`HasLocallyConstantChartAt`-free tensor elliptic
-   regularity bootstrap** producing, from the all-orders connection-Laplacian
-   domain membership, all-orders chart-Sobolev regularity of the tensor's chart
-   frame components;
-2. the unconditional `C^m` tensor Sobolev embedding
-   `iteratedCovGrad_toSobolev_embedding_Cm` (PDE layer), bounding the `C^m` fibre
-   norms of a `SmoothCcTensor` by its `H^{2(k-j)}` Sobolev norms for
-   `2k > dim M + 2m`.
-
-The present file supplies the **regularity engine of ingredient (1)** in the
-form actually needed: for a connection-Laplacian weak-solution `SmoothCcTensor`
-the chart frame components are regularised to **every** order `2k+2` on every
-precompact interior subdomain (`tensorComponent_memWkp_allOrders_interior`),
-with the Weitzenböck lower-order coupling among the components handled honestly,
-order by order, through the iterated weak-solution identity rather than by any
-chart-selection / uniform-atlas hypothesis. This is the
-`HasLocallyConstantChartAt`-free twin of the eigenvector arbitrary-order
-regularity `eigenvector_chartComponent_memWkp_arbitrary` (which carries
-`h_atlas`).
-
-What is **not** supplied here, and is the remaining content of the gate, is the
-construction of a genuine smooth (`SmoothCcTensor`) representative of an abstract
-`L²`/`Hˢ` spectral class: i.e. assembling the per-chart, per-component regular
-representatives into one global smooth tensor section that *is* the class in
-`TensorL2`. That assembly is the analytic step still presently routed through
-`h_atlas`; the engine above is the elliptic-regularity input it consumes. -/
 
 end TensorRegularity
 end Laplacian

@@ -105,8 +105,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## (A) `heucl` from the Euclidean variational ODE -/
-
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
 /-- **`heucl` from a `IsLocalFlow` Picard datum.**
@@ -139,17 +137,6 @@ theorem heucl_factorODE_of_isLocalFlow
         (fderiv ℝ (fun z => Φ (z, t)) (extChartAt I α x))) t :=
   IsLocalFlow.hasDerivAt_partial_spatial_fderiv hΦ hf hUopen hΦsmooth hxsU hx ht
 
-/-! ## (B) `hagree` from the spatial chart realisation
-
-The spatial chart realisation reads the manifold flow, in a *fixed* chart `α`, as the
-chart-coordinate flow `Φ_eucl` conjugated by the chart:
-
-  `Φ_fam s y = (extChartAt I α).symm (Φ_eucl (extChartAt I α y) s)`,
-
-for `(s, y)` near `(t, x)` (with the chart-coordinate trajectory confined to the chart target so
-`(extChartAt I α).symm` makes sense).  Applying `extChartAt I α` and cancelling on the chart
-target via `extChartAt_left_inv` gives the producer's chart-conjugation. -/
-
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 /-- **`hagree` from the spatial chart realisation.**
 
@@ -181,26 +168,6 @@ theorem hagree_of_spatial_chart_realisation
   obtain ⟨hpt, htgt⟩ := hy
   rw [hpt, (extChartAt I α).right_inv htgt]
 
-/-! ## (C) `hg` from the moving-trivialisation chart jet and the chart-orbit velocity
-
-The moving-trivialisation orbit jet `hg` is the time-derivative of the CLM-valued path
-
-  `s ↦ chartMovingTriv α (extChartAt I α (Φ_fam s x)) = G (c s)`,
-
-with `G : E → (E →L[ℝ] E)`, `G z := chartMovingTriv α z` the moving-trivialisation
-chart-function (the tangent-bundle `coordChangeL`-type map, read as a function of the chart
-coordinate), and `c s := extChartAt I α (Φ_fam s x)` the chart-orbit.  By the chain rule
-(`HasFDerivAt.comp_hasDerivAt`) `hg` is the composition of:
-
-* `hGfd` — `HasFDerivAt G G' (c t)`, the differentiability of the moving-trivialisation
-  chart-function at the orbit-time chart point (the `HasFDerivAt` strengthening of the
-  convention-bridge side condition `hCdiff`, available from `coordChangeL` smoothness); and
-* `hc` — `HasDerivAt c velChart t`, the two-sided chart-orbit velocity at the interior time `t`
-  (available from the open-interval `ContDiffOn` of the chart-coordinate Picard flow,
-  `ChartLocalPicardData.contDiffOn_top`).
-
-Both are genuine separable smoothness data of the concrete flow; `hg` is *derived*, not assumed. -/
-
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
 /-- **`hg` from the moving-triv chart jet and the chart-orbit velocity.**
@@ -228,8 +195,6 @@ theorem chartMovingTriv_orbit_hasDerivAt_of_chartJet
         (extChartAt I α ((Φ_fam s : M → M) x))) (G' velChart) t := by
   have := hGfd.comp_hasDerivAt t hc
   simpa using this
-
-/-! ## (D) Composing the two producers into the orbit-ODE factors -/
 
 /-- **The two factor `HasDerivAt`s `hP`, `hT` from the chart realisation.**
 
@@ -305,23 +270,6 @@ theorem rawVariationalIdentityFlat_of_chart_realisation
   exact rawVariationalIdentityFlat_of_orbitODE_factors (I := I) Φ_fam t x v hcontAt hT hP
 
 end Discharge
-
-/-! ## (E) Routing into the paired residual
-
-The paired residual `variational_flow_flat_paired_residual_hasDerivAt`
-(`TimeDependentFlow/VariationalFlowFlatPairedResidual.lean`) consumes, besides the two
-`RawVariationalIdentityFlat` data (discharged in section D above), the two flat-value identities
-`hflatval_v`/`hflatval_w` and the two basepoint-bridge `E`-equations `hbridge_v`/`hbridge_w`
-(`∇_u X = F(u) + Γ(u)`).  The bridge equations are *not* assumed: this section discharges them
-from the genuine basepoint data via `leviCivita_basepoint_eq_rawFderiv_add_corrections`.
-
-This section is stated in the `[InnerProductSpace ℝ E]`-**only** world (no standalone
-`[NormedSpace ℝ E]` variable), exactly as the paired residual's `MainPairing` section and the
-section-C discharges, so the `RawVariationalIdentityFlat` factor jets, `metricTransportResidual`,
-and the bridge `E`-equations all live over the single `InnerProductSpace.toNormedSpace` module
-instance — avoiding the two-`NormedSpace` diamond (matching section D's discharges).  The bridge
-lemma `leviCivita_basepoint_eq_rawFderiv_add_corrections` elaborates here against that canonical
-inner-product norm. -/
 
 section PairedResidualDischarge
 

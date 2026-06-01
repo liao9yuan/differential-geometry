@@ -45,16 +45,12 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## File-local helpers for the numerator composition -/
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 /-- Triangle inequality for `wkpNorm` of a difference. -/
@@ -108,8 +104,6 @@ private lemma sharpDiffExplicit_layerA_coeff_contDiffOn
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single b (1 : ℝ))).contDiff
   exact h_eval.contDiffOn.comp h_fderiv (mapsTo_univ _ _)
 
-/-! ## Chart-locality-free twins -/
-
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1000000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
@@ -136,7 +130,6 @@ private lemma rhsZeroAggregate_le_at_target
                   g r s) i‖ := by
   classical
   have hK_le_N : K ≤ N := by omega
-  -- Per-summand cardinal collapse constants at the fixed `K`.
   set Cqtot : ℝ := (Fintype.card (TensorCompIdx (E := E) r s) : ℝ) * H.CresH K
     with hCqtot_def
   set Cmid_α : ℝ := (transportChartCenters (I := I) (M := M) α).sum fun β =>
@@ -155,7 +148,6 @@ private lemma rhsZeroAggregate_le_at_target
         ((Fintype.card (Fin (Module.finrank ℝ E)) : ℝ) * H.Ccut K) with hCcut'_def
   set Cagg : ℝ := H.Ceig K + Cmid_α + Clow_α + Cpar' + Ccom' + CcR' + Ccut'
     with hCagg_def
-  -- Nonnegativity of building blocks.
   have hCqtot_nn : 0 ≤ Cqtot := by
     have h := H.hCresH_nn K; positivity
   have hCmid_α_nn : 0 ≤ Cmid_α := by
@@ -178,10 +170,8 @@ private lemma rhsZeroAggregate_le_at_target
       (add_nonneg ?_ hCmid_α_nn) hClow_α_nn) hCpar'_nn) hCcom'_nn) hCcR'_nn) hCcut'_nn
     exact H.hCeig_nn K
   refine ⟨Cagg, hCagg_nn, fun i => ?_⟩
-  -- Eigenvalue facts.
   have hμ_inv_ge_one : (1 : ℝ) ≤ (i.fst.val)⁻¹ :=
     sharpDiff_eigen_inv_one_le (I := I) (M := M) g r s i
-  -- Power domination on `μ⁻¹^?` to `target`.
   have hpow_dom : ∀ a, a ≤ target → (i.fst.val)⁻¹ ^ a ≤ (i.fst.val)⁻¹ ^ target :=
     fun _a ha => pow_le_pow_right₀ hμ_inv_ge_one ha
   set Rhs : ℝ≥0∞ := ENNReal.ofReal
@@ -190,9 +180,6 @@ private lemma rhsZeroAggregate_le_at_target
     with hRhs_def
   set Rhs_eff : ℝ≥0∞ := ENNReal.ofReal ((i.fst.val)⁻¹ ^ target) * Rhs
     with hRhs_eff_def
-  -- A per-summand bridge: given a per-`K`-family bound at exponent `a ≤ target`,
-  -- absorb `μ⁻¹^a ≤ μ⁻¹^target` to obtain a bound of the form
-  -- `ofReal Cval * Rhs_eff`.
   have h_bridge : ∀ (w : ℝ≥0∞) (Cval : ℝ) (a : ℕ),
       0 ≤ Cval → a ≤ target →
       w ≤ ENNReal.ofReal (Cval * (i.fst.val)⁻¹ ^ a) * Rhs →
@@ -211,8 +198,6 @@ private lemma rhsZeroAggregate_le_at_target
           = ENNReal.ofReal Cval * Rhs_eff := by
       rw [hRhs_eff_def, ENNReal.ofReal_mul hCval_nn, mul_assoc]
     exact h_step.trans_eq h_rw
-  -- The seven summand bounds, each phrased as `≤ ofReal C * Rhs_eff`.
-  -- Summand 1: the bare eigenvector chart component (at `K`).
   have hS1 :
       wkpNorm (d := Module.finrank ℝ E) K 2
           (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
@@ -221,7 +206,6 @@ private lemma rhsZeroAggregate_le_at_target
         ≤ ENNReal.ofReal (H.Ceig K) * Rhs_eff :=
     h_bridge _ (H.Ceig K) (H.eEig K) (H.hCeig_nn K) hEig_le
       (H.hCeig_bd i K hK_le_N)
-  -- Summand 2: the cross-Leibniz transport double sum (at `K + 1`).
   have hS2_inner : ∀ β ∈ transportChartCenters (I := I) (M := M) α,
       ((∑ Q : TensorCompIdx (E := E) r s,
             wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
@@ -643,7 +627,6 @@ private lemma rhsZeroAggregate_le_at_target
       Rhs_eff (fun _ _ => hk_nn) h_perP
     rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ] at h_sum
     exact h_sum.trans_eq (by rw [hCcut'_def])
-  -- The full seven-summand aggregate is bounded by `ofReal Cagg · Rhs_eff`.
   rw [rhsZeroAggregate]
   have hp1 : 0 ≤ H.Ceig K + Cmid_α := add_nonneg (H.hCeig_nn K) hCmid_α_nn
   have hp2 : 0 ≤ H.Ceig K + Cmid_α + Clow_α := add_nonneg hp1 hClow_α_nn
@@ -738,8 +721,6 @@ private lemma rhsZeroAggregate_le_at_target
       (add_le_add ?_ hS2) hS3) hS4) hS5) hS6) hS7
     exact hS1
   refine h_sum_bound.trans (le_of_eq ?_)
-  -- Re-package `ofReal Cagg * Rhs_eff` into the headline shape
-  -- `ofReal (Cagg * μ⁻¹^target) * Rhs`.
   rw [hRhs_eff_def, ← mul_assoc, ← ENNReal.ofReal_mul hCagg_nn]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
@@ -767,11 +748,9 @@ private lemma sharpDiffBdd_level_zero_wkpNorm_at_target
                 (tensorResolventL2_isCompactOperator (I := I) (M := M)
                   g r s) i‖ := by
   classical
-  -- The aggregate bound at the target exponent.
   obtain ⟨Cagg, hCagg_nn, hCagg_bd⟩ :=
     rhsZeroAggregate_le_at_target (I := I) (M := M) g r s α P₀ K N
       target hKN H hEig_le hResH_le_K hResL_le hPar_le hCom_le hCcR_le hCcut_le
-  -- The `μ⁻¹`-prefactor bound by the source aggregate.
   have h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
       (β : M) (Q : TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) (K + 1) 2
@@ -1081,7 +1060,6 @@ private lemma eigenvectorChartRHSDiffNumerator_wkpNorm_le_chartcpt_at_target
       chosenWeakPartial'_ae_zero_off_chartPouKernel_of_ae_zero
         (I := I) (M := M) α (h_prev_zero i) (l (Fin.last m))
     exact (hKc _ h_chosen_mem h_chosen_ae_zero).1
-  -- Per-layer bounds at `i` — already at exponent `target` (no domination).
   have hCA_e : wkpNorm (d := Module.finrank ℝ E) K 2 layerA
       (chartTargetEuclid (I := I) (M := M) α) ≤
       ENNReal.ofReal (CA * CatomA * (i.fst.val)⁻¹ ^ target) * Rhs := hCA i
@@ -1314,7 +1292,6 @@ private lemma sharpDiffBdd_recursion_at_target
         fun i =>
           eigenvectorChartRHSDiff_ae_zero_off_chartPouKernel
             (I := I) (M := M) g r s i α P₀ m (Fin.init l)
-      -- Layer A: chart-cpt at K+m+1, dominated UP from eAtomMax to eAtomMax+1.
       have hKN_KmP1 : K + m + 1 ≤ N := hKN_K
       have hAtomA_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
           (a : Fin (Module.finrank ℝ E)),
@@ -1351,7 +1328,6 @@ private lemma sharpDiffBdd_recursion_at_target
         exact sharpDiff_ofReal_const_pow_eigen_inv_le
           (I := I) (M := M) g r s i (H.hCeig_nn _)
           (le_trans (h_atom_bd (K + (m + 1)) (by omega)).1 (Nat.le_succ _))
-      -- Layer B: chart-cpt at K+m+2, dominated.
       have hAtomB_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
           (a b : Fin (Module.finrank ℝ E)),
           wkpNorm (d := Module.finrank ℝ E) K 2
@@ -1396,7 +1372,6 @@ private lemma sharpDiffBdd_recursion_at_target
         exact sharpDiff_ofReal_const_pow_eigen_inv_le
           (I := I) (M := M) g r s i (H.hCeig_nn _)
           (le_trans (h_atom_bd ((K + 1) + (m + 1)) (by omega)).1 (Nat.le_succ _))
-      -- Layer C: chart-cpt at K+m, dominated.
       have hAtomC_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s),
           wkpNorm (d := Module.finrank ℝ E) K 2
               (eigenvectorChartIteratedPartial (I := I) (M := M)
@@ -1428,7 +1403,6 @@ private lemma sharpDiffBdd_recursion_at_target
         exact sharpDiff_ofReal_const_pow_eigen_inv_le
           (I := I) (M := M) g r s i (H.hCeig_nn _)
           (le_trans (h_atom_bd (K + m) (by omega)).1 (Nat.le_succ _))
-      -- Layer D: IH at chain K, already at exponent `eAtomMax + 1`.
       have hAtomD_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s),
           wkpNorm (d := Module.finrank ℝ E) K 2
               (eigenvectorChartRHSDiff (I := I) (M := M)
@@ -1440,7 +1414,6 @@ private lemma sharpDiffBdd_recursion_at_target
                   (I := I) (M := M)
                   (tensorResolventL2_isCompactOperator
                     (I := I) (M := M) g r s) i‖ := hC_K_bd
-      -- Layer E: IH at chain K+1, already at exponent `eAtomMax + 1`.
       have hAtomE_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s),
           wkpNorm (d := Module.finrank ℝ E) K 2
               (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
@@ -1462,7 +1435,6 @@ private lemma sharpDiffBdd_recursion_at_target
           (eigenvectorChartRHSDiff (I := I) (M := M)
             g r s i α P₀ m (Fin.init l)) (l (Fin.last m))
         exact le_trans h_chosen (hC_K1_bd i)
-      -- Apply the explicit-exponent numerator-sharp twin.
       obtain ⟨Cnum, hCnum_nn, hCnum_bd⟩ :=
         eigenvectorChartRHSDiffNumerator_wkpNorm_le_chartcpt_at_target
           (I := I) (M := M) g r s α P₀ m K (eAtomMax + 1) l
@@ -1474,7 +1446,6 @@ private lemma sharpDiffBdd_recursion_at_target
           C_K hC_K_nn hAtomD_bd
           C_K1 hC_K1_nn hAtomE_bd
           h_prev_mem_succ h_prev_ae_zero
-      -- Indicator stripping + density coefficient.
       obtain ⟨Cden, hCden_nn, hCden_bd⟩ :=
         sharpDiff_wkpNorm_coef_mul_factor_le_uniform (I := I) (M := M) α K
           (one_div_densityOnEuclid_contDiffOn_chartTargetEuclid

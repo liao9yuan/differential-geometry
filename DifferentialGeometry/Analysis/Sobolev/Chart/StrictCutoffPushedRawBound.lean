@@ -48,8 +48,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## File-local naming -/
-
 /-- Abbreviation for the partition-of-unity weight `ρ_γ : M → ℝ` at index `γ`. -/
 private noncomputable def pou
     [T2Space M] [SigmaCompactSpace M] (γ : M) : M → ℝ :=
@@ -71,8 +69,6 @@ private lemma pou_hasCompactSupport
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] (γ : M) :
     HasCompactSupport (pou (I := I) (M := M) γ) :=
   (isClosed_tsupport _).isCompact
-
-/-! ## chartStrictCutoff: derived support / compactness / smoothness lemmas -/
 
 /-- `chartStrictCutoff α` has compact support on a compact manifold. -/
 private lemma hasCompactSupport_chartStrictCutoff
@@ -98,12 +94,6 @@ private lemma prod_pou_strictCutoff_v_eq_zero_off
   · have h0 : chartStrictCutoff (I := I) (M := M) α x = 0 :=
       image_eq_zero_of_notMem_tsupport hx_cut
     rw [h0]; ring
-
-/-! ## POU sum identity at the chart-α target
-
-The partition-of-unity decomposition `chartStrictCutoff α · v =
-Σ_{γ ∈ S} pou γ · chartStrictCutoff α · v` on `M`, applied pointwise to
-the chart-α raw pushforward on `EuclN`. -/
 
 /-- On `M`, the strict cutoff times `v` decomposes as a finite POU-weighted
 sum. -/
@@ -170,8 +160,6 @@ private lemma chartPushedRaw_strictCutoff_eq_finset_sum
       exact chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy
     rw [Finset.sum_eq_zero (fun γ _ => h_zero γ)]
 
-/-! ## Trivial case: empty intersection ⇒ chartPushedRaw is zero -/
-
 /-- If `tsupport (pou γ) ∩ tsupport (chartStrictCutoff α) = ∅`, then the chart-α
 raw pushforward of `pou γ · chartStrictCutoff α · v` is identically zero. -/
 private lemma chartPushedRaw_pou_strictCutoff_v_zero_of_disjoint
@@ -195,11 +183,6 @@ private lemma chartPushedRaw_pou_strictCutoff_v_zero_of_disjoint
       exact Set.notMem_empty x
     exact prod_pou_strictCutoff_v_eq_zero_off (I := I) (M := M) γ α v hx_not_in
   · rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy]
-
-/-! ## Per-γ joint result (membership + norm bound)
-
-To avoid duplicating the cross-chart construction, we package the per-γ MemWkp
-membership and the norm bound into a single existential. -/
 
 /-- **Per-pair joint result**: For a pair of chart points `γ, α : M` and a
 function `v` with `MemWkpChart g k p v`, there exists a positive constant
@@ -246,7 +229,6 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
           (chartTargetEuclid (I := I) (M := M) γ) := by
   classical
   let _ := g
-  -- K_M := tsupport (pou γ) ∩ tsupport (chartStrictCutoff α).
   set K_M : Set M := tsupport (pou (I := I) (M := M) γ) ∩
     tsupport (chartStrictCutoff (I := I) (M := M) α) with hKM_def
   have hKM_compact : IsCompact K_M :=
@@ -255,14 +237,12 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
     pou_tsupport_subset (I := I) (M := M) γ hx.1
   have hKM_in_α : K_M ⊆ (chartAt H α).source := fun x hx =>
     chartStrictCutoff_tsupport_subset (I := I) (M := M) α hx.2
-  -- Setup chart-α target / open.
   set Ωα_target : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩα_target_def
   set Ωγ_target : Set EuclN := chartTargetEuclid (I := I) (M := M) γ with hΩγ_target_def
   have hΩα_target_open : IsOpen Ωα_target := chartTargetEuclid_isOpen (I := I) (M := M) α
   have hΩγ_target_open : IsOpen Ωγ_target := chartTargetEuclid_isOpen (I := I) (M := M) γ
   by_cases hKM_empty : K_M = ∅
-  · -- Trivial case: K_M empty ⇒ chartPushedRaw = 0.
-    refine ⟨1, one_pos, ?_⟩
+  · refine ⟨1, one_pos, ?_⟩
     intro v _
     have h_zero := chartPushedRaw_pou_strictCutoff_v_zero_of_disjoint
       (I := I) (M := M) γ α v hKM_empty
@@ -273,7 +253,6 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
     · rw [h_zero]
       exact HasCompactSupport.zero
     · rw [h_zero]
-      -- tsupport of zero function is empty.
       have h_supp_eq : tsupport (fun _ : EuclN => (0 : ℝ)) = ∅ := by
         unfold tsupport
         rw [show (fun _ : EuclN => (0 : ℝ)) = (0 : EuclN → ℝ) from rfl,
@@ -284,7 +263,6 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
       rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_zero_fun_zero
         (d := Module.finrank ℝ E) hp_one hΩα_target_open]
       exact zero_le _
-  -- Substantive case.
   obtain ⟨Ω_α, Ω_γ, hΩα_open, hΩγ_open, hΩα_subset_target, hΩγ_subset_target,
     hΩα_subset_overlap, _hΩγ_subset_overlap, hKM_image_α_in_Ωα, Φ,
     hΦ_eq_on_Ωα, _hΦ_inv_eq_on_Ωγ⟩ :=
@@ -345,7 +323,6 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
     rcases hz with ⟨y, hy, hyz⟩
     have hy_in_Ωα : y ∈ Ω_α := hKM_image_α_in_Ωα hy
     rw [← hyz]; exact Φ.bijOn.mapsTo hy_in_Ωα
-  -- α-side cutoff.
   set Uα : Set EuclN := Ω_α ∩ Ωα_target with hUα_def
   have hUα_open : IsOpen Uα := hΩα_open.inter hΩα_target_open
   have hKEα_in_Uα : K_E_α ⊆ Uα :=
@@ -358,7 +335,6 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
     fun y hy => (hη_α_loc_supp hy).1
   have hη_α_loc_supp_target : tsupport η_α_loc ⊆ Ωα_target :=
     fun y hy => (hη_α_loc_supp hy).2
-  -- γ-side cutoff.
   set Uγ : Set EuclN := Ω_γ ∩ Ωγ_target with hUγ_def
   have hUγ_open : IsOpen Uγ := hΩγ_open.inter hΩγ_target_open
   have hKEγ_in_Uγ : K_E_γ ⊆ Uγ :=
@@ -371,7 +347,6 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
     fun y hy => (hη_γ_loc_supp hy).1
   have hη_γ_loc_supp_target : tsupport η_γ_loc ⊆ Ωγ_target :=
     fun y hy => (hη_γ_loc_supp hy).2
-  -- Smooth Euclidean extension of chartStrictCutoff α.
   set η_α_E : EuclN → ℝ := etaEuclid (I := I) (M := M) α
     (chartStrictCutoff (I := I) (M := M) α) with hη_α_E_def
   have hη_α_E_smooth : ContDiff ℝ (⊤ : ℕ∞) η_α_E :=
@@ -402,7 +377,6 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
     simp only [hηα_def, Function.mem_support, ne_eq] at hy
     have hη_ne : η_α_loc y ≠ 0 := by intro h0; apply hy; rw [h0]; ring
     exact Function.mem_support.mpr hη_ne
-  -- Uniform bounds.
   obtain ⟨C_combined_α, hC_combined_α_nn, hC_combined_α_bound⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
       hη_combined_α_smooth hη_combined_α_cpt k
@@ -460,7 +434,6 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
     mul_pos (mul_pos hK_leib_α_pos hK_chain_pos) hK_leib_γ_pos
   refine ⟨K_total, hK_total_pos, ?_⟩
   intro v hv_mem
-  -- Step A: ψ_γ_loc := η_γ_loc · chartPushed γ v on Ωγ_target.
   set chartPushedγV : EuclN → ℝ :=
     chartPushed (I := I) (M := M)
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ v
@@ -498,7 +471,6 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
         (d := Module.finrank ℝ E) k p ψ_γ_loc Ωγ_target =
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) k p ψ_γ_loc Ω_γ := hψ_γ_loc_pair_Ωγ.2
-  -- Step B: ψ_total := η_combined_α · (ψ_γ_loc ∘ Φ.toFun) on EuclN.
   set ψ_total : EuclN → ℝ := fun y => η_combined_α y * ψ_γ_loc (Φ.toFun y) with hψ_total_def
   have hψ_total_supp_in_η_combined_α : tsupport ψ_total ⊆ tsupport η_combined_α := by
     refine closure_mono ?_
@@ -514,14 +486,12 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
   have hψ_total_cpt : HasCompactSupport ψ_total := by
     refine hη_combined_α_cpt.of_isClosed_subset (isClosed_tsupport _)
       hψ_total_supp_in_η_combined_α
-  -- ψ_γ_loc ∘ Φ ∈ MemWkp k p Ω_α (chain rule).
   have h_ψγ_loc_comp_mem :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) k p (fun y => ψ_γ_loc (Φ.toFun y)) Ω_α :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.comp_smoothDiffeoBoundedAtOrder
       (d := Module.finrank ℝ E) k (le_refl k) hp_one hp_top hΩα_open hΩγ_open Φ
       hψ_γ_loc_mem_Ωγ hψ_γ_loc_cpt hψ_γ_loc_supp_in_Ωγ
-  -- ψ_total ∈ MemWkp k p Ω_α.
   have hψ_total_mem_Ωα :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) k p ψ_total Ω_α := by
@@ -531,14 +501,12 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
     exact DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.smul_smooth_bounded
       (d := Module.finrank ℝ E) k hp_one hΩα_open hη_combined_α_smooth h_bound
       h_ψγ_loc_comp_mem
-  -- Extend ψ_total from Ω_α to Ωα_target.
   have hψ_total_mem_Ωα_target :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) k p ψ_total Ωα_target :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.extend_zero
       (d := Module.finrank ℝ E) hp_one hp_top hΩα_open hΩα_target_open
       hΩα_subset_target hψ_total_mem_Ωα hψ_total_supp_Ωα hψ_total_cpt
-  -- Pointwise equality on Ωα_target.
   have h_pointwise_eq : ∀ y ∈ Ωα_target,
       chartPushedRaw (I := I) (M := M) α
           (fun x => pou (I := I) (M := M) γ x *
@@ -569,17 +537,14 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
     have hψ_total_unfold : ψ_total y =
         η_α_loc y * η_α_E y * (η_γ_loc (Φ.toFun y) * chartPushedγV (Φ.toFun y)) := rfl
     rw [hψ_total_unfold, hη_α_E_y]
-    -- Case A: y ∈ tsupp η_α_loc, hence y ∈ Ω_α.
     by_cases hy_in_supp_η_α : y ∈ tsupport η_α_loc
     · have hy_in_Ωα : y ∈ Ω_α := hη_α_loc_supp_Ωα hy_in_supp_η_α
       by_cases hcutoff_zero : chartStrictCutoff (I := I) (M := M) α z = 0
       · rw [hcutoff_zero]; ring
-      · -- A2: cutoff α z ≠ 0. Derive z ∈ chart γ source from y ∈ Ω_α ⊆ overlap.
-        have hz_in_tsupp_cut : z ∈ tsupport (chartStrictCutoff (I := I) (M := M) α) :=
+      · have hz_in_tsupp_cut : z ∈ tsupport (chartStrictCutoff (I := I) (M := M) α) :=
           subset_tsupport _ (Function.mem_support.mpr hcutoff_zero)
         have hy_in_overlap : y ∈ chartOverlapEuclid (I := I) (M := M) α γ :=
           hΩα_subset_overlap hy_in_Ωα
-        -- Extract x from overlap data and show z = x ∈ chart γ source.
         have hz_chartγ : z ∈ (chartAt H γ).source := by
           rcases hy_in_overlap with ⟨w, ⟨x, hx_inter, hxw⟩, hwy⟩
           have hx_chart : x ∈ (chartAt H α).source := hx_inter.1
@@ -601,7 +566,6 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
             rw [h_x_eq_chart, h_z_eq_chart]
           have h_x_eq_z := (extChartAt I α).injOn hx_α_ext hz_α_ext h_chart_eq
           rw [← h_x_eq_z]; exact hx_chart_γ
-        -- Φ.toFun y = chart transition.
         have hΦ_y : Φ.toFun y = (toEuclidean (E := E)) (extChartAt I γ z) := by
           rw [hΦ_eq_on_Ωα y hy_in_Ωα]
           have h_z_chart : extChartAt I α z = (toEuclidean (E := E)).symm y :=
@@ -612,7 +576,6 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
           rw [← hy_eq_α]
           exact chartTransitionEuclid_eq_chartα_image (I := I) (M := M) α γ hz_chartα
         rw [hΦ_y]
-        -- chartPushedγV at Φy = pou γ z · v z (uses z ∈ chart γ source).
         have h_chartPushedγV_at_Φy :
             chartPushedγV ((toEuclidean (E := E)) (extChartAt I γ z)) =
               pou (I := I) (M := M) γ z * v z := by
@@ -633,11 +596,9 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
           rw [(extChartAt I γ).left_inv hz_ext_γ]
           rfl
         rw [h_chartPushedγV_at_Φy]
-        -- Sub-case: pou γ z = 0?
         by_cases hpou_zero : pou (I := I) (M := M) γ z = 0
         · rw [hpou_zero]; ring
-        · -- A2b: pou γ z ≠ 0. z ∈ K_M, y ∈ K_E_α, Φy ∈ K_E_γ.
-          have hz_in_tsupp_pou : z ∈ tsupport (pou (I := I) (M := M) γ) :=
+        · have hz_in_tsupp_pou : z ∈ tsupport (pou (I := I) (M := M) γ) :=
             subset_tsupport _ (Function.mem_support.mpr hpou_zero)
           have hz_in_KM : z ∈ K_M := ⟨hz_in_tsupp_pou, hz_in_tsupp_cut⟩
           have hy_in_KEα : y ∈ K_E_α := by
@@ -658,8 +619,7 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
             exact Metric.self_subset_cthickening K_E_γ h_Φy_in_KEγ
           rw [hη_γ_loc_Φy]
           ring
-    · -- Case B: y ∉ tsupp η_α_loc. η_α_loc y = 0.
-      have h_zero : η_α_loc y = 0 := image_eq_zero_of_notMem_tsupport hy_in_supp_η_α
+    · have h_zero : η_α_loc y = 0 := image_eq_zero_of_notMem_tsupport hy_in_supp_η_α
       rw [h_zero]; simp only [zero_mul]
       by_cases hpou_zero : pou (I := I) (M := M) γ z = 0
       · rw [hpou_zero]; ring
@@ -685,7 +645,6 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
           have hy_in_supp : y ∈ Function.support η_α_loc := by
             simp only [Function.mem_support, ne_eq, h_ne_zero, not_false_eq_true]
           exact hy_in_supp_η_α (subset_tsupport _ hy_in_supp)
-  -- a.e. equality on Ωα_target.
   have h_ae_eq : (chartPushedRaw (I := I) (M := M) α
         (fun x => pou (I := I) (M := M) γ x *
           (chartStrictCutoff (I := I) (M := M) α x * v x))) =ᵐ[volume.restrict Ωα_target]
@@ -693,7 +652,6 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
     refine (ae_restrict_iff' hΩα_target_open.measurableSet).mpr ?_
     refine Filter.Eventually.of_forall ?_
     intro y hy; exact h_pointwise_eq y hy
-  -- Membership of chartPushedRaw α (...) on Ωα_target via a.e. equality.
   have h_pushed_mem : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) k p
       (chartPushedRaw (I := I) (M := M) α
@@ -703,12 +661,10 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
     refine (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
       (d := Module.finrank ℝ E) hp_one hΩα_target_open h_ae_eq.symm).mp ?_
     exact hψ_total_mem_Ωα_target
-  -- HasCompactSupport for chartPushedRaw α (...).
   have h_pushedRaw_supp_KE_α :
       tsupport (chartPushedRaw (I := I) (M := M) α
         (fun x => pou (I := I) (M := M) γ x *
           (chartStrictCutoff (I := I) (M := M) α x * v x))) ⊆ K_E_α := by
-    -- The chart-α raw push of `pou γ · cutoff α · v` is 0 outside chart-α image of K_M.
     have h_zero_off_KE_α :
         ∀ y : EuclN, y ∉ K_E_α →
         chartPushedRaw (I := I) (M := M) α
@@ -721,7 +677,6 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
         have hsymm_target : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
           rw [hΩα_target_def, chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy_target
           exact hy_target
-        -- If z ∉ K_M, the product is 0.
         have hz_not_in_KM : z ∉ K_M := by
           intro hz_in_KM
           apply hy_off
@@ -752,10 +707,8 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
           (chartStrictCutoff (I := I) (M := M) α x * v x))) ⊆ Ωα_target :=
     h_pushedRaw_supp_KE_α.trans hKEα_subset_target
   refine ⟨h_pushed_mem, h_pushedRaw_cpt, h_pushedRaw_supp_Ωα_target, ?_⟩
-  -- Norm bound.
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_congr_ae
         (d := Module.finrank ℝ E) hp_one hΩα_target_open h_ae_eq]
-  -- ψ_total wkpNorm Ωα_target ≤ ψ_total wkpNorm Ω_α.
   have h_bridge_α :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) k p ψ_total Ωα_target ≤
@@ -765,7 +718,6 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
       (d := Module.finrank ℝ E) k hp_one hΩα_target_open hΩα_open
       hΩα_subset_target hψ_total_mem_Ωα hψ_total_supp_Ωα
   refine h_bridge_α.trans ?_
-  -- ψ_total wkpNorm Ω_α ≤ K_leib_α · wkpNorm (ψ_γ_loc ∘ Φ) Ω_α.
   have h_leib_step : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
       (d := Module.finrank ℝ E) k p ψ_total Ω_α ≤
       ENNReal.ofReal K_leib_α *
@@ -773,7 +725,6 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
           (d := Module.finrank ℝ E) k p (fun y => ψ_γ_loc (Φ.toFun y)) Ω_α :=
     hK_leib_α_bound h_ψγ_loc_comp_mem
   refine h_leib_step.trans ?_
-  -- Chain rule bound.
   have h_chain_step :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) k p (fun y => ψ_γ_loc (Φ.toFun y)) Ω_α ≤
@@ -791,7 +742,6 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
           (d := Module.finrank ℝ E) k p ψ_γ_loc Ωγ_target := by
     refine h_chain_step.trans ?_
     rw [hψ_γ_loc_norm_target_eq_Ωγ]
-  -- Leibniz on Ωγ_target.
   have h_leib_γ_step :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) k p ψ_γ_loc Ωγ_target ≤
@@ -823,8 +773,6 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
     rw [ENNReal.ofReal_mul hK_leib_α_pos.le]
     ring
   exact h_K_eq ▸ le_refl _
-
-/-! ## Finset-sum triangle inequality for wkpNorm -/
 
 /-- A finite-`Finset` sum of `MemWkp k p` functions on an open set is also
 `MemWkp k p`. -/
@@ -927,8 +875,6 @@ theorem wkpNorm_finset_sum_le_chartTarget
         exact add_le_add le_rfl h_ih
       exact h_triangle.trans h_step
 
-/-! ## Headline theorem -/
-
 /-- **Headline**: For a closed Riemannian manifold `(M, g)`, a chart-atlas
 index `α : M`, an order `k : ℕ`, and an exponent `1 ≤ p < ∞`, there exists a
 positive constant `C` such that for every `v : M → ℝ` with
@@ -952,7 +898,6 @@ theorem wkpNorm_chartPushedRaw_strictCutoff_mul_le
   set S : Finset M :=
     DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset (I := I) (M := M)
     with hS_def
-  -- Per-γ constants.
   have h_per_γ : ∀ γ : M, ∃ Cγ : ℝ, 0 < Cγ ∧
       ∀ {v : M → ℝ}, MemWkpChart (I := I) (M := M) g k p v →
         DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
@@ -1006,8 +951,7 @@ theorem wkpNorm_chartPushedRaw_strictCutoff_mul_le
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ v)
           (chartTargetEuclid (I := I) (M := M) γ) := fun γ => (h_per_γ γ).choose_spec.2
   by_cases hS_empty : S = ∅
-  · -- S empty contradicts POU summing to 1.
-    refine ⟨1, one_pos, ?_⟩
+  · refine ⟨1, one_pos, ?_⟩
     intro v _
     exfalso
     have h_sum_one : ∑ γ ∈ S, pou (I := I) (M := M) γ α = 1 := by
@@ -1024,7 +968,6 @@ theorem wkpNorm_chartPushedRaw_strictCutoff_mul_le
     exact lt_of_lt_of_le (hCγ_pos γ₀) (hCmax_ge γ₀ hγ₀)
   refine ⟨Cmax, hCmax_pos, ?_⟩
   intro v hv
-  -- Pointwise sum.
   have h_pw_sum : ∀ y : EuclN,
       chartPushedRaw (I := I) (M := M) α
           (fun x => chartStrictCutoff (I := I) (M := M) α x * v x) y =
@@ -1042,7 +985,6 @@ theorem wkpNorm_chartPushedRaw_strictCutoff_mul_le
         (fun x => pou (I := I) (M := M) γ x *
           (chartStrictCutoff (I := I) (M := M) α x * v x)) y) := funext h_pw_sum
   rw [h_pw_eq]
-  -- Apply triangle inequality.
   have h_per_γ_mem : ∀ γ ∈ S,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) k p
@@ -1056,7 +998,6 @@ theorem wkpNorm_chartPushedRaw_strictCutoff_mul_le
         (fun x => pou (I := I) (M := M) γ x *
           (chartStrictCutoff (I := I) (M := M) α x * v x)) y) h_per_γ_mem
   refine h_triangle.trans ?_
-  -- Per-γ wkpNorm bound, then bound by Cmax.
   have h_bound_each : ∀ γ ∈ S,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) k p

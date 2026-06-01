@@ -26,8 +26,6 @@ namespace Analysis
 namespace Sobolev
 namespace Euclidean
 
-/-! ## Smooth diffeomorphism with bounded derivatives -/
-
 /-- A `C^∞` diffeomorphism between two open subsets of
 `E = EuclideanSpace ℝ (Fin d)`, equipped with uniform bounds on the
 iterated derivatives of both directions and a uniform lower bound on the
@@ -172,8 +170,6 @@ lemma toFun_quasiMeasurePreserving :
 
 end SmoothDiffeoBounded
 
-/-! ## Change-of-variables identity for `lintegral` -/
-
 /-- Change of variables for `lintegral` adapted to a smooth bounded
 diffeomorphism: for any `g : E → ℝ≥0∞`,
 `∫⁻ y in Ω', g y dy = ∫⁻ x in Ω, ENNReal.ofReal |det DΦ x| · g (Φ x) dx`. -/
@@ -197,8 +193,6 @@ lemma SmoothDiffeoBounded.lintegral_image_eq
   rw [hΦ_image] at h_chg
   exact h_chg
 
-/-! ## L^p case via change of variables -/
-
 /-- The L^p norm of `u ∘ Φ` over `Ω` is bounded by a constant times the L^p
 norm of `u` over `Ω'`. The constant comes from the lower bound on the
 absolute Jacobian determinant of `Φ`.
@@ -214,13 +208,11 @@ theorem MemLp.comp_smoothDiffeoBounded
   classical
   have hΩ_meas : MeasurableSet Ω := hΩ.measurableSet
   have hΩ'_meas : MeasurableSet Ω' := hΩ'.measurableSet
-  -- Step 1: AEStronglyMeasurable.
   have h_aestrong : AEStronglyMeasurable
       (fun x => u (Φ.toFun x)) (volume.restrict Ω) := by
     have hqmp := Φ.toFun_quasiMeasurePreserving
     exact hu.aestronglyMeasurable.comp_quasiMeasurePreserving hqmp
   refine ⟨h_aestrong, ?_⟩
-  -- Step 2: bound on eLpNorm.
   by_cases hp_zero : p = 0
   · simp [hp_zero]
   rw [eLpNorm_lt_top_iff_lintegral_rpow_enorm_lt_top hp_zero hp_top]
@@ -230,7 +222,6 @@ theorem MemLp.comp_smoothDiffeoBounded
   have hjLB_ennreal_pos : 0 < ENNReal.ofReal jLB := by
     rw [ENNReal.ofReal_pos]; exact hjLB_pos
   have hjLB_ennreal_ne_top : ENNReal.ofReal jLB ≠ ⊤ := ENNReal.ofReal_ne_top
-  -- Pointwise bound: jLB · ‖u(Φx)‖^q ≤ |det DΦ x| · ‖u(Φx)‖^q for x ∈ Ω.
   have hbound_pointwise : ∀ x ∈ Ω,
       ENNReal.ofReal jLB * ‖u (Φ.toFun x)‖ₑ ^ q ≤
         ENNReal.ofReal |(fderiv ℝ Φ.toFun x).det| * ‖u (Φ.toFun x)‖ₑ ^ q := by
@@ -247,7 +238,6 @@ theorem MemLp.comp_smoothDiffeoBounded
     refine MeasureTheory.lintegral_mono_ae ?_
     rw [MeasureTheory.ae_restrict_iff' hΩ_meas]
     exact Filter.Eventually.of_forall fun x hx => hbound_pointwise x hx
-  -- Use change of variables to identify the RHS with ∫⁻ y in Ω', ‖u y‖^q.
   have hchg := Φ.lintegral_image_eq hΩ (fun y => ‖u y‖ₑ ^ q)
   have h_RHS_lt :
       ∫⁻ x,
@@ -269,8 +259,6 @@ theorem MemLp.comp_smoothDiffeoBounded
       ∫⁻ x, ‖u (Φ.toFun x)‖ₑ ^ q ∂(volume.restrict Ω) = ⊤ := top_le_iff.mp h_top_contra
   rw [h_top', ENNReal.mul_top hjLB_ennreal_pos.ne'] at h_LHS_lt
   exact lt_irrefl _ h_LHS_lt
-
-/-! ## MemWkp at order 0 -/
 
 /-- The `MemWkp 0` (= `MemLp`) version of the chain rule. -/
 theorem MemWkp.comp_smoothDiffeoBounded_zero

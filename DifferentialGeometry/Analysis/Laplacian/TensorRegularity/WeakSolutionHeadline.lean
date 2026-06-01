@@ -93,12 +93,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-Match the convention in the surrounding chart-local Laplacian files: install the
-Borel σ-algebras locally, without leaking global instances onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -107,17 +101,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 local notation "chartHaar" =>
   MeasureTheory.Measure.map (toEuclidean : E → EuclN) (modelHaar (E := E))
-
-/-! ## The manifold-side chart bump from a Euclidean test function
-
-The inverse-Gram-rotated test section `rotatedTestSection g r s α P₀ χ` requires
-the scalar bump `χ` to be `C^∞` on the chart-`α` source with topological support
-contained in that source. For a Euclidean test function `φ` smooth, compactly
-supported, with `tsupport φ ⊆ chartTargetEuclid α`, the manifold-side pull-back
-`chartTestPullback I α φ` is such a bump: on the chart source it is
-`φ ∘ toEuclidean ∘ extChartAt I α`, hence `C^∞` there, and its support sits
-inside the chart-source preimage of the Euclidean image of `tsupport φ` — a
-compact set inside the open chart source. -/
 
 /-- The chart-source lift of `tsupport φ`: the `(extChartAt I α).symm`-image of
 the `toEuclidean.symm`-image of `tsupport φ`. It is compact and contained in the
@@ -221,13 +204,6 @@ lemma chartTestPullback_contMDiffOn (α : M)
   refine hcompose.congr (fun x hx => ?_)
   exact chartTestPullback_apply_of_mem (I := I) α φ hx
 
-/-! ## Smoothness gluing on the Euclidean model space
-
-A function `C^∞` on the open Euclidean chart target and vanishing off a closed
-subset of that target is globally `C^∞`. This is the extension-by-zero gluing
-device, used to certify global smoothness — hence integrability — of the
-test-weighted chart coefficients. -/
-
 /-- A function that is `C^∞` on the open Euclidean chart target and vanishes off
 a closed set inside the chart target is globally `C^∞`. -/
 lemma contDiff_of_contDiffOn_chartTarget_zero_off
@@ -303,28 +279,12 @@ lemma euclidPartial_contDiffOn_chartTarget
   refine hcomp.congr (fun z _ => ?_)
   rfl
 
-/-! ## Integrability of the test-weighted chart coefficients
-
-Every integrand appearing in the assembly is the product of a coefficient
-`C^∞` on the open chart target with a globally `C^∞` compactly-supported test
-function whose support sits inside the chart target. By the gluing lemma the
-product is globally `C^∞` with compact support, hence Bochner-integrable against
-the Lebesgue measure `volume`. -/
-
 /-- A globally `C^∞` compactly-supported function on the Euclidean model space is
 Bochner-integrable against `volume`. -/
 lemma integrable_of_contDiff_hasCompactSupport
     {P : EuclN → ℝ} (hP : ContDiff ℝ ∞ P) (hP_cs : HasCompactSupport P) :
     Integrable P (volume : Measure EuclN) :=
   hP.continuous.integrable_of_hasCompactSupport hP_cs
-
-/-! ## The chart bump pushed forward agrees with the Euclidean test function
-
-For `φ` a Euclidean test function supported in the chart target and
-`χ := chartTestPullback I α φ`, the Euclidean push-forward `chartPushedRaw I α χ`
-agrees with `φ` on the chart target: both evaluate, at a chart-target point, to
-`φ` of that point. Their chart-Euclidean partial derivatives therefore agree on
-the open chart target. -/
 
 /-- On the Euclidean chart target the push-forward `chartPushedRaw I α
 (chartTestPullback I α φ)` of the manifold-side chart bump agrees with `φ`. -/
@@ -337,7 +297,6 @@ lemma chartPushedRaw_chartTestPullback_eqOn (α : M) (φ : EuclN → ℝ) :
       (chartAt H α).source :=
     symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy
   rw [chartTestPullback_apply_of_mem (I := I) α φ hb_chart]
-  -- `toEuclidean (extChartAt I α ((extChartAt I α).symm (toEuclidean.symm y))) = y`.
   have hb_eq : (toEuclidean (E := E))
       ((extChartAt I α)
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) = y := by
@@ -364,16 +323,6 @@ lemma euclidPartial_chartPushedRaw_chartTestPullback_eqOn
     Filter.EventuallyEq.fderiv_eq (𝕜 := ℝ) (x := y)
       (Filter.eventuallyEq_of_mem (hopen.mem_nhds hy)
         (chartPushedRaw_chartTestPullback_eqOn (I := I) (M := M) α φ))]
-
-/-! ## The chart bilinear identity
-
-The principal-part bilinear form of the connection Laplacian, evaluated on the
-Euclidean chart component against a chart-supported Euclidean test function `φ`,
-equals the integral of the explicit right-hand side `tensorComponentWeakRHS`
-against `φ`. The identity is proved by substituting the inverse-Gram-rotated
-test section attached to `φ` into the global `H^1` weak equation, chart-pulling
-both sides, collapsing the principal and lower-order parts, and integrating the
-lower-order gradient term by parts. -/
 
 /-- The chart-Euclidean partial derivative of a function vanishes off the
 topological support of that function. -/
@@ -417,8 +366,7 @@ lemma density_scalarPrincipal_eq_principalIntegrand
   by_cases hyu : y ∈ tsupport u
   · exact weightedInvGram_principalIntegrand_eq (I := I) (M := M) g α hK
       hK_target u φ (hu_K hyu)
-  · -- Off `tsupport u` the chart-Euclidean partial of `u` vanishes.
-    have hLHS_zero :
+  · have hLHS_zero :
         densityOnEuclid (I := I) g α y *
           (∑ k : Fin (Module.finrank ℝ E),
             ∑ l : Fin (Module.finrank ℝ E),
@@ -434,14 +382,6 @@ lemma density_scalarPrincipal_eq_principalIntegrand
     have := euclidPartial_eq_zero_of_notMem_tsupport (E := E) i hyu
     rw [euclidPartial_def] at this
     rw [this]; ring
-
-/-! ## The chart-pulled global weak equation
-
-The chart-pulled global weak equation, after the rotated principal and
-lower-order collapses, expresses the volume integral of the `principalIntegrand`
-of `tensorPrincipalForm` as the source contribution minus the principal-rotation
-remainder, minus the lower-order value remainder, plus the divergence of the
-lower-order gradient remainder. -/
 
 /-- **The chart-supported per-component bilinear identity.**
 
@@ -476,25 +416,21 @@ theorem tensorComponent_chartBilinIdentity
       ∫ y, tensorComponentWeakRHS (I := I) (M := M) g r s T F α hK hK_target P₀ y
         * φ y := by
   classical
-  -- The Euclidean chart target is open and measurable.
   have hcTE_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) α
   have hcTE_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     hcTE_open.measurableSet
   have hφ' : ContDiff ℝ ∞ φ := hφ
-  -- The manifold-side chart bump and its smoothness / support.
   have hχs : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (chartTestPullback (I := I) (M := M) α φ)
       (chartAt H α).source :=
     chartTestPullback_contMDiffOn (I := I) (M := M) α hφ
   have hχt : tsupport (chartTestPullback (I := I) (M := M) α φ) ⊆
       (chartAt H α).source :=
     chartTestPullback_tsupport_subset_source (I := I) (M := M) α hφ_cs hφ_supp
-  -- The chart density is `C^∞` on the chart target.
   have hdensity : ContDiffOn ℝ ∞ (densityOnEuclid (I := I) g α)
       (chartTargetEuclid (I := I) (M := M) α) :=
     densityOnEuclid_contDiffOn (I := I) g α
-  -- The chart-pushed bump and its chart-Euclidean partial agree with `φ`.
   have hbump_eqOn : Set.EqOn
       (chartPushedRaw I α (chartTestPullback (I := I) (M := M) α φ)) φ
       (chartTargetEuclid (I := I) (M := M) α) :=
@@ -505,7 +441,6 @@ theorem tensorComponent_chartBilinIdentity
         (euclidPartial (E := E) l φ)
         (chartTargetEuclid (I := I) (M := M) α) := fun l =>
     euclidPartial_chartPushedRaw_chartTestPullback_eqOn (I := I) (M := M) α φ l
-  -- `∂_l φ` is globally `C^∞` and has compact support inside the chart target.
   have hdφ : ∀ l : Fin (Module.finrank ℝ E),
       ContDiff ℝ ∞ (euclidPartial (E := E) l φ) := by
     intro l
@@ -532,19 +467,14 @@ theorem tensorComponent_chartBilinIdentity
     rw [Function.mem_support] at hz
     by_contra hz'
     exact hz (euclidPartial_eq_zero_of_notMem_tsupport (E := E) l hz')
-  -- The chart-Euclidean partial of `φ` vanishes off `tsupport φ`.
   have hφ_partial_zero : ∀ l : Fin (Module.finrank ℝ E), ∀ y, y ∉ tsupport φ →
       euclidPartial (E := E) l φ y = 0 := fun l y hy =>
     euclidPartial_eq_zero_of_notMem_tsupport (E := E) l hy
-  -- The chart-Euclidean partial of the chart component vanishes off its support.
   have hu_partial_zero : ∀ k : Fin (Module.finrank ℝ E), ∀ y,
       y ∉ tsupport (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) →
       euclidPartial (E := E) k
         (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) y = 0 :=
     fun k y hy => euclidPartial_eq_zero_of_notMem_tsupport (E := E) k hy
-  -- ===================================================================
-  -- The five test-weighted integrands: global `C^∞` smoothness.
-  -- ===================================================================
   have hP_src : ContDiff ℝ ∞
       (fun y => densityOnEuclid (I := I) g α y *
         sourcePairingCoeff (I := I) (M := M) g r s F α P₀ y * φ y) :=
@@ -577,7 +507,6 @@ theorem tensorComponent_chartBilinIdentity
       (euclidPartial_contDiffOn_chartTarget (I := I) (M := M) α l
         (weightedGradCoeff_contDiffOn (I := I) (M := M) g r s T α P₀ l)) hφ'
       hφ_supp
-  -- `principalIntegrand` is globally `C^∞`.
   have hP_principal : ContDiff ℝ ∞
       ((tensorPrincipalForm (I := I) (M := M) g α hK hK_target).principalIntegrand
         (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) φ) := by
@@ -599,9 +528,6 @@ theorem tensorComponent_chartBilinIdentity
           (by rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from rfl])).clm_apply
           contDiff_const)))
     exact hbody
-  -- ===================================================================
-  -- The five test-weighted integrands: compact support and integrability.
-  -- ===================================================================
   have hcs_mul : ∀ h : EuclN → ℝ,
       HasCompactSupport (fun y => h y * φ y) := fun h =>
     hasCompactSupport_mul_chartTest (E := E) hφ_cs
@@ -669,7 +595,6 @@ theorem tensorComponent_chartBilinIdentity
           (weightedGradCoeff (I := I) (M := M) g r s T α P₀ l) y * φ y)
       (volume : Measure EuclN) := fun l =>
     integrable_of_contDiff_hasCompactSupport (E := E) (hP_ibp l) (hcs_mul _)
-  -- The conversion `∫_{cTE} X ∂chartHaar = ∫ X ∂volume` for `X` vanishing off `cTE`.
   have hsetInt_to_int : ∀ X : EuclN → ℝ,
       (∀ y, y ∉ chartTargetEuclid (I := I) (M := M) α → X y = 0) →
       ∫ y in chartTargetEuclid (I := I) (M := M) α, X y ∂chartHaar =
@@ -678,19 +603,12 @@ theorem tensorComponent_chartBilinIdentity
     rw [DifferentialGeometry.Integral.Measure.map_toEuclidean_modelHaar_eq_volume
       (E := E)]
     exact MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero hX_zero
-  -- ===================================================================
-  -- Step 1: chart-pull the global weak equation evaluated at the rotated test
-  -- section attached to `φ`.
-  -- ===================================================================
   have hweak_v := hweak (rotatedTestSection (I := I) (M := M) g r s α P₀
     (chartTestPullback (I := I) (M := M) α φ) hχs hχt)
   rw [tensorCovDerivPointwiseInner_integral_chart_pull (I := I) (M := M)
       g r s T _ α hT_supp,
     tensorL2Inner_rotatedTestSection_chart_pull (I := I) (M := M) g r s F α P₀
       hχs hχt] at hweak_v
-  -- ===================================================================
-  -- Step 2: collapse the chart-pulled LHS integrand on the chart target.
-  -- ===================================================================
   have hLHS_integrand : ∀ y ∈ chartTargetEuclid (I := I) (M := M) α,
       densityOnEuclid (I := I) g α y *
           (covPrincipalIntegrand (I := I) (M := M) g r s T
@@ -711,7 +629,6 @@ theorem tensorComponent_chartBilinIdentity
               covLowerOrderRotationGradCoeff (I := I) (M := M) g r s T α P₀ l y *
                 euclidPartial (E := E) l φ y)) := by
     intro y hy
-    -- Identify the density-weighted scalar principal integrand.
     have hPI : (tensorPrincipalForm (I := I) (M := M) g α hK hK_target).principalIntegrand
           (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) φ y =
         densityOnEuclid (I := I) g α y *
@@ -723,7 +640,6 @@ theorem tensorComponent_chartBilinIdentity
                 euclidPartial (E := E) l φ y) :=
       (density_scalarPrincipal_eq_principalIntegrand (I := I) (M := M) g α hK
         hK_target hT_K φ hy).symm
-    -- The collapsed scalar principal integrand uses the chart-pushed component.
     have hscalar : ∑ k : Fin (Module.finrank ℝ E),
           ∑ l : Fin (Module.finrank ℝ E),
             chartInvGramEuclid (I := I) g α k l y *
@@ -746,7 +662,6 @@ theorem tensorComponent_chartBilinIdentity
           tensorComponentEuclid (I := I) (M := M) g r s T α P₀ from
         (tensorComponentEuclid_def (I := I) (M := M) g r s T α P₀).symm,
         hbump_partial_eqOn l hy]
-    -- The collapsed lower-order gradient sum uses the chart-pushed bump.
     have hgrad : ∑ l : Fin (Module.finrank ℝ E),
           covLowerOrderRotationGradCoeff (I := I) (M := M) g r s T α P₀ l y *
             euclidPartial (E := E) l
@@ -788,9 +703,6 @@ theorem tensorComponent_chartBilinIdentity
               covLowerOrderRotationGradCoeff (I := I) (M := M) g r s T α P₀ l y *
                 euclidPartial (E := E) l φ y))) ∂chartHaar :=
     MeasureTheory.setIntegral_congr_fun hcTE_meas hLHS_integrand
-  -- ===================================================================
-  -- Step 3: convert the chart-pulled LHS to a whole-space `volume` integral.
-  -- ===================================================================
   have hsum_zero : ∀ y, y ∉ chartTargetEuclid (I := I) (M := M) α →
       (tensorPrincipalForm (I := I) (M := M) g α hK hK_target).principalIntegrand
           (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) φ y +
@@ -862,9 +774,6 @@ theorem tensorComponent_chartBilinIdentity
     refine hsetInt_to_int _ (fun y hy => ?_)
     rw [image_eq_zero_of_notMem_tsupport (fun h => hy (hφ_supp h))]; ring
   rw [hLHS_volume, hRHS_volume] at hweak_v
-  -- ===================================================================
-  -- Step 4: split the LHS whole-space integral into four pieces.
-  -- ===================================================================
   have hint_gradsum : Integrable
       (fun y => ∑ l : Fin (Module.finrank ℝ E),
         densityOnEuclid (I := I) g α y *
@@ -936,9 +845,6 @@ theorem tensorComponent_chartBilinIdentity
               euclidPartial (E := E) l φ y)
         hint_lov hint_gradsum]
   rw [hLHS_split] at hweak_v
-  -- ===================================================================
-  -- Step 5: integrate the lower-order gradient term by parts.
-  -- ===================================================================
   have hgradsum_eq :
       ∫ y, (∑ l : Fin (Module.finrank ℝ E),
         densityOnEuclid (I := I) g α y *
@@ -987,9 +893,6 @@ theorem tensorComponent_chartBilinIdentity
       hφ'.contDiffOn hφ_cs hφ_supp
   rw [hgradsum_eq, Finset.sum_congr rfl (fun l (_ : l ∈ Finset.univ) => hIBP l),
     Finset.sum_neg_distrib] at hweak_v
-  -- ===================================================================
-  -- Step 6: assemble `bilin` and the explicit right-hand side.
-  -- ===================================================================
   have hbilin_eq :
       (tensorPrincipalForm (I := I) (M := M) g α hK hK_target).bilin
           (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) φ =
@@ -1116,20 +1019,8 @@ theorem tensorComponent_chartBilinIdentity
           covPrincipalRotationCoeff (I := I) (M := M) g r s T α P₀ y * φ y)
         hint_src hint_prc,
       MeasureTheory.integral_finset_sum _ (fun l _ => hint_ibp l)]
-  -- Conclude: `bilin u φ = ∫ tensorComponentWeakRHS · φ`.
   rw [hbilin_eq, hWeakRHS_volume]
   linarith [hweak_v]
-
-/-! ## Support of the explicit right-hand side
-
-The explicit right-hand side `tensorComponentWeakRHS` is supported inside the
-topological support of the Euclidean chart component. Where the chart component
-vanishes, the principal-part bilinear form applied to any test bump supported
-there is zero (the principal integrand sees only the chart-Euclidean partial of
-the component, and the zeroth-order coefficient vanishes); the chart bilinear
-identity then forces the integral of `tensorComponentWeakRHS` against every such
-bump to vanish, and the variational fundamental lemma plus continuity force
-`tensorComponentWeakRHS` itself to vanish there. -/
 
 /-- **Support of the explicit right-hand side.** The explicit right-hand side
 `tensorComponentWeakRHS g r s T F α hK hK_target P₀` is supported inside the
@@ -1160,26 +1051,21 @@ theorem tensorComponentWeakRHS_tsupport_subset
     tsupport (tensorComponentWeakRHS (I := I) (M := M) g r s T F α hK hK_target P₀)
       ⊆ tsupport (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) := by
   classical
-  -- The explicit right-hand side is globally `C^∞`, hence continuous.
   have hRHS_cont : Continuous
       (tensorComponentWeakRHS (I := I) (M := M) g r s T F α hK hK_target P₀) :=
     (tensorComponentWeakRHS_contDiff (I := I) (M := M) g r s T F α hK hK_target P₀
       hT_supp hF_supp).continuous
-  -- The open set on which the chart component vanishes.
   set V : Set EuclN := chartTargetEuclid (I := I) (M := M) α \
     tsupport (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) with hV_def
   have hV_open : IsOpen V :=
     (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) α).sdiff (isClosed_tsupport _)
   have hV_meas : MeasurableSet V := hV_open.measurableSet
-  -- The chart-Euclidean partial of the chart component vanishes off its support.
   have hu_partial_zero : ∀ k : Fin (Module.finrank ℝ E), ∀ y,
       y ∉ tsupport (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) →
       euclidPartial (E := E) k
         (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) y = 0 :=
     fun k y hy => euclidPartial_eq_zero_of_notMem_tsupport (E := E) k hy
-  -- For a bump supported in `V`, the integral of `tensorComponentWeakRHS`
-  -- against it vanishes.
   have hzero_int : ∀ φ : EuclN → ℝ, ContDiff ℝ ∞ φ → HasCompactSupport φ →
       tsupport φ ⊆ V →
       ∫ y, φ y • tensorComponentWeakRHS (I := I) (M := M)
@@ -1187,10 +1073,8 @@ theorem tensorComponentWeakRHS_tsupport_subset
     intro φ hφ hφ_cs hφ_supp_V
     have hφ_supp : tsupport φ ⊆ chartTargetEuclid (I := I) (M := M) α :=
       hφ_supp_V.trans (Set.diff_subset)
-    -- The chart bilinear identity.
     have hbilin := tensorComponent_chartBilinIdentity (I := I) (M := M)
       g r s T F α hK hK_target P₀ hT_supp hT_K hweak hφ hφ_cs hφ_supp
-    -- The principal-part bilinear form vanishes on a `V`-supported bump.
     have hbilin_zero :
         (tensorPrincipalForm (I := I) (M := M) g α hK hK_target).bilin
           (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) φ = 0 := by
@@ -1203,19 +1087,16 @@ theorem tensorComponentWeakRHS_tsupport_subset
         rw [SmoothEllipticBilinearForm.principalIntegrand]
         refine Finset.sum_eq_zero (fun i _ => Finset.sum_eq_zero (fun j _ => ?_))
         by_cases hyφ : y ∈ tsupport φ
-        · -- On `tsupport φ ⊆ V` the chart-Euclidean partial of the component is `0`.
-          have hyu : y ∉ tsupport
+        · have hyu : y ∉ tsupport
               (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) :=
             (hφ_supp_V hyφ).2
           have := hu_partial_zero i y hyu
           rw [euclidPartial_def] at this
           rw [this]; ring
-        · -- Off `tsupport φ` the chart-Euclidean partial of `φ` is `0`.
-          have := euclidPartial_eq_zero_of_notMem_tsupport (E := E) j hyφ
+        · have := euclidPartial_eq_zero_of_notMem_tsupport (E := E) j hyφ
           rw [euclidPartial_def] at this
           rw [this]; ring
       rw [hprinc0]; ring
-    -- Combine: `∫ tensorComponentWeakRHS · φ = 0`, then commute the product.
     have hint0 : ∫ y, tensorComponentWeakRHS (I := I) (M := M)
         g r s T F α hK hK_target P₀ y * φ y ∂(volume : Measure EuclN) = 0 := by
       rw [← hbilin, hbilin_zero]
@@ -1225,19 +1106,16 @@ theorem tensorComponentWeakRHS_tsupport_subset
           g r s T F α hK hK_target P₀ y * φ y) from by
       funext y; rw [smul_eq_mul, mul_comm]]
     exact hint0
-  -- The variational fundamental lemma: `tensorComponentWeakRHS = 0` a.e. on `V`.
   have hae : ∀ᵐ y ∂(volume : Measure EuclN), y ∈ V →
       tensorComponentWeakRHS (I := I) (M := M) g r s T F α hK hK_target P₀ y = 0 :=
     hV_open.ae_eq_zero_of_integral_contDiff_smul_eq_zero
       (hRHS_cont.locallyIntegrable.locallyIntegrableOn V) hzero_int
-  -- Continuity upgrades the a.e. vanishing to vanishing on the whole open set.
   have hEqOn : Set.EqOn
       (tensorComponentWeakRHS (I := I) (M := M) g r s T F α hK hK_target P₀)
       (fun _ => (0 : ℝ)) V :=
     MeasureTheory.Measure.eqOn_open_of_ae_eq
       ((MeasureTheory.ae_restrict_iff' hV_meas).mpr hae) hV_open
       hRHS_cont.continuousOn continuousOn_const
-  -- `support tensorComponentWeakRHS ⊆ tsupport (tensorComponentEuclid …)`.
   refine closure_minimal (fun y hy => ?_) (isClosed_tsupport _)
   rw [Function.mem_support] at hy
   by_contra hyu
@@ -1268,12 +1146,10 @@ theorem tensorComponentWeakRHS_hasCompactSupport
     HasCompactSupport
       (tensorComponentWeakRHS (I := I) (M := M) g r s T F α hK hK_target P₀) := by
   classical
-  -- The chart component has compact support for a chart-supported section.
   have hcomp_cs : HasCompactSupport
       (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) :=
     tensorComponentEuclid_hasCompactSupport (I := I) (M := M)
       g r s T α P₀ hT_supp
-  -- The right-hand side is supported inside the chart component's support.
   have hRHS_supp : tsupport (tensorComponentWeakRHS (I := I) (M := M)
       g r s T F α hK hK_target P₀) ⊆
       tsupport (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) :=
@@ -1281,20 +1157,6 @@ theorem tensorComponentWeakRHS_hasCompactSupport
       hK_target P₀ hT_supp hF_supp hT_K hweak
   exact HasCompactSupport.of_support_subset_isCompact hcomp_cs
     (subset_trans (subset_tsupport _) hRHS_supp)
-
-/-! ## The unconditional headline
-
-Routing the chart bilinear identity through the hypothesis-bearing form
-`tensorComponent_isSmoothWeakSolution_of_chartIdentity` produces the
-unconditional headline. The chart bilinear identity is established only for
-chart-supported test functions; for an arbitrary Euclidean test function `φ` it
-is recovered by inserting a smooth cutoff `ζ` equal to `1` on a neighbourhood of
-`K` and supported inside the chart target: the principal-part bilinear form sees
-only the chart-Euclidean partial of the chart component (supported in
-`tsupport (tensorComponentEuclid …) ⊆ K`), so `bilin u φ = bilin u (ζ · φ)`; the
-chart identity applies to the chart-supported `ζ · φ`; and the explicit
-right-hand side, supported inside `tsupport (tensorComponentEuclid …) ⊆ K`,
-satisfies `∫ tensorComponentWeakRHS · (ζ · φ) = ∫ tensorComponentWeakRHS · φ`. -/
 
 /-- **Per-component scalar weak solution of the connection Laplacian.**
 
@@ -1328,33 +1190,26 @@ theorem tensorComponent_isSmoothWeakSolution
       (tensorComponentEuclid (I := I) (M := M) g r s T α P₀)
       (tensorComponentWeakRHS (I := I) (M := M) g r s T F α hK hK_target P₀) := by
   classical
-  -- The Euclidean chart target is open.
   have hcTE_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) α
-  -- The chart-Euclidean partial of the chart component vanishes off its support.
   have hu_partial_zero : ∀ k : Fin (Module.finrank ℝ E), ∀ y,
       y ∉ tsupport (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) →
       euclidPartial (E := E) k
         (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) y = 0 :=
     fun k y hy => euclidPartial_eq_zero_of_notMem_tsupport (E := E) k hy
-  -- The right-hand side is supported inside the chart component's support.
   have hRHS_supp : tsupport (tensorComponentWeakRHS (I := I) (M := M)
       g r s T F α hK hK_target P₀) ⊆
       tsupport (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) :=
     tensorComponentWeakRHS_tsupport_subset (I := I) (M := M) g r s T F α hK
       hK_target P₀ hT_supp hF_supp hT_K hweak
-  -- A compact set interpolating between `K` and the chart target.
   obtain ⟨L, hL_compact, hKL, hL_target⟩ := exists_compact_between hK hcTE_open
     hK_target
-  -- A smooth cutoff equal to `1` on a neighbourhood of `K`, supported inside `L`.
   obtain ⟨ζ, hζ_one, hζ_zero, -⟩ :=
     exists_contMDiffMap_one_nhds_of_subset_interior (𝓘(ℝ, EuclN))
       (n := (⊤ : ℕ∞)) hK.isClosed hKL
-  -- The cutoff is globally `C^∞`.
   have hζ_cd : ContDiff ℝ ∞ (fun y => ζ y) :=
     (contMDiff_iff_contDiff (n := (⊤ : ℕ∞))).mp ζ.contMDiff
-  -- The cutoff has compact support inside `L ⊆ chartTargetEuclid α`.
   have hζ_supp : tsupport (fun y => ζ y) ⊆ L := by
     refine closure_minimal (fun y hy => ?_) hL_compact.isClosed
     rw [Function.mem_support] at hy
@@ -1363,15 +1218,12 @@ theorem tensorComponent_isSmoothWeakSolution
   have hζ_cs : HasCompactSupport (fun y => ζ y) :=
     HasCompactSupport.of_support_subset_isCompact hL_compact
       (fun y hy => hζ_supp (subset_tsupport _ hy))
-  -- The chart component's support lies inside `{ζ = 1}`'s neighbourhood base.
   have hζ_one_on : ∀ y ∈ tsupport (tensorComponentEuclid (I := I) (M := M)
       g r s T α P₀), ζ y = 1 := by
     intro y hy
     exact (hζ_one.filter_mono (nhds_le_nhdsSet (hT_K hy))).self_of_nhds
-  -- Route through the hypothesis-bearing chart-identity form.
   refine tensorComponent_isSmoothWeakSolution_of_chartIdentity (I := I) (M := M)
     g r s T α hK hK_target P₀ hT_supp _ (fun φ hφ hφ_cs _ => ?_)
-  -- The cut-off test function `ζ · φ`.
   have hφ' : ContDiff ℝ ∞ φ := hφ
   set ψ : EuclN → ℝ := fun y => ζ y * φ y with hψ_def
   have hψ_cd : ContDiff ℝ ∞ ψ := hζ_cd.mul hφ'
@@ -1382,7 +1234,6 @@ theorem tensorComponent_isSmoothWeakSolution
     rw [Function.mem_support] at hy
     by_contra hyL
     exact hy (show ζ y * φ y = 0 by rw [hζ_zero y hyL, zero_mul])
-  -- The bilinear form is unchanged by the cutoff: `bilin u φ = bilin u ψ`.
   have hbilin_eq :
       (tensorPrincipalForm (I := I) (M := M) g α hK hK_target).bilin
           (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) φ =
@@ -1400,7 +1251,6 @@ theorem tensorComponent_isSmoothWeakSolution
         (tensorPrincipalForm (I := I) (M := M) g α hK hK_target).c y *
           tensorComponentEuclid (I := I) (M := M) g r s T α P₀ y * ψ y
     rw [tensorPrincipalForm_c_apply (I := I) (M := M) g α hK hK_target y]
-    -- The principal integrands agree: on `tsupport u` the cutoff is `1` near `y`.
     have hprinc :
         (tensorPrincipalForm (I := I) (M := M) g α hK hK_target).principalIntegrand
             (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) φ y =
@@ -1408,8 +1258,7 @@ theorem tensorComponent_isSmoothWeakSolution
             (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) ψ y := by
       by_cases hyu : y ∈ tsupport
           (tensorComponentEuclid (I := I) (M := M) g r s T α P₀)
-      · -- Near `y` the cutoff is `1`, so `ψ = φ` on a neighbourhood of `y`.
-        have hψφ : ψ =ᶠ[nhds y] φ := by
+      · have hψφ : ψ =ᶠ[nhds y] φ := by
           have hone : ∀ᶠ z in nhds y, ζ z = 1 :=
             hζ_one.filter_mono (nhds_le_nhdsSet (hT_K hyu))
           filter_upwards [hone] with z hz
@@ -1419,15 +1268,13 @@ theorem tensorComponent_isSmoothWeakSolution
           SmoothEllipticBilinearForm.principalIntegrand]
         refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
         rw [Filter.EventuallyEq.fderiv_eq hψφ]
-      · -- Off `tsupport u` the chart-Euclidean partial of the component is `0`.
-        rw [SmoothEllipticBilinearForm.principalIntegrand,
+      · rw [SmoothEllipticBilinearForm.principalIntegrand,
           SmoothEllipticBilinearForm.principalIntegrand]
         refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
         have := hu_partial_zero i y hyu
         rw [euclidPartial_def] at this
         rw [this]; ring
     rw [hprinc]; ring
-  -- The right-hand-side integral is unchanged by the cutoff.
   have hRHS_eq :
       ∫ y, tensorComponentWeakRHS (I := I) (M := M) g r s T F α hK hK_target P₀ y
         * ψ y ∂(volume : Measure EuclN) =
@@ -1442,7 +1289,6 @@ theorem tensorComponent_isSmoothWeakSolution
         g r s T F α hK hK_target P₀)
     · rw [hζ_one_on y (hRHS_supp hyR)]; ring
     · rw [image_eq_zero_of_notMem_tsupport hyR]; ring
-  -- Assemble: chart identity for `ψ`, then strip the cutoff.
   rw [MeasureTheory.setIntegral_univ, hbilin_eq,
     tensorComponent_chartBilinIdentity (I := I) (M := M) g r s T F α hK hK_target
       P₀ hT_supp hT_K hweak hψ_cd hψ_cs hψ_supp, hRHS_eq]

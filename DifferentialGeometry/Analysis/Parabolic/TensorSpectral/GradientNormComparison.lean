@@ -99,14 +99,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Headline gradient-indexed pointwise norm comparison
-
-The closed-manifold hypotheses needed below are exactly those of the
-parent statements: an inner-product model fibre with non-zero rank, and
-a closed manifold (compact, Hausdorff, sigma-compact, boundaryless).
-We package the shifted-index estimates under names matching the
-gradient flavour they will be consumed with downstream. -/
-
 section HeadlineGradientNormComparison
 
 variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -168,17 +160,6 @@ theorem
   chartTrivializationNorm_le_const_mul_tensorInnerPointwise_chartRSTwist_on_pouTsupport
     (I := I) (M := M) g r (s + 1) α
 
-/-! ## Compositional reuse: bundle-fibre at twisted tensor on the
-diagonal
-
-The bundle-fibre `(r, s + 1)`-inner product on the diagonal at a
-chart-`(α, b)`-twisted tensor is non-negative on the chart base set,
-since it equals the chart-frame `(r, s + 1)`-diagonal quadratic form
-via the bridge identity, and the latter is non-negative on the chart
-base set. This auxiliary fact is convenient when downstream consumers
-need both the upper bound (the headlines above) and non-negativity in
-the same calculation. -/
-
 /-- Non-negativity of the bundle-fibre `(r, s + 1)`-inner product on the
 diagonal at the chart-`(α, b)`-twisted tensor, on the chart base set.
 This is the gradient-indexed packaging of
@@ -199,20 +180,6 @@ lemma tensorInnerPointwise_chartRSTwist_succ_nonneg
     (I := I) (M := M) g r (s + 1) α hb T
 
 end HeadlineGradientNormComparison
-
-/-! ## Iterated form: simultaneous comparison for ranks `(r, s)` and
-`(r, s + 1)`
-
-A downstream argument that needs to compare *both* the value of an
-`(r, s)`-tensor section and its gradient (an `(r, s + 1)`-tensor
-section) typically combines the parent norm comparison at `(r, s)` with
-the gradient-flavoured one at `(r, s + 1)`. To avoid duplicating the
-existential extraction in such proofs, we package the combined
-statement: a single non-negative constant works for both estimates.
-
-The constant is the maximum of the two parent constants, but we only
-need to assert existence of a common upper bound, which is `K₀ + K₁`
-with each parent constant separately non-negative. -/
 
 section CombinedGradient
 
@@ -251,7 +218,6 @@ theorem
   refine ⟨K₀ + K₁, add_nonneg hK₀_nn hK₁_nn, ?_, ?_⟩
   · intro b hb T
     have h := h₀ b hb T
-    -- `‖T‖² ≤ K₀ * Q ≤ (K₀ + K₁) * Q` since `Q ≥ 0` and `K₁ ≥ 0`.
     have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
       pouTsupport_subset_baseSet (I := I) (M := M) α hb
     have hQ_nn : 0 ≤ chartTensorInnerPointwise_rs_model

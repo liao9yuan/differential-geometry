@@ -97,14 +97,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Directional covariant derivative on `SmoothCcTensor` -/
 
 /-- The directional covariant derivative of a smooth compactly-supported
 `(r, s)`-tensor section at a point `x`, along a model-fibre direction `v : E`
@@ -123,8 +119,6 @@ lemma tensorCovDerivAt_def
     tensorCovDerivAt (I := I) (M := M) g r s S x v =
       tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)
         (fun y : M => S.toSection y) x v := rfl
-
-/-! ## Algebraic properties of `tensorCovDerivAt` -/
 
 /-- The directional covariant derivative is additive in the section. -/
 lemma tensorCovDerivAt_add
@@ -156,7 +150,6 @@ lemma tensorCovDerivAt_add
   change (tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)).toFun
       (fun y : M => S₁.toSection y + S₂.toSection y) x v = _
   rw [hclm]
-  -- `(A + B) v = A v + B v` for CLMs.
   rfl
 
 /-- The directional covariant derivative is `ℝ`-homogeneous in the section. -/
@@ -173,7 +166,6 @@ lemma tensorCovDerivAt_smul
     rfl
   rw [hpt]
   have hf_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => c) := contMDiff_const
-  -- The constant function `M → ℝ` is differentiable at `x`.
   have hf_mdiff : MDiffAt (fun y : M => c) x :=
     (hf_smooth.mdifferentiable (by norm_num)).mdifferentiableAt
   have hcov_leibniz :=
@@ -184,19 +176,14 @@ lemma tensorCovDerivAt_smul
       (hσ := (S.toSection.contMDiff.mdifferentiable (by norm_num)).mdifferentiableAt)
       (hg := hf_mdiff)
       (hx := (by trivial : x ∈ (Set.univ : Set M)))
-  -- `extDerivFun (fun _ => c) x = 0` since constant functions have zero derivative.
   have hext_zero : extDerivFun (I := I) (fun _ : M => c) x = 0 := by
     unfold extDerivFun
     simp [mfderiv_const]
   change (tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)).toFun
       ((fun _ : M => c) • fun y : M => S.toSection y) x v = _
   rw [hcov_leibniz]
-  -- After leibniz: `c • cov σ x + (extDerivFun (const c) x).smulRight (σ x)`,
-  -- applied to `v`. The second term has factor `extDerivFun (const c) x = 0`.
   rw [hext_zero]
   simp [ContinuousLinearMap.smul_apply]
-
-/-! ## Pointwise H^1 gradient inner product -/
 
 /-- The pointwise Hilbert-Schmidt-type inner product of the covariant
 derivatives of two smooth compactly-supported `(r, s)`-tensor sections at a
@@ -227,8 +214,6 @@ lemma tensorCovDerivPointwiseInner_def
             (TensorRSSpace.toModel
               (tensorCovDerivAt (I := I) (M := M) g r s T x
                 ((chartModelBasis E) j))) := rfl
-
-/-! ## Algebraic properties of `tensorCovDerivPointwiseInner` -/
 
 /-- Symmetry of the pointwise gradient inner product. -/
 lemma tensorCovDerivPointwiseInner_symm
@@ -359,7 +344,6 @@ lemma tensorCovDerivPointwiseInner_nonneg
           tensorInnerPointwise (I := I) (M := M) g r s x
             (∑ i : Fin n, U i k • vfam i)
             (∑ j : Fin n, U j k • vfam j) := by
-    -- Generic helper: bilinearity in the first argument over a finite sum.
     have hsum_left :
         ∀ (A : Finset (Fin n)) (a : Fin n → ℝ)
           (φ : Fin n → TensorRSModel r s ℝ E)
@@ -380,7 +364,6 @@ lemma tensorCovDerivPointwiseInner_nonneg
           rw [tensorInnerPointwise_add_left]
           rw [ih]
           rw [Finset.sum_insert hi]
-    -- Generic helper: bilinearity in the second argument over a finite sum.
     have hsum_right :
         ∀ (A : Finset (Fin n))
           (S₀ : TensorRSModel r s ℝ E)
@@ -474,13 +457,6 @@ lemma tensorCovDerivPointwiseInner_nonneg
   exact tensorInnerPointwise_nonneg (I := I) (M := M) g r s x
     (∑ i : Fin n, U i k • vfam i)
 
-/-! ## Global H^1 inner product on smooth Cc tensor sections
-
-The H^1 inner product of two smooth compactly-supported `(r, s)`-tensor
-sections is the sum of the `L^2` inner product `tensorL2Inner g r s` (already
-in the codebase) and the integral of the pointwise gradient inner product
-`tensorCovDerivPointwiseInner g r s` against the Riemannian volume measure. -/
-
 /-- The global H^1 inner product of two smooth compactly-supported
 `(r, s)`-tensor sections on a closed Riemannian manifold:
 
@@ -502,14 +478,6 @@ lemma tensorH1Inner_def
         ∫ x, tensorCovDerivPointwiseInner (I := I) (M := M) g r s S T x
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) := rfl
 
-/-! ## Vanishing of the directional covariant derivative off the section support
-
-The directional covariant derivative `tensorCovDerivAt g r s S x v` vanishes whenever
-`x ∉ tsupport S.toSection`. The key tool is the local-germ characterisation of the
-covariant derivative: if `S.toSection` agrees with the zero section on a neighbourhood of
-`x`, then `tensorRSCovariantDerivative ... x` agrees with the covariant derivative of the
-zero section at `x`, which is `0` by `IsCovariantDerivativeOn.zero`. -/
-
 /-- Auxiliary: if `S.toSection y = 0` for all `y` in a neighbourhood of `x`, then
 the directional covariant derivative of `S` at `x` vanishes in every direction. -/
 private lemma tensorCovDerivAt_eq_zero_of_eventuallyEq_zero
@@ -518,13 +486,9 @@ private lemma tensorCovDerivAt_eq_zero_of_eventuallyEq_zero
     (hx_nhds : ∀ᶠ y in 𝓝 x, S.toSection y = 0) (v : E) :
     tensorCovDerivAt (I := I) (M := M) g r s S x v = 0 := by
   classical
-  -- The covariant derivative of `S.toSection` at `x` equals the covariant derivative
-  -- of the zero section at `x` by `congr_of_eventuallyEq`, then `0` by `zero`.
   set cov := tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)
-  -- Smoothness of `S.toSection` at `x`.
   have hS_diff :=
     (S.toSection.contMDiff.mdifferentiable (by norm_num)).mdifferentiableAt (x := x)
-  -- Smoothness of the zero section at `x`.
   have hzero_diff :
       MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
         (Bundle.zeroSection (TensorRSModel r s ℝ E)
@@ -532,7 +496,6 @@ private lemma tensorCovDerivAt_eq_zero_of_eventuallyEq_zero
     (Bundle.mdifferentiable_zeroSection
       (𝕜 := ℝ) (IB := I) (F := TensorRSModel r s ℝ E)
       (E := fun y : M => TensorRSSpace r s I y)).mdifferentiableAt
-  -- Eventually-equal: `S.toSection y = 0` near `x`.
   have hev : ∀ᶠ y in 𝓝 x,
       (fun y : M => S.toSection y) y =
         ((0 : (y : M) → TensorRSSpace r s I y)) y := hx_nhds
@@ -540,10 +503,8 @@ private lemma tensorCovDerivAt_eq_zero_of_eventuallyEq_zero
     (σ := fun y : M => S.toSection y)
     (σ' := (0 : (y : M) → TensorRSSpace r s I y))
     hS_diff hzero_diff (Filter.univ_mem) hev
-  -- `cov(0) x = 0`.
   have hcov_zero := cov.isCovariantDerivativeOnUniv.zero
     (x := x) (hx := (by trivial : x ∈ (Set.univ : Set M)))
-  -- Combine: cov(S.toSection) x = cov(0) x = 0.
   unfold tensorCovDerivAt
   change cov.toFun (fun y : M => S.toSection y) x v = (0 : E →L[ℝ] _) v
   rw [hcongr, hcov_zero]
@@ -556,28 +517,20 @@ lemma tensorCovDerivAt_eq_zero_off_tsupport
     (S : SmoothCcTensor g r s) {x : M} (hx : x ∉ tsupport S.toFun) (v : E) :
     tensorCovDerivAt (I := I) (M := M) g r s S x v = 0 := by
   classical
-  -- Outside `tsupport S.toFun`, the function `S.toFun` vanishes on an open
-  -- neighbourhood of `x`. Since `S.toFun = toModel ∘ S.toSection` and `toModel` is
-  -- injective, `S.toSection` vanishes on the same neighbourhood.
   have hopen : IsOpen (tsupport S.toFun)ᶜ := (isClosed_tsupport _).isOpen_compl
   have hmem : x ∈ (tsupport S.toFun)ᶜ := hx
   have hnhd : (tsupport S.toFun)ᶜ ∈ 𝓝 x := hopen.mem_nhds hmem
-  -- On this neighbourhood, `S.toFun y = 0`, hence `S.toSection y = 0`.
   have hev : ∀ᶠ y in 𝓝 x, S.toSection y = 0 := by
     filter_upwards [hnhd] with y hy
-    -- `y ∉ tsupport S.toFun` ⇒ `y ∉ support S.toFun` ⇒ `S.toFun y = 0`.
     have hy_notsupp : y ∉ Function.support S.toFun := fun hyS => hy (subset_tsupport _ hyS)
     have hy_zero : S.toFun y = 0 := by
       simpa [Function.support, Function.mem_support] using hy_notsupp
-    -- Translate `S.toFun y = 0` to `S.toSection y = 0` via `toModel` injectivity.
     have hto : TensorRSSpace.toModel (S.toSection y) = 0 := by
       have : S.toFun y = TensorRSSpace.toModel (S.toSection y) := rfl
       rw [this] at hy_zero
       exact hy_zero
     have htoModel_zero : TensorRSSpace.toModel
         (0 : TensorRSSpace r s I y) = 0 := TensorRSSpace.toModel_zero
-    -- `toModel` injective: from `toModel (S.toSection y) = 0 = toModel 0`, conclude
-    -- `S.toSection y = 0`.
     have hcomb : TensorRSSpace.toModel (S.toSection y) =
         TensorRSSpace.toModel (0 : TensorRSSpace r s I y) := by
       rw [hto, htoModel_zero]
@@ -585,8 +538,6 @@ lemma tensorCovDerivAt_eq_zero_off_tsupport
       (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := r) (s := s) (x := y) hcomb
   exact tensorCovDerivAt_eq_zero_of_eventuallyEq_zero
     (I := I) (M := M) g r s S x hev v
-
-/-! ## Compact support of the pointwise gradient inner product -/
 
 /-- The integrand vanishes at any point outside `tsupport S.toFun`. -/
 private lemma tensorCovDerivPointwiseInner_eq_zero_off_tsupport
@@ -612,15 +563,9 @@ theorem tensorCovDerivPointwiseInner_hasCompactSupport
     (S T : SmoothCcTensor g r s) :
     HasCompactSupport
       (tensorCovDerivPointwiseInner (I := I) (M := M) g r s S T) := by
-  -- We show `tsupport F ⊆ tsupport S.toFun`. Using `IsCompact.of_isClosed_subset`
-  -- with `tsupport S.toFun` (compact, by `S.hasCompactSupport`) and `tsupport F`
-  -- closed (always closed).
   refine IsCompact.of_isClosed_subset S.hasCompactSupport (isClosed_tsupport _) ?_
-  -- `tsupport F = closure (support F)` and `tsupport S.toFun` is closed. So it
-  -- suffices to show `support F ⊆ tsupport S.toFun`, then take closure.
   apply closure_minimal _ (isClosed_tsupport _)
   intro x hx
-  -- `hx : F x ≠ 0`. Suppose `x ∉ tsupport S.toFun`. Then `F x = 0`, contradiction.
   by_contra hx_notsupp
   exact hx (tensorCovDerivPointwiseInner_eq_zero_off_tsupport
     (I := I) (M := M) g r s S T hx_notsupp)
@@ -633,7 +578,6 @@ theorem tensorCovDerivPointwiseInner_tsupport_subset_left
     (S T : SmoothCcTensor g r s) :
     tsupport (tensorCovDerivPointwiseInner (I := I) (M := M) g r s S T) ⊆
       tsupport S.toFun := by
-  -- `tsupport F = closure (support F)`; `tsupport S.toFun` is closed.
   refine closure_minimal ?_ (isClosed_tsupport _)
   intro x hx
   by_contra hx_notsupp
@@ -648,7 +592,6 @@ theorem tensorCovDerivPointwiseInner_tsupport_subset_right
     (S T : SmoothCcTensor g r s) :
     tsupport (tensorCovDerivPointwiseInner (I := I) (M := M) g r s S T) ⊆
       tsupport T.toFun := by
-  -- Swap the section pair: `⟨∇S, ∇T⟩ = ⟨∇T, ∇S⟩`.
   have hswap : tensorCovDerivPointwiseInner (I := I) (M := M) g r s S T =
       tensorCovDerivPointwiseInner (I := I) (M := M) g r s T S := by
     funext x
@@ -656,23 +599,6 @@ theorem tensorCovDerivPointwiseInner_tsupport_subset_right
   rw [hswap]
   exact tensorCovDerivPointwiseInner_tsupport_subset_left
     (I := I) (M := M) g r s T S
-
-/-! ## Coordinate-invariance of the trace expression
-
-The integrand `tensorCovDerivPointwiseInner` is the metric-induced trace of the
-bilinear form `(u, v) ↦ ⟨cov_S(b)(u), cov_T(b)(v)⟩_{g(b)}` on `TangentSpace I b`.
-This trace is independent of the basis of `TangentSpace I b` used to compute it.
-We prove this invariance for the canonical choice of `chartBasisVecFiber α i b`
-versus `chartModelBasis E i`, with the corresponding Gram matrices.
-
-The proof is a linear-algebra identity: if `T : E ≃L[ℝ] E` is the change-of-basis
-isomorphism sending `chartModelBasis E i` to `chartBasisVecFiber α i b`
-(i.e. `(triv α).symm b`), and `G'_{ij} := g(b)(e_i', e_j')`,
-`G_{ij} := g(b)(e_i, e_j)` are the two Gram matrices, then
-`G' = T^T G T` (with `T_{ki}` the `k`-th coefficient of `e_i'` in basis `e_·`),
-and the trace formula
-`∑_{ij} G'⁻¹_{ij} B(e_i', e_j') = ∑_{kl} G⁻¹_{kl} B(e_k, e_l)`
-follows by algebraic manipulation. -/
 
 /-- An abstract linear-algebra identity: for any change-of-basis matrix `T` and
 any inner product matrix `G` with `G' := T^T G T` (the Gram matrix under the new
@@ -692,12 +618,7 @@ private lemma trace_invariance_under_change_of_basis
     ∑ i : Fin n, ∑ j : Fin n, G'⁻¹ i j * B' i j =
       ∑ i : Fin n, ∑ j : Fin n, G⁻¹ i j * B i j := by
   classical
-  -- The sum `∑_{ij} M_{ij} N_{ij}` is the trace of `M Nᵀ` (Frobenius inner product).
-  -- Equivalently, `Matrix.trace (M * Nᵀ)`. We prove that `Matrix.trace (G'⁻¹ * B'ᵀ) =
-  -- Matrix.trace (G⁻¹ * Bᵀ)` using the cyclic property of trace and the explicit
-  -- formulas `G' = Tᵀ G T`, `B' = Tᵀ B T`.
   simp only
-  -- Step 1: rewrite the double sum as a trace.
   have hsum_eq : ∀ M N : Matrix (Fin n) (Fin n) ℝ,
       ∑ i : Fin n, ∑ j : Fin n, M i j * N i j = Matrix.trace (M * Nᵀ) := by
     intro M N
@@ -709,7 +630,6 @@ private lemma trace_invariance_under_change_of_basis
     intro j _
     simp [Matrix.transpose_apply]
   rw [hsum_eq, hsum_eq]
-  -- Step 2: simplify `G'⁻¹ = T⁻¹ G⁻¹ T⁻ᵀ` (after standard algebra).
   set G' : Matrix (Fin n) (Fin n) ℝ := Tᵀ * G * T with hG'_def
   have hG'_inv : G'⁻¹ = T⁻¹ * G⁻¹ * (Tᵀ)⁻¹ := by
     rw [hG'_def]
@@ -718,17 +638,13 @@ private lemma trace_invariance_under_change_of_basis
       rw [Matrix.isUnit_iff_isUnit_det] at hT ⊢
       simpa [Matrix.det_transpose] using hT
     have hG_unit : IsUnit G := hG
-    -- (Tᵀ * G * T)⁻¹ = T⁻¹ * G⁻¹ * (Tᵀ)⁻¹.
     rw [Matrix.mul_inv_rev, Matrix.mul_inv_rev, mul_assoc]
   rw [hG'_inv]
-  -- Step 3: also rewrite B' = Tᵀ * B * T, so (B')ᵀ = Tᵀ * Bᵀ * T.
   set B' : Matrix (Fin n) (Fin n) ℝ := Tᵀ * B * T with hB'_def
   have hB'_trans : B'ᵀ = Tᵀ * Bᵀ * T := by
     rw [hB'_def, Matrix.transpose_mul, Matrix.transpose_mul, Matrix.transpose_transpose,
       mul_assoc]
   rw [hB'_trans]
-  -- Goal: trace (T⁻¹ * G⁻¹ * (Tᵀ)⁻¹ * (Tᵀ * Bᵀ * T)) = trace (G⁻¹ * Bᵀ).
-  -- Reassociate to combine `(Tᵀ)⁻¹ * Tᵀ = 1`.
   have hTT_unit : IsUnit Tᵀ := by
     rw [Matrix.isUnit_iff_isUnit_det] at hT ⊢
     simpa [Matrix.det_transpose] using hT
@@ -736,26 +652,14 @@ private lemma trace_invariance_under_change_of_basis
     (by simpa [Matrix.isUnit_iff_isUnit_det, Matrix.det_transpose] using hT)
   have hT_T_inv : T * T⁻¹ = 1 := Matrix.mul_nonsing_inv _
     (by simpa [Matrix.isUnit_iff_isUnit_det] using hT)
-  -- Reassociate: T⁻¹ * G⁻¹ * (Tᵀ)⁻¹ * (Tᵀ * Bᵀ * T) = T⁻¹ * G⁻¹ * ((Tᵀ)⁻¹ * Tᵀ) * Bᵀ * T.
-  -- We use only matrix monoid associativity.
   have hcyc :
       T⁻¹ * G⁻¹ * (Tᵀ)⁻¹ * (Tᵀ * Bᵀ * T) =
         T⁻¹ * G⁻¹ * ((Tᵀ)⁻¹ * Tᵀ) * Bᵀ * T := by
-    -- Both sides equal `((T⁻¹ * G⁻¹) * (Tᵀ)⁻¹) * (Tᵀ * Bᵀ * T)` =
-    -- `(T⁻¹ * G⁻¹) * ((Tᵀ)⁻¹ * (Tᵀ * Bᵀ * T))` =
-    -- `(T⁻¹ * G⁻¹) * (((Tᵀ)⁻¹ * Tᵀ) * (Bᵀ * T))`, etc.
-    -- Use `mul_assoc` repeatedly.
-    -- `mul_assoc` applied at various positions handles this.
     repeat rw [mul_assoc]
   rw [hcyc, hT_inv_T, mul_one]
-  -- Goal: trace (T⁻¹ * G⁻¹ * Bᵀ * T) = trace (G⁻¹ * Bᵀ).
-  -- Use cyclic property: trace(A * B) = trace(B * A) with A = T⁻¹, B = (G⁻¹ * Bᵀ * T).
-  -- Then trace(T⁻¹ * (G⁻¹ * Bᵀ * T)) = trace((G⁻¹ * Bᵀ * T) * T⁻¹) = trace(G⁻¹ * Bᵀ * (T * T⁻¹)) =
-  -- trace(G⁻¹ * Bᵀ * 1) = trace(G⁻¹ * Bᵀ).
   have hreassoc : T⁻¹ * G⁻¹ * Bᵀ * T = T⁻¹ * (G⁻¹ * Bᵀ * T) := by
     rw [mul_assoc T⁻¹ G⁻¹ Bᵀ, mul_assoc T⁻¹ (G⁻¹ * Bᵀ) T]
   rw [hreassoc, Matrix.trace_mul_comm T⁻¹ (G⁻¹ * Bᵀ * T)]
-  -- Goal: trace (G⁻¹ * Bᵀ * T * T⁻¹) = trace (G⁻¹ * Bᵀ).
   rw [mul_assoc (G⁻¹ * Bᵀ) T T⁻¹, hT_T_inv, mul_one]
 
 /-- The integrand `tensorCovDerivPointwiseInner g r s S T b` rewritten using the
@@ -793,7 +697,6 @@ private lemma chartBasisVecFiber_eq_sum_chartModelBasis
   classical
   unfold chartBasisTransitionMatrix
   simp only [Matrix.of_apply]
-  -- `Module.Basis.sum_repr`: any vector `v : E` is `∑_k ((basis.repr v) k) • basis k`.
   exact (((chartModelBasis E).sum_repr
     (chartBasisVecFiber (I := I) α i b))).symm
 
@@ -816,16 +719,9 @@ private lemma chartBasisTransitionMatrix_isUnit
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
     IsUnit (chartBasisTransitionMatrix (I := I) α b) := by
   classical
-  -- At base-set points, `chartBasisFamily α b` is a basis (since it's LI and
-  -- has `Module.finrank ℝ E` elements in a `Module.finrank ℝ E`-dimensional space).
-  -- So `chartBasisTransitionMatrix = (chartModelBasis E).toMatrix (chartBasisFamily)`
-  -- is the transition matrix between two bases, hence invertible.
   rw [chartBasisTransitionMatrix_eq_toMatrix]
-  -- Build the basis from the family
   set chartBasis : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E :=
     chartBasisFamily (I := I) α hb with hCB_def
-  -- The toMatrix of `chartBasisFamily` interpreted as a family is the same
-  -- as toMatrix of `chartBasis` (the basis).
   have hfam_eq : (fun i : Fin (Module.finrank ℝ E) =>
       chartBasisVecFiber (I := I) α i b)
       = (chartBasis : Fin (Module.finrank ℝ E) → E) := by
@@ -833,11 +729,9 @@ private lemma chartBasisTransitionMatrix_isUnit
     rw [hCB_def]
     exact (chartBasisFamily_apply (I := I) α hb i).symm
   rw [hfam_eq]
-  -- Now `(chartModelBasis E).toMatrix chartBasis` is invertible.
   refine ⟨⟨_, chartBasis.toMatrix (chartModelBasis E), ?_, ?_⟩, rfl⟩
   · exact Module.Basis.toMatrix_mul_toMatrix_flip _ _
   · exact Module.Basis.toMatrix_mul_toMatrix_flip _ _
-
 
 /-- A helper: a continuous bilinear form on `E` evaluated on linear combinations of
 basis vectors. -/
@@ -848,7 +742,6 @@ private lemma g_inner_bilinear_expand
       ∑ k : Fin n, ∑ l : Fin n,
         a k * c l * g.inner b (u k) (u l) := by
   classical
-  -- Apply `g.inner b` outer-linearly: `g.inner b (∑ k a_k • u_k) = ∑ k a_k • (g.inner b (u_k))`.
   have houter : g.inner b (∑ k : Fin n, a k • u k) =
       ∑ k : Fin n, a k • (g.inner b (u k)) := by
     rw [map_sum]
@@ -883,14 +776,6 @@ private lemma chartGramMatrix_eq_transition
       chartBasisVecFiber_eq_sum_chartModelBasis (I := I) α b j]
   rw [g_inner_bilinear_expand g b
         (fun k => T k i) (fun l => T l j) (chartModelBasis E)]
-  -- LHS: ∑_{kl} T_{ki} * T_{lj} * g(e_k, e_l)
-  -- RHS: ((Tᵀ * G * T) i j) = ∑_a (Tᵀ * G)_{ia} * T_{aj} = ∑_a (∑_b T^T_{ib} * G_{ba}) * T_{aj}
-  --     = ∑_a (∑_b T_{bi} * G_{ba}) * T_{aj} = ∑_{ab} T_{bi} * G_{ba} * T_{aj}.
-  -- We want LHS = RHS. The mapping (k, l) → (b, a) is k=b, l=a, so:
-  -- LHS = ∑_{kl} T_{ki} * T_{lj} * g(e_k, e_l)
-  -- RHS = ∑_{ab} T_{bi} * G_{ba} * T_{aj} = ∑_{kl} (k=b, l=a) T_{ki} * G_{kl} * T_{lj}.
-  -- Both should match if G_{kl} = g(e_k, e_l), which is gramMatrixAt_apply.
-  -- The issue: ∑ swap needed.
   rw [Matrix.mul_apply]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl ?_
@@ -958,13 +843,10 @@ private lemma chartTensorCovDeriv_innerMatrix_eq_transition
                   ((chartModelBasis E) l)))) *
           chartBasisTransitionMatrix (I := I) α b) i j := by
   classical
-  -- Notation: T = the change-of-basis matrix.
   set Tmat : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
     chartBasisTransitionMatrix (I := I) α b with hTmat_def
-  -- Expand `chartBasisVecFiber α i b` as a sum.
   have hexp_i := chartBasisVecFiber_eq_sum_chartModelBasis (I := I) α b i
   have hexp_j := chartBasisVecFiber_eq_sum_chartModelBasis (I := I) α b j
-  -- Apply CLM linearity of `cov_S b`, `cov_T b` (these are CLMs `E →L[ℝ] TensorRSSpace`).
   have hSi : tensorCovDerivAt (I := I) (M := M) g r s S b
         (chartBasisVecFiber (I := I) α i b) =
       ∑ k : Fin (Module.finrank ℝ E), Tmat k i •
@@ -986,7 +868,6 @@ private lemma chartTensorCovDeriv_innerMatrix_eq_transition
     intro l _
     rw [map_smul]
   rw [hSi, hTj]
-  -- Linearity of `toModel` on finite sums.
   have htoM_sum : ∀ (s' : Finset (Fin (Module.finrank ℝ E)))
       (f : Fin (Module.finrank ℝ E) → TensorRSSpace r s I b)
       (c : Fin (Module.finrank ℝ E) → ℝ),
@@ -1006,27 +887,19 @@ private lemma chartTensorCovDeriv_innerMatrix_eq_transition
     (fun l => tensorCovDerivAt (I := I) (M := M) g r s T b ((chartModelBasis E) l))
     (fun l => Tmat l j)
   rw [htoM_left, htoM_right]
-  -- Bilinearity of `tensorInnerPointwise`:
   rw [tensorInnerPointwise_sum_left (I := I) (M := M) g r s b Finset.univ]
-  -- Expand each inner sum.
   conv_lhs =>
     rhs
     ext k
     rw [tensorInnerPointwise_sum_right (I := I) (M := M) g r s b Finset.univ]
     rw [Finset.mul_sum]
-  -- Now LHS is `∑ k, ∑ l, T_{ki} * (T_{lj} * tensorInnerPointwise g ((cov_S e_k).toModel) ((cov_T e_l).toModel))`.
-  -- RHS = `(Tᵀ * B * T) i j = ∑_a (Tᵀ * B)_{ia} * T_{aj} = ∑_a (∑_b Tᵀ_{ib} * B_{ba}) * T_{aj} =
-  --       ∑_a (∑_b T_{bi} * B_{ba}) * T_{aj}`.
-  -- We need: LHS = RHS via index renaming k = b, l = a.
   rw [Matrix.mul_apply]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl ?_
   intro k _
-  -- Goal-ish: ∑ l, T_{ki} * (T_{lj} * B_{kl}) = (Tᵀ * B) i k * T k j
   rw [Matrix.mul_apply, Finset.sum_mul]
   refine Finset.sum_congr rfl ?_
   intro l _
-  -- Goal: T_{ki} * (T_{lj} * B_{kl}) = (Tᵀ_{ik?} ...) ... — index check needed.
   rw [Matrix.transpose_apply, Matrix.of_apply]
   ring
 
@@ -1052,17 +925,10 @@ lemma chartTensorCovDerivPointwiseInner_eq_tensorCovDerivPointwiseInner
         (TensorRSSpace.toModel
           (tensorCovDerivAt (I := I) (M := M) g r s T b ((chartModelBasis E) l)))
     with hBmat_def
-  -- The chart-frame integrand is ∑_{ij} (Tmatᵀ * Gmat * Tmat)⁻¹_{ij} * (Tmatᵀ * Bmat * Tmat)_{ij}.
-  -- By the abstract trace lemma, this equals ∑_{kl} Gmat⁻¹_{kl} * Bmat_{kl}.
-  -- And the latter is the model-basis integrand.
   unfold chartTensorCovDerivPointwiseInner
   unfold tensorCovDerivPointwiseInner
-  -- Rewrite both sides using the matrix structure.
-  -- LHS = ∑_{ij} (chartGramMatrix g α b)⁻¹ i j * (Bmat-prime)_{ij}
-  --     where Bmat-prime = Tmatᵀ * Bmat * Tmat.
   have hG_eq : chartGramMatrix (I := I) g α b = Tmatᵀ * Gmat * Tmat :=
     chartGramMatrix_eq_transition (I := I) g α b
-  -- Apply abstract trace lemma:
   have hLHS_term_eq : ∀ i j : Fin n,
       tensorInnerPointwise (I := I) (M := M) g r s b
           (TensorRSSpace.toModel
@@ -1074,8 +940,6 @@ lemma chartTensorCovDerivPointwiseInner_eq_tensorCovDerivPointwiseInner
         (Tmatᵀ * Bmat * Tmat) i j := by
     intro i j
     exact chartTensorCovDeriv_innerMatrix_eq_transition (I := I) (M := M) g α r s S T b i j
-  -- Goal: ∑_{ij} G_chart⁻¹_{ij} * (...) = ∑_{kl} G⁻¹_{kl} * tensorInnerPointwise(...)
-  -- Rewrite both sides to expose matrix structure.
   have hLHS_rewrite :
       ∑ i : Fin n, ∑ j : Fin n,
           (chartGramMatrix (I := I) g α b)⁻¹ i j *
@@ -1094,36 +958,16 @@ lemma chartTensorCovDerivPointwiseInner_eq_tensorCovDerivPointwiseInner
     intro j _
     rw [hLHS_term_eq i j, hG_eq]
   rw [hLHS_rewrite]
-  -- Now apply abstract trace lemma.
   have hT_unit : IsUnit Tmat := chartBasisTransitionMatrix_isUnit (I := I) α hb
   have hG_unit : IsUnit Gmat := by
     rw [hGmat_def]
-    -- `gramMatrixAt_isUnit` is private in the source file but we can derive
-    -- invertibility from `gramMatrixAt_posSemidef` and the fact that
-    -- `gramMatrixAt_inv_isHermitian` exists (the inverse is well-defined).
-    -- Alternative: use that the matrix is positive definite (g is Riemannian).
-    -- We use the fact that the inverse exists as a Hermitian matrix, which
-    -- gives `IsUnit`.
     have hinv_herm := gramMatrixAt_inv_isHermitian (I := I) (M := M) g b
-    -- For a square matrix M over a field, M is a unit iff its inverse is well-defined
-    -- (via `Matrix.nonsing_inv`).
-    -- `gramMatrixAt_inv_posSemidef.isHermitian` gives us that the inverse is hermitian,
-    -- meaning the inverse exists (otherwise it'd be junk = 0 which is hermitian, but
-    -- we have it positive semidefinite which rules out 0).
-    -- Direct: use gramMatrixAt_posDef.isUnit if accessible.
     have hpos := gramMatrixAt_inv_posSemidef (I := I) (M := M) g b
-    -- The Gram matrix at b is the inverse of `gramMatrixAt_inv`, which is positive semidefinite.
-    -- We argue via `Matrix.PosDef.isUnit` (the original matrix is PD).
-    -- Simpler: use that `gramMatrixAt` is the matrix of a positive-definite quadratic
-    -- form, hence invertible. This is essentially what `gramMatrixAt_isUnit` proves
-    -- (privately). We restate the argument.
     rw [Matrix.isUnit_iff_isUnit_det, isUnit_iff_ne_zero]
-    -- Use that PosDef ⇒ det ≠ 0.
     have hposdef : (gramMatrixAt (I := I) (M := M) g b).PosDef := by
       refine Matrix.PosDef.of_dotProduct_mulVec_pos
         (gramMatrixAt_isHermitian (I := I) (M := M) g b) ?_
       intro v hv
-      -- Same proof as `gramMatrixAt_posDef` (private). Reproduce.
       let w : E := ∑ i : Fin (Module.finrank ℝ E),
         v i • (chartModelBasis E) i
       have hw_ne : w ≠ 0 := by
@@ -1134,7 +978,6 @@ lemma chartTensorCovDerivPointwiseInner_eq_tensorCovDerivPointwiseInner
         exact hv (funext (hlin v h))
       have hquad : star v ⬝ᵥ (gramMatrixAt (I := I) (M := M) g b) *ᵥ v =
           g.inner b w w := by
-        -- Same expansion as in `gramMatrixAt_posDef`.
         have hexp : g.inner b w w =
             ∑ j : Fin (Module.finrank ℝ E),
               v j * ∑ i : Fin (Module.finrank ℝ E),
@@ -1162,7 +1005,6 @@ lemma chartTensorCovDerivPointwiseInner_eq_tensorCovDerivPointwiseInner
             rw [ContinuousLinearMap.smul_apply, smul_eq_mul]
           rw [hsm2, gramMatrixAt_apply]
         rw [hexp]
-        -- Unfold star v ⬝ᵥ M *ᵥ v as a sum.
         change ∑ j : Fin (Module.finrank ℝ E),
             star (v j) * (gramMatrixAt (I := I) (M := M) g b *ᵥ v) j =
           ∑ j : Fin (Module.finrank ℝ E),
@@ -1179,19 +1021,9 @@ lemma chartTensorCovDerivPointwiseInner_eq_tensorCovDerivPointwiseInner
         ring
       rw [hquad]
       exact g.pos b w hw_ne
-    -- Now apply: PosDef ⇒ det > 0 ⇒ det ≠ 0.
     have hdet_pos := hposdef.det_pos
     exact ne_of_gt hdet_pos
   exact trace_invariance_under_change_of_basis Tmat hT_unit Gmat hG_unit Bmat
-
-/-! ## Orthonormal-frame diagonal form of the gradient inner product
-
-The inverse-Gram-weighted double sum `tensorCovDerivPointwiseInner` is the
-metric trace of the pair of covariant derivatives. As a trace it is
-independent of the chosen frame; against a `g(b)`-orthonormal frame `F`, where
-the Gram matrix is the identity, it collapses to the plain diagonal sum
-`∑ᵢ ⟨∇_{Fᵢ}S, ∇_{Fᵢ}T⟩`. This is the frame-free presentation of the Dirichlet
-integrand used by the global integration-by-parts identity. -/
 
 /-- The transition matrix from the canonical model basis `chartModelBasis E`
 to an arbitrary tangent frame `frame : Fin n → E`: the `(k, i)`-entry is the
@@ -1369,7 +1201,6 @@ lemma tensorCovDerivPointwiseInner_eq_frameGram_sum
   have hG_eq : (Matrix.of fun i' j' : Fin (Module.finrank ℝ E) =>
       g.inner b (frame i') (frame j')) = Tmatᵀ * Gmat * Tmat :=
     frameGram_eq_transition (I := I) (M := M) g b (frame : Fin (Module.finrank ℝ E) → E)
-  -- Rewrite each summand into the transition-matrix form.
   have hterm : ∀ i j : Fin (Module.finrank ℝ E),
       (Matrix.of fun i' j' : Fin (Module.finrank ℝ E) =>
             g.inner b (frame i') (frame j'))⁻¹ i j *
@@ -1466,7 +1297,6 @@ lemma tensorCovDerivPointwiseInner_eq_orthoFrame_diag_sum
           (TensorRSSpace.toModel
             (tensorCovDerivAt (I := I) (M := M) g r s T b (frame i))) := by
   classical
-  -- The frame Gram matrix is the identity, so its inverse is the identity.
   have hGframe_eq_one :
       (Matrix.of fun i' j' : Fin (Module.finrank ℝ E) =>
         g.inner b (frame i') (frame j')) =
@@ -1476,7 +1306,6 @@ lemma tensorCovDerivPointwiseInner_eq_orthoFrame_diag_sum
   rw [← tensorCovDerivPointwiseInner_eq_frameGram_sum (I := I) (M := M) g r s S T b
     frame]
   rw [hGframe_eq_one, inv_one]
-  -- `∑ᵢ ∑ⱼ (1)ᵢⱼ * Bᵢⱼ = ∑ᵢ Bᵢᵢ`.
   refine Finset.sum_congr rfl ?_
   intro i _
   rw [Finset.sum_eq_single i]
@@ -1485,8 +1314,6 @@ lemma tensorCovDerivPointwiseInner_eq_orthoFrame_diag_sum
     rw [Matrix.one_apply_ne (Ne.symm hji), zero_mul]
   · intro hi
     exact absurd (Finset.mem_univ i) hi
-
-/-! ## Chart-local smoothness of the covariant derivative applied to chart basis -/
 
 /-- The covariant derivative of a smooth compactly-supported tensor section
 applied to a chart-basis tangent vector field is smooth as a tensor section
@@ -1503,27 +1330,21 @@ lemma tensorCovDeriv_chartBasis_contMDiffOn
             (chartBasisVecFiber (I := I) α i b)))
       (trivializationAt E (TangentSpace I) α).baseSet := by
   classical
-  -- The covariant derivative `cov σ` is smooth as a Hom(TM, V) bundle section globally.
-  -- Restricted to chart α base set, it's smooth on that set.
   set covLC := tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)
   haveI hcovLC_inst : CovariantDerivative.ContMDiffCovariantDerivative covLC ∞ :=
     inferInstance
-  -- Smoothness of `cov S` as a Hom-bundle section, globally (i.e., on `Set.univ`).
   have hop : ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] TensorRSModel r s ℝ E)) ∞
       (fun b : M => (⟨b, covLC.toFun (fun y : M => S.toSection y) b⟩ :
         TotalSpace (E →L[ℝ] TensorRSModel r s ℝ E)
           fun b : M => TangentSpace I b →L[ℝ] TensorRSSpace r s I b)) Set.univ :=
     hcovLC_inst.contMDiff.contMDiff (σ := fun y : M => S.toSection y)
       (S.toSection.contMDiff.contMDiffOn)
-  -- Smoothness of `chartBasisVec α i` on chart α base set.
   have hX_on : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
       (fun b : M => TotalSpace.mk' E (E := fun y : M => TangentSpace I y) b
         (chartBasisVecFiber (I := I) α i b))
       (trivializationAt E (TangentSpace I) α).baseSet := by
     have := chartBasisVec_contMDiffOn (I := I) α i
-    -- `chartBasisVec α i b = TotalSpace.mk' E b (chartBasisVecFiber α i b)` by def.
     exact this
-  -- Apply `ContMDiffOn.clm_bundle_apply`.
   intro x₀ hx₀
   refine ContMDiffAt.contMDiffWithinAt ?_
   have hcov_at : ContMDiffAt I (I.prod 𝓘(ℝ, E →L[ℝ] TensorRSModel r s ℝ E)) ∞
@@ -1536,7 +1357,6 @@ lemma tensorCovDeriv_chartBasis_contMDiffOn
         (chartBasisVecFiber (I := I) α i b)) x₀ :=
     (hX_on x₀ hx₀).contMDiffAt
       ((trivializationAt E (TangentSpace I) α).open_baseSet.mem_nhds hx₀)
-  -- `tensorCovDerivAt g r s S b v = covLC.toFun (fun y => S.toSection y) b v` by def.
   exact hcov_at.clm_bundle_apply hX_at
 
 /-- The trivialization-α-image of `cov_S b · chartBasisVecFiber α i b` is smooth on
@@ -1554,13 +1374,10 @@ lemma tensorCovDeriv_chartBasis_trivImage_contMDiffOn
             (chartBasisVecFiber (I := I) α i b)⟩).2)
       (trivializationAt E (TangentSpace I) α).baseSet := by
   classical
-  -- Use `contMDiffOn_section_baseSet_iff` for the tensorRS bundle.
   have hsection := tensorCovDeriv_chartBasis_contMDiffOn (I := I) (M := M) g r s S α i
-  -- The relevant trivialization has baseSet equal to chart α source = trivializationAt E TangentSpace α baseSet.
   have hbase_eq : (trivializationAt (TensorRSModel r s ℝ E)
       (fun y : M => TensorRSSpace r s I y) α).baseSet =
         (trivializationAt E (TangentSpace I) α).baseSet := by
-    -- Both equal `(chartAt H α).source`.
     change ((trivializationAt (Tensor0SModel r ℝ E) (fun x : M => Tensor0SSpace r I x) α).baseSet) ∩
         ((trivializationAt (Tensor0SModel s ℝ E) (fun x : M => Tensor0SSpace s I x) α).baseSet) =
           (trivializationAt E (TangentSpace I) α).baseSet
@@ -1574,14 +1391,6 @@ lemma tensorCovDeriv_chartBasis_trivImage_contMDiffOn
           (fun y : M => TensorRSSpace r s I y) α)]
   rw [hbase_eq]
   exact hsection
-
-/-! ## Local replays of private helpers from `Tensor.Multilinear.MetricLowering`
-
-The two helpers below mirror private lemmas inside
-`TensorMetricLowering`: `loweredCompose_at_basis_tuple` (an unfolding lemma)
-and `contMDiffOn_into_tensor0SModel_of_eval_basis` (a basis-tuple smoothness
-bridge into `Tensor0SModel`). We replay them here as `private` so they can be
-called from this file. -/
 
 /-- Linear "evaluation at all basis tuples" map on `Tensor0SModel n ℝ E`. -/
 private noncomputable def evalAtBasisLinearLocal (n : ℕ) :
@@ -1698,14 +1507,6 @@ private lemma loweredCompose_at_basis_tuple_local
   rw [loweredCompose_apply]
   rfl
 
-/-! ## Smoothness of inverse-Gram-matrix entries on the chart base set
-
-The inverse of `chartGramMatrix g α b`, entrywise, is smooth on the chart base
-set at `α`. Proof: `A⁻¹ = (det A)⁻¹ • adjugate A`, so each entry is the product
-of `(det)⁻¹` (smooth from `chartGramMatrix_det_contMDiffOn` and strict positivity
-of the determinant) and the adjugate entry (smooth from
-`chartGramMatrix_adjugate_entry_contMDiffOn`). -/
-
 /-- Smoothness of `(chartGramMatrix g α ·)⁻¹ i j` on the chart-α base set. -/
 private lemma chartGramMatrixInv_entry_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -1729,23 +1530,6 @@ private lemma chartGramMatrixInv_entry_contMDiffOn
     chartGramMatrix_det_pos (I := I) g α hb
   have hpos_ne : (chartGramMatrix (I := I) g α b).det ≠ 0 := ne_of_gt hpos
   exact (ContMDiffWithinAt.inv₀ hdet hpos_ne).mul hadj
-
-/-! ## Chart-local smoothness of the `loweredCompose`-image of the chart-α
-covariant-derivative-evaluation
-
-This block parallels `TensorMetricLowering.contMDiffOn_loweredCompose` and its
-auxiliary `contMDiffOn_lower_at_chartBasis_aux`, but takes a chart-locally
-smooth bundle section as input instead of a globally smooth one. Specifically,
-we prove smoothness on the chart-α base set of
-
-  `b ↦ loweredCompose g r s α b (TensorRSSpace.toModel
-                                  (cov_S(b) · chartBasisVecFiber α i b))`.
-
-The proof structure mirrors the existing one: combine the smooth
-`(0, r)`-separable-form bundle section with the chart-locally-smooth
-`(r, s)`-section (which here is `cov_S · chartBasisVec α i`, smooth via
-`tensorCovDeriv_chartBasis_contMDiffOn`) via `clm_bundle_apply`, then apply
-the pointwise multilinear-bundle-evaluation lemma. -/
 
 /-- The `(0, r)` separable-form bundle section, attached to a chart-α base
 point, evaluated at the chart-α basis indexed by `φ_first`. The trivialisation
@@ -1776,7 +1560,6 @@ private theorem trivializationAt_separableFormBundleSectionLocal_eval_basis
       ∏ k : Fin r,
         chartGramMatrix (I := I) g α b (φ_first k) (ψ k) := by
   unfold separableFormBundleSectionLocal
-  -- Unfold trivialisation-fibre as in the existing proof.
   change ((separableFormAt (I := I) (M := M) g b r
         (fun k : Fin r => chartBasisVecFiber (I := I) α (φ_first k) b)).compContinuousLinearMap
         (fun _ : Fin r => (trivializationAt E (TangentSpace I) α).symmL ℝ b))
@@ -1823,8 +1606,6 @@ private lemma contMDiffOn_separableFormBundleSectionLocal
   exact trivializationAt_separableFormBundleSectionLocal_eval_basis
     (I := I) (M := M) g r α φ_first hb ψ
 
-/-! ## Chart-local `loweredCompose` smoothness for the chart-α covariant derivative -/
-
 /-- Chart-local smoothness of
 `b ↦ lowerAllUpperIndices g r s b (toModel (cov_S(b) · chartBasisVecFiber α i b))
         (chartBasisVec α (φ ·) b)`
@@ -1844,7 +1625,6 @@ private lemma contMDiffOn_lower_chartCov_at_basis
       (trivializationAt E (TangentSpace I) α).baseSet := by
   intro x₀ hx₀
   refine ContMDiffAt.contMDiffWithinAt ?_
-  -- Step 1: Smoothness of the (0, r) separable-form bundle section at x₀.
   have h_sep_smooth_at :
       ContMDiffAt I (I.prod 𝓘(ℝ, Tensor0SModel r ℝ E)) ∞
         (separableFormBundleSectionLocal (I := I) (M := M) g r α
@@ -1853,8 +1633,6 @@ private lemma contMDiffOn_lower_chartCov_at_basis
     (contMDiffOn_separableFormBundleSectionLocal (I := I) (M := M) g r α
       (fun k : Fin r => φ (Fin.castAdd s k))).contMDiffAt
       ((trivializationAt E (TangentSpace I) α).open_baseSet.mem_nhds hx₀)
-  -- Step 2: Smoothness of the chart-locally smooth (r, s) section
-  -- `b ↦ cov_S(b) · chartBasisVecFiber α i b` at x₀.
   have h_S_smooth_on := tensorCovDeriv_chartBasis_contMDiffOn
     (I := I) (M := M) g r s S α i
   have h_S_smooth_at :
@@ -1866,7 +1644,6 @@ private lemma contMDiffOn_lower_chartCov_at_basis
               (chartBasisVecFiber (I := I) α i b))) x₀ :=
     h_S_smooth_on.contMDiffAt
       ((trivializationAt E (TangentSpace I) α).open_baseSet.mem_nhds hx₀)
-  -- Step 3: clm_bundle_apply gives smoothness of the (0, s) bundle section.
   have h_applied : ContMDiffAt I (I.prod 𝓘(ℝ, Tensor0SModel s ℝ E)) ∞
       (fun b : M =>
         TotalSpace.mk' (Tensor0SModel s ℝ E)
@@ -1894,7 +1671,6 @@ private lemma contMDiffOn_lower_chartCov_at_basis
             (fun k : Fin r =>
               chartBasisVecFiber (I := I) α (φ (Fin.castAdd s k)) b)))
       h_S_smooth_at h_sep_smooth_at
-  -- Step 4: Smoothness of `chartBasisVec` for the remaining s slots at x₀.
   have h_tangent_smooth_at : ∀ j : Fin s,
       ContMDiffAt I (I.prod 𝓘(ℝ, E)) ∞
         (fun b : M =>
@@ -1903,7 +1679,6 @@ private lemma contMDiffOn_lower_chartCov_at_basis
     intro j
     exact (chartBasisVec_contMDiffOn (I := I) α (φ (Fin.natAdd r j))).contMDiffAt
       ((trivializationAt E (TangentSpace I) α).open_baseSet.mem_nhds hx₀)
-  -- Step 5: Pointwise multilinear-bundle-evaluation lemma.
   have h_eval := TensorMultilinear.contMDiffAt_section_apply (I := I) (M := M)
     (T := fun b : M =>
       (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from
@@ -1959,9 +1734,6 @@ private lemma continuousOn_loweredCompose_chartCov
       (trivializationAt E (TangentSpace I) α).baseSet :=
   (contMDiffOn_loweredCompose_chartCov (I := I) (M := M) g r s S α i).continuousOn
 
-/-! ## Chart-local continuity of `tensorInnerPointwise` on the chart-α covariant
-derivative -/
-
 /-- Chart-local continuity, on the chart-α base set, of
 `b ↦ tensorInnerPointwise g r s b
        (toModel (cov_S(b) · chartBasisVecFiber α i b))
@@ -1992,8 +1764,6 @@ private lemma continuousOn_tensorInnerPointwise_chartCov
         (tensorCovDerivAt (I := I) (M := M) g r s T b
           (chartBasisVecFiber (I := I) α j b)))
       hSα hTα
-  -- `tensorInnerPointwise = chartTensorInnerPointwise` on the chart base set,
-  -- by `tensorInnerPointwise_bridge_identity`.
   refine ContinuousOn.congr hchart ?_
   intro b hb
   exact tensorInnerPointwise_bridge_identity
@@ -2004,12 +1774,6 @@ private lemma continuousOn_tensorInnerPointwise_chartCov
     (TensorRSSpace.toModel
       (tensorCovDerivAt (I := I) (M := M) g r s T b
         (chartBasisVecFiber (I := I) α j b)))
-
-/-! ## Chart-local continuity of `chartTensorCovDerivPointwiseInner`
-
-We now combine the previous lemma (continuous `tensorInnerPointwise`) with
-chart-local smoothness of the inverse Gram-matrix entries to obtain chart-local
-continuity of `chartTensorCovDerivPointwiseInner g α r s S T`. -/
 
 private lemma chartTensorCovDerivPointwiseInner_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -2025,8 +1789,6 @@ private lemma chartTensorCovDerivPointwiseInner_continuousOn
   · exact (chartGramMatrixInv_entry_contMDiffOn (I := I) (M := M) g α i j).continuousOn
   · exact continuousOn_tensorInnerPointwise_chartCov (I := I) (M := M) g r s S T α i j
 
-/-! ## Step 2: Global continuity of `tensorCovDerivPointwiseInner` -/
-
 /-- **Global continuity** of the gradient integrand
 `tensorCovDerivPointwiseInner g r s S T`. The proof glues chart-local continuity
 (via the coordinate-invariance identity) over the chart cover of `M`. -/
@@ -2036,16 +1798,12 @@ theorem tensorCovDerivPointwiseInner_continuous
     Continuous (tensorCovDerivPointwiseInner (I := I) (M := M) g r s S T) := by
   rw [continuous_iff_continuousAt]
   intro x
-  -- Every point lies in some chart-α base set, in particular for α = x.
   have hx_base : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
     FiberBundle.mem_baseSet_trivializationAt _ _ x
   have hOpen : IsOpen (trivializationAt E (TangentSpace I) x).baseSet :=
     (trivializationAt E (TangentSpace I) x).open_baseSet
-  -- Chart-x continuity of the chart-x form.
   have h_chart_cont := chartTensorCovDerivPointwiseInner_continuousOn
     (I := I) (M := M) g r s S T x
-  -- Convert to chart-x continuity of `tensorCovDerivPointwiseInner` via the
-  -- coordinate-invariance identity, which holds on the chart base set.
   have h_cong : ∀ b ∈ (trivializationAt E (TangentSpace I) x).baseSet,
       tensorCovDerivPointwiseInner (I := I) (M := M) g r s S T b =
         chartTensorCovDerivPointwiseInner (I := I) (M := M) g x r s S T b := by
@@ -2057,8 +1815,6 @@ theorem tensorCovDerivPointwiseInner_continuous
       (trivializationAt E (TangentSpace I) x).baseSet :=
     h_chart_cont.congr h_cong
   exact h_local.continuousAt (hOpen.mem_nhds hx_base)
-
-/-! ## Step 3: Integrability of the gradient integrand -/
 
 /-- **Integrability** of the gradient integrand against the Riemannian volume
 measure on a closed manifold. Follows from continuity and compact support of
@@ -2076,8 +1832,6 @@ theorem tensorCovDerivPointwiseInner_integrable
       (I := I) (M := M) g r s S T).integrable_of_hasCompactSupport
     (tensorCovDerivPointwiseInner_hasCompactSupport
       (I := I) (M := M) g r s S T)
-
-/-! ## Step 4: Algebraic properties of the H^1 inner product -/
 
 /-- Symmetry of `tensorH1Inner`. -/
 theorem tensorH1Inner_symm (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -2153,13 +1907,6 @@ theorem tensorH1Inner_smul_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [hL2, hGrad]
   rw [MeasureTheory.integral_const_mul]
   ring
-
-/-! ## Wrapper structure `SmoothCcTensorH1`
-
-We package `SmoothCcTensor g r s` into a distinct Lean type so that the `H^1`
-pre-Hilbert structure (to be installed in a follow-up commit, conditional on
-integrability of the gradient term) does not clash with the existing `L^2`
-pre-Hilbert structure on `SmoothCcTensor g r s`. -/
 
 /-- Compactly-supported smooth `(r, s)`-tensor section wrapped to carry the
 `H^1` pre-Hilbert structure, a distinct Lean type from `SmoothCcTensor`. -/
@@ -2250,9 +1997,6 @@ instance : Module ℝ (SmoothCcTensorH1 g r s) :=
 
 end SmoothCcTensorH1
 
-/-! ## Step 5: Pre-inner-product core, induced norm and inner-product-space
-structure on `SmoothCcTensorH1` -/
-
 set_option linter.unusedSectionVars false in
 /-- The pre-inner-product core on `SmoothCcTensorH1 g r s`, whose inner product
 is the `H^1` pairing `tensorH1Inner g r s` of the underlying smooth
@@ -2300,8 +2044,6 @@ noncomputable instance instInnerProductSpace
     InnerProductSpace ℝ (SmoothCcTensorH1 g r s) :=
   InnerProductSpace.ofCore _
 
-/-! ## Unfolding lemmas for the inner product and seminorm on `SmoothCcTensorH1` -/
-
 set_option linter.unusedSectionVars false in
 /-- The `H^1` inner product on `SmoothCcTensorH1 g r s` unfolds to the
 `tensorH1Inner` pairing of the underlying smooth compactly-supported
@@ -2320,8 +2062,6 @@ theorem SmoothCcTensorH1.norm_def
     (S : SmoothCcTensorH1 g r s) :
     ‖S‖ = Real.sqrt (tensorH1Inner
         (I := I) (M := M) g r s S.toCcTensor S.toCcTensor) := rfl
-
-/-! ## Materialisation tests for the `H^1` instances -/
 
 section InstanceTests
 

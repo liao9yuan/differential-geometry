@@ -64,17 +64,10 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Canonical measurable-space and Borel-space instances on `E` and `M`
-
-File-local canonical Borel structures, matching those installed in `ChartDensity.lean`
-and `Glue.lean`. Declared `local` so they do not pollute external typeclass search. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Preimage disjointness under the chart-symm map -/
 
 /-- The symmetric map `(extChartAt I x₀).symm : E → M` sends the chart
 target into the chart source, so the preimage of any set `A` disjoint from
@@ -99,8 +92,6 @@ lemma extChartAt_symm_preimage_inter_target_eq_empty
   rw [this] at hne
   exact hne
 
-/-! ## Borel-measurability of the extended-chart target -/
-
 /-- The extended-chart target is Borel-measurable in `E`. This works in the
 boundary case as well, because `(extChartAt I x₀).target = I.symm ⁻¹' (chartAt H x₀).target ∩ range I`,
 the first factor being the preimage of an open set under a continuous map and
@@ -111,8 +102,6 @@ lemma measurableSet_extChartAt_target (x₀ : M) :
   refine MeasurableSet.inter ?_ ?_
   · exact (I.continuous_symm.isOpen_preimage _ (chartAt H x₀).open_target).measurableSet
   · exact I.isClosed_range.measurableSet
-
-/-! ## Chart-local measure vanishes outside the chart source -/
 
 /-- The chart-local measure assigns zero mass to any measurable set disjoint
 from the base-chart source. -/
@@ -149,8 +138,6 @@ theorem chartLocalMeasure_apply_of_disjoint_source
     exact MeasureTheory.measure_empty
   exact hν_ac hbase_zero
 
-/-! ## Euclidean change-of-variables on the measure level -/
-
 variable (E) in
 /-- The Euclidean Jacobian change-of-variables identity for the canonical Haar measure
 on `E`, measure form. -/
@@ -164,8 +151,6 @@ theorem euclideanChangeOfVariablesMap
           (fun x => ENNReal.ofReal |(f' x).det|)) =
       (modelHaar (E := E)).restrict (f '' s) :=
   MeasureTheory.map_withDensity_abs_det_fderiv_eq_addHaar (modelHaar (E := E)) hs hf' hf
-
-/-! ## Transition derivative identification -/
 
 /-- On the overlap of two chart sources, `tangentCoordChange` is exactly the
 Fréchet derivative (within `range I`) of the chart-transition map. -/
@@ -185,8 +170,6 @@ lemma tangentCoordChange_hasFDerivWithinAt
     HasFDerivWithinAt (extChartAt I x₁ ∘ (extChartAt I x₀).symm)
       (tangentCoordChange I x₀ x₁ x) (range I) (extChartAt I x₀ x) :=
   hasFDerivWithinAt_tangentCoordChange (I := I) h
-
-/-! ## Metric transformation under chart change -/
 
 /-- Expansion of a linear map on `E` applied to a model-basis vector as a sum
 over the model basis with repr-coefficients. -/
@@ -237,13 +220,9 @@ lemma chartBasisVecFiber_pullback
     trivializationAt E (TangentSpace I) x₁
   have hx0' : x ∈ T₀.baseSet := hx0
   have hx1' : x ∈ T₁.baseSet := hx1
-  -- By definition, chartBasisVecFiber x₁ i x = T₁.symm x (chartModelBasis i).
   have hdef1 :
       chartBasisVecFiber (I := I) x₁ i x =
         T₁.symm x ((chartModelBasis E) i) := rfl
-  -- Use the composition identity
-  -- (T₁.cLEA x).symm.trans (T₀.cLEA x) = coordChangeL ℝ T₁ T₀ x
-  -- evaluated at the model-basis vector, then apply (T₀.cLEA x).symm to both sides.
   have hcompeq' :=
     Bundle.Trivialization.comp_continuousLinearEquivAt_eq_coord_change
       (R := ℝ) (F := E) (E := (TangentSpace I : M → Type _))
@@ -273,8 +252,6 @@ lemma chartBasisVecFiber_pullback
     simp only [ContinuousLinearEquiv.symm_apply_apply] at this
     rw [← hL, ← hR]
     exact this
-  -- Convert `coordChangeL ℝ T₁ T₀ x` to `tangentCoordChange I x₁ x₀ x` via
-  -- `VectorBundleCore.localTriv_coordChange_eq` applied to the tangent bundle core.
   have hcc :
       (Bundle.Trivialization.coordChangeL (R := ℝ) T₁ T₀ x)
           ((chartModelBasis E) i)
@@ -287,7 +264,6 @@ lemma chartBasisVecFiber_pullback
         (tangentBundleCore I M) (achart H x₁) (achart H x₀) (b := x)
         ⟨hx1', hx0'⟩ _
   rw [hdef1, hequiv, hcc, tangentCoordChange_chartModelBasis_eq_sum (I := I) x₀ x₁ x i]
-  -- Now use `T₀.symmL ℝ x` to apply linearity.
   have hsymmL : (T₀.symm x : E → TangentSpace I x) =
       (T₀.symmL ℝ x : E →L[ℝ] TangentSpace I x) := rfl
   rw [hsymmL]
@@ -317,7 +293,6 @@ lemma chartGramMatrix_pullback_eq_sum
   rw [hlhs]
   rw [chartBasisVecFiber_pullback (I := I) x₀ x₁ hx0 hx1 i]
   rw [chartBasisVecFiber_pullback (I := I) x₀ x₁ hx0 hx1 j]
-  -- Left linearity.
   have hL :
       g.inner x
           (∑ k, transitionMatrix (I := I) x₀ x₁ x k i •
@@ -413,8 +388,6 @@ theorem chartDensity_pullback_eq_abs_det_jacobian
   rw [Real.sqrt_mul (sq_nonneg _)]
   rw [Real.sqrt_sq_eq_abs]
 
-/-! ## Overlap measurability and related facts -/
-
 /-- The trivialization base set coincides with the chart source. -/
 lemma trivializationAt_baseSet_eq_chartAt_source (x₀ : M) :
     (trivializationAt E (TangentSpace I) x₀).baseSet = (chartAt H x₀).source :=
@@ -443,11 +416,6 @@ lemma chartDensity_continuousOn
       (trivializationAt E (TangentSpace I) x₀).baseSet :=
   (chartDensity_contMDiffOn (I := I) g x₀).continuousOn
 
-/-! ## Canonical Riemannian volume measure
-
-We define the canonical Riemannian volume measure as the glued measure
-using the chart-atlas partition of unity from `Glue.lean`. -/
-
 variable (I M) in
 /-- The canonical Riemannian volume measure on `M`, built from the canonical additive
 Haar measure on the model space `E`, a smooth Riemannian metric, and the canonical
@@ -463,8 +431,6 @@ lemma riemannianVolumeMeasure_def
     (g : SmoothRiemannianMetric I M) :
     riemannianVolumeMeasure (I := I) (M := M) g =
       riemannianMeasure (I := I) g (chartAtlasPOU I M) := rfl
-
-/-! ## Chart-local measure: integral characterisation -/
 
 /-- `AEMeasurable` for `(extChartAt I x₀).symm` with respect to the restricted
 canonical Haar measure on the chart target. Used repeatedly below. -/
@@ -532,9 +498,7 @@ theorem chartLocalMeasure_lintegral
         (fun y : E =>
           ENNReal.ofReal (chartDensity g x₀ ((extChartAt I x₀).symm y)))) :=
     haem_base.mono_ac hwd_ac
-  -- Push `lintegral` through `Measure.map`.
   rw [MeasureTheory.lintegral_map' hF.aemeasurable haem]
-  -- Use `lintegral_withDensity_eq_lintegral_mul₀` to unfold the `withDensity`.
   have hcomp :=
     MeasureTheory.lintegral_withDensity_eq_lintegral_mul₀
       (μ := (modelHaar (E := E)).restrict (extChartAt I x₀).target) hw_aem
@@ -542,8 +506,6 @@ theorem chartLocalMeasure_lintegral
       (hF.aemeasurable.comp_aemeasurable haem_base)
   simp only [Pi.mul_apply] at hcomp
   rw [hcomp]
-
-/-! ## Inverse relation between `tangentCoordChange` in both directions -/
 
 /-- At any point in the overlap of two chart sources, the two tangent
 transition maps compose to the identity. -/
@@ -555,8 +517,6 @@ lemma tangentCoordChange_comp_self_overlap
       (extChartAt I x₀).source := ⟨h, h.1⟩
   have := tangentCoordChange_comp (I := I) (w := x₀) (x := x₁) (y := x₀)
     (z := x) (v := v) h3
-  -- `tangentCoordChange I x₁ x₀ x (tangentCoordChange I x₀ x₁ x v)
-  --   = tangentCoordChange I x₀ x₀ x v`
   rw [this]
   exact tangentCoordChange_self (I := I) h.1
 
@@ -568,7 +528,6 @@ lemma tangentCoordChange_det_mul_inv_det_eq_one
     (tangentCoordChange I x₀ x₁ x : E →L[ℝ] E).det *
       (tangentCoordChange I x₁ x₀ x : E →L[ℝ] E).det = 1 := by
   classical
-  -- Unfold `ContinuousLinearMap.det` to `LinearMap.det`
   have hcomp_id :
       ((tangentCoordChange I x₁ x₀ x : E →L[ℝ] E) :
             E →ₗ[ℝ] E).comp
@@ -580,8 +539,6 @@ lemma tangentCoordChange_det_mul_inv_det_eq_one
     exact tangentCoordChange_comp_self_overlap (I := I) x₀ x₁ h v
   have := congrArg LinearMap.det hcomp_id
   rw [LinearMap.det_comp, LinearMap.det_id] at this
-  -- `det TCC(x₁,x₀) * det TCC(x₀,x₁) = 1`, want `det TCC(x₀,x₁) * det TCC(x₁,x₀) = 1`.
-  -- Use commutativity.
   have : (tangentCoordChange I x₁ x₀ x : E →L[ℝ] E).det *
       (tangentCoordChange I x₀ x₁ x : E →L[ℝ] E).det = 1 := this
   linarith [this, mul_comm
@@ -609,8 +566,6 @@ lemma ennreal_abs_det_tangentCoordChange_mul_abs_det_inv
   rw [abs_det_tangentCoordChange_mul_abs_det_inv (I := I) x₀ x₁ h]
   exact ENNReal.ofReal_one
 
-/-! ## Chart-local integral restricted to a subset of the chart source -/
-
 /-- Set-integral form of the chart-local measure: for measurable `F` and
 any measurable set `U`, the integral of `F` over `U` with respect to
 `chartLocalMeasure` equals the Euclidean integral of
@@ -626,15 +581,12 @@ theorem chartLocalMeasure_setLintegral_indicator
   rw [← MeasureTheory.lintegral_indicator hUmeas]
   exact chartLocalMeasure_lintegral (I := I) g x₀ (hF.indicator hUmeas)
 
-/-! ## Openness/measurability of the image of an overlap under a chart -/
-
 /-- The image of an open subset `U` of `(chartAt H x₀).source` under
 `extChartAt I x₀` is open in `E` under the Boundaryless assumption. -/
 lemma extChartAt_image_isOpen_of_open_subset_source_of_boundaryless
     [I.Boundaryless] (x₀ : M)
     {U : Set M} (hUopen : IsOpen U) (hUsub : U ⊆ (chartAt H x₀).source) :
     IsOpen ((extChartAt I x₀) '' U) := by
-  -- `extChartAt I x₀ = I ∘ chartAt H x₀`, so the image is `I '' (chartAt H x₀ '' U)`.
   have hchart_img : IsOpen ((chartAt H x₀) '' U) :=
     (chartAt H x₀).isOpen_image_of_subset_source hUopen hUsub
   have himg_eq : (extChartAt I x₀) '' U = I '' ((chartAt H x₀) '' U) := by
@@ -653,7 +605,6 @@ embedding `I` of an open set in `H`, hence Borel-measurable. -/
 lemma extChartAt_image_measurableSet_of_open_subset_source (x₀ : M)
     {U : Set M} (hUopen : IsOpen U) (hUsub : U ⊆ (chartAt H x₀).source) :
     MeasurableSet ((extChartAt I x₀) '' U) := by
-  -- `extChartAt I x₀ = I ∘ chartAt H x₀`, so the image is `I '' (chartAt H x₀ '' U)`.
   have hchart_img : IsOpen ((chartAt H x₀) '' U) :=
     (chartAt H x₀).isOpen_image_of_subset_source hUopen hUsub
   have himg_eq : (extChartAt I x₀) '' U = I '' ((chartAt H x₀) '' U) := by
@@ -661,8 +612,6 @@ lemma extChartAt_image_measurableSet_of_open_subset_source (x₀ : M)
     simp only [OpenPartialHomeomorph.extend_coe]
     rw [image_comp]
   rw [himg_eq]
-  -- `I` is a closed embedding, so it is a measurable embedding;
-  -- the image of any measurable set under a measurable embedding is measurable.
   exact I.isClosedEmbedding.measurableEmbedding.measurableSet_image.mpr
     hchart_img.measurableSet
 
@@ -673,8 +622,6 @@ lemma extChartAt_image_measurableSet_of_overlap (x₀ x₁ : M) :
   extChartAt_image_measurableSet_of_open_subset_source (I := I) x₀
     (isOpen_chartAt_source_inter (H := H) (M := M) x₀ x₁)
     Set.inter_subset_left
-
-/-! ## The chart-transition map and its derivative on the overlap -/
 
 /-- The chart-transition map `extChartAt I x₁ ∘ (extChartAt I x₀).symm` is
 well-defined on `(extChartAt I x₀).target` and carries the overlap image
@@ -699,7 +646,6 @@ lemma extChartAt_transition_injOn_overlap_image
     Set.InjOn (extChartAt I x₁ ∘ (extChartAt I x₀).symm)
       ((extChartAt I x₀) '' U) := by
   intro y hy z hz hyz
-  -- `symm₀ y ∈ U ⊆ source₀, source₁`.
   obtain ⟨a, haU, rfl⟩ := hy
   obtain ⟨b, hbU, rfl⟩ := hz
   have haS0 : a ∈ (extChartAt I x₀).source := by
@@ -710,10 +656,8 @@ lemma extChartAt_transition_injOn_overlap_image
     rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hUsub1 haU
   have hbS1 : b ∈ (extChartAt I x₁).source := by
     rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hUsub1 hbU
-  -- Apply `(extChartAt I x₀).left_inv` in the expression.
   simp only [Function.comp_apply, (extChartAt I x₀).left_inv haS0,
     (extChartAt I x₀).left_inv hbS0] at hyz
-  -- `φ₁ a = φ₁ b ⇒ a = b` since φ₁ injective on source₁.
   have := (extChartAt I x₁).injOn haS1 hbS1 hyz
   rw [this]
 
@@ -733,25 +677,18 @@ lemma extChartAt_transition_hasFDerivWithinAt_on_overlap_image
     rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hUsub0 hxU
   have hxS1 : x ∈ (extChartAt I x₁).source := by
     rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hUsub1 hxU
-  -- Using the Mathlib lemma on `range I`.
   have hfull := hasFDerivWithinAt_tangentCoordChange (I := I) (x := x₀) (y := x₁)
     (z := x) ⟨hxS0, hxS1⟩
-  -- Move to `HasFDerivWithinAt` on a smaller set:
-  -- Each point `y' = extChartAt I x₀ z` for `z ∈ U` lies in
-  -- `(extChartAt I x₀).target ⊆ range I`.
   have himage_sub : (extChartAt I x₀) '' U ⊆ Set.range I := by
     intro y' hy'
     rcases hy' with ⟨z, hzU, rfl⟩
     have hzS0 : z ∈ (extChartAt I x₀).source := by
       rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hUsub0 hzU
     exact extChartAt_target_subset_range (I := I) x₀ ((extChartAt I x₀).map_source hzS0)
-  -- `symm (extChartAt x) = x`:
   have hsymm_eq : (extChartAt I x₀).symm ((extChartAt I x₀) x) = x :=
     (extChartAt I x₀).left_inv hxS0
   rw [hsymm_eq]
   exact hfull.mono himage_sub
-
-/-! ## Substep D: chart-local measures agree on the overlap -/
 
 /-- Auxiliary: the set-lintegral of a function supported in the `φⱼ '' U`
 overlap image can be rewritten as a set-lintegral over `φⱼ '' U`, given that
@@ -770,7 +707,6 @@ lemma setLIntegral_target_eq_setLIntegral_image
       (extChartAt I x₀) '' U =
         (extChartAt I x₀).target ∩ (extChartAt I x₀).symm ⁻¹' U :=
     (extChartAt I x₀).image_eq_target_inter_inv_preimage hUsub'
-  -- Pointwise the integrand equals `(φ₀ '' U).indicator h`.
   have hptwise : ∀ y ∈ (extChartAt I x₀).target,
       U.indicator (fun _ => (1 : ℝ≥0∞)) ((extChartAt I x₀).symm y) * h y =
         ((extChartAt I x₀) '' U).indicator h y := by
@@ -789,7 +725,6 @@ lemma setLIntegral_target_eq_setLIntegral_image
     extChartAt_image_measurableSet_of_open_subset_source (I := I) x₀
       hUopen hUsub
   rw [MeasureTheory.setLIntegral_indicator hV_meas]
-  -- (V ∩ target) = V since V ⊆ target.
   rw [show ((extChartAt I x₀) '' U) ∩ (extChartAt I x₀).target =
         (extChartAt I x₀) '' U from by
     rw [himg]; ext y; constructor
@@ -808,9 +743,6 @@ lemma chartLocalMeasure_lintegral_U_eq_setLIntegral_image
         ENNReal.ofReal (chartDensity g x₀ ((extChartAt I x₀).symm y)) *
           F ((extChartAt I x₀).symm y) ∂ (modelHaar (E := E)) := by
   rw [chartLocalMeasure_setLintegral_indicator (I := I) g x₀ hUmeas hF]
-  -- Convert `U.indicator F` to `1-indicator`-times-function.
-  -- Pointwise: ofReal(d(symm y)) * U.indicator F (symm y)
-  --          = U.indicator 1 (symm y) * (ofReal(d(symm y)) * F(symm y))
   have hpt : ∀ y : E,
       ENNReal.ofReal (chartDensity g x₀ ((extChartAt I x₀).symm y)) *
           U.indicator F ((extChartAt I x₀).symm y) =
@@ -842,16 +774,10 @@ theorem chartLocalMeasure_lintegral_U_eq_of_overlap
     measurableSet_chartAt_source_inter (H := H) (M := M) x₀ x₁
   have hUsub0 : U ⊆ (chartAt H x₀).source := Set.inter_subset_left
   have hUsub1 : U ⊆ (chartAt H x₁).source := Set.inter_subset_right
-  -- Convert both sides to set-lintegrals over the respective image sets.
   rw [chartLocalMeasure_lintegral_U_eq_setLIntegral_image (I := I)
     g x₀ hUopen hUsub0 hF hUmeas]
   rw [chartLocalMeasure_lintegral_U_eq_setLIntegral_image (I := I)
     g x₁ hUopen hUsub1 hF hUmeas]
-  -- LHS: over `φ₀ '' U`. RHS: over `φ₁ '' U`.
-  -- Use Jacobian change-of-variables to relate these.
-  -- Let `T := φ₁ ∘ symm₀`, with T '' (φ₀ '' U) = φ₁ '' U, and
-  -- `HasFDerivWithinAt T (tangentCoordChange I x₀ x₁ (symm₀ y)) (φ₀ '' U) y`
-  -- for all `y ∈ φ₀ '' U`.
   have hV0_meas : MeasurableSet ((extChartAt I x₀) '' U) :=
     extChartAt_image_measurableSet_of_open_subset_source (I := I) x₀
       hUopen hUsub0
@@ -870,14 +796,12 @@ theorem chartLocalMeasure_lintegral_U_eq_of_overlap
           ((extChartAt I x₀) '' U) y :=
     extChartAt_transition_hasFDerivWithinAt_on_overlap_image (I := I) x₀ x₁
       hUsub0 hUsub1
-  -- Apply `lintegral_image_eq_lintegral_abs_det_fderiv_mul`.
   rw [← hT_image]
   rw [MeasureTheory.lintegral_image_eq_lintegral_abs_det_fderiv_mul
     (μ := modelHaar (E := E)) hV0_meas hT_fderiv hT_injOn
     (g := fun z : E =>
       ENNReal.ofReal (chartDensity g x₁ ((extChartAt I x₁).symm z)) *
         F ((extChartAt I x₁).symm z))]
-  -- Simplify `symm₁ (T y) = symm₀ y` and apply density pullback + det product = 1.
   refine MeasureTheory.setLIntegral_congr_fun hV0_meas ?_
   intro y hy
   obtain ⟨x, hxU, hx_eq⟩ := hy
@@ -893,7 +817,6 @@ theorem chartLocalMeasure_lintegral_U_eq_of_overlap
   have hx_trivBase1 : x ∈ (trivializationAt E (TangentSpace I) x₁).baseSet := by
     rw [trivializationAt_baseSet_eq_chartAt_source (I := I)]
     exact hUsub1 hxU
-  -- `symm₀ y = x` and `T y = φ₁ x`, so `symm₁ (T y) = x`.
   have hsymm0 : (extChartAt I x₀).symm y = x := by
     rw [← hx_eq]; exact (extChartAt I x₀).left_inv hx0
   have hTy :
@@ -903,27 +826,20 @@ theorem chartLocalMeasure_lintegral_U_eq_of_overlap
   have hsymm1 :
       (extChartAt I x₁).symm ((extChartAt I x₁ ∘ (extChartAt I x₀).symm) y) = x := by
     rw [hTy]; exact (extChartAt I x₁).left_inv hx1
-  -- Density pullback.
   have hdens_pb :
       chartDensity g x₁ x
         = |(tangentCoordChange I x₁ x₀ x : E →L[ℝ] E).det|
             * chartDensity g x₀ x :=
     chartDensity_pullback_eq_abs_det_jacobian (I := I) g x₀ x₁
       hx_trivBase0 hx_trivBase1
-  -- Det product identity.
   have hdet_mul :
       ENNReal.ofReal |(tangentCoordChange I x₀ x₁ x : E →L[ℝ] E).det| *
         ENNReal.ofReal |(tangentCoordChange I x₁ x₀ x : E →L[ℝ] E).det| = 1 :=
     ennreal_abs_det_tangentCoordChange_mul_abs_det_inv (I := I) x₀ x₁
       hx_in_inter
-  -- Simplify both sides, landing in terms of `x`.
   simp only [hsymm0, hsymm1]
-  -- After `simp only`:
-  --  LHS: ofReal(density_0 x) * F x
-  --  RHS: ofReal|det tcc x₀ x₁ x| * (ofReal(density_1 x) * F x)
   rw [hdens_pb]
   rw [ENNReal.ofReal_mul (abs_nonneg _)]
-  -- Reassociate and apply `hdet_mul`:
   rw [show
     ENNReal.ofReal |(tangentCoordChange I x₀ x₁ x : E →L[ℝ] E).det| *
         (ENNReal.ofReal |(tangentCoordChange I x₁ x₀ x : E →L[ℝ] E).det| *
@@ -944,8 +860,6 @@ theorem chartLocalMeasure_restrict_overlap_eq
         ((chartAt H x₀).source ∩ (chartAt H x₁).source) := by
   refine MeasureTheory.Measure.ext_of_lintegral _ (fun F hF => ?_)
   exact chartLocalMeasure_lintegral_U_eq_of_overlap (I := I) g x₀ x₁ hF
-
-/-! ## Chart-local measure: lintegral of a function supported in the overlap -/
 
 /-- If a measurable function `f : M → ℝ≥0∞` is zero outside the overlap of
 two chart sources, then its lintegrals against the two chart-local measures
@@ -975,14 +889,6 @@ lemma chartLocalMeasure_lintegral_eq_of_support_in_overlap
     · rw [Set.indicator_of_notMem hx, hsupp x hx]
   rw [hUeq, hUeq']
   exact chartLocalMeasure_lintegral_U_eq_of_overlap (I := I) g x₀ x₁ hf
-
-/-! ## Substep E: independence from the choice of partition of unity
-
-The key step swaps `∑' α` with `∑' β` inside the lintegral expansion,
-relying on `ENNReal.tsum_comm` (valid for any pair of index types) and a
-countability-aware application of `MeasureTheory.lintegral_tsum`. We extract
-a countable subfamily of the POU indices corresponding to non-trivial bumps
-using `LocallyFinite.countable_univ` on a σ-compact base. -/
 
 /-- For any POU `ρ` subordinate to the chart atlas and any function `f`,
 the `α, β`-integrand `ρ α * ρ' β * f` is supported in the overlap of the
@@ -1025,7 +931,6 @@ lemma countable_nonempty_support_of_pou
     hloc.comp_injective Subtype.val_injective
   have hne : ∀ α : S, (Function.support (ρ α.val)).Nonempty := fun α => α.2
   have hsub_univ : (Set.univ : Set S).Countable := hsubfam.countable_univ hne
-  -- Transport: countability of `Set.univ : Set S` ⇒ Countable S ⇒ Countable (↥S) ⇒ S.Countable.
   have : Countable S := Set.countable_univ_iff.mp hsub_univ
   exact Set.countable_coe_iff.mp this
 
@@ -1112,7 +1017,6 @@ lemma ofReal_pou_mul_expand_on_subtype
     rw [ENNReal.tsum_mul_right]
     congr 1
     rw [ENNReal.tsum_mul_left]
-  -- The subtype-tsum equals the full tsum (vanishing off the subset).
   have h_full :
       (∑' β : {β : M | (Function.support (ρ' β)).Nonempty},
         ENNReal.ofReal (ρ' β.val x)) =
@@ -1145,7 +1049,6 @@ theorem riemannianMeasure_eq_of_pou_independent
   refine MeasureTheory.Measure.ext_of_lintegral _ (fun F hF => ?_)
   rw [riemannianMeasure_lintegral_eq (I := I) g ρ hF]
   rw [riemannianMeasure_lintegral_eq (I := I) g ρ' hF]
-  -- Restrict sums to countable support.
   set Tρ : Set M := {α : M | (Function.support (ρ α)).Nonempty}
   set Tρ' : Set M := {β : M | (Function.support (ρ' β)).Nonempty}
   haveI hCρ : Countable Tρ :=
@@ -1154,7 +1057,6 @@ theorem riemannianMeasure_eq_of_pou_independent
     (countable_nonempty_support_of_pou (I := I) ρ').to_subtype
   rw [tsum_integral_pou_eq_subtype (I := I) ρ (chartLocalMeasure (I := I) g) F]
   rw [tsum_integral_pou_eq_subtype (I := I) ρ' (chartLocalMeasure (I := I) g) F]
-  -- Step 1: Expand `ρ α * F` via ρ'-POU, pulling the ∑' inside the integral.
   have hLHS :
       (∑' α : Tρ, ∫⁻ x, ENNReal.ofReal (ρ α.val x) * F x
           ∂(chartLocalMeasure (I := I) g α.val)) =
@@ -1173,7 +1075,6 @@ theorem riemannianMeasure_eq_of_pou_independent
       (ρ α.val).contMDiff.continuous.measurable).mul
       (ENNReal.measurable_ofReal.comp
         (ρ' β.val).contMDiff.continuous.measurable)).mul hF).aemeasurable
-  -- Step 2: Expand `ρ' β * F` via ρ-POU.
   have hRHS :
       (∑' β : Tρ', ∫⁻ x, ENNReal.ofReal (ρ' β.val x) * F x
           ∂(chartLocalMeasure (I := I) g β.val)) =
@@ -1185,12 +1086,8 @@ theorem riemannianMeasure_eq_of_pou_independent
         = fun x => ∑' α : Tρ,
             ENNReal.ofReal (ρ α.val x) * ENNReal.ofReal (ρ' β.val x) * F x := by
       funext x
-      -- Mirror: expand via ρ-POU on the ρ-side.
       have := ofReal_pou_mul_expand_on_subtype (I := I) ρ' ρ β.val
         (fun x => F x) x
-      -- `ρ' β.val * F = ∑' α : Tρ', ρ' β.val * ρ α.val * F` — but this uses
-      -- Tρ' as the outer subtype. We want it over Tρ instead.
-      -- Use the analogous expansion with roles swapped.
       have h_inner :
           (∑' α : Tρ,
               ENNReal.ofReal (ρ α.val x) * ENNReal.ofReal (ρ' β.val x) * F x) =
@@ -1221,11 +1118,9 @@ theorem riemannianMeasure_eq_of_pou_independent
       (ENNReal.measurable_ofReal.comp
         (ρ' β.val).contMDiff.continuous.measurable)).mul hF).aemeasurable
   rw [hLHS, hRHS]
-  -- Swap the double sum using `ENNReal.tsum_comm`.
   rw [ENNReal.tsum_comm]
   refine tsum_congr (fun β => ?_)
   refine tsum_congr (fun α => ?_)
-  -- For each (α, β): apply Substep D.
   apply chartLocalMeasure_lintegral_eq_of_support_in_overlap (I := I) g α.val β.val
   · refine (((ENNReal.measurable_ofReal.comp
       (ρ α.val).contMDiff.continuous.measurable).mul
@@ -1245,8 +1140,6 @@ theorem riemannianMeasure_independent_of_atlas
     (hρ' : ρ'.IsSubordinate (fun α : M => (chartAt H α).source)) :
     riemannianMeasure (I := I) g ρ = riemannianMeasure (I := I) g ρ' :=
   riemannianMeasure_eq_of_pou_independent (I := I) g ρ ρ' hρ hρ'
-
-/-! ## Substep F corollary: Riemannian volume measure POU agreement -/
 
 /-- The canonical Riemannian volume measure equals `riemannianMeasure` for any
 POU subordinate to the chart atlas. -/

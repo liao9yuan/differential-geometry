@@ -101,24 +101,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable (g : SmoothRiemannianMetric I M)
-
-/-! ## The unconditional spectral arithmetic core
-
-The squared `L²` norm of `Δ_∇^j (finiteEigenCombo F c)` is the orthogonal finite
-sum `∑_{i ∈ F} λᵢ^{2j} cᵢ²` (`finiteEigenCombo_iterRawConnLap_l2NormSq`). The
-squared spectral norm `‖finiteEigenComboHs F c (2k)‖²` is the orthogonal finite sum
-`∑_{i ∈ F} (1 + λᵢ)^{2k} cᵢ²` (`finiteEigenCombo_spectral_normSq` with `σ = 2k`).
-For `j ≤ k`, the termwise inequality `λᵢ^{2j} ≤ (1 + λᵢ)^{2k}` (both `λᵢ ≥ 0` and
-`2j ≤ 2k`, with `1 + λᵢ ≥ λᵢ`) yields the domination. No cross-terms, no
-`|F|`-blowup: the bound is the sum of nonnegative termwise inequalities. -/
 
 open scoped Classical in
 /-- **The orthogonal `L²`-iterate ≤ spectral-norm-squared bound.** For every
@@ -143,26 +131,21 @@ theorem finiteEigenCombo_iterRawConnLap_l2NormSq_le_spectral
   rw [finiteEigenCombo_iterRawConnLap_l2NormSq (I := I) (M := M) g F c j,
     finiteEigenCombo_spectral_normSq (I := I) (M := M) g F c ((2 * k : ℕ) : ℝ)]
   refine Finset.sum_le_sum (fun i _ => ?_)
-  -- Termwise: `λᵢ^{2j} · cᵢ² ≤ (1 + λᵢ)^{2k} · cᵢ²`.
   have hlam_nn : 0 ≤ TensorEigenIdx.lambda (I := I) (M := M) i :=
     tensor_lambda_nonneg (I := I) (M := M) i
   have h_one_le : (1 : ℝ) ≤ 1 + TensorEigenIdx.lambda (I := I) (M := M) i := by
     linarith
-  -- `λᵢ^{2j} ≤ (1 + λᵢ)^{2j}` since `0 ≤ λᵢ ≤ 1 + λᵢ`.
   have h_base_le : TensorEigenIdx.lambda (I := I) (M := M) i ≤
       1 + TensorEigenIdx.lambda (I := I) (M := M) i := by linarith
   have h1 : (TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * j) ≤
       (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * j) :=
     pow_le_pow_left₀ hlam_nn h_base_le (2 * j)
-  -- `(1 + λᵢ)^{2j} ≤ (1 + λᵢ)^{2k}` since `1 ≤ 1 + λᵢ` and `2j ≤ 2k`.
   have h2 : (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * j) ≤
       (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * k) :=
     pow_le_pow_right₀ h_one_le (Nat.mul_le_mul_left 2 hjk)
   have h_lam_le : (TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * j) ≤
       (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * k) :=
     le_trans h1 h2
-  -- The spectral weight `(1 + λᵢ)^{(2k : ℝ)}` equals the natural-power
-  -- `(1 + λᵢ)^{2k}` since the base is positive.
   have h_rpow_eq : (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ ((2 * k : ℕ) : ℝ) =
       (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * k) := by
     rw [Real.rpow_natCast]
@@ -183,18 +166,7 @@ theorem finiteEigenCombo_iterRawConnLap_l2Norm_le_spectral
       ‖finiteEigenComboHs (I := I) (M := M) g F c ((2 * k : ℕ) : ℝ)‖ := by
   have h_sq := finiteEigenCombo_iterRawConnLap_l2NormSq_le_spectral
     (I := I) (M := M) g F c hjk
-  -- `a² ≤ b²` with `b ≥ 0` gives `a ≤ b`.
   exact le_of_sq_le_sq h_sq (norm_nonneg _)
-
-/-! ## The keystone Gårding reduction
-
-The keystone spectral bound on the intrinsic order-`2k` chart-Sobolev norm reduces,
-via the *unconditional* orthogonal spectral arithmetic above, to the interior
-elliptic-regularity (Gårding) estimate controlling the intrinsic order-`2k` norm by
-the lower-order connection-Laplacian `L²` data of `u`. The elliptic estimate is the
-single missing analytic input; it is isolated as an explicit hypothesis on the
-combination `u` (not assumed in any headline), exactly as the project's order-`2`
-predicate `Order2NormEquivOnSmooth` isolates its order-`2` instance. -/
 
 open scoped Classical in
 /-- **The keystone orthogonal spectral bound, reduced to the all-orders elliptic
@@ -246,7 +218,6 @@ theorem eigenSpan_pouHs_le_spectral_of_elliptic
   set Nspec : ℝ := ‖finiteEigenComboHs (I := I) (M := M) g F c ((2 * k : ℕ) : ℝ)‖
     with hNspec_def
   have hNspec_nn : 0 ≤ Nspec := norm_nonneg _
-  -- Each `L²`-iterate norm, for `j ∈ range (k+1)` (i.e. `j ≤ k`), is `≤ Nspec`.
   have h_term : ∀ j ∈ Finset.range (k + 1),
       ‖SmoothCcTensor.toL2
         (rawTensorConnLapIter (I := I) g 0 2 j
@@ -255,7 +226,6 @@ theorem eigenSpan_pouHs_le_spectral_of_elliptic
     have hjk : j ≤ k := Nat.lt_succ_iff.mp (Finset.mem_range.mp hj)
     exact finiteEigenCombo_iterRawConnLap_l2Norm_le_spectral
       (I := I) (M := M) g F c hjk
-  -- The sum of `k + 1` terms each `≤ Nspec` is `≤ (k + 1) · Nspec`.
   have h_sum_le :
       ∑ j ∈ Finset.range (k + 1),
         ‖SmoothCcTensor.toL2
@@ -270,7 +240,6 @@ theorem eigenSpan_pouHs_le_spectral_of_elliptic
       _ = (Finset.range (k + 1)).card • Nspec := by rw [Finset.sum_const]
       _ = (k + 1 : ℝ) * Nspec := by
             rw [Finset.card_range, nsmul_eq_mul, Nat.cast_add, Nat.cast_one]
-  -- Chain: HsNorm ≤ C · (sum) ≤ C · ((k+1) · Nspec) = (C · (k+1)) · Nspec.
   calc (tensorPouSobolevHsNorm (I := I) (M := M) g k
           (finiteEigenCombo (I := I) (M := M) g F c)).toReal
       ≤ C * ∑ j ∈ Finset.range (k + 1),
@@ -280,13 +249,6 @@ theorem eigenSpan_pouHs_le_spectral_of_elliptic
     _ ≤ C * ((k + 1 : ℝ) * Nspec) := by
           exact mul_le_mul_of_nonneg_left h_sum_le hC
     _ = (C * (k + 1)) * Nspec := by ring
-
-/-! ## The right-hand side is the spectral weighted sum
-
-For completeness, the spectral norm appearing in the keystone bound is exactly the
-square root of the headline weighted sum `∑_{i ∈ F} cᵢ²(1 + λᵢ)^{2k}`, by
-`finiteEigenCombo_spectral_normSq`. This identifies the reduction's right-hand side
-with the target right-hand side verbatim. -/
 
 /-- The spectral norm `‖finiteEigenComboHs F c (2k)‖` equals the square root of the
 headline weighted sum `∑_{i ∈ F} cᵢ²(1 + λᵢ)^{2k}` — the exact right-hand side of

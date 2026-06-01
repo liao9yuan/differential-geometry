@@ -68,8 +68,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M]
 
-/-! ## The `L^1`-sum function -/
-
 /-- The sum of absolute values of all entries of the inverse chart-`α`-Gram
 matrix at `x : M`. -/
 def chartInvGramMatrix_l1Sum
@@ -82,8 +80,6 @@ lemma chartInvGramMatrix_l1Sum_nonneg
     0 ≤ chartInvGramMatrix_l1Sum (I := I) (M := M) g α x := by
   unfold chartInvGramMatrix_l1Sum
   exact Finset.sum_nonneg (fun _ _ => abs_nonneg _)
-
-/-! ## Continuity of the entries on the chart source -/
 
 /-- `b ↦ chartGramMatrix g α b i j` is continuous on `(chartAt H α).source`. -/
 private lemma chartGramMatrix_entry_continuousOn_chartSource
@@ -129,8 +125,6 @@ private lemma chartInvGramMatrix_l1Sum_continuousOn_chartSource
   exact (chartInvGramMatrix_entry_continuousOn_chartSource
     (I := I) (M := M) g α ij.1 ij.2).abs
 
-/-! ## Generic continuous-on-chart-source → bounded-on-compact lemma -/
-
 private lemma exists_bound_on_compact_of_continuousOn
     (α : M) (f : M → ℝ)
     (h_cont : ContinuousOn f (chartAt H α).source)
@@ -149,8 +143,6 @@ private lemma exists_bound_on_compact_of_continuousOn
   have h1 : f b ≤ C := hC ⟨b, hb, rfl⟩
   have h2 : C ≤ max C 0 := le_max_left _ _
   linarith
-
-/-! ## Headlines -/
 
 /-- Uniform absolute-value bound on each entry of the forward chart-Gram
 matrix over any compact subset of `(chartAt H α).source`. The locality
@@ -208,8 +200,6 @@ theorem chartInvGramMatrix_l1Sum_isBounded_on_compact
   have h_cont := chartInvGramMatrix_l1Sum_continuousOn_chartSource
     (I := I) (M := M) g α
   exact exists_bound_on_compact_of_continuousOn (α := α) _ h_cont hK hKsub
-
-/-! ## Specialisation: bound over `tsupport(POU_α)` on a closed manifold -/
 
 /-- **Uniform `L^1`-sum bound on the inverse chart-Gram matrix over the
 closed support of the chart-atlas partition-of-unity weight at `α`.**

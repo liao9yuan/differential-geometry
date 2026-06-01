@@ -81,8 +81,6 @@ namespace Analysis
 namespace Sobolev
 namespace WithBoundary
 
-/-! ## Pure-Euclidean iterated tower step (with-boundary) -/
-
 namespace EuclideanTowerStep
 
 variable {d : ℕ} [NeZero d]
@@ -129,12 +127,8 @@ theorem MemWkpHalfSpace_subcritical_iterated
       wkpNormHalfSpace (d := d) k (ENNReal.ofReal (pOne d p)) f Ω ≤
         ENNReal.ofReal (subcriticalConstant k d p) *
           wkpNormHalfSpace (d := d) (k + 1) (ENNReal.ofReal p) f Ω := by
-  -- Reduce both sides to the boundaryless predicate / norm on
-  -- `interiorHalfSpace Ω`, which is open.
   have hΩ_int_open : IsOpen (interiorHalfSpace (d := d) Ω) :=
     interiorHalfSpace_isOpen hΩ
-  -- The half-space membership / norm is by *definition* the boundaryless
-  -- one on `interiorHalfSpace Ω`.
   have hf' : MemWkp (d := d) (k + 1) (ENNReal.ofReal p) f
       (interiorHalfSpace Ω) := hf
   exact TowerStep.MemWkp_subcritical_iterated (d := d) k hp_one hp_dim
@@ -161,7 +155,6 @@ theorem MemWkpHalfSpace_succ_subcritical_step
   obtain ⟨h_mem, h_norm⟩ :=
     MemWkpHalfSpace_subcritical_iterated (d := d) k hp_one hp_dim hΩ
       hf_compact hf_supp hf
-  -- pOne d p = (d : ℝ) * p / ((d : ℝ) - p) by definition.
   have hpOne_eq : pOne d p = (d : ℝ) * p / ((d : ℝ) - p) := rfl
   refine ⟨?_, ?_⟩
   · rw [show (ENNReal.ofReal ((d : ℝ) * p / ((d : ℝ) - p))) =
@@ -173,13 +166,6 @@ theorem MemWkpHalfSpace_succ_subcritical_step
     exact h_norm
 
 end EuclideanTowerStep
-
-/-! ## Manifold-side iterated tower step (with-boundary), per-chart form
-
-For each chart `α : M`, given the chart-pushed function `chartPushed ρ_α α u`
-with `tsupport ⊆ interiorHalfSpace (chartTargetEuclid α)`, the per-chart
-boundaryless tower-step applies on the open interior part. Summing over
-charts yields the manifold-side bound. -/
 
 variable {n : ℕ} [NeZero n]
 variable {M : Type*} [TopologicalSpace M]
@@ -226,15 +212,11 @@ theorem wkpNormChart_succ_subcritical_step_withBoundary_perChart
               ENNReal.ofReal C *
                 wkpNormChart (n := n) (M := M) g (k + 1) (ENNReal.ofReal p) u := by
   classical
-  -- Use the boundaryless `subcriticalConstant` which is uniform across charts.
   set C : ℝ := EuclideanTowerStep.subcriticalConstant k n p with hC_def
   have hC_nn : 0 ≤ C :=
     EuclideanTowerStep.subcriticalConstant_nonneg (d := n) k p
   refine ⟨C, hC_nn, ?_⟩
   intro u h_compact h_supp hu
-  -- Apply per-chart: for each α, `chartPushed ρ α u` lies in
-  -- `MemWkpHalfSpace (k+1) p` of the chart target, with the assumed compact
-  -- support and tsupport in `interiorHalfSpace`.
   have h_per_chart : ∀ α : M,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkpHalfSpace
           (d := n) k (ENNReal.ofReal ((n : ℝ) * p / ((n : ℝ) - p)))
@@ -262,7 +244,6 @@ theorem wkpNormChart_succ_subcritical_step_withBoundary_perChart
         (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α)
         (h_compact α) (h_supp α) (hu α)
     obtain ⟨h_mem_p1, h_norm_p1⟩ := h_iter
-    -- The exponent `pOne n p = (n : ℝ) * p / ((n : ℝ) - p)`.
     have h_pOne_eq : EuclideanTowerStep.pOne n p =
         (n : ℝ) * p / ((n : ℝ) - p) := rfl
     refine ⟨?_, ?_⟩
@@ -272,11 +253,8 @@ theorem wkpNormChart_succ_subcritical_step_withBoundary_perChart
     · rw [show ENNReal.ofReal ((n : ℝ) * p / ((n : ℝ) - p)) =
         ENNReal.ofReal (EuclideanTowerStep.pOne n p) from by rw [h_pOne_eq]]
       exact h_norm_p1
-  -- Now sum over α : M.
   refine ⟨fun α => (h_per_chart α).1, ?_⟩
-  -- Use definition of `wkpNormChart` as a tsum.
   unfold wkpNormChart
-  -- The RHS is `ENNReal.ofReal C * (sum of half-space norms at (k+1, p))`.
   rw [show ENNReal.ofReal C * ∑' α : M,
         DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormHalfSpace
           (d := n) (k + 1) (ENNReal.ofReal p)
@@ -293,12 +271,6 @@ theorem wkpNormChart_succ_subcritical_step_withBoundary_perChart
           (chartTargetEuclid (n := n) (M := M) α) from
     (ENNReal.tsum_mul_left).symm]
   exact ENNReal.tsum_le_tsum (fun α => (h_per_chart α).2)
-
-/-! ## Smooth-input variant
-
-When the chart-pushed functions are smooth, the membership and norm
-hypotheses follow from the boundaryless smooth-input building blocks.
-We package the smooth-input form for downstream use. -/
 
 /-- **Smooth-input per-chart manifold-side iterated tower step (with-
 boundary).** -/
@@ -333,21 +305,12 @@ theorem wkpNormChart_succ_subcritical_step_withBoundary_perChart_smooth
                 (ENNReal.ofReal ((n : ℝ) * p / ((n : ℝ) - p))) u ≤
               ENNReal.ofReal C *
                 wkpNormChart (n := n) (M := M) g (k + 1) (ENNReal.ofReal p) u := by
-  -- The smooth-input form is just the per-chart form with the smoothness
-  -- hypothesis ignored: smoothness is unused in the iterated tower step
-  -- (which only uses compact support + tsupport).
   obtain ⟨C, hC_nn, h⟩ :=
     wkpNormChart_succ_subcritical_step_withBoundary_perChart (n := n) (M := M)
       g (k := k) hp_one hp_dim
   refine ⟨C, hC_nn, ?_⟩
   intro u _hu_smooth h_compact h_supp hu
   exact h h_compact h_supp hu
-
-/-! ## Auxiliary: termination of the iteration
-
-The same algebraic identity from the boundaryless module: if `(k+1) p > n`
-and `p < n`, then `k * p_1 > n`, where `p_1 = n p / (n - p)`. We re-export
-this. -/
 
 /-- Re-export of `IterationCalc.kp1_real_gt_d_of_kp1p_gt_d`: if `0 < p < d`
 and `d < (k+1) p`, then `d < k * p_1` where `p_1 = d p / (d - p)`. -/

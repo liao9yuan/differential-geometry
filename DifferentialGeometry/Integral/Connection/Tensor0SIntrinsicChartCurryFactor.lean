@@ -50,8 +50,6 @@ variable
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
-/-! ## The curry-left CLM -/
-
 /-- The "curry-left then evaluate at `w`" CLM, sending a `(0, s + 1)`-model tensor to
 a `(0, s)`-model tensor by currying the first slot at `w`. -/
 noncomputable def curryLeftEvalCLM (s : ℕ) (w : E) :
@@ -67,8 +65,6 @@ noncomputable def curryLeftEvalCLM (s : ℕ) (w : E) :
   unfold curryLeftEvalCLM
   simp [ContinuousLinearMap.comp_apply, ContinuousLinearMap.apply_apply,
     continuousMultilinearCurryLeftEquiv_apply]
-
-/-! ## Local trivialisation-action helpers -/
 
 /-- On the chart-α trivialisation base set, the chart-α trivialised representation of
 a `(0, n)`-tensor fibre applied to a model tuple `v : Fin n → E` equals the original
@@ -128,8 +124,6 @@ theorem tensor0SBundle_symmL_apply_eq_compContinuousLinearMap {n : ℕ}
             (F := E) (E := (TangentSpace I : M → Type _))
             (trivializationAt E (TangentSpace I) α)).symm b D) from rfl]
   exact h
-
-/-! ## Pointwise function-level identities -/
 
 /-- On the chart-α trivialisation base set, the `(s + 1)`-trivialised section
 applied to `Fin.cons (trivToE α b v) m` equals the `s`-trivialised partial
@@ -192,8 +186,6 @@ theorem tensor0SChartE_section_repr_partialEval_eq_curryLeftEval (s : ℕ) (α :
   exact (tensor0SChartE_section_repr_cons_eq_partialEval (I := I) (M := M) s α T
     (b := b) v (b' := b') hb' m).symm
 
-/-! ## Eventually-equality through the chart pullback -/
-
 /-- The chart pullback of the `s`-trivialised partial-eval representation agrees,
 in a neighbourhood of `extChartAt I α b`, with the curry-left-eval CLM applied to
 the chart pullback of the `(s + 1)`-trivialised representation. -/
@@ -229,8 +221,6 @@ theorem partialEval_chartPullback_eventually_eq_curryLeftEval_chartPullback
   exact tensor0SChartE_section_repr_partialEval_eq_curryLeftEval
     (I := I) (M := M) s α T (b := b) v (b' := φ.symm y) hyBase
 
-/-! ## Fréchet-derivative chain rule -/
-
 /-- The Fréchet derivative of the chart pullback of the `s`-trivialised
 partial-eval section at `φ b` factors through the curry-left-eval CLM. -/
 theorem fderiv_partialEval_chartPullback_eq_comp_curryLeftEval (s : ℕ) (α : M)
@@ -261,8 +251,6 @@ theorem fderiv_partialEval_chartPullback_eq_comp_curryLeftEval (s : ℕ) (α : M
       (x := (tensor0SChartE_section_repr (I := I) (s + 1) α T ∘
         (extChartAt I α).symm) (extChartAt I α b))).comp
     (extChartAt I α b) hT.hasFDerivAt).fderiv
-
-/-! ## Headline factorisation theorem -/
 
 /-- **Curry factorisation of the intrinsic chart Fréchet derivative.** On the
 chart Levi-Civita good set, applying the intrinsic chart Fréchet derivative CLM
@@ -305,7 +293,6 @@ theorem tensor0SIntrinsicChartCLM_factor_via_partialEval
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
   set w : E := trivToE (I := I) α b (X b) with hw_def
   set mE : Fin s → E := fun i => trivToE (I := I) α b (m i) with hmt_def
-  -- LHS reduction: unfold intrinsic CLM, then apply symmL formula and identify tuple.
   have hLHS_unfold :
       (show ContinuousMultilinearMap ℝ
           (fun _ : Fin (s + 1) => TangentSpace I b) ℝ from
@@ -341,7 +328,6 @@ theorem tensor0SIntrinsicChartCLM_factor_via_partialEval
       simp only [Fin.cons_succ]
       rfl
   rw [hLHS_unfold]
-  -- RHS reduction: same scheme on the partial-eval section.
   have hRHS_unfold :
       (show ContinuousMultilinearMap ℝ
           (fun _ : Fin s => TangentSpace I b) ℝ from
@@ -372,7 +358,6 @@ theorem tensor0SIntrinsicChartCLM_factor_via_partialEval
       (I := I) (M := M) (n := s) α hb_base D']
     rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
   rw [hRHS_unfold]
-  -- Connect via the curry-left factorisation of fderivs and `curryLeftEvalCLM_apply`.
   have hfderivEq := fderiv_partialEval_chartPullback_eq_comp_curryLeftEval
     (I := I) (M := M) s α T (b := b) v hb_src hb_tgt hb_base hT
   have hfderiv_at_w : fderiv ℝ

@@ -75,14 +75,6 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## The open neighbourhood `V` of `toEuclidean ((extChartAt I α) b₀)`
-
-For a manifold-open set `U ⊆ chartLeviCivitaGoodSet α` containing `b₀`, we
-build the open set `V` in `EuclideanSpace` consisting of those `y` in the
-Euclidean chart target whose chart-pullback `(extChartAt I α).symm
-(toEuclidean.symm y)` lies in `U`. This is precisely the chart-Euclidean
-preimage of `U` intersected with the chart target image. -/
-
 /-- The Euclidean-side neighbourhood corresponding to `U ⊆ M`. -/
 private def euclidNeighbourhood (α : M) (U : Set M) :
     Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
@@ -105,12 +97,8 @@ private lemma euclidNeighbourhood_isOpen
     (α : M) {U : Set M} (hU_open : IsOpen U) :
     IsOpen (euclidNeighbourhood (I := I) (M := M) α U) := by
   classical
-  -- The chart-target image is open under the boundaryless assumption.
   have hchartT_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- `toEuclidean.symm` is continuous globally; `(extChartAt I α).symm` is
-  -- continuous on `(extChartAt I α).target`; the composition sends
-  -- `chartTargetEuclid α` into `(extChartAt I α).target`.
   have hcont_te : Continuous
       ((toEuclidean (E := E)).symm :
         EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → E) :=
@@ -123,8 +111,6 @@ private lemma euclidNeighbourhood_isOpen
       (chartTargetEuclid (I := I) (M := M) α)
       (extChartAt I α).target := by
     intro y hy
-    -- `y ∈ toEuclidean '' (extChartAt I α).target`: there is `z ∈ target` with
-    -- `toEuclidean z = y`, hence `toEuclidean.symm y = z ∈ target`.
     rcases hy with ⟨z, hz_target, hz_eq⟩
     have hyz : (toEuclidean (E := E)).symm y = z := by
       rw [← hz_eq]; exact (toEuclidean (E := E)).symm_apply_apply _
@@ -136,8 +122,6 @@ private lemma euclidNeighbourhood_isOpen
           (extChartAt I α).symm ((toEuclidean (E := E)).symm y))
         (chartTargetEuclid (I := I) (M := M) α) :=
     hcont_extsymm.comp hcont_te.continuousOn hmap_target
-  -- The set under question is the intersection of `chartTargetEuclid α`
-  -- with the preimage of `U` under the composition.
   have hset_eq :
       euclidNeighbourhood (I := I) (M := M) α U =
         chartTargetEuclid (I := I) (M := M) α ∩
@@ -152,19 +136,14 @@ private lemma toEuclidean_extChartAt_mem_euclidNeighbourhood
     toEuclidean ((extChartAt I α) b₀) ∈
       euclidNeighbourhood (I := I) (M := M) α U := by
   classical
-  -- `b₀ ∈ U ⊆ chartLeviCivitaGoodSet α ⊆ extChartAt I α.source`.
   have hb₀_good : b₀ ∈ chartLeviCivitaGoodSet (I := I) α := hU_sub_good hb₀_U
   have hb₀_src : b₀ ∈ (extChartAt I α).source :=
     chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hb₀_good
-  -- `(extChartAt I α) b₀ ∈ (extChartAt I α).target` follows from being in
-  -- the source.
   have hb₀_tgt : (extChartAt I α) b₀ ∈ (extChartAt I α).target :=
     (extChartAt I α).map_source hb₀_src
   refine ⟨?_, ?_⟩
-  · -- `toEuclidean ((extChartAt I α) b₀) ∈ chartTargetEuclid α`.
-    exact ⟨(extChartAt I α) b₀, hb₀_tgt, rfl⟩
-  · -- The chart-pullback returns `b₀`.
-    change (extChartAt I α).symm
+  · exact ⟨(extChartAt I α) b₀, hb₀_tgt, rfl⟩
+  · change (extChartAt I α).symm
         ((toEuclidean (E := E)).symm (toEuclidean ((extChartAt I α) b₀))) ∈ U
     have hsymm_te : (toEuclidean (E := E)).symm
         (toEuclidean ((extChartAt I α) b₀)) =
@@ -175,8 +154,6 @@ private lemma toEuclidean_extChartAt_mem_euclidNeighbourhood
       (extChartAt I α).left_inv hb₀_src
     rw [hleft_inv]
     exact hb₀_U
-
-/-! ## The headline -/
 
 /-- **Equality of the chart-α `(Idx, Jdx)` raw component of the globally
 smooth extension with `covDerivComponentEuclid`.**
@@ -222,12 +199,9 @@ theorem chartPushedRaw_tensorChartComponentRaw_S_k_ext_eqOn_covDerivComponentEuc
   letI _h_fib : FiberBundle (TensorRSModel r s ℝ E)
       (fun x : M => TensorRSSpace r s I x) :=
     tensorRSBundle_fiber r s
-  -- Step 1: apply B.2.c.i to obtain `S_k_ext`, the open set `U ⊆
-  -- chartLeviCivitaGoodSet α` containing `b₀`, and the pointwise identity.
   obtain ⟨S_k_ext, U, hU_open, hb₀_U, hU_sub_good, hU_eq⟩ :=
     covApply_covRS_chartBasis_globalSmoothExtension
       (I := I) (M := M) g r s α T₀ k (b₀ := b₀) hb₀
-  -- Step 2: build the Euclidean-side neighbourhood `V`.
   set V : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
     euclidNeighbourhood (I := I) (M := M) α U with hV_def
   have hV_open : IsOpen V :=
@@ -236,55 +210,24 @@ theorem chartPushedRaw_tensorChartComponentRaw_S_k_ext_eqOn_covDerivComponentEuc
     toEuclidean_extChartAt_mem_euclidNeighbourhood
       (I := I) (M := M) α hU_sub_good hb₀_U
   refine ⟨S_k_ext, V, hV_open, hb₀_V, ?_⟩
-  -- Step 3: prove `EqOn` on `V`. Take `y ∈ V`. By `chartPushedRaw_apply_of_mem`,
-  -- the LHS equals the inner expression at `b := (extChartAt I α).symm
-  -- (toEuclidean.symm y)`. By `covDerivComponentEuclid_def`, the RHS equals
-  -- the same expression but with the inner argument
-  -- `chartTensorRSCovariantDerivative r s g α T₀.toSection
-  -- (chartBasisVecFiber α k) b` instead of `S_k_ext.toFun b`. The two inner
-  -- arguments agree by the chain (B.2.c.i + definitional + agreement on the
-  -- good set).
   intro y hy
-  -- `y ∈ chartTargetEuclid α` and `b := (extChartAt I α).symm (toEuclidean.symm
-  -- y) ∈ U`.
   have hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α := hy.1
   set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
   have hb_U : b ∈ U := hy.2
   have hb_good : b ∈ chartLeviCivitaGoodSet (I := I) α := hU_sub_good hb_U
-  -- LHS: rewrite chartPushedRaw.
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy_target]
-  -- LHS now: `tensorChartComponentProjection r s Idx Jdx
-  --   ((triv α).continuousLinearMapAt ℝ b (S_k_ext.toFun b))`.
-  -- RHS: rewrite covDerivComponentEuclid via its def.
   rw [covDerivComponentEuclid_def]
-  -- Both sides are `tensorChartComponentProjection r s Idx Jdx ∘
-  -- (triv α).continuousLinearMapAt ℝ b ∘ (some expression at b)`; show the
-  -- inner arguments agree.
   congr 1
-  -- Goal: `(triv α).continuousLinearMapAt ℝ b (S_k_ext.toFun b)
-  --      = (triv α).continuousLinearMapAt ℝ b
-  --          (chartTensorRSCovariantDerivative r s g α T₀.toSection
-  --            (chartBasisVecFiber α k) b)`.
-  -- Reduce to equality of the inner arguments to `continuousLinearMapAt`.
   congr 1
-  -- Goal: `S_k_ext.toFun b = chartTensorRSCovariantDerivative r s g α
-  --   T₀.toSection (chartBasisVecFiber α k) b`.
-  -- Chain through `tensorCovDerivAt`:
-  -- (a) `S_k_ext.toFun b = covApply cov_RS (chartBasisVecFiber α k)
-  --     T₀.toSection b` (B.2.c.i, on U).
   have hStep_BTCi : (S_k_ext : Π b' : M, TensorRSSpace r s I b') b =
       covApply
         (TensorRSNabla.tensorRSCovariantDerivative I M r s
           (LeviCivita (I := I) g))
         (chartBasisVecFiber (I := I) α k) T₀.toSection b := hU_eq b hb_U
-  -- `S_k_ext.toFun = ⇑S_k_ext` (DFunLike coercion); confirm by `rfl`.
   have hSk_unfold :
       S_k_ext.toFun b = (S_k_ext : Π b' : M, TensorRSSpace r s I b') b := rfl
   rw [hSk_unfold, hStep_BTCi]
-  -- (b) `covApply cov X Z b = cov.toFun Z b (X b)`.
   rw [covApply_apply]
-  -- (c) `cov.toFun T₀.toSection b (chartBasisVecFiber α k b) =
-  --     tensorCovDerivAt g r s T₀ b (chartBasisVecFiber α k b)`.
   have hCovDerivAt : (TensorRSNabla.tensorRSCovariantDerivative I M r s
         (LeviCivita (I := I) g)).toFun T₀.toSection b
         (chartBasisVecFiber (I := I) α k b) =
@@ -292,7 +235,6 @@ theorem chartPushedRaw_tensorChartComponentRaw_S_k_ext_eqOn_covDerivComponentEuc
         (chartBasisVecFiber (I := I) α k b) := by
     rw [tensorCovDerivAt_def]
   rw [hCovDerivAt]
-  -- (d) On the chart-α good set, `tensorCovDerivAt = chartTensorRSCov`.
   exact tensorCovDerivAt_eq_chartTensorRSCovariantDerivative
     (I := I) (M := M) g r s T₀ α k (b := b) hb_good
 

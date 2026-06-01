@@ -476,11 +476,9 @@ theorem indexForm_nonneg_of_minimising_geodesic
     exact hmin (fun t : ℝ => f s t) (hslice_C1 s) (hf_fix0 s) (hf_fixL s)
   have hLocalMin : IsLocalMin L_arc 0 :=
     Filter.Eventually.of_forall hmin_arc
-  -- (4) First variation vanishes (geodesic central curve): `L_arc'(0) = 0`.
   have hfirst : HasDerivAt L_arc 0 0 :=
     first_variation_vanishes_for_geodesic (I := I) g γ f L hf_smooth hL hγ hf0
       hf_fix0 hf_fixL hUnit
-  -- (5) Second variation: `HasDerivAt (deriv L_arc) (indexForm g γ 0 L Vfield Vfield) 0`.
   have hperp_field : ∀ t ∈ Set.Icc (0 : ℝ) L,
       g.inner (γ t) (Vfield t) (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) = 0 := by
     intro t ht
@@ -489,12 +487,8 @@ theorem indexForm_nonneg_of_minimising_geodesic
       (indexForm (I := I) g γ 0 L Vfield Vfield) 0 :=
     second_variation_of_arcLength_eq_indexForm (I := I) g γ f L Vfield hf_smooth hL hγ hf0
       (fun t => rfl) hUnit hf_fix0 hf_fixL hperp_field
-  -- (6) Second-derivative test: `0 ≤ indexForm g γ 0 L Vfield Vfield`.
   have hnonneg_field : 0 ≤ indexForm (I := I) g γ 0 L Vfield Vfield :=
     second_deriv_nonneg_of_isLocalMin hLocalMin hfirst hsecond
-  -- (7) The index forms of `Vfield` and `V` coincide: their integrands agree on the open
-  -- interval `Ioo 0 L` (pointwise field agreement plus locality of `covDerivAlong`), and the
-  -- interval integral ignores the single endpoint where they may differ.
   have hVfield_Ioo_eventually : ∀ t ∈ Set.Ioo (0 : ℝ) L,
       (fun s : ℝ => (Vfield s : TangentSpace I (γ s)))
         =ᶠ[nhds t] (fun s : ℝ => (V s : TangentSpace I (γ s))) := by
@@ -519,7 +513,6 @@ theorem indexForm_nonneg_of_minimising_geodesic
     rw [indexForm_eq_intervalIntegral, indexForm_eq_intervalIntegral]
     refine intervalIntegral.integral_congr_ae ?_
     filter_upwards [MeasureTheory.Measure.ae_ne MeasureTheory.volume L] with t htne hmem
-    -- `t ∈ Ι 0 L = Ioc 0 L` and `t ≠ L`, so `t ∈ Ioo 0 L`.
     rw [Set.uIoc_of_le (le_of_lt hL)] at hmem
     exact hintegrand_Ioo t ⟨hmem.1, lt_of_le_of_ne hmem.2 htne⟩
   rw [← hindexForm_eq]

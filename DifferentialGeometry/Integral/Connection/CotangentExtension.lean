@@ -63,15 +63,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Cotangent fibre bundle as a local instance
-
-The cotangent fibre type `fun x : M ↦ TangentSpace I x →L[ℝ] ℝ` is the `Hom`-bundle of the
-tangent bundle with the trivial bundle `Bundle.Trivial M ℝ`. The corresponding `FiberBundle`
-and `VectorBundle` instances are global in Mathlib, but the `T%` macro for converting a
-section to its total-space embedding uses `getLocalInstances`, which only sees instances
-introduced via `[...]` arguments. We therefore register the required instances locally as
-`scoped` local instances to make them findable by the macro within this section. -/
-
 /-- Local instance: the cotangent bundle is a fibre bundle with model fibre `E →L[ℝ] ℝ`. -/
 local instance cotangentFiberBundle :
     FiberBundle (E →L[ℝ] ℝ) (fun x : M => TangentSpace I x →L[ℝ] ℝ) :=
@@ -82,16 +73,6 @@ local instance cotangentVectorBundle :
     VectorBundle ℝ (E →L[ℝ] ℝ) (fun x : M => TangentSpace I x →L[ℝ] ℝ) :=
   inferInstance
 
-/-! ## A predicate for differentiability of cotangent-bundle sections
-
-The Mathlib `T%` macro for converting a section to its total-space embedding requires a local
-`FiberBundle` instance to be findable in the local context. For the cotangent fibre type
-`TangentSpace I x →L[ℝ] ℝ`, such an instance exists globally (via the `Hom` bundle of the
-tangent bundle and the trivial bundle), but is not picked up by `T%`'s local-context search.
-
-We therefore use the explicit total-space embedding throughout, packaged as the predicate
-`MDiffAtCotangent θ x` below. -/
-
 /-- The "cotangent-bundle section is differentiable" predicate, in the explicit
 total-space-embedding form. The cotangent bundle is `fun x : M ↦ TangentSpace I x →L[ℝ] ℝ`,
 the `Hom`-bundle with the trivial bundle `Bundle.Trivial M ℝ` as target. -/
@@ -100,17 +81,6 @@ def MDiffAtCotangent
   MDifferentiableAt I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ))
     (fun b : M => TotalSpace.mk' (E →L[ℝ] ℝ)
       (E := fun x : M => TangentSpace I x →L[ℝ] ℝ) b (θ b)) x
-
-/-! ## The auxiliary scalar functional `Φ(X, Y)`
-
-Given a tangent-bundle covariant derivative `cov`, a cotangent-bundle section `θ`, a point
-`x : M`, and two tangent-bundle sections `X` and `Y`, the scalar
-$$
-  \Phi(X, Y) := \mathrm{mfderiv}\,(b \mapsto \theta(b)(Y(b)))(x)\,(X(x)) - \theta(x)(\nabla_X Y)(x).
-$$
-When `θ` and `Y` are differentiable at `x`, the function `b ↦ θ(b)(Y(b))` is a differentiable
-scalar function, so the first term is well-defined. The second term uses the Mathlib argument
-convention `cov σ x v ≅ ∇_v σ`. -/
 
 /-- The auxiliary scalar functional `Φ(X, Y) := X(θ(Y))(x) - θ(x)(∇_X Y)(x)`.
 
@@ -141,18 +111,15 @@ lemma extDerivFun_mul_apply
     (v : TangentSpace I x) :
     extDerivFun (I := I) (fun b => p b * q b) x v =
       p x * extDerivFun (I := I) q x v + q x * extDerivFun (I := I) p x v := by
-  -- Define typed CLMs for `mfderiv p x`, `mfderiv q x`, `mfderiv (p*q) x` (as `→L[ℝ] ℝ`).
   let mp : TangentSpace I x →L[ℝ] ℝ := mfderiv I 𝓘(ℝ, ℝ) p x
   let mq : TangentSpace I x →L[ℝ] ℝ := mfderiv I 𝓘(ℝ, ℝ) q x
   let mpq : TangentSpace I x →L[ℝ] ℝ := mfderiv I 𝓘(ℝ, ℝ) (fun b : M => p b * q b) x
-  -- The Leibniz rule via `HasMFDerivAt.mul`.
   have hLeib : HasMFDerivAt I 𝓘(ℝ, ℝ) (fun b : M => p b * q b) x
       (p x • mq + q x • mp) := hp.hasMFDerivAt.mul hq.hasMFDerivAt
   have hmf : mpq = p x • mq + q x • mp := hLeib.mfderiv
   have hmf_v : mpq v = p x • mq v + q x • mp v := by
     have := congrArg (fun (L : TangentSpace I x →L[ℝ] ℝ) => L v) hmf
     simpa [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply] using this
-  -- `extDerivFun f x v = mfderiv f x v` for ℝ-valued f (the cast is the identity).
   change mpq v = p x * mq v + q x * mp v
   rw [hmf_v]
   rw [smul_eq_mul, smul_eq_mul]
@@ -164,7 +131,6 @@ lemma mdifferentiableAt_pairing
     {Y : Π x : M, TangentSpace I x} {x : M}
     (hθ : MDiffAtCotangent θ x) (hY : MDiffAt (T% Y) x) :
     MDifferentiableAt I 𝓘(ℝ, ℝ) (fun b : M => θ b (Y b)) x := by
-  -- Apply `MDifferentiableAt.clm_bundle_apply` with the trivial bundle as target.
   have h : MDifferentiableAt I (I.prod 𝓘(ℝ, ℝ))
       (fun m => TotalSpace.mk' ℝ (E := fun _ : M => ℝ) m (θ m (Y m))) x :=
     MDifferentiableAt.clm_bundle_apply
@@ -172,14 +138,8 @@ lemma mdifferentiableAt_pairing
       (E₂ := fun _ : M => ℝ)
       (b := fun b : M => b)
       (ϕ := fun b => θ b) (v := fun b => Y b) hθ hY
-  -- Now `h` says `(fun m => ⟨m, θ m (Y m)⟩)` is differentiable into `Bundle.Trivial M ℝ`.
-  -- The 2nd component (the value function) is differentiable, by `mdifferentiableAt_totalSpace`.
   rw [mdifferentiableAt_totalSpace] at h
-  -- For the trivial bundle, the trivialization's 2nd component is the identity.
-  -- The 2nd conjunct of `h` is then literally `MDiffAt (fun b => θ b (Y b)) x`.
   exact h.2
-
-/-! ## Tensoriality of `cotangentScalar` in `X` and `Y` -/
 
 variable {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
 
@@ -225,13 +185,11 @@ lemma cotangentScalar_tensorialAt_Y
     set h : M → ℝ := fun b => θ b (Y b) with hh_def
     have hh : MDifferentiableAt I 𝓘(ℝ, ℝ) h x := mdifferentiableAt_pairing hθ hY
     have hg' : MDifferentiableAt I 𝓘(ℝ, ℝ) g x := hg
-    -- Rewrite the function `b ↦ θ b ((g • Y) b)` as `b ↦ g b * h b`.
     have hfun : (fun b : M => θ b ((g • Y) b)) = (fun b : M => g b * h b) := by
       funext b
       change θ b ((g • Y) b) = g b * h b
       have : (g • Y) b = g b • Y b := rfl
       rw [this, ContinuousLinearMap.map_smul, smul_eq_mul]
-    -- Apply Leibniz for `extDerivFun` of a product, plus Leibniz for `cov`.
     change extDerivFun (I := I) (fun b => θ b ((g • Y) b)) x (X x) -
         θ x (cov (g • Y) x (X x)) =
       g x • (extDerivFun (I := I) h x (X x) - θ x (cov Y x (X x)))
@@ -241,8 +199,6 @@ lemma cotangentScalar_tensorialAt_Y
         ContinuousLinearMap.map_add, ContinuousLinearMap.map_smul]
     have hhx : h x = θ x (Y x) := rfl
     rw [hhx]
-    -- `θ x (a • Y x) = a • θ x (Y x)` by ℝ-linearity of `θ x`.
-    -- After all rewrites, we have a pure scalar identity to close with `ring`.
     change g x * extDerivFun (I := I) h x (X x) +
         θ x (Y x) * extDerivFun (I := I) g x (X x) -
         (g x • θ x (cov Y x (X x)) + θ x (extDerivFun (I := I) g x (X x) • Y x)) =
@@ -274,12 +230,6 @@ lemma cotangentScalar_tensorialAt_Y
         covOn.add hY hY' (Set.mem_univ x), ContinuousLinearMap.add_apply,
         ContinuousLinearMap.map_add]
     abel
-
-/-! ## Per-point construction via `TensorialAt.mkHom₂`
-
-When `θ` is differentiable at `x`, the bilinear-in-(X, Y) formula for `Φ` packages into a
-continuous bilinear map `T_x M →L[ℝ] T_x M →L[ℝ] ℝ`. When `θ` is not differentiable at `x`,
-we set the value to `0`. -/
 
 /-- The cotangent connection's value at a single point `x : M` on a section `θ`. -/
 def cotangentCovAt
@@ -318,8 +268,6 @@ lemma cotangentCovAt_apply_of_diff
   unfold cotangentCovAt
   rw [dif_neg hθ]
 
-/-! ## The unbundled cotangent covariant derivative -/
-
 /-- The cotangent covariant derivative as an unbundled map of sections. -/
 def cotangentCovFun
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) :
@@ -332,8 +280,6 @@ def cotangentCovFun
     (θ : Π x : M, TangentSpace I x →L[ℝ] ℝ) (x : M) :
     cotangentCovFun cov θ x = cotangentCovAt cov θ x := rfl
 
-/-! ## Connection axioms (additivity in `θ`, Leibniz over scalar multiplication) -/
-
 /-- The cotangent covariant derivative satisfies `IsCovariantDerivativeOn _ Set.univ`. -/
 lemma cotangentCovFun_isCovariantDerivativeOn
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) :
@@ -342,8 +288,6 @@ lemma cotangentCovFun_isCovariantDerivativeOn
       (cotangentCovFun cov) Set.univ where
   add {θ θ'} {x} hθ hθ' _hx := by
     classical
-    -- The structure passes `hθ : MDiffAt (T% θ) x` (for the cotangent bundle).
-    -- With our local `cotangentFiberBundle` instance, this is the same as `MDiffAtCotangent`.
     have hθ_cot : MDiffAtCotangent θ x := hθ
     have hθ'_cot : MDiffAtCotangent θ' x := hθ'
     have hsum_θ : MDiffAtCotangent (θ + θ') x := mdifferentiableAt_add_section hθ hθ'
@@ -367,7 +311,6 @@ lemma cotangentCovFun_isCovariantDerivativeOn
     rw [cotangentCovAt_apply_of_diff cov hsum_θ hX hY,
         cotangentCovAt_apply_of_diff cov hθ_cot hX hY,
         cotangentCovAt_apply_of_diff cov hθ'_cot hX hY]
-    -- Show: (Φ for θ+θ') = (Φ for θ) + (Φ for θ').
     change extDerivFun (I := I) (fun b => (θ + θ') b (Y b)) x (X x) -
         (θ + θ') x (cov.toFun Y x (X x)) =
       (extDerivFun (I := I) (fun b => θ b (Y b)) x (X x) -
@@ -409,19 +352,14 @@ lemma cotangentCovFun_isCovariantDerivativeOn
     have hY : MDiffAt (T% Y) x := mdifferentiableAt_extend ..
     have hXx : X x = v := by simp [X]
     have hYx : Y x = y := by simp [Y]
-    -- Substitute `v = X x` and `y = Y x`.
     rw [show v = X x from hXx.symm, show y = Y x from hYx.symm]
     rw [cotangentCovFun_apply, cotangentCovFun_apply]
-    -- Apply `cotangentCovAt_apply_of_diff` for the LHS section `g • θ`.
     rw [cotangentCovAt_apply_of_diff cov hsum_θ hX hY]
-    -- The RHS still has `(g x • cotangentCovAt cov θ x + (extDerivFun g x).smulRight (θ x))`
-    -- applied to `X x` and then `Y x`. Apply CLM operations to expose the inner-apply form.
     rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
         ContinuousLinearMap.smulRight_apply,
         ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
         ContinuousLinearMap.smul_apply]
     rw [cotangentCovAt_apply_of_diff cov hθ' hX hY]
-    -- Show: (Φ for g•θ) = g•(Φ for θ) + (extDerivFun g)(Y).
     change extDerivFun (I := I) (fun b => (g • θ) b (Y b)) x (X x) -
         (g • θ) x (cov.toFun Y x (X x)) =
       g x • (extDerivFun (I := I) (fun b => θ b (Y b)) x (X x) -
@@ -445,8 +383,6 @@ lemma cotangentCovFun_isCovariantDerivativeOn
     rw [hhx]
     simp only [smul_eq_mul]
     ring
-
-/-! ## The bundled cotangent covariant derivative -/
 
 /-- The **cotangent covariant derivative** induced by a tangent-bundle covariant derivative,
 as a bundled `CovariantDerivative I (E →L[ℝ] ℝ) (cotangent bundle)`. The model fiber of
@@ -486,11 +422,6 @@ theorem cotangentCov_dualPairing
   unfold cotangentScalar
   ring
 
-/-! ## Metric duality intertwining (Levi-Civita)
-
-When `cov = LeviCivita g`, the metric pairing intertwines the tangent and cotangent
-connections. This is the chart-free "metric is parallel" property. -/
-
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 /-- The cotangent-bundle section `♭X := b ↦ g.inner b (X b)` of the cotangent bundle
@@ -514,7 +445,6 @@ lemma metricFlat_mdiff_total
     MDifferentiableAt I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ))
       (fun b : M => TotalSpace.mk' (E →L[ℝ] ℝ)
         (E := fun x : M => TangentSpace I x →L[ℝ] ℝ) b (metricFlat g X b)) x := by
-  -- `g.inner` is smooth as a section of the bilinear hom-bundle.
   have hg : MDifferentiableAt I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ))
       (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun (x : M) => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) b
@@ -548,47 +478,20 @@ theorem cotangentCov_metricDuality
   have hY : MDiffAt (T% Y) x := mdifferentiableAt_extend ..
   have hYx : Y x = y := by simp [Y]
   have hflat : MDiffAtCotangent (metricFlat g X) x := metricFlat_mdiff g hX
-  -- Use the dual-pairing identity to expand the LHS.
   have hpair :=
     cotangentCov_dualPairing (LeviCivita (I := I) g) hflat hY v
-  -- Rewrite the function inside `mfderiv` as `g.inner b (X b) (Y b)`.
   have hpair_eq : (fun b : M => (metricFlat g X) b (Y b)) =
       (fun b : M => g.inner b (X b) (Y b)) := by
     funext b; rfl
   rw [hpair_eq] at hpair
-  -- Apply metric compatibility of the Levi-Civita connection.
   have hMC :=
     (LeviCivita_isMetricCompatible (I := I) g) hX hY (Set.mem_univ x) v
   have heq := hpair.symm.trans hMC
-  -- `metricFlat g X x z = g.inner x (X x) z`.
   have h_flat_apply : (metricFlat g X) x ((LeviCivita (I := I) g).toFun Y x v) =
       g.inner x (X x) ((LeviCivita (I := I) g).toFun Y x v) := rfl
   rw [h_flat_apply] at heq
   rw [hYx] at heq
-  -- `heq` is `LHS + commonTerm = RHS + commonTerm`. Subtract `commonTerm`.
   exact add_right_cancel heq
-
-/-! ## Smoothness of the cotangent covariant derivative
-
-When `cov : CovariantDerivative I E (TangentSpace I)` is `C^∞` as a covariant derivative
-(in the sense of `ContMDiffCovariantDerivative cov ∞`), the induced cotangent covariant
-derivative `cotangentCov cov` is also `C^∞`.
-
-The proof has three layers:
-
-* **Bridge lemma** `cotangentCov_clmSection_smooth_aux`: a self-contained restatement of the
-  "missing adjoint of `ContMDiff.clm_bundle_apply`": if for every smooth section `Y` of the
-  source bundle the value section `x ↦ ⟨x, φ x (Y x)⟩` of the target bundle is smooth, then
-  the operator section `x ↦ ⟨x, φ x⟩` of the Hom-bundle is smooth. The proof uses
-  `contMDiffAt_clm_of_pointwise` to reduce to per-vector smoothness, then a basis frame at
-  `x₀` (via `IsLocalFrameOn.exists_contMDiffSection_eqOn_nhd`) to extract smooth sections
-  whose values agree with the trivialization-`symmL` of basis vectors.
-
-* **Smoothness of `extDerivFun` of a smooth scalar**: for any smooth `h : M → ℝ`, the
-  cotangent section `extDerivFun h` is smooth.
-
-* **Main instance** `cotangentCov_isContMDiff`: combine the bridge and the dual-pairing
-  identity. -/
 
 /-- Bridge: pointwise smoothness of a CLM-bundle-valued section on every smooth tangent
 section lifts to total-space smoothness of the corresponding Hom-bundle section. This is the
@@ -614,45 +517,34 @@ theorem cotangentCov_clmSection_smooth_aux
       (fun x => TotalSpace.mk' (E →L[ℝ] F₂)
         (E := fun x : M => TangentSpace I x →L[ℝ] V₂ x) x (φ x)) := by
   intro x₀
-  -- Smoothness via hom-bundle characterisation `contMDiffAt_hom_bundle`.
   rw [contMDiffAt_hom_bundle]
   refine ⟨contMDiffAt_id, ?_⟩
-  -- Reduce operator-valued smoothness to per-vector smoothness via
-  -- `contMDiffAt_clm_of_pointwise`.
   apply contMDiffAt_clm_of_pointwise (IB := I) (X := M)
   intro v
-  -- Local trivialisations and the model-fibre basis on the tangent side.
   let e₁ := trivializationAt E (TangentSpace I : M → Type _) x₀
   let e₂ := trivializationAt F₂ V₂ x₀
   let b := Module.finBasis ℝ E
   have he₁ : x₀ ∈ e₁.baseSet := mem_baseSet_trivializationAt E (TangentSpace I) x₀
   have he₂ : x₀ ∈ e₂.baseSet := mem_baseSet_trivializationAt F₂ V₂ x₀
-  -- Get global smooth tangent sections `Y` agreeing with `e₁.localFrame b i` near `x₀`.
   have hframe := e₁.isLocalFrameOn_localFrame_baseSet I (⊤ : ℕ∞) b
   obtain ⟨Y, hY⟩ := hframe.exists_contMDiffSection_eqOn_nhd e₁.open_baseSet he₁
-  -- For each `i`, the section `x ↦ ⟨x, φ x (Y i x)⟩` of `V₂` is smooth.
   have hφY : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, F₂)) ∞
       (fun x => TotalSpace.mk' F₂ (E := V₂) x (φ x (Y i x))) := fun i => h (Y i)
-  -- Read off the `e₂`-trivialised fibre component of each.
   have hφY_fiber : ∀ i, ContMDiffAt I 𝓘(ℝ, F₂) ∞
       (fun x => (e₂ ⟨x, φ x (Y i x)⟩).2) x₀ := fun i => by
     have hi := (contMDiffAt_section (F := F₂) (E := V₂) x₀).mp ((hφY i) x₀)
     simpa [e₂, trivializationAt] using hi
-  -- Form the linear combination `∑ i, b.repr v i • (e₂-fibre of φ ∘ Y i)`.
   have hsum : ContMDiffAt I 𝓘(ℝ, F₂) ∞
       (fun x => ∑ i, b.repr v i • (e₂ ⟨x, φ x (Y i x)⟩).2) x₀ := by
     apply ContMDiffAt.sum
     intro i _
     exact (contMDiffAt_const (c := (b.repr v i : ℝ))).smul (hφY_fiber i)
-  -- Show that on a neighborhood of `x₀`, the `inCoordinates` expression equals this sum.
   refine hsum.congr_of_eventuallyEq ?_
   have h_base₁ : ∀ᶠ x in 𝓝 x₀, x ∈ e₁.baseSet :=
     e₁.open_baseSet.mem_nhds he₁
   have h_base₂ : ∀ᶠ x in 𝓝 x₀, x ∈ e₂.baseSet :=
     e₂.open_baseSet.mem_nhds he₂
   filter_upwards [h_base₁, h_base₂, hY] with x hx₁ hx₂ hYx
-  -- Decompose `v` in basis `b`. Then unfold `inCoordinates`, push through `φ x` and the
-  -- trivialisations using linearity, and match against the local frame `Y i`.
   have hv_decomp : v = ∑ i, b.repr v i • b i := (b.sum_repr v).symm
   have h_inCoord :
       (ContinuousLinearMap.inCoordinates E (TangentSpace I) F₂ V₂ x₀ x x₀ x (φ x)) v =
@@ -671,13 +563,11 @@ theorem cotangentCov_clmSection_smooth_aux
   rw [h₁, h₂, h₃]
   refine Finset.sum_congr rfl (fun i _ => ?_)
   congr 1
-  -- `e₁.symmL ℝ x (b i) = e₁.basisAt b hx₁ i = e₁.localFrame b i x = Y i x`.
   have h_lf : e₁.symmL ℝ x (b i) = (Y i) x := by
     rw [hYx i]
     rw [Trivialization.localFrame_apply_of_mem_baseSet (hx := hx₁)]
     simp [Trivialization.basisAt]
   rw [h_lf]
-  -- `e₂.continuousLinearMapAt ℝ x w = (e₂ ⟨x, w⟩).2` when `x ∈ e₂.baseSet`.
   change (Trivialization.continuousLinearMapAt ℝ e₂ x) ((φ x) ((Y i) x)) = _
   rw [show ⇑(e₂.continuousLinearMapAt ℝ x) = ⇑(e₂.linearMapAt ℝ x) from rfl,
     e₂.coe_linearMapAt_of_mem hx₂]
@@ -704,9 +594,6 @@ theorem cotangentCov_extDerivFun_smooth
     ((ContinuousLinearMap.apply ℝ ℝ v).contMDiff.contMDiffAt).comp x₀ hmfderiv
   convert hmfderiv_v using 1
   ext x
-  -- Both sides reduce: LHS uses `Bundle.Trivial M ℝ` trivialisation on codomain (identity);
-  -- RHS uses `TangentSpace 𝓘(ℝ,ℝ)` trivialisation at `h x` (also identity in model space).
-  -- Both reduce to: `mfderiv h x ∘ symmL` applied to `v`, via `fromTangentSpace = id` on ℝ.
   simp only [inTangentCoordinates, ContinuousLinearMap.inCoordinates,
     Bundle.Trivial.fiberBundle_trivializationAt',
     Bundle.Trivial.continuousLinearMapAt_trivialization,
@@ -726,8 +613,6 @@ theorem cotangentCov_pairing_contMDiff
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => TotalSpace.mk' E (E := TangentSpace I) x (Y x))) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun x => θ x (Y x)) := by
-  -- Apply `ContMDiff.clm_bundle_apply` with target the trivial bundle `Bundle.Trivial M ℝ`,
-  -- then unfold to a plain function via `contMDiff_section`.
   have hap : ContMDiff I (I.prod 𝓘(ℝ, ℝ)) ∞
       (fun x => TotalSpace.mk' ℝ (E := Bundle.Trivial M ℝ) x (θ x (Y x))) :=
     ContMDiff.clm_bundle_apply
@@ -776,7 +661,6 @@ theorem cotangentCov_double_apply_smooth
     (Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun x => ((cotangentCov cov).toFun θ x (Y x)) (Z x)) := by
-  -- Express via `cotangentCovAt_apply_of_diff` as the `cotangentScalar` formula.
   have h_eq : ∀ x : M,
       ((cotangentCov cov).toFun θ x (Y x)) (Z x) =
         extDerivFun (I := I) (fun b => θ b (Z b)) x (Y x) -
@@ -791,22 +675,15 @@ theorem cotangentCov_double_apply_smooth
     rw [cotangentCov_toFun, cotangentCovFun_apply]
     rw [this]
     rfl
-  -- Each summand is smooth.
-  -- (i) `b ↦ θ b (Z b)` is a smooth scalar function (smooth cotangent applied to smooth tangent).
   have h_pair_θZ : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun b : M => θ b (Z b)) :=
     cotangentCov_pairing_contMDiff hθ Z.contMDiff
-  -- (ii) `extDerivFun (b ↦ θ b (Z b))` is a smooth `T*M`-section.
   have h_extDeriv : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) ∞
       (fun x => TotalSpace.mk' (E →L[ℝ] ℝ)
         (E := fun x : M => TangentSpace I x →L[ℝ] (Bundle.Trivial M ℝ) x)
         x (extDerivFun (I := I) (fun b => θ b (Z b)) x)) :=
     cotangentCov_extDerivFun_smooth h_pair_θZ
-  -- (iii) `b ↦ extDerivFun (...) b (Y b)` is a smooth scalar (smooth `T*M`-section applied
-  -- to smooth tangent section `Y`). Note: as a `T*M = Hom(TM, Bundle.Trivial M ℝ)` section.
   have h_extDeriv_Y : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun x => extDerivFun (I := I) (fun b => θ b (Z b)) x (Y x)) := by
-    -- `extDerivFun ... x : T_x M →L (Bundle.Trivial M ℝ) x = T_x M →L ℝ`. Apply via
-    -- `clm_bundle_apply` with target `Bundle.Trivial M ℝ`, then unfold.
     have hap : ContMDiff I (I.prod 𝓘(ℝ, ℝ)) ∞
         (fun x => TotalSpace.mk' ℝ (E := Bundle.Trivial M ℝ) x
           (extDerivFun (I := I) (fun b => θ b (Z b)) x (Y x))) :=
@@ -818,8 +695,6 @@ theorem cotangentCov_double_apply_smooth
         (v := fun x => Y x) h_extDeriv Y.contMDiff
     intro x
     exact (contMDiffAt_section (F := ℝ) (E := Bundle.Trivial M ℝ) x).mp (hap x)
-  -- (iv) `b ↦ cov.toFun Z b (Y b)` is a smooth tangent section
-  -- (smooth Hom-bundle applied to smooth tangent).
   have h_covZ : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
       (fun x => TotalSpace.mk' (E →L[ℝ] E)
         (E := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x) x
@@ -832,16 +707,13 @@ theorem cotangentCov_double_apply_smooth
       (E₂ := fun x : M => TangentSpace I x)
       (b := fun x : M => x)
       (ϕ := fun x => cov.toFun Z x) (v := fun x => Y x) h_covZ Y.contMDiff
-  -- (v) `b ↦ θ b (cov.toFun Z b (Y b))` is a smooth scalar.
   have h_θ_covZY : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun x => θ x (cov.toFun Z x (Y x))) :=
     cotangentCov_pairing_contMDiff hθ h_covZY
-  -- Combine: the difference is smooth.
   have h_combined : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun x => extDerivFun (I := I) (fun b => θ b (Z b)) x (Y x) -
         θ x (cov.toFun Z x (Y x))) :=
     h_extDeriv_Y.sub h_θ_covZY
-  -- Identify with the cotangent connection's value.
   refine h_combined.congr ?_
   intro x
   exact h_eq x
@@ -862,9 +734,6 @@ instance cotangentCov_isContMDiff
           have h_le : (∞ : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) + 1 := by
             rw [ENat.coe_top_add_one]
           exact contMDiffOn_univ.mp (hθ.of_le h_le)
-        -- **Outer bridge**: smoothness of `cotangentCov cov θ` as a `Hom(TM, T*M)` section
-        -- follows from: for every smooth tangent section `Y`, the section
-        -- `x ↦ ⟨x, (cotangentCov cov θ x)(Y x)⟩` of `T*M` is smooth.
         have hglobal : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] (E →L[ℝ] ℝ))) ∞
             (fun x : M => TotalSpace.mk'
               (E →L[ℝ] (E →L[ℝ] ℝ))
@@ -875,19 +744,13 @@ instance cotangentCov_isContMDiff
             (V₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
             (φ := fun x => (cotangentCov cov).toFun θ x)
           intro Y
-          -- **Inner bridge**: smoothness of `x ↦ ⟨x, (cotangentCov cov θ x)(Y x)⟩` as a
-          -- `T*M = Hom(TM, Bundle.Trivial M ℝ)` section follows from: for every smooth tangent
-          -- section `Z`, the scalar `x ↦ ((cotangentCov cov θ x)(Y x))(Z x)` is smooth.
           apply cotangentCov_clmSection_smooth_aux
             (V₂ := fun _ : M => ℝ)
             (φ := fun x => (cotangentCov cov).toFun θ x (Y x))
           intro Z
-          -- The scalar `((cotangentCov cov θ x)(Y x))(Z x)` is smooth in `x`,
-          -- by `cotangentCov_double_apply_smooth`.
           have h_scalar : ContMDiff I 𝓘(ℝ, ℝ) ∞
               (fun x => ((cotangentCov cov).toFun θ x (Y x)) (Z x)) :=
             cotangentCov_double_apply_smooth cov hθ_inf Y Z
-          -- Convert scalar smoothness to smoothness as a section of `Bundle.Trivial M ℝ`.
           intro x
           rw [contMDiffAt_section]
           refine (h_scalar.contMDiffAt).congr_of_eventuallyEq ?_

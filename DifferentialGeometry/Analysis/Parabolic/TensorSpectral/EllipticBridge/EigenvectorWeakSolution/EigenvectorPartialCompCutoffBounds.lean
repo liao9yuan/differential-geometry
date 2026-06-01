@@ -95,16 +95,12 @@ open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Positivity of the resolvent eigenvalue -/
 
 omit [CompleteSpace E] in
 /-- `μ · μ⁻¹^eN ≤ μ⁻¹^eN` whenever `0 < μ ≤ 1`. -/
@@ -116,13 +112,6 @@ private lemma mu_mul_inv_pow_le_inv_pow_local
   have h : μ * μ⁻¹ ^ eN ≤ 1 * μ⁻¹ ^ eN :=
     mul_le_mul_of_nonneg_right hμ_le_one hμ_inv_pow_nn
   simpa using h
-
-/-! ## Chart-locality-free atom converters
-
-The atom converters below are keyed on the intrinsic compact-operator spectral
-theorem: the eigenbasis vector is `tensorResolventEigenbasisVec`
-applied to `tensorResolventL2_isCompactOperator`, and every concrete
-eigenvector chart object is in its `_unconditional` form. -/
 
 /-- The chart-locality-free eigenbasis vector has unit norm. -/
 private lemma vec_norm_eq_one_local
@@ -278,7 +267,6 @@ theorem eigenvector_componentLpLimit_perK_from_uniform_β_unconditional
     eigenval_pos_local (I := I) (M := M) g r s i
   have hμ_le_one : i.fst.val ≤ 1 :=
     eigenval_le_one_local (I := I) (M := M) g r s i
-  -- Express the atom's coercion as `μ *` the eigenvector chart component.
   have h_smul : (fun y => ((componentLpLimit (I := I) (M := M)
         g r s i α P :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -301,14 +289,11 @@ theorem eigenvector_componentLpLimit_perK_from_uniform_β_unconditional
     filter_upwards [h_smul] with y hy
     rw [hy, smul_eq_mul]
     rfl
-  -- Regularity of the eigenvector chart component at order `K'`, used by
-  -- `wkpNorm_const_smul`.
   have h_eig_mem : MemWkp (d := Module.finrank ℝ E) K' 2
       (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
         g r s i α P) Ω :=
     eigenvectorVec_pou_memWkp_local (I := I) (M := M) g r s i K'
       (fun β Q => h_pou_resolv i K' β Q hK') α P
-  -- Rewrite the wkpNorm through the a.e. equality.
   have h_norm_eq : wkpNorm (d := Module.finrank ℝ E) K' 2
       (fun y => ((componentLpLimit (I := I) (M := M) g r s i α P :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω
@@ -318,7 +303,6 @@ theorem eigenvector_componentLpLimit_perK_from_uniform_β_unconditional
             g r s i α P y) Ω :=
     wkpNorm_congr_ae (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae
-  -- Factor the scalar out.
   have h_smul_eq : wkpNorm (d := Module.finrank ℝ E) K' 2
       (fun y => i.fst.val *
         eigenvectorChartComponentFun_unconditional (I := I) (M := M)
@@ -329,7 +313,6 @@ theorem eigenvector_componentLpLimit_perK_from_uniform_β_unconditional
             g r s i α P) Ω :=
     wkpNorm_const_smul (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_eig_mem i.fst.val
-  -- The chart-component converter at `(α, P)` and order `K' ≤ N`.
   have h_eig_bd : wkpNorm (d := Module.finrank ℝ E) K' 2
       (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
         g r s i α P) Ω
@@ -462,7 +445,6 @@ theorem eigenvector_partialLpLimit_perK_from_uniform_β_unconditional
     eigenval_pos_local (I := I) (M := M) g r s i
   have hμ_le_one : i.fst.val ≤ 1 :=
     eigenval_le_one_local (I := I) (M := M) g r s i
-  -- Order-`(K' + 1)` regularity of the eigenvector chart component at `(α, P)`.
   have h_comp_succ : MemWkp (d := Module.finrank ℝ E) (K' + 1) 2
       (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
         g r s i α P) Ω :=
@@ -471,8 +453,6 @@ theorem eigenvector_partialLpLimit_perK_from_uniform_β_unconditional
   have h_comp_w1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
       (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
         g r s i α P) Ω := h_comp_succ.memW1p
-  -- The eigenvector weak chart partial is a genuine weak partial of the
-  -- canonical eigenvector chart component.
   have h_weak : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
       (eigenvectorChartWeakPartial (I := I) (M := M)
         g r s i α P k)
@@ -480,8 +460,6 @@ theorem eigenvector_partialLpLimit_perK_from_uniform_β_unconditional
         g r s i α P) Ω :=
     eigenvectorChartWeakPartial_hasWeakPartialDeriv (I := I) (M := M)
       g r s i α P k
-  -- The chosen weak partial of the chart component is also a genuine weak
-  -- partial (since the chart component is `W^{1,2}`).
   have h_chosen_weak : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
       (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
         (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
@@ -489,7 +467,6 @@ theorem eigenvector_partialLpLimit_perK_from_uniform_β_unconditional
       (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
         g r s i α P) Ω :=
     chosenWeakPartial'_isWeakPartial_of_mem h_comp_w1p k
-  -- Both weak partials are locally integrable.
   have h_weak_memLp : MemLp
       (eigenvectorChartWeakPartial (I := I) (M := M)
         g r s i α P k) 2
@@ -521,7 +498,6 @@ theorem eigenvector_partialLpLimit_perK_from_uniform_β_unconditional
           g r s i α P) Ω :=
     DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ_open h_weak h_chosen_weak
       h_weak_loc h_chosen_loc
-  -- Express the atom's coercion as `μ *` the chosen weak partial of the chart cpt.
   have h_smul : (fun y => ((partialLpLimit (I := I) (M := M)
         g r s i α P k :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -541,7 +517,6 @@ theorem eigenvector_partialLpLimit_perK_from_uniform_β_unconditional
             g r s i α P) Ω y) := by
     filter_upwards [h_smul, h_ae_weak_eq_chosen] with y hy hy_eq
     rw [hy, smul_eq_mul, hy_eq]
-  -- Rewrite the atom's wkpNorm through the a.e. equality.
   have h_norm_eq : wkpNorm (d := Module.finrank ℝ E) K' 2
       (fun y => ((partialLpLimit (I := I) (M := M)
         g r s i α P k :
@@ -553,7 +528,6 @@ theorem eigenvector_partialLpLimit_perK_from_uniform_β_unconditional
               g r s i α P) Ω y) Ω :=
     wkpNorm_congr_ae (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae_atom
-  -- Factor the scalar out.
   have h_smul_eq : wkpNorm (d := Module.finrank ℝ E) K' 2
       (fun y => i.fst.val *
         chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
@@ -566,7 +540,6 @@ theorem eigenvector_partialLpLimit_perK_from_uniform_β_unconditional
               g r s i α P) Ω) Ω :=
     wkpNorm_const_smul (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_chosen_memWkp i.fst.val
-  -- `wkpNorm K' 2 (chosenWeakPartial' ...) ≤ wkpNorm (K' + 1) 2 (chart cpt)`.
   have h_chosen_le : wkpNorm (d := Module.finrank ℝ E) K' 2
       (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
         (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
@@ -577,7 +550,6 @@ theorem eigenvector_partialLpLimit_perK_from_uniform_β_unconditional
     wkpNorm_chosenWeakPartial_le (d := Module.finrank ℝ E) K' hΩ_open
       (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
         g r s i α P) k
-  -- The chart-component converter at `(α, P)` and order `K' + 1 ≤ N`.
   have h_eig_bd : wkpNorm (d := Module.finrank ℝ E) (K' + 1) 2
       (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
         g r s i α P) Ω
@@ -709,8 +681,6 @@ theorem eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
   set S : Finset M := transportChartCenters (I := I) (M := M) α with hS_def
-  -- The input-uniform cutoff ↔ partition-of-unity bound, at every order `k`.
-  -- The constant produced by the uniform bridge is independent of `u`.
   set Cu : ℕ → ℝ := fun k =>
     (wkpNorm_tensorL2ChartComponentCutoff_le_of_pou_uniform
       (I := I) (M := M) g r s α P₀ k).choose with hCu_def
@@ -739,7 +709,6 @@ theorem eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional
                 (chartTargetEuclid (I := I) (M := M) β)) := fun k u h_pou_u =>
     (wkpNorm_tensorL2ChartComponentCutoff_le_of_pou_uniform
       (I := I) (M := M) g r s α P₀ k).choose_spec.2 u h_pou_u
-  -- Output constant per `K'`: `Cu (K' + 1) * |S| * |TensorCompIdx| * CN`.
   set CT : ℕ := S.card * (Finset.univ : Finset (TensorCompIdx (E := E) r s)).card
     with hCT_def
   set CN' : ℕ → ℝ := fun K' => Cu (K' + 1) * (CT : ℝ) * CN
@@ -756,7 +725,6 @@ theorem eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional
     eigenval_pos_local (I := I) (M := M) g r s i
   have hμ_le_one : i.fst.val ≤ 1 :=
     eigenval_le_one_local (I := I) (M := M) g r s i
-  -- The eigenvector chart components are `MemWkp (K' + 1) 2` at every `(β, Q)`.
   have h_pou_eigen : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
       MemWkp (d := d) (K' + 1) 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
@@ -768,10 +736,6 @@ theorem eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional
     fun β Q => eigenvectorVec_pou_memWkp_local
       (I := I) (M := M) g r s i (K' + 1)
       (fun β' Q' => h_pou_resolv i (K' + 1) β' Q' hK') β Q
-  -- The cutoff chart component is `MemWkp (K' + 1) 2` at `(α, P₀)` via the
-  -- non-uniform bridge — needed to invoke `chosenWeakPartial'_isWeakPartial_of_mem`.
-  -- (We use the non-uniform bridge for membership; the uniform one is reserved
-  -- for the explicit norm bound.)
   have h_cutoff_succ : MemWkp (d := d) (K' + 1) 2
       (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
           (tensorResolventEigenbasisVec (I := I) (M := M)
@@ -790,8 +754,6 @@ theorem eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional
               g r s) i) α P₀ :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω :=
     h_cutoff_succ.memW1p
-  -- The eigenvector cutoff chart partial is a genuine weak `l`-th partial of
-  -- the eigenvector cutoff chart component.
   have h_weak : DeGiorgi.HasWeakPartialDeriv (d := d) l
       ((eigenvectorCutoffChartPartialLp (I := I) (M := M)
           g r s i α P₀ l :
@@ -803,8 +765,6 @@ theorem eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω :=
     eigenvectorCutoffChartPartialLp_hasWeakPartialDeriv (I := I) (M := M)
       g r s i α P₀ l
-  -- The chosen weak partial of the cutoff chart component is also a genuine
-  -- weak partial.
   have h_chosen_weak : DeGiorgi.HasWeakPartialDeriv (d := d) l
       (chosenWeakPartial' (d := d) 2 l
         (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
@@ -818,7 +778,6 @@ theorem eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional
               g r s) i) α P₀ :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω :=
     chosenWeakPartial'_isWeakPartial_of_mem h_cutoff_w1p l
-  -- Both weak partials are locally integrable.
   have h_weak_memLp : MemLp
       ((eigenvectorCutoffChartPartialLp (I := I) (M := M)
           g r s i α P₀ l :
@@ -860,7 +819,6 @@ theorem eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω :=
     DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ_open h_weak h_chosen_weak
       h_weak_loc h_chosen_loc
-  -- Express the atom's coercion as `μ *` (chosen weak partial of cutoff chart cpt).
   have h_smul : (fun y => ((cutoffPartialLpLimit (I := I) (M := M)
         g r s i α P₀ l :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -884,7 +842,6 @@ theorem eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y') Ω y) := by
     filter_upwards [h_smul, h_ae_weak_eq_chosen] with y hy hy_eq
     rw [hy, smul_eq_mul, hy_eq]
-  -- Rewrite the atom's wkpNorm through the a.e. equality.
   have h_norm_eq : wkpNorm (d := d) K' 2
       (fun y => ((cutoffPartialLpLimit (I := I) (M := M)
         g r s i α P₀ l :
@@ -899,7 +856,6 @@ theorem eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y') Ω y) Ω :=
     wkpNorm_congr_ae (d := d)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae_atom
-  -- Factor the scalar out.
   have h_smul_eq : wkpNorm (d := d) K' 2
       (fun y => i.fst.val *
         chosenWeakPartial' (d := d) 2 l
@@ -918,7 +874,6 @@ theorem eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y') Ω) Ω :=
     wkpNorm_const_smul (d := d)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_chosen_memWkp i.fst.val
-  -- `wkpNorm K' 2 (chosenWeakPartial' ...) ≤ wkpNorm (K' + 1) 2 (cutoff chart cpt)`.
   have h_chosen_le : wkpNorm (d := d) K' 2
       (chosenWeakPartial' (d := d) 2 l
         (fun y' => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
@@ -938,8 +893,6 @@ theorem eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional
             (tensorResolventL2_isCompactOperator (I := I) (M := M)
               g r s) i) α P₀ :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) l
-  -- Bound the cutoff chart component norm by the double sum via the uniform
-  -- cutoff bridge.
   have h_cutoff_le : wkpNorm (d := d) (K' + 1) 2
       (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
           (tensorResolventEigenbasisVec (I := I) (M := M)
@@ -959,7 +912,6 @@ theorem eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional
       (tensorResolventL2_isCompactOperator (I := I) (M := M)
         g r s) i)
       h_pou_eigen
-  -- The eigenvector chart-component bound at every `(β, Q)` and order `K' + 1`.
   have h_each_cpt_le : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
       wkpNorm (d := d) (K' + 1) 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
@@ -976,7 +928,6 @@ theorem eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional
     intro β Q
     exact eigenvector_chartComponent_perK_from_uniform_β_unconditional
       (I := I) (M := M) g r s N CN hCN_nn eN hCN_bd β Q (K' + 1) hK' i
-  -- Bound the double sum by `|S| * |TensorCompIdx| * (CN * μ⁻¹^eN * ‖vec‖)`.
   set RHS_each : ℝ≥0∞ := ENNReal.ofReal (CN * (i.fst.val)⁻¹ ^ eN) *
     ENNReal.ofReal ‖tensorResolventEigenbasisVec (I := I) (M := M)
       (tensorResolventL2_isCompactOperator (I := I) (M := M)
@@ -1006,7 +957,6 @@ theorem eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional
       _ = (CT : ℝ≥0∞) * RHS_each := by
           simp only [Finset.sum_const, hCT_def, nsmul_eq_mul, Nat.cast_mul]
           ring
-  -- Combine the cutoff bound and the chart-cpt sum bound.
   have h_cutoff_le_final : wkpNorm (d := d) (K' + 1) 2
       (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
           (tensorResolventEigenbasisVec (I := I) (M := M)
@@ -1016,13 +966,10 @@ theorem eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional
       ≤ ENNReal.ofReal (Cu (K' + 1)) * ((CT : ℝ≥0∞) * RHS_each) := by
     refine h_cutoff_le.trans ?_
     exact mul_le_mul_of_nonneg_left h_double_sum_le (zero_le _)
-  -- Now assemble: `wkpNorm K' 2 atom = ‖μ‖ₑ * wkpNorm K' 2 (chosenWeakPartial')`
-  -- ≤ ‖μ‖ₑ * wkpNorm (K' + 1) 2 (cutoff chart cpt) ≤ ‖μ‖ₑ * (Cu(K'+1) * CT * RHS_each).
   rw [h_norm_eq, h_smul_eq]
   have h_norm_eq_val : ‖i.fst.val‖ₑ = ENNReal.ofReal i.fst.val := by
     rw [Real.enorm_eq_ofReal hμ_pos.le]
   rw [h_norm_eq_val]
-  -- Chain: bound the chosenWeakPartial norm.
   have h_step_chain :
       ENNReal.ofReal i.fst.val *
         wkpNorm (d := d) K' 2
@@ -1035,7 +982,6 @@ theorem eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional
       ≤ ENNReal.ofReal i.fst.val *
           (ENNReal.ofReal (Cu (K' + 1)) * ((CT : ℝ≥0∞) * RHS_each)) :=
     mul_le_mul_of_nonneg_left (h_chosen_le.trans h_cutoff_le_final) (zero_le _)
-  -- Rearrange `μ * Cu * CT * RHS_each` into the headline form.
   have hCu_nn_K1 : 0 ≤ Cu (K' + 1) := hCu_nn _
   have hCT_real_nn : (0 : ℝ) ≤ (CT : ℝ) := Nat.cast_nonneg _
   have hRHS_each_eq :
@@ -1044,7 +990,6 @@ theorem eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional
           ‖tensorResolventEigenbasisVec (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M)
               g r s) i‖ := rfl
-  -- Factor the constants.
   have h_packCT : (CT : ℝ≥0∞) = ENNReal.ofReal (CT : ℝ) := by
     simp [hCT_def, ENNReal.ofReal_natCast]
   have h_pack_left :
@@ -1138,7 +1083,6 @@ theorem eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional
                 (tensorResolventL2_isCompactOperator (I := I) (M := M)
                   g r s) i‖ := by
             rw [hCN_pow_eq]
-  -- Bound the packed scalar by `CN' K' * μ⁻¹^eN = Cu(K'+1) * CT * CN * μ⁻¹^eN`.
   have h_scalar_le :
       i.fst.val * Cu (K' + 1) * (CT : ℝ) * (CN * (i.fst.val)⁻¹ ^ eN) ≤
         CN' K' * (i.fst.val)⁻¹ ^ eN := by
@@ -1153,7 +1097,6 @@ theorem eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional
       exact mul_nonneg h1 hCN_nn
     exact mul_le_mul_of_nonneg_left
       (mu_mul_inv_pow_le_inv_pow_local hμ_pos hμ_le_one eN) hCC_nn
-  -- Convert the scalar inequality to an ENNReal inequality on the packed form.
   have h_packed_le :
       ENNReal.ofReal (i.fst.val * Cu (K' + 1) * (CT : ℝ) *
           (CN * (i.fst.val)⁻¹ ^ eN)) *
@@ -1168,7 +1111,6 @@ theorem eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional
               g r s) i‖ := by
     refine mul_le_mul_of_nonneg_right ?_ (zero_le _)
     exact ENNReal.ofReal_le_ofReal h_scalar_le
-  -- Final chain.
   calc
     ENNReal.ofReal i.fst.val *
         wkpNorm (d := d) K' 2

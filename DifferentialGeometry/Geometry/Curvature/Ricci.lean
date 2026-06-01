@@ -78,8 +78,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Symmetry of the chart inverse Gram matrix entries -/
-
 lemma chartInvGramOnE_symm
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -96,8 +94,6 @@ lemma chartInvGramOnE_symm
   rw [show star ((chartGramMatrix (I := I) g α z)⁻¹ j i) =
       (chartGramMatrix (I := I) g α z)⁻¹ j i from rfl] at hstar
   exact hstar.symm
-
-/-! ## Schwarz's theorem on the chart Gram matrix -/
 
 /-- **Schwarz's theorem on `chartGramOnE`.** -/
 lemma partialDeriv_partialDeriv_chartGramOnE_swap
@@ -156,8 +152,6 @@ lemma partialDeriv_partialDeriv_chartGramOnE_swap
   rw [hkey a b, hkey b a]
   exact hsymm_2 _ _
 
-/-! ## Algebraic simplification of `∑_j Γ^j{}_{ij}` -/
-
 private lemma sum_invGram_partialDeriv_swap
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) (y : E) :
@@ -192,7 +186,6 @@ lemma chartContractedChristoffel_eq_half_invGram_partialDeriv
           chartInvGramOnE (I := I) g α j l y *
             partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) y := by
   classical
-  -- Each Γ^j_{ij} expands by definition.
   have hexp : (∑ j : Fin (Module.finrank ℝ E),
         chartChristoffel (I := I) g α i j j y) =
       (∑ j : Fin (Module.finrank ℝ E),
@@ -205,8 +198,6 @@ lemma chartContractedChristoffel_eq_half_invGram_partialDeriv
   rw [hexp]
   rw [← Finset.mul_sum]
   congr 1
-  -- Distribute: G^{jl} (A + B - C) = G^{jl}·A + G^{jl}·B - G^{jl}·C, sum over j, l.
-  -- Step 1: Rewrite each summand as a difference of three terms.
   have hexpand : ∀ j l : Fin (Module.finrank ℝ E),
       chartInvGramOnE (I := I) g α j l y *
         (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) y +
@@ -218,7 +209,6 @@ lemma chartContractedChristoffel_eq_half_invGram_partialDeriv
           partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) y -
         chartInvGramOnE (I := I) g α j l y *
           partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) y := fun j l => by ring
-  -- Step 2: The double sum splits into three.
   have hdouble :
       (∑ j : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
@@ -238,7 +228,6 @@ lemma chartContractedChristoffel_eq_half_invGram_partialDeriv
         ∑ l : Fin (Module.finrank ℝ E),
           chartInvGramOnE (I := I) g α j l y *
             partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) y) := by
-    -- For each (j, l), apply hexpand. Then split sum.
     have hinner : ∀ j : Fin (Module.finrank ℝ E),
         (∑ l : Fin (Module.finrank ℝ E),
           chartInvGramOnE (I := I) g α j l y *
@@ -272,11 +261,8 @@ lemma chartContractedChristoffel_eq_half_invGram_partialDeriv
     rw [Finset.sum_congr rfl (fun j _ => hinner j)]
     rw [Finset.sum_sub_distrib, Finset.sum_add_distrib]
   rw [hdouble]
-  -- Now use the swap lemma to cancel the second and third terms.
   rw [sum_invGram_partialDeriv_swap (I := I) g α i y]
   ring
-
-/-! ## Differentiability infrastructure on the interior -/
 
 private lemma partialDeriv_chartGramOnE_contDiffOn_interior
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -332,7 +318,6 @@ private lemma chartChristoffel_diag_contDiffOn_interior
       (fun y : E => chartChristoffel (I := I) g α i j j y)
       (interior (extChartAt I α).target) := by
   classical
-  -- The function is `(1/2) * ∑_l G^{jl}(y) (∂_i G_{lj}(y) + ∂_j G_{li}(y) - ∂_l G_{ij}(y))`.
   have heq : (fun y : E => chartChristoffel (I := I) g α i j j y) =
       (fun y : E => (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
         chartInvGramOnE (I := I) g α j l y *
@@ -365,16 +350,6 @@ private lemma chartChristoffel_diag_diffAt_int
     hcd.contDiffAt (hop.mem_nhds hy)
   exact hat.differentiableAt (by simp)
 
-/-! ## Trace identity
-
-The "trace cyclicity" we need is the identity
-`∑_{j, l, a, b} G^{ja} G^{bl} (∂_k G_{ab}) (∂_i G_{lj}) =
-   ∑_{j, l, a, b} G^{ja} G^{bl} (∂_i G_{ab}) (∂_k G_{lj})`.
-We give a *direct* proof: the bijection on the index set
-`(j, l, a, b) ↦ (b, a, l, j)` transforms the LHS summand into the RHS summand
-(after using commutativity of multiplication on `ℝ`). This bypasses the explicit
-matrix-trace formulation. -/
-
 /-- **Index-bijection identity** equivalent to trace cyclicity for our
 specific four-fold sum. -/
 private lemma traceCyclic_invGram_partial
@@ -397,87 +372,6 @@ private lemma traceCyclic_invGram_partial
             partialDeriv (E := E) i (chartGramOnE (I := I) g α a b) y *
               partialDeriv (E := E) k (chartGramOnE (I := I) g α l j) y) := by
   classical
-  -- The bijection `(j, l, a, b) → (b, a, l, j)` maps the LHS summand to the RHS
-  -- summand. Concretely:
-  -- LHS@(j, l, a, b) = G^{ja} · G^{bl} · ∂_k G_{ab} · ∂_i G_{lj}
-  -- RHS@(b, a, l, j) = G^{ba} · G^{jl} · ∂_i G_{al} · ∂_k G_{jb}
-  -- These are NOT immediately equal, so we need to apply the bijection
-  -- AND swap factors. Specifically, after the bijection LHS@(j, l, a, b) ↔
-  -- "what LHS evaluates at (b, a, l, j)" = G^{bl} · G^{ja} · ∂_k G_{la} · ∂_i G_{ab}.
-  -- Compare with RHS@(j, l, a, b) = G^{ja} · G^{bl} · ∂_i G_{ab} · ∂_k G_{lj}.
-  -- Hmm — let's reverse the direction.
-  -- We perform sum-comm rearrangements directly to build LHS = RHS.
-  --
-  -- Strategy: Apply `Finset.sum_comm` four times to permute the order of
-  -- summation from `j l a b` to `b a l j`, then relabel.
-  --
-  -- LHS = ∑_j ∑_l ∑_a ∑_b f(j, l, a, b) where
-  -- f(j, l, a, b) = G^{ja} · G^{bl} · ∂_k G_{ab} · ∂_i G_{lj}.
-  --
-  -- Reorder to ∑_b ∑_a ∑_l ∑_j f(j, l, a, b).
-  -- Rename (j, l, a, b) ↔ (j', l', a', b') with j' := b, l' := a, a' := l, b' := j:
-  -- That is, j ← b', l ← a', a ← l', b ← j' (going back: substitute j = b', l = a', a = l', b = j').
-  -- Then ∑_{b}_{a}_{l}_{j} f(j, l, a, b) = ∑_{j'}_{a'}_{l'}_{b'} f(b', a', l', j').
-  -- So LHS = ∑_j ∑_l ∑_a ∑_b f(j, l, a, b) = ∑_{j'} ∑_{l'} ∑_{a'} ∑_{b'} f(b', a', l', j')
-  -- = ∑_{j} ∑_{l} ∑_{a} ∑_{b} f(b, a, l, j) (after renaming primes).
-  --
-  -- f(b, a, l, j) = G^{bl} · G^{ja} · ∂_k G_{la} · ∂_i G_{ab}
-  -- = G^{ja} · G^{bl} · ∂_i G_{ab} · ∂_k G_{la}    (commutativity)
-  -- We want: G^{ja} · G^{bl} · ∂_i G_{ab} · ∂_k G_{lj}   (RHS@(j,l,a,b))
-  -- Hmm — `∂_k G_{la}` ≠ `∂_k G_{lj}` because the indices differ.
-  --
-  -- Let me re-derive: we want a bijection σ : (j, l, a, b) ↦ (j', l', a', b') such
-  -- that f(σ⁻¹(j', l', a', b')) = g(j', l', a', b') where g is the RHS summand.
-  -- i.e., we need
-  -- f(j, l, a, b) = g(σ(j, l, a, b))
-  -- f(j, l, a, b) = G^{ja} · G^{bl} · ∂_k G_{ab} · ∂_i G_{lj}
-  -- g(j', l', a', b') = G^{j'a'} · G^{b'l'} · ∂_i G_{a'b'} · ∂_k G_{l'j'}
-  -- Match:
-  -- G^{ja} = G^{j'a'} ⟹ (j, a) = (j', a') OR (j, a) = (a', j')
-  -- G^{bl} = G^{b'l'} ⟹ (b, l) = (b', l') OR (b, l) = (l', b')
-  -- ∂_k G_{ab} = ∂_k G_{l'j'} ⟹ (a, b) = (l', j')
-  -- ∂_i G_{lj} = ∂_i G_{a'b'} ⟹ (l, j) = (a', b')
-  -- These give: a = l', b = j', l = a', j = b'.
-  -- So σ(j, l, a, b) = (b, a, l, j).
-  --
-  -- Now check G^{ja} = G^{j'a'} = G^{b a}. So we need G^{ja} = G^{ba}? No, we need
-  -- G^{ja} = G^{σ(j)σ(a)} where σ acts on indices via the chosen bijection.
-  -- Actually the substitution gives: σ(j, l, a, b) = (j' = b, l' = a, a' = l, b' = j).
-  -- So G^{j'a'} = G^{bl} (using j' = b, a' = l). And we needed G^{ja} = G^{j'a'} = G^{bl}.
-  -- That's NOT equal to G^{ja} unless j = b and a = l... which is only at specific points.
-  --
-  -- So a single bijection doesn't work. We need bijection AND symmetries of G.
-  -- LHS@(j, l, a, b) ↦ at the bijection-image (b, a, l, j):
-  -- the *original LHS summand evaluated at this image* is f(b, a, l, j) = G^{ba} · G^{jl} · ∂_k G_{al} · ∂_i G_{ab}.
-  -- We want this to equal g(j, l, a, b) = G^{ja} · G^{bl} · ∂_i G_{ab} · ∂_k G_{lj}.
-  -- Hmm, ∂_k G_{al} ≠ ∂_k G_{lj} in general.
-  --
-  -- I had a math error above. Let me redo carefully.
-  --
-  -- Actually, by repeated `sum_comm`:
-  -- LHS = ∑_j ∑_l ∑_a ∑_b f(j, l, a, b)
-  --     = ∑_b ∑_a ∑_l ∑_j f(j, l, a, b)  [4 sum_comms]
-  -- Now relabel the bound variables b → j', a → l', l → a', j → b':
-  --     = ∑_{j'} ∑_{l'} ∑_{a'} ∑_{b'} f(b', a', l', j')
-  -- Then drop primes:
-  --     = ∑_j ∑_l ∑_a ∑_b f(b, a, l, j)
-  -- where f(b, a, l, j) = G^{bl} · G^{ja} · ∂_k G_{la} · ∂_i G_{ab}.
-  -- (Substitute j ← b, l ← a, a ← l, b ← j into f(j, l, a, b) = G^{ja} G^{bl} ∂_k G_{ab} ∂_i G_{lj}.)
-  -- f(b, a, l, j) = G^{bl} · G^{ja} · ∂_k G_{la} · ∂_i G_{ab}.
-  -- Compare with RHS = ∑_j ∑_l ∑_a ∑_b g(j, l, a, b) where
-  -- g(j, l, a, b) = G^{ja} · G^{bl} · ∂_i G_{ab} · ∂_k G_{lj}.
-  -- These are NOT equal unless we have specific symmetries.
-  --
-  -- Use G symmetry on chartInvGramOnE: G^{bl} = G^{lb}. Hmm that doesn't directly help.
-  -- And chartGramOnE_symm: G_{la} = G_{al}.
-  -- ∂_k G_{la} = ∂_k G_{al}.
-  -- Still doesn't directly give ∂_k G_{lj}.
-  --
-  -- So the direct bijection approach does NOT work. We genuinely need the matrix
-  -- trace cyclicity which uses the inverse-Gram structure.
-  -- Use the matrix-trace approach.
-  --
-  -- We define the matrices and use trace cyclicity.
   set H : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
     Matrix.of fun a b => chartInvGramOnE (I := I) g α a b y with hH_def
   set Ak : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
@@ -486,7 +380,6 @@ private lemma traceCyclic_invGram_partial
   set Ai : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
     Matrix.of fun a b =>
       partialDeriv (E := E) i (chartGramOnE (I := I) g α a b) y with hAi_def
-  -- Both sides equal a matrix trace. We rewrite both sides explicitly.
   have hLHS_eq_trace :
       (∑ j : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
@@ -497,11 +390,6 @@ private lemma traceCyclic_invGram_partial
               partialDeriv (E := E) k (chartGramOnE (I := I) g α a b) y *
                 partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) y) =
       (H * Ak * H * Ai).trace := by
-    -- Compute the matrix trace as an iterated sum.
-    -- (H * Ak * H * Ai) j j = ∑_l (H * Ak * H) j l * Ai l j
-    -- = ∑_l ∑_b (H * Ak) j b * H b l * Ai l j
-    -- = ∑_l ∑_b ∑_a H j a * Ak a b * H b l * Ai l j
-    -- Sum over j gives the trace.
     have hexpand_diag : ∀ j : Fin (Module.finrank ℝ E),
         (H * Ak * H * Ai) j j =
           ∑ l : Fin (Module.finrank ℝ E),
@@ -514,13 +402,8 @@ private lemma traceCyclic_invGram_partial
       intro j
       simp only [Matrix.mul_apply, hH_def, hAk_def, hAi_def, Matrix.of_apply,
         Finset.sum_mul]
-      -- Now both sides are 4-fold sums. We need to match them.
-      -- Reorder summations to match (l, a, b) ordering.
       refine Finset.sum_congr rfl ?_
       intro l _
-      -- Inner sum: ∑_b (∑_a chartInvGramOnE(j,a) * partialDeriv k chartGramOnE(a,b)) *
-      --              chartInvGramOnE(b,l) * partialDeriv i chartGramOnE(l,j)
-      -- We need to swap `∑_b ∑_a` to `∑_a ∑_b`.
       rw [Finset.sum_comm]
       refine Finset.sum_congr rfl ?_
       intro a _
@@ -568,14 +451,11 @@ private lemma traceCyclic_invGram_partial
     rw [Matrix.diag_apply]
     rw [hexpand_diag j]
   rw [hLHS_eq_trace, hRHS_eq_trace]
-  -- Trace cyclicity: tr(H Ak H Ai) = tr((H Ak)(H Ai)) = tr((H Ai)(H Ak)) = tr(H Ai H Ak).
   have heq1 : (H * Ak * H * Ai).trace = ((H * Ak) * (H * Ai)).trace := by
     rw [Matrix.mul_assoc]
   have heq2 : ((H * Ai) * (H * Ak)).trace = (H * Ai * H * Ak).trace := by
     rw [← Matrix.mul_assoc]
   rw [heq1, Matrix.trace_mul_comm (H * Ak) (H * Ai), heq2]
-
-/-! ## Leibniz expansion of `∂_k(∑_{j,l} G^{jl} ∂_i G_{lj})` -/
 
 private lemma partialDeriv_doubleSum_invGram_partialGram
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -594,7 +474,6 @@ private lemma partialDeriv_doubleSum_invGram_partialGram
             partialDeriv (E := E) k
               (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j)) y) := by
   classical
-  -- Differentiability data.
   have hdiff_innermost : ∀ j l : Fin (Module.finrank ℝ E),
       DifferentiableAt ℝ
         (fun y' : E => chartInvGramOnE (I := I) g α j l y' *
@@ -610,7 +489,6 @@ private lemma partialDeriv_doubleSum_invGram_partialGram
             partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) y') y := by
     intro j
     exact DifferentiableAt.fun_sum (fun l _ => hdiff_innermost j l)
-  -- partialDeriv k of a sum = sum of partialDeriv k.
   have hsum_outer : partialDeriv (E := E) k
         (fun y' : E => ∑ j : Fin (Module.finrank ℝ E),
           ∑ l : Fin (Module.finrank ℝ E),
@@ -661,7 +539,6 @@ private lemma partialDeriv_doubleSum_invGram_partialGram
   rw [hsum_inner]
   refine Finset.sum_congr rfl ?_
   intro l _
-  -- Leibniz on the (j, l) summand.
   have hu : DifferentiableAt ℝ (chartInvGramOnE (I := I) g α j l) y :=
     chartInvGramOnE_diffAt_int (I := I) g α j l hy
   have hv : DifferentiableAt ℝ
@@ -679,8 +556,6 @@ private lemma partialDeriv_doubleSum_invGram_partialGram
   rw [fderiv_fun_mul (𝕜 := ℝ) hu hv]
   simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
     smul_eq_mul]
-  -- The fderiv expressions are definitionally `partialDeriv k`.
-  -- Use `change` to unify them, then `ring`.
   change chartInvGramOnE (I := I) g α j l y *
       (partialDeriv (E := E) k
         (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j)) y) +
@@ -692,8 +567,6 @@ private lemma partialDeriv_doubleSum_invGram_partialGram
         partialDeriv (E := E) k
           (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j)) y
   ring
-
-/-! ## The contracted Christoffel cross-derivative identity -/
 
 /-- **Contracted Christoffel symmetry identity.** -/
 theorem partialDeriv_contractedChristoffel_swap
@@ -728,7 +601,6 @@ theorem partialDeriv_contractedChristoffel_swap
     funext y'
     exact chartContractedChristoffel_eq_half_invGram_partialDeriv (I := I) g α k y'
   rw [hC_i, hC_k]
-  -- Pull out 1/2.
   have hsmul : ∀ (μ ν : Fin (Module.finrank ℝ E)),
       partialDeriv (E := E) μ
         (fun y' : E =>
@@ -754,7 +626,6 @@ theorem partialDeriv_contractedChristoffel_swap
       refine DifferentiableAt.mul ?_ ?_
       · exact chartInvGramOnE_diffAt_int (I := I) g α j l hy
       · exact partialDeriv_chartGramOnE_diffAt_int (I := I) g α l j ν hy
-    -- partialDeriv μ (c * f) y = c * partialDeriv μ f y.
     change fderiv ℝ
         (fun y' : E =>
           (1 / 2 : ℝ) *
@@ -770,7 +641,6 @@ theorem partialDeriv_contractedChristoffel_swap
               chartInvGramOnE (I := I) g α j l y' *
                 partialDeriv (E := E) ν (chartGramOnE (I := I) g α l j) y') y
           ((chartModelBasis E) μ)
-    -- Rewrite (1/2) * X as (1/2) • X to use fderiv_const_smul.
     set F : E → ℝ := fun y' : E => ∑ j : Fin (Module.finrank ℝ E),
           ∑ l : Fin (Module.finrank ℝ E),
             chartInvGramOnE (I := I) g α j l y' *
@@ -785,17 +655,8 @@ theorem partialDeriv_contractedChristoffel_swap
     simp [smul_eq_mul]
   rw [hsmul k i, hsmul i k]
   congr 1
-  -- Apply Leibniz on each side.
   rw [partialDeriv_doubleSum_invGram_partialGram (I := I) g α i k hy,
       partialDeriv_doubleSum_invGram_partialGram (I := I) g α k i hy]
-  -- Now substitute the matrix-inverse derivative formula.
-  -- Both sides are `S_inv + S_2nd`.
-  -- We split each side and handle the two parts.
-  -- LHS = ∑_{j,l} (∂_k G^{jl}) (∂_i G_{lj}) + ∑_{j,l} G^{jl} (∂_k ∂_i G_{lj})
-  -- RHS = ∑_{j,l} (∂_i G^{jl}) (∂_k G_{lj}) + ∑_{j,l} G^{jl} (∂_i ∂_k G_{lj})
-  -- The "Schwarz part" (G^{jl} ∂_k ∂_i G_{lj}) is symmetric in (i,k) by Schwarz on G.
-  -- The "inverse-Gram-derivative cross" part is symmetric by trace cyclicity.
-  -- We split each side into the two parts.
   have hsplit_LHS :
       (∑ j : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
@@ -813,7 +674,6 @@ theorem partialDeriv_contractedChristoffel_swap
           chartInvGramOnE (I := I) g α j l y *
             partialDeriv (E := E) k
               (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j)) y) := by
-    -- First: each inner ∑_l (X + Y) = ∑_l X + ∑_l Y.
     have hinner : ∀ j : Fin (Module.finrank ℝ E),
         (∑ l : Fin (Module.finrank ℝ E),
           (partialDeriv (E := E) k (chartInvGramOnE (I := I) g α j l) y *
@@ -868,7 +728,6 @@ theorem partialDeriv_contractedChristoffel_swap
     rw [Finset.sum_congr rfl (fun j _ => hinner j)]
     exact Finset.sum_add_distrib
   rw [hsplit_LHS, hsplit_RHS]
-  -- The Schwarz parts are equal by Schwarz on chartGramOnE.
   have hSchwarz : (∑ j : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
           chartInvGramOnE (I := I) g α j l y *
@@ -882,7 +741,6 @@ theorem partialDeriv_contractedChristoffel_swap
     refine Finset.sum_congr rfl (fun j _ => ?_)
     refine Finset.sum_congr rfl (fun l _ => ?_)
     rw [partialDeriv_partialDeriv_chartGramOnE_swap (I := I) g α l j k i hy]
-  -- The cross parts: substitute the matrix-inverse derivative formula.
   have hsubst_LHS :
       (∑ j : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
@@ -914,7 +772,6 @@ theorem partialDeriv_contractedChristoffel_swap
       rw [Finset.sum_mul]
     rw [Finset.sum_congr rfl (fun j _ =>
       Finset.sum_congr rfl (fun l _ => hentry j l))]
-    -- Move the negation outside.
     rw [show (∑ j : Fin (Module.finrank ℝ E),
               ∑ l : Fin (Module.finrank ℝ E),
                 -(∑ a : Fin (Module.finrank ℝ E),
@@ -985,10 +842,7 @@ theorem partialDeriv_contractedChristoffel_swap
       refine Finset.sum_congr rfl (fun j _ => ?_)
       rw [← Finset.sum_neg_distrib]]
   rw [hsubst_LHS, hsubst_RHS, hSchwarz]
-  -- Now apply trace cyclicity.
   rw [traceCyclic_invGram_partial (I := I) g α i k y]
-
-/-! ## Sum-derivative interchange and Ricci symmetry -/
 
 lemma sum_partialDeriv_eq_partialDeriv_sum_christ
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -1016,9 +870,7 @@ theorem chartRicciTensor_symm
     chartRicciTensor (I := I) g α i k y =
       chartRicciTensor (I := I) g α k i y := by
   classical
-  -- Expand the definitions.
   rw [chartRicciTensor_def, chartRicciTensor_def]
-  -- Replace each `chartRiemannTensor` by its explicit formula.
   have hLHS_replace :
       (∑ j : Fin (Module.finrank ℝ E), chartRiemannTensor (I := I) g α i j k j y) =
       (∑ j : Fin (Module.finrank ℝ E),
@@ -1044,7 +896,6 @@ theorem chartRicciTensor_symm
     refine Finset.sum_congr rfl (fun j _ => ?_)
     rfl
   rw [hLHS_replace, hRHS_replace]
-  -- Distribute the m-sum into a difference of two products on each summand.
   have hmsplit_L : ∀ j : Fin (Module.finrank ℝ E),
       (∑ m : Fin (Module.finrank ℝ E),
         (chartChristoffel (I := I) g α j m j y *
@@ -1073,7 +924,6 @@ theorem chartRicciTensor_symm
           chartChristoffel (I := I) g α k j m y) := by
     intro j
     simp only [Finset.sum_sub_distrib]
-  -- Rewrite each j-th summand of LHS using hmsplit_L; similarly for RHS.
   have hLHS_step : (∑ j : Fin (Module.finrank ℝ E),
         (partialDeriv (E := E) j (chartChristoffel (I := I) g α i k j) y -
           partialDeriv (E := E) k (chartChristoffel (I := I) g α i j j) y +
@@ -1113,9 +963,6 @@ theorem chartRicciTensor_symm
     refine Finset.sum_congr rfl (fun j _ => ?_)
     rw [hmsplit_R j]
   rw [hLHS_step, hRHS_step]
-  -- Now distribute the j-sum.
-  -- LHS = ∑_j (T1_L - T2_L + (T3_L - T4_L)) and similarly for RHS.
-  -- We rewrite each as a sum of four sums.
   have hLHS_redistribute :
       (∑ j : Fin (Module.finrank ℝ E),
         (partialDeriv (E := E) j (chartChristoffel (I := I) g α i k j) y -
@@ -1138,8 +985,6 @@ theorem chartRicciTensor_symm
          ∑ m : Fin (Module.finrank ℝ E),
             chartChristoffel (I := I) g α k m j y *
               chartChristoffel (I := I) g α i j m y)) := by
-    -- Each summand is ((A - B) + (C - D)) = (A - B + C) - D = A - B + C - D.
-    -- Distribute over the j-sum.
     have hpoint : ∀ j : Fin (Module.finrank ℝ E),
         (partialDeriv (E := E) j (chartChristoffel (I := I) g α i k j) y -
           partialDeriv (E := E) k (chartChristoffel (I := I) g α i j j) y +
@@ -1205,8 +1050,6 @@ theorem chartRicciTensor_symm
     rw [Finset.sum_add_distrib]
     rw [Finset.sum_sub_distrib]
   rw [hLHS_redistribute, hRHS_redistribute]
-  -- Now we have four pieces on each side. Match them.
-  -- T1: ∑_j ∂_j Γ^j_{ik} = ∑_j ∂_j Γ^j_{ki}, since Γ^j_{ik} = Γ^j_{ki}.
   have hT1 : (∑ j : Fin (Module.finrank ℝ E),
         partialDeriv (E := E) j (chartChristoffel (I := I) g α i k j) y) =
       (∑ j : Fin (Module.finrank ℝ E),
@@ -1216,7 +1059,6 @@ theorem chartRicciTensor_symm
         chartChristoffel (I := I) g α k i j :=
       funext (fun y' => chartChristoffel_symm (I := I) g α i k j y')
     rw [hsym]
-  -- T2: contracted Christoffel symmetry.
   have hT2 : (∑ j : Fin (Module.finrank ℝ E),
         partialDeriv (E := E) k (chartChristoffel (I := I) g α i j j) y) =
       (∑ j : Fin (Module.finrank ℝ E),
@@ -1224,7 +1066,6 @@ theorem chartRicciTensor_symm
     rw [sum_partialDeriv_eq_partialDeriv_sum_christ (I := I) g α i k hy,
         sum_partialDeriv_eq_partialDeriv_sum_christ (I := I) g α k i hy]
     exact partialDeriv_contractedChristoffel_swap (I := I) g α i k hy
-  -- T3: ∑_{j,m} Γ^j_{jm} Γ^m_{ik} = ∑_{j,m} Γ^j_{jm} Γ^m_{ki}, since Γ^m_{ik} = Γ^m_{ki}.
   have hT3 : (∑ j : Fin (Module.finrank ℝ E),
         ∑ m : Fin (Module.finrank ℝ E),
           chartChristoffel (I := I) g α j m j y *
@@ -1236,7 +1077,6 @@ theorem chartRicciTensor_symm
     refine Finset.sum_congr rfl (fun j _ => ?_)
     refine Finset.sum_congr rfl (fun m _ => ?_)
     rw [chartChristoffel_symm (I := I) g α i k m]
-  -- T4: ∑_{j,m} Γ^j_{km} Γ^m_{ij} = ∑_{j,m} Γ^j_{im} Γ^m_{kj} via swap j ↔ m.
   have hT4 : (∑ j : Fin (Module.finrank ℝ E),
         ∑ m : Fin (Module.finrank ℝ E),
           chartChristoffel (I := I) g α k m j y *

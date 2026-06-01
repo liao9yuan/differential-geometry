@@ -103,8 +103,6 @@ open DifferentialGeometry.Analysis.Laplacian.HessianPairingChart
 open DifferentialGeometry.Analysis.Laplacian.HessianPairingLapDom
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -113,13 +111,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Step 1: chart-pushed equivalence for smooth scalars
-
-For a smooth scalar `v : SmoothScalar g`, the L² coercion of
-`smoothToH1Compl v` agrees a.e. on `μ_g` with `v.toFun`. We lift this
-ae-equality to the chart-pushed level using the volume-bridge
-`chartPushed_aeEq_of_ae_eq_riemannianMeasure`. -/
 
 /-- The L² coercion of `smoothToH1Compl v` equals `v.toFun` a.e. on `μ_g`. -/
 private lemma h1ComplToLp_smoothToH1Compl_coeFn_aeEq_smooth
@@ -130,9 +121,7 @@ private lemma h1ComplToLp_smoothToH1Compl_coeFn_aeEq_smooth
       =ᵐ[riemannianVolumeMeasure (I := I) (M := M) g]
     v.toFun := by
   classical
-  -- H1ComplToLp ∘ smoothToH1Compl = smoothToLp on smooth scalars.
   rw [H1ComplToLp_smoothToH1Compl (I := I) (M := M) g v]
-  -- smoothToLp v = v.memLp_two.toLp v.toFun. Its coeFn equals v.toFun a.e.
   change ((v.memLp_two.toLp v.toFun :
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ)
       =ᵐ[riemannianVolumeMeasure (I := I) (M := M) g] v.toFun
@@ -173,7 +162,6 @@ theorem chartPushed_smoothToH1Compl_coeFn_aeEq_chartPushed_v
   have h_meas_v := smoothScalar_toFun_measurable (I := I) (M := M) (g := g) v
   have h_ae := h1ComplToLp_smoothToH1Compl_coeFn_aeEq_smooth
     (I := I) (M := M) g v
-  -- riemannianVolumeMeasure g = riemannianMeasure g (chartAtlasPOU I M).
   change ((H1ComplToLp (I := I) (M := M) g
       (smoothToH1Compl (I := I) (M := M) g v) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ)
@@ -181,13 +169,6 @@ theorem chartPushed_smoothToH1Compl_coeFn_aeEq_chartPushed_v
     v.toFun at h_ae
   exact chartPushed_aeEq_of_ae_eq_riemannianMeasure
     (I := I) (M := M) g α h_meas_u h_meas_v h_ae
-
-/-! ## Step 2: per-chart Hessian identification for smooth scalars
-
-Combining the chart-pushed equivalence (step 1) with the hypothesis-bearing
-identification `laplacianDomainHessianChart_smooth_case` from
-`HessianLpClass.lean`, we discharge the per-chart Hessian identification
-unconditionally for smooth `v`. -/
 
 /-- **Step 2 — Per-chart Hessian identification.** For smooth
 `v : SmoothScalar g`, the chart-side weak Hessian of `smoothToH1Compl v`
@@ -208,20 +189,10 @@ theorem laplacianDomainHessianChart_smooth_aeEq
           (chartTargetEuclid (I := I) (M := M) α))
         (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- Apply laplacianDomainHessianChart_smooth_case with the bridge hypothesis
-  -- discharged via chartPushed_smoothToH1Compl_coeFn_aeEq_chartPushed_v.
   exact laplacianDomainHessianChart_smooth_case
     (I := I) (M := M) g α v i j
     (chartPushed_smoothToH1Compl_coeFn_aeEq_chartPushed_v
       (I := I) (M := M) g α v)
-
-/-! ## Step 3: smooth-case "Euclidean Hessian" — chart-α-side direct Hessian
-
-For a smooth scalar `v : SmoothScalar g`, we package the smooth chart-α-side
-Hessian of `chartPushed POU α v.toFun` directly, by classical second-order
-calculus. This is the *Euclidean Hessian* of the chart-pushed function (no
-Christoffel correction); it is well-defined and smooth (as a function of `y`)
-on the chart target. -/
 
 /-- The smooth chart-pushed Euclidean Hessian of `v` in chart `α`, viewed as a
 function on `EuclideanSpace`. This is the second-order classical partial of
@@ -262,20 +233,6 @@ theorem laplacianDomainHessianChart_eq_chartPushedEuclidHessian_aeEq
       chartPushedEuclidHessian (I := I) (M := M) (g := g) α v i j :=
   laplacianDomainHessianChart_smooth_aeEq (I := I) (M := M) g α v i j
 
-/-! ## Step 4: the smooth-case chart-α "Euclidean" pairing
-
-For smooth `φ : C^∞⟮I, M; ℝ⟯` and smooth `v : SmoothScalar g`, define the
-chart-α smooth Euclidean Hessian pairing function on `EuclideanSpace`:
-
-```
-y ↦ ∑_{i,j,k,l} G^{ik}(α, y) G^{jl}(α, y)
-                · chartHessianPhiOnEuclid g α φ i j y
-                · chartPushedEuclidHessian α v k l y.
-```
-
-This is the natural "chart-α Euclidean version" of the LapDom chart-local
-pairing specialised to smooth `v`. -/
-
 /-- The chart-α smooth Euclidean Hessian pairing on the chart target. -/
 noncomputable def smoothEuclidHessianPairingChart
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -315,7 +272,6 @@ theorem hessPairingChartLocal_smoothCase_aeEq_smoothEuclidPairing
       smoothEuclidHessianPairingChart (I := I) (M := M) g α φ v := by
   classical
   set n := Module.finrank ℝ E
-  -- Collect per-(k, l) ae-equalities from Step 2.
   have h_per_kl : ∀ (k l : Fin n),
       ∀ᵐ y ∂((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)),
@@ -325,7 +281,6 @@ theorem hessPairingChartLocal_smoothCase_aeEq_smoothEuclidPairing
     intro k l
     exact laplacianDomainHessianChart_eq_chartPushedEuclidHessian_aeEq
       (I := I) (M := M) g α v k l
-  -- Combine all (k, l) into a single ae-statement using ae_all_iff.
   have h_pair_all : ∀ (p : Fin n × Fin n),
       ∀ᵐ y ∂((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)),
@@ -342,7 +297,6 @@ theorem hessPairingChartLocal_smoothCase_aeEq_smoothEuclidPairing
             chartPushedEuclidHessian (I := I) (M := M) (g := g) α v p.1 p.2 y :=
     ae_all_iff.mpr h_pair_all
   filter_upwards [h_all] with y hy
-  -- Rewrite the chart-local pairing using per-(k,l) substitutions.
   rw [hessPairingChartLocal_def (I := I) (M := M) g α φ
     (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) v) y,
     smoothEuclidHessianPairingChart_def
@@ -356,22 +310,6 @@ theorem hessPairingChartLocal_smoothCase_aeEq_smoothEuclidPairing
   refine Finset.sum_congr rfl ?_
   intro l _
   rw [hy (k, l)]
-
-/-! ## Step 5: pointwise bridge hypothesis — chart-α Euclidean vs. smooth pairing
-
-The chart-α Euclidean Hessian pairing differs from the chart-invariant smooth
-Hessian Frobenius pairing by the Christoffel correction in the `v`-factor (the
-chart-α Euclidean Hessian of `v` omits the Christoffel correction that appears
-in the chart-α tensor Hessian of `v`).
-
-We expose the per-chart pointwise pairing reconciliation between the
-chart-α-pulled smooth pairing function and the smooth Euclidean pairing
-function as an explicit hypothesis. Discharging it requires the Christoffel
-reconciliation infrastructure that is built by follow-up work.
-
-The hypothesis form is: for each chart `α`, the chart-α smooth Euclidean
-pairing function `smoothEuclidHessianPairingChart g α φ v` ae-equals the
-chart-α pullback of the smooth pairing function `hessPairingChart g φ ⟨v.toFun, v.smooth⟩`. -/
 
 /-- The chart-α pullback of the smooth pairing function. -/
 noncomputable def hessPairingSmoothOnEuclid
@@ -389,12 +327,6 @@ omit [NeZero (Module.finrank ℝ E)] in
       hessPairingChart (I := I) g φ
         (smoothScalarToContMDiffMap (I := I) (g := g) v)
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := rfl
-
-/-! ## Step 6: the LapDom-vs.-smooth bridge at the per-chart pointwise level
-
-The per-chart pointwise pairing bridge in hypothesis-bearing form. The
-hypothesis `h_chart_pointwise` exposes the per-chart pointwise pairing
-identification that arises from the Christoffel correction discharge. -/
 
 /-- **Per-chart Lp class bridge, hypothesis-bearing.**
 
@@ -418,31 +350,6 @@ theorem hessPairingChartLocal_smoothCase_aeEq_smoothOnEuclid_of_pointwise
   (hessPairingChartLocal_smoothCase_aeEq_smoothEuclidPairing
     (I := I) (M := M) g α φ v).trans h_chart_pointwise
 
-/-! ## Step 7: the chart contribution at the pointwise level
-
-We now move from the chart-local function (on `EuclN`) to the chart contribution
-on `M` (`hessPairingMChartContribution`). The chart contribution at `x` is:
-
-```
-POU(α)(x) · hessPairingChartLocal(α, φ, hu_h, toE(extChartAt α x)).
-```
-
-For smooth `v`, under `h_chart_pointwise`, this ae-equals
-`POU(α)(x) · hessPairingChart(g φ ⟨v.toFun, v.smooth⟩, x)` for `x` in the
-chart source. (We track the chart source domain explicitly through the
-pull-back structure.) -/
-
--- (Removed) The chart contribution apply lemma — duplicated downstream proof
--- exposure isn't needed here since the bridge takes the global manifold-side
--- hypothesis as input.
-
-/-! ## Step 8: the headline bridge — Lp class equality (hypothesis-bearing)
-
-We deliver the bridge at the `Lp 2 μ_g` class level, as a hypothesis-bearing
-theorem. The hypothesis is the Lp-class identification of the unconditional
-LapDom pairing with the smooth pairing, packaged into a single ae-equality
-hypothesis at the manifold level. -/
-
 /-- **Headline Hessian bridge, hypothesis-bearing form.** Given the
 hypothesis that the unconditional global pairing function ae-equals the
 smooth pairing function on `μ_g`, the Lp classes coincide. -/
@@ -458,30 +365,13 @@ theorem hessPairingLpOnLapDom_eq_hessPairingSmoothLp_of_globalHypothesis
         (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) v) =
       hessPairingSmoothLp (I := I) (M := M) g φ v := by
   classical
-  -- Both sides are Lp classes built via .toLp; equality reduces to
-  -- pointwise ae-equality of representatives.
   apply MeasureTheory.Lp.ext
-  -- LHS coeFn ae-equals hessPairingMOnLapDom.
   have h_LHS_coeFn := hessPairingLpOnLapDom_coeFn
     (I := I) (M := M) g φ
     (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) v)
-  -- RHS coeFn ae-equals hessPairingChart.
   have h_RHS_coeFn := hessPairingSmoothLp_coeFn
     (I := I) (M := M) g φ v
-  -- Combine: LHS coeFn ≡ hessPairingMOnLapDom ≡ hessPairingChart ≡ RHS coeFn.
   exact h_LHS_coeFn.trans (h_global.trans h_RHS_coeFn.symm)
-
-/-! ## Step 9: a packaged form taking the per-chart pointwise hypothesis
-
-For convenience, we package the headline bridge in a form that takes only
-the per-chart pointwise pairing hypotheses (one per chart). The chart
-contributions are assembled into the global pairing function via the
-POU sum, and the smooth pairing is `hessPairingChart g φ ⟨v.toFun, v.smooth⟩`.
-
-The hypothesis `h_chart_global` asserts the pointwise identity at the global
-level after POU assembly. This is the form most natural for downstream use:
-the chart-by-chart Christoffel correction discharge can be carried out
-once per chart and then assembled via POU. -/
 
 /-- **Hessian bridge, packaged.** Given the per-chart pointwise ae-equality
 `h_chart_global`, the Hessian bridge at the `Lp 2 μ_g` class level
@@ -499,19 +389,6 @@ theorem hessPairingLpOnLapDom_eq_hessPairingSmoothLp_of_chart_global
       hessPairingSmoothLp (I := I) (M := M) g φ v :=
   hessPairingLpOnLapDom_eq_hessPairingSmoothLp_of_globalHypothesis
     (I := I) (M := M) g φ v h_chart_global
-
-/-! ## Step 10: POU assembly — from per-chart pointwise identifications to global
-
-A pointwise per-chart hypothesis package, packaged in the form
-
-  ∀ α ∈ chartAtlasPOU_finset, ∀ x : M, x ∈ (chartAt H α).source →
-    hessPairingMChartContribution g φ α hu_h x
-    = (chartAtlasPOU I M α : M → ℝ) x · hessPairingChart g φ v_bundle x
-
-(plus the trivial vanishing of both sides off the chart α source), allows
-the POU sum to telescope into the global pairing.
-
-The assembly step uses `chartAtlasPOU_finset_sum_eq_one`. -/
 
 /-- **POU assembly lemma.** Given a per-chart pointwise identification (in the
 form of equality at every `x : M`), the POU sum of chart contributions
@@ -533,7 +410,6 @@ theorem hessPairingMOnLapDom_eq_hessPairingChart_of_per_chart
   rw [hessPairingMOnLapDom_def
     (I := I) (M := M) g φ
     (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) v) x]
-  -- Use the per-chart pointwise hypothesis to rewrite each term.
   have h_sum_eq :
       ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
         hessPairingMChartContribution (I := I) (M := M) g φ α
@@ -546,7 +422,6 @@ theorem hessPairingMOnLapDom_eq_hessPairingChart_of_per_chart
     intro α hα
     exact h_per_chart α hα x
   rw [h_sum_eq]
-  -- Factor out the smooth pairing: ∑ POU(α)(x) · f(x) = f(x) · (∑ POU(α)(x)).
   rw [← Finset.sum_mul]
   rw [DifferentialGeometry.Analysis.Sobolev.Chart.chartAtlasPOU_finset_sum_eq_one
     (I := I) (M := M) x]
@@ -630,8 +505,6 @@ theorem hessPairingLpOnLapDom_eq_hessPairingSmoothLp_of_per_chart_ae
   classical
   refine hessPairingLpOnLapDom_eq_hessPairingSmoothLp_of_globalHypothesis
     (I := I) (M := M) g φ v ?_
-  -- Combine per-chart ae-equalities into a single ae-statement over the finite finset.
-  -- The bad set for each α has measure 0; the union over a finite set still has measure 0.
   have h_union_null :
       (riemannianVolumeMeasure (I := I) (M := M) g)
         (⋃ α ∈ chartAtlasPOU_finset (I := I) (M := M),
@@ -648,7 +521,6 @@ theorem hessPairingLpOnLapDom_eq_hessPairingSmoothLp_of_per_chart_ae
     have h_ae := h_per_chart_ae α hα
     rw [Filter.EventuallyEq, MeasureTheory.ae_iff] at h_ae
     exact h_ae
-  -- Build the ae-statement.
   have h_all_ae : ∀ᵐ x ∂(riemannianVolumeMeasure (I := I) (M := M) g),
       ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
         hessPairingMChartContribution (I := I) (M := M) g φ α
@@ -663,22 +535,9 @@ theorem hessPairingLpOnLapDom_eq_hessPairingSmoothLp_of_per_chart_ae
     obtain ⟨α, hα_in_finset, hα_ne⟩ := hx
     simp only [Set.mem_iUnion]
     exact ⟨α, hα_in_finset, hα_ne⟩
-  -- Now use h_all_ae to derive the global identity ae.
   filter_upwards [h_all_ae] with x h_x_per_chart
   exact hessPairingMOnLapDom_eq_pointwise_at
     (I := I) (M := M) g φ v x h_x_per_chart
-
-/-! ## Step 11: connector for downstream Bochner usage
-
-The `BochnerPolarisedLpFull.lean` infrastructure expects the bridge with
-the specific membership-proof form
-`laplacianDomainPow_succ_subset_laplacianDomain g 1
-  (smoothToH1Compl_mem_laplacianDomainPow_two g v)`.
-
-By Prop irrelevance, this is the same proof as
-`smoothToH1Compl_mem_laplacianDomain v` (both prove
-`smoothToH1Compl v ∈ laplacianDomain g`), so the bridge transfers
-through the type. We expose this connector form. -/
 
 /-- Connector form of the bridge using the membership-proof form expected
 by `BochnerPolarisedLpFull.lean`. Conditional on the global ae-equality

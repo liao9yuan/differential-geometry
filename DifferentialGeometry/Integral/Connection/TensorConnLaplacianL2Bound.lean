@@ -84,38 +84,10 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 local notation "EuclN" =>
   EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The chart-target integration depends on the canonical Borel structures on the
-model space `E` and on the manifold `M`. These are installed file-locally to
-avoid leaking global instances. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The chart-target Sobolev-style aggregate
-
-We package the right-hand side of the L²-bound headline into a single
-manifold-defined non-negative `ℝ≥0∞`-valued aggregate. This is a finite sum,
-over the chart-atlas partition-of-unity support set
-`chartAtlasPOU_finset I M`, of the chart-target Lebesgue integrals of
-`ENNReal.ofReal` of the chart-pushed squared model-fiber norm of the raw
-connection Laplacian.
-
-The construction uses the existing chart-pushed squared-norm function
-`tensorTrivProjPushedNormSq g r s α S` (defined in
-`Integral/Measure/TensorChartPulled.lean`) applied to the raw connection
-Laplacian as the input section.
-
-For the `k = 1` instance, this aggregate plays the role of a chart-target
-Sobolev quantity for `rawTensorConnLap g r s T.toSection`: it dominates, up
-to a constant depending only on the metric, atlas, and partition of unity,
-the manifold L²-norm-squared of the raw connection Laplacian. Downstream
-consumers needing a chart-pushed Sobolev quantity for `T` itself
-(rather than for the raw connection Laplacian) can compose this aggregate
-with the per-chart Sobolev bridge for second-order derivatives. -/
 
 /-- **Chart-target Sobolev-style aggregate.** For a smooth Riemannian manifold
 `(M, g)`, ranks `(r, s)`, and a smooth compactly-supported `(r, s)`-tensor
@@ -150,13 +122,6 @@ noncomputable def chartSobolevRawNorm
                   (fun z : M => T.toSection z) b)
               y)
           ∂(volume : Measure EuclN) := rfl
-
-/-! ## Headline
-
-L² bound of the raw tensor connection Laplacian by the chart-target Sobolev-
-style aggregate. The constant `C` is the named public
-`chartTargetL2BridgeConstant g`, which depends only on `g`, the
-canonical chart atlas, and the canonical partition of unity. -/
 
 /-- **Manifold L² bound for the raw tensor connection Laplacian.**
 
@@ -203,8 +168,6 @@ theorem rawTensorConnLap_L2NormSq_le_chartSobolevRawNorm
   refine ⟨chartTargetL2BridgeConstant (I := I) (M := M) g,
     chartTargetL2BridgeConstant_nonneg (I := I) (M := M) g, ?_⟩
   intro T hΔT_meas
-  -- Apply the uniform-constant chart-target L² bridge with input section the
-  -- raw connection Laplacian of `T.toSection`.
   have hbound :=
     uniform_manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq
       (I := I) (M := M) g r s
@@ -212,18 +175,8 @@ theorem rawTensorConnLap_L2NormSq_le_chartSobolevRawNorm
         rawTensorConnLap (I := I) g r s
           (fun z : M => T.toSection z) b)
       hΔT_meas
-  -- The RHS of `hbound` is exactly `ENNReal.ofReal C *
-  -- chartSobolevRawNorm …`, by definition of `chartSobolevRawNorm`.
-  -- Unfold and conclude.
   rw [chartSobolevRawNorm_def]
   exact hbound
-
-/-! ## Restated headline against the underlying `toSection` form
-
-For consumers that prefer to view the input as the underlying
-`ContMDiffSection` rather than the bundled `SmoothCcTensor`, we restate the
-headline with `T : Cₛ^∞⟮I; TensorRSModel r s ℝ E, fun b => TensorRSSpace r s I b⟯`
-together with a compact-support witness. The proof is a one-line packaging. -/
 
 /-- The headline restated against the underlying `ContMDiffSection`. -/
 theorem rawTensorConnLap_L2NormSq_le_chartSobolevRawNorm_of_section
@@ -256,10 +209,6 @@ theorem rawTensorConnLap_L2NormSq_le_chartSobolevRawNorm_of_section
   refine ⟨chartTargetL2BridgeConstant (I := I) (M := M) g,
     chartTargetL2BridgeConstant_nonneg (I := I) (M := M) g, ?_⟩
   intro T₀ _hT₀_cc hΔT_meas
-  -- Apply the uniform-constant bridge directly with input section the raw
-  -- connection Laplacian of `T₀`. The compact-support witness is not used
-  -- by the bridge; it is included in the public hypotheses for signature
-  -- consistency with the bundled `SmoothCcTensor` form.
   exact
     uniform_manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq
       (I := I) (M := M) g r s

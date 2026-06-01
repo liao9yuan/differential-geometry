@@ -86,18 +86,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## File-local Borel-space instances
-
-Match the convention in the surrounding files: `E` and `M` carry their
-canonical Borel σ-algebras. Declared `local` to avoid leaking into
-callers. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Interior-supported with-boundary divergence theorem (family) -/
 
 /-- **Family form of the with-boundary divergence theorem on a closed
 manifold.** For a smoothly time-parameterised Riemannian metric family
@@ -135,8 +127,6 @@ theorem integral_divergence_with_boundary_eq_zero_of_hasCompactSupport_of_interi
   rw [riemannianMeasureFamily_def]
   exact integral_divergence_with_boundary_eq_zero_of_hasCompactSupport_of_interior_support
     (I := I) (g_fam t) X hX hX_int
-
-/-! ## With-boundary integration by parts, interior-supported (family) -/
 
 /-- **Family form of with-boundary integration by parts (basic).** For a
 smoothly time-parameterised Riemannian metric family `g_fam` on a
@@ -190,8 +180,6 @@ theorem integral_tangentSectionAction_mul_add_eq_neg_with_boundary_family
   exact integral_tangentSectionAction_mul_add_eq_neg_with_boundary
     (I := I) (g_fam t) hf hh hf_int hh_int X hX hX_int
 
-/-! ## With-boundary Green's identities, interior-supported (family) -/
-
 /-- **Family form of Green's first identity, with boundary.** For a
 smoothly time-parameterised Riemannian metric family `g_fam` on a
 σ-compact Hausdorff smooth manifold `M` whose model `I` may carry a
@@ -236,15 +224,6 @@ theorem integral_smul_laplacian_sub_eq_zero_with_boundary_family
   rw [riemannianMeasureFamily_def]
   exact integral_smul_laplacian_sub_eq_zero_with_boundary
     (I := I) (g_fam t) hf hh hf_int hh_int
-
-/-! ## Global Stokes theorem and Green's identities with boundary
-contribution (family)
-
-The global Stokes theorem and the with-boundary Green's identities require
-the model `I` to carry a smooth boundary stratum
-(`[hI : HasSmoothBoundary E H I]`); the boundary contribution is packaged
-as a finite sum of chart-α boundary face integrals against the chart-atlas
-partition of unity. -/
 
 section StokesGlobal
 
@@ -342,18 +321,6 @@ theorem green_second_with_boundary_family
   exact green_second_with_boundary (I := I) (g_fam t) hf hh hf_int hh_int
 
 end StokesGlobal
-
-/-! ## Volume-variation formula re-export
-
-The clean volume-variation formula
-`DifferentialGeometry.Integral.Measure.Family.first_variation_of_volume`
-does not require `[I.Boundaryless]`: it relies only on the chart-by-chart
-formulation of the Riemannian volume measure and on Jacobi's formula for
-the determinant of a smooth matrix family, neither of which uses the
-boundaryless assumption. We re-export it here under a name belonging to
-this directory for navigation convenience downstream. The hypotheses,
-namespaces, and statement are unchanged from the closed-manifold variant
-in `DifferentialGeometry/Integral/DivergenceTheorem/Family.lean`. -/
 
 /-- **Volume-variation formula (with-boundary re-export).** For a regular
 family of Riemannian metrics `g_fam` and a regular integrand

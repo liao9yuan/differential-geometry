@@ -38,8 +38,6 @@ private instance tangentSpace_finiteDimensional (x : M) :
     FiniteDimensional Real (TangentSpace I x) :=
   inferInstanceAs (FiniteDimensional Real E)
 
-/-! ## Metric musical maps -/
-
 /-- The pointwise musical-flat linear map induced by a realized metric. -/
 def metricFlatLinear (g : SmoothRiemannianMetric I M) (x : M) :
     TangentSpace I x →ₗ[Real] Module.Dual Real (TangentSpace I x) where
@@ -121,8 +119,6 @@ theorem inner_metricSharp
           ((metricFlatEquiv (I := I) g x).symm alpha) = alpha :=
     LinearEquiv.apply_symm_apply (metricFlatEquiv (I := I) g x) alpha
   exact congrArg (fun L : Module.Dual Real (TangentSpace I x) => L w) h
-
-/-! ## Gradient, divergence, and Laplacian -/
 
 /-- Pointwise gradient of a scalar function with respect to a realized metric. -/
 def gradientFun (g : SmoothRiemannianMetric I M) (f : M -> Real) (x : M) :
@@ -485,8 +481,6 @@ theorem half_laplacian_mul_self
 
 end AlgebraicRules
 
-/-! ## Family-facing wrappers -/
-
 /-- Gradient at a time in a realized metric family. -/
 def gradientAt
     (G : RealizedMetricFamily (I := I) (M := M) Time)
@@ -597,8 +591,6 @@ end FamilyAlgebraicRules
     laplacianAt (I := I) G t f x =
       laplacian (I := I) (G.connection t) (G.metric t) f x := by
   rfl
-
-/-! ## Minimum-point targets for Theorem 7.1 -/
 
 /-- First-order Fermat rule for a scalar function on a boundaryless realized
 manifold.

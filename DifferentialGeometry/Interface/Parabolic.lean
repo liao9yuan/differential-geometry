@@ -38,8 +38,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.HeatEquation
 
-/-! ## Duhamel mild solution -/
-
 /-- Public alias for the Duhamel mild solution of the inhomogeneous heat
 equation `∂_t u = Δ_g u + f`, `u(0) = u_0`, on the closed Riemannian
 manifold `(M, g)`. -/
@@ -70,8 +68,6 @@ theorem duhamel_zero_forcing (g : SmoothRiemannianMetric I M)
   unfold duhamel
   exact mildSolution_zero_forcing (I := I) (M := M) g u_0 t
 
-/-! ## Smooth-initial-datum adapter -/
-
 /-- One-line adapter: feed a smooth real scalar `u_0 : M → ℝ` as the
 initial datum of the Duhamel mild solution, with an `Lp`-valued forcing
 term `f`. -/
@@ -96,15 +92,6 @@ theorem duhamelSmoothInitial_zero_forcing (g : SmoothRiemannianMetric I M)
 
 end Interface
 end DifferentialGeometry
-
-/-! ## Re-exports
-
-Pull the Duhamel mild-solution primitives directly into
-`DifferentialGeometry.Interface` so that, after
-`open DifferentialGeometry.Interface`, the names `mildSolution`,
-`mildSolution_zero`, `mildSolution_add_initial`, `mildSolution_smul_initial`,
-`mildSolution_add_forcing`, `mildSolution_continuous`, and
-`mildSolution_zero_forcing` resolve without further qualification. -/
 
 namespace DifferentialGeometry.Interface
 

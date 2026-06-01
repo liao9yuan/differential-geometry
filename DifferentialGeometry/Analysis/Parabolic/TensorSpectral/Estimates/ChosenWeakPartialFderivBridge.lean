@@ -63,19 +63,13 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## Local abbreviation -/
-
 private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] := EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Smooth-input bridge for `chartSmoothExt` -/
 
 /-- **Smooth bridge (`chartSmoothExt` form):** For smooth `u : M → ℝ` on a closed
 Riemannian manifold and any chart `α : M`, the chosen weak partial of the
@@ -99,9 +93,6 @@ theorem chosenWeakPartial'_chartPushed_ae_eq_fderiv_chartSmoothExt
   have hp_one : (1 : ℝ≥0∞) ≤ (2 : ℝ≥0∞) := by norm_num
   exact DifferentialGeometry.Analysis.Sobolev.EquivalenceReverse.chosenWeakPartial_chartPushed_ae_eq_fderiv
     (I := I) (M := M) α hp_one hu k
-
-/-! ## Pointwise agreement of `chartPushed` and `chartSmoothExt` on the chart
-target -/
 
 /-- For closed manifolds, smooth `u`, and any `y` in the chart target, the
 chart-pushed image and the globally-smooth extension `chartSmoothExt α (ρ_α u)`
@@ -128,8 +119,6 @@ theorem fderiv_chartPushed_eq_fderiv_chartSmoothExt_on_target
       fderiv ℝ (chartSmoothExt (I := I) (M := M) α
         (fun z : M => ((chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) : M → ℝ) z * u z)) y := by
-  -- The two functions agree on the open chart target neighbourhood of `y`,
-  -- hence their Fréchet derivatives at `y` coincide.
   have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have h_nhds : chartTargetEuclid (I := I) (M := M) α ∈ nhds y :=
@@ -143,8 +132,6 @@ theorem fderiv_chartPushed_eq_fderiv_chartSmoothExt_on_target
     intro z hz
     exact chartPushed_eq_chartSmoothExt_on_target (I := I) (M := M) α u hz
   exact Filter.EventuallyEq.fderiv_eq h_eventually
-
-/-! ## Smooth-input bridge for `chartPushed` -/
 
 /-- **Smooth bridge (`chartPushed` form, headline):** For smooth `u : M → ℝ`
 on a closed Riemannian manifold and any chart `α : M`, the chosen weak partial
@@ -164,14 +151,9 @@ theorem chosenWeakPartial'_chartPushed_ae_eq_fderiv_chartPushed
         (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α u) y
           (EuclideanSpace.single k (1 : ℝ))) := by
   classical
-  -- The weak partial is a.e. equal to the smooth-extension fderiv...
   have h_smooth_form :=
     chosenWeakPartial'_chartPushed_ae_eq_fderiv_chartSmoothExt
       (I := I) (M := M) (α := α) (u := u) hu k
-  -- ...and the smooth-extension fderiv coincides pointwise on the chart target
-  -- with the chartPushed fderiv. The volume-restrict measure is supported on
-  -- the chart target, so the two pointwise-on-target fderiv expressions are
-  -- a.e. equal on volume.restrict ChTE.
   have h_fderiv_eq_ae :
       (fun y : EuclN E => fderiv ℝ
         (chartSmoothExt (I := I) (M := M) α
@@ -183,18 +165,14 @@ theorem chosenWeakPartial'_chartPushed_ae_eq_fderiv_chartPushed
       (fun y : EuclN E => fderiv ℝ
         (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α u) y
           (EuclideanSpace.single k (1 : ℝ))) := by
-    -- self_mem_ae_restrict gives "almost every y is in the chart target".
     have h_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
       (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
     refine Filter.eventually_of_mem (self_mem_ae_restrict h_meas) ?_
     intro y hy
-    -- Pointwise on the chart target, the two fderivs coincide.
     simp only
     rw [fderiv_chartPushed_eq_fderiv_chartSmoothExt_on_target
       (I := I) (M := M) α u hy]
   exact h_smooth_form.trans h_fderiv_eq_ae
-
-/-! ## Specialisation to the manifold-side tensor scalar component -/
 
 /-- **Bridge for the tensor scalar component (`chartSmoothExt` form):** For a
 smooth compactly-supported tensor section `S` on a closed Riemannian
@@ -259,14 +237,6 @@ theorem chosenWeakPartial'_chartPushed_tensorChartComponentScalar_ae_eq_fderiv_c
     (u := tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx)
     (tensorChartComponentScalar_contMDiff
       (I := I) (M := M) g r s S α Idx Jdx) k
-
-/-! ## `eLpNorm` consequence: chart-pushed and chartSmoothExt fderivs have the
-same `L^2` norm
-
-A measure-theoretic restatement of the bridge: the `eLpNorm` of the chosen
-weak partial agrees with the `eLpNorm` of either pointwise Fréchet partial
-on the chart target, since `eLpNorm` is invariant under almost-everywhere
-equality. -/
 
 /-- The `eLpNorm` of the chosen weak partial of the chart-pushed image agrees
 with the `eLpNorm` of the classical Fréchet partial of the globally-smooth

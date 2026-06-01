@@ -36,8 +36,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ### Chart-coordinate ODE → manifold ODE bridge -/
-
 omit [FiniteDimensional ℝ E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
 /--
@@ -67,9 +65,7 @@ theorem chartCoord_hasDerivWithinAt_to_manifold_hasMFDerivWithinAt
       (fun s' : ℝ => (extChartAt I α).symm (u s')) s t
       ((mfderivWithin 𝓘(ℝ, E) I (extChartAt I α).symm (Set.range I) (u t)) ∘L
         ((ContinuousLinearMap.id ℝ ℝ).smulRight vel)) := by
-  -- Restricted set on which the curve provably lands in `range I`.
   set s' : Set ℝ := s ∩ u ⁻¹' (Set.range I) with hs'
-  -- The chart-coordinate curve as a model-space manifold map, on `s'`.
   have hu_mf : HasMFDerivWithinAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) u s' t
       ((ContinuousLinearMap.id ℝ ℝ).smulRight vel) := by
     have h0 : HasMFDerivWithinAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) u s t
@@ -77,24 +73,18 @@ theorem chartCoord_hasDerivWithinAt_to_manifold_hasMFDerivWithinAt
       (by simpa using hd.hasFDerivWithinAt :
         HasFDerivWithinAt u _ _ _).hasMFDerivWithinAt
     exact h0.mono Set.inter_subset_left
-  -- The chart inverse is `MDifferentiableWithinAt` on `range I` at `u t`.
   have hsymm_mf : HasMFDerivWithinAt 𝓘(ℝ, E) I (extChartAt I α).symm
       (Set.range I) (u t)
       (mfderivWithin 𝓘(ℝ, E) I (extChartAt I α).symm (Set.range I) (u t)) :=
     (mdifferentiableWithinAt_extChartAt_symm htgt_t).hasMFDerivWithinAt
-  -- Compose: on `s'`, the curve maps into `range I`, so the chain rule applies.
   have hcomp : HasMFDerivWithinAt 𝓘(ℝ, ℝ) I
       ((extChartAt I α).symm ∘ u) s' t
       ((mfderivWithin 𝓘(ℝ, E) I (extChartAt I α).symm (Set.range I) (u t)) ∘L
         ((ContinuousLinearMap.id ℝ ℝ).smulRight vel)) :=
     HasMFDerivWithinAt.comp t hsymm_mf hu_mf Set.inter_subset_right
-  -- Transport back from `s'` to `s`: the two sets agree near `t`
-  -- within `s` (the confinement hypothesis).
   exact (hasMFDerivWithinAt_inter' (I := 𝓘(ℝ, ℝ)) (I' := I)
     (f := (extChartAt I α).symm ∘ u) (s := s)
     (t := u ⁻¹' Set.range I) hconf).mp hcomp
-
-/-! ### The time-indexed diffeomorphism family -/
 
 /--
 **Time-indexed diffeomorphism family from chart-local Picard data.**
@@ -168,17 +158,13 @@ theorem manifoldFlowFamily_exists
   obtain ⟨T, hT, Φ, hΦ_init, _hΦ_repr_simple, hdiffeo⟩ :=
     time_dependent_vf_flow_diffeomorph_on_closed_manifold X hper hperNeg
       hSmoothX_chart hSmoothNegX_chart hLocalFwd hLocalRev hBijPerChart
-  -- Build the family: on `(0, T)`, the chosen Hartman diffeomorphism;
-  -- elsewhere, the identity.
   refine ⟨T, hT, fun t =>
     if h : 0 < t ∧ t < T then (hdiffeo t h.1 h.2).choose else Diffeomorph.refl I M ∞,
     Φ, ?_, hΦ_init, ?_⟩
-  · -- `Φ_fam 0 = refl`: `0` fails the `0 < t` guard.
-    have h0 : ¬ (0 < (0 : ℝ) ∧ (0 : ℝ) < T) := by
+  · have h0 : ¬ (0 < (0 : ℝ) ∧ (0 : ℝ) < T) := by
       rintro ⟨h, _⟩; exact (lt_irrefl 0) h
     simp only [h0, dif_neg, not_false_iff]
-  · -- Agreement on `(0, T)`.
-    intro t ht htT x
+  · intro t ht htT x
     have hguard : 0 < t ∧ t < T := ⟨ht, htT⟩
     simp only [hguard, dif_pos, and_self]
     exact (hdiffeo t ht htT).choose_spec x
@@ -269,23 +255,17 @@ theorem manifoldFlowFamily_exists_chartRepr
   obtain ⟨T, hT, Φ, hΦ_init, hΦ_repr_simple, hdiffeo⟩ :=
     time_dependent_vf_flow_diffeomorph_on_closed_manifold X hper hperNeg
       hSmoothX_chart hSmoothNegX_chart hLocalFwd hLocalRev hBijPerChart
-  -- Build the family: on `(0, T)`, the chosen Hartman diffeomorphism;
-  -- elsewhere, the identity.
   refine ⟨T, hT, fun t =>
     if h : 0 < t ∧ t < T then (hdiffeo t h.1 h.2).choose else Diffeomorph.refl I M ∞,
     Φ, ?_, hΦ_init, ?_, hΦ_repr_simple, ?_⟩
-  · -- `Φ_fam 0 = refl`: `0` fails the `0 < t` guard.
-    have h0 : ¬ (0 < (0 : ℝ) ∧ (0 : ℝ) < T) := by
+  · have h0 : ¬ (0 < (0 : ℝ) ∧ (0 : ℝ) < T) := by
       rintro ⟨h, _⟩; exact (lt_irrefl 0) h
     simp only [h0, dif_neg, not_false_iff]
-  · -- Agreement on `(0, T)`.
-    intro t ht htT x
+  · intro t ht htT x
     have hguard : 0 < t ∧ t < T := ⟨ht, htT⟩
     simp only [hguard, dif_pos, and_self]
     exact (hdiffeo t ht htT).choose_spec x
-  · -- Chart realization of the family on `(0, T)`: combine the agreement
-    -- `Φ_fam t x = Φ t x` with the chart representation of `Φ`.
-    intro t ht htT x
+  · intro t ht htT x
     obtain ⟨α, hαrepr⟩ := hΦ_repr_simple x
     refine ⟨α, ?_⟩
     have hguard : 0 < t ∧ t < T := ⟨ht, htT⟩
@@ -294,8 +274,6 @@ theorem manifoldFlowFamily_exists_chartRepr
       simp only [hguard, dif_pos, and_self]
       exact (hdiffeo t ht htT).choose_spec x
     rw [hfam_eq, hαrepr t]
-
-/-! ### Manifold flow ODE in chart-bridge transported-velocity form -/
 
 /--
 **Manifold flow ODE for a chart-α-represented flow.**
@@ -338,24 +316,18 @@ theorem manifoldFlow_hasMFDerivWithinAt_of_chartLocal
         ((ContinuousLinearMap.id ℝ ℝ).smulRight
           (X t ((chartAt H α).symm
             (I.symm (hper.flow (I ((chartAt H α) x)) t)))))) := by
-  -- Abbreviations.
   set y : E := I ((chartAt H α) x) with hy
   set u : ℝ → E := hper.flow y with hu
-  -- Chart-coordinate image of `x` lies in the closed ball used by `flow_spec`.
   have hball : y ∈ Metric.closedBall (I ((chartAt H α) α)) hper.r :=
     picard_data_chart_coord_in_closedBall X α hper x hxU
-  -- Extract the chart-coordinate ODE from `flow_spec`.
   obtain ⟨_hinit, hode⟩ := hper.flow_spec y hball
   have hd : HasDerivWithinAt u
       (X t ((chartAt H α).symm (I.symm (u t))))
       (Set.Icc (0 : ℝ) hper.T) t := hode t ht
-  -- The chart-coordinate realisation `(chartAt H α).symm ∘ I.symm` is
-  -- `(extChartAt I α).symm`.
   have hrealise : (fun s : ℝ => (chartAt H α).symm (I.symm (u s))) =
       fun s : ℝ => (extChartAt I α).symm (u s) := by
     funext s; rw [extChartAt_coe_symm]; rfl
   rw [hrealise]
-  -- Apply the chart-to-manifold ODE bridge.
   exact chartCoord_hasDerivWithinAt_to_manifold_hasMFDerivWithinAt
     (I := I) α u (Set.Icc 0 hper.T) t
     (X t ((chartAt H α).symm (I.symm (u t)))) htgt_t hconf hd

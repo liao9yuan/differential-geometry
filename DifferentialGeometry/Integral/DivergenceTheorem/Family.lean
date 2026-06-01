@@ -62,17 +62,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## File-local Borel-space instances
-
-Match the convention in the surrounding files: `E` and `M` carry their canonical
-Borel σ-algebras. Declared `local` to avoid leaking into callers. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Pointwise-in-`t` divergence theorem on a closed manifold -/
 
 /-- **Family form of the divergence theorem on a closed manifold.** For a
 smoothly time-parameterised Riemannian metric family `g_fam` on a closed
@@ -104,8 +97,6 @@ theorem integral_divergence_eq_zero_of_hasCompactSupport_family
         ∂(riemannianMeasureFamily (I := I) (M := M) g_fam t) = 0 := by
   rw [riemannianMeasureFamily_def]
   exact integral_divergence_eq_zero_of_hasCompactSupport (I := I) (g_fam t) X hX
-
-/-! ## Pointwise-in-`t` integration by parts -/
 
 /-- **Family form of integration by parts (basic).** For a smoothly
 time-parameterised Riemannian metric family `g_fam` on a σ-compact Hausdorff
@@ -148,8 +139,6 @@ theorem integral_tangentSectionAction_mul_add_eq_neg_family
   exact integral_tangentSectionAction_mul_add_eq_neg
     (I := I) (g_fam t) hf hh X hX
 
-/-! ## Pointwise-in-`t` Green's identities -/
-
 /-- **Family form of Green's first identity.** For a smoothly time-parameterised
 Riemannian metric family `g_fam` on a σ-compact Hausdorff boundaryless smooth
 manifold `M`, smooth scalars `f, h : M → ℝ` with `h` having compact support,
@@ -187,14 +176,6 @@ theorem integral_smul_laplacian_sub_eq_zero_family
         ∂(riemannianMeasureFamily (I := I) (M := M) g_fam t) = 0 := by
   rw [riemannianMeasureFamily_def]
   exact green_second_integral_smul_laplacian_sub_eq_zero (I := I) (g_fam t) hf hh
-
-/-! ## Volume-variation formula re-export
-
-The clean volume-variation formula is established in
-`DifferentialGeometry.Integral.Measure.Family.first_variation_of_volume`.
-We re-export it here under a name belonging to this directory for navigation
-convenience downstream. The hypotheses, namespaces, and statement are
-unchanged. -/
 
 /-- **Volume-variation formula.** Re-export of the volume-variation formula:
 for a regular family of Riemannian metrics `g_fam` and a regular integrand

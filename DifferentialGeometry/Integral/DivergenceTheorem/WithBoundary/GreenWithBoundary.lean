@@ -88,22 +88,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## File-local Borel-space instances
-
-Match the convention in the surrounding files: `E` and `M` carry their
-canonical Borel σ-algebras. Declared `local` to avoid leaking into callers. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Boundary-face sum
-
-A single named quantity packaging the chart-by-chart boundary contribution
-appearing in both Green's identities and in the global Stokes theorem.
-Declared as the finite sum (over the chart-atlas POU support) of the
-chart-α boundary face integrals weighted by the chart-atlas POU. -/
 
 /-- **Boundary face sum.** The boundary contribution to the with-boundary
 divergence theorem, expressed as a finite sum over the chart-atlas
@@ -159,23 +147,6 @@ theorem integral_divergence_with_boundary_eq_boundaryFaceSum
   rw [boundaryFaceSum_def]
   exact stokes_compact_via_pou (I := I) g X
 
-/-! ## Green's first identity with boundary
-
-The proof applies the global Stokes theorem to the smooth tangent section
-`Y := f · ∇_g h`, which is packaged as `smoothSmul f hf
-(grad_g_with_boundary_section g hh hh_int)`. By the divergence Leibniz rule
-`divergence_g_with_boundary_smoothSmul`,
-`div_g^{(\partial)}(f · ∇h) = f · Δh + ⟨∇f, ∇h⟩` pointwise. Integrating
-this against the canonical Riemannian volume measure and using the global
-Stokes theorem yields:
-
-  `∫ ⟨∇f, ∇h⟩ + ∫ f · Δh = boundaryFaceSum g (f · ∇h)`.
-
-The pointwise reformulation uses the duality of the gradient with the
-tangent action and the symmetry of the metric:
-
-  `tangentSectionAction (∇h) f x = ⟨∇h, ∇f⟩ = ⟨∇f, ∇h⟩`. -/
-
 /-- A continuity helper: the inner product `⟨∇f, ∇h⟩` is continuous on the
 manifold interior. The pointwise formula `g.inner x (gradFun g f x) (gradFun
 g h x)` is continuous on `I.interior M` because both gradients are smooth
@@ -192,14 +163,6 @@ private lemma inner_grad_grad_continuous_of_interior_support
     Continuous
       (fun x : M => g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g h x)) := by
   classical
-  -- Strategy: rewrite `g.inner x (∇f) (∇h) = tangentSectionAction (∇h_section) f`,
-  -- which is continuous by `tangentSectionAction_continuous_of_interior_support`
-  -- under the interior-support hypothesis on `f` — but here we only have the
-  -- interior-support hypothesis on `h`, packaged through the section
-  -- `grad_g_with_boundary_section g hh hh_int`. We use the section's
-  -- interior-support to deduce continuity of the inner product.
-  -- Set `Y := grad_g_with_boundary_section g hh hh_int` and observe
-  -- `g.inner x (∇f x) (∇h x) = tangentSectionAction Y f x` (by duality + symmetry).
   set Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     grad_g_with_boundary_section (I := I) g hh hh_int with hY_def
   have hY_int : tsupport (Y : ∀ x, TangentSpace I x) ⊆ I.interior M :=
@@ -208,59 +171,22 @@ private lemma inner_grad_grad_continuous_of_interior_support
       g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g h x) =
         tangentSectionAction (I := I) Y f x := by
     intro x
-    -- `tangentSectionAction Y f x = g.inner x (Y x) (gradFun g f x)`
-    --                            = g.inner x (gradFun g h x) (gradFun g f x)`.
-    -- By symmetry, `g.inner x (gradFun g h x) (gradFun g f x) =
-    --              g.inner x (gradFun g f x) (gradFun g h x)`.
     rw [tangentSectionAction_grad_g_with_boundary_eq_inner (I := I) g hf Y x]
-    -- Goal: g.inner x (gradFun g f) (gradFun g h) = g.inner x (Y x) (gradFun g f).
-    -- Y x = gradFun g h x by definitional unfolding; then symmetry swaps.
     change g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g h x) =
       g.inner x (gradFun (I := I) g h x) (gradFun (I := I) g f x)
     exact g.symm x _ _
-  -- Continuity of `tangentSectionAction Y f` follows from the with-boundary
-  -- helper, since `f` is smooth and `tsupport (Y …) ⊆ I.interior M` (the
-  -- tangent action's continuity on interior-supported scalars is established
-  -- in `IntegrationByParts.lean`; the symmetric statement we need here uses
-  -- the interior support of `Y`, which is captured indirectly through
-  -- `tangentSectionAction_continuous_of_interior_support`).
-  -- The latter helper requires `tsupport f ⊆ I.interior M`. We don't have
-  -- that hypothesis; instead, we derive continuity directly.
-  -- We use: `Y` is smooth as a tangent-bundle section globally on `M`; `f` is
-  -- smooth globally; hence `mfderiv f x (Y x)` is continuous as a function on
-  -- `M`. The latter is `tangentSectionAction Y f`.
-  -- Since `Y` is a `Cₛ^∞`-section and `f` is `ContMDiff ∞`, we use the
-  -- standard manifold-level continuity: `tangentSectionAction Y f` is the
-  -- bundle-evaluation of `mfderiv f` on `Y`, and is continuous when both are
-  -- smooth.
   have hY_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => TotalSpace.mk' E x (Y x)) := Y.contMDiff
-  -- Bridge: `tangentSectionAction Y f` is continuous on M.
-  -- We rebuild via the existing helper, conditioned on the interior support
-  -- of `Y`: the helper accepts `tsupport (scalar) ⊆ I.interior M`; here we
-  -- need a version conditioned on `tsupport (section) ⊆ I.interior M`.
-  -- Instead of plumbing a new helper, observe that
-  -- `tangentSectionAction Y f x = mfderiv I 𝓘(ℝ) f x (Y x)` is the action of
-  -- the smooth `Y` on smooth `f`. The action's continuity follows from a
-  -- pointwise case split on whether `x ∈ tsupport Y`:
-  -- * On `tsupport Y ⊆ I.interior M` the action is smooth (from
-  --   `tangentSectionAction_contMDiffOn` applied on a chart whose image lies
-  --   in the interior of the chart target).
-  -- * Off `tsupport Y` the action vanishes, hence is locally constant.
-  -- This mirrors the proof of `tangentSectionAction_continuous_of_interior_support`
-  -- but with the interior-support hypothesis transferred to `Y`.
   have h_act_cont : Continuous (tangentSectionAction (I := I) Y f) := by
     classical
     rw [continuous_iff_continuousAt]
     intro x
     by_cases hx_supp : x ∈ tsupport (Y : ∀ x, TangentSpace I x)
-    · -- `x ∈ tsupport Y ⊆ I.interior M`. Use smoothness on the chart at `x`.
-      have hx_int : x ∈ I.interior M := hY_int hx_supp
+    · have hx_int : x ∈ I.interior M := hY_int hx_supp
       have hx_chart : x ∈ (chartAt H x).source := mem_chart_source H x
       have hx_target_int : extChartAt I x x ∈ interior (extChartAt I x).target :=
         extChartAt_mem_interior_target_of_isInteriorPoint
           (I := I) (M := M) x hx_chart hx_int
-      -- `tangentSectionAction Y f` is smooth on the smoothness domain at `α := x`.
       have hsmooth : ContMDiffOn I 𝓘(ℝ) ∞ (tangentSectionAction (I := I) Y f)
           ((extChartAt I x).source ∩
             (extChartAt I x : M → E) ⁻¹' interior (extChartAt I x).target) :=
@@ -276,9 +202,7 @@ private lemma inner_grad_grad_continuous_of_interior_support
         exact hcontOn.isOpen_inter_preimage (isOpen_extChartAt_source (I := I) x)
           isOpen_interior
       exact ((hsmooth x hxU).continuousWithinAt.continuousAt) (hUopen.mem_nhds hxU)
-    · -- `x ∉ tsupport Y` — `Y` vanishes on a neighborhood of `x`, so the
-      -- tangent action vanishes too.
-      have h_open : IsOpen (tsupport (Y : ∀ x, TangentSpace I x))ᶜ :=
+    · have h_open : IsOpen (tsupport (Y : ∀ x, TangentSpace I x))ᶜ :=
         (isClosed_tsupport _).isOpen_compl
       have hev_zero : tangentSectionAction (I := I) Y f =ᶠ[𝓝 x]
           (fun _ => (0 : ℝ)) := by
@@ -290,7 +214,6 @@ private lemma inner_grad_grad_continuous_of_interior_support
         rw [hY_zero]
         exact (mfderiv I 𝓘(ℝ, ℝ) f y).map_zero
       exact (continuous_const.continuousAt.congr hev_zero.symm)
-  -- Conclude continuity by congruence with the smooth-action representation.
   refine h_act_cont.congr ?_
   intro x
   exact (h_eq x).symm
@@ -381,23 +304,17 @@ theorem green_first_with_boundary
         (smoothSmul (I := I) f hf
           (grad_g_with_boundary_section (I := I) g hh hh_int)) := by
   classical
-  -- Set `X := ∇h_section`, `Y := f · X`.
   set X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     grad_g_with_boundary_section (I := I) g hh hh_int with hX_def
   set Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     smoothSmul (I := I) f hf X with hY_def
-  -- Apply the global Stokes theorem to `Y`.
   have hStokes :=
     integral_divergence_with_boundary_eq_boundaryFaceSum (I := I) g Y
-  -- Pointwise Leibniz: `div_g^∂ Y = f · div_g^∂ X + tangentSectionAction X f`.
   have h_leibniz : ∀ x : M,
       divergence_g_with_boundary (I := I) g Y x =
         f x * divergence_g_with_boundary (I := I) g X x +
           tangentSectionAction (I := I) X f x :=
     divergence_g_with_boundary_smoothSmul (I := I) g f hf X
-  -- Pointwise rewrites:
-  -- (1) `f · div_g^∂ X = f · Δh` (definitionally — `Δh = div_g^∂ ∇h_section`).
-  -- (2) `tangentSectionAction X f x = ⟨∇f, ∇h⟩` (by duality + symmetry).
   have h1 : ∀ x : M,
       f x * divergence_g_with_boundary (I := I) g X x =
         f x * Δ_g_with_boundary (I := I) g hh hh_int x := by
@@ -406,22 +323,16 @@ theorem green_first_with_boundary
       tangentSectionAction (I := I) X f x =
         g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g h x) := by
     intro x
-    -- `tangentSectionAction X f x = g.inner x (X x) (gradFun g f x)`.
     rw [tangentSectionAction_grad_g_with_boundary_eq_inner (I := I) g hf X x]
-    -- Now `g.inner x (X x) (grad_g_with_boundary g f x)`.
-    -- `X x = grad_g_with_boundary_section g hh hh_int x = gradFun g h x`.
     change g.inner x (gradFun (I := I) g h x) (gradFun (I := I) g f x) =
       g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g h x)
     exact g.symm x _ _
-  -- Combined pointwise identity:
-  --   `div_g^∂ Y x = f x · Δh x + ⟨∇f x, ∇h x⟩`.
   have h_combined : ∀ x : M,
       divergence_g_with_boundary (I := I) g Y x =
         f x * Δ_g_with_boundary (I := I) g hh hh_int x +
           g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g h x) := by
     intro x
     rw [h_leibniz x, h1 x, h2 x]
-  -- Integrate both sides against the canonical volume measure.
   have h_int_eq :
       ∫ x, divergence_g_with_boundary (I := I) g Y x
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
@@ -430,7 +341,6 @@ theorem green_first_with_boundary
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
     refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
     exact h_combined x
-  -- Integrability of each summand.
   have h_int_fΔh : Integrable
       (fun x : M => f x * Δ_g_with_boundary (I := I) g hh hh_int x)
       (riemannianVolumeMeasure (I := I) (M := M) g) :=
@@ -440,24 +350,9 @@ theorem green_first_with_boundary
         g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g h x))
       (riemannianVolumeMeasure (I := I) (M := M) g) :=
     inner_grad_grad_integrable (I := I) g hf hh hh_int
-  -- Linearity of the integral.
   rw [h_int_eq] at hStokes
   rw [integral_add h_int_fΔh h_int_inner] at hStokes
-  -- `hStokes : ∫ f · Δh + ∫ ⟨∇f, ∇h⟩ = boundaryFaceSum g Y`.
-  -- Goal: `∫ ⟨∇f, ∇h⟩ + ∫ f · Δh = boundaryFaceSum g Y`.
   linarith
-
-/-! ## Sanity check — recovery of the interior-supported identity
-
-When `f` is also interior-supported (in addition to `h`), the section
-`f · ∇h` has compact support and interior support inherited from `h`.
-By `integral_divergence_with_boundary_eq_zero_of_hasCompactSupport_of_interior_support`,
-its with-boundary divergence integrates to zero, and equivalently
-`boundaryFaceSum g (f · ∇h) = 0`. Combined with Green's first identity,
-this yields the interior-supported form `∫ ⟨∇f, ∇h⟩ + ∫ f · Δh = 0`, i.e.
-`∫ ⟨∇f, ∇h⟩ = -∫ f · Δh`, matching
-`integral_inner_grad_eq_neg_integral_smul_laplacian_with_boundary`
-in `Green.lean`. -/
 
 set_option linter.unusedVariables false in
 /-- **Sanity check — vanishing of the boundary face sum on
@@ -485,32 +380,20 @@ theorem green_first_with_boundary_face_sum_eq_zero_of_interior_support
     grad_g_with_boundary_section (I := I) g hh hh_int with hX_def
   set Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     smoothSmul (I := I) f hf X with hY_def
-  -- `Y` has compact support (compact M).
   have hY_cs : HasCompactSupport Y := HasCompactSupport.of_compactSpace _
-  -- `Y` has interior support: factors `f` and `X` are both interior-supported,
-  -- and `tsupport (f · X) ⊆ tsupport X ⊆ I.interior M`.
   have hX_int : tsupport (X : ∀ x, TangentSpace I x) ⊆ I.interior M :=
     tsupport_grad_g_with_boundary_section_subset_interior (I := I) g hh hh_int
   have hY_int : tsupport (Y : ∀ x, TangentSpace I x) ⊆ I.interior M :=
     tsupport_smoothSmul_subset_interior (I := I) hf X hX_int
-  -- Apply the with-boundary divergence theorem to `Y`.
   have h_div_Y_zero :
       ∫ x, divergence_g_with_boundary (I := I) g Y x
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) = 0 :=
     integral_divergence_with_boundary_eq_zero_of_hasCompactSupport_of_interior_support
       (I := I) g Y hY_cs hY_int
-  -- Combined with the global Stokes theorem (`integral_divergence ... =
-  -- boundaryFaceSum`).
   have h_stokes :=
     integral_divergence_with_boundary_eq_boundaryFaceSum (I := I) g Y
-  -- Pull together: `0 = ∫ div Y = boundaryFaceSum g Y`.
   rw [h_div_Y_zero] at h_stokes
   exact h_stokes.symm
-
-/-! ## Symmetric variant of Green's first identity (with boundary)
-
-The symmetric variant — with the test scalar in the gradient slot — is used
-to derive Green's second identity by subtraction. -/
 
 /-- A symmetric variant of Green's first identity (with boundary): with
 the integration-by-parts test section built from `f` instead of `h`. The
@@ -528,13 +411,6 @@ private theorem green_first_with_boundary_swap
         (smoothSmul (I := I) h hh
           (grad_g_with_boundary_section (I := I) g hf hf_int)) :=
   green_first_with_boundary (I := I) g hh hf hf_int
-
-/-! ## Green's second identity with boundary
-
-Subtracting the swapped identity from Green's first cancels the
-inner-product terms (by symmetry of the metric) and yields a clean
-expression for `∫ (f · Δh − h · Δf)` in terms of two boundary face sums.
--/
 
 /-- **Green's second identity (closed manifold-with-boundary, chart-local
 boundary terms).** For smooth `f, h : M → ℝ` with `tsupport f, tsupport h ⊆
@@ -569,10 +445,8 @@ theorem green_second_with_boundary
         (smoothSmul (I := I) h hh
           (grad_g_with_boundary_section (I := I) g hf hf_int)) := by
   classical
-  -- Apply Green's first identity twice.
   have h_main := green_first_with_boundary (I := I) g hf hh hh_int
   have h_swap := green_first_with_boundary_swap (I := I) g hf hh hf_int
-  -- The two `⟨∇f, ∇h⟩` and `⟨∇h, ∇f⟩` integrals are equal by symmetry.
   have h_inner_symm : ∀ x : M,
       g.inner x (gradFun (I := I) g h x) (gradFun (I := I) g f x) =
         g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g h x) := by
@@ -583,14 +457,7 @@ theorem green_second_with_boundary
         ∫ x, g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g h x)
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
     integral_congr_ae (Filter.Eventually.of_forall h_inner_symm)
-  -- Replace the swapped-inner integral by the canonically-oriented one.
   rw [h_inner_int_eq] at h_swap
-  -- Subtract the two identities. Each equation is of the form A + B = R,
-  -- with A the inner-product integral, B the f·Δh / h·Δf integral.
-  -- main:  ∫⟨∇f,∇h⟩ + ∫ f · Δh = R₁
-  -- swap:  ∫⟨∇f,∇h⟩ + ∫ h · Δf = R₂   (after symmetry rewrite)
-  -- Subtract: ∫ f · Δh − ∫ h · Δf = R₁ − R₂.
-  -- Now apply linearity of the integral to combine the difference.
   have h_int_fΔh : Integrable
       (fun x : M => f x * Δ_g_with_boundary (I := I) g hh hh_int x)
       (riemannianVolumeMeasure (I := I) (M := M) g) :=

@@ -50,8 +50,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## (A) Chart pull-back of the inner product -/
-
 /-- Evaluation of `g.inner x` on two chart-basis frame vectors recovers the
 chart Gram matrix entry. -/
 lemma g_inner_eq_chartGramMatrix_basis
@@ -124,16 +122,13 @@ theorem g_inner_eq_chart_sum
     chartBasisVecFiber_recompose (I := I) α hx v
   have hw : w = ∑ j, b.repr wE j • chartBasisVecFiber (I := I) α j x :=
     chartBasisVecFiber_recompose (I := I) α hx w
-  -- Identify `chartGramOnE g α i j (φ x) = chartGramMatrix g α x i j`.
   have hchart : ∀ i j : Fin (Module.finrank ℝ E),
       chartGramOnE (I := I) g α i j (extChartAt I α x) =
         chartGramMatrix (I := I) g α x i j := by
     intro i j
     unfold chartGramOnE
     rw [(extChartAt I α).left_inv hxsrc]
-  -- Bilinear expansion: rewrite v and w then expand via map_sum / map_smul.
   rw [hv, hw]
-  -- Distribute `g.inner x` over the sum in its first argument.
   have hL :
       g.inner x (∑ i, b.repr vE i • chartBasisVecFiber (I := I) α i x)
         = ∑ i, b.repr vE i •
@@ -142,28 +137,15 @@ theorem g_inner_eq_chart_sum
     refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [map_smul]
   rw [hL]
-  -- Apply the resulting sum-of-CLMs to the second argument.
   rw [ContinuousLinearMap.sum_apply]
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [ContinuousLinearMap.smul_apply, smul_eq_mul]
-  -- Distribute `g.inner x (e_i)` over the sum in its second argument.
   rw [map_sum]
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl (fun j _ => ?_)
   rw [map_smul, smul_eq_mul]
   rw [hchart i j, g_inner_eq_chartGramMatrix_basis (I := I) g α x i j]
   ring
-
-/-! ## (B) Chart metric identity
-
-The chart Christoffel symbol of the second kind satisfies the metric
-compatibility property in chart coordinates:
-$$\partial_k G_{ij}(α, y) = \sum_l \Gamma^l{}_{ki}(α, y)\, G_{lj}(α, y)
-  + \sum_l \Gamma^l{}_{kj}(α, y)\, G_{li}(α, y).$$
-
-The proof substitutes the explicit definition
-`chartChristoffel = (1/2) G^{-1}(∂G + ∂G − ∂G)` and uses the pairing
-`G^{-1} G = I` to collapse the inner contraction. -/
 
 /-- The Gram-inverse pairing identity at a chart-target point: for any
 `y ∈ (extChartAt I α).target` and indices `m, j`,
@@ -249,7 +231,6 @@ theorem partialDeriv_chartGramOnE_eq_chartChristoffel_sum
             chartGramOnE (I := I) g α l i y) := by
   classical
   have hytgt : y ∈ (extChartAt I α).target := interior_subset hy
-  -- Abbreviation for the bracket inside Γ.
   let S : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
           Fin (Module.finrank ℝ E) → ℝ :=
     fun a b c =>
@@ -260,16 +241,12 @@ theorem partialDeriv_chartGramOnE_eq_chartChristoffel_sum
       partialDeriv (E := E) a (chartGramOnE (I := I) g α c b) y +
         partialDeriv (E := E) b (chartGramOnE (I := I) g α c a) y -
         partialDeriv (E := E) c (chartGramOnE (I := I) g α a b) y := fun _ _ _ => rfl
-  -- Rewrite each `chartChristoffel a b c y` via its definition, identifying
-  -- `chartInvGramMatrix g α (symm y) c l = chartInvGramOnE g α c l y`.
   have hchristoffel : ∀ (a b c : Fin (Module.finrank ℝ E)),
       chartChristoffel (I := I) g α a b c y =
         (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
           chartInvGramOnE (I := I) g α c l y * S a b l := by
     intro a b c
     rfl
-  -- Substitute and simplify the right-hand side. The substitution is by `rfl`
-  -- because `hchristoffel` is itself `rfl`.
   have hsubst :
       (∑ l : Fin (Module.finrank ℝ E),
           chartChristoffel (I := I) g α k i l y *
@@ -286,8 +263,6 @@ theorem partialDeriv_chartGramOnE_eq_chartChristoffel_sum
               chartInvGramOnE (I := I) g α l m y * S k j m) *
               chartGramOnE (I := I) g α l i y) := rfl
   rw [hsubst]
-  -- Distribute and swap inner sums to bring G_{l?} inside the m-sum.
-  -- For the first term:
   have hT1 :
       (∑ l : Fin (Module.finrank ℝ E),
         ((1 / 2 : ℝ) * ∑ m : Fin (Module.finrank ℝ E),
@@ -298,8 +273,6 @@ theorem partialDeriv_chartGramOnE_eq_chartChristoffel_sum
           (∑ l : Fin (Module.finrank ℝ E),
               chartInvGramOnE (I := I) g α l m y *
                 chartGramOnE (I := I) g α l j y) := by
-    -- Rewrite each summand of the outer l-sum as
-    -- (1/2) * ∑_m G^{lm} * S_{kim} * G_{lj}, then swap and pull (1/2) outside.
     have hreshape :
         (∑ l : Fin (Module.finrank ℝ E),
           ((1 / 2 : ℝ) * ∑ m : Fin (Module.finrank ℝ E),
@@ -351,7 +324,6 @@ theorem partialDeriv_chartGramOnE_eq_chartChristoffel_sum
     refine Finset.sum_congr rfl (fun l _ => ?_)
     ring
   rw [hT1, hT2]
-  -- Collapse the inner (∑_l G^{lm} G_{l?}) sums via the Gram-inverse pairing.
   have hcollapse1 : ∀ m : Fin (Module.finrank ℝ E),
       (∑ l : Fin (Module.finrank ℝ E),
           chartInvGramOnE (I := I) g α l m y *
@@ -386,7 +358,6 @@ theorem partialDeriv_chartGramOnE_eq_chartChristoffel_sum
     congr 2
     · refine Finset.sum_congr rfl (fun m _ => ?_); rw [hcollapse1 m]
     · refine Finset.sum_congr rfl (fun m _ => ?_); rw [hcollapse2 m]]
-  -- Collapse each (∑_m S_{...m} (if m = ?)) to the single non-zero term.
   rw [show
       (∑ m : Fin (Module.finrank ℝ E),
           S k i m * (if m = j then (1 : ℝ) else 0)) =
@@ -407,13 +378,7 @@ theorem partialDeriv_chartGramOnE_eq_chartChristoffel_sum
       simp [hmi]
     · intro hi
       exact absurd (Finset.mem_univ i) hi]
-  -- Now expand the definitions of `S k i j` and `S k j i` and simplify.
   rw [hS k i j, hS k j i]
-  -- After the ring rearrangement, use partial-derivative symmetry on Gram
-  -- entries to fold pairs that differ only by a swap of indices.
-  --   S k i j = ∂_k G_{ji} + ∂_i G_{jk} - ∂_j G_{ki}
-  --   S k j i = ∂_k G_{ij} + ∂_j G_{ik} - ∂_i G_{kj}
-  -- Apply ∂_? G_{ab} = ∂_? G_{ba}:
   rw [partialDeriv_chartGramOnE_swap_indices (I := I) g α k j i y,
       partialDeriv_chartGramOnE_swap_indices (I := I) g α i j k y,
       partialDeriv_chartGramOnE_swap_indices (I := I) g α j k i y,

@@ -51,23 +51,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimension
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Identification of the Mathlib chart-pulled-back vector field
-with the chart-trivialised representation
-
-The Mathlib pullback `mpullbackWithin 𝓘(ℝ,E) I (extChartAt I x).symm V (range I)`
-is a vector field on `E`, defined as
-`(mfderivWithin (extChartAt I x).symm (range I) y).inverse (V ((extChartAt I x).symm y))`.
-
-The chart-trivialised representation `chartE_section_repr x V ∘
-(extChartAt I x).symm` is, on the chart target,
-`triv.continuousLinearMapAt ℝ ((extChartAt I x).symm y) (V ((extChartAt I x).symm y))`,
-which by `TangentBundle.continuousLinearMapAt_trivializationAt` equals
-`mfderiv (extChartAt I x) ((extChartAt I x).symm y) (V ((extChartAt I x).symm y))`.
-
-These two CLMs applied to `V ((extChartAt I x).symm y)` agree because
-`mfderiv (extChartAt I x) ((extChartAt I x).symm y)` is the inverse of
-`mfderivWithin (extChartAt I x).symm (range I) y`. -/
-
 /-- Pointwise identification: at any point `y ∈ (extChartAt I x).target`, the
 Mathlib chart-pulled-back vector field equals the chart-trivialised
 representation of the section composed with `(extChartAt I x).symm`. -/
@@ -78,11 +61,9 @@ lemma mpullbackWithin_extChartAt_symm_eq_chartE_repr_symm
       (chartE_section_repr (I := I) x V ∘ (extChartAt I x).symm) y := by
   classical
   set φ := extChartAt I x with hφ
-  -- `φ.symm y ∈ φ.source`.
   have hsymm_src : φ.symm y ∈ φ.source := φ.map_target hy
   have hsymm_chart : φ.symm y ∈ (chartAt H x).source := by
     rw [← extChartAt_source (I := I) (x := x)]; exact hsymm_src
-  -- The two compositions giving identity.
   have hAB :
       (mfderiv I 𝓘(ℝ, E) φ (φ.symm y)).comp
           (mfderivWithin 𝓘(ℝ, E) I φ.symm (range I) y) = ContinuousLinearMap.id ℝ _ :=
@@ -91,24 +72,18 @@ lemma mpullbackWithin_extChartAt_symm_eq_chartE_repr_symm
       (mfderivWithin 𝓘(ℝ, E) I φ.symm (range I) y).comp
           (mfderiv I 𝓘(ℝ, E) φ (φ.symm y)) = ContinuousLinearMap.id ℝ _ :=
     mfderivWithin_extChartAt_symm_comp_mfderiv_extChartAt (I := I) (x := x) hy
-  -- From the two-sided inverse, the Mathlib `inverse` equals `mfderiv φ (φ.symm y)`.
-  -- `inverse_eq f g hf hg`: if `f ∘L g = id` and `g ∘L f = id` then `f.inverse = g`.
   have hinv_eq :
       (mfderivWithin 𝓘(ℝ, E) I φ.symm (range I) y).inverse =
         mfderiv I 𝓘(ℝ, E) φ (φ.symm y) :=
     ContinuousLinearMap.inverse_eq hBA hAB
-  -- LHS: unfold `mpullbackWithin`.
   change (mfderivWithin 𝓘(ℝ, E) I φ.symm (range I) y).inverse (V (φ.symm y)) =
        chartE_section_repr (I := I) x V (φ.symm y)
   rw [hinv_eq]
-  -- RHS: unfold `chartE_section_repr` and use `TangentBundle.continuousLinearMapAt_trivializationAt`.
-  -- We want: mfderiv φ (φ.symm y) (V _) = triv.continuousLinearMapAt ℝ (φ.symm y) (V _).
   rw [show (chartE_section_repr (I := I) x V (φ.symm y)) =
         (trivializationAt E (TangentSpace I) x).continuousLinearMapAt ℝ (φ.symm y) (V (φ.symm y))
       from rfl,
       ← TangentBundle.continuousLinearMapAt_trivializationAt
         (𝕜 := ℝ) (I := I) (x₀ := x) (x := φ.symm y) hsymm_chart]
-  -- After this rewrite, the goal becomes definitionally trivial.
   rfl
 
 /-- Eventual equality on `𝓝 (extChartAt I x x)` (full `E`-neighbourhood) when the
@@ -121,13 +96,10 @@ lemma mpullbackWithin_extChartAt_symm_eventuallyEq_chartE_repr_symm
     VectorField.mpullbackWithin 𝓘(ℝ, E) I (extChartAt I x).symm V (range I) =ᶠ[𝓝 (extChartAt I x x)]
       chartE_section_repr (I := I) x V ∘ (extChartAt I x).symm := by
   classical
-  -- `interior φ.target` is open in `E`, so it is in `𝓝 (φ x)`.
   have htgt_nhds : (extChartAt I x).target ∈ 𝓝 (extChartAt I x x) :=
     Filter.mem_of_superset (isOpen_interior.mem_nhds hxint) interior_subset
   filter_upwards [htgt_nhds] with y hy
   exact mpullbackWithin_extChartAt_symm_eq_chartE_repr_symm V hy
-
-/-! ## Main theorem: chart-coordinate Lie bracket -/
 
 set_option linter.unusedVariables false in
 set_option linter.style.show false in
@@ -164,27 +136,18 @@ theorem mlieBracket_eq_chart_fderiv_diff
         - fderiv ℝ (chartE_section_repr (I := I) x X ∘ (extChartAt I x).symm)
             (extChartAt I x x) (Y x) := by
   classical
-  -- Auxiliary: identify the chart-pulled-back Mathlib vector fields with the
-  -- chart-trivialised section representations on a neighborhood of `extChartAt I x x`,
-  -- then evaluate the resulting Fréchet Lie bracket.
   set φ := extChartAt I x with hφ
-  -- `range I` is a neighborhood of `φ x` (since interior of chart target ⊆ range I and
-  -- φ x is in the interior of the chart target by hypothesis).
   have hrange_nhds : range I ∈ 𝓝 (extChartAt I x x) := by
     have hsubset : (extChartAt I x).target ⊆ range I := extChartAt_target_subset_range x
     exact Filter.mem_of_superset
       (Filter.mem_of_superset (isOpen_interior.mem_nhds hxint) interior_subset)
       hsubset
-  -- `mfderiv φ x = id` at the basepoint.
   have hmfderiv_self :
       mfderiv I 𝓘(ℝ, E) (extChartAt I x) x = ContinuousLinearMap.id ℝ _ :=
     mfderiv_extChartAt_self (𝕜 := ℝ) (I := I) (x := x)
-  -- Pointwise value of the Mathlib pullback at the basepoint chart-image.
-  -- Uses `mfderivWithin_extChartAt_symm_inverse_apply : (mfderivWithin φ.symm (range I) (φ x)).inverse v = v`.
   have hVE_at :
       VectorField.mpullbackWithin 𝓘(ℝ, E) I φ.symm X (range I) (extChartAt I x x) = X x := by
     rw [VectorField.mpullbackWithin_apply]
-    -- argument is `X (φ.symm (φ x)) = X x`.
     rw [show φ.symm (φ x) = x from extChartAt_to_inv (I := I) (x := x)]
     exact mfderivWithin_extChartAt_symm_inverse_apply (𝕜 := ℝ) (I := I) (x := x) (X x)
   have hWE_at :
@@ -192,8 +155,6 @@ theorem mlieBracket_eq_chart_fderiv_diff
     rw [VectorField.mpullbackWithin_apply]
     rw [show φ.symm (φ x) = x from extChartAt_to_inv (I := I) (x := x)]
     exact mfderivWithin_extChartAt_symm_inverse_apply (𝕜 := ℝ) (I := I) (x := x) (Y x)
-  -- Eventual-equality identification of the Mathlib pullback with the
-  -- `chartE_section_repr ∘ φ.symm` form.
   have hVE_eq :
       fderiv ℝ (VectorField.mpullbackWithin 𝓘(ℝ, E) I φ.symm X (range I)) (extChartAt I x x) =
         fderiv ℝ (chartE_section_repr (I := I) x X ∘ (extChartAt I x).symm)
@@ -206,45 +167,19 @@ theorem mlieBracket_eq_chart_fderiv_diff
           (extChartAt I x x) :=
     Filter.EventuallyEq.fderiv_eq
       (mpullbackWithin_extChartAt_symm_eventuallyEq_chartE_repr_symm (x := x) Y hxint)
-  -- The mlieBracket as a Mathlib chart-pullback Lie-bracket on E.
-  -- Definitionally, `mlieBracket I X Y x = (mfderiv φ x).inverse
-  --     (lieBracketWithin ℝ V_E W_E (φ.symm ⁻¹' univ ∩ range I) (φ x))`
-  -- where `V_E, W_E` are the chart-pullbacks.
-  -- Re-express the LHS via `mlieBracketWithin` (definitionally equal).
   show VectorField.mlieBracketWithin I X Y univ x =
         fderiv ℝ (chartE_section_repr (I := I) x Y ∘ (extChartAt I x).symm)
             (extChartAt I x x) (X x)
           - fderiv ℝ (chartE_section_repr (I := I) x X ∘ (extChartAt I x).symm)
               (extChartAt I x x) (Y x)
   rw [VectorField.mlieBracketWithin_apply]
-  -- Goal: `(mfderiv φ x).inverse (lieBracketWithin ℝ V_E W_E (univ.symm-preim ∩ range I) (φ x)) = RHS`
-  -- Simplify the within-set:
   rw [Set.preimage_univ, Set.univ_inter]
-  -- Convert `lieBracketWithin (range I) (φ x)` to `lieBracket (φ x)`:
   rw [VectorField.lieBracketWithin_of_mem_nhds (𝕜 := ℝ) hrange_nhds]
-  -- Replace `(mfderiv φ x).inverse` with `id.inverse`:
   rw [hmfderiv_self]
-  -- Now: `(id).inverse (lieBracket V_E W_E (φ x)) = RHS`. Reduce `id.inverse` to `id`:
   rw [ContinuousLinearMap.inverse_id]
-  -- Now: `(id) (lieBracket V_E W_E (φ x)) = RHS`. Apply id:
-  -- The `lieBracket` returns `E`, and `id : E →L E` by defeq. After `id_apply`, equality is
-  -- `lieBracket V_E W_E (φ x) = RHS`.
   unfold VectorField.lieBracket
-  -- Substitute the pointwise values and the fderiv eventual-equalities.
   rw [hVE_at, hWE_at, hVE_eq, hWE_eq]
-  -- Close: defeq.
   rfl
-
-/-! ## Chart-coordinate Lie bracket at an arbitrary chart base point
-
-The formula above is stated with the chart at the evaluation point itself.
-Here we generalise to a chart at an arbitrary point `α`, using the
-chart-invariance of the manifold Lie bracket (`mpullback_mlieBracket` from
-Mathlib). The trivialization-equals-chart-differential identity
-(`TangentBundle.continuousLinearMapAt_trivializationAt`) translates the
-manifold derivative of the chart at `α` (which is no longer the identity
-since `α ≠ x` in general) into the canonical trivialization map
-`trivToE α x`, and dually for `trivFromE α x`. -/
 
 set_option linter.unusedVariables false in
 set_option linter.style.show false in
@@ -292,26 +227,18 @@ theorem mlieBracket_eq_chart_fderiv_diff_general
   classical
   set φ := extChartAt I α with hφ
   set y₀ : E := φ x with hy₀
-  -- A : `φ.symm y₀ = x`.
   have hxsrc_chart : x ∈ (chartAt H α).source := by
     have := hx_src; rwa [extChartAt_source] at this
   have hxsymm : φ.symm y₀ = x := φ.left_inv hx_src
-  -- B : at the interior point `y₀`, `range I` is a neighbourhood, so
-  -- `mfderiv φ.symm y₀ = mfderivWithin φ.symm (range I) y₀`.
   have hint_open : IsOpen (interior ((extChartAt I α).target : Set E)) := isOpen_interior
   have hrange_nhds : range I ∈ 𝓝 y₀ := by
     have hsubset : (extChartAt I α).target ⊆ range I := extChartAt_target_subset_range α
     exact Filter.mem_of_superset
       (Filter.mem_of_superset (hint_open.mem_nhds hx_int) interior_subset)
       hsubset
-  -- C : smoothness of `φ.symm` at `y₀`.
-  -- `φ.symm` is `C^∞` on `φ.target` (Mathlib `contMDiffOn_extChartAt_symm`).
   have hytarget : y₀ ∈ φ.target := φ.map_source hx_src
   have hsymm_cmd_inf : ContMDiffOn 𝓘(ℝ, E) I (∞ : WithTop ℕ∞) φ.symm φ.target :=
     contMDiffOn_extChartAt_symm (I := I) (n := ∞) (x := α)
-  -- We need `ContMDiffAt 𝓘(ℝ,E) I 2 φ.symm y₀`. Since `φ.target` is a
-  -- neighborhood of `y₀` (using the interior-of-target hypothesis), the
-  -- `ContMDiffOn` collapses to `ContMDiffAt`.
   have htgt_nhds : φ.target ∈ 𝓝 y₀ :=
     Filter.mem_of_superset (hint_open.mem_nhds hx_int) interior_subset
   have hsymm_cmd_at_inf : ContMDiffAt 𝓘(ℝ, E) I (∞ : WithTop ℕ∞) φ.symm y₀ := by
@@ -325,13 +252,8 @@ theorem mlieBracket_eq_chart_fderiv_diff_general
     (ENat.LEInfty.out (m := (2 : WithTop ℕ∞)))
   have hsymm_cmd_at : ContMDiffAt 𝓘(ℝ, E) I (2 : WithTop ℕ∞) φ.symm y₀ :=
     hsymm_cmd_at_inf.of_le h2le
-  -- D : MDifferentiable at the right point.
   have hX_at : MDiffAt (T% X) (φ.symm y₀) := by rw [hxsymm]; exact hX
   have hY_at : MDiffAt (T% Y) (φ.symm y₀) := by rw [hxsymm]; exact hY
-  -- Apply Mathlib `mpullback_mlieBracket` to `f := φ.symm` at `y₀`.
-  -- Source manifold: E (model 𝓘(ℝ,E)). Target manifold: M (model I).
-  -- Need `[IsManifold I (minSmoothness ℝ 2) M]`. For ℝ, this is `[IsManifold I 2 M]`,
-  -- which is auto-derived from `[IsManifold I ∞ M]`.
   haveI : IsManifold I (minSmoothness ℝ 2) M := by
     rw [minSmoothness_of_isRCLikeNormedField (𝕜 := ℝ)]
     infer_instance
@@ -346,16 +268,10 @@ theorem mlieBracket_eq_chart_fderiv_diff_general
       (n := (2 : WithTop ℕ∞))
       hX_at hY_at hsymm_cmd_at
       (by rw [minSmoothness_of_isRCLikeNormedField])
-  -- Now interpret each side.
-  -- LHS: mpullback 𝓘(ℝ,E) I φ.symm (mlieBracket I X Y) y₀
-  --    = (mfderiv φ.symm y₀).inverse (mlieBracket I X Y (φ.symm y₀))
-  --    = (mfderiv φ.symm y₀).inverse (mlieBracket I X Y x).
-  -- We will show: `(mfderiv φ.symm y₀).inverse = trivToE α x = mfderiv φ x`.
   have hmf_symm_eq_within :
       mfderiv 𝓘(ℝ, E) I φ.symm y₀ = mfderivWithin 𝓘(ℝ, E) I φ.symm (range I) y₀ := by
     exact (mfderivWithin_of_mem_nhds (I := 𝓘(ℝ, E)) (I' := I) (f := φ.symm)
       (s := range I) (x := y₀) hrange_nhds).symm
-  -- The inverse identity: `(mfderivWithin φ.symm (range I) y₀).inverse = mfderiv φ x`.
   have hinv_eq_mfderiv_φ :
       (mfderivWithin 𝓘(ℝ, E) I φ.symm (range I) y₀).inverse =
         mfderiv I 𝓘(ℝ, E) φ x := by
@@ -372,16 +288,13 @@ theorem mlieBracket_eq_chart_fderiv_diff_general
           mfderiv I 𝓘(ℝ, E) φ (φ.symm y₀) :=
       ContinuousLinearMap.inverse_eq hBA hAB
     rw [h_eq, hxsymm]
-  -- And: `mfderiv φ x = trivToE α x` via `TangentBundle.continuousLinearMapAt_trivializationAt`.
   have hmfderiv_φ_eq_triv :
       mfderiv I 𝓘(ℝ, E) φ x = trivToE (I := I) α x :=
     (TangentBundle.continuousLinearMapAt_trivializationAt
       (𝕜 := ℝ) (I := I) (x₀ := α) (x := x) hxsrc_chart).symm
-  -- Combine: `(mfderiv φ.symm y₀).inverse = trivToE α x`.
   have hinv_eq_trivToE :
       (mfderiv 𝓘(ℝ, E) I φ.symm y₀).inverse = trivToE (I := I) α x := by
     rw [hmf_symm_eq_within, hinv_eq_mfderiv_φ, hmfderiv_φ_eq_triv]
-  -- LHS as `trivToE α x (mlieBracket I X Y x)`:
   have hLHS :
       VectorField.mpullback 𝓘(ℝ, E) I φ.symm
           (VectorField.mlieBracket I X Y) y₀ =
@@ -390,20 +303,9 @@ theorem mlieBracket_eq_chart_fderiv_diff_general
               (VectorField.mlieBracket I X Y (φ.symm y₀)) = _
     rw [hxsymm, hinv_eq_trivToE]
     rfl
-  -- RHS interpretation. `mlieBracket 𝓘(ℝ,E) (mpullback ... X) (mpullback ... Y) y₀`.
-  -- Step 1: replace `mpullback (φ.symm) X` with `chartE_section_repr α X ∘ φ.symm` on a
-  -- neighbourhood of `y₀` (so that `mlieBracket 𝓘(ℝ,E)` agrees by
-  -- `Filter.EventuallyEq.mlieBracket_vectorField_eq`).
-  -- Note: `mpullback I I' f V x = (mfderiv f x).inverse (V (f x))` and
-  -- `mpullbackWithin I I' f V s x = (mfderivWithin f s x).inverse (V (f x))`.
-  -- On a neighbourhood of `y₀ ∈ interior φ.target`, `mfderiv φ.symm = mfderivWithin φ.symm (range I)`
-  -- (by `mfderivWithin_of_mem_nhds`), so the two pullbacks agree pointwise.
   have hmpb_eq_mpbWithin (V : Π y : M, TangentSpace I y) :
       VectorField.mpullback 𝓘(ℝ, E) I φ.symm V =ᶠ[𝓝 y₀]
         VectorField.mpullbackWithin 𝓘(ℝ, E) I φ.symm V (range I) := by
-    -- We need pointwise equality on a neighbourhood of `y₀`.
-    -- `range I ∈ 𝓝 y` for all `y ∈ interior φ.target` (and a fortiori on a neighborhood of y₀).
-    -- Actually we need `range I ∈ 𝓝 y` for `y` near `y₀`. Take the neighborhood `interior φ.target`.
     have hint_nhds : interior ((extChartAt I α).target : Set E) ∈ 𝓝 y₀ :=
       hint_open.mem_nhds hx_int
     filter_upwards [hint_nhds] with z hz
@@ -417,8 +319,6 @@ theorem mlieBracket_eq_chart_fderiv_diff_general
         mfderiv 𝓘(ℝ, E) I φ.symm z = mfderivWithin 𝓘(ℝ, E) I φ.symm (range I) z :=
       (mfderivWithin_of_mem_nhds hz_range).symm
     rw [hmf_eq]
-  -- The chart-α version of the chart-pullback identification (with `V` arbitrary):
-  -- `mpullbackWithin 𝓘(ℝ,E) I φ.symm V (range I) =ᶠ[𝓝 y₀] chartE_section_repr α V ∘ φ.symm`.
   have hmpbWithin_eq (V : Π y : M, TangentSpace I y) :
       VectorField.mpullbackWithin 𝓘(ℝ, E) I φ.symm V (range I) =ᶠ[𝓝 y₀]
         chartE_section_repr (I := I) α V ∘ φ.symm := by
@@ -430,14 +330,8 @@ theorem mlieBracket_eq_chart_fderiv_diff_general
       VectorField.mpullback 𝓘(ℝ, E) I φ.symm V =ᶠ[𝓝 y₀]
         chartE_section_repr (I := I) α V ∘ φ.symm :=
     (hmpb_eq_mpbWithin V).trans (hmpbWithin_eq V)
-  -- Step 2: identify the RHS of `hpb` (mlieBracket on E of pullbacks) as the
-  -- Fréchet Lie bracket of the chart-α-trivialised representations.
-  -- We use `Filter.EventuallyEq.mlieBracket_vectorField_eq` to substitute the
-  -- eventually-equal pullbacks, then `mlieBracketWithin_eq_lieBracketWithin` to
-  -- collapse the manifold Lie bracket on `E` to the Fréchet `lieBracket`.
   set V_E : E → E := chartE_section_repr (I := I) α X ∘ φ.symm with hV_E
   set W_E : E → E := chartE_section_repr (I := I) α Y ∘ φ.symm with hW_E
-  -- The substitution: `mlieBracket 𝓘(ℝ,E) (mpullback X) (mpullback Y) y₀ = mlieBracket 𝓘(ℝ,E) V_E W_E y₀`.
   have hRHS_subst :
       VectorField.mlieBracket 𝓘(ℝ, E)
           (VectorField.mpullback 𝓘(ℝ, E) I φ.symm X)
@@ -446,7 +340,6 @@ theorem mlieBracket_eq_chart_fderiv_diff_general
     have h1 : VectorField.mpullback 𝓘(ℝ, E) I φ.symm X =ᶠ[𝓝 y₀] V_E := hmpb_eq_chartE X
     have h2 : VectorField.mpullback 𝓘(ℝ, E) I φ.symm Y =ᶠ[𝓝 y₀] W_E := hmpb_eq_chartE Y
     exact (h1.mlieBracket_vectorField_eq h2)
-  -- Collapse to Fréchet Lie bracket on E:
   have hmL_eq_L :
       VectorField.mlieBracket 𝓘(ℝ, E) V_E W_E y₀ =
         VectorField.lieBracket ℝ V_E W_E y₀ := by
@@ -458,11 +351,9 @@ theorem mlieBracket_eq_chart_fderiv_diff_general
       rw [VectorField.lieBracketWithin_univ] at this
       exact this
     exact congrFun h1 y₀
-  -- The Fréchet Lie bracket unfolds: `lieBracket V W x = fderiv W x (V x) - fderiv V x (W x)`.
   have hL_unfold :
       VectorField.lieBracket ℝ V_E W_E y₀ =
         fderiv ℝ W_E y₀ (V_E y₀) - fderiv ℝ V_E y₀ (W_E y₀) := rfl
-  -- Identify `V_E y₀ = chartE_section_repr α X x = trivToE α x (X x)` etc.
   have hVE_y₀ : V_E y₀ = trivToE (I := I) α x (X x) := by
     show (chartE_section_repr (I := I) α X ∘ φ.symm) y₀ =
       trivToE (I := I) α x (X x)
@@ -477,10 +368,6 @@ theorem mlieBracket_eq_chart_fderiv_diff_general
       trivToE (I := I) α x (Y x)
     rw [hxsymm]
     exact chartE_section_repr_eq_trivToE (I := I) α Y x
-  -- Combine RHS_subst, hmL_eq_L, hL_unfold, hVE_y₀, hWE_y₀:
-  -- `RHS = fderiv W_E y₀ (trivToE α x (X x)) - fderiv V_E y₀ (trivToE α x (Y x))`.
-  -- Now combine with hpb and hLHS. We have:
-  -- trivToE α x (mlieBracket I X Y x) = fderiv W_E y₀ (trivToE α x (X x)) - fderiv V_E y₀ (trivToE α x (Y x))
   have hkey :
       trivToE (I := I) α x (VectorField.mlieBracket I X Y x) =
         fderiv ℝ W_E y₀ (trivToE (I := I) α x (X x))
@@ -497,24 +384,10 @@ theorem mlieBracket_eq_chart_fderiv_diff_general
       _ = fderiv ℝ W_E y₀ (trivToE (I := I) α x (X x))
           - fderiv ℝ V_E y₀ (trivToE (I := I) α x (Y x)) := by
             rw [hVE_y₀, hWE_y₀]
-  -- Apply `trivFromE α x` to both sides; on the LHS the round-trip `trivFromE_trivToE` collapses.
   have hround : trivFromE (I := I) α x (trivToE (I := I) α x (VectorField.mlieBracket I X Y x)) =
       VectorField.mlieBracket I X Y x :=
     trivFromE_trivToE (I := I) α hx_base _
-  -- Final: LHS = trivFromE α x (RHS).
   rw [← hround, hkey]
-
-/-! ## Lie bracket as commutator on scalar functions
-
-The fundamental identity `X(Y f) - Y(X f) = [X, Y] f` for two tangent vector fields `X, Y`
-and a scalar function `f`, expressed at a single point `x` in chart coordinates centred at
-`x`. The proof reduces to the Schwarz identity for the second Fréchet derivative of the
-chart-pulled-back scalar function, applied to the chart-trivialised representations of `X`
-and `Y`.
-
-This identity underlies the C^∞(M)-tensoriality of the Riemann curvature operator in its
-third (section) argument: the cross terms in `R(X, Y)(f Z)` cancel precisely when one knows
-that `X(Y f)(x) - Y(X f)(x) = mfderiv f x ([X, Y] x)`. -/
 
 /-- **Auxiliary: chart-pullback of `b ↦ mfderiv f b (Y b)`.** For a `C^2` scalar function
 `f` on `M` and a tangent vector field `Y` differentiable at `x`, the function `b ↦ mfderiv
@@ -531,20 +404,15 @@ lemma mfderiv_scalar_along_eventuallyEq_chart_fderiv
         (chartE_section_repr (I := I) x Y ((extChartAt I x).symm y))) ∘ (extChartAt I x) := by
   classical
   set φ := extChartAt I x with hφ
-  -- Standing facts about the chart at `x`.
   have hint_open : IsOpen (interior ((extChartAt I x).target : Set E)) := isOpen_interior
   have hsrc_extChart : x ∈ φ.source := mem_extChartAt_source x
   have hsrc_chart : x ∈ (chartAt H x).source := mem_chart_source H x
-  -- `φ.source` is a neighbourhood of `x`.
   have hφsrc_nhds : φ.source ∈ 𝓝 x :=
     extChartAt_source_mem_nhds' (I := I) hsrc_extChart
-  -- The set of `b` with `φ b ∈ interior φ.target` is open (preimage of open under
-  -- continuous `φ`) and contains `x`.
   have hφ_cont : ContinuousAt φ x := by
     apply (continuousAt_extChartAt' (I := I) (x := x) hsrc_extChart)
   have hφ_pre_nhds : φ ⁻¹' (interior φ.target) ∈ 𝓝 x :=
     hφ_cont.preimage_mem_nhds (hint_open.mem_nhds hx_int)
-  -- `f` is `ContMDiffAt 2` on a neighbourhood of `x`, so eventually `MDiffAt f`.
   have hf_eventually_cmd : ∀ᶠ b in 𝓝 x, ContMDiffAt I 𝓘(ℝ) 2 f b :=
     (contMDiffAt_iff_contMDiffAt_nhds (n := (2 : WithTop ℕ∞))
       (by simp : (2 : WithTop ℕ∞) ≠ ∞)).mp hf
@@ -552,19 +420,13 @@ lemma mfderiv_scalar_along_eventuallyEq_chart_fderiv
     filter_upwards [hf_eventually_cmd] with b hb
     exact hb.mdifferentiableAt (by simp)
   filter_upwards [hφsrc_nhds, hφ_pre_nhds, hf_eventually_mdiff] with b hb_src hb_int hb_mdiff
-  -- For each such `b`, apply `mfderiv_scalar_eq_chart_fderiv` (with chart at `x`).
   have hb_src_chart : b ∈ (chartAt H x).source := by
     rwa [extChartAt_source] at hb_src
-  -- Now both sides equal.
   change mfderiv I 𝓘(ℝ) f b (Y b) =
     fderiv ℝ (f ∘ φ.symm) (φ b) (chartE_section_repr (I := I) x Y (φ.symm (φ b)))
   rw [show φ.symm (φ b) = b from φ.left_inv hb_src]
-  -- `mfderiv_scalar_eq_chart_fderiv` gives:
-  --   mfderiv I 𝓘(ℝ) f b v = fderiv ℝ (f ∘ φ.symm) (φ b) (trivToE x b v)
-  -- with v = Y b.
   rw [mfderiv_scalar_eq_chart_fderiv (I := I) (α := x) (f := f) (x := b)
       hb_src_chart hb_int hb_mdiff (Y b)]
-  -- And `chartE_section_repr x Y b = trivToE x b (Y b)`.
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
@@ -585,9 +447,7 @@ theorem mfderiv_scalar_along_eq_chart_fderiv
   set φ := extChartAt I x with hφ
   set ftilde : E → ℝ := f ∘ φ.symm with hftilde
   set Ychart : E → E := chartE_section_repr (I := I) x Y ∘ φ.symm with hYchart
-  -- Define the chart-pulled-back combined map G̃ : E → ℝ.
   set Gtilde : E → ℝ := fun y => fderiv ℝ ftilde y (Ychart y) with hGtilde
-  -- Standing facts.
   have hsrc_extChart : x ∈ φ.source := mem_extChartAt_source x
   have hsrc_chart : x ∈ (chartAt H x).source := mem_chart_source H x
   have hxbase : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
@@ -597,16 +457,11 @@ theorem mfderiv_scalar_along_eq_chart_fderiv
     Filter.mem_of_superset (hint_open.mem_nhds hx_int) interior_subset
   have hrange_nhds : range I ∈ 𝓝 (φ x) :=
     Filter.mem_of_superset htgt_nhds (extChartAt_target_subset_range x)
-  -- Step 1: eventual equality and rewrite of `mfderiv` of LHS.
   have hLHS_eq : mfderiv I 𝓘(ℝ) (fun b => mfderiv I 𝓘(ℝ) f b (Y b)) x =
       mfderiv I 𝓘(ℝ) (Gtilde ∘ φ) x :=
     Filter.EventuallyEq.mfderiv_eq
       (mfderiv_scalar_along_eventuallyEq_chart_fderiv x f Y hx_int hf)
-  -- Step 2: chain rule for `mfderiv (Gtilde ∘ φ) x`. Need MDifferentiableAt for Gtilde at φ x
-  -- and for φ at x.
   have hφ_mdiff : MDiffAt φ x := mdifferentiableAt_extChartAt (I := I) (x := x) hsrc_chart
-  -- Gtilde is differentiable at φ x: it is `fderiv ℝ ftilde y (Ychart y)`, which is the
-  -- application of the CLM `fderiv ℝ ftilde y` to the vector `Ychart y`. Use fderiv_clm_apply.
   have hftilde_cmd : ContMDiffWithinAt 𝓘(ℝ, E) 𝓘(ℝ) 2 ftilde (range I) (φ x) :=
     (contMDiffAt_iff_source_of_mem_source (n := (2 : WithTop ℕ∞))
       (x := x) (x' := x) (f := f) hsrc_chart).mp hf
@@ -614,7 +469,6 @@ theorem mfderiv_scalar_along_eq_chart_fderiv
     hftilde_cmd.contMDiffAt hrange_nhds
   have hftilde_cda : ContDiffAt ℝ 2 ftilde (φ x) :=
     contMDiffAt_iff_contDiffAt.mp hftilde_cmdAt
-  -- `fderiv ℝ ftilde` is `DifferentiableAt` at φ x (one degree drop from C^2).
   have h_one_le_two : (1 : WithTop ℕ∞) + 1 ≤ (2 : WithTop ℕ∞) := by norm_num
   have hfderiv_ftilde_cda : ContDiffAt ℝ 1 (fderiv ℝ ftilde) (φ x) :=
     hftilde_cda.fderiv_right (m := 1) h_one_le_two
@@ -626,21 +480,16 @@ theorem mfderiv_scalar_along_eq_chart_fderiv
     hfderiv_ftilde_diff.clm_apply hYchart_diff
   have hGtilde_mdiff : MDifferentiableAt 𝓘(ℝ, E) 𝓘(ℝ) Gtilde (φ x) :=
     hGtilde_diff.mdifferentiableAt
-  -- Chain rule.
   have hchain :
       mfderiv I 𝓘(ℝ) (Gtilde ∘ φ) x =
         (mfderiv 𝓘(ℝ, E) 𝓘(ℝ) Gtilde (φ x)).comp (mfderiv I 𝓘(ℝ, E) φ x) :=
     mfderiv_comp x hGtilde_mdiff hφ_mdiff
-  -- `mfderiv` of vector-target ≡ `fderiv`.
   have hmf_to_fderiv :
       mfderiv 𝓘(ℝ, E) 𝓘(ℝ) Gtilde (φ x) = fderiv ℝ Gtilde (φ x) :=
     mfderiv_eq_fderiv (𝕜 := ℝ) (E := E) (E' := ℝ) (f := Gtilde) (x := φ x)
-  -- `mfderiv I 𝓘(ℝ,E) φ x = id` at the basepoint.
   have hφ_id : mfderiv I 𝓘(ℝ, E) (extChartAt I x) x = ContinuousLinearMap.id ℝ _ :=
     mfderiv_extChartAt_self (𝕜 := ℝ) (I := I) (x := x)
-  -- Combine.
   rw [hLHS_eq, hchain, hmf_to_fderiv]
-  -- Goal: ((fderiv ℝ Gtilde (φ x)).comp (mfderiv I 𝓘(ℝ,E) φ x)) (X x) = fderiv ℝ Gtilde (φ x) (X x)
   change (fderiv ℝ Gtilde (φ x)) ((mfderiv I 𝓘(ℝ, E) (extChartAt I x) x) (X x)) =
     fderiv ℝ Gtilde (φ x) (X x)
   rw [hφ_id]
@@ -672,7 +521,6 @@ theorem extDerivFun_apply_mlieBracket
   set ftilde : E → ℝ := f ∘ φ.symm with hftilde
   set Xchart : E → E := chartE_section_repr (I := I) x X ∘ φ.symm with hXchart
   set Ychart : E → E := chartE_section_repr (I := I) x Y ∘ φ.symm with hYchart
-  -- Standing memberships.
   have hsrc_chart : x ∈ (chartAt H x).source := mem_chart_source H x
   have hsrc_extChart : x ∈ φ.source := mem_extChartAt_source x
   have hxbase : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
@@ -682,7 +530,6 @@ theorem extDerivFun_apply_mlieBracket
     Filter.mem_of_superset (hint_open.mem_nhds hx_int) interior_subset
   have hrange_nhds : range I ∈ 𝓝 (φ x) :=
     Filter.mem_of_superset htgt_nhds (extChartAt_target_subset_range x)
-  -- Step 1: `ftilde` is `ContDiffAt 2` at `φ x`, hence `IsSymmSndFDerivAt`.
   have hftilde_cmd : ContMDiffWithinAt 𝓘(ℝ, E) 𝓘(ℝ) 2 ftilde (range I) (φ x) :=
     (contMDiffAt_iff_source_of_mem_source (n := (2 : WithTop ℕ∞))
       (x := x) (x' := x) (f := f) hsrc_chart).mp hf
@@ -690,12 +537,10 @@ theorem extDerivFun_apply_mlieBracket
     hftilde_cmd.contMDiffAt hrange_nhds
   have hftilde_cda : ContDiffAt ℝ 2 ftilde (φ x) :=
     contMDiffAt_iff_contDiffAt.mp hftilde_cmdAt
-  -- Step 2: Xchart, Ychart are DifferentiableAt at φ x.
   have hXchart_diff : DifferentiableAt ℝ Xchart (φ x) :=
     (mdifferentiableAt_section_iff_chartE_fderiv (I := I) x X hsrc_chart hxbase hx_int).mp hX
   have hYchart_diff : DifferentiableAt ℝ Ychart (φ x) :=
     (mdifferentiableAt_section_iff_chartE_fderiv (I := I) x Y hsrc_chart hxbase hx_int).mp hY
-  -- Step 3: identification at the basepoint: `Xchart (φ x) = X x`, `Ychart (φ x) = Y x`.
   have hxsymm : φ.symm (φ x) = x := φ.left_inv hsrc_extChart
   have htriv_eq :
       mfderiv I 𝓘(ℝ, E) (extChartAt I x) x =
@@ -718,12 +563,10 @@ theorem extDerivFun_apply_mlieBracket
     rw [hxsymm]
     show trivToE (I := I) x x (Y x) = Y x
     rw [htriv_id]; rfl
-  -- Step 4: chart-bracket form gives [X,Y]_x as the difference of Fréchet derivatives.
   have hbracket_chart :
       VectorField.mlieBracket I X Y x =
         fderiv ℝ Ychart (φ x) (X x) - fderiv ℝ Xchart (φ x) (Y x) :=
     mlieBracket_eq_chart_fderiv_diff x X Y hx_int hX hY
-  -- Step 5: Schwarz on `ftilde` at `φ x` with vector fields Xchart, Ychart.
   have hsymm : IsSymmSndFDerivAt ℝ ftilde (φ x) :=
     hftilde_cda.isSymmSndFDerivAt (by simp)
   have hftilde_lieBracket :
@@ -732,29 +575,18 @@ theorem extDerivFun_apply_mlieBracket
           fderiv ℝ (fun y => fderiv ℝ ftilde y (Xchart y)) (φ x) (Ychart (φ x)) :=
     VectorField.fderiv_apply_lieBracket_of_isSymmSndFDerivAt hftilde_cda hsymm
       hYchart_diff hXchart_diff
-  -- Step 6: identify LHS via chart-pulled-back scalar derivative.
   have hf_mdiff : MDiffAt f x := hf.mdifferentiableAt (by simp)
-  -- For a scalar function `g : M → ℝ`, `extDerivFun g x v = mfderiv I 𝓘(ℝ) g x v` (in ℝ
-  -- via the canonical `fromTangentSpace` collapse). Combine with `mfderiv_scalar_eq_chart_fderiv`.
-  -- Substep 6a: extDerivFun f x ([X,Y] x) = fderiv ftilde (φ x) ([X,Y] x).
   have hsub_X : (X x : E) = Xchart (φ x) := hXchart_at.symm
   have hsub_Y : (Y x : E) = Ychart (φ x) := hYchart_at.symm
-  -- Reformulate `extDerivFun` as a Fréchet derivative on the chart side.
   have hLHS_chart :
       extDerivFun f x (VectorField.mlieBracket I X Y x) =
         fderiv ℝ ftilde (φ x) (VectorField.mlieBracket I X Y x) := by
-    -- `extDerivFun f x v = (fromTangentSpace (f x)) (mfderiv f x v)`.
-    -- After `mfderiv_scalar_eq_chart_fderiv`, the RHS is `fromTangentSpace (f x) (fderiv ftilde
-    -- (φ x) (trivToE x x v))`. With `trivToE x x = id`, this collapses to the goal.
     show (NormedSpace.fromTangentSpace (f x))
         (mfderiv I 𝓘(ℝ) f x (VectorField.mlieBracket I X Y x)) =
       fderiv ℝ ftilde (φ x) (VectorField.mlieBracket I X Y x)
     rw [mfderiv_scalar_eq_chart_fderiv (I := I) x f hsrc_chart hx_int hf_mdiff
         (VectorField.mlieBracket I X Y x), htriv_id]
     rfl
-  -- Substep 6b: similarly for the two pieces in the RHS, via `mfderiv_scalar_along_eq_chart_fderiv`.
-  -- Identification: for a scalar `M → ℝ` function `g`, `extDerivFun g b v = mfderiv g b v`
-  -- definitionally (since `fromTangentSpace : TangentSpace 𝓘(ℝ,ℝ) y ≃L[ℝ] ℝ` is the identity).
   have hg_eq_Y : (fun b => extDerivFun f b (Y b)) = (fun b => mfderiv I 𝓘(ℝ) f b (Y b)) := by
     funext b
     change (NormedSpace.fromTangentSpace _) (mfderiv I 𝓘(ℝ) f b (Y b)) = _
@@ -767,11 +599,8 @@ theorem extDerivFun_apply_mlieBracket
       extDerivFun (fun b => extDerivFun f b (Y b)) x (X x) =
         fderiv ℝ (fun y => fderiv ℝ ftilde y (Ychart y)) (φ x) (Xchart (φ x)) := by
     rw [hg_eq_Y]
-    -- Goal: `extDerivFun (b ↦ mfderiv f b (Y b)) x (X x) = fderiv ...`.
     show (NormedSpace.fromTangentSpace _)
         (mfderiv I 𝓘(ℝ) (fun b => mfderiv I 𝓘(ℝ) f b (Y b)) x (X x)) = _
-    -- Apply the chart-form of mfderiv. The result is a real number; the outer
-    -- `NormedSpace.fromTangentSpace` is the identity coercion.
     have hkey := mfderiv_scalar_along_eq_chart_fderiv (X := X) (Y := Y) hx_int hf hY
     rw [hkey, hXchart_at]
     rfl
@@ -784,10 +613,7 @@ theorem extDerivFun_apply_mlieBracket
     have hkey := mfderiv_scalar_along_eq_chart_fderiv (X := Y) (Y := X) hx_int hf hX
     rw [hkey, hYchart_at]
     rfl
-  -- Combine.
   rw [hLHS_chart, hbracket_chart, hRHS_chart_Y, hRHS_chart_X]
-  -- LHS = fderiv ftilde (φ x) (fderiv Ychart (φ x) (X x) - fderiv Xchart (φ x) (Y x))
-  -- Identify the difference with `lieBracket ℝ Xchart Ychart (φ x)`.
   have hlie_unfold :
       VectorField.lieBracket ℝ Xchart Ychart (φ x) =
         fderiv ℝ Ychart (φ x) (Xchart (φ x)) - fderiv ℝ Xchart (φ x) (Ychart (φ x)) := rfl

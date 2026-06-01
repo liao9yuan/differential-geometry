@@ -71,8 +71,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Chart-α `m`-th coordinate projection on the model fibre `E` -/
-
 /-- The linear functional `v ↦ ((chartModelBasis E).repr v) m`, packaged as a
 continuous linear map `E →L[ℝ] ℝ`. -/
 private noncomputable def chartModelBasisProjE (m : Fin (Module.finrank ℝ E)) :
@@ -90,8 +88,6 @@ private noncomputable def chartModelBasisProjE (m : Fin (Module.finrank ℝ E)) 
   change ((LinearMap.proj m).comp ((chartModelBasis E).equivFun.toLinearMap)) v = _
   rw [LinearMap.comp_apply]
   simp [Module.Basis.equivFun]
-
-/-! ## The chart-α `m`-th coordinate of `(LC g) B^α_i b (B^α_i b)` -/
 
 /-- The chart-α `m`-th coordinate scalar function of `(LC g) B^α_i b (B^α_i b)`,
 defined on the chart-α trivialization base set via the chart-α basis family,
@@ -150,8 +146,6 @@ private lemma lcFrameSelfCoord_eq_clmAt_proj
       (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b
       ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b))) h
 
-/-! ## Expansion of `(LC g) B^α_i b (B^α_i b)` in the chart-α coordinate basis -/
-
 /-- **Expansion of `(LC g) B^α_i b (B^α_i b)` in the chart-α coordinate basis at
 a chart-α Levi-Civita good-set point.** -/
 private lemma lcFrameSelf_eq_lcFrameSelfCoord_sum
@@ -177,8 +171,6 @@ private lemma lcFrameSelf_eq_lcFrameSelfCoord_sum
   rw [lcFrameSelfCoord_of_mem (I := I) (M := M) g α i m hb_base]
   rw [chartBasisFamily_apply (I := I) α hb_base m]
 
-/-! ## The pullback of `lcFrameSelfCoord` to `chartTargetEuclid α` -/
-
 /-- The pullback of the chart-α `m`-coord scalar `lcFrameSelfCoord g α i m` to
 the Euclidean chart target, via `b ↦ (extChartAt I α).symm (toEuclidean.symm y)`. -/
 private noncomputable def lcFrameSelfCoordPullback
@@ -203,17 +195,11 @@ private lemma lcFrameSelfCoordPullback_contDiffOn
     ContDiffOn ℝ ∞ (lcFrameSelfCoordPullback (I := I) (M := M) g α i m)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- Sub.4's headline statement.
   have h_sub4 :=
     leviCivita_chartFrame_self_chartCoord_pullback_contDiffOn_chartTarget
       (I := I) (M := M) g α i m
-  -- Both functions agree pointwise: each is the chart-α `m`-th coord
-  -- (`((chartModelBasis E).repr v) m`) of the same tangent vector image under
-  -- `(trivα).clmAt b`.
   refine h_sub4.congr (fun y _ => ?_)
   rfl
-
-/-! ## The headline coefficients -/
 
 /-- The principal coefficient of the T₀-linear expansion: indexed by
 `(I', J', m)`, supported on `(I', J') = (Idx, Jdx)` only. -/
@@ -278,8 +264,6 @@ private lemma chartFrameTraceΓZerothCoeff_contDiffOn
   refine ContDiffOn.sum (fun m _ => ?_)
   exact (lcFrameSelfCoordPullback_contDiffOn (I := I) (M := M) g α i m).mul
     (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M) g r s α m Idx I' Jdx J')
-
-/-! ## Per-summand pointwise step -/
 
 /-- For a chart-α Levi-Civita good-set point `b` and `i : Fin n`, the chart-α
 `(Idx, Jdx)` raw scalar of one chart-frame trace summand
@@ -379,7 +363,6 @@ private lemma chart_α_proj_covRS_T₀_at_chartBasisVec_eq_euclidPartial_plus_lo
     (extChartAt I α).left_inv hb_src
   have hb_eq : (extChartAt I α).symm ((toEuclidean (E := E)).symm y) = b := by
     rw [hsymm_te, hleft_inv]
-  -- Replace the bundled covariant derivative with the chart-frame one.
   have hagree : tensorCovDerivAt (I := I) (M := M) g r s T₀ b
         (chartBasisVecFiber (I := I) α m b) =
       chartTensorRSCovariantDerivative (I := I) r s g α T₀.toSection
@@ -397,13 +380,10 @@ private lemma chart_α_proj_covRS_T₀_at_chartBasisVec_eq_euclidPartial_plus_lo
       (chartBasisVecFiber (I := I) α m b)
     exact htdef.symm.trans hagree
   rw [hLHS_eq]
-  -- Apply B.1.
   have hB1 := covDerivComponent_eq_euclidPartial_add_lowerOrder
     (I := I) (M := M) g r s T₀ α m Idx Jdx hy_mem
   rw [hb_eq] at hB1
   exact hB1
-
-/-! ## The headline T₀-linear identity -/
 
 /-- **Headline.** The chart-α `(Idx, Jdx)` raw scalar component of the
 chart-frame trace Γ-correction `chartFrameTraceΓCorrection g r s α T₀ Idx Jdx b`
@@ -467,7 +447,6 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
       (extChartAt I α).left_inv hb_src
     have hb_eq : (extChartAt I α).symm ((toEuclidean (E := E)).symm y) = b := by
       rw [hsymm_te, hleft_inv]
-    -- Step 1: unfold `chartFrameTraceΓCorrection` and apply per-summand expansion.
     unfold chartFrameTraceΓCorrection
     have hStep1 :
         (∑ i : Fin (Module.finrank ℝ E),
@@ -494,7 +473,6 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
       exact chart_α_proj_lcFrameSelfTraceSummand_eq_coord_sum
         (I := I) (M := M) g r s α T₀ Idx Jdx i hb
     rw [hStep1]
-    -- Step 2: apply B.1 inside each summand.
     have hStep2 :
         (∑ i : Fin (Module.finrank ℝ E),
           ∑ m : Fin (Module.finrank ℝ E),
@@ -518,7 +496,6 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
       rw [chart_α_proj_covRS_T₀_at_chartBasisVec_eq_euclidPartial_plus_lower
         (I := I) (M := M) g r s α T₀ m Idx Jdx hb]
     rw [hStep2]
-    -- Step 3: identify `lcFrameSelfCoord g α i m b = lcFrameSelfCoordPullback g α i m y`.
     have hcoord_eq : ∀ i m : Fin (Module.finrank ℝ E),
         lcFrameSelfCoord (I := I) (M := M) g α i m b =
         lcFrameSelfCoordPullback (I := I) (M := M) g α i m y := by
@@ -547,7 +524,6 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
       refine Finset.sum_congr rfl (fun m _ => ?_)
       rw [hcoord_eq i m]
     rw [hStep3]
-    -- Step 4: distribute multiplication, splitting each summand.
     have hStep4 :
         (∑ i : Fin (Module.finrank ℝ E),
           ∑ m : Fin (Module.finrank ℝ E),
@@ -572,7 +548,6 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
       refine Finset.sum_congr rfl (fun m _ => ?_)
       ring
     rw [hStep4]
-    -- Step 5: principal block matches `Σ_{I',J',m} Coeff_1 · euclidPartial m`.
     have hPrincipal_block_eq :
         (∑ i : Fin (Module.finrank ℝ E),
           ∑ m : Fin (Module.finrank ℝ E),
@@ -588,7 +563,6 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
                 euclidPartial (E := E) m
                   (chartPushedRaw I α
                     (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J')) y := by
-      -- Swap `Σ_i Σ_m` to `Σ_m Σ_i`, collect `Σ_i` into the principal coefficient.
       rw [Finset.sum_comm]
       have hLHS :
           (∑ m : Fin (Module.finrank ℝ E),
@@ -606,7 +580,6 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
         refine Finset.sum_congr rfl (fun m _ => ?_)
         rw [Finset.sum_mul]
       rw [hLHS]
-      -- The RHS collapses to the `(I', J') = (Idx, Jdx)` summand.
       have hRHS :
           (∑ I' : Fin r → Fin (Module.finrank ℝ E),
             ∑ J' : Fin s → Fin (Module.finrank ℝ E),
@@ -639,8 +612,6 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
           simp [hIne]
         · intro hI; exact absurd (Finset.mem_univ _) hI
       rw [hRHS]
-    -- Step 6: rewrite `covDerivLowerOrderTerm = Σ_{I',J'} coeff · raw` and then
-    -- collect the zeroth block as `Σ_{I',J'} Coeff_0 · chartPushedRaw`.
     have hZeroth_block_eq :
         (∑ i : Fin (Module.finrank ℝ E),
           ∑ m : Fin (Module.finrank ℝ E),
@@ -653,8 +624,6 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
               chartPushedRaw I α
                 (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J')
                 y := by
-      -- Expand `covDerivLowerOrderTerm` and substitute `b' = b` via `hb_eq` for
-      -- the raw factor.
       have hLowerEq : ∀ m,
           covDerivLowerOrderTerm (I := I) (M := M) g r s T₀ α m Idx Jdx y =
           ∑ I' : Fin r → Fin (Module.finrank ℝ E),
@@ -665,13 +634,10 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
         intro m
         rw [covDerivComponent_lowerOrder_eq_linearCombination
           (I := I) (M := M) g r s T₀ α m Idx Jdx y]
-        -- The RHS form uses `(p : (Fin r → ...) × (Fin s → ...))` summed via
-        -- `Finset.sum_product'`. We rewrite the raw factor via `hb_eq`.
         rw [← Finset.sum_product']
         refine Finset.sum_congr rfl (fun p _ => ?_)
         rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α
           (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α p.1 p.2) hy_mem]
-      -- Substitute into the LHS double sum.
       have hSubst :
           (∑ i : Fin (Module.finrank ℝ E),
             ∑ m : Fin (Module.finrank ℝ E),
@@ -693,9 +659,6 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
         refine Finset.sum_congr rfl (fun I' _ => ?_)
         rw [Finset.mul_sum]
       rw [hSubst]
-      -- Now reorder: `Σ_i Σ_m Σ_{I'} Σ_{J'}` → `Σ_{I'} Σ_{J'} Σ_i Σ_m`.
-      -- Also factor `chartPushedRaw` outside `Σ_i Σ_m`.
-      -- Then collapse `Σ_i Σ_m W · coeff` into `Coeff_0`.
       have hReorder :
           (∑ i : Fin (Module.finrank ℝ E),
             ∑ m : Fin (Module.finrank ℝ E),
@@ -717,9 +680,6 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
                       chartPushedRaw I α
                         (tensorChartComponentRaw (I := I) (M := M)
                           g r s T₀ α I' J') y) := by
-        -- Strategy: bring Σ_{I'} Σ_{J'} (in that order) to the front.
-        -- Currently: Σ_i Σ_m Σ_{I'} Σ_{J'}. Use four `Finset.sum_comm` swaps.
-        -- 1. Inside Σ_i: swap Σ_m and Σ_{I'} → Σ_i Σ_{I'} Σ_m Σ_{J'}.
         have h1 :
             (∑ i : Fin (Module.finrank ℝ E),
               ∑ m : Fin (Module.finrank ℝ E),
@@ -744,9 +704,7 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
           refine Finset.sum_congr rfl (fun i _ => ?_)
           rw [Finset.sum_comm]
         rw [h1]
-        -- 2. Outer swap Σ_i and Σ_{I'} → Σ_{I'} Σ_i Σ_m Σ_{J'}.
         rw [Finset.sum_comm]
-        -- 3. Inside Σ_{I'} Σ_i: swap Σ_m and Σ_{J'} → Σ_{I'} Σ_i Σ_{J'} Σ_m.
         have h3 :
             (∑ I' : Fin r → Fin (Module.finrank ℝ E),
               ∑ i : Fin (Module.finrank ℝ E),
@@ -772,18 +730,12 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
           refine Finset.sum_congr rfl (fun i _ => ?_)
           rw [Finset.sum_comm]
         rw [h3]
-        -- 4. Inside Σ_{I'}, swap Σ_i and Σ_{J'} → Σ_{I'} Σ_{J'} Σ_i Σ_m.
         refine Finset.sum_congr rfl (fun I' _ => ?_)
         rw [Finset.sum_comm]
       rw [hReorder]
-      -- Now factor `chartPushedRaw` outside `Σ_i Σ_m` and identify the
-      -- result with `Coeff_0 · chartPushedRaw`.
       refine Finset.sum_congr rfl (fun I' _ => ?_)
       refine Finset.sum_congr rfl (fun J' _ => ?_)
-      -- LHS inner: Σ_i Σ_m W · (coeff · raw).
-      -- RHS inner: Coeff_0 · raw = (Σ_i Σ_m W · coeff) · raw.
       unfold chartFrameTraceΓZerothCoeff
-      -- Rewrite as `(Σ_i Σ_m W · coeff) · raw` by extracting raw.
       rw [Finset.sum_mul]
       refine Finset.sum_congr rfl (fun i _ => ?_)
       rw [Finset.sum_mul]

@@ -74,8 +74,6 @@ open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalLimit
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -84,8 +82,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## Leibniz rule for `Δ_g` on a product of smooth scalars -/
 
 /-- Pointwise gradient Leibniz rule, in the smooth-witness form: for
 smooth `φ` and `v`,
@@ -100,10 +96,6 @@ theorem gradFun_smul_smooth_eq_pointwise
   classical
   have hρ_md := hφ.mdifferentiable (by simp) x
   have hu_md := hv.mdifferentiable (by simp) x
-  -- We follow the proof from EquivalenceReverse.gradFun_mul_pointwise.
-  -- Use the injectivity of metricFlatLinear: it suffices to show the two
-  -- sides have the same metric flat (i.e. same inner product against any
-  -- test tangent vector).
   apply DifferentialGeometry.Integral.DivergenceTheorem.metricFlatLinear_injective
     (I := I) g x
   ext w
@@ -111,7 +103,6 @@ theorem gradFun_smul_smooth_eq_pointwise
       (gradFun (I := I) g (fun y : M => φ y * v y) x) w =
     g.inner x (φ x • gradFun (I := I) g v x + v x • gradFun (I := I) g φ x) w
   rw [inner_gradFun (I := I) g _ x w]
-  -- mfderiv (φ * v) x w = φ(x) * mfderiv v x w + v(x) * mfderiv φ x w (product rule).
   have h_fun_eq : (fun y : M => φ y * v y) = φ * v := by funext y; rfl
   set d_φ : TangentSpace I x →L[ℝ] ℝ := mfderiv I 𝓘(ℝ, ℝ) φ x with hd_φ_def
   set d_v : TangentSpace I x →L[ℝ] ℝ := mfderiv I 𝓘(ℝ, ℝ) v x with hd_v_def
@@ -236,12 +227,6 @@ theorem Δ_g_smul_eq
   rw [h_symm]
   ring
 
-/-! ## Pointwise Leibniz expansion of `(pouScalar α v).oneSubLapClassical`
-
-The smooth function `(pouScalar α v).oneSubLapClassical.toFun = ρα·v - Δ_g(ρα·v)`
-expands via the Leibniz rule for `Δ_g` to the pointwise sum
-`ρα · v.oneSubLapClassical - 2 g(grad ρα, grad v) - v · Δρα`. -/
-
 /-- Pointwise expression of `(pouScalar α v).oneSubLapClassical.toFun`
 via the Leibniz expansion: for any `x : M`,
 ```
@@ -297,13 +282,6 @@ theorem pouScalar_oneSubLapClassical_pointwise_leibniz
   rw [h_lap_v_eq]
   ring
 
-/-! ## A.e.-`μ_g` agreement of `fHLeibniz`-coeFn with `(pouScalar α v).oneSubLap`
-
-The `M → ℝ` representative of the Lp class `fHLeibniz (smoothToH1Compl v) _`
-agrees a.e.-`riemannianVolumeMeasure g` with the smooth pointwise function
-`ρα · v.oneSubLap - 2 g(grad ρα, grad v) - v · Δρα`, hence with the smooth
-function `(pouScalar α v).oneSubLapClassical.toFun` by pointwise Leibniz. -/
-
 /-- The `M → ℝ` representative of `fHLeibniz (smoothToH1Compl v) _` is
 a.e.-`riemannianVolumeMeasure g` equal to the smooth pointwise Leibniz
 combination
@@ -326,13 +304,11 @@ private lemma fHLeibniz_smoothCase_coeFn_aeEq
         v.toFun x *
           Δ_g (I := I) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff x) := by
   classical
-  -- Identify the Lp class via `fHLeibniz_smoothToH1Compl`.
   rw [fHLeibniz_smoothToH1Compl (I := I) (M := M) g α v]
   set ρα : C^∞⟮I, M; ℝ⟯ := chartAtlasPOU I M α with hρα_def
   set ρα_fun : M → ℝ := (ρα : M → ℝ) with hρα_fun_def
   set Δρα : C^∞⟮I, M; ℝ⟯ := laplacianOfChartPOU (I := I) (M := M) g α
     with hΔρα_def
-  -- Linearity of Lp coercion: ⇑(a - b - c) =ᵐ ⇑a - ⇑b - ⇑c.
   have h_sub1 := MeasureTheory.Lp.coeFn_sub
       ((smoothMulLp (I := I) (M := M) g ρα
           (smoothToLp (I := I) (M := M) g v.oneSubLapClassical)
@@ -343,7 +319,6 @@ private lemma fHLeibniz_smoothCase_coeFn_aeEq
       (smoothMulLp (I := I) (M := M) g ρα
         (smoothToLp (I := I) (M := M) g v.oneSubLapClassical))
       ((2 : ℝ) • gradInnerSmooth (I := I) (M := M) g ρα v)
-  -- Pointwise unfoldings of the three pieces.
   have h_mul1 := smoothMulLp_apply_coeFn (I := I) (M := M) g ρα
     (smoothToLp (I := I) (M := M) g v.oneSubLapClassical)
   have h_mul2 := smoothMulLp_apply_coeFn (I := I) (M := M) g Δρα
@@ -363,16 +338,6 @@ private lemma fHLeibniz_smoothCase_coeFn_aeEq
     MemLp.coeFn_toLp v.memLp_two
   filter_upwards [h_sub1, h_sub2, h_mul1, h_mul2, h_smul, h_grad, h_smoothToLp1,
     h_smoothToLp2] with x hx1 hx2 hx_mul1 hx_mul2 hx_smul hx_grad hx_lp1 hx_lp2
-  -- hx1 : ⇑(a - b - c) x = ⇑(a - b) x - ⇑c x  (Pi.sub_apply form)
-  -- hx2 : ⇑(a - b) x = ⇑a x - ⇑b x  (Pi.sub_apply form)
-  -- hx_mul1 : ⇑(smoothMulLp ρα h) x = ρα x * ⇑h x
-  -- hx_mul2 : ⇑(smoothMulLp Δρα h) x = Δρα x * ⇑h x
-  -- hx_smul : ⇑(2 • g) x = (2 • ⇑g) x = 2 • (⇑g x)  (Pi.smul_apply form)
-  -- hx_grad : ⇑(gradInnerSmooth ρα v) x = g.inner x (gradFun ρα x) (gradFun v.toFun x)
-  -- hx_lp1 : ⇑(smoothToLp v.oneSubLap) x = v.oneSubLap.toFun x
-  -- hx_lp2 : ⇑(smoothToLp v) x = v.toFun x
-  -- Chain: LHS = ⇑(a - b - c) x = ⇑(a-b) x - ⇑c x = ⇑a x - ⇑b x - ⇑c x.
-  -- Substitute hx_mul1, hx_smul ∘ hx_grad, hx_mul2 ∘ hx_lp2.
   rw [hx1]
   change ((smoothMulLp (I := I) (M := M) g ρα
             (smoothToLp (I := I) (M := M) g v.oneSubLapClassical) -

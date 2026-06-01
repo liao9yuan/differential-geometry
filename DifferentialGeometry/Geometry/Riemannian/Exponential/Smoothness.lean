@@ -84,8 +84,6 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Chart-coordinate `C^1` smoothness of the flow's `v`-slice -/
-
 section ChartCoordSlice
 
 variable [I.Boundaryless] [CompleteSpace E]
@@ -129,8 +127,6 @@ lemma contDiffAt_chartFlow_slice_fst_zero
 
 end ChartCoordSlice
 
-/-! ## Manifold-valued candidate map -/
-
 section ManifoldCandidate
 
 variable [I.Boundaryless]
@@ -158,8 +154,6 @@ lemma chartFlowCandidate_zero_at_initial
   exact (extChartAt I p).left_inv (mem_extChartAt_source (I := I) p)
 
 end ManifoldCandidate
-
-/-! ## Chart-coordinate `C^1` smoothness of the manifold-valued candidate -/
 
 section CandidateChartCoord
 
@@ -238,11 +232,6 @@ lemma chartFlowCandidate_chart_contDiffAt_zero_at_origin
 
 end CandidateChartCoord
 
-/-! ## Headline packaging
-
-We package the V.4 chart-pushed flow's substantive analytic content
-together with the manifold-valued candidate. -/
-
 section Headline
 
 variable [I.Boundaryless] [CompleteSpace E]
@@ -300,14 +289,6 @@ theorem exists_chartFlowCandidate_chart_contDiffAt_zero
       (I := I) (p := p) (Φ := Φ) (ρ := ρ) (T := T) hρ_pos hT_pos hinit hcd
   · exact chartFlowCandidate_zero_at_initial (I := I) (Φ := Φ) (p := p) hinit
 
-/-! ### Manifold-side `ContMDiffAt` upgrade
-
-We upgrade the chart-coordinate `C^1` smoothness to a manifold-side
-`ContMDiffAt 𝓘(ℝ, E) I 1` at `v = 0`. The continuity-at-`0` ingredient
-follows from the continuity of `(extChartAt I p).symm` at
-`extChartAt I p p` combined with the slice's first-coordinate
-continuity at `v = 0`. -/
-
 /-- **Continuity of the manifold-valued candidate at `v = 0`.** -/
 lemma chartFlowCandidate_continuousAt_zero_at_origin
     {p : M} {Φ : (E × E) × ℝ → E × E} {ρ T : ℝ}
@@ -321,7 +302,6 @@ lemma chartFlowCandidate_continuousAt_zero_at_origin
   classical
   set x₀ : E := extChartAt I p p with hx₀_def
   have ht0 : (0 : ℝ) ∈ Set.Ioo (-T) T := ⟨by linarith, hT⟩
-  -- Continuity of the slice's first coordinate at v = 0.
   have hslice :
       ContDiffAt ℝ 1 (fun v : E => (Φ (((x₀, v) : E × E), (0 : ℝ))).1) (0 : E) :=
     contDiffAt_chartFlow_slice_fst_zero (Φ := Φ) (x₀ := x₀)
@@ -329,28 +309,18 @@ lemma chartFlowCandidate_continuousAt_zero_at_origin
   have hcont_slice : ContinuousAt
       (fun v : E => (Φ (((x₀, v) : E × E), (0 : ℝ))).1) (0 : E) :=
     hslice.continuousAt
-  -- Value of slice at v = 0 is x₀.
   have hval0 : (Φ (((x₀, (0 : E)) : E × E), (0 : ℝ))).1 = x₀ := by
     rw [hinit]
-  -- Continuity of `(extChartAt I p).symm` at x₀.
   have hsymm_cont : ContinuousAt (extChartAt I p).symm x₀ :=
     continuousAt_extChartAt_symm (I := I) p
-  -- Composition. We need `(extChartAt I p).symm` continuous at the slice's value.
-  -- The slice value at v=0 is x₀, so `hsymm_cont` says `(extChartAt I p).symm`
-  -- is continuous at x₀; we lift through composition with the slice.
   have hcont_slice' : ContinuousAt
       (fun v : E => (Φ (((x₀, v) : E × E), (0 : ℝ))).1) (0 : E) := hcont_slice
-  -- ContinuousAt.comp: given `g` cont at `f x` and `f` cont at `x`, `g ∘ f` cont at `x`.
-  -- ContinuousAt.comp: given `g` cont at `f x` and `f` cont at `x`, `g ∘ f` cont at `x`.
-  -- We use the fact that the slice's value at v=0 is x₀, so chart-symm is continuous there.
   have hsymm_at_x₀ : ContinuousAt (fun y : E => (extChartAt I p).symm y) x₀ := hsymm_cont
-  -- Build the composition directly.
   have hcomp_step : ContinuousAt
       (fun v : E => (extChartAt I p).symm
         ((fun v' : E => (Φ (((x₀, v') : E × E), (0 : ℝ))).1) v))
       (0 : E) := by
     refine ContinuousAt.comp ?_ hcont_slice'
-    -- Goal: ContinuousAt _ ((slice's value at 0)).
     show ContinuousAt (extChartAt I p).symm (Φ (((x₀, (0 : E)) : E × E), (0 : ℝ))).1
     rw [hval0]
     exact hsymm_at_x₀
@@ -371,45 +341,28 @@ lemma chartFlowCandidate_contMDiffAt_zero_at_origin
   classical
   rw [contMDiffAt_iff]
   refine ⟨?_, ?_⟩
-  · -- Continuity at v = 0.
-    exact chartFlowCandidate_continuousAt_zero_at_origin
+  · exact chartFlowCandidate_continuousAt_zero_at_origin
       (I := I) (p := p) (Φ := Φ) (ρ := ρ) (T := T) hρ hT hinit hcd
-  · -- ContDiffWithinAt ℝ 1 (extChartAt I (f 0) ∘ f ∘ (extChartAt 𝓘(ℝ,E) 0).symm) (range 𝓘(ℝ,E))
-    --   (extChartAt 𝓘(ℝ,E) 0 0).
-    -- The source-side chart `extChartAt 𝓘(ℝ,E) 0` is the identity on E, `range 𝓘(ℝ,E) = univ`,
-    -- so this reduces to `ContDiffAt ℝ 1 (extChartAt I (f 0) ∘ f) 0`.
-    -- The value `f 0 = p` via `chartFlowCandidate_zero_at_initial`, so target chart is `extChartAt I p`.
-    have hval : chartFlowCandidate (I := I) Φ p 0 (0 : E) = p :=
+  · have hval : chartFlowCandidate (I := I) Φ p 0 (0 : E) = p :=
       chartFlowCandidate_zero_at_initial (I := I) (Φ := Φ) (p := p) hinit
-    -- Goal after `rw [contMDiffAt_iff]`:
-    -- ContDiffWithinAt ℝ 1 (extChartAt I (chartFlowCandidate Φ p 0 0) ∘ chartFlowCandidate Φ p 0
-    --   ∘ (extChartAt 𝓘(ℝ,E) 0).symm) (range 𝓘(ℝ,E)) (extChartAt 𝓘(ℝ,E) 0 0).
-    -- Rewrite using hval and simplify extChartAt 𝓘(ℝ,E).
     rw [hval]
-    -- Now: ContDiffWithinAt ℝ 1 (extChartAt I p ∘ chartFlowCandidate Φ p 0 ∘ (extChartAt 𝓘(ℝ,E) 0).symm)
-    --   (range 𝓘(ℝ,E)) (extChartAt 𝓘(ℝ,E) 0 0).
     have hchart_cd :
         ContDiffAt ℝ 1
           (fun v : E => extChartAt I p (chartFlowCandidate (I := I) Φ p 0 v))
           (0 : E) :=
       chartFlowCandidate_chart_contDiffAt_zero_at_origin
         (I := I) (p := p) (Φ := Φ) (ρ := ρ) (T := T) hρ hT hinit hcd
-    -- Convert ContDiffAt → ContDiffWithinAt with range 𝓘(ℝ,E) = univ.
     have hsimp_range : (range (𝓘(ℝ, E) : ModelWithCorners ℝ E E)) = Set.univ :=
       ModelWithCorners.range_eq_univ _
     have hsimp_base : (extChartAt (𝓘(ℝ, E) : ModelWithCorners ℝ E E) (0 : E)) (0 : E) =
         (0 : E) := by simp
     rw [hsimp_base, hsimp_range]
-    -- Goal: ContDiffWithinAt ℝ 1 (extChartAt I p ∘ chartFlowCandidate Φ p 0 ∘
-    --   (extChartAt 𝓘(ℝ,E) 0).symm) univ 0.
     have hsymm_id : ∀ v : E, (extChartAt (𝓘(ℝ, E) : ModelWithCorners ℝ E E) (0 : E)).symm v = v := by
       intro v; simp
-    -- The chart-symm on the source is the identity, so the composition simplifies.
     change ContDiffWithinAt ℝ 1
         (extChartAt I p ∘ chartFlowCandidate (I := I) Φ p 0 ∘
           (extChartAt (𝓘(ℝ, E) : ModelWithCorners ℝ E E) (0 : E)).symm)
         Set.univ (0 : E)
-    -- Convert from composition notation.
     have hgoal_eq :
         (extChartAt I p ∘ chartFlowCandidate (I := I) Φ p 0 ∘
           (extChartAt (𝓘(ℝ, E) : ModelWithCorners ℝ E E) (0 : E)).symm) =

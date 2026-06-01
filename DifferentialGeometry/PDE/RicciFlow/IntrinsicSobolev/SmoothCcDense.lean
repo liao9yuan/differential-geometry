@@ -52,11 +52,6 @@ theorem smoothCcTensor_denseRange_toHs
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     DenseRange
       (SmoothCcTensor.toHs (g := g) (r := r) (s := s) (k := k)) := by
-  -- `SmoothCcTensor.toHs k T = ((⟨T⟩ : SmoothCcTensorHs g r s k)
-  --   : TensorPouSobolevHilbert g r s k)`, i.e. the wrapping
-  --   `T ↦ ⟨T⟩` composed with the completion coercion. The wrapping is
-  --   surjective, so the composition's range equals the range of the
-  --   coercion, which is dense by `UniformSpace.Completion.denseRange_coe`.
   have hwrap_surj :
       Function.Surjective
         (fun T : SmoothCcTensor g r s =>

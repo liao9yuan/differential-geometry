@@ -77,27 +77,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-These are required only to keep the ambient instance environment consistent
-with the imported files; they do not leak onto the public signature. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The `(r, s)`-tensor bundle of `M`
-
-The mixed `(r, s)`-tensor bundle has model fibre `TensorRSModel r s ℝ E` and
-fibre `TensorRSSpace r s I x` at `x : M`. Its fibre-bundle, vector-bundle and
-`C^∞`-vector-bundle structures are the ones declared in `Tensor.RSTensor.Defs`.
-
-The trivialisation at a base point `α : M` is
-`trivializationAt (TensorRSModel r s ℝ E) (fun y : M => TensorRSSpace r s I y) α`.
-It is a member of the trivialisation atlas, and — since the bundle is a vector
-bundle — it is linear in the fibres, so the bundle coordinate-change map
-`Trivialization.coordChangeL` between two such trivialisations is available. -/
 
 /-- The trivialisation of the `(r, s)`-tensor bundle centred at `α : M`.
 
@@ -128,11 +111,6 @@ private lemma rsTriv_baseSet (r s : ℕ) (α : M) :
   rw [Set.inter_self]
   rfl
 
-/-! ## The trivialisation projection identified through `tensorTrivProj`
-
-`tensorTrivProj g r s S α x` is, by definition, the fibre projection of the
-section value `S.toSection x` through the trivialisation centred at `α`. -/
-
 /-- The fibre projection through the trivialisation centred at `α` recovers
 `tensorTrivProj`. -/
 private lemma tensorTrivProj_eq_clmAt
@@ -141,15 +119,6 @@ private lemma tensorTrivProj_eq_clmAt
     tensorTrivProj (I := I) (M := M) g r s S α x =
       (rsTriv (E := E) (I := I) (M := M) r s α).continuousLinearMapAt ℝ x
         (S.toSection x) := rfl
-
-/-! ## The bundle coordinate-change identity for the trivialisation projection
-
-The fibre projections of two trivialisations are related, on the overlap of
-their base sets, by the bundle coordinate-change continuous linear map. The
-proof unfolds `Trivialization.coordChangeL` to the composition of the inverse
-fibre projection of the first trivialisation with the fibre projection of the
-second; the inverse fibre projection cancels against the fibre projection
-inside `tensorTrivProj`. -/
 
 /-- Applying the coordinate-change map of two trivialisations equals the
 fibre projection of the second composed with the inverse fibre projection of
@@ -212,22 +181,11 @@ private lemma tensorTrivProj_chartTransition
     tensorRSBundle_vector r s
   have hxγ' : x ∈ (rsTriv (E := E) (I := I) (M := M) r s γ).baseSet := by
     rw [rsTriv_baseSet]; exact hxγ
-  -- The coordinate-change map of `tensorTrivProj … γ x` unfolds to the
-  -- `α`-projection of the `γ`-inverse-projection of the `γ`-projection.
   rw [tensorTrivProj_eq_clmAt (I := I) (M := M) g r s S γ x,
     coordChangeL_apply_eq_clmAt_symmL (E := E) (I := I) (M := M) r s γ α
       hxγ hxα]
-  -- The `γ`-inverse-projection cancels the `γ`-projection (centre membership).
   rw [Bundle.Trivialization.symmL_continuousLinearMapAt _ hxγ' (S.toSection x)]
   exact (tensorTrivProj_eq_clmAt (I := I) (M := M) g r s S α x)
-
-/-! ## The smooth transition-coefficient family
-
-For a fixed component multi-index `P₀` the transition coefficient indexed by a
-multi-index pair `Q` is the `P₀`-component, in the chart-frame basis of
-`TensorRSModel r s ℝ E`, of the coordinate-change image of the `Q`-th
-chart-frame basis element. As `x` ranges over the chart overlap this is a
-scalar function `M → ℝ`. -/
 
 /-- The transition-coefficient function: the `P₀`-component of the bundle
 coordinate-change image of the `Q`-th chart-frame basis element of
@@ -252,12 +210,6 @@ def transitionCoeff
     (((rsTriv (E := E) (I := I) (M := M) r s γ).coordChangeL ℝ
         (rsTriv (E := E) (I := I) (M := M) r s α) x)
       (tensorChartBasisElement (E := E) r s Q.1 Q.2))
-
-/-! ### Smoothness of the bundle coordinate change on the chart overlap
-
-The bundle coordinate change `x ↦ coordChangeL ℝ (triv γ) (triv α) x` is `C^∞`
-on the intersection of the trivialisation base sets — i.e. on the chart
-overlap — because the `(r, s)`-tensor bundle is a `C^∞` vector bundle. -/
 
 /-- The bundle coordinate change of the `(r, s)`-tensor-bundle trivialisations
 is `C^∞` on the chart overlap, as a map into the continuous linear
@@ -307,9 +259,7 @@ lemma contMDiffOn_transitionCoeff
     tensorRSModel_normedAddCommGroup r s
   letI : NormedSpace ℝ (TensorRSModel r s ℝ E) :=
     tensorRSModel_normedSpace r s
-  -- The coordinate change is `C^∞` as a map into endomorphisms of the model.
   have hcoord := contMDiffOn_rsCoordChangeL (E := E) (I := I) (M := M) r s γ α
-  -- Apply it at the constant chart-frame basis element `Q`.
   have hcoord_app : ContMDiffOn I
       (modelWithCornersSelf ℝ (TensorRSModel r s ℝ E)) ∞
       (fun x : M =>
@@ -319,19 +269,12 @@ lemma contMDiffOn_transitionCoeff
             (tensorChartBasisElement (E := E) r s Q.1 Q.2))
       ((chartAt H γ).source ∩ (chartAt H α).source) :=
     hcoord.clm_apply contMDiffOn_const
-  -- Compose with the constant component-projection continuous linear map.
   have hproj : ContMDiff
       (modelWithCornersSelf ℝ (TensorRSModel r s ℝ E))
       (modelWithCornersSelf ℝ ℝ) ∞
       (tensorChartComponentProjection (E := E) r s P₀.1 P₀.2) :=
     (tensorChartComponentProjection (E := E) r s P₀.1 P₀.2).contMDiff
   exact hproj.comp_contMDiffOn hcoord_app
-
-/-! ## The transformation law
-
-The headline. On the chart overlap, the raw component in the chart at `α` is a
-finite linear combination, with coefficients smooth on the overlap, of the raw
-components in the chart at `γ`. -/
 
 /-- **Tensor transformation law for raw chart-frame components, with explicit
 coefficients.** For a smooth compactly-supported `(r, s)`-tensor section `S`,
@@ -357,24 +300,15 @@ theorem tensorChartComponentRaw_eq_transitionCoeff_sum
   letI : NormedSpace ℝ (TensorRSModel r s ℝ E) :=
     tensorRSModel_normedSpace r s
   obtain ⟨hxγ, hxα⟩ := hx
-  -- The raw `α`-component is the projection of the `α`-trivialisation image.
   rw [tensorChartComponentRaw_def (I := I) (M := M) g r s S α P₀.1 P₀.2]
-  -- The `α`-trivialisation image is the coordinate-change image of the
-  -- `γ`-trivialisation image (bundle transformation law).
   rw [tensorTrivProj_chartTransition (E := E) (I := I) (M := M)
     g r s S γ α hxγ hxα]
-  -- Abbreviate the bundle coordinate-change continuous linear equivalence.
   set L : TensorRSModel r s ℝ E ≃L[ℝ] TensorRSModel r s ℝ E :=
     (rsTriv (E := E) (I := I) (M := M) r s γ).coordChangeL ℝ
       (rsTriv (E := E) (I := I) (M := M) r s α) x with hL_def
-  -- Expand the `γ`-trivialisation image in the chart-frame basis.
   have hsum := tensorRSModel_eq_sum_basis (E := E) r s
     (tensorTrivProj (I := I) (M := M) g r s S γ x)
-  -- Rewrite the argument of `L` by the basis expansion, then push `L`
-  -- and the projection through the finite double sum by linearity.
   conv_lhs => rw [hsum]
-  -- The double sum over `(Idx, Jdx)` is reindexed as a single sum over the
-  -- multi-index pair type `TensorCompIdx r s`.
   rw [show (∑ Idx : Fin r → Fin (Module.finrank ℝ E),
             ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
               tensorChartComponentProjection (E := E) r s Idx Jdx
@@ -391,16 +325,11 @@ theorem tensorChartComponentRaw_eq_transitionCoeff_sum
         tensorChartComponentProjection (E := E) r s Idx Jdx
             (tensorTrivProj (I := I) (M := M) g r s S γ x) •
           tensorChartBasisElement (E := E) r s Idx Jdx)).symm]
-  -- Push `L` (a continuous linear equivalence) through the finite sum, then
-  -- push the component projection through, and identify each summand.
   rw [map_sum L, map_sum (tensorChartComponentProjection (E := E) r s P₀.1 P₀.2)]
   refine Finset.sum_congr rfl ?_
   intro Q _
-  -- Push `L` and the projection through the scalar multiplication.
   rw [map_smul L, map_smul (tensorChartComponentProjection (E := E) r s P₀.1 P₀.2),
     smul_eq_mul]
-  -- Identify the projection of the `L`-image of the `Q`-th basis element with
-  -- the transition coefficient, and the scalar with the raw `γ`-component.
   rw [show tensorChartComponentProjection (E := E) r s P₀.1 P₀.2
           (L (tensorChartBasisElement (E := E) r s Q.1 Q.2)) =
         transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀ Q x from by
@@ -436,38 +365,13 @@ theorem tensorChartComponentRaw_chartTransition_decomp
               tensorChartComponentRaw (I := I) (M := M) g r s S γ Q.1 Q.2 x := by
   classical
   refine ⟨transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀, ?_, ?_⟩
-  · -- Smoothness of every coefficient.
-    intro Q
+  · intro Q
     exact contMDiffOn_transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀ Q
-  · -- The pointwise decomposition on the chart overlap.
-    intro x hx
+  · intro x hx
     exact tensorChartComponentRaw_eq_transitionCoeff_sum
       (E := E) (I := I) (M := M) g r s S γ α P₀ hx
 
-/-! ## Uniform op-norm bound on `transitionCoeff` over POU tsupport overlaps
-
-For closed Riemannian manifolds the chart-atlas partition of unity has finite
-nonempty support: there is a designated finite set `chartAtlasPOU_finset` of
-chart base points outside which the partition-of-unity weight vanishes
-identically. Each weight has compact closed support (`tsupport`) contained in
-the corresponding chart source.
-
-Restricting the smooth (hence continuous) function `transitionCoeff r s γ α P₀ Q`
-to the closed-in-`M` set
-`tsupport (POU γ) ∩ tsupport (POU α) ⊆ (chartAt H γ).source ∩ (chartAt H α).source`
-yields a continuous function on a compact set, hence bounded. The component
-multi-index pair `(P₀, Q)` ranges over the finite type `TensorCompIdx r s`
-squared, and `(γ, α)` ranges over the finite product
-`chartAtlasPOU_finset × chartAtlasPOU_finset` (for pairs outside this product
-the tsupport overlap is empty, so the bound is vacuous).
-
-Taking the maximum over all these finite parameter choices produces a single
-uniform constant `K ≥ 0` bounding `|transitionCoeff r s γ α P₀ Q b|` for every
-`(γ, α, P₀, Q, b)` with `b` in the POU tsupport overlap. -/
-
 section UniformBound
-
-/-! ### A `transitionCoeff` overlap region is compact and chart-subordinate -/
 
 /-- The intersection of two POU tsupports is a closed subset of the compact
 manifold `M`, hence compact. -/
@@ -499,8 +403,6 @@ private lemma pouTsupport_inter_subset_chartSource_inter (γ α : M) :
   exact ⟨pouTsupport_subset_chartSource (I := I) (M := M) γ hx.1,
     pouTsupport_subset_chartSource (I := I) (M := M) α hx.2⟩
 
-/-! ### Per-pair, per-`(P₀, Q)` bound from continuity on the compact overlap -/
-
 /-- For each pair `(γ, α)` of chart base points and each component-index pair
 `(P₀, Q)`, the absolute value of `transitionCoeff r s γ α P₀ Q` is bounded on
 the (compact) POU tsupport intersection. The bound is non-negative. -/
@@ -513,40 +415,32 @@ private lemma exists_transitionCoeff_bound_on_pouTsupport_pair
             ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x),
         |transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀ Q b| ≤ C := by
   classical
-  -- Abbreviate the compact intersection.
   set K : Set M := tsupport (fun x : M =>
         ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
       tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) with hK_def
-  -- Case split on whether `K` is empty.
   by_cases hK_empty : K = ∅
-  · -- Empty case: any `C ≥ 0` works, take `C = 0`.
-    refine ⟨0, le_refl 0, ?_⟩
+  · refine ⟨0, le_refl 0, ?_⟩
     intro b hb
     rw [hK_empty] at hb
     exact absurd hb (Set.notMem_empty b)
-  · -- Non-empty case: extract max on the compact set.
-    have hK_ne : K.Nonempty := Set.nonempty_iff_ne_empty.mpr hK_empty
+  · have hK_ne : K.Nonempty := Set.nonempty_iff_ne_empty.mpr hK_empty
     have hK_compact : IsCompact K :=
       pouTsupport_inter_isCompact (I := I) (M := M) γ α
     have hK_sub : K ⊆ (chartAt H γ).source ∩ (chartAt H α).source :=
       pouTsupport_inter_subset_chartSource_inter (I := I) (M := M) γ α
-    -- `transitionCoeff r s γ α P₀ Q` is `ContinuousOn` on the chart-overlap.
     have h_cont_overlap : ContinuousOn
         (transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀ Q)
         ((chartAt H γ).source ∩ (chartAt H α).source) :=
       (contMDiffOn_transitionCoeff (E := E) (I := I) (M := M)
         r s γ α P₀ Q).continuousOn
-    -- Restrict to `K`.
     have h_cont_K : ContinuousOn
         (transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀ Q) K :=
       h_cont_overlap.mono hK_sub
-    -- Pass to `|·|`.
     have h_abs_cont_K : ContinuousOn
         (fun b => |transitionCoeff (E := E) (I := I) (M := M)
           r s γ α P₀ Q b|) K :=
       continuous_abs.comp_continuousOn h_cont_K
-    -- Extract the maximizer.
     obtain ⟨b_max, _hb_max_mem, hb_max⟩ :=
       hK_compact.exists_isMaxOn hK_ne h_abs_cont_K
     set C₀ : ℝ := |transitionCoeff (E := E) (I := I) (M := M)
@@ -556,19 +450,11 @@ private lemma exists_transitionCoeff_bound_on_pouTsupport_pair
     intro b hb
     exact hb_max hb
 
-/-! ### Vanishing of `transitionCoeff` data outside `chartAtlasPOU_finset`
-
-When `γ ∉ chartAtlasPOU_finset`, the partition-of-unity weight at `γ` is
-identically zero, so its function support is empty and its tsupport (the
-closure of an empty set) is empty. The tsupport intersection with any other
-POU tsupport is then empty, so the bound predicate is vacuously satisfied. -/
-
 private lemma chartAtlasPOU_tsupport_eq_empty_of_notMem_finset
     {γ : M} (hγ : γ ∉ chartAtlasPOU_finset (I := I) (M := M)) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) = ∅ := by
   classical
-  -- The function support is empty, since the function is identically zero.
   have h_supp_empty :
       Function.support (fun x : M =>
         ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) = ∅ := by
@@ -577,7 +463,6 @@ private lemma chartAtlasPOU_tsupport_eq_empty_of_notMem_finset
       Decidable.not_not]
     exact DifferentialGeometry.Integral.Measure.chartAtlasPOU_weight_zero_of_notMem
       (I := I) (M := M) hγ x
-  -- The tsupport is the closure of the function support.
   unfold tsupport
   rw [h_supp_empty, closure_empty]
 
@@ -601,14 +486,6 @@ private lemma pouTsupport_inter_eq_empty_of_right_notMem_finset
     (I := I) (M := M) hα]
   exact Set.inter_empty _
 
-/-! ### Aggregation of the per-pair, per-`(P₀, Q)` bounds into a single
-constant by finset induction
-
-We package the bound as a plain existential: there exists a single `K : ℝ`
-simultaneously bounding the absolute value of `transitionCoeff` over the
-finite product of the quantified data, constructed inductively on the
-chart-atlas POU finset using the per-`(γ, α)` joint bound. -/
-
 /-- For a fixed pair `(γ, α)` and each component index `(P₀, Q)`, the per-pair
 bound is a finite quantification on the (compact, hence bounded) POU-tsupport
 intersection. Aggregating over the finite type `TensorCompIdx r s ×
@@ -624,9 +501,6 @@ private lemma exists_transitionCoeff_bound_on_pouTsupport_joint_PQ
             ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x),
         |transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀ Q b| ≤ C := by
   classical
-  -- Universal-over-`(P₀, Q)` form: induct on `Finset.univ`.
-  -- The auxiliary claim: for a finset `T : Finset (TensorCompIdx × TensorCompIdx)`,
-  -- there is a uniform `C` bounding all `(PQ ∈ T)` cases.
   suffices h_aux :
       ∀ T : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s),
         ∃ C : ℝ, 0 ≤ C ∧
@@ -643,7 +517,6 @@ private lemma exists_transitionCoeff_bound_on_pouTsupport_joint_PQ
     refine ⟨C, hC_nn, ?_⟩
     intro P₀ Q b hb
     exact hC_le (P₀, Q) (Finset.mem_univ _) b hb
-  -- Induction on `T`.
   intro T
   induction T using Finset.induction_on with
   | empty =>
@@ -658,11 +531,9 @@ private lemma exists_transitionCoeff_bound_on_pouTsupport_joint_PQ
     refine ⟨max C_T C_PQ, le_max_of_le_left hC_T_nn, ?_⟩
     intro QQ hQQ b hb
     rcases Finset.mem_insert.mp hQQ with heq | hin
-    · -- `QQ = PQ`: use the new per-`(P₀, Q)` bound.
-      subst heq
+    · subst heq
       exact le_trans (hC_PQ_le b hb) (le_max_right _ _)
-    · -- `QQ ∈ T'`: use the inductive hypothesis.
-      exact le_trans (hC_T_le QQ hin b hb) (le_max_left _ _)
+    · exact le_trans (hC_T_le QQ hin b hb) (le_max_left _ _)
 
 /-- Existential form: there is a single non-negative constant `K` bounding
 `|transitionCoeff r s γ α P₀ Q b|` simultaneously over all chart base points
@@ -679,7 +550,6 @@ private lemma exists_transitionCoeff_uniform_bound_on_pouTsupport
             ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
         |transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀ Q b| ≤ K := by
   classical
-  -- Auxiliary: induction on a finset `S` of chart-base-point pairs.
   suffices h_aux :
       ∀ S : Finset (M × M),
         ∃ K : ℝ, 0 ≤ K ∧
@@ -691,32 +561,26 @@ private lemma exists_transitionCoeff_uniform_bound_on_pouTsupport
                 ((chartAtlasPOU I M γα.2 : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
             |transitionCoeff (E := E) (I := I) (M := M)
               r s γα.1 γα.2 P₀ Q b| ≤ K by
-    -- Take `S := chartAtlasPOU_finset × chartAtlasPOU_finset`.
     obtain ⟨K, hK_nn, hK_le⟩ := h_aux
       (chartAtlasPOU_finset (I := I) (M := M) ×ˢ
         chartAtlasPOU_finset (I := I) (M := M))
     refine ⟨K, hK_nn, ?_⟩
     intro γ α P₀ Q b hb
-    -- Case split on the membership of `(γ, α)` in the product.
     by_cases hγ : γ ∈ chartAtlasPOU_finset (I := I) (M := M)
     · by_cases hα : α ∈ chartAtlasPOU_finset (I := I) (M := M)
-      · -- Both in: apply `hK_le`.
-        have hmem : (γ, α) ∈
+      · have hmem : (γ, α) ∈
             chartAtlasPOU_finset (I := I) (M := M) ×ˢ
               chartAtlasPOU_finset (I := I) (M := M) :=
           Finset.mem_product.mpr ⟨hγ, hα⟩
         exact hK_le (γ, α) hmem P₀ Q b hb
-      · -- α not in: tsupport intersection is empty.
-        have h_empty := pouTsupport_inter_eq_empty_of_right_notMem_finset
+      · have h_empty := pouTsupport_inter_eq_empty_of_right_notMem_finset
           (I := I) (M := M) γ hα
         rw [h_empty] at hb
         exact absurd hb (Set.notMem_empty b)
-    · -- γ not in: tsupport intersection is empty.
-      have h_empty := pouTsupport_inter_eq_empty_of_left_notMem_finset
+    · have h_empty := pouTsupport_inter_eq_empty_of_left_notMem_finset
         (I := I) (M := M) hγ α
       rw [h_empty] at hb
       exact absurd hb (Set.notMem_empty b)
-  -- Induction on `S`.
   intro S
   induction S using Finset.induction_on with
   | empty =>
@@ -731,11 +595,9 @@ private lemma exists_transitionCoeff_uniform_bound_on_pouTsupport
     refine ⟨max K_S K_γα, le_max_of_le_left hK_S_nn, ?_⟩
     intro δβ hδβ P₀ Q b hb
     rcases Finset.mem_insert.mp hδβ with heq | hin
-    · -- `δβ = γα`.
-      subst heq
+    · subst heq
       exact le_trans (hK_γα_le P₀ Q b hb) (le_max_right _ _)
-    · -- `δβ ∈ S'`.
-      exact le_trans (hK_S_le δβ hin P₀ Q b hb) (le_max_left _ _)
+    · exact le_trans (hK_S_le δβ hin P₀ Q b hb) (le_max_left _ _)
 
 /-- **Uniform op-norm bound on `transitionCoeff` over chart overlaps,
 restricted to POU tsupport ranges.**
@@ -771,21 +633,6 @@ theorem transitionCoeff_le_uniform_on_pouTsupport
   exists_transitionCoeff_uniform_bound_on_pouTsupport
     (E := E) (I := I) (M := M) r s
 
-/-! ## Uniform op-norm bound on the chart-transition Fréchet derivative
-
-The chart-transition map `extChartAt I α ∘ (extChartAt I γ).symm` is `C^∞` on
-the open `E`-source `((extChartAt I γ).symm ≫ extChartAt I α).source`. Its
-Fréchet derivative is therefore `ContinuousOn` on the same set, and its
-operator norm is bounded on any compact subset.
-
-For chart base points `γ, α` in the (finite) `chartAtlasPOU_finset` and points
-`b : M` in `tsupport (POU γ) ∩ tsupport (POU α)`, the image
-`extChartAt I γ '' (tsupport (POU γ) ∩ tsupport (POU α))` is a compact subset
-of `((extChartAt I γ).symm ≫ extChartAt I α).source`. Taking the maximum of
-the per-pair operator-norm bounds over the finite chart-pair product yields a
-single uniform constant `K_jac ≥ 0`. For pairs outside the finite product the
-POU tsupport intersection is empty, so the bound is vacuously satisfied. -/
-
 /-- The `E`-source of the chart transition `(extChartAt I γ).symm ≫
 extChartAt I α` is open in `E` for a boundaryless model. The source equals
 `I '' ((chartAt H γ).symm ≫ₕ chartAt H α).source`, which under boundaryless
@@ -795,10 +642,8 @@ the `OpenPartialHomeomorph` trans source. -/
 private lemma isOpen_extCoordChange_source (γ α : M) :
     IsOpen (((extChartAt I γ).symm ≫ extChartAt I α).source) := by
   classical
-  -- Rewrite the source via `ext_coord_change_source` and `I.image_eq`.
   rw [ext_coord_change_source (I := I) α γ, I.image_eq, I.range_eq_univ,
     Set.inter_univ]
-  -- The remaining set is the preimage of an open set under continuous `I.symm`.
   exact ((chartAt H γ).symm ≫ₕ chartAt H α).open_source.preimage I.continuous_symm
 
 /-- The image of `tsupport (POU γ) ∩ tsupport (POU α)` under `extChartAt I γ`
@@ -838,14 +683,8 @@ private lemma extChartAt_mem_extCoordChange_source
     (hbγ : b ∈ (chartAt H γ).source) (hbα : b ∈ (chartAt H α).source) :
     extChartAt I γ b ∈ ((extChartAt I γ).symm ≫ extChartAt I α).source := by
   classical
-  -- The image identity:
-  -- (chartAt H γ).extend I '' ((chartAt H γ).source ∩ (chartAt H α).source)
-  --   = (I.extendCoordChange (chartAt H γ) (chartAt H α)).source.
   have h_img := OpenPartialHomeomorph.extend_image_source_inter
     (I := I) (f := chartAt H γ) (f' := chartAt H α)
-  -- The trans `(extChartAt I γ).symm ≫ extChartAt I α` is by definition
-  -- `I.extendCoordChange (chartAt H γ) (chartAt H α)` (both unfold to
-  -- `((chartAt H γ).extend I).symm ≫ (chartAt H α).extend I`).
   change extChartAt I γ b ∈ (I.extendCoordChange (chartAt H γ) (chartAt H α)).source
   rw [← h_img]
   exact ⟨b, ⟨hbγ, hbα⟩, rfl⟩
@@ -866,8 +705,6 @@ private lemma pouTsupport_inter_image_subset_extCoordChange_source
   exact extChartAt_mem_extCoordChange_source
     (I := I) (M := M) hb_inter.1 hb_inter.2
 
-/-! ### Per-pair bound: continuous Fréchet derivative on a compact image -/
-
 /-- For each pair `(γ, α)` of chart base points, the operator norm of the
 Fréchet derivative `fderiv ℝ (extChartAt I α ∘ (extChartAt I γ).symm)` at the
 point `extChartAt I γ b`, with `b` in the POU tsupport intersection, is
@@ -887,25 +724,20 @@ private lemma exists_fderiv_chartTransition_bound_on_pouTsupport_pair
         ‖fderiv ℝ (extChartAt I α ∘ (extChartAt I γ).symm)
             (extChartAt I γ b)‖ ≤ C := by
   classical
-  -- The chart-transition source in `E`.
   set U : Set E := ((extChartAt I γ).symm ≫ extChartAt I α).source with hU_def
   have hU_open : IsOpen U :=
     isOpen_extCoordChange_source (I := I) (M := M) γ α
-  -- Smoothness of the chart transition on `U`.
   have h_contDiff : ContDiffOn ℝ ∞
       (extChartAt I α ∘ (extChartAt I γ).symm) U :=
     contDiffOn_ext_coord_change (I := I) (n := ∞) α γ
-  -- Continuity of `fderiv` on `U`.
   have h_one_le : (1 : WithTop ℕ∞) ≤ ∞ := by
     exact_mod_cast (by decide : (1 : ℕ∞) ≤ ⊤)
   have h_cont_fderiv : ContinuousOn
       (fderiv ℝ (extChartAt I α ∘ (extChartAt I γ).symm)) U :=
     h_contDiff.continuousOn_fderiv_of_isOpen hU_open h_one_le
-  -- Continuity of the operator norm composed with `fderiv` on `U`.
   have h_cont_norm : ContinuousOn
       (fun y : E => ‖fderiv ℝ (extChartAt I α ∘ (extChartAt I γ).symm) y‖) U :=
     continuous_norm.comp_continuousOn h_cont_fderiv
-  -- The image `K_E` of the POU tsupport intersection.
   set K_E : Set E := (extChartAt I γ) '' (tsupport (fun x : M =>
         ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
       tsupport (fun x : M =>
@@ -914,17 +746,13 @@ private lemma exists_fderiv_chartTransition_bound_on_pouTsupport_pair
     pouTsupport_inter_image_extChartAt_isCompact (I := I) (M := M) γ α
   have hKE_subset_U : K_E ⊆ U :=
     pouTsupport_inter_image_subset_extCoordChange_source (I := I) (M := M) γ α
-  -- Case split on whether `K_E` is empty.
   by_cases hKE_empty : K_E = ∅
-  · -- Empty case: every `C ≥ 0` works, take `C = 0`.
-    refine ⟨0, le_refl 0, ?_⟩
+  · refine ⟨0, le_refl 0, ?_⟩
     intro b hb
-    -- Reach a contradiction: `extChartAt I γ b ∈ K_E = ∅`.
     have h_mem : extChartAt I γ b ∈ K_E := ⟨b, hb, rfl⟩
     rw [hKE_empty] at h_mem
     exact absurd h_mem (Set.notMem_empty _)
-  · -- Non-empty case: take the maximum on `K_E`.
-    have hKE_ne : K_E.Nonempty := Set.nonempty_iff_ne_empty.mpr hKE_empty
+  · have hKE_ne : K_E.Nonempty := Set.nonempty_iff_ne_empty.mpr hKE_empty
     have h_cont_norm_KE : ContinuousOn
         (fun y : E => ‖fderiv ℝ (extChartAt I α ∘ (extChartAt I γ).symm) y‖)
         K_E := h_cont_norm.mono hKE_subset_U
@@ -937,8 +765,6 @@ private lemma exists_fderiv_chartTransition_bound_on_pouTsupport_pair
     intro b hb
     have h_mem : extChartAt I γ b ∈ K_E := ⟨b, hb, rfl⟩
     exact hy_max h_mem
-
-/-! ### Aggregation: finset induction over `chartAtlasPOU_finset` pairs -/
 
 /-- Existential form: there is a single non-negative constant `K_jac` bounding
 `‖fderiv ℝ (extChartAt I α ∘ (extChartAt I γ).symm) (extChartAt I γ b)‖`
@@ -955,7 +781,6 @@ private lemma exists_fderiv_chartTransition_uniform_bound_on_pouTsupport :
         ‖fderiv ℝ (extChartAt I α ∘ (extChartAt I γ).symm)
             (extChartAt I γ b)‖ ≤ K_jac := by
   classical
-  -- Auxiliary: induct on a finset `S` of chart-base-point pairs.
   suffices h_aux :
       ∀ S : Finset (M × M),
         ∃ K_jac : ℝ, 0 ≤ K_jac ∧
@@ -1048,8 +873,6 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
 
 #print axioms
   DifferentialGeometry.Analysis.Parabolic.TensorSpectral.transitionCoeff_le_uniform_on_pouTsupport

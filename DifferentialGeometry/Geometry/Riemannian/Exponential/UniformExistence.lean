@@ -121,12 +121,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-/-! ## Compact-set uniform inner-ball confinement
-
-We extract uniform radii `(ρ, T)` from the joint continuity of `Φ` at
-`((x₀, 0), 0)` so that the orbit `(v, s) ↦ Φ ((x₀, v), s)` lands inside
-the inner closed ball of the bump on `ball (0 : E) ρ × Icc (-T) T`. -/
-
 section UniformConfinement
 
 variable [I.Boundaryless] [CompleteSpace E]
@@ -153,8 +147,6 @@ lemma exists_uniform_orbit_in_inner_ball
       ∀ v ∈ Metric.ball (0 : E) ρ, ∀ s ∈ Set.Icc (-T) T,
         Φ (((x₀, v) : E × E), s) ∈ Metric.ball ((x₀, (0 : E)) : E × E) b.rIn := by
   classical
-  -- The pair (x₀, 0) belongs to the open ball of Φ's joint-C^1 domain.
-  -- `Φ` is continuous at `((x₀, 0), 0)`.
   have h_open : IsOpen
       ((Metric.ball ((x₀, (0 : E)) : E × E) ρ_V4) ×ˢ Set.Ioo (-T_V4) T_V4) :=
     Metric.isOpen_ball.prod isOpen_Ioo
@@ -165,10 +157,8 @@ lemma exists_uniform_orbit_in_inner_ball
     have hcdf : ContDiffOn ℝ 1 Φ _ := hΦ_cd
     have := hcdf.continuousOn
     exact this.continuousAt (h_open.mem_nhds hz₀_mem)
-  -- Ψ : the orbit-as-fn-of-(v, s).
   have hΨ_cont : ContinuousAt (fun w : E × ℝ => Φ (((x₀, w.1) : E × E), w.2))
       ((0 : E), (0 : ℝ)) := by
-    -- The base map (v, s) ↦ ((x₀, v), s) is continuous.
     have h1 : Continuous (fun w : E × ℝ => (((x₀, w.1) : E × E), w.2)) := by
       apply Continuous.prodMk
       · exact (continuous_const.prodMk continuous_fst)
@@ -176,40 +166,31 @@ lemma exists_uniform_orbit_in_inner_ball
     have h1_at_explicit : ContinuousAt
         (fun w : E × ℝ => (((x₀, w.1) : E × E), w.2))
         ((0 : E), (0 : ℝ)) := h1.continuousAt
-    -- Manually evaluate at (0, 0): (((x₀, 0), 0) is what hΦ_cont expects.
     have h1_val : (fun w : E × ℝ => (((x₀, w.1) : E × E), w.2))
         ((0 : E), (0 : ℝ)) = (((x₀, (0 : E)) : E × E), (0 : ℝ)) := rfl
-    -- Use the explicit composition.
     have := ContinuousAt.comp (f := fun w : E × ℝ => (((x₀, w.1) : E × E), w.2))
       (g := Φ) (x := ((0 : E), (0 : ℝ))) ?_ h1_at_explicit
     · exact this
     · rw [h1_val]; exact hΦ_cont
-  -- The inner ball is a neighbourhood of (x₀, 0).
   have h_inner_nhds : Metric.ball ((x₀, (0 : E)) : E × E) b.rIn ∈
       𝓝 ((x₀, (0 : E)) : E × E) :=
     Metric.ball_mem_nhds _ b.rIn_pos
-  -- Pull back via Ψ: the preimage is a neighbourhood of (0, 0).
   have h_preim : (fun w : E × ℝ => Φ (((x₀, w.1) : E × E), w.2)) ⁻¹'
       (Metric.ball ((x₀, (0 : E)) : E × E) b.rIn) ∈ 𝓝 ((0 : E), (0 : ℝ)) := by
     apply hΨ_cont.preimage_mem_nhds
-    -- Need: ball (x₀, 0) b.rIn ∈ 𝓝 (Φ ((x₀, (0,0).1), (0,0).2)) = 𝓝 (x₀, 0).
     simp only [hΦ_init0]
     exact Metric.ball_mem_nhds _ b.rIn_pos
-  -- Extract a product neighbourhood (ball, Ioo) inside the preimage.
   obtain ⟨U, V, hU_open, hU_mem, hV_open, hV_mem, h_subset⟩ :=
     mem_nhds_prod_iff'.mp h_preim
-  -- U is an open nbhd of 0 in E, V is an open nbhd of 0 in ℝ. Shrink to balls / Ioo.
   obtain ⟨ρ₀, hρ₀_pos, hρ₀_sub⟩ :=
     Metric.isOpen_iff.mp hU_open (0 : E) hU_mem
   obtain ⟨T₀, hT₀_pos, hT₀_sub⟩ :=
     Metric.isOpen_iff.mp hV_open (0 : ℝ) hV_mem
-  -- Convert `T₀`-ball in ℝ to `Ioo (-T₀) T₀`.
   have hT₀_Ioo : Set.Ioo (-T₀) T₀ ⊆ V := by
     intro s hs
     apply hT₀_sub
     rw [Metric.mem_ball, Real.dist_eq, sub_zero, abs_lt]
     exact hs
-  -- Choose ρ := min ρ₀ ρ_V4, T := min T₀ (T_V4/2) (strict inequalities).
   set ρ : ℝ := min ρ₀ ρ_V4 / 2 with hρ_def
   have hρ_pos : 0 < ρ := by
     apply div_pos
@@ -238,7 +219,6 @@ lemma exists_uniform_orbit_in_inner_ball
     linarith
   refine ⟨ρ, T, hρ_pos, hT_pos, hρ_le_ρ_V4, hT_lt_T_V4, ?_⟩
   intro v hv s hs
-  -- v ∈ ball 0 ρ ⊆ ball 0 ρ₀ ⊆ U, s ∈ Icc (-T) T ⊆ Ioo (-T₀) T₀ ⊆ V.
   have hv_in_U : v ∈ U := by
     apply hρ₀_sub
     rw [Metric.mem_ball, dist_zero_right] at hv ⊢
@@ -250,21 +230,10 @@ lemma exists_uniform_orbit_in_inner_ball
     refine ⟨?_, ?_⟩
     · linarith [hs.1]
     · linarith [hs.2]
-  -- Hence (v, s) ∈ U × V ⊆ Ψ⁻¹(ball z₀ b.rIn).
   have h_pair : (v, s) ∈ U ×ˢ V := ⟨hv_in_U, hs_in_V⟩
-  -- The preimage statement gives Ψ (v, s) ∈ ball z₀ b.rIn.
-  -- Ψ (v, s) = Φ ((x₀, v), s) and z₀ = (x₀, 0) definitionally.
   exact h_subset h_pair
 
 end UniformConfinement
-
-/-! ## Headline chart-coordinate uniform existence
-
-We package the existence of `Φ` together with uniform radii `(ρ, T)`
-such that the orbit `s ↦ Φ ((x₀, v), s)` stays inside the inner closed
-ball of the bump (where the cutoff equals `chartPhaseVF`) for every
-`v ∈ ball (0 : E) ρ`. From this, we derive the uniform chart-phase ODE
-on `Ioo (-T) T`. -/
 
 section UniformChartCoordExistence
 
@@ -302,8 +271,6 @@ theorem exists_chartFlow_uniform_orbit
         Φ (((extChartAt I p p, v) : E × E), s) ∈
           Metric.ball (((extChartAt I p p, (0 : E)) : E × E)) b.rIn) := by
   classical
-  -- The base chart point `x₀ := extChartAt I p p` lies in the chart-target
-  -- interior under `[I.Boundaryless]`.
   set x₀ : E := extChartAt I p p with hx₀_def
   have hx₀_src : p ∈ (extChartAt I p).source :=
     mem_extChartAt_source (I := I) p
@@ -311,12 +278,10 @@ theorem exists_chartFlow_uniform_orbit
     (extChartAt I p).map_source hx₀_src
   have hx₀_interior : x₀ ∈ interior (extChartAt I p).target :=
     extChartAt_target_subset_interior_of_boundaryless (I := I) p hx₀_target
-  -- Invoke the combined V.4 packaging at `(x₀, 0)`.
   obtain ⟨b, r, ε, ρ_V4, T_V4, Φ, hr, hε, hρ_V4_pos, hT_V4_pos, hb_sub, hΦ_ILF,
     hΦ_cd, hΦ_init0⟩ :=
     Geodesic.exists_chartPhase_contDiffOn_isLocalFlow_combined
       (I := I) (g := g) (α := p) (x₀ := x₀) (v₀ := (0 : E)) hx₀_interior
-  -- Extract uniform inner-ball confinement.
   obtain ⟨ρ, T, hρ_pos, hT_pos, _hρ_le_V4, _hT_lt_V4, h_orbit_in⟩ :=
     exists_uniform_orbit_in_inner_ball (I := I) (g := g) (p := p)
       (x₀ := x₀) hx₀_def
@@ -326,14 +291,6 @@ theorem exists_chartFlow_uniform_orbit
     h_orbit_in⟩
 
 end UniformChartCoordExistence
-
-/-! ## Uniform chart-phase ODE on `Ioo (-T) T`
-
-From the uniform inner-ball confinement, we deduce that the orbit
-`s ↦ Φ ((x₀, v), s)` satisfies the **genuine** chart-phase ODE
-(`chartPhaseVF`, not the cutoff) on `Ioo (-T) T`, uniformly in
-`v ∈ ball (0 : E) ρ`. This is the input required for R.A's uniform
-chart-coordinate ODE uniqueness. -/
 
 section UniformChartPhaseODE
 
@@ -369,7 +326,6 @@ lemma orbit_hasDerivAt_chartPhaseVF_uniform
         (chartPhaseVF (I := I) g p (Φ (((x₀, v) : E × E), s))) s := by
   intro v hv s hs
   classical
-  -- (x₀, v) ∈ closedBall (x₀, 0) r.
   have hr_nn : (0 : ℝ) ≤ (r : ℝ) := r.coe_nonneg
   have hv_in : ((x₀, v) : E × E) ∈
       Metric.closedBall ((x₀, (0 : E)) : E × E) (r : ℝ) := by
@@ -378,7 +334,6 @@ lemma orbit_hasDerivAt_chartPhaseVF_uniform
     rw [Metric.mem_ball, dist_zero_right] at hv
     have hv_r : ‖v‖ ≤ (r : ℝ) := le_of_lt (lt_of_lt_of_le hv hρ_le_r)
     exact max_le hr_nn hv_r
-  -- s ∈ Ioo (-T) T ⊆ Ioo (-ε) ε ⊆ Icc (-ε) ε.
   have hs_Icc_ε : s ∈ Set.Icc (-ε) ε := by
     refine ⟨?_, ?_⟩
     · linarith [hs.1]
@@ -388,17 +343,13 @@ lemma orbit_hasDerivAt_chartPhaseVF_uniform
     · linarith [hs.1]
     · linarith [hs.2]
   have hs_Icc_T : s ∈ Set.Icc (-T) T := Set.Ioo_subset_Icc_self hs
-  -- The cutoff ODE: `HasDerivAt orbit (chartPhaseVFCutoff (orbit s)) s`.
-  -- We use the IsLocalFlow.hasDerivWithinAt directly at point (x₀, v).
   have hd_within := hΦ_ILF.hasDerivWithinAt ((x₀, v) : E × E) hv_in s hs_Icc_ε
-  -- chartPhaseVFTime ... s (Φ ((x₀, v), s)) = chartPhaseVFCutoff ... (Φ ((x₀, v), s)).
   have hVFTime_apply :
       chartPhaseVFTime (I := I) g p ((x₀, (0 : E)) : E × E) b s
         (Φ (((x₀, v) : E × E), s)) =
       chartPhaseVFCutoff (I := I) g p ((x₀, (0 : E)) : E × E) b
         (Φ (((x₀, v) : E × E), s)) := rfl
   rw [hVFTime_apply] at hd_within
-  -- Upgrade HasDerivWithinAt on Icc to HasDerivAt at an interior point.
   have hIoo_nhds : Set.Ioo (-ε) ε ∈ 𝓝 s := isOpen_Ioo.mem_nhds hs_Ioo_ε
   have hIcc_nhds : Set.Icc (-ε) ε ∈ 𝓝 s :=
     Filter.mem_of_superset hIoo_nhds Set.Ioo_subset_Icc_self
@@ -406,7 +357,6 @@ lemma orbit_hasDerivAt_chartPhaseVF_uniform
       HasDerivAt (fun s' : ℝ => Φ (((x₀, v) : E × E), s'))
         (chartPhaseVFCutoff (I := I) g p ((x₀, (0 : E)) : E × E) b
           (Φ (((x₀, v) : E × E), s))) s := hd_within.hasDerivAt hIcc_nhds
-  -- The orbit at s lies in the inner ball; cutoff = chartPhaseVF there.
   have h_in : Φ (((x₀, v) : E × E), s) ∈
       Metric.ball ((x₀, (0 : E)) : E × E) b.rIn := h_orbit_in v hv s hs_Icc_T
   have h_in_closed : Φ (((x₀, v) : E × E), s) ∈
@@ -444,12 +394,9 @@ theorem exists_uniform_orbit_hasDerivAt_chartPhaseVF
           (chartPhaseVF (I := I) g p
             (Φ (((extChartAt I p p, v) : E × E), s))) s) := by
   classical
-  -- Note: we keep `extChartAt I p p` literal throughout to ensure all
-  -- `b`-typed objects refer to the same `(extChartAt I p p, 0)` base point.
   obtain ⟨b, r, ε, ρ₀, T₀, Φ, hr, hε, hρ₀_pos, hT₀_pos, hb_sub, hΦ_ILF,
     _hΦ_init, h_orbit_in⟩ :=
     exists_chartFlow_uniform_orbit (I := I) (g := g) (p := p)
-  -- Possibly shrink ρ₀ to ensure ρ ≤ r, and shrink T₀ to ensure T < ε.
   set ρ : ℝ := min ρ₀ ((r : ℝ) / 2) with hρ_def
   have hρ_pos : 0 < ρ := by
     apply lt_min hρ₀_pos
@@ -472,9 +419,7 @@ theorem exists_uniform_orbit_hasDerivAt_chartPhaseVF
     have : T = min T₀ (ε / 2) := hT_def
     rw [this]; linarith
   refine ⟨b, ρ, T, Φ, hρ_pos, hT_pos, hb_sub, ?_, ?_, ?_⟩
-  · -- Initial value identity for every v ∈ ball 0 ρ.
-    intro v hv
-    -- (extChartAt I p p, v) ∈ closedBall (extChartAt I p p, 0) r.
+  · intro v hv
     have hr_nn : (0 : ℝ) ≤ (r : ℝ) := r.coe_nonneg
     have hv_in : ((extChartAt I p p, v) : E × E) ∈
         Metric.closedBall ((extChartAt I p p, (0 : E)) : E × E) (r : ℝ) := by
@@ -484,8 +429,7 @@ theorem exists_uniform_orbit_hasDerivAt_chartPhaseVF
       have hv_r : ‖v‖ ≤ (r : ℝ) := le_of_lt (lt_of_lt_of_le hv hρ_le_r)
       exact max_le hr_nn hv_r
     exact hΦ_ILF.apply_initial ((extChartAt I p p, v) : E × E) hv_in
-  · -- Inner-ball confinement.
-    intro v hv s hs
+  · intro v hv s hs
     have hv_ρ₀ : v ∈ Metric.ball (0 : E) ρ₀ := by
       rw [Metric.mem_ball, dist_zero_right] at hv ⊢
       have : ‖v‖ < ρ := hv
@@ -495,13 +439,11 @@ theorem exists_uniform_orbit_hasDerivAt_chartPhaseVF
       · linarith [hs.1]
       · linarith [hs.2]
     exact h_orbit_in v hv_ρ₀ s hs_T₀
-  · -- ODE on Ioo (-T) T.
-    intro v hv s hs
+  · intro v hv s hs
     have hv_ρ₀ : v ∈ Metric.ball (0 : E) ρ₀ := by
       rw [Metric.mem_ball, dist_zero_right] at hv ⊢
       have : ‖v‖ < ρ := hv
       exact lt_of_lt_of_le this hρ_le_ρ₀
-    -- Shrunk inner-ball confinement holds on Icc (-T) T ⊆ Icc (-T₀) T₀.
     have h_inner_T : ∀ v ∈ Metric.ball (0 : E) ρ, ∀ s ∈ Set.Icc (-T) T,
         Φ (((extChartAt I p p, v) : E × E), s) ∈
           Metric.ball (((extChartAt I p p, (0 : E)) : E × E)) b.rIn := by
@@ -523,46 +465,6 @@ theorem exists_uniform_orbit_hasDerivAt_chartPhaseVF
       v hv s hs
 
 end UniformChartPhaseODE
-
-/-! ## Per-v identification with the maximal-geodesic chosen-curve
-
-We now lift the chart-coordinate uniform existence to the manifold side.
-The strategy:
-
-1. For each `v ∈ ball (0 : E) ρ`, pull back the orbit's first
-   coordinate via `(extChartAt I p).symm` to get a manifold curve
-   `γ_v : ℝ → M`.
-
-2. Invoke `exists_isMIntegralCurveAt_geodesicVectorFieldChart` to obtain
-   a tangent-bundle lift `f_v : ℝ → TangentBundle I M` with
-   `f_v 0 = ⟨p, v⟩`.
-
-3. The chart-pushed lift `c_v := chartPushLift f_v 0` satisfies the
-   chart-phase ODE on a (small, `v`-dependent) neighbourhood of `0`,
-   with initial value `(x₀, v)`. Both `c_v` and the orbit
-   `s ↦ Φ ((x₀, v), s)` have the same initial value and stay in a
-   compact set near `(x₀, v)` over `Ioo (-T') T'` for some `T' ≤ T`.
-
-4. Apply R.A's uniform chart-coordinate uniqueness on `Ioo (-T') T'`
-   (`chartPhaseVF_orbit_uniqueness_uniform_Ioo`) to get equality of
-   `c_v` and the orbit on `Ioo (-T') T'`. Projecting first components
-   and inverting `extChartAt I p` yields `γ_v(s) = (f_v s).proj` on the
-   small interval, hence `γ_v(s) = projectCurve f_v s` for such `s`.
-
-5. Through `IsMIntegralCurveAt.isMIntegralCurveOn` (Mathlib) and the
-   maximal-interval witness construction, this shows that
-   `s ∈ Ioo (-T') T'` belongs to `maximalGeodesicInterval g p v`, and
-   `maximalGeodesic g p v s = γ_v s`.
-
-For the *uniform* `T` (not the per-v `T'`), we use the fact that on the
-uniform `Ioo (-T) T`, the orbit stays in a uniform compact set, while
-the lift `f_v` stays in the chart source on a `v`-dependent small
-neighbourhood of `0`. The match on the intersection — extended via the
-preconnected witness scheme of `maximalGeodesicInterval` — gives the
-required identification on `Ioo (-T) T`.
-
-We package the result in the streamlined form needed by R.D's final
-assembly. -/
 
 section ManifoldIdentification
 
@@ -593,25 +495,20 @@ lemma per_v_orbit_proj_eq_lift_proj_eventually
       ∀ᶠ s in 𝓝 (0 : ℝ),
         (f s).proj = (extChartAt I p).symm (Φ (((x₀, v) : E × E), s)).1 := by
   classical
-  -- Step 1: invoke local existence for a lift at (p, v).
   obtain ⟨f, hf0, hf_int⟩ :=
     Geodesic.exists_isMIntegralCurveAt_geodesicVectorFieldChart
       (I := I) (g := g) (p := p) (v := v)
   refine ⟨f, hf0, hf_int, ?_⟩
-  -- Step 2: the chart-pushed lift's chart-phase ODE near 0.
   have hf0_proj : (f 0).proj = p := by rw [hf0]
   have hd_lift :=
     chartPushLift_eventually_hasDerivAt_chartPhaseVF_and_target_interior
       (I := I) (g := g) (α := p) (f := f) hf0_proj hf_int
-  -- Step 3: the chart-pushed lift's initial value at 0.
   have hc0 : chartPushLift (I := I) f 0 0 = ((x₀, v) : E × E) := by
     have h := chartPushLift_self_pair (I := I) f 0
     rw [h]
-    -- (f 0).proj = p, chartFiberCoord p (f 0) = v.
     have hproj0 : (f 0).proj = p := hf0_proj
     have hfiber0 : chartFiberCoord (I := I) p (f 0) = v := by
       rw [hf0]
-      -- chartFiberCoord p ⟨p, v⟩ = v.
       have hp_src : p ∈ (chartAt H p).source := mem_chart_source H p
       have hbase : p ∈ (trivializationAt E (TangentSpace I) p).baseSet := by
         rw [TangentBundle.trivializationAt_baseSet]; exact hp_src
@@ -640,11 +537,8 @@ lemma per_v_orbit_proj_eq_lift_proj_eventually
         exact congrFun hcoe v
       rw [← happly, hcore_at]
     rw [hproj0, hfiber0, hx₀_def]
-  -- Step 4: orbit and lift's chart-pushed form agree near 0 by chart-coord
-  -- uniqueness `chartPhaseVF_orbit_uniqueness` (eventually form from Bridge.lean).
   have hΦorbit_zero :
       (fun s' : ℝ => Φ (((x₀, v) : E × E), s')) 0 = ((x₀, v) : E × E) := hΦ_init_v
-  -- The base point (x₀, v) ∈ (interior _.target) ×ˢ univ.
   have hbase_interior : ((x₀, v) : E × E) ∈
       (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E) := by
     have hp_extsrc : p ∈ (extChartAt I p).source := by
@@ -659,8 +553,6 @@ lemma per_v_orbit_proj_eq_lift_proj_eventually
     (c₂ := fun s' : ℝ => Φ (((x₀, v) : E × E), s'))
     (z₀ := ((x₀, v) : E × E))
     hbase_interior hc0 hΦorbit_zero hd_lift hΦ_chart_phase
-  -- Project first components, apply (extChartAt I p).symm.
-  -- We also need (f s).proj ∈ chart source eventually.
   have hπ_cont : Continuous
       (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
     FiberBundle.continuous_proj E (TangentSpace I)
@@ -675,8 +567,6 @@ lemma per_v_orbit_proj_eq_lift_proj_eventually
     apply hcomp0.preimage_mem_nhds
     rw [hf0_proj]; exact hp_nhds
   filter_upwards [hcd_eq, hsrc_nhds] with s hs_eq hs_src
-  -- hs_eq : chartPushLift f 0 s = Φ ((x₀, v), s).
-  -- First component: extChartAt I p (f s).proj = (Φ ((x₀, v), s)).1.
   have h_fst_eq :
       extChartAt I p (f s).proj = (Φ (((x₀, v) : E × E), s)).1 := by
     have hpair := chartPushLift_fst (I := I) (f := f) 0 s (by
@@ -685,23 +575,16 @@ lemma per_v_orbit_proj_eq_lift_proj_eventually
     have := congrArg Prod.fst hs_eq
     rw [hpair] at this
     exact this
-  -- Apply (extChartAt I p).symm.
   have hf_extsrc : (f s).proj ∈ (extChartAt I p).source := by
     rw [extChartAt_source]; exact hs_src
   have h_inv :
       (extChartAt I p).symm (extChartAt I p (f s).proj) = (f s).proj :=
     (extChartAt I p).left_inv hf_extsrc
-  -- Combine.
   have h_target := congrArg (extChartAt I p).symm h_fst_eq
   rw [h_inv] at h_target
   exact h_target
 
 end ManifoldIdentification
-
-/-! ## Headline R.C: uniform manifold-level existence interval
-
-We package the uniform chart-flow existence and per-`v` identification
-into the headline form needed by R.D. -/
 
 section HeadlineUniformExistence
 
@@ -755,7 +638,6 @@ theorem exists_uniform_existence_interval
   classical
   obtain ⟨b, ρ, T, Φ, hρ_pos, hT_pos, hb_sub, hΦ_init, h_orbit_in, h_orbit_phase⟩ :=
     exists_uniform_orbit_hasDerivAt_chartPhaseVF (I := I) (g := g) (p := p)
-  -- Convert inner-ball confinement to chart-target-interior confinement.
   have h_orbit_target : ∀ v ∈ Metric.ball (0 : E) ρ, ∀ s ∈ Set.Icc (-T) T,
       Φ (((extChartAt I p p, v) : E × E), s) ∈
         (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E) := by
@@ -776,8 +658,6 @@ theorem exists_uniform_existence_interval
   · intro v hv s hs; exact h_orbit_target v hv s hs
   · exact h_orbit_phase
   · intro v hv
-    -- Build the per-v identification: orbit's chart-phase ODE eventually
-    -- near 0 (from the uniform Ioo (-T) T ODE).
     have hΦ_init_v : Φ (((extChartAt I p p, v) : E × E), 0) =
         ((extChartAt I p p, v) : E × E) := hΦ_init v hv
     have hΦ_chart_phase : ∀ᶠ s in 𝓝 (0 : ℝ),

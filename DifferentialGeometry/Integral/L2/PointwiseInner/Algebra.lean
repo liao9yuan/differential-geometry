@@ -50,8 +50,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Algebraic properties of the pointwise `(0, s)` inner product -/
-
 /-- Left additivity: the pointwise `(0, s)` inner product is additive in the
 first argument. -/
 theorem tensorInnerPointwise_0s_add_left
@@ -186,7 +184,6 @@ theorem tensorInnerPointwise_0s_symm
       ring
   | succ s ih =>
       rw [tensorInnerPointwise_0s_succ, tensorInnerPointwise_0s_succ]
-      -- Swap (i, j) ↔ (j, i) and use symmetry of the Gram-matrix inverse.
       rw [Finset.sum_comm]
       refine Finset.sum_congr rfl ?_
       intro i _
@@ -220,14 +217,6 @@ theorem tensorInnerPointwise_0s_zero_right
   rw [tensorInnerPointwise_0s_symm]
   exact tensorInnerPointwise_0s_zero_left (I := I) (M := M) g x s S
 
-/-! ## Non-negativity in the arity-zero case
-
-Non-negativity on the diagonal is immediate for arity `s = 0`, where the
-pointwise inner product reduces to the square of a real number. The
-general-`s` case requires propagating positive semidefiniteness of the
-Gram-matrix inverse through the recursion, which is handled below using the
-spectral decomposition of the inverse Gram matrix. -/
-
 /-- The pointwise inner product on scalar-valued `(0, 0)`-tensors is
 non-negative on the diagonal: `⟨S, S⟩ = S ⋅ S ≥ 0`. -/
 theorem tensorInnerPointwise_0s_zero_arity_nonneg
@@ -258,14 +247,6 @@ theorem tensorInnerPointwise_0s_zero_arity_eq_zero_iff
   · intro h
     rw [h]
     simp
-
-/-! ## Helpers for non-negativity
-
-These private helpers support the general non-negativity statement for the
-pointwise `(0, s)` inner product on the diagonal. The strategy is to use
-positive-(semi)definiteness of the inverse Gram matrix (provided by
-`PointwiseInner.DualMetric`) and propagate this through the recursion via
-the spectral decomposition of the inverse Gram matrix. -/
 
 /-- Bilinear expansion of the pointwise `(0, s)` inner product over a finite
 sum in the first argument. -/
@@ -333,12 +314,6 @@ private lemma tensorInnerPointwise_0s_sum_sum
   intro j _
   ring
 
-/-! ## Non-negativity of the pointwise `(0, s)` inner product on the diagonal
-
-The general non-negativity statement proceeds by induction on the tensor
-arity `s`. The inductive step rests on the spectral decomposition of the
-inverse Gram matrix of `g(x)` on the fixed model-space basis. -/
-
 /-- **Non-negativity of the pointwise `(0, s)` inner product on the
 diagonal**. The proof proceeds by induction on `s`. The base case is
 immediate from `tensorInnerPointwise_0s_zero_arity_nonneg`. The inductive
@@ -357,23 +332,19 @@ theorem tensorInnerPointwise_0s_nonneg
   | zero => exact tensorInnerPointwise_0s_zero_arity_nonneg (I := I) (M := M) g x S
   | succ s ih =>
       classical
-      -- Set up notation.
       set n := Module.finrank ℝ E with hn_def
       set Ginv : Matrix (Fin n) (Fin n) ℝ :=
         (gramMatrixAt (I := I) (M := M) g x)⁻¹ with hGinv
       have hGinv_psd : Ginv.PosSemidef := by
         simpa [hGinv] using gramMatrixAt_inv_posSemidef (I := I) (M := M) g x
       have hGinv_herm : Ginv.IsHermitian := hGinv_psd.isHermitian
-      -- Family `(S_i)ᵢ := (S.curryLeft eᵢ)ᵢ`.
       set Sfam : Fin n → ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ :=
         fun i => S.curryLeft ((chartModelBasis E) i) with hSfam_def
-      -- Apply the spectral theorem to `Ginv`.
       have hspec := hGinv_herm.spectral_theorem
       set U : Matrix (Fin n) (Fin n) ℝ :=
         (hGinv_herm.eigenvectorUnitary : Matrix (Fin n) (Fin n) ℝ) with hU_def
       set μ : Fin n → ℝ := hGinv_herm.eigenvalues with hμ_def
       have hμ_nonneg : ∀ k, 0 ≤ μ k := hGinv_psd.eigenvalues_nonneg
-      -- Expand `Ginv i j = ∑ₖ μ k * (U i k * U j k)`.
       have hGinv_entry :
           ∀ i j : Fin n,
             Ginv i j = ∑ k : Fin n, μ k * (U i k * U j k) := by
@@ -381,7 +352,6 @@ theorem tensorInnerPointwise_0s_nonneg
         have hUDstar : Ginv = U * (Matrix.diagonal μ) * star U := by
           have := hspec
           simp only [Unitary.conjStarAlgAut_apply] at this
-          -- `RCLike.ofReal ∘ eigenvalues = eigenvalues` on ℝ.
           have hofReal : (RCLike.ofReal ∘ hGinv_herm.eigenvalues :
               Fin n → ℝ) = hGinv_herm.eigenvalues := by
             funext k
@@ -389,9 +359,7 @@ theorem tensorInnerPointwise_0s_nonneg
           rw [hofReal] at this
           exact this
         rw [hUDstar]
-        -- `((U * D) * star U) i j = ∑ k, (U * D) i k * (star U) k j`.
         rw [Matrix.mul_apply]
-        -- For each k, `(U * D) i k = ∑ l, U i l * D l k = U i k * μ k`.
         have hUD_entry : ∀ k : Fin n,
             (U * Matrix.diagonal μ) i k = U i k * μ k := by
           intro k
@@ -405,14 +373,11 @@ theorem tensorInnerPointwise_0s_nonneg
         refine Finset.sum_congr rfl ?_
         intro k _
         rw [hUD_entry k]
-        -- `(star U) k j = U j k` for real U.
         have hstar : (star U) k j = U j k := by
           simp [Matrix.star_apply, star_trivial]
         rw [hstar]
         ring
-      -- Now rewrite the tensor inner product in the `s + 1` case.
       rw [tensorInnerPointwise_0s_succ]
-      -- Substitute the spectral decomposition entrywise and commute sums.
       have hrewrite :
           ∑ i : Fin n, ∑ j : Fin n,
               Ginv i j *
@@ -422,8 +387,6 @@ theorem tensorInnerPointwise_0s_nonneg
               tensorInnerPointwise_0s (I := I) (M := M) s g x
                 (∑ i : Fin n, U i k • Sfam i)
                 (∑ j : Fin n, U j k • Sfam j) := by
-        -- For each `k`, using bilinearity of the inner pairing:
-        -- `⟨∑ i Uᵢₖ Sᵢ, ∑ j Uⱼₖ Sⱼ⟩ = ∑ i ∑ j Uᵢₖ Uⱼₖ ⟨Sᵢ, Sⱼ⟩`.
         have hbilin :
             ∀ k : Fin n,
               tensorInnerPointwise_0s (I := I) (M := M) s g x
@@ -437,7 +400,6 @@ theorem tensorInnerPointwise_0s_nonneg
             rw [tensorInnerPointwise_0s_sum_sum (g := g) (x := x) (s := s)
                   Finset.univ Finset.univ (fun i => U i k) (fun j => U j k)
                   Sfam Sfam]
-        -- Therefore `μ k * ⟨_, _⟩ = ∑ i ∑ j μ k * Uᵢₖ Uⱼₖ ⟨Sᵢ, Sⱼ⟩`.
         have hRHS :
             ∑ k : Fin n, μ k *
               tensorInnerPointwise_0s (I := I) (M := M) s g x
@@ -457,7 +419,6 @@ theorem tensorInnerPointwise_0s_nonneg
           intro j _
           ring
         rw [hRHS]
-        -- Substitute `Ginv i j = ∑ k μ k (Uᵢₖ Uⱼₖ)` on the LHS.
         have hLHS :
             ∑ i : Fin n, ∑ j : Fin n,
                 Ginv i j *
@@ -474,8 +435,6 @@ theorem tensorInnerPointwise_0s_nonneg
           intro j _
           rw [hGinv_entry i j, Finset.sum_mul]
         rw [hLHS]
-        -- Swap sum order: i, j, k → k, i, j. First swap inner j, k → k, j,
-        -- then outer i, k → k, i.
         have h_swap_inner :
             ∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n,
                 (μ k * (U i k * U j k)) *
@@ -490,18 +449,10 @@ theorem tensorInnerPointwise_0s_nonneg
           rw [Finset.sum_comm]
         rw [h_swap_inner, Finset.sum_comm]
       rw [hrewrite]
-      -- Each term is non-negative.
       refine Finset.sum_nonneg ?_
       intro k _
       refine mul_nonneg (hμ_nonneg k) ?_
       exact ih (∑ i : Fin n, U i k • Sfam i)
-
-/-! ## Positive-definiteness of the `(0, s)` pointwise inner product
-
-Using the spectral decomposition of the inverse Gram matrix and the strict
-positivity of its eigenvalues (inherited from positive-definiteness of the
-Gram matrix itself), the zero-arity characterisation
-`⟨S, S⟩ = 0 ↔ S = 0` extends to all arities. -/
 
 /-- **Positive-definiteness of the pointwise `(0, s)` inner product on the
 diagonal**: `⟨S, S⟩ = 0 ↔ S = 0`. Proved by induction on the arity, using
@@ -667,8 +618,6 @@ theorem tensorInnerPointwise_0s_eq_zero_iff
               unitary (Matrix (Fin n) (Fin n) ℝ))
         have hSfam_zero : ∀ j : Fin n, Sfam j = 0 := by
           intro j
-          -- Helper: `c • ∑ i, f i = ∑ i, (c • f i)` for CMLM-valued sums,
-          -- derived by evaluating both sides at the same tuple.
           have hsmul_sum : ∀ (A : Finset (Fin n)) (c : ℝ)
               (f : Fin n → ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ),
               c • (∑ i ∈ A, f i) = ∑ i ∈ A, c • f i := fun A c f => by
@@ -726,7 +675,6 @@ theorem tensorInnerPointwise_0s_eq_zero_iff
           have hrhs :
               ∑ i : Fin n, (∑ k : Fin n, U j k * U i k) • Sfam i = Sfam j := by
             rw [Finset.sum_congr rfl (fun i _ => by rw [hcoef_one i])]
-            -- `∑ i, (if j = i then 1 else 0) • Sfam i = Sfam j` by Finset.sum_ite_eq.
             have h_ite_eq : ∀ i : Fin n,
                 (if j = i then (1 : ℝ) else 0) • Sfam i
                   = if j = i then Sfam i else 0 := by
@@ -763,15 +711,6 @@ theorem tensorInnerPointwise_0s_eq_zero_iff
       · rw [h]
         exact tensorInnerPointwise_0s_zero_left
           (I := I) (M := M) g x (s + 1) 0
-
-/-! ## Algebraic properties of the mixed `(r, s)` pointwise inner product
-
-The mixed `(r, s)` pointwise inner product (`tensorInnerPointwise`) is
-defined by lowering the `r` upper slots through the metric and reducing
-to the covariant `(0, r + s)` case. The algebraic properties below follow
-directly from the corresponding properties of `tensorInnerPointwise_0s`
-together with `ContinuousLinearMap.map_add`, `ContinuousLinearMap.map_smul`,
-and `map_zero` of the lowering map. -/
 
 /-- Symmetry of the mixed pointwise inner product. -/
 theorem tensorInnerPointwise_symm
@@ -851,8 +790,6 @@ theorem tensorInnerPointwise_nonneg
   unfold tensorInnerPointwise
   exact tensorInnerPointwise_0s_nonneg (I := I) (M := M) g x (r + s) _
 
-/-! ### Positive definiteness of the mixed pointwise inner product -/
-
 /-- **Positive-definiteness of the mixed pointwise inner product on the
 diagonal**: `⟨S, S⟩ = 0 ↔ S = 0`. Combines the analogous result on the
 covariant side with injectivity of the index-lowering map. -/
@@ -866,21 +803,6 @@ theorem tensorInnerPointwise_eq_zero_iff
   · exact lowerAllUpperIndices_injective (I := I) (M := M) g r s x
       (h.trans (map_zero _).symm)
   · rw [h, map_zero]
-
-/-! ## Pointwise Cauchy–Schwarz inequality
-
-The pointwise metric-induced inner product on covariant `(0, s)`-tensors is
-a real-valued symmetric bilinear form which is non-negative on the diagonal
-and which vanishes on the diagonal only on the zero tensor. From these
-purely algebraic ingredients we deduce the Cauchy–Schwarz inequality
-`B(S, T)² ≤ B(S, S) · B(T, T)` and its absolute-value form
-`|B(S, T)| ≤ ‖S‖ · ‖T‖`, where `‖·‖` is the metric-induced pointwise norm.
-
-The proof is the standard "discriminant" argument applied to the real
-quadratic `t ↦ B(S - t • T, S - t • T) ≥ 0`. The statement and proof do
-not invoke any Mathlib `InnerProductSpace` instance: the inner product
-`tensorInnerPointwise` is intrinsically a function-valued bilinear pairing,
-and Cauchy–Schwarz is established by direct calculation. -/
 
 /-- **Cauchy–Schwarz** for the pointwise metric-induced inner product on
 covariant `(0, s)`-tensors at a point: the squared inner product is bounded
@@ -898,10 +820,6 @@ theorem tensorInnerPointwise_0s_sq_le_mul
     tensorInnerPointwise_0s_nonneg (I := I) (M := M) g x s S
   have hc_nn : 0 ≤ c :=
     tensorInnerPointwise_0s_nonneg (I := I) (M := M) g x s T
-  -- The quadratic `q(t) := B(S + t • T, S + t • T) ≥ 0` for all `t : ℝ`,
-  -- expanded by bilinearity to `a + 2 t b + t² c`. We then apply the
-  -- discriminant test by substituting the optimal `t`, namely `t = -b / c`
-  -- when `c > 0` (handled by case-splitting below).
   have hbilin_pair :
       ∀ u v : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ,
         ∀ p q : ℝ,
@@ -917,9 +835,6 @@ theorem tensorInnerPointwise_0s_sq_le_mul
     have h0 : 0 ≤
         tensorInnerPointwise_0s (I := I) (M := M) s g x (S + t • T) (S + t • T) :=
       tensorInnerPointwise_0s_nonneg (I := I) (M := M) g x s _
-    -- Expand by bilinearity:
-    -- B(S + tT, S + tT) = B(S, S) + B(S, tT) + B(tT, S) + B(tT, tT)
-    --                  = a + t b + t b + t² c (using symmetry).
     have hexpand :
         tensorInnerPointwise_0s (I := I) (M := M) s g x (S + t • T) (S + t • T) =
           a + 2 * (t * b) + t ^ 2 * c := by
@@ -945,17 +860,13 @@ theorem tensorInnerPointwise_0s_sq_le_mul
       ring
     rw [hexpand] at h0
     exact h0
-  -- Discriminant test. Two cases on `c = 0` vs `c > 0`.
   rcases (lt_or_eq_of_le hc_nn) with hc_pos | hc_zero
-  · -- Case `c > 0`. Take `t = -b / c`. Then `0 ≤ a + 2 * (-b/c) * b + (-b/c)² * c
-    -- = a - 2 b²/c + b²/c = a - b²/c`. Multiply by `c > 0`: `b² ≤ a c`.
-    have hc_ne : c ≠ 0 := ne_of_gt hc_pos
+  · have hc_ne : c ≠ 0 := ne_of_gt hc_pos
     have h := hquad (-b / c)
     have hsimp : a + 2 * (-b / c * b) + (-b / c) ^ 2 * c = a - b ^ 2 / c := by
       field_simp
       ring
     rw [hsimp] at h
-    -- Multiply both sides by `c > 0`.
     have hmul : 0 * c ≤ (a - b ^ 2 / c) * c :=
       mul_le_mul_of_nonneg_right h (le_of_lt hc_pos)
     rw [zero_mul] at hmul
@@ -963,8 +874,7 @@ theorem tensorInnerPointwise_0s_sq_le_mul
       field_simp
     rw [hrhs] at hmul
     linarith
-  · -- Case `c = 0`. Then `T = 0` by positive-definiteness, so `B(S, T) = 0`.
-    have hc_eq : c = 0 := hc_zero.symm
+  · have hc_eq : c = 0 := hc_zero.symm
     have hT_zero : T = 0 :=
       (tensorInnerPointwise_0s_eq_zero_iff (I := I) (M := M) g x s T).mp hc_eq
     have hb_zero : b = 0 := by
@@ -994,7 +904,6 @@ theorem abs_tensorInnerPointwise_le_mul
       tensorPointwiseNorm (I := I) (M := M) g r s x S *
         tensorPointwiseNorm (I := I) (M := M) g r s x T := by
   unfold tensorPointwiseNorm
-  -- Step 1: square root of the squared CS bound, using monotonicity of sqrt.
   have hcs := tensorInnerPointwise_sq_le_mul (I := I) (M := M) g r s x S T
   have hSS_nn :
       0 ≤ tensorInnerPointwise (I := I) (M := M) g r s x S S :=
@@ -1002,7 +911,6 @@ theorem abs_tensorInnerPointwise_le_mul
   have hTT_nn :
       0 ≤ tensorInnerPointwise (I := I) (M := M) g r s x T T :=
     tensorInnerPointwise_nonneg (I := I) (M := M) g r s x T
-  -- |b| ≤ sqrt(a c), and sqrt(a c) = sqrt a * sqrt c.
   have h1 : |tensorInnerPointwise (I := I) (M := M) g r s x S T| ≤
       Real.sqrt (tensorInnerPointwise (I := I) (M := M) g r s x S S *
         tensorInnerPointwise (I := I) (M := M) g r s x T T) := by
@@ -1010,7 +918,6 @@ theorem abs_tensorInnerPointwise_le_mul
         (tensorInnerPointwise (I := I) (M := M) g r s x S T) ^ 2 ≤
           tensorInnerPointwise (I := I) (M := M) g r s x S S *
             tensorInnerPointwise (I := I) (M := M) g r s x T T := hcs
-    -- Take square roots: `|b| = sqrt(b²) ≤ sqrt(a c)`.
     have habs_sq :
         |tensorInnerPointwise (I := I) (M := M) g r s x S T| =
           Real.sqrt

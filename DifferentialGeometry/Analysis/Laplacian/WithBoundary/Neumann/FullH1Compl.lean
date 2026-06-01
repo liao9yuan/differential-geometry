@@ -66,8 +66,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace (EuclideanSpace ℝ (Fin n)) :=
   borel _
 private local instance : BorelSpace (EuclideanSpace ℝ (Fin n)) := ⟨rfl⟩
@@ -80,8 +78,6 @@ private abbrev I_half (n : ℕ) [NeZero n] :
   modelWithCornersEuclideanHalfSpace n
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## The H¹ Hilbert completion -/
 
 /-- The H¹ Hilbert space for the full Neumann variant on `(M, g)`,
 defined as the Hausdorff completion of the pre-Hilbert space
@@ -100,8 +96,6 @@ noncomputable def smoothToH1ComplFullNeumann
     (f : FullSmoothScalar g) :
     smoothToH1ComplFullNeumann g f = (f : H1ComplFullNeumann g) := rfl
 
-/-! ## L²-membership of full smooth scalars -/
-
 /-- A smooth scalar function on a closed manifold-with-boundary lies in
 `MemLp 2`: it is continuous and supported in a compact set (since `M`
 itself is compact). -/
@@ -113,8 +107,6 @@ lemma FullSmoothScalar.memLp_two
     riemannianVolumeMeasure_isFiniteMeasureOnCompacts (I := I_half n) (M := M) g
   exact f.smooth.continuous.memLp_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
-
-/-! ## The L² inclusion as a linear map -/
 
 /-- The linear map from full smooth scalars to `Lp ℝ 2 μ_g`. -/
 noncomputable def smoothToLpLinFullNeumann
@@ -136,8 +128,6 @@ noncomputable def smoothToLpLinFullNeumann
     (g : SmoothRiemannianMetric (I_half n) M)
     (f : FullSmoothScalar g) :
     smoothToLpLinFullNeumann g f = f.memLp_two.toLp f.toFun := rfl
-
-/-! ## Squared L² norm equals `∫ f²` -/
 
 lemma FullSmoothScalar.norm_smoothToLp_sq
     {g : SmoothRiemannianMetric (I_half n) M} (f : FullSmoothScalar g) :
@@ -197,8 +187,6 @@ lemma FullSmoothScalar.norm_smoothToLp_le_one_mul
     ‖smoothToLpLinFullNeumann g f‖ ≤ 1 * ‖f‖ := by
   rw [one_mul]; exact f.norm_smoothToLp_le
 
-/-! ## The L² inclusion as a continuous linear map -/
-
 /-- The continuous linear map from full smooth scalars to `Lp ℝ 2 μ_g`. -/
 noncomputable def smoothToLpFullNeumann
     (g : SmoothRiemannianMetric (I_half n) M) :
@@ -211,8 +199,6 @@ noncomputable def smoothToLpFullNeumann
     (g : SmoothRiemannianMetric (I_half n) M)
     (f : FullSmoothScalar g) :
     smoothToLpFullNeumann g f = f.memLp_two.toLp f.toFun := rfl
-
-/-! ## The L² inclusion extended to the H¹ completion -/
 
 private lemma denseRange_toComplL_fullSmoothScalar
     (g : SmoothRiemannianMetric (I_half n) M) :
@@ -258,8 +244,6 @@ noncomputable def H1ComplFullNeumannToLp
     (denseRange_toComplL_fullSmoothScalar g)
     (isUniformInducing_toComplL_fullSmoothScalar g) f
 
-/-! ## The bilinear form `B = inner` on `H1ComplFullNeumann` -/
-
 /-- The bilinear form `B(u, v) := ⟨u, v⟩` packaged as a continuous
 bilinear map on `H1ComplFullNeumann g`. This is the inner product
 itself. -/
@@ -284,8 +268,6 @@ lemma H1ComplFullNeumannBilin_isCoercive
   rw [real_inner_self_eq_norm_sq]
   ring_nf
   exact le_refl _
-
-/-! ## The L² functional `L_f` for `f ∈ Lp ℝ 2 μ_g` -/
 
 /-- The map `f ↦ L_f` where `L_f v := ⟨H1ComplFullNeumannToLp v, f⟩_{L²}`. -/
 noncomputable def lpFunctionalCLMFullNeumann
@@ -313,8 +295,6 @@ noncomputable def lpFunctionalCLMFullNeumann
     ⟪H1ComplFullNeumannToLp g v, f⟫_ℝ
   rw [innerSL_apply_apply]
   exact real_inner_comm (H1ComplFullNeumannToLp g v) f
-
-/-! ## The Lax–Milgram resolvent -/
 
 noncomputable def H1ComplFullNeumannLaxMilgramEquiv
     (g : SmoothRiemannianMetric (I_half n) M) :
@@ -379,8 +359,6 @@ theorem resolventFullNeumann_inner_eq_lpFunctional
   unfold resolventFullNeumann
   rw [ContinuousLinearMap.comp_apply, H1ComplFullNeumannRieszRepr_inner,
     lpFunctionalCLMFullNeumann_apply]
-
-/-! ## Sanity tests -/
 
 example (g : SmoothRiemannianMetric (I_half n) M) : Type _ := H1ComplFullNeumann g
 

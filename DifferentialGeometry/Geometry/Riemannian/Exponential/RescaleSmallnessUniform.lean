@@ -76,15 +76,6 @@ section UniformSmallRescaling
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-! ## The orbit-projection bridge
-
-For a fixed uniform chart-pushed flow `Φ` and base velocity
-`v_base ∈ ball 0 ρ`, the small-velocity rescaling identity at every
-`t ∈ Ioo (-T/t') (T/t')` with working scale `t'` follows by reducing
-both maximal geodesics to the same orbit-projection value. We isolate
-the bridge so that both `foot_in_source_throughout` and
-`maximalGeodesic_rescale_at_one_of_small` consume it directly. -/
-
 /-- **Orbit-projection value of the rescaled geodesic.** For the uniform
 chart-pushed flow data `Φ` and a base velocity `v` in the uniform ball,
 the maximal geodesic at the rescaled velocity `t' • v` evaluated at any
@@ -107,20 +98,16 @@ private theorem maximalGeodesic_rescaled_eq_orbit_proj
     maximalGeodesic (I := I) g p (t' • v) s =
       (extChartAt I p).symm
         (Φ (((extChartAt I p p, v) : E × E), t' * s)).1 := by
-  -- The on-`Ioo` projection identity.
   have h_proj_eq :=
     chartFlowOrbitLiftRescaled_proj_eq_maximalGeodesic_on_Ioo (I := I)
       (g := g) (p := p) (v := v) (T := T) (t' := t') ht'_pos
       (Φ := Φ) hΦ_init hΦ_target hΦ_phase hs
-  -- The orbit-projection target confinement at the rescaled time `t' * s`.
   have hts_Ioo : t' * s ∈ Set.Ioo (-T) T :=
     mul_mem_Ioo_of_pos_of_lt ht'_pos hs
   have hΦ_target_ts := hΦ_target (t' * s) (Set.Ioo_subset_Icc_self hts_Ioo)
   have h_proj :=
     chartFlowOrbitLiftRescaled_proj (I := I) p v t' (Φ := Φ) s hΦ_target_ts
   rw [← h_proj_eq, h_proj]
-
-/-! ## Step 1 — foot-in-source on `[0, 1]` for small velocity -/
 
 /-- **Foot-in-source throughout `[0, 1]` for small velocity.** There
 exists `ρ > 0` such that for every initial velocity `v` with `‖v‖ < ρ`
@@ -142,21 +129,16 @@ theorem foot_in_source_throughout
   classical
   obtain ⟨ρ₀, T, Φ, hρ₀_pos, hT_pos, hΦ_init, hΦ_target, hΦ_phase, _hF⟩ :=
     exists_uniform_existence_interval (I := I) (g := g) (p := p)
-  -- Working scale.
   set t' : ℝ := T / 2 with ht'_def
   have ht'_pos : 0 < t' := by rw [ht'_def]; linarith
   have ht'_lt_T : t' < T := by rw [ht'_def]; linarith
   refine ⟨t' * ρ₀, mul_pos ht'_pos hρ₀_pos, ?_⟩
   intro v hv t ht
-  -- Base velocity. Work with the `E`-typed copy `w` of `v` so that all
-  -- scalar actions below are unambiguously in `E`.
   set w : E := (v : E) with hw_def
   have ht'_ne : t' ≠ 0 := ne_of_gt ht'_pos
   obtain ⟨vb, hvb_def⟩ : ∃ vb : E, vb = (1 / t') • w := ⟨_, rfl⟩
-  -- `t' • vb = v`.
   have hvb_resc : t' • vb = (v : E) := by
     rw [hvb_def, smul_smul, mul_one_div, div_self ht'_ne, one_smul, hw_def]
-  -- `vb ∈ ball 0 ρ₀`.
   have hw_norm : ‖w‖ < t' * ρ₀ := by rw [hw_def]; exact hv
   have hvb_ball : vb ∈ Metric.ball (0 : E) ρ₀ := by
     rw [Metric.mem_ball, dist_zero_right, hvb_def, norm_smul]
@@ -164,14 +146,12 @@ theorem foot_in_source_throughout
     rw [one_div, ← div_eq_inv_mul]
     rw [div_lt_iff₀ ht'_pos]
     linarith [hw_norm, mul_comm t' ρ₀]
-  -- `t ∈ Ioo (-T/t') (T/t')`, since `T/t' = 2`.
   have hT_div : T / t' = 2 := by
     rw [ht'_def]; field_simp
   have ht_Ioo : t ∈ Set.Ioo (-T / t') (T / t') := by
     rw [neg_div, hT_div]
     obtain ⟨ht0, ht1⟩ := ht
     exact ⟨by linarith, by linarith⟩
-  -- The geodesic equals the rescaled orbit projection.
   have hmem_v : (v : E) = t' • vb := hvb_resc.symm
   have h_eq :
       maximalGeodesic (I := I) g p v t =
@@ -181,26 +161,20 @@ theorem foot_in_source_throughout
       (v := vb) (T := T) (t' := t') ht'_pos
       (hΦ_init vb hvb_ball) (hΦ_target vb hvb_ball) (hΦ_phase vb hvb_ball)
       (s := t) ht_Ioo
-    -- Rewrite the velocity `t' • vb` to `v`.
     rw [show (t' • vb : TangentSpace I p) = v from hvb_resc] at h
     exact h
   rw [h_eq]
-  -- The orbit projection is in the chart source.
   have hts_Icc : t' * t ∈ Set.Icc (-T) T := by
     obtain ⟨ht0, ht1⟩ := ht
     refine ⟨?_, ?_⟩
     · nlinarith [ht'_pos.le, hT_pos.le]
     · nlinarith [ht'_lt_T.le, ht'_pos.le]
   have hΦ_target_tt := hΦ_target vb hvb_ball (t' * t) hts_Icc
-  -- `chartFlowOrbitLiftRescaled_proj_mem_chartAt_source` with `s := t` (so `t' * s = t' * t`).
   have hsrc :=
     chartFlowOrbitLiftRescaled_proj_mem_chartAt_source (I := I) p vb t' t
       hΦ_target_tt
-  -- Rewrite the lift projection to the explicit orbit form.
   rw [chartFlowOrbitLiftRescaled_proj (I := I) p vb t' t hΦ_target_tt] at hsrc
   exact hsrc
-
-/-! ## Step 2 — the uniform small-velocity rescaling identity -/
 
 /-- **Uniform small-velocity geodesic rescaling at time `1`.** There is
 an explicit `ρ > 0` (namely `(T / 2) * ρ₀` for the uniform flow radii
@@ -231,7 +205,6 @@ theorem maximalGeodesic_rescale_at_one_of_small
   refine ⟨t' * ρ₀, mul_pos ht'_pos hρ₀_pos, ?_⟩
   intro v hv t ht
   obtain ⟨ht0, ht1⟩ := ht
-  -- Base velocity in the uniform ball. Work with the `E`-typed copy `w` of `v`.
   set w : E := (v : E) with hw_def
   have ht'_ne : t' ≠ 0 := ne_of_gt ht'_pos
   obtain ⟨vb, hvb_def⟩ : ∃ vb : E, vb = (1 / t') • w := ⟨_, rfl⟩
@@ -245,14 +218,9 @@ theorem maximalGeodesic_rescale_at_one_of_small
     rw [div_lt_iff₀ ht'_pos]
     linarith [hw_norm, mul_comm t' ρ₀]
   have hT_div : T / t' = 2 := by rw [ht'_def]; field_simp
-  -- Handle `t = 0` separately: both sides are `p`.
   rcases eq_or_lt_of_le ht0 with ht_zero | ht_pos
-  · -- `t = 0`.
-    subst ht_zero
-    -- LHS: `maximalGeodesic g p (0 • v) 1 = maximalGeodesic g p 0 1 = p`.
-    -- RHS: `maximalGeodesic g p v 0 = p`.
+  · subst ht_zero
     rw [zero_smul, maximalGeodesic_zero (I := I) g p v]
-    -- `maximalGeodesic g p 0 1 = p` via the zero-velocity witness propagation.
     have h1 : (1 : ℝ) ∈ maximalGeodesicInterval (I := I) g p
         (0 : TangentSpace I p) :=
       maximalGeodesicWitness_zero_all_times (I := I) g p 1
@@ -262,9 +230,7 @@ theorem maximalGeodesic_rescale_at_one_of_small
       maximalGeodesicChosenCurve_spec (I := I) g p (0 : TangentSpace I p) h1
     exact maximalGeodesicWitness_zero_curve_eq_p (I := I)
       hJ_open hJ_conn h0J hγ 1 h1J
-  · -- `0 < t ≤ 1`.
-    -- RHS: reduce `maximalGeodesic g p v t` to the orbit value at `t' * t`.
-    have ht_Ioo : t ∈ Set.Ioo (-T / t') (T / t') := by
+  · have ht_Ioo : t ∈ Set.Ioo (-T / t') (T / t') := by
       rw [neg_div, hT_div]; exact ⟨by linarith, by linarith⟩
     have h_rhs :
         maximalGeodesic (I := I) g p v t =
@@ -276,7 +242,6 @@ theorem maximalGeodesic_rescale_at_one_of_small
         (s := t) ht_Ioo
       rw [show (t' • vb : TangentSpace I p) = v from hvb_resc] at h
       exact h
-    -- LHS: `t • v = (t * t') • vb`, working scale `t'' := t * t' ∈ (0, T)`.
     set t'' : ℝ := t * t' with ht''_def
     have ht''_pos : 0 < t'' := by rw [ht''_def]; exact mul_pos ht_pos ht'_pos
     have ht''_lt_T : t'' < T := by
@@ -284,7 +249,6 @@ theorem maximalGeodesic_rescale_at_one_of_small
     have htvb : (t'' • vb : E) = t • w := by
       rw [ht''_def, ← smul_smul, hvb_resc, hw_def]
     have h_tv : (t • v : TangentSpace I p) = t'' • vb := htvb.symm
-    -- `1 ∈ Ioo (-T/t'') (T/t'')` since `t'' < T`.
     have hone_Ioo : (1 : ℝ) ∈ Set.Ioo (-T / t'') (T / t'') := by
       have hlt : 1 < T / t'' := (one_lt_div ht''_pos).mpr ht''_lt_T
       have hneg : -T / t'' < 0 := by
@@ -301,7 +265,6 @@ theorem maximalGeodesic_rescale_at_one_of_small
       rw [show (t'' • vb : TangentSpace I p) = t • v from h_tv.symm] at h
       exact h
     rw [h_lhs, h_rhs]
-    -- Both orbit times agree: `t'' * 1 = t' * t`.
     congr 2
     rw [ht''_def, mul_one, mul_comm]
 

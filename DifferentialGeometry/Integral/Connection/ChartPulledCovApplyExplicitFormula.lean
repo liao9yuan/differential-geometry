@@ -95,20 +95,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Base-set membership at a good-set point
-
-The chart-`α` `(r, s)`-bundle trivialisation has base set equal to the
-intersection of the `(0, r)` and `(0, s)`-bundle base sets, each of which is
-the chart-`α` tangent-bundle base set. A chart-`α` Levi-Civita good-set
-point sits inside the latter by `chartLeviCivitaGoodSet_mem_baseSet`. -/
-
 private lemma good_set_mem_baseSet_rs
     (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ chartLeviCivitaGoodSet (I := I) α) :
     b ∈ (trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).baseSet := by
   classical
-  -- Reduce to the intersection form of the `(r, s)`-bundle base set.
   change b ∈ ((trivializationAt (Tensor0SModel r ℝ E)
       (fun y : M => Tensor0SSpace r I y) α).baseSet) ∩
     ((trivializationAt (Tensor0SModel s ℝ E)
@@ -118,8 +110,6 @@ private lemma good_set_mem_baseSet_rs
     exact chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
   · change b ∈ (trivializationAt E (TangentSpace I) α).baseSet
     exact chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
-
-/-! ## The headline identity -/
 
 /-- **Chart-pulled explicit formula for the first covariant derivative.**
 
@@ -188,21 +178,14 @@ theorem chart_pulled_covApply_explicit_formula
   letI _h_fib : FiberBundle (TensorRSModel r s ℝ E)
       (fun x : M => TensorRSSpace r s I x) :=
     tensorRSBundle_fiber r s
-  -- Base-set membership at `b`.
   have hb_baseRS : b ∈ (trivializationAt (TensorRSModel r s ℝ E)
       (fun y : M => TensorRSSpace r s I y) α).baseSet :=
     good_set_mem_baseSet_rs (I := I) r s α hb
   have hb_baseT : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
-  -- Step 1: rewrite `covApply cov_RS B T b = cov_RS T b (B b)`
-  --   = `chartTensorRSCovariantDerivative r s g α T.toFun B.toFun b`
-  --   via the first-derivative chart agreement.
   have hAgree :=
     chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet (I := I) (M := M)
       g r s α T B (b := b) hb
-  -- `tensorRSChartE_section_repr r s α (covApply ...) b` is by definition
-  -- `triv.continuousLinearMapAt ℝ b ((covApply cov_RS B T) b)`, and
-  -- `(covApply cov_RS B T) b = cov_RS T b (B b)`.
   have hLHS_eq :
       tensorRSChartE_section_repr (I := I) r s α
           (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
@@ -211,25 +194,18 @@ theorem chart_pulled_covApply_explicit_formula
             (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
           (chartTensorRSCovariantDerivative (I := I) r s g α
             T.toFun B.toFun b) := by
-    -- Unfold the chart-trivialised representation.
     change (trivializationAt (TensorRSModel r s ℝ E)
           (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
         ((covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
             (LeviCivita (I := I) g)) B.toFun T.toFun) b) = _
-    -- `covApply cov_RS B T b = cov_RS T b (B b)`.
     change (trivializationAt (TensorRSModel r s ℝ E)
           (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
         ((TensorRSNabla.tensorRSCovariantDerivative I M r s
             (LeviCivita (I := I) g)).toFun T.toFun b (B.toFun b)) = _
-    -- Apply the chart-frame agreement.
     rw [hAgree.symm]
   rw [hLHS_eq]
-  -- Step 2: unfold the chart-frame covariant derivative into its three pieces.
   rw [chartTensorRSCovariantDerivative_def (I := I) r s g α T.toFun B.toFun b]
-  -- Step 3: distribute the trivialisation CLM across `+`, `-` and finite sums.
-  -- `triv.continuousLinearMapAt ℝ b (A + Bs - Cs) = ... + ... - ...`.
   rw [map_sub, map_add]
-  -- Distribute across the input-slot sum.
   rw [show (trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
         (∑ k : Fin r,
@@ -242,7 +218,6 @@ theorem chart_pulled_covApply_explicit_formula
             T.toFun B.toFun b k) from
     map_sum ((trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b) _ _]
-  -- Distribute across the output-slot sum.
   rw [show (trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
         (∑ l : Fin s,
@@ -255,26 +230,11 @@ theorem chart_pulled_covApply_explicit_formula
             T.toFun B.toFun b l) from
     map_sum ((trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b) _ _]
-  -- Step 4: identify the intrinsic piece's image under the trivialisation
-  -- with the bare Fréchet derivative.
-  -- `tensorRSIntrinsicChartCLM r s α T b (B b)` unfolds to
-  --   `tensorRSChartFiberFromModel r s α b (fderiv ℝ
-  --     (tensorRSChartE_section_repr r s α T.toFun ∘ (extChartAt I α).symm)
-  --     (extChartAt I α b) (trivToE α b (B b)))`
-  -- and `tensorRSChartFiberFromModel = triv.symmL ℝ b`, so on the base set
-  -- `triv.continuousLinearMapAt ℝ b (triv.symmL ℝ b w) = w` for any `w`.
   rw [tensorRSIntrinsicChartCLM_apply (I := I) r s α T.toFun b (B.toFun b)]
-  -- Unfold `tensorRSChartFiberFromModel` and apply the round-trip identity.
   unfold tensorRSChartFiberFromModel
   rw [(trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt_symmL
       (R := ℝ) hb_baseRS]
-
-/-! ## Chart-target version
-
-The chart-target version follows by substituting `b = (extChartAt I α).symm y`
-for `y` in the chart target with `(extChartAt I α).symm y` in the chart-`α`
-Levi-Civita good set. -/
 
 /-- **Chart-target version of the chart-pulled explicit formula.**
 
@@ -320,23 +280,13 @@ theorem chart_pulled_covApply_explicit_formula_target
             (chartTensorRSOutputSlotCorrection (I := I) r s g α
               T.toFun B.toFun ((extChartAt I α).symm y) l) := by
   classical
-  -- Apply the base-point version at `b := (extChartAt I α).symm y`.
   have h := chart_pulled_covApply_explicit_formula (I := I) (M := M)
     g r s α T B (b := (extChartAt I α).symm y) hy_good
-  -- `extChartAt I α ((extChartAt I α).symm y) = y` on the chart target.
   have hround : extChartAt I α ((extChartAt I α).symm y) = y :=
     (extChartAt I α).right_inv hy_target
-  -- The LHS is the composition, evaluated at `y`.
-  -- Rewrite the `extChartAt I α b` in the intrinsic piece by `hround`.
   simp only [Function.comp_apply]
   rw [hround] at h
   exact h
-
-/-! ## `SmoothCcTensor` corollary
-
-For convenience downstream, we also ship the chart-target version specialised
-to the bundled smooth-compactly-supported tensor type `SmoothCcTensor g r s`,
-unwrapping `T.toSection`. -/
 
 /-- **Chart-target version for `SmoothCcTensor`.** Specialisation of
 `chart_pulled_covApply_explicit_formula_target` to a smooth, compactly

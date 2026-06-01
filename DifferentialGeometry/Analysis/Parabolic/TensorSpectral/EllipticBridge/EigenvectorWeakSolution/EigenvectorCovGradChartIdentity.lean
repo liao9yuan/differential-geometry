@@ -87,27 +87,12 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Laplacian.ChartLocalLaplacian
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Trivialisation-fibre of a covariant-gradient bundle element
-
-On the chart source, the chart-`α`-trivialisation fibre of a covariant-gradient
-bundle element `Φ` (a continuous linear map from a tangent vector to an
-`(r, s)`-tensor) post-composes `Φ` (with its tangent input re-trivialised
-through `triv_{TM}.symmL`) with the `(r, s)`-tensor-bundle `continuousLinearMapAt`.
-This is the `Trivialization.continuousLinearMap` formula for the hom bundle,
-holding definitionally. -/
 
 /-- The chart-`α`-trivialisation fibre of a covariant-gradient bundle element
 `Φ` (a continuous linear map from a tangent vector to an `(r, s)`-tensor) is the
@@ -124,16 +109,6 @@ private lemma covGradBundle_trivFibre_eq'
           (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b).comp
         (Φ.comp ((trivializationAt E (TangentSpace I) α).symmL ℝ b)) :=
   rfl
-
-/-! ## The raw chart-component formula for the covariant gradient
-
-The headline below mirrors `tensorChartComponentRaw_prependCovGradSlot`. There
-the section carries `dζ` un-differentiated in its leftmost slot; here the
-section is the genuine covariant gradient, so after the leftmost-slot projection
-the remaining `(r, s)`-component is the directional covariant derivative of `S`
-along the chart-frame basis vector — which the chart-coordinate
-covariant-derivative component formula resolves into the chart-Euclidean partial
-plus the Christoffel correction. -/
 
 /-- **The raw chart-component formula for the section-level covariant
 gradient.** For a smooth compactly-supported `(r, s)`-tensor section `S`, a
@@ -186,16 +161,12 @@ theorem tensorChartComponentRaw_covGrad
   letI : VectorBundle ℝ (TensorRSModel r (s + 1) ℝ E)
       (fun z : M => TensorRSSpace r (s + 1) I z) :=
     tensorRSBundle_vector r (s + 1)
-  -- The chart-source preimage `b` of `y`.
   set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
-  -- `b` lies in the chart source.
   have hb_chart : b ∈ (chartAt H α).source :=
     symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy
-  -- The tangent-bundle trivialisation base set is the chart source.
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [TangentBundle.trivializationAt_baseSet]
     exact hb_chart
-  -- The `(r, s + 1)`-tensor-bundle trivialisation base set is the chart source.
   have hb_baseS1 : b ∈ (trivializationAt (TensorRSModel r (s + 1) ℝ E)
       (fun z : M => TensorRSSpace r (s + 1) I z) α).baseSet := by
     change b ∈ ((trivializationAt (Tensor0SModel r ℝ E)
@@ -203,7 +174,6 @@ theorem tensorChartComponentRaw_covGrad
       ((trivializationAt (Tensor0SModel (s + 1) ℝ E)
         (fun z : M => Tensor0SSpace (s + 1) I z) α).baseSet)
     exact ⟨hb_base, hb_base⟩
-  -- `b` lies in the chart-`α` Levi-Civita good set.
   have hy_pre : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
     rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
     exact hy
@@ -217,56 +187,33 @@ theorem tensorChartComponentRaw_covGrad
     refine ⟨⟨?_, ?_⟩, hb_int⟩
     · rw [extChartAt_source]; exact hb_chart
     · rw [TangentBundle.trivializationAt_baseSet]; exact hb_chart
-  -- The covariant-gradient model element: the bundled directional covariant
-  -- derivative of `S` at `b`.
   set Φ : TangentSpace I b →L[ℝ] TensorRSSpace r s I b :=
     tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)
       (fun z : M => S.toSection z) b with hΦ_def
-  -- The raw component is the chart-frame projection of `tensorTrivProj`.
   rw [tensorChartComponentRaw_def]
   unfold tensorTrivProj
-  -- The underlying section value of `covGrad g r s S` is `covGradBundleEquiv Φ`.
   rw [covGrad_toSection_apply (I := I) (M := M) g r s S b]
   rw [show (tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)
         (fun z : M => S.toSection z) b) = Φ from rfl]
-  -- `continuousLinearMapAt b X = (triv ⟨b, X⟩).2` on the base set.
   rw [Bundle.Trivialization.continuousLinearMapAt_apply,
     (trivializationAt (TensorRSModel r (s + 1) ℝ E)
         (fun z : M => TensorRSSpace r (s + 1) I z) α).coe_linearMapAt_of_mem
       (R := ℝ) hb_baseS1]
   beta_reduce
-  -- The trivialisation compatibility of the covariant-gradient bundle equivalence.
   rw [covGradBundleEquiv_trivializationAt_eq (I := I) (M := M) r s α hb_base Φ]
-  -- The chart-frame projection evaluates on `dualCovariantCMM r Idx` and the
-  -- basis tuple `chartModelBasis E ∘ Jdx`; `covGradModelEquiv` reads `Jdx 0` off
-  -- the leftmost slot.
   rw [tensorChartComponentProjection_apply,
     covGradModelEquiv_apply (E := E) r s]
-  -- The covariant-gradient bundle trivialisation fibre of `Φ`, evaluated at the
-  -- leftmost basis direction.
   rw [covGradBundle_trivFibre_eq' (I := I) (M := M) r s α b Φ]
   rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
-  -- `triv_{TM}.symmL b (chartModelBasis E (Jdx 0)) = chartBasisVecFiber α (Jdx 0) b`.
   have hsymmL : (trivializationAt E (TangentSpace I) α).symmL ℝ b
       ((chartModelBasis E) (Jdx 0)) =
       chartBasisVecFiber (I := I) α (Jdx 0) b := rfl
   rw [hsymmL]
-  -- `Φ` along the chart-frame basis vector is the directional covariant
-  -- derivative `tensorCovDerivAt g r s S b (chartBasisVecFiber α (Jdx 0) b)`.
   rw [show Φ (chartBasisVecFiber (I := I) α (Jdx 0) b) =
       tensorCovDerivAt (I := I) (M := M) g r s S b
         (chartBasisVecFiber (I := I) α (Jdx 0) b) from rfl]
-  -- On the chart-`α` Levi-Civita good set the directional covariant derivative
-  -- equals the chart-coordinate covariant derivative.
   rw [tensorCovDerivAt_eq_chartTensorRSCovariantDerivative (I := I) (M := M)
     g r s S α (Jdx 0) hb_good]
-  -- The remaining factor is the raw chart-frame `(r, s)`-component of the
-  -- chart-coordinate covariant derivative with the leftmost slot removed: the
-  -- chart-coordinate covariant-derivative component formula resolves it into the
-  -- chart-Euclidean partial plus the Christoffel correction. The `(0, s)`-tuple
-  -- `Matrix.vecTail (chartModelBasis E ∘ Jdx)` is, definitionally, the tuple
-  -- `chartModelBasis E ∘ Matrix.vecTail Jdx`, so the projected factor matches
-  -- the component-formula left-hand side.
   exact covDerivComponent_eq_euclidPartial_add_lowerOrder (I := I) (M := M)
     g r s S α (Jdx 0) Idx (Matrix.vecTail Jdx) hy
 

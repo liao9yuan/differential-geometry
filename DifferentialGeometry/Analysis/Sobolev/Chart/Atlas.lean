@@ -50,8 +50,6 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## General-POU chart-pushed function and norm -/
-
 /-- The general chart-pushed `Wkp`-membership predicate, parametrised by an
 arbitrary smooth partition of unity `ρ : SmoothPartitionOfUnity M I M univ`
 indexed by `M` and subordinate to the canonical chart family. -/
@@ -82,8 +80,6 @@ def wkpNormChartGen [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
       (chartPushed (I := I) (M := M) ρ α u)
       (chartTargetEuclid (I := I) (M := M) α)
 
-/-! ## Identity with the canonical chart-atlas POU -/
-
 /-- For the canonical chart-atlas POU, `MemWkpChartGen` reduces to `MemWkpChart`. -/
 theorem MemWkpChartGen_chartAtlasPOU
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
@@ -102,13 +98,6 @@ theorem wkpNormChartGen_chartAtlasPOU
     wkpNormChartGen (I := I) (M := M) g k p
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) u =
       wkpNormChart (I := I) (M := M) g k p u := rfl
-
-/-! ## Pointwise extensional congruence
-
-If two smooth POUs `ρ, ρ'` agree at every point as functions `M → ℝ`, then
-their chart-pushed images coincide and the resulting norms are equal. This is
-the simplest form of the equivalence: two POUs that are extensionally equal
-yield the same norm. -/
 
 /-- Pointwise equality of POU values implies pointwise equality of chart-pushed
 functions. -/
@@ -155,8 +144,6 @@ theorem MemWkpChartGen_congr_of_pointwise_eq
       h α u
     rw [hcp]
     exact H α
-
-/-! ## Basic structural lemmas — generalised forms -/
 
 omit [IsManifold I ∞ M] in
 /-- Generalised chart-pushed-of-zero is zero. -/
@@ -282,8 +269,6 @@ theorem MemWkpChartGen_sub
   rw [hEq] at h
   exact h
 
-/-! ## Triangle inequality and scalar identity for the general norm -/
-
 /-- The triangle inequality for the general chart-based norm. -/
 theorem wkpNormChartGen_add_le
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
@@ -326,8 +311,6 @@ theorem wkpNormChartGen_const_smul
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     (hu α) c
 
-/-! ## Order monotonicity -/
-
 /-- Membership in `W^{k+1,p}_chart` (general POU) implies membership in
 `W^{k,p}_chart` (general POU). -/
 theorem MemWkpChartGen.le_succ
@@ -353,11 +336,6 @@ theorem MemWkpChartGen.le_of_le
     MemWkpChartGen (I := I) (M := M) g k p ρ u := by
   intro α
   exact (h α).le_of_le hk
-
-/-! ## Finiteness on compact `M`
-
-Mirroring `wkpNormChart_lt_top_of_memWkpChart`: on a compact manifold the
-general chart-based norm is finite for any function in `MemWkpChartGen`. -/
 
 /-- On compact `M`, the general chart-based norm is finite for any function
 in `MemWkpChartGen`. -/
@@ -426,13 +404,6 @@ theorem wkpNormChartGen_lt_top_of_memWkpChartGen
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_lt_top_of_memWkp
     (d := Module.finrank ℝ E) (hu α)
 
-/-! ## Locally-finite POU support analysis
-
-The following lemmas describe support behaviour of POUs and their products on a
-compact manifold. They are foundational for cross-POU comparison arguments,
-which compare a `ρ`-weighted norm of `u` with a `ρ'`-weighted norm of `u` via
-the identity `ρ_α u = ρ_α (∑_β ρ'_β) u = ∑_β (ρ_α · ρ'_β) u`. -/
-
 /-- The set of POU members with non-empty support is finite on a compact
 manifold. -/
 theorem support_set_finite_of_compactSpace
@@ -478,8 +449,6 @@ theorem tsupport_pou_mul_subset
     simp only [Function.mem_support]
     intro h; exact hx (by rw [h]; ring)
 
-/-! ## Subordinate POU support is contained in chart sources -/
-
 /-- If `ρ` is subordinate to the canonical chart family, the `tsupport` of each
 POU member lies inside the corresponding chart source. -/
 theorem tsupport_subset_chartAt_source
@@ -496,12 +465,6 @@ theorem support_subset_chartAt_source
     (α : M) :
     Function.support (ρ α : M → ℝ) ⊆ (chartAt H α).source :=
   (subset_tsupport _).trans (tsupport_subset_chartAt_source ρ hρ α)
-
-/-! ## Chart-pushed support analysis
-
-The chart-pushed function `chartPushed ρ α u : EuclideanSpace ℝ (Fin n) → ℝ`
-inherits compact support from the POU member `ρ α` whenever the manifold is
-compact. -/
 
 /-- On a compact manifold, every POU member is bounded uniformly in `α`. The
 existing `SmoothPartitionOfUnity.le_one` already gives a pointwise bound by `1`;
@@ -523,12 +486,6 @@ theorem chartPushed_pointwise_bound
       ≤ 1 * |u ((extChartAt I α).symm (toEuclidean.symm y))| :=
         mul_le_mul_of_nonneg_right hbound hu_nonneg
     _ = |u ((extChartAt I α).symm (toEuclidean.symm y))| := one_mul _
-
-/-! ## Finite-form chart-Sobolev norm on compact `M`
-
-On a compact manifold, the `tsum` form of `wkpNormChartGen` reduces to a finite
-sum over the (finite) set of POU members with non-empty support. We package
-this as `wkpNormChartFin`. -/
 
 /-- The finite-support form of the general chart-based Sobolev norm on compact
 `M`: a finite sum over the (finite) set of POU members with non-empty support. -/
@@ -555,19 +512,16 @@ theorem wkpNormChartGen_eq_wkpNormChartFin
     wkpNormChartGen (I := I) (M := M) g k p ρ u =
       wkpNormChartFin (I := I) (M := M) g k p ρ u := by
   classical
-  -- Explicit per-α term.
   let f : M → ℝ≥0∞ := fun α =>
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
       (d := Module.finrank ℝ E) k p
       (chartPushed (I := I) (M := M) ρ α u)
       (chartTargetEuclid (I := I) (M := M) α)
-  -- Both sides equal forms of summing `f`.
   have hLHS : wkpNormChartGen (I := I) (M := M) g k p ρ u = ∑' α : M, f α := rfl
   have hRHS : wkpNormChartFin (I := I) (M := M) g k p ρ u =
       ∑ α ∈ (support_set_finite_of_compactSpace (I := I) (M := M) ρ).toFinset,
         f α := rfl
   rw [hLHS, hRHS]
-  -- The function `f` vanishes on every α with empty support.
   have hf_zero_off : ∀ α : M, (Function.support (ρ α : M → ℝ)) = ∅ →
         f α = 0 := by
     intro α hα
@@ -591,7 +545,6 @@ theorem wkpNormChartGen_eq_wkpNormChartFin
     exact DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_zero_fun_zero
       (d := Module.finrank ℝ E) hp
       (chartTargetEuclid_isOpen (I := I) (M := M) α)
-  -- Apply tsum_eq_sum.
   rw [tsum_eq_sum]
   intro α hα
   have hαS : α ∉ {α : M | (Function.support (ρ α : M → ℝ)).Nonempty} := by
@@ -604,8 +557,6 @@ theorem wkpNormChartGen_eq_wkpNormChartFin
       exact hαS hne
     exact Set.not_nonempty_iff_eq_empty.mp h_not_nonempty
   exact hf_zero_off α hempty
-
-/-! ## Counting Argument: number of distinct POU members on compact M -/
 
 /-- On compact `M`, the cardinality of the set of POU members with non-empty
 support is determined by a `Finset` extracted from local finiteness. -/
@@ -624,12 +575,6 @@ theorem mem_chartTransitionFinset_iff
   unfold chartTransitionFinset
   rw [Set.Finite.mem_toFinset]
   rfl
-
-/-! ## Foundational chart-transition data
-
-These foundational lemmas are useful for downstream atlas-comparison
-arguments. They expose the smoothness of chart transitions in the canonical
-atlas on the boundaryless case. -/
 
 /-- An auxiliary handle: smoothness of the chart-transition derivative on the
 open overlap of two canonical chart sources. -/

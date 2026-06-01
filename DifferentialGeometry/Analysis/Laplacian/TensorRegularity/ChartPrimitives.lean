@@ -67,23 +67,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## Chart-coordinate primitives
-
-The scalar chart components `tensorChartComp g r s T α Idx Jdx` of an
-`(r, s)`-tensor section are functions on the standard Euclidean model space
-`EuclideanSpace ℝ (Fin n)` (`n = finrank ℝ E`). Their chart-coordinate analysis
-is expressed in terms of:
-
-* the inverse Gram matrix, transported to the Euclidean model space;
-* the chart Christoffel symbols, transported to the Euclidean model space;
-* the partial derivatives in the standard Euclidean basis directions.
-
-The `E`-side chart primitives `chartInvGramOnE`, `chartChristoffel` (defined in
-`Geometry/`) are functions on the model fibre `E`. We precompose with the
-canonical linear isometry `toEuclidean.symm : EuclideanSpace ℝ (Fin n) ≃L[ℝ] E`
-to obtain `EuclideanSpace`-side versions matching the domain of
-`tensorChartComp`. -/
-
 /-- The partial derivative of a scalar function on the Euclidean model space in
 the `i`-th standard-basis direction. -/
 def euclidPartial (i : Fin (Module.finrank ℝ E))
@@ -141,14 +124,6 @@ def weightedInvGramEuclid (g : SmoothRiemannianMetric I M) (α : M)
     weightedInvGramEuclid (I := I) g α k l y =
       chartDensityOnE (I := I) g α (toEuclidean.symm y) *
         chartInvGramEuclid (I := I) g α k l y := rfl
-
-/-! ### Smoothness of the chart-coordinate primitives
-
-The inverse Gram matrix, the Christoffel symbols, and the volume density are
-`C^∞` on the interior of the `E`-chart target. Transporting through the linear
-isometry `toEuclidean` (a `C^∞` map both ways), they are `C^∞` on
-`chartTargetEuclid α`, which is the open `toEuclidean`-image of the `E`-chart
-target. -/
 
 /-- Pulling a Euclidean chart-target point back along `toEuclidean.symm` lands
 in the `E`-chart target. -/
@@ -240,20 +215,12 @@ theorem weightedInvGramEuclid_contDiffOn
         chartInvGramEuclid (I := I) g α k l y from rfl]
   exact hdensity.mul (chartInvGramEuclid_contDiffOn (I := I) (M := M) g α k l)
 
-/-! ### Smoothness of the chart components and their partials
-
-The scalar chart component `tensorChartComp g r s T α Idx Jdx` is `C^∞` on all
-of `EuclideanSpace ℝ (Fin n)` (`tensorChartComp_contDiff`). Its iterated
-Euclidean partial derivatives are therefore again `C^∞`. -/
-
 /-- A `C^∞` function on the Euclidean model space has `C^∞` `i`-th partial
 derivative. -/
 private lemma euclidPartial_contDiff
     {u : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
     (hu : ContDiff ℝ ∞ u) (i : Fin (Module.finrank ℝ E)) :
     ContDiff ℝ ∞ (euclidPartial (E := E) i u) := by
-  -- `euclidPartial i u = (fderiv ℝ u ·) (single i 1)`; `fderiv` of a `C^∞`
-  -- function is `C^∞`, and evaluation at a fixed vector is a CLM.
   have hfd : ContDiff ℝ ∞ (fun y => fderiv ℝ u y) :=
     hu.fderiv_right (m := ∞) (by rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from rfl])
   have hcomp : euclidPartial (E := E) i u =
@@ -289,12 +256,6 @@ theorem tensorChartComp_euclidPartial_partial_contDiff
   euclidPartial_contDiff (E := E)
     (tensorChartComp_euclidPartial_contDiff (I := I) (M := M) g r s T α Idx Jdx l) k
 
-/-! ### Compact support of the chart component's partial derivative
-
-The first Euclidean partial derivative of the chart component vanishes outside
-the (compact) support of the chart component, hence has compact support. A
-finite sum of compactly-supported functions is again compactly supported. -/
-
 /-- The first Euclidean partial derivative of the chart component has compact
 support: it vanishes outside the (compact) support of the chart component. -/
 private lemma tensorChartComp_euclidPartial_hasCompactSupport
@@ -306,17 +267,12 @@ private lemma tensorChartComp_euclidPartial_hasCompactSupport
     HasCompactSupport (euclidPartial (E := E) m
       (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)) := by
   classical
-  -- `euclidPartial m u = (fderiv ℝ u ·) (single m 1)`; the Fréchet derivative
-  -- of a compactly-supported function is compactly supported.
   have hcs : HasCompactSupport
       (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx) :=
     tensorChartComp_hasCompactSupport (I := I) (M := M) g r s T α Idx Jdx
   have hfd : HasCompactSupport (fun y => fderiv ℝ
       (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx) y) :=
     hcs.fderiv ℝ
-  -- Evaluation at `single m 1` keeps compact support: the partial derivative
-  -- vanishes wherever the Fréchet derivative vanishes, hence its support is
-  -- contained in the (compact) `tsupport` of the Fréchet derivative.
   have hsubset : (Function.support (euclidPartial (E := E) m
       (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx))) ⊆
       tsupport (fun y => fderiv ℝ

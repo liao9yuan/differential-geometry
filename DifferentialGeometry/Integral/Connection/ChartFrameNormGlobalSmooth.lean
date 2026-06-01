@@ -62,8 +62,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Local instances: regularity from T2 + local compactness -/
-
 /-- File-local: `LocallyCompactSpace M`. The model is finite-dim normed, so it
 is locally compact; transfer through `ChartedSpace.locallyCompactSpace`. -/
 private lemma locallyCompactSpace_M (I : ModelWithCorners ℝ E H)
@@ -80,15 +78,11 @@ private lemma regularSpace_M (I : ModelWithCorners ℝ E H)
   haveI : R1Space M := T2Space.r1Space
   infer_instance
 
-/-! ## Step 1: the compact partition-of-unity tsupport -/
-
 private lemma pouTsupport_subset_chartAt_source (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
       (chartAt H α).source :=
   (chartAtlasPOU_isSubordinate I M) α
-
-/-! ## Step 2: nested compact-open separation -/
 
 /-- From a compact `K` inside an open `U`, produce an open `V` with
 `K ⊆ V ⊆ closure V ⊆ U`. Uses `IsCompact.exists_isOpen_closure_subset` with
@@ -120,8 +114,6 @@ private lemma exists_open_closure_open_closure_subset_open_of_isCompact
       (M := M) I hclos_V₁_compact hU_open hclos_V₁_U
   refine ⟨V₁, V₂, hV₁_open, hV₂_open, hKV₁, hclos_V₁_V₂, hclos_V₂_U⟩
 
-/-! ## Step 3: the global bump function -/
-
 /-- Data for the global bump: open sets `V₁ ⊆ V₂` whose closures nest inside
 the chart source, and a smooth bump `ψ : M → ℝ` that is `1` on `closure V₁`,
 `0` on `V₂ᶜ`, and takes values in `[0, 1]`. -/
@@ -143,8 +135,6 @@ private lemma exists_globalBump_data (α : M) :
       (pouTsupport_isCompact (I := I) (M := M) α)
       ((chartAt H α).open_source)
       (pouTsupport_subset_chartAt_source (I := I) (M := M) α)
-  -- Apply manifold Urysohn to `s := V₂ᶜ` (closed) and `t := closure V₁`
-  -- (closed); they are disjoint since `closure V₁ ⊆ V₂`.
   set s : Set M := V₂ᶜ
   set t : Set M := closure V₁
   have hs_closed : IsClosed s := isClosed_compl_iff.mpr hV₂_open
@@ -157,8 +147,6 @@ private lemma exists_globalBump_data (α : M) :
     have hx_V₂ : x ∈ V₂ := hclos_V₁_V₂ hx_t
     have hx_notV₂ : x ∉ V₂ := hx_s
     exact (hx_notV₂ hx_V₂).elim
-  -- Use the manifold Urysohn theorem at smoothness `∞`.
-  -- Note: it takes `n : ℕ∞`; pass `(⊤ : ℕ∞)`, which equals `∞` for `ContMDiff`.
   have h_urysohn :
       ∃ f : M → ℝ,
         ContMDiff I 𝓘(ℝ) ((⊤ : ℕ∞) : WithTop ℕ∞) f ∧
@@ -168,15 +156,12 @@ private lemma exists_globalBump_data (α : M) :
     exists_contMDiff_zero_iff_one_iff_of_isClosed (n := (⊤ : ℕ∞)) I
       hs_closed ht_closed hdisjoint
   obtain ⟨ψ, hψ_smooth, hψ_range, hψ_s, hψ_t⟩ := h_urysohn
-  -- Convert ContMDiff … (⊤ : ℕ∞) to ContMDiff … ∞.
   have hψ_smooth' : ContMDiff I 𝓘(ℝ) ∞ ψ := by
     have : ((⊤ : ℕ∞) : WithTop ℕ∞) = (∞ : WithTop ℕ∞) := rfl
     rw [this] at hψ_smooth
     exact hψ_smooth
   exact ⟨V₁, V₂, ψ, hV₁_open, hV₂_open, hKV₁, hclos_V₁_V₂, hclos_V₂_src,
     hψ_smooth', hψ_range, hψ_t, hψ_s⟩
-
-/-! ## Step 4: choice projections -/
 
 /-- The chosen open inner set `V₁` for `α`. -/
 private noncomputable def globalBumpV₁ (α : M) : Set M :=
@@ -246,8 +231,6 @@ private lemma globalBumpψ_eq_zero_off_V₂ (α : M) {b : M}
     globalBumpψ (I := I) (M := M) α b = 0 :=
   ((globalBumpData_spec (I := I) (M := M) α).2.2.2.2.2.2.2.2 b).mp hb
 
-/-! ## Step 5: the global smooth section -/
-
 /-- A globally smooth tangent-bundle section that, on an open neighbourhood of
 the chart-α partition-of-unity tsupport, agrees with the un-bumped Gram-Schmidt
 chart-frame section `chartFrameNorm g α i`. -/
@@ -258,7 +241,6 @@ noncomputable def chartFrameNormGlobalSmooth
   classical
   set u : Set M := (chartAt H α).source with hu_def
   have hu_open : IsOpen u := (chartAt H α).open_source
-  -- tsupport ψ ⊆ closure V₂ ⊆ u.
   have hψ_tsupport_subset_clV₂ :
       tsupport (globalBumpψ (I := I) (M := M) α) ⊆
         closure (globalBumpV₂ (I := I) (M := M) α) := by
@@ -277,7 +259,6 @@ noncomputable def chartFrameNormGlobalSmooth
       (closure_globalBumpV₂_subset_chartAt_source (I := I) (M := M) α)
   have hψ_smoothOn : ContMDiffOn I 𝓘(ℝ) ∞ (globalBumpψ (I := I) (M := M) α) u :=
     (globalBumpψ_contMDiff (I := I) (M := M) α).contMDiffOn
-  -- chartFrameNorm g α i is C^∞ on the chart source (= base set).
   have hs_smoothOn : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
       (T% (fun b : M => chartFrameNorm (I := I) g α i b)) u := by
     rw [show u = (trivializationAt E (TangentSpace I) α).baseSet from rfl]
@@ -297,8 +278,6 @@ private lemma chartFrameNormGlobalSmooth_toFun_apply
   classical
   unfold chartFrameNormGlobalSmooth
   rfl
-
-/-! ## Stage A: the first headline -/
 
 /-- An open neighbourhood of the chart-α partition-of-unity tsupport on which
 the globally smooth section equals the un-bumped Gram-Schmidt chart-frame
@@ -327,8 +306,6 @@ theorem chartFrameNormGlobalSmooth_eq_chartFrameNorm_on_pouTsupportNbhd
       globalBumpψ_eq_one_on_closure_V₁ (I := I) (M := M) α (subset_closure hb)
     rw [chartFrameNormGlobalSmooth_toFun_apply, hψ, one_smul]
 
-/-! ## Stage C: orthonormality of the globally smooth frame -/
-
 /-- **Orthonormality of the globally smooth chart-α frame**. On the intersection
 of the chart-α partition-of-unity tsupport with the chart-α Levi-Civita good
 set, the globally smooth section `chartFrameNormGlobalSmooth g α i` satisfies
@@ -352,26 +329,20 @@ theorem chartFrameNormGlobalSmooth_orthonormal_on_pouTsupportGoodSet
         ((chartFrameNormGlobalSmooth (I := I) (M := M) g α j).toFun b) =
       if i = j then 1 else 0 := by
   classical
-  -- Extract the open neighbourhood and local-equality data for index `i`.
   obtain ⟨U_i, _hU_i_open, htsupp_U_i, hU_i_source, hU_eq_i⟩ :=
     chartFrameNormGlobalSmooth_eq_chartFrameNorm_on_pouTsupportNbhd
       (I := I) (M := M) g α i
-  -- Extract the analogous data for index `j` (the open `U` depends on `i`).
   obtain ⟨U_j, _hU_j_open, htsupp_U_j, _hU_j_source, hU_eq_j⟩ :=
     chartFrameNormGlobalSmooth_eq_chartFrameNorm_on_pouTsupportNbhd
       (I := I) (M := M) g α j
-  -- `b` is in the partition-of-unity tsupport, hence in both `U_i` and `U_j`.
   have hb_pou : b ∈ tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) := hb.1
   have hb_U_i : b ∈ U_i := htsupp_U_i hb_pou
   have hb_U_j : b ∈ U_j := htsupp_U_j hb_pou
-  -- Via `U_i ⊆ chart source`, get `b ∈ chart source`.
   have hb_source : b ∈ (chartAt H α).source := hU_i_source hb_U_i
-  -- Convert chart-source membership to trivialization base-set membership.
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [trivializationAt_baseSet_eq_chartAt_source]
     exact hb_source
-  -- The global section equals `chartFrameNorm g α _` at `b` (for both indices).
   have h_eq_i : (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b =
       chartFrameNorm (I := I) g α i b := hU_eq_i b hb_U_i
   have h_eq_j : (chartFrameNormGlobalSmooth (I := I) (M := M) g α j).toFun b =

@@ -47,8 +47,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## (a) Chart-α pullback identification of `chartCoeffOnE α W i` -/
-
 /-- On a neighborhood of `extChartAt I α x` (with `x ∈ chartLeviCivitaGoodSet α`),
 `chartCoeffOnE α W i` equals the composition of the linear coord functional
 `b.coord i` with the chart pullback of `chartE_section_repr α W`. -/
@@ -96,8 +94,6 @@ private lemma differentiableAt_chartE_pullback_W_alpha
   have hW_at : MDiffAt (T% fun y => W y) x := W.mdifferentiableAt
   exact differentiableAt_chartE_pullback_of_MDiff (I := I) α hx hW_at
 
-/-! ## (b) Chart-α Christoffel expansion of LC(W) at the chart-α frame -/
-
 /-- At a chart-`α` good-set point `x`, the Levi-Civita covariant derivative of `W`
 in the direction of the chart-`α` basis-frame vector `chartBasisVecFiber α j x`
 reads, in the chart-`α` model basis, as
@@ -125,21 +121,17 @@ private lemma chart_christoffel_expansion_nabla_W_alpha_chartBasis
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hx
   have hW_at : MDiffAt (T% fun y => W y) x := W.mdifferentiableAt
   set v : TangentSpace I x := chartBasisVecFiber (I := I) α j x with hv_def
-  -- `trivToE α x v = e_j` via the round-trip identity.
   have h_trivToE_v : trivToE (I := I) α x v = (chartModelBasis E) j := by
     rw [hv_def]
     have heq : chartBasisVecFiber (I := I) α j x =
         trivFromE (I := I) α x ((chartModelBasis E) j) := rfl
     rw [heq, trivToE_trivFromE (I := I) α hx_base ((chartModelBasis E) j)]
-  -- Step 1: LeviCivita ↝ chartLeviCivita ↝ explicit chart formula.
   have hLC_apply :
       (LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x v =
         chartLeviCivita (I := I) g α (W : ∀ x : M, TangentSpace I x) x v :=
     LeviCivita_chart_apply (I := I) g α hx hW_at v
   rw [hLC_apply]
   rw [chartLeviCivita_apply (I := I) g α (W : ∀ x : M, TangentSpace I x) hx v]
-  -- The argument of `trivFromE α x (...)` is `(fderiv … (trivToE α x v) + Christoffel(...) v)`.
-  -- Apply trivToE to the trivFromE; the round-trip on the chart base set gives the identity.
   rw [show trivToE (I := I) α x (trivFromE (I := I) α x
         (fderiv ℝ (chartE_section_repr (I := I) α
             (W : ∀ x : M, TangentSpace I x) ∘ (extChartAt I α).symm)
@@ -156,9 +148,7 @@ private lemma chart_christoffel_expansion_nabla_W_alpha_chartBasis
       trivToE_trivFromE (I := I) α hx_base _]
   rw [map_add, Finsupp.add_apply]
   congr 1
-  · -- fderiv piece via chain rule + chartCoeffOnE bridge.
-    rw [h_trivToE_v]
-    -- (b.repr (fderiv F (φ x) e_j)) k = ((b.coord k) (fderiv F (φ x) e_j))
+  · rw [h_trivToE_v]
     rw [show ((chartModelBasis E).repr
           (fderiv ℝ (chartE_section_repr (I := I) α (W : ∀ x : M, TangentSpace I x) ∘
             (extChartAt I α).symm) (extChartAt I α x) ((chartModelBasis E) j))) k =
@@ -166,7 +156,6 @@ private lemma chart_christoffel_expansion_nabla_W_alpha_chartBasis
           (fderiv ℝ (chartE_section_repr (I := I) α (W : ∀ x : M, TangentSpace I x) ∘
             (extChartAt I α).symm) (extChartAt I α x) ((chartModelBasis E) j)) from by
       rw [← Module.Basis.coord_apply]; rfl]
-    -- Identify with `partialDeriv j (chartCoeffOnE α W k) (φ_α x)` via the eventuallyEq.
     rw [← ContinuousLinearMap.comp_apply]
     rw [← ContinuousLinearMap.fderiv (((chartModelBasis E).coord k).toContinuousLinearMap)]
     rw [← fderiv_comp (x := extChartAt I α x)
@@ -175,11 +164,9 @@ private lemma chart_christoffel_expansion_nabla_W_alpha_chartBasis
     unfold partialDeriv
     have hev := chartCoeffOnE_alpha_eq_basis_comp_pullback_eventuallyEq (I := I) W α hx k
     rw [hev.fderiv_eq]
-  · -- Christoffel piece: expand + collapse δ + identify with chartCoeff.
-    rw [christoffelCorrection_apply (I := I) g α x
+  · rw [christoffelCorrection_apply (I := I) g α x
           (chartE_section_repr (I := I) α (W : ∀ x : M, TangentSpace I x) x) v]
     rw [h_trivToE_v]
-    -- Pull b.repr through the triple sum.
     rw [show ((chartModelBasis E).repr
           (∑ i' : Fin (Module.finrank ℝ E),
             ∑ j' : Fin (Module.finrank ℝ E),
@@ -201,7 +188,6 @@ private lemma chart_christoffel_expansion_nabla_W_alpha_chartBasis
                 ((chartModelBasis E).repr ((chartModelBasis E) k')) k from by
       simp only [map_sum, map_smul, Finsupp.coe_finset_sum, Finset.sum_apply,
         Finsupp.coe_smul, Pi.smul_apply, smul_eq_mul]]
-    -- Helpers: basis repr Kronecker.
     have hrepr_basis : ∀ (r s : Fin (Module.finrank ℝ E)),
         ((chartModelBasis E).repr ((chartModelBasis E) r)) s =
           if r = s then (1 : ℝ) else 0 := by
@@ -210,7 +196,6 @@ private lemma chart_christoffel_expansion_nabla_W_alpha_chartBasis
       by_cases h : r = s
       · subst h; simp
       · simp [h]
-    -- Collapse k'-sum: only k' = k contributes.
     have hkc : ∀ (i' j' : Fin (Module.finrank ℝ E)),
         (∑ k' : Fin (Module.finrank ℝ E),
             (((chartModelBasis E).repr ((chartModelBasis E) j)) i' *
@@ -249,7 +234,6 @@ private lemma chart_christoffel_expansion_nabla_W_alpha_chartBasis
               (chartE_section_repr (I := I) α
                 (W : ∀ x : M, TangentSpace I x) x)) j'
       from Finset.sum_congr rfl (fun i' _ => Finset.sum_congr rfl (fun j' _ => hkc i' j'))]
-    -- Collapse i'-sum: only i' = j contributes.
     rw [show
       ∑ i' : Fin (Module.finrank ℝ E),
         ∑ j' : Fin (Module.finrank ℝ E),
@@ -274,7 +258,6 @@ private lemma chart_christoffel_expansion_nabla_W_alpha_chartBasis
       have hjj : ((chartModelBasis E).repr ((chartModelBasis E) j)) j = 1 := by
         rw [hrepr_basis j j, if_pos rfl]
       rw [hjj]; ring]
-    -- b.repr (chartE_section_repr α W x) j' = chartCoeff α W j' x.
     have hrepr_chartCoeff : ∀ (j' : Fin (Module.finrank ℝ E)),
         ((chartModelBasis E).repr
           (chartE_section_repr (I := I) α
@@ -286,8 +269,6 @@ private lemma chart_christoffel_expansion_nabla_W_alpha_chartBasis
       rfl
     refine Finset.sum_congr rfl (fun j' _ => ?_)
     rw [hrepr_chartCoeff j']
-
-/-! ## (c) Chart-α metric compatibility identity at a good-set point -/
 
 /-- Chart-`α` metric compatibility: at a chart-`α` good-set point `x`, the partial
 derivative of the chart-`α` Gram entry along the `k`-th model-basis direction
@@ -307,8 +288,6 @@ private lemma metric_compat_coord_identity_alpha
     chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx
   exact
     partialDeriv_chartGramOnE_eq_chartChristoffel_sum (I := I) g α i j k hint
-
-/-! ## (d) Chart-α reformulation of `chartLieDerivMetricMatrix` -/
 
 /-- Chart-`α` algebraic form of `chartLieDerivMetricMatrix g W α i j x` at a
 chart-`α` good-set point. The right-hand side mirrors the symbolic shape used in
@@ -375,7 +354,6 @@ private lemma chartLieDerivMetricMatrix_alpha_algebraic
       (fun l _ hl => by rw [if_neg hl]; ring)
       (fun hm => (hm (Finset.mem_univ k)).elim)]
     simp
-  -- Substitute δ-collapses on RHS.
   conv_rhs =>
     rw [show
       (∑ k : Fin (Module.finrank ℝ E),
@@ -409,7 +387,6 @@ private lemma chartLieDerivMetricMatrix_alpha_algebraic
         rw [← Finset.sum_add_distrib]
         refine Finset.sum_congr rfl (fun k _ => ?_)
         rw [hcoll2 k, mul_add]]
-  -- Split convective via hmc.
   rw [show
     (∑ k : Fin (Module.finrank ℝ E),
       chartCoeff (I := I) α W k x *
@@ -423,7 +400,6 @@ private lemma chartLieDerivMetricMatrix_alpha_algebraic
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [hmc k, mul_add]]
-  -- Reshape: H1 ↔ B; H2 ↔ D.
   have hreshape_H1 :
       (∑ k : Fin (Module.finrank ℝ E),
         chartCoeff (I := I) α W k x *
@@ -497,8 +473,6 @@ private lemma chartLieDerivMetricMatrix_alpha_algebraic
   rw [hreshape_H1, hreshape_H2]
   ring
 
-/-! ## (e) The chart-α frame identity for the metric Lie-derivative matrix -/
-
 /-- **Chart-`α` frame identity for the metric Lie-derivative matrix
 (chart-basis-frame form).**  For a smooth Riemannian metric `g`, a smooth tangent
 vector field `W`, a chart base point `α : M`, indices `i, j`, and a manifold
@@ -524,11 +498,9 @@ theorem chartLieDerivMetricMatrix_eq_lieDerivMetric_chartBasis
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hx
   have hx_src : x ∈ (extChartAt I α).source :=
     chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hx
-  -- Step A: apply Cartan formula to RHS to get a sum of two inner-product terms.
   set vα : TangentSpace I x := chartBasisVecFiber (I := I) α i x with hvα_def
   set wα : TangentSpace I x := chartBasisVecFiber (I := I) α j x with hwα_def
   rw [cartan_formula_for_lie_deriv_metric (I := I) g W x vα wα]
-  -- Step B: expand each inner product via `g_inner_eq_chart_sum` in chart-α basis.
   have hRHS1 :
       g.inner x ((LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x vα) wα =
       ∑ i' : Fin (Module.finrank ℝ E),
@@ -552,7 +524,6 @@ theorem chartLieDerivMetricMatrix_eq_lieDerivMetric_chartBasis
     g_inner_eq_chart_sum (I := I) g α hx_base hx_src vα
       ((LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x wα)
   rw [hRHS1, hRHS2]
-  -- Step C: simplify `trivToE α x vα = e_i` and `trivToE α x wα = e_j` via round-trip.
   have h_trivToE_vα : trivToE (I := I) α x vα = (chartModelBasis E) i := by
     rw [hvα_def]
     have heq : chartBasisVecFiber (I := I) α i x =
@@ -577,7 +548,6 @@ theorem chartLieDerivMetricMatrix_eq_lieDerivMetric_chartBasis
     by_cases h : r = s
     · subst h; simp
     · simp [h]
-  -- Reshape RHS1: only `j' = j` survives in the second factor (b.repr e_j = δ_{j, j'}).
   rw [show
     (∑ i' : Fin (Module.finrank ℝ E),
       ∑ j' : Fin (Module.finrank ℝ E),
@@ -600,7 +570,6 @@ theorem chartLieDerivMetricMatrix_eq_lieDerivMetric_chartBasis
         (fun hm => (hm (Finset.mem_univ j)).elim)]
       rw [h_trivToE_wα, hrepr_basis j j, if_pos rfl, hgram i' j]
       ring]
-  -- Reshape RHS2: only `i' = i` survives.
   rw [show
     (∑ i' : Fin (Module.finrank ℝ E),
       ∑ j' : Fin (Module.finrank ℝ E),
@@ -624,7 +593,6 @@ theorem chartLieDerivMetricMatrix_eq_lieDerivMetric_chartBasis
       refine Finset.sum_congr rfl (fun j' _ => ?_)
       rw [h_trivToE_vα, hrepr_basis i i, if_pos rfl, hgram i j']
       ring]
-  -- Step D: expand b.repr (trivToE α x (LC W x vα)) i' via chart-α Christoffel expansion.
   have hLC_vα : ∀ (i' : Fin (Module.finrank ℝ E)),
       ((chartModelBasis E).repr
         (trivToE (I := I) α x
@@ -665,7 +633,6 @@ theorem chartLieDerivMetricMatrix_eq_lieDerivMetric_chartBasis
     from by
       refine Finset.sum_congr rfl (fun k _ => ?_)
       rw [hLC_vα k]
-      -- Expand: ∑ l, partialDeriv … * δ_{l, k} = partialDeriv …
       have hpd_collapse :
           (∑ l : Fin (Module.finrank ℝ E),
             partialDeriv (E := E) i (chartCoeffOnE (I := I) α W k) (extChartAt I α x) *
@@ -706,7 +673,6 @@ theorem chartLieDerivMetricMatrix_eq_lieDerivMetric_chartBasis
         simp
       rw [hpd_collapse]
       ring]
-  -- The RHS now matches the algebraic form of `chartLieDerivMetricMatrix`.
   exact chartLieDerivMetricMatrix_alpha_algebraic (I := I) g W α hx i j
 
 end DeTurck

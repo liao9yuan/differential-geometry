@@ -85,27 +85,12 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
   hiding chartTargetEuclid chartTargetEuclid_isOpen
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Real-arithmetic helper for the geometric-energy bound
-
-The quantitative interior order-2 engine `tensor_h2_chart_loc_of_data_quantitative`
-bounds each extracted weak second partial by `C_geom i k · √(DATA D)`, where the
-energy `DATA D` collects the squared `L²(closure Ω')`-norms of the weak partials,
-of `u_chart`, and of `f_chart`. The lemma below converts a `√(DATA)` bound into a
-linear bound: if every weak-partial / `u_chart` term is `≤ A` and the `f_chart`
-term is `≤ K_f · B`, then `√(DATA) ≤ √(n + 1 + K_f²) · (A + B)`. -/
 
 /-- **Geometric-energy `√`-to-linear conversion.** For nonnegative reals `A`,
 `B`, `K_f`, a finite family `a : Fin n → ℝ` with `0 ≤ a l ≤ A`, and nonnegative
@@ -119,11 +104,9 @@ private lemma sqrt_geometricEnergy_le
     (ha_f_nn : 0 ≤ a_f) (ha_f_le : a_f ≤ K_f * B) :
     Real.sqrt ((∑ l : Fin n, (a l) ^ 2) + a_u ^ 2 + a_f ^ 2) ≤
       Real.sqrt ((n : ℝ) + 1 + K_f ^ 2) * (A + B) := by
-  -- The energy is bounded by `(√(n + 1 + K_f²) · (A + B))²`.
   set C₂ : ℝ := Real.sqrt ((n : ℝ) + 1 + K_f ^ 2) with hC₂_def
   have hC₂_nn : 0 ≤ C₂ := Real.sqrt_nonneg _
   have h_radicand_nn : 0 ≤ (n : ℝ) + 1 + K_f ^ 2 := by positivity
-  -- Step 1: `∑ l, (a l)² ≤ n · A²`.
   have h_sum_le : (∑ l : Fin n, (a l) ^ 2) ≤ (n : ℝ) * A ^ 2 := by
     have h_each : ∀ l : Fin n, (a l) ^ 2 ≤ A ^ 2 := fun l =>
       pow_le_pow_left₀ (ha_nn l) (ha_le l) 2
@@ -132,14 +115,11 @@ private lemma sqrt_geometricEnergy_le
       _ = (n : ℝ) * A ^ 2 := by
           rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin]
           ring
-  -- Step 2: `a_u² ≤ A²`.
   have h_u_le : a_u ^ 2 ≤ A ^ 2 := pow_le_pow_left₀ ha_u_nn ha_u_le 2
-  -- Step 3: `a_f² ≤ K_f² · B²`.
   have h_f_le : a_f ^ 2 ≤ K_f ^ 2 * B ^ 2 := by
     have h1 : a_f ^ 2 ≤ (K_f * B) ^ 2 := pow_le_pow_left₀ ha_f_nn ha_f_le 2
     calc a_f ^ 2 ≤ (K_f * B) ^ 2 := h1
       _ = K_f ^ 2 * B ^ 2 := by ring
-  -- Step 4: combine into `DATA ≤ (n + 1 + K_f²) · (A + B)²`.
   have h_energy_le :
       (∑ l : Fin n, (a l) ^ 2) + a_u ^ 2 + a_f ^ 2 ≤
         ((n : ℝ) + 1 + K_f ^ 2) * (A + B) ^ 2 := by
@@ -156,7 +136,6 @@ private lemma sqrt_geometricEnergy_le
       have hn_nn : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
       nlinarith [h_AB_sq, h_BB_sq, hn_nn, sq_nonneg K_f, _hK_f]
     linarith
-  -- Step 5: take square roots.
   calc Real.sqrt ((∑ l : Fin n, (a l) ^ 2) + a_u ^ 2 + a_f ^ 2)
       ≤ Real.sqrt (((n : ℝ) + 1 + K_f ^ 2) * (A + B) ^ 2) :=
         Real.sqrt_le_sqrt h_energy_le
@@ -164,14 +143,6 @@ private lemma sqrt_geometricEnergy_le
         rw [Real.sqrt_mul h_radicand_nn]
     _ = C₂ * (A + B) := by
         rw [hC₂_def, Real.sqrt_sq (by linarith [hA, hB])]
-
-/-! ## Density-comparison helper for the `f_chart` energy term
-
-The geometric-energy term involving `f_chart` is measured in the plain volume
-`L²` on the compact set `closure Ω'`, whereas the headline bound exposes the
-`f_chart` `L²`-norm in the chart-pulled weighted measure on the full chart
-target. The lemma below relates the two via the dominating-measure bound
-`volume_restrict_compact_le_chartPulledWeightedMeasure`. -/
 
 /-- **Density comparison for the `f_chart` `L²`-norm.** For a compact subset
 `K ⊆ chartTargetEuclid α`, the plain-volume `L²`-norm of any `f` on `K` is
@@ -187,25 +158,21 @@ private lemma eLpNorm_volume_restrict_compact_le_weighted
           eLpNorm f 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
             (chartTargetEuclid (I := I) (M := M) α)) := by
   classical
-  -- The dominating-measure bound: `volume.restrict K ≤ ofReal c • μ_w.restrict`.
   obtain ⟨c, _hc_pos, h_le⟩ :=
     volume_restrict_compact_le_chartPulledWeightedMeasure (I := I) (M := M)
       (g := g) α hK_compact hK_meas hK_in
-  -- The `(1/2)`-power factor produced by `eLpNorm` measure-scaling.
   set c_d_enn : ℝ≥0∞ :=
     (ENNReal.ofReal c) ^ ((1 / 2 : ℝ≥0∞).toReal) with hc_d_enn_def
   have hc_d_enn_ne_top : c_d_enn ≠ ⊤ := by
     rw [hc_d_enn_def]
     exact ENNReal.rpow_ne_top_of_nonneg ENNReal.toReal_nonneg ENNReal.ofReal_ne_top
   refine ⟨c_d_enn.toReal, ENNReal.toReal_nonneg, ?_⟩
-  -- `eLpNorm f 2 (volume.restrict K) ≤ eLpNorm f 2 (ofReal c • μ_w.restrict)`.
   have h_mono :
       eLpNorm f 2 ((volume : Measure EuclN).restrict K) ≤
         eLpNorm f 2 (ENNReal.ofReal c •
           ((chartPulledWeightedMeasure (I := I) g α).restrict
             (chartTargetEuclid (I := I) (M := M) α))) :=
     eLpNorm_mono_measure f h_le
-  -- `eLpNorm f 2 (ofReal c • ν) = c_d_enn • eLpNorm f 2 ν`.
   have h_smul :
       eLpNorm f 2 (ENNReal.ofReal c •
           ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -216,7 +183,6 @@ private lemma eLpNorm_volume_restrict_compact_le_weighted
     rw [hc_d_enn_def]
     exact eLpNorm_smul_measure_of_ne_top (by norm_num : (2 : ℝ≥0∞) ≠ ⊤) f
       (ENNReal.ofReal c)
-  -- `c_d_enn • x = ENNReal.ofReal c_d_enn.toReal * x`.
   have h_smul_eq :
       c_d_enn •
         eLpNorm f 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -247,27 +213,21 @@ private lemma eLpNorm_volume_restrict_compact_le_weighted_uniform
             eLpNorm f 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
               (chartTargetEuclid (I := I) (M := M) α)) := by
   classical
-  -- The dominating-measure bound: `volume.restrict K ≤ ofReal c • μ_w.restrict`.
-  -- The scalar `c` is produced from `g`, `α`, `K` only — integrand-free.
   obtain ⟨c, _hc_pos, h_le⟩ :=
     volume_restrict_compact_le_chartPulledWeightedMeasure (I := I) (M := M)
       (g := g) α hK_compact hK_meas hK_in
-  -- The `(1/2)`-power factor produced by `eLpNorm` measure-scaling.
   set c_d_enn : ℝ≥0∞ :=
     (ENNReal.ofReal c) ^ ((1 / 2 : ℝ≥0∞).toReal) with hc_d_enn_def
   have hc_d_enn_ne_top : c_d_enn ≠ ⊤ := by
     rw [hc_d_enn_def]
     exact ENNReal.rpow_ne_top_of_nonneg ENNReal.toReal_nonneg ENNReal.ofReal_ne_top
-  -- Fix the integrand-free scalar, then introduce the integrand.
   refine ⟨c_d_enn.toReal, ENNReal.toReal_nonneg, fun f => ?_⟩
-  -- `eLpNorm f 2 (volume.restrict K) ≤ eLpNorm f 2 (ofReal c • μ_w.restrict)`.
   have h_mono :
       eLpNorm f 2 ((volume : Measure EuclN).restrict K) ≤
         eLpNorm f 2 (ENNReal.ofReal c •
           ((chartPulledWeightedMeasure (I := I) g α).restrict
             (chartTargetEuclid (I := I) (M := M) α))) :=
     eLpNorm_mono_measure f h_le
-  -- `eLpNorm f 2 (ofReal c • ν) = c_d_enn • eLpNorm f 2 ν`.
   have h_smul :
       eLpNorm f 2 (ENNReal.ofReal c •
           ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -278,7 +238,6 @@ private lemma eLpNorm_volume_restrict_compact_le_weighted_uniform
     rw [hc_d_enn_def]
     exact eLpNorm_smul_measure_of_ne_top (by norm_num : (2 : ℝ≥0∞) ≠ ⊤) f
       (ENNReal.ofReal c)
-  -- `c_d_enn • x = ENNReal.ofReal c_d_enn.toReal * x`.
   have h_smul_eq :
       c_d_enn •
         eLpNorm f 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -289,16 +248,6 @@ private lemma eLpNorm_volume_restrict_compact_le_weighted_uniform
     rw [smul_eq_mul, ENNReal.ofReal_toReal hc_d_enn_ne_top]
   rw [h_smul, h_smul_eq] at h_mono
   exact h_mono
-
-/-! ## Chart-locality-free twins
-
-The declarations below re-key the quantitative weakened Nirenberg interior
-`W^{2,2}` bounds onto the intrinsic compact-operator eigenbasis, dropping the
-uniform-Sobolev hypothesis `h_atlas`. The region setup, smooth Nirenberg cutoff,
-quantitative interior order-2 engine, energy bookkeeping, and support-aware
-promotion are identical to the chart-local versions; only the eigenvector
-chart-component carrier and its derived data are routed through their
-chart-locality-free analogues. -/
 
 set_option maxHeartbeats 1600000 in
 /-- Chart-locality-free twin of
@@ -338,17 +287,13 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
               2 ((chartPulledWeightedMeasure (I := I) g α).restrict
                   (chartTargetEuclid (I := I) (M := M) α))) := by
   classical
-  -- The bridged per-component scalar divergence-form datum.
   set D : TensorChartBilinearH1ComplData (I := I) (M := M) g r s α P₀ :=
     eigenvectorIteratedTensorChartBilinearData_toData
       (I := I) (M := M) g r s i α P₀ D_m h_parent
     with hD_def
-  -- `D.u_chart` is, definitionally, the `m`-fold mixed weak partial along
-  -- `D_m.directions`.
   have hD_u_chart : D.u_chart =
       eigenvectorChartIteratedPartial (I := I) (M := M)
         g r s i α P₀ m D_m.directions := rfl
-  -- The first conjunct: the qualitative global `W^{2,2}` headline.
   have h_first :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) 2 2
@@ -357,15 +302,10 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
         (chartTargetEuclid (I := I) (M := M) α) :=
     eigenvectorChartIteratedPartial_memWkp_two_two
       g r s i α P₀ directions D_m h_dir h_parent
-  -- The principal factor: the `m`-fold mixed weak partial along `directions`.
-  -- Naming it `P` folds it in `h_first` and in the remaining goal.
   set P : EuclN → ℝ :=
     eigenvectorChartIteratedPartial (I := I) (M := M)
       g r s i α P₀ m directions with hP_def
-  -- `D.u_chart = P` after rewriting `D_m.directions` to `directions`.
   have hD_u_chart_P : D.u_chart = P := by rw [hD_u_chart, hP_def, h_dir]
-  -- `D.weak_partial j` is the canonical chosen weak `j`-partial of `P` on the
-  -- chart target.
   have hD_weak_partial : ∀ j,
       D.weak_partial j =
         DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
@@ -377,10 +317,8 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
           g r s i α P₀ m D_m.directions)
         (chartTargetEuclid (I := I) (M := M) α) = _
     rw [h_dir]
-  -- `D.f_chart = D_m.fChartEff` definitionally.
   have hD_f_chart : D.f_chart = D_m.fChartEff := rfl
   refine ⟨h_first, ?_⟩
-  -- The compact partition-of-unity kernel and its enclosing open chart target.
   set K : Set EuclN := chartPouKernel (I := I) (M := M) α with hK_def
   have hK_compact : IsCompact K := chartPouKernel_isCompact (I := I) (M := M) α
   have hK_meas : MeasurableSet K :=
@@ -389,10 +327,8 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
     chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
   have h_chart_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- A closed thickening of `K` of radius `R_α` inside the chart target.
   obtain ⟨R_α, hR_α_pos, hR_α_subset⟩ :=
     hK_compact.exists_cthickening_subset_open h_chart_open hK_in
-  -- The precompact interior subdomain `Ω'' := thickening (R_α / 2) K`.
   set Ω'' : Set EuclN := Metric.thickening (R_α / 2) K with hΩ''_def
   have hΩ''_open : IsOpen Ω'' := Metric.isOpen_thickening
   have h_half_pos : 0 < R_α / 2 := by positivity
@@ -411,7 +347,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
     hK_compact.cthickening.of_isClosed_subset isClosed_closure h_closureΩ''_sub
   have hΩ''_in_chart : Ω'' ⊆ chartTargetEuclid (I := I) (M := M) α :=
     fun y hy => h_closureΩ''_in_chart (subset_closure hy)
-  -- The difference-quotient room radius `R₀ := R_α / 4`.
   set R₀ : ℝ := R_α / 4 with hR₀_def
   have hR₀_pos : 0 < R₀ := by positivity
   have h_room : Metric.cthickening R₀ (closure Ω'') ⊆
@@ -429,14 +364,10 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
       have hle : R₀ + R_α / 2 ≤ R_α := by rw [hR₀_def]; linarith
       exact Metric.cthickening_mono hle K
     exact ((h1.trans h2).trans h3).trans hR_α_subset
-  -- The qualitative order-2 interior elliptic engine: `D.u_chart` and every
-  -- `D.weak_partial j` lie in `W^{1,2}(Ω'')`.
   obtain ⟨h_uChart_memW1p, h_wp_memW1p⟩ :=
     tensorChartBilinear_chartComponent_regularity_of_data
       (g := g) (r := r) (s := s) (α := α) (P₀ := P₀) D
       hΩ''_open hΩ''_compact_closure hR₀_pos h_room
-  -- The interior `W^{2,2}` of `D.u_chart` on `Ω''` (assembled below as in the
-  -- qualitative proof, supplying the finiteness input for the promotion).
   have h_uChart_memWkp_two_Ω'' :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) 2 2 D.u_chart Ω'' := by
@@ -468,12 +399,10 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
     rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p]
     exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemW1p_congr_ae
       hΩ''_open h_ae.symm).mp (h_wp_memW1p j)
-  /- ## The smooth Nirenberg cutoff for the quantitative interior engine -/
   set K_Ω : Set EuclN := closure Ω'' with hK_Ω_def
   have hK_Ω_compact : IsCompact K_Ω := hΩ''_compact_closure
   set ε : ℝ := R₀ / 16 with hε_def
   have hε_pos : 0 < ε := by positivity
-  -- The precompact target `Ω' := thickening (8ε) K_Ω` inside the chart target.
   set Ω' : Set EuclN := Metric.thickening (8 * ε) K_Ω with hΩ'_def
   have hΩ'_open : IsOpen Ω' := Metric.isOpen_thickening
   have h_closureΩ'_sub : closure Ω' ⊆ Metric.cthickening (8 * ε) K_Ω :=
@@ -488,7 +417,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
     h_closureΩ'_sub.trans h_cthick_eight_ε_in_chart
   have hΩ'_compact_closure : IsCompact (closure Ω') :=
     hK_Ω_compact.cthickening.of_isClosed_subset isClosed_closure h_closureΩ'_sub
-  -- The smooth Nirenberg cutoff `η`.
   set K_η : Set EuclN := Metric.cthickening (3 * ε) K_Ω with hK_η_def
   have hK_η_compact : IsCompact K_η := hK_Ω_compact.cthickening
   set Ω_η : Set EuclN := Metric.thickening (5 * ε) K_Ω with hΩ_η_def
@@ -503,7 +431,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
     DifferentialGeometry.Analysis.Sobolev.Chart.exists_grad_bound_of_compactSupport_smooth
       hη_smooth hη_supp
   have hN_nn : 0 ≤ N := hN_pos.le
-  -- `η ≡ 1` on `K_η`, hence on `Ω''` (`⊆ K_Ω ⊆ K_η`).
   have hη_one_on_K_η : ∀ x ∈ K_η, η x = 1 := fun x hx =>
     hη_one_on_cthick_K_η x (Metric.self_subset_cthickening _ hx)
   have hΩ''_sub_K_η : Ω'' ⊆ K_η := by
@@ -511,7 +438,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
     exact Metric.self_subset_cthickening _ (subset_closure hy)
   have hη_one_on_Ω'' : ∀ x ∈ Ω'', η x = 1 :=
     fun x hx => hη_one_on_K_η x (hΩ''_sub_K_η hx)
-  -- `tsupport η ⊆ Ω'` (cutoff support inside the precompact target).
   have hη_in_Ω' : tsupport η ⊆ Ω' := by
     refine hη_tsupp_in_Ω_η.trans ?_
     rw [hΩ_η_def, hΩ'_def]
@@ -519,8 +445,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
     refine Metric.mem_thickening_iff_infEDist_lt.mpr ?_
     have h := Metric.mem_thickening_iff_infEDist_lt.mp hy
     exact lt_of_lt_of_le h (ENNReal.ofReal_le_ofReal (by linarith))
-  -- The difference-quotient room: `cthickening |h| (tsupport η) ⊆ Ω'` for
-  -- `|h| ≤ ε`.
   have hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ ε →
       Metric.cthickening |h| (tsupport η) ⊆ Ω' := by
     intro h hh
@@ -547,43 +471,34 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
         rw [hΩ'_def]
         exact Metric.cthickening_subset_thickening' (by linarith) h_le K_Ω
       exact (h1.trans h2).trans h3
-  -- The diff-quot radius `ε`'s room hypothesis for the quantitative engine.
   have h_room_ε : Metric.cthickening ε (closure Ω'') ⊆
       chartTargetEuclid (I := I) (M := M) α :=
     (Metric.cthickening_mono (by rw [hε_def]; linarith) (closure Ω'')).trans h_room
-  /- ## The quantitative interior order-2 elliptic engine -/
   obtain ⟨C_geom, hC_geom_nn, hC_geom⟩ :=
     tensor_h2_chart_loc_of_data_quantitative (I := I) (M := M) (g := g)
       (α := α) (r := r) (s := s) (P₀ := P₀)
       hη_smooth hη_supp hη_range hN_nn h_fderiv_eta hΩ'_open h_closureΩ'_in_chart
       hΩ'_compact_closure hη_in_Ω' hε_pos hh_supp_in_Ω' hη_one_on_Ω''
       hΩ''_open hΩ''_compact_closure h_room_ε
-  -- All region/principal-factor construction is complete; opacify the `set`
-  -- variables so downstream theorem applications do not unfold their
-  -- definitions during strict-implicit-argument unification.
   clear_value P K Ω'' Ω'
-  /- ## Assembly of the interior `W^{2,2}`-norm bound -/
   set RHS_inner : ℝ≥0∞ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
       (d := Module.finrank ℝ E) 1 2 P (chartTargetEuclid (I := I) (M := M) α)
     + eLpNorm D.f_chart 2
         ((chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α)) with hRHS_inner_def
-  -- `P` lies in `W^{1,2}` of the chart target (from the qualitative `W^{2,2}`).
   have h_P_W1 :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) 1 2 P
         (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.le_of_le
       (by norm_num : (1 : ℕ) ≤ 2) h_first
-  -- The chart-target `W^{1,2}`-norm of `P` is finite.
   have h_wkpNorm1_finite :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) 1 2 P
         (chartTargetEuclid (I := I) (M := M) α) < ⊤ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_lt_top_of_memWkp
       h_P_W1
-  -- The carrier's effective source is weighted-`MemLp 2`.
   have h_fchart_memLp :
       MemLp D.f_chart 2
         ((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -595,7 +510,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
         ((chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α)) ≠ ⊤ :=
     h_fchart_memLp.eLpNorm_lt_top.ne
-  -- The real scalars `A`, `B` for the energy comparison.
   set A : ℝ :=
     (DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
       (d := Module.finrank ℝ E) 1 2 P
@@ -606,7 +520,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
         (chartTargetEuclid (I := I) (M := M) α))).toReal with hB_def
   have hA_nn : 0 ≤ A := ENNReal.toReal_nonneg
   have hB_nn : 0 ≤ B := ENNReal.toReal_nonneg
-  -- `ENNReal.ofReal A ≤ wkpNorm 1 2 P chartTarget` and likewise for `B`.
   have h_ofReal_A_le :
       ENNReal.ofReal A ≤
         DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
@@ -619,18 +532,14 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
           ((chartPulledWeightedMeasure (I := I) g α).restrict
             (chartTargetEuclid (I := I) (M := M) α)) := by
     rw [hB_def]; exact ENNReal.ofReal_toReal_le
-  -- `ENNReal.ofReal A + ENNReal.ofReal B ≤ RHS_inner`.
   have h_ofReal_AB_le_RHS :
       ENNReal.ofReal A + ENNReal.ofReal B ≤ RHS_inner := by
     rw [hRHS_inner_def]
     exact add_le_add h_ofReal_A_le h_ofReal_B_le
-  -- The density-comparison constant for the `f_chart` energy term, on the
-  -- compact set `closure Ω'`.
   obtain ⟨c_d, hc_d_nn, h_fchart_density⟩ :=
     eLpNorm_volume_restrict_compact_le_weighted (I := I) (M := M) g α D.f_chart
       hΩ'_compact_closure hΩ'_compact_closure.isClosed.measurableSet
       h_closureΩ'_in_chart
-  /- ### Energy bounds. -/
   have h_restrict_mono :
       (volume : Measure EuclN).restrict (closure Ω') ≤
         (volume : Measure EuclN).restrict
@@ -690,7 +599,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
     exact h_mono.trans
       (DifferentialGeometry.Analysis.Sobolev.Euclidean.eLpNorm_le_wkpNorm
         1 2 (chartTargetEuclid (I := I) (M := M) α) P)
-  -- The `.toReal` energy bounds.
   have h_wp_toReal_le : ∀ l,
       (eLpNorm (D.weak_partial l) 2
           ((volume : Measure EuclN).restrict (closure Ω'))).toReal ≤ A := by
@@ -713,7 +621,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
       ENNReal.mul_ne_top ENNReal.ofReal_ne_top h_fchart_eLpNorm_finite
     have h_toReal := ENNReal.toReal_mono h_rhs_ne_top h_fchart_density
     rwa [ENNReal.toReal_mul, ENNReal.toReal_ofReal hc_d_nn, ← hB_def] at h_toReal
-  /- ### The geometric energy `√`-bound. -/
   set C₂ : ℝ :=
     Real.sqrt (((Module.finrank ℝ E : ℕ) : ℝ) + 1 + c_d ^ 2) with hC₂_def
   have hC₂_nn : 0 ≤ C₂ := Real.sqrt_nonneg _
@@ -732,7 +639,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
       (fun l => ENNReal.toReal_nonneg) h_wp_toReal_le
       ENNReal.toReal_nonneg h_uChart_toReal_le
       ENNReal.toReal_nonneg h_fchart_toReal_le
-  /- ### The geometric constant. -/
   set C_geom_max : ℝ :=
     ∑ i' : Fin (Module.finrank ℝ E), ∑ k' : Fin (Module.finrank ℝ E),
       C_geom i' k' with hC_geom_max_def
@@ -756,8 +662,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
     exact h_inner.trans h_outer
   set C₁ : ℝ := C_geom_max * C₂ with hC₁_def
   have hC₁_nn : 0 ≤ C₁ := mul_nonneg hC_geom_max_nn hC₂_nn
-  /- ### Per-`(i, k)`: the extracted weak second partial is `L²`-bounded by
-  `ofReal C₁ · RHS_inner`. -/
   have h_gik_bound : ∀ i' k' : Fin (Module.finrank ℝ E),
       ∃ g_ik : EuclN → ℝ,
         MemLp g_ik 2 ((volume : Measure EuclN).restrict Ω'') ∧
@@ -802,7 +706,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
           rw [ENNReal.ofReal_mul hC₁_nn, ENNReal.ofReal_add hA_nn hB_nn]
       _ ≤ ENNReal.ofReal C₁ * RHS_inner :=
           mul_le_mul_right h_ofReal_AB_le_RHS _
-  /- ### Per-`i`: the order-`1` `wkpNorm` of the chosen weak `i`-partial. -/
   have h_chosen_ae_wp : ∀ i' : Fin (Module.finrank ℝ E),
       DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
           2 i' D.u_chart Ω''
@@ -904,7 +807,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
           h_chosen_loc h_g_ik_loc
       rw [eLpNorm_congr_ae h_ae]
       exact hg_ik_bd
-  /- ### Assembling the interior `W^{2,2}`-norm on `Ω''` -/
   set C' : ℝ :=
     1 + ((Module.finrank ℝ E : ℕ) : ℝ)
       + ((Module.finrank ℝ E : ℕ) : ℝ) ^ 2 * C₁ with hC'_def
@@ -974,7 +876,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
     rw [h_ofReal_C']
     simp only [nsmul_eq_mul]
     exact le_of_eq (by ring)
-  /- ### Quantitative support-aware promotion to a global chart-target bound -/
   have h_global_Lp : MemLp P 2
       ((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
@@ -1047,7 +948,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
                   2 ((chartPulledWeightedMeasure (I := I) g α).restrict
                       (chartTargetEuclid (I := I) (M := M) α))) := by
   classical
-  /- ## Eigenbasis-free region setup -/
   set K : Set EuclN := chartPouKernel (I := I) (M := M) α with hK_def
   have hK_compact : IsCompact K := chartPouKernel_isCompact (I := I) (M := M) α
   have hK_meas : MeasurableSet K :=
@@ -1056,10 +956,8 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
     chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
   have h_chart_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- A closed thickening of `K` of radius `R_α` inside the chart target.
   obtain ⟨R_α, hR_α_pos, hR_α_subset⟩ :=
     hK_compact.exists_cthickening_subset_open h_chart_open hK_in
-  -- The precompact interior subdomain `Ω'' := thickening (R_α / 2) K`.
   set Ω'' : Set EuclN := Metric.thickening (R_α / 2) K with hΩ''_def
   have hΩ''_open : IsOpen Ω'' := Metric.isOpen_thickening
   have h_half_pos : 0 < R_α / 2 := by positivity
@@ -1078,7 +976,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
     hK_compact.cthickening.of_isClosed_subset isClosed_closure h_closureΩ''_sub
   have hΩ''_in_chart : Ω'' ⊆ chartTargetEuclid (I := I) (M := M) α :=
     fun y hy => h_closureΩ''_in_chart (subset_closure hy)
-  -- The difference-quotient room radius `R₀ := R_α / 4`.
   set R₀ : ℝ := R_α / 4 with hR₀_def
   have hR₀_pos : 0 < R₀ := by positivity
   have h_room : Metric.cthickening R₀ (closure Ω'') ⊆
@@ -1096,7 +993,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
       have hle : R₀ + R_α / 2 ≤ R_α := by rw [hR₀_def]; linarith
       exact Metric.cthickening_mono hle K
     exact ((h1.trans h2).trans h3).trans hR_α_subset
-  /- ## The eigenbasis-free smooth Nirenberg cutoff -/
   set K_Ω : Set EuclN := closure Ω'' with hK_Ω_def
   have hK_Ω_compact : IsCompact K_Ω := hΩ''_compact_closure
   set ε : ℝ := R₀ / 16 with hε_def
@@ -1172,16 +1068,13 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
   have h_room_ε : Metric.cthickening ε (closure Ω'') ⊆
       chartTargetEuclid (I := I) (M := M) α :=
     (Metric.cthickening_mono (by rw [hε_def]; linarith) (closure Ω'')).trans h_room
-  /- ## The eigenbasis-free order-2 interior engine constant -/
   obtain ⟨C_geom, hC_geom_nn, hC_geom⟩ :=
     tensor_h2_chart_loc_of_data_quantitative (I := I) (M := M) (g := g)
       (α := α) (r := r) (s := s) (P₀ := P₀)
       hη_smooth hη_supp hη_range hN_nn h_fderiv_eta hΩ'_open h_closureΩ'_in_chart
       hΩ'_compact_closure hη_in_Ω' hε_pos hh_supp_in_Ω' hη_one_on_Ω''
       hΩ''_open hΩ''_compact_closure h_room_ε
-  -- Opacify the eigenbasis-free regions before downstream theorem applications.
   clear_value K Ω'' Ω'
-  /- ## The eigenbasis-free density scalar and promotion constant -/
   obtain ⟨c_d, hc_d_nn, h_fchart_density_uniform⟩ :=
     eLpNorm_volume_restrict_compact_le_weighted_uniform (I := I) (M := M) g α
       hΩ'_compact_closure hΩ'_compact_closure.isClosed.measurableSet
@@ -1191,7 +1084,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
       (d := Module.finrank ℝ E) (k := 2) (p := 2)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)
       h_chart_open hΩ''_open hK_compact hK_in_Ω'' h_closureΩ''_in_chart
-  /- ## The eigenbasis-free geometric constant `C := K_prom · C'` -/
   set C_geom_max : ℝ :=
     ∑ i' : Fin (Module.finrank ℝ E), ∑ k' : Fin (Module.finrank ℝ E),
       C_geom i' k' with hC_geom_max_def
@@ -1227,10 +1119,8 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
     have h2 : (0 : ℝ) ≤ ((Module.finrank ℝ E : ℕ) : ℝ) ^ 2 * C₁ :=
       mul_nonneg (by positivity) hC₁_nn
     linarith
-  -- Fix the eigenbasis-free witness `K_prom · C'`, then introduce the index.
   refine ⟨K_prom * C', mul_pos hK_prom_pos hC'_pos, ?_⟩
   intro i directions D_m h_dir h_parent
-  -- The bridged per-component scalar divergence-form datum.
   set D : TensorChartBilinearH1ComplData (I := I) (M := M) g r s α P₀ :=
     eigenvectorIteratedTensorChartBilinearData_toData
       (I := I) (M := M) g r s i α P₀ D_m h_parent
@@ -1238,7 +1128,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
   have hD_u_chart : D.u_chart =
       eigenvectorChartIteratedPartial (I := I) (M := M)
         g r s i α P₀ m D_m.directions := rfl
-  -- The first conjunct: the qualitative global `W^{2,2}` headline.
   have h_first :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) 2 2
@@ -1247,7 +1136,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
         (chartTargetEuclid (I := I) (M := M) α) :=
     eigenvectorChartIteratedPartial_memWkp_two_two
       g r s i α P₀ directions D_m h_dir h_parent
-  -- The principal factor: the `m`-fold mixed weak partial along `directions`.
   set P : EuclN → ℝ :=
     eigenvectorChartIteratedPartial (I := I) (M := M)
       g r s i α P₀ m directions with hP_def
@@ -1265,13 +1153,10 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
     rw [h_dir]
   have hD_f_chart : D.f_chart = D_m.fChartEff := rfl
   refine ⟨h_first, ?_⟩
-  -- The qualitative order-2 interior elliptic engine: `D.u_chart` and every
-  -- `D.weak_partial j` lie in `W^{1,2}(Ω'')`.
   obtain ⟨h_uChart_memW1p, h_wp_memW1p⟩ :=
     tensorChartBilinear_chartComponent_regularity_of_data
       (g := g) (r := r) (s := s) (α := α) (P₀ := P₀) D
       hΩ''_open hΩ''_compact_closure hR₀_pos h_room
-  -- The interior `W^{2,2}` of `D.u_chart` on `Ω''`.
   have h_uChart_memWkp_two_Ω'' :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) 2 2 D.u_chart Ω'' := by
@@ -1303,7 +1188,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
     rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p]
     exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemW1p_congr_ae
       hΩ''_open h_ae.symm).mp (h_wp_memW1p j)
-  /- ## Assembly of the interior `W^{2,2}`-norm bound -/
   set RHS_inner : ℝ≥0∞ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
       (d := Module.finrank ℝ E) 1 2 P (chartTargetEuclid (I := I) (M := M) α)
@@ -1359,7 +1243,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
       ENNReal.ofReal A + ENNReal.ofReal B ≤ RHS_inner := by
     rw [hRHS_inner_def]
     exact add_le_add h_ofReal_A_le h_ofReal_B_le
-  -- Specialize the integrand-uniform density bound to the carrier's source.
   have h_fchart_density :
       eLpNorm D.f_chart 2 ((volume : Measure EuclN).restrict (closure Ω')) ≤
         ENNReal.ofReal c_d *
@@ -1448,7 +1331,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
       ENNReal.mul_ne_top ENNReal.ofReal_ne_top h_fchart_eLpNorm_finite
     have h_toReal := ENNReal.toReal_mono h_rhs_ne_top h_fchart_density
     rwa [ENNReal.toReal_mul, ENNReal.toReal_ofReal hc_d_nn, ← hB_def] at h_toReal
-  -- The geometric energy `√`-bound.
   have h_sqrt_data_le :
       Real.sqrt (
         (∑ l : Fin (Module.finrank ℝ E),
@@ -1464,8 +1346,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
       (fun l => ENNReal.toReal_nonneg) h_wp_toReal_le
       ENNReal.toReal_nonneg h_uChart_toReal_le
       ENNReal.toReal_nonneg h_fchart_toReal_le
-  /- ### Per-`(i, k)`: the extracted weak second partial is `L²`-bounded by
-  `ofReal C₁ · RHS_inner`. -/
   have h_gik_bound : ∀ i' k' : Fin (Module.finrank ℝ E),
       ∃ g_ik : EuclN → ℝ,
         MemLp g_ik 2 ((volume : Measure EuclN).restrict Ω'') ∧
@@ -1510,7 +1390,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
           rw [ENNReal.ofReal_mul hC₁_nn, ENNReal.ofReal_add hA_nn hB_nn]
       _ ≤ ENNReal.ofReal C₁ * RHS_inner :=
           mul_le_mul_right h_ofReal_AB_le_RHS _
-  /- ### Per-`i`: the order-`1` `wkpNorm` of the chosen weak `i`-partial. -/
   have h_chosen_ae_wp : ∀ i' : Fin (Module.finrank ℝ E),
       DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
           2 i' D.u_chart Ω''
@@ -1612,7 +1491,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
           h_chosen_loc h_g_ik_loc
       rw [eLpNorm_congr_ae h_ae]
       exact hg_ik_bd
-  /- ### Assembling the interior `W^{2,2}`-norm on `Ω''` -/
   have h_interior_bound :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
           (d := Module.finrank ℝ E) 2 2 D.u_chart Ω''
@@ -1673,7 +1551,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
     rw [h_ofReal_C']
     simp only [nsmul_eq_mul]
     exact le_of_eq (by ring)
-  /- ### Quantitative support-aware promotion to a global chart-target bound -/
   have h_global_Lp : MemLp P 2
       ((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
@@ -1686,7 +1563,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
     rw [hP_def, hK_def]
     exact eigenvectorChartIteratedPartial_ae_zero_off_chartPouKernel
       (I := I) (M := M) g r s i α P₀ m directions
-  -- Specialize the function-uniform promotion to the principal factor `P`.
   have hK_prom_bound :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
           (d := Module.finrank ℝ E) 2 2 P
@@ -1695,7 +1571,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
             DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
               (d := Module.finrank ℝ E) 2 2 P Ω'' :=
     hK_prom_bound_uniform P h_ae_zero (hD_u_chart_P ▸ h_uChart_memWkp_two_Ω'')
-  -- Chain the promotion with the interior bound.
   calc DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
           (d := Module.finrank ℝ E) 2 2 P
           (chartTargetEuclid (I := I) (M := M) α)
@@ -1710,7 +1585,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
         mul_le_mul_right h_interior_bound _
     _ = ENNReal.ofReal (K_prom * C') * RHS_inner := by
         rw [← mul_assoc, ← ENNReal.ofReal_mul hK_prom_pos.le]
-
 
 end TensorSpectral
 end Parabolic

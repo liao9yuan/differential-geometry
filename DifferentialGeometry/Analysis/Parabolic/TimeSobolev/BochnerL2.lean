@@ -58,8 +58,6 @@ namespace TimeSobolev
 variable {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
 variable {T : ℝ}
 
-/-! ## The reference measure -/
-
 /-- The reference measure for `L²([0,T]; X)`: Lebesgue measure on `ℝ` restricted
 to the closed time interval `[0,T]`.  It is a finite measure for every `T`
 (`MeasureTheory.isFiniteMeasure_restrict_Icc`). -/
@@ -105,8 +103,6 @@ theorem toReal_ofReal_rpow_half (T : ℝ) :
   · rw [ENNReal.ofReal_eq_zero.2 hT.le, ENNReal.zero_rpow_of_pos (by norm_num),
       ENNReal.toReal_zero, Real.sqrt_eq_zero'.2 hT.le]
 
-/-! ## The space `L²([0,T]; X)` -/
-
 /-- **The vector-valued time `L²` space** `L²([0,T]; X)`.
 
 This is the space of a.e.-equivalence classes of square-Bochner-integrable
@@ -124,13 +120,10 @@ abbrev timeL2 (X : Type*) [NormedAddCommGroup X] [InnerProductSpace ℝ X] [Comp
     (T : ℝ) : Type _ :=
   MeasureTheory.Lp X 2 (timeMeasure T)
 
--- The Hilbert-space structure is fully inherited; record that the instances fire.
 example : NormedAddCommGroup (timeL2 X T) := inferInstance
 example : NormedSpace ℝ (timeL2 X T) := inferInstance
 example : InnerProductSpace ℝ (timeL2 X T) := inferInstance
 example : CompleteSpace (timeL2 X T) := inferInstance
-
-/-! ## Norm and inner product -/
 
 /-- The inner product on `L²([0,T]; X)` is the integral of the pointwise inner
 product over the time interval `[0,T]`. -/
@@ -162,13 +155,6 @@ theorem integral_norm_sq_nonneg (f : timeL2 X T) :
     0 ≤ ∫ t in Set.Icc (0 : ℝ) T, ‖f t‖ ^ 2 := by
   rw [← norm_sq_eq_integral]; positivity
 
-/-! ## Embedding of continuous functions
-
-A function continuous on the closed interval `[0,T]` is bounded there, hence
-square-integrable: it represents an element of `L²([0,T]; X)`.  This is the
-bridge used by the fixed-point argument, which produces continuous-in-time
-solutions and must measure them in `L²`. -/
-
 section ContinuousEmbedding
 
 variable {f : ℝ → X}
@@ -183,14 +169,12 @@ theorem memLp_of_continuousOn (hf : ContinuousOn f (Set.Icc (0 : ℝ) T)) :
     unfold timeMeasure
     exact hf.aestronglyMeasurable measurableSet_Icc
   rcases le_or_gt 0 T with hT | hT
-  · -- `[0,T]` is nonempty: a continuous function attains a maximum norm on it.
-    obtain ⟨t₀, _, ht₀max⟩ :=
+  · obtain ⟨t₀, _, ht₀max⟩ :=
       isCompact_Icc.exists_isMaxOn (s := Set.Icc (0 : ℝ) T) ⟨0, ⟨le_refl 0, hT⟩⟩ hf.norm
     refine MemLp.of_bound hmeas ‖f t₀‖ ?_
     unfold timeMeasure
     exact (ae_restrict_iff' measurableSet_Icc).2 (Eventually.of_forall fun t ht => ht₀max ht)
-  · -- `[0,T]` is empty: the time measure is the zero measure.
-    refine ⟨hmeas, ?_⟩
+  · refine ⟨hmeas, ?_⟩
     rw [timeMeasure_eq_zero_of_nonpos hT.le, eLpNorm_measure_zero]
     exact ENNReal.zero_lt_top
 
@@ -225,8 +209,7 @@ theorem norm_ofContinuousOn_le_of_bound (hf : ContinuousOn f (Set.Icc (0 : ℝ) 
     · rw [ENNReal.toReal_mul, timeMeasure_univ,
         show ((2 : ℝ≥0∞).toReal)⁻¹ = (1 / 2 : ℝ) by norm_num,
         toReal_ofReal_rpow_half, ENNReal.toReal_ofReal hC0]
-  · -- A negative bound `C` forces the function to vanish a.e., so the norm is `0`.
-    have hfzero : ∀ᵐ t ∂(timeMeasure T), f t = 0 := by
+  · have hfzero : ∀ᵐ t ∂(timeMeasure T), f t = 0 := by
       filter_upwards [hbound] with t ht
       have : ‖f t‖ = 0 := le_antisymm (le_trans ht hC0.le) (norm_nonneg _)
       exact norm_eq_zero.1 this
@@ -243,8 +226,6 @@ theorem norm_ofContinuousOn_le_of_bound (hf : ContinuousOn f (Set.Icc (0 : ℝ) 
     · rw [h, zero_mul]
 
 end ContinuousEmbedding
-
-/-! ## Constant functions -/
 
 section Const
 
@@ -264,14 +245,12 @@ theorem norm_const (T : ℝ) (c : X) :
   rw [const, Lp.norm_toLp]
   rcases le_or_gt 0 T with hT | hT
   · rcases eq_or_lt_of_le hT with hT0 | hTpos
-    · -- `T = 0`: the time measure is the zero measure.
-      rw [timeMeasure_eq_zero_of_nonpos (le_of_eq hT0.symm), eLpNorm_measure_zero,
+    · rw [timeMeasure_eq_zero_of_nonpos (le_of_eq hT0.symm), eLpNorm_measure_zero,
         ENNReal.toReal_zero, ← hT0, Real.sqrt_zero, zero_mul]
     · rw [eLpNorm_const c (by norm_num) (timeMeasure_ne_zero hTpos), ENNReal.toReal_mul,
         show (1 / ENNReal.toReal 2) = (1 / 2 : ℝ) by norm_num, timeMeasure_univ,
         toReal_ofReal_rpow_half, toReal_enorm, mul_comm]
-  · -- `T < 0`: the time measure is the zero measure and `√T = 0`.
-    rw [timeMeasure_eq_zero_of_nonpos hT.le, eLpNorm_measure_zero, ENNReal.toReal_zero,
+  · rw [timeMeasure_eq_zero_of_nonpos hT.le, eLpNorm_measure_zero, ENNReal.toReal_zero,
       Real.sqrt_eq_zero'.2 hT.le, zero_mul]
 
 /-- The norm of `const T 0` is zero. -/
@@ -280,14 +259,6 @@ theorem const_zero (T : ℝ) : const T (0 : X) = 0 := by
   rw [← norm_eq_zero, norm_const, norm_zero, mul_zero]
 
 end Const
-
-/-! ## The Bochner interval integral
-
-The map `f ↦ ∫ t in [0,T], f t` is a bounded linear map `timeL2 X T →L[ℝ] X`.
-Boundedness is the Cauchy–Schwarz estimate `‖∫ f‖ ≤ √T · ‖f‖`, obtained by
-estimating the Bochner integral by the integral of the norm and then applying
-Hölder's inequality (`L¹ ⊆ L²` on the finite-measure interval).  The downstream
-maximal-regularity operator integrates `timeL2` elements through this map. -/
 
 section IntervalIntegral
 
@@ -306,7 +277,6 @@ theorem integrableOn (f : timeL2 X T) :
 interval integral: `∫ t in [0,T], ‖f t‖ ≤ √T · ‖f‖`. -/
 theorem integral_norm_le (f : timeL2 X T) :
     ∫ t in Set.Icc (0 : ℝ) T, ‖f t‖ ≤ Real.sqrt T * ‖f‖ := by
-  -- Rewrite both sides through `eLpNorm` and reduce to a Hölder inequality in `ℝ≥0∞`.
   have hf1 : MemLp (fun t => f t) 1 (timeMeasure T) :=
     (Lp.memLp f).mono_exponent (by norm_num)
   have hint : ∫ t in Set.Icc (0 : ℝ) T, ‖f t‖

@@ -91,26 +91,12 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-Match the convention in surrounding files: install Borel σ-algebras locally
-without leaking global instances. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The chart-pulled-back function on `EuclideanSpace`
-
-For `f : M → ℝ` and a chart point `α : M`, the chart-pulled-back function
-`chartPullback I α f : EuclN → ℝ` evaluates `f` at the inverse-chart image of
-`toEuclidean.symm y`, with the result extended by `0` outside the chart-target
-image `chartTargetEuclid α`. The extension by zero is essential for global
-smoothness of the pull-back when `tsupport f ⊆ (chartAt H α).source`.
--/
 
 /-- The chart-pulled-back function: `f ∘ (extChartAt I α).symm ∘ toEuclidean.symm`,
 extended by `0` outside the chart-target image `chartTargetEuclid α`. -/
@@ -129,11 +115,6 @@ def chartPullback (α : M) (f : M → ℝ) : EuclN → ℝ :=
     chartPullback (I := I) α f y = 0 :=
   Set.indicator_of_notMem hy _
 
-/-! ## The image of `tsupport f` in `EuclN`
-
-The image of `tsupport f` under the composition `toEuclidean ∘ extChartAt I α`
-serves as a compact "barrier" containing the support of `chartPullback I α f`. -/
-
 /-- The Euclidean image of `tsupport f` under `toEuclidean ∘ extChartAt I α`. -/
 def euclideanChartImageOfTsupport (α : M) (f : M → ℝ) : Set EuclN :=
   (toEuclidean (E := E)) '' ((extChartAt I α) '' tsupport f)
@@ -145,7 +126,6 @@ lemma euclideanChartImageOfTsupport_isCompact
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
     IsCompact (euclideanChartImageOfTsupport (I := I) (M := M) α f) := by
   unfold euclideanChartImageOfTsupport
-  -- Continuity of `extChartAt I α` on `tsupport f`.
   have hcontOn : ContinuousOn (extChartAt I α) (tsupport f) := by
     refine (continuousOn_extChartAt (I := I) α).mono ?_
     intro x hx
@@ -153,7 +133,6 @@ lemma euclideanChartImageOfTsupport_isCompact
     exact hf_supp hx
   have hImage1 : IsCompact ((extChartAt I α) '' tsupport f) :=
     (hf_cs : IsCompact (tsupport f)).image_of_continuousOn hcontOn
-  -- Continuity of `toEuclidean` on the resulting compact.
   have hcont_toE : Continuous (toEuclidean (E := E)) :=
     (toEuclidean (E := E)).continuous
   exact hImage1.image hcont_toE
@@ -172,18 +151,13 @@ lemma euclideanChartImageOfTsupport_subset_chartTargetEuclid
       chartTargetEuclid (I := I) (M := M) α := by
   intro y hy
   rcases hy with ⟨z, hz_target, hz_eq⟩
-  -- `z = (extChartAt I α) x` for some `x ∈ tsupport f`.
   rcases hz_target with ⟨x, hx_supp, hx_eq⟩
-  -- `chartTargetEuclid α = toEuclidean '' (extChartAt I α).target`.
   refine ⟨z, ?_, hz_eq⟩
   rw [← hx_eq]
-  -- Need: (extChartAt I α) x ∈ (extChartAt I α).target.
   have hxsrc : x ∈ (extChartAt I α).source := by
     rw [extChartAt_source_eq_chartAt_source (I := I)]
     exact hf_supp hx_supp
   exact (extChartAt I α).map_source hxsrc
-
-/-! ## Support and topological support of `chartPullback I α f` -/
 
 /-- The support of `chartPullback I α f` is contained in the Euclidean image of
 `tsupport f`. -/
@@ -194,20 +168,15 @@ lemma chartPullback_support_subset
   intro y hy
   rw [Function.mem_support] at hy
   by_cases hyT : y ∈ chartTargetEuclid (I := I) (M := M) α
-  · -- chartPullback I α f y = f (symm (toE.symm y)) ≠ 0.
-    rw [chartPullback_apply_of_mem (I := I) α f hyT] at hy
-    -- So `(extChartAt I α).symm (toEuclidean.symm y) ∈ support f ⊆ tsupport f`.
+  · rw [chartPullback_apply_of_mem (I := I) α f hyT] at hy
     have hsymm_supp : (extChartAt I α).symm ((toEuclidean (E := E)).symm y)
         ∈ tsupport f := subset_tsupport _ hy
-    -- Hence y = toEuclidean (extChartAt I α (symm…)) is in the Euclidean image.
     refine ⟨(extChartAt I α) ((extChartAt I α).symm
         ((toEuclidean (E := E)).symm y)), ?_, ?_⟩
     · exact ⟨_, hsymm_supp, rfl⟩
-    · -- Recover y via right inverse of toEuclidean and right inverse of extChartAt.
-      rcases hyT with ⟨z, hz_tgt, hz_eq⟩
+    · rcases hyT with ⟨z, hz_tgt, hz_eq⟩
       have h1 : (extChartAt I α) ((extChartAt I α).symm z) = z :=
         (extChartAt I α).right_inv hz_tgt
-      -- Substituting:
       have hsymm_eq : (toEuclidean (E := E)).symm y = z := by
         rw [← hz_eq]; simp
       rw [hsymm_eq, h1, hz_eq]
@@ -242,21 +211,6 @@ lemma chartPullback_hasCompactSupport
     (euclideanChartImageOfTsupport_isCompact (I := I) (M := M) α hf_cs hf_supp)
     (chartPullback_support_subset (I := I) α f)
 
-/-! ## Smoothness of `chartPullback I α f` on `EuclN`
-
-Under the closed (boundaryless) hypothesis on `M`, when `f` is `C^∞` on `M` and
-`tsupport f ⊆ (chartAt H α).source`, the chart-pulled-back function
-`chartPullback I α f` is `C^∞` on the whole of `EuclN`. This combines two
-ingredients:
-
-1. On the open set `chartTargetEuclid α`, `chartPullback I α f` agrees with the
-   smooth composite `scalarOnE α f ∘ toEuclidean.symm`.
-2. Outside `tsupport (chartPullback I α f)`, the function is identically zero.
-
-The smoothness on the whole space follows by the standard cover argument
-(open cover of `EuclN` by `chartTargetEuclid α` and the complement of the
-support). -/
-
 /-- On the chart-target image, `chartPullback I α f` agrees with the smooth
 composite `scalarOnE α f ∘ toEuclidean.symm`. -/
 private lemma chartPullback_eq_compose_on_chartTargetEuclid
@@ -277,7 +231,6 @@ lemma chartPullback_contDiffOn_chartTargetEuclid [I.Boundaryless]
       (fun y : EuclN =>
         scalarOnE (I := I) α f ((toEuclidean (E := E)).symm y))
       (chartTargetEuclid (I := I) (M := M) α) := by
-    -- Compose `toEuclidean.symm` (smooth on EuclN) with `scalarOnE α f` (smooth on target).
     have h_toE_symm_cd : ContDiff ℝ (⊤ : ℕ∞) (fun y : EuclN => (toEuclidean (E := E)).symm y) :=
       (toEuclidean (E := E)).symm.contDiff
     have h_toE_symm : ContDiffOn ℝ ∞
@@ -334,26 +287,21 @@ lemma chartPullback_contDiff [I.Boundaryless]
   · exact chartPullback_contDiffOn_chartTargetEuclid (I := I) α hf
   · intro y hy
     by_cases hyT : y ∈ chartTargetEuclid (I := I) (M := M) α
-    · -- y ∈ chartTargetEuclid α but y ∉ Euclidean image of tsupport ⇒ symm composition lands outside tsupport ⇒ f = 0 there.
-      rw [chartPullback_apply_of_mem (I := I) α f hyT]
+    · rw [chartPullback_apply_of_mem (I := I) α f hyT]
       by_contra hne
-      -- f (symm…) ≠ 0 ⇒ symm… ∈ support f ⊆ tsupport f, hence y ∈ Euclidean image.
       have hsymm_supp : (extChartAt I α).symm ((toEuclidean (E := E)).symm y)
           ∈ tsupport f := subset_tsupport _ hne
       refine hy ?_
       refine ⟨(extChartAt I α) ((extChartAt I α).symm
           ((toEuclidean (E := E)).symm y)), ?_, ?_⟩
       · exact ⟨_, hsymm_supp, rfl⟩
-      · -- Recover y by right inverses.
-        rcases hyT with ⟨z, hz_tgt, hz_eq⟩
+      · rcases hyT with ⟨z, hz_tgt, hz_eq⟩
         have h1 : (extChartAt I α) ((extChartAt I α).symm z) = z :=
           (extChartAt I α).right_inv hz_tgt
         have hsymm_eq : (toEuclidean (E := E)).symm y = z := by
           rw [← hz_eq]; simp
         rw [hsymm_eq, h1, hz_eq]
     · exact chartPullback_apply_of_notMem (I := I) α f hyT
-
-/-! ## The right-hand-side function: density-weighted negative Laplacian -/
 
 /-- The chart-pulled-back density-weighted negative Laplacian:
 `F̃(y) := -(densityOnEuclid g α y) · (Δ_g g hf) ((extChartAt I α).symm
@@ -386,13 +334,6 @@ def negDensityLaplacianPullback [I.Boundaryless] [T2Space M]
     negDensityLaplacianPullback (I := I) g hf α y = 0 :=
   Set.indicator_of_notMem hy _
 
-/-! ## The H¹-derived bilinear form
-
-Apply `exists_smooth_metric_extension` to a chosen compact `K ⊆ chartTargetEuclid α`
-to extract a `SmoothEllipticBilinearForm` on `Set.univ` whose principal coefficient
-matrix `B.a` agrees on `K` with the chart-pulled-back volume-weighted inverse
-Gram matrix `√det g · g^{ij}`. -/
-
 /-- Existence of a smooth elliptic bilinear form `B` extending the chart-pulled
 volume-weighted inverse Gram matrix on a compact `K`. This is a direct
 re-export of `exists_smooth_metric_extension` (from `MetricExtension.lean`),
@@ -412,28 +353,6 @@ theorem exists_chart_metric_bilinearForm
         B.a y i j = weightedInvGramOnEuclid (I := I) g α i j y) ∧
       B.c = (fun _ : EuclN => (0 : ℝ)) :=
   exists_smooth_metric_extension (I := I) (M := M) g α hK hK_target
-
-/-! ## The headline theorem: hypothesis-bearing form
-
-The headline result is stated in **hypothesis-bearing form**: it takes as a
-hypothesis the chart-pulled bilinear identity
-```
-B.bilin (chartPullback I α f) ψ = ∫ y, F̃ y · ψ y dy
-```
-for every smooth compactly-supported test function `ψ : EuclN → ℝ`, and
-concludes that `chartPullback I α f` is a smooth weak solution of `B` with
-right-hand side `negDensityLaplacianPullback`.
-
-This packaging is the standard channel through which the manifold-side
-Green's-first identity, after chart-pull-back via the chart-pulled-volume
-identity from `ChartMeasureEquiv.lean` and pointwise identification of the
-principal integrand with the chart-pulled volume-weighted inverse Gram matrix,
-delivers a Euclidean weak-solution statement compatible with the De Giorgi /
-Nirenberg interior-regularity machinery. The downstream caller supplies the
-hypothesis, computed by combining `chart_local_ibp` (which delivers the
-manifold-side Voss–Weyl integration-by-parts identity) with the chart-pulled
-volume identity and a chart-pullback-of-test-function argument.
--/
 
 /-- **Chart-pulled smooth weak solution (hypothesis-bearing form).**
 
@@ -476,21 +395,8 @@ theorem chart_pulled_smooth_weak_solution_of_chartIdentity
       (negDensityLaplacianPullback (I := I) g hf α) := by
   refine ⟨chartPullback_contDiff (I := I) α hf hf_cs hf_supp, ?_⟩
   intro ψ hψ hψ_cs _hψ_supp
-  -- The integral over `Set.univ` reduces to the integral over the whole space.
   rw [MeasureTheory.setIntegral_univ]
   exact hbilin ψ hψ hψ_cs
-
-/-! ## Auxiliary fact: chart-target image of test functions
-
-For a smooth ψ : EuclN → ℝ with `tsupport ψ ⊆ chartTargetEuclid α`, the
-function ψ ∘ chartTargetEuclid is well-defined and pulls back to a smooth
-manifold function ψ : M → ℝ with `tsupport ψ ⊆ chart source`. This is the
-manifold-side test function corresponding to the Euclidean test function ψ,
-used to apply the manifold-side Green's first identity. We expose the
-manifold-side test-function map as `chartTestPullback` for downstream use.
-
-The manifold-side test function `chartTestPullback I α ψ` is defined as
-`ψ ∘ toEuclidean ∘ extChartAt I α` extended by `0` outside the chart source. -/
 
 /-- The manifold-side pull-back of an `EuclN`-test function: at points of the
 chart source, evaluate `ψ` at `toEuclidean (extChartAt I α x)`; off the chart

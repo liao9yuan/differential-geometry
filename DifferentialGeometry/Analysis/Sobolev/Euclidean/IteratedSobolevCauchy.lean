@@ -37,8 +37,6 @@ variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Cauchy decomposition of `wkpNorm` -/
-
 /-- The `wkpNorm` is dominated termwise by the sum over `(j, β)` of `eLpNorm`s of
 iterated weak partials. In particular, for any fixed `(j₀, β₀)` with `j₀ ≤ k`,
 the `eLpNorm` of the order-`j₀` weak partial is bounded by the `wkpNorm`. -/
@@ -49,7 +47,6 @@ theorem eLpNorm_iterWeakPartial_le_wkpNorm
       wkpNorm (d := d) k p u Ω := by
   classical
   unfold wkpNorm
-  -- Bound by the inner sum over β at fixed j₀.
   have h_inner :
       eLpNorm (iterWeakPartial (d := d) p j₀ β₀ u Ω) p (volume.restrict Ω) ≤
         ∑ β : Fin j₀ → Fin d,
@@ -59,7 +56,6 @@ theorem eLpNorm_iterWeakPartial_le_wkpNorm
         eLpNorm (iterWeakPartial (d := d) p j₀ β u Ω) p (volume.restrict Ω))
       (s := (Finset.univ : Finset (Fin j₀ → Fin d)))
       (fun _ _ => zero_le _) (Finset.mem_univ _)
-  -- Bound the inner sum by the outer sum over j.
   have h_outer :
       (∑ β : Fin j₀ → Fin d,
         eLpNorm (iterWeakPartial (d := d) p j₀ β u Ω) p (volume.restrict Ω)) ≤
@@ -75,8 +71,6 @@ theorem eLpNorm_iterWeakPartial_le_wkpNorm
     rw [Finset.mem_range]
     omega
   exact le_trans h_inner h_outer
-
-/-! ## Existence of an `eLpNorm`-limit for a `wkpNorm`-Cauchy sequence -/
 
 /-- For a sequence `(u n)` whose `wkpNorm` differences are bounded by a summable
 `B N`, every iterated weak partial of order `j ≤ k` is `eLpNorm`-Cauchy with the
@@ -100,18 +94,12 @@ theorem iterWeakPartial_cauchy_of_wkpNorm_cauchy
   have h_iter_le := eLpNorm_iterWeakPartial_le_wkpNorm
     (d := d) (k := k) (p := p)
     (u := fun x => u n x - u m x) (Ω := Ω) j hj β
-  -- We want to compare `eLpNorm` of `iterWeakPartial _ _ _ (u n - u m) _` with
-  -- the difference of iterated weak partials.
   have h_uW : MemWkp (d := d) j p (u n) Ω := MemWkp.le_of_le hj (hu n)
   have h_vW : MemWkp (d := d) j p (u m) Ω := MemWkp.le_of_le hj (hu m)
   have h_iter_sub_ae :=
     iterWeakPartial_add_ae (d := d) hp hΩ β h_uW (MemWkp.neg (d := d) hp hΩ h_vW)
-  -- `iterWeakPartial _ (u n + (-u m)) =ᵐ iterWeakPartial _ (u n) + iterWeakPartial _ (-u m)`.
   have h_iter_neg_ae := iterWeakPartial_const_smul_ae
     (d := d) hp hΩ β h_vW (-1)
-  -- `iterWeakPartial _ (-1 * v) =ᵐ -1 * iterWeakPartial _ v = -iterWeakPartial _ v`
-  -- Combine to get `iterWeakPartial (d := d) p j β (u n - u m) =ᵐ
-  --                    iterWeakPartial (...) (u n) - iterWeakPartial (...) (u m)`.
   have h_iter_sub : iterWeakPartial (d := d) p j β (fun x => u n x - u m x) Ω
       =ᵐ[volume.restrict Ω]
       (fun x => iterWeakPartial (d := d) p j β (u n) Ω x -
@@ -119,24 +107,18 @@ theorem iterWeakPartial_cauchy_of_wkpNorm_cauchy
     have h_eq_un_sub : (fun x => u n x - u m x) = (fun x => u n x + (-1) * u m x) := by
       funext x; ring
     rw [h_eq_un_sub]
-    -- Apply add_ae with (u n) and (-1 * u m).
     have h_neg_uW : MemWkp (d := d) j p (fun x => (-1 : ℝ) * u m x) Ω :=
       MemWkp.const_smul (d := d) hp hΩ h_vW (-1)
     have h_iter_add :=
       iterWeakPartial_add_ae (d := d) hp hΩ β h_uW h_neg_uW
-    -- iterWeakPartial _ (u n + (-1)*(u m)) =ᵐ iterWeakPartial _ (u n) + iterWeakPartial _ ((-1)*(u m))
     refine h_iter_add.trans ?_
-    -- iterWeakPartial _ ((-1)*(u m)) =ᵐ -1 * iterWeakPartial _ (u m)
     have h_iter_smul := iterWeakPartial_const_smul_ae
       (d := d) hp hΩ β h_vW (-1)
     filter_upwards [h_iter_smul] with x hx
     rw [hx]
     ring
-  -- Now `eLpNorm (iter sub of un - um) =ᵐ eLpNorm (iter un - iter um)`.
   rw [eLpNorm_congr_ae h_iter_sub] at h_iter_le
   exact lt_of_le_of_lt h_iter_le h_bound
-
-/-! ## L^p limits of iterated weak partials -/
 
 /-- For `1 ≤ p`, every Cauchy sequence in `wkpNorm` has an `eLpNorm`-limit
 of every iterated weak partial of order `j ≤ k`, and the limit is in `MemLp`. -/
@@ -156,17 +138,13 @@ theorem exists_eLpNorm_limit_iterWeakPartial
           p (volume.restrict Ω))
         (𝓝 0) := by
   classical
-  -- Each iterWeakPartial p j β u_n is in MemLp p (volume.restrict Ω).
   have h_iter_memLp : ∀ n,
       MemLp (iterWeakPartial (d := d) p j β (u n) Ω) p (volume.restrict Ω) := by
     intro n
     have h_uWj : MemWkp (d := d) j p (u n) Ω := MemWkp.le_of_le hj (hu n)
     exact iterWeakPartial_memLp_of_memWkp (d := d) (p := p) h_uWj β
-  -- The Cauchy condition for the iterated weak partials.
   have h_iter_cau :=
     iterWeakPartial_cauchy_of_wkpNorm_cauchy (d := d) hp_one hΩ hu h_cau hj β
-  -- Reformulate the Cauchy bound to match Mathlib's signature: takes `f n - f m`
-  -- (using `Pi.sub_apply`).
   have h_iter_cau' : ∀ N n m : ℕ, N ≤ n → N ≤ m →
       eLpNorm
         ((fun n => iterWeakPartial (d := d) p j β (u n) Ω) n -
@@ -183,12 +161,10 @@ theorem exists_eLpNorm_limit_iterWeakPartial
       simp [Pi.sub_apply]
     rw [hEq]
     exact h
-  -- Apply Mathlib's `cauchy_complete_eLpNorm`.
   rcases MeasureTheory.Lp.cauchy_complete_eLpNorm
       (μ := volume.restrict Ω) hp_one h_iter_memLp hB h_iter_cau'
       with ⟨v, hv_memLp, hv_tendsto⟩
   refine ⟨v, hv_memLp, ?_⟩
-  -- Translate back from `f n - f` to `fun x => f n x - f x`.
   have hEq : (fun n => eLpNorm
         ((fun n => iterWeakPartial (d := d) p j β (u n) Ω) n - v)
         p (volume.restrict Ω)) =

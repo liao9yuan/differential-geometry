@@ -91,13 +91,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.Measure
 
-/-! ## A maximal-geodesic witness from a Picard–Lindelöf lift
-
-Given a manifold lift `g_v : ℝ → TangentBundle I M` with
-`g_v 0 = ⟨p, v⟩` and `IsMIntegralCurveAt g_v _ 0`, the curve
-`projectCurve g_v` is a base geodesic with initial data `(p, v)` on an
-open metric ball `J ∋ 0`. -/
-
 section MaximalGeodesicWitnessFromLift
 
 variable [I.Boundaryless] [CompleteSpace E]
@@ -123,8 +116,6 @@ theorem exists_picardLift_witness_interval
   have hg_int' := hg_int
   rw [isMIntegralCurveAt_iff'] at hg_int'
   obtain ⟨ε₀, hε₀, hg_on⟩ := hg_int'
-  -- Shrink ε so that g_v stays in the chart-source preimage of (chartAt H p).source.
-  -- g_v is continuous at 0 (from hg_int.continuousAt), and (g_v 0).proj = p ∈ chart source.
   have hcont_g_v : ContinuousAt g_v 0 := hg_int.continuousAt
   have hπ_cont : Continuous
       (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
@@ -139,30 +130,16 @@ theorem exists_picardLift_witness_interval
     apply hcomp.preimage_mem_nhds
     rw [hg0_proj]; exact hp_open.mem_nhds hp_mem
   obtain ⟨ε₁, hε₁, hε₁_sub⟩ := Metric.mem_nhds_iff.mp hpreim_nhds
-  -- Take ε := min ε₀ ε₁.
   refine ⟨min ε₀ ε₁, lt_min hε₀ hε₁, ?_, ?_, ?_⟩
-  · -- IsMIntegralCurveOn on the smaller ball.
-    exact hg_on.mono (Metric.ball_subset_ball (min_le_left _ _))
-  · -- IsGeodesicOnWithInitial on the smaller ball.
-    exact ⟨g_v, fun _ => rfl, hg0,
+  · exact hg_on.mono (Metric.ball_subset_ball (min_le_left _ _))
+  · exact ⟨g_v, fun _ => rfl, hg0,
       hg_on.mono (Metric.ball_subset_ball (min_le_left _ _))⟩
-  · -- Chart-source confinement.
-    intro s hs
+  · intro s hs
     have hs_ε₁ : s ∈ Metric.ball (0 : ℝ) ε₁ :=
       Metric.ball_subset_ball (min_le_right _ _) hs
     exact hε₁_sub hs_ε₁
 
 end MaximalGeodesicWitnessFromLift
-
-/-! ## Clopen propagation: equality of two lifts on a preconnected interval
-
-If two `IsMIntegralCurveOn` curves of `geodesicVectorFieldChart g p` on
-a preconnected open interval `K ⊆ ℝ` agree at `0 ∈ K`, then they agree
-on all of `K`. The proof uses that the set
-`A := {s ∈ K | f₁ s = f₂ s}` is open and closed inside `K` (the open
-side comes from Mathlib's local uniqueness of integral curves at every
-point of `K`, the closed side from continuity of the curves and the
-Hausdorffness of the tangent bundle). -/
 
 section ClopenPropagation
 
@@ -182,36 +159,14 @@ theorem isMIntegralCurveOn_eq_of_isPreconnected
     (h0_eq : f₁ 0 = f₂ 0) :
     Set.EqOn f₁ f₂ K := by
   classical
-  -- A := { s ∈ K | f₁ s = f₂ s }.
   set A : Set ℝ := {s ∈ K | f₁ s = f₂ s} with hA_def
-  -- A nonempty: 0 ∈ A.
   have h0_A : (0 : ℝ) ∈ A := ⟨h0_K, h0_eq⟩
-  -- A is closed in K (in the subspace topology of K).
-  -- f₁, f₂ continuous on K (from IsMIntegralCurveOn.continuousOn); TM is T2.
   have hf₁_cont : ContinuousOn f₁ K := hf₁_on.continuousOn
   have hf₂_cont : ContinuousOn f₂ K := hf₂_on.continuousOn
-  -- The closed set in TM × TM where pairs are equal (the diagonal of TM).
-  -- We work via the function (f₁, f₂) : K → TM × TM and the diagonal.
-  -- Actually simpler: equality of two continuous functions on a T2 codomain gives a closed set.
   have hclosed_in_K : IsClosed {s : ℝ | s ∈ K ∧ f₁ s = f₂ s} ∨ True := Or.inr trivial
-  -- For preconnected propagation we instead use IsPreconnected.subset_isClopen.
-  -- We prove A is open in K (using local uniqueness) and closed in K (using T2 on TM).
-  -- Mathlib's IsPreconnected.subset_isClopen needs the relative form.
-  --
-  -- We use a manual approach: show K ⊆ A by preconnectedness of K, using:
-  --   - A ⊆ K (by definition).
-  --   - A is open in ℝ ∩ K (i.e., for each s ∈ A, ∃ open nbhd U of s with U ∩ K ⊆ A).
-  --   - (K \ A) is open in ℝ ∩ K.
-  --   - A ∩ K ≠ ∅ (h0_A).
-  --
-  -- Since K is preconnected, A ∪ (K \ A) = K disjoint, both relatively open ⟹ K \ A = ∅.
-  --
-  -- Step 1: A is open in K (relatively).
   have hA_rel_open : ∀ s ∈ A, ∃ U : Set ℝ, IsOpen U ∧ s ∈ U ∧ U ∩ K ⊆ A := by
     intro s hs_A
     obtain ⟨hs_K, hs_eq⟩ := hs_A
-    -- Local uniqueness: IsMIntegralCurveAt f₁ at s, IsMIntegralCurveAt f₂ at s,
-    -- and f₁ s = f₂ s.
     have hK_nhds : K ∈ 𝓝 s := hK_open.mem_nhds hs_K
     have hf₁_at_s : IsMIntegralCurveAt f₁
         (geodesicVectorFieldChart (I := I) g p) s :=
@@ -224,7 +179,6 @@ theorem isMIntegralCurveOn_eq_of_isPreconnected
       isMIntegralCurveAt_geodesicVectorFieldChart_eventuallyEq
         (I := I) (g := g) (α := p) (t₀ := s)
         (f₁ := f₁) (f₂ := f₂) hsrc_s hf₁_at_s hf₂_at_s hs_eq
-    -- heq_ev : f₁ =ᶠ[𝓝 s] f₂. Extract an open nbhd of s on which f₁ = f₂.
     rw [Filter.eventuallyEq_iff_exists_mem] at heq_ev
     obtain ⟨U₀, hU₀_nhds, hU₀_eq⟩ := heq_ev
     obtain ⟨U, hU_sub, hU_open, hs_U⟩ := _root_.mem_nhds_iff.mp hU₀_nhds
@@ -232,20 +186,16 @@ theorem isMIntegralCurveOn_eq_of_isPreconnected
     intro s' hs'
     refine ⟨hs'.2, ?_⟩
     exact hU₀_eq (hU_sub hs'.1)
-  -- Step 2: K \ A is open in K (relatively).
   have hKnA_rel_open : ∀ s ∈ K \ A, ∃ U : Set ℝ, IsOpen U ∧ s ∈ U ∧ U ∩ K ⊆ K \ A := by
     intro s hs_KnA
     obtain ⟨hs_K, hs_nA⟩ := hs_KnA
     have hs_neq : f₁ s ≠ f₂ s := by
       intro h
       exact hs_nA ⟨hs_K, h⟩
-    -- T2: continuous functions f₁, f₂ to T2 codomain (TM); preimage of {(x, y) | x ≠ y}
-    -- via (f₁, f₂) is open in K.
     have hpair_cont : ContinuousAt (fun s : ℝ => (f₁ s, f₂ s)) s := by
       apply ContinuousAt.prodMk
       · exact (hf₁_cont.continuousWithinAt hs_K).continuousAt (hK_open.mem_nhds hs_K)
       · exact (hf₂_cont.continuousWithinAt hs_K).continuousAt (hK_open.mem_nhds hs_K)
-    -- diagonal of TM is closed (T2).
     have hdiag_closed : IsClosed {q : TangentBundle I M × TangentBundle I M | q.1 = q.2} :=
       isClosed_diagonal
     have hndiag_open : IsOpen {q : TangentBundle I M × TangentBundle I M | q.1 ≠ q.2} :=
@@ -261,15 +211,9 @@ theorem isMIntegralCurveOn_eq_of_isPreconnected
     obtain ⟨_, hs'_eq⟩ := hs'_A
     have : f₁ s' ≠ f₂ s' := hU_sub hs'.1
     exact this hs'_eq
-  -- Step 3: preconnected propagation.
-  -- A ∪ (K \ A) = K, disjoint, both relatively open. So A = K.
-  -- We use IsPreconnected with the predicate: every element of K is in A.
   intro s hs_K
   by_contra h_neq
-  -- s ∈ K \ A. We'll find a contradiction.
   have hs_KnA : s ∈ K \ A := ⟨hs_K, fun h => h_neq h.2⟩
-  -- Use preconnectedness: cover K with U₁ (open hull of A) and U₂ (open hull of K \ A).
-  -- We construct U_A and U_KnA as unions of the local opens.
   set U_A : Set ℝ := ⋃ (s : ℝ) (hsA : s ∈ A), Classical.choose (hA_rel_open s hsA) with hU_A_def
   have hU_A_open : IsOpen U_A := by
     apply isOpen_iUnion; intro s
@@ -301,30 +245,21 @@ theorem isMIntegralCurveOn_eq_of_isPreconnected
     obtain ⟨s', hs'_KnA, hx_s'⟩ := hx_U
     have hsub := (Classical.choose_spec (hKnA_rel_open s' hs'_KnA)).2.2
     exact hsub ⟨hx_s', hx_K⟩
-  -- K ⊆ U_A ∪ U_KnA (every element of K is in A or in K \ A).
   have hK_cover : K ⊆ U_A ∪ U_KnA := by
     intro x hx_K
     by_cases hxA : x ∈ A
     · left; exact hA_sub_U_A hxA
     · right; exact hKnA_sub_U_KnA ⟨hx_K, hxA⟩
-  -- Apply preconnectedness: K covered by U_A ∪ U_KnA, both open; K ∩ U_A nonempty (0),
-  -- K ∩ U_KnA nonempty (s). Hence K ∩ U_A ∩ U_KnA nonempty.
   have hcontra : (K ∩ (U_A ∩ U_KnA)).Nonempty :=
     hK_conn U_A U_KnA hU_A_open hU_KnA_open hK_cover
       ⟨0, h0_K, hA_sub_U_A h0_A⟩
       ⟨s, hs_K, hKnA_sub_U_KnA hs_KnA⟩
   obtain ⟨x, hx_K, hx_UA, hx_UKnA⟩ := hcontra
-  -- x ∈ K ∩ U_A ⊆ A and x ∈ K ∩ U_KnA ⊆ K \ A: contradiction.
   have hxA : x ∈ A := hU_A_inter_K_sub_A ⟨hx_UA, hx_K⟩
   have hxKnA : x ∈ K \ A := hU_KnA_inter_K_sub_KnA ⟨hx_UKnA, hx_K⟩
   exact hxKnA.2 hxA
 
 end ClopenPropagation
-
-/-! ## Identification of `maximalGeodesic` with the Picard–Lindelöf lift's projection
-
-On the witness interval `J = ball 0 ε` of a Picard–Lindelöf lift, the
-canonical `maximalGeodesic g p v` equals the projection of the lift. -/
 
 section PicardLiftProjEqMaximalGeodesic
 
@@ -349,21 +284,14 @@ theorem picardLift_proj_eq_maximalGeodesic_on_ball
   set J : Set ℝ := Metric.ball (0 : ℝ) ε with hJ_def
   refine ⟨ε, hε, ?_⟩
   intro t ht
-  -- t ∈ J ∋ 0, and we have IsGeodesicOnWithInitial g (projectCurve g_v) J p v.
-  -- We need maximalGeodesic g p v t = (g_v t).proj.
-  -- Step 1: t ∈ maximalGeodesicInterval g p v via the witness (projectCurve g_v, J).
   have ht_witness : MaximalGeodesicWitness (I := I) g p v t :=
     ⟨projectCurve (I := I) g_v, J, Metric.isOpen_ball,
       (convex_ball (0 : ℝ) ε).isPreconnected, Metric.mem_ball_self hε, ht, hgeo⟩
   have ht_mem : t ∈ maximalGeodesicInterval (I := I) g p v := ht_witness
   rw [maximalGeodesic_of_mem (I := I) ht_mem]
-  -- Step 2: extract the chosen-curve witness for t.
   obtain ⟨J', hJ'_open, hJ'_conn, h0_J', ht_J', hgeo'⟩ :=
     maximalGeodesicChosenCurve_spec (I := I) g p v ht_mem
   obtain ⟨f', hproj', hf'_0, hf'_on⟩ := hgeo'
-  -- f' projects to (chosen-curve), f' 0 = ⟨p, v⟩, IsMIntegralCurveOn f' _ J'.
-  -- We want (chosen-curve) t = (g_v t).proj, i.e., (f' t).proj = (g_v t).proj.
-  -- Step 3: clopen propagation on K := J ∩ J'.
   set K : Set ℝ := J ∩ J' with hK_def
   have hK_open : IsOpen K := Metric.isOpen_ball.inter hJ'_open
   have hK_conn : IsPreconnected K := by
@@ -374,32 +302,23 @@ theorem picardLift_proj_eq_maximalGeodesic_on_ball
     exact hK_ord.isPreconnected
   have h0_K : (0 : ℝ) ∈ K := ⟨Metric.mem_ball_self hε, h0_J'⟩
   have ht_K : t ∈ K := ⟨ht, ht_J'⟩
-  -- IsMIntegralCurveOn restrictions:
   have hg_on_K : IsMIntegralCurveOn g_v
       (geodesicVectorFieldChart (I := I) g p) K :=
     hg_on.mono Set.inter_subset_left
   have hf'_on_K : IsMIntegralCurveOn f' (geodesicVectorFieldChart (I := I) g p) K :=
     hf'_on.mono Set.inter_subset_right
-  -- f₁ = g_v, f₂ = f'. Need (g_v s).proj ∈ chart source of p for s ∈ K.
-  -- K ⊆ J = ball 0 ε, and hg_src gives us (g_v s).proj ∈ chart source on all of J.
   have hg_src_K : ∀ s ∈ K, (g_v s).proj ∈ (chartAt H p).source := by
     intro s hs_K
     exact hg_src s hs_K.1
-  -- Continued in the call:
   have heqOn := isMIntegralCurveOn_eq_of_isPreconnected (I := I) (g := g) (p := p)
     (f₁ := g_v) (f₂ := f') hK_open hK_conn h0_K hg_on_K hf'_on_K hg_src_K
     (by rw [hg0, hf'_0])
-  -- heqOn : EqOn g_v f' K. In particular at t ∈ K, g_v t = f' t.
   have hg_t_eq : g_v t = f' t := heqOn ht_K
-  -- Project: (g_v t).proj = (f' t).proj = (chosen-curve) t.
   have : (g_v t).proj = (f' t).proj := by rw [hg_t_eq]
   rw [this]
-  -- (chosen-curve) t = (f' t).proj by hproj'.
   exact (hproj' t).symm
 
 end PicardLiftProjEqMaximalGeodesic
-
-/-! ## Eventually-near-`0` identification of `F_v` with `maximalGeodesic` -/
 
 section ChartFlowOrbitLiftProjEqMaximalGeodesic
 
@@ -420,15 +339,12 @@ theorem chartFlowOrbitLift_proj_eq_maximalGeodesic_eventually
       (chartFlowOrbitLift (I := I) Φ p v s).proj =
         maximalGeodesic (I := I) g p v s := by
   classical
-  -- Step 1: get a Picard–Lindelöf lift g_v at (p, v).
   obtain ⟨g_v, hg0, hg_int⟩ :=
     exists_isMIntegralCurveAt_geodesicVectorFieldChart (I := I) (g := g)
       (p := p) (v := v)
-  -- Step 2: maximalGeodesic = projectCurve g_v on a ball around 0.
   obtain ⟨ε, hε, h_max_eq⟩ :=
     picardLift_proj_eq_maximalGeodesic_on_ball (I := I) (g := g) (p := p)
       (v := v) hg0 hg_int
-  -- Step 3: F_v =ᶠ g_v near 0 via Mathlib local uniqueness.
   have hF_proj_0 : (chartFlowOrbitLift (I := I) Φ p v 0).proj = p := by
     rw [hF_0]
   have hp_src : (g_v 0).proj ∈ (chartAt H p).source := by
@@ -440,22 +356,14 @@ theorem chartFlowOrbitLift_proj_eq_maximalGeodesic_eventually
       (I := I) (g := g) (α := p) (t₀ := 0)
       (f₁ := g_v) (f₂ := chartFlowOrbitLift (I := I) Φ p v)
       hp_src hg_int hF_int h0_eq
-  -- Combine: on a nbhd of 0 contained in `Metric.ball 0 ε`, F_v s = g_v s,
-  -- hence (F_v s).proj = (g_v s).proj = maximalGeodesic g p v s.
   have h_ball_nhds : Metric.ball (0 : ℝ) ε ∈ 𝓝 (0 : ℝ) :=
     Metric.isOpen_ball.mem_nhds (Metric.mem_ball_self hε)
   filter_upwards [hgF_ev, h_ball_nhds] with s hs_eq hs_ball
-  -- hs_eq : g_v s = F_v s. hs_ball : s ∈ ball 0 ε.
   have h_max_s : maximalGeodesic (I := I) g p v s = (g_v s).proj :=
     h_max_eq s hs_ball
   rw [h_max_s, ← hs_eq]
 
 end ChartFlowOrbitLiftProjEqMaximalGeodesic
-
-/-! ## Headline R.D.2 packaging
-
-We combine the R.D.1 manifold-lift data with the per-`v` identification
-above into a single existential packaging. -/
 
 section HeadlineRD2
 
@@ -504,14 +412,12 @@ theorem exists_chartFlowOrbitLift_proj_eq_maximalGeodesic_data
           (chartFlowOrbitLift (I := I) Φ p v s).proj =
             maximalGeodesic (I := I) g p v s) := by
   classical
-  -- Invoke R.D.1's uniform data.
   obtain ⟨ρ, T, Φ, hρ_pos, hT_pos, hΦ_init, hΦ_target, hΦ_phase, hF_0,
     _hF_proj, _hF_chartPush, hF_int⟩ :=
     exists_chartFlowOrbitLift_data_uniform (I := I) (g := g) (p := p)
   refine ⟨ρ, T, Φ, hρ_pos, hT_pos, hΦ_init, hΦ_target, hΦ_phase, hF_0,
     hF_int, ?_⟩
   intro v hv
-  -- Per-v eventually-near-0 identification.
   exact chartFlowOrbitLift_proj_eq_maximalGeodesic_eventually
     (I := I) (g := g) (p := p) (v := v) (Φ := Φ) (hF_0 v hv) (hF_int v hv)
 

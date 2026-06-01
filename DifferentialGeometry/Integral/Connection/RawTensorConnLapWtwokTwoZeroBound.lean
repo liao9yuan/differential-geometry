@@ -60,8 +60,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 local notation "EuclN" =>
   EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## Vanishing of `tensorChartComp` outside `chartAtlasPOU_finset` -/
-
 /-- For `α` outside the canonical chart-atlas partition-of-unity finset, every
 chart component of any smooth compactly-supported `(r, s)`-tensor section
 vanishes identically. The partition-of-unity weight is zero everywhere for such
@@ -76,16 +74,12 @@ private lemma tensorChartComp_eq_zero_of_notMem_finset
   classical
   funext y
   by_cases hy : y ∈ chartTargetEuclid (I := I) (M := M) α
-  · -- On chart target: tensorChartComp = tensorChartComponentPou (...).
-    rw [tensorChartComp_apply_of_mem (I := I) (M := M) g r s S α Idx Jdx hy]
+  · rw [tensorChartComp_apply_of_mem (I := I) (M := M) g r s S α Idx Jdx hy]
     unfold tensorChartComponentPou
     rw [chartAtlasPOU_weight_zero_of_notMem (I := I) (M := M) hα _]
     ring
-  · -- Off chart target: tensorChartComp = 0.
-    exact tensorChartComp_apply_of_notMem
+  · exact tensorChartComp_apply_of_notMem
       (I := I) (M := M) g r s S α Idx Jdx hy
-
-/-! ## Collapse the chart-aggregating tsum to a finset sum -/
 
 /-- The chart-aggregating `tsum` defining `wtwokTwoNorm g 0 (rawTensorConnLapSmooth
 g r s T)` collapses to a finset sum over `chartAtlasPOU_finset`. The per-`α`
@@ -106,11 +100,7 @@ private lemma wtwokTwoNorm_zero_rawTensorConnLap_eq_finset_sum
   classical
   rw [wtwokTwoNorm_eq_tsum (I := I) (M := M) g 0
     (rawTensorConnLapSmooth (I := I) g r s T)]
-  -- Replace the `2 * 0` inside the `wkpNorm` with `0`.
-  -- The chart-aggregating sum is the same as in the goal (definitionally
-  -- `2 * 0 = 0`); we use `Nat.mul_zero` to convert.
   rw [show (2 * 0 : ℕ) = 0 from by norm_num]
-  -- Apply `tsum_eq_sum` with finset `chartAtlasPOU_finset` and zero hypothesis.
   rw [tsum_eq_sum
     (s := chartAtlasPOU_finset (I := I) (M := M))
     (f := fun α : M =>
@@ -120,7 +110,6 @@ private lemma wtwokTwoNorm_zero_rawTensorConnLap_eq_finset_sum
             (tensorChartComp (I := I) (M := M) g r s
               (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx)
             (chartTargetEuclid (I := I) (M := M) α))]
-  -- Side condition: the summand vanishes for `α ∉ chartAtlasPOU_finset`.
   intro α hα
   refine Finset.sum_eq_zero ?_
   intro Idx _
@@ -131,8 +120,6 @@ private lemma wtwokTwoNorm_zero_rawTensorConnLap_eq_finset_sum
     hα Idx Jdx]
   exact wkpNorm_zero_fun_zero (d := Module.finrank ℝ E) (by norm_num)
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
-
-/-! ## `wkpNorm 0 2` equals `eLpNorm 2 (volume.restrict ·)` -/
 
 /-- The order-zero `wkpNorm` over an open set equals the corresponding restricted
 `eLpNorm`. A specialisation of `wkpNorm_zero` recorded for direct use below. -/

@@ -35,8 +35,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Pointwise multilinear bounds in the standard basis -/
-
 /-- For any `v` in `EuclideanSpace ℝ (Fin d)`, each coordinate has absolute
 value bounded by the Euclidean norm. -/
 private lemma euclideanSpace_coord_abs_le_norm (v : E) (i : Fin d) :
@@ -78,9 +76,6 @@ private lemma basisTuple_prod_norms {m : ℕ} (α : Fin m → Fin d) :
 private lemma euclideanSpace_basis_expansion (v : E) :
     v = ∑ j : Fin d, v j • EuclideanSpace.single j (1 : ℝ) := by
   classical
-  -- Use the linear equivalence to/from Pi.
-  -- `EuclideanSpace ℝ (Fin d) = PiLp 2 (fun _ : Fin d => ℝ)`.
-  -- The basis decomposition holds in Pi and transfers via toLp.
   have h_pi_decomp : (fun i : Fin d => v i) =
       ∑ j : Fin d, (v j) • ((Pi.single j (1 : ℝ)) : Fin d → ℝ) := by
     funext i
@@ -91,18 +86,14 @@ private lemma euclideanSpace_basis_expansion (v : E) :
       rw [Pi.smul_apply, Pi.single_apply, if_neg hj.symm, smul_zero]
     · intro h
       exact absurd (Finset.mem_univ i) h
-  -- Two-step: rewrite v as toLp of its Pi representation, then push the sum out.
   have h_v_toLp : v = WithLp.toLp 2 (fun i : Fin d => v i) := by rfl
-  -- The RHS of the goal: rewrite each `EuclideanSpace.single j 1` as `toLp (Pi.single j 1)`.
   have h_rhs :
       (∑ j : Fin d, v j • EuclideanSpace.single j (1 : ℝ) : E) =
         ∑ j : Fin d, v j • WithLp.toLp 2 ((Pi.single j (1 : ℝ)) : Fin d → ℝ) := by
     refine Finset.sum_congr rfl (fun j _ => ?_)
     rfl
   rw [h_rhs]
-  -- LHS: rewrite v via toLp; then push the sum out via the linear equivalence.
   conv_lhs => rw [h_v_toLp, h_pi_decomp]
-  -- Pull the linear equivalence through the sum.
   rw [show (WithLp.toLp 2 : (Fin d → ℝ) → E) =
       (WithLp.linearEquiv 2 ℝ (Fin d → ℝ)).symm from rfl]
   rw [_root_.map_sum]
@@ -117,11 +108,9 @@ private theorem opNorm_le_sum_basis
   set S : ℝ := ∑ α : Fin m → Fin d, |f (basisTuple α)| with hS_def
   have hS_nn : 0 ≤ S := Finset.sum_nonneg (fun α _ => abs_nonneg _)
   refine ContinuousMultilinearMap.opNorm_le_bound hS_nn (fun v => ?_)
-  -- Expand each v i along the standard basis.
   have h_v_eq : v = fun i : Fin m => ∑ j : Fin d, (v i j) • EuclideanSpace.single j (1 : ℝ) := by
     funext i; exact euclideanSpace_basis_expansion (v i)
   conv_lhs => rw [h_v_eq]
-  -- Use multilinearity to expand f over basis tuples.
   have h_sum_expand :
       f (fun i : Fin m => ∑ j : Fin d, (v i j) • EuclideanSpace.single j (1 : ℝ)) =
         ∑ α : Fin m → Fin d, f (fun i => (v i (α i)) • EuclideanSpace.single (α i) (1 : ℝ)) := by
@@ -167,8 +156,6 @@ private lemma abs_apply_basisTuple_le_opNorm
   rw [basisTuple_prod_norms α, mul_one] at h
   exact h
 
-/-! ## Smoothness of the basis-evaluation -/
-
 /-- For smooth `u : E → ℝ`, the scalar function
 `y ↦ (iteratedFDeriv ℝ m u y) (basisTuple α)` is smooth. -/
 private theorem contDiff_iteratedFDeriv_apply_basisTuple
@@ -181,8 +168,6 @@ private theorem contDiff_iteratedFDeriv_apply_basisTuple
   let app : ContinuousMultilinearMap ℝ (fun _ : Fin m => E) ℝ →L[ℝ] ℝ :=
     ContinuousMultilinearMap.apply ℝ (fun _ : Fin m => E) ℝ (basisTuple α)
   exact app.contDiff.comp h_iterFD
-
-/-! ## Norm bounds connecting basis-evaluation and full iteratedFDeriv -/
 
 /-- The basis-evaluation `|iteratedFDeriv m u y (basisTuple α)| ≤ ‖iteratedFDeriv m u y‖`. -/
 private lemma abs_iteratedFDeriv_apply_basisTuple_le
@@ -211,7 +196,6 @@ private theorem norm_fderiv_iteratedFDeriv_apply_basisTuple_le
         fun z => app (iteratedFDeriv ℝ m u z) := by
     funext z; rfl
   rw [h_funext]
-  -- Compute the fderiv via chain rule.
   have h_app_hasFDerivAt : HasFDerivAt app app (iteratedFDeriv ℝ m u y) :=
     app.hasFDerivAt
   have h_inner_hasFDerivAt :
@@ -239,8 +223,6 @@ private theorem norm_fderiv_iteratedFDeriv_apply_basisTuple_le
       ≤ 1 * ‖iteratedFDeriv ℝ (m + 1) u y‖ :=
         mul_le_mul_of_nonneg_right h_app_norm_le (norm_nonneg _)
     _ = ‖iteratedFDeriv ℝ (m + 1) u y‖ := one_mul _
-
-/-! ## eLpNorm comparisons -/
 
 /-- `‖basis-evaluation ·‖_{L^p}` ≤ `‖iteratedFDeriv ℝ m u ·‖_{L^p}`. -/
 private lemma eLpNorm_apply_basisTuple_le_eLpNorm_iteratedFDeriv
@@ -270,8 +252,6 @@ private lemma eLpNorm_fderiv_apply_basisTuple_le_eLpNorm_iteratedFDeriv_succ
   rw [show ‖‖iteratedFDeriv ℝ (m + 1) u y‖‖ = ‖iteratedFDeriv ℝ (m + 1) u y‖ from
     Real.norm_of_nonneg (norm_nonneg _)]
   exact norm_fderiv_iteratedFDeriv_apply_basisTuple_le hu α y
-
-/-! ## Finiteness of relevant `L^p` norms on a ball -/
 
 /-- For smooth `u`, the function `‖iteratedFDeriv ℝ j u ·‖` is in `L^p` on a ball. -/
 private lemma smooth_iteratedFDeriv_norm_memLp_on_ball
@@ -307,8 +287,6 @@ private lemma smooth_iteratedFDeriv_norm_eLpNorm_ne_top
       (volume.restrict (Metric.ball x₀ R)) ≠ ⊤ :=
   (smooth_iteratedFDeriv_norm_memLp_on_ball hp_pos hR j hu).eLpNorm_ne_top
 
-/-! ## Main theorem -/
-
 /-- Uniform-in-`u` higher-order Morrey sup bound for smooth functions: for every
 smooth `u`, the operator norm of its `m`-th iterated derivative on the
 half-radius interior of a ball is bounded by a constant (depending only on
@@ -328,19 +306,15 @@ theorem smooth_morrey_iteratedFDeriv_bound_uniform
   classical
   have hd_pos : (0 : ℝ) < d := Nat.cast_pos.mpr (NeZero.pos d)
   have hp_pos : 0 < p := lt_trans hd_pos hp
-  -- Apply scalar Morrey to extract the constant.
   obtain ⟨C₀, hC₀_nn, hC₀_bound⟩ :=
     smooth_morrey_sup_bound_uniform (d := d) hp (x₀ := x₀) (R := R) hR
-  -- Define the total constant.
   set N : ℕ := Fintype.card (Fin m → Fin d) with hN_def
   refine ⟨(N : ℝ) * C₀, mul_nonneg (Nat.cast_nonneg _) hC₀_nn, ?_⟩
   intro u hu x hx
-  -- Per-basis-tuple smooth scalar functions.
   set g : (Fin m → Fin d) → (E → ℝ) :=
     fun α y => (iteratedFDeriv ℝ m u y) (basisTuple α) with hg_def
   have h_gα_smooth : ∀ α, ContDiff ℝ (⊤ : ℕ∞) (g α) := fun α =>
     contDiff_iteratedFDeriv_apply_basisTuple hu α
-  -- Apply scalar Morrey to each.
   have h_per_α : ∀ α : Fin m → Fin d,
       ‖g α x‖ ≤ C₀ * (
         (eLpNorm (g α) (ENNReal.ofReal p)
@@ -348,22 +322,18 @@ theorem smooth_morrey_iteratedFDeriv_bound_uniform
         (eLpNorm (fun z => ‖fderiv ℝ (g α) z‖) (ENNReal.ofReal p)
           (volume.restrict (Metric.ball x₀ R))).toReal) := fun α =>
     hC₀_bound (h_gα_smooth α) x hx
-  -- Bound the basis evaluation norms by full iteratedFDeriv norms.
-  -- The N_m := ‖iteratedFDeriv m u‖_{L^p} and N_{m+1} := ‖iteratedFDeriv (m+1) u‖_{L^p}.
   set Nm : ℝ := (eLpNorm (fun z => ‖iteratedFDeriv ℝ m u z‖) (ENNReal.ofReal p)
     (volume.restrict (Metric.ball x₀ R))).toReal with hNm_def
   set Nm1 : ℝ := (eLpNorm (fun z => ‖iteratedFDeriv ℝ (m + 1) u z‖) (ENNReal.ofReal p)
     (volume.restrict (Metric.ball x₀ R))).toReal with hNm1_def
   have hNm_nn : 0 ≤ Nm := ENNReal.toReal_nonneg
   have hNm1_nn : 0 ≤ Nm1 := ENNReal.toReal_nonneg
-  -- Finiteness facts.
   have hNm_finite : eLpNorm (fun z => ‖iteratedFDeriv ℝ m u z‖) (ENNReal.ofReal p)
       (volume.restrict (Metric.ball x₀ R)) ≠ ⊤ :=
     smooth_iteratedFDeriv_norm_eLpNorm_ne_top hp_pos hR m hu
   have hNm1_finite : eLpNorm (fun z => ‖iteratedFDeriv ℝ (m + 1) u z‖) (ENNReal.ofReal p)
       (volume.restrict (Metric.ball x₀ R)) ≠ ⊤ :=
     smooth_iteratedFDeriv_norm_eLpNorm_ne_top hp_pos hR (m + 1) hu
-  -- Bound each scalar quantity.
   have h_each_α_simplified : ∀ α : Fin m → Fin d, ‖g α x‖ ≤ C₀ * (Nm + Nm1) := by
     intro α
     refine (h_per_α α).trans ?_
@@ -379,10 +349,8 @@ theorem smooth_morrey_iteratedFDeriv_bound_uniform
       apply ENNReal.toReal_mono hNm1_finite
       exact eLpNorm_fderiv_apply_basisTuple_le_eLpNorm_iteratedFDeriv_succ hu m α
     linarith
-  -- Pointwise multilinear bound: ‖iteratedFDeriv m u x‖ ≤ ∑ α |g α x|.
   have h_pointwise : ‖iteratedFDeriv ℝ m u x‖ ≤ ∑ α : Fin m → Fin d, |g α x| :=
     opNorm_le_sum_basis (iteratedFDeriv ℝ m u x)
-  -- Combine: sum over all α.
   have h_sum_each :
       ∑ α : Fin m → Fin d, ‖g α x‖ ≤ (N : ℝ) * (C₀ * (Nm + Nm1)) := by
     have h_each_le : ∀ α : Fin m → Fin d, ‖g α x‖ ≤ C₀ * (Nm + Nm1) :=
@@ -396,22 +364,18 @@ theorem smooth_morrey_iteratedFDeriv_bound_uniform
       ring
     rw [h_const_sum] at h_sum_le
     exact h_sum_le
-  -- Note ‖g α x‖ = |g α x|, so the two sums are equal.
   have h_sum_eq : ∑ α : Fin m → Fin d, |g α x| = ∑ α : Fin m → Fin d, ‖g α x‖ := by
     refine Finset.sum_congr rfl (fun α _ => ?_)
     rfl
   rw [← h_sum_eq] at h_sum_each
   have h_step1 : ‖iteratedFDeriv ℝ m u x‖ ≤ (N : ℝ) * (C₀ * (Nm + Nm1)) :=
     le_trans h_pointwise h_sum_each
-  -- Bound (N · C₀ · (Nm + Nm1)) ≤ ((N · C₀) · ∑_{j ≤ m+1} N_j).
   set total : ℝ :=
     (Finset.range (m + 2)).sum fun j =>
       (eLpNorm (fun z => ‖iteratedFDeriv ℝ j u z‖) (ENNReal.ofReal p)
         (volume.restrict (Metric.ball x₀ R))).toReal with htotal_def
   have h_total_nn : 0 ≤ total :=
     Finset.sum_nonneg (fun j _ => ENNReal.toReal_nonneg)
-  -- Both Nm and Nm1 are individual terms in `total`. Sum them:
-  -- Nm + Nm1 ≤ total since the other terms are non-negative.
   have h_Nm_plus_Nm1_le_total : Nm + Nm1 ≤ total := by
     have h_pair_eq :
         Nm + Nm1 =
@@ -421,7 +385,6 @@ theorem smooth_morrey_iteratedFDeriv_bound_uniform
             (volume.restrict (Metric.ball x₀ R))).toReal) := by
       rw [hNm_def, hNm1_def]
     rw [h_pair_eq]
-    -- Use Finset.sum monotonicity: the sum of two indices ≤ total.
     set f : ℕ → ℝ := fun j => (eLpNorm (fun z => ‖iteratedFDeriv ℝ j u z‖)
       (ENNReal.ofReal p) (volume.restrict (Metric.ball x₀ R))).toReal with hf_def
     have h_split : (Finset.range (m + 2)).sum f =
@@ -445,11 +408,9 @@ theorem smooth_morrey_iteratedFDeriv_bound_uniform
     have h_remainder_nn : 0 ≤
         (((Finset.range (m + 2)).erase m).erase (m + 1)).sum f :=
       Finset.sum_nonneg (fun j _ => ENNReal.toReal_nonneg)
-    -- LHS: Nm + Nm1 = f m + f (m+1).
     have hf_m : f m = Nm := rfl
     have hf_m1 : f (m + 1) = Nm1 := rfl
     linarith [h_remainder_nn]
-  -- Final: ‖...‖ ≤ N · C₀ · (Nm + Nm1) ≤ N · C₀ · total = (N · C₀) · total.
   have hN_C₀_nn : 0 ≤ (N : ℝ) * C₀ := mul_nonneg (Nat.cast_nonneg _) hC₀_nn
   have h_step2 :
       (N : ℝ) * (C₀ * (Nm + Nm1)) ≤ ((N : ℝ) * C₀) * total := by
@@ -457,43 +418,6 @@ theorem smooth_morrey_iteratedFDeriv_bound_uniform
     rw [h_rewrite]
     exact mul_le_mul_of_nonneg_left h_Nm_plus_Nm1_le_total hN_C₀_nn
   exact le_trans h_step1 h_step2
-
-/-! ## Non-smooth `C^m` representative for `MemWkp (m+1) p`
-
-We extend the smooth `C^m` Morrey bound to non-smooth inputs `u ∈ W^{m+1, p}`
-by mollification.
-
-The strategy is:
-
-1. **Cutoff and approximation.** Take a smooth cutoff `χ` with `χ = 1` on
-   `closedBall x₀ (3R/4)` and tsupport in `ball x₀ R`. The product `v := χ · u`
-   lies in `MemWkp (m+1) p` and has compact support. By the headline density
-   theorem (`MemWkp.exists_smooth_compactSupport_approx`), there is a sequence
-   `φ_n` of smooth compactly supported functions with
-   `wkpNorm (m+1) p (v - φ_n) (ball x₀ R) ≤ 1/(n+1)`.
-
-2. **Smooth Morrey on differences.** Applying
-   `smooth_morrey_iteratedFDeriv_bound_uniform` to `φ_n - φ_n'` gives a uniform
-   bound `‖iteratedFDeriv ℝ j (φ_n - φ_n') x‖ ≤ C · wkpNorm (m+1) p
-   (φ_n - φ_n') (ball x₀ R)` for every `x ∈ ball x₀ (R/2)` and every `j ≤ m`.
-   The bridge `eLpNorm_iteratedFDeriv_le_wkpNorm` converts the right-hand sum
-   of `eLpNorm` of iterated derivatives into a single `wkpNorm`.
-
-3. **Uniform C^m Cauchy.** Multiplying by a smaller smooth cutoff `ψ`
-   (supported in `ball x₀ (R/2)`, equal to 1 on `closedBall x₀ (R/4)`) yields
-   a globally-supported sequence `ψ · φ_n` that is uniformly Cauchy in C^m on
-   all of `E`.
-
-4. **C^m limit.** The C^m limit `u_smooth` is constructed pointwise via the
-   completeness of `ℝ` and is identified with the differential limit using
-   `hasFDerivAt_of_tendstoUniformly`.
-
-5. **A.e.-equality with `u`.** On `ball x₀ (R/4)` where both cutoffs equal 1,
-   `ψ · φ_n = φ_n → χ · u = u` in `L^p`, hence (up to a subsequence) a.e.,
-   identifying `u_smooth` with `u` a.e.
--/
-
-/-! ### Smooth-cutoff infrastructure -/
 
 /-- A smooth cutoff `η` adapted to `ball x₀ R`: `η = 1` on
 `closedBall x₀ (3R/4)`, `tsupport η ⊆ closedBall x₀ (7R/8) ⊂ ball x₀ R`,
@@ -597,8 +521,6 @@ private lemma exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
     (m : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ x : E, ∀ j ≤ m, ‖iteratedFDeriv ℝ j η x‖ ≤ C := by
   classical
-  -- For each j, the bound holds by compactness.
-  -- Collect bounds and take the max.
   have h_per_j : ∀ j, ∃ Cj : ℝ, 0 ≤ Cj ∧
       ∀ x : E, ‖iteratedFDeriv ℝ j η x‖ ≤ Cj := by
     intro j
@@ -615,7 +537,6 @@ private lemma exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
   have hCj_nn : ∀ j, 0 ≤ Cj j := fun j => (Classical.choose_spec (h_per_j j)).1
   have hCj_bound : ∀ j, ∀ x : E, ‖iteratedFDeriv ℝ j η x‖ ≤ Cj j := fun j =>
     (Classical.choose_spec (h_per_j j)).2
-  -- Take C := max over j ≤ m of Cj j, using Finset.sup' on a nonempty Finset.
   have h_nonempty : (Finset.range (m + 1)).Nonempty := ⟨0, Finset.mem_range.mpr (Nat.zero_lt_succ _)⟩
   let C : ℝ := (Finset.range (m + 1)).sup' h_nonempty Cj
   have hC_ge : ∀ j ∈ Finset.range (m + 1), Cj j ≤ C := fun j hj =>
@@ -626,8 +547,6 @@ private lemma exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
   intro x j hj
   have hj_mem : j ∈ Finset.range (m + 1) := Finset.mem_range.mpr (Nat.lt_succ_of_le hj)
   exact le_trans (hCj_bound j x) (hC_ge j hj_mem)
-
-/-! ### Smooth Morrey on differences in terms of `wkpNorm` -/
 
 /-- Smooth Morrey bound, restated for a pair of smooth compactly-supported
 functions: there is a constant `C` (depending only on `d, p, R, m`) such that
@@ -659,7 +578,6 @@ private theorem smooth_compactSupport_pair_iteratedFDeriv_bound
     rw [show (1 : ℝ≥0∞) = ENNReal.ofReal 1 from by simp]
     exact ENNReal.ofReal_le_ofReal hp_one
   have hΩ_open : IsOpen (Metric.ball x₀ R) := Metric.isOpen_ball
-  -- For each j ≤ m, get the constant from the smooth Morrey bound.
   have h_per_j : ∀ j, ∃ Cj : ℝ, 0 ≤ Cj ∧
       ∀ {h : E → ℝ}, ContDiff ℝ (⊤ : ℕ∞) h →
         ∀ x ∈ Metric.ball x₀ (R / 2),
@@ -677,7 +595,6 @@ private theorem smooth_compactSupport_pair_iteratedFDeriv_bound
             (eLpNorm (fun z => ‖iteratedFDeriv ℝ i h z‖) (ENNReal.ofReal p)
               (volume.restrict (Metric.ball x₀ R))).toReal) := fun j _ hh =>
     (Classical.choose_spec (h_per_j j)).2 hh
-  -- Take C := max over j ≤ m.
   have h_nonempty : (Finset.range (m + 1)).Nonempty := ⟨0, Finset.mem_range.mpr (Nat.zero_lt_succ _)⟩
   let C : ℝ := (Finset.range (m + 1)).sup' h_nonempty CjFun
   have hC_ge : ∀ j ∈ Finset.range (m + 1), CjFun j ≤ C := fun j hj =>
@@ -686,12 +603,10 @@ private theorem smooth_compactSupport_pair_iteratedFDeriv_bound
     le_trans (hCjFun_nn 0) (hC_ge 0 (Finset.mem_range.mpr (Nat.zero_lt_succ _)))
   refine ⟨C, hC_nn, ?_⟩
   intro f g hf_smooth hf_cpt hf_supp hg_smooth hg_cpt hg_supp x hx j hj
-  -- h := f - g is smooth with compact support inside ball x₀ R.
   set h : E → ℝ := fun y => f y - g y with hh_def
   have hh_smooth : ContDiff ℝ (⊤ : ℕ∞) h := hf_smooth.sub hg_smooth
   have hh_cpt : HasCompactSupport h := hf_cpt.sub hg_cpt
   have hh_supp : tsupport h ⊆ Metric.ball x₀ R := by
-    -- tsupport (f - g) ⊆ tsupport f ∪ tsupport g ⊆ ball x₀ R.
     have h_supp_le : tsupport h ⊆ tsupport f ∪ tsupport g := by
       refine closure_minimal ?_ (isClosed_tsupport _ |>.union (isClosed_tsupport _))
       intro y hy
@@ -707,14 +622,11 @@ private theorem smooth_compactSupport_pair_iteratedFDeriv_bound
       rw [hf_zero, hg_zero]; ring
     exact h_supp_le.trans (Set.union_subset hf_supp hg_supp)
   have hj_mem : j ∈ Finset.range (m + 1) := Finset.mem_range.mpr (Nat.lt_succ_of_le hj)
-  -- Apply smooth Morrey to h.
   have h_morrey := hCjFun_bound j hh_smooth x hx
-  -- Bound the sum of eLpNorm by wkpNorm.
   set S : ℝ := (Finset.range (j + 2)).sum fun i =>
     (eLpNorm (fun z => ‖iteratedFDeriv ℝ i h z‖) (ENNReal.ofReal p)
       (volume.restrict (Metric.ball x₀ R))).toReal with hS_def
   have hS_nn : 0 ≤ S := Finset.sum_nonneg (fun _ _ => ENNReal.toReal_nonneg)
-  -- The wkpNorm of h is finite (since h is smooth with compact support).
   have hh_W : MemWkp (d := d) (m + 1) (ENNReal.ofReal p) h (Metric.ball x₀ R) :=
     MemWkp_of_smooth_compactSupport (d := d) hΩ_open hh_smooth hh_cpt
       hh_supp hpp_one (m + 1)
@@ -723,11 +635,9 @@ private theorem smooth_compactSupport_pair_iteratedFDeriv_bound
   set N : ℝ := (wkpNorm (d := d) (m + 1) (ENNReal.ofReal p) h
     (Metric.ball x₀ R)).toReal with hN_def
   have hN_nn : 0 ≤ N := ENNReal.toReal_nonneg
-  -- The bridge lemma: ∑_{n ≤ m+1} eLpNorm (iteratedFDeriv n h) ≤ wkpNorm.
   have h_bridge :=
     eLpNorm_iteratedFDeriv_le_wkpNorm (d := d) hΩ_open hpp_one (m + 1)
       hh_smooth hh_cpt hh_supp
-  -- Each eLpNorm in S is one of the terms in the sum (since j + 2 ≤ m + 2).
   have hj_le_succ : j + 2 ≤ m + 2 := by omega
   have hS_le_total :
       S ≤ ((Finset.range (m + 2)).sum fun i =>
@@ -738,12 +648,10 @@ private theorem smooth_compactSupport_pair_iteratedFDeriv_bound
       rw [Finset.mem_range] at hk ⊢
       omega
     · intros; exact ENNReal.toReal_nonneg
-  -- The full sum equals (∑ eLpNorm).toReal since each is finite (smooth + compact support).
   have h_eLp_finite : ∀ i ∈ Finset.range (m + 2),
       eLpNorm (fun z => ‖iteratedFDeriv ℝ i h z‖) (ENNReal.ofReal p)
         (volume.restrict (Metric.ball x₀ R)) ≠ ⊤ := fun i _ =>
     smooth_iteratedFDeriv_norm_eLpNorm_ne_top hp_pos hR i hh_smooth
-  -- The sum on the LHS of h_bridge is a sum of ENNReals.
   have h_sum_toReal_eq :
       ((Finset.range (m + 2)).sum fun i =>
         (eLpNorm (fun z => ‖iteratedFDeriv ℝ i h z‖) (ENNReal.ofReal p)
@@ -752,7 +660,6 @@ private theorem smooth_compactSupport_pair_iteratedFDeriv_bound
         eLpNorm (fun z => ‖iteratedFDeriv ℝ i h z‖) (ENNReal.ofReal p)
           (volume.restrict (Metric.ball x₀ R))).toReal := by
     rw [← ENNReal.toReal_sum h_eLp_finite]
-  -- The bridged sum is bounded by N (using wkpNorm).
   have h_sum_le_N :
       ((Finset.range (m + 2)).sum fun i =>
         (eLpNorm (fun z => ‖iteratedFDeriv ℝ i h z‖) (ENNReal.ofReal p)
@@ -771,8 +678,6 @@ private theorem smooth_compactSupport_pair_iteratedFDeriv_bound
       _ ≤ C * N := mul_le_mul_of_nonneg_right (hC_ge j hj_mem) hN_nn
   exact le_trans h_step1 h_step2
 
-/-! ### Construction of smooth approximating sequence -/
-
 /-- For `u ∈ MemWkp (m+1) p` on `ball x₀ R`, we extract a sequence of smooth
 compactly supported functions `φ_n` that approximate `χ · u` in `wkpNorm`. -/
 private theorem exists_smooth_approx_seq_of_memWkp
@@ -781,22 +686,18 @@ private theorem exists_smooth_approx_seq_of_memWkp
     {u : E → ℝ}
     (hu : MemWkp (d := d) (m + 1) (ENNReal.ofReal p) u (Metric.ball x₀ R)) :
     ∃ (χ : E → ℝ) (φ : ℕ → E → ℝ),
-      -- χ properties
       ContDiff ℝ (⊤ : ℕ∞) χ ∧
       HasCompactSupport χ ∧
       Set.range χ ⊆ Set.Icc (0 : ℝ) 1 ∧
       (∀ x ∈ Metric.closedBall x₀ (3 * R / 4), χ x = 1) ∧
       tsupport χ ⊆ Metric.closedBall x₀ (7 * R / 8) ∧
-      -- v := χ · u is in MemWkp (m+1) p
       MemWkp (d := d) (m + 1) (ENNReal.ofReal p) (fun x => χ x * u x)
         (Metric.ball x₀ R) ∧
       tsupport (fun x => χ x * u x) ⊆ Metric.closedBall x₀ (7 * R / 8) ∧
       HasCompactSupport (fun x => χ x * u x) ∧
-      -- φ_n smooth, compactly supported
       (∀ n, ContDiff ℝ (⊤ : ℕ∞) (φ n)) ∧
       (∀ n, HasCompactSupport (φ n)) ∧
       (∀ n, tsupport (φ n) ⊆ Metric.ball x₀ R) ∧
-      -- φ_n approximates χ · u
       (∀ n, wkpNorm (d := d) (m + 1) (ENNReal.ofReal p)
         (fun x => χ x * u x - φ n x) (Metric.ball x₀ R) ≤
           ENNReal.ofReal (1 / (n + 1 : ℝ))) := by
@@ -812,17 +713,14 @@ private theorem exists_smooth_approx_seq_of_memWkp
     exact ENNReal.ofReal_le_ofReal hp_one
   have hp_top : ENNReal.ofReal p ≠ ⊤ := ENNReal.ofReal_ne_top
   have hΩ_open : IsOpen (Metric.ball x₀ R) := Metric.isOpen_ball
-  -- Outer cutoff χ.
   obtain ⟨χ, hχ_smooth, hχ_compact, hχ_range, hχ_one, hχ_supp⟩ :=
     exists_smooth_cutoff_outer (x₀ := x₀) hR
-  -- v := χ · u ∈ MemWkp (m+1) p (ball x₀ R) via MemWkp.smul_smooth_bounded.
   obtain ⟨Cχ, hCχ_nn, hCχ_bound⟩ :=
     exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport hχ_smooth hχ_compact (m + 1)
   have hv_W : MemWkp (d := d) (m + 1) (ENNReal.ofReal p) (fun x => χ x * u x)
       (Metric.ball x₀ R) :=
     MemWkp.smul_smooth_bounded (d := d) (m + 1) hpp_one hΩ_open hχ_smooth
       (C := Cχ) (fun j hj x _ => hCχ_bound x j hj) hu
-  -- tsupport (χ · u) ⊆ tsupport χ ⊆ closedBall x₀ (7R/8) ⊂ ball x₀ R.
   have hv_supp : tsupport (fun x => χ x * u x) ⊆ Metric.closedBall x₀ (7 * R / 8) := by
     have h_supp_sub_χ : tsupport (fun x => χ x * u x) ⊆ tsupport χ := by
       refine closure_mono ?_
@@ -840,7 +738,6 @@ private theorem exists_smooth_approx_seq_of_memWkp
     refine HasCompactSupport.of_support_subset_isCompact
       (isCompact_closedBall (x := x₀) (7 * R / 8)) ?_
     exact (subset_tsupport _).trans hv_supp
-  -- Apply MemWkp.exists_smooth_compactSupport_approx with ε = 1/(n+1) for each n.
   have h_pick : ∀ n : ℕ, ∃ φₙ : E → ℝ,
       ContDiff ℝ (⊤ : ℕ∞) φₙ ∧
       HasCompactSupport φₙ ∧
@@ -872,8 +769,6 @@ private theorem exists_smooth_approx_seq_of_memWkp
     hv_W, hv_supp, hv_cpt,
     hφ_smooth, hφ_cpt, hφ_supp, hφ_close⟩
 
-/-! ### Uniform Cauchy of multiplied smooth approximants -/
-
 /-- For smooth, compactly supported functions `ψ` and `f`, the iterated
 derivatives of `ψ · f` are pointwise bounded by a constant times the sum of
 iterated derivatives of `f` on the support of `ψ`. -/
@@ -887,7 +782,6 @@ private lemma norm_iteratedFDeriv_mul_left_bound
           ‖iteratedFDeriv ℝ j (fun y => ψ y * f y) x‖ ≤
             C * ∑ i ∈ Finset.range (j + 1), ‖iteratedFDeriv ℝ i f x‖ := by
   classical
-  -- Get a uniform iteratedFDeriv bound on ψ for orders ≤ m.
   obtain ⟨Cψ, hCψ_nn, hCψ_bound⟩ :=
     exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport hψ_smooth hψ_cpt m
   have h_simple_bound : ∀ n i : ℕ, ((n.choose i : ℕ) : ℝ) ≤ 2 ^ n := by
@@ -906,9 +800,7 @@ private lemma norm_iteratedFDeriv_mul_left_bound
     norm_iteratedFDeriv_mul_le (𝕜 := ℝ)
       (n := j) (f := ψ) (g := f) (x := x) (N := ((⊤ : ℕ∞) : WithTop ℕ∞))
       hψ_top hf_top hj_le'
-  -- Each |∇^i ψ| ≤ Cψ for i ≤ j ≤ m.
   refine h_leibniz.trans ?_
-  -- For each i, C(j,i) ‖∇^i ψ‖ ‖∇^{j-i} f‖ ≤ 2^j * Cψ * ‖∇^{j-i} f‖.
   have h_each : ∀ i ∈ Finset.range (j + 1),
       (j.choose i : ℝ) * ‖iteratedFDeriv ℝ i ψ x‖ * ‖iteratedFDeriv ℝ (j - i) f x‖ ≤
       (2 ^ m * Cψ) * ‖iteratedFDeriv ℝ (j - i) f x‖ := by
@@ -930,7 +822,6 @@ private lemma norm_iteratedFDeriv_mul_left_bound
         mul_le_mul_of_nonneg_right h_choose hCψ_nn
       exact le_trans h1 h2
     exact mul_le_mul_of_nonneg_right h_lhs (norm_nonneg _)
-  -- The map i ↦ j - i is a bijection of Finset.range (j+1) to itself.
   have h_reindex : ∑ i ∈ Finset.range (j + 1), ‖iteratedFDeriv ℝ (j - i) f x‖ =
       ∑ i ∈ Finset.range (j + 1), ‖iteratedFDeriv ℝ i f x‖ := by
     refine Finset.sum_nbij' (fun i : ℕ => j - i) (fun i : ℕ => j - i)
@@ -953,14 +844,6 @@ private lemma norm_iteratedFDeriv_mul_left_bound
     _ = (Cψ * 2 ^ m) *
           ∑ i ∈ Finset.range (j + 1), ‖iteratedFDeriv ℝ i f x‖ := by ring
 
-/-! ### Iterated-derivative bound across `ψ · (f - g)` for smooth `f, g`
-
-We now apply `norm_iteratedFDeriv_mul_left_bound` together with
-`smooth_compactSupport_pair_iteratedFDeriv_bound` to bound
-`‖iteratedFDeriv ℝ j (ψ · (f - g)) x‖` by a constant times the `wkpNorm` of
-`f - g`. The factor of `(R / 2)` enters only in the smooth-Morrey bound for
-the inner difference. -/
-
 /-- Uniform C^m bound for `ψ · (f - g)` across smooth compactly-supported
 `f, g`. The constant `C` depends only on `d, p, R, m, ψ`. -/
 private theorem smooth_compactSupport_pair_iteratedFDeriv_mul_bound
@@ -979,27 +862,18 @@ private theorem smooth_compactSupport_pair_iteratedFDeriv_mul_bound
             (wkpNorm (d := d) (m + 1) (ENNReal.ofReal p) (fun y => f y - g y)
               (Metric.ball x₀ R)).toReal := by
   classical
-  -- Get the smooth pair Morrey constant.
   obtain ⟨C_inner, hC_inner_nn, hC_inner_bound⟩ :=
     smooth_compactSupport_pair_iteratedFDeriv_bound (d := d) hp hR m
-  -- Get the Leibniz constant.
   obtain ⟨C_leibniz, hC_leibniz_nn, hC_leibniz_bound⟩ :=
     norm_iteratedFDeriv_mul_left_bound (d := d) hψ_smooth hψ_cpt m
-  -- Total constant.
   refine ⟨C_leibniz * (m + 1 : ℕ) * C_inner,
     by positivity, ?_⟩
   intro f g hf_smooth hf_cpt hf_supp hg_smooth hg_cpt hg_supp x j hj
-  -- Step 1: at points outside tsupport ψ, the product ψ · (f - g) vanishes, so
-  -- iteratedFDeriv is zero, and the bound is trivial.
   by_cases hx_supp : x ∈ tsupport ψ
-  · -- x ∈ tsupport ψ ⊆ ball x₀ (R/2), so we can apply the smooth pair bound.
-    have hx_in_ball : x ∈ Metric.ball x₀ (R / 2) := hψ_supp_ball hx_supp
-    -- f - g is smooth.
+  · have hx_in_ball : x ∈ Metric.ball x₀ (R / 2) := hψ_supp_ball hx_supp
     have hfg_smooth : ContDiff ℝ (⊤ : ℕ∞) (fun y => f y - g y) := hf_smooth.sub hg_smooth
-    -- Apply Leibniz to ψ · (f - g).
     have h_leibniz := hC_leibniz_bound hfg_smooth x j hj
     refine h_leibniz.trans ?_
-    -- Each ‖iteratedFDeriv ℝ i (f - g) x‖ for i ≤ j ≤ m is bounded by the smooth pair Morrey.
     have h_each : ∀ i ∈ Finset.range (j + 1),
         ‖iteratedFDeriv ℝ i (fun y => f y - g y) x‖ ≤ C_inner *
           (wkpNorm (d := d) (m + 1) (ENNReal.ofReal p) (fun y => f y - g y)
@@ -1008,7 +882,6 @@ private theorem smooth_compactSupport_pair_iteratedFDeriv_mul_bound
       rw [Finset.mem_range] at hi
       have hi_le : i ≤ m := Nat.lt_succ_iff.mp (Nat.lt_of_lt_of_le hi (Nat.succ_le_succ hj))
       exact hC_inner_bound hf_smooth hf_cpt hf_supp hg_smooth hg_cpt hg_supp x hx_in_ball i hi_le
-    -- Now compute.
     set NormDiff : ℝ :=
       (wkpNorm (d := d) (m + 1) (ENNReal.ofReal p) (fun y => f y - g y)
         (Metric.ball x₀ R)).toReal with hNormDiff_def
@@ -1033,9 +906,7 @@ private theorem smooth_compactSupport_pair_iteratedFDeriv_mul_bound
           exact mul_le_mul_of_nonneg_left
             (by exact_mod_cast Nat.succ_le_succ hj) hC_leibniz_nn
       _ = (C_leibniz * ((m + 1 : ℕ) : ℝ) * C_inner) * NormDiff := by ring
-  · -- x ∉ tsupport ψ. Then ψ vanishes in a neighborhood of x, so
-    -- iteratedFDeriv ℝ j (ψ · (f - g)) x = 0.
-    have h_zero_nbhd : ∀ᶠ y in 𝓝 x, ψ y = 0 := by
+  · have h_zero_nbhd : ∀ᶠ y in 𝓝 x, ψ y = 0 := by
       have h_open : IsOpen (tsupport ψ)ᶜ := isClosed_tsupport ψ |>.isOpen_compl
       have h_eq : ∀ y ∈ (tsupport ψ)ᶜ, ψ y = 0 := fun y hy =>
         image_eq_zero_of_notMem_tsupport hy
@@ -1054,8 +925,6 @@ private theorem smooth_compactSupport_pair_iteratedFDeriv_mul_bound
       (Metric.ball x₀ R)).toReal := ENNReal.toReal_nonneg
     have hC_nn : 0 ≤ C_leibniz * ↑(m + 1) * C_inner := by positivity
     exact mul_nonneg hC_nn hN_nn
-
-/-! ### C^m limit of uniformly Cauchy smooth functions -/
 
 /-- For each `j ≤ m`, the pointwise limit at every `x` of a uniformly Cauchy
 sequence of smooth functions; here `D j x` is the limit of
@@ -1180,8 +1049,6 @@ private lemma cauchyLimitFun_tendstoUniformly
   rw [dist_eq_norm, norm_sub_rev]
   linarith
 
-/-! ### Helper: identifying the C^m limit -/
-
 /-- Identification step: if `g_n` is smooth and uniformly Cauchy in C^m, then
 the pointwise limit `u_smooth = cauchyLimitFun g _ _` has iteratedFDeriv equal
 at every order j ≤ m to the pointwise limit of `iteratedFDeriv ℝ j (g n)`. -/
@@ -1202,7 +1069,6 @@ private theorem iteratedFDeriv_cauchyLimitFun_eq
   have h_cauchy_at : ∀ j ≤ m, ∀ x : E,
       CauchySeq (fun n => iteratedFDeriv ℝ j (g n) x) := fun j hj =>
     cauchy_at_of_unifCauchy (h_unif_cauchy j hj)
-  -- Define D j only for j ≤ m, using h_cauchy_at directly (no if-then-else):
   let D : ∀ (j : ℕ), j ≤ m → E → ContinuousMultilinearMap ℝ (fun _ : Fin j => E) ℝ :=
     fun j hj => cauchyIteratedLimit j g (h_cauchy_at j hj)
   have hD_tendsto : ∀ j (hj : j ≤ m), ∀ x : E,
@@ -1220,7 +1086,6 @@ private theorem iteratedFDeriv_cauchyLimitFun_eq
       exact h_smooth.continuous
     exact (h_uniform_D j hj).continuous
       ((Filter.Eventually.of_forall h_each_cont).frequently)
-  -- Differentiability of D j at every x for j+1 ≤ m.
   have h_diff_D_at : ∀ j (hj_succ : j + 1 ≤ m), ∀ x : E,
       HasFDerivAt (D j (le_of_lt hj_succ))
         ((continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (j + 1) => E) ℝ)
@@ -1263,7 +1128,6 @@ private theorem iteratedFDeriv_cauchyLimitFun_eq
       exact (hg_diff_at n y').hasFDerivAt
     · intro y'
       exact hD_tendsto j (le_of_lt hj_succ) y'
-  -- Key: iteratedFDeriv ℝ j u_smooth = D j hj for j ≤ m.
   have h_iter_eq_D : ∀ j (hj : j ≤ m), ∀ x : E,
       iteratedFDeriv ℝ j u_smooth x = D j hj x := by
     intro j hj
@@ -1303,8 +1167,7 @@ private theorem iteratedFDeriv_cauchyLimitFun_eq
           rw [← h_fderiv_iter]; exact h_fderiv
         exact LC.injective h_LC_eq
   refine ⟨?_, ?_⟩
-  · -- ContDiff ℝ m u_smooth.
-    rw [contDiff_nat_iff_continuous_differentiable]
+  · rw [contDiff_nat_iff_continuous_differentiable]
     refine ⟨?_, ?_⟩
     · intro j hj
       have h_fn_eq : (fun x => iteratedFDeriv ℝ j u_smooth x) = D j hj :=
@@ -1320,8 +1183,6 @@ private theorem iteratedFDeriv_cauchyLimitFun_eq
   · intro j hj x
     rw [h_iter_eq_D j hj]
     exact hD_tendsto j hj x
-
-/-! ### The main `C^m` representative theorem -/
 
 /-- **Non-smooth `C^m` representative for `MemWkp (m+1, p)` on a Euclidean ball.**
 For `p > d`, every `u ∈ W^{m+1, p}` on `B(x₀, R)` admits a `C^m` representative
@@ -1345,31 +1206,25 @@ theorem morrey_iteratedFDeriv_representative
     rw [show (1 : ℝ≥0∞) = ENNReal.ofReal 1 from by simp]
     exact ENNReal.ofReal_le_ofReal hp_one
   have hΩ_open : IsOpen (Metric.ball x₀ R) := Metric.isOpen_ball
-  -- Step 1: Get cutoff χ and smooth approximations φ_n.
   obtain ⟨χ, φ, hχ_smooth, hχ_compact, hχ_range, hχ_one, hχ_supp,
     hv_W, _hv_supp_closed, _hv_cpt,
     hφ_smooth, hφ_cpt, hφ_supp, hφ_close⟩ :=
     exists_smooth_approx_seq_of_memWkp (d := d) hp hR m hu
-  -- Step 2: Smaller cutoff ψ.
   obtain ⟨ψ, hψ_smooth, hψ_compact, _hψ_range, hψ_one, hψ_supp⟩ :=
     exists_smooth_cutoff_smaller (x₀ := x₀) hR
   have hψ_supp_ball : tsupport ψ ⊆ Metric.ball x₀ (R / 2) := by
     refine hψ_supp.trans ?_
     intro z hz; rw [Metric.mem_closedBall] at hz; rw [Metric.mem_ball]; linarith
-  -- Step 3: C^m pair bound for ψ · (f - g).
   obtain ⟨Cpair, hCpair_nn, hCpair_bound⟩ :=
     smooth_compactSupport_pair_iteratedFDeriv_mul_bound (d := d) hp hR m
       hψ_smooth hψ_compact hψ_supp_ball
-  -- Step 4: Define g_n := ψ · φ_n.
   let g : ℕ → E → ℝ := fun n y => ψ y * φ n y
   have hg_smooth : ∀ n, ContDiff ℝ (⊤ : ℕ∞) (g n) := fun n =>
     hψ_smooth.mul (hφ_smooth n)
-  -- φ_n in MemWkp.
   have hφ_W : ∀ n, MemWkp (d := d) (m + 1) (ENNReal.ofReal p) (φ n)
       (Metric.ball x₀ R) := fun n =>
     MemWkp_of_smooth_compactSupport (d := d) hΩ_open (hφ_smooth n) (hφ_cpt n)
       (hφ_supp n) hpp_one (m + 1)
-  -- Step 5: φ_n Cauchy in wkpNorm.
   have hφ_cauchy_wkp : ∀ ε > 0, ∃ N : ℕ, ∀ n n', N ≤ n → N ≤ n' →
       wkpNorm (d := d) (m + 1) (ENNReal.ofReal p)
         (fun y => φ n y - φ n' y) (Metric.ball x₀ R) ≤ ENNReal.ofReal ε := by
@@ -1377,7 +1232,6 @@ theorem morrey_iteratedFDeriv_representative
     have hε_half_pos : 0 < ε / 2 := half_pos hε
     obtain ⟨N₀, hN₀⟩ := exists_nat_one_div_lt hε_half_pos
     refine ⟨N₀, fun n n' hn hn' => ?_⟩
-    -- (φ_n - φ_n') decomposes as -((χu - φ_n) - (χu - φ_n')).
     have h_decomp : (fun y => φ n y - φ n' y) =
         fun y => -(χ y * u y - φ n y) + (χ y * u y - φ n' y) := by
       funext y; ring
@@ -1435,13 +1289,11 @@ theorem morrey_iteratedFDeriv_representative
     refine le_trans h_combined ?_
     rw [← ENNReal.ofReal_add (le_of_lt hε_half_pos) (le_of_lt hε_half_pos)]
     rw [show ε / 2 + ε / 2 = ε from by ring]
-  -- Step 6: g_n uniformly Cauchy in C^m on E.
   have hg_unif_cauchy : ∀ j ≤ m, ∀ ε > 0, ∃ N : ℕ, ∀ n n', N ≤ n → N ≤ n' → ∀ x : E,
       ‖iteratedFDeriv ℝ j (g n) x - iteratedFDeriv ℝ j (g n') x‖ ≤ ε := by
     intro j hj ε hε
     by_cases hCpair_zero : Cpair = 0
     · refine ⟨0, fun n n' _ _ x => ?_⟩
-      -- iteratedFDeriv ℝ j (g n) x - iter (g n') x = iter (g n - g n') x = iter (ψ(φ_n - φ_n')) x.
       have h_iter_sub :
           iteratedFDeriv ℝ j (g n) x - iteratedFDeriv ℝ j (g n') x =
             iteratedFDeriv ℝ j (fun y => g n y - g n' y) x := by
@@ -1486,7 +1338,6 @@ theorem morrey_iteratedFDeriv_representative
         _ ≤ Cpair * (ε / Cpair) :=
             mul_le_mul_of_nonneg_left h_wkp_to_real hCpair_nn
         _ = ε := by field_simp
-  -- Step 7: g_n uniformly Cauchy in C^0 (special case of step 6, j=0).
   have hg_unif_cauchy_C0 : ∀ ε > 0, ∃ N : ℕ, ∀ n n', N ≤ n → N ≤ n' → ∀ x : E,
       ‖g n x - g n' x‖ ≤ ε := by
     intro ε hε
@@ -1501,21 +1352,17 @@ theorem morrey_iteratedFDeriv_representative
         ((hg_smooth n').of_le (by exact_mod_cast le_top : (0 : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞))).contDiffAt]
     rw [h_sub, norm_iteratedFDeriv_zero] at this
     exact this
-  -- Step 8: Get the C^m limit.
   set u_smooth := cauchyLimitFun g hg_unif_cauchy_C0 with hu_smooth_def
   have hu_tendsto : ∀ x, Filter.Tendsto (fun n => g n x) Filter.atTop (𝓝 (u_smooth x)) :=
     cauchyLimitFun_tendsto hg_unif_cauchy_C0
   obtain ⟨hu_contDiff, hu_iter_tendsto⟩ :=
     iteratedFDeriv_cauchyLimitFun_eq m hg_smooth hg_unif_cauchy_C0 hg_unif_cauchy
-  -- Step 9: u =ᵐ u_smooth on ball x₀ (R/4).
   refine ⟨u_smooth, hu_contDiff, ?_⟩
-  -- L^p convergence φ_n → χu on ball x₀ R.
   have hχu_ae_meas : AEStronglyMeasurable (fun y => χ y * u y)
       (volume.restrict (Metric.ball x₀ R)) := hv_W.memLp.aestronglyMeasurable
   have hφ_ae_meas : ∀ n, AEStronglyMeasurable (φ n)
       (volume.restrict (Metric.ball x₀ R)) := fun n =>
     (hφ_smooth n).continuous.aestronglyMeasurable
-  -- eLpNorm convergence from wkpNorm convergence (eLpNorm ≤ wkpNorm).
   have h_eLp_le_wkp : ∀ n,
       eLpNorm (fun y => χ y * u y - φ n y)
         (ENNReal.ofReal p) (volume.restrict (Metric.ball x₀ R)) ≤
@@ -1569,7 +1416,6 @@ theorem morrey_iteratedFDeriv_representative
         ENNReal.ofReal_le_ofReal h_toReal_lt.le
       rw [ENNReal.ofReal_toReal hε_top] at h_ofReal_le
       exact h_ofReal_le
-    -- Squeeze: 0 ≤ eLpNorm ≤ ENNReal.ofReal (1 / (n + 1)), both ends → 0.
     refine tendsto_of_tendsto_of_tendsto_of_le_of_le
       (a := (0 : ℝ≥0∞))
       (f := fun n : ℕ => eLpNorm (fun y => χ y * u y - φ n y)
@@ -1578,7 +1424,6 @@ theorem morrey_iteratedFDeriv_representative
       (h := fun n : ℕ => ENNReal.ofReal (1 / ((n : ℝ) + 1)))
       tendsto_const_nhds h_close_tendsto
       (fun _ => zero_le _) (fun n => le_trans (h_eLp_le_wkp n) (hφ_close n))
-  -- Rephrase φ - χu.
   have h_eLp_tendsto' : Filter.Tendsto
       (fun n => eLpNorm (φ n - fun y => χ y * u y)
         (ENNReal.ofReal p) (volume.restrict (Metric.ball x₀ R))) Filter.atTop (𝓝 0) := by
@@ -1601,10 +1446,6 @@ theorem morrey_iteratedFDeriv_representative
       (by simp [ENNReal.ofReal_eq_zero, not_le.mpr hp_pos])
       hφ_ae_meas hχu_ae_meas h_eLp_tendsto'
   obtain ⟨ns, _hns_strict, hns_ae⟩ := h_in_measure.exists_seq_tendsto_ae
-  -- u_smooth y = lim_n g n y = lim_n ψ y * φ n y.
-  -- On ball x₀ (R/4): ψ = 1, χ = 1.
-  -- So u_smooth y = lim_n φ n y, and (along subsequence ns) → χ y * u y = u y.
-  -- Hence u_smooth y = u y a.e. y in ball x₀ (R/4).
   have h_psi_one_R4 : ∀ x ∈ Metric.ball x₀ (R / 4), ψ x = 1 := fun x hx =>
     hψ_one x (Metric.ball_subset_closedBall hx)
   have h_chi_one_R4 : ∀ x ∈ Metric.ball x₀ (R / 4), χ x = 1 := fun x hx => by
@@ -1613,25 +1454,16 @@ theorem morrey_iteratedFDeriv_representative
   have h_ball_R4_sub_R : Metric.ball x₀ (R / 4) ⊆ Metric.ball x₀ R := by
     intro z hz; rw [Metric.mem_ball] at hz ⊢; linarith
   rw [Filter.EventuallyEq, ae_restrict_iff' measurableSet_ball]
-  -- Convert hns_ae to ae on the smaller ball.
   rw [ae_restrict_iff' measurableSet_ball] at hns_ae
   filter_upwards [hns_ae] with y h_ae_y h_y_in_R4
-  -- h_ae_y : y ∈ ball R → tendsto (fun k => φ (ns k) y) atTop (𝓝 (χ y * u y)).
-  -- y ∈ ball R/4 ⊆ ball R.
   have h_y_in_R : y ∈ Metric.ball x₀ R := h_ball_R4_sub_R h_y_in_R4
   have h_φ_ns_tendsto := h_ae_y h_y_in_R
-  -- u_smooth y = lim g n y.
   have h_g_tendsto := hu_tendsto y
-  -- On ball x₀ (R/4): g n y = ψ y * φ n y = 1 * φ n y = φ n y.
   have h_g_eq_φ : ∀ n, g n y = φ n y := fun n => by
     simp [g, h_psi_one_R4 y h_y_in_R4]
-  -- u_smooth y = lim (φ n y), and (along subsequence) → χ y * u y.
-  -- Take the subsequence ns.
   have h_g_ns_tendsto : Filter.Tendsto (fun k => g (ns k) y) Filter.atTop (𝓝 (u_smooth y)) :=
     h_g_tendsto.comp (Filter.tendsto_atTop_atTop_of_monotone (fun a b hab => _hns_strict.le_iff_le.mpr hab) (fun n => ⟨n, _hns_strict.id_le n⟩))
-  -- g (ns k) y = φ (ns k) y.
   simp_rw [h_g_eq_φ] at h_g_ns_tendsto
-  -- Hence φ (ns k) y → u_smooth y. But also φ (ns k) y → χ y * u y = 1 * u y = u y.
   have h_chi_y : χ y * u y = u y := by rw [h_chi_one_R4 y h_y_in_R4, one_mul]
   rw [h_chi_y] at h_φ_ns_tendsto
   exact tendsto_nhds_unique h_φ_ns_tendsto h_g_ns_tendsto

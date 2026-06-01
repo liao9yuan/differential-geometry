@@ -81,46 +81,38 @@ theorem gronwall_integral_le
     (hf_int : ∀ t ∈ Set.Icc (0:ℝ) T,
       f t ≤ A + K * ∫ τ in (0:ℝ)..t, f τ) :
     ∀ t ∈ Set.Icc (0:ℝ) T, f t ≤ A * Real.exp (K * t) := by
-  -- Work with the clamped function so we have global continuity / integrability.
   set f₀ : ℝ → ℝ := clamp T f with hf₀def
   have hf₀_cont : Continuous f₀ := continuous_clamp hT hf_cont
   have hf₀_int_eq : ∀ t ∈ Set.Icc (0:ℝ) T,
       ∫ τ in (0:ℝ)..t, f₀ τ = ∫ τ in (0:ℝ)..t, f τ := fun _ ht => integral_clamp_eq ht
   have hf₀_eq : ∀ t ∈ Set.Icc (0:ℝ) T, f₀ t = f t := fun _ ht => clamp_eq_of_mem ht
-  -- The primitive `g(t) := A + K * ∫₀ᵗ f₀`. By FTC, `g'(t) = K · f₀(t)` everywhere.
   set g : ℝ → ℝ := fun t => A + K * ∫ τ in (0:ℝ)..t, f₀ τ with hgdef
   have hg_cont : Continuous g :=
     continuous_const.add (continuous_const.mul (primitive_continuous hf₀_cont))
   have hg_deriv : ∀ t : ℝ, HasDerivAt g (K * f₀ t) t := fun t =>
     ((primitive_hasDerivAt hf₀_cont t).const_mul K).const_add A
-  -- On `Icc 0 T` we have `f ≤ g`.
   have hfg : ∀ t ∈ Set.Icc (0:ℝ) T, f t ≤ g t := by
     intro t ht
     have hbd := hf_int t ht
     change f t ≤ A + K * ∫ τ in (0:ℝ)..t, f₀ τ
     rw [hf₀_int_eq t ht]; exact hbd
-  -- Slope inequality required by `le_gronwallBound_of_liminf_deriv_right_le`.
   have hslope :
       ∀ t ∈ Set.Ico (0:ℝ) T, ∀ r, K * f₀ t < r →
         ∃ᶠ z in 𝓝[>] t, (z - t)⁻¹ * (g z - g t) < r := by
     intro t _ r hr
     exact (hg_deriv t).hasDerivWithinAt.liminf_right_slope_le hr
-  -- Bound on the derivative: `K · f₀(t) ≤ K · g(t) + 0` whenever `t ∈ [0, T]`.
   have hbound : ∀ t ∈ Set.Ico (0:ℝ) T, K * f₀ t ≤ K * g t + 0 := by
     intro t ht
     have ht' : t ∈ Set.Icc (0:ℝ) T := ⟨ht.1, ht.2.le⟩
     have hft : f₀ t ≤ g t := by rw [hf₀_eq t ht']; exact hfg t ht'
     have := mul_le_mul_of_nonneg_left hft hK
     linarith
-  -- Initial condition: `g(0) ≤ A`.
   have hg0 : g 0 ≤ A := by
     change A + K * ∫ τ in (0:ℝ)..0, f₀ τ ≤ A
     rw [intervalIntegral.integral_same, mul_zero, add_zero]
-  -- Apply the differential Grönwall inequality to `g` with `δ := A, K := K, ε := 0`.
   have hgB : ∀ t ∈ Set.Icc (0:ℝ) T, g t ≤ gronwallBound A K 0 (t - 0) :=
     le_gronwallBound_of_liminf_deriv_right_le
       (f' := fun t => K * f₀ t) hg_cont.continuousOn hslope hg0 hbound
-  -- Identify `gronwallBound A K 0 t = A * exp(K · t)`.
   intro t ht
   have hfg_t : f t ≤ g t := hfg t ht
   have hgt : g t ≤ gronwallBound A K 0 (t - 0) := hgB t ht
@@ -139,7 +131,6 @@ theorem integral_gronwall_le_affine
     (hf_int : ∀ t ∈ Set.Icc (0:ℝ) T,
       f t ≤ A + B * t + K * ∫ τ in (0:ℝ)..t, f τ) :
     ∀ t ∈ Set.Icc (0:ℝ) T, f t ≤ (A + B * t) * Real.exp (K * t) := by
-  -- Same plan: clamp, build primitive, apply differential Grönwall, identify bound.
   set f₀ : ℝ → ℝ := clamp T f with hf₀def
   have hf₀_cont : Continuous f₀ := continuous_clamp hT hf_cont
   have hf₀_int_eq : ∀ t ∈ Set.Icc (0:ℝ) T,
@@ -149,7 +140,6 @@ theorem integral_gronwall_le_affine
   have hg_cont : Continuous g :=
     ((continuous_const.add (continuous_const.mul continuous_id)).add
       (continuous_const.mul (primitive_continuous hf₀_cont)))
-  -- Derivative: `g'(t) = B + K · f₀(t)`.
   have hg_deriv : ∀ t : ℝ, HasDerivAt g (B + K * f₀ t) t := by
     intro t
     have h₁ : HasDerivAt (fun u : ℝ => A + B * u) B t := by
@@ -178,39 +168,29 @@ theorem integral_gronwall_le_affine
   have hg0 : g 0 ≤ A := by
     change A + B * 0 + K * ∫ τ in (0:ℝ)..0, f₀ τ ≤ A
     rw [intervalIntegral.integral_same, mul_zero, mul_zero, add_zero, add_zero]
-  -- Apply differential Grönwall with `δ := A, K := K, ε := B`.
   have hgB : ∀ t ∈ Set.Icc (0:ℝ) T, g t ≤ gronwallBound A K B (t - 0) :=
     le_gronwallBound_of_liminf_deriv_right_le
       (f' := fun t => B + K * f₀ t) hg_cont.continuousOn hslope hg0 hbound
-  -- Now compare `gronwallBound A K B t` to `(A + B · t) · exp(K · t)`.
   intro t ht
   have hfg_t : f t ≤ g t := hfg t ht
   have hgt : g t ≤ gronwallBound A K B (t - 0) := hgB t ht
   rw [sub_zero] at hgt
-  -- Show `gronwallBound A K B t ≤ (A + B · t) · exp(K · t)`.
   have hbnd_le : gronwallBound A K B t ≤ (A + B * t) * Real.exp (K * t) := by
     by_cases hK0 : K = 0
-    · -- `gronwallBound A 0 B t = A + B · t`, and `exp(0) = 1`.
-      have hgB_eq : gronwallBound A K B t = A + B * t := by
+    · have hgB_eq : gronwallBound A K B t = A + B * t := by
         simp [gronwallBound_K0, hK0]
       have hexp : Real.exp (K * t) = 1 := by simp [hK0]
       rw [hgB_eq, hexp, mul_one]
-    · -- `gronwallBound A K B t = A · exp(Kt) + (B/K) · (exp(Kt) - 1)`.
-      have hK_pos : 0 < K := lt_of_le_of_ne hK (Ne.symm hK0)
+    · have hK_pos : 0 < K := lt_of_le_of_ne hK (Ne.symm hK0)
       have hgB_eq : gronwallBound A K B t = A * Real.exp (K * t)
           + B / K * (Real.exp (K * t) - 1) := by
         rw [gronwallBound_of_K_ne_0 hK0]
       rw [hgB_eq]
-      -- Need: A * exp + (B/K) * (exp - 1) ≤ (A + B t) * exp.
-      -- Equivalently: (B/K) * (exp - 1) ≤ B * t * exp.
-      -- Equivalently: (exp - 1) ≤ K * t * exp  (since B ≥ 0 and K > 0).
-      -- Use `add_one_le_exp`: `-Kt + 1 ≤ exp(-Kt)` ⇒ `1 - exp(-Kt) ≤ Kt`.
       have hexp_pos : 0 < Real.exp (K * t) := Real.exp_pos _
       have h_neg : -(K * t) + 1 ≤ Real.exp (-(K * t)) := add_one_le_exp (-(K * t))
       have h_one_sub : 1 - Real.exp (-(K * t)) ≤ K * t := by linarith
       have hexp_inv : Real.exp (-(K * t)) * Real.exp (K * t) = 1 := by
         rw [← Real.exp_add]; simp
-      -- Multiply by `exp(K*t) ≥ 0`:
       have hmul : (1 - Real.exp (-(K * t))) * Real.exp (K * t)
           ≤ K * t * Real.exp (K * t) :=
         mul_le_mul_of_nonneg_right h_one_sub hexp_pos.le
@@ -220,7 +200,6 @@ theorem integral_gronwall_le_affine
             = Real.exp (K * t) - Real.exp (-(K * t)) * Real.exp (K * t) := by ring
         rw [this, hexp_inv]
       rw [hLHS] at hmul
-      -- So `exp(Kt) - 1 ≤ K * t * exp(Kt)`. Multiply by `B / K ≥ 0`.
       have hBK_nn : 0 ≤ B / K := div_nonneg hB hK
       have hscaled : B / K * (Real.exp (K * t) - 1)
           ≤ B / K * (K * t * Real.exp (K * t)) :=
@@ -229,11 +208,9 @@ theorem integral_gronwall_le_affine
           = B * t * Real.exp (K * t) := by
         field_simp
       rw [hsimplify] at hscaled
-      -- Now: `A * exp + (B/K)(exp - 1) ≤ A * exp + B * t * exp = (A + B * t) * exp`.
       have hRHS : (A + B * t) * Real.exp (K * t)
           = A * Real.exp (K * t) + B * t * Real.exp (K * t) := by ring
       linarith
   linarith [hgt, hfg_t, hbnd_le]
 
 end DifferentialGeometry.Analysis.ODE
-

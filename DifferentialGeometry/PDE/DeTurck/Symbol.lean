@@ -71,22 +71,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpa
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## The principal-symbol type
-
-A principal symbol of a second-order operator acting on sections of a vector bundle is,
-by definition, a fibrewise linear endomorphism of the bundle fibre attached to every
-base point `x : M` and every covector `ξ`.  We record covectors as model vectors `ξ : E`
-(see the covector convention in the module docstring), and the bundle fibre as a family
-`F : M → Type*`, so the symbol is a function
-
-```
-∀ x : M, E → (F x →ₗ[ℝ] F x).
-```
-
-Keeping the fibre family `F` generic lets a single set of definitions cover both the
-scalar operators (constant fibre `ℝ`) and the `(0,2)`-tensor operators (fibre the
-bilinear-form space at each point), which is what the Ricci–DeTurck application needs. -/
-
 /-- A **principal symbol** of a second-order linear operator acting on sections of a
 vector bundle with fibre family `F : M → Type*`.
 
@@ -115,16 +99,6 @@ fibre `ℝ`).  Used for the validation example: the scalar Laplace–Beltrami op
 abbrev ScalarSymbol : Type _ :=
   OperatorSymbol (E := E) (fun _ : M => ℝ)
 
-/-! ## The squared `g`-norm of a covector
-
-For a covector with chart components `ξ_i`, the metric (inverse-metric) squared norm is
-the contraction `|ξ|²_g = g^{ij} ξ_i ξ_j`.  We compute it in the chart at `x` itself,
-using the inverse Gram matrix `chartInvGramMatrix g x x` (the chart `g^{ij}`) and the
-model-basis coordinates `ξ_i = (chartModelBasis E).repr ξ i`.
-
-This is the same inverse metric used by the gradient and Voss–Weyl Laplacian: it is the
-matrix inverse of the chart Gram matrix of `g`. -/
-
 /-- The squared `g`-norm of a covector `ξ`, expressed in the chart at `x`:
 $$|\xi|^2_g(x) = \sum_{i,j} g^{ij}(x)\, \xi_i\, \xi_j,$$
 where `g^{ij} = chartInvGramMatrix g x x` is the chart inverse metric and
@@ -147,25 +121,15 @@ def metricCovectorNormSq (g : SmoothRiemannianMetric I M) (x : M) (ξ : E) : ℝ
     metricCovectorNormSq (I := I) g x 0 = 0 := by
   simp [metricCovectorNormSq]
 
-/-! ### Positivity of `|ξ|²_g`
-
-The chart inverse Gram matrix `chartInvGramMatrix g x x` is positive-definite at any
-chart-source point (it is the inverse of the positive-definite chart Gram matrix), so the
-quadratic form `g^{ij} ξ_i ξ_j` is non-negative, and strictly positive whenever the
-covector `ξ` is nonzero. -/
-
 /-- The chart inverse Gram matrix at `x` (in the chart at `x` itself) is
 positive-definite. -/
 private lemma chartInvGramMatrix_self_posDef (g : SmoothRiemannianMetric I M) (x : M) :
     (chartInvGramMatrix (I := I) g x x).PosDef := by
-  -- `x` lies in the base set of the trivialization at `x` itself.
   have hx : x ∈ (trivializationAt E (TangentSpace I) x).baseSet := by
     rw [trivializationAt_baseSet_eq_chartAt_source]
     exact mem_chart_source H x
-  -- The chart Gram matrix is positive-definite there; its inverse is too.
   have hG : (chartGramMatrix (I := I) g x x).PosDef :=
     chartGramMatrix_posDef (I := I) g x hx
-  -- `chartInvGramMatrix g x x = (chartGramMatrix g x x)⁻¹`.
   rw [chartInvGramMatrix]
   exact hG.inv
 
@@ -200,7 +164,6 @@ theorem metricCovectorNormSq_pos (g : SmoothRiemannianMetric I M) (x : M)
     0 < metricCovectorNormSq (I := I) g x ξ := by
   classical
   rw [metricCovectorNormSq_eq_dotProduct_mulVec]
-  -- The coordinate vector of a nonzero covector is nonzero.
   have hcoord : (fun i => (chartModelBasis E).repr ξ i) ≠ 0 := by
     intro hzero
     apply hξ
@@ -210,12 +173,6 @@ theorem metricCovectorNormSq_pos (g : SmoothRiemannianMetric I M) (x : M)
     have := congrArg (chartModelBasis E).repr.symm hrepr
     simpa using this
   exact (chartInvGramMatrix_self_posDef (I := I) g x).dotProduct_mulVec_pos hcoord
-
-/-! ## The isotropic symbol
-
-The simplest principal symbols are the *isotropic* (scalar-multiple) ones: at each `x`
-and `ξ` the endomorphism is `c(x, ξ) • id` for a scalar coefficient `c`.  The principal
-symbol of the Ricci–DeTurck operator is of this form, with `c(x, ξ) = −|ξ|²_g`. -/
 
 /-- The **isotropic symbol** with scalar coefficient `c`: for each base point `x` and
 covector `ξ`, the fibrewise endomorphism `c x ξ • LinearMap.id`.
@@ -246,18 +203,6 @@ def deTurckSymbolCoeff (g : SmoothRiemannianMetric I M) : M → E → ℝ :=
 
 @[simp] lemma deTurckSymbolCoeff_apply (g : SmoothRiemannianMetric I M) (x : M) (ξ : E) :
     deTurckSymbolCoeff (I := I) g x ξ = -metricCovectorNormSq (I := I) g x ξ := rfl
-
-/-! ## Strict parabolicity
-
-An operator `L` viewed as the right-hand side of the evolution `∂_t u = L u` is
-**strictly (uniformly) parabolic** when its principal symbol is negative-definite for
-nonzero covectors.  For the Ricci–DeTurck operator the symbol is exactly the isotropic
-symbol `−|ξ|²_g · id`; we take that cleanest form as the definition.
-
-`IsStrictlyParabolic` is therefore the predicate: the symbol agrees, at every base point
-`x` and every nonzero covector `ξ`, with the isotropic symbol of coefficient `−|ξ|²_g`.
-With this definition "the Ricci–DeTurck operator is strictly parabolic" becomes the clean
-target `IsStrictlyParabolic g σ` for the operator's symbol `σ`. -/
 
 /-- A symbol `σ` (on the fibre family `F`) is **strictly parabolic** with respect to the
 metric `g` when, at every base point `x` and every nonzero covector `ξ`, it equals the
@@ -291,18 +236,6 @@ theorem isStrictlyParabolic_isotropic_deTurckSymbolCoeff (F : M → Type*)
     IsStrictlyParabolic (E := E) F g
       (isotropicSymbol (E := E) F (deTurckSymbolCoeff (I := I) g)) :=
   fun _ _ _ => rfl
-
-/-! ## Reading off the symbol of a second-order chart operator
-
-A second-order chart operator on scalar functions has leading part
-$$\sum_{i,j} a^{ij}(x)\, \partial_i \partial_j h$$
-for a coefficient matrix `a^{ij}(x)` (plus discarded first- and zeroth-order terms).  Its
-principal symbol substitutes `∂_i ∂_j ↦ −ξ_i ξ_j`, yielding the isotropic symbol with
-scalar coefficient `−∑_{i,j} a^{ij}(x) ξ_i ξ_j`.
-
-`secondOrderSymbol` packages exactly this rule.  It is intentionally a lightweight
-helper: downstream operators define their symbols directly, and use this only to read off
-the symbol of an explicit `∑ a^{ij} ∂_i ∂_j` leading part. -/
 
 /-- The **principal symbol of a second-order chart operator** whose leading part is
 `∑_{i,j} a^{ij}(x) · ∂_i ∂_j h`, where `a x` is the coefficient matrix at the base point
@@ -374,21 +307,6 @@ theorem secondOrderSymbol_invGram_isStrictlyParabolic (F : M → Type*)
       (secondOrderSymbol (E := E) F (fun x => chartInvGramMatrix (I := I) g x x)) := by
   rw [secondOrderSymbol_invGram_eq_isotropic]
   exact isStrictlyParabolic_isotropic_deTurckSymbolCoeff (E := E) F g
-
-/-! ## Worked validation example: the scalar Laplace–Beltrami operator
-
-We validate the abstraction on the scalar Laplacian `Δ_g`.  In the chart at `x`, the
-Voss–Weyl Laplacian splits (see `chartHessTrace_expand`) into the second-order term
-`∑_{i,j} g^{ij}(x) · ∂_i ∂_j f` and discarded first-order terms.  Hence the leading part
-of `Δ_g` has coefficient matrix `a^{ij} = g^{ij}`, and its principal symbol is
-
-```
-σ(Δ_g)(x, ξ) = secondOrderSymbol (fun _ => ℝ) (fun x => chartInvGramMatrix g x x) x ξ
-            = −|ξ|²_g · id.
-```
-
-We package this as the scalar symbol `laplacianSymbol g` and prove it equals the
-isotropic symbol `−|ξ|²_g · id` and is strictly parabolic. -/
 
 /-- The **principal symbol of the scalar Laplace–Beltrami operator** `Δ_g`.
 

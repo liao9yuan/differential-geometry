@@ -62,8 +62,6 @@ open scoped Manifold Topology ContDiff BigOperators
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [FiniteDimensional ℝ E] [InnerProductSpace ℝ E]
 
-/-! ## Basis of `Tensor0SModel n ℝ E` induced by the model basis -/
-
 /-- Linear "evaluation at a model-basis tuple" map on `Tensor0SModel n ℝ E`,
 sending `Φ` to the function `φ ↦ Φ (chartModelBasis E ∘ φ)`.
 
@@ -163,16 +161,6 @@ noncomputable def eval0SCLE (n : ℕ) :
     eval0SCLE (E := E) n Φ φ =
       Φ (fun k : Fin n => (chartModelBasis E) (φ k)) := rfl
 
-/-! ## The `(r, s)`-tensor model fibre equivalence
-
-The model fibre `TensorRSModel r s ℝ E` is by definition
-`Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E`.  Composing the equivalence
-`eval0SCLE` on both factors gives an equivalence to
-`((Fin r → Fin n) → ℝ) →L[ℝ] ((Fin s → Fin n) → ℝ)`, which we finally
-flatten to a Pi-type indexed by `(Fin r → Fin n) × (Fin s → Fin n)` by
-extracting matrix entries.
--/
-
 /-- Linear "evaluation at a pair of model-basis tuples" map on
 `TensorRSModel r s ℝ E`. Sends `T : Tensor0SModel r ℝ E →L Tensor0SModel s ℝ E`
 to the function
@@ -211,10 +199,6 @@ against the model basis on both sides. -/
 private lemma evalAtBasisLinear_TensorRSModel_injective (r s : ℕ) :
     Function.Injective (evalAtBasisLinear_TensorRSModel (E := E) r s) := by
   intro T₁ T₂ h
-  -- Step 1: For every `Idx`, the elements
-  --   `T₁ ((eval0SCLE r).symm (Pi.single Idx 1))`
-  --   `T₂ ((eval0SCLE r).symm (Pi.single Idx 1))`
-  -- of `Tensor0SModel s ℝ E` agree on every model-basis tuple `Jdx`.
   have h_pt :
       ∀ Idx : Fin r → Fin (Module.finrank ℝ E),
         T₁ ((eval0SCLE (E := E) r).symm (Pi.single Idx (1 : ℝ))) =
@@ -224,11 +208,6 @@ private lemma evalAtBasisLinear_TensorRSModel_injective (r s : ℕ) :
     funext Jdx
     have h_pair := congr_fun h (Idx, Jdx)
     simpa [evalAtBasisLinear_TensorRSModel, eval0SLinear_apply] using h_pair
-  -- Step 2: As `Idx` ranges over `Fin r → Fin (finrank ℝ E)`, the
-  -- elements `(eval0SCLE r).symm (Pi.single Idx 1)` form a basis of
-  -- `Tensor0SModel r ℝ E` (transport of the Pi basis along the inverse
-  -- equivalence).  Hence two continuous linear maps that agree on this
-  -- family are equal.
   let bPi : Module.Basis (Fin r → Fin (Module.finrank ℝ E)) ℝ
       ((Fin r → Fin (Module.finrank ℝ E)) → ℝ) :=
     Pi.basisFun ℝ (Fin r → Fin (Module.finrank ℝ E))
@@ -242,9 +221,6 @@ private lemma evalAtBasisLinear_TensorRSModel_injective (r s : ℕ) :
     intro Idx
     have : bPi Idx = Pi.single Idx (1 : ℝ) := by
       simp [bPi, Pi.basisFun_apply]
-    -- `(eval0SCLE r).symm` and `(eval0SLinearEquiv r).symm` agree as
-    -- functions, since the CLE is built from the LinearEquiv via
-    -- `LinearEquiv.toContinuousLinearEquiv`.
     simp [bTen, Module.Basis.map_apply, this, eval0SCLE]
   have h_linear :
       (T₁ : Tensor0SModel r ℝ E →ₗ[ℝ] Tensor0SModel s ℝ E) =
@@ -253,10 +229,7 @@ private lemma evalAtBasisLinear_TensorRSModel_injective (r s : ℕ) :
     intro Idx
     rw [h_basis Idx]
     exact h_pt Idx
-  -- Step 3: Equal as linear maps ⇒ equal as continuous linear maps.
   exact ContinuousLinearMap.coe_injective h_linear
-
-/-! ### Dimensions of the source and target -/
 
 private lemma finrank_tensorRSModel_loc (r s : ℕ) :
     Module.finrank ℝ (TensorRSModel r s ℝ E) =
@@ -296,8 +269,6 @@ private lemma evalAtBasisLinear_TensorRSModel_bijective (r s : ℕ) :
     rw [finrank_tensorRSModel_loc, finrank_basis_pair_pi_loc]
   exact (LinearMap.injective_iff_surjective_of_finrank_eq_finrank h_eq).mp h_inj
 
-/-! ## Continuous-linear equivalence for `TensorRSModel` -/
-
 /-- The continuous-linear equivalence between the `(r, s)`-tensor model
 fibre and the finite-dimensional Pi-space of matrix entries indexed by
 `(Fin r → Fin n) × (Fin s → Fin n)`, where `n := Module.finrank ℝ E`.
@@ -330,15 +301,6 @@ noncomputable def evalAtBasisCLE_TensorRSModel (r s : ℕ) :
       (T ((eval0SCLE (E := E) r).symm (Pi.single Idx (1 : ℝ))))
         (fun k : Fin s => (chartModelBasis E) (Jdx k)) := rfl
 
-/-! ## Smoothness reduction
-
-A map `f : M → TensorRSModel r s ℝ E` is `ContMDiffOn` iff every scalar
-component `b ↦ evalAtBasisCLE_TensorRSModel r s (f b) (Idx, Jdx)` is
-`ContMDiffOn`. This is the `(r, s)`-tensor analogue of
-`contMDiffOn_into_tensor0SModel_of_eval_basis_local` and is exactly the
-form needed by downstream chart-by-chart smoothness arguments.
--/
-
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M]
@@ -365,9 +327,7 @@ theorem contMDiffOn_into_tensorRSModel_of_eval_basis
           (fun b : M =>
             evalAtBasisCLE_TensorRSModel (E := E) r s (f b) (Idx, Jdx)) U := by
   constructor
-  · -- Forward: smoothness into the model fibre, post-composed with the CLE
-    -- and projected to the `(Idx, Jdx)`-coordinate, is smooth.
-    intro hf Idx Jdx
+  · intro hf Idx Jdx
     have hCLE :
         ContMDiff
           𝓘(ℝ, ContinuousMultilinearMap ℝ (fun _ : Fin r => E) ℝ →L[ℝ]
@@ -385,9 +345,7 @@ theorem contMDiffOn_into_tensorRSModel_of_eval_basis
       hCLE.comp_contMDiffOn hf
     have hpi := (contMDiffOn_pi_space).1 hcomp
     exact hpi (Idx, Jdx)
-  · -- Backward: assemble the coordinates into a Pi-smooth map, then apply
-    -- the inverse CLE.
-    intro h
+  · intro h
     have hpi : ContMDiffOn I
         𝓘(ℝ, (Fin r → Fin (Module.finrank ℝ E)) ×
           (Fin s → Fin (Module.finrank ℝ E)) → ℝ) ∞

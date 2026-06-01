@@ -36,8 +36,6 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Real-valued chart-based Sobolev norm -/
-
 /-- Real-valued (`ℝ≥0∞.toReal`) version of the chart-based Sobolev norm. -/
 def wkpNormChartReal
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
@@ -91,7 +89,6 @@ lemma wkpNormChartReal_add_le
   have hu_ne : wkpNormChart (I := I) (M := M) g k p u ≠ ⊤ := hu_lt.ne
   have hv_ne : wkpNormChart (I := I) (M := M) g k p v ≠ ⊤ := hv_lt.ne
   have hSum_le := wkpNormChart_add_le (I := I) (M := M) g hp hu hv
-  -- Translate the ℝ≥0∞ inequality to a real inequality.
   have hRHS_ne : wkpNormChart (I := I) (M := M) g k p u +
       wkpNormChart (I := I) (M := M) g k p v ≠ ⊤ :=
     ENNReal.add_ne_top.mpr ⟨hu_ne, hv_ne⟩
@@ -110,10 +107,7 @@ lemma wkpNormChartReal_const_smul
       ‖c‖ * wkpNormChartReal (I := I) (M := M) g k p u := by
   unfold wkpNormChartReal
   rw [wkpNormChart_const_smul (I := I) (M := M) g hp c hu]
-  -- `(‖c‖ₑ * x).toReal = ‖c‖ₑ.toReal * x.toReal = ‖c‖ * x.toReal`.
   rw [ENNReal.toReal_mul, toReal_enorm]
-
-/-! ## `Norm` and `SeminormedAddCommGroup` instances on `WkpChart` -/
 
 /-- The underlying `M → ℝ` function of an element `u : WkpChart g k p hp`.
 Implementation: `WkpChart` is by definition the submodule subtype, so we extract
@@ -233,8 +227,6 @@ instance instNormedSpaceRealWkpChart
     rw [wkpChartFun_smul]
     rw [wkpNormChart_const_smul (I := I) (M := M) g hp c hu_mem]
     rw [ENNReal.toReal_mul, toReal_enorm]
-
-/-! ## Normed quotient via `SeparationQuotient` -/
 
 /-- The `SeparationQuotient` of `WkpChart g k p hp` is a `NormedAddCommGroup`
 (automatically inherited from the seminormed structure). -/

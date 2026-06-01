@@ -70,14 +70,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Step 1: `chartGramBilin` as the `chartJinv`-pullback of the bundle metric
-
-We show that the chart-Gram bilinear form `chartGramBilin g α b` on `E × E`
-equals the bundle metric `g.inner b` pulled back in both arguments along
-`chartJinv α b`. The proof expands `chartGramBilin` to its double-sum form,
-substitutes `chartGramMatrix_eq_innerJinv` for each entry, and then collapses
-the double sum back via bilinearity of `g.inner b`. -/
-
 /-- The chart-Gram bilinear form is the `chartJinv α b`-pullback of the
 bundle metric in both arguments. -/
 lemma chartGramBilin_eq_innerJinv
@@ -87,9 +79,7 @@ lemma chartGramBilin_eq_innerJinv
         (chartJinv (I := I) (M := M) α b u)
         (chartJinv (I := I) (M := M) α b w) := by
   classical
-  -- Expand `chartGramBilin` to a double sum in basis coordinates.
   rw [chartGramBilin_apply]
-  -- Substitute `chartGramMatrix_eq_innerJinv` for each entry.
   have hrewrite :
       (∑ j : Fin (Module.finrank ℝ E),
         ∑ k : Fin (Module.finrank ℝ E),
@@ -110,7 +100,6 @@ lemma chartGramBilin_eq_innerJinv
     rw [chartGramMatrix_eq_innerJinv (I := I) (M := M) g α b j k]
     ring
   rw [hrewrite]
-  -- Collapse the inner sum via bilinearity of `g.inner b` in the second slot.
   have hcollapse_inner : ∀ j : Fin (Module.finrank ℝ E),
       (∑ k : Fin (Module.finrank ℝ E),
           (chartModelBasis E).equivFun u j *
@@ -126,7 +115,6 @@ lemma chartGramBilin_eq_innerJinv
                   chartJinv (I := I) (M := M) α b
                     ((chartModelBasis E) k)) := by
     intro j
-    -- RHS unfolds via linearity of `g.inner b ((chartJinv α b) e_j)` in second slot.
     have hRHS_unfold :
         ((g.inner b (chartJinv (I := I) (M := M) α b ((chartModelBasis E) j)))
             (∑ k : Fin (Module.finrank ℝ E),
@@ -162,7 +150,6 @@ lemma chartGramBilin_eq_innerJinv
                     chartJinv (I := I) (M := M) α b
                       ((chartModelBasis E) k)) from
       Finset.sum_congr rfl (fun j _ => hcollapse_inner j)]
-  -- Pull the second-slot sum out using linearity of chartJinv α b.
   have hwsum :
       (∑ k : Fin (Module.finrank ℝ E),
           (chartModelBasis E).equivFun w k •
@@ -181,7 +168,6 @@ lemma chartGramBilin_eq_innerJinv
       rw [ContinuousLinearMap.map_smul]
     rw [hsum_eq, (chartModelBasis E).sum_equivFun w]
   rw [hwsum]
-  -- Collapse the outer sum via bilinearity of `g.inner b` in the first slot.
   have hcollapse_outer :
       (∑ j : Fin (Module.finrank ℝ E),
           (chartModelBasis E).equivFun u j *
@@ -218,11 +204,6 @@ lemma chartGramBilin_eq_innerJinv
     rw [hsum_eq, (chartModelBasis E).sum_equivFun u]
   rw [husum]
 
-/-! ## Step 2: chart-Gram on `chartJ`-images recovers the bundle metric
-
-On the chart base set, `chartJ α b ∘ chartJinv α b = id : E → E`. Hence
-`chartGramBilin g α b (chartJ u) (chartJ w) = g.inner b u w`. -/
-
 lemma chartGramBilin_chartJ_chartJ
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) (u w : E) :
@@ -233,18 +214,6 @@ lemma chartGramBilin_chartJ_chartJ
   rw [chartGramBilin_eq_innerJinv (I := I) (M := M) g α b]
   rw [chartJinv_chartJ_self (I := I) (M := M) α hb u]
   rw [chartJinv_chartJ_self (I := I) (M := M) α hb w]
-
-/-! ## Step 3: the chart-frame separable form under `chartJ`-precomposition
-
-On the chart base set,
-`chartSeparableFormAt g α b r (chartJ ∘ v_first) =
- (separableFormAt g b r v_first).compContinuousLinearMap (fun _ => chartJinv α b)`.
-
-The key calculation: applied at `w : Fin r → E`,
-`chartSeparableFormAt g α b r (chartJ ∘ v_first) w
-   = ∏ k, chartGramBilin g α b (chartJ (v_first k)) (w k)
-   = ∏ k, g.inner b (v_first k) (chartJinv (w k))
-   = separableFormAt g b r v_first (chartJinv ∘ w)`. -/
 
 lemma chartSeparableFormAt_chartJ_compose
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
@@ -261,21 +230,8 @@ lemma chartSeparableFormAt_chartJ_compose
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply, separableFormAt_apply]
   refine Finset.prod_congr rfl ?_
   intro k _
-  -- chartGramBilin g α b (chartJ u) (w_k)
-  --   = g.inner b (chartJinv (chartJ u)) (chartJinv (w_k))
-  --   = g.inner b u (chartJinv (w_k))   (chartJinv ∘ chartJ = id on baseSet)
   rw [chartGramBilin_eq_innerJinv (I := I) (M := M) g α b]
   rw [chartJinv_chartJ_self (I := I) (M := M) α hb (v_first k)]
-
-/-! ## Step 4: reverse direction of the `(0, s)`-bridge
-
-The bridge identity in its forward form is
-`tensorInnerPointwise_0s s g b T S =
-  chartTensorInnerPointwise_0s s g α b (T.compCLM chartJinv) (S.compCLM chartJinv)`,
-expressing the bundle-fibre inner product in terms of the chart-frame inner
-product after `chartJinv`-pullback. We invert this by substituting
-`T = A.compCLM chartJ`, `S = B.compCLM chartJ` and using
-`chartJ ∘ chartJinv = id` on the chart base set. -/
 
 /-- On the chart base set, the chart-frame `(0, s)`-inner product on tensors
 `A, B` equals the bundle-fibre `(0, s)`-inner product on the
@@ -291,14 +247,12 @@ theorem chartTensorInnerPointwise_0s_eq_tensorInnerPointwise_0s_chartJ
         (B.compContinuousLinearMap
           (fun _ : Fin s => chartJ (I := I) (M := M) α b)) := by
   classical
-  -- Apply the forward bridge to `T = A.compCLM chartJ`, `S = B.compCLM chartJ`.
   have hbridge :=
     tensorInnerPointwise_0s_bridge_identity (I := I) (M := M) g α s hb
       (A.compContinuousLinearMap
         (fun _ : Fin s => chartJ (I := I) (M := M) α b))
       (B.compContinuousLinearMap
         (fun _ : Fin s => chartJ (I := I) (M := M) α b))
-  -- Show that composing twice (chartJ then chartJinv) recovers A and B on baseSet.
   have hAcompose :
       (A.compContinuousLinearMap
           (fun _ : Fin s => chartJ (I := I) (M := M) α b)).compContinuousLinearMap
@@ -321,15 +275,8 @@ theorem chartTensorInnerPointwise_0s_eq_tensorInnerPointwise_0s_chartJ
     congr 1
     funext k
     exact chartJ_chartJinv (I := I) (M := M) α hb (m k)
-  -- Substitute and reverse the equation.
   rw [hAcompose, hBcompose] at hbridge
   exact hbridge.symm
-
-/-! ## Step 5: the main bridge for the chart-frame `(r, s)`-inner product
-
-The chart-frame `(r, s)`-inner product is, by definition, the chart-frame
-`(0, r + s)`-inner product on the two chart-frame-lowered tensors. Applying
-Step 4 at arity `r + s` yields the main bridge identity. -/
 
 /-- **Main bridge identity (chart-frame to bundle-fibre, via `(0, n)`-inner
 product on `chartJ`-composed lowered tensors)**.
@@ -351,16 +298,6 @@ theorem chartTensorInnerPointwise_rs_model_eq_tensorInnerPointwise_0s_compChartJ
   rw [chartTensorInnerPointwise_rs_model_def]
   exact chartTensorInnerPointwise_0s_eq_tensorInnerPointwise_0s_chartJ
     (I := I) (M := M) g α hb (r + s) _ _
-
-/-! ## Step 6: relating `(chartLowerAllUpperIndices_model T).compCLM chartJ`
-to `lowerAllUpperIndices` of a twisted tensor
-
-For a mixed model tensor `T : TensorRSModel r s ℝ E`, we relate
-`(chartLowerAllUpperIndices_model r s g α b T).compContinuousLinearMap chartJ`
-to `lowerAllUpperIndices g r s b T'`, where `T'` is the `chartJ`/`chartJinv`-
-twisted tensor: pre-compose the upper-`r`-block input with `chartJinv` and
-post-compose the lower-`s`-block output with `chartJ`. This packages the
-bridge entirely inside the `tensorInnerPointwise` framework. -/
 
 /-- The chart-`(α, b)`-twist of a mixed model tensor: pre-compose the
 input on the `r`-block with `chartJinv α b`, and post-compose the output on
@@ -403,15 +340,10 @@ lemma chartLowerAllUpperIndices_model_compChartJ
   classical
   refine ContinuousMultilinearMap.ext ?_
   intro v
-  -- LHS: evaluate at `v`, which equals chartLower T at `chartJ ∘ v`.
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply,
     chartLowerAllUpperIndices_model_apply]
-  -- RHS: evaluate at `v`, which equals (twisted T) at the bundle separable form.
   rw [lowerAllUpperIndices_apply]
   rw [chartRSTwist_apply]
-  -- Identify the chart-frame separable form on the first `r` slots of
-  -- `chartJ ∘ v` with the bundle-frame separable form on the first `r`
-  -- slots of `v`, composed with `chartJinv` in every slot.
   have hsep :
       chartSeparableFormAt (I := I) (M := M) g α b r
           (fun i : Fin r => chartJ (I := I) (M := M) α b
@@ -422,19 +354,8 @@ lemma chartLowerAllUpperIndices_model_compChartJ
     have := chartSeparableFormAt_chartJ_compose (I := I) (M := M) g α hb r
       (fun i : Fin r => v (Fin.castAdd s i))
     exact this
-  -- LHS becomes T applied to the chart-frame separable form on
-  -- (chartJ ∘ v ∘ castAdd s), evaluated at (chartJ ∘ v ∘ natAdd r).
-  -- Rewrite using `hsep`.
   rw [hsep]
-  -- RHS evaluates the post-composition of T(α'.compCLM chartJinv) with chartJ
-  -- at (v ∘ natAdd r), which is exactly the same expression.
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
-
-/-! ## Step 7: the bridge identity in `tensorInnerPointwise` form
-
-Combining Steps 5 and 6: on the chart base set, the chart-frame
-`(r, s)`-inner product on `T₀, T₁` equals the bundle-fibre `(r, s)`-inner
-product on the chart-`(α, b)`-twisted tensors. -/
 
 /-- **Bridge identity, `tensorInnerPointwise` form**: on the chart base set,
 the chart-frame `(r, s)`-inner product equals the bundle-fibre

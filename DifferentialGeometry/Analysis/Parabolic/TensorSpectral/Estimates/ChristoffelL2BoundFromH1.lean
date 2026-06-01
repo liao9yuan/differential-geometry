@@ -51,21 +51,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Pointwise bound including the partition-of-unity factor
-
-The pointwise sum bound from the companion module
-`ChristoffelCorrectionL2Bound` holds only on `tsupport ρ_α`. To obtain a
-global pointwise bound suitable for integration over all of `M`, we
-multiply the LHS by `ρ_α(b)^2`: inside `tsupport ρ_α` we use
-`0 ≤ ρ_α ≤ 1`; outside, `ρ_α(b) = 0` makes the LHS vanish while the RHS
-remains non-negative. -/
 
 private lemma chartPou_mul_chart_christoffel_correction_sum_sq_le_const_mul_tensorInnerPointwise
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -134,9 +123,7 @@ private lemma chartPou_mul_chart_christoffel_correction_sum_sq_le_const_mul_tens
     rw [hQ_def]
     exact tensorInnerPointwise_nonneg (I := I) (M := M) g r s b _
   by_cases hb : b ∈ tsupport ρ
-  · -- Inside the support: chain `SumSq ≤ C · Q` from the headline with
-    -- `ρ b ^ 2 ≤ 1` from `0 ≤ ρ b ≤ 1`.
-    have hρ_nn : 0 ≤ ρ b := (chartAtlasPOU I M).nonneg α b
+  · have hρ_nn : 0 ≤ ρ b := (chartAtlasPOU I M).nonneg α b
     have hρ_le_one : ρ b ≤ 1 := (chartAtlasPOU I M).le_one α b
     have hρ_sq_le_one : ρ b ^ 2 ≤ 1 := by
       have hsq : ρ b * ρ b ≤ 1 * 1 :=
@@ -151,20 +138,13 @@ private lemma chartPou_mul_chart_christoffel_correction_sum_sq_le_const_mul_tens
         ≤ 1 * (C * Q) :=
           mul_le_mul hρ_sq_le_one hSumSq_le hSumSq_nn (by linarith)
       _ = C * Q := one_mul _
-  · -- Outside the support: `ρ b = 0`, so LHS = 0.
-    have hρ_zero : ρ b = 0 := by
+  · have hρ_zero : ρ b = 0 := by
       by_contra hne
       exact hb (subset_tsupport _ hne)
     have hLHS_zero : ρ b ^ 2 * SumSq = 0 := by
       rw [hρ_zero]; ring
     rw [hLHS_zero]
     exact mul_nonneg hC_nn hQ_nn
-
-/-! ## `eLpNorm` conversion helpers (private, file-local)
-
-Mirrors of the helpers in `CovL2BoundFromH1.lean`: convert
-`(eLpNorm f 2 μ)^2` to a lintegral of `‖f x‖ₑ^2`, bound it by
-`ENNReal.ofReal (∫ |f x|^2 dμ)`, then take square roots. -/
 
 private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq
     {α : Type*} [MeasurableSpace α] (μ : Measure α) (f : α → ℝ) :
@@ -209,16 +189,11 @@ private lemma eLpNorm_two_le_ofReal_sqrt
   rw [sqrt_ofReal_eq_ofReal_sqrt hS] at h_pow
   exact h_pow
 
-/-! ## Coercion helper for `nnnorm` ↔ `ofReal` -/
-
 private lemma coe_nnnorm_eq_ofReal_norm {X : Type*} [SeminormedAddCommGroup X]
     (x : X) :
     (‖x‖₊ : ℝ≥0∞) = ENNReal.ofReal ‖x‖ := by
   rw [show ((‖x‖₊ : ℝ≥0∞)) = ‖x‖ₑ from (enorm_eq_nnnorm x).symm,
     ← ofReal_norm_eq_enorm x]
-
-/-! ## Integrated bound: the diagonal tensor inner product integrates below
-the `L²` norm-sq, hence below the `H¹` norm-sq -/
 
 private lemma integral_tensorInnerPointwise_diagonal_le_h1NormSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -228,7 +203,6 @@ private lemma integral_tensorInnerPointwise_diagonal_le_h1NormSq
       ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤
       ‖S‖ ^ 2 := by
   classical
-  -- The integral equals `tensorL2Inner` on `S.toCcTensor.toFun`.
   have h_l2_eq :
       ∫ b, tensorInnerPointwise (I := I) (M := M) g r s b
           (S.toCcTensor.toFun b) (S.toCcTensor.toFun b)
@@ -236,7 +210,6 @@ private lemma integral_tensorInnerPointwise_diagonal_le_h1NormSq
         tensorL2Inner (I := I) (M := M) g r s
           S.toCcTensor.toFun S.toCcTensor.toFun := rfl
   rw [h_l2_eq]
-  -- `tensorL2Inner = ‖S.toCcTensor‖^2 ≤ ‖S‖^2` by `H1Compl.l2NormSq_le_h1NormSq`.
   have h_l2_norm_sq :
       tensorL2Inner (I := I) (M := M) g r s
           S.toCcTensor.toFun S.toCcTensor.toFun =
@@ -244,8 +217,6 @@ private lemma integral_tensorInnerPointwise_diagonal_le_h1NormSq
     (SmoothCcTensor.norm_sq_eq_inner_self (I := I) (M := M) S.toCcTensor).symm
   rw [h_l2_norm_sq]
   exact SmoothCcTensorH1.l2NormSq_le_h1NormSq (I := I) (M := M) S
-
-/-! ## Headline `L^2` bound -/
 
 /-- **Headline `L²` integration of the Christoffel slot-correction sum**,
 conditional on the operator-norm sup bound `M_F` for the slot substitutions
@@ -294,15 +265,11 @@ theorem exists_eLpNorm_chartPou_mul_sqrt_chart_christoffel_correction_le_const_m
             2 (riemannianVolumeMeasure (I := I) (M := M) g) ≤
           ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞) := by
   classical
-  -- Extract the constant `C` from the pointwise bound, then prove the
-  -- squared-eLpNorm bound `≤ ENNReal.ofReal (C * ‖S‖^2)`, and finally take
-  -- square roots to obtain the headline.
   obtain ⟨C, hC_nn, h_pt⟩ :=
     chartPou_mul_chart_christoffel_correction_sum_sq_le_const_mul_tensorInnerPointwise
       (I := I) (M := M) g r s α X hM_F_nn hM_F_input hM_F_output hK_S_nn hK_S_bound
   refine ⟨Real.sqrt C, Real.sqrt_nonneg _, ?_⟩
   intro S
-  -- Notation for the integrand and the measure.
   set ρ : M → ℝ := fun x : M =>
     ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x with hρ_def
   set SumSq : M → ℝ := fun b : M =>
@@ -320,7 +287,6 @@ theorem exists_eLpNorm_chartPou_mul_sqrt_chart_christoffel_correction_le_const_m
     exact add_nonneg
       (Finset.sum_nonneg fun _ _ => sq_nonneg _)
       (Finset.sum_nonneg fun _ _ => sq_nonneg _)
-  -- Pointwise `(f b)^2 ≤ C * tensorInnerPointwise`.
   have h_pt_sq : ∀ b : M, (f b) ^ 2 ≤
       C * tensorInnerPointwise (I := I) (M := M) g r s b
         (S.toCcTensor.toFun b) (S.toCcTensor.toFun b) := by
@@ -330,7 +296,6 @@ theorem exists_eLpNorm_chartPou_mul_sqrt_chart_christoffel_correction_le_const_m
         show Real.sqrt (SumSq b) ^ 2 = SumSq b from Real.sq_sqrt (hSumSq_nn b)]
     rw [h_eq]
     exact h_pt S.toCcTensor b
-  -- ENNReal-valued pointwise bound.
   have h_pt_enn : ∀ b : M,
       (‖f b‖ₑ : ℝ≥0∞) ^ 2 ≤
         ENNReal.ofReal (C * tensorInnerPointwise
@@ -341,7 +306,6 @@ theorem exists_eLpNorm_chartPou_mul_sqrt_chart_christoffel_correction_le_const_m
       rw [Real.enorm_eq_ofReal_abs, ← ENNReal.ofReal_pow (abs_nonneg _) 2,
         sq_abs]]
     exact ENNReal.ofReal_le_ofReal (h_pt_sq b)
-  -- Squared `eLpNorm` ≤ `ofReal (C * ‖S‖^2)`.
   have h_inner_int :
       Integrable (fun b : M => tensorInnerPointwise
         (I := I) (M := M) g r s b
@@ -386,7 +350,6 @@ theorem exists_eLpNorm_chartPou_mul_sqrt_chart_christoffel_correction_le_const_m
           rw [integral_const_mul]
       _ ≤ ENNReal.ofReal (C * ‖S‖ ^ 2) :=
           ENNReal.ofReal_le_ofReal (mul_le_mul_of_nonneg_left h_int_le hC_nn)
-  -- Take square roots: `eLpNorm f 2 μ ≤ ofReal (√(C · ‖S‖^2)) = ofReal (√C · ‖S‖)`.
   set T : ℝ := C * ‖S‖ ^ 2 with hT_def
   have hT_nn : 0 ≤ T := mul_nonneg hC_nn (sq_nonneg _)
   have h_eLpNorm_le := eLpNorm_two_le_ofReal_sqrt hT_nn h_sq

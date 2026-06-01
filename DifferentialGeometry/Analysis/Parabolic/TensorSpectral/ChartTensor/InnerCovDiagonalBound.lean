@@ -95,7 +95,6 @@ theorem exists_sum_tensorInnerPointwise_cov_chartBasis_diagonal_le_const_mul_ten
       (hA_herm.eigenvectorUnitary : Matrix (Fin n) (Fin n) ℝ) ∈
         Matrix.unitaryGroup (Fin n) ℝ :=
     (hA_herm.eigenvectorUnitary).property
-  -- Orthonormality of `U` (real case).
   have hUTU : ∀ k l : Fin n,
       ∑ i : Fin n, U i k * U i l = if k = l then 1 else 0 := by
     intro k l
@@ -116,7 +115,6 @@ theorem exists_sum_tensorInnerPointwise_cov_chartBasis_diagonal_le_const_mul_ten
     refine (?_ : _ = _).trans hij
     refine Finset.sum_congr rfl ?_
     intro k _; rw [Matrix.star_apply, star_trivial]
-  -- Spectral expansion `A_{ij} = ∑_k μ_k U_{ik} U_{jk}`.
   have hA_entry : ∀ i j : Fin n,
       A i j = ∑ k : Fin n, μ k * (U i k * U j k) := by
     intro i j
@@ -138,7 +136,6 @@ theorem exists_sum_tensorInnerPointwise_cov_chartBasis_diagonal_le_const_mul_ten
     rw [hUD k]
     have : (star U) k j = U j k := by simp [Matrix.star_apply, star_trivial]
     rw [this]; ring
-  -- Each eigenvalue `μ k ≥ c` by 3.a applied to the k-th eigenvector.
   have hμ_ge_c : ∀ k : Fin n, c ≤ μ k := by
     intro k
     have hbnd := hc_bound b hb (fun i => U i k)
@@ -187,10 +184,8 @@ theorem exists_sum_tensorInnerPointwise_cov_chartBasis_diagonal_le_const_mul_ten
         c ≤ ∑ i : Fin n, ∑ j : Fin n, A i j * U i k * U j k := by
       rw [hA_def]; exact hbnd
     rw [hRHS] at hbnd'; exact hbnd'
-  -- The transformed tensor family.
   set w : Fin n → TensorRSModel r s ℝ E := fun k =>
     ∑ i : Fin n, U i k • cov i with hw_def
-  -- Local abbreviation `tip` for the pointwise inner product.
   set tip : TensorRSModel r s ℝ E → TensorRSModel r s ℝ E → ℝ :=
     tensorInnerPointwise (I := I) (M := M) g r s b with htip_def
   have hwkwk : ∀ k : Fin n,
@@ -204,7 +199,6 @@ theorem exists_sum_tensorInnerPointwise_cov_chartBasis_diagonal_le_const_mul_ten
     rw [tensorInnerPointwise_sum_right (I := I) (M := M) g r s b
           Finset.univ _ cov (fun j => U j k), Finset.mul_sum]
     refine Finset.sum_congr rfl ?_; intro j _; ring
-  -- `∑_{ij} A_{ij} ⟨cov_i, cov_j⟩ = ∑_k μ_k ⟨w_k, w_k⟩`.
   have hquad_eq : ∑ i : Fin n, ∑ j : Fin n,
         A i j * tip (cov i) (cov j) =
       ∑ k : Fin n, μ k * tip (w k) (w k) := by
@@ -234,7 +228,6 @@ theorem exists_sum_tensorInnerPointwise_cov_chartBasis_diagonal_le_const_mul_ten
     rw [hswap1]
     refine Finset.sum_congr rfl ?_; intro i _
     rw [Finset.sum_comm]
-  -- Diagonal sum collapses to `∑_k ⟨w_k, w_k⟩` via `U`-orthogonality.
   have hdiag_eq : ∑ i : Fin n, tip (cov i) (cov i) =
       ∑ k : Fin n, tip (w k) (w k) := by
     have hRHS_swap :
@@ -254,7 +247,6 @@ theorem exists_sum_tensorInnerPointwise_cov_chartBasis_diagonal_le_const_mul_ten
     · rw [hUUT i i]; simp
     · intro j _ hji; rw [hUUT i j]; simp [hji.symm]
     · intro h; exact absurd (Finset.mem_univ i) h
-  -- Apply pointwise bound `μ_k ≥ c > 0` and sum.
   have hw_nonneg : ∀ k, 0 ≤ tip (w k) (w k) :=
     fun k => tensorInnerPointwise_nonneg (I := I) (M := M) g r s b (w k)
   have hc_ne : (c : ℝ) ≠ 0 := ne_of_gt hc_pos
@@ -271,7 +263,6 @@ theorem exists_sum_tensorInnerPointwise_cov_chartBasis_diagonal_le_const_mul_ten
       _ ≤ c⁻¹ * (μ k * tip (w k) (w k)) := by
           refine mul_le_mul_of_nonneg_left ?_ (inv_pos.mpr hc_pos).le
           exact mul_le_mul_of_nonneg_right hμk (hw_nonneg k)
-  -- Bridge the chart-frame form to `tensorCovDerivPointwiseInner` on the base set.
   have hb_baseSet :
       b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     hK_M_sub_baseSet hb

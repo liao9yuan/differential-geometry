@@ -97,14 +97,6 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Rescaled orbit of the chart-pushed flow
-
-For `Φ` the chart-pushed flow at base `(x₀, 0)` and `t' > 0`, the
-rescaled orbit through `(x₀, v)` at scale `t'` is the curve
-`s ↦ rescaleChartOrbit t' (Φ((x₀, v), t' s))`. By `hasDerivAt_rescaled_orbit`
-(in `SmoothnessClose.lean`), this curve satisfies the chart-phase ODE
-on a neighbourhood of `s = 0`, with initial value `(x₀, t' • v)`. -/
-
 section RescaledOrbit
 
 variable [I.Boundaryless]
@@ -149,17 +141,6 @@ lemma chartFlowOrbitRescaled_hasDerivAt_chartPhaseVF
 
 end RescaledOrbit
 
-/-! ## Zero-section orbit constancy
-
-The chart-phase ODE's right-hand side vanishes at the zero section
-`(x₀, 0)`: `chartPhaseVF g p (x₀, 0) = (0, -Γ(0, 0)(x₀)) = (0, 0)`. By
-chart-coord ODE uniqueness on `E × E`, any chart-coord ODE solution
-through `(x₀, 0)` is the constant curve. In particular, the V.4 flow's
-orbit through `(x₀, 0)` is the constant `(x₀, 0)` on its time interval.
-
-This is the chart-coord image of the unconditional fact
-`expMap g p 0 = p` (from `Definition.lean`). -/
-
 section ZeroSectionOrbit
 
 variable [I.Boundaryless]
@@ -171,26 +152,15 @@ lemma chartPhaseVF_zero_section
     chartPhaseVF (I := I) g p
       ((extChartAt I p p, (0 : E)) : E × E) = (0, 0) := by
   classical
-  -- `chartPhaseVF g p (x, v) = (v, -Γ(v, v)(x))`; here `v = 0`, so the
-  -- first component is `0` and the second is `-Γ(0, 0)(x) = 0` by
-  -- `chartChristoffelContraction_zero_left`.
   have hΓ : chartChristoffelContraction (I := I) g p (0 : E) (0 : E)
       (extChartAt I p p) = 0 :=
     chartChristoffelContraction_zero_left (I := I) g p (0 : E)
       (extChartAt I p p)
-  -- Compute.
   change ((0 : E), -chartChristoffelContraction (I := I) g p (0 : E) (0 : E)
       (extChartAt I p p)) = (0, 0)
   rw [hΓ, neg_zero]
 
 end ZeroSectionOrbit
-
-/-! ## V.4 flow with the zero-section orbit identified as constant
-
-We package the V.4 chart-pushed flow at base `(x₀, 0)` together with the
-identification of its orbit through `(x₀, 0)` as the constant curve
-`(x₀, 0)` (eventually in time, around `s = 0`). This identification is
-the chart-coord image of the unconditional `expMap_zero` identity. -/
 
 section FlowZeroSectionConstancy
 
@@ -212,15 +182,10 @@ lemma chartFlow_zero_section_eventually_const
       Φ (((extChartAt I p p, (0 : E)) : E × E), s) =
         ((extChartAt I p p, (0 : E)) : E × E) := by
   classical
-  -- Note: We do NOT bind `z₀ := (x₀, 0)` because `b` is bound at the literal
-  -- type `((extChartAt I p p, (0 : E)) : E × E)`. We keep all uses literal.
-  -- Orbit `c₁(s) := Φ((x₀, 0), s)`.
   set c₁ : ℝ → E × E := fun s => Φ (((extChartAt I p p, (0 : E)) : E × E), s)
     with hc₁_def
-  -- Constant curve `c₂(s) := (x₀, 0)`.
   set c₂ : ℝ → E × E := fun _ => ((extChartAt I p p, (0 : E)) : E × E)
     with hc₂_def
-  -- Both satisfy the chart-phase ODE near 0 with c_i(0) = (x₀, 0).
   have hz₀_interior :
       ((extChartAt I p p, (0 : E)) : E × E) ∈
       (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E) := by
@@ -230,16 +195,13 @@ lemma chartFlow_zero_section_eventually_const
     have hx₀_target : extChartAt I p p ∈ (extChartAt I p).target :=
       (extChartAt I p).map_source hx₀_src
     exact extChartAt_target_subset_interior_of_boundaryless (I := I) p hx₀_target
-  -- c₁ 0 = (x₀, 0) via the initial-value identity.
   have hc₁_zero : c₁ 0 = ((extChartAt I p p, (0 : E)) : E × E) := by
     have hinit : Φ ((((extChartAt I p p, (0 : E)) : E × E)), 0) =
         ((extChartAt I p p, (0 : E)) : E × E) :=
       hΦ.apply_initial ((extChartAt I p p, (0 : E)) : E × E)
         (Metric.mem_closedBall_self (by exact_mod_cast (le_of_lt hr)))
     rw [hc₁_def]; exact hinit
-  -- c₂ 0 = (x₀, 0) trivially.
   have hc₂_zero : c₂ 0 = ((extChartAt I p p, (0 : E)) : E × E) := rfl
-  -- c₁ satisfies the chart-phase ODE near 0.
   have hc₁_cont0 : ContinuousAt c₁ 0 := by
     have hcont_on : ContinuousOn c₁ (Set.Icc (-ε) ε) := by
       exact hΦ.orbit_continuousOn ((extChartAt I p p, (0 : E)) : E × E)
@@ -287,7 +249,6 @@ lemma chartFlow_zero_section_eventually_const
     have hd := hc₁_deriv s hsIoo
     rw [hcutoff_eq] at hd
     exact hd
-  -- c₂ satisfies the chart-phase ODE trivially with derivative = VF at z₀ = 0.
   have hVF_zero : chartPhaseVF (I := I) g p
       ((extChartAt I p p, (0 : E)) : E × E) = (0, 0) :=
     chartPhaseVF_zero_section (I := I) g p
@@ -297,13 +258,10 @@ lemma chartFlow_zero_section_eventually_const
     refine Filter.Eventually.of_forall ?_
     intro s
     refine ⟨?_, hz₀_interior⟩
-    -- HasDerivAt of constant `c₂` at any s, with derivative 0.
     have h0 : HasDerivAt c₂ (0 : E × E) s :=
       hasDerivAt_const s ((extChartAt I p p, (0 : E)) : E × E)
-    -- Rewrite 0 to `chartPhaseVF g p (c₂ s) = chartPhaseVF g p (x₀, 0) = (0, 0)`.
     rw [show c₂ s = ((extChartAt I p p, (0 : E)) : E × E) from rfl, hVF_zero]
     exact h0
-  -- Apply chart-coord ODE uniqueness.
   have heq : c₁ =ᶠ[𝓝 (0 : ℝ)] c₂ :=
     chartPhaseVF_orbit_uniqueness (I := I) (g := g) (α := p)
       (c₁ := c₁) (c₂ := c₂)
@@ -313,11 +271,6 @@ lemma chartFlow_zero_section_eventually_const
   exact hs
 
 end FlowZeroSectionConstancy
-
-/-! ## V.4 flow value at `((x₀, 0), t')` for any `t'` in the time interval
-
-By zero-section orbit constancy (eventually in `s`), for `t'` near `0`
-we have `Φ((x₀, 0), t') = (x₀, 0)`. -/
 
 section FlowAtZeroEval
 
@@ -342,17 +295,6 @@ lemma chartFlow_zero_section_apply_eventually_eq_origin
     (Φ := Φ) (b := b) (r := r) (ε := ε) hΦ hb_sub hr hε
 
 end FlowAtZeroEval
-
-/-! ## Slice smoothness at an arbitrary time `t'`
-
-Granted the V.4 flow's joint `C^1` regularity on
-`ball ((x₀, 0)) ρ × Ioo (-T, T)`, the chart-coord slice
-`v ↦ (Φ((x₀, v), t')).1` is `C^1` at `v = 0` for every `t' ∈ Ioo (-T, T)`
-— this is `contDiffAt_chartFlow_slice_fst_zero` from `Smoothness.lean`.
-We lift to the manifold side, assuming the chart-flow's value at
-`((x₀, 0), t')` lies in the chart-target interior (which holds eventually
-for `t'` near `0` by zero-section orbit constancy, and lies in the
-target for the V.4 flow's full time interval by continuity). -/
 
 section CandidateSliceSmoothness
 
@@ -420,16 +362,6 @@ lemma chartFlowCandidate_chart_contDiffAt_zero_at_general_time
 
 end CandidateSliceSmoothness
 
-/-! ## Named gap: the manifold-side identification
-
-The remaining manifold-side step for the bridge: a V.4 chart-pushed flow
-`Φ`, at some positive time `t'` and over some ball of radius `ρ`,
-identifies the chart-flow candidate with `expMap g p` rescaled.
-
-We expose the identification as a clean `Prop`-valued predicate, the
-**only remaining gap** in the unconditional discharge of
-`UniformChartFlowBridge`. -/
-
 section ManifoldGap
 
 variable [I.Boundaryless] [CompleteSpace E]
@@ -456,12 +388,6 @@ def ChartFlowGeodesicMatchAt
 
 end ManifoldGap
 
-/-! ## Conditional bridge discharge
-
-Given the manifold-side identification at some `t' > 0` and `ρ > 0`
-together with the V.4 flow's slice smoothness at `t'`, we discharge
-`UniformChartFlowBridge`. -/
-
 section ConditionalDischarge
 
 variable [I.Boundaryless] [CompleteSpace E]
@@ -487,8 +413,6 @@ theorem uniformChartFlowBridge_of_match
     UniformChartFlowBridge (I := I) g p := by
   classical
   refine ⟨Φ, t', ρ', ht'_pos, hρ'_pos, ?_, hmatch⟩
-  -- ContMDiffAt 𝓘(ℝ, E) I 1 (chartFlowCandidate Φ p t') 0.
-  -- Combine chart-coord smoothness + continuity + manifold-target chart.
   set x₀ : E := extChartAt I p p with hx₀_def
   have hchart_cd :
       ContDiffAt ℝ 1
@@ -497,11 +421,9 @@ theorem uniformChartFlowBridge_of_match
     chartFlowCandidate_chart_contDiffAt_zero_at_general_time
       (I := I) (p := p) (Φ := Φ) (ρ := ρ) (T := T) (t' := t')
       hρ ht'_in hcd hval
-  -- Value of cand at v = 0 is p.
   have hcand_zero : chartFlowCandidate (I := I) Φ p t' (0 : E) = p := by
     change (extChartAt I p).symm (Φ (((x₀, (0 : E)) : E × E), t')).1 = p
     exact hval_p
-  -- Continuity at v = 0: from the slice and chart-symm at the value.
   have hcd_slice_fst :
       ContDiffAt ℝ 1 (fun v : E => (Φ (((x₀, v) : E × E), t')).1) (0 : E) :=
     contDiffAt_chartFlow_slice_fst_zero (Φ := Φ) (x₀ := x₀)
@@ -509,38 +431,28 @@ theorem uniformChartFlowBridge_of_match
   have hcont_slice0 : ContinuousAt
       (fun v : E => (Φ (((x₀, v) : E × E), t')).1) (0 : E) :=
     hcd_slice_fst.continuousAt
-  -- Continuity of `(extChartAt I p).symm` at the slice's value at 0.
   have hsymm_cont : ContinuousAt (extChartAt I p).symm
       (Φ (((x₀, (0 : E)) : E × E), t')).1 :=
     continuousAt_extChartAt_symm'' (I := I) (x := p)
       (y := (Φ (((x₀, (0 : E)) : E × E), t')).1) hval
   have hcont_cand : ContinuousAt
       (chartFlowCandidate (I := I) Φ p t') (0 : E) := by
-    -- chartFlowCandidate Φ p t' v = (extChartAt I p).symm (slice's first coord at v).
-    -- Use `ContinuousAt.comp_of_eq` to specify the matching point explicitly.
     have hinner : ContinuousAt
         (fun v : E => (Φ (((x₀, v) : E × E), t')).1) (0 : E) := hcont_slice0
     have hinner_eval : (fun v : E => (Φ (((x₀, v) : E × E), t')).1) (0 : E) =
         (Φ (((x₀, (0 : E)) : E × E), t')).1 := rfl
-    -- Use the rewrite to match: ContinuousAt (g ∘ f) 0 ↔ ContinuousAt g (f 0) ∧ ContinuousAt f 0
-    -- (the latter is hsymm_cont composed with hinner via comp_of_eq).
     have hcomp : ContinuousAt
         ((extChartAt I p).symm ∘
           (fun v : E => (Φ (((x₀, v) : E × E), t')).1)) (0 : E) :=
       hsymm_cont.comp_of_eq hinner hinner_eval.symm
     exact hcomp
-  -- Assemble via `contMDiffAt_iff`. The target chart at cand 0 = p is the
-  -- standard `extChartAt I p`.
   rw [contMDiffAt_iff]
   refine ⟨hcont_cand, ?_⟩
-  -- Source-side chart simplifies to identity on E; range to univ.
   have hsimp_range : (range (𝓘(ℝ, E) : ModelWithCorners ℝ E E)) = Set.univ :=
     ModelWithCorners.range_eq_univ _
   have hsimp_base : (extChartAt (𝓘(ℝ, E) : ModelWithCorners ℝ E E) (0 : E)) (0 : E) =
       (0 : E) := by simp
   rw [hsimp_base, hsimp_range, hcand_zero]
-  -- Goal: ContDiffWithinAt ℝ 1 (extChartAt I p ∘ chartFlowCandidate Φ p t' ∘
-  --   (extChartAt 𝓘(ℝ,E) 0).symm) univ 0.
   have hgoal_eq :
       (extChartAt I p ∘ chartFlowCandidate (I := I) Φ p t' ∘
         (extChartAt (𝓘(ℝ, E) : ModelWithCorners ℝ E E) (0 : E)).symm) =
@@ -550,19 +462,6 @@ theorem uniformChartFlowBridge_of_match
   exact hchart_cd.contDiffWithinAt
 
 end ConditionalDischarge
-
-/-! ## Headline: unconditional `expMap_contMDiffAt_zero_of_uniformChartFlowBridge` modulo the
-named manifold-side match
-
-We package the headline as a theorem that consumes a witness of the
-manifold-side match at some `(Φ, t', ρ)` (the named gap) and produces
-the unconditional `ContMDiffAt 1` smoothness of `expMap g p` at the
-zero vector.
-
-The witness `ChartFlowGeodesicMatchAt` is the **only** input that
-remains to be discharged unconditionally; everything else (the V.4
-flow, zero-section orbit constancy, slice smoothness at arbitrary
-positive time, the conditional headline) is unconditional. -/
 
 section Headline
 

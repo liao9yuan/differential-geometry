@@ -73,8 +73,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpa
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Elementary helpers -/
-
 /-- Triangle inequality for a difference: `|a − b| ≤ |a| + |b|`. -/
 private lemma abs_sub_le_abs_add_abs (a b : ℝ) : |a - b| ≤ |a| + |b| := by
   calc |a - b| = |a + (-b)| := by ring_nf
@@ -137,12 +135,6 @@ private lemma partial_chartGramOnE_contDiffOn_int'
   partialDeriv_contDiffOn_int_of_contDiffOn (I := I) α
     ((chartGramOnE_contDiffOn (I := I) g α l b).mono interior_subset) a
 
-/-! ## The second-order and first-order parts of `chartRicciTensor`
-
-`chartRicciTensor g α i k` is, after expanding the contracted Riemann tensor, the
-sum of the `∂Γ`-terms (the second-order part) and the `Γ·Γ`-terms (the first-order
-part).  We name each part and prove the split. -/
-
 /-- The **second-order part** of the chart Ricci tensor: the `∂Γ` terms
 `∑_j (∂_j Γ^j_{ik}(y) − ∂_k Γ^j_{ij}(y))`.  These are the terms carrying second
 chart derivatives of the metric. -/
@@ -176,18 +168,9 @@ theorem chartRicciTensor_eq_secondOrder_add_firstOrder
         chartRicciFirstOrderTerm (I := I) g α i k y := by
   classical
   rw [chartRicciTensor_def, chartRicciSecondOrderTerm, chartRicciFirstOrderTerm]
-  -- Each `chartRiemannTensor g α i j k j y` expands to the `∂Γ` difference plus the
-  -- `Γ·Γ` sum; redistribute the outer `j`-sum.
   rw [← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl (fun j _ => ?_)
   rw [chartRiemannTensor_def]
-
-/-! ## Symmetry of the two parts
-
-The principal-symbol cancellation downstream consumes symmetric `(0,2)` inputs.  We
-expose the `(i,k)`-symmetry of each piece (and of the full difference) on the
-chart-target interior, where the contracted-Christoffel cross-derivative identity
-holds. -/
 
 /-- **`(i,k)`-symmetry of the second-order part** on the chart-target interior. -/
 theorem chartRicciSecondOrderTerm_symm
@@ -199,7 +182,6 @@ theorem chartRicciSecondOrderTerm_symm
   classical
   rw [chartRicciSecondOrderTerm, chartRicciSecondOrderTerm]
   rw [Finset.sum_sub_distrib, Finset.sum_sub_distrib]
-  -- First sum: ∂_j Γ^j_{ik} = ∂_j Γ^j_{ki} since Γ is symmetric in its lower pair.
   have hT1 : (∑ j : Fin (Module.finrank ℝ E),
         partialDeriv (E := E) j (chartChristoffel (I := I) g α i k j) y) =
       (∑ j : Fin (Module.finrank ℝ E),
@@ -209,7 +191,6 @@ theorem chartRicciSecondOrderTerm_symm
         chartChristoffel (I := I) g α k i j :=
       funext (fun y' => chartChristoffel_symm (I := I) g α i k j y')
     rw [hsym]
-  -- Second sum: the contracted-Christoffel cross-derivative identity.
   have hT2 : (∑ j : Fin (Module.finrank ℝ E),
         partialDeriv (E := E) k (chartChristoffel (I := I) g α i j j) y) =
       (∑ j : Fin (Module.finrank ℝ E),
@@ -229,9 +210,7 @@ theorem chartRicciFirstOrderTerm_symm
       chartRicciFirstOrderTerm (I := I) g α k i y := by
   classical
   rw [chartRicciFirstOrderTerm, chartRicciFirstOrderTerm]
-  -- Split each double sum of differences into the `T3` and `T4` double sums.
   simp only [Finset.sum_sub_distrib]
-  -- T3: ∑_{j,m} Γ^j_{jm} Γ^m_{ik} = ∑_{j,m} Γ^j_{jm} Γ^m_{ki} via Γ^m_{ik} = Γ^m_{ki}.
   have hT3 : (∑ j : Fin (Module.finrank ℝ E),
         ∑ m : Fin (Module.finrank ℝ E),
           chartChristoffel (I := I) g α j m j y *
@@ -243,7 +222,6 @@ theorem chartRicciFirstOrderTerm_symm
     refine Finset.sum_congr rfl (fun j _ => ?_)
     refine Finset.sum_congr rfl (fun m _ => ?_)
     rw [chartChristoffel_symm (I := I) g α i k m]
-  -- T4: ∑_{j,m} Γ^j_{km} Γ^m_{ij} = ∑_{j,m} Γ^j_{im} Γ^m_{kj} via the swap j ↔ m.
   have hT4 : (∑ j : Fin (Module.finrank ℝ E),
         ∑ m : Fin (Module.finrank ℝ E),
           chartChristoffel (I := I) g α k m j y *
@@ -269,18 +247,6 @@ theorem chartRicciTensor_diff_symm
       chartRicciTensor (I := I) g₁ α k i y - chartRicciTensor (I := I) g₂ α k i y := by
   rw [chartRicciTensor_symm (I := I) g₁ α i k hy,
       chartRicciTensor_symm (I := I) g₂ α i k hy]
-
-/-! ## The principal symbol of the second-order-part difference
-
-The second-order part difference is, by the Leibniz expansion of each `∂Γ`,
-```
-∑_j (∂_j(Γ₁ − Γ₂)^j_{ik} − ∂_k(Γ₁ − Γ₂)^j_{ij}),
-```
-and the only genuinely `∂²(g₁−g₂)` content is the branch where `∂` lands on the
-`gramBracket` and the inverse-Gram coefficient is taken from `g₂`.  That branch is
-`½∑_l G₂^{jl}·(gramBracketDeriv g₁ − gramBracketDeriv g₂)`, where the difference of
-`gramBracketDeriv`s is a literal finite sum of iterated second partials of the
-Gram-entry difference `G(g₁) − G(g₂)` — manifestly linear in `∂²(g₁−g₂)`. -/
 
 /-- The **principal symbol of the second-order-part difference**: the part of
 `chartRicciSecondOrderTerm g₁ − chartRicciSecondOrderTerm g₂` carrying the second
@@ -372,15 +338,6 @@ theorem ricciDiffPrincipalSymbol_eq_invGram_weighted_d2_gram_diff
     simp only [gramBracketDeriv]
     ring
 
-/-! ## The affine decomposition of the second-order-part difference
-
-We Leibniz-expand each `∂Γ` difference via `partialDeriv_chartChristoffel_eq`, and
-collect the `g₂`-inverse-Gram-weighted `gramBracketDeriv`-difference branch into the
-principal symbol.  The complementary terms — the inverse-Gram-derivative branches,
-the `gramBracket`-difference branches, and the cross terms — each carry at most one
-chart derivative of `g₁−g₂` (or none of `g₁−g₂` at all), so they form the
-first-order remainder. -/
-
 /-- The **first-order remainder of the second-order-part difference**: everything in
 `chartRicciSecondOrderTerm g₁ − chartRicciSecondOrderTerm g₂` except the principal
 `∂²(g₁−g₂)` symbol.  It is defined as the literal complement
@@ -409,18 +366,6 @@ theorem chartRicciSecondOrderTerm_sub_eq_principalSymbol_add_remainder
   rw [chartRicciDiffFirstOrderRemainder]
   ring
 
-/-! ## The chart Ricci difference, fully decomposed
-
-Combining the second-order/first-order split with the affine decomposition of the
-second-order-part difference gives the full chart Ricci-difference decomposition:
-```
-Rc(g₁)_{ik} − Rc(g₂)_{ik} = [principal: linear in ∂²(g₁−g₂)]
-                            + [second-order-part first-order remainder]
-                            + [Γ·Γ-part difference].
-```
-The last two summands are first-order in `(g₁−g₂)` (one chart derivative or none of
-`g₁−g₂`). -/
-
 /-- **Full affine-in-`∂²(g₁−g₂)` decomposition of the chart Ricci difference.**  At
 every chart-coordinate point, the chart-frame scalar Ricci difference splits as the
 principal symbol `ricciDiffPrincipalSymbol` (genuinely linear in `∂²(g₁−g₂)`) plus
@@ -437,8 +382,6 @@ theorem chartRicciTensor_sub_eq_principalSymbol_add_lowerOrder
       chartRicciTensor_eq_secondOrder_add_firstOrder (I := I) g₂ α i k y]
   have hsplit := chartRicciSecondOrderTerm_sub_eq_principalSymbol_add_remainder
     (I := I) g₁ g₂ α i k y
-  -- (S₁ + F₁) − (S₂ + F₂) = (S₁ − S₂) + (F₁ − F₂)
-  --   = (Symbol + Rem) + (F₁ − F₂).
   rw [show chartRicciSecondOrderTerm (I := I) g₁ α i k y +
             chartRicciFirstOrderTerm (I := I) g₁ α i k y -
           (chartRicciSecondOrderTerm (I := I) g₂ α i k y +
@@ -450,16 +393,6 @@ theorem chartRicciTensor_sub_eq_principalSymbol_add_lowerOrder
   rw [hsplit]
   ring
 
-/-! ## Per-point bounds on the three pieces of the Ricci difference
-
-Each of the three pieces of the chart Ricci-difference decomposition is bounded by a
-uniform constant times the appropriate chart-jet difference seminorm:
-* the `∂Γ`-difference second-order part by the chart `2`-jet seminorm (via the
-  Christoffel-derivative Lipschitz atom);
-* the `Γ·Γ`-difference first-order part by the chart `1`-jet seminorm (via the
-  Christoffel Lipschitz atom and uniform Christoffel bounds).
-Summing gives the chart `2`-jet bound on the full Ricci difference. -/
-
 /-- Uniform bound on the chart Christoffel symbols over a compact subset `K` of the
 chart-target interior. -/
 private lemma exists_chartChristoffel_bound_on_compact
@@ -468,14 +401,11 @@ private lemma exists_chartChristoffel_bound_on_compact
     ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ K, ∀ i j k : Fin (Module.finrank ℝ E),
       |chartChristoffel (I := I) g α i j k y| ≤ C := by
   classical
-  -- Each `chartChristoffel g α i j k` is `C^∞` on the chart-target interior, being a
-  -- finite sum of products of inverse-Gram entries and metric first partials.
   have hsmooth : ∀ p : ((Fin (Module.finrank ℝ E)) × (Fin (Module.finrank ℝ E))) ×
         (Fin (Module.finrank ℝ E)),
       ContDiffOn ℝ ∞ (chartChristoffel (I := I) g α p.1.1 p.1.2 p.2)
         (interior (extChartAt I α).target) := by
     intro p
-    -- `Γ^k_{ij} = ½ ∑_l G^{kl} · S_{ij,l}`.
     have heq : chartChristoffel (I := I) g α p.1.1 p.1.2 p.2 =
         fun y : E => (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
           chartInvGramOnE (I := I) g α p.2 l y *
@@ -486,7 +416,6 @@ private lemma exists_chartChristoffel_bound_on_compact
     refine ContDiffOn.mul contDiffOn_const ?_
     refine ContDiffOn.sum (fun l _ => ?_)
     refine ContDiffOn.mul ((chartInvGramOnE_contDiffOn (I := I) g α p.2 l).mono interior_subset) ?_
-    -- `gramBracket` is `C^∞` on the interior.
     refine ContDiffOn.sub (ContDiffOn.add ?_ ?_) ?_
     · exact partial_chartGramOnE_contDiffOn_int' (I := I) g α p.1.1 l p.1.2
     · exact partial_chartGramOnE_contDiffOn_int' (I := I) g α p.1.2 l p.1.1
@@ -517,12 +446,10 @@ theorem chartRicciSecondOrderTerm_sub_abs_le
   rw [chartRicciSecondOrderTerm, chartRicciSecondOrderTerm, ← Finset.sum_sub_distrib]
   set jet2 : ℝ := chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y with hjet2_def
   have hjet2_nn : 0 ≤ jet2 := chartMetricJet2DiffSup_nonneg _ _ _ _
-  -- `|∑_j ((∂_j Γ₁ − ∂_k Γ₁) − (∂_j Γ₂ − ∂_k Γ₂))| ≤ ∑_j (2·Cdiff·jet2) = n·2·Cdiff·jet2`.
   refine le_trans (Finset.abs_sum_le_sum_abs _ _) ?_
   refine le_trans (Finset.sum_le_sum
     (g := fun _ : Fin (Module.finrank ℝ E) => 2 * Cdiff * jet2) (fun j _ => ?_)) ?_
-  · -- Per-`j` bound: triangle on the two `∂Γ` differences.
-    have hjk :
+  · have hjk :
         (partialDeriv (E := E) j (chartChristoffel (I := I) g₁ α i k j) y -
             partialDeriv (E := E) k (chartChristoffel (I := I) g₁ α i j j) y) -
           (partialDeriv (E := E) j (chartChristoffel (I := I) g₂ α i k j) y -
@@ -569,11 +496,6 @@ theorem chartRicciFirstOrderTerm_sub_abs_le
   rw [chartRicciFirstOrderTerm, chartRicciFirstOrderTerm, ← Finset.sum_sub_distrib]
   set jet1 : ℝ := chartMetricJet1DiffSup (I := I) (M := M) g₁ g₂ α y with hjet1_def
   have hjet1_nn : 0 ≤ jet1 := chartMetricJet1DiffSup_nonneg _ _ _ _
-  -- Per-`j` inner double sum: each of two product-difference groups is bounded by
-  -- `n · (2·Clip·Mg·jet1)`, so the inner sum is bounded by `n · (4·Clip·Mg·jet1)`.
-  -- Outer `j`-sum gives `n² · (4·Clip·Mg·jet1)`.
-  -- Helper: `|A₁B₁ − A₂B₂| ≤ |A₁−A₂||B₁| + |A₂||B₁−B₂| ≤ 2·Clip·Mg·jet1` whenever
-  -- the two factors are Christoffel symbols.
   have hprod : ∀ a₁ a₂ a₃ a₄ a₅ a₆ : Fin (Module.finrank ℝ E),
       |chartChristoffel (I := I) g₁ α a₁ a₂ a₃ y *
             chartChristoffel (I := I) g₁ α a₄ a₅ a₆ y -
@@ -598,7 +520,6 @@ theorem chartRicciFirstOrderTerm_sub_abs_le
           add_le_add (mul_le_mul hA hB₁ (abs_nonneg _) (mul_nonneg hClip_nn hjet1_nn))
             (mul_le_mul hA₂ hB (abs_nonneg _) hMg_nn)
       _ = 2 * Clip * Mg * jet1 := by ring
-  -- Inner-`m` bound for a fixed `j`.
   have hinner : ∀ j : Fin (Module.finrank ℝ E),
       |∑ m : Fin (Module.finrank ℝ E),
           ((chartChristoffel (I := I) g₁ α j m j y *
@@ -614,8 +535,7 @@ theorem chartRicciFirstOrderTerm_sub_abs_le
     refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
     refine le_trans (Finset.sum_le_sum
       (g := fun _ : Fin (Module.finrank ℝ E) => 4 * Clip * Mg * jet1) (fun m _ => ?_)) ?_
-    · -- Triangle into two product-differences.
-      have hrearr :
+    · have hrearr :
           (chartChristoffel (I := I) g₁ α j m j y *
                 chartChristoffel (I := I) g₁ α i k m y -
               chartChristoffel (I := I) g₁ α k m j y *
@@ -647,13 +567,11 @@ theorem chartRicciFirstOrderTerm_sub_abs_le
           ≤ 2 * Clip * Mg * jet1 + 2 * Clip * Mg * jet1 := add_le_add h1 h2
         _ = 4 * Clip * Mg * jet1 := by ring
     · simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, le_refl]
-  -- Outer `j`-sum.
   refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
   refine le_trans (Finset.sum_le_sum
     (g := fun _ : Fin (Module.finrank ℝ E) =>
       (Module.finrank ℝ E : ℝ) * (4 * Clip * Mg * jet1)) (fun j _ => ?_)) ?_
-  · -- Reorganise the inner sum-of-differences into a difference-of-products sum.
-    have hreorg : ∀ j : Fin (Module.finrank ℝ E),
+  · have hreorg : ∀ j : Fin (Module.finrank ℝ E),
         ((∑ m : Fin (Module.finrank ℝ E),
             (chartChristoffel (I := I) g₁ α j m j y *
                 chartChristoffel (I := I) g₁ α i k m y -
@@ -692,8 +610,6 @@ theorem chartRicciFirstOrderTerm_sub_abs_le
           (Module.finrank ℝ E : ℝ) *
             ((Module.finrank ℝ E : ℝ) * (4 * Clip * Mg * jet1)) by ring]
 
-/-! ## Uniform-over-compact Ricci-difference headline -/
-
 /-- **Uniform Lipschitz dependence of the chart Ricci tensor on the chart `2`-jet of
 the metric difference, over a compact subset of the chart-target interior.**
 
@@ -720,11 +636,8 @@ theorem exists_chartRicciTensor_lipschitz_on_compact
       |chartRicciTensor (I := I) g₁ α i k y - chartRicciTensor (I := I) g₂ α i k y| ≤
         C * chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y := by
   classical
-  -- Christoffel Lipschitz constant `Clip` on `K` (against the `1`-jet).
   obtain ⟨Clip, hClip_pos, hClip⟩ :=
     exists_chartChristoffel_lipschitz_on_compact (I := I) (M := M) g₁ g₂ α hK hKsub
-  -- Christoffel-derivative Lipschitz constant per direction `m`; take the max over
-  -- the finitely many directions.
   have hCdiff_each : ∀ m : Fin (Module.finrank ℝ E),
       ∃ C : ℝ, 0 < C ∧ ∀ y ∈ K, ∀ i j k : Fin (Module.finrank ℝ E),
         |partialDeriv (E := E) m (chartChristoffel (I := I) g₁ α i j k) y -
@@ -736,12 +649,10 @@ theorem exists_chartRicciTensor_lipschitz_on_compact
   have hCdiff_nn : 0 ≤ Cdiff :=
     le_trans (hCm_pos (Classical.arbitrary _)).le
       (Finset.le_sup' Cm (Finset.mem_univ (Classical.arbitrary _)))
-  -- Uniform Christoffel bounds for `g₁, g₂` on `K`; combine into a single `Mg`.
   obtain ⟨Mg1, hMg1_nn, hMg1⟩ := exists_chartChristoffel_bound_on_compact (I := I) g₁ α hK hKsub
   obtain ⟨Mg2, hMg2_nn, hMg2⟩ := exists_chartChristoffel_bound_on_compact (I := I) g₂ α hK hKsub
   set Mg : ℝ := max Mg1 Mg2 with hMg_def
   have hMg_nn : 0 ≤ Mg := le_max_of_le_left hMg1_nn
-  -- The constant: 2nC_diff (second order) + 4n²·Clip·Mg (first order), bumped by 1.
   refine ⟨2 * (Module.finrank ℝ E : ℝ) * Cdiff +
       4 * (Module.finrank ℝ E : ℝ) ^ 2 * Clip * Mg + 1, ?_, ?_⟩
   · have h1 : 0 ≤ 2 * (Module.finrank ℝ E : ℝ) * Cdiff := by positivity
@@ -755,7 +666,6 @@ theorem exists_chartRicciTensor_lipschitz_on_compact
   have hjet1_le_jet2 : chartMetricJet1DiffSup (I := I) (M := M) g₁ g₂ α y ≤
       chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y :=
     chartMetricJet1DiffSup_le_jet2 (I := I) (M := M) g₁ g₂ α y
-  -- Christoffel-derivative Lipschitz with the common constant `Cdiff`.
   have hCdiff : ∀ m i j k : Fin (Module.finrank ℝ E),
       |partialDeriv (E := E) m (chartChristoffel (I := I) g₁ α i j k) y -
           partialDeriv (E := E) m (chartChristoffel (I := I) g₂ α i j k) y| ≤
@@ -763,25 +673,21 @@ theorem exists_chartRicciTensor_lipschitz_on_compact
     intro m i' j' k'
     refine (hCm m y hy i' j' k').trans ?_
     exact mul_le_mul_of_nonneg_right (Finset.le_sup' Cm (Finset.mem_univ m)) hjet2_nn
-  -- Christoffel Lipschitz on this `y`.
   have hClip' : ∀ i j k : Fin (Module.finrank ℝ E),
       |chartChristoffel (I := I) g₁ α i j k y -
           chartChristoffel (I := I) g₂ α i j k y| ≤
         Clip * chartMetricJet1DiffSup (I := I) (M := M) g₁ g₂ α y :=
     fun i' j' k' => hClip y hy i' j' k'
-  -- Common Christoffel bound.
   have hMg1' : ∀ i j k : Fin (Module.finrank ℝ E),
       |chartChristoffel (I := I) g₁ α i j k y| ≤ Mg :=
     fun i' j' k' => (hMg1 y hy i' j' k').trans (le_max_left _ _)
   have hMg2' : ∀ i j k : Fin (Module.finrank ℝ E),
       |chartChristoffel (I := I) g₂ α i j k y| ≤ Mg :=
     fun i' j' k' => (hMg2 y hy i' j' k').trans (le_max_right _ _)
-  -- Bound the two pieces and combine via the second-order/first-order split.
   have h2nd := chartRicciSecondOrderTerm_sub_abs_le (I := I) (M := M) g₁ g₂ α
     hCdiff i k
   have h1st := chartRicciFirstOrderTerm_sub_abs_le (I := I) (M := M) g₁ g₂ α
     hClip_pos.le hMg_nn hClip' hMg1' hMg2' i k
-  -- The chart Ricci difference is the sum of the two part differences.
   have hsplit :
       chartRicciTensor (I := I) g₁ α i k y - chartRicciTensor (I := I) g₂ α i k y =
         (chartRicciSecondOrderTerm (I := I) g₁ α i k y -
@@ -794,7 +700,6 @@ theorem exists_chartRicciTensor_lipschitz_on_compact
   rw [hsplit]
   refine (abs_add_le _ _).trans ?_
   set jet2 : ℝ := chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y with hjet2_def
-  -- Bound the first-order piece's `jet1` against `jet2`.
   have h1st' : |chartRicciFirstOrderTerm (I := I) g₁ α i k y -
         chartRicciFirstOrderTerm (I := I) g₂ α i k y| ≤
       4 * (Module.finrank ℝ E : ℝ) ^ 2 * Clip * Mg * jet2 := by

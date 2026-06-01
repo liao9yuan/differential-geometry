@@ -53,8 +53,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## The connection-difference tensor -/
-
 /-- The **connection-difference tensor** of two smooth Riemannian metrics `g` and `g'`.
 
 It is the difference of their Levi-Civita covariant derivatives, packaged by
@@ -84,8 +82,6 @@ theorem connDiff_apply (g g' : SmoothRiemannianMetric I M)
     (LeviCivita (I := I) g).isCovariantDerivativeOnUniv
     (LeviCivita (I := I) g').isCovariantDerivativeOnUniv
     (x := x) (mem_univ x) (σ := σ) hσ
-  -- `h : difference _ _ x (σ x) = (LeviCivita g) σ x - (LeviCivita g') σ x`.
-  -- `CovariantDerivative.difference` is definitionally the unbundled `difference`.
   simp only [connDiff, CovariantDerivative.difference]
   rw [h]
   rfl
@@ -97,30 +93,19 @@ theorem connDiff_self (g : SmoothRiemannianMetric I M) :
     connDiff (I := I) g g = 0 := by
   classical
   funext x
-  -- It suffices to check the bilinear map at every pair of arguments.
   apply ContinuousLinearMap.ext
   intro w
   apply ContinuousLinearMap.ext
   intro v
-  -- Realise `w` as the value at `x` of a smooth global tangent section.
   obtain ⟨σ, hσx⟩ := ContMDiffSection.exists_eq_at (I := I) (n := (⊤ : ℕ∞))
     (F := E) (V := (TangentSpace I : M → Type _)) x w
   have hσ : MDiffAt (T% fun y => σ y) x := σ.mdifferentiableAt
-  -- Rewrite `w` as `σ x` and apply the evaluation formula.
   have hval : connDiff (I := I) g g x (σ x) v =
       (LeviCivita (I := I) g).toFun (fun y => σ y) x v -
         (LeviCivita (I := I) g).toFun (fun y => σ y) x v :=
     connDiff_apply (I := I) g g hσ v
   rw [sub_self] at hval
   simpa [hσx] using hval
-
-/-! ## Smoothness of the connection-difference tensor on vector fields
-
-The connection-difference tensor, applied to two vector fields, returns a vector field.
-We record that this output is smooth whenever the inputs are.  The differentiated slot
-is fed to the Levi-Civita covariant derivatives — whose `C^∞` instances require a
-globally smooth section — while the direction slot is fed pointwise as a vector, so it
-may be merely smooth on an open set. -/
 
 /-- The Levi-Civita covariant derivative of a globally smooth tangent vector field is a
 globally smooth section of the endomorphism bundle `Hom(TM, TM)`.
@@ -161,10 +146,8 @@ theorem connDiff_contMDiff (g g' : SmoothRiemannianMetric I M)
       (fun x : M =>
         (⟨x, connDiff (I := I) g g' x (σ x) (τ x)⟩ :
           TotalSpace E (TangentSpace I))) := by
-  -- Smoothness of each Levi-Civita covariant derivative of `σ` as a `Hom(TM, TM)`-section.
   have hcovg := leviCivita_section_contMDiff (I := I) g hσ
   have hcovg' := leviCivita_section_contMDiff (I := I) g' hσ
-  -- Apply each `Hom(TM, TM)`-section to the direction field `τ`.
   have hg : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M =>
         (TotalSpace.mk' E (E := fun y : M => TangentSpace I y) x
@@ -175,14 +158,10 @@ theorem connDiff_contMDiff (g g' : SmoothRiemannianMetric I M)
         (TotalSpace.mk' E (E := fun y : M => TangentSpace I y) x
           ((LeviCivita (I := I) g').toFun σ x (τ x)))) :=
     ContMDiff.clm_bundle_apply (b := id) hcovg' hτ
-  -- The difference of the two smooth vector fields is smooth.
   have hdiff := hg.sub_section hg'
-  -- Rewrite the difference field to `connDiff g g' · (σ ·) (τ ·)` via the evaluation formula.
   refine hdiff.congr (fun x => ?_)
   have hσ_at : MDiffAt (T% σ) x := (hσ x).mdifferentiableAt (by simp)
   have hval := connDiff_apply (I := I) g g' hσ_at (τ x)
-  -- Goal: `⟨x, connDiff g g' x (σ x) (τ x)⟩ = ⟨x, (F - G) x⟩`; section subtraction
-  -- unfolds pointwise to the fibrewise difference, then `connDiff_apply` closes it.
   change (⟨x, connDiff (I := I) g g' x (σ x) (τ x)⟩ : TotalSpace E (TangentSpace I)) =
       ⟨x, ((fun y => (LeviCivita (I := I) g).toFun σ y (τ y)) -
         (fun y => (LeviCivita (I := I) g').toFun σ y (τ y))) x⟩
@@ -205,11 +184,8 @@ theorem connDiff_contMDiffOn (g g' : SmoothRiemannianMetric I M)
       (fun x : M =>
         (⟨x, connDiff (I := I) g g' x (σ x) (τ x)⟩ :
           TotalSpace E (TangentSpace I))) U := by
-  -- Smoothness of each Levi-Civita covariant derivative of `σ` as a `Hom(TM, TM)`-section,
-  -- restricted to the open set `U`.
   have hcovg := (leviCivita_section_contMDiff (I := I) g hσ).contMDiffOn (s := U)
   have hcovg' := (leviCivita_section_contMDiff (I := I) g' hσ).contMDiffOn (s := U)
-  -- Apply each `Hom(TM, TM)`-section to the direction field `τ` on `U`.
   have hg : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M =>
         (TotalSpace.mk' E (E := fun y : M => TangentSpace I y) x
@@ -220,9 +196,7 @@ theorem connDiff_contMDiffOn (g g' : SmoothRiemannianMetric I M)
         (TotalSpace.mk' E (E := fun y : M => TangentSpace I y) x
           ((LeviCivita (I := I) g').toFun σ x (τ x)))) U :=
     ContMDiffOn.clm_bundle_apply (b := id) hcovg' hτ
-  -- The difference of the two `U`-smooth vector fields is `U`-smooth.
   have hdiff := hg.sub_section hg'
-  -- Rewrite the difference field to `connDiff g g' · (σ ·) (τ ·)` via the evaluation formula.
   refine hdiff.congr (fun x _hx => ?_)
   have hσ_at : MDiffAt (T% σ) x := (hσ x).mdifferentiableAt (by simp)
   have hval := connDiff_apply (I := I) g g' hσ_at (τ x)

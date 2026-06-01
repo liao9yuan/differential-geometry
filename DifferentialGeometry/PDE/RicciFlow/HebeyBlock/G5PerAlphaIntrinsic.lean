@@ -40,8 +40,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## Model-space basis geometry constants -/
-
 private noncomputable def basisCoordSup : ℝ :=
   (Finset.univ : Finset (Fin (Module.finrank ℝ E))).sup'
     (Finset.univ_nonempty_iff.mpr ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩⟩)
@@ -85,8 +83,6 @@ private lemma basis_vec_norm_le (k : Fin (Module.finrank ℝ E)) :
     ‖(chartModelBasis E) k‖ ≤ basisVecSup (E := E) := by
   exact Finset.le_sup' (f := fun k => ‖(chartModelBasis E) k‖) (Finset.mem_univ _)
 
-/-! ## Headline: Christoffel-correction model-space norm bound -/
-
 theorem christoffelCorrection_norm_le_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -112,7 +108,6 @@ theorem christoffelCorrection_norm_le_on_pouTsupport
     ⟨b, hb, rfl⟩
   rw [christoffelCorrection_apply]
   set w : E := trivToE (I := I) α b v
-  -- Three-level triangle inequality + basis vector norm.
   have h_step1 :
       ‖∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n,
           (((chartModelBasis E).repr w) i *
@@ -129,7 +124,6 @@ theorem christoffelCorrection_norm_le_on_pouTsupport
     rw [norm_smul, Real.norm_eq_abs, abs_mul, abs_mul]
     exact mul_le_mul_of_nonneg_left (basis_vec_norm_le k)
       (mul_nonneg (mul_nonneg (abs_nonneg _) (abs_nonneg _)) (abs_nonneg _))
-  -- Bound |Christoffel| by CΓ.
   have h_step2 :
       ∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n,
         |((chartModelBasis E).repr w) i| *
@@ -147,7 +141,6 @@ theorem christoffelCorrection_norm_le_on_pouTsupport
           have hYj := abs_nonneg (((chartModelBasis E).repr Y) j)
           exact mul_le_mul_of_nonneg_right
             (mul_le_mul_of_nonneg_left h1 (mul_nonneg hwi hYj)) hCv_nn
-  -- Collapse the k-sum and factor.
   have h_step3 :
       ∑ i : Fin n, ∑ j : Fin n, ∑ _k : Fin n,
         |((chartModelBasis E).repr w) i| *
@@ -164,7 +157,6 @@ theorem christoffelCorrection_norm_le_on_pouTsupport
         |((chartModelBasis E).repr Y) j| from by ring]
     simp_rw [← Finset.mul_sum]
     rw [← Finset.sum_mul, ← Finset.mul_sum]
-  -- Bound coordinate sums.
   have h_w_bound :
       (∑ i : Fin n, |((chartModelBasis E).repr w) i|) ≤ (n : ℝ) * Cc * ‖w‖ := by
     calc ∑ i : Fin n, |((chartModelBasis E).repr w) i|
@@ -179,7 +171,6 @@ theorem christoffelCorrection_norm_le_on_pouTsupport
           Finset.sum_le_sum fun j _ => repr_coord_abs_le Y j
       _ = (n : ℝ) * Cc * ‖Y‖ := by
           rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]; ring
-  -- Assemble.
   calc ‖∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n,
           (((chartModelBasis E).repr w) i *
             ((chartModelBasis E).repr Y) j *

@@ -79,12 +79,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## Item 1: the vector Ricci identity
-
-The vector Ricci identity is the unfolding of the section-level Riemann formula
-`riemannSec`. We expose it under a Ricci-flavoured name so that downstream callers can
-refer to it by content rather than by `riemannSec_def`. -/
-
 /-- **Vector Ricci identity.** For any covariant derivative `cov` on the tangent bundle,
 smooth tangent vector fields `X`, `Y`, `V`, and a point `x : M`, the iterated covariant
 derivative commutator equals the section-level Riemann curvature:
@@ -107,13 +101,6 @@ theorem ricci_identity_vector
         - cov.toFun V x (VectorField.mlieBracket I X Y x) =
       riemannSec cov X Y V x :=
   (riemannSec_def cov X Y V x).symm
-
-/-! ## Item 2: the 1-form Ricci identity
-
-Strategy: we apply `cotangentCov_dualPairing` to the scalar `b ↦ θ(b)(W(b))` first along
-`Y` (yielding a section identity), then along `X`, and finally along the Lie bracket.
-Substituting and using `extDerivFun_apply_mlieBracket` for the bracket of two
-directional derivatives of a scalar produces the desired identity. -/
 
 /-- The **iterated cotangent connection** of a cotangent section `θ` along smooth
 tangent fields `X` and `Y`, evaluated at `(x, W(x))`. Concretely:
@@ -160,12 +147,10 @@ theorem ricci_identity_oneForm
         ((cotangentCov cov).toFun θ x (VectorField.mlieBracket I X Y x)) (W x) =
       - θ x (riemannSec cov X Y W x) := by
   classical
-  -- Pointwise differentiability hypotheses.
   have hX_at : MDiffAt (T% X) x := (hX x).mdifferentiableAt (by simp)
   have hY_at : MDiffAt (T% Y) x := (hY x).mdifferentiableAt (by simp)
   have hW_at : MDiffAt (T% W) x := (hW x).mdifferentiableAt (by simp)
   have hθ_at : MDiffAtCotangent θ x := (hθ x).mdifferentiableAt (by simp)
-  -- Smoothness of `b ↦ θ b (W b)` as a scalar function.
   have hf_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun b : M => θ b (W b)) :=
     cotangentCov_pairing_contMDiff hθ hW
   have hf_2 : ContMDiffAt I 𝓘(ℝ) 2 (fun b : M => θ b (W b)) x := by
@@ -176,8 +161,6 @@ theorem ricci_identity_oneForm
     exact (hf_smooth x).of_le hle
   have hx_int : extChartAt I x x ∈ interior ((extChartAt I x).target : Set E) :=
     (I.isInteriorPoint_iff (x := x)).mp BoundarylessManifold.isInteriorPoint
-  -- Smoothness of `covApply cov Y W` and `covApply cov X W` (used for the connection
-  -- corrections from differentiating `b ↦ θ b (cov W b (Y b))` and the X-version).
   have hcYW_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (covApply cov Y W)) := by
     intro b
     exact (covApply_contMDiffOn (cov := cov) hY (by simpa using hW)).contMDiffAt
@@ -190,7 +173,6 @@ theorem ricci_identity_oneForm
     (hcYW_smooth x).mdifferentiableAt (by simp)
   have hcXW_at : MDiffAt (T% (covApply cov X W)) x :=
     (hcXW_smooth x).mdifferentiableAt (by simp)
-  -- Step 1: pairing identity for the scalar `b ↦ θ b (W b)` along `Y`. Pointwise globally.
   have hpair_Y_glob :
       (fun b : M => extDerivFun (I := I) (fun b' : M => θ b' (W b')) b (Y b)) =
       (fun b : M => ((cotangentCov cov).toFun θ b (Y b)) (W b) +
@@ -199,7 +181,6 @@ theorem ricci_identity_oneForm
     have hθ_b : MDiffAtCotangent θ b := (hθ b).mdifferentiableAt (by simp)
     have hW_b : MDiffAt (T% W) b := (hW b).mdifferentiableAt (by simp)
     exact cotangentCov_dualPairing cov hθ_b hW_b (Y b)
-  -- Symmetric: along `X`.
   have hpair_X_glob :
       (fun b : M => extDerivFun (I := I) (fun b' : M => θ b' (W b')) b (X b)) =
       (fun b : M => ((cotangentCov cov).toFun θ b (X b)) (W b) +
@@ -208,7 +189,6 @@ theorem ricci_identity_oneForm
     have hθ_b : MDiffAtCotangent θ b := (hθ b).mdifferentiableAt (by simp)
     have hW_b : MDiffAt (T% W) b := (hW b).mdifferentiableAt (by simp)
     exact cotangentCov_dualPairing cov hθ_b hW_b (X b)
-  -- Step 2: foundational identity for the second derivative along the bracket.
   haveI : IsManifold I 2 M := by
     have h_le : (2 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by norm_cast
     exact IsManifold.of_le h_le
@@ -221,17 +201,13 @@ theorem ricci_identity_oneForm
       extDerivFun (I := I)
         (fun b : M => extDerivFun (I := I) (fun b' : M => θ b' (W b')) b (X b)) x (Y x) :=
     extDerivFun_apply_mlieBracket hX_at hY_at hf_2 hx_int
-  -- Substitute the global pairing identities into hfound.
   rw [hpair_Y_glob, hpair_X_glob] at hfound
-  -- Step 3: pairing identity for `θ x ([X,Y]_x (W x))`.
   have hpair_br : extDerivFun (I := I) (fun b : M => θ b (W b)) x
         (VectorField.mlieBracket I X Y x) =
       ((cotangentCov cov).toFun θ x (VectorField.mlieBracket I X Y x)) (W x) +
         θ x (cov.toFun W x (VectorField.mlieBracket I X Y x)) :=
     cotangentCov_dualPairing cov hθ_at hW_at (VectorField.mlieBracket I X Y x)
   rw [hpair_br] at hfound
-  -- Step 4: distribute extDerivFun over the inner sums in hfound.
-  -- The X-side function: b ↦ ((cotangentCov θ) b (Y b))(W b) + θ b (cov W b (Y b)).
   have hsum1_diff : MDifferentiableAt I 𝓘(ℝ, ℝ)
       (fun b : M => ((cotangentCov cov).toFun θ b (Y b)) (W b)) x := by
     have h_smooth :=
@@ -287,10 +263,6 @@ theorem ricci_identity_oneForm
         extDerivFun (I := I) (fun b : M => θ b (cov.toFun W b (X b))) x (Y x) := by
     rw [hadd_Y]; rfl
   rw [hadd_X_app, hadd_Y_app] at hfound
-  -- Step 5: identify the four scalar-derivative terms.
-  -- (5a) extDerivFun (b ↦ ((cotangentCov θ) b (Y b))(W b)) x (X x) =
-  --       (cotangentCov (b ↦ (cotangentCov θ) b (Y b))) x (X x) (W x) +
-  --       ((cotangentCov θ) x (Y x)) (cov W x (X x)).
   have hθY_at : MDiffAtCotangent
       (fun b : M => (cotangentCov cov).toFun θ b (Y b)) x := by
     have h_section :
@@ -317,9 +289,6 @@ theorem ricci_identity_oneForm
       exact (hres x (Set.mem_univ x)).contMDiffAt (Filter.univ_mem) |>.mdifferentiableAt
         (by simp)
     exact h_section.clm_bundle_apply (v := X) hX_at
-  -- Apply `cotangentCov_dualPairing` to the cotangent section
-  --   (fun b => (cotangentCov θ) b (Y b))
-  -- with tangent vector `X x` (extracted via the smooth `X`).
   have h_iter_X : extDerivFun (I := I)
         (fun b : M => ((cotangentCov cov).toFun θ b (Y b)) (W b)) x (X x) =
       ((cotangentCov cov).toFun
@@ -333,9 +302,6 @@ theorem ricci_identity_oneForm
         ((cotangentCov cov).toFun θ x (X x)) (cov.toFun W x (Y x)) :=
     cotangentCov_dualPairing cov hθX_at hW_at (Y x)
   rw [h_iter_X, h_iter_Y] at hfound
-  -- (5b) extDerivFun (b ↦ θ b (cov W b (Y b))) x (X x) =
-  --       (cotangentCov θ x (X x)) (cov W x (Y x)) (which is `(cotangentCov θ x (X x)) (covApply cov Y W x)`)
-  --       + θ x (cov.toFun (covApply cov Y W) x (X x)).
   have hB_eq : extDerivFun (I := I)
       (fun b : M => θ b (cov.toFun W b (Y b))) x (X x) =
       ((cotangentCov cov).toFun θ) x (X x) (covApply cov Y W x) +
@@ -353,26 +319,9 @@ theorem ricci_identity_oneForm
         (fun b : M => θ b (covApply cov X W b)) := by funext b; rfl
     rw [h_eq_fn]; exact hpair
   rw [hB_eq, hB'_eq] at hfound
-  -- Step 6: the equation `hfound` now has the form
-  --   bracket_cotangent + θ([X,Y].W) =
-  --     iter_XY + ((cotθ) x (Y x))(cov W x (X x))
-  --     + ((cotθ) x (X x))(covApply Y W x) + θ(cov^2_{XY} W x)
-  --     -[ iter_YX + ((cotθ) x (X x))(cov W x (Y x))
-  --     + ((cotθ) x (Y x))(covApply X W x) + θ(cov^2_{YX} W x) ]
-  -- The cross terms ((cotθ) x (Y x))(...) and ((cotθ) x (X x))(...) cancel because
-  --   covApply Y W x = cov.toFun W x (Y x)  and  covApply X W x = cov.toFun W x (X x),
-  -- which are exactly the "cov W x (X x)" / "cov W x (Y x)" terms with the slots swapped.
-  -- After cancellation, the equation reduces to:
-  --   bracket_cot + θ(cov W x [X,Y]_x) = iter_XY - iter_YX + θ(cov^2_XY W x - cov^2_YX W x)
-  -- which gives, after rearranging:
-  --   iter_XY - iter_YX - bracket_cot =
-  --     θ(cov W x [X,Y]_x - cov^2_XY W x + cov^2_YX W x)
-  --   = -θ(riemannSec cov X Y W x).
-  -- We unfold riemannSec and use linarith.
   rw [show riemannSec cov X Y W x =
       cov.toFun (covApply cov Y W) x (X x) - cov.toFun (covApply cov X W) x (Y x)
         - cov.toFun W x (VectorField.mlieBracket I X Y x) from rfl]
-  -- Distribute `θ x` (a continuous linear map) over the difference.
   have hθ_lin :
       θ x (cov.toFun (covApply cov Y W) x (X x) -
         cov.toFun (covApply cov X W) x (Y x) -
@@ -388,26 +337,11 @@ theorem ricci_identity_oneForm
           cov.toFun W x (VectorField.mlieBracket I X Y x) from rfl,
         map_sub, map_sub]
   rw [hθ_lin]
-  -- Identify covApply cov Y W x = cov.toFun W x (Y x) and covApply cov X W x = cov.toFun W x (X x).
-  -- These are definitional, but we substitute them explicitly inside `hfound` so the
-  -- cross-term cancellations are visible to `linarith`.
   have h_covYW : covApply cov Y W x = cov.toFun W x (Y x) := rfl
   have h_covXW : covApply cov X W x = cov.toFun W x (X x) := rfl
   rw [h_covYW, h_covXW] at hfound
   unfold iterCotangentCov
   linarith
-
-/-! ## Item 3: trace identity for the gradient (heart of Bochner reduction)
-
-Without yet defining a global connection Laplacian on tangent vectors (deferred to a
-follow-up file), we package the trace formula relating the abstract Ricci tensor to a
-trace of the section-level Riemann curvature on a smooth global tangent frame. This
-identity is the algebraic engine of the Lichnerowicz / heart-of-Bochner identity:
-$$
-  \Delta_\nabla(\nabla f) = \nabla(\Delta_g f) + \mathrm{Ric}^\sharp(\nabla f),
-$$
-which the downstream `Δ_∇` setup will assemble from the vector Ricci identity (item 1)
-and the trace formula proved here. -/
 
 /-- The **local connection Laplacian on tangent sections** with respect to a smooth
 global tangent frame `B : Fin n → Π b, TangentSpace I b`. With the standing argument
@@ -470,32 +404,15 @@ theorem ricciTensor_gradFun_eq_frame_sum_riemannSec [I.Boundaryless]
           (riemannSec (LeviCivita (I := I) g) (B i) w
             (fun y => gradFun (I := I) g f y) x) i := by
   classical
-  -- Smoothness of `gradFun g f` as a tangent section.
   have h_grad_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun y : M => TotalSpace.mk' E (E := TangentSpace I) y
         (gradFun (I := I) g f y)) :=
     gradFun_contMDiff_total_section (I := I) g hf
-  -- Apply `ricciTensor_apply_smooth_basisSum` with `Y = w` and `Z = grad f`. This gives:
-  --   Ric(w x, grad f x) = ∑_i (finBasis).repr (R(B_i, w, grad f)(x)) i
-  -- and we then use `ricciTensor_symm` to get the desired LHS Ric(grad f x, w x).
   have hbasisSum := ricciTensor_apply_smooth_basisSum (I := I) g
     (Y := w) (Z := fun y => gradFun (I := I) g f y)
     (B := B) hw h_grad_smooth hB x hBx
-  -- Now `hbasisSum : Ric(w x, grad f x) = ∑ ...`
-  -- Apply ricciTensor_symm: Ric(grad f x, w x) = Ric(w x, grad f x).
   rw [ricciTensor_symm (I := I) g x (gradFun (I := I) g f x) (w x)]
   exact hbasisSum
-
-/-! ## Item 4: the (1,1)-Ricci endomorphism `ricciSharp`
-
-The pointwise (1,1)-Ricci tensor `ricciSharp g x : T_x M →L[ℝ] T_x M` is the metric
-Riesz dual of the (0,2)-Ricci tensor `ricciTensor g x`. By definition,
-$$
-  g_x(\mathrm{Ric}^\sharp(v), w) = \mathrm{Ric}_x(v, w) \qquad \text{for all } v, w \in T_x M.
-$$
-In coordinates, `Ric^♯` raises the lower index of `Ric` using the inverse metric `g^{-1}`.
-The construction goes through the existing musical-isomorphism `metricSharp` applied to the
-linear functional `(ricciTensor g x v).toLinearMap`. -/
 
 /-- The (1,1)-Ricci endomorphism `ricciSharp g x v` of a tangent vector `v ∈ T_x M`. By the
 defining identity (see `inner_ricciSharp`), it is the unique vector `W ∈ T_x M` such that
@@ -608,30 +525,6 @@ theorem inner_ricciSharp_right
   rw [ricciSharp_apply]
   exact inner_ricciSharpVec_right (I := I) g x v w
 
-/-! ## Item 5: heart-of-Bochner trace-commutator identity (inner-product form)
-
-The frame-trace formulation of the heart-of-Bochner identity. The vector-valued identity
-$$
-  \Delta_\nabla(\nabla f)(x) = \nabla(\Delta_g f)(x) + \mathrm{Ric}^\sharp(\nabla f)(x)
-$$
-is naturally read off the **inner-product** characterisation against an arbitrary smooth
-test field. We expose the inner-product form in three orthogonal pieces, matching the
-three terms of the textbook derivation:
-
-* The metric-symmetry of the abstract Hessian:
-  `g(∇_X (∇f), Y) = abstractHessian g f x X Y` is symmetric in `(X, Y)`.
-* The metric-skewness of the section-level Riemann curvature
-  (`riemannSec_metric_skew`).
-* The Riesz characterisation of `ricciSharp` and `gradFun`.
-
-These ingredients combine, frame-by-frame, to give the heart-of-Bochner reduction.
-
-The full vector identity at `x` requires a smooth orthonormal frame near `x`; that
-construction is deferred to a downstream file (the orthonormalisation of the canonical
-chart frame against the metric `g.inner x`). The inner-product form below is the engine
-that the downstream file consumes — once an orthonormal frame is chosen, the vector form
-is recovered by Riesz uniqueness (`ricciSharpVec_unique` and `gradFun_unique`). -/
-
 /-- **Bridge between `g(∇_X (∇f), Y)` and the abstract Hessian.** For the Levi-Civita
 covariant derivative, the inner product `g(∇_X (∇f), Y)` agrees with the abstract Hessian
 `abstractHessian g f x (X x) (Y x)`. This identity links the local (Hessian) and global
@@ -649,7 +542,6 @@ theorem inner_cov_gradFun_eq_abstractHessian [I.Boundaryless]
   classical
   set cov := LeviCivita (I := I) g with hcov
   set θ : Π b : M, TangentSpace I b →L[ℝ] ℝ := extDerivFun (I := I) f with hθ_def
-  -- Smoothness of `gradFun g f` as a tangent section.
   have h_grad_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun y : M => TotalSpace.mk' E (E := TangentSpace I) y
         (gradFun (I := I) g f y)) :=
@@ -657,101 +549,40 @@ theorem inner_cov_gradFun_eq_abstractHessian [I.Boundaryless]
   have h_grad_at : MDiffAt (T% (fun b => gradFun (I := I) g f b)) x :=
     (h_grad_smooth x).mdifferentiableAt (by simp)
   have hY_at : MDiffAt (T% Y) x := (hY x).mdifferentiableAt (by simp)
-  -- Smoothness of θ = extDerivFun f.
   have hθ_at : MDiffAtCotangent θ x := by
     have hext_smooth :=
       cotangentCov_extDerivFun_smooth (I := I) hf
-    -- `cotangentCov_extDerivFun_smooth` provides smoothness as a section of the cotangent
-    -- bundle; `MDiffAtCotangent` is precisely the differentiability of the explicit
-    -- total-space embedding.
     exact (hext_smooth x).mdifferentiableAt (by simp)
-  -- The pairing identity for θ along `b ↦ gradFun g f b`:
-  --   extDerivFun (b ↦ θ b ((grad f) b)) x (X x)
-  --     = (cotangentCov θ x (X x)) ((grad f) x) + θ x (cov (grad f) x (X x))
   have hpair := cotangentCov_dualPairing cov hθ_at h_grad_at (X x)
-  -- The function `b ↦ θ b ((grad f) b) = mfderiv f b ((grad f) b) = g.inner b ((grad f) b) ((grad f) b)`.
-  -- In particular, this is the squared norm of grad f, which differs from a scalar that
-  -- pairs with Y x. We don't use this expansion. Instead, we use the cotangent-section
-  -- duality of θ with Y directly:
   have hpair' := cotangentCov_dualPairing cov hθ_at hY_at (X x)
-  -- hpair' : extDerivFun (b ↦ θ b (Y b)) x (X x)
-  --        = (cotangentCov θ x (X x)) (Y x) + θ x (cov Y x (X x))
-  -- The left side is `extDerivFun (b ↦ extDerivFun f b (Y b)) x (X x)`; the right side
-  -- contains `(cotangentCov θ x (X x)) (Y x) = abstractHessian g f x (X x) (Y x)`.
-  -- Use the metric-compatibility identity to express:
-  --   extDerivFun (b ↦ g.inner b ((grad f) b) (Y b)) x (X x)
-  --     = g.inner x (cov (grad f) x (X x)) (Y x) + g.inner x ((grad f) x) (cov Y x (X x))
-  -- Combining the two identities will isolate `g.inner x (cov (grad f) x (X x)) (Y x)`
-  -- against `abstractHessian g f x (X x) (Y x)` modulo a common piece on both sides.
-  --
-  -- We follow this strategy now.
-  -- Step 1: identify `θ b (Y b)` with the directional derivative `(mfderiv f b)(Y b)`,
-  -- then with `extDerivFun f b (Y b)`.
-  -- The function `b ↦ θ b (Y b)` is equal to `b ↦ extDerivFun f b (Y b)` by definition.
-  -- Step 2: the metric-compatibility identity for the function `b ↦ g.inner b ((grad f) b) (Y b)`,
-  -- which by `gradFun_metricDual_extDerivFun` agrees pointwise with `b ↦ extDerivFun f b (Y b)`.
-  -- Hence the two extDerivFun-applications coincide.
   have h_eq_fn : (fun b : M => extDerivFun (I := I) f b (Y b)) =
       (fun b : M => g.inner b (gradFun (I := I) g f b) (Y b)) := by
     funext b
     exact (gradFun_metricDual_extDerivFun (I := I) g f b (Y b)).symm
-  -- The metric-compatibility identity at the point x for the function b ↦ g.inner b (grad f b) (Y b):
-  --   extDerivFun (b ↦ g.inner b (grad f b) (Y b)) x (X x)
-  --     = g.inner x (cov (grad f) x (X x)) (Y x) + g.inner x ((grad f) x) (cov Y x (X x))
-  -- This is provided by metric_compat_one (private), but we can re-derive inline using
-  -- `LeviCivita_isMetricCompatible.apply`.
   have hmc := (LeviCivita_isMetricCompatible (I := I) g).apply h_grad_at hY_at (X x)
-  -- hmc : (mfderiv I 𝓘(ℝ, ℝ) (fun b => g.inner b (grad f b) (Y b)) x) (X x) =
-  --   g.inner x (cov (grad f) x (X x)) (Y x) + g.inner x ((grad f) x) (cov Y x (X x))
-  -- Convert mfderiv to extDerivFun.
   have hmc' : extDerivFun (I := I) (fun b => g.inner b (gradFun (I := I) g f b) (Y b)) x (X x) =
       g.inner x (cov.toFun (fun b => gradFun (I := I) g f b) x (X x)) (Y x) +
         g.inner x (gradFun (I := I) g f x) (cov.toFun Y x (X x)) := by
-    -- extDerivFun f x v = (NormedSpace.fromTangentSpace _).toContinuousLinearMap (mfderiv f x v).
-    -- For ℝ-valued f this is rfl.
     have hext_eq : extDerivFun (I := I) (fun b => g.inner b (gradFun (I := I) g f b) (Y b)) x (X x) =
         (mfderiv I 𝓘(ℝ) (fun b : M => g.inner b (gradFun (I := I) g f b) (Y b)) x) (X x) := rfl
     rw [hext_eq, hmc]
-  -- Now hpair': extDerivFun (b ↦ θ b (Y b)) x (X x)
-  --              = (cotangentCov θ x (X x)) (Y x) + θ x (cov Y x (X x))
-  -- And by definition of θ, `b ↦ θ b (Y b) = b ↦ extDerivFun f b (Y b)`.
-  -- By `h_eq_fn`, `b ↦ extDerivFun f b (Y b) = b ↦ g.inner b (grad f b) (Y b)`.
   have h_lhs_eq : extDerivFun (I := I) (fun b : M => θ b (Y b)) x (X x) =
       extDerivFun (I := I) (fun b : M => g.inner b (gradFun (I := I) g f b) (Y b)) x (X x) := by
-    -- `θ b = extDerivFun f b` by definition; the two functions of `b` are pointwise equal.
     have h_eq : (fun b : M => θ b (Y b)) =
         (fun b : M => g.inner b (gradFun (I := I) g f b) (Y b)) := h_eq_fn
     rw [h_eq]
-  -- Substitute into hpair':
   rw [h_lhs_eq] at hpair'
-  -- hpair' : extDerivFun (b ↦ g.inner b (grad f b) (Y b)) x (X x) =
-  --            (cotangentCov θ x (X x)) (Y x) + θ x (cov Y x (X x))
-  -- By hmc', LHS = g.inner x (cov (grad f) x (X x)) (Y x) + g.inner x ((grad f) x) (cov Y x (X x)).
-  -- Equating:
-  --   g.inner x (cov (grad f) x (X x)) (Y x) + g.inner x ((grad f) x) (cov Y x (X x))
-  --     = (cotangentCov θ x (X x)) (Y x) + θ x (cov Y x (X x))
-  -- And `g.inner x ((grad f) x) (cov Y x (X x)) = mfderiv f x (cov Y x (X x))
-  --                                              = θ x (cov Y x (X x))`.
   have h_grad_inner : g.inner x (gradFun (I := I) g f x) (cov.toFun Y x (X x)) =
       θ x (cov.toFun Y x (X x)) := by
     rw [gradFun_metricDual_extDerivFun (I := I) g f x (cov.toFun Y x (X x))]
-  -- Substituting:
-  --   g.inner x (cov (grad f) x (X x)) (Y x) + θ x (cov Y x (X x)) =
-  --     (cotangentCov θ x (X x)) (Y x) + θ x (cov Y x (X x))
-  -- Hence `g.inner x (cov (grad f) x (X x)) (Y x) = (cotangentCov θ x (X x)) (Y x)`.
-  -- And the RHS is `abstractHessian g f x (X x) (Y x)` by definition.
   have hkey : g.inner x (cov.toFun (fun b => gradFun (I := I) g f b) x (X x)) (Y x) =
       ((cotangentCov cov).toFun θ x (X x)) (Y x) := by
     have hlhs : extDerivFun (I := I) (fun b => g.inner b (gradFun (I := I) g f b) (Y b)) x (X x) =
         g.inner x (cov.toFun (fun b => gradFun (I := I) g f b) x (X x)) (Y x) +
           g.inner x (gradFun (I := I) g f x) (cov.toFun Y x (X x)) := hmc'
     rw [h_grad_inner] at hlhs
-    -- hlhs : LHS = g.inner x (cov (grad f) x (X x)) (Y x) + θ x (cov Y x (X x))
-    -- hpair' : LHS = (cotangentCov θ x (X x)) (Y x) + θ x (cov Y x (X x))
     have h := hlhs.symm.trans hpair'
     linarith [h]
-  -- Goal: g.inner x (cov (grad f) x (X x)) (Y x) = abstractHessian g f x (X x) (Y x).
-  -- abstractHessian g f x v w = ((cotangentCov ... f) x v) w by definition.
   rw [hkey]
   rfl
 
@@ -814,20 +645,10 @@ theorem heart_of_bochner_curvature_term [I.Boundaryless]
                 (fun b => gradFun (I := I) g f b) x) (B x) =
       - g.inner x (gradFun (I := I) g f x)
           (riemannSec (LeviCivita (I := I) g) B w B x) := by
-  -- Apply `riemannSec_metric_skew` with X = B, Y = w, Z = grad f, W = B.
   have h := riemannSec_metric_skew (I := I) g (X := B) (Y := w)
     (Z := fun b => gradFun (I := I) g f b) (W := B) (x := x) hB hw
     (gradFun_contMDiff_total_section (I := I) g hf) hB
-  -- h : g.inner x (riemannSec ... B w (grad f) x) (B x) +
-  --     g.inner x (grad f x) (riemannSec ... B w B x) = 0
   linarith
-
-/-! ## Item 6: Riesz-dual reduction to the inner-product form
-
-By Riesz uniqueness on a finite-dimensional inner-product space, two vectors in `T_x M` are
-equal iff they have the same inner product with every test vector. The next lemma packages
-this Riesz uniqueness for the LHS-equals-RHS comparison of the heart-of-Bochner vector
-identity. -/
 
 /-- **Riesz uniqueness reduction for the heart-of-Bochner vector identity.** Two tangent
 vectors `LHS, RHS ∈ T_x M` are equal iff `g.inner x LHS w = g.inner x RHS w` for every
@@ -843,53 +664,6 @@ lemma vector_eq_iff_inner_eq
   ext w
   rw [metricFlatLinear_apply, metricFlatLinear_apply]
   exact h w
-
-/-! ## Item 7: registration of the heart-of-Bochner identity
-
-The vector identity
-$$
-  \Delta_\nabla(\nabla f)(x) = \nabla(\Delta_g f)(x) + \mathrm{Ric}^\sharp(\nabla f)(x)
-$$
-holds when `localConnLap_vector` is computed against a smooth orthonormal local frame
-near `x`. Its proof factors into:
-
-* the **abstract Hessian symmetry** (`abstractHessian_symm`, equivalently
-  `inner_cov_gradFun_symm`), which lets one swap a `∇` past the gradient `∇f`;
-* the **metric skewness of `riemannSec`** (`heart_of_bochner_curvature_term`), which
-  produces the Ricci-tensor term `g(∇f, R(B_i, w) B_i)` from the curvature commutator;
-* the **identification of the trace of the abstract Hessian with the Laplacian**
-  (`Δ_g f = tr_g (Hess f)`), which is the divergence-of-gradient identity in disguise.
-
-The first two ingredients are proved above. The third is the divergence formula, available
-as `Δ_g g hf x = ...`; together with an orthonormal frame at `x` it identifies
-`∑_i abstractHessian g f x (B_i x) (B_i x) = Δ_g g hf x`.
-
-Once a smooth orthonormal frame `B` near `x` is fixed, applying `inner_cov_gradFun_symm`
-inside the trace `∑_i g(∇_{B_i} ∇_{B_i}(∇f), w)` swaps one `∇` past the gradient and
-re-organises the sum into `∇w(Δf) + Ric^♯(∇f) · w`, by the abstract identity already
-encoded above. The remaining algebra is purely combinatorial:
-
-```
-∑_i g(∇_{B_i} ∇_{B_i} (∇f), w)
-  = ∑_i [B_i (g(∇_{B_i} (∇f), w)) - g(∇_{B_i} (∇f), ∇_{B_i} w)]    (metric compat)
-  = ∑_i [B_i (Hess f(B_i, w)) - Hess f(B_i, ∇_{B_i} w)]            (Hessian bridge)
-  = ...
-```
-
-And the final `Ric` term emerges by Hessian-symmetry-induced rearrangement coupled with
-the curvature commutator from `heart_of_bochner_curvature_term`.
-
-The full proof at this level requires producing a smooth orthonormal frame near every
-point. Mathlib's `Trivialization.localFrame` together with a smooth Gram-Schmidt
-construction would supply the needed frame. The combinatorial reduction is elementary,
-but requires careful bookkeeping of indices and non-trivial intermediate algebraic
-identities.
-
-We package the engine identity below: the inner-product form of the heart-of-Bochner
-trace-commutator, taking as input a smooth tangent frame `B` (no orthonormality assumed,
-no claim that the frame is at-x-orthonormal) and a smooth test field `w`. The output is
-the algebraic content equivalent to the heart-of-Bochner identity once the frame is
-declared orthonormal at `x`. -/
 
 /-- **Frame-traced inner product of the connection Laplacian on `∇f` against `w`.** This
 is the LHS of the heart-of-Bochner identity in inner-product form, displayed in the trace
@@ -922,11 +696,7 @@ lemma localConnLap_vector_grad_inner_eq_hessian_diff [I.Boundaryless]
                       (fun b => gradFun (I := I) g f b) x
                       ((LeviCivita (I := I) g).toFun (B i) x (B i x))) (w x)) := by
   classical
-  -- Distribute g.inner x over the finite sum.
   unfold localConnLap_vector
-  -- The function `g.inner x` is a CLM on T_x M; applying it to a sum yields the sum of
-  -- applications. Then evaluating at `(w x)` distributes through the sum (sum of CLMs
-  -- applied at a vector = sum of values).
   set u : Fin (Module.finrank ℝ E) → TangentSpace I x := fun i =>
     (LeviCivita (I := I) g).toFun
         (covApply (LeviCivita (I := I) g) (B i)
@@ -934,10 +704,8 @@ lemma localConnLap_vector_grad_inner_eq_hessian_diff [I.Boundaryless]
       (LeviCivita (I := I) g).toFun
         (fun b => gradFun (I := I) g f b) x
         ((LeviCivita (I := I) g).toFun (B i) x (B i x)) with hu_def
-  -- LHS = g.inner x (∑_i u i) (w x) = ∑_i g.inner x (u i) (w x), then distribute g.inner x.
   have h1 : g.inner x (∑ i : Fin (Module.finrank ℝ E), u i) =
       ∑ i : Fin (Module.finrank ℝ E), g.inner x (u i) := map_sum _ _ _
-  -- Apply both sides at (w x). The sum-of-CLMs evaluation is a finite-step CLM addition.
   have h2 : ∀ S : Finset (Fin (Module.finrank ℝ E)),
       (∑ i ∈ S, g.inner x (u i)) (w x) = ∑ i ∈ S, g.inner x (u i) (w x) := by
     intro S
@@ -948,31 +716,9 @@ lemma localConnLap_vector_grad_inner_eq_hessian_diff [I.Boundaryless]
   rw [h1, h2]
   refine Finset.sum_congr rfl ?_
   intro i _
-  -- Distribute g.inner x over the subtraction defining `u i`.
   show g.inner x (u i) (w x) = _
   rw [hu_def]
   rw [map_sub, ContinuousLinearMap.sub_apply]
-
-/-! ## Item 8: heart-of-Bochner vector identity, in conditional form
-
-The full vector heart-of-Bochner identity
-$$
-  (\Delta_\nabla^B \nabla f)(x) = \nabla(\Delta_g f)(x) + \mathrm{Ric}^\sharp(\nabla f)(x)
-$$
-holds when the smooth frame `B` is `g_x`-orthonormal at `x` (or, more strongly, on a
-neighbourhood of `x`). The orthonormality drives both:
-
-1. the identification of `∑_i \mathrm{Hess} f(B_i, B_i)|_x` with the Laplacian
-   `\Delta_g f|_x` (the trace of `\mathrm{Hess} f` against an orthonormal basis is the
-   metric trace, which by the divergence-of-gradient identity equals `\Delta_g f`),
-2. the identification of `∑_i (\mathrm{finBasis}\,\mathbb R\,E).\mathrm{repr}\,(R(B_i, w)
-   \nabla f)\,i` with `\mathrm{ricciTensor}\,g\,x\,(\nabla f)(w)` (`ricciTensor_apply_smooth_basisSum`).
-
-Below, we expose the **conditional vector identity**: assuming the inner-product reduction
-(the input that an orthonormal-frame extension would supply), the vector identity follows
-by Riesz uniqueness. This packages the heart-of-Bochner reduction into a single named
-theorem of vector content, ready for the downstream abstract-Bochner consumer to feed in
-either an orthonormal-frame argument or the equivalent inner-product reduction. -/
 
 /-- **Heart-of-Bochner vector identity, conditional form.** Given a smooth frame
 `B : Fin n → Π b, TangentSpace I b` and a smooth scalar `f : M → ℝ`, suppose the

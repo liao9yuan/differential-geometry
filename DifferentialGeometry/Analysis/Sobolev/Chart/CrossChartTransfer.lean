@@ -64,13 +64,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-! ## Smoothness of the chart-symm composition (self-contained)
-
-The chart-symm composition `(extChartAt I α).symm ∘ toEuclidean.symm` is
-`ContMDiffOn` on `chartTargetEuclid α`. We reprove it locally (from
-`contMDiffOn_extChartAt_symm` and the smoothness of the linear `toEuclidean.symm`)
-to keep this file within the `Sobolev/Chart` layer. -/
-
 /-- `(extChartAt I α).symm ∘ toEuclidean.symm` is `ContMDiffOn` on
 `chartTargetEuclid α`. -/
 private lemma contMDiffOn_extChartSymm_toEuclideanSymm (α : M) :
@@ -93,17 +86,6 @@ private lemma contMDiffOn_extChartSymm_toEuclideanSymm (α : M) :
     exact hy
   exact h_outer.comp h_inner.contMDiffOn h_maps
 
-/-! ## A Faà di Bruno bound keeping the outer derivatives
-
-Mathlib's `norm_iteratedFDerivWithin_comp_le` bounds the iterated derivative of a
-composition `f ∘ g` by `n! · C · D ^ n` where the single constant `C` majorizes
-**all** outer derivatives `‖∂ⁱ f (g x)‖` for `i ≤ n`, and `D` majorizes the inner
-derivatives. The cross-chart transfer needs the outer derivatives to stay
-visible on the right-hand side (they are derivatives of the unbounded data `u`),
-while the inner derivatives (those of the smooth, uniformly-bounded chart
-transition) are absorbed into a constant. We obtain this by taking, *pointwise*,
-`C := ∑_{i ≤ n} ‖∂ⁱ f (g x)‖`, which majorizes each individual `‖∂ⁱ f (g x)‖`. -/
-
 /-- **Faà di Bruno bound with the outer derivatives retained.**
 
 For `f : F → ℝ` smooth on a set `t`, `g : E → F` smooth on a set `s` with
@@ -124,7 +106,6 @@ private theorem norm_iteratedFDerivWithin_comp_le_sumDeriv
       (n ! : ℝ) * (∑ i ∈ Finset.range (n + 1),
           ‖iteratedFDerivWithin ℝ i g t (f x)‖) * D ^ n := by
   classical
-  -- The sum of outer-derivative norms majorizes each individual term.
   set C : ℝ := ∑ i ∈ Finset.range (n + 1),
       ‖iteratedFDerivWithin ℝ i g t (f x)‖ with hC_def
   have hC_ge : ∀ i, i ≤ n → ‖iteratedFDerivWithin ℝ i g t (f x)‖ ≤ C := by
@@ -133,17 +114,7 @@ private theorem norm_iteratedFDerivWithin_comp_le_sumDeriv
     refine Finset.single_le_sum (f := fun j =>
         ‖iteratedFDerivWithin ℝ j g t (f x)‖) (fun j _ => norm_nonneg _) ?_
     exact Finset.mem_range_succ_iff.mpr hi
-  -- Apply Mathlib's composition bound with the pointwise constant `C`.
   exact norm_iteratedFDerivWithin_comp_le hg hf hn ht hs hst hx hC_ge hD
-
-/-! ## Pointwise factorisation of the β-pushed weighted scalar on the overlap
-
-The β-pushed, partition-of-unity-weighted scalar `chartPushed ρ β u` factors, on
-the chart-Euclidean overlap, into the β-pushed partition-of-unity coefficient
-times the α-raw pushed scalar of `u` composed with the chart transition. The
-partition-of-unity coefficient factor is realised as a raw chart pushforward of
-the smooth weight `ρ_β` viewed as a scalar, which is what makes both factors
-amenable to the smoothness API. -/
 
 /-- The β-chart-pushed partition-of-unity coefficient, viewed as a scalar
 function on chart-β Euclidean coordinates: `chartPushedRaw I β (ρ_β)`. -/
@@ -162,23 +133,18 @@ theorem crossChart_pushed_eq_pou_mul_comp_on_overlap
       pouCoeffPushed (I := I) (M := M) ρ β y *
         chartPushedRaw I α u (chartTransitionEuclid (I := I) (M := M) β α y) := by
   classical
-  -- Unpack the overlap membership: `y = toEuclidean (extChartAt I β x)` for some
-  -- `x` in both chart sources.
   rcases hy with ⟨z, ⟨x, hx_in, hxz⟩, hzy⟩
   have hx_β : x ∈ (chartAt H β).source := hx_in.1
   have hx_α : x ∈ (chartAt H α).source := hx_in.2
   have hy_eq : y = (toEuclidean (E := E)) (extChartAt I β x) := by rw [← hzy, ← hxz]
-  -- The manifold preimage of `y` through chart-β is `x`.
   have hx_β_ext : x ∈ (extChartAt I β).source := by
     rw [extChartAt_source (I := I)]; exact hx_β
   have h_symm_y : (extChartAt I β).symm ((toEuclidean (E := E)).symm y) = x := by
     rw [hy_eq, (toEuclidean (E := E)).symm_apply_apply, (extChartAt I β).left_inv hx_β_ext]
-  -- LHS: chartPushed unfolds to `ρ_β(x) * u(x)`.
   have h_lhs : chartPushed (I := I) (M := M) ρ β u y =
       (ρ β : C^∞⟮I, M; ℝ⟯) x * u x := by
     unfold chartPushed
     rw [h_symm_y]
-  -- First factor: `pouCoeffPushed ρ β y = ρ_β(x)`.
   have hy_target_β : y ∈ chartTargetEuclid (I := I) (M := M) β := by
     rw [hy_eq]
     exact ⟨extChartAt I β x, (extChartAt I β).map_source hx_β_ext, rfl⟩
@@ -186,7 +152,6 @@ theorem crossChart_pushed_eq_pou_mul_comp_on_overlap
       (ρ β : C^∞⟮I, M; ℝ⟯) x := by
     unfold pouCoeffPushed
     rw [chartPushedRaw_apply_of_mem (I := I) (M := M) β _ hy_target_β, h_symm_y]
-  -- Second factor: `chartPushedRaw I α u (T_βα y) = u(x)`.
   have h_T_eq : chartTransitionEuclid (I := I) (M := M) β α y =
       (toEuclidean (E := E)) (extChartAt I α x) := by
     rw [hy_eq]
@@ -206,13 +171,6 @@ theorem crossChart_pushed_eq_pou_mul_comp_on_overlap
     rw [(extChartAt I α).left_inv hx_α_ext]
   rw [h_lhs, h_pou, h_comp]
 
-/-! ## Smoothness of the partition-of-unity coefficient and the chart transition
-
-The β-pushed partition-of-unity coefficient `pouCoeffPushed ρ β` is smooth on
-`chartTargetEuclid β`, since `ρ_β` is a smooth scalar and the chart-pullback
-machinery transfers smoothness. The chart transition `chartTransitionEuclid β α`
-is smooth on the overlap by `chartTransitionEuclid_contDiffOn_overlap`. -/
-
 /-- `pouCoeffPushed ρ β` is `C^∞` on `chartTargetEuclid β`. -/
 lemma pouCoeffPushed_contDiffOn
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
@@ -220,8 +178,6 @@ lemma pouCoeffPushed_contDiffOn
     ContDiffOn ℝ ∞ (pouCoeffPushed (I := I) (M := M) ρ β)
       (chartTargetEuclid (I := I) (M := M) β) := by
   classical
-  -- On `chartTargetEuclid β`, `pouCoeffPushed ρ β` agrees with the smooth
-  -- composition `ρ_β ∘ (extChartAt I β).symm ∘ toEuclidean.symm`.
   set Φ : EuclN → ℝ := fun y =>
     (ρ β : C^∞⟮I, M; ℝ⟯) ((extChartAt I β).symm ((toEuclidean (E := E)).symm y))
     with hΦ_def
@@ -230,7 +186,6 @@ lemma pouCoeffPushed_contDiffOn
     intro y hy
     unfold pouCoeffPushed
     rw [chartPushedRaw_apply_of_mem (I := I) (M := M) β _ hy]
-  -- The composition is `ContMDiffOn` then transfer to `ContDiffOn ℝ`.
   have h_chart_symm : ContMDiffOn 𝓘(ℝ, EuclN) I ∞
       (fun y : EuclN => (extChartAt I β).symm ((toEuclidean (E := E)).symm y))
       (chartTargetEuclid (I := I) (M := M) β) :=
@@ -245,20 +200,6 @@ lemma pouCoeffPushed_contDiffOn
   have h_contDiffOn : ContDiffOn ℝ ∞ Φ (chartTargetEuclid (I := I) (M := M) β) :=
     (contMDiffOn_iff_contDiffOn).mp h_comp
   exact h_contDiffOn.congr hEqOn
-
-/-! ## The headline cross-chart transfer bound
-
-We combine:
-
-* the pointwise factorisation `crossChart_pushed_eq_pou_mul_comp_on_overlap`,
-* `EventuallyEq.iteratedFDeriv` to replace `iteratedFDeriv (chartPushed ρ β u)`
-  by the iterated derivative of the product, on the open overlap,
-* the Leibniz rule `norm_iteratedFDerivWithin_mul_le`,
-* the outer-derivative-retaining Faà di Bruno bound
-  `norm_iteratedFDerivWithin_comp_le_sumDeriv`,
-* uniform bounds (on the compact overlap) for the partition-of-unity coefficient
-  derivatives and the chart-transition derivatives.
--/
 
 set_option maxHeartbeats 1600000 in
 /-- **Cross-chart order-`k` transfer bound, pointwise/uniform form.**
@@ -296,36 +237,28 @@ theorem crossChart_transfer_bound
                 (chartTransitionEuclid (I := I) (M := M) β α
                   ((toEuclidean (E := E)) (extChartAt I β x)))‖ := by
   classical
-  -- The open overlap region and its unique-differentiability.
   set Ωβ : Set EuclN := chartOverlapEuclid (I := I) (M := M) β α with hΩβ_def
   have hΩβ_open : IsOpen Ωβ := chartOverlapEuclid_isOpen (I := I) (M := M) β α
   have hΩβ_uniqueDiff : UniqueDiffOn ℝ Ωβ := hΩβ_open.uniqueDiffOn
   set Ωα : Set EuclN := chartOverlapEuclid (I := I) (M := M) α β with hΩα_def
   have hΩα_open : IsOpen Ωα := chartOverlapEuclid_isOpen (I := I) (M := M) α β
   have hΩα_uniqueDiff : UniqueDiffOn ℝ Ωα := hΩα_open.uniqueDiffOn
-  -- The chart-β Euclidean image of `K_M` is compact and contained in the overlap.
   set fβ : M → EuclN := fun x => (toEuclidean (E := E)) (extChartAt I β x) with hfβ_def
   have hK_E_compact : IsCompact (fβ '' K_M) :=
     kEuclid_compact (I := I) (M := M) β hK_compact hK_β
   have hK_E_sub : fβ '' K_M ⊆ Ωβ :=
     kEuclid_subset_overlap (I := I) (M := M) β α hK_β hK_α
-  -- The chart transition is smooth on `Ωβ`.
   have hT_contDiffOn : ContDiffOn ℝ ∞
       (chartTransitionEuclid (I := I) (M := M) β α) Ωβ := by
     have h := chartTransitionEuclid_contDiffOn_overlap (I := I) (M := M) β α
     exact h.of_le (by exact_mod_cast le_top)
-  -- The chart transition maps `Ωβ` into `Ωα`.
   have hT_maps : MapsTo (chartTransitionEuclid (I := I) (M := M) β α) Ωβ Ωα :=
     fun y hy => chartTransitionEuclid_mapsTo_overlap (I := I) (M := M) β α hy
-  -- Uniform bound `D` for the chart-transition derivatives on `fβ '' K_M`.
-  -- (We restrict to derivative orders `1 ≤ i ≤ k` for the chain rule, but the
-  -- uniform bound is taken over all `i ≤ k`.)
   have hT_iter_contOn : ∀ i : ℕ,
       ContinuousOn (fun y => iteratedFDerivWithin ℝ i
         (chartTransitionEuclid (I := I) (M := M) β α) Ωβ y) Ωβ :=
     fun i => hT_contDiffOn.continuousOn_iteratedFDerivWithin
       (by exact_mod_cast le_top) hΩβ_uniqueDiff
-  -- The partition-of-unity coefficient is smooth on `chartTargetEuclid β ⊇ Ωβ`.
   have hpou_contDiffOn_target : ContDiffOn ℝ ∞
       (pouCoeffPushed (I := I) (M := M) ρ β)
       (chartTargetEuclid (I := I) (M := M) β) :=
@@ -340,17 +273,12 @@ theorem crossChart_transfer_bound
         (pouCoeffPushed (I := I) (M := M) ρ β) Ωβ y) Ωβ :=
     fun i => hpou_contDiffOn.continuousOn_iteratedFDerivWithin
       (by exact_mod_cast le_top) hΩβ_uniqueDiff
-  -- Extract uniform bounds on `fβ '' K_M` for both families of derivatives.
-  -- For each order `i ≤ k`, take the max of the continuous derivative norm on
-  -- the compact image; aggregate into single constants `D` (transition) and
-  -- `B` (partition-of-unity).
   obtain ⟨D, hD_one, hD_bd⟩ :
       ∃ D : ℝ, 1 ≤ D ∧ ∀ i, i ≤ k → ∀ y ∈ fβ '' K_M,
         ‖iteratedFDerivWithin ℝ i
           (chartTransitionEuclid (I := I) (M := M) β α) Ωβ y‖ ≤ D := by
     by_cases hKne : (fβ '' K_M).Nonempty
-    · -- For each `i`, max of the continuous norm on the compact image.
-      have hmax : ∀ i, i ≤ k → ∃ Mi : ℝ, 0 ≤ Mi ∧ ∀ y ∈ fβ '' K_M,
+    · have hmax : ∀ i, i ≤ k → ∃ Mi : ℝ, 0 ≤ Mi ∧ ∀ y ∈ fβ '' K_M,
           ‖iteratedFDerivWithin ℝ i
             (chartTransitionEuclid (I := I) (M := M) β α) Ωβ y‖ ≤ Mi := by
         intro i _
@@ -392,11 +320,6 @@ theorem crossChart_transfer_bound
         refine Finset.le_sup'_of_le _ (Finset.mem_range_succ_iff.mpr hi) ?_
         simp only [hi, dif_pos, le_refl]
     · exact ⟨0, le_refl _, fun i _ y hy => absurd ⟨y, hy⟩ hKne⟩
-  -- The assembled constant: absorb the Leibniz binomials, the Faà di Bruno
-  -- factorials, the transition bound `D ^ k`, and the partition-of-unity bound
-  -- `B`. A uniform majorant over all `j ≤ k`, `i ≤ j` is
-  -- `C := (k + 1) * (2 ^ k) * (k ! * B * D ^ k + 1)` (any explicit nonneg
-  -- majorant suffices; we use a generous one).
   set C : ℝ := (k + 1 : ℕ) * (2 ^ k : ℕ) * ((k ! : ℝ) * B * D ^ k + 1) with hC_def
   have hD_nonneg : (0 : ℝ) ≤ D := le_trans zero_le_one hD_one
   have hDk_nonneg : (0 : ℝ) ≤ D ^ k := pow_nonneg hD_nonneg k
@@ -408,16 +331,11 @@ theorem crossChart_transfer_bound
     positivity
   refine ⟨C, hC_nn, ?_⟩
   intro u hu_smooth j hj x hx
-  -- Reduce the membership `j ∈ range (k+1)` to `j ≤ k`.
   have hj_le : j ≤ k := Finset.mem_range_succ_iff.mp hj
-  -- The point `y := fβ x` lies in the overlap and is in `fβ '' K_M`.
   set y : EuclN := fβ x with hy_def
   have hy_mem_image : y ∈ fβ '' K_M := ⟨x, hx, rfl⟩
   have hy_overlap : y ∈ Ωβ := hK_E_sub hy_mem_image
-  -- Smoothness of `chartPushedRaw I α u` on `Ωα` (the data composed with chart α).
   have hraw_contDiffOn : ContDiffOn ℝ ∞ (chartPushedRaw I α u) Ωα := by
-    -- On `chartTargetEuclid α ⊇ Ωα`, `chartPushedRaw I α u` agrees with the smooth
-    -- composition `u ∘ (extChartAt I α).symm ∘ toEuclidean.symm`.
     have hΨ_eqOn : Set.EqOn (chartPushedRaw I α u)
         (fun z => u ((extChartAt I α).symm ((toEuclidean (E := E)).symm z)))
         (chartTargetEuclid (I := I) (M := M) α) := by
@@ -439,8 +357,6 @@ theorem crossChart_transfer_bound
     have hΩα_sub_target : Ωα ⊆ chartTargetEuclid (I := I) (M := M) α :=
       chartOverlapEuclid_subset_chartTarget (I := I) (M := M) α β
     exact (h_target_contDiffOn.congr hΨ_eqOn).mono hΩα_sub_target
-  -- Step 1: replace the global `iteratedFDeriv (chartPushed ρ β u)` at `y` by
-  -- `iteratedFDerivWithin` (on the open overlap) of the product factorisation.
   set prodFun : EuclN → ℝ := fun z =>
     pouCoeffPushed (I := I) (M := M) ρ β z *
       chartPushedRaw I α u (chartTransitionEuclid (I := I) (M := M) β α z)
@@ -448,7 +364,6 @@ theorem crossChart_transfer_bound
   have h_eqOn_prod : Set.EqOn (chartPushed (I := I) (M := M) ρ β u) prodFun Ωβ := by
     intro z hz
     exact crossChart_pushed_eq_pou_mul_comp_on_overlap (I := I) (M := M) ρ β α u hz
-  -- `iteratedFDeriv (chartPushed ρ β u) y = iteratedFDerivWithin prodFun Ωβ y`.
   have h_iter_lhs :
       iteratedFDeriv ℝ j (chartPushed (I := I) (M := M) ρ β u) y =
       iteratedFDerivWithin ℝ j prodFun Ωβ y := by
@@ -458,7 +373,6 @@ theorem crossChart_transfer_bound
       iteratedFDerivWithin_of_isOpen j hΩβ_open hy_overlap
     rw [← h_within_pushed]
     exact iteratedFDerivWithin_congr h_eqOn_prod hy_overlap j
-  -- Step 2: Leibniz bound for the product `prodFun = pou · (raw ∘ T)` on `Ωβ`.
   set compFun : EuclN → ℝ := fun z =>
     chartPushedRaw I α u (chartTransitionEuclid (I := I) (M := M) β α z)
     with hcomp_def
@@ -478,9 +392,6 @@ theorem crossChart_transfer_bound
       (hcomp_contDiffOn.of_le (by exact_mod_cast le_top))
       hΩβ_uniqueDiff hy_overlap (n := j) le_rfl
     exact h
-  -- Step 3: Faà di Bruno bound (outer-derivatives-retained) for each
-  -- `‖∂^{j-i} compFun y‖`.
-  -- The inner-derivative bound for `T_βα` on `fβ '' K_M`, shaped as `D ^ i`.
   have hT_shape : ∀ m : ℕ, m ≤ k → ∀ i, 1 ≤ i → i ≤ m →
       ‖iteratedFDerivWithin ℝ i
         (chartTransitionEuclid (I := I) (M := M) β α) Ωβ y‖ ≤ D ^ i := by
@@ -505,8 +416,6 @@ theorem crossChart_transfer_bound
       hraw_contDiffOn hT_contDiffOn (by exact_mod_cast le_top)
       hΩα_uniqueDiff hΩβ_uniqueDiff hT_maps hy_overlap
       (fun i hi1 him => hT_shape m hm_le_k i hi1 him)
-  -- Step 4: convert `iteratedFDerivWithin (chartPushedRaw I α u) Ωα` (at the
-  -- transition image) into the global `iteratedFDeriv` claimed in the statement.
   have hTy_overlap : chartTransitionEuclid (I := I) (M := M) β α y ∈ Ωα :=
     hT_maps hy_overlap
   have h_raw_within_eq : ∀ i : ℕ,
@@ -515,15 +424,12 @@ theorem crossChart_transfer_bound
       iteratedFDeriv ℝ i (chartPushedRaw I α u)
         (chartTransitionEuclid (I := I) (M := M) β α y) :=
     fun i => iteratedFDerivWithin_of_isOpen i hΩα_open hTy_overlap
-  -- Abbreviate the RHS data-sum at the transition image.
   set S : ℝ := ∑ i ∈ Finset.range (j + 1),
     ‖iteratedFDeriv ℝ i (chartPushedRaw I α u)
       (chartTransitionEuclid (I := I) (M := M) β α y)‖ with hS_def
   have hS_nonneg : 0 ≤ S := by
     rw [hS_def]
     exact Finset.sum_nonneg (fun i _ => norm_nonneg _)
-  -- For each `i ≤ j`, the order-`(m+1)` data-sum (with `m = j - i ≤ j`) is `≤ S`,
-  -- since `range (m+1) ⊆ range (j+1)` and the summands are nonnegative.
   have h_inner_sum_le : ∀ m : ℕ, m ≤ j →
       (∑ i ∈ Finset.range (m + 1),
         ‖iteratedFDeriv ℝ i (chartPushedRaw I α u)
@@ -533,8 +439,6 @@ theorem crossChart_transfer_bound
     refine Finset.sum_le_sum_of_subset_of_nonneg ?_ (fun i _ _ => norm_nonneg _)
     intro i hi
     rw [Finset.mem_range] at hi ⊢; omega
-  -- Combine Leibniz + Faà di Bruno into a single bound on `‖∂ʲ prodFun y‖`.
-  -- First rewrite each `compFun` derivative-within (at `y`) sum via `h_raw_within_eq`.
   have h_faa' : ∀ m : ℕ, m ≤ j →
       ‖iteratedFDerivWithin ℝ m compFun Ωβ y‖ ≤
         (m ! : ℝ) * S * D ^ m := by
@@ -552,16 +456,12 @@ theorem crossChart_transfer_bound
     have hm_factorial_nonneg : (0 : ℝ) ≤ (m ! : ℝ) := by positivity
     have hDm_nonneg : (0 : ℝ) ≤ D ^ m := by positivity
     have h_sum_le := h_inner_sum_le m hm
-    -- `(m! · innerSum · D^m) ≤ (m! · S · D^m)`.
     have : (m ! : ℝ) * (∑ i ∈ Finset.range (m + 1),
           ‖iteratedFDeriv ℝ i (chartPushedRaw I α u)
             (chartTransitionEuclid (I := I) (M := M) β α y)‖) * D ^ m ≤
         (m ! : ℝ) * S * D ^ m := by
       gcongr
     exact this
-  -- Now bound each Leibniz summand and sum up.
-  -- Summand `i`: (j choose i) · ‖∂ⁱ pou y‖ · ‖∂^{j-i} compFun y‖
-  --            ≤ (j choose i) · B · ((j-i)! · S · D^{j-i}).
   have h_summand_bound : ∀ i ∈ Finset.range (j + 1),
       (j.choose i : ℝ) *
         ‖iteratedFDerivWithin ℝ i (pouCoeffPushed (I := I) (M := M) ρ β) Ωβ y‖ *
@@ -582,26 +482,18 @@ theorem crossChart_transfer_bound
     have h_comp_nonneg : (0 : ℝ) ≤ ‖iteratedFDerivWithin ℝ (j - i) compFun Ωβ y‖ :=
       norm_nonneg _
     gcongr
-  -- Sum the summand bounds.
   have h_sum_bound :
       ‖iteratedFDerivWithin ℝ j prodFun Ωβ y‖ ≤
         ∑ i ∈ Finset.range (j + 1),
           (j.choose i : ℝ) * B * (((j - i)! : ℝ) * S * D ^ (j - i)) :=
     h_leibniz.trans (Finset.sum_le_sum h_summand_bound)
-  -- Finally bound the RHS sum by `C * S`.
-  -- Each summand `(j choose i) · B · ((j-i)! · S · D^{j-i})`
-  --   ≤ (j choose i) · B · ((k)! · S · D^k)   [since (j-i)! ≤ k!, D^{j-i} ≤ D^k]
-  --   ≤ (2^k) · B · (k! · S · D^k).
-  -- Summing over `i ∈ range (j+1)` (j+1 ≤ k+1 terms) gives ≤ (k+1)·(2^k)·B·k!·S·D^k ≤ C·S.
   have h_RHS_le : ∑ i ∈ Finset.range (j + 1),
         (j.choose i : ℝ) * B * (((j - i)! : ℝ) * S * D ^ (j - i)) ≤ C * S := by
-    -- Bound each summand by a uniform term `(2^k : ℕ) * B * (k! · S · D^k)`.
     have h_each : ∀ i ∈ Finset.range (j + 1),
         (j.choose i : ℝ) * B * (((j - i)! : ℝ) * S * D ^ (j - i)) ≤
           (2 ^ k : ℕ) * B * ((k ! : ℝ) * S * D ^ k) := by
       intro i hi
       have hi_le_j : i ≤ j := Finset.mem_range_succ_iff.mp hi
-      -- (j choose i) ≤ 2^j ≤ 2^k
       have h_choose : (j.choose i : ℝ) ≤ (2 ^ k : ℕ) := by
         have h1 : j.choose i ≤ 2 ^ j := by
           calc j.choose i ≤ ∑ m ∈ Finset.range (j + 1), j.choose m :=
@@ -610,11 +502,9 @@ theorem crossChart_transfer_bound
             _ = 2 ^ j := by rw [Nat.sum_range_choose]
         have h2 : (2 : ℕ) ^ j ≤ 2 ^ k := Nat.pow_le_pow_right (by norm_num) hj_le
         exact_mod_cast le_trans h1 h2
-      -- (j-i)! ≤ k!
       have h_fact : ((j - i)! : ℝ) ≤ (k ! : ℝ) := by
         have : (j - i)! ≤ k ! := Nat.factorial_le (le_trans (Nat.sub_le j i) hj_le)
         exact_mod_cast this
-      -- D^{j-i} ≤ D^k
       have h_pow : D ^ (j - i) ≤ D ^ k :=
         pow_le_pow_right₀ hD_one (le_trans (Nat.sub_le j i) hj_le)
       have hB_nonneg : (0 : ℝ) ≤ B := hB0
@@ -622,14 +512,10 @@ theorem crossChart_transfer_bound
       have hD_nn : (0 : ℝ) ≤ D := le_trans zero_le_one hD_one
       gcongr
     refine (Finset.sum_le_sum h_each).trans ?_
-    -- The constant summand summed over `range (j+1)` is `(j+1) · (2^k·B·(k!·S·D^k))`.
     rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
-    -- `(j+1) · (2^k · B · (k! · S · D^k)) ≤ C · S`.
     have hj1_le : ((j + 1 : ℕ) : ℝ) ≤ ((k + 1 : ℕ) : ℝ) := by
       exact_mod_cast Nat.add_le_add_right hj_le 1
-    -- Expand `C * S`.
     rw [hC_def]
-    -- LHS = (j+1) · 2^k · B · k! · S · D^k ; RHS = (k+1)·2^k·(k!·B·D^k+1)·S.
     have hterm_nonneg : (0 : ℝ) ≤ (2 ^ k : ℕ) * B * ((k ! : ℝ) * S * D ^ k) := by
       have : (0 : ℝ) ≤ (2 ^ k : ℕ) := by positivity
       have hB_nonneg : (0 : ℝ) ≤ B := hB0
@@ -642,19 +528,11 @@ theorem crossChart_transfer_bound
           have hbase_nonneg : (0 : ℝ) ≤ ((k + 1 : ℕ) : ℝ) * (2 ^ k : ℕ) := by positivity
           have hkbd_le : (k ! : ℝ) * B * D ^ k ≤ (k ! : ℝ) * B * D ^ k + 1 := by linarith
           gcongr
-  -- Chain everything together.
   rw [h_iter_lhs, hS_def]
   calc ‖iteratedFDerivWithin ℝ j prodFun Ωβ y‖
       ≤ ∑ i ∈ Finset.range (j + 1),
           (j.choose i : ℝ) * B * (((j - i)! : ℝ) * S * D ^ (j - i)) := h_sum_bound
     _ ≤ C * S := h_RHS_le
-
-/-! ## Existence form of the constant
-
-A convenience repackaging of `crossChart_transfer_bound` that exposes only the
-existence of the uniform constant, matching the existential headline form of the
-sibling `tensorChartTransition_Ck_bound_on_compact` and
-`christoffel_Ck_bound_from_metric_Ck1`. -/
 
 /-- **Cross-chart order-`k` transfer constant (existence form).** Repackages
 `crossChart_transfer_bound` as the existence of a single non-negative constant

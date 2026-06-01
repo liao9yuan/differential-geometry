@@ -60,16 +60,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## The set of nonzero Laplacian eigenvalues -/
 
 /-- The set of distinct nonzero Laplacian eigenvalues, defined as the image of
 the resolvent-eigenvalue subtype `{μ ∈ Spec(R) | μ ≠ 0, μ < 1}` under the map
@@ -90,8 +86,6 @@ theorem nonzeroLaplacianEigenvalueSet_pos
   have h_pos : 0 < μ.val := nonzeroResolventEigenvalue_pos μ
   have h_num_pos : 0 < 1 - μ.val := by linarith
   exact div_pos h_num_pos h_pos
-
-/-! ## Discreteness: only finitely many eigenvalues below any bound -/
 
 /-- Given a positive Laplacian eigenvalue candidate `lam = (1 - μ)/μ` with
 `μ ∈ (0, 1)`, the resolvent eigenvalue is recovered as `μ = 1 / (lam + 1)`. -/
@@ -125,20 +119,15 @@ theorem nonzeroLaplacianEigenvalueSet_finite_below
     Set.Finite { lam : ℝ |
       lam ∈ nonzeroLaplacianEigenvalueSet (I := I) (M := M) g ∧ lam ≤ N } := by
   by_cases hN : 0 < N
-  · -- Real case: `N > 0`. Use shell `ε := 1 / (N + 1) > 0`.
-    set ε : ℝ := 1 / (N + 1) with hε_def
+  · set ε : ℝ := 1 / (N + 1) with hε_def
     have hN1_pos : 0 < N + 1 := by linarith
     have hε_pos : 0 < ε := by rw [hε_def]; positivity
-    -- The finite shell from `Compactness.lean`.
     have h_shell_fin :
         Set.Finite { μ : ℝ |
           Module.End.HasEigenvalue
             ((resolventL2 (I := I) (M := M) g).toLinearMap) μ ∧ ε ≤ |μ| } :=
       resolvent_eigenvalues_finite_above_on_closed
         (I := I) (M := M) g hε_pos
-    -- Strategy: show that the image of S under `f lam := 1/(lam+1)` is a
-    -- subset of the shell, and the map is injective on S. Then `S` is
-    -- finite by `Set.Finite.of_finite_image`.
     set S : Set ℝ := { lam : ℝ |
         lam ∈ nonzeroLaplacianEigenvalueSet (I := I) (M := M) g ∧ lam ≤ N }
     set fmap : ℝ → ℝ := fun lam => 1 / (lam + 1) with hfmap_def
@@ -183,15 +172,13 @@ theorem nonzeroLaplacianEigenvalueSet_finite_below
       have hb1_pos : 0 < b + 1 := by linarith
       have ha1_ne : (a + 1 : ℝ) ≠ 0 := ne_of_gt ha1_pos
       have hb1_ne : (b + 1 : ℝ) ≠ 0 := ne_of_gt hb1_pos
-      -- `1/(a+1) = 1/(b+1)`, cross-multiply.
       have h_eq : (a + 1) = (b + 1) := by
         rw [hfmap_def] at hab
         field_simp at hab
         linarith
       linarith
     exact Set.Finite.of_finite_image h_image_finite h_inj_on
-  · -- Trivial case: N ≤ 0. The set is empty.
-    push Not at hN
+  · push Not at hN
     have h_empty : { lam : ℝ |
         lam ∈ nonzeroLaplacianEigenvalueSet (I := I) (M := M) g ∧ lam ≤ N } = ∅ := by
       ext lam
@@ -210,8 +197,6 @@ theorem nonzeroLaplacianEigenvalueSet_inter_Iic_finite
     (nonzeroLaplacianEigenvalueSet_finite_below (I := I) (M := M) g N) ?_
   intro lam hlam
   exact ⟨hlam.1, hlam.2⟩
-
-/-! ## Recursive enumeration of the eigenvalues -/
 
 /-- The recursive ascending enumeration of `nonzeroLaplacianEigenvalueSet g`.
 
@@ -258,8 +243,6 @@ lemma laplacianEigenvalueAscending_succ
               Set.Ioi (laplacianEigenvalueAscending (I := I) (M := M) g n))
        else 0) := rfl
 
-/-! ## Properties of the first iterate -/
-
 /-- The first iterate equals the infimum of the set, when the set is nonempty. -/
 theorem laplacianEigenvalueAscending_zero_eq_sInf
     (g : SmoothRiemannianMetric I M)
@@ -275,8 +258,6 @@ theorem laplacianEigenvalueAscending_zero_of_empty
     laplacianEigenvalueAscending (I := I) (M := M) g 0 = 0 := by
   rw [laplacianEigenvalueAscending_zero, if_neg h_empty]
 
-/-! ## Membership of each iterate in the set, when infinite -/
-
 /-- The csInf of a nonempty set `T ⊆ ℝ` that is bounded below and such that
 `T ∩ Iic a` is finite for some `a ∈ T`, lies in `T`. This is the key
 "discrete attainment of infimum" lemma we'll reuse. -/
@@ -288,7 +269,6 @@ private lemma csInf_mem_of_finite_slice
   have hTslice_nonempty : Tslice.Nonempty := ⟨a, ha, le_refl a⟩
   have h_csInf_in_slice : sInf Tslice ∈ Tslice :=
     hTslice_nonempty.csInf_mem hT_slice_fin
-  -- Show sInf T = sInf Tslice.
   have h_lb : ∀ x ∈ T, sInf Tslice ≤ x := by
     intro x hx
     by_cases hxa : x ≤ a
@@ -347,7 +327,6 @@ private lemma sInf_inter_Ioi_mem
   have hT_bddBelow : BddBelow T := by
     refine ⟨t, ?_⟩
     intro x hx; exact (Set.mem_Ioi.mp hx.2).le
-  -- `T ∩ Iic a ⊆ {lam ∈ S | lam ≤ a}` is finite.
   have hT_slice_fin : Set.Finite (T ∩ Set.Iic a) := by
     apply (nonzeroLaplacianEigenvalueSet_finite_below
       (I := I) (M := M) g a).subset
@@ -365,7 +344,6 @@ theorem laplacianEigenvalueAscending_mem_of_infinite
   induction n with
   | zero =>
       rw [laplacianEigenvalueAscending_zero, if_pos h_inf.nonempty]
-      -- sInf S ∈ S via csInf_mem_of_finite_slice.
       set S : Set ℝ := nonzeroLaplacianEigenvalueSet (I := I) (M := M) g
       obtain ⟨a, ha_S⟩ := h_inf.nonempty
       have h_S_bddBelow : BddBelow S := by
@@ -387,8 +365,6 @@ theorem laplacianEigenvalueAscending_mem_of_infinite
       rw [if_pos h_inter_nonempty]
       exact (sInf_inter_Ioi_mem (I := I) (M := M) g prev h_inter_nonempty).1
 
-/-! ## Strict monotonicity, under the infinity hypothesis -/
-
 /-- Under the infinity hypothesis, the ascending enumeration is strictly
 increasing. -/
 theorem laplacianEigenvalueAscending_strictMono_of_infinite
@@ -406,8 +382,6 @@ theorem laplacianEigenvalueAscending_strictMono_of_infinite
   have h_inter_nonempty := h_inter_inf.nonempty
   rw [if_pos h_inter_nonempty]
   exact (sInf_inter_Ioi_mem (I := I) (M := M) g prev h_inter_nonempty).2
-
-/-! ## Tendsto: the enumeration tends to infinity -/
 
 /-- If the set of distinct nonzero Laplacian eigenvalues is infinite, then the
 ascending enumeration `laplacianEigenvalueAscending g n` tends to `+∞` as
@@ -427,12 +401,10 @@ theorem laplacianEigenvalueAscending_tendsto_atTop_of_infinite
   set Sbelow := {lam | lam ∈ S ∧ lam ≤ N}
   have hSbelow_fin : Set.Finite Sbelow :=
     nonzeroLaplacianEigenvalueSet_finite_below (I := I) (M := M) g N
-  -- Use `hSbelow_fin.toFinset.card` as the threshold.
   refine ⟨hSbelow_fin.toFinset.card, ?_⟩
   intro n hn
   by_contra h_not
   push Not at h_not
-  -- h_not : f n < N.
   have h_le_N : ∀ k ≤ n, laplacianEigenvalueAscending (I := I) (M := M) g k ≤ N := by
     intro k hk
     have h_mono : laplacianEigenvalueAscending (I := I) (M := M) g k ≤
@@ -443,8 +415,6 @@ theorem laplacianEigenvalueAscending_tendsto_atTop_of_infinite
       laplacianEigenvalueAscending (I := I) (M := M) g k ∈ Sbelow := by
     intro k hk
     exact ⟨h_mem k, h_le_N k hk⟩
-  -- Build the injection Fin (n+1) → hSbelow_fin.toFinset and apply
-  -- Fintype.card_le_of_injective.
   classical
   have h_card_le_fin : n + 1 ≤ hSbelow_fin.toFinset.card := by
     have h_inj_to_finset : ∀ k : Fin (n + 1),
@@ -463,10 +433,7 @@ theorem laplacianEigenvalueAscending_tendsto_atTop_of_infinite
     have h_card := Fintype.card_le_of_injective g' hg'_inj
     simp only [Fintype.card_fin, Fintype.card_coe] at h_card
     exact h_card
-  -- Combine: n + 1 ≤ Sbelow.toFinset.card ≤ n, contradiction.
   omega
-
-/-! ## Sanity test -/
 
 example (g : SmoothRiemannianMetric I M) : ℕ → ℝ :=
   laplacianEigenvalueAscending (I := I) (M := M) g

@@ -97,21 +97,15 @@ theorem christoffel_Ck_bound_from_metric_Ck1 [I.Boundaryless]
                   ((extChartAt I α).symm ((toEuclidean (E := E)).symm z)))
               y‖ ≤ C := by
   classical
-  -- Local abbreviation for the model finrank dimension.
   let n : ℕ := Module.finrank ℝ E
-  -- The target function whose iterated derivatives we bound.
   let Φ : EuclideanSpace ℝ (Fin n) → (E →L[ℝ] E →L[ℝ] E) := fun z =>
     chartChristoffelBilin (I := I) (M := M) g α
       ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))
   have hΦ : Φ = fun z =>
     chartChristoffelBilin (I := I) (M := M) g α
       ((extChartAt I α).symm ((toEuclidean (E := E)).symm z)) := rfl
-  -- The chart-image set, which is open under `[I.Boundaryless]`.
   let U : Set (EuclideanSpace ℝ (Fin n)) := chartTargetEuclid (I := I) (M := M) α
   have hU_open : IsOpen U := chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- A "simpler" reformulation of `Φ` valid on `U`: replace the manifold
-  -- composition by the corresponding Euclidean expression. This uses the
-  -- right inverse `extChartAt I α ((extChartAt I α).symm z) = z` on the target.
   let Ψ : EuclideanSpace ℝ (Fin n) → (E →L[ℝ] E →L[ℝ] E) := fun z =>
     ∑ i : Fin n, ∑ j : Fin n, ∑ κ : Fin n,
       ((chartModelBasis E).coord i).toContinuousLinearMap.smulRight
@@ -124,9 +118,6 @@ theorem christoffel_Ck_bound_from_metric_Ck1 [I.Boundaryless]
         (((chartModelBasis E).coord j).toContinuousLinearMap.smulRight
           (chartChristoffel (I := I) g α i j κ ((toEuclidean (E := E)).symm z) •
             (chartModelBasis E) κ)) := rfl
-  -- Step 1: `Φ = Ψ` on the open set `U`.
-  -- Helper: `y ∈ U` implies `toEuclidean.symm y ∈ (extChartAt I α).target`.
-  -- Both `chartTargetEuclid` definitions unfold to `toEuclidean '' (extChartAt I α).target`.
   have h_toE_symm_mem_target : ∀ {y : EuclideanSpace ℝ (Fin n)},
       y ∈ U → (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
     intro y hy
@@ -137,33 +128,23 @@ theorem christoffel_Ck_bound_from_metric_Ck1 [I.Boundaryless]
     exact hz_target
   have hΦΨ_on_U : Set.EqOn Φ Ψ U := by
     intro y hy
-    -- For `y ∈ U`, `toEuclidean.symm y ∈ (extChartAt I α).target`, so
-    -- `extChartAt I α ((extChartAt I α).symm (toEuclidean.symm y)) = toEuclidean.symm y`.
     have hy_target : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target :=
       h_toE_symm_mem_target hy
     have h_right_inv :
         (extChartAt I α) ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) =
           (toEuclidean (E := E)).symm y :=
       (extChartAt I α).right_inv hy_target
-    -- Unfold both sides and apply the right-inverse identity.
     simp only [hΦ, hΨ, chartChristoffelBilin]
     refine Finset.sum_congr rfl (fun i _ => ?_)
     refine Finset.sum_congr rfl (fun j _ => ?_)
     refine Finset.sum_congr rfl (fun κ _ => ?_)
     rw [h_right_inv]
-  -- Step 2: `Ψ` is smooth on `U`. This follows by composing the smoothness of
-  -- `chartChristoffel g α i j κ` on `interior ((extChartAt I α).target)` (which
-  -- equals the target itself under `[I.Boundaryless]`) with the smooth linear
-  -- map `toEuclidean.symm`, and noting that the basis / coord factors are
-  -- constants in `z`.
   have h_target_eq_interior :
       (extChartAt I α).target = interior ((extChartAt I α).target : Set E) :=
     (isOpen_extChartAt_target (I := I) α).interior_eq.symm
   have h_toE_symm_contDiff : ContDiff ℝ ∞
       (fun z : EuclideanSpace ℝ (Fin n) => (toEuclidean (E := E)).symm z) :=
     (toEuclidean (E := E)).symm.contDiff
-  -- The chart-Christoffel scalar, post-composed with `toEuclidean.symm`,
-  -- is smooth on `U`.
   have h_chart_chr_scalar_contDiffOn : ∀ i j κ : Fin n,
       ContDiffOn ℝ ∞
         (fun z : EuclideanSpace ℝ (Fin n) =>
@@ -176,8 +157,6 @@ theorem christoffel_Ck_bound_from_metric_Ck1 [I.Boundaryless]
         (chartChristoffel (I := I) g α i j κ)
         (interior ((extChartAt I α).target : Set E)) :=
       chartChristoffel_contDiffOn_interior (I := I) g α i j κ
-    -- `toEuclidean.symm` maps `U` into `interior ((extChartAt I α).target)`
-    -- (which under `[I.Boundaryless]` equals the target itself).
     have h_maps : Set.MapsTo (fun z : EuclideanSpace ℝ (Fin n) =>
         (toEuclidean (E := E)).symm z)
         U (interior ((extChartAt I α).target : Set E)) := by
@@ -187,16 +166,10 @@ theorem christoffel_Ck_bound_from_metric_Ck1 [I.Boundaryless]
       rw [← h_target_eq_interior]
       exact hz_target
     exact h_outer_contDiffOn.comp (h_inner_contDiff.mono (Set.subset_univ _)) h_maps
-  -- Each summand: a scalar smooth function on `U`, scaled by a CONSTANT
-  -- bilinear-CLM (independent of `z`). The summand has the form
-  -- `f(z) • Nijk` where `Nijk : E →L[ℝ] E →L[ℝ] E` is constant.
-  -- This `Nijk` is defined as `(coord i).toCLM.smulRight ((coord j).toCLM.smulRight (basis κ))`.
   let N : Fin n → Fin n → Fin n → (E →L[ℝ] E →L[ℝ] E) := fun i j κ =>
     ((chartModelBasis E).coord i).toContinuousLinearMap.smulRight
       (((chartModelBasis E).coord j).toContinuousLinearMap.smulRight
         ((chartModelBasis E) κ))
-  -- Rewrite each summand of `Ψ` in `f • Nijk` form (linearity of `smulRight`
-  -- in the second argument).
   have h_summand_eq : ∀ (i j κ : Fin n) (z : EuclideanSpace ℝ (Fin n)),
       ((chartModelBasis E).coord i).toContinuousLinearMap.smulRight
           (((chartModelBasis E).coord j).toContinuousLinearMap.smulRight
@@ -205,10 +178,7 @@ theorem christoffel_Ck_bound_from_metric_Ck1 [I.Boundaryless]
         chartChristoffel (I := I) g α i j κ ((toEuclidean (E := E)).symm z) •
           N i j κ := by
     intro i j κ z
-    -- Abbreviate the chart-Christoffel scalar.
     set s : ℝ := chartChristoffel (I := I) g α i j κ ((toEuclidean (E := E)).symm z)
-    -- Pull the scalar through the two `smulRight` layers using the
-    -- second-argument linearity of `smulRight`.
     have h_inner : ((chartModelBasis E).coord j).toContinuousLinearMap.smulRight
         (s • (chartModelBasis E) κ) =
         s • ((chartModelBasis E).coord j).toContinuousLinearMap.smulRight
@@ -227,8 +197,6 @@ theorem christoffel_Ck_bound_from_metric_Ck1 [I.Boundaryless]
       simp [ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.smul_apply,
         smul_smul, mul_comm]
     exact h_outer
-  -- Smoothness of `Ψ`: it is a finite sum, each summand is `f • Nijk` with
-  -- `f` smooth on `U` and `Nijk` constant.
   have hΨ_contDiffOn : ContDiffOn ℝ ∞ Ψ U := by
     refine ContDiffOn.sum (fun i _ => ?_)
     refine ContDiffOn.sum (fun j _ => ?_)
@@ -245,9 +213,6 @@ theorem christoffel_Ck_bound_from_metric_Ck1 [I.Boundaryless]
       exact h_summand_eq i j κ z
     rw [h_eq]
     exact h_scalar.smul_const (N i j κ)
-  -- Step 3: relate `iteratedFDeriv` of `Φ` to that of `Ψ` on `U`. They agree
-  -- on the open set, hence `iteratedFDeriv` agrees pointwise on `U` via
-  -- `Filter.EventuallyEq.iteratedFDeriv`.
   have h_iterated_eq : ∀ j_idx : ℕ, ∀ y ∈ U,
       iteratedFDeriv ℝ j_idx Φ y = iteratedFDeriv ℝ j_idx Ψ y := by
     intro j_idx y hy
@@ -255,25 +220,18 @@ theorem christoffel_Ck_bound_from_metric_Ck1 [I.Boundaryless]
       Filter.eventuallyEq_iff_exists_mem.mpr
         ⟨U, hU_open.mem_nhds hy, fun z hz => hΦΨ_on_U hz⟩
     exact (Filter.EventuallyEq.iteratedFDeriv ℝ hΦΨ_nhds j_idx).eq_of_nhds
-  -- Step 4: bound `iteratedFDeriv ℝ j_idx Ψ y` on `K` via continuity of
-  -- `iteratedFDerivWithin Ψ U` on `U` (which equals `iteratedFDeriv ℝ j_idx Ψ`
-  -- on `U` by openness) and compactness of `K`.
   have hU_uniqueDiff : UniqueDiffOn ℝ U := hU_open.uniqueDiffOn
   have h_iteratedFDerivWithin_eq_iteratedFDeriv : ∀ j_idx : ℕ, ∀ y ∈ U,
       iteratedFDerivWithin ℝ j_idx Ψ U y = iteratedFDeriv ℝ j_idx Ψ y :=
     fun j_idx y hy => iteratedFDerivWithin_of_isOpen j_idx hU_open hy
-  -- Continuity of `iteratedFDerivWithin Ψ U` on `U`.
   have h_iterated_contOn : ∀ j_idx : ℕ,
       ContinuousOn (fun y => iteratedFDerivWithin ℝ j_idx Ψ U y) U := fun j_idx =>
     hΨ_contDiffOn.continuousOn_iteratedFDerivWithin (by exact_mod_cast le_top) hU_uniqueDiff
-  -- For each fixed order `j_idx`, the continuous function
-  -- `y ↦ ‖iteratedFDerivWithin ℝ j_idx Ψ U y‖` is bounded on the compact `K`.
   have h_per_order : ∀ j_idx : ℕ, ∃ Cj : ℝ, 0 ≤ Cj ∧ ∀ y ∈ K,
       ‖iteratedFDeriv ℝ j_idx Φ y‖ ≤ Cj := by
     intro j_idx
     by_cases hKne : K.Nonempty
-    · -- Use continuity on a compact set to extract a max.
-      have h_iter_K : ContinuousOn (iteratedFDerivWithin ℝ j_idx Ψ U) K :=
+    · have h_iter_K : ContinuousOn (iteratedFDerivWithin ℝ j_idx Ψ U) K :=
         (h_iterated_contOn j_idx).mono hK_sub
       have h_cont_within : ContinuousOn (fun y =>
           ‖iteratedFDerivWithin ℝ j_idx Ψ U y‖) K :=
@@ -295,11 +253,9 @@ theorem christoffel_Ck_bound_from_metric_Ck1 [I.Boundaryless]
       intro y hy
       exfalso
       exact hKne ⟨y, hy⟩
-  -- Step 5: take the maximum of the per-order bounds across `j_idx ∈ Finset.range k`.
   choose Cj hCj_nn hCj_bd using h_per_order
   by_cases hk : k = 0
-  · -- Vacuous case: `Finset.range 0 = ∅`.
-    refine ⟨0, le_refl _, ?_⟩
+  · refine ⟨0, le_refl _, ?_⟩
     intro j_idx hj
     subst hk
     simp at hj

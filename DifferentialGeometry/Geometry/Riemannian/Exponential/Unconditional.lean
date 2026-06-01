@@ -134,21 +134,16 @@ theorem exists_chartFlow_combined_witness
   set x₀ : E := extChartAt I p p with hx₀_def
   have hx₀_interior : x₀ ∈ interior (extChartAt I p).target :=
     extChartAt_self_mem_interior_target (I := I) p
-  -- Combined existence: joint C^1 + IsLocalFlow on the same Φ.
   obtain ⟨b, r, ε, ρ, T, Φ, hr, hε, hρ_pos, hT_pos, hb_sub, hΦ_loc, hcd, hinit⟩ :=
     DifferentialGeometry.Geometry.Riemannian.Geodesic.exists_chartPhase_contDiffOn_isLocalFlow_combined
       (I := I) (M := M) (g := g) (α := p)
       (x₀ := x₀) (v₀ := (0 : E)) hx₀_interior
-  -- Zero-section orbit constancy: ∀ᶠ s in 𝓝 0, Φ((x₀, 0), s) = (x₀, 0).
   have hconst :=
     chartFlow_zero_section_eventually_const (I := I) (g := g) (p := p)
       (Φ := Φ) (b := b) (r := r) (ε := ε) hΦ_loc hb_sub hr hε
-  -- Extract an open interval Ioo (-δ) δ on which the constancy holds.
   rcases Filter.eventually_iff_exists_mem.mp hconst with ⟨U, hU_nhds, hU⟩
   rcases _root_.mem_nhds_iff.mp hU_nhds with ⟨V, hVU, hV_open, hV_mem_zero⟩
-  -- V is open in ℝ, contains 0, and U-membership implies the constancy.
   rcases (Metric.isOpen_iff.mp hV_open) (0 : ℝ) hV_mem_zero with ⟨δ_match, hδ_match_pos, hδ_sub⟩
-  -- Set T_match := min (δ_match) T.
   set T_match : ℝ := min δ_match T with hT_match_def
   have hT_match_pos : 0 < T_match := by
     exact lt_min hδ_match_pos hT_pos
@@ -161,22 +156,13 @@ theorem exists_chartFlow_combined_witness
     apply hδ_sub
     rw [Metric.mem_ball, Real.dist_eq, sub_zero, abs_lt]
     refine ⟨?_, ?_⟩
-    · -- -δ_match < t': since -T_match < t' and -δ_match ≤ -T_match.
-      have h1 : -T_match < t' := ht'.1
+    · have h1 : -T_match < t' := ht'.1
       linarith
-    · -- t' < δ_match: since t' < T_match and T_match ≤ δ_match.
-      have h2 : t' < T_match := ht'.2
+    · have h2 : t' < T_match := ht'.2
       linarith
   exact hU _ (hVU ht'_in_V)
 
 end ZeroSectionWitness
-
-/-! ## The named manifold-side data predicate
-
-We expose a single `Prop` capturing the full existential input expected
-by `expMap_contMDiffAt_zero_of_chartFlowGeodesicMatch`. This is the
-**only** unconditional input that remains to be discharged for the
-headline. -/
 
 section HasMatchData
 
@@ -206,15 +192,6 @@ def HasChartFlowGeodesicMatchData (g : SmoothRiemannianMetric I M) (p : M) : Pro
 
 end HasMatchData
 
-/-! ## Reduction to the manifold-side match
-
-The named predicate `HasChartFlowGeodesicMatchData g p` is implied by
-the existence of `ChartFlowGeodesicMatchAt` at some V.4-compatible
-configuration. This reduction packages the chart-side conditions
-(`ContDiffOn 1`, chart-target containment at the zero-section
-evaluation, inverse-chart image being `p`) which the V.4 combined-form
-flow plus zero-section orbit constancy supply unconditionally. -/
-
 section ReductionToMatch
 
 variable [I.Boundaryless] [CompleteSpace E]
@@ -243,13 +220,11 @@ theorem hasChartFlowGeodesicMatchData_of_match
   classical
   obtain ⟨Φ, ρ, T, T_match, t', ρ', hρ, hT, hT_match, hT_match_le, ht'_pos, hρ'_pos,
     ht'_lt, hcd, _hinit, hconst, hmatch⟩ := h
-  -- t' ∈ Ioo (-T_match) T_match → Φ((x₀, 0), t') = (x₀, 0).
   have ht'_in_match : t' ∈ Set.Ioo (-T_match) T_match := by
     refine ⟨?_, ht'_lt⟩
     linarith
   have hval0 : Φ (((extChartAt I p p, (0 : E)) : E × E), t') =
       ((extChartAt I p p, (0 : E)) : E × E) := hconst t' ht'_in_match
-  -- From hval0: the first coordinate is x₀, which is in (extChartAt I p).target.
   have hval0_fst : (Φ (((extChartAt I p p, (0 : E)) : E × E), t')).1 =
       extChartAt I p p := by
     rw [hval0]
@@ -260,12 +235,10 @@ theorem hasChartFlowGeodesicMatchData_of_match
   have hval_target : (Φ (((extChartAt I p p, (0 : E)) : E × E), t')).1 ∈
       (extChartAt I p).target := by
     rw [hval0_fst]; exact hx₀_target
-  -- (extChartAt I p).symm of the first coord is p.
   have hval_symm : (extChartAt I p).symm
       (Φ (((extChartAt I p p, (0 : E)) : E × E), t')).1 = p := by
     rw [hval0_fst]
     exact (extChartAt I p).left_inv hx₀_src
-  -- t' ∈ Ioo (-T) T.
   have ht'_in : t' ∈ Set.Ioo (-T) T := by
     refine ⟨?_, ?_⟩
     · linarith
@@ -274,11 +247,6 @@ theorem hasChartFlowGeodesicMatchData_of_match
     hcd, hval_target, hval_symm, hmatch⟩
 
 end ReductionToMatch
-
-/-! ## Headline: `expMap_contMDiffAt_zero_of_chartFlowGeodesicMatchData`
-
-The headline `ContMDiffAt 𝓘(ℝ, E) I 1` smoothness of `expMap g p` at the
-zero vector, conditional on `HasChartFlowGeodesicMatchData g p`. -/
 
 section Headline
 

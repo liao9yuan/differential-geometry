@@ -66,22 +66,12 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH2kBridge
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-
-/-! ## Bridge ↔ chart-Sobolev membership: a definitional unfolding
-
-The chart-side `H^{2k}` bridge is, by unfolding, the manifold-level
-chart-Sobolev membership `MemWkpChart g (2k) 2`. Both sides are
-quantifications over chart points `α : M` of the same per-chart
-`MemWkp (2k) 2` predicate on the POU-cut chart-pushed function under
-the canonical atlas POU. -/
 
 /-- **`ChartSideH2kBridge g k u ↔ MemWkpChart g (2k) 2 u`.**
 
@@ -97,13 +87,6 @@ theorem chartSideH2kBridge_iff_memWkpChart_two_k
     (I := I) (M := M) g k h, fun h => ?_⟩
   intro α
   exact h α
-
-/-! ## Headline: bridge-form smoothing
-
-The bridge form of `heatSemigroup_smooth_representative`: replace the
-iterated chart-Sobolev hypothesis by the equivalent chart-side bridge
-hypothesis. Both are stated for the `Lp`-coercion of the heat output
-`(heatSemigroup g t u_0 : Lp ℝ 2 μ_g) : M → ℝ`. -/
 
 /-- **Bridge-form smoothing of the heat semigroup**.
 
@@ -129,7 +112,6 @@ theorem heatSemigroup_smooth_representative_of_chartSideBridges
       ((heatSemigroup (I := I) (M := M) g t u_0 :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) =ᵐ[
           riemannianVolumeMeasure (I := I) (M := M) g] u_smooth := by
-  -- Translate each bridge to a chart-Sobolev membership.
   have h_iterated_regularity : ∀ k : ℕ,
       MemWkpChart (I := I) (M := M) g (2 * k) 2
         (((heatSemigroup (I := I) (M := M) g t u_0 :
@@ -137,7 +119,6 @@ theorem heatSemigroup_smooth_representative_of_chartSideBridges
     intro k
     exact (chartSideH2kBridge_iff_memWkpChart_two_k
       (I := I) (M := M) g k _).mp (h_bridges k)
-  -- Forward to the existing smoothing theorem.
   exact heatSemigroup_smooth_representative (I := I) (M := M) g ht u_0
     h_iterated_regularity
 
@@ -173,18 +154,6 @@ theorem heatSemigroup_smooth_in_space_and_time_of_chartSideBridges
       (I := I) (M := M) g ht u_0 (h_bridges_uniform t ht)
   · exact heatSemigroup_contMDiff_in_time (I := I) (M := M) g u_0
 
-/-! ## Documentation lemma: bridge-shape iterated regularity
-
-For every `k`, the heat-evolved `Lp` element `heatSemigroup g t u_0` admits an
-`H1Compl g` lift `u_h_k ∈ laplacianDomainPow g k` with
-`H1ComplToLp g u_h_k = heatSemigroup g t u_0`. Consequently, the canonical
-function representatives `((H1ComplToLp u_h_k) : M → ℝ)` and
-`((heatSemigroup g t u_0) : M → ℝ)` agree a.e., so the chart-side bridge for
-the heat representative is equivalent to the chart-side bridge for the lift
-of each `k`. This documentation lemma packages this fact, showing that the
-bridge hypothesis on the heat output is exactly the iterated chart-side
-regularity at the `H1Compl` level. -/
-
 /-- **Documentation lemma**: the chart-side bridge on the heat representative
 implies a uniform-`k` family of bridges on the canonical function representatives
 of the `H1Compl` lifts `u_h_k ∈ laplacianDomainPow g k`. -/
@@ -207,9 +176,6 @@ theorem chartSideH2kBridge_heat_implies_chartSideH2kBridge_lifts
   obtain ⟨u_h, hu_h_mem, hu_h_eq⟩ :=
     heatSemigroup_mem_laplacianDomainPow_all (I := I) (M := M) g ht u_0 k
   refine ⟨u_h, hu_h_mem, hu_h_eq, ?_⟩
-  -- The bridge depends only on the function `((H1ComplToLp u_h) : M → ℝ)`.
-  -- From `H1ComplToLp u_h = heatSemigroup g t u_0`, the coercions agree as
-  -- elements of `M → ℝ` (definitional equality after rewriting).
   have h_coe : ((H1ComplToLp (I := I) (M := M) g u_h :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) =
       ((heatSemigroup (I := I) (M := M) g t u_0 :
@@ -251,13 +217,6 @@ theorem laplacianDomainPow_memWkpChart_2k_of_chartSideBridges_heat
       (I := I) (M := M) g k hu_h_mem h_bridge_lift).1
   · exact (laplacianDomainPow_memWkpChart_2k_of_chartSideH2kBridge
       (I := I) (M := M) g k hu_h_mem h_bridge_lift).2
-
-/-! ## `k ≤ 1` smoothing: unconditional bridge
-
-For `k = 0` and `k = 1`, the chart-side bridge on the heat output is
-discharged unconditionally by `chartSideH2kBridge_zero` and
-`chartSideH2kBridge_one` applied to any `H1Compl` lift of the heat
-output. These document the boundary cases of the bridge hypothesis. -/
 
 /-- **At `k = 0`, the chart-side `H⁰` bridge for the heat representative is
 unconditional.** -/

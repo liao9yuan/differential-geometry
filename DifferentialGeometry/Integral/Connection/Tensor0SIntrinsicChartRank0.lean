@@ -47,12 +47,6 @@ variable
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## Evaluation at the empty tuple as a CLM
-
-The map sending a rank-0 model tensor `F : Tensor0SModel 0 ℝ E` to the scalar
-`F (Fin.elim0)` is a continuous linear functional. We expose this as a CLM so
-that the chain rule for `fderiv` can be applied with it. -/
-
 /-- Evaluation of a rank-0 model tensor at the unique empty tuple, as a CLM.
 This is the `ContinuousMultilinearMap.apply` bundled CLM specialised to the
 unique input in `Fin 0 → E`. -/
@@ -63,8 +57,6 @@ private noncomputable def evalEmptyCLM :
 
 @[simp] private lemma evalEmptyCLM_apply (F : Tensor0SModel 0 ℝ E) :
     evalEmptyCLM (E := E) F = F (fun i : Fin 0 => Fin.elim0 i) := rfl
-
-/-! ## Rank-0 trivialisation acts trivially on the empty tuple -/
 
 /-- The chart-α-trivialised rank-0 representation evaluated at the empty tuple
 equals the original fibre value evaluated at the empty tuple. -/
@@ -102,8 +94,6 @@ private lemma tensor0SChartFiberFromModel_zero_empty (α : M) {b : M}
   congr 1
   funext i
   exact i.elim0
-
-/-! ## Scalar evaluation of the chart pullback equals the scalar pullback -/
 
 /-- Pointwise: the rank-0 chart-α trivialised representation, evaluated at
 the empty tuple, equals the scalar tensor evaluation, on the trivialisation
@@ -161,8 +151,6 @@ private lemma evalEmpty_chartPullback_eventually_eq_scalar
   rintro y ⟨_hy_int, hy_base⟩
   exact chartE_eval_eq_scalar (I := I) α T (b' := φ.symm y) hy_base
 
-/-! ## Manifold differentiability of the scalar tensor evaluation -/
-
 /-- If the bundle-section form of a `(0, 0)`-tensor section `T` is
 manifold-differentiable at a good-set point `b`, then the scalar evaluation
 `b' ↦ T b' (Fin.elim0)` is manifold-differentiable at `b`. -/
@@ -219,8 +207,6 @@ private lemma mdifferentiableAt_scalarFn_of_tensorSectionMDiffAt
     rw [chartE_eval_eq_scalar (I := I) α T hb']
   exact hcomp.congr_of_eventuallyEq hev
 
-/-! ## The headline rank-0 identity -/
-
 /-- **Rank-0 identity.** The intrinsic chart-α Fréchet-derivative CLM of a
 `(0, 0)`-tensor section `T`, applied to a tangent vector `v` and evaluated at
 the unique empty tuple, equals the manifold-Fréchet derivative of the scalar
@@ -255,12 +241,9 @@ theorem tensor0SIntrinsicChartCLM_zero_apply_empty_eq_mfderiv
     chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hb
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
-  -- Unfold the LHS to the fibre-from-model image of the Fréchet derivative.
   rw [tensor0SIntrinsicChartCLM_apply (I := I) 0 α T b v]
   rw [tensor0SChartFiberFromModel_zero_empty (I := I) α hb_base
       (fderiv ℝ (repr ∘ φ.symm) (φ b) v0)]
-  -- Rewrite empty-tuple evaluation as `evalEmptyCLM` postcomposition, then
-  -- pull through `fderiv` by the chain rule.
   change evalEmptyCLM (E := E) (fderiv ℝ (repr ∘ φ.symm) (φ b) v0) = _
   have hDiff_repr_pullback : DifferentiableAt ℝ (repr ∘ φ.symm) (φ b) :=
     differentiableAt_tensor0SChartE_pullback_of_mdifferentiableAt
@@ -280,13 +263,11 @@ theorem tensor0SIntrinsicChartCLM_zero_apply_empty_eq_mfderiv
               (repr ∘ φ.symm)) (φ b) v0 := by
     rw [hChain]; rfl
   rw [hCommute]
-  -- Identify the chart-pullback composition with the scalar-tensor pullback.
   have hev :
       ((evalEmptyCLM (E := E) : Tensor0SModel 0 ℝ E →L[ℝ] ℝ) ∘
         (repr ∘ φ.symm)) =ᶠ[𝓝 (φ b)] (scalarFn ∘ φ.symm) :=
     evalEmpty_chartPullback_eventually_eq_scalar (I := I) α T hb
   rw [hev.fderiv_eq]
-  -- Bridge to `mfderiv` via the scalar chart-pullback identity.
   have hscalarFn_at : MDifferentiableAt I 𝓘(ℝ) scalarFn b :=
     mdifferentiableAt_scalarFn_of_tensorSectionMDiffAt
       (I := I) (M := M) α T (b := b) hb hT_at

@@ -61,8 +61,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Compactness of the chart-α image of the partition-of-unity tsupport -/
-
 /-- The chart-α image of the partition-of-unity tsupport, transferred to the
 chart-Euclidean target via `toEuclidean`, is a compact subset of
 `chartTargetEuclid α`. -/
@@ -124,8 +122,6 @@ lemma pouTsupport_image_subset_chartTargetEuclid (α : M) :
     (extChartAt I α).map_source hb_src
   exact ⟨(extChartAt I α) b, hb_tgt, rfl⟩
 
-/-! ## Uniform sup-bound on `ContDiffOn ℝ ∞` functions over a compact subset -/
-
 /-- Auxiliary: a function that is `ContDiffOn ℝ ∞` on a set `U` is continuous
 on `U`, hence bounded on any compact subset `K ⊆ U`. -/
 lemma exists_sup_bound_of_contDiffOn_on_compact_subset
@@ -142,8 +138,6 @@ lemma exists_sup_bound_of_contDiffOn_on_compact_subset
   refine ⟨max B 0, le_max_right _ _, ?_⟩
   intro y hy
   exact (hB ⟨y, hy, rfl⟩).trans (le_max_left _ _)
-
-/-! ## Headline -/
 
 /-- **Uniform bound on the squared chart-α `(Idx, Jdx)` raw component of the
 tensor connection Laplacian on the partition-of-unity tsupport.**
@@ -189,7 +183,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport
   classical
   let n : ℕ := Module.finrank ℝ E
   have hn_def : n = Module.finrank ℝ E := rfl
-  -- The compact subset of `chartTargetEuclid α`.
   set K_set : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
     (fun b : M => (toEuclidean (E := E)) ((extChartAt I α) b)) ''
       tsupport (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
@@ -198,7 +191,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport
     pouTsupport_image_isCompact (I := I) (M := M) α
   have hK_sub : K_set ⊆ chartTargetEuclid (I := I) (M := M) α :=
     pouTsupport_image_subset_chartTargetEuclid (I := I) (M := M) α
-  -- Per-`(k, l)` sup-bound on `weightedInvGramEuclid g α k l` over `K_set`.
   have h_each_C : ∀ kl : Fin n × Fin n, ∃ C : ℝ, 0 ≤ C ∧
       ∀ y ∈ K_set,
         |weightedInvGramEuclid (I := I) (M := M) g α kl.1 kl.2 y| ≤ C := by
@@ -220,10 +212,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport
     refine h.trans ?_
     exact Finset.le_sup'_of_le C_fn (Finset.mem_univ (⟨k, l⟩ : Fin n × Fin n))
       (le_refl _)
-  -- Sup-bound on the lower-order correction. We use the inline construction
-  -- from B.2.c.vi: `Coeff_LO y = chartPushedRaw(rawConnLapSmooth T₀)(y) -
-  --   Σ_{k,l} weightedInvGramEuclid g α k l y * ∂_l ∂_k chartPushedRaw(T₀) y`,
-  -- which is `ContDiffOn ℝ ∞` on `chartTargetEuclid α`.
   have h_chartPushed_raw_contDiffOn : ContDiffOn ℝ ∞
       (chartPushedRaw I α
         (tensorChartComponentRaw (I := I) (M := M) g r s
@@ -231,8 +219,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport
       (chartTargetEuclid (I := I) (M := M) α) :=
     chartPushedRaw_tensorChartComponentRaw_contDiffOn (I := I) (M := M) g r s
       (rawTensorConnLapSmooth (I := I) g r s T₀) α idx jdx
-  -- The double-partial-of-chartPushedRaw is `ContDiffOn ℝ ∞` (peel two
-  -- `fderiv` layers on the open chart-Euclidean target).
   have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have h_each_partial : ∀ k : Fin n,
@@ -250,7 +236,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport
               (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α idx jdx))))
         (chartTargetEuclid (I := I) (M := M) α) := by
     intro k l
-    -- Same `fderiv`-on-open argument as in B.2.c.vi (`hkl` block).
     set u : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
       euclidPartial (E := E) k
         (chartPushedRaw I α
@@ -276,7 +261,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport
         (EuclideanSpace.single l 1)).contDiff.comp_contDiffOn hfderiv
     refine hcomp.congr (fun z _ => ?_)
     rfl
-  -- Build the LO-correction function on `chartTargetEuclid α`.
   set Coeff_LO_fn : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
     fun y =>
       (chartPushedRaw I α
@@ -299,37 +283,24 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport
   obtain ⟨B_LO, hB_LO_nn, hB_LO_bd⟩ :=
     exists_sup_bound_of_contDiffOn_on_compact_subset
       hK_compact hK_sub hCoeff_LO_fn_contDiffOn
-  -- Choose the constant K.
   refine ⟨2 * ((n : ℝ) ^ 2 * B_C ^ 2 + 1) * (1 + B_LO ^ 2), by positivity, ?_⟩
   intro b hb_inter
-  -- Invoke B.2.c.vi to rewrite the LHS.
   obtain ⟨U, _hU_open, hb_U, _hU_good, _Coeff_2, _Coeff_LO,
     _hC2_cd, _hCLO_cd, hidentity⟩ :=
     tensorChartComponentRaw_rawTensorConnLap_eq_chart_α_coord_formula
       (I := I) g r s α T₀ idx jdx hb_inter
   have hLHS := hidentity b hb_U
-  -- Set up names.
   set y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) :=
     (toEuclidean (E := E)) ((extChartAt I α) b) with hy_def
   have hb_tsupp : b ∈ tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) := hb_inter.1
   have hy_K : y ∈ K_set := ⟨b, hb_tsupp, rfl⟩
-  -- Avoid `set`/`let` for the LHS to prevent Lean from internally renaming
-  -- `Idx` / `Jdx`; instead, work directly with the explicit form via a local
-  -- definition that we explicitly unfold at the end.
   let lhs : ℝ := tensorChartComponentRaw (I := I) (M := M) g r s
       (rawTensorConnLapSmooth (I := I) g r s T₀) α idx jdx b
   have hlhs_def : lhs = tensorChartComponentRaw (I := I) (M := M) g r s
       (rawTensorConnLapSmooth (I := I) g r s T₀) α idx jdx b := rfl
   have hlhs_eq_b : tensorChartComponentRaw (I := I) (M := M) g r s
       (rawTensorConnLapSmooth (I := I) g r s T₀) α idx jdx b = lhs := rfl
-  -- B.2.c.vi sets `Coeff_2 k l = weightedInvGramEuclid g α k l` and
-  -- `Coeff_LO = lowerOrderCorrection` definitionally. In our identity we
-  -- can rewrite via `change`.
-  -- The identity gives:
-  --  lhs = Σ_{k,l} weightedInvGramEuclid g α k l y * ∂_l ∂_k chartPushed T₀ y + Coeff_LO_fn y.
-  -- That's our `Coeff_LO_fn` by construction (the chartPushed_rawConnLap value).
-  -- We need to show this.
   have h_lhs_eq :
       lhs = (∑ k : Fin (Module.finrank ℝ E),
               ∑ l : Fin (Module.finrank ℝ E),
@@ -340,20 +311,10 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport
                         (tensorChartComponentRaw (I := I) (M := M) g r s
                           T₀ α idx jdx))) y) +
               Coeff_LO_fn y := by
-    -- From B.2.c.vi's identity:
-    -- lhs = Σ Coeff_2 k l y · ∂_l ∂_k chartPushed_T₀ y + Coeff_LO y
-    -- where Coeff_2 k l = weightedInvGramEuclid and Coeff_LO = lowerOrderCorrection.
-    -- The lowerOrderCorrection at y equals
-    --   chartPushed_rawConnLapComponent(y) - principalSecondDerivSum(y)
-    -- = chartPushedRaw(rawConnLapSmooth T₀_Idx_Jdx)(y) - Σ ...
-    -- = Coeff_LO_fn y.
-    -- So algebraically we get our identity (after the principal sum cancels with itself).
-    -- We carry out this rewriting via the chartPushed identity.
     have h_chartPushed_eq :
         (chartPushedRaw I α
           (tensorChartComponentRaw (I := I) (M := M) g r s
             (rawTensorConnLapSmooth (I := I) g r s T₀) α idx jdx)) y = lhs := by
-      -- On the good set, chartPushedRaw equals the raw component at b.
       have hb_good : b ∈ chartLeviCivitaGoodSet (I := I) α := hb_inter.2
       have hb_src : b ∈ (extChartAt I α).source :=
         chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hb_good
@@ -362,18 +323,14 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport
       have hy_chartTarget : y ∈ chartTargetEuclid (I := I) (M := M) α :=
         ⟨(extChartAt I α) b, hb_tgt, rfl⟩
       rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy_chartTarget]
-      -- Reduce `(extChartAt I α).symm (toEuclidean.symm y) = b`.
       have hsymm_te : (toEuclidean (E := E)).symm
           ((toEuclidean (E := E)) ((extChartAt I α) b)) = (extChartAt I α) b :=
         (toEuclidean (E := E)).symm_apply_apply _
       have hleft_inv : (extChartAt I α).symm ((extChartAt I α) b) = b :=
         (extChartAt I α).left_inv hb_src
       simp only [hy_def, hsymm_te, hleft_inv, hlhs_def]
-    -- Unfold Coeff_LO_fn at y: it's chartPushed_rawConnLap y - principal_sum y.
-    -- Then lhs = principal_sum + Coeff_LO_fn = principal_sum + (lhs - principal_sum) = lhs.
     simp only [hCoeff_LO_fn_def, h_chartPushed_eq]
     ring
-  -- Now bound `lhs^2 = (principal_sum + Coeff_LO_fn y)^2`.
   set principal_sum : ℝ := ∑ k : Fin (Module.finrank ℝ E),
                             ∑ l : Fin (Module.finrank ℝ E),
                               weightedInvGramEuclid (I := I) (M := M) g α k l y *
@@ -401,10 +358,7 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport
                       y) ^ 2 := rfl
   have hSumPart2_nn : 0 ≤ SumPart2 :=
     Finset.sum_nonneg (fun _ _ => Finset.sum_nonneg (fun _ _ => sq_nonneg _))
-  -- Step 1: |principal_sum|² ≤ (Σ_{k,l} |Cₖₗ|·|∂_l ∂_k|)² ≤ (Σ |Cₖₗ|²)(Σ |∂|²)
-  --                          ≤ n² B_C² · SumPart2  via Cauchy-Schwarz.
   have h_principal_sq : principal_sum ^ 2 ≤ (n : ℝ) ^ 2 * B_C ^ 2 * SumPart2 := by
-    -- Set up shorthand for each pair `(k, l)`.
     set Ckl : Fin n → Fin n → ℝ :=
       fun k l => weightedInvGramEuclid (I := I) (M := M) g α k l y with hCkl_def
     set Dkl : Fin n → Fin n → ℝ :=
@@ -413,10 +367,8 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport
           (chartPushedRaw I α
             (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α idx jdx))) y
       with hDkl_def
-    -- principal_sum = Σ_{k,l} Ckl k l * Dkl k l.
     have hps_eq : principal_sum = ∑ k : Fin n, ∑ l : Fin n, Ckl k l * Dkl k l :=
       rfl
-    -- Cauchy-Schwarz on the double sum, viewed as a sum over `Fin n × Fin n`.
     have h_cs : (∑ k : Fin n, ∑ l : Fin n, Ckl k l * Dkl k l) ^ 2 ≤
         (∑ k : Fin n, ∑ l : Fin n, Ckl k l ^ 2) *
           (∑ k : Fin n, ∑ l : Fin n, Dkl k l ^ 2) := by
@@ -433,7 +385,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport
       exact Finset.sum_mul_sq_le_sq_mul_sq
         (Finset.univ : Finset (Fin n × Fin n))
         (fun kl => Ckl kl.1 kl.2) (fun kl => Dkl kl.1 kl.2)
-    -- Σ |Ckl|² ≤ n² B_C².
     have h_C_sq_bd : (∑ k : Fin n, ∑ l : Fin n, Ckl k l ^ 2) ≤
         (n : ℝ) ^ 2 * B_C ^ 2 := by
       have h_each : ∀ k l : Fin n, Ckl k l ^ 2 ≤ B_C ^ 2 := by
@@ -449,7 +400,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport
         _ = (n : ℝ) ^ 2 * B_C ^ 2 := by
             simp [Finset.sum_const, Finset.card_univ, Fintype.card_fin]
             ring
-    -- Combine.
     calc principal_sum ^ 2
         = (∑ k : Fin n, ∑ l : Fin n, Ckl k l * Dkl k l) ^ 2 := by rw [hps_eq]
       _ ≤ (∑ k : Fin n, ∑ l : Fin n, Ckl k l ^ 2) *
@@ -461,7 +411,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport
                 Finset.sum_nonneg (fun _ _ => sq_nonneg _))
             exact mul_le_mul_of_nonneg_right h_C_sq_bd hD_nn
       _ = (n : ℝ) ^ 2 * B_C ^ 2 * SumPart2 := by rfl
-  -- Step 2: lhs² = (principal_sum + LO)² ≤ 2(principal_sum² + LO²).
   have h_LO_abs : |Coeff_LO_fn y| ≤ B_LO := hB_LO_bd y hy_K
   have h_LO_sq : (Coeff_LO_fn y) ^ 2 ≤ B_LO ^ 2 := by
     have := pow_le_pow_left₀ (abs_nonneg (Coeff_LO_fn y)) h_LO_abs 2
@@ -470,7 +419,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport
   have h_lhs_sq : lhs ^ 2 ≤ 2 * principal_sum ^ 2 + 2 * (Coeff_LO_fn y) ^ 2 := by
     rw [h_lhs_eq]
     nlinarith [sq_nonneg (principal_sum - Coeff_LO_fn y)]
-  -- Combine.
   have h_final : lhs ^ 2 ≤
       2 * ((n : ℝ) ^ 2 * B_C ^ 2 + 1) * (1 + B_LO ^ 2) * (SumPart2 + 1) := by
     calc lhs ^ 2
@@ -483,7 +431,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport
           nlinarith [hSumPart2_nn, ha, hb, mul_nonneg ha hSumPart2_nn,
             mul_nonneg hb hSumPart2_nn, mul_nonneg ha hb,
             mul_nonneg (mul_nonneg ha hb) hSumPart2_nn]
-  -- Rewrite the goal to use the let-bound `lhs` and `SumPart2` names.
   rw [hlhs_eq_b, ← hSumPart2_def]
   exact h_final
 

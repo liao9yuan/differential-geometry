@@ -75,14 +75,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Local L² bound for the difference quotient
-
-We prove a localised `lintegral` analogue of
-`lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv`: the
-integral of `(D_h^k v)²` over a measurable set `K` is bounded by the
-integral of `(∂_k v)²` over the closed `|h|`-thickening of `K`.
--/
-
 omit [NeZero d] in
 /-- Localized L² lintegral bound for the difference quotient. -/
 private theorem lintegral_sq_diffQuot_le_local
@@ -112,7 +104,6 @@ private theorem lintegral_sq_diffQuot_le_local
     have h5 : Measurable (fun p : E × ℝ => p.1 + (p.2 * h) • e) :=
       h1.add h4
     exact hH_meas.comp h5
-  -- Pointwise bound: `(D_h^k v(x))² ≤ ∫₀¹ H(x + sh e)`.
   have hpt : ∀ x : E,
       (‖diffQuot k h v x‖ₑ : ℝ≥0∞) ^ 2 ≤
         ∫⁻ s in Set.Ioc (0 : ℝ) 1, H (x + (s * h) • e) := by
@@ -148,7 +139,6 @@ private theorem lintegral_sq_diffQuot_le_local
         sq_abs]
     rw [hLHS_eq, ← hConvert]
     exact ENNReal.ofReal_le_ofReal hreal
-  -- Step 2: bound `∫⁻ x in K, (D_h^k v)²` by `∫⁻ x in K, ∫⁻ s, H`.
   have h_step12 :
       ∫⁻ x in K, (‖diffQuot k h v x‖ₑ : ℝ≥0∞) ^ 2 ∂(volume : Measure E) ≤
         ∫⁻ x in K,
@@ -156,7 +146,6 @@ private theorem lintegral_sq_diffQuot_le_local
           ∂(volume : Measure E) := by
     refine lintegral_mono ?_
     intro x; exact hpt x
-  -- Step 3: Fubini swap.
   have h_swap :
       ∫⁻ x in K,
           ∫⁻ s in Set.Ioc (0 : ℝ) 1, H (x + (s * h) • e) ∂(volume : Measure ℝ)
@@ -165,7 +154,6 @@ private theorem lintegral_sq_diffQuot_le_local
           ∫⁻ x in K, H (x + (s * h) • e) ∂(volume : Measure E)
           ∂(volume : Measure ℝ) := by
     exact lintegral_lintegral_swap hPair_meas.aemeasurable
-  -- Step 4: For `s ∈ Ioc 0 1`, `∫_K H(x + sh e) dx ≤ ∫_{cthickening |h| K} H y dy`.
   have hTrans : ∀ s : ℝ, s ∈ Set.Ioc (0 : ℝ) 1 →
       ∫⁻ x in K, H (x + (s * h) • e) ∂(volume : Measure E) ≤
         ∫⁻ y in Metric.cthickening |h| K, H y ∂(volume : Measure E) := by
@@ -204,7 +192,6 @@ private theorem lintegral_sq_diffQuot_le_local
               mul_le_mul_of_nonneg_right hs_le_one habs_h_nn
         _ = |h| := one_mul _
     exact lintegral_mono_set h_subset
-  -- Step 5: combine.
   calc ∫⁻ x in K, (‖diffQuot k h v x‖ₑ : ℝ≥0∞) ^ 2 ∂(volume : Measure E)
       ≤ ∫⁻ x in K,
             (∫⁻ s in Set.Ioc (0 : ℝ) 1, H (x + (s * h) • e))
@@ -244,7 +231,6 @@ private theorem integral_sq_diffQuot_le_local
   have hLHS_nonneg : ∀ x : E, 0 ≤ fL x := fun _ => sq_nonneg _
   have hRHS_nonneg : ∀ y : E, 0 ≤ fR y := fun _ => sq_nonneg _
   have h_lintegral := lintegral_sq_diffQuot_le_local (d := d) hv k hh hK
-  -- Convert via `ENNReal.ofReal`.
   have h_norm_LHS : ∀ x : E,
       (‖diffQuot k h v x‖ₑ : ℝ≥0∞) ^ 2 = ENNReal.ofReal (fL x) := by
     intro x
@@ -268,28 +254,23 @@ private theorem integral_sq_diffQuot_le_local
         fun y : E => ENNReal.ofReal (fR y) := by
       funext y; exact h_norm_RHS y
     rw [← h1, ← h2]; exact h_lintegral
-  -- RHS finite by integrability hypothesis.
   have hRHS_fin : ∫⁻ y in Metric.cthickening |h| K, ENNReal.ofReal (fR y)
         ∂(volume : Measure E) ≠ ∞ := by
     have h := h_thick_int
     rw [← ofReal_integral_eq_lintegral_ofReal h
       (Filter.Eventually.of_forall hRHS_nonneg)]
     exact ENNReal.ofReal_ne_top
-  -- LHS finite (sandwiched).
   have hLHS_fin : ∫⁻ x in K, ENNReal.ofReal (fL x) ∂(volume : Measure E) ≠ ∞ :=
     fun h_eq_top => hRHS_fin (le_antisymm le_top
       (by rw [← h_eq_top]; exact h_lintegral_real))
-  -- LHS integrable.
   have hL_meas : AEStronglyMeasurable fL ((volume : Measure E).restrict K) := by
     have hfL_cont : Continuous fL := by
       have hfL_cont : Continuous (diffQuot k h v) := by
-        -- Build continuity directly without smoothness lift.
         by_cases hh0 : h = 0
         · subst hh0
           rw [diffQuot_zero_h]
           exact continuous_const
-        · -- `diffQuot k h v x = (v(x + h e_k) - v(x))/h`.
-          have hv_cont : Continuous v := hv.continuous
+        · have hv_cont : Continuous v := hv.continuous
           have h_translate :
               Continuous (fun x : E => v (x + h • EuclideanSpace.single k 1)) := by
             have h_add : Continuous (fun x : E => x + h • EuclideanSpace.single k 1) :=
@@ -319,14 +300,11 @@ private theorem integral_sq_diffQuot_le_local
       lintegral_congr (fun x => h_eq x)
     rw [heq_lin]
     exact lt_of_le_of_lt (le_refl _) (lt_of_le_of_ne le_top hLHS_fin)
-  -- Convert to real integrals.
   rw [integral_eq_lintegral_of_nonneg_ae
     (Filter.Eventually.of_forall hLHS_nonneg) hL_meas]
   rw [integral_eq_lintegral_of_nonneg_ae
     (Filter.Eventually.of_forall hRHS_nonneg) h_thick_int.aestronglyMeasurable]
   exact ENNReal.toReal_mono hRHS_fin h_lintegral_real
-
-/-! ## Pointwise FTC bound for the difference quotient of a smooth function -/
 
 omit [NeZero d] in
 /-- Pointwise FTC bound: for smooth `g`, the difference quotient
@@ -345,15 +323,12 @@ private theorem abs_diffQuot_le_of_bound
     have hx0 : x ∈ Metric.cthickening |0| ({x} : Set E) := by
       have : x ∈ ({x} : Set E) := rfl
       exact self_subset_cthickening _ this
-    -- M ≥ 0 from the bound applied to x.
     have hM0 : 0 ≤ M := le_trans (abs_nonneg _) (hM x hx0)
     simp only [Pi.zero_apply, abs_zero]
     exact hM0
-  -- General case: use FTC representation.
   set e : E := EuclideanSpace.single k (1 : ℝ) with he
   have hFTC := diffQuot_eq_integral_partialDeriv (d := d) hg k hh x
   rw [hFTC]
-  -- Bound integrand absolute value by `M` on `Ioc 0 1`.
   have hpt : ∀ s : ℝ, s ∈ Set.Ioc (0 : ℝ) 1 →
       |(fderiv ℝ g (x + (s * h) • e)) e| ≤ M := by
     intro s hs
@@ -377,7 +352,6 @@ private theorem abs_diffQuot_le_of_bound
               mul_le_mul_of_nonneg_right hs_le_one habs_h_nn
         _ = |h| := one_mul _
     exact hM _ hin
-  -- Now bound the integral.
   have hint_cont : Continuous (fun s : ℝ =>
       (fderiv ℝ g (x + (s * h) • e)) e) := by
     have hfd_cont : Continuous (fun y : E => fderiv ℝ g y) :=
@@ -388,10 +362,8 @@ private theorem abs_diffQuot_le_of_bound
     exact (hfd_cont.comp hgamma_cont).clm_apply continuous_const
   have hint_M : ∀ s : ℝ, s ∈ Set.Ioc (0 : ℝ) 1 → 0 ≤ M :=
     fun s hs => le_trans (abs_nonneg _) (hpt s hs)
-  -- Use `abs_integral_le_integral_abs` and then `integral_mono`.
   have h1 : 0 ∈ Set.Ioc (0 : ℝ) 1 ∨ ¬ (0 : ℝ) ∈ Set.Ioc (0 : ℝ) 1 := em _
   have hM_nonneg : 0 ≤ M := by
-    -- Apply hpt to s = 1.
     have hs1 : (1 : ℝ) ∈ Set.Ioc (0 : ℝ) 1 := ⟨zero_lt_one, le_refl _⟩
     exact hint_M 1 hs1
   have h_int :
@@ -407,12 +379,10 @@ private theorem abs_diffQuot_le_of_bound
         ((volume : Measure ℝ).restrict (Set.Ioc (0 : ℝ) 1)) := by
     have h_cont_M : Continuous (fun _ : ℝ => M) := continuous_const
     exact h_cont_M.integrableOn_Ioc (a := 0) (b := 1)
-  -- |∫ f| ≤ ∫ |f|.
   have h_tri :
       |∫ s in Set.Ioc (0 : ℝ) 1, (fderiv ℝ g (x + (s * h) • e)) e| ≤
         ∫ s in Set.Ioc (0 : ℝ) 1, |(fderiv ℝ g (x + (s * h) • e)) e| := by
     exact abs_integral_le_integral_abs (μ := (volume : Measure ℝ).restrict _)
-  -- ∫ |f| ≤ ∫ M.
   have h_mono :
       ∫ s in Set.Ioc (0 : ℝ) 1, |(fderiv ℝ g (x + (s * h) • e)) e| ≤
         ∫ _s in Set.Ioc (0 : ℝ) 1, M := by
@@ -421,7 +391,6 @@ private theorem abs_diffQuot_le_of_bound
     refine Filter.Eventually.of_forall ?_
     intro ⟨s, hs⟩
     exact hpt s hs
-  -- ∫ M = M.
   have h_const_int :
       ∫ _s in Set.Ioc (0 : ℝ) 1, M = M := by
     rw [integral_const, Measure.real, Measure.restrict_apply MeasurableSet.univ]
@@ -500,12 +469,9 @@ theorem singleton_cthick_subset
   refine le_trans hy ?_
   exact_mod_cast ENNReal.ofReal_le_ofReal h_abs
 
-/-! ## Young's inequality and pointwise auxiliary bounds -/
-
 /-- Young's inequality for nonnegative absolute values. -/
 private lemma two_abs_mul_le_eps_sq_add (a b ε : ℝ) (hε : 0 < ε) :
     2 * |a| * |b| ≤ ε * a^2 + (1/ε) * b^2 := by
-  -- 2 * |a| * |b| = 2 * (√ε |a|) * (|b| / √ε), then AM-GM.
   have hsqrt_pos : 0 < Real.sqrt ε := Real.sqrt_pos.mpr hε
   have hsqrt_ne : Real.sqrt ε ≠ 0 := ne_of_gt hsqrt_pos
   set u : ℝ := Real.sqrt ε * |a|
@@ -547,14 +513,8 @@ private theorem cross_1_pointwise_bound
         (diffQuot k h u x)^2 := by
   let _ := hu
   let _ := hη
-  -- Goal LHS abs of product. Group: (2 * (τa) * (∂_j η)) * (η · D_h^k ∂u) * (D_h^k u).
-  -- Apply Young to split into η · D_h^k ∂u (absorbing) vs (τa)(∂η)(D_h^k u) (other).
-  -- Pointwise bounds on coefficients.
-  -- |τa(x)| bound: case split on x ∈ tsupport η or not.
-  -- If x ∉ tsupport η, then η x = 0, so LHS = 0, trivially bounded.
   by_cases hx : x ∈ tsupport η
-  · -- x ∈ tsupport η. Use bounds on τa, ∂η.
-    have h_shift_in : x + h • EuclideanSpace.single k 1 ∈ closure Ω' := by
+  · have h_shift_in : x + h • EuclideanSpace.single k 1 ∈ closure Ω' := by
       have h_shift_in_Ω' : x + h • EuclideanSpace.single k 1 ∈ Ω' :=
         shift_in_omega' (d := d) η k hh_supp_in_Ω' (le_refl _) hx
       exact subset_closure h_shift_in_Ω'
@@ -579,8 +539,6 @@ private theorem cross_1_pointwise_bound
       have h1 : η x ≤ 1 := h_in.2
       rw [abs_of_nonneg h0]; exact h1
     have h_η_nn : 0 ≤ η x := (hη_range ⟨x, rfl⟩).1
-    -- Apply Young: 2|A||B| ≤ ε A² + (1/ε) B²
-    -- A = η · D_h^k ∂_i u. B = (τa) · ∂_j η · D_h^k u.
     set A : ℝ := η x *
       diffQuot k h (fun y => (fderiv ℝ u y) (EuclideanSpace.single i 1)) x
     set B' : ℝ := translate k h (fun y => B.a y i j) x *
@@ -631,11 +589,8 @@ private theorem cross_1_pointwise_bound
           abs_mul]
         ring]
     rw [h_eq_lhs]
-    -- Apply Young
     have h_young := two_abs_mul_le_eps_sq_add A B' ε hε
-    -- h_young: 2|A||B'| ≤ ε A² + (1/ε) B'²
     refine h_young.trans ?_
-    -- Now bound A² ≤ η² (D_h^k ∂_i u)²  and  B'² ≤ Λ² N² (D_h^k u)² · 𝟙_{tsupport η}
     have hA_sq : A^2 = (η x)^2 *
         (diffQuot k h
           (fun y => (fderiv ℝ u y) (EuclideanSpace.single i 1)) x)^2 := by
@@ -644,7 +599,6 @@ private theorem cross_1_pointwise_bound
     have hB'_sq_le : B'^2 ≤ Λ^2 * N^2 *
         (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
         (diffQuot k h u x)^2 := by
-      -- B'² = (τa)² (∂_j η)² (D_h^k u)² ≤ Λ² N² (D_h^k u)² (since x ∈ tsupport η, indicator = 1).
       have h_indicator : Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x = 1 := by
         rw [Set.indicator_of_mem hx]
       rw [h_indicator]
@@ -684,7 +638,6 @@ private theorem cross_1_pointwise_bound
               (diffQuot k h u x)^2 := by ring
         _ ≤ Λ^2 * N^2 * (diffQuot k h u x)^2 := h_step1
         _ = Λ^2 * N^2 * 1 * (diffQuot k h u x)^2 := by rw [mul_one]
-    -- Combine.
     have hε_pos : 0 < (1 : ℝ) / ε := one_div_pos.mpr hε
     have h_step :
         (1/ε) * B'^2 ≤ (1/ε) * (Λ^2 * N^2 *
@@ -702,9 +655,7 @@ private theorem cross_1_pointwise_bound
             (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
             (diffQuot k h u x)^2 := by
             rw [hA_sq]; ring
-  · -- x ∉ tsupport η. Then `η x = 0`, so LHS = 0.
-    -- Indicator at x = 0.
-    have h_η_zero : η x = 0 := image_eq_zero_of_notMem_tsupport hx
+  · have h_η_zero : η x = 0 := image_eq_zero_of_notMem_tsupport hx
     have h_LHS_zero : 2 * translate k h (fun y => B.a y i j) x * (η x) *
         ((fderiv ℝ η x) (EuclideanSpace.single j 1)) *
         diffQuot k h
@@ -712,7 +663,6 @@ private theorem cross_1_pointwise_bound
         diffQuot k h u x = 0 := by
       rw [h_η_zero]; ring
     rw [h_LHS_zero, abs_zero]
-    -- RHS ≥ 0.
     have h_indicator : Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x = 0 :=
       Set.indicator_of_notMem hx _
     have h_t1_nn : 0 ≤ ε * (η x)^2 *
@@ -725,8 +675,6 @@ private theorem cross_1_pointwise_bound
         (diffQuot k h u x)^2 = 0 := by
       rw [h_indicator]; ring
     linarith
-
-/-! ## Integrability infrastructure -/
 
 /-- Continuity of `D_h^k u` for smooth `u` (h ≠ 0). -/
 lemma continuous_diffQuot_smooth
@@ -801,8 +749,6 @@ private lemma cross_1_summand_compactSupport
     h_step2.mul_right
   exact h_step3.mul_right
 
-/-! ## Bound for `∫_{tsupport η} (D_h^k u)²` -/
-
 /-- A bound for `∫_{tsupport η} (D_h^k u)²` in terms of `∫_{Ω'} (∂_k u)²`,
 when `cthickening |h| (tsupport η) ⊆ Ω'`. -/
 private theorem integral_diffQuot_sq_on_tsupport_le
@@ -835,9 +781,6 @@ private theorem integral_diffQuot_sq_on_tsupport_le
     exact h_deriv_cont.continuousOn
   have h_local := integral_sq_diffQuot_le_local (d := d) hu_C1 k hh
     h_tsupp_meas h_thick_int
-  -- setIntegral_mono_set: cthickening ⊆ Ω', and (∂_k u)² ≥ 0.
-  -- Ω' is a subset of closure Ω' (compact). Bounded continuous on compact = integrable.
-  -- We have Ω' open. To use setIntegral_mono_set we need integrability on Ω'.
   have h_Ω'_meas : MeasurableSet Ω' := hΩ'.measurableSet
   have h_clΩ'_int :
       Integrable (fun y : E =>
@@ -861,21 +804,6 @@ private theorem integral_diffQuot_sq_on_tsupport_le
     · refine Filter.Eventually.of_forall ?_; intro x; exact sq_nonneg _
     · exact (Filter.Eventually.of_forall hh_supp_in_Ω').mono (fun _ h => h)
   exact h_local.trans h_setIntegral_mono
-
-/-! ## Public cross-term bounds
-
-The five public theorems below combine the private helpers above with the
-master inequality from `NirenbergCoercivity.nirenberg_master_inequality`:
-
-* `cross_1_bound`, `cross_2_bound`, `cross_3_bound`: each cross term is
-  bounded by `ε ∫ η² ‖D_h^k ∇u‖² + C ‖∇u‖²_{L²(Ω')}` (Cross_3 has no
-  absorbing piece).
-* `c_term_bound`, `f_term_bound`: the data terms are bounded by
-  `ε ∫ η² ‖D_h^k ∇u‖² + C(‖∇u‖²_{L²(Ω')} + ‖u‖²_{L²(Ω')})` (resp. `‖f‖²`).
-* `nirenberg_master_inequality_after_young`: combination of the above with
-  the master inequality, yielding the absorbing form
-  `λ ∫ η² ‖D_h^k ∇u‖² ≤ (λ/2) ∫ η² ‖D_h^k ∇u‖² + C (...)`.
--/
 
 /-- The "η²-weighted absorbing integral" appearing in every cross-term
 bound: `∫ η² · ∑_i (D_h^k ∂_i u)²`. This is the term we absorb on the LHS
@@ -913,8 +841,6 @@ private lemma gradL2sqOn_nonneg (Ω' : Set E) (u : E → ℝ) :
   intro x
   exact Finset.sum_nonneg (fun _ _ => sq_nonneg _)
 
-/-! ### Continuity / integrability building blocks -/
-
 /-- For smooth `u` and `h ≠ 0`, `D_h^k(∂_i u)` is continuous. -/
 private lemma continuous_diffQuot_partial_u
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -940,8 +866,6 @@ private lemma continuous_partial_u
   have hu_C1 : ContDiff ℝ 1 u := hu.of_le (by norm_cast)
   exact (hu_C1.continuous_fderiv (by norm_num)).clm_apply continuous_const
 
-/-! ### Cross_1: bound for `∑ ∫ 2 (τ_h a) η ∂η · D_h^k(∂u) · D_h^k u` -/
-
 /-- Compact-support version of integrability of `(η x)² · ∑_i (D_h^k(∂_i u) x)²`. -/
 private lemma integrable_eta_sq_diffQuot_sum
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -951,7 +875,6 @@ private lemma integrable_eta_sq_diffQuot_sum
         ∑ i : Fin d, (diffQuot k h
           (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single i 1)) x)^2)
       (volume : Measure E) := by
-  -- Compact support of η².
   have h_eta_sq_supp : HasCompactSupport (fun y : E => η y ^ 2) := by
     have heq : (fun y : E => η y ^ 2) = (fun y : E => η y * η y) := by
       funext y; ring
@@ -1225,7 +1148,6 @@ theorem cross_1_bound
         (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
         (diffQuot k h u x)^2) volume :=
     fun i _ => (h_first_int i).add h_indicator_int
-  -- Compute each (i, j) integral via the pointwise bound.
   have h_per_pair_bound : ∀ i j : Fin d,
       |∫ x, 2 * translate k h (fun y => B.a y i j) x * (η x) *
           ((fderiv ℝ η x) (EuclideanSpace.single j 1)) *
@@ -1261,11 +1183,6 @@ theorem cross_1_bound
           (diffQuot k h u x)^2) ∂(volume : Measure E) :=
     Finset.sum_le_sum (fun i _ => Finset.sum_le_sum (fun j _ => h_per_pair_bound i j))
   refine h_outer_sum.trans ?_
-  -- Now the goal is:
-  -- ∑_i ∑_j ∫ (A_i + B) ≤ ε ∫ η² ∑(D_h^k ∂u)² + C · ∫_{Ω'} ∑(∂u)².
-  -- The j-sum gives factor d_real; the i-sum of A_i gives the absorbing piece;
-  -- the i-sum of B gives an extra factor d_real.
-  -- Use direct computation.
   have h_total_eq :
       ∑ i : Fin d, ∑ j : Fin d,
         ∫ x, ((ε / d_real) * (η x)^2 *
@@ -1279,7 +1196,6 @@ theorem cross_1_bound
         ∂(volume : Measure E) +
       d_real^2 * ((1 / (ε / d_real)) * Λ^2 * N^2 *
         ∫ x in tsupport η, (diffQuot k h u x)^2 ∂(volume : Measure E)) := by
-    -- Step (a): split each ∫ (A + B) = ∫ A + ∫ B.
     have h_per_ij : ∀ i j : Fin d,
         ∫ x, ((ε / d_real) * (η x)^2 *
             (diffQuot k h (fun y => (fderiv ℝ u y) (EuclideanSpace.single i 1)) x)^2 +
@@ -1308,7 +1224,6 @@ theorem cross_1_bound
               (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
               (diffQuot k h u x)^2 ∂(volume : Measure E)) from
           Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => h_per_ij i j))]
-    -- Step (b): split each (A_i + B) sum into ∑_j A_i + ∑_j B (∑_j is constant w.r.t. j).
     have h_step_b : ∀ i : Fin d, ∑ _j : Fin d,
           (∫ x, (ε / d_real) * (η x)^2 *
               (diffQuot k h (fun y => (fderiv ℝ u y) (EuclideanSpace.single i 1)) x)^2
@@ -1338,11 +1253,8 @@ theorem cross_1_bound
               (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
               (diffQuot k h u x)^2 ∂(volume : Measure E)) from
         Finset.sum_congr rfl (fun i _ => h_step_b i)]
-    -- Now the i-sum of d_real * (A_i + B). Use mul_sum to factor d_real out.
     rw [← Finset.mul_sum]
-    -- Inside: ∑_i (A_i + B) = (∑_i A_i) + d_real * B (since ∑_i B = d_real B).
     rw [Finset.sum_add_distrib]
-    -- ∑_i ∫ A_i = ∫ ∑_i A_i; ∑_i (constant) = d_real * (constant).
     rw [show (∑ _i : Fin d, ∫ x, (1 / (ε / d_real)) * Λ^2 * N^2 *
             (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
             (diffQuot k h u x)^2 ∂(volume : Measure E)) =
@@ -1350,11 +1262,9 @@ theorem cross_1_bound
             (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
             (diffQuot k h u x)^2 ∂(volume : Measure E)
         from by rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]]
-    -- ∫ const · 𝟙 · f = const · ∫_{set} f.
     have h_indicator_eq := integral_const_indicator_eq (d := d) k h η
       ((1 / (ε / d_real)) * Λ^2 * N^2) (u := u)
     rw [h_indicator_eq]
-    -- ∫ ((ε/d_real) η² f²) = (ε/d_real) ∫ (η² f²).
     have h_eta_sq_diffQuot_int : ∀ i : Fin d,
         ∫ x, (ε / d_real) * (η x)^2 *
             (diffQuot k h (fun y => (fderiv ℝ u y) (EuclideanSpace.single i 1)) x)^2
@@ -1376,7 +1286,6 @@ theorem cross_1_bound
               (diffQuot k h (fun y => (fderiv ℝ u y) (EuclideanSpace.single i 1)) x)^2
             ∂(volume : Measure E) from
         Finset.sum_congr rfl (fun i _ => h_eta_sq_diffQuot_int i)]
-    -- ∑_i (ε/d_real) ∫ ... = (ε/d_real) ∑_i ∫ ... = (ε/d_real) ∫ ∑_i ...
     rw [← Finset.mul_sum]
     have h_first_int_per : ∀ i : Fin d, Integrable (fun x : E =>
         (η x)^2 * (diffQuot k h
@@ -1394,15 +1303,11 @@ theorem cross_1_bound
       filter_upwards with x
       rw [Finset.mul_sum]
     rw [h_swap_sum]
-    -- Combine: d_real * ((ε/d_real) · I_1 + d_real · I_2)
-    --        = (d_real · ε/d_real) · I_1 + d_real² · I_2
-    --        = ε · I_1 + d_real² · I_2.
     rw [mul_add]
     congr 1
     · rw [← mul_assoc, mul_div_cancel₀ _ (ne_of_gt hd_pos)]
     · ring
   rw [h_total_eq]
-  -- Now apply the bound: d_real² · (1/(ε/d_real)) Λ² N² · ∫_{tsupport η} (D_h^k u)² ≤ C · gradL2sqOn.
   have h_diffQuot_sq_le := integral_diffQuot_sq_on_tsupport_le_gradL2sqOn (d := d)
     hu k hh η hΩ' hΩ'_compact h_thick_in_Ω'
   unfold gradL2sqOn at h_diffQuot_sq_le
@@ -1426,8 +1331,6 @@ theorem cross_1_bound
     refine mul_le_mul_of_nonneg_left h_diffQuot_sq_le ?_
     rw [h_C_eq]; exact mul_nonneg h_d_real_sq_nn h_factor_nn
   linarith
-
-/-! ### Cross_2: bound for `∑ ∫ (D_h^k a) η² · ∂u · D_h^k(∂u)` -/
 
 set_option linter.unusedVariables false in
 /-- Pointwise bound for one summand of `Cross_2`. -/
@@ -1455,8 +1358,7 @@ private theorem cross_2_pointwise_bound
         ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2 := by
   classical
   by_cases hx : x ∈ tsupport η
-  · -- |D_h^k a^{ij}(x)| ≤ M (using uniform Lipschitz bound).
-    have h_dq_a_bound : |diffQuot k h (fun y => B.a y i j) x| ≤ M :=
+  · have h_dq_a_bound : |diffQuot k h (fun y => B.a y i j) x| ≤ M :=
       abs_diffQuot_a_le_of_bound_on_set (d := d) (B.contDiff_a i j |>.of_le (by norm_cast)) k h
         (h_M i j) ((singleton_cthick_subset (d := d) η hh_supp_in_Ω' (le_refl _) hx).trans
           subset_closure)
@@ -1464,27 +1366,20 @@ private theorem cross_2_pointwise_bound
     have h_η_nn : 0 ≤ η x := h_η_in.1
     have h_η_le : η x ≤ 1 := h_η_in.2
     have h_η_sq_nn : 0 ≤ (η x)^2 := sq_nonneg _
-    -- Set up Young: A = η · D_h^k(∂_j u), B' = M η · ∂_i u.
     set A : ℝ := η x *
       diffQuot k h (fun y => (fderiv ℝ u y) (EuclideanSpace.single j 1)) x with hA_def
     set B' : ℝ := M * η x *
       ((fderiv ℝ u x) (EuclideanSpace.single i 1)) with hB'_def
-    -- Apply Young with parameter 2ε.
     have h2ε_pos : 0 < 2 * ε := by linarith
     have h_young := two_abs_mul_le_eps_sq_add A B' (2 * ε) h2ε_pos
-    -- 2|A||B'| ≤ 2ε A² + (1/(2ε)) B'²
-    -- |A · B'| = |A| · |B'| ≤ ε A² + (1/(4ε)) B'² (divide by 2)
     have h_AB_abs : |A * B'| ≤ ε * A^2 + (1/(4*ε)) * B'^2 := by
       have h1 : |A * B'| = |A| * |B'| := abs_mul A B'
-      -- Two times the desired LHS is given by Young.
-      -- 2 |A| |B'| ≤ 2ε A² + (1/(2ε)) B'² = 2 (ε A² + (1/(4ε)) B'²)
       have h_double : 2 * (ε * A^2 + (1/(4*ε)) * B'^2) =
           2 * ε * A^2 + (1/(2*ε)) * B'^2 := by
         field_simp
         ring
       have h_ε_ne : ε ≠ 0 := ne_of_gt hε
       linarith [h_young, h_double]
-    -- LHS = |D_h^k a · η² · ∂_i u · D_h^k(∂_j u)| ≤ M · η² · |∂_i u| · |D_h^k(∂_j u)| = |A · B'|.
     have h_lhs_bound :
         |diffQuot k h (fun y => B.a y i j) x * (η x)^2 *
             ((fderiv ℝ u x) (EuclideanSpace.single i 1)) *
@@ -1521,7 +1416,6 @@ private theorem cross_2_pointwise_bound
       exact mul_le_mul_of_nonneg_right h_dq_a_bound h_η_sq_nn
     refine h_lhs_bound.trans ?_
     refine h_AB_abs.trans ?_
-    -- ε A² + (1/(4ε)) B'² ≤ ε η² (D_h^k(∂_j u))² + (M²/(4ε)) η² (∂_i u)² (using indicator = 1).
     have h_indicator : Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x = 1 := by
       rw [Set.indicator_of_mem hx]
     rw [h_indicator]
@@ -1532,7 +1426,6 @@ private theorem cross_2_pointwise_bound
     have hB'_sq_le : B'^2 ≤ M^2 * (η x)^2 *
         ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2 := by
       change (M * η x * _)^2 ≤ _; nlinarith
-    -- ε A² + (1/(4ε)) B'² ≤ ε η² (D_h^k ∂_j u)² + (M²/(4ε)) η² (∂_i u)² · 1.
     have h_4ε_pos : 0 < 4 * ε := by linarith
     have h_4ε_ne : (4 * ε) ≠ 0 := ne_of_gt h_4ε_pos
     have h_inv_4ε_nn : 0 ≤ 1 / (4 * ε) :=
@@ -1557,8 +1450,7 @@ private theorem cross_2_pointwise_bound
                   ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2 := by
               field_simp
             linarith [h_div_eq]
-  · -- x ∉ tsupport η: η x = 0, indicator = 0.
-    have h_η_zero : η x = 0 := image_eq_zero_of_notMem_tsupport hx
+  · have h_η_zero : η x = 0 := image_eq_zero_of_notMem_tsupport hx
     have h_indicator : Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x = 0 :=
       Set.indicator_of_notMem hx _
     rw [h_indicator]
@@ -1657,7 +1549,6 @@ private lemma integrable_const_eta_sq_indicator_partial_sq
     have heq : (fun y : E => η y ^ 2) = (fun y : E => η y * η y) := by
       funext y; ring
     rw [heq]; exact hη_supp.mul_right
-  -- The indicator of tsupport η coincides with 1 on the support of η², so we can drop it.
   have h_eq : (fun x : E => c * (η x)^2 *
         (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
         ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2) =
@@ -1673,7 +1564,6 @@ private lemma integrable_const_eta_sq_indicator_partial_sq
   have h_cont : Continuous (fun x : E => c * (η x)^2 *
       ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2) :=
     (continuous_const.mul h_eta_sq_cont).mul (h_partial_cont.pow 2)
-  -- Compact support: outer product is supported by η².
   have h_step1 : HasCompactSupport (fun x : E => c * (η x)^2) :=
     h_eta_sq_supp.mul_left
   have h_step2 : HasCompactSupport (fun x : E => c * (η x)^2 *
@@ -1728,7 +1618,6 @@ theorem cross_2_bound
   refine ⟨C, hC_nn, ?_⟩
   intro u hu h hh hh_le
   have h_thick_in_Ω' : Metric.cthickening |h| (tsupport η) ⊆ Ω' := hh_supp_in_Ω' hh_le
-  -- Pointwise per (i, j) bound (with effective ε' = ε/d_real).
   have h_each_pointwise := fun (i j : Fin d) (x : E) =>
     cross_2_pointwise_bound (d := d) B hu hη hη_range i j k hM_nn h_M
       h_thick_in_Ω' hε'_pos x
@@ -1749,7 +1638,6 @@ theorem cross_2_bound
     (Finset.abs_sum_le_sum_abs _ _).trans
       (Finset.sum_le_sum (fun i _ => Finset.abs_sum_le_sum_abs _ _))
   refine h_abs_sum.trans ?_
-  -- For each (i, j), |∫ summand| ≤ ∫ |summand| ≤ ∫ pt_bound.
   have h_integrand_int : ∀ i j : Fin d, Integrable (fun x : E =>
       diffQuot k h (fun y => B.a y i j) x * (η x)^2 *
         ((fderiv ℝ u x) (EuclideanSpace.single i 1)) *
@@ -1815,30 +1703,6 @@ theorem cross_2_bound
             ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2) ∂(volume : Measure E) :=
     Finset.sum_le_sum (fun i _ => Finset.sum_le_sum (fun j _ => h_per_pair_bound i j))
   refine h_outer_sum.trans ?_
-  -- Goal: ∑_i ∑_j ∫ (A_j + B_i) ≤ ε ∫ η² ∑_i (D_h^k ∂_i u)² + C · ∫_{Ω'} ∑_i (∂_i u)².
-  -- ∑_i ∑_j ∫ (A_j + B_i) = ∑_i ∑_j ∫ A_j + ∑_i ∑_j ∫ B_i
-  -- ∑_i ∑_j ∫ A_j = d_real · ∑_j ∫ A_j  (i-sum is constant)
-  --              = d_real · (ε/d_real) · ∫ η² ∑_j (D_h^k ∂_j u)²
-  --              = ε · ∫ η² ∑_j (...).
-  -- ∑_i ∑_j ∫ B_i = d_real · ∑_i ∫ B_i.
-  -- And ∑_i ∫ B_i ≤ d_real · (M²/(4 ε/d_real)) · gradL2sqOn
-  --                     [Wait actually there's no D_h^k in B_i; need to bound via η ≤ 1]
-  -- Each B_i = (M²/(4 ε/d_real)) η² 𝟙_{tsupp η} (∂_i u)².
-  -- ∫ B_i = (M²/(4 ε/d_real)) · ∫ η² 𝟙 (∂_i u)² ≤ (M²/(4 ε/d_real)) · ∫_{Ω'} (∂_i u)²
-  --   (since η² ≤ 1, indicator ≤ 1, support ⊆ tsupport η ⊆ Ω').
-  -- ∑_i ∫ B_i ≤ (M²/(4 ε/d_real)) · ∫_{Ω'} ∑_i (∂_i u)².
-  -- ∑_i ∑_j ∫ B_i = d_real · ∑_i ∫ B_i ≤ d_real · (M²/(4 ε/d_real)) · ∫_{Ω'} ∑_i (∂_i u)²
-  --              ≤ d_real² · (M²/(4 ε/d_real)) · ∫_{Ω'} ∑_i (∂_i u)²  (since d_real ≥ 1?)
-  -- Hmm, we have d_real instead of d_real². But our C is d_real² · (...).
-  -- Let me check: cross_2 has each (i, j) summand independent of `i` for the absorbing
-  -- piece (which depends on `j`), and each (i, j) summand non-trivially depending on `i` for the
-  -- other piece. So we get d_real factors from the other index.
-  -- ∑_i ∑_j A_j: A_j doesn't depend on i, so ∑_i = d_real · ∑_j. Good: d_real · ∑_j A_j = ε · ∫ ...
-  -- ∑_i ∑_j B_i: B_i doesn't depend on j, so ∑_j = d_real · ∑_i B_i = d_real · I where
-  --   I = (M²/(4 ε/d_real)) ∫_{Ω'} ∑_i (∂_i u)² (after bounding).
-  -- So ∑_i ∑_j B_i = d_real · I, and our C bound is d_real² · (M²/(4 ε/d_real)).
-  -- We get d_real · I = d_real · (M²/(4 ε/d_real)) · ∫_{Ω'} ∑_i (∂_i u)².
-  -- This is ≤ d_real² · (M²/(4 ε/d_real)) · ∫ if d_real ≥ 1. Always true since d ≥ 1.
   have h_total_eq :
       ∑ i : Fin d, ∑ j : Fin d,
         ∫ x, ((ε / d_real) * (η x)^2 *
@@ -1856,7 +1720,6 @@ theorem cross_2_bound
             ∑ i : Fin d, (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
               ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2
           ∂(volume : Measure E)) := by
-    -- Step (a): split each ∫ (A + B) = ∫ A + ∫ B.
     have h_per_ij : ∀ i j : Fin d,
         ∫ x, ((ε / d_real) * (η x)^2 *
             (diffQuot k h
@@ -1889,9 +1752,6 @@ theorem cross_2_bound
               (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
               ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2 ∂(volume : Measure E)) from
           Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => h_per_ij i j))]
-    -- Now the sum has the form ∑_i ∑_j (A_j + B_i).
-    -- Using sum_add_distrib: ∑_j (A_j + B_i) = (∑_j A_j) + d_real · B_i.
-    -- Then ∑_i [(∑_j A_j) + d_real · B_i] = d_real · (∑_j A_j) + d_real · (∑_i B_i).
     have h_inner_step : ∀ i : Fin d, ∑ j : Fin d,
           (∫ x, (ε / d_real) * (η x)^2 *
               (diffQuot k h
@@ -1927,22 +1787,6 @@ theorem cross_2_bound
               ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2 ∂(volume : Measure E)) from
         Finset.sum_congr rfl (fun i _ => h_inner_step i)]
     rw [Finset.sum_add_distrib, Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
-    -- Now we have:
-    -- d_real * (∑_j ∫ A_j) + d_real * (∑_i d_real * ∫ B_i)
-    -- Wait, ∑_j A_j is the same for all i, so ∑_i (∑_j A_j) = d_real · ∑_j A_j.
-    -- And ∑_i d_real · B_i = d_real · ∑_i B_i.
-    -- Actually let me carefully redo.
-    -- Each term in the i-sum is: (∑_j A_j) + d_real · B_i. ∑_i of (constant + d_real · B_i)
-    -- = d_real · (constant) + d_real · ∑_i B_i.
-    -- So total = d_real · (∑_j A_j) + d_real · (∑_i B_i).
-    -- Compute each piece:
-    -- d_real · (∑_j ∫ A_j) = d_real · ∫ ∑_j A_j = d_real · ∫ ∑_j (ε/d_real) η² (D_h^k ∂_j u)²
-    --                     = d_real · (ε/d_real) · ∫ η² ∑_j (D_h^k ∂_j u)² = ε · ∫ η² ∑_j (...).
-    -- d_real · (∑_i ∫ B_i) = d_real · (∑_i (M²/(4 ε/d_real)) ∫ η² 𝟙 (∂_i u)²)
-    --                     = d_real · (M²/(4 ε/d_real)) · ∫ η² ∑_i 𝟙 (∂_i u)².
-    -- The second piece bounds by d_real · (M²/(4 ε/d_real)) · ∫_{Ω'} ∑_i (∂_i u)²
-    -- (since η² ≤ 1, 𝟙 ≤ 1, supported on tsupport η ⊆ Ω').
-    -- Now let's tackle the first piece: d_real · (∑_j ∫ A_j) = ε · ∫ η² ∑_j (...).
     have h_first_eq : d_real * (∑ j : Fin d, ∫ x, (ε / d_real) * (η x)^2 *
               (diffQuot k h
                 (fun y => (fderiv ℝ u y) (EuclideanSpace.single j 1)) x)^2
@@ -1999,27 +1843,7 @@ theorem cross_2_bound
               (fun y => (fderiv ℝ u y) (EuclideanSpace.single j 1)) x)^2 := by
         funext x; rw [Finset.mul_sum]
       rw [h_swap, ← mul_assoc, mul_div_cancel₀ _ (ne_of_gt hd_pos)]
-    -- Second piece: d_real · (∑_i d_real · ∫ B_i) — wait we need to check structure.
-    -- Actually, looking at the line above, after the outer rw, we have:
-    -- d_real * (∑_j ∫ A_j) + d_real * ∑_i (d_real * ∫ B_i)
-    -- = d_real * (∑_j ∫ A_j) + d_real² * ∑_i ∫ B_i
-    -- but actually re-read: after the inner show rewrite, each i-summand has d_real · ∫ B_i, so
-    -- ∑_i of it = d_real · ∑_i ∫ B_i. Then we have d_real * (∑_j ∫ A_j) + d_real * (∑_i (d_real · ∫ B_i))
-    -- = d_real * (∑_j ∫ A_j) + d_real * d_real * (∑_i ∫ B_i). But we said C has d_real² in it.
-    -- Wait, our outer step `Finset.sum_add_distrib, Finset.sum_const, Finset.card_univ, nsmul_eq_mul`
-    -- gave us:
-    -- d_real * (∑_j ∫ A_j) + d_real * d_real * ∫ B_i (for all i)?
-    -- Hmm, ∑_i (constant + d_real · ∫ B_i) doesn't simplify like that — d_real · ∫ B_i depends on i.
-    -- So ∑_i (constant + d_real · ∫ B_i) = d_real · constant + d_real · ∑_i ∫ B_i.
-    -- The `Finset.sum_const` is applied to the constant only.
-    -- Wait — looking at my code, I used Finset.sum_add_distrib then Finset.sum_const for the
-    -- non-constant part. That's wrong because the second part has d_real · ∫ B_i where ∫ B_i
-    -- DOES depend on i.
-    -- So the proof breaks at the Finset.sum_const step.
-    -- Let me fix this.
     rw [h_first_eq]
-    -- Now the second summand is `∑ i, d_real * ∫ B_i`. Compute d_real * ∑_i ∫ B_i.
-    -- We need to handle the ∑_i. Let me do it by `← Finset.mul_sum` and then simplify.
     have h_second_eq :
         (∑ i : Fin d, d_real * ∫ x, (M^2 / (4 * (ε / d_real))) * (η x)^2 *
               (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
@@ -2029,7 +1853,6 @@ theorem cross_2_bound
             ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2 ∂(volume : Measure E)) :=
       (Finset.mul_sum _ _ _).symm
     rw [h_second_eq]
-    -- Pull the constant out and swap sum and integral.
     have h_pull_const_2 : ∀ i : Fin d, ∫ x, (M^2 / (4 * (ε / d_real))) * (η x)^2 *
               (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
               ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2 ∂(volume : Measure E) =
@@ -2052,7 +1875,6 @@ theorem cross_2_bound
               ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2 ∂(volume : Measure E) from
         Finset.sum_congr rfl (fun i _ => h_pull_const_2 i)]
     rw [← Finset.mul_sum]
-    -- Swap sum and integral.
     have h_inner_int : ∀ i : Fin d, Integrable (fun x : E =>
         (η x)^2 * (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
         ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2) volume := by
@@ -2084,15 +1906,6 @@ theorem cross_2_bound
       intro i _; ring
     rw [h_swap]
   rw [h_total_eq]
-  -- Now need to bound:
-  -- d_real * ((M²/(4 ε/d_real)) · ∫ η² · ∑_i (𝟙 · (∂_i u)²)) ≤ C · ∫_{Ω'} ∑_i (∂_i u)².
-  -- C = (M²/(4 ε/d_real)) · d_real², so we need d_real · I ≤ d_real² · J where
-  -- I = ∫ η² · ∑_i (𝟙_{tsupport η} · (∂_i u)²)
-  -- J = ∫_{Ω'} ∑_i (∂_i u)²
-  -- And we want I ≤ J: η² ≤ 1, 𝟙 ≤ 1, support ⊆ tsupport η ⊆ Ω', so
-  -- ∫ η² · ∑_i (𝟙 · (∂_i u)²) = ∫_{tsupport η} η² · ∑_i (∂_i u)² ≤ ∫_{tsupport η} ∑_i (∂_i u)²
-  -- ≤ ∫_{Ω'} ∑_i (∂_i u)².
-  -- Then d_real · I ≤ d_real · J ≤ d_real² · J (since d_real ≥ 1).
   have h_M_factor_nn : 0 ≤ M^2 / (4 * (ε / d_real)) := by
     refine div_nonneg (sq_nonneg _) (by linarith)
   have h_d_real_ge_one : 1 ≤ d_real := by
@@ -2105,8 +1918,6 @@ theorem cross_2_bound
           ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2 ∂(volume : Measure E) ≤
       ∫ x in Ω', ∑ i : Fin d, ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2
         ∂(volume : Measure E) := by
-    -- Step 1: ∫ η² · ∑ (𝟙 · (∂u)²) = ∫ ∑ (η² · 𝟙 · (∂u)²) ≤ ∫_{tsupport η} ∑ (∂u)² ≤ ∫_{Ω'} ∑ (∂u)².
-    -- Use: η² ≤ 1, 𝟙 ≤ 1, support of η² · 𝟙 ⊆ tsupport η.
     have h_pointwise : ∀ x : E,
         (η x)^2 * ∑ i : Fin d, (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
           ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2 ≤
@@ -2114,11 +1925,9 @@ theorem cross_2_bound
           ((fderiv ℝ u y) (EuclideanSpace.single i 1))^2)) x := by
       intro x
       by_cases hx : x ∈ tsupport η
-      · -- x ∈ tsupport η ⊆ Ω'.
-        have hx_Ω' : x ∈ Ω' :=
+      · have hx_Ω' : x ∈ Ω' :=
           h_thick_in_Ω' (self_subset_cthickening _ hx)
         rw [Set.indicator_of_mem hx_Ω']
-        -- η² ≤ 1 since 0 ≤ η ≤ 1.
         have h_η_in : η x ∈ Set.Icc (0 : ℝ) 1 := hη_range ⟨x, rfl⟩
         have h_η_sq_le : (η x)^2 ≤ 1 := by
           have h_η_le : η x ≤ 1 := h_η_in.2
@@ -2127,7 +1936,6 @@ theorem cross_2_bound
                   refine pow_le_pow_left₀ h_η_nn h_η_le 2
             _ = 1 := one_pow _
         have h_η_sq_nn : 0 ≤ (η x)^2 := sq_nonneg _
-        -- ∑ (𝟙 · (∂u)²) ≤ ∑ (∂u)² (since 𝟙 ≤ 1).
         have h_indicator_le_one : ∀ y : E,
             (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) y) ≤ 1 := by
           intro y
@@ -2146,7 +1954,6 @@ theorem cross_2_bound
               1 * ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2 :=
             mul_le_mul_of_nonneg_right h_le h_sq_nn
           linarith
-        -- Combine: η² · ∑ ≤ 1 · ∑ = ∑.
         have h_sum_nn : 0 ≤ ∑ i : Fin d,
             (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
               ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2 := by
@@ -2168,15 +1975,13 @@ theorem cross_2_bound
               (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
                 ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2 := by ring
           _ ≤ ∑ i : Fin d, ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2 := h_sum_le
-      · -- x ∉ tsupport η: η x = 0, indicator = 0.
-        have h_η_zero : η x = 0 := image_eq_zero_of_notMem_tsupport hx
+      · have h_η_zero : η x = 0 := image_eq_zero_of_notMem_tsupport hx
         rw [h_η_zero]
         simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, zero_mul, ge_iff_le]
         by_cases hx_Ω' : x ∈ Ω'
         · rw [Set.indicator_of_mem hx_Ω']
           exact Finset.sum_nonneg (fun i _ => sq_nonneg _)
         · rw [Set.indicator_of_notMem hx_Ω']
-    -- Integrate the pointwise bound.
     have h_lhs_int : Integrable (fun x : E =>
         (η x)^2 * ∑ i : Fin d, (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
           ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2) volume := by
@@ -2228,7 +2033,6 @@ theorem cross_2_bound
         Set.indicator Ω' (fun z : E => ∑ i : Fin d,
           ((fderiv ℝ u z) (EuclideanSpace.single i 1))^2) from rfl]
     rw [MeasureTheory.integral_indicator hΩ'.measurableSet]
-  -- Combine.
   have h_combine :
       d_real * ((M^2 / (4 * (ε / d_real))) *
         ∫ x, (η x)^2 *
@@ -2253,7 +2057,6 @@ theorem cross_2_bound
       refine integral_nonneg ?_
       intro x
       exact Finset.sum_nonneg (fun i _ => sq_nonneg _)
-    -- d_real · (M²/...) · J ≤ d_real² · (M²/...) · J = C · J.
     have h_step2 :
         d_real * ((M^2 / (4 * (ε / d_real))) *
           ∫ x in Ω', ∑ i : Fin d, ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2
@@ -2282,8 +2085,6 @@ theorem cross_2_bound
     rw [← h_C_eq]
   linarith
 
-/-! ### Cross_3: bound for `∑ ∫ 2 (D_h^k a) η ∂η · ∂u · D_h^k u` -/
-
 /-- Pointwise bound for one summand of `Cross_3`. Uses `2 ab ≤ a² + b²`
 applied to `|∂_i u|` and `|D_h^k u|`, after extracting bounds on
 `|D_h^k a^{ij}|`, `η`, `|∂_j η|`. -/
@@ -2311,14 +2112,12 @@ private theorem cross_3_pointwise_bound
         (diffQuot k h u x)^2 := by
   classical
   by_cases hx : x ∈ tsupport η
-  · -- |D_h^k a^{ij}(x)| ≤ M.
-    have h_dq_a_bound : |diffQuot k h (fun y => B.a y i j) x| ≤ M := by
+  · have h_dq_a_bound : |diffQuot k h (fun y => B.a y i j) x| ≤ M := by
       have hCD : ContDiff ℝ 1 (fun y : E => B.a y i j) :=
         (B.contDiff_a i j).of_le (by norm_cast)
       exact abs_diffQuot_a_le_of_bound_on_set (d := d) hCD k h
         (h_M i j) ((singleton_cthick_subset (d := d) η hh_supp_in_Ω' (le_refl _) hx).trans
           subset_closure)
-    -- |∂_j η(x)| ≤ N.
     have h_dη_bound : |(fderiv ℝ η x) (EuclideanSpace.single j 1)| ≤ N := by
       have hsing_norm :
           ‖(EuclideanSpace.single j (1 : ℝ) : E)‖ = 1 := by simp
@@ -2330,12 +2129,10 @@ private theorem cross_3_pointwise_bound
       have h2 := h_apply.trans (h_fderiv_eta x)
       rw [Real.norm_eq_abs] at h2
       exact h2
-    -- 0 ≤ η x ≤ 1.
     have h_η_in : η x ∈ Set.Icc (0 : ℝ) 1 := hη_range ⟨x, rfl⟩
     have h_η_nn : 0 ≤ η x := h_η_in.1
     have h_η_le : η x ≤ 1 := h_η_in.2
     have hN_nn : 0 ≤ N := le_trans (norm_nonneg _) (h_fderiv_eta x)
-    -- Bound the LHS.
     have h_lhs_eq :
         |2 * diffQuot k h (fun y => B.a y i j) x * (η x) *
             ((fderiv ℝ η x) (EuclideanSpace.single j 1)) *
@@ -2358,7 +2155,6 @@ private theorem cross_3_pointwise_bound
       rw [abs_of_nonneg h_η_nn]
       ring
     rw [h_lhs_eq]
-    -- Bound: 2 |D_h^k a| η |∂_j η| |∂_i u| |D_h^k u| ≤ 2 M N η |∂_i u| |D_h^k u|.
     have h_step1 :
         2 * |diffQuot k h (fun y => B.a y i j) x| * (η x) *
             |(fderiv ℝ η x) (EuclideanSpace.single j 1)| *
@@ -2396,7 +2192,6 @@ private theorem cross_3_pointwise_bound
         mul_le_mul_of_nonneg_right h_step1c (abs_nonneg _)
       exact mul_le_mul_of_nonneg_right h_intermediate (abs_nonneg _)
     refine h_step1.trans ?_
-    -- Apply Young: 2 |a| |b| ≤ a² + b² (no scaling).
     have h_young2 : 2 *
         |(fderiv ℝ u x) (EuclideanSpace.single i 1)| *
         |diffQuot k h u x| ≤
@@ -2422,7 +2217,6 @@ private theorem cross_3_pointwise_bound
       rw [h_eq]
       exact mul_le_mul_of_nonneg_left h_young2 h_MN_η_nn
     refine h_step2.trans ?_
-    -- M η N · (∂² + (D_h)²) ≤ M N · (∂² + (D_h)²) (since η ≤ 1).
     have h_step3 :
         M * (η x) * N *
           (((fderiv ℝ u x) (EuclideanSpace.single i 1))^2 + (diffQuot k h u x)^2) ≤
@@ -2444,14 +2238,12 @@ private theorem cross_3_pointwise_bound
             (((fderiv ℝ u x) (EuclideanSpace.single i 1))^2 + (diffQuot k h u x)^2) := by
             rw [h_M_N_eq]
     refine h_step3.trans ?_
-    -- M N · (∂² + (D_h)²) = M N · 𝟙 · ∂² + M N · 𝟙 · (D_h)² (since indicator = 1).
     have h_indicator : Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x = 1 := by
       rw [Set.indicator_of_mem hx]
     rw [h_indicator]
     ring_nf
     rfl
-  · -- x ∉ tsupport η: η x = 0, indicator = 0.
-    have h_η_zero : η x = 0 := image_eq_zero_of_notMem_tsupport hx
+  · have h_η_zero : η x = 0 := image_eq_zero_of_notMem_tsupport hx
     have h_indicator : Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x = 0 :=
       Set.indicator_of_notMem hx _
     have h_lhs_zero : 2 * diffQuot k h (fun y => B.a y i j) x * (η x) *
@@ -2564,7 +2356,6 @@ theorem cross_3_bound
   have hd_ge_one : 1 ≤ d_real := by
     rw [hd_real]; exact_mod_cast Fintype.card_pos
   have hd_nn : 0 ≤ d_real := hd_pos.le
-  -- Constant C.
   set C : ℝ := 2 * M * N * d_real^2 with hC_def
   have hC_nn : 0 ≤ C := by
     rw [hC_def]
@@ -2574,7 +2365,6 @@ theorem cross_3_bound
   refine ⟨C, hC_nn, ?_⟩
   intro u hu h hh hh_le
   have h_thick_in_Ω' : Metric.cthickening |h| (tsupport η) ⊆ Ω' := hh_supp_in_Ω' hh_le
-  -- Pointwise bound.
   have h_each_pointwise := fun (i j : Fin d) (x : E) =>
     cross_3_pointwise_bound (d := d) B (u := u) hη_range h_fderiv_eta i j k hM_nn h_M
       h_thick_in_Ω' x
@@ -2585,7 +2375,6 @@ theorem cross_3_bound
         diffQuot k h u x
       ∂(volume : Measure E) with hS_def
   rw [abs_neg]
-  -- |S| ≤ ∑ ∑ |∫ ...|.
   have h_abs_sum : |S| ≤
       ∑ i : Fin d, ∑ j : Fin d, |∫ x, 2 *
           diffQuot k h (fun y : E => B.a y i j) x * (η x) *
@@ -2595,23 +2384,18 @@ theorem cross_3_bound
     (Finset.abs_sum_le_sum_abs _ _).trans
       (Finset.sum_le_sum (fun i _ => Finset.abs_sum_le_sum_abs _ _))
   refine h_abs_sum.trans ?_
-  -- |∫ ...| ≤ ∫ |...| ≤ ∫ pt_bound.
   have h_integrand_int : ∀ i j : Fin d, Integrable (fun x : E =>
       2 * diffQuot k h (fun y => B.a y i j) x * (η x) *
         ((fderiv ℝ η x) (EuclideanSpace.single j 1)) *
         ((fderiv ℝ u x) (EuclideanSpace.single i 1)) *
         diffQuot k h u x) volume :=
     fun i j => integrable_cross_3_summand (d := d) B hu hη hη_supp i j k hh
-  -- Integrability of pointwise bound: needs `M N · 𝟙 · (∂_i u)²` and `M N · 𝟙 · (D_h^k u)²`.
   have h_pt_bound1_int : ∀ i : Fin d, Integrable (fun x : E =>
       M * N *
         (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
         ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2) volume := by
     intro i
     have h := integrable_const_eta_sq_indicator_partial_sq (d := d) hu hη hη_supp i 1
-    -- Note: this gives integrability of `1 * η² · 𝟙 · (∂_i u)²`. But we want `MN · 𝟙 · (∂_i u)²`,
-    -- without the η² factor. We need a different approach: indicator of compact set.
-    -- Use h_each_indicator_partial_sq directly.
     have h_partial_cont : Continuous
         (fun x : E => (fderiv ℝ u x) (EuclideanSpace.single i 1)) :=
       continuous_partial_u (d := d) hu i
@@ -2686,16 +2470,6 @@ theorem cross_3_bound
             (diffQuot k h u x)^2) ∂(volume : Measure E) :=
     Finset.sum_le_sum (fun i _ => Finset.sum_le_sum (fun j _ => h_per_pair_bound i j))
   refine h_outer_sum.trans ?_
-  -- ∑_{i,j} ∫ (A_i + B) where A_i = MN 𝟙 (∂_i u)² and B = MN 𝟙 (D_h^k u)².
-  -- ∑_{i,j} = d² · const for B, d for A_i (j-sum gives d).
-  -- ∑_{i,j} ∫ (A_i + B) = ∑_{i,j} ∫ A_i + ∑_{i,j} ∫ B
-  --                    = d · ∑_i ∫ A_i + d² · ∫ B
-  -- ∫ A_i = MN · ∫_{tsupport η} (∂_i u)² ≤ MN · ∫_{Ω'} (∂_i u)².
-  -- ∑_i ∫ A_i ≤ MN · ∫_{Ω'} ∑_i (∂_i u)².
-  -- d · ∑_i ∫ A_i ≤ d · MN · ∫_{Ω'} ∑_i (∂_i u)².
-  -- ∫ B = MN · ∫_{tsupport η} (D_h^k u)² ≤ MN · ∫_{Ω'} (∂_k u)² ≤ MN · ∫_{Ω'} ∑_i (∂_i u)².
-  -- d² · ∫ B ≤ d² · MN · ∫_{Ω'} ∑_i (∂_i u)².
-  -- Total: ≤ (d + d²) · MN · ∫_{Ω'} ∑_i (∂_i u)² ≤ 2 d² · MN · ∫_{Ω'} ∑_i (∂_i u)² = C · ∫.
   have h_total_bound :
       ∑ i : Fin d, ∑ j : Fin d,
         ∫ x, (M * N *
@@ -2707,7 +2481,6 @@ theorem cross_3_bound
       C * ∫ x in Ω',
           ∑ i : Fin d, ((fderiv ℝ u x) (EuclideanSpace.single i 1)) ^ 2
         ∂(volume : Measure E) := by
-    -- Split the integrals.
     have h_split_integral : ∀ i j : Fin d,
         ∫ x, (M * N *
             (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
@@ -2723,7 +2496,6 @@ theorem cross_3_bound
             (diffQuot k h u x)^2 ∂(volume : Measure E) := by
       intro i j
       rw [integral_add (h_pt_bound1_int i) h_pt_bound2_int]
-    -- ∫ A_i = M N · ∫_{tsupport η} (∂_i u)².
     have h_A_factor : ∀ i : Fin d,
         ∫ x, M * N *
             (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
@@ -2747,7 +2519,6 @@ theorem cross_3_bound
         · rw [Set.indicator_of_mem hx, Set.indicator_of_mem hx]; ring
         · rw [Set.indicator_of_notMem hx, Set.indicator_of_notMem hx]; ring]
       rw [MeasureTheory.integral_indicator (isClosed_tsupport η).measurableSet]
-    -- ∫ B = M N · ∫_{tsupport η} (D_h^k u)².
     have h_B_factor :
         ∫ x, M * N *
             (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
@@ -2769,7 +2540,6 @@ theorem cross_3_bound
               (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
               (diffQuot k h u x)^2 ∂(volume : Measure E)) from
         Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => h_split_integral i j))]
-    -- ∑_{i, j} (A_i + B) = ∑_{i, j} A_i + ∑_{i, j} B.
     rw [show (∑ i : Fin d, ∑ j : Fin d,
           (∫ x, M * N *
               (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
@@ -2787,7 +2557,6 @@ theorem cross_3_bound
         refine Finset.sum_congr rfl ?_
         intro i _
         rw [Finset.sum_add_distrib]]
-    -- ∑_i (∑_j A_i) = ∑_i (d_real * A_i) = d_real * ∑_i A_i.
     have h_step1 : (∑ i : Fin d, (∑ _j : Fin d, ∫ x, M * N *
               (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
               ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2 ∂(volume : Measure E))) =
@@ -2828,7 +2597,6 @@ theorem cross_3_bound
       rw [← mul_assoc, ← hd_real]
       ring
     rw [h_step1, h_step2]
-    -- Substitute h_A_factor and h_B_factor.
     rw [show (∑ i : Fin d, ∫ x, M * N *
               (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
               ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2 ∂(volume : Measure E)) =
@@ -2836,16 +2604,12 @@ theorem cross_3_bound
           ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2 ∂(volume : Measure E) from
         Finset.sum_congr rfl (fun i _ => h_A_factor i)]
     rw [h_B_factor]
-    -- Now bound: d_real · M N · ∑_i ∫_{tsupport η} (∂_i u)² + d_real² · M N · ∫_{tsupport η} (D_h^k u)²
-    --        ≤ d_real² · M N · ∫_{Ω'} ∑_i (∂_i u)² + d_real² · M N · ∫_{Ω'} ∑_i (∂_i u)²
-    --        = 2 d_real² · M N · ∫_{Ω'} ∑_i (∂_i u)² = C · ∫.
     have h_MN_nn : 0 ≤ M * N := mul_nonneg hM_nn hN
     have h_d_le_d_sq : d_real ≤ d_real^2 := by nlinarith
     have h_J_nn : 0 ≤ ∫ x in Ω',
         ∑ i : Fin d, ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2
           ∂(volume : Measure E) :=
       integral_nonneg (fun x => Finset.sum_nonneg (fun i _ => sq_nonneg _))
-    -- Bound ∑_i ∫_{tsupport η} (∂_i u)² ≤ ∫_{Ω'} ∑_i (∂_i u)².
     have h_partial_sq_cont : ∀ i : Fin d,
         Continuous (fun x : E => ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2) :=
       fun i => (continuous_partial_u (d := d) hu i).pow 2
@@ -2887,7 +2651,6 @@ theorem cross_3_bound
           ∑ i : Fin d, ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2 ∂(volume : Measure E) :=
       integral_diffQuot_sq_on_tsupport_le_gradL2sqOn (d := d) hu k hh η hΩ'
         hΩ'_compact h_thick_in_Ω'
-    -- Now combine.
     have h_term1 :
         d_real * ∑ i : Fin d, M * N *
             ∫ x in tsupport η,
@@ -2924,7 +2687,6 @@ theorem cross_3_bound
             ∂(volume : Measure E)) := by
       refine mul_le_mul_of_nonneg_left ?_ (sq_nonneg _)
       exact mul_le_mul_of_nonneg_left h_diff_bound h_MN_nn
-    -- Compose: term1 + term2 ≤ 2 d_real² · MN · J = C · J.
     have h_sum_le : d_real * ∑ i : Fin d, M * N *
             ∫ x in tsupport η,
               ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2 ∂(volume : Measure E) +
@@ -2944,8 +2706,6 @@ theorem cross_3_bound
             ∂(volume : Measure E) from by ring]
     rw [← h_C_eq]
   exact h_total_bound
-
-/-! ### L² bound on the test function -/
 
 /-- The pointwise FDeriv expansion of `η² · D_h^k u`:
 `∂_k(η² · D_h^k u)(x) = 2 η(x) · ∂_k η(x) · D_h^k u(x) + η(x)² · D_h^k(∂_k u)(x)`. -/
@@ -2981,14 +2741,12 @@ private lemma fderiv_eta_sq_diffQuot_sq_bound
         (diffQuot k h
           (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single k 1)) x)^2 := by
   rw [fderiv_eta_sq_diffQuot_apply (d := d) hu hη k hh x]
-  -- (a + b)² ≤ 2 a² + 2 b².
   set A : ℝ := 2 * η x * ((fderiv ℝ η x) (EuclideanSpace.single k 1)) *
     diffQuot k h u x with hA_def
   set B' : ℝ := η x ^ 2 * diffQuot k h
     (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single k 1)) x with hB'_def
   have h_AB_sq : (A + B')^2 ≤ 2 * A^2 + 2 * B'^2 := by nlinarith [sq_nonneg (A - B')]
   refine h_AB_sq.trans ?_
-  -- 2 A² ≤ 8 N² · 𝟙 · (D_h^k u)².
   have hN_nn : 0 ≤ N := le_trans (norm_nonneg _) (h_fderiv_eta x)
   have h_dη_bound : |(fderiv ℝ η x) (EuclideanSpace.single k 1)| ≤ N := by
     have hsing_norm :
@@ -3053,7 +2811,6 @@ private lemma fderiv_eta_sq_diffQuot_sq_bound
           (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single k 1)) x)^2 := sq_nonneg _
       have h_4_eq : (η x)^4 = (η x)^2 * (η x)^2 := by ring
       rw [h_4_eq]
-      -- (η x)² · (η x)² · DQ² ≤ (η x)² · 1 · DQ² (since (η x)² ≤ 1).
       have h_step :
           (η x)^2 * ((η x)^2 *
             (diffQuot k h
@@ -3068,8 +2825,7 @@ private lemma fderiv_eta_sq_diffQuot_sq_bound
         nlinarith
       nlinarith
     linarith
-  · -- Outside tsupport η, η x = 0, so both sides simplify.
-    have h_η_zero : η x = 0 := image_eq_zero_of_notMem_tsupport hx
+  · have h_η_zero : η x = 0 := image_eq_zero_of_notMem_tsupport hx
     have h_indicator : Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x = 0 :=
       Set.indicator_of_notMem hx _
     rw [h_indicator]
@@ -3102,8 +2858,6 @@ private theorem v_test_sq_int_le
           (diffQuot k h
             (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single k 1)) x)^2
         ∂(volume : Measure E) := by
-  -- v_test = D_{-h}^k(η²·D_h^k u). Apply integral_sq_diffQuot_le_local on E (so K = univ),
-  -- using that g := η²·D_h^k u has compact support.
   set g : E → ℝ := fun y : E => η y ^ 2 * diffQuot k h u y with hg_def
   have hg_smooth : ContDiff ℝ 1 g := by
     have h1 : ContDiff ℝ (⊤ : ℕ∞) (fun y : E => η y ^ 2) := hη.pow 2
@@ -3117,7 +2871,6 @@ private theorem v_test_sq_int_le
       rw [heq]; exact hη_supp.mul_right
     exact h_eta_sq_supp.mul_right
   have hnh : (-h) ≠ 0 := neg_ne_zero.mpr hh
-  -- Apply integral_sq_diffQuot_le_local with K = univ.
   have h_thick_int : Integrable
       (fun y : E => ((fderiv ℝ g y) (EuclideanSpace.single k 1)) ^ 2)
       ((volume : Measure E).restrict (Metric.cthickening |-h| (Set.univ : Set E))) := by
@@ -3140,7 +2893,6 @@ private theorem v_test_sq_int_le
     exact (h_partial_sq_cont.integrable_of_hasCompactSupport h_partial_sq_supp).integrableOn
   have h_local := integral_sq_diffQuot_le_local (d := d) hg_smooth k hnh
     MeasurableSet.univ h_thick_int
-  -- LHS: rewrite ∫ v_test² as ∫_E (D_{-h}^k g)².
   have h_v_test_eq : (fun x : E =>
       (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
         k h η u x)^2) =
@@ -3151,9 +2903,6 @@ private theorem v_test_sq_int_le
     unfold DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
     rfl
   rw [h_v_test_eq]
-  -- The lhs of h_local has ∫ x, (D_{-h}^k g x)² ∂volume restricted to univ which is the same.
-  -- Apply h_local: ∫_{univ} (D_{-h}^k g)² ≤ ∫_{cthickening |-h| univ} (∂_k g)²
-  -- = ∫ (∂_k g)² (since cthickening |-h| univ = univ).
   have h_lhs : ∫ x, (diffQuot k (-h) g x)^2 ∂(volume : Measure E) ≤
       ∫ y, ((fderiv ℝ g y) (EuclideanSpace.single k 1))^2 ∂(volume : Measure E) := by
     have h_lhs_restrict : ∫ x in (Set.univ : Set E),
@@ -3173,7 +2922,6 @@ private theorem v_test_sq_int_le
     rw [← h_lhs_restrict, ← h_rhs_restrict]
     exact h_local
   refine h_lhs.trans ?_
-  -- ∫ (∂_k g)² ≤ 8 N² ∫_{tsupport η} (D_h^k u)² + 2 ∫ η² (D_h^k ∂_k u)².
   have h_pointwise_bound : ∀ x : E,
       ((fderiv ℝ g x) (EuclideanSpace.single k 1))^2 ≤
         8 * N^2 *
@@ -3183,9 +2931,7 @@ private theorem v_test_sq_int_le
           (diffQuot k h
             (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single k 1)) x)^2 := by
     intro x
-    -- g = η² · D_h^k u, so this is the bound from `fderiv_eta_sq_diffQuot_sq_bound`.
     exact fderiv_eta_sq_diffQuot_sq_bound (d := d) hu hη hη_range h_fderiv_eta k hh x
-  -- Integrate the pointwise bound.
   have h_lhs_int : Integrable (fun x : E =>
       ((fderiv ℝ g x) (EuclideanSpace.single k 1))^2) volume := by
     have h_fderiv_g_cont : Continuous (fderiv ℝ g) :=
@@ -3226,14 +2972,12 @@ private theorem v_test_sq_int_le
   have h_int_le := integral_mono h_lhs_int h_rhs_int h_pointwise_bound
   refine h_int_le.trans ?_
   rw [integral_add h_t1_int h_t2_int]
-  -- Convert: ∫ 8N² · 𝟙 · (D_h^k u)² = 8N² · ∫_{tsupport η} (D_h^k u)².
   have h_t1_eq : ∫ x, 8 * N^2 *
       (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
       (diffQuot k h u x)^2 ∂(volume : Measure E) =
     8 * N^2 * ∫ x in tsupport η, (diffQuot k h u x)^2 ∂(volume : Measure E) :=
     integral_const_indicator_eq (d := d) k h η (8 * N^2) (u := u)
   rw [h_t1_eq]
-  -- Convert ∫ 2 η² f² = 2 ∫ η² f².
   have h_t2_eq : ∫ x, 2 * (η x)^2 *
       (diffQuot k h
         (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single k 1)) x)^2 ∂(volume : Measure E) =
@@ -3249,8 +2993,6 @@ private theorem v_test_sq_int_le
         funext x; ring]
     rw [integral_const_mul]
   rw [h_t2_eq]
-
-/-! ### c-term bound: `|∫_Ω c · u · v_test|` -/
 
 /-- The test function has compact support contained in the |h|-thickening of `tsupport η`,
 hence in `Ω'` for `|h| ≤ 1`. -/
@@ -3317,16 +3059,6 @@ theorem c_term_bound
   classical
   obtain ⟨Mc, hMc_nn, h_Mc⟩ :=
     SmoothEllipticBilinearForm.bounded_c_on_compact (d := d) B hΩ'_compact
-  -- Strategy:
-  --   |∫_Ω cu v| ≤ ‖cu‖_{L²(Ω')} · ‖v_test‖_{L²}  (Cauchy-Schwarz, supp v_test ⊆ Ω')
-  --   2|a||b| ≤ ε a² + (1/ε) b²
-  --   2 |∫ cu v| ≤ ε ‖v_test‖² + (1/ε) ‖cu‖²
-  --   |∫ cu v| ≤ (ε/2) ‖v_test‖² + (1/(2ε)) Mc² · ‖u‖²
-  --   ‖v_test‖² ≤ 8N² ‖∂_k u‖²_{Ω'} + 2 · I (where I = absorbingIntegral_k)
-  -- Plug in:
-  --   |∫ cu v| ≤ ε · I + 4εN² · ‖∂_k u‖²_{Ω'} + Mc²/(2ε) · ‖u‖²_{Ω'}
-  --   ≤ ε · I + 4εN² · ‖∇u‖²_{Ω'} + Mc²/(2ε) · ‖u‖²_{Ω'}
-  --   ≤ ε · I + C · (‖∇u‖²_{Ω'} + ‖u‖²_{Ω'}) where C = max(4εN², Mc²/(2ε)).
   set C : ℝ := max (4 * ε * N^2) (Mc^2 / (2 * ε)) with hC_def
   have hC_nn : 0 ≤ C := by
     rw [hC_def]
@@ -3339,7 +3071,6 @@ theorem c_term_bound
   set v_test : E → ℝ :=
     DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
       k h η u with hv_test_def
-  -- Support of v_test is in Ω' ⊆ Ω.
   have h_v_test_supp : tsupport v_test ⊆ Ω' := v_test_supported_in_Ω' hh_supp_in_Ω' k hh_le
   have h_v_test_in_Ω : tsupport v_test ⊆ Ω := fun x hx =>
     hΩ'_closure (subset_closure (h_v_test_supp hx))
@@ -3348,7 +3079,6 @@ theorem c_term_bound
     hasCompactSupport_v_test (d := d) hη_supp k h
   have h_c_cont : Continuous B.c := B.continuous_c
   have h_u_cont : Continuous u := hu.continuous
-  -- Step 1: convert ∫_Ω c u v_test = ∫_E c u v_test.
   have h_v_test_zero_outside : ∀ x ∉ Ω, v_test x = 0 := fun x hx =>
     image_eq_zero_of_notMem_tsupport (fun hy => hx (h_v_test_in_Ω hy))
   have h_int_E : ∫ x in Ω, B.c x * u x * v_test x ∂(volume : Measure E) =
@@ -3358,7 +3088,6 @@ theorem c_term_bound
       rw [h_v_test_zero_outside x hx]; ring
     exact setIntegral_eq_integral_of_forall_compl_eq_zero h_eq_zero
   rw [h_int_E]
-  -- Step 2: ∫_E c u v_test = ∫_{Ω'} c u v_test.
   have h_v_test_zero_outside_Ω' : ∀ x ∉ Ω', v_test x = 0 := fun x hx =>
     image_eq_zero_of_notMem_tsupport (fun hy => hx (h_v_test_supp hy))
   have h_int_Ω' : ∫ x, B.c x * u x * v_test x ∂(volume : Measure E) =
@@ -3368,9 +3097,6 @@ theorem c_term_bound
       rw [h_v_test_zero_outside_Ω' x hx]; ring
     exact (setIntegral_eq_integral_of_forall_compl_eq_zero h_eq_zero).symm
   rw [h_int_Ω']
-  -- Step 3: Apply pointwise Young to cu · v_test, then integrate over Ω'.
-  -- Pointwise: 2 |cu v_test| ≤ ε v_test² + (1/ε) (cu)²
-  -- ⇒ |cu v_test| ≤ (ε/2) v_test² + (1/(2ε)) (cu)²
   have h_pointwise_cu_v : ∀ x : E,
       |B.c x * u x * v_test x| ≤ (ε/2) * (v_test x)^2 + (1/(2*ε)) * (B.c x * u x)^2 := by
     intro x
@@ -3379,15 +3105,12 @@ theorem c_term_bound
       rw [show (B.c x * u x * v_test x) = v_test x * (B.c x * u x) from by ring,
         abs_mul]
     rw [h_abs_eq]
-    -- From h_y: 2 |v||cu| ≤ ε v² + (1/ε)(cu)²
-    -- So |v||cu| ≤ (1/2) (ε v² + (1/ε)(cu)²) = (ε/2) v² + (1/(2ε))(cu)²
     have h_ε_pos_inv : (1 : ℝ) / ε > 0 := one_div_pos.mpr hε
     have h_div_eq : (1 / ε) * (B.c x * u x)^2 = 2 * ((1 / (2 * ε)) * (B.c x * u x)^2) := by
       have hε_ne : ε ≠ 0 := ne_of_gt hε
       field_simp
     have h_ε_eq : ε * (v_test x)^2 = 2 * ((ε / 2) * (v_test x)^2) := by ring
     linarith [h_y, h_div_eq, h_ε_eq]
-  -- All pieces are integrable on Ω' (Ω' is contained in compact closure Ω').
   have h_v_test_sq_int_Ω' : IntegrableOn (fun x : E => (v_test x)^2) Ω' volume := by
     have h_int : Integrable (fun x : E => (v_test x)^2) volume :=
       (h_v_test_cont.pow 2).integrable_of_hasCompactSupport
@@ -3408,7 +3131,6 @@ theorem c_term_bound
   have h_rhs_int_Ω' : IntegrableOn (fun x : E =>
       (ε/2) * (v_test x)^2 + (1/(2*ε)) * (B.c x * u x)^2) Ω' volume := by
     refine (h_v_test_sq_int_Ω'.const_mul (ε/2)).add (h_cu_sq_int_Ω'.const_mul (1/(2*ε)))
-  -- |∫_{Ω'} cu v| ≤ ∫_{Ω'} |cu v| ≤ ∫_{Ω'} ((ε/2) v² + (1/(2ε)) (cu)²).
   have h_step1 : |∫ x in Ω', B.c x * u x * v_test x ∂(volume : Measure E)| ≤
       ∫ x in Ω', |B.c x * u x * v_test x| ∂(volume : Measure E) :=
     abs_integral_le_integral_abs (μ := (volume : Measure E).restrict Ω')
@@ -3420,12 +3142,10 @@ theorem c_term_bound
     refine Filter.Eventually.of_forall ?_
     intro x; exact h_pointwise_cu_v x
   refine (h_step1.trans h_step2).trans ?_
-  -- ∫_{Ω'} ((ε/2) v² + (1/(2ε)) (cu)²) = (ε/2) ∫_{Ω'} v² + (1/(2ε)) ∫_{Ω'} (cu)²
   rw [integral_add (h_v_test_sq_int_Ω'.const_mul (ε/2)) (h_cu_sq_int_Ω'.const_mul (1/(2*ε)))]
   rw [show (fun x : E => (ε/2) * (v_test x)^2) =
       (fun x : E => (ε/2) * (v_test x)^2) from rfl]
   rw [integral_const_mul, integral_const_mul]
-  -- ∫_{Ω'} v² ≤ ∫_E v² (since v² ≥ 0).
   have h_v_test_sq_Ω'_le_E :
       ∫ x in Ω', (v_test x)^2 ∂(volume : Measure E) ≤
       ∫ x, (v_test x)^2 ∂(volume : Measure E) := by
@@ -3439,9 +3159,7 @@ theorem c_term_bound
         rw [h_v_test_zero_outside_Ω' x hx]; ring
       exact (setIntegral_eq_integral_of_forall_compl_eq_zero h_eq_zero).symm
     rw [h_v_test_sq_eq]
-  -- ‖v_test‖² ≤ 8N² · ∫_{tsupport η} (D_h^k u)² + 2 · I_k where I_k = ∫ η² (D_h^k ∂_k u)².
   have h_v_test_bound := v_test_sq_int_le (d := d) hu hη hη_supp hη_range h_fderiv_eta k hh
-  -- (cu)² ≤ Mc² · u² on Ω' (using |c| ≤ Mc on closure Ω' ⊇ Ω').
   have h_cu_sq_bound : ∀ x ∈ Ω', (B.c x * u x)^2 ≤ Mc^2 * (u x)^2 := by
     intro x hx
     have h_x_in_clΩ' : x ∈ closure Ω' := subset_closure hx
@@ -3464,7 +3182,6 @@ theorem c_term_bound
       setIntegral_mono_on h_cu_sq_int_Ω' h_const_int hΩ'.measurableSet h_cu_sq_bound
     rw [integral_const_mul] at h_step
     exact h_step
-  -- Now combine.
   have h_v_sq_le_8N_2I :
       ∫ x in Ω', (v_test x)^2 ∂(volume : Measure E) ≤
         8 * N^2 *
@@ -3474,14 +3191,12 @@ theorem c_term_bound
               (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single k 1)) x)^2
           ∂(volume : Measure E) :=
     h_v_test_sq_Ω'_le_E.trans h_v_test_bound
-  -- Bound ∫_{tsupport η} (D_h^k u)² ≤ ∫_{Ω'} ∑_i (∂_i u)².
   have h_diff_bound :
       ∫ x in tsupport η, (diffQuot k h u x)^2 ∂(volume : Measure E) ≤
         ∫ x in Ω', ∑ i : Fin d, ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2
           ∂(volume : Measure E) :=
     integral_diffQuot_sq_on_tsupport_le_gradL2sqOn (d := d) hu k hh η hΩ'
       hΩ'_compact h_thick_in_Ω'
-  -- Bound ∫ η² · (D_h^k ∂_k u)² ≤ ∫ η² · ∑_i (D_h^k ∂_i u)² (= I).
   have h_partial_le_sum : ∀ x : E,
       (η x)^2 *
         (diffQuot k h
@@ -3514,14 +3229,12 @@ theorem c_term_bound
             (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single i 1)) x)^2
         ∂(volume : Measure E) :=
     integral_mono h_eta_sq_partial_int h_eta_sq_sum_int h_partial_le_sum
-  -- Now combine all the bounds.
   have h_gradL2_nn : 0 ≤ ∫ x in Ω',
         ∑ i : Fin d, ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2
           ∂(volume : Measure E) :=
     integral_nonneg (fun x => Finset.sum_nonneg (fun i _ => sq_nonneg _))
   have h_uL2_nn : 0 ≤ ∫ x in Ω', (u x)^2 ∂(volume : Measure E) :=
     integral_nonneg (fun x => sq_nonneg _)
-  -- Compute step by step.
   have h_v_full_bound :
       (ε/2) * ∫ x in Ω', (v_test x)^2 ∂(volume : Measure E) ≤
       4 * ε * N^2 *
@@ -3531,9 +3244,6 @@ theorem c_term_bound
           ∑ i : Fin d, (diffQuot k h
             (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single i 1)) x)^2
         ∂(volume : Measure E) := by
-    -- (ε/2) · ‖v_test‖² ≤ (ε/2) · (8N² ‖∂_k u‖²_{Ω'} + 2 I_k)
-    --                 = 4εN² ‖∂_k u‖²_{Ω'} + ε · I_k
-    --                 ≤ 4εN² ‖∇u‖²_{Ω'} + ε · I.
     have h_step_a := mul_le_mul_of_nonneg_left h_v_sq_le_8N_2I (by linarith : 0 ≤ ε/2)
     have h_step_b : (ε/2) * (8 * N^2 *
             ∫ x in tsupport η, (diffQuot k h u x)^2 ∂(volume : Measure E) +
@@ -3580,7 +3290,6 @@ theorem c_term_bound
         mul_le_mul_of_nonneg_left h_partial_int_le hε.le
       linarith [h1, h2]
     linarith
-  -- Combine: |∫ cu v| ≤ (ε/2) ‖v‖² + (1/(2ε)) ‖cu‖² ≤ ε I + 4εN² ‖∇u‖² + Mc²/(2ε) ‖u‖².
   have h_cu_full_bound :
       (1/(2*ε)) * ∫ x in Ω', (B.c x * u x)^2 ∂(volume : Measure E) ≤
       (Mc^2 / (2 * ε)) * ∫ x in Ω', (u x)^2 ∂(volume : Measure E) := by
@@ -3591,7 +3300,6 @@ theorem c_term_bound
         Mc^2 / (2*ε) * ∫ x in Ω', (u x)^2 ∂(volume : Measure E) := by
       ring
     linarith [h_step, h_eq]
-  -- Final composition.
   have h_C_grad_le : 4 * ε * N^2 ≤ C := le_max_left _ _
   have h_C_uL2_le : Mc^2 / (2*ε) ≤ C := le_max_right _ _
   have h_combine :
@@ -3612,8 +3320,6 @@ theorem c_term_bound
         C * ∫ x in Ω', (u x)^2 ∂(volume : Measure E) := by ring
     linarith
   linarith
-
-/-! ### f-term bound: `|∫_Ω f · v_test|` -/
 
 set_option linter.unusedVariables false in
 /-- The f-term `∫_Ω f · v_test` is bounded by an absorbing piece plus
@@ -3647,13 +3353,6 @@ theorem f_term_bound
             ∂(volume : Measure E) +
           ∫ x in Ω', (f x)^2 ∂(volume : Measure E)) := by
   classical
-  -- Strategy: same as c_term_bound but with f directly.
-  -- |∫_Ω f v_test| ≤ ‖f‖_{L²(Ω')} · ‖v_test‖_{L²(E)}
-  -- 2 |a| |b| ≤ ε a² + (1/ε) b²
-  -- |∫ f v| ≤ (ε/2) ‖v‖² + (1/(2ε)) ‖f‖²_{L²(Ω')}
-  -- ‖v‖² ≤ 8N² ‖∂_k u‖²_{Ω'} + 2 I
-  -- ⇒ |∫ f v| ≤ 4εN² ‖∂_k u‖²_{Ω'} + ε I + (1/(2ε)) ‖f‖²_{L²(Ω')}
-  --        ≤ ε I + max(4εN², 1/(2ε)) (‖∇u‖²_{Ω'} + ‖f‖²_{Ω'}).
   set C : ℝ := max (4 * ε * N^2) (1 / (2 * ε)) with hC_def
   have hC_nn : 0 ≤ C := by
     rw [hC_def]
@@ -3670,15 +3369,12 @@ theorem f_term_bound
   have h_v_test_cont : Continuous v_test := continuous_v_test (d := d) hu hη k hh
   have h_v_test_supp_cmp : HasCompactSupport v_test :=
     hasCompactSupport_v_test (d := d) hη_supp k h
-  -- Step 1: ∫_Ω f v_test = ∫_{Ω'} f v_test (using v_test = 0 outside Ω' ⊆ Ω).
   have h_v_test_zero_outside : ∀ x ∉ Ω, v_test x = 0 := fun x hx =>
     image_eq_zero_of_notMem_tsupport (fun hy => hx (hΩ'_closure (subset_closure (h_v_test_supp hy))))
   have h_v_test_zero_outside_Ω' : ∀ x ∉ Ω', v_test x = 0 := fun x hx =>
     image_eq_zero_of_notMem_tsupport (fun hy => hx (h_v_test_supp hy))
-  -- f is in L²(Ω').
   have hf_memLp : MemLp f 2 (volume.restrict Ω') := hf_l2_loc hΩ'_compact
   have hf_sq_int_Ω' : IntegrableOn (fun x : E => (f x)^2) Ω' volume := hf_memLp.integrable_sq
-  -- Step 2: rewrite ∫_Ω f v_test = ∫ f v_test = ∫_{Ω'} f v_test.
   have h_int_E : ∫ x in Ω, f x * v_test x ∂(volume : Measure E) =
       ∫ x in Ω', f x * v_test x ∂(volume : Measure E) := by
     have h_eq_zero_Ω : ∀ x, x ∉ Ω → f x * v_test x = 0 := by
@@ -3688,7 +3384,6 @@ theorem f_term_bound
     rw [setIntegral_eq_integral_of_forall_compl_eq_zero h_eq_zero_Ω,
       ← setIntegral_eq_integral_of_forall_compl_eq_zero h_eq_zero_Ω']
   rw [h_int_E]
-  -- Step 3: pointwise Young + integrate over Ω'.
   have h_pointwise : ∀ x : E,
       |f x * v_test x| ≤ (ε/2) * (v_test x)^2 + (1/(2*ε)) * (f x)^2 := by
     intro x
@@ -3701,17 +3396,12 @@ theorem f_term_bound
       field_simp
     have h_ε_eq : ε * (v_test x)^2 = 2 * ((ε / 2) * (v_test x)^2) := by ring
     linarith [h_y, h_div_eq, h_ε_eq]
-  -- Integrability.
   have h_v_test_sq_int_Ω' : IntegrableOn (fun x : E => (v_test x)^2) Ω' volume := by
     have h_int : Integrable (fun x : E => (v_test x)^2) volume :=
       (h_v_test_cont.pow 2).integrable_of_hasCompactSupport
         (h_v_test_supp_cmp.comp_left (g := fun x : ℝ => x^2) (by simp : (0 : ℝ)^2 = 0))
     exact h_int.integrableOn
   have h_f_v_int_Ω' : IntegrableOn (fun x : E => f x * v_test x) Ω' volume := by
-    -- f ∈ L²(Ω'), v_test bounded with compact support. Use MemLp.integrable_mul.
-    -- v_test² is integrable on Ω' (continuous compact support).
-    -- f² is integrable on Ω' (hf_l2_loc).
-    -- |fv| ≤ (1/2)(f² + v_test²), so |fv| is integrable on Ω'.
     have h_pointwise_abs : ∀ x : E,
         |f x * v_test x| ≤ (1/2) * ((f x)^2 + (v_test x)^2) := by
       intro x
@@ -3735,8 +3425,6 @@ theorem f_term_bound
     have h_pt := h_pointwise_abs x
     have h_rhs_nn : 0 ≤ (1 : ℝ) / 2 * ((f x)^2 + (v_test x)^2) :=
       mul_nonneg (by norm_num) (add_nonneg (sq_nonneg _) (sq_nonneg _))
-    -- |a * b| ≤ rhs, and rhs ≥ 0, so |a*b| ≤ |rhs| = rhs.
-    -- But we need ‖a*b‖ ≤ rhs, where ‖·‖ is the same as |·|.
     exact h_pt
   have h_rhs_int_Ω' : IntegrableOn (fun x : E =>
       (ε/2) * (v_test x)^2 + (1/(2*ε)) * (f x)^2) Ω' volume := by
@@ -3752,7 +3440,6 @@ theorem f_term_bound
   refine (h_step1.trans h_step2).trans ?_
   rw [integral_add (h_v_test_sq_int_Ω'.const_mul (ε/2)) (hf_sq_int_Ω'.const_mul (1/(2*ε)))]
   rw [integral_const_mul, integral_const_mul]
-  -- ∫_{Ω'} v² ≤ ∫_E v².
   have h_v_test_sq_Ω'_le_E :
       ∫ x in Ω', (v_test x)^2 ∂(volume : Measure E) ≤
       ∫ x, (v_test x)^2 ∂(volume : Measure E) := by
@@ -3764,7 +3451,6 @@ theorem f_term_bound
       exact (setIntegral_eq_integral_of_forall_compl_eq_zero h_eq_zero).symm
     rw [h_v_test_sq_eq]
   have h_v_test_bound := v_test_sq_int_le (d := d) hu hη hη_supp hη_range h_fderiv_eta k hh
-  -- Now combine.
   have h_v_sq_le_8N_2I :
       ∫ x in Ω', (v_test x)^2 ∂(volume : Measure E) ≤
         8 * N^2 *
@@ -3894,8 +3580,6 @@ theorem f_term_bound
     linarith
   linarith
 
-/-! ## Headline: master inequality after Young absorption -/
-
 /-- The headline absorbing inequality: combining the master inequality
 (`nirenberg_master_inequality`) with the five cross-term bounds and
 choosing `ε := λ/8` so that the four absorbing pieces sum to at most
@@ -3933,18 +3617,9 @@ theorem nirenberg_master_inequality_after_young
           ∫ x in Ω', (u x)^2 ∂(volume : Measure E) +
           ∫ x in Ω', (f x)^2 ∂(volume : Measure E)) := by
   classical
-  -- Strategy: choose ε := λ/8 in the four absorbing-term bounds (cross_1, cross_2, c, f).
-  -- Cross_3 doesn't have an absorbing piece. Sum:
-  -- λ · I ≤ |C1| + |C2| + |C3| + |R| + |Q|
-  --       ≤ (ε I + C1' G) + (ε I + C2' G) + C3' G + (ε I + Cc' (G + U)) + (ε I + Cf' (G + F))
-  --       = 4ε · I + (C1' + C2' + C3' + Cc' + Cf') · G + Cc' · U + Cf' · F
-  -- With ε = λ/8: 4ε = λ/2.
-  -- Set C := max(C1' + C2' + C3' + Cc' + Cf', Cc', Cf').
   set ε_eff : ℝ := B.lam / 8 with hε_eff_def
   have hε_eff_pos : 0 < ε_eff := by
     rw [hε_eff_def]; exact div_pos B.hlam_pos (by norm_num)
-  -- Apply the five bounds. Each produces a constant independent of the
-  -- solution data `(u, f)`, so the constants can be assembled up front.
   obtain ⟨C1, hC1_nn, hC1⟩ := cross_1_bound (d := d) B hη hη_supp hη_range hN
     h_fderiv_eta hΩ' hΩ'_closure hΩ'_compact hh_supp_in_Ω' k ε_eff hε_eff_pos
   obtain ⟨C2, hC2_nn, hC2⟩ := cross_2_bound (d := d) B hη hη_supp hη_range
@@ -3955,7 +3630,6 @@ theorem nirenberg_master_inequality_after_young
     h_fderiv_eta hΩ' hΩ'_closure hΩ'_compact hη_in_Ω' hh_supp_in_Ω' k ε_eff hε_eff_pos
   obtain ⟨Cf, hCf_nn, hCf⟩ := f_term_bound (d := d) hη hη_supp hη_range hN
     h_fderiv_eta hΩ' hΩ'_closure hΩ'_compact hη_in_Ω' hh_supp_in_Ω' k ε_eff hε_eff_pos
-  -- The final constant.
   set C : ℝ := max (C1 + C2 + C3 + Cc + Cf) (max Cc Cf) with hC_def
   have hC_nn : 0 ≤ C := by
     rw [hC_def]
@@ -3964,7 +3638,6 @@ theorem nirenberg_master_inequality_after_young
   refine ⟨C, hC_nn, ?_⟩
   intro u f h_weak hf_l2_loc h hh hh_le
   have hu : ContDiff ℝ (⊤ : ℕ∞) u := h_weak.1
-  -- Set up notation for the integrals.
   set I : ℝ := ∫ x, (η x)^2 *
       ∑ i : Fin d, DifferentialGeometry.Analysis.Sobolev.diffQuot k h
         (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single i 1)) x ^ 2
@@ -3979,39 +3652,18 @@ theorem nirenberg_master_inequality_after_young
     (fun x => Finset.sum_nonneg (fun i _ => sq_nonneg _))
   have hU_nn : 0 ≤ U := integral_nonneg (fun x => sq_nonneg _)
   have hF_nn : 0 ≤ F := integral_nonneg (fun x => sq_nonneg _)
-  -- Apply the master inequality.
   have h_thick_in_Ω : Metric.cthickening |h| (tsupport η) ⊆ Ω :=
     (hh_supp_in_Ω' hh_le).trans (subset_closure.trans hΩ'_closure)
   have h_master := nirenberg_master_inequality (d := d) B h_weak hη hη_supp k hh h_thick_in_Ω
-  -- h_master: B.lam * I ≤ |C1_sum| + |C2_sum| + |C3_sum| + |R| + |Q|.
-  -- Substitute the specific bounds.
   have hC1_h := hC1 hu hh hh_le
   have hC2_h := hC2 hu hh hh_le
   have hC3_h := hC3 hu hh hh_le
   have hCc_h := hCc hu hh hh_le
   have hCf_h := hCf hf_l2_loc hu hh hh_le
-  -- Combine: λ · I ≤ |C1| + |C2| + |C3| + |R| + |Q|
-  --              ≤ (ε_eff · I + C1 · G) + (ε_eff · I + C2 · G) + (C3 · G) +
-  --                (ε_eff · I + Cc · (G + U)) + (ε_eff · I + Cf · (G + F))
-  --              = 4 ε_eff · I + (C1 + C2 + C3 + Cc + Cf) · G + Cc · U + Cf · F
-  --              = (λ/2) · I + (...) · G + Cc · U + Cf · F
-  --              ≤ (λ/2) · I + C · (G + U + F).
   have h_4ε_eq : 4 * ε_eff = B.lam / 2 := by
     rw [hε_eff_def]; ring
   have h_combine : B.lam * I ≤
       4 * ε_eff * I + (C1 + C2 + C3 + Cc + Cf) * G + Cc * U + Cf * F := by
-    -- Sum up the cross-term and data-term bounds.
-    -- |R| (f-term, from master) is the C_f bound; |Q| (c-term) is the C_c bound.
-    -- Specifically, from the master inequality:
-    -- λ I ≤ |C1_sum| + |C2_sum| + |C3_sum| + |R| + |Q|
-    -- where R = ∫_Ω f · v_test and Q = ∫_Ω c u v_test.
-    -- The bounds give:
-    -- |C1_sum| ≤ ε_eff · I + C1 · G
-    -- |C2_sum| ≤ ε_eff · I + C2 · G
-    -- |C3_sum| ≤ C3 · G
-    -- |Q| ≤ ε_eff · I + Cc · (G + U)
-    -- |R| ≤ ε_eff · I + Cf · (G + F)
-    -- Sum: ≤ 4 ε_eff · I + (C1 + C2 + C3 + Cc + Cf) · G + Cc · U + Cf · F.
     have h_sum_bound :
         |∑ i : Fin d, ∑ j : Fin d, ∫ x, 2 *
               DifferentialGeometry.Analysis.Sobolev.translate k h
@@ -4094,15 +3746,11 @@ theorem nirenberg_master_inequality_after_young
             ∂(volume : Measure E)| ≤ C3 * G := by
         rw [← abs_neg]; exact h3
       linarith
-    -- λ I ≤ sum bound.
     refine h_master.trans (h_sum_bound.trans ?_)
-    -- Sum bound = 4 ε_eff I + (C1+C2+C3+Cc+Cf) G + Cc U + Cf F.
     have hCc_distrib : Cc * (G + U) = Cc * G + Cc * U := by ring
     have hCf_distrib : Cf * (G + F) = Cf * G + Cf * F := by ring
     linarith [hCc_distrib, hCf_distrib]
-  -- 4 ε_eff = λ/2; combine with bounds.
   rw [show (4 * ε_eff * I) = (B.lam / 2) * I from by rw [h_4ε_eq]] at h_combine
-  -- Now combine: (λ/2) I + (C1+...+Cf) G + Cc U + Cf F ≤ (λ/2) I + C (G + U + F).
   have hC_grad_le : C1 + C2 + C3 + Cc + Cf ≤ C := le_max_left _ _
   have hC_Cc_le : Cc ≤ C := le_trans (le_max_left _ _) (le_max_right _ _)
   have hC_Cf_le : Cf ≤ C := le_trans (le_max_right _ _) (le_max_right _ _)

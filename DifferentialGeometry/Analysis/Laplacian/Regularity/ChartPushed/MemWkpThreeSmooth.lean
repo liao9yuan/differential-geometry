@@ -104,8 +104,6 @@ open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
 open DifferentialGeometry.Analysis.Laplacian.H1ComplWeakPartialLimit
 open DifferentialGeometry.Analysis.Laplacian.H1ComplGradientH1LipschitzBound
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -114,16 +112,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Support-aware `MemWkp` extension from a precompact open subdomain
-
-The core technical lemma: a function `u` that lies in `MemWkp k 2` of a
-precompact open `Ω' ⊆ Ω` and that vanishes a.e. on the complement
-`Ω \ K` for some compact `K ⊆ Ω'` can be promoted to `MemWkp k 2 Ω`. The
-proof multiplies `u` by a smooth cutoff `η` that is `1` on a neighborhood
-of `K` and has pointwise topological support inside `Ω'`, then applies
-`MemWkp.extend_zero` to the product and transfers back via
-`MemWkp_congr_ae`. -/
 
 /-- Given a function `u : EuclN → ℝ` that lies in `MemWkp k 2` of an open
 precompact `Ω' ⊆ Ω` (both open, `Ω' ⊆ Ω`, closure of `Ω'` inside `Ω`),
@@ -143,28 +131,22 @@ private theorem MemWkp_two_extend_via_cutoff
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) k 2 u Ω := by
   classical
-  -- Pick a smooth cutoff η ≡ 1 on a neighborhood of K, tsupport η ⊆ Ω'.
   obtain ⟨δ, η, hδ_pos, hδ_in_Ω', hη_smooth, hη_compact_support, hη_range,
     hη_one_on_cthick, hη_tsupp_in_Ω'⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.exists_smooth_cutoff_with_neighborhood
       (d := Module.finrank ℝ E) hK_compact hΩ'_open hK_in_Ω'
-  -- Uniform bound on the iterated derivatives of η, up to order k.
   obtain ⟨C, hC_nn, hη_bound⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
       (d := Module.finrank ℝ E) hη_smooth hη_compact_support k
-  -- The product `η · u` is in `MemWkp k 2 Ω'`.
   have h_eta_u_in_Ω' : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) k 2 (fun x => η x * u x) Ω' :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.smul_smooth_bounded
       (d := Module.finrank ℝ E) k (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ'_open hη_smooth
       (fun j _hj x _hx => hη_bound x j _hj) hu_local
-  -- The pointwise tsupport of `η · u` is inside `tsupport η ⊆ Ω'`.
   have h_tsupp_prod_in_tsupp_eta : tsupport (fun x => η x * u x) ⊆ tsupport η := by
     refine closure_mono ?_
     intro x hx
-    -- hx : x ∈ support (η · u), i.e. (η x) * (u x) ≠ 0.
     have hx_ne : η x * u x ≠ 0 := hx
-    -- Show x ∈ support η, i.e. η x ≠ 0.
     intro hx_eta_zero
     apply hx_ne
     rw [hx_eta_zero]
@@ -174,7 +156,6 @@ private theorem MemWkp_two_extend_via_cutoff
   have h_compactSupport_prod : HasCompactSupport (fun x => η x * u x) :=
     hη_compact_support.of_isClosed_subset (isClosed_tsupport _)
       h_tsupp_prod_in_tsupp_eta
-  -- Extend `η · u` from `Ω'` to `Ω`.
   have h_eta_u_in_Ω : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) k 2 (fun x => η x * u x) Ω :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.extend_zero
@@ -182,10 +163,8 @@ private theorem MemWkp_two_extend_via_cutoff
       (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)
       hΩ'_open hΩ_open hΩ'_in_Ω h_eta_u_in_Ω' h_tsupp_prod_in_Ω'
       h_compactSupport_prod
-  -- Show `η · u =ᵃᵉ u` on `volume.restrict Ω`.
   have hΩ_meas : MeasurableSet Ω := hΩ_open.measurableSet
   have hK_meas : MeasurableSet K := hK_compact.isClosed.measurableSet
-  -- Inner cthickening: η ≡ 1 on cthickening δ K.
   set U_K : Set EuclN := Metric.cthickening δ K with hU_K_def
   have hU_K_compact : IsCompact U_K := hK_compact.cthickening
   have hU_K_closed : IsClosed U_K := Metric.isClosed_cthickening
@@ -193,11 +172,7 @@ private theorem MemWkp_two_extend_via_cutoff
   have hK_in_U_K : K ⊆ U_K := Metric.self_subset_cthickening _
   have hU_K_in_Ω' : U_K ⊆ Ω' := hδ_in_Ω'
   have hU_K_in_Ω : U_K ⊆ Ω := hU_K_in_Ω'.trans hΩ'_in_Ω
-  -- The ae-equality argument.
   have h_eta_u_ae_eq_u : (fun x => η x * u x) =ᵐ[(volume : Measure EuclN).restrict Ω] u := by
-    -- Split Ω as U_K ∪ (Ω \ U_K).
-    -- On U_K: η x = 1, so η x * u x = u x.
-    -- On Ω \ U_K ⊆ Ω \ K: u x = 0 ae, so η x * u x = 0 = u x ae.
     have h_eq_on_U_K : (fun x => η x * u x) =ᵐ[(volume : Measure EuclN).restrict U_K] u := by
       refine (ae_restrict_iff' hU_K_meas).mpr ?_
       refine Filter.Eventually.of_forall fun x hx => ?_
@@ -218,7 +193,6 @@ private theorem MemWkp_two_extend_via_cutoff
     have h_eq_on_diff : (fun x => η x * u x) =ᵐ[(volume : Measure EuclN).restrict (Ω \ U_K)] u := by
       filter_upwards [hu_ae_zero_diff] with x hx
       rw [hx]; ring
-    -- Cover Ω = U_K ∪ (Ω \ U_K).
     have h_cover : Ω = U_K ∪ (Ω \ U_K) := by
       ext x; constructor
       · intro hx
@@ -234,21 +208,10 @@ private theorem MemWkp_two_extend_via_cutoff
       rw [← h_cover]
     rw [hΩ_restrict_eq]
     rw [MeasureTheory.Measure.restrict_union (Set.disjoint_sdiff_right) h_diff_meas]
-    -- Goal is now `(fun x ↦ η x * u x) =ᵐ[μ_U_K + μ_diff] u`. Split via
-    -- `ae_add_measure_iff` after unfolding `Filter.EventuallyEq`.
     exact (MeasureTheory.ae_add_measure_iff).mpr ⟨h_eq_on_U_K, h_eq_on_diff⟩
-  -- Transfer `MemWkp k 2 (η · u) Ω` to `MemWkp k 2 u Ω` via ae-equality.
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
     (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open
     h_eta_u_ae_eq_u).mp h_eta_u_in_Ω
-
-/-! ## Per-direction chart-`H²` regularity of the chart-pushed chosen first
-weak partial
-
-For each coordinate direction `i`, the chosen first weak partial
-`chosenWeakPartial' 2 i (chartPushed POU α u_h.coeFn) chartTargetEuclid`
-lies in `MemWkp 2 2 (chartTargetEuclid α)`, unconditionally for
-`u_h ∈ laplacianDomainPow g 2`. -/
 
 /-- For every coordinate direction `i`, the canonical chosen first weak
 partial `chartPushedChosenFirstPartial g α u_h i` lies in
@@ -278,40 +241,27 @@ theorem chartPushed_chosenFirstPartial_memWkp_two_two
         (chartTargetEuclid (I := I) (M := M) α))
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- Set up the derived data for direction `i`.
   set D : ChartBilinearH1ComplData (I := I) (M := M) g α :=
     derivedChartBilinearH1ComplDataUnconditional (I := I) (M := M) g α i hu_h
     with hD_def
-  -- Interior MemWkp 2 2 regularity of D.u_chart on a precompact open `Ω''`.
   obtain ⟨Ω'', hΩ''_open, hΩ''_compact_closure, hΩ''_in_chart, hK_in_Ω'',
     h_D_uChart_memWkp22_Ω''⟩ :=
     derivedChartBilinear_memWkp_two_two_interior (I := I) (M := M) g α i hu_h
-  -- The compact POU support `K_α := chartImagePOUTsupport α`.
   set K_α : Set EuclN := chartImagePOUTsupport (I := I) (M := M) α with hK_α_def
   have hK_α_compact : IsCompact K_α :=
     chartImagePOUTsupport_isCompact (I := I) (M := M) α
   have hK_α_in_chart : K_α ⊆ chartTargetEuclid (I := I) (M := M) α :=
     chartImagePOUTsupport_subset_target (I := I) (M := M) α
-  -- The full chart target is open.
   have h_chart_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) α
   have hΩ''_in_chart' : Ω'' ⊆ chartTargetEuclid (I := I) (M := M) α :=
     subset_trans subset_closure hΩ''_in_chart
-  -- `D.u_chart` is ae zero on `chartTargetEuclid α \ K_α`. This follows from
-  -- the fact that `D.u_chart = (base).weak_partial i`, where `(base)` is the
-  -- chart-bilinear data attached to `laplacianDomain`. The base's weak
-  -- partial is ae zero on the complement of `K_α` (from
-  -- `base_weak_partial_ae_zero_off_K_α`).
   have h_D_uChart_eq_base : D.u_chart =
       (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
         (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1
           hu_h)).weak_partial i := by
-    -- D.u_chart = derivedChartBilinearH1ComplDataUnconditional.u_chart =
-    -- derivedChartBilinearH1ComplData.u_chart = derived_u_chart g α i hu_h =
-    -- (chartBilinearH1ComplData_of_laplacianDomain ...).weak_partial i
     rfl
-  -- Apply `base_weak_partial_ae_zero_off_K_α` for direction `i`.
   have h_D_uChart_ae_zero_off_K_α :
       ∀ᵐ y ∂((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α \ K_α)),
@@ -320,8 +270,6 @@ theorem chartPushed_chosenFirstPartial_memWkp_two_two
     exact base_weak_partial_ae_zero_off_K_α (I := I) (M := M) g α
       (laplacianDomainPow_succ_subset_laplacianDomain
         (I := I) (M := M) g 1 hu_h) i
-  -- Promote `MemWkp 2 2 D.u_chart Ω''` to the full chart target via the
-  -- support-aware extension lemma.
   have h_D_uChart_memWkp22_chart :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) 2 2 D.u_chart
@@ -329,19 +277,14 @@ theorem chartPushed_chosenFirstPartial_memWkp_two_two
     MemWkp_two_extend_via_cutoff (E := E) 2
       h_chart_open hΩ''_open hΩ''_in_chart' hK_α_compact hK_in_Ω''
       h_D_uChart_memWkp22_Ω'' h_D_uChart_ae_zero_off_K_α
-  -- `D.u_chart` agrees ae with `chartPushedChosenFirstPartial g α u_h i` on
-  -- the chart target.
   have h_D_uChart_ae_eq_chosen :
       D.u_chart =ᵐ[(volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)]
       chartPushedChosenFirstPartial (I := I) (M := M) g α u_h i := by
-    -- D.u_chart unfolds to chartPushedWeakPartialLp.coeFn. The ae-equality is
-    -- the existing σ-compact-exhaustion bridge.
     have h_eq : D.u_chart = (((chartPushedWeakPartialLp (I := I) (M := M) g α i
         (chartPushedPartialLipschitz_canonical (I := I) (M := M) g α i) u_h
        ) : EuclN → ℝ)) := by
       rw [h_D_uChart_eq_base]
-      -- (base).weak_partial i = chartPushedWeakPartialLp ... .coeFn.
       exact DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData.chartBilinearH1ComplData_of_laplacianDomain_weak_partial_def
         (I := I) (M := M) g α
         (laplacianDomainPow_succ_subset_laplacianDomain
@@ -349,8 +292,6 @@ theorem chartPushed_chosenFirstPartial_memWkp_two_two
     rw [h_eq]
     exact chartPushedWeakPartialLp_ae_eq_chosenFirstPartial_on_chartTarget
       (I := I) (M := M) g α hu_h i
-  -- Transfer `MemWkp 2 2` from `D.u_chart` to
-  -- `chartPushedChosenFirstPartial g α u_h i` via ae-equality.
   have h_chosenFirst_memWkp22 :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) 2 2
@@ -359,16 +300,7 @@ theorem chartPushed_chosenFirstPartial_memWkp_two_two
     (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
       (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_chart_open
       h_D_uChart_ae_eq_chosen).mp h_D_uChart_memWkp22_chart
-  -- Unfold `chartPushedChosenFirstPartial` to the explicit chosen partial.
-  -- The definitions coincide by `rfl`.
   exact h_chosenFirst_memWkp22
-
-/-! ## Final unconditional chart-`H³` regularity
-
-The headline of this module: for any chart point `α : M`, the canonical
-chart-pushed POU-cut representative `chartPushed POU α u_h.coeFn` lies in
-`MemWkp 3 2 (chartTargetEuclid α)`, unconditionally for any element
-`u_h ∈ laplacianDomainPow g 2` on a closed Riemannian manifold. -/
 
 /-- **Final chart-`H³` regularity of the canonical chart-pushed function,
 unconditional for `u_h ∈ laplacianDomainPow g 2`.**
@@ -389,16 +321,11 @@ theorem chartPushed_memWkp_three_two_of_laplacianDomainPow_two
           Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ))
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := by
-  -- Use the assembly form: combine the unconditional `MemW1p 2` of the
-  -- chart-pushed function with the per-direction `MemWkp 2 2` of the chosen
-  -- first weak partials.
   refine chartPushed_memWkp_three_two_of_chosen_partials_memWkp_two_two
     (I := I) (M := M) g α hu_h ?_
   intro i
   exact chartPushed_chosenFirstPartial_memWkp_two_two
     (I := I) (M := M) g α hu_h i
-
-/-! ## Headline statement, exposed at the requested name -/
 
 /-- **Headline (renamed for compatibility): chart-`H³` of the canonical
 chart-pushed function, unconditional for `u_h ∈ laplacianDomainPow g 2`.**

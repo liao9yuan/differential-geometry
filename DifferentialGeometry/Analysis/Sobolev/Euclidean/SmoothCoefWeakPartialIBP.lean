@@ -63,16 +63,13 @@ theorem integral_smul_weak_partial_eq
         ∂(MeasureTheory.volume : MeasureTheory.Measure E))) := by
   classical
   let _ := hΩ_open
-  -- Compact tsupport of the test factor `ψ`.
   set K : Set E := tsupport ψ with hK_def
   have hK_compact : IsCompact K := hψ_cs
   have hK_meas : MeasurableSet K := (isClosed_tsupport ψ).measurableSet
   have hK_sub : K ⊆ Ω := hψ_supp
-  -- The test function we hand to the weak-partial relation: `φ · ψ`.
   set ξ : E → ℝ := fun y => φ y * ψ y with hξ_def
   have hξ_smooth : ContDiff ℝ (⊤ : ℕ∞) ξ := hφ_smooth.mul hψ_smooth
   have hξ_cs : HasCompactSupport ξ := hψ_cs.mul_left
-  -- `tsupport (φ · ψ) ⊆ tsupport ψ`: `(φ · ψ)(y) = 0` whenever `ψ y = 0`.
   have hξ_tsupport : tsupport ξ ⊆ K := by
     have h_sub_support : Function.support ξ ⊆ Function.support ψ := by
       intro y hy
@@ -83,7 +80,6 @@ theorem integral_smul_weak_partial_eq
       closure_mono h_sub_support
     exact h_sub_tsupport
   have hξ_supp : tsupport ξ ⊆ Ω := hξ_tsupport.trans hK_sub
-  -- Smoothness and continuity helpers.
   have hφ_diff : Differentiable ℝ φ := hφ_smooth.differentiable (by simp)
   have hψ_diff : Differentiable ℝ ψ := hψ_smooth.differentiable (by simp)
   let ej : E := EuclideanSpace.single j (1 : ℝ)
@@ -93,7 +89,6 @@ theorem integral_smul_weak_partial_eq
     (hφ_smooth.continuous_fderiv (by simp)).clm_apply continuous_const
   have hψ_deriv_cont : Continuous (fun y : E => (fderiv ℝ ψ y) ej) :=
     (hψ_smooth.continuous_fderiv (by simp)).clm_apply continuous_const
-  -- Leibniz on `φ · ψ` in direction `ej`.
   have fderiv_prod : ∀ y : E, (fderiv ℝ ξ y) ej =
       (fderiv ℝ φ y) ej * ψ y + φ y * (fderiv ℝ ψ y) ej := by
     intro y
@@ -106,14 +101,12 @@ theorem integral_smul_weak_partial_eq
     simp [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
       smul_eq_mul]
     ring
-  -- The weak-derivative relation applied to test function `ξ = φ · ψ`.
   have key :
       ∫ y in Ω, v y * (fderiv ℝ ξ y) ej
         ∂(MeasureTheory.volume : MeasureTheory.Measure E) =
       -∫ y in Ω, w j y * ξ y
         ∂(MeasureTheory.volume : MeasureTheory.Measure E) := by
     simpa [ej] using hw_isWeakPartial j ξ hξ_smooth hξ_cs hξ_supp
-  -- Useful: `v` is integrable on the compact `K` w.r.t. plain volume.
   have hvK_memLp : MemLp v 2 ((volume : Measure E).restrict K) :=
     hv_locMemLp K hK_compact hK_sub
   have hwK_memLp : MemLp (w j) 2 ((volume : Measure E).restrict K) :=
@@ -127,38 +120,29 @@ theorem integral_smul_weak_partial_eq
     hvK_memLp.integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
   have hw_int_K : IntegrableOn (w j) K (volume : Measure E) :=
     hwK_memLp.integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
-  -- A core auxiliary: for a continuous `h` with `tsupport h ⊆ K`, the
-  -- product `(v · h)` (and similarly `(w j) · h`) is integrable on
-  -- `volume.restrict Ω`.
   have integrable_mul_compact :
       ∀ {h : E → ℝ}, Continuous h → tsupport h ⊆ K →
         Integrable (fun y => v y * h y) (volume.restrict Ω) := by
     intro h hh_cont hh_supp
-    -- Step 1: integrability of `v · h` on `K`.
     have hh_contOn : ContinuousOn h K := hh_cont.continuousOn
     have step_K : IntegrableOn (fun y => v y * h y) K (volume : Measure E) :=
       hv_int_K.mul_continuousOn hh_contOn hK_compact
-    -- Step 2: `v · h` vanishes outside `K`.
     have h_vanish : ∀ y, y ∉ K → v y * h y = 0 := by
       intro y hy
       have : h y = 0 := image_eq_zero_of_notMem_tsupport
         (fun hy_supp => hy (hh_supp hy_supp))
       simp [this]
-    -- Step 3: `v · h = K.indicator (v · h)`.
     have h_eq_ind :
         (fun y => v y * h y) = K.indicator (fun y => v y * h y) := by
       funext y
       by_cases hy : y ∈ K
       · simp [Set.indicator_of_mem hy]
       · simp [Set.indicator_of_notMem hy, h_vanish y hy]
-    -- Step 4: integrability of the indicator on plain volume.
     have ind_int : Integrable (K.indicator (fun y => v y * h y))
         (volume : Measure E) :=
       (integrable_indicator_iff hK_meas).mpr step_K
-    -- Step 5: integrability on plain volume.
     have full_int : Integrable (fun y => v y * h y) (volume : Measure E) := by
       rw [h_eq_ind]; exact ind_int
-    -- Step 6: restrict to `Ω`.
     exact full_int.restrict
   have integrable_mul_compact_w :
       ∀ {h : E → ℝ}, Continuous h → tsupport h ⊆ K →
@@ -184,12 +168,9 @@ theorem integral_smul_weak_partial_eq
     have full_int : Integrable (fun y => w j y * h y) (volume : Measure E) := by
       rw [h_eq_ind]; exact ind_int
     exact full_int.restrict
-  -- Continuous bounded factors and their tsupport within `K`.
   have h_dφ_ψ_cont : Continuous (fun y : E => (fderiv ℝ φ y) ej * ψ y) :=
     hφ_deriv_cont.mul hψ_cont
   have h_dφ_ψ_supp : tsupport (fun y : E => (fderiv ℝ φ y) ej * ψ y) ⊆ K := by
-    -- `((∂_jφ) y) * ψ y` is zero when `ψ y = 0`, so the support sits inside
-    -- `tsupport ψ = K`.
     have h_sub : Function.support (fun y : E => (fderiv ℝ φ y) ej * ψ y) ⊆
         Function.support ψ := by
       intro y hy
@@ -200,7 +181,6 @@ theorem integral_smul_weak_partial_eq
   have h_φ_dψ_cont : Continuous (fun y : E => φ y * (fderiv ℝ ψ y) ej) :=
     hφ_cont.mul hψ_deriv_cont
   have h_φ_dψ_supp : tsupport (fun y : E => φ y * (fderiv ℝ ψ y) ej) ⊆ K := by
-    -- Here we use that `(∂_jψ)` is supported in `tsupport ψ`.
     have h1 : Function.support (fun y : E => (fderiv ℝ ψ y) ej) ⊆
         tsupport ψ := by
       intro y hy
@@ -221,18 +201,15 @@ theorem integral_smul_weak_partial_eq
       have : φ y * (fderiv ℝ ψ y) ej ≠ 0 := hy
       have : (fderiv ℝ ψ y) ej ≠ 0 := fun h0 => this (by simp [h0])
       exact this
-    -- `tsupport _ = closure (support _)`, and closures of subsets are subsets.
     have : tsupport (fun y : E => φ y * (fderiv ℝ ψ y) ej) ⊆
         tsupport (fun y : E => (fderiv ℝ ψ y) ej) := closure_mono h2
     have : tsupport (fun y : E => φ y * (fderiv ℝ ψ y) ej) ⊆ tsupport ψ :=
       this.trans (by
-        -- `tsupport` is the closure of `support`; subset of `support` ⊆ ts.
         exact (closure_mono h1).trans (by
           rw [closure_eq_iff_isClosed.mpr (isClosed_tsupport ψ)]))
     exact this
   have h_ψ_cont : Continuous ψ := hψ_cont
   have h_ψ_supp : tsupport ψ ⊆ K := by rw [hK_def]
-  -- Integrability of the three pieces of the unrolled identity.
   have int_v_dφ_ψ :
       Integrable (fun y => v y * ((fderiv ℝ φ y) ej * ψ y))
         (volume.restrict Ω) :=
@@ -243,10 +220,8 @@ theorem integral_smul_weak_partial_eq
     integrable_mul_compact h_φ_dψ_cont h_φ_dψ_supp
   have int_w_ξ :
       Integrable (fun y => w j y * ξ y) (volume.restrict Ω) := by
-    -- `ξ = φ · ψ` is continuous with tsupport inside `K`.
     have h_ξ_cont : Continuous ξ := hφ_cont.mul hψ_cont
     exact integrable_mul_compact_w h_ξ_cont hξ_tsupport
-  -- Pointwise rewrite of LHS of `key` using `fderiv_prod`.
   have key' :
       ∫ y in Ω, v y * ((fderiv ℝ φ y) ej * ψ y) +
         v y * (φ y * (fderiv ℝ ψ y) ej)
@@ -267,16 +242,7 @@ theorem integral_smul_weak_partial_eq
               ring
     rw [eq1] at key
     exact key
-  -- Split the LHS integral with `integral_add`.
   rw [integral_add int_v_dφ_ψ int_v_φ_dψ] at key'
-  -- Final algebraic rearrangement.
-  -- key' :
-  --   (∫ y in Ω, v y * ((∂_jφ y) * ψ y))
-  --   + (∫ y in Ω, v y * (φ y * (∂_jψ y))) =
-  --   -∫ y in Ω, w j y * ξ y
-  -- Goal:
-  --   ∫ y in Ω, φ y * v y * (∂_jψ y) =
-  --   -((∫ y in Ω, (∂_jφ y) * v y * ψ y) + (∫ y in Ω, φ y * w j y * ψ y))
   have congr_lhs :
       (fun y => φ y * v y * (fderiv ℝ ψ y) ej) =
       (fun y => v y * (φ y * (fderiv ℝ ψ y) ej)) := by
@@ -288,7 +254,6 @@ theorem integral_smul_weak_partial_eq
   have congr_φ_w_ψ :
       (fun y => φ y * w j y * ψ y) = (fun y => w j y * ξ y) := by
     funext y; simp [ξ]; ring
-  -- Show the goal.
   change ∫ y in Ω, φ y * v y * (fderiv ℝ ψ y) ej ∂(volume : Measure E) =
     -((∫ y in Ω, (fderiv ℝ φ y) ej * v y * ψ y ∂(volume : Measure E))
       + (∫ y in Ω, φ y * w j y * ψ y ∂(volume : Measure E)))
@@ -300,10 +265,6 @@ theorem integral_smul_weak_partial_eq
       (fun y => v y * ((fderiv ℝ φ y) ej * ψ y)) from congr_dφ_v_ψ,
     show (fun y => φ y * w j y * ψ y) = (fun y => w j y * ξ y) from
       congr_φ_w_ψ]
-  -- Now LHS = ∫ v y * (φ y * (∂_jψ y))
-  -- RHS = -((∫ v y * ((∂_jφ y) * ψ y)) + (∫ w j y * ξ y))
-  -- key': (∫ v y * ((∂_jφ y) * ψ y)) + (∫ v y * (φ y * (∂_jψ y))) =
-  --       -(∫ w j y * ξ y)
   have h_extract :
       ∫ y in Ω, v y * (φ y * (fderiv ℝ ψ y) ej) ∂(volume : Measure E) =
       -(∫ y in Ω, w j y * ξ y ∂(volume : Measure E)) -

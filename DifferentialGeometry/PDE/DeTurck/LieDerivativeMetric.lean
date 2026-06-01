@@ -83,17 +83,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## The chart components of the metric Lie derivative
-
-The three pieces of `(𝓛_W g)_{ij}` are organised as separate definitions so the
-smoothness proof can address them one at a time.
-
-* the **convective term** `W^k ∂_k g_{ij}` — the directional derivative of the metric
-  components along `W`;
-* the two **deformation terms** `g_{kj} ∂_i W^k` and `g_{ik} ∂_j W^k` — the contraction of
-  the Gram matrix into the Jacobian of `W`.
--/
-
 /-- The **convective term** of the metric Lie derivative in the chart at `α`:
 $$ \sum_k W^k(x)\,\partial_k g_{ij}(\varphi_\alpha x), $$
 the directional derivative of the metric components along `W`.  The `k`-th coefficient
@@ -186,21 +175,12 @@ theorem chartLieDerivMetricMatrix_def (g : SmoothRiemannianMetric I M)
   classical
   rw [chartLieDerivMetricMatrix, chartLieMetricConvective_def,
     chartLieMetricDeform_def, chartLieMetricDeform_def]
-  -- The third (deformation) summand `chartLieMetricDeform g W α j i x` has Gram
-  -- entries `g_{k i}`; the displayed formula uses the symmetric `g_{i k}`.
   congr 1
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [show chartGramMatrix (I := I) g α x k i =
       chartGramMatrix (I := I) g α x i k from by
     rw [chartGramMatrix_apply, chartGramMatrix_apply]
     exact g.symm x _ _]
-
-/-! ## Symmetry of the chart components
-
-The chart Lie-derivative matrix is symmetric in `(i, j)`.  The convective term carries
-the factor `∂_k g_{ij}`, which is symmetric because the Gram matrix is symmetric
-(`chartGramOnE_symm`).  The two deformation terms `g_{kj} ∂_i W^k` and `g_{ik} ∂_j W^k`
-are interchanged by swapping `i ↔ j`, so their sum is symmetric. -/
 
 /-- The convective term is symmetric in `(i, j)`: the metric component `g_{ij}`, hence its
 partial derivative, is symmetric. -/
@@ -212,7 +192,6 @@ lemma chartLieMetricConvective_symm (g : SmoothRiemannianMetric I M)
   classical
   rw [chartLieMetricConvective_def, chartLieMetricConvective_def]
   refine Finset.sum_congr rfl (fun k _ => ?_)
-  -- `g_{ij} = g_{ji}` as functions on the chart target, so their partial derivatives agree.
   have hsym : chartGramOnE (I := I) g α i j = chartGramOnE (I := I) g α j i :=
     funext (fun y => chartGramOnE_symm (I := I) g α i j y)
   rw [hsym]
@@ -226,11 +205,6 @@ theorem chartLieDerivMetricMatrix_symm (g : SmoothRiemannianMetric I M)
   rw [chartLieDerivMetricMatrix, chartLieDerivMetricMatrix]
   rw [chartLieMetricConvective_symm (I := I) g W α i j]
   ring
-
-/-! ## The canonical chart-at-the-point component
-
-Following `chartHessianTensor` / `deTurckFun`, the canonical chart-independent
-representative specialises the chart basepoint `α` to the evaluation point `x` itself. -/
 
 /-- The **canonical metric Lie-derivative component** `(𝓛_W g)_{ij}` at `x`: the chart-`α`
 representative `chartLieDerivMetricMatrix` evaluated in the chart at `x` itself.
@@ -282,18 +256,6 @@ theorem lieDerivMetricMatrix_symm (g : SmoothRiemannianMetric I M)
       lieDerivMetricMatrix (I := I) g W j i x := by
   rw [lieDerivMetricMatrix, lieDerivMetricMatrix,
     chartLieDerivMetricMatrix_symm (I := I) g W x i j]
-
-/-! ## The bundled `(0,2)`-tensor field `𝓛_W g`
-
-`lieDerivMetric g W` packages the canonical components `lieDerivMetricMatrix` into a
-pointwise bilinear form on the tangent bundle, exactly as `hessFun` packages
-`chartHessianTensor`.  At each `x`, two tangent vectors `v, w : TangentSpace I x` are
-expanded in the model basis `chartModelBasis E` and the components are summed against the
-Lie-derivative matrix:
-$$
-  (\mathcal L_W g)(v, w)
-    = \sum_{i, j} v^i\, w^j\,(\mathcal L_W g)_{ij}(x).
-$$ -/
 
 /-- The **Lie derivative `𝓛_W g`** of a smooth Riemannian metric `g` along a smooth
 tangent vector field `W`, as a bundled symmetric `(0,2)`-tensor field
@@ -385,7 +347,6 @@ lemma lieDerivMetric_basis_apply (g : SmoothRiemannianMetric I M)
       lieDerivMetricMatrix (I := I) g W i j x := by
   classical
   rw [lieDerivMetric_apply]
-  -- Replace the basis-rep entries by Kronecker deltas; only the `(i, j)` term survives.
   conv_lhs => rw [show
       (∑ i' : Fin (Module.finrank ℝ E),
         ∑ j' : Fin (Module.finrank ℝ E),
@@ -414,12 +375,6 @@ lemma lieDerivMetric_basis_apply (g : SmoothRiemannianMetric I M)
   · intro hi
     exact absurd (Finset.mem_univ i) hi
 
-/-! ## Symmetry of the bundled tensor
-
-`lieDerivMetric g W` is a *symmetric* bilinear form: this is the genuine `(0,2)`-tensor
-symmetry of `𝓛_W g`.  It follows from the symmetry `lieDerivMetricMatrix_symm` of the
-chart components, by re-indexing the defining double sum. -/
-
 /-- **Symmetry of the metric Lie derivative as a bilinear form:**
 `(𝓛_W g)(v, w) = (𝓛_W g)(w, v)`.
 
@@ -432,16 +387,10 @@ theorem lieDerivMetric_isPointwiseSymm (g : SmoothRiemannianMetric I M)
   intro x v w
   classical
   rw [lieDerivMetric_apply, lieDerivMetric_apply]
-  -- Swap the order of summation on the right, then use the matrix symmetry.
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
   rw [lieDerivMetricMatrix_symm (I := I) g W j i]
   ring
-
-/-! ## Vanishing along the zero vector field
-
-The Lie derivative of any metric along the zero vector field is the zero tensor: every
-chart component is a sum of products each carrying a vanishing factor. -/
 
 /-- At a base-set point of the trivialization at `α`, every chart component
 `chartCoeff α 0 k` of the zero tangent vector field vanishes: the zero section has value
@@ -450,8 +399,6 @@ private lemma chartCoeff_zero_of_mem (α : M) (k : Fin (Module.finrank ℝ E)) {
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
     chartCoeff (I := I) α (0 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) k x = 0 := by
   rw [chartCoeff_def]
-  -- The zero section has value `0` in every fibre; the trivialization of the zero
-  -- section on the base set is `(x, 0)` (`Trivialization.zeroSection`).
   have hsec : (0 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x
       = (0 : TangentSpace I x) := rfl
   have hzero : ((trivializationAt E (TangentSpace I) α)
@@ -470,7 +417,6 @@ private lemma chartCoeffOnE_zero_of_mem (α : M) (k : Fin (Module.finrank ℝ E)
     chartCoeffOnE (I := I) α (0 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) k y = 0 := by
   rw [chartCoeffOnE]
   refine chartCoeff_zero_of_mem (I := I) α k ?_
-  -- The chart inverse sends the chart target into the trivialization base set.
   have hsource : (extChartAt I α).symm y ∈ (extChartAt I α).source :=
     (extChartAt I α).map_target hy
   rw [extChartAt_source_eq_chartAt_source (I := I)] at hsource
@@ -485,23 +431,19 @@ form). -/
         (0 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) i j x = 0 := by
   classical
   rw [lieDerivMetricMatrix_def]
-  -- `x` lies in the base set of the trivialization at `x` itself.
   have hxbase : x ∈ (trivializationAt E (TangentSpace I) x).baseSet := by
     rw [trivializationAt_baseSet_eq_chartAt_source]
     exact mem_chart_source H x
-  -- `extChartAt I x x` lies in the chart target.
   have hxtgt : extChartAt I x x ∈ (extChartAt I x).target := by
     refine (extChartAt I x).map_source ?_
     rw [extChartAt_source_eq_chartAt_source (I := I)]
     exact mem_chart_source H x
-  -- The convective term: each `W^k = 0`.
   have hconv : (∑ k : Fin (Module.finrank ℝ E),
       chartCoeff (I := I) x (0 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) k x *
         partialDeriv (E := E) k (chartGramOnE (I := I) g x i j)
           (extChartAt I x x)) = 0 := by
     refine Finset.sum_eq_zero (fun k _ => ?_)
     rw [chartCoeff_zero_of_mem (I := I) x k hxbase, zero_mul]
-  -- The deformation terms: each `∂ W^k = ∂ 0 = 0`, for any `k`-indexed coefficient.
   have hdeform : ∀ (c : Fin (Module.finrank ℝ E) → ℝ)
       (b : Fin (Module.finrank ℝ E)),
       (∑ k : Fin (Module.finrank ℝ E),
@@ -512,9 +454,6 @@ form). -/
             (extChartAt I x x)) = 0 := by
     intro c b
     refine Finset.sum_eq_zero (fun k _ => ?_)
-    -- `chartCoeffOnE x 0 k` vanishes on the chart target, hence its partial derivative
-    -- (a `fderivWithin`-free Fréchet derivative) at the interior point `extChartAt I x x`
-    -- vanishes.  We rewrite to the zero function eventually near the point.
     have hzeroOn : ∀ z ∈ (extChartAt I x).target,
         chartCoeffOnE (I := I) x
           (0 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) k z = 0 :=
@@ -524,7 +463,6 @@ form). -/
           (0 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) k)
         (extChartAt I x x) = 0 := by
       rw [partialDeriv]
-      -- `fderiv` of a function eventually-equal to `0` near the point is `0`.
       have htargetnhds : (extChartAt I x).target ∈ 𝓝 (extChartAt I x x) :=
         (isOpen_extChartAt_target (I := I) x).mem_nhds hxtgt
       have heq : chartCoeffOnE (I := I) x
@@ -552,14 +490,6 @@ form). -/
   rw [lieDerivMetricMatrix_zero (I := I) g i j x]
   ring
 
-/-! ## Linearity in the vector field
-
-The Lie derivative `𝓛_W g` is `ℝ`-linear in the vector field `W`: this is one of the
-structural properties of the genuine intrinsic Lie derivative.  It is visible in the
-coordinate formula because every occurrence of `W` is through its components `W^k` or
-their partial derivatives, both of which are `ℝ`-linear in `W` (on the chart base set,
-where the trivialization is fibrewise linear). -/
-
 /-- At a base-set point, the chart components are additive in the section: the
 trivialization is fibrewise linear on its base set. -/
 private lemma chartCoeff_add_of_mem (α : M) (k : Fin (Module.finrank ℝ E))
@@ -570,7 +500,6 @@ private lemma chartCoeff_add_of_mem (α : M) (k : Fin (Module.finrank ℝ E))
   classical
   set T : Bundle.Trivialization E (π E (TangentSpace I : M → Type _)) :=
     trivializationAt E (TangentSpace I) α with hT_def
-  -- The trivialization of the fibrewise sum splits, since `T` is linear on `baseSet`.
   have hadd : (T ⟨x, (W₁ + W₂) x⟩).2 = (T ⟨x, W₁ x⟩).2 + (T ⟨x, W₂ x⟩).2 := by
     have h := (T.linear ℝ hx).map_add (W₁ x) (W₂ x)
     change (T ⟨x, W₁ x + W₂ x⟩).2 = (T ⟨x, W₁ x⟩).2 + (T ⟨x, W₂ x⟩).2
@@ -633,8 +562,6 @@ theorem lieDerivMetricMatrix_add_vectorField [I.Boundaryless]
         lieDerivMetricMatrix (I := I) g W₂ i j x := by
   classical
   rw [lieDerivMetricMatrix_def, lieDerivMetricMatrix_def, lieDerivMetricMatrix_def]
-  -- `x` lies in the base set of the trivialization at `x`; `extChartAt I x x` lies in
-  -- the chart target.
   have hxbase : x ∈ (trivializationAt E (TangentSpace I) x).baseSet := by
     rw [trivializationAt_baseSet_eq_chartAt_source]; exact mem_chart_source H x
   have hxtgt : extChartAt I x x ∈ (extChartAt I x).target := by
@@ -642,7 +569,6 @@ theorem lieDerivMetricMatrix_add_vectorField [I.Boundaryless]
     rw [extChartAt_source_eq_chartAt_source (I := I)]; exact mem_chart_source H x
   have htargetnhds : (extChartAt I x).target ∈ 𝓝 (extChartAt I x x) :=
     (isOpen_extChartAt_target (I := I) x).mem_nhds hxtgt
-  -- Convective term: `W^k` splits via `chartCoeff_add_of_mem`.
   have hconv :
       (∑ k : Fin (Module.finrank ℝ E),
           chartCoeff (I := I) x (W₁ + W₂) k x *
@@ -660,9 +586,6 @@ theorem lieDerivMetricMatrix_add_vectorField [I.Boundaryless]
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [chartCoeff_add_of_mem (I := I) x k W₁ W₂ hxbase]
     ring
-  -- Deformation terms: `∂_b W^k` splits, since the partial derivative of a sum of
-  -- functions that agree near the point with `chartCoeffOnE _ W₁ _ + chartCoeffOnE _ W₂ _`
-  -- is the sum of the partial derivatives.
   have hdeform : ∀ (c : Fin (Module.finrank ℝ E) → ℝ)
       (b : Fin (Module.finrank ℝ E)),
       (∑ k : Fin (Module.finrank ℝ E),
@@ -680,15 +603,12 @@ theorem lieDerivMetricMatrix_add_vectorField [I.Boundaryless]
     intro c b
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl (fun k _ => ?_)
-    -- The partial derivative of `chartCoeffOnE x (W₁ + W₂) k` at the point splits.
     have hpd : partialDeriv (E := E) b
         (chartCoeffOnE (I := I) x (W₁ + W₂) k) (extChartAt I x x) =
         partialDeriv (E := E) b (chartCoeffOnE (I := I) x W₁ k) (extChartAt I x x) +
           partialDeriv (E := E) b (chartCoeffOnE (I := I) x W₂ k)
             (extChartAt I x x) := by
       rw [partialDeriv, partialDeriv, partialDeriv]
-      -- `chartCoeffOnE x (W₁ + W₂) k =ᶠ chartCoeffOnE x W₁ k + chartCoeffOnE x W₂ k`
-      -- near the point, so the Fréchet derivatives agree, and `fderiv` is additive.
       have heq : chartCoeffOnE (I := I) x (W₁ + W₂) k
           =ᶠ[𝓝 (extChartAt I x x)]
             (fun z => chartCoeffOnE (I := I) x W₁ k z +
@@ -696,7 +616,6 @@ theorem lieDerivMetricMatrix_add_vectorField [I.Boundaryless]
         filter_upwards [htargetnhds] with z hz
         exact chartCoeffOnE_add_of_mem (I := I) x k W₁ W₂ hz
       rw [heq.fderiv_eq]
-      -- `chartCoeffOnE x Wᵢ k` are differentiable at the point (smooth on the target).
       have hsmooth₁ : ContDiffOn ℝ ∞ (chartCoeffOnE (I := I) x W₁ k)
           (extChartAt I x).target := chartCoeffOnE_contDiffOn (I := I) x W₁ k
       have hsmooth₂ : ContDiffOn ℝ ∞ (chartCoeffOnE (I := I) x W₂ k)
@@ -732,7 +651,6 @@ theorem lieDerivMetricMatrix_smul_vectorField [I.Boundaryless]
     rw [extChartAt_source_eq_chartAt_source (I := I)]; exact mem_chart_source H x
   have htargetnhds : (extChartAt I x).target ∈ 𝓝 (extChartAt I x x) :=
     (isOpen_extChartAt_target (I := I) x).mem_nhds hxtgt
-  -- Convective term.
   have hconv :
       (∑ k : Fin (Module.finrank ℝ E),
           chartCoeff (I := I) x (c • W) k x *
@@ -746,7 +664,6 @@ theorem lieDerivMetricMatrix_smul_vectorField [I.Boundaryless]
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [chartCoeff_smul_of_mem (I := I) x k c W hxbase]
     ring
-  -- Deformation terms.
   have hdeform : ∀ (a : Fin (Module.finrank ℝ E) → ℝ)
       (b : Fin (Module.finrank ℝ E)),
       (∑ k : Fin (Module.finrank ℝ E),
@@ -816,22 +733,6 @@ theorem lieDerivMetric_smul_vectorField [I.Boundaryless]
   rw [lieDerivMetricMatrix_smul_vectorField (I := I) g c W i j x]
   ring
 
-/-! ## Smoothness of the chart components
-
-Each chart component `chartLieDerivMetricMatrix g W α i j` is `C^∞` on the chart-`α`
-source.  The proof handles the three summands separately:
-
-* the **convective** summands `W^k · (∂_k g_{ij} ∘ φ_α)` — a product of `chartCoeff α W k`
-  (smooth on the chart base set) with the pulled-back partial derivative of the metric
-  density (smooth by composing `partialDeriv` smoothness on the chart-target interior with
-  the chart map);
-* the **deformation** summands `g_{kj} · (∂_i W^k ∘ φ_α)` — a product of the chart Gram
-  matrix entry (smooth on the chart base set) with the pulled-back partial derivative of
-  `chartCoeffOnE α W k`.
-
-The chart-target-interior arguments mirror `partialDeriv_scalarOnE_comp_extChartAt_-
-contMDiffOn` from the divergence-theorem development. -/
-
 /-- The pulled-back partial derivative `∂_k (chartGramOnE g α i j)` is `C^∞` on the
 interior of the chart target. -/
 private lemma partialDeriv_chartGramOnE_contDiffOn_interior
@@ -880,14 +781,10 @@ private lemma comp_extChartAt_contMDiffOn_source [I.Boundaryless]
     (hu : ContDiffOn ℝ ∞ u (interior (extChartAt I α).target)) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞
       (fun x : M => u (extChartAt I α x)) (chartAt H α).source := by
-  -- Lift `u` to manifold smoothness on the interior of the chart target.
   have huM : ContMDiffOn 𝓘(ℝ, E) 𝓘(ℝ, ℝ) ∞ u
       (interior (extChartAt I α).target) := hu.contMDiffOn
-  -- The chart map is smooth on its source.
   have hchart : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I α : M → E)
       (chartAt H α).source := contMDiffOn_extChartAt
-  -- Under `Boundaryless`, the chart map sends the source into the (open) target,
-  -- equivalently into its interior.
   have hmaps : MapsTo (extChartAt I α : M → E) (chartAt H α).source
       (interior (extChartAt I α).target) := by
     intro x hx
@@ -911,8 +808,7 @@ private lemma chartLieMetricConvective_summand_contMDiffOn [I.Boundaryless]
             (extChartAt I α x))
       (chartAt H α).source := by
   refine ContMDiffOn.mul ?_ ?_
-  · -- `chartCoeff α W k` is smooth on the chart base set = chart source.
-    have h1 : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (chartCoeff (I := I) α W k)
+  · have h1 : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (chartCoeff (I := I) α W k)
         (trivializationAt E (TangentSpace I) α).baseSet :=
       chartCoeff_contMDiffOn (I := I) α W k
     rwa [trivializationAt_baseSet_eq_chartAt_source] at h1
@@ -932,8 +828,7 @@ private lemma chartLieMetricDeform_summand_contMDiffOn [I.Boundaryless]
             (extChartAt I α x))
       (chartAt H α).source := by
   refine ContMDiffOn.mul ?_ ?_
-  · -- The chart Gram matrix entry is smooth on the chart base set = chart source.
-    have h1 : ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+  · have h1 : ContMDiffOn I 𝓘(ℝ, ℝ) ∞
         (fun x : M => chartGramMatrix (I := I) g α x k j)
         (trivializationAt E (TangentSpace I) α).baseSet :=
       chartGramMatrix_entry_contMDiffOn (I := I) g α k j

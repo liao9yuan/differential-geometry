@@ -50,8 +50,6 @@ namespace Flow
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
-/-! ## Main theorem: joint Fréchet derivative of the flow at `(x₀, t)` -/
-
 section MainTheorem
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
@@ -83,7 +81,6 @@ theorem hasFDerivAt_flow_jointly_of_isLocalFlow
             hA_bd (Ioo_subset_Icc_self ht))).coprod
         ((ContinuousLinearMap.id ℝ ℝ).smulRight (f t (Φ ⟨x₀, t⟩))))
       (x₀, t) := by
-  /- ## Stage 1: bring the V.2.b.2 space-partial into scope. -/
   have hr' : (0 : ℝ) < r := by exact_mod_cast hr
   have hx₀_in_ball : x₀ ∈ closedBall x₀ r := Metric.mem_closedBall_self (le_of_lt hr')
   set hA_cont :=
@@ -93,21 +90,17 @@ theorem hasFDerivAt_flow_jointly_of_isLocalFlow
     hT hM hMT hA_cont hA_bd ht_Icc with hLmap_def
   have h_space :=
     hasFDerivAt_flow_at_initial_of_isLocalFlow hΦ hf_C1 hT hM hMT hsub hA_bd hr ht_Icc
-  -- Joint CLM.
   set Ltime : ℝ →L[ℝ] E :=
     (ContinuousLinearMap.id ℝ ℝ).smulRight (f t (Φ ⟨x₀, t⟩)) with hLtime_def
   set Ljoint : (E × ℝ) →L[ℝ] E := Lmap.coprod Ltime with hLjoint_def
-  /- ## Stage 2: unfold the HasFDerivAt goal. -/
   rw [hasFDerivAt_iff_isLittleO_nhds_zero]
   rw [Asymptotics.isLittleO_iff]
   intro c hc
   set c2 : ℝ := c / 2 with hc2_def
   have hc2_pos : 0 < c2 := by positivity
-  /- ## Stage 3: continuity of `f` at `(t, Φ ⟨x₀, t⟩)`.  Pick `η_f > 0`. -/
   have hf_cont_pt : ContinuousAt (uncurry f) (t, Φ ⟨x₀, t⟩) :=
     hf_C1.continuousOn.continuousAt (IsOpen.mem_nhds isOpen_univ (mem_univ _))
   rcases Metric.continuousAt_iff.mp hf_cont_pt c2 hc2_pos with ⟨η_f, hη_f_pos, hη_f⟩
-  /- ## Stage 4: continuity of `Φ` at `(x₀, t)` (on its domain). -/
   have hΦ_cont_pt : ContinuousWithinAt Φ
       (closedBall x₀ r ×ˢ Icc tmin tmax) (x₀, t) := by
     apply hΦ.continuousOn
@@ -117,7 +110,6 @@ theorem hasFDerivAt_flow_jointly_of_isLocalFlow
   have hη_half_pos : 0 < η_half := by positivity
   have hη_half_lt : η_half < η_f := by linarith
   rcases hΦ_cont_pt η_half hη_half_pos with ⟨ρ₀, hρ₀_pos, hΦ_close⟩
-  /- ## Stage 5: time-bandwidth `ρ_t > 0` so that `[t - ρ_t, t + ρ_t] ⊆ Icc (t₀-T) (t₀+T)`. -/
   set ρ_t_raw : ℝ := min ((t - (t₀ - T)) / 2) (((t₀ + T) - t) / 2) with hρ_t_raw_def
   have hρ_t_raw_pos : 0 < ρ_t_raw := by
     refine lt_min ?_ ?_
@@ -131,23 +123,11 @@ theorem hasFDerivAt_flow_jointly_of_isLocalFlow
   have h_t_plus_ρ_t_raw : t + ρ_t_raw ≤ t₀ + T := by
     have h1 : ρ_t_raw ≤ ((t₀ + T) - t) / 2 := min_le_right _ _
     linarith
-  /- ## Stage 6: from space-piece, get a neighbourhood-radius `ρ_s > 0` such that for
-  `‖δ‖ < ρ_s`, `‖Φ ⟨x₀ + δ, t⟩ − Φ ⟨x₀, t⟩ − Lmap δ‖ ≤ c2 · ‖δ‖`. -/
   have h_space_io := (hasFDerivAt_iff_isLittleO_nhds_zero.mp h_space)
   rw [Asymptotics.isLittleO_iff] at h_space_io
   have h_space_c2 := h_space_io hc2_pos
   rcases Filter.eventually_iff_exists_mem.mp h_space_c2 with ⟨U_space, hU_space_mem, hU_space⟩
   rcases Metric.mem_nhds_iff.mp hU_space_mem with ⟨ρ_s, hρ_s_pos, hρ_s_sub⟩
-  /- ## Stage 7: assemble the final radius `ρ`.
-
-  Constraints on `ρ`:
-  - `ρ ≤ r` (so `‖δ‖ < ρ ⇒ ‖δ‖ < r`).
-  - `ρ ≤ ρ_s` (so the space-piece inequality applies).
-  - `ρ ≤ ρ_t_raw` (so `t + s ∈ Icc (t - ρ_t_raw) (t + ρ_t_raw)`).
-  - `ρ ≤ ρ₀` (so pair distance ≤ ρ₀ ⇒ `Φ` is `η_half`-close).
-  - `ρ ≤ η_half` (so `|s| < η_half ≤ η_f/2`; combined with `‖α u − Φ ⟨x₀,t⟩‖ < η_half`,
-    pair-distance in `(τ, z)` to `(t, Φ ⟨x₀, t⟩)` is `< η_f`, giving `‖f − v₀‖ < c2`).
-  -/
   set ρ : ℝ := min (min ((r : ℝ)) ρ_s) (min (min ρ_t_raw ρ₀) η_half) with hρ_def
   have hρ_pos : 0 < ρ := by
     refine lt_min (lt_min hr' hρ_s_pos) (lt_min (lt_min hρ_t_raw_pos hρ₀_pos) hη_half_pos)
@@ -160,7 +140,6 @@ theorem hasFDerivAt_flow_jointly_of_isLocalFlow
   have hδ_norm : ‖δ‖ < ρ := lt_of_le_of_lt (le_max_left _ _) hp_norm
   have hs_norm_real : ‖s‖ < ρ := lt_of_le_of_lt (le_max_right _ _) hp_norm
   have hs_abs : |s| < ρ := hs_norm_real
-  /- Unpack the radius. -/
   have hδ_lt_r' : ‖δ‖ < (r : ℝ) :=
     lt_of_lt_of_le hδ_norm (le_trans (min_le_left _ _) (min_le_left _ _))
   have hδ_lt_ρ_s : ‖δ‖ < ρ_s :=
@@ -176,11 +155,9 @@ theorem hasFDerivAt_flow_jointly_of_isLocalFlow
       (min_le_right _ _)))
   have hs_lt_η_half : |s| < η_half :=
     lt_of_lt_of_le hs_abs (le_trans (min_le_right _ _) (min_le_right _ _))
-  /- `x := x₀ + δ ∈ closedBall x₀ r`. -/
   have hx_in_ball : x₀ + δ ∈ closedBall x₀ r := by
     rw [mem_closedBall, dist_eq_norm, add_sub_cancel_left]
     exact le_of_lt hδ_lt_r'
-  /- `t` and `t + s` lie in `Icc (t - ρ_t_raw) (t + ρ_t_raw) ⊆ Icc (t₀ - T) (t₀ + T) ⊆ Icc tmin tmax`. -/
   have h_ab_sub_T : Icc (t - ρ_t_raw) (t + ρ_t_raw) ⊆ Icc (t₀ - T) (t₀ + T) := by
     intro u hu
     exact ⟨h_t_minus_ρ_t_raw.trans hu.1, hu.2.trans h_t_plus_ρ_t_raw⟩
@@ -193,11 +170,6 @@ theorem hasFDerivAt_flow_jointly_of_isLocalFlow
       linarith [hs_lt_ρ_t_raw]
   have ht_in_ab : t ∈ Icc (t - ρ_t_raw) (t + ρ_t_raw) := by
     refine ⟨?_, ?_⟩ <;> linarith [hρ_t_raw_pos]
-  /- ## Stage 8: time-piece bound via mean value.
-
-  The orbit `α u := Φ ⟨x₀ + δ, u⟩` on `Icc (t - ρ_t_raw) (t + ρ_t_raw)` has derivative
-  `f u (α u)`.  Define `g(u) := α u − (u − t) • v₀` with `v₀ := f t (Φ ⟨x₀, t⟩)`.  Then
-  `g'(u) = f u (α u) − v₀`. -/
   set α : ℝ → E := fun u => Φ ⟨x₀ + δ, u⟩ with hα_def
   have hα_deriv : ∀ u ∈ Icc (t - ρ_t_raw) (t + ρ_t_raw),
       HasDerivWithinAt α (f u (α u)) (Icc (t - ρ_t_raw) (t + ρ_t_raw)) u := by
@@ -221,10 +193,6 @@ theorem hasFDerivAt_flow_jointly_of_isLocalFlow
       have hsmul := h_lin.smul_const v₀
       simpa using hsmul
     exact (hα_deriv u hu).sub hsubconst
-  /- Closeness of `(x₀ + δ, u)` to `(x₀, t)` for `u ∈ Icc (t - ρ_t_raw) (t + ρ_t_raw)`,
-  when `‖δ‖ < ρ₀` and `ρ_t_raw ≤ ρ₀`.  Actually we only have `|s| < ρ₀`, not `ρ_t_raw ≤ ρ₀`.
-  But the relevant `u` values lie in the **segment** between `t` and `t + s`, so
-  `|u - t| ≤ |s| < ρ₀`.  Let's work on that segment. -/
   set u_lo : ℝ := min t (t + s) with hu_lo_def
   set u_hi : ℝ := max t (t + s) with hu_hi_def
   have hu_lo_le_t : u_lo ≤ t := min_le_left _ _
@@ -232,7 +200,6 @@ theorem hasFDerivAt_flow_jointly_of_isLocalFlow
   have hu_lo_le_ts : u_lo ≤ t + s := min_le_right _ _
   have hts_le_u_hi : t + s ≤ u_hi := le_max_right _ _
   have hu_lo_le_u_hi : u_lo ≤ u_hi := hu_lo_le_t.trans ht_le_u_hi
-  /- `Icc u_lo u_hi ⊆ Icc (t - ρ_t_raw) (t + ρ_t_raw)`. -/
   have h_uloIcc : t - ρ_t_raw ≤ u_lo := by
     rw [hu_lo_def, le_min_iff]
     refine ⟨by linarith [hρ_t_raw_pos], ?_⟩
@@ -246,12 +213,10 @@ theorem hasFDerivAt_flow_jointly_of_isLocalFlow
   have hseg_sub : Icc u_lo u_hi ⊆ Icc (t - ρ_t_raw) (t + ρ_t_raw) := by
     intro u hu
     exact ⟨h_uloIcc.trans hu.1, hu.2.trans h_uhiIcc⟩
-  /- For `u ∈ Icc u_lo u_hi`, `|u - t| ≤ |s| < ρ₀`. -/
   have h_seg_dist : ∀ u ∈ Icc u_lo u_hi, |u - t| ≤ |s| := by
     intro u hu
     rcases le_or_gt 0 s with hs_nn | hs_neg
-    · -- s ≥ 0, so u_lo = t, u_hi = t + s, segment is [t, t+s].
-      have hlo : u_lo = t := min_eq_left (by linarith)
+    · have hlo : u_lo = t := min_eq_left (by linarith)
       have hhi : u_hi = t + s := max_eq_right (by linarith)
       rw [hlo, hhi] at hu
       have h1 : t ≤ u := hu.1
@@ -261,8 +226,7 @@ theorem hasFDerivAt_flow_jointly_of_isLocalFlow
       rw [abs_of_nonneg h3]
       have habs_s : |s| = s := abs_of_nonneg hs_nn
       rw [habs_s]; exact h4
-    · -- s < 0, so u_lo = t + s, u_hi = t, segment is [t + s, t].
-      have hlo : u_lo = t + s := min_eq_right (by linarith)
+    · have hlo : u_lo = t + s := min_eq_right (by linarith)
       have hhi : u_hi = t := max_eq_left (by linarith)
       rw [hlo, hhi] at hu
       have h1 : t + s ≤ u := hu.1
@@ -272,7 +236,6 @@ theorem hasFDerivAt_flow_jointly_of_isLocalFlow
       rw [abs_of_nonpos h3]
       have habs_s : |s| = -s := abs_of_neg hs_neg
       rw [habs_s]; exact h4
-  /- Pair distance from `(x₀ + δ, u)` to `(x₀, t)`, for `u ∈ Icc u_lo u_hi`, is < ρ₀. -/
   have hpair_dist_seg : ∀ u ∈ Icc u_lo u_hi,
       dist ((x₀ + δ, u) : E × ℝ) (x₀, t) < ρ₀ := by
     intro u hu
@@ -284,7 +247,6 @@ theorem hasFDerivAt_flow_jointly_of_isLocalFlow
     have h3 : ‖δ‖ < ρ₀ := hδ_lt_ρ₀
     have h4 : |u - t| < ρ₀ := lt_of_le_of_lt (h_seg_dist u hu) hs_lt_ρ₀
     exact max_lt h3 h4
-  /- For `u ∈ Icc u_lo u_hi`, `Φ ⟨x₀ + δ, u⟩` is `η_half`-close to `Φ ⟨x₀, t⟩`. -/
   have hΦ_seg : ∀ u ∈ Icc u_lo u_hi,
       dist (α u) (Φ ⟨x₀, t⟩) < η_half := by
     intro u hu
@@ -292,8 +254,6 @@ theorem hasFDerivAt_flow_jointly_of_isLocalFlow
       refine ⟨hx_in_ball, ?_⟩
       exact h_ab_sub_tmin (hseg_sub hu)
     exact hΦ_close hpair_in (hpair_dist_seg u hu)
-  /- Pair distance from `(u, α u)` to `(t, Φ ⟨x₀, t⟩)`, for `u ∈ Icc u_lo u_hi`,
-  is < η_f. -/
   have hpair_dist_f : ∀ u ∈ Icc u_lo u_hi,
       dist ((u, α u) : ℝ × E) (t, Φ ⟨x₀, t⟩) < η_f := by
     intro u hu
@@ -306,33 +266,22 @@ theorem hasFDerivAt_flow_jointly_of_isLocalFlow
     have h2 : dist (α u) (Φ ⟨x₀, t⟩) < η_half := hΦ_seg u hu
     have h3 : max (|u - t|) (dist (α u) (Φ ⟨x₀, t⟩)) < η_half := max_lt hu_t h2
     exact lt_trans h3 hη_half_lt
-  /- For `u ∈ Icc u_lo u_hi`, `‖f u (α u) − v₀‖ < c2`. -/
   have hf_close_seg : ∀ u ∈ Icc u_lo u_hi, ‖f u (α u) - v₀‖ ≤ c2 := by
     intro u hu
     have hd := hpair_dist_f u hu
     have h := hη_f hd
     rw [dist_eq_norm] at h
-    -- `h : ‖uncurry f (u, α u) - uncurry f (t, Φ ⟨x₀, t⟩)‖ < c2`.
-    -- `uncurry f (u, α u) = f u (α u)`, `uncurry f (t, Φ ⟨x₀, t⟩) = v₀`.
     change ‖f u (α u) - v₀‖ ≤ c2
     exact le_of_lt h
-  /- ## Stage 9: mean-value on the segment.
-
-  `g` is `HasDerivWithinAt`-differentiable on `Icc u_lo u_hi` with derivative bounded
-  by `c2` in norm.  Conclude `‖g(t + s) − g t‖ ≤ c2 · |t + s − t| = c2 · |s|`.
-
-  We apply `norm_image_sub_le_of_norm_deriv_le_segment'` with `[a, b] := [u_lo, u_hi]`. -/
   have hg_deriv_seg : ∀ u ∈ Icc u_lo u_hi,
       HasDerivWithinAt g (f u (α u) - v₀) (Icc u_lo u_hi) u := fun u hu =>
     (hg_deriv u (hseg_sub hu)).mono hseg_sub
   have hf_seg_bound : ∀ u ∈ Ico u_lo u_hi, ‖f u (α u) - v₀‖ ≤ c2 := fun u hu =>
     hf_close_seg u ⟨hu.1, le_of_lt hu.2⟩
-  /- `g(u_hi) − g(u_lo)` has norm ≤ `c2 · (u_hi − u_lo)`. -/
   have h_mvt :=
     norm_image_sub_le_of_norm_deriv_le_segment' (f := g)
       (f' := fun u => f u (α u) - v₀) (C := c2) (a := u_lo) (b := u_hi)
       hg_deriv_seg hf_seg_bound u_hi (right_mem_Icc.mpr hu_lo_le_u_hi)
-  /- Now `u_hi - u_lo = |s|`. -/
   have h_u_diff : u_hi - u_lo = |s| := by
     rcases le_or_gt 0 s with hs_nn | hs_neg
     · have hlo : u_lo = t := min_eq_left (by linarith)
@@ -343,15 +292,9 @@ theorem hasFDerivAt_flow_jointly_of_isLocalFlow
       have hhi : u_hi = t := max_eq_left (by linarith)
       rw [hlo, hhi]
       rw [abs_of_neg hs_neg]; ring
-  /- Conclude `‖α (t + s) − α t − s • v₀‖ ≤ c2 · |s|`.
-
-  We use the fact that `g(t + s) − g(t) = α(t+s) − s • v₀ − α(t)`, and the MVT bound
-  for both orderings. -/
   have h_time_residual : ‖α (t + s) - α t - s • v₀‖ ≤ c2 * |s| := by
-    -- Case split on sign of s.
     rcases le_or_gt 0 s with hs_nn | hs_neg
-    · -- s ≥ 0, u_lo = t, u_hi = t + s.
-      have hlo : u_lo = t := min_eq_left (by linarith)
+    · have hlo : u_lo = t := min_eq_left (by linarith)
       have hhi : u_hi = t + s := max_eq_right (by linarith)
       have h_mvt' : ‖g (t + s) - g t‖ ≤ c2 * (t + s - t) := by
         have := h_mvt
@@ -367,8 +310,7 @@ theorem hasFDerivAt_flow_jointly_of_isLocalFlow
       have hs_eq : t + s - t = s := by ring
       rw [hs_eq] at h_mvt'
       rw [abs_of_nonneg hs_nn]; exact h_mvt'
-    · -- s < 0, u_lo = t + s, u_hi = t.
-      have hlo : u_lo = t + s := min_eq_right (by linarith)
+    · have hlo : u_lo = t + s := min_eq_right (by linarith)
       have hhi : u_hi = t := max_eq_left (by linarith)
       have h_mvt' : ‖g t - g (t + s)‖ ≤ c2 * (t - (t + s)) := by
         have := h_mvt
@@ -386,17 +328,11 @@ theorem hasFDerivAt_flow_jointly_of_isLocalFlow
       have hs_eq : t - (t + s) = -s := by ring
       rw [hs_eq] at h_mvt'
       rw [abs_of_neg hs_neg]; exact h_mvt'
-  /- ## Stage 10: combine the two pieces. -/
   have h_space_piece : ‖Φ ⟨x₀ + δ, t⟩ - Φ ⟨x₀, t⟩ - Lmap δ‖ ≤ c2 * ‖δ‖ := by
     have hδ_in_U : δ ∈ U_space :=
       hρ_s_sub (by rw [mem_ball_zero_iff]; exact hδ_lt_ρ_s)
     have h := hU_space δ hδ_in_U
-    -- h : ‖(fun x => Φ ⟨x₀ + x, t⟩ - Φ ⟨x₀, t⟩ - Lmap x) δ‖ ≤ c2 * ‖δ‖.
-    -- The little-o is for the function `fun h => Φ ⟨x₀ + h, t⟩ - Φ ⟨x₀, t⟩ - (variationalLinearMapAt _ ht_Icc) h`.
-    -- That's exactly what we want.
-    -- The bound from `isLittleO_iff` is `‖f h‖ ≤ c2 ‖h‖`.
     exact h
-  /- Now combine. -/
   have h_total :
       ‖Φ ⟨x₀ + δ, t + s⟩ - Φ ⟨x₀, t⟩ - Lmap δ - s • v₀‖
         ≤ c2 * ‖δ‖ + c2 * |s| := by
@@ -412,7 +348,6 @@ theorem hasFDerivAt_flow_jointly_of_isLocalFlow
       (Φ ⟨x₀ + δ, t⟩ - Φ ⟨x₀, t⟩ - Lmap δ)
     have h_sum_le : c2 * |s| + c2 * ‖δ‖ ≤ c2 * ‖δ‖ + c2 * |s| := by linarith
     linarith [hnorm, h_time_residual, h_space_piece]
-  /- Final cleanup: `c2 * ‖δ‖ + c2 * |s| ≤ c * ‖(δ, s)‖`. -/
   have h_norm_pair : ‖(δ, s)‖ = max ‖δ‖ |s| := by
     rw [Prod.norm_def]
     rfl
@@ -428,11 +363,6 @@ theorem hasFDerivAt_flow_jointly_of_isLocalFlow
     have hkey : c2 * ‖(δ, s)‖ + c2 * ‖(δ, s)‖ = c * ‖(δ, s)‖ := by
       rw [hc2_def]; ring
     linarith
-  /- Now express the goal in terms of `Ljoint`. -/
-  -- Goal: `‖uncurry Φ ((x₀, t) + (δ, s)) - uncurry Φ (x₀, t) - Ljoint (δ, s)‖ ≤ c * ‖(δ, s)‖`.
-  -- (x₀, t) + (δ, s) = (x₀ + δ, t + s).
-  -- uncurry Φ (x₀ + δ, t + s) = Φ ⟨x₀ + δ, t + s⟩.
-  -- Ljoint (δ, s) = Lmap δ + Ltime s = Lmap δ + s • v₀.
   have h_Ljoint : Ljoint (δ, s) = Lmap δ + s • v₀ := by
     rw [hLjoint_def, hLtime_def]
     simp [ContinuousLinearMap.coprod_apply, ContinuousLinearMap.smulRight_apply,

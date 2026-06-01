@@ -63,11 +63,8 @@ theorem lions_magenes_intermediate_trace
     ∀ t ∈ Set.Icc (0 : ℝ) T,
       ‖ι (u.toFun t)‖ ≤ ‖ι‖ * ((1 + Real.sqrt T) * ‖u‖) := by
   refine ⟨?_, ?_⟩
-  · -- Continuity: `ι` is continuous and `toFun u` is continuous on `[0,T]`.
-    exact ι.continuous.comp_continuousOn u.continuousOn_toFun
-  · -- Pointwise bound: combine `‖ι v‖ ≤ ‖ι‖ · ‖v‖` with the Sobolev embedding
-    -- bound `‖toFun u t‖ ≤ (1 + √T) · ‖u‖`.
-    intro t ht
+  · exact ι.continuous.comp_continuousOn u.continuousOn_toFun
+  · intro t ht
     have h1 : ‖ι (u.toFun t)‖ ≤ ‖ι‖ * ‖u.toFun t‖ := ι.le_opNorm _
     have h2 : ‖u.toFun t‖ ≤ (1 + Real.sqrt T) * ‖u‖ := u.norm_toFun_le_norm ht
     have hι : 0 ≤ ‖ι‖ := norm_nonneg _

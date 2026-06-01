@@ -90,15 +90,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Arithmetic step: `V^2 + F^2 + I^2 ≤ (V + F + I)^2` for non-negative `V, F, I` -/
-
 private lemma sum_sq_le_sq_sum_of_nonneg (V F I2 : ℝ)
     (hV : 0 ≤ V) (hF : 0 ≤ F) (hI2 : 0 ≤ I2) :
     V ^ 2 + F ^ 2 + I2 ^ 2 ≤ (V + F + I2) ^ 2 := by
   nlinarith [mul_nonneg hV hF, mul_nonneg hV hI2, mul_nonneg hF hI2]
-
-/-! ## Iterated-Fréchet-derivative identifications: V = ‖iteratedFDeriv 0‖,
-F = ‖iteratedFDeriv 1‖ -/
 
 /-- The chart-pulled representation `V` at `b ∈` good set equals the order-0
 iterated Fréchet-derivative norm of `T_repr ∘ symm` at `extChartAt I α b`. -/
@@ -138,8 +133,6 @@ private lemma F_eq_iteratedFDeriv_one_norm
         (extChartAt I α b)‖ := by
   rw [norm_iteratedFDeriv_one]
 
-/-! ## V + F + I2 reformulated as `∑ j : Fin 3, ‖iteratedFDeriv ℝ j.val ...‖` -/
-
 private lemma sum_VFI2_eq_finSum
     (r s : ℕ) (α : M)
     (S : Π b : M, TensorRSSpace r s I b) {b : M}
@@ -160,7 +153,6 @@ private lemma sum_VFI2_eq_finSum
           (extChartAt I α b)‖ := by
   rw [V_eq_iteratedFDeriv_zero_norm (I := I) (M := M) r s α S (b := b) hb_good]
   rw [F_eq_iteratedFDeriv_one_norm (I := I) (M := M) r s α S b]
-  -- Sum over Fin 3 = a_0 + a_1 + a_2.
   rw [Fin.sum_univ_three]
   simp only [Fin.val_zero, Fin.val_one, Fin.val_two]
 

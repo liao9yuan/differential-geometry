@@ -69,16 +69,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## Re-exports of boundary-agnostic constructions
-
-The pointwise smul of a smooth function and a smooth tangent section, the
-chart-coefficient pull-out lemmas, and the intrinsic tangent-action helpers all
-live in the boundaryless file and depend only on the trivialization being linear
-on the fiber and on `mfderiv` being intrinsic. They are re-used here directly. -/
-
-/-! ### Notation re-exports for `smoothSmul` and the chart-coefficient
-pull-outs -/
-
 /-- The boundaryless `smoothSmul` packages `(fun x => φ x • X x)` as a smooth
 tangent section. The construction is intrinsic — it does not refer to the chart
 target — so it is reused verbatim under the with-boundary hypotheses. -/
@@ -86,22 +76,6 @@ example (φ : M → ℝ) (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     (smoothSmul
         (I := I) φ hφ X) x = φ x • X x := rfl
-
-/-! ## Chart-local representation of `tangentSectionAction` (with boundary)
-
-In the chart at any base point `α : M`, the tangent action
-`tangentSectionAction X f x` admits a chart-local representation as a sum over
-the chart-basis components of `X`, weighted by the `i`-th model-basis directional
-derivative of the chart-pullback `scalarOnE α f`. Under `[I.Boundaryless]` the
-derivatives are ordinary Fréchet partials; in general the within-derivative
-`partialDerivWithin (extChartAt I α).target` is the correct replacement, and is
-well-posed at every point of the chart base set thanks to
-`uniqueDiffOn_extChartAt_target`.
-
-This is the key with-boundary lemma needed for the divergence Leibniz rule. The
-proof goes via the manifold chain rule (`mfderivWithin_comp`) on the open chart
-base set, using the decomposition `f = (scalarOnE α f) ∘ (extChartAt I α)` near
-every chart-source point. -/
 
 /-- The pull-back `scalarOnE α f` is `MDifferentiableWithinAt` (as a map
 `E → ℝ`) on the chart target at every point of the chart target, when `f` is
@@ -111,9 +85,6 @@ private lemma scalarOnE_mdifferentiableWithinAt_target
     {y : E} (hy : y ∈ (extChartAt I α).target) :
     MDifferentiableWithinAt 𝓘(ℝ, E) 𝓘(ℝ)
       (scalarOnE (I := I) α f) (extChartAt I α).target y := by
-  -- `scalarOnE α f` is `C^∞` on the chart target, hence
-  -- `ContDiffWithinAt ℝ ∞`, hence `DifferentiableWithinAt ℝ`,
-  -- hence `MDifferentiableWithinAt 𝓘(ℝ, E) 𝓘(ℝ)`.
   have hcont : ContDiffWithinAt ℝ ∞ (scalarOnE (I := I) α f)
       (extChartAt I α).target y :=
     scalarOnE_contDiffWithinAt (I := I) α hf hy
@@ -164,14 +135,12 @@ private lemma mfderiv_extChartAt_chartBasisVecFiber
         (chartBasisVecFiber (I := I) α i x)
       = (chartModelBasis E) i := by
   classical
-  -- We work with the abbreviation `T` for the trivialization at `α`.
   let T : Bundle.Trivialization E (π E (TangentSpace I : M → Type _)) :=
     trivializationAt E (TangentSpace I) α
   have hT_def : T = trivializationAt E (TangentSpace I) α := rfl
   have hbase : x ∈ T.baseSet := by
     change x ∈ (trivializationAt E (TangentSpace I) α).baseSet
     rw [trivializationAt_baseSet_eq_chartAt_source]; exact hx
-  -- `mfderiv (extChartAt I α) x = T.continuousLinearMapAt ℝ x`.
   have hmfderiv_eq :
       mfderiv I 𝓘(ℝ, E) (extChartAt I α) x =
         (T.continuousLinearMapAt ℝ x : TangentSpace I x →L[ℝ] E) := by
@@ -181,10 +150,8 @@ private lemma mfderiv_extChartAt_chartBasisVecFiber
     exact (TangentBundle.continuousLinearMapAt_trivializationAt (𝕜 := ℝ) (I := I)
       (x₀ := α) (x := x) hx).symm
   rw [hmfderiv_eq]
-  -- `chartBasisVecFiber α i x = T.symm x ((finBasis ℝ E) i)` (definition).
   change T.continuousLinearMapAt ℝ x (T.symm x ((chartModelBasis E) i))
     = (chartModelBasis E) i
-  -- `T.continuousLinearMapAt ℝ x (T.symmL ℝ x v) = v` on the base set.
   rw [show T.symm x ((chartModelBasis E) i) =
         T.symmL ℝ x ((chartModelBasis E) i) from by
       rw [Trivialization.symmL_apply]]
@@ -222,7 +189,6 @@ private lemma mfderiv_factor_through_extChartAt
           (extChartAt I α).target ((extChartAt I α) x))
         ((mfderiv I 𝓘(ℝ, E) (extChartAt I α : M → E) x) v) := by
   classical
-  -- `f` is smooth on `M`, hence MDifferentiable on the chart source.
   set s : Set M := (chartAt H α).source with hs_def
   have hs_open : IsOpen s := (chartAt H α).open_source
   have hxs : x ∈ s := hx
@@ -230,35 +196,27 @@ private lemma mfderiv_factor_through_extChartAt
     hf.mdifferentiableAt (by simp)
   have hphi_mdiff_at : MDifferentiableAt I 𝓘(ℝ, E) (extChartAt I α) x :=
     mdifferentiableAt_extChartAt (I := I) (x := α) hx
-  -- Chart target image of `x`.
   set y₀ : E := (extChartAt I α) x
   have hy₀_target : y₀ ∈ (extChartAt I α).target :=
     extChartAt_mapsTo_target_chart_source (I := I) α hx
-  -- Within-restrictions to the chart source.
   have hf_mdiffWithin : MDifferentiableWithinAt I 𝓘(ℝ) f s x :=
     hf_mdiff_at.mdifferentiableWithinAt
   have hphi_mdiffWithin : MDifferentiableWithinAt I 𝓘(ℝ, E) (extChartAt I α) s x :=
     hphi_mdiff_at.mdifferentiableWithinAt
-  -- `s ⊆ (extChartAt I α) ⁻¹' (extChartAt I α).target`.
   have hsubset : s ⊆ (extChartAt I α : M → E) ⁻¹' (extChartAt I α).target :=
     fun z hz => extChartAt_mapsTo_target_chart_source (I := I) α hz
-  -- Within-MDifferentiable for `scalarOnE α f` on the chart target at `y₀`.
   have hscalar_mdiffWithin :
       MDifferentiableWithinAt 𝓘(ℝ, E) 𝓘(ℝ) (scalarOnE (I := I) α f)
         (extChartAt I α).target y₀ :=
     scalarOnE_mdifferentiableWithinAt_target (I := I) α hf hy₀_target
-  -- Eventually-equal: `f = scalarOnE α f ∘ extChartAt I α` on `s`.
   have hcomp_eq : ∀ z ∈ s, f z = (scalarOnE (I := I) α f) ((extChartAt I α) z) := by
     intro z hz
     have hzsrc : z ∈ (extChartAt I α).source := by
       rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hz
     rw [scalarOnE_def, (extChartAt I α).left_inv hzsrc]
-  -- Convert to `EventuallyEq` near `x`, using openness of `s`.
   have hcomp_evEq : f =ᶠ[𝓝 x] (scalarOnE (I := I) α f) ∘ (extChartAt I α) := by
     filter_upwards [hs_open.mem_nhds hxs] with z hz
     exact hcomp_eq z hz
-  -- The chain-rule version of mfderiv via `mfderivWithin_comp`.
-  -- We compute `mfderivWithin (g ∘ extChartAt I α) s x` two ways.
   have huniq : UniqueMDiffWithinAt I s x := hs_open.uniqueMDiffWithinAt hxs
   have hcomp_within :
       mfderivWithin I 𝓘(ℝ) (Function.comp (scalarOnE (I := I) α f)
@@ -267,14 +225,10 @@ private lemma mfderiv_factor_through_extChartAt
             (extChartAt I α).target y₀).comp
           (mfderivWithin I 𝓘(ℝ, E) (extChartAt I α : M → E) s x) :=
     mfderivWithin_comp x hscalar_mdiffWithin hphi_mdiffWithin hsubset huniq
-  -- `mfderivWithin _ s x = mfderiv _ x` for both `f` and `extChartAt I α`
-  -- (since `s` is open and both are differentiable at `x`).
   have hmfderiv_phi :
       mfderivWithin I 𝓘(ℝ, E) (extChartAt I α : M → E) s x =
         mfderiv I 𝓘(ℝ, E) (extChartAt I α : M → E) x :=
     mfderivWithin_extChartAt_chart_source (I := I) α hx
-  -- For `f`, use `Filter.EventuallyEq.mfderiv_eq` to first replace `f` by the
-  -- composition near `x`. We need `mfderiv f x = mfderiv (g ∘ φ) x`.
   have hmfderiv_f_eq :
       mfderiv I 𝓘(ℝ) f x =
         mfderiv I 𝓘(ℝ) (Function.comp (scalarOnE (I := I) α f)
@@ -286,14 +240,12 @@ private lemma mfderiv_factor_through_extChartAt
         mfderiv I 𝓘(ℝ) (Function.comp (scalarOnE (I := I) α f)
             (extChartAt I α : M → E)) x :=
     mfderivWithin_chart_source_of_mdiff (I := I) α hx _
-  -- Combine into `mfderiv I 𝓘(ℝ) f x = (...). comp (mfderiv (extChartAt I α) x)`.
   have hgoal_full :
       mfderiv I 𝓘(ℝ) f x =
         (mfderivWithin 𝓘(ℝ, E) 𝓘(ℝ) (scalarOnE (I := I) α f)
             (extChartAt I α).target y₀).comp
           (mfderiv I 𝓘(ℝ, E) (extChartAt I α : M → E) x) := by
     rw [hmfderiv_f_eq, ← hmfderiv_comp_within_to_full, hcomp_within, hmfderiv_phi]
-  -- Replace `mfderivWithin (scalarOnE) target` by `fderivWithin ℝ (scalarOnE) target`.
   have hscalar_mfd_eq_fd :
       mfderivWithin 𝓘(ℝ, E) 𝓘(ℝ) (scalarOnE (I := I) α f)
           (extChartAt I α).target y₀ =
@@ -318,14 +270,9 @@ private lemma mfderiv_chartBasisVecFiber_within
       partialDerivWithin (E := E) (extChartAt I α).target i
         (scalarOnE (I := I) α f) ((extChartAt I α) x) := by
   classical
-  -- Apply the factorisation lemma to `v = chartBasisVecFiber α i x`.
   rw [mfderiv_factor_through_extChartAt (I := I) α hf hx
         (chartBasisVecFiber (I := I) α i x)]
-  -- The mfderiv of `extChartAt I α` sends the chart-basis vector to the model
-  -- basis vector by `mfderiv_extChartAt_chartBasisVecFiber`.
   rw [mfderiv_extChartAt_chartBasisVecFiber (I := I) α hx i]
-  -- The within-Fréchet derivative applied to the model basis vector is the
-  -- within-partial derivative by definition.
   rfl
 
 /-- **Chart-local representation of `tangentSectionAction` (with boundary).**
@@ -351,32 +298,16 @@ theorem tangentSectionAction_chartLocal_within
   classical
   have hbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [trivializationAt_baseSet_eq_chartAt_source]; exact hx
-  -- Decompose `X x` in the chart-basis frame at `α`.
   have hXrecomp : X x = ∑ i, chartCoeff (I := I) α X i x •
         chartBasisVecFiber (I := I) α i x :=
     chartCoeff_recompose (I := I) α X hbase
-  -- Linearly expand `mfderiv I 𝓘(ℝ) f x` applied to this decomposition.
   rw [tangentSectionAction_def, hXrecomp]
   rw [map_sum]
   refine Finset.sum_congr rfl ?_
   intro i _
   rw [map_smul]
-  -- `mfderiv f x (c • v) = c * mfderiv f x v` (codomain `ℝ`).
   rw [mfderiv_chartBasisVecFiber_within (I := I) α hf hx i]
   exact smul_eq_mul ..
-
-/-! ## Divergence Leibniz rule (with boundary)
-
-The chart-local divergence at the chart at `x` itself (`α := x`) admits the
-Leibniz rule by the within-Leibniz rule for `partialDerivWithin` and the chart-
-coefficient pull-out `chartCoeffOnE_smoothSmul`. The global divergence equals
-the chart-local divergence at `x` by definition, giving the global Leibniz
-rule.
-
-This is the with-boundary analogue of `divergence_g_smoothSmul` from the
-boundaryless variant. The key difference is that the within-derivative
-`partialDerivWithin` is well-defined on the boundary of the chart target, so the
-proof goes through without an `[I.Boundaryless]` assumption. -/
 
 /-- The integrand `y ↦ chartCoeffOnE α X i y * chartDensityOnE g α y` is
 `DifferentiableWithinAt ℝ` on the chart target at any chart-target point.
@@ -420,7 +351,6 @@ private lemma localDivergenceWithin_at_self_smoothSmul
       φ x * localDivergenceWithin (I := I) g x X x +
         tangentSectionAction (I := I) X φ x := by
   classical
-  -- Setup.
   set y₀ : E := extChartAt I x x with hy₀_def
   have hxsrc : x ∈ (extChartAt I x).source := by
     rw [extChartAt_source_eq_chartAt_source (I := I)]
@@ -433,17 +363,13 @@ private lemma localDivergenceWithin_at_self_smoothSmul
   have hρ_pos : 0 < chartDensity (I := I) g x x :=
     chartDensity_pos (I := I) g x hbase
   have hρ_ne : chartDensity (I := I) g x x ≠ 0 := ne_of_gt hρ_pos
-  -- Unique-differentiability at `y₀`.
   have huniq : UniqueDiffWithinAt ℝ (extChartAt I x).target y₀ :=
     uniqueDiffOn_extChartAt_target_apply (I := I) x hy₀_target
-  -- Unfold both sides via `localDivergenceWithin_def`.
   rw [localDivergenceWithin_def, localDivergenceWithin_def]
-  -- Per-index expansion via the within-Leibniz rule.
   set u : E → ℝ := scalarOnE (I := I) x φ with hu_def
   set v : Fin (Module.finrank ℝ E) → E → ℝ :=
     fun i y => chartCoeffOnE (I := I) x X i y * chartDensityOnE (I := I) g x y
     with hv_def
-  -- Pointwise on the chart target, the (φ • X) integrand factors as `u * v i`.
   have hintegrand_eq : ∀ y ∈ (extChartAt I x).target,
       ∀ i : Fin (Module.finrank ℝ E),
         chartCoeffOnE (I := I) x
@@ -458,8 +384,6 @@ private lemma localDivergenceWithin_at_self_smoothSmul
         chartDensityOnE (I := I) g x y =
       u y * (chartCoeffOnE (I := I) x X i y * chartDensityOnE (I := I) g x y)
     ring
-  -- Replace each within-partial of the (φ • X) integrand by the within-partial of `u * v i`,
-  -- using `partialDerivWithin_congr_of_eqOn_of_mem` (the EqOn is on the chart target, and `y₀ ∈ target`).
   have hpartial_eq : ∀ i : Fin (Module.finrank ℝ E),
       partialDerivWithin (E := E) (extChartAt I x).target i
         (fun y => chartCoeffOnE (I := I) x
@@ -472,7 +396,6 @@ private lemma localDivergenceWithin_at_self_smoothSmul
     refine partialDerivWithin_congr_of_eqOn_of_mem ?_ hy₀_target
     intro y hy
     exact hintegrand_eq y hy i
-  -- For each `i`, expand `partialDerivWithin i (u · v i)` via the within-Leibniz rule.
   have hu_diff : DifferentiableWithinAt ℝ u (extChartAt I x).target y₀ :=
     scalarOnE_differentiableWithinAt (I := I) x hφ hy₀_target
   have hv_diff : ∀ i : Fin (Module.finrank ℝ E),
@@ -487,7 +410,6 @@ private lemma localDivergenceWithin_at_self_smoothSmul
     intro i
     exact partialDerivWithin_mul (s := (extChartAt I x).target) (y := y₀) (i := i)
       u (v i) huniq hu_diff (hv_diff i)
-  -- Combine the per-i results and sum.
   have hLHS_num :
       ∑ i : Fin (Module.finrank ℝ E),
         partialDerivWithin (E := E) (extChartAt I x).target i
@@ -503,7 +425,6 @@ private lemma localDivergenceWithin_at_self_smoothSmul
     rw [hpartial_eq i, hLeibniz i]
   rw [hLHS_num]
   rw [Finset.sum_add_distrib]
-  -- Refactor: factor `u y₀` out of the first sum.
   rw [show (∑ i : Fin (Module.finrank ℝ E),
             u y₀ * partialDerivWithin (E := E) (extChartAt I x).target i
               (v i) y₀) =
@@ -511,21 +432,14 @@ private lemma localDivergenceWithin_at_self_smoothSmul
             ∑ i : Fin (Module.finrank ℝ E),
               partialDerivWithin (E := E) (extChartAt I x).target i (v i) y₀ from
         (Finset.mul_sum _ _ _).symm]
-  -- LHS becomes `(u y₀ * S + R) / ρ` where
-  --   S = ∑ ∂_i (v i) y₀
-  --   R = ∑ v i y₀ * ∂_i u y₀
-  -- RHS = φ x * (S / ρ) + tangentSectionAction X φ x.
   rw [add_div]
-  -- Goal: u y₀ · S / ρ + R / ρ = φ x · (S / ρ) + tangentSectionAction X φ x.
   have hsymm_inv : (extChartAt I x).symm y₀ = x := (extChartAt I x).left_inv hxsrc
   have hu_eq_φ : u y₀ = φ x := by
     change scalarOnE (I := I) x φ y₀ = φ x
     exact scalarOnE_extChartAt (I := I) x φ hxsrc
   congr 1
-  · -- `u y₀ · S / ρ = φ x · (S / ρ)`.
-    rw [hu_eq_φ, mul_div_assoc]
-  · -- `(∑ i, v i y₀ · ∂_i u y₀) / ρ = tangentSectionAction X φ x`.
-    have hρOnE : chartDensityOnE (I := I) g x y₀ = chartDensity (I := I) g x x := by
+  · rw [hu_eq_φ, mul_div_assoc]
+  · have hρOnE : chartDensityOnE (I := I) g x y₀ = chartDensity (I := I) g x x := by
       change chartDensity (I := I) g x ((extChartAt I x).symm y₀) = _
       rw [hsymm_inv]
     have heach : ∀ i : Fin (Module.finrank ℝ E),
@@ -553,19 +467,16 @@ private lemma localDivergenceWithin_at_self_smoothSmul
           Finset.sum_congr rfl (fun i _ => heach i)]
     rw [← Finset.sum_mul]
     rw [mul_div_assoc, div_self hρ_ne, mul_one]
-    -- Goal: `∑ i, chartCoeffOnE x X i y₀ · ∂_i u y₀ = tangentSectionAction X φ x`.
     have hchartCoeff : ∀ i : Fin (Module.finrank ℝ E),
         chartCoeffOnE (I := I) x X i y₀ = chartCoeff (I := I) x X i x := by
       intro i
       change chartCoeff (I := I) x X i ((extChartAt I x).symm y₀) = _
       rw [hsymm_inv]
-    -- Apply the with-boundary chart-local representation of `tangentSectionAction`.
     have htsa := tangentSectionAction_chartLocal_within (I := I) (α := x) X
       (f := φ) hφ (mem_chart_source H x)
     rw [htsa]
     refine Finset.sum_congr rfl ?_
     intro i _
-    -- Goal: `chartCoeffOnE x X i y₀ * ∂_i u y₀ = chartCoeff x X i x * ∂_i u y₀`.
     rw [hchartCoeff i]
 
 /-- **Leibniz rule for the global with-boundary divergence.** -/
@@ -583,8 +494,6 @@ theorem divergence_g_with_boundary_smoothSmul [T2Space M]
   rw [divergence_g_with_boundary_def, divergence_g_with_boundary_def]
   exact localDivergenceWithin_at_self_smoothSmul (I := I) g x φ hφ X
 
-/-! ## Linearity of the with-boundary divergence in `X` -/
-
 /-- Sum rule: `divergence_g_with_boundary g (X + Y) = divergence_g_with_boundary g X +
 divergence_g_with_boundary g Y`. -/
 theorem divergence_g_with_boundary_add [T2Space M]
@@ -599,7 +508,6 @@ theorem divergence_g_with_boundary_add [T2Space M]
   rw [divergence_g_with_boundary_def, divergence_g_with_boundary_def,
       divergence_g_with_boundary_def]
   rw [localDivergenceWithin_def, localDivergenceWithin_def, localDivergenceWithin_def]
-  -- Reduce to the chart-coefficient additivity via the within-Leibniz rule.
   set y₀ : E := extChartAt I x x with hy₀_def
   have hxsrc : x ∈ (extChartAt I x).source := by
     rw [extChartAt_source_eq_chartAt_source (I := I)]
@@ -608,7 +516,6 @@ theorem divergence_g_with_boundary_add [T2Space M]
     (extChartAt I x).map_source hxsrc
   have huniq : UniqueDiffWithinAt ℝ (extChartAt I x).target y₀ :=
     uniqueDiffOn_extChartAt_target_apply (I := I) x hy₀_target
-  -- Pointwise: `chartCoeff x (X + Y) i z = chartCoeff x X i z + chartCoeff x Y i z` on the base set.
   have hchartCoeff_add : ∀ z ∈ (trivializationAt E (TangentSpace I) x).baseSet,
       ∀ i : Fin (Module.finrank ℝ E),
         chartCoeff (I := I) x (X + Y) i z =
@@ -639,7 +546,6 @@ theorem divergence_g_with_boundary_add [T2Space M]
       exact hsymm_chart
     unfold chartCoeffOnE
     exact hchartCoeff_add ((extChartAt I x).symm y) hsymm_base i
-  -- Per index, the integrand splits.
   have hpartial_split : ∀ i : Fin (Module.finrank ℝ E),
       partialDerivWithin (E := E) (extChartAt I x).target i
         (fun y => chartCoeffOnE (I := I) x (X + Y) i y *
@@ -651,7 +557,6 @@ theorem divergence_g_with_boundary_add [T2Space M]
         (fun y => chartCoeffOnE (I := I) x Y i y *
           chartDensityOnE (I := I) g x y) y₀ := by
     intro i
-    -- Replace integrand of `(X + Y)` by sum of integrands using `partialDerivWithin_congr`.
     have hcongr : partialDerivWithin (E := E) (extChartAt I x).target i
         (fun y => chartCoeffOnE (I := I) x (X + Y) i y *
           chartDensityOnE (I := I) g x y) y₀ =
@@ -665,7 +570,6 @@ theorem divergence_g_with_boundary_add [T2Space M]
       rw [hchartCoeffOnE_add y hy i]
       ring
     rw [hcongr]
-    -- Apply within-Leibniz additivity rule.
     have hX_diff : DifferentiableWithinAt ℝ
         (fun y => chartCoeffOnE (I := I) x X i y *
           chartDensityOnE (I := I) g x y) (extChartAt I x).target y₀ :=
@@ -706,8 +610,6 @@ theorem divergence_g_with_boundary_add [T2Space M]
     exact mem_chart_source H x
   have hy₀_target : y₀ ∈ (extChartAt I x).target :=
     (extChartAt I x).map_source hxsrc
-  -- For each `i`, the integrand vanishes on the chart target, hence its
-  -- within-partial vanishes at `y₀`.
   have hchartCoeff_zero : ∀ z ∈ (trivializationAt E (TangentSpace I) x).baseSet,
       ∀ i : Fin (Module.finrank ℝ E),
         chartCoeff (I := I) x
@@ -745,7 +647,6 @@ theorem divergence_g_with_boundary_add [T2Space M]
           (0 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) i y *
           chartDensityOnE (I := I) g x y) y₀ = 0 := by
     intro i
-    -- The integrand is identically `0` on the chart target.
     have hcongr_zero :
         partialDerivWithin (E := E) (extChartAt I x).target i
           (fun y => chartCoeffOnE (I := I) x
@@ -759,7 +660,6 @@ theorem divergence_g_with_boundary_add [T2Space M]
       rw [hchartCoeffOnE_zero y hy i]
       ring
     rw [hcongr_zero]
-    -- The within-partial of the zero function is zero.
     unfold partialDerivWithin
     have h_const_eq : (fun _ : E => (0 : ℝ)) = Function.const E (0 : ℝ) := rfl
     rw [h_const_eq, fderivWithin_const]
@@ -771,8 +671,6 @@ theorem divergence_g_with_boundary_add [T2Space M]
                 chartDensityOnE (I := I) g x y) y₀) = 0 from
         Finset.sum_eq_zero (fun i _ => hpartial_zero i)]
   rw [zero_div]
-
-/-! ## POU divergence-decomposition identity (with boundary) -/
 
 /-- For a smooth POU `ρ` indexed by `M`, the with-boundary divergence
 `divergence_g_with_boundary g X x` decomposes as the locally-finite tsum
@@ -787,9 +685,7 @@ theorem divergence_g_with_boundary_pou_tsum [T2Space M] [SigmaCompactSpace M]
           (I := I) (ρ α : M → ℝ) (ρ α).contMDiff X) x := by
   intro x
   classical
-  -- Pick the Finset of α's for which `x ∈ tsupport (ρ α)`.
   set S : Finset M := ρ.fintsupport x with hS_def
-  -- Step 1: the tsum equals a Finset sum over S, since for `α ∉ S` the divergence vanishes.
   have h_tsum_eq_sum :
       (∑' α : M, divergence_g_with_boundary (I := I) g
           (smoothSmul
@@ -799,13 +695,11 @@ theorem divergence_g_with_boundary_pou_tsum [T2Space M] [SigmaCompactSpace M]
             (I := I) (ρ α : M → ℝ) (ρ α).contMDiff X) x := by
     refine tsum_eq_sum ?_
     intro α hα
-    -- α ∉ S = ρ.fintsupport x ⇒ x ∉ tsupport (ρ α).
     have hxnotin : x ∉ tsupport (ρ α : M → ℝ) := by
       intro h
       apply hα
       rw [ρ.mem_fintsupport_iff]
       exact h
-    -- Apply the Leibniz rule at x.
     rw [divergence_g_with_boundary_smoothSmul (I := I) g
         (ρ α : M → ℝ) (ρ α).contMDiff X x]
     have hραx : (ρ α : M → ℝ) x = 0 := by
@@ -823,7 +717,6 @@ theorem divergence_g_with_boundary_pou_tsum [T2Space M] [SigmaCompactSpace M]
       rfl
     rw [hραx, htsa_zero, zero_mul, add_zero]
   rw [h_tsum_eq_sum]
-  -- Step 2: expand each Finset summand by the Leibniz rule.
   have h_each : ∀ α ∈ S,
       divergence_g_with_boundary (I := I) g
         (smoothSmul
@@ -834,9 +727,7 @@ theorem divergence_g_with_boundary_pou_tsum [T2Space M] [SigmaCompactSpace M]
     exact divergence_g_with_boundary_smoothSmul (I := I) g
       (ρ α : M → ℝ) (ρ α).contMDiff X x
   rw [Finset.sum_congr rfl h_each]
-  -- Step 3: split the Finset sum and identify the constant-1 sum and zero action sum.
   rw [Finset.sum_add_distrib]
-  -- (a) `∑ α ∈ S, ρ α x · divergence_g_with_boundary g X x = (∑ α ∈ S, ρ α x) · ... = ...`.
   rw [show (∑ α ∈ S, (ρ α : M → ℝ) x *
               divergence_g_with_boundary (I := I) g X x) =
         (∑ α ∈ S, (ρ α : M → ℝ) x) *
@@ -845,7 +736,6 @@ theorem divergence_g_with_boundary_pou_tsum [T2Space M] [SigmaCompactSpace M]
   rw [ρ.sum_finsupport' x (mem_univ x)
         (ρ.finsupport_subset_fintsupport x)]
   rw [one_mul]
-  -- (b) `∑ α ∈ S, tangentSectionAction X (ρ α) x = 0`.
   have hsum_action : ∑ α ∈ S,
       tangentSectionAction (I := I) X (ρ α : M → ℝ) x = 0 := by
     have hMDiff_each : ∀ α ∈ S,

@@ -79,8 +79,6 @@ open DifferentialGeometry.Analysis.Laplacian.TwiceDifferentiatedVariationalIdent
 open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpFourSmooth
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH2kBridge
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -89,15 +87,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## The per-pair family of twice-differentiated identities (single α)
-
-Assembled by composing the three unconditional ingredients. The hypothesis
-of `twice_differentiated_variational_identity_holds` is the
-`MemW1p 2` membership of `chosenFChartDeriv g α hu_h l₁`, discharged
-unconditionally via `chosenFChartDeriv_memW1p_truly_unconditional` from
-the chart-`H²` of `base.f_chart` (itself unconditional via
-`base_f_chart_memWkp_two_two`). -/
 
 /-- The family of twice-differentiated chart-bilinear variational identities
 for `u_h ∈ laplacianDomainPow g 2` at a fixed chart point `α : M`. Indexed
@@ -127,24 +116,15 @@ private lemma twice_diff_identities_at
             fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
           ∂(volume : Measure EuclN) := by
   intro l₁ l₂ ψ hψ_smooth hψ_cs hψ_supp
-  -- Step 1: chart-`H²` of `base.f_chart` (unconditional).
   have h_base_f_chart_memWkp22 :=
     base_f_chart_memWkp_two_two
       (I := I) (M := M) g α hu_h
-  -- Step 2: `chosenFChartDeriv g α hu_h l₁ ∈ MemW1p 2` (from step 1).
   have h_chosenFChartDeriv_memW1p :=
     chosenFChartDeriv_memW1p_truly_unconditional
       (I := I) (M := M) g α hu_h l₁ h_base_f_chart_memWkp22
-  -- Step 3: twice-differentiated identity (from step 2).
   exact twice_differentiated_variational_identity_holds
     (I := I) (M := M) g α hu_h l₁ l₂ h_chosenFChartDeriv_memW1p
     hψ_smooth hψ_cs hψ_supp
-
-/-! ## Headline 1: chart-`H⁴` of the chart-pushed function
-
-Compose the per-pair family of twice-differentiated identities with the
-hypothesis-bearing assembly
-`chartPushed_memWkp_four_two_of_laplacianDomainPow_two_of_twice_diff_identities`. -/
 
 /-- **Headline: truly unconditional chart-`H⁴` of the chart-pushed function.**
 
@@ -174,11 +154,6 @@ theorem chartPushed_memWkp_four_two_of_laplacianDomainPow_two
     (I := I) (M := M) g α hu_h
     (twice_diff_identities_at (I := I) (M := M) g α hu_h)
 
-/-! ## Headline 2: per-chart `ChartSideH2kBridge g 2`
-
-The per-chart bridge predicate. The α-indexed family of twice-differentiated
-identities is supplied by `twice_diff_identities_at` ranging over `α : M`. -/
-
 /-- **Headline: truly unconditional `ChartSideH2kBridge g 2` for the canonical
 function representative.**
 
@@ -200,8 +175,6 @@ theorem chartSideH2kBridge_two_of_laplacianDomainPow_two
   chartSideH2kBridge_two_of_twice_diff_identities
     (I := I) (M := M) g hu_h
     (fun α => twice_diff_identities_at (I := I) (M := M) g α hu_h)
-
-/-! ## Headline 3: manifold-level `MemWkpChart g 4 2` -/
 
 /-- **Headline: truly unconditional manifold-level `MemWkpChart g 4 2`.**
 
@@ -227,13 +200,6 @@ theorem laplacianDomainPow_memWkpChart_four_two_of_laplacianDomainPow_two
   laplacianDomainPow_memWkpChart_four_two_of_twice_diff_identities
     (I := I) (M := M) g hu_h
     (fun α => twice_diff_identities_at (I := I) (M := M) g α hu_h)
-
-/-! ## Headline 4 (equivalent reformulation): `ChartSideH4Bridge`
-
-The chart-`H⁴` bridge predicate from `LaplacianDomainPowH4Bridge` is
-equivalent (via `chartSideH4Bridge_of_chartSideH2kBridge_two`) to the
-`k = 2` instance of `ChartSideH2kBridge`. This equivalent reformulation
-exposes the truly unconditional headline in the alternative shape. -/
 
 /-- **Headline (equivalent form): truly unconditional `ChartSideH4Bridge`.**
 

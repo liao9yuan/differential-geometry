@@ -70,32 +70,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-! ## File-local Borel-space instances
-
-We match the convention in the surrounding files: `E` and `M` carry their
-canonical Borel σ-algebras. Declared `local` to avoid leaking into callers. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Green's first identity (with boundary)
-
-For smooth `f, h : M → ℝ` with topological supports inside `I.interior M`, and
-`h` having compact support, the gradient section `grad_g_with_boundary_section
-g hh hh_int` has compact support and interior support inherited from `h`. We
-apply the with-boundary integration-by-parts identity
-`integral_tangentSectionAction_eq_neg_integral_smul_divergence_with_boundary`
-with this section as the test section and `f` as the test scalar.
-
-* The LHS of the IBP identity, `∫ tangentSectionAction X f`, becomes
-  `∫ g.inner x (gradFun g f x) (gradFun g h x)` via the duality
-  `tangentSectionAction_grad_g_with_boundary_eq_inner` and the symmetry
-  `inner_grad_g_with_boundary_symm`.
-* The RHS of the IBP identity, `-∫ f · divergence_g_with_boundary g X`,
-  becomes `-∫ f · Δ_g_with_boundary g hh hh_int` because the Laplacian is
-  defined as the divergence of the packaged gradient section. -/
 
 /-- **Green's first identity on a Riemannian manifold with boundary.** For
 smooth `f, h : M → ℝ` with `tsupport f, tsupport h ⊆ I.interior M` and `h`
@@ -114,38 +92,27 @@ theorem integral_inner_grad_eq_neg_integral_smul_laplacian_with_boundary
       -∫ x, f x * Δ_g_with_boundary (I := I) g hh hh_int x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
   classical
-  -- Set `X := grad_g_with_boundary_section g hh hh_int`, smooth tangent section
-  -- with compact support and interior support inherited from `h`.
   set X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     grad_g_with_boundary_section (I := I) g hh hh_int with hX_def
   have hX_cs : HasCompactSupport X :=
     hasCompactSupport_grad_g_with_boundary_section (I := I) g hh hh_int hh_supp
   have hX_int : tsupport (X : ∀ x, TangentSpace I x) ⊆ I.interior M :=
     tsupport_grad_g_with_boundary_section_subset_interior (I := I) g hh hh_int
-  -- Apply the with-boundary IBP identity with `X` and `f`.
   have h_ibp :=
     integral_tangentSectionAction_eq_neg_integral_smul_divergence_with_boundary
       (I := I) g hf hf_int X hX_cs hX_int
-  -- LHS: `∫ tangentSectionAction X f`. By duality with `X = grad_g_with_boundary_section g hh _`,
-  -- we get `g.inner x (X x) (gradFun g f x)`, then symmetry gives `g.inner x (gradFun g f x) (gradFun g h x)`.
   have hLHS_eq : ∀ x : M,
       tangentSectionAction (I := I) X f x =
         g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g h x) := by
     intro x
     rw [tangentSectionAction_grad_g_with_boundary_eq_inner (I := I) g hf X x]
-    -- After rewriting: `g.inner x (X x) (grad_g_with_boundary g f x) =
-    --                   g.inner x (gradFun g f x) (gradFun g h x)`.
-    -- Use `X x = gradFun g h x` (definitional) and symmetry of `g.inner`.
     change g.inner x (gradFun (I := I) g h x) (gradFun (I := I) g f x) =
       g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g h x)
     exact g.symm x _ _
-  -- RHS: `f x * divergence_g_with_boundary g X x = f x * Δ_g_with_boundary g hh hh_int x`,
-  -- definitional from `X = grad_g_with_boundary_section g hh hh_int`.
   have hRHS_eq : ∀ x : M,
       f x * divergence_g_with_boundary (I := I) g X x =
         f x * Δ_g_with_boundary (I := I) g hh hh_int x := by
     intro x; rfl
-  -- Convert pointwise equalities to integral equalities.
   have hLHS_int : ∫ x, tangentSectionAction (I := I) X f x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
       ∫ x, g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g h x)
@@ -156,19 +123,7 @@ theorem integral_inner_grad_eq_neg_integral_smul_laplacian_with_boundary
       ∫ x, f x * Δ_g_with_boundary (I := I) g hh hh_int x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
     integral_congr_ae (Filter.Eventually.of_forall hRHS_eq)
-  -- Combine.
   rw [← hLHS_int, h_ibp, hRHS_int]
-
-/-! ## Green's second identity (closed manifold with boundary)
-
-On a compact manifold whose model carries a boundary, both `f` and `h`
-automatically have compact support. Applying the with-boundary Green's first
-identity twice — once with `h` in the gradient slot and once with `f` in the
-gradient slot — and subtracting yields the integrand `f · Δh − h · Δf` whose
-integral is zero.
-
-We first prove a symmetric variant of Green's first identity (with the test
-section's underlying scalar being `f` instead of `h`) as a private corollary. -/
 
 /-- A symmetric variant of Green's first identity, with the integration-by-parts
 test section built from `f` instead of `h`. The compactness of `tsupport f` is
@@ -184,27 +139,21 @@ private theorem integral_inner_grad_eq_neg_integral_smul_laplacian_with_boundary
       -∫ x, h x * Δ_g_with_boundary (I := I) g hf hf_int x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
   classical
-  -- Set `X := grad_g_with_boundary_section g hf hf_int`, smooth tangent section
-  -- with compact support and interior support inherited from `f`.
   set X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     grad_g_with_boundary_section (I := I) g hf hf_int with hX_def
   have hX_cs : HasCompactSupport X :=
     hasCompactSupport_grad_g_with_boundary_section (I := I) g hf hf_int hf_supp
   have hX_int : tsupport (X : ∀ x, TangentSpace I x) ⊆ I.interior M :=
     tsupport_grad_g_with_boundary_section_subset_interior (I := I) g hf hf_int
-  -- Apply the with-boundary IBP identity with `X` and `h` (test scalar).
   have h_ibp :=
     integral_tangentSectionAction_eq_neg_integral_smul_divergence_with_boundary
       (I := I) g hh hh_int X hX_cs hX_int
-  -- LHS: `∫ tangentSectionAction X h x = ∫ g.inner x (X x) (gradFun g h x)
-  --                                    = ∫ g.inner x (gradFun g f x) (gradFun g h x)`.
   have hLHS_eq : ∀ x : M,
       tangentSectionAction (I := I) X h x =
         g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g h x) := by
     intro x
     rw [tangentSectionAction_grad_g_with_boundary_eq_inner (I := I) g hh X x]
     rfl
-  -- RHS: definitional rewrite of `divergence_g_with_boundary g X = Δ_g_with_boundary g hf hf_int`.
   have hRHS_eq : ∀ x : M,
       h x * divergence_g_with_boundary (I := I) g X x =
         h x * Δ_g_with_boundary (I := I) g hf hf_int x := by
@@ -236,16 +185,12 @@ theorem integral_smul_laplacian_sub_eq_zero_with_boundary
             h x * Δ_g_with_boundary (I := I) g hf hf_int x)
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) = 0 := by
   classical
-  -- On compact `M`, every continuous (or smooth) function has compact support.
   have hf_cs : HasCompactSupport f := HasCompactSupport.of_compactSpace _
   have hh_cs : HasCompactSupport h := HasCompactSupport.of_compactSpace _
-  -- Apply Green's first with `h` in the gradient slot.
   have h1 := integral_inner_grad_eq_neg_integral_smul_laplacian_with_boundary
     (I := I) g hf hh hf_int hh_int hh_cs
-  -- Apply Green's first variant with `f` in the gradient slot.
   have h2 := integral_inner_grad_eq_neg_integral_smul_laplacian_with_boundary'
     (I := I) g hf hh hf_int hh_int hf_cs
-  -- Combine: the LHSs are equal, so the RHSs are equal.
   have h_eq : ∫ x, f x * Δ_g_with_boundary (I := I) g hh hh_int x
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
         ∫ x, h x * Δ_g_with_boundary (I := I) g hf hf_int x
@@ -256,7 +201,6 @@ theorem integral_smul_laplacian_sub_eq_zero_with_boundary
             ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
       rw [← h1, h2]
     linarith
-  -- Continuity / integrability of both products (compact `M`).
   haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
   have hΔh_cont : Continuous (Δ_g_with_boundary (I := I) g hh hh_int) :=

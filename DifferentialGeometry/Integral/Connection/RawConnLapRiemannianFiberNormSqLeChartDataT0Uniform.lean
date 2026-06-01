@@ -57,14 +57,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Headline -/
 
 /-- **Uniform-in-`T₀` pointwise bound on `riemannianFiberNormSq` of the raw
 tensor connection Laplacian.**
@@ -114,15 +110,9 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_T0_uniform
                      ((toEuclidean (E := E)) ((extChartAt I α) b))) ^ 2)) := by
   classical
   set n : ℕ := Module.finrank ℝ E with hn_def
-  -- Step 1: obtain the (T₀-uniform) Riemannian-to-raw-component bound (H.2.c.2).
   obtain ⟨C_H, hC_H_nn, hH⟩ :=
     riemannianFiberNormSq_le_raw_components_on_pouTsupport
       (I := I) (M := M) g r s α
-  -- Step 2: per-(idx, jdx) T₀-uniform B.3.refine bound. For each fixed
-  -- `(idx, jdx)`, B.3.refine yields a constant `K idx jdx` (depending only on
-  -- `g, r, s, α, idx, jdx`) such that, uniformly in `T₀` and `b`,
-  --   `(rawComp (rawConnLap T₀) α idx jdx b)² ≤ K idx jdx · BigSum(b, T₀)`.
-  -- Here `BigSum` is the full multi-index RHS sum below.
   have hB_each : ∀ idx : Fin r → Fin n, ∀ jdx : Fin s → Fin n,
       ∃ K : ℝ, 0 ≤ K ∧
         ∀ (T₀ : SmoothCcTensor g r s),
@@ -152,7 +142,6 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_T0_uniform
     exact rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
       (I := I) (M := M) g r s α idx jdx
   choose K_fn hK_fn_nn hK_fn_bd using hB_each
-  -- Take the sup of `K_fn` across the (finite) `(idx, jdx)` index set.
   set IJ_set : Finset ((Fin r → Fin n) × (Fin s → Fin n)) := Finset.univ
   have hIJ_ne : IJ_set.Nonempty := Finset.univ_nonempty
   set K_max : ℝ := IJ_set.sup' hIJ_ne (fun p => K_fn p.1 p.2) with hKmax_def
@@ -164,22 +153,18 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_T0_uniform
       K_fn idx jdx ≤ K_max := fun idx jdx =>
     Finset.le_sup'_of_le (fun p => K_fn p.1 p.2)
       (Finset.mem_univ (idx, jdx)) (le_refl _)
-  -- Multi-index counting constant `cardIJ = n^r · n^s`.
   set cardIJ : ℝ := (n : ℝ) ^ r * (n : ℝ) ^ s with hcardIJ_def
   have hcardIJ_nn : 0 ≤ cardIJ :=
     mul_nonneg (pow_nonneg (Nat.cast_nonneg n) r)
                (pow_nonneg (Nat.cast_nonneg n) s)
-  -- Final T₀-uniform constant `C = C_H · cardIJ · K_max`.
   set C : ℝ := C_H * cardIJ * K_max with hC_def
   have hC_nn : 0 ≤ C :=
     mul_nonneg (mul_nonneg hC_H_nn hcardIJ_nn) hKmax_nn
   refine ⟨C, hC_nn, ?_⟩
   intro T₀ b hb_inter
-  -- Apply H.2.c.2 at the bundled `rawTensorConnLapSmooth T₀`.
   set S : SmoothCcTensor g r s :=
     rawTensorConnLapSmooth (I := I) g r s T₀ with hS_def
   have hH_at := hH (S := S) (b := b) hb_inter.1
-  -- Pointwise equality `S.toSection b = rawTensorConnLap … b`.
   have hS_value : S.toSection b =
       rawTensorConnLap (I := I) g r s (fun z : M => T₀.toSection z) b := by
     rw [hS_def]; exact rawTensorConnLapSmooth_toSection_apply (I := I) g r s T₀ b
@@ -193,10 +178,8 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_T0_uniform
               (tensorChartComponentRaw (I := I) (M := M) g r s
                 S α Idx Jdx b) ^ 2) := by
     rw [← hS_value]; exact hH_at
-  -- Abbreviations for the chart-Euclidean image and the per-(Idx', Jdx') data.
   set y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) :=
     (toEuclidean (E := E)) ((extChartAt I α) b) with hy_def
-  -- The per-(Idx', Jdx') summand: `‖iterFD²‖² + ‖fderiv‖² + raw²`.
   set DataIJ : (Fin r → Fin n) → (Fin s → Fin n) → ℝ :=
     fun Idx' Jdx' =>
       (‖iteratedFDeriv ℝ 2
@@ -223,28 +206,23 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_T0_uniform
          (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx' Jdx') y) ^ 2 :=
       sq_nonneg _
     linarith
-  -- The full multi-index sum `BigSum := Σ_{Idx', Jdx'} DataIJ Idx' Jdx'`.
   set BigSum : ℝ :=
     ∑ Idx' : Fin r → Fin n, ∑ Jdx' : Fin s → Fin n, DataIJ Idx' Jdx'
     with hBigSum_def
   have hBigSum_nn : 0 ≤ BigSum :=
     Finset.sum_nonneg (fun _ _ =>
       Finset.sum_nonneg (fun _ _ => hDataIJ_nn _ _))
-  -- The B.3.refine bound, in its `BigSum`-shorthand form.
-  -- `(rawComp (rawConnLap T₀) α idx jdx b)² ≤ K_fn idx jdx · BigSum`.
   have hPerIJ_raw : ∀ idx : Fin r → Fin n, ∀ jdx : Fin s → Fin n,
       (tensorChartComponentRaw (I := I) (M := M) g r s
             S α idx jdx b) ^ 2 ≤ K_fn idx jdx * BigSum := by
     intro idx jdx
     have h := hK_fn_bd idx jdx T₀ b hb_inter
-    -- Reshape to use the shorthand `S = rawTensorConnLapSmooth T₀`.
     have hS_lhs : (tensorChartComponentRaw (I := I) (M := M) g r s
             S α idx jdx b) ^ 2 =
         (tensorChartComponentRaw (I := I) (M := M) g r s
             (rawTensorConnLapSmooth (I := I) g r s T₀) α idx jdx b) ^ 2 := by
       rw [hS_def]
     rw [hS_lhs]
-    -- Identify the RHS of `h` with `K_fn idx jdx * BigSum`.
     have hRHS_eq : K_fn idx jdx * (∑ Idx' : Fin r → Fin n,
                     ∑ Jdx' : Fin s → Fin n,
                       ((‖iteratedFDeriv ℝ 2
@@ -264,7 +242,6 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_T0_uniform
         K_fn idx jdx * BigSum := by
       rw [hBigSum_def, hDataIJ_def, hy_def]
     rw [← hRHS_eq]; exact h
-  -- Upgrade to `K_max` on the right.
   have hPerIJ_raw_max : ∀ idx : Fin r → Fin n, ∀ jdx : Fin s → Fin n,
       (tensorChartComponentRaw (I := I) (M := M) g r s
             S α idx jdx b) ^ 2 ≤ K_max * BigSum := by
@@ -274,14 +251,12 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_T0_uniform
         ≤ K_fn idx jdx * BigSum := hPerIJ_raw idx jdx
       _ ≤ K_max * BigSum :=
           mul_le_mul_of_nonneg_right (hKmax_bd idx jdx) hBigSum_nn
-  -- Sum the per-(idx, jdx) bound over the multi-index set.
   have hSumIJ_rawCompSq :
       (∑ idx : Fin r → Fin n,
         ∑ jdx : Fin s → Fin n,
           (tensorChartComponentRaw (I := I) (M := M) g r s
             S α idx jdx b) ^ 2) ≤
       cardIJ * (K_max * BigSum) := by
-    -- Pointwise per-(idx, jdx) summand bounded by the constant `K_max * BigSum`.
     have h_le : (∑ idx : Fin r → Fin n,
         ∑ jdx : Fin s → Fin n,
           (tensorChartComponentRaw (I := I) (M := M) g r s
@@ -289,7 +264,6 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_T0_uniform
         ∑ _idx : Fin r → Fin n, ∑ _jdx : Fin s → Fin n, K_max * BigSum :=
       Finset.sum_le_sum (fun idx _ =>
         Finset.sum_le_sum (fun jdx _ => hPerIJ_raw_max idx jdx))
-    -- Evaluate the constant double sum.
     have h_inner_const : ∀ _idx : Fin r → Fin n,
         (∑ _jdx : Fin s → Fin n, K_max * BigSum) =
           ((n : ℝ) ^ s) * (K_max * BigSum) := by
@@ -322,7 +296,6 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_T0_uniform
         ≤ (∑ _idx : Fin r → Fin n,
             ∑ _jdx : Fin s → Fin n, K_max * BigSum) := h_le
       _ = cardIJ * (K_max * BigSum) := h_const_sum
-  -- Final composition.
   calc riemannianFiberNormSq (I := I) (M := M) g r s b
         (rawTensorConnLap (I := I) g r s (fun z : M => T₀.toSection z) b)
       ≤ C_H *
@@ -339,8 +312,6 @@ end Integral
 end DifferentialGeometry
 
 end
-
-/-! ## Sanity check: axioms used by the headline. -/
 
 open DifferentialGeometry.Integral.Connection in
 #print axioms rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_T0_uniform

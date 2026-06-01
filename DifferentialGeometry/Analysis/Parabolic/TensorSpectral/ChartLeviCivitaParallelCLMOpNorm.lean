@@ -55,18 +55,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Factored op-norm bound for a general vector argument
-
-The chart Levi-Civita parallel CLM at `b` along the section `X` is
-`(trivFromE α b).comp (christoffelCorrection g α b (trivToE α b (X b)))`.
-Its operator norm is therefore bounded by
-
-  `‖trivFromE α b‖ * ‖christoffelCorrection g α b (trivToE α b (X b))‖`,
-
-and the Christoffel-correction op-norm is bounded by `C_χ * ‖trivToE α b (X b)‖`.
-Both `‖trivFromE α b‖` and `‖trivToE α b (X b)‖ ≤ ‖trivToE α b‖ * ‖X b‖` admit
-uniform bounds on the POU tsupport. -/
-
 private lemma chartLeviCivitaParallelCLM_general_opNorm_le_factors
     (g : SmoothRiemannianMetric I M) (α b : M)
     (X : Π b' : M, TangentSpace I b')
@@ -78,9 +66,7 @@ private lemma chartLeviCivitaParallelCLM_general_opNorm_le_factors
     ‖chartLeviCivitaParallelCLM (I := I) g α b X‖ ≤
       C_Jinv * C_χ * C_J * ‖X b‖ := by
   classical
-  -- Step 1: unfold the definition.
   unfold chartLeviCivitaParallelCLM
-  -- Step 2: bound the composition by the product of op-norms.
   set Y : E := trivToE (I := I) α b (X b) with hY_def
   have h_comp_le :
       ‖(trivFromE (I := I) α b).comp
@@ -88,13 +74,11 @@ private lemma chartLeviCivitaParallelCLM_general_opNorm_le_factors
         ‖trivFromE (I := I) α b‖ *
           ‖christoffelCorrection (I := I) g α b Y‖ :=
     ContinuousLinearMap.opNorm_comp_le _ _
-  -- Step 3: identify ‖trivFromE α b‖ = ‖chartJinv α b‖, ≤ C_Jinv.
   have h_trivFromE_norm :
       ‖trivFromE (I := I) α b‖ = ‖chartJinv (I := I) (M := M) α b‖ := rfl
   have h_trivFromE_le : ‖trivFromE (I := I) α b‖ ≤ C_Jinv := by
     rw [h_trivFromE_norm]; exact hCJinv
   have h_trivFromE_nn : 0 ≤ ‖trivFromE (I := I) α b‖ := norm_nonneg _
-  -- Step 4: bound ‖Y‖ = ‖trivToE α b (X b)‖ ≤ ‖trivToE α b‖ * ‖X b‖ ≤ C_J * ‖X b‖.
   have h_Y_le_triv :
       ‖Y‖ ≤ ‖trivToE (I := I) α b‖ * ‖X b‖ := by
     rw [hY_def]
@@ -105,12 +89,10 @@ private lemma chartLeviCivitaParallelCLM_general_opNorm_le_factors
     refine h_Y_le_triv.trans ?_
     rw [h_triv_J]
     exact mul_le_mul_of_nonneg_right hCJ h_Xb_nn
-  -- Step 5: bound the Christoffel correction at Y.
   have h_χ_Y : ‖christoffelCorrection (I := I) g α b Y‖ ≤ C_χ * ‖Y‖ := hCχ Y
   have h_Y_nn : 0 ≤ ‖Y‖ := norm_nonneg _
   have h_χ_le : ‖christoffelCorrection (I := I) g α b Y‖ ≤ C_χ * (C_J * ‖X b‖) :=
     h_χ_Y.trans (mul_le_mul_of_nonneg_left h_Y_le hCχ_nn)
-  -- Step 6: combine.
   have h_χ_nn : 0 ≤ ‖christoffelCorrection (I := I) g α b Y‖ := norm_nonneg _
   have h_step1 :
       ‖trivFromE (I := I) α b‖ *

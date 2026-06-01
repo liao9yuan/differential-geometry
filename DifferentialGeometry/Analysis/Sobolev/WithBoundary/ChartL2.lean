@@ -55,8 +55,6 @@ variable {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanHalfSpace n) M]
   [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M]
 
-/-! ## The squared `L²`-Sobolev chart norm and the `L²`-Sobolev norm -/
-
 /-- The squared `L²`-convention chart-based Sobolev norm, as a `tsum`
 over charts of squared per-chart half-space `L²`-Sobolev norms. -/
 def wkpNormChartL2Sq [T2Space M] [SigmaCompactSpace M]
@@ -101,8 +99,6 @@ theorem wkpNormChartL2Sq_eq_tsum
               (modelWithCornersEuclideanHalfSpace n) M) α u)
           (chartTargetEuclid (n := n) (M := M) α) := rfl
 
-/-! ## Helper: rpow ↔ sqrt translation -/
-
 /-- `wkpNormChartL2 g k u = ENNReal.ofReal √((wkpNormChartL2Sq g k u).toReal)`
 when the squared norm is finite. -/
 private theorem wkpNormChartL2_eq_ofReal_sqrt_toReal
@@ -127,8 +123,6 @@ private theorem wkpNormChartL2_eq_ofReal_sqrt_toReal
   rw [show (wkpNormChartL2Sq (n := n) (M := M) g k u).toReal ^ ((1 : ℝ) / 2) =
       Real.sqrt (wkpNormChartL2Sq (n := n) (M := M) g k u).toReal by
     rw [Real.sqrt_eq_rpow]]
-
-/-! ## Basic structural lemmas -/
 
 /-- The squared `L²`-Sobolev chart-based norm of the zero function is zero. -/
 theorem wkpNormChartL2Sq_zero_fun
@@ -164,8 +158,6 @@ theorem wkpNormChartL2_zero_fun
   rw [wkpNormChartL2Sq_zero_fun (n := n) (M := M) g]
   exact ENNReal.zero_rpow_of_pos (by norm_num : (0 : ℝ) < 1 / 2)
 
-/-! ## Finiteness for `MemWkpChart g k 2 u` on compact `M` -/
-
 /-- The squared `L²`-chart norm is finite for any function in
 `MemWkpChart g k 2`, when `M` is compact. -/
 theorem wkpNormChartL2Sq_lt_top_of_memWkpChart
@@ -177,7 +169,6 @@ theorem wkpNormChartL2Sq_lt_top_of_memWkpChart
     wkpNormChartL2Sq (n := n) (M := M) g k u < ⊤ := by
   classical
   unfold wkpNormChartL2Sq
-  -- Locally finite POU: only finitely many α : M have nonempty supp(ρ_α).
   set f : M → ℝ≥0∞ := fun α =>
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormL2SqHalfSpace
       (d := n) k
@@ -278,8 +269,6 @@ theorem wkpNormChartL2_lt_top_of_memWkpChart
   exact ENNReal.rpow_lt_top_of_nonneg (by norm_num : (0 : ℝ) ≤ 1 / 2)
     (wkpNormChartL2Sq_lt_top_of_memWkpChart (n := n) (M := M) g hu).ne
 
-/-! ## ae-invariance of the chart-based `L²`-Sobolev norm -/
-
 /-- The squared `L²`-chart norm is invariant under `ChartPushedAEEq`. -/
 theorem wkpNormChartL2Sq_congr_chartPushed_ae
     [T2Space M] [SigmaCompactSpace M]
@@ -307,8 +296,6 @@ theorem wkpNormChartL2_congr_chartPushed_ae
       wkpNormChartL2 (n := n) (M := M) g k v := by
   unfold wkpNormChartL2
   rw [wkpNormChartL2Sq_congr_chartPushed_ae (n := n) (M := M) g huv]
-
-/-! ## Scalar multiplication on the chart-based `L²`-Sobolev norm -/
 
 /-- Scalar-multiplication identity for the squared `L²`-chart norm. -/
 theorem wkpNormChartL2Sq_const_smul
@@ -346,11 +333,6 @@ theorem wkpNormChartL2_const_smul
   rw [← ENNReal.rpow_mul]
   norm_num
 
-/-! ## Triangle inequality on the chart-based `L²`-Sobolev norm
-
-Same strategy as the boundaryless case: the per-chart triangle inequality
-plus a finite Minkowski step over the active POU set (compact `M`). -/
-
 /-- Auxiliary: pointwise per-chart triangle for the squared `L²`-norm
 composes to the squared global. -/
 private theorem wkpNormChartL2_add_le_aux
@@ -365,7 +347,6 @@ private theorem wkpNormChartL2_add_le_aux
       wkpNormChartL2 (n := n) (M := M) g k u +
         wkpNormChartL2 (n := n) (M := M) g k v := by
   classical
-  -- Per-α: half-space `L²` triangle.
   have h_per_α : ∀ α : M,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormL2HalfSpace
         (d := n) k
@@ -391,7 +372,6 @@ private theorem wkpNormChartL2_add_le_aux
     exact DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormL2HalfSpace_add_le
       (d := n) (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α)
       (hu α) (hv α)
-  -- Set up real-valued versions over the finite chart-support set.
   set S : Set M := {α : M | (Function.support
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU
         (modelWithCornersEuclideanHalfSpace n) M α : M → ℝ)).Nonempty}
@@ -425,7 +405,6 @@ private theorem wkpNormChartL2_add_le_aux
           (modelWithCornersEuclideanHalfSpace n) M) α
         (fun x => u x + v x))
       (chartTargetEuclid (n := n) (M := M) α) with hfUV_def
-  -- Finiteness for u, v.
   have h_finiteness_fU : ∀ α : M, fU α < (⊤ : ℝ≥0∞) := by
     intro α
     rw [hfU_def]
@@ -443,7 +422,6 @@ private theorem wkpNormChartL2_add_le_aux
       ENNReal.add_ne_top.mpr ⟨(h_finiteness_fU α).ne, (h_finiteness_fV α).ne⟩
     change fUV α < (⊤ : ℝ≥0∞)
     exact lt_of_le_of_lt this (lt_of_le_of_ne le_top h_rhs_ne)
-  -- Real-valued projections.
   let fUR : M → ℝ := fun α => (fU α).toReal
   let fVR : M → ℝ := fun α => (fV α).toReal
   let fUVR : M → ℝ := fun α => (fUV α).toReal
@@ -458,7 +436,6 @@ private theorem wkpNormChartL2_add_le_aux
     have h_lhs_le := ENNReal.toReal_mono h_rhs_ne h_lhs
     rw [ENNReal.toReal_add (h_finiteness_fU α).ne (h_finiteness_fV α).ne] at h_lhs_le
     exact h_lhs_le
-  -- Outside S, all of fU, fV, fUV are zero (chartPushed is identically zero).
   have h_zero_outside_U : ∀ α : M, α ∉ S → fU α = 0 := by
     intro α hα
     have hempty : (Function.support
@@ -552,7 +529,6 @@ private theorem wkpNormChartL2_add_le_aux
     rw [hChartPushed_zero]
     exact DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormL2HalfSpace_zero_fun_zero
       (d := n) (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α)
-  -- Each tsum reduces to a finite sum over hS_finite.toFinset.
   have htsum_eq_USq : ∑' α : M, (fU α) ^ (2 : ℕ) =
       ∑ α ∈ hS_finite.toFinset, (fU α) ^ (2 : ℕ) := by
     apply tsum_eq_sum
@@ -574,7 +550,6 @@ private theorem wkpNormChartL2_add_le_aux
     have hαS : α ∉ S := fun hαS => hα ((Set.Finite.mem_toFinset _).mpr hαS)
     rw [h_zero_outside_UV α hαS]
     simp
-  -- Express wkpNormChartL2Sq in terms of (fU α)^2 over the finite set.
   have h_chartL2Sq_U : wkpNormChartL2Sq (n := n) (M := M) g k u =
       ∑ α ∈ hS_finite.toFinset, (fU α) ^ (2 : ℕ) := by
     unfold wkpNormChartL2Sq
@@ -621,7 +596,6 @@ private theorem wkpNormChartL2_add_le_aux
         rw [hfUV_def,
           DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormL2HalfSpace_sq_eq_wkpNormL2SqHalfSpace])]
     exact htsum_eq_UVSq
-  -- Real-valued forms.
   have h_chartL2Sq_U_finite :
       wkpNormChartL2Sq (n := n) (M := M) g k u ≠ (⊤ : ℝ≥0∞) := by
     rw [h_chartL2Sq_U]
@@ -637,7 +611,6 @@ private theorem wkpNormChartL2_add_le_aux
     rw [h_chartL2Sq_UV]
     exact (ENNReal.sum_lt_top.mpr fun α _ =>
       ENNReal.pow_lt_top (h_finiteness_fUV α)).ne
-  -- toReal of squared norms.
   have h_chartL2Sq_U_toReal :
       (wkpNormChartL2Sq (n := n) (M := M) g k u).toReal =
         ∑ α ∈ hS_finite.toFinset, fUR α ^ 2 := by
@@ -662,7 +635,6 @@ private theorem wkpNormChartL2_add_le_aux
     refine Finset.sum_congr rfl ?_
     intro α _
     rw [ENNReal.toReal_pow]
-  -- Real Minkowski on the finite set hS_finite.toFinset.
   have h_real_triangle :
       Real.sqrt (∑ α ∈ hS_finite.toFinset, fUVR α ^ 2) ≤
         Real.sqrt (∑ α ∈ hS_finite.toFinset, fUR α ^ 2) +
@@ -738,7 +710,6 @@ private theorem wkpNormChartL2_add_le_aux
       rw [← h_norm_FRpGR, ← h_norm_FR, ← h_norm_GR]
       exact h_lp_triangle
     linarith
-  -- ENNReal translation of the triangle inequality.
   rw [wkpNormChartL2_eq_ofReal_sqrt_toReal h_chartL2Sq_UV_finite]
   rw [wkpNormChartL2_eq_ofReal_sqrt_toReal h_chartL2Sq_U_finite]
   rw [wkpNormChartL2_eq_ofReal_sqrt_toReal h_chartL2Sq_V_finite]
@@ -760,8 +731,6 @@ theorem wkpNormChartL2_add_le
       wkpNormChartL2 (n := n) (M := M) g k u +
         wkpNormChartL2 (n := n) (M := M) g k v :=
   wkpNormChartL2_add_le_aux (n := n) (M := M) g hu hv
-
-/-! ## The chart-based `L²`-Sobolev inner product -/
 
 /-- The chart-based `L²`-Sobolev inner product, defined as the `tsum` of
 the per-chart half-space `L²`-Sobolev inner products. -/
@@ -826,8 +795,6 @@ theorem wkpInnerChartL2_self_nonneg
   exact tsum_nonneg fun α =>
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpInnerL2HalfSpace_self_nonneg
       (d := n) k _ _
-
-/-! ## The `L²`-Sobolev `WkpChartL2` subtype -/
 
 /-- The `L²`-convention chart-based Sobolev space, as a subtype of
 `M → ℝ`, implemented as the underlying subtype of
@@ -910,8 +877,6 @@ lemma wkpChartL2Fun_zero
     {k : ℕ} :
     wkpChartL2Fun (0 : WkpChartL2 (n := n) (M := M) g k) = (fun _ => 0) := rfl
 
-/-! ## Norm and seminormed structure on `WkpChartL2` -/
-
 /-- `Norm` instance on `WkpChartL2 g k`, using the `L²`-convention chart
 norm. -/
 instance instNormWkpChartL2
@@ -991,8 +956,6 @@ instance instNormedSpaceRealWkpChartL2
     rw [wkpNormChartL2_const_smul (n := n) (M := M) g c hu_mem]
     rw [ENNReal.toReal_mul, toReal_enorm]
 
-/-! ## Quotient via `SeparationQuotient` -/
-
 /-- The `SeparationQuotient` of `WkpChartL2 g k` is a `NormedAddCommGroup`. -/
 def WkpChartL2Quot
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
@@ -1037,8 +1000,6 @@ instance instNormedSpaceRealWkpChartL2Quot
   inferInstanceAs (NormedSpace ℝ
     (SeparationQuotient (WkpChartL2 (n := n) (M := M) g k)))
 
-/-! ## Inner product structure on `WkpChartL2` -/
-
 /-- The `Inner ℝ` instance on `WkpChartL2 g k`. -/
 instance instInnerWkpChartL2
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
@@ -1058,8 +1019,6 @@ lemma inner_wkpChartL2_def
     (u v : WkpChartL2 (n := n) (M := M) g k) :
     @inner ℝ _ _ u v =
       wkpInnerChartL2 (n := n) (M := M) g k (wkpChartL2Fun u) (wkpChartL2Fun v) := rfl
-
-/-! ### Auxiliary: per-chart support reduction via the locally-finite POU -/
 
 /-- The set of "active" chart points: those for which the partition-of-unity
 weight has nonempty support. This is finite when `M` is compact. -/
@@ -1127,7 +1086,6 @@ private theorem wkpInnerChartL2_eq_finsum
   have hα_off : α ∉ activeChartSupp (n := n) (M := M) := fun hαS =>
     hα ((Set.Finite.mem_toFinset _).mpr hαS)
   rw [chartPushed_eq_zero_off_activeChartSupp (n := n) (M := M) α hα_off u]
-  -- wkpInnerL2HalfSpace of zero function with anything is zero.
   unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpInnerL2HalfSpace
   unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpInnerL2
   refine Finset.sum_eq_zero ?_
@@ -1239,7 +1197,6 @@ private theorem wkpChartL2_norm_sq_eq_inner
       (wkpChartL2Fun u) (wkpChartL2Fun u) := by
   classical
   have hu_mem := wkpChartL2Fun_memWkpChart u
-  -- (wkpNormChartL2 _).toReal² = (wkpNormChartL2Sq _).toReal.
   have h_chartL2_sq :
       (wkpNormChartL2 (n := n) (M := M) g k (wkpChartL2Fun u)) ^ (2 : ℕ) =
         wkpNormChartL2Sq (n := n) (M := M) g k (wkpChartL2Fun u) := by
@@ -1265,8 +1222,6 @@ private theorem wkpChartL2_norm_sq_eq_inner
   intro α _
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormL2SqHalfSpace_toReal_eq_wkpInnerL2HalfSpace_self
     (d := n) (hu_mem α)
-
-/-! ### Linearity and symmetry of the inner product (compact `M`) -/
 
 /-- Inner product is symmetric. -/
 private theorem wkpInnerChartL2_apply_comm
@@ -1337,17 +1292,14 @@ instance instInnerProductSpaceRealWkpChartL2
     (k : ℕ) :
     InnerProductSpace ℝ (WkpChartL2 (n := n) (M := M) g k) where
   norm_sq_eq_re_inner u := by
-    -- Over ℝ, `RCLike.re = id`, so `re ⟨u, u⟩ = ⟨u, u⟩`.
     change ‖u‖ ^ 2 =
       wkpInnerChartL2 (n := n) (M := M) g k (wkpChartL2Fun u) (wkpChartL2Fun u)
     exact wkpChartL2_norm_sq_eq_inner (n := n) (M := M) g k u
   conj_inner_symm u v := by
-    -- Over ℝ, `conj = id`.
     change (@inner ℝ _ _ v u) = (@inner ℝ _ _ u v)
     exact wkpInnerChartL2_apply_comm (n := n) (M := M) g k u v
   add_left u v w := wkpInnerChartL2_apply_add_left (n := n) (M := M) g k u v w
   smul_left u v r := by
-    -- Over ℝ, `conj r = r`.
     change @inner ℝ _ _ (r • u) v = r * @inner ℝ _ _ u v
     exact wkpInnerChartL2_apply_smul_left (n := n) (M := M) g k u v r
 

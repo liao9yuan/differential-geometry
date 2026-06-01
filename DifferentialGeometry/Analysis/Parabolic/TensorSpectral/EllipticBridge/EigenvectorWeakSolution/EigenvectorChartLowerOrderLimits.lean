@@ -99,28 +99,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## The compact partition-of-unity kernel of the chart
-
-Every Euclidean chart component of a smooth section is the chart push-forward of
-the partition-of-unity-weighted chart-frame scalar `tensorChartComponentScalar`,
-whose closed support sits inside the closed support of the chart-atlas
-partition-of-unity weight. The Euclidean image of that closed support is a
-single compact set — the `kernel` of the chart — inside which **every** chart
-component (and hence its chart-Euclidean partial) of **every** smooth section is
-supported. -/
 
 /-- The compact partition-of-unity kernel of the chart at `α`, transferred to
 the Euclidean model space: the `toEuclidean`-image of the chart image of the
@@ -163,20 +147,11 @@ private lemma notMem_pouTsupport_of_notMem_chartPouKernel
   intro hb
   apply hker
   refine ⟨(toEuclidean (E := E)).symm y, ⟨_, hb, ?_⟩, ?_⟩
-  · -- `extChartAt I α` recovers `toEuclidean.symm y` from its chart preimage.
-    have hmem : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target :=
+  · have hmem : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target :=
       DifferentialGeometry.Analysis.Laplacian.MetricExtension.toEuclidean_symm_mem_target
         (I := I) (M := M) hy
     exact (extChartAt I α).right_inv hmem
   · exact toEuclidean.apply_symm_apply y
-
-/-! ## Vanishing of the chart component off the partition-of-unity kernel
-
-The Euclidean chart component `tensorChartComponent g r s S α Idx Jdx` of a
-smooth section is the chart push-forward of `tensorChartComponentScalar`, the
-chart-atlas partition-of-unity weight times the raw chart-frame component. It
-therefore vanishes off the chart target and, on the chart target, off the
-partition-of-unity kernel. -/
 
 /-- The Euclidean chart component vanishes outside the partition-of-unity
 kernel. -/
@@ -189,9 +164,7 @@ lemma tensorChartComponent_eq_zero_off_chartPouKernel
     tensorChartComponent (I := I) (M := M) g r s S α Idx Jdx y = 0 := by
   classical
   by_cases htar : y ∈ chartTargetEuclid (I := I) (M := M) α
-  · -- On the chart target the component is the pushed scalar; the scalar
-    -- vanishes off the closed support of the partition-of-unity weight.
-    rw [tensorChartComponent_def,
+  · rw [tensorChartComponent_def,
       chartPushedRaw_apply_of_mem (I := I) (M := M) α
         (tensorChartComponentPou (I := I) (M := M) g r s S α Idx Jdx) htar]
     have hb := notMem_pouTsupport_of_notMem_chartPouKernel
@@ -207,8 +180,7 @@ lemma tensorChartComponent_eq_zero_off_chartPouKernel
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) = 0
     unfold tensorChartComponentPou
     rw [hρ, zero_mul]
-  · -- Off the chart target the push-forward is zero outright.
-    rw [tensorChartComponent_def,
+  · rw [tensorChartComponent_def,
       chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ htar]
 
 /-- The chart-Euclidean partial of the Euclidean chart component vanishes
@@ -223,8 +195,6 @@ lemma euclidPartial_tensorChartComponent_eq_zero_off_chartPouKernel
     euclidPartial (E := E) k
         (tensorChartComponent (I := I) (M := M) g r s S α Idx Jdx) y = 0 := by
   classical
-  -- The chart component is supported in the compact kernel, hence vanishes on
-  -- an open neighbourhood of `y`; so does its Fréchet derivative.
   have hsupp : Function.support
       (tensorChartComponent (I := I) (M := M) g r s S α Idx Jdx) ⊆
       chartPouKernel (I := I) (M := M) α := by
@@ -249,14 +219,6 @@ lemma euclidPartial_tensorChartComponent_eq_zero_off_chartPouKernel
     exact image_eq_zero_of_notMem_tsupport hz
   rw [euclidPartial_def, hevt.fderiv_eq]
   simp
-
-/-! ## Boundedness of a `C^∞` factor on the partition-of-unity kernel
-
-Every `T`-independent factor occurring in a lower-order coefficient is `C^∞` on
-the open Euclidean chart target, hence continuous there. Its restriction to the
-compact partition-of-unity kernel is therefore bounded. The indicator of the
-kernel times the factor is consequently a globally bounded measurable
-function. -/
 
 /-- A `C^∞`-on-the-chart-target function is bounded on the compact
 partition-of-unity kernel: there is a non-negative constant `C` with
@@ -295,13 +257,6 @@ lemma aestronglyMeasurable_indicator_mul
       (chartPouKernel_measurableSet (I := I) (M := M) α)
   exact (aestronglyMeasurable_indicator_iff
     (chartPouKernel_measurableSet (I := I) (M := M) α)).mpr hmeas
-
-/-! ## Multiplication by a bounded measurable factor preserves `L²`-convergence
-
-For a globally bounded `AEStronglyMeasurable` function `c`, multiplication by
-`c` sends an `L²`-function to an `L²`-function, with `L²` norm controlled by the
-sup bound. Consequently, if a sequence of `L²` classes converges, so does the
-sequence of products by `c`. -/
 
 /-- The product of a bounded `AEStronglyMeasurable` function with an `L²`
 function is `L²`, with the `L²` norm of the product controlled by the bound. -/
@@ -370,14 +325,10 @@ lemma tendsto_bdd_mul
       (𝓝 ((memLp_bdd_mul (I := I) (M := M) α hC hc_bd hc_meas
         (Lp.memLp Flim)).toLp (fun y => c y * (Flim : EuclN → ℝ) y))) := by
   classical
-  -- Convergence in distance: the distance of the products is bounded by `C`
-  -- times the distance of `Fₙ` and `Flim`, which tends to `0`.
   refine Metric.tendsto_atTop.mpr (fun ε hε => ?_)
-  -- The distance of the `Fₙ` to `Flim` is eventually `< ε / (C + 1)`.
   have hCpos : (0 : ℝ) < C + 1 := by positivity
   obtain ⟨N, hN⟩ := Metric.tendsto_atTop.mp hF (ε / (C + 1)) (by positivity)
   refine ⟨N, fun n hn => ?_⟩
-  -- Compute the distance of the two `L²` products.
   have hdist_eq :
       dist
         ((memLp_bdd_mul (I := I) (M := M) α hC hc_bd hc_meas
@@ -396,16 +347,13 @@ lemma tendsto_bdd_mul
         (Lp.memLp Flim))] with y hy₁ hy₂
     rw [Pi.sub_apply, hy₁, hy₂]
   rw [hdist_eq]
-  -- The product difference is `c` times the difference of representatives.
   have hsub_eq :
       (fun y => c y * (F n : EuclN → ℝ) y - c y * (Flim : EuclN → ℝ) y) =
         (fun y => c y * ((F n : EuclN → ℝ) y - (Flim : EuclN → ℝ) y)) := by
     funext y; ring
   rw [hsub_eq]
-  -- Bound the `L²` norm of the product difference.
   have hle := eLpNorm_bdd_mul_le (I := I) (M := M) α hC hc_bd
     (fun y => (F n : EuclN → ℝ) y - (Flim : EuclN → ℝ) y)
-  -- The `eLpNorm` of the representative difference is the `Lp` distance.
   have hsub_ae :
       (fun y => (F n : EuclN → ℝ) y - (Flim : EuclN → ℝ) y)
         =ᵐ[chartL2Measure (I := I) (M := M) α]
@@ -424,7 +372,6 @@ lemma tendsto_bdd_mul
       ENNReal.ofReal_toReal ((eLpNorm_congr_ae hsub_ae) ▸ hfin)]
     exact (eLpNorm_congr_ae hsub_ae).symm
   rw [hdist_F] at hle
-  -- Pass to real numbers and finish.
   have hfin : (ENNReal.ofReal C * ENNReal.ofReal (dist (F n) Flim)) ≠ ⊤ :=
     (ENNReal.mul_lt_top ENNReal.ofReal_lt_top ENNReal.ofReal_lt_top).ne
   have hreal :
@@ -436,7 +383,6 @@ lemma tendsto_bdd_mul
     rw [ENNReal.toReal_mul, ENNReal.toReal_ofReal hC,
       ENNReal.toReal_ofReal dist_nonneg]
   refine lt_of_le_of_lt hreal ?_
-  -- `C · dist < ε`.
   have hd : dist (F n) Flim < ε / (C + 1) := hN n hn
   calc C * dist (F n) Flim
       ≤ (C + 1) * dist (F n) Flim :=
@@ -444,12 +390,6 @@ lemma tendsto_bdd_mul
     _ < (C + 1) * (ε / (C + 1)) :=
         mul_lt_mul_of_pos_left hd hCpos
     _ = ε := by field_simp
-
-/-! ## Almost-everywhere identification of the chart-partial atom
-
-For a smooth section the chosen weak `k`-th chart partial of the Euclidean chart
-component agrees, on the chart `L²` measure, with the classical chart-Euclidean
-partial `euclidPartial k`. -/
 
 /-- The Euclidean chart component is globally `C^∞`: a restatement of
 `tensorChartComponent_contMDiff` via the model-space `ContMDiff ↔ ContDiff`
@@ -526,14 +466,6 @@ lemma chosenWeakPartial'_tensorChartComponent_ae_eq
   rw [chartL2Measure]
   refine h_ae.trans (Filter.EventuallyEq.of_eq ?_)
   funext y; rw [euclidPartial_def]
-
-/-! ## The finite-sum `L²`-convergence assembly
-
-Each lower-order coefficient is a finite sum of `(C^∞ factor) · (atom)` products.
-The next lemmas assemble a finite sum of `L²`-convergent sequences into a single
-`L²`-convergent sequence: the `L²` class of a function equal almost everywhere
-to a finite sum of `L²` functions is the finite sum of their `L²` classes, and a
-finite sum of `L²`-convergent sequences converges. -/
 
 /-- The function underlying a finite sum of `L²` classes agrees almost
 everywhere with the finite sum of the underlying functions. -/
@@ -614,7 +546,6 @@ lemma tendsto_toLp_finsetSum
     Filter.Tendsto (fun n => (hFn n).toLp (Fn n)) atTop
       (𝓝 (hFlim.toLp Flim)) := by
   classical
-  -- Rewrite each `L²` class as a finite sum of summand `L²` classes.
   have h_n : ∀ n : ℕ,
       (hFn n).toLp (Fn n) =
         ∑ a ∈ s, (hf a n).toLp (f a n) :=
@@ -626,12 +557,6 @@ lemma tendsto_toLp_finsetSum
   rw [show (fun n => (hFn n).toLp (Fn n)) =
       (fun n => ∑ a ∈ s, (hf a n).toLp (f a n)) from funext h_n, h_lim]
   exact tendsto_finset_sum s (fun a _ => h_tendsto a)
-
-/-! ## `L²`-membership of the coefficient summands
-
-The two `T`-dependent atoms are `L²`, and a `C^∞`-on-the-chart-target factor
-times either atom is `L²` because each atom is supported in the compact
-partition-of-unity kernel, off which the indicator-cut factor is bounded. -/
 
 /-- A `C^∞`-on-the-chart-target factor, indicator-cut to the partition-of-unity
 kernel, times an arbitrary `L²` limit class, is `L²`. -/
@@ -653,13 +578,6 @@ lemma memLp_indicatorFactor_mul_lp
   exact memLp_bdd_mul (I := I) (M := M) α hC_nn hci_bd
     (aestronglyMeasurable_indicator_mul (I := I) (M := M) α hc) (Lp.memLp G)
 
-/-! ## The tracing identity for the partition-of-unity-weighted approximant
-
-The chart push-forward of the raw chart component of the partition-of-unity-
-weighted approximant `Tₙ := pouSmul g r s α wₙ.toCcTensor` is the canonical
-Euclidean chart component of `wₙ.toCcTensor`: this is the tracing identity
-through which every lower-order coefficient at `Tₙ` reduces to the two atoms. -/
-
 /-- The chart push-forward of the raw chart component of the partition-of-unity-
 weighted section equals the canonical Euclidean chart component. -/
 private lemma chartPushedRaw_tensorChartComponentRaw_pouSmul_eq
@@ -673,15 +591,6 @@ private lemma chartPushedRaw_tensorChartComponentRaw_pouSmul_eq
       tensorChartComponent (I := I) (M := M) g r s S α Idx Jdx := by
   rw [tensorChartComponentRaw_pouSmul_eq_tensorChartComponentPou
     (I := I) (M := M) g r s α S Idx Jdx, tensorChartComponent_def]
-
-/-! ## The `n → ∞` `L²`-limit of the principal rotation coefficient
-
-The principal rotation coefficient `covPrincipalRotationCoeff g r s Tₙ α P₀`
-depends on `Tₙ` only through the chart-Euclidean partial of the raw chart
-component's push-forward, which by the tracing identity is the chart-Euclidean
-partial of the canonical chart component of `wₙ.toCcTensor`. It is therefore a
-finite `C^∞`-coefficient-weighted sum of the chart-partial atom, whose `L²`
-limit is `partialLpLimit`. -/
 
 /-- The `T`-independent `C^∞` factor of the `(P, Q, k, l)`-summand of the
 principal rotation coefficient: the chart-frame tensor-metric Gram, the
@@ -711,15 +620,6 @@ lemma principalRotationFactor_contDiffOn
     (euclidPartial_contDiffOn_target (I := I) (M := M) α l
       (gramInvEntry_contDiffOn (I := I) (M := M) g r s α Q P₀))
 
-/-! ## The zeroth-order Christoffel-correction tracing identity
-
-The zeroth-order Christoffel correction `covDerivLowerOrderTerm` of the
-partition-of-unity-weighted approximant `Tₙ := pouSmul g r s α wₙ.toCcTensor`
-collapses, on the chart target, to a finite `C^∞`-coefficient-weighted sum of the
-canonical Euclidean chart components of `wₙ.toCcTensor`: the raw chart component
-of `Tₙ` is the partition-of-unity-weighted chart component, whose value at the
-chart preimage is the Euclidean chart component. -/
-
 /-- On the Euclidean chart target, the zeroth-order Christoffel correction of the
 partition-of-unity-weighted approximant is the finite linear combination, over
 component multi-index pairs, of the lower-order correction coefficient times the
@@ -745,15 +645,6 @@ private lemma covDerivLowerOrderTerm_pouSmul_eqOn
     tensorChartComponent_def,
     chartPushedRaw_apply_of_mem (I := I) (M := M) α
       (tensorChartComponentPou (I := I) (M := M) g r s S α p.1 p.2) hy]
-
-/-! ## The `n → ∞` `L²`-limit of the chart-density-weighted lower-order gradient
-coefficient
-
-The chart-density-weighted lower-order gradient coefficient `weightedGradCoeff g
-r s Tₙ α P₀ l` is zeroth-order in `Tₙ`: by the Christoffel-correction tracing
-identity it is, on the chart target, a finite `C^∞`-coefficient-weighted sum of
-the bare chart-component atom of `wₙ.toCcTensor`, whose `L²` limit is
-`componentLpLimit`. -/
 
 /-- The `T`-independent `C^∞` factor of the `(P, Q, k, p)`-summand of the
 chart-density-weighted lower-order gradient coefficient. -/
@@ -808,8 +699,6 @@ private lemma weightedGradCoeff_pouSmul_eqOn_section
                 tensorChartComponent (I := I) (M := M) g r s
                   S α p.1 p.2 y := by
   classical
-  -- Expand the coefficient and the Christoffel correction at the chart-target
-  -- point, then match the four-fold sum termwise.
   simp only [weightedGradCoeff, covLowerOrderRotationGradCoeff_def]
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl (fun P _ => ?_)
@@ -823,17 +712,6 @@ private lemma weightedGradCoeff_pouSmul_eqOn_section
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [weightedGradFactor]
   ring
-
-/-! ## A nested finite-sum `L²`-convergence step
-
-The lower-order rotation value coefficient and the chart-Euclidean divergence of
-the chart-density-weighted gradient coefficient are heterogeneously indexed
-finite sums: the first-order chart-partial atom and the zeroth-order component
-atom appear in distinct summand groups, the second carrying an extra component
-multi-index sum. To assemble such a sum *without* over-flattening the product
-structure of the component multi-index type, we use a single-`Finset`
-convergence step that descends one nesting level at a time. Iterating it builds
-the full nested `L²`-limit. -/
 
 /-- **One nesting level of finite-sum `L²`-convergence.** If, for every index `a`
 in a finite type, the `L²` classes `(hf a n).toLp (f a n)` converge to
@@ -863,13 +741,6 @@ lemma tendsto_sumToLp
       Finset.univ (fun a _ => hflim a))
     (fun _ => Filter.EventuallyEq.rfl) Filter.EventuallyEq.rfl
 
-/-! ## The chart-Euclidean partial of a finite sum
-
-The chart-Euclidean partial derivative `euclidPartial l` is the Fréchet
-derivative paired with a fixed basis vector; the Fréchet-derivative sum rule
-`fderiv_fun_sum` therefore distributes it across a finite sum of functions, each
-differentiable at the evaluation point. -/
-
 /-- **The chart-Euclidean partial distributes across a finite sum.** For a
 finite family of functions all differentiable at `y`, the `l`-th chart-Euclidean
 partial of the sum is the sum of the chart-Euclidean partials. -/
@@ -882,13 +753,6 @@ lemma euclidPartial_finsetSum
   classical
   rw [euclidPartial_def, fderiv_fun_sum hf, ContinuousLinearMap.sum_apply]
   exact Finset.sum_congr rfl (fun a _ => by rw [euclidPartial_def])
-
-/-! ## Four- and five-fold nested finite-sum `L²`-convergence
-
-Iterating the single-level step `tendsto_sumToLp` over four and five nested
-finite types assembles the `L²`-limit of a four- or five-fold nested finite sum.
-The conclusion's `L²` classes are the correspondingly nested `memLp_finset_sum`
-constructions, matching the per-`n` and limiting coefficient decompositions. -/
 
 /-- **Four-fold nested finite-sum `L²`-convergence.** Per-`(a, b, c, d)`-leaf
 `L²`-convergence assembles into the `L²`-convergence of the four-fold nested
@@ -995,14 +859,6 @@ private lemma tendsto_sum5
       (fun b c d e => hflim a b c d e)
       (fun b c d e => h_tendsto a b c d e))
 
-/-! ## Differentiability of the two atoms and the `C^∞` factors
-
-The two `T`-dependent atoms — the bare Euclidean chart component and its
-chart-Euclidean partial — are globally `C^∞` (the chart component) and
-`C^∞`-on-the-chart-target (its partial); a `C^∞`-on-the-open-chart-target
-function is differentiable at every chart-target point. These local
-differentiability facts feed the Leibniz / sum rules below. -/
-
 /-- A function `C^∞` on the open Euclidean chart target is differentiable at
 every point of the chart target. -/
 lemma differentiableAt_of_contDiffOn_chartTarget
@@ -1026,19 +882,6 @@ lemma differentiableAt_tensorChartComponent
       (tensorChartComponent (I := I) (M := M) g r s S α Idx Jdx) y :=
   ((tensorChartComponent_contDiff' (I := I) (M := M) g r s S α Idx Jdx).differentiable
     (by simp)).differentiableAt
-
-/-! ## The `n → ∞` `L²`-limit of the chart-Euclidean divergence of the
-chart-density-weighted lower-order gradient coefficient
-
-The chart-density-weighted lower-order gradient coefficient `weightedGradCoeff g
-r s Tₙ α P₀ l` is, on the chart target, a finite `C^∞`-coefficient-weighted sum
-of the bare chart-component atom. Its `l`-th chart-Euclidean partial
-`euclidPartial l (weightedGradCoeff g r s Tₙ α P₀ l)` is therefore — by the
-chart-Euclidean sum rule and the Leibniz rule — a finite sum of two summand
-groups: the chart-Euclidean partial of the `C^∞` factor times the bare
-chart-component atom (a component-atom summand), and the `C^∞` factor times the
-chart-Euclidean partial of the bare chart-component atom (a chart-partial
-summand). -/
 
 /-- On the chart target, the `l`-th chart-Euclidean partial of the
 chart-density-weighted lower-order gradient coefficient at the
@@ -1071,13 +914,10 @@ private lemma euclidPartial_weightedGradCoeff_pouSmul_eqOn_section
                       (tensorChartComponent (I := I) (M := M) g r s
                         S α p.1 p.2) y := by
   classical
-  -- The chart target is open; on it the coefficient agrees with the four-fold
-  -- sum, so the chart-Euclidean partials agree at `y`.
   have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) α
   set wₙ : SmoothCcTensor g r s := S with hwₙ_def
-  -- The four-fold-sum representative of the coefficient on the chart target.
   set Sum4 : EuclN → ℝ := fun z =>
     ∑ P : TensorCompIdx (E := E) r s,
       ∑ Q : TensorCompIdx (E := E) r s,
@@ -1094,7 +934,6 @@ private lemma euclidPartial_weightedGradCoeff_pouSmul_eqOn_section
     exact weightedGradCoeff_pouSmul_eqOn_section (I := I) (M := M)
       g r s α P₀ l wₙ hz
   rw [euclidPartial_def, hcoeff_evt.fderiv_eq, ← euclidPartial_def]
-  -- Differentiability of every `(P, Q, k, p)`-leaf at `y`.
   have hleaf_diff : ∀ P Q : TensorCompIdx (E := E) r s,
       ∀ k : Fin (Module.finrank ℝ E), ∀ p : TensorCompIdx (E := E) r s,
       DifferentiableAt ℝ
@@ -1106,7 +945,6 @@ private lemma euclidPartial_weightedGradCoeff_pouSmul_eqOn_section
         hy).mul
       (differentiableAt_tensorChartComponent (I := I) (M := M) g r s wₙ α
         p.1 p.2 y)
-  -- Distribute `euclidPartial l` across the four nested finite sums.
   rw [hSum4_def, euclidPartial_finsetSum (E := E) l Finset.univ
     (fun P _ => DifferentiableAt.fun_sum (fun Q _ =>
       DifferentiableAt.fun_sum (fun k _ =>
@@ -1126,7 +964,6 @@ private lemma euclidPartial_weightedGradCoeff_pouSmul_eqOn_section
     (fun p _ => hleaf_diff P Q k p)]
   rw [← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl (fun p _ => ?_)
-  -- Leibniz on the `(P, Q, k, p)`-leaf.
   exact euclidPartial_mul (E := E) l
     (differentiableAt_of_contDiffOn_chartTarget (I := I) (M := M) α
       (weightedGradFactor_contDiffOn (I := I) (M := M) g r s α P₀ l P Q k p) hy)
@@ -1166,17 +1003,6 @@ lemma toLp_add_eq
   refine (Lp.coeFn_add (hf₁.toLp f₁) (hf₂.toLp f₂)).trans ?_
   filter_upwards [MemLp.coeFn_toLp hf₁, MemLp.coeFn_toLp hf₂] with y hy₁ hy₂
   rw [Pi.add_apply, hy₁, hy₂]
-
-/-! ## The `n → ∞` `L²`-limit of the lower-order rotation value coefficient
-
-The lower-order rotation value coefficient `covLowerOrderRotationValueCoeff g r s
-Tₙ α P₀` is *first-order* in `Tₙ`: it depends on `Tₙ` only through the
-chart-Euclidean partial of the raw chart component's push-forward (a chart-partial
-atom) and through the zeroth-order Christoffel correction `covDerivLowerOrderTerm`
-(a `C^∞`-linear combination of bare chart components). By the tracing identity
-and the Christoffel-correction tracing identity it is, on the chart target, the
-sum of a four-fold nested chart-partial-atom sum and a five-fold nested
-component-atom sum. -/
 
 /-- The `T`-independent `C^∞` factor of the chart-partial-atom summand of the
 lower-order rotation value coefficient: the chart-frame tensor-metric Gram, the
@@ -1270,7 +1096,6 @@ private lemma covLowerOrderRotationValueCoeff_pouSmul_eqOn_section
   classical
   set wₙ : SmoothCcTensor g r s := S with hwₙ_def
   rw [covLowerOrderRotationValueCoeff_def]
-  -- For each `(P, Q, k, l)`-summand the inner body collapses.
   have hbody : ∀ P Q : TensorCompIdx (E := E) r s,
       ∀ k l : Fin (Module.finrank ℝ E),
       chartInvGramEuclid (I := I) g α k l y *
@@ -1300,7 +1125,6 @@ private lemma covLowerOrderRotationValueCoeff_pouSmul_eqOn_section
                     g r s α k P.1 p.1 P.2 p.2 y *
                 tensorChartComponent (I := I) (M := M) g r s wₙ α p.1 p.2 y := by
     intro P Q k l
-    -- Substitute the two tracing identities.
     rw [show euclidPartial (E := E) k
             (chartPushedRaw I α
               (tensorChartComponentRaw (I := I) (M := M) g r s
@@ -1312,7 +1136,6 @@ private lemma covLowerOrderRotationValueCoeff_pouSmul_eqOn_section
             g r s α wₙ P.1 P.2)]
     rw [covDerivLowerOrderTerm_pouSmul_eqOn (I := I) (M := M) g r s α wₙ
       k P.1 P.2 hy]
-    -- The component-atom sum equals the two distributed zeroth-order groups.
     rw [show (∑ p : TensorCompIdx (E := E) r s,
               chartInvGramEuclid (I := I) g α k l y *
                   (euclidPartial (E := E) l
@@ -1342,11 +1165,9 @@ private lemma covLowerOrderRotationValueCoeff_pouSmul_eqOn_section
         ← Finset.sum_add_distrib]
       refine Finset.sum_congr rfl (fun p _ => ?_); ring]
     ring
-  -- Rewrite every inner `(k, l)`-summand and split into the two parts.
   rw [Finset.sum_congr rfl (fun P _ => Finset.sum_congr rfl (fun Q _ => by
     rw [Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl
       (fun l _ => hbody P Q k l))]))]
-  -- Distribute `covChartMetricGram` and separate the partial / component parts.
   have hsplit : ∀ P Q : TensorCompIdx (E := E) r s,
       covChartMetricGram (I := I) (M := M) g r s α P Q y *
           (∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
@@ -1410,36 +1231,21 @@ private lemma covLowerOrderRotationValueCoeff_pouSmul_eqOn_section
       refine Finset.sum_congr rfl (fun k _ => ?_)
       rw [Finset.mul_sum]
       refine Finset.sum_congr rfl (fun l _ => ?_)
-      -- Per-`(k, l)` summand: distribute `covChartMetricGram` over the body.
       rw [mul_add]
       refine congrArg₂ (· + ·) ?_ ?_
       · rw [valuePartialFactor]; ring
       · rw [Finset.mul_sum]
         refine Finset.sum_congr rfl (fun p _ => ?_)
         rw [valueComponentFactor]; ring]
-    -- Separate the partial / component parts of the double sum.
     rw [Finset.sum_congr rfl (fun k _ =>
         Finset.sum_add_distrib
           (s := (Finset.univ : Finset (Fin (Module.finrank ℝ E))))),
       Finset.sum_add_distrib]
   rw [Finset.sum_congr rfl (fun P _ => Finset.sum_congr rfl
     (fun Q _ => hsplit P Q))]
-  -- Separate the partial / component parts of the outer double sum.
   rw [Finset.sum_congr rfl (fun P _ =>
       Finset.sum_add_distrib (s := (Finset.univ : Finset (TensorCompIdx (E := E) r s)))),
     Finset.sum_add_distrib]
-
-/-! ## Chart-locality-free `L²`-limit machinery
-
-The lower-order coefficient `L²`-limits depend on the manifold only through the
-eigenvector and its canonical smooth approximating sequence; both have
-chart-locality-free constructions in the companion files (`SmoothApprox.lean`,
-`EigenvectorChartComponentL2.lean`, `EigenvectorChartPartialL2.lean`). The
-eigenvector itself is re-keyed onto `tensorResolventEigenbasisVec` at
-the unconditional compactness witness
-`tensorResolventL2_isCompactOperator`; `[CompleteSpace E]` comes from
-`FiniteDimensional.complete`. The `C^∞`-factor / finite-sum-assembly
-infrastructure above is chart-locality-free and is reused verbatim. -/
 
 /-- Chart-locality-free twin of `approxComponentLp`. -/
 def approxComponentLp
@@ -1825,8 +1631,6 @@ lemma memLp_factor_mul_partialAtom
     (euclidPartial_tensorChartComponent_approx_memLp (I := I) (M := M)
       g r s i α P k n)
 
-/-! ### Principal-rotation coefficient (chart-locality-free) -/
-
 /-- Chart-locality-free twin of `covPrincipalRotationCoeffLimit`. -/
 noncomputable def covPrincipalRotationCoeffLimit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -2012,9 +1816,6 @@ theorem covPrincipalRotationCoeff_tendsto
     (covPrincipalRotationCoeffLimit_memLp (I := I) (M := M)
       g r s i α P₀)
     hFn_eq hFlim_eq
-
-/-! ### Chart-density-weighted lower-order gradient coefficient
-(chart-locality-free) -/
 
 /-- Chart-locality-free twin of `weightedGradCoeffLimit`. -/
 noncomputable def weightedGradCoeffLimit
@@ -2213,9 +2014,6 @@ theorem weightedGradCoeff_tendsto
       g r s i α P₀ l n)
     (weightedGradCoeffLimit_memLp (I := I) (M := M) g r s i α P₀ l)
     hFn_eq hFlim_eq
-
-/-! ### Chart-Euclidean divergence of the weighted gradient coefficient
-(chart-locality-free) -/
 
 /-- Chart-locality-free twin of `weightedGradCoeffDivLimit`. -/
 noncomputable def weightedGradCoeffDivLimit
@@ -2518,8 +2316,6 @@ theorem weightedGradCoeffDivSum_tendsto
   tendsto_finset_sum (Finset.univ : Finset (Fin (Module.finrank ℝ E)))
     (fun l _ => weightedGradCoeffDiv_tendsto (I := I) (M := M)
       g r s i α P₀ l)
-
-/-! ### Lower-order rotation value coefficient (chart-locality-free) -/
 
 /-- Chart-locality-free twin of `covLowerOrderRotationValueCoeffLimit`. -/
 noncomputable def covLowerOrderRotationValueCoeffLimit

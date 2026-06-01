@@ -56,15 +56,12 @@ theorem Finset.sum_mul_inner_triple_sum_swap
         ∑ i : I, ∑ j : J, ∑ m : M, B i j m * X i j m) =
       ∑ i : I, ∑ j : J, ∑ m : M,
         ((∑ k : K, ∑ l : L, A k l) * B i j m) * X i j m := by
-  -- Step 1: pull the inner sum out of the outer two sums by `sum_mul`.
   have hSumMul :
       (∑ k : K, ∑ l : L, A k l *
             ∑ i : I, ∑ j : J, ∑ m : M, B i j m * X i j m)
         = (∑ k : K, ∑ l : L, A k l) *
             (∑ i : I, ∑ j : J, ∑ m : M, B i j m * X i j m) := by
     simp_rw [_root_.Finset.sum_mul]
-  -- Step 2: distribute the constant outer aggregate into the inner triple
-  -- sum and into the product `B · X`.
   have hDistI :
       (∑ k : K, ∑ l : L, A k l) *
           (∑ i : I, ∑ j : J, ∑ m : M, B i j m * X i j m)
@@ -139,7 +136,6 @@ theorem single_eq_sum_diracPair
     X Idx Jdx =
       ∑ i' : I', ∑ j' : J',
         (if (i', j') = (Idx, Jdx) then (1 : ℝ) else 0) * X i' j' := by
-  -- Inner sum over `j'` collapses to `j' = Jdx` for each `i'`.
   have hJ :
       ∀ i' : I',
         (∑ j' : J',
@@ -147,21 +143,17 @@ theorem single_eq_sum_diracPair
           = (if i' = Idx then (1 : ℝ) else 0) * X i' Jdx := by
     intro i'
     rw [Finset.sum_eq_single Jdx]
-    · -- main: the j' = Jdx contribution
-      by_cases hi : i' = Idx
+    · by_cases hi : i' = Idx
       · subst hi
         simp
       · simp [hi]
-    · -- off-diagonal: j' ≠ Jdx ⇒ if-condition false ⇒ 0
-      intro j' _ hjne
+    · intro j' _ hjne
       have hne : ¬ ((i', j') = (Idx, Jdx)) := by
         intro hpair
         exact hjne (Prod.mk_inj.mp hpair).2
       simp [hne]
-    · -- triviality: `Jdx ∈ Finset.univ`
-      intro hnot
+    · intro hnot
       exact (hnot (Finset.mem_univ _)).elim
-  -- Outer sum over `i'` collapses to `i' = Idx`.
   calc
     X Idx Jdx
         = (1 : ℝ) * X Idx Jdx := by ring

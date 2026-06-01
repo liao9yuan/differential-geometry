@@ -92,17 +92,6 @@ open scoped Manifold Topology ContDiff
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 
-/-! ## (A) The flat-linearization reconciliation (two-instance world)
-
-The flat ODE's linearization factor `fderiv ℝ (f t) (Φ (z₀, t))` — for the chart-`α`
-conjugated vector field `f t = -chartTrivRepr α X_t` evaluated at the basepoint image
-`φ α` — equals minus the *trivialised* flat derivative `fderiv ℝ (chartTrivRepr α X_t) (φ α)`.
-The committed convention bridge `chartTrivRepr_fderiv_eq` rewrites the trivialised flat
-derivative as the raw flat derivative plus the moving-trivialization `D²φ` correction.
-
-The conclusion is an `E`-equation, so it crosses cleanly into the single-instance world
-consumed by `RawVariationalIdentity`. -/
-
 section Reconciliation
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -158,33 +147,10 @@ theorem flatLinearization_eq_rawFderiv_add_movingTriv
     fderiv ℝ (fun z => -(chartTrivRepr (I := I) α X z)) (extChartAt I α α) w
       = -(fderiv ℝ (chartRawRepr (I := I) α X) (extChartAt I α α) w
           + movingTrivCorrection (I := I) α X w) := by
-  -- The derivative of a negation is the negation of the derivative.
   rw [fderiv_fun_neg, ContinuousLinearMap.neg_apply]
   rw [chartTrivRepr_fderiv_eq_rawFderiv_add_movingTriv (I := I) α X w hR hC]
 
 end Reconciliation
-
-/-! ## (B) Assembly of the producer's `hcov` (single-instance world)
-
-The producer `rawVariationalIdentity_of_flatChartFderiv_witness` requires the value
-equation `hcov` in flat-plus-two-corrections form.  Here we assemble it from two genuine,
-*separate* value-level contributions to the true derivative value `Q (Dchart' d)`:
-
-* the **flat-and-`D²φ` contribution** — minus `trivFromE α α` of the *trivialised* flat
-  derivative `fderiv (chartTrivRepr α X) (φ α) w`, which the flat variational ODE produces
-  (it is the chart-`α` conjugated VF linearization) and which Part (A) splits as raw flat
-  `+ D²φ`; and
-
-* the **moving-target-trivialization contribution** — minus `trivFromE α α` of the metric
-  Christoffel correction, the derivative of the *moving* target trivialization
-  `s ↦ trivFromE α (Φ_fam s x)` along the orbit (velocity `−X(α)`).  This is the
-  `g`-referencing geometric content the pure flat variational ODE does not produce; it is
-  supplied as an honest *additive* residual, never asserted to vanish.
-
-The decomposition `Q (Dchart' d) = flatPart + residual` is the honest statement that the
-true variational value splits as flat-ODE contribution plus moving-trivialization
-contribution.  Part (A) folds the `D²φ` correction into the first summand internally, so the
-producer's `hcov` reads with the three separate summands `raw`, `D²φ`, `Γ`. -/
 
 section Assembly
 
@@ -262,7 +228,6 @@ theorem hcov_of_flatTrivPart_and_movingTrivResidual
                 (X : ∀ y : M, TangentSpace I y) (Φ_fam t x))
               (mfderiv I I (Φ_fam t : M → M) x v)) := by
   classical
-  -- Split the trivialised flat derivative into raw flat `+ D²φ` (Part A), as an `E`-equation.
   have hAdecomp :
       fderiv ℝ (chartTrivRepr (I := I) (Φ_fam t x) (X : ∀ y : M, TangentSpace I y))
           (extChartAt I (Φ_fam t x) (Φ_fam t x))
@@ -276,19 +241,10 @@ theorem hcov_of_flatTrivPart_and_movingTrivResidual
               (mfderiv I I (Φ_fam t : M → M) x v) :=
     chartTrivRepr_fderiv_eq_rawFderiv_add_movingTriv (I := I) (Φ_fam t x)
       (X : ∀ y : M, TangentSpace I y) (mfderiv I I (Φ_fam t : M → M) x v) hRdiff hCdiff
-  -- Substitute the split, push `trivFromE α α` over the sum, rearrange to three summands.
   rw [hsplit, hAdecomp, map_add]
   abel
 
 end Assembly
-
-/-! ## (C) The generic per-flow producer (single-instance world)
-
-The headline: from the `IsLocalFlow` variational ODE data (operator-valued ODE, orbit
-continuity, chart-reading witness, convention-bridge side conditions) plus the value-level
-input `hsplit` (the honest decomposition of the true derivative value into the flat
-variational-ODE contribution and the moving-target-trivialization residual), produce
-`RawVariationalIdentity`. -/
 
 section Producer
 
@@ -361,10 +317,8 @@ theorem rawVariationalIdentity_of_isLocalFlow
                 (X : ∀ y : M, TangentSpace I y) (Φ_fam t x))
               (mfderiv I I (Φ_fam t : M → M) x v)))) :
     RawVariationalIdentity (I := I) g X Φ_fam t x v := by
-  -- Assemble the producer's full `hcov` from the honest two-contribution split (Part B).
   have hcov := hcov_of_flatTrivPart_and_movingTrivResidual (I := I) g X Φ_fam t x v
     Q Dchart' d hRdiff hCdiff hsplit
-  -- Feed everything into the committed flat-data producer.
   exact rawVariationalIdentity_of_flatChartFderiv_witness (I := I) g X Φ_fam t x v Q d
     hDchart hcontAt hwitness hRdiff hCdiff hcov
 

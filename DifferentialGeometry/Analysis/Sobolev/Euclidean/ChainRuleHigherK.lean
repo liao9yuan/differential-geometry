@@ -45,8 +45,6 @@ variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Geometric constant for the Faà di Bruno bound -/
-
 namespace SmoothDiffeoBounded
 
 /-- The geometric constant used in the iterated-derivative bound:
@@ -69,8 +67,6 @@ lemma deriv_bound_le_derivBoundMaxOne {Ω Ω' : Set E}
     (Φ : SmoothDiffeoBounded d Ω Ω') :
     Φ.deriv_bound ≤ Φ.derivBoundMaxOne :=
   le_max_left _ _
-
-/-! ## Faà di Bruno-style cruder pointwise bound -/
 
 /-- The Faà di Bruno-style cruder bound:
 `‖∂^n (u ∘ Φ.toFun)(x)‖ ≤ n! · C · D^n`

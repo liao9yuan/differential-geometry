@@ -32,8 +32,6 @@ variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Pointwise bounds derived from `iteratedFDeriv` -/
-
 /-- The j-th iterated derivative of `(fderiv ℝ η ·)(e_i)` is bounded by the
 (j+1)-th iterated derivative of `η`. -/
 lemma norm_iteratedFDeriv_partial_le
@@ -42,22 +40,18 @@ lemma norm_iteratedFDeriv_partial_le
     (i : Fin d) (j : ℕ) (x : E) :
     ‖iteratedFDeriv ℝ j (fun y : E => (fderiv ℝ η y) (EuclideanSpace.single i 1)) x‖ ≤
       ‖iteratedFDeriv ℝ (j + 1) η x‖ := by
-  -- ContDiff ℝ j (fderiv ℝ η). Use that ContDiff ℝ ⊤ η implies ContDiff ℝ (j+1) η.
   have hη_succ : ContDiff ℝ ((j + 1 : ℕ) : ℕ∞) η := by
     refine hη.of_le ?_
     exact_mod_cast (le_top : ((j + 1 : ℕ) : ℕ∞) ≤ ⊤)
   have hf : ContDiff ℝ ((j : ℕ) : ℕ∞) (fderiv ℝ η) := by
     refine hη_succ.fderiv_right (m := ((j : ℕ) : ℕ∞)) ?_
-    -- Goal: (j : ℕ∞) + 1 ≤ (j + 1 : ℕ∞).
     push_cast; exact le_refl _
-  -- Apply norm_iteratedFDeriv_clm_apply_const.
   have h1 : ‖iteratedFDeriv ℝ j (fun y : E => (fderiv ℝ η y) (EuclideanSpace.single i 1)) x‖
       ≤ ‖(EuclideanSpace.single i (1 : ℝ))‖ *
           ‖iteratedFDeriv ℝ j (fderiv ℝ η) x‖ := by
     refine norm_iteratedFDeriv_clm_apply_const (𝕜 := ℝ) (f := fderiv ℝ η)
       (c := EuclideanSpace.single i (1 : ℝ)) (n := j)
       (x := x) hf.contDiffAt ?_
-    -- (j : ℕ) ≤ N where N = ((j : ℕ) : WithTop ℕ∞). Trivial.
     exact le_refl _
   have h2 : ‖iteratedFDeriv ℝ j (fderiv ℝ η) x‖ = ‖iteratedFDeriv ℝ (j + 1) η x‖ :=
     norm_iteratedFDeriv_fderiv (𝕜 := ℝ) (f := η) (n := j) (x := x)
@@ -76,20 +70,14 @@ lemma contDiff_partial_eta
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (i : Fin d) :
     ContDiff ℝ (⊤ : ℕ∞)
       (fun x : E => (fderiv ℝ η x) (EuclideanSpace.single i 1)) := by
-  -- (⊤ : WithTop ℕ∞) + 1 = ⊤.
   have h : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) η := by
     simpa using hη
-  -- Need fderiv_right with: ⊤ + 1 ≤ n. Pick n := ⊤.
   have hfd : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (fderiv ℝ η) := by
     refine h.fderiv_right (m := (⊤ : ℕ∞)) ?_
-    -- m + 1 ≤ n ⟺ ⊤ + 1 ≤ ⊤. In WithTop ℕ∞, ⊤ + 1 = ⊤, so this is le_refl.
     simp
-  -- Now compose with apply (single i 1).
   have hfd' : ContDiff ℝ (⊤ : ℕ∞) (fderiv ℝ η) := by
     simpa using hfd
   exact hfd'.clm_apply contDiff_const
-
-/-! ## First-order case `MemW1p` -/
 
 /-- `MemW1p` is preserved by multiplication by a smooth bounded function. -/
 theorem MemW1p.mul_smooth_bounded
@@ -103,8 +91,7 @@ theorem MemW1p.mul_smooth_bounded
     DeGiorgi.MemW1p (d := d) p (fun x => η x * u x) Ω := by
   classical
   refine ⟨?_, ?_⟩
-  · -- η · u ∈ L^p(Ω) since |η · u| ≤ C · |u| on Ω, and u ∈ L^p(Ω).
-    refine MemLp.of_le_mul (g := u) (c := C) hu.1 ?_ ?_
+  · refine MemLp.of_le_mul (g := u) (c := C) hu.1 ?_ ?_
     · exact hη.continuous.aestronglyMeasurable.mul hu.1.aestronglyMeasurable
     · refine (ae_restrict_iff' hΩ.measurableSet).mpr ?_
       exact Filter.Eventually.of_forall fun x hx => by
@@ -113,12 +100,10 @@ theorem MemW1p.mul_smooth_bounded
           _ ≤ C * ‖u x‖ := by
                 gcongr
                 exact hη_bound x hx
-  · -- For each `i`, candidate weak partial is `(η · ∂ᵢu) + (∂ᵢη · u)`.
-    intro i
+  · intro i
     obtain ⟨g, hg_memLp, hg_weak⟩ := hu.2 i
     refine ⟨fun x => η x * g x + (fderiv ℝ η x) (EuclideanSpace.single i 1) * u x, ?_, ?_⟩
-    · -- This candidate is in L^p(Ω).
-      have h1 : MemLp (fun x => η x * g x) p (volume.restrict Ω) := by
+    · have h1 : MemLp (fun x => η x * g x) p (volume.restrict Ω) := by
         refine MemLp.of_le_mul (g := g) (c := C) hg_memLp ?_ ?_
         · exact hη.continuous.aestronglyMeasurable.mul hg_memLp.aestronglyMeasurable
         · refine (ae_restrict_iff' hΩ.measurableSet).mpr ?_
@@ -150,14 +135,11 @@ theorem MemW1p.mul_smooth_bounded
                     gcongr
                     exact hη_grad_bound x hx
       simpa using h1.add h2
-    · -- The IBP identity: η · ∂ᵢu + (∂ᵢη) · u is the i-th weak partial of η · u.
-      have hu_loc : LocallyIntegrable u (volume.restrict Ω) :=
+    · have hu_loc : LocallyIntegrable u (volume.restrict Ω) :=
         hu.1.locallyIntegrable hp
       have hg_loc : LocallyIntegrable g (volume.restrict Ω) :=
         hg_memLp.locallyIntegrable hp
       exact DeGiorgi.HasWeakPartialDeriv.mul_smooth hΩ hg_weak hη hu_loc hg_loc
-
-/-! ## Chosen weak partial of a smooth-bounded multiplication -/
 
 /-- The chosen weak partial of `η · u` is a.e. equal to `η · ∂ᵢu + (∂ᵢη) · u`. -/
 theorem chosenWeakPartial'_smul_smooth_bounded_ae
@@ -175,7 +157,6 @@ theorem chosenWeakPartial'_smul_smooth_bounded_ae
   classical
   have hηu : DeGiorgi.MemW1p (d := d) p (fun x => η x * u x) Ω :=
     MemW1p.mul_smooth_bounded (d := d) hp hΩ hη hη_bound hη_grad_bound hu
-  -- Both sides are weak `i`-partials of `η · u`. By uniqueness, they agree a.e.
   have hLHS : DeGiorgi.HasWeakPartialDeriv (d := d) i
       (chosenWeakPartial' p i (fun x => η x * u x) Ω) (fun x => η x * u x) Ω :=
     chosenWeakPartial'_isWeakPartial_of_mem hηu i
@@ -194,7 +175,6 @@ theorem chosenWeakPartial'_smul_smooth_bounded_ae
   have hLHS_loc : LocallyIntegrable
       (chosenWeakPartial' p i (fun x => η x * u x) Ω) (volume.restrict Ω) :=
     (chosenWeakPartial'_memLp_of_mem hηu i).locallyIntegrable hp
-  -- Local integrability of the RHS.
   have hηcwp_memLp :
       MemLp (fun x => η x * chosenWeakPartial' p i u Ω x) p (volume.restrict Ω) := by
     refine MemLp.of_le_mul (g := chosenWeakPartial' p i u Ω) (c := C)
@@ -236,8 +216,6 @@ theorem chosenWeakPartial'_smul_smooth_bounded_ae
     (hηcwp_memLp.add hdηu_memLp).locallyIntegrable hp
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ hLHS hRHS hLHS_loc hRHS_loc
 
-/-! ## Iterated case via induction on `k` -/
-
 /-- `MemWkp k p` is preserved by multiplication by a smooth function whose
 iterated derivatives up to order `k` are uniformly bounded on `Ω`. -/
 theorem MemWkp.smul_smooth_bounded
@@ -251,7 +229,6 @@ theorem MemWkp.smul_smooth_bounded
     MemWkp (d := d) k p (fun x => η x * u x) Ω := by
   induction k generalizing η u with
   | zero =>
-      -- Base case: η · u ∈ L^p(Ω).
       rw [MemWkp_zero] at hu ⊢
       have h0 : ∀ x ∈ Ω, ‖η x‖ ≤ C := by
         intro x hx
@@ -267,9 +244,7 @@ theorem MemWkp.smul_smooth_bounded
                   gcongr
                   exact h0 x hx
   | succ k ih =>
-      -- Inductive step.
       rw [MemWkp_succ] at hu ⊢
-      -- Bounds on η: order 0 (η itself) and order 1 (gradient) are needed for MemW1p step.
       have h0 : ∀ x ∈ Ω, ‖η x‖ ≤ C := by
         intro x hx
         have h := hη_bound 0 (Nat.zero_le _) x hx
@@ -278,31 +253,23 @@ theorem MemWkp.smul_smooth_bounded
         intro x hx
         have h := hη_bound 1 (Nat.succ_le_succ (Nat.zero_le _)) x hx
         rwa [norm_iteratedFDeriv_one] at h
-      -- First, MemW1p of η · u.
       refine ⟨MemW1p.mul_smooth_bounded (d := d) hp hΩ hη h0 h1 hu.1, ?_⟩
-      -- Now we need: ∀ i, MemWkp k p (chosen weak partial of η · u) Ω.
       intro i
-      -- The chosen weak partial of η · u is a.e. equal to:
-      --   η · chosen_i u + (∂ᵢ η) · u.
       have hae : chosenWeakPartial' p i (fun x => η x * u x) Ω
           =ᵐ[volume.restrict Ω]
           (fun x => η x * chosenWeakPartial' p i u Ω x +
             (fderiv ℝ η x) (EuclideanSpace.single i 1) * u x) :=
         chosenWeakPartial'_smul_smooth_bounded_ae (d := d) hp hΩ hη h0 h1 hu.1 i
-      -- The RHS is in MemWkp k p Ω.
       have hRHS_in_Wk : MemWkp (d := d) k p
           (fun x => η x * chosenWeakPartial' p i u Ω x +
             (fderiv ℝ η x) (EuclideanSpace.single i 1) * u x) Ω := by
-        -- Sum of two terms.
         have hT1 : MemWkp (d := d) k p
             (fun x => η x * chosenWeakPartial' p i u Ω x) Ω := by
-          -- η · ∂ᵢu, where ∂ᵢu ∈ MemWkp k p (the recursive part of MemWkp succ).
           have hbnd : ∀ j ≤ k, ∀ x ∈ Ω, ‖iteratedFDeriv ℝ j η x‖ ≤ C :=
             fun j hj x hx => hη_bound j (hj.trans (Nat.le_succ _)) x hx
           exact ih (η := η) hη hbnd (hu.2 i)
         have hT2 : MemWkp (d := d) k p
             (fun x => (fderiv ℝ η x) (EuclideanSpace.single i 1) * u x) Ω := by
-          -- (∂ᵢη) · u, where ∂ᵢη has bounded derivatives up to order k, and u ∈ MemWkp k p.
           have h_inner_smooth : ContDiff ℝ (⊤ : ℕ∞)
               (fun x => (fderiv ℝ η x) (EuclideanSpace.single i 1)) :=
             contDiff_partial_eta (d := d) hη i
@@ -321,12 +288,8 @@ theorem MemWkp.smul_smooth_bounded
           have hu_inner : MemWkp (d := d) k p u Ω := hu_succ.le_succ
           exact ih (η := fun x => (fderiv ℝ η x) (EuclideanSpace.single i 1))
             h_inner_smooth h_inner_bound hu_inner
-        -- The sum is in MemWkp k p.
         exact MemWkp.add (d := d) hp hΩ hT1 hT2
-      -- Now transfer: chosen weak partial of η · u is a.e. equal to RHS.
       exact (MemWkp_congr_ae (d := d) hp hΩ hae).mpr hRHS_in_Wk
-
-/-! ## Norm bound for `wkpNorm` -/
 
 /-- A polynomial-in-`C` bound for the `wkpNorm` of `η · u` in terms of
 `wkpNorm` of `u`. The constant is finite, derived from the smooth bound

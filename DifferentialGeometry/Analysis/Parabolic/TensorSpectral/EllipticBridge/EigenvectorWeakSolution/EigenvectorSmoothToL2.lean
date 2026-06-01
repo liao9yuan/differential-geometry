@@ -83,12 +83,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -96,14 +90,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
-
-/-! ## Chart-locality-free twins
-
-The following declarations reprove the headline identifications without the
-chart-selection hypothesis `h_atlas`, re-keyed onto the intrinsic
-compact-operator eigenbasis `tensorResolventEigenbasisVec` at the
-unconditional compactness witness `tensorResolventL2_isCompactOperator`.
--/
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- Chart-locality-free twin of `eigenvectorSmooth_toL2`. -/

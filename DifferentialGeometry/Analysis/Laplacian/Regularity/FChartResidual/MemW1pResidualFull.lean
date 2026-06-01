@@ -72,8 +72,6 @@ open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualMem
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -82,8 +80,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Smooth approximator at any chart-W^{2,2} approximation rate -/
 
 /-- For `u_h ∈ laplacianDomainPow g 2`, a smooth approximator at any `ε > 0`
 in chart-W^{2,2} norm. -/
@@ -97,19 +93,15 @@ theorem exists_smoothApprox_chartW22
           Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) x -
         v.toFun x) ≤ ENNReal.ofReal ε := by
   classical
-  -- The function representative of u_h.
   set u : M → ℝ := ((H1ComplToLp (I := I) (M := M) g u_h :
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) with hu_def
-  -- u ∈ MemWkpChart g 2 2.
   have h_u_mem : MemWkpChart (I := I) (M := M) g 2 2 u :=
     (DifferentialGeometry.Analysis.Laplacian.laplacianDomainPow_two_h2_plus_rhs_h2
       (I := I) (M := M) g hu_h).1.1
-  -- Apply the smooth-density theorem.
   obtain ⟨w, hw_smooth, hw_le⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Chart.contMDiff_dense_in_WkpChart_k
       (I := I) (M := M) g 2 (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
       (by norm_num : (2 : ℝ≥0∞) ≠ ⊤) h_u_mem hε
-  -- Wrap w as a SmoothScalar g.
   refine ⟨⟨w, hw_smooth⟩, ?_⟩
   exact hw_le
 
@@ -151,28 +143,14 @@ theorem smoothApproxSeq_wkpNormChart_diff_le
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) with hu_def
   set vm : SmoothScalar g := smoothApproxSeq (I := I) (M := M) g hu_h m
   set vn : SmoothScalar g := smoothApproxSeq (I := I) (M := M) g hu_h n
-  -- Triangle inequality: ‖vm.toFun - vn.toFun‖ ≤ ‖u - vm.toFun‖ + ‖u - vn.toFun‖.
-  -- Rewrite vm - vn = (u - vn) - (u - vm).
   have h_decomp : (fun x => vm.toFun x - vn.toFun x) =
       (fun x => (u x - vn.toFun x) - (u x - vm.toFun x)) := by
     funext x; ring
   rw [h_decomp]
-  -- Apply wkpNormChart_sub_le.
   have h_u_mem : MemWkpChart (I := I) (M := M) g 2 2 u :=
     (DifferentialGeometry.Analysis.Laplacian.laplacianDomainPow_two_h2_plus_rhs_h2
       (I := I) (M := M) g hu_h).1.1
-  -- We need MemWkpChart of (u - vm.toFun) and (u - vn.toFun).
-  -- u - vn.toFun = u - (smooth function); the smooth function is in MemWkpChart g 2 2
-  -- (every smooth function on M is in MemWkpChart at any level on closed M).
-  -- Use wkpNormChart_add_le for triangle and wkpNormChart_neg.
   have hp_one : (1 : ℝ≥0∞) ≤ 2 := by norm_num
-  -- wkpNormChart ((u - vn) - (u - vm)) ≤ wkpNormChart (u - vn) + wkpNormChart -(u - vm)
-  -- = wkpNormChart (u - vn) + wkpNormChart (u - vm).
-  -- Use MemWkpChart_sub directly.
-  -- vm.toFun is smooth, so it is in MemWkpChart at any level. Same for vn.toFun.
-  -- The difference (u - vn) - (u - vm) = vm - vn.
-  -- We'll use the manifold smooth approximation: every smooth function is in MemWkpChart.
-  -- Actually let's just apply wkpNormChart_sub_le directly.
   have h_smooth_vm : MemWkpChart (I := I) (M := M) g 2 2 vm.toFun :=
     DifferentialGeometry.Analysis.Sobolev.Chart.memWkpChart_of_contMDiff_k
       (I := I) (M := M) g hp_one 2 vm.smooth
@@ -185,12 +163,10 @@ theorem smoothApproxSeq_wkpNormChart_diff_le
   have h_u_diff_vn : MemWkpChart (I := I) (M := M) g 2 2 (fun x => u x - vn.toFun x) :=
     DifferentialGeometry.Analysis.Sobolev.Chart.MemWkpChart_sub
       (I := I) (M := M) g hp_one h_u_mem h_smooth_vn
-  -- Decompose (u - vn) - (u - vm) = (u - vn) + (-(u - vm)).
   have h_split : (fun x : M => (u x - vn.toFun x) - (u x - vm.toFun x)) =
       (fun x : M => (u x - vn.toFun x) + (-1 : ℝ) * (u x - vm.toFun x)) := by
     funext x; ring
   rw [h_split]
-  -- For the c=-1 scaled term, use wkpNormChart_const_smul.
   have h_neg_smul :
       wkpNormChart (I := I) (M := M) g 2 2
         (fun x => (-1 : ℝ) * (u x - vm.toFun x)) =
@@ -200,11 +176,8 @@ theorem smoothApproxSeq_wkpNormChart_diff_le
   have h_neg_one_norm : ‖(-1 : ℝ)‖ₑ = 1 := by
     simp [enorm]
   rw [h_neg_one_norm, one_mul] at h_neg_smul
-  -- Now MemWkpChart for the scaled term.
   have h_u_diff_vm_neg : MemWkpChart (I := I) (M := M) g 2 2
       (fun x => (-1 : ℝ) * (u x - vm.toFun x)) := by
-    -- Using closure under scalar.
-    -- Easier: use h_u_diff_vm and rewrite.
     have h_eq : (fun x : M => (-1 : ℝ) * (u x - vm.toFun x)) =
         (fun x => -(u x - vm.toFun x)) := by funext x; ring
     rw [h_eq]
@@ -213,9 +186,7 @@ theorem smoothApproxSeq_wkpNormChart_diff_le
   have h_add :=
     DifferentialGeometry.Analysis.Sobolev.Chart.wkpNormChart_add_le (I := I) (M := M)
       g (k := 2) (p := 2) hp_one h_u_diff_vn h_u_diff_vm_neg
-  -- h_add gives: wkpNormChart (u - vn) + (-1) * (u - vm) ≤ wkpNormChart (u - vn) + wkpNormChart ((-1) * (u - vm))
   rw [h_neg_smul] at h_add
-  -- h_add : wkpNormChart (u - vn) + (-1)(u - vm) ≤ wkpNormChart (u - vn) + wkpNormChart (u - vm)
   have h_bound1 : wkpNormChart (I := I) (M := M) g 2 2 (fun x => u x - vn.toFun x) +
         wkpNormChart (I := I) (M := M) g 2 2 (fun x => u x - vm.toFun x) ≤
       ENNReal.ofReal (1 / ((n : ℝ) + 1)) + ENNReal.ofReal (1 / ((m : ℝ) + 1)) :=
@@ -226,25 +197,6 @@ theorem smoothApproxSeq_wkpNormChart_diff_le
       ENNReal.ofReal (1 / ((m : ℝ) + 1)) + ENNReal.ofReal (1 / ((n : ℝ) + 1)) := by
     rw [add_comm]
   exact le_trans h_add (le_of_le_of_eq h_bound1 h_comm)
-
-/-! ## Headline: unconditional discharge from a chart-target Sobolev bilinear bound
-
-For arbitrary `u_h ∈ laplacianDomainPow g 2`, the unconditional `MemW1p 2`
-discharge of `fChartResidual g α u_h` follows from:
-
-1. The chart-W^{2,2} smooth-density approximation `smoothApproxSeq` constructed
-   above.
-2. A chart-target W^{1,2} bilinear continuity bound for the smooth-residual
-   operator, captured here as a clean hypothesis. The bilinear bound states
-   that the chart-pulled smooth-residual of any chart-W^{2,2}-Cauchy sequence
-   of smooth scalars is chart-target W^{1,2}-Cauchy, and that the chart-target
-   W^{1,2}-limit identifies (a.e. on `volume.restrict chartTarget`) with the
-   chart-pulled non-smooth residual `fChartResidual g α u_h`.
-
-The bilinear continuity bound is a standard chart-target Sobolev result:
-the smooth-residual map `v ↦ -2 g(∇ρα, ∇v) - Δρα · v` is bounded
-`W^{2,2}_chart(M) → W^{1,2}_chart_α(EuclN)`, with the constant depending only
-on `g`, `α`, and bounds on smooth chart coefficients. -/
 
 /-- **Headline discharge (from bilinear continuity hypothesis).**
 

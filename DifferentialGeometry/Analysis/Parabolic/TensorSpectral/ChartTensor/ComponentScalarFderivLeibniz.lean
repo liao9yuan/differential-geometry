@@ -59,30 +59,13 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## Local abbreviation for the Euclidean ambient space -/
-
 private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] := EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Headline Leibniz decomposition for the chart-pushed scalar component
-
-The chart-pushed manifold-side scalar field
-`chartPushed ρ_α α (tensorChartComponentScalar g r s S α Idx Jdx)` is locally
-on the chart target a product of two smooth Euclidean factors:
-
-* the chart-smooth extension of the partition-of-unity weight
-  `chartSmoothExt α (POU_α)`, and
-* the chart-smooth extension of the scalar component
-  `chartSmoothExt α (tensorChartComponentScalar g r s S α Idx Jdx)`.
-
-The product rule applies pointwise. -/
 
 /-- **Leibniz decomposition** for the Fréchet derivative of
 `chartPushed ρ_α α (tensorChartComponentScalar g r s S α Idx Jdx)` on the
@@ -110,8 +93,6 @@ theorem fderiv_chartPushed_tensorChartComponentScalar_eq_leibniz_on_target
             (chartSmoothExt (I := I) (M := M) α
               ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)) y := by
   classical
-  -- The scalar component is globally smooth on `M`, so the generic Leibniz
-  -- formula applies with `u := tensorChartComponentScalar g r s S α Idx Jdx`.
   have hu_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx) :=
     tensorChartComponentScalar_contMDiff
@@ -120,12 +101,6 @@ theorem fderiv_chartPushed_tensorChartComponentScalar_eq_leibniz_on_target
     (I := I) (M := M) (α := α)
     (u := tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx)
     hu_smooth hy
-
-/-! ## Functional packaging
-
-The functional packaging `(fun y ↦ fderiv ℝ (chartPushed _) y) =ᶠ[chartTargetEuclid]
-(Leibniz sum)` captures the same information as the pointwise statement but is
-slightly more convenient for downstream rewriting under filters. -/
 
 /-- Filter-eventual form of the Leibniz decomposition: on the neighbourhood
 filter of any chart-target point, the Fréchet derivative of the chart-pushed
@@ -155,20 +130,12 @@ theorem fderiv_chartPushed_tensorChartComponentScalar_eventuallyEq_leibniz
               (chartSmoothExt (I := I) (M := M) α
                 ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)) z) := by
   classical
-  -- The chart target is open, so eventual equality reduces to pointwise
-  -- equality on a chart-target neighbourhood of `y`.
   have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   refine Filter.eventually_of_mem (h_open.mem_nhds hy) ?_
   intro z hz
   exact fderiv_chartPushed_tensorChartComponentScalar_eq_leibniz_on_target
     (I := I) (M := M) g r s α S Idx Jdx hz
-
-/-! ## Specialisation to `tensorChartComponentPou`
-
-By definition, `tensorChartComponentScalar = tensorChartComponentPou`; the
-formal alias is recorded so downstream files relying on the `Pou` name can
-import the same Leibniz formula without an additional rewrite. -/
 
 /-- Leibniz decomposition specialised to the `tensorChartComponentPou` alias.
 This is `tensorChartComponentScalar = tensorChartComponentPou` and is purely
@@ -195,21 +162,16 @@ theorem fderiv_chartPushed_tensorChartComponentPou_eq_leibniz_on_target
           fderiv ℝ
             (chartSmoothExt (I := I) (M := M) α
               ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)) y := by
-  -- `tensorChartComponentScalar = tensorChartComponentPou` definitionally.
   have h_eq :
       tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx =
         tensorChartComponentPou (I := I) (M := M) g r s S α Idx Jdx :=
     tensorChartComponentScalar_def
       (I := I) (M := M) g r s S α Idx Jdx
-  -- Rewrite both sides through this definitional identity.
   have h_main :=
     fderiv_chartPushed_tensorChartComponentScalar_eq_leibniz_on_target
       (I := I) (M := M) g r s α S Idx Jdx hy
-  -- Substitute the definitional identity throughout.
   rw [h_eq] at h_main
   exact h_main
-
-/-! ## Sanity check (small `(r, s)`) -/
 
 example (g : SmoothRiemannianMetric I M) (α : M)
     (S : SmoothCcTensor g 1 2)

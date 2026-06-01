@@ -78,8 +78,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## The diagonal Green identity at rank `s + 1` -/
-
 set_option linter.unusedSectionVars false in
 /-- **Diagonal Green identity at rank `s + 1`.** For a smooth compactly-supported
 `(0, s)`-tensor field `S`, writing `∇S := covGrad g 0 s S` for its `(0, s + 1)`
@@ -106,8 +104,6 @@ lemma covGrad_l2Inner_self_eq_neg_rawConnLap_inner_gen
   tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_gen (I := I) (M := M) g (s + 1)
     (covGrad (I := I) (M := M) g 0 s S)
     (covGrad (I := I) (M := M) g 0 s S)
-
-/-! ## The Laplacian-gradient collapse at rank `s` -/
 
 set_option linter.unusedSectionVars false in
 /-- **Laplacian-gradient collapse at rank `s`.** For a smooth compactly-supported
@@ -137,8 +133,6 @@ lemma covGrad_rawConnLap_l2Inner_covGrad_eq_neg_normSq_gen
   rw [hΔS_def]
   rw [tensorL2Norm_sq_toFun (I := I) (M := M) g 0 s
     (rawTensorConnLapSmooth (I := I) g 0 s S)]
-
-/-! ## The cross-pairing split through the commutator -/
 
 set_option linter.unusedSectionVars false in
 /-- **Cross-pairing split.** Writing `Curv := Δ_∇(∇S) − ∇(Δ_∇ S)` for the
@@ -170,7 +164,6 @@ lemma rawConnLap_l2Inner_covGrad_split_gen
     rawTensorConnLapSmooth (I := I) g 0 (s + 1) GS with hΔGS_def
   set GΔ : SmoothCcTensor g 0 (s + 1) :=
     covGrad (I := I) (M := M) g 0 s (rawTensorConnLapSmooth (I := I) g 0 s S) with hGΔ_def
-  -- `Δ_∇(∇S) = ∇(Δ_∇ S) + Curv` with `Curv := Δ_∇(∇S) − ∇(Δ_∇ S)`.
   have hcomm : ΔGS = GΔ + (ΔGS - GΔ) := by abel
   nth_rewrite 1 [hcomm]
   rw [SmoothCcTensor.toFun_add]
@@ -180,8 +173,6 @@ lemma rawConnLap_l2Inner_covGrad_split_gen
     (SmoothCcTensor.integrable_inner_cross (I := I) (M := M) (ΔGS - GΔ) GS)]
   rw [hGΔ_def, hGS_def]
   rw [covGrad_rawConnLap_l2Inner_covGrad_eq_neg_normSq_gen (I := I) (M := M) g s S]
-
-/-! ## The integrated Weitzenböck identity -/
 
 set_option linter.unusedSectionVars false in
 /-- **The integrated order-`2` Weitzenböck identity at arbitrary covariant rank.**
@@ -215,12 +206,10 @@ theorem weitzenbock_integrated_covGrad_l2_normSq
             covGrad (I := I) (M := M) g 0 s
               (rawTensorConnLapSmooth (I := I) g 0 s S)).toFun
           (covGrad (I := I) (M := M) g 0 s S).toFun := by
-  -- Diagonal Green identity at rank `s + 1`: `‖∇²S‖² = − ⟨Δ_∇(∇S), ∇S⟩`.
   rw [tensorL2Norm_sq_toFun (I := I) (M := M) g 0 (s + 1 + 1)
     (covGrad (I := I) (M := M) g 0 (s + 1)
       (covGrad (I := I) (M := M) g 0 s S))]
   rw [covGrad_l2Inner_self_eq_neg_rawConnLap_inner_gen (I := I) (M := M) g s S]
-  -- Cross-pairing split: `⟨Δ_∇(∇S), ∇S⟩ = − ‖Δ_∇ S‖² + ⟨Curv, ∇S⟩`.
   rw [rawConnLap_l2Inner_covGrad_split_gen (I := I) (M := M) g s S]
   ring
 

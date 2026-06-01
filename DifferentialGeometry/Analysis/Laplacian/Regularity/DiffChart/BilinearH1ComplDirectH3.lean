@@ -87,8 +87,6 @@ open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplH3
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -97,9 +95,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Intermediate: `MemWkp 2 2` of `chartPushedChosenFirstPartial` from
-    chart-`H³` of the chart-pull -/
 
 /-- From chart-`H³` of the chart-pull `chartPushed POU α u_h.coeFn`, the
 canonical chosen first weak partial `chartPushedChosenFirstPartial g α u_h l₁`
@@ -123,21 +118,7 @@ theorem chartPushedChosenFirstPartial_memWkp_two_of_memWkp_three
       (d := Module.finrank ℝ E) 2 2
       (chartPushedChosenFirstPartial (I := I) (M := M) g α u_h l₁)
       (chartTargetEuclid (I := I) (M := M) α) := by
-  -- `chartPushedChosenFirstPartial g α u_h l₁ = chosenWeakPartial' 2 l₁
-  --   (chartPushed POU α u_h.coeFn) chartTarget` by definition.
-  -- From `MemWkp 3 2 (chartPushed POU α u_h.coeFn) chartTarget`, the chosen
-  -- first weak partial in direction `l₁` is in `MemWkp 2 2 chartTarget`.
   exact h_chartPushed_memWkp32.chosenWeakPartial_mem l₁
-
-/-! ## Headline: `MemWkp 2 2 D₁.u_chart_deriv` from chart-`H³` of the chart-pull
-
-The `u_chart_deriv` field of the once-differentiated chart-bilinear data is
-the chart-pushed weak-partial coercion. By the σ-compact exhaustion lift
-`chartPushedWeakPartialLp_ae_eq_chosenFirstPartial_on_chartTarget` (already
-in the companion module), it is ae-equal to the canonical chosen first weak
-partial `chartPushedChosenFirstPartial g α u_h l₁` on
-`volume.restrict (chartTargetEuclid α)`. By `MemWkp_congr_ae`, the
-`MemWkp 2 2` membership transfers across this ae-equality. -/
 
 /-- **`MemWkp 2 2 D₁.u_chart_deriv (chartTargetEuclid α)` discharge from
 chart-`H³` regularity of the chart-pull of `u_h.coeFn`.**
@@ -220,28 +201,17 @@ theorem diffChartBilinearH1Compl_u_chart_deriv_memWkp_two
         h_base_f_chart_memW1p h_once_identity).u_chart_deriv
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- The `u_chart_deriv` is `base.weak_partial l₁` = `chartPushedWeakPartialLp.coeFn`.
-  -- By unfolding the constructor field, identify this with the explicit
-  -- chart-pushed weak partial Lp coercion.
   change DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
     (d := Module.finrank ℝ E) 2 2
     (((chartPushedWeakPartialLp (I := I) (M := M) g α l₁
       (chartPushedPartialLipschitz_canonical (I := I) (M := M) g α l₁) u_h
      ) : EuclN → ℝ))
     (chartTargetEuclid (I := I) (M := M) α)
-  -- The canonical chosen first weak partial of `chartPushed POU α u_h.coeFn`
-  -- is `MemWkp 2 2 chartTarget` by `chosenWeakPartial_mem` applied to the
-  -- chart-`H³` hypothesis.
   have h_chosenFirst_memWkp_two :=
     chartPushedChosenFirstPartial_memWkp_two_of_memWkp_three
       (I := I) (M := M) g α h_chartPushed_memWkp32 l₁
-  -- The chart-pushed weak partial coercion is ae-equal to the chosen first
-  -- weak partial on `volume.restrict chartTargetEuclid α`, by the σ-compact
-  -- exhaustion lift of the precompact-open ae-equality
-  -- (already proved in `DiffChartBilinearH1ComplH3`).
   have h_ae := chartPushedWeakPartialLp_ae_eq_chosenFirstPartial_on_chartTarget
     (I := I) (M := M) g α hu_h l₁
-  -- Transfer `MemWkp 2 2` via the ae-equality.
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
     (k := 2) (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     (chartTargetEuclid_isOpen (I := I) (M := M) α) h_ae.symm).mp

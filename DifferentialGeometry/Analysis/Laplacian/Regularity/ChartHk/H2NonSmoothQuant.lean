@@ -61,16 +61,12 @@ open DifferentialGeometry.Analysis.Laplacian.ChartBilinearUniformDiffQuotBoundCa
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Headline: quantitative per-chart H² regularity -/
 
 /-- **Quantitative per-chart `H²` regularity from the chart-bilinear data.**
 
@@ -130,21 +126,11 @@ theorem h2_chart_loc_of_data_quantitative
               + (eLpNorm D.f_chart 2
                   ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2)) := by
   classical
-  -- ====================================================================
-  -- Step 1: Discharge the uniform difference-quotient bound. The constant
-  -- `C_geom` is built purely from the chart geometry (cutoff `χ` + smooth
-  -- elliptic extension `B`) and does NOT depend on `D`.
-  -- ====================================================================
   obtain ⟨C_geom, hC_geom_nn, hC_geom⟩ :=
     chartBilinearH1Compl_uniform_diffQuot_bound_of_data_quantitative
       (I := I) (M := M) (E := E) (H := H) (g := g) (α := α)
       hη hη_supp hη_range hN h_fderiv_eta hΩ' hΩ'_chart hΩ'_compact
       hη_in_Ω' hR₀_pos hh_supp_in_Ω' hη_one_on_Ω'' hΩ''_open.measurableSet
-  -- ====================================================================
-  -- Step 2: For each `D` and `(i, k)`, feed the discharged bound into the
-  -- hypothesis-bearing `H²` regularity theorem. The data-dependent factor
-  -- `√(DATA)` is absorbed into `M_bound i k := C_geom i k · √(DATA)`.
-  -- ====================================================================
   refine ⟨C_geom, hC_geom_nn, fun D i k => ?_⟩
   obtain ⟨g_ik, hg_ik_memLp, hg_ik_partial, hg_ik_norm⟩ :=
     h2_chart_loc_of_uniform_bound (I := I) (M := M) (g := g) (α := α)

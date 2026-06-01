@@ -104,13 +104,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## Core reduction: `MemW1p 2 chosenFChartDeriv` from `MemWkp 2 2 base.f_chart`
-
-The structural reduction step. From `MemWkp 2 2 base.f_chart` on the chart
-target, each chosen weak partial is in `MemWkp 1 2 = MemW1p 2`. Since
-`chosenFChartDeriv` is by definition such a chosen weak partial, the
-conclusion is immediate. -/
-
 /-- **Core reduction lemma.**
 
 If `base.f_chart` lies in `MemWkp 2 2 (chartTargetEuclid α)`, then the
@@ -134,27 +127,11 @@ theorem chosenFChartDeriv_memW1p_of_base_memWkp22
       (chosenFChartDeriv (I := I) (M := M) g α hu_h direction)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- The canonical chart-side derivative is by definition the chosen weak
-  -- `direction`-partial of `base.f_chart` on the chart target.
   unfold chosenFChartDeriv
-  -- From `MemWkp 2 2 base.f_chart Ω`, the chosen weak partial in any
-  -- coordinate direction lies in `MemWkp 1 2 Ω`.
   have h_step := h_base_f_chart_memWkp22.chosenWeakPartial_mem direction
-  -- `MemWkp 1 2 ↔ MemW1p 2`.
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p]
     at h_step
   exact h_step
-
-/-! ## Headline: `MemW1p 2 chosenFChartDeriv` from `u_h ∈ laplacianDomainPow g 2`
-
-The headline statement re-exposes the core reduction in the ergonomic
-shape requested by downstream consumers, taking the bulk chart-`H²`
-regularity of `base.f_chart` as the single residual hypothesis.
-
-This headline is mathematically the strongest form one can state at this
-layer: the residual hypothesis is mathematically equivalent (via the
-elliptic identity satisfied by the chart-pushed POU-cut representative)
-to the chart-`H⁴` regularity of `chartPushed POU α u_h.coeFn`. -/
 
 /-- **Headline: `MemW1p 2` chart-side regularity of `chosenFChartDeriv`,
 unconditional for `u_h ∈ laplacianDomainPow g 2`.**
@@ -196,21 +173,6 @@ theorem chosenFChartDeriv_memW1p_truly_unconditional
       (chartTargetEuclid (I := I) (M := M) α) :=
   chosenFChartDeriv_memW1p_of_base_memWkp22 (I := I) (M := M) g α hu_h l₁
     h_base_f_chart_memWkp22
-
-/-! ## Equivalent formulation in terms of chart-`H⁴` of `chartPushed POU α u_h.coeFn`
-
-The bulk chart-`H²` regularity of `base.f_chart` is mathematically equivalent
-(via the elliptic identity) to the chart-`H⁴` regularity of `chartPushed POU
-α u_h.coeFn`. We restate the headline using the latter as input, exposing
-the equivalence as a hypothesis on the chart-pushed function rather than on
-the right-hand side `base.f_chart`.
-
-The equivalence between the two hypotheses is the structural content of the
-chart-bilinear bootstrap: it is not unfolded here, but downstream consumers
-that have the chart-`H⁴` regularity of `chartPushed POU α u_h.coeFn` in
-hand (via, e.g., `ChartPushedMemWkpFourSmooth`) can supply the
-`MemWkp 2 2 base.f_chart` hypothesis from the chart-`H⁴` regularity by
-following the bootstrap chain through the chart-bilinear elliptic identity. -/
 
 /-- **Headline variant**: `MemW1p 2 chosenFChartDeriv` from chart-`H²` of
 `base.f_chart`, restated in convenient form.

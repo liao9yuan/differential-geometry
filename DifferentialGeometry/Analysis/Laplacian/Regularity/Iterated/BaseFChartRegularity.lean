@@ -100,8 +100,6 @@ open DifferentialGeometry.Analysis.Laplacian.GradInnerCLMChartFormula
 open DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -110,8 +108,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-! ## Membership of `chartPushedRaw α (η · v.toFun)` in `MemWkp (m+1) 2` -/
 
 /-- For smooth `v : SmoothScalar g`, the chart-pushed-raw of `etaTimesV α v.toFun`
 is in `MemWkp (m+1) 2 chartTargetEuclid α` (it is `ContDiff ℝ ∞` with compact
@@ -215,8 +211,6 @@ private lemma memWkp_partialDerivOnEuclid_etaTimesV
     (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     (chartTargetEuclid_isOpen (I := I) (M := M) α) h_ae).mpr h_chosen_mem
 
-/-! ## `W^{m+1,2}` bound for the strict-cutoff times `v` -/
-
 /-- The bound on `wkpNorm (m+1) 2 (chartPushedRaw α (η · v.toFun))`: there exists
 `C > 0` such that for every smooth `v`,
 `wkpNorm (m+1) 2 (chartPushedRaw α (η · v.toFun)) ≤ C · wkpNormChart g (m+1) 2 v.toFun`. -/
@@ -270,9 +264,6 @@ private lemma wkpNorm_chartPushedRaw_etaTimesV_le_self
     funext x; rfl
   rw [h_funext]
   exact hC_bound h_v_MemWkpChart
-
-/-! ## Order-`(m, m+1)` chart-direction partial bound for `η · v.toFun`
--/
 
 private lemma wkpNorm_partialDerivOnEuclid_etaTimesV_le_m
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ) :
@@ -357,8 +348,6 @@ private lemma wkpNorm_partialDerivOnEuclid_etaTimesV_le_m
             rw [hC_total_def]
             exact mul_le_mul_of_nonneg_right (hCmax_ge i) hC_strict_pos.le
 
-/-! ## `W^{m,2}` bound for the `gradInnerPiece` chart-pushed-raw -/
-
 private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ) :
     ∃ C : ℝ, 0 < C ∧ ∀ v : SmoothScalar g,
@@ -370,7 +359,6 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
       ENNReal.ofReal C * wkpNormChart (I := I) (M := M) g (m + 1) 2
         (fun x : M => v.toFun x) := by
   classical
-  -- Per-direction order-m smooth-multiplication constants.
   have h_per_i_smul : ∀ i : Fin (Module.finrank ℝ E), ∃ K : ℝ, 0 < K ∧
       ∀ {u : EuclN → ℝ},
         DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
@@ -411,10 +399,8 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
             (d := Module.finrank ℝ E) m 2 u
             (chartTargetEuclid (I := I) (M := M) α) := fun i =>
     (h_per_i_smul i).choose_spec.2
-  -- Order-(m, m+1) chart-direction partial bound for η · v.
   obtain ⟨C_partial, hC_partial_pos, hC_partial_bound⟩ :=
     wkpNorm_partialDerivOnEuclid_etaTimesV_le_m (I := I) (M := M) g α m
-  -- Combined constant.
   set sumK : ℝ := ∑ i : Fin (Module.finrank ℝ E), K i with hsumK_def
   have hsumK_nn : 0 ≤ sumK :=
     Finset.sum_nonneg (fun i _ => (hK_pos i).le)
@@ -423,7 +409,6 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
     rw [hCfinal_def]; linarith [mul_nonneg hsumK_nn hC_partial_pos.le]
   refine ⟨Cfinal, h_Cfinal_pos, ?_⟩
   intro v
-  -- Pointwise identity on chartTarget.
   have h_pointwise : ∀ y ∈ chartTargetEuclid (I := I) (M := M) α,
       chartPushedRaw (I := I) (M := M) α
           (gradInnerPiece (I := I) (M := M) g α v.toFun) y =
@@ -446,7 +431,6 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_congr_ae
         (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
         (chartTargetEuclid_isOpen (I := I) (M := M) α) h_ae]
-  -- Each summand is in MemWkp m 2.
   have h_partial_mem : ∀ i : Fin (Module.finrank ℝ E),
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) m 2
@@ -473,7 +457,6 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
       (Λgrad_contDiff (I := I) (M := M) g α i)
       (fun j hj y _ => hC_Λ_bound j hj y)
       (h_partial_mem i)
-  -- Membership of the finite sum via Finset.induction.
   have h_sum_mem_gen : ∀ (S : Finset (Fin (Module.finrank ℝ E))),
       (∀ ε ∈ S, DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) m 2
@@ -527,7 +510,6 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
               (etaTimesV (I := I) (M := M) α v.toFun) y)
         (chartTargetEuclid (I := I) (M := M) α) :=
     h_sum_mem_gen Finset.univ (fun i _ => h_summand_mem i)
-  -- Pull out the constant 2.
   have h_const2 :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) m 2
@@ -548,7 +530,6 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
       (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
       (chartTargetEuclid_isOpen (I := I) (M := M) α) h_sum_mem (2 : ℝ)
   rw [h_const2]
-  -- Triangle inequality for the finite sum.
   have h_triangle :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) m 2
@@ -636,7 +617,6 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
     rw [Real.enorm_eq_ofReal (by norm_num : (0 : ℝ) ≤ 2)]
   rw [h_two_norm]
   refine le_trans (mul_le_mul_of_nonneg_left h_triangle (zero_le _)) ?_
-  -- Per-i bound: K_i · C_partial · wkpNormChart (m+1) 2 v.
   have h_each_bound : ∀ i : Fin (Module.finrank ℝ E),
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) m 2
@@ -667,7 +647,6 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
       _ = ENNReal.ofReal (K i * C_partial) *
               wkpNormChart (I := I) (M := M) g (m + 1) 2 v.toFun := by
             rw [← mul_assoc, ENNReal.ofReal_mul (hK_pos i).le]
-  -- Sum per-i bounds.
   have h_sum_bound : ∑ i : Fin (Module.finrank ℝ E),
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) m 2
@@ -694,8 +673,6 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
   refine ENNReal.ofReal_le_ofReal ?_
   rw [hCfinal_def]; linarith [mul_nonneg hsumK_nn hC_partial_pos.le]
 
-/-! ## Order monotonicity helper for `wkpNormChart` -/
-
 private lemma wkpNormChart_le_of_le
     (g : SmoothRiemannianMetric I M) (j k : ℕ) (hjk : j ≤ k)
     (p : ℝ≥0∞) (u : M → ℝ) :
@@ -706,8 +683,6 @@ private lemma wkpNormChart_le_of_le
   refine ENNReal.tsum_le_tsum (fun α => ?_)
   exact DifferentialGeometry.Analysis.Sobolev.Chart.EuclideanIterated.wkpNorm_mono_order
     (d := Module.finrank ℝ E) (j := j) (k := k) hjk
-
-/-! ## `W^{m,2}` bound for the `lapPiece` chart-pushed-raw -/
 
 private lemma wkpNorm_chartPushedRaw_lapPiece_le
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ) :
@@ -720,7 +695,6 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le
       ENNReal.ofReal C * wkpNormChart (I := I) (M := M) g (m + 1) 2
         (fun x : M => v.toFun x) := by
   classical
-  -- Step 1: order-m Leibniz factorisation for lapPiece.
   obtain ⟨b, hb_smooth, _, hb_one_on_tsupp, hb_supp⟩ :=
     exists_chart_cutoff_M (I := I) (M := M) α
   set bΔρα : M → ℝ := fun x : M =>
@@ -735,7 +709,6 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le
     exact (tsupport_smul_subset_left (f := b)
       (g := ((laplacianOfChartPOU (I := I) (M := M) g α : C^∞⟮I, M; ℝ⟯) : M → ℝ))).trans
       hb_supp
-  -- Uniform iteratedFDeriv bound on the smooth extension up to order m.
   obtain ⟨CΛ, hCΛ_nn, hCΛ_bound⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Chart.smoothExtensionScalar_iteratedFDeriv_bound
       (I := I) (M := M) α hbΔρα_smooth hbΔρα_supp m
@@ -744,20 +717,17 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le
     contDiff_smoothExtensionScalar (I := I) (M := M) α hbΔρα_smooth hbΔρα_supp
   have hΛ_bound : ∀ j ≤ m, ∀ y ∈ chartTargetEuclid (I := I) (M := M) α,
       ‖iteratedFDeriv ℝ j Λ y‖ ≤ CΛ := fun j hj y _ => hCΛ_bound j hj y
-  -- Apply the order-m Euclidean Leibniz bound.
   obtain ⟨K, hK_pos, hK_bound⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_smul_smooth_bounded_le
       (d := Module.finrank ℝ E) m (p := 2) (by norm_num) (by norm_num)
       (chartTargetEuclid_isOpen (I := I) (M := M) α)
       hΛ_smooth hCΛ_nn hΛ_bound
-  -- Step 2: strict-cutoff W^{m,2} bound for chartPushedRaw α (η · v).
   obtain ⟨C_strict, hC_strict_pos, hC_strict_bound⟩ :=
     wkpNorm_chartPushedRaw_etaTimesV_le_self (I := I) (M := M) g α m
   set Cfinal : ℝ := K * C_strict with hCfinal_def
   have h_Cfinal_pos : 0 < Cfinal := mul_pos hK_pos hC_strict_pos
   refine ⟨Cfinal, h_Cfinal_pos, ?_⟩
   intro v
-  -- The pointwise factorisation.
   have h_factor : (fun y : EuclN => chartPushedRaw (I := I) (M := M) α
         (lapPiece (I := I) (M := M) g α v.toFun) y) =ᵐ[
         volume.restrict (chartTargetEuclid (I := I) (M := M) α)]
@@ -768,7 +738,6 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le
     refine Filter.Eventually.of_forall (fun y hy => ?_)
     exact chartPushedRaw_lapPiece_factor (I := I) (M := M) g α v.toFun
       hb_one_on_tsupp hy
-  -- wkpNorm is invariant under a.e. equality.
   have h_norm_eq :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) m 2
@@ -784,14 +753,12 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le
       (d := Module.finrank ℝ E) (by norm_num)
       (chartTargetEuclid_isOpen (I := I) (M := M) α) h_factor
   rw [h_norm_eq]
-  -- W^{m,2} membership of chartPushedRaw α (η · v).
   have hH_Wm2 : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) m 2
       (chartPushedRaw (I := I) (M := M) α
         (etaTimesV (I := I) (M := M) α v.toFun))
       (chartTargetEuclid (I := I) (M := M) α) :=
     memWkp_chartPushedRaw_etaTimesV (I := I) (M := M) g α m v
-  -- Apply Leibniz and strict-cutoff bounds, then order monotonicity.
   have h_mono : wkpNormChart (I := I) (M := M) g m 2 v.toFun ≤
       wkpNormChart (I := I) (M := M) g (m + 1) 2 v.toFun :=
     wkpNormChart_le_of_le (I := I) (M := M) g m (m + 1)
@@ -821,8 +788,6 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le
             wkpNormChart (I := I) (M := M) g (m + 1) 2 v.toFun := by
           rw [hCfinal_def]
 
-/-! ## Headline: polymorphic `W^{m,2}` bilinear bound -/
-
 /-- **Polymorphic `W^{m,2}` bilinear bound**. For a closed Riemannian manifold
 `(M, g)` and a chart-atlas index `α : M`, the smooth chart-pulled Leibniz
 residual `smoothFChartResidual g α v` satisfies a quantitative `W^{m,2}` bound
@@ -845,13 +810,11 @@ theorem wkpNorm_smoothFChartResidual_le_wkpNormChart_wkpM
     wkpNorm_chartPushedRaw_lapPiece_le (I := I) (M := M) g α m
   refine ⟨C_grad + C_lap, by linarith, ?_⟩
   intro v
-  -- Step 1: smoothFChartResidual =ᵐ chartPushedRaw α (smoothRep g α v).
   have h_ae := smoothFChartResidual_ae_eq_chartPushedRaw_smoothRep
     (I := I) (M := M) g α v
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_congr_ae
         (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
         (chartTargetEuclid_isOpen (I := I) (M := M) α) h_ae]
-  -- Step 2: pointwise decomposition.
   have h_ptwise : chartPushedRaw (I := I) (M := M) α
         (smoothRep (I := I) (M := M) g α v) =
       fun y => -chartPushedRaw (I := I) (M := M) α
@@ -861,7 +824,6 @@ theorem wkpNorm_smoothFChartResidual_le_wkpNormChart_wkpM
     funext y
     exact chartPushedRaw_smoothRep_eq (I := I) (M := M) g α v y
   rw [h_ptwise]
-  -- Step 3: memberships of the two pieces in MemWkp m 2.
   have hP_grad : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) m 2
       (chartPushedRaw (I := I) (M := M) α
@@ -910,7 +872,6 @@ theorem wkpNorm_smoothFChartResidual_le_wkpNormChart_wkpM
       (d := Module.finrank ℝ E)
       (chartTargetEuclid_isOpen (I := I) (M := M) α)
       hCP_smooth hCP_cpt hCP_tsupp (by norm_num : (1 : ℝ≥0∞) ≤ 2) m
-  -- Step 4: triangle inequality. Rewrite -A - B = (-1)·A + (-1)·B.
   have h_rewrite : (fun y : EuclN => -chartPushedRaw (I := I) (M := M) α
           (gradInnerPiece (I := I) (M := M) g α v.toFun) y -
         chartPushedRaw (I := I) (M := M) α
@@ -998,8 +959,6 @@ theorem wkpNorm_smoothFChartResidual_le_wkpNormChart_wkpM
     _ = ENNReal.ofReal (C_grad + C_lap) *
         wkpNormChart (I := I) (M := M) g (m + 1) 2 v.toFun := by
             rw [ENNReal.ofReal_add hC_grad_pos.le hC_lap_pos.le]
-
-/-! ## Chart-target `MemWkp m 2` of the smooth chart-pulled residual -/
 
 /-- For every `m : ℕ` and every smooth scalar `v : SmoothScalar g`, the smooth
 chart-pulled Leibniz residual `smoothFChartResidual g α v` lies in
@@ -1109,13 +1068,6 @@ lemma smoothFChartResidual_memWkp_m
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
     hp_one hΩ_open h_ae.symm).mp hP_sum
 
-/-! ## Hypothesis-bearing `MemWkp m 2` discharge of `fChartResidual`
-
-The constructor mirrors `memWkp_fChartResidual_of_wkpNorm_cauchy_identification_w22`
-at level `m`: given a smooth approximator sequence with chart-target
-`W^{m,2}`-Cauchy + identification properties, the chart-pulled residual lies in
-`MemWkp m 2 chartTargetEuclid α`. -/
-
 /-- **Density-form discharge via the chart-target `W^{m,2}`-Cauchy hypothesis
 and identification of the Cauchy limit.**
 
@@ -1154,38 +1106,23 @@ theorem memWkp_fChartResidual_of_wkpNorm_cauchy_identification_wkpM
         (I := I) (M := M) g α u_h)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- Each smooth residual is in MemWkp m 2.
   have h_smooth_Wmp : ∀ n,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) m 2
         (smoothFChartResidual (I := I) (M := M) g α (v n))
         (chartTargetEuclid (I := I) (M := M) α) := fun n =>
     smoothFChartResidual_memWkp_m (I := I) (M := M) g α m (v n)
-  -- Cauchy completeness of MemWkp m 2.
   obtain ⟨F_lim, hF_lim_memWkp, hF_lim_tendsto⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.exists_limit_of_wkpNorm_cauchy
       (hΩ_open := chartTargetEuclid_isOpen (I := I) (M := M) α)
       (k := m) (p := 2) (hp_one := by norm_num) (hp_top := by norm_num)
       (u := fun n => smoothFChartResidual (I := I) (M := M) g α (v n))
       h_smooth_Wmp h_cauchy
-  -- Identification.
   have hF_lim_aeEq := h_identification F_lim hF_lim_memWkp hF_lim_tendsto
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
     (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     hF_lim_aeEq).mp hF_lim_memWkp
-
-/-! ## Headline: hypothesis-bearing chart-target `MemWkp m 2` of `base.f_chart`
-
-The base.f_chart decomposition `base.f_chart =ᵐ fChartPiecePreimage + fChartResidual`
-on `volume.restrict chartTargetEuclid α` reduces the chart-target
-`MemWkp m 2`-discharge of `base.f_chart` to the two pieces:
-
-* `fChartPiecePreimage` — provided by the chart-`H^m` hypothesis on the
-  partition-of-unity-weighted `(1-Δ_g)u_h` representative.
-* `fChartResidual` — provided by the hypothesis-bearing discharge applied
-  to a chart-target `W^{m,2}`-Cauchy + identification approximator sequence.
--/
 
 /-- **Hypothesis-bearing chart-target `MemWkp m 2` of `base.f_chart`** (general
 form taking the a.e. decomposition as an external input).
@@ -1244,7 +1181,6 @@ theorem base_f_chart_memWkp_m_of_hypotheses
       (d := Module.finrank ℝ E) m 2 F_base
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- Step 1: fChartResidual ∈ MemWkp m 2 via the hypothesis-bearing discharge.
   have h_residual_memWkp :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) m 2
@@ -1253,7 +1189,6 @@ theorem base_f_chart_memWkp_m_of_hypotheses
         (chartTargetEuclid (I := I) (M := M) α) :=
     memWkp_fChartResidual_of_wkpNorm_cauchy_identification_wkpM
       (I := I) (M := M) g α m u_h v h_cauchy h_identification
-  -- Step 2: sum is in MemWkp m 2.
   have hΩ_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have hp_one : (1 : ℝ≥0∞) ≤ 2 := by norm_num
@@ -1266,7 +1201,6 @@ theorem base_f_chart_memWkp_m_of_hypotheses
         (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.add hp_one hΩ_open
       h_piece1_memWkp h_residual_memWkp
-  -- Transfer via a.e. equality.
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
     hp_one hΩ_open h_decomp_ae.symm).mp h_sum_memWkp
 

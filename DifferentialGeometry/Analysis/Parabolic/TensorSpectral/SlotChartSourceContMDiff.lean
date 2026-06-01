@@ -53,8 +53,6 @@ open DifferentialGeometry.Tensor
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
 open Tensor0SBundle
 
-/-! ## Chart-source smoothness of the trivialised parallel CLM (general input) -/
-
 section ParallelGeneral
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -70,8 +68,6 @@ a local instance so that the `chartLeviCivitaParallelCLM` infrastructure
 private local instance parallelGeneral_complete_E : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
-/-! ### Chart-source smoothness of `chartE_section_repr` -/
-
 /-- On the chart-`α` source (= the trivialisation base set), the chart-
 trivialised representation of a smooth vector field is `C^∞`. -/
 private lemma chartE_section_repr_contMDiffOn_chartSource
@@ -82,7 +78,6 @@ private lemma chartE_section_repr_contMDiffOn_chartSource
       ((chartAt H α).source) := by
   classical
   intro b hb_src
-  -- The chart source equals the trivialization base set.
   have hbase_eq :
       (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source :=
     DifferentialGeometry.Integral.Measure.trivializationAt_baseSet_eq_chartAt_source α
@@ -112,8 +107,6 @@ private lemma chartE_section_repr_basis_component_contMDiffOn_chartSource
   intro b hb
   exact (hcoord_clm.contMDiffAt).comp_contMDiffWithinAt b (hbase b hb)
 
-/-! ### Chart-source smoothness of `chartChristoffel` -/
-
 /-- Under `[I.Boundaryless]`, the chart target is open, hence equal to its
 interior. Therefore `chartChristoffel` precomposed with `extChartAt I α` is
 `ContMDiffOn` on the chart-`α` source. -/
@@ -127,12 +120,10 @@ private lemma chartChristoffel_contMDiffOn_chartSource
   intro b hb_src
   have hφ_at : ContMDiffAt I 𝓘(ℝ, E) ∞ (extChartAt I α) b :=
     contMDiffAt_extChartAt' (I := I) (n := ∞) hb_src
-  -- The chart target is open under `[I.Boundaryless]`, so `interior = target`.
   have h_target_open : IsOpen ((extChartAt I α).target : Set E) :=
     isOpen_extChartAt_target α
   have h_int_eq : interior ((extChartAt I α).target : Set E) =
       (extChartAt I α).target := h_target_open.interior_eq
-  -- `extChartAt I α b ∈ target` from `b ∈ chartAt.source`.
   have hb_ext_src : b ∈ (extChartAt I α).source := by
     rw [extChartAt_source]; exact hb_src
   have hxφ_tgt : extChartAt I α b ∈ (extChartAt I α).target :=
@@ -140,7 +131,6 @@ private lemma chartChristoffel_contMDiffOn_chartSource
   have hxφ_int : extChartAt I α b ∈
       interior ((extChartAt I α).target : Set E) := by
     rw [h_int_eq]; exact hxφ_tgt
-  -- Christoffel smoothness on the interior.
   have hΓ_on : ContDiffOn ℝ ∞ (chartChristoffel (I := I) g α i j k)
       (interior (extChartAt I α).target) :=
     chartChristoffel_contDiffOn_interior (I := I) g α i j k
@@ -148,8 +138,6 @@ private lemma chartChristoffel_contMDiffOn_chartSource
       (extChartAt I α b) :=
     hΓ_on.contDiffAt (isOpen_interior.mem_nhds hxφ_int)
   exact (hΓ_chart.comp_contMDiffAt hφ_at).contMDiffWithinAt
-
-/-! ### Chart-source smoothness of `christoffelCorrectionCLM` -/
 
 /-- Smoothness of the chart-side Christoffel-correction CLM as a CLM-valued
 function of `b : M` on the chart-`α` source. -/
@@ -162,11 +150,9 @@ private lemma christoffelCorrectionCLM_contMDiffOn_chartSource
       ((chartAt H α).source) := by
   classical
   unfold christoffelCorrectionCLM
-  -- Triple finite-sum: each summand is smooth on chart source.
   refine contMDiffOn_finset_sum (t := Finset.univ) (fun i _ => ?_)
   refine contMDiffOn_finset_sum (t := Finset.univ) (fun j _ => ?_)
   refine contMDiffOn_finset_sum (t := Finset.univ) (fun k _ => ?_)
-  -- Goal: smoothness of `b ↦ scalar(b) • Cᵢₖ` where Cᵢₖ is constant.
   have hrepr_smooth :=
     chartE_section_repr_basis_component_contMDiffOn_chartSource
       (I := I) (M := M) α (X := X) hX (j := j)
@@ -183,8 +169,6 @@ private lemma christoffelCorrectionCLM_contMDiffOn_chartSource
       ((chartAt H α).source) :=
     contMDiffOn_const
   exact hscalar.smul hblock_const
-
-/-! ### Identification: hom-trivialised image equals `christoffelCorrectionCLM` -/
 
 /-- On the chart-`α` source, the hom-bundle trivialisation at `α` applied to
 the chart Levi-Civita parallel CLM equals the chart-side Christoffel-
@@ -203,7 +187,6 @@ private lemma chartLeviCivitaParallelCLM_trivImage_eq_christoffelCorrectionCLM
     DifferentialGeometry.Integral.Measure.trivializationAt_baseSet_eq_chartAt_source α
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [hbase_eq]; exact hb
-  -- The `.2` of the hom-bundle trivialisation is `inCoordinates`.
   have htriv :
       (trivializationAt (E →L[ℝ] E)
           (fun b' : M => TangentSpace I b' →L[ℝ] TangentSpace I b') α
@@ -211,9 +194,7 @@ private lemma chartLeviCivitaParallelCLM_trivImage_eq_christoffelCorrectionCLM
         ContinuousLinearMap.inCoordinates E (TangentSpace I) E (TangentSpace I)
           α b α b (chartLeviCivitaParallelCLM (I := I) g α b X) := rfl
   rw [htriv]
-  -- Unfold both sides into a CLM equality on `w : E`.
   ext w
-  -- LHS = `trivToE α b ((parallelCLM) (trivFromE α b w))`.
   have hLHS_unfold :
       ContinuousLinearMap.inCoordinates E (TangentSpace I) E (TangentSpace I)
         α b α b (chartLeviCivitaParallelCLM (I := I) g α b X) w =
@@ -221,20 +202,13 @@ private lemma chartLeviCivitaParallelCLM_trivImage_eq_christoffelCorrectionCLM
         ((chartLeviCivitaParallelCLM (I := I) g α b X) (trivFromE (I := I) α b w)) :=
     rfl
   rw [hLHS_unfold]
-  -- Substitute the parallel-CLM evaluation formula.
   rw [chartLeviCivitaParallelCLM_apply (I := I) g α b X (trivFromE (I := I) α b w)]
-  -- `trivToE α b (trivFromE α b (·)) = ·` on the base set.
   rw [trivToE_trivFromE (I := I) α hb_base]
-  -- Rewrite `christoffelCorrection ... (trivFromE α b w) = christoffelCorrectionCLM g α X b w`.
-  -- The `Y`-argument of `christoffelCorrection` is `trivToE α b (X b)`, which
-  -- equals `chartE_section_repr α X b` by definition.
   have hY :
       trivToE (I := I) α b (X b) =
         chartE_section_repr (I := I) α X b := rfl
   rw [hY]
   exact christoffelCorrection_eq_christoffelCorrectionCLM (I := I) g α X hb_base w
-
-/-! ### Public headline: chart-source `ContMDiffOn` of the trivialised image -/
 
 /-- **Chart-source `C^∞` smoothness of the hom-trivialised chart Levi-Civita
 parallel CLM.** For a closed Riemannian manifold `(M, g)`, a chart-base point
@@ -271,8 +245,6 @@ theorem chartLeviCivitaParallelCLM_trivImage_contMDiffOn_chartSource
 
 end ParallelGeneral
 
-/-! ## Chart-source smoothness of the trivialised parallel CLM at chart-basis -/
-
 section ParallelChartBasis
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -284,8 +256,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance parallelChartBasis_complete_E : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
-
-/-! ### Chart-source smoothness of the chart-basis representation -/
 
 /-- Chart-source smoothness of `b ↦ chartE_section_repr α (chartBasisVecFiber α j) b`.
 
@@ -303,16 +273,13 @@ private lemma chartE_section_repr_chartBasisVec_eq_const_on_chart_source
     DifferentialGeometry.Integral.Measure.trivializationAt_baseSet_eq_chartAt_source α
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [hbase_eq]; exact hb
-  -- `chartE_section_repr α X b = trivToE α b (X b)`.
   have h1 :
       chartE_section_repr (I := I) α (chartBasisVecFiber (I := I) α j) b =
         trivToE (I := I) α b (chartBasisVecFiber (I := I) α j b) := rfl
   rw [h1]
-  -- `trivToE α b (chartBasisVecFiber α j b) = (chartModelBasis E) j` on baseSet.
   have h2 := trivializationAt_chartBasisVec_snd (I := I) α j (x := b) hb_base
   change (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b
       (chartBasisVecFiber (I := I) α j b) = (chartModelBasis E) j
-  -- `continuousLinearMapAt R b = linearMapAt R b` (the underlying linear map).
   rw [Bundle.Trivialization.continuousLinearMapAt_apply
     (R := ℝ) (trivializationAt E (TangentSpace I) α) b]
   rw [(trivializationAt E (TangentSpace I) α).coe_linearMapAt_of_mem
@@ -334,7 +301,6 @@ private lemma chartE_section_repr_chartBasisVec_basis_component_contMDiffOn_char
             (chartBasisVecFiber (I := I) α j) b)) j')
       ((chartAt H α).source) := by
   classical
-  -- On chart source, the scalar equals `(if j' = j then 1 else 0)`.
   have h_const_on :
       ∀ b ∈ (chartAt H α).source,
         ((chartModelBasis E).repr
@@ -357,17 +323,10 @@ private lemma chartE_section_repr_chartBasisVec_basis_component_contMDiffOn_char
     by_cases hj' : j' = j
     · simp [hj']
     · simp [hj']
-  -- Smoothness via congruence with the constant function.
   refine ContMDiffOn.congr (contMDiffOn_const (c :=
     (if j' = j then (1 : ℝ) else 0))) ?_
   intro b hb
   exact h_const_on b hb
-
-/-! ### Chart-source smoothness of the chart Christoffel symbols (per-component)
-
-This is a re-export of the chain used in the general-input chart-source
-smoothness proof above. We restate the per-component version locally; this
-file's downstream consumers reuse this form. -/
 
 private lemma chartChristoffel_contMDiffOn_chartSource'
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -398,8 +357,6 @@ private lemma chartChristoffel_contMDiffOn_chartSource'
     hΓ_on.contDiffAt (isOpen_interior.mem_nhds hxφ_int)
   exact (hΓ_chart.comp_contMDiffAt hφ_at).contMDiffWithinAt
 
-/-! ### Chart-source smoothness of the chart-basis christoffel-correction CLM -/
-
 /-- The chart-side Christoffel-correction CLM for the chart-basis vector
 field `chartBasisVecFiber α j` is chart-source smooth as a CLM-valued
 function of `b`. The proof reuses the triple-finite-sum decomposition from
@@ -414,7 +371,6 @@ private lemma christoffelCorrectionCLM_chartBasisVec_contMDiffOn_chartSource
       ((chartAt H α).source) := by
   classical
   unfold christoffelCorrectionCLM
-  -- Triple finite-sum: each summand is chart-source smooth.
   refine contMDiffOn_finset_sum (t := Finset.univ) (fun i _ => ?_)
   refine contMDiffOn_finset_sum (t := Finset.univ) (fun j' _ => ?_)
   refine contMDiffOn_finset_sum (t := Finset.univ) (fun k _ => ?_)
@@ -436,9 +392,6 @@ private lemma christoffelCorrectionCLM_chartBasisVec_contMDiffOn_chartSource
       ((chartAt H α).source) :=
     contMDiffOn_const
   exact hscalar.smul hblock_const
-
-/-! ### Public theorem: chart-source `ContMDiffOn` of the trivialised parallel CLM
-for the chart-basis vector field -/
 
 /-- **Chart-source smoothness of the hom-trivialised chart Levi-Civita
 parallel CLM for the chart-basis vector field.**
@@ -469,8 +422,6 @@ theorem chartLeviCivitaParallelCLM_chartBasisVec_trivImage_contMDiffOn_chartSour
             (chartBasisVecFiber (I := I) α j)⟩).2)
       ((chartAt H α).source) := by
   classical
-  -- Use the chart-source smoothness of `christoffelCorrectionCLM` plus the
-  -- bridge identity from the general-input proof.
   have h_χ : ContMDiffOn I 𝓘(ℝ, E →L[ℝ] E) ∞
       (christoffelCorrectionCLM (I := I) g α
         (chartBasisVecFiber (I := I) α j))
@@ -479,8 +430,6 @@ theorem chartLeviCivitaParallelCLM_chartBasisVec_trivImage_contMDiffOn_chartSour
       (I := I) (M := M) g α j
   refine h_χ.congr ?_
   intro b hb
-  -- The bridge identity: trivialised parallel CLM = `christoffelCorrectionCLM`
-  -- on chart source. Apply pointwise.
   classical
   have hbase_eq :
       (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source :=
@@ -488,7 +437,6 @@ theorem chartLeviCivitaParallelCLM_chartBasisVec_trivImage_contMDiffOn_chartSour
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [hbase_eq]; exact hb
   ext w
-  -- LHS: trivialised image at b, unfolded via `inCoordinates`.
   have hLHS_unfold :
       (trivializationAt (E →L[ℝ] E)
           (fun b' : M => TangentSpace I b' →L[ℝ] TangentSpace I b') α
@@ -522,8 +470,6 @@ theorem chartLeviCivitaParallelCLM_chartBasisVec_trivImage_contMDiffOn_chartSour
 
 end ParallelChartBasis
 
-/-! ## Chart-source smoothness of the trivialised slot-substitution CLM -/
-
 section SlotSubst
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -534,13 +480,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance slotSubst_complete_E : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
-
-/-! ### Auxiliary smoothness of the trivialised parallel-CLM at a basis vector
-
-For a chart-basis input `chartBasisVecFiber α j`, the previous section gives
-chart-source smoothness of `b ↦ inCoordinates (...) (Φ_b) : E →L[ℝ] E`.
-Specialising to the scalar matrix entry against the model basis yields a
-smooth scalar. -/
 
 /-- For a chart-basis input `chartBasisVecFiber α j`, the matrix entry
 `(chartModelBasis E).repr (Φ_b_triv (chartModelBasis E j_in)) i_out` is
@@ -571,7 +510,6 @@ private lemma chartLeviCivitaParallelCLM_chartBasisVec_matrixEntry_contMDiffOn_c
         ((chartAt H α).source) :=
     chartLeviCivitaParallelCLM_chartBasisVec_trivImage_contMDiffOn_chartSource
       (I := I) (M := M) g α j
-  -- Apply CLM at the model basis vector (j_in).
   have hbasis_smooth : ContMDiffOn I 𝓘(ℝ, E) ∞
       (fun (_ : M) => (chartModelBasis E) j_in)
       ((chartAt H α).source) := contMDiffOn_const
@@ -605,11 +543,6 @@ private lemma chartLeviCivitaParallelCLM_chartBasisVec_matrixEntry_contMDiffOn_c
     hcoord_smooth.comp_contMDiffOn hΦv_smooth
   exact hfinal
 
-/-! ### Inner round-trip on chart source
-
-For `b` in the chart source (= tangent trivialisation base set at `α`), the
-roundtrip `chartJ α b (chartJinv α b v) = v` and likewise the other way. -/
-
 private lemma chartJ_chartJinv_on_chartSource
     (α : M) {b : M} (hb : b ∈ (chartAt H α).source) (v : E) :
     chartJ (I := I) (M := M) α b
@@ -626,11 +559,6 @@ private lemma chartJinv_chartJ_self_on_chartSource
   have hbase : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := hb
   exact chartJinv_chartJ_self (I := I) (M := M) α hbase v
 
-/-! ### Expansion of `(eval0SCLE r).symm (Pi.single Idx 1)` on a basis tuple
-
-The key characterising property: `((eval0SCLE r).symm (Pi.single Idx 1))`
-evaluated at `chartModelBasis E ∘ φ` is the indicator `[φ = Idx]`. -/
-
 private lemma eval0SCLE_symm_pi_single_at_basis_tuple
     (r : ℕ) (Idx : Fin r → Fin (Module.finrank ℝ E))
     (φ : Fin r → Fin (Module.finrank ℝ E)) :
@@ -643,20 +571,6 @@ private lemma eval0SCLE_symm_pi_single_at_basis_tuple
     (Pi.single Idx (1 : ℝ))
   have h' := congr_fun h φ
   simpa [eval0SCLE_apply] using h'
-
-/-! ### Closed-form expansion of the trivialised slot-substitution CLM
-
-The trivialised image of `tensorSlotSubstCLM r b (tangentSlotCLM r k Φ_b)`
-on chart source has matrix-entry expression at `(Idx, Jdx)`:
-
-* `M_{Idx k, Jdx k}` if `Idx i = Jdx i` for all `i ≠ k`,
-* `0` otherwise.
-
-Here `M` is the matrix of `Φ_b_triv := chartJ ∘ Φ_b ∘ chartJinv` in the
-model basis. This follows from the bridge identity
-`triv_continuousLinearMapAt_eq_chartRSTwistInv_toModel`, multilinearity of
-the basis "delta multilinear form" `((eval0SCLE r).symm (Pi.single Idx 1))`,
-and the round-trip identity `chartJ ∘ chartJinv = id` on chart source. -/
 
 /-- Closed-form expansion of `((triv_RR α) ⟨b, T_b⟩).2 ((eval0SCLE r).symm (Pi.single Idx 1)) (chartModelBasis ∘ Jdx)`
 for `T_b = tensorSlotSubstCLM r b (tangentSlotCLM r k Φ_b)` and `Φ_b =
@@ -1034,8 +948,6 @@ private lemma slotSubst_trivProj_entry_closedForm
     rw [hphi_zero a]
     simp
 
-/-! ### Headline -/
-
 /-- **Chart-source smoothness of the hom-trivialised slot-substitution CLM
 for the chart-Levi-Civita parallel CLM at a chart-basis vector field.**
 
@@ -1148,8 +1060,6 @@ theorem tensorSlotSubstCLM_chartLeviCivita_chartBasisVec_trivImage_contMDiffOn_c
 
 end SlotSubst
 
-/-! ## Chart-source smoothness of the trivialised slot-correction sections -/
-
 section SlotCorrection
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -1160,15 +1070,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance slotCorrection_complete_E : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
-
-/-! ### Auxiliary bridge: trivialisation projection of a composition
-
-For two smooth CLM-valued bundle sections of compatible types, the
-trivialisation projection of their pointwise composition equals the
-composition of the individual projections on the chart-`α` base set. This is
-the structural fact that the Hom-bundle pretrivialisation formula commutes
-with composition once the inner chart-`(α, b)`-twist round-trips back to the
-identity. -/
 
 /-- The trivialisation-projection of `(T b).comp S_b` on chart source, where
 `T b ∈ TensorRSSpace r s I b` and `S_b ∈ TensorRSSpace r r I b`. The result
@@ -1465,8 +1366,6 @@ private lemma triv_compOutput_eq_trivS_compL_trivT
       (fun i => chartJinv (I := I) (M := M) α b (w i))
   rw [hround]
 
-/-! ### The input-slot trivialised image is chart-source `ContMDiffOn` -/
-
 /-- **Headline (input slot).**
 For a closed Riemannian manifold `(M, g)`, a chart base point `α : M`, a
 chart-basis direction `j : Fin (Module.finrank ℝ E)`, an input slot
@@ -1590,8 +1489,6 @@ theorem chartTensorRSInputSlotCorrection_chartBasisVec_trivImage_contMDiffOn_cha
   refine hcomp.congr ?_
   intro b hb
   exact hbridge b hb
-
-/-! ### The output-slot trivialised image is chart-source `ContMDiffOn` -/
 
 /-- **Headline (output slot).**
 For a closed Riemannian manifold `(M, g)`, a chart base point `α : M`, a

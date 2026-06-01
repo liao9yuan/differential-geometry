@@ -98,26 +98,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The chart-locality-free realisation
-
-Threading the chart-locality-free eigenvector resolvent of `SmoothApprox.lean`
-through the chain — `TensorH1ComplToTensorL2`, the rescaling by `μ⁻¹`, and the
-continuous chart-component map `tensorL2ChartComponentCLM` — realises the
-canonical chart component of the eigenvector as the `L²`-limit of the concrete
-Euclidean chart components of genuine smooth sections. The eigenbasis vector and
-the eigenvector resolvent are keyed by compactness, not by a chart-locality
-hypothesis. -/
 
 /-- **The canonical smooth `H¹`-approximating sequence of the eigenvector
 resolvent (chart-locality-free).** Chart-locality-free twin of

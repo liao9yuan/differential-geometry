@@ -37,8 +37,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## Main pointwise identity -/
-
 /-- **Pointwise cross-chart identity for non-smooth inputs.**
 
 For two chart points `γ α : M` on a closed Riemannian manifold and a fixed
@@ -86,7 +84,6 @@ theorem chartPushed_chartPullback_pointwise_identity
               (chartPullback I α v) y =
             ργ_pre y * v (Φ.toFun y)) := by
   classical
-  -- Set K_M := K_α ∩ tsupport ρ_γ.
   set K_M : Set M := K_α ∩ tsupport
     ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M γ
       : C^∞⟮I, M; ℝ⟯) : M → ℝ) with hKM_def
@@ -95,14 +92,11 @@ theorem chartPushed_chartPullback_pointwise_identity
   have hKM_in_α : K_M ⊆ (chartAt H α).source := fun x hx => hK_α_in_α hx.1
   have hKM_in_γ : K_M ⊆ (chartAt H γ).source := fun x hx =>
     DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M γ hx.2
-  -- Apply chartTransition_smoothDiffeoBoundedAtOrder_strict with K = K_M, kmax = 1.
-  -- This works uniformly whether K_M is empty or not.
   obtain ⟨Ω_γα, Ω_αγ, hΩγα_open, hΩαγ_open, hΩγα_subset_target,
     hΩαγ_subset_target, hΩγα_subset_overlap, _hΩαγ_subset_overlap,
     hKM_image_in_Ωγα, Φ, hΦ_eq_on_Ωγα, _hΦ_inv_eq_on_Ωαγ⟩ :=
     chartTransition_smoothDiffeoBoundedAtOrder_strict (I := I) (M := M)
       γ α hKM_compact hKM_in_γ hKM_in_α 1
-  -- Notation for the chart-γ Euclidean image of K_M.
   set K_E_γ : Set EuclN :=
     (fun x : M => (toEuclidean (E := E)) (extChartAt I γ x)) '' K_M
     with hKEγ_def
@@ -116,7 +110,6 @@ theorem chartPushed_chartPullback_pointwise_identity
     have h_target : extChartAt I γ x ∈ (extChartAt I γ).target :=
       (extChartAt I γ).map_source hx_ext
     rw [← hxy]; exact ⟨extChartAt I γ x, h_target, rfl⟩
-  -- Build a smooth cutoff η_γ_loc supported in Ω_γα ∩ chart-γ target.
   set Uγ : Set EuclN := Ω_γα ∩ chartTargetEuclid (I := I) (M := M) γ with hUγ_def
   have hUγ_open : IsOpen Uγ :=
     hΩγα_open.inter (chartTargetEuclid_isOpen (I := I) (M := M) γ)
@@ -128,7 +121,6 @@ theorem chartPushed_chartPullback_pointwise_identity
       (d := Module.finrank ℝ E) hKEγ_compact hUγ_open hKEγ_in_Uγ
   have hη_γ_loc_supp_Ωγα : tsupport η_γ_loc ⊆ Ω_γα :=
     fun y hy => (hη_γ_loc_supp hy).1
-  -- Set ργE := etaEuclid γ ρ_γ_M.
   set ρ_γ_M : M → ℝ :=
     ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M γ
       : C^∞⟮I, M; ℝ⟯) : M → ℝ) with hρ_γ_M_def
@@ -160,7 +152,6 @@ theorem chartPushed_chartPullback_pointwise_identity
     norm_le_one_of_range_Icc hη_γ_loc_range
   obtain ⟨C_η_γ_grad, _hC_η_γ_pos, hC_η_γ_grad⟩ :=
     exists_grad_bound_of_compactSupport_smooth hη_γ_loc_smooth hη_γ_loc_cpt
-  -- ργ_pre := η_γ_loc · ργE.
   set ργ_pre : EuclN → ℝ := fun y => η_γ_loc y * ργE y with hργ_pre_def
   have hργ_pre_smooth : ContDiff ℝ (⊤ : ℕ∞) ργ_pre :=
     hη_γ_loc_smooth.mul hργE_smooth
@@ -198,7 +189,6 @@ theorem chartPushed_chartPullback_pointwise_identity
     (hργ_pre_bound y).trans (le_max_left _ _)
   have hC_grad : ∀ y : EuclN, ‖fderiv ℝ ργ_pre y‖ ≤ C := fun y =>
     (hC_combined_grad_bound y).trans (le_max_right _ _)
-  -- Identity: for x ∈ K_M, Φ.toFun ((toEucl)(extChartAt I γ x)) = (toEucl)(extChartAt I α x).
   have hΦ_eq_KM : ∀ x ∈ K_M, Φ.toFun ((toEuclidean (E := E)) (extChartAt I γ x)) =
       (toEuclidean (E := E)) (extChartAt I α x) := by
     intro x hxK
@@ -211,7 +201,6 @@ theorem chartPushed_chartPullback_pointwise_identity
     have hx_chart : x ∈ (chartAt H γ).source := hKM_in_γ hxK
     rw [hy_def]
     exact chartTransitionEuclid_eq_chartα_image (I := I) (M := M) γ α hx_chart
-  -- Support inclusion for ργ_pre.
   have hργ_pre_supp_in_Uγ : tsupport ργ_pre ⊆ Uγ := by
     refine subset_trans ?_ hη_γ_loc_supp
     refine closure_mono ?_
@@ -223,10 +212,8 @@ theorem chartPushed_chartPullback_pointwise_identity
       change η_γ_loc y * ργE y = 0
       rw [h0]; ring
     exact Function.mem_support.mpr h_η_ne
-  -- Chart-α image of K_M ⊆ Ω_αγ via Φ.
   have hKEα_in_Ωαγ : (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) '' K_M ⊆ Ω_αγ := by
     rintro w ⟨x, hxK, hxw⟩
-    -- w = chart-α image of x ∈ K_M; equals Φ.toFun (chart-γ image of x).
     have hΦ_x := hΦ_eq_KM x hxK
     have h_y_in_Ωγα : (toEuclidean (E := E)) (extChartAt I γ x) ∈ Ω_γα :=
       hKM_image_in_Ωγα ⟨x, hxK, rfl⟩
@@ -234,16 +221,12 @@ theorem chartPushed_chartPullback_pointwise_identity
       rw [hΦ_x]; exact hxw
     rw [← h_w_eq]
     exact Φ.bijOn.mapsTo h_y_in_Ωγα
-  -- Build the existential package.
   refine ⟨Ω_γα, Ω_αγ, hΩγα_open, hΩαγ_open, hΩγα_subset_target, hΩαγ_subset_target,
     Φ, ργ_pre, hργ_pre_smooth,
     ⟨C, hC_nn, fun y => ⟨hC_norm y, hC_grad y⟩⟩, hργ_pre_supp_in_Uγ,
     hKEα_in_Ωαγ, hΦ_eq_on_Ωγα, ?_⟩
-  -- The pointwise identity for any v with the support hypothesis, on chart-γ target.
   intro v hv_supp y hy_target
-  -- Set z := chart-γ inverse of y.
   set z : M := (extChartAt I γ).symm ((toEuclidean (E := E)).symm y) with hz_def
-  -- y ∈ chartTargetEuclid γ ⇒ (toEucl).symm y ∈ extChartAt I γ target ⇒ z ∈ chart-γ source.
   have hsymm_target : (toEuclidean (E := E)).symm y ∈ (extChartAt I γ).target := by
     have := hy_target
     rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at this
@@ -254,7 +237,6 @@ theorem chartPushed_chartPullback_pointwise_identity
     rw [DifferentialGeometry.Integral.Measure.extChartAt_source_eq_chartAt_source
       (I := I) (M := M)] at hz_source
     exact hz_source
-  -- Compute chartPushed = ρ_γ_M(z) * chartPullback α v z.
   have h_pushed_eq : chartPushed (I := I) (M := M)
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ
       (chartPullback I α v) y =
@@ -262,30 +244,23 @@ theorem chartPushed_chartPullback_pointwise_identity
     unfold chartPushed
     rfl
   rw [h_pushed_eq]
-  -- ργ_pre y = η_γ_loc y * ργE y.
   have hργ_pre_y : ργ_pre y = η_γ_loc y * ργE y := rfl
   rw [hργ_pre_y]
-  -- Compute ργE(y) = ρ_γ_M(z), since y ∈ chartTargetEuclid γ.
   have hργE_y : ργE y = ρ_γ_M z := by
     rw [hργE_def]
     exact etaEuclid_apply_of_mem (I := I) (M := M) γ ρ_γ_M hy_target
-  -- Case split on y ∈ tsupport η_γ_loc.
   by_cases h_y_in_supp_η_γ : y ∈ tsupport η_γ_loc
-  · -- Case A: y ∈ tsupport η_γ_loc ⊆ Ω_γα.
-    have hy_in_Ωγα : y ∈ Ω_γα := hη_γ_loc_supp_Ωγα h_y_in_supp_η_γ
-    -- Sub-case based on whether ρ_γ_M(z) = 0.
+  · have hy_in_Ωγα : y ∈ Ω_γα := hη_γ_loc_supp_Ωγα h_y_in_supp_η_γ
     by_cases hρ_zero : ρ_γ_M z = 0
     · rw [hρ_zero, hργE_y, hρ_zero]; ring
     · have hz_in_tsupp_ρ : z ∈ tsupport ρ_γ_M := by
         have h_in : z ∈ Function.support ρ_γ_M := by
           simp only [Function.mem_support, ne_eq]; exact hρ_zero
         exact subset_tsupport _ h_in
-      -- Sub-case based on whether z ∈ chart α source.
       by_cases hz_in_α : z ∈ (chartAt H α).source
       · rw [chartPullback_apply_of_mem (I := I) (M := M) α v hz_in_α]
         by_cases hz_in_Kα : z ∈ K_α
-        · -- z ∈ K_α ⇒ z ∈ K_M ⇒ y ∈ K_E_γ ⇒ η_γ_loc(y) = 1.
-          have hz_in_KM : z ∈ K_M := ⟨hz_in_Kα, hz_in_tsupp_ρ⟩
+        · have hz_in_KM : z ∈ K_M := ⟨hz_in_Kα, hz_in_tsupp_ρ⟩
           have hy_in_KEγ : y ∈ K_E_γ := by
             refine ⟨z, hz_in_KM, ?_⟩
             change (toEuclidean (E := E)) (extChartAt I γ z) = y
@@ -307,8 +282,7 @@ theorem chartPushed_chartPullback_pointwise_identity
             exact h
           rw [hΦ_y, hη_γ_loc_y, hργE_y]
           ring
-        · -- z ∉ K_α: chart-α(z) ∉ tsupport v ⇒ v(...) = 0.
-          have hvα_z_eq : (toEuclidean (E := E)) (extChartAt I α z) ∉ tsupport v := by
+        · have hvα_z_eq : (toEuclidean (E := E)) (extChartAt I α z) ∉ tsupport v := by
             intro hin
             have := hv_supp hin
             rcases this with ⟨x', hx'_K, hx'_eq⟩
@@ -340,8 +314,7 @@ theorem chartPushed_chartPullback_pointwise_identity
             rw [← hy_eq]
             exact chartTransitionEuclid_eq_chartα_image (I := I) (M := M) γ α hz_chartγ
           rw [hΦ_y, hv_z]; ring
-      · -- z ∉ chart α source: impossible since y ∈ Ω_γα ⊆ chartOverlapEuclid γ α.
-        rw [chartPullback_apply_of_notMem (I := I) (M := M) α v hz_in_α]
+      · rw [chartPullback_apply_of_notMem (I := I) (M := M) α v hz_in_α]
         exfalso
         have hy_in_overlap : y ∈ chartOverlapEuclid (I := I) (M := M) γ α :=
           hΩγα_subset_overlap hy_in_Ωγα
@@ -359,11 +332,9 @@ theorem chartPushed_chartPullback_pointwise_identity
           exact (extChartAt I γ).left_inv h_w_chart_γ
         rw [h_z_eq_w] at hz_in_α
         exact hz_in_α hw_inter.2
-  · -- Case B: y ∉ tsupport η_γ_loc.
-    have h_zero_η : η_γ_loc y = 0 := image_eq_zero_of_notMem_tsupport h_y_in_supp_η_γ
+  · have h_zero_η : η_γ_loc y = 0 := image_eq_zero_of_notMem_tsupport h_y_in_supp_η_γ
     rw [h_zero_η]
     simp only [zero_mul]
-    -- Need: chartPushed = 0 in this case (LHS already = ρ_γ_M(z) * chartPullback α v z).
     by_cases hρ_zero : ρ_γ_M z = 0
     · rw [hρ_zero]; ring
     · have hz_in_tsupp_ρ : z ∈ tsupport ρ_γ_M := by
@@ -373,7 +344,6 @@ theorem chartPushed_chartPullback_pointwise_identity
       by_cases hpb_zero : chartPullback I α v z = 0
       · rw [hpb_zero]; ring
       · exfalso
-        -- chartPullback z ≠ 0 ⇒ z ∈ chart-α source AND v(chart-α z) ≠ 0.
         have hz_chartα : z ∈ (chartAt H α).source := by
           by_contra hcontra
           apply hpb_zero
@@ -401,7 +371,6 @@ theorem chartPushed_chartPullback_pointwise_identity
         have h_inj := (extChartAt I α).injOn hx'_α_ext hz_α_ext h_eq_chart
         have hz_in_K_α : z ∈ K_α := by rw [← h_inj]; exact hx'_K_α
         have hz_in_K_M : z ∈ K_M := ⟨hz_in_K_α, hz_in_tsupp_ρ⟩
-        -- y is the chart-γ image of z ∈ K_M, hence y ∈ K_E_γ ⊆ tsupport η_γ_loc.
         have hy_in_KEγ : y ∈ K_E_γ := by
           refine ⟨z, hz_in_K_M, ?_⟩
           change (toEuclidean (E := E)) (extChartAt I γ z) = y

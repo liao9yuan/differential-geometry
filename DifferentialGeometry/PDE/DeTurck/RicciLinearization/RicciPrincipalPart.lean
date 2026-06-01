@@ -67,14 +67,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## Differentiability infrastructure
-
-The Leibniz expansion of the outer chart derivative needs two differentiability facts:
-the chart inverse Gram entries are differentiable at chart-interior points, and every
-`partialDeriv` of a perturbation component field is globally differentiable (it is even
-globally `C^∞`).  Both are immediate from existing smoothness results; we re-expose them
-here as the non-private lemmas the linearization proofs consume. -/
-
 section Differentiability
 
 /-- The chart inverse Gram entry `G^{jl}` is differentiable at every point in the
@@ -154,8 +146,6 @@ lemma partialDeriv_partialDeriv_perturbation_swap
     have hfderiv : ContDiff ℝ ∞ (fderiv ℝ (h a b)) :=
       hsmooth.fderiv_right (by rw [ENat.coe_top_add_one])
     exact (hfderiv.differentiable (by simp)).differentiableAt
-  -- `partialDeriv p (partialDeriv q u) y` is the iterated `fderiv` against the
-  -- model-basis vectors `e_p`, `e_q`.
   have hkey : ∀ r s : Fin (Module.finrank ℝ E),
       partialDeriv (E := E) r (partialDeriv (E := E) s (h a b)) y =
         (fderiv ℝ (fderiv ℝ (h a b)) y ((chartModelBasis E) r))
@@ -173,22 +163,6 @@ lemma partialDeriv_partialDeriv_perturbation_swap
   exact hsymm2 _ _
 
 end Differentiability
-
-/-! ## The second-order part of the linearized Ricci tensor
-
-`chartRicciSecondOrderPart` is the second-order-in-`h` part of the linearized chart
-Ricci tensor.  Since the `Γ·Γ` terms and the `D(G⁻¹)` part of the linearized
-Christoffel symbol each carry at most one chart derivative of `h`, the only `∂²h` terms
-of `D\operatorname{Rc}_{ik}[h]` come from the outer chart derivative applied to the
-principal part `chartLinearizedChristoffelPrincipal`.  The definition is the literal
-chart-derivative combination
-
-$$\sum_j \bigl(\partial_j [D\Gamma_{\mathrm{principal}}]^j{}_{ik}
-    - \partial_k [D\Gamma_{\mathrm{principal}}]^j{}_{ij}\bigr)(y).$$
-
-The index convention follows `chartChristoffel`: the principal linearized Christoffel
-part with upper index `j` and lower index pair `(i, k)` is
-`chartLinearizedChristoffelPrincipal g α h i k j`. -/
 
 /-- The **second-order-in-`h` part of the linearized chart Ricci tensor** in the chart
 at `α`, in the perturbation direction `h`, evaluated at the chart-coordinate point
@@ -218,13 +192,6 @@ def chartRicciSecondOrderPart (g : SmoothRiemannianMetric I M) (α : M)
           partialDeriv (E := E) k
             (fun y' => chartLinearizedChristoffelPrincipal (I := I) g α h i j j y') y) :=
   rfl
-
-/-! ## The explicit `∂²h` symbol and the first-order remainder
-
-The four-term `∂²h` expression `chartRicciSecondOrderPrincipalSymbol` is what the
-principal-symbol substitution `∂_a∂_b ↦ ξ_aξ_b` will act on.  The complementary
-`(∂G⁻¹)·(∂h)` terms are collected in `chartRicciFirstOrderRemainder`; they carry only
-one chart derivative of `h` and are invisible to the second-order symbol. -/
 
 /-- The **explicit second-order symbol expression** of the linearized chart Ricci
 tensor: the four-term `∂²h` combination
@@ -311,14 +278,6 @@ def chartRicciFirstOrderRemainder (g : SmoothRiemannianMetric I M) (α : M)
              partialDeriv (E := E) l (h i j) y) :=
   rfl
 
-/-! ## The Leibniz expansion of the outer chart derivative
-
-The single technical lemma `partialDeriv_chartLinearizedChristoffelPrincipal` expands
-`∂_d [DΓ_principal]^j{}_{ab}` by the Leibniz product rule, term by term across the
-`Finset.sum` over `l`.  The two branches — `∂_d` hitting `G^{jl}` and `∂_d` hitting the
-`h`-derivative combination — are kept separate; the first is the (first-order)
-inverse-Gram branch, the second carries a second derivative of `h`. -/
-
 /-- **Leibniz expansion of the outer chart derivative of the principal linearized
 Christoffel part.**  Differentiating
 `[DΓ_principal]^j{}_{ab}(y') = ½∑_l G^{jl}(y')·(∂_a h_{lb} + ∂_b h_{la} − ∂_l h_{ab})(y')`
@@ -341,13 +300,10 @@ lemma partialDeriv_chartLinearizedChristoffelPrincipal
              partialDeriv (E := E) d (partialDeriv (E := E) b (h l a)) y -
              partialDeriv (E := E) d (partialDeriv (E := E) l (h a b)) y)) := by
   classical
-  -- Abbreviation for the `h`-derivative combination appearing under the `l`-sum.
   set S : Fin (Module.finrank ℝ E) → E → ℝ := fun l y' =>
     partialDeriv (E := E) a (h l b) y' +
       partialDeriv (E := E) b (h l a) y' -
       partialDeriv (E := E) l (h a b) y' with hS
-  -- `S l` is differentiable at every point: it is a sum/difference of `partialDeriv`s
-  -- of perturbation component fields, each of which is globally smooth.
   have hS_diff : ∀ l : Fin (Module.finrank ℝ E), DifferentiableAt ℝ (S l) y := by
     intro l
     have h1 : DifferentiableAt ℝ (partialDeriv (E := E) a (h l b)) y :=
@@ -357,37 +313,30 @@ lemma partialDeriv_chartLinearizedChristoffelPrincipal
     have h3 : DifferentiableAt ℝ (partialDeriv (E := E) l (h a b)) y :=
       partialDeriv_perturbation_differentiableAt h l a b y
     exact (h1.add h2).sub h3
-  -- The inverse Gram entry is differentiable at the interior point `y`.
   have hG_diff : ∀ l : Fin (Module.finrank ℝ E),
       DifferentiableAt ℝ (chartInvGramOnE (I := I) g α j l) y :=
     fun l => chartInvGramOnE_differentiableAt_interior (I := I) g α j l hy
-  -- Each summand `l ↦ G^{jl}·(S l)` is differentiable at `y`.
   have hsummand_diff : ∀ l : Fin (Module.finrank ℝ E),
       DifferentiableAt ℝ
         (fun y' => chartInvGramOnE (I := I) g α j l y' * S l y') y :=
     fun l => (hG_diff l).mul (hS_diff l)
-  -- The principal Christoffel part is `(1/2) • (∑_l G^{jl}·(S l))`.
   have hrewrite : (fun y' => chartLinearizedChristoffelPrincipal (I := I) g α h a b j y') =
       fun y' => (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
         chartInvGramOnE (I := I) g α j l y' * S l y' := by
     funext y'
     rw [chartLinearizedChristoffelPrincipal_def]
   rw [hrewrite]
-  -- Pull the constant `1/2` out of the partial derivative.
   rw [partialDeriv_const_mul (1 / 2 : ℝ)
         (fun y' => ∑ l : Fin (Module.finrank ℝ E),
           chartInvGramOnE (I := I) g α j l y' * S l y')
         (DifferentiableAt.fun_sum (fun l _ => hsummand_diff l))]
   congr 1
-  -- Distribute the partial derivative across the finite sum.
   rw [partialDeriv_sum Finset.univ
         (fun l y' => chartInvGramOnE (I := I) g α j l y' * S l y')
         (fun l _ => hsummand_diff l)]
   refine Finset.sum_congr rfl (fun l _ => ?_)
-  -- Leibniz product rule on each `(j, l)` summand.
   rw [partialDeriv_mul (chartInvGramOnE (I := I) g α j l) (S l)
         (hG_diff l) (hS_diff l)]
-  -- Expand the partial derivative of `S l`, which is a sum/difference of three terms.
   have hSderiv : partialDeriv (E := E) d (S l) y =
       partialDeriv (E := E) d (partialDeriv (E := E) a (h l b)) y +
         partialDeriv (E := E) d (partialDeriv (E := E) b (h l a)) y -
@@ -406,21 +355,6 @@ lemma partialDeriv_chartLinearizedChristoffelPrincipal
     rw [partialDeriv_add (E := E)
           (partialDeriv (E := E) a (h l b)) (partialDeriv (E := E) b (h l a)) h1 h2]
   rw [hSderiv, hS]
-
-/-! ## The expanded `∂²h` formula
-
-The deliverable identity: `chartRicciSecondOrderPart`, the literal chart-derivative
-combination, equals the explicit `∂²h` symbol `chartRicciSecondOrderPrincipalSymbol`
-plus the genuinely-first-order remainder `chartRicciFirstOrderRemainder`.
-
-The proof Leibniz-expands both outer derivatives via
-`partialDeriv_chartLinearizedChristoffelPrincipal`.  The resulting six `∂²h` terms are
-$$+\partial_j\partial_i h_{lk} + \partial_j\partial_k h_{li} - \partial_j\partial_l h_{ik}
-  - \partial_k\partial_i h_{lj} - \partial_k\partial_j h_{li} + \partial_k\partial_l h_{ij};$$
-Schwarz symmetry on the smooth component field `h_{li}` gives
-`∂_j∂_k h_{li} = ∂_k∂_j h_{li}`, so the `+∂_j∂_k h_{li}` and `−∂_k∂_j h_{li}` terms
-cancel, leaving exactly the four-term symbol.  The complementary `(∂G⁻¹)·(∂h)` branches
-assemble into the remainder. -/
 
 /-- **The expanded `∂²h` formula for the second-order part of the linearized chart Ricci
 tensor.**  At chart-interior points, the literal chart-derivative combination
@@ -442,8 +376,6 @@ theorem chartRicciSecondOrderPart_eq_principalSymbol_add_remainder
         chartRicciFirstOrderRemainder (I := I) g α h i k y := by
   classical
   rw [chartRicciSecondOrderPart_def]
-  -- Expand each outer derivative `∂_j[DΓ_principal]^j{}_{ik}` and
-  -- `∂_k[DΓ_principal]^j{}_{ij}` via the Leibniz lemma.
   have hexpand : ∀ j : Fin (Module.finrank ℝ E),
       partialDeriv (E := E) j
           (fun y' => chartLinearizedChristoffelPrincipal (I := I) g α h i k j y') y -
@@ -471,8 +403,6 @@ theorem chartRicciSecondOrderPart_eq_principalSymbol_add_remainder
     rw [partialDeriv_chartLinearizedChristoffelPrincipal (I := I) g α h i k j j hy,
       partialDeriv_chartLinearizedChristoffelPrincipal (I := I) g α h i j j k hy]
   rw [Finset.sum_congr rfl (fun j _ => hexpand j)]
-  -- Split the `j`-sum into the four contributions: the two `∂²h` branches and the two
-  -- inverse-Gram branches.
   have hsplit : ∀ j : Fin (Module.finrank ℝ E),
       ((1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
         (partialDeriv (E := E) j (chartInvGramOnE (I := I) g α j l) y *
@@ -513,13 +443,10 @@ theorem chartRicciSecondOrderPart_eq_principalSymbol_add_remainder
              partialDeriv (E := E) j (h l i) y -
              partialDeriv (E := E) l (h i j) y)) := by
     intro j
-    -- Each `l`-sum of `(A + B)` splits as `∑ A + ∑ B`.
     rw [Finset.sum_add_distrib, Finset.sum_add_distrib, mul_add, mul_add]
     ring
   rw [Finset.sum_congr rfl (fun j _ => hsplit j)]
-  -- Distribute the `j`-sum over the `[∂²h-block] + [∂G⁻¹-block]` split.
   rw [Finset.sum_add_distrib]
-  -- Identify the second `j`-sum with the first-order remainder.
   have hrem : (∑ j : Fin (Module.finrank ℝ E),
       ((1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
           partialDeriv (E := E) j (chartInvGramOnE (I := I) g α j l) y *
@@ -534,7 +461,6 @@ theorem chartRicciSecondOrderPart_eq_principalSymbol_add_remainder
       chartRicciFirstOrderRemainder (I := I) g α h i k y := by
     rw [chartRicciFirstOrderRemainder_def]
     rw [Finset.sum_sub_distrib, ← Finset.mul_sum, ← Finset.mul_sum]
-  -- Identify the first `j`-sum with the principal symbol after Schwarz cancellation.
   have hsymbol : (∑ j : Fin (Module.finrank ℝ E),
       ((1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
           chartInvGramOnE (I := I) g α j l y *
@@ -548,7 +474,6 @@ theorem chartRicciSecondOrderPart_eq_principalSymbol_add_remainder
              partialDeriv (E := E) k (partialDeriv (E := E) l (h i j)) y))) =
       chartRicciSecondOrderPrincipalSymbol (I := I) g α h i k y := by
     rw [chartRicciSecondOrderPrincipalSymbol_def]
-    -- Combine the two `(1/2)·∑_l` blocks into a single `(1/2)·∑_l` of a difference.
     have hcombine : ∀ j : Fin (Module.finrank ℝ E),
         ((1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
             chartInvGramOnE (I := I) g α j l y *
@@ -570,8 +495,6 @@ theorem chartRicciSecondOrderPart_eq_principalSymbol_add_remainder
       rw [← mul_sub, ← Finset.sum_sub_distrib]
       congr 1
       refine Finset.sum_congr rfl (fun l _ => ?_)
-      -- Schwarz symmetry on the component field `h l i`, cancelling the two
-      -- `∂\partial h_{li}` terms in the difference of bracketed expressions.
       rw [partialDeriv_partialDeriv_perturbation_swap h l i j k y]
       ring
     rw [Finset.sum_congr rfl (fun j _ => hcombine j), ← Finset.mul_sum]
@@ -596,15 +519,6 @@ theorem chartRicciSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_source
   have hx_int : extChartAt I α x ∈ interior (extChartAt I α).target :=
     extChartAt_target_subset_interior_of_boundaryless (I := I) α hx_target
   exact chartRicciSecondOrderPart_eq_principalSymbol_add_remainder (I := I) g α h i k hx_int
-
-/-! ## First-order character of the remainder
-
-The remainder `chartRicciFirstOrderRemainder` carries **exactly one** chart derivative
-of any component field of `h`.  We make this precise by exhibiting it as a finite sum of
-terms each syntactically of the form `(coefficient)·partialDeriv _ (h _ _) _`, where the
-coefficient — a chart derivative of an inverse-Gram entry, scaled by `±1/2` — does not
-involve `h` at all.  This is the structural fact that justifies the remainder being
-invisible to the second-order principal symbol. -/
 
 /-- **The first-order remainder, exhibited as a sum of first-order terms.**  The
 remainder `chartRicciFirstOrderRemainder` is a finite double sum (over `j, l`) of terms,
@@ -640,24 +554,12 @@ theorem chartRicciFirstOrderRemainder_eq_first_order_sum
               partialDeriv (E := E) l (h i j) y) := by
   classical
   rw [chartRicciFirstOrderRemainder_def]
-  -- Push the constant `1/2` fully inside both double sums.
   simp only [Finset.mul_sum]
-  -- Combine the two double sums into a single one, then match summand by summand.
   rw [← Finset.sum_sub_distrib]
   refine Finset.sum_congr rfl (fun j _ => ?_)
   rw [← Finset.sum_sub_distrib]
   refine Finset.sum_congr rfl (fun l _ => ?_)
   ring
-
-/-! ## Linearity in the perturbation direction
-
-All three objects — the second-order part, the explicit `∂²h` symbol, and the
-first-order remainder — are `ℝ`-linear in the perturbation `h`.  Linearity of the
-second-order part follows directly from `h`-linearity of the principal linearized
-Christoffel part; linearity of the symbol and the remainder is read off their explicit
-formulas through the `partialDeriv` algebra. -/
-
-/-! ### Linearity of the second-order part -/
 
 /-- The second-order part of the linearized Ricci tensor vanishes on the zero
 perturbation. -/
@@ -698,8 +600,6 @@ theorem chartRicciSecondOrderPart_add
   rw [chartRicciSecondOrderPart_def, chartRicciSecondOrderPart_def,
     chartRicciSecondOrderPart_def, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl (fun j _ => ?_)
-  -- Additivity of each outer derivative, via `h`-additivity of the principal part and
-  -- additivity of `partialDeriv`.
   have hadd_ik : partialDeriv (E := E) j
         (fun y' => chartLinearizedChristoffelPrincipal (I := I) g α (h₁ + h₂) i k j y')
         y =
@@ -749,8 +649,6 @@ theorem chartRicciSecondOrderPart_smul
   rw [chartRicciSecondOrderPart_def, chartRicciSecondOrderPart_def, smul_eq_mul,
     Finset.mul_sum]
   refine Finset.sum_congr rfl (fun j _ => ?_)
-  -- Homogeneity of each outer derivative, via `h`-homogeneity of the principal part and
-  -- the constant-scalar `partialDeriv` rule.
   have hsmul_ik : partialDeriv (E := E) j
         (fun y' => chartLinearizedChristoffelPrincipal (I := I) g α (c • h) i k j y')
         y =
@@ -780,8 +678,6 @@ theorem chartRicciSecondOrderPart_smul
   rw [hsmul_ik, hsmul_ij]
   ring
 
-/-! ### Linearity of the explicit `∂²h` symbol -/
-
 /-- The explicit second-order symbol vanishes on the zero perturbation. -/
 @[simp] lemma chartRicciSecondOrderPrincipalSymbol_zero
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -790,8 +686,6 @@ theorem chartRicciSecondOrderPart_smul
       (0 : ChartMetricPerturbation E) i k y = 0 := by
   classical
   rw [chartRicciSecondOrderPrincipalSymbol_def]
-  -- Each iterated partial derivative of a zero component field is the zero function,
-  -- hence vanishes after the inner and outer derivative.
   have hiter : ∀ p q a b : Fin (Module.finrank ℝ E),
       partialDeriv (E := E) p
           (partialDeriv (E := E) q ((0 : ChartMetricPerturbation E) a b)) y = 0 := by
@@ -902,7 +796,6 @@ theorem chartRicciSecondOrderPrincipalSymbol_smul
     ring
   rw [Finset.sum_congr rfl (fun j _ =>
     Finset.sum_congr rfl (fun l _ => hsummand j l))]
-  -- Pull the constant `c` out of every inner `l`-sum, then out of the `j`-sum.
   have hinner : ∀ j : Fin (Module.finrank ℝ E),
       (∑ l : Fin (Module.finrank ℝ E),
         c * (chartInvGramOnE (I := I) g α j l y *
@@ -919,8 +812,6 @@ theorem chartRicciSecondOrderPrincipalSymbol_smul
     fun j => by rw [← Finset.mul_sum]
   rw [Finset.sum_congr rfl (fun j _ => hinner j), ← Finset.mul_sum]
   ring
-
-/-! ### Linearity of the first-order remainder -/
 
 /-- The first-order remainder vanishes on the zero perturbation. -/
 @[simp] lemma chartRicciFirstOrderRemainder_zero
@@ -970,7 +861,6 @@ theorem chartRicciFirstOrderRemainder_add
   classical
   rw [chartRicciFirstOrderRemainder_def, chartRicciFirstOrderRemainder_def,
     chartRicciFirstOrderRemainder_def]
-  -- Expand each `(h₁ + h₂)` component field through `partialDeriv_add`, term by term.
   have hsummand1 : ∀ j l : Fin (Module.finrank ℝ E),
       partialDeriv (E := E) j (chartInvGramOnE (I := I) g α j l) y *
         (partialDeriv (E := E) i ((h₁ + h₂) l k) y +
@@ -1037,7 +927,6 @@ theorem chartRicciFirstOrderRemainder_add
         Finset.sum_congr rfl (fun l _ => hsummand1 j l)),
     Finset.sum_congr rfl (fun j _ =>
         Finset.sum_congr rfl (fun l _ => hsummand2 j l))]
-  -- Split the double sums of `(A + B)` and recombine.
   rw [Finset.sum_congr rfl (fun j _ => Finset.sum_add_distrib),
     Finset.sum_congr rfl (fun j _ => Finset.sum_add_distrib),
     Finset.sum_add_distrib, Finset.sum_add_distrib, mul_add, mul_add]
@@ -1110,22 +999,10 @@ theorem chartRicciFirstOrderRemainder_smul
         Finset.sum_congr rfl (fun l _ => hsummand1 j l)),
     Finset.sum_congr rfl (fun j _ =>
         Finset.sum_congr rfl (fun l _ => hsummand2 j l))]
-  -- Pull the constant `c` out of every sum.
   rw [Finset.sum_congr rfl (fun j _ => (Finset.mul_sum _ _ c).symm),
     Finset.sum_congr rfl (fun j _ => (Finset.mul_sum _ _ c).symm),
     ← Finset.mul_sum, ← Finset.mul_sum]
   ring
-
-/-! ## Symmetry observations
-
-The principal `∂²h` symbol is symmetric in the lower index pair `(i, k)`.  This is the
-linearized analogue of the Ricci tensor's symmetry.  Unlike the symmetry of the
-principal linearized Christoffel part — which is term-by-term per summand — the symmetry
-of the symbol genuinely uses Schwarz symmetry of the mixed partials together with a
-relabeling of the dummy summation index `l ↔ j` and the symmetry of the chart inverse
-Gram matrix `G^{jl} = G^{lj}`.  Since the perturbation component fields are globally
-`C^∞`, Schwarz applies everywhere, so the symmetry holds at every point of the model
-space — no chart-interior hypothesis is needed. -/
 
 /-- **Symmetry of the explicit second-order symbol** in the index pair `(i, k)`.  The
 four-term `∂²h` formula is invariant under `i ↔ k`: each of the four terms of the
@@ -1140,7 +1017,6 @@ theorem chartRicciSecondOrderPrincipalSymbol_symm
   classical
   rw [chartRicciSecondOrderPrincipalSymbol_def, chartRicciSecondOrderPrincipalSymbol_def]
   congr 1
-  -- Split each four-term symbol bracket into its four separate double sums.
   have hsplit : ∀ p q : Fin (Module.finrank ℝ E),
       (∑ j : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
@@ -1206,8 +1082,6 @@ theorem chartRicciSecondOrderPrincipalSymbol_symm
     rw [Finset.sum_congr rfl (fun j _ => hinner j)]
     rw [Finset.sum_sub_distrib, Finset.sum_sub_distrib, Finset.sum_add_distrib]
   rw [hsplit i k, hsplit k i]
-  -- Match the four terms of `Symbol(k, i)` with those of `Symbol(i, k)`.
-  -- Term A: `∑ G^{jl} ∂_j∂_k h_{li}` ↦ `∑ G^{jl} ∂_k∂_l h_{ij}` (the `(i,k)` second term).
   have hA : (∑ j : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
           chartInvGramOnE (I := I) g α j l y *
@@ -1221,7 +1095,6 @@ theorem chartRicciSecondOrderPrincipalSymbol_symm
     refine Finset.sum_congr rfl (fun l _ => ?_)
     rw [chartInvGramOnE_symm (I := I) g α l j y, h.symm_fun j i,
       partialDeriv_partialDeriv_perturbation_swap h i j l k y]
-  -- Term B: `∑ G^{jl} ∂_i∂_l h_{kj}` ↦ `∑ G^{jl} ∂_j∂_i h_{lk}` (the `(i,k)` first term).
   have hB : (∑ j : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
           chartInvGramOnE (I := I) g α j l y *
@@ -1235,7 +1108,6 @@ theorem chartRicciSecondOrderPrincipalSymbol_symm
     refine Finset.sum_congr rfl (fun l _ => ?_)
     rw [chartInvGramOnE_symm (I := I) g α l j y, h.symm_fun k l,
       partialDeriv_partialDeriv_perturbation_swap h l k i j y]
-  -- Term C: `∑ G^{jl} ∂_j∂_l h_{ki}` ↦ `∑ G^{jl} ∂_j∂_l h_{ik}` (the `(i,k)` third term).
   have hC : (∑ j : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
           chartInvGramOnE (I := I) g α j l y *
@@ -1247,7 +1119,6 @@ theorem chartRicciSecondOrderPrincipalSymbol_symm
     refine Finset.sum_congr rfl (fun j _ => ?_)
     refine Finset.sum_congr rfl (fun l _ => ?_)
     rw [h.symm_fun k i]
-  -- Term D: `∑ G^{jl} ∂_i∂_k h_{lj}` ↦ `∑ G^{jl} ∂_k∂_i h_{lj}` (the `(i,k)` fourth term).
   have hD : (∑ j : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
           chartInvGramOnE (I := I) g α j l y *

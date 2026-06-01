@@ -55,8 +55,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [BoundarylessManifold I M] [T2Space M]
 
-/-! ### The autonomised vector field on `ℝ × M` -/
-
 /--
 **Autonomisation of a time-dependent vector field.** The time-dependent field
 `X : ℝ → (x : M) → TangentSpace I x` on `M` becomes the autonomous field
@@ -138,8 +136,6 @@ theorem hasDerivAt_one_eq_self_on_Ioo (φ : ℝ → ℝ) {a b : ℝ}
     · exact h0mem
   simp only at hkey; rw [hval] at hkey; linarith
 
-/-! ### Local genuine integral flow in bare form -/
-
 /--
 **Local genuine integral flow, bare manifold form.** Given a time-dependent
 vector field `X` whose autonomisation `(1, X)` on `ℝ × M` is `C¹` (the clean
@@ -168,7 +164,6 @@ theorem time_dependent_vf_local_integral_flow_bare [CompleteSpace E]
           ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t))) := by
   obtain ⟨c, hc0, hcurve⟩ :=
     exists_isMIntegralCurveAt_of_contMDiffAt_boundaryless 0 (hX (0, x))
-  -- Extract a metric ball on which the pointwise `HasMFDerivAt` holds.
   rw [IsMIntegralCurveAt, Filter.eventually_iff_exists_mem] at hcurve
   obtain ⟨S, hS, hSon⟩ := hcurve
   rw [Metric.mem_nhds_iff] at hS
@@ -184,7 +179,6 @@ theorem time_dependent_vf_local_integral_flow_bare [CompleteSpace E]
   have hct : HasMFDerivAt 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod I) c t
       ((1 : ℝ →L[ℝ] ℝ).smulRight (autonomizedFlowVF X (c t))) := hSon t htS
   have h0mem : (0 : ℝ) ∈ Ioo (-ε) ε := by constructor <;> simp [hε]
-  -- Time component is the identity, so the velocity is `X t (c t).2`.
   have htime : ∀ s ∈ Ioo (-ε) ε, (c s).1 = s := by
     apply hasDerivAt_one_eq_self_on_Ioo (fun s => (c s).1) h0mem
     · intro u hu
@@ -199,8 +193,6 @@ theorem time_dependent_vf_local_integral_flow_bare [CompleteSpace E]
   have hsnd := autonomizedFlow_snd_hasMFDerivAt X c t hct
   rw [htime t ht] at hsnd
   exact hsnd.hasMFDerivWithinAt
-
-/-! ### The time-indexed diffeomorphism family carrying the genuine bare flow -/
 
 variable [CompactSpace M] [SigmaCompactSpace M]
 
@@ -246,24 +238,17 @@ theorem time_dependent_vf_manifold_integral_flow_family
         HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => Φ_fam u x) (Ici 0) s
           ((1 : ℝ →L[ℝ] ℝ).smulRight (X s (Φ_fam s x)))) := by
   classical
-  -- Build the family: on `(0, T)`, the chosen diffeomorphism; elsewhere, the
-  -- identity. All choices use `Classical.choice`, mirroring the upstream
-  -- existential.
   refine ⟨fun t =>
     if h : 0 < t ∧ t < T then (hdiffeo t h.1 h.2).choose else Diffeomorph.refl I M ∞,
     ?_, ?_, ?_⟩
-  · -- `Φ_fam 0 = refl`: `0` fails the `0 < t` guard.
-    have h0 : ¬ (0 < (0 : ℝ) ∧ (0 : ℝ) < T) := by
+  · have h0 : ¬ (0 < (0 : ℝ) ∧ (0 : ℝ) < T) := by
       rintro ⟨h, _⟩; exact (lt_irrefl 0) h
     simp only [h0, dif_neg, not_false_iff]
-  · -- Agreement on `(0, T)`.
-    intro t ht htT x
+  · intro t ht htT x
     have hguard : 0 < t ∧ t < T := ⟨ht, htT⟩
     simp only [hguard, dif_pos, and_self]
     exact (hdiffeo t ht htT).choose_spec x
-  · -- The genuine bare flow, transported along the agreement.
-    intro s hs hsT x
-    -- The family realises `Φ` on `(0, T)`.
+  · intro s hs hsT x
     have hagree : ∀ t : ℝ, 0 < t → t < T → ∀ y : M,
         (if h : 0 < t ∧ t < T then (hdiffeo t h.1 h.2).choose
           else Diffeomorph.refl I M ∞) y = Φ t y := by
@@ -271,12 +256,8 @@ theorem time_dependent_vf_manifold_integral_flow_family
       have hguard : 0 < t ∧ t < T := ⟨ht, htT⟩
       simp only [hguard, dif_pos, and_self]
       exact (hdiffeo t ht htT).choose_spec y
-    -- `Φ_fam s x = Φ s x`, so the velocity base point agrees.
     have hbase : (if h : 0 < s ∧ s < T then (hdiffeo s h.1 h.2).choose
         else Diffeomorph.refl I M ∞) x = Φ s x := hagree s hs hsT x
-    -- The time-curve `u ↦ Φ_fam u x` agrees with `u ↦ Φ u x` near `s` within
-    -- `Ici 0` (in fact on the open interval `(0, T)`), so its bare derivative is
-    -- the `hflow` derivative with base point `Φ s x = Φ_fam s x`.
     have hcurve_eq : (fun u : ℝ =>
           (if h : 0 < u ∧ u < T then (hdiffeo u h.1 h.2).choose
             else Diffeomorph.refl I M ∞) x) =ᶠ[𝓝[Ici 0] s]
@@ -285,7 +266,6 @@ theorem time_dependent_vf_manifold_integral_flow_family
         mem_nhdsWithin_of_mem_nhds (Ioo_mem_nhds hs hsT)
       filter_upwards [hopen] with u hu
       exact hagree u hu.1 hu.2 x
-    -- Transport the `hflow` bare ODE along the curve agreement and base point.
     have hbase_flow := hflow s hs hsT x
     rw [← hbase] at hbase_flow
     exact hbase_flow.congr_of_eventuallyEq hcurve_eq hbase

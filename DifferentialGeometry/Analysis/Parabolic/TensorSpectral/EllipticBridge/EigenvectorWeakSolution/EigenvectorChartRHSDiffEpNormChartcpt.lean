@@ -67,24 +67,12 @@ open DifferentialGeometry.Analysis.Laplacian.MetricExtension
   hiding chartTargetEuclid chartTargetEuclid_isOpen
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Sharp `eLpNorm` / `wkpNorm` bounds, in chart-component data
-
-These bounds are keyed onto the intrinsic compact-operator eigenbasis
-`tensorResolventEigenbasisVec` of
-`tensorResolventL2_isCompactOperator g r s`. -/
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
@@ -118,7 +106,6 @@ private lemma iteratedPartial_wkpNorm_le_of_chart_perK
                   g r s) i‖ := by
   classical
   intro i j hj idx K'
-  -- Step 1: chart-component `wkpNorm` at order `K' + m + 3` via `hCeig_bd`.
   have h_chart_cpt :
       wkpNorm (d := Module.finrank ℝ E) (K' + m + 3) 2
           (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
@@ -131,7 +118,6 @@ private lemma iteratedPartial_wkpNorm_le_of_chart_perK
               (tensorResolventL2_isCompactOperator (I := I) (M := M)
                 g r s) i‖ :=
     hCeig_bd i (K' + m + 3)
-  -- Step 2: chart cpt `MemWkp` at order `(2 + K') + j`, free for all orders.
   have h_chart_cpt_memWkp :
       MemWkp (d := Module.finrank ℝ E) ((2 + K') + j) 2
           (eigenvectorChartComponentFun (I := I) (M := M)
@@ -139,11 +125,9 @@ private lemma iteratedPartial_wkpNorm_le_of_chart_perK
           (chartTargetEuclid (I := I) (M := M) α) :=
     eigenvector_chartComponent_memWkp_arbitrary (I := I) (M := M)
       g r s i ((2 + K') + j) α P₀
-  -- Step 3: bridge to the `j`-fold iterated weak partial.
   obtain ⟨_, h_partial⟩ :=
     eigenvectorChartIteratedPartial_wkpNorm_le_of_memWkp
       (I := I) (M := M) g r s i α P₀ j (2 + K') h_chart_cpt_memWkp idx
-  -- Step 4: `wkpNorm`-monotonicity: `wkpNorm (2 + K' + j) ≤ wkpNorm (K' + m + 3)`.
   have h_order_le : (2 + K') + j ≤ K' + m + 3 := by omega
   have h_mono :
       wkpNorm (d := Module.finrank ℝ E) ((2 + K') + j) 2
@@ -155,9 +139,6 @@ private lemma iteratedPartial_wkpNorm_le_of_chart_perK
               g r s i α P₀)
             (chartTargetEuclid (I := I) (M := M) α) :=
     wkpNorm_mono_order (d := Module.finrank ℝ E) h_order_le _ _
-  -- Chain: `wkpNorm (2 + K') (partial j idx) ≤ wkpNorm (2 + K' + j) (chart cpt)
-  --                                          ≤ wkpNorm (K' + m + 3) (chart cpt)
-  --                                          ≤ ofReal (...) · ofReal ‖vec‖`.
   exact h_partial.trans (h_mono.trans h_chart_cpt)
 
 set_option maxHeartbeats 8000000 in
@@ -285,16 +266,9 @@ theorem eigenvectorChartRHSDiff_eLpNorm_le_chartcpt
                 (tensorResolventL2_isCompactOperator (I := I) (M := M)
                   g r s) i‖ := by
   classical
-  -- Step 1: bound `eLpNorm` of the level-`m` differentiated right-hand side by
-  -- `μ⁻¹ · C * diffRHSAggregate m 0 l` via the existing weighted-`eLpNorm`
-  -- chain.
   obtain ⟨Cwk, hCwk_nn, hCwk_bd⟩ :=
     eigenvectorChartRHSDiff_eLpNorm_le_uniform (I := I) (M := M)
       g r s α P₀ m l h_pou
-  -- Step 2: bound `diffRHSAggregate m 0 l` by `ofReal (Caggr * μ⁻¹^e) * ‖vec‖`
-  -- via the energy-aggregate chain. The iterated-partial per-K-family is
-  -- derived from the chart-component per-K-family via the polymorphic bridge
-  -- combined with `wkpNorm`-monotonicity in the order.
   set Citer : ℕ → ℝ := fun K' => Ceig (K' + m + 3) with hCiter_def
   set eIter : ℕ → ℕ := fun K' => eEig (K' + m + 3) with heIter_def
   have hCiter_nn : ∀ K', 0 ≤ Citer K' := fun K' => hCeig_nn (K' + m + 3)
@@ -324,11 +298,7 @@ theorem eigenvectorChartRHSDiff_eLpNorm_le_chartcpt
       CcR eCcR hCcR_nn hCcR_bd
       Ccut eCcut hCcut_nn hCcut_bd
       Citer eIter hCiter_nn hCiter_bd
-  -- Step 3: compose the two bounds to get the headline.
-  -- The eigenvalue is in `(0, 1]`, so `μ⁻¹ ≥ 1` and `μ⁻¹ ≤ μ⁻¹ · μ⁻¹^e ≤ μ⁻¹^(e + 1)`.
   refine ⟨Cwk * Caggr, eAggr + 1, mul_nonneg hCwk_nn hCaggr_nn, fun i => ?_⟩
-  -- Per-`i` setup: eigenvalue facts.
-  -- The resolvent eigenvalue lies in `(0, 1]`.
   have hμ_unit : i.fst.val ∈ Set.Ioc (0 : ℝ) 1 := by
     have h_norm :
         ‖tensorResolventEigenbasisVec (I := I) (M := M)
@@ -355,9 +325,6 @@ theorem eigenvectorChartRHSDiff_eLpNorm_le_chartcpt
       ‖tensorResolventEigenbasisVec (I := I) (M := M)
         (tensorResolventL2_isCompactOperator (I := I) (M := M)
           g r s) i‖ with hRhs_def
-  -- Chain: `eLpNorm ≤ ofReal (μ⁻¹ · Cwk) · diffRHSAggregate m 0 l`
-  --                ≤ ofReal (μ⁻¹ · Cwk) · (ofReal (Caggr · μ⁻¹^eAggr) · ‖vec‖)
-  --                = ofReal ((Cwk · Caggr) · μ⁻¹^(eAggr + 1)) · ‖vec‖.
   calc eLpNorm (eigenvectorChartRHSDiff (I := I) (M := M)
           g r s i α P₀ m l) 2
         ((volume : Measure EuclN).restrict
@@ -499,14 +466,9 @@ theorem eigenvectorChartRHSDiff_wkpNormOne_le_chartcpt
                 (tensorResolventL2_isCompactOperator (I := I) (M := M)
                   g r s) i‖ := by
   classical
-  -- Step 1: bound `wkpNorm 1` of the level-`m` differentiated right-hand side
-  -- by `μ⁻¹ · C * diffRHSAggregate m 1 l` via the existing `wkpNorm`-graded
-  -- chain at `K = 1`.
   obtain ⟨Cwk, hCwk_nn, hCwk_bd⟩ :=
     eigenvectorChartRHSDiff_wkpNorm_le_uniform (I := I) (M := M)
       g r s α P₀ m 1 l h_pou
-  -- Step 2: bound `diffRHSAggregate m 1 l` by `ofReal (Caggr * μ⁻¹^e) * ‖vec‖`
-  -- via the energy-aggregate chain at `K = 1`.
   set Citer : ℕ → ℝ := fun K' => Ceig (K' + m + 3) with hCiter_def
   set eIter : ℕ → ℕ := fun K' => eEig (K' + m + 3) with heIter_def
   have hCiter_nn : ∀ K', 0 ≤ Citer K' := fun K' => hCeig_nn (K' + m + 3)
@@ -537,7 +499,6 @@ theorem eigenvectorChartRHSDiff_wkpNormOne_le_chartcpt
       Ccut eCcut hCcut_nn hCcut_bd
       Citer eIter hCiter_nn hCiter_bd
   refine ⟨Cwk * Caggr, eAggr + 1, mul_nonneg hCwk_nn hCaggr_nn, fun i => ?_⟩
-  -- Per-`i` setup: eigenvalue facts.
   have hμ_unit : i.fst.val ∈ Set.Ioc (0 : ℝ) 1 := by
     have h_norm :
         ‖tensorResolventEigenbasisVec (I := I) (M := M)

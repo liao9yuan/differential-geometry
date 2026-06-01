@@ -42,35 +42,6 @@ theorem nabla_equals_partial_plus_christoffel_on_tensors
             chartTensorRSOutputSlotCorrection (I := I) r s g α T X b l) :=
   chartTensorRSCovariantDerivative_def (I := I) r s g α T X b
 
-/-! ## Helper lemmas: chain rule and pointwise basis-evaluation bound
-
-The substantive proofs of `nabla_tensor_single_step_formula` and
-`nabla_tensor_iterated_Hk_formula` reduce to a single pointwise estimate:
-
-  for each `α`, each component index pair `IJ`, each derivative order `j`,
-  each basis-index tuple `basisIdx : Fin j → Fin n`, and each
-  `y ∈ chartTargetEuclid α`, denoting
-
-    A := iteratedFDeriv ℝ j (raw α IJ ∘ extChartAt.symm) (L.symm y)
-    B := iteratedFDeriv ℝ j (raw α IJ ∘ extChartAt.symm ∘ L.symm) y
-
-  (with `L := toEuclidean : E ≃L[ℝ] EuclN`),
-
-    ∑_{basisIdx} |B(e_{basisIdx_1}, ..., e_{basisIdx_j})|² ≤
-        (finrank ℝ E)^j · ‖L.symm‖^(2j) · ‖A‖² .
-
-This is the reverse of the bound in `UniformChartBounds`: there the bound was
-`‖A‖² ≤ ‖L‖^(2j) · ∑_{idx} |B(e_idx)|²`; here we get
-`∑_{basisIdx} |B(e_basisIdx)|² ≤ n^j · ‖L.symm‖^(2j) · ‖A‖²`. Both follow from
-the chain-rule identity `B = A.compContinuousLinearMap (L.symm)`,
-the multilinear-CLM-composition norm bound, and the orthonormality of
-`EuclideanSpace.basisFun` (which gives `|B(e)| ≤ ‖B‖`).
-
-The pointwise bound is then aggregated against the partition-of-unity weight,
-integrated, summed over basis-index tuples and derivative orders, and tsumed
-over chart-base points, mirroring the structure of
-`uniform_chart_bounds_from_compactness`. -/
-
 /-- The preimage of `extChartAt.target` under `toEuclidean.symm` equals
 `chartTargetEuclid α`. -/
 private lemma nabla_tensor_toEucl_symm_preimage_target (α : M) :
@@ -216,7 +187,6 @@ private lemma basis_sum_sq_le_opNorm_sq_E
               ∘ (extChartAt I α).symm)
             ((toEuclidean (E := E)).symm y)‖ ^ 2 := by
   classical
-  -- Set up the multilinear maps `A` (on E) and `B` (on EuclN).
   set Lsymm : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) →L[ℝ] E :=
     ((toEuclidean (E := E)).symm
       : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) →L[ℝ] E) with hLsymm_def
@@ -232,13 +202,11 @@ private lemma basis_sum_sq_le_opNorm_sq_E
         (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx
           ∘ (extChartAt I α).symm
           ∘ (toEuclidean (E := E)).symm) y with hB_def
-  -- Chain rule: B = A.compContinuousLinearMap (fun _ => Lsymm).
   have hBeq : B =
       A.compContinuousLinearMap (fun _ : Fin j => Lsymm) := by
     rw [hB_def, hA_def, hLsymm_def]
     exact nabla_tensor_iteratedFDeriv_chain_rule
       (I := I) (M := M) g r s T α Idx Jdx j hy
-  -- Norm bound: ‖B‖ ≤ ‖A‖ · ‖Lsymm‖^j.
   have hLsymm_nonneg : 0 ≤ ‖Lsymm‖ := norm_nonneg _
   have hB_norm_le : ‖B‖ ≤ ‖A‖ * (‖Lsymm‖ ^ j) := by
     calc ‖B‖
@@ -247,7 +215,6 @@ private lemma basis_sum_sq_le_opNorm_sq_E
           ContinuousMultilinearMap.norm_compContinuousLinearMap_le _ _
       _ = ‖A‖ * (‖Lsymm‖ ^ j) := by
           rw [Finset.prod_const, Finset.card_univ, Fintype.card_fin]
-  -- Squared: ‖B‖² ≤ ‖A‖² · ‖Lsymm‖^(2j).
   have hAnn : 0 ≤ ‖A‖ := norm_nonneg _
   have hBnn : 0 ≤ ‖B‖ := norm_nonneg _
   have hB_sq_le : ‖B‖ ^ 2 ≤ (‖A‖ ^ 2) * (‖Lsymm‖ ^ (2 * j)) := by
@@ -260,7 +227,6 @@ private lemma basis_sum_sq_le_opNorm_sq_E
       rw [← pow_mul, mul_comm j 2]
     rw [h2] at h1
     exact h1
-  -- Pointwise bound on each summand: |B(e_basisIdx)|² ≤ ‖B‖² · ∏ ‖e‖² = ‖B‖².
   have h_per_basis : ∀ (basisIdx : Fin j → Fin (Module.finrank ℝ E)),
       |B (fun i => EuclideanSpace.basisFun
           (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2 ≤ ‖B‖ ^ 2 := by
@@ -287,7 +253,6 @@ private lemma basis_sum_sq_le_opNorm_sq_E
     rw [h_abs_eq]
     have := pow_le_pow_left₀ h_apply_nn h_opNorm 2
     exact this
-  -- Sum over basisIdx: card = n^j.
   have h_card : (Finset.univ :
       Finset (Fin j → Fin (Module.finrank ℝ E))).card =
       (Module.finrank ℝ E) ^ j := by
@@ -297,7 +262,6 @@ private lemma basis_sum_sq_le_opNorm_sq_E
           (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2 ≤
         ((Finset.univ : Finset (Fin j → Fin (Module.finrank ℝ E))).card : ℝ) *
           ‖B‖ ^ 2 := by
-    -- Bound each summand by ‖B‖² and use sum_le_card_nsmul.
     have h_le_const :
         ∑ basisIdx : Fin j → Fin (Module.finrank ℝ E),
           |B (fun i => EuclideanSpace.basisFun
@@ -307,14 +271,12 @@ private lemma basis_sum_sq_le_opNorm_sq_E
     rw [Finset.sum_const, nsmul_eq_mul] at h_le_const
     exact h_le_const
   rw [h_card] at h_sum_le
-  -- Combine: ∑ ≤ n^j · ‖B‖² ≤ n^j · (‖A‖² · ‖Lsymm‖^(2j)).
   have hnj_nn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) ^ j := by
     positivity
   have h_combine : ((Module.finrank ℝ E : ℝ) ^ j) * ‖B‖ ^ 2 ≤
       ((Module.finrank ℝ E : ℝ) ^ j) *
         ((‖A‖ ^ 2) * (‖Lsymm‖ ^ (2 * j))) :=
     mul_le_mul_of_nonneg_left hB_sq_le hnj_nn
-  -- Note: ((finrank ℝ E : ℕ) : ℝ) = ((finrank ℝ E : ℝ))^... cast handling.
   have h_cast : ((Finset.univ :
       Finset (Fin j → Fin (Module.finrank ℝ E))).card : ℝ) =
       ((Module.finrank ℝ E) ^ j : ℝ) := by
@@ -329,8 +291,6 @@ private lemma basis_sum_sq_le_opNorm_sq_E
           ((‖A‖ ^ 2) * (‖Lsymm‖ ^ (2 * j))) := h_combine
     _ = ((Module.finrank ℝ E : ℝ) ^ j) *
           (‖Lsymm‖ ^ (2 * j)) * ‖A‖ ^ 2 := by ring
-
-/-! ## Per-(α, IJ, j) integral bound: sum over basisIdx of HS integrand ≤ CE · pou integrand -/
 
 /-- ContinuousOn of the pulled partition-of-unity weight on `chartTargetEuclid α`. -/
 private lemma nabla_tensor_pouPull_contOn (α : M) :
@@ -403,7 +363,6 @@ private lemma per_alpha_j_basis_integral_bound
           ∂(volume :
             Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))) := by
   classical
-  -- Pointwise bound, on chartTargetEuclid α, of the sum over basisIdx.
   have h_pt : ∀ y ∈ chartTargetEuclid (I := I) (M := M) α,
       ∑ basisIdx : Fin j → Fin (Module.finrank ℝ E),
         ENNReal.ofReal
@@ -434,7 +393,6 @@ private lemma per_alpha_j_basis_integral_bound
           ∘ (extChartAt I α).symm)
         ((toEuclidean (E := E)).symm y)‖ ^ 2 with hAsq_def
     have hAsq_nn : 0 ≤ Asq := sq_nonneg _
-    -- Each summand in `basisIdx` is non-negative.
     have h_per_term_nn : ∀ basisIdx : Fin j → Fin (Module.finrank ℝ E),
         0 ≤ ρ *
           |(iteratedFDeriv ℝ j
@@ -445,7 +403,6 @@ private lemma per_alpha_j_basis_integral_bound
               (fun i => EuclideanSpace.basisFun
                 (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2 :=
       fun _ => mul_nonneg hρ_nn (sq_nonneg _)
-    -- Pull out sum of ENNReal.ofReal.
     have h_sum_ofReal :
         ∑ basisIdx : Fin j → Fin (Module.finrank ℝ E),
           ENNReal.ofReal
@@ -470,7 +427,6 @@ private lemma per_alpha_j_basis_integral_bound
                   (fun i => EuclideanSpace.basisFun
                     (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2) :=
       (ENNReal.ofReal_sum_of_nonneg (fun b _ => h_per_term_nn b)).symm
-    -- Factor out ρ from the inner real sum.
     have h_factor_rho :
         ∑ basisIdx : Fin j → Fin (Module.finrank ℝ E),
           ρ *
@@ -492,10 +448,8 @@ private lemma per_alpha_j_basis_integral_bound
                   (fun i => EuclideanSpace.basisFun
                     (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2 :=
       (Finset.mul_sum _ _ _).symm
-    -- Apply the basis-sum-bound at y.
     have h_basis_bound := basis_sum_sq_le_opNorm_sq_E
       (I := I) (M := M) g r s T α Idx Jdx j hy
-    -- The basis sum is ≤ n^j · ‖Lsymm‖^(2j) · Asq ≤ CE · Asq.
     have h_inner_le : ∑ basisIdx : Fin j → Fin (Module.finrank ℝ E),
         |(iteratedFDeriv ℝ j
               (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx
@@ -517,7 +471,6 @@ private lemma per_alpha_j_basis_integral_bound
                   (2 * j)) * Asq := h_basis_bound
         _ ≤ CE * Asq :=
             mul_le_mul_of_nonneg_right hCE hAsq_nn
-    -- Multiply by ρ ≥ 0.
     have h_rho_le : ρ * ∑ basisIdx : Fin j → Fin (Module.finrank ℝ E),
           |(iteratedFDeriv ℝ j
                 (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx
@@ -527,27 +480,17 @@ private lemma per_alpha_j_basis_integral_bound
                 (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2 ≤
         ρ * (CE * Asq) :=
       mul_le_mul_of_nonneg_left h_inner_le hρ_nn
-    -- Rearrange ρ * (CE * Asq) = CE * (ρ * Asq).
     have h_rearr : ρ * (CE * Asq) = CE * (ρ * Asq) := by ring
-    -- Convert to ENNReal.ofReal.
     have hρAsq_nn : 0 ≤ ρ * Asq := mul_nonneg hρ_nn hAsq_nn
     rw [h_sum_ofReal, h_factor_rho]
     have h_ofReal_le : ENNReal.ofReal (ρ * (CE * Asq)) =
         ENNReal.ofReal CE * ENNReal.ofReal (ρ * Asq) := by
       rw [h_rearr, ENNReal.ofReal_mul hCE_nn]
-    -- ENNReal.ofReal preserves ≤.
     calc ENNReal.ofReal (ρ * _)
         ≤ ENNReal.ofReal (ρ * (CE * Asq)) := ENNReal.ofReal_le_ofReal h_rho_le
       _ = ENNReal.ofReal CE * ENNReal.ofReal (ρ * Asq) := h_ofReal_le
-  -- Pull out CE from the integral.
   have h_meas_set : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
-  -- Step 1: Integrate the sum over basisIdx ≤ integrate the bound.
-  -- First, swap ∑ and ∫: ∑_basisIdx ∫_target f ≤ ∫_target ∑_basisIdx f.
-  -- Actually we need: ∑_basisIdx ∫_target f = ∫_target ∑_basisIdx f (lintegral_finset_sum').
-  -- Then ∫_target ∑ ≤ ∫_target (CE · pou_integrand).
-  -- Then ∫_target (CE · pou_integrand) = CE · ∫_target pou_integrand.
-  -- AE-measurability of each summand (basisIdx fixed).
   have h_basis_aem : ∀ basisIdx : Fin j → Fin (Module.finrank ℝ E),
       AEMeasurable
         (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
@@ -566,9 +509,7 @@ private lemma per_alpha_j_basis_integral_bound
           Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict
             (chartTargetEuclid (I := I) (M := M) α)) := by
     intro basisIdx
-    -- Build continuity → AEMeasurable.
     have h_pou := nabla_tensor_pouPull_contOn (I := I) (M := M) α
-    -- Continuity of the iterated derivative on chartTargetEuclid α:
     have h_cdOn := nabla_tensor_raw_pull_contDiffOn
       (I := I) (M := M) g r s T α Idx Jdx
     have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
@@ -625,7 +566,6 @@ private lemma per_alpha_j_basis_integral_bound
             (chartTargetEuclid (I := I) (M := M) α)) :=
       h_full_cont.aestronglyMeasurable h_meas_set
     exact ENNReal.measurable_ofReal.comp_aemeasurable h_aesm.aemeasurable
-  -- Step 1: ∑ ∫ = ∫ ∑ via lintegral_finset_sum'.
   have h_swap_sum :
       (∑ basisIdx : Fin j → Fin (Module.finrank ℝ E),
         ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
@@ -658,7 +598,6 @@ private lemma per_alpha_j_basis_integral_bound
           ∂(volume :
             Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))) := by
     rw [MeasureTheory.lintegral_finset_sum' _ (fun basisIdx _ => h_basis_aem basisIdx)]
-  -- Step 2: pointwise integrand bound.
   have h_pt_le :
       (∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
         ∑ basisIdx : Fin j → Fin (Module.finrank ℝ E),
@@ -692,7 +631,6 @@ private lemma per_alpha_j_basis_integral_bound
     by_cases hy : y ∈ chartTargetEuclid (I := I) (M := M) α
     · exact fun _ => h_pt y hy
     · intro hy'; exact absurd hy' hy
-  -- Step 3: pull out CE.
   have h_pull_const :
       (∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
         ENNReal.ofReal CE *
@@ -717,13 +655,10 @@ private lemma per_alpha_j_basis_integral_bound
           ∂(volume :
             Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))) :=
     MeasureTheory.lintegral_const_mul' _ _ ENNReal.ofReal_ne_top
-  -- Combine.
   calc _
       = _ := h_swap_sum
     _ ≤ _ := h_pt_le
     _ = _ := h_pull_const
-
-/-! ## Main theorem -/
 
 /-- Substantive existence theorem: the Hilbert-Schmidt partition-of-unity
 chart-Sobolev seminorm is uniformly dominated by the operator-norm
@@ -746,7 +681,6 @@ private theorem hs_le_pou_uniform
     ‖((toEuclidean (E := E)).symm :
         EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) →L[ℝ] E)‖ with hMsym_def
   have hMsym_nn : 0 ≤ Msym := norm_nonneg _
-  -- Dominating constant: D := (1 + n^(2k)) · (1 + Msym^(4k)).
   set D : ℝ := (1 + n ^ (2 * k)) * (1 + Msym ^ (4 * k)) with hD_def
   have hD_nn : 0 ≤ D := by
     have h1 : (0 : ℝ) ≤ 1 + n ^ (2 * k) := by
@@ -756,14 +690,12 @@ private theorem hs_le_pou_uniform
       have hpos : (0 : ℝ) ≤ Msym ^ (4 * k) := pow_nonneg hMsym_nn _
       linarith
     exact mul_nonneg h1 h2
-  -- D dominates n^j · Msym^(2j) for j ≤ 2k.
   have hD_dom : ∀ j ∈ Finset.range (2 * k + 1),
       n ^ j * Msym ^ (2 * j) ≤ D := by
     intro j hj
     have hj_le : j ≤ 2 * k := by
       have : j < 2 * k + 1 := Finset.mem_range.mp hj
       omega
-    -- n^j ≤ 1 + n^(2k).
     have h_n_dom : n ^ j ≤ 1 + n ^ (2 * k) := by
       by_cases h_n_ge_one : 1 ≤ n
       · have h1 : n ^ j ≤ n ^ (2 * k) :=
@@ -774,7 +706,6 @@ private theorem hs_le_pou_uniform
         have h_le_one : n ^ j ≤ 1 := pow_le_one₀ hn_nn (le_of_lt h_n_lt)
         have hpos : (0 : ℝ) ≤ n ^ (2 * k) := pow_nonneg hn_nn _
         linarith
-    -- Msym^(2j) ≤ 1 + Msym^(4k).
     have h_Msym_dom : Msym ^ (2 * j) ≤ 1 + Msym ^ (4 * k) := by
       by_cases h_M_ge_one : 1 ≤ Msym
       · have h2j_le_4k : 2 * j ≤ 4 * k := by omega
@@ -798,17 +729,13 @@ private theorem hs_le_pou_uniform
           mul_le_mul_of_nonneg_right h_n_dom h_Mj_nn
       _ ≤ (1 + n ^ (2 * k)) * (1 + Msym ^ (4 * k)) :=
           mul_le_mul_of_nonneg_left h_Msym_dom h_1pn_nn
-  -- The final constant.
   refine ⟨Real.sqrt D, Real.sqrt_nonneg _, ?_⟩
   intro T
-  -- Finiteness of the pou norm.
   have hpou_ne_top :
       tensorPouSobolevNorm (I := I) (M := M) g k T ≠ ⊤ :=
     DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.tensorPouSobolevNorm_ne_top
       (I := I) (M := M) g k T
-  -- Unfold both norms.
   rw [tensorPouSobolevNorm_eq, tensorPouSobolevHsNorm_eq]
-  -- Work at the level of the tsums under `^(1/2)`.
   set tsumPou : ℝ≥0∞ :=
     ∑' α : M,
       ∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -847,7 +774,6 @@ private theorem hs_le_pou_uniform
               ∂(volume :
                 Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
     with htsumHs_def
-  -- Main inequality: tsumHs ≤ ENNReal.ofReal D * tsumPou.
   have h_main : tsumHs ≤ ENNReal.ofReal D * tsumPou := by
     rw [htsumHs_def, htsumPou_def]
     rw [← ENNReal.tsum_mul_left]
@@ -858,11 +784,9 @@ private theorem hs_le_pou_uniform
     refine Finset.sum_le_sum (fun j hj => ?_)
     exact per_alpha_j_basis_integral_bound
       (I := I) (M := M) g r s T α IJ.1 IJ.2 j D (hD_dom j hj) hD_nn
-  -- Apply rpow to both sides.
   have h_rpow_le : tsumHs ^ (1 / 2 : ℝ) ≤
       (ENNReal.ofReal D * tsumPou) ^ (1 / 2 : ℝ) :=
     ENNReal.rpow_le_rpow h_main (by norm_num)
-  -- Split RHS: (ofReal D * tsumPou)^(1/2) = ofReal (√D) * tsumPou^(1/2).
   have h_split :
       (ENNReal.ofReal D * tsumPou) ^ (1 / 2 : ℝ) =
         ENNReal.ofReal (Real.sqrt D) * tsumPou ^ (1 / 2 : ℝ) := by
@@ -871,15 +795,10 @@ private theorem hs_le_pou_uniform
     rw [ENNReal.ofReal_rpow_of_nonneg hD_nn (by norm_num : (0:ℝ) ≤ 1 / 2)]
     rw [← Real.sqrt_eq_rpow]
   rw [h_split] at h_rpow_le
-  -- Finiteness of tsumPou via tensorPouSobolevNorm.
   have h_tsumPou_ne_top : tsumPou ≠ ⊤ := by
-    -- tsumPou is the unfolding inside tensorPouSobolevNorm.
-    -- And (tsumPou)^(1/2) = tensorPouSobolevNorm.
     have hpou_lt_top : tensorPouSobolevNorm (I := I) (M := M) g k T < ⊤ :=
       lt_of_le_of_ne le_top hpou_ne_top
-    -- Unfold: tensorPouSobolevNorm = tsumPou^(1/2).
     rw [tensorPouSobolevNorm_eq, ← htsumPou_def] at hpou_lt_top
-    -- If tsumPou = ⊤, then tsumPou^(1/2) = ⊤ as well (since 1/2 > 0).
     intro h_top
     rw [h_top] at hpou_lt_top
     have hrw := ENNReal.top_rpow_of_pos (by norm_num : (0 : ℝ) < 1/2)

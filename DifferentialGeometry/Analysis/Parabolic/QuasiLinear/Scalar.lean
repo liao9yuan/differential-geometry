@@ -48,22 +48,10 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Sobolev.Hs
 open DifferentialGeometry.Analysis.Laplacian.Spectral
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Short-time existence for the quasi-linear scalar heat equation
-
-Instantiating the abstract semilinear existence theorem
-`semilinear_mild_solution_existence` with the scalar spectral heat semigroup
-and a globally Lipschitz nonlinearity yields a continuous short-time
-mild solution of the quasi-linear scalar heat equation. The abstract
-Duhamel terms `S t u₀` and `S (t - τ) (N (u τ))` unfold definitionally —
-the `toFun` field of `scalarHsBoundedC0Semigroup` *is* the extended
-scalar heat semigroup — to the concrete heat-semigroup applications. -/
 
 /-- **Short-time existence of a mild solution of the quasi-linear scalar
 heat equation on the spectral `Hˢ`-scale.**
@@ -89,24 +77,13 @@ theorem scalar_quasilinear_local_existence
         u t = heatSemigroupHsExt (I := I) (M := M) g σ t u₀ +
           ∫ τ in (0:ℝ)..t,
             heatSemigroupHsExt (I := I) (M := M) g σ (t - τ) (N (u τ)) := by
-  -- Apply the abstract semilinear existence theorem to the scalar
-  -- spectral heat semigroup.
   obtain ⟨T, hT_pos, u, hu_cont, hu_zero, hu_eq⟩ :=
     semilinear_mild_solution_existence
       (scalarHsBoundedC0Semigroup (I := I) (M := M) g σ) u₀ hN
   refine ⟨T, hT_pos, u, hu_cont, hu_zero, ?_⟩
-  -- The abstract Duhamel terms coincide with the concrete heat-semigroup
-  -- applications by definition of `scalarHsBoundedC0Semigroup`.
   intro t ht
   have h := hu_eq t ht
   simpa only [scalarHsBoundedC0Semigroup_apply] using h
-
-/-! ## Uniqueness for the quasi-linear scalar heat equation
-
-Instantiating the abstract semilinear uniqueness theorem
-`semilinear_mild_solution_unique` with the scalar spectral heat semigroup:
-two continuous mild solutions on the same interval `[0, T]` with
-`(L : ℝ) * T < 1` coincide. -/
 
 /-- **Uniqueness of the mild solution of the quasi-linear scalar heat
 equation on the spectral `Hˢ`-scale.**
@@ -131,8 +108,6 @@ theorem scalar_quasilinear_local_unique
         ∫ τ in (0:ℝ)..t,
           heatSemigroupHsExt (I := I) (M := M) g σ (t - τ) (N (v τ))) :
     Set.EqOn u v (Set.Icc 0 T) := by
-  -- Translate the concrete Duhamel equations into the abstract form
-  -- expected by `semilinear_mild_solution_unique`, then apply it.
   refine semilinear_mild_solution_unique
     (scalarHsBoundedC0Semigroup (I := I) (M := M) g σ) u₀ hN
     hT hTL hu hv ?_ ?_
@@ -140,12 +115,6 @@ theorem scalar_quasilinear_local_unique
     simpa only [scalarHsBoundedC0Semigroup_apply] using hu_eq t ht
   · intro t ht
     simpa only [scalarHsBoundedC0Semigroup_apply] using hv_eq t ht
-
-/-! ## Integer-exponent specialisation
-
-The integer-exponent alias `HkScalar g k = scalarHs g (k : ℝ)` inherits
-the existence theorem verbatim: it is a one-line specialisation of
-`scalar_quasilinear_local_existence` at `σ = (k : ℝ)`. -/
 
 /-- **Short-time existence of a mild solution of the quasi-linear scalar
 heat equation on the integer Sobolev scale `Hᵏ`.**

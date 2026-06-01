@@ -55,16 +55,12 @@ open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open DifferentialGeometry.Analysis.Laplacian.ChartLocalLaplacian
 open DifferentialGeometry.Analysis.Laplacian.ChartMeasureEquiv
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Boundedness of `weightedInvGramOnEuclid` on compact subsets -/
 
 /-- Each entry `weightedInvGramOnEuclid g α i j` is bounded above on any
 compact subset `K` of `chartTargetEuclid α`. -/
@@ -81,7 +77,6 @@ private lemma weightedInvGramOnEuclid_bounded_on_compact
     intro y hy
     rw [hK_empty] at hy
     exact absurd hy (Set.notMem_empty y)
-  -- The continuous function `|w_ij|` on the compact `K` attains its max.
   have h_pull : ContinuousOn (weightedInvGramOnEuclid (I := I) g α i j)
       (chartTargetEuclid (I := I) (M := M) α) :=
     (weightedInvGramOnEuclid_contDiffOn (I := I) g α i j).continuousOn
@@ -124,12 +119,6 @@ private lemma densityOnEuclid_bounded_above_on_compact
   intro y hy
   exact h_max_eq hy
 
-/-! ## A pointwise `L²` convergence helper
-
-If `ψ_n → ψ` in `L²(volume.restrict K)` and `Y ∈ L²(volume.restrict K)`,
-then `∫_K Y · ψ_n → ∫_K Y · ψ`. The proof is Cauchy–Schwarz: write
-`∫_K Y · (ψ_n - ψ)` and use Hölder's inequality with exponents `(2, 2)`. -/
-
 private lemma tendsto_setIntegral_mul_of_eLpNorm_tendsto_zero_l2
     {μ : Measure EuclN} {Y : EuclN → ℝ} {ψ_n : ℕ → EuclN → ℝ} {ψ : EuclN → ℝ}
     (hY : MemLp Y 2 μ)
@@ -140,16 +129,13 @@ private lemma tendsto_setIntegral_mul_of_eLpNorm_tendsto_zero_l2
     Tendsto (fun n => ∫ x, Y x * ψ_n n x ∂μ) atTop
       (𝓝 (∫ x, Y x * ψ x ∂μ)) := by
   classical
-  -- The L² Hölder pair (2, 2) gives an L¹ product estimate.
   haveI hpqT : ENNReal.HolderTriple (2 : ℝ≥0∞) (2 : ℝ≥0∞) 1 := by
     refine ⟨?_⟩
     rw [inv_one]
     rw [show ((2 : ℝ≥0∞)⁻¹ + (2 : ℝ≥0∞)⁻¹) = 2 * (2 : ℝ≥0∞)⁻¹ from by ring]
     rw [ENNReal.mul_inv_cancel (by norm_num) (by norm_num)]
-  -- Reduce to convergence of `∫ Y · (ψ_n - ψ) → 0`.
   have h_diff_lp : ∀ n, MemLp (fun x => ψ_n n x - ψ x) 2 μ := fun n =>
     (hψ_n_lp n).sub hψ_lp
-  -- Hölder: |∫ Y * (ψ_n - ψ)| ≤ ‖Y‖_{L²} · ‖ψ_n - ψ‖_{L²}.
   have h_bound_pointwise : ∀ n,
       ENNReal.ofReal |∫ x, Y x * (ψ_n n x - ψ x) ∂μ|
         ≤ eLpNorm Y 2 μ * eLpNorm (fun x => ψ_n n x - ψ x) 2 μ := by
@@ -190,7 +176,6 @@ private lemma tendsto_setIntegral_mul_of_eLpNorm_tendsto_zero_l2
       _ = eLpNorm (fun x => (ψ_n n x - ψ x) * Y x) 1 μ := h_lintegral_eq
       _ ≤ eLpNorm (fun x => ψ_n n x - ψ x) 2 μ * eLpNorm Y 2 μ := h_smul_bound
       _ = eLpNorm Y 2 μ * eLpNorm (fun x => ψ_n n x - ψ x) 2 μ := mul_comm _ _
-  -- This gives the difference integral → 0.
   have h_diff_int_tendsto :
       Tendsto (fun n => ∫ x, Y x * (ψ_n n x - ψ x) ∂μ) atTop (𝓝 0) := by
     have h_eLpNorm_Y_lt_top : eLpNorm Y 2 μ < (∞ : ℝ≥0∞) := hY.eLpNorm_lt_top
@@ -225,7 +210,6 @@ private lemma tendsto_setIntegral_mul_of_eLpNorm_tendsto_zero_l2
         Tendsto (fun n => |∫ x, Y x * (ψ_n n x - ψ x) ∂μ|) atTop (𝓝 0) :=
       squeeze_zero h_ge h_le_real h_rhs_real_tendsto
     exact (tendsto_zero_iff_abs_tendsto_zero _).2 h_abs_tendsto
-  -- Express ∫ Y · ψ_n = ∫ Y · ψ + ∫ Y · (ψ_n - ψ).
   have h_eq : ∀ n,
       ∫ x, Y x * ψ_n n x ∂μ =
         (∫ x, Y x * ψ x ∂μ) + ∫ x, Y x * (ψ_n n x - ψ x) ∂μ := by
@@ -261,9 +245,6 @@ private lemma tendsto_setIntegral_mul_of_eLpNorm_tendsto_zero_l2
     simpa [h_eq] using h_aux
   simpa [add_zero] using h_aux'
 
-/-! ## Plain `L²` membership of `D.u_chart` and `D.f_chart` on a compact
-subset of `chartTargetEuclid α` -/
-
 /-- `D.u_chart` is plain `L²` on any compact subset `K ⊆ chartTargetEuclid α`. -/
 private lemma uChart_memLp_volume_restrict_compact
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -287,8 +268,6 @@ private lemma fChart_memLp_volume_restrict_compact
     MemLp D.f_chart 2 ((volume : Measure EuclN).restrict K) :=
   memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure (I := I) (M := M)
     (D.f_chart_memLp_weighted) hK_compact hK_meas hK_in
-
-/-! ## Headline: `H¹_0` extension of the chart-bilinear identity -/
 
 /-- **`H¹_0` extension of the chart-bilinear variational identity.**
 
@@ -341,17 +320,13 @@ theorem chart_bilinear_identity_h1_0
       densityOnEuclid (I := I) g α y * D.f_chart y * ψ y
       ∂(volume : Measure EuclN) := by
   classical
-  -- Hölder triple instance for L².
   haveI hpqT : ENNReal.HolderTriple (2 : ℝ≥0∞) (2 : ℝ≥0∞) 1 := by
     refine ⟨?_⟩
     rw [inv_one]
     rw [show ((2 : ℝ≥0∞)⁻¹ + (2 : ℝ≥0∞)⁻¹) = 2 * (2 : ℝ≥0∞)⁻¹ from by ring]
     rw [ENNReal.mul_inv_cancel (by norm_num) (by norm_num)]
-  -- Measurability of K_0.
   have hK_0_meas : MeasurableSet K_0 := hK_0_compact.isClosed.measurableSet
-  -- Key abbreviation: μ = volume.restrict K_0.
   set μ : Measure EuclN := (volume : Measure EuclN).restrict K_0 with hμ_def
-  -- Continuity / boundedness facts on K_0.
   have h_dens_cont : ContinuousOn (densityOnEuclid (I := I) g α)
       (chartTargetEuclid (I := I) (M := M) α) :=
     (densityOnEuclid_contDiffOn (I := I) g α).continuousOn
@@ -365,29 +340,23 @@ theorem chart_bilinear_identity_h1_0
       (weightedInvGramOnEuclid (I := I) g α i j) K_0 := by
     intro i j
     exact (h_wig_cont i j).mono hK_0_in
-  -- Bounds on K_0.
   obtain ⟨C_dens, hC_dens_nn, h_dens_bd⟩ :=
     densityOnEuclid_bounded_above_on_compact (I := I) (M := M) g α
       hK_0_compact hK_0_in
-  -- Plain L² of D.u_chart and D.f_chart on K_0.
   have hD_u_lp : MemLp D.u_chart 2 μ :=
     uChart_memLp_volume_restrict_compact (I := I) (M := M) D
       hK_0_compact hK_0_meas hK_0_in
   have hD_f_lp : MemLp D.f_chart 2 μ :=
     fChart_memLp_volume_restrict_compact (I := I) (M := M) D
       hK_0_compact hK_0_meas hK_0_in
-  -- D.weak_partial i in plain L² on K_0.
   have hD_wp_lp : ∀ i, MemLp (D.weak_partial i) 2 μ := fun i =>
     D.weak_partial_locally_memLp i K_0 hK_0_compact hK_0_in
-  -- ψ-related membership.
   have hψ_lp : MemLp ψ 2 μ := hψ_l2
   have hψ_grad_lp : ∀ j, MemLp (weak_partial_ψ j) 2 μ := hψ_grad_l2
-  -- ψ_seq n in plain L² on K_0.
   have hψ_seq_lp : ∀ n, MemLp (ψ_seq n) 2 μ := by
     intro n
     have h_cont : Continuous (ψ_seq n) := (hψ_seq_smooth n).continuous
     exact (h_cont.memLp_of_hasCompactSupport (hψ_seq_cs n)).restrict _
-  -- The classical partials are L² on K_0 (smooth + compact support).
   have hψ_seq_grad_lp : ∀ n j,
       MemLp (fun x => (fderiv ℝ (ψ_seq n) x) (EuclideanSpace.single j 1)) 2 μ := by
     intro n j
@@ -402,8 +371,6 @@ theorem chart_bilinear_identity_h1_0
         (fun x => (fderiv ℝ (ψ_seq n) x) (EuclideanSpace.single j 1)) :=
       (hψ_seq_cs n).fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single j 1)
     exact (h_cont.memLp_of_hasCompactSupport h_cs).restrict _
-  -- Y_density := y ↦ density(y) * D.u_chart(y) is in L²(μ): density is bounded
-  -- on K_0 and D.u_chart ∈ L²(μ).
   have h_dens_K_aestronglyMeasurable :
       AEStronglyMeasurable (densityOnEuclid (I := I) g α) μ := by
     have h_cont' := h_dens_cont_K
@@ -413,14 +380,12 @@ theorem chart_bilinear_identity_h1_0
     intro i j
     have h_cont' := h_wig_cont_K i j
     exact h_cont'.aestronglyMeasurable hK_0_meas
-  -- Build Y_dens_u := density(y) * D.u_chart(y) ∈ L²(μ).
   have hY_dens_u_lp :
       MemLp (fun y => densityOnEuclid (I := I) g α y * D.u_chart y) 2 μ := by
     have h_aestronglyMeasurable :
         AEStronglyMeasurable
           (fun y => densityOnEuclid (I := I) g α y * D.u_chart y) μ :=
       h_dens_K_aestronglyMeasurable.mul hD_u_lp.aestronglyMeasurable
-    -- Bound: |density · u| ≤ C_dens · |u|.
     have h_pt_bd : ∀ᵐ y ∂μ,
         ‖densityOnEuclid (I := I) g α y * D.u_chart y‖ ≤
           ‖C_dens * D.u_chart y‖ := by
@@ -434,7 +399,6 @@ theorem chart_bilinear_identity_h1_0
       rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg hC_dens_nn]
       exact mul_le_mul_of_nonneg_right h_dens_le (abs_nonneg _)
     refine MemLp.mono (hD_u_lp.const_mul C_dens) h_aestronglyMeasurable h_pt_bd
-  -- Similarly Y_dens_f := density(y) * D.f_chart(y) ∈ L²(μ).
   have hY_dens_f_lp :
       MemLp (fun y => densityOnEuclid (I := I) g α y * D.f_chart y) 2 μ := by
     have h_aestronglyMeasurable :
@@ -454,12 +418,9 @@ theorem chart_bilinear_identity_h1_0
       rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg hC_dens_nn]
       exact mul_le_mul_of_nonneg_right h_dens_le (abs_nonneg _)
     refine MemLp.mono (hD_f_lp.const_mul C_dens) h_aestronglyMeasurable h_pt_bd
-  -- For each (i, j), the principal coefficient in the bilinear form:
-  -- Y_ij := y ↦ weightedInvGramOnEuclid g α i j y * D.weak_partial i y ∈ L²(μ).
   have hY_ij_lp : ∀ i j, MemLp
       (fun y => weightedInvGramOnEuclid (I := I) g α i j y * D.weak_partial i y) 2 μ := by
     intro i j
-    -- Get bound on |w_ij(y)| ≤ C_ij on K_0.
     obtain ⟨C_ij, hC_ij_nn, h_wig_bd⟩ :=
       weightedInvGramOnEuclid_bounded_on_compact (I := I) (M := M) g α i j
         hK_0_compact hK_0_in
@@ -479,8 +440,6 @@ theorem chart_bilinear_identity_h1_0
       have h_wig_abs := h_wig_bd y hy
       exact mul_le_mul_of_nonneg_right h_wig_abs (abs_nonneg _)
     refine MemLp.mono ((hD_wp_lp i).const_mul C_ij) h_aestronglyMeasurable h_pt_bd
-  -- The variational identity for ψ_seq n on K_0 (smooth-CS form, but converted
-  -- to integration over K_0 using zero-outside-tsupport).
   have h_id_seq :
       ∀ n, (∫ y in K_0,
               (∑ i : Fin (Module.finrank ℝ E),
@@ -496,15 +455,12 @@ theorem chart_bilinear_identity_h1_0
               densityOnEuclid (I := I) g α y * D.f_chart y * ψ_seq n y
               ∂(volume : Measure EuclN) := by
     intro n
-    -- Step A: variational identity holds with chartTarget integrals.
     have hψ_seq_supp_chart : tsupport (ψ_seq n) ⊆
         chartTargetEuclid (I := I) (M := M) α :=
       (hψ_seq_supp n).trans hK_0_in
     have h_id_chart :=
       chart_bilinear_identity_h1Compl (I := I) (M := M) D
         (hψ_seq_smooth n) (hψ_seq_cs n) hψ_seq_supp_chart
-    -- Step B: convert chartTarget integrals to K_0 integrals using zero-outside-tsupport.
-    -- The integrand on the LHS of h_id_chart is supported in tsupport (ψ_seq n) ⊆ K_0.
     have hChart_meas : MeasurableSet
         (chartTargetEuclid (I := I) (M := M) α) :=
       (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
@@ -526,10 +482,8 @@ theorem chart_bilinear_identity_h1_0
       apply setIntegral_eq_of_subset_of_forall_diff_eq_zero hChart_meas
         (hK_0_in.trans (subset_refl _))
       intro y hy
-      -- y is in chartTarget but not in K_0.
       have hy_notin_supp : y ∉ tsupport (ψ_seq n) := fun hin =>
         hy.2 ((hψ_seq_supp n) hin)
-      -- Then (fderiv ψ_seq n) y = 0.
       have h_fderiv_zero :
           ∀ v : EuclN, (fderiv ℝ (ψ_seq n) y) v = 0 := by
         have h_fderiv_eq_zero : fderiv ℝ (ψ_seq n) y = 0 := by
@@ -590,12 +544,6 @@ theorem chart_bilinear_identity_h1_0
     rw [← h_int_lhs1_chart_to_K0, ← h_int_lhs2_chart_to_K0,
       ← h_int_rhs_chart_to_K0]
     exact h_id_chart
-  -- Now: prepare to pass to the limit on each of the three integrals.
-  -- LHS principal: rewrite the inner sum as ∑_{i,j} Y_ij(y) · ∂_j ψ_seq n.
-  -- For each fixed (i, j), the integral
-  --   ∫_K_0 Y_ij(y) · ∂_j ψ_seq n
-  -- converges to
-  --   ∫_K_0 Y_ij(y) · weak_partial_ψ j(y).
   have h_lhs_principal_n_converges : ∀ i j,
       Tendsto
         (fun n => ∫ y in K_0,
@@ -654,7 +602,6 @@ theorem chart_bilinear_identity_h1_0
       funext n; exact h_int_n n
     rw [h_tendsto_match]
     exact h_helper
-  -- Sum over (i, j) for the principal LHS.
   have h_lhs_principal_converges :
       Tendsto
         (fun n => ∫ y in K_0,
@@ -724,7 +671,6 @@ theorem chart_bilinear_identity_h1_0
             weak_partial_ψ j y) := rfl
       rw [h_eq] at h
       exact h
-    -- Swap integral and sums.
     have h_int_swap_n : ∀ n,
         ∫ y in K_0, (∑ i : Fin (Module.finrank ℝ E),
             ∑ j : Fin (Module.finrank ℝ E),
@@ -811,7 +757,6 @@ theorem chart_bilinear_identity_h1_0
     rw [h_eq_n]
     rw [h_int_swap_lim]
     exact h_per_ij_tendsto
-  -- LHS lower-order: integral of (density · u) · ψ_seq n → integral of (density · u) · ψ.
   have h_lhs_lower_converges :
       Tendsto
         (fun n => ∫ y in K_0,
@@ -851,7 +796,6 @@ theorem chart_bilinear_identity_h1_0
       funext n; exact h_int_n n
     rw [h_tendsto_match]
     exact h_helper
-  -- RHS: integral of (density · f) · ψ_seq n → integral of (density · f) · ψ.
   have h_rhs_converges :
       Tendsto
         (fun n => ∫ y in K_0,
@@ -891,7 +835,6 @@ theorem chart_bilinear_identity_h1_0
       funext n; exact h_int_n n
     rw [h_tendsto_match]
     exact h_helper
-  -- Combine: LHS_n → LHS_lim by add of two convergent sequences.
   have h_lhs_converges :
       Tendsto
         (fun n => (∫ y in K_0,
@@ -916,7 +859,6 @@ theorem chart_bilinear_identity_h1_0
             densityOnEuclid (I := I) g α y * D.u_chart y * ψ y
             ∂(volume : Measure EuclN))) :=
     h_lhs_principal_converges.add h_lhs_lower_converges
-  -- LHS_n = RHS_n for each n by h_id_seq.
   have h_lhs_eq_rhs_n :
       (fun n => (∫ y in K_0,
           (∑ i : Fin (Module.finrank ℝ E),

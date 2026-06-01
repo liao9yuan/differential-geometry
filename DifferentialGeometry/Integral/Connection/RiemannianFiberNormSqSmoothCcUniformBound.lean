@@ -81,13 +81,6 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Step 1: the raw chart-component sum-of-squares is bounded on the closed POU support
-
-The raw chart-`α` scalar components of a smooth section are smooth on the chart
-source. The closed support of the partition-of-unity weight at `α` is a compact
-subset of the chart source, so the (continuous, nonnegative) finite sum of squared
-raw components attains a finite maximum there. -/
-
 /-- The finite sum of squared raw chart-`α` scalar components of a smooth section
 is continuous on the closed support of the chart-atlas partition-of-unity weight
 at `α`. -/
@@ -103,7 +96,6 @@ lemma sum_tensorChartComponentRaw_sq_continuousOn_pouTsupport
       (tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) := by
   classical
-  -- The tsupport is contained in the chart source via the trivialisation base set.
   have h_sub :
       tsupport (fun x : M =>
           ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
@@ -113,7 +105,6 @@ lemma sum_tensorChartComponentRaw_sq_continuousOn_pouTsupport
       pouTsupport_subset_baseSet (I := I) (M := M) α hb
     rwa [DifferentialGeometry.Integral.Measure.trivializationAt_baseSet_eq_chartAt_source]
       at hb_base
-  -- Each summand `b ↦ (raw α Idx Jdx b)²` is continuous on the chart source.
   refine ContinuousOn.mono ?_ h_sub
   refine continuousOn_finset_sum _ (fun Idx _ => ?_)
   refine continuousOn_finset_sum _ (fun Jdx _ => ?_)
@@ -157,23 +148,14 @@ lemma exists_uniform_bound_sum_tensorChartComponentRaw_sq_on_pouTsupport
     refine Finset.sum_nonneg (fun Jdx _ => ?_)
     exact sq_nonneg _
   rcases K.eq_empty_or_nonempty with hKe | hKne
-  · -- Empty closed support: any nonnegative bound works (vacuously true).
-    refine ⟨0, le_refl 0, ?_⟩
+  · refine ⟨0, le_refl 0, ?_⟩
     intro b hb
     rw [hKe] at hb
     exact absurd hb (Set.notMem_empty b)
-  · -- Nonempty compact: the continuous `f` attains a maximum on `K`.
-    obtain ⟨b₀, hb₀_mem, hb₀_max⟩ := hK_compact.exists_isMaxOn hKne hf_cont
+  · obtain ⟨b₀, hb₀_mem, hb₀_max⟩ := hK_compact.exists_isMaxOn hKne hf_cont
     refine ⟨f b₀, hf_nonneg b₀, ?_⟩
     intro b hb
     exact hb₀_max hb
-
-/-! ## Step 2: the per-`α` uniform bound on `riemannianFiberNormSq`
-
-Combining the intrinsic chart-`α` summand bound, the chart-`α`-summand-to-raw-component
-bound, and the uniform raw-component bound over the closed POU support, we obtain a
-single nonnegative constant controlling the intrinsic fiber norm of a smooth section
-over the closed support of the partition-of-unity weight at `α`. -/
 
 /-- **Per-`α` uniform bound on `riemannianFiberNormSq` over the closed POU support.**
 For a closed Riemannian manifold `(M, g)`, smooth section `S : SmoothCcTensor g r s`,
@@ -191,19 +173,15 @@ theorem exists_bound_riemannianFiberNormSq_smoothCcTensor_on_pouTsupport
         riemannianFiberNormSq (I := I) (M := M) g r s b (S.toSection b) ≤ Kα := by
   classical
   set n : ℕ := Module.finrank ℝ E with hn_def
-  -- Intrinsic chart-`α` summand bound.
   obtain ⟨C₁, hC₁_nonneg, hC₁_bound⟩ :=
     riemannianFiberNormSq_le_chartAlpha_summand_sum_on_pouTsupport
       (I := I) (M := M) g r s α
-  -- Chart-`α`-summand-to-raw-component bound (per multi-index pair).
   obtain ⟨C₂, hC₂_nonneg, hC₂_bound⟩ :=
     fiberNormSqSummand_chartAlpha_le_raw_components_sq
       (I := I) (M := M) g r s α
-  -- Uniform raw-component bound over the closed POU support.
   obtain ⟨B, hB_nonneg, hB_bound⟩ :=
     exists_uniform_bound_sum_tensorChartComponentRaw_sq_on_pouTsupport
       (I := I) (M := M) g r s α S
-  -- The number of multi-index pairs `(Idx, Jdx)`.
   set Npair : ℝ := (n : ℝ) ^ r * (n : ℝ) ^ s with hNpair_def
   have hNpair_nonneg : 0 ≤ Npair := by
     rw [hNpair_def]
@@ -211,9 +189,7 @@ theorem exists_bound_riemannianFiberNormSq_smoothCcTensor_on_pouTsupport
   refine ⟨C₁ * (Npair * (C₂ * B)), ?_, ?_⟩
   · exact mul_nonneg hC₁_nonneg (mul_nonneg hNpair_nonneg (mul_nonneg hC₂_nonneg hB_nonneg))
   · intro b hb
-    -- Step A: intrinsic fiber norm ≤ C₁ · ∑_{IJ} fiberNormSqSummand(chart-α).
     have hA := hC₁_bound S hb
-    -- Step B: each summand ≤ C₂ · ∑raw², hence ∑_{IJ} summand ≤ Npair · C₂ · ∑raw².
     set rawSum : ℝ :=
       ∑ Idx' : Fin r → Fin n, ∑ Jdx' : Fin s → Fin n,
         (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx' Jdx' b) ^ 2
@@ -229,7 +205,6 @@ theorem exists_bound_riemannianFiberNormSq_smoothCcTensor_on_pouTsupport
             C₂ * rawSum := by
         intro Idx Jdx
         exact hC₂_bound S hb Idx Jdx
-      -- Sum the per-pair bound over all `n^r · n^s` index pairs.
       calc
         (∑ Idx : Fin r → Fin n, ∑ Jdx : Fin s → Fin n,
             fiberNormSqSummand (I := I) (M := M) g b r s (S.toSection b) n
@@ -246,11 +221,9 @@ theorem exists_bound_riemannianFiberNormSq_smoothCcTensor_on_pouTsupport
               rw [hNpair_def]
               push_cast
               ring
-    -- Step C: ∑raw² ≤ B.
     have hC : rawSum ≤ B := by
       rw [hrawSum_def]
       exact hB_bound hb
-    -- Chain the three steps.
     calc
       riemannianFiberNormSq (I := I) (M := M) g r s b (S.toSection b)
           ≤ C₁ *
@@ -263,13 +236,6 @@ theorem exists_bound_riemannianFiberNormSq_smoothCcTensor_on_pouTsupport
             refine mul_le_mul_of_nonneg_left ?_ hC₁_nonneg
             refine mul_le_mul_of_nonneg_left ?_ hNpair_nonneg
             exact mul_le_mul_of_nonneg_left hC hC₂_nonneg
-
-/-! ## Step 3: the global uniform bound on a closed manifold
-
-On a compact manifold the chart-atlas partition of unity has finite nonempty
-support. Every base point lies in the support — hence the closed support — of at
-least one weight in the finite index set, so the maximum (here the sum) of the
-finitely many per-`α` bounds is a single global uniform bound. -/
 
 /-- **Uniform bound on the intrinsic Riemannian fiber norm of a smooth tensor
 section.** Let `g` be a smooth Riemannian metric on a closed manifold `M`, and let
@@ -292,7 +258,6 @@ theorem exists_bound_riemannianFiberNormSq_smoothCcTensor
     ∃ K : ℝ, 0 ≤ K ∧ ∀ b : M,
       riemannianFiberNormSq (I := I) (M := M) g r s b (S.toSection b) ≤ K := by
   classical
-  -- The per-`α` bounding constant (as a function of `α`), and its defining property.
   set Kα : M → ℝ := fun α =>
     (exists_bound_riemannianFiberNormSq_smoothCcTensor_on_pouTsupport
       (I := I) (M := M) g r s α S).choose with hKα_def
@@ -305,26 +270,21 @@ theorem exists_bound_riemannianFiberNormSq_smoothCcTensor
       riemannianFiberNormSq (I := I) (M := M) g r s b (S.toSection b) ≤ Kα α := fun α =>
     (exists_bound_riemannianFiberNormSq_smoothCcTensor_on_pouTsupport
       (I := I) (M := M) g r s α S).choose_spec.2
-  -- The global constant: the sum of the per-`α` bounds over the finite support set.
   set K : ℝ := ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M), Kα α with hK_def
   have hK_nonneg : 0 ≤ K := by
     rw [hK_def]
     exact Finset.sum_nonneg (fun α _ => hKα_nonneg α)
   refine ⟨K, hK_nonneg, ?_⟩
   intro b
-  -- `b` lies in the support of some POU weight, hence in its closed support.
   obtain ⟨α, hα_pos⟩ :=
     (chartAtlasPOU I M).exists_pos_of_mem (Set.mem_univ b)
-  -- `α` is in the finite support set.
   have hα_finset : α ∈ chartAtlasPOU_finset (I := I) (M := M) := by
     rw [chartAtlasPOU_finset_mem]
     exact ⟨b, Function.mem_support.mpr (ne_of_gt hα_pos)⟩
-  -- `b` is in the closed support of `chartAtlasPOU α`.
   have hb_tsupport : b ∈ tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) := by
     apply subset_tsupport
     exact Function.mem_support.mpr (ne_of_gt hα_pos)
-  -- Apply the per-`α` bound, then bound `Kα α` by the sum `K`.
   refine le_trans (hKα_bound α hb_tsupport) ?_
   rw [hK_def]
   exact Finset.single_le_sum (fun β _ => hKα_nonneg β) hα_finset

@@ -42,11 +42,6 @@ theorem maxreg_solution_in_c1_via_sobolev_embedding
     ∀ x : M, ∀ v w : TangentSpace I x,
       ContinuousOn (fun t : ℝ => (g_DT t).inner x v w)
         (Set.Ico (0 : ℝ) T) := by
-  -- The maxReg / Sobolev super-criticality hypothesis `_h_super` is the natural
-  -- input for a `H^{a+2} ↪ C¹` strengthening; for the present conclusion — pointwise
-  -- continuity of the scalar metric pairing — the parabolic-solution hypothesis
-  -- already supplies a `HasDerivWithinAt` on each pairing, which downgrades to
-  -- continuity.
   obtain ⟨_hT, _hinit, hderiv⟩ := _hsol
   intro x v w t ht
   have hcont_within_Ici :
@@ -74,17 +69,11 @@ theorem c1_norm_time_continuous_from_h1_time_derivative
     ∀ x : M, ∀ v w : TangentSpace I x,
       ContinuousOn (fun t : ℝ => (g_DT t).inner x v w)
         (Set.Ico (0 : ℝ) T) := by
-  -- Unpack the parabolic-solution hypothesis: at every `t ∈ [0, T)`, every base
-  -- point `x`, and every pair `(v, w)`, the scalar pairing `s ↦ (g_DT s).inner x v w`
-  -- has a derivative within `Set.Ici 0` at `t` (equal to the RHS evaluated at `g_DT t`).
   obtain ⟨_hT, _hinit, hderiv⟩ := _hsol
-  -- Fix the inputs and read off the derivative datum.
   intro x v w t ht
-  -- The derivative within `Ici 0` at `t` yields continuity within `Ici 0` at `t`.
   have hcont_within_Ici :
       ContinuousWithinAt (fun s : ℝ => (g_DT s).inner x v w) (Set.Ici (0 : ℝ)) t :=
     (hderiv t ht x v w).continuousWithinAt
-  -- `Set.Ico 0 T ⊆ Set.Ici 0`, so we can mono-strengthen the continuity neighbourhood.
   exact hcont_within_Ici.mono Set.Ico_subset_Ici_self
 
 /-- **The DeTurck vector field is continuous in its `C¹` metric input.**

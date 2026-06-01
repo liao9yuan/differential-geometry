@@ -77,14 +77,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Headline -/
 
 /-- **Pointwise uniform-in-`T₀` bound on `riemannianFiberNormSq` of the raw
 tensor connection Laplacian by chart-`α` Sobolev-summand data on `M`.**
@@ -127,19 +123,14 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chartPouSobolevSummand_T0_unif
                         ((extChartAt I α) b)‖ ^ 2) := by
   classical
   set n : ℕ := Module.finrank ℝ E with hn_def
-  -- Step 1: invoke the chart-α Euclidean push-forward bound (B.4.refine).
   obtain ⟨C_B, hC_B_nn, hB⟩ :=
     rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_T0_uniform
       (I := I) (M := M) g r s α
-  -- Step 2: the chain factor from `(toEuclidean (E := E)).symm`.
   set Lop : ℝ :=
       ‖((toEuclidean (E := E)).symm :
           EuclideanSpace ℝ (Fin n) ≃L[ℝ] E).toContinuousLinearMap‖
       with hLop_def
   have hLop_nn : 0 ≤ Lop := by rw [hLop_def]; exact norm_nonneg _
-  -- The maximum chain factor over `j ∈ {0, 1, 2}` is `max 1 Lop^4`. (At `j = 0`,
-  -- the bridge is an equality, so the factor is `1`; at `j = 1`, the factor is
-  -- `Lop^2 ≤ max 1 Lop^4`; at `j = 2`, the factor is `Lop^4 ≤ max 1 Lop^4`.)
   set Lmax : ℝ := max 1 (Lop ^ 4) with hLmax_def
   have h_one_le_Lmax : (1 : ℝ) ≤ Lmax := by rw [hLmax_def]; exact le_max_left _ _
   have h_Lmax_nn : 0 ≤ Lmax := le_trans (by linarith : (0 : ℝ) ≤ 1) h_one_le_Lmax
@@ -154,42 +145,31 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chartPouSobolevSummand_T0_unif
             mul_le_mul_of_nonneg_left h_one_le
               (le_trans (by linarith : (0 : ℝ) ≤ 1) h_one_le)
         _ = max 1 (Lop ^ 2) ^ 2 := by ring
-    -- `max 1 (Lop^2) ^ 2 = max 1 (Lop^4)`? Not in general — but we just need
-    -- `Lop ^ 2 ≤ max 1 (Lop ^ 4)`.
     by_cases h_Lop_le_one : Lop ≤ 1
-    · -- If `Lop ≤ 1` then `Lop^2 ≤ 1 ≤ max 1 (Lop^4)`.
-      have h_Lop2_le_one : Lop ^ 2 ≤ 1 := by
+    · have h_Lop2_le_one : Lop ^ 2 ≤ 1 := by
         have h_sq : Lop ^ 2 ≤ 1 ^ 2 := pow_le_pow_left₀ hLop_nn h_Lop_le_one 2
         simpa using h_sq
       exact le_trans h_Lop2_le_one h_one_le_Lmax
-    · -- If `Lop > 1` then `Lop^2 ≤ Lop^4 ≤ max 1 (Lop^4)`.
-      have h_one_lt_Lop : (1 : ℝ) < Lop := lt_of_not_ge h_Lop_le_one
+    · have h_one_lt_Lop : (1 : ℝ) < Lop := lt_of_not_ge h_Lop_le_one
       have h_one_le_Lop : (1 : ℝ) ≤ Lop := le_of_lt h_one_lt_Lop
       have h_Lop2_le_Lop4 : Lop ^ 2 ≤ Lop ^ 4 :=
         pow_le_pow_right₀ h_one_le_Lop (by norm_num : 2 ≤ 4)
       exact le_trans h_Lop2_le_Lop4 (le_max_right _ _)
   have h_Lop4_le_Lmax : Lop ^ 4 ≤ Lmax := by rw [hLmax_def]; exact le_max_right _ _
-  -- Define `C := C_B * 3 * Lmax`. The factor `3` absorbs the three orders
-  -- `j ∈ {0, 1, 2}` summed in the RHS Sobolev-summand pattern.
   set C : ℝ := C_B * 3 * Lmax with hC_def
   have hC_nn : 0 ≤ C := by
     rw [hC_def]
     exact mul_nonneg (mul_nonneg hC_B_nn (by norm_num : (0 : ℝ) ≤ 3)) h_Lmax_nn
   refine ⟨C, hC_nn, ?_⟩
   intro T₀ b hb_inter
-  -- Step 3: invoke B.4.refine to get the Euclidean-side bound.
   have hB_at := hB T₀ (b := b) hb_inter
-  -- Set up abbreviations.
   set y : EuclideanSpace ℝ (Fin n) := (toEuclidean (E := E)) ((extChartAt I α) b)
     with hy_def
-  -- Membership: `b ∈ chart source` (via subordination), so `(extChartAt I α) b ∈
-  -- (extChartAt I α).target`, hence `y ∈ chartTargetEuclid α`.
   have hb_src : b ∈ (chartAt H α).source := by
     have h_sub : tsupport
         (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
           (chartAt H α).source := by
       have := chartAtlasPOU_isSubordinate (I := I) (M := M) α
-      -- the subordinate predicate phrases `tsupport (POU α : M → ℝ) ⊆ chart α source`
       exact this
     exact h_sub hb_inter.1
   have hb_extsrc : b ∈ (extChartAt I α).source := by
@@ -200,20 +180,14 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chartPouSobolevSummand_T0_unif
     rw [hy_def]
     refine ⟨(extChartAt I α) b, h_extat_b_in_target, ?_⟩
     rfl
-  -- The model-space point `(toEuclidean (E := E)).symm y = (extChartAt I α) b`.
   have hsymm_y : (toEuclidean (E := E)).symm y = (extChartAt I α) b := by
     rw [hy_def]; exact (toEuclidean (E := E)).symm_apply_apply _
-  -- Smoothness witnesses for the chart-pulled composition: `ContDiffOn ℝ ∞` on
-  -- the chart-target (these are needed by H.3.bridge orders 1 and 2 as a
-  -- placeholder hypothesis — the headlines have an unused-but-required arg).
   have hcontDiff_comp : ∀ Idx : Fin r → Fin n, ∀ Jdx : Fin s → Fin n,
       ContDiffOn ℝ ∞
         ((tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx) ∘
           (extChartAt I α).symm)
         (extChartAt I α).target := by
     intro Idx Jdx
-    -- Re-derive the C∞ witness exactly as in
-    -- `chartPushedRaw_tensorChartComponentRaw_contDiffOn`.
     have hraw_src : ContMDiffOn I 𝓘(ℝ) ∞
         (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx)
         ((chartAt H α).source) :=
@@ -228,24 +202,6 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chartPouSobolevSummand_T0_unif
     have hmaps : Set.MapsTo (extChartAt I α).symm (extChartAt I α).target
         (extChartAt I α).source := fun y' hy' => (extChartAt I α).map_target hy'
     exact (hraw_extsrc.comp hsymm hmaps).contDiffOn
-  -- Step 4: bound each of the three Euclidean-side summands by the
-  -- corresponding chart-pulled iterated-Fréchet summand at `(extChartAt I α) b`,
-  -- absorbing a chain factor `Lop ^ (2 j)`.
-  -- The per-(Idx, Jdx) Euclidean-side summand from B.4.refine has shape
-  --   (‖iteratedFDeriv ℝ 2 (chartPushedRaw …) y‖)^2 +
-  --   (‖fderiv ℝ (chartPushedRaw …) y‖)^2 +
-  --   (chartPushedRaw … y)^2.
-  -- We bound each piece via the H.3.bridge:
-  --   order-2:  ≤ Lop^4 · ‖iteratedFDeriv ℝ 2 (comp) (extChartAt α b)‖^2
-  --   order-1:  ≤ Lop^2 · ‖fderiv ℝ (comp) (extChartAt α b)‖^2
-  --             = Lop^2 · ‖iteratedFDeriv ℝ 1 (comp) (extChartAt α b)‖^2
-  --   order-0:  =          (comp (extChartAt α b))^2
-  --             = ‖iteratedFDeriv ℝ 0 (comp) (extChartAt α b)‖^2.
-  -- All three pieces are then ≤ Lmax · ‖iteratedFDeriv ℝ j (comp) (extChartAt α b)‖^2
-  -- for the appropriate `j`. Summing over `j ∈ {0, 1, 2}` gives a single
-  -- multiple of the Sobolev-summand pattern.
-  -- Helper: for each (Idx, Jdx), upper bound the Euclidean triple by
-  -- `Lmax * (Σ j ∈ {0,1,2}, ‖iterFD_j (comp) (extChartAt α b)‖^2)`.
   have h_per_IJ : ∀ Idx : Fin r → Fin n, ∀ Jdx : Fin s → Fin n,
       ((‖iteratedFDeriv ℝ 2
             (chartPushedRaw I α
@@ -264,18 +220,14 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chartPouSobolevSummand_T0_unif
     set u : M → ℝ := tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx
       with hu_def
     set v : E → ℝ := u ∘ (extChartAt I α).symm with hv_def
-    -- The model-space point at which we evaluate `iteratedFDeriv ℝ j v`.
     set p : E := (extChartAt I α) b with hp_def
-    -- Express `p = (toEuclidean (E := E)).symm y`.
     have hp_eq : p = (toEuclidean (E := E)).symm y := by rw [hp_def, hsymm_y]
-    -- The three contributions, indexed by `j ∈ {0, 1, 2}`.
     set a0 : ℝ := ‖iteratedFDeriv ℝ 0 v p‖ ^ 2 with ha0_def
     set a1 : ℝ := ‖iteratedFDeriv ℝ 1 v p‖ ^ 2 with ha1_def
     set a2 : ℝ := ‖iteratedFDeriv ℝ 2 v p‖ ^ 2 with ha2_def
     have ha0_nn : 0 ≤ a0 := sq_nonneg _
     have ha1_nn : 0 ≤ a1 := sq_nonneg _
     have ha2_nn : 0 ≤ a2 := sq_nonneg _
-    -- Identify the RHS sum.
     have h_sum_eq :
         (∑ j ∈ Finset.range 3,
           ‖iteratedFDeriv ℝ j
@@ -285,8 +237,6 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chartPouSobolevSummand_T0_unif
           a0 + a1 + a2 := by
       rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
           Finset.sum_range_zero, zero_add]
-    -- Order-0 bridge: `(chartPushedRaw … y)^2 = (u ((extChartAt I α).symm y))^2 =
-    -- (v p)^2 = ‖iteratedFDeriv ℝ 0 v p‖^2 = a0`.
     have h_order0 :
         (chartPushedRaw I α u y) ^ 2 = a0 := by
       have h_eq_sq :
@@ -305,14 +255,10 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chartPouSobolevSummand_T0_unif
         rw [hv_def]
         change u ((extChartAt I α).symm p) = u b
         rw [h_uniqueLeftInv]
-      -- a0 = ‖iteratedFDeriv ℝ 0 v p‖^2 = ‖v p‖^2 = (v p)^2.
       have h_a0_eq_v_sq : a0 = (v p) ^ 2 := by
         rw [ha0_def, norm_iteratedFDeriv_zero]
-        -- ‖v p‖² = (v p)²: for ℝ-valued v, ‖x‖ = |x|, so ‖x‖² = |x|² = x².
         rw [Real.norm_eq_abs, sq_abs]
-      -- Combine.
       rw [h_eq_sq, h_arg_eq, h_uniqueLeftInv, h_a0_eq_v_sq, h_v_p_eq]
-    -- Order-1 bridge.
     have h_order1 :
         (‖fderiv ℝ (chartPushedRaw I α u) y‖) ^ 2 ≤ Lop ^ 2 * a1 := by
       have hbridge :=
@@ -323,20 +269,13 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chartPouSobolevSummand_T0_unif
             refine hc.of_le ?_
             exact (WithTop.coe_le_coe.mpr (le_top : (1 : ℕ∞) ≤ ⊤)))
           (y := y) hy_in_target
-      -- The bridge bound's RHS contains `‖fderiv ℝ (u ∘ symm) ((toEucl).symm y)‖^2`.
-      -- Identify this with `a1 = ‖iteratedFDeriv ℝ 1 v p‖^2`.
-      -- v = u ∘ symm, p = (toEucl).symm y, and ‖iterFD¹ v p‖ = ‖fderiv ℝ v p‖.
       have h_norm_eq : ‖fderiv ℝ (u ∘ (extChartAt I α).symm)
               ((toEuclidean (E := E)).symm y)‖ ^ 2 = a1 := by
         rw [ha1_def, ← hp_eq]
-        -- v = u ∘ (extChartAt I α).symm, so ‖iteratedFDeriv ℝ 1 v p‖ =
-        -- ‖fderiv ℝ v p‖ = ‖fderiv ℝ (u ∘ symm) p‖.
         rw [show (‖iteratedFDeriv ℝ 1 v p‖ ^ 2) =
               (‖fderiv ℝ v p‖ ^ 2) from by rw [norm_iteratedFDeriv_one]]
-      -- Goal: ‖fderiv ℝ (chartPushedRaw I α u) y‖^2 ≤ Lop^2 * a1.
       refine hbridge.trans ?_
       rw [h_norm_eq]
-    -- Order-2 bridge.
     have h_order2 :
         (‖iteratedFDeriv ℝ 2 (chartPushedRaw I α u) y‖) ^ 2 ≤ Lop ^ 4 * a2 := by
       have hbridge :=
@@ -345,8 +284,6 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chartPouSobolevSummand_T0_unif
           (by
             have hc := hcontDiff_comp Idx Jdx
             refine hc.of_le ?_
-            -- The expected type is `(2 : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞)`.
-            -- We prove `(2 : ℕ∞) ≤ ⊤` then coerce.
             exact (WithTop.coe_le_coe.mpr (le_top : (2 : ℕ∞) ≤ ⊤)))
           (y := y) hy_in_target
       have h_norm_eq : ‖iteratedFDeriv ℝ 2 (u ∘ (extChartAt I α).symm)
@@ -354,7 +291,6 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chartPouSobolevSummand_T0_unif
         rw [ha2_def, ← hp_eq]
       refine hbridge.trans ?_
       rw [h_norm_eq]
-    -- Compose: bound `(order-2)^2 + (order-1)^2 + (order-0)^2 ≤ Lmax · (a2 + a1 + a0)`.
     rw [h_sum_eq]
     have h_o0_le : (chartPushedRaw I α u y) ^ 2 ≤ Lmax * a0 := by
       rw [h_order0]
@@ -374,7 +310,6 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chartPouSobolevSummand_T0_unif
         ≤ Lmax * a2 + Lmax * a1 + Lmax * a0 := by
           exact add_le_add (add_le_add h_o2_le h_o1_le) h_o0_le
       _ = Lmax * (a0 + a1 + a2) := by ring
-  -- Sum the per-(Idx, Jdx) bound over the multi-index set.
   have hSumIJ :
       (∑ Idx : Fin r → Fin n,
         ∑ Jdx : Fin s → Fin n,
@@ -393,7 +328,6 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chartPouSobolevSummand_T0_unif
                         ((tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx)
                           ∘ (extChartAt I α).symm)
                         ((extChartAt I α) b)‖ ^ 2) := by
-    -- Apply per-(Idx, Jdx) bound under both sums.
     have h_inner :
         (∑ Idx : Fin r → Fin n,
           ∑ Jdx : Fin s → Fin n,
@@ -414,7 +348,6 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chartPouSobolevSummand_T0_unif
                     ((extChartAt I α) b)‖ ^ 2) :=
       Finset.sum_le_sum (fun Idx _ =>
         Finset.sum_le_sum (fun Jdx _ => h_per_IJ Idx Jdx))
-    -- Pull `Lmax` outside both sums.
     have h_pull :
         (∑ Idx : Fin r → Fin n,
           ∑ Jdx : Fin s → Fin n,
@@ -457,14 +390,6 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chartPouSobolevSummand_T0_unif
                           ((tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx)
                             ∘ (extChartAt I α).symm)
                           ((extChartAt I α) b)‖ ^ 2) := h_pull
-  -- Final composition.
-  -- (Note: `3 * Lmax = 3 * Lmax` and we use `C_B * Lmax * (full triple sum) ≤
-  --  C_B * 3 * Lmax * (Sobolev pattern sum)` implicitly, but the factor `3`
-  --  is incorporated by leaving the Sobolev pattern sum with weight `1`,
-  --  since the per-(I,J) Euclidean triple is already bounded by `Lmax ·
-  --  (a0 + a1 + a2)` rather than `3 · Lmax · …`. Hence the `* 3` is
-  --  pre-emptive overhead absorbed via `Lmax ≤ 3 · Lmax`, ensuring the
-  --  inequality holds.)
   have h_chain : C_B *
       (∑ Idx : Fin r → Fin n,
         ∑ Jdx : Fin s → Fin n,
@@ -486,7 +411,6 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chartPouSobolevSummand_T0_unif
                         ((tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx)
                           ∘ (extChartAt I α).symm)
                         ((extChartAt I α) b)‖ ^ 2) := by
-    -- Express the RHS sum from B.4.refine using `y`.
     have h_euclSum_eq :
         (∑ Idx : Fin r → Fin n,
           ∑ Jdx : Fin s → Fin n,
@@ -512,7 +436,6 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chartPouSobolevSummand_T0_unif
               (chartPushedRaw I α
                  (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx) y) ^ 2)) := by
       rw [hy_def]
-    -- Define the Sobolev-pattern sum as `BigPat`.
     set BigPat : ℝ :=
       ∑ Idx : Fin r → Fin n,
         ∑ Jdx : Fin s → Fin n,
@@ -574,8 +497,6 @@ end Integral
 end DifferentialGeometry
 
 end
-
-/-! ## Sanity check: axioms used by the headline. -/
 
 open DifferentialGeometry.Integral.Connection in
 #print axioms rawTensorConnLap_riemannianFiberNormSq_le_chartPouSobolevSummand_T0_uniform

@@ -50,8 +50,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## First headline: smoothness of the pulled-back coordinate matrix entry -/
-
 /-- **First headline.** The pullback of `chartFrameNormGlobalSmoothCoordMatrix g
 α i k` through `(extChartAt I α).symm ∘ (toEuclidean E).symm` is `ContDiffOn ℝ ∞`
 on the Euclidean chart target `chartTargetEuclid α`. -/
@@ -65,20 +63,17 @@ theorem chartFrameNormGlobalSmoothCoordMatrix_pullback_contDiffOn_chartTarget
           ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- The chart-symm composition is smooth on `chartTargetEuclid α`.
   have h_chart :
       ContMDiffOn 𝓘(ℝ, EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) I ∞
         (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
           (extChartAt I α).symm ((toEuclidean (E := E)).symm y))
         (chartTargetEuclid (I := I) (M := M) α) :=
     contMDiffOn_chart_symm (I := I) (M := M) α
-  -- The coordinate-matrix entry is smooth on the chart-α trivialization base set.
   have h_coord : ContMDiffOn I 𝓘(ℝ, ℝ) ∞
       (fun b : M =>
         chartFrameNormGlobalSmoothCoordMatrix (I := I) (M := M) g α i k b)
       (trivializationAt E (TangentSpace I) α).baseSet :=
     chartFrameNormGlobalSmoothCoordMatrix_contMDiffOn (I := I) (M := M) g α i k
-  -- The chart-symm composition lands in the chart-α trivialization base set.
   have h_maps :
       MapsTo (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
           (extChartAt I α).symm ((toEuclidean (E := E)).symm y))
@@ -88,11 +83,9 @@ theorem chartFrameNormGlobalSmoothCoordMatrix_pullback_contDiffOn_chartTarget
     have h_src : (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈
         (chartAt H α).source :=
       DifferentialGeometry.Analysis.Sobolev.Chart.symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy
-    -- The tangent-bundle trivialization base set equals the chart source.
     change (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈
       (chartAt H α).source
     exact h_src
-  -- Compose.
   have h_comp :
       ContMDiffOn 𝓘(ℝ, EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) 𝓘(ℝ, ℝ) ∞
         (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
@@ -100,10 +93,7 @@ theorem chartFrameNormGlobalSmoothCoordMatrix_pullback_contDiffOn_chartTarget
             ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
         (chartTargetEuclid (I := I) (M := M) α) :=
     h_coord.comp h_chart h_maps
-  -- A `ContMDiffOn` map between model spaces is `ContDiffOn`.
   exact (contMDiffOn_iff_contDiffOn).mp h_comp
-
-/-! ## Second headline: smoothness of the pulled-back directional derivative -/
 
 /-- The chart-pullback `y ↦ chartFrameNormGlobalSmoothCoordMatrix g α i k
 ((extChartAt I α).symm (toEuclidean.symm y))` as a function on
@@ -164,15 +154,12 @@ private lemma partialDeriv_scalarOnE_eq_euclidPartial_pulled
     toEuclidean_symm_mem_target (I := I) hy
   have hphi_b : extChartAt I α b = (toEuclidean (E := E)).symm y := by
     rw [hb_def]; exact (extChartAt I α).right_inv hy_pre
-  -- Chart-Euclidean partial as a Fréchet derivative of the push-forward.
   rw [euclidPartial_def]
-  -- Near `y` the push-forward equals the explicit composition.
   have hpushed_eq :
       DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α f =ᶠ[𝓝 y]
         ((scalarOnE (I := I) α f) ∘ (toEuclidean (E := E)).symm) := by
     have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
       chartTargetEuclid_isOpen (I := I) (M := M) α
-    -- `Sobolev.Chart.chartTargetEuclid` reduces to `MetricExtension.chartTargetEuclid`.
     have hy_sob : y ∈ (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := hy
     filter_upwards [hopen.mem_nhds hy] with z hz
@@ -182,11 +169,9 @@ private lemma partialDeriv_scalarOnE_eq_euclidPartial_pulled
       (I := I) (M := M) α f hz_sob]
     rfl
   rw [Filter.EventuallyEq.fderiv_eq hpushed_eq]
-  -- Chain rule through the linear isometry `toEuclidean.symm`.
   rw [(toEuclidean (E := E)).symm.comp_right_fderiv
     (f := scalarOnE (I := I) α f) (x := y)]
   rw [ContinuousLinearMap.comp_apply]
-  -- `toEuclidean.symm (single m 1) = chartModelBasis E m`.
   rw [show (toEuclidean (E := E)).symm.toContinuousLinearMap
       (EuclideanSpace.single m (1 : ℝ)) = (chartModelBasis E) m from by
     rw [chartModelBasis_apply]; rfl]
@@ -247,7 +232,6 @@ private lemma extDerivFun_pull_eq_euclidPartial_on_target
           (chartFrameNormGlobalSmoothCoordMatrix (I := I) g α i k)))
       (chartTargetEuclid (I := I) (M := M) α) := by
   intro y hy
-  -- `MDifferentiableAt` at `b := chartSymm y` from the ContMDiffOn on the base set.
   set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
   have hb_chart : b ∈ (chartAt H α).source :=
     DifferentialGeometry.Analysis.Sobolev.Chart.symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy
@@ -302,8 +286,6 @@ private lemma euclidPartial_chartPushedRaw_coordMatrix_contDiffOn
           (chartFrameNormGlobalSmoothCoordMatrix (I := I) g α i k)))
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- `chartPushedRaw` of the coord matrix equals `coordMatrixOnEuclid` on the
-  -- chart target. Their fderivs agree on the open target.
   set u : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α
       (chartFrameNormGlobalSmoothCoordMatrix (I := I) g α i k) with hu_def
@@ -317,10 +299,8 @@ private lemma euclidPartial_chartPushedRaw_coordMatrix_contDiffOn
       (I := I) (M := M) g α i k hy).symm
   have hv_smooth : ContDiffOn ℝ ∞ v (chartTargetEuclid (I := I) (M := M) α) :=
     coordMatrixOnEuclid_contDiffOn (I := I) (M := M) g α i k
-  -- `u` is also `ContDiffOn ℝ ∞` on the open chart target (by EqOn).
   have hu_smooth : ContDiffOn ℝ ∞ u (chartTargetEuclid (I := I) (M := M) α) :=
     hv_smooth.congr (fun z hz => h_eq hz)
-  -- The Fréchet derivative is `C^∞` on the open set.
   have hfderiv : ContDiffOn ℝ ∞ (fun z => fderiv ℝ u z)
       (chartTargetEuclid (I := I) (M := M) α) := by
     have hsucc : ContDiffOn ℝ ((∞ : WithTop ℕ∞) + 1) u
@@ -332,7 +312,6 @@ private lemma euclidPartial_chartPushedRaw_coordMatrix_contDiffOn
       ((contDiffOn_succ_iff_fderivWithin hopen.uniqueDiffOn).mp hsucc).2.2
     refine hfw.congr (fun z hz => ?_)
     exact (fderivWithin_of_isOpen (f := u) (𝕜 := ℝ) hopen hz).symm
-  -- Evaluation at `single l 1` is a continuous linear map; compose.
   have hcomp : ContDiffOn ℝ ∞
       ((fun L : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) →L[ℝ] ℝ =>
           L (EuclideanSpace.single l 1)) ∘ (fun z => fderiv ℝ u z))
@@ -360,8 +339,6 @@ theorem chartFrameNormGlobalSmoothCoordMatrix_dirDeriv_pullback_contDiffOn_chart
             ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))))
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- The function equals `euclidPartial l (chartPushedRaw (coord matrix))` on
-  -- the chart target, which is `ContDiffOn ℝ ∞`.
   refine (euclidPartial_chartPushedRaw_coordMatrix_contDiffOn
     (I := I) (M := M) g α i k l).congr ?_
   intro y hy

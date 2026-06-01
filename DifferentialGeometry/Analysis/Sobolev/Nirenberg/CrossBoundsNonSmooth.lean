@@ -53,13 +53,10 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Local Young inequality (private re-derivation) -/
-
 /-- Young's inequality for nonnegative absolute values.
 Re-derivation since the upstream version is `private`. -/
 private lemma two_abs_mul_le_eps_sq_add' (a b ε : ℝ) (hε : 0 < ε) :
     2 * |a| * |b| ≤ ε * a^2 + (1/ε) * b^2 := by
-  -- 2 * |a| * |b| = 2 * (√ε |a|) * (|b| / √ε), then AM-GM.
   have hsqrt_pos : 0 < Real.sqrt ε := Real.sqrt_pos.mpr hε
   have hsqrt_ne : Real.sqrt ε ≠ 0 := ne_of_gt hsqrt_pos
   set u : ℝ := Real.sqrt ε * |a|
@@ -77,8 +74,6 @@ private lemma two_abs_mul_le_eps_sq_add' (a b ε : ℝ) (hε : 0 < ε) :
   calc 2 * |a| * |b| = 2 * u * v := huv.symm
     _ ≤ u^2 + v^2 := two_mul_le_add_sq u v
     _ = ε * a^2 + (1/ε) * b^2 := by rw [hu_sq, hv_sq]
-
-/-! ## Pointwise bound (mechanical substitution of `cross_1_pointwise_bound`) -/
 
 /-- Pointwise bound for one summand of the non-smooth Cross_1 sum.
 Mechanical substitution `(fderiv ℝ u y) (single i 1) → g i y` in
@@ -105,8 +100,7 @@ private theorem cross_1_pointwise_bound_nonsmooth
         (diffQuot k h u x)^2 := by
   classical
   by_cases hx : x ∈ tsupport η
-  · -- x ∈ tsupport η. Bounds on τa and ∂η apply.
-    have h_shift_in : x + h • EuclideanSpace.single k 1 ∈ closure Ω' := by
+  · have h_shift_in : x + h • EuclideanSpace.single k 1 ∈ closure Ω' := by
       have h_shift_in_Ω' : x + h • EuclideanSpace.single k 1 ∈ Ω' := by
         refine hh_supp_in_Ω' ?_
         refine Metric.mem_cthickening_of_dist_le _ x |h| (tsupport η) hx ?_
@@ -134,8 +128,6 @@ private theorem cross_1_pointwise_bound_nonsmooth
       exact h2
     have h_η_in : η x ∈ Set.Icc (0 : ℝ) 1 := hη_range ⟨x, rfl⟩
     have h_η_nn : 0 ≤ η x := h_η_in.1
-    -- Apply Young: 2 |A| |B'| ≤ ε A² + (1/ε) B'² with
-    -- A = η · D_h^k g_i, B' = (τa) · ∂_j η · D_h^k u.
     set A : ℝ := η x * diffQuot k h (g i) x with hA_def
     set B' : ℝ := translate k h (fun y => B.a y i j) x *
       ((fderiv ℝ η x) (EuclideanSpace.single j 1)) *
@@ -222,8 +214,7 @@ private theorem cross_1_pointwise_bound_nonsmooth
             (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
             (diffQuot k h u x)^2 := by
             rw [hA_sq]; ring
-  · -- x ∉ tsupport η: η x = 0, so LHS = 0.
-    have h_η_zero : η x = 0 := image_eq_zero_of_notMem_tsupport hx
+  · have h_η_zero : η x = 0 := image_eq_zero_of_notMem_tsupport hx
     have h_LHS_zero : 2 * translate k h (fun y => B.a y i j) x * (η x) *
         ((fderiv ℝ η x) (EuclideanSpace.single j 1)) *
         diffQuot k h (g i) x *
@@ -242,8 +233,6 @@ private theorem cross_1_pointwise_bound_nonsmooth
         (diffQuot k h u x)^2 = 0 := by
       rw [h_indicator]; ring
     linarith
-
-/-! ## Local-integrability and L² lemmas -/
 
 omit [NeZero d] in
 /-- The translate of an `L²` function is `L²` with the same norm. -/
@@ -321,8 +310,6 @@ lemma memLp_bounded_mul
   rw [Real.norm_eq_abs, abs_mul, Real.norm_eq_abs]
   exact mul_le_mul_of_nonneg_right (hM x) (abs_nonneg _)
 
-/-! ## Integrability of the per-(i, j) summand -/
-
 /-- The integrand of the non-smooth Cross_1 (one (i, j) summand) is
 integrable. The integrand is `f₁ · D_h^k g_i · D_h^k u`, where
 `f₁ = 2 · τa · η · ∂_j η` is continuous compactly supported (hence
@@ -341,7 +328,6 @@ private lemma integrable_cross_1_summand_nonsmooth
         diffQuot k h (g i) x *
         diffQuot k h u x) volume := by
   classical
-  -- f₁ := 2 · τa · η · ∂_j η is continuous compactly supported.
   have h_a_cont : Continuous (fun x : E => B.a x i j) := B.continuous_a i j
   have h_translate_a : Continuous
       (translate k h (fun y => B.a y i j)) := by
@@ -363,17 +349,13 @@ private lemma integrable_cross_1_summand_nonsmooth
     exact h_step1.mul_right
   obtain ⟨M, hM_nn, hM⟩ :=
     exists_bound_of_continuous_compactSupport hf₁_cont hf₁_supp
-  -- D_h^k g_i ∈ L²(E).
   have h_dq_g_l2 : MemLp (diffQuot k h (g i)) 2 (volume : Measure E) :=
     memLp_diffQuot_two k h (hg_l2 i)
-  -- D_h^k u ∈ L²(E).
   have h_dq_u_l2 : MemLp (diffQuot k h u) 2 (volume : Measure E) :=
     memLp_diffQuot_two k h hu_l2
-  -- f₁ · D_h^k g_i ∈ L²(E) (bounded × L²).
   have hf₁_dqg_l2 : MemLp (fun x => f₁ x * diffQuot k h (g i) x) 2
       (volume : Measure E) :=
     memLp_bounded_mul hf₁_cont.aestronglyMeasurable hM_nn hM h_dq_g_l2
-  -- (f₁ · D_h^k g_i) · D_h^k u ∈ L¹(E) by Hölder L² × L² = L¹.
   have h_target_eq :
       (fun x : E =>
         2 * translate k h (fun y => B.a y i j) x * (η x) *
@@ -402,7 +384,6 @@ lemma integrable_const_eta_sq_diffQuot_g_sq
       (diffQuot k h (g i) x)^2)
       (volume : Measure E) := by
   classical
-  -- η² is bounded continuous.
   have hη_sq_cont : Continuous (fun x : E => η x ^ 2) := hη.continuous.pow 2
   have hη_sq_supp : HasCompactSupport (fun x : E => η x ^ 2) := by
     have heq : (fun y : E => η y ^ 2) = (fun y : E => η y * η y) := by
@@ -410,10 +391,8 @@ lemma integrable_const_eta_sq_diffQuot_g_sq
     rw [heq]; exact hη_supp.mul_right
   obtain ⟨M, hM_nn, hM⟩ :=
     exists_bound_of_continuous_compactSupport hη_sq_cont hη_sq_supp
-  -- D_h^k g_i ∈ L²(E).
   have h_dq_g_l2 : MemLp (diffQuot k h (g i)) 2 (volume : Measure E) :=
     memLp_diffQuot_two k h (hg_l2 i)
-  -- (D_h^k g_i)² is in L¹(E).
   have h_dq_g_sq_int : Integrable (fun x : E => (diffQuot k h (g i) x)^2)
       (volume : Measure E) := by
     have h_dq_norm_sq_int : Integrable
@@ -436,7 +415,6 @@ lemma integrable_const_eta_sq_diffQuot_g_sq
       rw [Real.norm_eq_abs, sq_abs]
     rw [heq2]
     exact h_dq_norm_sq_int
-  -- Now bound `|c · (η x)² · (D_h^k g_i)²| ≤ |c| · M · (D_h^k g_i)²`.
   have h_aesm : AEStronglyMeasurable
       (fun x : E => c * (η x)^2 * (diffQuot k h (g i) x)^2)
       (volume : Measure E) := by
@@ -449,8 +427,6 @@ lemma integrable_const_eta_sq_diffQuot_g_sq
     have h2 : AEStronglyMeasurable (fun x : E => (diffQuot k h (g i) x)^2)
         (volume : Measure E) := h_dq_aesm.pow 2
     exact h1.mul h2
-  -- Use comparison: |LHS| = |c| · |η²| · |Dh g|² ≤ |c| · M · |Dh g|².
-  -- Combine with h_dq_g_sq_int via const-mul.
   have h_const_mul_int : Integrable
       (fun x : E => |c| * M * (diffQuot k h (g i) x)^2)
       (volume : Measure E) := h_dq_g_sq_int.const_mul (|c| * M)
@@ -463,9 +439,7 @@ lemma integrable_const_eta_sq_diffQuot_g_sq
     have hM_apply := hM x
     rw [abs_of_nonneg h_eta_sq_nn] at hM_apply
     exact hM_apply
-  -- Goal: ‖c * η² * (D_h^k g_i)²‖ ≤ |c| * M * (D_h^k g_i)².
   rw [Real.norm_eq_abs]
-  -- Goal: |c * η² * (D_h^k g_i)²| ≤ |c| * M * (D_h^k g_i)².
   have h_LHS_eq : |c * (η x)^2 * (diffQuot k h (g i) x)^2| =
       |c| * (η x)^2 * (diffQuot k h (g i) x)^2 := by
     rw [show c * (η x)^2 * (diffQuot k h (g i) x)^2 =
@@ -474,7 +448,6 @@ lemma integrable_const_eta_sq_diffQuot_g_sq
     rw [abs_of_nonneg h_eta_sq_nn, abs_of_nonneg h_dq_sq_nn]
     ring
   rw [h_LHS_eq]
-  -- Goal: |c| * (η x)² * (D_h^k g_i x)² ≤ |c| * M * (D_h^k g_i x)².
   have h_ic_nn : 0 ≤ |c| := abs_nonneg _
   have h_ic_eta_sq : |c| * (η x)^2 ≤ |c| * M :=
     mul_le_mul_of_nonneg_left h_eta_sq_le h_ic_nn
@@ -494,10 +467,8 @@ lemma integrable_const_indicator_diffQuot_u_sq
   have h_tsupp_meas : MeasurableSet (tsupport η) :=
     isClosed_tsupport η |>.measurableSet
   have h_tsupp_compact : IsCompact (tsupport η) := hη_supp
-  -- D_h^k u ∈ L²(E).
   have h_dq_u_l2 : MemLp (diffQuot k h u) 2 (volume : Measure E) :=
     memLp_diffQuot_two k h hu_l2
-  -- (D_h^k u)² is in L¹(E).
   have h_dq_u_sq_int : Integrable (fun x : E => (diffQuot k h u x)^2)
       (volume : Measure E) := by
     have h_dq_norm_sq_int : Integrable
@@ -520,8 +491,6 @@ lemma integrable_const_indicator_diffQuot_u_sq
       rw [Real.norm_eq_abs, sq_abs]
     rw [heq2]
     exact h_dq_norm_sq_int
-  -- Indicator times const times bounded is integrable.
-  -- AEStronglyMeasurable.
   have h_aesm : AEStronglyMeasurable
       (fun x : E => c *
         (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
@@ -550,9 +519,6 @@ lemma integrable_const_indicator_diffQuot_u_sq
     rw [abs_zero]
     have h_dq_sq_nn : 0 ≤ (diffQuot k h u x)^2 := sq_nonneg _
     refine mul_nonneg (abs_nonneg _) h_dq_sq_nn
-
-/-! ## Local-bound for `∫_{tsupport η} (D_h^k u)²` (Fréchet–Kolmogorov bound,
-hypothesised) -/
 
 omit [NeZero d] in
 /-- Conversion `∫ c · 1_K · f = c · ∫_K f`. -/
@@ -630,8 +596,6 @@ private lemma gradL2sqOn_nonsmooth_nonneg
   intro x
   exact Finset.sum_nonneg (fun _ _ => sq_nonneg _)
 
-/-! ## Headline non-smooth Cross_1 bound -/
-
 set_option linter.unusedVariables false in
 /-- **Quantitative non-smooth Cross_1 bound.**
 
@@ -680,7 +644,6 @@ theorem cross_1_bound_nonsmooth_quantitative
             ∑ i : Fin d, ((g i) x) ^ 2
           ∂(volume : Measure E) := by
   classical
-  -- Constant Λ bounding |a^{ij}| on closure Ω'.
   set Λ : ℝ := Classical.choose
     (SmoothEllipticBilinearForm.bounded_a_on_compact (d := d) B hΩ'_compact)
     with hΛ_eq
@@ -725,7 +688,6 @@ theorem cross_1_bound_nonsmooth_quantitative
     intro i _
     exact Finset.abs_sum_le_sum_abs _ _
   refine h_abs_sum.trans ?_
-  -- Integrability infrastructure.
   have h_integrand_int : ∀ i j : Fin d, Integrable (fun x : E =>
       2 * translate k h (fun y => B.a y i j) x * (η x) *
         ((fderiv ℝ η x) (EuclideanSpace.single j 1)) *
@@ -787,7 +749,6 @@ theorem cross_1_bound_nonsmooth_quantitative
     Finset.sum_le_sum (fun i _ => Finset.sum_le_sum (fun j _ =>
       h_per_pair_bound i j))
   refine h_outer_sum.trans ?_
-  -- Compute the total bound via summation manipulation.
   have h_total_eq :
       ∑ i : Fin d, ∑ j : Fin d,
         ∫ x, ((ε / d_real) * (η x)^2 *
@@ -800,7 +761,6 @@ theorem cross_1_bound_nonsmooth_quantitative
         ∂(volume : Measure E) +
       d_real^2 * ((1 / (ε / d_real)) * Λ^2 * N^2 *
         ∫ x in tsupport η, (diffQuot k h u x)^2 ∂(volume : Measure E)) := by
-    -- Step (a): split each ∫ (A + B) = ∫ A + ∫ B.
     have h_per_ij : ∀ i j : Fin d,
         ∫ x, ((ε / d_real) * (η x)^2 *
             (diffQuot k h (g i) x)^2 +
@@ -828,7 +788,6 @@ theorem cross_1_bound_nonsmooth_quantitative
               (diffQuot k h u x)^2 ∂(volume : Measure E)) from
           Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl
             (fun j _ => h_per_ij i j))]
-    -- Step (b): inner ∑_j of constant in j = d_real × the value.
     have h_step_b : ∀ i : Fin d, ∑ _j : Fin d,
           (∫ x, (ε / d_real) * (η x)^2 *
               (diffQuot k h (g i) x)^2 ∂(volume : Measure E) +
@@ -854,10 +813,8 @@ theorem cross_1_bound_nonsmooth_quantitative
               (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
               (diffQuot k h u x)^2 ∂(volume : Measure E)) from
         Finset.sum_congr rfl (fun i _ => h_step_b i)]
-    -- Factor d_real out, then split sum.
     rw [← Finset.mul_sum]
     rw [Finset.sum_add_distrib]
-    -- ∑_i (constant) = d_real * (constant).
     rw [show (∑ _i : Fin d, ∫ x, (1 / (ε / d_real)) * Λ^2 * N^2 *
             (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
             (diffQuot k h u x)^2 ∂(volume : Measure E)) =
@@ -865,11 +822,9 @@ theorem cross_1_bound_nonsmooth_quantitative
             (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
             (diffQuot k h u x)^2 ∂(volume : Measure E)
         from by rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]]
-    -- Convert the indicator integral via integral_const_indicator_eq.
     have h_indicator_eq := integral_const_indicator_eq (d := d) k h η
       ((1 / (ε / d_real)) * Λ^2 * N^2) (u := u)
     rw [h_indicator_eq]
-    -- Pull (ε / d_real) out of each per-i integral.
     have h_eta_sq_diffQuot_int : ∀ i : Fin d,
         ∫ x, (ε / d_real) * (η x)^2 *
             (diffQuot k h (g i) x)^2 ∂(volume : Measure E) =
@@ -886,9 +841,7 @@ theorem cross_1_bound_nonsmooth_quantitative
         ∑ i : Fin d, (ε / d_real) * ∫ x, (η x)^2 *
               (diffQuot k h (g i) x)^2 ∂(volume : Measure E) from
         Finset.sum_congr rfl (fun i _ => h_eta_sq_diffQuot_int i)]
-    -- Pull (ε / d_real) out of the sum over i.
     rw [← Finset.mul_sum]
-    -- Swap sum and integral on the left.
     have h_first_int_per : ∀ i : Fin d, Integrable (fun x : E =>
         (η x)^2 * (diffQuot k h (g i) x)^2) volume :=
       fun i => integrable_eta_sq_diffQuot_g_sq (d := d) hg_l2 hη hη_supp i k h
@@ -901,15 +854,11 @@ theorem cross_1_bound_nonsmooth_quantitative
       filter_upwards with x
       rw [Finset.mul_sum]
     rw [h_swap_sum]
-    -- Combine: d_real * ((ε/d_real) · I_1 + d_real · I_2) =
-    -- (d_real · ε/d_real) · I_1 + d_real² · I_2
-    --   = ε · I_1 + d_real² · I_2.
     rw [mul_add]
     congr 1
     · rw [← mul_assoc, mul_div_cancel₀ _ (ne_of_gt hd_pos)]
     · ring
   rw [h_total_eq]
-  -- Apply the FK bound to the second term.
   have h_diffQuot_sq_le := h_FK_diffQuot_u_bound hh hh_le
   have h_factor_nn : 0 ≤ (1 / (ε / d_real)) * Λ^2 * N^2 := by
     refine mul_nonneg (mul_nonneg ?_ (sq_nonneg _)) (sq_nonneg _)

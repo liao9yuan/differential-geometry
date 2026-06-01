@@ -145,28 +145,11 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## `(‖x‖₊ : ℝ≥0∞) = ENNReal.ofReal ‖x‖` -/
-
 private lemma coe_nnnorm_eq_ofReal_norm
     {X : Type*} [SeminormedAddCommGroup X] (x : X) :
     (‖x‖₊ : ℝ≥0∞) = ENNReal.ofReal ‖x‖ := by
   rw [show ((‖x‖₊ : ℝ≥0∞)) = ‖x‖ₑ from (enorm_eq_nnnorm x).symm,
     ← ofReal_norm_eq_enorm x]
-
-/-! ## Unconditional `L²` bound for the chart-frame scalar component
-in `ENNReal.ofReal ‖T‖` form
-
-The existing `tensorChartComponentScalar_eLpNorm_le_uniform` gives:
-`eLpNorm u_α 2 μ_g ≤ ENNReal.ofReal C · ENNReal.ofReal (tensorL2Norm S.toFun)`.
-The right-hand side is `ENNReal.ofReal C · ENNReal.ofReal ‖T.toCcTensor‖`
-since `tensorL2Norm S.toFun = ‖S.toCcTensor‖` for a smooth compactly
-supported section (definitional bound), and is then bounded by
-`ENNReal.ofReal C · ENNReal.ofReal ‖T‖` since
-`‖T.toCcTensor‖ ≤ ‖T‖` (the `H¹` norm dominates the `L²` norm).
-
-This is uniform in `(T, α, Idx, Jdx)`: the per-α `C` is aggregated over
-the (finite) active chart-atlas POU finset via
-`chartAtlasPOU_activeFinset` and absorbed into a single constant. -/
 
 /-- **Unconditional uniform `L²` bound on the chart-frame scalar
 component**, translated to `ENNReal.ofReal ‖T‖` form. The constant is
@@ -189,41 +172,10 @@ theorem tensorChartComponentScalar_eLpNorm_le_h1Norm_uniform
   intro T α Idx Jdx
   have h_bound :=
     hC₀_bound T α Idx Jdx
-  -- Convert `(‖T‖₊ : ℝ≥0∞)` to `ENNReal.ofReal ‖T‖`.
   have h_coe : (‖T‖₊ : ℝ≥0∞) = ENNReal.ofReal ‖T‖ :=
     coe_nnnorm_eq_ofReal_norm T
   rw [h_coe] at h_bound
   exact h_bound
-
-/-! ## Headline reduction: from gradient `L²` bound to chart `W^{1,2}` bound
-
-The structural reduction step: given an uniform-in-`(T, α, Idx, Jdx)`
-`L²` bound on the manifold-side gradient self-inner square-root of the
-chart-frame scalar component, the headline chart-Sobolev `W^{1,2}` bound
-follows by:
-
-* invoking the per-α scalar-component Sobolev reverse bridge
-  `tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm` from
-  `Estimates.ComponentWkpNormBoundFromH1`,
-* combined with the per-α `L²` bound and the `eLpNorm` of the gradient
-  self-inner square-root translated to `ENNReal.ofReal ‖T‖` form,
-* aggregated over the (finite) active chart-atlas POU finset via
-  `chartAtlasPOU_activeFinset`.
-
-The result is uniform in `(T, α, Idx, Jdx)`.
-
-This reduction is structurally non-trivial — it performs the
-per-α-to-α-uniform aggregation step — and is the layer that consumes
-the Christoffel-based pointwise atom bound through the gradient `L²`
-hypothesis. The gradient `L²` hypothesis is a separate analytical
-statement that is independently buildable from the unconditional atom
-decomposition `g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport_h1`
-plus the chart Christoffel sup bound `chartChristoffel_bdd_on_pou_tsupport`,
-once the chart-frame fiber-norm-to-intrinsic-norm bridge is supplied
-through a Christoffel-based path (see substep below).
-
-A constant of the form `4 · C_grad` absorbs the cross-term cancellation
-in the per-α Sobolev reverse bridge. -/
 
 /-- **Headline reduction.** Given an `α`-uniform `L²` bound on the
 manifold-side gradient self-inner square-root of the chart-frame scalar
@@ -255,13 +207,7 @@ theorem tensorChartComponentScalar_wkpNormChart_le_h1Norm_of_grad_l2
               g r s T.toCcTensor α Idx Jdx) ≤
           ENNReal.ofReal C * ENNReal.ofReal ‖T‖ := by
   classical
-  -- Convert `ENNReal.ofReal ‖T‖` back to `(‖T‖₊ : ℝ≥0∞)` to invoke the
-  -- per-α `wkpNormChart` bound from
-  -- `tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm`.
   obtain ⟨C_grad, hC_grad_nn, hGrad_le⟩ := hGrad
-  -- Build a per-α uniform `wkpNormChart` constant via the per-α
-  -- `tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm` consuming
-  -- the gradient `L²` hypothesis re-expressed in `‖T‖₊` form.
   have hGrad_le' : ∀ (T : SmoothCcTensorH1 g r s) (α : M)
       (Idx : Fin r → Fin (Module.finrank ℝ E))
       (Jdx : Fin s → Fin (Module.finrank ℝ E)),
@@ -279,8 +225,6 @@ theorem tensorChartComponentScalar_wkpNormChart_le_h1Norm_of_grad_l2
     have h := hGrad_le T α Idx Jdx
     rw [coe_nnnorm_eq_ofReal_norm T]
     exact h
-  -- Each chart `α : M` yields a per-α `wkpNormChart` constant via the
-  -- per-α scalar-component Sobolev bridge.
   have hper_α : ∀ α : M, ∃ C : ℝ, 0 ≤ C ∧
       ∀ (T : SmoothCcTensorH1 g r s)
         (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -294,7 +238,6 @@ theorem tensorChartComponentScalar_wkpNormChart_le_h1Norm_of_grad_l2
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm
         (I := I) (M := M) g r s α hC_grad_nn
         (fun T Idx Jdx => hGrad_le' T α Idx Jdx)
-  -- Aggregate over the (finite) active chart-atlas POU finset.
   set S : Finset M := chartAtlasPOU_activeFinset (I := I) (M := M)
     with hS_def
   set Cα : M → ℝ := fun α => Classical.choose (hper_α α) with hCα_def
@@ -308,7 +251,6 @@ theorem tensorChartComponentScalar_wkpNormChart_le_h1Norm_of_grad_l2
             g r s T.toCcTensor α Idx Jdx) ≤
         ENNReal.ofReal (Cα α) * (‖T‖₊ : ℝ≥0∞) :=
     fun α T Idx Jdx => (Classical.choose_spec (hper_α α)).2 T Idx Jdx
-  -- Build the final α-uniform constant: sum over active centres.
   refine ⟨∑ α ∈ S, Cα α, Finset.sum_nonneg (fun α _ => hCα_nn α), ?_⟩
   intro T α Idx Jdx
   by_cases hα : α ∈ S
@@ -329,13 +271,11 @@ theorem tensorChartComponentScalar_wkpNormChart_le_h1Norm_of_grad_l2
         ENNReal.ofReal (Cα α) * (‖T‖₊ : ℝ≥0∞) ≤
           ENNReal.ofReal (∑ α ∈ S, Cα α) * (‖T‖₊ : ℝ≥0∞) :=
       mul_le_mul_of_nonneg_right h_const_le (zero_le _)
-    -- Translate `(‖T‖₊ : ℝ≥0∞)` to `ENNReal.ofReal ‖T‖`.
     have h_coe : (‖T‖₊ : ℝ≥0∞) = ENNReal.ofReal ‖T‖ :=
       coe_nnnorm_eq_ofReal_norm T
     rw [h_coe] at h_per h_envelope
     exact h_per.trans h_envelope
-  · -- Outside the active finset, `wkpNormChart u_α = 0`.
-    have h_zero :=
+  · have h_zero :=
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartAtlasPOU_eq_zero_of_notMem_activeFinset
         (I := I) (M := M) hα
     have h_scalar_zero :

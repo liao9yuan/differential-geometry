@@ -74,8 +74,6 @@ local instance tangentSpaceNormedSpace (y : M) :
     NormedSpace ℝ (TangentSpace I y) :=
   inferInstanceAs (NormedSpace ℝ E)
 
-/-! ## Pointwise inequality: normalised bilinear value ≤ fibre op-norm -/
-
 /-- Pointwise bound: for any continuous bilinear `Δ : E₀ →L[ℝ] E₀ →L[ℝ] ℝ`,
 the normalized value `‖Δ a b‖ / (‖a‖ * ‖b‖ + 1)` is bounded by the operator
 norm `‖Δ‖`. -/
@@ -104,8 +102,6 @@ lemma iSup_iSup_normalized_le_opNorm
   intro b
   exact normalized_bilinear_le_opNorm Δ a b
 
-/-! ## Assembling a global bound from per-point local op-norm bounds -/
-
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] in
 /-- **Global `BddAbove` from per-point local op-norm bounds.** If for every
 `y₀ : M` there is an open neighborhood `W` and a constant `C` such that
@@ -121,7 +117,6 @@ theorem bddAbove_iSup_normalized_of_locally_bounded_opNorm
       (fun y : M => ⨆ a : TangentSpace I y, ⨆ b : TangentSpace I y,
         ‖Δ y a b‖ / (‖a‖ * ‖b‖ + 1))) := by
   classical
-  -- Extract the cover.
   set W : M → Set M := fun y₀ => (h_local_bound y₀).choose with hW_def
   have hW_open : ∀ y₀, IsOpen (W y₀) := fun y₀ => (h_local_bound y₀).choose_spec.1
   have hW_mem : ∀ y₀, y₀ ∈ W y₀ := fun y₀ => (h_local_bound y₀).choose_spec.2.1
@@ -130,13 +125,11 @@ theorem bddAbove_iSup_normalized_of_locally_bounded_opNorm
     (h_local_bound y₀).choose_spec.2.2.choose_spec.1
   have hΔ_bound : ∀ y₀, ∀ b ∈ W y₀, ‖Δ b‖ ≤ Cₐ y₀ := fun y₀ =>
     (h_local_bound y₀).choose_spec.2.2.choose_spec.2
-  -- Finite subcover via compactness.
   have hW_cover : (Set.univ : Set M) ⊆ ⋃ y₀ : M, W y₀ := by
     intro x _; exact Set.mem_iUnion.mpr ⟨x, hW_mem x⟩
   rcases isCompact_univ.elim_finite_subcover W hW_open hW_cover with ⟨S, hS_sub⟩
   by_cases hS_empty : S = ∅
-  · -- Empty cover ⇒ M is empty ⇒ range is empty ⇒ trivially BddAbove.
-    have h_M_empty : (Set.univ : Set M) = ∅ := by
+  · have h_M_empty : (Set.univ : Set M) = ∅ := by
       apply Set.eq_empty_of_forall_notMem
       intro x hx
       rcases Set.mem_iUnion₂.mp (hS_sub hx) with ⟨y₀, hy₀, _⟩
@@ -159,11 +152,9 @@ theorem bddAbove_iSup_normalized_of_locally_bounded_opNorm
   rcases hx with ⟨y, rfl⟩
   have hy_in : y ∈ Set.univ := Set.mem_univ y
   rcases Set.mem_iUnion₂.mp (hS_sub hy_in) with ⟨y₀, hy₀, hy_W⟩
-  -- Inner iSup ≤ ‖Δ y‖.
   have h_iSup_le_Δ : (⨆ a : TangentSpace I y, ⨆ b : TangentSpace I y,
       ‖Δ y a b‖ / (‖a‖ * ‖b‖ + 1)) ≤ ‖Δ y‖ :=
     iSup_iSup_normalized_le_opNorm (E₀ := TangentSpace I y) (Δ y)
-  -- ‖Δ y‖ ≤ Cₐ y₀ ≤ C.
   have h_Δ_bound_y : ‖Δ y‖ ≤ Cₐ y₀ := hΔ_bound y₀ y hy_W
   have h_Cₐ_le_C : Cₐ y₀ ≤ C := by
     rw [hC_def]
@@ -182,11 +173,7 @@ theorem bddAbove_iSup_normalized_of_continuous_opNorm
         ‖Δ y a b‖ / (‖a‖ * ‖b‖ + 1))) := by
   apply bddAbove_iSup_normalized_of_locally_bounded_opNorm
   intro y₀
-  -- Continuity of ‖Δ ·‖ at y₀ gives a neighbourhood where it is bounded.
   have hca : ContinuousAt (fun b : M => ‖Δ b‖) y₀ := h_cont.continuousAt
-  -- Use the ε-δ characterisation: for ε = 1 there is a neighbourhood
-  -- where |‖Δ b‖ - ‖Δ y₀‖| < 1, giving ‖Δ b‖ ≤ ‖Δ y₀‖ + 1.
-  -- Use Iic (closed half-line) and the ContinuousAt preimage.
   have h_mem : Set.Iic (‖Δ y₀‖ + 1) ∈ nhds (‖Δ y₀‖) :=
     Iic_mem_nhds (by linarith : ‖Δ y₀‖ < ‖Δ y₀‖ + 1)
   have h_pre : (fun b : M => ‖Δ b‖) ⁻¹' Set.Iic (‖Δ y₀‖ + 1) ∈ nhds y₀ :=
@@ -195,8 +182,6 @@ theorem bddAbove_iSup_normalized_of_continuous_opNorm
   obtain ⟨W, hW_sub, hW_open, hy₀_mem⟩ := h_pre
   refine ⟨W, hW_open, hy₀_mem, ‖Δ y₀‖ + 1, by positivity, fun b hb => ?_⟩
   exact hW_sub hb
-
-/-! ## BddAbove for the raw op-norm range -/
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] in
 /-- **Global `BddAbove` for the fibre op-norm range from per-point local bounds.**

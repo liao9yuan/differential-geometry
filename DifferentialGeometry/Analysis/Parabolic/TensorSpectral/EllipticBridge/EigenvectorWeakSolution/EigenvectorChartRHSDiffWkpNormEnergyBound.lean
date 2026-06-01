@@ -87,23 +87,12 @@ open DifferentialGeometry.Analysis.Laplacian.MetricExtension
   hiding chartTargetEuclid chartTargetEuclid_isOpen
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 
-/-! ## File-local Borel-space instances on `E` and `M`
-
-The measurable structure on `E` and `M` is the Borel σ-algebra coming from the
-topology; it is installed locally so it does not leak onto the public
-signatures. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Per-`Finset`-sum collapse
-
-A finite indexed family bounded, summand-by-summand, by `ENNReal.ofReal Cⱼ * A`
-sums to `ENNReal.ofReal (∑ Cⱼ) * A`. -/
 
 omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)] [TopologicalSpace H] [TopologicalSpace M]
@@ -120,14 +109,6 @@ lemma finsetSum_eNNReal_ofReal_mul_le
     _ = (∑ j ∈ s, ENNReal.ofReal (C j)) * A := by rw [Finset.sum_mul]
     _ = ENNReal.ofReal (∑ j ∈ s, C j) * A := by
         rw [ENNReal.ofReal_sum_of_nonneg hC]
-
-/-! ## Chart-locality-free twins
-
-The declarations below re-key the entire chain above onto the intrinsic
-compact-operator eigenbasis `tensorResolventEigenbasisVec … (…
-intrinsic …)`, dropping the chart-selection hypothesis. The statements are
-otherwise identical to their originals; the proofs mirror them verbatim with
-every primitive regularity datum routed through its `_unconditional` twin. -/
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

@@ -62,8 +62,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Auxiliary measurability and integrability lemmas -/
-
 omit [NeZero d] in
 /-- A continuous function on a set with compact closure is in `L²` on
 that set restricted (variant adapted to the non-smooth setting). -/
@@ -88,8 +86,6 @@ private lemma memLp_two_of_continuous_compact_closure
   have h := hM (Set.mem_image_of_mem _ h_in_closure)
   rw [Real.norm_eq_abs]
   exact h.trans (le_max_left _ _)
-
-/-! ## The hypothesis package: smooth approximating sequence -/
 
 /-- Data describing a smooth approximating sequence to a non-smooth weak
 solution. Each `u_n` is smooth, satisfies a smooth weak equation with
@@ -154,8 +150,6 @@ structure SmoothApproximation
         (∫ y in Ω', (f_seq n y) ^ 2 ∂(volume : Measure E)) ≤
           C * data_bound
 
-/-! ## Per-`n` smooth-case bound, packaged in `SmoothApproximation` form -/
-
 /-- Per-`n` interior `H²` regularity bound (raw smooth-case form). For
 each `n`, the smooth-case result `h2_loc_smooth_solution` applied to
 `(u_n, f_n)` yields a weak `k`-partial derivative `g_n` of `∂_i u_n` on
@@ -192,8 +186,6 @@ private lemma h2_loc_per_n_smooth_bound
   exact ⟨g, hg_memLp, hg_weak, Ω', hΩ'_open, hΩ''_in_Ω', hΩ'_in,
     hΩ'_compact, C, hC_nn, hbound⟩
 
-/-! ## Public per-`n` headline theorem -/
-
 /-- **Interior `H²` regularity for non-smooth weak solutions
 (per-`n` form, hypothesis-bearing).**
 
@@ -227,21 +219,16 @@ theorem h2_loc_nonsmooth_per_n_bound
       hΩ'_compact, C, hC_nn, hC_bound⟩ :=
     h2_loc_per_n_smooth_bound (d := d) B hΩ'' hΩ''_compact_closure hΩ''_in_Ω
       h_room S i k n
-  -- Use the integrated-data bound on the intermediate `Ω'`.
   obtain ⟨D, hD_nn, hD_bound⟩ :=
     S.data_integrated_bound (Ω' := Ω') hΩ'_open hΩ'_compact
   refine ⟨g, hg_l2, hg_partial, C * D,
     mul_nonneg hC_nn hD_nn, ?_⟩
-  -- Combine: ∫ g² ≤ C · (data) ≤ C · (D · data_bound) = (C · D) · data_bound.
   have h_data_le := hD_bound n
   refine hC_bound.trans ?_
   calc C * _
       ≤ C * (D * S.data_bound) :=
         mul_le_mul_of_nonneg_left h_data_le hC_nn
     _ = (C * D) * S.data_bound := by ring
-
-/-! ## Public `h2_loc_nonsmooth_solution`: per-`n` bound exposed in
-the headline form -/
 
 /-- **Interior `H²` regularity for non-smooth weak solutions.**
 
