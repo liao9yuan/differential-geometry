@@ -372,11 +372,6 @@ theorem chartPushed_rawConnLap_chart_α_proj_eq_weighted_secondCovDeriv_minus_fr
     Finset.sum_congr rfl (fun i _ => hperI i)]
   rw [Finset.sum_sub_distrib]
 
-section
-#print axioms
-  DifferentialGeometry.Integral.Connection.chartPushed_rawConnLap_chart_α_proj_eq_weighted_secondCovDeriv_minus_frameTraceΓ
-end
-
 end Connection
 end Integral
 end DifferentialGeometry

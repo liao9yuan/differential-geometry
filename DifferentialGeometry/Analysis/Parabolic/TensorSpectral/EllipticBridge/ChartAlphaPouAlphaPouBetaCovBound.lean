@@ -463,6 +463,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chart_α_pou_α_pou_β_raw_β_sq_le_chart_β_wkpNorm

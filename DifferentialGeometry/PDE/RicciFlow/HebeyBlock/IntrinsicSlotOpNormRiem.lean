@@ -500,9 +500,3 @@ end PDE
 end DifferentialGeometry
 
 end
-
-open DifferentialGeometry.PDE.RicciFlow.HebeyBlock in
-#print axioms chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport
-
-open DifferentialGeometry.PDE.RicciFlow.HebeyBlock in
-#print axioms chartTensorRSOutputSlotCorrection_riemannian_norm_le_on_pouTsupport

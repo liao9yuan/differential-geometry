@@ -220,8 +220,3 @@ end PDE
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.PDE.RicciFlow.HebeyBlock.tensorChartComponent_wkpNormChart_le
-end Sanity

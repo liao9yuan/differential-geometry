@@ -469,5 +469,3 @@ instance tensorRS_isContinuousRiemannianBundle
     rfl
 
 end DifferentialGeometry.Tensor.TensorRSRiemannianBundleContinuous
-
-#print axioms DifferentialGeometry.Tensor.TensorRSRiemannianBundleContinuous.tensorRS_isContinuousRiemannianBundle

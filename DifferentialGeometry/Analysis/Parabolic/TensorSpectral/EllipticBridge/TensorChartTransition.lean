@@ -873,9 +873,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.transitionCoeff_le_uniform_on_pouTsupport
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartTransition_fderiv_le_uniform_on_pouTsupport

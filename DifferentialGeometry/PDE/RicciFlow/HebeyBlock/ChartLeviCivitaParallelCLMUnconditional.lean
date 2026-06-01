@@ -695,12 +695,3 @@ theorem chartLeviCivitaParallelCLM_general_X_opNorm_isBounded_on_pouTsupport_unc
 end DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.PDE.RicciFlow.HebeyBlock.chartJinv_opNorm_isBounded_on_compact_unconditional
-#print axioms
-  DifferentialGeometry.PDE.RicciFlow.HebeyBlock.christoffelCorrection_opNorm_isBounded_on_pouTsupport_unconditional
-#print axioms
-  DifferentialGeometry.PDE.RicciFlow.HebeyBlock.chartLeviCivitaParallelCLM_general_X_opNorm_isBounded_on_pouTsupport_unconditional
-end Sanity

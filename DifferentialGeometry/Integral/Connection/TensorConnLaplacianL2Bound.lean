@@ -222,10 +222,3 @@ end Integral
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Integral.Connection.rawTensorConnLap_L2NormSq_le_chartSobolevRawNorm
-#print axioms
-  DifferentialGeometry.Integral.Connection.rawTensorConnLap_L2NormSq_le_chartSobolevRawNorm_of_section
-end Sanity

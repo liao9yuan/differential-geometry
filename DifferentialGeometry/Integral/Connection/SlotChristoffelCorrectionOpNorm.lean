@@ -401,18 +401,3 @@ end Integral
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Integral.Connection.chartTensorRSInputSlotCorrection_opNorm_le
-#print axioms
-  DifferentialGeometry.Integral.Connection.chartTensorRSOutputSlotCorrection_opNorm_le
-#print axioms
-  DifferentialGeometry.Integral.Connection.tensorSlotSubstCLM_opNorm_le
-#print axioms
-  DifferentialGeometry.Integral.Connection.tensorSlotSubstCLM_tangentSlotCLM_opNorm_le
-#print axioms
-  DifferentialGeometry.Integral.Connection.tensorSlotSubstCLM_inputSlotChartCLM_opNorm_le
-#print axioms
-  DifferentialGeometry.Integral.Connection.tensorSlotSubstCLM_outputSlotChartCLM_opNorm_le
-end Sanity

@@ -243,11 +243,6 @@ theorem chartPushed_rawConnLap_chart_α_proj_eq_chartInvGram_secondCovDeriv_plus
       (I := I) (M := M) g r s α T₀ Idx Jdx b
   linarith
 
-section
-#print axioms
-  DifferentialGeometry.Integral.Connection.chartPushed_rawConnLap_chart_α_proj_eq_chartInvGram_secondCovDeriv_plus_corrections
-end
-
 end Connection
 end Integral
 end DifferentialGeometry

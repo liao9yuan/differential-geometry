@@ -517,10 +517,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport_h1
-end Sanity

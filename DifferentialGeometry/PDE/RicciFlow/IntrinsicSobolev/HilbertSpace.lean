@@ -1086,9 +1086,6 @@ theorem tensorPouSobolevHilbert_norm_eq
   rw [ENNReal.toReal_pow]
   exact Real.sqrt_sq (ENNReal.toReal_nonneg)
 
-#print axioms DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.tensorPouSobolevHilbert_norm_eq
-#print axioms DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.instPreInnerProductSpaceCore
-
 end IntrinsicSobolev
 end RicciFlow
 end PDE

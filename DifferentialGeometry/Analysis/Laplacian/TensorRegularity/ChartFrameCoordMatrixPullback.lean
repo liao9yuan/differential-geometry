@@ -345,13 +345,6 @@ theorem chartFrameNormGlobalSmoothCoordMatrix_dirDeriv_pullback_contDiffOn_chart
   exact extDerivFun_pull_eq_euclidPartial_on_target
     (I := I) (M := M) g α i k l hy
 
-section
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.TensorRegularity.chartFrameNormGlobalSmoothCoordMatrix_pullback_contDiffOn_chartTarget
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.TensorRegularity.chartFrameNormGlobalSmoothCoordMatrix_dirDeriv_pullback_contDiffOn_chartTarget
-end
-
 end TensorRegularity
 end Laplacian
 end Analysis

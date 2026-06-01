@@ -404,10 +404,4 @@ end Connection
 end Integral
 end DifferentialGeometry
 
-open DifferentialGeometry.Integral.Connection in
-#print axioms pointwiseBoundScalar_one_le
-
-open DifferentialGeometry.Integral.Connection in
-#print axioms riemannianFiberNormSq_le_pointwise_witness
-
 end

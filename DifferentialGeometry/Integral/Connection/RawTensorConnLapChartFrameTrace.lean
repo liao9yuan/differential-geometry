@@ -115,10 +115,6 @@ theorem rawTensorConnLap_via_chartFrameNormGlobalSmooth
         (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun)
     hB_smooth b hB_orth
 
-section
-#print axioms DifferentialGeometry.Integral.Connection.rawTensorConnLap_via_chartFrameNormGlobalSmooth
-end
-
 end Connection
 end Integral
 end DifferentialGeometry

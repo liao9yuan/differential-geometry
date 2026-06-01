@@ -796,6 +796,4 @@ theorem uniform_chart_bounds_from_compactness
     _ = Real.sqrt CE * (tsumHs ^ (1 / 2 : ℝ)).toReal := by
         rw [ENNReal.toReal_ofReal (Real.sqrt_nonneg _)]
 
-#print axioms uniform_chart_bounds_from_compactness
-
 end DifferentialGeometry.PDE.RicciFlow.HebeyBlock

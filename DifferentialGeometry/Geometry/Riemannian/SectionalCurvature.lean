@@ -534,10 +534,3 @@ theorem sectionalCurvature_symm_of_chartRiemannLower_second_pair_antisymm
 end Riemannian
 end Geometry
 end DifferentialGeometry
-
-#print axioms DifferentialGeometry.Geometry.Riemannian.sectionalCurvature_neg_left
-#print axioms DifferentialGeometry.Geometry.Riemannian.sectionalCurvature_neg_right
-#print axioms DifferentialGeometry.Geometry.Riemannian.sectionalCurvature_neg_neg
-#print axioms DifferentialGeometry.Geometry.Riemannian.sectionalCurvature_smul_smul
-#print axioms DifferentialGeometry.Geometry.Riemannian.sectionalCurvature_neg_smul_left
-#print axioms DifferentialGeometry.Geometry.Riemannian.sectionalCurvature_neg_smul_right

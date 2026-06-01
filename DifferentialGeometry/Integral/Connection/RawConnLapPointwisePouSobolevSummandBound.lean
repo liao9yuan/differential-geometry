@@ -497,6 +497,3 @@ end Integral
 end DifferentialGeometry
 
 end
-
-open DifferentialGeometry.Integral.Connection in
-#print axioms rawTensorConnLap_riemannianFiberNormSq_le_chartPouSobolevSummand_T0_uniform

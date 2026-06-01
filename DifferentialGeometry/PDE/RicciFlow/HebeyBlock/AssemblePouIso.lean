@@ -93,6 +93,4 @@ theorem assemble_pou_h1_iso_intrinsic_h1
         _ ≤ max C₀ C₁ * (tensorPouSobolevNorm (I := I) (M := M) g 1 T).toReal := by
               exact mul_le_mul_of_nonneg_right (le_max_right C₀ C₁) h_norm_op_nn
 
-#print axioms assemble_pou_h1_iso_intrinsic_h1
-
 end DifferentialGeometry.PDE.RicciFlow.HebeyBlock

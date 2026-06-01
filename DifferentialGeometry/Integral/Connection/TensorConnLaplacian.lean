@@ -1647,10 +1647,3 @@ end Integral
 end DifferentialGeometry
 
 end
-
-section
-#print axioms DifferentialGeometry.Integral.Connection.rawTensorConnLap_psi_bilinAt
-#print axioms DifferentialGeometry.Integral.Connection.rawTensorConnLap_psi_bilinAt_apply
-#print axioms DifferentialGeometry.Integral.Connection.rawTensorConnLap_eq_frame_trace
-#print axioms DifferentialGeometry.Integral.Connection.rawTensorConnLap_eq_fixedFrame_of_orthonormal
-end

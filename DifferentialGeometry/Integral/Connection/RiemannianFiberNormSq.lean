@@ -152,12 +152,3 @@ theorem riemannianFiberNormSq_zero
 end Connection
 end Integral
 end DifferentialGeometry
-
-open DifferentialGeometry.Integral.Connection in
-#print axioms riemannianFiberNormSq
-
-open DifferentialGeometry.Integral.Connection in
-#print axioms riemannianFiberNormSq_nonneg
-
-open DifferentialGeometry.Integral.Connection in
-#print axioms riemannianFiberNormSq_zero

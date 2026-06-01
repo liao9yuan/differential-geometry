@@ -729,11 +729,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
             (cardI : ℝ) * (cardJ : ℝ) * B0 ^ 2) * BigSum := by ring
   exact h_final
 
-section
-#print axioms
-  DifferentialGeometry.Integral.Connection.rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
-end
-
 end Connection
 end Integral
 end DifferentialGeometry

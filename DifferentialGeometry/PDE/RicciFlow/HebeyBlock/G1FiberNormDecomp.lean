@@ -350,6 +350,3 @@ end PDE
 end DifferentialGeometry
 
 end
-
-open DifferentialGeometry.PDE.RicciFlow.HebeyBlock in
-#print axioms g_inner_gradFun_le_pou_weighted_fiber_norm_atoms_on_pouTsupport_h1

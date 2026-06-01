@@ -1164,17 +1164,6 @@ theorem iteratedFDeriv_basisEval_add_eq
   rw [iteratedFDeriv_add_apply h_cdAt₁_n h_cdAt₂_n]
   rfl
 
-#print axioms tensorPouSobolevHsNorm
-#print axioms tensorPouSobolevHsNorm_nonneg
-#print axioms tensorPouSobolevHsNorm_zero_section
-#print axioms tensorPouSobolevHsNorm_le_succ
-#print axioms tensorPouSobolevHsNorm_smul
-#print axioms tensorPouSobolevHsNorm_neg
-#print axioms tensorPouSobolevHsNorm_lt_top
-#print axioms tensorPouSobolevHsNormSq
-#print axioms tensorPouSobolevHsNormSq_eq_inner_sum
-#print axioms tensorPouSobolevHsNormSq_lt_top
-
 end Tensor
 end Sobolev
 end Analysis

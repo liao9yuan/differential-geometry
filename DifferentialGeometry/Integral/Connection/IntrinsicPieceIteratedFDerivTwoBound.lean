@@ -444,8 +444,3 @@ end Integral
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Integral.Connection.intrinsic_piece_iteratedFDeriv_two_bound
-end Sanity

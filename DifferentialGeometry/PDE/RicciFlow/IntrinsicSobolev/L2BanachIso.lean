@@ -209,8 +209,6 @@ noncomputable def TensorPouSobolevHilbert.toTensorL2_continuousLinearEquiv_of_fo
     (exists_tensorPouSobolevHsNorm_zero_le_const_mul_norm
       (I := I) (M := M) g r s).choose_spec.2
 
-#print axioms TensorPouSobolevHilbert.toTensorL2_continuousLinearEquiv
-
 end IntrinsicSobolev
 end RicciFlow
 end PDE

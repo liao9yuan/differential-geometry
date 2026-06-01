@@ -434,11 +434,6 @@ theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport
   rw [hlhs_eq_b, ← hSumPart2_def]
   exact h_final
 
-section
-#print axioms
-  DifferentialGeometry.Integral.Connection.rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport
-end
-
 end Connection
 end Integral
 end DifferentialGeometry

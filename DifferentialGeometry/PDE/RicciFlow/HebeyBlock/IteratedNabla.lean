@@ -105,6 +105,4 @@ theorem iterated_nabla_vs_iterated_partial_equivalence_H1
         _ ≤ C * P := mul_le_mul_of_nonneg_right hCfwd_le_C hP_nn
     exact ⟨hc_P_le_Hs, hHs_le_C_P⟩
 
-#print axioms iterated_nabla_vs_iterated_partial_equivalence_H1
-
 end DifferentialGeometry.PDE.RicciFlow.HebeyBlock

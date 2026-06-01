@@ -481,11 +481,6 @@ theorem chartLeibnizRemainder_eq_firstDerivOnly
   rw [← hCross_collapse]
   ring
 
-section
-#print axioms
-  DifferentialGeometry.Integral.Connection.chartLeibnizRemainder_eq_firstDerivOnly
-end
-
 end Connection
 end Integral
 end DifferentialGeometry

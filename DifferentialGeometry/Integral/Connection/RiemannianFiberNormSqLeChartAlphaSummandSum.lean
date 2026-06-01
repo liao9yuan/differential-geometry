@@ -984,6 +984,3 @@ end Integral
 end DifferentialGeometry
 
 end
-
-open DifferentialGeometry.Integral.Connection in
-#print axioms riemannianFiberNormSq_le_chartAlpha_summand_sum_on_pouTsupport

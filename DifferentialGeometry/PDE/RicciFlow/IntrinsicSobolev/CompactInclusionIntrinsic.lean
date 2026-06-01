@@ -344,8 +344,3 @@ end PDE
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.tensorH1ComplToTensorL2_isCompactOperator_intrinsic
-end Sanity

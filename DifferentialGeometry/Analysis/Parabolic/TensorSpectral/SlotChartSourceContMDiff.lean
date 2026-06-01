@@ -1622,18 +1622,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartLeviCivitaParallelCLM_trivImage_contMDiffOn_chartSource
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartLeviCivitaParallelCLM_chartBasisVec_trivImage_contMDiffOn_chartSource
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorSlotSubstCLM_chartLeviCivita_chartBasisVec_trivImage_contMDiffOn_chartSource
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartTensorRSInputSlotCorrection_chartBasisVec_trivImage_contMDiffOn_chartSource
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartTensorRSOutputSlotCorrection_chartBasisVec_trivImage_contMDiffOn_chartSource
-
-end Sanity

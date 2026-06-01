@@ -348,8 +348,3 @@ end Integral
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Integral.Connection.chart_pulled_tensor_repr_norm_le_chartComp_data
-end Sanity

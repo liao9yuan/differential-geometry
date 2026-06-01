@@ -312,6 +312,3 @@ end Integral
 end DifferentialGeometry
 
 end
-
-open DifferentialGeometry.Integral.Connection in
-#print axioms rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_T0_uniform

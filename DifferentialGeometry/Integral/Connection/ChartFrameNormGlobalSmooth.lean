@@ -350,10 +350,6 @@ theorem chartFrameNormGlobalSmooth_orthonormal_on_pouTsupportGoodSet
   rw [h_eq_i, h_eq_j]
   exact chartFrameNorm_orthonormal (I := I) g α hb_base i j
 
-section
-#print axioms DifferentialGeometry.Integral.Connection.chartFrameNormGlobalSmooth_orthonormal_on_pouTsupportGoodSet
-end
-
 end Connection
 end Integral
 end DifferentialGeometry

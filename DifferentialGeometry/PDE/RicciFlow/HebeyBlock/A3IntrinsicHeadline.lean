@@ -1124,7 +1124,3 @@ end PDE
 end DifferentialGeometry
 
 end
-
-open DifferentialGeometry.PDE.RicciFlow.HebeyBlock in
-#print axioms
-  exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm

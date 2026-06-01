@@ -324,13 +324,6 @@ theorem chartFrameNormGlobalSmoothCoordMatrix_orthonormality
   simp only [coordMatrix_apply] at heval
   exact heval
 
-section
-#print axioms
-  DifferentialGeometry.Integral.Connection.chartFrameNormGlobalSmooth_eq_coordMatrix_sum
-#print axioms
-  DifferentialGeometry.Integral.Connection.chartFrameNormGlobalSmoothCoordMatrix_orthonormality
-end
-
 end Connection
 end Integral
 end DifferentialGeometry

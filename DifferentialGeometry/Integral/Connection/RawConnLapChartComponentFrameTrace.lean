@@ -180,11 +180,6 @@ theorem tensorChartComponentRaw_rawTensorConnLap_eq_chart_frame_trace_sum
   rw [map_sum] at hApply
   simpa [hL, ContinuousLinearMap.comp_apply] using hApply
 
-section
-#print axioms
-  DifferentialGeometry.Integral.Connection.tensorChartComponentRaw_rawTensorConnLap_eq_chart_frame_trace_sum
-end
-
 end Connection
 end Integral
 end DifferentialGeometry

@@ -743,11 +743,6 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
       ring
     rw [hPrincipal_block_eq, hZeroth_block_eq]
 
-section
-#print axioms
-  DifferentialGeometry.Integral.Connection.chartFrameTraceΓCorrection_eq_T₀_linear
-end
-
 end Connection
 end Integral
 end DifferentialGeometry

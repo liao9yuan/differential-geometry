@@ -225,6 +225,3 @@ end Integral
 end DifferentialGeometry
 
 end
-
-open DifferentialGeometry.Integral.Connection in
-#print axioms riemannianFiberNormSq_le_raw_components_on_pouTsupport

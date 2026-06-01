@@ -172,8 +172,3 @@ end HebeyBlock
 end RicciFlow
 end PDE
 end DifferentialGeometry
-
-section Sanity
-#print axioms
-  DifferentialGeometry.PDE.RicciFlow.HebeyBlock.tensorChartComponentScalar_memWkpChart
-end Sanity

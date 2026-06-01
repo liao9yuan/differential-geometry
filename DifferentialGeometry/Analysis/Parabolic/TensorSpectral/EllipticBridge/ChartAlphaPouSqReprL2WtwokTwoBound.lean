@@ -246,6 +246,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chart_α_pou_sq_repr_L2_le_wtwokTwoNorm_sq

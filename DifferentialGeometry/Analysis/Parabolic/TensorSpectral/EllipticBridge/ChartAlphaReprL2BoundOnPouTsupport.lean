@@ -494,9 +494,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.sum_raw_α_sq_le_sum_raw_β_sq_on_pouInter
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.pointwise_α_repr_le_sum_β_componentPou_sq

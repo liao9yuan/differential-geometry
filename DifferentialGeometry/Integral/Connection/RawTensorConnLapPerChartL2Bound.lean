@@ -222,12 +222,3 @@ end Integral
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Integral.Connection.add_sq_le_two_mul_sq_add_sq
-#print axioms
-  DifferentialGeometry.Integral.Connection.sum_sq_le_card_mul_sum_sq
-#print axioms
-  DifferentialGeometry.Integral.Connection.rawTensorConnLap_norm_sq_le_chart_data_on_pou_tsupport
-end Sanity

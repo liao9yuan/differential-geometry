@@ -277,11 +277,6 @@ theorem leviCivita_chartFrame_self_chartCoord_pullback_contDiffOn_chartTarget
     h_coord.comp h_chart h_maps
   exact (contMDiffOn_iff_contDiffOn).mp h_comp
 
-section
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.TensorRegularity.leviCivita_chartFrame_self_chartCoord_pullback_contDiffOn_chartTarget
-end
-
 end TensorRegularity
 end Laplacian
 end Analysis

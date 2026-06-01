@@ -285,10 +285,3 @@ end PDE
 end DifferentialGeometry
 
 end
-
-open DifferentialGeometry.PDE.RicciFlow.HebeyBlock in
-#print axioms intrinsicG1G3BridgePouTsupport
-
-open DifferentialGeometry.PDE.RicciFlow.HebeyBlock in
-#print axioms
-  norm_sq_triv_neg_sum_add_sum_le_const_mul_sum_norm_sq_on_pouTsupport_intrinsic_h1

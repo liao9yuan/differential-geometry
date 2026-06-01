@@ -268,8 +268,3 @@ end Integral
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Integral.Connection.iteratedFDeriv_two_tensorRSChartE_section_repr_opNorm_le_sum
-end Sanity

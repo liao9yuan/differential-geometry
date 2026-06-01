@@ -112,6 +112,3 @@ end Integral
 end DifferentialGeometry
 
 end
-
-open DifferentialGeometry.Integral.Connection in
-#print axioms rawTensorConnLapIter_intrinsicL2_le_tensorPouSobolevNorm_sq_one

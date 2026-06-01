@@ -162,15 +162,3 @@ end PDE
 end DifferentialGeometry
 
 end
-
-open DifferentialGeometry.PDE.RicciFlow.HebeyBlock in
-#print axioms triv_eq_toModel_at_chartCenter
-
-open DifferentialGeometry.PDE.RicciFlow.HebeyBlock in
-#print axioms symmL_toModel_eq_self_at_chartCenter
-
-open DifferentialGeometry.PDE.RicciFlow.HebeyBlock in
-#print axioms modelNorm_le_gNorm_pointwise
-
-open DifferentialGeometry.PDE.RicciFlow.HebeyBlock in
-#print axioms gNorm_le_modelNorm_pointwise

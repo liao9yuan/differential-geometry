@@ -768,10 +768,3 @@ end PDE
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.PDE.RicciFlow.HebeyBlock.chartAtlasPOU_mul_sqrt_g_inner_chartLeviCivitaParallelCLM_chartBasisVec_self_eLpNorm_le_uniform_intrinsic
-#print axioms
-  DifferentialGeometry.PDE.RicciFlow.HebeyBlock.g3_christoffel_atom_eLpNorm_le_uniform_intrinsic_pou
-end Sanity

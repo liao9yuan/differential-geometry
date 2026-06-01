@@ -227,8 +227,3 @@ end Integral
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Integral.Connection.exists_chartGramMatrix_quadForm_upper_bound_on_pouTsupport
-end Sanity

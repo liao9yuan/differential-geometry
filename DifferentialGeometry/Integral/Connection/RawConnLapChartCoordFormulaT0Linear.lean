@@ -1072,11 +1072,6 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
   rw [hLeib_partial_collapse, hLeib_partial_factor.symm, hLeib_zeroth_match]
   ring
 
-section
-#print axioms
-  DifferentialGeometry.Integral.Connection.rawTensorConnLap_chartα_raw_eq_T₀_linear_formula
-end
-
 end Connection
 end Integral
 end DifferentialGeometry

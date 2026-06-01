@@ -683,11 +683,6 @@ theorem cov_RS_covApply_frameVec_eq_coord_expansion
   rw [hLeibniz]
   rw [Finset.sum_add_distrib]
 
-section
-#print axioms
-  DifferentialGeometry.Integral.Connection.cov_RS_covApply_frameVec_eq_coord_expansion
-end
-
 end Connection
 end Integral
 end DifferentialGeometry

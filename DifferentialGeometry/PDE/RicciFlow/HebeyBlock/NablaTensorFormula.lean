@@ -847,7 +847,4 @@ theorem nabla_tensor_iterated_Hk_formula
           C * (tensorPouSobolevNorm (I := I) (M := M) g k T).toReal :=
   hs_le_pou_uniform (I := I) (M := M) g r s k
 
-#print axioms nabla_tensor_single_step_formula
-#print axioms nabla_tensor_iterated_Hk_formula
-
 end DifferentialGeometry.PDE.RicciFlow.HebeyBlock

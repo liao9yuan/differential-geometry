@@ -315,5 +315,3 @@ theorem tensorRSChartFiberToModel_opNorm_isBounded_on_compact_unconditional
 end DifferentialGeometry.Integral.Connection
 
 end
-
-#print axioms DifferentialGeometry.Integral.Connection.tensorRSChartFiberToModel_opNorm_isBounded_on_compact_unconditional

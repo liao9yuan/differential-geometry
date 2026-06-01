@@ -199,6 +199,3 @@ end PDE
 end DifferentialGeometry
 
 end
-
-open DifferentialGeometry.PDE.RicciFlow.HebeyBlock in
-#print axioms christoffelCorrection_norm_le_on_pouTsupport

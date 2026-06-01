@@ -1803,9 +1803,3 @@ end Integral
 end DifferentialGeometry
 
 end
-
-open DifferentialGeometry.Integral.Connection in
-#print axioms tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
-
-open DifferentialGeometry.Integral.Connection in
-#print axioms wtwokTwoNorm_zero_rawTensorConnLap_le_tensorPouSobolevNorm_one

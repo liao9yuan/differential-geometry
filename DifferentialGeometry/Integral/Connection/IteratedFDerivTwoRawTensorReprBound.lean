@@ -243,10 +243,3 @@ end Integral
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Integral.Connection.rawTensorRepr_chart_pulled_contDiffOn_goodSet_image
-#print axioms
-  DifferentialGeometry.Integral.Connection.rawTensorRepr_chart_pulled_contDiffAt_goodSet
-end Sanity

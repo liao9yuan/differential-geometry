@@ -243,14 +243,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartGramMatrix_entry_isBounded_on_compact
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartInvGramMatrix_entry_isBounded_on_compact
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartInvGramMatrix_l1Sum_isBounded_on_compact
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartInvGramMatrix_l1Sum_isBounded_on_pouTsupport
-end Sanity

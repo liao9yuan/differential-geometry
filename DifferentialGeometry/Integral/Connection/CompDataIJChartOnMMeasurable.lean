@@ -270,8 +270,6 @@ theorem compDataIJ_chart_on_M_measurable
       ((chartAt H α).source)ᶜ := continuous_const.continuousOn
   exact ContinuousOn.measurable_piecewise hf_norm_sq_cont hconst_cont hsrc_meas
 
-#print axioms compDataIJ_chart_on_M_measurable
-
 end Connection
 end Integral
 end DifferentialGeometry

@@ -299,10 +299,3 @@ end PDE
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.PDE.RicciFlow.HebeyBlock.tensorChartComponentScalar_eLpNorm_le_h1Norm_uniform
-#print axioms
-  DifferentialGeometry.PDE.RicciFlow.HebeyBlock.tensorChartComponentScalar_wkpNormChart_le_h1Norm_of_grad_l2
-end Sanity

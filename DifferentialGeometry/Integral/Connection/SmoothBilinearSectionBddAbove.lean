@@ -239,6 +239,3 @@ theorem bddAbove_opNorm_range_of_continuous_opNorm
 end Connection
 end Integral
 end DifferentialGeometry
-
-#print axioms DifferentialGeometry.Integral.Connection.bddAbove_iSup_normalized_of_locally_bounded_opNorm
-#print axioms DifferentialGeometry.Integral.Connection.bddAbove_opNorm_range_of_locally_bounded

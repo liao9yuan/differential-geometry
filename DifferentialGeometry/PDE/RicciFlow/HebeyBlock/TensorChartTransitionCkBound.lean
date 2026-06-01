@@ -315,9 +315,3 @@ theorem tensorChartTransition_Ck_bound_on_compact_manifold
   exact hC_bd j hj P₀ Q (f x) hf_mem
 
 end DifferentialGeometry.PDE.RicciFlow.HebeyBlock
-
-#print axioms
-  DifferentialGeometry.PDE.RicciFlow.HebeyBlock.tensorChartTransition_Ck_bound_on_compact
-
-#print axioms
-  DifferentialGeometry.PDE.RicciFlow.HebeyBlock.tensorChartTransition_Ck_bound_on_compact_manifold

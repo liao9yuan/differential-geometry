@@ -968,8 +968,3 @@ end Integral
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Integral.Connection.rawTensorConnLap_L2NormSq_le_chartSobolevRawNormPou
-end Sanity

@@ -249,11 +249,6 @@ theorem chartLeibnizRemainder_eq_T₀_linear
   rw [tensorChartComponentProjection_covApply_eq_T₀_expansion
     (I := I) (M := M) g r s α T₀ k Idx Jdx hb_good]
 
-section
-#print axioms
-  DifferentialGeometry.Integral.Connection.chartLeibnizRemainder_eq_T₀_linear
-end
-
 end Connection
 end Integral
 end DifferentialGeometry

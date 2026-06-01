@@ -172,12 +172,3 @@ theorem single_eq_sum_diracPair
           exact (hJ i').symm
 
 end DifferentialGeometry.Analysis.Laplacian.TensorRegularity
-
-namespace DifferentialGeometry.Analysis.Laplacian.TensorRegularity
-
-#print axioms Finset.sum_mul_inner_triple_sum_swap
-#print axioms Finset.sum_mul_inner_double_sum_swap
-#print axioms Finset.sum_mul_inner_triple_swap_two_inner
-#print axioms single_eq_sum_diracPair
-
-end DifferentialGeometry.Analysis.Laplacian.TensorRegularity

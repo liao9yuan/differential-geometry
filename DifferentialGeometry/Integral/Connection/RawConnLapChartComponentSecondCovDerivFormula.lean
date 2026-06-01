@@ -363,11 +363,6 @@ theorem tensorChartComponentRaw_rawTensorConnLap_eq_chart_α_coord_formula
         (I := I) (M := M) g r s α T₀ Idx Jdx y]
     rfl
 
-section
-#print axioms
-  DifferentialGeometry.Integral.Connection.tensorChartComponentRaw_rawTensorConnLap_eq_chart_α_coord_formula
-end
-
 end Connection
 end Integral
 end DifferentialGeometry

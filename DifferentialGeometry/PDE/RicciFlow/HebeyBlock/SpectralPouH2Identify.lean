@@ -75,6 +75,4 @@ theorem chart_sobolev_intrinsic_nabla_equivalence_tensors_h1
             C * (tensorPouSobolevNorm (I := I) (M := M) g 1 T).toReal :=
   assemble_pou_h1_iso_intrinsic_h1 (I := I) (M := M) g r s
 
-#print axioms chart_sobolev_intrinsic_nabla_equivalence_tensors_h1
-
 end DifferentialGeometry.PDE.RicciFlow.HebeyBlock

@@ -355,11 +355,6 @@ theorem tensorPouSobolevNorm_le_succ
     exact ENNReal.tsum_le_tsum hper_chart
   exact ENNReal.rpow_le_rpow htsum_le (by norm_num)
 
-#print axioms tensorPouSobolevNorm
-#print axioms tensorPouSobolevNorm_nonneg
-#print axioms tensorPouSobolevNorm_zero_section
-#print axioms tensorPouSobolevNorm_le_succ
-
 end Tensor
 end Sobolev
 end Analysis

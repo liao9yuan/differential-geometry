@@ -563,6 +563,3 @@ end Integral
 end DifferentialGeometry
 
 end
-
-open DifferentialGeometry.Integral.Connection in
-#print axioms fiberNormSqSummand_chartAlpha_le_raw_components_sq
