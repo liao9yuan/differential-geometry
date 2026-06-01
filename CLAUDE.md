@@ -27,16 +27,17 @@ This file is the loaded-every-session summary; the two docs above are the full a
 - **R1 — three granularity tiers.** Atom (one result-cluster) → a file; Concept (a definition + API +
   several clusters) → a folder; Area (a subject) → a folder of Concepts. Promote a file to a folder
   when it exceeds ~400–500 lines or mixes a definition with its deep theory.
-- **R2 — Concept folder skeleton + 3-level aggregators.** `Defs.lean → Basic.lean → <Aspect>*.lean →
-  Concept.lean`. Each Area has an `Area.lean`; the single root `DifferentialGeometry.lean` is the one
-  place new imports are added.
+- **R2 — Concept folder skeleton.** `Defs.lean → Basic.lean → <Aspect>*.lean`. NO per-directory aggregator
+  files (no `Concept.lean`/`Area.lean` re-export layer — Lean has no glob import, but Mathlib-style uses a
+  SINGLE flat root, not one aggregator per folder). The single root `DifferentialGeometry.lean` flatly imports
+  every leaf module (auto-generated, the one place imports are tracked); each file imports the precise modules it needs.
 - **R3 — name by content, never by effort.** Files UpperCamelCase naming the math object/conclusion.
   Forbidden suffixes: `Final/FinalClosure/Unconditional/Close/UnifiedPackaging/v2/strong/clean/assembly`.
   Mathematical qualifiers are allowed and encouraged: `_withBoundary`, `_of_closed`, `_intrinsic`.
 - **R4 — loose `Defs.lean`.** Definitions plus a few immediately-needed lemmas may co-locate, but
   `Defs.lean` keeps its imports minimal (it is the low-rank anchor everyone imports).
 - **R5 — one cluster per file** (cluster = one public headline + only the private lemmas serving it).
-- **R6 — thin headline at the top** of its folder, assembling from sibling files.
+- **R6 — folder = math grouping only** (no headline/aggregator file; a folder is navigated, not imported as a unit).
 - **R7 — re-export, never re-derive.** Each canonical definition has exactly one home; visibility
   elsewhere is a thin `export`, never a second definition.
 

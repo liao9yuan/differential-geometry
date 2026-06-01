@@ -18,26 +18,27 @@ content maps to **files and folders**. Every migration/refactor obeys it.
 - **Area** = a mathematical subject containing several Concepts → **a folder of Concepts**.
 - Promote a file → folder when it exceeds ~400–500 lines OR mixes a definition with its deep theory.
 
-## 2. Concept folder skeleton + aggregators
+## 2. Concept folder skeleton
 ```
 Concept/
   Defs.lean        -- definitions (def/structure/class/abbrev/notation). Minimal imports (low-rank anchor).
   Basic.lean       -- foundational API right on the defs (constructors, simp, basic properties).
   <Aspect>.lean    -- one thematic result-cluster each (Smoothness, Continuity, Comp, MetricCompatible, …).
-  Concept.lean     -- (sibling) thin aggregator: imports the whole Concept/ folder.
 ```
-Three aggregator levels: per-Concept `Concept.lean`, per-Area `Area.lean`, and the single root
-`DifferentialGeometry.lean` (the ONE place new imports are added). Upper levels import lower aggregators.
+NO per-directory aggregator files. Lean has no glob import (`import X.*` does not exist), but the Mathlib-standard
+solution is a SINGLE flat root, not a `Concept.lean`/`Area.lean` re-export layer for every folder (that just adds
+clutter). The one root `DifferentialGeometry.lean` flatly imports every leaf module (auto-generated; the ONE place
+imports are tracked). Each file imports the precise modules it needs; folders are for navigation, not import-as-a-unit.
 
 ## 3. The seven rules
 - **R1** three tiers (above).
-- **R2** skeleton + aggregators (above).
+- **R2** Concept skeleton (above); flat root, NO per-folder aggregators.
 - **R3** name by CONTENT (math object/conclusion), files UpperCamelCase. **Forbidden** effort/status
   suffixes: `Final, FinalClosure, Unconditional, Close, Unconditional, UnifiedPackaging, v2, strong,
   clean, assembly`. **Allowed** mathematical qualifiers: `_withBoundary, _of_closed, _intrinsic, _pointwise, _seq`.
 - **R4** loose `Defs.lean` (defs + a few immediate lemmas may co-locate), but its imports stay minimal.
 - **R5** one cluster per file.
-- **R6** thin headline at the top of its folder, assembling from siblings.
+- **R6** folder = math grouping only (no headline/aggregator file; navigated, not imported as a unit).
 - **R7** re-export (`export`), never re-derive: one canonical home per definition; elsewhere a thin re-export.
 
 ## 4. Variant rule (boundary, scalar/tensor, chart/intrinsic, local/global, time-dependent/static)

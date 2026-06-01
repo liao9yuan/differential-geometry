@@ -1,9 +1,0 @@
-import DifferentialGeometry.Analysis.Parabolic.AbstractSemigroup.AbstractSpectralSemigroup
-import DifferentialGeometry.Analysis.Parabolic.AbstractSemigroup.AbstractSpectralSemigroupContinuity
-import DifferentialGeometry.Analysis.Parabolic.AbstractSemigroup.AbstractSpectralSemigroupLaw
-
-/-!
-# DifferentialGeometry.Analysis.Parabolic.AbstractSemigroup
-
-Aggregated headline for `DifferentialGeometry.Analysis.Parabolic.AbstractSemigroup`.
--/

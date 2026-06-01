@@ -1,9 +1,0 @@
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExpansion.ChartProjectionSecondCovDerivViaSkExt
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExpansion.SecondCovDerivChartProjEuclidGlobal
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExpansion.SkExtChartComponentEqCovDerivEuclid
-
-/-!
-# DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExpansion
-
-Aggregated headline for `DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExpansion`.
--/
