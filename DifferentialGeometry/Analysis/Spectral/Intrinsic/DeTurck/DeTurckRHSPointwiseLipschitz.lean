@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.FiberNormRiemannianBridge
-import DifferentialGeometry.Analysis.Parabolic.DeTurckRicciRHSSmoothQuasilinear
+import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckRicciRHSSmoothQuasilinear
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHSSection
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorExtension
 import DifferentialGeometry.Geometry.Connection.TensorNabla.IteratedTensorCovDeriv

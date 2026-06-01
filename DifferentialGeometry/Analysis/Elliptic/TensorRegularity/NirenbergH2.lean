@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolutionHeadline
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolution.WeakSolutionHeadline
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity
 
 /-!

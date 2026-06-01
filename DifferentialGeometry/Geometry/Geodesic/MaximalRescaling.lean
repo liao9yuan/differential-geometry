@@ -1,8 +1,8 @@
-import DifferentialGeometry.Geometry.Exponential.ChartIdentification
-import DifferentialGeometry.Geometry.Exponential.ChartPushVFEq
+import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartIdentification
+import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartPushVFEq
 import DifferentialGeometry.Geometry.Exponential.Definition
-import DifferentialGeometry.Geometry.Exponential.SmoothnessClose
-import DifferentialGeometry.Geometry.Exponential.UniformUniqueness
+import DifferentialGeometry.Geometry.Exponential.Smoothness.SmoothnessClose
+import DifferentialGeometry.Geometry.Exponential.ChartFlow.UniformUniqueness
 import DifferentialGeometry.Geometry.Geodesic.GeodesicEquationFromIntegralCurve
 import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
 

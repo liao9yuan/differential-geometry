@@ -1,6 +1,6 @@
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.BootstrapMixed
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.BootstrapStep
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.Bootstrap
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.BootstrapMixed
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.BootstrapStep
 
 /-!
 # All-orders interior elliptic-system regularity of connection-Laplacian tensor

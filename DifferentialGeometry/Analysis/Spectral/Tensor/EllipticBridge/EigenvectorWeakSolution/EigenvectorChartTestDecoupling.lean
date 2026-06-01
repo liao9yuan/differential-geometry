@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cross.EigenvectorChartCrossRightLimit
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolutionHeadline
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolution.WeakSolutionHeadline
 
 /-!
 # Decoupling the test section from the cross-term chart components

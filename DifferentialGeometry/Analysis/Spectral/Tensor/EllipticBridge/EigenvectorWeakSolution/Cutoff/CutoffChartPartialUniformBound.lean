@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.AbstractChar
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.ChartPartialUniformBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.CovL2BoundFromH1
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChristoffelBound
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDerivChartFormLowerOrder
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.CovDerivChartFormLowerOrder
 import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothFChartResidual.BilinearBound
 
 /-!

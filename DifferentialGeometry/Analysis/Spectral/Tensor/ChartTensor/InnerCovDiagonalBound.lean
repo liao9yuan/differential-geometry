@@ -1,5 +1,5 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.GramInvUniformEigenvalueLowerBound
-import DifferentialGeometry.Analysis.Spectral.Tensor.PreHilbert
+import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.GramInvUniformEigenvalueLowerBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.PreHilbert
 
 /-!
 # Diagonal-sum bound for covariant-derivative inner products

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.NormComparison
+import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.NormComparison
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerCovDiagonalBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerPointwiseUpperBound
 

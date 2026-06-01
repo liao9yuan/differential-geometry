@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDerivComponentFormula
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.CovDerivComponentFormula
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChristoffelBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.TensorReprFromFrame
 

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftFactorDischarge
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Manifold
-import DifferentialGeometry.Analysis.ODE.FlowC1
+import DifferentialGeometry.Analysis.ODE.Flow.FlowC1
 
 /-!
 # Discharging the chart-realised factor inputs from the BARE geometric flow

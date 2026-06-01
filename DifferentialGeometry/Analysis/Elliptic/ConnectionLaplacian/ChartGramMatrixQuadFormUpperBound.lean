@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.ChartGramUniformContinuity
+import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.ChartGramUniformContinuity
 
 /-!
 # Uniform upper bound for the chart-α Gram-matrix quadratic form on the

@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Component.EigenvectorChartComponentL2
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.AbstractChartPullCutoff
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGradCrossBridge
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGradL2
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradCrossBridge
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradL2
 
 /-!
 # The covariant-Leibniz cross terms of an eigenvector approximant as `n → ∞`

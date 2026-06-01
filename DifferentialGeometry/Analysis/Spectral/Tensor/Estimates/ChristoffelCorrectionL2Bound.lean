@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChristoffelBound
-import DifferentialGeometry.Analysis.Spectral.Tensor.NormComparison
+import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.NormComparison
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentL2BoundUniform
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.ChartTensorRSCovariantDerivative
 

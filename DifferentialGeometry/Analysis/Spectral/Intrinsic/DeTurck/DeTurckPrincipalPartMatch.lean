@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.DeTurckRicciStrictParabolic
+import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckRicciStrictParabolic
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckLinearization
 
 /-!

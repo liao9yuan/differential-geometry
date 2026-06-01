@@ -10,10 +10,10 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.EigenvectorWeakPartials
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.TensorChartBilinearData
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.AbstractChartPull
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolutionDirichlet
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.BootstrapSource
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolution.WeakSolutionDirichlet
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.BootstrapSource
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.RotatedTestSection
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovariantLeibniz
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantLeibniz
 
 /-!
 # The eigenvector chart variational identity and the chart-bilinear data

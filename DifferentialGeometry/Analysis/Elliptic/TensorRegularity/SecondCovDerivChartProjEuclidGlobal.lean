@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartProjectionSecondCovDerivViaSkExt
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDerivComponentEuclidSkExtExpansion
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.CovDerivComponentEuclidSkExtExpansion
 
 /-!
 # Global chart-α `(Idx, Jdx)` projection of the bundle second covariant derivative

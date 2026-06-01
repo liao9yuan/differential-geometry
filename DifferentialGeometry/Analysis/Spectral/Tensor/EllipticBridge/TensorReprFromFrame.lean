@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentL2BoundUniform
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChristoffelBound
-import DifferentialGeometry.Analysis.Spectral.Tensor.H1Compl
+import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.H1Compl
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.Defs
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.Inherited

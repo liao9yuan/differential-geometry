@@ -1,8 +1,8 @@
 import DifferentialGeometry.Geometry.Connection.RawConnLapChartProjFullExpansionViaChartInvGram
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.LeviCivitaChartFrameSelfChartCoordPullback
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SkExtChartComponentEqCovDerivEuclid
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDerivComponentFormula
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDerivChartForm
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.CovDerivComponentFormula
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.CovDerivChartForm
 
 /-!
 # T₀-linear expansion of the chart-frame trace Γ-correction at the chart-α

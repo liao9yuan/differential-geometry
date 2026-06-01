@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawTensorConnLapL2WtwokTwoBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.Bridge
-import DifferentialGeometry.Analysis.Spectral.Tensor.TensorChartTwistUniformBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.TensorChartTwistUniformBound
 
 /-!
 # Manifold L² bound for a smooth compactly-supported tensor section by the

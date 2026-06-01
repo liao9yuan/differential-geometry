@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.AbstractSpectralSemigroupContinuity
+import DifferentialGeometry.Analysis.Parabolic.AbstractSemigroup.AbstractSpectralSemigroupContinuity
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.Semigroup
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 

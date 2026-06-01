@@ -3,7 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.EigenvectorArbitraryKRegularity
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevBanach
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevQuant
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.BootstrapMixed
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.BootstrapMixed
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Plancherel
 
 /-!

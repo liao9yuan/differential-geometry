@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.Variati
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ForwardIntegralCurveUniqueness
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Manifold
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.BareFlowFromJointC1
-import DifferentialGeometry.Analysis.ODE.FlowC1
+import DifferentialGeometry.Analysis.ODE.Flow.FlowC1
 
 /-!
 # Moving-chart-local discharge of the chart-realised factor inputs at an interior time

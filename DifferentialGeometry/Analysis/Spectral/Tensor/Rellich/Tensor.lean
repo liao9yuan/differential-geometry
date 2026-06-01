@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.Resolvent
+import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.Resolvent
 import Mathlib.Analysis.Normed.Operator.Compact
 
 /-!

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.SobolevScaleSummable
-import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum
+import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.Spectrum
 
 /-!
 # Closability of the covariant gradient: the faithful `H¹ ↪ L²` embedding

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Tensor3rdCurvFiberNormBound
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorThirdOrderWeitzenbock
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGrad
 
 /-!
 # Uniform curvature and differentiated-curvature fibre-norm bounds on a closed manifold

@@ -1,6 +1,6 @@
-import DifferentialGeometry.Analysis.ODE.FlowCkVariational
-import DifferentialGeometry.Analysis.ODE.FlowCk
-import DifferentialGeometry.Analysis.ODE.FlowC1
+import DifferentialGeometry.Analysis.ODE.Flow.FlowCkVariational
+import DifferentialGeometry.Analysis.ODE.Flow.FlowCk
+import DifferentialGeometry.Analysis.ODE.Flow.FlowC1
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalODE
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.BanachIC
 

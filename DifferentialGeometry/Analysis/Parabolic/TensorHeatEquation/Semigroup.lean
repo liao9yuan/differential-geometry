@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.EigenBasis
+import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.EigenBasis
 import Mathlib.Analysis.SpecialFunctions.Exp
 
 /-!

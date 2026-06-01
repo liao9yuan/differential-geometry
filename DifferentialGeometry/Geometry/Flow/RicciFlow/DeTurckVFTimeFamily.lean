@@ -1,7 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckShortTime
 import DifferentialGeometry.Geometry.Flow.VectorField
 import DifferentialGeometry.Geometry.Flow.VectorFieldSmooth
-import DifferentialGeometry.Analysis.Parabolic.DeTurckVectorFieldContinuousInMetric
+import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckVectorFieldContinuousInMetric
 import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
 
 namespace DifferentialGeometry.PDE.RicciFlow

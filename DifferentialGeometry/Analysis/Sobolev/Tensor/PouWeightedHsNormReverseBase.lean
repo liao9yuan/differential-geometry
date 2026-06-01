@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNorm
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentL2BoundUniform
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.IntrinsicL2Bridge
-import DifferentialGeometry.Analysis.Spectral.Tensor.H1Compl
+import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.H1Compl
 
 /-!
 # Order-`0` reverse comparison: chart Hilbert-Schmidt norm ≤ intrinsic `L²`

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.RawConnLapRiemannianFiberNormSqLeChartDataT0Uniform
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.IteratedFDerivChartPushedRawBridge
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDerivChartFormLowerOrder
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.CovDerivChartFormLowerOrder
 
 /-!
 # Pointwise uniform-in-`T₀` bound on the Riemannian fiber norm-squared of the

@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentL2BoundUniform
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.IntrinsicL2Bridge
-import DifferentialGeometry.Analysis.Spectral.Tensor.H1Compl
-import DifferentialGeometry.Analysis.Spectral.Tensor.PreHilbert
+import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.H1Compl
+import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.PreHilbert
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentSobolevBound
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.PreHilbert
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic

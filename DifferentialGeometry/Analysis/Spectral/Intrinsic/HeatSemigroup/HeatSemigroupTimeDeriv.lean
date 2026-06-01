@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.AbstractSpectralSemigroupContinuity
+import DifferentialGeometry.Analysis.Parabolic.AbstractSemigroup.AbstractSpectralSemigroupContinuity
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.HeatSemigroupIntrinsic
 import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 import Mathlib.Analysis.SpecialFunctions.Log.Basic

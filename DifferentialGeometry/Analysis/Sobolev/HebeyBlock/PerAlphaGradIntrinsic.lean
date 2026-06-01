@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.PerChartGradientL2Headline
-import DifferentialGeometry.Analysis.Spectral.Tensor.TensorChartComponentSobolevBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.TensorChartComponentSobolevBound
 
 /-!
 # Intrinsic per-`α` gradient constants and the `α`-uniform gradient `L²` headline

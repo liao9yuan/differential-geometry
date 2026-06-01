@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Exponential.SmoothnessOffZero
+import DifferentialGeometry.Geometry.Exponential.Smoothness.SmoothnessOffZero
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExp
 
 set_option linter.unusedSectionVars false

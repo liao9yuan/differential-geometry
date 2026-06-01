@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.LeibnizRemainderSecondDerivCancellation
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SkExtChartComponentEqCovDerivEuclid
-import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDerivComponentFormula
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.CovDerivComponentFormula
 
 /-!
 # T₀-linear expansion of the chart-α Leibniz remainder

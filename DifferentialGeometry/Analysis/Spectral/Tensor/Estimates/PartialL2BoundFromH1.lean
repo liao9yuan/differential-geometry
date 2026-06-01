@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChosenWeakPartialFderivBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentL2BoundUniform
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentSobolevBoundFromH1
-import DifferentialGeometry.Analysis.Spectral.Tensor.H1Compl
+import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.H1Compl
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceReverse
 
 /-!

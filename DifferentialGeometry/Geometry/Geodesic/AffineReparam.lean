@@ -1,7 +1,7 @@
 import DifferentialGeometry.Geometry.Geodesic.Equation
 import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
-import DifferentialGeometry.Geometry.Exponential.SmoothnessClose
-import DifferentialGeometry.Geometry.Exponential.ChartPushVFEq
+import DifferentialGeometry.Geometry.Exponential.Smoothness.SmoothnessClose
+import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartPushVFEq
 import DifferentialGeometry.Geometry.Connection.Chart.NablaComponents
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.IntegralCurve.Transform

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExp
-import DifferentialGeometry.Geometry.Exponential.ChainedFlowContinuity
+import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChainedFlowContinuity
 import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
 import DifferentialGeometry.Geometry.Geodesic.CrossVFReduction
 import Mathlib.Topology.MetricSpace.Pseudo.Lemmas

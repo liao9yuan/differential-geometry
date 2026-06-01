@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.PreHilbert
+import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.PreHilbert
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.ChartTensorRSCovariantDerivative
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Analysis.Integration.Measure.Glue

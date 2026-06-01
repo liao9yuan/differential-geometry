@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.EigenvectorWeakPartials
-import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGradL2
+import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.Spectrum
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradL2
 
 /-!
 # A chart-local gradient-energy estimate for an eigenvector chart component

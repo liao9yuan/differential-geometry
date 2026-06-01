@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.CompactInclusion
+import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.CompactInclusion
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.TensorChartComponentSobolevIntrinsic
 
 /-!

@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.FiberNormGradientDecomp
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.IntrinsicCovAtomL2Fiber
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.IntrinsicSlotOpNormRiem
-import DifferentialGeometry.Analysis.Spectral.Tensor.TensorComponentGradientEpNormPerAlpha
+import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.TensorComponentGradientEpNormPerAlpha
 
 /-!
 # Intrinsic per-`α` `eLpNorm` headline on the gradient of a chart component

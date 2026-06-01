@@ -5,7 +5,7 @@ import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.NablaTensorFormula
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.IteratedNabla
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.UniformChartBounds
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.PouNormChartComp
-import DifferentialGeometry.Analysis.Spectral.Tensor.H1Compl
+import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.H1Compl
 
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 

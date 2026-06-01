@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Heat.Semigroup
+import DifferentialGeometry.Analysis.Heat.Semigroup.Semigroup
 import DifferentialGeometry.Geometry.Operator.HessianTrace
 import DifferentialGeometry.Geometry.Operator.Laplacian
 import DifferentialGeometry.Geometry.Operator.VossWeyl
