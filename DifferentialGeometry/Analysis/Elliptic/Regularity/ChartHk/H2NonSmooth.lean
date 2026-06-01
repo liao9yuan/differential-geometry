@@ -12,7 +12,7 @@ using the localized difference-quotient infrastructure
 (`hasWeakPartialDeriv_of_diffQuot_uniform_bound_loc`) and the non-smooth
 chart-bilinear identity packaged in `ChartBilinearH1ComplData`.
 
-The headline result `h2_chart_loc_of_uniform_bound` produces, for a
+The headline result `chart_loc_of_uniform_bound` produces, for a
 precompact `Ω''` inside the chart target, a weak second `k`-partial
 derivative of the explicit `i`-th weak partial `D.weak_partial i` (lying
 in `L²(Ω'')`), with a quantitative bound in terms of the supplied uniform
@@ -38,7 +38,7 @@ extract this from `D.weak_partial_locally_memLp` applied to the closure of
 
 ## Main results
 
-* `h2_chart_loc_of_uniform_bound`: for a chart-bilinear data structure
+* `chart_loc_of_uniform_bound`: for a chart-bilinear data structure
   `D : ChartBilinearH1ComplData g α` and a uniform-in-`h` bound on the
   difference quotient of each weak partial of `D.u_chart`, extract weak
   second partial derivatives in `L²(Ω'')` with quantitative `L²` bound.
@@ -91,7 +91,7 @@ of `D.weak_partial i` (the `i`-th weak partial of `D.u_chart`) on `Ω''`,
 with `‖g_{i,k}‖_{L²(Ω'')} ≤ M_{i,k}`.
 
 This is the localized Nirenberg conclusion in non-smooth chart form. -/
-theorem h2_chart_loc_of_uniform_bound
+theorem chart_loc_of_uniform_bound
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : ChartBilinearH1ComplData (I := I) (M := M) g α)

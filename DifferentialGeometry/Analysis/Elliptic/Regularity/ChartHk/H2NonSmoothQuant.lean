@@ -5,7 +5,7 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.UniformDi
 # Quantitative per-chart `H²` interior regularity for non-smooth weak solutions
 
 This module upgrades the hypothesis-bearing per-chart `H²` regularity
-result `h2_chart_loc_of_uniform_bound` to a *quantitative* statement in
+result `chart_loc_of_uniform_bound` to a *quantitative* statement in
 which the uniform difference-quotient hypothesis has been **discharged**.
 
 The hypothesis-bearing form requires the caller to supply a uniform
@@ -20,13 +20,13 @@ the bilinear data `D`**, with
   `  ENNReal.ofReal (C_geom i k · √(∑_l ‖D.weak_partial l‖²_{L²(closure Ω')}`
   `    + ‖D.u_chart‖²_{L²(closure Ω')} + ‖D.f_chart‖²_{L²(closure Ω')}))`.
 
-Feeding this discharged bound into `h2_chart_loc_of_uniform_bound` with
+Feeding this discharged bound into `chart_loc_of_uniform_bound` with
 `M_bound i k := C_geom i k · √(DATA)` and `h₀ := R₀` yields the headline
 of this file.
 
 ## Main results
 
-* `h2_chart_loc_of_data_quantitative`: for a standard Nirenberg cutoff
+* `chart_loc_of_data_quantitative`: for a standard Nirenberg cutoff
   `η`, there is a chart-geometric constant `C_geom i k ≥ 0`, uniform
   over `D`, such that for every `ChartBilinearH1ComplData D` the `i`-th
   weak partial `D.weak_partial i` admits a weak `k`-partial derivative
@@ -70,7 +70,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 /-- **Quantitative per-chart `H²` regularity from the chart-bilinear data.**
 
-This is the explicit-constant analogue of `h2_chart_loc_of_uniform_bound`
+This is the explicit-constant analogue of `chart_loc_of_uniform_bound`
 with the uniform difference-quotient hypothesis **discharged**.
 
 Given a standard Nirenberg cutoff `η` on the Euclidean chart space — with
@@ -91,7 +91,7 @@ Because `C_geom` is quantified **before** `D`, the bound is uniform over
 all bilinear data: the chart-localising cutoff and the smooth elliptic
 extension of the metric depend only on `g`, `α`, `Ω'`, `η`, never on `D`.
 -/
-theorem h2_chart_loc_of_data_quantitative
+theorem chart_loc_of_data_quantitative
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -133,7 +133,7 @@ theorem h2_chart_loc_of_data_quantitative
       hη_in_Ω' hR₀_pos hh_supp_in_Ω' hη_one_on_Ω'' hΩ''_open.measurableSet
   refine ⟨C_geom, hC_geom_nn, fun D i k => ?_⟩
   obtain ⟨g_ik, hg_ik_memLp, hg_ik_partial, hg_ik_norm⟩ :=
-    h2_chart_loc_of_uniform_bound (I := I) (M := M) (g := g) (α := α)
+    chart_loc_of_uniform_bound (I := I) (M := M) (g := g) (α := α)
       D hΩ''_open hΩ''_compact_closure hR₀_pos h_room
       (M_bound := fun i k => C_geom i k * Real.sqrt (
         (∑ l : Fin (Module.finrank ℝ E),

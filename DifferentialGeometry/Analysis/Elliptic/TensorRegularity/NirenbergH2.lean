@@ -15,7 +15,7 @@ solution of the principal-part elliptic bilinear form
 `SmoothEllipticBilinearForm` on `Set.univ : Set EuclN`.
 
 This file glues that packaging to the Euclidean interior `H²` regularity
-theorem `h2_loc_smooth_solution` (from `Sobolev.Nirenberg.H2Regularity`). The
+theorem `loc_smooth_solution` (from `Sobolev.Nirenberg.H2Regularity`). The
 end product is a per-component, per-chart statement: on any precompact open
 subdomain `Ω''` of `EuclN`, each chart component `tensorComponentEuclid` admits
 weak second partial derivatives in `L²(Ω'')`, with a quantitative bound on
@@ -25,7 +25,7 @@ enlarged compact-closure neighborhood.
 
 ## Discharging the engine hypotheses
 
-The Euclidean engine `h2_loc_smooth_solution` requires, beyond the
+The Euclidean engine `loc_smooth_solution` requires, beyond the
 `IsSmoothWeakSolution` witness:
 
 * an `L²`-locality property for the right-hand side — discharged here from
@@ -188,7 +188,7 @@ theorem tensor_h2_loc_chartComp
   have h_room :
       Metric.cthickening 2 (closure Ω'') ⊆ (Set.univ : Set EuclN) :=
     fun y _ => Set.mem_univ y
-  obtain ⟨C, hC_nn, h_eng⟩ := h2_loc_smooth_solution
+  obtain ⟨C, hC_nn, h_eng⟩ := loc_smooth_solution
     (d := Module.finrank ℝ E)
     (tensorPrincipalForm (I := I) (M := M) g α hK hK_target)
     hΩ'' hΩ''_compact_closure h_closure_in h_room

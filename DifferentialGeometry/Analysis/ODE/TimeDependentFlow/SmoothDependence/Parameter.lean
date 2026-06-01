@@ -10,10 +10,10 @@ namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 /-! ## Pending proof-target children — Euclidean (H4)
 
-The headline `h4_exists_isLocalFlow_param_contDiffOn_top` is stated *after* these
+The headline `exists_isLocalFlow_param_contDiffOn_top` is stated *after* these
 children, because its proof composes them; the order is otherwise immaterial. -/
 
-theorem h4_augmented_field_contDiff
+theorem augmented_field_contDiff
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     {f : ℝ → P → E → E} (hf : ContDiff ℝ ∞ (fun q : ℝ × P × E => f q.1 q.2.1 q.2.2)) :
@@ -27,7 +27,7 @@ theorem h4_augmented_field_contDiff
     hf.comp hshuffle
   exact hfst.prodMk contDiff_const
 
-theorem h4_orbit_param_invariant
+theorem orbit_param_invariant
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
     {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P] [CompleteSpace P]
     {f : ℝ → P → E → E} {t₀ : ℝ} {z₀ : E × P} {r : ℝ≥0} {ε : ℝ}
@@ -61,7 +61,7 @@ theorem h4_orbit_param_invariant
   change g t = z.2
   rw [ht', ← ht₀', hinit]
 
-theorem h4_projected_ode_initial
+theorem projected_ode_initial
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
     {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P] [CompleteSpace P]
     {f : ℝ → P → E → E} {t₀ : ℝ} {z₀ : E × P} {r : ℝ≥0} {ε : ℝ}
@@ -99,7 +99,7 @@ theorem reindex_contDiff_top
     ContDiff ℝ ∞ (fun w : P × E × ℝ => (((w.2.1, w.1) : E × P), w.2.2)) :=
   ((contDiff_snd.fst).prodMk contDiff_fst).prodMk contDiff_snd.snd
 
-theorem h4_projected_contDiffOn
+theorem projected_contDiffOn
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     {t₀ : ℝ} {z₀ : E × P} {Ψ : (E × P) × ℝ → E × P} {ρ T : ℝ}
@@ -117,7 +117,7 @@ theorem h4_projected_contDiffOn
     (reindex_contDiff_top).contDiffOn
   exact hg.comp hf hmaps
 
-theorem h4_exists_isLocalFlow_param_contDiffOn_top
+theorem exists_isLocalFlow_param_contDiffOn_top
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P] [FiniteDimensional ℝ P]
     {f : ℝ → P → E → E} {t₀ : ℝ} {x₀ : E} {lam₀ : P}
@@ -134,11 +134,11 @@ theorem h4_exists_isLocalFlow_param_contDiffOn_top
   set z₀ : E × P := (x₀, lam₀) with hz₀
   set g : ℝ → (E × P) → E × P :=
     fun (t : ℝ) (z : E × P) => ((f t z.2 z.1, (0 : P)) : E × P) with hg
-  have hg_smooth : ContDiff ℝ ∞ (Function.uncurry g) := h4_augmented_field_contDiff hf
+  have hg_smooth : ContDiff ℝ ∞ (Function.uncurry g) := augmented_field_contDiff hf
   obtain ⟨r, ε, hr_pos, hε_pos, Ψ, hΨ, ρ, T, hρ_pos, hT_pos, hρ_le_r, hT_le_ε, hΨsmooth⟩ :=
     exists_isLocalFlow_contDiffOn_top (f := g) (t₀ := t₀) (x₀ := z₀) hg_smooth
   have hinv : ∀ z ∈ Metric.closedBall z₀ (r : ℝ), ∀ t ∈ Set.Icc (t₀ - ε) (t₀ + ε),
-      (Ψ (z, t)).2 = z.2 := h4_orbit_param_invariant hΨ
+      (Ψ (z, t)).2 = z.2 := orbit_param_invariant hΨ
   have htimeε : Set.Ioo (t₀ - min ε T) (t₀ + min ε T) ⊆ Set.Ioo (t₀ - ε) (t₀ + ε) :=
     Set.Ioo_subset_Ioo (by have := min_le_left ε T; linarith)
       (by have := min_le_left ε T; linarith)
@@ -156,10 +156,10 @@ theorem h4_exists_isLocalFlow_param_contDiffOn_top
     by positivity, by positivity, lt_min hε_pos hT_pos, ?_, ?_, ?_⟩
   · intro lam hlam x hx
     have hz := hmem lam hlam x hx
-    exact (h4_projected_ode_initial hΨ hinv x lam hz).1
+    exact (projected_ode_initial hΨ hinv x lam hz).1
   · intro lam hlam x hx t ht
     have hz := hmem lam hlam x hx
-    exact (h4_projected_ode_initial hΨ hinv x lam hz).2 t (htimeε ht)
+    exact (projected_ode_initial hΨ hinv x lam hz).2 t (htimeε ht)
   · have hmaps : Set.MapsTo (fun w : P × E × ℝ => (((w.2.1, w.1) : E × P), w.2.2))
         (Metric.ball lam₀ (ρ / 2) ×ˢ Metric.ball x₀ (ρ / 2) ×ˢ Set.Ioo (t₀ - T) (t₀ + T))
         (Metric.ball z₀ ρ ×ˢ Set.Ioo (t₀ - T) (t₀ + T)) := by
@@ -168,7 +168,7 @@ theorem h4_exists_isLocalFlow_param_contDiffOn_top
       have h1 : ((x, lam) : E × P) ∈ Metric.ball z₀ (ρ / 2) := by
         rw [hz₀, ← ball_prod_same]; exact ⟨hx, hlam⟩
       exact Metric.ball_subset_ball (by linarith) h1
-    have hcd := h4_projected_contDiffOn (t₀ := t₀) (z₀ := z₀) (Ψ := Ψ) (ρ := ρ) (T := T)
+    have hcd := projected_contDiffOn (t₀ := t₀) (z₀ := z₀) (Ψ := Ψ) (ρ := ρ) (T := T)
       hΨsmooth (lam₀ := lam₀) (x₀ := x₀) (ρP := ρ / 2) (ρE := ρ / 2) hmaps
     refine hcd.mono (Set.prod_mono (le_refl _) (Set.prod_mono (le_refl _) htimeT))
 

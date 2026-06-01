@@ -11,7 +11,7 @@ as a smooth weak solution of a `SmoothEllipticBilinearForm` on
 `Set.univ : Set EuclN` (provided the chart-pulled bilinear identity is supplied).
 
 This file glues that packaging to the Euclidean interior `H²` regularity
-theorem `h2_loc_smooth_solution` from `NirenbergH2Regularity.lean`. The
+theorem `loc_smooth_solution` from `NirenbergH2Regularity.lean`. The
 end product is a per-chart statement that, on any precompact open subdomain
 `Ω''` of the chart-target image, the chart-pulled smooth function admits weak
 `(i, k)`-second partials in `L²(Ω'')`, with a quantitative bound in terms of
@@ -34,7 +34,7 @@ positive dimension (`[NeZero (Module.finrank ℝ E)]`).
 
 ## Main results
 
-* `h2_loc_chart_pulled` — the per-chart interior `H²` regularity statement for
+* `loc_chart_pulled` — the per-chart interior `H²` regularity statement for
   any smooth weak solution `(B, w, F̃)` and any precompact open subdomain
   `Ω''` of the chart-target image. Provides existence, for every pair
   `(i, k) : Fin n × Fin n`, of a weak `k`-partial `g_{i,k}` of the classical
@@ -42,11 +42,11 @@ positive dimension (`[NeZero (Module.finrank ℝ E)]`).
   bound on `∫_{Ω''} g_{i,k}²` in terms of the `H¹` seminorm and `L²` norms on
   a slightly enlarged compact-closure neighborhood.
 
-* `h2_loc_chart_pulled_manifold` — the manifold-level wrapper that takes the
+* `loc_chart_pulled_manifold` — the manifold-level wrapper that takes the
   manifold-side smooth function `u : M → ℝ` (with chart-source-supported
   closed support), the bilinear form `B`, the `IsSmoothWeakSolution` witness,
   and a precompact open subdomain. The conclusion is the Euclidean
-  `h2_loc_chart_pulled` statement applied to `chartPullback I α u`.
+  `loc_chart_pulled` statement applied to `chartPullback I α u`.
 -/
 
 noncomputable section
@@ -90,10 +90,10 @@ the function `w` admits, for every pair `(i, k) : Fin n × Fin n`, a weak
 neighborhood `Ω'` and a constant `C ≥ 0` such that
 `∫_{Ω''} g² ≤ C · (∫_{Ω'} ∑_j (∂_j w)² + ∫_{Ω'} w² + ∫_{Ω'} F̃²)`.
 
-This is the manifold-side packaging of `h2_loc_smooth_solution`: the only
+This is the manifold-side packaging of `loc_smooth_solution`: the only
 input that is mathematically nontrivial is the smooth-weak-solution witness
 `h_weak`, which in turn comes from H3. -/
-theorem h2_loc_chart_pulled
+theorem loc_chart_pulled
     (B : SmoothEllipticBilinearForm (Module.finrank ℝ E)
       (Set.univ : Set EuclN))
     {w F : EuclN → ℝ}
@@ -123,7 +123,7 @@ theorem h2_loc_chart_pulled
   have h_closure_in :
       closure Ω'' ⊆ (Set.univ : Set EuclN) := by
     intro y _; exact Set.mem_univ _
-  obtain ⟨C, hC_nn, h_eng⟩ := h2_loc_smooth_solution
+  obtain ⟨C, hC_nn, h_eng⟩ := loc_smooth_solution
     (d := Module.finrank ℝ E)
     B hΩ'' hΩ''_compact_closure h_closure_in h_room
   intro i k
@@ -153,8 +153,8 @@ by `chartPullback_contDiff` (from H3). Coupled with the smooth-weak-solution
 hypothesis `B.IsSmoothWeakSolution (chartPullback I α u) F̃` produced by
 `chart_pulled_smooth_weak_solution_of_chartIdentity` (from H3), and the
 `L²`-locality of `F̃`, the standard Euclidean interior `H²` regularity
-theorem `h2_loc_smooth_solution` gives the conclusion. -/
-theorem h2_loc_chart_pulled_manifold
+theorem `loc_smooth_solution` gives the conclusion. -/
+theorem loc_chart_pulled_manifold
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
     {u : M → ℝ} (hu_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
@@ -191,7 +191,7 @@ theorem h2_loc_chart_pulled_manifold
   let _ := hu_smooth
   let _ := hu_cs
   let _ := hu_supp
-  exact h2_loc_chart_pulled (E := E)
+  exact loc_chart_pulled (E := E)
     B h_weak hF_l2_loc hΩ'' hΩ''_compact_closure
 
 end ManifoldH2

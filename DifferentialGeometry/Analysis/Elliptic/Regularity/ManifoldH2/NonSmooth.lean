@@ -19,7 +19,7 @@ are in `MemWkp 2 2` of the corresponding chart-target image lies in
 supply the per-chart `MemWkp 2 2` evidence.
 
 The chart-level non-smooth `H²` evidence is the natural target of
-`h2_chart_loc_of_uniform_bound` (delivered for the chart-bilinear data structure
+`chart_loc_of_uniform_bound` (delivered for the chart-bilinear data structure
 `ChartBilinearH1ComplData g α` in `ChartH2NonSmooth.lean`). The bridge from
 that chart-level output to the per-chart `MemWkp 2 2` evidence uses two
 analytical packaging steps:
@@ -30,7 +30,7 @@ analytical packaging steps:
   `u : M → ℝ` is a function representative of `H1ComplToLp u_h`;
 * an extension-by-zero argument that lifts weak partials defined on a
   precompact open subdomain `Ω''` of `chartTargetEuclid α` (the output of
-  `h2_chart_loc_of_uniform_bound`) to weak partials on the full chart-target
+  `chart_loc_of_uniform_bound`) to weak partials on the full chart-target
   image, using the fact that the POU-cut chart-pushed function vanishes
   outside the chart-image of `tsupport (ρ_α)`.
 
@@ -243,7 +243,7 @@ theorem wkpNormChart_two_le_tsum_chart_norms
 * the room hypothesis on the precompact subdomain `Ω''`,
 * a target `MemWkp 2 2` membership of the POU-cut chart-pushed function on
   `chartTargetEuclid α` packaged via the chart-level output of
-  `h2_chart_loc_of_uniform_bound` plus the Leibniz / extension-by-zero
+  `chart_loc_of_uniform_bound` plus the Leibniz / extension-by-zero
   packaging.
 
 The output `memWkp_two_chartPushed` is a *hypothesis* on the consumer:
@@ -294,8 +294,8 @@ variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 /-- The chart-level non-smooth `H²` regularity output: from the bridge data,
 extract the weak `(i, k)`-second-partials of `D.weak_partial i` on `Omega''`,
 with quantitative `L²` norm bounds. This is direct use of
-`h2_chart_loc_of_uniform_bound` on the data carried by the bridge. -/
-theorem h2_loc_chart_of_chartH2NonSmoothBridgeData
+`chart_loc_of_uniform_bound` on the data carried by the bridge. -/
+theorem loc_chart_of_chartH2NonSmoothBridgeData
     {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
     (h : ChartH2NonSmoothBridgeData (I := I) (M := M) g u α) :
     ∀ i k : Fin (Module.finrank ℝ E),
@@ -305,7 +305,7 @@ theorem h2_loc_chart_of_chartH2NonSmoothBridgeData
         (h.D.weak_partial i) h.Omega'' ∧
       eLpNorm g_ik 2 ((volume : Measure EuclN).restrict h.Omega'') ≤
         ENNReal.ofReal (h.M_bound i k) := by
-  exact h2_chart_loc_of_uniform_bound (I := I) (M := M) (g := g) (α := α)
+  exact chart_loc_of_uniform_bound (I := I) (M := M) (g := g) (α := α)
     h.D h.Omega''_open h.Omega''_compact_closure h.h0_pos h.room
     h.M_bound_nn h.uniform_diffQuot_bound
 
@@ -349,7 +349,7 @@ satisfy `MemWkp 2 2` of the chart-target image at every chart point lies in
 
 This statement is hypothesis-bearing: the per-chart `MemWkp 2 2` evidence is
 the natural target of the chart-level non-smooth `H²` regularity output (via
-`h2_chart_loc_of_uniform_bound` plus a Leibniz-rule packaging that transports
+`chart_loc_of_uniform_bound` plus a Leibniz-rule packaging that transports
 the chart-pulled weak first partials of `H1ComplToLp u_h` to weak first
 partials of `chartPushed (chartAtlasPOU I M) α u`).
 

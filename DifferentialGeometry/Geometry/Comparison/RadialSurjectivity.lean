@@ -52,7 +52,7 @@ diamond leaking into a public statement.
 
 * `radial_image_T_preconnected` — the `expMap g p`-image of the
   `g`-norm closed ball is preconnected, by continuity of `expMap g p`
-  (`bm_c_expMap_continuous_of_geodesic_complete`). **Fully proven.**
+  (`expMap_continuous_of_geodesic_complete`). **Fully proven.**
 
 * `radial_image_is_open` — `radialMinSet g p` is open *relative to* the
   `riemannianEDist`-closed-ball subspace of radius `R` at `p` (the
@@ -185,13 +185,13 @@ theorem p_mem_radialMinSet (g : SmoothRiemannianMetric I M) (p : M) :
 /-- **Preconnectedness of the `expMap g p`-image of the closed `g`-ball.**
 The closed `g`-ball `gBall g p R` is preconnected (`gBall_isPreconnected`);
 its image under the continuous map `expMap g p`
-(`bm_c_expMap_continuous_of_geodesic_complete`) is preconnected. -/
+(`expMap_continuous_of_geodesic_complete`) is preconnected. -/
 theorem radial_image_T_preconnected (g : SmoothRiemannianMetric I M)
     (p : M) {R : ℝ} (hR : 0 ≤ R) :
     IsPreconnected
       ((expMap (I := I) g p) '' (gBall (I := I) g p R)) := by
   have hcont : Continuous (expMap (I := I) g p) :=
-    HopfRinow.bm_c_expMap_continuous_of_geodesic_complete (I := I) g p
+    HopfRinow.expMap_continuous_of_geodesic_complete (I := I) g p
   exact (gBall_isPreconnected (I := I) g p hR).image _ hcont.continuousOn
 
 /-- **Radial-image openness (relative form).** The radial-minimiser set
@@ -330,7 +330,7 @@ theorem radial_image_is_closed (g : SmoothRiemannianMetric I M)
       (Subtype.val ⁻¹' (radialMinSet (I := I) g p) :
         Set ↥{q : M | riemannianEDist I p q ≤ ENNReal.ofReal R}) := by
   have hexp : Continuous (expMap (I := I) g p) :=
-    HopfRinow.bm_c_expMap_continuous_of_geodesic_complete (I := I) g p
+    HopfRinow.expMap_continuous_of_geodesic_complete (I := I) g p
   have hf : Continuous
       (fun v : TangentSpace I p =>
         ENNReal.ofReal (Real.sqrt (g.inner p v v))) :=

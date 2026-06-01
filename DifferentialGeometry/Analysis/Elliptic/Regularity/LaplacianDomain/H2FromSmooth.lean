@@ -29,7 +29,7 @@ which combines:
 * `chartBilinear_substitution_identity_holds` from
   `SubstitutionDischargeAssembly.lean` (the unconditional substitution identity
   for the chart-bilinear data);
-* `h2_chart_loc_of_uniform_bound` from `ChartH2NonSmooth.lean` (the per-chart
+* `chart_loc_of_uniform_bound` from `ChartH2NonSmooth.lean` (the per-chart
   weak-second-partial output of the localised Nirenberg argument).
 
 ## Structural form
@@ -109,7 +109,7 @@ unconditional construction of this evidence from `u_h ∈ laplacianDomain g`
 follows from the chart-bilinear non-smooth weak-solution machinery
 (`chartBilinearH1ComplData_of_laplacianDomain` plus
 `chartBilinear_substitution_identity_holds` plus the localised absorbing
-inequality `h2_chart_loc_of_uniform_bound`). -/
+inequality `chart_loc_of_uniform_bound`). -/
 theorem laplacianDomain_memWkpChart_two
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)

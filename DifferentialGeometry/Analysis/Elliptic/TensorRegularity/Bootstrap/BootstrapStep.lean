@@ -6,7 +6,7 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 /-!
 # Single-step adapter for the iterated interior elliptic-regularity bootstrap
 
-The interior `H²` regularity engine `h2_loc_smooth_solution` (from
+The interior `H²` regularity engine `loc_smooth_solution` (from
 `Sobolev.Nirenberg.H2Regularity`) raises a smooth weak solution of a uniformly
 elliptic divergence-form equation from `H¹` data to `H²` data on a precompact
 subdomain. Iterating it to arbitrary order requires the *differentiated*
@@ -18,7 +18,7 @@ explicitly-constructed perturbed source `perturbedSource B u f l`.
 This file is the first of a three-file `Bootstrap` sub-phase. It supplies the
 two tensor-side specialisations of the differentiated identity for the chart
 component of an `(r, s)`-tensor weak solution, together with one generic
-`W^{2,2}` adapter that converts the `h2_loc_smooth_solution` engine output into
+`W^{2,2}` adapter that converts the `loc_smooth_solution` engine output into
 iterated-Sobolev (`MemWkp`) form with the quantitative constant retained.
 
 ## Main results
@@ -36,7 +36,7 @@ iterated-Sobolev (`MemWkp`) form with the quantitative constant retained.
   `Set.univ` with `C^∞` source `f`, on any precompact open subdomain `Ω''` the
   function `u` lies in `W^{2,2}(Ω'')`, and there is an explicit constant
   `C ≥ 0` with `wkpNorm 2 2 u Ω''` bounded by `C` times the square root of the
-  `H¹`-and-`L²` data delivered by `h2_loc_smooth_solution`.
+  `H¹`-and-`L²` data delivered by `loc_smooth_solution`.
 
 The constant in the `W^{2,2}` bound is preserved so that a later step in the
 bootstrap can iterate it with an explicit budget.
@@ -382,7 +382,7 @@ source `f`. Then, on any precompact open subdomain `Ω'' ⊆ EE`:
 
   `wkpNorm 2 2 u Ω'' ≤ ENNReal.ofReal (C · √D)`,
 
-  where `D` is the `H¹`-and-`L²` data delivered by `h2_loc_smooth_solution`:
+  where `D` is the `H¹`-and-`L²` data delivered by `loc_smooth_solution`:
   `D = (∫ ∑_j (∂_j u)²) + (∫ u²) + (∫ f²)`, the integrals taken over the whole
   space. (The engine produces this data on a slightly enlarged neighbourhood
   `Ω'`; since `u` and `f` are smooth and compactly supported, every integrand
@@ -415,7 +415,7 @@ theorem smooth_cc_h2_loc_memWkp_two
   have h_closure_in :
       closure Ω'' ⊆ (Set.univ : Set EE) := fun y _ => Set.mem_univ y
   obtain ⟨C_engine, hC_engine_nn, h_engine⟩ :=
-    h2_loc_smooth_solution (d := d) B hΩ'' hΩ''_compact_closure
+    loc_smooth_solution (d := d) B hΩ'' hΩ''_compact_closure
       h_closure_in h_room
   set C₀ : ℝ :=
     ((Fintype.card (Fin d) : ℝ) * (Fintype.card (Fin d) : ℝ)) * C_engine + 1

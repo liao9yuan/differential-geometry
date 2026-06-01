@@ -80,7 +80,7 @@ theorem maximalGeodesic_continuousAt_zero
 
 /-- The image of `[0, 1]` under `maximalGeodesic g p v₀` is a compact
 subset of `M`. -/
-theorem bm_c_expMap_geodesicSegment_compactImage
+theorem expMap_geodesicSegment_compactImage
     (g : SmoothRiemannianMetric I M) (p : M) (v₀ : TangentSpace I p) :
     IsCompact (maximalGeodesic (I := I) g p v₀ '' Set.Icc (0 : ℝ) 1) := by
   have h_cont :
@@ -91,7 +91,7 @@ theorem bm_c_expMap_geodesicSegment_compactImage
 /-- For every initial velocity `v₀` there exists a radius `ρ > 0` such
 that the chained flow `(v, t) ↦ maximalGeodesic g p v t` is jointly
 continuous on `Metric.ball v₀ ρ × Set.Icc 0 1`. -/
-theorem bm_c_expMap_chainedFlow_joint_continuity
+theorem expMap_chainedFlow_joint_continuity
     (g : SmoothRiemannianMetric I M) (p : M) (v₀ : TangentSpace I p) :
     ∃ ρ : ℝ, 0 < ρ ∧
       ContinuousOn
@@ -107,11 +107,11 @@ that the chained flow `(v, t) ↦ maximalGeodesic g p v t` is jointly
 `Metric.ball v₀ ρ ×ˢ Set.Icc 0 1`.
 
 This is the `C¹`-in-`(v, t)` strengthening of
-`bm_c_expMap_chainedFlow_joint_continuity`; restricting it to the
+`expMap_chainedFlow_joint_continuity`; restricting it to the
 `t = 1` slice and precomposing with the smooth slice map `w ↦ (w, 1)`
 yields the off-zero exponential-map regularity
 `expMap_contMDiffAt_of_ne_zero`. -/
-theorem bm_c_expMap_chainedFlow_joint_contMDiff
+theorem expMap_chainedFlow_joint_contMDiff
     (g : SmoothRiemannianMetric I M) (p : M) (v₀ : E)
     (hv₀ : (show TangentSpace I p from v₀) ≠ 0) :
     ∃ ρ : ℝ, 0 < ρ ∧
@@ -125,7 +125,7 @@ theorem bm_c_expMap_chainedFlow_joint_contMDiff
 
 The proof reduces continuity to `ContinuousAt (expMap g p) v₀` for each `v₀`,
 then restricts the joint continuity of the chained flow
-`bm_c_expMap_chainedFlow_joint_continuity` to the `t = 1` slice: since
+`expMap_chainedFlow_joint_continuity` to the `t = 1` slice: since
 `expMap g p v = maximalGeodesic g p v 1` by definitional unfolding of
 `expMap`, continuity at `v₀` follows from the joint continuity on the
 neighbourhood `ball v₀ ρ ×ˢ Icc 0 1`, precomposed with the continuous
@@ -136,7 +136,7 @@ theorem expMap_continuous
   rw [continuous_iff_continuousAt]
   intro v₀
   obtain ⟨ρ, hρ, hjoint⟩ :=
-    bm_c_expMap_chainedFlow_joint_continuity (I := I) g p v₀
+    expMap_chainedFlow_joint_continuity (I := I) g p v₀
   set F : TangentSpace I p × ℝ → M :=
     fun vt => maximalGeodesic (I := I) g p vt.1 vt.2 with hF_def
   set s : TangentSpace I p → TangentSpace I p × ℝ := fun v => (v, 1) with hs_def

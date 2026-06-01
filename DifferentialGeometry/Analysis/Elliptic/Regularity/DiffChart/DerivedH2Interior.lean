@@ -16,7 +16,7 @@ unconditional once-differentiated chart-bilinear data
 
 This module applies the polymorphic chart-`H²` Nirenberg pipeline
 (`chartBilinearH1Compl_uniform_diffQuot_bound_of_data` followed by
-`h2_chart_loc_of_uniform_bound`) to this derived data to extract a
+`chart_loc_of_uniform_bound`) to this derived data to extract a
 precompact open `Ω''` containing `chartImagePOUTsupport α` together with a
 proof that the derived `u_chart` lies in `MemWkp 2 2` of `Ω''`.
 
@@ -35,7 +35,7 @@ For each `α : M`:
 6. Apply `chartBilinearH1Compl_uniform_diffQuot_bound_of_data` with the
    derived data to obtain a uniform-in-`h` bound on the difference quotients
    of `D_eff.weak_partial i`.
-7. Apply `h2_chart_loc_of_uniform_bound` to extract weak second partials
+7. Apply `chart_loc_of_uniform_bound` to extract weak second partials
    `g_{i,k}` of `D_eff.weak_partial i` on `Ω''`.
 8. Assemble the iterated chart-`MemWkp 2 2` membership of `D_eff.u_chart`
    on `Ω''`.
@@ -256,7 +256,7 @@ theorem derivedChartBilinear_memWkp_two_two_interior
       hΩ'_open h_closureΩ'_in_chart hΩ'_compact_closure
       hη_in_Ω' hR₀_pos hh_supp_in_Ω' hη_one_on_Ω'' hΩ''_open.measurableSet
   have h_h2 :=
-    h2_chart_loc_of_uniform_bound
+    chart_loc_of_uniform_bound
       (I := I) (M := M) (g := g) (α := α) D
       hΩ''_open hΩ''_compact_closure hR₀_pos h_room
       hM_nn h_uniform_bd

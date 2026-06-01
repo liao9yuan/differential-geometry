@@ -3816,7 +3816,7 @@ target and Ω'' ⊆ Ω' on which `η ≡ 1`, the wrapper produces a constant
   `‖D_h^k (D.weak_partial i)‖_{L²(Ω'')} ≤ ENNReal.ofReal (M_bound i k)`.
 
 The conclusion is the uniform-in-`h` bound consumed by
-`h2_chart_loc_of_uniform_bound` to extract `H²` regularity. The radius
+`chart_loc_of_uniform_bound` to extract `H²` regularity. The radius
 `R₀ > 0` is the diff-quotient bound; the proof works uniformly in `R₀`.
 
 This is a thin wrapper around the quantitative theorem

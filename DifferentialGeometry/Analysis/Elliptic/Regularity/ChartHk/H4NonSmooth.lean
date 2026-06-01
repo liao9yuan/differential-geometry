@@ -11,7 +11,7 @@ function `u_chart`, by applying the per-chart `H²` regularity to a
 The construction iterates the `H³` chart-local regularity (in
 `ChartH3NonSmooth.lean`) one further step:
 
-1. The `H²` regularity of `ChartH2NonSmooth.h2_chart_loc_of_uniform_bound`
+1. The `H²` regularity of `ChartH2NonSmooth.chart_loc_of_uniform_bound`
    gives, for each pair `(i, k)`, a weak `k`-partial of the `i`-th weak
    partial of `u_chart` — i.e., a weak mixed second partial of
    `u_chart`. This is the chart-local `H²` content.
@@ -36,7 +36,7 @@ levels. The conclusion is the chart-local weak fourth partial of
 
 ## Main results
 
-* `h4_chart_loc_of_iterated_diff_data_and_uniform_bound`: from a base
+* `chart_loc_of_iterated_diff_data_and_uniform_bound`: from a base
   `ChartBilinearH1ComplData` `D₀`, a derived first-iteration
   `ChartBilinearH1ComplData` `D₁` whose `u_chart = D₀_l.u_chart_deriv` for
   some `D₀_l : DiffChartBilinearH1ComplData` with direction `l` and
@@ -51,10 +51,10 @@ levels. The conclusion is the chart-local weak fourth partial of
 
 The construction is a direct iteration of the `H³` step:
 
-* Apply `h2_chart_loc_of_uniform_bound` to `D₁` (with `u_chart =
+* Apply `chart_loc_of_uniform_bound` to `D₁` (with `u_chart =
   ∂_l u_chart_base`) → weak mixed second partials of `∂_l u_chart_base`,
   i.e. weak mixed third partials of `u_chart_base`.
-* Apply `h2_chart_loc_of_uniform_bound` to `D₂` (with `u_chart =
+* Apply `chart_loc_of_uniform_bound` to `D₂` (with `u_chart =
   ∂_m (∂_l u_chart_base)`) → weak mixed second partials of the latter,
   i.e. weak mixed fourth partials of `u_chart_base`.
 -/
@@ -109,11 +109,11 @@ we extract, for each pair `(i, k)`, a weak `k`-partial derivative
 
 This statement is a direct re-application of the per-chart `H²`
 regularity at the second iteration level, mirroring
-`h3_chart_loc_of_diff_data_and_uniform_bound` in
+`chart_loc_of_diff_data_and_uniform_bound` in
 `ChartH3NonSmooth.lean`. Semantically: `g_{i,k}` is a weak `k`-partial of
 the `i`-th weak partial of `D₂.u_chart`. If `D₂.u_chart = ∂_m ∂_l u_chart_base`,
 then `g_{i,k}` is a weak mixed fourth partial of `u_chart_base`. -/
-theorem h4_chart_loc_of_iterated_diff_data_and_uniform_bound
+theorem chart_loc_of_iterated_diff_data_and_uniform_bound
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D₂ : ChartBilinearH1ComplData (I := I) (M := M) g α)
@@ -141,7 +141,7 @@ theorem h4_chart_loc_of_iterated_diff_data_and_uniform_bound
         ENNReal.ofReal (M_bound i k) := by
   classical
   intro i k
-  exact h2_chart_loc_of_uniform_bound (I := I) (M := M)
+  exact chart_loc_of_uniform_bound (I := I) (M := M)
     (g := g) (α := α) D₂
     hΩ''_open hΩ''_compact_closure hh₀ h_room hM_nn h_uniform_bd i k
 
@@ -161,7 +161,7 @@ The hypotheses make the chain structure explicit:
 * `D₂` is a derived base-form data with `D₂.u_chart = D₁_m.u_chart_deriv`.
 
 The conclusion is the weak mixed fourth partial of `u_chart_base`. -/
-theorem h4_chart_loc_explicit_iterated
+theorem chart_loc_explicit_iterated
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D₀ : ChartBilinearH1ComplData (I := I) (M := M) g α)
@@ -201,7 +201,7 @@ theorem h4_chart_loc_explicit_iterated
   let _ := D₀_l
   let _ := D₁
   let _ := D₁_m
-  exact h4_chart_loc_of_iterated_diff_data_and_uniform_bound
+  exact chart_loc_of_iterated_diff_data_and_uniform_bound
     (I := I) (M := M) (g := g) (α := α) D₂
     hΩ''_open hΩ''_compact_closure hh₀ h_room hM_nn h_uniform_bd
 

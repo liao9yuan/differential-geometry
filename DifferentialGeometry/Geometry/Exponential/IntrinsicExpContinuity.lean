@@ -39,7 +39,7 @@ initial velocity `v` because:
   arc-image lies in a single chart source;
 * on each such subinterval the per-chart continuous-in-`(v, t)` flow applies,
   re-based at the foot point `intrinsicGeodesic g hEnorm p v₀ τ` via the proven
-  cross-chart re-basing `Geodesic.bm_c_gc_cross_vf_projection_uniqueness`, and
+  cross-chart re-basing `Geodesic.gc_cross_vf_projection_uniqueness`, and
   the *uniqueness* of the geodesic with prescribed initial data identifies
   `intrinsicGeodesic g hEnorm p v` with the chained flow uniformly in `v` over a
   small ball;
@@ -214,7 +214,7 @@ chart-`γ(t)`-centred local integral curve `f₁` of the chart-fixed geodesic
 vector field at `γ t` whose projection agrees with `γ` on a neighbourhood of
 `t`.
 
-This is the mirror of `Geodesic.bm_c_gc_cross_vf_projection_uniqueness` but
+This is the mirror of `Geodesic.gc_cross_vf_projection_uniqueness` but
 starting from the *moving-foot* geodesic equation (the structure the intrinsic
 geodesic exposes through `intrinsicGeodesic_isGeodesic`) rather than from
 `IsGeodesicAt`.  The proof:

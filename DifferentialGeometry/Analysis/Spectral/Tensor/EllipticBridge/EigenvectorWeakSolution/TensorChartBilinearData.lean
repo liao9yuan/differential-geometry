@@ -52,7 +52,7 @@ ergonomics surface as the scalar structure. The semantic parameters `r`, `s`,
 because the divergence-form data does not depend on the tensor object beyond the
 choice of right-hand side, which a downstream producer plugs into
 `toChartData.f_chart`. This wrapper exposes a `toChartData` projection so the
-scalar interior-regularity engine `h2_chart_loc_of_uniform_bound` (which consumes
+scalar interior-regularity engine `chart_loc_of_uniform_bound` (which consumes
 a `ChartBilinearH1ComplData`) can be applied to it via a trivial adapter.
 
 The data structure is **non-vacuous** for non-smooth `u_chart`: the principal

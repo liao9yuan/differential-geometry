@@ -16,7 +16,7 @@ mixed partial `chosenSecondPartialChartPushedU g α u_h l₁ l₂`.
 
 This module applies the polymorphic chart-`H²` Nirenberg pipeline
 (`chartBilinearH1Compl_uniform_diffQuot_bound_of_data` followed by
-`h2_chart_loc_of_uniform_bound`) to this twice-derived data to extract a
+`chart_loc_of_uniform_bound`) to this twice-derived data to extract a
 precompact open `Ω''` containing `chartImagePOUTsupport α` together with a
 proof that the second mixed partial lies in `MemWkp 2 2` of `Ω''`.
 
@@ -35,7 +35,7 @@ For each `α : M`:
 6. Apply `chartBilinearH1Compl_uniform_diffQuot_bound_of_data` with the
    twice-derived data to obtain a uniform-in-`h` bound on the difference
    quotients of `D.weak_partial i`.
-7. Apply `h2_chart_loc_of_uniform_bound` to extract weak second partials of
+7. Apply `chart_loc_of_uniform_bound` to extract weak second partials of
    `D.weak_partial i` on `Ω''`.
 8. Assemble `MemWkp 2 2 D.u_chart Ω''` for the second mixed partial.
 
@@ -281,7 +281,7 @@ theorem twiceDerivedChartBilinear_memWkp_two_two_interior
       hΩ'_open h_closureΩ'_in_chart hΩ'_compact_closure
       hη_in_Ω' hR₀_pos hh_supp_in_Ω' hη_one_on_Ω'' hΩ''_open.measurableSet
   have h_h2 :=
-    h2_chart_loc_of_uniform_bound
+    chart_loc_of_uniform_bound
       (I := I) (M := M) (g := g) (α := α) D
       hΩ''_open hΩ''_compact_closure hR₀_pos h_room
       hM_nn h_uniform_bd

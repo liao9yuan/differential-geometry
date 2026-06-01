@@ -1277,7 +1277,7 @@ theorem partial_smooth_weak_solution
 bound: there exist a smooth source `f'_l` (the `perturbedSource`) such
 that `∂_l u` is itself a smooth weak solution of `B(·, ·) = ⟨f'_l, ·⟩`
 and, via the standard interior `H²` regularity of smooth weak solutions
-(`h2_loc_smooth_solution`), `∂_l u` admits weak second partial
+(`loc_smooth_solution`), `∂_l u` admits weak second partial
 derivatives in `L²` on a compactly contained subdomain. -/
 theorem partial_u_in_h2_loc
     {Ω : Set E} (hΩ : IsOpen Ω) (B : SmoothEllipticBilinearForm d Ω)
@@ -1332,7 +1332,7 @@ theorem partial_u_in_h2_loc
     have h := hM (Set.mem_image_of_mem _ hx_closure)
     rw [Real.norm_eq_abs]
     exact h.trans (le_max_left _ _)
-  obtain ⟨C, hC_nn, h_eng⟩ := h2_loc_smooth_solution (d := d) B
+  obtain ⟨C, hC_nn, h_eng⟩ := loc_smooth_solution (d := d) B
     hΩ'' hΩ''_compact_closure hΩ''_in_Ω h_room
   intro i k
   obtain ⟨g, hg_memLp, hg_weak, Ω', hΩ'_open, hΩ''_in_Ω', hΩ'_in,

@@ -446,7 +446,7 @@ chart-fixed geodesic vector field at one basepoint `α` is also a local
 integral curve at `t₀` of the chart-fixed geodesic vector field at a
 different basepoint `α'`, provided the projection of the curve at `t₀` lies
 in both chart sources. -/
-theorem bm_c_gc_vf_chart_coincidence
+theorem gc_vf_chart_coincidence
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α α' : M)
     {f : ℝ → TangentBundle I M} {t₀ : ℝ}
@@ -479,7 +479,7 @@ theorem bm_c_gc_vf_chart_coincidence
 chart-`γ(t₀)`-centred local integral curve `f₁` of the chart-fixed geodesic
 vector field at `γ(t₀)` whose projection agrees with `γ` on a neighbourhood
 of `t₀`. -/
-theorem bm_c_gc_cross_vf_projection_uniqueness
+theorem gc_cross_vf_projection_uniqueness
     [I.Boundaryless] [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {t₀ : ℝ}
     (hγ : IsGeodesicAt (I := I) g γ t₀) :
@@ -498,7 +498,7 @@ theorem bm_c_gc_cross_vf_projection_uniqueness
   refine ⟨f₁, hf₁_proj, hf₁, ?_⟩
   have hf_at_γ : IsMIntegralCurveAt f
       (geodesicVectorFieldChart (I := I) g (γ t₀)) t₀ :=
-    bm_c_gc_vf_chart_coincidence (I := I) g α (γ t₀) hα_src hγt₀_src hf
+    gc_vf_chart_coincidence (I := I) g α (γ t₀) hα_src hγt₀_src hf
   have h0 : f₁ t₀ = f t₀ := by
     rw [hf₁_init]
     rw [← hft₀]
@@ -520,7 +520,7 @@ theorem IsGeodesicAt.hasGeodesicEquationAt
     (hγ : IsGeodesicAt (I := I) g γ t₀) :
     HasGeodesicEquationAt (I := I) g γ t₀ := by
   obtain ⟨f₁, hf₁_proj_t₀, hf₁, hcross⟩ :=
-    bm_c_gc_cross_vf_projection_uniqueness (I := I) (g := g) (γ := γ) (t₀ := t₀) hγ
+    gc_cross_vf_projection_uniqueness (I := I) (g := g) (γ := γ) (t₀ := t₀) hγ
   exact IsGeodesicAt.hasGeodesicEquationAt_of_chartCentered_lift_eventuallyEq
     (I := I) (g := g) (γ := γ) (t₀ := t₀) hγ (f₁ := f₁) hf₁ hf₁_proj_t₀ hcross
 

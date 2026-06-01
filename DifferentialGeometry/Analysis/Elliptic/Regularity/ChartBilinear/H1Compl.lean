@@ -147,7 +147,7 @@ structure ChartBilinearH1ComplData
   (since the chart-pulled Gram matrix has uniformly bounded eigenvalues
   on a closed manifold). The local statement here is the minimum
   needed for the variational identity to make sense and for the consumer
-  `h2_chart_loc_of_uniform_bound` to extract `H²` regularity. -/
+  `chart_loc_of_uniform_bound` to extract `H²` regularity. -/
   weak_partial_locally_memLp :
     ∀ i, ∀ K : Set EuclN, IsCompact K → K ⊆ chartTargetEuclid (I := I) (M := M) α →
       MemLp (weak_partial i) 2 ((volume : Measure EuclN).restrict K)

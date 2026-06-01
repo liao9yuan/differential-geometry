@@ -19,7 +19,7 @@ scalar divergence-form weak-elliptic data structure.
 The project already has a *quantitative* scalar non-smooth interior
 `H²`-regularity engine for `ChartBilinearH1ComplData`:
 
-* `DifferentialGeometry.Analysis.Laplacian.ChartH2NonSmooth.h2_chart_loc_of_data_quantitative`
+* `DifferentialGeometry.Analysis.Laplacian.ChartH2NonSmooth.chart_loc_of_data_quantitative`
   — given a standard Nirenberg cutoff `η` (with precompact target `Ω'` inside
   the chart target, difference-quotient radius `R₀`, and a subregion `Ω'' ⊆ Ω'`
   on which `η ≡ 1`), it produces an explicit chart-geometric constant
@@ -45,7 +45,7 @@ scalar quantitative engine's conclusion at the tensor level by unfolding the
   `(i, k)` the `i`-th weak partial `D.weak_partial i` admits a weak `k`-partial
   derivative `g_{i,k} ∈ L²(Ω'')` with `‖g_{i,k}‖_{L²(Ω'')} ≤ C_geom i k ·
   √(DATA D)`. This is the quantitative tensor analogue of
-  `h2_chart_loc_of_data_quantitative` and the explicit-constant upgrade of
+  `chart_loc_of_data_quantitative` and the explicit-constant upgrade of
   `tensor_h2_chart_loc_of_uniform_bound`.
 -/
 
@@ -83,7 +83,7 @@ tensor chart component.**
 
 This is the explicit-constant analogue of `tensor_h2_chart_loc_of_uniform_bound`
 with the uniform difference-quotient hypothesis **discharged**, and the
-tensor-level mirror of the scalar `h2_chart_loc_of_data_quantitative`.
+tensor-level mirror of the scalar `chart_loc_of_data_quantitative`.
 
 Given a standard Nirenberg cutoff `η` on the Euclidean chart space — with a
 precompact target `Ω'` inside the chart target, a difference-quotient radius
@@ -105,7 +105,7 @@ tensor bilinear data: the chart-localising cutoff and the smooth elliptic
 extension of the metric depend only on `g`, `α`, `Ω'`, `η`, never on `D`.
 
 This is a **thin delegate** to the scalar quantitative interior-regularity
-engine `h2_chart_loc_of_data_quantitative`: because
+engine `chart_loc_of_data_quantitative`: because
 `TensorChartBilinearH1ComplData` is a thin wrapper whose `toChartData` field is
 the scalar divergence-form data structure, the projections `D.weak_partial`,
 `D.u_chart`, `D.f_chart` are definitionally those of `D.toChartData`, and the
@@ -147,7 +147,7 @@ theorem tensor_h2_chart_loc_of_data_quantitative
               + (eLpNorm D.f_chart 2
                   ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2)) := by
   classical
-  obtain ⟨C_geom, hC_geom_nn, hC_geom⟩ := h2_chart_loc_of_data_quantitative
+  obtain ⟨C_geom, hC_geom_nn, hC_geom⟩ := chart_loc_of_data_quantitative
     (I := I) (M := M) (g := g) (α := α)
     hη hη_supp hη_range hN h_fderiv_eta hΩ' hΩ'_chart hΩ'_compact
     hη_in_Ω' hR₀_pos hh_supp_in_Ω' hη_one_on_Ω'' hΩ''_open hΩ''_compact_closure

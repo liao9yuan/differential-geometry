@@ -29,7 +29,7 @@ The argument is a thin assembly over two existing engines:
 
 * the **tensor** non-smooth interior-regularity engine
   `tensor_h2_chart_loc_of_uniform_bound` (a delegate to the scalar Nirenberg
-  difference-quotient engine `h2_chart_loc_of_uniform_bound`), which extracts a
+  difference-quotient engine `chart_loc_of_uniform_bound`), which extracts a
   weak `H¹` partial of each `weak_partial` on `Ω''` *given* a uniform-in-`h`
   difference-quotient bound on those `weak_partial`s;
 * the **scalar** unconditional uniform difference-quotient bound

@@ -13,7 +13,7 @@ a compact set `K` containing `cthickening |h| (closure Ω'')`.
 The bounds are intended as building blocks for the difference-quotient
 approach to interior `H²` regularity: see `Nirenberg/CrossBounds.lean` for the
 smooth-case algebra and `Regularity/ChartH2NonSmooth.lean` for the consumer
-(`h2_chart_loc_of_uniform_bound`) that turns a uniform-in-`h` bound into a
+(`chart_loc_of_uniform_bound`) that turns a uniform-in-`h` bound into a
 weak second partial derivative.
 
 ## Main results

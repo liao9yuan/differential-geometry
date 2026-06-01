@@ -14,7 +14,7 @@ subdomains.
 * `uniform_nirenberg_estimate` — uniform-in-`h` bound on the integral
   `∫ η² · ∑_i (D_h^k ∂_i u)²` by `C` times `H¹` data, for the absorbed form
   of the master inequality.
-* `h2_loc_smooth_solution` — for each pair `(i, k) : Fin d × Fin d`,
+* `loc_smooth_solution` — for each pair `(i, k) : Fin d × Fin d`,
   the function `∂_i u` admits a weak `k`-partial derivative `g` on the
   open compactly contained subdomain `Ω''`, with the integral of `g²` on
   `Ω''` bounded in terms of the `H¹` seminorm of `u` plus the `L²` norms
@@ -202,7 +202,7 @@ The bound is in *integral form* (∫ g²) rather than *norm form* (eLpNorm g):
 the difference-quotient method yields an uniform `L²` bound on
 `D_h^k ∂_i u` via Part A, and Fatou's lemma converts this to a bound on the
 classical limit `g = ∂_k ∂_i u`. -/
-theorem h2_loc_smooth_solution
+theorem loc_smooth_solution
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {Ω'' : Set E} (hΩ'' : IsOpen Ω'')
     (hΩ''_compact_closure : IsCompact (closure Ω''))

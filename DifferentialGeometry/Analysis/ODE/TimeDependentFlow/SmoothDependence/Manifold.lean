@@ -29,7 +29,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [BoundarylessManifold I M] [T2Space M]
 
-theorem h3_manifoldFlow_contMDiffOn_of_jointContDiffOn
+theorem manifoldFlow_contMDiffOn_of_jointContDiffOn
     (p₀ : M) (Φ_E : E × ℝ → E) {ρ T t₀ : ℝ}
     (U : Set M) (_hUopen : IsOpen U) (hUsub : U ⊆ (chartAt H p₀).source)
     (hUball : ∀ p ∈ U, I ((chartAt H p₀) p) ∈ Metric.ball (I ((chartAt H p₀) p₀)) ρ)
@@ -410,7 +410,7 @@ theorem chartflow_eq_bareflow_on_U
   rw [← hvel]
   exact hbridge
 
-theorem h3_local_flow_jointSmooth_and_integralCurve [CompleteSpace E] [I.Boundaryless]
+theorem local_flow_jointSmooth_and_integralCurve [CompleteSpace E] [I.Boundaryless]
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M)))
@@ -510,7 +510,7 @@ theorem h3_local_flow_jointSmooth_and_integralCurve [CompleteSpace E] [I.Boundar
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
         (fun q : ℝ × M => (extChartAt I p₀).symm (ΦE (I ((chartAt H p₀) q.2), q.1)))
         (Set.Ioo (t₀ - T') (t₀ + T') ×ˢ U) := by
-    refine h3_manifoldFlow_contMDiffOn_of_jointContDiffOn (I := I) p₀ ΦE
+    refine manifoldFlow_contMDiffOn_of_jointContDiffOn (I := I) p₀ ΦE
       (ρ := ρ'ₒₚ) (T := T') (t₀ := t₀) U hU_open ?_ ?_ ?_ ?_
     · rw [← extChartAt_source (I := I)]; exact hU_src
     · intro p hp
@@ -555,7 +555,7 @@ theorem h3_local_flow_jointSmooth_and_integralCurve [CompleteSpace E] [I.Boundar
     exact (extChartAt I p₀).left_inv (hU_src hp)
   exact ⟨U, hU_open, hp₀_U, T', hT'_pos, Φ, hΦinit, hContMDiffOn', hbare⟩
 
-theorem h3_local_flow_chartIsLocalFlow_and_realisation [CompleteSpace E] [I.Boundaryless]
+theorem local_flow_chartIsLocalFlow_and_realisation [CompleteSpace E] [I.Boundaryless]
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M)))
@@ -661,7 +661,7 @@ theorem h3_local_flow_chartIsLocalFlow_and_realisation [CompleteSpace E] [I.Boun
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
         (fun q : ℝ × M => (extChartAt I p₀).symm (ΦE (I ((chartAt H p₀) q.2), q.1)))
         (Set.Ioo (t₀ - T') (t₀ + T') ×ˢ U) := by
-    refine h3_manifoldFlow_contMDiffOn_of_jointContDiffOn (I := I) p₀ ΦE
+    refine manifoldFlow_contMDiffOn_of_jointContDiffOn (I := I) p₀ ΦE
       (ρ := ρ'ₒₚ) (T := T') (t₀ := t₀) U hU_open ?_ ?_ ?_ ?_
     · rw [← extChartAt_source (I := I)]; exact hU_src
     · intro p hp

@@ -68,7 +68,7 @@ For each `α : M`:
    chartImagePOUTsupport α`, define geometric scales, build a smooth
    Nirenberg cutoff, apply
    `chartBilinearH1Compl_uniform_diffQuot_bound_of_data` followed by
-   `h2_chart_loc_of_uniform_bound`, and assemble `MemWkp 2 2 D.u_chart Ω''`.
+   `chart_loc_of_uniform_bound`, and assemble `MemWkp 2 2 D.u_chart Ω''`.
 -/
 
 noncomputable section
@@ -1033,7 +1033,7 @@ theorem iteratedDerivedChartBilinear_memWkp_two_two_interior
       hΩ'_open h_closureΩ'_in_chart hΩ'_compact_closure
       hη_in_Ω' hR₀_pos hh_supp_in_Ω' hη_one_on_Ω'' hΩ''_open.measurableSet
   have h_h2 :=
-    h2_chart_loc_of_uniform_bound
+    chart_loc_of_uniform_bound
       (I := I) (M := M) (g := g) (α := α) D
       hΩ''_open hΩ''_compact_closure hR₀_pos h_room
       hM_nn h_uniform_bd

@@ -54,7 +54,7 @@ theorem exists_uniform_norm_fderiv_le_on_flow_box
   refine ⟨‖fderiv ℝ (f q₀.2) (Φ q₀)‖, norm_nonneg _, fun x hx τ hτ => ?_⟩
   exact hq₀_max (show (x, τ) ∈ B from ⟨hx, hτ⟩)
 
-theorem stub_isVariationalFlowProjection_mono_box
+theorem isVariationalFlowProjection_mono_box
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
     {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
     {hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ}
@@ -85,7 +85,7 @@ variational-flow projection producer, a uniform operator-norm bound on the linea
 selects nested geometric parameters (with caps reconciling the projection's own
 `(T_Y, ρ_Y)`), shrinks the projection onto the geometric box, and assembles the finite-`C^k`
 flow via `contDiffOn_flow_of_isVariationalFlowProjection_top`. -/
-theorem h1_exists_isLocalFlow_contDiffOn_Ck
+theorem exists_isLocalFlow_contDiffOn_Ck
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
       [FiniteDimensional ℝ E]
     {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {k : ℕ∞} (hk : 1 ≤ k)
@@ -173,7 +173,7 @@ theorem h1_exists_isLocalFlow_contDiffOn_Ck
       exact hMglob_bound x (Metric.closedBall_subset_closedBall hρ_out_le_r hx) τ
         (hsub_T_out hτ)
     have hY : IsVariationalFlowProjection hΦ T ρ Y (m : ℕ∞) :=
-      stub_isVariationalFlowProjection_mono_box hY_raw hT_le_TY hρ_le_ρY
+      isVariationalFlowProjection_mono_box hY_raw hT_le_TY hρ_le_ρY
     have hYlevel : IsVariationalFlowProjection hΦ T ρ Y (((m + 1) - 1 : ℕ) : ℕ∞) := by
       have hmm : ((m + 1) - 1 : ℕ) = m := by omega
       rw [hmm]; exact hY

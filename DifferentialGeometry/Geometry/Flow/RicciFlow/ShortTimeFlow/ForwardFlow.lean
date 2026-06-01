@@ -56,7 +56,7 @@ geometric velocity on `(0,T)` (conjunct 3), and the three downstream analytic an
 `t₀ ∈ (0,T)` choose a window `(a,b) ∋ t₀` with `0 < a < b < T`; the time-cutoff field
 `Xt = cutoffEta a b δ • X_DT` (`interior_field_global_cutoff_extension`) equals `X_DT`
 on `(a-δ, b+δ)`, is globally `C∞`, and is `AutonomizedFieldJointC1`.  Its global bare
-flow (`h3_global_flow_jointContMDiffOn_on_closed_manifold`) carries `X_DT`'s bare
+flow (`global_flow_jointContMDiffOn_on_closed_manifold`) carries `X_DT`'s bare
 velocity on that window; the per-window flows are glued into a single `Φ` on `(0,T)` by
 bare-flow uniqueness (`bare_integral_flow_eqOn_of_jointC1`), with the `t = 0` anchor
 `Φ 0 = id` from the chart-local Picard flow of `time_dependent_vf_chart_local_picard`.

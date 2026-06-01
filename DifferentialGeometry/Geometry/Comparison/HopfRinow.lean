@@ -30,17 +30,17 @@ boundaryless smooth manifold `M` that is metric-complete as a
 
 ## Geodesic-completeness chain
 
-* `bm_c_gc_constant_speed` -- a geodesic has constant `g`-speed.
+* `gc_constant_speed` -- a geodesic has constant `g`-speed.
 * `isGeodesicOn_speedSq_const` -- constant `g`-speed of an intrinsic
   moving-foot geodesic on an open interval.
-* `bm_c_gc_length_distance_bound` -- `riemannianEDist` is Lipschitz in
+* `gc_length_distance_bound` -- `riemannianEDist` is Lipschitz in
   the parameter along a geodesic with constant speed bound.
-* `bm_c_gc_escape_cauchy` -- if the maximal interval of a geodesic
+* `gc_escape_cauchy` -- if the maximal interval of a geodesic
   escapes to a finite right endpoint, the values form a Cauchy
   sequence in `riemannianEDist`.
-* `bm_c_gc_velocity_limit` -- the velocity speed is preserved at the
+* `gc_velocity_limit` -- the velocity speed is preserved at the
   metric limit point.
-* `bm_c_gc_position_limit` -- a bounded-speed curve converges to a single
+* `gc_position_limit` -- a bounded-speed curve converges to a single
   limit point as the parameter approaches a finite endpoint.
 * `hasEndpointContinuation_of_complete` -- metric completeness furnishes
   endpoint-continuation data at a finite right endpoint.
@@ -52,10 +52,10 @@ boundaryless smooth manifold `M` that is metric-complete as a
 
 ## Exponential-map totality
 
-* `bm_c_expMap_continuous_of_geodesic_complete` -- continuity of
+* `expMap_continuous_of_geodesic_complete` -- continuity of
   `expMap g p` on the entire tangent space, given geodesic
   completeness.
-* `bm_c_expMap_total` -- totality plus continuity packaged.
+* `expMap_total` -- totality plus continuity packaged.
 
 ## Hopf-Rinow existence of minimisers
 
@@ -169,7 +169,7 @@ moving-foot equation; differentiating the speed integrand additionally
 requires `γ` to be `C^1`, exposed here as the minimal separable
 regularity hypothesis `hγ_C1` (in the canonical use case the geodesic is
 the smooth ODE flow, which is `C^1` a fortiori). -/
-theorem bm_c_gc_constant_speed
+theorem gc_constant_speed
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M}
     (hγ : IsGeodesic (I := I) g γ) (hγ_C1 : ContMDiff 𝓘(ℝ, ℝ) I 1 γ) :
     ∀ s t : ℝ,
@@ -277,7 +277,7 @@ and is `ContMDiffOn 𝓘(ℝ, ℝ) I 1` on `s`, then the speed-squared function
 `F t = g.inner (γ t) (γ'(t)) (γ'(t))` has derivative `0` at every `t ∈ s`.
 
 This is the open-set generalisation of the pointwise `hF_deriv` step inside
-`bm_c_gc_constant_speed`: the differentiation of the speed integrand is purely
+`gc_constant_speed`: the differentiation of the speed integrand is purely
 local at `t`, requiring only the moving-foot geodesic equation at `t` and the
 mdifferentiability of `γ` on a neighbourhood of `t` (supplied here by the
 `ContMDiffOn` hypothesis on the open set `s`). -/
@@ -450,7 +450,7 @@ fibre instances locally suppressed):
   packages both the bundle-norm ↔ `√(g.inner …)` compatibility and the
   constant-speed property of a geodesic in the exact form the
   `pathELength` estimate needs. -/
-theorem bm_c_gc_length_distance_bound
+theorem gc_length_distance_bound
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
     {s t : ℝ}
     (_hs : s ∈ maximalGeodesicInterval (I := I) g p v)
@@ -510,7 +510,7 @@ maximal interval of the geodesic at `(p, v)` is bounded above by
 `T < \infty`, then for every monotone real sequence `t_n \to T` inside
 the maximal interval the image sequence `\gamma(t_n)` is Cauchy in
 `riemannianEDist`. -/
-theorem bm_c_gc_escape_cauchy
+theorem gc_escape_cauchy
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
     {T : ℝ} (_hT : IsLUB (maximalGeodesicInterval (I := I) g p v) T)
     {tₙ : ℕ → ℝ}
@@ -550,7 +550,7 @@ theorem bm_c_gc_escape_cauchy
   have h_bound :
       riemannianEDist I (γ s) (γ t) ≤ ENNReal.ofReal (c * (t - s)) := by
     have :=
-      bm_c_gc_length_distance_bound (I := I) g p v (s := s) (t := t)
+      gc_length_distance_bound (I := I) g p v (s := s) (t := t)
         hs_mem ht_mem hst (hγ_smooth.contMDiffOn) hSpeedBound
     simpa [hγ_def, hc_def] using this
   have h_edist_bound :
@@ -607,7 +607,7 @@ witness is produced by scaling any nonzero tangent vector at `y` by the
 appropriate factor `\sqrt{(g.inner p) v v / (g.inner y) u u}`; the
 limit hypotheses, while motivating the precise value, are not needed
 to discharge the existential.) -/
-theorem bm_c_gc_velocity_limit
+theorem gc_velocity_limit
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
     {T : ℝ} (_hT : IsLUB (maximalGeodesicInterval (I := I) g p v) T)
     {tₙ : ℕ → ℝ}
@@ -651,7 +651,7 @@ enorm is bounded by `ENNReal.ofReal c` throughout, the Riemannian extended
 distance between the endpoints is at most `ENNReal.ofReal (c * (t - s))`.
 
 This is the moving-foot / general-curve analogue of
-`bm_c_gc_length_distance_bound` (which is specialised to the fixed
+`gc_length_distance_bound` (which is specialised to the fixed
 basepoint spray `maximalGeodesic`): the proof is the identical
 `pathELength`-integral computation, dominating the velocity-enorm
 integrand by the constant `ofReal c`, evaluating the constant
@@ -662,7 +662,7 @@ The local `attribute [-instance]` suppresses the project's `Tensor0SBundle`
 fibre norms, so the velocity-enorm hypothesis and the `riemannianEDist`
 conclusion both resolve to the `RiemannianBundle`-derived norm — the same
 norm against which `IsRiemannianManifold.out` is stated downstream. -/
-theorem bm_c_gc_length_distance_bound_curve
+theorem gc_length_distance_bound_curve
     {γ : ℝ → M} {s t c : ℝ}
     (hc_nonneg : 0 ≤ c) (hst : s ≤ t)
     (hγ_smooth : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc s t))
@@ -711,7 +711,7 @@ The proof shows `Filter.map γ (𝓝[<] b)` is Cauchy in the
 ε-characterisation: for a target tolerance `ε`, choosing a real
 `δ₀ ∈ (0, ε)` and the left interval `Ioo (b - δ₀/(c+1)) b` makes any two
 of its `γ`-images closer than `ε`, by the constant-speed length-distance
-bound `bm_c_gc_length_distance_bound_curve` (converted from
+bound `gc_length_distance_bound_curve` (converted from
 `riemannianEDist` to `edist` through `IsRiemannianManifold.out`).
 Completeness then yields the limit `y` via
 `cauchy_map_iff_exists_tendsto`.
@@ -722,7 +722,7 @@ which is the natural topology for the metric-completeness argument; on a
 Riemannian manifold this coincides with the underlying manifold topology,
 but that identification is a separate compatibility statement and is not
 needed for the convergence content here. -/
-theorem bm_c_gc_position_limit
+theorem gc_position_limit
     {γ : ℝ → M} {a b c : ℝ} (hab : a < b) (hc_nonneg : 0 ≤ c)
     (hγ_smooth : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Ioo a b))
     (hSpeedBound : ∀ τ ∈ Set.Ioo a b,
@@ -773,7 +773,7 @@ theorem bm_c_gc_position_limit
       hγ_smooth.mono hIcc_sub
     have h_bound :
         riemannianEDist I (γ s) (γ t) ≤ ENNReal.ofReal (c * (t - s)) :=
-      bm_c_gc_length_distance_bound_curve (I := I) (γ := γ) (s := s) (t := t)
+      gc_length_distance_bound_curve (I := I) (γ := γ) (s := s) (t := t)
         (c := c) hc_nonneg hst hγ_Icc
         (fun τ hτ => hSpeedBound τ (hIcc_sub hτ))
     have h_edist_bound :
@@ -863,7 +863,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 /-- **Topology-compatibility bridge (tendsto form).**
 A metric-topology limit `f a → p` is also a manifold-topology limit.  This is the
 clean transfer lemma: it lets the endpoint limit produced by
-`bm_c_gc_position_limit` (in the `PseudoEMetricSpace` topology) be consumed by the
+`gc_position_limit` (in the `PseudoEMetricSpace` topology) be consumed by the
 chart-coordinate / velocity-bound machinery (in the manifold `ChartedSpace`
 topology). -/
 theorem tendsto_nhds_of_tendsto_metric_nhds
@@ -1625,17 +1625,17 @@ data at `b`.
 The genuine ODE-regularity argument has three parts:
 
 * **Full position limit.** The constant-speed length-distance estimate
-  (`bm_c_gc_length_distance_bound_curve`) makes `γ` uniformly Cauchy in
+  (`gc_length_distance_bound_curve`) makes `γ` uniformly Cauchy in
   the Riemannian extended distance as `t → b⁻`, so by completeness `γ`
   converges to a single limit point `y` along the whole filter `𝓝[<] b`
-  (`bm_c_gc_position_limit`).
+  (`gc_position_limit`).
 
 * **Directional velocity limit.** Near `b` the geodesic stays inside a
   single chart at `y`; in that chart the geodesic ODE has continuous,
   bounded Christoffels on the compact image, so the chart-coordinate
   solution and its derivative extend continuously to `b`, producing a
   genuine limit tangent vector `w ∈ T_y M` (of the correct speed, by the
-  speed-preservation lemma `bm_c_gc_velocity_limit`).
+  speed-preservation lemma `gc_velocity_limit`).
 
 * **`C¹` matching.** A fresh geodesic `η` is launched from `(y, w)` by
   `exists_isGeodesicOn_Ioo_at`; uniqueness of the chart-`y` geodesic ODE
@@ -1678,7 +1678,7 @@ theorem hasEndpointContinuation_of_complete
   have hγ_mdiff_on : MDifferentiableOn 𝓘(ℝ, ℝ) I γ (Set.Ioo aL b) :=
     hγ_smooth.mdifferentiableOn (by norm_num)
   obtain ⟨y, hy_metric⟩ :=
-    bm_c_gc_position_limit (I := I) (γ := γ) (a := aL) (b := b) (c := c)
+    gc_position_limit (I := I) (γ := γ) (a := aL) (b := b) (c := c)
       haLb hc_nonneg hγ_smooth hSpeedBound
   have hy_mfld : Tendsto γ (𝓝[<] b) (𝓝 y) :=
     tendsto_nhds_of_tendsto_metric_nhds (I := I) (l := 𝓝[<] b) (f := γ) (p := y)
@@ -2673,7 +2673,7 @@ geodesic completeness (`isGeodesicOn_Ici_of_complete`), the exponential map
 at `p` is continuous on the entire tangent space `T_p M`. The proof propagates
 the smooth dependence of geodesics on initial conditions chart-locally
 along the compact arc `[0, 1]`. -/
-theorem bm_c_expMap_continuous_of_geodesic_complete
+theorem expMap_continuous_of_geodesic_complete
     (g : SmoothRiemannianMetric I M) (p : M) :
     Continuous (expMap (I := I) g p) := by
   sorry
@@ -2682,12 +2682,12 @@ theorem bm_c_expMap_continuous_of_geodesic_complete
 is a total continuous function from the tangent space `T_p M` to `M`,
 under the geodesic-completeness conclusion of `isGeodesicOn_Ici_of_complete`.
 The membership conjunct `expMap g p v \in Set.univ` is trivial. -/
-theorem bm_c_expMap_total
+theorem expMap_total
     (g : SmoothRiemannianMetric I M) (p : M) :
     Continuous (expMap (I := I) g p) ∧
       ∀ v : TangentSpace I p,
         expMap (I := I) g p v ∈ (Set.univ : Set M) :=
-  ⟨bm_c_expMap_continuous_of_geodesic_complete (I := I) g p,
+  ⟨expMap_continuous_of_geodesic_complete (I := I) g p,
     fun _ => Set.mem_univ _⟩
 
 end ExpMapTotality

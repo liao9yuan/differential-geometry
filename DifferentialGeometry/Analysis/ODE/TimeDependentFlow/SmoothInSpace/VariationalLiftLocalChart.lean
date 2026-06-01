@@ -27,7 +27,7 @@ This file supplies those five data from the genuine *local-near-`t`* regularity 
 The orbit of `Φ_fam` through a spatial point `y` is `s ↦ Φ_fam s y`, whose value at the
 *interior* time `t` is `Φ_fam t y` (not `y`).  The local flow near `(t, α)` — the time-`t`
 centred local flow `Ψ` of the bare field `X` (delivered by
-`h3_local_flow_jointSmooth_and_integralCurve` at `t₀ := t`, `p₀ := α`, read in the chart `α`
+`local_flow_jointSmooth_and_integralCurve` at `t₀ := t`, `p₀ := α`, read in the chart `α`
 as the time-`t` centred Euclidean Picard flow `ΦE` with `ΦE(·, t) = id`) — reproduces the orbit
 *forward from time `t`*:
 
@@ -380,7 +380,7 @@ that:
 * the local-near-`t` cocycle realisation `hrealΨ` holds, with the chart value confined to the
   chart target.
 
-The chart Picard flow is produced by `h3_local_flow_chartIsLocalFlow_and_realisation` at the
+The chart Picard flow is produced by `local_flow_chartIsLocalFlow_and_realisation` at the
 interior `(t, α)`; the cocycle realisation is the two-sided integral-curve uniqueness
 `bare_integral_flow_eqOn_of_jointC1` identifying `s ↦ Φ_fam s y` with the chart flow's continuation
 `s ↦ Φ (Φ_fam t y) s` on the uniform window (both solve the bare ODE and agree at `s = t`).  The
@@ -418,7 +418,7 @@ theorem exists_chartPicard_and_cocycle_realisation
   set α : M := Φ_fam t x with hα
   obtain ⟨U, hU_open, hp₀_U, T, hT_pos, Φ, f, x₀, r, ε, ΦE, hf, hx₀eq, hr_pos, hε_pos, hflow,
       ⟨ρE, TE, hρE_pos, hTE_pos, hΦE_smooth⟩, hΦinit, hΦreal, hΦconf, hΦsmoothOn, hΦbare⟩ :=
-    h3_local_flow_chartIsLocalFlow_and_realisation (I := I) X hX t α
+    local_flow_chartIsLocalFlow_and_realisation (I := I) X hX t α
   set z₀ : E := extChartAt I α x with hz₀
   set w₀ : E := precompMap (I := I) Φ_fam t α z₀ with hw₀
   have hαα : extChartAt I α α = x₀ := hx₀eq.symm

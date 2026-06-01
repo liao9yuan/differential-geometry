@@ -7,7 +7,7 @@ import DifferentialGeometry.Analysis.Sobolev.Tools.DiffQuotFKNonSmooth
 
 /-!
 # Uniform-in-`h` `L²` bound on the difference quotient of the chart-pulled
-weak partial derivatives, packaged for `h2_chart_loc_of_uniform_bound`
+weak partial derivatives, packaged for `chart_loc_of_uniform_bound`
 
 For a non-smooth chart-bilinear data structure `D` and a precompact
 `Ω''` whose `h₀`-thickening lies inside the chart-target image, this
@@ -18,7 +18,7 @@ module produces the uniform-in-`h` `L²(Ω'')` bound
 for `0 < |h| ≤ 1`, where `g_g i` is a globally `L²` representative of
 `D.weak_partial i` (agreeing on a neighbourhood of `closure Ω''`).
 This bound is exactly the input shape consumed by
-`h2_chart_loc_of_uniform_bound` to extract weak second partial
+`chart_loc_of_uniform_bound` to extract weak second partial
 derivatives.
 
 ## Strategy
@@ -203,7 +203,7 @@ quotient of the chart-pulled weak partial derivatives.**
 The headline integrates the localised non-smooth absorbing inequality
 `nirenberg_diffQuot_g_localL2_bound` with a sum-to-component shape
 conversion. The output is exactly the uniform-in-`h` bound consumed
-by `h2_chart_loc_of_uniform_bound` to extract weak second partial
+by `chart_loc_of_uniform_bound` to extract weak second partial
 derivatives.
 
 ### Inputs

@@ -246,7 +246,7 @@ Their content is the chain rule combining (i) the supplied joint chart-Gram regu
 `C⁰`-up-to-`0` DeTurck solution), with (ii) the joint `(t, x)` smoothness / continuity of the
 orbit `(t, x) ↦ Φ_fam t x` and its chart Jacobian `mfderiv (Φ_fam t) x`.  Part (ii) is the
 classical Hartman smooth-dependence-on-initial-conditions output for the conjugating flow
-(`h3_global_flow_jointContMDiffOn_on_closed_manifold` + `manifoldFlowFamily_*` applied along the
+(`global_flow_jointContMDiffOn_on_closed_manifold` + `manifoldFlowFamily_*` applied along the
 cutoff windows of the interior field, continuous up to the `C⁰`-at-`0` boundary).  The on-disk
 Hartman / pullback chart-Gram joint-smoothness machinery is faithful but not yet wired to the
 specific conjugating flow; we isolate that open content here as a single faithful labeled

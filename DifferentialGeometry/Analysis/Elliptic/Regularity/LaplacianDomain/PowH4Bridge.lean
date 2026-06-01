@@ -10,7 +10,7 @@ this module provides the bridge connecting:
 
 * the chart-local `H⁴` regularity of the chart-pulled function `u_chart` of a
   base `ChartBilinearH1ComplData` (delivered by
-  `ChartH4NonSmooth.h4_chart_loc_explicit_iterated`), and
+  `ChartH4NonSmooth.chart_loc_explicit_iterated`), and
 * the manifold-level `ChartH4NonSmoothPOUWitness` carrying the `MemWkp 4 2`
   membership of the chart-pushed POU function on the chart-target image.
 

@@ -5,7 +5,7 @@ import DifferentialGeometry.Analysis.Sobolev.Solutions.FriedrichsCommutator
 # Interior `H²` regularity for non-smooth weak solutions of uniformly
 elliptic divergence-form equations on Euclidean space.
 
-This module extends the smooth-case result `h2_loc_smooth_solution` to
+This module extends the smooth-case result `loc_smooth_solution` to
 weak solutions `u ∈ H¹(Ω)` whose data `f` lies in `L²(Ω)`. The headline
 theorem is hypothesis-bearing: it accepts a smooth approximating sequence
 `(u_n, f_n)` with associated convergence properties that are the analytic
@@ -20,7 +20,7 @@ For an `H¹` weak solution `u ∈ H¹(Ω)` of `B(u, ·) = ⟨f, ·⟩`:
 2. Each `u_n` satisfies a smooth weak equation `B(u_n, ·) = ⟨f_n, ·⟩` with
    `f_n` close to the mollification of `f` (the `L²` discrepancy is the
    Friedrichs commutator).
-3. Apply `h2_loc_smooth_solution` to obtain a per-`n` `L²` bound on
+3. Apply `loc_smooth_solution` to obtain a per-`n` `L²` bound on
    `∂_k ∂_i u_n` over `Ω''`, with constant uniform in `n` (as the
    smooth-case constant depends only on the elliptic data `B` and the
    geometric room, not on the specific solution).
@@ -31,11 +31,11 @@ For an `H¹` weak solution `u ∈ H¹(Ω)` of `B(u, ·) = ⟨f, ·⟩`:
   sequence to a non-smooth weak solution, together with uniform-in-`n`
   integrated `L²(Ω')` bounds on `u_n`, the gradients `∇u_n`, and the data
   `f_n` over every precompact open `Ω'`.
-* `h2_loc_nonsmooth_per_n_bound` — for each pair `(i, k) : Fin d × Fin d`
+* `loc_nonsmooth_per_n_bound` — for each pair `(i, k) : Fin d × Fin d`
   and each `n`, the function `∂_i u_n` admits a weak `k`-partial
   derivative `g_n` on `Ω''` with `‖g_n‖²_{L²(Ω'')}` bounded by a constant
   multiple of the master `data_bound`.
-* `h2_loc_nonsmooth_solution` — packaged form of the per-`n` bound,
+* `loc_nonsmooth_solution` — packaged form of the per-`n` bound,
   exposing for each `n` a constant `K` and a witness `g_n`.
 
 ## Scope
@@ -113,7 +113,7 @@ structure SmoothApproximation
   /-- Each `(u_n, f_n)` is a smooth weak solution of the same equation `B`. -/
   is_smooth_weak_sol :
     ∀ n, B.IsSmoothWeakSolution (u_seq n) (f_seq n)
-  /-- The `L²`-loc condition required by `h2_loc_smooth_solution` for each
+  /-- The `L²`-loc condition required by `loc_smooth_solution` for each
   `n`: the data `f_n` is in `L²` on every set with compact closure. This
   follows automatically when `f_n` is continuous, e.g. when `f_n` is
   produced as a mollification or as a classical Laplacian of a smooth
@@ -151,7 +151,7 @@ structure SmoothApproximation
           C * data_bound
 
 /-- Per-`n` interior `H²` regularity bound (raw smooth-case form). For
-each `n`, the smooth-case result `h2_loc_smooth_solution` applied to
+each `n`, the smooth-case result `loc_smooth_solution` applied to
 `(u_n, f_n)` yields a weak `k`-partial derivative `g_n` of `∂_i u_n` on
 `Ω''`, with `L²(Ω'')` norm bounded in terms of integrated `L²` data
 of `u_n` on a smooth-case-chosen intermediate `Ω'`. -/
@@ -178,7 +178,7 @@ private lemma h2_loc_per_n_smooth_bound
                 ∂(volume : Measure E) +
               ∫ x in Ω', (S.u_seq n x) ^ 2 ∂(volume : Measure E) +
               ∫ x in Ω', (S.f_seq n x) ^ 2 ∂(volume : Measure E)) := by
-  obtain ⟨C, hC_nn, h_eng⟩ := h2_loc_smooth_solution (d := d) B
+  obtain ⟨C, hC_nn, h_eng⟩ := loc_smooth_solution (d := d) B
     hΩ'' hΩ''_compact_closure hΩ''_in_Ω h_room
   obtain ⟨g, hg_memLp, hg_weak, Ω', hΩ'_open, hΩ''_in_Ω', hΩ'_in,
     hΩ'_compact, hbound⟩ :=
@@ -198,7 +198,7 @@ Nirenberg case constant, (2) the per-`Ω'` integrated-bound constant
 and (3) all uniform-in-`n` factors. The right-hand side of the bound is
 `K · data_bound`, where `data_bound` is the master scalar of the
 approximation. -/
-theorem h2_loc_nonsmooth_per_n_bound
+theorem loc_nonsmooth_per_n_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u f : E → ℝ}
     {Ω'' : Set E} (hΩ'' : IsOpen Ω'')
@@ -246,7 +246,7 @@ The bound has the form
 where `data_bound` is the master scalar of the approximation that
 controls the uniform-in-`n` integrated `H¹`+data energy of the
 sequence on every precompact open subdomain. -/
-theorem h2_loc_nonsmooth_solution
+theorem loc_nonsmooth_solution
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u f : E → ℝ}
     {Ω'' : Set E} (hΩ'' : IsOpen Ω'')
@@ -261,7 +261,7 @@ theorem h2_loc_nonsmooth_solution
           (fderiv ℝ (S.u_seq n) y) (EuclideanSpace.single i 1)) Ω'' ∧
       ∃ K : ℝ, 0 ≤ K ∧
         ∫ x in Ω'', g_n x ^ 2 ∂(volume : Measure E) ≤ K * S.data_bound :=
-  h2_loc_nonsmooth_per_n_bound (d := d) B hΩ'' hΩ''_compact_closure
+  loc_nonsmooth_per_n_bound (d := d) B hΩ'' hΩ''_compact_closure
     hΩ''_in_Ω h_room S
 
 end DifferentialGeometry.Analysis.Sobolev.NirenbergNonSmooth

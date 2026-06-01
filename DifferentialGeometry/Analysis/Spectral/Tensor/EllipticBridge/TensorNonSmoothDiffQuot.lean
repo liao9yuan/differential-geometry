@@ -19,7 +19,7 @@ scalar divergence-form weak-elliptic data structure.
 The project already has a scalar non-smooth interior `H²`-regularity engine for
 `ChartBilinearH1ComplData`:
 
-* `DifferentialGeometry.Analysis.Laplacian.ChartH2NonSmooth.h2_chart_loc_of_uniform_bound`
+* `DifferentialGeometry.Analysis.Laplacian.ChartH2NonSmooth.chart_loc_of_uniform_bound`
   — given a `ChartBilinearH1ComplData g α`, a precompact open `Ω''` with
   closure inside the chart target, a difference-quotient radius `h₀`, the
   room hypothesis `Metric.cthickening h₀ (closure Ω'') ⊆ chartTargetEuclid α`,
@@ -44,7 +44,7 @@ conclusion at the tensor level by unfolding the `toChartData` field.
   `D.weak_partial i`, and the room hypothesis, extract for every `(i, k)` a
   weak `k`-partial derivative of `D.weak_partial i` in `L²(Ω'')` with
   quantitative `L²` bound. This is the tensor analogue of
-  `h2_chart_loc_of_uniform_bound`.
+  `chart_loc_of_uniform_bound`.
 -/
 
 noncomputable section
@@ -99,12 +99,12 @@ interior `W^{2,2}` regularity on `Ω''` — a weak `H¹` partial of each
 `weak_partial`.
 
 This is a **thin delegate** to the scalar interior-regularity engine
-`h2_chart_loc_of_uniform_bound`: because `TensorChartBilinearH1ComplData` is a
+`chart_loc_of_uniform_bound`: because `TensorChartBilinearH1ComplData` is a
 thin wrapper whose `toChartData` field is the scalar divergence-form data
 structure, and the principal symbol `weightedInvGramOnEuclid g α` is shared
 between the scalar and tensor settings, the scalar Nirenberg
 difference-quotient conclusion applies verbatim. It is the tensor analogue of
-`h2_chart_loc_of_uniform_bound`. -/
+`chart_loc_of_uniform_bound`. -/
 theorem tensor_h2_chart_loc_of_uniform_bound
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
@@ -133,7 +133,7 @@ theorem tensor_h2_chart_loc_of_uniform_bound
       eLpNorm g_ik 2 ((volume : Measure EuclN).restrict Ω'') ≤
         ENNReal.ofReal (M_bound i k) := by
   classical
-  exact h2_chart_loc_of_uniform_bound (I := I) (M := M)
+  exact chart_loc_of_uniform_bound (I := I) (M := M)
     (g := g) (α := α) D.toChartData
     hΩ''_open hΩ''_compact_closure hh₀ h_room hM_nn h_uniform_bd
 

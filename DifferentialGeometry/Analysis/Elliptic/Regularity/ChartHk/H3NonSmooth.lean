@@ -9,7 +9,7 @@ from a differentiated chart-bilinear data structure
 This module establishes per-chart `H³` regularity for the chart-pulled
 function `u_chart_deriv` (the weak first partial of `base.u_chart`) of a
 `DiffChartBilinearH1ComplData`, by applying the per-chart `H²` regularity
-of `ChartH2NonSmooth.h2_chart_loc_of_uniform_bound` to a derived
+of `ChartH2NonSmooth.chart_loc_of_uniform_bound` to a derived
 `ChartBilinearH1ComplData` whose `u_chart` is `u_chart_deriv`, after the
 cross terms from the differentiated variational identity have been
 absorbed into the right-hand side.
@@ -28,7 +28,7 @@ differentiated variational identity reads
     + ∫ densityDerivOnEuclid · base.f_chart · ψ.
 ```
 
-To reuse the per-chart `H²` machinery (`h2_chart_loc_of_uniform_bound`),
+To reuse the per-chart `H²` machinery (`chart_loc_of_uniform_bound`),
 we need to package the differentiated identity in the standard
 `ChartBilinearH1ComplData` form. The principal `L²` block on the LHS
 (``∑ weightedInvGramOnEuclid · ∂_i (u_chart_deriv) · ∂_j ψ`` together with
@@ -59,13 +59,13 @@ a hypothesis in `DiffChartBilinearH1ComplUnconditional.lean`).
 Accordingly, this module **exposes** the derived `ChartBilinearH1ComplData`
 for `u_chart_deriv` as a hypothesis, mirroring the pattern in
 `DiffChartBilinearH1ComplUnconditional.lean`. The headline
-`h3_chart_loc_of_diff_data_and_uniform_bound` then applies the existing
+`chart_loc_of_diff_data_and_uniform_bound` then applies the existing
 per-chart `H²` regularity to the supplied derived data, producing the
 chart-local `H³` regularity of `u_chart_deriv`.
 
 ## Main results
 
-* `h3_chart_loc_of_diff_data_and_uniform_bound`: for a
+* `chart_loc_of_diff_data_and_uniform_bound`: for a
   `DiffChartBilinearH1ComplData` `D` and a supplied derived
   `ChartBilinearH1ComplData` `D_deriv` whose `u_chart = D.u_chart_deriv`
   and `weak_partial = D.weak_partial_deriv`, plus a uniform difference
@@ -127,7 +127,7 @@ weak partial of `D.u_chart_deriv`) on `Ω''`, with
 This is the chart-local third-order regularity statement for `D.base.u_chart`,
 since `g_{i,k}` is the weak `k`-partial of `∂_i (∂_l u_chart) = D.base.u_chart`'s
 mixed `(l,i,k)`-partial. -/
-theorem h3_chart_loc_of_diff_data_and_uniform_bound
+theorem chart_loc_of_diff_data_and_uniform_bound
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : DiffChartBilinearH1ComplData (I := I) (M := M) g α)
@@ -158,14 +158,14 @@ theorem h3_chart_loc_of_diff_data_and_uniform_bound
         ENNReal.ofReal (M_bound i k) := by
   classical
   intro i k
-  exact h2_chart_loc_of_uniform_bound (I := I) (M := M)
+  exact chart_loc_of_uniform_bound (I := I) (M := M)
     (g := g) (α := α) D_deriv
     hΩ''_open hΩ''_compact_closure hh₀ h_room hM_nn h_uniform_bd i k
 
 /-- The same regularity statement re-stated in terms of `D.weak_partial_deriv`
 (which equals `D_deriv.weak_partial` by hypothesis). Useful when downstream
 consumers want to phrase the conclusion in terms of `D`'s fields. -/
-theorem h3_chart_loc_weak_partial_deriv_of_diff_data_and_uniform_bound
+theorem chart_loc_weak_partial_deriv_of_diff_data_and_uniform_bound
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : DiffChartBilinearH1ComplData (I := I) (M := M) g α)
@@ -208,7 +208,7 @@ theorem h3_chart_loc_weak_partial_deriv_of_diff_data_and_uniform_bound
     rw [h_weak_partial_eq i']
     exact h_uniform_bd i' k' h hh hh_le
   obtain ⟨g_ik, hg_ik_memLp, hg_ik_partial, hg_ik_norm⟩ :=
-    h3_chart_loc_of_diff_data_and_uniform_bound (I := I) (M := M)
+    chart_loc_of_diff_data_and_uniform_bound (I := I) (M := M)
       (g := g) (α := α) D D_deriv h_u_chart_eq h_weak_partial_eq
       hΩ''_open hΩ''_compact_closure hh₀ h_room hM_nn h_uniform_bd' i k
   refine ⟨g_ik, hg_ik_memLp, ?_, hg_ik_norm⟩

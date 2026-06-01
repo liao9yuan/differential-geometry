@@ -53,7 +53,7 @@ These two are the single-chart skeleton of the off-zero argument. The
 remaining content — reaching an arbitrary fixed `v ≠ 0` whose geodesic
 leaves the home chart — is genuinely cross-chart and is supplied by the
 re-basing and chart-cover gluing recorded as separate obligations
-(`Geodesic.bm_c_gc_cross_vf_projection_uniqueness` and the chained-flow
+(`Geodesic.gc_cross_vf_projection_uniqueness` and the chained-flow
 joint regularity); see the proof of `expMap_contMDiffAt_of_ne_zero`.
 -/
 
@@ -1449,7 +1449,7 @@ theorem expMap_contMDiffAt_of_ne_zero
       v := by
   classical
   obtain ⟨ρ, hρ, hjoint⟩ :=
-    bm_c_expMap_chainedFlow_joint_contMDiff (I := I) g p v hv
+    expMap_chainedFlow_joint_contMDiff (I := I) g p v hv
   set F : E × ℝ → M :=
     fun vt => (maximalGeodesic (I := I) g p (show TangentSpace I p from vt.1) vt.2 : M)
     with hF_def

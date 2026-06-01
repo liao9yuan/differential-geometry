@@ -88,7 +88,7 @@ theorem isCompact_image_closedBall_under_expMap
   have hcompact : IsCompact (Metric.closedBall (0 : TangentSpace I p) R) :=
     tangent_closedBall_isCompact (E := E) I p hR
   have hcont : Continuous (expMap (I := I) g p) :=
-    DifferentialGeometry.Geometry.Riemannian.HopfRinow.bm_c_expMap_continuous_of_geodesic_complete
+    DifferentialGeometry.Geometry.Riemannian.HopfRinow.expMap_continuous_of_geodesic_complete
       g p
   exact hcompact.image hcont
 

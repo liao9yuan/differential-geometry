@@ -8,7 +8,7 @@ Riemannian manifold
 
 This module supplies the foundational chart-local divergence-form bilinear
 form needed to apply the Euclidean second-order interior regularity theorem
-`h2_loc_smooth_solution` to chart-pushed scalar functions on a smooth
+`loc_smooth_solution` to chart-pushed scalar functions on a smooth
 manifold equipped with a smooth Riemannian metric.
 
 The construction is the **constant-identity** chart-local form, which
@@ -47,7 +47,7 @@ subset of the chart range and remaining uniformly elliptic globally. This
 will be developed in subsequent modules. The present module supplies the
 constant-coefficient form, which already establishes the `SmoothEllipticBilinearForm`
 API on the chart side and demonstrates the connection with
-`h2_loc_smooth_solution`.
+`loc_smooth_solution`.
 -/
 
 noncomputable section

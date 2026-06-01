@@ -57,7 +57,7 @@ theorem fderiv_spatialSlice_initial_eq_id
     Filter.eventuallyEq_of_mem hball heqon
   rw [heq.fderiv_eq, fderiv_id']
 
-theorem h2_variationalEquation_spatialDerivative_of_contDiff
+theorem variationalEquation_spatialDerivative_of_contDiff
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [CompleteSpace E] [FiniteDimensional ℝ E]
     {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E}

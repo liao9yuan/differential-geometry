@@ -8,7 +8,7 @@ import Mathlib.Data.Finset.Lattice.Fold
 ## H3 — global jointly-smooth flow on a closed manifold
 
 This file upgrades the *local* manifold ODE smooth-dependence theorem
-`h3_local_flow_jointSmooth_and_integralCurve` (one open neighbourhood per point)
+`local_flow_jointSmooth_and_integralCurve` (one open neighbourhood per point)
 to a single *global* jointly-smooth flow on a closed (compact, boundaryless)
 manifold.  The proof is entirely **intrinsic**: it does not route through the
 chart-coordinate Picard machinery (which would require bridging the intrinsic
@@ -122,11 +122,11 @@ uniform horizon `Ioo (t₀ - T) (t₀ + T)`: `Φ p t₀ = p` for every `p`, the 
 carries the bare velocity `X t (Φ p t)`.
 
 The proof is intrinsic.  The local flows from
-`h3_local_flow_jointSmooth_and_integralCurve` are glued by manifold integral-curve
+`local_flow_jointSmooth_and_integralCurve` are glued by manifold integral-curve
 uniqueness in bare-velocity form (`bare_integral_flow_eqOn_of_jointC1`, whose
 joint-`C¹` input is supplied by `autonomizedFieldJointC1_of_contMDiff`); smoothness
 and the velocity are local, read off each local flow near its base point. -/
-theorem h3_global_flow_jointContMDiffOn_on_closed_manifold
+theorem global_flow_jointContMDiffOn_on_closed_manifold
     [CompactSpace M] [CompleteSpace E] [I.Boundaryless]
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -150,7 +150,7 @@ theorem h3_global_flow_jointContMDiffOn_on_closed_manifold
       (∀ p ∈ U, ∀ t ∈ Set.Ioo (t₀ - T) (t₀ + T),
         HasMFDerivAt 𝓘(ℝ, ℝ) I (fun s => Φ p s) t
           ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ p t)))) :=
-    fun p₀ => h3_local_flow_jointSmooth_and_integralCurve X hX t₀ p₀
+    fun p₀ => local_flow_jointSmooth_and_integralCurve X hX t₀ p₀
   choose U hU_open hU_mem Tloc hTloc_pos Φloc hΦloc_init hΦloc_smooth hΦloc_bare
     using hlocal
   have hcover : (Set.univ : Set M) ⊆ ⋃ p₀, U p₀ :=

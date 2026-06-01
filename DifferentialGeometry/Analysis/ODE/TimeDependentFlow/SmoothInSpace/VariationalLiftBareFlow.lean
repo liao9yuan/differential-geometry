@@ -27,7 +27,7 @@ DeTurck field).
 
 This file supplies the two inputs from the **bare geometric flow** instead, bypassing the
 compatibility obstruction entirely.  The bare manifold flow `Φ` of `X` (the smooth-dependence
-headline `h3_local_flow_jointSmooth_and_integralCurve`, read off the cutoff-field Euclidean
+headline `local_flow_jointSmooth_and_integralCurve`, read off the cutoff-field Euclidean
 local flow `ΦE` in the chart at the *expansion centre* `α`) carries, by
 `chartflow_eq_bareflow_on_U`, the **genuine geometric** velocity — not a chart-convention
 transport.  Consequently the chart reading of that flow is a `IsLocalFlow` Picard datum whose
