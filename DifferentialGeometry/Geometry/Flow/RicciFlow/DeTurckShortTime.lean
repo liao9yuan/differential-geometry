@@ -1,9 +1,9 @@
 import DifferentialGeometry.Geometry.Metric.Basic
-import DifferentialGeometry.Analysis.Parabolic.ParabolicShortTime
+import DifferentialGeometry.Analysis.Parabolic.QuasilinearMetricShortTimeExistence
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHS
-import DifferentialGeometry.Analysis.Parabolic.StrictParabolicAtSelf
-import DifferentialGeometry.Analysis.Parabolic.SmoothQuasilinear
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.MaxReg
+import DifferentialGeometry.Analysis.Parabolic.DeTurckRicciStrictParabolic
+import DifferentialGeometry.Analysis.Parabolic.DeTurckRicciRHSSmoothQuasilinear
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.ConnectionLaplacianMaximalRegularity
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.PointwiseDeriv
 
 namespace DifferentialGeometry.PDE.RicciFlow

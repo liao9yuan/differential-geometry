@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.DerivedDataCanonical
+import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.DerivedDataConstructor
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.DifferentiatedVariationalIdentity
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.ChosenThirdMixedPartial
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.FChartEffTwiceDef

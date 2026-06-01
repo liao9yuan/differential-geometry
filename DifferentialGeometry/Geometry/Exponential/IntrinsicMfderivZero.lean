@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Exponential.MfderivAtZero
+import DifferentialGeometry.Geometry.Exponential.MfderivZero
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 
 /-!

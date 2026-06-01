@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolutionHeadline
-import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.CanonicalTensorRepr
+import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.TensorReprFromFrame
 
 /-!
 # Building a smooth compactly-supported tensor section from prescribed chart-frame components

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLapCommutatorClose2
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLapCommutatorFreeDirection
 
 /-!
 # The `(0, 2) → (0, 3)` rough-Laplacian / covariant-gradient commutator:

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbedding
-import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmRankReduction
+import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmRankReduced
 import DifferentialGeometry.Analysis.Sobolev.IntrinsicFlow.SmoothCcDense
 import Mathlib.Analysis.Normed.Operator.Extend
 import Mathlib.Analysis.Normed.Module.Completion

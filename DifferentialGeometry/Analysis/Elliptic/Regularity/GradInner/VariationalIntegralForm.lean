@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.LaplacianSmoothCanonical
+import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.LaplacianSmoothFromDensity
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.LaplacianDensityExt
 
 /-!

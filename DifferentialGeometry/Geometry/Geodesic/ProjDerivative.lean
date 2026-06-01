@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Geodesic.Equation
 import DifferentialGeometry.Geometry.Geodesic.Existence
-import DifferentialGeometry.Geometry.Geodesic.GeodesicEquationBridge
+import DifferentialGeometry.Geometry.Geodesic.GeodesicEquationFromIntegralCurve
 import DifferentialGeometry.Geometry.Geodesic.Smoothness
 import DifferentialGeometry.Geometry.Exponential.ChartIdentification
 import Mathlib.Geometry.Manifold.IntegralCurve.Basic

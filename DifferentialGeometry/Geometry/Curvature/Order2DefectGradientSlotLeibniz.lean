@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.Order2DefectFrameCurvatureCore
-import DifferentialGeometry.Geometry.Curvature.Order2DefectFinalGWeighted
+import DifferentialGeometry.Geometry.Curvature.Order2DefectMetricTraceGWeighted
 import DifferentialGeometry.Geometry.Connection.TensorRSCovariantDerivativeCongrLocally
 
 /-!

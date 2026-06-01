@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.G5PerAlphaIntrinsic
+import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChristoffelCorrectionModelNormBound
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.FiberNormRiemannianBridge
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.SlotCorrectionChartKernel
 

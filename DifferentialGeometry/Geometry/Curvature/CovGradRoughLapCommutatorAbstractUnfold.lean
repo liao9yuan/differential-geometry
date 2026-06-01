@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLapCommutatorAssembly
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLapCommutatorCurried
 
 /-!
 # The double unfold of the abstract `(0, 3)` rough Laplacian of the gradient field

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Curvature.Order2DefectStep2PT_Direct
+import DifferentialGeometry.Geometry.Curvature.Order2DefectPartialTraceCommutation
 
 /-!
 # The partial-trace covariant-derivative commutation and the unconditional order-`2` estimate

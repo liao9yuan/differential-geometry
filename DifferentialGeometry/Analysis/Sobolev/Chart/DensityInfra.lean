@@ -3,7 +3,7 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.Atlas
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiply
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
-import DifferentialGeometry.Analysis.Sobolev.Chart.CompletenessAux
+import DifferentialGeometry.Analysis.Sobolev.Chart.CompletenessLp
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 

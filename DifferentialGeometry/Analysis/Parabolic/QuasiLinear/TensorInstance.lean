@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Existence
-import DifferentialGeometry.Analysis.Parabolic.TensorLinearParabolic
+import DifferentialGeometry.Analysis.Parabolic.TensorHeatDuhamelMildSolution
 
 /-!
 # Quasi-linear tensor heat equation on `L²`: file-local Borel-space setup

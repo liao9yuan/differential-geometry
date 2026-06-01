@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmRankReduction
+import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmRankReduced
 
 /-!
 # Reverse-Christoffel order-peeling: order-`2k` chart Hilbert-Schmidt control

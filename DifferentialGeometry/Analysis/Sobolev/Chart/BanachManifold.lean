@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Chart.Banach
 import DifferentialGeometry.Analysis.Sobolev.Chart.Completeness
-import DifferentialGeometry.Analysis.Sobolev.Chart.CompletenessAux
+import DifferentialGeometry.Analysis.Sobolev.Chart.CompletenessLp
 import DifferentialGeometry.Analysis.Sobolev.Chart.MeasurablePullback
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevBanach
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.LaplacianFinal
+import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.LaplacianVariationalIdentity
 
 /-!
 # Polarised Bochner-Weitzenböck identity for smooth `(φ, v)`

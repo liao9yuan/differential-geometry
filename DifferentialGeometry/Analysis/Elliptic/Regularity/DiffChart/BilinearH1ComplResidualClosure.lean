@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplFromDomainPow
-import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplCanonical
+import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplFromDomainPow2
 import DifferentialGeometry.Analysis.Elliptic.Regularity.FChartResidual.LpDecomposition
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.LpIdentity
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.LaplacianDensityExt

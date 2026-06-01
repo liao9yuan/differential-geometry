@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EigenBasis
-import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.CanonicalTensorRepr
+import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.TensorReprFromFrame
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 
 /-!

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossBounds
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossBoundsNonSmooth
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossBoundsNonSmooth_Cross2
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossBoundsNonSmoothCross2
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.DiffQuotTestFunction
 
 /-!

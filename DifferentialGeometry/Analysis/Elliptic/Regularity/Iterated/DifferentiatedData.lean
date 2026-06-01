@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.MixedPartials
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.LeibnizCoefficients
-import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.DerivedDataCanonical
+import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.DerivedDataConstructor
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.TwiceDifferentiatedIdentity
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ChosenFChartDerivMemW1p
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BaseFChartMemWkp22

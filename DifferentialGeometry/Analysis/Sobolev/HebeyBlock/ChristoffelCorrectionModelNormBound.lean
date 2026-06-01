@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.G3IntrinsicL2Bound
+import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChristoffelCorrectionAtomL2Bound
 
 /-!
 # Pointwise Christoffel-correction model-space norm bound

@@ -2,10 +2,10 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Differentiated
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.VariationalIdentityStep
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BaseFChartRegularityB
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.FChartEffStepRegularity
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.NirenbergInteriorWeakened
+import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.NirenbergInteriorRelaxedHyp
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BootstrapChartHm
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.MixedPartials
-import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.DerivedDataCanonical
+import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.DerivedDataConstructor
 
 /-!
 # Single-stage chart-`H^{m+1}` → chart-`H^{m+2}` boost (truly polymorphic)

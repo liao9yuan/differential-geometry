@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.TensorConnLaplacianL2Bound
 import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
-import DifferentialGeometry.Analysis.Sobolev.Chart.CompletenessAux
+import DifferentialGeometry.Analysis.Sobolev.Chart.CompletenessLp
 
 /-!
 # Manifold L² bound for the raw tensor connection Laplacian via a partition-

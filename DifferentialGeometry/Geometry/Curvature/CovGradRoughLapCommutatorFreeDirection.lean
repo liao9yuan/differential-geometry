@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLapCommutatorDoubleUnfold
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLapCommutatorAbstractUnfold
 import DifferentialGeometry.Geometry.Curvature.TensorThirdOrderWeitzenbock
 import DifferentialGeometry.Geometry.Curvature.CurvatureBundling
 

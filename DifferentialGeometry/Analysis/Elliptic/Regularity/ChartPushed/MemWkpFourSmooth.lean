@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.DerivedDataCanonical
+import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.DerivedDataConstructor
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.TwiceDerivedH2Interior
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.MemWkpThreeSmooth
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.MemWkpThree

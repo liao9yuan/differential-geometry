@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHS
-import DifferentialGeometry.Analysis.Parabolic.ParabolicShortTime
-import DifferentialGeometry.Analysis.Parabolic.StrictParabolicAtSelf
+import DifferentialGeometry.Analysis.Parabolic.QuasilinearMetricShortTimeExistence
+import DifferentialGeometry.Analysis.Parabolic.DeTurckRicciStrictParabolic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.CartanFormula
 import DifferentialGeometry.Geometry.Curvature.RicciConnection
 import DifferentialGeometry.Geometry.Connection.LeviCivita

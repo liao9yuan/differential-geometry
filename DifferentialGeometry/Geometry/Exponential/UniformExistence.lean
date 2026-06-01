@@ -2,7 +2,7 @@ import DifferentialGeometry.Geometry.Exponential.Bridge
 import DifferentialGeometry.Geometry.Exponential.ChartIdentification
 import DifferentialGeometry.Geometry.Exponential.ChartPushVFEq
 import DifferentialGeometry.Geometry.Exponential.UniformUniqueness
-import DifferentialGeometry.Geometry.Geodesic.GeodesicEquationBridge
+import DifferentialGeometry.Geometry.Geodesic.GeodesicEquationFromIntegralCurve
 import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
 import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
 

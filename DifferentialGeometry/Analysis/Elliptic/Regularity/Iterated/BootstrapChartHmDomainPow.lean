@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BootstrapChartHmFinal
+import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BootstrapChartHmPolymorphic
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.FChartEffStepRegularity
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.FChartEffRegularity
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.NirenbergInterior

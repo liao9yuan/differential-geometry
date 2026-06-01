@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1Compl
-import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.CanonicalTensorRepr
+import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.TensorReprFromFrame
 
 /-!
 # Chart-bilinear divergence-form data for a non-smooth tensor chart component

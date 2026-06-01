@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.A3IntrinsicHeadline
+import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.PerChartGradientL2Headline
 import DifferentialGeometry.Analysis.Spectral.Tensor.TensorChartComponentSobolevBound
 
 /-!

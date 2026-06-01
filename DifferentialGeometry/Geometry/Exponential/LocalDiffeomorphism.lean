@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Exponential.MfderivAtZero
+import DifferentialGeometry.Geometry.Exponential.MfderivZero
 import Mathlib.Geometry.Manifold.LocalDiffeomorph
 import Mathlib.Analysis.Calculus.InverseFunctionTheorem.ContDiff
 import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace

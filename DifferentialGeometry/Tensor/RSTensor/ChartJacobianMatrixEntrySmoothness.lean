@@ -1,4 +1,4 @@
-import DifferentialGeometry.Tensor.RSTensor.ChartJacobianSmooth
+import DifferentialGeometry.Tensor.RSTensor.ChartJacobianClmSmoothness
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Geometry.Manifold.MFDeriv.Atlas

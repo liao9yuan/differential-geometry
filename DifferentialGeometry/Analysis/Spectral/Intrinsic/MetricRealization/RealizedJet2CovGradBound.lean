@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizedGramDiff
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChristoffelPerturbation
-import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmRankReduction
+import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmRankReduced
 
 /-!
 # The chart `2`-jet seminorm of two realized metrics, bounded by the iterated covariant

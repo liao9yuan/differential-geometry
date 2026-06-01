@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentSobolevBoundFromH1
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentSobolevBoundDerivBridge
-import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.PartialL2BoundFromH1Final
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.PartialL2BoundFromH1
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChosenWeakPartialFderivBridge
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceReverse
 import DifferentialGeometry.Analysis.Sobolev.Chart.AtlasIndependence

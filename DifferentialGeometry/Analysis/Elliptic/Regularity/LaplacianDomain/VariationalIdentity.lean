@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.PulledIntegralContinuity
-import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.VariationalLimitGeneral
+import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.VariationalLimitAnyTest
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.VariationalLimit
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.LeibnizCompensatedFh
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.CLM

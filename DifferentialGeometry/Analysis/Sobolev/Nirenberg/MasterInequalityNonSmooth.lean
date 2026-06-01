@@ -1,8 +1,8 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossBoundsNonSmooth
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossBoundsNonSmooth_Cross2
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossBoundsNonSmooth_Cross3
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossBoundsNonSmooth_CTerm
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossBoundsNonSmooth_FTerm
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossBoundsNonSmoothCross2
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossBoundsNonSmoothCross3
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossBoundsNonSmoothCTerm
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossBoundsNonSmoothFTerm
 
 /-!
 # Non-smooth analogue of `nirenberg_master_inequality_after_young`

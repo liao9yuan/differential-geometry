@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1Compl_H1_0
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartHk.H2NonSmooth
 import DifferentialGeometry.Analysis.Elliptic.MetricExtension
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossBoundsNonSmooth_Master
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.MasterInequalityNonSmooth
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.StandardNirenbergTest
 import DifferentialGeometry.Analysis.Sobolev.Tools.DiffQuotFKNonSmooth
 

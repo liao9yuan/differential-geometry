@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.EigenvalueTailSummableUncond
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.EigenvalueTailSummableFromCounting
 
 /-!
 # The Weyl-counting reduction of the spectral smooth-representative gate

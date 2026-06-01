@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.SmoothMul
-import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.VariationalLimitGeneral
+import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.VariationalLimitAnyTest
 import Mathlib.Analysis.Normed.Operator.Extend
 
 /-!

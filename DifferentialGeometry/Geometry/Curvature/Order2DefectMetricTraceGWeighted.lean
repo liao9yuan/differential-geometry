@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Curvature.Order2DefectStep2PT_Direct
+import DifferentialGeometry.Geometry.Curvature.Order2DefectPartialTraceCommutation
 
 /-!
 # The partial metric-trace covariant-derivative commutation (final, `g`-weighted route)

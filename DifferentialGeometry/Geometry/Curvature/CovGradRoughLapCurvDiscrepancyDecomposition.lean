@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLapCurvRicciRoute
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLapCurvSlot0Matching
 
 /-!
 # The corrected curried curvature-defect identity

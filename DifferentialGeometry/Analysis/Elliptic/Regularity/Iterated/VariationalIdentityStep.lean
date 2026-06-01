@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.VariationalIdentityStepScaffold
+import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.VariationalIdentityStepConstructor
 
 /-!
 # Polymorphic inductive step of the iterated chart-bilinear identity

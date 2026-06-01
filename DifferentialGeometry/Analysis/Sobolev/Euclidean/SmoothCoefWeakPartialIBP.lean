@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.Init
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Setup
 
 /-!
 # Integration by parts against a smooth coefficient

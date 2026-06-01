@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Bochner.PolarisedLpSmooth
-import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.LaplacianFinal
+import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.LaplacianVariationalIdentity
 
 /-!
 # Lp-class lift of the polarised Bochner-Weitzenböck identity (smooth case)

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLapCurvBoundCorrect
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLapCurvDiscrepancyDecomposition
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLapCurvPointwiseBound
 import DifferentialGeometry.Geometry.Curvature.SlotSplitParsevalBridge
 

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLapCommutatorClose3
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLapCommutatorDefect
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLapCurvL2Bound
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLapCurvPointwiseBound
 import DifferentialGeometry.Geometry.Curvature.Tensor3rdCurvFiberNormBound

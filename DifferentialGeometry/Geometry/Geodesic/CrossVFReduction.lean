@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Geodesic.Equation
-import DifferentialGeometry.Geometry.Geodesic.GeodesicEquationBridge
+import DifferentialGeometry.Geometry.Geodesic.GeodesicEquationFromIntegralCurve
 import DifferentialGeometry.Geometry.Geodesic.Uniqueness
 import DifferentialGeometry.Geometry.Geodesic.ProjDerivative
 import DifferentialGeometry.Geometry.Geodesic.ChartTransition

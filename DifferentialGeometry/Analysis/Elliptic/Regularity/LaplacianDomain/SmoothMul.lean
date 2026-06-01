@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.LeibnizCompensatedFh
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.LaplacianDomain
-import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.VariationalLimitGeneral
+import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.VariationalLimitAnyTest
 import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothScalar.PreH1
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PerChart
 

@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.NirenbergInterior
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BootstrapChartHm
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BootstrapChartHmStrong
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BootstrapChartHmCanonical
+import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BootstrapChartHmMonotone
+import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BootstrapChartHmDomainPow
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.H2RegularityStep
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PowH2kBridge
 

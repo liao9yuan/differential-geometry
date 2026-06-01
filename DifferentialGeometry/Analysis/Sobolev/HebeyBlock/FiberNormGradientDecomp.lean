@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.GradNormChartBoundPouWeighted
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.TensorRSChartFiberToModelOpNorm
-import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.G1G3BridgeIntrinsic
+import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChristoffelSlotCorrectionFiberNormBridge
 
 /-!
 # Pointwise gradient bound with naked fiber-norm atoms

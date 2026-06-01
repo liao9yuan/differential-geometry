@@ -3,7 +3,7 @@ import DifferentialGeometry.Geometry.Exponential.ChartPushVFEq
 import DifferentialGeometry.Geometry.Exponential.Definition
 import DifferentialGeometry.Geometry.Exponential.SmoothnessClose
 import DifferentialGeometry.Geometry.Exponential.UniformUniqueness
-import DifferentialGeometry.Geometry.Geodesic.GeodesicEquationBridge
+import DifferentialGeometry.Geometry.Geodesic.GeodesicEquationFromIntegralCurve
 import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
 
 set_option linter.unusedSectionVars false

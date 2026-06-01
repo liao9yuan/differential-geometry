@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Chart.TransitionPipeline
-import DifferentialGeometry.Analysis.Sobolev.Chart.CompletenessAux
+import DifferentialGeometry.Analysis.Sobolev.Chart.CompletenessLp
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedCompBound
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
 import DifferentialGeometry.Analysis.Integration.Measure.Glue

@@ -2,8 +2,8 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.JumpChartHm
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.MemWkpFour
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.H2Regularity
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.H2RegularityStep
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BootstrapChartHmCanonical
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BootstrapChartHmFinal
+import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BootstrapChartHmDomainPow
+import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BootstrapChartHmPolymorphic
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PowH2kBridge
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.LaplacianDomain
 

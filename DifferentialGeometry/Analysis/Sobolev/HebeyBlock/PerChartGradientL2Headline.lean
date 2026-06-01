@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.G1FiberNormDecomp
+import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.FiberNormGradientDecomp
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.IntrinsicCovAtomL2Fiber
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.IntrinsicSlotOpNormRiem
 import DifferentialGeometry.Analysis.Spectral.Tensor.TensorComponentGradientEpNormPerAlpha

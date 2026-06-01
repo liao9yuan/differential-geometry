@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionDischargeIBP
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionDischargeGradTendsto
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionDischargeFinal
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionIdentityTrivialReductions
 
 /-!
 # Final unconditional discharge of the chart-bilinear substitution identity
