@@ -40,7 +40,6 @@ namespace DifferentialGeometry.Integral.Connection
 
 open DifferentialGeometry.Tensor
 open Tensor0SBundle
-open DifferentialGeometry.Geometry
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]

@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorSmooth
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorCovGradLeibniz
-import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # The chart-`β` component of the per-chart smooth eigenvector section

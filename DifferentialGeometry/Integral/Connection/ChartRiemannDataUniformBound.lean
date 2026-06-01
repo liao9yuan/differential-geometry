@@ -56,7 +56,6 @@ namespace DifferentialGeometry
 namespace Integral
 namespace Connection
 
-open DifferentialGeometry.Geometry
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.Chart

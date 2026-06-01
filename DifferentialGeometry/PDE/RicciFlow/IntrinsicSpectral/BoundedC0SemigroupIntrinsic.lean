@@ -48,7 +48,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Geometry
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
 /-- The intrinsic tensor heat semigroup `e^{t Δ_∇}` on `TensorL2 r s g`

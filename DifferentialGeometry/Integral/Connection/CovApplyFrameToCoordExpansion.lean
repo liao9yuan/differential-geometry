@@ -68,7 +68,6 @@ namespace Connection
 
 open DifferentialGeometry.Tensor
 open Tensor0SBundle
-open DifferentialGeometry.Geometry
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 

@@ -1,6 +1,5 @@
 import DifferentialGeometry.Integral.Connection.ChartTensorRSCovariantDerivative
 import DifferentialGeometry.Tensor.RSTensor.TensorRSBundleLocalityIdentities
-import DifferentialGeometry.Geometry.LocalChartConsistency
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Topology.VectorBundle.Hom
 import Mathlib.Topology.Order.Compact
@@ -46,7 +45,6 @@ namespace Connection
 
 open DifferentialGeometry.Tensor
 open Tensor0SBundle
-open DifferentialGeometry.Geometry
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]

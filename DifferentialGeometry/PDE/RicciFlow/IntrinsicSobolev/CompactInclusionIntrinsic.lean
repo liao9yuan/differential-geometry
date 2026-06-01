@@ -46,7 +46,6 @@ namespace IntrinsicSobolev
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
-open DifferentialGeometry.Geometry
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 

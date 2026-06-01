@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorDifferentiatedRHS
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorChartRHSEpNorm
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.PouCutoffComponentBridge
-import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # Off-support vanishing of the eigenvector partition-of-unity chart component

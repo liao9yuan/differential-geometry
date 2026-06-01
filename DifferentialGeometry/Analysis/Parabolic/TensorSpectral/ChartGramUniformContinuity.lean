@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.InnerLowerBound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.GramInvUniformEigenvalueLowerBound
-import DifferentialGeometry.Geometry.LocalChartConsistency
 import DifferentialGeometry.Geometry.Gradient
 import DifferentialGeometry.Integral.Measure.Invariance
 import Mathlib.Topology.Order.Compact
@@ -62,7 +61,6 @@ namespace TensorSpectral
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Geometry
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [FiniteDimensional ℝ E] [InnerProductSpace ℝ E]

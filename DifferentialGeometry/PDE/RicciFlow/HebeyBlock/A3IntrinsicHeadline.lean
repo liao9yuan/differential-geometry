@@ -60,7 +60,6 @@ namespace PDE
 namespace RicciFlow
 namespace HebeyBlock
 
-open DifferentialGeometry.Geometry
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection

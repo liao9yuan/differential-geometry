@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorChartTestDecoupling
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorChartLowerOrderLimits
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorCutoffChartPartialL2
-import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # The cross-right divergence-form `n → ∞` `L²`-limit

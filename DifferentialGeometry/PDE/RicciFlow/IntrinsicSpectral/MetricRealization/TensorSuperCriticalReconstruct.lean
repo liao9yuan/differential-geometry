@@ -12,7 +12,6 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.Cha
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorCovGradLeibniz
 import DifferentialGeometry.Analysis.Sobolev.Chart.TransitionQMP
 import DifferentialGeometry.Analysis.Sobolev.Chart.TransitionPipeline
-import DifferentialGeometry.Geometry.LocalChartConsistency
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 

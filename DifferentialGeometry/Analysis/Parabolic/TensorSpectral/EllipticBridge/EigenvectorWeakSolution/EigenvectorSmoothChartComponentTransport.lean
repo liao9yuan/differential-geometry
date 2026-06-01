@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.Eig
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorSmoothChartComponentTerm
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.ChartTransitionTransportCLM
 import DifferentialGeometry.Analysis.Sobolev.Chart.TransitionQMP
-import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # Reconciliation of a single transport term of the smooth eigenvector section

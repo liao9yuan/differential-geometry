@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.Eig
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.TensorNonSmoothDiffQuot
 import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartBilinear.UniformDiffQuotBoundCanonical
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
-import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # Interior `H²`/`W^{2,2}_loc` regularity of the eigenvector chart component

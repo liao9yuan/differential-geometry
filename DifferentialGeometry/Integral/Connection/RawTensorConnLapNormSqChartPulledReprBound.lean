@@ -11,7 +11,6 @@ import DifferentialGeometry.Integral.Connection.TensorRSChartReprNormBound
 import DifferentialGeometry.Integral.Connection.IntrinsicPieceFderivBound
 import DifferentialGeometry.Integral.Connection.LeviCivitaChartLocal
 import DifferentialGeometry.Integral.Connection.TensorConnLaplacian
-import DifferentialGeometry.Geometry.LocalChartConsistency
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.Components
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.CovDerivIntrinsicComponent
 import DifferentialGeometry.Integral.L2.SmoothSections.Defs
@@ -56,7 +55,6 @@ namespace Connection
 
 open DifferentialGeometry.Tensor
 open Tensor0SBundle
-open DifferentialGeometry.Geometry
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral

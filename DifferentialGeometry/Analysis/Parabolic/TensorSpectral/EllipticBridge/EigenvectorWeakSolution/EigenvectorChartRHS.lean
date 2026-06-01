@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.Eig
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorChartWeightedMemLp
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorChartTestDecoupling
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorChartCrossRightDiv
-import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # The chart right-hand side of the eigenvector weak-solution assembly

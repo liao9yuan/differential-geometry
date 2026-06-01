@@ -47,7 +47,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Geometry
 open DifferentialGeometry.Tensor
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
 

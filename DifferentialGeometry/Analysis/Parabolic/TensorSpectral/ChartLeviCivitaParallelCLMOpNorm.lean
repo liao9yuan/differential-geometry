@@ -44,7 +44,6 @@ namespace TensorSpectral
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
-open DifferentialGeometry.Geometry
 open DifferentialGeometry.Tensor
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
 

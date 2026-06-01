@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.WeakSolutionGlobal
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorChartPartialL2
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.PouComponentBridge
-import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # The `n → ∞` `L²`-limits of the three lower-order coefficient terms

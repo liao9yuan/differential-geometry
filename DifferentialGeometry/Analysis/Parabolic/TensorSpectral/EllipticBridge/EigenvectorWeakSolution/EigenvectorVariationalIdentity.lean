@@ -14,7 +14,6 @@ import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.WeakSolutionDiri
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.BootstrapSource
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.RotatedTestSection
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CovariantLeibniz
-import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # The eigenvector chart variational identity and the chart-bilinear data

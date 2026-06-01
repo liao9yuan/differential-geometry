@@ -1,5 +1,4 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorChartLowerOrderLimits
-import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # The `n → ∞` `L²`-limit of the covariant-gradient Christoffel correction term

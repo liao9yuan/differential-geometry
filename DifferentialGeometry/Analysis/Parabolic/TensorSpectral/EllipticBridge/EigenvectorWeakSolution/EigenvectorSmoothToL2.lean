@@ -1,5 +1,4 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorSmoothChartComponent
-import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # The smooth representative *is* the connection-Laplacian resolvent eigenvector

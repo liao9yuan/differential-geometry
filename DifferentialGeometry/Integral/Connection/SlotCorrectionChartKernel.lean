@@ -80,7 +80,6 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Tensor
 open Tensor0SBundle
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
-open DifferentialGeometry.Geometry
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]

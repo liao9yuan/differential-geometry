@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorSmoothToL2
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorArbitraryKRegularity
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartLocality
-import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # The connection-Laplacian eigenvector lies in the tensor Sobolev space `W^{2k, 2}`

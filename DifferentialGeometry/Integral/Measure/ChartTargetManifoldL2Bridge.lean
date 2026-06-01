@@ -2,7 +2,6 @@ import DifferentialGeometry.Integral.Measure.TensorChartPulled
 import DifferentialGeometry.Integral.Measure.PouDensityChartBound
 import DifferentialGeometry.Integral.Measure.Family
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
-import DifferentialGeometry.Geometry.LocalChartConsistency
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
 /-!

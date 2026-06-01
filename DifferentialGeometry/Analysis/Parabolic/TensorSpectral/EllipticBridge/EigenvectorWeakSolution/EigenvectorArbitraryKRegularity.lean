@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.Eig
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorIteratedNirenbergWeakened
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorNonSmoothRegularity
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSupportPromotion
-import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # Arbitrary-order interior `W^{k,2}` regularity of the eigenvector chart component

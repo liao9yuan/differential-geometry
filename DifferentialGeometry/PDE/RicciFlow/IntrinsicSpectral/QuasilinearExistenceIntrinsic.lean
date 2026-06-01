@@ -43,7 +43,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Geometry
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
 /-! ## Short-time existence for the quasi-linear tensor heat equation

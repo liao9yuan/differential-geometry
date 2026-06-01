@@ -1,5 +1,4 @@
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
-import DifferentialGeometry.Geometry.LocalChartConsistency
 import DifferentialGeometry.Integral.Measure.Invariance
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorBundle.Basic
@@ -73,7 +72,6 @@ namespace TensorSpectral
 
 open DifferentialGeometry.Tensor
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
-open DifferentialGeometry.Geometry
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

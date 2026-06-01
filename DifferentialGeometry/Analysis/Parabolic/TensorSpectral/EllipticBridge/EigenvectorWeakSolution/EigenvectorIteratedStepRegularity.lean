@@ -1,5 +1,4 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorDifferentiatedRHSWkp
-import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # Polymorphic-in-`K` `W^{k,2}` regularity of the per-step effective source

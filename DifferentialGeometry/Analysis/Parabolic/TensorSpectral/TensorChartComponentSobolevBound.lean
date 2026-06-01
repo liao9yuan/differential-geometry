@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.Componen
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ComponentWkpNormBoundFromH1
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.H1Compl
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TensorComponentGradientEpNormPerAlpha
-import DifferentialGeometry.Geometry.LocalChartConsistency
 import Mathlib.Topology.Compactness.LocallyFinite
 
 /-!
@@ -45,7 +44,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.Chart
-open DifferentialGeometry.Geometry
 
 /-! ## `α`-uniform `L²` bound for `tensorChartComponentScalar` -/
 

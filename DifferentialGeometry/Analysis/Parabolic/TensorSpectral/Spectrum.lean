@@ -67,7 +67,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Geometry
 
 /-! ## File-local Borel-space instances on `E` and `M` -/
 

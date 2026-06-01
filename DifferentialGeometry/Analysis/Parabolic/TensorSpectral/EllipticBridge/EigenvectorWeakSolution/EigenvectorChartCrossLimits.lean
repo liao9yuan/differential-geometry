@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.Eig
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.AbstractChartPullCutoff
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CovGradCrossBridge
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CovGradL2
-import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # The covariant-Leibniz cross terms of an eigenvector approximant as `n → ∞`

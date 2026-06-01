@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.Pou
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.TensorChartTransition
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.TensorChartTransitionTransport
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.ChartTransitionTransportCLM
-import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # A smooth representative of a connection-Laplacian resolvent eigenvector

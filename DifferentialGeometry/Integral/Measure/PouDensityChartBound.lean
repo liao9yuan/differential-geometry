@@ -1,7 +1,6 @@
 import DifferentialGeometry.Integral.Measure.ChartDensity
 import DifferentialGeometry.Integral.Measure.Glue
 import DifferentialGeometry.Integral.Measure.Invariance
-import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # Uniform bound for the chart-`α` partition-of-unity-weighted chart density

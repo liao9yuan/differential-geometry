@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.InnerB
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.LowerAllUpperIndices
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.JinvContinuity
 import DifferentialGeometry.Analysis.Laplacian.MetricBounds
-import DifferentialGeometry.Geometry.LocalChartConsistency
 import DifferentialGeometry.Integral.Measure.ChartDensity
 import DifferentialGeometry.Integral.Measure.Invariance
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
@@ -68,7 +67,6 @@ namespace TensorSpectral
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Tensor
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
-open DifferentialGeometry.Geometry
 open DifferentialGeometry.Analysis.Laplacian
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

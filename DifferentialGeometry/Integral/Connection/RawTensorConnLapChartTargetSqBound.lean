@@ -1,7 +1,6 @@
 import DifferentialGeometry.Integral.Connection.RawTensorConnLapNormSqChartPulledReprBound
 import DifferentialGeometry.Integral.Measure.TensorChartPulled
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.GoodSetMeasure
-import DifferentialGeometry.Geometry.LocalChartConsistency
 import DifferentialGeometry.Integral.L2.SmoothSections.Defs
 
 /-!
@@ -64,7 +63,6 @@ namespace Connection
 
 open DifferentialGeometry.Tensor
 open Tensor0SBundle
-open DifferentialGeometry.Geometry
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral

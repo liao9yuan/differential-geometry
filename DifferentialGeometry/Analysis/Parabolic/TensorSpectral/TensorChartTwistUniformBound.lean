@@ -56,7 +56,6 @@ namespace TensorSpectral
 open DifferentialGeometry.Tensor
 open Tensor0SBundle
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
-open DifferentialGeometry.Geometry
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [FiniteDimensional ℝ E] [InnerProductSpace ℝ E]

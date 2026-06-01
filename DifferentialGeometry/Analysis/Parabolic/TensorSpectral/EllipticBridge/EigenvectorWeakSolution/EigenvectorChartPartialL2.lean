@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorChartComponentL2
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.ChartPartialUniformBound
-import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # The chart partials of an eigenvector chart component as an `L²`-limit of smooth ones

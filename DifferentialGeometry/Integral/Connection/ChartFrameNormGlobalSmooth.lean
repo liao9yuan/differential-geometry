@@ -1,6 +1,5 @@
 import DifferentialGeometry.Integral.Connection.RicciIdentitySmoothFrame
 import DifferentialGeometry.Integral.Connection.LeviCivitaChartSmooth
-import DifferentialGeometry.Geometry.LocalChartConsistency
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.GoodSetMeasure
 import DifferentialGeometry.Integral.Measure.Glue
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.InnerLowerBound
@@ -52,7 +51,6 @@ namespace Integral
 namespace Connection
 
 open DifferentialGeometry.Tensor
-open DifferentialGeometry.Geometry
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 

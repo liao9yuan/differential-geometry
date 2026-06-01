@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorChartPartialL2
 import DifferentialGeometry.Analysis.Sobolev.Tools.WeakPartialLimit
-import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # The eigenvector chart partial is a genuine weak chart partial

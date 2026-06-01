@@ -46,7 +46,6 @@ namespace Integral
 namespace Connection
 
 open DifferentialGeometry.Tensor
-open DifferentialGeometry.Geometry
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 

@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorArbitraryKRegularity
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorIteratedData
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevEmbedding
-import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # A compactly-supported smooth representative of the eigenvector chart component

@@ -52,7 +52,6 @@ namespace Connection
 open DifferentialGeometry.Tensor
 open Tensor0SBundle
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
-open DifferentialGeometry.Geometry
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

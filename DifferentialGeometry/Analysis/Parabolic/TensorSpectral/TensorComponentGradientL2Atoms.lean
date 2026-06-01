@@ -9,7 +9,6 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SlotChartSourceCon
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SlotUniformBound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ChristoffelBound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TrivProj.Bridge
-import DifferentialGeometry.Geometry.LocalChartConsistency
 import DifferentialGeometry.Integral.Connection.ChartTensorRSCovariantDerivativeAgreement
 import DifferentialGeometry.Integral.Connection.SlotCorrectionChartKernel
 import DifferentialGeometry.Integral.Connection.TensorRSChartFiberFromModelOpNormUnconditional
@@ -59,7 +58,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Connection
-open DifferentialGeometry.Geometry
 
 /-! ## Chart-source continuity companion to the covariant-derivative atom -/
 

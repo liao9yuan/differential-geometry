@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Tensor.Defs
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.POUFDerivBound
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.MultiplyQuantK
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
-import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # Raw chart-component Sobolev norm for `(r, s)`-tensor sections

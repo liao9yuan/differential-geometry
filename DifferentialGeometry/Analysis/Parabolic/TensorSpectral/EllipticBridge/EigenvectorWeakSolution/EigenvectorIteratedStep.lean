@@ -1,5 +1,4 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorIteratedScaffold
-import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # The iterated divergence-form step for the eigenvector chart component

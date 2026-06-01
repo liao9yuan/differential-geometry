@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.Eig
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorChartWeightedMemLp
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.CutoffChartComponentMemWkp
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.BootstrapSource
-import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # Iterated Sobolev regularity of the covariant-gradient partition-of-unity chart

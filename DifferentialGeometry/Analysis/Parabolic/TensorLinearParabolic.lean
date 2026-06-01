@@ -37,7 +37,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
-open DifferentialGeometry.Geometry
 
 /-! ## File-local Borel-space instances on `E` and `M` -/
 

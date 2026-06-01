@@ -82,7 +82,6 @@ namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-open DifferentialGeometry.Geometry
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
