@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.RiemannianFiberNormSqLeChartAlphaSummandSum
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSqLeChartAlphaSummandSum
 import DifferentialGeometry.Integration.Measure.Family
 import Mathlib.Topology.Order.Compact
 

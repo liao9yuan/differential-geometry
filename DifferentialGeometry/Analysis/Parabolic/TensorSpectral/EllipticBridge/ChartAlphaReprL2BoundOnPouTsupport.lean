@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.RawTensorConnLapL2WtwokTwoBound
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawTensorConnLapL2WtwokTwoBound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.DetOpNormBound
 import DifferentialGeometry.Analysis.Sobolev.Tensor.Defs
 

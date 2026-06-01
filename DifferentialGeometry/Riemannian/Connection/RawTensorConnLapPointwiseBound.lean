@@ -1,6 +1,6 @@
 import DifferentialGeometry.Riemannian.Connection.TensorConnLaplacianChart
-import DifferentialGeometry.Riemannian.Connection.ChartTensorRSCovariantDerivativeOpNorm
-import DifferentialGeometry.Riemannian.Connection.RawTensorConnLap2ndApplicationOpNorm
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartTensorRSCovariantDerivativeOpNorm
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawTensorConnLap2ndApplicationOpNorm
 
 /-!
 # Pointwise op-norm bound for `rawTensorConnLap`

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Riemannian.Connection.RawConnLapRiemannianFiberNormSqLeChartDataT0Uniform
-import DifferentialGeometry.Riemannian.Connection.IteratedFDerivChartPushedRawBridge
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.IteratedFDerivChartPushedRawBridge
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDerivChartFormLowerOrder
 
 /-!

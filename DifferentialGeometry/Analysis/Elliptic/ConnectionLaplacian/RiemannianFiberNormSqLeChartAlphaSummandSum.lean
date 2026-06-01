@@ -1,5 +1,5 @@
 import DifferentialGeometry.Riemannian.Connection.RiemannianFiberNormSq
-import DifferentialGeometry.Riemannian.Connection.FiberNormSqSummandChartAlphaBound
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.FiberNormSqSummandChartAlphaBound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.GramInvUniformEigenvalueLowerBound
 
 /-!

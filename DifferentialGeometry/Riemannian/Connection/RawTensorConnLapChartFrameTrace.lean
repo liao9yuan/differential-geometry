@@ -1,5 +1,5 @@
 import DifferentialGeometry.Riemannian.Connection.TensorConnLaplacian
-import DifferentialGeometry.Riemannian.Connection.ChartFrameNormGlobalSmooth
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFrameNormGlobalSmooth
 import DifferentialGeometry.Integration.L2.SmoothSections.Defs
 
 /-!

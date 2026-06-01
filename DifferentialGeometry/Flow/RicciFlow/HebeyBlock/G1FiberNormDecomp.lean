@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.GradNormChartBoundPouWeighted
-import DifferentialGeometry.Riemannian.Connection.TensorRSChartFiberToModelOpNormUnconditional
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.TensorRSChartFiberToModelOpNormUnconditional
 import DifferentialGeometry.Flow.RicciFlow.HebeyBlock.G1G3BridgeIntrinsic
 
 /-!

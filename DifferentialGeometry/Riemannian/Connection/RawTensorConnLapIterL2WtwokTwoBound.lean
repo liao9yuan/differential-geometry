@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.RawTensorConnLapL2WtwokTwoBound
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawTensorConnLapL2WtwokTwoBound
 
 /-!
 # Iterated raw tensor connection Laplacian and its L² bound at the first step

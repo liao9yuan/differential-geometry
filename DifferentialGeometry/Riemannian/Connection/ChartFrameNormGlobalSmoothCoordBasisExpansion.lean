@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.ChartFrameNormGlobalSmooth
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFrameNormGlobalSmooth
 import DifferentialGeometry.Riemannian.Operator.Gradient
 
 /-!

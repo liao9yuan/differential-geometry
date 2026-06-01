@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.TensorCovGradL2InnerDirichletBridge
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.TensorCovGradL2InnerDirichletBridge
 import DifferentialGeometry.Riemannian.Connection.TensorLoweringParallel
 
 /-!

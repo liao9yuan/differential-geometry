@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.RawConnLapChartCoeffsUniformBound
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapChartCoeffsUniformBound
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartPrimitives
 import DifferentialGeometry.Riemannian.Curvature.Riemann
 

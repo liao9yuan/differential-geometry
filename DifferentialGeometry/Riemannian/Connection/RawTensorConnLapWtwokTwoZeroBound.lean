@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.RawTensorConnLapWtwokTwoZeroSquaredAggregate
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawTensorConnLapWtwokTwoZeroSquaredAggregate
 
 /-!
 # Linear chart-Sobolev-zero bound on the raw tensor connection Laplacian

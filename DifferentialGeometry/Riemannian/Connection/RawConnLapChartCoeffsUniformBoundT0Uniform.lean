@@ -1,5 +1,5 @@
-import DifferentialGeometry.Riemannian.Connection.RawConnLapChartCoordFormulaT0Linear
-import DifferentialGeometry.Riemannian.Connection.RawConnLapChartCoeffsUniformBound
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapChartCoordFormulaT0Linear
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapChartCoeffsUniformBound
 import DifferentialGeometry.Riemannian.Connection.RawConnLapRiemannianFiberNormSqLeChartData
 
 /-!

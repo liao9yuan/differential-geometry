@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.TensorRSIntrinsicChartCLMOpNorm
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.TensorRSIntrinsicChartCLMOpNorm
 import DifferentialGeometry.Riemannian.Connection.SlotChristoffelCorrectionOpNorm
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartLeviCivitaParallelCLMOpNorm
 

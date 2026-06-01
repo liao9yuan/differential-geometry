@@ -1,10 +1,10 @@
 import DifferentialGeometry.Riemannian.Connection.ChartPulledCovApplyReprFderivBound
 import DifferentialGeometry.Riemannian.Connection.ChartPulledCovApplyExplicitFormula
-import DifferentialGeometry.Riemannian.Connection.ChartFrameNormGlobalSmooth
-import DifferentialGeometry.Riemannian.Connection.SlotCorrectionChartKernel
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFrameNormGlobalSmooth
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.SlotCorrectionChartKernel
 import DifferentialGeometry.Riemannian.Connection.SlotCorrectionChartFderivBound
 import DifferentialGeometry.Riemannian.Connection.TensorRSChartReprNormBound
-import DifferentialGeometry.Riemannian.Connection.ChartPulledRawTensorReprFactorization
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartPulledRawTensorReprFactorization
 
 /-!
 # Pointwise norm bound on the chart-pulled value of the nested chart-frame

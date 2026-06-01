@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.SlotCorrectionChartCompFormula
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.SlotCorrectionChartCompFormula
 import DifferentialGeometry.Riemannian.Connection.LeviCivitaChartSmooth
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartLeviCivitaParallelCLMOpNorm
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SlotUniformBound

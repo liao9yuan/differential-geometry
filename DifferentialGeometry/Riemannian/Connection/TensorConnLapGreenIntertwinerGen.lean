@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.TensorConnLapGreenDivergenceIdentityGeneral
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.TensorConnLapGreenDivergenceIdentityGeneral
 
 noncomputable section
 

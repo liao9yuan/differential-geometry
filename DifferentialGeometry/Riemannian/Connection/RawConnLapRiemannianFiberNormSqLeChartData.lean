@@ -1,5 +1,5 @@
 import DifferentialGeometry.Riemannian.Connection.RiemannianFiberNormSqLeRawComponents
-import DifferentialGeometry.Riemannian.Connection.RawConnLapChartCoeffsUniformBound
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapChartCoeffsUniformBound
 
 /-!
 # Pointwise bound on `riemannianFiberNormSq` of the raw tensor connection

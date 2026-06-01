@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.RawTensorConnLapIntrinsicL2LePouSobolevNorm
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawTensorConnLapIntrinsicL2LePouSobolevNorm
 import DifferentialGeometry.Riemannian.Connection.RawTensorConnLapIterL2WtwokTwoBound
 
 /-!

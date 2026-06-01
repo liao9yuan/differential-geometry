@@ -1,5 +1,5 @@
-import DifferentialGeometry.Riemannian.Connection.RiemannianFiberNormSqLeChartAlphaSummandSum
-import DifferentialGeometry.Riemannian.Connection.FiberNormSqSummandChartAlphaBound
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSqLeChartAlphaSummandSum
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.FiberNormSqSummandChartAlphaBound
 
 /-!
 # Bounding `riemannianFiberNormSq` by raw chart-`α` components on POU tsupport

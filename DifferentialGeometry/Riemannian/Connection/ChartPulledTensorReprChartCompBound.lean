@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.ChartPulledCovDerivChartCompBound
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartPulledCovDerivChartCompBound
 
 /-!
 # Pointwise bound on the chart-trivialised representation of a tensor section

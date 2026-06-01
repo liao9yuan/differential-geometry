@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.ChartPulledCovDerivChartCompBound
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartPulledCovDerivChartCompBound
 import DifferentialGeometry.Riemannian.Connection.LeviCivitaChartSmooth
 
 /-!

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.TensorConnLapGreenDivergenceIdentity
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.TensorConnLapGreenDivergenceIdentity
 import DifferentialGeometry.Integration.L2.SmoothSections.Integrability
 import DifferentialGeometry.Integration.L2.Pairing.CauchySchwarz
 

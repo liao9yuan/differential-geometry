@@ -1,4 +1,4 @@
-import DifferentialGeometry.Riemannian.Connection.SlotCorrectionChartKernel
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.SlotCorrectionChartKernel
 import DifferentialGeometry.Riemannian.Connection.IntrinsicPieceFderivBound
 
 /-!
