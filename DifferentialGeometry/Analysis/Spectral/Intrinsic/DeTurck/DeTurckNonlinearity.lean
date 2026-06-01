@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.Sobolev.IntrinsicFlow.HilbertSpace
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHS
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHSSection
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability
-import DifferentialGeometry.Geometry.Connection.SmoothBilinearSectionBddAbove
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTrivialisationOpNorm.SmoothBilinearSectionBddAbove
 
 noncomputable section
 

@@ -3,7 +3,7 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.CovGradRoughLapCu
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.CovGradRoughLapCurvPointwiseBound
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Tensor3rdCurvFiberNormBound
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.RiemannianFiberNormSqRiemannOpHigherRankParseval
-import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSqTensorInnerBridge
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
 
 /-!
 # Frame-component scaffolding for the order-`2` curvature-defect pointwise bound

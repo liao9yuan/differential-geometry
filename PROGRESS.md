@@ -21,6 +21,25 @@ DifferentialGeometry/
 1319 files. Old top-levels gone: Integral, Geometry(old), Coordinates, Realized, Interface, PDE, VectorBundle,
 DifferentialForm, Metric(top), Synthetic, Riemannian, Flow, SpectralBounds.
 
+## DONE — Atom/Concept/Area granularity (R1/R2 concept-folder grouping), all green
+Flat Areas regrouped into Concept sub-folders (Defs/Basic/Aspect pattern; build-safe git-mv + import rewrite):
+- round 1 (commit e871bac4): Geometry/Curvature {Riemann,CurvatureOperator,Bochner,FiberNormParseval,
+  CovGradRoughLap,Order2Defect}; Geometry/Connection {LeviCivita,ChartFrame,TensorNabla,ChartTensorNabla,
+  MetricCompatibility,Laplacian,ParallelTransport}; Analysis/Spectral/Intrinsic {DeTurck,HeatSemigroup,Garding}.
+- round 2+3 (commit 8a7496ff): Geometry/Exponential {Smoothness,ChartFlow}; Analysis/Heat {Smoothing,Semigroup};
+  Analysis/ODE/Flow; Analysis/Elliptic/TensorRegularity {Bootstrap,WeakSolution,CovDeriv}; Analysis/Spectral/Tensor
+  {Spectrum,Variational,UniformChartBounds,NormEstimates,CovGrad}; Analysis/Parabolic {DeTurckRicci,AbstractSemigroup}.
+- CROSS-PILLAR CONSOLIDATION (by reasoning nature): the scattered analytic connection-Laplacian estimate cluster
+  (33 flat in Geometry/Connection + 10 in Geometry/Connection/Laplacian + 1 in Geometry/Curvature) was fixpoint-
+  analyzed (/tmp/_moveA.json) and the 36 purely-analytic files moved → Analysis/Elliptic/ConnectionLaplacian
+  (now 84 files). The 6 files that genuinely-geometric facts depend on (Voss-Weyl divergence, chart-Christoffel
+  Riemann identity, cov-grad naturality) STAY in Geometry as the thin support layer; residual acyclicity violations = 0.
+  Geometry/Connection flat is now just the 4 geometric support files. ConnectionLaplacian (84) then concept-grouped.
+NOTE on a PRE-EXISTING tangle (out of scope): Geometry/Curvature still holds Bochner L²-estimate files
+  (CovGradRoughLapCurvL2Bound, FiberNormParseval/*, Order2Defect/*) that already import Analysis (pre-existing
+  Geometry→Analysis edges, compile green). A future "consolidate the Bochner L²-estimate apparatus" pass could
+  move them; deferred (riskier, needs the same fixpoint treatment).
+
 ## Commit trail (md2, all green)
 f720f9fa docs → d45a68aa W1 → ec22c521 → 9bca9957 → b837d6d0 → aa460779 → bd6eb3ff → e1be3452 (Spectral)
 → 35eec9a9 (Boundary) → 4fbd4f97 (ChartGram split, D1) → f96c4f98 (D1 PointwiseInner+RSTensor down)

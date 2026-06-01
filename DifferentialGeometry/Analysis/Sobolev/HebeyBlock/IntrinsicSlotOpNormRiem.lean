@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChristoffelCorrectionModelNormBound
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.FiberNormRiemannianBridge
-import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.SlotCorrectionChartKernel
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.SlotCorrectionChartKernel
 
 /-!
 # Riemannian-norm uniform op-norm bound for the chart-frame slot corrections

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLapSecondOrderGardingGen
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.CovGradRoughLapCommutatorDefect
-import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSqTensorInnerBridge
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Tensor3rdCurvFiberNormBound
 
 /-!
