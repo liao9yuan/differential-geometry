@@ -6,7 +6,7 @@ Coauthors: Jack McCarthy
 -/
 import DifferentialGeometry.Tensor.Auxiliary.Perm
 import DifferentialGeometry.Tensor.Auxiliary.MultiKroneckerDelta
-import DifferentialGeometry.Tensor.Auxiliary.Basis
+import DifferentialGeometry.Tensor.Auxiliary.PredualBasis
 import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Split
 import DifferentialGeometry.Tensor.Alternating.Congr
 import DifferentialGeometry.Tensor.Alternating.Comp

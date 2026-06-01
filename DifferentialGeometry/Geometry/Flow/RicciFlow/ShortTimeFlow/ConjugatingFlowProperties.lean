@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.FlatVariat
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.BasepointMotion
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.EvalFormChainRule
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.RicciFlowPdeAtZero
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.RicciContinuityInMetricTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Defs
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 

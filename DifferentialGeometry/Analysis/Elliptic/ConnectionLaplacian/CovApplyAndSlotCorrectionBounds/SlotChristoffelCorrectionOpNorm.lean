@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivative
-import DifferentialGeometry.Tensor.RSTensor.FiberMetric.TensorRSSpaceNormBridge
+import DifferentialGeometry.Tensor.RSTensor.FiberMetric.TensorRSSpaceOperatorNorm
 import Mathlib.Analysis.Normed.Module.Multilinear.Basic
 
 /-!

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.WithBoundary.Neumann.FullH1Compl
-import DifferentialGeometry.Analysis.Elliptic.WithBoundary.Neumann.FullSmoothBridge
+import DifferentialGeometry.Analysis.Elliptic.WithBoundary.Neumann.FullSmoothBridgeInteriorSupport
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.BoundaryContribution.GreenFull
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.BoundaryContribution.SurfaceIntegralIdentification
 

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckLinearization
-import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbedding
+import DifferentialGeometry.Analysis.Sobolev.Embedding.TensorSobolevEmbeddingCm
 import DifferentialGeometry.Analysis.Sobolev.IntrinsicFlow.HilbertSpace
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHS
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHSSection

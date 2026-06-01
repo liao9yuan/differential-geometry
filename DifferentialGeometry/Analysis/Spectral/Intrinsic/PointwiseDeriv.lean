@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbedding
+import DifferentialGeometry.Analysis.Sobolev.Embedding.TensorSobolevEmbeddingCm
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionSpace
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1
 import Mathlib.Analysis.Calculus.Deriv.Mul

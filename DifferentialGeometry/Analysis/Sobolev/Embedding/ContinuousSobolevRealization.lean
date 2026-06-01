@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbedding
+import DifferentialGeometry.Analysis.Sobolev.Embedding.TensorSobolevEmbeddingCm
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmOrderDropping
 import DifferentialGeometry.Analysis.Sobolev.IntrinsicFlow.SmoothCcDense
 import Mathlib.Analysis.Normed.Operator.Extend

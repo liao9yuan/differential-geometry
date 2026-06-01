@@ -5,7 +5,7 @@ import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.Multilinear.Curry
 import DifferentialGeometry.Tensor.Multilinear.Tensor
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
-import DifferentialGeometry.Tensor.Auxiliary.Basis
+import DifferentialGeometry.Tensor.Auxiliary.PredualBasis
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Topology.VectorBundle.Basic
 import Mathlib.LinearAlgebra.Trace
