@@ -1,5 +1,5 @@
-import DifferentialGeometry.Synthetic.Realization.SmoothSections
-import DifferentialGeometry.Synthetic.Realization.Connection
+import DifferentialGeometry.Realized.Realization.SmoothSections
+import DifferentialGeometry.Realized.Realization.Connection
 import Mathlib.Geometry.Manifold.VectorBundle.Tensoriality
 
 /-!

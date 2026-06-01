@@ -1,4 +1,4 @@
-import DifferentialGeometry.Synthetic.Realization.Tensor0SBridge
+import DifferentialGeometry.Realized.Realization.Tensor0SBridge
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
 
 /-!
@@ -12,7 +12,7 @@ applied to `(v₁, …, v_s)`, equals `T b (Y b, v₁, …, v_s)`.
 The construction goes through the fiberwise currying isomorphism
 `tensor0S_curry s b : Tensor0SSpace (s + 1) I b ≃L[ℝ] (TangentSpace I b →L[ℝ] Tensor0SSpace s I b)`
 defined in `Tensor/RSTensor/Defs.lean`; equivalently it is `curriedSection T b (Y b)` for
-the bridge-level `curriedSection` of `Synthetic/Realization/Tensor0SBridge.lean`.
+the bridge-level `curriedSection` of `Realized/Realization/Tensor0SBridge.lean`.
 
 ## Main definitions
 

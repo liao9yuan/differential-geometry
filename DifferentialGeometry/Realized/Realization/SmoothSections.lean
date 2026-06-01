@@ -1,4 +1,4 @@
-import DifferentialGeometry.Synthetic.Realization.Embedding
+import DifferentialGeometry.Realized.Realization.Embedding
 import DifferentialGeometry.VectorBundle.Section
 import DifferentialGeometry.VectorBundle.Dual
 import DifferentialGeometry.VectorBundle.Equiv

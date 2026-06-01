@@ -1,4 +1,4 @@
-import DifferentialGeometry.Synthetic.Realization.Embedding
+import DifferentialGeometry.Realized.Realization.Embedding
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 
@@ -6,7 +6,7 @@ import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 # SmoothRicciFlow: Connection from CovariantDerivative
 
 Given a Mathlib `CovariantDerivative I E (TangentSpace I)` on the tangent bundle of `M`,
-this file constructs the Synthetic layer's `conn : V → V → V` and proves its four
+this file constructs the concrete connection `conn : V → V → V` and proves its four
 linearity properties.
 
 ## Main definitions
@@ -24,7 +24,7 @@ linearity properties.
 ## Convention
 
 Mathlib's `CovariantDerivative` has the signature `cov σ x v` corresponding to `(∇_v σ)(x)`.
-The Synthetic layer's `conn X Y` corresponds to `∇_X Y`. So `conn X Y x = cov Y x (X x)`.
+The `conn X Y` notation corresponds to `∇_X Y`. So `conn X Y x = cov Y x (X x)`.
 -/
 
 noncomputable section

@@ -20,7 +20,7 @@ import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 For a smooth Riemannian metric `g` on the tangent bundle of a smooth manifold `M`
 and a smooth tangent section `X`, this file defines the divergence
 `divergence_g g X : M → ℝ` directly via a chart-local formula, independently of
-any abstract Synthetic-layer connection structure.
+any abstract connection structure.
 
 The construction proceeds in two layers:
 

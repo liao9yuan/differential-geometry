@@ -32,24 +32,16 @@ import DifferentialGeometry.Realized.ScalarBochner
 import DifferentialGeometry.Realized.Bochner
 import DifferentialGeometry.Realized.Bianchi
 
--- Synthetic Algebra
-
--- Synthetic Analysis
-
--- Synthetic Geometry
-
--- Synthetic Operators
-
 -- Axiom Interface
 
 -- Realization: Concrete Ricci flow solution analysis
-import DifferentialGeometry.Synthetic.Realization.Basic
-import DifferentialGeometry.Synthetic.Realization.Embedding
-import DifferentialGeometry.Synthetic.Realization.SmoothSections
-import DifferentialGeometry.Synthetic.Realization.Connection
-import DifferentialGeometry.Synthetic.Realization.TensorNabla
-import DifferentialGeometry.Synthetic.Realization.HomNabla
-import DifferentialGeometry.Synthetic.Realization.Tensor0SBridge
+import DifferentialGeometry.Realized.Realization.Basic
+import DifferentialGeometry.Realized.Realization.Embedding
+import DifferentialGeometry.Realized.Realization.SmoothSections
+import DifferentialGeometry.Realized.Realization.Connection
+import DifferentialGeometry.Realized.Realization.TensorNabla
+import DifferentialGeometry.Realized.Realization.HomNabla
+import DifferentialGeometry.Realized.Realization.Tensor0SBridge
 import DifferentialGeometry.Integral.Connection.Tensor0SNabla
 import DifferentialGeometry.Integral.Connection.Tensor0SPartialEval
 import DifferentialGeometry.Integral.Connection.Tensor0SChartChristoffel

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Synthetic.Realization.Basic
+import DifferentialGeometry.Realized.Realization.Basic
 import Mathlib.Geometry.Manifold.MFDeriv.NormedSpace
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Geometry.Manifold.VectorBundle.Hom

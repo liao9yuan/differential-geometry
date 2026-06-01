@@ -1,5 +1,5 @@
-import DifferentialGeometry.Synthetic.Realization.Tensor0SBridge
-import DifferentialGeometry.Synthetic.Realization.HomNabla
+import DifferentialGeometry.Realized.Realization.Tensor0SBridge
+import DifferentialGeometry.Realized.Realization.HomNabla
 
 /-!
 # Bundled covariant derivative on the (0,s) tensor bundle

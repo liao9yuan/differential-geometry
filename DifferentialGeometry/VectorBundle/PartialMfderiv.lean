@@ -6,9 +6,8 @@ import Mathlib.Analysis.Calculus.Deriv.Basic
 /-!
 # Partial derivative along the first factor of a product manifold
 
-Auxiliary lemma for `Synthetic/Realization/TimeDeriv.lean`: the partial derivative
-in the ℝ-factor of a jointly-`C^∞` real-valued function on `ℝ × M` is itself
-jointly `C^∞`.
+Auxiliary lemma on the partial derivative in the ℝ-factor of a jointly-`C^∞`
+real-valued function on `ℝ × M`: it is itself jointly `C^∞`.
 -/
 
 set_option autoImplicit false
