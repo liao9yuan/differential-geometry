@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.FChartResidual.MemW1pResidualFull
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.H2
 import DifferentialGeometry.Analysis.Elliptic.Operator.SmoothBridge
-import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceFull
+import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceForward
 
 /-!
 # Convergence of the smooth-density approximator sequence in `H1Compl g`

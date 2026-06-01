@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.H2Regularity
-import DifferentialGeometry.Analysis.Sobolev.Solutions.H2NonSmoothDirect
+import DifferentialGeometry.Analysis.Sobolev.Solutions.Mollification
 
 /-!
 # Non-smooth weak solutions of uniformly elliptic divergence-form

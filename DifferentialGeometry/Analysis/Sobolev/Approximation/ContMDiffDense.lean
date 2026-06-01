@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseHelpers
+import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseLemmas
 import DifferentialGeometry.Analysis.Sobolev.Tools.StrictStrongSupport
 import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBoundStrictMemWkp
 import DifferentialGeometry.Analysis.Sobolev.Chart.BanachCompleteness.BanachManifold

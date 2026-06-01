@@ -1,0 +1,20 @@
+import DifferentialGeometry.Analysis.Parabolic.AbstractMetricOperatorChartComponent
+import DifferentialGeometry.Analysis.Parabolic.AbstractSemigroup
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization
+import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci
+import DifferentialGeometry.Analysis.Parabolic.LionsMagenes
+import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
+import DifferentialGeometry.Analysis.Parabolic.PrincipalSymbol
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization
+import DifferentialGeometry.Analysis.Parabolic.ShortTime
+import DifferentialGeometry.Analysis.Parabolic.StrictParabolicity
+import DifferentialGeometry.Analysis.Parabolic.TensorHeatDuhamelMildSolution
+import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
+import DifferentialGeometry.Analysis.Parabolic.TimeSobolev
+
+/-!
+# DifferentialGeometry.Analysis.Parabolic
+
+Aggregated headline for `DifferentialGeometry.Analysis.Parabolic`.
+-/

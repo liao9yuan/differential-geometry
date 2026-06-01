@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.H2
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.SmoothTestPairing
 import DifferentialGeometry.Analysis.Sobolev.Tools.WeakPartialLimit
 import Mathlib.Analysis.Normed.Lp.SmoothApprox
 import Mathlib.Analysis.Normed.Operator.Extend

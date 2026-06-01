@@ -1,0 +1,12 @@
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentContinuousRiemannianMetric
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentRiemannian
+import DifferentialGeometry.Geometry.Metric.TensorInner.Tensor0SRiemannian
+import DifferentialGeometry.Geometry.Metric.TensorInner.Tensor0SRiemannianBundle
+import DifferentialGeometry.Geometry.Metric.TensorInner.TensorRSRiemannian
+import DifferentialGeometry.Geometry.Metric.TensorInner.TensorRSRiemannianBundle
+
+/-!
+# DifferentialGeometry.Geometry.Metric.TensorInner
+
+Aggregated headline for `DifferentialGeometry.Geometry.Metric.TensorInner`.
+-/

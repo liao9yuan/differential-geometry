@@ -1,0 +1,15 @@
+import DifferentialGeometry.Geometry.Comparison.BonnetMyers
+import DifferentialGeometry.Geometry.Comparison.GeodesicConvexity
+import DifferentialGeometry.Geometry.Comparison.HopfRinow
+import DifferentialGeometry.Geometry.Comparison.InjectivityRadius
+import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
+import DifferentialGeometry.Geometry.Comparison.RadialSurjectivity
+import DifferentialGeometry.Geometry.Comparison.RiemannianDistContinuity
+import DifferentialGeometry.Geometry.Comparison.TangentNormDiamond
+import DifferentialGeometry.Geometry.Comparison.Variation
+
+/-!
+# DifferentialGeometry.Geometry.Comparison
+
+Aggregated headline for `DifferentialGeometry.Geometry.Comparison`.
+-/

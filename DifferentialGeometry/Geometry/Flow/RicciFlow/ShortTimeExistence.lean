@@ -16,9 +16,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ChainRule
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import DifferentialGeometry.Analysis.Parabolic.ShortTime.DeTurckRicciPde
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.ConjugatingDiffeoFamily
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.FlatAssemblyInterior
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.FlatInteriorRicciFlowPde
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.RicciFlowPdeAtZero
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.ConjugatingFlowData
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.ConjugatingFlowProperties
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 
 namespace DifferentialGeometry.PDE.RicciFlow

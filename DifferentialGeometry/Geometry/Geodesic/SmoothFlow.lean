@@ -3,8 +3,8 @@ import DifferentialGeometry.Geometry.Geodesic.Existence
 import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
 import DifferentialGeometry.Geometry.Geodesic.Smoothness
 import DifferentialGeometry.Geometry.Geodesic.Uniqueness
-import DifferentialGeometry.Analysis.ODE.Flow.FlowC1Continuous
-import DifferentialGeometry.Analysis.ODE.Flow.FlowCkVariational
+import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.ContDiffOnOne
+import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.VariationalMapContDiffOnK
 import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 
 set_option linter.unusedSectionVars false

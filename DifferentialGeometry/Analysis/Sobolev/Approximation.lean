@@ -1,0 +1,12 @@
+import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDense
+import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseHigherOrder
+import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseLemmas
+import DifferentialGeometry.Analysis.Sobolev.Approximation.H1WeakSolutionApprox
+import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothApproximationConstruction
+import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
+
+/-!
+# DifferentialGeometry.Analysis.Sobolev.Approximation
+
+Aggregated headline for `DifferentialGeometry.Analysis.Sobolev.Approximation`.
+-/

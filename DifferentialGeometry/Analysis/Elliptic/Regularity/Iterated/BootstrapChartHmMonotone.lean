@@ -6,12 +6,12 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.FChartEffRegul
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.FChartEffStepRegularity
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BaseFChartRegularityB
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.DifferentiatedData
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.VariationalIdentityStep
+import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.VariationalIdentityInductiveStep
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.MixedPartials
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PowH2kBridge
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.H2Regularity
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.H2RegularityStep
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.LaplacianDomain
+import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Defs
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.MemWkpFour
 
 /-!

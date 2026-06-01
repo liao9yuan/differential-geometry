@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Smooth.EigenvectorSmoothChartComponentSupport
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Smooth.EigenvectorSmoothChartComponentTerm
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.ChartTransitionTransportCLM
-import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.TransitionQMP
+import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.QuasiMeasurePreserving
 
 /-!
 # Reconciliation of a single transport term of the smooth eigenvector section

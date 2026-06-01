@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
-import DifferentialGeometry.Analysis.Integration.Measure.Glue
+import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import Mathlib.MeasureTheory.Function.Jacobian
 import Mathlib.MeasureTheory.Measure.Haar.Basic
 import Mathlib.MeasureTheory.Measure.Restrict

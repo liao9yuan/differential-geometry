@@ -7,7 +7,7 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridgeUniform
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDense
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichManifold
 import DifferentialGeometry.Analysis.Integration.Measure.Family
-import DifferentialGeometry.Analysis.Integration.Measure.Glue
+import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 
 /-!
 # Manifold Morrey embedding `W^{1,p}_chart(M) ↪ C^0(M)` for `p > n`

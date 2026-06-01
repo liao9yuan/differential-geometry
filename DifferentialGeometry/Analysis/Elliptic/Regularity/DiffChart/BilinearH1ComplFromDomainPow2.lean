@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplFromDomainPow
-import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.CLMLeibniz
+import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.CLM.Leibniz
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PerChart
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.SmoothMulH1Compl
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothMul

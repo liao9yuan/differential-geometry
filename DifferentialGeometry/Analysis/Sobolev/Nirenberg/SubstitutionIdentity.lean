@@ -1,0 +1,11 @@
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.ChartBilinearTrivialCases
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.ChartBilinearVariationalIdentity
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.Substitution
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.SubstitutionNonSmooth
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.SubstitutionNonSmoothChartBilinear
+
+/-!
+# DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionIdentity
+
+Aggregated headline for `DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionIdentity`.
+-/

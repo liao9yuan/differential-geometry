@@ -1,0 +1,11 @@
+import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParallelNaturality
+import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovariantIntegrationByParts
+import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweringParallel
+import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorMetricCompatible
+import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorRSMetricCompatible
+
+/-!
+# DifferentialGeometry.Geometry.Connection.MetricCompatibility
+
+Aggregated headline for `DifferentialGeometry.Geometry.Connection.MetricCompatibility`.
+-/

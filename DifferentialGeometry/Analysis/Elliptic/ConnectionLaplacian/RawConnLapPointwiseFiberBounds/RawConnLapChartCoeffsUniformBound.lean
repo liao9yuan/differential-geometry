@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.RawConnLapChartComponentSecondCovDerivFormula
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartSmooth
-import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.DensityInfra
+import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.Defs
 
 /-!
 # Uniform bound on the chart-α coefficient functions of the raw tensor

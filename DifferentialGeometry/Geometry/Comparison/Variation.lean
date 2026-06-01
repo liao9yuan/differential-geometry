@@ -1,0 +1,13 @@
+import DifferentialGeometry.Geometry.Comparison.Variation.FixedChartIdentities
+import DifferentialGeometry.Geometry.Comparison.Variation.ParallelLocalODE
+import DifferentialGeometry.Geometry.Comparison.Variation.ParallelTransport
+import DifferentialGeometry.Geometry.Comparison.Variation.ParallelTransportSmooth
+import DifferentialGeometry.Geometry.Comparison.Variation.PerpFrame
+import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariation
+import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariationMinimiser
+
+/-!
+# DifferentialGeometry.Geometry.Comparison.Variation
+
+Aggregated headline for `DifferentialGeometry.Geometry.Comparison.Variation`.
+-/

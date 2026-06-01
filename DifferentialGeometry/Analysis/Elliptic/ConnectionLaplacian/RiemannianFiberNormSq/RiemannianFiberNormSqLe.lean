@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSq
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.Defs
 import DifferentialGeometry.Analysis.Elliptic.MetricBounds
 import DifferentialGeometry.Tensor.RSTensor.TensorRSSpaceNormBridge
 import Mathlib.Analysis.Normed.Module.Multilinear.Basic

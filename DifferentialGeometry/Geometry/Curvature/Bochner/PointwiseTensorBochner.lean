@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Bochner.IntegratedOrder2WeitzenbockCurvature
-import DifferentialGeometry.Geometry.Curvature.Order2Defect.Order2DefectGradientSlotLeibniz
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.CovGradRoughLapCurvPointwiseBound
+import DifferentialGeometry.Geometry.Curvature.Order2Defect.GradientSlotLeibniz
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FiberNormSubadditivity
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorThirdOrderWeitzenbock
 
 /-!

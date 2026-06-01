@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.CovGradRoughLapCurvL2Bound
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.L2Bound
 import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLapGradientL2Bound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.IntegratedOrder2Garding
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.DenseSubset

@@ -1,0 +1,14 @@
+import DifferentialGeometry.Analysis.Sobolev.Embedding.ContinuousSobolevRealization
+import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbedding
+import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
+import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmOrderDropping
+import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmOrderReduction
+import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingManifoldC0
+import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingReverseHebey
+import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingReverseOrderPeeling
+
+/-!
+# DifferentialGeometry.Analysis.Sobolev.Embedding
+
+Aggregated headline for `DifferentialGeometry.Analysis.Sobolev.Embedding`.
+-/

@@ -1,0 +1,13 @@
+import DifferentialGeometry.Geometry.Connection.Laplacian.ConnectionLaplacian
+import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLapGradientL2Bound
+import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLapSecondGradientL2Bound
+import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLapSecondOrderGardingGen
+import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLapSecondOrderGardingL2Bound
+import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLaplacian
+import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLaplacianChart
+
+/-!
+# DifferentialGeometry.Geometry.Connection.Laplacian
+
+Aggregated headline for `DifferentialGeometry.Geometry.Connection.Laplacian`.
+-/

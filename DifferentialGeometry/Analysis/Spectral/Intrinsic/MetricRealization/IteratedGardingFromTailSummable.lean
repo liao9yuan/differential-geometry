@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.SpectralSmoothGate
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.SpectralSmoothRepresentative
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.SpectralChartRegularityAnyOrder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.SpectralWeylCounting
 

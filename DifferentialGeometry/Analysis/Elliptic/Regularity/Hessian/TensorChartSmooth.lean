@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.Bridge
+import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.SmoothCasePairingIdentification
 
 /-!
 # Chart-α tensor smooth Hessian for smooth scalars

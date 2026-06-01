@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSNabla
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
-import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0SCovariantDerivativeAgreementSucc
+import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorSectionMDifferentiability
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciIdentitySmoothFrame
 import DifferentialGeometry.Geometry.Metric.PointwiseInner.Algebra
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval

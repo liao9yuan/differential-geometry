@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplDirectH3
+import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplW22ViaH3
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.MemWkpThree
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PerChart
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.UniformDiffQuotBoundFromDomain

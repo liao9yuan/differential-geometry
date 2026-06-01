@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifold
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuant
 import DifferentialGeometry.Analysis.Sobolev.Tools.StrictStrongSupport
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
-import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseHelpers
+import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseLemmas
 
 /-!
 # Chart-based Sobolev algebra at first order, super-critical exponent

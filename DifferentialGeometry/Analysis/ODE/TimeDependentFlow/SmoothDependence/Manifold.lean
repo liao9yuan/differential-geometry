@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ManifoldIntegralFlow
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.BareFlowFromJointC1
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ManifoldFlowFamily
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.BanachIC
-import DifferentialGeometry.Analysis.ODE.Flow.FlowC1
+import DifferentialGeometry.Analysis.ODE.Flow.Defs
 import Mathlib.Geometry.Manifold.ContMDiff.Atlas
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0SChartChristoffel
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.ChartTensor0SCovariantDerivative
-import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0SCovariantDerivativeAgreementSucc
+import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorSectionMDifferentiability
 
 /-!
 # Rank-0 evaluation of the intrinsic chart Fréchet-derivative CLM

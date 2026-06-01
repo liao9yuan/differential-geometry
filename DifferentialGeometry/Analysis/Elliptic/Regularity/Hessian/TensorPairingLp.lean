@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.ChartAlphaWeakRaw
+import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.ChartAlphaWeakHessian
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.PairingLapDom
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.TensorChartSmooth
 import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.MeasurablePullback

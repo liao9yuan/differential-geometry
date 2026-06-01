@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerUpperBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerLowerBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBridge
-import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.Bridge
+import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.ChartTwistIdentity
 
 /-!
 # Bundle-fibre upper bound for the `(r, s)` pointwise inner product

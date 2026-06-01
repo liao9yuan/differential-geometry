@@ -5,7 +5,7 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.H2RegularitySt
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BootstrapChartHmDomainPow
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BootstrapChartHmPolymorphic
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PowH2kBridge
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.LaplacianDomain
+import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Defs
 
 /-!
 # Truly unconditional chart-`H^{2k}` regularity for arbitrary `k`

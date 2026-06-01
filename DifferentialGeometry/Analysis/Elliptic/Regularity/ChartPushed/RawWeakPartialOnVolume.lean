@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.WeakPartialOnVolume
-import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.CLMChartFormula
+import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.CLM.ChartFormula
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.ChartData
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Function.LpSpace.Complete

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.TransitionPipeline
+import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.ChartPullbackSmooth
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 
 /-!

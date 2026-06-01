@@ -1,0 +1,12 @@
+import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Operator
+import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.OperatorEquation
+import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.PerMode
+import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.PerModeL2
+import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Plancherel
+import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Synthesis
+
+/-!
+# DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
+
+Aggregated headline for `DifferentialGeometry.Analysis.Parabolic.MaximalRegularity`.
+-/

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceFull
+import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceForward
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridgeUniform
 
 /-!

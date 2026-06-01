@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.Transition
-import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.TransitionPipeline
+import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.ChartPullbackSmooth
 import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.TransitionDiffeo
-import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.DensityInfra
+import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.Defs
 import DifferentialGeometry.Analysis.Sobolev.Chart.BanachCompleteness.CompletenessLp
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.Multiply

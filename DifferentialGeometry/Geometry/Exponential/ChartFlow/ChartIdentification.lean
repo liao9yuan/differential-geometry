@@ -4,8 +4,8 @@ import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
 import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
 import DifferentialGeometry.Geometry.Geodesic.Smoothness
 import DifferentialGeometry.Geometry.Geodesic.Uniqueness
-import DifferentialGeometry.Geometry.Exponential.ChartFlow.Bridge
-import DifferentialGeometry.Geometry.Exponential.Definition
+import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartFlowGeodesicLink
+import DifferentialGeometry.Geometry.Exponential.Defs
 import Mathlib.Geometry.Manifold.VectorBundle.Basic
 
 set_option linter.unusedSectionVars false

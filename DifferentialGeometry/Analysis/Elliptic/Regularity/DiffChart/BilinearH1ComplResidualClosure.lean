@@ -1,9 +1,9 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplFromDomainPow
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplFromDomainPow2
 import DifferentialGeometry.Analysis.Elliptic.Regularity.FChartResidual.LpDecomposition
-import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.LpIdentity
-import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.LaplacianDensityExt
-import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.VariationalIntegralForm
+import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.LpIdentity
+import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.DensityExtension
+import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.IntegralForm
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothMul
 
 /-!

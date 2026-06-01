@@ -1,7 +1,7 @@
 import DifferentialGeometry.Geometry.Comparison.HopfRinow
 import DifferentialGeometry.Geometry.Geodesic.Equation
 import DifferentialGeometry.Geometry.Geodesic.CrossVFReduction
-import DifferentialGeometry.Geometry.Exponential.Definition
+import DifferentialGeometry.Geometry.Exponential.Defs
 import DifferentialGeometry.Geometry.Comparison.TangentNormDiamond
 
 set_option linter.unusedSectionVars false

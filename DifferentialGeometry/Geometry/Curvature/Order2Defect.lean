@@ -1,0 +1,17 @@
+import DifferentialGeometry.Geometry.Curvature.Order2Defect.FrameComponentBound
+import DifferentialGeometry.Geometry.Curvature.Order2Defect.FrameCurvatureCore
+import DifferentialGeometry.Geometry.Curvature.Order2Defect.FrozenFrameTrace
+import DifferentialGeometry.Geometry.Curvature.Order2Defect.GradientSlotIntertwining
+import DifferentialGeometry.Geometry.Curvature.Order2Defect.GradientSlotLeibniz
+import DifferentialGeometry.Geometry.Curvature.Order2Defect.MetricTraceCommutation
+import DifferentialGeometry.Geometry.Curvature.Order2Defect.MetricTraceFrame
+import DifferentialGeometry.Geometry.Curvature.Order2Defect.MetricTraceIntertwining
+import DifferentialGeometry.Geometry.Curvature.Order2Defect.OffDiagonalCurvatureCore
+import DifferentialGeometry.Geometry.Curvature.Order2Defect.PartialMetricTrace
+import DifferentialGeometry.Geometry.Curvature.Order2Defect.SlotSplitBound
+
+/-!
+# DifferentialGeometry.Geometry.Curvature.Order2Defect
+
+Aggregated headline for `DifferentialGeometry.Geometry.Curvature.Order2Defect`.
+-/

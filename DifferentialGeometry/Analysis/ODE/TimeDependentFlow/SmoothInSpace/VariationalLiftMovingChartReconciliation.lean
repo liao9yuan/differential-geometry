@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftFactorDischarge
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftFactor
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartOverlapUniqueness
 
 /-!

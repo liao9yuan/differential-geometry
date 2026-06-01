@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.DifferentiatedData
-import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.VariationalIdentityStep
+import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.VariationalIdentityInductiveStep
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BaseFChartRegularityB
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.FChartEffStepRegularity
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.NirenbergInteriorRelaxedHyp

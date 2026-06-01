@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Ibp
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartInvariance
-import DifferentialGeometry.Analysis.Integration.Measure.Glue
+import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import Mathlib.Analysis.Calculus.FDeriv.Mul
 import Mathlib.Analysis.Calculus.FDeriv.Basic
 import Mathlib.Geometry.Manifold.PartitionOfUnity

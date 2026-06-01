@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.Euclidean
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.Defs
 
 /-!
 # The interior-regularity test function `D_{-h}^k(η² · D_h^k u)`

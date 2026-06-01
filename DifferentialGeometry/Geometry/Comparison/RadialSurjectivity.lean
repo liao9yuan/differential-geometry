@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Exponential.GaussLemma
 import DifferentialGeometry.Geometry.Comparison.HopfRinow
-import DifferentialGeometry.Geometry.Exponential.Definition
+import DifferentialGeometry.Geometry.Exponential.Defs
 import DifferentialGeometry.Geometry.Exponential.LocalDiffeomorphism
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 import DifferentialGeometry.Geometry.Comparison.RiemannianDistContinuity

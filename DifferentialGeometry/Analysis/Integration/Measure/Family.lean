@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
-import DifferentialGeometry.Analysis.Integration.Measure.Glue
+import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import Mathlib.Analysis.Calculus.Deriv.Mul

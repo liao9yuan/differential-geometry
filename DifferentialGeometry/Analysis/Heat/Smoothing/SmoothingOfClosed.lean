@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Heat.Smoothing.SmoothingBridge
+import DifferentialGeometry.Analysis.Heat.Smoothing.SmoothingFromChartBridges
 import DifferentialGeometry.Analysis.Heat.Smoothing.HeatSemigroupIteratedDomain
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.SideH2kBridge
 

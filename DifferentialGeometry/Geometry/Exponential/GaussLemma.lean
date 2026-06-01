@@ -1,6 +1,6 @@
-import DifferentialGeometry.Geometry.Exponential.Definition
+import DifferentialGeometry.Geometry.Exponential.Defs
 import DifferentialGeometry.Geometry.Exponential.Smoothness.MfderivZero
-import DifferentialGeometry.Geometry.Exponential.Smoothness.SmoothnessOffZero
+import DifferentialGeometry.Geometry.Exponential.Smoothness.OffZero
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 import DifferentialGeometry.Geometry.Comparison.InjectivityRadius
 import DifferentialGeometry.Geometry.Geodesic.Equation

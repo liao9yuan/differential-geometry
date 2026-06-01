@@ -7,13 +7,13 @@ Coauthors: Jack McCarthy
 import DifferentialGeometry.Tensor.Auxiliary.Perm
 import DifferentialGeometry.Tensor.Auxiliary.MultiKroneckerDelta
 import DifferentialGeometry.Tensor.Auxiliary.Basis
-import DifferentialGeometry.Tensor.Auxiliary.ShuffleSplit
+import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Split
 import DifferentialGeometry.Tensor.Alternating.Congr
 import DifferentialGeometry.Tensor.Alternating.Comp
 import DifferentialGeometry.Tensor.Alternating.Curry
 import DifferentialGeometry.Tensor.Product.Defs
 import DifferentialGeometry.Tensor.Alternating.Basis
-import DifferentialGeometry.Tensor.Auxiliary.ShuffleDeriv
+import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Derivative
 
 /-
 d(Sum_J ω_J dx^J) := Sum dω_J ∧ dx^J

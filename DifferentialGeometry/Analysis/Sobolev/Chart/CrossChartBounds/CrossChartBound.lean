@@ -1,14 +1,14 @@
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
 import DifferentialGeometry.Analysis.Sobolev.Chart.AtlasNorm.Atlas
-import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.DensityInfra
+import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.Defs
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothDensity
 import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.TransitionDiffeo
 import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.Transition
-import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.TransitionPipeline
+import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.ChartPullbackSmooth
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.Multiply
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
-import DifferentialGeometry.Analysis.Integration.Measure.Glue
+import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 
 /-!
 # Per-pair cross-chart support helpers and existence form

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.ChartTensorRSCurryFactor
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.ChartTensor0SLeviCivitaParallelExtend
-import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0SCovariantDerivativeAgreementHeadline
+import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.ChartTensor0SCovariantDerivativeAgreementSucc
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSNabla
 
 /-!

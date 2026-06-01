@@ -1,0 +1,11 @@
+import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChristoffelCorrectionL2.ChristoffelCorrectionAtomL2Bound
+import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChristoffelCorrectionL2.ChristoffelSlotCorrectionFiberNormBridge
+import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChristoffelCorrectionL2.FiberNormGradientDecomp
+import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChristoffelCorrectionL2.IntrinsicCovAtomL2Fiber
+import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChristoffelCorrectionL2.IntrinsicSlotOpNormRiem
+
+/-!
+# DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChristoffelCorrectionL2
+
+Aggregated headline for `DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChristoffelCorrectionL2`.
+-/

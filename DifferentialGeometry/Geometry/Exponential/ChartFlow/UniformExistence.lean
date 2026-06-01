@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Exponential.ChartFlow.Bridge
+import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartFlowGeodesicLink
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartIdentification
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartPushVFEq
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.UniformUniqueness

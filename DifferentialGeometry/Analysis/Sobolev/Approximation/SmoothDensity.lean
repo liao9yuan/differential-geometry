@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseHelpers
+import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseLemmas
 import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBound
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuant
 

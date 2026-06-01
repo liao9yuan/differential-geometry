@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplResidual
-import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.CLMLeibniz
+import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.CLM.Leibniz
 
 /-!
 # A.e. linearity of `smoothFChartResidual` in the smooth scalar argument

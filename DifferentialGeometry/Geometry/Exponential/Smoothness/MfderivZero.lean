@@ -1,5 +1,5 @@
-import DifferentialGeometry.Geometry.Exponential.Smoothness.FinalClosure
-import DifferentialGeometry.Analysis.ODE.Flow.FlowC1Frechet
+import DifferentialGeometry.Geometry.Exponential.Smoothness.AtZero
+import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.FrechetDerivative
 
 set_option linter.unusedSectionVars false
 

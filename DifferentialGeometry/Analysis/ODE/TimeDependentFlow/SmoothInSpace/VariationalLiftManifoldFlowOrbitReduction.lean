@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftManifoldFlowClose
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftConcreteFlow
 
 /-!
 # The canonical chart operator of the orbit flow IS the pushforward

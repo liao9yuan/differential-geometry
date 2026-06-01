@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.BilinearH1ComplResidual
-import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.CLMChartFormula
-import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.StrictCutoffPushedRawBound
+import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.CLM.ChartFormula
+import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.StrictCutoffPushforwardBound
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothMulQuant
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifoldHigherOrder
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding

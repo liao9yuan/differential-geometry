@@ -1,0 +1,12 @@
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.ChartVectorField
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionPrincipalSymbolRemainder
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionSecondOrder
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionSymbol
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionSymbolFormula
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LinearizedVectorField
+
+/-!
+# DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization
+
+Aggregated headline for `DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization`.
+-/

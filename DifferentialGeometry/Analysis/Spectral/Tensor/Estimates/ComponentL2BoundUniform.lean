@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ComponentL2Bound
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.NormComparison
-import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.Bridge
+import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.ChartTwistIdentity
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerLowerBound
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.ODE.Flow.FlowVariationalLinearMap
+import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.VariationalLinearMapSmoothness
 import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 
 /-!

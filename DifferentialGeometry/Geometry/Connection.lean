@@ -1,0 +1,21 @@
+import DifferentialGeometry.Geometry.Connection.Chart
+import DifferentialGeometry.Geometry.Connection.ChartBridge
+import DifferentialGeometry.Geometry.Connection.ChartFrame
+import DifferentialGeometry.Geometry.Connection.ChartFrameNormGlobalSmoothCoordBasisExpansion
+import DifferentialGeometry.Geometry.Connection.ChartTensorNabla
+import DifferentialGeometry.Geometry.Connection.CovApplyCovRSChartBasisExtension
+import DifferentialGeometry.Geometry.Connection.DivergenceCovariantTrace
+import DifferentialGeometry.Geometry.Connection.Laplacian
+import DifferentialGeometry.Geometry.Connection.LeviCivita
+import DifferentialGeometry.Geometry.Connection.LocalFrame
+import DifferentialGeometry.Geometry.Connection.MetricCompatibility
+import DifferentialGeometry.Geometry.Connection.ParallelTransport
+import DifferentialGeometry.Geometry.Connection.Realization
+import DifferentialGeometry.Geometry.Connection.TensorNabla
+import DifferentialGeometry.Geometry.Connection.WithBoundary
+
+/-!
+# DifferentialGeometry.Geometry.Connection
+
+Aggregated headline for `DifferentialGeometry.Geometry.Connection`.
+-/

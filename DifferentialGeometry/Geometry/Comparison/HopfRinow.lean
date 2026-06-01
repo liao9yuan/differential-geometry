@@ -6,8 +6,8 @@ import DifferentialGeometry.Geometry.Geodesic.Uniqueness
 import DifferentialGeometry.Geometry.Geodesic.Homogeneity
 import DifferentialGeometry.Geometry.Geodesic.CrossVFReduction
 import DifferentialGeometry.Geometry.Geodesic.ProjDerivative
-import DifferentialGeometry.Geometry.Exponential.Definition
-import DifferentialGeometry.Geometry.Exponential.Smoothness.SmoothnessUnconditional
+import DifferentialGeometry.Geometry.Exponential.Defs
+import DifferentialGeometry.Geometry.Exponential.Smoothness.ZeroSectionConstancy
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.AlongCurve
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.MFDerivAlongCurve
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity

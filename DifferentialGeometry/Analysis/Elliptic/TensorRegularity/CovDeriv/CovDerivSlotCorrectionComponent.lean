@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.CovDerivIntrinsicComponent
-import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.Bridge
+import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.ChartTwistIdentity
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.ChartTensorRSCovariantDerivative
 
 /-!

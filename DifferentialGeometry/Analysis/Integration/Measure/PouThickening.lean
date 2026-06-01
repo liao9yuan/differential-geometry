@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Integration.Measure.Glue
+import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Topology.Compactness.Paracompact
 import Mathlib.Topology.Separation.Regular
