@@ -3,7 +3,7 @@ Authors: Jack McCarthy
 -/
 import DifferentialGeometry.Tensor.Mixed.Bundle
 import DifferentialGeometry.Tensor.Multilinear.Field
-import DifferentialGeometry.VectorBundle.Section
+import DifferentialGeometry.Bundle.Section
 /-!
 # Smooth sections of the mixed multilinear bundle
 

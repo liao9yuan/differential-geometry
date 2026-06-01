@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Laplacian.Lichnerowicz
 import DifferentialGeometry.Analysis.Laplacian.Spectral.EigenBasis
-import DifferentialGeometry.Analysis.HeatEquation.Semigroup
-import DifferentialGeometry.Analysis.HeatEquation.SmoothingUnconditional
+import DifferentialGeometry.Analysis.Heat.Semigroup
+import DifferentialGeometry.Analysis.Heat.SmoothingUnconditional
 
 /-!
 # Lichnerowicz inequality at the spectral level

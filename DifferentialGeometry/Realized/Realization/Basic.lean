@@ -6,7 +6,7 @@ import Mathlib.Geometry.Manifold.VectorField.LieBracket
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.LinearAlgebra.Trace
 import Mathlib.Analysis.InnerProductSpace.Dual
-import DifferentialGeometry.VectorBundle.Section
+import DifferentialGeometry.Bundle.Section
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
 /-!

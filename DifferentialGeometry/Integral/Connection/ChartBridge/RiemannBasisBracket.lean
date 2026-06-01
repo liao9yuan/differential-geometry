@@ -2,7 +2,7 @@ import DifferentialGeometry.Integral.Measure.ChartDensity
 import DifferentialGeometry.Integral.Connection.CurvatureBundling
 import DifferentialGeometry.Integral.Connection.LeviCivita
 import DifferentialGeometry.Integral.Connection.ChartBridge.Ricci
-import DifferentialGeometry.VectorBundle.Frame
+import DifferentialGeometry.Bundle.Frame
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 

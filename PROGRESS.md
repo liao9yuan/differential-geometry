@@ -10,10 +10,16 @@ Resume: read this + `git log --oneline`, continue from the last green checkpoint
 - ☑ Baseline build green (9584 jobs)
 
 ### W1 — pure folder renames (import-path only; namespaces untouched)
+- ◐ moves done (229 import-rewrites, no dangling paths); build verifying
 - ☐ VectorBundle → Bundle
 - ☐ Analysis/HeatEquation → Analysis/Heat
 - ☐ DifferentialForm → Tensor/Exterior
 - ☐ PDE/DeTurck → Flow/DeTurck ; PDE/RicciFlow → Flow/RicciFlow ; loose PDE → Flow
+
+KEY INSIGHT: file/dir renames + consistent import rewrites preserve the import DAG ⇒ build
+stays green by construction. Layering "inversions" are a lint concern, not a build concern.
+So all MOVES are build-safe; only content ops (metric 3→1 dedup, R5 declaration-splitting,
+Interface delete) carry real build risk → done separately with their own builds.
 
 ### W2 — selective pillar moves
 - ☐ Integral/{Measure,L2,DivergenceTheorem} → Integration/*

@@ -5,7 +5,7 @@ import DifferentialGeometry.Tensor.Multilinear.Fiber
 import DifferentialGeometry.Tensor.Multilinear.Field
 import DifferentialGeometry.Tensor.Product.Basis
 import DifferentialGeometry.Tensor.Product.Bundle
-import DifferentialGeometry.VectorBundle.Section
+import DifferentialGeometry.Bundle.Section
 import Mathlib.RingTheory.TensorProduct.Finite
 /-!
 # Tensor product of multilinear bundle fibers

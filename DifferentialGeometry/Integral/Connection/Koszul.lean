@@ -4,7 +4,7 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import DifferentialGeometry.Integral.Connection.MetricCompatible
-import DifferentialGeometry.VectorBundle.Section
+import DifferentialGeometry.Bundle.Section
 
 /-!
 # The Koszul identity and uniqueness of the Levi-Civita connection

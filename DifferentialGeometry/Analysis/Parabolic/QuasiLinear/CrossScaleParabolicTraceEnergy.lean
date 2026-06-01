@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.CrossScaleParabolicTrace
-import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.CompactSAResolventIntrinsic
+import DifferentialGeometry.Flow.RicciFlow.IntrinsicSpectral.CompactSAResolventIntrinsic
 
 /-!
 # The parabolic energy identity and the unconditional cross-scale trace estimate

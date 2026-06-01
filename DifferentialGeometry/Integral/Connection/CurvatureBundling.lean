@@ -1,5 +1,5 @@
 import DifferentialGeometry.Integral.Connection.Curvature
-import DifferentialGeometry.VectorBundle.Frame
+import DifferentialGeometry.Bundle.Frame
 import Mathlib.Geometry.Manifold.VectorBundle.LocalFrame
 import Mathlib.Geometry.Manifold.VectorBundle.Tensoriality
 import Mathlib.Geometry.Manifold.BumpFunction

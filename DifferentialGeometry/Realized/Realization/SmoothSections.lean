@@ -1,7 +1,7 @@
 import DifferentialGeometry.Realized.Realization.Embedding
-import DifferentialGeometry.VectorBundle.Section
-import DifferentialGeometry.VectorBundle.Dual
-import DifferentialGeometry.VectorBundle.Equiv
+import DifferentialGeometry.Bundle.Section
+import DifferentialGeometry.Bundle.Dual
+import DifferentialGeometry.Bundle.Equiv
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 

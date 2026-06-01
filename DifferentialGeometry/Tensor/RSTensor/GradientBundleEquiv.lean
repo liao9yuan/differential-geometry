@@ -1,6 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
-import DifferentialGeometry.VectorBundle.Equiv
+import DifferentialGeometry.Bundle.Equiv
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Analysis.Normed.Module.Multilinear.Curry
 

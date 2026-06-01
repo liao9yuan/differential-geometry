@@ -1,5 +1,5 @@
 import DifferentialGeometry.Interface.Heat
-import DifferentialGeometry.Analysis.HeatEquation.Duhamel
+import DifferentialGeometry.Analysis.Heat.Duhamel
 
 /-!
 # Public Duhamel mild-solution adapters

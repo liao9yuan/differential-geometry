@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.FractionalPower
-import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.L2BanachIso
-import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.CompactSAResolventIntrinsic
-import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.IteratedNabla
+import DifferentialGeometry.Flow.RicciFlow.IntrinsicSobolev.L2BanachIso
+import DifferentialGeometry.Flow.RicciFlow.IntrinsicSpectral.CompactSAResolventIntrinsic
+import DifferentialGeometry.Flow.RicciFlow.HebeyBlock.IteratedNabla
 import Mathlib.Analysis.Normed.Operator.Extend
 
 /-!

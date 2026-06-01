@@ -1,5 +1,5 @@
 import DifferentialGeometry.Interface.Sobolev
-import DifferentialGeometry.Analysis.HeatEquation.Semigroup
+import DifferentialGeometry.Analysis.Heat.Semigroup
 
 /-!
 # Public heat semigroup adapters

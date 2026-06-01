@@ -5,8 +5,8 @@ import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions
 import Mathlib.Geometry.Manifold.MFDeriv.NormedSpace
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
-import DifferentialGeometry.VectorBundle.Equiv
-import DifferentialGeometry.VectorBundle.Frame
+import DifferentialGeometry.Bundle.Equiv
+import DifferentialGeometry.Bundle.Frame
 import DifferentialGeometry.Integral.Connection.LeviCivita
 import DifferentialGeometry.Integral.Connection.CotangentExtension
 

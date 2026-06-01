@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EigenBasis
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.CanonicalTensorRepr
-import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.CompactSAResolventIntrinsic
+import DifferentialGeometry.Flow.RicciFlow.IntrinsicSpectral.CompactSAResolventIntrinsic
 
 /-!
 # Smooth `H¹`-approximation of a connection-Laplacian eigenvector
