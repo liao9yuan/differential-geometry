@@ -10,10 +10,10 @@
 !/README.md
 !/LICENSE
 !/.gitignore
-!/CLAUDE.md
 # end of whitelist
 
-# Internal planning / convention docs — never tracked
+# Internal planning / convention docs — never tracked (kept local-only)
+/CLAUDE.md
 /STRUCTURE.md
 /NAMING.md
 /MIGRATION_PLAN.md
