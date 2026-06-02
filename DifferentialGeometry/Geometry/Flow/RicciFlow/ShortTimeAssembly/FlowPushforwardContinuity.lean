@@ -303,41 +303,4 @@ theorem flow_family_identification
   obtain ⟨a, b, Xt, hr', _, _, _, hall⟩ := hsubu hs
   exact hall s hr' x
 
-theorem joint_smooth_moving_mfderiv_continuous
-    (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
-    (Φ : ℝ → M → M) (hΦ0 : ∀ x : M, Φ 0 x = x)
-    (hcont0 : ContinuousOn
-      (fun q : ℝ × M => (X_DT q.1 q.2 : TangentSpace I q.2))
-      (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
-    (hgrad0 : ∀ α : M,
-      ContinuousOn
-        (fun q : ℝ × M =>
-          fderiv ℝ (chartRawRepr (I := I) α (X_DT q.1)) (extChartAt I α q.2))
-        (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
-    (hinterior : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
-      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) t
-        ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φ t x))))
-    (hpicard : ∀ x : M, ∃ α : M, ∃ δ : ℝ, 0 < δ ∧ x ∈ (chartAt H α).source ∧
-      ∀ s ∈ Set.Ico (0 : ℝ) (min δ T), Φ s x ∈ (chartAt H α).source ∧
-        extChartAt I α (Φ s x)
-          = extChartAt I α x + ∫ r in (0 : ℝ)..s,
-              chartRawRepr (I := I) α (X_DT r) (extChartAt I α (Φ r x)))
-    (hvarpicard : ∀ (x : M) (v : TangentSpace I x), ∃ α : M, ∃ δ : ℝ, 0 < δ ∧
-      ∀ s ∈ Set.Ico (0 : ℝ) (min δ T),
-        (mfderiv I I (fun y : M => Φ s y) x v : E)
-          = (@id E (mfderiv I I (fun y : M => Φ 0 y) x v))
-            + ∫ r in (0 : ℝ)..s,
-                (fderiv ℝ (chartRawRepr (I := I) α (X_DT r))
-                    (extChartAt I α (Φ r x)))
-                  (mfderiv I I (fun y : M => Φ r y) x v : E))
-    (hJbound : ∀ (x : M) (v : TangentSpace I x), ∃ δ : ℝ, ∃ B : ℝ, 0 < δ ∧
-      ∀ s ∈ Set.Ico (0 : ℝ) (min δ T),
-        ‖(mfderiv I I (fun y : M => Φ s y) x v : E)‖ ≤ B) :
-    (∀ x : M, ContinuousWithinAt (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) 0)
-    ∧ (∀ (x : M) (v : TangentSpace I x),
-        ContinuousWithinAt (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E))
-          (Set.Ici (0 : ℝ)) 0) :=
-  flow_t0_continuity_extension X_DT T hT Φ hΦ0 hcont0 hgrad0 hinterior hpicard
-    hvarpicard hJbound
-
 end DifferentialGeometry.PDE.RicciFlow
