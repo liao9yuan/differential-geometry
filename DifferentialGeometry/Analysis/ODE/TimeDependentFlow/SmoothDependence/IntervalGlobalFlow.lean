@@ -1,4 +1,8 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOperator.ConventionBridge
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.CutoffExtension
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFromJointC1
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.ChartBridge
 import Mathlib.Geometry.Manifold.Diffeomorph
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 
@@ -44,7 +48,32 @@ theorem interior_cutoff_window_flow
       (∀ p, Φw p t₀ = p) ∧
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞ (fun q : ℝ × M => Φw q.2 q.1) (Set.Ioo (t₀ - Te) (t₀ + Te) ×ˢ (Set.univ : Set M)) ∧
       (∀ p, ∀ t ∈ Set.Ioo (t₀ - Te) (t₀ + Te), Set.Ioo (t₀ - Te) (t₀ + Te) ⊆ Set.Ioo (a - δ) (b + δ) → HasMFDerivAt 𝓘(ℝ, ℝ) I (fun s => Φw p s) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φw p t)))) ∧
-      Set.Ioo (t₀ - Te) (t₀ + Te) ⊆ Set.Ioo (a - δ) (b + δ) := sorry
+      Set.Ioo (t₀ - Te) (t₀ + Te) ⊆ Set.Ioo (a - δ) (b + δ) := by
+  obtain ⟨Xt, δ, hδ_pos, hagree, hXt_smooth, _hXt_auto⟩ :=
+    interior_field_global_cutoff_extension X_DT T hint hab hab' hbT
+  obtain ⟨T', hT'_pos, Φ, hΦ_init, hΦ_smooth, hΦ_bare⟩ :=
+    global_flow_jointContMDiffOn_on_closed_manifold (I := I) Xt hXt_smooth t₀
+  set Te : ℝ := min T' (min (t₀ - (a - δ)) ((b + δ) - t₀)) with hTe_def
+  have ht₀a : a - δ < t₀ := by obtain ⟨h1, _⟩ := ht₀; linarith
+  have ht₀b : t₀ < b + δ := by obtain ⟨_, h2⟩ := ht₀; linarith
+  have hTe_pos : 0 < Te := by
+    rw [hTe_def]; refine lt_min hT'_pos (lt_min ?_ ?_) <;> linarith
+  have hTe_le_T' : Te ≤ T' := by rw [hTe_def]; exact min_le_left _ _
+  have hTe_le_2 : Te ≤ min (t₀ - (a - δ)) ((b + δ) - t₀) := by
+    rw [hTe_def]; exact min_le_right _ _
+  have hsub_window : Set.Ioo (t₀ - Te) (t₀ + Te) ⊆ Set.Ioo (a - δ) (b + δ) := by
+    apply Set.Ioo_subset_Ioo
+    · have : Te ≤ t₀ - (a - δ) := le_trans hTe_le_2 (min_le_left _ _); linarith
+    · have : Te ≤ (b + δ) - t₀ := le_trans hTe_le_2 (min_le_right _ _); linarith
+  have hsub_T' : Set.Ioo (t₀ - Te) (t₀ + Te) ⊆ Set.Ioo (t₀ - T') (t₀ + T') :=
+    Set.Ioo_subset_Ioo (by linarith [hTe_le_T']) (by linarith [hTe_le_T'])
+  refine ⟨Te, δ, hTe_pos, hδ_pos, Φ, hΦ_init, ?_, ?_, hsub_window⟩
+  · exact hΦ_smooth.mono (Set.prod_mono hsub_T' (subset_refl _))
+  · intro p t ht _
+    have hbare := hΦ_bare p t (hsub_T' ht)
+    have hval : Xt t (Φ p t) = X_DT t (Φ p t) := hagree t (hsub_window ht) (Φ p t)
+    rw [hval] at hbare
+    exact hbare
 
 /-- **Extend the `t = 0` anchor to the full interval.** Given the anchor flow `Φ0` (with
 `Φ0 0 = id` and the bare velocity on a short horizon `(0, σ)`), produce a single flow `Φ` on
