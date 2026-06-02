@@ -61,7 +61,7 @@ theorem flow_pushforward_continuous_in_time
     (hgrad0 : ∀ α : M,
       ContinuousOn
         (fun q : ℝ × M =>
-          fderiv ℝ (chartRawRepr (I := I) α (X q.1)) (extChartAt I α q.2))
+          fderiv ℝ (fun z => chartTrivRepr (I := I) α (X q.1) z) (extChartAt I α q.2))
         (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))

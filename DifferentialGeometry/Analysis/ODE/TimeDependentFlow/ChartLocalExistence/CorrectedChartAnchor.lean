@@ -34,7 +34,11 @@ orbit at `0`. -/
 theorem corrected_chart_anchor_flow_build
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hCont : ContinuousOn (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2)) (Set.univ : Set (ℝ × M)))
-    (hgrad : ∀ α : M, ContinuousOn (fun q : ℝ × M => fderiv ℝ (chartRawRepr (I := I) α (X q.1)) (extChartAt I α q.2)) (Set.univ : Set (ℝ × M))) :
+    (hgrad : ∀ α : M, ContinuousOn (fun q : ℝ × M => fderiv ℝ (fun z => chartTrivRepr (I := I) α (X q.1) z) (extChartAt I α q.2)) (Set.univ : Set (ℝ × M)))
+    (T : ℝ) (hT : 0 < T)
+    (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) :
     ∃ (σ : ℝ) (_ : 0 < σ) (Φ0 : ℝ → M → M),
       (∀ x : M, Φ0 0 x = x) ∧
       (∀ t ∈ Set.Ioo (0 : ℝ) σ, ∀ x : M,

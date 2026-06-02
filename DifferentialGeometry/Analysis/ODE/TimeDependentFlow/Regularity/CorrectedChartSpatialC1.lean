@@ -31,7 +31,7 @@ tangent-bundle section on the interior `(0, T) ×ˢ univ` (`hint`). -/
 theorem corrected_chart_field_lipschitz_of_data
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (T : ℝ) (hT : 0 < T)
     (hcont : ContinuousOn (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2)) (Set.univ : Set (ℝ × M)))
-    (hgrad : ContinuousOn (fun q : ℝ × M => fderiv ℝ (chartRawRepr (I := I) α (X q.1)) (extChartAt I α q.2)) (Set.univ : Set (ℝ × M)))
+    (hgrad : ContinuousOn (fun q : ℝ × M => fderiv ℝ (fun z => chartTrivRepr (I := I) α (X q.1) z) (extChartAt I α q.2)) (Set.univ : Set (ℝ × M)))
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞ (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M)) (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) :
     ∃ L K r : ℝ, 0 < L ∧ 0 < r ∧ 0 ≤ K ∧
       (∀ t ∈ Set.Icc (0 : ℝ) L,

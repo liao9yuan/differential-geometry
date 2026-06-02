@@ -89,6 +89,7 @@ theorem interior_extends_anchor
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞ (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X_DT q.1 q.2) : TangentBundle I M)) (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
     (Φ0 : ℝ → M → M) (σ : ℝ) (hσ : 0 < σ) (hσT : σ ≤ T)
     (hΦ0_0 : ∀ x : M, Φ0 0 x = x)
+    (hΦ0_cont0 : ∀ x : M, ContinuousWithinAt (fun s : ℝ => Φ0 s x) (Set.Ici (0 : ℝ)) 0)
     (hΦ0_bare : ∀ t ∈ Set.Ioo (0 : ℝ) σ, ∀ x : M,
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ0 s x) (Set.Ioo (0 : ℝ) σ) t
         ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φ0 t x)))) :
@@ -96,7 +97,8 @@ theorem interior_extends_anchor
       (∀ x : M, Φ 0 x = x) ∧
       (∀ s ∈ Set.Ioo (0 : ℝ) σ, ∀ x : M, Φ s x = Φ0 s x) ∧
       (∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x) (Set.Ioo (0 : ℝ) T) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φ t x)))) ∧
-      (∀ t ∈ Set.Ioo (0 : ℝ) T, ContMDiff I I ∞ (Φ t)) := sorry
+      (∀ t ∈ Set.Ioo (0 : ℝ) T, ContMDiff I I ∞ (Φ t)) ∧
+      (ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞ (fun q : ℝ × M => Φ q.1 q.2) (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) := sorry
 
 /-- Each time-slice `Φint t` (for `t ∈ (0, T)`) is a diffeomorphism, by building the reverse
 flow of `-X_DT` and exhibiting the two as mutually inverse smooth maps. -/
@@ -104,6 +106,8 @@ theorem interior_flow_slice_diffeo_on_Ioo
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞ (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X_DT q.1 q.2) : TangentBundle I M)) (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
     (Φint : ℝ → M → M)
+    (hΦint_init : ∀ x : M, Φint 0 x = x)
+    (hΦint_cont0 : ∀ x : M, ContinuousWithinAt (fun s : ℝ => Φint s x) (Set.Ici (0 : ℝ)) 0)
     (hΦint_slice : ∀ t ∈ Set.Ioo (0 : ℝ) T, ContMDiff I I ∞ (Φint t))
     (hΦint_bare : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φint s x) (Set.Ioo (0 : ℝ) T) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φint t x)))) :
     ∀ t ∈ Set.Ioo (0 : ℝ) T, ∃ d : M ≃ₘ⟮I, I⟯ M, ∀ x : M, d x = Φint t x := sorry

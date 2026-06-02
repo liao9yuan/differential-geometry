@@ -89,7 +89,7 @@ theorem conjugating_diffeo_family
     (h_grad0 : ∀ α : M,
       ContinuousOn
         (fun q : ℝ × M =>
-          fderiv ℝ (chartRawRepr (I := I) α (fun x => deTurckVF (I := I) (g_DT q.1) g_bg x))
+          fderiv ℝ (fun z => chartTrivRepr (I := I) α (fun x => deTurckVF (I := I) (g_DT q.1) g_bg x) z)
             (extChartAt I α q.2))
         (Set.Icc 0 T_DT ×ˢ Set.univ)) :
     ∃ T : ℝ, 0 < T ∧ T ≤ T_DT ∧ ∃ Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M),
@@ -115,18 +115,25 @@ theorem conjugating_diffeo_family
       (fun q : ℝ × M => (X_DT q.1 q.2 : TangentSpace I q.2))
       (Set.Icc (0 : ℝ) T_DT ×ˢ Set.univ) := h_cont0.neg
   have hgrad0 : ∀ α : M, ContinuousOn
-      (fun q : ℝ × M => fderiv ℝ (chartRawRepr (I := I) α (X_DT q.1)) (extChartAt I α q.2))
+      (fun q : ℝ × M => fderiv ℝ (fun z => chartTrivRepr (I := I) α (X_DT q.1) z) (extChartAt I α q.2))
       (Set.Icc (0 : ℝ) T_DT ×ˢ Set.univ) := by
     intro α
     have hfun :
-        (fun q : ℝ × M => fderiv ℝ (chartRawRepr (I := I) α (X_DT q.1)) (extChartAt I α q.2))
-          = (fun q : ℝ × M => -(fderiv ℝ (chartRawRepr (I := I) α
-              (fun x => (deTurckVF (I := I) (g_DT q.1) g_bg x : TangentSpace I x)))
+        (fun q : ℝ × M => fderiv ℝ (fun z => chartTrivRepr (I := I) α (X_DT q.1) z) (extChartAt I α q.2))
+          = (fun q : ℝ × M => -(fderiv ℝ (fun z => chartTrivRepr (I := I) α
+              (fun x => (deTurckVF (I := I) (g_DT q.1) g_bg x : TangentSpace I x)) z)
               (extChartAt I α q.2))) := by
       funext q
-      have hcr : chartRawRepr (I := I) α (X_DT q.1)
-          = (fun z => -(chartRawRepr (I := I) α
-              (fun x => (deTurckVF (I := I) (g_DT q.1) g_bg x : TangentSpace I x)) z)) := rfl
+      have hcr : (fun z => chartTrivRepr (I := I) α (X_DT q.1) z)
+          = (fun z => -(chartTrivRepr (I := I) α
+              (fun x => (deTurckVF (I := I) (g_DT q.1) g_bg x : TangentSpace I x)) z)) := by
+        funext z
+        change chartE_section_repr (I := I) α (X_DT q.1) ((extChartAt I α).symm z)
+          = -(chartE_section_repr (I := I) α
+              (fun x => (deTurckVF (I := I) (g_DT q.1) g_bg x : TangentSpace I x))
+              ((extChartAt I α).symm z))
+        unfold chartE_section_repr
+        exact map_neg _ _
       rw [hcr, fderiv_fun_neg]
     rw [hfun]
     exact (h_grad0 α).neg

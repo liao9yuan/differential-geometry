@@ -95,7 +95,7 @@ theorem deturck_ricci_flow_parabolic_short_time_existence
       (∀ α : M,
         ContinuousOn
           (fun q : ℝ × M =>
-            fderiv ℝ (chartRawRepr (I := I) α (fun x => deTurckVF (I := I) (g_DT q.1) g_bg x))
+            fderiv ℝ (fun z => chartTrivRepr (I := I) α (fun x => deTurckVF (I := I) (g_DT q.1) g_bg x) z)
               (extChartAt I α q.2))
           (Set.Icc 0 T ×ˢ Set.univ)) ∧
       (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
