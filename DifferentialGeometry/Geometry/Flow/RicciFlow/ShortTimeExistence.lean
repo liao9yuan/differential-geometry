@@ -170,7 +170,7 @@ theorem ricci_flow_short_time_existence
         h_reg_T hΦorbit0 hΦmfderiv0
     obtain ⟨h_gram_fam, h_gram0_fam⟩ :=
       conjugating_flow_pullback_jointGram_data (I := I) g_DT g₀ T Φ_fam hΦode'
-        h_gram_DT_T h_gram0_DT_T
+        h_reg_T h_gram_DT_T h_gram0_DT_T
     refine ⟨T, hT0, fun s => Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s),
       ?_, h_gram_fam, h_gram0_fam, ?_⟩
     · change Diffeomorph.pullbackMetric (g_DT 0) (Φ_fam 0) = g₀
@@ -193,7 +193,7 @@ theorem ricci_flow_short_time_existence
         intro s hs y a b
         exact hDT_deriv' s ⟨hs.1, lt_of_lt_of_le hs.2 hT_le⟩ y a b
       obtain ⟨T', P', hv_flat, hcorr, hbase, h_total_eval⟩ :=
-        conjugating_flow_flat_data (I := I) g_DT g₀ T Φ_fam hDT_deriv_Ico hΦode
+        conjugating_flow_flat_data (I := I) g_DT g₀ T Φ_fam hDT_deriv_Ico hΦode h_reg_T
       have h_interior :=
         DifferentialGeometry.PDE.RicciFlow.flat_assembly_interior
           (I := I) g₀ g_DT T Φ_fam T' P' hDT_deriv_T hbase h_total_eval hv_flat hcorr

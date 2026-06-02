@@ -50,9 +50,14 @@ facts of that flow hold:
 * `h_total_eval`: the three-piece additive chain rule for the full pulled-back inner product.
 
 These are the genuine open chart-ODE jet / variational-lift analytic inputs of the concrete
-conjugating flow.  They are TRUE for this flow (pinned via `hΦode`) and reference only the
-internal data `g_DT` / `Φ_fam` / `deTurckVF (g_DT t) g_bg`.  Faithful labeled deferred input
-for a dedicated fill effort. -/
+conjugating flow.  They are TRUE for this flow: it is pinned to the genuine flow by `hΦode`,
+and the moving spatial Jacobian `s ↦ mfderiv (Φ_fam s) x v` they vary is time-differentiable
+because the DeTurck field is jointly `C∞` on the interior (`hfield_reg`) — so the flow is the
+genuine jointly-`C∞` flow of that field by Hartman smooth dependence (`hΦode` alone, a pointwise
+orbit derivative, does NOT supply this regularity).  They reference only the internal data
+`g_DT` / `Φ_fam` / `deTurckVF (g_DT t) g_bg`.  Faithful labeled deferred input for a dedicated
+fill effort (the on-disk Hartman / factor-jet machinery is faithful but not yet wired to this
+flow). -/
 theorem conjugating_flow_flat_data
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
@@ -63,7 +68,11 @@ theorem conjugating_flow_flat_data
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => (Φ_fam s : M → M) x)
         (Set.Ici (0 : ℝ)) t
         ((1 : ℝ →L[ℝ] ℝ).smulRight
-          (-(deTurckVF (I := I) (g_DT t) g_bg ((Φ_fam t : M → M) x))))) :
+          (-(deTurckVF (I := I) (g_DT t) g_bg ((Φ_fam t : M → M) x)))))
+    (hfield_reg : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
+        : TangentBundle I M))
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) :
     ∃ T' P' : ℝ → ∀ x : M, TangentSpace I x → (E →L[ℝ] E),
       (∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v : TangentSpace I x,
           RawVariationalIdentityFlat (I := I) Φ_fam t x v (T' t x v) (P' t x v)) ∧
@@ -259,8 +268,9 @@ classical Hartman smooth-dependence-on-initial-conditions output for the conjuga
 cutoff windows of the interior field, continuous up to the `C⁰`-at-`0` boundary).  The on-disk
 Hartman / pullback chart-Gram joint-smoothness machinery is faithful but not yet wired to the
 specific conjugating flow; we isolate that open content here as a single faithful labeled
-`sorry`, PINNED to the genuine flow by `hΦode` and consuming the genuine `g_DT` regularity
-`hgram_DT`/`hgram0_DT`.  Neither output is equal to, nor destructures to, any hypothesis (the
+`sorry`, PINNED to the genuine flow by `hΦode`, fed the joint-`C∞` DeTurck-field regularity
+`hfield_reg` (the Hartman smooth-dependence input that makes the orbit `(t, x) ↦ Φ_fam t x`
+jointly `C∞`), and consuming the genuine `g_DT` regularity `hgram_DT`/`hgram0_DT`.  Neither output is equal to, nor destructures to, any hypothesis (the
 hypotheses concern `g_DT`; the conclusions concern the pullback `pullbackMetric (g_DT) (Φ_fam)`),
 so this is not hypothesis-packaging.  Faithful labeled deferred input for a dedicated fill
 effort. -/
@@ -272,6 +282,10 @@ theorem conjugating_flow_pullback_jointGram_data
         (Set.Ici (0 : ℝ)) t
         ((1 : ℝ →L[ℝ] ℝ).smulRight
           (-(deTurckVF (I := I) (g_DT t) g_bg ((Φ_fam t : M → M) x)))))
+    (hfield_reg : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
+        : TangentBundle I M))
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
     (hgram_DT : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
         (fun p : ℝ × M =>
