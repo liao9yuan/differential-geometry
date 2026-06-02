@@ -44,81 +44,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **Producer: the single forward BARE flow from `t = 0` of an interior-`C∞`-only
-time-dependent field, with the integral anchors consumed by the `t = 0` continuity
-extension.**
-
-This is the one genuinely-missing flow input on the forward-flow route.  From the
-interior joint-`C∞` datum `hint` (on `(0,T) ×ˢ univ`) together with the up-to-`0`
-continuity data `hcont0`/`hgrad0`, it produces a single flow `Φ : ℝ → M → M` with
-`Φ 0 = id`, per-time diffeomorphism witnesses on `(0,T)` (conjunct 2), the **bare**
-geometric velocity on `(0,T)` (conjunct 3), and the three downstream analytic anchors:
-
-* `hpicard`  — the chart-Picard integral identity of the orbit near `0`;
-* `hvarpicard` — the linearised (variational) integral equation for the moving
-  spatial Jacobian near `0`;
-* `hJbound` — the near-`0` boundedness of the moving spatial Jacobian.
-
-**Honest construction (the remaining work, isolated here).**  For each interior point
-`t₀ ∈ (0,T)` choose a window `(a,b) ∋ t₀` with `0 < a < b < T`; the time-cutoff field
-`Xt = cutoffEta a b δ • X_DT` (`interior_field_global_cutoff_extension`) equals `X_DT`
-on `(a-δ, b+δ)`, is globally `C∞`, and is `AutonomizedFieldJointC1`.  Its global bare
-flow (`global_flow_jointContMDiffOn_on_closed_manifold`) carries `X_DT`'s bare
-velocity on that window; the per-window flows are glued into a single `Φ` on `(0,T)` by
-bare-flow uniqueness (`bare_integral_flow_eqOn_of_jointC1`), with the `t = 0` anchor
-`Φ 0 = id` from the chart-local Picard flow of `time_dependent_vf_chart_local_picard`.
-The per-time diffeomorphisms (conjunct 2) come from
-`time_dependent_vf_hdiffeo_of_smooth_bijective`; the bare-velocity equation
-(conjunct 3) is read off each window.  The integral anchors `hpicard`/`hvarpicard`/
-`hJbound` are obtained by chart-pushing the bare manifold ODE through `extChartAt I α`
-on the orbit (which stays in the chart source near `0`) and applying the FTC; the
-variational anchor likewise from the spatial-Jacobian ODE, and the Jacobian bound from
-the linear Grönwall estimate `‖J r‖ ≤ ‖J₀‖ · exp (CA · r)`.
-
-The chart-Picard *integral* form (`extChartAt I α x + ∫ … chartRawRepr …`) and the
-variational integral form have NO producer anywhere in the on-disk flow infrastructure
-(`ODE/TimeDependentFlow/**` provides only the chart-coordinate `HasDerivWithinAt` Picard
-flow, the chart-cover *transported*-velocity manifold ODE, and the bare-flow
-existence/uniqueness — not the FTC integral form nor the variational integral form).
-Building that chart-Picard / variational integral layer plus the multi-window glue is a
-multi-file effort beyond this leaf's budget; it is isolated here as a SINGLE labeled
-`sorry` and reported.  The conclusion is the flow-existence statement, distinct from the
-field-regularity inputs `hint`/`hcont0`/`hgrad0` — this is not hypothesis-packaging. -/
-private theorem interior_forward_bare_flow_from_zero
-    (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
-    (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
-      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X_DT q.1 q.2) : TangentBundle I M))
-      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
-    (hcont0 : ContinuousOn
-      (fun q : ℝ × M => (X_DT q.1 q.2 : TangentSpace I q.2))
-      (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
-    (hgrad0 : ∀ α : M,
-      ContinuousOn
-        (fun q : ℝ × M =>
-          fderiv ℝ (chartRawRepr (I := I) α (X_DT q.1)) (extChartAt I α q.2))
-        (Set.Icc (0 : ℝ) T ×ˢ Set.univ)) :
-    ∃ Φ : ℝ → M → M, (∀ x : M, Φ 0 x = x) ∧
-      (∀ t ∈ Set.Ioo (0 : ℝ) T, ∃ d : M ≃ₘ⟮I, I⟯ M, ∀ x : M, d x = Φ t x) ∧
-      (∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x)
-        (Set.Ici (0 : ℝ)) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φ t x)))) ∧
-      (∀ x : M, ∃ α : M, ∃ δ : ℝ, 0 < δ ∧ x ∈ (chartAt H α).source ∧
-        ∀ s ∈ Set.Ico (0 : ℝ) (min δ T), Φ s x ∈ (chartAt H α).source ∧
-          extChartAt I α (Φ s x)
-            = extChartAt I α x + ∫ r in (0 : ℝ)..s,
-                chartRawRepr (I := I) α (X_DT r) (extChartAt I α (Φ r x))) ∧
-      (∀ (x : M) (v : TangentSpace I x), ∃ α : M, ∃ δ : ℝ, 0 < δ ∧
-        ∀ s ∈ Set.Ico (0 : ℝ) (min δ T),
-          (mfderiv I I (fun y : M => Φ s y) x v : E)
-            = (@id E (mfderiv I I (fun y : M => Φ 0 y) x v))
-              + ∫ r in (0 : ℝ)..s,
-                  (fderiv ℝ (chartRawRepr (I := I) α (X_DT r))
-                      (extChartAt I α (Φ r x)))
-                    (mfderiv I I (fun y : M => Φ r y) x v : E)) ∧
-      (∀ (x : M) (v : TangentSpace I x), ∃ δ : ℝ, ∃ B : ℝ, 0 < δ ∧
-        ∀ s ∈ Set.Ico (0 : ℝ) (min δ T),
-          ‖(mfderiv I I (fun y : M => Φ s y) x v : E)‖ ≤ B) := by
-  sorry
-
 /-- **Orbit right-continuity at `t = 0`.**
 
 Self-contained helper for the first conjunct of `flow_t0_continuity_extension`.
@@ -374,6 +299,7 @@ theorem flow_t0_continuity_extension
   ⟨flow_orbit_continuousWithinAt_zero X_DT T hT Φ hΦ0 hcont0 hpicard,
     flow_mfderiv_continuousWithinAt_zero X_DT T hT Φ hgrad0 hvarpicard hJbound⟩
 
+set_option linter.unusedVariables false in
 /-- A time-dependent field `X_DT` that is jointly `C∞` on the interior `(0,T) ×ˢ univ`
 (`hint`) and continuous together with its chart-gradient up to `t = 0` (`hcont0`,
 `hgrad0`) admits a single forward flow `Φ : ℝ → M → M` with `Φ 0 = id`, per-time
@@ -381,10 +307,17 @@ diffeomorphisms on `(0,T)`, the bare geometric velocity `∂ₛ Φ s x = X_DT t 
 `(0,T)`, and `t = 0` right-continuity of both the orbit `s ↦ Φ s x` and the moving
 spatial Jacobian `s ↦ mfderiv I I (Φ s) x v`.
 
-The flow, its `Φ 0 = id` value, the per-time diffeomorphisms, the bare velocity, and the
-chart-Picard / variational integral anchors are supplied by the producer
-`interior_forward_bare_flow_from_zero`; the two `t = 0` right-continuity claims are then
-obtained from `flow_t0_continuity_extension` applied to those anchors. -/
+This statement is correct; its forward-flow construction is currently a deferred `sorry`.
+The previous internal producer rebuilt the flow through a chart-Picard / variational
+integral identity whose integrand was the *raw-fibre* chart representation `chartRawRepr`
+(the bare value `(X_DT r (Φ r x) : E)`).  An adversarial statement check found that
+integrand to be the wrong chart-ODE term off the basepoint: the genuine flow's chart
+velocity is `mfderiv (extChartAt I α) (Φ r x) (X_DT r (Φ r x)) = trivToE α (Φ r x) …`,
+which differs from the bare value by the moving-trivialization (chart-transition Jacobian)
+correction and agrees with it only at `Φ r x = α`.  That producer was therefore
+unsatisfiable on a curved manifold (every `Sⁿ`) and has been removed; this `sorry` is to
+be discharged by reconstructing the forward flow with the *trivialised* chart integral
+identity (and the analogous covariant variational identity). -/
 theorem forward_flow_existence_onesided_of_jointsmooth_field
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -406,14 +339,6 @@ theorem forward_flow_existence_onesided_of_jointsmooth_field
       (∀ (x : M) (v : TangentSpace I x),
         ContinuousWithinAt (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E))
           (Set.Ici (0 : ℝ)) 0) := by
-  obtain ⟨Φ, hΦ0, hdiffeo, hflow, hpicard, hvarpicard, hJbound⟩ :=
-    interior_forward_bare_flow_from_zero (I := I) X_DT T hT hint hcont0 hgrad0
-  have hinterior : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
-      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) t
-        ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φ t x))) := hflow
-  obtain ⟨hcont4, hcont5⟩ :=
-    flow_t0_continuity_extension (I := I) X_DT T hT Φ hΦ0 hcont0 hgrad0
-      hinterior hpicard hvarpicard hJbound
-  exact ⟨Φ, hΦ0, hdiffeo, hflow, hcont4, hcont5⟩
+  sorry
 
 end DifferentialGeometry.PDE.RicciFlow
