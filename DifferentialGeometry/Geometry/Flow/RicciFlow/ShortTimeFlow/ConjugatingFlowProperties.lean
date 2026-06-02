@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.EvalFormCh
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.RicciFlowPdeAtZero
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.RicciContinuityInMetricTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Defs
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.CutoffExtension
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 
 /-!
@@ -33,6 +34,154 @@ variable
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+
+/-- **Interior joint `(t, x)`-smoothness of the conjugating flow.**
+
+For the conjugating diffeomorphism family `Φ_fam` pinned to the genuine flow by the backward
+orbit ODE `hΦode`, with the DeTurck field jointly `C∞` on the interior (`hfield_reg`), the orbit
+map `(t, x) ↦ Φ_fam t x` is jointly `C∞` on `Ioo 0 T ×ˢ univ`.  This is the Hartman
+smooth-dependence-on-initial-conditions content the pointwise orbit ODE alone does not supply:
+cut off `deTurckVF (g_DT ·) g_bg` to a globally-`C∞` field agreeing with it on the interior,
+flow it via `global_flow_jointContMDiffOn_on_closed_manifold` (a jointly-`C∞` abstract flow),
+identify `Φ_fam` with that flow window-by-window through `bare_integral_flow_eqOn_of_jointC1`
+(uniqueness for the bare-velocity ODE, with `hΦode` the bare-velocity datum), and transfer
+`ContMDiffOn` along the agreement.  All cited machinery is sorry-free. -/
+theorem conjugating_flow_jointContMDiffOn
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
+    (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
+    (hΦode : ∀ x : M, ∀ t ∈ Set.Ioo (0 : ℝ) T,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => (Φ_fam s : M → M) x)
+        (Set.Ici (0 : ℝ)) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight
+          (-(deTurckVF (I := I) (g_DT t) g_bg ((Φ_fam t : M → M) x)))))
+    (hfield_reg : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
+        : TangentBundle I M))
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
+      (fun q : ℝ × M => (Φ_fam q.1 : M → M) q.2)
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ) := by
+  set Y : ℝ → ∀ x : M, TangentSpace I x :=
+    fun s x => -(deTurckVF (I := I) (g_DT s) g_bg x) with hY_def
+  have hint_Y : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (Y q.1 q.2) : TangentBundle I M))
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ) := by
+    have hYeq : (fun q : ℝ × M => (TotalSpace.mk' E q.2 (Y q.1 q.2) : TangentBundle I M))
+        = (fun q : ℝ × M => (TotalSpace.mk' E q.2
+            ((-1 : ℝ) • deTurckVF (I := I) (g_DT q.1) g_bg q.2) : TangentBundle I M)) := by
+      funext q; simp only [hY_def, neg_one_smul]
+    rw [hYeq]
+    intro q hq
+    exact CutoffExtensionAux.smul_tangentMap_cmdwa
+      (fun s x => (deTurckVF (I := I) (g_DT s) g_bg x : TangentSpace I x)) (fun _ => (-1 : ℝ))
+      contMDiffWithinAt_const (hfield_reg q hq)
+  intro q₀ hq₀
+  obtain ⟨ht₀_lo, ht₀_hi⟩ := hq₀.1
+  obtain ⟨a, ha0, hat₀⟩ := exists_between ht₀_lo
+  obtain ⟨b, ht₀b, hbT⟩ := exists_between ht₀_hi
+  obtain ⟨Xt, δ, hδ, hXt_eq, hXt_cont, hXt_auto⟩ :=
+    interior_field_global_cutoff_extension Y T hint_Y ha0 (lt_trans hat₀ ht₀b) hbT
+  obtain ⟨T', hT', Φ, hΦ_init, hΦ_smooth, hΦ_bare⟩ :=
+    global_flow_jointContMDiffOn_on_closed_manifold Xt hXt_cont q₀.1
+  set c : ℝ := max (max (a - δ) (q₀.1 - T')) 0 with hc_def
+  set d : ℝ := min (min (b + δ) (q₀.1 + T')) T with hd_def
+  have hc_lt : c < q₀.1 := by
+    rw [hc_def]
+    refine max_lt (max_lt ?_ (by linarith)) ht₀_lo
+    have : a - δ < a := by linarith
+    linarith [hat₀]
+  have hlt_d : q₀.1 < d := by
+    rw [hd_def]
+    refine lt_min (lt_min ?_ (by linarith)) ht₀_hi
+    have : b < b + δ := by linarith
+    linarith [ht₀b]
+  have ht₀_cd : q₀.1 ∈ Set.Ioo c d := ⟨hc_lt, hlt_d⟩
+  have hc_ge0 : 0 ≤ c := le_max_right _ _
+  have hcd_aδ : Set.Ioo c d ⊆ Set.Ioo (a - δ) (b + δ) :=
+    Set.Ioo_subset_Ioo (le_trans (le_max_left _ _) (le_max_left _ _))
+      (le_trans (min_le_left _ _) (min_le_left _ _))
+  have hcd_T' : Set.Ioo c d ⊆ Set.Ioo (q₀.1 - T') (q₀.1 + T') :=
+    Set.Ioo_subset_Ioo (le_trans (le_max_right _ _) (le_max_left _ _))
+      (le_trans (min_le_left _ _) (min_le_right _ _))
+  have hcd_0T : Set.Ioo c d ⊆ Set.Ioo (0 : ℝ) T :=
+    Set.Ioo_subset_Ioo (le_max_right _ _) (min_le_right _ _)
+  have hcd_Ici : Set.Ioo c d ⊆ Set.Ici (0 : ℝ) := fun s hs => le_of_lt (lt_of_le_of_lt hc_ge0 hs.1)
+  have hident : ∀ y : M, ∀ s ∈ Set.Ioo c d,
+      (Φ_fam s : M → M) y = Φ ((Φ_fam q₀.1 : M → M) y) s := by
+    intro y
+    have hflow : ∀ s ∈ Set.Ioo c d,
+        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => (Φ_fam u : M → M) y) (Set.Ioo c d) s
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (Xt s ((Φ_fam s : M → M) y))) := by
+      intro s hs
+      have heq : Xt s ((Φ_fam s : M → M) y) = -(deTurckVF (I := I) (g_DT s) g_bg
+          ((Φ_fam s : M → M) y)) := by
+        rw [hXt_eq s (hcd_aδ hs) ((Φ_fam s : M → M) y)]
+      rw [heq]
+      exact (hΦode y s (hcd_0T hs)).mono hcd_Ici
+    have hflow' : ∀ s ∈ Set.Ioo c d,
+        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => Φ ((Φ_fam q₀.1 : M → M) y) u)
+          (Set.Ioo c d) s
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (Xt s (Φ ((Φ_fam q₀.1 : M → M) y) s))) := fun s hs =>
+      (hΦ_bare ((Φ_fam q₀.1 : M → M) y) s (hcd_T' hs)).hasMFDerivWithinAt.mono (subset_refl _)
+    have hstart : (fun u : ℝ => (Φ_fam u : M → M) y) q₀.1
+        = (fun u : ℝ => Φ ((Φ_fam q₀.1 : M → M) y) u) q₀.1 := by
+      simp only [hΦ_init]
+    exact bare_integral_flow_eqOn_of_jointC1 (a := c) (b := d) (t₀ := q₀.1)
+      Xt hXt_auto (fun u : ℝ => (Φ_fam u : M → M))
+      (fun u : ℝ => fun p : M => Φ p u) y ((Φ_fam q₀.1 : M → M) y) ht₀_cd hflow hflow' hstart
+  set W : Set (ℝ × M) := Set.Ioo c d ×ˢ (Set.univ : Set M) with hW_def
+  have hW_open : IsOpen W := isOpen_Ioo.prod isOpen_univ
+  have hq₀_W : q₀ ∈ W := ⟨ht₀_cd, Set.mem_univ _⟩
+  have hΦfam_t₀ : ContMDiff I I ∞ (Φ_fam q₀.1 : M → M) := Diffeomorph.mfderiv_contMDiff _
+  have hF : ContMDiff (𝓘(ℝ, ℝ).prod I) (𝓘(ℝ, ℝ).prod I) ∞
+      (fun q : ℝ × M => (q.1, (Φ_fam q₀.1 : M → M) q.2)) :=
+    contMDiff_fst.prodMk (hΦfam_t₀.comp contMDiff_snd)
+  have ht₀_T' : q₀.1 ∈ Set.Ioo (q₀.1 - T') (q₀.1 + T') := ⟨by linarith, by linarith⟩
+  have hG_at : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) I ∞ (fun p : ℝ × M => Φ p.2 p.1)
+      (Set.Ioo (q₀.1 - T') (q₀.1 + T') ×ˢ (Set.univ : Set M))
+      ((fun q : ℝ × M => (q.1, (Φ_fam q₀.1 : M → M) q.2)) q₀) :=
+    hΦ_smooth _ ⟨ht₀_T', Set.mem_univ _⟩
+  have hmaps : Set.MapsTo (fun q : ℝ × M => (q.1, (Φ_fam q₀.1 : M → M) q.2))
+      W (Set.Ioo (q₀.1 - T') (q₀.1 + T') ×ˢ (Set.univ : Set M)) := by
+    rintro ⟨s, y⟩ ⟨hs, -⟩
+    exact ⟨hcd_T' hs, Set.mem_univ _⟩
+  have hcomp : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) I ∞
+      (fun q : ℝ × M => Φ ((Φ_fam q₀.1 : M → M) q.2) q.1) W q₀ :=
+    (hG_at.comp q₀ (hF.contMDiffAt.contMDiffWithinAt) hmaps)
+  have hcongr_W : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) I ∞
+      (fun q : ℝ × M => (Φ_fam q.1 : M → M) q.2) W q₀ := by
+    refine hcomp.congr_of_eventuallyEq ?_ ?_
+    · filter_upwards [self_mem_nhdsWithin] with q hq
+      exact hident q.2 q.1 hq.1
+    · exact hident q₀.2 q₀.1 ht₀_cd
+  have hW_nhds : W ∈ 𝓝[Set.Ioo (0 : ℝ) T ×ˢ Set.univ] q₀ :=
+    mem_nhdsWithin_of_mem_nhds (hW_open.mem_nhds hq₀_W)
+  exact hcongr_W.mono_of_mem_nhdsWithin hW_nhds
+
+/-- **Base-point-motion derivative of the conjugating flow (the conjunct-3 datum).**
+
+For the conjugating flow pinned by `hΦode`, freezing the metric index and the spatial Jacobians
+at the interior time `t` and moving only the base point `Φ_fam s x`, the frozen-vector
+chart-metric map along the orbit has within-set derivative `-metricTransportResidual`.  This is
+the orbit directional derivative of `y ↦ (g_DT t).inner y (dΦv) (dΦw)` along the orbit velocity
+`-deTurckVF`, identified by metric compatibility (`∂_k G_{ij} = Σ Γ G`) with the symmetric
+Christoffel-correction pairing that defines `metricTransportResidual`.  Needs only `hΦode` (the
+orbit's chart-differentiability) and the smoothness of `g_DT t`; independent of joint smoothness. -/
+theorem conjugating_flow_basepoint_motion
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
+    (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
+    (hΦode : ∀ x : M, ∀ t ∈ Set.Ioo (0 : ℝ) T,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => (Φ_fam s : M → M) x)
+        (Set.Ici (0 : ℝ)) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight
+          (-(deTurckVF (I := I) (g_DT t) g_bg ((Φ_fam t : M → M) x))))) :
+    ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
+      HasDerivWithinAt
+        (fun s : ℝ => (g_DT t).inner ((Φ_fam s : M → M) x)
+          (mfderiv I I (Φ_fam t : M → M) x v) (mfderiv I I (Φ_fam t : M → M) x w))
+        (-metricTransportResidual (I := I) (g_DT t)
+            (deTurckVF (I := I) (g_DT t) g_bg) Φ_fam t x v w) (Set.Ici 0) t := by
+  sorry
 
 /-- **Flat variational data of the conjugating flow (faithful open input).**
 
