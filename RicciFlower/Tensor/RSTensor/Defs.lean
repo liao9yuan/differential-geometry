@@ -623,5 +623,45 @@ omit [FiniteDimensional 𝕜 E] in
 theorem tensor0SSpace_continuousLinearEquiv_symm_coe (s : ℕ) (x : M) :
     ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) s x).symm : _ → _) = id := rfl
 
+/-- Applying the mixed-tensor CLE to a tensor and then to the model version of a
+covariant input agrees with applying the tensor first and then passing the
+output through the covariant CLE. -/
+theorem tensorRSSpace_continuousLinearEquiv_apply_apply
+    (r s : ℕ) (x : M) (T : TensorRSSpace r s I x)
+    (input : Tensor0SSpace r I x) :
+    tensorRSSpace_continuousLinearEquiv (I := I) (M := M) r s x T
+        (Tensor0SSpace.toModel (I := I) input) =
+      Tensor0SSpace.toModel (I := I) (T input) := by
+  rfl
+
+/-- Applying the inverse mixed-tensor CLE to a model tensor and then to a
+covariant input agrees with applying the model tensor to the model input and
+then returning through the covariant inverse CLE. -/
+theorem tensorRSSpace_continuousLinearEquiv_symm_apply_apply
+    (r s : ℕ) (x : M) (T : TensorRSModel r s 𝕜 E)
+    (input : Tensor0SSpace r I x) :
+    ((tensorRSSpace_continuousLinearEquiv (I := I) (M := M) r s x).symm T)
+        input =
+      Tensor0SSpace.ofModel (I := I) (x := x)
+        (T (Tensor0SSpace.toModel (I := I) input)) := by
+  rfl
+
+set_option linter.unnecessarySimpa false in
+/-- The canonical scalar action on a mixed-tensor fiber is pointwise scalar
+action on the underlying continuous-linear-map model. -/
+theorem tensorRSSpace_smul_apply
+    {r s : ℕ} {x : M} (c : 𝕜) (T : TensorRSSpace r s I x)
+    (input : Tensor0SSpace r I x) :
+    (c • T) input = c • T input := by
+  apply Tensor0SSpace.toModel_injective (I := I)
+  have h :=
+    congrArg
+      (fun F : TensorRSModel r s 𝕜 E =>
+        F (Tensor0SSpace.toModel (I := I) input))
+      (TensorRSSpace.toModel_smul (I := I) (x := x) c T)
+  simpa [TensorRSSpace.toModel, Tensor0SSpace.toModel,
+    tensorRSSpace_continuousLinearEquiv_apply_apply,
+    ContinuousLinearMap.smul_apply, Tensor0SSpace.toModel_smul] using h
+
 end
 end Tensor0SBundle

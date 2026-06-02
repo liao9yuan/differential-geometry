@@ -59,6 +59,20 @@ theorem component0S_product
   rw [component0S_apply, Bundle.continuousMultilinearMap.product_fun_apply]
   rfl
 
+/-- Permute the slots of a covariant tensor at one point. -/
+def permute0S
+    (σ : Fin s ≃ Fin s) (A : Tensor0SSpace s I x) : Tensor0SSpace s I x :=
+  A.domDomCongr σ
+
+@[simp]
+theorem component0S_permute0S
+    (σ : Fin s ≃ Fin s) (A : Tensor0SSpace s I x)
+    (slots : Fin s -> Idx) :
+    component0S (I := I) basis (permute0S (I := I) σ A) slots =
+      component0S (I := I) basis A (slots ∘ σ) := by
+  rw [component0S_apply, component0S_apply]
+  simp [permute0S]
+
 end Covariant
 
 section Mixed
@@ -83,6 +97,40 @@ theorem componentRS_apply
       (T (basisTensor0S (I := I) basis upper))
         (fun a => basis (lower a)) :=
   rfl
+
+set_option backward.isDefEq.respectTransparency false in
+@[simp]
+theorem componentRS_smul
+    (c : 𝕜) (T : TensorRSSpace r s I x)
+    (upper : Fin r -> Idx) (lower : Fin s -> Idx) :
+    componentRS (I := I) basis (c • T) upper lower =
+      c * componentRS (I := I) basis T upper lower := by
+  unfold componentRS
+  simp
+
+/-- Scalar multiplication of a mixed tensor through the canonical model
+equivalence.  This avoids downstream dependence on the reducible
+`ContinuousLinearMap` representation of `TensorRSSpace`. -/
+def smulRS (c : 𝕜) (T : TensorRSSpace r s I x) :
+    TensorRSSpace r s I x :=
+  TensorRSSpace.ofModel (I := I) (x := x) (c • TensorRSSpace.toModel (I := I) T)
+
+set_option backward.isDefEq.respectTransparency false in
+@[simp]
+theorem componentRS_smulRS
+    (c : 𝕜) (T : TensorRSSpace r s I x)
+    (upper : Fin r -> Idx) (lower : Fin s -> Idx) :
+    componentRS (I := I) basis (smulRS (I := I) c T) upper lower =
+      c * componentRS (I := I) basis T upper lower := by
+  unfold componentRS smulRS
+  unfold TensorRSSpace.ofModel
+  rw [tensorRSSpace_continuousLinearEquiv_symm_apply_apply]
+  rw [ContinuousLinearMap.smul_apply]
+  rw [TensorRSSpace.toModel]
+  rw [tensorRSSpace_continuousLinearEquiv_apply_apply]
+  rw [← Tensor0SSpace.toModel_smul]
+  rw [Tensor0SSpace.ofModel_toModel]
+  rw [component0S_smul]
 
 /-- Expanding the Hom input of a mixed tensor in a basis gives the usual
 component contraction formula. -/

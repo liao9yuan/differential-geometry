@@ -616,6 +616,40 @@ inductive HigherCovDerivRSRealizes
             TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
               (n := (∞ : WithTop ℕ∞)) r ((k + 1) + s))
 
+/-- Unpack the first derivative realization of a `(1,2)` mixed tensor into
+the corresponding total-nabla realization. -/
+theorem HigherCovDerivRSRealizes.one_12
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 1 2}
+    {T1 : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 1 3}
+    (h : HigherCovDerivRSRealizes (𝕜 := 𝕜) (E := E) (H := H)
+      (I := I) (M := M) cov T 1 T1) :
+    TotalNablaRSRealizes (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      1 2 cov T T1 := by
+  exact
+    match h with
+    | HigherCovDerivRSRealizes.succ HigherCovDerivRSRealizes.zero hstep =>
+        by simpa using hstep
+
+/-- Pointwise form of `HigherCovDerivRSRealizes.one_12`. -/
+theorem HigherCovDerivRSRealizes.one_apply_12
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 1 2}
+    {T1 : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 1 3}
+    (h : HigherCovDerivRSRealizes (𝕜 := 𝕜) (E := E) (H := H)
+      (I := I) (M := M) cov T 1 T1)
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (x : M) (β : Tensor0SSpace 1 I x) (slots : Fin 2 -> TangentSpace I x) :
+    T1 x β (Fin.cons (X x) slots) =
+      nablaRSFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        1 2 cov X T x β slots :=
+  (HigherCovDerivRSRealizes.one_12 (𝕜 := 𝕜) (E := E) (H := H)
+    (I := I) (M := M) h).apply X x β slots
+
 theorem higherCovDeriv0SRealizes_two_apply {s : ℕ}
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     {nablaAlpha : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)

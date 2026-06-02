@@ -180,6 +180,50 @@ theorem tensorRSModelAt_trivializationAt_symm (r s : ℕ) (x₀ : M)
           (fun x => TensorRSSpace r s I x) x₀)
         T)
 
+/-- Fixed-chart mixed tensor modelization is additive in the fiber tensor on
+the fixed trivialization domain. -/
+theorem tensorRSModelAt_add_of_mem (r s : ℕ) (x₀ x : M)
+    (hx : x ∈ (trivializationAt (TensorRSModel r s 𝕜 E)
+      (fun x => TensorRSSpace r s I x) x₀).baseSet)
+    (T U : TensorRSSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s x) :
+    tensorRSModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        r s x₀ x (T + U) =
+      tensorRSModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        r s x₀ x T +
+      tensorRSModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        r s x₀ x U := by
+  let e := trivializationAt (TensorRSModel r s 𝕜 E)
+    (fun x => TensorRSSpace r s I x) x₀
+  have hcoe : ⇑(e.linearMapAt 𝕜 x) = fun z => (e ⟨x, z⟩).2 := by
+    exact e.coe_linearMapAt_of_mem (R := 𝕜) hx
+  have hsum := congrFun hcoe (T + U)
+  have hT := congrFun hcoe T
+  have hU := congrFun hcoe U
+  change (e ⟨x, T + U⟩).2 = (e ⟨x, T⟩).2 + (e ⟨x, U⟩).2
+  rw [← hsum, ← hT, ← hU]
+  exact map_add (e.linearMapAt 𝕜 x) T U
+
+/-- Fixed-chart mixed tensor modelization is homogeneous in the fiber tensor on
+the fixed trivialization domain. -/
+theorem tensorRSModelAt_smul_of_mem (r s : ℕ) (x₀ x : M)
+    (hx : x ∈ (trivializationAt (TensorRSModel r s 𝕜 E)
+      (fun x => TensorRSSpace r s I x) x₀).baseSet)
+    (c : 𝕜)
+    (T : TensorRSSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s x) :
+    tensorRSModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        r s x₀ x (c • T) =
+      c • tensorRSModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        r s x₀ x T := by
+  let e := trivializationAt (TensorRSModel r s 𝕜 E)
+    (fun x => TensorRSSpace r s I x) x₀
+  have hcoe : ⇑(e.linearMapAt 𝕜 x) = fun z => (e ⟨x, z⟩).2 := by
+    exact e.coe_linearMapAt_of_mem (R := 𝕜) hx
+  have hsmul := congrFun hcoe (c • T)
+  have hT := congrFun hcoe T
+  change (e ⟨x, c • T⟩).2 = c • (e ⟨x, T⟩).2
+  rw [← hsmul, ← hT]
+  exact map_smul (e.linearMapAt 𝕜 x) c T
+
 /-- The chart-local model mixed tensor field obtained from a mixed tensor field
 by the fixed tensor-bundle trivialization centered at `x₀`. -/
 noncomputable def tensorRSModelInChart (r s : ℕ) (x₀ : M)
@@ -188,6 +232,62 @@ noncomputable def tensorRSModelInChart (r s : ℕ) (x₀ : M)
     (y : E) : TensorRSModel r s 𝕜 E :=
   tensorRSModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
     r s x₀ ((extChartAt I x₀).symm y) (T ((extChartAt I x₀).symm y))
+
+/-- In the centered chart-neighborhood, fixed-chart mixed tensor modelization is
+additive in the fiber tensor. -/
+theorem tensorRSModelInChart_add_eventually (r s : ℕ) (x₀ : M)
+    (T U : (x : M) →
+      TensorRSSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s x) :
+    (tensorRSModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        r s x₀ (fun x => T x + U x)) =ᶠ[
+      𝓝[Set.range I] (extChartAt I x₀ x₀)]
+      (fun y =>
+        tensorRSModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+          r s x₀ T y +
+        tensorRSModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+          r s x₀ U y) := by
+  filter_upwards [extChartAt_target_mem_nhdsWithin (I := I) x₀] with y hy
+  have hy_src : (extChartAt I x₀).symm y ∈ (chartAt H x₀).source := by
+    rw [← extChartAt_source (I := I)]
+    exact (extChartAt I x₀).map_target hy
+  have hy_base :
+      (extChartAt I x₀).symm y ∈ (trivializationAt (TensorRSModel r s 𝕜 E)
+        (fun x => TensorRSSpace r s I x) x₀).baseSet := by
+    have hy_tan :
+        (extChartAt I x₀).symm y ∈
+          (trivializationAt E (TangentSpace I : M → Type _) x₀).baseSet := by
+      simpa [TangentBundle.trivializationAt_baseSet, extChartAt_source] using hy_src
+    rw [hom_trivializationAt_baseSet]
+    exact ⟨hy_tan, hy_tan⟩
+  exact tensorRSModelAt_add_of_mem (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+    (M := M) r s x₀ ((extChartAt I x₀).symm y) hy_base (T _) (U _)
+
+/-- In the centered chart-neighborhood, fixed-chart mixed tensor modelization is
+homogeneous in the fiber tensor. -/
+theorem tensorRSModelInChart_smul_eventually (r s : ℕ) (x₀ : M) (c : 𝕜)
+    (T : (x : M) →
+      TensorRSSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s x) :
+    (tensorRSModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        r s x₀ (fun x => c • T x)) =ᶠ[
+      𝓝[Set.range I] (extChartAt I x₀ x₀)]
+      (fun y =>
+        c • tensorRSModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+          r s x₀ T y) := by
+  filter_upwards [extChartAt_target_mem_nhdsWithin (I := I) x₀] with y hy
+  have hy_src : (extChartAt I x₀).symm y ∈ (chartAt H x₀).source := by
+    rw [← extChartAt_source (I := I)]
+    exact (extChartAt I x₀).map_target hy
+  have hy_base :
+      (extChartAt I x₀).symm y ∈ (trivializationAt (TensorRSModel r s 𝕜 E)
+        (fun x => TensorRSSpace r s I x) x₀).baseSet := by
+    have hy_tan :
+        (extChartAt I x₀).symm y ∈
+          (trivializationAt E (TangentSpace I : M → Type _) x₀).baseSet := by
+      simpa [TangentBundle.trivializationAt_baseSet, extChartAt_source] using hy_src
+    rw [hom_trivializationAt_baseSet]
+    exact ⟨hy_tan, hy_tan⟩
+  exact tensorRSModelAt_smul_of_mem (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+    (M := M) r s x₀ ((extChartAt I x₀).symm y) hy_base c (T _)
 end SmoothVectorFieldRSNabla
 
 end

@@ -909,6 +909,49 @@ theorem gammaL2_le_of_christoffel
     exact RicciFlow.christoffelRHS_id
       (M := M) gInv nablaRic (hinv_id s hs) i j k
 
+set_option linter.unusedDecidableInType false in
+/-- Component bridge from the HCG first metric covariant derivative to the
+coordinate/local-frame covariant derivative of metric components. -/
+theorem metricCov1_coord
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
+    (g h : SmoothRiemannianMetric I M)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
+    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (d a b : Idx) :
+    Tensor0SBundle.component0S (I := I) (hframe.toBasisAt hx)
+        (metricCovDeriv (I := I) g h 1 x)
+        (Fin.cons d (fun q : Fin 2 => if q = 0 then a else b) :
+          Fin 3 -> Idx) =
+      Coordinates.metricCovDerivForMetricCompInFrame
+        (I := I) g
+        (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
+        frame (localFrameOneOfInf (I := I) frame hframe) x d a b := by
+  let cov := LeviCivita.leviCivitaConnectionOfMetric (I := I) h
+  let hframe1 : IsLocalFrameOn I E (1 : WithTop ℕ∞) frame u :=
+    localFrameOneOfInf (I := I) frame hframe
+  rw [metricCovDeriv_one_component_localFrame
+    (I := I) (h := g) (gRef := h) frame hframe hu hx d a b]
+  unfold Coordinates.metricCovDerivForMetricCompInFrame
+    Coordinates.metricCompForMetricInFrame
+  have ha :
+      (cov (frame a) x) (frame d x) =
+        ∑ p : Idx,
+          Coordinates.christoffelSymbolInFrame cov frame hframe1 x d a p •
+            frame p x :=
+    Coordinates.covariantDerivative_eq_sum_christoffel
+      (I := I) cov frame hframe1 hx d a
+  have hb :
+      (cov (frame b) x) (frame d x) =
+        ∑ p : Idx,
+          Coordinates.christoffelSymbolInFrame cov frame hframe1 x d b p •
+            frame p x :=
+    Coordinates.covariantDerivative_eq_sum_christoffel
+      (I := I) cov frame hframe1 hx d b
+  rw [ha, hb]
+  simp [map_sum, map_smul, cov]
+  ring
+
 /-- Canonical realized metric family with the Levi-Civita connection attached
 to each time slice.
 

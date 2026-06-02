@@ -89,6 +89,30 @@ def covariantDeriv_tensorRSModelAt (r s : ℕ)
         + T.comp (lieDeriv_correctionL (𝕜 := 𝕜) (E := E) r ΓX) := by
   rfl
 
+/-- The model-space mixed covariant derivative is additive in the tensor field
+and its directional component derivative. -/
+theorem covariantDeriv_tensorRSModelAt_add (r s : ℕ)
+    (dT_X dU_X : TensorRSModel r s 𝕜 E) (ΓX : E →L[𝕜] E)
+    (T U : TensorRSModel r s 𝕜 E) :
+    covariantDeriv_tensorRSModelAt (𝕜 := 𝕜) (E := E) r s (dT_X + dU_X) ΓX (T + U) =
+      covariantDeriv_tensorRSModelAt (𝕜 := 𝕜) (E := E) r s dT_X ΓX T +
+        covariantDeriv_tensorRSModelAt (𝕜 := 𝕜) (E := E) r s dU_X ΓX U := by
+  unfold covariantDeriv_tensorRSModelAt
+  rw [ContinuousLinearMap.comp_add, ContinuousLinearMap.add_comp]
+  abel
+
+/-- The model-space mixed covariant derivative is homogeneous under constant
+scalar multiplication of the tensor field and its directional component
+derivative. -/
+theorem covariantDeriv_tensorRSModelAt_smul (r s : ℕ)
+    (c : 𝕜) (dT_X : TensorRSModel r s 𝕜 E) (ΓX : E →L[𝕜] E)
+    (T : TensorRSModel r s 𝕜 E) :
+    covariantDeriv_tensorRSModelAt (𝕜 := 𝕜) (E := E) r s (c • dT_X) ΓX (c • T) =
+      c • covariantDeriv_tensorRSModelAt (𝕜 := 𝕜) (E := E) r s dT_X ΓX T := by
+  unfold covariantDeriv_tensorRSModelAt
+  rw [ContinuousLinearMap.comp_smul, ContinuousLinearMap.smul_comp]
+  module
+
 /-- Evaluation form of the model-space covariant derivative of an `(r,s)`
 tensor.
 
