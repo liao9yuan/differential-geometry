@@ -735,9 +735,13 @@ variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
 /-- **Continuity of `expMap g p` on the whole tangent space.** Under
 geodesic completeness (`isGeodesicOn_Ici_of_complete`), the exponential map
-at `p` is continuous on the entire tangent space `T_p M`. The proof propagates
-the smooth dependence of geodesics on initial conditions chart-locally
-along the compact arc `[0, 1]`. -/
+at `p` is continuous on the entire tangent space `T_p M`.
+
+**Status: DEFERRED — the proof body is `sorry`.** The intended argument
+propagates the smooth dependence of geodesics on initial conditions
+chart-locally along the compact arc `[0, 1]`, but this is not yet formalized.
+Consumers (`expMap_total`, and transitively the Bonnet–Myers compactness /
+finite-fundamental-group corollaries) therefore also depend on `sorryAx`. -/
 theorem expMap_continuous_of_geodesic_complete
     (g : SmoothRiemannianMetric I M) (p : M) :
     Continuous (expMap (I := I) g p) := by
@@ -1095,9 +1099,14 @@ under a diameter bound.** On a complete Riemannian manifold
 (`IsRiemannianManifold I M`, `CompleteSpace M`), if the metric diameter of
 `Set.univ` is at most `ENNReal.ofReal R` (`R ≥ 0`), then `Set.univ` is
 contained in the image of `Metric.closedBall (0 : T_p M) R` under
-`expMap g p`. Intended construction: for each `q`, a unit-speed minimising
-geodesic from `p` to `q` has length `L = riemannianDist p q ≤ R` and initial
-velocity `L • v₀` in the closed ball, with `expMap g p (L • v₀) = q`. -/
+`expMap g p`.
+
+**Status: DEFERRED — the proof body is `sorry`.** Intended construction (not
+yet formalized): for each `q`, a unit-speed minimising geodesic from `p` to `q`
+has length `L = riemannianDist p q ≤ R` and initial velocity `L • v₀` in the
+closed ball, with `expMap g p (L • v₀) = q`. The Bonnet–Myers compactness /
+finite-fundamental-group corollaries that consume this lemma therefore depend
+on `sorryAx`. -/
 theorem expMap_surjective_on_closedBall_of_ediam_le
     (g : SmoothRiemannianMetric I M) (p : M) {R : ℝ} (hR : 0 ≤ R)
     (hdiam : Metric.ediam (Set.univ : Set M) ≤ ENNReal.ofReal R) :

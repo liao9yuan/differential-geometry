@@ -652,7 +652,14 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 manifold of dimension `n ≥ 2` with Ricci curvature bounded below by
 `(n-1) K` for some `K > 0`, the manifold is compact (`CompactSpace M`). The
 hypothesis `hEnorm` is the supplied structural identity that the fibre
-extended norm equals `ofReal (√ g.inner)`. -/
+extended norm equals `ofReal (√ g.inner)`.
+
+**Status: NOT yet sorry-free.** The compactness conclusion reduces (via
+`isCompact_univ` → `expMap` surjectivity from a bounded ball) to the two
+currently-`sorry` lemmas `expMap_surjective_on_closedBall_of_ediam_le` and
+`expMap_continuous_of_geodesic_complete` in `HopfRinow.lean`, so this theorem
+transitively depends on `sorryAx`. (Contrast `bonnet_myers_diameter_of_ricci_bound`,
+which is genuinely sorry-free.) -/
 theorem bonnet_myers_compactSpace_of_ricci_bound
     {M : Type*}
     {I : ModelWithCorners ℝ E H} [I.Boundaryless]
@@ -683,11 +690,13 @@ lifted manifold, and identifies the cover fibre over `x` with `π₁(M, x)`
 via monodromy. The hypothesis `hEnormBase` is the supplied structural
 identity that the fibre extended norm on `M` equals `ofReal (√ g.inner)`.
 
-One residual gap remains: the cross-instance norm-diamond bridge reconciling
-the lifted `RiemannianBundle` extended norm with the project `Tensor0SBundle`
-extended norm in the compactness application (the two agree pointwise as the
-square root of the lifted metric, but the explicit identification is left as
-a `sorry`). -/
+**Status: NOT yet sorry-free.** Two deferred gaps remain: (1) the cross-instance
+norm-diamond bridge reconciling the lifted `RiemannianBundle` extended norm with
+the project `Tensor0SBundle` extended norm in the compactness application (the
+two agree pointwise as the square root of the lifted metric, but the explicit
+identification is left as a `sorry` here); and (2) transitively, the compactness
+theorem it invokes rests on the deferred `expMap` surjectivity/continuity `sorry`s
+in `HopfRinow.lean`. So this theorem depends on `sorryAx`. -/
 theorem bonnet_myers_finite_fundamentalGroup_of_ricci_bound
     {M : Type*}
     {I : ModelWithCorners ℝ E H} [I.Boundaryless]
