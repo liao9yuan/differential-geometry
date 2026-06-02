@@ -918,6 +918,7 @@ import DifferentialGeometry.Geometry.Comparison.RadialSurjectivity
 import DifferentialGeometry.Geometry.Comparison.RiemannianDistContinuity
 import DifferentialGeometry.Geometry.Comparison.TangentNormDiamond
 import DifferentialGeometry.Geometry.Comparison.Variation.ArcLength
+import DifferentialGeometry.Geometry.Comparison.Variation.CovariantChainRule
 import DifferentialGeometry.Geometry.Comparison.Variation.CovariantCommutationCurvature
 import DifferentialGeometry.Geometry.Comparison.Variation.FirstVariation
 import DifferentialGeometry.Geometry.Comparison.Variation.FixedChartIdentities
