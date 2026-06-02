@@ -122,6 +122,7 @@ private theorem flow_mfderiv_continuousWithinAt_zero
       ContinuousWithinAt (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E))
         (Set.Ici (0 : ℝ)) 0 := sorry
 
+set_option linter.unusedSectionVars false in
 /-- **Bare geometric velocity on `(0,T)` for `Φ := Φ0`** (C3), transported from the interior
 flow `Φint` across their pointwise agreement on `(0,T)`.
 
@@ -138,8 +139,21 @@ theorem forwardFlow_bare_velocity_of_agree
         ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φint t x)))) :
     ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ0 s x) (Set.Ici (0 : ℝ)) t
-        ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φ0 t x))) := sorry
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φ0 t x))) := by
+  intro t ht x
+  have hIoo_nhds : Set.Ioo (0 : ℝ) T ∈ 𝓝 t := Ioo_mem_nhds ht.1 ht.2
+  have hint_at : HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φint s x) (Set.Ici (0 : ℝ)) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φint t x))) :=
+    ((hΦint_bare t ht x).hasMFDerivAt hIoo_nhds).hasMFDerivWithinAt
+  have hev : (fun s : ℝ => Φ0 s x) =ᶠ[𝓝[Set.Ici (0 : ℝ)] t] (fun s : ℝ => Φint s x) := by
+    refine Filter.eventuallyEq_of_mem (s := Set.Ioo (0 : ℝ) T)
+      (nhdsWithin_le_nhds hIoo_nhds) (fun s hs => ?_)
+    exact (hagree s hs x).symm
+  have hxpt : (fun s : ℝ => Φ0 s x) t = (fun s : ℝ => Φint s x) t := (hagree t ht x).symm
+  have hcongr := hint_at.congr_of_eventuallyEq hev hxpt
+  rwa [hagree t ht x] at hcongr
 
+set_option linter.unusedSectionVars false in
 /-- **Per-time diffeomorphisms on `(0,T)` for `Φ := Φ0`** (C2), transported from the interior
 flow `Φint` across their pointwise agreement on `(0,T)`.
 
@@ -150,7 +164,10 @@ theorem forwardFlow_diffeo_of_agree
     (Φ Φint : ℝ → M → M) (T : ℝ)
     (hagree : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, Φint t x = Φ t x)
     (hdiffeo_int : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∃ d : M ≃ₘ⟮I, I⟯ M, ∀ x : M, d x = Φint t x) :
-    ∀ t ∈ Set.Ioo (0 : ℝ) T, ∃ d : M ≃ₘ⟮I, I⟯ M, ∀ x : M, d x = Φ t x := sorry
+    ∀ t ∈ Set.Ioo (0 : ℝ) T, ∃ d : M ≃ₘ⟮I, I⟯ M, ∀ x : M, d x = Φ t x := by
+  intro t ht
+  obtain ⟨d, hd⟩ := hdiffeo_int t ht
+  exact ⟨d, fun x => (hd x).trans (hagree t ht x)⟩
 
 set_option linter.unusedVariables false in
 /-- A time-dependent field `X_DT` that is jointly `C∞` on the interior `(0,T) ×ˢ univ`
