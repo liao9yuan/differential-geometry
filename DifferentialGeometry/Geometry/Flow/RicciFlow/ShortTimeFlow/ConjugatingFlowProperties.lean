@@ -158,55 +158,31 @@ theorem conjugating_flow_jointContMDiffOn
     mem_nhdsWithin_of_mem_nhds (hW_open.mem_nhds hq₀_W)
   exact hcongr_W.mono_of_mem_nhdsWithin hW_nhds
 
-/-- **Base-point-motion derivative of the conjugating flow (the conjunct-3 datum).**
+/-- **Interior Ricci-flow PDE for the DeTurck pull-back metric (intrinsic).**
 
-For the conjugating flow pinned by `hΦode`, freezing the metric index and the spatial Jacobians
-at the interior time `t` and moving only the base point `Φ_fam s x`, the frozen-vector
-chart-metric map along the orbit has within-set derivative `-metricTransportResidual`.  This is
-the orbit directional derivative of `y ↦ (g_DT t).inner y (dΦv) (dΦw)` along the orbit velocity
-`-deTurckVF`, identified by metric compatibility (`∂_k G_{ij} = Σ Γ G`) with the symmetric
-Christoffel-correction pairing that defines `metricTransportResidual`.  Needs only `hΦode` (the
-orbit's chart-differentiability) and the smoothness of `g_DT t`; independent of joint smoothness. -/
-theorem conjugating_flow_basepoint_motion
-    (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
-    (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
-    (hΦode : ∀ x : M, ∀ t ∈ Set.Ioo (0 : ℝ) T,
-      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => (Φ_fam s : M → M) x)
-        (Set.Ici (0 : ℝ)) t
-        ((1 : ℝ →L[ℝ] ℝ).smulRight
-          (-(deTurckVF (I := I) (g_DT t) g_bg ((Φ_fam t : M → M) x))))) :
-    ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
-      HasDerivWithinAt
-        (fun s : ℝ => (g_DT t).inner ((Φ_fam s : M → M) x)
-          (mfderiv I I (Φ_fam t : M → M) x v) (mfderiv I I (Φ_fam t : M → M) x w))
-        (-metricTransportResidual (I := I) (g_DT t)
-            (deTurckVF (I := I) (g_DT t) g_bg) Φ_fam t x v w) (Set.Ici 0) t := by
-  sorry
+For the conjugating diffeomorphism family `Φ_fam` pinned to the genuine flow by the backward
+orbit ODE `hΦode` (`∂_s Φ_fam = -deTurckVF (g_DT s) g_bg ∘ Φ_fam` on `Ioo 0 T`), with `g_DT`
+solving the DeTurck–Ricci ODE (`hDT_deriv`), the DeTurck field jointly `C∞` on the interior
+(`hfield_reg`), and `g_DT`'s chart-Gram jointly `C∞` (`hgram_DT`), the pull-back metric family
+`g_fam s := (Φ_fam s)^* (g_DT s) = Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s)` satisfies the
+genuine Ricci flow on the interior: the intrinsic inner product `s ↦ (g_fam s).inner x v w` has
+within-set derivative `-2 · Ric(g_fam t)(x)(v, w)` at every interior `t`.
 
-/-- **Flat variational data of the conjugating flow (faithful open input).**
+This is the Hamilton–DeTurck payoff, stated and proved INTRINSICALLY (`g`-inner pairings,
+Levi-Civita / Lie-derivative / Ricci-naturality), never extracting a raw `M → E` chart
+coordinate.  The bare-`E` pushforwards `mfderiv (Φ_fam s) x v` appear only INSIDE the metric
+`(g_DT s).inner (Φ_fam s x)`, where the moving-chart `chartJ` reading cancels against the
+metric's, leaving the intrinsic pull-back inner product (`pullbackMetric_inner_eq_inner_mfderiv`).
+The time-derivative is the three-piece chain rule `∂_s(Φ_s^* g_DT_s) = Φ_s^*(∂_s g_DT_s +
+𝓛_{-deTurckVF} g_DT_s) = Φ_s^*(-2 Ric)` (the DeTurck cancellation `deTurckRicciRHS -
+𝓛_{deTurckVF} g = -2 Ric`), pulled back by Ricci naturality to `-2 Ric(g_fam)`; the
+moving-pushforward time-regularity is the Hartman joint-`C∞` content
+`conjugating_flow_jointContMDiffOn` (from `hfield_reg`).
 
-For the conjugating diffeomorphism family `Φ_fam` of the Hamilton–DeTurck construction —
-PINNED to the genuine flow by the backward bare-orbit ODE `hΦode`
-(`∂_s Φ_fam = -deTurckVF (g_DT s) g_bg ∘ Φ_fam` on `Ioo 0 T`) — the four flat variational
-facts of that flow hold:
-
-* `hv_flat`: existence of factor jets `T'`, `P'` realising the per-slot raw flat variational
-  identity `RawVariationalIdentityFlat Φ_fam t x v (T' t x v) (P' t x v)` on the interior;
-* `hcorr`: the Christoffel-correction equation relating those factor values to the negative
-  covariant slot value plus the Christoffel-correction term;
-* `hbase`: the base-point-motion datum (the frozen-vector chart-metric map along the orbit has
-  within-set derivative `-metricTransportResidual`);
-* `h_total_eval`: the three-piece additive chain rule for the full pulled-back inner product.
-
-These are the genuine open chart-ODE jet / variational-lift analytic inputs of the concrete
-conjugating flow.  They are TRUE for this flow: it is pinned to the genuine flow by `hΦode`,
-and the moving spatial Jacobian `s ↦ mfderiv (Φ_fam s) x v` they vary is time-differentiable
-because the DeTurck field is jointly `C∞` on the interior (`hfield_reg`) — so the flow is the
-genuine jointly-`C∞` flow of that field by Hartman smooth dependence (`hΦode` alone, a pointwise
-orbit derivative, does NOT supply this regularity).  They reference only the internal data
-`g_DT` / `Φ_fam` / `deTurckVF (g_DT t) g_bg`.  Faithful labeled deferred input for a dedicated
-fill effort (the on-disk Hartman / factor-jet machinery is faithful but not yet wired to this
-flow). -/
+This is exactly the interior datum the short-time-existence assembly consumes.  It replaces the
+former chart-`flat`-variational tower, whose per-slot `RawVariationalIdentityFlat` read the
+moving Jacobian as a raw `E`-coordinate (`chartJ`, discontinuous on multi-chart manifolds) and
+was dead in the consumer anyway. -/
 theorem conjugating_flow_flat_data
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
@@ -221,39 +197,18 @@ theorem conjugating_flow_flat_data
     (hfield_reg : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
         : TangentBundle I M))
-      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) :
-    ∃ T' P' : ℝ → ∀ x : M, TangentSpace I x → (E →L[ℝ] E),
-      (∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v : TangentSpace I x,
-          RawVariationalIdentityFlat (I := I) Φ_fam t x v (T' t x v) (P' t x v)) ∧
-      (∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v : TangentSpace I x,
-          (T' t x v) (mfderiv I I (Φ_fam t : M → M) x v) + (P' t x v) v
-            = negCovariantSlotValue (I := I) (g_DT t)
-                (deTurckVF (I := I) (g_DT t) g_bg) Φ_fam t x v
-              + christoffelCorrection (I := I) (g_DT t) (Φ_fam t x) (Φ_fam t x)
-                  (chartE_section_repr (I := I) (Φ_fam t x)
-                    (deTurckVF (I := I) (g_DT t) g_bg) (Φ_fam t x))
-                  (mfderiv I I (Φ_fam t : M → M) x v)) ∧
-      (∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
-          HasDerivWithinAt
-            (fun s : ℝ => (g_DT t).inner ((Φ_fam s : M → M) x)
-              (mfderiv I I (Φ_fam t : M → M) x v) (mfderiv I I (Φ_fam t : M → M) x w))
-            (-metricTransportResidual (I := I) (g_DT t)
-                (deTurckVF (I := I) (g_DT t) g_bg) Φ_fam t x v w) (Set.Ici 0) t) ∧
-      (∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
-          HasDerivWithinAt
-            (fun s : ℝ => (g_DT s).inner (Φ_fam s x)
-              (mfderiv I I (Φ_fam s : M → M) x v) (mfderiv I I (Φ_fam s : M → M) x w))
-            (((-2 : ℝ) * ricciTensor (I := I) (g_DT t) (Φ_fam t x)
-                    (mfderiv I I (Φ_fam t : M → M) x v)
-                    (mfderiv I I (Φ_fam t : M → M) x w)
-                + lieDerivMetric (I := I) (g_DT t)
-                    (deTurckVF (I := I) (g_DT t) g_bg) (Φ_fam t x)
-                    (mfderiv I I (Φ_fam t : M → M) x v)
-                    (mfderiv I I (Φ_fam t : M → M) x w))
-              + (-lieDerivMetric (I := I) (g_DT t)
-                    (deTurckVF (I := I) (g_DT t) g_bg) (Φ_fam t x)
-                    (mfderiv I I (Φ_fam t : M → M) x v)
-                    (mfderiv I I (Φ_fam t : M → M) x w))) (Set.Ici 0) t) := by
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+    (hgram_DT : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × M =>
+          Integral.Measure.chartGramMatrix (I := I) (g_DT p.1) x₀ p.2 i j)
+        (Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+    ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
+      HasDerivWithinAt
+        (fun s : ℝ =>
+          (Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s)).inner x v w)
+        ((-2) * ricciTensor (I := I)
+          (Diffeomorph.pullbackMetric (g_DT t) (Φ_fam t)) x v w) (Set.Ici 0) t := by
   sorry
 
 /-- **Whole-`Ico 0 T` orbit and total-space pushforward continuity of the conjugating flow
