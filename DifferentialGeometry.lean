@@ -929,6 +929,7 @@ import DifferentialGeometry.Geometry.Comparison.Variation.PerpFrame
 import DifferentialGeometry.Geometry.Comparison.Variation.RegularParameterFirstVariation
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariation
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariationMinimiser
+import DifferentialGeometry.Geometry.Comparison.Variation.SmoothCurveGerm
 import DifferentialGeometry.Geometry.Comparison.Variation.SpeedDerivative
 import DifferentialGeometry.Geometry.Connection.Chart.Basic
 import DifferentialGeometry.Geometry.Connection.Chart.Christoffel
