@@ -11,11 +11,20 @@
 !/LICENSE
 !/.gitignore
 !/CLAUDE.md
-!/STRUCTURE.md
-!/NAMING.md
-!/MIGRATION_PLAN.md
-!/PROGRESS.md
 # end of whitelist
+
+# Internal planning / convention docs — never tracked
+/STRUCTURE.md
+/NAMING.md
+/MIGRATION_PLAN.md
+/PROGRESS.md
+/architecture.md
+/*_PLAN.md
+/*_PROMPTS.md
+/REFACTOR_*.md
+/PROMPTS_*.md
+/SYNTHETIC_AUDIT.md
+/TASKS.md
 
 .lake/
 
