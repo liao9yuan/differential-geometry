@@ -23,22 +23,30 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+omit [CompactSpace M] in
 /-- The corrected chart ODE `u' = chartTrivRepr α (X t) u` has a Picard–Lindelöf solution
 flow on `[0, T]` anchored at `t = 0` (`flow y 0 = y`) on a closed ball of radius `r'`, from
-continuity-in-time + uniform chart-Lipschitz data. -/
+continuity-in-time + uniform chart-Lipschitz data on the closed ball of radius `r`.  The
+solution is **confined** to the ball of radius `r` throughout `[0, T]`: starting inside the
+smaller ball of radius `r'` it can drift only by the bounded velocity, and the horizon `T` is
+chosen short enough that it never leaves the closed `r`-ball on which the field data hold.
+This confinement is exactly the membership consumed downstream (via the chart target, which
+contains that ball) to read the chart velocity as the trivialised `chartTrivRepr`. -/
 theorem corrected_chart_local_picard_from_zero
-    (X : ℝ → ∀ x : M, TangentSpace I x) (α : M)
+    (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (r : ℝ) (hr : 0 < r)
     (hCont : ContinuousOn (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2)) (Set.univ : Set (ℝ × M)))
-    (hLip : ∃ L K r : ℝ, 0 < L ∧ 0 < r ∧ 0 ≤ K ∧
+    (hLip : ∃ L K : ℝ, 0 < L ∧ 0 ≤ K ∧
       (∀ t ∈ Set.Icc (0 : ℝ) L, ContinuousOn (fun y : E => chartTrivRepr (I := I) α (X t) y) (Metric.closedBall (I ((chartAt H α) α)) r)) ∧
       (∀ t ∈ Set.Icc (0 : ℝ) L, LipschitzOnWith (Real.toNNReal K) (fun y : E => chartTrivRepr (I := I) α (X t) y) (Metric.ball (I ((chartAt H α) α)) r))) :
-    ∃ T : ℝ, 0 < T ∧ ∃ r' : ℝ, 0 < r' ∧
+    ∃ T : ℝ, 0 < T ∧ ∃ r' : ℝ, 0 < r' ∧ ∃ C : ℝ, 0 ≤ C ∧
       ∃ flow : E → ℝ → E,
         (∀ y ∈ Metric.closedBall (I ((chartAt H α) α)) r',
           flow y 0 = y ∧
           ∀ t ∈ Set.Icc (0 : ℝ) T,
-            HasDerivWithinAt (flow y) (chartTrivRepr (I := I) α (X t) (flow y t)) (Set.Icc (0 : ℝ) T) t) := by
-  obtain ⟨L, K, r, hL, hr, hK, _hContY, hLipt⟩ := hLip
+            HasDerivWithinAt (flow y) (chartTrivRepr (I := I) α (X t) (flow y t)) (Set.Icc (0 : ℝ) T) t ∧
+            flow y t ∈ Metric.closedBall (I ((chartAt H α) α)) r ∧
+            ‖chartTrivRepr (I := I) α (X t) (flow y t)‖ ≤ C) := by
+  obtain ⟨L, K, hL, hK, _hContY, hLipt⟩ := hLip
   set f : ℝ → E → E := fun t y => chartTrivRepr (I := I) α (X t) y with hf_def
   set x₀ : E := I ((chartAt H α) α) with hx₀_def
   have hCont_t :
@@ -184,19 +192,39 @@ theorem corrected_chart_local_picard_from_zero
       have : (LboundN : ℝ) = Lbound := hLboundN
       rw [this]; exact hLb
     · exact hmul_max
-  obtain ⟨flow, hflow⟩ :=
-    hPL.exists_forall_mem_closedBall_eq_forall_mem_Icc_hasDerivWithinAt
-  refine ⟨T, hT_pos, r', hr'_pos, flow, ?_⟩
+  have hr'_le_r : r' ≤ r := by rw [hr'_def]; linarith
+  have ha_le_r : a ≤ r := by rw [ha_def]; linarith
+  have hball_aN_sub_r : Metric.closedBall x₀ (aN : ℝ) ⊆ Metric.closedBall x₀ r :=
+    Metric.closedBall_subset_closedBall (by rw [haN]; exact ha_le_r)
+  have hpt : ∀ y ∈ Metric.closedBall x₀ rN, ∃ g : ℝ → E,
+      g 0 = y ∧
+      ∀ t ∈ Set.Icc (0 : ℝ) T,
+        HasDerivWithinAt g (f t (g t)) (Set.Icc (0 : ℝ) T) t ∧
+          g t ∈ Metric.closedBall x₀ (aN : ℝ) := by
+    intro y hy'
+    obtain ⟨β, hβ⟩ := ODE.FunSpace.exists_isFixedPt_next hPL hy'
+    refine ⟨β.compProj, ?_, ?_⟩
+    · change β.compProj (t₀_set : ℝ) = y
+      rw [ODE.FunSpace.compProj_val, ← hβ, ODE.FunSpace.next_apply₀]
+    · intro t ht
+      refine ⟨?_, β.compProj_mem_closedBall hPL.mul_max_le⟩
+      apply ODE.hasDerivWithinAt_picard_Icc t₀_set.2 hPL.continuousOn_uncurry
+        β.continuous_compProj.continuousOn
+        (fun _ _ ↦ β.compProj_mem_closedBall hPL.mul_max_le) y ht |>.congr_of_mem _ ht
+      intro t' ht'
+      nth_rw 1 [← hβ]
+      rw [ODE.FunSpace.compProj_of_mem ht', ODE.FunSpace.next_apply]
+  choose! flow hflow_init hflow_rest using hpt
+  refine ⟨T, hT_pos, r', hr'_pos, Lbound, hLbound_pos.le, flow, ?_⟩
   intro y hy
   have hy' : y ∈ Metric.closedBall x₀ rN := by
     rw [Metric.mem_closedBall] at hy ⊢
     rw [hrN]; exact hy
-  obtain ⟨h_init, h_flow⟩ := hflow y hy'
-  refine ⟨?_, ?_⟩
-  · have : flow y (t₀_set : ℝ) = y := h_init
-    simpa [t₀_set] using this
-  · intro t ht
-    have hd := h_flow t ht
-    exact hd
+  refine ⟨hflow_init y hy', ?_⟩
+  intro t ht
+  obtain ⟨hd, hmem⟩ := hflow_rest y hy' t ht
+  refine ⟨hd, hball_aN_sub_r hmem, ?_⟩
+  have hbound := hnorm_le t ht (flow y t) hmem
+  simpa only [hf_def] using hbound
 
 end DifferentialGeometry.PDE.RicciFlow.ODE

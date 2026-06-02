@@ -164,7 +164,8 @@ theorem corrected_chart_field_lipschitz_of_data
       (∀ t ∈ Set.Icc (0 : ℝ) L,
         ContinuousOn (fun y : E => chartTrivRepr (I := I) α (X t) y) (Metric.closedBall (I ((chartAt H α) α)) r)) ∧
       (∀ t ∈ Set.Icc (0 : ℝ) L,
-        LipschitzOnWith (Real.toNNReal K) (fun y : E => chartTrivRepr (I := I) α (X t) y) (Metric.ball (I ((chartAt H α) α)) r)) := by
+        LipschitzOnWith (Real.toNNReal K) (fun y : E => chartTrivRepr (I := I) α (X t) y) (Metric.ball (I ((chartAt H α) α)) r)) ∧
+      Metric.closedBall (I ((chartAt H α) α)) r ⊆ (extChartAt I α).target := by
   classical
   set center : E := extChartAt I α α with hcenter
   have hcenter_eq : center = I ((chartAt H α) α) := by rw [hcenter, extChartAt_coe]; rfl
@@ -227,10 +228,12 @@ theorem corrected_chart_field_lipschitz_of_data
         exact pointwise_tendsto_chartTrivRepr (I := I) X α L hcont z
     · exact hLipPos t ⟨h0, ht.2⟩
   rw [hcenter_eq] at hLipAll
-  refine ⟨L, C, r, hL_pos, hr_pos, hC_nonneg, ?_, ?_⟩
+  refine ⟨L, C, r, hL_pos, hr_pos, hC_nonneg, ?_, ?_, ?_⟩
   · intro t ht
     exact (hLipAll t ht).continuousOn
   · intro t ht
     exact (hLipAll t ht).mono Metric.ball_subset_closedBall
+  · rw [← hcenter_eq]
+    exact hcball_sub.trans interior_subset
 
 end DifferentialGeometry.PDE.RicciFlow.ODE
