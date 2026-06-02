@@ -13,7 +13,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Inte
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.CorrectedChartAnchor
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.CorrectedVariationalEndpoint
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.FieldTimeExtension
-import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOperator.MovingTrivJet
 
 /-!
 # Forward (one-sided) flow of the DeTurck vector field
@@ -49,28 +48,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **Orbit right-continuity at `t = 0`** from the trivialised chart integral identity.
-
-Fix `x : M`.  By `hpicard` the orbit `s ↦ Φ s x` satisfies, on a right-half neighbourhood
-`Ico 0 (min δ T)` of `0`, the chart integral identity with the *trivialised* integrand
-`chartTrivRepr α (X_DT r) (extChartAt I α (Φ r x))` (the geometrically-correct chart velocity,
-the `trivToE`-transported field).  On the orbit this equals `trivToE α (Φ r x) (X_DT r (Φ r x))`,
-whose norm is bounded on the compact `Icc 0 T ×ˢ univ`; hence the chart image of the orbit differs
-from `extChartAt I α x` by an integral of norm `≤ C·|s| → 0` as `s → 0⁺`, giving right-continuity
-of the orbit at `0` after composing with the continuous chart inverse. -/
-private theorem flow_orbit_continuousWithinAt_zero
-    (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
-    (Φ : ℝ → M → M) (hΦ0 : ∀ x : M, Φ 0 x = x)
-    (hcont0 : ContinuousOn
-      (fun q : ℝ × M => (X_DT q.1 q.2 : TangentSpace I q.2))
-      (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
-    (hpicard : ∀ x : M, ∃ α : M, ∃ δ : ℝ, 0 < δ ∧ x ∈ (chartAt H α).source ∧
-      ∀ s ∈ Set.Ico (0 : ℝ) (min δ T), Φ s x ∈ (chartAt H α).source ∧
-        extChartAt I α (Φ s x)
-          = extChartAt I α x + ∫ r in (0 : ℝ)..s,
-              chartTrivRepr (I := I) α (X_DT r) (extChartAt I α (Φ r x))) :
-    ∀ x : M, ContinuousWithinAt (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) 0 := sorry
-
 /-- **Moving-spatial-Jacobian right-continuity at `t = 0` (variational endpoint).**
 
 The variational analogue of `flow_orbit_continuousWithinAt_zero`.  Fix `x : M` and
@@ -82,45 +59,31 @@ The variational analogue of `flow_orbit_continuousWithinAt_zero`.  Fix `x : M` a
 
 where `J₀ = (mfderiv I I (Φ 0) x v : E)` is the initial Jacobian value and the *covariant*
 coefficient `A r := fderiv ℝ (chartTrivRepr α (X_DT r)) (extChartAt I α (Φ r x))` is the spatial
-gradient of the trivialised chart field along the orbit.  `‖A‖` is bounded on the compact
-`Icc 0 T ×ˢ univ` via the `chartTrivRepr_fderiv_eq` decomposition (`hgrad0` for the raw spatial
-gradient, `hmovtriv` for the moving-trivialization jet) and `B` bounds `‖J r‖` near `0`
+gradient of the trivialised chart field along the orbit.  The per-`s` bound `‖A s‖ ≤ CA`
+(carried inside `hvarpicard`) controls the coefficient near `0`, and `B` bounds `‖J r‖` near `0`
 (`hJbound`, the genuine near-`0` boundedness of the variational Jacobian, dischargeable
-downstream by the linear Grönwall estimate `‖J r‖ ≤ ‖J₀‖ · exp (C_A · r)`).  Hence
-`‖J s − J₀‖ ≤ (C_A · B) · |s| → 0` as `s → 0⁺`; with `J 0 = J₀` this is right-continuity
+downstream by the linear Grönwall estimate `‖J r‖ ≤ ‖J₀‖ · exp (CA · r)`).  Hence
+`‖J s − J₀‖ ≤ (CA · B) · |s| → 0` as `s → 0⁺`; with `J 0 = J₀` this is right-continuity
 at `0`.
 
-`hvarpicard` (the variational integral equation for the moving Jacobian) and `hJbound`
-(near-`0` boundedness of the Jacobian) are genuine dischargeable analytic data about the
-linearised flow — neither is the conclusion (a `ContinuousWithinAt` of `J`), so this is
-not hypothesis-packaging. -/
+`hvarpicard` (the variational integral equation for the moving Jacobian, with its per-`s`
+coefficient bound) and `hJbound` (near-`0` boundedness of the Jacobian) are genuine
+dischargeable analytic data about the linearised flow — neither is the conclusion (a
+`ContinuousWithinAt` of `J`), so this is not hypothesis-packaging. -/
 private theorem flow_mfderiv_continuousWithinAt_zero
-    (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
-    (Φ : ℝ → M → M)
-    (hgrad0 : ∀ α : M,
-      ContinuousOn
-        (fun q : ℝ × M =>
-          fderiv ℝ (chartRawRepr (I := I) α (X_DT q.1)) (extChartAt I α q.2))
-        (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
-    (hmovtriv : ∀ α : M,
-      ContinuousOn
-        (fun q : ℝ × M =>
-          fderiv ℝ (fun z => chartMovingTriv (I := I) α z) (extChartAt I α q.2))
-        (Prod.snd ⁻¹' (chartAt H α).source : Set (ℝ × M)))
-    (hvarpicard : ∀ (x : M) (v : TangentSpace I x), ∃ α : M, ∃ δ : ℝ, 0 < δ ∧
+    (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T) (Φ : ℝ → M → M)
+    (hvarpicard : ∀ (x : M) (v : TangentSpace I x), ∃ α : M, ∃ δ : ℝ, ∃ CA : ℝ, 0 < δ ∧ 0 ≤ CA ∧
       ∀ s ∈ Set.Ico (0 : ℝ) (min δ T),
-        (mfderiv I I (fun y : M => Φ s y) x v : E)
+        ((mfderiv I I (fun y : M => Φ s y) x v : E)
           = (@id E (mfderiv I I (fun y : M => Φ 0 y) x v))
             + ∫ r in (0 : ℝ)..s,
-                (fderiv ℝ (fun z => chartTrivRepr (I := I) α (X_DT r) z)
-                    (extChartAt I α (Φ r x)))
+                (fderiv ℝ (fun z => chartTrivRepr (I := I) α (X_DT r) z) (extChartAt I α (Φ r x)))
                   (mfderiv I I (fun y : M => Φ r y) x v : E))
+            ∧ ‖(fderiv ℝ (fun z => chartTrivRepr (I := I) α (X_DT s) z) (extChartAt I α (Φ s x)))‖ ≤ CA)
     (hJbound : ∀ (x : M) (v : TangentSpace I x), ∃ δ : ℝ, ∃ B : ℝ, 0 < δ ∧
-      ∀ s ∈ Set.Ico (0 : ℝ) (min δ T),
-        ‖(mfderiv I I (fun y : M => Φ s y) x v : E)‖ ≤ B) :
+      ∀ s ∈ Set.Ico (0 : ℝ) (min δ T), ‖(mfderiv I I (fun y : M => Φ s y) x v : E)‖ ≤ B) :
     ∀ (x : M) (v : TangentSpace I x),
-      ContinuousWithinAt (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E))
-        (Set.Ici (0 : ℝ)) 0 := sorry
+      ContinuousWithinAt (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E)) (Set.Ici (0 : ℝ)) 0 := sorry
 
 set_option linter.unusedSectionVars false in
 /-- **Bare geometric velocity on `(0,T)` for `Φ := Φ0`** (C3), transported from the interior
