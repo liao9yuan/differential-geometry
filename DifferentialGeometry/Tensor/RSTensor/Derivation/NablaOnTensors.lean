@@ -969,8 +969,9 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [CompleteSpace 𝕜]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I (⊤ : WithTop ℕ∞) M]
-variable [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
+variable {n : WithTop ℕ∞}
+variable [IsManifold I n M]
+variable [IsManifold I (n + 1) M]
 
 /-- Canonical raw pointwise covariant derivative of a covariant tensor field
 along a smooth vector field, using a realized connection.
@@ -980,13 +981,13 @@ model-space tensor formula and extracting the local connection endomorphism from
 mathlib's `CovariantDerivative`.  The bundled section version is `nabla0S`. -/
 noncomputable def nabla0SFun (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s)
+      (n := n) s)
     (x : M) : Tensor0SSpace s I x :=
   TensorLieDeriv.mcovariantDeriv_tensor0SFromConnection
     (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-    (n := (⊤ : WithTop ℕ∞)) s cov X α x
+    (n := n) s cov X α x
 
 /-- Canonical raw pointwise covariant derivative of a mixed tensor field along a
 smooth vector field, using a realized connection.
@@ -995,46 +996,46 @@ Use this in downstream geometry.  The lower-level model and chart declarations
 above are implementation bridges.  The bundled section version is `nablaRS`. -/
 noncomputable def nablaRSFun (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) r s)
+      (n := n) r s)
     (x : M) : TensorRSSpace r s I x :=
   TensorLieDeriv.mcovariantDeriv_tensorRSFromConnection
     (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-    (n := (⊤ : WithTop ℕ∞)) r s cov X T x
+    (n := n) r s cov X T x
 
 @[simp] theorem nabla0SFun_apply (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s)
+      (n := n) s)
     (x : M) :
     nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s cov X α x =
       TensorLieDeriv.mcovariantDeriv_tensor0SFromConnection
         (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-        (n := (⊤ : WithTop ℕ∞)) s cov X α x := rfl
+        (n := n) s cov X α x := rfl
 
 @[simp] theorem nablaRSFun_apply (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) r s)
+      (n := n) r s)
     (x : M) :
     nablaRSFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s cov X T x =
       TensorLieDeriv.mcovariantDeriv_tensorRSFromConnection
         (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-        (n := (⊤ : WithTop ℕ∞)) r s cov X T x := rfl
+        (n := n) r s cov X T x := rfl
 
 /-- Regularity predicate for the raw covariant derivative of a covariant tensor field.
 
 This is kept explicit so `nabla0S` never hides the analytic smoothness proof. -/
 abbrev Nabla0SRegular (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s) : Prop :=
+      (n := n) s) : Prop :=
   letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s
-  ContMDiff I (I.prod 𝓘(𝕜, Tensor0SModel s 𝕜 E)) (⊤ : WithTop ℕ∞)
+  ContMDiff I (I.prod 𝓘(𝕜, Tensor0SModel s 𝕜 E)) n
     (fun x : M =>
       (⟨x, nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
         s cov X α x⟩ :
@@ -1045,11 +1046,11 @@ abbrev Nabla0SRegular (s : ℕ)
 This is kept explicit so `nablaRS` never hides the analytic smoothness proof. -/
 abbrev NablaRSRegular (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) r s) : Prop :=
+      (n := n) r s) : Prop :=
   letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s
-  ContMDiff I (I.prod 𝓘(𝕜, TensorRSModel r s 𝕜 E)) (⊤ : WithTop ℕ∞)
+  ContMDiff I (I.prod 𝓘(𝕜, TensorRSModel r s 𝕜 E)) n
     (fun x : M =>
       (⟨x, nablaRSFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
         r s cov X T x⟩ :
@@ -1059,13 +1060,13 @@ abbrev NablaRSRegular (r s : ℕ)
 explicit argument; use `nabla0S_reg` once the analytic regularity bridge is available. -/
 noncomputable def nabla0S (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s)
+      (n := n) s)
     (hreg : Nabla0SRegular (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       s cov X α) :
     Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s :=
+      (n := n) s :=
   letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s
   ⟨nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s cov X α, hreg⟩
 
@@ -1073,21 +1074,21 @@ noncomputable def nabla0S (s : ℕ)
 explicit argument; use `nablaRS_reg` once the analytic regularity bridge is available. -/
 noncomputable def nablaRS (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) r s)
+      (n := n) r s)
     (hreg : NablaRSRegular (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       r s cov X T) :
     TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) r s :=
+      (n := n) r s :=
   letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s
   ⟨nablaRSFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s cov X T, hreg⟩
 
 @[simp] theorem nabla0S_apply (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s)
+      (n := n) s)
     (hreg : Nabla0SRegular (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       s cov X α)
     (x : M) :
@@ -1096,9 +1097,9 @@ noncomputable def nablaRS (r s : ℕ)
 
 @[simp] theorem nablaRS_apply (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) r s)
+      (n := n) r s)
     (hreg : NablaRSRegular (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       r s cov X T)
     (x : M) :
@@ -1112,9 +1113,9 @@ for `mcovariantDeriv_tensor0SFromConnection`, and combine smoothness of the conn
 endomorphism with the model-space derivative/correction smoothness lemmas. -/
 theorem nabla0S_reg (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s) :
+      (n := n) s) :
     Nabla0SRegular (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s cov X α := by
   sorry
 
@@ -1125,9 +1126,9 @@ for `mcovariantDeriv_tensorRSFromConnection`, and combine smoothness of the conn
 endomorphism with the model-space derivative/correction smoothness lemmas. -/
 theorem nablaRS_reg (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) r s) :
+      (n := n) r s) :
     NablaRSRegular (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s cov X T := by
   sorry
 
