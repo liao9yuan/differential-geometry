@@ -46,15 +46,28 @@ theorem interior_cutoff_window_flow
       (∀ p, ∀ t ∈ Set.Ioo (t₀ - Te) (t₀ + Te), Set.Ioo (t₀ - Te) (t₀ + Te) ⊆ Set.Ioo (a - δ) (b + δ) → HasMFDerivAt 𝓘(ℝ, ℝ) I (fun s => Φw p s) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φw p t)))) ∧
       Set.Ioo (t₀ - Te) (t₀ + Te) ⊆ Set.Ioo (a - δ) (b + δ) := sorry
 
-/-- Glue the per-window local flows into a single flow `Φint` on the whole open interval
-`(0, T)` carrying the bare velocity `X_DT` and per-time smoothness, by interior
-bare-uniqueness chaining over an exhausting family of windows. -/
-theorem interior_bare_flow_on_Ioo
+/-- **Extend the `t = 0` anchor to the full interval.** Given the anchor flow `Φ0` (with
+`Φ0 0 = id` and the bare velocity on a short horizon `(0, σ)`), produce a single flow `Φ` on
+all of `(0, T)` that AGREES with `Φ0` on `(0, σ)`, carries the bare velocity `X_DT` on `(0, T)`,
+and is per-time `C∞`.  The agreement is **interior** (both `Φ` and `Φ0` are bare integral curves
+of the interior-`C∞` field on `(0, σ)`, equal at one interior reference point, hence on all of
+`(0, σ)` by `bare_integral_flow_eqOn_of_jointC1`); the extension is the per-window intrinsic-engine
+continuation glued by the same interior uniqueness over an exhausting family of windows.  No
+`t = 0`-edge continuity-only seed is needed: the anchor supplies the `t = 0` behaviour and the
+interior continuation supplies `(σ, T)`. -/
+theorem interior_extends_anchor
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
-    (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞ (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X_DT q.1 q.2) : TangentBundle I M)) (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) :
-    ∃ Φint : ℝ → M → M,
-      (∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φint s x) (Set.Ioo (0 : ℝ) T) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φint t x)))) ∧
-      (∀ t ∈ Set.Ioo (0 : ℝ) T, ContMDiff I I ∞ (Φint t)) := sorry
+    (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞ (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X_DT q.1 q.2) : TangentBundle I M)) (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+    (Φ0 : ℝ → M → M) (σ : ℝ) (hσ : 0 < σ) (hσT : σ ≤ T)
+    (hΦ0_0 : ∀ x : M, Φ0 0 x = x)
+    (hΦ0_bare : ∀ t ∈ Set.Ioo (0 : ℝ) σ, ∀ x : M,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ0 s x) (Set.Ioo (0 : ℝ) σ) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φ0 t x)))) :
+    ∃ Φ : ℝ → M → M,
+      (∀ x : M, Φ 0 x = x) ∧
+      (∀ s ∈ Set.Ioo (0 : ℝ) σ, ∀ x : M, Φ s x = Φ0 s x) ∧
+      (∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x) (Set.Ioo (0 : ℝ) T) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φ t x)))) ∧
+      (∀ t ∈ Set.Ioo (0 : ℝ) T, ContMDiff I I ∞ (Φ t)) := sorry
 
 /-- Each time-slice `Φint t` (for `t ∈ (0, T)`) is a diffeomorphism, by building the reverse
 flow of `-X_DT` and exhibiting the two as mutually inverse smooth maps. -/
@@ -65,22 +78,5 @@ theorem interior_flow_slice_diffeo_on_Ioo
     (hΦint_slice : ∀ t ∈ Set.Ioo (0 : ℝ) T, ContMDiff I I ∞ (Φint t))
     (hΦint_bare : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φint s x) (Set.Ioo (0 : ℝ) T) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φint t x)))) :
     ∀ t ∈ Set.Ioo (0 : ℝ) T, ∃ d : M ≃ₘ⟮I, I⟯ M, ∀ x : M, d x = Φint t x := sorry
-
-/-- The interior flow `Φint` and the `t = 0` anchor `Φ0` agree on all of `(0, T)`: the
-continuity-only forward Euclidean Grönwall seed forces `Φint`'s right-limit at `0` to be
-`x = Φ0`'s value, then interior bare-uniqueness extends the agreement. -/
-theorem anchor_eq_interior_on_Ioo
-    (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
-    (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞ (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X_DT q.1 q.2) : TangentBundle I M)) (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
-    (hcont0 : ContinuousOn (fun q : ℝ × M => (X_DT q.1 q.2 : TangentSpace I q.2)) (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
-    (Φ0 Φint : ℝ → M → M) (σ : ℝ) (hσ : 0 < σ) (hσT : σ ≤ T)
-    (hΦ0_0 : ∀ x : M, Φ0 0 x = x)
-    (hΦ0_picard : ∀ x : M, ∃ α : M, ∃ δ : ℝ, 0 < δ ∧ x ∈ (chartAt H α).source ∧
-      ∀ s ∈ Set.Ico (0 : ℝ) (min δ σ), Φ0 s x ∈ (chartAt H α).source ∧
-        extChartAt I α (Φ0 s x) = extChartAt I α x + ∫ r in (0 : ℝ)..s, chartTrivRepr (I := I) α (X_DT r) (extChartAt I α (Φ0 r x)))
-    (hΦ0_bare : ∀ t ∈ Set.Ioo (0 : ℝ) σ, ∀ x : M, HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ0 s x) (Set.Ioo (0 : ℝ) σ) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φ0 t x))))
-    (hΦint_bare : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φint s x) (Set.Ioo (0 : ℝ) T) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φint t x))))
-    (hΦint_cont0 : ∀ x : M, ContinuousWithinAt (fun s : ℝ => Φint s x) (Set.Ioi (0 : ℝ)) 0 → Filter.Tendsto (fun s : ℝ => Φint s x) (nhdsWithin 0 (Set.Ioi 0)) (nhds x)) :
-    ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, Φint t x = Φ0 t x := sorry
 
 end DifferentialGeometry.PDE.RicciFlow.ODE
