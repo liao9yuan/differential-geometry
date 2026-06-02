@@ -30,9 +30,10 @@ open scoped Manifold ContDiff
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [FiniteDimensional ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 /-- Chart-component smoothness witness for an abstract metric operator `F`
 under the hypothesis that `F` has smooth quasi-linear dependence on metric data:

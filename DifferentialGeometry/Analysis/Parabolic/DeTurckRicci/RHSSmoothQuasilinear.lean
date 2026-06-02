@@ -387,8 +387,10 @@ conjuncts:
   is the chart-`α`-pushforward frame vector at `x`.  Discharged by
   `combine_smoothness_of_summands` above.
 * **(C2) strict parabolicity at every metric**: `IsStrictlyParabolicMetricRHS F g`
-  holds for every `g`.  Discharged via the isotropic Ricci–DeTurck symbol
-  `−|ξ|²_g · id` (`isStrictlyParabolic_isotropic_deTurckSymbolCoeff`). -/
+  holds for every `g`.  Discharged by `deTurckRicciRHS_isStrictlyParabolic_at_self`
+  (whose principal-symbol witness records that `deTurckRicciRHS g_bg g` is symmetric and
+  has the gauge-cancelled isotropic Laplacian symbol `−|ξ|²_g · id` on the symmetric
+  perturbation space). -/
 theorem deTurckRicciRHS_isSmoothQuasilinear
     (g_bg : SmoothRiemannianMetric I M) :
     IsSmoothQuasilinearMetricRHS (I := I)
@@ -397,11 +399,6 @@ theorem deTurckRicciRHS_isSmoothQuasilinear
   · intro g α i j
     exact combine_smoothness_of_summands (I := I) g_bg g α i j
   · intro g
-    refine
-      ⟨DifferentialGeometry.PDE.DeTurck.isotropicSymbol
-          (fun x : M => TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
-          (DifferentialGeometry.PDE.DeTurck.deTurckSymbolCoeff (I := I) g), ?_⟩
-    exact DifferentialGeometry.PDE.DeTurck.isStrictlyParabolic_isotropic_deTurckSymbolCoeff
-      (E := E) (fun x : M => TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) g
+    exact deTurckRicciRHS_isStrictlyParabolic_at_self g g_bg
 
 end DifferentialGeometry.PDE.RicciFlow

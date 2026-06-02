@@ -59,6 +59,7 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 /-- A smooth family of Riemannian metrics `g_fam : ℝ → SmoothRiemannianMetric I M`
 solves the quasi-linear parabolic PDE `∂_t g(t) = F(g(t))` on the time interval
@@ -139,7 +140,7 @@ intended instantiation; its strict-parabolicity witness is
 
 The proof is currently `sorry`. -/
 theorem quasilinear_parabolic_metric_short_time_existence
-    [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+    [CompactSpace M]
     (F : SmoothRiemannianMetric I M →
          (∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ))
     (g₀ : SmoothRiemannianMetric I M)
@@ -179,7 +180,7 @@ condition `u 0 = u₀` is `duhamel_zero`; continuity on `[0, T]` follows
 from `duhamel_continuousOn` on `[0, ∞)` by restriction. Any positive
 existence time works for this purely linear case; we pick `T := 1`. -/
 theorem linear_tensor_parabolic_shortTime_exists
-    [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+    [CompactSpace M]
     {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
     (S : Analysis.Parabolic.QuasiLinear.BoundedC0Semigroup X) (u₀ : X)
     (F : ℝ → X) (hF : Continuous F) :

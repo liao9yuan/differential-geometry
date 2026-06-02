@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.PrincipalSymbol
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSecondOrderPart
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionSymbol
 import DifferentialGeometry.Analysis.Parabolic.StrictParabolicity
+import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSStrictParabolic
 
 /-!
 # Principal symbol of the linearized Ricci–DeTurck right-hand side
@@ -64,8 +65,6 @@ theorem deturck_ricci_rhs_linearization_at_g0
       (fun x : M => TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
       (DifferentialGeometry.PDE.DeTurck.deTurckSymbolCoeff (I := I) g₀),
     rfl,
-    DifferentialGeometry.PDE.DeTurck.isStrictlyParabolic_isotropic_deTurckSymbolCoeff
-      (E := E)
-      (fun x : M => TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) g₀⟩
+    DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS_hasPrincipalSymbol_at_self g₀ g_bg⟩
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
