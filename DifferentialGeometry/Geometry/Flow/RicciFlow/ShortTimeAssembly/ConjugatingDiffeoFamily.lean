@@ -79,19 +79,10 @@ private theorem neg_tangentMap_cmdwa
 theorem conjugating_diffeo_family
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T_DT : ℝ) (hDT : 0 < T_DT)
-    (h_reg : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+    (h_smooth0 : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
         : TangentBundle I M))
-      (Set.Ioo (0 : ℝ) T_DT ×ˢ Set.univ))
-    (h_cont0 : ContinuousOn
-      (fun q : ℝ × M => (deTurckVF (I := I) (g_DT q.1) g_bg q.2 : TangentSpace I q.2))
-      (Set.Icc 0 T_DT ×ˢ Set.univ))
-    (h_grad0 : ∀ α : M,
-      ContinuousOn
-        (fun q : ℝ × M =>
-          fderiv ℝ (fun z => chartTrivRepr (I := I) α (fun x => deTurckVF (I := I) (g_DT q.1) g_bg x) z)
-            (extChartAt I α q.2))
-        (Set.Icc 0 T_DT ×ˢ Set.univ)) :
+      (Set.Icc (0 : ℝ) T_DT ×ˢ Set.univ)) :
     ∃ T : ℝ, 0 < T ∧ T ≤ T_DT ∧ ∃ Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M),
       Φ_fam 0 = _root_.Diffeomorph.refl I M ∞ ∧
       (∀ x : M, ∀ s ∈ Set.Ioo (0 : ℝ) T,
@@ -106,39 +97,13 @@ theorem conjugating_diffeo_family
           (Set.Ici (0 : ℝ)) 0) := by
   set X_DT : ℝ → ∀ x : M, TangentSpace I x :=
     fun s x => -(deTurckVF (I := I) (g_DT s) g_bg x) with hXDT
-  have hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+  have hsmooth0_X : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X_DT q.1 q.2) : TangentBundle I M))
-      (Set.Ioo (0 : ℝ) T_DT ×ˢ Set.univ) :=
+      (Set.Icc (0 : ℝ) T_DT ×ˢ Set.univ) :=
     fun q hq => neg_tangentMap_cmdwa
-      (fun s x => (deTurckVF (I := I) (g_DT s) g_bg x : TangentSpace I x)) (h_reg q hq)
-  have hcont0 : ContinuousOn
-      (fun q : ℝ × M => (X_DT q.1 q.2 : TangentSpace I q.2))
-      (Set.Icc (0 : ℝ) T_DT ×ˢ Set.univ) := h_cont0.neg
-  have hgrad0 : ∀ α : M, ContinuousOn
-      (fun q : ℝ × M => fderiv ℝ (fun z => chartTrivRepr (I := I) α (X_DT q.1) z) (extChartAt I α q.2))
-      (Set.Icc (0 : ℝ) T_DT ×ˢ Set.univ) := by
-    intro α
-    have hfun :
-        (fun q : ℝ × M => fderiv ℝ (fun z => chartTrivRepr (I := I) α (X_DT q.1) z) (extChartAt I α q.2))
-          = (fun q : ℝ × M => -(fderiv ℝ (fun z => chartTrivRepr (I := I) α
-              (fun x => (deTurckVF (I := I) (g_DT q.1) g_bg x : TangentSpace I x)) z)
-              (extChartAt I α q.2))) := by
-      funext q
-      have hcr : (fun z => chartTrivRepr (I := I) α (X_DT q.1) z)
-          = (fun z => -(chartTrivRepr (I := I) α
-              (fun x => (deTurckVF (I := I) (g_DT q.1) g_bg x : TangentSpace I x)) z)) := by
-        funext z
-        change chartE_section_repr (I := I) α (X_DT q.1) ((extChartAt I α).symm z)
-          = -(chartE_section_repr (I := I) α
-              (fun x => (deTurckVF (I := I) (g_DT q.1) g_bg x : TangentSpace I x))
-              ((extChartAt I α).symm z))
-        unfold chartE_section_repr
-        exact map_neg _ _
-      rw [hcr, fderiv_fun_neg]
-    rw [hfun]
-    exact (h_grad0 α).neg
+      (fun s x => (deTurckVF (I := I) (g_DT s) g_bg x : TangentSpace I x)) (h_smooth0 q hq)
   obtain ⟨Φ, hΦ0, hdiffeo, hflow, hΦcont0, hΦmfderiv0⟩ :=
-    forward_flow_existence_onesided_of_jointsmooth_field (I := I) X_DT T_DT hDT hint hcont0 hgrad0
+    forward_flow_existence_onesided_of_jointsmooth_field (I := I) X_DT T_DT hDT hsmooth0_X
   obtain ⟨Φ_fam, hfam0, hfameq, hfamode⟩ :=
     time_dependent_vf_bare_flow_family (I := I) X_DT T_DT hDT Φ hΦ0
       (fun t ht htT => hdiffeo t ⟨ht, htT⟩)

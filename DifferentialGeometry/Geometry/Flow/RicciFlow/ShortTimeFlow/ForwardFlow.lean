@@ -196,31 +196,22 @@ private theorem forwardFlow_agree_extends_to_zero
   · exact hagree s ⟨hs0, hs.2⟩ x
 
 set_option linter.unusedVariables false in
-/-- A time-dependent field `X_DT` that is jointly `C∞` on the interior `(0,T) ×ˢ univ`
-(`hint`) and continuous together with its chart-gradient up to `t = 0` (`hcont0`,
-`hgrad0`) admits a single forward flow `Φ : ℝ → M → M` with `Φ 0 = id`, per-time
-diffeomorphisms on `(0,T)`, the bare geometric velocity `∂ₛ Φ s x = X_DT t (Φ t x)` on
-`(0,T)`, and `t = 0` right-continuity of both the orbit `s ↦ Φ s x` and the moving
-spatial Jacobian `s ↦ mfderiv I I (Φ s) x v`.
+/-- A time-dependent field `X_DT` that is jointly `C∞` up to AND across `t = 0` on the
+CLOSED slab `Icc 0 T ×ˢ univ` (`hsmooth0`) admits a single forward flow `Φ : ℝ → M → M`
+with `Φ 0 = id`, per-time diffeomorphisms on `(0,T)`, the bare geometric velocity
+`∂ₛ Φ s x = X_DT t (Φ t x)` on `(0,T)`, and `t = 0` right-continuity of both the orbit
+`s ↦ Φ s x` and the moving spatial Jacobian `s ↦ mfderiv I I (Φ s) x v`.  The single
+closed-slab smoothness `hsmooth0` subsumes the former interior-`C∞` + `C⁰`-to-`0` +
+`C¹`-chart-gradient-to-`0` trio.
 
-The forward flow is assembled by composition: a time-clamp extension of the field, the
-`t = 0`-anchored chart flow, the interior continuation to all of `(0,T)`, and the trivialised
-chart/covariant-variational integral identities supplying the two `t = 0` right-continuities.
-Several of those inputs are themselves deferred `sorry`s, so this theorem transitively depends
-on `sorryAx` until they are discharged. -/
+The body is a deferred A2 reconstruction: with the field smooth across `t = 0` the forward
+flow is built directly by the `C∞`-flow-from-boundary construction (an honest `sorry`
+here, filled by a later worker), so this theorem transitively depends on `sorryAx`. -/
 theorem forward_flow_existence_onesided_of_jointsmooth_field
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
-    (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+    (hsmooth0 : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X_DT q.1 q.2) : TangentBundle I M))
-      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
-    (hcont0 : ContinuousOn
-      (fun q : ℝ × M => (X_DT q.1 q.2 : TangentSpace I q.2))
-      (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
-    (hgrad0 : ∀ α : M,
-      ContinuousOn
-        (fun q : ℝ × M =>
-          fderiv ℝ (fun z => chartTrivRepr (I := I) α (X_DT q.1) z) (extChartAt I α q.2))
-        (Set.Icc (0 : ℝ) T ×ˢ Set.univ)) :
+      (Set.Icc (0 : ℝ) T ×ˢ Set.univ)) :
     ∃ Φ : ℝ → M → M, (∀ x : M, Φ 0 x = x) ∧
       (∀ t ∈ Set.Ioo (0 : ℝ) T, ∃ d : M ≃ₘ⟮I, I⟯ M, ∀ x : M, d x = Φ t x) ∧
       (∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x)
@@ -228,84 +219,6 @@ theorem forward_flow_existence_onesided_of_jointsmooth_field
       (∀ x : M, ContinuousWithinAt (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) 0) ∧
       (∀ (x : M) (v : TangentSpace I x),
         ContinuousWithinAt (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E))
-          (Set.Ici (0 : ℝ)) 0) := by
-  obtain ⟨Xext, hXeq, hXcont, hXgrad⟩ := field_time_clamp_extension X_DT T hT hcont0 hgrad0
-  have hint_ext : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
-      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (Xext q.1 q.2) : TangentBundle I M))
-      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ) := by
-    refine hint.congr (fun q hq => ?_)
-    have hq1 : q.1 ∈ Set.Icc (0 : ℝ) T := Set.Ioo_subset_Icc_self (Set.mem_prod.mp hq).1
-    show (TotalSpace.mk' E q.2 (Xext q.1 q.2) : TangentBundle I M)
-      = (TotalSpace.mk' E q.2 (X_DT q.1 q.2) : TangentBundle I M)
-    rw [hXeq q.1 hq1 q.2]
-  obtain ⟨σ, hσ, Φ0, hΦ0_0, hΦ0_bare, hΦ0_pic, hΦ0_cont0⟩ :=
-    corrected_chart_anchor_flow_build Xext hXcont hXgrad T hT hint_ext
-  set σ' : ℝ := min σ T with hσ'def
-  have hσ' : 0 < σ' := lt_min hσ hT
-  have hσ'T : σ' ≤ T := min_le_right _ _
-  have hσ'σ : σ' ≤ σ := min_le_left _ _
-  have hΦ0_bare' : ∀ t ∈ Set.Ioo (0 : ℝ) σ', ∀ x : M,
-      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ0 s x) (Set.Ioo (0 : ℝ) σ') t
-        ((1 : ℝ →L[ℝ] ℝ).smulRight (Xext t (Φ0 t x))) := by
-    intro t ht x
-    exact (hΦ0_bare t (Set.Ioo_subset_Ioo_right hσ'σ ht) x).mono
-      (Set.Ioo_subset_Ioo_right hσ'σ)
-  obtain ⟨Φ, hΦ0id, hagree, hΦbare_Ioo, hΦslice, hΦjoint⟩ :=
-    interior_extends_anchor Xext T hT hint_ext Φ0 σ' hσ' hσ'T hΦ0_0 hΦ0_cont0 hΦ0_bare'
-  have hΦbare_Ici_Xext : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
-      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) t
-        ((1 : ℝ →L[ℝ] ℝ).smulRight (Xext t (Φ t x))) :=
-    forwardFlow_bare_velocity_of_agree Xext T Φ Φ (fun t _ x => rfl) hΦbare_Ioo
-  have hΦbare_Ici_XDT : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
-      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) t
-        ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φ t x))) := by
-    intro t ht x
-    have := hΦbare_Ici_Xext t ht x
-    rwa [hXeq t (Set.Ioo_subset_Icc_self ht) (Φ t x)] at this
-  have hΦorbit0 : ∀ x : M, ContinuousWithinAt (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) 0 := by
-    intro x
-    have hagree_Ico : Set.EqOn (fun s : ℝ => Φ s x) (fun s : ℝ => Φ0 s x)
-        (Set.Ico (0 : ℝ) σ') := fun s hs =>
-      forwardFlow_agree_extends_to_zero Φ Φ0 σ' x s hs hΦ0id hΦ0_0 hagree
-    have hev : (fun s : ℝ => Φ s x) =ᶠ[𝓝[Set.Ici (0 : ℝ)] (0 : ℝ)] (fun s : ℝ => Φ0 s x) :=
-      Filter.eventuallyEq_of_mem (Ico_mem_nhdsGE hσ') hagree_Ico
-    have hx0 : (fun s : ℝ => Φ s x) 0 = (fun s : ℝ => Φ0 s x) 0 := by
-      simp only [hΦ0id x, hΦ0_0 x]
-    exact (hΦ0_cont0 x).congr_of_eventuallyEq hev hx0
-  refine ⟨Φ, hΦ0id, ?_, hΦbare_Ici_XDT, hΦorbit0, ?_⟩
-  · exact interior_flow_slice_diffeo_on_Ioo Xext T hT hint_ext Φ hΦ0id hΦorbit0 hΦslice hΦbare_Ioo
-  · have hΦpic : ∀ x : M, ∃ α : M, ∃ δ : ℝ, 0 < δ ∧ x ∈ (chartAt H α).source ∧
-        ∀ s ∈ Set.Ico (0 : ℝ) (min δ T), Φ s x ∈ (chartAt H α).source ∧
-          extChartAt I α (Φ s x) = extChartAt I α x
-            + ∫ r in (0 : ℝ)..s, chartTrivRepr (I := I) α (Xext r) (extChartAt I α (Φ r x)) := by
-      intro x
-      obtain ⟨α, δ, C, hδ, hxsrc, hpic⟩ := hΦ0_pic x
-      refine ⟨α, min δ σ', lt_min hδ hσ', hxsrc, ?_⟩
-      have hmin_eq : min (min δ σ') T = min δ σ' := by
-        rw [min_eq_left (le_trans (min_le_right _ _) hσ'T)]
-      intro s hs
-      rw [hmin_eq] at hs
-      have hsσ' : s < σ' := lt_of_lt_of_le hs.2 (min_le_right _ _)
-      have hsδσ : s < min δ σ := lt_of_lt_of_le hs.2 (min_le_min (le_refl δ) hσ'σ)
-      have hΦs : Φ s x = Φ0 s x :=
-        forwardFlow_agree_extends_to_zero Φ Φ0 σ' x s ⟨hs.1, hsσ'⟩ hΦ0id hΦ0_0 hagree
-      obtain ⟨hsrc0, heq0, _⟩ := hpic s ⟨hs.1, hsδσ⟩
-      refine ⟨by rw [hΦs]; exact hsrc0, ?_⟩
-      have hintegrand : Set.EqOn
-          (fun r => chartTrivRepr (I := I) α (Xext r) (extChartAt I α (Φ r x)))
-          (fun r => chartTrivRepr (I := I) α (Xext r) (extChartAt I α (Φ0 r x)))
-          (Set.uIcc (0 : ℝ) s) := by
-        intro r hr
-        rw [Set.uIcc_of_le hs.1, Set.mem_Icc] at hr
-        have hrσ' : r < σ' := lt_of_le_of_lt hr.2 hsσ'
-        simp only [forwardFlow_agree_extends_to_zero Φ Φ0 σ' x r ⟨hr.1, hrσ'⟩ hΦ0id hΦ0_0 hagree]
-      rw [hΦs, heq0, intervalIntegral.integral_congr hintegrand]
-    have hXgrad' : ∀ α : M, ContinuousOn
-        (fun q : ℝ × M => fderiv ℝ (fun z => chartTrivRepr (I := I) α (Xext q.1) z) (extChartAt I α q.2))
-        (Set.Icc (0 : ℝ) T ×ˢ Set.univ) :=
-      fun α => (hXgrad α).mono (Set.subset_univ _)
-    have hvarjb := corrected_variational_endpoint_data Xext T hT Φ hint_ext hXgrad' hΦjoint hΦ0id
-      hΦpic hΦbare_Ici_Xext
-    exact flow_mfderiv_continuousWithinAt_zero Xext T hT Φ hvarjb.1 hvarjb.2
+          (Set.Ici (0 : ℝ)) 0) := sorry
 
 end DifferentialGeometry.PDE.RicciFlow
