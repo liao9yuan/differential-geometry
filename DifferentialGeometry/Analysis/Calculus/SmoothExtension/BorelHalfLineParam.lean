@@ -3,8 +3,10 @@ import DifferentialGeometry.Analysis.Calculus.SmoothExtension.IteratedFDerivProd
 import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 import Mathlib.Analysis.Calculus.ContDiff.Comp
 import Mathlib.Analysis.Calculus.ContDiff.Bounds
+import Mathlib.Analysis.Calculus.FDeriv.Add
 import Mathlib.Analysis.Calculus.TangentCone.Prod
 import Mathlib.Analysis.Normed.Operator.Prod
+import Mathlib.Analysis.SpecialFunctions.SmoothTransition
 
 /-!
 # Parametrized Borel half-line extension
@@ -50,7 +52,7 @@ Fréchet derivative, closing the seam coefficient match. The file is `sorry`-fre
 
 noncomputable section
 open Set Filter Topology
-open scoped ContDiff
+open scoped ContDiff Pointwise
 
 namespace DifferentialGeometry
 namespace Analysis
@@ -925,6 +927,628 @@ theorem borel_halfLine_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
   · -- Agreement with `g` for `t ≥ 0`, on all of `V`.
     intro t ht z _
     simp only [hgext_def, if_pos ht]
+
+/-- The linear reflection `(a, b) ↦ (-a, b)` of `ℝ × E`, the derivative of the affine seam-swap
+`(t, z) ↦ (T - t, z)`. -/
+private def reflectFst : (ℝ × E) ≃L[ℝ] (ℝ × E) :=
+  (ContinuousLinearEquiv.neg ℝ).prodCongr (ContinuousLinearEquiv.refl ℝ E)
+
+/-- The unique-differentiability of a set is preserved by translation. -/
+private theorem uniqueDiffOn_vadd {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G]
+    (a : G) {s : Set G} (hs : UniqueDiffOn ℝ s) : UniqueDiffOn ℝ (a +ᵥ s) := by
+  have himg : a +ᵥ s = (fun x => a + x) '' s := by
+    ext y; simp only [Set.mem_vadd_set, Set.mem_image, vadd_eq_add]
+  rw [himg]
+  refine hs.image (f' := fun _ => ContinuousLinearMap.id ℝ G) (fun x _ => ?_) (fun x _ => ?_)
+  · have h : HasFDerivWithinAt (fun y => a + y) (0 + ContinuousLinearMap.id ℝ G) s x :=
+      (hasFDerivWithinAt_const a x s).add (hasFDerivWithinAt_id x s)
+    rwa [zero_add] at h
+  · exact Function.surjective_id.denseRange
+
+/-- **Reflection transport.** The joint iterated Fréchet derivative of `G` on `s` at the seam image
+`(T - x.1, x.2)` equals that of the reflected `G ∘ (t,z) ↦ (T-t,z)` on the reflected set at `x`,
+post-composed with the (orientation-reversing) linear reflection `reflectFst`. The affine seam-swap
+factors as `(· + (T,0)) ∘ reflectFst`; the translation is absorbed via
+`iteratedFDerivWithin_comp_add_right` and the linear reflection via
+`ContinuousLinearEquiv.iteratedFDerivWithin_comp_right`. -/
+private theorem reflect_iteratedFDerivWithin (T : ℝ) (G : ℝ × E → F) (n : ℕ) (s : Set (ℝ × E))
+    (x : ℝ × E) (hs : UniqueDiffOn ℝ s) (hx : (T - x.1, x.2) ∈ s) :
+    iteratedFDerivWithin ℝ n (fun p => G (T - p.1, p.2))
+        ((fun p : ℝ × E => (T - p.1, p.2)) ⁻¹' s) x =
+      (iteratedFDerivWithin ℝ n G s (T - x.1, x.2)).compContinuousLinearMap
+        (fun _ => ((reflectFst : (ℝ × E) ≃L[ℝ] (ℝ × E)) : (ℝ × E) →L[ℝ] (ℝ × E))) := by
+  set φ : ℝ × E → ℝ × E := fun p => (T - p.1, p.2) with hφ
+  set c : ℝ × E := ((T : ℝ), (0 : E)) with hc
+  have hrefl : ∀ p : ℝ × E, (reflectFst : (ℝ × E) → (ℝ × E)) p + c = φ p := by
+    intro p
+    simp only [reflectFst, ContinuousLinearEquiv.prodCongr_apply, ContinuousLinearEquiv.neg_apply,
+      ContinuousLinearEquiv.refl_apply, Prod.mk_add_mk, hφ, hc, add_zero]
+    rw [neg_add_eq_sub]
+  have hcomp : (fun p : ℝ × E => G (φ p))
+      = (fun q : ℝ × E => G (q + c)) ∘ (reflectFst : (ℝ × E) → (ℝ × E)) := by
+    funext p; simp only [Function.comp_apply, hrefl]
+  set s'' : Set (ℝ × E) := (fun q : ℝ × E => q + c) ⁻¹' s with hs''
+  have hpre : (reflectFst : (ℝ × E) → (ℝ × E)) ⁻¹' s'' = φ ⁻¹' s := by
+    ext p; simp only [hs'', Set.mem_preimage, hrefl]
+  have hvadd : c +ᵥ s'' = s := by
+    rw [hs'']
+    ext q
+    simp only [Set.mem_vadd_set, Set.mem_preimage, vadd_eq_add]
+    constructor
+    · rintro ⟨w, hw, rfl⟩; rwa [add_comm c w]
+    · intro hq; exact ⟨q - c, by rwa [sub_add_cancel], by rw [add_sub_cancel]⟩
+  have hs''eq : s'' = (-c) +ᵥ s := by
+    rw [hs'']
+    ext q
+    simp only [Set.mem_vadd_set, Set.mem_preimage, vadd_eq_add]
+    constructor
+    · intro hq; exact ⟨q + c, hq, by abel⟩
+    · rintro ⟨w, hw, rfl⟩; rwa [show -c + w + c = w by abel]
+  have hs''ud : UniqueDiffOn ℝ s'' := by
+    rw [hs''eq]; exact uniqueDiffOn_vadd (-c) hs
+  have hreflx : (reflectFst : (ℝ × E) → (ℝ × E)) x ∈ s'' := by
+    simp only [hs'', Set.mem_preimage, hrefl]; exact hx
+  rw [hcomp, ← hpre,
+    reflectFst.iteratedFDerivWithin_comp_right (fun q : ℝ × E => G (q + c)) hs''ud hreflx n]
+  congr 1
+  rw [iteratedFDerivWithin_comp_add_right, hvadd, hrefl]
+
+/-- The smooth `t`-cutoff: `1` on `(-∞, T/2]`, `0` on `[3T/4, ∞)`. Multiplying a family smooth on
+the compact slab `Icc 0 T ×ˢ V` by this cutoff produces a family smooth on the half-line slab
+`Ici 0 ×ˢ V` that is unchanged near the left seam `t = 0`. -/
+private def intervalCutoff (T : ℝ) (t : ℝ) : ℝ :=
+  Real.smoothTransition ((3 * T / 4 - t) / (T / 4))
+
+private theorem intervalCutoff_contDiff (T : ℝ) : ContDiff ℝ ∞ (intervalCutoff T) :=
+  Real.smoothTransition.contDiff.comp ((contDiff_const.sub contDiff_id).div_const _)
+
+private theorem intervalCutoff_eq_one (T : ℝ) (hT : 0 < T) {t : ℝ} (ht : t ≤ T / 2) :
+    intervalCutoff T t = 1 := by
+  apply Real.smoothTransition.one_of_one_le
+  rw [le_div_iff₀ (by positivity)]; linarith
+
+private theorem intervalCutoff_eq_zero (T : ℝ) (hT : 0 < T) {t : ℝ} (ht : 3 * T / 4 ≤ t) :
+    intervalCutoff T t = 0 := by
+  apply Real.smoothTransition.zero_of_nonpos
+  apply div_nonpos_of_nonpos_of_nonneg <;> [linarith; positivity]
+
+omit [NormedSpace ℝ E] [NormedAddCommGroup F] [NormedSpace ℝ F] in
+private theorem tsupport_intervalCutoff_fst (T : ℝ) (hT : 0 < T) :
+    tsupport (fun p : ℝ × E => intervalCutoff T p.1) ⊆ {p : ℝ × E | p.1 ≤ 3 * T / 4} := by
+  apply closure_minimal
+  · intro p hp
+    simp only [Function.mem_support] at hp
+    simp only [Set.mem_setOf_eq]
+    by_contra h
+    exact hp (intervalCutoff_eq_zero T hT (le_of_lt (lt_of_not_ge h)))
+  · exact isClosed_le continuous_fst continuous_const
+
+/-- Multiplying a family `h` smooth on the compact slab `Icc 0 T ×ˢ V` by the smooth `t`-cutoff
+`intervalCutoff T` gives a family smooth on the whole half-line slab `Ici 0 ×ˢ V`. -/
+private theorem contDiffOn_intervalCutoff_smul (T : ℝ) (hT : 0 < T) (h : ℝ × E → F) {V : Set E}
+    (hV : IsOpen V) (hh : ContDiffOn ℝ ∞ h (Set.Icc 0 T ×ˢ V)) :
+    ContDiffOn ℝ ∞ (fun p : ℝ × E => intervalCutoff T p.1 • h p) (Set.Ici 0 ×ˢ V) := by
+  intro p hp
+  by_cases hsupp : p ∈ tsupport (fun q : ℝ × E => intervalCutoff T q.1)
+  · have hp1 : p.1 ≤ 3 * T / 4 := tsupport_intervalCutoff_fst T hT hsupp
+    have hp1' : p.1 < T := by linarith
+    have hmemIcc : p ∈ Set.Icc 0 T ×ˢ V := ⟨⟨hp.1, le_of_lt hp1'⟩, hp.2⟩
+    have hset : Set.Icc (0:ℝ) T ×ˢ V =ᶠ[𝓝 p] Set.Ici (0:ℝ) ×ˢ V := by
+      filter_upwards [prod_mem_nhds (Iio_mem_nhds hp1') (hV.mem_nhds hp.2)] with q hq
+      have hqT : q.1 < T := hq.1
+      simp only [eq_iff_iff]
+      exact ⟨fun hr => ⟨hr.1.1, hr.2⟩, fun hr => ⟨⟨hr.1, le_of_lt hqT⟩, hr.2⟩⟩
+    have hhp : ContDiffWithinAt ℝ ∞ h (Set.Ici (0:ℝ) ×ˢ V) p :=
+      (contDiffWithinAt_congr_set hset).mp (hh p hmemIcc)
+    exact (((intervalCutoff_contDiff T).comp contDiff_fst).contDiffWithinAt).smul hhp
+  · have hopen : (tsupport (fun q : ℝ × E => intervalCutoff T q.1))ᶜ ∈ 𝓝 p :=
+      (isClosed_tsupport _).isOpen_compl.mem_nhds hsupp
+    have heq : (fun q : ℝ × E => intervalCutoff T q.1 • h q) =ᶠ[𝓝 p] (fun _ => (0:F)) := by
+      filter_upwards [hopen] with q hq
+      rw [image_eq_zero_of_notMem_tsupport (f := fun r : ℝ × E => intervalCutoff T r.1) hq,
+        zero_smul]
+    exact (contDiffAt_const.congr_of_eventuallyEq heq).contDiffWithinAt
+
+/-- **Seam jet match across a compact-interval seam.** A globally-`C∞` family `Φ` and a family `h`
+smooth on the compact slab `Icc 0 T ×ˢ V` that share their entire one-sided `t`-jet at `t = 0` for
+every parameter `w ∈ V` have the same joint iterated Fréchet derivative at every seam point `(0, z)`
+— `Φ`'s computed on the *lower* slab `Iic 0 ×ˢ V`, `h`'s on the compact slab `Icc 0 T ×ˢ V`.
+
+The compact slab is bridged to the half-line slab `Ici 0 ×ˢ V` near the seam (they agree on
+`Iio T`), `Φ`'s lower jet is collapsed to its full jet (`Φ` global), and `h` is replaced by its
+`intervalCutoff` truncation (globally `C∞` on `Ici 0 ×ˢ V`, unchanged near the seam) so that the
+half-line `iteratedFDerivWithin_prod_match` applies. -/
+private theorem prodMatch_intervalCutoff (T : ℝ) (hT : 0 < T) (Φ : ℝ × E → F)
+    (hΦ : ContDiff ℝ ∞ Φ) (h : ℝ × E → F) {V : Set E} (hV : IsOpen V)
+    (hh : ContDiffOn ℝ ∞ h (Set.Icc 0 T ×ˢ V))
+    (hjet : ∀ i : ℕ, ∀ w ∈ V, iteratedDerivWithin i (fun t => Φ (t, w)) (Set.Ici 0) 0
+                              = iteratedDerivWithin i (fun t => h (t, w)) (Set.Ici 0) 0)
+    (n : ℕ) {z : E} (hz : z ∈ V) :
+    iteratedFDerivWithin ℝ n Φ (Set.Iic (0:ℝ) ×ˢ V) (0, z)
+      = iteratedFDerivWithin ℝ n h (Set.Icc 0 T ×ˢ V) (0, z) := by
+  have hmem0 : ((0:ℝ), z) ∈ Set.Ici (0:ℝ) ×ˢ V := ⟨Set.self_mem_Ici, hz⟩
+  have hUDl : UniqueDiffOn ℝ (Set.Iic (0:ℝ) ×ˢ V) :=
+    UniqueDiffOn.prod (uniqueDiffOn_Iic 0) hV.uniqueDiffOn
+  have hUDr : UniqueDiffOn ℝ (Set.Ici (0:ℝ) ×ˢ V) :=
+    UniqueDiffOn.prod (uniqueDiffOn_Ici 0) hV.uniqueDiffOn
+  have hΦat : ContDiffAt ℝ (n : WithTop ℕ∞) Φ (0, z) :=
+    hΦ.contDiffAt.of_le (by exact_mod_cast le_top)
+  have hLHS : iteratedFDerivWithin ℝ n Φ (Set.Iic (0:ℝ) ×ˢ V) (0, z)
+      = iteratedFDerivWithin ℝ n Φ (Set.Ici (0:ℝ) ×ˢ V) (0, z) := by
+    rw [iteratedFDerivWithin_eq_iteratedFDeriv hUDl hΦat ⟨Set.self_mem_Iic, hz⟩,
+      ← iteratedFDerivWithin_eq_iteratedFDeriv hUDr hΦat hmem0]
+  have hsetEq : Set.Icc (0:ℝ) T ×ˢ V =ᶠ[𝓝 ((0:ℝ), z)] Set.Ici (0:ℝ) ×ˢ V := by
+    filter_upwards [prod_mem_nhds (Iio_mem_nhds hT) (hV.mem_nhds hz)] with q hq
+    have hqT : q.1 < T := hq.1
+    simp only [eq_iff_iff]
+    exact ⟨fun hr => ⟨hr.1.1, hr.2⟩, fun hr => ⟨⟨hr.1, le_of_lt hqT⟩, hr.2⟩⟩
+  rw [hLHS, iteratedFDerivWithin_congr_set hsetEq n]
+  have hĥsmooth : ContDiffOn ℝ ∞ (fun p : ℝ × E => intervalCutoff T p.1 • h p)
+      (Set.Ici (0:ℝ) ×ˢ V) := contDiffOn_intervalCutoff_smul T hT h hV hh
+  have hĥeq : (fun p : ℝ × E => intervalCutoff T p.1 • h p)
+      =ᶠ[𝓝[Set.Ici (0:ℝ) ×ˢ V] ((0:ℝ), z)] h := by
+    have hu : {q : ℝ × E | q.1 < T / 2} ∈ 𝓝 ((0:ℝ), z) :=
+      continuous_fst.continuousAt.preimage_mem_nhds (Iio_mem_nhds (by positivity))
+    filter_upwards [mem_nhdsWithin_of_mem_nhds hu] with q hqlt
+    show intervalCutoff T q.1 • h q = h q
+    rw [intervalCutoff_eq_one T hT (le_of_lt hqlt), one_smul]
+  have hĥval : (fun p : ℝ × E => intervalCutoff T p.1 • h p) ((0:ℝ), z) = h ((0:ℝ), z) := by
+    change intervalCutoff T (0:ℝ) • h ((0:ℝ), z) = h ((0:ℝ), z)
+    rw [intervalCutoff_eq_one T hT (by positivity), one_smul]
+  rw [(hĥeq.iteratedFDerivWithin_eq hĥval n).symm]
+  have htjet : ∀ i : ℕ, Set.EqOn
+      (fun w => iteratedDerivWithin i (fun t => Φ (t, w)) (Set.Ici 0) 0)
+      (fun w => iteratedDerivWithin i (fun t => intervalCutoff T t • h (t, w)) (Set.Ici 0) 0) V := by
+    intro i w hw
+    simp only
+    rw [hjet i w hw]
+    refine (Filter.EventuallyEq.iteratedDerivWithin_eq ?_ ?_).symm
+    · filter_upwards [mem_nhdsWithin_of_mem_nhds
+        (Iio_mem_nhds (show (0:ℝ) < T / 2 by positivity))] with t ht
+      show intervalCutoff T t • h (t, w) = h (t, w)
+      rw [intervalCutoff_eq_one T hT (le_of_lt ht), one_smul]
+    · show intervalCutoff T (0:ℝ) • h ((0:ℝ), w) = h ((0:ℝ), w)
+      rw [intervalCutoff_eq_one T hT (by positivity), one_smul]
+  exact iteratedFDerivWithin_prod_match hV hΦ.contDiffOn hĥsmooth htjet n hz
+
+set_option linter.unusedVariables false in
+/-- **Parametrized Borel compact-interval extension.** The two-seam analogue of
+`borel_halfLine_extend_param`. Let `g : ℝ → E → F` be jointly `C∞` on the compact slab
+`Icc 0 T ×ˢ K` for a compact `K` with `z₀` in its interior. Then there is a function `gext` and an
+open neighbourhood `V` of `z₀` on which `gext` is jointly `C∞` on the full slab `univ ×ˢ V` and
+agrees with `g` for all `t ∈ [0, T]` and all `z ∈ V`.
+
+The construction runs the parametrized Borel series twice, once at each endpoint: `Lext` matches
+`g`'s one-sided `t`-jet at `t = 0` and supplies the extension for `t < 0`; `Rext (t, z) := RΦ(T-t,z)`
+is the reflected Borel series matching `g`'s one-sided `t`-jet at `t = T` and supplies the extension
+for `t > T`; on the middle `[0, T]` the extension is `g`. Joint `C∞` on `univ ×ˢ V` is the two-seam
+`HasFTaylorSeriesUpToOn` glue: the assembled candidate Taylor series is the lower series on `t < 0`,
+`g`'s on `0 ≤ t ≤ T`, the reflected series on `t > T`, with the two seam coefficient matches supplied
+by `prodMatch_intervalCutoff` (left seam directly; right seam after the orientation-reversing
+`reflect_iteratedFDerivWithin` transport). As in the half-line case, `E` is finite-dimensional (the
+cutoff `ρ`) and the compactness of `K` provides the interior point. -/
+theorem borel_interval_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
+    (g : ℝ → E → F) (T : ℝ) (hT : 0 < T) (K : Set E) (hK : IsCompact K)
+    (z₀ : E) (hz₀ : z₀ ∈ interior K)
+    (hg : ContDiffOn ℝ ∞ (Function.uncurry g) (Set.Icc (0:ℝ) T ×ˢ K)) :
+    ∃ gext : ℝ → E → F, ∃ V ∈ nhds z₀,
+      ContDiffOn ℝ ∞ (Function.uncurry gext) ((Set.univ : Set ℝ) ×ˢ V) ∧
+      (∀ t ∈ Set.Icc (0:ℝ) T, ∀ z ∈ V, gext t z = g t z) := by
+  classical
+  obtain ⟨ρ, hρ_tsupp, hρ_cs, hρ_smooth, _hρ_range, _hρ_one, hρ_eq1⟩ :=
+    exists_contDiff_tsupport_subset_eventuallyEq_one (x := z₀) (isOpen_interior.mem_nhds hz₀)
+  set U : Set E := interior K with hU_def
+  have hUopen : IsOpen U := isOpen_interior
+  have hg' : ContDiffOn ℝ ∞ (Function.uncurry g) (Set.Icc (0:ℝ) T ×ˢ U) :=
+    hg.mono (Set.prod_mono_right interior_subset)
+  -- The reflected family `(s, z) ↦ g (T - s) z`, smooth on `Icc 0 T ×ˢ U`.
+  set gR : ℝ → E → F := fun s z => g (T - s) z with hgR_def
+  have hgR' : ContDiffOn ℝ ∞ (Function.uncurry gR) (Set.Icc (0:ℝ) T ×ˢ U) := by
+    have hmap : ContDiffOn ℝ ∞ (fun p : ℝ × E => ((T - p.1 : ℝ), p.2)) (Set.Icc (0:ℝ) T ×ˢ U) :=
+      ((contDiff_const.sub contDiff_fst).prodMk contDiff_snd).contDiffOn
+    have hmaps : Set.MapsTo (fun p : ℝ × E => ((T - p.1 : ℝ), p.2))
+        (Set.Icc (0:ℝ) T ×ˢ U) (Set.Icc (0:ℝ) T ×ˢ U) := by
+      rintro ⟨s, z⟩ ⟨hs, hz⟩
+      simp only [Set.mem_Icc] at hs
+      exact ⟨Set.mem_Icc.mpr ⟨by linarith [hs.1, hs.2], by linarith [hs.1, hs.2]⟩, hz⟩
+    exact hg'.comp hmap hmaps
+  -- The two curried cutoff families, smooth on the half-line slab `Ici 0 ×ˢ U`.
+  set gLcut : ℝ → E → F := fun s z => intervalCutoff T s • g s z with hgLcut_def
+  set gRcut : ℝ → E → F := fun s z => intervalCutoff T s • gR s z with hgRcut_def
+  have hgLcut : ContDiffOn ℝ ∞ (Function.uncurry gLcut) (Set.Ici (0:ℝ) ×ˢ U) :=
+    contDiffOn_intervalCutoff_smul T hT (Function.uncurry g) hUopen hg'
+  have hgRcut : ContDiffOn ℝ ∞ (Function.uncurry gRcut) (Set.Ici (0:ℝ) ×ˢ U) :=
+    contDiffOn_intervalCutoff_smul T hT (Function.uncurry gR) hUopen hgR'
+  -- The two parametrized coefficient families.
+  set aL : ℕ → E → F :=
+    fun n z => ρ z • iteratedDerivWithin n (fun s => gLcut s z) (Set.Ici 0) 0 with haL_def
+  set aR : ℕ → E → F :=
+    fun n z => ρ z • iteratedDerivWithin n (fun s => gRcut s z) (Set.Ici 0) 0 with haR_def
+  have haL : ∀ n, ContDiff ℝ ∞ (aL n) := fun n =>
+    contDiff_cutoff_smul hUopen hρ_smooth hρ_tsupp (param_jet_contDiffOn gLcut U hgLcut n)
+  have haR : ∀ n, ContDiff ℝ ∞ (aR n) := fun n =>
+    contDiff_cutoff_smul hUopen hρ_smooth hρ_tsupp (param_jet_contDiffOn gRcut U hgRcut n)
+  have hsuppL : ∀ n, HasCompactSupport (aL n) := fun n => hρ_cs.smul_right
+  have hsuppR : ∀ n, HasCompactSupport (aR n) := fun n => hρ_cs.smul_right
+  -- The two Borel series and the reflected right extension.
+  set Lext : ℝ × E → F := fun p => ∑' n, paramTerm aL haL hsuppL n p with hLext_def
+  set RΦ : ℝ × E → F := fun p => ∑' n, paramTerm aR haR hsuppR n p with hRΦ_def
+  set Rext : ℝ → E → F := fun t z => RΦ (T - t, z) with hRext_def
+  have hLextC : ContDiff ℝ ∞ Lext := paramSeries_contDiff aL haL hsuppL
+  have hRΦC : ContDiff ℝ ∞ RΦ := paramSeries_contDiff aR haR hsuppR
+  have hRextC : ContDiff ℝ ∞ (Function.uncurry Rext) := by
+    have hmap : ContDiff ℝ ∞ (fun p : ℝ × E => ((T - p.1 : ℝ), p.2)) :=
+      (contDiff_const.sub contDiff_fst).prodMk contDiff_snd
+    exact hRΦC.comp hmap
+  -- The extension.
+  set gext : ℝ → E → F :=
+    fun t z => if t < 0 then Lext (t, z) else if t ≤ T then g t z else Rext t z with hgext_def
+  -- An open neighbourhood `V ∋ z₀`, `V ⊆ U`, on which `ρ ≡ 1`.
+  have hVnhds : {z : E | ρ z = 1} ∩ U ∈ nhds z₀ :=
+    Filter.inter_mem hρ_eq1 (hUopen.mem_nhds hz₀)
+  obtain ⟨V, hVsub, hVopen, hz₀V⟩ := mem_nhds_iff.1 hVnhds
+  have hρV : ∀ z ∈ V, ρ z = 1 := fun z hz => (hVsub hz).1
+  have hVU : V ⊆ U := fun z hz => (hVsub hz).2
+  -- `g` and the reflected extension are smooth on the relevant slabs over `V`.
+  have hgV : ContDiffOn ℝ ∞ (Function.uncurry g) (Set.Icc (0:ℝ) T ×ˢ V) :=
+    hg.mono (Set.prod_mono_right (hVU.trans interior_subset))
+  have hgRV : ContDiffOn ℝ ∞ (Function.uncurry gR) (Set.Icc (0:ℝ) T ×ˢ V) :=
+    hgR'.mono (Set.prod_mono_right hVU)
+  -- The one-sided `t`-jet of the left series at `0` realizes `g`'s one-sided `t`-jet (`ρ ≡ 1`).
+  have hjetL : ∀ i : ℕ, ∀ w ∈ V, iteratedDerivWithin i (fun t => Lext (t, w)) (Set.Ici 0) 0
+      = iteratedDerivWithin i (fun t => Function.uncurry g (t, w)) (Set.Ici 0) 0 := by
+    intro i w hw
+    have hLHS : iteratedDerivWithin i (fun t => Lext (t, w)) (Set.Ici 0) 0 = aL i w := by
+      have hsliceAt : ContDiffAt ℝ (i : WithTop ℕ∞) (fun t => Lext (t, w)) 0 :=
+        (hLextC.comp (contDiff_id.prodMk contDiff_const)).contDiffAt.of_le (by exact_mod_cast le_top)
+      rw [iteratedDerivWithin_eq_iteratedDeriv (uniqueDiffOn_Ici 0) hsliceAt Set.self_mem_Ici]
+      have heq : (fun t => Lext (t, w)) = fun t => ∑' n, paramTerm aL haL hsuppL n (t, w) := by
+        funext t; rw [hLext_def]
+      rw [heq, paramSeries_slice_iteratedDeriv_zero aL haL hsuppL i w]
+    rw [hLHS, haL_def]
+    simp only [hρV w hw, one_smul]
+    refine Filter.EventuallyEq.iteratedDerivWithin_eq ?_ ?_
+    · filter_upwards [mem_nhdsWithin_of_mem_nhds
+        (Iio_mem_nhds (show (0:ℝ) < T / 2 by positivity))] with t ht
+      change intervalCutoff T t • g t w = Function.uncurry g (t, w)
+      rw [intervalCutoff_eq_one T hT (le_of_lt ht), one_smul]; rfl
+    · change intervalCutoff T (0:ℝ) • g 0 w = Function.uncurry g (0, w)
+      rw [intervalCutoff_eq_one T hT (by positivity), one_smul]; rfl
+  -- The one-sided `t`-jet of the right series at `0` realizes `gR`'s one-sided `t`-jet (`ρ ≡ 1`).
+  have hjetR : ∀ i : ℕ, ∀ w ∈ V, iteratedDerivWithin i (fun t => RΦ (t, w)) (Set.Ici 0) 0
+      = iteratedDerivWithin i (fun t => Function.uncurry gR (t, w)) (Set.Ici 0) 0 := by
+    intro i w hw
+    have hLHS : iteratedDerivWithin i (fun t => RΦ (t, w)) (Set.Ici 0) 0 = aR i w := by
+      have hsliceAt : ContDiffAt ℝ (i : WithTop ℕ∞) (fun t => RΦ (t, w)) 0 :=
+        (hRΦC.comp (contDiff_id.prodMk contDiff_const)).contDiffAt.of_le (by exact_mod_cast le_top)
+      rw [iteratedDerivWithin_eq_iteratedDeriv (uniqueDiffOn_Ici 0) hsliceAt Set.self_mem_Ici]
+      have heq : (fun t => RΦ (t, w)) = fun t => ∑' n, paramTerm aR haR hsuppR n (t, w) := by
+        funext t; rw [hRΦ_def]
+      rw [heq, paramSeries_slice_iteratedDeriv_zero aR haR hsuppR i w]
+    rw [hLHS, haR_def]
+    simp only [hρV w hw, one_smul]
+    refine Filter.EventuallyEq.iteratedDerivWithin_eq ?_ ?_
+    · filter_upwards [mem_nhdsWithin_of_mem_nhds
+        (Iio_mem_nhds (show (0:ℝ) < T / 2 by positivity))] with t ht
+      change intervalCutoff T t • gR t w = Function.uncurry gR (t, w)
+      rw [intervalCutoff_eq_one T hT (le_of_lt ht), one_smul]; rfl
+    · change intervalCutoff T (0:ℝ) • gR 0 w = Function.uncurry gR (0, w)
+      rw [intervalCutoff_eq_one T hT (by positivity), one_smul]; rfl
+  -- Value matches at the two seams: only the `n = 0` term survives at the seam, `ρ ≡ 1`, `χ(0) = 1`.
+  have hbump0 : borelBumpMono 0 0 = 1 := by
+    rw [borelBumpMono, borelCutoff_eq_one (by norm_num : (0:ℝ) ^ 2 ≤ 1)]; norm_num
+  have hseamval : ∀ (a : ℕ → E → F) (ha : ∀ n, ContDiff ℝ ∞ (a n))
+      (hsupp : ∀ n, HasCompactSupport (a n)) (w : E),
+      (∑' n, paramTerm a ha hsupp n (0, w)) = a 0 w := by
+    intro a ha hsupp w
+    have hterm0 : ∀ n, paramTerm a ha hsupp n (0, w) = (if n = 0 then (1:ℝ) else 0) • a n w := by
+      intro n
+      have hp1 : (((0:ℝ), w) : ℝ × E).1 = 0 := rfl
+      rw [paramTerm, hp1, mul_zero]
+      rcases Nat.eq_zero_or_pos n with hn | hn
+      · subst hn; rw [if_pos rfl, hbump0]; simp
+      · rw [if_neg (by omega : ¬ n = 0), borelBumpMono, zero_pow (by omega : n ≠ 0)]; simp
+    rw [tsum_congr hterm0, tsum_eq_single 0 (fun n hn => by rw [if_neg hn, zero_smul]),
+      if_pos rfl, one_smul]
+  have hLext0 : ∀ z ∈ V, Lext (0, z) = g 0 z := by
+    intro z hz
+    rw [hLext_def]
+    change (∑' n, paramTerm aL haL hsuppL n (0, z)) = g 0 z
+    rw [hseamval aL haL hsuppL z, haL_def]
+    change ρ z • iteratedDerivWithin 0 (fun s => gLcut s z) (Set.Ici 0) 0 = g 0 z
+    rw [hρV z hz, one_smul, iteratedDerivWithin_zero, hgLcut_def]
+    change intervalCutoff T 0 • g 0 z = g 0 z
+    rw [intervalCutoff_eq_one T hT (by positivity), one_smul]
+  have hRextT : ∀ z ∈ V, Rext T z = g T z := by
+    intro z hz
+    rw [hRext_def]
+    change RΦ (T - T, z) = g T z
+    rw [sub_self, hRΦ_def]
+    change (∑' n, paramTerm aR haR hsuppR n (0, z)) = g T z
+    rw [hseamval aR haR hsuppR z, haR_def]
+    change ρ z • iteratedDerivWithin 0 (fun s => gRcut s z) (Set.Ici 0) 0 = g T z
+    rw [hρV z hz, one_smul, iteratedDerivWithin_zero, hgRcut_def]
+    change intervalCutoff T 0 • gR 0 z = g T z
+    rw [intervalCutoff_eq_one T hT (by positivity), one_smul, hgR_def]
+    change g (T - 0) z = g T z
+    rw [sub_zero]
+  refine ⟨gext, V, hVopen.mem_nhds hz₀V, ?_, ?_⟩
+  · -- Joint `C∞` of `uncurry gext` on the full slab `univ ×ˢ V`, via a three-piece, two-seam glue.
+    have hUDl : UniqueDiffOn ℝ (Set.Iic (0:ℝ) ×ˢ V) :=
+      UniqueDiffOn.prod (uniqueDiffOn_Iic 0) hVopen.uniqueDiffOn
+    have hUDm : UniqueDiffOn ℝ (Set.Icc (0:ℝ) T ×ˢ V) :=
+      UniqueDiffOn.prod (uniqueDiffOn_Icc hT) hVopen.uniqueDiffOn
+    have hUDr : UniqueDiffOn ℝ (Set.Ici T ×ˢ V) :=
+      UniqueDiffOn.prod (uniqueDiffOn_Ici T) hVopen.uniqueDiffOn
+    -- The three one-sided Taylor series.
+    set pL : ℝ × E → FormalMultilinearSeries ℝ (ℝ × E) F :=
+      ftaylorSeriesWithin ℝ Lext (Set.Iic (0:ℝ) ×ˢ V) with hpL_def
+    set pM : ℝ × E → FormalMultilinearSeries ℝ (ℝ × E) F :=
+      ftaylorSeriesWithin ℝ (Function.uncurry g) (Set.Icc (0:ℝ) T ×ˢ V) with hpM_def
+    set pR : ℝ × E → FormalMultilinearSeries ℝ (ℝ × E) F :=
+      ftaylorSeriesWithin ℝ (Function.uncurry Rext) (Set.Ici T ×ˢ V) with hpR_def
+    have hTL : HasFTaylorSeriesUpToOn ∞ Lext pL (Set.Iic (0:ℝ) ×ˢ V) :=
+      hLextC.contDiffOn.ftaylorSeriesWithin hUDl
+    have hTM : HasFTaylorSeriesUpToOn ∞ (Function.uncurry g) pM (Set.Icc (0:ℝ) T ×ˢ V) :=
+      hgV.ftaylorSeriesWithin hUDm
+    have hTR : HasFTaylorSeriesUpToOn ∞ (Function.uncurry Rext) pR (Set.Ici T ×ˢ V) :=
+      hRextC.contDiffOn.ftaylorSeriesWithin hUDr
+    -- **LEFT SEAM coefficient match**: `pL (0,z) = pM (0,z)` for `z ∈ V`.
+    have hLM : ∀ (n : ℕ) (z : E), z ∈ V → pL (0, z) n = pM (0, z) n := by
+      intro n z hz
+      simp only [hpL_def, hpM_def, ftaylorSeriesWithin]
+      exact prodMatch_intervalCutoff T hT Lext hLextC (Function.uncurry g) hVopen hgV hjetL n hz
+    -- **RIGHT SEAM coefficient match**: `pM (T,z) = pR (T,z)` for `z ∈ V`.
+    have hMR : ∀ (n : ℕ) (z : E), z ∈ V → pM (T, z) n = pR (T, z) n := by
+      intro n z hz
+      simp only [hpM_def, hpR_def, ftaylorSeriesWithin]
+      -- Transport both seam coefficients through the reflection `(t,z) ↦ (T-t,z)`.
+      have hpreM : (fun p : ℝ × E => ((T - p.1 : ℝ), p.2)) ⁻¹' (Set.Icc (0:ℝ) T ×ˢ V)
+          = Set.Icc (0:ℝ) T ×ˢ V := by
+        ext q
+        simp only [Set.mem_preimage, Set.mem_prod, Set.mem_Icc]
+        constructor
+        · rintro ⟨⟨h1, h2⟩, hv⟩; exact ⟨⟨by linarith, by linarith⟩, hv⟩
+        · rintro ⟨⟨h1, h2⟩, hv⟩; exact ⟨⟨by linarith, by linarith⟩, hv⟩
+      have hpreR : (fun p : ℝ × E => ((T - p.1 : ℝ), p.2)) ⁻¹' (Set.Ici T ×ˢ V)
+          = Set.Iic (0:ℝ) ×ˢ V := by
+        ext q
+        simp only [Set.mem_preimage, Set.mem_prod, Set.mem_Ici, Set.mem_Iic]
+        exact ⟨fun ⟨h1, hv⟩ => ⟨by linarith, hv⟩, fun ⟨h1, hv⟩ => ⟨by linarith, hv⟩⟩
+      have hmemTg : (T - ((0:ℝ), z).1, ((0:ℝ), z).2) ∈ Set.Icc (0:ℝ) T ×ˢ V := by
+        simp only [sub_zero]
+        exact ⟨Set.mem_Icc.mpr ⟨le_of_lt hT, le_refl T⟩, hz⟩
+      have hmemTr : (T - ((0:ℝ), z).1, ((0:ℝ), z).2) ∈ Set.Ici T ×ˢ V := by
+        simp only [sub_zero]
+        exact ⟨Set.mem_Ici.mpr (le_refl T), hz⟩
+      have hTg := reflect_iteratedFDerivWithin T (Function.uncurry g) n (Set.Icc (0:ℝ) T ×ˢ V)
+        (0, z) hUDm hmemTg
+      have hTr := reflect_iteratedFDerivWithin T (Function.uncurry Rext) n (Set.Ici T ×ˢ V)
+        (0, z) hUDr hmemTr
+      simp only [sub_zero] at hTg hTr
+      rw [hpreM] at hTg
+      rw [hpreR] at hTr
+      -- `uncurry gR = fun p => uncurry g (T - p.1, p.2)` and `RΦ = fun p => uncurry Rext (T-p.1,p.2)`.
+      have hgReq : (fun p : ℝ × E => Function.uncurry g (T - p.1, p.2)) = Function.uncurry gR := by
+        funext p; rfl
+      have hRΦeq : (fun p : ℝ × E => Function.uncurry Rext (T - p.1, p.2)) = RΦ := by
+        funext p
+        change RΦ (T - (T - p.1), p.2) = RΦ p
+        rw [sub_sub_cancel]
+      rw [hgReq] at hTg
+      rw [hRΦeq] at hTr
+      -- Reflected match via the left-seam bridge applied to `(RΦ, uncurry gR)`.
+      have hM : iteratedFDerivWithin ℝ n RΦ (Set.Iic (0:ℝ) ×ˢ V) (0, z)
+          = iteratedFDerivWithin ℝ n (Function.uncurry gR) (Set.Icc (0:ℝ) T ×ˢ V) (0, z) :=
+        prodMatch_intervalCutoff T hT RΦ hRΦC (Function.uncurry gR) hVopen hgRV hjetR n hz
+      -- Combine: the two reflected coefficients agree, hence (compCLM injective) the seam ones.
+      have hcompeq : (iteratedFDerivWithin ℝ n (Function.uncurry g) (Set.Icc (0:ℝ) T ×ˢ V) (T, z)
+            ).compContinuousLinearMap
+            (fun _ => ((reflectFst : (ℝ × E) ≃L[ℝ] (ℝ × E)) : (ℝ × E) →L[ℝ] (ℝ × E)))
+          = (iteratedFDerivWithin ℝ n (Function.uncurry Rext) (Set.Ici T ×ˢ V) (T, z)
+            ).compContinuousLinearMap
+            (fun _ => ((reflectFst : (ℝ × E) ≃L[ℝ] (ℝ × E)) : (ℝ × E) →L[ℝ] (ℝ × E))) := by
+        rw [← hTg, ← hTr, hM]
+      -- `·.compContinuousLinearMap reflectFst` is injective (it has the inverse `reflectFst.symm`).
+      have hroundtrip : ∀ w : (ℝ × E) [×n]→L[ℝ] F,
+          (w.compContinuousLinearMap
+              (fun _ => ((reflectFst : (ℝ × E) ≃L[ℝ] (ℝ × E)) : (ℝ × E) →L[ℝ] (ℝ × E)))
+            ).compContinuousLinearMap
+              (fun _ => ((reflectFst.symm : (ℝ × E) ≃L[ℝ] (ℝ × E))
+                : (ℝ × E) →L[ℝ] (ℝ × E))) = w := by
+        intro w; ext1 m; simp
+      have hcancel := congrArg (fun w : (ℝ × E) [×n]→L[ℝ] F =>
+          w.compContinuousLinearMap
+            (fun _ => ((reflectFst.symm : (ℝ × E) ≃L[ℝ] (ℝ × E)) : (ℝ × E) →L[ℝ] (ℝ × E))))
+        hcompeq
+      simp only at hcancel
+      rwa [hroundtrip, hroundtrip] at hcancel
+    -- The candidate joint series, assembled piecewise across the two seams.
+    set p : ℝ × E → FormalMultilinearSeries ℝ (ℝ × E) F :=
+      fun q => if q.1 < 0 then pL q else if q.1 ≤ T then pM q else pR q with hp_def
+    -- `uncurry gext` agrees with the three pieces on their closed slabs.
+    have hEqL : Set.EqOn (Function.uncurry gext) Lext (Set.Iic (0:ℝ) ×ˢ V) := by
+      rintro ⟨t, z⟩ ⟨ht, hz⟩
+      simp only [Set.mem_Iic] at ht
+      rcases eq_or_lt_of_le ht with ht0 | ht0
+      · subst ht0
+        simp only [Function.uncurry, hgext_def, lt_irrefl, if_false, le_of_lt hT, ite_true]
+        exact (hLext0 z hz).symm
+      · simp only [Function.uncurry, hgext_def, if_pos ht0]
+    have hEqM : Set.EqOn (Function.uncurry gext) (Function.uncurry g) (Set.Icc (0:ℝ) T ×ˢ V) := by
+      rintro ⟨t, z⟩ ⟨ht, _⟩
+      simp only [Set.mem_Icc] at ht
+      simp only [Function.uncurry, hgext_def, if_neg (not_lt.mpr ht.1), if_pos ht.2]
+    have hEqR : Set.EqOn (Function.uncurry gext) (Function.uncurry Rext) (Set.Ici T ×ˢ V) := by
+      rintro ⟨t, z⟩ ⟨ht, hz⟩
+      simp only [Set.mem_Ici] at ht
+      rcases eq_or_lt_of_le ht with htT | htT
+      · subst htT
+        simp only [Function.uncurry, hgext_def, if_neg (not_lt.mpr (le_of_lt hT)),
+          if_pos (le_refl T)]
+        exact (hRextT z hz).symm
+      · simp only [Function.uncurry, hgext_def, if_neg (not_lt.mpr (le_of_lt (lt_trans hT htT))),
+          if_neg (not_le.mpr htT)]
+    -- `p` agrees with each piece's series on the corresponding closed slab.
+    have hEqpL : ∀ m : ℕ, Set.EqOn (fun q => p q m) (fun q => pL q m) (Set.Iic (0:ℝ) ×ˢ V) := by
+      intro m q hq
+      rcases lt_or_ge q.1 0 with hq0 | hq0
+      · simp only [hp_def, if_pos hq0]
+      · have hq0' : q.1 = 0 := le_antisymm (Set.mem_Iic.mp hq.1) hq0
+        obtain ⟨t, z⟩ := q
+        simp only at hq0'
+        subst hq0'
+        simp only [hp_def, lt_irrefl, if_false, le_of_lt hT, ite_true]
+        exact (hLM m z hq.2).symm
+    have hEqpM : ∀ m : ℕ, Set.EqOn (fun q => p q m) (fun q => pM q m) (Set.Icc (0:ℝ) T ×ˢ V) := by
+      intro m q hq
+      have ht := Set.mem_Icc.mp hq.1
+      simp only [hp_def, if_neg (not_lt.mpr ht.1), if_pos ht.2]
+    have hEqpR : ∀ m : ℕ, Set.EqOn (fun q => p q m) (fun q => pR q m) (Set.Ici T ×ˢ V) := by
+      intro m q hq
+      rcases eq_or_lt_of_le (Set.mem_Ici.mp hq.1) with hqT | hqT
+      · have hq1 : q.1 = T := hqT.symm
+        simp only [hp_def, hq1, if_neg (not_lt.mpr (le_of_lt hT)), if_pos (le_refl T)]
+        have : q = (T, q.2) := by rw [← hq1]
+        rw [this]; exact hMR m q.2 hq.2
+      · simp only [hp_def, if_neg (not_lt.mpr (le_of_lt (lt_trans hT hqT))), if_neg (not_le.mpr hqT)]
+    -- The zero-th coefficient yields the value of `uncurry gext`.
+    have hzero : ∀ q ∈ Set.univ ×ˢ V, (p q 0).curry0 = Function.uncurry gext q := by
+      rintro ⟨t, z⟩ ⟨_, hz⟩
+      rcases lt_trichotomy t 0 with ht | ht | ht
+      · have hmem : (t, z) ∈ Set.Iic (0:ℝ) ×ˢ V := ⟨Set.mem_Iic.mpr (le_of_lt ht), hz⟩
+        rw [hp_def]; simp only [if_pos ht]
+        rw [hTL.zero_eq (t, z) hmem, hEqL hmem]
+      · subst ht
+        have hmem : ((0:ℝ), z) ∈ Set.Icc (0:ℝ) T ×ˢ V :=
+          ⟨Set.mem_Icc.mpr ⟨le_refl 0, le_of_lt hT⟩, hz⟩
+        rw [hp_def]; simp only [lt_irrefl, if_false, le_of_lt hT, ite_true]
+        rw [hTM.zero_eq (0, z) hmem, hEqM hmem]
+      · rcases le_or_gt t T with htT | htT
+        · have hmem : (t, z) ∈ Set.Icc (0:ℝ) T ×ˢ V :=
+            ⟨Set.mem_Icc.mpr ⟨le_of_lt ht, htT⟩, hz⟩
+          rw [hp_def]; simp only [if_neg (not_lt.mpr (le_of_lt ht)), if_pos htT]
+          rw [hTM.zero_eq (t, z) hmem, hEqM hmem]
+        · have hmem : (t, z) ∈ Set.Ici T ×ˢ V := ⟨Set.mem_Ici.mpr (le_of_lt htT), hz⟩
+          rw [hp_def]
+          simp only [if_neg (not_lt.mpr (le_of_lt (lt_trans hT htT))), if_neg (not_le.mpr htT)]
+          rw [hTR.zero_eq (t, z) hmem, hEqR hmem]
+    have hm_lt : ∀ m : ℕ, (m : WithTop ℕ∞) < ∞ := fun m => by
+      exact_mod_cast (Nat.cast_lt.mpr m.lt_succ_self).trans_le le_top
+    -- The per-order derivative obligation on `univ ×ˢ V`.
+    have hderiv : ∀ (m : ℕ), ∀ q ∈ Set.univ ×ˢ V,
+        HasFDerivWithinAt (fun y => p y m) (p q m.succ).curryLeft (Set.univ ×ˢ V) q := by
+      intro m q hq
+      obtain ⟨t, z⟩ := q
+      have hz : z ∈ V := hq.2
+      rcases lt_trichotomy t 0 with ht | ht | ht
+      · -- t < 0: interior of the lower slab.
+        have hmem : (t, z) ∈ Set.Iic (0:ℝ) ×ˢ V := ⟨Set.mem_Iic.mpr (le_of_lt ht), hz⟩
+        have hdL : HasFDerivWithinAt (fun y => pL y m) (pL (t, z) m.succ).curryLeft
+            (Set.Iic (0:ℝ) ×ˢ V) (t, z) := hTL.fderivWithin m (hm_lt m) (t, z) hmem
+        have hnhds : Set.Iio (0:ℝ) ×ˢ V ∈ nhds (t, z) :=
+          prod_mem_nhds (Iio_mem_nhds ht) (hVopen.mem_nhds hz)
+        have hsub : Set.Iio (0:ℝ) ×ˢ V ⊆ Set.Iic (0:ℝ) ×ˢ V :=
+          Set.prod_mono_left Iio_subset_Iic_self
+        have hfd : HasFDerivAt (fun y => p y m) (pL (t, z) m.succ).curryLeft (t, z) :=
+          ((hdL.mono hsub).hasFDerivAt hnhds).congr_of_eventuallyEq
+            (Filter.eventuallyEq_of_mem hnhds (fun y hy => hEqpL m (hsub hy)))
+        rw [hp_def]; simp only [if_pos ht]
+        exact hfd.hasFDerivWithinAt
+      · -- t = 0: LEFT seam. Work on the nbhd `Iio T ×ˢ V`, glue lower with middle.
+        subst ht
+        have hu : Set.Iio T ×ˢ V ∈ nhds ((0:ℝ), z) :=
+          prod_mem_nhds (Iio_mem_nhds hT) (hVopen.mem_nhds hz)
+        have hmemL : ((0:ℝ), z) ∈ Set.Iic (0:ℝ) ×ˢ V := ⟨Set.self_mem_Iic, hz⟩
+        have hmemM : ((0:ℝ), z) ∈ Set.Icc (0:ℝ) T ×ˢ V :=
+          ⟨Set.mem_Icc.mpr ⟨le_refl 0, le_of_lt hT⟩, hz⟩
+        have hdL0 : HasFDerivWithinAt (fun y => p y m) (pL (0, z) m.succ).curryLeft
+            (Set.Iic (0:ℝ) ×ˢ V) (0, z) :=
+          (hTL.fderivWithin m (hm_lt m) (0, z) hmemL).congr (hEqpL m) (hEqpL m hmemL)
+        have hdM0 : HasFDerivWithinAt (fun y => p y m) (pL (0, z) m.succ).curryLeft
+            (Set.Icc (0:ℝ) T ×ˢ V) (0, z) := by
+          have hval : (pM (0, z) m.succ).curryLeft = (pL (0, z) m.succ).curryLeft := by
+            rw [hLM m.succ z hz]
+          rw [← hval]
+          exact (hTM.fderivWithin m (hm_lt m) (0, z) hmemM).congr (hEqpM m) (hEqpM m hmemM)
+        have hunion := hdL0.union hdM0
+        rw [← Set.union_prod, Set.Iic_union_Icc_eq_Iic (le_of_lt hT)] at hunion
+        have hmono : HasFDerivWithinAt (fun y => p y m) (pL (0, z) m.succ).curryLeft
+            (Set.Iio T ×ˢ V) (0, z) :=
+          hunion.mono (Set.prod_mono_left Iio_subset_Iic_self)
+        have hinter : (Set.univ ×ˢ V) ∩ (Set.Iio T ×ˢ V) = Set.Iio T ×ˢ V := by
+          rw [Set.prod_inter_prod, Set.univ_inter, Set.inter_self]
+        have hmono' : HasFDerivWithinAt (fun y => p y m) (pL (0, z) m.succ).curryLeft
+            ((Set.univ ×ˢ V) ∩ (Set.Iio T ×ˢ V)) (0, z) := by rw [hinter]; exact hmono
+        have hres := (hasFDerivWithinAt_inter hu).mp hmono'
+        rw [hLM m.succ z hz] at hres
+        rw [hp_def]; simp only [lt_irrefl, if_false, le_of_lt hT, ite_true]
+        exact hres
+      · -- t > 0.
+        rcases lt_trichotomy t T with htT | htT | htT
+        · -- 0 < t < T: interior of the middle slab.
+          have hmem : (t, z) ∈ Set.Icc (0:ℝ) T ×ˢ V :=
+            ⟨Set.mem_Icc.mpr ⟨le_of_lt ht, le_of_lt htT⟩, hz⟩
+          have hdM : HasFDerivWithinAt (fun y => pM y m) (pM (t, z) m.succ).curryLeft
+              (Set.Icc (0:ℝ) T ×ˢ V) (t, z) := hTM.fderivWithin m (hm_lt m) (t, z) hmem
+          have hnhds : Set.Ioo (0:ℝ) T ×ˢ V ∈ nhds (t, z) :=
+            prod_mem_nhds (Ioo_mem_nhds ht htT) (hVopen.mem_nhds hz)
+          have hsub : Set.Ioo (0:ℝ) T ×ˢ V ⊆ Set.Icc (0:ℝ) T ×ˢ V :=
+            Set.prod_mono_left Ioo_subset_Icc_self
+          have hfd : HasFDerivAt (fun y => p y m) (pM (t, z) m.succ).curryLeft (t, z) :=
+            ((hdM.mono hsub).hasFDerivAt hnhds).congr_of_eventuallyEq
+              (Filter.eventuallyEq_of_mem hnhds (fun y hy => hEqpM m (hsub hy)))
+          rw [hp_def]; simp only [if_neg (not_lt.mpr (le_of_lt ht)), if_pos (le_of_lt htT)]
+          exact hfd.hasFDerivWithinAt
+        · -- t = T: RIGHT seam. Work on the nbhd `Ioi 0 ×ˢ V`, glue middle with right.
+          subst htT
+          have hu : Set.Ioi (0:ℝ) ×ˢ V ∈ nhds (t, z) :=
+            prod_mem_nhds (Ioi_mem_nhds hT) (hVopen.mem_nhds hz)
+          have hmemM : (t, z) ∈ Set.Icc (0:ℝ) t ×ˢ V :=
+            ⟨Set.mem_Icc.mpr ⟨le_of_lt hT, le_refl t⟩, hz⟩
+          have hmemR : (t, z) ∈ Set.Ici t ×ˢ V := ⟨Set.self_mem_Ici, hz⟩
+          have hdM0 : HasFDerivWithinAt (fun y => p y m) (pM (t, z) m.succ).curryLeft
+              (Set.Icc (0:ℝ) t ×ˢ V) (t, z) :=
+            (hTM.fderivWithin m (hm_lt m) (t, z) hmemM).congr (hEqpM m) (hEqpM m hmemM)
+          have hdR0 : HasFDerivWithinAt (fun y => p y m) (pM (t, z) m.succ).curryLeft
+              (Set.Ici t ×ˢ V) (t, z) := by
+            have hval : (pR (t, z) m.succ).curryLeft = (pM (t, z) m.succ).curryLeft := by
+              rw [hMR m.succ z hz]
+            rw [← hval]
+            exact (hTR.fderivWithin m (hm_lt m) (t, z) hmemR).congr (hEqpR m) (hEqpR m hmemR)
+          have hunion := hdM0.union hdR0
+          rw [← Set.union_prod, Set.Icc_union_Ici_eq_Ici (le_of_lt hT)] at hunion
+          have hmono : HasFDerivWithinAt (fun y => p y m) (pM (t, z) m.succ).curryLeft
+              (Set.Ioi (0:ℝ) ×ˢ V) (t, z) :=
+            hunion.mono (Set.prod_mono_left Ioi_subset_Ici_self)
+          rw [hp_def]; simp only [if_neg (not_lt.mpr (le_of_lt hT)), if_pos (le_refl t)]
+          have hinter : (Set.univ ×ˢ V) ∩ (Set.Ioi (0:ℝ) ×ˢ V) = Set.Ioi (0:ℝ) ×ˢ V := by
+            rw [Set.prod_inter_prod, Set.univ_inter, Set.inter_self]
+          have hmono' : HasFDerivWithinAt (fun y => p y m) (pM (t, z) m.succ).curryLeft
+              ((Set.univ ×ˢ V) ∩ (Set.Ioi (0:ℝ) ×ˢ V)) (t, z) := by rw [hinter]; exact hmono
+          have hres := (hasFDerivWithinAt_inter hu).mp hmono'
+          simpa only [hp_def, if_neg (not_lt.mpr (le_of_lt hT)), if_pos (le_refl t)] using hres
+        · -- t > T: interior of the upper slab.
+          have hmem : (t, z) ∈ Set.Ici T ×ˢ V := ⟨Set.mem_Ici.mpr (le_of_lt htT), hz⟩
+          have hdR : HasFDerivWithinAt (fun y => pR y m) (pR (t, z) m.succ).curryLeft
+              (Set.Ici T ×ˢ V) (t, z) := hTR.fderivWithin m (hm_lt m) (t, z) hmem
+          have hnhds : Set.Ioi T ×ˢ V ∈ nhds (t, z) :=
+            prod_mem_nhds (Ioi_mem_nhds htT) (hVopen.mem_nhds hz)
+          have hsub : Set.Ioi T ×ˢ V ⊆ Set.Ici T ×ˢ V :=
+            Set.prod_mono_left Ioi_subset_Ici_self
+          have hfd : HasFDerivAt (fun y => p y m) (pR (t, z) m.succ).curryLeft (t, z) :=
+            ((hdR.mono hsub).hasFDerivAt hnhds).congr_of_eventuallyEq
+              (Filter.eventuallyEq_of_mem hnhds (fun y hy => hEqpR m (hsub hy)))
+          rw [hp_def]
+          simp only [if_neg (not_lt.mpr (le_of_lt (lt_trans hT htT))), if_neg (not_le.mpr htT)]
+          exact hfd.hasFDerivWithinAt
+    have hTaylor : HasFTaylorSeriesUpToOn ∞ (Function.uncurry gext) p (Set.univ ×ˢ V) :=
+      (hasFTaylorSeriesUpToOn_top_iff' (le_refl _)).mpr ⟨hzero, hderiv⟩
+    exact hTaylor.contDiffOn
+  · -- Agreement with `g` on `[0, T]`, on all of `V`.
+    intro t ht z _
+    obtain ⟨ht0, htT⟩ := ht
+    simp only [hgext_def, if_neg (not_lt.mpr ht0), if_pos htT]
 
 end Setup
 
