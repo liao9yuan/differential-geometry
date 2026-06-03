@@ -58,6 +58,9 @@ chart-locality-free `C⁰` space of `(r, s)`-tensor sections.
 
 noncomputable section
 
+set_option linter.style.setOption false
+set_option backward.isDefEq.respectTransparency false
+
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle Topology Metric
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
