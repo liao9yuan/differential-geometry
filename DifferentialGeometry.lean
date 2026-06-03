@@ -671,6 +671,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieM
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieSummandLipschitz
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RicciDiffAffine
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.AllOrderGardingBootstrap
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.AllValenceL2DefectBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenComboGardingReduction
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenvalueTailSummableFromCounting
@@ -1132,6 +1133,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.InteriorAllscaleTi
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.MildSolutionTimeH1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.RealizeTransport
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.SolutionC2Continuous
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LocalWeylReproducingKernel
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.WeylEigenvalueCountingBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.BasepointMotion
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.ConjugatingDiffeoFamily

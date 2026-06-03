@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Spectr
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.SpectralDiagonalCounting
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LocalWeylReproducingKernel
 
 /-! # Local Weyl law: pointwise diagonal kernel bound and eigenvalue counting
 
@@ -112,7 +113,17 @@ theorem weyl_pointwise_diagonalKernel_bound_of_closed
                 (hCompact (I := I) (M := M) g) (SmoothCcTensor.toL2 T) i *
               ccTensorBilinSymm (I := I) g
                 (eigenvectorSmooth (I := I) (M := M) g 0 2 i) x v w)
-          (ccTensorBilinSymm (I := I) g T x v w))) := sorry
+          (ccTensorBilinSymm (I := I) g T x v w))) := by
+  refine ⟨?_, ?_⟩
+  · -- Conjunct 1: the polynomial diagonal-kernel bound.
+    exact diagonalKernel_polynomial_bound_of_closed (I := I) (M := M) g r s
+  · -- Conjuncts 2 and 3: the supercritical realize read-offs of the kernel.
+    intro a ha
+    refine ⟨?_, ?_⟩
+    · intro x v w
+      exact weyl_realize_weighted_summable_of_closed (I := I) (M := M) g a ha x v w
+    · intro T x v w
+      exact weyl_realize_hasSum_of_closed (I := I) (M := M) g a ha T x v w
 
 /-- The integrated polynomial eigenvalue-counting bound `EigenvalueCountingBound g r s`
 for the tensor connection-Laplacian spectrum on a closed manifold. Re-derived from the
