@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Metric.Basic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHS
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckInitialAnchorConstruction
 
 /-! # `g₀`-anchored DeTurck–Ricci interior parabolic existence
 
@@ -35,7 +36,7 @@ variable
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
-      [T2Space M] [SigmaCompactSpace M]
+      [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 /-- **`g₀`-anchored DeTurck–Ricci interior parabolic existence (genuine analytic input).**
 
@@ -76,6 +77,7 @@ theorem deturck_metric_pde_interior_at_initial
           (Set.Ioi 0) 0) ∧
       (∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
         HasDerivWithinAt (fun s : ℝ => (g_DT s).inner x v w)
-          (deTurckRicciRHS (I := I) g_bg (g_DT t) x v w) (Set.Ici 0) t) := sorry
+          (deTurckRicciRHS (I := I) g_bg (g_DT t) x v w) (Set.Ici 0) t) :=
+  deturck_metric_pde_interior_at_initial_construction (I := I) g₀ g_bg
 
 end DifferentialGeometry.PDE.RicciFlow
