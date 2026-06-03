@@ -4,6 +4,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.GeneralOrderPo
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.FaithfulH1Embedding
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.CcTensorFibreCauchySchwarz
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizedGramDiff
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.SpectralDiagonalCounting
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.TensorRSContRiemannianBundle
@@ -149,8 +151,81 @@ theorem tensorEigenIdx_one_add_lambda_lt_finite
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (Λ : ℝ) :
     {i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s |
       1 + Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx.lambda
-        (I := I) (M := M) i < Λ}.Finite :=
-  sorry
+        (I := I) (M := M) i < Λ}.Finite := by
+  classical
+  by_cases hΛ : 0 < Λ
+  · -- The base set of nonzero resolvent eigenvalues `μ` with `1 + λ(μ) < Λ`.
+    set B : Set (Analysis.Parabolic.TensorSpectral.TensorNonzeroResolventEigenvalue
+        (I := I) (M := M) g r s) :=
+      {μ | 1 + Analysis.Parabolic.TensorSpectral.tensorLaplacianEigenvalueOf μ.val < Λ}
+      with hB_def
+    -- It is finite: the value map `μ ↦ μ.val` injects it into the finite shell
+    -- `{x | HasEigenvalue x ∧ 1/Λ ≤ |x|}` (`tensorResolvent_eigenvalues_finite_above`).
+    have hBfin : B.Finite := by
+      apply Set.Finite.of_finite_image
+        (f := fun μ : Analysis.Parabolic.TensorSpectral.TensorNonzeroResolventEigenvalue
+            (I := I) (M := M) g r s => μ.val)
+      · refine Set.Finite.subset
+          (Analysis.Parabolic.TensorSpectral.tensorResolvent_eigenvalues_finite_above
+            (I := I) (M := M) g r s
+            (IntrinsicSpectral.tensorResolventL2_isCompactOperator
+              (I := I) (M := M) g r s)
+            (show (0 : ℝ) < 1 / Λ by positivity)) ?_
+        rintro x ⟨μ, hμB, rfl⟩
+        have hev : Module.End.HasEigenvalue
+            ((Analysis.Parabolic.TensorSpectral.tensorResolventL2
+              (I := I) (M := M) g r s).toLinearMap) μ.val :=
+          μ.hasEigenvalue
+        obtain ⟨u, hu_mem, hu_ne⟩ := μ.hasEigenvalue.exists_hasEigenvector
+        have hu_in : u ∈ Analysis.Parabolic.TensorSpectral.tensorResolventEigenspace
+            (I := I) (M := M) g r s μ.val := hu_mem
+        have hμ_unit : μ.val ∈ Set.Ioc (0 : ℝ) 1 :=
+          Analysis.Parabolic.TensorSpectral.tensorResolvent_eigenvalue_mem_unit_interval
+            (I := I) (M := M) g r s hu_in hu_ne
+        have hμ_pos : 0 < μ.val := hμ_unit.1
+        have hlt : 1 + Analysis.Parabolic.TensorSpectral.tensorLaplacianEigenvalueOf μ.val < Λ :=
+          hμB
+        have hinv : (μ.val)⁻¹ < Λ := by
+          have heq : (μ.val)⁻¹
+              = 1 + Analysis.Parabolic.TensorSpectral.tensorLaplacianEigenvalueOf μ.val := by
+            rw [Analysis.Parabolic.TensorSpectral.tensorLaplacianEigenvalueOf]
+            field_simp; ring
+          rw [heq]; exact hlt
+        have hμ_gt : 1 / Λ < μ.val := by
+          rw [div_lt_iff₀ hΛ]
+          rw [inv_lt_iff_one_lt_mul₀ hμ_pos] at hinv
+          linarith [hinv]
+        exact ⟨hev, by rw [abs_of_pos hμ_pos]; exact le_of_lt hμ_gt⟩
+      · intro μ₁ _ μ₂ _ h
+        exact Analysis.Parabolic.TensorSpectral.TensorNonzeroResolventEigenvalue.ext μ₁ μ₂ h
+    -- The eigen-index set is the sigma over `B` with finite (`Fintype`) eigenspace fibres.
+    have hset_eq :
+        {i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s |
+          1 + Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx.lambda
+            (I := I) (M := M) i < Λ}
+          = ⋃ μ ∈ B, Sigma.mk μ '' Set.univ := by
+      ext ⟨μ, k⟩
+      simp only [Set.mem_setOf_eq, Set.mem_iUnion, Set.mem_image, Set.mem_univ, true_and]
+      constructor
+      · intro h
+        exact ⟨μ, by rw [hB_def]; exact h, k, rfl⟩
+      · rintro ⟨μ', hμ'B, k', heq⟩
+        obtain ⟨rfl, _⟩ := Sigma.mk.injEq .. ▸ heq
+        rw [hB_def] at hμ'B; exact hμ'B
+    rw [hset_eq]
+    exact hBfin.biUnion (fun μ _ => Set.finite_univ.image _)
+  · -- For `Λ ≤ 0` the set is empty, as `1 + λᵢ ≥ 1 > 0 ≥ Λ`.
+    have hempty :
+        {i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s |
+          1 + Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx.lambda
+            (I := I) (M := M) i < Λ} = ∅ := by
+      rw [Set.eq_empty_iff_forall_notMem]
+      intro i hi
+      have hlam := Analysis.Parabolic.TensorHeatEquation.tensor_lambda_nonneg (I := I) (M := M) i
+      have hΛle := not_lt.1 hΛ
+      simp only [Set.mem_setOf_eq] at hi
+      linarith
+    rw [hempty]; exact Set.finite_empty
 
 /-! ## Conjunct 1: the polynomial diagonal-kernel bound -/
 
@@ -665,8 +740,53 @@ theorem ccTensorBilinSymm_sq_le_gInner_eigenFiberNormSq
     (v w : TangentSpace I x) :
     (ccTensorBilinSymm (I := I) g T x v w) ^ 2 ≤
       g.inner x v v * g.inner x w w *
-        Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g 0 2 x (T.toSection x) :=
-  sorry
+        Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g 0 2 x (T.toSection x) := by
+  set fnsq : ℝ :=
+    Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g 0 2 x (T.toSection x)
+    with hfnsq_def
+  have hgvv : 0 ≤ g.inner x v v :=
+    DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg (I := I) (M := M) g x v
+  have hgww : 0 ≤ g.inner x w w :=
+    DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg (I := I) (M := M) g x w
+  have hfnsq_nn : 0 ≤ fnsq :=
+    Integral.Connection.riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 2 x _
+  -- Cauchy–Schwarz for the unsymmetrized form, in both argument orders.
+  have hCSvw : (ccTensorBilin (I := I) g T x v w) ^ 2 ≤ g.inner x v v * g.inner x w w * fnsq :=
+    ccTensorBilin_sq_le_gInner_riemannianFiberNormSq (I := I) g T x v w
+  have hCSwv : (ccTensorBilin (I := I) g T x w v) ^ 2 ≤ g.inner x v v * g.inner x w w * fnsq := by
+    have h := ccTensorBilin_sq_le_gInner_riemannianFiberNormSq (I := I) g T x w v
+    calc (ccTensorBilin (I := I) g T x w v) ^ 2
+        ≤ g.inner x w w * g.inner x v v * fnsq := h
+      _ = g.inner x v v * g.inner x w w * fnsq := by ring
+  set R : ℝ := Real.sqrt (g.inner x v v * g.inner x w w * fnsq) with hR_def
+  have hR_nn : 0 ≤ R := Real.sqrt_nonneg _
+  have hR_sq : R ^ 2 = g.inner x v v * g.inner x w w * fnsq := by
+    rw [hR_def, Real.sq_sqrt (by positivity)]
+  have hbvw : |ccTensorBilin (I := I) g T x v w| ≤ R := by
+    rw [hR_def,
+      show |ccTensorBilin (I := I) g T x v w|
+          = Real.sqrt ((ccTensorBilin (I := I) g T x v w) ^ 2)
+        from (Real.sqrt_sq_eq_abs _).symm]
+    exact Real.sqrt_le_sqrt hCSvw
+  have hbwv : |ccTensorBilin (I := I) g T x w v| ≤ R := by
+    rw [hR_def,
+      show |ccTensorBilin (I := I) g T x w v|
+          = Real.sqrt ((ccTensorBilin (I := I) g T x w v) ^ 2)
+        from (Real.sqrt_sq_eq_abs _).symm]
+    exact Real.sqrt_le_sqrt hCSwv
+  rw [ccTensorBilinSymm_apply]
+  set S : ℝ :=
+    (1 / 2 : ℝ) * (ccTensorBilin (I := I) g T x v w + ccTensorBilin (I := I) g T x w v)
+    with hS_def
+  have habs : |S| ≤ R := by
+    rw [hS_def, abs_mul, abs_of_pos (by norm_num : (0 : ℝ) < 1 / 2)]
+    have htri :=
+      (abs_add_le (ccTensorBilin (I := I) g T x v w)
+        (ccTensorBilin (I := I) g T x w v)).trans (add_le_add hbvw hbwv)
+    linarith [htri]
+  calc S ^ 2 = |S| ^ 2 := (sq_abs S).symm
+    _ ≤ R ^ 2 := pow_le_pow_left₀ (abs_nonneg S) habs 2
+    _ = g.inner x v v * g.inner x w w * fnsq := hR_sq
 
 /-- **Conjunct 2: supercritical weighted summability of the realize values.** At a
 supercritical order `a` (`2a > dim M + 4`), the per-eigenmode realize values
@@ -732,14 +852,62 @@ theorem weyl_realize_weighted_summable_of_closed
             ((tensorSobolevWeight (I := I) (M := M) i (a : ℝ))⁻¹ *
               eigenFiberNormSq (I := I) (M := M) g 0 2 i x) := by ring
 
-/-- **Conjunct 3: the realize eigen-expansion.** At a supercritical order `a`
-(`2a > dim M + 4`), the realize-evaluation `ccTensorBilinSymm g T x v w` of a smooth
-compactly-supported `(0, 2)`-tensor `T` is the absolutely-convergent eigen-series of
-its `L²`-coordinates `cᵢ(T) = tensorL2Coeff (T.toL2) i` weighted by the per-eigenmode
-realize values `eᵢ(x,v,w)`. This is the `C⁰`-convergence of the eigenbasis expansion of
-the realize, resting on the same on-diagonal kernel control `(★)` (Cauchy–Schwarz of
-the smooth tensor's `Hᵃ`-coordinates against the `(1+λᵢ)^{-a}` kernel tail) together
-with the `L²`-completeness of the eigenbasis-coordinate expansion. -/
+/-- `ccTensorBilinSymm g · x v w` is additive in the tensor section (derived from the
+subtractivity `ccTensorBilinSymm_sub` and the homogeneity `ccTensorBilinSymm_smul`). -/
+private lemma ccTensorBilinSymm_add
+    (g : SmoothRiemannianMetric I M) (S T : SmoothCcTensor g 0 2) (x : M)
+    (v w : TangentSpace I x) :
+    ccTensorBilinSymm (I := I) g (S + T) x v w =
+      ccTensorBilinSymm (I := I) g S x v w + ccTensorBilinSymm (I := I) g T x v w := by
+  have h1 : S + T = S - ((-1 : ℝ) • T) := by rw [neg_one_smul, sub_neg_eq_add]
+  rw [h1, ccTensorBilinSymm_sub, ccTensorBilinSymm_smul]; ring
+
+/-- The symmetric realize value of a finite eigen-combination is the finite fibre-linear
+combination of the per-eigenmode realize values: `ccTensorBilinSymm g (∑_{i∈F} cᵢ·bᵢ)
+x v w = ∑_{i∈F} cᵢ · ccTensorBilinSymm g bᵢ x v w`. -/
+private lemma ccTensorBilinSymm_finiteEigenCombo
+    (g : SmoothRiemannianMetric I M)
+    (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
+    (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ)
+    (x : M) (v w : TangentSpace I x) :
+    ccTensorBilinSymm (I := I) g (finiteEigenCombo (I := I) (M := M) g F c) x v w =
+      ∑ i ∈ F, c i *
+        ccTensorBilinSymm (I := I) g (eigenvectorSmooth (I := I) (M := M) g 0 2 i) x v w := by
+  classical
+  rw [finiteEigenCombo_eq]
+  induction F using Finset.induction with
+  | empty =>
+      rw [Finset.sum_empty, Finset.sum_empty,
+        show (0 : SmoothCcTensor g 0 2) = (0 : ℝ) • (0 : SmoothCcTensor g 0 2) from
+          (zero_smul ℝ _).symm,
+        ccTensorBilinSymm_smul]
+      ring
+  | insert j F hj ih =>
+      rw [Finset.sum_insert hj, Finset.sum_insert hj, ccTensorBilinSymm_add,
+        ccTensorBilinSymm_smul, ih]
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option linter.unusedVariables false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **Conjunct 3: the realize eigen-expansion.** The realize-evaluation
+`ccTensorBilinSymm g T x v w` of a smooth compactly-supported `(0, 2)`-tensor `T` is
+the absolutely-convergent eigen-series of its `L²`-coordinates
+`cᵢ(T) = tensorL2Coeff (T.toL2) i` weighted by the per-eigenmode realize values
+`eᵢ(x,v,w)`. This is the `C⁰`-convergence of the eigenbasis expansion of the realize:
+the finite eigen-truncation `T_F = finiteEigenCombo F (cᵢ(T))` has
+`ccTensorBilinSymm g T_F x v w = ∑_{i ∈ F} cᵢ(T)·eᵢ(x,v,w)`, and the realize evaluation
+of the difference is controlled — through the fibre Cauchy–Schwarz
+`ccTensorBilinSymm_sq_le_gInner_eigenFiberNormSq`, the in-file fibre/spectral embedding
+`pointwiseFiberNorm_le_spectralHs_02` (taken at a fixed supercritical chart order
+`k = dim M + 1`) and the `H^{4k}`-summability of a smooth tensor's `L²`-coordinates —
+by the convergent supercritical tail `∑_{i ∉ F}(1+λᵢ)^{4k}·cᵢ(T)² → 0`, forcing the
+partial sums to converge to `ccTensorBilinSymm g T x v w`. (The ambient supercritical
+order `a` of conjunct 2 is carried for uniformity but not needed here: the expansion
+holds for every smooth `T` regardless of `a`, controlled by the fixed order `k`; the
+hypothesis `ha` is correspondingly unused — the narrow `linter.unusedVariables`
+suppression above is for that frozen signature parameter.) -/
 theorem weyl_realize_hasSum_of_closed
     (g : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (T : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
@@ -750,7 +918,149 @@ theorem weyl_realize_hasSum_of_closed
             (SmoothCcTensor.toL2 T) i *
           ccTensorBilinSymm (I := I) g
             (eigenvectorSmooth (I := I) (M := M) g 0 2 i) x v w)
-      (ccTensorBilinSymm (I := I) g T x v w) :=
-  sorry
+      (ccTensorBilinSymm (I := I) g T x v w) := by
+  classical
+  letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 2 I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g 0 2
+  -- Supercritical chart order `k`, embedding order `σ = 2·(2k)`.
+  set k : ℕ := Module.finrank ℝ E + 1 with hk_def
+  have hk : Module.finrank ℝ E < 2 * k := by rw [hk_def]; omega
+  set σ : ℝ := ((2 * (2 * k) : ℕ) : ℝ) with hσ_def
+  obtain ⟨C, hC_nn, hbound⟩ := pointwiseFiberNorm_le_spectralHs_02 (I := I) (M := M) g k hk
+  have hgvv : 0 ≤ g.inner x v v :=
+    DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg (I := I) (M := M) g x v
+  have hgww : 0 ≤ g.inner x w w :=
+    DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg (I := I) (M := M) g x w
+  -- coordinate family of `T` and the supercritically-summable weight family.
+  set cT : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ :=
+    fun i => tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
+      (SmoothCcTensor.toL2 T) i with hcT_def
+  set fT : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ :=
+    fun i => tensorSobolevWeight (I := I) (M := M) i σ * (cT i) ^ 2 with hfT_def
+  have hfT_summable : Summable fT :=
+    smoothCcTensor_tensorL2Coeff_weighted_summable (I := I) (M := M) g σ T
+      (hCompact (I := I) (M := M) g)
+  -- **Combined fibre/spectral bound.** For any smooth `S`, the symmetric realize value
+  -- is controlled by `C · √(g v v) · √(g w w) · ‖φ(S)‖`, `φ(S) = smoothToTensorHs g σ S`.
+  have hAbs : ∀ S : SmoothCcTensor g 0 2,
+      |ccTensorBilinSymm (I := I) g S x v w| ≤
+        C * Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w) *
+          ‖smoothToTensorHs (I := I) (M := M) g σ S‖ := by
+    intro S
+    have hCS := ccTensorBilinSymm_sq_le_gInner_eigenFiberNormSq (I := I) g S x v w
+    rw [riemannianFiberNormSq_eq_norm_sq_02 (I := I) (M := M) g x (S.toSection x)] at hCS
+    have hsec : ‖S.toSection x‖ ≤ C * ‖smoothToTensorHs (I := I) (M := M) g σ S‖ := hbound S x
+    have hsec_nn : 0 ≤ ‖S.toSection x‖ := norm_nonneg _
+    have hφ_nn : 0 ≤ ‖smoothToTensorHs (I := I) (M := M) g σ S‖ := norm_nonneg _
+    have hsqv : 0 ≤ Real.sqrt (g.inner x v v) := Real.sqrt_nonneg _
+    have hsqw : 0 ≤ Real.sqrt (g.inner x w w) := Real.sqrt_nonneg _
+    -- `|ccTensorBilinSymm| ≤ ‖S(x)‖ · √(g v v) · √(g w w)`.
+    have h1 : |ccTensorBilinSymm (I := I) g S x v w| ≤
+        ‖S.toSection x‖ * Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w) := by
+      have hsq : (ccTensorBilinSymm (I := I) g S x v w) ^ 2 ≤
+          (‖S.toSection x‖ * Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w)) ^ 2 := by
+        calc (ccTensorBilinSymm (I := I) g S x v w) ^ 2
+            ≤ g.inner x v v * g.inner x w w * ‖S.toSection x‖ ^ 2 := hCS
+          _ = (‖S.toSection x‖ * Real.sqrt (g.inner x v v) *
+                Real.sqrt (g.inner x w w)) ^ 2 := by
+              rw [mul_pow, mul_pow, Real.sq_sqrt hgvv, Real.sq_sqrt hgww]; ring
+      have hrhs_nn : 0 ≤ ‖S.toSection x‖ * Real.sqrt (g.inner x v v) *
+          Real.sqrt (g.inner x w w) := by positivity
+      exact abs_le_of_sq_le_sq hsq hrhs_nn
+    -- absorb `‖S(x)‖ ≤ C · ‖φ(S)‖`.
+    refine h1.trans ?_
+    have hmul : ‖S.toSection x‖ * Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w) ≤
+        (C * ‖smoothToTensorHs (I := I) (M := M) g σ S‖) *
+          Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w) := by
+      have := mul_le_mul_of_nonneg_right
+        (mul_le_mul_of_nonneg_right hsec hsqv) hsqw
+      exact this
+    refine hmul.trans (le_of_eq ?_); ring
+  -- The partial sums are the realize values of the finite eigen-truncations.
+  set f : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ :=
+    fun i => cT i *
+      ccTensorBilinSymm (I := I) g (eigenvectorSmooth (I := I) (M := M) g 0 2 i) x v w
+    with hf_def
+  set K : ℝ := C * Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w) with hK_def
+  have hpartial : ∀ F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+      (I := I) (M := M) g 0 2),
+      ∑ i ∈ F, f i =
+        ccTensorBilinSymm (I := I) g (finiteEigenCombo (I := I) (M := M) g F cT) x v w := by
+    intro F
+    rw [ccTensorBilinSymm_finiteEigenCombo (I := I) (M := M) g F cT x v w]
+  -- It suffices that the partial sums converge to `ccTensorBilinSymm g T x v w`.
+  suffices htend : Filter.Tendsto (fun F => ∑ i ∈ F, f i) Filter.atTop
+      (nhds (ccTensorBilinSymm (I := I) g T x v w)) from htend
+  rw [tendsto_iff_dist_tendsto_zero]
+  apply squeeze_zero (fun F => dist_nonneg)
+    (g := fun F => K * Real.sqrt (∑' (i : {x // x ∉ F}), fT i))
+  · -- the per-finite-set distance bound through the truncation tail.
+    intro F
+    have hdist : dist (∑ i ∈ F, f i) (ccTensorBilinSymm (I := I) g T x v w)
+        = |ccTensorBilinSymm (I := I) g
+            (finiteEigenCombo (I := I) (M := M) g F cT - T) x v w| := by
+      rw [Real.dist_eq, hpartial F, ccTensorBilinSymm_sub]
+    rw [hdist]
+    -- the truncation difference's spectral norm² is the supercritical tail off `F`.
+    have hcoeff : ∀ i, (smoothToTensorHs (I := I) (M := M) g σ
+        (finiteEigenCombo (I := I) (M := M) g F cT - T)).coeff i =
+          (if i ∈ F then (0 : ℝ) else - cT i) := by
+      intro i
+      rw [smoothToTensorHs_coeff,
+        Analysis.Parabolic.TensorHeatEquation.tensorL2Coeff_eq_inner,
+        map_sub, inner_sub_right,
+        ← Analysis.Parabolic.TensorHeatEquation.tensorL2Coeff_eq_inner,
+        ← Analysis.Parabolic.TensorHeatEquation.tensorL2Coeff_eq_inner,
+        show SmoothCcTensor.toL2 (finiteEigenCombo (I := I) (M := M) g F cT) =
+            (finiteEigenCombo (I := I) (M := M) g F cT : TensorL2 0 2 g) from
+          SmoothCcTensor.toL2_apply _,
+        finiteEigenCombo_tensorL2Coeff (I := I) (M := M) g F cT i]
+      by_cases h : i ∈ F
+      · rw [if_pos h, if_pos h, hcT_def, sub_self]
+      · rw [if_neg h, if_neg h, hcT_def, zero_sub]
+    -- the truncated summand: `(1+λᵢ)^σ · (coeff i)² = if i ∈ F then 0 else fT i`.
+    have hsummand : ∀ i, tensorSobolevWeight (I := I) (M := M) i σ *
+        ((smoothToTensorHs (I := I) (M := M) g σ
+          (finiteEigenCombo (I := I) (M := M) g F cT - T)).coeff i) ^ 2 =
+          {x : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g 0 2 | x ∉ F}.indicator fT i := by
+      intro i
+      rw [hcoeff i]
+      unfold Set.indicator
+      by_cases h : i ∈ F
+      · simp [h]
+      · rw [if_neg (by simpa [Set.mem_setOf_eq] using h), if_pos (by simpa [Set.mem_setOf_eq] using h),
+          hfT_def]
+        ring
+    have hnormsq : ‖smoothToTensorHs (I := I) (M := M) g σ
+        (finiteEigenCombo (I := I) (M := M) g F cT - T)‖ ^ 2 =
+          ∑' (i : {x // x ∉ F}), fT i := by
+      rw [Analysis.Parabolic.TensorHeatEquation.tensorHs.norm_sq_eq_tsum, tsum_congr hsummand]
+      exact (tsum_subtype {x : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+        (I := I) (M := M) g 0 2 | x ∉ F} fT).symm
+    have hnorm_eq : ‖smoothToTensorHs (I := I) (M := M) g σ
+        (finiteEigenCombo (I := I) (M := M) g F cT - T)‖
+          = Real.sqrt (∑' (i : {x // x ∉ F}), fT i) := by
+      rw [← hnormsq, Real.sqrt_sq (norm_nonneg _)]
+    calc |ccTensorBilinSymm (I := I) g
+            (finiteEigenCombo (I := I) (M := M) g F cT - T) x v w|
+        ≤ C * Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w) *
+            ‖smoothToTensorHs (I := I) (M := M) g σ
+              (finiteEigenCombo (I := I) (M := M) g F cT - T)‖ :=
+          hAbs (finiteEigenCombo (I := I) (M := M) g F cT - T)
+      _ = K * Real.sqrt (∑' (i : {x // x ∉ F}), fT i) := by rw [hK_def, hnorm_eq]
+  · -- the supercritical tail tends to `0`.
+    have htail : Filter.Tendsto
+        (fun F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g 0 2) => ∑' (i : {x // x ∉ F}), fT i)
+        Filter.atTop (nhds 0) :=
+      tendsto_tsum_compl_atTop_zero fT
+    have hsqrt : Filter.Tendsto
+        (fun F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g 0 2) => Real.sqrt (∑' (i : {x // x ∉ F}), fT i))
+        Filter.atTop (nhds (Real.sqrt 0)) :=
+      (Real.continuous_sqrt.tendsto 0).comp htail
+    rw [Real.sqrt_zero] at hsqrt
+    simpa using hsqrt.const_mul K
 
 end DifferentialGeometry.PDE.RicciFlow

@@ -153,11 +153,12 @@ For an anchor metric `g₀`, a flow background `g_bg`, and a supercritical order
   (`exists_chartDeTurckRHSComp_lipschitz_on_compact`) composed with the un-gated supercritical
   chart-`2`-jet Lipschitz of the continuous realization (the corrected analogue of `(A)`,
   about this continuous synthesis rather than the gated `realizeMetricAt`);
-* `hcarrier` — **carrier-agreement**: on the gate-realizable domain `realizableAtGate g₀ u`,
-  `S u` *is* the gate-based gauge `deTurckRemainderRealizeSection g₀ g_bg u` (there the
-  continuous synthesis reproduces the honest DeTurck remainder of the realized metric, the
-  gate-produced representative `gateSmoothRep u` being `L²`-determined by `u`'s spectral
-  coordinates).
+* `hcarrier` — **carrier-agreement** (`L²`-class level): on the gate-realizable domain
+  `realizableAtGate g₀ u`, the `L²`-class of `S u` agrees with that of the gate-based gauge
+  `deTurckRemainderRealizeSection g₀ g_bg u` (there the continuous synthesis reproduces the
+  honest DeTurck remainder's `L²`-class; agreement is stated at the `L²`-class — not the
+  section — level, which is all the sole consumer needs and which decouples the continuous
+  synthesis `S` from the non-canonical, discontinuous gate representative `gateSmoothRep u`).
 
 This is the genuine un-gated continuous-synthesis primitive the maximal-regularity engine's
 nonlinearity is built from: the conclusion produces a *section* map together with the
@@ -181,7 +182,9 @@ theorem exists_deTurckRemainderG0ContSynth
             (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) ∧
       (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
         realizableAtGate (I := I) g₀ u →
-          S u = deTurckRemainderRealizeSection (I := I) g₀ g_bg u) := sorry
+          Integral.L2.SmoothCcTensor.toL2 (S u)
+            = Integral.L2.SmoothCcTensor.toL2
+                (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := sorry
 
 /-- **The genuine, un-gated coordinate-spectral DeTurck nonlinearity and its
 engine-shaped local Lipschitz `(B)`.**
