@@ -1,4 +1,5 @@
 import RicciFlower.Coordinates.Christoffel
+import RicciFlower.Coordinates.LocalCoframe
 import RicciFlower.Coordinates.MetricCompatibility.Covariant
 import RicciFlower.Coordinates.NablaComponents.OneForm.Smoothness
 import RicciFlower.Coordinates.NablaComponents.TensorRS.Special12
@@ -976,6 +977,79 @@ theorem totalNabla_lcDiff_localFrame
   rw [hext, hupper, hlower0, hlower1]
   simp [lcDiffCovDerivCompInFrame, covH]
   abel
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Trivialization-local-frame version of `totalNabla_lcDiff_localFrame`.
+
+This wrapper chooses the smooth local frame and coframe section extensions from
+`existsTrivFrameCoframePair`, so callers only provide the tangent
+trivialization model basis and no longer pass arbitrary frame/coframe pairing
+assumptions. -/
+theorem totalNabla_lcDiff_trivFrame
+    [CompleteSpace E] [IsManifold I ∞ M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [SigmaCompactSpace M] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
+    (g h : SmoothRiemannianMetric I M)
+    (D : TensorRSField
+      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 1 2)
+    (D1 : TensorRSField
+      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 1 3)
+    (hD : ∀ y : M,
+      D y =
+        connectionDifferenceTensorAt
+          (I := I)
+          (LeviCivita.leviCivitaConnectionOfMetric (I := I) g)
+          (LeviCivita.leviCivitaConnectionOfMetric (I := I) h) y)
+    (hD1 :
+      TotalNablaRSRealizes
+        (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 2
+        (LeviCivita.leviCivitaConnectionOfMetric (I := I) h) D D1)
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (basisE : Module.Basis Idx Real E) {x : M}
+    (d a b e : Idx)
+    (hX :
+      X x =
+        (trivializationAt E (TangentSpace I : M -> Type _) x).localFrame basisE d x) :
+    let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+    let frame : Idx -> (y : M) -> TangentSpace I y :=
+      fun i y => e₀.localFrame basisE i y
+    let u : Set M := e₀.baseSet
+    let hframe : IsLocalFrameOn I E 1 frame u :=
+      e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE
+    let hx : x ∈ u := mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
+    componentRS (I := I) (hframe.toBasisAt hx) (D1 x) (upperIdx1 e)
+        (slots3 d a b) =
+      lcDiffCovDerivCompInFrame (I := I) g h frame hframe x d a b e := by
+  classical
+  let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+  let frame : Idx -> (y : M) -> TangentSpace I y :=
+    fun i y => e₀.localFrame basisE i y
+  let u : Set M := e₀.baseSet
+  let hframe : IsLocalFrameOn I E 1 frame u :=
+    e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE
+  have hu : IsOpen u := e₀.open_baseSet
+  have hx : x ∈ u := by
+    exact mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
+  obtain ⟨Z, θ, hZ, _hθ, hpair⟩ :=
+    existsTrivFrameCoframePair (J := I) (N := M) x basisE
+  exact
+    totalNabla_lcDiff_localFrame
+      (I := I) (M := M) (Idx := Idx) (u := u)
+      g h D D1 hD hD1 X Z (θ e) frame hframe hu hx d a b e
+      (by
+        change X x = e₀.localFrame basisE d x
+        exact hX)
+      (by
+        intro j
+        simpa [frame] using hZ j)
+      (by
+        intro j
+        simpa using hpair e j)
 
 /-- The symmetrized covariant derivative of `g` appearing in DC1:
 `A_{abc} + A_{bac} - A_{cab}`, where `A = ∇_h g`. -/
