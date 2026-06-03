@@ -18,6 +18,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckRicciPde
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.ConjugatingDiffeoFamily
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.RicciFlowPdeAtZero
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.ConjugatingFlowProperties
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.DeTurckVFSmoothness
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -167,9 +168,12 @@ theorem ricci_flow_short_time_existence
     obtain ⟨hΦ_orbit, hΦ_total⟩ :=
       conjugating_flow_orbit_pushforward_continuity_data (I := I) g_DT g₀ T hT0 Φ_fam hΦode'
         h_reg_T hΦorbit0 hΦmfderiv0
+    obtain ⟨Hcomp_T, Hfderiv_T⟩ :=
+      DeTurckVFSmoothnessKeystone.deturck_vf_chartFrame_continuity_data
+        (I := I) g_DT g₀ T h_gramOnE0_T h_C2_T
     obtain ⟨h_gram_fam, h_gram0_fam⟩ :=
-      conjugating_flow_pullback_jointGram_data (I := I) g_DT g₀ T Φ_fam hΦode'
-        h_reg_T h_gram_DT_T h_gram0_DT_T
+      conjugating_flow_pullback_jointGram_data (I := I) g_DT g₀ T Φ_fam hT0 hΦ0 hΦode'
+        h_reg_T Hcomp_T Hfderiv_T hΦorbit0 hΦmfderiv0 h_gramOnE0_T h_gram_DT_T h_gram0_DT_T
     refine ⟨T, hT0, fun s => Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s),
       ?_, h_gram_fam, h_gram0_fam, ?_⟩
     · change Diffeomorph.pullbackMetric (g_DT 0) (Φ_fam 0) = g₀
