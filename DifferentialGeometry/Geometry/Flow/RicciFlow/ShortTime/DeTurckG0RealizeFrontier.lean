@@ -141,22 +141,26 @@ theorem deTurck_g0_decoupled_principal_match
       (∀ (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
           (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
           (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2),
-        (∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
+        (∀ s ∈ Set.Ico (0 : ℝ) T,
+          realizableAtGate (I := I) g₀
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) →
+        (∀ s ∈ Set.Ico (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
           (g_DT s).inner x v w
             = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w) →
-        (∀ s ∈ Set.Icc (0 : ℝ) T,
+        (∀ s ∈ Set.Ico (0 : ℝ) T,
             ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
               (I := I) (M := M) g₀ 0 2,
           (u₂ s).coeff i
             = tensorL2Coeff (I := I) (M := M)
                 (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
                 (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) →
-        (∀ s ∈ Set.Icc (0 : ℝ) T,
+        (∀ s ∈ Set.Ico (0 : ℝ) T,
           Integral.L2.SmoothCcTensor.toL2 (T_s s) =
             tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
               (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
               (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s)) →
-        ∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x' : M) (v' w' : TangentSpace I x'),
+        ∀ s ∈ Set.Ico (0 : ℝ) T, ∀ (x' : M) (v' w' : TangentSpace I x'),
           ccTensorBilinSymm (I := I) g₀
               (rawTensorConnLapSmooth (I := I) g₀ 0 2 (T_s s)) x' v' w'
             + ccTensorBilinSymm (I := I) g₀

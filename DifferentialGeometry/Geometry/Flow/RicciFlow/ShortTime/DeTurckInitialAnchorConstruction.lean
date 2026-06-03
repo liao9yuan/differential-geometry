@@ -161,7 +161,7 @@ theorem deTurck_g0_realize_data
             = tensorL2Coeff (I := I) (M := M)
                 (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
                 (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) ∧
-        (∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x' : M) (v' w' : TangentSpace I x'),
+        (∀ s ∈ Set.Ico (0 : ℝ) T, ∀ (x' : M) (v' w' : TangentSpace I x'),
           ccTensorBilinSymm (I := I) g₀
               (rawTensorConnLapSmooth (I := I) g₀ 0 2 (T_s s)) x' v' w'
             + ccTensorBilinSymm (I := I) g₀
@@ -187,9 +187,37 @@ theorem deTurck_g0_realize_data
   obtain ⟨T, g_DT, u₂, T_s, hT, h0, hreal, hcont, hreg, hsmall, hsmoothrepr, hcanon⟩ :=
     deTurck_g0_carrier_realize_transport (I := I) g₀ a ha ha2 N_cont Nsec
       hN_coeff ⟨K, hNsec_lip⟩
+  -- Discharge the honest `realizableAtGate` membership of the carrier inclusion on the
+  -- whole closed interval: `MemAllTensorHs` from the smooth representative `T_s s`, and
+  -- the `g₀`-fibre-smallness from `hsmall` on the interior and from `hreal`/`h0`
+  -- (`ccTensorBilinSymm g₀ (T_s 0) = 0`) at the initial time.
+  have hgate : ∀ s ∈ Set.Ico (0 : ℝ) T,
+      realizableAtGate (I := I) g₀
+        (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) := by
+    intro s hs
+    refine realizableAtGate_carrierInclusion (I := I) g₀ a u₂ T_s
+      (hsmoothrepr s (Set.Ico_subset_Icc_self hs)) ?_
+    rcases eq_or_lt_of_le hs.1 with hs0 | hs0
+    · -- `s = 0`: the perturbation vanishes (`g_DT 0 = g₀`), so it is `0`-fibre-small.
+      refine ⟨0, by norm_num, ?_⟩
+      intro x v w
+      have hz : ccTensorBilinSymm (I := I) g₀ (T_s s) x v w = 0 := by
+        have hre := hreal s (Set.Ico_subset_Icc_self hs) x v w
+        have hg0 : (g_DT s).inner x v w = g₀.inner x v w := by
+          rw [← hs0, h0]
+        rw [hg0] at hre
+        linarith [hre]
+      rw [hz]
+      simp
+    · -- `s ∈ (0, T)`: the interior fibre-smallness from `hsmall`.
+      exact hsmall s ⟨hs0, hs.2⟩
   exact ⟨T, a, hT, ha, g_DT, u₂, T_s, N_cont, repr, Nsec, h0, hreal, hN_coeff,
     hNsec_realize, hcont, hreg, hsmall, hsmoothrepr,
-    hNsec_geom_univ T g_DT u₂ T_s hreal hsmoothrepr hcanon,
+    hNsec_geom_univ T g_DT u₂ T_s hgate
+      (fun s hs => hreal s (Set.Ico_subset_Icc_self hs))
+      (fun s hs => hsmoothrepr s (Set.Ico_subset_Icc_self hs))
+      (fun s hs => hcanon s (Set.Ico_subset_Icc_self hs)),
     deTurck_g0_chartGram_continuity (I := I) g₀ a ha hT g_DT u₂ T_s N_cont
       hreal hcont hreg⟩
 
@@ -249,7 +277,7 @@ theorem deTurck_g0_interior_deriv_from_data
         = tensorL2Coeff (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
             (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i)
-    (hNsec_geom : ∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x' : M) (v' w' : TangentSpace I x'),
+    (hNsec_geom : ∀ s ∈ Set.Ico (0 : ℝ) T, ∀ (x' : M) (v' w' : TangentSpace I x'),
       ccTensorBilinSymm (I := I) g₀
           (rawTensorConnLapSmooth (I := I) g₀ 0 2 (T_s s)) x' v' w'
         + ccTensorBilinSymm (I := I) g₀
@@ -288,7 +316,7 @@ theorem deTurck_g0_interior_deriv_from_data
     g_DT T_s x v w (fun s hs => hreal s (Set.Ico_subset_Icc_self hs))
     N_cont repr Nsec hN_coeff hNsec_realize
     (fun s hs => hsmoothrepr s (Set.Ico_subset_Icc_self hs)) hℓ
-    (fun s hs => hNsec_geom s (Set.Ico_subset_Icc_self hs)) t (Set.Ioo_subset_Ico_self ht)
+    hNsec_geom t (Set.Ioo_subset_Ico_self ht)
   rw [hu_car'_def] at hpush
   rw [hmatch] at hpush
   exact hpush
