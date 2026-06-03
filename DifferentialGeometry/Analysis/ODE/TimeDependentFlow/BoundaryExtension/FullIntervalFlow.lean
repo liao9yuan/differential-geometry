@@ -834,4 +834,300 @@ theorem global_flow_full_interval_on_closed_manifold
     rw [hXt_eq t htIcc (Φ t x)] at hb
     exact hb
 
+/-- **Spatial smoothness of the autonomous-flow slices from an arbitrary anchor time.** The
+companion of `cutoffFlow_slice_contMDiff` that does *not* fix the anchor at `0`: for the global
+autonomous flow `ψ` of a globally-`C∞` cut-off field `Xt` on `ℝ × M` (each `ψ p` a global integral
+curve fixing `p` at parameter `0`, with time-coordinate `(ψ p u).1 = p.1 + u`), the spatial-slice
+map `x ↦ ψ (σ, x) a` is smooth at `x₀` whenever `σ` and `σ + a` keep the closed segment between
+`0` and `a` inside the smooth-dependence slab.
+
+The argument is the connectedness propagation of `cutoffFlow_slice_contMDiff` carried out in the
+parameter `b ∈ uIcc 0 a` (so it works for both forward `a > 0` and backward `a < 0`).  Seed at
+`b = 0`, where `ψ (σ, x) 0 = (σ, x)` is smooth in `x`.  The local step: near `x₀`,
+`ψ (σ, x) b = Ψ_win (ψ (σ, x) b₀) (b - b₀)`, the jointly-smooth uniform local autonomised flow
+`Ψ_win` (`autonomized_uniform_jointSmoothWindow`) anchored at `ψ (σ, x₀) b₀` pre-composed with the
+smooth map `x ↦ ψ (σ, x) b₀`; the agreement is integral-curve uniqueness on `ℝ × M` (the global
+curve `u ↦ ψ (σ, x) u` time-shifted by `comp_add` and the local flow both pass through
+`ψ (σ, x) b₀` at parameter `0`).  No invertibility of the slices is used. -/
+private theorem autonomizedFlow_slice_contMDiff
+    (Xt : ℝ → ∀ x : M, TangentSpace I x)
+    (hXt_sm : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (Xt q.1 q.2) : TangentBundle I M)))
+    (hXtC1 : AutonomizedFieldJointC1 (I := I) Xt)
+    (ψ : (ℝ × M) → ℝ → (ℝ × M))
+    (hψ0 : ∀ p : ℝ × M, ψ p 0 = p)
+    (hψcurve : ∀ p : ℝ × M, IsMIntegralCurve (ψ p) (autonomizedFlowVF Xt))
+    (hψtime : ∀ (p : ℝ × M) (u : ℝ), (ψ p u).1 = p.1 + u)
+    (lo hi : ℝ) (σ : ℝ) (a : ℝ)
+    (hseg : ∀ b ∈ Set.Ioo (min (0 : ℝ) a - 1) (max (0 : ℝ) a + 1),
+      σ + b ∈ Set.Icc (lo - 3) (hi + 3)) :
+    ContMDiff I (𝓘(ℝ, ℝ).prod I) ∞ (fun x : M => ψ (σ, x) a) := by
+  classical
+  obtain ⟨ε, hε_pos, hwin⟩ := autonomized_uniform_jointSmoothWindow Xt hXt_sm lo hi
+  set ε' : ℝ := min ε 1 with hε'_def
+  have hε'_pos : 0 < ε' := lt_min hε_pos one_pos
+  have hε'_le_ε : ε' ≤ ε := min_le_left _ _
+  intro x₀
+  -- The local propagation step in the parameter `b`.
+  have hstep : ∀ b₀ : ℝ, σ + b₀ ∈ Set.Icc (lo - 3) (hi + 3) →
+      ContMDiffAt I (𝓘(ℝ, ℝ).prod I) ∞ (fun x : M => ψ (σ, x) b₀) x₀ →
+      ∀ b : ℝ, |b - b₀| < ε' → ContMDiffAt I (𝓘(ℝ, ℝ).prod I) ∞ (fun x : M => ψ (σ, x) b) x₀ := by
+    intro b₀ hb₀_slab hψb₀ b hbb₀
+    have hb₀_slab' : (ψ (σ, x₀) b₀).1 ∈ Set.Icc (lo - 3) (hi + 3) := by
+      rw [hψtime (σ, x₀) b₀]; exact hb₀_slab
+    obtain ⟨U, hU_open, hpt_U, Ψw, hΨw0, hΨwsm, hΨwcurve⟩ := hwin (ψ (σ, x₀) b₀) hb₀_slab'
+    have hτ_mem : (b - b₀) ∈ Set.Ioo (-ε) ε := by
+      rw [Set.mem_Ioo, ← abs_lt]; exact lt_of_lt_of_le hbb₀ hε'_le_ε
+    -- The candidate `g x = Ψw (ψ (σ, x) b₀) (b - b₀)`, smooth at `x₀`.
+    set ι : M → ℝ × M := fun x => ψ (σ, x) b₀ with hι_def
+    have hι_x₀ : ι x₀ = ψ (σ, x₀) b₀ := rfl
+    have hslice : ContMDiffAt (𝓘(ℝ, ℝ).prod I) (𝓘(ℝ, ℝ).prod I) ∞
+        (fun q : ℝ × M => Ψw q (b - b₀)) (ψ (σ, x₀) b₀) := by
+      have hprepend : ContMDiffAt (𝓘(ℝ, ℝ).prod I) (𝓘(ℝ, ℝ).prod (𝓘(ℝ, ℝ).prod I)) ∞
+          (fun q : ℝ × M => ((b - b₀, q) : ℝ × (ℝ × M))) (ψ (σ, x₀) b₀) :=
+        contMDiffAt_const.prodMk contMDiffAt_id
+      have hmem_prod : ((b - b₀, ψ (σ, x₀) b₀) : ℝ × (ℝ × M)) ∈ Set.Ioo (-ε) ε ×ˢ U :=
+        ⟨hτ_mem, hpt_U⟩
+      have hopen_prod : IsOpen (Set.Ioo (-ε) ε ×ˢ U) := isOpen_Ioo.prod hU_open
+      have hΨwsm_at : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod (𝓘(ℝ, ℝ).prod I)) (𝓘(ℝ, ℝ).prod I) ∞
+          (fun bb : ℝ × (ℝ × M) => Ψw bb.2 bb.1) (Set.Ioo (-ε) ε ×ˢ U)
+          (b - b₀, ψ (σ, x₀) b₀) := hΨwsm _ hmem_prod
+      have hΨwsm_contMDiffAt : ContMDiffAt (𝓘(ℝ, ℝ).prod (𝓘(ℝ, ℝ).prod I)) (𝓘(ℝ, ℝ).prod I) ∞
+          (fun bb : ℝ × (ℝ × M) => Ψw bb.2 bb.1) (b - b₀, ψ (σ, x₀) b₀) :=
+        hΨwsm_at.contMDiffAt (hopen_prod.mem_nhds hmem_prod)
+      exact hΨwsm_contMDiffAt.comp (ψ (σ, x₀) b₀) hprepend
+    have hg_smooth : ContMDiffAt I (𝓘(ℝ, ℝ).prod I) ∞
+        (fun x : M => Ψw (ψ (σ, x) b₀) (b - b₀)) x₀ :=
+      (hι_x₀ ▸ hslice).comp x₀ hψb₀
+    -- Eventual agreement `g = (fun x => ψ (σ, x) b)` near `x₀`, by integral-curve uniqueness.
+    have heq : (fun x : M => Ψw (ψ (σ, x) b₀) (b - b₀)) =ᶠ[nhds x₀] (fun x : M => ψ (σ, x) b) := by
+      have hW : (fun x : M => ψ (σ, x) b₀) ⁻¹' U ∈ nhds x₀ := by
+        have hcont : ContinuousAt (fun x : M => ψ (σ, x) b₀) x₀ := hψb₀.continuousAt
+        exact hcont.preimage_mem_nhds (hU_open.mem_nhds hpt_U)
+      filter_upwards [hW] with x hx
+      have hqU : ψ (σ, x) b₀ ∈ U := hx
+      have hΨwq : IsMIntegralCurveOn (fun u : ℝ => Ψw (ψ (σ, x) b₀) u)
+          (autonomizedFlowVF Xt) (Set.Ioo (-ε) ε) := hΨwcurve (ψ (σ, x) b₀) hqU
+      have hshift : IsMIntegralCurveOn (fun u : ℝ => ψ (σ, x) (u + b₀))
+          (autonomizedFlowVF Xt) (Set.Ioo (-ε) ε) :=
+        ((hψcurve (σ, x)).comp_add b₀).isMIntegralCurveOn (Set.Ioo (-ε) ε)
+      have hstart : (fun u : ℝ => Ψw (ψ (σ, x) b₀) u) 0
+          = (fun u : ℝ => ψ (σ, x) (u + b₀)) 0 := by
+        simp only [hΨw0 (ψ (σ, x) b₀) hqU, zero_add]
+      have h0mem : (0 : ℝ) ∈ Set.Ioo (-ε) ε := ⟨by linarith, hε_pos⟩
+      have hv : ContMDiff (𝓘(ℝ, ℝ).prod I) ((𝓘(ℝ, ℝ).prod I).prod 𝓘(ℝ, ℝ × E)) 1
+          (fun p : ℝ × M =>
+            (⟨p, autonomizedFlowVF Xt p⟩ : TangentBundle (𝓘(ℝ, ℝ).prod I) (ℝ × M))) :=
+        fun p => hXtC1 p
+      have heqOn := isMIntegralCurveOn_Ioo_eqOn_of_contMDiff_boundaryless
+        h0mem hv hΨwq hshift hstart
+      have hatτ := heqOn hτ_mem
+      have hval : Ψw (ψ (σ, x) b₀) (b - b₀) = ψ (σ, x) (b - b₀ + b₀) := hatτ
+      rw [hval]
+      simp only [sub_add_cancel]
+    exact hg_smooth.congr_of_eventuallyEq heq.symm
+  -- Connectedness in `b` over the unordered interval `[[0, a]]`: the good set contains `a`.
+  set W : Set ℝ := Set.Ioo (min (0 : ℝ) a - 1) (max (0 : ℝ) a + 1) with hW_def
+  have hWopen : IsOpen W := isOpen_Ioo
+  have huIcc_sub : Set.uIcc (0 : ℝ) a ⊆ W := by
+    intro b hb
+    rw [Set.mem_uIcc] at hb
+    rw [hW_def, Set.mem_Ioo]
+    have hmin : min (0 : ℝ) a ≤ b := by
+      rw [min_le_iff]; rcases hb with hb | hb
+      · exact Or.inl hb.1
+      · exact Or.inr hb.1
+    have hmax : b ≤ max (0 : ℝ) a := by
+      rw [le_max_iff]; rcases hb with hb | hb
+      · exact Or.inr hb.2
+      · exact Or.inl hb.2
+    exact ⟨by linarith, by linarith⟩
+  set u : Set ℝ :=
+    {b : ℝ | ContMDiffAt I (𝓘(ℝ, ℝ).prod I) ∞ (fun x : M => ψ (σ, x) b) x₀} ∩ W with hu_def
+  have hu_open : IsOpen u := by
+    rw [isOpen_iff_mem_nhds]
+    rintro b ⟨hb_smooth, hb_int⟩
+    have hb_slab : σ + b ∈ Set.Icc (lo - 3) (hi + 3) := hseg b hb_int
+    have hball : Set.Ioo (b - ε') (b + ε') ∩ W ⊆ u := by
+      rintro b' ⟨hb'_ball, hb'_int⟩
+      refine ⟨?_, hb'_int⟩
+      have hdist : |b' - b| < ε' := by
+        rw [abs_lt]; constructor <;> [linarith [hb'_ball.1]; linarith [hb'_ball.2]]
+      exact hstep b hb_slab hb_smooth b' hdist
+    refine Filter.mem_of_superset (Filter.inter_mem ?_ ?_) hball
+    · exact isOpen_Ioo.mem_nhds ⟨by linarith [hε'_pos], by linarith [hε'_pos]⟩
+    · exact hWopen.mem_nhds hb_int
+  -- The map at `b = 0` is `x ↦ (σ, x)`, smooth.
+  have h0_smooth : ContMDiffAt I (𝓘(ℝ, ℝ).prod I) ∞ (fun x : M => ψ (σ, x) 0) x₀ := by
+    have hcongr : (fun x : M => ψ (σ, x) 0) = (fun x : M => ((σ, x) : ℝ × M)) := by
+      funext x; rw [hψ0 (σ, x)]
+    rw [hcongr]; exact contMDiffAt_const.prodMk contMDiffAt_id
+  have h0_u : (0 : ℝ) ∈ Set.uIcc (0 : ℝ) a ∩ u :=
+    ⟨Set.left_mem_uIcc, h0_smooth, huIcc_sub Set.left_mem_uIcc⟩
+  have hclosed : closure u ∩ Set.uIcc (0 : ℝ) a ⊆ u := by
+    rintro bstar ⟨hbstar_cl, hbstar_uIcc⟩
+    have hbstar_W : bstar ∈ W := huIcc_sub hbstar_uIcc
+    have hbstar_slab : σ + bstar ∈ Set.Icc (lo - 3) (hi + 3) := hseg bstar hbstar_W
+    have hnhd : Set.Ioo (bstar - ε') (bstar + ε') ∩ W ∈ nhds bstar :=
+      Filter.inter_mem
+        (isOpen_Ioo.mem_nhds ⟨by linarith [hε'_pos], by linarith [hε'_pos]⟩)
+        (hWopen.mem_nhds hbstar_W)
+    obtain ⟨bn, ⟨hbn_ball, hbn_W⟩, hbn_smooth, _⟩ :=
+      mem_closure_iff_nhds.mp hbstar_cl _ hnhd
+    have hbn_slab : σ + bn ∈ Set.Icc (lo - 3) (hi + 3) := hseg bn hbn_W
+    have hdist : |bstar - bn| < ε' := by
+      rw [abs_lt]; constructor <;> [linarith [hbn_ball.2]; linarith [hbn_ball.1]]
+    exact ⟨hstep bn hbn_slab hbn_smooth bstar hdist, hbstar_W⟩
+  have hsub : Set.uIcc (0 : ℝ) a ⊆ u :=
+    isPreconnected_uIcc.subset_of_closure_inter_subset hu_open ⟨0, h0_u⟩ hclosed
+  exact (hsub Set.right_mem_uIcc).1
+
+/-- **Full-interval flow with its reverse on a closed manifold.**
+
+The reverse-flow strengthening of `global_flow_full_interval_on_closed_manifold`: for a globally
+jointly-`C∞` field `X` on a closed manifold and any horizon `T > 0`, the full-interval flow `Φ`
+(with `Φ 0 = id`, jointly `C∞` on `Ioo lo hi ⊇ [0, T]`, carrying the bare velocity `X t (Φ t x)`)
+comes with a reverse flow `Ψ` that is smooth in each slice `Ψ t` (for `0 < t < hi`) and is the
+two-sided inverse of `Φ` on `[0, hi)`: `Ψ s (Φ s x) = x` and `Φ s (Ψ s x) = x`.
+
+The reverse is the genuine **group inverse** of the *autonomous* flow on `ℝ × M`, not the flow of
+`-X` (which only inverts for autonomous fields).  The cut-off field `Xt` (as in the headline) has a
+global integral-curve flow `ψ : (ℝ × M) → ℝ → (ℝ × M)` of the autonomised field
+`autonomizedFlowVF Xt` (built from `exists_isMIntegralCurve_of_isMIntegralCurveOn` through *every*
+point); `ψ` is a one-parameter group `ψ p (a + b) = ψ (ψ p a) b` (integral-curve uniqueness
+`isMIntegralCurve_Ioo_eq_of_contMDiff_boundaryless`) whose time coordinate advances by the
+parameter `(ψ p u).1 = p.1 + u`.  Setting `Φ s x := (ψ (0, x) s).2` (matching the headline flow,
+since both lift to integral curves through `(0, x)`) and `Ψ s x := (ψ (s, x) (-s)).2`, the
+mutual-inverse identities are the group law evaluated at `s + (-s) = 0` and `(-s) + s = 0`, after
+identifying `ψ (0, x) s = (s, Φ s x)` and `ψ (s, x) (-s) = (0, Ψ s x)` via the time-coordinate.
+Slice smoothness of `Ψ t` is `autonomizedFlow_slice_contMDiff` (the anchor-free companion of
+`cutoffFlow_slice_contMDiff`) applied at start time `σ = t`, reverse time `a = -t`. -/
+theorem global_flow_full_interval_with_reverse_on_closed_manifold
+    (X : ℝ → ∀ x : M, TangentSpace I x)
+    (hX : ContMDiff (𝓘(ℝ,ℝ).prod I) (I.prod 𝓘(ℝ,E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M)))
+    (T : ℝ) (hT : 0 < T) :
+    ∃ (Φ Ψ : ℝ → M → M) (lo hi : ℝ), lo < 0 ∧ T < hi ∧ (∀ x, Φ 0 x = x) ∧
+      ContMDiffOn (𝓘(ℝ,ℝ).prod I) I ∞ (fun q => Φ q.1 q.2) (Set.Ioo lo hi ×ˢ Set.univ) ∧
+      (∀ t ∈ Set.Ioo lo hi, ∀ x, HasMFDerivAt 𝓘(ℝ,ℝ) I (fun s => Φ s x) t
+        ((1:ℝ→L[ℝ]ℝ).smulRight (X t (Φ t x)))) ∧
+      (∀ t, 0 < t → t < hi → ContMDiff I I ∞ (Ψ t)) ∧
+      (∀ s ∈ Set.Ico (0:ℝ) hi, ∀ x, Ψ s (Φ s x) = x) ∧
+      (∀ s ∈ Set.Ico (0:ℝ) hi, ∀ x, Φ s (Ψ s x) = x) := by
+  classical
+  set Xt : ℝ → ∀ x : M, TangentSpace I x :=
+    fun s x => fullIntervalBump (-1) (T + 1) s • X s x with hXt_def
+  have hXt_sm : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (Xt q.1 q.2) : TangentBundle I M)) :=
+    cutoffField_contMDiff X hX (-1) (T + 1)
+  have hXtC1 : AutonomizedFieldJointC1 (I := I) Xt :=
+    autonomizedFieldJointC1_of_contMDiff Xt hXt_sm
+  have hXt_eq : ∀ s ∈ Set.Icc (-1 : ℝ) (T + 1), ∀ x : M, Xt s x = X s x := by
+    intro s hs x
+    rw [hXt_def]
+    simp only [fullIntervalBump_eq_one (-1) (T + 1) s hs, one_smul]
+  have hvanish : ∀ s : ℝ, s ∉ Set.Icc (-1 - 2 : ℝ) (T + 1 + 2) → ∀ x : M, Xt s x = 0 := by
+    intro s hs x
+    rw [hXt_def]
+    simp only [fullIntervalBump_eq_zero (-1) (T + 1) s hs, zero_smul]
+  obtain ⟨ε, hε, huniform⟩ :=
+    autonomized_uniform_localExistence Xt hXt_sm (-1) (T + 1) hvanish
+  have hv : ContMDiff (𝓘(ℝ, ℝ).prod I) ((𝓘(ℝ, ℝ).prod I).prod 𝓘(ℝ, ℝ × E)) 1
+      (fun p : ℝ × M =>
+        (⟨p, autonomizedFlowVF Xt p⟩ : TangentBundle (𝓘(ℝ, ℝ).prod I) (ℝ × M))) :=
+    fun p => hXtC1 p
+  -- The global autonomous flow `ψ` on `ℝ × M`.
+  choose ψ hψ0 hψcurve using fun p : ℝ × M =>
+    exists_isMIntegralCurve_of_isMIntegralCurveOn (v := autonomizedFlowVF Xt) hv hε huniform p
+  -- The time coordinate advances by the parameter.
+  have hψtime : ∀ (p : ℝ × M) (u : ℝ), (ψ p u).1 = p.1 + u := by
+    intro p
+    have hderiv : ∀ s, HasDerivAt (fun w => (ψ p w).1) (1 : ℝ) s :=
+      fun s => autonomizedFlow_fst_hasDerivAt Xt (ψ p) s (hψcurve p s)
+    have hconst : ∀ w : ℝ, HasDerivAt (fun w => (ψ p w).1 - w) (0 : ℝ) w :=
+      fun w => by simpa using (hderiv w).sub (hasDerivAt_id w)
+    intro u
+    have hkey : (fun w => (ψ p w).1 - w) u = (fun w => (ψ p w).1 - w) 0 :=
+      is_const_of_deriv_eq_zero (fun w => (hconst w).differentiableAt)
+        (fun w => (hconst w).deriv) u 0
+    simp only at hkey
+    rw [hψ0 p] at hkey
+    simp only [sub_zero] at hkey
+    linarith [hkey]
+  -- One-parameter group law, via global integral-curve uniqueness.
+  have hgroup : ∀ (p : ℝ × M) (a b : ℝ), ψ p (a + b) = ψ (ψ p a) b := by
+    intro p a b
+    have hcurve1 : IsMIntegralCurve (ψ p ∘ (· + a)) (autonomizedFlowVF Xt) :=
+      (hψcurve p).comp_add a
+    have hstart : (ψ p ∘ (· + a)) 0 = ψ (ψ p a) 0 := by
+      simp only [Function.comp_apply, zero_add, hψ0 (ψ p a)]
+    have heq : (ψ p ∘ (· + a)) = ψ (ψ p a) :=
+      isMIntegralCurve_Ioo_eq_of_contMDiff_boundaryless (t₀ := 0) hv hcurve1 (hψcurve (ψ p a)) hstart
+    have hb := congrFun heq b
+    simp only [Function.comp_apply] at hb
+    rw [add_comm a b]
+    exact hb
+  -- The forward flow `Φ` and the reverse flow `Ψ`.
+  set Φ : ℝ → M → M := fun s x => (ψ (0, x) s).2 with hΦ_def
+  set Ψ : ℝ → M → M := fun s x => (ψ (s, x) (-s)).2 with hΨ_def
+  have hΦ0 : ∀ x : M, Φ 0 x = x := by
+    intro x; simp only [hΦ_def, hψ0 (0, x)]
+  -- `ψ (0, x) s = (s, Φ s x)`.
+  have hψ0x : ∀ (s : ℝ) (x : M), ψ (0, x) s = (s, Φ s x) := by
+    intro s x
+    apply Prod.ext
+    · rw [hψtime (0, x) s]; simp
+    · rfl
+  -- Bare velocity at every time.
+  have hΦbare : ∀ t : ℝ, ∀ x : M, HasMFDerivAt 𝓘(ℝ, ℝ) I (fun s => Φ s x) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (Xt t (Φ t x))) := by
+    intro t x
+    have hsnd := autonomizedFlow_snd_hasMFDerivAt Xt (ψ (0, x)) t (hψcurve (0, x) t)
+    have ht1 : (ψ (0, x) t).1 = t := by rw [hψtime (0, x) t]; simp
+    rw [ht1] at hsnd
+    exact hsnd
+  refine ⟨Φ, Ψ, -1, T + 1, by norm_num, by linarith, hΦ0, ?_, ?_, ?_, ?_, ?_⟩
+  · -- Joint smoothness of `Φ`.
+    exact cutoffFlow_jointContMDiffOn Xt hXt_sm hXtC1 Φ hΦ0 hΦbare (-1) (T + 1)
+      (by norm_num) (by linarith)
+  · -- Bare velocity of `Φ` against the genuine field `X` on `Ioo (-1) (T+1)`.
+    intro t ht x
+    have htIcc : t ∈ Set.Icc (-1 : ℝ) (T + 1) := ⟨le_of_lt ht.1, le_of_lt ht.2⟩
+    have hb := hΦbare t x
+    rw [hXt_eq t htIcc (Φ t x)] at hb
+    exact hb
+  · -- Slice smoothness of the reverse flow `Ψ t`, for `0 < t < T + 1`.
+    intro t ht0 hthi
+    have hseg : ∀ b ∈ Set.Ioo (min (0 : ℝ) (-t) - 1) (max (0 : ℝ) (-t) + 1),
+        t + b ∈ Set.Icc ((-1 : ℝ) - 3) ((T + 1) + 3) := by
+      have hmin : min (0 : ℝ) (-t) = -t := min_eq_right (by linarith)
+      have hmax : max (0 : ℝ) (-t) = 0 := max_eq_left (by linarith)
+      rw [hmin, hmax]
+      intro b hb
+      rw [Set.mem_Ioo] at hb
+      rw [Set.mem_Icc]
+      exact ⟨by linarith [hb.1], by linarith [hb.2]⟩
+    have hslice := autonomizedFlow_slice_contMDiff Xt hXt_sm hXtC1 ψ hψ0 hψcurve hψtime
+      (-1) (T + 1) t (-t) hseg
+    have hΨeq : Ψ t = (fun x : M => (ψ (t, x) (-t)).2) := by
+      funext x; rw [hΨ_def]
+    rw [hΨeq]
+    exact contMDiff_snd.comp hslice
+  · -- `Ψ s (Φ s x) = x` on `Ico 0 (T + 1)`.
+    intro s _ x
+    have hstep1 : Ψ s (Φ s x) = (ψ (ψ (0, x) s) (-s)).2 := by
+      rw [hΨ_def]; rw [hψ0x s x]
+    rw [hstep1, ← hgroup (0, x) s (-s)]
+    simp only [add_neg_cancel, hψ0 (0, x)]
+  · -- `Φ s (Ψ s x) = x` on `Ico 0 (T + 1)`.
+    intro s _ x
+    have hψsx : ψ (s, x) (-s) = (0, Ψ s x) := by
+      apply Prod.ext
+      · rw [hψtime (s, x) (-s)]; simp
+      · rfl
+    have hstep1 : Φ s (Ψ s x) = (ψ (ψ (s, x) (-s)) s).2 := by
+      rw [hΦ_def]; rw [hψsx]
+    rw [hstep1, ← hgroup (s, x) (-s) s]
+    simp only [neg_add_cancel, hψ0 (s, x)]
+
 end DifferentialGeometry.PDE.RicciFlow.ODE
