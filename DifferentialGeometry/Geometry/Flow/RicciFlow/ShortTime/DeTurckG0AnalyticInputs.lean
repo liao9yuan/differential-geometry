@@ -323,7 +323,7 @@ theorem deturck_g0_parabolic_chartGram_C2_upto_zero
     (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2)
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
-    (hreal : ∀ (s : ℝ) (x : M) (v w : TangentSpace I x),
+    (hreal : ∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
       (g_DT s).inner x v w
         = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w)
     (hcont : ContinuousOn
@@ -386,7 +386,7 @@ theorem deturck_g0_carrier_Hk_smallness_upto_zero
           N_cont
             (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
               (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s)
-    (hcanon : ∀ s : ℝ,
+    (hcanon : ∀ s ∈ Set.Icc (0 : ℝ) T,
       Integral.L2.SmoothCcTensor.toL2 (T_s s) =
         tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
           (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
@@ -433,17 +433,17 @@ theorem deturck_g0_carrier_realize_package
     ∃ (g_DT : ℝ → SmoothRiemannianMetric I M)
         (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2),
       g_DT 0 = g₀ ∧
-      (∀ (s : ℝ) (x : M) (v w : TangentSpace I x),
+      (∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
         (g_DT s).inner x v w
           = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w) ∧
-      (∀ (s : ℝ)
-          (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-            (I := I) (M := M) g₀ 0 2),
+      (∀ s ∈ Set.Icc (0 : ℝ) T,
+          ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g₀ 0 2,
         (u₂ s).coeff i
           = tensorL2Coeff (I := I) (M := M)
               (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
               (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) ∧
-      (∀ s : ℝ,
+      (∀ s ∈ Set.Icc (0 : ℝ) T,
         Integral.L2.SmoothCcTensor.toL2 (T_s s) =
           tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
@@ -589,7 +589,7 @@ theorem deturck_g0_engine_carrier_extraction
         (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2),
       0 < T ∧
       g_DT 0 = g₀ ∧
-      (∀ (s : ℝ) (x : M) (v w : TangentSpace I x),
+      (∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
         (g_DT s).inner x v w
           = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w) ∧
       ContinuousOn
@@ -606,14 +606,14 @@ theorem deturck_g0_engine_carrier_extraction
       (∀ s ∈ Set.Ioo (0 : ℝ) T, ∃ δ' : ℝ, δ' < 1 ∧
         gFibreOpBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (T_s s)) δ') ∧
-      (∀ (s : ℝ)
-          (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-            (I := I) (M := M) g₀ 0 2),
+      (∀ s ∈ Set.Icc (0 : ℝ) T,
+          ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g₀ 0 2,
         (u₂ s).coeff i
           = tensorL2Coeff (I := I) (M := M)
               (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
               (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) ∧
-      (∀ s : ℝ,
+      (∀ s ∈ Set.Icc (0 : ℝ) T,
         Integral.L2.SmoothCcTensor.toL2 (T_s s) =
           tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
@@ -705,8 +705,11 @@ theorem deturck_g0_engine_carrier_extraction
   rw [eventually_nhdsWithin_iff, Metric.eventually_nhds_iff] at hev
   obtain ⟨η, hη_pos, hη⟩ := hev
   -- Final horizon: shrink so the whole interval lies in the fibre-small regime.
-  refine ⟨min Te η, g_DT, u₂, T_s, lt_min hTe_pos hη_pos, h0, hreal, ?_, ?_, ?_,
-    hsmoothrepr, hcanon⟩
+  have hsub : Set.Icc (0 : ℝ) (min Te η) ⊆ Set.Icc (0 : ℝ) Te :=
+    Set.Icc_subset_Icc le_rfl (min_le_left _ _)
+  refine ⟨min Te η, g_DT, u₂, T_s, lt_min hTe_pos hη_pos, h0,
+    fun s hs => hreal s (hsub hs), ?_, ?_, ?_,
+    fun s hs => hsmoothrepr s (hsub hs), fun s hs => hcanon s (hsub hs)⟩
   · exact hcont.mono (Set.Icc_subset_Icc le_rfl (min_le_left _ _))
   · intro s hs
     exact hreg s ⟨hs.1, lt_of_lt_of_le hs.2 (min_le_left _ _)⟩

@@ -281,10 +281,10 @@ theorem deturck_metric_pde_interior
     exact (hreg s hs).hasDerivWithinAt
   have hpush := pointwise_deriv_through_realize (I := I) (M := M) g_bg a
     g_DT T_s u_car u_car' x v w ℓ_a
-    (fun s => hreal s x v w) hfactor hderiv t ht
+    (fun s _ => hreal s x v w) (fun s _ => hfactor s) hderiv t ht
   have hmatch := rhs_matches_deturck_at_solution (I := I) (M := M) g_bg g_bg a u₂ ℓ_a
-    g_DT T_s x v w hreal N_cont repr Nsec hN_coeff hNsec_realize
-    hsmoothrepr hℓ hNsec_geom t (Set.Ioo_subset_Ico_self ht)
+    g_DT T_s x v w (fun s _ => hreal s) N_cont repr Nsec hN_coeff hNsec_realize
+    (fun s _ => hsmoothrepr s) hℓ (fun s _ => hNsec_geom s) t (Set.Ioo_subset_Ico_self ht)
   rw [hu_car'_def] at hpush
   rw [hmatch] at hpush
   exact hpush

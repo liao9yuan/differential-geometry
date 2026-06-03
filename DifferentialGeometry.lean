@@ -1120,6 +1120,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckInitialAnch
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckInitialDataExistence
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckInteriorTimeRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckRicciPde
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckRemainderRealizeGauge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckRicciRHSSymmetric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DuhamelIntegralTimeDeriv
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.ForcingPerMode

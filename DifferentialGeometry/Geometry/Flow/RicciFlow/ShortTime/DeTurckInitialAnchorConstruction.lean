@@ -126,7 +126,7 @@ theorem deTurck_g0_realize_data
         (repr Nsec : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
           Integral.L2.SmoothCcTensor g₀ 0 2),
         g_DT 0 = g₀ ∧
-        (∀ (s : ℝ) (x : M) (v w : TangentSpace I x),
+        (∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
           (g_DT s).inner x v w
             = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w) ∧
         (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
@@ -154,14 +154,14 @@ theorem deTurck_g0_realize_data
         (∀ s ∈ Set.Ioo (0 : ℝ) T, ∃ δ' : ℝ, δ' < 1 ∧
           gFibreOpBound (I := I) (M := M) g₀
             (ccTensorBilinSymm (I := I) g₀ (T_s s)) δ') ∧
-        (∀ (s : ℝ)
-            (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-              (I := I) (M := M) g₀ 0 2),
+        (∀ s ∈ Set.Icc (0 : ℝ) T,
+            ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+              (I := I) (M := M) g₀ 0 2,
           (u₂ s).coeff i
             = tensorL2Coeff (I := I) (M := M)
                 (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
                 (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) ∧
-        (∀ (s : ℝ) (x' : M) (v' w' : TangentSpace I x'),
+        (∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x' : M) (v' w' : TangentSpace I x'),
           ccTensorBilinSymm (I := I) g₀
               (rawTensorConnLapSmooth (I := I) g₀ 0 2 (T_s s)) x' v' w'
             + ccTensorBilinSymm (I := I) g₀
@@ -189,7 +189,7 @@ theorem deTurck_g0_realize_data
       hN_coeff ⟨K, hNsec_lip⟩
   exact ⟨T, a, hT, ha, g_DT, u₂, T_s, N_cont, repr, Nsec, h0, hreal, hN_coeff,
     hNsec_realize, hcont, hreg, hsmall, hsmoothrepr,
-    hNsec_geom_univ g_DT u₂ T_s hreal hsmoothrepr hcanon,
+    hNsec_geom_univ T g_DT u₂ T_s hreal hsmoothrepr hcanon,
     deTurck_g0_chartGram_continuity (I := I) g₀ a ha hT g_DT u₂ T_s N_cont
       hreal hcont hreg⟩
 
@@ -220,7 +220,7 @@ theorem deTurck_g0_interior_deriv_from_data
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
     (repr Nsec : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
       Integral.L2.SmoothCcTensor g₀ 0 2)
-    (hreal : ∀ (s : ℝ) (x : M) (v w : TangentSpace I x),
+    (hreal : ∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
       (g_DT s).inner x v w
         = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w)
     (hN_coeff : ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
@@ -242,14 +242,14 @@ theorem deTurck_g0_interior_deriv_from_data
           N_cont
             (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
               (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s)
-    (hsmoothrepr : ∀ (s : ℝ)
-        (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-          (I := I) (M := M) g₀ 0 2),
+    (hsmoothrepr : ∀ s ∈ Set.Icc (0 : ℝ) T,
+        ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2,
       (u₂ s).coeff i
         = tensorL2Coeff (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
             (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i)
-    (hNsec_geom : ∀ (s : ℝ) (x' : M) (v' w' : TangentSpace I x'),
+    (hNsec_geom : ∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x' : M) (v' w' : TangentSpace I x'),
       ccTensorBilinSymm (I := I) g₀
           (rawTensorConnLapSmooth (I := I) g₀ 0 2 (T_s s)) x' v' w'
         + ccTensorBilinSymm (I := I) g₀
@@ -269,24 +269,26 @@ theorem deTurck_g0_interior_deriv_from_data
         (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
           (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) with hu_car'_def
   obtain ⟨ℓ_a, hℓ⟩ := realize_eval_carrier_factorization (I := I) (M := M) g₀ a ha x v w
-  have hfactor : ∀ s : ℝ,
+  have hfactor : ∀ s ∈ Set.Ioo (0 : ℝ) T,
       ccTensorBilinSymm (I := I) g₀ (T_s s) x v w = ℓ_a (u_car s) := by
-    intro s
+    intro s hs
     refine (hℓ (T_s s) (u_car s) ?_).symm
     intro i
     rw [hu_car_def]
     simp only [tensorHsInclusion_coeff_apply]
-    exact hsmoothrepr s i
+    exact hsmoothrepr s (Set.Ioo_subset_Icc_self hs) i
   have hderiv : ∀ s ∈ Set.Ioo (0 : ℝ) T,
       HasDerivWithinAt (fun r : ℝ => u_car r) (u_car' s) (Set.Ici 0) s := by
     intro s hs
     exact (hreg s hs).hasDerivWithinAt
   have hpush := pointwise_deriv_through_realize (I := I) (M := M) g₀ a
     g_DT T_s u_car u_car' x v w ℓ_a
-    (fun s => hreal s x v w) hfactor hderiv t ht
+    (fun s hs => hreal s (Set.Ioo_subset_Icc_self hs) x v w) hfactor hderiv t ht
   have hmatch := rhs_matches_deturck_at_solution (I := I) (M := M) g₀ g_bg a u₂ ℓ_a
-    g_DT T_s x v w hreal N_cont repr Nsec hN_coeff hNsec_realize
-    hsmoothrepr hℓ hNsec_geom t (Set.Ioo_subset_Ico_self ht)
+    g_DT T_s x v w (fun s hs => hreal s (Set.Ico_subset_Icc_self hs))
+    N_cont repr Nsec hN_coeff hNsec_realize
+    (fun s hs => hsmoothrepr s (Set.Ico_subset_Icc_self hs)) hℓ
+    (fun s hs => hNsec_geom s (Set.Ico_subset_Icc_self hs)) t (Set.Ioo_subset_Ico_self ht)
   rw [hu_car'_def] at hpush
   rw [hmatch] at hpush
   exact hpush
@@ -312,12 +314,12 @@ theorem deTurck_g0_inner_continuous_icc
     (hcont : ContinuousOn
       (fun s : ℝ => tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
         (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (Set.Icc 0 T))
-    (hreal : ∀ (s : ℝ) (x : M) (v w : TangentSpace I x),
+    (hreal : ∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
       (g_DT s).inner x v w
         = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w)
-    (hsmoothrepr : ∀ (s : ℝ)
-        (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-          (I := I) (M := M) g₀ 0 2),
+    (hsmoothrepr : ∀ s ∈ Set.Icc (0 : ℝ) T,
+        ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2,
       (u₂ s).coeff i
         = tensorL2Coeff (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
@@ -350,7 +352,7 @@ theorem deTurck_g0_inner_continuous_icc
   exact (deturck_solution_c2_continuous_icc0 (I := I) g₀ a ha g_DT
     (fun s => tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
       (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) T_s hcont hreal
-    (fun s i => hsmoothrepr s i) hC2_pt).1
+    hsmoothrepr hC2_pt).1
 
 /-- **Right-continuity at `t = 0` of the DeTurck–Ricci right-hand side along the
 realized `g₀`-anchored flow (genuine analytic input).**
@@ -370,15 +372,15 @@ theorem deTurck_g0_rhs_right_continuous_at_zero
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2)
     (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
-    (hreal : ∀ (s : ℝ) (x : M) (v w : TangentSpace I x),
+    (hreal : ∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
       (g_DT s).inner x v w
         = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w)
     (hcont : ContinuousOn (fun s : ℝ =>
       tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
         (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (Set.Icc 0 T))
-    (hsmoothrepr : ∀ (s : ℝ)
-        (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-          (I := I) (M := M) g₀ 0 2),
+    (hsmoothrepr : ∀ s ∈ Set.Icc (0 : ℝ) T,
+        ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2,
       (u₂ s).coeff i
         = tensorL2Coeff (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)

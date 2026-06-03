@@ -54,12 +54,12 @@ theorem deturck_solution_c2_continuous_icc0
     (u : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ))
     (T_s : ℝ → Integral.L2.SmoothCcTensor g_bg 0 2)
     (hcont : ContinuousOn (fun s : ℝ => u s) (Set.Icc 0 T))
-    (hreal : ∀ (s : ℝ) (x : M) (v w : TangentSpace I x),
+    (hreal : ∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
       (g_DT s).inner x v w
         = g_bg.inner x v w + ccTensorBilinSymm (I := I) g_bg (T_s s) x v w)
-    (hsmoothrepr : ∀ (s : ℝ)
-        (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-          (I := I) (M := M) g_bg 0 2),
+    (hsmoothrepr : ∀ s ∈ Set.Icc (0 : ℝ) T,
+        ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g_bg 0 2,
       (u s).coeff i
         = tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
             (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i)
@@ -79,17 +79,13 @@ theorem deturck_solution_c2_continuous_icc0
     intro x v w
     obtain ⟨ℓ_a, hℓ_a⟩ :=
       realize_eval_carrier_factorization (I := I) (M := M) g_bg a ha x v w
-    have hval : ∀ s : ℝ,
+    have hval : ∀ s ∈ Set.Icc (0 : ℝ) T,
         (g_DT s).inner x v w = g_bg.inner x v w + ℓ_a (u s) := by
-      intro s
-      rw [hreal s x v w, hℓ_a (T_s s) (u s) (hsmoothrepr s)]
-    have hfun : (fun s : ℝ => (g_DT s).inner x v w)
-        = fun s : ℝ => g_bg.inner x v w + ℓ_a (u s) := by
-      funext s; exact hval s
-    rw [hfun]
+      intro s hs
+      rw [hreal s hs x v w, hℓ_a (T_s s) (u s) (hsmoothrepr s hs)]
     have hcomp : ContinuousOn (fun s : ℝ => ℓ_a (u s)) (Set.Icc 0 T) :=
       ℓ_a.continuous.comp_continuousOn hcont
-    exact continuousOn_const.add hcomp
+    exact (continuousOn_const.add hcomp).congr (fun s hs => hval s hs)
   refine ⟨hconj1, ?_⟩
   intro x v w
   exact ricci_continuous_in_metric_time (I := I) (M := M) g_DT T x v w hconj1 hC2_chart

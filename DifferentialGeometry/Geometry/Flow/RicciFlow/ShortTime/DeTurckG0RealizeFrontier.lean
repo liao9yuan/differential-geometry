@@ -5,6 +5,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTi
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckG0AnalyticInputs
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckG0RealizeSectionLipschitz
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckRemainderRealizeGauge
 
 /-! # Open analytic frontier of the `g₀`-anchored DeTurck–Ricci realize construction
 
@@ -50,7 +51,8 @@ conclusion as a hypothesis.
 * `deTurck_g0_chartGram_continuity` — the `k ≤ 2` chart-Gram continuity of the
   realized flow (the parabolic-regularity datum).
 
-Each body is `sorry`, so consumers transitively depend on `sorryAx`. -/
+Each body is `sorry` or (for `deTurck_g0_decoupled_principal_match`) is assembled from a
+single concrete-gauge `sorry` datum, so consumers transitively depend on `sorryAx`. -/
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -117,8 +119,14 @@ it is the correct, non-leaking decomposition.
 
 The match is an honest geometric identity — the genuinely-open *decoupled DeTurck
 principal-part* datum the realize program isolates, not a hypothesis-packaged conclusion
-(the gauge is constructed, the match is not a fold of any other hypothesis).  The body
-is `sorry`. -/
+(the gauge is constructed, the match is not a fold of any other hypothesis).
+
+The gauge `repr = Nsec` is the *concrete* section
+`deTurckRemainderRealizeSection g₀ g_bg` (`DeTurckRemainderRealizeGauge.lean`); the
+realize identity `hNsec_realize` is then `rfl`, and the `hNsec_lip`/`hNsec_geom`
+conjuncts are supplied by the concrete-gauge open datum
+`deTurckRemainderRealize_geomMatch_lipschitz`.  This node therefore carries no `sorry`
+of its own; it transitively depends on that single concrete-gauge `sorryAx`. -/
 theorem deTurck_g0_decoupled_principal_match
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
     ∃ repr Nsec : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
@@ -130,31 +138,36 @@ theorem deTurck_g0_decoupled_principal_match
       (∃ K : ℝ≥0, ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
         ‖deTurckG0SectionDiffHa (I := I) (M := M) g₀ a Nsec u u'‖
           ≤ (K : ℝ) * dist u u') ∧
-      (∀ (g_DT : ℝ → SmoothRiemannianMetric I M)
+      (∀ (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
           (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
           (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2),
-        (∀ (s : ℝ) (x : M) (v w : TangentSpace I x),
+        (∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
           (g_DT s).inner x v w
             = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w) →
-        (∀ (s : ℝ)
-            (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-              (I := I) (M := M) g₀ 0 2),
+        (∀ s ∈ Set.Icc (0 : ℝ) T,
+            ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+              (I := I) (M := M) g₀ 0 2,
           (u₂ s).coeff i
             = tensorL2Coeff (I := I) (M := M)
                 (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
                 (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) →
-        (∀ s : ℝ,
+        (∀ s ∈ Set.Icc (0 : ℝ) T,
           Integral.L2.SmoothCcTensor.toL2 (T_s s) =
             tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
               (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
               (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s)) →
-        ∀ (s : ℝ) (x' : M) (v' w' : TangentSpace I x'),
+        ∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x' : M) (v' w' : TangentSpace I x'),
           ccTensorBilinSymm (I := I) g₀
               (rawTensorConnLapSmooth (I := I) g₀ 0 2 (T_s s)) x' v' w'
             + ccTensorBilinSymm (I := I) g₀
                 (repr (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
                   (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) x' v' w'
-            = deTurckRicciRHS (I := I) g_bg (g_DT s) x' v' w') := sorry
+            = deTurckRicciRHS (I := I) g_bg (g_DT s) x' v' w') := by
+  obtain ⟨hNsec_lip, hNsec_geom⟩ :=
+    deTurckRemainderRealize_geomMatch_lipschitz (I := I) (M := M) g₀ g_bg a
+  exact ⟨deTurckRemainderRealizeSection (I := I) g₀ g_bg,
+    deTurckRemainderRealizeSection (I := I) g₀ g_bg,
+    fun _ _ _ _ => rfl, hNsec_lip, hNsec_geom⟩
 
 /-- **The continuous spectral lift of the gauge section to the `g₀`-DeTurck
 nonlinearity (open analytic datum).**
@@ -345,7 +358,7 @@ theorem deTurck_g0_carrier_realize_transport
         (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2),
       0 < T ∧
       g_DT 0 = g₀ ∧
-      (∀ (s : ℝ) (x : M) (v w : TangentSpace I x),
+      (∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
         (g_DT s).inner x v w
           = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w) ∧
       ContinuousOn
@@ -362,14 +375,14 @@ theorem deTurck_g0_carrier_realize_transport
       (∀ s ∈ Set.Ioo (0 : ℝ) T, ∃ δ' : ℝ, δ' < 1 ∧
         gFibreOpBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (T_s s)) δ') ∧
-      (∀ (s : ℝ)
-          (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-            (I := I) (M := M) g₀ 0 2),
+      (∀ s ∈ Set.Icc (0 : ℝ) T,
+          ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g₀ 0 2,
         (u₂ s).coeff i
           = tensorL2Coeff (I := I) (M := M)
               (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
               (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) ∧
-      (∀ s : ℝ,
+      (∀ s ∈ Set.Icc (0 : ℝ) T,
         Integral.L2.SmoothCcTensor.toL2 (T_s s) =
           tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
@@ -400,7 +413,7 @@ theorem deTurck_g0_chartGram_continuity
     (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2)
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
-    (hreal : ∀ (s : ℝ) (x : M) (v w : TangentSpace I x),
+    (hreal : ∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
       (g_DT s).inner x v w
         = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w)
     (hcont : ContinuousOn

@@ -174,10 +174,10 @@ theorem pointwise_deriv_through_realize
     (u_car' : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ))
     (x : M) (v w : TangentSpace I x)
     (ℓ_a : tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ) →L[ℝ] ℝ)
-    (hreal : ∀ s : ℝ,
+    (hreal : ∀ s ∈ Set.Ioo (0 : ℝ) T,
       (g_DT s).inner x v w
         = g_bg.inner x v w + ccTensorBilinSymm (I := I) g_bg (T_s s) x v w)
-    (hfactor : ∀ s : ℝ,
+    (hfactor : ∀ s ∈ Set.Ioo (0 : ℝ) T,
       ccTensorBilinSymm (I := I) g_bg (T_s s) x v w = ℓ_a (u_car s))
     (hderiv : ∀ t ∈ Set.Ioo (0 : ℝ) T,
       HasDerivWithinAt (fun s : ℝ => u_car s) (u_car' t) (Set.Ici 0) t) :
@@ -186,17 +186,22 @@ theorem pointwise_deriv_through_realize
         (fun s : ℝ => (g_DT s).inner x v w)
         (ℓ_a (u_car' t)) (Set.Ici 0) t := by
   intro t ht
-  have hval : ∀ s : ℝ,
+  have hval : ∀ s ∈ Set.Ioo (0 : ℝ) T,
       (g_DT s).inner x v w = g_bg.inner x v w + ℓ_a (u_car s) := by
-    intro s
-    rw [hreal s, hfactor s]
+    intro s hs
+    rw [hreal s hs, hfactor s hs]
   have hℓderiv :
       HasDerivWithinAt (fun s : ℝ => ℓ_a (u_car s)) (ℓ_a (u_car' t))
         (Set.Ici 0) t :=
     ℓ_a.hasFDerivAt.comp_hasDerivWithinAt t (hderiv t ht)
-  refine (hℓderiv.const_add (g_bg.inner x v w)).congr (fun s _ => ?_) ?_
-  · exact hval s
-  · exact hval t
+  have hmem : Set.Ioo (0 : ℝ) T ∈ nhdsWithin t (Set.Ici 0) :=
+    nhdsWithin_le_nhds (isOpen_Ioo.mem_nhds ht)
+  have heq : (fun s : ℝ => (g_DT s).inner x v w)
+      =ᶠ[nhdsWithin t (Set.Ici 0)] (fun s : ℝ => g_bg.inner x v w + ℓ_a (u_car s)) := by
+    filter_upwards [hmem] with s hs
+    exact hval s hs
+  exact (hℓderiv.const_add (g_bg.inner x v w)).congr_of_eventuallyEq_of_mem heq
+    (Set.mem_Ici.mpr ht.1.le)
 
 set_option linter.unusedVariables false in
 /-- **Spectral→geometric reconciliation at the solution (fully ungated).**
@@ -233,7 +238,7 @@ theorem rhs_matches_deturck_at_solution
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (T_s : ℝ → Integral.L2.SmoothCcTensor g_bg 0 2)
     (x : M) (v w : TangentSpace I x)
-    (hreal : ∀ (s : ℝ) (x' : M) (v' w' : TangentSpace I x'),
+    (hreal : ∀ s ∈ Set.Ico (0 : ℝ) T, ∀ (x' : M) (v' w' : TangentSpace I x'),
       (g_DT s).inner x' v' w'
         = g_bg.inner x' v' w' + ccTensorBilinSymm (I := I) g_bg (T_s s) x' v' w')
     (N_cont : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1) →
@@ -253,8 +258,8 @@ theorem rhs_matches_deturck_at_solution
         (x' : M) (v' w' : TangentSpace I x'),
       ccTensorBilinSymm (I := I) g_bg (Nsec u) x' v' w' =
         ccTensorBilinSymm (I := I) g_bg (repr u) x' v' w')
-    (hsmoothrepr : ∀ (s : ℝ)
-        (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g_bg 0 2),
+    (hsmoothrepr : ∀ s ∈ Set.Ico (0 : ℝ) T,
+        ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g_bg 0 2,
       (u₂ s).coeff i
         = tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
             (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i)
@@ -266,7 +271,7 @@ theorem rhs_matches_deturck_at_solution
             = tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
                 (Integral.L2.SmoothCcTensor.toL2 T_z) i) →
           ℓ_a z = ccTensorBilinSymm (I := I) g_bg T_z x v w)
-    (hNsec_geom : ∀ (s : ℝ) (x' : M) (v' w' : TangentSpace I x'),
+    (hNsec_geom : ∀ s ∈ Set.Ico (0 : ℝ) T, ∀ (x' : M) (v' w' : TangentSpace I x'),
       ccTensorBilinSymm (I := I) g_bg
           (rawTensorConnLapSmooth (I := I) g_bg 0 2 (T_s s)) x' v' w'
         + ccTensorBilinSymm (I := I) g_bg
@@ -291,7 +296,7 @@ theorem rhs_matches_deturck_at_solution
     intro i
     rw [scaleLaplacianFun_coeff,
       bare_laplacian_spectral_match (I := I) (M := M) g_bg (T_s t) i,
-      hsmoothrepr t i]
+      hsmoothrepr t _ht i]
   have hlap : ℓ_a (scaleLaplacianFun (I := I) (M := M) (u₂ t)) =
       ccTensorBilinSymm (I := I) g_bg
         (rawTensorConnLapSmooth (I := I) g_bg 0 2 (T_s t)) x v w :=
@@ -306,6 +311,6 @@ theorem rhs_matches_deturck_at_solution
       ccTensorBilinSymm (I := I) g_bg (repr uincl) x v w := by
     rw [hℓ (Nsec uincl) (N_cont uincl) hcoeff_N, hNsec_realize uincl x v w]
   rw [map_add, hlap, hN]
-  exact hNsec_geom t x v w
+  exact hNsec_geom t _ht x v w
 
 end DifferentialGeometry.PDE.RicciFlow
