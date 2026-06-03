@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ParabolicInteriorSmoothing
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionSpace
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckRemainderRealizeGauge
 
 /-! # First-order coupling of the DeTurck continuous-nonlinearity forcing
 
@@ -39,18 +40,22 @@ then `gforce = N_cont(solField)` lies in `L²(H^d)` — the bounded first-order 
 `H^{d+1} → H^d`; the coupling is at the level of summed `L²(H^σ)`-norm masses (`N_cont`
 is a genuine non-diagonal first-order operator, so the bound is NOT mode by mode).
 
-The coupling is *proven* sorry-free over a single genuine analytic leaf
-`Ncont_timeL2_firstOrder_loss`: the quantitative per-order operator first-order-loss of the
-geometric nonlinearity at the spectral-mass level (a finite operator constant `C` bounding,
-at every order `d` and for every reproduced pair of time fields, the order-`d` output
-partial sums by the total order-`(d+1)` input mass — additional structure of the DeTurck
-remainder not deducible from the fixed-order datum `N_cont : H^{a+1} → H^a`).  The
-quantitative forcing partial-sum bound `deTurckForcing_firstOrder_partialSum_bound` is then
-assembled (sorry-free) from that leaf for the smooth (`u₀ = 0`) datum, where the homogeneous
-heat flow vanishes so the `H^{a+1}`-view Duhamel field's order-`(d+1)` mass equals the
-Duhamel `solFieldMass`; from that bound the qualitative summability implication follows by
-`summable_of_sum_le` (bounded nonnegative partial sums are summable).  Consumers
-transitively depend on `sorryAx` through that leaf. -/
+Both `deTurckForcing_firstOrder_partialSum_bound` and `deTurckForcing_firstOrder_coupling`
+take the first-order operator-loss datum `hloss : FirstOrderOperatorLoss g₀ a T N_cont` as a
+threaded hypothesis (the genuine per-order operator first-order-loss of the geometric
+nonlinearity at the spectral-mass level — a finite operator constant `C` bounding, at every
+order `d` and for every reproduced pair of time fields, the order-`d` output partial sums by
+the total order-`(d+1)` input mass; *additional* structure of the DeTurck remainder not
+deducible from the fixed-order datum `N_cont : H^{a+1} → H^a`).  That datum is supplied at the
+assembler `deTurck_g0_realize_data` from the posited genuine analytic leaf
+`deTurckGenuineN_firstOrder_operatorLoss` (the operator-loss of the gauge-cancelled geometric
+remainder, pinned to the geometry by the gate-coordinate tie against
+`deTurckRemainderRealizeSection g₀ g_bg`).  The partial-sum bound is then assembled
+(sorry-free) from `hloss` for the smooth (`u₀ = 0`) datum, where the homogeneous heat flow
+vanishes so the `H^{a+1}`-view Duhamel field's order-`(d+1)` mass equals the Duhamel
+`solFieldMass`; from that bound the qualitative summability implication follows by
+`summable_of_sum_le` (bounded nonnegative partial sums are summable).  Consumers transitively
+depend on `sorryAx` through that operator-loss leaf. -/
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -74,47 +79,74 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **Per-order spectral-mass first-order-loss of the continuous nonlinearity `N_cont`
+/-- **The first-order operator-loss datum of a continuous nonlinearity (the per-order
+spectral-mass operator bound), packaged as a predicate.**
+
+`FirstOrderOperatorLoss g₀ a N_cont` asserts that the (continuous) nonlinearity
+`N_cont : H^{a+1} → H^a` has a genuine **first-order operator-loss**: there is a finite
+constant `C ≥ 0` such that, **at every time horizon `T`**, **every spatial Sobolev order
+`d`**, and **for every** `H^{a+1}`-valued time field `w` and `H^a`-valued time field `Nw`
+reproducing `N_cont` along `w` a.e., whenever the order-`(d + 1)` spectral masses of `w` are
+summable, **every finite partial sum** of the order-`d` spectral masses of `Nw` is bounded by
+`C` times the total order-`(d + 1)` mass of `w`.  At the `L²`-in-time / summed-mode level this
+is the bounded first-order map `H^{d+1} → H^d` with operator norm `≤ √C` *at every order `d`*,
+so `‖N_cont(w)‖²_{L²(H^d)} ≤ C ‖w‖²_{L²(H^{d+1})}`; the partial-sum form is the finite
+restriction.  The constant `C` is the time-independent operator norm of `N_cont`, so the
+horizon `T` is quantified inside; this is *not* a mode-wise domination (a genuine non-diagonal
+first-order operator). -/
+def FirstOrderOperatorLoss
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) : Prop :=
+  ∃ C : ℝ, 0 ≤ C ∧ ∀ (T : ℝ) (d : ℝ),
+    ∀ (w : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) T)
+      (Nw : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T),
+      ((Nw : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) =ᵐ[timeMeasure T]
+        (fun t => N_cont (w t))) →
+      Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (d + 1) *
+          ‖timeModeCoeff (I := I) (M := M) w i‖ ^ 2) →
+        ∀ F : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2),
+          ∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i d *
+              ‖timeModeCoeff (I := I) (M := M) Nw i‖ ^ 2 ≤
+            C * ∑' i, tensorSobolevWeight (I := I) (M := M) i (d + 1) *
+              ‖timeModeCoeff (I := I) (M := M) w i‖ ^ 2
+
+/-- **The geometric gauge-cancelled DeTurck nonlinearity has the first-order operator-loss
 (genuine elliptic / first-order operator estimate — posited child).**
 
-For the geometric continuous DeTurck nonlinearity `N_cont : H^{a+1} → H^a`, there is a
-finite constant `C ≥ 0` such that, **at every spatial Sobolev order `d`** and **for every**
-`H^{a+1}`-valued time field `w` and `H^a`-valued time field `Nw` that reproduces `N_cont`
-along `w` a.e. (`Nw =ᵐ t ↦ N_cont (w t)`), whenever the order-`(d + 1)` spectral masses of
-`w` are summable, **every finite partial sum** of the order-`d` spectral masses of `Nw` is
-bounded by `C` times the total order-`(d + 1)` mass of `w`:
+For the genuine continuous DeTurck nonlinearity `N_cont : H^{a+1} → H^a` of the `g₀`-anchored
+construction — pinned to the geometric gauge-cancelled remainder by its continuity `hN_cont`
+and the gate-coordinate tie `hcoeff` (on the realizable gate its eigenbasis coordinates are
+the `L²` coordinates of the gauge `deTurckRemainderRealizeSection g₀ g_bg`, the honest DeTurck
+remainder `deTurckRicciRHS g_bg (realize) − Δ_∇(realize)`) — the first-order operator-loss
+`FirstOrderOperatorLoss g₀ a T N_cont` holds.
 
-  `∑_{i ∈ F} (1 + λᵢ)ᵈ · ‖timeModeCoeff Nw i‖² ≤ C · ∑' i, (1 + λᵢ)^{d+1} · ‖timeModeCoeff w i‖²`.
-
-This is the genuine quantitative **first-order operator-loss** of the gauge-cancelled
-geometric DeTurck remainder (`N_cont = deTurckRicciRHS − Δ_∇(realize)`, whose second-order
-principal part cancels against the linear `Δ_∇`): at the `L²`-in-time / summed-mode level it
-is the bounded first-order map `H^{d+1} → H^d` with operator norm `≤ √C` *at every order
-`d`*, so `‖N_cont(w)‖²_{L²(H^d)} ≤ C ‖w‖²_{L²(H^{d+1})}`; the partial-sum form is the finite
-restriction of that summed inequality.  This is **additional structure** of the DeTurck
-remainder — the higher-order operator-norm extension of `N_cont` to every pair
-`H^{d+1} → H^d`, not deducible from the fixed-order datum `N_cont : H^{a+1} → H^a` alone —
-and it is genuinely about the operator (a finite constant `C` quantified over arbitrary
-fields `w`, `Nw`), distinct from the qualitative summability *implication* it powers; the
-bound is *not* a mode-wise domination (`N_cont` is a genuine non-diagonal first-order
-operator).  The body is `sorry` (this is the single genuine analytic leaf — the operator
-first-order-loss estimate).  Consumers transitively depend on `sorryAx`. -/
-theorem Ncont_timeL2_firstOrder_loss
-    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T)
+This is the genuine quantitative first-order operator-loss of the gauge-cancelled geometric
+DeTurck remainder, whose second-order principal part cancels against the linear `Δ_∇`,
+leaving a genuine first-order differential operator.  It is the higher-order operator-norm
+extension of `N_cont` to every pair `H^{d+1} → H^d` — *additional* structure of the DeTurck
+remainder, not deducible from the fixed-order datum `N_cont : H^{a+1} → H^a` alone (this is
+why it is posited).  The hypotheses `hN_cont`/`hcoeff` genuinely pin `N_cont` to the geometric
+gauge object (a generic function does *not* satisfy the coordinate tie against
+`deTurckRemainderRealizeSection g₀ g_bg`), so the statement is *not* the false bare-function
+claim; the conclusion (the operator-loss) is structurally distinct from those hypotheses; no
+packaging.  The body is `sorry` (the single genuine analytic leaf — the operator
+first-order-loss estimate of the geometric remainder).  Consumers transitively depend on
+`sorryAx`. -/
+theorem deTurckGenuineN_firstOrder_operatorLoss
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
-        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ d : ℝ,
-      ∀ (w : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) T)
-        (Nw : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T),
-        ((Nw : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) =ᵐ[timeMeasure T]
-          (fun t => N_cont (w t))) →
-        Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (d + 1) *
-            ‖timeModeCoeff (I := I) (M := M) w i‖ ^ 2) →
-          ∀ F : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2),
-            ∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i d *
-                ‖timeModeCoeff (I := I) (M := M) Nw i‖ ^ 2 ≤
-              C * ∑' i, tensorSobolevWeight (I := I) (M := M) i (d + 1) *
-                ‖timeModeCoeff (I := I) (M := M) w i‖ ^ 2 := sorry
+        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+    (hN_cont : Continuous N_cont)
+    (hcoeff : ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
+        realizableAtGate (I := I) g₀ u →
+          ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+            (N_cont u).coeff i =
+              tensorL2Coeff (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                (Integral.L2.SmoothCcTensor.toL2
+                  (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) i) :
+    FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont := sorry
 
 /-- **First-order-loss partial-sum operator bound of the DeTurck forcing
 (genuine elliptic / first-order operator estimate, assembled from the per-order operator
@@ -150,6 +182,7 @@ theorem deTurckForcing_firstOrder_partialSum_bound
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+    (hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont)
     (u₀ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) (hu0 : u₀ = 0)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : (gforce : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
@@ -194,8 +227,8 @@ theorem deTurckForcing_firstOrder_partialSum_bound
       filter_upwards with t
       rw [tensorHs.zero_coeff, mul_zero]
     rw [hhom0, zero_add]
-  -- The per-order spectral-mass operator loss of `N_cont` (posited child).
-  obtain ⟨C, hC0, hbound⟩ := Ncont_timeL2_firstOrder_loss (I := I) (M := M) g₀ a hT N_cont
+  -- The per-order spectral-mass operator loss of `N_cont` (supplied first-order datum).
+  obtain ⟨C, hC0, hbound⟩ := hloss
   refine ⟨C, hC0, fun d hsum F => ?_⟩
   -- Identify the order-`(d + 1)` mass of `w` with the Duhamel `solFieldMass`.
   have hmass_eq : ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
@@ -211,7 +244,7 @@ theorem deTurckForcing_firstOrder_partialSum_bound
       ∑' i, solFieldMass (I := I) (M := M) hT.le gforce (d + 1) i :=
     tsum_congr hmass_eq
   -- Apply the operator-loss bound to `w` and `Nw := gforce` (reproduced via `hforce`).
-  have hkey := hbound d w gforce hforce hsum_w F
+  have hkey := hbound T d w gforce hforce hsum_w F
   rw [htsum_w] at hkey
   refine le_trans (le_of_eq (Finset.sum_congr rfl (fun i _ => ?_))) hkey
   rw [forcingMass]
@@ -260,6 +293,7 @@ theorem deTurckForcing_firstOrder_coupling
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+    (hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont)
     (u₀ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) (hu0 : u₀ = 0)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : (gforce : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
@@ -270,7 +304,7 @@ theorem deTurckForcing_firstOrder_coupling
       Summable (solFieldMass (I := I) (M := M) hT.le gforce (d + 1)) →
         Summable (forcingMass (I := I) (M := M) gforce d) := by
   obtain ⟨C, hC0, hbound⟩ :=
-    deTurckForcing_firstOrder_partialSum_bound (I := I) (M := M) g₀ a hT hT1 N_cont u₀ hu0
+    deTurckForcing_firstOrder_partialSum_bound (I := I) (M := M) g₀ a hT hT1 N_cont hloss u₀ hu0
       gforce hforce
   intro d hsol
   -- The order-`d` forcing masses are nonnegative with all finite partial sums bounded

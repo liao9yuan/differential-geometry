@@ -24,15 +24,21 @@ pointwise tensor Bochner–Weitzenböck representation (`pointwiseTensorCurv_toS
 Riemann tensor and finitely many of its covariant derivatives against the `≤ 2`-order covariant
 gradients of `S`; each coefficient (a covariant derivative of curvature) is continuous on the
 compact manifold, hence sup-bounded. The three consumer-shaped `L²` statements below, the two
-intermediate pointwise fibre-norm bounds, and the two single-step genuine/remainder and integrated
-genuine-field forms are all *proved* by fibre subadditivity / inner-product bridges over a small set
-of deeper general-valence curvature children whose bodies are `sorry` (the genuine remaining
-moving-frame curvature-endomorphism content): the order-separated three-term section split
-(`exists_pointwiseTensorCurv_genuineRemainder_orderSeparated_bound`), the genuine-field /
-IBP-null-remainder divergence split (`exists_pointwiseTensorCurv_genuineField_divergenceSplit`), and
-the per-order iterated-Ricci component decomposition
+intermediate pointwise fibre-norm bounds, the genuine-field IBP-null divergence split, and the
+integrated genuine-field forms are all *proved* by fibre subadditivity / inner-product bridges /
+the covariant Green identity over a small set of deeper general-valence curvature children whose
+bodies are `sorry` (the genuine remaining moving-frame curvature-endomorphism content): the
+order-separated three-term section split
+(`exists_pointwiseTensorCurv_genuineRemainder_orderSeparated_bound`), the bracket-free curvature
+representation (`exists_pointwiseTensorCurv_bracketFreePairing_field`), and the per-order
+iterated-Ricci component decomposition
 (`exists_covGrad_commutatorDefect_component_fiberNormSq_bound`); the precise shape is recorded in each
-docstring. Consumers transitively depend on `sorryAx` through these deepest curvature leaves.
+docstring. The genuine-field / IBP-null-remainder divergence split
+(`exists_pointwiseTensorCurv_genuineField_divergenceSplit`) is itself now *proved* from the
+bracket-free representation — its remainder `Drem := Curv S − G` is `IBP`-null against `∇S` by the
+left additivity of the `L²` pairing — so the `∇²S`-order bracket's integration-by-parts content no
+longer enters as a posit. Consumers transitively depend on `sorryAx` through the three deepest
+curvature leaves named above.
 
 ## Main statements (posited curvature inputs)
 
@@ -316,32 +322,58 @@ theorem exists_pointwiseTensorCurv_l2_bound (g : SmoothRiemannianMetric I M) :
     (covGrad (I := I) (M := M) g 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S))
     (pointwiseTensorCurv (I := I) (M := M) g s S) (Ccurv s) (hCcurv_nn s) (hpt s S)
 
-/-- **Posited deepest curvature child for the integrated bracket-free field: genuine field plus
-IBP-null divergence remainder (per-valence).** The genuine *integrated* third-order tensor
-Bochner–Weitzenböck content, isolated as the two genuinely-distinct primitives that the bracket-free
-pairing rests on. Fibrewise `Curv S = tensor3rdCurvGenuine + tensor3rdCurvBracket`
-(`pointwiseTensorCurv_toSection_eq_frame_sum`, `frame_trace_thirdCovDeriv_defect_eq_genuine_add_bracket`,
-`Tensor3rdCurv_eq_genuine_add_bracket`); this child exhibits a smooth compactly-supported genuine field
-`G` (the `R(∇S) + (∇R) S` part, order `≤ 1` in `S`) and a smooth compactly-supported remainder field
-`Drem` (the moving-frame/bracket discrepancy, genuinely `∇²S`-order) with the *section-level* identity
-`Curv S = G + Drem` and the *integrated IBP-vanishing* `⟨Drem, ∇S⟩_{L²} = 0` (the moving-frame bracket
-being a total covariant divergence of an order-`∇S` field, so it integrates by parts to zero against
-`∇S` via the covariant Green identity `green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed`
-and its general-valence companions `tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_gen`), together
-with the genuine field's *pointwise* fibre bound.
+/-- **Posited deepest curvature child for the integrated bracket-free field: the genuine
+bracket-free curvature representation (per-valence).** The genuine *integrated* third-order tensor
+Bochner–Weitzenböck content, isolated as its single irreducible primitive — the bracket-free
+representation of the curvature cross term. Fibrewise `Curv S = tensor3rdCurvGenuine +
+tensor3rdCurvBracket` (`pointwiseTensorCurv_toSection_eq_frame_sum`,
+`frame_trace_thirdCovDeriv_defect_eq_genuine_add_bracket`, `Tensor3rdCurv_eq_genuine_add_bracket`);
+the moving-frame bracket `tensor3rdCurvBracket` is a total covariant divergence of an order-`∇S`
+field, so the `L²` pairing `⟨tensor3rdCurvBracket-part, ∇S⟩` vanishes by the covariant Green
+identity (`green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed` and its general-valence
+companions `tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_gen`). This child names exactly the
+resulting `L²` identity: there is a smooth compactly-supported genuine field `G` (the
+`R(∇S) + (∇R) S` part, order `≤ 1` in `S`) with `⟨Curv S, ∇S⟩_{L²} = ⟨G, ∇S⟩_{L²}` and the genuine
+field's *pointwise* fibre bound by `rfns(∇S) + rfns(S)` (`R(∇S)` is `rfns(∇S)`-order, `(∇R) S` is
+`rfns(S)`-order, both fibre-bounded by `riemannianFiberNormSq_tensor3rdCurvGenuine_le` from the
+uniform curvature/differentiated-curvature sups `exists_uniform_riemannianFiberNormSq_riemannOp_bound`,
+`exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound`).
 
-This says: there is a *valence-dependent* nonnegative constant `K : ℕ → ℝ` such that, at every rank `s`
-and for every `S`, there are smooth compactly-supported fields `G, Drem : SmoothCcTensor g 0 (s + 1)`
-with `pointwiseTensorCurv g s S = G + Drem`, the IBP-vanishing
-`tensorL2Inner g 0 (s + 1) Drem.toFun (∇S).toFun = 0`, and the genuine field fibre-bounded by
-`rfns(∇S) + rfns(S)` (`R(∇S)` is `rfns(∇S)`-order, `(∇R) S` is `rfns(S)`-order, both fibre-bounded by
-`riemannianFiberNormSq_tensor3rdCurvGenuine_le` from the uniform curvature/differentiated-curvature
-sups `exists_uniform_riemannianFiberNormSq_riemannOp_bound`,
-`exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound`). This is the genuine integrated
-curvature leaf (the pointwise fibre bound on `Curv S` itself is *false* at the `∇²S`-order bracket —
-only the pairing against `∇S` removes it); the canonical-`inner ℝ` primitive
-`exists_pointwiseTensorCurv_genuineField_inner` is *proved* from it by `tensorL2Inner` bilinearity
-(`tensorL2Inner_add_left`) and the `inner ℝ ↔ tensorL2Inner` bridge `SmoothCcTensor.inner_def`. -/
+This says: there is a *valence-dependent* nonnegative constant `K : ℕ → ℝ` such that, at every rank
+`s` and for every `S`, there is a smooth compactly-supported field `G : SmoothCcTensor g 0 (s + 1)`
+with `⟨Curv S, ∇S⟩_{L²} = ⟨G, ∇S⟩_{L²}` and the genuine field fibre-bounded by `rfns(∇S) + rfns(S)`.
+This is the genuine integrated curvature leaf (the pointwise fibre bound on `Curv S` itself is *false*
+at the `∇²S`-order bracket — only the pairing against `∇S` removes it). -/
+theorem exists_pointwiseTensorCurv_bracketFreePairing_field
+    (g : SmoothRiemannianMetric I M) :
+    ∃ K : ℕ → ℝ, (∀ s, 0 ≤ K s) ∧ ∀ (s : ℕ) (S : SmoothCcTensor g 0 s),
+      ∃ G : SmoothCcTensor g 0 (s + 1),
+        tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+            (pointwiseTensorCurv (I := I) (M := M) g s S).toFun
+            (covGrad (I := I) (M := M) g 0 s S).toFun =
+          tensorL2Inner (I := I) (M := M) g 0 (s + 1) G.toFun
+            (covGrad (I := I) (M := M) g 0 s S).toFun ∧
+        ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x (G.toSection x) ≤
+          K s ^ 2 *
+            (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
+              riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) := by
+  sorry
+
+/-- **The genuine + remainder section decomposition of the order-`2` defect (proved from the
+bracket-free curvature representation, per-valence).** For a closed smooth Riemannian manifold
+`(M, g)` there is a *valence-dependent* nonnegative constant `K : ℕ → ℝ` such that, at every covariant
+rank `s` and for every smooth compactly-supported `(0, s)`-tensor `S`, there are smooth
+compactly-supported fields `G, Drem : SmoothCcTensor g 0 (s + 1)` with the *section-level* identity
+`Curv S = G + Drem`, the *integrated IBP-vanishing* `⟨Drem, ∇S⟩_{L²} = 0`, and the genuine field `G`
+fibre-bounded by `rfns(∇S) + rfns(S)`. This is **proved** from the bracket-free curvature
+representation `exists_pointwiseTensorCurv_bracketFreePairing_field` (which supplies `G` with the
+pairing identity `⟨Curv S, ∇S⟩_{L²} = ⟨G, ∇S⟩_{L²}` and the fibre bound) by taking the moving-frame
+remainder `Drem := Curv S − G`: then `Curv S = G + Drem` is `add_sub_cancel`, and the IBP-vanishing
+`⟨Drem, ∇S⟩_{L²} = ⟨Curv S, ∇S⟩_{L²} − ⟨G, ∇S⟩_{L²} = 0` follows from the pairing identity through the
+left additivity of the `L²` pairing (`tensorL2Inner_add_left` on `G.toFun + Drem.toFun = Curv S.toFun`,
+joint integrability `SmoothCcTensor.integrable_inner_cross`). The genuine field's fibre bound is
+inherited verbatim. Its only `sorry`-dependence is through that posited curvature input. -/
 theorem exists_pointwiseTensorCurv_genuineField_divergenceSplit
     (g : SmoothRiemannianMetric I M) :
     ∃ K : ℕ → ℝ, (∀ s, 0 ≤ K s) ∧ ∀ (s : ℕ) (S : SmoothCcTensor g 0 s),
@@ -354,7 +386,28 @@ theorem exists_pointwiseTensorCurv_genuineField_divergenceSplit
             (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
                 ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
               riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) := by
-  sorry
+  classical
+  obtain ⟨K, hK_nn, hfield⟩ :=
+    exists_pointwiseTensorCurv_bracketFreePairing_field (I := I) (M := M) g
+  refine ⟨K, hK_nn, fun s S => ?_⟩
+  obtain ⟨G, hpair, hbound⟩ := hfield s S
+  set Curv : SmoothCcTensor g 0 (s + 1) := pointwiseTensorCurv (I := I) (M := M) g s S with hCurv
+  set gradS : SmoothCcTensor g 0 (s + 1) := covGrad (I := I) (M := M) g 0 s S with hgrad
+  refine ⟨G, Curv - G, by abel, ?_, hbound⟩
+  have hCurv_eq : Curv = G + (Curv - G) := by abel
+  have hfun : (G + (Curv - G)).toFun = G.toFun + (Curv - G).toFun :=
+    SmoothCcTensor.toFun_add G (Curv - G)
+  have hint₁ := SmoothCcTensor.integrable_inner_cross (I := I) (M := M) G gradS
+  have hint₂ := SmoothCcTensor.integrable_inner_cross (I := I) (M := M) (Curv - G) gradS
+  have hsplit : tensorL2Inner (I := I) (M := M) g 0 (s + 1) Curv.toFun gradS.toFun =
+      tensorL2Inner (I := I) (M := M) g 0 (s + 1) G.toFun gradS.toFun +
+        tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Curv - G).toFun gradS.toFun := by
+    nth_rewrite 1 [hCurv_eq]
+    rw [hfun]
+    exact tensorL2Inner_add_left (I := I) (M := M) g 0 (s + 1) G.toFun (Curv - G).toFun gradS.toFun
+      hint₁ hint₂
+  rw [hpair] at hsplit
+  linarith [hsplit]
 
 /-- **The integrated bracket-free curvature field in canonical `inner ℝ` form (proved from the
 genuine-field / divergence-split input).** For a closed smooth Riemannian manifold `(M, g)` there is a

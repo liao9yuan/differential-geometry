@@ -60,6 +60,7 @@ open DifferentialGeometry.PDE
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
@@ -186,7 +187,10 @@ metric family `g_DT`, with:
 * `hsmall` — `ccTensorBilinSymm (T_s s)` is `g₀`-fibre small on `(0, T)`;
 * `hsmoothrepr` — `u₂ s`'s coordinates are the `L²` coordinates of `T_s s`;
 * `hcanon` — `T_s s` is the canonical smooth representative of the carrier (its `L²`
-  class equals the `L²` realization `tensorHsToL2` of `u₂ s`).
+  class equals the `L²` realization `tensorHsToL2` of `u₂ s`);
+* `hHk` — every supercritical `H^{2k}` Sobolev norm of `T_s s` is continuous up to
+  `t = 0` (the parabolic-up-to-boundary regularity, established at the driver from the
+  Duhamel data; the input the chart-`C²` joint-continuity bridge consumes).
 
 The engine outputs an `L²`-time/`H¹`-time object and its derivative *as an
 `L²`-time element*; the conversion to the pointwise carrier function with the
@@ -207,7 +211,8 @@ theorem deTurck_g0_carrier_realize_transport
       (Metric.closedBall
         (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
           (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
-          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R)) :
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R))
+    (hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont) :
     ∃ (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
         (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
         (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2),
@@ -241,9 +246,13 @@ theorem deTurck_g0_carrier_realize_transport
         Integral.L2.SmoothCcTensor.toL2 (T_s s) =
           tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-            (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s)) :=
+            (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s)) ∧
+      (∀ (k : ℕ), 2 * k > Module.finrank ℝ E + 4 →
+        ContinuousOn
+          (fun s : ℝ => SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * k) (T_s s))
+          (Set.Icc 0 T)) :=
   deturck_g0_engine_carrier_extraction (I := I) (M := M) g₀ a ha ha2 N_cont hR
-    hN_cont hLipBall
+    hN_cont hLipBall hloss
     (gFibreOpBound_ccTensorBilinSymm_le_tensorHsNorm (I := I) (M := M) g₀)
 
 /-- **`k ≤ 2` chart-Gram continuity of the `g₀`-anchored realize flow
@@ -252,17 +261,21 @@ theorem deTurck_g0_carrier_realize_transport
 For the realized `g₀`-anchored parabolic flow `g_DT` over `[0, T]` (the linear
 realize `hreal` of a carrier `u₂`/`T_s` solving the interior spectral PDE `hreg`
 and time-continuous up to `0` via `hcont`, with the smooth representative `T_s`
-tied to the carrier by the canonical `L²` realization `hcanon`), every iterated
-chart-Gram derivative of order `k ≤ 2` is jointly continuous in `(time, point)` on
-`[0, T] × chartLeviCivitaGoodSet α`.
+tied to the carrier by the canonical `L²` realization `hcanon`, and every
+supercritical `H^{2k}` norm of `T_s s` continuous up to `0` via `hHk`), every
+iterated chart-Gram derivative of order `k ≤ 2` is jointly continuous in
+`(time, point)` on `[0, T] × chartLeviCivitaGoodSet α`.
 
 This is the genuine parabolic-regularity continuity datum that the `C²`-in-time
 realize assembler consumes; it lives strictly downstream of the headline (the
 `C²`-realize tower) and is isolated here as an open node about the constructed
-flow.  The conclusion is joint continuity of chart-Gram iterated derivatives,
-distinct from the carrier hypotheses; no packaging.  This is sorry-free glue
-forwarding to `deturck_g0_parabolic_chartGram_C2_upto_zero`; consumers transitively
-depend on `sorryAx` through that node's open analytic sub-leaves. -/
+flow.  The `H^{2k}`-continuity input `hHk` is the parabolic-up-to-boundary datum
+(established at the driver from the Duhamel data and threaded through the realize
+bundle, supplied here from `deTurck_g0_carrier_realize_transport`).  The conclusion
+is joint continuity of chart-Gram iterated derivatives, distinct from the carrier
+hypotheses; no packaging.  This is sorry-free glue forwarding to
+`deturck_g0_parabolic_chartGram_C2_upto_zero`; consumers transitively depend on
+`sorryAx` through that node's chart-Gram Fréchet-jet transfer leaf. -/
 theorem deTurck_g0_chartGram_continuity
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) {T : ℝ} (hT : 0 < T)
@@ -290,7 +303,11 @@ theorem deTurck_g0_chartGram_continuity
       Integral.L2.SmoothCcTensor.toL2 (T_s s) =
         tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
           (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-          (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s)) :
+          (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s))
+    (hHk : ∀ (k : ℕ), 2 * k > Module.finrank ℝ E + 4 →
+      ContinuousOn
+        (fun s : ℝ => SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * k) (T_s s))
+        (Set.Icc 0 T)) :
     ∀ (α : M) (i j : Fin (Module.finrank ℝ E)) (k : ℕ), k ≤ 2 →
       ContinuousOn
         (fun q : ℝ × M => iteratedFDeriv ℝ k
@@ -298,6 +315,6 @@ theorem deTurck_g0_chartGram_continuity
           (extChartAt I α q.2))
         (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α) :=
   deturck_g0_parabolic_chartGram_C2_upto_zero (I := I) (M := M) g₀ a ha hT g_DT u₂ T_s
-    N_cont hreal hcont hreg hg0 hcanon
+    N_cont hreal hcont hreg hg0 hcanon hHk
 
 end DifferentialGeometry.PDE.RicciFlow

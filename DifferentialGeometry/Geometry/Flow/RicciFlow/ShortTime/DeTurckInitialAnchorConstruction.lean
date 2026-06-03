@@ -201,8 +201,13 @@ theorem deTurck_g0_realize_data
   -- (`hcoeff`).  The engine's Lipschitz is *not* routed through the gated gauge.
   obtain ⟨N_cont, K, R, hR, hN_cont, hLipBall, hcoeff⟩ :=
     deTurck_g0_genuine_nonlinearity (I := I) g₀ g_bg a ha
-  obtain ⟨T, g_DT, u₂, T_s, hT, h0, hreal, hcont, hreg, hsmall, hsmoothrepr, hcanon⟩ :=
-    deTurck_g0_carrier_realize_transport (I := I) g₀ a ha ha2 N_cont hR hN_cont hLipBall
+  -- The first-order operator-loss of the gauge-cancelled geometric nonlinearity (posited
+  -- analytic leaf `deTurckGenuineN_firstOrder_operatorLoss`), pinned to the geometric gauge
+  -- by the continuity `hN_cont` and the gate-coordinate tie `hcoeff`.
+  have hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont :=
+    deTurckGenuineN_firstOrder_operatorLoss (I := I) g₀ g_bg a N_cont hN_cont hcoeff
+  obtain ⟨T, g_DT, u₂, T_s, hT, h0, hreal, hcont, hreg, hsmall, hsmoothrepr, hcanon, hHk⟩ :=
+    deTurck_g0_carrier_realize_transport (I := I) g₀ a ha ha2 N_cont hR hN_cont hLipBall hloss
   -- Discharge the honest `realizableAtGate` membership of the carrier inclusion on the
   -- whole closed interval: `MemAllTensorHs` from the smooth representative `T_s s`, and
   -- the `g₀`-fibre-smallness from `hsmall` on the interior and from `hreal`/`h0`
@@ -254,7 +259,7 @@ theorem deTurck_g0_realize_data
       (fun s hs => hsmoothrepr s (Set.Ico_subset_Icc_self hs))
       (fun s hs => hcanon s (Set.Ico_subset_Icc_self hs)),
     deTurck_g0_chartGram_continuity (I := I) g₀ a ha hT g_DT u₂ T_s N_cont
-      hreal hcont hreg h0 hcanon⟩
+      hreal hcont hreg h0 hcanon hHk⟩
 
 /-- **Interior one-sided time-derivative of the realized `g₀`-anchored flow
 (genuine analytic input).**
