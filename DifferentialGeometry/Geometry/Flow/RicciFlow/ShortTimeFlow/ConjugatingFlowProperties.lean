@@ -152,7 +152,8 @@ theorem conjugating_flow_orbit_pushforward_continuity_data
     (hΦorbit0 : ∀ y : M,
       ContinuousWithinAt (fun s : ℝ => (Φ_fam s : M → M) y) (Set.Ici (0 : ℝ)) 0)
     (hΦmfderiv0 : ∀ (y : M) (u : TangentSpace I y),
-      ContinuousWithinAt (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) y u : E))
+      ContinuousWithinAt (fun s : ℝ =>
+          (⟨(Φ_fam s : M → M) y, mfderiv I I (Φ_fam s : M → M) y u⟩ : TangentBundle I M))
         (Set.Ici (0 : ℝ)) 0) :
     (∀ y : M,
       ContinuousOn (fun s : ℝ => (Φ_fam s : M → M) y) (Set.Ico 0 T)) ∧

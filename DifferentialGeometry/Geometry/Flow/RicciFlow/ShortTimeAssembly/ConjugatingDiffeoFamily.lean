@@ -93,7 +93,8 @@ theorem conjugating_diffeo_family
       (∀ x : M,
         ContinuousWithinAt (fun s : ℝ => (Φ_fam s : M → M) x) (Set.Ici (0 : ℝ)) 0) ∧
       (∀ (x : M) (v : TangentSpace I x),
-        ContinuousWithinAt (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E))
+        ContinuousWithinAt (fun s : ℝ =>
+            (⟨(Φ_fam s : M → M) x, mfderiv I I (Φ_fam s : M → M) x v⟩ : TangentBundle I M))
           (Set.Ici (0 : ℝ)) 0) := by
   set X_DT : ℝ → ∀ x : M, TangentSpace I x :=
     fun s x => -(deTurckVF (I := I) (g_DT s) g_bg x) with hXDT
@@ -128,16 +129,19 @@ theorem conjugating_diffeo_family
     rw [hfun_eqOn 0 ⟨le_rfl, hDT⟩]
   · intro x v
     have hmfeq : Set.EqOn
-        (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E))
-        (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E)) (Set.Ico 0 T_DT) := by
+        (fun s : ℝ =>
+          (⟨(Φ_fam s : M → M) x, mfderiv I I (Φ_fam s : M → M) x v⟩ : TangentBundle I M))
+        (fun s : ℝ =>
+          (⟨Φ s x, mfderiv I I (fun y : M => Φ s y) x v⟩ : TangentBundle I M))
+        (Set.Ico 0 T_DT) := by
       intro s hs
-      change (mfderiv I I (Φ_fam s : M → M) x v : E)
-        = (mfderiv I I (fun y : M => Φ s y) x v : E)
+      change (⟨(Φ_fam s : M → M) x, mfderiv I I (Φ_fam s : M → M) x v⟩ : TangentBundle I M)
+        = (⟨Φ s x, mfderiv I I (fun y : M => Φ s y) x v⟩ : TangentBundle I M)
       rw [hfun_eqOn s hs]
     refine (hΦmfderiv0 x v).congr_of_eventuallyEq
       (Filter.eventuallyEq_of_mem (Ico_mem_nhdsGE hDT) hmfeq) ?_
-    change (mfderiv I I (Φ_fam 0 : M → M) x v : E)
-      = (mfderiv I I (fun y : M => Φ 0 y) x v : E)
+    change (⟨(Φ_fam 0 : M → M) x, mfderiv I I (Φ_fam 0 : M → M) x v⟩ : TangentBundle I M)
+      = (⟨Φ 0 x, mfderiv I I (fun y : M => Φ 0 y) x v⟩ : TangentBundle I M)
     rw [hfun_eqOn 0 ⟨le_rfl, hDT⟩]
 
 end DifferentialGeometry.PDE.RicciFlow

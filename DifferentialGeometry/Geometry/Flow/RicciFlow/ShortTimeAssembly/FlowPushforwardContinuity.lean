@@ -68,9 +68,12 @@ theorem flow_pushforward_continuous_in_time
       ∃ δ : ℝ, 0 < δ ∧ δ < T ∧
         ∀ s ∈ Set.Ioo (0 : ℝ) δ, ∀ x : M, (Φ_fam s : M → M) x = Ψ s x)
     (hΦfam_mfderiv_cont : ∀ (x : M) (v : TangentSpace I x), ∀ s ∈ Set.Ioo (0 : ℝ) T,
-      ContinuousAt (fun r : ℝ => (mfderiv I I (Φ_fam r : M → M) x v : E)) s) :
+      ContinuousAt (fun r : ℝ =>
+        (⟨(Φ_fam r : M → M) x, mfderiv I I (Φ_fam r : M → M) x v⟩ : TangentBundle I M)) s) :
     (∀ (x : M) (v : TangentSpace I x), ContinuousOn
-      (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E)) (Set.Ico 0 T))
+      (fun s : ℝ =>
+        (⟨(Φ_fam s : M → M) x, mfderiv I I (Φ_fam s : M → M) x v⟩ : TangentBundle I M))
+      (Set.Ico 0 T))
     ∧ (∀ x : M, ContinuousWithinAt (fun s : ℝ => (Φ_fam s : M → M) x) (Set.Ici (0 : ℝ)) 0) := by
   obtain ⟨Φ, hΦ0', hdiffeo, hΦflow, hΦcont0, hΦmfderiv0⟩ :=
     forward_flow_existence_onesided_of_jointsmooth_field X T hT hsmooth0
@@ -191,8 +194,10 @@ theorem flow_pushforward_continuous_in_time
   rcases eq_or_lt_of_le hs.1 with h0 | h0
   · subst_vars
     have hmfeq : Set.EqOn
-        (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E))
-        (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E)) (Set.Ico 0 T) := by
+        (fun s : ℝ =>
+          (⟨(Φ_fam s : M → M) x, mfderiv I I (Φ_fam s : M → M) x v⟩ : TangentBundle I M))
+        (fun s : ℝ =>
+          (⟨Φ s x, mfderiv I I (fun y : M => Φ s y) x v⟩ : TangentBundle I M)) (Set.Ico 0 T) := by
       intro s hs
       have hfun : (Φ_fam s : M → M) = (fun y : M => Φ s y) := by
         funext y
@@ -202,13 +207,15 @@ theorem flow_pushforward_continuous_in_time
       simp only []
       rw [hfun]
     have hΦm : ContinuousWithinAt
-        (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E)) (Set.Ico 0 T) 0 :=
+        (fun s : ℝ =>
+          (⟨Φ s x, mfderiv I I (fun y : M => Φ s y) x v⟩ : TangentBundle I M)) (Set.Ico 0 T) 0 :=
       (hΦmfderiv0 x v).mono Set.Ico_subset_Ici_self
     refine hΦm.congr_of_eventuallyEq
       (Filter.eventuallyEq_of_mem self_mem_nhdsWithin hmfeq) ?_
     have hfun0 : (Φ_fam 0 : M → M) = (fun y : M => Φ 0 y) := by
       funext y; rw [hΦ0', hΦ0]; rfl
-    change (mfderiv I I (Φ_fam 0 : M → M) x v : E) = (mfderiv I I (fun y : M => Φ 0 y) x v : E)
+    change (⟨(Φ_fam 0 : M → M) x, mfderiv I I (Φ_fam 0 : M → M) x v⟩ : TangentBundle I M)
+      = (⟨Φ 0 x, mfderiv I I (fun y : M => Φ 0 y) x v⟩ : TangentBundle I M)
     rw [hfun0]
   · exact (hΦfam_mfderiv_cont x v s ⟨h0, hs.2⟩).continuousWithinAt
 
