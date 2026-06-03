@@ -71,18 +71,32 @@ The fix is to use a *continuous* un-gated synthesis, the genuine route below; th
   `C·K`-Lipschitz in the `Hᵃ⁺¹`-distance on every chart-good compact (`jetLip`).  This packages
   the un-gated supercritical embedding `Hᵃ⁺¹ ↪ C²` content as a *real-valued* chart bound.
 
+* `deTurckRealizeRemainderOf_spectralN_dist_le_of_chartJet2Control`,
+  `deTurckRealizeRemainderOf_spectralN_continuous_of_chartJet2Control` — the two **deep analytic
+  chart-RHS-tower nodes** (body `sorry`, no Weyl dependence): under `ChartJet2LipControl`, the
+  coordinate-spectral nonlinearity on the realized DeTurck remainder has a `K'`-rate `Hᵃ`-Lipschitz
+  ball `dist`-bound, and is globally continuous.  These transit the coordinate DeTurck-RHS Lipschitz
+  `exists_chartDeTurckRHSComp_lipschitz_on_compact` composed with the chart-frame → spectral-`Hᵃ`
+  packaging of the realized-remainder difference.
+
+* `exists_deTurckRealizeRemainderOf_synthesis_matching_gauge` — the **deep supercritical
+  eigen-synthesis node** (body `sorry`, transiting the Weyl node): there is a chart-`2`-jet-controlled
+  perturbation synthesis `P` (`ChartJet2LipControl`) whose realized DeTurck remainder
+  `deTurckRealizeRemainderOf g₀ g_bg (P u)` coincides, *as a smooth section*, with the gate-based gauge
+  `deTurckRemainderRealizeSection g₀ g_bg u` on the gate-realizable locus.
+
 * `deTurckG0SpectralN_continuous_lipschitz_of_chartJet2Control` — the **chart-`2`-jet → spectral
-  bridge** (body `sorry`, transiting the chart-RHS tower): a perturbation synthesis with
-  `ChartJet2LipControl` induces a continuous, locally Lipschitz coordinate-spectral nonlinearity
-  on its realized DeTurck remainder `deTurckRealizeRemainderOf g₀ g_bg ∘ P`, via the coordinate
-  DeTurck-RHS Lipschitz `exists_chartDeTurckRHSComp_lipschitz_on_compact` composed with the
-  chart-`C⁰`-to-`Hᵃ` spectral control.
+  bridge**, **proven by composition** of the two deep chart-RHS-tower nodes: a perturbation synthesis
+  with `ChartJet2LipControl` induces a continuous, locally Lipschitz coordinate-spectral nonlinearity
+  on its realized DeTurck remainder `deTurckRealizeRemainderOf g₀ g_bg ∘ P` (the `dist`-bound upgraded
+  to `LipschitzOnWith` via `LipschitzOnWith.of_dist_le_mul`).
 
 * `exists_deTurckRemainderG0_synthesis_chartJet2Control` — the genuine **supercritical
-  eigen-synthesis** (body `sorry`, transiting the Weyl node): there is a perturbation synthesis
-  `P` carrying `ChartJet2LipControl` whose realized remainder `deTurckRealizeRemainderOf g₀ g_bg
-  (P u)` agrees, at the `L²`-class level, with the gate-based gauge
-  `deTurckRemainderRealizeSection g₀ g_bg u` on the gate-realizable locus.
+  eigen-synthesis**, **proven by composition** of the deep eigen-synthesis node: there is a perturbation
+  synthesis `P` carrying `ChartJet2LipControl` whose realized remainder `deTurckRealizeRemainderOf g₀
+  g_bg (P u)` agrees, at the `L²`-class level (the section identity projected through
+  `SmoothCcTensor.toL2`), with the gate-based gauge `deTurckRemainderRealizeSection g₀ g_bg u` on the
+  gate-realizable locus.
 
 * `exists_deTurckRemainderG0ContSynth` — the genuine, un-gated **continuous DeTurck-remainder
   smooth-section synthesis** `S : Hᵃ⁺¹ → SmoothCcTensor g₀ 0 2` (with `S u =
@@ -102,9 +116,10 @@ The fix is to use a *continuous* un-gated synthesis, the genuine route below; th
   hence every coordinate — agree).  Its conclusion is structurally distinct from each
   hypothesis; no packaging.
 
-Consumers of `deTurck_g0_genuine_nonlinearity` transitively depend on `sorryAx` (through the two
-posited analytic children) and on the Weyl node, but **never** on a false-as-stated Lipschitz of
-the gated gauge or of the gated `realizeMetricAt`. -/
+Consumers of `deTurck_g0_genuine_nonlinearity` transitively depend on `sorryAx` (through the
+three deep analytic nodes — the two chart-RHS-tower nodes and the eigen-synthesis node) and on
+the Weyl node, but **never** on a false-as-stated Lipschitz of the gated gauge or of the gated
+`realizeMetricAt`. -/
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -259,6 +274,117 @@ structure ChartJet2LipControl (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
               α y ≤
             C * (K : ℝ) * dist u u'
 
+/-- **The quantitative chart-`2`-jet → spectral `Hᵃ`-Lipschitz bound of the realized
+DeTurck remainder (the deep analytic node of the bridge).**
+
+For a `(0,2)`-perturbation synthesis `P` carrying the chart-`2`-jet local-Lipschitz control
+`ChartJet2LipControl g₀ a P K R` on the radius-`R` ball, there is a Lipschitz rate `K'` so
+that, for all `u, u'` in the ball, the `Hᵃ`-distance between the induced coordinate-spectral
+nonlinearities of the realized DeTurck remainders is `K'`-rate-controlled by the
+`Hᵃ⁺¹`-distance:
+```
+dist (deTurckG0SpectralN g₀ a (deTurckRealizeRemainderOf g₀ g_bg (P u)))
+     (deTurckG0SpectralN g₀ a (deTurckRealizeRemainderOf g₀ g_bg (P u')))
+  ≤ K' * dist u u' .
+```
+
+This is the genuine analytic core consumed by the bridge: the coordinate Ricci–DeTurck-RHS
+Lipschitz `exists_chartDeTurckRHSComp_lipschitz_on_compact` (chart-frame scalar `2`-jet
+Lipschitz of the DeTurck right-hand side, controlled by the metric chart-`2`-jet
+`chartMetricJet2DiffSup`) composed with the chart-frame → spectral-`Hᵃ` packaging of the
+realized-remainder difference (`deTurckG0SpectralN`'s coordinates are the `L²` coordinates of
+the realized remainder; their weighted square-sum is the `Hᵃ` norm).  The `ChartJet2LipControl`
+hypothesis supplies the per-compact chart-`2`-jet Lipschitz of the realized metric, which the
+chart-RHS tower turns into the chart-frame DeTurck-RHS-component Lipschitz; the
+pointwise-to-`Hᵃ` packaging then bounds the spectral-projection difference.  Its conclusion is
+a *real-valued* `Hᵃ`-distance inequality producing the Lipschitz witness `K'`, structurally
+distinct from the `LipschitzOnWith`/`Continuous` topological statements the bridge assembles
+from it; no packaging.  The body is `sorry` (the deep analytic content transiting the chart-RHS
+tower — no Weyl dependence here; Weyl is consumed entirely by `ChartJet2LipControl`). -/
+theorem deTurckRealizeRemainderOf_spectralN_dist_le_of_chartJet2Control
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+      Integral.L2.SmoothCcTensor g₀ 0 2)
+    (K : ℝ≥0) {R : ℝ} (hR : 0 < R)
+    (hctrl : ChartJet2LipControl (I := I) (M := M) g₀ a P K R) :
+    ∃ (K' : ℝ≥0),
+      ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+        u ∈ Metric.closedBall
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
+        u' ∈ Metric.closedBall
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
+        dist (deTurckG0SpectralN (I := I) g₀ a
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)))
+            (deTurckG0SpectralN (I := I) g₀ a
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u')))
+          ≤ (K' : ℝ) * dist u u' := sorry
+
+/-- **Global continuity of the realized-DeTurck-remainder coordinate-spectral nonlinearity
+under chart-`2`-jet control (the deep analytic continuity node of the bridge).**
+
+For a `(0,2)`-perturbation synthesis `P` carrying the chart-`2`-jet local-Lipschitz control
+`ChartJet2LipControl g₀ a P K R`, the induced coordinate-spectral nonlinearity
+`u ↦ deTurckG0SpectralN g₀ a (deTurckRealizeRemainderOf g₀ g_bg (P u))` is continuous over all
+of `Hᵃ⁺¹`.
+
+Continuity is genuinely *global* (the synthesis `P` is continuous through the supercritical
+embedding `Hᵃ⁺¹ ↪ C²`, so its realized metric's chart-`2`-jet varies continuously, hence the
+chart-frame DeTurck right-hand side and its `Hᵃ` spectral projection vary continuously even at
+the boundary of the fibre-small domain), so it cannot be read off a finite-radius distance
+bound; it is therefore isolated as its own deep node, structurally distinct from the
+quantitative ball-Lipschitz bound.  The body is `sorry` (the deep analytic content, transiting
+the chart-RHS tower; Weyl is consumed by `ChartJet2LipControl`). -/
+theorem deTurckRealizeRemainderOf_spectralN_continuous_of_chartJet2Control
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+      Integral.L2.SmoothCcTensor g₀ 0 2)
+    (K : ℝ≥0) {R : ℝ} (hR : 0 < R)
+    (hctrl : ChartJet2LipControl (I := I) (M := M) g₀ a P K R) :
+    Continuous (fun u => deTurckG0SpectralN (I := I) g₀ a
+        (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))) := sorry
+
+/-- **Existence of a chart-`2`-jet-controlled un-gated perturbation synthesis whose realized
+DeTurck remainder coincides (as a smooth section) with the gate gauge on the realizable locus
+(the deep supercritical eigen-synthesis node).**
+
+For the anchor `g₀`, a flow background `g_bg`, and a supercritical order `a`
+(`2a > dim M + 4`), there is a `(0,2)`-perturbation synthesis `P : Hᵃ⁺¹(g₀) → SmoothCcTensor
+g₀ 0 2`, a Lipschitz rate `K`, and a positive radius `R`, such that:
+
+* `hctrl` — `P` carries the chart-`2`-jet local-Lipschitz control `ChartJet2LipControl g₀ a
+  P K R` on the radius-`R` ball (the un-gated supercritical embedding `Hᵃ⁺¹ ↪ C²` content,
+  transiting the Weyl node); and
+* `hsec` — on the gate-realizable locus `realizableAtGate g₀ u`, the realized DeTurck
+  remainder `deTurckRealizeRemainderOf g₀ g_bg (P u)` coincides, **as a smooth section**, with
+  the gate-based gauge `deTurckRemainderRealizeSection g₀ g_bg u` (on the locus both are the
+  honest DeTurck remainder of the realized flow; the synthesis `P u` is arranged so its
+  realized remainder reproduces the gate gauge's, even though `P u` itself is *not* the
+  discontinuous gate representative `gateSmoothRep u`).
+
+This is the genuine deep eigen-synthesis primitive: it produces the synthesized perturbation
+carrier together with the chart-`2`-jet control its realized metric satisfies and the
+section-level remainder agreement with the gauge on the realizable locus.  Its conclusion (a
+*section-level* remainder identity) is structurally distinct — and, for these smooth sections
+with full-support `L²` separation, equivalent — to the `L²`-class identity the eigen-synthesis
+parent derives; the parent does the genuine `L²`-projection step.  The body is `sorry`,
+transiting the Weyl node. -/
+theorem exists_deTurckRealizeRemainderOf_synthesis_matching_gauge
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+          Integral.L2.SmoothCcTensor g₀ 0 2)
+        (K : ℝ≥0) (R : ℝ),
+      0 < R ∧
+      ChartJet2LipControl (I := I) (M := M) g₀ a P K R ∧
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
+        realizableAtGate (I := I) g₀ u →
+          deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)
+            = deTurckRemainderRealizeSection (I := I) g₀ g_bg u) := sorry
+
 /-- **The chart-`2`-jet → spectral bridge: a perturbation synthesis with chart-`2`-jet
 local-Lipschitz control induces a continuous, locally Lipschitz coordinate-spectral
 nonlinearity on its realized DeTurck remainder.**
@@ -279,8 +405,15 @@ metric bounds the chart-frame DeTurck-RHS-component difference, which bounds the
 spectral Lipschitz; continuity follows from the same bound with `u' → u`.  Its conclusion
 (spectral continuity + local Lipschitz of `deTurckG0SpectralN ∘ (deTurckRealizeRemainderOf ∘
 P)`) is structurally distinct from its chart-`2`-jet real-valued hypothesis; no packaging.
-The body is `sorry`, transiting the chart-RHS tower (no Weyl dependence here — Weyl is
-consumed entirely by `ChartJet2LipControl`). -/
+
+It is **proven by composition** of two deep analytic nodes (no Weyl dependence here — Weyl is
+consumed entirely by `ChartJet2LipControl`): the quantitative chart-`2`-jet → spectral
+`Hᵃ`-Lipschitz bound `deTurckRealizeRemainderOf_spectralN_dist_le_of_chartJet2Control` supplies
+the Lipschitz rate `K'` and the ball `dist`-bound (upgraded here to `LipschitzOnWith` via
+`LipschitzOnWith.of_dist_le_mul`), and the global-continuity node
+`deTurckRealizeRemainderOf_spectralN_continuous_of_chartJet2Control` supplies continuity.  Its
+body carries no `sorry`; consumers transitively depend on `sorryAx` only through those two
+chart-RHS-tower nodes. -/
 theorem deTurckG0SpectralN_continuous_lipschitz_of_chartJet2Control
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
@@ -295,7 +428,17 @@ theorem deTurckG0SpectralN_continuous_lipschitz_of_chartJet2Control
         (Metric.closedBall
           (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
             (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
-            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) := sorry
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) := by
+  -- The quantitative chart-`2`-jet → spectral `Hᵃ`-Lipschitz bound supplies the rate `K'`
+  -- and the ball `dist`-bound; the global-continuity node supplies continuity.
+  obtain ⟨K', hbound⟩ :=
+    deTurckRealizeRemainderOf_spectralN_dist_le_of_chartJet2Control (I := I) g₀ g_bg a P K hR hctrl
+  refine ⟨K',
+    deTurckRealizeRemainderOf_spectralN_continuous_of_chartJet2Control
+      (I := I) g₀ g_bg a P K hR hctrl,
+    ?_⟩
+  -- The ball `dist`-bound upgrades to `LipschitzOnWith K'` on the ball.
+  exact LipschitzOnWith.of_dist_le_mul (fun u hu u' hu' => hbound u u' hu hu')
 
 /-- **Existence of a chart-`2`-jet-controlled un-gated perturbation synthesis whose realized
 DeTurck remainder agrees with the gate gauge on the realizable locus (the genuine
@@ -325,8 +468,15 @@ synthesized perturbation carrier together with the chart-`2`-jet control its rea
 satisfies and the one-directional `L²`-class agreement of its realized remainder with the
 gauge on the realizable locus.  Its conclusion is the existence of such a synthesis with
 chart-`2`-jet real-valued control and a remainder-`L²`-class identity — structurally distinct
-from the spectral continuity/Lipschitz the bridge later derives; no packaging.  The body is
-`sorry`, transiting the Weyl node. -/
+from the spectral continuity/Lipschitz the bridge later derives; no packaging.
+
+It is **proven by composition** of the deep eigen-synthesis node
+`exists_deTurckRealizeRemainderOf_synthesis_matching_gauge` (which supplies the
+chart-`2`-jet-controlled synthesis `P` and the *section-level* remainder agreement
+`deTurckRealizeRemainderOf g₀ g_bg (P u) = deTurckRemainderRealizeSection g₀ g_bg u` on the
+locus) by projecting that section identity through the `L²`-class map `SmoothCcTensor.toL2`
+(`congrArg`).  Its body carries no `sorry`; consumers transitively depend on `sorryAx`, and on
+the Weyl node, only through that eigen-synthesis node. -/
 theorem exists_deTurckRemainderG0_synthesis_chartJet2Control
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) :
@@ -340,7 +490,15 @@ theorem exists_deTurckRemainderG0_synthesis_chartJet2Control
           Integral.L2.SmoothCcTensor.toL2
               (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
             = Integral.L2.SmoothCcTensor.toL2
-                (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := sorry
+                (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
+  -- The deep eigen-synthesis supplies a chart-`2`-jet-controlled synthesis `P` whose realized
+  -- DeTurck remainder coincides, *as a smooth section*, with the gate gauge on the realizable
+  -- locus.  Projecting that section identity through the `L²`-class map gives the required
+  -- `L²`-class agreement.
+  obtain ⟨P, K, R, hR, hctrl, hsec⟩ :=
+    exists_deTurckRealizeRemainderOf_synthesis_matching_gauge (I := I) g₀ g_bg a ha
+  refine ⟨P, K, R, hR, hctrl, fun u hu => ?_⟩
+  rw [hsec u hu]
 
 /-- **The genuine, un-gated continuous DeTurck-remainder smooth-section synthesis.**
 

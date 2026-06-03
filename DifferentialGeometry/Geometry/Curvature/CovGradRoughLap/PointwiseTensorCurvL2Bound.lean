@@ -89,8 +89,51 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- **The pointwise fibre-norm bound for the order-`2` commutator defect (posited curvature
-input, per-valence).** For a closed smooth Riemannian manifold `(M, g)` there is a
+/-- **Posited deepest curvature child for the order-`2` defect (per-valence, genuine + remainder
+section decomposition).** The genuine general-valence third-order tensor Bochner–Weitzenböck content
+of the order-`2` commutator defect, isolated as an explicit *section-level* split of `Curv S =
+pointwiseTensorCurv g s S` into a genuine curvature contraction and a moving-frame remainder. By the
+rank-generic frame-sum representation `pointwiseTensorCurv_toSection_eq_frame_sum` and the
+directional-`W` swap `frame_trace_thirdCovDeriv_defect_eq_genuine_add_bracket`
+(`Tensor3rdCurv_eq_genuine_add_bracket`), the fibre value `Curv S (x)` splits as
+```
+Curv S (x) = Ggen(x) + Grem(x),
+```
+where `Ggen` is the genuine curvature field `tensor3rdCurvGenuine` — the `R(∇S)` term
+(`rfns(∇S)`-order) and the differentiated curvature `(∇R) S` term (`rfns(S)`-order), fibre-bounded by
+`riemannianFiberNormSq_tensor3rdCurvGenuine_le` from the uniform curvature/differentiated-curvature
+sups `exists_uniform_riemannianFiberNormSq_riemannOp_bound`,
+`exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound` — and `Grem` is the
+moving-frame/bracket remainder (`tensor3rdCurvBracket` plus the frame-trace discrepancy and
+moving-frame residual), genuinely `rfns(∇²S)`-order.
+
+This says: there is a *valence-dependent* nonnegative constant `Cper : ℕ → ℝ` such that, at every `s`,
+`S` and `x`, there are fibre values `Ggen, Grem : TensorRSSpace 0 (s + 1) I x` with `Curv S (x) =
+Ggen + Grem`, the genuine part fibre-bounded by `rfns(S) + rfns(∇S)` and the remainder fibre-bounded
+by `rfns(∇²S)` (each by `(Cper s)²`, uniformly in `S`; the constant scales like `(s + 1)·‖R‖_∞` for
+the `s`-slot curvature endomorphism). This is the irreducible general-valence Weitzenböck leaf; the
+aggregate fibre-norm bound `exists_pointwiseTensorCurv_pointwise_fiberNormSq_bound` is *proved* from
+it by the two-term fibre subadditivity `riemannianFiberNormSq_add_le`. -/
+theorem exists_pointwiseTensorCurv_genuineRemainder_fiberNormSq_bound
+    (g : SmoothRiemannianMetric I M) :
+    ∃ Cper : ℕ → ℝ, (∀ s, 0 ≤ Cper s) ∧
+      ∀ (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M),
+        ∃ Ggen Grem : TensorRSSpace 0 (s + 1) I x,
+          (pointwiseTensorCurv (I := I) (M := M) g s S).toSection x = Ggen + Grem ∧
+          riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x Ggen ≤
+            Cper s ^ 2 *
+              (riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                  ((covGrad (I := I) (M := M) g 0 s S).toSection x)) ∧
+          riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x Grem ≤
+            Cper s ^ 2 *
+              riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+                ((covGrad (I := I) (M := M) g 0 (s + 1)
+                  (covGrad (I := I) (M := M) g 0 s S)).toSection x) := by
+  sorry
+
+/-- **The pointwise fibre-norm bound for the order-`2` commutator defect (proved from the
+per-summand input, per-valence).** For a closed smooth Riemannian manifold `(M, g)` there is a
 *valence-dependent* nonnegative constant `Ccurv : ℕ → ℝ` such that, at every covariant rank `s`,
 for every smooth compactly-supported `(0, s)`-tensor `S`, and at *every point* `x`, the intrinsic
 fibre norm of the order-`2` commutator defect `Curv S := pointwiseTensorCurv g s S` is bounded by
@@ -99,21 +142,11 @@ fibre norm of the order-`2` commutator defect `Curv S := pointwiseTensorCurv g s
 ```
 rfns(Curv S)(x) ≤ (Ccurv s)² · ( rfns(S)(x) + rfns(∇S)(x) + rfns(∇²S)(x) ).
 ```
-
-This is the genuine *pointwise* third-order tensor Bochner–Weitzenböck content. By the rank-generic
-frame-sum representation `pointwiseTensorCurv_toSection_eq_frame_sum`, the fibre value of `Curv S`
-at `x` is the fixed-frame sum of per-summand third-order covariant-derivative differences; matching
-the curried gradient slot to the directional-`W` frame trace
-(`frame_trace_thirdCovDeriv_defect_eq_genuine_add_bracket`) decomposes each into the genuine
-curvature contraction `tensor3rdCurvGenuine` (the `R(∇S)` term, `rfns(∇S)`-order, and the `(∇R) S`
-term, `rfns(S)`-order; fibre-bounded by `riemannianFiberNormSq_tensor3rdCurvGenuine_le` from the
-uniform curvature/differentiated-curvature sups `exists_uniform_riemannianFiberNormSq_riemannOp_bound`,
-`exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound`) plus the frame-bracket discrepancy
-`tensor3rdCurvBracket` (the `rfns(∇²S)`-order moving-frame term; fibre-bounded by the uniform
-second-covariant-derivative sup of `∇S`). Each coefficient is continuous on the compact manifold,
-hence sup-bounded, so the per-valence constant `Ccurv s` (scaling like `(s + 1)·‖R‖_∞` for the
-`s`-slot curvature endomorphism) is finite. This is the genuine remaining per-valence
-curvature-derivative leaf; the *integrated* `∇²S`-removing form is
+This is **proved** from the genuine + remainder section-decomposition input
+`exists_pointwiseTensorCurv_genuineRemainder_fiberNormSq_bound` (`Curv S (x) = Ggen + Grem`, with
+`Ggen` fibre-bounded by `rfns(S) + rfns(∇S)` and `Grem` by `rfns(∇²S)`) through the two-term fibre
+subadditivity `riemannianFiberNormSq_add_le` (taking `Ccurv s := √2 · Cper s`). Its only
+`sorry`-dependence is through that posited curvature input; the *integrated* `∇²S`-removing form is
 `exists_pointwiseTensorCurv_bracketFree_field`. -/
 theorem exists_pointwiseTensorCurv_pointwise_fiberNormSq_bound
     (g : SmoothRiemannianMetric I M) :
@@ -127,7 +160,44 @@ theorem exists_pointwiseTensorCurv_pointwise_fiberNormSq_bound
             riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
               ((covGrad (I := I) (M := M) g 0 (s + 1)
                 (covGrad (I := I) (M := M) g 0 s S)).toSection x)) := by
-  sorry
+  classical
+  obtain ⟨Cper, hCper_nn, hsplit⟩ :=
+    exists_pointwiseTensorCurv_genuineRemainder_fiberNormSq_bound (I := I) (M := M) g
+  refine ⟨fun s => Real.sqrt 2 * Cper s, fun s => ?_, fun s S x => ?_⟩
+  · exact mul_nonneg (Real.sqrt_nonneg 2) (hCper_nn s)
+  · obtain ⟨Ggen, Grem, heq, hgen, hrem⟩ := hsplit s S x
+    have hSnn := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x (S.toSection x)
+    have hGSnn := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x
+      ((covGrad (I := I) (M := M) g 0 s S).toSection x)
+    have hHSnn := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1 + 1) x
+      ((covGrad (I := I) (M := M) g 0 (s + 1)
+        (covGrad (I := I) (M := M) g 0 s S)).toSection x)
+    have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g 0 (s + 1) x Ggen Grem
+    rw [heq]
+    have hsq2 : (Real.sqrt 2 * Cper s) ^ 2 = 2 * Cper s ^ 2 := by
+      rw [mul_pow, Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2)]
+    rw [hsq2]
+    calc riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x (Ggen + Grem)
+        ≤ 2 * riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x Ggen +
+            2 * riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x Grem := hadd
+      _ ≤ 2 * (Cper s ^ 2 *
+              (riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                  ((covGrad (I := I) (M := M) g 0 s S).toSection x))) +
+            2 * (Cper s ^ 2 *
+              riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+                ((covGrad (I := I) (M := M) g 0 (s + 1)
+                  (covGrad (I := I) (M := M) g 0 s S)).toSection x)) := by
+          have e1 := mul_le_mul_of_nonneg_left hgen (by norm_num : (0 : ℝ) ≤ 2)
+          have e2 := mul_le_mul_of_nonneg_left hrem (by norm_num : (0 : ℝ) ≤ 2)
+          linarith
+      _ = 2 * Cper s ^ 2 *
+            (riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) +
+              riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
+              riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+                ((covGrad (I := I) (M := M) g 0 (s + 1)
+                  (covGrad (I := I) (M := M) g 0 s S)).toSection x)) := by ring
 
 set_option linter.unusedSectionVars false in
 /-- **The single-step commutator-defect `L²` norm bound (proved from the pointwise curvature
@@ -164,34 +234,60 @@ theorem exists_pointwiseTensorCurv_l2_bound (g : SmoothRiemannianMetric I M) :
     (covGrad (I := I) (M := M) g 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S))
     (pointwiseTensorCurv (I := I) (M := M) g s S) (Ccurv s) (hCcurv_nn s) (hpt s S)
 
-/-- **The integrated bracket-free curvature field of the cross term (posited curvature input,
-per-valence).** For a closed smooth Riemannian manifold `(M, g)` there is a *valence-dependent*
-nonnegative constant `K : ℕ → ℝ` such that, at every covariant rank `s` and for every smooth
-compactly-supported `(0, s)`-tensor `S`, there exists a curvature contraction field
-`G : SmoothCcTensor g 0 (s + 1)` — the genuine `R(∇S) + (∇R) S` part of the order-`2` commutator
-defect `Curv S := pointwiseTensorCurv g s S` — for which the `L²` cross-pairing of `Curv S` against
-`∇S = covGrad g 0 s S` equals that of `G` against `∇S` (the moving-frame bracket integrating by
-parts to zero), and `G` is *pointwise* fibre-norm-controlled by `∇S` and `S`:
+/-- **Posited deepest curvature child for the integrated bracket-free field (per-valence).** The
+genuine *integrated* third-order tensor Bochner–Weitzenböck content, stated in the canonical real
+inner-product-space form on `SmoothCcTensor` (`SmoothCcTensor.inner_def`: `inner ℝ A B =
+tensorL2Inner g 0 s A.toFun B.toFun`). Fibrewise `Curv S = tensor3rdCurvGenuine + tensor3rdCurvBracket`
+(`pointwiseTensorCurv_toSection_eq_frame_sum`, `frame_trace_thirdCovDeriv_defect_eq_genuine_add_bracket`,
+`Tensor3rdCurv_eq_genuine_add_bracket`); the bracket term `tensor3rdCurvBracket` is a total covariant
+divergence of an order-`∇S` field, so it integrates by parts to zero against `∇S` (the covariant
+Green identity `green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed` and its general-valence
+companions), leaving only the genuine contraction `G = tensor3rdCurvGenuine` realized as a smooth
+compactly-supported section.
+
+This says: there is a *valence-dependent* nonnegative constant `K : ℕ → ℝ` such that, at every rank
+`s` and for every `S`, there is a smooth compactly-supported field `G : SmoothCcTensor g 0 (s + 1)`
+(the genuine `R(∇S) + (∇R) S` part) with the `L²` cross-pairing identity (the moving-frame bracket
+integrating by parts to zero against `∇S`) and the *pointwise* fibre-norm bound. The genuine field
+`G` is order `≤ 1` in `S` — the `R(∇S)` term (`rfns(∇S)`-order) and the `(∇R) S` term
+(`rfns(S)`-order), fibre-bounded by `riemannianFiberNormSq_tensor3rdCurvGenuine_le` from the uniform
+curvature/differentiated-curvature sups (`exists_uniform_riemannianFiberNormSq_riemannOp_bound`,
+`exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound`), with the `(s + 1)·‖R‖_∞` valence
+scaling of the `s`-slot curvature endomorphism. This is the genuine integrated curvature leaf (the
+pointwise fibre bound on `Curv S` itself is *false* at the `∇²S`-order bracket — only this `L²`
+pairing removes it).
+
+The primitive `exists_pointwiseTensorCurv_bracketFree_field` is *proved* from this by bridging the
+`tensorL2Inner … .toFun` formulation to the abstract `inner ℝ` formulation (`SmoothCcTensor.inner_def`). -/
+theorem exists_pointwiseTensorCurv_genuineField_inner (g : SmoothRiemannianMetric I M) :
+    ∃ K : ℕ → ℝ, (∀ s, 0 ≤ K s) ∧ ∀ (s : ℕ) (S : SmoothCcTensor g 0 s),
+      ∃ G : SmoothCcTensor g 0 (s + 1),
+        (inner ℝ (pointwiseTensorCurv (I := I) (M := M) g s S)
+            (covGrad (I := I) (M := M) g 0 s S) : ℝ) =
+          (inner ℝ G (covGrad (I := I) (M := M) g 0 s S) : ℝ) ∧
+        ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x (G.toSection x) ≤
+          K s ^ 2 *
+            (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
+              riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) := by
+  sorry
+
+/-- **The integrated bracket-free curvature field of the cross term (proved from the genuine-field
+input).** For a closed smooth Riemannian manifold `(M, g)` there is a *valence-dependent* nonnegative
+constant `K : ℕ → ℝ` such that, at every covariant rank `s` and for every smooth compactly-supported
+`(0, s)`-tensor `S`, there exists a curvature contraction field `G : SmoothCcTensor g 0 (s + 1)` —
+the genuine `R(∇S) + (∇R) S` part of the order-`2` commutator defect `Curv S := pointwiseTensorCurv
+g s S` — for which the `L²` cross-pairing of `Curv S` against `∇S = covGrad g 0 s S` equals that of
+`G` against `∇S` (the moving-frame bracket integrating by parts to zero), and `G` is *pointwise*
+fibre-norm-controlled by `∇S` and `S`:
 ```
 ⟨Curv S, ∇S⟩_{L²} = ⟨G, ∇S⟩_{L²}   and
 rfns(G)(x) ≤ (K s)² · ( rfns(∇S)(x) + rfns(S)(x) )   (every x).
 ```
-
-This is the genuine *integrated* third-order tensor Bochner–Weitzenböck content. Fibrewise
-`Curv S = tensor3rdCurvGenuine + tensor3rdCurvBracket`
-(`pointwiseTensorCurv_toSection_eq_frame_sum`, `frame_trace_thirdCovDeriv_defect_eq_genuine_add_bracket`,
-`Tensor3rdCurv_eq_genuine_add_bracket`); the bracket term `tensor3rdCurvBracket` is a total
-covariant divergence of an order-`∇S` field, so it integrates by parts to zero against `∇S`
-(`green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed` / the covariant integration-by-parts
-`integral_tensorInner_covDeriv_integrationByParts`), leaving only the genuine contraction
-`G = tensor3rdCurvGenuine` realized as a smooth compactly-supported section. That genuine field is
-order `≤ 1` in `S` — the `R(∇S)` term (`rfns(∇S)`-order) and the `(∇R) S` term (`rfns(S)`-order),
-fibre-bounded pointwise by `riemannianFiberNormSq_tensor3rdCurvGenuine_le` from the uniform curvature
-and differentiated-curvature sups (`exists_uniform_riemannianFiberNormSq_riemannOp_bound`,
-`exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound`). The constant is valence-dependent
-because the `(0, s)`-bundle curvature endomorphism is an `s`-slot derivation, so its operator norm
-grows like `(s + 1)·‖R‖_∞`. This is the genuine integrated curvature leaf (the pointwise fibre bound
-on `Curv S` itself is *false* at the `∇²S`-order bracket — only this `L²` pairing removes it). -/
+This is **proved** from the genuine-field input `exists_pointwiseTensorCurv_genuineField_inner` by
+bridging the `tensorL2Inner … .toFun` formulation to the canonical real inner-product-space form
+`inner ℝ` on `SmoothCcTensor` (`SmoothCcTensor.inner_def`). Its only `sorry`-dependence is through
+that posited curvature input. -/
 theorem exists_pointwiseTensorCurv_bracketFree_field (g : SmoothRiemannianMetric I M) :
     ∃ K : ℕ → ℝ, (∀ s, 0 ≤ K s) ∧ ∀ (s : ℕ) (S : SmoothCcTensor g 0 s),
       ∃ G : SmoothCcTensor g 0 (s + 1),
@@ -205,7 +301,16 @@ theorem exists_pointwiseTensorCurv_bracketFree_field (g : SmoothRiemannianMetric
             (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
                 ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
               riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) := by
-  sorry
+  classical
+  obtain ⟨K, hK_nn, hfield⟩ :=
+    exists_pointwiseTensorCurv_genuineField_inner (I := I) (M := M) g
+  refine ⟨K, hK_nn, fun s S => ?_⟩
+  obtain ⟨G, hpair, hbound⟩ := hfield s S
+  refine ⟨G, ?_, hbound⟩
+  rw [← SmoothCcTensor.inner_def (I := I) (M := M)
+      (pointwiseTensorCurv (I := I) (M := M) g s S) (covGrad (I := I) (M := M) g 0 s S),
+    ← SmoothCcTensor.inner_def (I := I) (M := M) G (covGrad (I := I) (M := M) g 0 s S)]
+  exact hpair
 
 set_option linter.unusedSectionVars false in
 /-- **The integrated bracket-free curvature representation of the cross term (proved from the
@@ -245,8 +350,46 @@ theorem exists_pointwiseTensorCurv_l2_bracketFree_repr (g : SmoothRiemannianMetr
   exact tensorL2Norm_le_of_pointwise_fiberNormSq_bound_two (I := I) (M := M) g
     (covGrad (I := I) (M := M) g 0 s S) S G (K s) (hK_nn s) hGpt
 
-/-- **The pointwise gradient-of-commutator-defect fibre-norm bound (posited curvature input,
-per-order).** For a closed smooth Riemannian manifold `(M, g)` there is an *order-dependent*
+/-- **Posited deepest curvature child for the gradient-of-commutator-defect bound (per-order,
+per-component).** The genuine one-higher-derivative iterated curvature-coefficient expansion of the
+commutator defect, isolated *per curvature-derivative component*. By the iterated Ricci identity,
+the covariant gradient of the order-`p` commutator defect `∇(Defect p) = ∇(Δ_∇(∇^p U) − ∇^p(Δ_∇ U))`
+expands, at each `x`, as a finite sum over orders `i ≤ p + 2` of curvature-derivative contractions of
+the `i`-th iterated gradient `∇^i U` (the top-order term cancelling), with all curvature-derivative
+coefficients up to order `p + 1` continuous on the compact manifold, hence sup-bounded.
+
+This says: there is an *order-dependent* nonnegative constant `Dc : ℕ → ℝ` such that, for every
+`(0, 2)`-tensor base `U`, every gradient order `p` and *every point* `x`, there is a family of
+`(0, 2 + p + 1)`-tensor fibre values `H i` (`i ∈ Fin (p + 1 + 2)`, the per-order curvature-derivative
+components) whose sum is the fibre value of `∇(Defect p)`, with each component fibre-norm-bounded by
+`(Dc p)²` times the intrinsic fibre norm of `∇^i U`:
+```
+(∇(Defect p)).toSection x = ∑_{i < p + 3} H i,   rfns(H i) ≤ (Dc p)² · rfns(∇^i U)(x).
+```
+Each curvature-derivative coefficient is the genuine iterated-Ricci contraction; the constant is
+order-dependent because the number of terms and the slot count of the tensor-bundle curvature
+endomorphism grow with `p`. This is the irreducible per-order iterated curvature-derivative leaf; the
+aggregate bound `exists_covGrad_commutatorDefect_pointwise_fiberNormSq_bound` is *proved* from it by
+the finite-sum subadditivity `riemannianFiberNormSq_sum_le_card_mul`. -/
+theorem exists_covGrad_commutatorDefect_component_fiberNormSq_bound
+    (g : SmoothRiemannianMetric I M) :
+    ∃ Dc : ℕ → ℝ, (∀ p, 0 ≤ Dc p) ∧
+      ∀ (U : SmoothCcTensor g 0 2) (p : ℕ) (x : M),
+        ∃ H : Fin (p + 1 + 2) → TensorRSSpace 0 (2 + p + 1) I x,
+          (covGrad g 0 (2 + p)
+              (rawTensorConnLapSmooth (I := I) g 0 (2 + p) (iteratedCovGrad g 0 2 p U) -
+                iteratedCovGrad g 0 2 p
+                  (rawTensorConnLapSmooth (I := I) g 0 2 U))).toSection x =
+            ∑ i : Fin (p + 1 + 2), H i ∧
+          ∀ i : Fin (p + 1 + 2),
+            riemannianFiberNormSq (I := I) (M := M) g 0 (2 + p + 1) x (H i) ≤
+              Dc p ^ 2 *
+                riemannianFiberNormSq (I := I) (M := M) g 0 (2 + (i : ℕ)) x
+                  ((iteratedCovGrad g 0 2 (i : ℕ) U).toSection x) := by
+  sorry
+
+/-- **The pointwise gradient-of-commutator-defect fibre-norm bound (proved from the per-component
+input, per-order).** For a closed smooth Riemannian manifold `(M, g)` there is an *order-dependent*
 nonnegative constant `Dc : ℕ → ℝ` such that, for every smooth compactly-supported `(0, 2)`-tensor
 base `U`, every gradient order `p`, and *every point* `x`, the intrinsic fibre norm of the covariant
 gradient of the order-`p` commutator defect `Defect p := Δ_∇(∇^p U) − ∇^p(Δ_∇ U)` is bounded by
@@ -254,16 +397,11 @@ gradient of the order-`p` commutator defect `Defect p := Δ_∇(∇^p U) − ∇
 ```
 rfns(∇(Defect p))(x) ≤ (Dc p)² · ∑_{i ≤ p + 2} rfns(∇^i U)(x).
 ```
-
-This is the genuine one-higher-derivative iterated curvature-coefficient expansion of the commutator
-defect: differentiating `Defect p` once more produces, by the iterated Ricci identity, one further
-contraction of a covariant derivative of the Riemann tensor against the `≤ p + 2`-order gradients of
-`U` (the top-order term cancelling). Each curvature-derivative coefficient up to order `p + 1` is
-continuous on the compact manifold, hence sup-bounded (`exists_bound_riemannianFiberNormSq_smoothCcTensor`
-on each finitely-many curvature-contraction term), so the per-order constant `Dc p` is finite. The
-constant is order-dependent because the number of curvature-derivative terms — and the slot count of
-the tensor-bundle curvature endomorphism — grow with `p`. This is the genuine remaining iterated
-curvature-derivative leaf, correctly per-order-quantified. -/
+This is **proved** from the per-component iterated curvature-derivative input
+`exists_covGrad_commutatorDefect_component_fiberNormSq_bound` (which exhibits `∇(Defect p)(x)` as a
+finite sum of `p + 3` curvature-derivative components, each fibre-bounded by `rfns(∇^i U)`) through
+the finite-sum subadditivity `riemannianFiberNormSq_sum_le_card_mul`. Its only `sorry`-dependence is
+through that posited curvature input. -/
 theorem exists_covGrad_commutatorDefect_pointwise_fiberNormSq_bound
     (g : SmoothRiemannianMetric I M) :
     ∃ Dc : ℕ → ℝ, (∀ p, 0 ≤ Dc p) ∧
@@ -276,7 +414,53 @@ theorem exists_covGrad_commutatorDefect_pointwise_fiberNormSq_bound
           Dc p ^ 2 * ∑ i ∈ Finset.range (p + 1 + 2),
             riemannianFiberNormSq (I := I) (M := M) g 0 (2 + i) x
               ((iteratedCovGrad g 0 2 i U).toSection x) := by
-  sorry
+  classical
+  obtain ⟨Dc, hDc_nn, hcomp⟩ :=
+    exists_covGrad_commutatorDefect_component_fiberNormSq_bound (I := I) (M := M) g
+  refine ⟨fun p => (p + 1 + 2 : ℕ) * Dc p, fun p => ?_, fun U p x => ?_⟩
+  · exact mul_nonneg (Nat.cast_nonneg _) (hDc_nn p)
+  · obtain ⟨H, hsum, hHbound⟩ := hcomp U p x
+    set rhs : ℝ := ∑ i ∈ Finset.range (p + 1 + 2),
+      riemannianFiberNormSq (I := I) (M := M) g 0 (2 + i) x
+        ((iteratedCovGrad g 0 2 i U).toSection x) with hrhs
+    have hrhs_nn : 0 ≤ rhs :=
+      Finset.sum_nonneg (fun i _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (2 + i) x _)
+    have hcard := riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g 0 (2 + p + 1) x
+      (Finset.univ : Finset (Fin (p + 1 + 2))) H
+    rw [Finset.card_univ, Fintype.card_fin] at hcard
+    have hcomp_sum :
+        ∑ i : Fin (p + 1 + 2),
+            riemannianFiberNormSq (I := I) (M := M) g 0 (2 + p + 1) x (H i) ≤
+          Dc p ^ 2 * rhs := by
+      have hstep :
+          ∑ i : Fin (p + 1 + 2),
+              riemannianFiberNormSq (I := I) (M := M) g 0 (2 + p + 1) x (H i) ≤
+            ∑ i : Fin (p + 1 + 2), Dc p ^ 2 *
+              riemannianFiberNormSq (I := I) (M := M) g 0 (2 + (i : ℕ)) x
+                ((iteratedCovGrad g 0 2 (i : ℕ) U).toSection x) :=
+        Finset.sum_le_sum (fun i _ => hHbound i)
+      refine le_trans hstep ?_
+      rw [← Finset.mul_sum]
+      refine mul_le_mul_of_nonneg_left ?_ (sq_nonneg (Dc p))
+      rw [hrhs, ← Fin.sum_univ_eq_sum_range
+        (fun i => riemannianFiberNormSq (I := I) (M := M) g 0 (2 + i) x
+          ((iteratedCovGrad g 0 2 i U).toSection x)) (p + 1 + 2)]
+    have hN_nn : (0 : ℝ) ≤ ((p + 1 + 2 : ℕ) : ℝ) := Nat.cast_nonneg _
+    have hN_le_sq : ((p + 1 + 2 : ℕ) : ℝ) ≤ ((p + 1 + 2 : ℕ) : ℝ) ^ 2 := by
+      have h1 : (1 : ℝ) ≤ ((p + 1 + 2 : ℕ) : ℝ) := by
+        exact_mod_cast Nat.le_add_left 1 (p + 2)
+      nlinarith [hN_nn, h1]
+    rw [hsum]
+    calc riemannianFiberNormSq (I := I) (M := M) g 0 (2 + p + 1) x (∑ i : Fin (p + 1 + 2), H i)
+        ≤ ((p + 1 + 2 : ℕ) : ℝ) *
+            ∑ i : Fin (p + 1 + 2),
+              riemannianFiberNormSq (I := I) (M := M) g 0 (2 + p + 1) x (H i) := hcard
+      _ ≤ ((p + 1 + 2 : ℕ) : ℝ) * (Dc p ^ 2 * rhs) :=
+          mul_le_mul_of_nonneg_left hcomp_sum hN_nn
+      _ ≤ ((p + 1 + 2 : ℕ) : ℝ) ^ 2 * (Dc p ^ 2 * rhs) :=
+          mul_le_mul_of_nonneg_right hN_le_sq
+            (mul_nonneg (sq_nonneg (Dc p)) hrhs_nn)
+      _ = (((p + 1 + 2 : ℕ) : ℝ) * Dc p) ^ 2 * rhs := by ring
 
 set_option linter.unusedSectionVars false in
 /-- **The gradient-of-commutator-defect `L²` bound (proved from the pointwise curvature input).**
