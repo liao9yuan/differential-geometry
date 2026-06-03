@@ -227,7 +227,7 @@ by the parent assembly; this reconciliation step routes the value identity
 through `hℓ`/`hNsec_geom` and the spectral-coordinate identities, so the linter
 flags them as unused here — narrowly disabled above the docstring.) -/
 theorem rhs_matches_deturck_at_solution
-    (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
+    (g_bg g_back : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
     (u₂ : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
     (ℓ_a : tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ) →L[ℝ] ℝ)
     (g_DT : ℝ → SmoothRiemannianMetric I M)
@@ -276,13 +276,13 @@ theorem rhs_matches_deturck_at_solution
         + ccTensorBilinSymm (I := I) g_bg
             (repr (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
               (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) x' v' w'
-        = deTurckRicciRHS (I := I) g_bg (g_DT s) x' v' w') :
+        = deTurckRicciRHS (I := I) g_back (g_DT s) x' v' w') :
     ∀ t ∈ Set.Ico (0 : ℝ) T,
       ℓ_a (scaleLaplacianFun (I := I) (M := M) (u₂ t) +
           N_cont
             (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
               (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ t)))
-        = deTurckRicciRHS (I := I) g_bg (g_DT t) x v w := by
+        = deTurckRicciRHS (I := I) g_back (g_DT t) x v w := by
   intro t _ht
   set uincl := tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
       (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ t) with huincl

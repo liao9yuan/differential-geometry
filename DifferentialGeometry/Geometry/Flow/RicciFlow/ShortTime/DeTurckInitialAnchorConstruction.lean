@@ -3,6 +3,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Tensor
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.DeTurckGeometricNonlinearity
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.RealizeTransport
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.SolutionC2Continuous
 
 /-! # The `g₀`-anchored DeTurck–Ricci realize construction
 
@@ -245,7 +247,38 @@ theorem deTurck_g0_interior_deriv_from_data
         = deTurckRicciRHS (I := I) g_bg (g_DT s) x' v' w') :
     ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
       HasDerivWithinAt (fun s : ℝ => (g_DT s).inner x v w)
-        (deTurckRicciRHS (I := I) g_bg (g_DT t) x v w) (Set.Ici 0) t := sorry
+        (deTurckRicciRHS (I := I) g_bg (g_DT t) x v w) (Set.Ici 0) t := by
+  intro t ht x v w
+  set u_car : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) :=
+    fun s => tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+      (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s) with hu_car_def
+  set u_car' : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) :=
+    fun s => scaleLaplacianFun (I := I) (M := M) (u₂ s) +
+      N_cont
+        (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) with hu_car'_def
+  obtain ⟨ℓ_a, hℓ⟩ := realize_eval_carrier_factorization (I := I) (M := M) g₀ a ha x v w
+  have hfactor : ∀ s : ℝ,
+      ccTensorBilinSymm (I := I) g₀ (T_s s) x v w = ℓ_a (u_car s) := by
+    intro s
+    refine (hℓ (T_s s) (u_car s) ?_).symm
+    intro i
+    rw [hu_car_def]
+    simp only [tensorHsInclusion_coeff_apply]
+    exact hsmoothrepr s i
+  have hderiv : ∀ s ∈ Set.Ioo (0 : ℝ) T,
+      HasDerivWithinAt (fun r : ℝ => u_car r) (u_car' s) (Set.Ici 0) s := by
+    intro s hs
+    exact (hreg s hs).hasDerivWithinAt
+  have hpush := pointwise_deriv_through_realize (I := I) (M := M) g₀ a
+    g_DT T_s u_car u_car' x v w ℓ_a
+    (fun s => hreal s x v w) hfactor hderiv t ht
+  have hmatch := rhs_matches_deturck_at_solution (I := I) (M := M) g₀ g_bg a u₂ ℓ_a
+    g_DT T_s x v w hreal N_cont repr Nsec hN_coeff hNsec_realize hrepr_small
+    hsmoothrepr hℓ hNsec_geom t (Set.Ioo_subset_Ico_self ht)
+  rw [hu_car'_def] at hpush
+  rw [hmatch] at hpush
+  exact hpush
 
 /-- **Continuity up to `t = 0` of the realized `g₀`-anchored flow components
 (genuine analytic input).**
@@ -285,7 +318,28 @@ theorem deTurck_g0_inner_continuous_icc
           (extChartAt I α q.2))
         (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α)) :
     ∀ (x : M) (v w : TangentSpace I x),
-      ContinuousOn (fun s : ℝ => (g_DT s).inner x v w) (Set.Icc 0 T) := sorry
+      ContinuousOn (fun s : ℝ => (g_DT s).inner x v w) (Set.Icc 0 T) := by
+  have hC2_pt : ∀ (α : M) (y : M), y ∈ chartLeviCivitaGoodSet (I := I) α →
+      ∀ i j : Fin (Module.finrank ℝ E), ∀ k : ℕ, k ≤ 2 →
+        ContinuousOn
+          (fun s : ℝ => iteratedFDeriv ℝ k
+            (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT s) α i j)
+            (extChartAt I α y))
+          (Set.Icc 0 T) := by
+    intro α y hy i j k hk
+    have hjoint := hC2_chart α i j k hk
+    have hmap : ContinuousOn (fun s : ℝ => (s, y))
+        (Set.Icc 0 T) := (continuous_id.prodMk continuous_const).continuousOn
+    have hsub : Set.MapsTo (fun s : ℝ => (s, y)) (Set.Icc 0 T)
+        (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α) := by
+      intro s hs
+      exact Set.mk_mem_prod hs hy
+    have hcomp := hjoint.comp hmap hsub
+    simpa only [Function.comp_def] using hcomp
+  exact (deturck_solution_c2_continuous_icc0 (I := I) g₀ a ha g_DT
+    (fun s => tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+      (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) T_s hcont hreal
+    (fun s i => hsmoothrepr s i) hC2_pt).1
 
 /-- **Right-continuity at `t = 0` of the DeTurck–Ricci right-hand side along the
 realized `g₀`-anchored flow (genuine analytic input).**
