@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOperator.ConventionBridge
+import DifferentialGeometry.Analysis.Calculus.SmoothExtension.BorelHalfLineParam
 
 /-!
 # Smooth time-extension of a field smooth on a closed time slab
@@ -157,7 +158,7 @@ theorem partitionOfUnity_assembled_section_contMDiff
       (ρ.locallyFinite.point_finite q.2).subset (fun i hi => by
         simp only [Function.mem_support] at hi ⊢
         exact fun h => hi (by rw [h, zero_smul]))
-    show (e (TotalSpace.mk' E q.2 (∑ᶠ i, ρ i q.2 • Y i q.1 q.2))).2 = ∑ᶠ i, ρ i q.2 • g i q
+    change (e (TotalSpace.mk' E q.2 (∑ᶠ i, ρ i q.2 • Y i q.1 q.2))).2 = ∑ᶠ i, ρ i q.2 • g i q
     have hcl : (e (TotalSpace.mk' E q.2 (∑ᶠ i, ρ i q.2 • Y i q.1 q.2))).2
         = e.continuousLinearMapAt ℝ q.2 (∑ᶠ i, ρ i q.2 • Y i q.1 q.2) :=
       (chartE_section_repr_eq_trivialization_snd (I := I) x₀
@@ -165,7 +166,7 @@ theorem partitionOfUnity_assembled_section_contMDiff
     rw [hcl, map_finsum (g := e.continuousLinearMapAt ℝ q.2) hfin]
     refine finsum_congr fun i => ?_
     rw [map_smul]
-  show ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, E) ∞
+  change ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, E) ∞
     (fun q : ℝ × M => (e (TotalSpace.mk' E q.2 (∑ᶠ i, ρ i q.2 • Y i q.1 q.2))).2) q₀
   refine ContMDiffAt.congr_of_eventuallyEq ?_ hfib_eq
   -- The family `fun i q => ρ i q.2 • g i q` is locally finite (pulled back from `ρ` by `snd`).
@@ -184,12 +185,117 @@ theorem partitionOfUnity_assembled_section_contMDiff
   · exact contMDiffAt_of_notMem (compl_subset_compl.mpr
       (tsupport_smul_subset_left (fun q : ℝ × M => ρ i q.2) (g i)) hi) ∞
 
+set_option linter.unusedSectionVars false in
+/-- **Euclidean joint reading of a time-dependent section over a chart.** Pulling the
+manifold-level chart reading `(t, x) ↦ chartE_section_repr α (X t) x` back through the chart
+inverse `(extChartAt I α).symm` gives the `E`-valued map
+`g_α (t, z) := chartE_section_repr α (X t) ((extChartAt I α).symm z)`, which is jointly
+`ContDiffOn ℝ ∞` on `s ×ˢ (extChartAt I α).target`. This is the Fréchet-level reading consumed by
+the Borel/Seeley parametrized interval extension `borel_interval_extend_param`. -/
+private theorem chartE_euclideanReading_contDiffOn
+    (X : ℝ → ∀ x : M, TangentSpace I x) (s : Set ℝ) (α : M)
+    (hX : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
+      (s ×ˢ (univ : Set M))) :
+    ContDiffOn ℝ ∞
+      (Function.uncurry fun t (z : E) =>
+        chartE_section_repr (I := I) α (X t) ((extChartAt I α).symm z))
+      (s ×ˢ (extChartAt I α).target) := by
+  classical
+  have hread := chartE_jointReading_contMDiffOn (I := I) X s α hX
+  set R : ℝ × M → E := fun q => chartE_section_repr (I := I) α (X q.1) q.2 with hR
+  have hΨsymm : ContMDiffOn (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) (𝓘(ℝ, ℝ).prod I) ∞
+      (fun q : ℝ × E => (q.1, (extChartAt I α).symm q.2))
+      (s ×ˢ (extChartAt I α).target) := by
+    refine ContMDiffOn.prodMk contMDiffOn_fst ?_
+    refine (contMDiffOn_extChartAt_symm (I := I) (n := ∞) α).comp contMDiffOn_snd ?_
+    intro q hq; exact hq.2
+  have hcomp : ContMDiffOn (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) 𝓘(ℝ, E) ∞
+      (fun q : ℝ × E => R (q.1, (extChartAt I α).symm q.2))
+      (s ×ˢ (extChartAt I α).target) := by
+    refine hread.comp hΨsymm ?_
+    intro q hq
+    refine ⟨hq.1, ?_⟩
+    change (extChartAt I α).symm q.2 ∈ (chartAt H α).source
+    rw [← extChartAt_source (I := I) α]
+    exact (extChartAt I α).map_target hq.2
+  rw [show (Function.uncurry fun t (z : E) =>
+        chartE_section_repr (I := I) α (X t) ((extChartAt I α).symm z))
+      = fun q : ℝ × E => R (q.1, (extChartAt I α).symm q.2) from rfl]
+  rw [← contMDiffOn_iff_contDiffOn, ← chartedSpaceSelf_prod, modelWithCornersSelf_prod]
+  exact hcomp
+
+set_option linter.unusedSectionVars false in
+/-- **Local chart lift of an extended Euclidean reading.** Given an `E`-valued family
+`gext : ℝ → E → E` that is jointly `ContDiffOn ℝ ∞` on `univ ×ˢ V` (`V` open in the chart
+target), the lifted local section `Y t x := trivFromE α x (gext t (extChartAt I α x))` has a
+joint tangent-bundle section that is `ContMDiffOn` on `univ ×ˢ W`, where
+`W := (chartAt H α).source ∩ extChartAt I α ⁻¹' V`. -/
+private theorem lift_extended_reading_contMDiffOn
+    (α : M) (gext : ℝ → E → E) (V : Set E)
+    (hgext : ContDiffOn ℝ ∞ (Function.uncurry gext) ((univ : Set ℝ) ×ˢ V)) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M =>
+        (TotalSpace.mk' E q.2
+            ((trivFromE (I := I) α q.2) (gext q.1 (extChartAt I α q.2))) : TangentBundle I M))
+      ((univ : Set ℝ) ×ˢ
+        ((chartAt H α).source ∩ (extChartAt I α) ⁻¹' V)) := by
+  classical
+  set W : Set M := (chartAt H α).source ∩ (extChartAt I α) ⁻¹' V with hW
+  set e : Trivialization E (π E (TangentSpace I : M → Type _)) :=
+    trivializationAt E (TangentSpace I) α with he
+  set Yfib : ℝ → ∀ x : M, TangentSpace I x :=
+    fun t x => (trivFromE (I := I) α x) (gext t (extChartAt I α x)) with hYfib
+  have hbase : W ⊆ e.baseSet := by
+    intro x hx
+    rw [he, TangentBundle.trivializationAt_baseSet]
+    exact hx.1
+  have hmaps : Set.MapsTo
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (Yfib q.1 q.2) : TangentBundle I M))
+      ((univ : Set ℝ) ×ˢ W) e.source := by
+    intro q hq
+    rw [Trivialization.mem_source]
+    exact hbase hq.2
+  have hiff := e.contMDiffOn_iff (n := ∞) (IM := 𝓘(ℝ, ℝ).prod I) (IB := I)
+    (f := fun q : ℝ × M => (TotalSpace.mk' E q.2 (Yfib q.1 q.2) : TangentBundle I M)) hmaps
+  -- The Euclidean composite `(t, x) ↦ gext t (extChartAt I α x)` is `ContMDiffOn` on `univ ×ˢ W`.
+  have hgextM : ContMDiffOn (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) 𝓘(ℝ, E) ∞
+      (Function.uncurry gext) ((univ : Set ℝ) ×ˢ V) := by
+    rw [← contMDiffOn_iff_contDiffOn, ← chartedSpaceSelf_prod, modelWithCornersSelf_prod] at hgext
+    exact hgext
+  have hΦ : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (q.1, extChartAt I α q.2)) ((univ : Set ℝ) ×ˢ W) := by
+    refine ContMDiffOn.prodMk contMDiffOn_fst ?_
+    refine (contMDiffOn_extChartAt (I := I) (n := ∞) (x := α)).comp contMDiffOn_snd ?_
+    intro q hq; exact hq.2.1
+  have hread : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, E) ∞
+      (fun q : ℝ × M => gext q.1 (extChartAt I α q.2)) ((univ : Set ℝ) ×ˢ W) := by
+    have := hgextM.comp hΦ ?_
+    · exact this
+    · intro q hq
+      exact ⟨mem_univ _, hq.2.2⟩
+  refine (hiff.mpr ⟨contMDiffOn_snd, ?_⟩)
+  refine hread.congr ?_
+  intro q hq
+  have hq2 : q.2 ∈ e.baseSet := hbase hq.2
+  rw [he] at hq2
+  change (e (TotalSpace.mk' E q.2 (Yfib q.1 q.2))).2 = gext q.1 (extChartAt I α q.2)
+  rw [← chartE_section_repr_eq_trivialization_snd (I := I) α (Yfib q.1) hq2]
+  change trivToE (I := I) α q.2 ((trivFromE (I := I) α q.2) (gext q.1 (extChartAt I α q.2)))
+    = gext q.1 (extChartAt I α q.2)
+  rw [trivToE_trivFromE (I := I) α hq2]
+
 /-- **Smooth time-extension across the slab endpoints.** A field `X` whose joint tangent-bundle
 section is `C∞` on the closed time slab `Icc 0 T ×ˢ univ` admits a field `Xext` whose joint
 section is `C∞` on all of `ℝ × M` and which agrees with `X` on `Icc 0 T`.
 
-The body is a deferred Seeley/Whitney smooth-extension construction (filled by a later worker);
-this theorem therefore transitively depends on `sorryAx`. -/
+The construction is the Seeley/Whitney smooth extension in the time variable, performed chart by
+chart in the Euclidean reading (`chartE_euclideanReading_contDiffOn` →
+`borel_interval_extend_param`), lifted back to a local tangent-bundle section over each chart
+(`lift_extended_reading_contMDiffOn`), and patched globally by a smooth partition of unity
+subordinate to the chart-local extension neighbourhoods
+(`partitionOfUnity_assembled_section_contMDiff`). Agreement on `Icc 0 T` follows from
+`∑ ρ = 1` together with each local section reproducing `X` over `[0, T]`. -/
 theorem seeley_time_extend
     (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
     (hsmooth0 : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -198,6 +304,101 @@ theorem seeley_time_extend
     ∃ Xext : ℝ → ∀ x : M, TangentSpace I x,
       ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
         (fun q : ℝ × M => (TotalSpace.mk' E q.2 (Xext q.1 q.2) : TangentBundle I M)) ∧
-      (∀ t ∈ Set.Icc 0 T, ∀ x : M, Xext t x = X t x) := sorry
+      (∀ t ∈ Set.Icc 0 T, ∀ x : M, Xext t x = X t x) := by
+  classical
+  -- The Euclidean chart reading of `X` at every chart centre `α`.
+  set g : M → ℝ → E → E :=
+    fun α t z => chartE_section_repr (I := I) α (X t) ((extChartAt I α).symm z) with hg
+  have hgC : ∀ α : M, ContDiffOn ℝ ∞ (Function.uncurry (g α))
+      (Set.Icc 0 T ×ˢ (extChartAt I α).target) :=
+    fun α => chartE_euclideanReading_contDiffOn (I := I) X (Set.Icc 0 T) α hsmooth0
+  -- For each `α`, pick a compact `K_α ⊆ target` containing `z₀ := extChartAt I α α` in its interior.
+  have hz₀tgt : ∀ α : M, extChartAt I α α ∈ (extChartAt I α).target :=
+    fun α => mem_extChartAt_target (I := I) α
+  have hKexists : ∀ α : M, ∃ K : Set E, IsCompact K ∧ extChartAt I α α ∈ interior K ∧
+      K ⊆ (extChartAt I α).target :=
+    fun α => exists_compact_subset (isOpen_extChartAt_target (I := I) α) (hz₀tgt α)
+  choose K hKcompact hKint hKtgt using hKexists
+  -- Apply the parametrized interval extension fibrewise in the chart coordinate.
+  have hborel : ∀ α : M, ∃ gext : ℝ → E → E, ∃ Vα ∈ nhds (extChartAt I α α),
+      ContDiffOn ℝ ∞ (Function.uncurry gext) ((univ : Set ℝ) ×ˢ Vα) ∧
+        ∀ t ∈ Set.Icc (0:ℝ) T, ∀ z ∈ Vα, gext t z = g α t z := by
+    intro α
+    have hgK : ContDiffOn ℝ ∞ (Function.uncurry (g α)) (Set.Icc (0:ℝ) T ×ˢ K α) :=
+      (hgC α).mono (Set.prod_mono_right (hKtgt α))
+    exact DifferentialGeometry.Analysis.borel_interval_extend_param (g α) T hT (K α) (hKcompact α)
+      (extChartAt I α α) (hKint α) hgK
+  choose gext V hVnhds hgextC hgextEq using hborel
+  -- Replace each neighbourhood `V α` by an open `Vo α ⊆ V α ∩ target` containing `z₀`.
+  have hVoexists : ∀ α : M, ∃ Vo : Set E, IsOpen Vo ∧ extChartAt I α α ∈ Vo ∧
+      Vo ⊆ V α ∧ Vo ⊆ (extChartAt I α).target := by
+    intro α
+    have hmem : V α ∩ (extChartAt I α).target ∈ nhds (extChartAt I α α) :=
+      Filter.inter_mem (hVnhds α) ((isOpen_extChartAt_target (I := I) α).mem_nhds (hz₀tgt α))
+    obtain ⟨Vo, hVosub, hVoopen, hz₀Vo⟩ := mem_nhds_iff.1 hmem
+    exact ⟨Vo, hVoopen, hz₀Vo, fun z hz => (hVosub hz).1, fun z hz => (hVosub hz).2⟩
+  choose Vo hVoopen hz₀Vo hVoV hVotgt using hVoexists
+  -- The open chart-local extension neighbourhoods `W α` (cover `M`: each `α ∈ W α`).
+  set W : M → Set M := fun α => (chartAt H α).source ∩ (extChartAt I α) ⁻¹' Vo α with hW
+  have hWopen : ∀ α : M, IsOpen (W α) := by
+    intro α
+    have hcont : ContinuousOn (extChartAt I α) (chartAt H α).source := by
+      rw [← extChartAt_source (I := I) α]; exact continuousOn_extChartAt (I := I) α
+    exact hcont.isOpen_inter_preimage (chartAt H α).open_source (hVoopen α)
+  have hWmem : ∀ α : M, α ∈ W α := fun α =>
+    ⟨mem_chart_source H α, by
+      simp only [Set.mem_preimage]
+      exact hz₀Vo α⟩
+  have hWcover : (univ : Set M) ⊆ ⋃ α, W α := fun x _ => mem_iUnion_of_mem x (hWmem x)
+  -- A smooth partition of unity subordinate to `{W α}`.
+  obtain ⟨ρ, hρsub⟩ :=
+    SmoothPartitionOfUnity.exists_isSubordinate (I := I) (M := M) (ι := M)
+      isClosed_univ W hWopen hWcover
+  -- The local lifted sections.
+  set Y : M → ℝ → ∀ x : M, TangentSpace I x :=
+    fun α t x => (trivFromE (I := I) α x) (gext α t (extChartAt I α x)) with hY
+  have hYsmooth : ∀ α : M, ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (Y α q.1 q.2) : TangentBundle I M))
+      ((univ : Set ℝ) ×ˢ W α) := fun α =>
+    lift_extended_reading_contMDiffOn (I := I) α (gext α) (Vo α)
+      ((hgextC α).mono (Set.prod_mono_right (hVoV α)))
+  -- The global patched extension.
+  refine ⟨fun t x => ∑ᶠ α, ρ α x • Y α t x, ?_, ?_⟩
+  · exact partitionOfUnity_assembled_section_contMDiff (I := I) hρsub hWopen Y hYsmooth
+  · intro t ht x
+    -- On `[0, T]`, each local section reproduces `X`, weighted by `ρ` summing to `1`.
+    have hYeq : ∀ α : M, x ∈ tsupport (ρ α) → ρ α x • Y α t x = ρ α x • X t x := by
+      intro α hα
+      have hxW : x ∈ W α := hρsub α hα
+      have hxsrc : x ∈ (chartAt H α).source := hxW.1
+      have hxbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+        rw [TangentBundle.trivializationAt_baseSet]; exact hxsrc
+      have hxVo : extChartAt I α x ∈ Vo α := hxW.2
+      have hgextval : gext α t (extChartAt I α x) = g α t (extChartAt I α x) :=
+        hgextEq α t ht (extChartAt I α x) (hVoV α hxVo)
+      have hsymm : (extChartAt I α).symm (extChartAt I α x) = x :=
+        (extChartAt I α).left_inv (by rw [extChartAt_source]; exact hxsrc)
+      have hYval : Y α t x = X t x := by
+        change (trivFromE (I := I) α x) (gext α t (extChartAt I α x)) = X t x
+        rw [hgextval]
+        change (trivFromE (I := I) α x)
+            (chartE_section_repr (I := I) α (X t) ((extChartAt I α).symm (extChartAt I α x)))
+          = X t x
+        rw [hsymm]
+        rw [chartE_section_repr_eq_trivToE (I := I) α (X t) x]
+        exact trivFromE_trivToE (I := I) α hxbase (X t x)
+      rw [hYval]
+    have hsum1 : ∑ᶠ α, ρ α x = 1 := ρ.sum_eq_one (mem_univ x)
+    have hfin : HasFiniteSupport fun α : M => ρ α x :=
+      hasFiniteSupport_of_finsum_eq_one hsum1
+    calc ∑ᶠ α, ρ α x • Y α t x
+        = ∑ᶠ α, ρ α x • X t x := by
+          refine finsum_congr fun α => ?_
+          by_cases hα : x ∈ tsupport (ρ α)
+          · exact hYeq α hα
+          · have : ρ α x = 0 := image_eq_zero_of_notMem_tsupport hα
+            rw [this, zero_smul, zero_smul]
+      _ = (∑ᶠ α, ρ α x) • X t x := (finsum_smul' hfin (X t x)).symm
+      _ = X t x := by rw [hsum1, one_smul]
 
 end DifferentialGeometry.PDE.RicciFlow.ODE
