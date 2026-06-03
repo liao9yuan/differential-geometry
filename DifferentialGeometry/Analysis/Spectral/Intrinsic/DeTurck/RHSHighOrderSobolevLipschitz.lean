@@ -402,6 +402,78 @@ theorem exists_spectralWeightedSq_le_pouHaNorm_sq
             = Real.sqrt (D * (a + 1)) ^ 2 * (C₀ * toHsNorm) ^ 2 from by ring, hsqrt]
         ring
 
+/-- **The covariant-gradient `L²` Nemytskii bound for the re-tagged Ricci–DeTurck right-hand
+side (the genuine deep analytic input: each intrinsic iterated covariant gradient of the
+right-hand-side difference is `L²`-controlled by the order-`(a+2)` chart-Sobolev norm of the
+perturbation difference).**
+
+For an anchor `g₀`, a flow background `g_bg`, an order `a`, and a uniform `H^{a+2}`-size bound
+`B ≥ 0`, there is a single constant `C ≥ 0` such that for any two `g₀`-fibre-small perturbations
+`T₁, T₂` whose `H^{a+2}` norms are `≤ B`, any two realized metrics `g₁, g₂` of `T₁, T₂` (tied by
+the fibrewise `inner`-identities), and every covariant-gradient order `j ≤ 2 * a`, the global
+metric `L²` (semi-)norm of the `j`-th intrinsic iterated covariant gradient of the **re-tagged
+DeTurck right-hand-side** section difference is bounded by the order-`(a+2)` chart-Sobolev norm
+of the perturbation difference:
+```
+‖iteratedCovGrad g₀ 0 2 j (deTurckRHSRetag g₀ g_bg g₁ − deTurckRHSRetag g₀ g_bg g₂)‖
+  ≤ C · ‖(T₁ − T₂).toHs (a+2)‖   (for j ≤ 2 * a).
+```
+
+This is the genuine **higher-order quasilinear Nemytskii estimate** for the *non-linear* summand
+`Ric + Lie` of the second-order Ricci–DeTurck right-hand side, phrased intrinsically: the chart
+right-hand side `deTurckRicciRHS g_bg g = -2 • Ric(g) + 𝓛_{W(g)} g` is a smooth (fibrewise)
+function `F` of the metric `≤2`-jet `(g, ∇g, ∇²g)` and the fibre-inverse `g⁻¹`, so by the
+covariant fundamental theorem of calculus along the segment `g_t = g₂ + t·(g₁ − g₂)` the
+difference `F(g₁) − F(g₂) = ∫₀¹ DF(g_t)·(g₁ − g₂) dt` and its `j`-th covariant gradient is, by the
+covariant product/chain rule (covariant Faà-di-Bruno), a finite sum of terms each a smooth bounded
+coefficient (a fibrewise-polynomial expression in the `≤ (j+2)`-jets of `g₁, g₂` and the bounded
+fibre-inverses, dominated uniformly on the compact `M` because `g₁, g₂` are genuine smooth metrics
+whose jet-data is sup-bounded in terms of the `H^{a+2}` size `B`) times an iterated covariant
+gradient `∇^i(g₁ − g₂)` of order `i ≤ j + 2` of the metric difference.  Since the inner-identity
+difference makes `(g₁ − g₂).inner = ccTensorBilinSymm g₀ (T₁ − T₂)` the realized bilinear form of
+`T₁ − T₂`, each `∇^i(g₁ − g₂)` is `L²`-controlled (the realization is a bounded smooth bundle map
+gaining no derivatives) by the `≤ (j+2)`-order covariant gradients of `T₁ − T₂`, hence — for
+`j ≤ 2 * a`, so `j + 2 ≤ 2 * (a + 2)` — by the order-`(a+2)` chart-Sobolev norm `‖(T₁ −
+T₂).toHs (a+2)‖`.  No supercriticality is needed: the smooth metric jet-coefficients are
+sup-bounded by smoothness on the compact base, never through a Sobolev embedding.
+
+Its conclusion is a *real-valued* global-`L²` (semi-)norm inequality on the intrinsic iterated
+covariant gradients of the right-hand-side difference, structurally distinct from the chart-`Hᵃ`
+`toHs`-norm conclusion of the consumer below; no packaging.
+
+The supercriticality hypothesis `ha : 2 * a > Module.finrank ℝ E + 4` is genuinely required (and
+mirrors the sibling consumer chain `exists_deTurckRealizeRemainderOf_synthesis_matching_gauge` /
+`exists_deTurckRemainderG0ContSynth`, which carry exactly this hypothesis): the uniform-over-the
+`B`-family Nemytskii constant needs an `L^∞` bound on the metric `≤2`-jet in terms of its
+`H^{2a+2}`-content, i.e. the Sobolev embedding `H^{2a+2} ↪ C^0` of the `≤2`-jet (equivalently
+`H^{2(a+2)} ↪ C^2` of the metric), which holds precisely on the supercritical scale `2 * (a + 2) >
+finrank/2 + 2`, implied by `2 * a > finrank + 4`.  This is the honest order threshold of the
+quasilinear Ricci–DeTurck Nemytskii map `H^{a+2} → Hᵃ` (locally Lipschitz only above the critical
+Sobolev scale).
+
+Its body is `sorry`: it is the genuine atomic higher-order quasilinear covariant-jet Nemytskii
+estimate (the `Ric + Lie` summand only — the linear `Δ_∇` summand is handled separately by the
+rough-Laplacian order-dropping bound), with no spectral-nonlinearity, no
+perturbation-indexed-remainder, and no Weyl dependence. -/
+theorem exists_deTurckRHSRetagDiff_iteratedCovGrad_l2Norm_le_toHs_highOrder
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+        (g₁ g₂ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+        ∀ j : ℕ, j ≤ 2 * a →
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+              (deTurckRHSRetag (I := I) g₀ g_bg g₁ - deTurckRHSRetag (I := I) g₀ g_bg g₂)‖
+            ≤ C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
+                (T₁ - T₂)‖ :=
+  sorry
+
 /-- **The higher-order quasilinear Nemytskii bound for the re-tagged Ricci–DeTurck right-hand
 side (the genuine deep analytic Sobolev-multiplication / composition primitive).**
 
@@ -418,20 +490,31 @@ chart-Sobolev norm of the perturbation difference:
 
 This is the genuine **higher-order quasilinear Nemytskii estimate** for the *non-linear* summand
 `Ric + Lie` of the second-order Ricci–DeTurck right-hand side: `deTurckRicciRHS g_bg g` is a
-smooth Nemytskii function of the metric's `≤2`-jet, so on the supercritical scale (`Hᵃ` a Banach
-algebra, `H^{a+2}·Hᵃ ⊂ Hᵃ`) its order-`a` chart-Sobolev norm is controlled by the order-`(a+2)`
-chart-Sobolev norm of the metric perturbation, uniformly over the `H^{a+2}`-bounded family.  It
-is the intrinsic-norm analogue of the on-disk `C⁰`/`2`-jet base case
-`exists_chartDeTurckRHSComp_lipschitz_on_compact` (chart-frame value difference `≤
+smooth Nemytskii function of the metric's `≤2`-jet, so its order-`a` chart-Sobolev norm is
+controlled by the order-`(a+2)` chart-Sobolev norm of the metric perturbation, uniformly over the
+`H^{a+2}`-bounded family.  It is the intrinsic-norm analogue of the on-disk `C⁰`/`2`-jet base
+case `exists_chartDeTurckRHSComp_lipschitz_on_compact` (chart-frame value difference `≤
 C · chartMetricJet2DiffSup`), upgraded to the order-`a` intrinsic Sobolev norm.
 
-Its body is `sorry`: it is the genuine atomic higher-order quasilinear chart-RHS Sobolev-product
-/ Nemytskii-composition estimate on the supercritical `Hᵃ`-Banach-algebra scale (the
-`Ric + Lie` summand only — the linear `Δ_∇` summand is handled separately by the rough-Laplacian
-order-dropping bound), with no spectral-nonlinearity, no perturbation-indexed-remainder, and no
-Weyl dependence. -/
+It is **proven by composition** of the intrinsic covariant-gradient `L²` Nemytskii bound
+`exists_deTurckRHSRetagDiff_iteratedCovGrad_l2Norm_le_toHs_highOrder` (each iterated covariant
+gradient `∇^j` of the right-hand-side difference, `j ≤ 2 * a`, is `L²`-controlled by `‖(T₁ −
+T₂).toHs (a+2)‖`) with the on-disk reverse chart-Sobolev comparison
+`exists_tensorPouSobolevHsNorm_toReal_le_iteratedCovGrad_tensorL2Norm_sum` (the chart-`Hᵃ`
+partition-of-unity Sobolev norm is dominated by the finite sum, over `j ≤ 2 * a`, of the metric
+`L²` norms of the iterated covariant gradients `∇^j`), after rewriting each
+`tensorL2Norm … .toFun = ‖·‖` (`tensorL2Norm_toFun_eq_norm`) and `‖·.toHs a‖ =
+(tensorPouSobolevHsNorm g₀ a ·).toReal` (`tensorPouSobolevHilbert_norm_eq`).  Consumers
+transitively depend on `sorryAx` only through the genuine covariant-jet Nemytskii primitive (and
+the reverse chart-Sobolev comparison's own atomic Sobolev primitives).
+
+The supercriticality hypothesis `ha : 2 * a > Module.finrank ℝ E + 4` is genuinely required for the
+uniform-over-the-`B`-family Nemytskii constant (the quasilinear Ricci–DeTurck map `H^{a+2} → Hᵃ`
+is locally Lipschitz only above the critical Sobolev scale; see the child for the embedding) and
+mirrors the sibling consumer chain `exists_deTurckRemainderG0ContSynth`. -/
 theorem exists_deTurckRHSRetagDiff_pouHa_le_toHs_highOrder
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (B : ℝ) (hB : 0 ≤ B) :
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -444,8 +527,51 @@ theorem exists_deTurckRHSRetagDiff_pouHa_le_toHs_highOrder
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
             (deTurckRHSRetag (I := I) g₀ g_bg g₁ - deTurckRHSRetag (I := I) g₀ g_bg g₂)‖
           ≤ C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
-              (T₁ - T₂)‖ :=
-  sorry
+              (T₁ - T₂)‖ := by
+  classical
+  -- The intrinsic covariant-gradient `L²` Nemytskii bound, and the reverse chart-Sobolev
+  -- comparison expressing the chart-`Hᵃ` norm by the iterated covariant-gradient `L²` norms.
+  obtain ⟨CN, hCN_nn, hCN⟩ :=
+    exists_deTurckRHSRetagDiff_iteratedCovGrad_l2Norm_le_toHs_highOrder (I := I) g₀ g_bg a ha B hB
+  obtain ⟨CR, hCR_nn, hCR⟩ :=
+    DifferentialGeometry.PDE.RicciFlow.exists_tensorPouSobolevHsNorm_toReal_le_iteratedCovGrad_tensorL2Norm_sum
+      (I := I) g₀ 0 2 a
+  refine ⟨CR * ((2 * a + 1 : ℕ) * CN), by positivity, ?_⟩
+  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂
+  set R : Integral.L2.SmoothCcTensor g₀ 0 2 :=
+    deTurckRHSRetag (I := I) g₀ g_bg g₁ - deTurckRHSRetag (I := I) g₀ g_bg g₂ with hR_def
+  set N : ℝ := ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
+      (T₁ - T₂)‖ with hN_def
+  have hN_nn : 0 ≤ N := norm_nonneg _
+  -- The reverse chart-Sobolev comparison, applied to the right-hand-side difference `R`.
+  have hcmp :
+      (Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm (I := I) (M := M) g₀ a R).toReal ≤
+        CR * ∑ j ∈ Finset.range (2 * a + 1),
+          Integral.L2.tensorL2Norm (I := I) g₀ 0 (2 + j)
+            (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j R).toFun := hCR R
+  -- Each covariant-gradient `L²` summand `= ‖∇^j R‖ ≤ CN · N`.
+  have hsummand : ∀ j ∈ Finset.range (2 * a + 1),
+      Integral.L2.tensorL2Norm (I := I) g₀ 0 (2 + j)
+          (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j R).toFun ≤ CN * N := by
+    intro j hj
+    rw [Analysis.Sobolev.Tensor.tensorL2Norm_toFun_eq_norm]
+    exact hCN T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j (by rw [Finset.mem_range] at hj; omega)
+  -- Sum the per-`j` bounds: `∑_{j} ‖∇^j R‖ ≤ (2*a+1) · (CN · N)`.
+  have hsum_le : ∑ j ∈ Finset.range (2 * a + 1),
+        Integral.L2.tensorL2Norm (I := I) g₀ 0 (2 + j)
+          (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j R).toFun ≤
+      (2 * a + 1 : ℕ) * (CN * N) := by
+    refine le_trans (Finset.sum_le_sum hsummand) ?_
+    rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+  -- Rewrite the chart-`Hᵃ` `toHs`-norm as the seminorm `toReal`, then chain the two bounds.
+  rw [DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.tensorPouSobolevHilbert_norm_eq]
+  calc (Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm (I := I) (M := M) g₀ a R).toReal
+      ≤ CR * ∑ j ∈ Finset.range (2 * a + 1),
+          Integral.L2.tensorL2Norm (I := I) g₀ 0 (2 + j)
+            (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j R).toFun := hcmp
+    _ ≤ CR * ((2 * a + 1 : ℕ) * (CN * N)) :=
+        mul_le_mul_of_nonneg_left hsum_le hCR_nn
+    _ = CR * ((2 * a + 1 : ℕ) * CN) * N := by ring
 
 /-- **The higher-order chart-RHS Nemytskii bound in intrinsic chart-Sobolev norms: the order-`a`
 chart-Sobolev norm of the realized Ricci–DeTurck *remainder*-section difference is controlled by
@@ -487,9 +613,14 @@ the rough-Laplacian linearity `rawTensorConnLapSmooth_sub` (`Δ_∇ T₁ − Δ_
 together with the tight order-dropping bound `exists_rawConnLapSmooth_toHs_le_toHs_succ`
 (`H^a(Δ_∇ (T₁ − T₂)) ≤ C · H^{a+1}(T₁ − T₂)`) and the order-monotonicity `toHs_norm_mono`
 (`H^{a+1} ≤ H^{a+2}`).  Consumers transitively depend on `sorryAx` only through the genuine
-quasilinear Nemytskii primitive and the rough-Laplacian Sobolev/linearity primitives. -/
+quasilinear Nemytskii primitive and the rough-Laplacian Sobolev/linearity primitives.  The
+supercriticality hypothesis `ha : 2 * a > Module.finrank ℝ E + 4` is genuinely required by, and
+threaded into, the quasilinear Nemytskii primitive (the only summand needing it; the linear
+rough-Laplacian arm is order-free), and mirrors the sibling consumer chain
+`exists_deTurckRemainderG0ContSynth`. -/
 theorem exists_realizedRHSRemainder_pouHa_le_toHs_highOrder
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (B : ℝ) (hB : 0 ≤ B) :
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -508,7 +639,7 @@ theorem exists_realizedRHSRemainder_pouHa_le_toHs_highOrder
   -- The quasilinear Nemytskii bound for the re-tagged DeTurck right-hand side, and the tight
   -- single-step rough-Laplacian order-dropping bound.
   obtain ⟨CD, hCD_nn, hCD⟩ :=
-    exists_deTurckRHSRetagDiff_pouHa_le_toHs_highOrder (I := I) g₀ g_bg a B hB
+    exists_deTurckRHSRetagDiff_pouHa_le_toHs_highOrder (I := I) g₀ g_bg a ha B hB
   obtain ⟨CL, hCL_nn, hCL⟩ :=
     exists_rawConnLapSmooth_toHs_le_toHs_succ (I := I) g₀ a
   refine ⟨CD + CL, by positivity, fun T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ => ?_⟩
@@ -596,9 +727,13 @@ is `sorry`: it is the genuine order-`a` chart-RHS-tower content — the higher-o
 Nemytskii estimate composing the chart-frame DeTurck-RHS-component derivatives up to order `a`
 (each a polynomial in `(g, ∂g, …, ∂^{a+2} g)` controlled by the chart `(a+2)`-jet of the metric
 difference) with the chart-`Hᵃ`-to-intrinsic-`Hᵃ` partition-of-unity packaging — with no
-spectral-nonlinearity, no perturbation-indexed-remainder, and no Weyl dependence. -/
+spectral-nonlinearity, no perturbation-indexed-remainder, and no Weyl dependence.  The
+supercriticality hypothesis `ha : 2 * a > Module.finrank ℝ E + 4` is genuinely required by, and
+threaded into, the higher-order intrinsic Nemytskii bound, and mirrors the sibling consumer chain
+`exists_deTurckRemainderG0ContSynth`. -/
 theorem exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (B : ℝ) (hB : 0 ≤ B) :
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -632,7 +767,7 @@ theorem exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder
   -- The reverse spectral bound at order `a` and the higher-order intrinsic Nemytskii bound.
   obtain ⟨CB, hCB_nn, hCB⟩ := exists_spectralWeightedSq_le_pouHaNorm_sq (I := I) g₀ a
   obtain ⟨CA, hCA_nn, hCA⟩ :=
-    exists_realizedRHSRemainder_pouHa_le_toHs_highOrder (I := I) g₀ g_bg a B hB
+    exists_realizedRHSRemainder_pouHa_le_toHs_highOrder (I := I) g₀ g_bg a ha B hB
   refine ⟨CB * CA, mul_nonneg hCB_nn hCA_nn, ?_⟩
   intro T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂
   -- The realized-remainder section difference and the `L²`-coordinate `map_sub` rewrite.

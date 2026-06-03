@@ -339,7 +339,7 @@ packaging.  It is **proven by composition** of the posited higher-order Nemytski
 deep analytic content of the order-`a` chart-RHS tower — no Weyl dependence here; Weyl is
 consumed entirely by `ChartJet2LipControl`). -/
 theorem deTurckRealizeRemainderOf_spectralN_dist_le_of_chartJet2Control
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
       Integral.L2.SmoothCcTensor g₀ 0 2)
     (K : ℝ≥0) {R : ℝ} (hR : 0 < R)
@@ -362,7 +362,7 @@ theorem deTurckRealizeRemainderOf_spectralN_dist_le_of_chartJet2Control
   classical
   obtain ⟨B, Csob, hB, hCsob, hsob⟩ := hctrl.sobolevLip
   obtain ⟨C', hC', hchild⟩ :=
-    exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder (I := I) g₀ g_bg a B hB
+    exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder (I := I) g₀ g_bg a ha B hB
   refine ⟨⟨C', hC'⟩ * (⟨Csob, hCsob⟩ * K), fun u u' hu hu' => ?_⟩
   -- The fibre-small witnesses over the ball, and the realized metrics they assemble.
   set h := hctrl.fibreSmall u hu with hh_def
@@ -604,7 +604,7 @@ synthesis continuity `hctrl.globalH2Cont`), with no spectral-nonlinearity step (
 lift is added by the parent through `deTurckG0SpectralN_dist_le_pouHaNorm`); Weyl is consumed by
 `ChartJet2LipControl`. -/
 theorem deTurckRealizeRemainderOf_pouToHs_continuous_of_chartJet2Control
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
       Integral.L2.SmoothCcTensor g₀ 0 2)
     (K : ℝ≥0) {R : ℝ} (hR : 0 < R)
@@ -631,7 +631,7 @@ Sobolev tower `exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder` at ever
 together with the global continuity of the synthesis; Weyl is consumed by
 `ChartJet2LipControl`). -/
 theorem deTurckRealizeRemainderOf_spectralN_continuous_of_chartJet2Control
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
       Integral.L2.SmoothCcTensor g₀ 0 2)
     (K : ℝ≥0) {R : ℝ} (hR : 0 < R)
@@ -646,7 +646,7 @@ theorem deTurckRealizeRemainderOf_spectralN_continuous_of_chartJet2Control
       Continuous (fun u => IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
         (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))) :=
     deTurckRealizeRemainderOf_pouToHs_continuous_of_chartJet2Control
-      (I := I) g₀ g_bg a P K hR hctrl
+      (I := I) g₀ g_bg a ha P K hR hctrl
   -- The spectral nonlinearity is `(C-Lipschitz spectral lift) ∘ (continuous toHs synthesis)`.
   rw [Metric.continuous_iff] at hcont_toHs ⊢
   intro u ε hε
@@ -766,7 +766,7 @@ supplies continuity.  Its body carries no `sorry`; consumers transitively depend
 only through the continuity node and (via the quantitative node) the Nemytskii bound, i.e. the
 chart-RHS-tower nodes. -/
 theorem deTurckG0SpectralN_continuous_lipschitz_of_chartJet2Control
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
       Integral.L2.SmoothCcTensor g₀ 0 2)
     (K : ℝ≥0) {R : ℝ} (hR : 0 < R)
@@ -783,10 +783,11 @@ theorem deTurckG0SpectralN_continuous_lipschitz_of_chartJet2Control
   -- The quantitative `H^{a+2}` → spectral `Hᵃ`-Lipschitz bound supplies the rate `K'`
   -- and the ball `dist`-bound; the global-continuity node supplies continuity.
   obtain ⟨K', hbound⟩ :=
-    deTurckRealizeRemainderOf_spectralN_dist_le_of_chartJet2Control (I := I) g₀ g_bg a P K hR hctrl
+    deTurckRealizeRemainderOf_spectralN_dist_le_of_chartJet2Control
+      (I := I) g₀ g_bg a ha P K hR hctrl
   refine ⟨K',
     deTurckRealizeRemainderOf_spectralN_continuous_of_chartJet2Control
-      (I := I) g₀ g_bg a P K hR hctrl,
+      (I := I) g₀ g_bg a ha P K hR hctrl,
     ?_⟩
   -- The ball `dist`-bound upgrades to `LipschitzOnWith K'` on the ball.
   exact LipschitzOnWith.of_dist_le_mul (fun u hu u' hu' => hbound u u' hu hu')
@@ -917,7 +918,8 @@ theorem exists_deTurckRemainderG0ContSynth
   -- The `H^{a+2}` → spectral bridge upgrades the `H^{a+2}` control to continuity and
   -- local Lipschitz of the coordinate-spectral nonlinearity on the realized DeTurck remainder.
   obtain ⟨K', hcont, hlip⟩ :=
-    deTurckG0SpectralN_continuous_lipschitz_of_chartJet2Control (I := I) g₀ g_bg a P K hR hctrl
+    deTurckG0SpectralN_continuous_lipschitz_of_chartJet2Control
+      (I := I) g₀ g_bg a ha P K hR hctrl
   -- The genuine synthesis section is the realized DeTurck remainder of `P`.
   exact ⟨fun u => deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u), K', R, hR, hcont, hlip,
     hcarrier⟩

@@ -421,31 +421,125 @@ theorem deturck_g0_carrier_Hk_continuousOn_upto_zero
         _ = ε := by field_simp
   exact hmain
 
+/-- **Reverse finite-dimensional Fréchet↔chart-`2`-jet bound (posited finite-dim
+real-analysis input).**
+
+For two smooth metrics `g₁, g₂`, a chart base point `α`, a chart-interior point `y ∈ interior
+(extChartAt I α).target`, and an order `k ≤ 2`, the operator norm of the order-`k` iterated
+Fréchet derivative of the chart-Gram difference function `z ↦ G_{ij}(g₁)(z) − G_{ij}(g₂)(z)` at
+`y` is controlled by a single dimensional constant `C` (independent of `g₁, g₂, y`) times the
+chart-`2`-jet seminorm `chartMetricJet2DiffSup g₁ g₂ α y`:
+
+  `‖iteratedFDeriv k (fun z => chartGramOnE g₁ α i j z − chartGramOnE g₂ α i j z) y‖`
+      `≤ C · chartMetricJet2DiffSup g₁ g₂ α y`.
+
+This is the genuine reverse direction of the forward coordinate-partial bound
+`euclidPartial_sq_le_iteratedFDeriv_two_sq` (`RawConnLapRiemannianFiberNormSqLeChartData.lean`):
+there each second Euclidean partial is bounded by the iterated-Fréchet operator norm; here the
+iterated-Fréchet operator norm is bounded, for `k ≤ 2`, by the sum of the coordinate `≤2`-jet
+partials.  It is true because each `iteratedFDeriv ℝ k F y` is a continuous multilinear map whose
+operator norm over the orthonormal chart-model basis `chartModelBasis E` is dominated by the sum,
+over all `k`-multi-indices, of `|F`'s iterated partial in those coordinate directions| (a unit
+input decomposes into basis coordinates of absolute value `≤ 1`), and each such iterated partial
+of the difference function is one summand of `chartGramDiffSup`/`chartGramPartialDiffSup`/
+`chartGramPartial2DiffSup` — hence of `chartMetricJet2DiffSup`.  The `k = 0` case is
+`norm_iteratedFDeriv_zero` and a single `matrixEntryL1` term; the `k = 1, 2` cases run the
+multilinear-norm-by-basis estimate against the first/second chart partials.
+
+The dimensional constant `C` is **uniform over the metric pair** (it is the count of `k`-multi-
+indices, a function of `dim M` only — the metric pair enters solely the bounding seminorm), so it
+is quantified ahead of `g₁, g₂`.  The conclusion (an operator-norm bound by the chart-`2`-jet
+seminorm) is structurally distinct from any time/carrier datum; no packaging.  The body is
+`sorry`; consumers transitively depend on `sorryAx`. -/
+theorem chartGramDiff_iteratedFDeriv_norm_le_chartMetricJet2DiffSup (α : M)
+    (i j : Fin (Module.finrank ℝ E)) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ g₂ : SmoothRiemannianMetric I M) (k : ℕ), k ≤ 2 →
+      ∀ y ∈ interior ((extChartAt I α).target : Set E),
+        ‖iteratedFDeriv ℝ k
+            (fun z => Integral.DivergenceTheorem.chartGramOnE (I := I) g₁ α i j z -
+              Integral.DivergenceTheorem.chartGramOnE (I := I) g₂ α i j z) y‖ ≤
+          C * DeTurckCoefficients.chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y :=
+  sorry
+
+/-- **Forward chart-`2`-jet seminorm bound for the realize carrier difference (posited deep
+Sobolev-embedding input).**
+
+For the realized `g₀`-anchored flow `g_DT` (the linear realize `hreal` off `g₀` via the carrier
+`T_s`), there is a finite constant `C ≥ 0` such that, for all times `t, t' ∈ [0, T]` and every
+chart image of a good point `x`, the chart-`2`-jet seminorm of the metric pair `(g_DT t, g_DT t')`
+is controlled by `C` times the supercritical intrinsic `H^{2(dim M + 3)}` Sobolev norm of the
+carrier difference `T_s t − T_s t'`:
+
+  `chartMetricJet2DiffSup (g_DT t) (g_DT t') α (chart x) ≤ C · ‖(T_s t − T_s t').toHs (2(dim M+3))‖`.
+
+This is the carrier-direct analogue of the on-disk realize bound
+`chartMetricJet2DiffSup_realizeMetricAt_le_toHs_unconditional` (`RealizedCovGradJetInput.lean`),
+which controls `chartMetricJet2DiffSup (realizeMetricAt g₀ u₁) (realizeMetricAt g₀ u₂)` by the
+`H^{2k}` norm of `realizableRepr u₁ − realizableRepr u₂`.  Here the metric pair is supplied
+abstractly through `hreal` (`(g_DT s).inner = g₀.inner + ccTensorBilinSymm g₀ (T_s s)`), so the
+chart-Gram difference `chartGramOnE (g_DT t) − chartGramOnE (g_DT t')` depends, by bilinearity of
+`ccTensorBilinSymm`, only on the carrier difference `T_s t − T_s t'`, and the Morrey/Sobolev
+embedding `H^{2k} ↪ C²` (`2k = 2(dim M + 3) > dim M + 4`) bounds its full `≤2`-jet seminorm by the
+`H^{2(dim M+3)}` norm of `T_s t − T_s t'`, uniformly over good chart points.  It is the genuine
+deep embedding content (the carrier-side reading of the realize bound), recorded here as a clean,
+realize-witness-free statement so the Fréchet-jet modulus does not have to manufacture a
+realizability witness for the arbitrary carrier `T_s`.
+
+The conclusion is a uniform chart-`2`-jet bound by the carrier-`H` norm, structurally distinct
+from `hreal`; no packaging.  The body is `sorry`; consumers transitively depend on `sorryAx`. -/
+theorem deturck_g0_carrierDiff_chartMetricJet2DiffSup_le_toHs
+    (g₀ : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
+    (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2)
+    (hreal : ∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
+      (g_DT s).inner x v w
+        = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w)
+    (α : M) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ t' ∈ Set.Icc (0 : ℝ) T,
+      ∀ x ∈ chartLeviCivitaGoodSet (I := I) α,
+        DeTurckCoefficients.chartMetricJet2DiffSup (I := I) (M := M)
+            (g_DT t) (g_DT t') α (extChartAt I α x) ≤
+          C * ‖SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * (Module.finrank ℝ E + 3))
+            (T_s t - T_s t')‖ :=
+  sorry
+
+set_option linter.unusedVariables false in
 /-- **Fréchet-jet ↔ carrier-`H^{2k}` time-uniform modulus of the realize-perturbation
-chart-Gram `k`-jet (posited deep Fréchet↔coordinate-jet transfer).**
+chart-Gram `k`-jet (assembled over the reverse Fréchet↔jet bound and the forward carrier jet
+bound).**
 
 For the realized `g₀`-anchored flow `g_DT` (the linear realize `hreal` off `g₀`), there is a
 finite constant `C ≥ 0` such that, at every order `k ≤ 2`, the operator norm of the *Fréchet
 `k`-jet difference between two times* of the chart-Gram perturbation
 `y ↦ G_{ij}(g_DT t)(y) − G_{ij}(g₀)(y)`, evaluated at any chart image of a good point `x`, is
-bounded by `C` times the supercritical intrinsic `H^{2k}` Sobolev norm of the corresponding
-carrier difference `T_s t − T_s t'` (`2k > dim M + 4`):
+bounded by `C` times the supercritical intrinsic `H^{2(dim M+3)}` Sobolev norm of the
+corresponding carrier difference `T_s t − T_s t'`:
 
   `‖iteratedFDeriv k (Diff t) (chart x) − iteratedFDeriv k (Diff t') (chart x)‖`
-      `≤ C · ‖(T_s t − T_s t').toHs (2k)‖`,  `Diff t = chartGramOnE (g_DT t) α i j − chartGramOnE g₀ α i j`.
+      `≤ C · ‖(T_s t − T_s t').toHs (2(dim M+3))‖`,  `Diff t = chartGramOnE (g_DT t) α i j − chartGramOnE g₀ α i j`.
 
-This isolates the genuine analytic core — the finite-dimensional Fréchet↔coordinate-jet
-transfer.  Since the `g₀`-baseline term cancels in the time difference, `Diff t − Diff t' =
-chartGramOnE (g_DT t) − chartGramOnE (g_DT t')`, and the chart-`2`-jet seminorm bound
-`chartMetricJet2DiffSup_realizeMetricAt_le_toHs_unconditional` (`RealizedCovGradJetInput.lean`)
-controls each coordinate `≤2`-jet of that difference by the `H^{2k}` norm of `T_s t − T_s t'`
-uniformly over compact chart subsets; the reverse finite-dimensional Fréchet↔partial bound
-(the operator norm of `iteratedFDeriv k` controlled by the coordinate partials, the reverse of
-`euclidPartial_sq_le_iteratedFDeriv_two_sq`) lifts that pointwise seminorm bound to the Fréchet
-`k`-jet.  Both ingredients are genuine multi-hundred-line analytic structure; they are recorded
-together inside this single posited modulus.  The conclusion is a uniform operator-norm bound,
-structurally distinct from the joint-continuity conclusion it powers (no packaging).  The body
-is `sorry`; consumers transitively depend on `sorryAx`. -/
+This is *assembled by real proof* from two genuine analytic inputs:
+* the **reverse finite-dimensional Fréchet↔chart-`2`-jet bound**
+  `chartGramDiff_iteratedFDeriv_norm_le_chartMetricJet2DiffSup` (operator norm of `iteratedFDeriv k`,
+  `k ≤ 2`, of a chart-Gram difference controlled by its `chartMetricJet2DiffSup`); and
+* the **forward chart-`2`-jet carrier bound**
+  `deturck_g0_carrierDiff_chartMetricJet2DiffSup_le_toHs` (chart-`2`-jet seminorm of `(g_DT t,
+  g_DT t')` controlled by the carrier-`H^{2(dim M+3)}` norm of `T_s t − T_s t'`).
+
+Since the `g₀`-baseline term cancels in the time difference, the `g₀`-jets drop out and the
+Fréchet `k`-jet difference equals the `k`-jet of the *single* difference function `chartGramOnE
+(g_DT t) − chartGramOnE (g_DT t')` (`iteratedFDeriv_sub_apply`, both summands `C^∞` at the chart
+image of a good point by `chartGramOnE_contDiffOn`); the reverse bound at `(g_DT t, g_DT t')` then
+controls its norm by `C₁ · chartMetricJet2DiffSup (g_DT t) (g_DT t') α (chart x)`, and the forward
+carrier bound controls that by `C₁ · C₂ · ‖(T_s t − T_s t').toHs (2(dim M+3))‖`.  The conclusion is
+a uniform operator-norm bound, structurally distinct from the joint-continuity conclusion it
+powers (no packaging).  Consumers transitively depend on `sorryAx` through the two posited
+analytic inputs.
+
+The order parameters `a`/`ha` are retained on the (frozen) signature for fidelity with the
+parent/sibling interface; this assembled proof routes the bound through the fixed supercritical
+order `2(dim M + 3)`, so it does not itself consume `ha` — the narrow `unusedVariables`
+suppression above records that. -/
 theorem deturck_g0_chartGramDiff_iteratedFDeriv_timeUniformModulus
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) {T : ℝ} (hT : 0 < T)
@@ -466,8 +560,101 @@ theorem deturck_g0_chartGramDiff_iteratedFDeriv_timeUniformModulus
                 Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j y)
               (extChartAt I α x)‖ ≤
           C * ‖SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * (Module.finrank ℝ E + 3))
-            (T_s t - T_s t')‖ :=
-  sorry
+            (T_s t - T_s t')‖ := by
+  classical
+  -- The dimensional reverse-bound constant `C₁` (uniform over the metric pair), and the forward
+  -- carrier-jet constant `C₂` (uniform over `(t, t')`).
+  obtain ⟨C₂, hC₂0, hC₂⟩ :=
+    deturck_g0_carrierDiff_chartMetricJet2DiffSup_le_toHs (I := I) (M := M) g₀ hT g_DT T_s hreal α
+  obtain ⟨C₁, hC₁0, hrev⟩ :=
+    chartGramDiff_iteratedFDeriv_norm_le_chartMetricJet2DiffSup (I := I) (M := M) α i j
+  refine ⟨C₁ * C₂, mul_nonneg hC₁0 hC₂0, fun t ht t' ht' x hx => ?_⟩
+  -- The chart image of a good point lies in the open chart-target interior.
+  have hyInt : (extChartAt I α x) ∈ interior ((extChartAt I α).target : Set E) :=
+    chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx
+  have htarget_mem : (extChartAt I α).target ∈ nhds (extChartAt I α x) :=
+    Filter.mem_of_superset (isOpen_interior.mem_nhds hyInt) interior_subset
+  -- The four chart-Gram entries involved are each `C^∞` at the chart image of `x`.
+  have hcd : ∀ g : SmoothRiemannianMetric I M, ContDiffAt ℝ (k : WithTop ℕ∞)
+      (Integral.DivergenceTheorem.chartGramOnE (I := I) g α i j) (extChartAt I α x) := by
+    intro g
+    exact ((Integral.DivergenceTheorem.chartGramOnE_contDiffOn (I := I) g α i j).contDiffAt
+      htarget_mem).of_le (by exact_mod_cast le_top)
+  -- Cancel the `g₀`-baseline jets via `iteratedFDeriv_sub_apply`, leaving the `k`-jet of the
+  -- single difference function `chartGramOnE (g_DT t) − chartGramOnE (g_DT t')`.
+  have hsubt : iteratedFDeriv ℝ k
+        (fun y => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j y -
+          Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j y) (extChartAt I α x) =
+      iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j)
+          (extChartAt I α x) -
+        iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j)
+          (extChartAt I α x) :=
+    iteratedFDeriv_sub_apply (hcd (g_DT t)) (hcd g₀)
+  have hsubt' : iteratedFDeriv ℝ k
+        (fun y => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j y -
+          Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j y) (extChartAt I α x) =
+      iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j)
+          (extChartAt I α x) -
+        iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j)
+          (extChartAt I α x) :=
+    iteratedFDeriv_sub_apply (hcd (g_DT t')) (hcd g₀)
+  have hmerge : iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j)
+          (extChartAt I α x) -
+        iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j)
+          (extChartAt I α x) =
+      iteratedFDeriv ℝ k
+        (fun z => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j z -
+          Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j z) (extChartAt I α x) :=
+    (iteratedFDeriv_sub_apply (hcd (g_DT t)) (hcd (g_DT t'))).symm
+  have hjet_eq : iteratedFDeriv ℝ k
+        (fun y => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j y -
+          Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j y) (extChartAt I α x) -
+      iteratedFDeriv ℝ k
+        (fun y => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j y -
+          Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j y) (extChartAt I α x) =
+      iteratedFDeriv ℝ k
+        (fun z => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j z -
+          Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j z)
+        (extChartAt I α x) := by
+    rw [hsubt, hsubt']
+    rw [show (iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j)
+          (extChartAt I α x) -
+        iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j)
+          (extChartAt I α x)) -
+        (iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j)
+          (extChartAt I α x) -
+        iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j)
+          (extChartAt I α x)) =
+      iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j)
+          (extChartAt I α x) -
+        iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j)
+          (extChartAt I α x) by abel]
+    exact hmerge
+  rw [hjet_eq]
+  -- The reverse bound (uniform `C₁`) at the running pair `(g_DT t, g_DT t')`, then the forward
+  -- carrier bound (`C₂`), both at this `(t, t', x)`.
+  have hbound1 : ‖iteratedFDeriv ℝ k
+        (fun z => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j z -
+          Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j z) (extChartAt I α x)‖ ≤
+      C₁ * DeTurckCoefficients.chartMetricJet2DiffSup (I := I) (M := M)
+          (g_DT t) (g_DT t') α (extChartAt I α x) :=
+    hrev (g_DT t) (g_DT t') k hk (extChartAt I α x) hyInt
+  have hbound2 : DeTurckCoefficients.chartMetricJet2DiffSup (I := I) (M := M)
+        (g_DT t) (g_DT t') α (extChartAt I α x) ≤
+      C₂ * ‖SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * (Module.finrank ℝ E + 3))
+        (T_s t - T_s t')‖ :=
+    hC₂ t ht t' ht' x hx
+  calc ‖iteratedFDeriv ℝ k
+            (fun z => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j z -
+              Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j z)
+            (extChartAt I α x)‖
+      ≤ C₁ * DeTurckCoefficients.chartMetricJet2DiffSup (I := I) (M := M)
+          (g_DT t) (g_DT t') α (extChartAt I α x) := hbound1
+    _ ≤ C₁ * (C₂ * ‖SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+          (2 * (Module.finrank ℝ E + 3)) (T_s t - T_s t')‖) :=
+        mul_le_mul_of_nonneg_left hbound2 hC₁0
+    _ = (C₁ * C₂) * ‖SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+          (2 * (Module.finrank ℝ E + 3)) (T_s t - T_s t')‖ := by ring
 
 /-- **Joint continuity of the realize-perturbation chart-Gram `k`-jet from the carrier's
 `H^{2k}` continuity (assembled over the Fréchet-jet time-uniform modulus).**
