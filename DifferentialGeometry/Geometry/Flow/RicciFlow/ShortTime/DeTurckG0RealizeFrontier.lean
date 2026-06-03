@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Tensor
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.DeTurckGeometricNonlinearity
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckG0AnalyticInputs
 
 /-! # Open analytic frontier of the `g₀`-anchored DeTurck–Ricci realize construction
 
@@ -292,7 +293,10 @@ theorem deTurck_g0_carrier_realize_transport
         (u₂ s).coeff i
           = tensorL2Coeff (I := I) (M := M)
               (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-              (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) := sorry
+              (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) :=
+  deturck_g0_engine_carrier_extraction (I := I) (M := M) g₀ a ha ha2 N_cont Nsec
+    hN_coeff hNsec_lip
+    (gFibreOpBound_ccTensorBilinSymm_le_tensorHsNorm (I := I) (M := M) g₀)
 
 /-- **`k ≤ 2` chart-Gram continuity of the `g₀`-anchored realize flow
 (parabolic-regularity datum).**
@@ -335,6 +339,8 @@ theorem deTurck_g0_chartGram_continuity
         (fun q : ℝ × M => iteratedFDeriv ℝ k
           (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j)
           (extChartAt I α q.2))
-        (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α) := sorry
+        (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α) :=
+  deturck_g0_parabolic_chartGram_C2_upto_zero (I := I) (M := M) g₀ a ha hT g_DT u₂ T_s
+    N_cont hreal hcont hreg
 
 end DifferentialGeometry.PDE.RicciFlow
