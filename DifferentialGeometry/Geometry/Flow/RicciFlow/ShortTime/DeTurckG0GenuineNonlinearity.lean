@@ -292,6 +292,16 @@ structure ChartJet2LipControl (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
           ≤ B ∧
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
             (P u - P u')‖ ≤ C * (K : ℝ) * dist u u'
+  /-- **Global** `H^{a+2}`-Sobolev continuity of the regularized synthesis: the order-`(a+2)`
+  chart-Sobolev embedding of the realized perturbation varies continuously in `u` over *all* of
+  `Hᵃ⁺¹` (not just on the ball).  This is the genuine global regularity of the continuous
+  regularized eigen-synthesis `P` (a smoothing realization through the supercritical embedding
+  `Hᵃ⁺¹ ↪ H^{a+2}`): it is a *strictly weaker, structurally distinct* statement than the
+  continuity of the **realized DeTurck remainder** `deTurckRealizeRemainderOf g₀ g_bg (P ·)` (a
+  non-linear, second-order function of `P u`), supplying the global input the Nemytskii
+  continuity node needs to upgrade ball-Lipschitz to global continuity. -/
+  globalH2Cont : Continuous (fun u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) =>
+    IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) (P u))
 
 set_option linter.unusedVariables false in
 /-- **The quantitative `H^{a+2}` → spectral `Hᵃ`-Lipschitz bound of the realized
@@ -580,10 +590,19 @@ of the fibre-small domain — the supercritical embedding `Hᵃ⁺¹ ↪ H^{a+2}
 spectral `tensorHs`-valued form), structurally distinct from the spectral continuity the parent
 derives from it; no packaging.
 
+Global continuity is genuinely available because `ChartJet2LipControl` now carries the field
+`globalH2Cont`: the **global** `H^{a+2}`-Sobolev continuity of the regularized synthesis
+`u ↦ (P u).toHs (a+2)` over all of `Hᵃ⁺¹`.  This node is the genuine Nemytskii-continuity step
+that composes that global synthesis continuity with the continuity of the realized
+DeTurck-remainder map `H^{a+2} → H^a` (the second-order Ricci–DeTurck remainder is a continuous
+Nemytskii function of the metric's `H^{a+2}` content); its conclusion is therefore no longer
+under-hypothesized.
+
 The body is `sorry`: it is the genuine order-`a` chart-RHS-tower continuity content (the
-intrinsic-`Hᵃ` Nemytskii continuity of the realized DeTurck remainder), with no
-spectral-nonlinearity step (the spectral lift is added by the parent through
-`deTurckG0SpectralN_dist_le_pouHaNorm`); Weyl is consumed by `ChartJet2LipControl`. -/
+intrinsic-`Hᵃ` Nemytskii continuity of the realized DeTurck remainder, on top of the global
+synthesis continuity `hctrl.globalH2Cont`), with no spectral-nonlinearity step (the spectral
+lift is added by the parent through `deTurckG0SpectralN_dist_le_pouHaNorm`); Weyl is consumed by
+`ChartJet2LipControl`. -/
 theorem deTurckRealizeRemainderOf_pouToHs_continuous_of_chartJet2Control
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →

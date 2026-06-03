@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Realiz
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapIterL2WtwokTwoBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.FaithfulH1Embedding
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.GeneralOrderPouSpectralBound
+import DifferentialGeometry.Analysis.Sobolev.Embedding.RawConnLapToHsOrderDropping
 
 /-! # The higher-order chart-RHS Sobolev–Lipschitz Nemytskii bound
 
@@ -76,6 +77,25 @@ noncomputable def realizedRHSRemainderSection (g₀ g_bg g₁ : SmoothRiemannian
     hasCompactSupport := (deTurckRHSSection (I := I) g_bg g₁).hasCompactSupport }
     - rawTensorConnLapSmooth (I := I) g₀ 0 2 T
 
+/-- **The `g₀`-re-tagged Ricci–DeTurck right-hand-side section.**  The chart-frame DeTurck
+right-hand side `deTurckRHSSection g_bg g₁` of the realized metric `g₁`, re-tagged from the
+`g₁` type tag to the `g₀` type tag (the metric tag being a pure type-level parameter): the
+non-linear `Ric + Lie` summand of the realized remainder, isolated so its higher-order
+quasilinear Nemytskii bound can be stated independently of the linear `Δ_∇` summand. -/
+noncomputable def deTurckRHSRetag (g₀ g_bg g₁ : SmoothRiemannianMetric I M) :
+    Integral.L2.SmoothCcTensor g₀ 0 2 :=
+  { toSection := (deTurckRHSSection (I := I) g_bg g₁).toSection
+    hasCompactSupport := (deTurckRHSSection (I := I) g_bg g₁).hasCompactSupport }
+
+/-- The realized remainder section splits as its `g₀`-re-tagged DeTurck right-hand side minus its
+linear rough-Laplacian summand: `realizedRHSRemainderSection g₀ g_bg g₁ T = deTurckRHSRetag g₀
+g_bg g₁ − Δ_∇ T`. -/
+theorem realizedRHSRemainderSection_eq_sub (g₀ g_bg g₁ : SmoothRiemannianMetric I M)
+    (T : Integral.L2.SmoothCcTensor g₀ 0 2) :
+    realizedRHSRemainderSection (I := I) g₀ g_bg g₁ T
+      = deTurckRHSRetag (I := I) g₀ g_bg g₁ - rawTensorConnLapSmooth (I := I) g₀ 0 2 T :=
+  rfl
+
 /-- **The "easy" all-order iterated-Laplacian `L²` bound by the intrinsic chart-Sobolev norm
 (the differentiation arm of the spectral–Sobolev comparison, posited as the genuine atomic
 Sobolev primitive).**
@@ -97,17 +117,78 @@ are dominated by the intrinsic order-`a` (`H^{2a}`-chart) Sobolev norm `‖R.toH
 curvature commutator / Gårding regularity (no `Order2GardingFamily`, no `CommutatorDefectBound`)
 is needed for this arm.
 
-Its body is `sorry`: it is the genuine atomic "easy" all-order `Δ_∇^i`-`L²`-by-chart-Sobolev
-estimate (the elliptic-regularity-free differentiation arm), with no spectral nonlinearity, no
-perturbation-indexed remainder, and no Weyl dependence. -/
+This is **proven by composition** of three order-dropping primitives
+(`RawConnLapToHsOrderDropping.lean`): the global metric `L²` norm of `Δ_∇^i R` is controlled by
+its order-`0` chart-Sobolev norm (`exists_l2Norm_le_toHs_zero`, after `norm_toL2`); the iterated
+rough-Laplacian order-dropping bound `exists_rawConnLapIter_toHs_le_toHs`
+(`‖(Δ_∇^i R).toHs 0‖ ≤ Cᵢ · ‖R.toHs i‖`); and the order-monotonicity `toHs_norm_mono`
+(`‖R.toHs i‖ ≤ ‖R.toHs a‖` for `i ≤ a`).  The per-iteration constants `Cᵢ` are made uniform
+over `i ≤ a` by dominating each by their finite sum `∑_{j ≤ a} C_j`.  Consumers transitively
+depend on `sorryAx` only through the two genuine atomic Sobolev primitives
+`exists_rawConnLapSmooth_toHs_le_toHs_succ` (the tight single-step rough-Laplacian chart-Sobolev
+bound) and `exists_l2Norm_le_toHs_zero` (the `L² ≤ C · H⁰_chart` comparison). -/
 theorem exists_rawConnLapIter_l2Norm_le_toHs
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (R : Integral.L2.SmoothCcTensor g₀ 0 2) (i : ℕ), i ≤ a →
         ‖Integral.L2.SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
             (Integral.Connection.rawTensorConnLapIter (I := I) g₀ 0 2 i R)‖ ≤
-          C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a R‖ :=
-  sorry
+          C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a R‖ := by
+  classical
+  -- The `L² ≤ C₂ · H⁰_chart` comparison constant.
+  obtain ⟨C₂, hC₂_nn, hC₂⟩ := exists_l2Norm_le_toHs_zero (I := I) g₀
+  -- The per-iteration order-dropping constant `Cᵢ` (chosen for each `i ≤ a`), at output order 0.
+  set Cfun : ℕ → ℝ := fun i =>
+    Classical.choose (exists_rawConnLapIter_toHs_le_toHs (I := I) g₀ i 0) with hCfun_def
+  have hCfun_nn : ∀ i, 0 ≤ Cfun i := fun i =>
+    (Classical.choose_spec (exists_rawConnLapIter_toHs_le_toHs (I := I) g₀ i 0)).1
+  have hCfun_bound : ∀ (i : ℕ) (T : Integral.L2.SmoothCcTensor g₀ 0 2),
+      ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) 0
+          (Integral.Connection.rawTensorConnLapIter (I := I) g₀ 0 2 i T)‖ ≤
+        Cfun i * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (0 + i) T‖ :=
+    fun i => (Classical.choose_spec
+      (exists_rawConnLapIter_toHs_le_toHs (I := I) g₀ i 0)).2
+  -- The uniform constant: `C₂ · (∑_{j ≤ a} C_j)`.
+  set Csum : ℝ := ∑ j ∈ Finset.range (a + 1), Cfun j with hCsum_def
+  have hCsum_nn : 0 ≤ Csum := Finset.sum_nonneg (fun j _ => hCfun_nn j)
+  refine ⟨C₂ * Csum, mul_nonneg hC₂_nn hCsum_nn, fun R i hi => ?_⟩
+  -- `‖toL2 (Δ_∇^i R)‖ ≤ C₂ · ‖(Δ_∇^i R).toHs 0‖`.
+  have hstep1 :
+      ‖Integral.L2.SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+          (Integral.Connection.rawTensorConnLapIter (I := I) g₀ 0 2 i R)‖ ≤
+        C₂ * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) 0
+          (Integral.Connection.rawTensorConnLapIter (I := I) g₀ 0 2 i R)‖ :=
+    hC₂ (Integral.Connection.rawTensorConnLapIter (I := I) g₀ 0 2 i R)
+  -- `‖(Δ_∇^i R).toHs 0‖ ≤ Cfun i · ‖R.toHs i‖ ≤ Cfun i · ‖R.toHs a‖`.
+  have hRa_nn : 0 ≤ ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a R‖ :=
+    norm_nonneg _
+  have hstep2 :
+      ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) 0
+          (Integral.Connection.rawTensorConnLapIter (I := I) g₀ 0 2 i R)‖ ≤
+        Cfun i * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a R‖ := by
+    refine le_trans (hCfun_bound i R) ?_
+    have hmono :
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (0 + i) R‖ ≤
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a R‖ := by
+      have : (0 + i) ≤ a := by omega
+      exact toHs_norm_mono (I := I) (M := M) g₀ this R
+    exact mul_le_mul_of_nonneg_left hmono (hCfun_nn i)
+  -- `Cfun i ≤ Csum` (each summand dominated by the finite sum), so `Cfun i · ‖R.toHs a‖ ≤
+  -- Csum · ‖R.toHs a‖`.
+  have hCfun_le_Csum : Cfun i ≤ Csum := by
+    rw [hCsum_def]
+    exact Finset.single_le_sum (fun j _ => hCfun_nn j) (Finset.mem_range.mpr (by omega))
+  calc ‖Integral.L2.SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+          (Integral.Connection.rawTensorConnLapIter (I := I) g₀ 0 2 i R)‖
+      ≤ C₂ * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) 0
+          (Integral.Connection.rawTensorConnLapIter (I := I) g₀ 0 2 i R)‖ := hstep1
+    _ ≤ C₂ * (Cfun i * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a R‖) :=
+        mul_le_mul_of_nonneg_left hstep2 hC₂_nn
+    _ ≤ C₂ * (Csum * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a R‖) :=
+        mul_le_mul_of_nonneg_left
+          (mul_le_mul_of_nonneg_right hCfun_le_Csum hRa_nn) hC₂_nn
+    _ = C₂ * Csum * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a R‖ := by
+        ring
 
 /-- **Binomial collapse of the spectral weight.** For `λ ≥ 0` and an order `a`, the Sobolev
 weight base `(1 + λ)^a` is dominated by a constant multiple of the finite sum of even powers
@@ -321,6 +402,51 @@ theorem exists_spectralWeightedSq_le_pouHaNorm_sq
             = Real.sqrt (D * (a + 1)) ^ 2 * (C₀ * toHsNorm) ^ 2 from by ring, hsqrt]
         ring
 
+/-- **The higher-order quasilinear Nemytskii bound for the re-tagged Ricci–DeTurck right-hand
+side (the genuine deep analytic Sobolev-multiplication / composition primitive).**
+
+For an anchor `g₀`, a flow background `g_bg`, an order `a`, and a uniform `H^{a+2}`-size bound
+`B ≥ 0`, there is a single constant `C ≥ 0` such that for any two `g₀`-fibre-small perturbations
+`T₁, T₂` whose `H^{a+2}` norms are `≤ B`, and any two realized metrics `g₁, g₂` of `T₁, T₂`
+(tied by the fibrewise `inner`-identities), the order-`a` chart-Sobolev norm of the difference
+of the **re-tagged DeTurck right-hand-side** sections is bounded by the order-`(a+2)`
+chart-Sobolev norm of the perturbation difference:
+```
+‖(deTurckRHSRetag g₀ g_bg g₁ − deTurckRHSRetag g₀ g_bg g₂).toHs a‖
+  ≤ C · ‖(T₁ − T₂).toHs (a+2)‖ .
+```
+
+This is the genuine **higher-order quasilinear Nemytskii estimate** for the *non-linear* summand
+`Ric + Lie` of the second-order Ricci–DeTurck right-hand side: `deTurckRicciRHS g_bg g` is a
+smooth Nemytskii function of the metric's `≤2`-jet, so on the supercritical scale (`Hᵃ` a Banach
+algebra, `H^{a+2}·Hᵃ ⊂ Hᵃ`) its order-`a` chart-Sobolev norm is controlled by the order-`(a+2)`
+chart-Sobolev norm of the metric perturbation, uniformly over the `H^{a+2}`-bounded family.  It
+is the intrinsic-norm analogue of the on-disk `C⁰`/`2`-jet base case
+`exists_chartDeTurckRHSComp_lipschitz_on_compact` (chart-frame value difference `≤
+C · chartMetricJet2DiffSup`), upgraded to the order-`a` intrinsic Sobolev norm.
+
+Its body is `sorry`: it is the genuine atomic higher-order quasilinear chart-RHS Sobolev-product
+/ Nemytskii-composition estimate on the supercritical `Hᵃ`-Banach-algebra scale (the
+`Ric + Lie` summand only — the linear `Δ_∇` summand is handled separately by the rough-Laplacian
+order-dropping bound), with no spectral-nonlinearity, no perturbation-indexed-remainder, and no
+Weyl dependence. -/
+theorem exists_deTurckRHSRetagDiff_pouHa_le_toHs_highOrder
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (B : ℝ) (hB : 0 ≤ B) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+        (g₁ g₂ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
+            (deTurckRHSRetag (I := I) g₀ g_bg g₁ - deTurckRHSRetag (I := I) g₀ g_bg g₂)‖
+          ≤ C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
+              (T₁ - T₂)‖ :=
+  sorry
+
 /-- **The higher-order chart-RHS Nemytskii bound in intrinsic chart-Sobolev norms: the order-`a`
 chart-Sobolev norm of the realized Ricci–DeTurck *remainder*-section difference is controlled by
 the order-`(a+2)` chart-Sobolev norm of the perturbation difference.**
@@ -348,11 +474,20 @@ analogue of `chartMetricJet2DiffSup_realizeMetricAt_le_toHs_unconditional` (the 
 chart-`2`-jet instance).  Its conclusion is a *real-valued* `toHs`-norm inequality, structurally
 distinct from the spectral square-sum conclusion of the parent; no packaging.
 
-The body is `sorry`: it is the genuine order-`a` quasilinear Nemytskii content (the higher-order
-chart-RHS multiplication / composition estimate on the supercritical scale, composing the
-chart-frame DeTurck-RHS-component derivatives up to order `a` with the chart-`Hᵃ`-to-intrinsic
-partition-of-unity packaging), with no spectral-nonlinearity, no perturbation-indexed-remainder,
-and no Weyl dependence. -/
+This is **proven by composition**: the realized-remainder difference splits (in the
+`SmoothCcTensor` additive group) as the difference of re-tagged DeTurck right-hand sides minus
+the difference of linear rough-Laplacian summands,
+```
+(realizedRem₁ − realizedRem₂) = (D₁ − D₂) − (Δ_∇ T₁ − Δ_∇ T₂),  Dⱼ := deTurckRHSRetag g₀ g_bg gⱼ ,
+```
+so by the `toHs`-triangle inequality the order-`a` norm is bounded by the sum of the order-`a`
+norms of the two pieces.  The first piece is the genuine quasilinear Nemytskii primitive
+`exists_deTurckRHSRetagDiff_pouHa_le_toHs_highOrder` (the `Ric + Lie` summand); the second uses
+the rough-Laplacian linearity `rawTensorConnLapSmooth_sub` (`Δ_∇ T₁ − Δ_∇ T₂ = Δ_∇ (T₁ − T₂)`)
+together with the tight order-dropping bound `exists_rawConnLapSmooth_toHs_le_toHs_succ`
+(`H^a(Δ_∇ (T₁ − T₂)) ≤ C · H^{a+1}(T₁ − T₂)`) and the order-monotonicity `toHs_norm_mono`
+(`H^{a+1} ≤ H^{a+2}`).  Consumers transitively depend on `sorryAx` only through the genuine
+quasilinear Nemytskii primitive and the rough-Laplacian Sobolev/linearity primitives. -/
 theorem exists_realizedRHSRemainder_pouHa_le_toHs_highOrder
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (B : ℝ) (hB : 0 ≤ B) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -368,8 +503,66 @@ theorem exists_realizedRHSRemainder_pouHa_le_toHs_highOrder
             (realizedRHSRemainderSection (I := I) g₀ g_bg g₁ T₁
               - realizedRHSRemainderSection (I := I) g₀ g_bg g₂ T₂)‖
           ≤ C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
-              (T₁ - T₂)‖ :=
-  sorry
+              (T₁ - T₂)‖ := by
+  classical
+  -- The quasilinear Nemytskii bound for the re-tagged DeTurck right-hand side, and the tight
+  -- single-step rough-Laplacian order-dropping bound.
+  obtain ⟨CD, hCD_nn, hCD⟩ :=
+    exists_deTurckRHSRetagDiff_pouHa_le_toHs_highOrder (I := I) g₀ g_bg a B hB
+  obtain ⟨CL, hCL_nn, hCL⟩ :=
+    exists_rawConnLapSmooth_toHs_le_toHs_succ (I := I) g₀ a
+  refine ⟨CD + CL, by positivity, fun T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ => ?_⟩
+  set D₁ : Integral.L2.SmoothCcTensor g₀ 0 2 := deTurckRHSRetag (I := I) g₀ g_bg g₁ with hD₁_def
+  set D₂ : Integral.L2.SmoothCcTensor g₀ 0 2 := deTurckRHSRetag (I := I) g₀ g_bg g₂ with hD₂_def
+  set L₁ : Integral.L2.SmoothCcTensor g₀ 0 2 := rawTensorConnLapSmooth (I := I) g₀ 0 2 T₁
+    with hL₁_def
+  set L₂ : Integral.L2.SmoothCcTensor g₀ 0 2 := rawTensorConnLapSmooth (I := I) g₀ 0 2 T₂
+    with hL₂_def
+  set TΔ : Integral.L2.SmoothCcTensor g₀ 0 2 := T₁ - T₂ with hTΔ_def
+  -- The realized-remainder difference equals `(D₁ − D₂) − (L₁ − L₂)`.
+  have hsplit : realizedRHSRemainderSection (I := I) g₀ g_bg g₁ T₁
+        - realizedRHSRemainderSection (I := I) g₀ g_bg g₂ T₂
+      = (D₁ - D₂) - (L₁ - L₂) := by
+    rw [realizedRHSRemainderSection_eq_sub, realizedRHSRemainderSection_eq_sub,
+      hD₁_def, hD₂_def, hL₁_def, hL₂_def]
+    abel
+  -- The linear piece `L₁ − L₂ = Δ_∇ (T₁ − T₂)`.
+  have hlin : L₁ - L₂ = rawTensorConnLapSmooth (I := I) g₀ 0 2 TΔ := by
+    rw [hL₁_def, hL₂_def, hTΔ_def, rawTensorConnLapSmooth_sub]
+  -- Norm of the realized-remainder difference: triangle on the `toHs`-`a` of the two pieces.
+  rw [hsplit, SmoothCcTensor.toHs_sub]
+  refine le_trans (norm_sub_le _ _) ?_
+  -- The re-tagged DeTurck piece `‖(D₁ − D₂).toHs a‖ ≤ CD · ‖TΔ.toHs (a+2)‖`.
+  have hDbound :
+      ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (D₁ - D₂)‖
+        ≤ CD * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) TΔ‖ := by
+    rw [hD₁_def, hD₂_def, hTΔ_def]
+    exact hCD T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂
+  -- The linear piece `‖(L₁ − L₂).toHs a‖ ≤ CL · ‖TΔ.toHs (a+1)‖ ≤ CL · ‖TΔ.toHs (a+2)‖`.
+  have hLbound :
+      ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (L₁ - L₂)‖
+        ≤ CL * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) TΔ‖ := by
+    rw [hlin]
+    refine le_trans (hCL TΔ) ?_
+    have hmono :
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 1) TΔ‖ ≤
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) TΔ‖ :=
+      toHs_norm_mono (I := I) (M := M) g₀ (by omega) TΔ
+    exact mul_le_mul_of_nonneg_left hmono hCL_nn
+  -- Combine.
+  have hTΔ_nn :
+      0 ≤ ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) TΔ‖ :=
+    norm_nonneg _
+  calc ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (D₁ - D₂)‖
+        + ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (L₁ - L₂)‖
+      ≤ CD * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) TΔ‖
+          + CL * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) TΔ‖ :=
+        add_le_add hDbound hLbound
+    _ = (CD + CL) *
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) TΔ‖ := by ring
+    _ = (CD + CL) *
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
+            (T₁ - T₂)‖ := by rw [hTΔ_def]
 
 /-- **The higher-order chart-RHS Sobolev–Lipschitz Nemytskii bound (the genuine deep analytic
 input of the order-`a` chart-RHS tower).**

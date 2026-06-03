@@ -421,30 +421,81 @@ theorem deturck_g0_carrier_Hk_continuousOn_upto_zero
         _ = ε := by field_simp
   exact hmain
 
+/-- **Fréchet-jet ↔ carrier-`H^{2k}` time-uniform modulus of the realize-perturbation
+chart-Gram `k`-jet (posited deep Fréchet↔coordinate-jet transfer).**
+
+For the realized `g₀`-anchored flow `g_DT` (the linear realize `hreal` off `g₀`), there is a
+finite constant `C ≥ 0` such that, at every order `k ≤ 2`, the operator norm of the *Fréchet
+`k`-jet difference between two times* of the chart-Gram perturbation
+`y ↦ G_{ij}(g_DT t)(y) − G_{ij}(g₀)(y)`, evaluated at any chart image of a good point `x`, is
+bounded by `C` times the supercritical intrinsic `H^{2k}` Sobolev norm of the corresponding
+carrier difference `T_s t − T_s t'` (`2k > dim M + 4`):
+
+  `‖iteratedFDeriv k (Diff t) (chart x) − iteratedFDeriv k (Diff t') (chart x)‖`
+      `≤ C · ‖(T_s t − T_s t').toHs (2k)‖`,  `Diff t = chartGramOnE (g_DT t) α i j − chartGramOnE g₀ α i j`.
+
+This isolates the genuine analytic core — the finite-dimensional Fréchet↔coordinate-jet
+transfer.  Since the `g₀`-baseline term cancels in the time difference, `Diff t − Diff t' =
+chartGramOnE (g_DT t) − chartGramOnE (g_DT t')`, and the chart-`2`-jet seminorm bound
+`chartMetricJet2DiffSup_realizeMetricAt_le_toHs_unconditional` (`RealizedCovGradJetInput.lean`)
+controls each coordinate `≤2`-jet of that difference by the `H^{2k}` norm of `T_s t − T_s t'`
+uniformly over compact chart subsets; the reverse finite-dimensional Fréchet↔partial bound
+(the operator norm of `iteratedFDeriv k` controlled by the coordinate partials, the reverse of
+`euclidPartial_sq_le_iteratedFDeriv_two_sq`) lifts that pointwise seminorm bound to the Fréchet
+`k`-jet.  Both ingredients are genuine multi-hundred-line analytic structure; they are recorded
+together inside this single posited modulus.  The conclusion is a uniform operator-norm bound,
+structurally distinct from the joint-continuity conclusion it powers (no packaging).  The body
+is `sorry`; consumers transitively depend on `sorryAx`. -/
+theorem deturck_g0_chartGramDiff_iteratedFDeriv_timeUniformModulus
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) {T : ℝ} (hT : 0 < T)
+    (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2)
+    (hreal : ∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
+      (g_DT s).inner x v w
+        = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w)
+    (α : M) (i j : Fin (Module.finrank ℝ E)) (k : ℕ) (hk : k ≤ 2) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ t' ∈ Set.Icc (0 : ℝ) T,
+      ∀ x ∈ chartLeviCivitaGoodSet (I := I) α,
+        ‖iteratedFDeriv ℝ k
+              (fun y => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j y -
+                Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j y)
+              (extChartAt I α x) -
+            iteratedFDeriv ℝ k
+              (fun y => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j y -
+                Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j y)
+              (extChartAt I α x)‖ ≤
+          C * ‖SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * (Module.finrank ℝ E + 3))
+            (T_s t - T_s t')‖ :=
+  sorry
+
 /-- **Joint continuity of the realize-perturbation chart-Gram `k`-jet from the carrier's
-`H^{2k}` continuity (deep Fréchet↔coordinate-jet transfer — posited child).**
+`H^{2k}` continuity (assembled over the Fréchet-jet time-uniform modulus).**
 
 For the realized `g₀`-anchored flow `g_DT` (the linear realize `hreal` off `g₀`), *given*
 the up-to-`t = 0` supercritical `H^{2k}` continuity `hHk` of the smooth representatives
 `T_s`, the order-`k ≤ 2` iterated Fréchet derivative of the *chart-Gram perturbation*
-`y ↦ G_{ij}(g_DT t)(y) − G_{ij}(g₀)(y)` (the realized symmetric form of the tensor `T_s t`)
-is jointly continuous in `(time, point)` on `[0, T] × chartLeviCivitaGoodSet α`.
+`y ↦ G_{ij}(g_DT t)(y) − G_{ij}(g₀)(y)` is jointly continuous in `(time, point)` on
+`[0, T] × chartLeviCivitaGoodSet α`.
 
-This isolates the genuine analytic core — the Fréchet↔coordinate-jet transfer — on the
-*perturbation alone* (the `g₀`-baseline term carries no `t`-dependence and is handled by
-real proof in the parent).  The chart-`2`-jet seminorm bound
-`chartMetricJet2DiffSup_realizeMetricAt_le_toHs_unconditional` (`RealizedCovGradJetInput.lean`)
-controls each coordinate `2`-jet of the perturbation *difference* between two times by the
-`H^{2k}` norm of the corresponding carrier difference, uniformly over compact chart subsets;
-the reverse finite-dimensional Fréchet↔partial bound (the operator-norm of `iteratedFDeriv k`
-controlled by the coordinate partials, the reverse of `euclidPartial_sq_le_iteratedFDeriv_two_sq`)
-lifts that to the Fréchet jet, and the supplied up-to-`0` `H^{2k}` time-continuity `hHk`
-then gives joint `(time, point)`-continuity.  The perturbation `H^{2k}`-continuity `hHk`
-is the deep parabolic-up-to-boundary input (supplied by
-`deturck_g0_carrier_Hk_continuousOn_upto_zero`); this node is the embedding/Fréchet-jet
-content on top of it.  The conclusion is the joint continuity of the perturbation jet,
-structurally distinct from `hHk` and the realize hypotheses; no packaging.  The body is
-`sorry`; consumers transitively depend on `sorryAx`. -/
+This is *assembled by real proof* from two inputs: the genuine deep Fréchet↔coordinate-jet
+**time-uniform modulus** `deturck_g0_chartGramDiff_iteratedFDeriv_timeUniformModulus` (the
+operator-norm of the Fréchet `k`-jet time-difference controlled by `C·‖(T_s t − T_s t').toHs
+(2k)‖`, uniformly over good points), and the **per-time spatial continuity** of the
+perturbation jet (proved here from `chartGramOnE_contDiffOn`: for fixed `t`, both `g_DT t`
+and `g₀` are smooth metrics, so `Diff t` is `C^∞` on the chart target and its `k`-jet is
+continuous on the open good-set image, precomposed with the continuous chart evaluation).  The
+joint continuity at `(t₀, x₀)` then follows by the uniform-modulus triangle estimate
+`‖f(t,x) − f(t₀,x₀)‖ ≤ ‖f(t,x) − f(t₀,x)‖ + ‖f(t₀,x) − f(t₀,x₀)‖`, the first summand small by
+`hHk`-continuity at `t₀` (uniformly in `x`, through the modulus), the second by the spatial
+continuity of `f(t₀, ·)` at `x₀`.  The carrier `H^{2k}`-continuity `hHk` is the deep
+parabolic-up-to-boundary input (supplied by `deturck_g0_carrier_Hk_continuousOn_upto_zero`);
+this node is the joint-continuity assembly on top of it and the posited Fréchet-jet modulus.
+The realize-flow hypotheses are all load-bearing: `hreal` feeds the modulus child, `hHk`
+drives the time continuity, and `a`/`ha`/`hT` are threaded into the modulus.  The conclusion
+is the joint continuity of the perturbation jet, structurally distinct from `hHk` and the
+realize hypotheses; no packaging.  Consumers transitively depend on `sorryAx` through the
+posited Fréchet-jet modulus. -/
 theorem deturck_g0_chartGramDiff_iteratedFDeriv_jointContinuous
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) {T : ℝ} (hT : 0 < T)
@@ -463,7 +514,109 @@ theorem deturck_g0_chartGramDiff_iteratedFDeriv_jointContinuous
           (fun y => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j y -
             Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j y)
           (extChartAt I α q.2))
-        (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α) := sorry
+        (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α) := by
+  classical
+  intro α i j k hk
+  set D : Set (ℝ × M) := Set.Icc (0 : ℝ) T ×ˢ chartLeviCivitaGoodSet (I := I) α with hD_def
+  -- The chart-Gram perturbation `Diff t = chartGramOnE (g_DT t) − chartGramOnE g₀`.
+  set Diff : ℝ → E → ℝ := fun t y =>
+    Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j y -
+      Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j y with hDiff_def
+  -- The supercritical reference chart order `k₀` for the `H^{2k₀}` modulus.
+  set k₀ : ℕ := Module.finrank ℝ E + 3 with hk₀_def
+  have hk₀_super : 2 * k₀ > Module.finrank ℝ E + 4 := by rw [hk₀_def]; omega
+  -- The deep Fréchet-jet time-uniform modulus.
+  obtain ⟨C, hC0, hmod⟩ :=
+    deturck_g0_chartGramDiff_iteratedFDeriv_timeUniformModulus (I := I) (M := M) g₀ a ha hT
+      g_DT T_s hreal α i j k hk
+  -- Per-time spatial continuity of the perturbation jet on the open good-set image.
+  have hG₀_cd : ContDiffOn ℝ ∞
+      (Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j) (extChartAt I α).target :=
+    Integral.DivergenceTheorem.chartGramOnE_contDiffOn (I := I) g₀ α i j
+  have hgoodsub : chartLeviCivitaGoodSet (I := I) α ⊆ (extChartAt I α).source :=
+    fun x hx => chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hx
+  have hopen : IsOpen (↑(extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) :=
+    chartLeviCivitaGoodSet_image_isOpen (I := I) α
+  have himgsub : (↑(extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) ⊆
+      (extChartAt I α).target := by
+    rw [chartLeviCivitaGoodSet_image_eq_target (I := I) α]
+  have hspatial : ∀ t : ℝ, ContinuousOn
+      (fun x : M => iteratedFDeriv ℝ k (Diff t) (extChartAt I α x))
+      (chartLeviCivitaGoodSet (I := I) α) := by
+    intro t
+    have hDiff_cd : ContDiffOn ℝ ∞ (Diff t) (extChartAt I α).target := by
+      have hGt_cd : ContDiffOn ℝ ∞
+          (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j)
+          (extChartAt I α).target :=
+        Integral.DivergenceTheorem.chartGramOnE_contDiffOn (I := I) (g_DT t) α i j
+      exact hGt_cd.sub hG₀_cd
+    have hiF_cont : ContinuousOn (iteratedFDeriv ℝ k (Diff t))
+        (↑(extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) :=
+      ContinuousOn.continuousOn_iteratedFDeriv (hDiff_cd.mono himgsub) hopen
+        (by exact_mod_cast le_top)
+    have hev_cont : ContinuousOn (fun x : M => extChartAt I α x)
+        (chartLeviCivitaGoodSet (I := I) α) :=
+      (continuousOn_extChartAt (I := I) α).mono hgoodsub
+    have hmaps : Set.MapsTo (fun x : M => extChartAt I α x)
+        (chartLeviCivitaGoodSet (I := I) α)
+        (↑(extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) :=
+      fun x hx => ⟨x, hx, rfl⟩
+    exact hiF_cont.comp hev_cont hmaps
+  -- The carrier-`H^{2k₀}` time-continuity (`hHk` at the reference order `k₀`).
+  have hHk₀ := hHk k₀ hk₀_super
+  -- Joint continuity at each `(t₀, x₀) ∈ D`: the domain `ℝ × M` is not metric, so we argue
+  -- through the product neighbourhood filter, using the metric codomain only.
+  intro q₀ hq₀
+  obtain ⟨ht₀, hx₀⟩ := hq₀
+  rw [ContinuousWithinAt, hD_def, nhdsWithin_prod_eq]
+  refine Metric.tendsto_nhds.mpr (fun ε hε => ?_)
+  -- Time-factor eventual: `C · ‖(T_s t − T_s t₀).toHs (2k₀)‖ < ε/2` for `t` near `t₀` in
+  -- `Icc 0 T`, together with the membership `t ∈ Icc 0 T` (from the within-filter).
+  have htime_ev : ∀ᶠ t in nhdsWithin q₀.1 (Set.Icc (0 : ℝ) T),
+      t ∈ Set.Icc (0 : ℝ) T ∧
+      C * ‖SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * k₀)
+        (T_s t - T_s q₀.1)‖ < ε / 2 := by
+    refine eventually_mem_nhdsWithin.and ?_
+    rcases le_or_gt C 0 with hCle | hCpos
+    · -- `C = 0`: the bound `0 < ε/2` holds for every `t`.
+      have hC00 : C = 0 := le_antisymm hCle hC0
+      refine Filter.Eventually.of_forall (fun t => ?_)
+      rw [hC00, zero_mul]; positivity
+    · -- `C > 0`: pull back `ε/(2C)` through the carrier `H^{2k₀}`-continuity at `t₀`.
+      have hHk₀_at := hHk₀ q₀.1 ht₀
+      rw [ContinuousWithinAt, Metric.tendsto_nhds] at hHk₀_at
+      filter_upwards [hHk₀_at (ε / (2 * C)) (by positivity)] with t ht
+      rw [dist_eq_norm, ← smoothCcTensor_toHs_sub_local] at ht
+      calc C * ‖SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * k₀) (T_s t - T_s q₀.1)‖
+          < C * (ε / (2 * C)) := by
+            apply mul_lt_mul_of_pos_left (by simpa [hk₀_def] using ht) hCpos
+        _ = ε / 2 := by field_simp
+  -- Space-factor eventual: the spatial jet at fixed time `t₀` is within `ε/2` of its value
+  -- at `x₀`, for `x` near `x₀` in `goodSet`, together with `x ∈ goodSet`.
+  have hspace_ev : ∀ᶠ x in nhdsWithin q₀.2 (chartLeviCivitaGoodSet (I := I) α),
+      x ∈ chartLeviCivitaGoodSet (I := I) α ∧
+      dist (iteratedFDeriv ℝ k (Diff q₀.1) (extChartAt I α x))
+        (iteratedFDeriv ℝ k (Diff q₀.1) (extChartAt I α q₀.2)) < ε / 2 := by
+    refine eventually_mem_nhdsWithin.and ?_
+    have hspatial_at := hspatial q₀.1 q₀.2 hx₀
+    rw [ContinuousWithinAt, Metric.tendsto_nhds] at hspatial_at
+    exact hspatial_at (ε / 2) (by positivity)
+  -- Combine the two factor-eventuals on the product filter and apply the triangle estimate.
+  filter_upwards [htime_ev.prod_mk hspace_ev] with q hq
+  obtain ⟨⟨htmem, htbd⟩, ⟨hxmem, hxbd⟩⟩ := hq
+  -- `dist (f q) (f q₀) ≤ dist (f q) (f (t₀, x_q)) + dist (f (t₀, x_q)) (f q₀)`.
+  have htime : dist (iteratedFDeriv ℝ k (Diff q.1) (extChartAt I α q.2))
+      (iteratedFDeriv ℝ k (Diff q₀.1) (extChartAt I α q.2)) < ε / 2 := by
+    rw [dist_eq_norm]
+    exact lt_of_le_of_lt (by simpa [hk₀_def] using hmod q.1 htmem q₀.1 ht₀ q.2 hxmem) htbd
+  calc dist (iteratedFDeriv ℝ k (Diff q.1) (extChartAt I α q.2))
+          (iteratedFDeriv ℝ k (Diff q₀.1) (extChartAt I α q₀.2))
+      ≤ dist (iteratedFDeriv ℝ k (Diff q.1) (extChartAt I α q.2))
+            (iteratedFDeriv ℝ k (Diff q₀.1) (extChartAt I α q.2)) +
+          dist (iteratedFDeriv ℝ k (Diff q₀.1) (extChartAt I α q.2))
+            (iteratedFDeriv ℝ k (Diff q₀.1) (extChartAt I α q₀.2)) := dist_triangle _ _ _
+    _ < ε / 2 + ε / 2 := add_lt_add htime hxbd
+    _ = ε := by ring
 
 set_option linter.unusedVariables false in
 /-- **Sobolev-embedding chart-`C²` joint-continuity bridge for the `g₀`-anchored realize
