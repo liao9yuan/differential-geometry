@@ -471,6 +471,128 @@ theorem deTurckRealizeRemainderOf_spectralN_dist_le_of_chartJet2Control
     _ ≤ Real.sqrt ((C' * (Csob * (K : ℝ) * dist u u')) ^ 2) := Real.sqrt_le_sqrt hstep1
     _ = C' * (Csob * (K : ℝ) * dist u u') := Real.sqrt_sq hKlip_nn
 
+omit [BoundarylessManifold I M] in
+/-- The intrinsic order-`a` chart-Sobolev embedding `SmoothCcTensor.toHs a` commutes with
+subtraction: `(R₁ − R₂).toHs a = R₁.toHs a − R₂.toHs a`.  Both sides are the completion
+coercion of the wrapper subtraction, which is the pointwise section subtraction
+(`UniformSpace.Completion.coe_sub`). -/
+private theorem smoothCcTensor_toHs_sub (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (R₁ R₂ : Integral.L2.SmoothCcTensor g₀ 0 2) :
+    IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (R₁ - R₂)
+      = IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a R₁
+        - IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a R₂ := by
+  unfold IntrinsicSobolev.SmoothCcTensor.toHs
+  rw [← UniformSpace.Completion.coe_sub]
+  rfl
+
+/-- **The order-`a` spectral nonlinearity is `C`-Lipschitz, with respect to the intrinsic
+order-`a` chart-Sobolev (`toHs a`) norm, on *all* of the smooth compactly-supported sections.**
+
+For any two smooth compactly-supported `(0,2)`-tensor sections `R₁, R₂`, the `Hᵃ`-distance
+between their coordinate-spectral nonlinearities is controlled by the intrinsic order-`a`
+chart-Sobolev norm of their difference:
+```
+dist (deTurckG0SpectralN g₀ a R₁) (deTurckG0SpectralN g₀ a R₂) ≤ C · ‖(R₁ − R₂).toHs a‖ .
+```
+This is the global (un-restricted) `toHs`-`a` Lipschitz of the spectral lift, derived from the
+reverse spectral–Sobolev bound `exists_spectralWeightedSq_le_pouHaNorm_sq` applied to the
+section difference `R₁ − R₂`: the `Hᵃ`-`dist`-squared between the two spectral lifts equals the
+weighted spectral square-sum of the `L²`-coordinates of `R₁ − R₂`, which that bound controls by
+`(C · ‖(R₁ − R₂).toHs a‖)²`.  It is the section-level analytic backbone shared by the
+ball-Lipschitz node and the continuity node. -/
+theorem deTurckG0SpectralN_dist_le_pouHaNorm
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ R₁ R₂ : Integral.L2.SmoothCcTensor g₀ 0 2,
+        dist (deTurckG0SpectralN (I := I) g₀ a R₁) (deTurckG0SpectralN (I := I) g₀ a R₂)
+          ≤ C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
+              (R₁ - R₂)‖ := by
+  classical
+  obtain ⟨C, hC_nn, hC⟩ := exists_spectralWeightedSq_le_pouHaNorm_sq (I := I) g₀ a
+  refine ⟨C, hC_nn, fun R₁ R₂ => ?_⟩
+  -- The spectral `dist²` equals the weighted spectral square-sum of `toL2 (R₁ − R₂)`.
+  have hdist_sq :
+      dist (deTurckG0SpectralN (I := I) g₀ a R₁) (deTurckG0SpectralN (I := I) g₀ a R₂) ^ 2
+        = ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g₀ 0 2,
+            tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+              (tensorL2Coeff (I := I) (M := M)
+                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                  (Integral.L2.SmoothCcTensor.toL2 (R₁ - R₂)) i) ^ 2 := by
+    rw [dist_eq_norm, tensorHs.norm_sq_eq_tsum]
+    refine tsum_congr (fun i => ?_)
+    congr 1
+    have hcoeff_sub :
+        (deTurckG0SpectralN (I := I) g₀ a R₁ - deTurckG0SpectralN (I := I) g₀ a R₂).coeff i
+          = (deTurckG0SpectralN (I := I) g₀ a R₁).coeff i
+            - (deTurckG0SpectralN (I := I) g₀ a R₂).coeff i := by
+      rw [sub_eq_add_neg, tensorHs.add_coeff, tensorHs.neg_coeff, sub_eq_add_neg]
+    rw [hcoeff_sub, deTurckG0SpectralN_coeff, deTurckG0SpectralN_coeff]
+    have hsub :
+        tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (Integral.L2.SmoothCcTensor.toL2 (R₁ - R₂)) i
+            = tensorL2Coeff (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                (Integral.L2.SmoothCcTensor.toL2 R₁) i
+              - tensorL2Coeff (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                (Integral.L2.SmoothCcTensor.toL2 R₂) i := by
+      unfold tensorL2Coeff
+      rw [map_sub, map_sub]
+      rfl
+    rw [hsub]
+  -- The reverse spectral bound supplies `dist² ≤ (C·‖(R₁−R₂).toHs a‖)²`; take square roots.
+  obtain ⟨_, hspec⟩ := hC (R₁ - R₂)
+  have hCtoHs_nn :
+      0 ≤ C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (R₁ - R₂)‖ :=
+    mul_nonneg hC_nn (norm_nonneg _)
+  have hdist_nn :
+      0 ≤ dist (deTurckG0SpectralN (I := I) g₀ a R₁) (deTurckG0SpectralN (I := I) g₀ a R₂) :=
+    dist_nonneg
+  calc dist (deTurckG0SpectralN (I := I) g₀ a R₁) (deTurckG0SpectralN (I := I) g₀ a R₂)
+      = Real.sqrt
+          (dist (deTurckG0SpectralN (I := I) g₀ a R₁) (deTurckG0SpectralN (I := I) g₀ a R₂) ^ 2) :=
+        (Real.sqrt_sq hdist_nn).symm
+    _ ≤ Real.sqrt
+          ((C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
+              (R₁ - R₂)‖) ^ 2) := by
+        rw [hdist_sq]; exact Real.sqrt_le_sqrt hspec
+    _ = C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (R₁ - R₂)‖ :=
+        Real.sqrt_sq hCtoHs_nn
+
+/-- **Global continuity of the intrinsic order-`a` chart-Sobolev synthesis of the realized
+DeTurck remainder (the deep Nemytskii-continuity node, in intrinsic-`Hᵃ` form).**
+
+For a `(0,2)`-perturbation synthesis `P` carrying the supercritical `H^{a+2}` local-Lipschitz
+control `ChartJet2LipControl g₀ a P K R`, the realized-DeTurck-remainder section, viewed in the
+intrinsic order-`a` chart-Sobolev Hilbert space `H^a`, varies continuously in `u`:
+```
+Continuous (fun u => (deTurckRealizeRemainderOf g₀ g_bg (P u)).toHs a) .
+```
+
+This is the genuine **Nemytskii-continuity** content (the second-order Ricci–DeTurck remainder
+is a continuous Nemytskii function of the metric's `≤2`-jet, and the continuous regularized
+synthesis `P` makes the realized metric's `H^{a+2}` content vary continuously, hence the
+order-`a` chart-Sobolev norm of the realized remainder varies continuously even at the boundary
+of the fibre-small domain — the supercritical embedding `Hᵃ⁺¹ ↪ H^{a+2}` consumed by
+`ChartJet2LipControl`).  It is stated in the intrinsic `H^a`-Hilbert-valued form (not the
+spectral `tensorHs`-valued form), structurally distinct from the spectral continuity the parent
+derives from it; no packaging.
+
+The body is `sorry`: it is the genuine order-`a` chart-RHS-tower continuity content (the
+intrinsic-`Hᵃ` Nemytskii continuity of the realized DeTurck remainder), with no
+spectral-nonlinearity step (the spectral lift is added by the parent through
+`deTurckG0SpectralN_dist_le_pouHaNorm`); Weyl is consumed by `ChartJet2LipControl`. -/
+theorem deTurckRealizeRemainderOf_pouToHs_continuous_of_chartJet2Control
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+      Integral.L2.SmoothCcTensor g₀ 0 2)
+    (K : ℝ≥0) {R : ℝ} (hR : 0 < R)
+    (hctrl : ChartJet2LipControl (I := I) (M := M) g₀ a P K R) :
+    Continuous (fun u => IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
+        (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))) := sorry
+
 /-- **Global continuity of the realized-DeTurck-remainder coordinate-spectral nonlinearity
 under supercritical `H^{a+2}` control (the deep analytic continuity node of the bridge).**
 
@@ -496,7 +618,59 @@ theorem deTurckRealizeRemainderOf_spectralN_continuous_of_chartJet2Control
     (K : ℝ≥0) {R : ℝ} (hR : 0 < R)
     (hctrl : ChartJet2LipControl (I := I) (M := M) g₀ a P K R) :
     Continuous (fun u => deTurckG0SpectralN (I := I) g₀ a
-        (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))) := sorry
+        (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))) := by
+  classical
+  -- The global `toHs`-`a` Lipschitz of the spectral lift, and the intrinsic-`Hᵃ` continuity
+  -- of the realized DeTurck remainder synthesis.
+  obtain ⟨C, hC_nn, hCdist⟩ := deTurckG0SpectralN_dist_le_pouHaNorm (I := I) g₀ a
+  have hcont_toHs :
+      Continuous (fun u => IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
+        (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))) :=
+    deTurckRealizeRemainderOf_pouToHs_continuous_of_chartJet2Control
+      (I := I) g₀ g_bg a P K hR hctrl
+  -- The spectral nonlinearity is `(C-Lipschitz spectral lift) ∘ (continuous toHs synthesis)`.
+  rw [Metric.continuous_iff] at hcont_toHs ⊢
+  intro u ε hε
+  -- A continuity tolerance for the `toHs` synthesis that the `C`-Lipschitz lift turns into `ε`.
+  have hCp1_pos : 0 < C + 1 := by positivity
+  obtain ⟨δ, hδ_pos, hδ⟩ := hcont_toHs u (ε / (C + 1)) (by positivity)
+  refine ⟨δ, hδ_pos, fun u' hu' => ?_⟩
+  -- The spectral `dist` is bounded by `C` times the `toHs`-`a` distance of the remainders.
+  have hbound :
+      dist (deTurckG0SpectralN (I := I) g₀ a (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u')))
+          (deTurckG0SpectralN (I := I) g₀ a (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)))
+        ≤ C * dist
+            (IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u')))
+            (IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))) := by
+    have hd := hCdist (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u'))
+      (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
+    rwa [smoothCcTensor_toHs_sub, ← dist_eq_norm] at hd
+  -- The `toHs` synthesis distance is `< ε/(C+1)` by `hδ`; chain to `< ε`.
+  have htoHs_lt := hδ u' hu'
+  have htoHs_nn :
+      0 ≤ dist
+          (IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
+            (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u')))
+          (IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
+            (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))) := dist_nonneg
+  calc dist (deTurckG0SpectralN (I := I) g₀ a
+            (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u')))
+          (deTurckG0SpectralN (I := I) g₀ a (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)))
+      ≤ C * dist
+          (IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
+            (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u')))
+          (IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
+            (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))) := hbound
+    _ ≤ (C + 1) * dist
+          (IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
+            (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u')))
+          (IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
+            (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))) :=
+        mul_le_mul_of_nonneg_right (by linarith) htoHs_nn
+    _ < (C + 1) * (ε / (C + 1)) := mul_lt_mul_of_pos_left htoHs_lt hCp1_pos
+    _ = ε := by field_simp
 
 /-- **Existence of a supercritical-`H^{a+2}`-controlled un-gated perturbation synthesis whose
 realized DeTurck remainder coincides (as a smooth section) with the gate gauge on the

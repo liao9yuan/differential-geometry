@@ -260,8 +260,53 @@ theorem deturck_g0_carrier_Hk_continuousOn_upto_zero
         (fun s : ℝ => SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * k) (T_s s))
         (Set.Icc 0 T) := sorry
 
+/-- **Joint continuity of the realize-perturbation chart-Gram `k`-jet from the carrier's
+`H^{2k}` continuity (deep Fréchet↔coordinate-jet transfer — posited child).**
+
+For the realized `g₀`-anchored flow `g_DT` (the linear realize `hreal` off `g₀`), *given*
+the up-to-`t = 0` supercritical `H^{2k}` continuity `hHk` of the smooth representatives
+`T_s`, the order-`k ≤ 2` iterated Fréchet derivative of the *chart-Gram perturbation*
+`y ↦ G_{ij}(g_DT t)(y) − G_{ij}(g₀)(y)` (the realized symmetric form of the tensor `T_s t`)
+is jointly continuous in `(time, point)` on `[0, T] × chartLeviCivitaGoodSet α`.
+
+This isolates the genuine analytic core — the Fréchet↔coordinate-jet transfer — on the
+*perturbation alone* (the `g₀`-baseline term carries no `t`-dependence and is handled by
+real proof in the parent).  The chart-`2`-jet seminorm bound
+`chartMetricJet2DiffSup_realizeMetricAt_le_toHs_unconditional` (`RealizedCovGradJetInput.lean`)
+controls each coordinate `2`-jet of the perturbation *difference* between two times by the
+`H^{2k}` norm of the corresponding carrier difference, uniformly over compact chart subsets;
+the reverse finite-dimensional Fréchet↔partial bound (the operator-norm of `iteratedFDeriv k`
+controlled by the coordinate partials, the reverse of `euclidPartial_sq_le_iteratedFDeriv_two_sq`)
+lifts that to the Fréchet jet, and the supplied up-to-`0` `H^{2k}` time-continuity `hHk`
+then gives joint `(time, point)`-continuity.  The perturbation `H^{2k}`-continuity `hHk`
+is the deep parabolic-up-to-boundary input (supplied by
+`deturck_g0_carrier_Hk_continuousOn_upto_zero`); this node is the embedding/Fréchet-jet
+content on top of it.  The conclusion is the joint continuity of the perturbation jet,
+structurally distinct from `hHk` and the realize hypotheses; no packaging.  The body is
+`sorry`; consumers transitively depend on `sorryAx`. -/
+theorem deturck_g0_chartGramDiff_iteratedFDeriv_jointContinuous
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) {T : ℝ} (hT : 0 < T)
+    (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2)
+    (hreal : ∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
+      (g_DT s).inner x v w
+        = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w)
+    (hHk : ∀ (k : ℕ), 2 * k > Module.finrank ℝ E + 4 →
+      ContinuousOn
+        (fun s : ℝ => SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * k) (T_s s))
+        (Set.Icc 0 T)) :
+    ∀ (α : M) (i j : Fin (Module.finrank ℝ E)) (k : ℕ), k ≤ 2 →
+      ContinuousOn
+        (fun q : ℝ × M => iteratedFDeriv ℝ k
+          (fun y => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j y -
+            Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j y)
+          (extChartAt I α q.2))
+        (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α) := sorry
+
+set_option linter.unusedVariables false in
 /-- **Sobolev-embedding chart-`C²` joint-continuity bridge for the `g₀`-anchored realize
-flow (deep Fréchet↔coordinate-jet bridge — posited child).**
+flow (assembled over the perturbation Fréchet-jet transfer).**
 
 For the realized `g₀`-anchored flow `g_DT` (the linear realize `hreal` of a carrier
 `u₂`/`T_s` with the canonical `L²` realization `hcanon`, per-time smooth in space),
@@ -269,17 +314,31 @@ For the realized `g₀`-anchored flow `g_DT` (the linear realize `hreal` of a ca
 representatives `T_s`, every iterated chart-Gram derivative of order `k ≤ 2` is jointly
 continuous in `(time, point)` on `[0, T] × chartLeviCivitaGoodSet α`.
 
-This is the genuine Fréchet↔coordinate-jet joint-continuity bridge: the chart-`2`-jet
-seminorm bound `chartMetricJet2DiffSup_realizeMetricAt_le_toHs_unconditional` controls the
-iterated chart-Gram derivative *difference* between two times by the `H^{2k}` norm of the
-carrier difference, uniformly over compact chart subsets; combined with the per-time
-`C^∞`-in-space smoothness `chartGramOnE_contDiffOn` and the supplied up-to-`0` `H^{2k}`
-time-continuity `hHk`, the iterated derivative is jointly `(time, point)`-continuous.  The
-carrier `H^{2k}`-continuity `hHk` is the deep parabolic-up-to-boundary input (supplied by
-`deturck_g0_carrier_Hk_continuousOn_upto_zero`); this bridge is the embedding/Fréchet-jet
-content on top of it.  The conclusion is the joint continuity, distinct from `hHk` and the
-realize hypotheses; no packaging.  The body is `sorry`; consumers transitively depend on
-`sorryAx`. -/
+This is the Fréchet↔coordinate-jet joint-continuity bridge, **assembled by real proof**
+from the linear chart-Gram decomposition and the perturbation Fréchet-jet transfer.  Since
+`chartGramOnE (g_DT t) = chartGramOnE g₀ + (chartGramOnE (g_DT t) − chartGramOnE g₀)` as a
+function equality, the order-`k` iterated Fréchet derivative (at a chart point, where both
+summands are `C^∞` by `chartGramOnE_contDiffOn`) splits additively
+(`iteratedFDeriv_add_apply`) into:
+* the `g₀`-baseline jet `q ↦ iteratedFDeriv k (chartGramOnE g₀) (chart q.2)`, which is
+  `t`-independent and jointly continuous because `iteratedFDeriv k` of the `C^∞` chart-Gram
+  is continuous on the open image of `chartLeviCivitaGoodSet α`
+  (`ContinuousOn.continuousOn_iteratedFDeriv`), precomposed with the continuous evaluation
+  `q ↦ extChartAt I α q.2`; and
+* the perturbation jet, which is jointly continuous by the deep transfer
+  `deturck_g0_chartGramDiff_iteratedFDeriv_jointContinuous` (the embedding/Fréchet-jet
+  content driven by `hHk`).
+Their sum is jointly continuous.  The carrier `H^{2k}`-continuity `hHk` is the deep
+parabolic-up-to-boundary input (supplied by `deturck_g0_carrier_Hk_continuousOn_upto_zero`);
+this bridge is the linear-decomposition glue on top of it.  The conclusion is the joint
+continuity, distinct from `hHk` and the realize hypotheses; no packaging.  Consumers
+transitively depend on `sorryAx` through the perturbation transfer.
+
+The realize-flow hypotheses `hcont`, `hreg`, `hg0`, `hcanon` are retained on the signature
+for fidelity with the frozen parent/sibling node interface (they pin `g_DT`/`u₂`/`T_s` to the
+genuine realize flow); this assembled proof routes the `H^{2k}` content through the
+perturbation transfer and the `g₀`-baseline jet, so it does not itself consume them — the
+narrow `unusedVariables` suppression below records that. -/
 theorem deturck_g0_chartGram_jointContinuous_of_carrier_Hk
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) {T : ℝ} (hT : 0 < T)
@@ -317,7 +376,96 @@ theorem deturck_g0_chartGram_jointContinuous_of_carrier_Hk
         (fun q : ℝ × M => iteratedFDeriv ℝ k
           (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j)
           (extChartAt I α q.2))
-        (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α) := sorry
+        (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α) := by
+  classical
+  intro α i j k hk
+  set D : Set (ℝ × M) := Set.Icc (0 : ℝ) T ×ˢ chartLeviCivitaGoodSet (I := I) α with hD_def
+  -- The `g₀`-baseline chart-Gram entry and the time-varying perturbation difference.
+  set G₀ : E → ℝ := Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j with hG₀_def
+  set Diff : ℝ → E → ℝ := fun t y =>
+    Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j y - G₀ y with hDiff_def
+  -- Each chart-Gram entry is `C^∞` on the chart target.
+  have hG₀_cd : ContDiffOn ℝ ∞ G₀ (extChartAt I α).target :=
+    Integral.DivergenceTheorem.chartGramOnE_contDiffOn (I := I) g₀ α i j
+  have hGt_cd : ∀ t : ℝ, ContDiffOn ℝ ∞
+      (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j)
+      (extChartAt I α).target :=
+    fun t => Integral.DivergenceTheorem.chartGramOnE_contDiffOn (I := I) (g_DT t) α i j
+  -- For a good point `x`, the chart image lies in the open chart-target interior, where the
+  -- target is a neighbourhood, so each entry is `C^∞` *at* that chart point.
+  have hmemInt : ∀ x ∈ chartLeviCivitaGoodSet (I := I) α,
+      (extChartAt I α x) ∈ interior (extChartAt I α).target := fun x hx =>
+    chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx
+  have htarget_mem : ∀ x ∈ chartLeviCivitaGoodSet (I := I) α,
+      (extChartAt I α).target ∈ nhds (extChartAt I α x) := fun x hx =>
+    Filter.mem_of_superset (isOpen_interior.mem_nhds (hmemInt x hx)) interior_subset
+  -- The pointwise additive split of the `k`-jet at a good point:
+  -- `iFDeriv (chartGramOnE (g_DT t)) = iFDeriv G₀ + iFDeriv (Diff t)`.
+  have hsplit : ∀ q ∈ D,
+      iteratedFDeriv ℝ k
+          (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j)
+          (extChartAt I α q.2) =
+        iteratedFDeriv ℝ k G₀ (extChartAt I α q.2) +
+          iteratedFDeriv ℝ k (Diff q.1) (extChartAt I α q.2) := by
+    rintro ⟨t, x⟩ ⟨_, hx⟩
+    have hfun_eq :
+        Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j =
+          G₀ + Diff t := by
+      funext y
+      simp only [hDiff_def, Pi.add_apply]
+      ring
+    have hG₀_at : ContDiffAt ℝ (k : WithTop ℕ∞) G₀ (extChartAt I α x) :=
+      (hG₀_cd.contDiffAt (htarget_mem x hx)).of_le (by exact_mod_cast le_top)
+    have hDiff_at : ContDiffAt ℝ (k : WithTop ℕ∞) (Diff t) (extChartAt I α x) := by
+      have hGt_at : ContDiffAt ℝ (k : WithTop ℕ∞)
+          (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j)
+          (extChartAt I α x) :=
+        ((hGt_cd t).contDiffAt (htarget_mem x hx)).of_le (by exact_mod_cast le_top)
+      exact hGt_at.sub hG₀_at
+    rw [hfun_eq, iteratedFDeriv_add_apply hG₀_at hDiff_at]
+  -- The `g₀`-baseline jet is jointly continuous: `iFDeriv k G₀` is continuous on the open
+  -- image of the good set, precomposed with the continuous chart evaluation `q ↦ chart q.2`.
+  have hbase_cont : ContinuousOn
+      (fun q : ℝ × M => iteratedFDeriv ℝ k G₀ (extChartAt I α q.2)) D := by
+    have hopen : IsOpen (↑(extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) :=
+      chartLeviCivitaGoodSet_image_isOpen (I := I) α
+    have hsub : (↑(extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) ⊆
+        (extChartAt I α).target := by
+      rw [chartLeviCivitaGoodSet_image_eq_target (I := I) α]
+    have hiF_cont : ContinuousOn (iteratedFDeriv ℝ k G₀)
+        (↑(extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) :=
+      ContinuousOn.continuousOn_iteratedFDeriv (hG₀_cd.mono hsub) hopen
+        (by exact_mod_cast le_top)
+    -- `q ↦ extChartAt I α q.2` is continuous on `D` and lands in the good-set image.
+    have hgoodsub : chartLeviCivitaGoodSet (I := I) α ⊆ (extChartAt I α).source :=
+      fun x hx => chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hx
+    have hev_cont : ContinuousOn (fun q : ℝ × M => extChartAt I α q.2) D := by
+      have hchart : ContinuousOn (fun x : M => extChartAt I α x)
+          (chartLeviCivitaGoodSet (I := I) α) :=
+        (continuousOn_extChartAt (I := I) α).mono hgoodsub
+      exact hchart.comp continuousOn_snd (fun q hq => hq.2)
+    have hmaps : Set.MapsTo (fun q : ℝ × M => extChartAt I α q.2) D
+        (↑(extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) := by
+      rintro ⟨t, x⟩ ⟨_, hx⟩
+      exact ⟨x, hx, rfl⟩
+    exact hiF_cont.comp hev_cont hmaps
+  -- The perturbation jet is jointly continuous by the deep Fréchet-jet transfer.
+  have hpert_cont : ContinuousOn
+      (fun q : ℝ × M => iteratedFDeriv ℝ k (Diff q.1) (extChartAt I α q.2)) D :=
+    deturck_g0_chartGramDiff_iteratedFDeriv_jointContinuous (I := I) (M := M) g₀ a ha hT
+      g_DT T_s hreal hHk α i j k hk
+  -- The full `k`-jet equals (baseline jet) + (perturbation jet) on `D`, hence continuous.
+  -- (The codomain `ContinuousMultilinearMap`'s `ContinuousAdd` is supplied explicitly via its
+  -- topological-additive-group instance, fixing the goal type to avoid an instance-search
+  -- explosion over the ambient ring instances on `E`.)
+  letI itag : IsTopologicalAddGroup
+      (ContinuousMultilinearMap ℝ (fun _ : Fin k => E) ℝ) :=
+    ContinuousMultilinearMap.instIsTopologicalAddGroup
+  haveI : ContinuousAdd (ContinuousMultilinearMap ℝ (fun _ : Fin k => E) ℝ) :=
+    itag.toContinuousAdd
+  refine ContinuousOn.congr (hbase_cont.add hpert_cont) ?_
+  intro q hq
+  exact hsplit q hq
 
 /-- **Parabolic up-to-`t = 0` chart-`C²` regularity for the `g₀`-anchored realize flow
 with smooth initial datum (deep parabolic-up-to-boundary leaf).**

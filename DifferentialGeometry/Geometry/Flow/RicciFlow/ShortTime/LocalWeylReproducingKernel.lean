@@ -104,16 +104,136 @@ private lemma diagonalKernel_eq_sum_eigenFiberNormSq
     (I := I) (M := M) g r s x ((eigenvectorSmooth (I := I) (M := M) g r s i).toSection x)]
   rfl
 
-/-! ## Posited inputs at general bidegree
+/-! ## The general-rank reproducing-kernel bound by fibre Parseval
 
 `reproducingKernel_weighted_tsum_le_of_closed` is the general-`(r, s)` form of the
-supercritical on-diagonal reproducing-kernel summability `(★)`. It is proved outright
-at `(0, 2)` (`reproducingKernel_tsum_le_of_closed_02` below) by the finite-truncation
-argument off the chart-Sobolev embedding `H^{2k} ↪ C⁰` and the all-order Gårding
-spectral bound `pouSobolevToHsNorm_le_spectral`; at general `(r, s)` the same argument
-needs the general-rank all-order Gårding lift (currently available only at `(0, 2)`),
-so it is recorded here as a named input. -/
+supercritical on-diagonal reproducing-kernel summability `(★)`. It is proved here from a
+single posited general-rank analytic primitive — the per-direction **truncated Bessel
+bound** `reproducingKernel_partialBessel_le_of_closed` at bidegree `(r, s)` — by the same
+fibre-Parseval-over-an-orthonormal-frame argument that derives the `(0, 2)` outright proof
+`reproducingKernel_tsum_le_of_closed_02` from `partialBessel_le_Csq_02`.
 
+The general-rank fibre helpers below (`riemannianFiberNormSq_eq_norm_sq_rs`,
+`gFiberInnerRS`, `gFiberInnerRS_eq_inner`, `riemannianFiberNormSq_eq_sum_gFiberInnerRS_sq`)
+are the bidegree-`(r, s)` analogues of their in-file `(0, 2)` siblings, proved verbatim
+from the general-rank fibre-norm bridge `riemannianFiberNormSq_eq_tensorInnerPointwise` and
+the general-rank Riemannian-bundle inner product `tensorRSRiemannianInnerCLM`. -/
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- The Riemannian bundle fibre-norm squared `riemannianFiberNormSq g r s x z` coincides
+with the squared bundle-fibre norm `‖z‖²` under the general-rank Riemannian bundle
+instance `tensorRS_riemannianBundle g r s`, via the fibre-norm bridge and
+`tensorRSRiemannianInnerCLM_apply`. (The bidegree-`(r, s)` analogue of
+`riemannianFiberNormSq_eq_norm_sq_02`.) -/
+private lemma riemannianFiberNormSq_eq_norm_sq_rs
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (z : TensorRSSpace r s I x) :
+    letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+    Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r s x z = ‖z‖ ^ 2 := by
+  letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+  have h_inner :
+      (DifferentialGeometry.Tensor.TensorRSRiemannianBundle.tensorRSRiemannianInnerCLM
+          (I := I) (M := M) g r s x z z : ℝ) =
+        Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r s x z := by
+    rw [DifferentialGeometry.Tensor.TensorRSRiemannianBundle.tensorRSRiemannianInnerCLM_apply]
+    exact (Integral.Connection.riemannianFiberNormSq_eq_tensorInnerPointwise
+      (I := I) (M := M) g r s x z).symm
+  have hself : (inner ℝ z z : ℝ) =
+      Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r s x z := by
+    rw [← h_inner]; rfl
+  rw [← hself, real_inner_self_eq_norm_sq]
+
+/-- The fibre Riemannian inner product as a plain function, `gFiberInnerRS x ζ z =
+tensorRSRiemannianInnerCLM g r s x ζ z` (instance-free in the signature). The
+bidegree-`(r, s)` analogue of the in-file `(0, 2)` `gFiberInner`. -/
+@[reducible] private noncomputable def gFiberInnerRS
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (ζ z : TensorRSSpace r s I x) : ℝ :=
+  DifferentialGeometry.Tensor.TensorRSRiemannianBundle.tensorRSRiemannianInnerCLM
+    (I := I) (M := M) g r s x ζ z
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- With the Riemannian bundle instance installed, `gFiberInnerRS` is the genuine fibre
+inner product `inner ℝ`. (The bidegree-`(r, s)` analogue of `gFiberInner_eq_inner`; the
+underlying `rfl` unfolds the bundle inner product instance, hence the raised heartbeat
+budget.) -/
+private lemma gFiberInnerRS_eq_inner
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (ζ z : TensorRSSpace r s I x) :
+    letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+    gFiberInnerRS (I := I) (M := M) g r s x ζ z = (inner ℝ ζ z : ℝ) :=
+  rfl
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **Fibre Parseval (general rank).** The Riemannian fibre-norm squared expands over any
+fibre orthonormal basis `b` as `∑ₘ (gFiberInnerRS x (b m) z)²`. The bidegree-`(r, s)`
+analogue of `riemannianFiberNormSq_eq_sum_gFiberInner_sq`. -/
+private lemma riemannianFiberNormSq_eq_sum_gFiberInnerRS_sq
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
+    {ι : Type*} [Fintype ι]
+    (b : letI : Bundle.RiemannianBundle (fun y : M => TensorRSSpace r s I y) :=
+        Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+      OrthonormalBasis ι ℝ (TensorRSSpace r s I x))
+    (z : TensorRSSpace r s I x) :
+    Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r s x z =
+      ∑ m : ι, gFiberInnerRS (I := I) (M := M) g r s x (b m) z ^ 2 := by
+  letI : Bundle.RiemannianBundle (fun y : M => TensorRSSpace r s I y) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+  rw [riemannianFiberNormSq_eq_norm_sq_rs (I := I) (M := M) g r s x z]
+  rw [← OrthonormalBasis.sum_sq_inner_left b z]
+  refine Finset.sum_congr rfl (fun m _ => ?_)
+  rw [gFiberInnerRS_eq_inner (I := I) (M := M) g r s x (b m) z, real_inner_comm]
+
+/-- **Per-direction truncated Bessel bound at general bidegree `(r, s)` (posited
+analytic primitive).** For every supercritical Sobolev order `a` (`2a > dim M + 4`) there
+is a finite constant `C ≥ 0` such that, at every point `x`, every fibre vector `ζ` with
+`gFiberInner x ζ ζ ≤ 1`, and every finite eigen-index set `F`, the truncated Bessel sum
+of the `g`-fibre pairings of `ζ` against the eigenbasis fibre values, weighted by
+`(1 + λⱼ)^{-a}`, is bounded by `C`:
+
+  `∑_{j ∈ F} (1 + λⱼ)^{-a} · (gFiberInnerRS x ζ (bⱼ(x)))² ≤ C`,  `bⱼ = eigenvectorSmooth g r s j`.
+
+This is the genuine general-rank analytic content of the local Weyl law: it is the
+bidegree-`(r, s)` analogue of the in-file `(0, 2)` `partialBessel_le_Csq_02`, whose proof
+builds the smooth eigen-combination `T := ∑_{j ∈ F}(1 + λⱼ)^{-a}⟪ζ, bⱼ(x)⟫·eigenSmooth_j`
+and bounds the partial sum `S = ⟪ζ, T(x)⟫ ≤ ‖ζ‖·‖T(x)‖ ≤ C·‖φ(T)‖ = C·√S` through the
+chart-Sobolev embedding `H^{2k} ↪ C⁰` (`tensorPouSobolevHilbert_embedding_Ck`, available at
+general rank) composed with the **general-rank all-order Gårding spectral bound** (the
+`(r, s)` analogue of `pouSobolevToHsNorm_le_spectral`, available in the current library only
+at `(0, 2)`) and the **general-rank finite-eigen-combination spectral calculus** (the
+`(r, s)` analogue of the `finiteEigenCombo` / `smoothToTensorHs` tower of
+`Analysis/Spectral/.../Garding/EigenCombination.lean`, likewise built so far only at
+`(0, 2)`).  Both general-rank ingredients are genuine additional analytic structure beyond
+the elementary embedding; they are recorded together inside this single posited primitive.
+The body is `sorry`; consumers transitively depend on `sorryAx`. The conclusion is a
+truncated quadratic-form bound, structurally distinct from the summability/`tsum`
+conclusion it powers (no packaging). -/
+theorem reproducingKernel_partialBessel_le_of_closed
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (x : M) (ζ : TensorRSSpace r s I x),
+        gFiberInnerRS (I := I) (M := M) g r s x ζ ζ ≤ 1 →
+        ∀ F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g r s),
+          ∑ j ∈ F, (tensorSobolevWeight (I := I) (M := M) j (a : ℝ))⁻¹ *
+              gFiberInnerRS (I := I) (M := M) g r s x ζ
+                ((eigenvectorSmooth (I := I) (M := M) g r s j).toSection x) ^ 2 ≤ C :=
+  sorry
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
 /-- **The supercritical on-diagonal reproducing-kernel summability `(★)` (general
 bidegree, uniform in the supercritical order).** This is the pointwise local Weyl
 law: for every supercritical Sobolev order `a` (`2a > dim M + 4`) and every point
@@ -122,11 +242,15 @@ summable and bounded by a point-uniform constant `C a`. The base term
 `‖bᵢ(x)‖²_g = riemannianFiberNormSq g r s x (bᵢ.toSection x)` is the Riemannian fibre
 norm squared of the eigenbasis representative `bᵢ = eigenvectorSmooth g r s i`.
 
-At the coarse slice `a = 2 · (2k)` with `2k > dim M`, this is proved outright at
-`(0, 2)` by `reproducingKernel_tsum_le_of_closed_02` (the finite-truncation Bessel
-argument off the `H^{2k} ↪ C⁰` embedding). The sharp supercritical-threshold statement
-recorded here — the genuine local-Weyl input — is the content beyond that elementary
-embedding (the on-diagonal heat-trace asymptotics). -/
+It is *proven* here by the fibre-Parseval-over-an-orthonormal-frame argument (the same one
+that derives `reproducingKernel_tsum_le_of_closed_02` from `partialBessel_le_Csq_02` at
+`(0, 2)`): the fibre Parseval `riemannianFiberNormSq_eq_sum_gFiberInnerRS_sq` expands
+`‖bⱼ(x)‖²_g = ∑ₘ ⟪ζₘ, bⱼ(x)⟫²` over a fibre orthonormal frame `ζₘ`, summing the posited
+per-direction truncated Bessel bound `reproducingKernel_partialBessel_le_of_closed` over
+the `D = dim` frame directions bounds every finite partial sum of
+`(1 + λⱼ)^{-a} · ‖bⱼ(x)‖²_g` by `D · C`, hence summability with total `≤ D · C` by
+`Real.tsum_le_of_sum_le`.  Consumers transitively depend on `sorryAx` through that
+per-direction primitive. -/
 theorem reproducingKernel_weighted_tsum_le_of_closed
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∀ (a : ℕ), 2 * a > Module.finrank ℝ E + 4 →
@@ -139,8 +263,72 @@ theorem reproducingKernel_weighted_tsum_le_of_closed
           (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
               (I := I) (M := M) g r s,
             (tensorSobolevWeight (I := I) (M := M) i (a : ℝ))⁻¹ *
-              eigenFiberNormSq (I := I) (M := M) g r s i x) ≤ C :=
-  sorry
+              eigenFiberNormSq (I := I) (M := M) g r s i x) ≤ C := by
+  classical
+  intro a ha
+  letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+  obtain ⟨C, hC_nn, hbessel⟩ :=
+    reproducingKernel_partialBessel_le_of_closed (I := I) (M := M) g r s a ha
+  -- The point-uniform constant is `D · C`, `D = dim` of the model fibre.
+  refine ⟨(Module.finrank ℝ (TensorRSModel r s ℝ E) : ℝ) * C, by positivity, fun x => ?_⟩
+  set D : ℕ := Module.finrank ℝ (TensorRSSpace r s I x) with hD_def
+  set bON := stdOrthonormalBasis ℝ (TensorRSSpace r s I x) with hbON_def
+  set f : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s → ℝ :=
+    fun i => (tensorSobolevWeight (I := I) (M := M) i (a : ℝ))⁻¹ *
+      eigenFiberNormSq (I := I) (M := M) g r s i x with hf_def
+  have hf_nn : ∀ i, 0 ≤ f i := by
+    intro i; rw [hf_def]
+    have hw : 0 < tensorSobolevWeight (I := I) (M := M) i (a : ℝ) :=
+      Analysis.Parabolic.TensorHeatEquation.tensorSobolevWeight_pos (I := I) (M := M) i (a : ℝ)
+    have := eigenFiberNormSq_nonneg (I := I) (M := M) g r s i x
+    positivity
+  -- Per-finite-set bound: `∑_{j∈F} f j ≤ D · C`.
+  have hfinset : ∀ (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+      (I := I) (M := M) g r s)), ∑ j ∈ F, f j ≤ (D : ℝ) * C := by
+    intro F
+    -- expand `eigenFiberNormSq = ∑ₘ (gFiberInnerRS ζₘ bⱼ(x))²` via the fibre Parseval.
+    have hexpand : ∀ j, f j =
+        ∑ m : Fin D, (tensorSobolevWeight (I := I) (M := M) j (a : ℝ))⁻¹ *
+          gFiberInnerRS (I := I) (M := M) g r s x (bON m)
+            ((eigenvectorSmooth (I := I) (M := M) g r s j).toSection x) ^ 2 := by
+      intro j
+      simp only [hf_def, eigenFiberNormSq]
+      rw [riemannianFiberNormSq_eq_sum_gFiberInnerRS_sq (I := I) (M := M) g r s x bON
+          ((eigenvectorSmooth (I := I) (M := M) g r s j).toSection x), Finset.mul_sum]
+    -- swap sums and apply the truncated Bessel bound per direction.
+    calc ∑ j ∈ F, f j
+        = ∑ j ∈ F, ∑ m : Fin D, (tensorSobolevWeight (I := I) (M := M) j (a : ℝ))⁻¹ *
+            gFiberInnerRS (I := I) (M := M) g r s x (bON m)
+              ((eigenvectorSmooth (I := I) (M := M) g r s j).toSection x) ^ 2 := by
+          exact Finset.sum_congr rfl (fun j _ => hexpand j)
+      _ = ∑ m : Fin D, ∑ j ∈ F, (tensorSobolevWeight (I := I) (M := M) j (a : ℝ))⁻¹ *
+            gFiberInnerRS (I := I) (M := M) g r s x (bON m)
+              ((eigenvectorSmooth (I := I) (M := M) g r s j).toSection x) ^ 2 :=
+          Finset.sum_comm
+      _ ≤ ∑ _m : Fin D, C := by
+          refine Finset.sum_le_sum (fun m _ => ?_)
+          refine hbessel x (bON m) ?_ F
+          -- `gFiberInnerRS x (bON m) (bON m) = ‖bON m‖² = 1 ≤ 1`.
+          have hone : gFiberInnerRS (I := I) (M := M) g r s x (bON m) (bON m) = 1 := by
+            rw [gFiberInnerRS_eq_inner (I := I) (M := M) g r s x (bON m) (bON m),
+              real_inner_self_eq_norm_sq, hbON_def,
+              (stdOrthonormalBasis ℝ (TensorRSSpace r s I x)).orthonormal.1 m]
+            norm_num
+          rw [hone]
+      _ = (D : ℝ) * C := by
+          rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+  -- summability + tsum bound from the uniform finite-set bound.
+  have hsummable : Summable f := summable_of_sum_le hf_nn hfinset
+  refine ⟨hsummable, ?_⟩
+  -- `D = finrank (model)` since the fibre is isomorphic to the model fibre.
+  have hDeq : (D : ℝ) = (Module.finrank ℝ (TensorRSModel r s ℝ E) : ℝ) := by
+    rw [hD_def]
+    congr 1
+    exact (Tensor0SBundle.tensorRSSpace_continuousLinearEquiv (I := I) (M := M)
+      (𝕜 := ℝ) r s x).toLinearEquiv.finrank_eq
+  calc ∑' i, f i ≤ (D : ℝ) * C := Real.tsum_le_of_sum_le hf_nn hfinset
+    _ = (Module.finrank ℝ (TensorRSModel r s ℝ E) : ℝ) * C := by rw [hDeq]
 
 /-- **Discreteness of the tensor connection-Laplacian spectrum below a threshold.**
 For every threshold `Λ`, only finitely many eigen-indices `i` satisfy `1 + λᵢ < Λ`.
