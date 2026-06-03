@@ -1113,6 +1113,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PullbackConnection
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.TimeDerivativeChainRule
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.BareLaplacianSpectralMatch
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckInitialDataExistence
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckInteriorTimeRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckRicciPde
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckRicciRHSSymmetric
