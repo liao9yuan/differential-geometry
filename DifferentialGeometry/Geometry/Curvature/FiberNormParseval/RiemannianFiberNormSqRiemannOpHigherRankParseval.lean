@@ -374,6 +374,22 @@ lemma tangent_orthonormalBasisS_witness
   · intro S
     rfl
 
+/-- A continuous linear map distributes over a finite sum of scalar multiples:
+`R (∑ i, c i • f i) = ∑ i, c i • R (f i)`.
+
+Stated over *abstract* module/topology variables `α`, `β` so that the
+`AddMonoidHomClass` instance required by `map_sum` is synthesized against the bare
+`α →L[ℝ] β` head, never against the reducible `TensorRSSpace` fibre abbreviation. This
+keeps the rank-`s` curvature-operator frame expansion below from forcing a super-linear
+unfold of the nested continuous-linear-map fibre type. -/
+private lemma clm_apply_smul_sum
+    {α : Type*} [AddCommMonoid α] [Module ℝ α] [TopologicalSpace α]
+    {β : Type*} [AddCommMonoid β] [Module ℝ β] [TopologicalSpace β]
+    {ι : Type*} (R : α →L[ℝ] β) (t : Finset ι) (c : ι → ℝ) (f : ι → α) :
+    R (∑ i ∈ t, c i • f i) = ∑ i ∈ t, c i • R (f i) := by
+  rw [map_sum]
+  exact Finset.sum_congr rfl (fun i _ => map_smul R (c i) (f i))
+
 /-- **Frame expansion of the rank-`s` curvature operator action.** With
 `v = ∑_i ⟨e_i, v⟩_g e_i`, `w = ∑_j ⟨e_j, w⟩_g e_j`, the curvature value expands as
 `R_x(v, w) T = ∑_{i, j} (⟨e_i, v⟩_g · ⟨e_j, w⟩_g) • R_x(e_i, e_j) T`. -/
@@ -392,9 +408,7 @@ lemma riemannOp_tensorCovS_frame_expand
   have hw : w = ∑ j : Fin n, g.inner x (e j) w • e j := hv_expand w
   have hRv : R v = ∑ i : Fin n, g.inner x (e i) v • R (e i) := by
     conv_lhs => rw [hv]
-    rw [map_sum]
-    refine Finset.sum_congr rfl (fun i _ => ?_)
-    rw [map_smul]
+    exact clm_apply_smul_sum R Finset.univ (fun i => g.inner x (e i) v) e
   have hRvw : R v w = ∑ i : Fin n, g.inner x (e i) v • R (e i) w := by
     rw [hRv, ContinuousLinearMap.sum_apply]
     refine Finset.sum_congr rfl (fun i _ => ?_)
@@ -403,9 +417,7 @@ lemma riemannOp_tensorCovS_frame_expand
       ∑ j : Fin n, g.inner x (e j) w • R (e i) (e j) := by
     intro i
     conv_lhs => rw [hw]
-    rw [map_sum]
-    refine Finset.sum_congr rfl (fun j _ => ?_)
-    rw [map_smul]
+    exact clm_apply_smul_sum (R (e i)) Finset.univ (fun j => g.inner x (e j) w) e
   have hRvwT : R v w T = ∑ i : Fin n, g.inner x (e i) v • (R (e i) w) T := by
     rw [hRvw, ContinuousLinearMap.sum_apply]
     refine Finset.sum_congr rfl (fun i _ => ?_)

@@ -66,6 +66,10 @@ The weight `(1 + λᵢ)^σ ≥ 1` for `σ ≥ 0`, so `Hˢ ⊆ H⁰ = L²`.
 
 noncomputable section
 
+set_option linter.style.setOption false
+set_option synthInstance.maxHeartbeats 400000
+set_option backward.isDefEq.respectTransparency false
+
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal BigOperators
   RealInnerProductSpace InnerProductSpace
