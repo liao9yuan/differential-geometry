@@ -41,35 +41,35 @@ namespace Analysis
 
 /-- The smooth cutoff `χ s = Real.smoothTransition (2 - s ^ 2)`: it equals `1`
 for `|s| ≤ 1` and `0` for `|s| ≥ √2`, hence is supported in `[-2, 2]`. -/
-private def borelCutoff (s : ℝ) : ℝ := Real.smoothTransition (2 - s ^ 2)
+def borelCutoff (s : ℝ) : ℝ := Real.smoothTransition (2 - s ^ 2)
 
-private theorem borelCutoff_contDiff {n : ℕ∞} : ContDiff ℝ n borelCutoff := by
+theorem borelCutoff_contDiff {n : ℕ∞} : ContDiff ℝ n borelCutoff := by
   unfold borelCutoff
   have h : ContDiff ℝ (n : WithTop ℕ∞) (fun s : ℝ => 2 - s ^ 2) :=
     contDiff_const.sub (contDiff_id.pow 2)
   exact Real.smoothTransition.contDiff.comp h
 
-private theorem borelCutoff_eq_one {s : ℝ} (hs : s ^ 2 ≤ 1) : borelCutoff s = 1 := by
+theorem borelCutoff_eq_one {s : ℝ} (hs : s ^ 2 ≤ 1) : borelCutoff s = 1 := by
   refine Real.smoothTransition.one_of_one_le ?_
   linarith
 
-private theorem borelCutoff_eq_zero {s : ℝ} (hs : 2 ≤ s ^ 2) : borelCutoff s = 0 := by
+theorem borelCutoff_eq_zero {s : ℝ} (hs : 2 ≤ s ^ 2) : borelCutoff s = 0 := by
   refine Real.smoothTransition.zero_of_nonpos ?_
   linarith
 
 /-- The fixed bump-monomial `g₀ n s = χ s * s ^ n / n !`. -/
-private def borelBumpMono (n : ℕ) (s : ℝ) : ℝ := borelCutoff s * s ^ n / (Nat.factorial n : ℝ)
+def borelBumpMono (n : ℕ) (s : ℝ) : ℝ := borelCutoff s * s ^ n / (Nat.factorial n : ℝ)
 
-private theorem borelBumpMono_contDiff {N : ℕ∞} (n : ℕ) :
+theorem borelBumpMono_contDiff {N : ℕ∞} (n : ℕ) :
     ContDiff ℝ N (borelBumpMono n) :=
   ((borelCutoff_contDiff.mul ((contDiff_id).pow n)).div_const _)
 
 /-- The bump-monomial scaled by a constant `a` is `C^∞`. -/
-private theorem borelBumpMono_comp_smul_contDiff {N : ℕ∞} (n : ℕ) (a : ℝ) :
+theorem borelBumpMono_comp_smul_contDiff {N : ℕ∞} (n : ℕ) (a : ℝ) :
     ContDiff ℝ N (fun s : ℝ => borelBumpMono n (a * s)) :=
   (borelBumpMono_contDiff n).comp (contDiff_const.mul contDiff_id)
 
-private theorem borelBumpMono_support_subset (n : ℕ) :
+theorem borelBumpMono_support_subset (n : ℕ) :
     Function.support (borelBumpMono n) ⊆ Icc (-2 : ℝ) 2 := by
   intro s hs
   by_contra hmem
@@ -82,14 +82,14 @@ private theorem borelBumpMono_support_subset (n : ℕ) :
       nlinarith
   simp [borelBumpMono, borelCutoff_eq_zero h2]
 
-private theorem borelBumpMono_hasCompactSupport (n : ℕ) :
+theorem borelBumpMono_hasCompactSupport (n : ℕ) :
     HasCompactSupport (borelBumpMono n) :=
   HasCompactSupport.of_support_subset_isCompact isCompact_Icc
     (borelBumpMono_support_subset n)
 
 /-- A global bound on the `k`-th derivative of the bump-monomial `g₀ n`.
 We take the supremum (via compact support) over all `k ≤ n`. -/
-private theorem borelBumpMono_deriv_bound (n : ℕ) :
+theorem borelBumpMono_deriv_bound (n : ℕ) :
     ∃ G : ℝ, 0 ≤ G ∧ ∀ k ≤ n, ∀ s : ℝ,
       ‖iteratedDeriv k (borelBumpMono n) s‖ ≤ G := by
   have hbnd : ∀ k, ∃ C : ℝ, ∀ s : ℝ,
