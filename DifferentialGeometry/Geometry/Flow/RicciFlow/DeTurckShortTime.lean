@@ -46,19 +46,25 @@ is the DeTurck-modified Ricci operator, where `W(g, g_bg)` is the DeTurck
 vector field; this modification makes the otherwise only weakly-parabolic
 Ricci flow strictly parabolic.
 
-The proof instantiates the abstract quasilinear parabolic short-time existence
-theorem `quasilinear_parabolic_metric_short_time_existence` with the two witnesses
-that `deTurckRicciRHS g_bg` is strictly parabolic at `g₀`
-(`deTurckRicciRHS_isStrictlyParabolic_at_self`) and has smooth quasi-linear
-dependence on `(g, ∇g, ∇²g)` (`deTurckRicciRHS_isSmoothQuasilinear`). -/
+This is the genuine quasi-linear parabolic short-time existence for the concrete
+DeTurck–Ricci operator. Its inputs are that `deTurckRicciRHS g_bg` is strictly
+parabolic at every metric (`deTurckRicciRHS_isStrictlyParabolic_at_self`), has
+smooth quasi-linear dependence on `(g, ∇g, ∇²g)`
+(`deTurckRicciRHS_isSmoothQuasilinear`), and is value-symmetric
+(`deTurckRicciRHS_symm` — this keeps the conclusion, a curve of symmetric metrics,
+satisfiable). The proof is to be supplied by Banach fixed point on Duhamel iterates
+seeded by the linearised analytic semigroup
+(`Analysis/Parabolic/QuasiLinear/Semigroup/`); it is currently `sorry`, so
+consumers transitively depend on `sorryAx`.
+
+There is intentionally no abstract free-operator version: that statement is false
+as written (the conclusion forces value-symmetry that a free operator binder does
+not carry), so the existence content lives here, at the symmetric DeTurck operator. -/
 theorem deTurckRicci_shortTime_existence_of_closed
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ T : ℝ, ∃ g_DT : ℝ → SmoothRiemannianMetric I M,
       IsQuasilinearMetricParabolicSolution (I := I)
-        (deTurckRicciRHS (I := I) g_bg) g₀ T g_DT :=
-  DifferentialGeometry.PDE.quasilinear_parabolic_metric_short_time_existence
-    (deTurckRicciRHS (I := I) g_bg) g₀
-    (deTurckRicciRHS_isStrictlyParabolic_at_self g₀ g_bg)
-    (deTurckRicciRHS_isSmoothQuasilinear g_bg)
+        (deTurckRicciRHS (I := I) g_bg) g₀ T g_DT := by
+  sorry
 
 end DifferentialGeometry.PDE.RicciFlow

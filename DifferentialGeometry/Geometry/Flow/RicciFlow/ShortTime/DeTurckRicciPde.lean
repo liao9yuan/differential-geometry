@@ -121,9 +121,9 @@ the `k ≤ 2` spatial jets).  These constrain only the internal `g_DT`/`X_DT`, n
 `g₀`/the headline statement, so the enrichment is non-leaking.
 
 This is assembled from its two faithful classical inputs, each isolated:
-* existence — `deTurckRicci_shortTime_existence_of_closed` (the abstract quasilinear parabolic
-  short-time existence `quasilinear_parabolic_metric_short_time_existence`, a Banach fixed
-  point on Duhamel iterates);
+* existence — `deTurckRicci_shortTime_existence_of_closed` (quasi-linear parabolic short-time
+  existence for the concrete strictly-parabolic symmetric DeTurck–Ricci operator, a Banach
+  fixed point on Duhamel iterates);
 * regularity — `deturck_ricci_parabolic_interior_regularity` (interior parabolic smoothing and
   continuity up to the smooth initial data).
 
