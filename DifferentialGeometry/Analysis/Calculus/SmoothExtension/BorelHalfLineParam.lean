@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Calculus.SmoothExtension.BorelHalfLine
+import DifferentialGeometry.Analysis.Calculus.SmoothExtension.IteratedFDerivProdMatch
 import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 import Mathlib.Analysis.Calculus.ContDiff.Comp
 import Mathlib.Analysis.Calculus.ContDiff.Bounds
@@ -35,15 +36,16 @@ Away from the seam `t = 0` the extension `gext t z := if 0 ≤ t then g t z else
 `C^∞` because it locally agrees with either `g` (on the open upper half) or the smooth series (on
 the open lower half).
 
-## Deferred input
+## The seam
 
 The seam case `t₀ = 0` is the *joint* analogue of `contDiff_if_le_of_jet_match` across the
 hyperplane `{0} × E`: it requires that the globally-smooth series and `g` share their full joint
 Taylor jet at `(0, z₀)`. The series matches `g`'s one-sided `t`-jet `cₙ` for every parameter `z`
-near `z₀` by construction, so the mixed `t`/`z` Taylor coefficients agree by Clairaut symmetry, but
-formalising this bivariate-Taylor decomposition of `iteratedFDeriv` on a product, together with the
-joint hyperplane glue, is a self-contained deep result and is left here as the file's single
-deferred `sorry` (so `borel_halfLine_extend_param` transitively depends on `sorryAx`).
+near `z₀` by construction (`paramSeries_slice_iteratedDeriv_zero`, the parametrized analogue of
+`borel_jet_realize`'s jet identity, fibre by fibre), so on the common closed slab `Ici 0 ×ˢ V` both
+`Φ` and `uncurry g` are `C∞` and share their entire one-sided `t`-jet at every seam parameter.
+`Analysis.iteratedFDerivWithin_prod_match` turns that common `t`-jet into the matching joint iterated
+Fréchet derivative, closing the seam coefficient match. The file is `sorry`-free.
 -/
 
 noncomputable section
@@ -421,6 +423,180 @@ private theorem paramDomBound_bound (k n : ℕ) (p : ℝ × E) :
   · rw [if_neg hkn]
     exact Classical.choose_spec (paramTerm_iteratedFDeriv_global_bound a ha hsupp n k) p
 
+/-- Near `0`, the `t`-scalar `sₙ` of the `n`-th term equals `tⁿ / n!`, so its `k`-th derivative at
+`0` is `1` if `n = k` and `0` otherwise. -/
+private theorem paramScalar_iteratedDeriv_zero (n k : ℕ) :
+    iteratedDeriv k (paramScalar a ha hsupp n) 0 = if n = k then (1 : ℝ) else 0 := by
+  have hL0 : 0 < paramScale a ha hsupp n := paramScale_pos a ha hsupp n
+  have hev : paramScalar a ha hsupp n =ᶠ[𝓝 (0 : ℝ)]
+      fun t => (paramScale a ha hsupp n)⁻¹ ^ n *
+        ((paramScale a ha hsupp n * t) ^ n / (Nat.factorial n : ℝ)) := by
+    refine eventuallyEq_of_mem (Ioo_mem_nhds (a := -(1 / paramScale a ha hsupp n))
+      (b := 1 / paramScale a ha hsupp n) (by simpa using by positivity) (by positivity)) ?_
+    intro t ht
+    have h1 : (paramScale a ha hsupp n * t) ^ 2 ≤ 1 := by
+      rw [mul_pow]
+      have htabs : |t| < 1 / paramScale a ha hsupp n := by
+        rw [abs_lt]; exact ⟨by simpa using ht.1, ht.2⟩
+      have ht2 : t ^ 2 ≤ (1 / paramScale a ha hsupp n) ^ 2 := by
+        rw [← sq_abs t]; exact pow_le_pow_left₀ (abs_nonneg t) htabs.le 2
+      calc paramScale a ha hsupp n ^ 2 * t ^ 2
+          ≤ paramScale a ha hsupp n ^ 2 * (1 / paramScale a ha hsupp n) ^ 2 :=
+            mul_le_mul_of_nonneg_left ht2 (by positivity)
+        _ = 1 := by field_simp
+    simp only [paramScalar, borelBumpMono, borelCutoff_eq_one h1, one_mul]
+  rw [Filter.EventuallyEq.iteratedDeriv_eq k hev]
+  have hcd : ContDiffAt ℝ k
+      (fun t => (paramScale a ha hsupp n)⁻¹ ^ n *
+        ((paramScale a ha hsupp n * t) ^ n / (Nat.factorial n : ℝ))) 0 := by
+    fun_prop
+  have hfun : (fun t => (paramScale a ha hsupp n)⁻¹ ^ n *
+      ((paramScale a ha hsupp n * t) ^ n / (Nat.factorial n : ℝ))) =
+      (fun t => ((paramScale a ha hsupp n)⁻¹ ^ n * (paramScale a ha hsupp n) ^ n /
+        (Nat.factorial n : ℝ)) * t ^ n) := by
+    funext t; rw [mul_pow]; ring
+  rw [hfun]
+  simp only [iteratedDeriv_const_mul_field, iteratedDeriv_fun_pow_zero]
+  have hLn : (paramScale a ha hsupp n)⁻¹ ^ n * paramScale a ha hsupp n ^ n = 1 := by
+    rw [← mul_pow, inv_mul_cancel₀ hL0.ne', one_pow]
+  rcases eq_or_ne n k with h | h
+  · subst h
+    rw [if_pos rfl, if_pos rfl]
+    have hfac : (Nat.factorial n : ℝ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero n
+    rw [div_mul_cancel₀ _ hfac, hLn]
+  · rw [if_neg (fun h' => h h'.symm), if_neg h]
+    simp
+
+/-- The `n`-th term restricted to the fibre over `w` is the scalar `sₙ` times the vector `a n w`. -/
+private theorem paramTerm_slice_eq (n : ℕ) (w : E) :
+    (fun t => paramTerm a ha hsupp n (t, w)) = fun t => paramScalar a ha hsupp n t • a n w :=
+  rfl
+
+private theorem paramTerm_slice_contDiff (n : ℕ) (w : E) :
+    ContDiff ℝ ∞ (fun t => paramTerm a ha hsupp n (t, w)) := by
+  rw [paramTerm_slice_eq]
+  exact (paramScalar_contDiff a ha hsupp n).smul_const (a n w)
+
+/-- The `k`-th derivative at `0` of the `n`-th term over the fibre `w`: `a n w` if `n = k`, else `0`. -/
+private theorem paramTerm_slice_iteratedDeriv_zero (n k : ℕ) (w : E) :
+    iteratedDeriv k (fun t => paramTerm a ha hsupp n (t, w)) 0 =
+      (if n = k then (1 : ℝ) else 0) • a n w := by
+  rw [paramTerm_slice_eq,
+    iteratedDeriv_smul_const ((paramScalar_contDiff a ha hsupp n).contDiffAt.of_le
+      (by exact_mod_cast le_top)),
+    paramScalar_iteratedDeriv_zero]
+
+/-- A uniform bound on the fibre-slice term derivatives that dominates the `k`-th derivative of the
+`n`-th fibre-slice term, summably in `n`: `2⁻ⁿ` for `k < n` and a global bound otherwise. -/
+private theorem paramTerm_slice_iteratedFDeriv_bound {n k : ℕ} (hkn : k < n) (w : E) (t : ℝ) :
+    ‖iteratedFDeriv ℝ k (fun s => paramTerm a ha hsupp n (s, w)) t‖ ≤ (2 : ℝ)⁻¹ ^ n := by
+  set L : ℝ := paramScale a ha hsupp n with hLdef
+  set G : ℝ := Classical.choose (borelBumpMono_deriv_bound n) with hGdef
+  set A : ℝ := Classical.choose (param_coeff_deriv_bound (a n) (ha n) (hsupp n) n) with hAdef
+  have hGnn : 0 ≤ G := (Classical.choose_spec (borelBumpMono_deriv_bound n)).1
+  have hAspec := Classical.choose_spec (param_coeff_deriv_bound (a n) (ha n) (hsupp n) n)
+  rw [← hAdef] at hAspec
+  obtain ⟨hAnn, hAbound⟩ := hAspec
+  have hL0 : 0 < L := paramScale_pos a ha hsupp n
+  have hLmax : (4 : ℝ) ^ n * G * (1 + A) ≤ L := le_max_right _ _
+  rw [norm_iteratedFDeriv_eq_norm_iteratedDeriv, paramTerm_slice_eq,
+    iteratedDeriv_smul_const ((paramScalar_contDiff a ha hsupp n).contDiffAt.of_le
+      (by exact_mod_cast le_top)), norm_smul]
+  -- The scalar derivative is `≤ G/L`; the constant vector is `≤ A`.
+  have hsb : ‖iteratedDeriv k (paramScalar a ha hsupp n) t‖ ≤ G / L := by
+    have hb := paramScalar_iteratedDeriv_bound a ha hsupp hkn t
+    rwa [← hLdef, ← hGdef] at hb
+  have hab : ‖a n w‖ ≤ A := by
+    have h0 := hAbound 0 (Nat.zero_le n) w
+    rwa [norm_iteratedFDeriv_zero] at h0
+  have hprod : ‖iteratedDeriv k (paramScalar a ha hsupp n) t‖ * ‖a n w‖ ≤ (G / L) * A :=
+    mul_le_mul hsb hab (norm_nonneg _) (by positivity)
+  refine le_trans hprod ?_
+  -- `(G/L) * A ≤ 2⁻ⁿ` by the scale choice, exactly as in `paramTerm_iteratedFDeriv_bound`.
+  rcases eq_or_lt_of_le hGnn with hG0 | hGpos
+  · rw [← hG0]; simp
+  · have h1A : (0 : ℝ) < 1 + A := by positivity
+    have h2n : (0 : ℝ) < (2 : ℝ) ^ n := by positivity
+    have hGL : G / L ≤ 1 / ((4 : ℝ) ^ n * (1 + A)) := by
+      rw [div_le_div_iff₀ hL0 (by positivity)]
+      have hrw : G * ((4 : ℝ) ^ n * (1 + A)) = (4 : ℝ) ^ n * G * (1 + A) := by ring
+      rw [hrw, one_mul]; exact hLmax
+    have h4n : (4 : ℝ) ^ n = (2 : ℝ) ^ n * (2 : ℝ) ^ n := by rw [← mul_pow]; norm_num
+    rw [inv_pow, inv_eq_one_div, le_div_iff₀ h2n]
+    have hstep : G / L * A * (2 : ℝ) ^ n ≤ (1 / ((4 : ℝ) ^ n * (1 + A))) * A * (2 : ℝ) ^ n := by
+      gcongr
+    refine le_trans hstep ?_
+    have heq : (1 / ((4 : ℝ) ^ n * (1 + A))) * A * (2 : ℝ) ^ n = A / ((2 : ℝ) ^ n * (1 + A)) := by
+      rw [h4n]; field_simp
+    rw [heq, div_le_one (by positivity)]
+    have h1le : (1 : ℝ) ≤ (2 : ℝ) ^ n := one_le_pow₀ (by norm_num)
+    nlinarith [mul_nonneg (sub_nonneg.mpr h1le) h1A.le, mul_nonneg hAnn (sub_nonneg.mpr h1le)]
+
+/-- The fibre-slice term has compact support (the scalar `sₙ` does). -/
+private theorem paramTerm_slice_hasCompactSupport (n : ℕ) (w : E) :
+    HasCompactSupport (fun t => paramTerm a ha hsupp n (t, w)) := by
+  rw [paramTerm_slice_eq]
+  exact (paramScalar_hasCompactSupport a ha hsupp n).smul_right
+
+private theorem paramTerm_slice_iteratedFDeriv_global_bound (n k : ℕ) (w : E) :
+    ∃ B : ℝ, ∀ t : ℝ, ‖iteratedFDeriv ℝ k (fun s => paramTerm a ha hsupp n (s, w)) t‖ ≤ B := by
+  have hcs : HasCompactSupport (iteratedFDeriv ℝ k (fun s => paramTerm a ha hsupp n (s, w))) :=
+    (paramTerm_slice_hasCompactSupport a ha hsupp n w).iteratedFDeriv k
+  have hcont : Continuous (iteratedFDeriv ℝ k (fun s => paramTerm a ha hsupp n (s, w))) :=
+    (paramTerm_slice_contDiff a ha hsupp n w).continuous_iteratedFDeriv
+      (by exact_mod_cast le_top : (k : WithTop ℕ∞) ≤ ∞)
+  obtain ⟨B, hB⟩ := hcs.exists_bound_of_continuous hcont
+  exact ⟨B, hB⟩
+
+/-- Per-fibre summable dominating function for the fibre-slice Borel series. -/
+private def paramSliceDomBound (w : E) (k n : ℕ) : ℝ :=
+  if k < n then (2 : ℝ)⁻¹ ^ n
+  else Classical.choose (paramTerm_slice_iteratedFDeriv_global_bound a ha hsupp n k w)
+
+private theorem paramSliceDomBound_summable (w : E) (k : ℕ) :
+    Summable (paramSliceDomBound a ha hsupp w k) := by
+  have hgeom : Summable (fun n : ℕ => (2 : ℝ)⁻¹ ^ n) := by
+    simpa only [one_div] using summable_geometric_two
+  refine Summable.congr_cofinite hgeom ?_
+  rw [Nat.cofinite_eq_atTop]
+  filter_upwards [eventually_gt_atTop k] with n hn
+  rw [paramSliceDomBound, if_pos hn]
+
+private theorem paramSliceDomBound_bound (w : E) (k n : ℕ) (t : ℝ) :
+    ‖iteratedFDeriv ℝ k (fun s => paramTerm a ha hsupp n (s, w)) t‖ ≤
+      paramSliceDomBound a ha hsupp w k n := by
+  rw [paramSliceDomBound]
+  by_cases hkn : k < n
+  · rw [if_pos hkn]; exact paramTerm_slice_iteratedFDeriv_bound a ha hsupp hkn w t
+  · rw [if_neg hkn]
+    exact Classical.choose_spec (paramTerm_slice_iteratedFDeriv_global_bound a ha hsupp n k w) t
+
+/-- The `k`-th `t`-derivative at `0` of the parametrized Borel series over the fibre `w` realizes
+the prescribed coefficient `a k w`. This is the parametrized analogue of `borel_jet_realize`'s jet
+identity, fibre by fibre. -/
+private theorem paramSeries_slice_iteratedDeriv_zero [CompleteSpace F] (k : ℕ) (w : E) :
+    iteratedDeriv k (fun t => ∑' n, paramTerm a ha hsupp n (t, w)) 0 = a k w := by
+  have hFD : iteratedFDeriv ℝ k (fun t => ∑' n, paramTerm a ha hsupp n (t, w)) 0 =
+      ∑' n, iteratedFDeriv ℝ k (fun t => paramTerm a ha hsupp n (t, w)) 0 :=
+    iteratedFDeriv_tsum_apply (N := (⊤ : ℕ∞)) (v := paramSliceDomBound a ha hsupp w)
+      (fun n => paramTerm_slice_contDiff a ha hsupp n w)
+      (fun j _ => paramSliceDomBound_summable a ha hsupp w j)
+      (fun j i t _ => paramSliceDomBound_bound a ha hsupp w j i t)
+      (le_top : (k : ℕ∞) ≤ (⊤ : ℕ∞)) 0
+  rw [iteratedDeriv_eq_equiv_comp, Function.comp_apply, hFD,
+    ← LinearIsometryEquiv.coe_toContinuousLinearEquiv,
+    (ContinuousMultilinearMap.piFieldEquiv ℝ (Fin k) F).symm.toContinuousLinearEquiv.map_tsum]
+  simp only [LinearIsometryEquiv.coe_toContinuousLinearEquiv]
+  have hterm : ∀ n, (ContinuousMultilinearMap.piFieldEquiv ℝ (Fin k) F).symm
+      (iteratedFDeriv ℝ k (fun t => paramTerm a ha hsupp n (t, w)) 0) =
+      (if n = k then (1 : ℝ) else 0) • a n w := by
+    intro n
+    rw [← Function.comp_apply (f := (ContinuousMultilinearMap.piFieldEquiv ℝ (Fin k) F).symm),
+      ← iteratedDeriv_eq_equiv_comp]
+    exact paramTerm_slice_iteratedDeriv_zero a ha hsupp n k w
+  rw [tsum_congr hterm, tsum_eq_single k (fun n hn => by rw [if_neg hn, zero_smul]),
+    if_pos rfl, one_smul]
+
 /-- The parametrized Borel series `(t,z) ↦ ∑' n, fₙ(t,z)` is globally `C∞` on `ℝ × E`. -/
 private theorem paramSeries_contDiff [CompleteSpace F] :
     ContDiff ℝ ∞ (fun p : ℝ × E => ∑' n, paramTerm a ha hsupp n p) :=
@@ -495,6 +671,7 @@ private theorem exists_contDiff_tsupport_subset_eventuallyEq_one
       (x := x) : Filter.Tendsto toEuclidean (𝓝 x) (𝓝 (toEuclidean x)))
     simpa only [hρ_def, Function.comp_def, Pi.one_apply] using this
 
+set_option linter.unusedVariables false in
 /-- **Parametrized Borel half-line extension.** Let `g : ℝ → E → F` be jointly `C∞` on
 `Ici 0 ×ˢ K` for a compact `K` with `z₀` in its interior. Then there is a function `gext` and an
 open neighbourhood `V` of `z₀` on which `gext` is jointly `C∞` on the full slab `univ ×ˢ V`
@@ -505,7 +682,12 @@ coefficients are promoted to smooth functions of the parameter `z`, multiplied b
 near `z₀`, and the Borel series is run jointly on `ℝ × E`. The model space `E` is finite-dimensional
 (as in every intended application, where `E` is a chart/tangent model `ℝ^d`); this is required to
 build the smooth cutoff `ρ`. The conclusion is the joint-smoothness-on-a-`z`-neighbourhood form
-needed by the downstream time-extension consumer (not merely `ContDiffAt` on the central fibre). -/
+needed by the downstream time-extension consumer (not merely `ContDiffAt` on the central fibre).
+
+The compactness hypothesis `hK` is retained because it is the mathematically natural condition for the
+statement (a family smooth on a closed slab over a compact base), even though the present proof draws
+its compact support from the finite-dimensional bump cutoff supported in `interior K` rather than from
+`hK` directly. -/
 theorem borel_halfLine_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
     (g : ℝ → E → F) (K : Set E) (hK : IsCompact K) (z₀ : E) (hz₀ : z₀ ∈ interior K)
     (hg : ContDiffOn ℝ ∞ (Function.uncurry g) ((Set.Ici (0:ℝ)) ×ˢ K)) :
@@ -569,10 +751,10 @@ theorem borel_halfLine_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
             zero_pow (by omega : n ≠ 0)]
           simp
       rw [hΦ_def]
-      show (∑' n, paramTerm a ha hsupp n (0, z)) = g 0 z
+      change (∑' n, paramTerm a ha hsupp n (0, z)) = g 0 z
       rw [tsum_congr hterm0, tsum_eq_single 0 (fun n hn => by rw [if_neg hn, zero_smul]),
         if_pos rfl, one_smul, ha_def]
-      show ρ z • iteratedDerivWithin 0 (fun s => g s z) (Set.Ici 0) 0 = g 0 z
+      change ρ z • iteratedDerivWithin 0 (fun s => g s z) (Set.Ici 0) 0 = g 0 z
       rw [hρV z hz, one_smul, iteratedDerivWithin_zero]
     -- `uncurry gext` equals `Φ` on the closed lower half `Iic 0 ×ˢ V`.
     have hEqLower : Set.EqOn (Function.uncurry gext) Φ (Set.Iic (0:ℝ) ×ˢ V) := by
@@ -608,30 +790,40 @@ theorem borel_halfLine_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
     -- The candidate joint series, assembled piecewise.
     set p : ℝ × E → FormalMultilinearSeries ℝ (ℝ × E) F :=
       fun q => if q.1 ≤ 0 then pL q else pR q with hp_def
-    -- **THE SEAM COEFFICIENT MATCH** (the file's single deferred input): the two one-sided joint
-    -- Taylor coefficients agree at every seam point `(0, z)`, `z ∈ V`. This holds *by
-    -- construction* — both joint jets are determined by the common one-sided `t`-jet
-    -- `cₙ z = ∂ₜⁿ g(·,z)|₀` and the common `z`-dependence (`Φ(0,·) = g(0,·) = ρ·c₀` on `V`),
-    -- their mixed `∂_z^a ∂_t^b` parts agreeing by differentiating the `t`-jet identity in `z`
-    -- together with Clairaut symmetry of `iteratedFDerivWithin`. Since `Φ` is globally smooth, the
-    -- lower within-jet equals the full jet, which equals the *upper* within-jet, so the goal reduces
-    -- to a common-domain (`Ici 0 ×ˢ V`) statement; formalising the remaining product-domain
-    -- (bivariate-Taylor) decomposition of `iteratedFDerivWithin` is a self-contained deep result,
-    -- left here as the sole `sorry`.
+    -- **THE SEAM COEFFICIENT MATCH**: the two one-sided joint Taylor coefficients agree at every
+    -- seam point `(0, z)`, `z ∈ V`. Since `Φ` is globally smooth, its lower within-jet equals the
+    -- full jet, which equals its *upper* within-jet, so the goal reduces to a common-domain
+    -- (`Ici 0 ×ˢ V`) statement. Both `Φ` and `uncurry g` are `C∞` there and share their entire
+    -- one-sided `t`-jet at every seam parameter `w ∈ V` (the Borel series realizes `cₙ` fibrewise by
+    -- construction, and `ρ ≡ 1` on `V`); `iteratedFDerivWithin_prod_match` turns this common `t`-jet
+    -- into the matching joint iterated Fréchet derivative.
+    have htjet : ∀ i : ℕ, Set.EqOn
+        (fun w => iteratedDerivWithin i (fun t => Φ (t, w)) (Set.Ici 0) 0)
+        (fun w => iteratedDerivWithin i (fun t => Function.uncurry g (t, w)) (Set.Ici 0) 0) V := by
+      intro i w hw
+      simp only
+      have hΦsliceAt : ContDiffAt ℝ (i : WithTop ℕ∞) (fun t => Φ (t, w)) 0 :=
+        (hΦ.comp (contDiff_id.prodMk contDiff_const)).contDiffAt.of_le (by exact_mod_cast le_top)
+      have hLHS : iteratedDerivWithin i (fun t => Φ (t, w)) (Set.Ici 0) 0 = a i w := by
+        rw [iteratedDerivWithin_eq_iteratedDeriv (uniqueDiffOn_Ici 0) hΦsliceAt Set.self_mem_Ici]
+        have hΦeq : (fun t => Φ (t, w)) = fun t => ∑' n, paramTerm a ha hsupp n (t, w) := by
+          funext t; rw [hΦ_def]
+        rw [hΦeq, paramSeries_slice_iteratedDeriv_zero a ha hsupp i w]
+      rw [hLHS]
+      simp only [ha_def, hρV w hw, one_smul]
+      rfl
+    -- Apply the common-`t`-jet ⟹ matching-joint-jet lemma after collapsing the smooth left jet.
     have hjetF : ∀ (n : ℕ) (z : E), z ∈ V →
         iteratedFDerivWithin ℝ n Φ (Set.Iic (0:ℝ) ×ˢ V) (0, z) =
           iteratedFDerivWithin ℝ n (Function.uncurry g) (Set.Ici (0:ℝ) ×ˢ V) (0, z) := by
       intro n z hz
-      -- Collapse LEFT: `Φ` is globally smooth, so the lower within-derivative equals the full one,
-      -- which in turn equals the *upper* within-derivative (same reasoning). Both sides are now on
-      -- the common domain `Ici 0 ×ˢ V`.
       have hmemL : ((0:ℝ), z) ∈ Set.Iic (0:ℝ) ×ˢ V := ⟨Set.self_mem_Iic, hz⟩
       have hmemR : ((0:ℝ), z) ∈ Set.Ici (0:ℝ) ×ˢ V := ⟨Set.self_mem_Ici, hz⟩
       have hΦn : ContDiffAt ℝ (n : WithTop ℕ∞) Φ (0, z) :=
         hΦ.contDiffAt.of_le (by exact_mod_cast le_top)
       rw [iteratedFDerivWithin_eq_iteratedFDeriv hUDl hΦn hmemL,
         ← iteratedFDerivWithin_eq_iteratedFDeriv hUDr hΦn hmemR]
-      sorry
+      exact iteratedFDerivWithin_prod_match hVopen hΦ.contDiffOn hgR htjet n hz
     -- Hence the assembled series is well-defined at the seam: `pL (0,z) = pR (0,z)` on `V`.
     have hpLR : ∀ (n : ℕ) (z : E), z ∈ V → pL (0, z) n = pR (0, z) n := by
       intro n z hz
