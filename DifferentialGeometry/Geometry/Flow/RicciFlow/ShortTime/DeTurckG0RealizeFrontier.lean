@@ -36,23 +36,20 @@ conclusion as a hypothesis.
   principal-part match `hNsec_geom` (anchor `g₀` ≠ background `g_bg`).  The
   second-order part of `deTurckRicciRHS g_bg` linearised at `g₀` is the
   `g₀`-rough-Laplacian regardless of `g_bg`, so this `repr` reconciles the realized
-  flow's spectral data with `deTurckRicciRHS g_bg`.
-* `deTurck_g0_continuous_nonlinearity` — the spectral lift of that section to a
-  *continuous* first-order nonlinearity `N_cont : Hᵃ⁺¹(g₀) → Hᵃ(g₀)` whose
-  coordinates are the `L²` coordinates of `Nsec`.  The gated `deTurckGeometricN` is
-  discontinuous (zeroed off finite support), so the continuous realize-based lift is
-  the genuine open datum.
-* `deTurck_g0_nonlinearity_lipschitz` — the weighted-resolvent Lipschitz
-  certificate of that nonlinearity (the resolvent-smoothing bridge).
+  flow's spectral data with `deTurckRicciRHS g_bg`.  It is sorry-free glue over the
+  fully-proven gate-conditioned match `deTurckRemainderRealize_geomMatch`.
 * `deTurck_g0_carrier_realize_transport` — the `L²`-time → pointwise Duhamel
-  carrier transport: the engine's strong solution, realized off `g₀`, yields a
+  carrier transport: driven by the **genuine, un-gated** continuous nonlinearity
+  `N_cont` and its engine-shaped local Lipschitz (supplied by
+  `deTurck_g0_genuine_nonlinearity`, `DeTurckG0GenuineNonlinearity.lean` — *not* the
+  discontinuous gated gauge), the engine's strong solution, realized off `g₀`, yields a
   genuine pointwise carrier `u₂`/`T_s` and metric family `g_DT` with the interior
   strong derivative, time-continuity, and fibre-small certificates.
 * `deTurck_g0_chartGram_continuity` — the `k ≤ 2` chart-Gram continuity of the
   realized flow (the parabolic-regularity datum).
 
-Each body is `sorry` or (for `deTurck_g0_decoupled_principal_match`) is assembled from a
-single concrete-gauge `sorry` datum, so consumers transitively depend on `sorryAx`. -/
+Each body is `sorry` or (for `deTurck_g0_decoupled_principal_match`) is sorry-free glue
+over a proven gate-conditioned match, so consumers transitively depend on `sorryAx`. -/
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -85,15 +82,13 @@ representative `repr` such that:
 
 * `hNsec_realize` — `Nsec u`'s symmetric bilinear extraction equals that of
   `repr u` (the realize identity tying `Nsec` to the linear realization program);
-* `hNsec_lip` — the weighted-resolvent `Hᵃ`-Lipschitz bound on the gauge section
-  difference `deTurckG0SectionDiffHa Nsec u u'` (the resolvent-smoothing certificate
-  consumed by the maximal-regularity Duhamel engine);
 * `hNsec_geom` — for *every* metric family `g_DT` realized as the linear realize off
   `g₀` (`hreal`) of a *canonically realized* carrier `u₂`/`T_s` (`hsmoothrepr`: the
   carrier coordinates are the `L²` coordinates of `T_s`; `hcanon`: `T_s s` is the
   canonical smooth representative of the carrier, i.e. its `L²` class is the
-  `tensorHsToL2`-realization of `u₂ s`), the `g₀`-rough-Laplacian of `T_s s` plus the
-  `g₀`-realize of `repr` of the carrier equals `deTurckRicciRHS g_bg (g_DT s)`.
+  `tensorHsToL2`-realization of `u₂ s`) **whose carrier inclusion is `realizableAtGate`**,
+  the `g₀`-rough-Laplacian of `T_s s` plus the `g₀`-realize of `repr` of the carrier
+  equals `deTurckRicciRHS g_bg (g_DT s)`.
 
 `hNsec_geom` is the *decoupled* (anchor `g₀` ≠ background `g_bg`) integrated analogue
 of `deTurckNonlinearitySpectral_principalPart_cancels`: the second-order part of
@@ -101,11 +96,13 @@ of `deTurckNonlinearitySpectral_principalPart_cancels`: the second-order part of
 `g_bg`, which only enters the lower-order DeTurck field carried by the *concrete*
 DeTurck gauge `repr` (the `g_bg`-background, `g₀`-retagged Ricci–DeTurck remainder
 section `deTurckRHSSection g_bg (realize) − Δ_∇` of the canonical smooth
-representative).  The gauge is concrete (so `hNsec_realize`/`hNsec_lip`/`hNsec_geom`
-are *true* — they fail for a generic discontinuous `Nsec`); the `hcanon` premise pins
-the carrier to its canonical smooth representative, which is exactly what makes the
-realize of `repr` reconcile with `deTurckRicciRHS g_bg (g_DT s)` via the sorry-free
-bridge `deTurckRHSSection_ccTensorBilinSymm_eq_deTurckRicciRHS`.
+representative).  The gauge is concrete (so `hNsec_realize`/`hNsec_geom` are *true*);
+the `hcanon` premise pins the carrier to its canonical smooth representative, which is
+exactly what makes the realize of `repr` reconcile with `deTurckRicciRHS g_bg (g_DT s)`
+via the sorry-free bridge `deTurckRHSSection_ccTensorBilinSymm_eq_deTurckRicciRHS`.  The
+engine's nonlinearity Lipschitz is **not** carried here (the gated gauge is
+discontinuous): it is supplied separately, un-gated, by `deTurck_g0_genuine_nonlinearity`
+(`DeTurckG0GenuineNonlinearity.lean`).
 
 The earlier `hrepr_small` conjunct (a uniform `g₀`-fibre-`< 1` bound on
 `ccTensorBilinSymm (repr u)`) is *dropped*: it is jointly *unsatisfiable* with
@@ -123,10 +120,10 @@ principal-part* datum the realize program isolates, not a hypothesis-packaged co
 
 The gauge `repr = Nsec` is the *concrete* section
 `deTurckRemainderRealizeSection g₀ g_bg` (`DeTurckRemainderRealizeGauge.lean`); the
-realize identity `hNsec_realize` is then `rfl`, and the `hNsec_lip`/`hNsec_geom`
-conjuncts are supplied by the concrete-gauge open datum
-`deTurckRemainderRealize_geomMatch_lipschitz`.  This node therefore carries no `sorry`
-of its own; it transitively depends on that single concrete-gauge `sorryAx`. -/
+realize identity `hNsec_realize` is then `rfl`, and the `hNsec_geom` conjunct is the
+fully proven gate-conditioned geometric match `deTurckRemainderRealize_geomMatch`.  This
+node is therefore sorry-free glue (it carries no `sorry` of its own and routes through no
+false-as-stated leaf). -/
 theorem deTurck_g0_decoupled_principal_match
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
     ∃ repr Nsec : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
@@ -135,9 +132,6 @@ theorem deTurck_g0_decoupled_principal_match
           (x : M) (v w : TangentSpace I x),
         ccTensorBilinSymm (I := I) g₀ (Nsec u) x v w =
           ccTensorBilinSymm (I := I) g₀ (repr u) x v w) ∧
-      (∃ K : ℝ≥0, ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-        ‖deTurckG0SectionDiffHa (I := I) (M := M) g₀ a Nsec u u'‖
-          ≤ (K : ℝ) * dist u u') ∧
       (∀ (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
           (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
           (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2),
@@ -167,146 +161,21 @@ theorem deTurck_g0_decoupled_principal_match
                 (repr (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
                   (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) x' v' w'
             = deTurckRicciRHS (I := I) g_bg (g_DT s) x' v' w') := by
-  obtain ⟨hNsec_lip, hNsec_geom⟩ :=
-    deTurckRemainderRealize_geomMatch_lipschitz (I := I) (M := M) g₀ g_bg a
   exact ⟨deTurckRemainderRealizeSection (I := I) g₀ g_bg,
     deTurckRemainderRealizeSection (I := I) g₀ g_bg,
-    fun _ _ _ _ => rfl, hNsec_lip, hNsec_geom⟩
-
-/-- **The continuous spectral lift of the gauge section to the `g₀`-DeTurck
-nonlinearity (open analytic datum).**
-
-For the realize-based gauge section `Nsec` (the open geometric datum of
-`deTurck_g0_decoupled_principal_match`), there is a *continuous* first-order
-nonlinearity `N_cont : Hᵃ⁺¹(g₀) → Hᵃ(g₀)` whose eigenbasis coordinates `(N_cont u).coeff i`
-are the `L²` coordinates of `Nsec u` (`hN_coeff`).
-
-The finite-support-gated `deTurckGeometricN` is globally discontinuous (it jumps to
-`0` off the non-open finite-support locus), hence is **not** this `N_cont`; the
-continuous realize-based lift, with infinite-support inputs handled through the
-smooth representative, is the project's genuine open continuous-nonlinearity datum.
-The conclusion is the existence of the continuous lift with the coordinate identity,
-not any Lipschitz/existence statement — no packaging.  The body is `sorry`. -/
-theorem deTurck_g0_continuous_nonlinearity
-    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (Nsec : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
-        Integral.L2.SmoothCcTensor g₀ 0 2) :
-    ∃ N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
-          tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ),
-      ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
-          (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-            (I := I) (M := M) g₀ 0 2),
-        (N_cont u).coeff i =
-          tensorL2Coeff (I := I) (M := M)
-            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-            (Integral.L2.SmoothCcTensor.toL2 (Nsec u)) i := by
-  refine ⟨fun u =>
-    Analysis.Parabolic.MaximalRegularity.timeModeSynthesisPointwise
-      (g := g₀) (r := 0) (s := 2) (b := (a : ℝ))
-      (fun i => tensorL2Coeff (I := I) (M := M)
-        (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-        (Integral.L2.SmoothCcTensor.toL2 (Nsec u)) i)
-      (smoothCcTensor_tensorL2Coeff_weighted_summable (I := I) (M := M)
-        g₀ (a : ℝ) (Nsec u)
-        (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)), ?_⟩
-  intro u i
-  exact Analysis.Parabolic.MaximalRegularity.timeModeSynthesisPointwise_coeff
-    (g := g₀) (r := 0) (s := 2) (b := (a : ℝ)) _ _ i
-
-set_option linter.unusedVariables false in
-/-- **Weighted-resolvent Lipschitz certificate for the `g₀`-DeTurck nonlinearity
-(open analytic datum: the resolvent-smoothing bridge).**
-
-For the realize-based geometric remainder section `Nsec` tied to the linear realize
-`repr` by the realize identity `hNsec_realize`, the weighted-resolvent
-`Hᵃ`-difference of `Nsec` is locally Lipschitz across Sobolev scales: there is a
-constant `K` with the per-mode weighted square-sum of the resolvent coordinates of
-`Nsec u − Nsec u'` bounded by `(K · dist u u')²`.
-
-This is exactly the `hNsec_lip` keystone consumed by the maximal-regularity Duhamel
-engine (`deturckN_hscale_lipschitz`).  It is **not** the Lipschitz conclusion of
-`N_cont` itself but a weighted-summability bound on `Nsec`'s coordinates,
-structurally distinct from the realize-identity hypothesis.
-
-The proof splits the certificate into its two genuine pieces.  The
-square-summability of the weighted eigenbasis coordinates of the section difference
-is *discharged* here from the spectral "smooth ⇒ in every `Hˢ`" fact
-(`smoothCcTensor_tensorL2Coeff_weighted_summable`, applied to the smooth tensor
-`Nsec u − Nsec u'`), packaged as the spectral element `deTurckG0SectionDiffHa`.  By
-`tensorHs.norm_sq_eq_tsum` the weighted square-sum is exactly `‖deTurckG0SectionDiffHa
-Nsec u u'‖²`, so the bound reduces to the realize-side `Hᵃ`-Lipschitz norm bound
-`hNsec_ha_lip` supplied for the *concrete* gauge `Nsec` by the gauge node
-`deTurck_g0_decoupled_principal_match`.  The `hNsec_ha_lip` hypothesis is the genuine
-resolvent-smoothing certificate of the concrete gauge (it is *false* for a generic
-discontinuous `Nsec`, so it cannot be a free leaf about an arbitrary section — it is
-threaded here from the concrete gauge producer).  This declaration is therefore a
-derivation: it converts the norm bound into the engine's weighted-square-sum shape. -/
-theorem deTurck_g0_nonlinearity_lipschitz
-    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (repr Nsec : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
-        Integral.L2.SmoothCcTensor g₀ 0 2)
-    (hNsec_realize : ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
-        (x : M) (v w : TangentSpace I x),
-      ccTensorBilinSymm (I := I) g₀ (Nsec u) x v w =
-        ccTensorBilinSymm (I := I) g₀ (repr u) x v w)
-    (hNsec_ha_lip : ∃ K : ℝ≥0, ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-      ‖deTurckG0SectionDiffHa (I := I) (M := M) g₀ a Nsec u u'‖
-        ≤ (K : ℝ) * dist u u') :
-    ∃ K : ℝ≥0, ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-      Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-            (I := I) (M := M) g₀ 0 2 =>
-          tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
-            (tensorL2Coeff (I := I) (M := M)
-                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                (Integral.L2.SmoothCcTensor.toL2 (Nsec u)
-                  - Integral.L2.SmoothCcTensor.toL2 (Nsec u')) i) ^ 2)
-        ∧ (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-              (I := I) (M := M) g₀ 0 2,
-            tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
-              (tensorL2Coeff (I := I) (M := M)
-                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                  (Integral.L2.SmoothCcTensor.toL2 (Nsec u)
-                    - Integral.L2.SmoothCcTensor.toL2 (Nsec u')) i) ^ 2)
-            ≤ ((K : ℝ) * dist u u') ^ 2 := by
-  classical
-  obtain ⟨K, hK⟩ := hNsec_ha_lip
-  refine ⟨K, fun u u' => ?_⟩
-  set N := deTurckG0SectionDiffHa (I := I) (M := M) g₀ a Nsec u u' with hN_def
-  have hcoeff : ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-        (I := I) (M := M) g₀ 0 2,
-      N.coeff i = tensorL2Coeff (I := I) (M := M)
-        (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-        (Integral.L2.SmoothCcTensor.toL2 (Nsec u)
-          - Integral.L2.SmoothCcTensor.toL2 (Nsec u')) i := fun _ => rfl
-  have hsummand :
-      (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-          (I := I) (M := M) g₀ 0 2 =>
-        tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
-          (tensorL2Coeff (I := I) (M := M)
-              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-              (Integral.L2.SmoothCcTensor.toL2 (Nsec u)
-                - Integral.L2.SmoothCcTensor.toL2 (Nsec u')) i) ^ 2)
-        = fun i => tensorSobolevWeight (I := I) (M := M) i (a : ℝ) * (N.coeff i) ^ 2 := by
-    funext i; rw [hcoeff i]
-  refine ⟨?_, ?_⟩
-  · rw [hsummand]
-    exact N.weighted_summable
-  · rw [hsummand, ← tensorHs.norm_sq_eq_tsum N]
-    have hnorm_nonneg : 0 ≤ ‖N‖ := norm_nonneg _
-    have hKd_nonneg : 0 ≤ (K : ℝ) * dist u u' :=
-      mul_nonneg K.coe_nonneg dist_nonneg
-    have hle : ‖N‖ ≤ (K : ℝ) * dist u u' := hK u u'
-    exact pow_le_pow_left₀ hnorm_nonneg hle 2
+    fun _ _ _ _ => rfl,
+    deTurckRemainderRealize_geomMatch (I := I) (M := M) g₀ g_bg a⟩
 
 /-- **`L²`-time → pointwise Duhamel carrier transport for the `g₀`-anchored flow
 (downstream-only analytic content).**
 
 For the anchor `g₀`, a supercritical order `a` (`2a > dim M + 4` and the engine's
-`dim M < 2(a − 2)`), and the continuous nonlinearity `N_cont` presented through its
-section `Nsec` with the coordinate identity `hN_coeff` and the weighted-resolvent
-Lipschitz certificate `hNsec_lip`, the maximal-regularity Duhamel engine
-`deTurckRemainder_strong_shortTime_exists` driven with initial datum `0` produces a
-strong solution which, realized off `g₀`, yields a genuine *pointwise* carrier
+`dim M < 2(a − 2)`), and the genuine continuous nonlinearity `N_cont` (continuous via
+`hN_cont`) together with its **un-gated local Lipschitz** `hLipBall`
+(`LipschitzOnWith K N_cont` on the radius-`R > 0` ball about the included zero datum —
+the genuine coordinate-spectral route, *not* the gated gauge), the maximal-regularity
+Duhamel engine `deTurckRemainder_strong_shortTime_exists` driven with initial datum `0`
+produces a strong solution which, realized off `g₀`, yields a genuine *pointwise* carrier
 `u₂ : ℝ → Hᵃ⁺²(g₀)`, smooth representatives `T_s : ℝ → SmoothCcTensor g₀ 0 2`, and a
 metric family `g_DT`, with:
 
@@ -324,39 +193,21 @@ The engine outputs an `L²`-time/`H¹`-time object and its derivative *as an
 pointwise strong derivative is the indefinite-Bochner-integral / FTC transport of
 `DeTurckInteriorTimeRegularity.lean`, which transitively imports the headline and so
 is isolated here.  The conclusion is the existence of the realized carrier bundle —
-distinct from the supplied coordinate-identity and Lipschitz hypotheses; no
-packaging.  This thinly forwards `deturck_g0_engine_carrier_extraction`. -/
+distinct from the supplied Lipschitz hypothesis; no packaging.  This thinly forwards
+`deturck_g0_engine_carrier_extraction`. -/
 theorem deTurck_g0_carrier_realize_transport
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
     (ha2 : Module.finrank ℝ E < 2 * (a - 2))
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
-    (Nsec : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
-        Integral.L2.SmoothCcTensor g₀ 0 2)
-    (hN_coeff : ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
-        (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-          (I := I) (M := M) g₀ 0 2),
-      (N_cont u).coeff i =
-        tensorL2Coeff (I := I) (M := M)
-          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-          (Integral.L2.SmoothCcTensor.toL2 (Nsec u)) i)
-    (hNsec_lip : ∃ K : ℝ≥0, ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-      Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-            (I := I) (M := M) g₀ 0 2 =>
-          tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
-            (tensorL2Coeff (I := I) (M := M)
-                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                (Integral.L2.SmoothCcTensor.toL2 (Nsec u)
-                  - Integral.L2.SmoothCcTensor.toL2 (Nsec u')) i) ^ 2)
-        ∧ (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-              (I := I) (M := M) g₀ 0 2,
-            tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
-              (tensorL2Coeff (I := I) (M := M)
-                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                  (Integral.L2.SmoothCcTensor.toL2 (Nsec u)
-                    - Integral.L2.SmoothCcTensor.toL2 (Nsec u')) i) ^ 2)
-            ≤ ((K : ℝ) * dist u u') ^ 2) :
+    {K : ℝ≥0} {R : ℝ} (hR : 0 < R)
+    (hN_cont : Continuous N_cont)
+    (hLipBall : LipschitzOnWith K N_cont
+      (Metric.closedBall
+        (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R)) :
     ∃ (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
         (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
         (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2),
@@ -391,8 +242,8 @@ theorem deTurck_g0_carrier_realize_transport
           tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
             (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s)) :=
-  deturck_g0_engine_carrier_extraction (I := I) (M := M) g₀ a ha ha2 N_cont Nsec
-    hN_coeff hNsec_lip
+  deturck_g0_engine_carrier_extraction (I := I) (M := M) g₀ a ha ha2 N_cont hR
+    hN_cont hLipBall
     (gFibreOpBound_ccTensorBilinSymm_le_tensorHsNorm (I := I) (M := M) g₀)
 
 /-- **`k ≤ 2` chart-Gram continuity of the `g₀`-anchored realize flow

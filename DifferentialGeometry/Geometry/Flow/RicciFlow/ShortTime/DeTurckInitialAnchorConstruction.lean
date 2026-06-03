@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.DeTurc
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckG0RealizeFrontier
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckG0GenuineNonlinearity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.RealizeTransport
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.SolutionC2Continuous
 
@@ -129,13 +130,16 @@ theorem deTurck_g0_realize_data
         (∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
           (g_DT s).inner x v w
             = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w) ∧
-        (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
-            (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-              (I := I) (M := M) g₀ 0 2),
-          (N_cont u).coeff i =
+        (∀ s ∈ Set.Ico (0 : ℝ) T,
+            ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+              (I := I) (M := M) g₀ 0 2,
+          (N_cont (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))).coeff i =
             tensorL2Coeff (I := I) (M := M)
               (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-              (Integral.L2.SmoothCcTensor.toL2 (Nsec u)) i) ∧
+              (Integral.L2.SmoothCcTensor.toL2
+                (Nsec (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                  (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)))) i) ∧
         (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
             (x : M) (v w : TangentSpace I x),
           ccTensorBilinSymm (I := I) g₀ (Nsec u) x v w =
@@ -178,15 +182,27 @@ theorem deTurck_g0_realize_data
   set a : ℕ := Module.finrank ℝ E + 5 with ha_def
   have ha : 2 * a > Module.finrank ℝ E + 4 := by omega
   have ha2 : Module.finrank ℝ E < 2 * (a - 2) := by omega
-  obtain ⟨repr, Nsec, hNsec_realize, hNsec_ha_lip, hNsec_geom_univ⟩ :=
-    deTurck_g0_decoupled_principal_match (I := I) g₀ g_bg a
-  obtain ⟨N_cont, hN_coeff⟩ :=
-    deTurck_g0_continuous_nonlinearity (I := I) g₀ a Nsec
-  obtain ⟨K, hNsec_lip⟩ :=
-    deTurck_g0_nonlinearity_lipschitz (I := I) g₀ a repr Nsec hNsec_realize hNsec_ha_lip
+  -- The geometric gauge-cancelled section `repr = Nsec = deTurckRemainderRealizeSection`
+  -- (used *concretely*, so the carrier-only coordinate tie below unifies) together with
+  -- its `rfl` realize identity and the gate-conditioned decoupled principal-part match.
+  set Nsec : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+      Integral.L2.SmoothCcTensor g₀ 0 2 :=
+    deTurckRemainderRealizeSection (I := I) g₀ g_bg with hNsec_def
+  set repr : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+      Integral.L2.SmoothCcTensor g₀ 0 2 :=
+    deTurckRemainderRealizeSection (I := I) g₀ g_bg with hrepr_def
+  have hNsec_realize : ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+      (x : M) (v w : TangentSpace I x),
+      ccTensorBilinSymm (I := I) g₀ (Nsec u) x v w =
+        ccTensorBilinSymm (I := I) g₀ (repr u) x v w := fun _ _ _ _ => rfl
+  have hNsec_geom_univ := deTurckRemainderRealize_geomMatch (I := I) (M := M) g₀ g_bg a
+  -- The **genuine, un-gated** continuous DeTurck nonlinearity `N_cont`, its engine-shaped
+  -- local Lipschitz `hLipBall`, and the *carrier-only* coordinate tie to the gauge
+  -- (`hcoeff`).  The engine's Lipschitz is *not* routed through the gated gauge.
+  obtain ⟨N_cont, K, R, hR, hN_cont, hLipBall, hcoeff⟩ :=
+    deTurck_g0_genuine_nonlinearity (I := I) g₀ g_bg a ha
   obtain ⟨T, g_DT, u₂, T_s, hT, h0, hreal, hcont, hreg, hsmall, hsmoothrepr, hcanon⟩ :=
-    deTurck_g0_carrier_realize_transport (I := I) g₀ a ha ha2 N_cont Nsec
-      hN_coeff ⟨K, hNsec_lip⟩
+    deTurck_g0_carrier_realize_transport (I := I) g₀ a ha ha2 N_cont hR hN_cont hLipBall
   -- Discharge the honest `realizableAtGate` membership of the carrier inclusion on the
   -- whole closed interval: `MemAllTensorHs` from the smooth representative `T_s s`, and
   -- the `g₀`-fibre-smallness from `hsmall` on the interior and from `hreal`/`h0`
@@ -212,6 +228,25 @@ theorem deTurck_g0_realize_data
       simp
     · -- `s ∈ (0, T)`: the interior fibre-smallness from `hsmall`.
       exact hsmall s ⟨hs0, hs.2⟩
+  -- The carrier-only coordinate tie: at each carrier inclusion `ι (u₂ s)` (which is
+  -- `realizableAtGate` by `hgate`), the genuine `N_cont`'s coordinates are the `L²`
+  -- coordinates of the gauge `Nsec = deTurckRemainderRealizeSection g₀ g_bg` (where the
+  -- gauge is the honest DeTurck remainder).  This is `deTurck_g0_genuine_nonlinearity`'s
+  -- `hcoeff` evaluated at the gate-realizable carrier — *not* a global `∀ u` tie.
+  have hN_coeff : ∀ s ∈ Set.Ico (0 : ℝ) T,
+      ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+        (I := I) (M := M) g₀ 0 2,
+      (N_cont (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))).coeff i =
+        tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (Integral.L2.SmoothCcTensor.toL2
+            (Nsec (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)))) i := by
+    intro s hs i
+    exact hcoeff
+      (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (hgate s hs) i
   exact ⟨T, a, hT, ha, g_DT, u₂, T_s, N_cont, repr, Nsec, h0, hreal, hN_coeff,
     hNsec_realize, hcont, hreg, hsmall, hsmoothrepr,
     hNsec_geom_univ T g_DT u₂ T_s hgate
@@ -251,13 +286,16 @@ theorem deTurck_g0_interior_deriv_from_data
     (hreal : ∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
       (g_DT s).inner x v w
         = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w)
-    (hN_coeff : ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
-        (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-          (I := I) (M := M) g₀ 0 2),
-      (N_cont u).coeff i =
+    (hN_coeff : ∀ s ∈ Set.Ico (0 : ℝ) T,
+        ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2,
+      (N_cont (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))).coeff i =
         tensorL2Coeff (I := I) (M := M)
           (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-          (Integral.L2.SmoothCcTensor.toL2 (Nsec u)) i)
+          (Integral.L2.SmoothCcTensor.toL2
+            (Nsec (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)))) i)
     (hNsec_realize : ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
         (x : M) (v w : TangentSpace I x),
       ccTensorBilinSymm (I := I) g₀ (Nsec u) x v w =

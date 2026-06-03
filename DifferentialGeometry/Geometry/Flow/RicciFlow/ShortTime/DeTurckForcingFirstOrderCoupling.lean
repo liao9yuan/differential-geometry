@@ -24,16 +24,17 @@ controlled by `‖v‖_{H^{d+1}}`, which at the spectral-mass level is exactly t
 coupling `Summable (solFieldMass (d+1)) → Summable (forcingMass d)`.
 
 `deTurckForcing_firstOrder_coupling`: for the engine's continuous nonlinearity
-`N_cont` (presented through its smooth section `Nsec` with the coordinate
-identity `hN_coeff`) and a forcing `gforce` reproduced a.e. by `N_cont` along the
-Duhamel solution field of initial datum `u₀` (`hforce`), the first-order coupling
+`N_cont` and a forcing `gforce` reproduced a.e. by `N_cont` along the Duhamel
+solution field of initial datum `u₀` (`hforce`), the first-order coupling
 `∀ d, Summable (solFieldMass (d+1)) → Summable (forcingMass d)` holds.
 
 This is the operator first-order-loss bound of the continuous nonlinearity, NOT a
 summability conclusion folded in as a hypothesis: it constrains the geometric
 nonlinearity (it is false for a generic second-order forcing), and is distinct
-from the coupling conclusion.  The body is `sorry`, so consumers transitively
-depend on `sorryAx`. -/
+from the coupling conclusion.  It is stated purely in terms of the genuine
+nonlinearity `N_cont` (no presentation through a finite-support/gated section), as
+the operator first-order-loss is an intrinsic property of the DeTurck remainder.
+The body is `sorry`, so consumers transitively depend on `sorryAx`. -/
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -79,14 +80,6 @@ theorem deTurckForcing_firstOrder_coupling
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
-    (Nsec : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
-        Integral.L2.SmoothCcTensor g₀ 0 2)
-    (hN_coeff : ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
-        (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
-      (N_cont u).coeff i =
-        tensorL2Coeff (I := I) (M := M)
-          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-          (Integral.L2.SmoothCcTensor.toL2 (Nsec u)) i)
     (u₀ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : (gforce : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))

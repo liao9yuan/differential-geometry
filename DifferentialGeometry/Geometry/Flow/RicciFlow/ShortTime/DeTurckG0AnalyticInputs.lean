@@ -402,7 +402,7 @@ theorem deturck_g0_carrier_Hk_smallness_upto_zero
   -- The general-order intrinsic ≤ spectral bound (the Gårding lift).
   obtain ⟨C, hC0, hCbound⟩ :=
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.pouSobolevToHsNorm_le_spectral
-      (I := I) (M := M) g₀
+      (I := I) (M := M) g₀ k
   -- The order-`2k` forcing mass is summable (free base regularity + the first-order
   -- coupling bootstrap), so the spectral up-to-zero decay core applies.
   have hbase : Summable (forcingMass (I := I) (M := M) gforce ((a : ℝ) - 2)) := by
@@ -423,11 +423,13 @@ theorem deturck_g0_carrier_Hk_smallness_upto_zero
     have hrw : (a : ℝ) - 2 + 2 = (a : ℝ) := by ring
     rwa [hrw] at hgain
   have hsolall := solFieldMass_summable_all (I := I) (M := M) hT.le gforce hcouple hsolbase
-  have hforce_2k : Summable (forcingMass (I := I) (M := M) gforce ((2 * k : ℕ) : ℝ)) :=
-    hcouple ((2 * k : ℕ) : ℝ) (hsolall (((2 * k : ℕ) : ℝ) + 1))
-  -- Spectral up-to-zero decay of the carrier coordinates at order `2k`.
+  have hforce_2k : Summable (forcingMass (I := I) (M := M) gforce ((2 * (2 * k) : ℕ) : ℝ)) :=
+    hcouple ((2 * (2 * k) : ℕ) : ℝ) (hsolall (((2 * (2 * k) : ℕ) : ℝ) + 1))
+  -- Spectral up-to-zero decay of the carrier coordinates at order `4k = 2*(2k)` (the
+  -- Gårding lift `pouSobolevToHsNorm_le_spectral` bounds the `H^{2k}` chart norm by the
+  -- spectral `H^{4k}` norm, so the decay must be taken at the matching exponent `4k`).
   have hspec := zeroDatum_carrier_weighted_tsum_tendsto_zero (I := I) (M := M) g₀ a
-    gforce hT hT1 u hu (((2 * k : ℕ)) : ℝ) hforce_2k
+    gforce hT hT1 u hu (((2 * (2 * k) : ℕ)) : ℝ) hforce_2k
   -- Identify the carrier coordinates with the eigenbasis coordinates of `(T_s s).toL2`.
   set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
     with hcompact_def
@@ -447,10 +449,10 @@ theorem deturck_g0_carrier_Hk_smallness_upto_zero
   -- Rewrite the spectral sum in terms of `(T_s s)`'s eigenbasis coordinates.
   have hsum_eq : ∀ s ∈ Set.Icc (0 : ℝ) T,
       (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2,
-        tensorSobolevWeight (I := I) (M := M) i (((2 * k : ℕ)) : ℝ) *
+        tensorSobolevWeight (I := I) (M := M) i (((2 * (2 * k) : ℕ)) : ℝ) *
           (Analysis.Parabolic.TimeSobolev.timeH1.toFun u s).coeff i ^ 2) =
       (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2,
-        tensorSobolevWeight (I := I) (M := M) i (((2 * k : ℕ)) : ℝ) *
+        tensorSobolevWeight (I := I) (M := M) i (((2 * (2 * k) : ℕ)) : ℝ) *
           (tensorL2Coeff (I := I) (M := M) hcompact
             (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) ^ 2) := by
     intro s hs
@@ -466,7 +468,7 @@ theorem deturck_g0_carrier_Hk_smallness_upto_zero
   have hspec' : Filter.Tendsto
       (fun s : ℝ => ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
           (I := I) (M := M) g₀ 0 2,
-        tensorSobolevWeight (I := I) (M := M) i (((2 * k : ℕ)) : ℝ) *
+        tensorSobolevWeight (I := I) (M := M) i (((2 * (2 * k) : ℕ)) : ℝ) *
           (tensorL2Coeff (I := I) (M := M) hcompact
             (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) ^ 2)
       (nhdsWithin (0 : ℝ) (Set.Ioi 0)) (nhds 0) := by
@@ -477,7 +479,7 @@ theorem deturck_g0_carrier_Hk_smallness_upto_zero
   have hsqrt : Filter.Tendsto
       (fun s : ℝ => Real.sqrt (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
           (I := I) (M := M) g₀ 0 2,
-        tensorSobolevWeight (I := I) (M := M) i (((2 * k : ℕ)) : ℝ) *
+        tensorSobolevWeight (I := I) (M := M) i (((2 * (2 * k) : ℕ)) : ℝ) *
           (tensorL2Coeff (I := I) (M := M) hcompact
             (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) ^ 2))
       (nhdsWithin (0 : ℝ) (Set.Ioi 0)) (nhds 0) := by
@@ -486,7 +488,7 @@ theorem deturck_g0_carrier_Hk_smallness_upto_zero
   have hCmul : Filter.Tendsto
       (fun s : ℝ => C * Real.sqrt (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
           (I := I) (M := M) g₀ 0 2,
-        tensorSobolevWeight (I := I) (M := M) i (((2 * k : ℕ)) : ℝ) *
+        tensorSobolevWeight (I := I) (M := M) i (((2 * (2 * k) : ℕ)) : ℝ) *
           (tensorL2Coeff (I := I) (M := M) hcompact
             (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) ^ 2))
       (nhdsWithin (0 : ℝ) (Set.Ioi 0)) (nhds 0) := by
@@ -496,7 +498,7 @@ theorem deturck_g0_carrier_Hk_smallness_upto_zero
   refine squeeze_zero_norm' ?_ hCmul
   filter_upwards with s
   rw [Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)]
-  exact hCbound k (T_s s)
+  exact hCbound (T_s s)
 
 /-- **Canonical smooth-representative family of the `g₀`-anchored carrier.**
 
@@ -833,15 +835,17 @@ set_option linter.unusedVariables false in
 `g₀`-anchored flow with smooth initial datum (deep analytic input).**
 
 For the anchor `g₀`, a supercritical order `a` (`2a > dim M + 4`, plus the engine's
-`dim M < 2(a − 2)`), the continuous nonlinearity `N_cont` presented through its section
-`Nsec` with the coordinate identity `hN_coeff` and the weighted-resolvent Lipschitz
-certificate `hNsec_lip`, **and** the `C⁰`-Sobolev fibre embedding `hfibre`
-(`gFibreOpBound_ccTensorBilinSymm_le_tensorHsNorm`-shape — the input that turns the
-carrier's vanishing at `t = 0` into the metric-realize fibre-smallness), the
-maximal-regularity Duhamel engine `deTurckRemainder_strong_shortTime_exists` driven with
-initial datum `0` produces a strong `L²`-time solution which, transported to the
-pointwise time domain (the indefinite-Bochner / FTC transport that lives strictly
-downstream of the headline) and realized off `g₀`, yields:
+`dim M < 2(a − 2)`), the genuine continuous nonlinearity `N_cont` (continuous via
+`hN_cont`) together with its **un-gated local Lipschitz** `hLipBall`
+(`LipschitzOnWith K N_cont` on the radius-`R > 0` ball about the included zero datum —
+the genuine coordinate-spectral route, *not* the gated gauge), **and** the `C⁰`-Sobolev
+fibre embedding `hfibre` (`gFibreOpBound_ccTensorBilinSymm_le_tensorHsNorm`-shape — the
+input that turns the carrier's vanishing at `t = 0` into the metric-realize
+fibre-smallness), the maximal-regularity Duhamel engine
+`deTurckRemainder_strong_shortTime_exists` driven with initial datum `0` produces a strong
+`L²`-time solution which, transported to the pointwise time domain (the
+indefinite-Bochner / FTC transport that lives strictly downstream of the headline) and
+realized off `g₀`, yields:
 
 * a pointwise carrier `u₂ : ℝ → H^{a+2}(g₀)`, smooth representatives
   `T_s : ℝ → SmoothCcTensor g₀ 0 2`, and a realized metric family `g_DT`;
@@ -856,49 +860,31 @@ downstream of the headline) and realized off `g₀`, yields:
   gauge-reconciliation consumes to reconstruct `deTurckRicciRHS g_bg` from the carrier).
 
 The conclusion is the existence of the realized carrier bundle — distinct from the
-supplied coordinate-identity, Lipschitz, and fibre-embedding hypotheses; no packaging.
-The genuinely-open content is isolated into three precise sub-leaves — the Bochner/FTC
-transport `deturck_g0_engine_pointwise_carrier`, the smooth-representative realize package
+supplied Lipschitz and fibre-embedding hypotheses; no packaging.  The genuinely-open
+content is isolated into three precise sub-leaves — the Bochner/FTC transport
+`deturck_g0_engine_pointwise_carrier`, the smooth-representative realize package
 `deturck_g0_carrier_realize_package`, and the up-to-`t = 0` supercritical decay
 `deturck_g0_carrier_Hk_smallness_upto_zero` — which this driver assembles on top of the
-maximal-regularity Duhamel engine `deTurckRemainder_strong_shortTime_exists`: it proves
-`N_cont` globally Lipschitz from `hN_coeff`/`hNsec_lip`, runs the engine with smooth datum
-`0`, transports to the pointwise carrier, realizes it off `g₀`, and shrinks the horizon so
-the supercritical decay (through `hfibre`) yields the fibre-smallness on the whole interior.
-The frozen supercriticality/engine hypotheses `ha`, `ha2` are kept for the consumer contract
-(they are discharged inside the sub-leaves); the narrow unused-variable suppression keeps the
-signature intact and warning-free. -/
+maximal-regularity Duhamel engine `deTurckRemainder_strong_shortTime_exists`: it runs the
+engine on the genuine `N_cont` directly from the supplied un-gated local Lipschitz
+`hLipBall`, transports to the pointwise carrier, realizes it off `g₀`, and shrinks the
+horizon so the supercritical decay (through `hfibre`) yields the fibre-smallness on the
+whole interior.  The frozen supercriticality/engine hypotheses `ha`, `ha2` are kept for
+the consumer contract (they are discharged inside the sub-leaves); the narrow
+unused-variable suppression keeps the signature intact and warning-free. -/
 theorem deturck_g0_engine_carrier_extraction
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
     (ha2 : Module.finrank ℝ E < 2 * (a - 2))
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
-    (Nsec : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
-        Integral.L2.SmoothCcTensor g₀ 0 2)
-    (hN_coeff : ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
-        (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-          (I := I) (M := M) g₀ 0 2),
-      (N_cont u).coeff i =
-        tensorL2Coeff (I := I) (M := M)
-          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-          (Integral.L2.SmoothCcTensor.toL2 (Nsec u)) i)
-    (hNsec_lip : ∃ K : ℝ≥0, ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-      Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-            (I := I) (M := M) g₀ 0 2 =>
-          tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
-            (tensorL2Coeff (I := I) (M := M)
-                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                (Integral.L2.SmoothCcTensor.toL2 (Nsec u)
-                  - Integral.L2.SmoothCcTensor.toL2 (Nsec u')) i) ^ 2)
-        ∧ (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-              (I := I) (M := M) g₀ 0 2,
-            tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
-              (tensorL2Coeff (I := I) (M := M)
-                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                  (Integral.L2.SmoothCcTensor.toL2 (Nsec u)
-                    - Integral.L2.SmoothCcTensor.toL2 (Nsec u')) i) ^ 2)
-            ≤ ((K : ℝ) * dist u u') ^ 2)
+    {K : ℝ≥0} {R : ℝ} (hR : 0 < R)
+    (hN_cont : Continuous N_cont)
+    (hLipBall : LipschitzOnWith K N_cont
+      (Metric.closedBall
+        (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R))
     (hfibre : ∃ C : ℝ, 0 ≤ C ∧ ∀ (k : ℕ), 2 * k > Module.finrank ℝ E + 4 →
         ∀ T : Integral.L2.SmoothCcTensor g₀ 0 2,
           gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T)
@@ -940,59 +926,11 @@ theorem deturck_g0_engine_carrier_extraction
   classical
   set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
     with hcompact_def
-  obtain ⟨K, hK⟩ := hNsec_lip
-  -- `N_cont` is globally `K`-Lipschitz in the `Hᵃ` norm (from `hN_coeff` + `hNsec_lip`).
-  have hdist_le : ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-      dist (N_cont u) (N_cont u') ≤ (K : ℝ) * dist u u' := by
-    intro u u'
-    have hsub : ∀ (S T : Integral.L2.TensorL2 0 2 g₀)
-        (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-          (I := I) (M := M) g₀ 0 2),
-        tensorL2Coeff (I := I) (M := M) hcompact (S - T) i =
-          tensorL2Coeff (I := I) (M := M) hcompact S i
-            - tensorL2Coeff (I := I) (M := M) hcompact T i := by
-      intro S T i; unfold tensorL2Coeff; rw [map_sub]; rfl
-    have hcoeff_diff : ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-        (I := I) (M := M) g₀ 0 2,
-        (N_cont u - N_cont u').coeff i =
-          tensorL2Coeff (I := I) (M := M) hcompact
-            (Integral.L2.SmoothCcTensor.toL2 (Nsec u)
-              - Integral.L2.SmoothCcTensor.toL2 (Nsec u')) i := by
-      intro i
-      have hcoeff_sub : (N_cont u - N_cont u').coeff i
-          = (N_cont u).coeff i - (N_cont u').coeff i := by
-        rw [sub_eq_add_neg, tensorHs.add_coeff, tensorHs.neg_coeff, sub_eq_add_neg]
-      rw [hcoeff_sub, hN_coeff u i, hN_coeff u' i, ← hsub]
-    have hnorm_sq : ‖N_cont u - N_cont u'‖ ^ 2 ≤ ((K : ℝ) * dist u u') ^ 2 := by
-      rw [tensorHs.norm_sq_eq_tsum]
-      have hcongr : (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-            (I := I) (M := M) g₀ 0 2 =>
-          tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
-            ((N_cont u - N_cont u').coeff i) ^ 2)
-          = (fun i => tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
-              (tensorL2Coeff (I := I) (M := M) hcompact
-                  (Integral.L2.SmoothCcTensor.toL2 (Nsec u)
-                    - Integral.L2.SmoothCcTensor.toL2 (Nsec u')) i) ^ 2) := by
-        funext i; rw [hcoeff_diff i]
-      rw [hcongr]; exact (hK u u').2
-    have hKd_nonneg : 0 ≤ (K : ℝ) * dist u u' := mul_nonneg K.coe_nonneg dist_nonneg
-    rw [dist_eq_norm]
-    calc ‖N_cont u - N_cont u'‖
-        = Real.sqrt (‖N_cont u - N_cont u'‖ ^ 2) := (Real.sqrt_sq (norm_nonneg _)).symm
-      _ ≤ Real.sqrt (((K : ℝ) * dist u u') ^ 2) := Real.sqrt_le_sqrt hnorm_sq
-      _ = (K : ℝ) * dist u u' := Real.sqrt_sq hKd_nonneg
-  have hLipG : LipschitzWith K N_cont :=
-    LipschitzWith.of_dist_le_mul hdist_le
-  have hN_cont : Continuous N_cont := hLipG.continuous
-  have hLipBall : LipschitzOnWith K N_cont
-      (Metric.closedBall (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-        (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
-        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) 1) :=
-    hLipG.lipschitzOnWith
-  -- Drive the maximal-regularity Duhamel engine with smooth initial datum `0`.
+  -- Drive the maximal-regularity Duhamel engine with smooth initial datum `0`, using the
+  -- genuine local-Lipschitz of `N_cont` on the radius-`R` ball (the un-gated route).
   obtain ⟨T₀, hT₀_pos, hsol⟩ :=
     deTurckRemainder_strong_shortTime_exists (I := I) (M := M) g₀
-      (a := (a : ℝ)) (N := N_cont) (L_R := K) (R := (1 : ℝ)) one_pos
+      (a := (a : ℝ)) (N := N_cont) (L_R := K) (R := R) hR
       (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) hLipBall
   set Te : ℝ := min T₀ 1 with hTe_def
   have hTe_pos : 0 < Te := lt_min hT₀_pos one_pos
@@ -1001,7 +939,7 @@ theorem deturck_g0_engine_carrier_extraction
     hsol hTe_pos (min_le_left _ _) hTe1
   -- The first-order coupling of the forcing (posited child `deTurckForcing_firstOrder_coupling`).
   have hcouple := deTurckForcing_firstOrder_coupling (I := I) (M := M) g₀ a hTe_pos hTe1
-    N_cont Nsec hN_coeff (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce hforce
+    N_cont (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce hforce
   -- Bochner/FTC transport to the pointwise order-`(a+2)` carrier.
   obtain ⟨u₂, hbridge, hcont, hcar0, hreg⟩ :=
     deturck_g0_engine_pointwise_carrier (I := I) (M := M) g₀ a hTe_pos hTe1

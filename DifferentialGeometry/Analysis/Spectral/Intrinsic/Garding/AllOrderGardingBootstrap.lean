@@ -678,6 +678,95 @@ theorem order2Garding_rank_two_of_pointwise_curv_bound
   exact secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound
     (I := I) (M := M) g S C₀ hC₀ hpt
 
+set_option linter.unusedSectionVars false in
+/-- **The all-valence integrated curvature cross-term bound on a closed manifold
+(posited curvature input — the atomic order-`2` Weitzenböck content).** For a closed
+smooth Riemannian manifold `(M, g)` there is a nonnegative constant `Ccross` with
+`CurvatureCrossTermBound g Ccross`: at every covariant rank `s`, the one-sided `L²`
+pairing of the rough-Laplacian / covariant-gradient commutator defect
+`Curv := Δ_∇(∇S) − ∇(Δ_∇ S)` with `∇S` satisfies
+`− ⟨Curv, ∇S⟩_{L²} ≤ Ccross · (‖∇S‖²_{L²} + ‖S‖_{L²}·‖∇S‖_{L²})`.
+
+This is the integrated Bochner curvature term of the order-`2` Weitzenböck identity:
+fibrewise, `Curv` is a Riemann-curvature contraction of `∇S` (the Ricci identity on
+the gradient field), so its `L²` cross-pairing with `∇S` is controlled by the uniform
+curvature sup `‖R‖_∞` over the compact manifold. It is the **atomic** order-`2`
+curvature input; from it the all-valence order-`2` Gårding family follows
+unconditionally (`order2GardingFamily_holds` below). It is **posited** here; its body
+is `sorry`. -/
+theorem curvatureCrossTermBound_holds (g : SmoothRiemannianMetric I M) :
+    ∃ Ccross : ℝ, CurvatureCrossTermBound (I := I) (M := M) g Ccross := by
+  sorry
+
+set_option linter.unusedSectionVars false in
+/-- **The all-valence order-`2` Gårding estimate on a closed manifold.** For a closed
+smooth Riemannian manifold `(M, g)` there is a nonnegative constant `Cg` with
+`Order2GardingFamily g Cg`: at every covariant rank `s`,
+`‖∇²S‖²_{L²} ≤ Cg · (‖Δ_∇ S‖²_{L²} + ‖S‖²_{L²})`.
+
+This is the intrinsic order-`2` Gårding / interior-elliptic-regularity estimate
+threaded at every valence. It is **derived** here (not posited) from the atomic
+curvature cross-term bound `curvatureCrossTermBound_holds` via the on-disk integrated
+Weitzenböck reduction `order2GardingFamily_of_curvatureCrossTermBound`: the integrated
+identity `‖∇²S‖² = ‖Δ_∇ S‖² − ⟨Curv, ∇S⟩`, the cross-term bound, the order-`1`
+control `‖∇S‖² ≤ ‖Δ_∇ S‖·‖S‖`, and Young's inequality. Its only `sorry`-dependence is
+through the posited `curvatureCrossTermBound_holds`. -/
+theorem order2GardingFamily_holds (g : SmoothRiemannianMetric I M) :
+    ∃ Cg : ℝ, Order2GardingFamily (I := I) (M := M) g Cg := by
+  obtain ⟨Ccross, hcross⟩ := curvatureCrossTermBound_holds (I := I) (M := M) g
+  exact ⟨2 + 2 * Ccross, order2GardingFamily_of_curvatureCrossTermBound
+    (I := I) (M := M) g Ccross hcross⟩
+
+set_option linter.unusedSectionVars false in
+/-- **The all-order, all-valence curvature-commutator `L²` defect bound on a closed
+manifold (posited curvature input).** For a closed smooth Riemannian manifold
+`(M, g)` there is a nonnegative constant `Cc` with `CommutatorDefectBound g Cc`: for
+every smooth compactly-supported `(0, 2)`-tensor base `U` and every gradient order
+`p`, the rough-Laplacian / iterated-gradient commutator defect satisfies
+`‖Δ_∇(∇^p U) − ∇^p(Δ_∇ U)‖_{L²} ≤ Cc · ∑_{i ≤ p+1} ‖∇^i U‖_{L²}`.
+
+This is the genuine curvature-derivative content of the all-order bootstrap: on a
+closed manifold the iterated commutator `[Δ_∇, ∇^p]` expands, via the Ricci
+identity, into a finite sum of contractions of `∇^{≤ p-1}Rm` against `∇^{≤ p}U`, so
+it is a lower-order (order `≤ p+1`) operator with curvature-derivative
+coefficients, all bounded by compactness; the single-step `(0, 2)` instance is
+`covGradRoughLap_commutator_eq` together with the pointwise curvature-defect bound.
+It is **posited** here as the genuinely-deep curvature sub-estimate; its body is
+`sorry`. -/
+theorem commutatorDefectBound_holds (g : SmoothRiemannianMetric I M) :
+    ∃ Cc : ℝ, CommutatorDefectBound (I := I) (M := M) g Cc := by
+  sorry
+
+set_option linter.unusedSectionVars false in
+/-- **The unconditional all-order intrinsic Gårding bootstrap.** For a closed smooth
+Riemannian manifold `(M, g)` and order `k`, there is a nonnegative constant `C` such
+that for every smooth compactly-supported `(0, 2)`-tensor field `T`,
+
+```
+∑_{j ≤ 2k} ‖∇^j T‖_{L²}  ≤  C · ∑_{i ≤ k} ‖Δ_∇^i T‖_{L²}.
+```
+
+This is `allOrder_covGrad_l2Norm_le_lapIter_sum` with the three per-order ingredients
+discharged on the closed manifold: the order-`1` control family unconditionally
+(`order1ControlFamily_holds`), the all-valence order-`2` Gårding family
+(`order2GardingFamily_holds`), and the all-order curvature-commutator defect bound
+(`commutatorDefectBound_holds`). The latter two are the posited genuine
+curvature-derivative content. -/
+theorem allOrder_covGrad_l2Norm_le_lapIter_sum_unconditional
+    (g : SmoothRiemannianMetric I M) (k : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (T : SmoothCcTensor g 0 2),
+        ∑ j ∈ Finset.range (2 * k + 1),
+            tensorL2Norm (I := I) (M := M) g 0 (2 + j)
+              (iteratedCovGrad g 0 2 j T).toFun ≤
+          C * ∑ i ∈ Finset.range (k + 1),
+            ‖SmoothCcTensor.toL2 (g := g) (r := 0) (s := 2)
+              (rawTensorConnLapIter (I := I) g 0 2 i T)‖ := by
+  obtain ⟨Cg, hgard⟩ := order2GardingFamily_holds (I := I) (M := M) g
+  obtain ⟨Cc, hcomm⟩ := commutatorDefectBound_holds (I := I) (M := M) g
+  exact allOrder_covGrad_l2Norm_le_lapIter_sum (I := I) (M := M) g Cg Cc k
+    hgard (order1ControlFamily_holds (I := I) (M := M) g) hcomm
+
 end IntrinsicSpectral
 end RicciFlow
 end PDE

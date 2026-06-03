@@ -283,7 +283,11 @@ theorem deturck_metric_pde_interior
     g_DT T_s u_car u_car' x v w ℓ_a
     (fun s _ => hreal s x v w) (fun s _ => hfactor s) hderiv t ht
   have hmatch := rhs_matches_deturck_at_solution (I := I) (M := M) g_bg g_bg a u₂ ℓ_a
-    g_DT T_s x v w (fun s _ => hreal s) N_cont repr Nsec hN_coeff hNsec_realize
+    g_DT T_s x v w (fun s _ => hreal s) N_cont repr Nsec
+    (fun s _ i => hN_coeff
+      (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
+        (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) i)
+    hNsec_realize
     (fun s _ => hsmoothrepr s) hℓ (fun s _ => hNsec_geom s) t (Set.Ioo_subset_Ico_self ht)
   rw [hu_car'_def] at hpush
   rw [hmatch] at hpush

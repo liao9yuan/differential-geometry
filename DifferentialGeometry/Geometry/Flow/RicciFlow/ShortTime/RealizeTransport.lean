@@ -220,8 +220,12 @@ identity holds for the genuine infinite-support solution carrier.
 The construction data `N_cont`, `repr`, `Nsec` and the construction/realize
 hypotheses `hN_coeff`, `hNsec_realize` are coordinate/realize identities about
 `N_cont`'s coordinates and `Nsec`'s bilinear extraction, NOT the reconciliation
-conclusion. `hℓ` is the carrier-wide pinning of `ℓ_a` against the linear realize
-`ccTensorBilinSymm`.
+conclusion. `hN_coeff` is the **carrier-only** eigenbasis-coordinate tie — it pins
+`N_cont (ι (u₂ s))`'s coordinates to the `L²` coordinates of `Nsec (ι (u₂ s))` exactly
+at the (gate-realizable) carrier inclusions, the only place the reconciliation evaluates
+the nonlinearity; it does *not* assert a global `∀ u` tie of the genuine continuous
+nonlinearity to a (discontinuous, gated) section. `hℓ` is the carrier-wide pinning of
+`ℓ_a` against the linear realize `ccTensorBilinSymm`.
 
 Non-packaging: every hypothesis is a coordinate/realize identity; none is the
 `ℓ_a (…) = deTurckRicciRHS …` conclusion. Non-leaking: all data constrains the
@@ -247,13 +251,16 @@ theorem rhs_matches_deturck_at_solution
       Integral.L2.SmoothCcTensor g_bg 0 2)
     (Nsec : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1) →
       Integral.L2.SmoothCcTensor g_bg 0 2)
-    (hN_coeff : ∀ (u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1))
-        (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-          (I := I) (M := M) g_bg 0 2),
-      (N_cont u).coeff i =
+    (hN_coeff : ∀ s ∈ Set.Ico (0 : ℝ) T,
+        ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g_bg 0 2,
+      (N_cont (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))).coeff i =
         tensorL2Coeff (I := I) (M := M)
           (tensorResolventL2_isCompactOperator (I := I) (M := M) g_bg 0 2)
-          (Integral.L2.SmoothCcTensor.toL2 (Nsec u)) i)
+          (Integral.L2.SmoothCcTensor.toL2
+            (Nsec (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)))) i)
     (hNsec_realize : ∀ (u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1))
         (x' : M) (v' w' : TangentSpace I x'),
       ccTensorBilinSymm (I := I) g_bg (Nsec u) x' v' w' =
@@ -284,7 +291,7 @@ theorem rhs_matches_deturck_at_solution
             (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
               (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ t)))
         = deTurckRicciRHS (I := I) g_back (g_DT t) x v w := by
-  intro t _ht
+  intro t ht
   set uincl := tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
       (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ t) with huincl
   have hcoeff_lap : ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
@@ -296,7 +303,7 @@ theorem rhs_matches_deturck_at_solution
     intro i
     rw [scaleLaplacianFun_coeff,
       bare_laplacian_spectral_match (I := I) (M := M) g_bg (T_s t) i,
-      hsmoothrepr t _ht i]
+      hsmoothrepr t ht i]
   have hlap : ℓ_a (scaleLaplacianFun (I := I) (M := M) (u₂ t)) =
       ccTensorBilinSymm (I := I) g_bg
         (rawTensorConnLapSmooth (I := I) g_bg 0 2 (T_s t)) x v w :=
@@ -306,11 +313,11 @@ theorem rhs_matches_deturck_at_solution
         (I := I) (M := M) g_bg 0 2,
       (N_cont uincl).coeff i =
         tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g_bg)
-          (Integral.L2.SmoothCcTensor.toL2 (Nsec uincl)) i := fun i => hN_coeff uincl i
+          (Integral.L2.SmoothCcTensor.toL2 (Nsec uincl)) i := fun i => hN_coeff t ht i
   have hN : ℓ_a (N_cont uincl) =
       ccTensorBilinSymm (I := I) g_bg (repr uincl) x v w := by
     rw [hℓ (Nsec uincl) (N_cont uincl) hcoeff_N, hNsec_realize uincl x v w]
   rw [map_add, hlap, hN]
-  exact hNsec_geom t _ht x v w
+  exact hNsec_geom t ht x v w
 
 end DifferentialGeometry.PDE.RicciFlow

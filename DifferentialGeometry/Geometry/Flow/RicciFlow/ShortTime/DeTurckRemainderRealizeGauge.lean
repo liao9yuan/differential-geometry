@@ -39,8 +39,8 @@ is now `realizableAtGate`, requiring `MemAllTensorHs` of `u`'s `L²` class plus 
 `g₀`-fibre-smallness `< 1` that makes `g₀ + ccTensorBilinSymm g₀ (gateSmoothRep u)` an
 honest positive-definite smooth metric.  Off that domain the gauge is the zero section.
 
-The single open datum about the concrete gate-based gauge is
-`deTurckRemainderRealize_geomMatch_lipschitz`:
+The single datum about the concrete gate-based gauge proved here is the gate-conditioned
+geometric match `deTurckRemainderRealize_geomMatch`:
 
 * the *decoupled* principal-part match (`hNsec_geom`) — for every realize family
   `g_DT`/`u₂`/`T_s` with the realize identity, the smooth-coordinate identity, the
@@ -52,15 +52,15 @@ The single open datum about the concrete gate-based gauge is
   with `deTurckRicciRHS g_bg (g_DT s)` through the sorry-free bridge
   `deTurckRHSSection_ccTensorBilinSymm_eq_deTurckRicciRHS` (the carrier `T_s s` is the
   canonical smooth representative of the realized perturbation).
-* the concrete-gauge `Hᵃ`-Lipschitz certificate (`hNsec_lip`) — the gauge's
-  `deTurckG0SectionDiffHa`-difference is Lipschitz in the realize input, via the
-  chart-coordinate DeTurck-RHS Lipschitz tower and the resolvent/eigenbasis Parseval
-  identity (`tensorHs.norm_sq_eq_tsum`).
 
-Both are genuine, well-posed, non-vacuous statements about the realized concrete gauge;
-neither packages the existential of `deTurck_g0_decoupled_principal_match`, and the
-principal-part premises (`hreal`/`hsmoothrepr`/`hcanon`/`hgate`) are honest data, not the
-conclusion.  The body is `sorry`, so consumers transitively depend on `sorryAx`. -/
+It is a genuine, fully proven, non-vacuous geometric identity about the realized concrete
+gauge; it does not package the existential of `deTurck_g0_decoupled_principal_match`, and
+the principal-part premises (`hreal`/`hsmoothrepr`/`hcanon`/`hgate`) are honest data, not
+the conclusion.  The gate (`realizableAtGate`) is reserved for **this final geometric
+output only**; the maximal-regularity engine's nonlinearity Lipschitz is supplied,
+separately and *un-gated*, by the genuine coordinate-spectral DeTurck nonlinearity
+(`DeTurckG0GenuineNonlinearity.lean`), so no Lipschitz claim about the gated (hence
+discontinuous) gauge is made anywhere. -/
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -448,36 +448,17 @@ private theorem gauge_realizableGate_ccTensorBilinSymm
       ccTensorBilinSymm_eq_of_toSection_eq rfl x v w,
     deTurckRHSSection_ccTensorBilinSymm_eq_deTurckRicciRHS]
 
-/-- **`Hᵃ`-Lipschitz certificate of the concrete `g₀`-anchored gate-based gauge.**
-The `deTurckG0SectionDiffHa`-difference of the concrete gauge
-`deTurckRemainderRealizeSection g₀ g_bg` is `Hᵃ`-Lipschitz in the `Hᵃ⁺¹` realize
-input (chart-coordinate DeTurck-RHS Lipschitz tower transported across the
-resolvent/eigenbasis Parseval identity `tensorHs.norm_sq_eq_tsum`).  Posited
-child. -/
-theorem deTurckRemainderRealize_gauge_ha_lipschitz
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
-    ∃ K : ℝ≥0, ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-        ‖deTurckG0SectionDiffHa (I := I) (M := M) g₀ a
-            (deTurckRemainderRealizeSection (I := I) g₀ g_bg) u u'‖
-          ≤ (K : ℝ) * dist u u' :=
-  sorry
+/-- **The decoupled principal-part match of the concrete `g₀`-anchored, `g_bg`-background
+gate-based Ricci–DeTurck remainder gauge (the gate-conditioned geometric output).**
 
-/-- **The decoupled principal-part match and `Hᵃ`-Lipschitz certificate of the
-concrete `g₀`-anchored, `g_bg`-background gate-based Ricci–DeTurck remainder gauge (open
-analytic datum).**
-
-For the concrete gate-based gauge `deTurckRemainderRealizeSection g₀ g_bg`:
-
-* (`hNsec_lip`) the gauge's `deTurckG0SectionDiffHa`-difference is `Hᵃ`-Lipschitz in the
-  realize input (posited child `deTurckRemainderRealize_gauge_ha_lipschitz`);
-* (`hNsec_geom`) for every realize family `g_DT`/`u₂`/`T_s` whose realized metric is the
-  linear realize `g_DT s = g₀ + ccTensorBilinSymm g₀ (T_s s)` (`hreal`), whose carrier
-  coordinates are the `L²` coordinates of `T_s s` (`hsmoothrepr`), whose `T_s s` is the
-  canonical smooth representative of the carrier — its `L²` class is the
-  `tensorHsToL2`-realization of `u₂ s` (`hcanon`) — **and whose carrier inclusion
-  `ι (u₂ s)` is `realizableAtGate` (`hgate`: lies in every `Hˢ` and is `g₀`-fibre small)**,
-  the `g₀`-rough-Laplacian of `T_s s` plus the `g₀`-`ccTensorBilinSymm` of the gauge of
-  `u₂ s` equals `deTurckRicciRHS g_bg (g_DT s)`.
+For the concrete gate-based gauge `deTurckRemainderRealizeSection g₀ g_bg`, for every
+realize family `g_DT`/`u₂`/`T_s` whose realized metric is the linear realize
+`g_DT s = g₀ + ccTensorBilinSymm g₀ (T_s s)` (`hreal`), whose carrier coordinates are the
+`L²` coordinates of `T_s s` (`hsmoothrepr`), whose `T_s s` is the canonical smooth
+representative of the carrier — its `L²` class is the `tensorHsToL2`-realization of `u₂ s`
+(`hcanon`) — **and whose carrier inclusion `ι (u₂ s)` is `realizableAtGate` (`hgate`: lies
+in every `Hˢ` and is `g₀`-fibre small)**, the `g₀`-rough-Laplacian of `T_s s` plus the
+`g₀`-`ccTensorBilinSymm` of the gauge of `u₂ s` equals `deTurckRicciRHS g_bg (g_DT s)`.
 
 The match is the integrated decoupled analogue of
 `deTurckNonlinearitySpectral_principalPart_cancels`, reconciled through the sorry-free
@@ -489,14 +470,12 @@ terms cancel; the gate-realized metric coincides with `g_DT s`; and the residual
 `deTurckRHSSection` summand reduces to `deTurckRicciRHS g_bg (g_DT s)`.  `hgate` is the
 honest gate the gated gauge requires (NOT the conclusion folded in: it is the
 `MemAllTensorHs` + fibre-small validity datum, true for the maximal-regularity carrier and
-discharged at the assembler).  The body is `sorry`, so consumers transitively depend on
-`sorryAx`. -/
-theorem deTurckRemainderRealize_geomMatch_lipschitz
+discharged at the assembler).  This is a fully proven geometric identity about the
+gate-based gauge — it carries no `sorry` of its own; the gate is reserved for this final
+geometric output, while the engine nonlinearity's Lipschitz comes from the genuine
+un-gated coordinate-spectral route (`DeTurckG0GenuineNonlinearity.lean`). -/
+theorem deTurckRemainderRealize_geomMatch
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
-    (∃ K : ℝ≥0, ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-        ‖deTurckG0SectionDiffHa (I := I) (M := M) g₀ a
-            (deTurckRemainderRealizeSection (I := I) g₀ g_bg) u u'‖
-          ≤ (K : ℝ) * dist u u') ∧
       (∀ (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
           (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
           (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2),
@@ -528,7 +507,6 @@ theorem deTurckRemainderRealize_geomMatch_lipschitz
                     (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) x' v' w'
             = deTurckRicciRHS (I := I) g_bg (g_DT s) x' v' w') := by
   classical
-  refine ⟨deTurckRemainderRealize_gauge_ha_lipschitz (I := I) (M := M) g₀ g_bg a, ?_⟩
   intro T g_DT u₂ T_s hgate hreal hsmoothrepr hcanon s hs x' v' w'
   set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
     with hcompact_def
