@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Tensor
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.DeTurckGeometricNonlinearity
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckG0RealizeFrontier
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.RealizeTransport
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.SolutionC2Continuous
 
@@ -176,7 +177,25 @@ theorem deTurck_g0_realize_data
             (fun q : ℝ × M => iteratedFDeriv ℝ k
               (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j)
               (extChartAt I α q.2))
-            (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α)) := sorry
+            (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α)) := by
+  classical
+  set a : ℕ := Module.finrank ℝ E + 5 with ha_def
+  have ha : 2 * a > Module.finrank ℝ E + 4 := by omega
+  have ha2 : Module.finrank ℝ E < 2 * (a - 2) := by omega
+  obtain ⟨repr, Nsec, hNsec_realize, hrepr_small, hNsec_geom_univ⟩ :=
+    deTurck_g0_decoupled_principal_match (I := I) g₀ g_bg a
+  obtain ⟨N_cont, hN_coeff⟩ :=
+    deTurck_g0_continuous_nonlinearity (I := I) g₀ a Nsec
+  obtain ⟨K, hNsec_lip⟩ :=
+    deTurck_g0_nonlinearity_lipschitz (I := I) g₀ a repr Nsec hNsec_realize
+  obtain ⟨T, g_DT, u₂, T_s, hT, h0, hreal, hcont, hreg, hsmall, hsmoothrepr⟩ :=
+    deTurck_g0_carrier_realize_transport (I := I) g₀ a ha ha2 N_cont Nsec
+      hN_coeff ⟨K, hNsec_lip⟩
+  exact ⟨T, a, hT, ha, g_DT, u₂, T_s, N_cont, repr, Nsec, h0, hreal, hN_coeff,
+    hNsec_realize, hrepr_small, hcont, hreg, hsmall, hsmoothrepr,
+    hNsec_geom_univ g_DT u₂ T_s hreal hsmoothrepr,
+    deTurck_g0_chartGram_continuity (I := I) g₀ a ha hT g_DT u₂ T_s N_cont
+      hreal hcont hreg⟩
 
 /-- **Interior one-sided time-derivative of the realized `g₀`-anchored flow
 (genuine analytic input).**
