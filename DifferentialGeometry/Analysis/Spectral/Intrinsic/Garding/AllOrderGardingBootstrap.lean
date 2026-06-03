@@ -122,15 +122,21 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- **The per-valence order-`2` Gårding hypothesis.** A nonnegative constant `Cg`
-such that for every covariant rank `s` and every smooth compactly-supported
-`(0, s)`-tensor `S`, the squared `L²` norm of the second covariant gradient is
-bounded by `Cg` times the sum of the squared `L²` norms of the rough Laplacian
-and of `S`. This is the order-`2` Gårding estimate threaded at every valence. -/
-def Order2GardingFamily (g : SmoothRiemannianMetric I M) (Cg : ℝ) : Prop :=
-  0 ≤ Cg ∧ ∀ (s : ℕ) (S : SmoothCcTensor g 0 s),
+/-- **The per-valence order-`2` Gårding hypothesis.** A *valence-dependent* nonnegative
+constant `Cg : ℕ → ℝ` such that for every covariant rank `s` and every smooth
+compactly-supported `(0, s)`-tensor `S`, the squared `L²` norm of the second covariant
+gradient is bounded by `Cg s` times the sum of the squared `L²` norms of the rough
+Laplacian and of `S`. This is the order-`2` Gårding estimate threaded at every valence.
+
+The constant is valence-dependent (`ℕ → ℝ`) rather than a single scalar because the
+curvature endomorphism of the `(0, s)`-tensor bundle acts as an `s`-slot derivation, so the
+order-`2` Gårding constant grows like `(s+1)·‖R‖_∞`; no single finite scalar works for all
+ranks on a non-flat closed manifold, but the per-valence constant `Cg s` is finite (curvature
+bounded on the compact manifold at each fixed rank). -/
+def Order2GardingFamily (g : SmoothRiemannianMetric I M) (Cg : ℕ → ℝ) : Prop :=
+  (∀ s, 0 ≤ Cg s) ∧ ∀ (s : ℕ) (S : SmoothCcTensor g 0 s),
     ‖covGrad (I := I) (M := M) g 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S)‖ ^ 2 ≤
-      Cg * (‖rawTensorConnLapSmooth (I := I) g 0 s S‖ ^ 2 + ‖S‖ ^ 2)
+      Cg s * (‖rawTensorConnLapSmooth (I := I) g 0 s S‖ ^ 2 + ‖S‖ ^ 2)
 
 /-- **The per-valence order-`1` control hypothesis.** For every covariant rank
 `s` and every smooth compactly-supported `(0, s)`-tensor `S`, the squared `L²`
@@ -142,19 +148,26 @@ def Order1ControlFamily (g : SmoothRiemannianMetric I M) : Prop :=
     ‖covGrad (I := I) (M := M) g 0 s S‖ ^ 2 ≤
       ‖rawTensorConnLapSmooth (I := I) g 0 s S‖ * ‖S‖
 
-/-- **The per-order curvature-commutator `L²` defect bound.** A nonnegative
-constant `Cc` such that for every smooth compactly-supported `(0, 2)`-tensor base
-`U` and every gradient order `p`, the rough-Laplacian / iterated-gradient
-commutator defect `Δ_∇(∇^p U) − ∇^p(Δ_∇ U)` has `L²` norm bounded by `Cc` times
-the sum of the `L²` norms of the gradients `∇^i U` for `i ≤ p + 1`. The defect is
-a lower-order (order `≤ p+1`) operator with curvature-derivative coefficients,
-all bounded by compactness. -/
-def CommutatorDefectBound (g : SmoothRiemannianMetric I M) (Cc : ℝ) : Prop :=
-  0 ≤ Cc ∧ ∀ (U : SmoothCcTensor g 0 2) (p : ℕ),
+/-- **The per-order curvature-commutator `L²` defect bound.** A *order-dependent*
+nonnegative constant `Cc : ℕ → ℝ` such that for every smooth compactly-supported
+`(0, 2)`-tensor base `U` and every gradient order `p`, the rough-Laplacian /
+iterated-gradient commutator defect `Δ_∇(∇^p U) − ∇^p(Δ_∇ U)` has `L²` norm bounded by
+`Cc p` times the sum of the `L²` norms of the gradients `∇^i U` for `i ≤ p + 1`. The defect
+is a lower-order (order `≤ p+1`) operator with curvature-derivative coefficients, all bounded
+by compactness.
+
+The constant is order-dependent (`ℕ → ℝ`) rather than a single scalar because the iterated
+commutator `[Δ_∇, ∇^p]` is a contraction of `∇^{≤ p-1}Rm` across the `(0, 2 + p)`-tensor slots
+of `∇^{≤ p}U`, whose coefficient grows with the order `p`; no single finite scalar works for
+all orders on a non-flat closed manifold, but the per-order constant `Cc p` is finite
+(curvature and its finitely-many relevant derivatives bounded on the compact manifold at each
+fixed order). -/
+def CommutatorDefectBound (g : SmoothRiemannianMetric I M) (Cc : ℕ → ℝ) : Prop :=
+  (∀ p, 0 ≤ Cc p) ∧ ∀ (U : SmoothCcTensor g 0 2) (p : ℕ),
     ‖rawTensorConnLapSmooth (I := I) g 0 (2 + p)
           (iteratedCovGrad g 0 2 p U) -
         iteratedCovGrad g 0 2 p (rawTensorConnLapSmooth (I := I) g 0 2 U)‖ ≤
-      Cc * ∑ i ∈ Finset.range (p + 2),
+      Cc p * ∑ i ∈ Finset.range (p + 2),
         ‖iteratedCovGrad g 0 2 i U‖
 
 /-- **The per-valence integrated curvature cross-term bound.** A nonnegative constant
@@ -170,19 +183,25 @@ bounded by `Ccross` times `‖∇S‖²_{L²} + ‖S‖_{L²} · ‖∇S‖_{L²
 This is the integrated Bochner curvature term of the order-`2` Weitzenböck identity:
 fibrewise, `Curv` is a Riemann-curvature contraction of `∇S` (the Ricci identity on
 the gradient field, both differentiation directions genuine frame fields), so its
-`L²` cross-pairing with `∇S` is controlled by the uniform curvature sup `‖R‖_∞` over
-the compact manifold. It is strictly weaker than — and structurally distinct from —
-the order-`2` Gårding conclusion, which it implies through the integrated Weitzenböck
-identity and the order-`1` control. -/
-def CurvatureCrossTermBound (g : SmoothRiemannianMetric I M) (Ccross : ℝ) : Prop :=
-  0 ≤ Ccross ∧ ∀ (s : ℕ) (S : SmoothCcTensor g 0 s),
+`L²` cross-pairing with `∇S` is controlled, at each fixed valence `s`, by the curvature
+sup `‖R‖_∞` over the compact manifold. It is strictly weaker than — and structurally
+distinct from — the order-`2` Gårding conclusion, which it implies through the integrated
+Weitzenböck identity and the order-`1` control.
+
+The constant is valence-dependent (`ℕ → ℝ`) rather than a single scalar because the
+curvature endomorphism of the `(0, s)`-tensor bundle acts as an `s`-slot derivation, so the
+cross-term constant grows like `(s+1)·‖R‖_∞`; no single finite scalar works for all ranks on
+a non-flat closed manifold, but the per-valence constant `Ccross s` is finite (curvature
+bounded on the compact manifold at each fixed rank). -/
+def CurvatureCrossTermBound (g : SmoothRiemannianMetric I M) (Ccross : ℕ → ℝ) : Prop :=
+  (∀ s, 0 ≤ Ccross s) ∧ ∀ (s : ℕ) (S : SmoothCcTensor g 0 s),
     - tensorL2Inner (I := I) (M := M) g 0 (s + 1)
           (rawTensorConnLapSmooth (I := I) g 0 (s + 1)
               (covGrad (I := I) (M := M) g 0 s S) -
             covGrad (I := I) (M := M) g 0 s
               (rawTensorConnLapSmooth (I := I) g 0 s S)).toFun
           (covGrad (I := I) (M := M) g 0 s S).toFun ≤
-      Ccross *
+      Ccross s *
         (tensorL2Norm (I := I) (M := M) g 0 (s + 1)
             (covGrad (I := I) (M := M) g 0 s S).toFun ^ 2 +
           tensorL2Norm (I := I) (M := M) g 0 s S.toFun *
@@ -191,25 +210,25 @@ def CurvatureCrossTermBound (g : SmoothRiemannianMetric I M) (Ccross : ℝ) : Pr
 
 set_option linter.unusedSectionVars false in
 /-- **`Order2GardingFamily` from the integrated curvature cross-term bound.** Given a
-nonnegative `Ccross` for which `CurvatureCrossTermBound g Ccross` holds, the order-`2`
-Gårding family `Order2GardingFamily g (2 + 2 · Ccross)` holds. The constant
-`2 + 2 · Ccross` is uniform in the valence `s`. The proof is, at every `s`, the
-integrated-Weitzenböck order-`2` Gårding reduction
-`secondCovGrad_l2NormSq_le_of_cross_bound`: the integrated Weitzenböck identity
-`‖∇²S‖² = ‖Δ_∇ S‖² − ⟨Curv, ∇S⟩`, the cross-term hypothesis, the order-`1` control
-`‖∇S‖² ≤ ‖Δ_∇ S‖ · ‖S‖`, and Young's inequality. -/
+valence-dependent nonnegative `Ccross : ℕ → ℝ` for which `CurvatureCrossTermBound g Ccross`
+holds, the order-`2` Gårding family `Order2GardingFamily g (fun s => 2 + 2 · Ccross s)`
+holds. The Gårding constant `2 + 2 · Ccross s` is the per-valence transform of the
+cross-term constant. The proof is, at every `s`, the integrated-Weitzenböck order-`2`
+Gårding reduction `secondCovGrad_l2NormSq_le_of_cross_bound`: the integrated Weitzenböck
+identity `‖∇²S‖² = ‖Δ_∇ S‖² − ⟨Curv, ∇S⟩`, the cross-term hypothesis at valence `s`, the
+order-`1` control `‖∇S‖² ≤ ‖Δ_∇ S‖ · ‖S‖`, and Young's inequality. -/
 theorem order2GardingFamily_of_curvatureCrossTermBound
-    (g : SmoothRiemannianMetric I M) (Ccross : ℝ)
+    (g : SmoothRiemannianMetric I M) (Ccross : ℕ → ℝ)
     (hcross : CurvatureCrossTermBound (I := I) (M := M) g Ccross) :
-    Order2GardingFamily (I := I) (M := M) g (2 + 2 * Ccross) := by
+    Order2GardingFamily (I := I) (M := M) g (fun s => 2 + 2 * Ccross s) := by
   obtain ⟨hCcross, hcrossS⟩ := hcross
-  refine ⟨by linarith, fun s S => ?_⟩
+  refine ⟨fun s => by have := hCcross s; linarith, fun s S => ?_⟩
   rw [SmoothCcTensor.norm_def (I := I) (M := M)
       (covGrad (I := I) (M := M) g 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S)),
     SmoothCcTensor.norm_def (I := I) (M := M) (rawTensorConnLapSmooth (I := I) g 0 s S),
     SmoothCcTensor.norm_def (I := I) (M := M) S]
-  exact secondCovGrad_l2NormSq_le_of_cross_bound (I := I) (M := M) g s S Ccross hCcross
-    (hcrossS s S)
+  exact secondCovGrad_l2NormSq_le_of_cross_bound (I := I) (M := M) g s S (Ccross s)
+    (hCcross s) (hcrossS s S)
 
 set_option linter.unusedSectionVars false in
 /-- `‖∇^i U‖` as a `SmoothCcTensor` seminorm equals `tensorL2Norm` of its
@@ -244,7 +263,7 @@ with `⌈p/2⌉ = (p+1)/2` and `Cmix` a constant determined by the per-order
 ingredients. The proof is the strong induction described in the module
 docstring. -/
 private lemma gradOrder_l2Norm_le_lapIter_sum
-    (g : SmoothRiemannianMetric I M) (Cg Cc : ℝ)
+    (g : SmoothRiemannianMetric I M) (Cg Cc : ℕ → ℝ)
     (hgard : Order2GardingFamily (I := I) (M := M) g Cg)
     (hgrad1 : Order1ControlFamily (I := I) (M := M) g)
     (hcomm : CommutatorDefectBound (I := I) (M := M) g Cc) :
@@ -256,20 +275,23 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
   classical
   obtain ⟨hCg, hgardS⟩ := hgard
   obtain ⟨hCc, hcommU⟩ := hcomm
-  set sg : ℝ := Real.sqrt Cg with hsg_def
-  have hsg_nn : 0 ≤ sg := Real.sqrt_nonneg _
-  set K : ℝ := sg * (2 + Cc) with hK_def
-  have hK_nn : 0 ≤ K := mul_nonneg hsg_nn (by linarith [hCc])
+  -- Per-step constants: at the step producing order `m + 2` the Gårding estimate is
+  -- applied at valence `2 + m` (constant `Cg (2 + m)`) and the commutator defect at
+  -- gradient order `m` (constant `Cc m`); both are finite at each fixed index.
+  set sg : ℕ → ℝ := fun m => Real.sqrt (Cg (2 + m)) with hsg_def
+  have hsg_nn : ∀ m, 0 ≤ sg m := fun m => Real.sqrt_nonneg _
+  set K : ℕ → ℝ := fun m => sg m * (2 + Cc m) with hK_def
+  have hK_nn : ∀ m, 0 ≤ K m := fun m => mul_nonneg (hsg_nn m) (by linarith [hCc m])
   let Bpair : ℕ → ℝ × ℝ := fun n => Nat.rec (motive := fun _ => ℝ × ℝ)
     (1, 1)
     (fun n prev =>
       let s := prev.2
-      let b : ℝ := if n = 0 then 1 else K * s + 1
+      let b : ℝ := if n = 0 then 1 else K (n - 1) * s + 1
       (b, s + b))
     n
   let B : ℕ → ℝ := fun n => (Bpair n).1
   have hBfst_succ : ∀ n, (Bpair (n + 1)).1 =
-      (if n = 0 then 1 else K * (Bpair n).2 + 1) := fun _ => rfl
+      (if n = 0 then 1 else K (n - 1) * (Bpair n).2 + 1) := fun _ => rfl
   have hBsnd_succ : ∀ n, (Bpair (n + 1)).2 =
       (Bpair n).2 + (Bpair (n + 1)).1 := fun _ => rfl
   have hBsnd_zero : (Bpair 0).2 = 1 := rfl
@@ -282,10 +304,10 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
     | zero => rw [hBsnd_zero, Finset.sum_range_one, hB0]
     | succ m ihm =>
         rw [Finset.sum_range_succ, ← ihm, hBsnd_succ m, hB_fst (m + 1)]
-  have hBsucc_pos : ∀ n, B (n + 2) = K * (∑ i ∈ Finset.range (n + 2), B i) + 1 := by
+  have hBsucc_pos : ∀ n, B (n + 2) = K n * (∑ i ∈ Finset.range (n + 2), B i) + 1 := by
     intro n
     rw [hB_fst (n + 2), hBfst_succ (n + 1)]
-    simp only [Nat.succ_ne_zero, if_false]
+    simp only [Nat.succ_ne_zero, if_false, Nat.add_sub_cancel]
     rw [hBpair_sum (n + 1)]
   have hB_nn : ∀ p, 0 ≤ B p := by
     intro p
@@ -299,9 +321,10 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
           have h2 : 0 ≤ ∑ i ∈ Finset.range (m + 2), B i :=
             Finset.sum_nonneg (fun i hi => ih i (by
               have := Finset.mem_range.mp hi; omega))
-          have : 0 ≤ K * (∑ i ∈ Finset.range (m + 2), B i) := mul_nonneg hK_nn h2
+          have : 0 ≤ K m * (∑ i ∈ Finset.range (m + 2), B i) := mul_nonneg (hK_nn m) h2
           linarith
-  have hBstep : ∀ m, sg * (B m + Cc * (∑ i ∈ Finset.range (m + 2), B i) + B m) + 1 ≤
+  have hBstep : ∀ m,
+      sg m * (B m + Cc m * (∑ i ∈ Finset.range (m + 2), B i) + B m) + 1 ≤
       B (m + 2) := by
     intro m
     rw [hBsucc_pos m]
@@ -310,15 +333,16 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
       rw [Finset.mem_range]; omega
     have hsum_nn : 0 ≤ ∑ i ∈ Finset.range (m + 2), B i :=
       Finset.sum_nonneg (fun i _ => hB_nn i)
-    have hkey : sg * (B m + Cc * (∑ i ∈ Finset.range (m + 2), B i) + B m) ≤
-        K * (∑ i ∈ Finset.range (m + 2), B i) := by
+    have hkey : sg m * (B m + Cc m * (∑ i ∈ Finset.range (m + 2), B i) + B m) ≤
+        K m * (∑ i ∈ Finset.range (m + 2), B i) := by
       rw [hK_def]
-      have h1 : B m + Cc * (∑ i ∈ Finset.range (m + 2), B i) + B m ≤
-          (2 + Cc) * (∑ i ∈ Finset.range (m + 2), B i) := by nlinarith [hBm_le, hCc, hsum_nn]
-      calc sg * (B m + Cc * (∑ i ∈ Finset.range (m + 2), B i) + B m)
-          ≤ sg * ((2 + Cc) * (∑ i ∈ Finset.range (m + 2), B i)) :=
-            mul_le_mul_of_nonneg_left h1 hsg_nn
-        _ = sg * (2 + Cc) * (∑ i ∈ Finset.range (m + 2), B i) := by ring
+      have h1 : B m + Cc m * (∑ i ∈ Finset.range (m + 2), B i) + B m ≤
+          (2 + Cc m) * (∑ i ∈ Finset.range (m + 2), B i) := by
+        nlinarith [hBm_le, hCc m, hsum_nn]
+      calc sg m * (B m + Cc m * (∑ i ∈ Finset.range (m + 2), B i) + B m)
+          ≤ sg m * ((2 + Cc m) * (∑ i ∈ Finset.range (m + 2), B i)) :=
+            mul_le_mul_of_nonneg_left h1 (hsg_nn m)
+        _ = sg m * (2 + Cc m) * (∑ i ∈ Finset.range (m + 2), B i) := by ring
     linarith
   refine ⟨B, hB_nn, ?_⟩
   intro p
@@ -375,7 +399,8 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
         have hgard2 :
             ‖covGrad (I := I) (M := M) g 0 (2 + m + 1)
                 (covGrad (I := I) (M := M) g 0 (2 + m) S)‖ ^ 2 ≤
-              Cg * (‖rawTensorConnLapSmooth (I := I) g 0 (2 + m) S‖ ^ 2 + ‖S‖ ^ 2) :=
+              Cg (2 + m) *
+                (‖rawTensorConnLapSmooth (I := I) g 0 (2 + m) S‖ ^ 2 + ‖S‖ ^ 2) :=
           hgardS (2 + m) S
         set nHess : ℝ := ‖covGrad (I := I) (M := M) g 0 (2 + m + 1)
           (covGrad (I := I) (M := M) g 0 (2 + m) S)‖ with hnHess_def
@@ -384,14 +409,14 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
         have hnHess_nn : 0 ≤ nHess := norm_nonneg _
         have hnLapS_nn : 0 ≤ nLapS := norm_nonneg _
         have hnS_nn : 0 ≤ nS := norm_nonneg _
-        have hgard_fp : nHess ≤ sg * (nLapS + nS) := by
+        have hgard_fp : nHess ≤ sg m * (nLapS + nS) := by
           rw [hsg_def]
           rw [← Real.sqrt_sq hnHess_nn]
           calc Real.sqrt (nHess ^ 2)
-              ≤ Real.sqrt (Cg * (nLapS ^ 2 + nS ^ 2)) := Real.sqrt_le_sqrt hgard2
-            _ = Real.sqrt Cg * Real.sqrt (nLapS ^ 2 + nS ^ 2) := by
-                  rw [Real.sqrt_mul hCg]
-            _ ≤ Real.sqrt Cg * (nLapS + nS) := by
+              ≤ Real.sqrt (Cg (2 + m) * (nLapS ^ 2 + nS ^ 2)) := Real.sqrt_le_sqrt hgard2
+            _ = Real.sqrt (Cg (2 + m)) * Real.sqrt (nLapS ^ 2 + nS ^ 2) := by
+                  rw [Real.sqrt_mul (hCg (2 + m))]
+            _ ≤ Real.sqrt (Cg (2 + m)) * (nLapS + nS) := by
                   apply mul_le_mul_of_nonneg_left _ (Real.sqrt_nonneg _)
                   rw [← Real.sqrt_sq (by positivity : (0:ℝ) ≤ nLapS + nS)]
                   apply Real.sqrt_le_sqrt
@@ -415,7 +440,7 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
         have hdef_bound :
             ‖rawTensorConnLapSmooth (I := I) g 0 (2 + m)
                   (iteratedCovGrad g 0 2 m U) - DefM‖ ≤
-              Cc * ∑ i ∈ Finset.range (m + 2), ‖iteratedCovGrad g 0 2 i U‖ := by
+              Cc m * ∑ i ∈ Finset.range (m + 2), ‖iteratedCovGrad g 0 2 i U‖ := by
           rw [hDefM_def]; exact hcomm_m
         have hih_base :
             ‖DefM‖ ≤ B m * ∑ i ∈ Finset.range ((m + 1) / 2 + 1),
@@ -482,7 +507,7 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
           Finset.sum_nonneg (fun i _ => norm_nonneg _)
         have hnLapS_le :
             nLapS ≤ B m * Sfull
-              + Cc * ∑ i ∈ Finset.range (m + 2), ‖iteratedCovGrad g 0 2 i U‖ := by
+              + Cc m * ∑ i ∈ Finset.range (m + 2), ‖iteratedCovGrad g 0 2 i U‖ := by
           rw [hnLapS_eq]
           calc ‖rawTensorConnLapSmooth (I := I) g 0 (2 + m) (iteratedCovGrad g 0 2 m U)‖
               ≤ ‖DefM‖ + ‖rawTensorConnLapSmooth (I := I) g 0 (2 + m)
@@ -490,10 +515,10 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
             _ ≤ (B m * ∑ i ∈ Finset.range ((m + 1) / 2 + 1),
                     ‖rawTensorConnLapIter (I := I) g 0 2 i
                       (rawTensorConnLapSmooth (I := I) g 0 2 U)‖)
-                  + Cc * ∑ i ∈ Finset.range (m + 2), ‖iteratedCovGrad g 0 2 i U‖ :=
+                  + Cc m * ∑ i ∈ Finset.range (m + 2), ‖iteratedCovGrad g 0 2 i U‖ :=
                 add_le_add hih_base hdef_bound
             _ ≤ B m * Sfull
-                  + Cc * ∑ i ∈ Finset.range (m + 2), ‖iteratedCovGrad g 0 2 i U‖ := by
+                  + Cc m * ∑ i ∈ Finset.range (m + 2), ‖iteratedCovGrad g 0 2 i U‖ := by
                 have hb := mul_le_mul_of_nonneg_left hbase_le_full (hB_nn m)
                 linarith [hb]
         have hSlow_le :
@@ -516,22 +541,24 @@ private lemma gradOrder_l2Norm_le_lapIter_sum
             _ ≤ B m * Sfull :=
                 mul_le_mul_of_nonneg_left (hlow_sub_le_full m (by omega)) (hB_nn m)
         have hcombine : nLapS + nS ≤
-            (B m + Cc * (∑ i ∈ Finset.range (m + 2), B i) + B m) * Sfull := by
-          have h1 : nLapS ≤ B m * Sfull + Cc * ((∑ i ∈ Finset.range (m + 2), B i) * Sfull) := by
+            (B m + Cc m * (∑ i ∈ Finset.range (m + 2), B i) + B m) * Sfull := by
+          have h1 : nLapS ≤ B m * Sfull
+              + Cc m * ((∑ i ∈ Finset.range (m + 2), B i) * Sfull) := by
             calc nLapS ≤ B m * Sfull
-                  + Cc * ∑ i ∈ Finset.range (m + 2), ‖iteratedCovGrad g 0 2 i U‖ := hnLapS_le
-              _ ≤ B m * Sfull + Cc * ((∑ i ∈ Finset.range (m + 2), B i) * Sfull) := by
-                  have hc := mul_le_mul_of_nonneg_left hSlow_le hCc
+                  + Cc m * ∑ i ∈ Finset.range (m + 2), ‖iteratedCovGrad g 0 2 i U‖ := hnLapS_le
+              _ ≤ B m * Sfull + Cc m * ((∑ i ∈ Finset.range (m + 2), B i) * Sfull) := by
+                  have hc := mul_le_mul_of_nonneg_left hSlow_le (hCc m)
                   linarith [hc]
           nlinarith [h1, hnS_le, hSfull_nn]
         have hfinal : nHess ≤ B (m + 2) * Sfull := by
           have hstep := hBstep m
-          calc nHess ≤ sg * (nLapS + nS) := hgard_fp
-            _ ≤ sg * ((B m + Cc * (∑ i ∈ Finset.range (m + 2), B i) + B m) * Sfull) := by
-                exact mul_le_mul_of_nonneg_left hcombine hsg_nn
-            _ = (sg * (B m + Cc * (∑ i ∈ Finset.range (m + 2), B i) + B m)) * Sfull := by ring
+          calc nHess ≤ sg m * (nLapS + nS) := hgard_fp
+            _ ≤ sg m * ((B m + Cc m * (∑ i ∈ Finset.range (m + 2), B i) + B m) * Sfull) := by
+                exact mul_le_mul_of_nonneg_left hcombine (hsg_nn m)
+            _ = (sg m * (B m + Cc m * (∑ i ∈ Finset.range (m + 2), B i) + B m)) * Sfull := by
+                ring
             _ ≤ B (m + 2) * Sfull := by
-                have hle : sg * (B m + Cc * (∑ i ∈ Finset.range (m + 2), B i) + B m) ≤
+                have hle : sg m * (B m + Cc m * (∑ i ∈ Finset.range (m + 2), B i) + B m) ≤
                     B (m + 2) := by linarith [hstep]
                 exact mul_le_mul_of_nonneg_right hle hSfull_nn
         have hLHS : ‖iteratedCovGrad g 0 2 (m + 2) U‖ = nHess := by
@@ -546,13 +573,14 @@ set_option linter.unusedSectionVars false in
 /-- **The all-order intrinsic Gårding bootstrap.** For a closed smooth
 Riemannian manifold `(M, g)` and order `k`, given:
 
-* the per-valence order-`2` Gårding family `hgard` (constant `Cg`; the order-`2`
-  estimate `secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound`
-  threaded at every valence),
+* the per-valence order-`2` Gårding family `hgard` (valence-dependent constant
+  `Cg : ℕ → ℝ`; the order-`2` estimate
+  `secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound` threaded at every
+  valence),
 * the per-valence order-`1` control family `hgrad1` (the unconditional
   `covGrad_l2NormSq_le_rawConnLap_mul_self` threaded at every valence),
-* the per-order curvature-commutator `L²` defect bound `hcomm` (constant `Cc`;
-  the genuine curvature-derivative content),
+* the per-order curvature-commutator `L²` defect bound `hcomm` (order-dependent
+  constant `Cc : ℕ → ℝ`; the genuine curvature-derivative content),
 
 there is a nonnegative constant `C` such that, for every smooth
 compactly-supported `(0, 2)`-tensor field `T`,
@@ -563,12 +591,15 @@ compactly-supported `(0, 2)`-tensor field `T`,
 
 where `∇^j T = iteratedCovGrad g 0 2 j T`, `‖∇^j T‖_{L²} = tensorL2Norm g 0 (2+j)
 (∇^j T).toFun`, `Δ_∇^i T = rawTensorConnLapIter g 0 2 i T`, and `‖Δ_∇^i T‖_{L²} =
-‖(Δ_∇^i T).toL2‖`.
+‖(Δ_∇^i T).toL2‖`. The per-order mixed constant `Cmix p` produced by the strong
+induction absorbs the relevant Gårding/commutator constants `Cg (2 + ·)` and
+`Cc ·` over the orders `≤ p` it visits; the final `C = ∑_{j ≤ 2k} Cmix j` is a
+finite sum over the order window the fixed-`k` bound actually touches.
 
 This is the elliptic-regularity bootstrap controlling all covariant gradients up
 to order `2k` by the iterated connection Laplacians up to order `k`. -/
 theorem allOrder_covGrad_l2Norm_le_lapIter_sum
-    (g : SmoothRiemannianMetric I M) (Cg Cc : ℝ) (k : ℕ)
+    (g : SmoothRiemannianMetric I M) (Cg Cc : ℕ → ℝ) (k : ℕ)
     (hgard : Order2GardingFamily (I := I) (M := M) g Cg)
     (hgrad1 : Order1ControlFamily (I := I) (M := M) g)
     (hcomm : CommutatorDefectBound (I := I) (M := M) g Cc) :
@@ -681,24 +712,25 @@ theorem order2Garding_rank_two_of_pointwise_curv_bound
 
 set_option linter.unusedSectionVars false in
 /-- **The all-valence integrated curvature cross-term bound on a closed manifold.** For a closed
-smooth Riemannian manifold `(M, g)` there is a nonnegative constant `Ccross` with
-`CurvatureCrossTermBound g Ccross`: at every covariant rank `s`, the one-sided `L²`
-pairing of the rough-Laplacian / covariant-gradient commutator defect
+smooth Riemannian manifold `(M, g)` there is a valence-dependent nonnegative constant
+`Ccross : ℕ → ℝ` with `CurvatureCrossTermBound g Ccross`: at every covariant rank `s`, the
+one-sided `L²` pairing of the rough-Laplacian / covariant-gradient commutator defect
 `Curv := Δ_∇(∇S) − ∇(Δ_∇ S)` with `∇S` satisfies
-`− ⟨Curv, ∇S⟩_{L²} ≤ Ccross · (‖∇S‖²_{L²} + ‖S‖_{L²}·‖∇S‖_{L²})`.
+`− ⟨Curv, ∇S⟩_{L²} ≤ Ccross s · (‖∇S‖²_{L²} + ‖S‖_{L²}·‖∇S‖_{L²})`.
 
 This is the integrated Bochner curvature term of the order-`2` Weitzenböck identity:
 fibrewise, `Curv` is a Riemann-curvature contraction of `∇S` (the Ricci identity on
-the gradient field), so its `L²` cross-pairing with `∇S` is controlled by the uniform
-curvature sup `‖R‖_∞` over the compact manifold. It is the **atomic** order-`2`
-curvature input; from it the all-valence order-`2` Gårding family follows
-unconditionally (`order2GardingFamily_holds` below). The proof reduces the one-sided
-pairing to its absolute value (`neg_le_abs`) and applies the posited integrated
+the gradient field), so its `L²` cross-pairing with `∇S` is controlled, at each fixed
+valence `s`, by the curvature sup `‖R‖_∞` over the compact manifold. The constant is
+valence-dependent because that bundle-curvature operator norm grows like `(s+1)·‖R‖_∞`. It
+is the **atomic** order-`2` curvature input; from it the all-valence order-`2` Gårding
+family follows unconditionally (`order2GardingFamily_holds` below). The proof reduces the
+one-sided pairing to its absolute value (`neg_le_abs`) and applies the posited integrated
 curvature input `exists_abs_curvCrossTerm_l2_bound`
-(`Geometry/Curvature/CovGradRoughLap/AllValenceL2DefectBound.lean`); its only
+(`Analysis/Spectral/Intrinsic/Garding/AllValenceL2DefectBound.lean`); its only
 `sorry`-dependence is through that posited input. -/
 theorem curvatureCrossTermBound_holds (g : SmoothRiemannianMetric I M) :
-    ∃ Ccross : ℝ, CurvatureCrossTermBound (I := I) (M := M) g Ccross := by
+    ∃ Ccross : ℕ → ℝ, CurvatureCrossTermBound (I := I) (M := M) g Ccross := by
   obtain ⟨Ccross, hCcross, hbound⟩ :=
     exists_abs_curvCrossTerm_l2_bound (I := I) (M := M) g
   refine ⟨Ccross, hCcross, fun s S => ?_⟩
@@ -706,43 +738,48 @@ theorem curvatureCrossTermBound_holds (g : SmoothRiemannianMetric I M) :
 
 set_option linter.unusedSectionVars false in
 /-- **The all-valence order-`2` Gårding estimate on a closed manifold.** For a closed
-smooth Riemannian manifold `(M, g)` there is a nonnegative constant `Cg` with
-`Order2GardingFamily g Cg`: at every covariant rank `s`,
-`‖∇²S‖²_{L²} ≤ Cg · (‖Δ_∇ S‖²_{L²} + ‖S‖²_{L²})`.
+smooth Riemannian manifold `(M, g)` there is a valence-dependent nonnegative constant
+`Cg : ℕ → ℝ` with `Order2GardingFamily g Cg`: at every covariant rank `s`,
+`‖∇²S‖²_{L²} ≤ Cg s · (‖Δ_∇ S‖²_{L²} + ‖S‖²_{L²})`.
 
 This is the intrinsic order-`2` Gårding / interior-elliptic-regularity estimate
 threaded at every valence. It is **derived** here (not posited) from the atomic
 curvature cross-term bound `curvatureCrossTermBound_holds` via the on-disk integrated
 Weitzenböck reduction `order2GardingFamily_of_curvatureCrossTermBound`: the integrated
-identity `‖∇²S‖² = ‖Δ_∇ S‖² − ⟨Curv, ∇S⟩`, the cross-term bound, the order-`1`
-control `‖∇S‖² ≤ ‖Δ_∇ S‖·‖S‖`, and Young's inequality. Its only `sorry`-dependence is
-through the posited `curvatureCrossTermBound_holds`. -/
+identity `‖∇²S‖² = ‖Δ_∇ S‖² − ⟨Curv, ∇S⟩`, the per-valence cross-term bound, the
+order-`1` control `‖∇S‖² ≤ ‖Δ_∇ S‖·‖S‖`, and Young's inequality. The resulting Gårding
+constant `Cg s = 2 + 2 · Ccross s` inherits the valence dependence of the cross-term
+constant. Its only `sorry`-dependence is through the posited
+`curvatureCrossTermBound_holds`. -/
 theorem order2GardingFamily_holds (g : SmoothRiemannianMetric I M) :
-    ∃ Cg : ℝ, Order2GardingFamily (I := I) (M := M) g Cg := by
+    ∃ Cg : ℕ → ℝ, Order2GardingFamily (I := I) (M := M) g Cg := by
   obtain ⟨Ccross, hcross⟩ := curvatureCrossTermBound_holds (I := I) (M := M) g
-  exact ⟨2 + 2 * Ccross, order2GardingFamily_of_curvatureCrossTermBound
+  exact ⟨fun s => 2 + 2 * Ccross s, order2GardingFamily_of_curvatureCrossTermBound
     (I := I) (M := M) g Ccross hcross⟩
 
 set_option linter.unusedSectionVars false in
 /-- **The all-order, all-valence curvature-commutator `L²` defect bound on a closed
-manifold.** For a closed smooth Riemannian manifold `(M, g)` there is a nonnegative
-constant `Cc` with `CommutatorDefectBound g Cc`: for every smooth compactly-supported
-`(0, 2)`-tensor base `U` and every gradient order `p`, the rough-Laplacian /
-iterated-gradient commutator defect satisfies
-`‖Δ_∇(∇^p U) − ∇^p(Δ_∇ U)‖_{L²} ≤ Cc · ∑_{i ≤ p+1} ‖∇^i U‖_{L²}`.
+manifold.** For a closed smooth Riemannian manifold `(M, g)` there is a order-dependent
+nonnegative constant `Cc : ℕ → ℝ` with `CommutatorDefectBound g Cc`: for every smooth
+compactly-supported `(0, 2)`-tensor base `U` and every gradient order `p`, the
+rough-Laplacian / iterated-gradient commutator defect satisfies
+`‖Δ_∇(∇^p U) − ∇^p(Δ_∇ U)‖_{L²} ≤ Cc p · ∑_{i ≤ p+1} ‖∇^i U‖_{L²}`.
 
 This is the genuine curvature-derivative content of the all-order bootstrap: on a
 closed manifold the iterated commutator `[Δ_∇, ∇^p]` expands, via the Ricci
 identity, into a finite sum of contractions of `∇^{≤ p-1}Rm` against `∇^{≤ p}U`, so
 it is a lower-order (order `≤ p+1`) operator with curvature-derivative
-coefficients, all bounded by compactness. The proof splits on the gradient order: the
-order-`0` case is the unconditional `covGradRoughLap_commutatorDefect_iter_zero` (the
-defect `Δ_∇ U − Δ_∇ U` vanishes); the orders `p + 1` are supplied by the posited
-curvature input `exists_commutatorDefect_l2_bound_succ`
-(`Geometry/Curvature/CovGradRoughLap/AllValenceL2DefectBound.lean`). Its only
-`sorry`-dependence is through that posited input. -/
+coefficients, all bounded by compactness. The constant is order-dependent because the
+number of curvature-derivative terms grows with `p`. The proof splits on the gradient
+order: the order-`0` case is the unconditional
+`covGradRoughLap_commutatorDefect_iter_zero` (the defect `Δ_∇ U − Δ_∇ U` vanishes); the
+orders `p + 1` are supplied by the posited curvature input
+`exists_commutatorDefect_l2_bound_succ`
+(`Analysis/Spectral/Intrinsic/Garding/AllValenceL2DefectBound.lean`), whose order-`(p+1)`
+constant `Cc (p + 1)` is used directly. Its only `sorry`-dependence is through that
+posited input. -/
 theorem commutatorDefectBound_holds (g : SmoothRiemannianMetric I M) :
-    ∃ Cc : ℝ, CommutatorDefectBound (I := I) (M := M) g Cc := by
+    ∃ Cc : ℕ → ℝ, CommutatorDefectBound (I := I) (M := M) g Cc := by
   obtain ⟨Cc, hCc, hsucc⟩ :=
     exists_commutatorDefect_l2_bound_succ (I := I) (M := M) g
   refine ⟨Cc, hCc, fun U p => ?_⟩
@@ -751,7 +788,7 @@ theorem commutatorDefectBound_holds (g : SmoothRiemannianMetric I M) :
       rw [covGradRoughLap_commutatorDefect_iter_zero (I := I) (M := M) g U, norm_zero]
       have hsum_nn : 0 ≤ ∑ i ∈ Finset.range (0 + 2), ‖iteratedCovGrad g 0 2 i U‖ :=
         Finset.sum_nonneg (fun i _ => norm_nonneg _)
-      exact mul_nonneg hCc hsum_nn
+      exact mul_nonneg (hCc 0) hsum_nn
   | (p + 1) => exact hsucc U p
 
 set_option linter.unusedSectionVars false in
