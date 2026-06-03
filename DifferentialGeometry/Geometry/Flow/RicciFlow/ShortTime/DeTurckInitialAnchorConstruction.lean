@@ -374,6 +374,7 @@ the interior derivative.  It constrains only the internal `g_DT`, never `g₀`/t
 headline.  The body is `sorry`, so consumers transitively depend on `sorryAx`. -/
 theorem deTurck_g0_rhs_right_continuous_at_zero
     (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2)
     (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
@@ -382,11 +383,75 @@ theorem deTurck_g0_rhs_right_continuous_at_zero
         = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w)
     (hcont : ContinuousOn (fun s : ℝ =>
       tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (Set.Icc 0 T)) :
+        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (Set.Icc 0 T))
+    (hsmoothrepr : ∀ (s : ℝ)
+        (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2),
+      (u₂ s).coeff i
+        = tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i)
+    (hC2_chart : ∀ (α : M) (i j : Fin (Module.finrank ℝ E)) (k : ℕ), k ≤ 2 →
+      ContinuousOn
+        (fun q : ℝ × M => iteratedFDeriv ℝ k
+          (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j)
+          (extChartAt I α q.2))
+        (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α)) :
     ∀ (x : M) (v w : TangentSpace I x),
       ContinuousWithinAt
         (fun s : ℝ => deTurckRicciRHS (I := I) g_bg (g_DT s) x v w)
-        (Set.Ioi 0) 0 := sorry
+        (Set.Ioi 0) 0 := by
+  have hC2_pt : ∀ (α : M) (y : M), y ∈ chartLeviCivitaGoodSet (I := I) α →
+      ∀ i j : Fin (Module.finrank ℝ E), ∀ k : ℕ, k ≤ 2 →
+        ContinuousOn
+          (fun s : ℝ => iteratedFDeriv ℝ k
+            (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT s) α i j)
+            (extChartAt I α y))
+          (Set.Icc 0 T) := by
+    intro α y hy i j k hk
+    have hjoint := hC2_chart α i j k hk
+    have hmap : ContinuousOn (fun s : ℝ => (s, y))
+        (Set.Icc 0 T) := (continuous_id.prodMk continuous_const).continuousOn
+    have hsub : Set.MapsTo (fun s : ℝ => (s, y)) (Set.Icc 0 T)
+        (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α) :=
+      fun s hs => Set.mk_mem_prod hs hy
+    simpa only [Function.comp_def] using hjoint.comp hmap hsub
+  have hval : ∀ (y : M) (p q : TangentSpace I y),
+      ContinuousOn (fun s : ℝ => (g_DT s).inner y p q) (Set.Icc 0 T) :=
+    deTurck_g0_inner_continuous_icc (I := I) g₀ a ha g_DT u₂ T_s hcont hreal
+      hsmoothrepr hC2_chart
+  intro x v w
+  have hric : ContinuousOn
+      (fun s : ℝ => ricciTensor (I := I) (g_DT s) x v w) (Set.Icc 0 T) :=
+    ricci_continuous_in_metric_time (I := I) (M := M) g_DT T x v w hval hC2_pt
+  have hlie : ContinuousOn
+      (fun s : ℝ => DeTurck.lieDerivMetric (I := I) (g_DT s)
+        (DeTurck.deTurckVF (I := I) (g_DT s) g_bg) x v w) (Set.Icc 0 T) :=
+    lieDeriv_deTurckVF_continuous_in_metric_time (I := I) (M := M) g_DT g_bg T x v w hC2_pt
+  have hrhs_eq : (fun s : ℝ => deTurckRicciRHS (I := I) g_bg (g_DT s) x v w)
+      = fun s : ℝ => (-2 : ℝ) • ricciTensor (I := I) (g_DT s) x v w +
+          DeTurck.lieDerivMetric (I := I) (g_DT s)
+            (DeTurck.deTurckVF (I := I) (g_DT s) g_bg) x v w := by
+    funext s
+    rw [deTurckRicciRHS, ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply,
+      ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply,
+      lieDerivMetricClm_apply]
+    rfl
+  rw [hrhs_eq]
+  have hIcc0 : (0 : ℝ) ∈ Set.Icc (0 : ℝ) T := ⟨le_refl 0, le_of_lt hT⟩
+  have hmem : Set.Icc (0 : ℝ) T ∈ nhdsWithin (0 : ℝ) (Set.Ioi 0) := by
+    refine Filter.mem_of_superset (inter_mem_nhdsWithin (Set.Ioi 0)
+      (IsOpen.mem_nhds isOpen_Iio (show (0 : ℝ) ∈ Set.Iio T from hT))) ?_
+    rintro s ⟨hs1, hs2⟩
+    exact ⟨le_of_lt hs1, le_of_lt hs2⟩
+  have hricW : ContinuousWithinAt
+      (fun s : ℝ => ricciTensor (I := I) (g_DT s) x v w) (Set.Ioi 0) 0 :=
+    (hric 0 hIcc0).mono_of_mem_nhdsWithin hmem
+  have hlieW : ContinuousWithinAt
+      (fun s : ℝ => DeTurck.lieDerivMetric (I := I) (g_DT s)
+        (DeTurck.deTurckVF (I := I) (g_DT s) g_bg) x v w) (Set.Ioi 0) 0 :=
+    (hlie 0 hIcc0).mono_of_mem_nhdsWithin hmem
+  exact (hricW.const_smul (-2 : ℝ)).add hlieW
 
 /-- **The `g₀`-anchored DeTurck–Ricci interior parabolic existence (assembled).**
 
@@ -418,8 +483,8 @@ theorem deturck_metric_pde_interior_at_initial_construction
   refine ⟨T, hT, g_DT, h0, ?_, ?_, ?_⟩
   · exact deTurck_g0_inner_continuous_icc (I := I) g₀ a ha g_DT u₂ T_s hcont hreal
       hsmoothrepr hC2_chart
-  · exact deTurck_g0_rhs_right_continuous_at_zero (I := I) g₀ g_bg hT a g_DT T_s u₂
-      hreal hcont
+  · exact deTurck_g0_rhs_right_continuous_at_zero (I := I) g₀ g_bg hT a ha g_DT T_s u₂
+      hreal hcont hsmoothrepr hC2_chart
   · exact deTurck_g0_interior_deriv_from_data (I := I) g₀ g_bg a ha g_DT u₂ T_s
       N_cont repr Nsec hreal hN_coeff hNsec_realize hrepr_small hreg hsmoothrepr
       hNsec_geom

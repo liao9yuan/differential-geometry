@@ -153,7 +153,19 @@ theorem deTurck_g0_continuous_nonlinearity
         (N_cont u).coeff i =
           tensorL2Coeff (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-            (Integral.L2.SmoothCcTensor.toL2 (Nsec u)) i := sorry
+            (Integral.L2.SmoothCcTensor.toL2 (Nsec u)) i := by
+  refine ⟨fun u =>
+    Analysis.Parabolic.MaximalRegularity.timeModeSynthesisPointwise
+      (g := g₀) (r := 0) (s := 2) (b := (a : ℝ))
+      (fun i => tensorL2Coeff (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+        (Integral.L2.SmoothCcTensor.toL2 (Nsec u)) i)
+      (smoothCcTensor_tensorL2Coeff_weighted_summable (I := I) (M := M)
+        g₀ (a : ℝ) (Nsec u)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)), ?_⟩
+  intro u i
+  exact Analysis.Parabolic.MaximalRegularity.timeModeSynthesisPointwise_coeff
+    (g := g₀) (r := 0) (s := 2) (b := (a : ℝ)) _ _ i
 
 /-- **Weighted-resolvent Lipschitz certificate for the `g₀`-DeTurck nonlinearity
 (open analytic datum: the resolvent-smoothing bridge).**

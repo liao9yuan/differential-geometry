@@ -7,6 +7,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.DeTurc
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChristoffelPerturbation
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieSummandLipschitz
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieMatrixChartBridge
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckVectorFieldContinuousInMetric
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Ricci
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentity
@@ -370,6 +372,151 @@ private lemma chartRicciTensor_continuous_of_hC2
   rw [heq]
   refine continuousOn_finset_sum _ (fun j _ => ?_)
   exact chartRiemannTensor_continuous_of_hC2 (I := I) g_DT α i j k j hy s hx h0 h1 h2
+
+/-- Continuity-in-time of a chart DeTurck vector-field component
+`s ↦ chartDeTurckVFComp (g_DT s) g_bg α k y`, at a chart-target interior point, from
+the `0`- and `1`-jet chart-Gram continuity (the background metric `g_bg` is fixed). -/
+private lemma chartDeTurckVFComp_continuous_of_hC2
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M) (α : M)
+    (k : Fin (Module.finrank ℝ E)) {y : E}
+    (_hy : y ∈ interior (extChartAt I α).target) (s : Set ℝ)
+    (hx : ((extChartAt I α).symm y) ∈
+      (trivializationAt E (TangentSpace I) α).baseSet)
+    (h0 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 0
+        (chartGramOnE (I := I) (g_DT t) α a b) y) s)
+    (h1 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 1
+        (chartGramOnE (I := I) (g_DT t) α a b) y) s) :
+    ContinuousOn (fun t : ℝ =>
+      DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT t) g_bg α k y) s := by
+  classical
+  have hentry : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => chartGramOnE (I := I) (g_DT t) α a b y) s :=
+    fun a b => chartGramOnE_continuous_of_hC2 (I := I) g_DT α a b y s (h0 a b)
+  have h_partial : ∀ l a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ =>
+        partialDeriv (E := E) l (chartGramOnE (I := I) (g_DT t) α a b) y) s :=
+    fun l a b => partialDeriv_chartGramOnE_continuous_of_hC2 (I := I) g_DT α l a b y s (h1 a b)
+  exact chartDeTurckVFComp_continuous_in_metric_at (I := I) g_bg α y s g_DT hentry h_partial hx k
+
+/-- Continuity-in-time of the directional partial of a chart DeTurck vector-field
+component `s ↦ ∂_m (chartDeTurckVFComp (g_DT s) g_bg α k) y`, at a chart-target interior
+point, from the `0`-, `1`- and `2`-jet chart-Gram continuity.
+
+The Leibniz expansion of `∂_m W^k` (`partialDeriv_chartDeTurckVFComp_eq`) is a finite sum
+of products of `chartInvGramOnE`, `∂(chartInvGramOnE)`, `chartChristoffel`, and
+`∂(chartChristoffel)`, each of which is time-continuous via the inverse-Gram and
+Christoffel continuity-in-metric lemmas. -/
+private lemma partialDeriv_chartDeTurckVFComp_continuous_of_hC2
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M) (α : M)
+    (m k : Fin (Module.finrank ℝ E)) {y : E}
+    (hy : y ∈ interior (extChartAt I α).target) (s : Set ℝ)
+    (hx : ((extChartAt I α).symm y) ∈
+      (trivializationAt E (TangentSpace I) α).baseSet)
+    (h0 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 0
+        (chartGramOnE (I := I) (g_DT t) α a b) y) s)
+    (h1 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 1
+        (chartGramOnE (I := I) (g_DT t) α a b) y) s)
+    (h2 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 2
+        (chartGramOnE (I := I) (g_DT t) α a b) y) s) :
+    ContinuousOn (fun t : ℝ =>
+      partialDeriv (E := E) m
+        (DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT t) g_bg α k) y) s := by
+  classical
+  have hentry : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => chartGramOnE (I := I) (g_DT t) α a b y) s :=
+    fun a b => chartGramOnE_continuous_of_hC2 (I := I) g_DT α a b y s (h0 a b)
+  have h_partial : ∀ l a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ =>
+        partialDeriv (E := E) l (chartGramOnE (I := I) (g_DT t) α a b) y) s :=
+    fun l a b => partialDeriv_chartGramOnE_continuous_of_hC2 (I := I) g_DT α l a b y s (h1 a b)
+  have hΓ : ∀ a b c : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => chartChristoffel (I := I) (g_DT t) α a b c y) s :=
+    fun a b c => chartChristoffel_continuous_in_metric_at (I := I) g_DT α y s hentry
+      (fun l p q => h_partial l p q) hx a b c
+  have heq : ∀ t ∈ s,
+      partialDeriv (E := E) m
+          (DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT t) g_bg α k) y =
+        ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+          (partialDeriv (E := E) m (chartInvGramOnE (I := I) (g_DT t) α a b) y *
+              (chartChristoffel (I := I) (g_DT t) α a b k y -
+                chartChristoffel (I := I) g_bg α a b k y)
+            + chartInvGramOnE (I := I) (g_DT t) α a b y *
+              (partialDeriv (E := E) m (chartChristoffel (I := I) (g_DT t) α a b k) y -
+                partialDeriv (E := E) m (chartChristoffel (I := I) g_bg α a b k) y)) := by
+    intro t _
+    exact partialDeriv_chartDeTurckVFComp_eq (I := I) (g_DT t) g_bg α m k hy
+  refine ContinuousOn.congr ?_ heq
+  refine continuousOn_finset_sum _ (fun a _ => ?_)
+  refine continuousOn_finset_sum _ (fun b _ => ?_)
+  refine ContinuousOn.add (ContinuousOn.mul ?_ ?_) (ContinuousOn.mul ?_ ?_)
+  · exact partialDeriv_chartInvGramOnE_continuous_of_hC2 (I := I) g_DT α m a b hy s hx h0 h1
+  · exact (hΓ a b k).sub continuousOn_const
+  · exact chartInvGramOnE_continuous_in_metric_at (I := I) g_DT α y s hentry hx a b
+  · exact (partialDeriv_chartChristoffel_continuous_of_hC2
+      (I := I) g_DT α m a b k hy s hx h0 h1 h2).sub continuousOn_const
+
+/-- Continuity-in-time of a chart Lie–DeTurck carrier entry
+`s ↦ chartLieDeTurckComp (g_DT s) g_bg α i j y`, at a chart-target interior point, from
+the `0`-, `1`- and `2`-jet chart-Gram continuity. -/
+private lemma chartLieDeTurckComp_continuous_of_hC2
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M) (α : M)
+    (i j : Fin (Module.finrank ℝ E)) {y : E}
+    (hy : y ∈ interior (extChartAt I α).target) (s : Set ℝ)
+    (hx : ((extChartAt I α).symm y) ∈
+      (trivializationAt E (TangentSpace I) α).baseSet)
+    (h0 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 0
+        (chartGramOnE (I := I) (g_DT t) α a b) y) s)
+    (h1 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 1
+        (chartGramOnE (I := I) (g_DT t) α a b) y) s)
+    (h2 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 2
+        (chartGramOnE (I := I) (g_DT t) α a b) y) s) :
+    ContinuousOn (fun t : ℝ =>
+      chartLieDeTurckComp (I := I) (g_DT t) g_bg α i j y) s := by
+  classical
+  have hVF : ∀ k : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ =>
+        DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT t) g_bg α k y) s :=
+    fun k => chartDeTurckVFComp_continuous_of_hC2 (I := I) g_DT g_bg α k hy s hx h0 h1
+  have hVFp : ∀ m k : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ =>
+        partialDeriv (E := E) m
+          (DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT t) g_bg α k) y) s :=
+    fun m k => partialDeriv_chartDeTurckVFComp_continuous_of_hC2
+      (I := I) g_DT g_bg α m k hy s hx h0 h1 h2
+  have hgram : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => chartGramOnE (I := I) (g_DT t) α a b y) s :=
+    fun a b => chartGramOnE_continuous_of_hC2 (I := I) g_DT α a b y s (h0 a b)
+  have hgp : ∀ l a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ =>
+        partialDeriv (E := E) l (chartGramOnE (I := I) (g_DT t) α a b) y) s :=
+    fun l a b => partialDeriv_chartGramOnE_continuous_of_hC2 (I := I) g_DT α l a b y s (h1 a b)
+  have heq : (fun t : ℝ => chartLieDeTurckComp (I := I) (g_DT t) g_bg α i j y)
+      = fun t : ℝ =>
+          (∑ k : Fin (Module.finrank ℝ E),
+              DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT t) g_bg α k y *
+                partialDeriv (E := E) k (chartGramOnE (I := I) (g_DT t) α i j) y)
+          + (∑ k : Fin (Module.finrank ℝ E),
+              chartGramOnE (I := I) (g_DT t) α k j y *
+                partialDeriv (E := E) i
+                  (DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT t) g_bg α k) y)
+          + (∑ k : Fin (Module.finrank ℝ E),
+              chartGramOnE (I := I) (g_DT t) α i k y *
+                partialDeriv (E := E) j
+                  (DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT t) g_bg α k) y) := by
+    funext t; rw [chartLieDeTurckComp_def]
+  rw [heq]
+  refine ContinuousOn.add (ContinuousOn.add ?_ ?_) ?_
+  · exact continuousOn_finset_sum _ (fun k _ => (hVF k).mul (hgp k i j))
+  · exact continuousOn_finset_sum _ (fun k _ => (hgram k j).mul (hVFp i k))
+  · exact continuousOn_finset_sum _ (fun k _ => (hgram i k).mul (hVFp j k))
 
 end RicciContInMetricAux
 
@@ -1160,6 +1307,82 @@ theorem ricci_continuous_in_metric_time
   refine continuousOn_finset_sum _ (fun k _ => ?_)
   refine ContinuousOn.mul continuousOn_const ?_
   exact chartRicciTensor_continuous_of_hC2 (I := I) g_DT x i k hx_int (Set.Icc 0 T)
+    hx_base h0 h1 h2
+
+open RicciContInMetricAux DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients in
+/-- **Time-continuity of the DeTurck-Lie carrier along a metric family.**
+
+For a time-family `g_DT` whose chart Gram entries (and their derivatives through second
+order) are time-continuous on `[0, T]`, the metric Lie-derivative of `g_DT s` along its
+own DeTurck vector field `W(g_DT s, g_bg) = deTurckVF (g_DT s) g_bg`,
+`s ↦ (𝓛_{W(g_DT s)} g_DT s)(v, w) = lieDerivMetric (g_DT s) (deTurckVF (g_DT s) g_bg) x v w`,
+is continuous on `[0, T]`.  This is the deformation summand of the Ricci–DeTurck
+right-hand side; it propagates through the chart Lie–DeTurck carrier
+`chartLieDeTurckComp`, which is built from the DeTurck vector-field components and the
+chart Gram data, all time-continuous by the chart formulae. -/
+theorem lieDeriv_deTurckVF_continuous_in_metric_time
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
+    (T : ℝ) (x : M) (v w : TangentSpace I x)
+    (hC2 : ∀ (α : M) (y : M), y ∈ chartLeviCivitaGoodSet (I := I) α →
+      ∀ i j : Fin (Module.finrank ℝ E), ∀ k : ℕ, k ≤ 2 →
+        ContinuousOn
+          (fun s : ℝ => iteratedFDeriv ℝ k
+            (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT s) α i j)
+            (extChartAt I α y))
+          (Set.Icc 0 T)) :
+    ContinuousOn (fun s : ℝ =>
+      lieDerivMetric (I := I) (g_DT s)
+        (deTurckVF (I := I) (g_DT s) g_bg) x v w) (Set.Icc 0 T) := by
+  classical
+  have hxgood : x ∈ chartLeviCivitaGoodSet (I := I) x :=
+    self_mem_chartLeviCivitaGoodSet (I := I) (α := x)
+  have hx_int : extChartAt I x x ∈ interior ((extChartAt I x).target : Set E) :=
+    chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hxgood
+  have hx_base : ((extChartAt I x).symm (extChartAt I x x)) ∈
+      (trivializationAt E (TangentSpace I) x).baseSet := by
+    rw [(extChartAt I x).left_inv (chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hxgood)]
+    exact chartLeviCivitaGoodSet_mem_baseSet (I := I) hxgood
+  have h0 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 0
+        (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) x a b)
+        (extChartAt I x x)) (Set.Icc 0 T) :=
+    fun a b => hC2 x x hxgood a b 0 (by norm_num)
+  have h1 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 1
+        (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) x a b)
+        (extChartAt I x x)) (Set.Icc 0 T) :=
+    fun a b => hC2 x x hxgood a b 1 (by norm_num)
+  have h2 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 2
+        (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) x a b)
+        (extChartAt I x x)) (Set.Icc 0 T) :=
+    fun a b => hC2 x x hxgood a b 2 (by norm_num)
+  have hbridge : ∀ t : ℝ,
+      lieDerivMetric (I := I) (g_DT t)
+          (deTurckVF (I := I) (g_DT t) g_bg) x v w =
+        ∑ i : Fin (Module.finrank ℝ E),
+          ∑ j : Fin (Module.finrank ℝ E),
+            ((chartModelBasis E).repr v) i *
+              ((chartModelBasis E).repr w) j *
+              chartLieDeTurckComp (I := I) (g_DT t) g_bg x i j (extChartAt I x x) := by
+    intro t
+    rw [lieDerivMetric_apply]
+    refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
+    rw [lieDerivMetricMatrix_def_chart,
+      chartLieDerivMetricMatrix_deTurckVF_eq_chartLieDeTurckComp (I := I) (g_DT t) g_bg x i j hxgood]
+  rw [show (fun s : ℝ =>
+        lieDerivMetric (I := I) (g_DT s)
+          (deTurckVF (I := I) (g_DT s) g_bg) x v w)
+        = fun s : ℝ => ∑ i : Fin (Module.finrank ℝ E),
+            ∑ j : Fin (Module.finrank ℝ E),
+              ((chartModelBasis E).repr v) i *
+                ((chartModelBasis E).repr w) j *
+                chartLieDeTurckComp (I := I) (g_DT s) g_bg x i j (extChartAt I x x) from by
+    funext s; exact hbridge s]
+  refine continuousOn_finset_sum _ (fun i _ => ?_)
+  refine continuousOn_finset_sum _ (fun j _ => ?_)
+  refine ContinuousOn.mul continuousOn_const ?_
+  exact chartLieDeTurckComp_continuous_of_hC2 (I := I) g_DT g_bg x i j hx_int (Set.Icc 0 T)
     hx_base h0 h1 h2
 
 end DifferentialGeometry.PDE.RicciFlow
