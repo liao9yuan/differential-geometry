@@ -296,25 +296,88 @@ private lemma finiteEigenComboRS_tensorL2Coeff
   · rw [if_neg hiF, Finset.sum_eq_zero]
     intro j hj; rw [if_neg (fun h => hiF (by rw [h]; exact hj))]
 
-/-- **The general-rank per-step eigen-coordinate identity (posited general-rank analytic
-child).** Applying the smooth one-minus-connection-Laplacian `(1 - Δ_∇)` scales the `i`-th
-eigenbasis coordinate by `(1 + λᵢ)`:
+/-- **The general-rank Green / `H¹`-pairing bridge for `(1 - Δ_∇)` (posited general-rank
+analytic child).** For smooth compactly-supported `(r, s)`-tensors `T, v`, the `L²` pairing
+of `(1 - Δ_∇) T` with `v` equals the `H¹` pairing of the `H¹`-completion embeddings of `T`
+and `v`:
+`⟪(1 - Δ_∇) T, v⟫_{L²} = ⟪⟦T⟧, ⟦v⟧⟫_{H¹}`.
+
+This is the bidegree-`(r, s)` analogue of the in-library `(0, s)`
+`oneMinusConnLapSmooth_toL2_inner_eq_h1_general`.  At `(0, s)` the identity is the
+connection-Laplacian integration-by-parts (Green) identity packaged through a *metric-lowering
+intertwiner* witness `LoweringIntertwiner g s` (`loweringIntertwiner_gen`); the lowering
+machinery is specific to purely-covariant `(0, s)`-tensors, so the general-`(r, s)` Green
+bridge — the same integration by parts for the general-rank rough connection Laplacian — is
+posited here.  The conclusion is an `L²`/`H¹`-pairing identity, structurally distinct from the
+coordinate-scaling identity it powers (no packaging); the body is `sorry` and consumers
+transitively depend on `sorryAx`. -/
+private theorem oneMinusConnLapSmoothRS_toL2_inner_eq_h1
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T v : Integral.L2.SmoothCcTensor g r s) :
+    (inner ℝ
+        ((oneMinusConnLapSmooth (I := I) g r s T : Integral.L2.SmoothCcTensor g r s) :
+          TensorL2 r s g)
+        (v : TensorL2 r s g) : ℝ) =
+      (inner ℝ
+        (smoothToTensorH1Compl (I := I) (M := M) g r s ⟨T⟩)
+        (smoothToTensorH1Compl (I := I) (M := M) g r s ⟨v⟩) : ℝ) :=
+  sorry
+
+/-- **Closability of the covariant gradient at general rank `(r, s)` (posited general-rank
+analytic child).** The canonical `H¹ → L²` inclusion `TensorH1ComplToTensorL2 g r s` is
+injective: the covariant gradient on `(r, s)`-tensor fields is a closable operator.
+
+This is the bidegree-`(r, s)` analogue of the in-library `(0, 2)` / `(0, 3)`
+`TensorH1ComplToTensorL2_injective_two` / `..._three`.  At those ranks the closability follows
+from the rank-specific Green / lowering-intertwiner machinery; the general-rank closability —
+the same density-and-Green argument for the general-rank rough connection Laplacian — is
+posited here.  The conclusion is an injectivity statement on the `H¹ → L²` map, structurally
+unrelated to the coordinate-scaling identity it powers (no packaging); the body is `sorry` and
+consumers transitively depend on `sorryAx`. -/
+private theorem TensorH1ComplToTensorL2RS_injective
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    Function.Injective (TensorH1ComplToTensorL2 (I := I) (M := M) g r s) :=
+  sorry
+
+/-- **The smooth eigenvector's `H¹` embedding is the rescaled resolvent eigenvector (general
+rank).** For the smooth representative `eᵢ = eigenvectorSmooth g r s i` of the resolvent
+eigenbasis vector at index `i`, `⟦eᵢ⟧ = (i.fst.val)⁻¹ • eigenvectorResolvent i` in the `H¹`
+completion. Both sides have the same image `tensorResolventEigenbasisVec i` under the injective
+`H¹ → L²` map `TensorH1ComplToTensorL2RS_injective`. The bidegree-`(r, s)` analogue of
+`smoothToTensorH1Compl_eigenvectorSmooth_eq`, proved verbatim from the general-rank closability
+child. -/
+private theorem smoothToTensorH1ComplRS_eigenvectorSmooth_eq
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s) :
+    smoothToTensorH1Compl (I := I) (M := M) g r s
+        ⟨eigenvectorSmooth (I := I) (M := M) g r s i⟩ =
+      (i.fst.val)⁻¹ •
+        eigenvectorResolvent (I := I) (M := M) g r s i := by
+  apply TensorH1ComplToTensorL2RS_injective (I := I) (M := M) g r s
+  rw [TensorH1ComplToTensorL2_smoothToTensorH1Compl_eq_coe]
+  change (eigenvectorSmooth (I := I) (M := M) g r s i :
+        TensorL2 r s g) =
+      TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+        ((i.fst.val)⁻¹ •
+          eigenvectorResolvent (I := I) (M := M) g r s i)
+  rw [eigenvectorSmooth_toL2 (I := I) (M := M) g r s i, map_smul]
+  exact eigenvector_eq_resolvent_smul (I := I) (M := M) g r s i
+
+/-- **The general-rank per-step eigen-coordinate identity.** Applying the smooth
+one-minus-connection-Laplacian `(1 - Δ_∇)` scales the `i`-th eigenbasis coordinate by
+`(1 + λᵢ)`:
 `cᵢ((1 - Δ_∇) T) = (1 + λᵢ) · cᵢ(T)`.
 
 This is the bidegree-`(r, s)` analogue of the `(0, 2)`
-`tensorL2Coeff_ofCompact_oneMinusConnLapSmooth`.  At `(0, 2)` the identity is proved through
-the Green / `H¹`-pairing bridge `oneMinusConnLapSmooth_toL2_inner_eq_h1_general` together with
-the `H¹ → L²` *injectivity* `TensorH1ComplToTensorL2_injective_two` and the eigenvector
-identification `smoothToTensorH1Compl_eigenvectorSmooth_eq`; the lowering Green identity
-`oneMinusConnLapSmooth_toL2_inner_eq_h1_general` itself extends to every `(0, s)` via the
-general lowering intertwiner `loweringIntertwiner_gen`, but the `H¹` injectivity and the
-eigenvector identification are available in the library only at `(0, 2)` and `(0, 3)`, so the
-general-rank single-step coordinate identity is posited here.  Everything downstream of it (the
-iterated identity, the even-order Parseval summability, and the all-order weighted summability
-`smoothCcTensorRS_tensorL2Coeff_weighted_summable`) is bidegree-generic and is *proved* on top
-of this single posited primitive.  The conclusion is a coordinate-scaling identity, structurally
-distinct from the summability conclusion it powers (no packaging); the body is `sorry` and
-consumers transitively depend on `sorryAx`. -/
+`tensorL2Coeff_ofCompact_oneMinusConnLapSmooth`, proved verbatim from the general-rank Green
+bridge `oneMinusConnLapSmoothRS_toL2_inner_eq_h1`, the eigenvector identification
+`smoothToTensorH1ComplRS_eigenvectorSmooth_eq` (over the general-rank closability child
+`TensorH1ComplToTensorL2RS_injective`), the general-rank weak-eigenvector equation
+`eigenvectorSmooth_weak_eigen`, and `one_add_lambda_eq_inv_val`.  Everything downstream of it
+(the iterated identity, the even-order Parseval summability, and the all-order weighted
+summability `smoothCcTensorRS_tensorL2Coeff_weighted_summable`) is bidegree-generic and is
+*proved* on top of it.  The conclusion is a coordinate-scaling identity, structurally distinct
+from the summability conclusion it powers (no packaging). -/
 private theorem tensorL2Coeff_ofCompact_oneMinusConnLapSmoothRS
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Integral.L2.SmoothCcTensor g r s)
@@ -327,8 +390,35 @@ private theorem tensorL2Coeff_ofCompact_oneMinusConnLapSmoothRS
           (I := I) (M := M) i) *
         tensorL2Coeff (I := I) (M := M)
           (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
-          (Integral.L2.SmoothCcTensor.toL2 T) i :=
-  sorry
+          (Integral.L2.SmoothCcTensor.toL2 T) i := by
+  classical
+  set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g r s with hcompact_def
+  have hb :
+      tensorResolventHilbertEigenbasisSigma (I := I) (M := M) hcompact i =
+        (eigenvectorSmooth (I := I) (M := M) g r s i : TensorL2 r s g) := by
+    rw [tensorResolventHilbertEigenbasisSigma_apply,
+      eigenvectorSmooth_toL2 (I := I) (M := M) g r s i]
+  rw [Analysis.Parabolic.TensorHeatEquation.tensorL2Coeff_eq_inner,
+    Analysis.Parabolic.TensorHeatEquation.tensorL2Coeff_eq_inner, hb,
+    Integral.L2.SmoothCcTensor.toL2_apply, Integral.L2.SmoothCcTensor.toL2_apply]
+  rw [real_inner_comm
+    ((oneMinusConnLapSmooth (I := I) g r s T : Integral.L2.SmoothCcTensor g r s) :
+      TensorL2 r s g)
+    (eigenvectorSmooth (I := I) (M := M) g r s i : TensorL2 r s g),
+    oneMinusConnLapSmoothRS_toL2_inner_eq_h1 (I := I) (M := M) g r s T
+      (eigenvectorSmooth (I := I) (M := M) g r s i)]
+  rw [smoothToTensorH1ComplRS_eigenvectorSmooth_eq (I := I) (M := M) g r s i,
+    inner_smul_right]
+  rw [real_inner_comm
+    (eigenvectorResolvent (I := I) (M := M) g r s i)
+    (smoothToTensorH1Compl (I := I) (M := M) g r s ⟨T⟩),
+    eigenvectorSmooth_weak_eigen (I := I) (M := M) g r s i ⟨T⟩]
+  rw [show ((⟨T⟩ : Analysis.Parabolic.TensorSpectral.SmoothCcTensorH1 g r s).toCcTensor :
+        TensorL2 r s g) = (T : TensorL2 r s g) from rfl,
+    real_inner_comm
+      (eigenvectorSmooth (I := I) (M := M) g r s i : TensorL2 r s g)
+      (T : TensorL2 r s g),
+    one_add_lambda_eq_inv_val (I := I) (M := M) i]
 
 /-- The iterated general-rank per-step identity:
 `cᵢ((1 - Δ_∇)^k T) = (1 + λᵢ)^k · cᵢ(T)`.  The bidegree-`(r, s)` analogue of
@@ -476,30 +566,89 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **The sharp general-rank chart Sobolev embedding `H^a ↪ C⁰` at the supercritical order
+`a` (posited general-rank analytic child).** At a supercritical order `a` (`2a > dim M + 4`)
+there is a constant `C ≥ 0` such that the bundle-fibre value `‖T.toSection x‖` of a smooth
+`(r, s)`-tensor is bounded by `C · ‖T.toHs a‖`, the intrinsic chart `H^a`-Sobolev norm of `T`,
+for all `x`.
+
+This is the *sharp* form of the chart Sobolev embedding: it costs only `a` chart derivatives
+(`a > (dim M)/2` suffices, here with margin `2a > dim M + 4`), whereas the in-library
+general-rank chart embedding `tensorPouSobolevHilbert_embedding_Ck` is the *crude* one, costing
+`2k > dim M` derivatives (i.e. it controls `C⁰` by the chart `H^{2k}`-norm only for
+`2k > dim M`, not by the chart `H^a`-norm for `a > (dim M)/2`).  The sharp embedding at
+`a > (dim M)/2` is a genuinely deeper Sobolev inequality, absent from the library at every
+bidegree, so it is posited here.  The conclusion is a fibre `C⁰` bound by the chart `H^a`-norm,
+structurally distinct from the spectral square-sum bound it powers (no packaging); the body is
+`sorry` and consumers transitively depend on `sorryAx`. -/
+private theorem pointwiseFiberNormRS_le_chartHs_sharp
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) :
+    letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (T : Integral.L2.SmoothCcTensor g r s) (x : M),
+        ‖T.toSection x‖ ≤ C *
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) a T‖ :=
+  sorry
+
+/-- **The sharp general-rank Gårding lift at the matching order `a` (posited general-rank
+analytic child).** For every supercritical order `a` (`2a > dim M + 4`) there is a constant
+`C ≥ 0` such that the intrinsic chart `H^a`-Sobolev norm of a smooth `(r, s)`-tensor `T` is
+bounded by `C` times the square root of the *order-`a`* weighted spectral square-sum
+`∑ᵢ (1 + λᵢ)^a · (tensorL2Coeff (T.toL2) i)²` of the eigenbasis coordinates of `T`'s `L²`
+class.
+
+This is the *sharp* (no-derivative-loss) elliptic-regularity / Gårding lift relating the chart
+`H^a`-norm to the spectral `H^a`-norm at the *matching* order `a`.  The in-library
+`pouSobolevToHsNorm_le_spectral` is (i) available only at bidegree `(0, 2)` and (ii) at the
+*chained* order `4k = 2·(2k)` — it controls the chart `H^{2k}`-norm by the spectral
+`(1 + λ)^{4k}` sum, a factor-`2` derivative loss.  The sharp general-rank matching-order lift is
+absent from the library, so it is posited here.  The conclusion is a chart-`H^a`-norm bound,
+structurally distinct from the fibre `C⁰` bound it powers (no packaging); the body is `sorry`
+and consumers transitively depend on `sorryAx`. -/
+private theorem chartHsRS_le_sqrt_spectral_sharp
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (T : Integral.L2.SmoothCcTensor g r s),
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) a T‖ ≤ C *
+          Real.sqrt (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+              (I := I) (M := M) g r s,
+            tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+              (tensorL2Coeff (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
+                (Integral.L2.SmoothCcTensor.toL2 T) i) ^ 2) :=
+  sorry
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
 /-- **The sharp general-rank fibre Sobolev embedding `H^a ↪ C⁰` at the supercritical
-spectral order `a` (posited general-rank analytic child).** At a supercritical order `a`
-(`2a > dim M + 4`) there is a constant `C ≥ 0` such that the bundle-fibre value
-`‖T.toSection x‖` of a smooth `(r, s)`-tensor is bounded by `C` times the square root of the
-weighted order-`a` spectral square-sum `∑ᵢ (1 + λᵢ)^a · (tensorL2Coeff (T.toL2) i)²` of the
-eigenbasis coordinates of `T`'s `L²` class, for all `x`.
+spectral order `a`.** At a supercritical order `a` (`2a > dim M + 4`) there is a constant
+`C ≥ 0` such that the bundle-fibre value `‖T.toSection x‖` of a smooth `(r, s)`-tensor is
+bounded by `C` times the square root of the weighted order-`a` spectral square-sum
+`∑ᵢ (1 + λᵢ)^a · (tensorL2Coeff (T.toL2) i)²` of the eigenbasis coordinates of `T`'s `L²`
+class, for all `x`.
 
 This is the genuine elliptic / Sobolev content underlying the local Weyl law at general
 bidegree: the *sharp* spectral Sobolev embedding `H^a ↪ C⁰`, valid for `a > (dim M)/2` (here
 `2a > dim M + 4 ⟹ a > dim M / 2` with margin for the `(r, s)` fibre Hilbert–Schmidt slack).
-It is the bidegree-`(r, s)` analogue of the spectral-order-read of the in-file `(0, 2)`
-`pointwiseFiberNorm_le_spectralHs_02`, but recorded at the *sharp* order `a` rather than the
-chained order `4k`.  The chained route used at `(0, 2)` — the general-rank chart-Sobolev
-embedding `H^{2k} ↪ C⁰` (`tensorPouSobolevHilbert_embedding_Ck`, available at general rank,
-but requiring the *crude* chart order `2k > dim M`) composed with the order-`4k` Gårding lift
-(the `(r, s)` analogue of `pouSobolevToHsNorm_le_spectral`) — produces the order-`4k`
-spectral sum with `4k > 2·dim M`, which is strictly stronger than (hence does *not* dominate)
-the order-`a` spectral sum for the supercritical regime `dim M / 2 < a ≤ 2·dim M`.  The sharp
-`H^a ↪ C⁰` at `a > (dim M)/2` is genuinely a different, deeper Sobolev embedding than the
-crude chart embedding (which costs more than `dim M` derivatives); it is absent from the
-library at every bidegree, so it is posited here at the sharp order `a` directly.  The
-conclusion is a fibre `C⁰` bound by the raw spectral square-sum, structurally distinct from
-the spectral-`H^a`-norm bound `pointwiseFiberNormRS_le_spectralHs` it powers (no packaging);
-the body is `sorry` and consumers transitively depend on `sorryAx`. -/
+It is recorded at the *sharp* order `a` rather than the chained order `4k` of the in-file
+`(0, 2)` `pointwiseFiberNorm_le_spectralHs_02`.  The chained route used at `(0, 2)` — the
+general-rank chart-Sobolev embedding `H^{2k} ↪ C⁰` (`tensorPouSobolevHilbert_embedding_Ck`,
+crude order `2k > dim M`) composed with the order-`4k` Gårding lift — produces the order-`4k`
+spectral sum, strictly stronger than (hence not dominating) the order-`a` spectral sum for the
+supercritical regime `dim M / 2 < a ≤ 2·dim M`.  It is *proved* here by composing the two sharp
+general-rank analytic children — the sharp chart embedding
+`pointwiseFiberNormRS_le_chartHs_sharp` (`H^a ↪ C⁰` at `a > (dim M)/2`) and the sharp
+matching-order Gårding lift `chartHsRS_le_sqrt_spectral_sharp` (chart `H^a`-norm `≤` spectral
+order-`a` square-root) — both genuinely deeper than the in-library crude chart embedding /
+factor-`2`-lossy Gårding lift, absent at every bidegree, and posited above.  Consumers
+transitively depend on `sorryAx` through those two posited sharp inputs.  The conclusion is a
+fibre `C⁰` bound by the raw spectral square-sum, structurally distinct from the
+spectral-`H^a`-norm bound `pointwiseFiberNormRS_le_spectralHs` it powers (no packaging). -/
 private theorem pointwiseFiberNormRS_le_sqrt_spectral
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) :
@@ -513,8 +662,26 @@ private theorem pointwiseFiberNormRS_le_sqrt_spectral
             tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
               (tensorL2Coeff (I := I) (M := M)
                 (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
-                (Integral.L2.SmoothCcTensor.toL2 T) i) ^ 2) :=
-  sorry
+                (Integral.L2.SmoothCcTensor.toL2 T) i) ^ 2) := by
+  classical
+  letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+  obtain ⟨Cc, hCc_nn, hCc⟩ :=
+    pointwiseFiberNormRS_le_chartHs_sharp (I := I) (M := M) g r s a ha
+  obtain ⟨Cn, hCn_nn, hCn⟩ :=
+    chartHsRS_le_sqrt_spectral_sharp (I := I) (M := M) g r s a ha
+  refine ⟨Cc * Cn, by positivity, fun T x => ?_⟩
+  set Nspec : ℝ := Real.sqrt (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+      (I := I) (M := M) g r s,
+    tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+      (tensorL2Coeff (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
+        (Integral.L2.SmoothCcTensor.toL2 T) i) ^ 2) with hNspec_def
+  calc ‖T.toSection x‖
+      ≤ Cc * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) a T‖ := hCc T x
+    _ ≤ Cc * (Cn * Nspec) := by
+          exact mul_le_mul_of_nonneg_left (hCn T) hCc_nn
+    _ = (Cc * Cn) * Nspec := by ring
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in

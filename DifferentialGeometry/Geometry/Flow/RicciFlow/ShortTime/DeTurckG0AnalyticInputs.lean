@@ -421,8 +421,35 @@ theorem deturck_g0_carrier_Hk_continuousOn_upto_zero
         _ = ε := by field_simp
   exact hmain
 
-/-- **Reverse finite-dimensional Fréchet↔chart-`2`-jet bound (posited finite-dim
-real-analysis input).**
+/-- **Orthonormal-basis multilinear operator-norm bound (posited finite-dim real-analysis atom).**
+
+For any continuous `k`-multilinear real form `f` on the finite-dimensional model space `E`, the
+operator norm `‖f‖` is bounded by the sum, over all `k`-multi-indices `idx : Fin k → Fin (dim E)`,
+of the magnitudes of the evaluations `f` on the corresponding tuples of the fixed model basis
+`chartModelBasis E`:
+
+  `‖f‖ ≤ ∑_{idx : Fin k → Fin (dim E)} ‖f (fun p => chartModelBasis E (idx p))‖`.
+
+This is the standard reverse multilinear-norm estimate over an **orthonormal** basis: `chartModelBasis
+E` is the image of `EuclideanSpace.basisFun` under the linear isometry `toEuclidean.symm`, hence
+orthonormal, so every unit input decomposes in the basis with coordinates of absolute value `≤ 1`
+(Cauchy–Schwarz against unit basis vectors), and multilinear expansion (`map_sum`) of `f m` over the
+basis coordinates of `m` dominates `‖f m‖` by `(∑_idx ‖f(basis tuple)‖) · ∏‖m i‖`; `opNorm_le_bound`
+then yields the claim.  It is the genuinely-missing finite-dim atom underpinning the reverse
+Fréchet↔chart-`2`-jet bound (the multilinear dual of the forward coordinate-partial estimate
+`euclidPartial_sq_le_iteratedFDeriv_two_sq`).
+
+The conclusion is a pure operator-norm bound on an arbitrary continuous multilinear map, structurally
+distinct from any geometric datum; no packaging.  The body is `sorry`; consumers transitively depend
+on `sorryAx`. -/
+theorem chartModelBasis_contMultilinear_opNorm_le_sum {k : ℕ}
+    (f : ContinuousMultilinearMap ℝ (fun _ : Fin k => E) ℝ) :
+    ‖f‖ ≤ ∑ idx : Fin k → Fin (Module.finrank ℝ E),
+      ‖f (fun p => (Integral.Measure.chartModelBasis E) (idx p))‖ :=
+  sorry
+
+/-- **Reverse finite-dimensional Fréchet↔chart-`2`-jet bound (assembled over the orthonormal-basis
+multilinear-norm atom).**
 
 For two smooth metrics `g₁, g₂`, a chart base point `α`, a chart-interior point `y ∈ interior
 (extChartAt I α).target`, and an order `k ≤ 2`, the operator norm of the order-`k` iterated
@@ -438,7 +465,7 @@ This is the genuine reverse direction of the forward coordinate-partial bound
 there each second Euclidean partial is bounded by the iterated-Fréchet operator norm; here the
 iterated-Fréchet operator norm is bounded, for `k ≤ 2`, by the sum of the coordinate `≤2`-jet
 partials.  It is true because each `iteratedFDeriv ℝ k F y` is a continuous multilinear map whose
-operator norm over the orthonormal chart-model basis `chartModelBasis E` is dominated by the sum,
+operator norm over the orthonormal chart-model basis `Integral.Measure.chartModelBasis E` is dominated by the sum,
 over all `k`-multi-indices, of `|F`'s iterated partial in those coordinate directions| (a unit
 input decomposes into basis coordinates of absolute value `≤ 1`), and each such iterated partial
 of the difference function is one summand of `chartGramDiffSup`/`chartGramPartialDiffSup`/
@@ -449,8 +476,11 @@ multilinear-norm-by-basis estimate against the first/second chart partials.
 The dimensional constant `C` is **uniform over the metric pair** (it is the count of `k`-multi-
 indices, a function of `dim M` only — the metric pair enters solely the bounding seminorm), so it
 is quantified ahead of `g₁, g₂`.  The conclusion (an operator-norm bound by the chart-`2`-jet
-seminorm) is structurally distinct from any time/carrier datum; no packaging.  The body is
-`sorry`; consumers transitively depend on `sorryAx`. -/
+seminorm) is structurally distinct from any time/carrier datum; no packaging.  This is *assembled
+by real proof* from the posited orthonormal-basis multilinear-norm atom
+`chartModelBasis_contMultilinear_opNorm_le_sum` (the genuinely-missing finite-dim fact) together
+with the chart-jet seminorm summand bounds; consumers transitively depend on `sorryAx` through that
+atom. -/
 theorem chartGramDiff_iteratedFDeriv_norm_le_chartMetricJet2DiffSup (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ g₂ : SmoothRiemannianMetric I M) (k : ℕ), k ≤ 2 →
@@ -458,11 +488,230 @@ theorem chartGramDiff_iteratedFDeriv_norm_le_chartMetricJet2DiffSup (α : M)
         ‖iteratedFDeriv ℝ k
             (fun z => Integral.DivergenceTheorem.chartGramOnE (I := I) g₁ α i j z -
               Integral.DivergenceTheorem.chartGramOnE (I := I) g₂ α i j z) y‖ ≤
-          C * DeTurckCoefficients.chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y :=
+          C * DeTurckCoefficients.chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y := by
+  classical
+  -- The single dimensional constant `1 + n + n²` dominates the multi-index count `n^k` for every
+  -- order `k ≤ 2`, and each multi-index summand is dominated by the chart-`2`-jet seminorm.
+  refine ⟨1 + ((Module.finrank ℝ E : ℕ) : ℝ) + ((Module.finrank ℝ E : ℕ) : ℝ) ^ 2,
+    by positivity, fun g₁ g₂ k hk y hy => ?_⟩
+  set F : E → ℝ := fun z => Integral.DivergenceTheorem.chartGramOnE (I := I) g₁ α i j z -
+    Integral.DivergenceTheorem.chartGramOnE (I := I) g₂ α i j z with hF_def
+  set J : ℝ := DeTurckCoefficients.chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y with hJ_def
+  have hJ_nn : 0 ≤ J := DeTurckCoefficients.chartMetricJet2DiffSup_nonneg _ _ _ _
+  -- `F` is `C^∞` (hence `C²`) at the interior point `y`.
+  have hF_cd : ContDiffAt ℝ 2 F y := by
+    have hcd : ContDiffOn ℝ ∞ F (interior ((extChartAt I α).target : Set E)) := by
+      have h1 := (Integral.DivergenceTheorem.chartGramOnE_contDiffOn (I := I) g₁ α i j).mono
+        (interior_subset (s := (extChartAt I α).target))
+      have h2 := (Integral.DivergenceTheorem.chartGramOnE_contDiffOn (I := I) g₂ α i j).mono
+        (interior_subset (s := (extChartAt I α).target))
+      exact h1.sub h2
+    exact (hcd.contDiffAt (isOpen_interior.mem_nhds hy)).of_le (by norm_cast)
+  -- Differentiability of the two Gram entries (and their first partials) at `y`.
+  have hG_diff : ∀ g : SmoothRiemannianMetric I M,
+      DifferentiableAt ℝ (Integral.DivergenceTheorem.chartGramOnE (I := I) g α i j) y := by
+    intro g
+    have hcd : ContDiffOn ℝ ∞ (Integral.DivergenceTheorem.chartGramOnE (I := I) g α i j)
+        (interior ((extChartAt I α).target : Set E)) :=
+      (Integral.DivergenceTheorem.chartGramOnE_contDiffOn (I := I) g α i j).mono interior_subset
+    exact (hcd.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
+  have hGp_diff : ∀ (g : SmoothRiemannianMetric I M) (a : Fin (Module.finrank ℝ E)),
+      DifferentiableAt ℝ
+        (Integral.DivergenceTheorem.partialDeriv (E := E) a (Integral.DivergenceTheorem.chartGramOnE (I := I) g α i j)) y := by
+    intro g a
+    have hcd_int : ContDiffOn ℝ ∞ (Integral.DivergenceTheorem.chartGramOnE (I := I) g α i j)
+        (interior ((extChartAt I α).target : Set E)) :=
+      (Integral.DivergenceTheorem.chartGramOnE_contDiffOn (I := I) g α i j).mono interior_subset
+    have hfderiv : ContDiffOn ℝ ∞ (fderiv ℝ (Integral.DivergenceTheorem.chartGramOnE (I := I) g α i j))
+        (interior ((extChartAt I α).target : Set E)) :=
+      hcd_int.fderiv_of_isOpen isOpen_interior (by rw [ENat.coe_top_add_one])
+    have hrw : (Integral.DivergenceTheorem.partialDeriv (E := E) a (Integral.DivergenceTheorem.chartGramOnE (I := I) g α i j)) =
+        fun z => fderiv ℝ (Integral.DivergenceTheorem.chartGramOnE (I := I) g α i j) z
+          ((Integral.Measure.chartModelBasis E) a) := rfl
+    rw [hrw]
+    exact ((hfderiv.clm_apply contDiffOn_const).contDiffAt
+      (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
+  -- The per-multi-index bound: every basis-tuple evaluation of `iteratedFDeriv k F y` is bounded
+  -- by the chart-`2`-jet seminorm `J`.  This is the `k = 0, 1, 2` partial identification.
+  have hterm : ∀ (idx : Fin k → Fin (Module.finrank ℝ E)),
+      ‖iteratedFDeriv ℝ k F y (fun p => (Integral.Measure.chartModelBasis E) (idx p))‖ ≤ J := by
+    intro idx
+    interval_cases k
+    · -- `k = 0`: the `0`-jet entry, bounded by `chartGramDiffSup ≤ J`.
+      rw [iteratedFDeriv_zero_apply]
+      have hval : F y =
+          Integral.DivergenceTheorem.chartGramOnE (I := I) g₁ α i j y -
+            Integral.DivergenceTheorem.chartGramOnE (I := I) g₂ α i j y := rfl
+      have hgram : F y =
+          Integral.Measure.chartGramMatrix (I := I) g₁ α ((extChartAt I α).symm y) i j -
+            Integral.Measure.chartGramMatrix (I := I) g₂ α ((extChartAt I α).symm y) i j := by
+        rw [hval, Integral.DivergenceTheorem.chartGramOnE_def,
+          Integral.DivergenceTheorem.chartGramOnE_def]
+      have h0 : ‖F y‖ ≤
+          DeTurckCoefficients.chartGramDiffSup (I := I) (M := M) g₁ g₂ α
+            ((extChartAt I α).symm y) := by
+        rw [Real.norm_eq_abs, hgram]
+        exact DeTurckCoefficients.chartGramMatrix_sub_entry_abs_le_gramDiffSup
+          (I := I) (M := M) g₁ g₂ α ((extChartAt I α).symm y) i j
+      refine h0.trans ?_
+      exact (DeTurckCoefficients.chartGramDiffSup_le_jet1 (I := I) (M := M) g₁ g₂ α y).trans
+        (DeTurckCoefficients.chartMetricJet1DiffSup_le_jet2 (I := I) (M := M) g₁ g₂ α y)
+    · -- `k = 1`: the first chart partial, bounded by `chartGramPartialDiffSup ≤ J`.
+      rw [iteratedFDeriv_one_apply]
+      have hpart : fderiv ℝ F y ((fun p => (Integral.Measure.chartModelBasis E) (idx p)) 0) =
+          Integral.DivergenceTheorem.partialDeriv (E := E) (idx 0) F y := rfl
+      rw [hpart]
+      have hsub : Integral.DivergenceTheorem.partialDeriv (E := E) (idx 0) F y =
+          Integral.DivergenceTheorem.partialDeriv (E := E) (idx 0) (Integral.DivergenceTheorem.chartGramOnE (I := I) g₁ α i j) y -
+            Integral.DivergenceTheorem.partialDeriv (E := E) (idx 0)
+              (Integral.DivergenceTheorem.chartGramOnE (I := I) g₂ α i j) y := by
+        simp only [Integral.DivergenceTheorem.partialDeriv]
+        rw [← ContinuousLinearMap.sub_apply, ← fderiv_fun_sub (hG_diff g₁) (hG_diff g₂)]
+      rw [Real.norm_eq_abs, hsub]
+      refine
+        (DeTurckCoefficients.partialDeriv_chartGramOnE_sub_abs_le_partialDiffSup
+          (I := I) (M := M) g₁ g₂ α y (idx 0) i j).trans ?_
+      exact (DeTurckCoefficients.chartGramPartialDiffSup_le_jet1 (I := I) (M := M) g₁ g₂ α y).trans
+        (DeTurckCoefficients.chartMetricJet1DiffSup_le_jet2 (I := I) (M := M) g₁ g₂ α y)
+    · -- `k = 2`: the second chart partial, bounded by `chartGramPartial2DiffSup ≤ J`.
+      rw [iteratedFDeriv_two_apply]
+      -- `fderiv (fderiv F) y (basis (idx 0)) (basis (idx 1)) = ∂_{idx 0} ∂_{idx 1} F y`.
+      have hfd_diff : DifferentiableAt ℝ (fderiv ℝ F) y := by
+        have h2 : ContDiffAt ℝ ((1 : ℕ) + 1) F y := by simpa using hF_cd
+        exact h2.fderiv_right_succ.differentiableAt_one
+      set ea : E := (Integral.Measure.chartModelBasis E) (idx 1) with hea_def
+      set evalEa : (E →L[ℝ] ℝ) →L[ℝ] ℝ := ContinuousLinearMap.apply ℝ ℝ ea with hEvalEa_def
+      have h_fderiv_evalEa_at : fderiv ℝ evalEa (fderiv ℝ F y) = evalEa :=
+        ContinuousLinearMap.fderiv evalEa
+      have h_apply_def : (fun z => fderiv ℝ F z ea) = evalEa ∘ (fderiv ℝ F) := by
+        funext z; rfl
+      have h_fderiv_app : fderiv ℝ (fun z => fderiv ℝ F z ea) y =
+          evalEa.comp (fderiv ℝ (fderiv ℝ F) y) := by
+        rw [h_apply_def]
+        rw [fderiv_comp y (evalEa.differentiable.differentiableAt) hfd_diff]
+        rw [h_fderiv_evalEa_at]
+      have h2id : fderiv ℝ (fderiv ℝ F) y ((fun p => (Integral.Measure.chartModelBasis E) (idx p)) 0)
+            ((fun p => (Integral.Measure.chartModelBasis E) (idx p)) 1) =
+          Integral.DivergenceTheorem.partialDeriv (E := E) (idx 0) (Integral.DivergenceTheorem.partialDeriv (E := E) (idx 1) F) y := by
+        change fderiv ℝ (fderiv ℝ F) y ((Integral.Measure.chartModelBasis E) (idx 0)) ea =
+          fderiv ℝ (fun z => fderiv ℝ F z ea) y ((Integral.Measure.chartModelBasis E) (idx 0))
+        rw [h_fderiv_app]
+        simp [evalEa, ContinuousLinearMap.comp_apply, ContinuousLinearMap.apply_apply]
+      rw [h2id]
+      -- Distribute the second partial over `F = G₁ − G₂`.
+      have hsub2 : Integral.DivergenceTheorem.partialDeriv (E := E) (idx 0) (Integral.DivergenceTheorem.partialDeriv (E := E) (idx 1) F) y =
+          Integral.DivergenceTheorem.partialDeriv (E := E) (idx 0)
+              (Integral.DivergenceTheorem.partialDeriv (E := E) (idx 1)
+                (Integral.DivergenceTheorem.chartGramOnE (I := I) g₁ α i j)) y -
+            Integral.DivergenceTheorem.partialDeriv (E := E) (idx 0)
+              (Integral.DivergenceTheorem.partialDeriv (E := E) (idx 1)
+                (Integral.DivergenceTheorem.chartGramOnE (I := I) g₂ α i j)) y := by
+        have hp1 : Set.EqOn (Integral.DivergenceTheorem.partialDeriv (E := E) (idx 1) F)
+            (fun z => Integral.DivergenceTheorem.partialDeriv (E := E) (idx 1)
+                (Integral.DivergenceTheorem.chartGramOnE (I := I) g₁ α i j) z -
+              Integral.DivergenceTheorem.partialDeriv (E := E) (idx 1)
+                (Integral.DivergenceTheorem.chartGramOnE (I := I) g₂ α i j) z)
+            (interior ((extChartAt I α).target : Set E)) := by
+          intro z hz
+          have hgz1 : DifferentiableAt ℝ
+              (Integral.DivergenceTheorem.chartGramOnE (I := I) g₁ α i j) z :=
+            ((((Integral.DivergenceTheorem.chartGramOnE_contDiffOn (I := I) g₁ α i j).mono
+              interior_subset).contDiffAt (isOpen_interior.mem_nhds hz)).differentiableAt (by simp))
+          have hgz2 : DifferentiableAt ℝ
+              (Integral.DivergenceTheorem.chartGramOnE (I := I) g₂ α i j) z :=
+            ((((Integral.DivergenceTheorem.chartGramOnE_contDiffOn (I := I) g₂ α i j).mono
+              interior_subset).contDiffAt (isOpen_interior.mem_nhds hz)).differentiableAt (by simp))
+          change Integral.DivergenceTheorem.partialDeriv (E := E) (idx 1) F z = _
+          simp only [Integral.DivergenceTheorem.partialDeriv]
+          rw [← ContinuousLinearMap.sub_apply, ← fderiv_fun_sub hgz1 hgz2]
+        have heq_nhds : (Integral.DivergenceTheorem.partialDeriv (E := E) (idx 1) F) =ᶠ[nhds y]
+            fun z => Integral.DivergenceTheorem.partialDeriv (E := E) (idx 1)
+                (Integral.DivergenceTheorem.chartGramOnE (I := I) g₁ α i j) z -
+              Integral.DivergenceTheorem.partialDeriv (E := E) (idx 1)
+                (Integral.DivergenceTheorem.chartGramOnE (I := I) g₂ α i j) z :=
+          Filter.eventuallyEq_iff_exists_mem.mpr
+            ⟨_, isOpen_interior.mem_nhds hy, hp1⟩
+        change fderiv ℝ (Integral.DivergenceTheorem.partialDeriv (E := E) (idx 1) F) y
+          ((Integral.Measure.chartModelBasis E) (idx 0)) = _
+        rw [heq_nhds.fderiv_eq,
+          fderiv_fun_sub (hGp_diff g₁ (idx 1)) (hGp_diff g₂ (idx 1)),
+          ContinuousLinearMap.sub_apply]
+        rfl
+      rw [Real.norm_eq_abs, hsub2]
+      refine
+        (DeTurckCoefficients.partialDeriv2_chartGramOnE_sub_abs_le_partial2DiffSup
+          (I := I) (M := M) g₁ g₂ α y (idx 0) (idx 1) i j).trans ?_
+      exact DeTurckCoefficients.chartGramPartial2DiffSup_le_jet2 (I := I) (M := M) g₁ g₂ α y
+  -- Apply the posited orthonormal-basis multilinear-norm atom and sum the per-term bounds.
+  change ‖iteratedFDeriv ℝ k F y‖ ≤
+    (1 + ((Module.finrank ℝ E : ℕ) : ℝ) + ((Module.finrank ℝ E : ℕ) : ℝ) ^ 2) * J
+  refine (chartModelBasis_contMultilinear_opNorm_le_sum (E := E) (iteratedFDeriv ℝ k F y)).trans ?_
+  calc ∑ idx : Fin k → Fin (Module.finrank ℝ E),
+          ‖iteratedFDeriv ℝ k F y (fun p => (Integral.Measure.chartModelBasis E) (idx p))‖
+      ≤ ∑ _idx : Fin k → Fin (Module.finrank ℝ E), J :=
+        Finset.sum_le_sum (fun idx _ => hterm idx)
+    _ = ((Module.finrank ℝ E : ℕ) : ℝ) ^ k * J := by
+        rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ, Fintype.card_fun,
+          Fintype.card_fin, Fintype.card_fin]
+        push_cast
+        ring
+    _ ≤ (1 + ((Module.finrank ℝ E : ℕ) : ℝ) + ((Module.finrank ℝ E : ℕ) : ℝ) ^ 2) * J := by
+        refine mul_le_mul_of_nonneg_right ?_ hJ_nn
+        have hn1 : (1 : ℝ) ≤ ((Module.finrank ℝ E : ℕ) : ℝ) := by
+          have := Nat.one_le_iff_ne_zero.mpr (NeZero.ne (Module.finrank ℝ E))
+          exact_mod_cast this
+        interval_cases k
+        · nlinarith [hn1]
+        · nlinarith [hn1]
+        · nlinarith [hn1]
+
+/-- **Carrier-direct chart-`2`-jet seminorm bound by the intrinsic covariant-gradient jet sum
+(posited carrier-side reading of the realize covariant-gradient reduction).**
+
+For the realized `g₀`-anchored flow `g_DT` (the linear realize `hreal` off `g₀` via the carrier
+`T_s`), there is a finite constant `C ≥ 0` such that, for all times `t, t' ∈ [0, T]` and every
+good point `x`, the chart-`2`-jet seminorm of the metric pair `(g_DT t, g_DT t')` at the chart
+image is controlled by `C` times the iterated covariant-gradient jet sum
+`∑_{j ≤ 2} ‖(∇^j (T_s t − T_s t'))(x)‖_{g₀}` of the carrier difference at `x`:
+
+  `chartMetricJet2DiffSup (g_DT t) (g_DT t') α (chart x) ≤ C · iteratedCovGradJetSum g₀ (T_s t − T_s t') x`.
+
+This is the **carrier-direct analogue of the on-disk realize covariant-gradient reduction**
+`chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum` (`RealizedJet2CovGradBound.lean`):
+there the chart `2`-jet seminorm of the realized-metric difference is reduced, summand by summand,
+to chart partials `∂^j` (`j = 0, 1, 2`) of the chart-frame components of the single fixed tensor
+`S = realizableRepr u₁ − realizableRepr u₂`, each bounded by the iterated covariant-gradient fibre
+norms `‖∇^j S‖` (the pointwise inversion of `∇T = ∂T + Γ·T`, iterated twice).  Here the metric pair
+is supplied abstractly through `hreal` (`(g_DT s).inner = g₀.inner + ccTensorBilinSymm g₀ (T_s s)`),
+so the same algebraic identity holds with `S := T_s t − T_s t'`: the chart-Gram difference
+`chartGramOnE (g_DT t) − chartGramOnE (g_DT t')` equals, by bilinearity of `ccTensorBilinSymm` and
+the cancellation of the `g₀` baselines, the chart-frame component of `ccTensorBilinSymm g₀
+(T_s t − T_s t')`, hence each `chartMetricJet2DiffSup` summand is a chart `∂^j` of a chart-frame
+component of the single carrier difference, controlled pointwise by `‖∇^j (T_s t − T_s t')‖`.  It is
+the genuine covariant-gradient reduction content (the carrier-side reading of the realize bound),
+recorded here as a clean, realize-witness-free statement so the assembling Sobolev cap does not have
+to manufacture a realizability witness for the arbitrary carrier `T_s`.
+
+The conclusion (chart-`2`-jet seminorm bounded by the covariant-gradient jet sum) is structurally
+distinct from `hreal` and from the `‖toHs‖`-form consumer; no packaging.  The body is `sorry`;
+consumers transitively depend on `sorryAx`. -/
+theorem deturck_g0_carrierDiff_chartMetricJet2DiffSup_le_iteratedCovGradJetSum
+    (g₀ : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
+    (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2)
+    (hreal : ∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
+      (g_DT s).inner x v w
+        = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w)
+    (α : M) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ t' ∈ Set.Icc (0 : ℝ) T,
+      ∀ x ∈ chartLeviCivitaGoodSet (I := I) α,
+        DeTurckCoefficients.chartMetricJet2DiffSup (I := I) (M := M)
+            (g_DT t) (g_DT t') α (extChartAt I α x) ≤
+          C * MetricRealization.iteratedCovGradJetSum (I := I) g₀ (T_s t - T_s t') x :=
   sorry
 
-/-- **Forward chart-`2`-jet seminorm bound for the realize carrier difference (posited deep
-Sobolev-embedding input).**
+/-- **Forward chart-`2`-jet seminorm bound for the realize carrier difference (assembled over the
+carrier-direct covariant-gradient reduction and the unconditional `C²` Sobolev embedding).**
 
 For the realized `g₀`-anchored flow `g_DT` (the linear realize `hreal` off `g₀` via the carrier
 `T_s`), there is a finite constant `C ≥ 0` such that, for all times `t, t' ∈ [0, T]` and every
@@ -476,17 +725,19 @@ This is the carrier-direct analogue of the on-disk realize bound
 `chartMetricJet2DiffSup_realizeMetricAt_le_toHs_unconditional` (`RealizedCovGradJetInput.lean`),
 which controls `chartMetricJet2DiffSup (realizeMetricAt g₀ u₁) (realizeMetricAt g₀ u₂)` by the
 `H^{2k}` norm of `realizableRepr u₁ − realizableRepr u₂`.  Here the metric pair is supplied
-abstractly through `hreal` (`(g_DT s).inner = g₀.inner + ccTensorBilinSymm g₀ (T_s s)`), so the
-chart-Gram difference `chartGramOnE (g_DT t) − chartGramOnE (g_DT t')` depends, by bilinearity of
-`ccTensorBilinSymm`, only on the carrier difference `T_s t − T_s t'`, and the Morrey/Sobolev
-embedding `H^{2k} ↪ C²` (`2k = 2(dim M + 3) > dim M + 4`) bounds its full `≤2`-jet seminorm by the
-`H^{2(dim M+3)}` norm of `T_s t − T_s t'`, uniformly over good chart points.  It is the genuine
-deep embedding content (the carrier-side reading of the realize bound), recorded here as a clean,
-realize-witness-free statement so the Fréchet-jet modulus does not have to manufacture a
-realizability witness for the arbitrary carrier `T_s`.
+abstractly through `hreal`, so the chart-Gram difference depends, by bilinearity of
+`ccTensorBilinSymm`, only on the carrier difference `T_s t − T_s t'`.  This is *assembled by real
+proof* exactly as the on-disk unconditional bound is: the **carrier-direct covariant-gradient
+reduction** `deturck_g0_carrierDiff_chartMetricJet2DiffSup_le_iteratedCovGradJetSum` bounds the
+chart `2`-jet seminorm by `C₁ · iteratedCovGradJetSum g₀ (T_s t − T_s t') x`, and the **unconditional
+`C²` Sobolev embedding** `iteratedCovGradJetSum_le_toHs` (`2(dim M + 3) > dim M + 4`) bounds that by
+`C₂ · ‖(T_s t − T_s t').toHs (2(dim M+3))‖`, uniformly over good chart points (the embedding constant
+is independent of the tensor and the base point).  The chart preimage of the good point's chart image
+is the point itself (`PartialEquiv.left_inv` on the good set), so the two jet sums match.
 
-The conclusion is a uniform chart-`2`-jet bound by the carrier-`H` norm, structurally distinct
-from `hreal`; no packaging.  The body is `sorry`; consumers transitively depend on `sorryAx`. -/
+The conclusion is a uniform chart-`2`-jet bound by the carrier-`H` norm, structurally distinct from
+`hreal`; no packaging.  Consumers transitively depend on `sorryAx` through the posited
+covariant-gradient reduction. -/
 theorem deturck_g0_carrierDiff_chartMetricJet2DiffSup_le_toHs
     (g₀ : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
     (g_DT : ℝ → SmoothRiemannianMetric I M)
@@ -500,8 +751,32 @@ theorem deturck_g0_carrierDiff_chartMetricJet2DiffSup_le_toHs
         DeTurckCoefficients.chartMetricJet2DiffSup (I := I) (M := M)
             (g_DT t) (g_DT t') α (extChartAt I α x) ≤
           C * ‖SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * (Module.finrank ℝ E + 3))
-            (T_s t - T_s t')‖ :=
-  sorry
+            (T_s t - T_s t')‖ := by
+  classical
+  -- The carrier-direct covariant-gradient reduction (constant `C₁`, uniform over `(t, t')`).
+  obtain ⟨C₁, hC₁0, hred⟩ :=
+    deturck_g0_carrierDiff_chartMetricJet2DiffSup_le_iteratedCovGradJetSum (I := I) (M := M)
+      g₀ hT g_DT T_s hreal α
+  -- The unconditional `C²` Sobolev embedding at the supercritical order `2(dim M + 3)`.
+  have hsuper : 2 * (Module.finrank ℝ E + 3) > Module.finrank ℝ E + 4 := by omega
+  obtain ⟨C₂, hC₂pos, hC₂⟩ :=
+    MetricRealization.iteratedCovGradJetSum_le_toHs (I := I) (M := M) g₀
+      (Module.finrank ℝ E + 3) hsuper
+  refine ⟨C₁ * C₂, mul_nonneg hC₁0 hC₂pos.le, fun t ht t' ht' x hx => ?_⟩
+  -- The chart preimage of the good point's chart image is the point itself.
+  have hsymm : (extChartAt I α).symm (extChartAt I α x) = x :=
+    (extChartAt I α).left_inv (chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hx)
+  have hjetsum_nn : 0 ≤ MetricRealization.iteratedCovGradJetSum (I := I) g₀ (T_s t - T_s t') x :=
+    MetricRealization.iteratedCovGradJetSum_nonneg (I := I) g₀ (T_s t - T_s t') x
+  calc DeTurckCoefficients.chartMetricJet2DiffSup (I := I) (M := M)
+          (g_DT t) (g_DT t') α (extChartAt I α x)
+      ≤ C₁ * MetricRealization.iteratedCovGradJetSum (I := I) g₀ (T_s t - T_s t') x :=
+        hred t ht t' ht' x hx
+    _ ≤ C₁ * (C₂ * ‖SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+          (2 * (Module.finrank ℝ E + 3)) (T_s t - T_s t')‖) :=
+        mul_le_mul_of_nonneg_left (hC₂ (T_s t - T_s t') x) hC₁0
+    _ = (C₁ * C₂) * ‖SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+          (2 * (Module.finrank ℝ E + 3)) (T_s t - T_s t')‖ := by ring
 
 set_option linter.unusedVariables false in
 /-- **Fréchet-jet ↔ carrier-`H^{2k}` time-uniform modulus of the realize-perturbation

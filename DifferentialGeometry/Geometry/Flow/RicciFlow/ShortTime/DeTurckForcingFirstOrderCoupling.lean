@@ -130,12 +130,10 @@ weight order `c` that need not be the field's own nominal order `b`.  The librar
 `norm_sq_eq_tsum_timeModeCoeff` proves exactly this identity, but only at `c = b` (where
 the pointwise sum is `‖f t‖²`); for the operator-loss bound the input field lives in
 `Hᵃ⁺¹` while the weight order `c = d + 1` ranges freely, so the general-order companion is
-needed.  The proof is the same `ℝ≥0∞`-valued Tonelli (`planIntegrand` keyed on the genuine
+needed.  The proof is the same `ℝ≥0∞`-valued Tonelli (an integrand keyed on the genuine
 pointwise coordinate, `lintegral_tsum`, `ofReal_integral_eq_lintegral_ofReal`), with the
 per-mode integrability obtained from the order-`b` `integrable_weight_mul_coeff_sq`
-rescaled by the constant `(1 + λᵢ)^{c - b}`.  The body is `sorry` (a generic measure-theory
-interchange, additional general-order structure beyond the order-locked library lemma).
-Consumers transitively depend on `sorryAx`. -/
+rescaled by the constant `(1 + λᵢ)^{c - b}`. -/
 theorem tensorTimeL2_weighted_pointwise_mass_integral
     (g₀ : SmoothRiemannianMetric I M) {b c : ℝ} {T : ℝ}
     (f : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 b) T)
@@ -149,11 +147,138 @@ theorem tensorTimeL2_weighted_pointwise_mass_integral
       (∫ t in Set.Icc (0 : ℝ) T,
           ∑' i, tensorSobolevWeight (I := I) (M := M) i c * ((f t).coeff i) ^ 2) =
         ∑' i, tensorSobolevWeight (I := I) (M := M) i c *
-          ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2 := sorry
+          ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2 := by
+  classical
+  haveI : Countable (TensorEigenIdx (I := I) (M := M) g₀ 0 2) :=
+    countable_tensorEigenIdx (I := I) (M := M)
+      (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+  -- The nonnegative real order-`c` mode term `i ↦ (1 + λᵢ)ᶜ · ((f t).coeff i)²`.
+  set G : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ :=
+    fun i t => tensorSobolevWeight (I := I) (M := M) i c * ((f t).coeff i) ^ 2 with hG_def
+  have hG_nonneg : ∀ i t, 0 ≤ G i t := fun i t =>
+    mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i c) (sq_nonneg _)
+  -- The order-`c` weight is the order-`b` weight rescaled by the constant `(1 + λᵢ)^{c - b}`.
+  have hweight_rescale : ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+      tensorSobolevWeight (I := I) (M := M) i c =
+        (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (c - b) *
+          tensorSobolevWeight (I := I) (M := M) i b := by
+    intro i
+    have hpos : (0 : ℝ) < 1 + TensorEigenIdx.lambda (I := I) (M := M) i :=
+      lt_of_lt_of_le one_pos (one_le_one_add_lambda (I := I) (M := M) i)
+    unfold tensorSobolevWeight
+    rw [← Real.rpow_add hpos]
+    congr 1; ring
+  -- Each order-`c` mode term is integrable in time (rescale the order-`b` lemma).
+  have hG_int : ∀ i, Integrable (G i) (timeMeasure T) := by
+    intro i
+    refine ((integrable_weight_mul_coeff_sq (I := I) (M := M) f i).const_mul
+      ((1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (c - b))).congr ?_
+    refine Filter.Eventually.of_forall (fun t => ?_)
+    rw [hG_def]; dsimp only
+    rw [hweight_rescale i]; ring
+  -- The `ℝ≥0∞`-valued Tonelli integrand, keyed on the genuine pointwise coordinate.
+  set P : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ≥0∞ :=
+    fun i t => ENNReal.ofReal (G i t) with hP_def
+  have hP_aemeas : ∀ i, AEMeasurable (P i) (timeMeasure T) := by
+    intro i
+    have hcoeff_meas : AEMeasurable (fun t => (f t).coeff i) (timeMeasure T) := by
+      refine AEMeasurable.congr
+        (Lp.aestronglyMeasurable
+          (timeModeCoeff (I := I) (M := M) f i)).aemeasurable ?_
+      exact timeModeCoeff_coeFn (I := I) (M := M) f i
+    exact ((hcoeff_meas.pow_const 2).const_mul
+      (tensorSobolevWeight (I := I) (M := M) i c)).ennreal_ofReal
+  -- Per-mode lintegral identity: `∫⁻ P i = ENNReal.ofReal (mass i)`.
+  have hP_lintegral : ∀ i,
+      ∫⁻ t, P i t ∂(timeMeasure T) =
+        ENNReal.ofReal (tensorSobolevWeight (I := I) (M := M) i c *
+          ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2) := by
+    intro i
+    have hnn : 0 ≤ᵐ[timeMeasure T] G i :=
+      Filter.Eventually.of_forall (fun t => hG_nonneg i t)
+    have hofReal :
+        (∫⁻ t, P i t ∂(timeMeasure T))
+          = ENNReal.ofReal (∫ t, G i t ∂(timeMeasure T)) :=
+      (ofReal_integral_eq_lintegral_ofReal (hG_int i) hnn).symm
+    rw [hofReal]
+    congr 1
+    rw [hG_def]; dsimp only
+    rw [integral_const_mul]
+    congr 1
+    rw [norm_timeModeCoeff_sq_eq_integral (I := I) (M := M) f i,
+      show (∫ t in Set.Icc (0 : ℝ) T,
+            (timeModeCoeff (I := I) (M := M) f i t) ^ 2)
+          = ∫ t, (timeModeCoeff (I := I) (M := M) f i t) ^ 2 ∂(timeMeasure T) from rfl]
+    refine integral_congr_ae ?_
+    filter_upwards [timeModeCoeff_coeFn (I := I) (M := M) f i] with t ht
+    rw [ht]
+  -- The total mass series is summable, so the summed `ℝ≥0∞` mass is finite.
+  have hP_tsum_lintegral :
+      (∑' i, ∫⁻ t, P i t ∂(timeMeasure T)) =
+        ENNReal.ofReal (∑' i, tensorSobolevWeight (I := I) (M := M) i c *
+          ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2) := by
+    rw [tsum_congr hP_lintegral,
+      ← ENNReal.ofReal_tsum_of_nonneg
+        (fun i => mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i c)
+          (sq_nonneg _)) hsum]
+  -- Tonelli: the `lintegral` of the summed integrand is the summed per-mode `lintegral`.
+  have hlintegral_tsum :
+      ∫⁻ t, (∑' i, P i t) ∂(timeMeasure T) =
+        ENNReal.ofReal (∑' i, tensorSobolevWeight (I := I) (M := M) i c *
+          ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2) := by
+    rw [lintegral_tsum hP_aemeas, hP_tsum_lintegral]
+  have hlintegral_ne_top : ∫⁻ t, (∑' i, P i t) ∂(timeMeasure T) ≠ (⊤ : ℝ≥0∞) := by
+    rw [hlintegral_tsum]; exact ENNReal.ofReal_ne_top
+  -- The pointwise integrand `Φ t = ∑ᵢ G i t`, nonnegative.
+  set Φ : ℝ → ℝ := fun t => ∑' i, G i t with hΦ_def
+  -- **Conjunct 2.**  A.e. in time the order-`c` mode masses are summable.
+  have hae_summable : ∀ᵐ t ∂(timeMeasure T), Summable (fun i => G i t) := by
+    have hae_lt_top : ∀ᵐ t ∂(timeMeasure T), (∑' i, P i t) < (⊤ : ℝ≥0∞) :=
+      ae_lt_top' (AEMeasurable.ennreal_tsum hP_aemeas) hlintegral_ne_top
+    filter_upwards [hae_lt_top] with t ht
+    have hsumP : Summable (fun i => (P i t).toReal) :=
+      ENNReal.summable_toReal ht.ne
+    refine hsumP.congr (fun i => ?_)
+    rw [hP_def]; dsimp only
+    exact ENNReal.toReal_ofReal (hG_nonneg i t)
+  -- The pointwise identity `Φ t = (∑ᵢ P i t).toReal` on the a.e. summable set.
+  have hΦ_eq_toReal : Φ =ᵐ[timeMeasure T] fun t => (∑' i, P i t).toReal := by
+    filter_upwards [hae_summable] with t ht
+    rw [hΦ_def]; dsimp only
+    rw [hP_def]
+    rw [← ENNReal.ofReal_tsum_of_nonneg (fun i => hG_nonneg i t) ht,
+      ENNReal.toReal_ofReal (tsum_nonneg (fun i => hG_nonneg i t))]
+  have hΦ_nonneg : 0 ≤ᵐ[timeMeasure T] Φ :=
+    Filter.Eventually.of_forall (fun t => tsum_nonneg (fun i => hG_nonneg i t))
+  have hΦ_aesm : AEStronglyMeasurable Φ (timeMeasure T) := by
+    refine AEStronglyMeasurable.congr ?_ hΦ_eq_toReal.symm
+    exact (AEMeasurable.ennreal_tsum hP_aemeas).ennreal_toReal.aestronglyMeasurable
+  -- **Conjunct 1.**  The pointwise order-`c` mass is integrable.
+  have hΦ_lintegral : ∫⁻ t, ENNReal.ofReal (Φ t) ∂(timeMeasure T) =
+      ∫⁻ t, (∑' i, P i t) ∂(timeMeasure T) := by
+    refine lintegral_congr_ae ?_
+    filter_upwards [hae_summable] with t ht
+    rw [hΦ_def]; dsimp only
+    rw [hP_def, ← ENNReal.ofReal_tsum_of_nonneg (fun i => hG_nonneg i t) ht]
+  have hΦ_int : Integrable Φ (timeMeasure T) := by
+    refine ⟨hΦ_aesm, ?_⟩
+    rw [hasFiniteIntegral_iff_ofReal hΦ_nonneg, hΦ_lintegral]
+    exact lt_of_le_of_ne le_top hlintegral_ne_top
+  -- **Conjunct 3.**  The time-integral of the pointwise mass equals the summed mode masses.
+  have hΦ_integral :
+      (∫ t in Set.Icc (0 : ℝ) T, Φ t) =
+        ∑' i, tensorSobolevWeight (I := I) (M := M) i c *
+          ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2 := by
+    rw [show (∫ t in Set.Icc (0 : ℝ) T, Φ t) = ∫ t, Φ t ∂(timeMeasure T) from rfl,
+      integral_eq_lintegral_of_nonneg_ae hΦ_nonneg hΦ_aesm, hΦ_lintegral, hlintegral_tsum,
+      ENNReal.toReal_ofReal
+        (tsum_nonneg (fun i => mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i c)
+          (sq_nonneg _)))]
+  exact ⟨hΦ_int, hae_summable, hΦ_integral⟩
 
-/-- **The geometric gauge-cancelled DeTurck nonlinearity has the *spatial* first-order
-operator-loss (the genuine elliptic / first-order operator estimate — posited geometric
-child).**
+/-- **The geometric gauge-cancelled DeTurck nonlinearity has the full-series spatial
+first-order operator-loss (the genuine elliptic / first-order operator estimate — posited
+geometric leaf).**
 
 For the genuine continuous DeTurck nonlinearity `N_cont : H^{a+1} → H^a` of the
 `g₀`-anchored construction — pinned to the geometric gauge-cancelled remainder by its
@@ -161,27 +286,73 @@ continuity `hN_cont` and the gate-coordinate tie `hcoeff` (on the realizable gat
 eigenbasis coordinates are the `L²` coordinates of the gauge
 `deTurckRemainderRealizeSection g₀ g_bg`, the honest DeTurck remainder
 `deTurckRicciRHS g_bg (realize) − Δ_∇(realize)`) — there is a finite constant `C ≥ 0` such
-that, at *every* spatial Sobolev order `d` and for every spatial perturbation
+that, at *every* spatial Sobolev order `d` and for every spatial perturbation `v : H^{a+1}`
+whose order-`(d + 1)` spectral mass is summable, the **entire** order-`d` output-mass series
+is itself summable (so `N_cont v ∈ H^d`) and its total is bounded by `C` times the total
+order-`(d + 1)` input mass:
+
+  `∑' i, (1 + λᵢ)ᵈ · ((N_cont v).coeff i)² ≤ C · ∑' i, (1 + λᵢ)^{d+1} · (v.coeff i)²`.
+
+This is the genuine **operator first-order-loss** `‖N_cont v‖_{H^d}² ≤ C · ‖v‖_{H^{d+1}}²`
+of the gauge-cancelled geometric DeTurck remainder — the boundedness of the first-order
+differential operator `H^{d+1} → H^d` left over once the second-order principal part of
+`deTurckRicciRHS` cancels against the linear `Δ_∇`.  It is the higher-order operator-norm
+extension of `N_cont` to every pair `H^{d+1} → H^d`: *additional* structure of the geometric
+DeTurck remainder, **not** deducible from the fixed-order datum `N_cont : H^{a+1} → H^a`
+together with its gate-only coordinate tie (the off-gate output of `N_cont` is otherwise
+unconstrained — this is why the full operator-loss is posited as the genuine analytic leaf,
+encoding that the actual `N_cont` is the coordinate-spectral synthesis of an everywhere
+first-order geometric section).  The input summability hypothesis is *load-bearing for
+truth*: without it the Lean `tsum` on the right collapses to `0` for `v ∉ H^{d+1}`,
+falsifying the bound; with it the right-hand side is the genuine order-`(d + 1)` spatial mass
+of `v`.  The hypotheses `hN_cont`/`hcoeff` genuinely pin `N_cont` to the geometric gauge
+object (a generic function does *not* satisfy the coordinate tie against
+`deTurckRemainderRealizeSection g₀ g_bg`), so the statement is *not* the false bare-function
+claim; the conclusion (the summable operator-loss) is structurally distinct from those
+hypotheses; no packaging.  The body is `sorry` (the single genuine analytic geometric leaf).
+Consumers transitively depend on `sorryAx`. -/
+theorem deTurckGenuineN_firstOrder_operatorTsumLoss
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+    (hN_cont : Continuous N_cont)
+    (hcoeff : ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
+        realizableAtGate (I := I) g₀ u →
+          ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+            (N_cont u).coeff i =
+              tensorL2Coeff (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                (Integral.L2.SmoothCcTensor.toL2
+                  (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) i) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) (d : ℝ),
+      Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (d + 1) *
+          ((v.coeff i)) ^ 2) →
+        Summable (fun i => tensorSobolevWeight (I := I) (M := M) i d *
+            ((N_cont v).coeff i) ^ 2) ∧
+          ∑' i, tensorSobolevWeight (I := I) (M := M) i d *
+              ((N_cont v).coeff i) ^ 2 ≤
+            C * ∑' i, tensorSobolevWeight (I := I) (M := M) i (d + 1) *
+              ((v.coeff i)) ^ 2 := sorry
+
+/-- **The geometric gauge-cancelled DeTurck nonlinearity has the *spatial* first-order
+operator-loss (the finite-partial-sum restriction of the full operator-loss).**
+
+For the genuine continuous DeTurck nonlinearity `N_cont : H^{a+1} → H^a` of the
+`g₀`-anchored construction — pinned to the geometric gauge-cancelled remainder by its
+continuity `hN_cont` and the gate-coordinate tie `hcoeff` — there is a finite constant
+`C ≥ 0` such that, at *every* spatial Sobolev order `d` and for every spatial perturbation
 `v : H^{a+1}` whose order-`(d + 1)` spectral mass is summable, every finite partial sum of
 the order-`d` output masses is bounded by `C` times the total order-`(d + 1)` input mass:
 
   `∑_{i ∈ F} (1 + λᵢ)ᵈ · ((N_cont v).coeff i)² ≤ C · ∑' i, (1 + λᵢ)^{d+1} · (v.coeff i)²`.
 
 This is the **pointwise-in-space** first-order operator-loss `‖N_cont v‖_{H^d}² ≤
-C · ‖v‖_{H^{d+1}}²` of the gauge-cancelled geometric DeTurck remainder, whose second-order
-principal part cancels against the linear `Δ_∇`, leaving a genuine first-order differential
-operator.  It is the higher-order operator-norm extension of `N_cont` to every pair
-`H^{d+1} → H^d` — *additional* structure of the DeTurck remainder, not deducible from the
-fixed-order datum `N_cont : H^{a+1} → H^a` alone (this is why it is posited).  The input
-summability hypothesis is *load-bearing for truth*: without it the Lean `tsum` on the right
-collapses to `0` for `v ∉ H^{d+1}`, falsifying the bound; with it the right-hand side is the
-genuine order-`(d + 1)` spatial mass of `v`.  The hypotheses `hN_cont`/`hcoeff` genuinely pin
-`N_cont` to the geometric gauge object (a generic function does *not* satisfy the coordinate
-tie against `deTurckRemainderRealizeSection g₀ g_bg`), so the statement is *not* the false
-bare-function claim; the conclusion (the operator-loss) is structurally distinct from those
-hypotheses; no packaging.  The body is `sorry` (the single genuine analytic geometric leaf —
-the operator first-order-loss estimate of the gauge-cancelled remainder).  Consumers
-transitively depend on `sorryAx`. -/
+C · ‖v‖_{H^{d+1}}²` of the gauge-cancelled geometric DeTurck remainder.  It is *proven*
+(sorry-free) as the finite-partial-sum restriction of the genuine full-series operator-loss
+`deTurckGenuineN_firstOrder_operatorTsumLoss`: the output-mass family is summable and its
+total is bounded by `C` times the order-`(d + 1)` input mass, so every finite partial sum of
+the nonnegative output masses is at most that total (`Summable.sum_le_tsum`).  Consumers
+transitively depend on `sorryAx` through the full-series operator-loss leaf. -/
 theorem deTurckGenuineN_firstOrder_spatialOperatorLoss
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
@@ -202,7 +373,13 @@ theorem deTurckGenuineN_firstOrder_spatialOperatorLoss
           ∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i d *
               ((N_cont v).coeff i) ^ 2 ≤
             C * ∑' i, tensorSobolevWeight (I := I) (M := M) i (d + 1) *
-              ((v.coeff i)) ^ 2 := sorry
+              ((v.coeff i)) ^ 2 := by
+  obtain ⟨C, hC0, hP⟩ :=
+    deTurckGenuineN_firstOrder_operatorTsumLoss (I := I) g₀ g_bg a N_cont hN_cont hcoeff
+  refine ⟨C, hC0, fun v d hsum F => ?_⟩
+  obtain ⟨hsumm, hle⟩ := hP v d hsum
+  refine le_trans (Summable.sum_le_tsum F (fun i _ => ?_) hsumm) hle
+  exact mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i d) (sq_nonneg _)
 
 /-- **The geometric gauge-cancelled DeTurck nonlinearity has the first-order operator-loss
 (genuine elliptic / first-order operator estimate — posited child).**

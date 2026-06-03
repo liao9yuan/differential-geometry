@@ -402,6 +402,116 @@ theorem exists_spectralWeightedSq_le_pouHaNorm_sq
             = Real.sqrt (D * (a + 1)) ^ 2 * (C₀ * toHsNorm) ^ 2 from by ring, hsqrt]
         ring
 
+/-- **The forward covariant-jet `L²` Sobolev comparison (the differentiation partner of the
+on-disk reverse Hebey bound).**
+
+For an anchor `g₀` and an order `k`, there is a single constant `C ≥ 0` such that for every
+smooth compactly-supported `(0,2)`-tensor section `S` and every covariant-gradient order
+`i ≤ 2 * k`, the global metric `L²` norm of the `i`-th intrinsic iterated covariant gradient
+`∇^i S` (an `(0, 2 + i)`-tensor) is controlled by the order-`k` chart-Sobolev (`toHs k`) norm of
+`S`:
+```
+‖∇^i S‖_{L²} ≤ C · ‖S.toHs k‖   (for i ≤ 2 * k).
+```
+
+This is the **forward** (intrinsic-chart `→` covariant-jet-`L²`) direction of the order-`k`
+covariant-jet Sobolev comparison, the exact differentiation partner of the on-disk **reverse**
+bound `exists_tensorPouSobolevHsNorm_toReal_le_iteratedCovGrad_tensorL2Norm_sum`
+(`‖S.toHs k‖ ≤ C · ∑_{i ≤ 2k} ‖∇^i S‖_{L²}`).  Concretely, the order-`k` chart-Sobolev norm is
+the Hilbert–Schmidt partition-of-unity weighted sum, over chart-frame component derivatives up
+to chart order `2k`, of their `L²` masses (`tensorPouSobolevHsNorm`, regularity order `2k`); the
+`L²` mass of the `i`-th intrinsic covariant gradient `∇^i S`, for `i ≤ 2k`, is, after the
+covariant-to-coordinate expansion (each intrinsic covariant gradient differing from the chart
+`∂^i` by a fibrewise-bounded combination of strictly-lower-order chart derivatives, with smooth
+bounded geometric coefficients on the compact base), dominated by that same weighted chart-`2k`
+derivative mass.  It is the genuinely tight forward comparison — `toHs k` (regularity `2k`)
+controls covariant gradients up to order `2k`, not merely up to order `k` — so it is sharper than
+the single-order-drop bound `iteratedCovGrad_toHs_norm_le` (`‖∇^i S.toHs σ‖ ≤ C·‖S.toHs (σ+i)‖`,
+which costs a derivative per gradient).
+
+Its conclusion is a *real-valued* `L²`-norm inequality on the iterated covariant gradients of
+`S`, structurally distinct from the `toHs`-norm hypothesis on the right; no packaging.  Its body
+is `sorry`: it is the genuine forward Sobolev covariant-jet comparison (the differentiation arm
+of the order-`k` norm equivalence), with no spectral, perturbation-indexed, or Weyl dependence. -/
+theorem exists_iteratedCovGrad_l2Norm_le_toHs
+    (g₀ : SmoothRiemannianMetric I M) (k : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (S : Integral.L2.SmoothCcTensor g₀ 0 2) (i : ℕ), i ≤ 2 * k →
+        Integral.L2.tensorL2Norm (I := I) g₀ 0 (2 + i)
+            (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i S).toFun ≤
+          C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) k S‖ :=
+  sorry
+
+/-- **The covariant Nemytskii covariant-jet `L²` bound for the re-tagged Ricci–DeTurck
+right-hand side, stated in covariant `L²`-jets of the perturbation difference (the genuine deep
+covariant-Faà-di-Bruno analytic core).**
+
+For an anchor `g₀`, a flow background `g_bg`, an order `a`, a supercriticality hypothesis
+`ha : 2 * a > Module.finrank ℝ E + 4`, and a uniform `H^{a+2}`-size bound `B ≥ 0`, there is a
+single constant `C ≥ 0` such that for any two `g₀`-fibre-small perturbations `T₁, T₂` whose
+`H^{a+2}` norms are `≤ B`, any two realized metrics `g₁, g₂` of `T₁, T₂` (tied by the fibrewise
+`inner`-identities), and every covariant-gradient order `j ≤ 2 * a`, the global metric `L²`
+(semi-)norm of the `j`-th intrinsic iterated covariant gradient of the **re-tagged DeTurck
+right-hand-side** section difference is bounded by the finite sum, over covariant-gradient orders
+`i ≤ 2 * a + 2`, of the global metric `L²` norms of the iterated covariant gradients `∇^i` of the
+perturbation difference `T₁ − T₂`:
+```
+‖∇^j (deTurckRHSRetag g₀ g_bg g₁ − deTurckRHSRetag g₀ g_bg g₂)‖_{L²}
+  ≤ C · ∑_{i ∈ range (2a+3)} ‖∇^i (T₁ − T₂)‖_{L²}   (for j ≤ 2 * a).
+```
+
+This is the genuine **higher-order quasilinear covariant Nemytskii estimate** for the *non-linear*
+summand `Ric + Lie` of the second-order Ricci–DeTurck right-hand side, phrased intrinsically and
+stated against the covariant `L²`-jets of the perturbation difference (the consumer below converts
+the right-hand-side covariant-jet sum to the order-`(a+2)` chart-Sobolev norm by the forward
+covariant-jet `L²` comparison `exists_iteratedCovGrad_l2Norm_le_toHs`, since `i ≤ 2a+2 = 2(a+2)`).
+The chart right-hand side `deTurckRicciRHS g_bg g = -2 • Ric(g) + 𝓛_{W(g)} g` is a smooth
+(fibrewise) function `F` of the metric `≤2`-jet `(g, ∇g, ∇²g)` and the fibre-inverse `g⁻¹`, so by
+the covariant fundamental theorem of calculus along the segment `g_t = g₂ + t·(g₁ − g₂)` the
+difference `F(g₁) − F(g₂) = ∫₀¹ DF(g_t)·(g₁ − g₂) dt`, and its `j`-th covariant gradient is, by the
+covariant product/chain rule (covariant Faà-di-Bruno), a finite sum of terms each a smooth bounded
+coefficient (a fibrewise-polynomial expression in the `≤ (j+2)`-jets of `g₁, g₂` and the bounded
+fibre-inverses, dominated **uniformly over the `H^{a+2}`-bounded `B`-family** because the
+supercritical embedding `H^{a+2} ↪ C²` of the metric — equivalently `H^{2(a+2)} ↪ C^0` of the
+`≤2`-jet, holding precisely on the supercritical scale implied by `ha`, see
+`iteratedCovGrad_toSobolev_embedding_C2_unconditional` — bounds the metric `≤2`-jet `C²`-sup by
+`φ(B)`) times an iterated covariant gradient `∇^i(g₁ − g₂)` of order `i ≤ j + 2 ≤ 2a + 2` of the
+metric difference.  Since the fibrewise `inner`-difference makes `(g₁ − g₂).inner =
+ccTensorBilinSymm g₀ (T₁ − T₂)` the realized bilinear form of `T₁ − T₂`, each `∇^i(g₁ − g₂)` is
+`L²`-controlled (the realization is a bounded smooth bundle map gaining no derivatives) by the
+`≤ i`-order covariant gradients of `T₁ − T₂`; integrating the pointwise covariant-Faà-di-Bruno
+fibre-norm bound over the compact base (the `L²`-norm of a finite sum dominated by a constant
+multiple of the sum of the `L²`-norms) yields the stated covariant-jet `L²`-sum bound.
+
+Its conclusion is a *real-valued* global-`L²` (semi-)norm inequality on the intrinsic iterated
+covariant gradients of the right-hand-side difference, bounded by the covariant-jet `L²`-sum of the
+perturbation difference — structurally distinct from the chart-`Hᵃ` `toHs`-norm conclusion of the
+consumer; no packaging.  The supercriticality hypothesis `ha` is genuinely required for the
+uniform-over-the-`B`-family Nemytskii constant (the `C²`-sup of the metric `≤2`-jet over the
+`H^{a+2}`-bounded family needs the supercritical embedding).  Its body is `sorry`: it is the
+genuine atomic higher-order quasilinear covariant-jet Nemytskii estimate (the `Ric + Lie` summand
+only — the linear `Δ_∇` summand is handled separately), with no spectral-nonlinearity,
+perturbation-indexed-remainder, or Weyl dependence. -/
+theorem exists_deTurckRHSRetagDiff_iteratedCovGrad_l2Norm_le_iteratedCovGrad_sum
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+        (g₁ g₂ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+        ∀ j : ℕ, j ≤ 2 * a →
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+              (deTurckRHSRetag (I := I) g₀ g_bg g₁ - deTurckRHSRetag (I := I) g₀ g_bg g₂)‖
+            ≤ C * ∑ i ∈ Finset.range (2 * a + 3),
+                Integral.L2.tensorL2Norm (I := I) g₀ 0 (2 + i)
+                  (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)).toFun :=
+  sorry
+
 /-- **The covariant-gradient `L²` Nemytskii bound for the re-tagged Ricci–DeTurck right-hand
 side (the genuine deep analytic input: each intrinsic iterated covariant gradient of the
 right-hand-side difference is `L²`-controlled by the order-`(a+2)` chart-Sobolev norm of the
@@ -471,8 +581,45 @@ theorem exists_deTurckRHSRetagDiff_iteratedCovGrad_l2Norm_le_toHs_highOrder
           ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
               (deTurckRHSRetag (I := I) g₀ g_bg g₁ - deTurckRHSRetag (I := I) g₀ g_bg g₂)‖
             ≤ C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
-                (T₁ - T₂)‖ :=
-  sorry
+                (T₁ - T₂)‖ := by
+  classical
+  -- The covariant-Faà-di-Bruno covariant-jet `L²` core (right-hand-side difference bounded by the
+  -- covariant `L²`-jets of the perturbation difference), and the forward covariant-jet `L²`
+  -- Sobolev comparison (each covariant `L²`-jet of `T₁ − T₂` bounded by `‖·.toHs (a+2)‖`).
+  obtain ⟨CA, hCA_nn, hCA⟩ :=
+    exists_deTurckRHSRetagDiff_iteratedCovGrad_l2Norm_le_iteratedCovGrad_sum
+      (I := I) g₀ g_bg a ha B hB
+  obtain ⟨CF, hCF_nn, hCF⟩ :=
+    exists_iteratedCovGrad_l2Norm_le_toHs (I := I) g₀ (a + 2)
+  refine ⟨CA * ((2 * a + 3 : ℕ) * CF), by positivity, ?_⟩
+  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j hj
+  set N : ℝ := ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
+      (T₁ - T₂)‖ with hN_def
+  have hN_nn : 0 ≤ N := norm_nonneg _
+  -- Each covariant-`L²`-jet summand `‖∇^i (T₁ − T₂)‖_{L²} ≤ CF · N` for `i ≤ 2a+2 = 2·(a+2)`.
+  have hsummand : ∀ i ∈ Finset.range (2 * a + 3),
+      Integral.L2.tensorL2Norm (I := I) g₀ 0 (2 + i)
+          (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)).toFun ≤ CF * N := by
+    intro i hi
+    have hi' : i ≤ 2 * (a + 2) := by rw [Finset.mem_range] at hi; omega
+    exact hCF (T₁ - T₂) i hi'
+  -- Sum the per-`i` bounds: `∑_{i} ‖∇^i (T₁ − T₂)‖_{L²} ≤ (2a+3) · (CF · N)`.
+  have hsum_le : ∑ i ∈ Finset.range (2 * a + 3),
+        Integral.L2.tensorL2Norm (I := I) g₀ 0 (2 + i)
+          (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)).toFun ≤
+      (2 * a + 3 : ℕ) * (CF * N) := by
+    refine le_trans (Finset.sum_le_sum hsummand) ?_
+    rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+  -- Chain the covariant-jet core with the per-summand forward Sobolev bound.
+  calc ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+          (deTurckRHSRetag (I := I) g₀ g_bg g₁ - deTurckRHSRetag (I := I) g₀ g_bg g₂)‖
+      ≤ CA * ∑ i ∈ Finset.range (2 * a + 3),
+          Integral.L2.tensorL2Norm (I := I) g₀ 0 (2 + i)
+            (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)).toFun :=
+        hCA T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j hj
+    _ ≤ CA * ((2 * a + 3 : ℕ) * (CF * N)) :=
+        mul_le_mul_of_nonneg_left hsum_le hCA_nn
+    _ = CA * ((2 * a + 3 : ℕ) * CF) * N := by ring
 
 /-- **The higher-order quasilinear Nemytskii bound for the re-tagged Ricci–DeTurck right-hand
 side (the genuine deep analytic Sobolev-multiplication / composition primitive).**
