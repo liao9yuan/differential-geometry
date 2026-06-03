@@ -12,6 +12,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFr
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.FlatIdentity
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
+import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckShortTime
 
 /-! # DeTurck-Ricci-flow parabolic short-time existence and the metric PDE
 
@@ -46,40 +47,88 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **DeTurck–Ricci parabolic short-time existence (the single faithful classical input).**
+/-- **Interior parabolic regularity of the DeTurck–Ricci solution (the faithful regularity input).**
+
+Given a DeTurck–Ricci weak solution `g_DT` on `[0, T)` with smooth initial data `g₀`
+(an `IsQuasilinearMetricParabolicSolution` of `deTurckRicciRHS g_bg`), the solution is
+interior-jointly-`C∞` and continuous up to `t = 0` together with its spatial jets, in
+every form the conjugating-diffeomorphism construction consumes:
+
+* interior joint-`C∞` of the DeTurck field `q ↦ ⟨q.2, deTurckVF (g_DT q.1) g_bg q.2⟩`
+  on `Ioo 0 T ×ˢ univ`;
+* `C⁰`-up-to-`0` of the field and of its spatial Fréchet derivative;
+* interior joint-`(t, x)` `C∞` and `C⁰`-up-to-`0` of each chart-local Gram-matrix entry of
+  `g_DT` (the `chartGramMatrix` and `chartGramOnE` formulations);
+* `C⁰`-up-to-`0` of the spatial `k ≤ 2` iterated Fréchet jets of each chart-Gram entry
+  (controlling the Hessian/Ricci a `k = 0`-only datum cannot reach up to `0`).
+
+This is genuinely TRUE of the strictly-parabolic (`deTurckRicciRHS_isStrictlyParabolic_at_self`),
+smooth-quasilinear (`deTurckRicciRHS_isSmoothQuasilinear`) DeTurck–Ricci flow from smooth
+initial data: interior parabolic smoothing plus continuity up to the smooth initial metric.
+It constrains only the internal `g_DT`/`X_DT`, never `g₀`/the headline.  The body is the
+deferred classical **parabolic-regularity** input; it remains `sorry`, so consumers
+transitively depend on `sorryAx`. -/
+theorem deturck_ricci_parabolic_interior_regularity
+    (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ}
+    (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (hsol : IsQuasilinearMetricParabolicSolution (I := I)
+      (deTurckRicciRHS (I := I) g_bg) g₀ T g_DT) :
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+        (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
+          : TangentBundle I M))
+        (Set.Ioo (0 : ℝ) T ×ˢ Set.univ) ∧
+      ContinuousOn
+        (fun q : ℝ × M => (deTurckVF (I := I) (g_DT q.1) g_bg q.2 : TangentSpace I q.2))
+        (Set.Icc 0 T ×ˢ Set.univ) ∧
+      (∀ α : M,
+        ContinuousOn
+          (fun q : ℝ × M =>
+            fderiv ℝ (chartRawRepr (I := I) α (fun x => deTurckVF (I := I) (g_DT q.1) g_bg x))
+              (extChartAt I α q.2))
+          (Set.Icc 0 T ×ˢ Set.univ)) ∧
+      (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+        ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+          (fun p : ℝ × M =>
+            Integral.Measure.chartGramMatrix (I := I) (g_DT p.1) x₀ p.2 i j)
+          (Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
+      (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+        ContinuousOn
+          (fun p : ℝ × M =>
+            Integral.Measure.chartGramMatrix (I := I) (g_DT p.1) x₀ p.2 i j)
+          (Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
+      (∀ (α : M) (i j : Fin (Module.finrank ℝ E)),
+        ContinuousOn
+          (fun q : ℝ × M =>
+            Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j
+              (extChartAt I α q.2))
+          (Set.Icc 0 T ×ˢ Set.univ)) ∧
+      (∀ (α : M) (i j : Fin (Module.finrank ℝ E)) (k : ℕ), k ≤ 2 →
+        ContinuousOn
+          (fun q : ℝ × M => iteratedFDeriv ℝ k
+            (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j)
+            (extChartAt I α q.2))
+          (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α)) := sorry
+
+/-- **DeTurck–Ricci parabolic short-time existence (existence + interior regularity).**
 
 For initial and background metrics `g₀`, `g_bg` there exist a positive time `T` and a metric
 family `g_DT` solving the strictly parabolic DeTurck–Ricci flow
-`∂_t g_DT = -2 Ric(g_DT) + 𝓛_{X_DT} g_DT` (with `X_DT(t) = deTurckVF (g_DT t) g_bg`) on `[0, T]`,
-packaged as `IsQuasilinearMetricParabolicSolution (deTurckRicciRHS g_bg) g₀ T g_DT`.  The
-existential is ENRICHED to additionally provide the DeTurck-vector-field and metric regularity
-data that the conjugating-diffeomorphism construction consumes, all of which is genuinely TRUE
-of the interior-parabolic-smooth, `C⁰`-up-to-`0` DeTurck solution:
+`∂_t g_DT = -2 Ric(g_DT) + 𝓛_{X_DT} g_DT` (with `X_DT(t) = deTurckVF (g_DT t) g_bg`) on `[0, T)`,
+packaged as `IsQuasilinearMetricParabolicSolution (deTurckRicciRHS g_bg) g₀ T g_DT`, TOGETHER
+with the DeTurck-vector-field and metric regularity data the conjugating-diffeomorphism
+construction consumes (interior joint-`C∞`, `C⁰`-up-to-`0`, joint chart-Gram smoothness, and
+the `k ≤ 2` spatial jets).  These constrain only the internal `g_DT`/`X_DT`, never
+`g₀`/the headline statement, so the enrichment is non-leaking.
 
-* `h_reg` — interior joint-`C∞` of the field map `q ↦ ⟨q.2, deTurckVF (g_DT q.1) g_bg q.2⟩`
-  on `Ioo 0 T ×ˢ univ` (interior parabolic smoothness of the solution → smooth field);
-* `h_cont0` — continuity of the field up to `t = 0` on `Icc 0 T ×ˢ univ` (`C⁰`-up-to-`0`);
-* `h_grad0` — continuity of the field's spatial Fréchet derivative up to `t = 0`;
-* `h_gram` — interior joint-`(t, x)` `C∞` of each chart-local Gram-matrix entry of `g_DT`
-  on `Ioo 0 T ×ˢ baseSet` (the canonical `chartGramMatrix` formulation of joint smoothness
-  of the metric family; TRUE of the interior-parabolic-smooth DeTurck solution);
-* `h_gram0` — joint-`(t, x)` continuity of each chart-local Gram-matrix entry of `g_DT`
-  up to `t = 0` on `Ico 0 T ×ˢ baseSet` (continuity-up-to-the-`C⁰`-at-`0`-boundary);
-* `h_gramOnE0` — joint-`(t, x)` continuity of each chart-Gram entry in the `chartGramOnE` /
-  `extChartAt` form on `Icc 0 T ×ˢ univ`, up to `t = 0`.  This is the `k = 0` value-continuity
-  in the exact shape `gfam_inner_continuous_on` consumes (`hg_joint`); a genuine `C⁰`-up-to-`0`
-  output of the smooth DeTurck solution;
-* `h_C2` — joint-`(t, x)` continuity of the spatial `k ≤ 2` iterated Fréchet jets of each
-  chart-Gram entry (in the `chartGramOnE` / `extChartAt` form, on `Icc 0 T ×ˢ goodSet`) up to
-  `t = 0`.  This is the GENUINE second-order-in-space regularity output of the DeTurck–Ricci
-  parabolic solution from SMOOTH initial data, which is `C^∞` up to `t = 0` (all spatial jets,
-  in particular the `k ≤ 2` ones controlling the Hessian/Ricci, vary continuously in time up to
-  `0`).  It is the exact `hC2` input of `ricci_gfam_continuous_on`, needed because the pullback
-  Ricci is a second-order spatial quantity that a `k = 0`-only datum cannot control up to `0`.
+This is assembled from its two faithful classical inputs, each isolated:
+* existence — `deTurckRicci_shortTime_existence_of_closed` (the abstract quasilinear parabolic
+  short-time existence `quasilinear_parabolic_metric_short_time_existence`, a Banach fixed
+  point on Duhamel iterates);
+* regularity — `deturck_ricci_parabolic_interior_regularity` (interior parabolic smoothing and
+  continuity up to the smooth initial data).
 
-These constrain only the internal `g_DT`/`X_DT`, never `g₀`/the headline statement, so the
-enrichment is non-leaking.  The body remains `sorry` — this is the single faithful
-"DeTurck–Ricci parabolic short-time existence" labeled classical input. -/
+Both inputs remain `sorry` at their leaves, so consumers transitively depend on `sorryAx`;
+this assembly is itself sorry-free glue. -/
 theorem deturck_ricci_flow_parabolic_short_time_existence
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ T : ℝ, ∃ g_DT : ℝ → SmoothRiemannianMetric I M,
@@ -119,7 +168,9 @@ theorem deturck_ricci_flow_parabolic_short_time_existence
           (fun q : ℝ × M => iteratedFDeriv ℝ k
             (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j)
             (extChartAt I α q.2))
-          (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α)) := sorry
+          (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α)) := by
+  obtain ⟨T, g_DT, hsol⟩ := deTurckRicci_shortTime_existence_of_closed g₀ g_bg
+  exact ⟨T, g_DT, hsol, deturck_ricci_parabolic_interior_regularity g₀ g_bg g_DT hsol⟩
 
 set_option linter.unusedVariables false in
 /-- **Interior metric-level DeTurck–Ricci time-derivative (fully ungated).**
