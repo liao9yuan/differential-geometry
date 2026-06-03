@@ -90,90 +90,70 @@ def TensorRSModel (r s : ℕ) (𝕜 : Type*) (E : Type*) [NontriviallyNormedFiel
 /-- The fiber of the (0,s) covariant tensor bundle at `x ∈ M`, defined as
 `Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I) x`.
 
-Declared as a non-reducible `def` so that typeclass synthesis treats it as an opaque
-type at the `Tensor0SSpace` level. Instances on `Bundle.continuousMultilinearMap` are
-re-declared here on `Tensor0SSpace` directly to avoid diamonds when these instances
-interact with the bundle / hom-bundle topologies further downstream. -/
-@[nolint unusedArguments]
-def Tensor0SSpace (s : ℕ) (I : ModelWithCorners 𝕜 E H) [IsManifold I 1 M] (x : M) : Type _ :=
+Declared as a reducible `abbrev`, so that all bundle / vector-space / normed instances
+on `Bundle.continuousMultilinearMap` are inherited through a single resolution path.
+This keeps the bundle-fibre topology and the operator-norm topology on the same diamond
+that Mathlib already manages on `Bundle.continuousMultilinearMap`, avoiding the extra
+topology paths that re-declared `Tensor0SSpace`-level instances would introduce. -/
+abbrev Tensor0SSpace (s : ℕ) (I : ModelWithCorners 𝕜 E H) [IsManifold I 1 M] (x : M) : Type _ :=
   Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I) x
 
 /-!
-## Bedrock instances for `Tensor0SSpace`
+## Re-exported elementwise lemmas for `Tensor0SSpace`
 
-Since `Tensor0SSpace` is now a non-reducible `def`, instances on
-`Bundle.continuousMultilinearMap` do not automatically transfer. We re-declare the
-needed instances here so they live at the `Tensor0SSpace` level. -/
+Even though `Tensor0SSpace` reduces to `Bundle.continuousMultilinearMap`, the following
+`@[ext]` / `@[simp]` lemmas are re-exported at the `Tensor0SSpace` level so that `ext` and
+`simp` fire on goals stated with the `Tensor0SSpace` head symbol. -/
 
-instance tensor0SSpace_topologicalSpace (s : ℕ) (x : M) :
-    TopologicalSpace (Tensor0SSpace s I x) :=
-  inferInstanceAs (TopologicalSpace (Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I) x))
-
-instance tensor0SSpace_addCommGroup (s : ℕ) (x : M) :
-    AddCommGroup (Tensor0SSpace s I x) :=
-  inferInstanceAs (AddCommGroup (Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I) x))
-
-instance tensor0SSpace_module (s : ℕ) (x : M) :
-    Module 𝕜 (Tensor0SSpace s I x) :=
-  inferInstanceAs (Module 𝕜 (Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I) x))
-
-instance tensor0SSpace_isTopologicalAddGroup (s : ℕ) (x : M) :
-    IsTopologicalAddGroup (Tensor0SSpace s I x) :=
-  inferInstanceAs (IsTopologicalAddGroup
-    (Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I) x))
-
-instance tensor0SSpace_continuousAdd (s : ℕ) (x : M) :
-    ContinuousAdd (Tensor0SSpace s I x) :=
-  inferInstanceAs (ContinuousAdd
-    (Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I) x))
-
-instance tensor0SSpace_continuousSMul (s : ℕ) (x : M) :
-    ContinuousSMul 𝕜 (Tensor0SSpace s I x) :=
-  inferInstanceAs (ContinuousSMul 𝕜
-    (Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I) x))
-
-instance tensor0SSpace_t2Space (s : ℕ) (x : M) :
-    T2Space (Tensor0SSpace s I x) :=
-  inferInstanceAs (T2Space (Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I) x))
-
-instance tensor0SSpace_moduleFree (s : ℕ) (x : M) :
-    Module.Free 𝕜 (Tensor0SSpace s I x) :=
-  inferInstanceAs (Module.Free 𝕜
-    (Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I) x))
-
-instance tensor0SSpace_instFunLike (s : ℕ) (x : M) :
-    FunLike (Tensor0SSpace s I x) (Fin s → TangentSpace I x) 𝕜 :=
-  inferInstanceAs (FunLike
-    (Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I) x) _ _)
-
-/-- Extensionality for `Tensor0SSpace`. Since the type is a non-reducible `def`, Lean
-cannot find the underlying `ContinuousMultilinearMap.ext` automatically; we re-export it
-at the `Tensor0SSpace` level. -/
+/-- Extensionality for `Tensor0SSpace`, re-exported from `ContinuousMultilinearMap.ext`. -/
 @[ext]
 theorem tensor0SSpace_ext (s : ℕ) (x : M)
     {T T' : Tensor0SSpace s I x}
     (h : ∀ v : Fin s → TangentSpace I x, T v = T' v) : T = T' :=
   ContinuousMultilinearMap.ext (M₁ := fun _ : Fin s => TangentSpace I x) (M₂ := 𝕜) h
 
-/-- `NormedAddCommGroup` on `Tensor0SSpace s I x` inherited from the bundle's CMM fiber.
+/-- Pointwise scalar action on `Tensor0SSpace`, re-exported from
+`ContinuousMultilinearMap.smul_apply` so that `simp` fires on the `Tensor0SSpace` head. -/
+@[simp]
+theorem tensor0SSpace_smul_apply (s : ℕ) (x : M) (c : 𝕜)
+    (T : Tensor0SSpace s I x) (v : Fin s → TangentSpace I x) :
+    (c • T) v = c • T v :=
+  ContinuousMultilinearMap.smul_apply
+    (f := (T : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => TangentSpace I x) 𝕜)) c v
 
-NOTE: the `TopologicalSpace` inside this instance is the **norm topology** on
-`ContinuousMultilinearMap`, while `tensor0SSpace_topologicalSpace` (registered separately)
-is the **bundle topology**. The two agree by `tensor0SSpace_topology_eq` but are not
-definitionally equal — this is the same propositional-vs-definitional topology mismatch
-present in Mathlib's `Bundle.continuousMultilinearMap.instNormedAddCommGroup`. It does not
-cause downstream synthesis problems for users who rely on `tensor0SSpace_topologicalSpace`
-for the bundle topology and on the operator-norm instances purely as a normed-space
-witness. -/
-instance tensor0SSpace_normedAddCommGroup (s : ℕ) (x : M) :
-    NormedAddCommGroup (Tensor0SSpace s I x) :=
-  inferInstanceAs (NormedAddCommGroup
-    (Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I) x))
+/-- Pointwise addition on `Tensor0SSpace`, re-exported at the `Tensor0SSpace` head so
+`simp` fires without unfolding the abbreviation. -/
+@[simp]
+theorem tensor0SSpace_add_apply (s : ℕ) (x : M)
+    (T T' : Tensor0SSpace s I x) (v : Fin s → TangentSpace I x) :
+    (T + T') v = T v + T' v :=
+  ContinuousMultilinearMap.add_apply
+    (M₁ := fun _ : Fin s => TangentSpace I x) (M₂ := 𝕜) T T' v
 
-instance tensor0SSpace_normedSpace (s : ℕ) (x : M) :
-    NormedSpace 𝕜 (Tensor0SSpace s I x) :=
-  inferInstanceAs (NormedSpace 𝕜
-    (Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I) x))
+/-- Updating a single argument of a `Tensor0SSpace` value by a scalar multiple.
+Re-exported at the `Tensor0SSpace` head so `simp` fires without unfolding the
+abbreviation. -/
+@[simp]
+theorem tensor0SSpace_map_update_smul (s : ℕ) (x : M)
+    (T : Tensor0SSpace s I x) (v : Fin s → TangentSpace I x)
+    (i : Fin s) (c : 𝕜) (y : TangentSpace I x) :
+    T (Function.update v i (c • y)) = c • T (Function.update v i y) :=
+  ContinuousMultilinearMap.map_update_smul
+    (f := (T : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => TangentSpace I x) 𝕜))
+    v i c y
+
+/-- Updating a single argument of a `Tensor0SSpace` value by a sum.
+Re-exported at the `Tensor0SSpace` head so `simp` fires without unfolding the
+abbreviation. -/
+@[simp]
+theorem tensor0SSpace_map_update_add (s : ℕ) (x : M)
+    (T : Tensor0SSpace s I x) (v : Fin s → TangentSpace I x)
+    (i : Fin s) (y y' : TangentSpace I x) :
+    T (Function.update v i (y + y')) =
+      T (Function.update v i y) + T (Function.update v i y') :=
+  ContinuousMultilinearMap.map_update_add
+    (f := (T : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => TangentSpace I x) 𝕜))
+    v i y y'
 
 /-- The cotangent space at `x ∈ M`: linear functionals on the tangent space,
 realized as (0,1)-tensors. -/
@@ -184,60 +164,14 @@ def CotangentSpace (I : ModelWithCorners 𝕜 E H) [IsManifold I 1 M] (x : M) :=
 /-- The fiber of the (r,s)-tensor bundle at `x ∈ M`: continuous linear maps from
 (0,r)-tensors to (0,s)-tensors, using `(V⊗W)* ≅ V*⊗W*` and `V*⊗W ≅ Hom(V,W)`.
 
-Declared as a non-reducible `def`; instances are re-derived explicitly below. -/
+Declared as a reducible `abbrev`, so the base bundle / vector-space instances are
+inherited through the underlying `→L[𝕜]` type along a single resolution path. The
+operator-norm `NormedAddCommGroup` / `NormedSpace` are installed explicitly below,
+transported from the model fibre so that they share the canonical `AddCommGroup`. -/
 /- TODO: Define the action of (r,s)-tensor on r covectors and s vectors.
     For example, F(ω₁,⋯,ωᵢ,v₁,⋯,vⱼ) := F(ω₁⋯ωⱼ)(v₁,⋯,vⱼ) -/
-@[nolint unusedArguments]
-def TensorRSSpace (r s : ℕ) (I : ModelWithCorners 𝕜 E H) [IsManifold I 1 M] (x : M) : Type _ :=
+abbrev TensorRSSpace (r s : ℕ) (I : ModelWithCorners 𝕜 E H) [IsManifold I 1 M] (x : M) : Type _ :=
   Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x
-
-/-!
-## Bedrock instances for `TensorRSSpace`
-
-`TensorRSSpace r s I x` is `Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x`. Since it is
-also a non-reducible `def`, we re-declare the basic instances explicitly. The base
-instances are sourced from the underlying `→L[𝕜]` type; the normed instances are
-transported from the model fiber and share the same underlying additive structure
-through `tensorRSSpace_continuousLinearEquiv`. -/
-
-instance tensorRSSpace_topologicalSpace (r s : ℕ) (x : M) :
-    TopologicalSpace (TensorRSSpace r s I x) :=
-  inferInstanceAs (TopologicalSpace (Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x))
-
-instance tensorRSSpace_addCommGroup (r s : ℕ) (x : M) :
-    AddCommGroup (TensorRSSpace r s I x) :=
-  inferInstanceAs (AddCommGroup (Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x))
-
-instance tensorRSSpace_module (r s : ℕ) (x : M) :
-    Module 𝕜 (TensorRSSpace r s I x) :=
-  inferInstanceAs (Module 𝕜 (Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x))
-
-instance tensorRSSpace_isTopologicalAddGroup (r s : ℕ) (x : M) :
-    IsTopologicalAddGroup (TensorRSSpace r s I x) :=
-  inferInstanceAs (IsTopologicalAddGroup
-    (Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x))
-
-instance tensorRSSpace_continuousAdd (r s : ℕ) (x : M) :
-    ContinuousAdd (TensorRSSpace r s I x) :=
-  inferInstanceAs (ContinuousAdd (Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x))
-
-instance tensorRSSpace_moduleFree [CompleteSpace 𝕜] (r s : ℕ) (x : M) :
-    Module.Free 𝕜 (TensorRSSpace r s I x) :=
-  inferInstanceAs (Module.Free 𝕜 (Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x))
-
-/-- `FunLike` instance for `TensorRSSpace`, enabling direct function-style application of an
-`(r,s)`-tensor on a `(0,r)`-tensor to obtain a `(0,s)`-tensor. -/
-instance tensorRSSpace_instFunLike (r s : ℕ) (x : M) :
-    FunLike (TensorRSSpace r s I x) (Tensor0SSpace r I x) (Tensor0SSpace s I x) :=
-  inferInstanceAs (FunLike (Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x) _ _)
-
-/-- `ContinuousLinearMapClass` instance for `TensorRSSpace`, providing additivity, continuity,
-and scalar-multiplicativity of the function-style application. -/
-instance tensorRSSpace_instContinuousLinearMapClass (r s : ℕ) (x : M) :
-    ContinuousLinearMapClass (TensorRSSpace r s I x) 𝕜
-      (Tensor0SSpace r I x) (Tensor0SSpace s I x) :=
-  inferInstanceAs (ContinuousLinearMapClass
-    (Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x) 𝕜 _ _)
 
 /-- A `TensorRSSpace` element converted to a `ContinuousLinearMap`. Since the underlying
 type is `Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x`, this is just the identity. -/
@@ -248,9 +182,8 @@ def TensorRSSpace.toCLM {r s : ℕ} {x : M} (T : TensorRSSpace r s I x) :
 def TensorRSSpace.ofCLM {r s : ℕ} {x : M}
     (T : Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x) : TensorRSSpace r s I x := T
 
-/-- Extensionality for `TensorRSSpace`. Since the type is a non-reducible `def`, Lean
-cannot find the underlying `ContinuousLinearMap.ext` automatically; we re-export it
-at the `TensorRSSpace` level. -/
+/-- Extensionality for `TensorRSSpace`, re-exported from `ContinuousLinearMap.ext` at the
+`TensorRSSpace` head symbol. -/
 @[ext]
 theorem tensorRSSpace_ext (r s : ℕ) (x : M)
     {T T' : TensorRSSpace r s I x}
@@ -471,7 +404,7 @@ def ofModel {s : ℕ} {x : M}
 set_option linter.unusedSectionVars false in
 @[simp]
 theorem toModelL_apply {s : ℕ} {x : M} (T : Tensor0SSpace s I x) :
-    toModelL s x T = toModel T := rfl
+    toModelL (𝕜 := 𝕜) (I := I) s x T = toModel T := rfl
 
 omit [FiniteDimensional 𝕜 E] in
 @[simp]
@@ -538,9 +471,8 @@ end Tensor0SSpace
 `TensorRSModel r s 𝕜 E`: this follows from `arrowCongr` applied to the
 `tensor0SSpace_continuousLinearEquiv` on both the domain and codomain. -/
 def tensorRSSpace_continuousLinearEquiv (r s : ℕ) (x : M) :
-    TensorRSSpace r s I x ≃L[𝕜] TensorRSModel r s 𝕜 E := by
-  unfold TensorRSSpace
-  exact (tensor0SSpace_continuousLinearEquiv (I := I) r x).arrowCongr
+    TensorRSSpace r s I x ≃L[𝕜] TensorRSModel r s 𝕜 E :=
+  (tensor0SSpace_continuousLinearEquiv (I := I) r x).arrowCongr
     (tensor0SSpace_continuousLinearEquiv (I := I) s x)
 
 omit [FiniteDimensional 𝕜 E] in
@@ -555,8 +487,8 @@ private theorem tensorRSSpace_type_eq (r s : ℕ) (x : M) :
   congr 1 <;> exact tensor0SSpace_topology_eq (I := I) _ x
 
 /-- An `AddMonoidHom` view of `tensorRSSpace_continuousLinearEquiv`: forwarding via
-the canonical `AddCommGroup` on `TensorRSSpace r s I x` (provided by
-`tensorRSSpace_addCommGroup`). Used to induce normed structure compatibly with the
+the canonical `AddCommGroup` on `TensorRSSpace r s I x` (the one inherited from the
+underlying `→L[𝕜]` type). Used to induce normed structure compatibly with the
 already-installed additive structure, avoiding an `AddCommGroup` diamond. -/
 private def tensorRSSpace_toModelAddHom (r s : ℕ) (x : M) :
     TensorRSSpace r s I x →+ TensorRSModel r s 𝕜 E :=
@@ -567,12 +499,13 @@ private def tensorRSSpace_toModelAddHom (r s : ℕ) (x : M) :
 /-- The fiber `TensorRSSpace r s I x` is a normed additive commutative group. The norm is
 pulled back from the model fiber `TensorRSModel r s 𝕜 E` along
 `tensorRSSpace_continuousLinearEquiv`; the underlying `AddCommGroup` is the canonical
-one from `tensorRSSpace_addCommGroup`, so there is no additive-structure diamond.
+one inherited from the `→L[𝕜]` reduction of the `abbrev`, so there is no
+additive-structure diamond.
 
-NOTE: as with `Tensor0SSpace`, the `TopologicalSpace` carried inside this
-`NormedAddCommGroup` is induced from the norm, while the explicit
-`tensorRSSpace_topologicalSpace` is induced from the fiber-bundle structure. The two
-agree by `tensor0SSpace_topology_eq` componentwise but are not definitionally equal. -/
+NOTE: the `TopologicalSpace` carried inside this `NormedAddCommGroup` is induced from the
+norm, while the fiber-bundle topology comes from the hom-bundle structure on the underlying
+`→L[𝕜]` type. The two agree by `tensor0SSpace_topology_eq` componentwise but are not
+definitionally equal — the same diamond Mathlib already manages on its hom bundles. -/
 noncomputable instance tensorRSSpace_normedAddCommGroup (r s : ℕ) (x : M) :
     NormedAddCommGroup (TensorRSSpace r s I x) :=
   NormedAddCommGroup.induced (TensorRSSpace r s I x) (TensorRSModel r s 𝕜 E)
@@ -863,3 +796,4 @@ theorem tensor0SSpace_continuousLinearEquiv_symm_coe (s : ℕ) (x : M) :
 
 end
 end Tensor0SBundle
+

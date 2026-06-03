@@ -153,7 +153,7 @@ def covGradBundleEquiv (r s : ℕ) (x : M) :
     ((covGradModelEquiv (E := E) r s).trans
       (tensorRSSpace_continuousLinearEquiv (I := I) r (s + 1) x).symm)
 
-set_option backward.isDefEq.respectTransparency true in
+set_option backward.isDefEq.respectTransparency false in
 /-- Closed form of the forward map: `covGradBundleEquiv r s x Φ` is obtained by
 pushing `Φ` to the model fibre, applying `covGradModelEquiv`, and pulling back. -/
 theorem covGradBundleEquiv_apply (r s : ℕ) (x : M)
@@ -165,7 +165,7 @@ theorem covGradBundleEquiv_apply (r s : ℕ) (x : M)
             Φ : TangentSpace I x →L[ℝ] TensorRSModel r s ℝ E))) :=
   rfl
 
-set_option backward.isDefEq.respectTransparency true in
+set_option backward.isDefEq.respectTransparency false in
 /-- Closed form of the inverse map: `(covGradBundleEquiv r s x).symm T` is
 obtained by pushing `T` to the model fibre, applying `(covGradModelEquiv).symm`,
 and pulling back the resulting covariant-gradient model element. -/
@@ -178,7 +178,7 @@ theorem covGradBundleEquiv_symm_apply (r s : ℕ) (x : M)
           (TensorRSSpace.toModel T)) :=
   rfl
 
-set_option backward.isDefEq.respectTransparency true in
+set_option backward.isDefEq.respectTransparency false in
 /-- Evaluating the `(r, s + 1)`-tensor `covGradBundleEquiv r s x Φ` at a
 `(0, r)`-tensor `D` and a `Fin (s + 1)`-tuple `v` recovers `Φ (v 0) D (tail v)`:
 the tangent direction is read off the first (leftmost) slot. -/
@@ -194,7 +194,7 @@ theorem covGradBundleEquiv_apply_eval (r s : ℕ) (x : M)
   rw [covGradBundleEquiv_apply (I := I) (M := M) r s x Φ]
   rfl
 
-set_option backward.isDefEq.respectTransparency true in
+set_option backward.isDefEq.respectTransparency false in
 /-- Evaluating the inverse: the covariant-gradient fibre element
 `(covGradBundleEquiv r s x).symm T`, taken along `w` and applied to a
 `(0, r)`-tensor `D`, gives the `(0, s)`-tensor whose value at a `Fin s`-tuple `v`

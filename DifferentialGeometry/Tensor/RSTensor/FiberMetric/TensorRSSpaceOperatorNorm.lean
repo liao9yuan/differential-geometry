@@ -36,6 +36,8 @@ and `tensorRSSpace_opNorm_le_bound` provide the standard "operator-norm" inequal
 
 noncomputable section
 
+set_option backward.isDefEq.respectTransparency false
+
 namespace Tensor0SBundle
 
 open scoped Topology
@@ -194,7 +196,6 @@ theorem tensorRSSpace_norm_apply_le {b : M} (T : TensorRSSpace r s I b)
         = e_s ((T : Tensor0SSpace r I b →L[𝕜] Tensor0SSpace s I b) x) := by
     rw [ContinuousLinearEquiv.arrowCongr_apply,
         ContinuousLinearEquiv.symm_apply_apply]
-    rfl
   have hLHS :
       ‖e_s ((T : Tensor0SSpace r I b →L[𝕜] Tensor0SSpace s I b) x)‖
         = ‖(T : Tensor0SSpace r I b →L[𝕜] Tensor0SSpace s I b) x‖ :=

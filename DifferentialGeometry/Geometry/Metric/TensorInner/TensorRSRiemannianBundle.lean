@@ -50,6 +50,8 @@ in `Tensor0SRiemannian.lean`.
 
 noncomputable section
 
+set_option backward.isDefEq.respectTransparency false
+
 open Bundle Set IsManifold ContinuousLinearMap Bornology
 open scoped Manifold Topology Bundle ContDiff BigOperators Matrix
 
