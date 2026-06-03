@@ -1,6 +1,3 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.FlatVariationalIdentity
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.BasepointMotion
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.EvalFormChainRule
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.RicciFlowPdeAtZero
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.RicciContinuityInMetricTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Defs
@@ -577,9 +574,9 @@ moving-pushforward time-regularity is the Hartman joint-`C∞` content
 `conjugating_flow_jointContMDiffOn` (from `hfield_reg`).
 
 This is exactly the interior datum the short-time-existence assembly consumes.  It replaces the
-former chart-`flat`-variational tower, whose per-slot `RawVariationalIdentityFlat` read the
-moving Jacobian as a raw `E`-coordinate (`chartJ`, discontinuous on multi-chart manifolds) and
-was dead in the consumer anyway. -/
+former chart-`flat`-variational route, whose per-slot identity read the moving Jacobian as a raw
+`E`-coordinate (`chartJ`, discontinuous on multi-chart manifolds) and was dead in the consumer
+anyway. -/
 theorem conjugating_flow_flat_data
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
@@ -644,8 +641,8 @@ These are the GENUINE forward-flow smooth-dependence-on-initial-conditions conti
 the conjugating flow (the moving basepoint together with its spatial Jacobian, tracked coherently
 inside the tangent bundle), continuous up to the `C⁰`-at-`0` boundary.  They are EXACTLY the
 whole-`Ico` orbit/pushforward inputs `gfam_inner_continuous_on` / `ricci_gfam_continuous_on`
-consume.  Their content is the moving-pushforward time-continuity of `flow_pushforward_continuous_in_time`
-(orbit + bundle Jacobian) instantiated at the conjugating flow.
+consume.  Their content is the moving-pushforward time-continuity (orbit + bundle Jacobian)
+instantiated at the conjugating flow.
 
 Conjunct 1 (orbit continuity) is derivable from the stated data: interior continuity follows from
 the orbit ODE `hΦode` (a `HasMFDerivWithinAt`, hence `ContinuousWithinAt` at each interior time),
@@ -659,7 +656,7 @@ content of the flow.  The exact input that closes that gap is the DeTurck FIELD 
 horizon `T`): for a jointly-`C∞`-in-`(t, x)` field the flow map is jointly `C∞` in `(t, x)` on the
 interior, so its spatial Jacobian — and thus `s ↦ (mfderiv I I (Φ_fam s) y u : E)` — is continuous
 at every interior time.  Combined with the at-`0` data and the orbit continuity, both conjuncts
-follow; this is the genuine flow-continuity / Hartman content of `flow_pushforward_continuous_in_time`,
+follow; this is the genuine flow-continuity / Hartman content of the moving pushforward,
 isolated here as a single faithful labeled `sorry`, PINNED to the genuine flow by `hΦode`, fed the
 field regularity `hfield_reg`, and consuming the flow's `t = 0`-endpoint orbit/Jacobian continuity
 (`hΦorbit0` / `hΦmfderiv0`, the `conjugating_diffeo_family` outputs).  All hypotheses constrain only
