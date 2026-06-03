@@ -374,6 +374,138 @@ theorem totalNablaSub_comp {r s : ℕ}
     (hpairT lower) hpairβ hβmodel hV hVmodel hcoord
 
 set_option backward.isDefEq.respectTransparency false in
+/-- Tensor form of `totalNablaSub_comp`.
+
+The difference of the supplied total covariant derivatives is the actual
+connection-action tensor built from the connection-difference tensor and `T`.
+This removes one component-only layer from the Lemma 4.5 route; the remaining
+frontier is differentiating this action tensor. -/
+theorem totalNablaSub_eq_connActTensor {r s : ℕ}
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (T : TensorRSField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) r s)
+    (nablaT nablaT' : TensorRSField
+      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) r (s + 1))
+    (hreal : TotalNablaRSRealizes (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) r s cov T nablaT)
+    (hreal' : TotalNablaRSRealizes (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) r s cov' T nablaT')
+    (β : (x : M) -> Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I)
+      (M := M) r x)
+    (x₀ : M)
+    (basis : Module.Basis Idx Real (TangentSpace I x₀))
+    (Xfield : Idx ->
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (V : Idx -> (x : M) -> TangentSpace I x)
+    (hX_at : forall i : Idx, Xfield i x₀ = basis i)
+    (hβ_at : forall upper : Fin r -> Idx,
+      β x₀ = basisTensor0S (I := I) basis upper)
+    (hV_at : forall i : Idx, V i x₀ = basis i)
+    (hpairT : forall lower : Fin (s + 1) -> Idx,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun p : M => (T p (β p)) (fun a : Fin s => V (lower a.succ) p)) x₀)
+    (hpairβ : forall slots : Fin r -> Idx,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun p : M => β p (fun a : Fin r => V (slots a) p)) x₀)
+    (hβmodel : DifferentiableWithinAt Real
+      (tensor0SModelInChart (𝕜 := Real) (E := E) (H := H) (I := I)
+        (M := M) r x₀ β)
+      (Set.range I) (extChartAt I x₀ x₀))
+    (hV : forall i : Idx, MDiffAt (T% (V i)) x₀)
+    (hVmodel : forall i : Idx,
+      DifferentiableWithinAt Real
+        (tangentFieldModelInChart (𝕜 := Real) (I := I) x₀ (V i))
+        (Set.range I) (extChartAt I x₀ x₀))
+    (hcoord : forall i : Idx, forall j : Fin (Module.finrank Real E),
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun p : M =>
+          (Module.finBasis Real E).coord j
+            (tangentFieldModelInChart (𝕜 := Real) (I := I) x₀ (V i)
+              (extChartAt I x₀ p))) x₀) :
+    nablaT x₀ - nablaT' x₀ =
+      connActTensorAt (I := I) basis
+        (connectionDifferenceTensorAt (I := I) cov cov' x₀) (T x₀) := by
+  apply extRS_basis (I := I) basis
+  intro upper lower
+  rw [totalNablaSub_comp
+    (E := E) (H := H) (I := I) (M := M)
+    (r := r) (s := s) cov cov' T nablaT nablaT' hreal hreal' β x₀ basis
+    Xfield V hX_at hβ_at hV_at hpairT hpairβ hβmodel hV hVmodel hcoord upper lower]
+  rw [connActTensorAt_comp]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Antidiagonal `k = 0` form of `totalNablaSub_comp`.
+
+This is the base case of the iterated connection-action Leibniz realization
+needed for MSM135 Lemma 4.5.  The higher-order frontier is to replace the
+constant arrays below by genuine `h`-covariant derivative jets of the
+connection difference and of `T`. -/
+theorem totalNablaSub_anti0 {r s : ℕ}
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (T : TensorRSField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) r s)
+    (nablaT nablaT' : TensorRSField
+      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) r (s + 1))
+    (hreal : TotalNablaRSRealizes (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) r s cov T nablaT)
+    (hreal' : TotalNablaRSRealizes (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) r s cov' T nablaT')
+    (β : (x : M) -> Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I)
+      (M := M) r x)
+    (x₀ : M)
+    (basis : Module.Basis Idx Real (TangentSpace I x₀))
+    (Xfield : Idx ->
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (V : Idx -> (x : M) -> TangentSpace I x)
+    (hX_at : forall i : Idx, Xfield i x₀ = basis i)
+    (hβ_at : forall upper : Fin r -> Idx,
+      β x₀ = basisTensor0S (I := I) basis upper)
+    (hV_at : forall i : Idx, V i x₀ = basis i)
+    (hpairT : forall lower : Fin (s + 1) -> Idx,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun p : M => (T p (β p)) (fun a : Fin s => V (lower a.succ) p)) x₀)
+    (hpairβ : forall slots : Fin r -> Idx,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun p : M => β p (fun a : Fin r => V (slots a) p)) x₀)
+    (hβmodel : DifferentiableWithinAt Real
+      (tensor0SModelInChart (𝕜 := Real) (E := E) (H := H) (I := I)
+        (M := M) r x₀ β)
+      (Set.range I) (extChartAt I x₀ x₀))
+    (hV : forall i : Idx, MDiffAt (T% (V i)) x₀)
+    (hVmodel : forall i : Idx,
+      DifferentiableWithinAt Real
+        (tangentFieldModelInChart (𝕜 := Real) (I := I) x₀ (V i))
+        (Set.range I) (extChartAt I x₀ x₀))
+    (hcoord : forall i : Idx, forall j : Fin (Module.finrank Real E),
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun p : M =>
+          (Module.finBasis Real E).coord j
+            (tangentFieldModelInChart (𝕜 := Real) (I := I) x₀ (V i)
+              (extChartAt I x₀ p))) x₀)
+    (upper : Fin r -> Idx) (lower : Fin (s + 1) -> Idx) :
+    componentRS (I := I) basis (nablaT x₀ - nablaT' x₀) upper lower =
+      Finset.sum (Finset.antidiagonal 0)
+        (fun ab => (Nat.choose 0 ab.1 : Real) *
+          connActComp
+            (fun l i j =>
+              componentRS (I := I) basis
+                (connectionDifferenceTensorAt (I := I) cov cov' x₀)
+                (fun _ : Fin 1 => l)
+                (fun q : Fin 2 => if q = 0 then i else j))
+            (fun upper' lower' =>
+              componentRS (I := I) basis (T x₀) upper' lower')
+            upper lower) := by
+  rw [totalNablaSub_comp
+    (E := E) (H := H) (I := I) (M := M)
+    (r := r) (s := s) cov cov' T nablaT nablaT' hreal hreal' β x₀ basis
+    Xfield V hX_at hβ_at hV_at hpairT hpairβ hβmodel hV hVmodel hcoord upper lower]
+  simp
+
+set_option backward.isDefEq.respectTransparency false in
 /-- Norm form of `totalNablaSub_comp`.  This is the total-derivative version of
 the first-order connection-change estimate. -/
 theorem totalNablaSubNorm_le {r s : ℕ}
@@ -455,6 +587,101 @@ theorem totalNablaSubNorm_le {r s : ℕ}
   simpa [B] using
     abs_connActTensor_le (I := I) g x₀ basis hinv
       (connectionDifferenceTensorAt (I := I) cov cov' x₀) (T x₀) upper lower
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Antidiagonal `k = 0` norm-bound form of the total first-order one-step
+estimate.
+
+This is the norm version of `totalNablaSub_anti0`, phrased with the same
+`connActAntiStepConst` used by the future iterated Leibniz estimate. -/
+theorem totalNablaAnti0 {r s : ℕ}
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (g : SmoothMetric I M)
+    (cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (T : TensorRSField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) r s)
+    (nablaT nablaT' : TensorRSField
+      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) r (s + 1))
+    (hreal : TotalNablaRSRealizes (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) r s cov T nablaT)
+    (hreal' : TotalNablaRSRealizes (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) r s cov' T nablaT')
+    (β : (x : M) -> Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I)
+      (M := M) r x)
+    (x₀ : M)
+    (basis : Module.Basis Idx Real (TangentSpace I x₀))
+    (hinv :
+      MetricInverseInBasis (I := I) g x₀ basis (identityInvMetric (Idx := Idx)))
+    (Xfield : Idx ->
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (V : Idx -> (x : M) -> TangentSpace I x)
+    (hX_at : forall i : Idx, Xfield i x₀ = basis i)
+    (hβ_at : forall upper : Fin r -> Idx,
+      β x₀ = basisTensor0S (I := I) basis upper)
+    (hV_at : forall i : Idx, V i x₀ = basis i)
+    (hpairT : forall lower : Fin (s + 1) -> Idx,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun p : M => (T p (β p)) (fun a : Fin s => V (lower a.succ) p)) x₀)
+    (hpairβ : forall slots : Fin r -> Idx,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun p : M => β p (fun a : Fin r => V (slots a) p)) x₀)
+    (hβmodel : DifferentiableWithinAt Real
+      (tensor0SModelInChart (𝕜 := Real) (E := E) (H := H) (I := I)
+        (M := M) r x₀ β)
+      (Set.range I) (extChartAt I x₀ x₀))
+    (hV : forall i : Idx, MDiffAt (T% (V i)) x₀)
+    (hVmodel : forall i : Idx,
+      DifferentiableWithinAt Real
+        (tangentFieldModelInChart (𝕜 := Real) (I := I) x₀ (V i))
+        (Set.range I) (extChartAt I x₀ x₀))
+    (hcoord : forall i : Idx, forall j : Fin (Module.finrank Real E),
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun p : M =>
+          (Module.finBasis Real E).coord j
+            (tangentFieldModelInChart (𝕜 := Real) (I := I) x₀ (V i)
+              (extChartAt I x₀ p))) x₀)
+    {eps B N : Real} (heps : 0 <= eps) (hB : 0 <= B) (hN : 0 <= N)
+    (hA :
+      Real.sqrt
+        (normSqRS (I := I) (g := g) (x := x₀) 1 2
+          (connectionDifferenceTensorAt (I := I) cov cov' x₀)) <= eps * B)
+    (hT :
+      Real.sqrt
+        (normSqRS (I := I) (g := g) (x := x₀) r s (T x₀)) <= N) :
+    Real.sqrt
+        (normSqRS (I := I) (g := g) (x := x₀) r (s + 1)
+          (nablaT' x₀)) <=
+      Real.sqrt
+          (normSqRS (I := I) (g := g) (x := x₀) r (s + 1)
+            (nablaT x₀)) +
+        eps * connActAntiStepConst (Idx := Idx) r s 0 (fun _ => B) * N := by
+  let A : Nat -> TensorRSSpace 1 2 I x₀ :=
+    fun _ => connectionDifferenceTensorAt (I := I) cov cov' x₀
+  let U : Nat -> TensorRSSpace r s I x₀ := fun _ => T x₀
+  have htri :=
+    sqrt_normRS_le_add_sub
+      (I := I) (g := g) (x := x₀) r (s + 1) (nablaT x₀) (nablaT' x₀)
+  have hdiff :
+      Real.sqrt
+          (normSqRS (I := I) (g := g) (x := x₀) r (s + 1)
+            (nablaT x₀ - nablaT' x₀)) <=
+        eps * connActAntiStepConst (Idx := Idx) r s 0 (fun _ => B) * N := by
+    refine norm_connActAnti_bound_step
+      (I := I) g x₀ 0 basis hinv A U (nablaT x₀ - nablaT' x₀) ?hcomp
+      (B := fun _ => B) heps (fun _ => hB) hN ?hA ?hU
+    · intro upper lower
+      simpa [A, U] using
+        totalNablaSub_anti0
+          (E := E) (H := H) (I := I) (M := M)
+          (r := r) (s := s) cov cov' T nablaT nablaT' hreal hreal' β
+          x₀ basis Xfield V hX_at hβ_at hV_at hpairT hpairβ hβmodel
+          hV hVmodel hcoord upper lower
+    · intro a
+      simpa [A] using hA
+    · intro b
+      simpa [U] using hT
+  exact htri.trans (add_le_add_right hdiff _)
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Total first-order one-step inequality following from

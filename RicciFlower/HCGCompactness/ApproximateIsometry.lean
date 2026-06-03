@@ -3,6 +3,7 @@ import RicciFlower.Metric.Pullback
 import RicciFlower.Tensor.RSTensor.QuadraticBounds.Unit
 import RicciFlower.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import RicciFlower.Tensor.RSTensor.NablaOnTensors.ConnectionDifferenceAction
+import RicciFlower.Tensor.RSTensor.NablaOnTensors.ConnectionDifferenceActionIdentity
 import RicciFlower.Tensor.RSTensor.NablaOnTensors.Regularity.Derivation
 
 set_option autoImplicit false
@@ -512,6 +513,48 @@ theorem normSqRS_compare_of_approxIsometry
       (1 + eps) ^ (r + s) *
         Tensor0SBundle.normSqRS (I := I) (g := g) (x := x) r s T :=
   Happrox.normSqRS_compare (I := I) hx r s T
+
+section BookTensorNorms
+
+variable {N : Type u} [TopologicalSpace N] [ChartedSpace H N]
+variable [T2Space N] [IsManifold I ∞ N] [SigmaCompactSpace N]
+variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) N]
+
+/-- MSM135 Corollary "Norms of tensors", in the supplied-pullback-metric
+form.  If a Riemannian metric `gh` on the source has the same quadratic form
+as the pullback tensor `Phi^* h` on `K`, then an `(eps,0)` approximate isometry
+compares mixed-tensor norms with the expected factor. -/
+theorem bookNormRS_compare
+    {K : Set M} {L : Set N} {eps : Real}
+    {Phi : M ≃ₘ⟮I, I⟯ N}
+    {g : SmoothRiemannianMetric I M} {h : SmoothRiemannianMetric I N}
+    (H : BookApproxIsometryData (I := I) K L eps 0 Phi g h)
+    (hMapsTo : Set.MapsTo (Phi : M -> N) K L)
+    (gh : SmoothRiemannianMetric I M)
+    (hgh : forall x : M, x ∈ K -> forall v : TangentSpace I x,
+      gh.inner x v v =
+        quad02 (I := I) (M := M) (H.forward.pullbackData.pullback x) v)
+    {x : M} (hx : x ∈ K) (r s : Nat)
+    (T : Tensor0SBundle.TensorRSSpace r s I x) :
+    Tensor0SBundle.normRS (I := I) (g := gh) (x := x) r s T <=
+        Real.sqrt ((1 + eps) ^ (r + s)) *
+          Tensor0SBundle.normRS (I := I) (g := g) (x := x) r s T /\
+      Tensor0SBundle.normRS (I := I) (g := g) (x := x) r s T <=
+        Real.sqrt ((1 + eps) ^ (r + s)) *
+          Tensor0SBundle.normRS (I := I) (g := gh) (x := x) r s T := by
+  have hEq :
+      MetricUniformEquivalentOn (I := I) K g gh (1 + eps) :=
+    bookApprox_uniformEquiv_of_pullback (I := I) H hMapsTo gh hgh
+  constructor
+  · simpa [Tensor0SBundle.normRS_eq_sqrt_normSqRS]
+      using Tensor0SBundle.sqrt_normRS_upper_le_of_equiv
+        (I := I) g gh x r s hEq.1 (hEq.2 x hx) T
+  · simpa [Tensor0SBundle.normRS_eq_sqrt_normSqRS]
+      using Tensor0SBundle.sqrt_normRS_lower_le_of_equiv
+        (I := I) g gh x r s hEq.1 (hEq.2 x hx) T
+
+end BookTensorNorms
 
 /-- Square-root upper mixed-tensor norm comparison from the `C^0` part of an
 approximate isometry. -/
@@ -1478,6 +1521,107 @@ theorem nablaRS_one_le_approx_comps
       (Tensor0SBundle.metricSubRS
         (I := I) (g := g) (x := x) r (s + 1) nablaH nablaG) hcomp
   exact htri.trans (add_le_add_right hdiff_g_bound _)
+
+/-- Total-derivative `p = 1` form of MSM135 Lemma "Norms of covariant
+derivatives of tensors, I".
+
+This is the checked base case in the natural total-covariant-derivative
+language: supplied realizations of `nabla_h T` and `nabla_g T` satisfy the
+book estimate with the zero-order connection-difference epsilon bound.  The
+remaining higher-order Lemma 4.5 work is the iterated product-rule realization
+for repeated `h`-derivatives of the connection-difference action. -/
+theorem nablaRS_one_le_approx_total
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    {K : Set M} {eps : Real} {p : Nat}
+    {g h : SmoothRiemannianMetric I M}
+    (Happrox : IsApproxIsometryOn (I := I) K eps p g h)
+    {x : M} (hx : x ∈ K) (hp : 1 <= p) (heps_lt : eps < 1)
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (basisG basisH : Module.Basis Idx Real (TangentSpace I x))
+    (hinvG :
+      Tensor0SBundle.MetricInverseInBasis
+        (I := I) g x basisG (Tensor0SBundle.identityInvMetric (Idx := Idx)))
+    (hinvH :
+      Tensor0SBundle.MetricInverseInBasis
+        (I := I) h x basisH (Tensor0SBundle.identityInvMetric (Idx := Idx)))
+    {r s : Nat}
+    (T : Tensor0SBundle.TensorRSField
+      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) r s)
+    (nablaH nablaG : Tensor0SBundle.TensorRSField
+      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) r (s + 1))
+    (hrealH : Tensor0SBundle.TotalNablaRSRealizes
+      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) r s
+      (LeviCivita.leviCivitaConnectionOfMetric (I := I) h) T nablaH)
+    (hrealG : Tensor0SBundle.TotalNablaRSRealizes
+      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) r s
+      (LeviCivita.leviCivitaConnectionOfMetric (I := I) g) T nablaG)
+    (β : (y : M) -> Tensor0SBundle.Tensor0SSpace
+      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) r y)
+    (Xfield : Idx ->
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (V : Idx -> (y : M) -> TangentSpace I y)
+    (hX_at : forall i : Idx, Xfield i x = basisG i)
+    (hβ_at : forall upper : Fin r -> Idx,
+      β x = Tensor0SBundle.basisTensor0S (I := I) basisG upper)
+    (hV_at : forall i : Idx, V i x = basisG i)
+    (hpairT : forall lower : Fin (s + 1) -> Idx,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M => (T y (β y)) (fun a : Fin s => V (lower a.succ) y)) x)
+    (hpairβ : forall slots : Fin r -> Idx,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M => β y (fun a : Fin r => V (slots a) y)) x)
+    (hβmodel : DifferentiableWithinAt Real
+      (TensorLieDeriv.tensor0SModelInChart
+        (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) r x β)
+      (Set.range I) (extChartAt I x x))
+    (hV : forall i : Idx, MDiffAt (T% (V i)) x)
+    (hVmodel : forall i : Idx,
+      DifferentiableWithinAt Real
+        (TensorLieDeriv.tangentFieldModelInChart (𝕜 := Real) (I := I) x (V i))
+        (Set.range I) (extChartAt I x x))
+    (hcoord : forall i : Idx, forall j : Fin (Module.finrank Real E),
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M =>
+          (Module.finBasis Real E).coord j
+            (TensorLieDeriv.tangentFieldModelInChart
+              (𝕜 := Real) (I := I) x (V i) (extChartAt I x y))) x) :
+    Real.sqrt
+        (Tensor0SBundle.normSqRS
+          (I := I) (g := g) (x := x) r (s + 1)
+          (nablaG x)) <=
+      Real.sqrt
+        (Tensor0SBundle.normSqRS
+          (I := I) (g := g) (x := x) r (s + 1)
+          (nablaH x)) +
+        eps * Tensor0SBundle.connActNormConst (Idx := Idx) r s 12
+          (Real.sqrt
+            (Tensor0SBundle.normSqRS
+              (I := I) (g := g) (x := x) r s (T x))) := by
+  have heps_nonneg : 0 <= eps := by
+    have hC := Happrox.uniform_equiv.1
+    linarith
+  have hA :
+      Real.sqrt
+        (Tensor0SBundle.normSqRS
+          (I := I) (g := g) (x := x) 1 2
+          (Tensor0SBundle.connectionDifferenceTensorAt
+            (I := I)
+            (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
+            (LeviCivita.leviCivitaConnectionOfMetric (I := I) g) x)) <=
+        eps * 12 := by
+    have hraw :=
+      connDiff_le_eps_g
+        (I := I) Happrox hx hp heps_lt basisH hinvH
+    simpa [mul_comm] using hraw
+  exact Tensor0SBundle.totalNablaNorm_bound
+    (I := I) (M := M) (Idx := Idx) g
+    (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
+    (LeviCivita.leviCivitaConnectionOfMetric (I := I) g)
+    T nablaH nablaG hrealH hrealG β x basisG hinvG Xfield V
+    hX_at hβ_at hV_at hpairT hpairβ hβmodel hV hVmodel hcoord
+    heps_nonneg hA le_rfl
 
 end FixedDomain
 

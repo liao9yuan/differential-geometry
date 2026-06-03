@@ -107,5 +107,31 @@ theorem lemma45Const_le_succ
   simp [lemma45Const]
   linarith
 
+/-- A convenient composition constant for MSM135 Chapter 4, Proposition
+"Composition of approximate isometries, I".
+
+The book displays a possible constant of the form
+`2^((p+2)/2) * (1 + p * C_{p,0,2})`.  For Lean bookkeeping we use a slightly
+larger natural-power version; later composition estimates only need a positive
+constant depending on `p` and the Corollary 4.6 constants. -/
+noncomputable def compApproxConst (C : Nat -> Real) (p : Nat) : Real :=
+  (2 : Real) ^ (p + 3) * (1 + (p : Real) * C p)
+
+theorem compApproxConst_pos
+    {C : Nat -> Real} (hC : forall i : Nat, 0 <= C i)
+    (p : Nat) :
+    0 < compApproxConst C p := by
+  have hpow : 0 < (2 : Real) ^ (p + 3) := pow_pos (by norm_num) _
+  have hp : 0 <= (p : Real) := by exact_mod_cast Nat.zero_le p
+  have hfactor : 0 < 1 + (p : Real) * C p := by
+    nlinarith [mul_nonneg hp (hC p)]
+  exact mul_pos hpow hfactor
+
+theorem compApproxConst_nonneg
+    {C : Nat -> Real} (hC : forall i : Nat, 0 <= C i)
+    (p : Nat) :
+    0 <= compApproxConst C p :=
+  le_of_lt (compApproxConst_pos hC p)
+
 end HCGCompactness
 end RicciFlower

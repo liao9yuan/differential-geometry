@@ -53,6 +53,98 @@ def connActComp {r s : Nat}
       A k (lower 0) (lower b.succ) *
         T upper (Function.update (connActLowerTail lower) b k))
 
+/-- The actual mixed tensor whose components are the connection-difference
+action `connActComp A T`.  This turns the component formula into a tensor
+object without unfolding the Hom implementation downstream. -/
+noncomputable def connActTensorAt {r s : Nat} [DecidableEq Idx]
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (A : TensorRSSpace 1 2 I x) (T : TensorRSSpace r s I x) :
+    TensorRSSpace r (s + 1) I x :=
+  ofComponentsRS (I := I) basis r (s + 1)
+    (fun upper lower =>
+      connActComp
+        (fun l i j =>
+          componentRS (I := I) basis A
+            (fun _ : Fin 1 => l)
+            (fun q : Fin 2 => if q = 0 then i else j))
+        (fun upper' lower' => componentRS (I := I) basis T upper' lower')
+        upper lower)
+
+@[simp]
+theorem connActTensorAt_comp {r s : Nat} [DecidableEq Idx]
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (A : TensorRSSpace 1 2 I x) (T : TensorRSSpace r s I x)
+    (upper : Fin r -> Idx) (lower : Fin (s + 1) -> Idx) :
+    componentRS (I := I) basis (connActTensorAt (I := I) basis A T) upper lower =
+      connActComp
+        (fun l i j =>
+          componentRS (I := I) basis A
+            (fun _ : Fin 1 => l)
+            (fun q : Fin 2 => if q = 0 then i else j))
+        (fun upper' lower' => componentRS (I := I) basis T upper' lower')
+        upper lower := by
+  simpa [connActTensorAt] using
+    (componentRS_ofComponentsRS (I := I) (basis := basis) (r := r) (s := s + 1)
+      (c := fun upper lower =>
+        connActComp
+          (fun l i j =>
+            componentRS (I := I) basis A
+              (fun _ : Fin 1 => l)
+              (fun q : Fin 2 => if q = 0 then i else j))
+          (fun upper' lower' => componentRS (I := I) basis T upper' lower')
+          upper lower)
+      upper lower)
+
+/-- The tensor with antidiagonal Leibniz-sum components expected from repeated
+covariant derivatives of the connection-difference action.  The derivative
+realization is a separate theorem; this definition only packages the component
+array as an actual mixed tensor. -/
+noncomputable def connActAntiTensorAt {r s : Nat} [DecidableEq Idx]
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x)) (k : Nat)
+    (A : Nat -> TensorRSSpace 1 2 I x) (T : Nat -> TensorRSSpace r s I x) :
+    TensorRSSpace r (s + 1) I x :=
+  ofComponentsRS (I := I) basis r (s + 1)
+    (fun upper lower =>
+      Finset.sum (Finset.antidiagonal k) fun ab =>
+        connActComp
+          (fun l i j =>
+            componentRS (I := I) basis (A ab.1)
+              (fun _ : Fin 1 => l)
+              (fun q : Fin 2 => if q = 0 then i else j))
+          (fun upper' lower' =>
+            componentRS (I := I) basis (T ab.2) upper' lower')
+          upper lower)
+
+@[simp]
+theorem connActAntiTensorAt_comp {r s : Nat} [DecidableEq Idx]
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x)) (k : Nat)
+    (A : Nat -> TensorRSSpace 1 2 I x) (T : Nat -> TensorRSSpace r s I x)
+    (upper : Fin r -> Idx) (lower : Fin (s + 1) -> Idx) :
+    componentRS (I := I) basis
+        (connActAntiTensorAt (I := I) basis k A T) upper lower =
+      Finset.sum (Finset.antidiagonal k) fun ab =>
+        connActComp
+          (fun l i j =>
+            componentRS (I := I) basis (A ab.1)
+              (fun _ : Fin 1 => l)
+              (fun q : Fin 2 => if q = 0 then i else j))
+          (fun upper' lower' =>
+            componentRS (I := I) basis (T ab.2) upper' lower')
+          upper lower := by
+  simpa [connActAntiTensorAt] using
+    (componentRS_ofComponentsRS (I := I) (basis := basis) (r := r) (s := s + 1)
+      (c := fun upper lower =>
+        Finset.sum (Finset.antidiagonal k) fun ab =>
+          connActComp
+            (fun l i j =>
+              componentRS (I := I) basis (A ab.1)
+                (fun _ : Fin 1 => l)
+                (fun q : Fin 2 => if q = 0 then i else j))
+            (fun upper' lower' =>
+              componentRS (I := I) basis (T ab.2) upper' lower')
+            upper lower)
+      upper lower)
+
 theorem connActComp_addL {r s : Nat}
     (A B : Idx -> Idx -> Idx -> Real)
     (T : (Fin r -> Idx) -> (Fin s -> Idx) -> Real)
