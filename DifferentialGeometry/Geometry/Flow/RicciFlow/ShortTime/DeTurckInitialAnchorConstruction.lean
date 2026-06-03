@@ -254,7 +254,7 @@ theorem deTurck_g0_realize_data
       (fun s hs => hsmoothrepr s (Set.Ico_subset_Icc_self hs))
       (fun s hs => hcanon s (Set.Ico_subset_Icc_self hs)),
     deTurck_g0_chartGram_continuity (I := I) g₀ a ha hT g_DT u₂ T_s N_cont
-      hreal hcont hreg⟩
+      hreal hcont hreg h0 hcanon⟩
 
 /-- **Interior one-sided time-derivative of the realized `g₀`-anchored flow
 (genuine analytic input).**

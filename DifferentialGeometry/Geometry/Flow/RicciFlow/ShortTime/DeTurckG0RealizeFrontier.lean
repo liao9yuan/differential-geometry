@@ -251,15 +251,18 @@ theorem deTurck_g0_carrier_realize_transport
 
 For the realized `g₀`-anchored parabolic flow `g_DT` over `[0, T]` (the linear
 realize `hreal` of a carrier `u₂`/`T_s` solving the interior spectral PDE `hreg`
-and time-continuous up to `0` via `hcont`), every iterated chart-Gram derivative of
-order `k ≤ 2` is jointly continuous in `(time, point)` on
+and time-continuous up to `0` via `hcont`, with the smooth representative `T_s`
+tied to the carrier by the canonical `L²` realization `hcanon`), every iterated
+chart-Gram derivative of order `k ≤ 2` is jointly continuous in `(time, point)` on
 `[0, T] × chartLeviCivitaGoodSet α`.
 
 This is the genuine parabolic-regularity continuity datum that the `C²`-in-time
 realize assembler consumes; it lives strictly downstream of the headline (the
 `C²`-realize tower) and is isolated here as an open node about the constructed
 flow.  The conclusion is joint continuity of chart-Gram iterated derivatives,
-distinct from the carrier hypotheses; no packaging.  The body is `sorry`. -/
+distinct from the carrier hypotheses; no packaging.  This is sorry-free glue
+forwarding to `deturck_g0_parabolic_chartGram_C2_upto_zero`; consumers transitively
+depend on `sorryAx` through that node's open analytic sub-leaves. -/
 theorem deTurck_g0_chartGram_continuity
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) {T : ℝ} (hT : 0 < T)
@@ -281,7 +284,13 @@ theorem deTurck_g0_chartGram_continuity
         (scaleLaplacianFun (I := I) (M := M) (u₂ s) +
           N_cont
             (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s) :
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s)
+    (hg0 : g_DT 0 = g₀)
+    (hcanon : ∀ s ∈ Set.Icc (0 : ℝ) T,
+      Integral.L2.SmoothCcTensor.toL2 (T_s s) =
+        tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s)) :
     ∀ (α : M) (i j : Fin (Module.finrank ℝ E)) (k : ℕ), k ≤ 2 →
       ContinuousOn
         (fun q : ℝ × M => iteratedFDeriv ℝ k
@@ -289,6 +298,6 @@ theorem deTurck_g0_chartGram_continuity
           (extChartAt I α q.2))
         (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α) :=
   deturck_g0_parabolic_chartGram_C2_upto_zero (I := I) (M := M) g₀ a ha hT g_DT u₂ T_s
-    N_cont hreal hcont hreg
+    N_cont hreal hcont hreg hg0 hcanon
 
 end DifferentialGeometry.PDE.RicciFlow

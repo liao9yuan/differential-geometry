@@ -43,9 +43,18 @@ statement; none packages a frontier leaf's conclusion as a hypothesis.
   `(time, point)` on `[0, T] × chartLeviCivitaGoodSet α`.  This is the genuine
   parabolic up-to-boundary regularity for smooth initial data: the interior smoothing
   `interior_allscale_time_continuity` gives only `[ε, T]`-control that blows up as
-  `ε → 0`, so the up-to-zero datum is the open prerequisite.
+  `ε → 0`, so the up-to-zero datum is the open prerequisite.  It is a single genuine
+  analytic leaf (its signature carries the carrier↔representative tie `hcanon` and the
+  smooth-datum condition `hg0 : g_DT 0 = g₀`, both load-bearing for truth and absent from
+  the original blueprint signature — a signature defect corrected here).
 
-Each body is `sorry`, so consumers transitively depend on `sorryAx`. -/
+The interior-PDE strong derivative `deturck_g0_pointwise_carrier_interior_pde` is assembled
+(sorry-free) from two genuine analytic sub-leaves — `deturck_g0_carrier_timeDeriv_ae` (the
+transported `L²`-time-derivative identity) and `deturck_g0_carrier_RHS_continuousOn_interior`
+(the interior continuity of the carrier right-hand side) — via the FTC.  The remaining
+`sorry`s of the file are the genuine analytic leaves (the `C⁰`-fibre embedding is *proven*;
+the chart-`C²` up-to-boundary regularity, the two interior-PDE inputs); consumers transitively
+depend on `sorryAx` through those leaves. -/
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -196,21 +205,38 @@ theorem gFibreOpBound_ccTensorBilinSymm_le_tensorHsNorm
         exact mul_le_mul_of_nonneg_right hsec_le hsqv
 
 /-- **Parabolic up-to-`t = 0` chart-`C²` regularity for the `g₀`-anchored realize flow
-with smooth initial datum (deep analytic input).**
+with smooth initial datum (deep parabolic-up-to-boundary leaf).**
 
 For the realized `g₀`-anchored parabolic flow `g_DT` over `[0, T]` — the linear realize
-`hreal` of a carrier `u₂`/`T_s` solving the interior spectral PDE `hreg` and
-time-continuous *up to `0`* via `hcont` (the smooth-initial-datum case, carrier `0`) —
-every iterated chart-Gram derivative of order `k ≤ 2` is jointly continuous in
-`(time, point)` on `[0, T] × chartLeviCivitaGoodSet α`.
+`hreal` of a carrier `u₂`/`T_s` solving the interior spectral PDE `hreg`, time-continuous
+*up to `0`* via `hcont`, with smooth initial datum (`hg0 : g_DT 0 = g₀`) and the smooth
+representative `T_s` tied to the carrier by the canonical `L²` realization `hcanon` — every
+iterated chart-Gram derivative of order `k ≤ 2` is jointly continuous in `(time, point)` on
+`[0, T] × chartLeviCivitaGoodSet α`.
 
 This is the genuine parabolic up-to-boundary regularity for smooth initial data: the
 project's interior smoothing `interior_allscale_time_continuity` controls the flow only
 on `[ε, T]` with constants that blow up as `ε → 0`, so the up-to-`t = 0` chart-`C²`
-datum cannot be read off it and is the open prerequisite.  The hypotheses `hreal`,
-`hcont`, `hreg` are genuine constraints on the constructed flow (it is the realize of a
-PDE solution), not a fold of the joint-continuity conclusion; no packaging.  The body is
-`sorry`. -/
+datum cannot be read off it and is the open prerequisite.  Its proof runs the chart-`2`-jet
+seminorm bound `chartMetricJet2DiffSup_realizeMetricAt_le_toHs_unconditional` (which controls
+the iterated chart-Gram derivative *difference* between two times by the `H^{2k}` norm of the
+carrier difference, uniformly over compact chart subsets) against the up-to-`0`
+`H^{2k}`-regularity of the smooth-datum parabolic carrier, combined with the per-time
+`C^∞`-in-space smoothness `chartGramOnE_contDiffOn`.
+
+The hypotheses are all genuine constraints on the constructed flow, not a fold of the
+joint-continuity conclusion; no packaging.  Two are *load-bearing for truth* (and were
+absent from the original blueprint signature — a signature defect):
+* `hcanon` ties `T_s` to the carrier `u₂` (the same carrier↔representative tie the sibling
+  `deturck_g0_carrier_Hk_smallness_upto_zero` carries); without it `T_s`, hence `g_DT`, is
+  unconstrained and time-discontinuous, falsifying the conclusion;
+* `hg0 : g_DT 0 = g₀` is the smooth-initial-datum condition; without it the data at `t = 0`
+  is only `H^a`-regular and the up-to-`0` chart-`C²` continuity fails.
+Both are supplied at the call site `deTurck_g0_realize_data` from
+`deTurck_g0_carrier_realize_transport`.  The body is `sorry` (a single genuine analytic
+leaf: the up-to-boundary parabolic `C²` regularity, which does not honestly factor into
+sub-lemmas provable from `hcont`'s order-`a` continuity alone — the higher-order `H^{2k}`
+carrier continuity is itself the deep content).  Consumers transitively depend on `sorryAx`. -/
 theorem deturck_g0_parabolic_chartGram_C2_upto_zero
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) {T : ℝ} (hT : 0 < T)
@@ -232,7 +258,13 @@ theorem deturck_g0_parabolic_chartGram_C2_upto_zero
         (scaleLaplacianFun (I := I) (M := M) (u₂ s) +
           N_cont
             (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s) :
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s)
+    (hg0 : g_DT 0 = g₀)
+    (hcanon : ∀ s ∈ Set.Icc (0 : ℝ) T,
+      Integral.L2.SmoothCcTensor.toL2 (T_s s) =
+        tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s)) :
     ∀ (α : M) (i j : Fin (Module.finrank ℝ E)) (k : ℕ), k ≤ 2 →
       ContinuousOn
         (fun q : ℝ × M => iteratedFDeriv ℝ k
@@ -454,8 +486,89 @@ theorem deturck_g0_carrier_realize_package
       tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hcompact hσ (u₂ s)
     rw [dif_pos hs, gateSmoothRep_toL2 (I := I) g₀ (u₂ s) hσ (hmem s hs)]
 
+/-- **`L²`-time derivative identity of the `g₀`-anchored carrier transported to the
+pointwise representative (deep `L²`-time → pointwise transport input).**
+
+For the maximal-regularity Duhamel carrier `u` of the smooth datum `0` (`hu`), its
+pointwise order-`(a+2)` representative `u₂` (the bridge carrier `hbridge`), and the
+continuous nonlinearity `N_cont` reproducing the forcing along the solution field
+(`hforce`), the `L²` time derivative of `u` agrees almost everywhere with the carrier
+right-hand side `s ↦ Δ_∇ u₂ s + N_cont (ι (u₂ s))`.
+
+This is the genuine `L²`-time-derivative datum, transported from the engine
+identity `maxRegDuhamelMap_timeDeriv_eq` (`∂_t u = timeScaleLaplacian (solField) + gforce`)
+through `hforce` (`gforce =ᵐ N_cont (solField)`) and the almost-everywhere identification of
+the bridge carrier `u₂` with the engine solution field `maxRegDuhamelSolField` (both
+represent `timeH1.toFun u` after the spectral inclusion `H^{a+2} ↪ H^a`, which is
+injective).  The conclusion is the a.e. derivative identity, distinct from the carrier
+hypotheses; no packaging.  The body is `sorry`. -/
+theorem deturck_g0_carrier_timeDeriv_ae
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+    (gforce : Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (u : Analysis.Parabolic.QuasiLinear.MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+    (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
+    (hu : u = Analysis.Parabolic.QuasiLinear.maxRegDuhamelMap (I := I) (M := M) (a : ℝ)
+      hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce)
+    (hbridge : ∀ s ∈ Set.Icc (0 : ℝ) T,
+      tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s) =
+        Analysis.Parabolic.TimeSobolev.timeH1.toFun u s)
+    (hforce : (gforce : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+        =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
+      (fun t => N_cont (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1
+        (I := I) (M := M) (a : ℝ) hT hT1
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t))) :
+    (u.deriv : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+        =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
+      (fun s => scaleLaplacianFun (I := I) (M := M) (u₂ s) +
+        N_cont
+          (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) := sorry
+
+/-- **Interior continuity of the `g₀`-anchored carrier right-hand side
+(deep parabolic-interior-smoothing input).**
+
+For the maximal-regularity Duhamel carrier `u` of the smooth datum `0` (`hu`), its
+pointwise order-`(a+2)` representative `u₂` (the bridge carrier `hbridge`), and the
+continuous nonlinearity `N_cont`, the carrier right-hand side
+`s ↦ Δ_∇ u₂ s + N_cont (ι (u₂ s))` is continuous on the open interior `(0, T)`.
+
+This is the genuine parabolic interior-smoothing datum: away from `t = 0` the parabolic
+flow is smooth in time at every higher Sobolev order, so the order-`a` right-hand side
+`Δ_∇ u₂ + N_cont (ι u₂)` (which loses two, resp. one, orders relative to the carrier) is
+continuous on `(0, T)`.  The project's interior smoothing
+`interior_allscale_time_continuity` controls only the order-`(a+2)` inclusion of the
+carrier; the continuity of the `Δ_∇`-image (order `a`) and of the `N_cont`-image is the
+open interior datum.  The conclusion is the interior continuity, distinct from the carrier
+hypotheses; no packaging.  The body is `sorry`. -/
+theorem deturck_g0_carrier_RHS_continuousOn_interior
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+    (hN_cont : Continuous N_cont)
+    (gforce : Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (u : Analysis.Parabolic.QuasiLinear.MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+    (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
+    (hu : u = Analysis.Parabolic.QuasiLinear.maxRegDuhamelMap (I := I) (M := M) (a : ℝ)
+      hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce)
+    (hbridge : ∀ s ∈ Set.Icc (0 : ℝ) T,
+      tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s) =
+        Analysis.Parabolic.TimeSobolev.timeH1.toFun u s) :
+    ContinuousOn
+      (fun s => scaleLaplacianFun (I := I) (M := M) (u₂ s) +
+        N_cont
+          (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)))
+      (Set.Ioo (0 : ℝ) T) := sorry
+
+open MeasureTheory in
 /-- **Interior strong derivative of the `g₀`-anchored pointwise carrier
-(deep parabolic-interior-regularity input).**
+(parabolic-interior-regularity assembly).**
 
 For the maximal-regularity Duhamel carrier `u` of the smooth datum `0` (`hu`), its
 pointwise order-`(a+2)` representative `u₂` (matching the carrier through the everywhere
@@ -464,14 +577,15 @@ reproducing the forcing along the solution field (`hforce`), the carrier solves 
 interior heat equation `∂_t (ι u₂) = Δ_∇ u₂ + N_cont (ι u₂)` strongly on `(0, T)`.
 
 This is the genuine interior strong-derivative datum of the `L²`-time → pointwise
-transport: the `L²`-time Duhamel derivative identity `maxRegDuhamelMap_timeDeriv_eq`,
-composed with the forcing reproduction `hforce` and the interior continuity of the
-right-hand side, gives the strong time derivative at every interior time (the FTC
-through `timeH1.hasDerivWithinAt_toFun_of_continuousOn`).  It is precisely the strong
-interior-solution datum the project's interior-regularity tower
-(`permode_sum_hasderivat`/`deturck_interior_time_regularity`) carries as a hypothesis;
-the conclusion is the strong derivative, distinct from the carrier hypotheses, no
-packaging.  The body is `sorry`. -/
+transport.  It is *assembled* here, mirroring `permode_sum_hasderivat`, from the
+fundamental theorem of calculus: the represented function `timeH1.toFun u` is the
+indefinite Bochner integral of `u.deriv` (`timeH1.toFun_apply`), which agrees a.e. with
+the carrier right-hand side `Δ_∇ u₂ + N_cont (ι u₂)` (the transported `L²`-time-derivative
+datum `deturck_g0_carrier_timeDeriv_ae`), continuous on the interior
+(`deturck_g0_carrier_RHS_continuousOn_interior`); FTC at every interior time then gives the
+strong derivative, transported through `hbridge` to `fun r ↦ ι (u₂ r)`.  The two genuine
+inputs `deturck_g0_carrier_timeDeriv_ae` and `deturck_g0_carrier_RHS_continuousOn_interior`
+carry `sorry`, so consumers transitively depend on `sorryAx`. -/
 theorem deturck_g0_pointwise_carrier_interior_pde
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
@@ -499,7 +613,70 @@ theorem deturck_g0_pointwise_carrier_interior_pde
         (scaleLaplacianFun (I := I) (M := M) (u₂ s) +
           N_cont
             (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s := sorry
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s := by
+  classical
+  set ι₂ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →L[ℝ]
+      tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) :=
+    tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+      (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) with hι₂_def
+  set RHS : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) :=
+    fun s => scaleLaplacianFun (I := I) (M := M) (u₂ s) +
+      N_cont
+        (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) with hRHS_def
+  have hderiv_ae : (u.deriv : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+      =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T] RHS :=
+    deturck_g0_carrier_timeDeriv_ae (I := I) (M := M) g₀ a hT hT1 N_cont gforce u u₂ hu
+      hbridge hforce
+  have hRHS_cont : ContinuousOn RHS (Set.Ioo (0 : ℝ) T) :=
+    deturck_g0_carrier_RHS_continuousOn_interior (I := I) (M := M) g₀ a hT hT1 N_cont
+      hN_cont gforce u u₂ hu hbridge
+  intro s hs
+  obtain ⟨hs0, hsT⟩ := hs
+  have hsmem : s ∈ Set.Ioo (0 : ℝ) T := ⟨hs0, hsT⟩
+  have hTpos : (0 : ℝ) ≤ T := hs0.le.trans hsT.le
+  have h0mem : (0 : ℝ) ∈ Set.Icc (0 : ℝ) T := ⟨le_rfl, hTpos⟩
+  have hsIcc : s ∈ Set.Icc (0 : ℝ) T := ⟨hs0.le, hsT.le⟩
+  -- FTC for the indefinite integral of the carrier right-hand side at the interior `s`.
+  have hderiv_int : IntervalIntegrable (fun r => u.deriv r)
+      MeasureTheory.volume 0 s :=
+    u.intervalIntegrable_deriv h0mem hsIcc
+  have hRHS_int : IntervalIntegrable RHS MeasureTheory.volume 0 s := by
+    have hsub : Set.uIoc (0 : ℝ) s ⊆ Set.Icc (0 : ℝ) T :=
+      (Set.uIoc_subset_uIcc).trans (Set.uIcc_subset_Icc h0mem hsIcc)
+    have hae := ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume) hsub hderiv_ae
+    exact hderiv_int.congr_ae hae
+  have hRHS_at : ContinuousAt RHS s :=
+    hRHS_cont.continuousAt (isOpen_Ioo.mem_nhds hsmem)
+  have hRHS_meas : StronglyMeasurableAtFilter RHS (nhds s) MeasureTheory.volume :=
+    hRHS_cont.stronglyMeasurableAtFilter isOpen_Ioo s hsmem
+  have hftc_RHS : HasDerivAt (fun r => ∫ x in (0 : ℝ)..r, RHS x) (RHS s) s :=
+    intervalIntegral.integral_hasDerivAt_right hRHS_int hRHS_meas hRHS_at
+  have heq : (fun r => ∫ x in (0 : ℝ)..r, u.deriv x)
+      =ᶠ[nhds s] fun r => ∫ x in (0 : ℝ)..r, RHS x := by
+    filter_upwards [Ioo_mem_nhds hs0 hsT] with r hr
+    refine intervalIntegral.integral_congr_ae ?_
+    have hrIcc : r ∈ Set.Icc (0 : ℝ) T := ⟨hr.1.le, hr.2.le⟩
+    have hsub : Set.uIoc (0 : ℝ) r ⊆ Set.Icc (0 : ℝ) T :=
+      (Set.uIoc_subset_uIcc).trans (Set.uIcc_subset_Icc h0mem hrIcc)
+    have hae := ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume) hsub hderiv_ae
+    rw [ae_restrict_iff' measurableSet_uIoc] at hae
+    filter_upwards [hae] with x hx hxmem
+    exact hx hxmem
+  have hftc_u : HasDerivAt (fun r => ∫ x in (0 : ℝ)..r, u.deriv x) (RHS s) s :=
+    hftc_RHS.congr_of_eventuallyEq heq
+  -- `timeH1.toFun u r = u.init + ∫₀ʳ u.deriv`, so it has the same derivative.
+  have htoFun : HasDerivAt
+      (fun r => (Analysis.Parabolic.TimeSobolev.timeH1.toFun u r :
+        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))) (RHS s) s := by
+    have h := hftc_u.const_add u.init
+    refine h.congr_of_eventuallyEq ?_
+    filter_upwards with r
+    rw [Analysis.Parabolic.TimeSobolev.timeH1.toFun_apply]
+  -- Transport from `timeH1.toFun u` to the included carrier via the bridge near `s`.
+  refine htoFun.congr_of_eventuallyEq ?_
+  filter_upwards [Ioo_mem_nhds hs0 hsT] with r hr
+  exact hbridge r ⟨hr.1.le, hr.2.le⟩
 
 open MeasureTheory in
 /-- **`L²`-time → pointwise Bochner/FTC transport of the `g₀`-anchored engine solution.**

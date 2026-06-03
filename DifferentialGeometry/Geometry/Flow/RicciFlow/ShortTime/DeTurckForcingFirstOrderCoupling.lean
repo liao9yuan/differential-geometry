@@ -33,8 +33,15 @@ summability conclusion folded in as a hypothesis: it constrains the geometric
 nonlinearity (it is false for a generic second-order forcing), and is distinct
 from the coupling conclusion.  It is stated purely in terms of the genuine
 nonlinearity `N_cont` (no presentation through a finite-support/gated section), as
-the operator first-order-loss is an intrinsic property of the DeTurck remainder.
-The body is `sorry`, so consumers transitively depend on `sorryAx`. -/
+the operator first-order-loss is an intrinsic property of the DeTurck remainder.  At
+the summability level it reads: if the Duhamel solution field lies in `L²(H^{d+1})`,
+then `gforce = N_cont(solField)` lies in `L²(H^d)` — the bounded first-order map
+`H^{d+1} → H^d`; the coupling is at the level of summed `L²(H^σ)`-norm masses (`N_cont`
+is a genuine non-diagonal first-order operator, so the bound is NOT mode by mode).
+
+The body is `sorry`: it is a single genuine analytic leaf (the per-order operator bound
+of the geometric first-order nonlinearity, additional structure not deducible from the
+fixed-order datum `N_cont : H^{a+1} → H^a`).  Consumers transitively depend on `sorryAx`. -/
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -61,21 +68,32 @@ variable
 /-- **First-order coupling of the DeTurck continuous-nonlinearity forcing
 (deep elliptic / first-order-loss input).**
 
-For the `g₀`-anchored DeTurck maximal-regularity engine with a continuous
-nonlinearity `N_cont` (presented through its smooth `(0, 2)`-tensor section `Nsec`
-with the eigenbasis-coordinate identity `hN_coeff`) and a forcing field `gforce`
-that is reproduced a.e. by `N_cont` along the Duhamel solution field of initial
-datum `u₀` (`hforce`), the forcing satisfies the parabolic first-order coupling:
-at every spatial Sobolev order `d`, summability of the solution-field masses at
-order `d + 1` forces summability of the forcing masses at order `d`.
+For the `g₀`-anchored DeTurck maximal-regularity engine with a continuous nonlinearity
+`N_cont` and a forcing field `gforce` that is reproduced a.e. by `N_cont` along the Duhamel
+solution field of initial datum `u₀` (`hforce`), the forcing satisfies the parabolic
+first-order coupling: at every spatial Sobolev order `d`, summability of the solution-field
+masses at order `d + 1` forces summability of the forcing masses at order `d`.
 
 This is the genuine first-order-loss / operator bound of the geometric DeTurck
-nonlinearity (`‖N_cont v‖_{H^d} ≲ ‖v‖_{H^{d+1}}`, read on the spectral mass
-families).  It constrains the nonlinearity (it is false for a generic second-order
-forcing) and is distinct from the coupling conclusion; no packaging.  It is the
-`hcouple` keystone consumed by `solFieldMass_summable_all`,
-`zeroDatum_allscale_continuity_uptoZero`, and
-`zeroDatum_carrier_weighted_tsum_tendsto_zero`.  The body is `sorry`. -/
+nonlinearity (`‖N_cont v‖_{H^d} ≲ ‖v‖_{H^{d+1}}`, read on the spectral mass families).  At
+the summability level it states: if the Duhamel solution field of `gforce` lies in
+`L²([0,T]; H^{d+1})`, then `gforce = N_cont(solField)` lies in `L²([0,T]; H^d)` — exactly
+the bounded first-order map `H^{d+1} → H^d` of the gauge-cancelled DeTurck remainder
+(`N_cont = deTurckRicciRHS − Δ_∇(realize)`, whose second-order principal part cancels
+against the linear `Δ_∇`).  It is *not* a mode-wise domination: `N_cont` is a genuine
+non-diagonal first-order differential operator, so the `i`-th output mode mixes all input
+modes — the coupling holds at the level of the summed (`L²(H^σ)`-norm) masses, via the
+per-order operator-norm bound of `N_cont`, not mode by mode.  It constrains the
+nonlinearity (it is false for a generic second-order forcing, which would need the order-`(d
++ 2)` solution-field mass) and is distinct from the coupling conclusion; no packaging.  It
+is the `hcouple` keystone consumed by `solFieldMass_summable_all`,
+`zeroDatum_allscale_continuity_uptoZero`, and `zeroDatum_carrier_weighted_tsum_tendsto_zero`.
+
+The body is `sorry` (this is a single genuine analytic leaf: the per-order operator bound of
+the geometric first-order nonlinearity, which is *additional* structure of the DeTurck
+remainder not deducible from the fixed-order datum `N_cont : H^{a+1} → H^a` alone — it
+requires `N_cont`'s extension to and boundedness on every higher pair `H^{d+1} → H^d`).
+Consumers transitively depend on `sorryAx`. -/
 theorem deTurckForcing_firstOrder_coupling
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
