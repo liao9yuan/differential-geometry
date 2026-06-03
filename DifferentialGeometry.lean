@@ -859,6 +859,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Rellich.Tensor
 import DifferentialGeometry.Analysis.Spectral.Tensor.Rellich.TensorL2SubsequenceExtraction
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Defs
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.FractionalPower
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.GeneralOrderPouSpectralBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Inclusion
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Order2Equivalence
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.CompactInclusion
@@ -1113,6 +1114,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PullbackConnection
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.TimeDerivativeChainRule
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.BareLaplacianSpectralMatch
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckForcingFirstOrderCoupling
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckG0AnalyticInputs
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckG0RealizeFrontier
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckG0RealizeSectionLipschitz

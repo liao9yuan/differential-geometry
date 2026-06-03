@@ -10,6 +10,12 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.SlotSplitParsevalBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.MildSolutionTimeH1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.ForcingPerMode
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.InteriorAllscaleTimeContinuity
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckForcingFirstOrderCoupling
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckRemainderRealizeGauge
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.GeneralOrderPouSpectralBound
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizedCovGradJetInput
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionSpace
 
 /-! # Deep analytic inputs of the `g₀`-anchored DeTurck–Ricci realize construction
 
@@ -344,48 +350,44 @@ theorem deturck_g0_parabolic_chartGram_C2_upto_zero
           (extChartAt I α q.2))
         (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α) := sorry
 
+set_option maxHeartbeats 1600000 in
 /-- **Supercritical Sobolev decay of the realize carrier to zero as `t → 0⁺`
-for the smooth (`u₀ = 0`) initial datum (deep analytic input).**
+for the smooth (`u₀ = 0`) initial datum.**
 
-For the interior `g₀`-anchored parabolic Duhamel carrier `u₂` with smooth initial datum
-(continuous up to `t = 0` via `hcont`, vanishing at `t = 0` via `hcar0`, solving the
-spectral DeTurck PDE on `(0, T)` via `hreg`) and its family of smooth `(0,2)`-tensor
-representatives `T_s` (the canonical smooth representatives of the carrier, `hcanon`),
+For the interior `g₀`-anchored maximal-regularity Duhamel carrier `u` with smooth
+initial datum `0` (`hu`), the forcing-coupled `hcouple` (the first-order coupling
+`deTurckForcing_firstOrder_coupling`), its pointwise order-`(a+2)` representative `u₂`
+matching the carrier through the everywhere bridge `hbridge`, and its family of smooth
+`(0,2)`-tensor representatives `T_s` (the canonical smooth representatives, `hcanon`),
 every supercritical `H^{2k}` Sobolev norm (`2k > dim M + 4`) of `T_s s` tends to `0` as
 `s → 0⁺`.
 
 This is the genuine parabolic up-to-`t = 0` regularity for smooth initial data: the
-parabolic DeTurck solution started at the smooth datum `0` converges to `0` in *every*
-Sobolev order as `t → 0⁺`, so the smooth representatives `T_s s` of the carrier decay in
-every supercritical order.  The interior smoothing `interior_allscale_time_continuity`
-controls the carrier only on `[ε, T]` with constants that blow up as `ε → 0`, so the
-up-to-zero supercritical decay is the open prerequisite.  It is exactly the input that,
-composed with the `C⁰`-Sobolev fibre embedding
-`gFibreOpBound_ccTensorBilinSymm_le_tensorHsNorm`, turns the carrier's vanishing at
-`t = 0` into the metric-realize fibre-smallness `C · ‖(T_s s).toHs (2k)‖ < 1` near
-`t = 0`.  The hypotheses (parabolic solution `hreg`, smooth datum `hcar0`, canonical
-representative `hcanon`) genuinely constrain the family to a parabolic carrier — without
-them the statement would be false for an arbitrary `s = 0`-vanishing family; they are
-distinct from the decay conclusion, no packaging.  The body is `sorry`. -/
+spectral up-to-zero decay core `zeroDatum_carrier_weighted_tsum_tendsto_zero` gives that
+the order-`2k` weighted spectral square-sum `∑ᵢ (1 + λᵢ)^{2k} · ((toFun u s).coeff i)²`
+tends to `0` as `s → 0⁺`; the everywhere bridge `hbridge` and the canonical
+representative `hcanon` identify those coordinates with the eigenbasis coordinates of
+`(T_s s).toL2`; and the general-order intrinsic-Sobolev control
+`pouSobolevToHsNorm_le_spectral` (the Gårding lift) bounds `‖(T_s s).toHs (2k)‖` by `C`
+times the square root of that spectral sum, so the intrinsic norm is squeezed to `0`.
+The hypotheses genuinely constrain the family to the parabolic carrier of the smooth
+datum `0`; they are distinct from the decay conclusion, no packaging. -/
 theorem deturck_g0_carrier_Hk_smallness_upto_zero
-    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
     (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2)
-    (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
-        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
-    (hcont : ContinuousOn
-      (fun s : ℝ => tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (Set.Icc 0 T))
-    (hcar0 : tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ 0) = 0)
-    (hreg : ∀ s ∈ Set.Ioo (0 : ℝ) T,
-      HasDerivAt
-        (fun r => (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-          (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ r)))
-        (scaleLaplacianFun (I := I) (M := M) (u₂ s) +
-          N_cont
-            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s)
+    (gforce : Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (u : Analysis.Parabolic.QuasiLinear.MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+    (hu : u = Analysis.Parabolic.QuasiLinear.maxRegDuhamelMap (I := I) (M := M) (a : ℝ)
+      hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce)
+    (hcouple : ∀ d : ℝ,
+      Summable (solFieldMass (I := I) (M := M) hT.le gforce (d + 1)) →
+        Summable (forcingMass (I := I) (M := M) gforce d))
+    (hbridge : ∀ s ∈ Set.Icc (0 : ℝ) T,
+      tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s) =
+        Analysis.Parabolic.TimeSobolev.timeH1.toFun u s)
     (hcanon : ∀ s ∈ Set.Icc (0 : ℝ) T,
       Integral.L2.SmoothCcTensor.toL2 (T_s s) =
         tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
@@ -394,48 +396,136 @@ theorem deturck_g0_carrier_Hk_smallness_upto_zero
     ∀ (k : ℕ), 2 * k > Module.finrank ℝ E + 4 →
       Filter.Tendsto
         (fun s : ℝ => ‖SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * k) (T_s s)‖)
-        (nhdsWithin (0 : ℝ) (Set.Ioi 0)) (nhds 0) := sorry
+        (nhdsWithin (0 : ℝ) (Set.Ioi 0)) (nhds 0) := by
+  classical
+  intro k hk
+  -- The general-order intrinsic ≤ spectral bound (the Gårding lift).
+  obtain ⟨C, hC0, hCbound⟩ :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.pouSobolevToHsNorm_le_spectral
+      (I := I) (M := M) g₀
+  -- The order-`2k` forcing mass is summable (free base regularity + the first-order
+  -- coupling bootstrap), so the spectral up-to-zero decay core applies.
+  have hbase : Summable (forcingMass (I := I) (M := M) gforce ((a : ℝ) - 2)) := by
+    have hsum := summable_weight_mul_norm_timeModeCoeff_sq (I := I) (M := M) gforce
+      (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+    refine Summable.of_nonneg_of_le
+      (fun i => forcingMass_nonneg (I := I) (M := M) gforce ((a : ℝ) - 2) i)
+      (fun i => ?_) hsum
+    have hbase_ge : (1 : ℝ) ≤ 1 + TensorEigenIdx.lambda (I := I) (M := M) i :=
+      one_le_one_add_lambda (I := I) (M := M) i
+    have hwle : tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) - 2) ≤
+        tensorSobolevWeight (I := I) (M := M) i (a : ℝ) :=
+      Real.rpow_le_rpow_of_exponent_le hbase_ge (by linarith)
+    simpa only [forcingMass] using mul_le_mul_of_nonneg_right hwle (sq_nonneg _)
+  have hsolbase : Summable (solFieldMass (I := I) (M := M) hT.le gforce (a : ℝ)) := by
+    have hgain := solFieldMass_summable_of_forcingMass_summable (I := I) (M := M)
+      hT.le gforce ((a : ℝ) - 2) hbase
+    have hrw : (a : ℝ) - 2 + 2 = (a : ℝ) := by ring
+    rwa [hrw] at hgain
+  have hsolall := solFieldMass_summable_all (I := I) (M := M) hT.le gforce hcouple hsolbase
+  have hforce_2k : Summable (forcingMass (I := I) (M := M) gforce ((2 * k : ℕ) : ℝ)) :=
+    hcouple ((2 * k : ℕ) : ℝ) (hsolall (((2 * k : ℕ) : ℝ) + 1))
+  -- Spectral up-to-zero decay of the carrier coordinates at order `2k`.
+  have hspec := zeroDatum_carrier_weighted_tsum_tendsto_zero (I := I) (M := M) g₀ a
+    gforce hT hT1 u hu (((2 * k : ℕ)) : ℝ) hforce_2k
+  -- Identify the carrier coordinates with the eigenbasis coordinates of `(T_s s).toL2`.
+  set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+    with hcompact_def
+  have hcoeff_eq : ∀ s ∈ Set.Icc (0 : ℝ) T,
+      ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+        (Analysis.Parabolic.TimeSobolev.timeH1.toFun u s).coeff i =
+          tensorL2Coeff (I := I) (M := M) hcompact
+            (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i := by
+    intro s hs i
+    have hb := hbridge s hs
+    have hb_coeff : (u₂ s).coeff i =
+        (Analysis.Parabolic.TimeSobolev.timeH1.toFun u s).coeff i := by
+      rw [← tensorHsInclusion_coeff_apply
+        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s) i, hb]
+    rw [← hb_coeff, hcanon s hs,
+      tensorHsToL2_tensorL2Coeff (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s) i]
+  -- Rewrite the spectral sum in terms of `(T_s s)`'s eigenbasis coordinates.
+  have hsum_eq : ∀ s ∈ Set.Icc (0 : ℝ) T,
+      (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+        tensorSobolevWeight (I := I) (M := M) i (((2 * k : ℕ)) : ℝ) *
+          (Analysis.Parabolic.TimeSobolev.timeH1.toFun u s).coeff i ^ 2) =
+      (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+        tensorSobolevWeight (I := I) (M := M) i (((2 * k : ℕ)) : ℝ) *
+          (tensorL2Coeff (I := I) (M := M) hcompact
+            (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) ^ 2) := by
+    intro s hs
+    refine tsum_congr (fun i => ?_)
+    rw [hcoeff_eq s hs i]
+  -- The right-neighbourhood filter at `0` lies inside the `Icc 0 T`-eventual set.
+  have hIcc_mem : Set.Icc (0 : ℝ) T ∈ nhdsWithin (0 : ℝ) (Set.Ioi 0) := by
+    rw [mem_nhdsWithin]
+    refine ⟨Set.Iio T, isOpen_Iio, hT, ?_⟩
+    rintro x ⟨hxlt, hxgt⟩
+    exact ⟨le_of_lt hxgt, le_of_lt hxlt⟩
+  -- Transport the decay to the `(T_s s)`-coordinate sum.
+  have hspec' : Filter.Tendsto
+      (fun s : ℝ => ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2,
+        tensorSobolevWeight (I := I) (M := M) i (((2 * k : ℕ)) : ℝ) *
+          (tensorL2Coeff (I := I) (M := M) hcompact
+            (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) ^ 2)
+      (nhdsWithin (0 : ℝ) (Set.Ioi 0)) (nhds 0) := by
+    refine hspec.congr' ?_
+    filter_upwards [hIcc_mem] with s hs
+    exact hsum_eq s hs
+  -- The square root of the spectral sum tends to `0`, hence so does `C ·` it.
+  have hsqrt : Filter.Tendsto
+      (fun s : ℝ => Real.sqrt (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2,
+        tensorSobolevWeight (I := I) (M := M) i (((2 * k : ℕ)) : ℝ) *
+          (tensorL2Coeff (I := I) (M := M) hcompact
+            (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) ^ 2))
+      (nhdsWithin (0 : ℝ) (Set.Ioi 0)) (nhds 0) := by
+    have h := (Real.continuous_sqrt.tendsto 0).comp hspec'
+    simpa using h
+  have hCmul : Filter.Tendsto
+      (fun s : ℝ => C * Real.sqrt (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2,
+        tensorSobolevWeight (I := I) (M := M) i (((2 * k : ℕ)) : ℝ) *
+          (tensorL2Coeff (I := I) (M := M) hcompact
+            (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) ^ 2))
+      (nhdsWithin (0 : ℝ) (Set.Ioi 0)) (nhds 0) := by
+    have := hsqrt.const_mul C
+    simpa using this
+  -- Squeeze: `0 ≤ ‖(T_s s).toHs (2k)‖ ≤ C · √(spectral sum) → 0`.
+  refine squeeze_zero_norm' ?_ hCmul
+  filter_upwards with s
+  rw [Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)]
+  exact hCbound k (T_s s)
 
-/-- **Smooth-representative realize package for the `g₀`-anchored carrier
-(deep analytic input).**
+/-- **Canonical smooth-representative family of the `g₀`-anchored carrier.**
 
-Given the interior `g₀`-anchored Duhamel carrier `u₂ : ℝ → H^{a+2}(g₀)` continuous up to
-`t = 0` (`hcont`) with smooth initial datum (carrier starts at `0`, `hcar0`), the
-parabolic smoothing of the carrier for `t > 0` produces a family of genuine smooth
-`(0,2)`-tensor representatives `T_s : ℝ → SmoothCcTensor g₀ 0 2` together with the
-realized metric family `g_DT` such that:
+Given the interior `g₀`-anchored Duhamel carrier `u₂ : ℝ → H^{a+2}(g₀)` whose `L²` class
+lies in *every* intrinsic Sobolev space on `[0, T]` (the all-order interior regularity
+`hmem`, supplied from the parabolic up-to-`t = 0` smoothing), the spectral
+smooth-representative gate `deTurckRealizeGate`/`gateSmoothRep` produces a family of
+genuine smooth `(0,2)`-tensor representatives `T_s : ℝ → SmoothCcTensor g₀ 0 2` with:
 
-* `h0` — `g_DT 0 = g₀` (the realized metric starts at the anchor);
-* `hreal` — the realized metric `g_DT s` is the linear realize `g₀ + ccTensorBilinSymm (T_s s)`;
-* `hsmoothrepr` — the carrier coordinates `(u₂ s).coeff i` are the `L²` coordinates of
-  the smooth representative `T_s s` (i.e. `T_s s` is the smooth representative of the
-  carrier `u₂ s`);
+* `hsmoothrepr` — the carrier coordinates `(u₂ s).coeff i` are the `L²` coordinates of the
+  smooth representative `T_s s`;
 * `hcanon` — the `L²` class of `T_s s` equals the `L²` realization `tensorHsToL2` of the
   carrier `u₂ s` (the canonical smooth-representative identity downstream
   gauge-reconciliation consumes to reconstruct `deTurckRicciRHS g_bg` from the carrier).
 
-This is the genuinely-open parabolic-smoothing realize layer: the carrier is only a
-finite-order `H^{a+2}` spectral object, while `T_s` is a genuine `C^∞` tensor section
-whose realize is an honest metric.  Producing `T_s` and the realize identities is the
-elliptic-regularity / smooth-representative content that lives strictly downstream of
-the headline (it consumes the spectral smooth-representative gate
-`spectralSmoothRealizesAsSmooth_of_eigenvalueTailSummable`).  The conclusion is the
-existence of the smooth-representative realize bundle, structurally distinct from the
-carrier hypotheses; no packaging.  The body is `sorry`. -/
+The carrier is only a finite-order `H^{a+2}` spectral object, while `T_s s` is a genuine
+`C^∞` tensor section; the spectral gate `gateSmoothRep` produces it from the all-order
+membership `hmem`.  The conclusion is the existence of the smooth-representative family
+with its `L²` identities, structurally distinct from the membership hypothesis; no
+packaging. -/
 theorem deturck_g0_carrier_realize_package
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
     (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
-    (hcont : ContinuousOn
-      (fun s : ℝ => tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (Set.Icc 0 T))
-    (hcar0 : tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ 0) = 0) :
-    ∃ (g_DT : ℝ → SmoothRiemannianMetric I M)
-        (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2),
-      g_DT 0 = g₀ ∧
-      (∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
-        (g_DT s).inner x v w
-          = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w) ∧
+    (hmem : ∀ s ∈ Set.Icc (0 : ℝ) T,
+      MemAllTensorHs (I := I) (M := M) g₀ 0 2
+        (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s))) :
+    ∃ (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2),
       (∀ s ∈ Set.Icc (0 : ℝ) T,
           ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
             (I := I) (M := M) g₀ 0 2,
@@ -447,35 +537,100 @@ theorem deturck_g0_carrier_realize_package
         Integral.L2.SmoothCcTensor.toL2 (T_s s) =
           tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-            (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s)) := sorry
+            (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s)) := by
+  classical
+  set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+    with hcompact_def
+  have hσ : (0 : ℝ) ≤ (a : ℝ) + 2 := by positivity
+  -- `T_s s` is the gate-produced smooth representative of `u₂ s` on `[0, T]` (and `0`
+  -- off the interval — never inspected by the consumers, which range over `[0, T]`).
+  refine ⟨fun s =>
+    if hs : s ∈ Set.Icc (0 : ℝ) T then
+      gateSmoothRep (I := I) g₀ (u₂ s) hσ (hmem s hs)
+    else 0, ?_, ?_⟩
+  · intro s hs i
+    change (u₂ s).coeff i = tensorL2Coeff (I := I) (M := M) hcompact
+      (Integral.L2.SmoothCcTensor.toL2
+        (if hs : s ∈ Set.Icc (0 : ℝ) T then
+          gateSmoothRep (I := I) g₀ (u₂ s) hσ (hmem s hs) else 0)) i
+    rw [dif_pos hs, gateSmoothRep_toL2 (I := I) g₀ (u₂ s) hσ (hmem s hs),
+      tensorHsToL2_tensorL2Coeff hσ (u₂ s) i]
+  · intro s hs
+    change Integral.L2.SmoothCcTensor.toL2
+        (if hs : s ∈ Set.Icc (0 : ℝ) T then
+          gateSmoothRep (I := I) g₀ (u₂ s) hσ (hmem s hs) else 0) =
+      tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hcompact hσ (u₂ s)
+    rw [dif_pos hs, gateSmoothRep_toL2 (I := I) g₀ (u₂ s) hσ (hmem s hs)]
+
+/-- **Interior strong derivative of the `g₀`-anchored pointwise carrier
+(deep parabolic-interior-regularity input).**
+
+For the maximal-regularity Duhamel carrier `u` of the smooth datum `0` (`hu`), its
+pointwise order-`(a+2)` representative `u₂` (matching the carrier through the everywhere
+bridge `hbridge` on `[0, T]`), and the continuous first-order nonlinearity `N_cont`
+reproducing the forcing along the solution field (`hforce`), the carrier solves the
+interior heat equation `∂_t (ι u₂) = Δ_∇ u₂ + N_cont (ι u₂)` strongly on `(0, T)`.
+
+This is the genuine interior strong-derivative datum of the `L²`-time → pointwise
+transport: the `L²`-time Duhamel derivative identity `maxRegDuhamelMap_timeDeriv_eq`,
+composed with the forcing reproduction `hforce` and the interior continuity of the
+right-hand side, gives the strong time derivative at every interior time (the FTC
+through `timeH1.hasDerivWithinAt_toFun_of_continuousOn`).  It is precisely the strong
+interior-solution datum the project's interior-regularity tower
+(`permode_sum_hasderivat`/`deturck_interior_time_regularity`) carries as a hypothesis;
+the conclusion is the strong derivative, distinct from the carrier hypotheses, no
+packaging.  The body is `sorry`. -/
+theorem deturck_g0_pointwise_carrier_interior_pde
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+    (hN_cont : Continuous N_cont)
+    (gforce : Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (u : Analysis.Parabolic.QuasiLinear.MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+    (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
+    (hu : u = Analysis.Parabolic.QuasiLinear.maxRegDuhamelMap (I := I) (M := M) (a : ℝ)
+      hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce)
+    (hbridge : ∀ s ∈ Set.Icc (0 : ℝ) T,
+      tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s) =
+        Analysis.Parabolic.TimeSobolev.timeH1.toFun u s)
+    (hforce : (gforce : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+        =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
+      (fun t => N_cont (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1
+        (I := I) (M := M) (a : ℝ) hT hT1
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t))) :
+    ∀ s ∈ Set.Ioo (0 : ℝ) T,
+      HasDerivAt
+        (fun r => (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ r)))
+        (scaleLaplacianFun (I := I) (M := M) (u₂ s) +
+          N_cont
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s := sorry
 
 open MeasureTheory in
-/-- **`L²`-time → pointwise Bochner/FTC transport of the `g₀`-anchored engine solution
-(deep analytic input).**
+/-- **`L²`-time → pointwise Bochner/FTC transport of the `g₀`-anchored engine solution.**
 
 For the maximal-regularity Duhamel engine solution `u = maxRegDuhamelMap a hT hT1 0 gforce`
-of the `g₀`-anchored DeTurck system with initial datum `0` and forcing reproduced a.e. by
-the continuous nonlinearity `N_cont` along the solution field (`hforce`), the indefinite
-Bochner integral / FTC transport produces the genuine *pointwise* order-`(a+2)` carrier
-`u₂ s := maxRegDuhamelSolField a hT hT1 0 gforce s` such that:
+of the `g₀`-anchored DeTurck system with initial datum `0`, the first-order coupling
+`hcouple`, and forcing reproduced a.e. by the continuous nonlinearity `N_cont` along the
+solution field (`hforce`), the spectral up-to-`t = 0` synthesis core
+`zeroDatum_allscale_continuity_uptoZero` produces the genuine *pointwise* order-`(a+2)`
+carrier `u₂` such that:
 
 * `hbridge` — the included carrier `ι (u₂ s)` is the represented function `timeH1.toFun u s`
-  (the order-`(a+2)` view of the `H¹`-time solution agrees, after inclusion, with the
-  solution's pointwise value — the indefinite-integral identity at every `s`);
+  on `[0, T]` (the order-`(a+2)` view of the `H¹`-time solution agrees, after inclusion,
+  with the solution's pointwise value);
 * `hcont` — the included carrier is continuous on `[0, T]` (up to `t = 0`);
 * `hcar0` — the included carrier starts at `0` (the smooth initial datum);
-* `hreg` — on `(0, T)` the carrier solves `∂_t (ι u₂) = Δ_∇ u₂ + N_cont (ι u₂)`, obtained
-  by the FTC from the `L²`-time Duhamel derivative identity `maxRegDuhamelMap_timeDeriv_eq`
-  composed with the forcing reproduction `hforce` and the interior continuity of the
-  right-hand side.
+* `hreg` — on `(0, T)` the carrier solves `∂_t (ι u₂) = Δ_∇ u₂ + N_cont (ι u₂)`, the
+  interior strong-derivative datum `deturck_g0_pointwise_carrier_interior_pde`.
 
-This is the genuinely-open `L²`-time → pointwise transport that lives strictly downstream
-of the headline (it is the content of `DeTurckInteriorTimeRegularity.lean`, which
-transitively imports the headline): the everywhere (not merely a.e.) order-`(a+2)` bridge
-`hbridge` is the open per-mode regularity datum that the whole interior-regularity tower
-carries as a hypothesis.  The conclusion is the existence of the pointwise carrier with its
-strong derivative and continuity, structurally distinct from the engine identities; no
-packaging.  The body is `sorry`. -/
+The everywhere-on-`[0, T]` bridge and the up-to-`t = 0` continuity are read off the
+synthesis core (which the coupling `hcouple` feeds); the conclusion is the existence of the
+pointwise carrier with its strong derivative and continuity, structurally distinct from the
+engine identities; no packaging. -/
 theorem deturck_g0_engine_pointwise_carrier
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
@@ -486,13 +641,17 @@ theorem deturck_g0_engine_pointwise_carrier
     (u : Analysis.Parabolic.QuasiLinear.MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
     (hu : u = Analysis.Parabolic.QuasiLinear.maxRegDuhamelMap (I := I) (M := M) (a : ℝ)
       hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce)
+    (hcouple : ∀ d : ℝ,
+      Summable (solFieldMass (I := I) (M := M) hT.le gforce (d + 1)) →
+        Summable (forcingMass (I := I) (M := M) gforce d))
     (hforce : (gforce : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
         =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
       (fun t => N_cont (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1
         (I := I) (M := M) (a : ℝ) hT hT1
         (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t))) :
     ∃ u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2),
-      (∀ s, tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+      (∀ s ∈ Set.Icc (0 : ℝ) T,
+        tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
           (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s)
         = Analysis.Parabolic.TimeSobolev.timeH1.toFun u s) ∧
       ContinuousOn
@@ -507,7 +666,167 @@ theorem deturck_g0_engine_pointwise_carrier
           (scaleLaplacianFun (I := I) (M := M) (u₂ s) +
             N_cont
               (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s) := sorry
+                (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s) := by
+  classical
+  -- The up-to-`t = 0` synthesis carrier at order `a + 2`.
+  obtain ⟨u₂, hu₂cont, hu₂bridge⟩ :=
+    zeroDatum_allscale_continuity_uptoZero (I := I) (M := M) g₀ a gforce hT hT1 u hu
+      hcouple ((a : ℝ) + 2) (by linarith)
+  refine ⟨u₂, hu₂bridge, ?_, ?_, ?_⟩
+  · -- Continuity of the included carrier on `[0, T]`.
+    exact (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+      (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith)).continuous.comp_continuousOn hu₂cont
+  · -- The carrier starts at `0`: `ι (u₂ 0) = toFun u 0 = u.init = ι 0 = 0`.
+    have h0mem : (0 : ℝ) ∈ Set.Icc (0 : ℝ) T := ⟨le_rfl, hT.le⟩
+    rw [hu₂bridge 0 h0mem, Analysis.Parabolic.TimeSobolev.timeH1.toFun_zero, hu,
+      Analysis.Parabolic.QuasiLinear.maxRegDuhamelMap_init, map_zero]
+  · -- Interior strong derivative (posited child `deturck_g0_pointwise_carrier_interior_pde`).
+    exact deturck_g0_pointwise_carrier_interior_pde (I := I) (M := M) g₀ a hT hT1
+      N_cont hN_cont gforce u u₂ hu hu₂bridge hforce
+
+/-- **All-order interior membership of the smooth-datum carrier.**  For the
+`g₀`-anchored maximal-regularity carrier `u` of the smooth datum `0` (`hu`), the
+first-order coupling `hcouple`, and its pointwise representative `u₂` matching the
+carrier through the everywhere bridge `hbridge`, the `L²` class of `u₂ s` lies in
+*every* intrinsic Sobolev space on `[0, T]`.  The order-`σ` weighted square-sum of the
+carrier coordinates is dominated by `4 · T · forcingMass gforce σ`
+(`zeroDatum_carrier_weighted_coeff_sq_le`), summable at every `σ` by the coupling
+bootstrap (`solFieldMass_summable_all` ∘ `hcouple`), so the order-`σ` spectral synthesis
+of `(u₂ s).coeff` is an `Hˢ` element whose `L²` realization recovers `tensorHsToL2 (u₂
+s)`.  This is the all-order interior smoothing of the parabolic carrier, the
+`MemAllTensorHs` antecedent the smooth-representative gate consumes. -/
+private theorem carrier_memAllTensorHs
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
+    (gforce : Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (u : Analysis.Parabolic.QuasiLinear.MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+    (hu : u = Analysis.Parabolic.QuasiLinear.maxRegDuhamelMap (I := I) (M := M) (a : ℝ)
+      hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce)
+    (hcouple : ∀ d : ℝ,
+      Summable (solFieldMass (I := I) (M := M) hT.le gforce (d + 1)) →
+        Summable (forcingMass (I := I) (M := M) gforce d))
+    (hbridge : ∀ s ∈ Set.Icc (0 : ℝ) T,
+      tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s) =
+        Analysis.Parabolic.TimeSobolev.timeH1.toFun u s) :
+    ∀ s ∈ Set.Icc (0 : ℝ) T,
+      MemAllTensorHs (I := I) (M := M) g₀ 0 2
+        (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s)) := by
+  classical
+  set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+    with hcompact_def
+  -- Free base regularity at order `a`, then the all-order coupling bootstrap.
+  have hbase : Summable (forcingMass (I := I) (M := M) gforce ((a : ℝ) - 2)) := by
+    have hsum := summable_weight_mul_norm_timeModeCoeff_sq (I := I) (M := M) gforce hcompact
+    refine Summable.of_nonneg_of_le
+      (fun i => forcingMass_nonneg (I := I) (M := M) gforce ((a : ℝ) - 2) i)
+      (fun i => ?_) hsum
+    have hbase_ge : (1 : ℝ) ≤ 1 + TensorEigenIdx.lambda (I := I) (M := M) i :=
+      one_le_one_add_lambda (I := I) (M := M) i
+    have hwle : tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) - 2) ≤
+        tensorSobolevWeight (I := I) (M := M) i (a : ℝ) :=
+      Real.rpow_le_rpow_of_exponent_le hbase_ge (by linarith)
+    simpa only [forcingMass] using mul_le_mul_of_nonneg_right hwle (sq_nonneg _)
+  have hsolbase : Summable (solFieldMass (I := I) (M := M) hT.le gforce (a : ℝ)) := by
+    have hgain := solFieldMass_summable_of_forcingMass_summable (I := I) (M := M)
+      hT.le gforce ((a : ℝ) - 2) hbase
+    have hrw : (a : ℝ) - 2 + 2 = (a : ℝ) := by ring
+    rwa [hrw] at hgain
+  have hsolall := solFieldMass_summable_all (I := I) (M := M) hT.le gforce hcouple hsolbase
+  have hforce_all : ∀ σ : ℝ, Summable (forcingMass (I := I) (M := M) gforce σ) := by
+    intro σ
+    exact hcouple σ (hsolall (σ + 1))
+  -- For each `s ∈ [0,T]` and each `σ ≥ 0`, the order-`σ` weighted square-sum of the
+  -- carrier coordinates is summable, by domination against the forcing mass.
+  intro s hs σ hσ
+  have hb := hbridge s hs
+  have hb_coeff : ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+        (I := I) (M := M) g₀ 0 2,
+      (u₂ s).coeff i = (Analysis.Parabolic.TimeSobolev.timeH1.toFun u s).coeff i := by
+    intro i
+    rw [← tensorHsInclusion_coeff_apply
+      (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s) i, hb]
+  have hsum_σ : Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+        (I := I) (M := M) g₀ 0 2 =>
+      tensorSobolevWeight (I := I) (M := M) i σ * ((u₂ s).coeff i) ^ 2) := by
+    refine Summable.of_nonneg_of_le
+      (fun i => mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i σ) (sq_nonneg _))
+      (fun i => ?_) ((hforce_all σ).mul_left (4 * T))
+    rw [hb_coeff i]
+    exact zeroDatum_carrier_weighted_coeff_sq_le (I := I) (M := M) g₀ a gforce hT hT1
+      u hu σ i hs
+  -- The order-`σ` synthesis of `(u₂ s).coeff` is the required `Hˢ` witness.
+  refine ⟨Analysis.Parabolic.MaximalRegularity.timeModeSynthesisPointwise
+      (g := g₀) (r := 0) (s := 2) (b := σ) (fun i => (u₂ s).coeff i) hsum_σ, ?_⟩
+  set v := Analysis.Parabolic.MaximalRegularity.timeModeSynthesisPointwise
+      (g := g₀) (r := 0) (s := 2) (b := σ) (fun i => (u₂ s).coeff i) hsum_σ with hv_def
+  -- Both `L²` classes have eigenbasis coordinates `(u₂ s).coeff`, hence coincide.
+  apply (tensorResolventHilbertEigenbasisSigma (I := I) (M := M) hcompact).repr.injective
+  ext i
+  have hlhs : tensorL2Coeff (I := I) (M := M) hcompact
+      (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hcompact hσ v) i
+        = (u₂ s).coeff i := by
+    rw [tensorHsToL2_tensorL2Coeff hσ v i, hv_def,
+      Analysis.Parabolic.MaximalRegularity.timeModeSynthesisPointwise_coeff]
+  have hrhs : tensorL2Coeff (I := I) (M := M) hcompact
+      (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hcompact
+        (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s)) i = (u₂ s).coeff i :=
+    tensorHsToL2_tensorL2Coeff (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s) i
+  exact hlhs.trans hrhs.symm
+
+/-- The pointwise carrier vanishes at any time where its inclusion vanishes (the smooth
+initial datum `0`): from `ι (u₂ s₀) = 0` the order-`(a+2)` carrier `u₂ s₀` is `0`, since
+the spectral inclusion is injective on eigenbasis coordinates. -/
+private theorem carrier_zero_at_zero
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
+    (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
+    (u : Analysis.Parabolic.QuasiLinear.MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+    {s₀ : ℝ}
+    (hb : tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s₀) =
+      Analysis.Parabolic.TimeSobolev.timeH1.toFun u s₀)
+    (hcar0 : tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ 0) = 0)
+    (hs0 : s₀ = 0) :
+    u₂ s₀ = 0 := by
+  subst hs0
+  refine tensorHs.ext (funext (fun i => ?_))
+  have hc : (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+      (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ 0)).coeff i = 0 := by
+    rw [hcar0]; rfl
+  rw [tensorHsInclusion_coeff_apply] at hc
+  rw [tensorHs.zero_coeff, hc]
+
+/-- The extracted symmetric bilinear form of the **zero** smooth section vanishes. -/
+private theorem ccTensorBilinSymm_zero_apply
+    (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
+    ccTensorBilinSymm (I := I) g (0 : Integral.L2.SmoothCcTensor g 0 2) x v w = 0 := by
+  have hsec0 : (0 : Integral.L2.SmoothCcTensor g 0 2).toSection x
+      (ContinuousMultilinearMap.constOfIsEmpty ℝ
+        (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) = 0 := by
+    rw [Integral.L2.SmoothCcTensor.toSection_zero]
+    rfl
+  have hmodel : ccTensorModel (I := I) g (0 : Integral.L2.SmoothCcTensor g 0 2) x = 0 := by
+    rw [ccTensorModel, ccTensorMultilinear_apply, hsec0]
+    exact map_zero _
+  rw [ccTensorBilinSymm_apply, ccTensorBilin_apply, ccTensorBilin_apply, hmodel,
+    ContinuousMultilinearMap.zero_apply, ContinuousMultilinearMap.zero_apply]
+  ring
+
+/-- If the `L²` class of a smooth section vanishes, its extracted symmetric bilinear
+form vanishes pointwise (`smoothCcTensor_toL2_injective`). -/
+private theorem ccTensorBilinSymm_of_toL2_zero
+    (g : SmoothRiemannianMetric I M) (T : Integral.L2.SmoothCcTensor g 0 2)
+    (hT : Integral.L2.SmoothCcTensor.toL2 T = 0) (x : M) (v w : TangentSpace I x) :
+    ccTensorBilinSymm (I := I) g T x v w = 0 := by
+  have hTzero : T = 0 :=
+    smoothCcTensor_toL2_injective (I := I) (M := M) g 0 2
+      (by rw [hT, map_zero])
+  rw [hTzero]
+  exact ccTensorBilinSymm_zero_apply (I := I) g x v w
 
 set_option linter.unusedVariables false in
 /-- **`L²`-time engine solution → pointwise realized carrier bundle for the
@@ -680,19 +999,25 @@ theorem deturck_g0_engine_carrier_extraction
   have hTe1 : Te ≤ 1 := min_le_right _ _
   obtain ⟨u, gforce, hduh, hforce, _htrace, _hderivEq⟩ :=
     hsol hTe_pos (min_le_left _ _) hTe1
+  -- The first-order coupling of the forcing (posited child `deTurckForcing_firstOrder_coupling`).
+  have hcouple := deTurckForcing_firstOrder_coupling (I := I) (M := M) g₀ a hTe_pos hTe1
+    N_cont Nsec hN_coeff (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce hforce
   -- Bochner/FTC transport to the pointwise order-`(a+2)` carrier.
-  obtain ⟨u₂, _hbridge, hcont, hcar0, hreg⟩ :=
+  obtain ⟨u₂, hbridge, hcont, hcar0, hreg⟩ :=
     deturck_g0_engine_pointwise_carrier (I := I) (M := M) g₀ a hTe_pos hTe1
-      N_cont hN_cont gforce u hduh hforce
-  -- Smooth-representative realize package.
-  obtain ⟨g_DT, T_s, h0, hreal, hsmoothrepr, hcanon⟩ :=
-    deturck_g0_carrier_realize_package (I := I) (M := M) g₀ a u₂ hcont hcar0
+      N_cont hN_cont gforce u hduh hcouple hforce
+  -- All-order interior membership of the carrier's `L²` class.
+  have hmem := carrier_memAllTensorHs (I := I) (M := M) g₀ a hTe_pos hTe1 u₂ gforce u hduh
+    hcouple hbridge
+  -- Canonical smooth-representative family of the carrier.
+  obtain ⟨T_s, hsmoothrepr, hcanon⟩ :=
+    deturck_g0_carrier_realize_package (I := I) (M := M) g₀ a u₂ hmem
   -- Supercritical decay of `T_s` to `0` as `t → 0⁺`, and the fibre embedding.
   obtain ⟨C, hC0, hCbound⟩ := hfibre
   set k₀ : ℕ := (Module.finrank ℝ E + 4) / 2 + 1 with hk₀_def
   have hk₀_super : 2 * k₀ > Module.finrank ℝ E + 4 := by rw [hk₀_def]; omega
-  have hdecay := deturck_g0_carrier_Hk_smallness_upto_zero (I := I) (M := M) g₀ a u₂ T_s
-    N_cont hcont hcar0 hreg hcanon k₀ hk₀_super
+  have hdecay := deturck_g0_carrier_Hk_smallness_upto_zero (I := I) (M := M) g₀ a hTe_pos hTe1
+    u₂ T_s gforce u hduh hcouple hbridge hcanon k₀ hk₀_super
   -- `C · ‖(T_s s).toHs (2k₀)‖ → 0`, hence `< 1` on a punctured right-neighbourhood of `0`.
   have htend : Filter.Tendsto
       (fun s : ℝ => C * ‖SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * k₀) (T_s s)‖)
@@ -704,25 +1029,73 @@ theorem deturck_g0_engine_carrier_extraction
     htend.eventually (gt_mem_nhds (by norm_num : (0 : ℝ) < 1))
   rw [eventually_nhdsWithin_iff, Metric.eventually_nhds_iff] at hev
   obtain ⟨η, hη_pos, hη⟩ := hev
-  -- Final horizon: shrink so the whole interval lies in the fibre-small regime.
-  have hsub : Set.Icc (0 : ℝ) (min Te η) ⊆ Set.Icc (0 : ℝ) Te :=
+  -- Final horizon: shrink (to `min Te (η/2)`) so the whole closed interval `[0, Tf]`
+  -- lies *strictly* inside the radius-`η` fibre-small regime.
+  set Tf : ℝ := min Te (η / 2) with hTf_def
+  have hTf_pos : 0 < Tf := lt_min hTe_pos (by linarith)
+  have hTf_lt_η : Tf < η := lt_of_le_of_lt (min_le_right _ _) (by linarith)
+  have hsub : Set.Icc (0 : ℝ) Tf ⊆ Set.Icc (0 : ℝ) Te :=
     Set.Icc_subset_Icc le_rfl (min_le_left _ _)
-  refine ⟨min Te η, g_DT, u₂, T_s, lt_min hTe_pos hη_pos, h0,
-    fun s hs => hreal s (hsub hs), ?_, ?_, ?_,
+  -- The realized perturbation `ccTensorBilinSymm (T_s s)` is `g₀`-fibre small with a
+  -- constant `< 1` on the whole shrunk interval `[0, Tf]` (at `s = 0` the carrier — hence
+  -- its smooth representative's `L²` class — vanishes, so the perturbation is `0`).
+  have hsmall_all : ∀ s ∈ Set.Icc (0 : ℝ) Tf, ∃ δ' : ℝ, δ' < 1 ∧
+      gFibreOpBound (I := I) (M := M) g₀
+        (ccTensorBilinSymm (I := I) g₀ (T_s s)) δ' := by
+    intro s hs
+    rcases eq_or_lt_of_le hs.1 with hs0 | hs0
+    · -- `s = 0`: the perturbation is the zero form.
+      refine ⟨0, by norm_num, ?_⟩
+      have hTsL2 : Integral.L2.SmoothCcTensor.toL2 (T_s s) = 0 := by
+        rw [hcanon s (hsub hs), carrier_zero_at_zero (I := I) (M := M) g₀ a u₂ u
+          (hbridge s (hsub hs)) hcar0 hs0.symm, map_zero]
+      intro x v w
+      rw [ccTensorBilinSymm_of_toL2_zero (I := I) g₀ (T_s s) hTsL2 x v w, abs_zero]
+      have := Real.sqrt_nonneg (g₀.inner x v v)
+      have := Real.sqrt_nonneg (g₀.inner x w w)
+      positivity
+    · -- `0 < s`: fibre-smallness from the decay.
+      have hs_lt_η : s < η := lt_of_le_of_lt hs.2 hTf_lt_η
+      have hsmall_lt : C * ‖SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+          (2 * k₀) (T_s s)‖ < 1 := by
+        apply hη
+        · rw [Real.dist_eq, sub_zero, abs_of_pos hs0]; exact hs_lt_η
+        · exact hs0
+      exact ⟨C * ‖SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * k₀) (T_s s)‖,
+        hsmall_lt, hCbound k₀ hk₀_super (T_s s)⟩
+  -- The realized metric family `g_DT s := g₀ + ccTensorBilinSymm (T_s s)` (`g₀` off the
+  -- fibre-small regime — never inspected outside `[0, Tf]`).
+  set g_DT : ℝ → SmoothRiemannianMetric I M := fun s =>
+    if h : ∃ δ' : ℝ, δ' < 1 ∧
+        gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ (T_s s)) δ' then
+      tensorSectionRealizeMetric (I := I) g₀ (T_s s) h.choose_spec.1 h.choose_spec.2
+    else g₀ with hg_DT_def
+  have hreal : ∀ s ∈ Set.Icc (0 : ℝ) Tf, ∀ (x : M) (v w : TangentSpace I x),
+      (g_DT s).inner x v w
+        = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w := by
+    intro s hs x v w
+    rw [hg_DT_def]
+    simp only [dif_pos (hsmall_all s hs)]
+    exact tensorSectionRealizeMetric_inner (I := I) g₀ (T_s s) _ _ x v w
+  have h0 : g_DT 0 = g₀ := by
+    have h0mem : (0 : ℝ) ∈ Set.Icc (0 : ℝ) Tf := ⟨le_rfl, hTf_pos.le⟩
+    -- The perturbation vanishes at `s = 0` (carrier vanishes there).
+    have hu₂0 : u₂ 0 = 0 :=
+      carrier_zero_at_zero (I := I) (M := M) g₀ a u₂ u (hbridge 0 (hsub h0mem)) hcar0 rfl
+    have hTsL2 : Integral.L2.SmoothCcTensor.toL2 (T_s 0) = 0 := by
+      rw [hcanon 0 (hsub h0mem), hu₂0, map_zero]
+    refine smoothRiemannianMetric_eq_of_inner (I := I) (g_DT 0) g₀ (fun x v w => ?_)
+    rw [hreal 0 h0mem x v w,
+      ccTensorBilinSymm_of_toL2_zero (I := I) g₀ (T_s 0) hTsL2 x v w, add_zero]
+  refine ⟨Tf, g_DT, u₂, T_s, hTf_pos, h0,
+    fun s hs => hreal s hs, ?_, ?_, ?_,
     fun s hs => hsmoothrepr s (hsub hs), fun s hs => hcanon s (hsub hs)⟩
-  · exact hcont.mono (Set.Icc_subset_Icc le_rfl (min_le_left _ _))
+  · exact hcont.mono hsub
   · intro s hs
     exact hreg s ⟨hs.1, lt_of_lt_of_le hs.2 (min_le_left _ _)⟩
   · intro s hs
-    have hs_pos : (0 : ℝ) < s := hs.1
-    have hs_lt_η : s < η := lt_of_lt_of_le hs.2 (min_le_right _ _)
-    have hsmall_lt : C * ‖SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
-        (2 * k₀) (T_s s)‖ < 1 := by
-      apply hη
-      · rw [Real.dist_eq, sub_zero, abs_of_pos hs_pos]; exact hs_lt_η
-      · exact hs_pos
-    exact ⟨C * ‖SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * k₀) (T_s s)‖,
-      hsmall_lt, hCbound k₀ hk₀_super (T_s s)⟩
+    exact hsmall_all s ⟨hs.1.le, hs.2.le⟩
 
 end DifferentialGeometry.PDE.RicciFlow
 

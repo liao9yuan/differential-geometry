@@ -89,10 +89,73 @@ The canonical embedding `SmoothCcTensor.toL2` is injective: a smooth, compactly
 supported `(r, s)`-tensor section whose `L²`-class vanishes is the zero section
 (the `L²` seminorm separates *continuous* sections, the integrand being a
 continuous nonnegative function whose integral against the full-support
-Riemannian volume vanishes only when it vanishes identically).  Posited child. -/
+Riemannian volume vanishes only when it vanishes identically).
+
+If `toL2 T = toL2 T'`, the `L²` class of the difference `T - T'` vanishes, so its
+seminorm `‖T - T'‖ = √(tensorL2Inner (T-T').toFun (T-T').toFun)` vanishes, hence the
+integral of the continuous nonnegative diagonal pointwise pairing
+`x ↦ ⟪(T-T')(x), (T-T')(x)⟫_{g(x)}` against the Riemannian volume vanishes
+(`integral_eq_zero_iff_of_nonneg`).  The integrand is therefore a.e. zero, and being
+continuous against the full-support (`IsOpenPosMeasure`) Riemannian volume it vanishes
+*identically* (`Continuous.ae_eq_iff_eq`).  Pointwise positive-definiteness
+(`tensorInnerPointwise_eq_zero_iff`) then forces `(T-T')(x) = 0` for every `x`, i.e.
+`T(x) = T'(x)` as model vectors; injectivity of the fibre model map
+(`TensorRSSpace.toModel_injective`) lifts this to equality of the underlying smooth
+sections, whence `T = T'`. -/
 theorem smoothCcTensor_toL2_injective (g : SmoothRiemannianMetric I M) (r s : ℕ) :
-    Function.Injective (Integral.L2.SmoothCcTensor.toL2 (g := g) (r := r) (s := s)) :=
-  sorry
+    Function.Injective (Integral.L2.SmoothCcTensor.toL2 (g := g) (r := r) (s := s)) := by
+  intro T T' htoL2
+  -- The `L²` class of the difference vanishes, hence so does its seminorm.
+  have hsub : Integral.L2.SmoothCcTensor.toL2 (T - T') = 0 := by
+    rw [map_sub, htoL2]; exact sub_self _
+  have hnorm : ‖T - T'‖ = 0 := by
+    have h := Integral.L2.SmoothCcTensor.norm_toL2 (g := g) (r := r) (s := s) (T - T')
+    rw [hsub, norm_zero] at h
+    exact h.symm
+  -- The diagonal `L²` inner product of `(T - T').toFun` therefore vanishes.
+  have hinner : tensorL2Inner (I := I) (M := M) g r s (T - T').toFun (T - T').toFun = 0 := by
+    rw [Integral.L2.SmoothCcTensor.norm_def, tensorL2Norm_def] at hnorm
+    exact (Real.sqrt_eq_zero
+      (tensorL2Inner_nonneg (I := I) (M := M) g r s (T - T').toFun)).mp hnorm
+  -- The diagonal integrand is nonnegative, continuous and integrable; its integral is `0`.
+  set f : M → ℝ := fun x =>
+    tensorInnerPointwise (I := I) (M := M) g r s x ((T - T').toFun x) ((T - T').toFun x)
+    with hf_def
+  have hf_nonneg : 0 ≤ f := fun x =>
+    tensorInnerPointwise_nonneg (I := I) (M := M) g r s x ((T - T').toFun x)
+  have hf_cont : Continuous f :=
+    Integral.L2.SmoothCcTensor.continuous_inner_self (I := I) (M := M) (g := g) (r := r) (s := s)
+      (T - T')
+  have hf_int : MeasureTheory.Integrable f
+      (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g) :=
+    Integral.L2.SmoothCcTensor.memL2_toFun (I := I) (M := M) (g := g) (r := r) (s := s) (T - T')
+  have hf_integral : (∫ x, f x
+        ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g)) = 0 :=
+    hinner
+  -- A.e. zero, then everywhere zero by continuity and the full-support volume measure.
+  have hf_ae :
+      f =ᵐ[DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g] 0 :=
+    (MeasureTheory.integral_eq_zero_iff_of_nonneg hf_nonneg hf_int).mp hf_integral
+  haveI : (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
+      (I := I) (M := M) g).IsOpenPosMeasure :=
+    DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure_isOpenPosMeasure
+      (I := I) (M := M) g
+  have hf_zero : f = 0 :=
+    (Continuous.ae_eq_iff_eq
+      (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g)
+      hf_cont continuous_const).mp hf_ae
+  -- Pointwise vanishing of the integrand forces the two sections to agree at every point.
+  have hsec : ∀ x : M, T.toSection x = T'.toSection x := by
+    intro x
+    have hfx : f x = 0 := by rw [hf_zero]; rfl
+    rw [hf_def] at hfx
+    simp only at hfx
+    have hTx : (T - T').toFun x = 0 :=
+      (tensorInnerPointwise_eq_zero_iff (I := I) (M := M) g r s x ((T - T').toFun x)).mp hfx
+    rw [Integral.L2.SmoothCcTensor.toFun_sub, Pi.sub_apply,
+      Integral.L2.SmoothCcTensor.toFun_apply, Integral.L2.SmoothCcTensor.toFun_apply] at hTx
+    exact Tensor0SBundle.TensorRSSpace.toModel_injective (I := I) (sub_eq_zero.mp hTx)
+  exact Integral.L2.SmoothCcTensor.ext (DFunLike.coe_injective (funext hsec))
 
 /-- **Metric extensionality from the fibrewise inner product.**
 Two smooth Riemannian metrics with the same fibrewise inner product on every
