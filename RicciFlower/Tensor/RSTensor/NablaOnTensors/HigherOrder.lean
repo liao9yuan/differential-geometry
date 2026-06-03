@@ -611,6 +611,135 @@ theorem TotalNablaRSRealizes.apply {r s : ℕ}
         r s cov X T x β slots :=
   h X x β slots
 
+/-- Definition 14.5 for any supplied mixed total covariant derivative
+realization: evaluating the total derivative on moving input and output slots
+agrees with the usual mixed-tensor derivation rule.
+
+This is the direct realization-level wrapper around
+`nablaRSFun_eval_moving_raw`; it keeps the local regularity assumptions on the
+moving slots explicit. -/
+theorem TotalNablaRSRealizes.eval_moving_slots {r s : ℕ}
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) r s}
+    {nablaT : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) r (s + 1)}
+    (h : TotalNablaRSRealizes (𝕜 := 𝕜) (E := E) (H := H)
+      (I := I) (M := M) r s cov T nablaT)
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (β : (x : M) -> Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+      (M := M) r x)
+    (V : Fin s -> (x : M) -> TangentSpace I x) (x₀ : M)
+    (hpair : MDifferentiableAt I 𝓘(𝕜, 𝕜)
+      (fun p : M => (T p (β p)) (fun a : Fin s => V a p)) x₀)
+    (hβmodel : DifferentiableWithinAt 𝕜
+      (tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+        (M := M) r x₀ β)
+      (Set.range I) (extChartAt I x₀ x₀))
+    (hV : ∀ a : Fin s, MDiffAt (T% (V a)) x₀)
+    (hVmodel : ∀ a : Fin s,
+      DifferentiableWithinAt 𝕜
+        (tangentFieldModelInChart (𝕜 := 𝕜) (I := I) x₀ (V a))
+        (Set.range I) (extChartAt I x₀ x₀))
+    (hcoord : ∀ a : Fin s, ∀ i : Fin (Module.finrank 𝕜 E),
+      MDifferentiableAt I 𝓘(𝕜, 𝕜)
+        (fun p : M =>
+          (Module.finBasis 𝕜 E).coord i
+            (tangentFieldModelInChart (𝕜 := 𝕜) (I := I) x₀ (V a)
+              (extChartAt I x₀ p))) x₀) :
+    nablaT x₀ (β x₀) (Fin.cons (X x₀) (fun a : Fin s => V a x₀)) =
+      extDerivFun (I := I) (fun p : M => (T p (β p)) (fun a : Fin s => V a p))
+        x₀ (X x₀) -
+        (T x₀ (localCovariantDerivTensor0SAt
+          (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X β x₀))
+          (fun a : Fin s => V a x₀) -
+        ∑ a : Fin s,
+          (T x₀ (β x₀))
+            (Function.update (fun b : Fin s => V b x₀) a
+              ((cov (V a) x₀) (X x₀))) := by
+  calc
+    nablaT x₀ (β x₀) (Fin.cons (X x₀) (fun a : Fin s => V a x₀))
+        = nablaRSFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+            r s cov X T x₀ (β x₀) (fun a : Fin s => V a x₀) := by
+          exact h.apply X x₀ (β x₀) (fun a : Fin s => V a x₀)
+    _ = extDerivFun (I := I)
+          (fun p : M => (T p (β p)) (fun a : Fin s => V a p)) x₀ (X x₀) -
+        (T x₀ (localCovariantDerivTensor0SAt
+          (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X β x₀))
+          (fun a : Fin s => V a x₀) -
+        ∑ a : Fin s,
+          (T x₀ (β x₀))
+            (Function.update (fun b : Fin s => V b x₀) a
+              ((cov (V a) x₀) (X x₀))) := by
+          exact nablaRSFun_eval_moving_raw
+            (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+            cov X T β V x₀ hpair hβmodel hV hVmodel hcoord
+
+/-- Component form of `TotalNablaRSRealizes.eval_moving_slots`.
+
+The hypotheses `hβ_at`, `hX_at`, and `hV_at` identify the moving input and
+lower slots with the chosen pointwise basis at `x₀`. -/
+theorem TotalNablaRSRealizes.component_moving_slots {r s : ℕ}
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) r s}
+    {nablaT : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) r (s + 1)}
+    (h : TotalNablaRSRealizes (𝕜 := 𝕜) (E := E) (H := H)
+      (I := I) (M := M) r s cov T nablaT)
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (β : (x : M) -> Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+      (M := M) r x)
+    (V : Fin s -> (x : M) -> TangentSpace I x) (x₀ : M)
+    (basis : Module.Basis Idx 𝕜 (TangentSpace I x₀))
+    (upper : Fin r -> Idx) (lower : Fin (s + 1) -> Idx)
+    (hβ_at : β x₀ = basisTensor0S (I := I) basis upper)
+    (hX_at : X x₀ = basis (lower 0))
+    (hV_at : ∀ a : Fin s, V a x₀ = basis (lower a.succ))
+    (hpair : MDifferentiableAt I 𝓘(𝕜, 𝕜)
+      (fun p : M => (T p (β p)) (fun a : Fin s => V a p)) x₀)
+    (hβmodel : DifferentiableWithinAt 𝕜
+      (tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+        (M := M) r x₀ β)
+      (Set.range I) (extChartAt I x₀ x₀))
+    (hV : ∀ a : Fin s, MDiffAt (T% (V a)) x₀)
+    (hVmodel : ∀ a : Fin s,
+      DifferentiableWithinAt 𝕜
+        (tangentFieldModelInChart (𝕜 := 𝕜) (I := I) x₀ (V a))
+        (Set.range I) (extChartAt I x₀ x₀))
+    (hcoord : ∀ a : Fin s, ∀ i : Fin (Module.finrank 𝕜 E),
+      MDifferentiableAt I 𝓘(𝕜, 𝕜)
+        (fun p : M =>
+          (Module.finBasis 𝕜 E).coord i
+            (tangentFieldModelInChart (𝕜 := 𝕜) (I := I) x₀ (V a)
+              (extChartAt I x₀ p))) x₀) :
+    componentRS (I := I) basis (nablaT x₀) upper lower =
+      extDerivFun (I := I) (fun p : M => (T p (β p)) (fun a : Fin s => V a p))
+        x₀ (X x₀) -
+        (T x₀ (localCovariantDerivTensor0SAt
+          (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X β x₀))
+          (fun a : Fin s => V a x₀) -
+        ∑ a : Fin s,
+          (T x₀ (β x₀))
+            (Function.update (fun b : Fin s => V b x₀) a
+              ((cov (V a) x₀) (X x₀))) := by
+  let slots : Fin s -> TangentSpace I x₀ := fun a => V a x₀
+  have hslots :
+      (fun a : Fin (s + 1) => basis (lower a)) =
+        Fin.cons (X x₀) slots := by
+    funext a
+    cases a using Fin.cases with
+    | zero =>
+        simp [slots, hX_at]
+    | succ a =>
+        simp [slots, hV_at a]
+  have hEval :=
+    TotalNablaRSRealizes.eval_moving_slots
+      (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      h X β V x₀ hpair hβmodel hV hVmodel hcoord
+  simpa [componentRS_apply, hβ_at, hslots, slots] using hEval
+
 /-- A total covariant-derivative realization for a covariant tensor field also
 realizes the mixed-tensor derivative after embedding both fields with zero
 upper slots. -/
