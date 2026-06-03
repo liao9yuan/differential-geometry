@@ -324,6 +324,52 @@ theorem normSqRS_identity_eq_componentL2SqRS
       (componentRS (I := I) basis A upper lower) ^ 2
   ring
 
+/-- Embedding a covariant tensor as a mixed tensor with zero upper slots leaves
+its covariant components unchanged. -/
+theorem compRS_toRS0
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {x : M} {s : Nat}
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (A : Tensor0SSpace s I x)
+    (upper : Fin 0 -> Idx) (lower : Fin s -> Idx) :
+    componentRS (I := I) basis (Tensor0SSpace.toRS0 (I := I) A) upper lower =
+      component0S (I := I) basis A lower := by
+  classical
+  have hone :
+      (basisTensor0S (I := I) basis upper : Tensor0SSpace 0 I x) Fin.elim0 =
+        (1 : Real) := by
+    have hcomp := basisTensor0S_component (I := I) basis upper upper
+    have harg : (fun a : Fin 0 => basis (upper a)) = Fin.elim0 := by
+      exact Subsingleton.elim _ _
+    simpa [component0S_apply, harg] using hcomp
+  rw [componentRS_apply, Tensor0SSpace.toRS0_apply]
+  rw [hone]
+  simp [component0S_apply]
+
+/-- The zero-upper-slot embedding is an isometry in an orthonormal basis. -/
+theorem normSqRS_toRS0
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (g : SmoothMetric I M) (x : M) (s : Nat)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (hinv :
+      MetricInverseInBasis (I := I) g x basis (identityInvMetric (Idx := Idx)))
+    (A : Tensor0SSpace s I x) :
+    normSqRS (I := I) (g := g) (x := x) 0 s
+        (Tensor0SSpace.toRS0 (I := I) A) =
+      normSq0S (I := I) g x s A := by
+  classical
+  rw [normSqRS_identity_eq_componentL2SqRS (I := I) g x 0 s basis hinv,
+    normSq0S_identity_eq_sum_sq (I := I) g x s basis hinv A]
+  unfold componentL2SqRS
+  rw [Finset.sum_eq_single (Fin.elim0 : Fin 0 -> Idx)]
+  · apply Finset.sum_congr rfl
+    intro lower _
+    rw [compRS_toRS0 (I := I) basis A (Fin.elim0 : Fin 0 -> Idx) lower]
+  · intro upper _ hupper
+    exact False.elim (hupper (Subsingleton.elim upper Fin.elim0))
+  · intro hnot
+    exact False.elim (hnot (Finset.mem_univ (Fin.elim0 : Fin 0 -> Idx)))
+
 theorem compRS_raiseFirst
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric I M) (x : M) (s : Nat)

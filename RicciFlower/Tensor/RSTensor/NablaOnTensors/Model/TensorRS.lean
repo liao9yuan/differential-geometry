@@ -128,6 +128,27 @@ theorem covariantDeriv_tensorRSModelAt_eval (r s : ℕ)
         (T ((lieDeriv_correctionL (𝕜 := 𝕜) (E := E) r ΓX) β)) v := by
   simp [covariantDeriv_tensorRSModelAt, sub_eq_add_neg, add_assoc]
 
+/-- Model covariant differentiation commutes with the zero-upper-slot
+embedding of covariant tensors.
+
+This is the fixed-vector-space form of the naturality needed to use mixed
+tensor derivative estimates on covariant tensors. -/
+theorem covariantDeriv_tensorRSModelAt_toRS0 (s : ℕ)
+    (dα_X : Tensor0SModel (𝕜 := 𝕜) (E := E) s) (ΓX : E →L[𝕜] E)
+    (α : Tensor0SModel (𝕜 := 𝕜) (E := E) s) :
+    covariantDeriv_tensorRSModelAt (𝕜 := 𝕜) (E := E) 0 s
+        (Tensor0SModel.toRS0 (𝕜 := 𝕜) (E := E) dα_X) ΓX
+        (Tensor0SModel.toRS0 (𝕜 := 𝕜) (E := E) α) =
+      Tensor0SModel.toRS0 (𝕜 := 𝕜) (E := E)
+        (covariantDeriv_tensor0SModelAt (𝕜 := 𝕜) (E := E) s dα_X ΓX α) := by
+  ext c slots
+  rw [covariantDeriv_tensorRSModelAt_eval]
+  rw [Tensor0SModel.toRS0_apply, Tensor0SModel.toRS0_apply]
+  have hcorr0 : (lieDeriv_correctionL (𝕜 := 𝕜) (E := E) 0 ΓX) c = 0 := by
+    rw [lieDeriv_correctionL_apply, lieDeriv_correction_zero]
+  rw [hcorr0]
+  simp [Tensor0SModel.toRS0_apply, sub_eq_add_neg, add_comm]
+
 def covariantDeriv_tensorRSModel (r s : ℕ)
     (X : E → E) (ΓX : E → E →L[𝕜] E)
     (T : E → TensorRSModel r s 𝕜 E) (x : E) :
@@ -142,6 +163,45 @@ def covariantDeriv_tensorRSModelWithin (r s : ℕ)
     TensorRSModel r s 𝕜 E :=
   covariantDeriv_tensorRSModelAt (𝕜 := 𝕜) (E := E) r s
     (fderivWithin 𝕜 T u x (X x)) (ΓX x) (T x)
+
+/-- Within-set model covariant differentiation commutes with the zero-upper-slot
+embedding, provided the ordinary derivative term is governed by the usual
+within-set chain rule. -/
+theorem covariantDeriv_tensorRSModelWithin_toRS0 (s : ℕ)
+    (X : E → E) (ΓX : E → E →L[𝕜] E)
+    (α : E → Tensor0SModel (𝕜 := 𝕜) (E := E) s) (u : Set E) (x : E)
+    (hα : DifferentiableWithinAt 𝕜 α u x)
+    (hu : UniqueDiffWithinAt 𝕜 u x) :
+    covariantDeriv_tensorRSModelWithin (𝕜 := 𝕜) (E := E) 0 s X ΓX
+        (fun y => Tensor0SModel.toRS0 (𝕜 := 𝕜) (E := E) (α y)) u x =
+      Tensor0SModel.toRS0 (𝕜 := 𝕜) (E := E)
+        (covariantDeriv_tensor0SModelWithin (𝕜 := 𝕜) (E := E) s X ΓX α u x) := by
+  let L : Tensor0SModel (𝕜 := 𝕜) (E := E) s →L[𝕜] TensorRSModel 0 s 𝕜 E :=
+    Tensor0SModel.toRS0L (𝕜 := 𝕜) (E := E)
+  have hcomp :
+      fderivWithin 𝕜 (fun y => L (α y)) u x =
+        L.comp (fderivWithin 𝕜 α u x) := by
+    have hlin : DifferentiableAt 𝕜 (fun T => L T) (α x) := L.differentiableAt
+    have hcomp0 :=
+      fderivWithin_comp (x := x) (f := α) (g := fun T => L T)
+        (s := u) (t := Set.univ)
+        (by simpa using hlin.differentiableWithinAt)
+        hα (by intro z hz; simp) hu
+    rw [L.fderivWithin (s := Set.univ) (x := α x) uniqueDiffWithinAt_univ] at hcomp0
+    simpa [L, Function.comp_def] using hcomp0
+  have hD :
+      fderivWithin 𝕜
+          (fun y => Tensor0SModel.toRS0 (𝕜 := 𝕜) (E := E) (α y)) u x (X x) =
+        Tensor0SModel.toRS0 (𝕜 := 𝕜) (E := E)
+          (fderivWithin 𝕜 α u x (X x)) := by
+    change (fderivWithin 𝕜 (fun y => L (α y)) u x) (X x) =
+      L ((fderivWithin 𝕜 α u x) (X x))
+    rw [hcomp]
+    rfl
+  unfold covariantDeriv_tensorRSModelWithin covariantDeriv_tensor0SModelWithin
+  rw [hD]
+  exact covariantDeriv_tensorRSModelAt_toRS0 (𝕜 := 𝕜) (E := E) s
+    (fderivWithin 𝕜 α u x (X x)) (ΓX x) (α x)
 
 /-- Hom-derivation form of the mixed model covariant derivative. Evaluating
 `∇_X T` on a variable input covariant tensor and variable output slots equals
