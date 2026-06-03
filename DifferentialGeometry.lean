@@ -929,6 +929,7 @@ import DifferentialGeometry.Geometry.Comparison.RadialSurjectivity
 import DifferentialGeometry.Geometry.Comparison.RiemannianDistContinuity
 import DifferentialGeometry.Geometry.Comparison.TangentNormDiamond
 import DifferentialGeometry.Geometry.Comparison.Variation.ArcLength
+import DifferentialGeometry.Geometry.Comparison.Variation.CovariantChainRule
 import DifferentialGeometry.Geometry.Comparison.Variation.CovariantCommutationCurvature
 import DifferentialGeometry.Geometry.Comparison.Variation.FirstVariation
 import DifferentialGeometry.Geometry.Comparison.Variation.FixedChartIdentities
@@ -939,6 +940,7 @@ import DifferentialGeometry.Geometry.Comparison.Variation.PerpFrame
 import DifferentialGeometry.Geometry.Comparison.Variation.RegularParameterFirstVariation
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariation
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariationMinimiser
+import DifferentialGeometry.Geometry.Comparison.Variation.SmoothCurveGerm
 import DifferentialGeometry.Geometry.Comparison.Variation.SpeedDerivative
 import DifferentialGeometry.Geometry.Connection.Chart.Basic
 import DifferentialGeometry.Geometry.Connection.Chart.Christoffel
@@ -1145,6 +1147,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.ConjugatingFlowProperties
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.CutoffExtension
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.DeTurckVFSmoothness
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.FlowVariation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.ForwardFlow
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.InteriorLocalFlow
 import DifferentialGeometry.Geometry.Flow.VectorField

@@ -12,8 +12,8 @@ time-clamp `field_time_clamp_extension`, the extension is smooth across the slab
 `t = 0` and `t = T`, so the autonomised flow field `(1, Xext)` is `C∞` on all of `ℝ × M`.
 
 The construction is the standard Seeley reflection/extension applied in the time variable, fibre
-by fibre over `M`; it is recorded here as an isolated deferred input (its body is a later wave's
-work), so consumers transitively depend on `sorryAx`.
+by fibre over `M`, assembled with a partition of unity; it is proven here in full (sorry-free),
+so consumers do not depend on `sorryAx` through this file.
 -/
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE

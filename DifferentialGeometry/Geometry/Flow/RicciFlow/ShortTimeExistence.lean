@@ -58,9 +58,9 @@ The DeTurck step is supplied by `deturck_ricci_flow_parabolic_short_time_existen
 DeTurck–Ricci parabolic engine, which also exposes the DeTurck-field regularity and
 the joint chart-Gram smoothness/continuity of `g_DT`); the conjugating
 diffeomorphism family `Φ_fam` is built by `conjugating_diffeo_family` (integrating
-the negated DeTurck field); the interior `∂_t g_fam = -2 Ric` identity is the flat
-Hamilton–DeTurck assembly `flat_assembly_interior` and the `t = 0` endpoint the
-continuity extension `ricci_flow_pde_at_zero`; the joint smoothness/continuity of
+the negated DeTurck field); the interior `∂_t g_fam = -2 Ric` identity is the intrinsic
+Hamilton–DeTurck pull-back variational equation `conjugating_flow_flat_data` and the `t = 0`
+endpoint the continuity extension `ricci_flow_pde_at_zero`; the joint smoothness/continuity of
 `g_fam = (Φ_fam)^* g_DT` follows from the conjugating-flow smooth-dependence data
 (`conjugating_flow_*`, pinned to the genuine flow by its orbit ODE). The
 construction step is assembled in `h_construct` below; it transits only those
@@ -170,33 +170,19 @@ theorem ricci_flow_short_time_existence
         h_reg_T hΦorbit0 hΦmfderiv0
     obtain ⟨h_gram_fam, h_gram0_fam⟩ :=
       conjugating_flow_pullback_jointGram_data (I := I) g_DT g₀ T Φ_fam hΦode'
-        h_gram_DT_T h_gram0_DT_T
+        h_reg_T h_gram_DT_T h_gram0_DT_T
     refine ⟨T, hT0, fun s => Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s),
       ?_, h_gram_fam, h_gram0_fam, ?_⟩
     · change Diffeomorph.pullbackMetric (g_DT 0) (Φ_fam 0) = g₀
       rw [hΦ0, Diffeomorph.pullbackMetric_refl, hDT_init]
-    · have hDT_deriv_T : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
-          HasDerivWithinAt (fun s : ℝ => (g_DT s).inner x v w)
-            (deTurckRicciRHS (I := I) g₀ (g_DT t) x v w)
-            (Set.Ici 0) t := by
-        intro t ht x v w
-        exact hDT_deriv' t ⟨le_of_lt ht.1, lt_of_lt_of_le ht.2 hT_le⟩ x v w
-      have horbit : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
-          HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => (Φ_fam s : M → M) x)
-            (Set.Ici (0 : ℝ)) t
-            ((1 : ℝ →L[ℝ] ℝ).smulRight
-              (-(deTurckVF (I := I) (g_DT t) g₀ (Φ_fam t x)))) :=
-        fun t ht x => hΦode x t ht
-      have hDT_deriv_Ico : ∀ s ∈ Set.Ico (0 : ℝ) T, ∀ y : M, ∀ a b : TangentSpace I y,
+    · have hDT_deriv_Ico : ∀ s ∈ Set.Ico (0 : ℝ) T, ∀ y : M, ∀ a b : TangentSpace I y,
           HasDerivWithinAt (fun u : ℝ => (g_DT u).inner y a b)
             (deTurckRicciRHS (I := I) g₀ (g_DT s) y a b) (Set.Ici 0) s := by
         intro s hs y a b
         exact hDT_deriv' s ⟨hs.1, lt_of_lt_of_le hs.2 hT_le⟩ y a b
-      obtain ⟨T', P', hv_flat, hcorr, hbase, h_total_eval⟩ :=
-        conjugating_flow_flat_data (I := I) g_DT g₀ T Φ_fam hDT_deriv_Ico hΦode
       have h_interior :=
-        DifferentialGeometry.PDE.RicciFlow.flat_assembly_interior
-          (I := I) g₀ g_DT T Φ_fam T' P' hDT_deriv_T hbase h_total_eval hv_flat hcorr
+        conjugating_flow_flat_data (I := I) g_DT g₀ T Φ_fam hDT_deriv_Ico hΦode h_reg_T
+          h_gram_DT_T
       intro t ht x v w
       rcases eq_or_lt_of_le ht.1 with h0 | h0
       · obtain ⟨h_cont, h_ric_cont⟩ :=
