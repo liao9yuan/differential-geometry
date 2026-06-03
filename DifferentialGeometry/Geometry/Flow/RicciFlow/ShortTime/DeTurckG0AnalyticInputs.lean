@@ -208,6 +208,117 @@ theorem gFibreOpBound_ccTensorBilinSymm_le_tensorHsNorm
         refine mul_le_mul_of_nonneg_right ?_ hsqw
         exact mul_le_mul_of_nonneg_right hsec_le hsqv
 
+/-- **Up-to-`t = 0` supercritical `H^{2k}` continuity of the `g₀`-anchored carrier's
+smooth representatives (deep parabolic-up-to-boundary primitive — posited child).**
+
+For the realized `g₀`-anchored parabolic flow data (the carrier `u₂`/`T_s` solving the
+interior spectral PDE `hreg`, time-continuous up to `0` at order `a` via `hcont`, with
+smooth initial datum `hg0 : g_DT 0 = g₀` and the canonical `L²` realization `hcanon`), every
+supercritical intrinsic `H^{2k}` Sobolev norm (`2k > dim M + 4`) of the smooth
+representative `T_s s` is jointly continuous in `s` on the *closed* interval `[0, T]`,
+including the boundary `t = 0`.
+
+This is the genuine parabolic up-to-boundary higher-order regularity for smooth initial
+data: the project's interior smoothing `interior_allscale_time_continuity` controls the
+carrier only on `[ε, T]` with constants that blow up as `ε → 0`, so the up-to-`t = 0`
+`H^{2k}`-continuity is the open prerequisite (the strict strengthening of the sibling
+`deturck_g0_carrier_Hk_smallness_upto_zero`, which gives only the boundary *limit* `→ 0`).
+It is the deep content the chart-`C²` joint-continuity bridge consumes.  The hypotheses
+genuinely constrain the carrier to the smooth-datum parabolic flow (it is false for a
+discontinuous representative family), distinct from the continuity conclusion; no packaging.
+The body is `sorry`; consumers transitively depend on `sorryAx`. -/
+theorem deturck_g0_carrier_Hk_continuousOn_upto_zero
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) {T : ℝ} (hT : 0 < T)
+    (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
+    (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2)
+    (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+    (hreal : ∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
+      (g_DT s).inner x v w
+        = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w)
+    (hcont : ContinuousOn
+      (fun s : ℝ => tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (Set.Icc 0 T))
+    (hreg : ∀ s ∈ Set.Ioo (0 : ℝ) T,
+      HasDerivAt
+        (fun r => (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ r)))
+        (scaleLaplacianFun (I := I) (M := M) (u₂ s) +
+          N_cont
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s)
+    (hg0 : g_DT 0 = g₀)
+    (hcanon : ∀ s ∈ Set.Icc (0 : ℝ) T,
+      Integral.L2.SmoothCcTensor.toL2 (T_s s) =
+        tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s)) :
+    ∀ (k : ℕ), 2 * k > Module.finrank ℝ E + 4 →
+      ContinuousOn
+        (fun s : ℝ => SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * k) (T_s s))
+        (Set.Icc 0 T) := sorry
+
+/-- **Sobolev-embedding chart-`C²` joint-continuity bridge for the `g₀`-anchored realize
+flow (deep Fréchet↔coordinate-jet bridge — posited child).**
+
+For the realized `g₀`-anchored flow `g_DT` (the linear realize `hreal` of a carrier
+`u₂`/`T_s` with the canonical `L²` realization `hcanon`, per-time smooth in space),
+*given* the up-to-`t = 0` supercritical `H^{2k}` continuity `hHk` of the smooth
+representatives `T_s`, every iterated chart-Gram derivative of order `k ≤ 2` is jointly
+continuous in `(time, point)` on `[0, T] × chartLeviCivitaGoodSet α`.
+
+This is the genuine Fréchet↔coordinate-jet joint-continuity bridge: the chart-`2`-jet
+seminorm bound `chartMetricJet2DiffSup_realizeMetricAt_le_toHs_unconditional` controls the
+iterated chart-Gram derivative *difference* between two times by the `H^{2k}` norm of the
+carrier difference, uniformly over compact chart subsets; combined with the per-time
+`C^∞`-in-space smoothness `chartGramOnE_contDiffOn` and the supplied up-to-`0` `H^{2k}`
+time-continuity `hHk`, the iterated derivative is jointly `(time, point)`-continuous.  The
+carrier `H^{2k}`-continuity `hHk` is the deep parabolic-up-to-boundary input (supplied by
+`deturck_g0_carrier_Hk_continuousOn_upto_zero`); this bridge is the embedding/Fréchet-jet
+content on top of it.  The conclusion is the joint continuity, distinct from `hHk` and the
+realize hypotheses; no packaging.  The body is `sorry`; consumers transitively depend on
+`sorryAx`. -/
+theorem deturck_g0_chartGram_jointContinuous_of_carrier_Hk
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) {T : ℝ} (hT : 0 < T)
+    (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
+    (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2)
+    (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+    (hreal : ∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
+      (g_DT s).inner x v w
+        = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w)
+    (hcont : ContinuousOn
+      (fun s : ℝ => tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (Set.Icc 0 T))
+    (hreg : ∀ s ∈ Set.Ioo (0 : ℝ) T,
+      HasDerivAt
+        (fun r => (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ r)))
+        (scaleLaplacianFun (I := I) (M := M) (u₂ s) +
+          N_cont
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s)
+    (hg0 : g_DT 0 = g₀)
+    (hcanon : ∀ s ∈ Set.Icc (0 : ℝ) T,
+      Integral.L2.SmoothCcTensor.toL2 (T_s s) =
+        tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s))
+    (hHk : ∀ (k : ℕ), 2 * k > Module.finrank ℝ E + 4 →
+      ContinuousOn
+        (fun s : ℝ => SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * k) (T_s s))
+        (Set.Icc 0 T)) :
+    ∀ (α : M) (i j : Fin (Module.finrank ℝ E)) (k : ℕ), k ≤ 2 →
+      ContinuousOn
+        (fun q : ℝ × M => iteratedFDeriv ℝ k
+          (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j)
+          (extChartAt I α q.2))
+        (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α) := sorry
+
 /-- **Parabolic up-to-`t = 0` chart-`C²` regularity for the `g₀`-anchored realize flow
 with smooth initial datum (deep parabolic-up-to-boundary leaf).**
 
@@ -221,12 +332,14 @@ iterated chart-Gram derivative of order `k ≤ 2` is jointly continuous in `(tim
 This is the genuine parabolic up-to-boundary regularity for smooth initial data: the
 project's interior smoothing `interior_allscale_time_continuity` controls the flow only
 on `[ε, T]` with constants that blow up as `ε → 0`, so the up-to-`t = 0` chart-`C²`
-datum cannot be read off it and is the open prerequisite.  Its proof runs the chart-`2`-jet
-seminorm bound `chartMetricJet2DiffSup_realizeMetricAt_le_toHs_unconditional` (which controls
-the iterated chart-Gram derivative *difference* between two times by the `H^{2k}` norm of the
-carrier difference, uniformly over compact chart subsets) against the up-to-`0`
-`H^{2k}`-regularity of the smooth-datum parabolic carrier, combined with the per-time
-`C^∞`-in-space smoothness `chartGramOnE_contDiffOn`.
+datum cannot be read off it and is the open prerequisite.  It is assembled (sorry-free
+glue) from two posited deep analytic sub-leaves: the up-to-`0` supercritical `H^{2k}`
+carrier continuity `deturck_g0_carrier_Hk_continuousOn_upto_zero` (the parabolic-up-to-
+boundary regularity of the carrier's smooth representatives) and the Sobolev-embedding
+Fréchet↔coordinate-jet joint-continuity bridge
+`deturck_g0_chartGram_jointContinuous_of_carrier_Hk` (which runs the chart-`2`-jet seminorm
+bound `chartMetricJet2DiffSup_realizeMetricAt_le_toHs_unconditional` and the per-time
+`C^∞`-in-space smoothness `chartGramOnE_contDiffOn` against that `H^{2k}`-continuity).
 
 The hypotheses are all genuine constraints on the constructed flow, not a fold of the
 joint-continuity conclusion; no packaging.  Two are *load-bearing for truth* (and were
@@ -237,10 +350,8 @@ absent from the original blueprint signature — a signature defect):
 * `hg0 : g_DT 0 = g₀` is the smooth-initial-datum condition; without it the data at `t = 0`
   is only `H^a`-regular and the up-to-`0` chart-`C²` continuity fails.
 Both are supplied at the call site `deTurck_g0_realize_data` from
-`deTurck_g0_carrier_realize_transport`.  The body is `sorry` (a single genuine analytic
-leaf: the up-to-boundary parabolic `C²` regularity, which does not honestly factor into
-sub-lemmas provable from `hcont`'s order-`a` continuity alone — the higher-order `H^{2k}`
-carrier continuity is itself the deep content).  Consumers transitively depend on `sorryAx`. -/
+`deTurck_g0_carrier_realize_transport`.  Consumers transitively depend on `sorryAx` through
+the two posited sub-leaves. -/
 theorem deturck_g0_parabolic_chartGram_C2_upto_zero
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) {T : ℝ} (hT : 0 < T)
@@ -274,7 +385,11 @@ theorem deturck_g0_parabolic_chartGram_C2_upto_zero
         (fun q : ℝ × M => iteratedFDeriv ℝ k
           (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j)
           (extChartAt I α q.2))
-        (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α) := sorry
+        (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α) :=
+  deturck_g0_chartGram_jointContinuous_of_carrier_Hk (I := I) (M := M) g₀ a ha hT g_DT u₂
+    T_s N_cont hreal hcont hreg hg0 hcanon
+    (deturck_g0_carrier_Hk_continuousOn_upto_zero (I := I) (M := M) g₀ a ha hT g_DT u₂
+      T_s N_cont hreal hcont hreg hg0 hcanon)
 
 set_option maxHeartbeats 1600000 in
 /-- **Supercritical Sobolev decay of the realize carrier to zero as `t → 0⁺`
@@ -948,7 +1063,7 @@ theorem deturck_g0_pointwise_carrier_interior_pde
       Summable (solFieldMass (I := I) (M := M) hT.le gforce (d + 1)) →
         Summable (forcingMass (I := I) (M := M) gforce d) :=
     deTurckForcing_firstOrder_coupling (I := I) (M := M) g₀ a hT hT1 N_cont
-      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce hforce
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) rfl gforce hforce
   have hRHS_cont : ContinuousOn RHS (Set.Ioo (0 : ℝ) T) :=
     deturck_g0_carrier_RHS_continuousOn_interior (I := I) (M := M) g₀ a hT hT1 N_cont
       hN_cont gforce u u₂ hu hbridge hcouple
@@ -1327,7 +1442,7 @@ theorem deturck_g0_engine_carrier_extraction
     hsol hTe_pos (min_le_left _ _) hTe1
   -- The first-order coupling of the forcing (posited child `deTurckForcing_firstOrder_coupling`).
   have hcouple := deTurckForcing_firstOrder_coupling (I := I) (M := M) g₀ a hTe_pos hTe1
-    N_cont (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce hforce
+    N_cont (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) rfl gforce hforce
   -- Bochner/FTC transport to the pointwise order-`(a+2)` carrier.
   obtain ⟨u₂, hbridge, hcont, hcar0, hreg⟩ :=
     deturck_g0_engine_pointwise_carrier (I := I) (M := M) g₀ a hTe_pos hTe1

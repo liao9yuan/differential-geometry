@@ -663,6 +663,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.NonlinearitySpec
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalPartMatch
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSAbstractJet2Bound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSChartCoverJet2
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSHighOrderSobolevLipschitz
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSPointwiseLipschitz
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChristoffelPerturbation
