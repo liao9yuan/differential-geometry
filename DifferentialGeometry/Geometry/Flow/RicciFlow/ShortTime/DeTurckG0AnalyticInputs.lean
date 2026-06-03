@@ -4,6 +4,10 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.DeTurc
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HilbertSpace
+import DifferentialGeometry.Analysis.Sobolev.Embedding.TensorSobolevEmbeddingCm
+import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmOrderReduction
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
+import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.SlotSplitParsevalBridge
 
 /-! # Deep analytic inputs of the `g₀`-anchored DeTurck–Ricci realize construction
 
@@ -57,7 +61,122 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **`C⁰`-Sobolev embedding at the `0`-jet fibre level (deep analytic input).**
+/-- The frame component `fiberNormSqComponent g x 0 2 (T.toSection x) n e K₀ J`
+(`K₀ : Fin 0 → Fin n` the unique empty multi-index) equals the extracted bilinear
+form `ccTensorBilin g T` evaluated on the frame vectors `(e (J 0), e (J 1))`: both
+apply the same model `(0,2)`-fibre value of `T` to the same `2`-tuple. -/
+private theorem ccTensorBilin_eq_fiberNormSqComponent
+    (g : SmoothRiemannianMetric I M) (T : Integral.L2.SmoothCcTensor g 0 2) (x : M)
+    {n : ℕ} (e : Fin n → TangentSpace I x)
+    (K₀ : Fin 0 → Fin n) (J : Fin 2 → Fin n) :
+    Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x 0 2
+        (T.toSection x) n e K₀ J =
+      ccTensorBilin (I := I) g T x (e (J 0)) (e (J 1)) := by
+  classical
+  have hcoframe :
+      Integral.Connection.coframeS (I := I) (M := M) g x 0 e K₀ =
+        ContinuousMultilinearMap.constOfIsEmpty ℝ
+          (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ) := by
+    apply Tensor0SBundle.tensor0SSpace_ext
+    intro v
+    rw [Integral.Connection.coframeS_apply]
+    rw [Finset.prod_of_isEmpty _]
+    rfl
+  rw [ccTensorBilin_apply, ccTensorModel, ccTensorMultilinear_apply]
+  unfold Integral.Connection.fiberNormSqComponent
+  rw [show ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+        (fun k => g.inner x (e (K₀ k))) : Tensor0SBundle.Tensor0SSpace 0 I x) =
+      Integral.Connection.coframeS (I := I) (M := M) g x 0 e K₀ from rfl, hcoframe]
+  change ((T.toSection x (ContinuousMultilinearMap.constOfIsEmpty ℝ
+        (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) (fun k : Fin 2 => e (J k)) : ℝ) =
+    Tensor0SBundle.Tensor0SSpace.toModel
+      (T.toSection x (ContinuousMultilinearMap.constOfIsEmpty ℝ
+        (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+      ![e (J 0), e (J 1)]
+  rw [Tensor0SBundle.Tensor0SSpace.toModel,
+    Tensor0SBundle.tensor0SSpace_continuousLinearEquiv_apply]
+  congr 1
+  funext k
+  fin_cases k <;> rfl
+
+/-- **Intrinsic `g`-fibre Cauchy–Schwarz for the extracted bilinear form.** For a
+smooth `(0,2)`-tensor section `T`, the squared value of the extracted bilinear form
+`ccTensorBilin g T x v w` is bounded by the product of the intrinsic quadratic factors
+`g x v v`, `g x w w` and the intrinsic Riemannian fibre norm squared
+`riemannianFiberNormSq g 0 2 x (T.toSection x)`.  Proved by expanding `v, w` in a
+`g`-orthonormal tangent frame, applying the bilinearity of `ccTensorBilin` and
+Cauchy–Schwarz over the frame-pair index, and Parseval `∑_i (g x (e i) v)² = g x v v`. -/
+private theorem ccTensorBilin_sq_le_gInner_riemannianFiberNormSq
+    (g : SmoothRiemannianMetric I M) (T : Integral.L2.SmoothCcTensor g 0 2) (x : M)
+    (v w : TangentSpace I x) :
+    (ccTensorBilin (I := I) g T x v w) ^ 2 ≤
+      g.inner x v v * g.inner x w w *
+        Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g 0 2 x
+          (T.toSection x) := by
+  classical
+  obtain ⟨n, e, hn, horth, hpars, hexpand, hrepr⟩ :=
+    Integral.Connection.tangent_frame_expansion (I := I) (M := M) g x
+  set B : ℝ := ccTensorBilin (I := I) g T x v w with hB_def
+  set a : Fin n × Fin n → ℝ := fun p =>
+    ccTensorBilin (I := I) g T x (e p.1) (e p.2) with ha_def
+  set c : Fin n × Fin n → ℝ := fun p =>
+    g.inner x (e p.1) v * g.inner x (e p.2) w with hc_def
+  have hexp_double : B =
+      ∑ i : Fin n, ∑ j : Fin n,
+        (g.inner x (e i) v * g.inner x (e j) w) *
+          ccTensorBilin (I := I) g T x (e i) (e j) := by
+    have hv : v = ∑ i : Fin n, g.inner x (e i) v • e i := hexpand v
+    have hw : w = ∑ j : Fin n, g.inner x (e j) w • e j := hexpand w
+    rw [hB_def]
+    conv_lhs => rw [hv]
+    rw [map_sum, ContinuousLinearMap.sum_apply]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [ContinuousLinearMap.map_smul, ContinuousLinearMap.smul_apply]
+    conv_lhs => rw [hw]
+    rw [map_sum, smul_eq_mul, Finset.mul_sum]
+    refine Finset.sum_congr rfl (fun j _ => ?_)
+    rw [ContinuousLinearMap.map_smul, smul_eq_mul]
+    ring
+  have hexp : B = ∑ p : Fin n × Fin n, c p * a p := by
+    rw [hexp_double, Fintype.sum_prod_type
+      (f := fun p : Fin n × Fin n => c p * a p)]
+  have hCS : (∑ p : Fin n × Fin n, c p * a p) ^ 2 ≤
+      (∑ p : Fin n × Fin n, c p ^ 2) * ∑ p : Fin n × Fin n, a p ^ 2 :=
+    Finset.sum_mul_sq_le_sq_mul_sq Finset.univ c a
+  have hcsq : (∑ p : Fin n × Fin n, c p ^ 2) = g.inner x v v * g.inner x w w := by
+    have hsplit : (∑ p : Fin n × Fin n, c p ^ 2) =
+        (∑ i : Fin n, g.inner x (e i) v ^ 2) *
+          ∑ j : Fin n, g.inner x (e j) w ^ 2 := by
+      rw [Finset.sum_mul_sum]
+      rw [Fintype.sum_prod_type (f := fun p : Fin n × Fin n => c p ^ 2)]
+      refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
+      rw [hc_def]; ring
+    rw [hsplit, hpars v, hpars w]
+  have hasq : (∑ p : Fin n × Fin n, a p ^ 2) =
+      Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g 0 2 x
+        (T.toSection x) := by
+    rw [hrepr (T.toSection x)]
+    rw [Fintype.sum_subsingleton
+      (fun K : Fin 0 → Fin n => ∑ J : Fin 2 → Fin n,
+        Integral.Connection.fiberNormSqSummand (I := I) (M := M) g x 0 2
+          (T.toSection x) n e K J)
+      (fun k : Fin 0 => k.elim0)]
+    refine (Fintype.sum_equiv (finTwoArrowEquiv (Fin n)) _ _ ?_).symm
+    intro J
+    rw [Integral.Connection.fiberNormSqSummand_eq_component_sq,
+      ccTensorBilin_eq_fiberNormSqComponent (I := I) g T x e
+        (fun k : Fin 0 => k.elim0) J]
+    rw [ha_def]
+    rfl
+  rw [hexp]
+  refine hCS.trans ?_
+  rw [hcsq, hasq]
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **`C⁰`-Sobolev embedding at the `0`-jet fibre level.**
 
 On a closed Riemannian manifold `(M, g)` there is a fixed constant `C ≥ 0` such that,
 for every supercritical Sobolev order `2k` (`2k > dim M + 4`) and every smooth
@@ -69,17 +188,114 @@ uniformly over base points `x` and tangent vectors `v, w`.
 This is the pointwise (`0`-jet, no-derivative) analogue of the chart-`2`-jet seminorm
 bound `chartMetricJet2DiffSup_realizeMetricAt_le_toHs_unconditional`
 (`RealizedCovGradJetInput.lean`): both are instances of the Morrey/Sobolev embedding
-`H^{2k} ↪ C⁰` for `2k > dim M + 4`, here read at the fibre level of the realized
-perturbation.  The conclusion is a fibre-operator-norm bound by the supercritical
-intrinsic Sobolev norm, not a hypothesis-restatement; the genuinely-open input is the
-intrinsic-`H^{2k}` → `C⁰` embedding constant for the symmetric bilinear extraction.
-The body is `sorry`. -/
+`H^{2k} ↪ C⁰` for `2k > dim M + 4`.  Here the realized perturbation fibre value is
+bounded by the intrinsic `g`-fibre Cauchy–Schwarz
+`ccTensorBilin_sq_le_gInner_riemannianFiberNormSq` against the Riemannian fibre norm
+squared `riemannianFiberNormSq g 0 2 x (T.toSection x) = ‖T.toSection x‖²`, and the
+fibre norm is then controlled by `C · ‖T.toHs (2k)‖` via the tensor Sobolev embedding
+`tensorPouSobolevHilbert_embedding_Ck` (read at `m = 2`, i.e. `2k > dim M + 4`). -/
 theorem gFibreOpBound_ccTensorBilinSymm_le_tensorHsNorm
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (k : ℕ), 2 * k > Module.finrank ℝ E + 4 →
       ∀ T : Integral.L2.SmoothCcTensor g 0 2,
         gFibreOpBound (I := I) (M := M) g (ccTensorBilinSymm (I := I) g T)
-          (C * ‖SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) (2 * k) T‖) := sorry
+          (C * ‖SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) (2 * k) T‖) := by
+  classical
+  letI : Bundle.RiemannianBundle (fun b : M => Tensor0SBundle.TensorRSSpace 0 2 I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g 0 2
+  set k₀ : ℕ := (Module.finrank ℝ E + 4) / 2 + 1 with hk₀_def
+  have hk₀_super : 2 * k₀ > Module.finrank ℝ E + 4 := by rw [hk₀_def]; omega
+  obtain ⟨C, hC_pos, hC⟩ :=
+    DifferentialGeometry.PDE.RicciFlow.tensorPouSobolevHilbert_embedding_Ck
+      (I := I) (M := M) (g := g) (r := 0) (s := 2) (k := k₀) (m := 2)
+      (by rw [show 2 * 2 = 4 from rfl]; exact hk₀_super)
+  refine ⟨C, le_of_lt hC_pos, fun k hk T x v w => ?_⟩
+  -- For each valid order `k`, `k₀ ≤ k`, so the fixed embedding norm is dominated.
+  have hk₀_le : k₀ ≤ k := by rw [hk₀_def]; omega
+  have hnorm_mono :
+      ‖SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) (2 * k₀) T‖ ≤
+        ‖SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) (2 * k) T‖ :=
+    toHs_norm_mono_order (I := I) (M := M) g (by omega) T
+  -- Fibre value bound from the intrinsic `g`-Cauchy–Schwarz against `‖T.toSection x‖`.
+  have hsec_norm_sq :
+      ‖T.toSection x‖ ^ 2 =
+        Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g 0 2 x
+          (T.toSection x) := by
+    have h_inner :
+        (DifferentialGeometry.Tensor.TensorRSRiemannianBundle.tensorRSRiemannianInnerCLM
+            (I := I) (M := M) g 0 2 x (T.toSection x) (T.toSection x) : ℝ) =
+          Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g 0 2 x
+            (T.toSection x) := by
+      rw [DifferentialGeometry.Tensor.TensorRSRiemannianBundle.tensorRSRiemannianInnerCLM_apply]
+      exact (Integral.Connection.riemannianFiberNormSq_eq_tensorInnerPointwise
+        (I := I) (M := M) g 0 2 x (T.toSection x)).symm
+    have hself :
+        (inner ℝ (T.toSection x) (T.toSection x) : ℝ) =
+          Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g 0 2 x
+            (T.toSection x) := by
+      rw [← h_inner]; rfl
+    rw [← hself, real_inner_self_eq_norm_sq]
+  have hbound : ∀ (p q : TangentSpace I x),
+      |ccTensorBilin (I := I) g T x p q| ≤
+        ‖T.toSection x‖ * Real.sqrt (g.inner x p p) * Real.sqrt (g.inner x q q) := by
+    intro p q
+    have hsq := ccTensorBilin_sq_le_gInner_riemannianFiberNormSq (I := I) g T x p q
+    rw [← hsec_norm_sq] at hsq
+    have hpp : 0 ≤ g.inner x p p := DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg (I := I) (M := M) g x p
+    have hqq : 0 ≤ g.inner x q q := DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg (I := I) (M := M) g x q
+    have hrhs_nn :
+        0 ≤ ‖T.toSection x‖ * Real.sqrt (g.inner x p p) * Real.sqrt (g.inner x q q) := by
+      have := Real.sqrt_nonneg (g.inner x p p)
+      have := Real.sqrt_nonneg (g.inner x q q)
+      positivity
+    have hsq' : (ccTensorBilin (I := I) g T x p q) ^ 2 ≤
+        (‖T.toSection x‖ * Real.sqrt (g.inner x p p) *
+          Real.sqrt (g.inner x q q)) ^ 2 := by
+      refine hsq.trans (le_of_eq ?_)
+      rw [mul_pow, mul_pow, Real.sq_sqrt hpp, Real.sq_sqrt hqq]
+      ring
+    calc |ccTensorBilin (I := I) g T x p q|
+        = Real.sqrt ((ccTensorBilin (I := I) g T x p q) ^ 2) :=
+          (Real.sqrt_sq_eq_abs _).symm
+      _ ≤ Real.sqrt ((‖T.toSection x‖ * Real.sqrt (g.inner x p p) *
+            Real.sqrt (g.inner x q q)) ^ 2) := Real.sqrt_le_sqrt hsq'
+      _ = ‖T.toSection x‖ * Real.sqrt (g.inner x p p) * Real.sqrt (g.inner x q q) :=
+          Real.sqrt_sq hrhs_nn
+  -- Symmetrize and absorb into the supercritical Sobolev norm.
+  rw [ccTensorBilinSymm_apply]
+  have hbvw : |ccTensorBilin (I := I) g T x v w| ≤
+      ‖T.toSection x‖ * Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w) :=
+    hbound v w
+  have hbwv : |ccTensorBilin (I := I) g T x w v| ≤
+      ‖T.toSection x‖ * Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w) := by
+    have h := hbound w v
+    calc |ccTensorBilin (I := I) g T x w v|
+        ≤ ‖T.toSection x‖ * Real.sqrt (g.inner x w w) *
+            Real.sqrt (g.inner x v v) := h
+      _ = ‖T.toSection x‖ * Real.sqrt (g.inner x v v) *
+            Real.sqrt (g.inner x w w) := by ring
+  have hsymm_bound :
+      |(1 / 2 : ℝ) * (ccTensorBilin (I := I) g T x v w +
+          ccTensorBilin (I := I) g T x w v)| ≤
+        ‖T.toSection x‖ * Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w) := by
+    rw [abs_mul, abs_of_pos (by norm_num : (0 : ℝ) < 1 / 2)]
+    have htri := (abs_add_le (ccTensorBilin (I := I) g T x v w)
+      (ccTensorBilin (I := I) g T x w v)).trans (add_le_add hbvw hbwv)
+    nlinarith [htri, Real.sqrt_nonneg (g.inner x v v), Real.sqrt_nonneg (g.inner x w w),
+      norm_nonneg (T.toSection x)]
+  refine hsymm_bound.trans ?_
+  have hsec_le :
+      ‖T.toSection x‖ ≤
+        C * ‖SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) (2 * k) T‖ := by
+    refine (hC T x).trans ?_
+    exact mul_le_mul_of_nonneg_left hnorm_mono (le_of_lt hC_pos)
+  have hsqv : 0 ≤ Real.sqrt (g.inner x v v) := Real.sqrt_nonneg _
+  have hsqw : 0 ≤ Real.sqrt (g.inner x w w) := Real.sqrt_nonneg _
+  calc ‖T.toSection x‖ * Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w)
+      ≤ (C * ‖SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) (2 * k) T‖) *
+          Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w) := by
+        refine mul_le_mul_of_nonneg_right ?_ hsqw
+        exact mul_le_mul_of_nonneg_right hsec_le hsqv
 
 /-- **Parabolic up-to-`t = 0` chart-`C²` regularity for the `g₀`-anchored realize flow
 with smooth initial datum (deep analytic input).**
@@ -220,3 +436,4 @@ theorem deturck_g0_engine_carrier_extraction
               (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) := sorry
 
 end DifferentialGeometry.PDE.RicciFlow
+
