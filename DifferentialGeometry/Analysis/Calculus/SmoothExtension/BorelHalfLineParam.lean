@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Calculus.SmoothExtension.BorelHalfLine
 import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 import Mathlib.Analysis.Calculus.ContDiff.Comp
 import Mathlib.Analysis.Calculus.ContDiff.Bounds
+import Mathlib.Analysis.Calculus.TangentCone.Prod
 import Mathlib.Analysis.Normed.Operator.Prod
 
 /-!
@@ -456,6 +457,44 @@ private theorem contDiff_cutoff_smul {ρ : E → ℝ} {c : E → F} {U : Set E} 
       rw [this, zero_smul]
     exact (contDiffAt_const.congr_of_eventuallyEq heq).contDiffWithinAt
 
+/-- Strengthening of `exists_contDiff_tsupport_subset`: a smooth, compactly supported cutoff with
+range in `[0,1]`, support inside the given neighbourhood, and equal to `1` *on a whole
+neighbourhood* of the base point (not merely at it). The last fact is what licenses replacing the
+cutoff coefficient `ρ` by `1` near `z₀`. -/
+private theorem exists_contDiff_tsupport_subset_eventuallyEq_one
+    [FiniteDimensional ℝ E] {s : Set E} {x : E} (hs : s ∈ 𝓝 x) :
+    ∃ ρ : E → ℝ, tsupport ρ ⊆ s ∧ HasCompactSupport ρ ∧ ContDiff ℝ ∞ ρ ∧
+      Set.range ρ ⊆ Set.Icc 0 1 ∧ ρ x = 1 ∧ ρ =ᶠ[𝓝 x] (1 : E → ℝ) := by
+  obtain ⟨d : ℝ, d_pos : 0 < d, hd : Euclidean.closedBall x d ⊆ s⟩ :=
+    Euclidean.nhds_basis_closedBall.mem_iff.1 hs
+  set c : ContDiffBump (toEuclidean x) :=
+    { rIn := d / 2
+      rOut := d
+      rIn_pos := half_pos d_pos
+      rIn_lt_rOut := half_lt_self d_pos } with hc_def
+  set ρ : E → ℝ := c ∘ toEuclidean with hρ_def
+  have ρ_supp : Function.support ρ ⊆ Euclidean.ball x d := by
+    intro y hy
+    have : toEuclidean y ∈ Function.support c := by
+      simpa only [Function.mem_support, Function.comp_apply, Ne] using hy
+    rwa [c.support_eq] at this
+  have ρ_tsupp : tsupport ρ ⊆ Euclidean.closedBall x d := by
+    rw [tsupport, ← Euclidean.closure_ball _ d_pos.ne']
+    exact closure_mono ρ_supp
+  refine ⟨ρ, ρ_tsupp.trans hd, ?_, ?_, ?_, ?_, ?_⟩
+  · exact HasCompactSupport.of_support_subset_isCompact Euclidean.isCompact_closedBall
+      (ρ_supp.trans Euclidean.ball_subset_closedBall)
+  · exact c.contDiff.comp (ContinuousLinearEquiv.contDiff _)
+  · rintro t ⟨y, rfl⟩
+    exact ⟨c.nonneg, c.le_one⟩
+  · exact c.one_of_mem_closedBall (by
+      simpa only [Euclidean.closedBall_eq_preimage, Set.mem_preimage] using
+        Metric.mem_closedBall_self (half_pos d_pos).le)
+  · have hc1 : c =ᶠ[𝓝 (toEuclidean x)] (1 : EuclideanSpace ℝ (Fin _) → ℝ) := c.eventuallyEq_one
+    have := hc1.comp_tendsto (toEuclidean.continuous.continuousAt
+      (x := x) : Filter.Tendsto toEuclidean (𝓝 x) (𝓝 (toEuclidean x)))
+    simpa only [hρ_def, Function.comp_def, Pi.one_apply] using this
+
 /-- **Parametrized Borel half-line extension.** Let `g : ℝ → E → F` be jointly `C∞` on
 `Ici 0 ×ˢ K` for a compact `K` with `z₀` in its interior. Then there is a function `gext` that is
 jointly `C∞` at every `(t₀, z₀)` and agrees with `g` for all `t ≥ 0` near `z₀`.
@@ -472,11 +511,9 @@ theorem borel_halfLine_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
       (∀ t₀ : ℝ, ContDiffAt ℝ ∞ (Function.uncurry gext) (t₀, z₀)) ∧
       (∀ t : ℝ, 0 ≤ t → ∀ᶠ z in nhds z₀, gext t z = g t z) := by
   classical
-  -- A smooth cutoff `ρ ≡ 1` at `z₀`, supported in the open set `interior K`.
-  obtain ⟨ρ, hρ_tsupp, hρ_cs, hρ_smooth0, _hρ_range, hρ_one⟩ :=
-    exists_contDiff_tsupport_subset (n := (⊤ : ℕ∞)) (x := z₀) (isOpen_interior.mem_nhds hz₀)
-  have hρ_smooth : ContDiff ℝ ∞ ρ := by
-    rw [show (∞ : WithTop ℕ∞) = ((⊤ : ℕ∞) : WithTop ℕ∞) from rfl]; exact hρ_smooth0
+  -- A smooth cutoff `ρ ≡ 1` on a neighbourhood of `z₀`, supported in the open set `interior K`.
+  obtain ⟨ρ, hρ_tsupp, hρ_cs, hρ_smooth, _hρ_range, _hρ_one, hρ_eq1⟩ :=
+    exists_contDiff_tsupport_subset_eventuallyEq_one (x := z₀) (isOpen_interior.mem_nhds hz₀)
   set U : Set E := interior K with hU_def
   have hUopen : IsOpen U := isOpen_interior
   -- The jet coefficients are smooth on `U`.
@@ -505,23 +542,195 @@ theorem borel_halfLine_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
         filter_upwards [hmem] with p hp
         simp only [Function.uncurry, hgext_def, if_neg (not_le.mpr (Set.mem_Iio.mp hp.1))]
       exact hseries.contDiffAt.congr_of_eventuallyEq heq
-    · -- `t₀ = 0`: the seam across the hyperplane `{0} × E`.
-      -- Here `uncurry gext` is the piecewise glue of the globally-smooth Borel series `G`
-      -- (lower side `t ≤ 0`) and `uncurry g` (upper side `t ≥ 0`). Smoothness at `(0, z₀)` is the
-      -- *joint* analogue of `contDiff_if_le_of_jet_match`: it requires that the two pieces share
-      -- their full joint Taylor jet at `(0, z₀)`, i.e.
-      --   `iteratedFDerivWithin ℝ k (uncurry g) (Ici 0 ×ˢ U) (0, z₀)`
-      --     `= iteratedFDeriv ℝ k (fun p => ∑' n, paramTerm a ha hsupp n p) (0, z₀)`  for all `k`.
-      -- The series matches `g`'s *one-sided t-jet* (`cₙ z = ∂ₜⁿ g(·,z)|₀`) for every `z` near `z₀`
-      -- by construction; the *mixed* `t`/`z` coefficients then agree by Clairaut symmetry, so the
-      -- joint jets coincide. Formalising this bivariate-Taylor / mixed-partial decomposition of
-      -- `iteratedFDeriv` on the product `ℝ × E`, together with the joint hyperplane glue
-      -- (`HasFTaylorSeriesUpToOn` on a neighbourhood with the seam derivative produced by
-      -- `HasFDerivWithinAt.union` over `(Iic 0 ×ˢ U) ∪ (Ici 0 ×ˢ U)`), is a self-contained deep
-      -- result of its own — the joint/parametrized `contDiff_if_le_of_jet_match` — and is left as
-      -- the single deferred input of this file.
+    · -- `t₀ = 0`: the seam across the hyperplane `{0} × E`. On a neighbourhood `univ ×ˢ V` of
+      -- `(0, z₀)` (where `ρ ≡ 1`), `uncurry gext` is the piecewise glue of the globally-smooth Borel
+      -- series `Φ` (lower closed side `t ≤ 0`) and `uncurry g` (upper closed side `t ≥ 0`), the two
+      -- agreeing at the seam because `Φ(0, z) = g(0, z)` there. This is the *joint* analogue of
+      -- `contDiff_if_le_of_jet_match`: we build the joint candidate Taylor series piecewise from the
+      -- two one-sided series and verify `HasFTaylorSeriesUpToOn ∞ · · (univ ×ˢ V)`, gluing the seam
+      -- derivative with `HasFDerivWithinAt.union` over `(Iic 0 ×ˢ V) ∪ (Ici 0 ×ˢ V) = univ ×ˢ V`.
       subst ht
-      sorry
+      -- The globally-smooth Borel series `Φ`.
+      set Φ : ℝ × E → F := fun p => ∑' n, paramTerm a ha hsupp n p with hΦ_def
+      have hΦ : ContDiff ℝ ∞ Φ := paramSeries_contDiff a ha hsupp
+      -- An open neighbourhood `V ∋ z₀`, `V ⊆ U`, on which `ρ ≡ 1`.
+      have hVnhds : {z : E | ρ z = 1} ∩ U ∈ nhds z₀ :=
+        Filter.inter_mem hρ_eq1 (hUopen.mem_nhds hz₀)
+      obtain ⟨V, hVsub, hVopen, hz₀V⟩ := mem_nhds_iff.1 hVnhds
+      have hρV : ∀ z ∈ V, ρ z = 1 := fun z hz => (hVsub hz).1
+      have hVU : V ⊆ U := fun z hz => (hVsub hz).2
+      -- `Φ(0, z) = g 0 z` for `z ∈ V`: only the `n = 0` term of the series survives at `t = 0`,
+      -- and there `ρ z = 1`, `c₀ z = g 0 z`.
+      have hΦ0 : ∀ z ∈ V, Φ (0, z) = g 0 z := by
+        intro z hz
+        have hbump0 : borelBumpMono 0 0 = 1 := by
+          rw [borelBumpMono, borelCutoff_eq_one (by norm_num : (0:ℝ) ^ 2 ≤ 1)]
+          norm_num
+        have hterm0 : ∀ n, paramTerm a ha hsupp n (0, z) =
+            (if n = 0 then (1:ℝ) else 0) • a n z := by
+          intro n
+          have hp1 : (((0:ℝ), z) : ℝ × E).1 = 0 := rfl
+          rw [paramTerm, hp1, mul_zero]
+          rcases Nat.eq_zero_or_pos n with hn | hn
+          · subst hn
+            rw [if_pos rfl, hbump0]
+            simp
+          · rw [if_neg (by omega : ¬ n = 0), borelBumpMono,
+              zero_pow (by omega : n ≠ 0)]
+            simp
+        rw [hΦ_def]
+        show (∑' n, paramTerm a ha hsupp n (0, z)) = g 0 z
+        rw [tsum_congr hterm0, tsum_eq_single 0 (fun n hn => by rw [if_neg hn, zero_smul]),
+          if_pos rfl, one_smul, ha_def]
+        show ρ z • iteratedDerivWithin 0 (fun s => g s z) (Set.Ici 0) 0 = g 0 z
+        rw [hρV z hz, one_smul, iteratedDerivWithin_zero]
+      -- `uncurry gext` equals `Φ` on the closed lower half `Iic 0 ×ˢ V`.
+      have hEqLower : Set.EqOn (Function.uncurry gext) Φ (Set.Iic (0:ℝ) ×ˢ V) := by
+        rintro ⟨t, z⟩ ⟨ht, hz⟩
+        simp only [Set.mem_Iic] at ht
+        rcases eq_or_lt_of_le ht with ht0 | ht0
+        · subst ht0
+          simp only [Function.uncurry, hgext_def, if_pos (le_refl (0:ℝ))]
+          exact (hΦ0 z hz).symm
+        · simp only [Function.uncurry, hgext_def, if_neg (not_le.mpr ht0), hΦ_def]
+      -- `uncurry gext` equals `uncurry g` on the closed upper half `Ici 0 ×ˢ V`.
+      have hEqUpper : Set.EqOn (Function.uncurry gext) (Function.uncurry g)
+          (Set.Ici (0:ℝ) ×ˢ V) := by
+        rintro ⟨t, z⟩ ⟨ht, _⟩
+        simp only [Set.mem_Ici] at ht
+        simp only [Function.uncurry, hgext_def, if_pos ht]
+      -- The unique-differentiability of the two closed half-slabs.
+      have hUDl : UniqueDiffOn ℝ (Set.Iic (0:ℝ) ×ˢ V) :=
+        UniqueDiffOn.prod (uniqueDiffOn_Iic 0) hVopen.uniqueDiffOn
+      have hUDr : UniqueDiffOn ℝ (Set.Ici (0:ℝ) ×ˢ V) :=
+        UniqueDiffOn.prod (uniqueDiffOn_Ici 0) hVopen.uniqueDiffOn
+      -- The two one-sided Taylor series.
+      set pL : ℝ × E → FormalMultilinearSeries ℝ (ℝ × E) F :=
+        ftaylorSeriesWithin ℝ Φ (Set.Iic (0:ℝ) ×ˢ V) with hpL_def
+      set pR : ℝ × E → FormalMultilinearSeries ℝ (ℝ × E) F :=
+        ftaylorSeriesWithin ℝ (Function.uncurry g) (Set.Ici (0:ℝ) ×ˢ V) with hpR_def
+      have hgR : ContDiffOn ℝ ∞ (Function.uncurry g) (Set.Ici (0:ℝ) ×ˢ V) :=
+        hg.mono (Set.prod_mono_right (hVU.trans interior_subset))
+      have hTL : HasFTaylorSeriesUpToOn ∞ Φ pL (Set.Iic (0:ℝ) ×ˢ V) :=
+        hΦ.contDiffOn.ftaylorSeriesWithin hUDl
+      have hTR : HasFTaylorSeriesUpToOn ∞ (Function.uncurry g) pR (Set.Ici (0:ℝ) ×ˢ V) :=
+        hgR.ftaylorSeriesWithin hUDr
+      -- The candidate joint series, assembled piecewise.
+      set p : ℝ × E → FormalMultilinearSeries ℝ (ℝ × E) F :=
+        fun q => if q.1 ≤ 0 then pL q else pR q with hp_def
+      -- **THE SEAM COEFFICIENT MATCH** (the file's single deferred input): the two one-sided joint
+      -- Taylor coefficients agree at every seam point `(0, z)`, `z ∈ V`. This holds *by
+      -- construction* — both joint jets are determined by the common one-sided `t`-jet
+      -- `cₙ z = ∂ₜⁿ g(·,z)|₀` and the common `z`-dependence (`Φ(0,·) = g(0,·) = ρ·c₀` on `V`),
+      -- their mixed `∂_z^a ∂_t^b` parts agreeing by differentiating the `t`-jet identity in `z`
+      -- together with Clairaut symmetry of `iteratedFDerivWithin`. Formalising this bivariate-Taylor
+      -- decomposition of `iteratedFDerivWithin` on the product `ℝ × E` is a self-contained deep
+      -- result, left here as the sole `sorry`.
+      have hjetF : ∀ (n : ℕ) (z : E), z ∈ V →
+          iteratedFDerivWithin ℝ n Φ (Set.Iic (0:ℝ) ×ˢ V) (0, z) =
+            iteratedFDerivWithin ℝ n (Function.uncurry g) (Set.Ici (0:ℝ) ×ˢ V) (0, z) := by
+        sorry
+      -- Hence the assembled series is well-defined at the seam: `pL (0,z) = pR (0,z)` on `V`.
+      have hpLR : ∀ (n : ℕ) (z : E), z ∈ V → pL (0, z) n = pR (0, z) n := by
+        intro n z hz
+        simp only [hpL_def, hpR_def, ftaylorSeriesWithin]
+        exact hjetF n z hz
+      -- `p` agrees with `pL` on the lower half (guard true).
+      have hEqpL : ∀ m : ℕ, Set.EqOn (fun q => p q m) (fun q => pL q m) (Set.Iic (0:ℝ) ×ˢ V) := by
+        intro m q hq
+        simp only [hp_def, if_pos (Set.mem_Iic.mp hq.1)]
+      -- `p` agrees with `pR` on the upper half (`> 0` directly; at the seam via `hpLR`).
+      have hEqpR : ∀ m : ℕ, Set.EqOn (fun q => p q m) (fun q => pR q m) (Set.Ici (0:ℝ) ×ˢ V) := by
+        intro m q hq
+        rcases eq_or_lt_of_le (Set.mem_Ici.mp hq.1) with hq0 | hq0
+        · obtain ⟨t, z⟩ := q
+          simp only at hq0
+          subst hq0
+          simp only [hp_def, if_pos (le_refl (0:ℝ))]
+          exact hpLR m z hq.2
+        · simp only [hp_def, if_neg (not_le.mpr hq0)]
+      -- The zero-th coefficient yields the value of `uncurry gext`.
+      have hzero : ∀ q ∈ Set.univ ×ˢ V, (p q 0).curry0 = Function.uncurry gext q := by
+        rintro ⟨t, z⟩ ⟨_, hz⟩
+        by_cases ht : t ≤ 0
+        · have hmem : (t, z) ∈ Set.Iic (0:ℝ) ×ˢ V := ⟨Set.mem_Iic.mpr ht, hz⟩
+          have hval : (pL (t, z) 0).curry0 = Φ (t, z) := hTL.zero_eq (t, z) hmem
+          rw [hp_def]; simp only [if_pos ht]
+          rw [hval, hEqLower hmem]
+        · have ht' : (0:ℝ) ≤ t := le_of_lt (not_le.mp ht)
+          have hmem : (t, z) ∈ Set.Ici (0:ℝ) ×ˢ V := ⟨Set.mem_Ici.mpr ht', hz⟩
+          have hval : (pR (t, z) 0).curry0 = Function.uncurry g (t, z) := hTR.zero_eq (t, z) hmem
+          rw [hp_def]; simp only [if_neg ht]
+          rw [hval, hEqUpper hmem]
+      -- The per-point derivative obligation for `p · m`, on `univ ×ˢ V`.
+      have hm_lt : ∀ m : ℕ, (m : WithTop ℕ∞) < ∞ := fun m => by
+        exact_mod_cast (Nat.cast_lt.mpr m.lt_succ_self).trans_le le_top
+      have hderiv : ∀ (m : ℕ), ∀ q ∈ Set.univ ×ˢ V,
+          HasFDerivWithinAt (fun y => p y m) (p q m.succ).curryLeft (Set.univ ×ˢ V) q := by
+        intro m q hq
+        obtain ⟨t, z⟩ := q
+        have hz : z ∈ V := hq.2
+        rcases lt_trichotomy t 0 with ht | ht | ht
+        · -- Interior of the lower slab: upgrade the `Iic`-derivative to a full one.
+          have hmem : (t, z) ∈ Set.Iic (0:ℝ) ×ˢ V := ⟨Set.mem_Iic.mpr (le_of_lt ht), hz⟩
+          have hdL : HasFDerivWithinAt (fun y => pL y m) (pL (t, z) m.succ).curryLeft
+              (Set.Iic (0:ℝ) ×ˢ V) (t, z) := hTL.fderivWithin m (hm_lt m) (t, z) hmem
+          have hnhds : Set.Iio (0:ℝ) ×ˢ V ∈ nhds (t, z) :=
+            prod_mem_nhds (Iio_mem_nhds ht) (hVopen.mem_nhds hz)
+          have hsub : Set.Iio (0:ℝ) ×ˢ V ⊆ Set.Iic (0:ℝ) ×ˢ V :=
+            Set.prod_mono_left Iio_subset_Iic_self
+          have hdL' : HasFDerivAt (fun y => pL y m) (pL (t, z) m.succ).curryLeft (t, z) :=
+            (hdL.mono hsub).hasFDerivAt hnhds
+          have hee : (fun y => p y m) =ᶠ[nhds (t, z)] (fun y => pL y m) :=
+            Filter.eventuallyEq_of_mem hnhds (fun y hy => hEqpL m (hsub hy))
+          have hfd : HasFDerivAt (fun y => p y m) (pL (t, z) m.succ).curryLeft (t, z) :=
+            hdL'.congr_of_eventuallyEq hee
+          rw [hp_def]; simp only [if_pos (le_of_lt ht)]
+          exact hfd.hasFDerivWithinAt
+        · -- The seam `t = 0`: glue the two one-sided derivatives.
+          subst ht
+          have hmemL : ((0:ℝ), z) ∈ Set.Iic (0:ℝ) ×ˢ V := ⟨Set.self_mem_Iic, hz⟩
+          have hmemR : ((0:ℝ), z) ∈ Set.Ici (0:ℝ) ×ˢ V := ⟨Set.self_mem_Ici, hz⟩
+          have hdL0 : HasFDerivWithinAt (fun y => pL y m) (pL (0, z) m.succ).curryLeft
+              (Set.Iic (0:ℝ) ×ˢ V) (0, z) := hTL.fderivWithin m (hm_lt m) (0, z) hmemL
+          have hdL0' : HasFDerivWithinAt (fun y => p y m) (pL (0, z) m.succ).curryLeft
+              (Set.Iic (0:ℝ) ×ˢ V) (0, z) := hdL0.congr (hEqpL m) (hEqpL m hmemL)
+          have hdR0 : HasFDerivWithinAt (fun y => pR y m) (pR (0, z) m.succ).curryLeft
+              (Set.Ici (0:ℝ) ×ˢ V) (0, z) := hTR.fderivWithin m (hm_lt m) (0, z) hmemR
+          have hdR0' : HasFDerivWithinAt (fun y => p y m) (pL (0, z) m.succ).curryLeft
+              (Set.Ici (0:ℝ) ×ˢ V) (0, z) := by
+            have hval : (pR (0, z) m.succ).curryLeft = (pL (0, z) m.succ).curryLeft := by
+              rw [hpLR m.succ z hz]
+            rw [← hval]
+            exact hdR0.congr (hEqpR m) (hEqpR m hmemR)
+          have hunion : HasFDerivWithinAt (fun y => p y m) (pL (0, z) m.succ).curryLeft
+              (Set.Iic (0:ℝ) ×ˢ V ∪ Set.Ici (0:ℝ) ×ˢ V) (0, z) := hdL0'.union hdR0'
+          rw [← Set.union_prod, Set.Iic_union_Ici] at hunion
+          rw [hp_def]; simp only [if_pos (le_refl (0:ℝ))]
+          exact hunion
+        · -- Interior of the upper slab: upgrade the `Ici`-derivative to a full one.
+          have hmem : (t, z) ∈ Set.Ici (0:ℝ) ×ˢ V := ⟨Set.mem_Ici.mpr (le_of_lt ht), hz⟩
+          have hdR : HasFDerivWithinAt (fun y => pR y m) (pR (t, z) m.succ).curryLeft
+              (Set.Ici (0:ℝ) ×ˢ V) (t, z) := hTR.fderivWithin m (hm_lt m) (t, z) hmem
+          have hnhds : Set.Ioi (0:ℝ) ×ˢ V ∈ nhds (t, z) :=
+            prod_mem_nhds (Ioi_mem_nhds ht) (hVopen.mem_nhds hz)
+          have hsub : Set.Ioi (0:ℝ) ×ˢ V ⊆ Set.Ici (0:ℝ) ×ˢ V :=
+            Set.prod_mono_left Ioi_subset_Ici_self
+          have hdR' : HasFDerivAt (fun y => pR y m) (pR (t, z) m.succ).curryLeft (t, z) :=
+            (hdR.mono hsub).hasFDerivAt hnhds
+          have hee : (fun y => p y m) =ᶠ[nhds (t, z)] (fun y => pR y m) :=
+            Filter.eventuallyEq_of_mem hnhds (fun y hy => hEqpR m (hsub hy))
+          have hfd : HasFDerivAt (fun y => p y m) (pR (t, z) m.succ).curryLeft (t, z) :=
+            hdR'.congr_of_eventuallyEq hee
+          rw [hp_def]; simp only [if_neg (not_le.mpr ht)]
+          exact hfd.hasFDerivWithinAt
+      -- Assemble the joint Taylor series on `univ ×ˢ V` (no continuity check needed at order `∞`).
+      have hTaylor : HasFTaylorSeriesUpToOn ∞ (Function.uncurry gext) p (Set.univ ×ˢ V) :=
+        (hasFTaylorSeriesUpToOn_top_iff' (le_refl _)).mpr ⟨hzero, hderiv⟩
+      have hCDOn : ContDiffOn ℝ ∞ (Function.uncurry gext) (Set.univ ×ˢ V) := hTaylor.contDiffOn
+      have hnhds0 : Set.univ ×ˢ V ∈ nhds ((0:ℝ), z₀) :=
+        prod_mem_nhds Filter.univ_mem (hVopen.mem_nhds hz₀V)
+      exact hCDOn.contDiffAt hnhds0
     · -- `t₀ > 0`: agrees with `g` near `(t₀, z₀)`.
       have hgU : ContDiffOn ℝ ∞ (Function.uncurry g) (Set.Ioi (0:ℝ) ×ˢ U) :=
         hg'.mono (Set.prod_mono_left Ioi_subset_Ici_self)
