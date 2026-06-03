@@ -127,7 +127,7 @@ private theorem hom_integral_eq
   ring
 
 omit [BoundarylessManifold I M] in
-private theorem coeffFun_u_eq
+theorem coeffFun_u_eq
     {g_bg : SmoothRiemannianMetric I M} {a : ℝ} {T : ℝ}
     (u₀ : tensorHs (I := I) (M := M) g_bg 0 2 (a + 2))
     (gforce : timeL2 (tensorHs (I := I) (M := M) g_bg 0 2 a) T)
@@ -182,7 +182,7 @@ private theorem coeffFun_u_eq
   ring
 
 omit [BoundarylessManifold I M] in
-private theorem duhamel_integral_abs_le
+theorem duhamel_integral_abs_le
     {g : SmoothRiemannianMetric I M} {a : ℝ} {T : ℝ} (hT : 0 ≤ T)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T)
     (i : TensorEigenIdx (I := I) (M := M) g 0 2)
@@ -261,7 +261,7 @@ private theorem norm_derivModeCoeff_le
   exact perModeConvDerivL2_sq_le _ (tensor_lambda_nonneg (I := I) (M := M) i) hT _
 
 omit [BoundarylessManifold I M] in
-private theorem duhamel_majorant_summable
+theorem duhamel_majorant_summable
     {g : SmoothRiemannianMetric I M} {a : ℝ} {T : ℝ}
     (gforce : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T)
     (htail : EigenvalueTailSummable (I := I) (M := M) g 0 2)
@@ -316,7 +316,7 @@ private theorem duhamel_majorant_summable
             + (1 + lam) ^ (-p)) := by rw [hA2, hB2]
 
 omit [BoundarylessManifold I M] in
-private theorem tsum_singleModeCLM_coeff
+theorem tsum_singleModeCLM_coeff
     {g : SmoothRiemannianMetric I M} {σ : ℝ}
     (c : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ)
     (hsum : Summable (fun j => singleModeCLM (I := I) (M := M) (g := g) (r := 0) (s := 2) (σ := σ) j (c j)))
@@ -340,7 +340,7 @@ private theorem tsum_singleModeCLM_coeff
   rw [tsum_congr hterm, tsum_ite_eq i c]
 
 omit [BoundarylessManifold I M] in
-private theorem continuousOn_coeffFun_u
+theorem continuousOn_coeffFun_u
     {g_bg : SmoothRiemannianMetric I M} {a : ℝ} {T : ℝ}
     (u : MaxRegSolutionSpace (I := I) (M := M) a T)
     (i : TensorEigenIdx (I := I) (M := M) g_bg 0 2) :
@@ -353,7 +353,7 @@ private theorem continuousOn_coeffFun_u
   simpa only [coeffCLM_apply] using hcomp
 
 omit [BoundarylessManifold I M] in
-private theorem norm_singleModeCLM_eq
+theorem norm_singleModeCLM_eq
     {g : SmoothRiemannianMetric I M} {σ : ℝ}
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) (c : ℝ) :
     ‖singleModeCLM (I := I) (M := M) (g := g) (r := 0) (s := 2) (σ := σ) i c‖
@@ -470,5 +470,275 @@ theorem interior_allscale_time_continuity
     funext i
     rw [tensorHsInclusion_coeff_apply,
       tsum_singleModeCLM_coeff (I := I) (M := M) (fun j => cfun j s) (hsummable s hs) i]
+
+/-- **Up-to-`t = 0` all-scale time-continuity of the maximal-regularity solution with
+smooth initial datum `0`.**
+
+This is the `u₀ = 0` strengthening of `interior_allscale_time_continuity`: for the
+smooth initial datum `0` the homogeneous majorant `Mhom` vanishes identically (it is
+`Real.sqrt (weight σ) · exp (-λ ε) · |u₀.coeff i|` with `u₀ = 0`), so the only majorant
+is the `ε`-independent Duhamel majorant `Mduh`; the Weierstrass `M`-test therefore
+applies uniformly on the *closed* interval `[0, T]` (down to `t = 0`), not merely on
+`[ε, T]`.  The witness `uσ s := ∑ᵢ ((toFun u s).coeff i) • bᵢ` is the same mode-by-mode
+synthesis, and the everywhere bridge `ι (uσ s) = timeH1.toFun u s` holds for every
+`s ∈ [0, T]`.
+
+The first-order coupling `hcouple` (solution masses summable at order `d + 1` ⟹ forcing
+masses summable at order `d`) supplies the forcing smoothness needed for the Duhamel
+majorant; it is the genuine parabolic first-order-loss property of the nonlinearity, not
+the continuity conclusion. -/
+theorem zeroDatum_allscale_continuity_uptoZero
+    (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ)) T)
+    (hT : 0 < T) (hT1 : T ≤ 1)
+    (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+    (hu : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
+      (0 : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2)) gforce)
+    (hcouple : ∀ d : ℝ,
+      Summable (solFieldMass (I := I) (M := M) hT.le gforce (d + 1)) →
+        Summable (forcingMass (I := I) (M := M) gforce d))
+    (σ : ℝ) (haσ : (a : ℝ) ≤ σ) :
+    ∃ uσ : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 σ,
+      ContinuousOn uσ (Set.Icc (0 : ℝ) T) ∧
+        ∀ s ∈ Set.Icc (0 : ℝ) T,
+          tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) haσ
+            (uσ s) = timeH1.toFun u s := by
+  have ha0 : (0 : ℝ) ≤ (a : ℝ) := Nat.cast_nonneg a
+  have hσ0 : (0 : ℝ) ≤ σ := le_trans ha0 haσ
+  have htail : EigenvalueTailSummable (I := I) (M := M) g_bg 0 2 :=
+    eigenvalueTailSummable_of_countingBound (I := I) (M := M) g_bg 0 2
+      (weyl_eigenvalue_counting_bound_of_closed (I := I) (M := M) g_bg 0 2)
+  have hforce : ∀ d : ℝ, Summable (forcingMass (I := I) (M := M) gforce d) := by
+    intro d
+    exact hcouple d (solFieldMass_summable_all (I := I) (M := M) hT.le gforce hcouple
+      (by
+        -- base regularity at order `a` is free: `forcingMass gforce a` is summable, and
+        -- the two-derivative gain bumps it to a solution-field bound at order `a + 2 ≥ a`.
+        have hfm : Summable (forcingMass (I := I) (M := M) gforce ((a : ℝ) - 2)) := by
+          have := summable_weight_mul_norm_timeModeCoeff_sq (I := I) (M := M) gforce
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g_bg 0 2)
+          refine Summable.of_nonneg_of_le
+            (fun i => forcingMass_nonneg (I := I) (M := M) gforce ((a : ℝ) - 2) i)
+            (fun i => ?_) this
+          have hbase_ge : (1 : ℝ) ≤ 1 + TensorEigenIdx.lambda (I := I) (M := M) i :=
+            one_le_one_add_lambda (I := I) (M := M) i
+          have hwle : tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) - 2) ≤
+              tensorSobolevWeight (I := I) (M := M) i (a : ℝ) :=
+            Real.rpow_le_rpow_of_exponent_le hbase_ge (by linarith)
+          simpa only [forcingMass] using
+            mul_le_mul_of_nonneg_right hwle (sq_nonneg _)
+        have hgain := solFieldMass_summable_of_forcingMass_summable (I := I) (M := M)
+          hT.le gforce ((a : ℝ) - 2) hfm
+        have hrw : (a : ℝ) - 2 + 2 = (a : ℝ) := by ring
+        rw [hrw] at hgain
+        exact hgain)
+      (d + 1))
+  set cfun : TensorEigenIdx (I := I) (M := M) g_bg 0 2 → ℝ → ℝ :=
+    fun i s => (timeH1.toFun u s).coeff i with hcfun_def
+  set Mduh : TensorEigenIdx (I := I) (M := M) g_bg 0 2 → ℝ :=
+    fun i => Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ)
+      * (Real.sqrt T * (2 * ‖timeModeCoeff (I := I) (M := M) gforce i‖)) with hMduh_def
+  have hMduh_sum : Summable Mduh :=
+    duhamel_majorant_summable (I := I) (M := M) gforce htail hforce
+  have hbound : ∀ i, ∀ s ∈ Set.Icc (0 : ℝ) T,
+      ‖singleModeCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := σ) i
+        (cfun i s)‖ ≤ Mduh i := by
+    intro i s hsT
+    set lam := TensorEigenIdx.lambda (I := I) (M := M) i with hlam
+    have hlam_nn : 0 ≤ lam := tensor_lambda_nonneg (I := I) (M := M) i
+    have hval : cfun i s
+        = ∫ τ in (0:ℝ)..s, (derivModeCoeff (I := I) (M := M) (a := (a:ℝ)) hT.le gforce i) τ := by
+      have hc : cfun i s = (timeH1.toFun u s).coeff i := rfl
+      rw [hc, hu]
+      have h := coeffFun_u_eq (I := I) (M := M)
+        (0 : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2)) gforce hT hT1 i hsT
+      rw [h]
+      simp only [tensorHs.zero_coeff, mul_zero, zero_add]
+    rw [norm_singleModeCLM_eq]
+    set wσsqrt := Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) with hwσsqrt
+    have hwσsqrt_nn : 0 ≤ wσsqrt := Real.sqrt_nonneg _
+    have habs : |cfun i s|
+        ≤ Real.sqrt T * (2 * ‖timeModeCoeff (I := I) (M := M) gforce i‖) := by
+      rw [hval]
+      have h1 := duhamel_integral_abs_le (I := I) (M := M) (a := (a:ℝ)) hT.le gforce i hsT
+      have h2 := norm_derivModeCoeff_le (I := I) (M := M) (a := (a:ℝ)) hT.le gforce i
+      have hTnn : 0 ≤ Real.sqrt T := Real.sqrt_nonneg T
+      calc |∫ τ in (0:ℝ)..s, (derivModeCoeff (I := I) (M := M) (a := (a:ℝ)) hT.le gforce i) τ|
+          ≤ Real.sqrt T * ‖derivModeCoeff (I := I) (M := M) (a := (a:ℝ)) hT.le gforce i‖ := h1
+        _ ≤ Real.sqrt T * (2 * ‖timeModeCoeff (I := I) (M := M) gforce i‖) :=
+            mul_le_mul_of_nonneg_left h2 hTnn
+    calc wσsqrt * |cfun i s|
+        ≤ wσsqrt * (Real.sqrt T * (2 * ‖timeModeCoeff (I := I) (M := M) gforce i‖)) :=
+          mul_le_mul_of_nonneg_left habs hwσsqrt_nn
+      _ = Mduh i := by rw [hMduh_def, hwσsqrt]
+  have hsummable : ∀ s ∈ Set.Icc (0 : ℝ) T,
+      Summable (fun i => singleModeCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
+        (σ := σ) i (cfun i s)) := by
+    intro s hs
+    exact Summable.of_norm_bounded hMduh_sum (fun i => hbound i s hs)
+  refine ⟨fun s => ∑' i, singleModeCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
+    (σ := σ) i (cfun i s), ?_, ?_⟩
+  · refine continuousOn_tsum ?_ hMduh_sum (fun i s hs => hbound i s hs)
+    intro i
+    exact (singleModeCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := σ)
+      i).continuous.comp_continuousOn (continuousOn_coeffFun_u (I := I) (M := M) u i)
+  · intro s hs
+    refine tensorHs.ext ?_
+    funext i
+    rw [tensorHsInclusion_coeff_apply,
+      tsum_singleModeCLM_coeff (I := I) (M := M) (fun j => cfun j s) (hsummable s hs) i]
+
+/-- **Per-mode square-sum domination of the smooth-datum (`u₀ = 0`) carrier.**
+
+For the carrier `s ↦ timeH1.toFun u s` of the `u₀ = 0` Duhamel solution and any spatial
+order `c`, the weighted squared eigen-coordinate is dominated, uniformly over `s ∈ [0,T]`,
+by `4 · T · forcingMass gforce c i`.  The pointwise carrier coordinate is the indefinite
+integral `∫₀ˢ derivModeCoeff gforce i` (the `u₀ = 0` case of `coeffFun_u_eq`), whose
+absolute value is at most `√T · ‖derivModeCoeff‖` (`duhamel_integral_abs_le`), and the
+derivative-mode norm is at most `2 · ‖timeModeCoeff gforce i‖` (`norm_derivModeCoeff_le`). -/
+theorem zeroDatum_carrier_weighted_coeff_sq_le
+    (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ)) T)
+    (hT : 0 < T) (hT1 : T ≤ 1)
+    (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+    (hu : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
+      (0 : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2)) gforce)
+    (c : ℝ) (i : TensorEigenIdx (I := I) (M := M) g_bg 0 2)
+    {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) T) :
+    tensorSobolevWeight (I := I) (M := M) i c * (timeH1.toFun u s).coeff i ^ 2 ≤
+      4 * T * forcingMass (I := I) (M := M) gforce c i := by
+  have hT0 : (0 : ℝ) ≤ T := hT.le
+  have hval : (timeH1.toFun u s).coeff i
+      = ∫ τ in (0:ℝ)..s, (derivModeCoeff (I := I) (M := M) (a := (a:ℝ)) hT.le gforce i) τ := by
+    rw [hu]
+    have h := coeffFun_u_eq (I := I) (M := M)
+      (0 : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2)) gforce hT hT1 i hs
+    rw [h]
+    simp only [tensorHs.zero_coeff, mul_zero, zero_add]
+  have hwc_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i c :=
+    tensorSobolevWeight_nonneg (I := I) (M := M) i c
+  have hintabs := duhamel_integral_abs_le (I := I) (M := M) (a := (a:ℝ)) hT.le gforce i hs
+  have hderivnorm := norm_derivModeCoeff_le (I := I) (M := M) (a := (a:ℝ)) hT.le gforce i
+  have hcoeff_sq : (timeH1.toFun u s).coeff i ^ 2 ≤
+      T * ‖derivModeCoeff (I := I) (M := M) (a := (a:ℝ)) hT.le gforce i‖ ^ 2 := by
+    have hsqrt_nn : 0 ≤ Real.sqrt T := Real.sqrt_nonneg T
+    have hnn : 0 ≤ ‖derivModeCoeff (I := I) (M := M) (a := (a:ℝ)) hT.le gforce i‖ :=
+      norm_nonneg _
+    have hsq : |∫ τ in (0:ℝ)..s, (derivModeCoeff (I := I) (M := M) (a := (a:ℝ)) hT.le gforce i) τ| ^ 2
+        ≤ (Real.sqrt T * ‖derivModeCoeff (I := I) (M := M) (a := (a:ℝ)) hT.le gforce i‖) ^ 2 :=
+      pow_le_pow_left₀ (abs_nonneg _) hintabs 2
+    rw [hval]
+    calc (∫ τ in (0:ℝ)..s, (derivModeCoeff (I := I) (M := M) (a := (a:ℝ)) hT.le gforce i) τ) ^ 2
+        = |∫ τ in (0:ℝ)..s, (derivModeCoeff (I := I) (M := M) (a := (a:ℝ)) hT.le gforce i) τ| ^ 2 := by
+          rw [sq_abs]
+      _ ≤ (Real.sqrt T * ‖derivModeCoeff (I := I) (M := M) (a := (a:ℝ)) hT.le gforce i‖) ^ 2 := hsq
+      _ = Real.sqrt T ^ 2 * ‖derivModeCoeff (I := I) (M := M) (a := (a:ℝ)) hT.le gforce i‖ ^ 2 := by
+          rw [mul_pow]
+      _ = T * ‖derivModeCoeff (I := I) (M := M) (a := (a:ℝ)) hT.le gforce i‖ ^ 2 := by
+          rw [Real.sq_sqrt hT0]
+  have htime_nn : 0 ≤ ‖timeModeCoeff (I := I) (M := M) gforce i‖ := norm_nonneg _
+  have hderiv_sq : ‖derivModeCoeff (I := I) (M := M) (a := (a:ℝ)) hT.le gforce i‖ ^ 2 ≤
+      4 * ‖timeModeCoeff (I := I) (M := M) gforce i‖ ^ 2 := by
+    have hnn : 0 ≤ ‖derivModeCoeff (I := I) (M := M) (a := (a:ℝ)) hT.le gforce i‖ :=
+      norm_nonneg _
+    nlinarith [hderivnorm, hnn, htime_nn]
+  calc tensorSobolevWeight (I := I) (M := M) i c * (timeH1.toFun u s).coeff i ^ 2
+      ≤ tensorSobolevWeight (I := I) (M := M) i c *
+          (T * ‖derivModeCoeff (I := I) (M := M) (a := (a:ℝ)) hT.le gforce i‖ ^ 2) :=
+        mul_le_mul_of_nonneg_left hcoeff_sq hwc_nn
+    _ ≤ tensorSobolevWeight (I := I) (M := M) i c *
+          (T * (4 * ‖timeModeCoeff (I := I) (M := M) gforce i‖ ^ 2)) := by
+        refine mul_le_mul_of_nonneg_left ?_ hwc_nn
+        exact mul_le_mul_of_nonneg_left hderiv_sq hT0
+    _ = 4 * T * forcingMass (I := I) (M := M) gforce c i := by
+        rw [forcingMass]; ring
+
+set_option maxHeartbeats 800000 in
+/-- **Up-to-`t = 0` spectral decay of the smooth-datum (`u₀ = 0`) carrier.**
+
+For the carrier `s ↦ timeH1.toFun u s` of the `u₀ = 0` Duhamel solution and any spatial
+order `c` whose forcing mass is summable, the order-`c` weighted square-sum of the carrier
+eigen-coordinates tends to `0` as `s → 0⁺`:
+
+  `∑ᵢ (1 + λᵢ)^c · ((toFun u s).coeff i)² → 0`   as `s → 0⁺`.
+
+This is the dominated-convergence (Tannery) limit: each summand
+`(1 + λᵢ)^c · ((toFun u s).coeff i)²` tends to `0` (the carrier coordinate
+`(toFun u s).coeff i → (toFun u 0).coeff i = u₀.coeff i = 0` by continuity, since the
+initial datum is `0`), and is dominated uniformly over `s ∈ [0,T]` by the summable family
+`4 · T · forcingMass gforce c i` (`zeroDatum_carrier_weighted_coeff_sq_le`). -/
+theorem zeroDatum_carrier_weighted_tsum_tendsto_zero
+    (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ)) T)
+    (hT : 0 < T) (hT1 : T ≤ 1)
+    (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+    (hu : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
+      (0 : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2)) gforce)
+    (c : ℝ) (hc : Summable (forcingMass (I := I) (M := M) gforce c)) :
+    Filter.Tendsto
+      (fun s : ℝ => ∑' i : TensorEigenIdx (I := I) (M := M) g_bg 0 2,
+        tensorSobolevWeight (I := I) (M := M) i c * (timeH1.toFun u s).coeff i ^ 2)
+      (nhdsWithin (0 : ℝ) (Set.Ioi 0)) (nhds 0) := by
+  classical
+  -- The pointwise limit of each summand is `0` as `s → 0⁺`.
+  have hcoeff0 : ∀ i : TensorEigenIdx (I := I) (M := M) g_bg 0 2,
+      (timeH1.toFun u 0).coeff i = 0 := by
+    intro i
+    rw [hu]
+    have h := coeffFun_u_eq (I := I) (M := M)
+      (0 : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2)) gforce hT hT1 i
+      (⟨le_rfl, hT.le⟩ : (0:ℝ) ∈ Set.Icc (0:ℝ) T)
+    rw [h]
+    simp only [tensorHs.zero_coeff, mul_zero, zero_add, intervalIntegral.integral_same]
+  have hab : ∀ i : TensorEigenIdx (I := I) (M := M) g_bg 0 2,
+      Filter.Tendsto
+        (fun s : ℝ => tensorSobolevWeight (I := I) (M := M) i c * (timeH1.toFun u s).coeff i ^ 2)
+        (nhdsWithin (0 : ℝ) (Set.Ioi 0)) (nhds 0) := by
+    intro i
+    have hcont : ContinuousWithinAt (fun s => (timeH1.toFun u s).coeff i)
+        (Set.Icc (0:ℝ) T) 0 :=
+      (continuousOn_coeffFun_u (I := I) (M := M) u i) 0 ⟨le_rfl, hT.le⟩
+    -- The right-neighbourhood filter at `0` refines the `Icc 0 T`-within filter at `0`,
+    -- because `Icc 0 T ⊇ Ioi 0 ∩ Iio T` is a neighbourhood of `0` within `Ioi 0`.
+    have hIcc_mem : Set.Icc (0:ℝ) T ∈ nhdsWithin (0:ℝ) (Set.Ioi 0) := by
+      rw [mem_nhdsWithin]
+      refine ⟨Set.Iio T, isOpen_Iio, hT, ?_⟩
+      rintro x ⟨hxlt, hxgt⟩
+      exact ⟨le_of_lt hxgt, le_of_lt hxlt⟩
+    have hfilt : nhdsWithin (0:ℝ) (Set.Ioi 0) ≤ nhdsWithin (0:ℝ) (Set.Icc (0:ℝ) T) :=
+      nhdsWithin_le_iff.mpr hIcc_mem
+    have htend0 : Filter.Tendsto (fun s => (timeH1.toFun u s).coeff i)
+        (nhdsWithin (0:ℝ) (Set.Ioi 0)) (nhds ((timeH1.toFun u 0).coeff i)) :=
+      hcont.tendsto.mono_left hfilt
+    rw [hcoeff0 i] at htend0
+    have : Filter.Tendsto
+        (fun s : ℝ => tensorSobolevWeight (I := I) (M := M) i c * (timeH1.toFun u s).coeff i ^ 2)
+        (nhdsWithin (0 : ℝ) (Set.Ioi 0))
+        (nhds (tensorSobolevWeight (I := I) (M := M) i c * (0:ℝ) ^ 2)) :=
+      (tendsto_const_nhds.mul (htend0.pow 2))
+    simpa using this
+  have hbound : ∀ᶠ s in nhdsWithin (0 : ℝ) (Set.Ioi 0),
+      ∀ i : TensorEigenIdx (I := I) (M := M) g_bg 0 2,
+        ‖tensorSobolevWeight (I := I) (M := M) i c * (timeH1.toFun u s).coeff i ^ 2‖ ≤
+          4 * T * forcingMass (I := I) (M := M) gforce c i := by
+    have hmem : Set.Icc (0:ℝ) T ∈ nhdsWithin (0:ℝ) (Set.Ioi 0) := by
+      rw [mem_nhdsWithin]
+      refine ⟨Set.Iio T, isOpen_Iio, hT, ?_⟩
+      rintro x ⟨hxlt, hxgt⟩
+      exact ⟨le_of_lt hxgt, le_of_lt hxlt⟩
+    filter_upwards [hmem] with s hsmem i
+    have hnn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i c * (timeH1.toFun u s).coeff i ^ 2 :=
+      mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i c) (sq_nonneg _)
+    rw [Real.norm_eq_abs, abs_of_nonneg hnn]
+    exact zeroDatum_carrier_weighted_coeff_sq_le (I := I) (M := M) g_bg a gforce hT hT1
+      u hu c i hsmem
+  have hmaj : Summable (fun i : TensorEigenIdx (I := I) (M := M) g_bg 0 2 =>
+      4 * T * forcingMass (I := I) (M := M) gforce c i) := hc.mul_left (4 * T)
+  have := tendsto_tsum_of_dominated_convergence (𝓕 := nhdsWithin (0:ℝ) (Set.Ioi 0))
+    (f := fun s i => tensorSobolevWeight (I := I) (M := M) i c * (timeH1.toFun u s).coeff i ^ 2)
+    (g := fun _ => (0:ℝ))
+    (bound := fun i => 4 * T * forcingMass (I := I) (M := M) gforce c i)
+    hmaj hab hbound
+  simpa using this
 
 end DifferentialGeometry.PDE.RicciFlow
