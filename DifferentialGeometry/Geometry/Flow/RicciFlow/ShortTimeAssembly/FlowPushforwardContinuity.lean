@@ -55,14 +55,9 @@ theorem flow_pushforward_continuous_in_time
     (hbare : ∀ s : ℝ, 0 < s → s ≤ T → ∀ x : M,
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => (Φ_fam u : M → M) x) (Set.Ici (0 : ℝ)) s
         ((1 : ℝ →L[ℝ] ℝ).smulRight (X s ((Φ_fam s : M → M) x))))
-    (hcont0 : ContinuousOn
-      (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2))
+    (hsmooth0 : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
       (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
-    (hgrad0 : ∀ α : M,
-      ContinuousOn
-        (fun q : ℝ × M =>
-          fderiv ℝ (chartRawRepr (I := I) α (X q.1)) (extChartAt I α q.2))
-        (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
       (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
@@ -73,12 +68,15 @@ theorem flow_pushforward_continuous_in_time
       ∃ δ : ℝ, 0 < δ ∧ δ < T ∧
         ∀ s ∈ Set.Ioo (0 : ℝ) δ, ∀ x : M, (Φ_fam s : M → M) x = Ψ s x)
     (hΦfam_mfderiv_cont : ∀ (x : M) (v : TangentSpace I x), ∀ s ∈ Set.Ioo (0 : ℝ) T,
-      ContinuousAt (fun r : ℝ => (mfderiv I I (Φ_fam r : M → M) x v : E)) s) :
+      ContinuousAt (fun r : ℝ =>
+        (⟨(Φ_fam r : M → M) x, mfderiv I I (Φ_fam r : M → M) x v⟩ : TangentBundle I M)) s) :
     (∀ (x : M) (v : TangentSpace I x), ContinuousOn
-      (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E)) (Set.Ico 0 T))
+      (fun s : ℝ =>
+        (⟨(Φ_fam s : M → M) x, mfderiv I I (Φ_fam s : M → M) x v⟩ : TangentBundle I M))
+      (Set.Ico 0 T))
     ∧ (∀ x : M, ContinuousWithinAt (fun s : ℝ => (Φ_fam s : M → M) x) (Set.Ici (0 : ℝ)) 0) := by
   obtain ⟨Φ, hΦ0', hdiffeo, hΦflow, hΦcont0, hΦmfderiv0⟩ :=
-    forward_flow_existence_onesided_of_jointsmooth_field X T hT hint hcont0 hgrad0
+    forward_flow_existence_onesided_of_jointsmooth_field X T hT hsmooth0
   have hΦfam_ode : ∀ s ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => (Φ_fam u : M → M) x) (Set.Ioo (0 : ℝ) T) s
         ((1 : ℝ →L[ℝ] ℝ).smulRight (X s ((Φ_fam s : M → M) x))) := by
@@ -196,8 +194,10 @@ theorem flow_pushforward_continuous_in_time
   rcases eq_or_lt_of_le hs.1 with h0 | h0
   · subst_vars
     have hmfeq : Set.EqOn
-        (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E))
-        (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E)) (Set.Ico 0 T) := by
+        (fun s : ℝ =>
+          (⟨(Φ_fam s : M → M) x, mfderiv I I (Φ_fam s : M → M) x v⟩ : TangentBundle I M))
+        (fun s : ℝ =>
+          (⟨Φ s x, mfderiv I I (fun y : M => Φ s y) x v⟩ : TangentBundle I M)) (Set.Ico 0 T) := by
       intro s hs
       have hfun : (Φ_fam s : M → M) = (fun y : M => Φ s y) := by
         funext y
@@ -207,13 +207,15 @@ theorem flow_pushforward_continuous_in_time
       simp only []
       rw [hfun]
     have hΦm : ContinuousWithinAt
-        (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E)) (Set.Ico 0 T) 0 :=
+        (fun s : ℝ =>
+          (⟨Φ s x, mfderiv I I (fun y : M => Φ s y) x v⟩ : TangentBundle I M)) (Set.Ico 0 T) 0 :=
       (hΦmfderiv0 x v).mono Set.Ico_subset_Ici_self
     refine hΦm.congr_of_eventuallyEq
       (Filter.eventuallyEq_of_mem self_mem_nhdsWithin hmfeq) ?_
     have hfun0 : (Φ_fam 0 : M → M) = (fun y : M => Φ 0 y) := by
       funext y; rw [hΦ0', hΦ0]; rfl
-    change (mfderiv I I (Φ_fam 0 : M → M) x v : E) = (mfderiv I I (fun y : M => Φ 0 y) x v : E)
+    change (⟨(Φ_fam 0 : M → M) x, mfderiv I I (Φ_fam 0 : M → M) x v⟩ : TangentBundle I M)
+      = (⟨Φ 0 x, mfderiv I I (fun y : M => Φ 0 y) x v⟩ : TangentBundle I M)
     rw [hfun0]
   · exact (hΦfam_mfderiv_cont x v s ⟨h0, hs.2⟩).continuousWithinAt
 
@@ -302,42 +304,5 @@ theorem flow_family_identification
   intro s hs x
   obtain ⟨a, b, Xt, hr', _, _, _, hall⟩ := hsubu hs
   exact hall s hr' x
-
-theorem joint_smooth_moving_mfderiv_continuous
-    (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
-    (Φ : ℝ → M → M) (hΦ0 : ∀ x : M, Φ 0 x = x)
-    (hcont0 : ContinuousOn
-      (fun q : ℝ × M => (X_DT q.1 q.2 : TangentSpace I q.2))
-      (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
-    (hgrad0 : ∀ α : M,
-      ContinuousOn
-        (fun q : ℝ × M =>
-          fderiv ℝ (chartRawRepr (I := I) α (X_DT q.1)) (extChartAt I α q.2))
-        (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
-    (hinterior : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
-      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) t
-        ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φ t x))))
-    (hpicard : ∀ x : M, ∃ α : M, ∃ δ : ℝ, 0 < δ ∧ x ∈ (chartAt H α).source ∧
-      ∀ s ∈ Set.Ico (0 : ℝ) (min δ T), Φ s x ∈ (chartAt H α).source ∧
-        extChartAt I α (Φ s x)
-          = extChartAt I α x + ∫ r in (0 : ℝ)..s,
-              chartRawRepr (I := I) α (X_DT r) (extChartAt I α (Φ r x)))
-    (hvarpicard : ∀ (x : M) (v : TangentSpace I x), ∃ α : M, ∃ δ : ℝ, 0 < δ ∧
-      ∀ s ∈ Set.Ico (0 : ℝ) (min δ T),
-        (mfderiv I I (fun y : M => Φ s y) x v : E)
-          = (@id E (mfderiv I I (fun y : M => Φ 0 y) x v))
-            + ∫ r in (0 : ℝ)..s,
-                (fderiv ℝ (chartRawRepr (I := I) α (X_DT r))
-                    (extChartAt I α (Φ r x)))
-                  (mfderiv I I (fun y : M => Φ r y) x v : E))
-    (hJbound : ∀ (x : M) (v : TangentSpace I x), ∃ δ : ℝ, ∃ B : ℝ, 0 < δ ∧
-      ∀ s ∈ Set.Ico (0 : ℝ) (min δ T),
-        ‖(mfderiv I I (fun y : M => Φ s y) x v : E)‖ ≤ B) :
-    (∀ x : M, ContinuousWithinAt (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) 0)
-    ∧ (∀ (x : M) (v : TangentSpace I x),
-        ContinuousWithinAt (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E))
-          (Set.Ici (0 : ℝ)) 0) :=
-  flow_t0_continuity_extension X_DT T hT Φ hΦ0 hcont0 hgrad0 hinterior hpicard
-    hvarpicard hJbound
 
 end DifferentialGeometry.PDE.RicciFlow

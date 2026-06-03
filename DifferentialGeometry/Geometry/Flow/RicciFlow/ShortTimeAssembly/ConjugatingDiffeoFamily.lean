@@ -79,19 +79,10 @@ private theorem neg_tangentMap_cmdwa
 theorem conjugating_diffeo_family
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T_DT : ℝ) (hDT : 0 < T_DT)
-    (h_reg : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+    (h_smooth0 : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
         : TangentBundle I M))
-      (Set.Ioo (0 : ℝ) T_DT ×ˢ Set.univ))
-    (h_cont0 : ContinuousOn
-      (fun q : ℝ × M => (deTurckVF (I := I) (g_DT q.1) g_bg q.2 : TangentSpace I q.2))
-      (Set.Icc 0 T_DT ×ˢ Set.univ))
-    (h_grad0 : ∀ α : M,
-      ContinuousOn
-        (fun q : ℝ × M =>
-          fderiv ℝ (chartRawRepr (I := I) α (fun x => deTurckVF (I := I) (g_DT q.1) g_bg x))
-            (extChartAt I α q.2))
-        (Set.Icc 0 T_DT ×ˢ Set.univ)) :
+      (Set.Icc (0 : ℝ) T_DT ×ˢ Set.univ)) :
     ∃ T : ℝ, 0 < T ∧ T ≤ T_DT ∧ ∃ Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M),
       Φ_fam 0 = _root_.Diffeomorph.refl I M ∞ ∧
       (∀ x : M, ∀ s ∈ Set.Ioo (0 : ℝ) T,
@@ -102,36 +93,18 @@ theorem conjugating_diffeo_family
       (∀ x : M,
         ContinuousWithinAt (fun s : ℝ => (Φ_fam s : M → M) x) (Set.Ici (0 : ℝ)) 0) ∧
       (∀ (x : M) (v : TangentSpace I x),
-        ContinuousWithinAt (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E))
+        ContinuousWithinAt (fun s : ℝ =>
+            (⟨(Φ_fam s : M → M) x, mfderiv I I (Φ_fam s : M → M) x v⟩ : TangentBundle I M))
           (Set.Ici (0 : ℝ)) 0) := by
   set X_DT : ℝ → ∀ x : M, TangentSpace I x :=
     fun s x => -(deTurckVF (I := I) (g_DT s) g_bg x) with hXDT
-  have hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+  have hsmooth0_X : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X_DT q.1 q.2) : TangentBundle I M))
-      (Set.Ioo (0 : ℝ) T_DT ×ˢ Set.univ) :=
+      (Set.Icc (0 : ℝ) T_DT ×ˢ Set.univ) :=
     fun q hq => neg_tangentMap_cmdwa
-      (fun s x => (deTurckVF (I := I) (g_DT s) g_bg x : TangentSpace I x)) (h_reg q hq)
-  have hcont0 : ContinuousOn
-      (fun q : ℝ × M => (X_DT q.1 q.2 : TangentSpace I q.2))
-      (Set.Icc (0 : ℝ) T_DT ×ˢ Set.univ) := h_cont0.neg
-  have hgrad0 : ∀ α : M, ContinuousOn
-      (fun q : ℝ × M => fderiv ℝ (chartRawRepr (I := I) α (X_DT q.1)) (extChartAt I α q.2))
-      (Set.Icc (0 : ℝ) T_DT ×ˢ Set.univ) := by
-    intro α
-    have hfun :
-        (fun q : ℝ × M => fderiv ℝ (chartRawRepr (I := I) α (X_DT q.1)) (extChartAt I α q.2))
-          = (fun q : ℝ × M => -(fderiv ℝ (chartRawRepr (I := I) α
-              (fun x => (deTurckVF (I := I) (g_DT q.1) g_bg x : TangentSpace I x)))
-              (extChartAt I α q.2))) := by
-      funext q
-      have hcr : chartRawRepr (I := I) α (X_DT q.1)
-          = (fun z => -(chartRawRepr (I := I) α
-              (fun x => (deTurckVF (I := I) (g_DT q.1) g_bg x : TangentSpace I x)) z)) := rfl
-      rw [hcr, fderiv_fun_neg]
-    rw [hfun]
-    exact (h_grad0 α).neg
+      (fun s x => (deTurckVF (I := I) (g_DT s) g_bg x : TangentSpace I x)) (h_smooth0 q hq)
   obtain ⟨Φ, hΦ0, hdiffeo, hflow, hΦcont0, hΦmfderiv0⟩ :=
-    forward_flow_existence_onesided_of_jointsmooth_field (I := I) X_DT T_DT hDT hint hcont0 hgrad0
+    forward_flow_existence_onesided_of_jointsmooth_field (I := I) X_DT T_DT hDT hsmooth0_X
   obtain ⟨Φ_fam, hfam0, hfameq, hfamode⟩ :=
     time_dependent_vf_bare_flow_family (I := I) X_DT T_DT hDT Φ hΦ0
       (fun t ht htT => hdiffeo t ⟨ht, htT⟩)
@@ -156,16 +129,19 @@ theorem conjugating_diffeo_family
     rw [hfun_eqOn 0 ⟨le_rfl, hDT⟩]
   · intro x v
     have hmfeq : Set.EqOn
-        (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E))
-        (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E)) (Set.Ico 0 T_DT) := by
+        (fun s : ℝ =>
+          (⟨(Φ_fam s : M → M) x, mfderiv I I (Φ_fam s : M → M) x v⟩ : TangentBundle I M))
+        (fun s : ℝ =>
+          (⟨Φ s x, mfderiv I I (fun y : M => Φ s y) x v⟩ : TangentBundle I M))
+        (Set.Ico 0 T_DT) := by
       intro s hs
-      change (mfderiv I I (Φ_fam s : M → M) x v : E)
-        = (mfderiv I I (fun y : M => Φ s y) x v : E)
+      change (⟨(Φ_fam s : M → M) x, mfderiv I I (Φ_fam s : M → M) x v⟩ : TangentBundle I M)
+        = (⟨Φ s x, mfderiv I I (fun y : M => Φ s y) x v⟩ : TangentBundle I M)
       rw [hfun_eqOn s hs]
     refine (hΦmfderiv0 x v).congr_of_eventuallyEq
       (Filter.eventuallyEq_of_mem (Ico_mem_nhdsGE hDT) hmfeq) ?_
-    change (mfderiv I I (Φ_fam 0 : M → M) x v : E)
-      = (mfderiv I I (fun y : M => Φ 0 y) x v : E)
+    change (⟨(Φ_fam 0 : M → M) x, mfderiv I I (Φ_fam 0 : M → M) x v⟩ : TangentBundle I M)
+      = (⟨Φ 0 x, mfderiv I I (fun y : M => Φ 0 y) x v⟩ : TangentBundle I M)
     rw [hfun_eqOn 0 ⟨le_rfl, hDT⟩]
 
 end DifferentialGeometry.PDE.RicciFlow
