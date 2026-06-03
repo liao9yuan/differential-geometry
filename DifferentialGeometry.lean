@@ -1115,6 +1115,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.TimeDerivativeChain
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.BareLaplacianSpectralMatch
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckG0AnalyticInputs
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckG0RealizeFrontier
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckG0RealizeSectionLipschitz
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckInitialAnchorConstruction
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckInitialDataExistence
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckInteriorTimeRegularity

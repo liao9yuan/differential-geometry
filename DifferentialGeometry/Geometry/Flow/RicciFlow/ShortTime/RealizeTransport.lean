@@ -213,19 +213,19 @@ finite-support-gated piecewise `realizeMetricMap`. The nonlinear forcing is the
 identity holds for the genuine infinite-support solution carrier.
 
 The construction data `N_cont`, `repr`, `Nsec` and the construction/realize
-hypotheses `hN_coeff`, `hNsec_realize`, `hrepr_small` are IDENTICAL in shape to
-A4/A5/parent (coordinate/realize identities about `N_cont`'s coordinates and
-`Nsec`'s bilinear extraction, NOT the reconciliation conclusion). `hℓ` is the
-carrier-wide pinning of `ℓ_a` against the linear realize `ccTensorBilinSymm`.
+hypotheses `hN_coeff`, `hNsec_realize` are coordinate/realize identities about
+`N_cont`'s coordinates and `Nsec`'s bilinear extraction, NOT the reconciliation
+conclusion. `hℓ` is the carrier-wide pinning of `ℓ_a` against the linear realize
+`ccTensorBilinSymm`.
 
 Non-packaging: every hypothesis is a coordinate/realize identity; none is the
 `ℓ_a (…) = deTurckRicciRHS …` conclusion. Non-leaking: all data constrains the
 internal carrier `u₂`/`T_s`/`g_DT`/`N_cont`, never `g₀`/the headline.
 
-(`hreal` and `hrepr_small` are blueprint-mandated signature hypotheses consumed
-by the parent assembly; this reconciliation step routes the value identity
-through `hℓ`/`hNsec_geom` and the spectral-coordinate identities, so the linter
-flags them as unused here — narrowly disabled above the docstring.) -/
+(`hreal` is a blueprint-mandated signature hypothesis consumed by the parent
+assembly; this reconciliation step routes the value identity through `hℓ`/`hNsec_geom`
+and the spectral-coordinate identities, so the linter flags it as unused here —
+narrowly disabled above the docstring.) -/
 theorem rhs_matches_deturck_at_solution
     (g_bg g_back : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
     (u₂ : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
@@ -253,10 +253,6 @@ theorem rhs_matches_deturck_at_solution
         (x' : M) (v' w' : TangentSpace I x'),
       ccTensorBilinSymm (I := I) g_bg (Nsec u) x' v' w' =
         ccTensorBilinSymm (I := I) g_bg (repr u) x' v' w')
-    (hrepr_small : ∀ u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1),
-      ∃ δ' : ℝ, δ' < 1 ∧
-        gFibreOpBound (I := I) (M := M) g_bg
-          (ccTensorBilinSymm (I := I) g_bg (repr u)) δ')
     (hsmoothrepr : ∀ (s : ℝ)
         (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g_bg 0 2),
       (u₂ s).coeff i

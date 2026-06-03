@@ -193,11 +193,12 @@ Dependency-sufficiency: `hreg` (ungated carrier derivative) pushed through `ℓ_
 by `pointwise_deriv_through_realize`, composed with `rhs_matches_deturck_at_solution`
 (now concluding `deTurckRicciRHS g_bg (g_DT t)`, the SAME continuous `N_cont` and
 the SAME linear `g_DT`), yields the conclusion. The construction data `N_cont`,
-`repr`, `Nsec` and the hypotheses `hN_coeff`, `hNsec_realize`, `hrepr_small` are
-IDENTICAL in shape to A3/A4/A5/parent (coordinate/realize identities, NOT the
-`HasDerivWithinAt` conclusion). Non-leaking: all data constrains the internal
-carrier `u₂`/`T_s`/`g_DT`/`N_cont`, never `g₀`/the headline. `hrepr_small` is the
-honestly-flagged open analytic input, consistent with A4/A5.
+`repr`, `Nsec` and the hypotheses `hN_coeff`, `hNsec_realize` are coordinate/realize
+identities, NOT the `HasDerivWithinAt` conclusion. Non-leaking: all data constrains
+the internal carrier `u₂`/`T_s`/`g_DT`/`N_cont`, never `g₀`/the headline. (The former
+`hrepr_small` fibre-`< 1` bound on `repr` is dropped: it is jointly unsatisfiable with
+`hNsec_geom`, which forces `ccTensorBilinSymm (repr (carrier))` to carry the unbounded
+DeTurck–Ricci curvature, and it was never used in any proof body.)
 
 (`hsmall` is a genuine blueprint-contract signature hypothesis — the fibre-small
 realize datum on `T_s`, consumed by the parent assembly — that this interior
@@ -229,10 +230,6 @@ theorem deturck_metric_pde_interior
         (x : M) (v w : TangentSpace I x),
       ccTensorBilinSymm (I := I) g_bg (Nsec u) x v w =
         ccTensorBilinSymm (I := I) g_bg (repr u) x v w)
-    (hrepr_small : ∀ u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1),
-      ∃ δ' : ℝ, δ' < 1 ∧
-        gFibreOpBound (I := I) (M := M) g_bg
-          (ccTensorBilinSymm (I := I) g_bg (repr u)) δ')
     (hreg : ∀ s ∈ Set.Ioo (0 : ℝ) T,
       HasDerivAt
         (fun r => (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
@@ -286,7 +283,7 @@ theorem deturck_metric_pde_interior
     g_DT T_s u_car u_car' x v w ℓ_a
     (fun s => hreal s x v w) hfactor hderiv t ht
   have hmatch := rhs_matches_deturck_at_solution (I := I) (M := M) g_bg g_bg a u₂ ℓ_a
-    g_DT T_s x v w hreal N_cont repr Nsec hN_coeff hNsec_realize hrepr_small
+    g_DT T_s x v w hreal N_cont repr Nsec hN_coeff hNsec_realize
     hsmoothrepr hℓ hNsec_geom t (Set.Ioo_subset_Ico_self ht)
   rw [hu_car'_def] at hpush
   rw [hmatch] at hpush

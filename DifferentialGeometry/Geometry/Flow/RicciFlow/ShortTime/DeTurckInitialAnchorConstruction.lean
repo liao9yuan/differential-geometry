@@ -89,10 +89,10 @@ continuous gauge-cancelled first-order nonlinearity `N_cont` (presented through 
 * `g_DT 0 = g₀` (the perturbation carrier starts at zero, anchoring the flow at the
   prescribed initial metric — the whole point of realizing off `g₀`);
 * `hreal` — `g_DT s` is the linear realize `g₀ + ccTensorBilinSymm (T_s s)`;
-* `hN_coeff`, `hNsec_realize`, `hrepr_small`, `hsmoothrepr` — the coordinate/realize
-  identities of the spectral construction data (`N_cont`'s coefficients are the `L²`
-  coordinates of `Nsec`; `Nsec` and `repr` have equal bilinear extraction; `repr`
-  is fibre-small; `u₂`'s coordinates are the `L²` coordinates of `T_s`);
+* `hN_coeff`, `hNsec_realize`, `hsmoothrepr` — the coordinate/realize identities of
+  the spectral construction data (`N_cont`'s coefficients are the `L²` coordinates of
+  `Nsec`; `Nsec` and `repr` have equal bilinear extraction; `u₂`'s coordinates are the
+  `L²` coordinates of `T_s`);
 * `hcont` — the included carrier `s ↦ ι (u₂ s)` is continuous up to `t = 0`
   (the mild solution is time-continuous);
 * `hreg` — the carrier `u₂` solves the genuine spectral PDE
@@ -140,10 +140,6 @@ theorem deTurck_g0_realize_data
             (x : M) (v w : TangentSpace I x),
           ccTensorBilinSymm (I := I) g₀ (Nsec u) x v w =
             ccTensorBilinSymm (I := I) g₀ (repr u) x v w) ∧
-        (∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-          ∃ δ' : ℝ, δ' < 1 ∧
-            gFibreOpBound (I := I) (M := M) g₀
-              (ccTensorBilinSymm (I := I) g₀ (repr u)) δ') ∧
         ContinuousOn
           (fun s : ℝ => tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
             (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (Set.Icc 0 T) ∧
@@ -182,18 +178,18 @@ theorem deTurck_g0_realize_data
   set a : ℕ := Module.finrank ℝ E + 5 with ha_def
   have ha : 2 * a > Module.finrank ℝ E + 4 := by omega
   have ha2 : Module.finrank ℝ E < 2 * (a - 2) := by omega
-  obtain ⟨repr, Nsec, hNsec_realize, hrepr_small, hNsec_geom_univ⟩ :=
+  obtain ⟨repr, Nsec, hNsec_realize, hNsec_ha_lip, hNsec_geom_univ⟩ :=
     deTurck_g0_decoupled_principal_match (I := I) g₀ g_bg a
   obtain ⟨N_cont, hN_coeff⟩ :=
     deTurck_g0_continuous_nonlinearity (I := I) g₀ a Nsec
   obtain ⟨K, hNsec_lip⟩ :=
-    deTurck_g0_nonlinearity_lipschitz (I := I) g₀ a repr Nsec hNsec_realize
-  obtain ⟨T, g_DT, u₂, T_s, hT, h0, hreal, hcont, hreg, hsmall, hsmoothrepr⟩ :=
+    deTurck_g0_nonlinearity_lipschitz (I := I) g₀ a repr Nsec hNsec_realize hNsec_ha_lip
+  obtain ⟨T, g_DT, u₂, T_s, hT, h0, hreal, hcont, hreg, hsmall, hsmoothrepr, hcanon⟩ :=
     deTurck_g0_carrier_realize_transport (I := I) g₀ a ha ha2 N_cont Nsec
       hN_coeff ⟨K, hNsec_lip⟩
   exact ⟨T, a, hT, ha, g_DT, u₂, T_s, N_cont, repr, Nsec, h0, hreal, hN_coeff,
-    hNsec_realize, hrepr_small, hcont, hreg, hsmall, hsmoothrepr,
-    hNsec_geom_univ g_DT u₂ T_s hreal hsmoothrepr,
+    hNsec_realize, hcont, hreg, hsmall, hsmoothrepr,
+    hNsec_geom_univ g_DT u₂ T_s hreal hsmoothrepr hcanon,
     deTurck_g0_chartGram_continuity (I := I) g₀ a ha hT g_DT u₂ T_s N_cont
       hreal hcont hreg⟩
 
@@ -238,10 +234,6 @@ theorem deTurck_g0_interior_deriv_from_data
         (x : M) (v w : TangentSpace I x),
       ccTensorBilinSymm (I := I) g₀ (Nsec u) x v w =
         ccTensorBilinSymm (I := I) g₀ (repr u) x v w)
-    (hrepr_small : ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-      ∃ δ' : ℝ, δ' < 1 ∧
-        gFibreOpBound (I := I) (M := M) g₀
-          (ccTensorBilinSymm (I := I) g₀ (repr u)) δ')
     (hreg : ∀ s ∈ Set.Ioo (0 : ℝ) T,
       HasDerivAt
         (fun r => (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
@@ -293,7 +285,7 @@ theorem deTurck_g0_interior_deriv_from_data
     g_DT T_s u_car u_car' x v w ℓ_a
     (fun s => hreal s x v w) hfactor hderiv t ht
   have hmatch := rhs_matches_deturck_at_solution (I := I) (M := M) g₀ g_bg a u₂ ℓ_a
-    g_DT T_s x v w hreal N_cont repr Nsec hN_coeff hNsec_realize hrepr_small
+    g_DT T_s x v w hreal N_cont repr Nsec hN_coeff hNsec_realize
     hsmoothrepr hℓ hNsec_geom t (Set.Ioo_subset_Ico_self ht)
   rw [hu_car'_def] at hpush
   rw [hmatch] at hpush
@@ -477,7 +469,7 @@ theorem deturck_metric_pde_interior_at_initial_construction
         HasDerivWithinAt (fun s : ℝ => (g_DT s).inner x v w)
           (deTurckRicciRHS (I := I) g_bg (g_DT t) x v w) (Set.Ici 0) t) := by
   obtain ⟨T, a, hT, ha, g_DT, u₂, T_s, N_cont, repr, Nsec, h0, hreal, hN_coeff,
-      hNsec_realize, hrepr_small, hcont, hreg, hsmall, hsmoothrepr, hNsec_geom,
+      hNsec_realize, hcont, hreg, hsmall, hsmoothrepr, hNsec_geom,
       hC2_chart⟩ :=
     deTurck_g0_realize_data (I := I) g₀ g_bg
   refine ⟨T, hT, g_DT, h0, ?_, ?_, ?_⟩
@@ -486,7 +478,7 @@ theorem deturck_metric_pde_interior_at_initial_construction
   · exact deTurck_g0_rhs_right_continuous_at_zero (I := I) g₀ g_bg hT a ha g_DT T_s u₂
       hreal hcont hsmoothrepr hC2_chart
   · exact deTurck_g0_interior_deriv_from_data (I := I) g₀ g_bg a ha g_DT u₂ T_s
-      N_cont repr Nsec hreal hN_coeff hNsec_realize hrepr_small hreg hsmoothrepr
+      N_cont repr Nsec hreal hN_coeff hNsec_realize hreg hsmoothrepr
       hNsec_geom
 
 end DifferentialGeometry.PDE.RicciFlow
