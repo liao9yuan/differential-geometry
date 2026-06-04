@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorBochner
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseToL2Packaging
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GenuineBracketSectionSplit
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.OrderSeparatedCurvatureJet
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 
 /-!
@@ -1201,7 +1202,58 @@ theorem exists_iteratedCovGrad_pointwiseTensorCurv_genuineRemainder_fiberNormSq_
             Cgr s m ^ 2 *
               riemannianFiberNormSq (I := I) (M := M) g 0 (s + (m + 2)) x
                 ((iteratedCovGrad g 0 s (m + 2) T).toSection x) := by
-  sorry
+  classical
+  obtain ⟨Cper, hCper_nn, hsplit⟩ :=
+    exists_iteratedCovGrad_pointwiseTensorCurv_orderSeparated_field (I := I) (M := M) g
+  refine ⟨fun s m => 2 * Cper s m, fun s m => ?_, fun s m T x => ?_⟩
+  · exact mul_nonneg (by norm_num) (hCper_nn s m)
+  · obtain ⟨Gcurv, GcurvDeriv, Grem, heq, hcurv, hcurvDeriv, hrem⟩ := hsplit s m T x
+    set F : ℕ → ℝ := fun i =>
+        riemannianFiberNormSq (I := I) (M := M) g 0 (s + i) x
+          ((iteratedCovGrad g 0 s i T).toSection x) with hF
+    have hF_nn : ∀ i, 0 ≤ F i := fun i =>
+      riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + i) x _
+    set LowSum : ℝ := ∑ i ∈ Finset.range (m + 2), F i with hLowSum
+    have hLowSum_nn : 0 ≤ LowSum := Finset.sum_nonneg (fun i _ => hF_nn i)
+    have hsub : Finset.range (m + 1) ⊆ Finset.range (m + 2) :=
+      Finset.range_subset_range.mpr (by omega)
+    have hDeriv_dom : (∑ i ∈ Finset.range (m + 1), F i) ≤ LowSum := by
+      rw [hLowSum]
+      exact Finset.sum_le_sum_of_subset_of_nonneg hsub (fun i _ _ => hF_nn i)
+    have hCurv_dom : (∑ i ∈ Finset.range (m + 1), F (i + 1)) ≤ LowSum := by
+      have hsplit_low : LowSum = (∑ i ∈ Finset.range (m + 1), F (i + 1)) + F 0 := by
+        rw [hLowSum, Finset.sum_range_succ' F (m + 1)]
+      rw [hsplit_low]
+      linarith [hF_nn 0]
+    have hcurv' : riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + m) x Gcurv ≤
+        Cper s m ^ 2 * (∑ i ∈ Finset.range (m + 1), F (i + 1)) := hcurv
+    have hcurvDeriv' : riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + m) x GcurvDeriv ≤
+        Cper s m ^ 2 * (∑ i ∈ Finset.range (m + 1), F i) := hcurvDeriv
+    have hCper_sq_nn : 0 ≤ Cper s m ^ 2 := sq_nonneg _
+    have hcurv_low : riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + m) x Gcurv ≤
+        Cper s m ^ 2 * LowSum :=
+      le_trans hcurv' (mul_le_mul_of_nonneg_left hCurv_dom hCper_sq_nn)
+    have hcurvDeriv_low : riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + m) x GcurvDeriv ≤
+        Cper s m ^ 2 * LowSum :=
+      le_trans hcurvDeriv' (mul_le_mul_of_nonneg_left hDeriv_dom hCper_sq_nn)
+    refine ⟨Gcurv + GcurvDeriv, Grem, by rw [heq], ?_, ?_⟩
+    · have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g 0 (s + 1 + m) x Gcurv GcurvDeriv
+      have hsq : (2 * Cper s m) ^ 2 = 4 * Cper s m ^ 2 := by ring
+      rw [hsq]
+      calc riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + m) x (Gcurv + GcurvDeriv)
+          ≤ 2 * riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + m) x Gcurv +
+              2 * riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + m) x GcurvDeriv := hadd
+        _ ≤ 2 * (Cper s m ^ 2 * LowSum) + 2 * (Cper s m ^ 2 * LowSum) := by
+              have e1 := mul_le_mul_of_nonneg_left hcurv_low (by norm_num : (0 : ℝ) ≤ 2)
+              have e2 := mul_le_mul_of_nonneg_left hcurvDeriv_low (by norm_num : (0 : ℝ) ≤ 2)
+              linarith
+        _ = 4 * Cper s m ^ 2 * LowSum := by ring
+    · have hTop_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 (s + (m + 2)) x
+          ((iteratedCovGrad g 0 s (m + 2) T).toSection x) :=
+        riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + (m + 2)) x _
+      have hsq : (2 * Cper s m) ^ 2 = 4 * Cper s m ^ 2 := by ring
+      rw [hsq]
+      nlinarith [hrem, hTop_nn, hCper_sq_nn]
 
 /-- **Posited deepest covariant-product curvature primitive: the *pointwise fibre-norm* bound on the
 iterated covariant gradient of the single-step commutator defect (rank/order-generic).** For a closed

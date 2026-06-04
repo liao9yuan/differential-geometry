@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorBochner
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseToL2Packaging
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GenuineCurvatureField
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameFieldDecomposition
 
 /-!
 # The genuine bracket-free curvature section split (assembly-ready spectral-pairing core)
@@ -41,9 +42,15 @@ bound `riemannOp_covGrad_fiberNormSq_le_gen` for `Gcurv`; the uniform differenti
 fibre bound `riemannianFiberNormSq_tensor3rdCurvGenuine_le` and the bracket fibre order for the
 remainder) and the **covariant integration-by-parts nullity**
 (`integral_tensorInner_tangentAction_add_smul_divergence_eq_zero`) identifying the bracket remainder
-as a total covariant divergence of an `∇S`-order field. It is posited here as the precise genuine
-curvature primitive (`sorry`), to be discharged by the orchestrator; the assembly-ready core is a
-genuine non-circular reduction on top of it.
+as a total covariant divergence of an `∇S`-order field. This bracket-free curvature core is itself
+*proved* (in this file) from the strictly-more-primitive order-separated *divergence-null* form of
+the same field decomposition,
+`exists_pointwiseTensorCurv_movingFrameField_orderSeparated_divergenceNull` (which packages the same
+explicit genuine fields, the same three proportional fibre bounds, and the integrated
+divergence-nullity `⟨Curv S − Gcurv − GcurvDeriv, ∇S⟩_{L²} = 0` of the moving-frame remainder); the
+bracket-free pairing is recovered from that nullity by left additivity of the `L²` pairing. The
+order-separated divergence-null form is the posited deepest genuine curvature primitive (`sorry`), to
+be discharged by the orchestrator.
 
 ## The Weitzenböck reduction performed here (the genuine content of the core)
 
@@ -143,8 +150,18 @@ covariant divergence of an `∇S`-order field, so
 `weitzenbock_integrated_covGrad_l2_normSq` and is *false* on a non-flat manifold, so the genuine
 fields must carry the actual curvature pairing — the zero witness is rejected.
 
-This is the deepest moving-frame curvature-endomorphism content at general rank; it is posited here
-as the precise genuine curvature primitive and discharged by the orchestrator. -/
+This is the deepest moving-frame curvature-endomorphism content at general rank. It is *proved* here
+from the strictly-more-primitive order-separated *divergence-null* form of the same field
+decomposition, `exists_pointwiseTensorCurv_movingFrameField_orderSeparated_divergenceNull`, which
+supplies the same explicit genuine fields with the same three proportional fibre bounds but records
+the integrated content as the divergence-nullity `⟨Curv S − Gcurv − GcurvDeriv, ∇S⟩_{L²} = 0` of the
+moving-frame remainder. The bracket-free pairing `⟨Gcurv + GcurvDeriv, ∇S⟩_{L²} = ⟨Curv S, ∇S⟩_{L²}`
+follows from that nullity by writing `Curv S = (Gcurv + GcurvDeriv) + (Curv S − Gcurv − GcurvDeriv)`
+and using the left additivity of the `L²` pairing (`tensorL2Inner_add_left`, with the cross-term
+integrabilities supplied by `SmoothCcTensor.integrable_inner_cross`): the remainder term drops by the
+nullity, leaving the genuine fields carrying the entire pairing. This reduction is genuine and
+non-circular — it converts a total-divergence nullity into a cross-pairing equality, a step
+consumers cannot perform without the covariant Green identity that produced the nullity. -/
 theorem pointwiseTensorCurv_genuineFields_bracketFree_curvatureCore
     (g : SmoothRiemannianMetric I M) :
     ∃ Cper : ℕ → ℝ, (∀ s, 0 ≤ Cper s) ∧
@@ -168,7 +185,36 @@ theorem pointwiseTensorCurv_genuineFields_bracketFree_curvatureCore
             tensorL2Inner (I := I) (M := M) g 0 (s + 1)
               (pointwiseTensorCurv (I := I) (M := M) g s S).toFun
               (covGrad (I := I) (M := M) g 0 s S).toFun := by
-  sorry
+  classical
+  obtain ⟨Cper, hCper_nn, hfields⟩ :=
+    exists_pointwiseTensorCurv_movingFrameField_orderSeparated_divergenceNull (I := I) (M := M) g
+  refine ⟨Cper, hCper_nn, fun s S => ?_⟩
+  obtain ⟨Gcurv, GcurvDeriv, hcurv, hcurvDeriv, hrem, hnull⟩ := hfields s S
+  refine ⟨Gcurv, GcurvDeriv, hcurv, hcurvDeriv, hrem, ?_⟩
+  -- The bracket-free pairing `⟨Gcurv + GcurvDeriv, ∇S⟩ = ⟨Curv S, ∇S⟩` follows from the integrated
+  -- divergence-nullity `⟨Curv S − Gcurv − GcurvDeriv, ∇S⟩ = 0`: write
+  -- `Curv S = (Gcurv + GcurvDeriv) + (Curv S − Gcurv − GcurvDeriv)` and split the `L²` pairing by
+  -- left additivity, dropping the remainder term by the nullity.
+  set Curv : SmoothCcTensor g 0 (s + 1) := pointwiseTensorCurv (I := I) (M := M) g s S with hCurv
+  set gradS : SmoothCcTensor g 0 (s + 1) := covGrad (I := I) (M := M) g 0 s S with hgrad
+  have hCurv_eq : Curv = (Gcurv + GcurvDeriv) + (Curv - Gcurv - GcurvDeriv) := by abel
+  have hfun : ((Gcurv + GcurvDeriv) + (Curv - Gcurv - GcurvDeriv)).toFun =
+      (Gcurv + GcurvDeriv).toFun + (Curv - Gcurv - GcurvDeriv).toFun :=
+    SmoothCcTensor.toFun_add _ _
+  have hint₁ := SmoothCcTensor.integrable_inner_cross (I := I) (M := M) (Gcurv + GcurvDeriv) gradS
+  have hint₂ :=
+    SmoothCcTensor.integrable_inner_cross (I := I) (M := M) (Curv - Gcurv - GcurvDeriv) gradS
+  have hsplit :
+      tensorL2Inner (I := I) (M := M) g 0 (s + 1) Curv.toFun gradS.toFun =
+        tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Gcurv + GcurvDeriv).toFun gradS.toFun +
+          tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+            (Curv - Gcurv - GcurvDeriv).toFun gradS.toFun := by
+    nth_rewrite 1 [hCurv_eq]
+    rw [hfun]
+    exact tensorL2Inner_add_left (I := I) (M := M) g 0 (s + 1)
+      (Gcurv + GcurvDeriv).toFun (Curv - Gcurv - GcurvDeriv).toFun gradS.toFun hint₁ hint₂
+  rw [hnull] at hsplit
+  linarith [hsplit]
 
 /-- **Assembly-ready spectral-pairing core of the genuine third-order Weitzenböck field
 decomposition.** For a closed smooth Riemannian manifold `(M, g)` there is a *valence-dependent*
