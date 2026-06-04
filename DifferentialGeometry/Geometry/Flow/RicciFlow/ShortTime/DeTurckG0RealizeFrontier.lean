@@ -171,7 +171,7 @@ theorem deTurck_g0_decoupled_principal_match
 (downstream-only analytic content).**
 
 For the anchor `g₀`, a supercritical order `a` (`2a > dim M + 4` and the engine's
-`dim M < 2(a − 2)`), and the genuine continuous nonlinearity `N_cont` (continuous via
+`dim M < 2(a − 2)`), and the genuine nonlinearity `N_cont` (ball-continuous via
 `hN_cont`) together with its **un-gated local Lipschitz** `hLipBall`
 (`LipschitzOnWith K N_cont` on the radius-`R > 0` ball about the included zero datum —
 the genuine coordinate-spectral route, *not* the gated gauge), the maximal-regularity
@@ -206,7 +206,11 @@ theorem deTurck_g0_carrier_realize_transport
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
     {K : ℝ≥0} {R : ℝ} (hR : 0 < R)
-    (hN_cont : Continuous N_cont)
+    (hN_cont : ContinuousOn N_cont
+      (Metric.closedBall
+        (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R))
     (hLipBall : LipschitzOnWith K N_cont
       (Metric.closedBall
         (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)

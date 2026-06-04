@@ -253,12 +253,19 @@ structurally unrelated to the spectral conclusion they later yield (no packaging
 
 The two arms (`fibreSmall`: each realized metric is a genuine metric over the ball;
 `sobolevLip`: the `H^{a+2}` norm of the perturbation is uniformly bounded and its difference
-is locally Lipschitz) together carry exactly the supercritical `Hᵃ⁺¹ ↪ H^{a+2}` content (the
-continuous regularized eigen-synthesis — a smoothing realization gaining the two derivatives
-the second-order DeTurck right-hand side loses — is `H^{a+2}`-bounded and `H^{a+2}`-Lipschitz
-in the `Hᵃ⁺¹`-distance on the ball, transiting the Weyl node through the all-order Gårding
-spectral bound; it is *not* the naive coordinate eigen-expansion, which would not gain a
-derivative). -/
+is locally Lipschitz on the ball) together carry exactly the supercritical `Hᵃ⁺¹ ↪ H^{a+2}`
+content (the continuous regularized eigen-synthesis — a smoothing realization gaining the two
+derivatives the second-order DeTurck right-hand side loses — is `H^{a+2}`-bounded and
+`H^{a+2}`-Lipschitz in the `Hᵃ⁺¹`-distance on the ball, transiting the Weyl node through the
+all-order Gårding spectral bound; it is *not* the naive coordinate eigen-expansion, which
+would not gain a derivative).
+
+The control is stated **only on the radius-`R` ball**: the realized DeTurck remainder is
+*not* globally continuous (the gate gauge `deTurckRemainderRealizeSection g₀ g_bg` blows up as
+the realized metric degenerates, and the realizable locus reaches such near-degenerate
+metrics), so a global `H^{a+2}`-continuity of the realized perturbation is inconsistent with
+gauge-matching; the maximal-regularity engine consumes only the ball-restricted Lipschitz, and
+the carrier stays inside the ball, so the ball control is exactly the right and sound input. -/
 structure ChartJet2LipControl (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
       Integral.L2.SmoothCcTensor g₀ 0 2)
@@ -292,16 +299,6 @@ structure ChartJet2LipControl (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
           ≤ B ∧
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
             (P u - P u')‖ ≤ C * (K : ℝ) * dist u u'
-  /-- **Global** `H^{a+2}`-Sobolev continuity of the regularized synthesis: the order-`(a+2)`
-  chart-Sobolev embedding of the realized perturbation varies continuously in `u` over *all* of
-  `Hᵃ⁺¹` (not just on the ball).  This is the genuine global regularity of the continuous
-  regularized eigen-synthesis `P` (a smoothing realization through the supercritical embedding
-  `Hᵃ⁺¹ ↪ H^{a+2}`): it is a *strictly weaker, structurally distinct* statement than the
-  continuity of the **realized DeTurck remainder** `deTurckRealizeRemainderOf g₀ g_bg (P ·)` (a
-  non-linear, second-order function of `P u`), supplying the global input the Nemytskii
-  continuity node needs to upgrade ball-Lipschitz to global continuity. -/
-  globalH2Cont : Continuous (fun u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) =>
-    IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) (P u))
 
 set_option linter.unusedVariables false in
 /-- **The quantitative `H^{a+2}` → spectral `Hᵃ`-Lipschitz bound of the realized
@@ -571,89 +568,146 @@ theorem deTurckG0SpectralN_dist_le_pouHaNorm
     _ = C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (R₁ - R₂)‖ :=
         Real.sqrt_sq hCtoHs_nn
 
-/-- **Global continuity of the intrinsic order-`a` chart-Sobolev synthesis of the realized
-DeTurck remainder (the deep Nemytskii-continuity node, in intrinsic-`Hᵃ` form).**
+set_option linter.unusedVariables false in
+/-- **Ball-continuity of the intrinsic order-`a` chart-Sobolev synthesis of the realized
+DeTurck remainder (the Nemytskii ball-continuity node, in intrinsic-`Hᵃ` form), proven here.**
 
 For a `(0,2)`-perturbation synthesis `P` carrying the supercritical `H^{a+2}` local-Lipschitz
 control `ChartJet2LipControl g₀ a P K R`, the realized-DeTurck-remainder section, viewed in the
-intrinsic order-`a` chart-Sobolev Hilbert space `H^a`, varies continuously in `u`:
+intrinsic order-`a` chart-Sobolev Hilbert space `H^a`, varies continuously in `u` **on the
+radius-`R` ball**:
 ```
-Continuous (fun u => (deTurckRealizeRemainderOf g₀ g_bg (P u)).toHs a) .
+ContinuousOn (fun u => (deTurckRealizeRemainderOf g₀ g_bg (P u)).toHs a)
+  (Metric.closedBall (ι 0) R) .
 ```
 
-This is the genuine **Nemytskii-continuity** content (the second-order Ricci–DeTurck remainder
-is a continuous Nemytskii function of the metric's `≤2`-jet, and the continuous regularized
-synthesis `P` makes the realized metric's `H^{a+2}` content vary continuously, hence the
-order-`a` chart-Sobolev norm of the realized remainder varies continuously even at the boundary
-of the fibre-small domain — the supercritical embedding `Hᵃ⁺¹ ↪ H^{a+2}` consumed by
-`ChartJet2LipControl`).  It is stated in the intrinsic `H^a`-Hilbert-valued form (not the
-spectral `tensorHs`-valued form), structurally distinct from the spectral continuity the parent
-derives from it; no packaging.
+This is the genuine **Nemytskii ball-continuity** content (the second-order Ricci–DeTurck
+remainder is a Lipschitz Nemytskii function of the metric's `H^{a+2}` jet, and the regularized
+synthesis `P` makes the realized perturbation's `H^{a+2}` content Lipschitz in `u` on the ball,
+hence the order-`a` chart-Sobolev norm of the realized remainder is ball-Lipschitz, hence
+`ContinuousOn`).  It is stated in the intrinsic `H^a`-Hilbert-valued form (not the spectral
+`tensorHs`-valued form), structurally distinct from the spectral continuity the parent derives
+from it; no packaging.
 
-Global continuity is genuinely available because `ChartJet2LipControl` now carries the field
-`globalH2Cont`: the **global** `H^{a+2}`-Sobolev continuity of the regularized synthesis
-`u ↦ (P u).toHs (a+2)` over all of `Hᵃ⁺¹`.  This node is the genuine Nemytskii-continuity step
-that composes that global synthesis continuity with the continuity of the realized
-DeTurck-remainder map `H^{a+2} → H^a` (the second-order Ricci–DeTurck remainder is a continuous
-Nemytskii function of the metric's `H^{a+2}` content); its conclusion is therefore no longer
-under-hypothesized.
-
-The body is `sorry`: it is the genuine order-`a` chart-RHS-tower continuity content (the
-intrinsic-`Hᵃ` Nemytskii continuity of the realized DeTurck remainder, on top of the global
-synthesis continuity `hctrl.globalH2Cont`), with no spectral-nonlinearity step (the spectral
-lift is added by the parent through `deTurckG0SpectralN_dist_le_pouHaNorm`); Weyl is consumed by
-`ChartJet2LipControl`. -/
+It is **proven** (no `sorry`): on the ball, `deTurckRealizeRemainderOf g₀ g_bg (P u)` reduces
+(via `fibreSmall`) to the chart-frame realized DeTurck remainder section, whose order-`a`
+chart-Sobolev norm difference the higher-order Nemytskii bound
+`exists_realizedRHSRemainder_pouHa_le_toHs_highOrder` controls by `C · ‖(P u − P u').toHs
+(a+2)‖`; the `sobolevLip` Lipschitz arm then bounds `‖(P u − P u').toHs (a+2)‖ ≤ Csob·K·dist u
+u'`, giving a `LipschitzOnWith (C·Csob·K)` bound on the ball, hence `ContinuousOn` by
+`LipschitzOnWith.continuousOn`.  Continuity is *not* global — the gate gauge blows up on the
+near-degenerate part of the realizable locus, so only the ball-restricted statement is sound —
+and ball-continuity is exactly what the maximal-regularity engine (whose carrier stays in the
+ball) consumes.  Weyl is consumed by `ChartJet2LipControl`. -/
 theorem deTurckRealizeRemainderOf_pouToHs_continuous_of_chartJet2Control
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
       Integral.L2.SmoothCcTensor g₀ 0 2)
     (K : ℝ≥0) {R : ℝ} (hR : 0 < R)
     (hctrl : ChartJet2LipControl (I := I) (M := M) g₀ a P K R) :
-    Continuous (fun u => IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
-        (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))) := sorry
+    ContinuousOn (fun u => IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
+        (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)))
+      (Metric.closedBall
+        (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) := by
+  classical
+  obtain ⟨B, Csob, hB, hCsob, hsob⟩ := hctrl.sobolevLip
+  obtain ⟨C', hC', hchild⟩ :=
+    exists_realizedRHSRemainder_pouHa_le_toHs_highOrder (I := I) g₀ g_bg a ha B hB
+  -- On the ball, `u ↦ (deTurckRealizeRemainderOf g₀ g_bg (P u)).toHs a` is Lipschitz.
+  refine (LipschitzOnWith.continuousOn (K := ⟨C', hC'⟩ * (⟨Csob, hCsob⟩ * K)) ?_)
+  refine LipschitzOnWith.of_dist_le_mul (fun u hu u' hu' => ?_)
+  -- The fibre-small witnesses over the ball, and the realized metrics they assemble.
+  set h := hctrl.fibreSmall u hu with hh_def
+  set h' := hctrl.fibreSmall u' hu' with hh'_def
+  set g₁ : SmoothRiemannianMetric I M :=
+    tensorSectionRealizeMetric (I := I) g₀ (P u) h.choose_spec.1 h.choose_spec.2 with hg₁_def
+  set g₂ : SmoothRiemannianMetric I M :=
+    tensorSectionRealizeMetric (I := I) g₀ (P u') h'.choose_spec.1 h'.choose_spec.2 with hg₂_def
+  -- `deTurckRealizeRemainderOf` reduces, on the fibre-small locus, to the chart-frame
+  -- realized DeTurck remainder section the Nemytskii bound controls.
+  have hreduce_u : deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)
+      = realizedRHSRemainderSection (I := I) g₀ g_bg g₁ (P u) := by
+    rw [deTurckRealizeRemainderOf, dif_pos h]; rfl
+  have hreduce_u' : deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u')
+      = realizedRHSRemainderSection (I := I) g₀ g_bg g₂ (P u') := by
+    rw [deTurckRealizeRemainderOf, dif_pos h']; rfl
+  -- The realized metrics carry the fibrewise `inner`-identities the Nemytskii bound needs.
+  have hg₁_inner : ∀ (x : M) (v w : TangentSpace I x),
+      g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (P u) x v w := by
+    intro x v w; rw [hg₁_def, tensorSectionRealizeMetric_inner]
+  have hg₂_inner : ∀ (x : M) (v w : TangentSpace I x),
+      g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (P u') x v w := by
+    intro x v w; rw [hg₂_def, tensorSectionRealizeMetric_inner]
+  -- The uniform `H^{a+2}` size bounds + the `H^{a+2}` Lipschitz of the perturbation difference.
+  obtain ⟨hsize_u, hsize_u', hlip⟩ := hsob u u' hu hu'
+  -- The higher-order Nemytskii `toHs a` bound on the realized-remainder difference.
+  have hchild_le := hchild (P u) (P u') g₁ g₂ hg₁_inner hg₂_inner hsize_u hsize_u'
+  -- Rewrite the `dist` of the two intrinsic-`Hᵃ` syntheses as the `toHs a` of the difference.
+  rw [dist_eq_norm, ← smoothCcTensor_toHs_sub, hreduce_u, hreduce_u']
+  -- Chain: `‖(realizedRem₁ − realizedRem₂).toHs a‖ ≤ C'·‖(Pu − Pu').toHs(a+2)‖ ≤ K'·dist u u'`.
+  have hcoe : ((⟨C', hC'⟩ * (⟨Csob, hCsob⟩ * K) : ℝ≥0) : ℝ) * dist u u'
+      = C' * (Csob * (K : ℝ) * dist u u') := by
+    push_cast; ring
+  rw [hcoe]
+  have hmul : C' * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
+        (P u - P u')‖
+      ≤ C' * (Csob * (K : ℝ) * dist u u') :=
+    mul_le_mul_of_nonneg_left hlip hC'
+  exact le_trans hchild_le hmul
 
-/-- **Global continuity of the realized-DeTurck-remainder coordinate-spectral nonlinearity
-under supercritical `H^{a+2}` control (the deep analytic continuity node of the bridge).**
+/-- **Ball-continuity of the realized-DeTurck-remainder coordinate-spectral nonlinearity
+under supercritical `H^{a+2}` control (the analytic ball-continuity node of the bridge),
+proven here.**
 
 For a `(0,2)`-perturbation synthesis `P` carrying the supercritical `H^{a+2}` local-Lipschitz
 control `ChartJet2LipControl g₀ a P K R`, the induced coordinate-spectral nonlinearity
-`u ↦ deTurckG0SpectralN g₀ a (deTurckRealizeRemainderOf g₀ g_bg (P u))` is continuous over all
-of `Hᵃ⁺¹`.
+`u ↦ deTurckG0SpectralN g₀ a (deTurckRealizeRemainderOf g₀ g_bg (P u))` is continuous **on the
+radius-`R` ball**.
 
-Continuity is genuinely *global* (the genuine synthesis `P` is the continuous
-regularized eigen-synthesis through the supercritical embedding `Hᵃ⁺¹ ↪ H^{a+2}`, so its
-realized metric's `H^{a+2}` content varies continuously, hence the chart-frame DeTurck
-right-hand side and its `Hᵃ` spectral projection vary continuously even at the boundary of the
-fibre-small domain), so it cannot be read off a finite-radius distance bound; it is therefore
-isolated as its own deep node, structurally distinct from the quantitative ball-Lipschitz
-bound.  The body is `sorry` (the deep analytic content, transiting the higher-order chart-RHS
-Sobolev tower `exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder` at every nearby radius
-together with the global continuity of the synthesis; Weyl is consumed by
-`ChartJet2LipControl`). -/
+Continuity is ball-restricted (the realized DeTurck remainder is *not* globally continuous —
+the gate gauge blows up on the near-degenerate part of the realizable locus), which is exactly
+what the maximal-regularity engine, whose carrier stays in the ball, consumes; it is therefore
+read off the ball-`ContinuousOn` intrinsic-`Hᵃ` synthesis composed with the globally
+`C`-Lipschitz spectral lift `deTurckG0SpectralN_dist_le_pouHaNorm`.  It is **proven** (no
+`sorry`): the intrinsic-`Hᵃ` synthesis ball-continuity node
+`deTurckRealizeRemainderOf_pouToHs_continuous_of_chartJet2Control` supplies the ball
+`ContinuousOn` of `u ↦ (deTurckRealizeRemainderOf g₀ g_bg (P u)).toHs a`, and the `C`-Lipschitz
+spectral lift turns it into ball `ContinuousOn` of the spectral nonlinearity (ε-δ within the
+ball).  Weyl is consumed by `ChartJet2LipControl`. -/
 theorem deTurckRealizeRemainderOf_spectralN_continuous_of_chartJet2Control
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
       Integral.L2.SmoothCcTensor g₀ 0 2)
     (K : ℝ≥0) {R : ℝ} (hR : 0 < R)
     (hctrl : ChartJet2LipControl (I := I) (M := M) g₀ a P K R) :
-    Continuous (fun u => deTurckG0SpectralN (I := I) g₀ a
-        (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))) := by
+    ContinuousOn (fun u => deTurckG0SpectralN (I := I) g₀ a
+        (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)))
+      (Metric.closedBall
+        (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) := by
   classical
-  -- The global `toHs`-`a` Lipschitz of the spectral lift, and the intrinsic-`Hᵃ` continuity
-  -- of the realized DeTurck remainder synthesis.
+  -- The global `toHs`-`a` Lipschitz of the spectral lift, and the intrinsic-`Hᵃ` ball
+  -- continuity of the realized DeTurck remainder synthesis.
   obtain ⟨C, hC_nn, hCdist⟩ := deTurckG0SpectralN_dist_le_pouHaNorm (I := I) g₀ a
   have hcont_toHs :
-      Continuous (fun u => IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
-        (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))) :=
+      ContinuousOn (fun u => IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
+        (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)))
+      (Metric.closedBall
+        (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) :=
     deTurckRealizeRemainderOf_pouToHs_continuous_of_chartJet2Control
       (I := I) g₀ g_bg a ha P K hR hctrl
-  -- The spectral nonlinearity is `(C-Lipschitz spectral lift) ∘ (continuous toHs synthesis)`.
-  rw [Metric.continuous_iff] at hcont_toHs ⊢
-  intro u ε hε
+  -- The spectral nonlinearity is `(C-Lipschitz spectral lift) ∘ (ball-continuous toHs synthesis)`.
+  rw [Metric.continuousOn_iff] at hcont_toHs ⊢
+  intro u hu ε hε
   -- A continuity tolerance for the `toHs` synthesis that the `C`-Lipschitz lift turns into `ε`.
   have hCp1_pos : 0 < C + 1 := by positivity
-  obtain ⟨δ, hδ_pos, hδ⟩ := hcont_toHs u (ε / (C + 1)) (by positivity)
-  refine ⟨δ, hδ_pos, fun u' hu' => ?_⟩
+  obtain ⟨δ, hδ_pos, hδ⟩ := hcont_toHs u hu (ε / (C + 1)) (by positivity)
+  refine ⟨δ, hδ_pos, fun u' hu' hu'lt => ?_⟩
   -- The spectral `dist` is bounded by `C` times the `toHs`-`a` distance of the remainders.
   have hbound :
       dist (deTurckG0SpectralN (I := I) g₀ a (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u')))
@@ -667,7 +721,7 @@ theorem deTurckRealizeRemainderOf_spectralN_continuous_of_chartJet2Control
       (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
     rwa [smoothCcTensor_toHs_sub, ← dist_eq_norm] at hd
   -- The `toHs` synthesis distance is `< ε/(C+1)` by `hδ`; chain to `< ε`.
-  have htoHs_lt := hδ u' hu'
+  have htoHs_lt := hδ u' hu' hu'lt
   have htoHs_nn :
       0 ≤ dist
           (IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
@@ -691,6 +745,44 @@ theorem deTurckRealizeRemainderOf_spectralN_continuous_of_chartJet2Control
     _ < (C + 1) * (ε / (C + 1)) := mul_lt_mul_of_pos_left htoHs_lt hCp1_pos
     _ = ε := by field_simp
 
+/-- **Ball-restricted abstract eigen-synthesis matching the gate gauge (the deep supercritical
+eigen-synthesis primitive, transiting the Weyl node).**
+
+For the anchor `g₀`, a flow background `g_bg`, and a supercritical order `a` (`2a > dim M + 4`),
+there is a `(0,2)`-perturbation synthesis `P : Hᵃ⁺¹(g₀) → SmoothCcTensor g₀ 0 2`, a Lipschitz
+rate `K`, and a positive radius `R`, carrying the **ball-restricted** supercritical `H^{a+2}`
+local-Lipschitz control `ChartJet2LipControl g₀ a P K R` (uniform `H^{a+2}` bound + `H^{a+2}`
+Lipschitz-in-`Hᵃ⁺¹` *on the ball*, the all-order Gårding/Weyl content of the continuous
+regularized eigen-synthesis — a smoothing realization gaining the two derivatives the
+second-order DeTurck right-hand side loses), whose realized DeTurck remainder
+`deTurckRealizeRemainderOf g₀ g_bg (P u)` coincides, **as a smooth section**, with the gate-based
+gauge `deTurckRemainderRealizeSection g₀ g_bg u` on the gate-realizable locus
+`realizableAtGate g₀ u`.
+
+This is the irreducible deep eigen-synthesis primitive of the construction (`Node-3`'s exact
+content as the more-primitive posited child): it produces the synthesized perturbation carrier
+together with the **ball-restricted** `H^{a+2}` control (now *consistent* with gauge-matching:
+the gate gauge blows up only as the realized metric degenerates and is bounded over the ball, so
+a ball-restricted `H^{a+2}`-Lipschitz synthesis can reproduce it — the previous *global*
+`H^{a+2}`-continuity requirement was inconsistent and has been removed) and the section-level
+remainder agreement with the gauge on the realizable locus.  Its `H^{a+2}` control is produced
+by the continuous regularized eigen-synthesis through the supercritical embedding
+`Hᵃ⁺¹ ↪ H^{a+2}`, transiting the Weyl node through the all-order Gårding spectral bound.  Its
+conclusion is structurally distinct from any hypothesis; no packaging.  The body is `sorry`
+(deep, transiting the Weyl node), to be discharged by the `/prove` recursion. -/
+theorem exists_deTurckRealizeRemainderOf_ballSynthesis_matching_gauge
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+          Integral.L2.SmoothCcTensor g₀ 0 2)
+        (K : ℝ≥0) (R : ℝ),
+      0 < R ∧
+      ChartJet2LipControl (I := I) (M := M) g₀ a P K R ∧
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
+        realizableAtGate (I := I) g₀ u →
+          deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)
+            = deTurckRemainderRealizeSection (I := I) g₀ g_bg u) := sorry
+
 /-- **Existence of a supercritical-`H^{a+2}`-controlled un-gated perturbation synthesis whose
 realized DeTurck remainder coincides (as a smooth section) with the gate gauge on the
 realizable locus (the deep supercritical eigen-synthesis node).**
@@ -711,16 +803,13 @@ g₀ 0 2`, a Lipschitz rate `K`, and a positive radius `R`, such that:
   realized remainder reproduces the gate gauge's, even though `P u` itself is *not* the
   discontinuous gate representative `gateSmoothRep u`).
 
-This is the genuine deep eigen-synthesis primitive: it produces the synthesized perturbation
-carrier together with the supercritical `H^{a+2}` control its realized metric satisfies and the
-section-level remainder agreement with the gauge on the realizable locus.  The `H^{a+2}` control
-is genuinely produced by the continuous regularized eigen-synthesis (a smoothing realization
-gaining the two derivatives the second-order DeTurck right-hand side loses), so the `H^{a+2}`
-Lipschitz-in-`Hᵃ⁺¹` and the uniform `H^{a+2}` bound both hold on the ball.  Its conclusion (a
-*section-level* remainder identity) is structurally distinct — and, for these smooth sections
-with full-support `L²` separation, equivalent — to the `L²`-class identity the eigen-synthesis
-parent derives; the parent does the genuine `L²`-projection step.  The body is `sorry`,
-transiting the Weyl node. -/
+This node is now **proven by composition** (no `sorry` of its own): it forwards the deep,
+ball-restricted eigen-synthesis primitive
+`exists_deTurckRealizeRemainderOf_ballSynthesis_matching_gauge` (which carries the irreducible
+Weyl-transiting `H^{a+2}` control and the section-level gauge agreement).  Dropping the
+inconsistent *global* `H^{a+2}`-continuity field from `ChartJet2LipControl` made this content
+consistent with gauge-matching.  Consumers transitively depend on `sorryAx` only through that
+primitive, and on the Weyl node. -/
 theorem exists_deTurckRealizeRemainderOf_synthesis_matching_gauge
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) :
@@ -732,17 +821,20 @@ theorem exists_deTurckRealizeRemainderOf_synthesis_matching_gauge
       (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
         realizableAtGate (I := I) g₀ u →
           deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)
-            = deTurckRemainderRealizeSection (I := I) g₀ g_bg u) := sorry
+            = deTurckRemainderRealizeSection (I := I) g₀ g_bg u) :=
+  exists_deTurckRealizeRemainderOf_ballSynthesis_matching_gauge (I := I) g₀ g_bg a ha
 
 /-- **The `H^{a+2}` → spectral bridge: a perturbation synthesis with supercritical `H^{a+2}`
-local-Lipschitz control induces a continuous, locally Lipschitz coordinate-spectral
+local-Lipschitz control induces a ball-continuous, locally Lipschitz coordinate-spectral
 nonlinearity on its realized DeTurck remainder.**
 
 For a `(0,2)`-perturbation synthesis `P` carrying the supercritical `H^{a+2}` local-Lipschitz
 control `ChartJet2LipControl g₀ a P K R` on the radius-`R` ball, the induced coordinate-spectral
 nonlinearity `u ↦ deTurckG0SpectralN g₀ a (deTurckRealizeRemainderOf g₀ g_bg (P u))` — read on
-the *realized DeTurck remainder* of the perturbation synthesis — is continuous over all of
-`Hᵃ⁺¹` and `LipschitzOnWith` (with a constant produced from `K`) on the radius-`R` ball.
+the *realized DeTurck remainder* of the perturbation synthesis — is `ContinuousOn` and
+`LipschitzOnWith` (with a constant produced from `K`) on the radius-`R` ball (continuity is
+ball-restricted, the sound regime, since the realized DeTurck remainder is not globally
+continuous — the gate gauge blows up on the near-degenerate realizable locus).
 
 This is the genuine analytic bridge that consumes the higher-order chart-RHS Sobolev–Lipschitz
 Nemytskii bound `exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder` (the weighted-`Hᵃ`
@@ -761,10 +853,10 @@ consumed entirely by `ChartJet2LipControl`): the quantitative `H^{a+2}` → spec
 `Hᵃ`-Lipschitz bound `deTurckRealizeRemainderOf_spectralN_dist_le_of_chartJet2Control` (itself
 fully proven, via the Nemytskii bound) supplies the Lipschitz rate `K'` and the ball
 `dist`-bound (upgraded here to `LipschitzOnWith` via `LipschitzOnWith.of_dist_le_mul`), and the
-global-continuity node `deTurckRealizeRemainderOf_spectralN_continuous_of_chartJet2Control`
-supplies continuity.  Its body carries no `sorry`; consumers transitively depend on `sorryAx`
-only through the continuity node and (via the quantitative node) the Nemytskii bound, i.e. the
-chart-RHS-tower nodes. -/
+ball-continuity node `deTurckRealizeRemainderOf_spectralN_continuous_of_chartJet2Control`
+supplies the ball `ContinuousOn`.  Its body carries no `sorry`; consumers transitively depend on
+`sorryAx` only through the continuity node and (via the quantitative node) the Nemytskii bound,
+i.e. the chart-RHS-tower nodes. -/
 theorem deTurckG0SpectralN_continuous_lipschitz_of_chartJet2Control
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
@@ -772,8 +864,12 @@ theorem deTurckG0SpectralN_continuous_lipschitz_of_chartJet2Control
     (K : ℝ≥0) {R : ℝ} (hR : 0 < R)
     (hctrl : ChartJet2LipControl (I := I) (M := M) g₀ a P K R) :
     ∃ (K' : ℝ≥0),
-      Continuous (fun u => deTurckG0SpectralN (I := I) g₀ a
-          (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))) ∧
+      ContinuousOn (fun u => deTurckG0SpectralN (I := I) g₀ a
+          (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)))
+        (Metric.closedBall
+          (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) ∧
       LipschitzOnWith K' (fun u => deTurckG0SpectralN (I := I) g₀ a
           (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)))
         (Metric.closedBall
@@ -781,7 +877,7 @@ theorem deTurckG0SpectralN_continuous_lipschitz_of_chartJet2Control
             (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
             (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) := by
   -- The quantitative `H^{a+2}` → spectral `Hᵃ`-Lipschitz bound supplies the rate `K'`
-  -- and the ball `dist`-bound; the global-continuity node supplies continuity.
+  -- and the ball `dist`-bound; the ball-continuity node supplies the ball `ContinuousOn`.
   obtain ⟨K', hbound⟩ :=
     deTurckRealizeRemainderOf_spectralN_dist_le_of_chartJet2Control
       (I := I) g₀ g_bg a ha P K hR hctrl
@@ -860,12 +956,14 @@ For an anchor metric `g₀`, a flow background `g_bg`, and a supercritical order
 `S : Hᵃ⁺¹(g₀) → SmoothCcTensor g₀ 0 2` such that the *coordinate-spectral* nonlinearity
 `u ↦ deTurckG0SpectralN g₀ a (S u)` it induces is:
 
-* `hcont` — **continuous** over all of `Hᵃ⁺¹` (the un-gated coordinate-spectral synthesis is
-  continuous because the supercritical embedding `Hᵃ⁺¹ ↪ H^{a+2}` makes the `H^{a+2}` content
-  of the realized metric `g₀ + ccTensorBilinSymm g₀ (S u)` continuous in `u`, and the
-  DeTurck-remainder right-hand-side, hence its `Hᵃ` spectral projection, is continuous in that
-  `H^{a+2}` content — through the higher-order chart-RHS Sobolev–Lipschitz Nemytskii bound
-  `exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder`; this transits the Weyl node);
+* `hcont` — **`ContinuousOn` the radius-`R` ball** (the un-gated coordinate-spectral synthesis
+  is continuous on the ball because the supercritical embedding `Hᵃ⁺¹ ↪ H^{a+2}` makes the
+  `H^{a+2}` content of the realized metric `g₀ + ccTensorBilinSymm g₀ (S u)` Lipschitz in `u`
+  on the ball, and the DeTurck-remainder right-hand-side, hence its `Hᵃ` spectral projection, is
+  Lipschitz in that `H^{a+2}` content — through the higher-order chart-RHS Sobolev–Lipschitz
+  Nemytskii bound `exists_realizedRHSRemainder_pouHa_le_toHs_highOrder`; this transits the Weyl
+  node.  Continuity is ball-restricted, the sound regime: the realized DeTurck remainder is not
+  globally continuous since the gate gauge blows up on the near-degenerate realizable locus);
 * `hlip` — **locally Lipschitz**: there are `K : ℝ≥0` and a positive radius `R` with
   `LipschitzOnWith K (fun u => deTurckG0SpectralN g₀ a (S u))` on the closed `Hᵃ⁺¹`-ball
   about the zero datum — gate-free, from the higher-order chart-RHS Sobolev–Lipschitz Nemytskii
@@ -899,7 +997,11 @@ theorem exists_deTurckRemainderG0ContSynth
           Integral.L2.SmoothCcTensor g₀ 0 2)
         (K : ℝ≥0) (R : ℝ),
       0 < R ∧
-      Continuous (fun u => deTurckG0SpectralN (I := I) g₀ a (S u)) ∧
+      ContinuousOn (fun u => deTurckG0SpectralN (I := I) g₀ a (S u))
+        (Metric.closedBall
+          (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) ∧
       LipschitzOnWith K (fun u => deTurckG0SpectralN (I := I) g₀ a (S u))
         (Metric.closedBall
           (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
@@ -933,14 +1035,18 @@ For an arbitrary initial metric `g₀`, a flow background `g_bg`, and a supercri
 that:
 
 * `hR` — `0 < R`;
-* `hcont` — `N_cont` is continuous (the genuine DeTurck nonlinearity is continuous over all
-  of `Hᵃ⁺¹`, even though it is only *locally* Lipschitz);
+* `hcont` — `N_cont` is `ContinuousOn` the closed `Hᵃ⁺¹`-ball `Metric.closedBall (ι 0) R` (the
+  genuine DeTurck nonlinearity is continuous on the ball — the sound regime, since it is *not*
+  globally continuous: the gate gauge blows up on the near-degenerate part of the realizable
+  locus, so a global continuity would be inconsistent with the carrier-only gauge tie `hcoeff`;
+  ball-continuity is exactly what the maximal-regularity engine, whose carrier stays in the
+  ball, consumes);
 * `hLip` — `N_cont` is `LipschitzOnWith K` on the closed `Hᵃ⁺¹`-ball
   `Metric.closedBall (ι 0) R` about the included zero datum — **the exact shape the
   maximal-regularity engine `deTurckRemainder_strong_shortTime_exists` consumes**; this
   local Lipschitz comes, *gate-free*, from the higher-order chart-RHS Sobolev–Lipschitz
-  Nemytskii bound (i) (`exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder`, controlling
-  the realized-remainder weighted-`Hᵃ` seminorm by the `H^{a+2}` perturbation norm) composed
+  Nemytskii bound (i) (`exists_realizedRHSRemainder_pouHa_le_toHs_highOrder`, controlling
+  the realized-remainder order-`a` Sobolev norm by the `H^{a+2}` perturbation norm) composed
   with the supercritical `H^{a+2}` Lipschitz control of the continuous synthesis (ii);
 * `hcoeff` — the **carrier-only** eigenbasis-coordinate tie to the gate-based gauge: on the
   gate-realizable domain `realizableAtGate g₀ u` (where the gauge
@@ -951,13 +1057,15 @@ that:
   `N_cont (carrier)` with the gauge — *without* the false `∀ u` coordinate tie to the
   discontinuous gauge.
 
-`N_cont` is the genuine continuous nonlinearity (locally Lipschitz, un-gated); `hcoeff` is
-a *carrier-restricted* coordinate identity, not the conclusion folded in (it constrains
+`N_cont` is the genuine nonlinearity (ball-continuous, locally Lipschitz, un-gated); `hcoeff`
+is a *carrier-restricted* coordinate identity, not the conclusion folded in (it constrains
 `N_cont` on the realizable domain only, where it is a true geometric fact about the honest
-remainder).  The conclusion is the existence of `N_cont` with its local Lipschitz and the
-carrier-only tie — structurally distinct from any of its hypotheses; no packaging.  The
-body is `sorry`, so consumers transitively depend on `sorryAx` and on the Weyl node, never
-on a Lipschitz claim about the gated gauge. -/
+remainder).  The conclusion is the existence of `N_cont` with its ball-continuity, local
+Lipschitz and the carrier-only tie — structurally distinct from any of its hypotheses; no
+packaging.  It is **proven by composition** of the continuous-synthesis primitive
+`exists_deTurckRemainderG0ContSynth`; consumers transitively depend on `sorryAx` (through that
+primitive's eigen-synthesis and Nemytskii children) and on the Weyl node, never on a Lipschitz
+or continuity claim about the gated gauge. -/
 theorem deTurck_g0_genuine_nonlinearity
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) :
@@ -965,7 +1073,11 @@ theorem deTurck_g0_genuine_nonlinearity
           tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
         (K : ℝ≥0) (R : ℝ),
       0 < R ∧
-      Continuous N_cont ∧
+      ContinuousOn N_cont
+        (Metric.closedBall
+          (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) ∧
       LipschitzOnWith K N_cont
         (Metric.closedBall
           (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)

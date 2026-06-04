@@ -566,24 +566,27 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **The sharp general-rank chart Sobolev embedding `H^a ↪ C⁰` at the supercritical order
-`a` (posited general-rank analytic child).** At a supercritical order `a` (`2a > dim M + 4`)
-there is a constant `C ≥ 0` such that the bundle-fibre value `‖T.toSection x‖` of a smooth
-`(r, s)`-tensor is bounded by `C · ‖T.toHs a‖`, the intrinsic chart `H^a`-Sobolev norm of `T`,
-for all `x`.
+/-- **The general-rank chart Sobolev embedding `chart-H^{2a} ↪ C⁰` (posited general-rank
+analytic child).** At a supercritical chart order `a` (`2·(2a) > dim M`, i.e. the chart-`H^{2a}`
+Sobolev exponent `2a` exceeds `(dim M)/2`) there is a constant `C ≥ 0` such that the
+bundle-fibre value `‖T.toSection x‖` of a smooth `(r, s)`-tensor is bounded by `C · ‖T.toHs a‖`,
+the intrinsic order-`a` partition-of-unity Hilbert–Schmidt chart-Sobolev norm of `T` (an
+`H^{2a}` chart-Sobolev norm, since the chart inner product `hkInner` aggregates chart
+derivatives up to order `2a`), for all `x`.
 
-This is the *sharp* form of the chart Sobolev embedding: it costs only `a` chart derivatives
-(`a > (dim M)/2` suffices, here with margin `2a > dim M + 4`), whereas the in-library
-general-rank chart embedding `tensorPouSobolevHilbert_embedding_Ck` is the *crude* one, costing
-`2k > dim M` derivatives (i.e. it controls `C⁰` by the chart `H^{2k}`-norm only for
-`2k > dim M`, not by the chart `H^a`-norm for `a > (dim M)/2`).  The sharp embedding at
-`a > (dim M)/2` is a genuinely deeper Sobolev inequality, absent from the library at every
-bidegree, so it is posited here.  The conclusion is a fibre `C⁰` bound by the chart `H^a`-norm,
+This is the general-rank `(r, s)` analogue of the in-library `(0, 2)`-only chart embedding
+`tensorPouSobolevHilbert_embedding_Ck`, which delivers `‖T.toSection x‖ ≤ C · ‖T.toHs (2k)‖`
+under `2k > dim M` — i.e. it controls `C⁰` by the chart `H^{2·(2k)} = H^{4k}`-norm of an
+*even*-index `‖T.toHs (2k)‖`.  The present statement is the same `chart-H^{2a} ↪ C⁰` embedding
+but at a *general* chart order `a` (not necessarily of the form `2k`) and at general bidegree
+`(r, s)`; the odd-`a` / general-rank case is absent from the library, so it is posited here.
+The hypothesis `2·(2a) > dim M` is the genuine supercritical Sobolev threshold for
+`chart-H^{2a} ↪ C⁰`.  The conclusion is a fibre `C⁰` bound by the chart `H^{2a}`-norm,
 structurally distinct from the spectral square-sum bound it powers (no packaging); the body is
 `sorry` and consumers transitively depend on `sorryAx`. -/
 private theorem pointwiseFiberNormRS_le_chartHs_sharp
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℕ)
-    (ha : 2 * a > Module.finrank ℝ E + 4) :
+    (ha : 2 * (2 * a) > Module.finrank ℝ E) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
       Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
     ∃ C : ℝ, 0 ≤ C ∧
@@ -592,34 +595,66 @@ private theorem pointwiseFiberNormRS_le_chartHs_sharp
           ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) a T‖ :=
   sorry
 
-/-- **The sharp general-rank Gårding lift at the matching order `a` (posited general-rank
-analytic child).** For every supercritical order `a` (`2a > dim M + 4`) there is a constant
-`C ≥ 0` such that the intrinsic chart `H^a`-Sobolev norm of a smooth `(r, s)`-tensor `T` is
-bounded by `C` times the square root of the *order-`a`* weighted spectral square-sum
-`∑ᵢ (1 + λᵢ)^a · (tensorL2Coeff (T.toL2) i)²` of the eigenbasis coordinates of `T`'s `L²`
+/-- **The general-rank matching-order Gårding lift `chart-H^{2a} ≤ spectral@{2a}` (posited
+general-rank analytic child).** For every chart order `a` there is a constant `C ≥ 0` such
+that the intrinsic order-`a` partition-of-unity Hilbert–Schmidt chart-Sobolev norm
+`‖T.toHs a‖` — an `H^{2a}` chart-Sobolev norm — of a smooth `(r, s)`-tensor `T` is bounded by
+`C` times the square root of the *order-`2a`* weighted spectral square-sum
+`∑ᵢ (1 + λᵢ)^{2a} · (tensorL2Coeff (T.toL2) i)²` of the eigenbasis coordinates of `T`'s `L²`
 class.
 
-This is the *sharp* (no-derivative-loss) elliptic-regularity / Gårding lift relating the chart
-`H^a`-norm to the spectral `H^a`-norm at the *matching* order `a`.  The in-library
-`pouSobolevToHsNorm_le_spectral` is (i) available only at bidegree `(0, 2)` and (ii) at the
-*chained* order `4k = 2·(2k)` — it controls the chart `H^{2k}`-norm by the spectral
-`(1 + λ)^{4k}` sum, a factor-`2` derivative loss.  The sharp general-rank matching-order lift is
-absent from the library, so it is posited here.  The conclusion is a chart-`H^a`-norm bound,
+The Sobolev exponent on the right is `2a = 2 · a`, **matching** the `H^{2a}` regularity of the
+chart norm `‖T.toHs a‖` (the chart inner product `hkInner` / `tensorPouSobolevHsNorm g a`
+aggregates chart derivatives up to order `2a`, so `‖T.toHs a‖ ↔ chart-H^{2a} ↔ spectral
+weight `(1 + λ)^{2a}``).  This is the general-rank analogue of the in-library `(0, 2)`
+`pouSobolevToHsNorm_le_spectral`, which controls `‖T.toHs (2k)‖` (chart `H^{4k}`) by the
+spectral `(1 + λ)^{2·(2k)} = (1 + λ)^{4k}` sum at the same matching exponent; here the
+chart order is `a` so the matching spectral exponent is `2a`.  The general-rank version is
+absent from the library, so it is posited here.  The conclusion is a chart-`H^{2a}`-norm bound,
 structurally distinct from the fibre `C⁰` bound it powers (no packaging); the body is `sorry`
 and consumers transitively depend on `sorryAx`. -/
 private theorem chartHsRS_le_sqrt_spectral_sharp
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℕ)
-    (ha : 2 * a > Module.finrank ℝ E + 4) :
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (T : Integral.L2.SmoothCcTensor g r s),
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) a T‖ ≤ C *
           Real.sqrt (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
               (I := I) (M := M) g r s,
-            tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+            tensorSobolevWeight (I := I) (M := M) i ((2 * a : ℕ) : ℝ) *
               (tensorL2Coeff (I := I) (M := M)
                 (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
                 (Integral.L2.SmoothCcTensor.toL2 T) i) ^ 2) :=
   sorry
+
+/-- **Monotone domination of the raw spectral square-root sum in the order.** For `τ ≤ σ` the
+order-`τ` weighted spectral square-root sum of the eigenbasis coordinates of `T`'s `L²` class is
+bounded by the order-`σ` one, since the spectral weight `(1 + λᵢ)^τ ≤ (1 + λᵢ)^σ` is monotone in
+the exponent (`tensorSobolevWeight_mono`) and both weighted square-sums are summable
+(`smoothCcTensorRS_tensorL2Coeff_weighted_summable`).  This is the raw-`tsum` form of the
+continuous Sobolev inclusion `Hˢ ⊆ Hᵗ` on the smooth subspace, used to descend the chained
+embedding from a smaller chart order back to the contract spectral order. -/
+private lemma spectral_sqrt_mono_of_le
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) {τ σ : ℝ} (hτσ : τ ≤ σ)
+    (T : Integral.L2.SmoothCcTensor g r s) :
+    Real.sqrt (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+        (I := I) (M := M) g r s,
+      tensorSobolevWeight (I := I) (M := M) i τ *
+        (tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
+          (Integral.L2.SmoothCcTensor.toL2 T) i) ^ 2) ≤
+      Real.sqrt (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g r s,
+        tensorSobolevWeight (I := I) (M := M) i σ *
+          (tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
+            (Integral.L2.SmoothCcTensor.toL2 T) i) ^ 2) := by
+  refine Real.sqrt_le_sqrt ?_
+  refine Summable.tsum_le_tsum (fun i => ?_)
+    (smoothCcTensorRS_tensorL2Coeff_weighted_summable (I := I) (M := M) g r s τ T)
+    (smoothCcTensorRS_tensorL2Coeff_weighted_summable (I := I) (M := M) g r s σ T)
+  exact mul_le_mul_of_nonneg_right
+    (Analysis.Parabolic.TensorHeatEquation.tensorSobolevWeight_mono (I := I) (M := M) i hτσ)
+    (sq_nonneg _)
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -635,19 +670,20 @@ class, for all `x`.
 This is the genuine elliptic / Sobolev content underlying the local Weyl law at general
 bidegree: the *sharp* spectral Sobolev embedding `H^a ↪ C⁰`, valid for `a > (dim M)/2` (here
 `2a > dim M + 4 ⟹ a > dim M / 2` with margin for the `(r, s)` fibre Hilbert–Schmidt slack).
-It is recorded at the *sharp* order `a` rather than the chained order `4k` of the in-file
-`(0, 2)` `pointwiseFiberNorm_le_spectralHs_02`.  The chained route used at `(0, 2)` — the
-general-rank chart-Sobolev embedding `H^{2k} ↪ C⁰` (`tensorPouSobolevHilbert_embedding_Ck`,
-crude order `2k > dim M`) composed with the order-`4k` Gårding lift — produces the order-`4k`
-spectral sum, strictly stronger than (hence not dominating) the order-`a` spectral sum for the
-supercritical regime `dim M / 2 < a ≤ 2·dim M`.  It is *proved* here by composing the two sharp
-general-rank analytic children — the sharp chart embedding
-`pointwiseFiberNormRS_le_chartHs_sharp` (`H^a ↪ C⁰` at `a > (dim M)/2`) and the sharp
-matching-order Gårding lift `chartHsRS_le_sqrt_spectral_sharp` (chart `H^a`-norm `≤` spectral
-order-`a` square-root) — both genuinely deeper than the in-library crude chart embedding /
-factor-`2`-lossy Gårding lift, absent at every bidegree, and posited above.  Consumers
-transitively depend on `sorryAx` through those two posited sharp inputs.  The conclusion is a
-fibre `C⁰` bound by the raw spectral square-sum, structurally distinct from the
+It is recorded at the *sharp* order `a` rather than the chained order of the in-file
+`(0, 2)` `pointwiseFiberNorm_le_spectralHs_02`.  It is *proved* here, honestly and at the
+sharp order `a`, by routing the two posited general-rank analytic children through the
+**halved** chart order `m = a / 2`: the chart-`H^{2m}`-embedding
+`pointwiseFiberNormRS_le_chartHs_sharp` at order `m` (`chart-H^{2m} ↪ C⁰`, valid since
+`2·(2m) ≥ 2a - 2 > dim M`), composed with the matching-order Gårding lift
+`chartHsRS_le_sqrt_spectral_sharp` at order `m` (`‖T.toHs m‖ ≤ √(spectral@{2m})`), produces the
+order-`2m` spectral square-root; since `2m = 2·(a / 2) ≤ a`, the monotone Sobolev domination
+`spectral_sqrt_mono_of_le` descends it to the contract order-`a` square-root.  (Routing the
+children at the full order `a` would instead land the order-`2a` spectral sum, strictly larger
+than — hence not dominating — the order-`a` sum; the halving is the honest reconciliation of the
+`H^{2·order}`-regularity of `‖T.toHs order‖` with the order-`a` contract.)  Consumers
+transitively depend on `sorryAx` through those two posited general-rank children.  The
+conclusion is a fibre `C⁰` bound by the raw spectral square-sum, structurally distinct from the
 spectral-`H^a`-norm bound `pointwiseFiberNormRS_le_spectralHs` it powers (no packaging). -/
 private theorem pointwiseFiberNormRS_le_sqrt_spectral
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℕ)
@@ -666,10 +702,15 @@ private theorem pointwiseFiberNormRS_le_sqrt_spectral
   classical
   letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+  set m : ℕ := a / 2 with hm_def
+  have h2m_le_a : 2 * m ≤ a := by rw [hm_def]; omega
+  have hm_embed : 2 * (2 * m) > Module.finrank ℝ E := by
+    have h2m : a - 1 ≤ 2 * m := by rw [hm_def]; omega
+    omega
   obtain ⟨Cc, hCc_nn, hCc⟩ :=
-    pointwiseFiberNormRS_le_chartHs_sharp (I := I) (M := M) g r s a ha
+    pointwiseFiberNormRS_le_chartHs_sharp (I := I) (M := M) g r s m hm_embed
   obtain ⟨Cn, hCn_nn, hCn⟩ :=
-    chartHsRS_le_sqrt_spectral_sharp (I := I) (M := M) g r s a ha
+    chartHsRS_le_sqrt_spectral_sharp (I := I) (M := M) g r s m
   refine ⟨Cc * Cn, by positivity, fun T x => ?_⟩
   set Nspec : ℝ := Real.sqrt (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
       (I := I) (M := M) g r s,
@@ -677,10 +718,23 @@ private theorem pointwiseFiberNormRS_le_sqrt_spectral
       (tensorL2Coeff (I := I) (M := M)
         (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
         (Integral.L2.SmoothCcTensor.toL2 T) i) ^ 2) with hNspec_def
+  set Nhalf : ℝ := Real.sqrt (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+      (I := I) (M := M) g r s,
+    tensorSobolevWeight (I := I) (M := M) i ((2 * m : ℕ) : ℝ) *
+      (tensorL2Coeff (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
+        (Integral.L2.SmoothCcTensor.toL2 T) i) ^ 2) with hNhalf_def
+  have hdom : Nhalf ≤ Nspec := by
+    rw [hNhalf_def, hNspec_def]
+    exact spectral_sqrt_mono_of_le (I := I) (M := M) g r s
+      (by exact_mod_cast h2m_le_a) T
   calc ‖T.toSection x‖
-      ≤ Cc * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) a T‖ := hCc T x
-    _ ≤ Cc * (Cn * Nspec) := by
+      ≤ Cc * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) m T‖ := hCc T x
+    _ ≤ Cc * (Cn * Nhalf) := by
           exact mul_le_mul_of_nonneg_left (hCn T) hCc_nn
+    _ ≤ Cc * (Cn * Nspec) := by
+          exact mul_le_mul_of_nonneg_left
+            (mul_le_mul_of_nonneg_left hdom hCn_nn) hCc_nn
     _ = (Cc * Cn) * Nspec := by ring
 
 set_option maxHeartbeats 1600000 in

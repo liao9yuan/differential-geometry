@@ -1,4 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapIterL2WtwokTwoBound
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.RawConnLapChartComponentSecondCovDerivFormula
+import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
+import DifferentialGeometry.Tensor.Multilinear.HsBoundOp
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HilbertSpace
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNorm
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNormReverseOrderZero
@@ -28,9 +31,14 @@ The `ℝ≥0∞` form `exists_rawConnLapSmooth_tensorPouSobolevHsNorm_le`, and o
 completion-norm forms `exists_rawConnLapSmooth_toHs_le_toHs_succ` and the iterated bound
 `exists_rawConnLapIter_toHs_le_toHs` (`H^k(Δ_∇^i T) ≤ C · H^{k+i}(T)`, the mirror of
 `iteratedCovGrad_toHs_norm_le`), are proved by assembling the per-chart order-drop
-`exists_rawConnLapSmooth_tensorPouSobolevHsNorm_le_perChart` over the chart base points (its body
-is the single remaining `sorry`: the genuine atomic per-chart second-order elliptic-boundedness
-content of the chart-coordinate formula `tensorChartComponentRaw_rawTensorConnLap_eq_chart_α_coord_formula`).
+`exists_rawConnLapSmooth_tensorPouSobolevHsNorm_le_perChart` over the chart base points.  The
+per-chart order-drop is itself assembled — Tonelli for finite sums plus a monotone `lintegral` of a
+pointwise integrand bound — from the pointwise second-order rough-Laplacian chart-component
+operator-norm primitive `exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsContent`,
+which is the single remaining `sorry`: the genuine atomic 2nd-order elliptic-boundedness content of
+the chart-coordinate formula `tensorChartComponentRaw_rawTensorConnLap_eq_chart_α_coord_formula`
+(principal mixed-second-partial part) together with the chart-frame trace lower-order expansion
+`covDerivComponentEuclid_S_k_ext_eq_iteratedFDeriv_T₀_add_lowerOrder`.
 
 The companion primitive `exists_l2Norm_le_toHs_zero` records the reverse of the on-disk
 `tensorPouSobolevHsNorm_zero_le_tensorL2Norm`: the global metric `L²` norm of a smooth
@@ -70,6 +78,672 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
+
+/-- The Euclidean pull-back of a raw `(r, s)`-component of `T` to the chart target: the leaf's
+chart-pulled integrand factor `raw_{IJ} ∘ chart⁻¹ ∘ toEuclidean⁻¹`. -/
+private noncomputable def rawConnLapPull (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : Integral.L2.SmoothCcTensor g r s) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
+  tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx
+    ∘ (extChartAt I α).symm
+    ∘ (toEuclidean (E := E)).symm
+
+/-- `rawConnLapPull` is definitionally the chart-pulled raw component. -/
+private lemma rawConnLapPull_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : Integral.L2.SmoothCcTensor g r s) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
+    (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx
+        ∘ (extChartAt I α).symm
+        ∘ (toEuclidean (E := E)).symm) =
+      rawConnLapPull (I := I) (M := M) g r s T α Idx Jdx := rfl
+
+/-- `rawConnLapPull` is `C^∞` on the (open) Euclidean chart target. -/
+private lemma rawConnLapPull_contDiffOn (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : Integral.L2.SmoothCcTensor g r s) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
+    ContDiffOn ℝ ∞ (rawConnLapPull (I := I) (M := M) g r s T α Idx Jdx)
+      (chartTargetEuclid (I := I) (M := M) α) := by
+  refine (chartPushedRaw_tensorChartComponentRaw_contDiffOn (I := I) (M := M)
+    g r s T α Idx Jdx).congr (fun y hy => ?_)
+  rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy]
+  rfl
+
+/-- `rawConnLapPull` is `C^∞` at every point of the (open) Euclidean chart target. -/
+private lemma rawConnLapPull_contDiffAt (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : Integral.L2.SmoothCcTensor g r s) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E))
+    {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
+    ContDiffAt ℝ ∞ (rawConnLapPull (I := I) (M := M) g r s T α Idx Jdx) y :=
+  (rawConnLapPull_contDiffOn (I := I) (M := M) g r s T α Idx Jdx).contDiffAt
+    ((chartTargetEuclid_isOpen (I := I) (M := M) α).mem_nhds hy)
+
+/-- The order-`(k + 1)` Hilbert-Schmidt content of `T` at chart `α`, at a fixed target point `y`:
+the finite sum over component multi-index pairs `q`, over Fréchet orders `l ≤ 2(k + 1)`, and over
+basis-index tuples, of the squared basis-evaluation of `D^l (rawConnLapPull q)`. -/
+private noncomputable def rawConnLapRhsHsContent (g : SmoothRiemannianMetric I M) (r s k : ℕ)
+    (T : Integral.L2.SmoothCcTensor g r s) (α : M) (y : EuclN) : ℝ :=
+  ∑ q : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)),
+    ∑ l ∈ Finset.range (2 * (k + 1) + 1),
+      ∑ bIdx : Fin l → Fin (Module.finrank ℝ E),
+        |(iteratedFDeriv ℝ l (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) y)
+            (fun i => EuclideanSpace.basisFun
+              (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2
+
+/-- `rawConnLapRhsHsContent` is non-negative. -/
+private lemma rawConnLapRhsHsContent_nonneg (g : SmoothRiemannianMetric I M) (r s k : ℕ)
+    (T : Integral.L2.SmoothCcTensor g r s) (α : M) (y : EuclN) :
+    0 ≤ rawConnLapRhsHsContent (I := I) (M := M) g r s k T α y :=
+  Finset.sum_nonneg (fun _ _ => Finset.sum_nonneg
+    (fun _ _ => Finset.sum_nonneg (fun _ _ => sq_nonneg _)))
+
+/-- A single iterated-derivative operator-norm squared of a raw component of `T`, at order
+`l ≤ 2(k + 1)`, is dominated by the full order-`(k + 1)` Hilbert-Schmidt content. -/
+private lemma rawConnLapPull_iteratedFDeriv_norm_sq_le_rhsContent
+    (g : SmoothRiemannianMetric I M) (r s k : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
+    (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    (l : ℕ) (hl : l ≤ 2 * (k + 1)) (y : EuclN) :
+    ‖iteratedFDeriv ℝ l (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) y‖ ^ 2 ≤
+      rawConnLapRhsHsContent (I := I) (M := M) g r s k T α y := by
+  classical
+  set basisSum : ((Fin r → Fin (Module.finrank ℝ E)) ×
+      (Fin s → Fin (Module.finrank ℝ E))) → ℕ → ℝ :=
+    fun q' l' => ∑ bIdx : Fin l' → Fin (Module.finrank ℝ E),
+      |(iteratedFDeriv ℝ l' (rawConnLapPull (I := I) (M := M) g r s T α q'.1 q'.2) y)
+          (fun i => EuclideanSpace.basisFun
+            (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2 with hbasisSum_def
+  have hbasisSum_nn : ∀ q' l', 0 ≤ basisSum q' l' :=
+    fun q' l' => Finset.sum_nonneg (fun _ _ => sq_nonneg _)
+  have h_op : ‖iteratedFDeriv ℝ l (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) y‖ ^ 2 ≤
+      basisSum q l :=
+    ContinuousMultilinearMap.opNorm_sq_le_sum_sq_basisEval
+      (EuclideanSpace.basisFun (Fin (Module.finrank ℝ E)) ℝ)
+      (iteratedFDeriv ℝ l (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) y)
+  refine le_trans h_op ?_
+  have h_unfold : rawConnLapRhsHsContent (I := I) (M := M) g r s k T α y =
+      ∑ q' : (Fin r → Fin (Module.finrank ℝ E)) ×
+            (Fin s → Fin (Module.finrank ℝ E)),
+        ∑ l' ∈ Finset.range (2 * (k + 1) + 1), basisSum q' l' := rfl
+  rw [h_unfold]
+  have hl_mem : l ∈ Finset.range (2 * (k + 1) + 1) := Finset.mem_range.mpr (by omega)
+  have h_inner : basisSum q l ≤ ∑ l' ∈ Finset.range (2 * (k + 1) + 1), basisSum q l' :=
+    Finset.single_le_sum (f := fun l' => basisSum q l')
+      (fun l' _ => hbasisSum_nn q l') hl_mem
+  refine le_trans h_inner ?_
+  exact Finset.single_le_sum
+    (f := fun q' => ∑ l' ∈ Finset.range (2 * (k + 1) + 1), basisSum q' l')
+    (fun q' _ => Finset.sum_nonneg (fun l' _ => hbasisSum_nn q' l'))
+    (Finset.mem_univ q)
+
+/-- **The pointwise second-order rough-Laplacian chart-component operator-norm bound (the genuine
+atomic 2nd-order elliptic-boundedness primitive — the only remaining `sorry` of this chart-port).**
+
+For a closed Riemannian manifold and ranks `(r, s)`, there is a non-negative constant `B`, uniform
+in the tensor `T` and the chart base point `α`, such that on the compact chart image of the
+chart-`α` partition-of-unity support, every order-`j` (`j ≤ 2k`) Fréchet derivative operator norm of
+the chart-pulled raw `(Idx, Jdx)`-component of the smooth rough Laplacian `Δ_∇ T =
+rawTensorConnLapSmooth g r s T` is square-bounded by `B` times the order-`(k + 1)` Hilbert-Schmidt
+content of the raw components of `T`:
+```
+‖D^j (raw_{IJ}(Δ_∇ T) ∘ chart⁻¹ ∘ toEuclidean⁻¹) y‖²
+  ≤ B · rawConnLapRhsHsContent g r s k T α y      (y ∈ chartImagePOUTsupport α,  j ≤ 2k).
+```
+
+This is the genuine analytic single-step (`+1` `toHs`-order) rough-Laplacian content.  The rough
+Laplacian is the frame trace of the second covariant derivative
+(`rawTensorConnLap_eq_frame_trace_secondCovDeriv`); in chart-Euclidean coordinates its raw
+`(Idx, Jdx)`-component is, by `tensorChartComponentRaw_rawTensorConnLap_eq_chart_α_coord_formula`, a
+finite linear combination of the *mixed second* Euclidean partials of the chart-pushed raw component
+of `T` with smooth volume-weighted inverse-Gram coefficients plus a `ContDiffOn`-smooth lower-order
+correction, the latter being (by the chart-frame trace expansion
+`covDerivComponentEuclid_S_k_ext_eq_iteratedFDeriv_T₀_add_lowerOrder`) a finite linear combination of
+`≤ 1`-order Euclidean partials of the raw components of `T` with `C^∞` coefficients.  An order-`j`
+(`j ≤ 2k`) Fréchet derivative of the principal part is dominated, by the Leibniz product rule, by the
+order-`(j + 2) ≤ 2(k + 1)` Fréchet derivatives of the raw components of `T`; the lower-order part, by
+order `(j + 1) ≤ 2(k + 1)`.  The smooth coefficients are uniformly bounded on the compact chart image
+of the partition-of-unity support (`chartImagePOUTsupport_isCompact`); a single uniform constant `B`
+is the resulting finite combinatorial/coefficient maximum.  It carries no spectral nonlinearity and
+no Weyl dependence. -/
+theorem exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsContent
+    (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
+    ∃ B : ℝ, 0 ≤ B ∧
+      ∀ (T : Integral.L2.SmoothCcTensor g r s) (α : M)
+        (Idx : Fin r → Fin (Module.finrank ℝ E))
+        (Jdx : Fin s → Fin (Module.finrank ℝ E)) (j : ℕ), j ≤ 2 * k →
+        ∀ y ∈ chartImagePOUTsupport (I := I) (M := M) α,
+          ‖iteratedFDeriv ℝ j
+              (rawConnLapPull (I := I) (M := M) g r s
+                (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx) y‖ ^ 2 ≤
+            B * rawConnLapRhsHsContent (I := I) (M := M) g r s k T α y :=
+  sorry
+
+/-- The pushed partition-of-unity weight `ρ_α` (read at the chart-source preimage of a target point
+`y`) vanishes when `y` lies in the chart target but outside the compact kernel
+`chartImagePOUTsupport α`. -/
+private lemma rawConnLapPouPull_eq_zero_off_kernel (α : M) (y : EuclN)
+    (hy : y ∈ chartTargetEuclid (I := I) (M := M) α)
+    (hy_off : y ∉ chartImagePOUTsupport (I := I) (M := M) α) :
+    (chartAtlasPOU I M α : M → ℝ)
+        ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) = 0 := by
+  classical
+  set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
+  by_contra hne
+  have hb_supp : b ∈ tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
+    subset_tsupport _ (by simpa [Function.mem_support] using hne)
+  have hy_pre : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
+    rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
+    exact hy
+  have h_round : (extChartAt I α) b = (toEuclidean (E := E)).symm y := by
+    rw [hb_def]; exact (extChartAt I α).right_inv hy_pre
+  apply hy_off
+  refine ⟨(extChartAt I α) b, ⟨b, hb_supp, rfl⟩, ?_⟩
+  rw [h_round]; simp
+
+/-- Continuity of the chart-pushed partition-of-unity weight on the chart target. -/
+private lemma rawConnLapPouPullCont (α : M) :
+    ContinuousOn
+      (fun y : EuclN =>
+        (chartAtlasPOU I M α : M → ℝ)
+          ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
+      (chartTargetEuclid (I := I) (M := M) α) := by
+  have hPOU_cont : Continuous fun x : M => (chartAtlasPOU I M α : M → ℝ) x :=
+    ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff).continuous
+  have hSymmCont : ContinuousOn ((extChartAt I α).symm) (extChartAt I α).target :=
+    continuousOn_extChartAt_symm α
+  have h_inner : ContinuousOn
+      (fun y : EuclN => (extChartAt I α).symm ((toEuclidean (E := E)).symm y))
+      (chartTargetEuclid (I := I) (M := M) α) := by
+    refine hSymmCont.comp (toEuclidean (E := E)).symm.continuous.continuousOn ?_
+    intro y hy
+    rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
+    exact hy
+  exact hPOU_cont.comp_continuousOn h_inner
+
+/-- AEMeasurability of one Hilbert-Schmidt integrand term on the chart-target-restricted volume. -/
+private lemma rawConnLapPullIntegrand_aemeasurable
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
+    (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E))) (l : ℕ)
+    (bIdx : Fin l → Fin (Module.finrank ℝ E)) :
+    AEMeasurable
+      (fun y : EuclN => ENNReal.ofReal
+        (((chartAtlasPOU I M α : M → ℝ)
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+          |(iteratedFDeriv ℝ l (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) y)
+              (fun i => EuclideanSpace.basisFun
+                (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2))
+      ((volume : Measure EuclN).restrict (chartTargetEuclid (I := I) (M := M) α)) := by
+  have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
+    chartTargetEuclid_isOpen (I := I) (M := M) α
+  have h_iter_contOn :
+      ContinuousOn (iteratedFDeriv ℝ l (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2))
+        (chartTargetEuclid (I := I) (M := M) α) := by
+    intro y hy
+    have h_cd : ContDiffAt ℝ ∞ (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) y :=
+      rawConnLapPull_contDiffAt (I := I) (M := M) g r s T α q.1 q.2 hy
+    exact (h_cd.continuousAt_iteratedFDeriv (k := l)
+      (by exact_mod_cast le_top)).continuousWithinAt
+  have h_eval : ContinuousOn
+      (fun y : EuclN => (iteratedFDeriv ℝ l (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) y)
+          (fun i => EuclideanSpace.basisFun (Fin (Module.finrank ℝ E)) ℝ (bIdx i)))
+      (chartTargetEuclid (I := I) (M := M) α) :=
+    (continuous_eval_const _).comp_continuousOn h_iter_contOn
+  have h_real : ContinuousOn
+      (fun y : EuclN => ((chartAtlasPOU I M α : M → ℝ)
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+          |(iteratedFDeriv ℝ l (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) y)
+              (fun i => EuclideanSpace.basisFun
+                (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2)
+      (chartTargetEuclid (I := I) (M := M) α) :=
+    (rawConnLapPouPullCont (I := I) (M := M) α).mul (h_eval.abs.pow 2)
+  exact ENNReal.measurable_ofReal.comp_aemeasurable
+    (h_real.aestronglyMeasurable h_open.measurableSet).aemeasurable
+
+/-- The chart-`α` Hilbert-Schmidt inner double-sum-of-integrals of a tensor `S` equals the integral
+of the partition-of-unity-weighted full Hilbert-Schmidt content.  (Tonelli for finite sums.) -/
+private lemma rawConnLapSumIntegrals_eq_integral_sum
+    (g : SmoothRiemannianMetric I M) (r' s' : ℕ) (S : Integral.L2.SmoothCcTensor g r' s')
+    (α : M) (K : ℕ) :
+    (∑ IJ : (Fin r' → Fin (Module.finrank ℝ E)) ×
+          (Fin s' → Fin (Module.finrank ℝ E)),
+        ∑ j ∈ Finset.range K,
+          ∑ bIdx : Fin j → Fin (Module.finrank ℝ E),
+            ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+              ENNReal.ofReal
+                (((chartAtlasPOU I M α : M → ℝ)
+                    ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                  |(iteratedFDeriv ℝ j
+                        (rawConnLapPull (I := I) (M := M) g r' s' S α IJ.1 IJ.2) y)
+                      (fun i => EuclideanSpace.basisFun
+                        (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2)
+              ∂(volume : Measure EuclN)) =
+      ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+        ENNReal.ofReal
+          (((chartAtlasPOU I M α : M → ℝ)
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+            (∑ IJ : (Fin r' → Fin (Module.finrank ℝ E)) ×
+                  (Fin s' → Fin (Module.finrank ℝ E)),
+              ∑ j ∈ Finset.range K,
+                ∑ bIdx : Fin j → Fin (Module.finrank ℝ E),
+                  |(iteratedFDeriv ℝ j
+                        (rawConnLapPull (I := I) (M := M) g r' s' S α IJ.1 IJ.2) y)
+                      (fun i => EuclideanSpace.basisFun
+                        (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2))
+        ∂(volume : Measure EuclN) := by
+  classical
+  have h_bIdx : ∀ (IJ : (Fin r' → Fin (Module.finrank ℝ E)) ×
+        (Fin s' → Fin (Module.finrank ℝ E))) (j : ℕ),
+      (∑ bIdx : Fin j → Fin (Module.finrank ℝ E),
+        ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+          ENNReal.ofReal
+            (((chartAtlasPOU I M α : M → ℝ)
+                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+              |(iteratedFDeriv ℝ j
+                    (rawConnLapPull (I := I) (M := M) g r' s' S α IJ.1 IJ.2) y)
+                  (fun i => EuclideanSpace.basisFun
+                    (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2)
+          ∂(volume : Measure EuclN)) =
+      ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+        (∑ bIdx : Fin j → Fin (Module.finrank ℝ E),
+          ENNReal.ofReal
+            (((chartAtlasPOU I M α : M → ℝ)
+                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+              |(iteratedFDeriv ℝ j
+                    (rawConnLapPull (I := I) (M := M) g r' s' S α IJ.1 IJ.2) y)
+                  (fun i => EuclideanSpace.basisFun
+                    (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2))
+        ∂(volume : Measure EuclN) := by
+    intro IJ j
+    rw [MeasureTheory.lintegral_finset_sum' _
+      (fun bIdx _ => rawConnLapPullIntegrand_aemeasurable (I := I) (M := M) g r' s' S α IJ j bIdx)]
+  have h_j : ∀ (IJ : (Fin r' → Fin (Module.finrank ℝ E)) ×
+        (Fin s' → Fin (Module.finrank ℝ E))),
+      (∑ j ∈ Finset.range K,
+        ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+          (∑ bIdx : Fin j → Fin (Module.finrank ℝ E),
+            ENNReal.ofReal
+              (((chartAtlasPOU I M α : M → ℝ)
+                  ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                |(iteratedFDeriv ℝ j
+                      (rawConnLapPull (I := I) (M := M) g r' s' S α IJ.1 IJ.2) y)
+                    (fun i => EuclideanSpace.basisFun
+                      (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2))
+          ∂(volume : Measure EuclN)) =
+      ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+        (∑ j ∈ Finset.range K,
+          ∑ bIdx : Fin j → Fin (Module.finrank ℝ E),
+            ENNReal.ofReal
+              (((chartAtlasPOU I M α : M → ℝ)
+                  ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                |(iteratedFDeriv ℝ j
+                      (rawConnLapPull (I := I) (M := M) g r' s' S α IJ.1 IJ.2) y)
+                    (fun i => EuclideanSpace.basisFun
+                      (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2))
+        ∂(volume : Measure EuclN) := by
+    intro IJ
+    have hmeas : ∀ j ∈ Finset.range K,
+        AEMeasurable (fun y : EuclN =>
+          ∑ bIdx : Fin j → Fin (Module.finrank ℝ E),
+            ENNReal.ofReal
+              (((chartAtlasPOU I M α : M → ℝ)
+                  ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                |(iteratedFDeriv ℝ j
+                      (rawConnLapPull (I := I) (M := M) g r' s' S α IJ.1 IJ.2) y)
+                    (fun i => EuclideanSpace.basisFun
+                      (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2))
+          ((volume : Measure EuclN).restrict (chartTargetEuclid (I := I) (M := M) α)) := by
+      intro j _
+      have h := Finset.aemeasurable_sum (Finset.univ : Finset (Fin j → Fin (Module.finrank ℝ E)))
+        (fun bIdx (_ : bIdx ∈ Finset.univ) =>
+          rawConnLapPullIntegrand_aemeasurable (I := I) (M := M) g r' s' S α IJ j bIdx)
+      refine h.congr (Filter.EventuallyEq.of_eq (funext (fun y => ?_)))
+      rw [Finset.sum_apply]
+    rw [MeasureTheory.lintegral_finset_sum' _ hmeas]
+  calc (∑ IJ : (Fin r' → Fin (Module.finrank ℝ E)) ×
+          (Fin s' → Fin (Module.finrank ℝ E)),
+        ∑ j ∈ Finset.range K,
+          ∑ bIdx : Fin j → Fin (Module.finrank ℝ E),
+            ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+              ENNReal.ofReal
+                (((chartAtlasPOU I M α : M → ℝ)
+                    ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                  |(iteratedFDeriv ℝ j
+                        (rawConnLapPull (I := I) (M := M) g r' s' S α IJ.1 IJ.2) y)
+                      (fun i => EuclideanSpace.basisFun
+                        (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2)
+              ∂(volume : Measure EuclN))
+      = ∑ IJ : (Fin r' → Fin (Module.finrank ℝ E)) ×
+            (Fin s' → Fin (Module.finrank ℝ E)),
+          ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+            (∑ j ∈ Finset.range K,
+              ∑ bIdx : Fin j → Fin (Module.finrank ℝ E),
+                ENNReal.ofReal
+                  (((chartAtlasPOU I M α : M → ℝ)
+                      ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                    |(iteratedFDeriv ℝ j
+                          (rawConnLapPull (I := I) (M := M) g r' s' S α IJ.1 IJ.2) y)
+                        (fun i => EuclideanSpace.basisFun
+                          (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2))
+            ∂(volume : Measure EuclN) := by
+        refine Finset.sum_congr rfl (fun IJ _ => ?_)
+        rw [← h_j IJ]
+        refine Finset.sum_congr rfl (fun j _ => ?_)
+        rw [← h_bIdx IJ j]
+    _ = ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+          (∑ IJ : (Fin r' → Fin (Module.finrank ℝ E)) ×
+              (Fin s' → Fin (Module.finrank ℝ E)),
+            ∑ j ∈ Finset.range K,
+              ∑ bIdx : Fin j → Fin (Module.finrank ℝ E),
+                ENNReal.ofReal
+                  (((chartAtlasPOU I M α : M → ℝ)
+                      ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                    |(iteratedFDeriv ℝ j
+                          (rawConnLapPull (I := I) (M := M) g r' s' S α IJ.1 IJ.2) y)
+                        (fun i => EuclideanSpace.basisFun
+                          (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2))
+          ∂(volume : Measure EuclN) := by
+        have hmeas2 : ∀ IJ ∈ (Finset.univ : Finset ((Fin r' → Fin (Module.finrank ℝ E)) ×
+            (Fin s' → Fin (Module.finrank ℝ E)))),
+            AEMeasurable (fun y : EuclN =>
+              ∑ j ∈ Finset.range K,
+                ∑ bIdx : Fin j → Fin (Module.finrank ℝ E),
+                  ENNReal.ofReal
+                    (((chartAtlasPOU I M α : M → ℝ)
+                        ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                      |(iteratedFDeriv ℝ j
+                            (rawConnLapPull (I := I) (M := M) g r' s' S α IJ.1 IJ.2) y)
+                          (fun i => EuclideanSpace.basisFun
+                            (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2))
+              ((volume : Measure EuclN).restrict (chartTargetEuclid (I := I) (M := M) α)) := by
+          intro IJ _
+          have h := Finset.aemeasurable_sum (Finset.range K)
+            (fun j (_ : j ∈ Finset.range K) =>
+              (Finset.aemeasurable_sum
+                (Finset.univ : Finset (Fin j → Fin (Module.finrank ℝ E)))
+                (fun bIdx (_ : bIdx ∈ Finset.univ) =>
+                  rawConnLapPullIntegrand_aemeasurable
+                    (I := I) (M := M) g r' s' S α IJ j bIdx)).congr
+                (Filter.EventuallyEq.of_eq (funext (fun y => by rw [Finset.sum_apply]))))
+          refine h.congr (Filter.EventuallyEq.of_eq (funext (fun y => ?_)))
+          rw [Finset.sum_apply]
+        rw [MeasureTheory.lintegral_finset_sum' _ hmeas2]
+    _ = ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+          ENNReal.ofReal
+            (((chartAtlasPOU I M α : M → ℝ)
+                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+              (∑ IJ : (Fin r' → Fin (Module.finrank ℝ E)) ×
+                    (Fin s' → Fin (Module.finrank ℝ E)),
+                ∑ j ∈ Finset.range K,
+                  ∑ bIdx : Fin j → Fin (Module.finrank ℝ E),
+                    |(iteratedFDeriv ℝ j
+                          (rawConnLapPull (I := I) (M := M) g r' s' S α IJ.1 IJ.2) y)
+                        (fun i => EuclideanSpace.basisFun
+                          (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2))
+          ∂(volume : Measure EuclN) := by
+        refine setLIntegral_congr_fun
+          (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet (fun y _ => ?_)
+        set ρ : ℝ := (chartAtlasPOU I M α : M → ℝ)
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) with hρ_def
+        have hρ_nn : 0 ≤ ρ := (chartAtlasPOU I M).nonneg α _
+        rw [Finset.mul_sum,
+          ENNReal.ofReal_sum_of_nonneg
+            (fun IJ _ => mul_nonneg hρ_nn (Finset.sum_nonneg
+              (fun j _ => Finset.sum_nonneg (fun bIdx _ => sq_nonneg _))))]
+        refine Finset.sum_congr rfl (fun IJ _ => ?_)
+        rw [Finset.mul_sum,
+          ENNReal.ofReal_sum_of_nonneg
+            (fun j _ => mul_nonneg hρ_nn (Finset.sum_nonneg (fun bIdx _ => sq_nonneg _)))]
+        refine Finset.sum_congr rfl (fun j _ => ?_)
+        rw [Finset.mul_sum,
+          ENNReal.ofReal_sum_of_nonneg (fun bIdx _ => mul_nonneg hρ_nn (sq_nonneg _))]
+
+/-- **The per-chart pointwise integrand bound.** For `y` in the chart target, the
+partition-of-unity-weighted full Hilbert-Schmidt content (over all components, orders `≤ 2k`, and
+basis tuples) of the chart-pulled `Δ_∇ T` component is bounded by `Ccomb · ρ_α ·
+rawConnLapRhsHsContent`, where `Ccomb = (#pairs) · (2k + 1) · n^{2k} · B` and the right side is the
+order-`(k + 1)` Hilbert-Schmidt content of `T`. -/
+private lemma rawConnLap_pointwise_integrand_le
+    (g : SmoothRiemannianMetric I M) (r s k : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
+    (α : M) (B : ℝ) (hB_nn : 0 ≤ B)
+    (hB : ∀ (Idx : Fin r → Fin (Module.finrank ℝ E))
+        (Jdx : Fin s → Fin (Module.finrank ℝ E)) (j : ℕ), j ≤ 2 * k →
+        ∀ z ∈ chartImagePOUTsupport (I := I) (M := M) α,
+          ‖iteratedFDeriv ℝ j
+              (rawConnLapPull (I := I) (M := M) g r s
+                (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx) z‖ ^ 2 ≤
+            B * rawConnLapRhsHsContent (I := I) (M := M) g r s k T α z)
+    {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
+    ((chartAtlasPOU I M α : M → ℝ)
+          ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+        (∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+            (Fin s → Fin (Module.finrank ℝ E)),
+          ∑ j ∈ Finset.range (2 * k + 1),
+            ∑ bIdx : Fin j → Fin (Module.finrank ℝ E),
+              |(iteratedFDeriv ℝ j
+                    (rawConnLapPull (I := I) (M := M) g r s
+                      (rawTensorConnLapSmooth (I := I) g r s T) α IJ.1 IJ.2) y)
+                  (fun i => EuclideanSpace.basisFun
+                    (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2) ≤
+      ((Fintype.card ((Fin r → Fin (Module.finrank ℝ E)) ×
+            (Fin s → Fin (Module.finrank ℝ E))) : ℝ) * ((2 * k + 1 : ℕ) : ℝ) *
+          ((Module.finrank ℝ E : ℝ) ^ (2 * k)) * B) *
+        (((chartAtlasPOU I M α : M → ℝ)
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+          rawConnLapRhsHsContent (I := I) (M := M) g r s k T α y) := by
+  classical
+  set ρ : ℝ := (chartAtlasPOU I M α : M → ℝ)
+      ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) with hρ_def
+  have hρ_nn : 0 ≤ ρ := (chartAtlasPOU I M).nonneg α _
+  set R : ℝ := rawConnLapRhsHsContent (I := I) (M := M) g r s k T α y with hR_def
+  have hR_nn : 0 ≤ R := rawConnLapRhsHsContent_nonneg (I := I) (M := M) g r s k T α y
+  set Ccomb : ℝ := (Fintype.card ((Fin r → Fin (Module.finrank ℝ E)) ×
+      (Fin s → Fin (Module.finrank ℝ E))) : ℝ) * ((2 * k + 1 : ℕ) : ℝ) *
+      ((Module.finrank ℝ E : ℝ) ^ (2 * k)) * B with hCcomb_def
+  set LHSsum : ℝ := ∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)),
+      ∑ j ∈ Finset.range (2 * k + 1),
+        ∑ bIdx : Fin j → Fin (Module.finrank ℝ E),
+          |(iteratedFDeriv ℝ j
+                (rawConnLapPull (I := I) (M := M) g r s
+                  (rawTensorConnLapSmooth (I := I) g r s T) α IJ.1 IJ.2) y)
+              (fun i => EuclideanSpace.basisFun
+                (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2 with hLHSsum_def
+  change ρ * LHSsum ≤ Ccomb * (ρ * R)
+  by_cases hyK : y ∈ chartImagePOUTsupport (I := I) (M := M) α
+  · -- Per-component, per-order basis-sum bound from the pointwise primitive.
+    have h_perIJorder : ∀ (IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+          (Fin s → Fin (Module.finrank ℝ E))) (j : ℕ), j ≤ 2 * k →
+        (∑ bIdx : Fin j → Fin (Module.finrank ℝ E),
+          |(iteratedFDeriv ℝ j
+                (rawConnLapPull (I := I) (M := M) g r s
+                  (rawTensorConnLapSmooth (I := I) g r s T) α IJ.1 IJ.2) y)
+              (fun i => EuclideanSpace.basisFun
+                (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2) ≤
+          ((Module.finrank ℝ E : ℝ) ^ (2 * k)) * (B * R) := by
+      intro IJ j hj
+      set F : EuclN → ℝ := rawConnLapPull (I := I) (M := M) g r s
+        (rawTensorConnLapSmooth (I := I) g r s T) α IJ.1 IJ.2 with hF_def
+      set Fop : ℝ := ‖iteratedFDeriv ℝ j F y‖ with hFop_def
+      have hFop_sq_le : Fop ^ 2 ≤ B * R := hB IJ.1 IJ.2 j hj y hyK
+      have h_eval_le : ∀ bIdx : Fin j → Fin (Module.finrank ℝ E),
+          |(iteratedFDeriv ℝ j F y)
+              (fun i => EuclideanSpace.basisFun
+                (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2 ≤ Fop ^ 2 := by
+        intro bIdx
+        have h_le : |(iteratedFDeriv ℝ j F y)
+            (fun i => EuclideanSpace.basisFun (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ≤ Fop := by
+          have h := (iteratedFDeriv ℝ j F y).le_opNorm
+            (fun i => EuclideanSpace.basisFun (Fin (Module.finrank ℝ E)) ℝ (bIdx i))
+          have hprod : (∏ i : Fin j,
+              ‖EuclideanSpace.basisFun (Fin (Module.finrank ℝ E)) ℝ (bIdx i)‖) = 1 := by
+            refine Finset.prod_eq_one (fun i _ => ?_)
+            rw [EuclideanSpace.basisFun_apply, PiLp.norm_single]; simp
+          rw [hprod, mul_one] at h
+          rw [← Real.norm_eq_abs]; exact h
+        exact pow_le_pow_left₀ (abs_nonneg _) h_le 2
+      have h_card : (Fintype.card (Fin j → Fin (Module.finrank ℝ E)) : ℝ) =
+          (Module.finrank ℝ E : ℝ) ^ j := by
+        rw [Fintype.card_fun, Fintype.card_fin, Fintype.card_fin, Nat.cast_pow]
+      calc (∑ bIdx : Fin j → Fin (Module.finrank ℝ E),
+            |(iteratedFDeriv ℝ j F y)
+                (fun i => EuclideanSpace.basisFun
+                  (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2)
+          ≤ ∑ _bIdx : Fin j → Fin (Module.finrank ℝ E), Fop ^ 2 :=
+            Finset.sum_le_sum (fun bIdx _ => h_eval_le bIdx)
+        _ = (Module.finrank ℝ E : ℝ) ^ j * Fop ^ 2 := by
+            rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul, h_card]
+        _ ≤ (Module.finrank ℝ E : ℝ) ^ j * (B * R) :=
+            mul_le_mul_of_nonneg_left hFop_sq_le (by positivity)
+        _ ≤ ((Module.finrank ℝ E : ℝ) ^ (2 * k)) * (B * R) := by
+            apply mul_le_mul_of_nonneg_right _ (mul_nonneg hB_nn hR_nn)
+            have hn1 : (1 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := by
+              have : 1 ≤ Module.finrank ℝ E :=
+                Nat.one_le_iff_ne_zero.mpr (NeZero.ne (Module.finrank ℝ E))
+              exact_mod_cast this
+            exact pow_le_pow_right₀ hn1 hj
+    have h_LHSsum_le : LHSsum ≤ Ccomb * R := by
+      have h_perIJ : ∀ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+            (Fin s → Fin (Module.finrank ℝ E)),
+          (∑ j ∈ Finset.range (2 * k + 1),
+            ∑ bIdx : Fin j → Fin (Module.finrank ℝ E),
+              |(iteratedFDeriv ℝ j
+                    (rawConnLapPull (I := I) (M := M) g r s
+                      (rawTensorConnLapSmooth (I := I) g r s T) α IJ.1 IJ.2) y)
+                  (fun i => EuclideanSpace.basisFun
+                    (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2) ≤
+          ((2 * k + 1 : ℕ) : ℝ) * (((Module.finrank ℝ E : ℝ) ^ (2 * k)) * (B * R)) := by
+        intro IJ
+        calc (∑ j ∈ Finset.range (2 * k + 1),
+              ∑ bIdx : Fin j → Fin (Module.finrank ℝ E),
+                |(iteratedFDeriv ℝ j
+                      (rawConnLapPull (I := I) (M := M) g r s
+                        (rawTensorConnLapSmooth (I := I) g r s T) α IJ.1 IJ.2) y)
+                    (fun i => EuclideanSpace.basisFun
+                      (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2)
+            ≤ ∑ _j ∈ Finset.range (2 * k + 1),
+                ((Module.finrank ℝ E : ℝ) ^ (2 * k)) * (B * R) := by
+              refine Finset.sum_le_sum (fun j hj => ?_)
+              exact h_perIJorder IJ j (by have := Finset.mem_range.mp hj; omega)
+          _ = ((2 * k + 1 : ℕ) : ℝ) * (((Module.finrank ℝ E : ℝ) ^ (2 * k)) * (B * R)) := by
+              rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+      calc LHSsum
+          ≤ ∑ _IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+              (Fin s → Fin (Module.finrank ℝ E)),
+              ((2 * k + 1 : ℕ) : ℝ) * (((Module.finrank ℝ E : ℝ) ^ (2 * k)) * (B * R)) :=
+            Finset.sum_le_sum (fun IJ _ => h_perIJ IJ)
+        _ = Ccomb * R := by
+            rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul, hCcomb_def]
+            ring
+    calc ρ * LHSsum ≤ ρ * (Ccomb * R) := mul_le_mul_of_nonneg_left h_LHSsum_le hρ_nn
+      _ = Ccomb * (ρ * R) := by ring
+  · have hρ0 : ρ = 0 :=
+      rawConnLapPouPull_eq_zero_off_kernel (I := I) (M := M) α y hy hyK
+    rw [hρ0]; simp
+
+/-- **The per-chart inner-sum bound** assembled from the pointwise integrand bound: integrating the
+pointwise bound over the chart target (Tonelli for finite sums + monotone `lintegral`), turning the
+chart-`α` order-`k` inner sum of `Δ_∇ T` into `ofReal Ccomb` times the chart-`α` order-`(k + 1)`
+inner sum of `T`.  On inactive charts the partition of unity vanishes, killing the left side. -/
+private lemma rawConnLap_per_alpha_inner_bound
+    (g : SmoothRiemannianMetric I M) (r s k : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
+    (α : M) (B : ℝ) (hB_nn : 0 ≤ B)
+    (hB : ∀ (T' : Integral.L2.SmoothCcTensor g r s) (α' : M)
+        (Idx : Fin r → Fin (Module.finrank ℝ E))
+        (Jdx : Fin s → Fin (Module.finrank ℝ E)) (j : ℕ), j ≤ 2 * k →
+        ∀ z ∈ chartImagePOUTsupport (I := I) (M := M) α',
+          ‖iteratedFDeriv ℝ j
+              (rawConnLapPull (I := I) (M := M) g r s
+                (rawTensorConnLapSmooth (I := I) g r s T') α' Idx Jdx) z‖ ^ 2 ≤
+            B * rawConnLapRhsHsContent (I := I) (M := M) g r s k T' α' z)
+    (Ccomb : ℝ)
+    (hCcomb_def : Ccomb = (Fintype.card ((Fin r → Fin (Module.finrank ℝ E)) ×
+          (Fin s → Fin (Module.finrank ℝ E))) : ℝ) * ((2 * k + 1 : ℕ) : ℝ) *
+        ((Module.finrank ℝ E : ℝ) ^ (2 * k)) * B)
+    {lhsInner rhsInner : ℝ≥0∞}
+    (hlhsInner_def : lhsInner =
+      ∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+          (Fin s → Fin (Module.finrank ℝ E)),
+        ∑ j ∈ Finset.range (2 * k + 1),
+          ∑ bIdx : Fin j → Fin (Module.finrank ℝ E),
+            ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+              ENNReal.ofReal
+                (((chartAtlasPOU I M α : M → ℝ)
+                    ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                  |(iteratedFDeriv ℝ j
+                        (tensorChartComponentRaw (I := I) (M := M) g r s
+                            (rawTensorConnLapSmooth (I := I) g r s T) α IJ.1 IJ.2
+                          ∘ (extChartAt I α).symm
+                          ∘ (toEuclidean (E := E)).symm)
+                        y)
+                      (fun i => EuclideanSpace.basisFun
+                        (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2)
+              ∂(volume : Measure EuclN))
+    (hrhsInner_def : rhsInner =
+      ∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+          (Fin s → Fin (Module.finrank ℝ E)),
+        ∑ j ∈ Finset.range (2 * (k + 1) + 1),
+          ∑ bIdx : Fin j → Fin (Module.finrank ℝ E),
+            ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+              ENNReal.ofReal
+                (((chartAtlasPOU I M α : M → ℝ)
+                    ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                  |(iteratedFDeriv ℝ j
+                        (tensorChartComponentRaw (I := I) (M := M) g r s T α IJ.1 IJ.2
+                          ∘ (extChartAt I α).symm
+                          ∘ (toEuclidean (E := E)).symm)
+                        y)
+                      (fun i => EuclideanSpace.basisFun
+                        (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2)
+              ∂(volume : Measure EuclN)) :
+    lhsInner ≤ ENNReal.ofReal Ccomb * rhsInner := by
+  classical
+  subst hlhsInner_def hrhsInner_def
+  have hCcomb_nn : 0 ≤ Ccomb := by rw [hCcomb_def]; positivity
+  simp only [rawConnLapPull_eq (I := I) (M := M)]
+  rw [rawConnLapSumIntegrals_eq_integral_sum (I := I) (M := M) g r s
+    (rawTensorConnLapSmooth (I := I) g r s T) α (2 * k + 1)]
+  rw [rawConnLapSumIntegrals_eq_integral_sum (I := I) (M := M) g r s T α (2 * (k + 1) + 1)]
+  rw [show (∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+      ENNReal.ofReal
+        (((chartAtlasPOU I M α : M → ℝ)
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+          (∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+                (Fin s → Fin (Module.finrank ℝ E)),
+            ∑ j ∈ Finset.range (2 * (k + 1) + 1),
+              ∑ bIdx : Fin j → Fin (Module.finrank ℝ E),
+                |(iteratedFDeriv ℝ j
+                      (rawConnLapPull (I := I) (M := M) g r s T α IJ.1 IJ.2) y)
+                    (fun i => EuclideanSpace.basisFun
+                      (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2))
+        ∂(volume : Measure EuclN)) =
+      ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+        ENNReal.ofReal
+          (((chartAtlasPOU I M α : M → ℝ)
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+            rawConnLapRhsHsContent (I := I) (M := M) g r s k T α y)
+        ∂(volume : Measure EuclN) from rfl]
+  rw [← MeasureTheory.lintegral_const_mul' _ _
+    (ENNReal.ofReal_ne_top (r := Ccomb))]
+  refine setLIntegral_mono_ae'
+    (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
+    (Filter.Eventually.of_forall (fun y hy => ?_))
+  have hpt := rawConnLap_pointwise_integrand_le (I := I) (M := M) g r s k T α B hB_nn
+    (fun Idx Jdx j hj z hz => hB T α Idx Jdx j hj z hz) hy
+  rw [← hCcomb_def] at hpt
+  have h_rhs_nn : 0 ≤ ((chartAtlasPOU I M α : M → ℝ)
+      ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+        rawConnLapRhsHsContent (I := I) (M := M) g r s k T α y :=
+    mul_nonneg ((chartAtlasPOU I M).nonneg α _)
+      (rawConnLapRhsHsContent_nonneg (I := I) (M := M) g r s k T α y)
+  rw [← ENNReal.ofReal_mul hCcomb_nn]
+  exact ENNReal.ofReal_le_ofReal hpt
+
 /-- **The per-chart inner-sum order-drop for the rough connection Laplacian (the genuine atomic
 analytic primitive).**
 
@@ -95,7 +769,20 @@ correction (`tensorChartComponentRaw_rawTensorConnLap_eq_chart_α_coord_formula`
 two Fréchet, hence one `tensorPouSobolevHsNorm`-order); the smooth coefficients are uniformly bounded
 on the compact chart image of the partition-of-unity support.  This is the exact rough-Laplacian
 analogue of the per-chart bound underlying `exists_covGrad_tensorPouSobolevHsNorm_le`, tight at `+1`
-order.  Its body is `sorry`: it carries no spectral nonlinearity and no Weyl dependence. -/
+order.
+
+It is assembled — sorry-free — from the genuine pointwise second-order elliptic-boundedness primitive
+`exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsContent` (the only remaining `sorry`
+in this chart-port): that primitive states that, on the compact chart image of the
+partition-of-unity support, every order-`j` (`j ≤ 2k`) Fréchet derivative operator norm of the
+chart-pulled raw `(Idx, Jdx)`-component of `Δ_∇ T` is square-bounded by a `T`-uniform constant times
+the order-`(k + 1)` Hilbert-Schmidt content of the raw components of `T`.  Squaring the basis
+evaluations, summing over the basis tuples / Fréchet orders / component multi-index pairs, weighting
+by the partition of unity (which vanishes off the chart image of its support, by
+`rawConnLapPouPull_eq_zero_off_kernel`), and integrating against the chart-Euclidean volume measure
+(Tonelli for finite sums, `rawConnLapSumIntegrals_eq_integral_sum`) turns the pointwise bound into
+the stated chart-`α` inner-sum inequality.  It carries no spectral nonlinearity and no Weyl
+dependence. -/
 theorem exists_rawConnLapSmooth_tensorPouSobolevHsNorm_le_perChart
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -133,8 +820,17 @@ theorem exists_rawConnLapSmooth_tensorPouSobolevHsNorm_le_perChart
                               y)
                             (fun i => EuclideanSpace.basisFun
                               (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2)
-                    ∂(volume : Measure EuclN)) :=
-  sorry
+                    ∂(volume : Measure EuclN)) := by
+  classical
+  obtain ⟨B, hB_nn, hB⟩ :=
+    exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsContent
+      (I := I) (M := M) g r s k
+  refine ⟨(Fintype.card ((Fin r → Fin (Module.finrank ℝ E)) ×
+      (Fin s → Fin (Module.finrank ℝ E))) : ℝ) * ((2 * k + 1 : ℕ) : ℝ) *
+      ((Module.finrank ℝ E : ℝ) ^ (2 * k)) * B, by positivity, fun T α => ?_⟩
+  refine rawConnLap_per_alpha_inner_bound (I := I) (M := M) g r s k T α B hB_nn hB _ rfl ?_ ?_
+  · rfl
+  · rfl
 
 /-- **The tight single-step order-dropping `ℝ≥0∞` chart-Sobolev norm bound for the rough
 connection Laplacian (the genuine analytic primitive).**
@@ -818,8 +1514,8 @@ theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
         (fun β _ => hCα_nn β.val β.property) (Finset.mem_attach Sf ⟨α, hα⟩)
     calc lhsEsq α Idx Jdx
         ≤ ENNReal.ofReal (Cα α hα) * summand α Idx Jdx := hCα α hα T Idx Jdx
-      _ ≤ ENNReal.ofReal Cmax * summand α Idx Jdx :=
-          mul_le_mul_right' (ENNReal.ofReal_le_ofReal hCα_le) _
+      _ ≤ ENNReal.ofReal Cmax * summand α Idx Jdx := by
+          gcongr
   -- Sum over `(Idx, Jdx)` and `α ∈ Sf`.
   have h_sum_le :
       (∑ α ∈ Sf, ∑ Idx, ∑ Jdx, lhsEsq α Idx Jdx) ≤
@@ -866,7 +1562,8 @@ theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
       (∑ α ∈ Sf, ∑ Idx, ∑ Jdx, lhsEsq α Idx Jdx) ≤
         ENNReal.ofReal Cmax * tensorPouSobolevHsNormSq (I := I) (M := M) g 0 T := by
     rw [h_summand_eq_normSq]
-    exact h_sum_le.trans (mul_le_mul_left' h_finset_le_tsum _)
+    refine h_sum_le.trans ?_
+    gcongr
   -- Transport to `ℝ` via `.toReal`.
   have h_lhsEsq_ne_top : ∀ α Idx Jdx, lhsEsq α Idx Jdx ≠ ⊤ := by
     intro α Idx Jdx

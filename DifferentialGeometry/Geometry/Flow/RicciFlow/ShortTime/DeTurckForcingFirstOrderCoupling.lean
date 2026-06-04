@@ -315,7 +315,12 @@ theorem deTurckGenuineN_firstOrder_operatorTsumLoss
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
-    (hN_cont : Continuous N_cont)
+    {R : ℝ}
+    (hN_cont : ContinuousOn N_cont
+      (Metric.closedBall
+        (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R))
     (hcoeff : ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
         realizableAtGate (I := I) g₀ u →
           ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
@@ -357,7 +362,12 @@ theorem deTurckGenuineN_firstOrder_spatialOperatorLoss
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
-    (hN_cont : Continuous N_cont)
+    {R : ℝ}
+    (hN_cont : ContinuousOn N_cont
+      (Metric.closedBall
+        (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R))
     (hcoeff : ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
         realizableAtGate (I := I) g₀ u →
           ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
@@ -407,7 +417,12 @@ theorem deTurckGenuineN_firstOrder_operatorLoss
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
-    (hN_cont : Continuous N_cont)
+    {R : ℝ}
+    (hN_cont : ContinuousOn N_cont
+      (Metric.closedBall
+        (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R))
     (hcoeff : ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
         realizableAtGate (I := I) g₀ u →
           ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
