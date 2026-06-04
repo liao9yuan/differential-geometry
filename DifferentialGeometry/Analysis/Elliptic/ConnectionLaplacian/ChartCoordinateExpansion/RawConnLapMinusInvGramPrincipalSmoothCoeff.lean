@@ -148,8 +148,150 @@ theorem rawConnLap_chartα_minus_invGramPrincipalSum_eq_christoffelTrace
                     (fun z : M => T₀.toSection z) b
                     ((LeviCivita (I := I) g).toFun
                       (fun z : M => chartBasisVecFiber (I := I) α k z) b
-                      (chartBasisVecFiber (I := I) α l b)))) :=
-  sorry
+                      (chartBasisVecFiber (I := I) α l b)))) := by
+  classical
+  have hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        ((fun z : M => T₀.toSection z) y)) := T₀.toSection.contMDiff
+  have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
+  -- The fixed component-projection continuous-linear functional on the tensor fibre at `b`.
+  set proj : TensorRSSpace r s I b →L[ℝ] ℝ :=
+    (tensorChartComponentProjection (E := E) r s Idx Jdx).comp
+      ((trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b)
+    with hproj_def
+  have hproj_apply : ∀ D : TensorRSSpace r s I b,
+      proj D =
+        tensorChartComponentProjection (E := E) r s Idx Jdx
+          ((trivializationAt (TensorRSModel r s ℝ E)
+              (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b D) := by
+    intro D; rw [hproj_def, ContinuousLinearMap.comp_apply]
+  -- The bundled second-covariant-derivative bilinear form `Ψ_{T₀}` at `b`.
+  set Ψ : TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] TensorRSSpace r s I b :=
+    rawTensorConnLap_psi_bilinAt (I := I) g r s (fun z : M => T₀.toSection z) hT_total b
+    with hΨ_def
+  set B : Fin (Module.finrank ℝ E) → TangentSpace I b :=
+    fun i => smoothOrthoFrame (I := I) g b i b with hB_def
+  have hB_orthonormal : ∀ i j : Fin (Module.finrank ℝ E),
+      g.inner b (B i) (B j) = if i = j then (1 : ℝ) else 0 :=
+    fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g b i j
+  -- Smoothness witnesses for the chart-`α` coordinate frame fields at `b ∈ baseSet α`.
+  have hChartBasis_mdiff : ∀ k : Fin (Module.finrank ℝ E),
+      MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+        (fun z : M => TotalSpace.mk' E (E := fun w : M => TangentSpace I w) z
+          (chartBasisVecFiber (I := I) α k z)) b :=
+    fun k => ((chartBasisVec_contMDiffOn (I := I) α k).contMDiffAt
+      ((trivializationAt E (TangentSpace I) α).open_baseSet.mem_nhds
+        hb_base)).mdifferentiableAt (by simp)
+  -- STEP A: the chart-α raw component of `Δ_∇ T₀` is the projected diagonal frame trace of `Ψ`.
+  have hLHS_trace :
+      tensorChartComponentRaw (I := I) (M := M) g r s
+          (rawTensorConnLapSmooth (I := I) g r s T₀) α Idx Jdx b =
+        proj (∑ i : Fin (Module.finrank ℝ E), Ψ (B i) (B i)) := by
+    rw [tensorChartComponentRaw_def, tensorTrivProj, rawTensorConnLapSmooth_toSection_apply]
+    rw [rawTensorConnLap_eq_frame_trace (I := I) g r s
+      (fun z : M => T₀.toSection z) hT_total b B hB_orthonormal]
+    rw [← hΨ_def, hproj_apply]
+  -- STEP B: the (fibre-valued) metric trace is basis-independent; project to the chart-α inverse-Gram
+  -- trace.  Apply the general-codomain trace identity, then push the projection `proj` through.
+  have hTrace_fibre :
+      (∑ i : Fin (Module.finrank ℝ E), Ψ (B i) (B i)) =
+        ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+          chartInvGramMatrix (I := I) g α b k l •
+            Ψ (chartBasisVecFiber (I := I) α k b)
+              (chartBasisVecFiber (I := I) α l b) :=
+    orthonormal_basis_bilin_trace_chartα (I := I) (A := TensorRSSpace r s I b)
+      g α hb_base Ψ B hB_orthonormal
+  have hTrace_chartα :
+      proj (∑ i : Fin (Module.finrank ℝ E), Ψ (B i) (B i)) =
+        ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+          chartInvGramMatrix (I := I) g α b k l *
+            proj (Ψ (chartBasisVecFiber (I := I) α k b)
+              (chartBasisVecFiber (I := I) α l b)) := by
+    rw [hTrace_fibre, map_sum]
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    rw [map_sum]
+    refine Finset.sum_congr rfl (fun l _ => ?_)
+    rw [map_smul, smul_eq_mul]
+  -- STEP C: evaluate `proj ∘ Ψ` on the chart-basis pair, split into the principal (covApply) block
+  -- and the Christoffel-correction block, via `rawTensorConnLap_psi_bilinAt_apply`.
+  have hProjΨ_chartBasis : ∀ k l : Fin (Module.finrank ℝ E),
+      proj (Ψ (chartBasisVecFiber (I := I) α k b) (chartBasisVecFiber (I := I) α l b)) =
+          tensorChartComponentProjection (E := E) r s Idx Jdx
+            ((trivializationAt (TensorRSModel r s ℝ E)
+                (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
+              ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+                  (LeviCivita (I := I) g)).toFun
+                (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+                  (LeviCivita (I := I) g)) (chartBasisVecFiber (I := I) α k)
+                  (fun z : M => T₀.toSection z)) b
+                (chartBasisVecFiber (I := I) α l b))) -
+        tensorChartComponentProjection (E := E) r s Idx Jdx
+          ((trivializationAt (TensorRSModel r s ℝ E)
+              (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
+            ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+                (LeviCivita (I := I) g)).toFun
+              (fun z : M => T₀.toSection z) b
+              ((LeviCivita (I := I) g).toFun
+                (fun z : M => chartBasisVecFiber (I := I) α k z) b
+                (chartBasisVecFiber (I := I) α l b)))) := by
+    intro k l
+    rw [hΨ_def, rawTensorConnLap_psi_bilinAt_apply (I := I) g r s
+      (fun z : M => T₀.toSection z) hT_total (hChartBasis_mdiff k) (hChartBasis_mdiff l)]
+    rw [hproj_apply, map_sub, map_sub]
+  -- STEP D: assemble.  The covApply block is exactly `chartInvGramPrincipalSum`; cancel it.
+  set A : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun k l =>
+      chartInvGramMatrix (I := I) g α b k l *
+        tensorChartComponentProjection (E := E) r s Idx Jdx
+          ((trivializationAt (TensorRSModel r s ℝ E)
+              (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
+            ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+                (LeviCivita (I := I) g)).toFun
+              (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+                (LeviCivita (I := I) g)) (chartBasisVecFiber (I := I) α k)
+                (fun z : M => T₀.toSection z)) b
+              (chartBasisVecFiber (I := I) α l b)))
+    with hA_def
+  set C : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun k l =>
+      chartInvGramMatrix (I := I) g α b k l *
+        tensorChartComponentProjection (E := E) r s Idx Jdx
+          ((trivializationAt (TensorRSModel r s ℝ E)
+              (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
+            ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+                (LeviCivita (I := I) g)).toFun
+              (fun z : M => T₀.toSection z) b
+              ((LeviCivita (I := I) g).toFun
+                (fun z : M => chartBasisVecFiber (I := I) α k z) b
+                (chartBasisVecFiber (I := I) α l b))))
+    with hC_def
+  -- Each `g^{kl}·proj(Ψ ∂_k ∂_l)` splits into the principal `A k l` minus the Christoffel `C k l`.
+  have hProjΨ_split : ∀ k l : Fin (Module.finrank ℝ E),
+      chartInvGramMatrix (I := I) g α b k l *
+          proj (Ψ (chartBasisVecFiber (I := I) α k b)
+            (chartBasisVecFiber (I := I) α l b)) =
+        A k l - C k l := by
+    intro k l
+    rw [hProjΨ_chartBasis k l, hA_def, hC_def, mul_sub]
+  rw [hLHS_trace, hTrace_chartα]
+  rw [Finset.sum_congr rfl (fun k (_ : k ∈ Finset.univ) =>
+    Finset.sum_congr rfl (fun l (_ : l ∈ Finset.univ) => hProjΨ_split k l))]
+  have hPrincipal :
+      (∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E), A k l) =
+        chartInvGramPrincipalSum (I := I) (M := M) g r s α T₀ Idx Jdx b := by
+    rw [chartInvGramPrincipalSum, hA_def]
+  have hSplit :
+      (∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E), (A k l - C k l)) =
+        (∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E), A k l) -
+          ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E), C k l := by
+    rw [← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    rw [Finset.sum_sub_distrib]
+  rw [hSplit, hPrincipal]
+  ring
 
 /-- The chart-`α` `m`-th coordinate of the chart-Christoffel-trace tangent field
 `W := ∑_{k,l} g^{kl}·(LC g) ∂_k (∂_l)`, pulled back to the Euclidean chart target:

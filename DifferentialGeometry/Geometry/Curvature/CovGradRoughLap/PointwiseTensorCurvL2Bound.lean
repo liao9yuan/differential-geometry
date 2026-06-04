@@ -1135,6 +1135,73 @@ theorem norm_iteratedCovGrad_iteratedCovGrad (g : SmoothRiemannianMetric I M) (r
   norm_heq_congr g r (by omega : (s + a) + b = s + (a + b))
     (iteratedCovGrad_iteratedCovGrad_heq (g := g) (r := r) (s := s) (a := a) (b := b) X)
 
+/-- **Posited deepest moving-frame curvature-jet primitive: the order-`m` genuine + remainder fibre
+decomposition of the iterated covariant gradient of the single-step commutator defect.** For a closed
+smooth Riemannian manifold `(M, g)` there is a *valence/order-dependent* nonnegative constant
+`Cgr : ℕ → ℕ → ℝ` such that, at every covariant rank `s`, every gradient order `m`, for every smooth
+compactly-supported `(0, s)`-tensor `T`, and at *every point* `x`, the fibre value of the `m`-fold
+iterated covariant gradient of the order-`2` single-step commutator defect
+`Curv T := pointwiseTensorCurv g s T` splits as
+
+```
+(∇^m(Curv T))(x) = Ggen + Grem,
+```
+
+with the *genuine curvature-jet* part `Ggen` fibre-bounded by `(Cgr s m)²` times the sum of the lower
+iterated-gradient fibre norms `∑_{i ≤ m + 1} rfns(∇^i T)(x)`, and the *moving-frame remainder* `Grem`
+fibre-bounded by `(Cgr s m)²` times the single top-order-but-one fibre norm `rfns(∇^{m + 2} T)(x)`:
+
+```
+rfns(Ggen)(x) ≤ (Cgr s m)² · ∑_{i ≤ m + 1} rfns(∇^i T)(x),
+rfns(Grem)(x) ≤ (Cgr s m)² · rfns(∇^{m + 2} T)(x).
+```
+
+This is the genuine rank-generic *and* order-generic moving-frame third-order Bochner–Weitzenböck
+curvature-jet decomposition — the order-`m` generalization of the `m = 0` genuine + remainder split
+`exists_pointwiseTensorCurv_genuineRemainder_fiberNormSq_bound`
+(`Curv T (x) = Ggen + Grem`, `Ggen` bounded by `rfns(T) + rfns(∇T)`, `Grem` by `rfns(∇²T)`). Applying
+`∇^m` to the defect `Curv T = Δ_∇(∇T) − ∇(Δ_∇ T)` produces, after the iterated Ricci identity
+(`ricci_identity_tensor_commutator_eq_riemannOp`, the rank-generic
+`secondCovDeriv_covGrad_antisymm_eq_riemannOp_gen`) cancels the top-order `∇^{m + 3} T` terms between
+the two summands `∇^m(Δ_∇∇T)` and `∇^m(∇Δ_∇T)`, a finite sum of contractions of `∇^{≤ m + 1}`
+covariant derivatives of curvature against the iterated gradients `∇^{≤ m + 1} T` (the *genuine
+curvature-jet* part `Ggen`, all coefficients sup-bounded on the compact manifold by the uniform
+curvature / differentiated-curvature sups `exists_uniform_riemannianFiberNormSq_riemannOp_bound`,
+`exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound`, hence `rfns(∇^{≤ m + 1} T)`-order)
+plus the surviving moving-frame / frame-bracket discrepancy (`tensor3rdCurvBracket` and its iterated
+analogue, the genuinely `rfns(∇^{m + 2} T)`-order remainder `Grem`). The remainder sits at order
+`m + 2` (not `m + 3`) precisely because the top-order `∇^{m + 3} T` terms cancel — the genuine
+curvature content a naive per-summand Sobolev order-count cannot recover. The constant is
+valence/order-dependent because the tensor-bundle curvature endomorphism is an `O(s + m)`-slot
+derivation and the curvature-derivative term count grows with `m`.
+
+It is the strictly-more-primitive *section-split* form that the aggregate fibre bound
+`exists_iteratedCovGrad_pointwiseTensorCurv_pointwise_fiberNormSq_bound` is *proved* from through the
+two-term fibre subadditivity `riemannianFiberNormSq_add_le` and the finite-sum reassembly
+`Finset.sum_range_succ` (exactly as the `m = 0` aggregate bound
+`exists_pointwiseTensorCurv_pointwise_fiberNormSq_bound` is proved from the `m = 0`
+genuine + remainder split). The degenerate witness is rejected because at `m = 0`, `x` arbitrary, the
+two bounds read `rfns(Ggen)(x) ≤ (Cgr s 0)²·(rfns(T) + rfns(∇T))(x)` and
+`rfns(Grem)(x) ≤ (Cgr s 0)²·rfns(∇²T)(x)` for a split summing to `Curv T (x)`, which is
+`exists_pointwiseTensorCurv_genuineRemainder_fiberNormSq_bound` — *false* with `Cgr s 0 = 0` on a
+non-flat manifold (the defect carries the genuine curvature contraction of `T`). -/
+theorem exists_iteratedCovGrad_pointwiseTensorCurv_genuineRemainder_fiberNormSq_bound
+    (g : SmoothRiemannianMetric I M) :
+    ∃ Cgr : ℕ → ℕ → ℝ, (∀ s m, 0 ≤ Cgr s m) ∧
+      ∀ (s m : ℕ) (T : SmoothCcTensor g 0 s) (x : M),
+        ∃ Ggen Grem : TensorRSSpace 0 (s + 1 + m) I x,
+          (iteratedCovGrad g 0 (s + 1) m
+              (pointwiseTensorCurv (I := I) (M := M) g s T)).toSection x = Ggen + Grem ∧
+          riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + m) x Ggen ≤
+            Cgr s m ^ 2 * ∑ i ∈ Finset.range (m + 2),
+              riemannianFiberNormSq (I := I) (M := M) g 0 (s + i) x
+                ((iteratedCovGrad g 0 s i T).toSection x) ∧
+          riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + m) x Grem ≤
+            Cgr s m ^ 2 *
+              riemannianFiberNormSq (I := I) (M := M) g 0 (s + (m + 2)) x
+                ((iteratedCovGrad g 0 s (m + 2) T).toSection x) := by
+  sorry
+
 /-- **Posited deepest covariant-product curvature primitive: the *pointwise fibre-norm* bound on the
 iterated covariant gradient of the single-step commutator defect (rank/order-generic).** For a closed
 smooth Riemannian manifold `(M, g)` there is a *valence/order-dependent* nonnegative constant
@@ -1183,7 +1250,44 @@ theorem exists_iteratedCovGrad_pointwiseTensorCurv_pointwise_fiberNormSq_bound
           Cic s m ^ 2 * ∑ i ∈ Finset.range (m + 3),
             riemannianFiberNormSq (I := I) (M := M) g 0 (s + i) x
               ((iteratedCovGrad g 0 s i T).toSection x) := by
-  sorry
+  classical
+  obtain ⟨Cgr, hCgr_nn, hsplit⟩ :=
+    exists_iteratedCovGrad_pointwiseTensorCurv_genuineRemainder_fiberNormSq_bound
+      (I := I) (M := M) g
+  refine ⟨fun s m => Real.sqrt 2 * Cgr s m, fun s m => ?_, fun s m T x => ?_⟩
+  · exact mul_nonneg (Real.sqrt_nonneg 2) (hCgr_nn s m)
+  · obtain ⟨Ggen, Grem, heq, hgen, hrem⟩ := hsplit s m T x
+    set FullSum : ℝ := ∑ i ∈ Finset.range (m + 3),
+        riemannianFiberNormSq (I := I) (M := M) g 0 (s + i) x
+          ((iteratedCovGrad g 0 s i T).toSection x) with hFullSum
+    set LowSum : ℝ := ∑ i ∈ Finset.range (m + 2),
+        riemannianFiberNormSq (I := I) (M := M) g 0 (s + i) x
+          ((iteratedCovGrad g 0 s i T).toSection x) with hLowSum
+    have hLowSum_nn : 0 ≤ LowSum :=
+      Finset.sum_nonneg (fun i _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + i) x _)
+    have hTop_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 (s + (m + 2)) x
+        ((iteratedCovGrad g 0 s (m + 2) T).toSection x) :=
+      riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + (m + 2)) x _
+    have hFull_split : FullSum = LowSum +
+        riemannianFiberNormSq (I := I) (M := M) g 0 (s + (m + 2)) x
+          ((iteratedCovGrad g 0 s (m + 2) T).toSection x) := by
+      rw [hFullSum, hLowSum, Finset.sum_range_succ]
+    have hsq2 : (Real.sqrt 2 * Cgr s m) ^ 2 = 2 * Cgr s m ^ 2 := by
+      rw [mul_pow, Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2)]
+    have hCgr_nn' : 0 ≤ Cgr s m := hCgr_nn s m
+    rw [heq, hsq2]
+    have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g 0 (s + 1 + m) x Ggen Grem
+    calc riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + m) x (Ggen + Grem)
+        ≤ 2 * riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + m) x Ggen +
+            2 * riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + m) x Grem := hadd
+      _ ≤ 2 * (Cgr s m ^ 2 * LowSum) +
+            2 * (Cgr s m ^ 2 *
+              riemannianFiberNormSq (I := I) (M := M) g 0 (s + (m + 2)) x
+                ((iteratedCovGrad g 0 s (m + 2) T).toSection x)) := by
+          have e1 := mul_le_mul_of_nonneg_left hgen (by norm_num : (0 : ℝ) ≤ 2)
+          have e2 := mul_le_mul_of_nonneg_left hrem (by norm_num : (0 : ℝ) ≤ 2)
+          linarith
+      _ = 2 * Cgr s m ^ 2 * FullSum := by rw [hFull_split]; ring
 
 /-- **Posited covariant-product curvature primitive: the iterated covariant gradient of the
 single-step commutator defect is `L²`-controlled by the lower iterated gradients of its argument.**

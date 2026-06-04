@@ -123,6 +123,65 @@ theorem flipCcModelFun_toModel_apply (g₀ : SmoothRiemannianMetric I M)
     ((ccTensorBilin (I := I) g₀ T x).flip) v).trans
     (ContinuousLinearMap.flip_apply (ccTensorBilin (I := I) g₀ T x) (v 1) (v 0))
 
+/-- **The slot-swapped fibre value is the `domDomCongr (swap 0 1)` of the underlying
+multilinear field.**  The pointwise model value of the slot-swapped tensor is the
+slot-reindexing (`domDomCongr (Equiv.swap 0 1)`) of the model value of the smooth field
+`ccTensorMultilinear g₀ T`:
+
+  `flipCcModelFun g₀ T x = ofModel (domDomCongr (swap 0 1) (toModel (ccTensorMultilinear g₀ T x)))`.
+
+Proven by `toModel`-injectivity, comparing the swapped bilinear-form evaluation
+(`flipCcModelFun_toModel_apply`) against the reindexed model evaluation
+(`ccTensorBilin_apply`); the argument permutation `fun i => v (swap 0 1 i)` agrees with
+`![v 1, v 0]`. -/
+theorem flipCcModelFun_eq_ofModel_domDomCongr (g₀ : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2) (x : M) :
+    flipCcModelFun (I := I) g₀ T x =
+      Tensor0SSpace.ofModel (x := x) (s := 2)
+        (ContinuousMultilinearMap.domDomCongr (Equiv.swap (0 : Fin 2) 1)
+          (Tensor0SSpace.toModel (ccTensorMultilinear (I := I) g₀ T x))) := by
+  apply Tensor0SSpace.toModel_injective (s := 2) (x := x)
+  apply ContinuousMultilinearMap.ext
+  intro v
+  simp only [Tensor0SSpace.toModel_ofModel, flipCcModelFun_toModel_apply,
+    ContinuousMultilinearMap.domDomCongr_apply]
+  -- Goal: `ccTensorBilin g₀ T x (v 1) (v 0) = ccTensorModel g₀ T x (fun i => v (swap 0 1 i))`.
+  rw [ccTensorBilin_apply]
+  -- Both sides are `ccTensorModel g₀ T x` applied to a tuple; the tuples agree pointwise
+  -- (`swap 0 1 0 = 1`, `swap 0 1 1 = 0`).  `ccTensorModel = toModel ∘ ccTensorMultilinear`.
+  have htuple : (![v 1, v 0] : Fin 2 → E) = (fun i => v (Equiv.swap (0 : Fin 2) 1 i)) := by
+    funext i
+    fin_cases i <;> rfl
+  rw [show ccTensorModel (I := I) g₀ T x =
+      Tensor0SSpace.toModel (ccTensorMultilinear (I := I) g₀ T x) from rfl, htuple]
+
+/-- **The forward trivialization fibre of the slot-swapped tensor is the `domDomCongr` of
+the forward trivialization fibre of `ccTensorMultilinear`.**  For `x` in the base set of the
+tangent-bundle trivialization at `x₀`, the model-fibre coordinate (via the bundle
+trivialization at `x₀`) of `flipCcModelFun g₀ T x` is the slot-swap of the model-fibre
+coordinate of `ccTensorMultilinear g₀ T x`.
+
+The forward multilinear-bundle trivialization precomposes every argument slot with the same
+linear map `e.symmL`; this commutes with the slot reindexing `domDomCongr (swap 0 1)`, so the
+trivialization fibre of the slot swap is the slot swap of the trivialization fibre. -/
+theorem flipCcModelFun_trivializationAt_snd_eq (g₀ : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2) (x₀ x : M) :
+    ((trivializationAt (Tensor0SModel 2 ℝ E)
+          (Bundle.continuousMultilinearMap ℝ 2 E (TangentSpace I)) x₀)
+        ⟨x, flipCcModelFun (I := I) g₀ T x⟩).2 =
+      ContinuousMultilinearMap.domDomCongr (Equiv.swap (0 : Fin 2) 1)
+        ((trivializationAt (Tensor0SModel 2 ℝ E)
+            (Bundle.continuousMultilinearMap ℝ 2 E (TangentSpace I)) x₀)
+          ⟨x, ccTensorMultilinear (I := I) g₀ T x⟩).2 := by
+  rw [flipCcModelFun_eq_ofModel_domDomCongr]
+  apply ContinuousMultilinearMap.ext
+  intro w
+  -- The forward trivialization fibre evaluates a fibre element at `fun i => e.symmL x (w i)`
+  -- (by `rfl`), i.e. it precomposes every slot with the same `e.symmL x`; this commutes with
+  -- the slot reindexing `domDomCongr (swap 0 1)`.  Both sides reduce to
+  -- `(toModel cc) (fun j => e.symmL x (w (swap 0 1 j)))`.
+  rfl
+
 /-- **The slot-swapped `(0,2)`-tensor field.**  The smooth covariant `(0,2)`-tensor field
 (`Tensor0SField ∞ 2`) whose value at `x` is the model image `flipCcModelFun g₀ T x` of the
 fibrewise flip of the bilinear form extracted from `T`.
@@ -130,14 +189,38 @@ fibrewise flip of the bilinear form extracted from `T`.
 Its underlying multilinear field is the slot-reindexing of the already smooth field
 `ccTensorMultilinear g₀ T`: at every base point `x`,
 `toModel (flipCcModelFun g₀ T x) v = toModel (ccTensorMultilinear g₀ T x) ![v 1, v 0]`, i.e.
-the slot-swap `domDomCongr (Equiv.swap 0 1)` of `ccTensorMultilinear g₀ T x`.  Smoothness is
-the bundle-naturality of the model-fibre slot swap (a posited primitive of the realization
-bundle calculus). -/
+the slot-swap `domDomCongr (Equiv.swap 0 1)` of `ccTensorMultilinear g₀ T x`
+(`flipCcModelFun_eq_ofModel_domDomCongr`).  Smoothness is the bundle-naturality of the
+model-fibre slot swap: the trivialized basis coordinates of the swap are a reindexing of
+those of `ccTensorMultilinear g₀ T` (`flipCcModelFun_trivializationAt_snd_eq`), hence smooth
+by the multilinear-bundle smoothness criterion `contMDiff_multilinearSection_iff_coord`. -/
 def flipCcTensorField (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) :
     Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) ∞ 2 :=
   ⟨fun x => flipCcModelFun (I := I) g₀ T x, by
-    sorry⟩
+    classical
+    let d := Module.finrank ℝ E
+    let b : Module.Basis (Fin d) ℝ E := Module.finBasis ℝ E
+    -- Smoothness via the multilinear-bundle coordinate criterion.
+    refine (contMDiff_multilinearSection_iff_coord (𝕜 := ℝ) (F := E)
+      (E := (TangentSpace I : M → Type _)) (IB := I) (n := (∞ : WithTop ℕ∞)) b
+      (fun x => (flipCcModelFun (I := I) g₀ T x : Tensor0SSpace 2 I x))).mpr ?_
+    -- The coordinate of the slot-swap at `τ` is the coordinate of `ccTensorMultilinear`
+    -- at the reindexed `τ ∘ swap`, supplied by the (smooth) underlying field.
+    have hcc := (contMDiff_multilinearSection_iff_coord (𝕜 := ℝ) (F := E)
+      (E := (TangentSpace I : M → Type _)) (IB := I) (n := (∞ : WithTop ℕ∞)) b
+      (fun x => (ccTensorMultilinear (I := I) g₀ T x : Tensor0SSpace 2 I x))).mp
+      (ccTensorMultilinear (I := I) g₀ T).contMDiff
+    intro τ x₀
+    refine (hcc (τ ∘ Equiv.swap (0 : Fin 2) 1) x₀).congr_of_eventuallyEq ?_
+    have hbase := (trivializationAt (Tensor0SModel 2 ℝ E)
+      (Bundle.continuousMultilinearMap ℝ 2 E (TangentSpace I)) x₀).open_baseSet.mem_nhds
+      (mem_baseSet_trivializationAt _ _ x₀)
+    filter_upwards [hbase] with x _
+    rw [flipCcModelFun_trivializationAt_snd_eq (I := I) g₀ T x₀ x]
+    rw [continuousMultilinearMap_basis_repr, continuousMultilinearMap_basis_repr,
+      ContinuousMultilinearMap.domDomCongr_apply]
+    rfl⟩
 
 @[simp] theorem flipCcTensorField_toModel_apply (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
