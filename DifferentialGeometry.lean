@@ -1093,6 +1093,7 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartMetric
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartSmooth
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartTorsion
+import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaLogDensity
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LinearExtensionTangent
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LocalFrameHessian
 import DifferentialGeometry.Geometry.Connection.LeviCivita.MetricCompatible
