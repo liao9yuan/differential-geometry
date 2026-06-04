@@ -1086,6 +1086,7 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.ChristoffelCorrection
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.LeviCivita
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.Realized
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
+import DifferentialGeometry.Geometry.Connection.LeviCivita.DivergenceFrameInvariance
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Hessian
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Koszul
 import DifferentialGeometry.Geometry.Connection.LeviCivita.KoszulFormula
