@@ -1276,6 +1276,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHSSection
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckShortTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckSolutionC1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckVFTimeFamily
+import DifferentialGeometry.Geometry.Flow.RicciFlow.DimensionThree.HamiltonPositiveRicci
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.Defs
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.ChartTrace
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.ConnectionTrace
@@ -1348,6 +1349,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.Limit
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.TensorBackedReaction
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ParabolicRescaling
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.Noncollapsing
 import DifferentialGeometry.Geometry.Flow.RicciFlow.PrincipalSymbol
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.Cancellation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationForm
