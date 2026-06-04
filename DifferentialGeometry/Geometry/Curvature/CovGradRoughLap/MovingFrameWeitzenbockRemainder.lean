@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorBochner
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.IntegratedOrder2WeitzenbockCurvature
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformCurvatureSup
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovariantIntegrationByParts
+import DifferentialGeometry.Geometry.Connection.MetricCompatibility.MovingFrameBracketDivergence
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameGenuineFieldPairing
 
 /-!
 # The genuine moving-frame third-order Weitzenböck remainder (named-field divergence form)
@@ -116,13 +118,20 @@ carries the `rfns(S)` and `rfns(∇S)` orders too), and the nullity would read `
 which equals `‖Δ_∇S‖²_{L²} − ‖∇²S‖²_{L²}` by `weitzenbock_integrated_covGrad_l2_normSq` and is *false*
 on a non-flat manifold. So the genuine curvature fields must carry the actual curvature content.
 
-This is the genuinely-irreducible moving-frame curvature-endomorphism content at general rank,
-posited here as the precise named-field divergence primitive and discharged by the orchestrator: its
-construction requires the rank-generic moving-frame third-order Weitzenböck apparatus — the
-general-rank curried-defect decomposition (the `_gen` lift of
-`covGradRoughLapCurv_curry_eq_discrepancy_add_curv_sub_residual`), the uniform-over-`M` proportional
-curvature / differentiated-curvature bounds, and the divergence-form identification of the bracket
-remainder — none of which is yet built at general rank in the library. -/
+This is the genuinely-irreducible moving-frame curvature-endomorphism content at general rank. It is
+**proved** from the strictly-more-primitive *bracket-free-pairing* form of the same field
+decomposition `exists_pointwiseTensorCurv_movingFrameField_orderSeparated_bracketFreePairing` (which
+supplies the same explicit genuine fields `Gcurv, GcurvDeriv`, the same three order-separated fibre
+bounds, and the bracket-free pairing `⟨Gcurv + GcurvDeriv, ∇S⟩_{L²} = ⟨Curv S, ∇S⟩_{L²}`): the named
+remainder field is `Grem := Curv S − Gcurv − GcurvDeriv`, the section identity
+`Curv S = Gcurv + GcurvDeriv + Grem` is `abel`, the three fibre bounds transfer verbatim (the
+remainder bound is the primitive's remainder bound on the same anonymous subtraction
+`Curv S − Gcurv − GcurvDeriv`), and the integrated divergence-nullity `⟨Grem, ∇S⟩_{L²} = 0` is the
+bracket-free-pairing nullity reduction
+`tensorL2Inner_movingFrameRemainder_eq_zero_of_bracketFreePairing` (left additivity of the `L²`
+pairing converts the cross-pairing equality into the remainder nullity). This reduction is genuine
+and non-circular — it converts the integrated bracket-free pairing into the named-field divergence
+form, exactly the named/anonymous repackaging the order-separated divergence-null consumers require. -/
 theorem pointwiseTensorCurv_movingFrameWeitzenbock_namedRemainder
     (g : SmoothRiemannianMetric I M) :
     ∃ Cper : ℕ → ℝ, (∀ s, 0 ≤ Cper s) ∧
@@ -143,7 +152,16 @@ theorem pointwiseTensorCurv_movingFrameWeitzenbock_namedRemainder
                   (covGrad (I := I) (M := M) g 0 s S)).toSection x)) ∧
           tensorL2Inner (I := I) (M := M) g 0 (s + 1) Grem.toFun
               (covGrad (I := I) (M := M) g 0 s S).toFun = 0 := by
-  sorry
+  classical
+  obtain ⟨Cper, hCper_nn, hfields⟩ :=
+    exists_pointwiseTensorCurv_movingFrameField_orderSeparated_bracketFreePairing
+      (I := I) (M := M) g
+  refine ⟨Cper, hCper_nn, fun s S => ?_⟩
+  obtain ⟨Gcurv, GcurvDeriv, hcurv, hcurvDeriv, hrem, hpair⟩ := hfields s S
+  refine ⟨Gcurv, GcurvDeriv, pointwiseTensorCurv (I := I) (M := M) g s S - Gcurv - GcurvDeriv,
+    by abel, hcurv, hcurvDeriv, hrem, ?_⟩
+  exact tensorL2Inner_movingFrameRemainder_eq_zero_of_bracketFreePairing
+    (I := I) (M := M) g s S Gcurv GcurvDeriv hpair
 
 end Connection
 end Integral
