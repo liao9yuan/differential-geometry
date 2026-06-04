@@ -13,9 +13,9 @@ set_option linter.unusedSectionVars false
 /-!
 # Ricci Identity Bridge for Realized Connections
 
-This file exposes the RicciFlower-facing one-form Ricci identity through the
-project's realized tensor predicates.  The proof route stays inside
-`RicciFlower`; do not import the external geometry namespace here.
+This file exposes the one-form Ricci identity through the
+project's realized tensor predicates.  The proof route stays inside the
+project's own algebraic layer; do not import the external geometry namespace here.
 -/
 
 noncomputable section
@@ -37,7 +37,7 @@ variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 /-- Raw dual-connection evaluation used by the algebraic one-form Ricci
 identity.
 
-This is the RicciFlower-local algebraic replacement for the external
+This is the local algebraic replacement for the external
 `nabla_dual` calculation: no smooth-section or synthetic realization API is
 involved here. -/
 def nablaDualEval {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
@@ -76,7 +76,7 @@ theorem oneFormRicciIdentity_algebra
   simp only [map_sub]
   abel
 
-/-- Connection-generic one-form Ricci identity in RicciFlower's public tensor
+/-- Connection-generic one-form Ricci identity in the project's public tensor
 interface.
 
 The proof currently routes through the coordinate Christoffel curvature layer:

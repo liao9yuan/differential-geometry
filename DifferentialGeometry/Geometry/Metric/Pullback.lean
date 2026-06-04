@@ -1,6 +1,6 @@
 /-
 Pullback of a smooth Riemannian metric along a diffeomorphism, in
-RicciFlower-native form.
+native form.
 
 The construction is cross-manifold at the base level: it pulls a metric on `N`
 back to `M` along a diffeomorphism `Φ : M ≃ₘ⟮I,I⟯ N` between two manifolds on the

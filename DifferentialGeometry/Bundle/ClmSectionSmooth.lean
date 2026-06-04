@@ -5,7 +5,7 @@ Migrated (not imported) from
 The "missing adjoint" of `ContMDiff.clm_bundle_apply`: pointwise smoothness of a
 CLM-bundle-valued section on every smooth tangent section lifts to total-space
 smoothness of the corresponding Hom-bundle operator section. This is the
-RicciFlower-native form used by the diffeomorphism pullback-metric construction.
+native form used by the diffeomorphism pullback-metric construction.
 -/
 import DifferentialGeometry.Bundle.Equiv
 import Mathlib.Topology.VectorBundle.Basic

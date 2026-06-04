@@ -1476,7 +1476,7 @@ private theorem sum4_kjli
   rw [Fintype.sum_prod_type]
 
 /-- Pure finite-sum contraction of the second Bianchi identity in the
-RicciFlower lowered-curvature convention.  This is the algebraic core of the
+lowered-curvature convention.  This is the algebraic core of the
 contracted second Bianchi producer. -/
 theorem contractSum
     {Idx : Type*} [Fintype Idx]

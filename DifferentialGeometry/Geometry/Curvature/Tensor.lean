@@ -186,7 +186,7 @@ def tensor04StdAt {x : M} (Rm04 : Tensor04At (I := I) (M := M) x)
 /-- Output-first compatibility evaluation for a lowered Riemann four-tensor:
 `Rm04Out(W,X,Y,Z) = Rm04(X,Y,Z,W)`.
 
-This is the old RicciFlower slot order kept explicit during the convention
+This is the old slot order kept explicit during the convention
 migration. -/
 def tensor04OutAt {x : M} (Rm04 : Tensor04At (I := I) (M := M) x)
     (W X Y Z : TangentSpace I x) : Real :=

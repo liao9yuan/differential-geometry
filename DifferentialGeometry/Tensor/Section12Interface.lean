@@ -229,7 +229,7 @@ def CubicReactionIdentity
 
 The vendored tensor stack already proves that multilinear bundles compose
 correctly under tensor product.  The wrapper below gives the result a short
-RicciFlower-facing name for future consumers.
+name for future consumers.
 -/
 
 namespace MultilinearBundle
@@ -249,7 +249,7 @@ variable {n : WithTop ℕ∞} [ContMDiffVectorBundle n F E IB]
 /-- The `(s+q)` covariant multilinear bundle is `C^n`-equivalent to the tensor
 product of the `s`- and `q`-covariant multilinear bundles.
 
-This is a short RicciFlower-facing alias for
+This is a short alias for
 `MultilinearSection.multilinearBundle_tensorProduct_equiv`.  Its inferred type
 is a `ContMDiffVectorBundleEquiv`; leaving the type inferred avoids re-solving
 the heavy model-fiber typeclass search at every import site. -/

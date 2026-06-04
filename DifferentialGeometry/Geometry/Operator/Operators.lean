@@ -17,7 +17,7 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
 /-!
-# RicciFlower Realized Scalar Operators
+# Realized Scalar Operators
 
 This file defines the pointwise realized gradient, divergence, and Laplacian
 directly from mathlib manifold primitives. It deliberately does not import the

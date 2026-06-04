@@ -10,7 +10,7 @@ set_option linter.unusedSectionVars false
 /-!
 # Pullback naturality for metric curvature
 
-This file develops the native RicciFlower API needed to transport the metric
+This file develops the native API needed to transport the metric
 Riemann tensor along a diffeomorphism.
 -/
 

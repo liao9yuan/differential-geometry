@@ -46,7 +46,7 @@ noncomputable abbrev vderiv
 commutator of the vector-field action:
 `[X,Y] f = X (Y f) - Y (X f)`.
 
-This is the local RicciFlower form of the standard chart-transfer identity
+This is the local form of the standard chart-transfer identity
 `VectorField.fderivWithin_apply_lieBracket`. -/
 set_option maxHeartbeats 250000 in
 set_option backward.isDefEq.respectTransparency false in

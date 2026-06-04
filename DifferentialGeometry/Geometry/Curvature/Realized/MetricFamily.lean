@@ -20,7 +20,7 @@ set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 /-!
-# RicciFlower Realized Metric Families
+# Realized Metric Families
 
 The realized V2 core stores the geometric objects: a time-indexed Riemannian
 metric, a time-indexed mathlib covariant derivative on the tangent bundle, and

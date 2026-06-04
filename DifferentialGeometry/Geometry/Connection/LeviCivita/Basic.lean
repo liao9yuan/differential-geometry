@@ -10,7 +10,7 @@ set_option linter.unusedSectionVars false
 /-!
 # Levi-Civita Calculus Predicates
 
-This file gives RicciFlower-facing predicates for torsion-freeness and
+This file gives predicates for torsion-freeness and
 Levi-Civita calculus.  Metric compatibility is part of the general connection
 layer, with compatibility aliases kept here for Levi-Civita-facing imports.
 -/

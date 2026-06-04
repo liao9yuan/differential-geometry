@@ -31,7 +31,7 @@ set_option linter.unusedDecidableInType false
 /-!
 # Scalar Bochner Formula
 
-This file contains the RicciFlower-facing scalar Bochner endpoint.  The fully
+This file contains the scalar Bochner endpoint.  The fully
 geometric work is split into named realized frontier hypotheses:
 
 * the one-form norm product rule;

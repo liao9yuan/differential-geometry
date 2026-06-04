@@ -3,7 +3,7 @@ import Mathlib.Tactic
 /-!
 # Three-dimensional curvature algebra
 
-This file contains native `RicciFlower` component algebra for the
+This file contains native component algebra for the
 three-dimensional identity expressing the algebraic curvature tensor in terms
 of Ricci and scalar curvature.
 
@@ -13,7 +13,7 @@ The component theorem below is intentionally stated for an abstract
 feed this layer without changing the finite algebra.
 
 The standard component convention in this file is the usual algebraic one:
-`R i j k l = g (R(e_i,e_j)e_k, e_l)`.  RicciFlower's bundled lowered
+`R i j k l = g (R(e_i,e_j)e_k, e_l)`.  The project's bundled lowered
 curvature field now uses the same standard slot order
 `Rm04(X,Y,Z,W) = <R(X,Y)Z,W>`, so component producers can feed this layer
 without an output-first slot permutation.

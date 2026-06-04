@@ -10,7 +10,7 @@ set_option linter.unusedSectionVars false
 
 The difference of two tangent-bundle covariant derivatives is tensorial.  This
 file packages Mathlib's pointwise `CovariantDerivative.difference` as a
-RicciFlower mixed `(1,2)` tensor and records its basis components.
+mixed `(1,2)` tensor and records its basis components.
 
 This is the invariant object behind the MSM135 shorthand
 `nabla - nabla_k = Gamma - Gamma_k`.

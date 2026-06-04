@@ -5,9 +5,9 @@ import DifferentialGeometry.Geometry.Metric.Basic
 set_option autoImplicit false
 
 /-!
-# RicciFlower metrics
+# Smooth Riemannian Metric Alias
 
-This file contains the RicciFlower-facing alias for smooth Riemannian metrics.
+This file contains the alias for smooth Riemannian metrics.
 It is not a realized object; realized metric families import this definition.
 -/
 

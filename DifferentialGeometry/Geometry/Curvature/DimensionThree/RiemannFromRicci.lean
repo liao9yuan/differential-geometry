@@ -20,7 +20,7 @@ set_option linter.unusedSectionVars false
 This file connects the checked `Fin 3` algebra in
 `DifferentialGeometry.Integral.Connection.CurvatureAlgebra` to realized pointwise curvature components.
 
-The bridge is intentionally explicit about conventions.  RicciFlower's lowered
+The bridge is intentionally explicit about conventions.  The lowered
 curvature convention is the standard component convention
 `Rm04(X,Y,Z,W) = <R(X,Y)Z,W>`, matching the algebraic convention
 `R i j k l = g(R(e_i,e_j)e_k,e_l)`.
@@ -46,7 +46,7 @@ def OrthonormalBasisAt
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x)) : Prop :=
   forall i j : Fin 3, g.inner x (basis i) (basis j) = delta3 i j
 
-/-- Standard algebraic curvature components read directly from RicciFlower's
+/-- Standard algebraic curvature components read directly from the
 standard lowered curvature convention. -/
 def standardRmCompAt
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -559,7 +559,7 @@ structure RiemannFromRicci3DTraceDataAt
 /-- The convention-correct first trace of `Rm04` is the negative of the
 displayed-slot Ricci contraction used by `stdRicci3`.
 
-This is the sign bridge between RicciFlower's intrinsic convention
+This is the sign bridge between the intrinsic convention
 `Ric(Y,Z) = tr (X |-> R(X,Y)Z)` and the displayed component convention used in
 the 3D finite algebra file. -/
 theorem firstTrace_delta3_eq_neg_stdRicci3
@@ -604,7 +604,7 @@ theorem firstTrace_delta3_eq_neg_stdRicci3
   simp [standardRmCompAt_apply, rm04CompAt_apply]
   ring
 
-/-- Produce the displayed-slot 3D trace-data package from RicciFlower's
+/-- Produce the displayed-slot 3D trace-data package from the
 convention-correct first trace.
 
 Because `RiemannFromRicci3DTraceDataAt` is stated for the displayed-slot
@@ -759,7 +759,7 @@ theorem rm04_einstein3_at
 
 /-- First-trace version of the three-dimensional Einstein space-form bridge.
 
-This consumes RicciFlower's geometric first-trace realization.  Because
+This consumes the geometric first-trace realization.  Because
 `traceDataOfFirst` converts geometric Ricci/scalar to the displayed algebraic
 trace data with a minus sign, this theorem is the sign audit needed before
 Hamilton's Section 12 endpoint can use the space-form formula. -/

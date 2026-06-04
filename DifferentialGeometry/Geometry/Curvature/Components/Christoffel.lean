@@ -79,7 +79,7 @@ def christoffelCurvCoeffAt
 /-- Coordinate Ricci coefficient obtained by tracing the output of
 `R(∂ₖ, ∂ᵢ) ∂ⱼ` against the first input.
 
-With RicciFlower's convention this is the coordinate trace
+With the present convention this is the coordinate trace
 `Ricᵢⱼ = ∑ₖ Rᵏ{}_{j k i}`. This is the first-input trace compatible with
 `ricciFromRm13At`; alternate displays that use `R(∂ₖ, ∂ⱼ) ∂ᵢ` have the last two
 Ricci slots swapped before any Levi-Civita symmetry is applied. -/
@@ -89,7 +89,7 @@ def christoffelRicciCoeffAt
   ∑ k : CoordinateIdx (𝕜 := Real) E,
     christoffelCurvCoeffAt (I := I) cov x₀ k i j k
 
-/-- Expanded local-coordinate Ricci formula in RicciFlower's curvature
+/-- Expanded local-coordinate Ricci formula in the curvature
 convention.
 
 This is the trace of the coordinate curvature formula for `R(∂ₖ, ∂ᵢ) ∂ⱼ`:

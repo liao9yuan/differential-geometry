@@ -14,7 +14,7 @@ set_option linter.unusedSectionVars false
 open scoped Topology
 
 /-!
-# Real Time Intervals for RicciFlower
+# Real Time Intervals
 
 Ricci-flow solutions live over concrete real time domains.  The carrier records
 where the metric exists, while `regular` records the interior times where

@@ -536,7 +536,7 @@ private theorem derivShuffleLeft_expanded_summand_eq
 The fully general vector-valued precomposition identities for `wedge_productL` are
 intentionally not stated here. A direct quotient-shuffle proof would have to transport
 individual summands through `Equiv.Perm.ModSumCongr`, but those summands depend on
-representatives. For the RicciFlower tensor-calculus use case we instead use the
+representatives. For the tensor-calculus use case we instead use the
 finite-rank route above: expand form-valued linear maps into elementary covectors and
 reduce the computation to determinant identities such as
 `uncurryFin_smulRight_elementaryCovector`.

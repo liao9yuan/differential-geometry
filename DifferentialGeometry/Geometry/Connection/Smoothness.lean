@@ -5,7 +5,7 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
 /-!
-# RicciFlower Connection Smoothness
+# Connection Smoothness
 
 Connection smoothness is exposed as a predicate around realized metric-family
 data. Metric compatibility, torsion freedom, and Levi-Civita predicates live in

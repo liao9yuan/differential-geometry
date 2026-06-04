@@ -14,7 +14,7 @@ set_option linter.unusedSectionVars false
 /-!
 # Koszul Formula for the Levi-Civita Connection
 
-This file starts the native RicciFlower construction route for the
+This file starts the native construction route for the
 Levi-Civita connection from a smooth Riemannian metric.
 
 The implemented layer is intentionally conservative and follows the

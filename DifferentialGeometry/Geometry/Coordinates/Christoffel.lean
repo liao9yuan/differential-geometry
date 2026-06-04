@@ -12,7 +12,7 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
 /-!
-# RicciFlower Christoffel Symbols in a Local Frame
+# Christoffel Symbols in a Local Frame
 
 Mathlib's bundled covariant derivative has argument order
 `cov sigma x v = (nabla_v sigma)(x)`. Given a local frame `frame i`, the

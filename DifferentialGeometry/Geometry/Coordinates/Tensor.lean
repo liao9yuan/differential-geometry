@@ -9,7 +9,7 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
 /-!
-# RicciFlower Local-Frame Tensor Components
+# Local-Frame Tensor Components
 
 This file evaluates realized tensor fibers against mathlib local frames.  The
 legacy component API evaluates directly on frame fields.  The preferred

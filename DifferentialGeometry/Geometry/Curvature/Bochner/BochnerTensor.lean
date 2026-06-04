@@ -16,7 +16,7 @@ set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 /-!
-# RicciFlower Coordinate Bochner Formulae
+# Coordinate Bochner Formulae
 
 This file contains the coordinate-facing Bochner consumers needed for the
 Ricci-norm evolution calculation.

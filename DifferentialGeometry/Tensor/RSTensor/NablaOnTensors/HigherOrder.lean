@@ -815,7 +815,7 @@ theorem nabla0SFun_sub_cov_two
 
 /-- The directional covariant derivative of covariant tensor fields is
 additive in the tensor argument.  This Real-specialized form matches the
-smooth-section extension API used throughout the RicciFlower geometry layer. -/
+smooth-section extension API used throughout the geometry layer. -/
 theorem nabla0SFun_add [T2Space M] {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))

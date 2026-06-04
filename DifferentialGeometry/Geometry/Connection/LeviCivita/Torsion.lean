@@ -10,7 +10,7 @@ set_option linter.unusedSectionVars false
 /-!
 # Torsion-Free Calculus
 
-Concrete consequences of mathlib's torsion tensor for RicciFlower
+Concrete consequences of mathlib's torsion tensor for
 Levi-Civita packages.
 -/
 
@@ -399,7 +399,7 @@ theorem leviCivitaConnectionOfMetric_isTorsionFree
   simp [B, coordinateFrameAt_toBasis_apply,
     leviCivitaConnectionOfMetric_coordinate_torsion_basis_zero]
 
-/-- The Koszul-constructed connection satisfies the RicciFlower Levi-Civita
+/-- The Koszul-constructed connection satisfies the Levi-Civita
 predicate. -/
 theorem leviCivitaConnectionOfMetric_isLeviCivita
     (g : SmoothRiemannianMetric I M) :
