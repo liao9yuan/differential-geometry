@@ -1,4 +1,5 @@
 -- Modified 2026-04-28: updated internal import paths for project namespace
+-- Modified 2026-05-16: style-warning cleanup
 import DifferentialGeometry.External.DeGiorgi.BallScaling
 import DifferentialGeometry.External.DeGiorgi.BallExtension
 import DifferentialGeometry.External.DeGiorgi.PositivePart
@@ -136,8 +137,9 @@ private noncomputable def affineMeasurableEmbedding
   ((MeasurableEquiv.addLeft x₀).measurableEmbedding).comp
     ((Homeomorph.smulOfNeZero R hR.ne').toMeasurableEquiv.measurableEmbedding)
 
-omit [NeZero d] in
 set_option maxHeartbeats 5000000 in
+-- essSup rescaling: pushforward measure equality plus essSup-as-sInf manipulation
+omit [NeZero d] in
 theorem essSup_rescale_halfBall
     {x₀ : E} {R : ℝ} (hR : 0 < R) {u : E → ℝ} :
     essSup (fun z : E => u (x₀ + R • z))
@@ -174,8 +176,9 @@ theorem essSup_rescale_halfBall
   ext a
   simpa [μsrc, μdst, T, ae_iff, not_le] using hiff a
 
-omit [NeZero d] in
 set_option maxHeartbeats 5000000 in
+-- essInf rescaling: pushforward measure equality plus essInf-as-sSup manipulation
+omit [NeZero d] in
 theorem essInf_rescale_halfBall
     {x₀ : E} {R : ℝ} (hR : 0 < R) {u : E → ℝ} :
     essInf (fun z : E => u (x₀ + R • z))

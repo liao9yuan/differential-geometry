@@ -21,8 +21,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Auxiliary: bound on continuous compactly-supported functions -/
-
 omit [NeZero d] in
 /-- A continuous compactly-supported real-valued function on `E` admits a
 nonneg sup-norm bound. -/
@@ -32,8 +30,6 @@ lemma exists_norm_bound_of_continuous_compactSupport
   rcases hη_cont.bounded_above_of_compact_support hη_compact with ⟨C, hC⟩
   refine ⟨max C 0, le_max_right _ _, fun y => ?_⟩
   exact (hC y).trans (le_max_left _ _)
-
-/-! ## Lipschitz constant for `C¹` functions with compact support -/
 
 omit [NeZero d] in
 /-- A `C¹` function with compact support on `E` is Lipschitz. -/
@@ -59,8 +55,6 @@ lemma lipschitz_of_contDiff_compactSupport
   rw [show ‖η x - η y‖ = dist (η x) (η y) from (Real.dist_eq _ _).symm,
     show ‖x - y‖ = dist x y from (dist_eq_norm _ _).symm]
   exact hdist
-
-/-! ## Convolution sup-norm bound -/
 
 omit [NeZero d] in
 /-- Translated kernel is measure-preserving: `t ↦ z - t` preserves `volume`. -/
@@ -90,7 +84,6 @@ theorem convolution_sup_le_holder
   have hη_meas_sub :
       AEStronglyMeasurable (fun t : E => η (x - t)) volume :=
     hη_meas.comp_measurePreserving (measurePreserving_constSub (d := d) x)
-  -- Pointwise bound on the integrand.
   have hpt : ∀ t : E, ‖f t • η (x - t)‖ ≤ M * ‖f t‖ := by
     intro t
     rw [norm_smul, mul_comm M ‖f t‖]
@@ -102,7 +95,6 @@ theorem convolution_sup_le_holder
     · exact hf_int.aestronglyMeasurable.smul hη_meas_sub
     · filter_upwards with t
       exact hpt t
-  -- Bound the convolution.
   have hconv_eq :
       (f ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] η) x =
         ∫ t, f t • η (x - t) ∂volume := by
@@ -118,8 +110,6 @@ theorem convolution_sup_le_holder
   refine hint_pt.trans ?_
   rw [integral_const_mul]
 
-/-! ## Continuity of `f ⋆ η` -/
-
 omit [NeZero d] in
 /-- Continuity of `f ⋆ η` when `f` is locally integrable and `η` is
 continuous and compactly supported. -/
@@ -130,8 +120,6 @@ theorem convolution_continuous_of_compact_support
     Continuous (f ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] η : E → ℝ) :=
   hη_compact.continuous_convolution_right
     (L := ContinuousLinearMap.lsmul ℝ ℝ) hf_loc hη_cont
-
-/-! ## Convolution Lipschitz bound -/
 
 omit [NeZero d] in
 /-- Lipschitz-type bound for the convolution: if `f` is integrable, `η`
@@ -171,7 +159,6 @@ theorem convolution_lipschitz_with
     intro z
     simp [MeasureTheory.convolution_def, ContinuousLinearMap.lsmul_apply]
   rw [hconv_eq x, hconv_eq y, ← integral_sub (hint_smul x) (hint_smul y)]
-  -- Pointwise bound on the integrand.
   have hpt : ∀ t : E,
       ‖f t • η (x - t) - f t • η (y - t)‖ ≤ L * ‖x - y‖ * ‖f t‖ := by
     intro t
@@ -190,7 +177,6 @@ theorem convolution_lipschitz_with
       Integrable (fun t : E =>
         f t • η (x - t) - f t • η (y - t)) volume :=
     (hint_smul x).sub (hint_smul y)
-  -- Bound integral norm.
   refine (norm_integral_le_integral_norm _).trans ?_
   have hint_pt :
       ∫ t, ‖f t • η (x - t) - f t • η (y - t)‖ ∂volume ≤
@@ -200,7 +186,6 @@ theorem convolution_lipschitz_with
     filter_upwards with t using hpt t
   refine hint_pt.trans ?_
   rw [integral_const_mul]
-  -- L * ‖x - y‖ * ∫ ‖f‖ ≤ L * ∫ ‖f‖ * ‖x - y‖
   rw [mul_assoc L ‖x - y‖ _, mul_comm ‖x - y‖ _, ← mul_assoc]
 
 end DifferentialGeometry.Analysis.Sobolev

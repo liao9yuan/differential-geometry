@@ -48,17 +48,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Smooth-case localized Fréchet–Kolmogorov bound (lintegral form)
-
-For a `C¹` function `v` on `ℝ^d` and a precompact open `Ω''` whose
-`h₀`-thickening of the closure is contained in `Ω'` (with `Ω'` measurable),
-the lintegral of the squared forward difference quotient on `Ω''` is dominated
-by the lintegral of the squared partial derivative on `Ω'`, uniformly for
-`0 < |h| ≤ h₀`.
-
-The proof is by Jensen on `Set.Ioc 0 1` plus Fubini plus translation invariance.
--/
-
 omit [NeZero d] in
 /-- For a `C¹` function `v` and an admissible displacement, the lintegral of
 the squared difference quotient on `Ω''` is bounded by the lintegral of the
@@ -78,12 +67,10 @@ private lemma lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv_loc
       ∂(volume : Measure EuclN) := by
   classical
   set e : EuclN := EuclideanSpace.single k (1 : ℝ) with he
-  -- Continuity / measurability of the partial derivative.
   have hfd_cont : Continuous (fun y : EuclN => fderiv ℝ v y) :=
     hv.continuous_fderiv one_ne_zero
   have h_partial_cont : Continuous (fun y : EuclN => (fderiv ℝ v y) e) :=
     hfd_cont.clm_apply continuous_const
-  -- Set FF := the enorm squared.
   set FF : EuclN → ℝ≥0∞ := fun y =>
     (‖(fderiv ℝ v y) e‖ₑ : ℝ≥0∞) ^ 2 with hFF_def
   have hFF_meas : Measurable FF := by
@@ -91,25 +78,21 @@ private lemma lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv_loc
     exact h_partial_cont.measurable.enorm.pow_const 2
   have hFF_indicator_meas : Measurable (Ω'.indicator FF) :=
     hFF_meas.indicator hΩ'
-  -- For x ∈ Ω'', the squared diffQuot is bounded by the lintegral over s ∈ (0,1].
   have hPoint_lint : ∀ x ∈ Ω'',
       (‖diffQuot k h v x‖ₑ : ℝ≥0∞) ^ 2 ≤
         ∫⁻ s in Set.Ioc (0 : ℝ) 1,
           Ω'.indicator FF (x + (s * h) • e) := by
     intro x hx
-    -- Real Jensen pointwise bound.
     have hreal :
         (diffQuot k h v x) ^ 2 ≤
           ∫ s in Set.Ioc (0 : ℝ) 1,
             ((fderiv ℝ v (x + (s * h) • e)) e) ^ 2 :=
       sq_diffQuot_le_integral_sq_partialDeriv (d := d) hv k hh x
-    -- LHS in ENNReal form.
     have hLHS_eq :
         (‖diffQuot k h v x‖ₑ : ℝ≥0∞) ^ 2 =
           ENNReal.ofReal ((diffQuot k h v x) ^ 2) := by
       rw [Real.enorm_eq_ofReal_abs, ← ENNReal.ofReal_pow (abs_nonneg _) 2,
         sq_abs]
-    -- For s ∈ Ioc 0 1, the integrand equals `Ω'.indicator FF`.
     have hgam_cont : Continuous (fun s : ℝ => x + (s * h) • e) :=
       continuous_const.add
         ((continuous_id.mul continuous_const).smul continuous_const)
@@ -121,7 +104,6 @@ private lemma lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv_loc
           ((fderiv ℝ v (x + (s * h) • e)) e) ^ 2) :=
         ((h_partial_cont.comp hgam_cont)).pow 2
       exact h_bd_cont.integrableOn_Ioc (a := 0) (b := 1)
-    -- Convert real integral to lintegral.
     have h_real_to_lint :
         ENNReal.ofReal (∫ s in Set.Ioc (0 : ℝ) 1,
           ((fderiv ℝ v (x + (s * h) • e)) e) ^ 2) =
@@ -133,7 +115,6 @@ private lemma lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv_loc
       filter_upwards with s
       rw [Real.enorm_eq_ofReal_abs, ← ENNReal.ofReal_pow (abs_nonneg _) 2,
         sq_abs]
-    -- For s in Ioc 0 1, x + s h e ∈ Ω', so the indicator is just FF.
     have h_indicator_eq :
         ∫⁻ s in Set.Ioc (0 : ℝ) 1,
           (‖((fderiv ℝ v (x + (s * h) • e)) e)‖ₑ : ℝ≥0∞) ^ 2 =
@@ -145,7 +126,6 @@ private lemma lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv_loc
       intro s hs
       have hin : x + (s * h) • e ∈ Ω' := h_admissible x hx s hs
       simp only [Set.indicator_of_mem hin, hFF_def]
-    -- Combine.
     calc (‖diffQuot k h v x‖ₑ : ℝ≥0∞) ^ 2
         = ENNReal.ofReal ((diffQuot k h v x) ^ 2) := hLHS_eq
       _ ≤ ENNReal.ofReal (∫ s in Set.Ioc (0 : ℝ) 1,
@@ -156,7 +136,6 @@ private lemma lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv_loc
             h_real_to_lint
       _ = ∫⁻ s in Set.Ioc (0 : ℝ) 1,
             Ω'.indicator FF (x + (s * h) • e) := h_indicator_eq
-  -- Step 1: Integrate the pointwise bound over Ω''.
   have h_step1 :
       ∫⁻ x in Ω'', (‖diffQuot k h v x‖ₑ : ℝ≥0∞) ^ 2
         ∂(volume : Measure EuclN) ≤
@@ -169,7 +148,6 @@ private lemma lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv_loc
     refine Filter.Eventually.of_forall ?_
     intro x hx
     exact hPoint_lint x hx
-  -- Step 2: Extend the outer integral from Ω'' to all of EuclN.
   have h_step2 :
       ∫⁻ x in Ω'',
           (∫⁻ s in Set.Ioc (0 : ℝ) 1,
@@ -180,7 +158,6 @@ private lemma lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv_loc
             Ω'.indicator FF (x + (s * h) • e))
           ∂(volume : Measure EuclN) :=
     lintegral_mono' Measure.restrict_le_self (le_refl _)
-  -- Step 3: Swap the order of integration via Tonelli.
   have h_pair_meas : Measurable (fun p : EuclN × ℝ =>
       Ω'.indicator FF (p.1 + (p.2 * h) • e)) := by
     have hpt : Measurable (fun p : EuclN × ℝ => p.1 + (p.2 * h) • e) := by
@@ -209,7 +186,6 @@ private lemma lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv_loc
               (Function.uncurry (fun (x : EuclN) (s : ℝ) =>
                 Ω'.indicator FF (x + (s * h) • e))) (x, s))
     exact lintegral_lintegral_swap h_pair_meas.aemeasurable
-  -- Step 4: Translation invariance.
   have h_trans : ∀ s : ℝ,
       ∫⁻ x : EuclN, Ω'.indicator FF (x + (s * h) • e)
           ∂(volume : Measure EuclN) =
@@ -219,7 +195,6 @@ private lemma lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv_loc
         (volume : Measure EuclN) (volume : Measure EuclN) :=
       measurePreserving_add_right (volume : Measure EuclN) _
     exact hMP.lintegral_comp hFF_indicator_meas
-  -- Step 5: Combine.
   have h_inner_const : (fun s : ℝ =>
         ∫⁻ x : EuclN, Ω'.indicator FF (x + (s * h) • e)
           ∂(volume : Measure EuclN)) =
@@ -241,7 +216,6 @@ private lemma lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv_loc
       ∫⁻ y : EuclN, Ω'.indicator FF y ∂(volume : Measure EuclN) =
         ∫⁻ y in Ω', FF y ∂(volume : Measure EuclN) := by
     rw [lintegral_indicator hΩ']
-  -- Final calc.
   calc ∫⁻ x in Ω'', (‖diffQuot k h v x‖ₑ : ℝ≥0∞) ^ 2
           ∂(volume : Measure EuclN)
       ≤ ∫⁻ x in Ω'',
@@ -258,8 +232,6 @@ private lemma lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv_loc
     _ = ∫⁻ y : EuclN, Ω'.indicator FF y
             ∂(volume : Measure EuclN) := h_outer_const
     _ = ∫⁻ y in Ω', FF y ∂(volume : Measure EuclN) := h_indicator_to_restrict
-
-/-! ## L² convergence of the mollifier on a compact set -/
 
 omit [NeZero d] in
 /-- Direct sup-norm bound on the L² norm restricted to a finite-volume
@@ -366,11 +338,9 @@ private lemma tendstoUniformlyOn_mollifyEps_of_uniformContinuous
   classical
   rw [Metric.tendstoUniformlyOn_iff]
   intro α hα
-  -- Use α/2: modulus of continuity gives `dist (φ x) (φ y) ≤ α/2 < α`.
   rw [Metric.uniformContinuous_iff] at hφ_uc
   have hα2_pos : 0 < α / 2 := by linarith
   obtain ⟨δ, hδ_pos, hδ_bound⟩ := hφ_uc (α / 2) hα2_pos
-  -- For εFn i < δ, the mollifier value at any x is within α/2 of φ x.
   have h_eventual_radius : ∀ᶠ i in l, εFn i < δ := by
     rw [Metric.tendsto_nhds] at hε_tendsto
     have := hε_tendsto δ hδ_pos
@@ -379,7 +349,6 @@ private lemma tendstoUniformlyOn_mollifyEps_of_uniformContinuous
     exact hi
   filter_upwards [h_eventual_radius] with i h_radius
   intro x _
-  -- Apply Mathlib's dist_normed_convolution_le.
   have h_bound :
       dist
         ((((mollifierBumpEps (d := d) (hε_pos i)).normed (volume : Measure EuclN)
@@ -391,7 +360,6 @@ private lemma tendstoUniformlyOn_mollifyEps_of_uniformContinuous
     have h_dist_lt : dist y x < εFn i := h_mem
     have hd_lt_δ : dist y x < δ := lt_trans h_dist_lt h_radius
     exact (hδ_bound hd_lt_δ).le
-  -- The convolution form `(mollifierBumpEps.normed) ⋆ φ` equals `mollifyEps φ`.
   have h_eq :
       ((mollifierBumpEps (d := d) (hε_pos i)).normed (volume : Measure EuclN)
           ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure EuclN)] φ : EuclN → ℝ) x =
@@ -418,10 +386,8 @@ private lemma tendsto_eLpNorm_restrict_sub_mollifyEps_of_continuous_compactSuppo
   have hK_meas : MeasurableSet K := hK_compact.isClosed.measurableSet
   have hK_volume_finite : (volume : Measure EuclN) K < ∞ :=
     hK_compact.measure_lt_top
-  -- A continuous compactly supported function is uniformly continuous via cocompact.
   have hφ_uc : UniformContinuous φ := by
     refine hφ_cont.uniformContinuous_of_tendsto_cocompact (x := 0) ?_
-    -- φ → 0 at cocompact: outside compact support, φ = 0.
     rw [tendsto_def]
     intro s hs
     rcases _root_.mem_nhds_iff.mp hs with ⟨t, hts, ht_open, h0_mem⟩
@@ -492,7 +458,6 @@ private lemma tendsto_eLpNorm_restrict_sub_mollifyEps_of_memLp
   have hK_meas : MeasurableSet K := hK_compact.isClosed.measurableSet
   have hg_loc : LocallyIntegrable g (volume : Measure EuclN) :=
     hg.locallyIntegrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
-  -- Use ENNReal tendsto_nhds_zero.
   rw [ENNReal.tendsto_nhds_zero]
   intro δ hδ_pos
   by_cases hδ_top : δ = ∞
@@ -504,7 +469,6 @@ private lemma tendsto_eLpNorm_restrict_sub_mollifyEps_of_memLp
   have hδ3_ne_top : δ3 ≠ ∞ := by
     rw [hδ3_def]
     exact ENNReal.div_ne_top hδ_top (by norm_num)
-  -- Pick continuous compactly-supported φ with ‖g - φ‖_{L²(EuclN)} ≤ δ3.
   obtain ⟨φ, hφ_compactSupp, h_approx, hφ_cont, hφ_memLp⟩ :=
     hg.exists_hasCompactSupport_eLpNorm_sub_le (p := 2)
       (by norm_num : (2 : ℝ≥0∞) ≠ ∞) hδ3_pos.ne'
@@ -519,7 +483,6 @@ private lemma tendsto_eLpNorm_restrict_sub_mollifyEps_of_memLp
     have h_eq : (fun x => g x - φ x) = g - φ := by funext x; rfl
     rw [h_eq]
     exact h_approx
-  -- Term 2: ‖mollifyEps ε φ - φ‖_{L²(K)} → 0 (uniform convergence).
   have h_term2_tendsto : Tendsto (fun i => eLpNorm
       (fun x => mollifyEps (d := d) (hε_pos i) φ x - φ x) 2
       ((volume : Measure EuclN).restrict K)) l (𝓝 0) :=
@@ -527,16 +490,12 @@ private lemma tendsto_eLpNorm_restrict_sub_mollifyEps_of_memLp
       hε_pos hε_tendsto hK_compact hφ_cont hφ_compactSupp
   rw [ENNReal.tendsto_nhds_zero] at h_term2_tendsto
   filter_upwards [h_term2_tendsto δ3 hδ3_pos] with i h2_le
-  -- mollifyEps ε g - g = (mollifyEps ε g - mollifyEps ε φ) + (mollifyEps ε φ - φ) + (φ - g).
-  -- = mollifyEps ε gd + (mollifyEps ε φ - φ) - gd.
-  -- AEStrongly measurable for the three summands.
   have h_moll_g_cont : Continuous (mollifyEps (d := d) (hε_pos i) g) :=
     mollifyEps_continuous (hε_pos i) hg_loc
   have h_moll_φ_cont : Continuous (mollifyEps (d := d) (hε_pos i) φ) :=
     mollifyEps_continuous (hε_pos i) hφ_loc
   have h_moll_gd_cont : Continuous (mollifyEps (d := d) (hε_pos i) gd) :=
     mollifyEps_continuous (hε_pos i) hgd_loc
-  -- Setup f1, f2, f3.
   set f1 : EuclN → ℝ := mollifyEps (d := d) (hε_pos i) gd with hf1_def
   set f2 : EuclN → ℝ := fun x => mollifyEps (d := d) (hε_pos i) φ x - φ x with hf2_def
   set f3 : EuclN → ℝ := fun x => φ x - g x with hf3_def
@@ -549,14 +508,12 @@ private lemma tendsto_eLpNorm_restrict_sub_mollifyEps_of_memLp
   have hf3_aestron : AEStronglyMeasurable f3
       ((volume : Measure EuclN).restrict K) := by
     refine (hφ_memLp.sub hg).aestronglyMeasurable.restrict
-  -- Decomposition: mollifyEps ε g - g = f1 + f2 + f3.
   have h_decomp : (fun x => mollifyEps (d := d) (hε_pos i) g x - g x) =
       f1 + f2 + f3 := by
     funext x
     change mollifyEps (d := d) (hε_pos i) g x - g x =
       mollifyEps (d := d) (hε_pos i) gd x +
       (mollifyEps (d := d) (hε_pos i) φ x - φ x) + (φ x - g x)
-    -- mollifyEps ε gd = mollifyEps ε g - mollifyEps ε φ.
     have h_lin : mollifyEps (d := d) (hε_pos i) gd =
         mollifyEps (d := d) (hε_pos i) g - mollifyEps (d := d) (hε_pos i) φ := by
       rw [hgd_def]
@@ -573,7 +530,6 @@ private lemma tendsto_eLpNorm_restrict_sub_mollifyEps_of_memLp
     rw [h_lin, Pi.sub_apply]
     ring
   rw [h_decomp]
-  -- Triangle: ‖f1 + f2 + f3‖_{L²(K)} ≤ ‖f1‖_{L²(K)} + ‖f2‖_{L²(K)} + ‖f3‖_{L²(K)}.
   have h_tri : eLpNorm (f1 + f2 + f3) 2 ((volume : Measure EuclN).restrict K) ≤
       eLpNorm f1 2 ((volume : Measure EuclN).restrict K) +
       eLpNorm f2 2 ((volume : Measure EuclN).restrict K) +
@@ -592,15 +548,11 @@ private lemma tendsto_eLpNorm_restrict_sub_mollifyEps_of_memLp
     refine h_step1.trans ?_
     exact add_le_add h_step2 le_rfl
   refine h_tri.trans ?_
-  -- Bound each term.
-  -- f1 = mollifyEps ε gd: ≤ ‖gd‖_{L²(EuclN)} ≤ δ3 (Young + monotone).
   have h_f1_le : eLpNorm f1 2 ((volume : Measure EuclN).restrict K) ≤ δ3 := by
     rw [hf1_def]
     refine (eLpNorm_mono_measure _ Measure.restrict_le_self).trans ?_
     exact (eLpNorm_mollifyEps_le (hε_pos i) hgd_memLp).trans hgd_eLp_le
-  -- f2: by hypothesis.
   have h_f2_le : eLpNorm f2 2 ((volume : Measure EuclN).restrict K) ≤ δ3 := h2_le
-  -- f3: ‖φ - g‖_{L²(K)} ≤ ‖φ - g‖_{L²(EuclN)} = ‖gd‖_{L²(EuclN)} ≤ δ3.
   have h_f3_le : eLpNorm f3 2 ((volume : Measure EuclN).restrict K) ≤ δ3 := by
     rw [hf3_def]
     have h_eq : (fun x => φ x - g x) = -gd := by
@@ -608,7 +560,6 @@ private lemma tendsto_eLpNorm_restrict_sub_mollifyEps_of_memLp
     rw [h_eq, eLpNorm_neg]
     refine (eLpNorm_mono_measure _ Measure.restrict_le_self).trans ?_
     exact hgd_eLp_le
-  -- Combine: δ3 + δ3 + δ3 = δ.
   have h_sum : δ3 + δ3 + δ3 = δ := by
     rw [hδ3_def]
     rw [ENNReal.div_add_div_same, ENNReal.div_add_div_same]
@@ -617,12 +568,6 @@ private lemma tendsto_eLpNorm_restrict_sub_mollifyEps_of_memLp
       (by norm_num : (3 : ℝ≥0∞) ≠ ∞)]
   refine (add_le_add (add_le_add h_f1_le h_f2_le) h_f3_le).trans ?_
   rw [h_sum]
-
-/-! ## Lintegral convergence of `mollifyEps ε g` squared
-
-We show that `∫⁻_K ‖mollifyEps ε g‖²_e → ∫⁻_K ‖g‖²_e` for a compact set `K`.
-This combines `eLpNorm` convergence (via reverse triangle) with squaring.
--/
 
 omit [NeZero d] in
 /-- For `f, g ∈ L²(EuclN)` with finite `eLpNorm` and `eLpNorm (f - g) ≤ δ`,
@@ -664,19 +609,15 @@ private lemma lintegral_enorm_sq_eq_eLpNorm_sq
     (by norm_num : (2 : ℝ≥0∞) ≠ 0) (by norm_num : (2 : ℝ≥0∞) ≠ ∞)]
   have h2 : (2 : ℝ≥0∞).toReal = 2 := by show ENNReal.toReal 2 = 2; rfl
   rw [h2]
-  -- ((∫⁻ ‖f‖²_e)^{1/2})² = ∫⁻ ‖f‖²_e.
   have h_inner_eq : ∫⁻ x, (‖f x‖ₑ : ℝ≥0∞) ^ (2 : ℝ) ∂μ =
       ∫⁻ x, (‖f x‖ₑ : ℝ≥0∞) ^ 2 ∂μ := by
     refine lintegral_congr_ae ?_
     filter_upwards with x
     rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) from by norm_num, ENNReal.rpow_natCast]
   rw [h_inner_eq]
-  -- (a^{1/2})² = a (for a in ℝ≥0∞).
   rw [← ENNReal.rpow_natCast _ 2]
   rw [← ENNReal.rpow_mul]
   norm_num
-
-/-! ## The headline theorem -/
 
 /-- The headline non-smooth Fréchet–Kolmogorov bound, lintegral form.
 For `u, g_k ∈ L²(EuclN)` with `g_k` the weak `k`-th partial of `u` on
@@ -698,20 +639,16 @@ private theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
         ∂(volume : Measure EuclN) ≤
       ∫⁻ y in Ω', (‖g_k y‖ₑ : ℝ≥0∞) ^ 2 ∂(volume : Measure EuclN) := by
   classical
-  -- Set: K := cthickening h₀ closure(Ω''), compact and ⊆ Ω'.
   set K : Set EuclN := Metric.cthickening h₀ (closure Ω'') with hK_def
   have hK_compact : IsCompact K := hΩ''_compact_closure.cthickening
   have hK_subset : K ⊆ Ω' := h_thick
   have hK_meas : MeasurableSet K := hK_compact.isClosed.measurableSet
-  -- εFn : ℕ → ℝ, εFn n = 1 / (n + 1).
   set εFn : ℕ → ℝ := fun n => 1 / ((n : ℝ) + 1) with hεFn_def
   have hε_pos : ∀ n, 0 < εFn n := fun n => by
     rw [hεFn_def]; positivity
   have hε_tendsto : Tendsto εFn Filter.atTop (𝓝 0) := by
     rw [hεFn_def]; exact tendsto_one_div_add_atTop_nhds_zero_nat
-  -- Define the smooth approximation.
   set u_n : ℕ → EuclN → ℝ := fun n => mollifyEps (d := d) (hε_pos n) u with hu_n_def
-  -- u_n is smooth.
   have hu_loc : LocallyIntegrable u (volume : Measure EuclN) :=
     hu_l2.locallyIntegrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
   have hg_k_loc : LocallyIntegrable g_k (volume : Measure EuclN) :=
@@ -720,19 +657,15 @@ private theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
     mollifyEps_contDiff (hε_pos n) hu_loc
   have hu_n_C1 : ∀ n, ContDiff ℝ 1 (u_n n) := fun n =>
     (hu_n_smooth n).of_le (by norm_cast)
-  -- Identification: ∂_k u_n = mollifyEps εFn n g_k.
   have h_partial_eq : ∀ n,
       (fun y => (fderiv ℝ (u_n n) y) (EuclideanSpace.single k 1)) =
         mollifyEps (d := d) (hε_pos n) g_k := by
     intro n
     funext y
     exact mollifyEps_partial_eq_mollifyEps_weakPartial (hε_pos n) hu_loc hwp y
-  -- Apply the smooth localized FK lemma with Ω' replaced by K.
-  -- Admissibility: for x ∈ Ω'' and s ∈ (0, 1], x + s h e_k ∈ K.
   have h_admissible : ∀ x ∈ Ω'', ∀ s ∈ Set.Ioc (0 : ℝ) 1,
       x + (s * h) • EuclideanSpace.single k 1 ∈ K := by
     intro x hx s hs
-    -- |s * h| ≤ |h| ≤ h₀.
     have h_dist : dist (x + (s * h) • EuclideanSpace.single k 1) x ≤ h₀ := by
       have h_norm_eq :
           ‖(s * h) • EuclideanSpace.single k (1 : ℝ)‖ = |s * h| := by
@@ -755,7 +688,6 @@ private theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
     exact Metric.mem_cthickening_of_dist_le
       (x + (s * h) • EuclideanSpace.single k 1) x h₀ (closure Ω'')
       h_in_closure h_dist
-  -- For each n, the smooth localized FK bound.
   have h_smooth_bound : ∀ n,
       ∫⁻ x in Ω'',
         (‖diffQuot k h (u_n n) x‖ₑ : ℝ≥0∞) ^ 2 ∂(volume : Measure EuclN) ≤
@@ -764,7 +696,6 @@ private theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
         ∂(volume : Measure EuclN) := fun n =>
     lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv_local
       (hu_n_C1 n) k hh hK_meas hΩ''_meas h_admissible
-  -- Substitute the partial identity.
   have h_partial_substitute : ∀ n,
       ∫⁻ y in K,
         (‖(fderiv ℝ (u_n n) y) (EuclideanSpace.single k 1)‖ₑ : ℝ≥0∞) ^ 2
@@ -781,18 +712,15 @@ private theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
     change (‖(fderiv ℝ (u_n n) y) (EuclideanSpace.single k 1)‖ₑ : ℝ≥0∞) ^ 2 =
       (‖mollifyEps (d := d) (hε_pos n) g_k y‖ₑ : ℝ≥0∞) ^ 2
     rw [h_eq_pt]
-  -- Combined: ∫⁻_{Ω''} ‖D_h u_n‖² ≤ ∫⁻_K ‖mollifyEps εFn(n) g_k‖².
   have h_combined : ∀ n,
       ∫⁻ x in Ω'', (‖diffQuot k h (u_n n) x‖ₑ : ℝ≥0∞) ^ 2
         ∂(volume : Measure EuclN) ≤
       ∫⁻ y in K, (‖mollifyEps (d := d) (hε_pos n) g_k y‖ₑ : ℝ≥0∞) ^ 2
         ∂(volume : Measure EuclN) := fun n =>
     (h_smooth_bound n).trans (le_of_eq (h_partial_substitute n))
-  -- Step 1: a.e. convergence of u_n → u, hence diffQuot u_n → diffQuot u.
   have h_ae_u : ∀ᵐ x ∂(volume : Measure EuclN),
       Tendsto (fun n => u_n n x) Filter.atTop (𝓝 (u x)) :=
     ae_tendsto_mollifyEps_of_locallyIntegrable hε_pos hε_tendsto hu_loc
-  -- Translation preserves a.e.
   have h_ae_u_translate : ∀ᵐ x ∂(volume : Measure EuclN),
       Tendsto (fun n => u_n n (x + h • EuclideanSpace.single k 1))
         Filter.atTop (𝓝 (u (x + h • EuclideanSpace.single k 1))) := by
@@ -821,23 +749,19 @@ private theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
       funext n; exact h_diff_eq n
     rw [h_funeq]
     exact ((hx_t.sub hx).div_const h)
-  -- Step 2: pointwise → ‖.‖²_e convergence.
   have h_ae_sq : ∀ᵐ x ∂(volume : Measure EuclN),
       Tendsto (fun n => (‖diffQuot k h (u_n n) x‖ₑ : ℝ≥0∞) ^ 2)
         Filter.atTop (𝓝 ((‖diffQuot k h u x‖ₑ : ℝ≥0∞) ^ 2)) := by
     filter_upwards [h_ae_diffQuot] with x hx
     have h_norm_tendsto : Tendsto (fun n => ‖diffQuot k h (u_n n) x‖ₑ)
         Filter.atTop (𝓝 ‖diffQuot k h u x‖ₑ) := hx.enorm
-    -- Apply continuity of x ↦ x² in ℝ≥0∞.
     have h_pow_cont : ContinuousAt (fun y : ℝ≥0∞ => y ^ 2) ‖diffQuot k h u x‖ₑ :=
       (ENNReal.continuous_pow 2).continuousAt
     exact h_pow_cont.tendsto.comp h_norm_tendsto
-  -- Step 3: Restrict to Ω''.
   have h_ae_sq_restrict : ∀ᵐ x ∂((volume : Measure EuclN).restrict Ω''),
       Tendsto (fun n => (‖diffQuot k h (u_n n) x‖ₑ : ℝ≥0∞) ^ 2)
         Filter.atTop (𝓝 ((‖diffQuot k h u x‖ₑ : ℝ≥0∞) ^ 2)) :=
     ae_restrict_of_ae h_ae_sq
-  -- Step 4: Fatou's lemma.
   have h_fatou : ∫⁻ x in Ω'',
       (‖diffQuot k h u x‖ₑ : ℝ≥0∞) ^ 2 ∂(volume : Measure EuclN) ≤
       Filter.atTop.liminf (fun n =>
@@ -851,13 +775,10 @@ private theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
         continuous_diffQuot_of_continuous (d := d) k h (hu_n_C1 n).continuous
       exact (h_cont.measurable.enorm.pow_const 2).aemeasurable
     have h_lim_meas := h_ae_sq_restrict
-    -- lintegral_liminf_le applies.
     refine (lintegral_liminf_le' h_meas).trans_eq' ?_
-    -- Need: liminf of ‖diffQuot u_n‖²_e = ‖diffQuot u‖²_e a.e.
     refine lintegral_congr_ae ?_
     filter_upwards [h_ae_sq_restrict] with x hx
     exact hx.liminf_eq
-  -- Step 5: Combine with h_combined.
   have h_step5 : Filter.atTop.liminf (fun n =>
         ∫⁻ x in Ω'', (‖diffQuot k h (u_n n) x‖ₑ : ℝ≥0∞) ^ 2
           ∂(volume : Measure EuclN)) ≤
@@ -867,19 +788,11 @@ private theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
     refine Filter.liminf_le_liminf ?_
     refine Filter.Eventually.of_forall fun n => ?_
     exact h_combined n
-  -- Step 6: Lim sup of mollifyEps²_K g_k ≤ ∫⁻_K ‖g_k‖²_e (using L²(K) convergence).
-  -- This is the key step requiring L²-on-K convergence.
   have h_l2_tendsto : Tendsto (fun n => eLpNorm
       (fun x => mollifyEps (d := d) (hε_pos n) g_k x - g_k x) 2
       ((volume : Measure EuclN).restrict K)) Filter.atTop (𝓝 0) :=
     tendsto_eLpNorm_restrict_sub_mollifyEps_of_memLp hε_pos hε_tendsto
       hK_compact hg_k_l2
-  -- We show: liminf ∫⁻_K ‖mollifyEps‖²_e ≤ ∫⁻_K ‖g_k‖²_e.
-  -- Via the bound: ∫⁻ ‖mollifyEps‖²_e = (eLpNorm mollifyEps)² ≤ (eLpNorm g_k + δ)² for any δ if eventually so.
-  -- We use: eLpNorm (mollifyEps - g_k) → 0, so for all ε > 0, eventually
-  -- (eLpNorm mollifyEps)² ≤ (eLpNorm g_k + ε)².
-  -- Hence liminf ≤ inf over ε > 0 of (eLpNorm g_k + ε)² = (eLpNorm g_k)².
-  -- For ENNReal: liminf is left-continuous from below.
   have h_eLpNorm_g_k_K : eLpNorm g_k 2 ((volume : Measure EuclN).restrict K) < ∞ := by
     have h_le : eLpNorm g_k 2 ((volume : Measure EuclN).restrict K) ≤
         eLpNorm g_k 2 (volume : Measure EuclN) :=
@@ -887,7 +800,6 @@ private theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
     exact lt_of_le_of_lt h_le hg_k_l2.eLpNorm_lt_top
   have h_eLpNorm_g_k_K_ne_top : eLpNorm g_k 2
       ((volume : Measure EuclN).restrict K) ≠ ∞ := h_eLpNorm_g_k_K.ne
-  -- For each n, ∫⁻_K ‖mollifyEps εFn(n) g_k‖²_e = (eLpNorm (mollifyEps εFn(n) g_k) 2 (vol.restrict K))².
   have h_lint_eq_eLpNorm_sq : ∀ n,
       ∫⁻ y in K, (‖mollifyEps (d := d) (hε_pos n) g_k y‖ₑ : ℝ≥0∞) ^ 2
         ∂(volume : Measure EuclN) =
@@ -901,7 +813,6 @@ private theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
       (eLpNorm g_k 2 ((volume : Measure EuclN).restrict K)) ^ 2 := by
     rw [← lintegral_enorm_sq_eq_eLpNorm_sq g_k
       (μ := (volume : Measure EuclN).restrict K)]
-  -- Bound `(eLpNorm mollifyEps n)² ≤ (eLpNorm g + δ)²` for any δ > 0 eventually.
   have h_eventual_sq_bound : ∀ δ : ℝ≥0∞, 0 < δ →
       ∀ᶠ n in Filter.atTop,
         (eLpNorm (mollifyEps (d := d) (hε_pos n) g_k) 2
@@ -916,7 +827,6 @@ private theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
     have h_aestron_g : AEStronglyMeasurable g_k
         ((volume : Measure EuclN).restrict K) := hg_k_l2.aestronglyMeasurable.restrict
     exact eLpNorm_sq_le_of_eLpNorm_sub_le h_aestron_n h_aestron_g hn
-  -- Step 7: Apply lintegral form.
   have h_lint_bound : ∀ δ : ℝ≥0∞, 0 < δ →
       ∀ᶠ n in Filter.atTop,
         ∫⁻ y in K, (‖mollifyEps (d := d) (hε_pos n) g_k y‖ₑ : ℝ≥0∞) ^ 2
@@ -926,7 +836,6 @@ private theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
     filter_upwards [h_eventual_sq_bound δ hδ_pos] with n hn
     rw [h_lint_eq_eLpNorm_sq n]
     exact hn
-  -- Liminf bound.
   have h_liminf_bound : ∀ δ : ℝ≥0∞, 0 < δ →
       Filter.atTop.liminf (fun n =>
         ∫⁻ y in K, (‖mollifyEps (d := d) (hε_pos n) g_k y‖ₑ : ℝ≥0∞) ^ 2
@@ -934,19 +843,13 @@ private theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
         (eLpNorm g_k 2 ((volume : Measure EuclN).restrict K) + δ) ^ 2 := by
     intro δ hδ_pos
     have h_event := h_lint_bound δ hδ_pos
-    -- liminf u f ≤ a if u ≤ a eventually.
     exact Filter.liminf_le_of_frequently_le' (h_event.frequently)
-  -- Take δ → 0.
-  -- liminf ≤ inf_{δ > 0} (eLpNorm g + δ)² = (eLpNorm g)².
   have h_inf_at_zero : Filter.atTop.liminf (fun n =>
         ∫⁻ y in K, (‖mollifyEps (d := d) (hε_pos n) g_k y‖ₑ : ℝ≥0∞) ^ 2
           ∂(volume : Measure EuclN)) ≤
       (eLpNorm g_k 2 ((volume : Measure EuclN).restrict K)) ^ 2 := by
-    -- Use ENNReal-specific argument: liminf ≤ inf over δ > 0 of bounds.
-    -- First convert to: liminf ≤ inf_{n ∈ ℕ} (N + 1/n)² where N := eLpNorm g_k.
     set N : ℝ≥0∞ := eLpNorm g_k 2 ((volume : Measure EuclN).restrict K) with hN_def
     have hN_ne_top : N ≠ ∞ := h_eLpNorm_g_k_K.ne
-    -- Sequence δ_m := 1/(m+1) (in ℝ≥0∞). Then δ_m → 0 and (N + δ_m)² → N².
     have h_seq_sub_tendsto : Tendsto (fun m : ℕ => (N + (1 : ℝ≥0∞) / (m + 1)) ^ 2)
         Filter.atTop (𝓝 (N ^ 2)) := by
       have h_one_div : Tendsto (fun m : ℕ => (1 : ℝ≥0∞) / (m + 1))
@@ -966,7 +869,6 @@ private theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
           Filter.atTop (𝓝 ((N + 0) ^ 2)) := by
         exact (ENNReal.continuous_pow 2).continuousAt.tendsto.comp h_add
       simpa using h_pow
-    -- For each m, h_liminf_bound applied with δ = 1/(m+1).
     have h_liminf_bound_seq : ∀ m : ℕ,
         Filter.atTop.liminf (fun n =>
           ∫⁻ y in K, (‖mollifyEps (d := d) (hε_pos n) g_k y‖ₑ : ℝ≥0∞) ^ 2
@@ -978,7 +880,6 @@ private theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
         exact ENNReal.add_ne_top.mpr ⟨ENNReal.natCast_ne_top _, by norm_num⟩
       have := h_liminf_bound ((1 : ℝ≥0∞) / (m + 1)) h_pos
       rw [hN_def]; exact this
-    -- Liminf is ≤ all the bounds.
     have h_le_lim : Filter.atTop.liminf (fun n =>
           ∫⁻ y in K, (‖mollifyEps (d := d) (hε_pos n) g_k y‖ₑ : ℝ≥0∞) ^ 2
             ∂(volume : Measure EuclN)) ≤ N ^ 2 := by
@@ -986,7 +887,6 @@ private theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
       exact Filter.Eventually.of_forall h_liminf_bound_seq
     rw [hN_def] at h_le_lim ⊢
     exact h_le_lim
-  -- Combine: ∫⁻_{Ω''} ‖D_h u‖²_e ≤ liminf ≤ liminf_{K} ≤ (eLpNorm g_k 2 (vol.restrict K))² = ∫⁻_K ‖g_k‖²_e.
   have h_K_to_Ω' : ∫⁻ y in K, (‖g_k y‖ₑ : ℝ≥0∞) ^ 2
         ∂(volume : Measure EuclN) ≤
       ∫⁻ y in Ω', (‖g_k y‖ₑ : ℝ≥0∞) ^ 2 ∂(volume : Measure EuclN) :=
@@ -1003,8 +903,6 @@ private theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
     _ = ∫⁻ y in K, (‖g_k y‖ₑ : ℝ≥0∞) ^ 2 ∂(volume : Measure EuclN) :=
             h_lint_eq_eLpNorm_sq_g.symm
     _ ≤ ∫⁻ y in Ω', (‖g_k y‖ₑ : ℝ≥0∞) ^ 2 ∂(volume : Measure EuclN) := h_K_to_Ω'
-
-/-! ## Public headline theorems: eLpNorm and Bochner integral forms -/
 
 /-- **Fréchet–Kolmogorov L² bound for the difference quotient of a non-smooth H¹ function.**
 
@@ -1028,16 +926,10 @@ theorem eLpNorm_diffQuot_le_eLpNorm_weakPartial
     eLpNorm (diffQuot k h u) 2 ((volume : Measure EuclN).restrict Ω'') ≤
       eLpNorm g_k 2 ((volume : Measure EuclN).restrict Ω') := by
   classical
-  -- Translate the lintegral bound to eLpNorm.
   have h_lint :=
     lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
       hu_l2 hg_k_l2 k hwp hΩ'_open.measurableSet hΩ''_open.measurableSet
       hΩ''_compact_closure hh₀_pos h_thick hh hh_le
-  -- LHS: eLpNorm (diffQuot k h u) 2 (vol.restrict Ω'')
-  --      = (∫⁻_{Ω''} ‖diffQuot k h u‖²_e)^{1/2}.
-  -- RHS: eLpNorm g_k 2 (vol.restrict Ω')
-  --      = (∫⁻_{Ω'} ‖g_k‖²_e)^{1/2}.
-  -- We use lintegral_enorm_sq_eq_eLpNorm_sq.
   have h_LHS_sq : (eLpNorm (diffQuot k h u) 2
       ((volume : Measure EuclN).restrict Ω''))^2 =
         ∫⁻ x in Ω'', (‖diffQuot k h u x‖ₑ : ℝ≥0∞) ^ 2
@@ -1050,12 +942,10 @@ theorem eLpNorm_diffQuot_le_eLpNorm_weakPartial
           ∂(volume : Measure EuclN) := by
     rw [lintegral_enorm_sq_eq_eLpNorm_sq g_k
       (μ := (volume : Measure EuclN).restrict Ω')]
-  -- (eLpNorm LHS)² ≤ (eLpNorm RHS)² → eLpNorm LHS ≤ eLpNorm RHS.
   have h_sq_le : (eLpNorm (diffQuot k h u) 2
       ((volume : Measure EuclN).restrict Ω''))^2 ≤
         (eLpNorm g_k 2 ((volume : Measure EuclN).restrict Ω'))^2 := by
     rw [h_LHS_sq, h_RHS_sq]; exact h_lint
-  -- For monotone squaring: if a² ≤ b² then a ≤ b (for a, b in ℝ≥0∞).
   exact (ENNReal.pow_le_pow_left_iff (by norm_num : 2 ≠ 0)).mp h_sq_le
 
 /-- L² version with explicit ∫ form, requiring only measurability of `Ω''`
@@ -1077,12 +967,10 @@ theorem integral_sq_diffQuot_le_integral_sq_weakPartial_meas
     ∫ x in Ω'', (diffQuot k h u x)^2 ∂(volume : Measure EuclN) ≤
       ∫ x in Ω', (g_k x)^2 ∂(volume : Measure EuclN) := by
   classical
-  -- Translate from lintegral form to Bochner integral form.
   have h_lint :=
     lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
       hu_l2 hg_k_l2 k hwp hΩ'_meas hΩ''_meas
       hΩ''_compact_closure hh₀_pos h_thick hh hh_le
-  -- The RHS lintegral is finite (= (eLpNorm g_k)² < ∞).
   have h_RHS_lint_lt_top :
       ∫⁻ y in Ω', (‖g_k y‖ₑ : ℝ≥0∞) ^ 2 ∂(volume : Measure EuclN) < ∞ := by
     rw [lintegral_enorm_sq_eq_eLpNorm_sq g_k
@@ -1091,19 +979,15 @@ theorem integral_sq_diffQuot_le_integral_sq_weakPartial_meas
       lt_of_le_of_lt (eLpNorm_mono_measure g_k Measure.restrict_le_self)
         hg_k_l2.eLpNorm_lt_top
     exact ENNReal.pow_lt_top h_lt_top
-  -- The LHS lintegral is also finite.
   have h_LHS_lint_lt_top :
       ∫⁻ x in Ω'', (‖diffQuot k h u x‖ₑ : ℝ≥0∞) ^ 2 ∂(volume : Measure EuclN) < ∞ :=
     lt_of_le_of_lt h_lint h_RHS_lint_lt_top
-  -- AEStrongly measurability for both sides.
   have hu_aestron : AEStronglyMeasurable u (volume : Measure EuclN) :=
     hu_l2.aestronglyMeasurable
   have hg_k_aestron : AEStronglyMeasurable g_k (volume : Measure EuclN) :=
     hg_k_l2.aestronglyMeasurable
   have hd_aestron : AEStronglyMeasurable (diffQuot k h u) (volume : Measure EuclN) :=
     aestronglyMeasurable_diffQuot (d := d) k h hu_aestron
-  -- ∫ (diffQuot k h u)² is integrable (over Ω''), with finite Bochner = toReal of lintegral.
-  -- Apply `integral_eq_lintegral_of_nonneg_ae`.
   have h_LHS_aestron :
       AEStronglyMeasurable (fun x => (diffQuot k h u x) ^ 2)
         ((volume : Measure EuclN).restrict Ω'') := by

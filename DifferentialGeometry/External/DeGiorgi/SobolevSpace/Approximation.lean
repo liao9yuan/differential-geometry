@@ -1,4 +1,5 @@
 -- Modified 2026-04-28: updated internal import paths for project namespace
+-- Modified 2026-05-16: style-warning cleanup
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace.Witnesses
 
 /-!
@@ -1295,8 +1296,7 @@ theorem exists_smooth_W1p_approx_of_supportedWitness
           intro i
           simpa [Measure.restrict_univ] using hgrad_memLp_univ i
         isWeakGrad := ?_ }
-    ·
-      intro i φ hφ_smooth hφ_compact _hφ_sub
+    · intro i φ hφ_smooth hφ_compact _hφ_sub
       let ψ : E → ℝ := fun x => χ x * φ x
       have hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ := hχ_smooth.mul hφ_smooth
       have hψ_compact : HasCompactSupport ψ := by
@@ -1387,8 +1387,7 @@ theorem exists_smooth_W1p_approx_of_supportedWitness
     exact (hφ_sup (n + N)).trans <|
       (Metric.cthickening_subset_of_subset (shrinkingBump (d := d) (n + N)).rOut hu_sub).trans <|
         (Metric.cthickening_mono hle K).trans hδΩ
-  ·
-    have hψ_fun_global :
+  · have hψ_fun_global :
         Tendsto
           (fun n => eLpNorm (fun x => ψ n x - u x) (ENNReal.ofReal p) volume)
           atTop (nhds 0) := by

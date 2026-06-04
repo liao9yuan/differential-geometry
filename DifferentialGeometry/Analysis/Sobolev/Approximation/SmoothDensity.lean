@@ -1,6 +1,6 @@
-import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseHelpers
-import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBound
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.MultiplyQuant
+import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseLemmas
+import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBound
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuant
 
 /-!
 # Per-chart strong-support smooth approximation in `W^{1,p}_chart(M)`
@@ -67,8 +67,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## The chart-α Euclidean image of `tsupport ρ_α` -/
-
 /-- The toEuclidean image of `extChartAt I α '' tsupport ρ_α` for the canonical
 chart-atlas partition of unity. Compact on a closed manifold and contained in
 `chartTargetEuclid α`, this is the natural compact "kernel" inside which the
@@ -84,24 +82,20 @@ def chartImagePOUTsupport
 lemma chartImagePOUTsupport_isCompact
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] (α : M) :
     IsCompact (chartImagePOUTsupport (I := I) (M := M) α) := by
-  -- tsupport ρ_α is closed, hence compact in compact M.
   set Tα : Set M := tsupport
     ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
       : C^∞⟮I, M; ℝ⟯) : M → ℝ) with hTα_def
   have hTα_compact : IsCompact Tα := (isClosed_tsupport _).isCompact
-  -- Tα ⊆ extChartAt source (via chartAt source).
   have hTα_chart_src : Tα ⊆ (chartAt H α).source :=
     DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α
   have hTα_ext_src : Tα ⊆ (extChartAt I α).source := by
     intro x hx
     rw [extChartAt_source]
     exact hTα_chart_src hx
-  -- (extChartAt I α) is continuous on Tα.
   have hcont_ext : ContinuousOn (extChartAt I α) Tα :=
     (continuousOn_extChartAt α).mono hTα_ext_src
   have hImg_ext_compact : IsCompact ((extChartAt I α) '' Tα) :=
     hTα_compact.image_of_continuousOn hcont_ext
-  -- toEuclidean is continuous, hence its image of a compact set is compact.
   exact hImg_ext_compact.image (toEuclidean (E := E)).continuous
 
 /-- `chartImagePOUTsupport α` is contained in `chartTargetEuclid α`. -/
@@ -112,7 +106,6 @@ lemma chartImagePOUTsupport_subset_target
   intro y hy
   unfold chartImagePOUTsupport at hy
   obtain ⟨z, ⟨x, hx_supp, hxz⟩, hzy⟩ := hy
-  -- x ∈ tsupport ρ_α ⊆ chart α source
   have hx_chart : x ∈ (chartAt H α).source :=
     DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α hx_supp
   have hx_ext : x ∈ (extChartAt I α).source := by
@@ -132,8 +125,6 @@ lemma chartPushed_eq_zero_off_chartImagePOUTsupport
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u y = 0 :=
   chartPushed_support_subset_compact_in_target (I := I) (M := M) α u y
     hy_target hy_off
-
-/-! ## Smooth cutoff `η_α` with strong support -/
 
 /-- For each chart `α` on a closed manifold, there exist a small radius `δ > 0`
 and a smooth cutoff `η_α : EuclN → ℝ` such that:
@@ -163,8 +154,6 @@ theorem exists_chartCutoff
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     (chartImagePOUTsupport_subset_target (I := I) (M := M) α)
 
-/-! ## Pointwise norm bounds for cutoffs from `Set.range η ⊆ [0, 1]` -/
-
 omit [FiniteDimensional ℝ E] in
 /-- A range bound `Set.range η ⊆ [0, 1]` gives `‖η x‖ ≤ 1` everywhere. -/
 lemma norm_le_one_of_range_Icc
@@ -177,8 +166,6 @@ lemma norm_le_one_of_range_Icc
   have h2 : η x ≤ 1 := hx.2
   rw [Real.norm_of_nonneg h1]
   exact h2
-
-/-! ## Quantitative gradient bound for the chart cutoff -/
 
 omit [FiniteDimensional ℝ E] in
 /-- A smooth function with compact support has a uniform bound on its gradient
@@ -195,7 +182,6 @@ lemma exists_grad_bound_of_compactSupport_smooth
     hη_smooth.continuous_fderiv h_ne_zero
   have h_cont_norm : Continuous (fun x : EuclN => ‖fderiv ℝ η x‖) :=
     h_cont_fderiv.norm
-  -- fderiv vanishes outside tsupport.
   have h_zero_off : ∀ x : EuclN, x ∉ tsupport η → fderiv ℝ η x = 0 := by
     intro x hx
     have h_mem : (tsupport η)ᶜ ∈ 𝓝 x :=
@@ -207,7 +193,6 @@ lemma exists_grad_bound_of_compactSupport_smooth
     simp
   set K : Set EuclN := tsupport η with hK_def
   have hK_compact : IsCompact K := hη_cpt
-  -- Continuous on a compact set ⇒ bounded.
   have h_bdd : ∃ C : ℝ, ∀ x ∈ K, ‖fderiv ℝ η x‖ ≤ C := by
     by_cases hKn : K.Nonempty
     · obtain ⟨x₀, _hx₀K, hx₀_max⟩ :=
@@ -224,12 +209,6 @@ lemma exists_grad_bound_of_compactSupport_smooth
   · rw [h_zero_off x hx]
     simp only [norm_zero]
     exact le_trans zero_le_one (le_max_right _ _)
-
-/-! ## Chart-cutoff times the chart-pushed function
-
-When `η_α` is `1` on a neighbourhood of `chartImagePOUTsupport α` (where the
-chart-pushed function lives), the product `η_α · chartPushed g α u` equals
-`chartPushed g α u` pointwise on the chart target. -/
 
 /-- If `η_α ≡ 1` on the closed `δ`-thickening of `chartImagePOUTsupport α`,
 and the chart-pushed function `chartPushed g α u` vanishes on the chart target
@@ -249,20 +228,16 @@ lemma chartCutoff_smul_chartPushed_eq_chartPushed
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u y := by
   intro y hy
   by_cases hyKα : y ∈ chartImagePOUTsupport (I := I) (M := M) α
-  · -- η y = 1 on cthickening δ.
-    have hy_cthick : y ∈ Metric.cthickening δ
+  · have hy_cthick : y ∈ Metric.cthickening δ
         (chartImagePOUTsupport (I := I) (M := M) α) :=
       Metric.self_subset_cthickening _ hyKα
     have hηy : η y = 1 := hη_one y hy_cthick
     rw [hηy]; ring
-  · -- chartPushed = 0 off chartImagePOUTsupport α (within target).
-    have hf_zero : chartPushed (I := I) (M := M)
+  · have hf_zero : chartPushed (I := I) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u y = 0 :=
       chartPushed_eq_zero_off_chartImagePOUTsupport (I := I) (M := M)
         α u hy hyKα
     rw [hf_zero]; ring
-
-/-! ## `MemWkp` membership for `η · chartPushed g α u` -/
 
 /-- The cutoff-product `η · chartPushed g α u` is in `MemWkp 1 p` of the
 chart target, given a uniform bound on `‖η‖` and `‖∇η‖` on the chart target. -/
@@ -293,20 +268,6 @@ lemma chartCutoff_smul_chartPushed_memWkp
     exact hη_bound_zero x hx
   · rw [norm_iteratedFDeriv_one]
     exact hη_bound_one x hx
-
-/-! ## Strong-support smooth approximation per chart
-
-The two key ingredients are now combined:
-
-1. The Euclidean smooth-density theorem `MemWkp.exists_smooth_compactSupport_approx`
-   produces a smooth compactly-supported approximant `χ_α` with weak support
-   `tsupport χ_α ⊆ chartTargetEuclid α` and small `W^{1,p}` distance to
-   `η · chartPushed g α u`.
-
-2. By `chartCutoff_smul_chartPushed_eq_chartPushed`, the cutoff product
-   `η · chartPushed g α u` equals `chartPushed g α u` pointwise on
-   `chartTargetEuclid α`, so the `W^{1,p}` distance to either is the same.
--/
 
 /-- For each `α` and each `MemWkpChart g 1 p u` function on a closed manifold,
 the chart-pushed function `chartPushed g α u` admits a smooth Euclidean
@@ -341,34 +302,28 @@ theorem exists_smooth_strong_support_approx
         (chartTargetEuclid (I := I) (M := M) α) ≤
         ENNReal.ofReal ε_per := by
   classical
-  -- Step 1: Get the cutoff η_α.
   obtain ⟨δ, η, hδ_pos, _hδ_subset, hη_smooth, hη_cpt, hη_range, hη_one,
     hη_supp⟩ :=
     exists_chartCutoff (I := I) (M := M) α
-  -- Step 2: Quantitative bounds for η.
   have hη_norm_one : ∀ x : EuclN, ‖η x‖ ≤ 1 :=
     norm_le_one_of_range_Icc hη_range
   obtain ⟨Cη, _hCη_pos, hCη_grad⟩ :=
     exists_grad_bound_of_compactSupport_smooth hη_smooth hη_cpt
-  -- Combined bound C := max Cη 1, ensures both ‖η‖ ≤ C and ‖∇η‖ ≤ C.
   set C : ℝ := max Cη 1 with hC_def
   have hη_norm_C : ∀ x ∈ chartTargetEuclid (I := I) (M := M) α, ‖η x‖ ≤ C :=
     fun x _ => (hη_norm_one x).trans (le_max_right _ _)
   have hη_grad_C : ∀ x ∈ chartTargetEuclid (I := I) (M := M) α,
       ‖fderiv ℝ η x‖ ≤ C := fun x _ => (hCη_grad x).trans (le_max_left _ _)
-  -- Step 3: f := η · chartPushed g α u. Strong support, compact support, ∈ MemWkp.
   set ρ_α := DifferentialGeometry.Integral.Measure.chartAtlasPOU I M with hρα_def
   set f_orig : EuclN → ℝ :=
     chartPushed (I := I) (M := M) ρ_α α u with hf_orig_def
   set f : EuclN → ℝ := fun y => η y * f_orig y with hf_def
-  -- f ∈ MemWkp 1 p of chart target.
   have hf_mem_W1p :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) 1 p f
         (chartTargetEuclid (I := I) (M := M) α) :=
     chartCutoff_smul_chartPushed_memWkp (I := I) (M := M) g hp_one hu α
       hη_smooth hη_norm_C hη_grad_C
-  -- f has tsupport ⊆ tsupport η ⊆ chartTargetEuclid α.
   have hf_supp_subset : tsupport f ⊆ tsupport η :=
     tsupport_smul_subset_left η f_orig
   have hf_compact : HasCompactSupport f :=
@@ -379,12 +334,10 @@ theorem exists_smooth_strong_support_approx
       ring)
   have hf_supp_target : tsupport f ⊆ chartTargetEuclid (I := I) (M := M) α :=
     hf_supp_subset.trans hη_supp
-  -- Step 4: f equals f_orig pointwise on chartTargetEuclid α.
   have hf_eq_forig_on_target : ∀ y ∈ chartTargetEuclid (I := I) (M := M) α,
       f y = f_orig y :=
     chartCutoff_smul_chartPushed_eq_chartPushed (I := I) (M := M) α u
       hδ_pos hη_one
-  -- Step 5: Apply the Euclidean smooth-density theorem to f.
   obtain ⟨χ, hχ_smooth, hχ_compact, hχ_supp, hχ_close⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.exists_smooth_compactSupport_approx
       (d := Module.finrank ℝ E)
@@ -393,7 +346,6 @@ theorem exists_smooth_strong_support_approx
       hf_mem_W1p hf_compact hf_supp_target
       ε_per hε_per
   refine ⟨χ, hχ_smooth, hχ_compact, hχ_supp, ?_⟩
-  -- Step 6: f_orig - χ =ᵐ f - χ on volume.restrict (chartTargetEuclid α).
   have h_target_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
   have h_diff_eq : (fun y => f_orig y - χ y) =ᵐ[volume.restrict

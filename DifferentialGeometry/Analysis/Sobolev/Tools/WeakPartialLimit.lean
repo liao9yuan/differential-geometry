@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolev
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
 
 /-!
@@ -27,8 +27,6 @@ namespace Euclidean
 variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
-
-/-! ## Hölder duality with the conjugate exponent -/
 
 /-- The conjugate exponent in `ℝ≥0∞` for the Hölder pair `(p, q)` with
 `p⁻¹ + q⁻¹ = 1`. For `p = 1` this gives `∞`; for `1 < p < ∞` it gives
@@ -155,8 +153,6 @@ private lemma tendsto_integral_mul_of_eLpNorm_tendsto_zero
     exact squeeze_zero h_ge h_le_real h_rhs_real_tendsto
   exact (tendsto_zero_iff_abs_tendsto_zero _).2 h_abs_tendsto
 
-/-! ## Single-derivative version: `L^p` limit of weak partials -/
-
 /-- **Stability of weak partial derivatives under `L^p` convergence**: if each
 `u_n` has weak `i`-partial `g_n`, both in `L^p`, and `u_n → u`, `g_n → g` in
 `L^p` (with `1 ≤ p ≠ ∞`), then `g` is the weak `i`-partial of `u`. -/
@@ -269,14 +265,6 @@ theorem hasWeakPartialDeriv_of_tendsto_eLpNorm
     -∫ x in Ω, g x * φ x
   simpa [dφ] using h_unique
 
-/-! ## Iterated version: `MemWkp k p` is closed under coordinated `L^p` limits
-
-For a sequence `u_n` converging to `u` in `L^p` with each `u_n ∈ MemWkp k p Ω`,
-if for every multi-index `(j, β)` with `1 ≤ j ≤ k` the iterated weak partials
-`iterWeakPartial p j β u_n` converge in `L^p` to a candidate limit `v j β`, then
-the order-`0` limit `u` lies in `MemWkp k p Ω` and the candidate limits agree,
-modulo `ae`, with the iterated weak partials of `u`. -/
-
 /-- For a sequence converging in `L^p` to `u`, with each `u_n ∈ W^{1,p}(Ω)` and
 each direction's chosen weak partial converging in `L^p` to a candidate
 `g i`, the limit `u` belongs to `W^{1,p}(Ω)` and `chosenWeakPartial' p i u Ω`
@@ -311,16 +299,12 @@ private theorem memW1p_and_chosenWeakPartial_ae_of_tendsto
       hu_n_lp (fun n => h_chosen_lp n i) hu_lp (hg_lp i) ?_ h_u_tendsto (h_partial_tendsto i)
     intro n
     exact chosenWeakPartial'_isWeakPartial_of_mem (hu_n_w1p n) i
-  -- u ∈ W^{1,p}(Ω): supply g i as the weak partial in direction i.
   have hu_w1p : DeGiorgi.MemW1p p u Ω := by
     refine ⟨hu_lp, ?_⟩
     intro i
     exact ⟨g i, hg_lp i, h_weak_g i⟩
   refine ⟨hu_w1p, ?_⟩
   intro i
-  -- chosenWeakPartial' p i u Ω is a weak i-partial of u; so is g i.
-  -- Both are in MemLp p (volume.restrict Ω), hence locally integrable.
-  -- By uniqueness up to a.e., they agree.
   have h_chosen_weak : DeGiorgi.HasWeakPartialDeriv i
       (chosenWeakPartial' p i u Ω) u Ω :=
     chosenWeakPartial'_isWeakPartial_of_mem hu_w1p i
@@ -358,39 +342,29 @@ theorem MemWkp_of_iter_tendsto_eLpNorm
       ∀ (j : ℕ) (β : Fin j → Fin d), j ≤ k →
         iterWeakPartial (d := d) p j β (v 0 ![]) Ω =ᵐ[volume.restrict Ω] v j β := by
   classical
-  -- The order-0 case: v 0 ![] is the order-0 candidate. Its iterWeakPartial of
-  -- order 0 is itself. Hence the L^p convergence at j = 0 is just `u_n → v 0 ![]`.
   induction k generalizing u_n v with
   | zero =>
-      -- Base case k = 0: only j = 0 is relevant.
       refine ⟨?_, ?_⟩
       · rw [MemWkp_zero]
         have hj0 : (0 : ℕ) ≤ 0 := le_refl _
         exact hv_lp 0 ![] hj0
       · intro j β hj
         interval_cases j
-        -- j = 0, β = ![]: iterWeakPartial p 0 ![] (v 0 ![]) Ω = v 0 ![]
         simp only [iterWeakPartial_zero]
-        -- β = ![] (the unique Fin 0 → Fin d).
         have hβ : β = ![] := by
           funext i; exact i.elim0
         subst hβ
         rfl
   | succ k ih =>
-      -- Inductive step: u_n ∈ MemWkp (k+1), so u_n ∈ W^{1,p} and chosen partials
-      -- ∈ MemWkp k. Apply IH to chosen partials.
-      -- Step 1: u := v 0 ![] is in W^{1,p}.
       have hu_n_w1p : ∀ n, DeGiorgi.MemW1p p (u_n n) Ω := fun n =>
         (hu_n_mem n).memW1p
       have hu_lp : MemLp (v 0 ![]) p (volume.restrict Ω) :=
         hv_lp 0 ![] (Nat.zero_le _)
-      -- Convergence at j = 0.
       have h_u_tendsto : Tendsto
           (fun n => eLpNorm (fun x => u_n n x - v 0 ![] x) p (volume.restrict Ω))
           atTop (𝓝 0) := by
         have h := h_iter_tendsto 0 ![] (Nat.zero_le _)
         simpa [iterWeakPartial_zero] using h
-      -- Per-direction: g i := v 1 (fun _ => i).
       let g : Fin d → E → ℝ := fun i => v 1 ![i]
       have hg_lp : ∀ i, MemLp (g i) p (volume.restrict Ω) := by
         intro i
@@ -403,9 +377,6 @@ theorem MemWkp_of_iter_tendsto_eLpNorm
         intro i
         have h := h_iter_tendsto 1 ![i]
           (Nat.one_le_iff_ne_zero.mpr (Nat.succ_ne_zero _))
-        -- iterWeakPartial p 1 ![i] u_n Ω
-        --   = iterWeakPartial p 0 (fun j => ![i] j.succ) (chosenWeakPartial' p (![i] 0) u_n Ω) Ω
-        --   = chosenWeakPartial' p i u_n Ω
         have h_iter_eq : ∀ n,
             iterWeakPartial (d := d) p 1 ![i] (u_n n) Ω =
               chosenWeakPartial' p i (u_n n) Ω := by
@@ -425,19 +396,12 @@ theorem MemWkp_of_iter_tendsto_eLpNorm
           rw [h_iter_eq]
         rw [← h_simp]
         exact h
-      -- Apply the W^{1,p} step lemma.
       obtain ⟨hu_w1p, h_chosen_ae⟩ :=
         memW1p_and_chosenWeakPartial_ae_of_tendsto hp_one hp_top hΩ
           hu_n_w1p hu_lp hg_lp h_u_tendsto h_partial_tendsto
-      -- Step 2: For each i, chosenWeakPartial' p i u Ω is in MemWkp k p (via g i).
-      -- Apply IH to the sequence chosenWeakPartial' p i (u_n) and target g i.
-      -- Define `v_i` as the shifted candidate: v_i j β := v (j+1) (Fin.cons i β).
       have h_chosen_mem_k :
           ∀ i, MemWkp (d := d) k p (g i) Ω := by
         intro i
-        -- IH applied to:
-        --   sequence: chosenWeakPartial' p i (u_n n) Ω, in MemWkp k.
-        --   candidate v_i j β := v (j+1) (Fin.cons i β).
         let v_i : ∀ j : ℕ, (Fin j → Fin d) → E → ℝ := fun j β =>
           v (j + 1) (Fin.cons i β)
         have hv_i_lp : ∀ (j : ℕ) (β : Fin j → Fin d), j ≤ k →
@@ -455,18 +419,12 @@ theorem MemWkp_of_iter_tendsto_eLpNorm
                 p (volume.restrict Ω))
               atTop (𝓝 0) := by
           intro j β hj
-          -- iterWeakPartial p j β (chosenWeakPartial' p i (u_n n) Ω) Ω
-          --   = iterWeakPartial p (j+1) (Fin.cons i β) (u_n n) Ω
-          --   (by `iterWeakPartial_succ` applied to (j+1, Fin.cons i β))
           have h_iter_eq : ∀ n,
               iterWeakPartial (d := d) p j β
                   (chosenWeakPartial' p i (u_n n) Ω) Ω =
                 iterWeakPartial (d := d) p (j + 1) (Fin.cons i β) (u_n n) Ω := by
             intro n
             rw [iterWeakPartial_succ]
-            -- Need: chosenWeakPartial' p ((Fin.cons i β) 0) (u_n n) Ω =
-            --       chosenWeakPartial' p i (u_n n) Ω
-            -- and (fun j' => (Fin.cons i β) j'.succ) = β
             have h0 : (Fin.cons i β : Fin (j + 1) → Fin d) 0 = i := by
               simp [Fin.cons_zero]
             have htail : (fun j' : Fin j => (Fin.cons i β : Fin (j+1) → Fin d) j'.succ) = β := by
@@ -485,14 +443,10 @@ theorem MemWkp_of_iter_tendsto_eLpNorm
             funext n
             rw [h_iter_eq n]
           rw [h_simp] at h
-          -- The candidate at (j+1, Fin.cons i β) is v_i j β.
           have h_v_eq : v (j + 1) (Fin.cons i β) = v_i j β := rfl
           simpa [h_v_eq] using h
         obtain ⟨h_g_mem, _⟩ :=
           ih h_iter_i v_i hv_i_lp h_iter_i_tendsto
-        -- ih.1 says v_i 0 ![] ∈ MemWkp k. But v_i 0 ![] = v 1 (Fin.cons i ![]).
-        -- And Fin.cons i ![] = ![i] (since Fin 1 → Fin d).
-        -- We want: g i = v 1 ![i] ∈ MemWkp k.
         have h_cons_eq : Fin.cons i (![] : Fin 0 → Fin d) = ![i] := by
           funext j'
           induction j' using Fin.cases with
@@ -503,10 +457,6 @@ theorem MemWkp_of_iter_tendsto_eLpNorm
           rw [h_cons_eq]
         rw [h_eq] at h_g_mem
         exact h_g_mem
-      -- Step 3: u = v 0 ![] ∈ MemWkp (k+1) p Ω.
-      -- Need: u ∈ W^{1,p} ✓ and ∀ i, chosenWeakPartial' p i u Ω ∈ MemWkp k p.
-      -- We have chosenWeakPartial' p i u Ω =ᵐ g i, and g i ∈ MemWkp k p.
-      -- So by MemWkp_congr_ae, chosenWeakPartial' p i u Ω ∈ MemWkp k p.
       have hu_memWkp : MemWkp (d := d) (k + 1) p (v 0 ![]) Ω := by
         rw [MemWkp_succ]
         refine ⟨hu_w1p, ?_⟩
@@ -516,22 +466,15 @@ theorem MemWkp_of_iter_tendsto_eLpNorm
         exact (MemWkp_congr_ae (d := d) hp_one hΩ h_ae).mpr (h_chosen_mem_k i)
       refine ⟨hu_memWkp, ?_⟩
       intro j β hj
-      -- We need: iterWeakPartial p j β (v 0 ![]) Ω =ᵐ v j β.
-      -- Case split on j.
       cases j with
       | zero =>
-          -- iterWeakPartial p 0 β u Ω = u = v 0 ![]. Need: v 0 ![] =ᵐ v 0 β.
-          -- Since β : Fin 0 → Fin d, β = ![] (only one such function).
           have hβ : β = ![] := by funext i; exact i.elim0
           subst hβ
           simp only [iterWeakPartial_zero]
           rfl
       | succ j =>
-          -- iterWeakPartial p (j+1) β (v 0 ![]) Ω
-          --   = iterWeakPartial p j (β ∘ Fin.succ) (chosenWeakPartial' p (β 0) (v 0 ![]) Ω) Ω
           rw [iterWeakPartial_succ]
           have hj' : j ≤ k := Nat.le_of_succ_le_succ hj
-          -- chosenWeakPartial' p (β 0) (v 0 ![]) Ω =ᵐ g (β 0)
           have h_chosen_β_ae :
               chosenWeakPartial' p (β 0) (v 0 ![]) Ω =ᵐ[volume.restrict Ω] g (β 0) :=
             h_chosen_ae (β 0)
@@ -541,9 +484,6 @@ theorem MemWkp_of_iter_tendsto_eLpNorm
                 =ᵐ[volume.restrict Ω]
               iterWeakPartial (d := d) p j (fun i : Fin j => β i.succ) (g (β 0)) Ω :=
             iterWeakPartial_ae_congr (d := d) hp_one hΩ j _ h_chosen_β_ae
-          -- Now iterWeakPartial j (β ∘ succ) (g (β 0)) Ω =ᵐ v (j+1) β.
-          -- Apply IH (specifically: the second conjunct returned by IH on the
-          -- shifted sequence) — we re-derive via the IH.
           let v_i : ∀ j' : ℕ, (Fin j' → Fin d) → E → ℝ := fun j' β' =>
             v (j' + 1) (Fin.cons (β 0) β')
           have hv_i_lp : ∀ (j' : ℕ) (β' : Fin j' → Fin d), j' ≤ k →
@@ -593,10 +533,6 @@ theorem MemWkp_of_iter_tendsto_eLpNorm
             simpa [h_v_eq] using h
           obtain ⟨_, h_iter_ae⟩ :=
             ih h_iter_i v_i hv_i_lp h_iter_i_tendsto
-          -- h_iter_ae says: ∀ j', β', j' ≤ k →
-          --   iterWeakPartial p j' β' (v_i 0 ![]) Ω =ᵐ v_i j' β'
-          -- We want: iterWeakPartial p j (fun i' => β i'.succ) (g (β 0)) Ω =ᵐ v (j+1) β.
-          -- Note v_i 0 ![] = v 1 (Fin.cons (β 0) ![]) = v 1 ![β 0] = g (β 0).
           have h_cons_zero_eq :
               Fin.cons (β 0) (![] : Fin 0 → Fin d) = ![β 0] := by
             funext j''
@@ -608,9 +544,7 @@ theorem MemWkp_of_iter_tendsto_eLpNorm
             rw [h_cons_zero_eq]
           have h_iter_i_specialized :=
             h_iter_ae j (fun i' : Fin j => β i'.succ) hj'
-          -- After rw h_v_i_zero in iterWeakPartial:
           rw [h_v_i_zero] at h_iter_i_specialized
-          -- And v_i j (β ∘ succ) = v (j+1) (Fin.cons (β 0) (β ∘ succ)) = v (j+1) β.
           have h_cons_full_eq :
               Fin.cons (β 0) (fun i' : Fin j => β i'.succ) = β := by
             funext i'

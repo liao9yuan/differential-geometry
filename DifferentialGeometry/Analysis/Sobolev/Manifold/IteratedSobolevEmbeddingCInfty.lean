@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifoldHigherOrder
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.MorreyHigherOrder
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.MorreyHigherOrder
 
 /-!
 # Chart-Sobolev to `C^∞` embedding on closed Riemannian manifolds
@@ -31,7 +31,7 @@ of `u`.
 * `memWkpChart_forall_implies_contMDiff_m_representative` — the parametric
   theorem at arbitrary `m : ℕ`, hypothesis-bearing in a single bridge lemma
   `h_bridge`. The bridge has exactly the same shape as the existing
-  `morrey_chart_C0_embedding` (just at order `m`): it takes a chart-Sobolev
+  `morrey_C0_embedding_of_compact` (just at order `m`): it takes a chart-Sobolev
   membership at order `(m+1)` and a super-critical real exponent `p > n`,
   and produces a `ContMDiff I 𝓘(ℝ, ℝ) m` a.e.-representative.
 
@@ -55,18 +55,10 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Step 1: continuous representative via the existing `C^0` chain
-
-For `2k > n`, `MemWkpChart g (2k) 2 u` with the side condition `n ≥ 2 ∨ p > 1`
-(satisfied by `p = 2`) yields a continuous representative via
-`iterated_sobolev_embedding_chart_C0_unconditional`. -/
 
 /-- Pick the smallest `k₀ ≥ 1` such that `2 * k₀ > n`. -/
 private noncomputable def witnessOrderC0 (E : Type*) [NormedAddCommGroup E]
@@ -104,16 +96,13 @@ theorem memWkpChart_forall_implies_continuous_representative
       ũ =ᵐ[DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
         (I := I) (M := M) g] u := by
   classical
-  -- Use k₀ = n+1; then 2k₀ = 2n+2 > n.
   set k₀ : ℕ := witnessOrderC0 E with hk₀_def
   have hk₀_pos : 1 ≤ k₀ := witnessOrderC0_pos
   have h_2k₀_gt_n : (Module.finrank ℝ E : ℝ) < (2 * k₀ : ℕ) * 2 := by
     have h := witnessOrderC0_two_gt_dim (E := E)
-    -- h : ↑(Module.finrank ℝ E) < ↑(witnessOrderC0 E) * 2 = ↑k₀ * 2
     have h' : (k₀ : ℝ) * 2 ≤ ((2 * k₀ : ℕ) : ℝ) * 2 := by
       push_cast; linarith
     linarith
-  -- From h_all we have MemWkpChart g (2k₀) 2 u; rewrite (2 : ℝ≥0∞) to ENNReal.ofReal 2.
   have hu_2k₀ : MemWkpChart (I := I) (M := M) g (2 * k₀) 2 u := h_all k₀
   have h_two_eq : (2 : ℝ≥0∞) = ENNReal.ofReal 2 := by
     rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) from by norm_num]
@@ -123,9 +112,7 @@ theorem memWkpChart_forall_implies_continuous_representative
     rw [← h_two_eq]; exact hu_2k₀
   have h_2k₀_pos : 1 ≤ 2 * k₀ := by omega
   have h_p_one : (1 : ℝ) ≤ 2 := by norm_num
-  -- Side condition `n ≥ 2 ∨ p > 1`. Since p = 2 > 1, this is true.
   have h_side : 2 ≤ Module.finrank ℝ E ∨ 1 < (2 : ℝ) := Or.inr (by norm_num)
-  -- Convert h_2k₀_gt_n to the form expected by the C^0 theorem.
   have hkp_real : (Module.finrank ℝ E : ℝ) < (2 * k₀ : ℕ) * (2 : ℝ) := by
     push_cast at h_2k₀_gt_n ⊢
     linarith
@@ -133,15 +120,8 @@ theorem memWkpChart_forall_implies_continuous_representative
     iterated_sobolev_embedding_chart_C0_unconditional
       (I := I) (M := M) g h_2k₀_pos h_p_one hkp_real h_side hu_meas hu_2k₀'
   refine ⟨ũ, hũ_cont, ?_⟩
-  -- ũ =ᵐ u under riemannianVolumeMeasure = riemannianMeasure g (chartAtlasPOU I M).
   rw [DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure_def]
   exact hũ_ae
-
-/-! ## `C^0` representative as a `ContMDiff I 𝓘(ℝ, ℝ) 0` witness
-
-Re-package `memWkpChart_forall_implies_continuous_representative` as a
-manifold-smoothness statement: the obtained continuous `ũ` satisfies
-`ContMDiff I 𝓘(ℝ, ℝ) 0 ũ`. This is the `m = 0` case of the headline. -/
 
 /-- `C^0` smoothness via `ContMDiff` of the continuous representative. -/
 theorem memWkpChart_forall_implies_contMDiff_zero_representative
@@ -163,19 +143,6 @@ theorem memWkpChart_forall_implies_contMDiff_zero_representative
   refine ⟨ũ, ?_, hũ_ae⟩
   exact contMDiff_zero_iff.mpr hũ_cont
 
-/-! ## Super-critical Sobolev exponent witness
-
-A pure existential: `u` lies in `MemWkpChart g (m+1) p` for some real
-super-critical exponent `p > n = Module.finrank ℝ E`. This is the
-"sub-critical chain output" needed by the higher-order embedding bridge.
-
-For a function `u` satisfying `∀ k, MemWkpChart g (2k) 2 u`, this witness
-follows from a finite chain of manifold-level sub-critical Sobolev tower
-steps (`wkpNormChart_succ_subcritical_step`). The number of chain steps is
-bounded by `Module.finrank ℝ E`, and the analytical bound that the chain
-reaches a super-critical exponent within that many steps is the same one
-used internally by `iterated_sobolev_embedding_chart_C0_unconditional`. -/
-
 /-- The "super-critical Sobolev witness at order `m + 1`" predicate.
 
 A pure existential about the function `u`: it asserts the existence of a
@@ -192,25 +159,6 @@ def ChartSobolevSuperCriticalWitness
     (m : ℕ) (u : M → ℝ) : Prop :=
   ∃ p : ℝ, 1 ≤ p ∧ (Module.finrank ℝ E : ℝ) < p ∧
     MemWkpChart (I := I) (M := M) g (m + 1) (ENNReal.ofReal p) u
-
-/-! ## Main theorem (parametric in a chart-Sobolev to `C^m` bridge)
-
-We deliver the bridge-parametric form of the headline theorem. The bridge is
-supplied as an inline function hypothesis, having exactly the shape of the
-existing `morrey_chart_C0_embedding` (at order `m`): it consumes a
-chart-Sobolev membership at a super-critical exponent and produces a
-`ContMDiff m` a.e.-representative on the same fixed manifold.
-
-At `m = 0`, the bridge is unconditional, available via
-`morrey_chart_C0_embedding`. We supply it directly below in
-`memWkpChart_forall_implies_contMDiff_zero_representative_via_bridge`.
-
-For `m ≥ 1`, the bridge requires a higher-order analog of
-`contMDiff_dense_in_WkpChart` (≈ 3 000 lines of new infrastructure) plus
-the existing `smooth_manifold_morrey_iteratedFDeriv_bound_uniform`. The
-witness `ChartSobolevSuperCriticalWitness` requires the analytical
-sub-critical chain bound (≈ 300 lines), trivial for `m = 0` and an
-incremental adaptation at higher `m`. -/
 
 /-- **`ContMDiff m` representative (bridge-parametric form).**
 
@@ -248,13 +196,8 @@ theorem memWkpChart_forall_implies_contMDiff_m_representative
   obtain ⟨p, _hp_one, hp_dim, hu_super⟩ := h_witness
   exact h_bridge hp_dim hu_meas hu_super
 
-/-! ## Consistency check: `m = 0` recovers the existing `C^0` result
-
-The order-`0` bridge instantiation is automatic via
-`morrey_chart_C0_embedding`. We deliver the corresponding wrapper. -/
-
 /-- **Sanity check.** At `m = 0`, supplying the bridge from
-`morrey_chart_C0_embedding` to the parametric theorem yields the same
+`morrey_C0_embedding_of_compact` to the parametric theorem yields the same
 `ContMDiff 0` representative as `memWkpChart_forall_implies_contMDiff_zero_representative`. -/
 theorem memWkpChart_forall_implies_contMDiff_zero_representative_via_bridge
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
@@ -271,24 +214,16 @@ theorem memWkpChart_forall_implies_contMDiff_zero_representative_via_bridge
         (I := I) (M := M) g] u := by
   refine memWkpChart_forall_implies_contMDiff_m_representative
     (I := I) (M := M) g 0 hu_meas h_witness ?_
-  -- Bridge: `MemWkpChart g 1 (ofReal p) v` with `p > n` ⇒ `ContMDiff 0 v_smooth`.
   intro p hp_dim v hv_meas hv
-  -- Reduce `MemWkpChart g (0 + 1)` to `MemWkpChart g 1`.
   have hv1 : MemWkpChart (I := I) (M := M) g 1 (ENNReal.ofReal p) v := by
     have : (0 : ℕ) + 1 = 1 := rfl
     rw [this] at hv
     exact hv
   obtain ⟨v_smooth, _C, hv_cont, _hC_nn, hv_ae, _hv_bound⟩ :=
-    morrey_chart_C0_embedding (I := I) (M := M) g hp_dim hv_meas hv1
+    morrey_C0_embedding_of_compact (I := I) (M := M) g hp_dim hv_meas hv1
   refine ⟨v_smooth, contMDiff_zero_iff.mpr hv_cont, ?_⟩
-  -- Convert `riemannianMeasure g (chartAtlasPOU I M)` to `riemannianVolumeMeasure I M g`.
   rw [DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure_def]
   exact hv_ae
-
-/-! ## Chart-pullback `C^m` smoothness lemma
-
-Finite-order `C^m` version of the existing `chartPullback_contMDiff` (which is
-stated at `C^∞`), required by higher-order chart-Sobolev to `C^m` constructions. -/
 
 namespace SuperCriticalBridge
 
@@ -312,8 +247,6 @@ lemma chartPullback_contMDiff_of_contDiff_finite
     (hψ_supp : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
     ContMDiff I 𝓘(ℝ, ℝ) m (chartPullback I α ψ) := by
   classical
-  -- The proof parallels `chartPullback_contMDiff` (at order ∞) but with finite
-  -- order `m`.
   set T : Set M := tsupport (chartPullback I α ψ) with hT_def
   have hT_closed : IsClosed T := isClosed_tsupport _
   refine contMDiff_of_locally_contMDiffOn ?_
@@ -334,7 +267,6 @@ lemma chartPullback_contMDiff_of_contDiff_finite
             (chartAt H α).source :=
           contMDiffOn_extChartAt (I := I) (n := ∞) (x := α)
         refine hSmooth.of_le ?_
-        -- (m : WithTop ℕ∞) ≤ ∞ = ((⊤ : ℕ∞) : WithTop ℕ∞).
         change ((m : ℕ∞) : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞)
         exact WithTop.coe_le_coe.mpr le_top
       have h_toE : ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, EuclN) m
@@ -351,16 +283,10 @@ lemma chartPullback_contMDiff_of_contDiff_finite
     refine h_comp_smooth.congr ?_
     intro y hy
     exact h_eq_on hy
-  · -- Off chart source: the pullback is identically zero near x (since
-    -- tsupport ⊆ chart source).
-    have h_tsupp_chartPull : tsupport (chartPullback I α ψ) ⊆ (chartAt H α).source := by
-      -- Use the existing infrastructure for the ∞-case; the support argument
-      -- is independent of smoothness order.
+  · have h_tsupp_chartPull : tsupport (chartPullback I α ψ) ⊆ (chartAt H α).source := by
       have h0 : tsupport (chartPullback I α ψ) ⊆
           (extChartAt I α).symm ''
             ((toEuclidean (E := E)).symm '' tsupport ψ) := by
-        -- This is the conclusion of `tsupport_chartPullback_subset` (private)
-        -- but is purely topological. We derive it directly here.
         classical
         set Kψ : Set EuclN := tsupport ψ with hKψ_def
         have hKψ_compact : IsCompact Kψ := hψ_cpt
@@ -448,21 +374,6 @@ lemma chartPullback_contMDiff_of_contDiff_finite
 
 end SuperCriticalBridge
 
-/-! ## Unconditional super-critical witness at arbitrary order `m`
-
-The super-critical witness `ChartSobolevSuperCriticalWitness g m u` is
-constructed unconditionally from the hypothesis `∀ k, MemWkpChart g (2k) 2 u`
-by iterating the sub-critical chart-tower step `wkpNormChart_succ_subcritical_step`
-finitely many times.
-
-We use a regular exponent `p₀ ∈ [1, 2]` close to `2` (chosen via
-`RegularExponent.exists_regular_exponent_below` to avoid the borderline values
-`n / j`) and start the iteration from `MemWkpChart g (m + 1 + s_max) (ofReal p₀) u`
-for `s_max := Module.finrank ℝ E`. Each step reduces the order by `1` and grows
-the exponent according to the Sobolev iteration `p ↦ n * p / (n - p)`. After at
-most `s_max` sub-critical steps the exponent surpasses `n`, yielding a
-membership at order `m + 1` and exponent `> n`. -/
-
 namespace SuperCriticalWitness
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -491,7 +402,6 @@ private theorem chain_to_supercritical
   induction s with
   | zero =>
       intro p hp_one _hreg hkp u hu
-      -- Base case: s = 0, so order is m+1+0 = m+1; (0+1)·p = p > n.
       have hp_dim : (Module.finrank ℝ E : ℝ) < p := by
         have : ((0 + 1 : ℕ) : ℝ) = 1 := by norm_num
         rw [this, one_mul] at hkp
@@ -500,26 +410,19 @@ private theorem chain_to_supercritical
       simpa using hu
   | succ s ih =>
       intro p hp_one hreg hkp u hu
-      -- Order is m + 1 + (s + 1) = m + s + 2.
-      -- Regularity at depth s + 2 yields p ≠ n.
       have hp_ne_n : p ≠ (Module.finrank ℝ E : ℝ) :=
         hreg.p_ne_n_of_one_le (by omega)
-      -- Case split: p > n (early-terminate via order-monotonicity) or p < n (step).
       rcases lt_or_gt_of_ne hp_ne_n with hp_lt | hp_gt
-      · -- Sub-critical step at order k := m + 1 + s.
-        have hp_pos : 0 < p := by linarith
+      · have hp_pos : 0 < p := by linarith
         obtain ⟨_C, _hC_nn, h_step⟩ :=
           wkpNormChart_succ_subcritical_step (I := I) (M := M) g (k := m + 1 + s)
             hp_one hp_lt
-        -- hu : MemWkpChart g (m + 1 + (s + 1)) (ofReal p) u
-        --    = MemWkpChart g ((m + 1 + s) + 1) (ofReal p) u.
         have hu' : MemWkpChart (I := I) (M := M) g ((m + 1 + s) + 1)
             (ENNReal.ofReal p) u := by
           have : m + 1 + (s + 1) = (m + 1 + s) + 1 := by ring
           rw [this] at hu
           exact hu
         obtain ⟨h_mem_p1, _h_norm_p1⟩ := h_step hu'
-        -- Tower-step exponent.
         set p_1 : ℝ := (Module.finrank ℝ E : ℝ) * p /
           ((Module.finrank ℝ E : ℝ) - p) with hp_1_def
         have hd_pos : 0 < (Module.finrank ℝ E : ℝ) := by
@@ -530,12 +433,7 @@ private theorem chain_to_supercritical
           rw [hp_1_def, le_div_iff₀ hd_p_pos]
           nlinarith [hp_pos]
         have hp_1_one : 1 ≤ p_1 := le_trans hp_one hp_1_ge_p
-        -- New super-critical inequality: (s + 1) * p_1 > n.
         have hkp_next : (Module.finrank ℝ E : ℝ) < ((s + 1 : ℕ) : ℝ) * p_1 := by
-          -- We have hkp : n < ((s + 1) + 1 : ℕ) * p = (s + 2) * p.
-          -- IterationCalc.kp1_real_gt_d_of_kp1p_gt_d expects (k + 1) * p > n
-          -- and concludes k * (n * p / (n - p)) > n.
-          -- We need (s + 1) * p_1 > n; here "k" plays the role of (s + 1).
           have h_form : (Module.finrank ℝ E : ℝ) < ((s + 1 : ℕ) + 1 : ℝ) * p := by
             have hkp_cast : ((s + 1 + 1 : ℕ) : ℝ) * p =
                 ((s + 1 : ℕ) + 1 : ℝ) * p := by push_cast; ring
@@ -544,22 +442,18 @@ private theorem chain_to_supercritical
           have h_id :=
             DifferentialGeometry.Analysis.Sobolev.Chart.IterationCalc.kp1_real_gt_d_of_kp1p_gt_d
               (Module.finrank ℝ E) (s + 1) p hp_pos hp_lt h_form
-          -- h_id : (Module.finrank ℝ E : ℝ) < ((s + 1 : ℕ) : ℝ) * (n * p / (n - p)).
           rw [hp_1_def]
           exact h_id
-        -- New regularity of p_1 at depth (s + 1).
         have hreg_p_1 :
             DifferentialGeometry.Analysis.Sobolev.Chart.RegularExponent.IsRegular
               (Module.finrank ℝ E : ℝ) p_1 (s + 1) := by
           rw [hp_1_def]
           exact hreg.tower_step hp_one hp_lt
-        -- Recurse: h_mem_p1 has order m + 1 + s and exponent ofReal p_1.
         have h_mem_p1' : MemWkpChart (I := I) (M := M) g (m + 1 + s)
             (ENNReal.ofReal p_1) u := by
           rw [hp_1_def]; exact h_mem_p1
         exact ih hp_1_one hreg_p_1 hkp_next h_mem_p1'
-      · -- Super-critical: p > n. Drop order from m + 1 + (s + 1) to m + 1.
-        have hu_order : MemWkpChart (I := I) (M := M) g (m + 1) (ENNReal.ofReal p) u :=
+      · have hu_order : MemWkpChart (I := I) (M := M) g (m + 1) (ENNReal.ofReal p) u :=
           MemWkpChart.le_of_le (by omega) hu
         exact ⟨p, hp_one, hp_gt, hu_order⟩
 
@@ -582,12 +476,9 @@ theorem chartSobolevSuperCriticalWitness_of_h_all
     (h_all : ∀ k : ℕ, MemWkpChart (I := I) (M := M) g (2 * k) 2 u) :
     ChartSobolevSuperCriticalWitness (I := I) (M := M) g m u := by
   classical
-  -- Set n := finrank ℝ E.
   set n : ℕ := Module.finrank ℝ E with hn_def
   have hn_pos : 0 < n := NeZero.pos _
-  -- Iteration depth s_max := n; then (s_max + 1) * 2 = 2n + 2 > n.
   set s_max : ℕ := n with hs_max_def
-  -- Pick a regular exponent p₀ ∈ [1, 2) at depth s_max + 1 with (s_max + 1) * p₀ > n.
   have hp_2_strict : (1 : ℝ) < 2 := by norm_num
   have hs_max_succ_pos : 1 ≤ s_max + 1 := by omega
   have h_n_lt_kp_2 : (n : ℝ) < ((s_max + 1 : ℕ) : ℝ) * 2 := by
@@ -599,24 +490,18 @@ theorem chartSobolevSuperCriticalWitness_of_h_all
   obtain ⟨p₀, hp₀_one, hp₀_lt, h_n_lt_kp₀, hp₀_reg⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Chart.RegularExponent.exists_regular_exponent_below
       (n : ℝ) (s_max + 1) hs_max_succ_pos hp_2_strict h_n_lt_kp_2
-  -- The witness needs `MemWkpChart g (m + 1 + s_max) (ofReal p₀) u`.
-  -- We obtain it from `h_all k₀` with `k₀ := m + n + 1`, then drop order
-  -- (via `MemWkpChart.le_of_le`) and drop exponent from `2` to `ofReal p₀`
-  -- (via `ChartLevelMonoExp.memWkpChart_mono_exponent`).
   set k₀ : ℕ := m + n + 1 with hk₀_def
   have h2k₀_ge : m + 1 + s_max ≤ 2 * k₀ := by
     rw [hs_max_def, hk₀_def]; omega
   have hu_at_2k₀ : MemWkpChart (I := I) (M := M) g (2 * k₀) 2 u := h_all k₀
   have hu_order : MemWkpChart (I := I) (M := M) g (m + 1 + s_max) 2 u :=
     MemWkpChart.le_of_le h2k₀_ge hu_at_2k₀
-  -- Convert exponent `(2 : ℝ≥0∞)` to `ENNReal.ofReal 2`.
   have h_two_eq : (2 : ℝ≥0∞) = ENNReal.ofReal 2 := by
     rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) from by norm_num]
     rw [ENNReal.ofReal_natCast]
     rfl
   have hu_order' : MemWkpChart (I := I) (M := M) g (m + 1 + s_max)
       (ENNReal.ofReal 2) u := by rw [← h_two_eq]; exact hu_order
-  -- Drop exponent from 2 to ofReal p₀ via chart-level exponent monotonicity.
   have hp₀_one_enn : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p₀ := by
     rw [show (1 : ℝ≥0∞) = ENNReal.ofReal 1 from by simp]
     exact ENNReal.ofReal_le_ofReal hp₀_one
@@ -626,27 +511,8 @@ theorem chartSobolevSuperCriticalWitness_of_h_all
       (ENNReal.ofReal p₀) u :=
     DifferentialGeometry.Analysis.Sobolev.Chart.ChartLevelMonoExp.memWkpChart_mono_exponent
       (I := I) (M := M) g hp₀_one_enn hp₀_le_two_enn hu_order'
-  -- Apply the chain driver.
   exact SuperCriticalWitness.chain_to_supercritical (I := I) (M := M) g m s_max
     hp₀_one hp₀_reg h_n_lt_kp₀ hu_p₀
-
-/-! ## Unconditional super-critical bridge: `MemWkpChart g (m+1) (ofReal p) u` with
-`p > n` yields a `ContMDiff m` representative
-
-This is the higher-order analogue of `morrey_chart_C0_embedding`. The proof composes:
-
-* the unconditional `C^0` chain
-  (`iterated_sobolev_embedding_chart_C0_unconditional`) to obtain a continuous
-  representative `ũ` of `u`;
-* the Euclidean higher-order Morrey representative
-  (`EuclideanMorrey.morrey_iteratedFDeriv_representative`) applied per chart to
-  obtain a Euclidean `C^m` representative of the chart-pushed function;
-* uniqueness of continuous representatives on open sets of positive measure
-  (`MeasureTheory.Measure.eqOn_open_of_ae_eq`) to identify `ũ` (after
-  chart-pushing) with the Euclidean `C^m` representative;
-* the standard "division by a positive smooth weight" argument at the chosen
-  partition-of-unity index to convert the per-chart `C^m` smoothness of the
-  product `ρ_α · ũ` into `ContMDiffAt I 𝓘(ℝ, ℝ) m ũ x`. -/
 
 namespace SuperCriticalBridge
 
@@ -731,7 +597,6 @@ theorem memWkpChart_super_critical_implies_contMDiff_m_representative
   haveI : BorelSpace E := ⟨rfl⟩
   letI : MeasurableSpace M := borel M
   haveI : BorelSpace M := ⟨rfl⟩
-  -- Basic numeric bounds on `p`.
   have hn_pos : 0 < Module.finrank ℝ E := NeZero.pos _
   have hn_real_pos : (0 : ℝ) < (Module.finrank ℝ E : ℝ) := by exact_mod_cast hn_pos
   have hn_one : 1 ≤ Module.finrank ℝ E := hn_pos
@@ -742,7 +607,6 @@ theorem memWkpChart_super_critical_implies_contMDiff_m_representative
   have hp_enn_one : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p := by
     rw [show (1 : ℝ≥0∞) = ENNReal.ofReal 1 from by simp]
     exact ENNReal.ofReal_le_ofReal hp_one
-  -- Step A: continuous C^0 representative via the unconditional iterated embedding.
   have h_m1_pos : 1 ≤ m + 1 := Nat.succ_le_succ (Nat.zero_le _)
   have h_kp_gt_n : (Module.finrank ℝ E : ℝ) < ((m + 1 : ℕ) : ℝ) * p := by
     have h_m1_real_pos : (1 : ℝ) ≤ ((m + 1 : ℕ) : ℝ) := by
@@ -755,29 +619,20 @@ theorem memWkpChart_super_critical_implies_contMDiff_m_representative
   obtain ⟨ũ, _C, hũ_cont, _hC_nn, hũ_ae, _hũ_bound⟩ :=
     iterated_sobolev_embedding_chart_C0_unconditional
       (I := I) (M := M) g h_m1_pos hp_one h_kp_gt_n h_side hu_meas hu
-  -- Measurability of `ũ` (from continuity).
   have hũ_meas : Measurable ũ := hũ_cont.measurable
   refine ⟨ũ, ?_, ?_⟩
-  · -- Step B–D: `ContMDiff I 𝓘(ℝ, ℝ) m ũ`.
-    -- We work locally: for each `x : M` we exhibit an open neighborhood on
-    -- which `ũ` is `C^m`.
-    refine contMDiff_of_locally_contMDiffOn ?_
+  · refine contMDiff_of_locally_contMDiffOn ?_
     intro x
-    -- Pick a chart index `α` with `ρ_α x > 0`.
     have hρ_pos : ∃ α : M, 0 <
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) x :=
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M).exists_pos_of_mem
         (Set.mem_univ _)
     obtain ⟨α, hρα_pos⟩ := hρ_pos
-    -- The chart-α partition weight is subordinate, so `x ∈ chartAt H α` source.
     have hx_src : x ∈ (chartAt H α).source := by
       refine DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate
         (I := I) (M := M) α ?_
       exact subset_tsupport _ (by exact ne_of_gt hρα_pos)
-    -- Open neighborhood `V` of `x` where `ρ_α ≥ c > 0`, with `V ⊆ chart α source`.
-    -- We construct it inline (mirroring the private `exists_open_nbhd_pou_pos`
-    -- from `Integral/Measure/Properties.lean`).
     have hρα_cont : Continuous (fun y : M =>
         ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) : M → ℝ) y) :=
@@ -809,17 +664,14 @@ theorem memWkpChart_super_critical_implies_contMDiff_m_representative
     have hc_bound : ∀ y ∈ V, c ≤
         ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) : M → ℝ) y := fun y hy => le_of_lt hy.2
-    -- `y₀ := toEuclidean (extChartAt I α x) ∈ chartTargetEuclid α`.
     set y₀ : EuclN := (toEuclidean (E := E)) (extChartAt I α x) with hy₀_def
     have hy₀_in : y₀ ∈ chartTargetEuclid (I := I) (M := M) α := by
       have hx_ext_src : x ∈ (extChartAt I α).source := by
         rw [extChartAt_source (I := I)]; exact hx_src
       refine ⟨extChartAt I α x, (extChartAt I α).map_source hx_ext_src, ?_⟩
       rfl
-    -- Pick `R > 0` with `ball y₀ R ⊆ chartTargetEuclid α`.
     obtain ⟨R, hR_pos, hR_subset⟩ :=
       exists_ball_subset_chartTargetEuclid (I := I) (M := M) α hy₀_in
-    -- Per-chart MemWkp for the POU-weighted chart-pushed function.
     have h_chart_mem :
         DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
           (d := Module.finrank ℝ E) (m + 1) (ENNReal.ofReal p)
@@ -827,7 +679,6 @@ theorem memWkpChart_super_critical_implies_contMDiff_m_representative
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
           (chartTargetEuclid (I := I) (M := M) α) :=
       hu α
-    -- Restrict to the smaller open ball.
     have h_ball_open : IsOpen (Metric.ball y₀ R) := Metric.isOpen_ball
     have h_chart_target_open :
         IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
@@ -841,13 +692,9 @@ theorem memWkpChart_super_critical_implies_contMDiff_m_representative
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.mono_set
         (d := Module.finrank ℝ E) hp_enn_one h_chart_target_open h_ball_open
         hR_subset h_chart_mem
-    -- Apply the Euclidean higher-order Morrey representative theorem.
     obtain ⟨u_α, hu_α_cdiff, hu_α_ae⟩ :=
       DifferentialGeometry.Analysis.Sobolev.EuclideanMorrey.morrey_iteratedFDeriv_representative
         (d := Module.finrank ℝ E) (p := p) (x₀ := y₀) (R := R) hp hR_pos m h_chart_mem_ball
-    -- `chartPushed ρ α u =ᵐ[volume.restrict ball(y₀, R/4)] u_α`.
-    -- Translate ũ =ᵐ u via `chartPushed_aeEq_of_ae_eq_riemannianMeasure`:
-    -- `chartPushed ρ α ũ =ᵐ[volume.restrict (chartTargetEuclid α)] chartPushed ρ α u`.
     have hũ_ae_u :
         ũ =ᵐ[DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)] u :=
@@ -861,7 +708,6 @@ theorem memWkpChart_super_critical_implies_contMDiff_m_representative
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u :=
       chartPushed_aeEq_of_ae_eq_riemannianMeasure (I := I) (M := M)
         g α hũ_meas hu_meas hũ_ae_u
-    -- Restrict to the smaller ball R/4.
     have h_ball_quarter_open : IsOpen (Metric.ball y₀ (R / 4)) := Metric.isOpen_ball
     have h_ball_quarter_subset_ball : Metric.ball y₀ (R / 4) ⊆ Metric.ball y₀ R := by
       intro z hz
@@ -871,7 +717,6 @@ theorem memWkpChart_super_critical_implies_contMDiff_m_representative
     have h_ball_quarter_subset_target :
         Metric.ball y₀ (R / 4) ⊆ chartTargetEuclid (I := I) (M := M) α :=
       h_ball_quarter_subset_ball.trans hR_subset
-    -- `chartPushed ρ α ũ =ᵐ[volume.restrict ball(y₀, R/4)] chartPushed ρ α u`.
     have h_pushed_ae_quarter :
         chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α ũ
@@ -887,14 +732,11 @@ theorem memWkpChart_super_critical_implies_contMDiff_m_representative
       rw [Filter.EventuallyEq, MeasureTheory.ae_restrict_iff' hMeas_target] at h_pushed_ae
       filter_upwards [h_pushed_ae] with z hz hz_in
       exact hz (h_ball_quarter_subset_target hz_in)
-    -- Combine: `chartPushed ρ α ũ =ᵐ[vol.restrict ball R/4] u_α`.
     have h_ũ_pushed_ae_u_α :
         chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α ũ
           =ᵐ[(volume : Measure EuclN).restrict (Metric.ball y₀ (R / 4))]
           u_α := h_pushed_ae_quarter.trans hu_α_ae
-    -- Both functions are continuous on the open ball R/4. Apply
-    -- `eqOn_open_of_ae_eq` to deduce pointwise equality.
     have h_ũ_pushed_contOn :
         ContinuousOn (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α ũ)
@@ -912,43 +754,26 @@ theorem memWkpChart_super_critical_implies_contMDiff_m_representative
           u_α (Metric.ball y₀ (R / 4)) :=
       MeasureTheory.Measure.eqOn_open_of_ae_eq h_ũ_pushed_ae_u_α
         h_ball_quarter_open h_ũ_pushed_contOn h_u_α_contOn
-    -- Step D: assemble the local `C^m` smoothness of `ũ` at `x`.
-    -- The neighborhood `W` of `x`: intersect `V` (where `ρ_α ≥ c > 0`) with the
-    -- chart-α pre-image of the open ball `Metric.ball y₀ (R/4)` under
-    -- `toEuclidean ∘ extChartAt I α`. This is open by combining `hVopen` with
-    -- `isOpen_extChartAt_preimage`.
-    -- For convenience define the chart-pre-image set `Q` first.
     set Q : Set M :=
       (chartAt H α).source ∩ extChartAt I α ⁻¹'
         ((toEuclidean (E := E)).symm '' Metric.ball y₀ (R / 4))
       with hQ_def
     have hQ_open : IsOpen Q := by
       refine isOpen_extChartAt_preimage (I := I) α ?_
-      -- `toE.symm '' ball y₀ (R/4)` is open because `toE.symm` is an open map
-      -- (it's a homeomorphism via the underlying CLE).
       have : IsOpen ((toEuclidean (E := E)).symm '' Metric.ball y₀ (R / 4)) :=
         (toEuclidean (E := E)).symm.toHomeomorph.isOpenMap _ h_ball_quarter_open
       exact this
     set W : Set M := V ∩ Q with hW_def
     have hW_open : IsOpen W := hVopen.inter hQ_open
-    -- `x ∈ W`.
     have hxQ : x ∈ Q := by
       refine ⟨hx_src, ?_⟩
-      -- Goal: `extChartAt I α x ∈ ↑(toEuclidean (E := E)).symm '' Metric.ball y₀ (R/4)`.
-      -- Pick `z := y₀`. We need `y₀ ∈ ball y₀ (R/4)` and `toE.symm y₀ = ext_chart α x`.
       refine ⟨y₀, ?_, ?_⟩
       · rw [Metric.mem_ball]
         change dist y₀ y₀ < R / 4
         simp; linarith
-      · -- `toE.symm y₀ = toE.symm (toE (ext_chart α x)) = ext_chart α x`.
-        exact (toEuclidean (E := E)).symm_apply_apply (extChartAt I α x)
+      · exact (toEuclidean (E := E)).symm_apply_apply (extChartAt I α x)
     have hxW : x ∈ W := ⟨hxV, hxQ⟩
     refine ⟨W, hW_open, hxW, ?_⟩
-    -- Now show ContMDiffOn I 𝓘(ℝ, ℝ) m ũ W.
-    -- On W: ρ_α(z) > 0 (in fact ≥ c > 0), so we can write
-    -- ũ(z) = (chartPushed ρ α ũ) (toE (ext_chart z)) / ρ_α(z).
-    -- Both numerator and denominator are smooth at z.
-    -- The numerator equals u_α (toE (ext_chart z)) on W, and u_α is ContDiff m.
     have h_ext_smooth : ContMDiffOn I 𝓘(ℝ, E) m (extChartAt I α) W := by
       have h_ext_chart_smooth : ContMDiffOn I 𝓘(ℝ, E) (∞ : WithTop ℕ∞)
           (extChartAt I α) (chartAt H α).source :=
@@ -966,7 +791,6 @@ theorem memWkpChart_super_critical_implies_contMDiff_m_representative
         (fun y : M => (toEuclidean (E := E)) (extChartAt I α y)) W := by
       intro y hy
       exact h_toE_smooth.contMDiffAt.comp_contMDiffWithinAt y (h_ext_smooth y hy)
-    -- u_α composed with `toE ∘ extChartAt` is ContMDiffOn m on W.
     have hu_α_contMDiff : ContMDiff 𝓘(ℝ, EuclN) 𝓘(ℝ, ℝ) m u_α :=
       hu_α_cdiff.contMDiff
     have h_uα_comp_smooth : ContMDiffOn I 𝓘(ℝ, ℝ) m
@@ -974,7 +798,6 @@ theorem memWkpChart_super_critical_implies_contMDiff_m_representative
       intro y hy
       exact hu_α_contMDiff.contMDiffAt.comp_contMDiffWithinAt y
         (h_toE_ext_smooth y hy)
-    -- ρ_α is smooth.
     have h_rho_smooth : ContMDiff I 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞)
         ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
@@ -985,15 +808,12 @@ theorem memWkpChart_super_critical_implies_contMDiff_m_representative
       refine h_rho_smooth.of_le ?_
       change ((m : ℕ∞) : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞)
       exact WithTop.coe_le_coe.mpr le_top
-    -- ρ_α is bounded below by `c > 0` on W (since W ⊆ V).
     have h_rho_pos_on_W : ∀ y ∈ W, 0 <
         ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) : M → ℝ) y := by
       intro y hy
       have hyV : y ∈ V := hy.1
       exact lt_of_lt_of_le hc_pos (hc_bound y hyV)
-    -- The smoothness of `ũ` on W follows from
-    -- ũ z = u_α(toE(ext_chart z)) / ρ_α z on W.
     have h_eq_on_W : Set.EqOn ũ
         (fun y : M =>
           u_α ((toEuclidean (E := E)) (extChartAt I α y)) /
@@ -1001,8 +821,6 @@ theorem memWkpChart_super_critical_implies_contMDiff_m_representative
               : C^∞⟮I, M; ℝ⟯) : M → ℝ) y) W := by
       intro y hy
       have hy_src : y ∈ (chartAt H α).source := hVsource hy.1
-      -- y is in chart source. By the chartPushed identity,
-      -- chartPushed ρ α ũ (toE (ext_chart α y)) = ρ_α(y) * ũ(y).
       have h_push_eq :
           chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α ũ
@@ -1010,45 +828,34 @@ theorem memWkpChart_super_critical_implies_contMDiff_m_representative
             ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
               : C^∞⟮I, M; ℝ⟯) : M → ℝ) y * ũ y :=
         chartPushed_apply_toE_extChartAt (I := I) (M := M) α ũ hy_src
-      -- The point toE (ext_chart α y) is in ball y₀ (R/4) since y ∈ W ⊆ Q.
       have hyQ : y ∈ Q := hy.2
       have hyQ_in_ball : (toEuclidean (E := E)) (extChartAt I α y) ∈
           Metric.ball y₀ (R / 4) := by
-        -- hyQ.2 : ext_chart α y ∈ toE.symm '' ball
         rcases hyQ.2 with ⟨z', hz'_in, hz'_eq⟩
-        -- hz'_in : z' ∈ ball, hz'_eq : toE.symm z' = ext_chart α y.
-        -- Then toE (ext_chart α y) = toE (toE.symm z') = z' ∈ ball.
         have h_toE_eq :
             (toEuclidean (E := E)) (extChartAt I α y) = z' := by
           rw [← hz'_eq]
           exact (toEuclidean (E := E)).apply_symm_apply z'
         rw [h_toE_eq]
         exact hz'_in
-      -- By the EqOn from `h_pushed_eq_u_α_on_ball`:
-      -- chartPushed ρ α ũ (toE (ext_chart y)) = u_α (toE (ext_chart y)).
       have h_push_eq_uα :
           chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α ũ
               ((toEuclidean (E := E)) (extChartAt I α y)) =
             u_α ((toEuclidean (E := E)) (extChartAt I α y)) :=
         h_pushed_eq_u_α_on_ball hyQ_in_ball
-      -- Combine: ρ_α y * ũ y = u_α (toE (ext_chart y)).
       rw [h_push_eq] at h_push_eq_uα
-      -- So ũ y = u_α (toE (ext_chart y)) / ρ_α y (since ρ_α y > 0).
       have hρ_pos : 0 <
           ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
             : C^∞⟮I, M; ℝ⟯) : M → ℝ) y :=
         h_rho_pos_on_W y hy
       have hρ_ne : ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) : M → ℝ) y ≠ 0 := ne_of_gt hρ_pos
-      -- From `ρ y * ũ y = u_α(...)` and `ρ y ≠ 0`, derive `ũ y = u_α(...) / ρ y`.
       rw [eq_div_iff hρ_ne, mul_comm]
       exact h_push_eq_uα
-    -- Use the equality and ContMDiffOn of the RHS.
     have h_rho_smooth_on : ContMDiffOn I 𝓘(ℝ, ℝ) m
         ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) : M → ℝ) W := h_rho_smooth_m.contMDiffOn
-    -- ContMDiffOn for the quotient.
     have h_quot_smooth : ContMDiffOn I 𝓘(ℝ, ℝ) m
         (fun y : M =>
           u_α ((toEuclidean (E := E)) (extChartAt I α y)) /
@@ -1065,26 +872,10 @@ theorem memWkpChart_super_critical_implies_contMDiff_m_representative
     refine h_quot_smooth.congr ?_
     intro y hy
     exact (h_eq_on_W hy)
-  · -- Step E: a.e. equality.
-    rw [DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure_def]
+  · rw [DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure_def]
     exact hũ_ae
 
 end SuperCriticalBridge
-
-/-! ## Unconditional `ContMDiff m` and `ContMDiff ∞` representatives
-
-The unconditional super-critical witness builder
-(`chartSobolevSuperCriticalWitness_of_h_all`) and the unconditional
-super-critical bridge
-(`SuperCriticalBridge.memWkpChart_super_critical_implies_contMDiff_m_representative`)
-compose into an unconditional `ContMDiff m` representative for any `m : ℕ`.
-
-Pasting these together for every `m : ℕ` yields a family of continuous
-representatives, all a.e. equal to `u`. Continuity + the positive-measure
-property on nonempty open sets (`IsOpenPosMeasure`) of the canonical
-Riemannian volume measure forces all such representatives to coincide
-pointwise. The single function so obtained is `ContMDiff m` for every
-`m : ℕ`, hence `ContMDiff ∞` by `contMDiff_infty`. -/
 
 /-- **Unconditional `ContMDiff m` representative.**
 
@@ -1113,12 +904,17 @@ theorem memWkpChart_forall_implies_contMDiff_m_representative_uncond
   exact SuperCriticalBridge.memWkpChart_super_critical_implies_contMDiff_m_representative
     (I := I) (M := M) g m hp_dim hv_meas hv
 
-/-- **Unconditional `ContMDiff ∞` representative.**
+/-- **Sobolev-to-smooth representative.**
 
 For a closed Riemannian manifold modelled on an inner-product space of
-dimension `n ≥ 1`, the hypothesis `∀ k, MemWkpChart g (2k) 2 u` together
-with measurability of `u` yields a single smooth (`ContMDiff I 𝓘(ℝ, ℝ) ∞`)
-a.e.-representative.
+dimension `n ≥ 1`, a measurable `u` lying in `W^{2k,2}` for every `k`
+(`∀ k, MemWkpChart g (2k) 2 u`) admits a single smooth
+(`ContMDiff I 𝓘(ℝ, ℝ) ∞`) representative `u_smooth` equal to `u`
+almost everywhere for the canonical Riemannian volume measure.
+
+Here "closed" is encoded by `CompactSpace M`, `T2Space M`,
+`SigmaCompactSpace M`, and `I.Boundaryless`, and `n ≥ 1` by
+`NeZero (Module.finrank ℝ E)`.
 
 The proof picks the order-`0` representative `u_smooth` from
 `memWkpChart_forall_implies_contMDiff_m_representative_uncond`. For each
@@ -1128,7 +924,7 @@ of the canonical Riemannian volume measure (via `Continuous.ae_eq_iff_eq`)
 upgrades a.e. equality of continuous functions to pointwise equality.
 Hence `u_smooth` itself is `ContMDiff m` for every `m : ℕ`, which gives
 `ContMDiff ∞` via Mathlib's `contMDiff_infty`. -/
-theorem memWkpChart_forall_implies_smooth_representative
+theorem sobolev_smooth_representative_of_memWkpChart_forall
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -1142,7 +938,6 @@ theorem memWkpChart_forall_implies_smooth_representative
       u_smooth =ᵐ[DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
         (I := I) (M := M) g] u := by
   classical
-  -- For every `m : ℕ`, pick a `ContMDiff m` a.e.-representative.
   have h_choice : ∀ m : ℕ, ∃ u_m : M → ℝ,
       ContMDiff I 𝓘(ℝ, ℝ) m u_m ∧
       u_m =ᵐ[DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
@@ -1150,34 +945,26 @@ theorem memWkpChart_forall_implies_smooth_representative
     memWkpChart_forall_implies_contMDiff_m_representative_uncond
       (I := I) (M := M) g m hu_meas h_all
   choose u_fam hu_fam_smooth hu_fam_ae using h_choice
-  -- Designate `u_smooth := u_fam 0`.
   set u_smooth : M → ℝ := u_fam 0 with hu_smooth_def
-  -- The canonical Riemannian volume measure is positive on nonempty open sets.
   have h_pos : (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
       (I := I) (M := M) g).IsOpenPosMeasure :=
     DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure_isOpenPosMeasure
       (I := I) (M := M) g
-  -- For every `m : ℕ`, `u_fam m = u_smooth` as functions.
   have h_eq : ∀ m : ℕ, u_fam m = u_smooth := by
     intro m
     have h_fam_cont : Continuous (u_fam m) := (hu_fam_smooth m).continuous
     have h_smooth_cont : Continuous u_smooth := (hu_fam_smooth 0).continuous
-    -- `u_fam m =ᵐ u =ᵐ u_smooth`, so `u_fam m =ᵐ u_smooth`.
     have h_ae : u_fam m =ᵐ[DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
         (I := I) (M := M) g] u_smooth :=
       (hu_fam_ae m).trans (hu_fam_ae 0).symm
-    -- IsOpenPosMeasure ⇒ continuous + a.e. equal ⇒ equal.
     exact (Continuous.ae_eq_iff_eq _ h_fam_cont h_smooth_cont).mp h_ae
   refine ⟨u_smooth, ?_, ?_⟩
-  · -- `ContMDiff ∞ u_smooth` via `contMDiff_infty`.
-    refine contMDiff_infty.mpr ?_
+  · refine contMDiff_infty.mpr ?_
     intro m
-    -- `u_fam m = u_smooth` and `ContMDiff m (u_fam m)`.
     have := hu_fam_smooth m
     rw [h_eq m] at this
     exact this
-  · -- `u_smooth =ᵐ u` follows from `u_fam 0 =ᵐ u`.
-    exact hu_fam_ae 0
+  · exact hu_fam_ae 0
 
 end Chart
 end Sobolev

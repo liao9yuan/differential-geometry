@@ -1,4 +1,5 @@
 -- Modified 2026-04-28: updated internal import paths for project namespace
+-- Modified 2026-05-16: style-warning cleanup
 import DifferentialGeometry.External.DeGiorgi.BallExtension.SmoothCore
 
 /-!
@@ -993,7 +994,8 @@ lemma norm_sub_le_of_fderiv_bound_closedBall
 
 -- Inner proof extracted to a standalone lemma to keep the proof context small.
 omit [NeZero d] in
-set_option maxHeartbeats 1600000 in
+set_option linter.style.setOption false in
+set_option maxHeartbeats 1600000 in -- elaboration budget for chained fderiv bound on shell annulus
 lemma shellSubPsi_error_bound_at
     {ψ : E → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
     {C : ℝ} (hC_nonneg : 0 ≤ C) (hC : ∀ x ∈ sphereOneControl (d := d),
@@ -1079,7 +1081,8 @@ theorem exists_shellFormula_error_bound
   exact ⟨C, hC_nonneg, fun n x hx => shellFormula_error_bound_at (d := d) hψ hC_nonneg hC hx⟩
 
 omit [NeZero d] in
-set_option maxHeartbeats 800000 in
+set_option linter.style.setOption false in
+set_option maxHeartbeats 800000 in -- elaboration budget for bad-set indicator error bound assembly
 theorem exists_fun_error_bound_badSet
     {ψ : E → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) :
     ∃ C : ℝ, 0 ≤ C ∧

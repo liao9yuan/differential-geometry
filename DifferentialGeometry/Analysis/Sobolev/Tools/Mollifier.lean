@@ -23,8 +23,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## A fixed mollifier with support in the closed unit ball -/
-
 /-- The unit `ContDiffBump` centred at the origin with `rIn = 1/2` and
 `rOut = 1`. -/
 def mollifierBump : ContDiffBump (0 : E) where
@@ -73,8 +71,6 @@ theorem mollifier_support_subset_closedBall_one :
     Function.support (mollifier (d := d)) ⊆ Metric.closedBall (0 : E) 1 := by
   rw [mollifier_support_eq]
   exact Metric.ball_subset_closedBall
-
-/-! ## Rescaled mollifier with parameter ε -/
 
 /-- The ε-scaled `ContDiffBump` centred at the origin with `rIn = ε/2`,
 `rOut = ε`. -/

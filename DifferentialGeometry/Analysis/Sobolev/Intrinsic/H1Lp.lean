@@ -10,7 +10,7 @@ import Mathlib.Analysis.Normed.Operator.BoundedLinearMaps
 
 This file defines an `Lp`-witnessed variant of the intrinsic `H¹` predicate on a
 closed (compact, boundaryless) smooth Riemannian manifold `(M, g)`. The key
-deviation from the function-based predicate of `IntrinsicLp.lean` is that the
+deviation from the function-based predicate of `Intrinsic/Lp.lean` is that the
 weak Riemannian gradient witness here is required to live in the
 *Banach-space quotient* `MeasureTheory.Lp E 2 μ_g`, rather than being an
 arbitrary measurable map `M → E`.
@@ -60,7 +60,7 @@ classes" of measurable functions. Since the IBP identity is bilinear in
 `(u, G)` and is invariant under a.e.-modification, well-definedness of the
 predicate on classes (rather than representatives) follows automatically,
 provided one phrases the integrand correctly via `Lp.coeFn`. We do this here
-by reducing to the `HasWeakRiemannianGradLp` predicate of `IntrinsicLp.lean`
+by reducing to the `HasWeakRiemannianGradLp` predicate of `Intrinsic/Lp.lean`
 applied to the canonical representatives.
 
 The metric `g`-norm `√(g(G,G))` is included as a separate `MemLp 2`
@@ -96,14 +96,10 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicLp
 
-/-! ## File-local Borel-space instances -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Pointwise bilinearity helpers (file-local) -/
 
 private lemma g_inner_zero_left
     (g : SmoothRiemannianMetric I M) (x : M) (y : TangentSpace I x) :
@@ -149,7 +145,7 @@ private lemma g_norm_neg
   simp
 
 /-- Triangle inequality for the metric `g`-norm. Reproves the result of
-`IntrinsicLp.lean` (where it is `private`) for use in this file. -/
+`Intrinsic/Lp.lean` (where it is `private`) for use in this file. -/
 private lemma g_norm_triangle
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     Real.sqrt (g.inner x (v + w) (v + w)) ≤
@@ -165,7 +161,6 @@ private lemma g_norm_triangle
     rcases eq_or_ne w 0 with hw0 | hw0
     · simp [b, hw0]
     · exact (g.pos x w hw0).le
-  -- Cauchy-Schwarz: c^2 ≤ a * b.
   have hCS_sq : c ^ 2 ≤ a * b := by
     have hquad : ∀ t : ℝ, 0 ≤ t * t * a + 2 * t * c + b := by
       intro t
@@ -214,7 +209,6 @@ private lemma g_norm_triangle
     Real.sqrt_mul ha_nn b
   rw [hsqrt_mul] at hC
   have hc_le : c ≤ Real.sqrt a * Real.sqrt b := (le_abs_self c).trans hC
-  -- Expand the LHS quadratic form.
   have h_expand : g.inner x (v + w) (v + w) =
       a + 2 * c + b := by
     rw [g_inner_add_left g x v w (v + w),
@@ -237,8 +231,6 @@ private lemma g_norm_triangle
       from Real.sqrt_sq h_nn] at h_sqrt_le
   exact h_sqrt_le
 
-/-! ## a.e.-invariance of `HasWeakRiemannianGradLp` -/
-
 /-- Congruence of `HasWeakRiemannianGradLp` along a.e. modifications of
 both `u` and `G`. -/
 theorem hasWeakRiemannianGradLp_congr_ae
@@ -253,7 +245,6 @@ theorem hasWeakRiemannianGradLp_congr_ae
       (I := I) (M := M) g
   refine ⟨?_, ?_⟩
   · intro Y
-    -- AEStronglyMeasurable invariance under a.e. modification of `G`.
     have hcong : (fun x : M => g.inner x (G' x) (Y x))
         =ᵐ[riemannianVolumeMeasure I M g]
         (fun x : M => g.inner x (G x) (Y x)) := by
@@ -261,7 +252,6 @@ theorem hasWeakRiemannianGradLp_congr_ae
       rw [hx]
     exact (h.1 Y).congr hcong.symm
   · intro X hX
-    -- Equality of integrals via a.e. congruence on integrands.
     have hLHS : (fun x : M => g.inner x (G' x) (X x))
         =ᵐ[riemannianVolumeMeasure I M g]
         (fun x : M => g.inner x (G x) (X x)) := by
@@ -274,8 +264,6 @@ theorem hasWeakRiemannianGradLp_congr_ae
       rw [hx]
     rw [integral_congr_ae hLHS, integral_congr_ae hRHS]
     exact h.2 X hX
-
-/-! ## a.e.-invariance of the metric-`g`-norm `MemLp` hypothesis -/
 
 /-- The metric `g`-norm `MemLp` hypothesis is invariant under a.e. modification
 of the witness. -/
@@ -290,18 +278,6 @@ theorem memLp_g_norm_congr_ae
   refine (memLp_congr_ae ?_).mp h
   filter_upwards [hG] with x hx
   rw [hx]
-
-/-! ## Joint AESM pairing predicate
-
-`PairAEMeasurable g G` says that pairing the witness `G : M → E` against any
-almost-everywhere strongly measurable test field `V : M → E` produces an
-AESM scalar function `x ↦ g.inner x (G x) (V x)`. This is preserved under
-bilinear operations on `G` (addition, scalar multiplication, negation),
-under a.e. modification of `G`, and under L²-limits.
-
-For a specific concrete witness — for example the gradient of a smooth
-function — verification of the clause is delivered through chart-localized
-arguments at the point of construction. -/
 
 /-- The joint AESM pairing clause: `G` pairs AESM-ly against any AESM `V`. -/
 def PairAEMeasurable
@@ -359,7 +335,6 @@ theorem const_smul {g : SmoothRiemannianMetric I M} {G : M → E} (c : ℝ)
 theorem neg {g : SmoothRiemannianMetric I M} {G : M → E}
     (hG : PairAEMeasurable (I := I) (M := M) g G) :
     PairAEMeasurable (I := I) (M := M) g (fun x => -G x) := by
-  -- `-G = (-1) • G`.
   have h := const_smul (I := I) (M := M) (-1 : ℝ) hG
   have heq : (fun x : M => (-1 : ℝ) • G x) = (fun x : M => -G x) := by
     funext x; rw [neg_one_smul]
@@ -380,8 +355,6 @@ theorem congr_ae {g : SmoothRiemannianMetric I M} {G G' : M → E}
   exact (h V hV).congr hcong.symm
 
 end PairAEMeasurable
-
-/-! ## The `Lp`-witnessed weak Riemannian gradient predicate -/
 
 /-- `MemH1Lp g u` asserts that `u : Lp ℝ 2 μ_g` lies in the `Lp`-witnessed
 intrinsic `H¹` space. Concretely, there exists a witness
@@ -414,14 +387,11 @@ namespace MemH1Lp
 
 variable [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
 
-/-! ### Closure under zero -/
-
 /-- The zero class lies in `MemH1Lp` with the zero witness. -/
 theorem zero (g : SmoothRiemannianMetric I M) :
     MemH1Lp (I := I) (M := M) g (0 : Lp ℝ 2 (riemannianVolumeMeasure I M g)) := by
   refine ⟨(0 : Lp E 2 (riemannianVolumeMeasure I M g)), ?_, ?_, ?_⟩
-  · -- HasWeakRiemannianGradLp via a.e.-congruence with the literal zero functions.
-    have h0u : (fun x : M => ((0 : Lp ℝ 2 (riemannianVolumeMeasure I M g)) : M → ℝ) x)
+  · have h0u : (fun x : M => ((0 : Lp ℝ 2 (riemannianVolumeMeasure I M g)) : M → ℝ) x)
         =ᵐ[riemannianVolumeMeasure I M g] (fun _ : M => (0 : ℝ)) := by
       have h := Lp.coeFn_zero (E := ℝ) (μ := riemannianVolumeMeasure I M g)
         (p := (2 : ℝ≥0∞))
@@ -435,8 +405,7 @@ theorem zero (g : SmoothRiemannianMetric I M) :
       exact hx
     exact hasWeakRiemannianGradLp_congr_ae (I := I) (M := M) (g := g)
       h0u.symm h0G.symm (HasWeakRiemannianGradLp.zero (I := I) (M := M) g)
-  · -- MemLp 2 of the metric-g-norm of the zero witness.
-    have h0G : (fun x : M => ((0 : Lp E 2 (riemannianVolumeMeasure I M g)) : M → E) x)
+  · have h0G : (fun x : M => ((0 : Lp E 2 (riemannianVolumeMeasure I M g)) : M → E) x)
         =ᵐ[riemannianVolumeMeasure I M g] (fun _ : M => (0 : E)) := by
       have h := Lp.coeFn_zero (E := E) (μ := riemannianVolumeMeasure I M g)
         (p := (2 : ℝ≥0∞))
@@ -452,8 +421,7 @@ theorem zero (g : SmoothRiemannianMetric I M) :
       exact Real.sqrt_zero
     rw [hcongr]
     exact MemLp.zero
-  · -- PairAEMeasurable of the zero Lp witness, transferred via a.e.-congruence.
-    have h0G : (fun x : M => ((0 : Lp E 2 (riemannianVolumeMeasure I M g)) : M → E) x)
+  · have h0G : (fun x : M => ((0 : Lp E 2 (riemannianVolumeMeasure I M g)) : M → E) x)
         =ᵐ[riemannianVolumeMeasure I M g] (fun _ : M => (0 : E)) := by
       have h := Lp.coeFn_zero (E := E) (μ := riemannianVolumeMeasure I M g)
         (p := (2 : ℝ≥0∞))
@@ -461,8 +429,6 @@ theorem zero (g : SmoothRiemannianMetric I M) :
       exact hx
     exact PairAEMeasurable.congr_ae (I := I) (M := M) (g := g) h0G.symm
       (PairAEMeasurable.zero (I := I) (M := M) g)
-
-/-! ### Closure under scalar multiplication -/
 
 /-- Scalar multiplication closure of `MemH1Lp`. -/
 theorem const_smul (g : SmoothRiemannianMetric I M) (c : ℝ)
@@ -474,8 +440,7 @@ theorem const_smul (g : SmoothRiemannianMetric I M) (c : ℝ)
       (I := I) (M := M) g
   obtain ⟨G, hG_weak, hG_p, hG_pair⟩ := hu
   refine ⟨c • G, ?_, ?_, ?_⟩
-  · -- Transfer representative of `(c • G : Lp E 2)` to `c • G` (pointwise scalar).
-    have h_smul_G : (fun x : M => ((c • G : Lp E 2 (riemannianVolumeMeasure I M g)) :
+  · have h_smul_G : (fun x : M => ((c • G : Lp E 2 (riemannianVolumeMeasure I M g)) :
           M → E) x) =ᵐ[riemannianVolumeMeasure I M g]
         (fun x : M => c • (G : M → E) x) := by
       filter_upwards [Lp.coeFn_smul c G] with x hx
@@ -484,23 +449,19 @@ theorem const_smul (g : SmoothRiemannianMetric I M) (c : ℝ)
           M → ℝ) x) =ᵐ[riemannianVolumeMeasure I M g]
         (fun x : M => c * (u : M → ℝ) x) := by
       filter_upwards [Lp.coeFn_smul c u] with x hx
-      -- `c • (r : ℝ) = c * r`.
       simpa using hx
-    -- Apply HasWeakRiemannianGradLp.const_smul to the function-level scalar.
     have h_smul : HasWeakRiemannianGradLp (I := I) (M := M) g
         (fun x : M => c * (u : M → ℝ) x) (fun x : M => c • (G : M → E) x) :=
       HasWeakRiemannianGradLp.const_smul (I := I) (M := M) (p := 2) (by norm_num) c
         hG_weak (Lp.memLp u)
     exact hasWeakRiemannianGradLp_congr_ae (I := I) (M := M) (g := g)
       h_smul_u.symm h_smul_G.symm h_smul
-  · -- MemLp 2 of the metric `g`-norm of (c • G : Lp).
-    have h_smul_G : (fun x : M => ((c • G : Lp E 2 (riemannianVolumeMeasure I M g)) :
+  · have h_smul_G : (fun x : M => ((c • G : Lp E 2 (riemannianVolumeMeasure I M g)) :
           M → E) x) =ᵐ[riemannianVolumeMeasure I M g]
         (fun x : M => c • (G : M → E) x) := by
       filter_upwards [Lp.coeFn_smul c G] with x hx
       exact hx
     refine memLp_g_norm_congr_ae (I := I) (M := M) (g := g) (p := 2) h_smul_G.symm ?_
-    -- `√(g.inner x (c • G x) (c • G x)) = |c| * √(g.inner x (G x) (G x))`.
     have hcongr : (fun x : M => Real.sqrt
         (g.inner x ((fun y : M => c • (G : M → E) y) x)
           ((fun y : M => c • (G : M → E) y) x))) =
@@ -509,8 +470,7 @@ theorem const_smul (g : SmoothRiemannianMetric I M) (c : ℝ)
       exact g_norm_const_smul g x c ((G : M → E) x)
     rw [hcongr]
     exact hG_p.const_mul (|c|)
-  · -- PairAEMeasurable of the scaled Lp witness.
-    have h_smul_G : (fun x : M => ((c • G : Lp E 2 (riemannianVolumeMeasure I M g)) :
+  · have h_smul_G : (fun x : M => ((c • G : Lp E 2 (riemannianVolumeMeasure I M g)) :
           M → E) x) =ᵐ[riemannianVolumeMeasure I M g]
         (fun x : M => c • (G : M → E) x) := by
       filter_upwards [Lp.coeFn_smul c G] with x hx
@@ -518,14 +478,11 @@ theorem const_smul (g : SmoothRiemannianMetric I M) (c : ℝ)
     exact PairAEMeasurable.congr_ae (I := I) (M := M) (g := g) h_smul_G.symm
       (PairAEMeasurable.const_smul (I := I) (M := M) c hG_pair)
 
-/-! ### Closure under negation -/
-
 /-- Negation closure of `MemH1Lp`. -/
 theorem neg (g : SmoothRiemannianMetric I M)
     {u : Lp ℝ 2 (riemannianVolumeMeasure I M g)}
     (hu : MemH1Lp (I := I) (M := M) g u) :
     MemH1Lp (I := I) (M := M) g (-u) := by
-  -- `-u = (-1) • u`. Reduce to `const_smul`.
   have h := const_smul (I := I) (M := M) g (-1 : ℝ) hu
   have h_eq : ((-1 : ℝ) • u : Lp ℝ 2 (riemannianVolumeMeasure I M g)) = -u := by
     rw [neg_one_smul]
@@ -533,18 +490,6 @@ theorem neg (g : SmoothRiemannianMetric I M)
   exact h
 
 end MemH1Lp
-
-/-! ## Closure under addition
-
-The `MemH1Lp` predicate's closure under addition reduces, after a transfer
-of canonical `Lp`-representatives via `Lp.coeFn_add`, to the closure of
-`HasWeakRiemannianGradLp` under addition (proved in `IntrinsicLp.lean`),
-*plus* an `MemLp 2` control on the metric `g`-norm of the summed witness.
-
-The latter, in turn, follows from the joint-AESM clause baked into the
-predicate definition: applied to `V := G + G'` (the sum of the two witnesses,
-which is AESM since each witness is `Lp` hence AESM), the clause produces an
-AESM scalar pairing, which suffices to apply the triangle bound. -/
 
 namespace MemH1Lp
 
@@ -563,8 +508,7 @@ theorem add (g : SmoothRiemannianMetric I M)
   obtain ⟨G, hG_weak, hG_p, hG_pair⟩ := hu
   obtain ⟨G', hG'_weak, hG'_p, hG'_pair⟩ := hv
   refine ⟨G + G', ?_, ?_, ?_⟩
-  · -- Transfer representative of `(G + G' : Lp E 2)` to `G + G'` (pointwise).
-    have h_sum_G : (fun x : M => ((G + G' : Lp E 2 (riemannianVolumeMeasure I M g)) :
+  · have h_sum_G : (fun x : M => ((G + G' : Lp E 2 (riemannianVolumeMeasure I M g)) :
           M → E) x) =ᵐ[riemannianVolumeMeasure I M g]
         (fun x : M => (G : M → E) x + (G' : M → E) x) := by
       filter_upwards [Lp.coeFn_add G G'] with x hx
@@ -574,8 +518,6 @@ theorem add (g : SmoothRiemannianMetric I M)
         (fun x : M => (u : M → ℝ) x + (v : M → ℝ) x) := by
       filter_upwards [Lp.coeFn_add u v] with x hx
       exact hx
-    -- Apply HasWeakRiemannianGradLp.add to (u+v, G+G') as functions, then
-    -- transport via a.e.-congruence.
     have h_add : HasWeakRiemannianGradLp (I := I) (M := M) g
         (fun x : M => (u : M → ℝ) x + (v : M → ℝ) x)
         (fun x : M => (G : M → E) x + (G' : M → E) x) :=
@@ -583,25 +525,17 @@ theorem add (g : SmoothRiemannianMetric I M)
         hG_weak hG'_weak (Lp.memLp u) (Lp.memLp v) hG_p hG'_p
     exact hasWeakRiemannianGradLp_congr_ae (I := I) (M := M) (g := g)
       h_sum_u.symm h_sum_G.symm h_add
-  · -- MemLp 2 of metric `g`-norm of (G + G' : Lp). The joint-AESM clause
-    -- supplies the measurability of `√g(G+G', G+G')` = sqrt of the
-    -- expansion `g(G,G) + 2 g(G,G') + g(G',G')`, all of whose summands are
-    -- AESM (the cross term `g(G, G')` uses `hG_pair G'_aesm`).
-    have h_sum_G : (fun x : M => ((G + G' : Lp E 2 (riemannianVolumeMeasure I M g)) :
+  · have h_sum_G : (fun x : M => ((G + G' : Lp E 2 (riemannianVolumeMeasure I M g)) :
           M → E) x) =ᵐ[riemannianVolumeMeasure I M g]
         (fun x : M => (G : M → E) x + (G' : M → E) x) := by
       filter_upwards [Lp.coeFn_add G G'] with x hx
       exact hx
     refine memLp_g_norm_congr_ae (I := I) (M := M) (g := g) (p := 2) h_sum_G.symm ?_
-    -- Bound by `√g(G,G) + √g(G',G')` (triangle inequality).
-    -- Construct AESM of `√g(G+G', G+G')` from the bilinear expansion:
-    -- `g(G+G', G+G') = g(G,G) + 2 g(G,G') + g(G',G')`. Each piece is AESM.
     have hAESM : AEStronglyMeasurable
         (fun x : M => Real.sqrt
           (g.inner x ((fun y : M => (G : M → E) y + (G' : M → E) y) x)
             ((fun y : M => (G : M → E) y + (G' : M → E) y) x)))
         (riemannianVolumeMeasure I M g) := by
-      -- Witnesses for AESM-ness of each piece:
       have hGG : AEStronglyMeasurable
           (fun x : M => g.inner x ((G : M → E) x) ((G : M → E) x))
           (riemannianVolumeMeasure I M g) :=
@@ -614,7 +548,6 @@ theorem add (g : SmoothRiemannianMetric I M)
           (fun x : M => g.inner x ((G' : M → E) x) ((G' : M → E) x))
           (riemannianVolumeMeasure I M g) :=
         hG'_pair (fun x : M => (G' : M → E) x) (Lp.aestronglyMeasurable G')
-      -- Combine: `g(G+G', G+G') = g(G,G) + 2 g(G,G') + g(G',G')`.
       have hsum_aem : AEStronglyMeasurable
           (fun x : M => g.inner x ((G : M → E) x + (G' : M → E) x)
             ((G : M → E) x + (G' : M → E) x))
@@ -654,8 +587,6 @@ theorem add (g : SmoothRiemannianMetric I M)
               g.inner x ((G' : M → E) x) ((G' : M → E) x)))) := by
           funext x; exact hpt x
         rw [hcong]
-        -- The cross term `g(G', G)` reduces by symmetry to `g(G, G')`,
-        -- which is AESM via hGG'. We use the symmetry of `g.inner`.
         have hG'G : AEStronglyMeasurable
             (fun x : M => g.inner x ((G' : M → E) x) ((G : M → E) x))
             (riemannianVolumeMeasure I M g) := by
@@ -672,7 +603,6 @@ theorem add (g : SmoothRiemannianMetric I M)
           Real.sqrt (g.inner x ((G' : M → E) x) ((G' : M → E) x)))
       (hG_p.add hG'_p) hAESM ?_
     refine Filter.Eventually.of_forall (fun x => ?_)
-    -- Triangle inequality: `√g(G+G', G+G') ≤ √g(G,G) + √g(G',G')`.
     have htri := g_norm_triangle (I := I) (M := M) g x
       ((G : M → E) x) ((G' : M → E) x)
     have hLHS_nn : 0 ≤ Real.sqrt
@@ -686,8 +616,7 @@ theorem add (g : SmoothRiemannianMetric I M)
       Real.norm_eq_abs (Real.sqrt _ + Real.sqrt _),
       abs_of_nonneg hLHS_nn, abs_of_nonneg hRHS_nn]
     exact htri
-  · -- PairAEMeasurable of the summed Lp witness.
-    have h_sum_G : (fun x : M => ((G + G' : Lp E 2 (riemannianVolumeMeasure I M g)) :
+  · have h_sum_G : (fun x : M => ((G + G' : Lp E 2 (riemannianVolumeMeasure I M g)) :
           M → E) x) =ᵐ[riemannianVolumeMeasure I M g]
         (fun x : M => (G : M → E) x + (G' : M → E) x) := by
       filter_upwards [Lp.coeFn_add G G'] with x hx
@@ -697,15 +626,12 @@ theorem add (g : SmoothRiemannianMetric I M)
       PairAEMeasurable.add (I := I) (M := M) (g := g) hG_pair hG'_pair
     exact PairAEMeasurable.congr_ae (I := I) (M := M) (g := g) h_sum_G.symm hsum_pair
 
-/-! ### Closure under subtraction -/
-
 /-- Subtraction closure of `MemH1Lp`. -/
 theorem sub (g : SmoothRiemannianMetric I M)
     {u v : Lp ℝ 2 (riemannianVolumeMeasure I M g)}
     (hu : MemH1Lp (I := I) (M := M) g u)
     (hv : MemH1Lp (I := I) (M := M) g v) :
     MemH1Lp (I := I) (M := M) g (u - v) := by
-  -- u - v = u + (-v).
   have h := add (I := I) (M := M) g hu (neg (I := I) (M := M) g hv)
   rw [show (u + -v : Lp ℝ 2 (riemannianVolumeMeasure I M g)) = u - v from by
     rw [sub_eq_add_neg]] at h

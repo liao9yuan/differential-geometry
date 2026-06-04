@@ -4,9 +4,9 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridgeUniform
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichManifold
-import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.Init
-import DifferentialGeometry.Integral.Measure.Family
+import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.ChartSobolevDensity
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Setup
+import DifferentialGeometry.Analysis.Integration.Measure.Family
 import Mathlib.MeasureTheory.Function.LpSeminorm.Indicator
 import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
@@ -18,12 +18,12 @@ import Mathlib.MeasureTheory.Function.ConvergenceInMeasure
 For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` modelled
 on a finite-dimensional real inner-product space `E` of dimension `n ≥ 1`, and
 for `1 ≤ p < n`, this file provides the sub-critical Sobolev embedding from the
-chart-based Sobolev space `W^{1,p}_chart(M)` (defined in `Chart.lean`) into
+chart-based Sobolev space `W^{1,p}_chart(M)` (defined in `Chart/Defs.lean`) into
 `L^{p*}(M, μ_g)`, where `p* = n*p/(n-p)` is the Sobolev conjugate exponent.
 
 ## Main results
 
-* `sobolev_embedding_chart_subcritical` — the headline statement: there is a
+* `sobolev_embedding_subcritical_of_closed` — the headline statement: there is a
   finite constant `C ≥ 0` such that for every `u ∈ W^{1,p}_chart(M)`,
   `eLpNorm u (ENNReal.ofReal p*) μ_g ≤ ENNReal.ofReal C * wkpNormChart g 1 p u`.
 
@@ -48,14 +48,10 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Pure-Euclidean per-chart sub-critical Sobolev embedding -/
 
 namespace EuclideanSubcritical
 
@@ -130,25 +126,21 @@ private lemma classical_partial_ae_eq_chosenWeakPartial_of_smooth
     (fun x => (fderiv ℝ f x) (EuclideanSpace.single i 1))
       =ᵐ[volume.restrict Ω]
       DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial' p i f Ω := by
-  -- f is in MemW1p on Ω.
   have hf_mem : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp (d := d) 1 p f Ω :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_of_smooth_compactSupport_pub
       (d := d) hΩ_open hf_smooth hf_compact hf_supp hp_one 1
   have hf_W1p : DeGiorgi.MemW1p (d := d) p f Ω :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p.mp hf_mem
-  -- The classical partial is a weak partial.
   have h_classical_isWeak :
       DeGiorgi.HasWeakPartialDeriv (d := d) i
         (fun x => (fderiv ℝ f x) (EuclideanSpace.single i 1)) f Ω :=
     DeGiorgi.HasWeakPartialDeriv.of_contDiff (Ω := Ω) (i := i) (f := f)
       hΩ_open (hf_smooth.of_le (by norm_cast))
-  -- chosenWeakPartial' is also a weak partial.
   have h_chosen_isWeak :
       DeGiorgi.HasWeakPartialDeriv (d := d) i
         (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial' p i f Ω) f Ω :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_isWeakPartial_of_mem
       hf_W1p i
-  -- LocallyIntegrable for both.
   have h_classical_loc : LocallyIntegrable
       (fun x : EuN => (fderiv ℝ f x) (EuclideanSpace.single i 1))
       (volume.restrict Ω) := by
@@ -160,7 +152,6 @@ private lemma classical_partial_ae_eq_chosenWeakPartial_of_smooth
       (volume.restrict Ω) :=
     (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_memLp_of_mem
       hf_W1p i).locallyIntegrable hp_one
-  -- Apply uniqueness of weak partials.
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq (Ω := Ω) hΩ_open
     h_classical_isWeak h_chosen_isWeak h_classical_loc h_chosen_loc
 
@@ -268,11 +259,9 @@ private lemma eLpNorm_fderiv_smooth_le_d_mul_wkpNorm
       (d : ℝ≥0∞) *
         DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm (d := d) 1 p f Ω := by
   classical
-  -- Bound by sum of partials.
   have h_grad_le := eLpNorm_fderiv_le_sum_eLpNorm_partials (d := d) hp_one
     (μ := volume.restrict Ω) hf_smooth
   refine h_grad_le.trans ?_
-  -- Each partial eLpNorm equals the chosen weak partial eLpNorm.
   have h_each_eq : ∀ i : Fin d,
       eLpNorm (fun x => (fderiv ℝ f x) (EuclideanSpace.single i 1)) p (volume.restrict Ω)
         = eLpNorm
@@ -288,7 +277,6 @@ private lemma eLpNorm_fderiv_smooth_le_d_mul_wkpNorm
             p (volume.restrict Ω) :=
     Finset.sum_congr rfl (fun i _ => h_each_eq i)
   rw [h_step1]
-  -- Compare ∑_i eLpNorm (chosen partial) p ≤ d * wkpNorm 1 p f Ω.
   have hWkpEq :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm (d := d) 1 p f Ω =
         ∑ j ∈ Finset.range 2,
@@ -298,7 +286,6 @@ private lemma eLpNorm_fderiv_smooth_le_d_mul_wkpNorm
                 (d := d) p j β f Ω)
               p (volume.restrict Ω) :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_eq_sum 1 p f Ω
-  -- The j=1 part of wkpNorm is exactly ∑_β eLpNorm (chosenWeakPartial' p (β 0) f Ω) p.
   have h_j1_term :
       (∑ β : Fin 1 → Fin d,
           eLpNorm
@@ -308,7 +295,6 @@ private lemma eLpNorm_fderiv_smooth_le_d_mul_wkpNorm
           eLpNorm
             (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial' p i f Ω)
             p (volume.restrict Ω) := by
-    -- iterWeakPartial p 1 β f Ω = chosenWeakPartial' p (β 0) f Ω by definition.
     have h_unfold : ∀ β : Fin 1 → Fin d,
         eLpNorm
           (DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial
@@ -325,7 +311,6 @@ private lemma eLpNorm_fderiv_smooth_le_d_mul_wkpNorm
         simp [DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial_zero]
       rw [hit]
     rw [Finset.sum_congr rfl (fun β _ => h_unfold β)]
-    -- Reindex β ↦ β 0.
     let e : (Fin 1 → Fin d) ≃ Fin d :=
       { toFun := fun β => β 0
         invFun := fun i _ => i
@@ -344,7 +329,6 @@ private lemma eLpNorm_fderiv_smooth_le_d_mul_wkpNorm
           (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial' p i f Ω)
           p (volume.restrict Ω))
       (fun _ => rfl)
-  -- Now: ∑_i eLpNorm (chosen partial)_i p ≤ wkpNorm 1 p f Ω.
   have h_le_wkp :
       (∑ i : Fin d,
           eLpNorm
@@ -355,7 +339,6 @@ private lemma eLpNorm_fderiv_smooth_le_d_mul_wkpNorm
     refine le_add_of_nonneg_left ?_
     exact zero_le _
   refine h_le_wkp.trans ?_
-  -- wkpNorm ≤ d * wkpNorm.
   have hd_pos : 0 < d := NeZero.pos d
   have hd_one_le : (1 : ℝ≥0∞) ≤ (d : ℝ≥0∞) := by exact_mod_cast hd_pos
   conv_lhs => rw [show DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
@@ -418,7 +401,6 @@ theorem eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
     · linarith
   have hp_enn_ne_zero : p_enn ≠ 0 := by
     rw [hp_enn_def]; exact ENNReal.ofReal_ne_zero_iff.mpr hp_pos
-  -- Get smooth approximations.
   have h_pick : ∀ n : ℕ, ∃ φ : EuN → ℝ,
       ContDiff ℝ (⊤ : ℕ∞) φ ∧ HasCompactSupport φ ∧ tsupport φ ⊆ Ω ∧
         DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
@@ -438,14 +420,12 @@ theorem eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := d) 1 p_enn (fun x => f x - φ n x) Ω ≤ ENNReal.ofReal (1 / (n + 1 : ℝ)) :=
     fun n => (h_pick n).choose_spec.2.2.2
-  -- For each n: eLpNorm φ_n p_star ≤ ofReal C_gns * eLpNorm fderiv φ_n p_enn (vr Ω).
   have h_smooth_sob : ∀ n,
       eLpNorm (φ n) p_star (volume.restrict Ω) ≤
         ENNReal.ofReal (DeGiorgi.C_gns d p) *
           eLpNorm (fderiv ℝ (φ n)) p_enn (volume.restrict Ω) := fun n =>
     sobolev_smooth_compactSupport_in_Ω (d := d) hp_one hp_dim hΩ_open
       (hφ_smooth n) (hφ_compact n) (hφ_supp n)
-  -- Bound the gradient eLpNorm by d * wkpNorm 1 p_enn φ_n Ω.
   have h_grad_bound : ∀ n,
       eLpNorm (fderiv ℝ (φ n)) p_enn (volume.restrict Ω) ≤
         (d : ℝ≥0∞) *
@@ -453,7 +433,6 @@ theorem eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
             (d := d) 1 p_enn (φ n) Ω :=
     fun n => eLpNorm_fderiv_smooth_le_d_mul_wkpNorm
       (d := d) (p := p_enn) hp_enn_one hΩ_open (hφ_smooth n) (hφ_compact n) (hφ_supp n)
-  -- φ_n smooth + compact-support ⇒ MemWkp.
   have h_φn_mem : ∀ n,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp (d := d)
         1 p_enn (φ n) Ω := fun n =>
@@ -464,7 +443,6 @@ theorem eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
         1 p_enn (fun x => f x - φ n x) Ω := fun n =>
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.sub
       (d := d) hp_enn_one hΩ_open hf (h_φn_mem n)
-  -- wkpNorm φ_n Ω ≤ wkpNorm f Ω + wkpNorm (f - φ_n) Ω (triangle: φ_n = (φ_n - f) + f).
   have h_wkp_φn_le : ∀ n,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm (d := d) 1 p_enn (φ n) Ω ≤
         DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
@@ -482,7 +460,6 @@ theorem eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
     have h_tri := DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_add_le
       (d := d) hp_enn_one hΩ_open h_v_mem hf
     refine h_tri.trans ?_
-    -- wkpNorm (φ n - f) = wkpNorm (f - φ n) (negation invariance).
     have h_neg_eq :
         DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm (d := d) 1 p_enn
             (fun x => φ n x - f x) Ω =
@@ -500,12 +477,9 @@ theorem eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
       rw [h_smul]
       simp
     rw [h_neg_eq, add_comm]
-    -- Goal now: wkpNorm f Ω + wkpNorm (f - φ_n) Ω ≤ wkpNorm f Ω + wkpNorm (f - (φ_n - f + f)) Ω.
-    -- The RHS's `(φ n)` got rewritten by h_φn_decomp; simplify back.
     have h_simplify : (fun x : EuN => f x - (φ n x - f x + f x)) = (fun x => f x - φ n x) := by
       funext x; ring
     rw [h_simplify]
-  -- L^p convergence of f - φ_n to zero.
   have h_eLpNorm_diff_le_wkp : ∀ n,
       eLpNorm (fun x => f x - φ n x) p_enn (volume.restrict Ω) ≤
         DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
@@ -514,7 +488,6 @@ theorem eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
       DifferentialGeometry.Analysis.Sobolev.Chart.Euclidean.wkpNorm_zero_le_wkpNorm
         (d := d) (k := 1) (p := p_enn)
         (u := fun x => f x - φ n x) (Ω := Ω)
-  -- ofReal (1/(n+1)) → 0.
   have h_decay_to_zero : Tendsto (fun n : ℕ => ENNReal.ofReal (1 / (n + 1 : ℝ)))
       atTop (nhds 0) := by
     have hReal : Tendsto (fun n : ℕ => 1 / (n + 1 : ℝ)) atTop (nhds 0) := by
@@ -533,7 +506,6 @@ theorem eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
     refine tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds h_decay_to_zero
       (Filter.Eventually.of_forall (fun _ => zero_le _))
       (Filter.Eventually.of_forall h_total_le)
-  -- Convert to TendstoInMeasure and extract a.e.-convergent subsequence.
   have hf_aesm : AEStronglyMeasurable f (volume.restrict Ω) := hf.memLp.aestronglyMeasurable
   have hφ_aesm : ∀ n, AEStronglyMeasurable (φ n) (volume.restrict Ω) :=
     fun n => (hφ_smooth n).continuous.aestronglyMeasurable
@@ -551,17 +523,14 @@ theorem eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
       rw [h_neg_apply, eLpNorm_neg]
     refine (Filter.tendsto_congr h_neg_eq).mpr h_eLpNorm_diff_to_zero
   obtain ⟨σ, hσ_mono, hσ_ae⟩ := h_tim.exists_seq_tendsto_ae
-  -- Apply Fatou.
   have h_aesm_subseq : ∀ n, AEStronglyMeasurable (φ (σ n)) (volume.restrict Ω) :=
     fun n => hφ_aesm (σ n)
   have h_fatou : eLpNorm f p_star (volume.restrict Ω) ≤
       atTop.liminf (fun n => eLpNorm (φ (σ n)) p_star (volume.restrict Ω)) :=
     MeasureTheory.Lp.eLpNorm_lim_le_liminf_eLpNorm h_aesm_subseq f hσ_ae
-  -- Bound liminf.
   set C : ℝ≥0∞ := ENNReal.ofReal (DeGiorgi.C_gns d p) * (d : ℝ≥0∞) with hC_def
   set N : ℝ≥0∞ := DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
     (d := d) 1 p_enn f Ω with hN_def
-  -- For each n: eLpNorm φ_(σn) p_star ≤ C * (N + wkpNorm (f - φ_(σn)) Ω).
   have h_per_n : ∀ n,
       eLpNorm (φ (σ n)) p_star (volume.restrict Ω) ≤
         C *
@@ -592,7 +561,6 @@ theorem eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
           DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
             (d := d) 1 p_enn (fun x => f x - φ (σ n) x) Ω) := fun n =>
     (h_per_n n).trans (by gcongr; exact h_wkp_subseq n)
-  -- Take liminf.
   have h_liminf_le_C_lim :
       atTop.liminf (fun n => eLpNorm (φ (σ n)) p_star (volume.restrict Ω))
       ≤ atTop.liminf (fun n => C * (N +
@@ -603,7 +571,6 @@ theorem eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
         (Filter.Eventually.of_forall (fun _ => zero_le _))
     · exact isCoboundedUnder_ge_of_eventually_le atTop
         (Filter.Eventually.of_forall (fun _ => le_top))
-  -- Decay of wkpNorm of difference along subsequence.
   have h_wkp_diff_decay : Tendsto (fun n =>
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := d) 1 p_enn (fun x => f x - φ n x) Ω) atTop (nhds 0) := by
@@ -617,7 +584,6 @@ theorem eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
   have hC_ne_top : C ≠ ⊤ := by
     rw [hC_def]
     exact ENNReal.mul_ne_top ENNReal.ofReal_ne_top (ENNReal.natCast_ne_top _)
-  -- C * (decaying) → 0.
   have h_C_diff_decay : Tendsto (fun n => C *
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := d) 1 p_enn (fun x => f x - φ (σ n) x) Ω) atTop (nhds 0) := by
@@ -642,8 +608,6 @@ theorem eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
   exact h_fatou.trans h_liminf_le_C_lim
 
 end EuclideanSubcritical
-
-/-! ## Per-chart manifold-side bound -/
 
 /-- The (closed) support of `ρ_α · u` is contained in the (closed) support of `ρ_α`. -/
 private lemma tsupport_pou_mul_subset_tsupport_pou_subcrit
@@ -907,7 +871,6 @@ private theorem perChart_eLpNorm_pStar_le
     hasCompactSupport_chartPushedRaw_pou_mul (I := I) (M := M) α u
   have hf_supp : tsupport f ⊆ chartTargetEuclid (I := I) (M := M) α :=
     tsupport_chartPushedRaw_pou_mul_subset_target (I := I) (M := M) α u
-  -- Per-chart Euclidean Sobolev bound.
   have h_eucl_sob :
       eLpNorm f p_star
           ((volume : Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict
@@ -921,11 +884,7 @@ private theorem perChart_eLpNorm_pStar_le
         (Ω := chartTargetEuclid (I := I) (M := M) α)
         (chartTargetEuclid_isOpen (I := I) (M := M) α)
         hf_memWkp hf_compact hf_supp
-    -- h_main bound: eLpNorm f (ofReal (d*p/(d-p))) ≤ ofReal (C_gns d p) * d * wkpNorm 1 (ofReal p) f Ω.
-    -- Our goal uses p_star = ENNReal.ofReal p_star_real, with p_star_real = d*p/(d-p).
-    -- These are defeq.
     convert h_main using 1
-  -- wkpNorm of chartPushedRaw equals wkpNorm of chartPushed.
   have h_wkp_eq :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm (d := d) 1 p_enn f
           (chartTargetEuclid (I := I) (M := M) α) =
@@ -935,7 +894,6 @@ private theorem perChart_eLpNorm_pStar_le
           (chartTargetEuclid (I := I) (M := M) α) :=
     wkpNorm_chartPushedRaw_pou_mul_eq_chartPushed (I := I) (M := M) g hp_enn_one u α
   rw [h_wkp_eq] at h_eucl_sob
-  -- wkpNorm of chartPushed at α ≤ wkpNormChart (sum over all charts).
   have h_wkp_chart_le :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm (d := d) 1 p_enn
           (chartPushed (I := I) (M := M)
@@ -960,8 +918,6 @@ private theorem perChart_eLpNorm_pStar_le
     _ ≤ ENNReal.ofReal C_α *
           (C_d * wkpNormChart (I := I) (M := M) g 1 p_enn u) := by gcongr
     _ = K_α * wkpNormChart (I := I) (M := M) g 1 p_enn u := by rw [hK_α_def]; ring
-
-/-! ## Headline theorem -/
 
 /-- Pointwise decomposition `u(x) = ∑_{α ∈ chartAtlasPOU_finset} ρ_α(x) · u(x)`. -/
 private theorem chartAtlasPOU_pou_decomp_subcritical
@@ -1063,7 +1019,6 @@ private theorem sobolev_embedding_chart_subcritical_measurable
     exact perChartConst_pStar_ne_top (I := I) (M := M) g hp_one hp_dim α
   refine ⟨max 1 D.toReal, ?_, ?_⟩
   · exact le_trans zero_le_one (le_max_left _ _)
-  -- u(x) = ∑ α ∈ S, ρ_α(x) · u(x).
   have h_eLpNorm_eq :
       eLpNorm u p_star (DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)) =
@@ -1079,7 +1034,6 @@ private theorem sobolev_embedding_chart_subcritical_measurable
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : M → ℝ) x * u x
     exact chartAtlasPOU_pou_decomp_subcritical (I := I) (M := M) u x
   rw [h_eLpNorm_eq]
-  -- Apply Minkowski.
   have h_aesm : ∀ α ∈ S,
       AEStronglyMeasurable
         (fun x : M =>
@@ -1108,7 +1062,6 @@ private theorem sobolev_embedding_chart_subcritical_measurable
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)) :=
     eLpNorm_sum_le h_aesm hp_star_one
   refine h_minkowski.trans ?_
-  -- Each summand bounded by perChartConst * wkpNormChart.
   have h_each : ∀ α ∈ S,
       eLpNorm
           (fun x : M =>
@@ -1145,11 +1098,15 @@ private theorem sobolev_embedding_chart_subcritical_measurable
   exact h_max_le
 
 /-- Sub-critical Sobolev embedding `W^{1,p}_chart(M) ↪ L^{p*}(M, μ_g)` on a closed
-Riemannian manifold. There is a finite constant `C ≥ 0` (depending on the metric,
-the canonical chart-atlas partition of unity, and `p`) such that for every
-`u ∈ W^{1,p}_chart(M)`, `eLpNorm u (p*) μ_g ≤ ENNReal.ofReal C * wkpNormChart g 1 p u`,
-where `p* = n*p/(n-p)` is the Sobolev conjugate exponent. -/
-theorem sobolev_embedding_chart_subcritical
+(compact, boundaryless) smooth Riemannian manifold `(M, g)` modelled on a
+finite-dimensional real inner-product space `E` of dimension `n ≥ 1`. For a
+sub-critical exponent `1 ≤ p < n` and a measurable `u ∈ W^{1,p}_chart(M)`, there
+exists a finite constant `C ≥ 0` (depending on the metric, the canonical
+chart-atlas partition of unity, and `p`) with
+`eLpNorm u (ENNReal.ofReal p*) μ_g ≤ ENNReal.ofReal C * wkpNormChart g 1 p u`,
+where `p* = n*p/(n-p)` is the Sobolev conjugate exponent and `μ_g` is the
+Riemannian measure built from the chart-atlas partition of unity. -/
+theorem sobolev_embedding_subcritical_of_closed
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]

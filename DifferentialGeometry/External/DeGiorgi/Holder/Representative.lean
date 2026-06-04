@@ -1,4 +1,5 @@
 -- Modified 2026-04-28: updated internal import paths for project namespace
+-- Modified 2026-05-16: style-warning cleanup
 import DifferentialGeometry.External.DeGiorgi.Holder.OscillationDecay
 
 /-!
@@ -387,7 +388,7 @@ theorem moserRepresentative_ae_eq
         Tendsto (dyadicBallAverage u x ρ) atTop (nhds (u x)) :=
       Tendsto.congr' hclosed_eq hclosed_to_u
     exact tendsto_nhds_unique hlimit_u hdyad_to_u
-  show ∀ᵐ x ∂ volume.restrict outer, moserRepresentative u x = u x
+  change ∀ᵐ x ∂ volume.restrict outer, moserRepresentative u x = u x
   rw [ae_restrict_iff' measurableSet_ball] at hinner_eq_ae
   rw [ae_restrict_iff' measurableSet_ball]
   filter_upwards [hinner_eq_ae] with x hx hx_outer

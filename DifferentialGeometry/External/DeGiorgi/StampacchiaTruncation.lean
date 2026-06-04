@@ -1,4 +1,5 @@
 -- Modified 2026-04-28: updated internal import paths for project namespace
+-- Modified 2026-05-16: style-warning cleanup
 import DifferentialGeometry.External.DeGiorgi.Common
 import DifferentialGeometry.External.DeGiorgi.SobolevChainRule
 
@@ -48,7 +49,7 @@ theorem deriv_ne_zero_implies_isolated_zero {f : ℝ → ℝ} {x : ℝ} {c : ℝ
   obtain ⟨S, hS_mem, hS⟩ := hfilt
   obtain ⟨δ, hδ_pos, hδ_sub⟩ := Metric.mem_nhds_iff.mp hS_mem
   refine ⟨δ, hδ_pos, fun h hh_pos hh_lt hf_eq => ?_⟩
-  have hh_in : h ∈ S := hδ_sub (by simp; exact hh_lt)
+  have hh_in : h ∈ S := hδ_sub (by simp only [mem_ball, dist_zero_right, Real.norm_eq_abs]; exact hh_lt)
   have h1 := hS h hh_in
   simp only [hfx, sub_zero, Real.norm_eq_abs, smul_eq_mul] at h1
   rw [hf_eq, zero_sub, abs_neg, abs_mul] at h1
@@ -215,7 +216,7 @@ private theorem exists_antideriv_of_zero_integral {a b : ℝ} (_hab : a < b)
     rw [intervalIntegral.integral_eq_integral_of_support_subset
       ((subset_tsupport η).trans (hη_supp.trans Ioo_subset_Ioc_self)), hη_int]
   have hφ_zero_ge_b : ∀ x, x ≥ b → φ x = 0 := by
-    intro x hx; show ∫ t in a..x, η t = 0
+    intro x hx; change ∫ t in a..x, η t = 0
     rw [← intervalIntegral.integral_add_adjacent_intervals (μ := volume)
       (hη_cont.intervalIntegrable a b) (hη_cont.intervalIntegrable b x), hint_ab]
     rw [intervalIntegral.integral_congr (show EqOn η 0 (Set.uIcc b x) from fun t ht => by
@@ -225,10 +226,10 @@ private theorem exists_antideriv_of_zero_integral {a b : ℝ} (_hab : a < b)
     hη_cs.isCompact.exists_cthickening_subset_open isOpen_Ioo hη_supp
   have hη_supp_Icc : tsupport η ⊆ Icc (a + ε) (b - ε) := by
     intro x hx; have hx_Ioo := hη_supp hx; constructor
-    · by_contra h; push_neg at h
+    · by_contra h; push Not at h
       exact lt_irrefl a (hε_thick (Metric.mem_cthickening_of_dist_le a x ε _ hx
         (by rw [Real.dist_eq, abs_of_nonpos (sub_nonpos.mpr hx_Ioo.1.le)]; linarith))).1
-    · by_contra h; push_neg at h
+    · by_contra h; push Not at h
       exact lt_irrefl b (hε_thick (Metric.mem_cthickening_of_dist_le b x ε _ hx
         (by rw [Real.dist_eq, abs_of_nonneg (sub_nonneg.mpr hx_Ioo.2.le)]; linarith))).2
   have hη_zero_lt : ∀ x, x < a + ε → η x = 0 := fun x hx => by
@@ -236,7 +237,7 @@ private theorem exists_antideriv_of_zero_integral {a b : ℝ} (_hab : a < b)
   have hη_zero_gt : ∀ x, x > b - ε → η x = 0 := fun x hx => by
     by_contra h; exact not_lt.mpr (hη_supp_Icc (subset_tsupport η (Function.mem_support.mpr h))).2 hx
   have hφ_zero_lt : ∀ x, x < a + ε → φ x = 0 := by
-    intro x hx; show ∫ t in a..x, η t = 0
+    intro x hx; change ∫ t in a..x, η t = 0
     rw [intervalIntegral.integral_congr (show EqOn η 0 (Set.uIcc a x) from fun t ht => by
       simp only [Pi.zero_apply]; apply hη_zero_lt
       rcases le_total a x with hax | hxa
@@ -244,7 +245,7 @@ private theorem exists_antideriv_of_zero_integral {a b : ℝ} (_hab : a < b)
       · rw [uIcc_of_ge hxa] at ht; linarith [ht.2])]
     exact intervalIntegral.integral_zero
   have hφ_zero_gt : ∀ x, x > b - ε → φ x = 0 := by
-    intro x hx; show ∫ t in a..x, η t = 0
+    intro x hx; change ∫ t in a..x, η t = 0
     rw [← intervalIntegral.integral_add_adjacent_intervals (μ := volume)
       (hη_cont.intervalIntegrable a b) (hη_cont.intervalIntegrable b x), hint_ab]
     rw [intervalIntegral.integral_congr (show EqOn η 0 (Set.uIcc b x) from fun t ht => by
@@ -255,8 +256,8 @@ private theorem exists_antideriv_of_zero_integral {a b : ℝ} (_hab : a < b)
     simp
   have hφ_supp_Icc : Function.support φ ⊆ Icc (a + ε) (b - ε) := by
     intro x hx; constructor
-    · by_contra h; push_neg at h; exact Function.mem_support.mp hx (hφ_zero_lt x h)
-    · by_contra h; push_neg at h; exact Function.mem_support.mp hx (hφ_zero_gt x h)
+    · by_contra h; push Not at h; exact Function.mem_support.mp hx (hφ_zero_lt x h)
+    · by_contra h; push Not at h; exact Function.mem_support.mp hx (hφ_zero_gt x h)
   exact ⟨φ,
     contDiff_infty_iff_deriv.mpr ⟨hφ_diff, hderiv_eq ▸ hη⟩,
     IsCompact.of_isClosed_subset isCompact_Icc isClosed_closure
@@ -279,7 +280,7 @@ private theorem smooth_cutoff_approximation {a b : ℝ} (_hab : a < b)
     · intro η hη hη_cs hη_supp
       have hη_zero : ∀ x, x ∉ Ioo a b → η x = 0 :=
         fun x hx => by by_contra h; exact hx (hη_supp (subset_tsupport _ h))
-      rw [← setIntegral_eq_integral_of_forall_compl_eq_zero
+      rw [← setIntegral_eq_integral_of_forall_compl_eq_zero (s := Ioo a b)
         (fun x hx => by simp [hη_zero x hx])]
       simp only [smul_eq_mul]
       rw [show (∫ x in Ioo a b, η x * f x) = (∫ x in Ioo a b, f x * η x) from by
@@ -445,7 +446,7 @@ theorem w11_ae_eq_ac_representative
       apply integrableOn_Ioo_intervalIntegrable hab.le
       have hcont := (intervalIntegral.continuousOn_primitive (μ := volume)
         (integrableOn_Icc_of_Ioo hg)).congr
-        (fun x hx => by show ∫ t in a..x, g t = _; rw [intervalIntegral.integral_of_le hx.1])
+        (fun x hx => by change ∫ t in a..x, g t = _; rw [intervalIntegral.integral_of_le hx.1])
       exact (hcont.mul (hφ.continuous_deriv (by norm_cast)).continuousOn).integrableOn_compact
         isCompact_Icc |>.mono_set Ioo_subset_Icc_self
     rw [intervalIntegral.integral_sub hu_ii hF_ii,
@@ -531,9 +532,11 @@ private theorem exists_smooth_trunc (ε : ℝ) (hε : 0 < ε) :
     intro x; simp only [← NNReal.coe_le_coe, coe_nnnorm, NNReal.coe_one, Real.norm_eq_abs, hderiv_eq]
     exact abs_le.mpr ⟨by linarith [β.nonneg' x], β.le_one⟩
   have hΦ_abs_le : ∀ s, |Φ s| ≤ |s| := fun s => by
-    have := hΦ_lip.dist_le_mul s 0; simp [dist_eq_norm, hΦ_zero, Real.norm_eq_abs] at this; linarith
+    have := hΦ_lip.dist_le_mul s 0
+    simp only [dist_eq_norm, hΦ_zero, sub_zero, Real.norm_eq_abs, NNReal.coe_one, one_mul] at this
+    linarith
   have hderiv_vanish : ∀ s, ε ≤ |s| → deriv Φ s = 0 := fun s hs => by
-    rw [hderiv_eq]; exact β.zero_of_le_dist (by simp; exact hs)
+    rw [hderiv_eq]; exact β.zero_of_le_dist (by simp only [dist_zero_right, Real.norm_eq_abs]; exact hs)
   have hΦ_const_pos : ∀ s, ε ≤ s → Φ s = Φ ε := by
     intro s hs; rcases eq_or_lt_of_le hs with rfl | hlt; · rfl
     exact constant_of_derivWithin_zero (hΦ_smooth.differentiable (by norm_cast)).differentiableOn
@@ -552,11 +555,11 @@ private theorem exists_smooth_trunc (ε : ℝ) (hε : 0 < ε) :
   refine ⟨Φ, hΦ_smooth, hΦ_zero, fun s => ?_, fun s => ?_, fun s hs => ?_, hderiv_vanish⟩
   · by_cases h : |s| ≤ ε
     · exact le_trans (hΦ_abs_le s) h
-    · push_neg at h; cases le_or_gt 0 s with
+    · push Not at h; cases le_or_gt 0 s with
       | inl hs => rw [hΦ_const_pos s (by linarith [abs_of_nonneg hs])]; exact le_trans (hΦ_abs_le ε) (by rw [abs_of_pos hε])
       | inr hs => rw [hΦ_const_neg s (by linarith [abs_of_neg hs])]; exact le_trans (hΦ_abs_le (-ε)) (by rw [abs_neg, abs_of_pos hε])
   · rw [hderiv_eq, abs_le]; exact ⟨by linarith [β.nonneg' s], β.le_one⟩
-  · rw [hderiv_eq]; exact β.one_of_mem_closedBall (by simp [mem_closedBall]; exact hs)
+  · rw [hderiv_eq]; exact β.one_of_mem_closedBall (by simp only [mem_closedBall, dist_zero_right, Real.norm_eq_abs]; exact hs)
 
 /-- Enhanced smooth truncation: also includes vanishing for |s| ≥ ε. -/
 private theorem exists_smooth_trunc' (ε : ℝ) (hε : 0 < ε) :
@@ -711,7 +714,7 @@ private theorem weakGrad_integral_test_eq_zero
       exact this.of_ae_diff_eq_zero hΩ.measurableSet.nullMeasurableSet
         (ae_of_all _ fun x ⟨_, hx⟩ => by simp [image_eq_zero_of_notMem_tsupport hx])
     -- Apply dominated convergence
-    show Filter.Tendsto (fun n => ∫ x, (deriv (Φ n) (u x) * G x i) * ψ x ∂volume.restrict Ω)
+    change Filter.Tendsto (fun n => ∫ x, (deriv (Φ n) (u x) * G x i) * ψ x ∂volume.restrict Ω)
         Filter.atTop (nhds (∫ x, (if u x = 0 then G x i else 0) * ψ x ∂volume.restrict Ω))
     apply MeasureTheory.tendsto_integral_of_dominated_convergence
       (fun x => ‖G x i * ψ x‖)

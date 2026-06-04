@@ -6,21 +6,22 @@ Coauthors: Jack McCarthy
 -/
 import DifferentialGeometry.Tensor.Auxiliary.Perm
 import DifferentialGeometry.Tensor.Auxiliary.MultiKroneckerDelta
-import DifferentialGeometry.Tensor.Auxiliary.Basis
-import DifferentialGeometry.Tensor.Auxiliary.ShuffleSplit
+import DifferentialGeometry.Tensor.Auxiliary.PredualBasis
+import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Split
 import DifferentialGeometry.Tensor.Alternating.Congr
 import DifferentialGeometry.Tensor.Alternating.Comp
 import DifferentialGeometry.Tensor.Alternating.Curry
 import DifferentialGeometry.Tensor.Product.Defs
 import DifferentialGeometry.Tensor.Alternating.Basis
-import DifferentialGeometry.Tensor.Auxiliary.ShuffleDeriv
+import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Derivative
 
-/-
-d(Sum_J ω_J dx^J) := Sum dω_J ∧ dx^J
--/
+/-!
+# Wedge products of continuous alternating maps
 
-/-
-# Wedge Products
+This file defines the wedge product `wedge_product` of continuous alternating maps
+(and the covector wedge `covectorWedge`), relates it to alternatization, and proves
+its core algebraic laws: bilinearity, associativity, antisymmetry, a norm bound, and
+the vanishing of the wedge of an odd-degree form with itself.
 -/
 
 noncomputable section
@@ -535,7 +536,7 @@ private theorem derivShuffleLeft_expanded_summand_eq
 The fully general vector-valued precomposition identities for `wedge_productL` are
 intentionally not stated here. A direct quotient-shuffle proof would have to transport
 individual summands through `Equiv.Perm.ModSumCongr`, but those summands depend on
-representatives. For the RicciFlower tensor-calculus use case we instead use the
+representatives. For the tensor-calculus use case we instead use the
 finite-rank route above: expand form-valued linear maps into elementary covectors and
 reduce the computation to determinant identities such as
 `uncurryFin_smulRight_elementaryCovector`.

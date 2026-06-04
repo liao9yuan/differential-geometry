@@ -22,8 +22,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Translation estimate for smooth compactly supported functions -/
-
 omit [NeZero d] in
 /-- Pointwise representation of `φ x − φ (x − h)` as the integral over `s ∈ [0,1]`
 of the directional derivative of `φ` at `x − h + s • h` in direction `h`. -/
@@ -37,7 +35,6 @@ private theorem sub_translate_eq_integral_fderiv
     intro t
     have hsmul : HasDerivAt (fun s : ℝ => s • h) h t := by
       simpa using (hasDerivAt_id t).smul_const h
-    -- Constant `(x - h)` plus `s • h` has derivative `0 + h = h`.
     have hadd : HasDerivAt (fun s : ℝ => (x - h) + s • h) h t :=
       hsmul.const_add (x - h)
     simpa [γ, add_comm] using hadd

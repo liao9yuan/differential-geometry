@@ -19,8 +19,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Translation invariance of `eLpNorm` and a measure-preserving lemma -/
-
 omit [NeZero d] in
 /-- `t ↦ z - t` is measure-preserving on `E`. -/
 private lemma measurePreserving_constSub_E (z : E) :
@@ -48,8 +46,6 @@ lemma eLpNorm_translate_eq
     rw [hEq]
     exact hMP_neg
   exact eLpNorm_comp_measurePreserving hf hMP
-
-/-! ## Jensen's inequality at the `lintegral` level -/
 
 /-- Jensen's inequality for `lintegral` and `pr ≥ 1`: if `ν` is a probability
 measure, then `(∫ g dν)^pr ≤ ∫ g^pr dν` (in `ℝ≥0∞`). -/
@@ -84,8 +80,6 @@ theorem lintegral_pow_le_pow_lintegral_prob
     ENNReal.rpow_le_rpow hHolder hpr_pos.le
   refine hpow.trans ?_
   rw [← ENNReal.rpow_mul, show (1 / pr) * pr = 1 by field_simp, ENNReal.rpow_one]
-
-/-! ## Convolution-sub `L^p` bound (Step C.5 core) -/
 
 omit [NeZero d] in
 /-- Pointwise integral identity: `(η ⋆ u)(x) - u(x) = ∫ η(s)(u(x-s) - u(x)) ds`,
@@ -197,8 +191,6 @@ private lemma enorm_convolution_sub_le_lintegral
     rw [Real.norm_eq_abs]
   exact hf_norm_e.trans (le_of_eq hReal_to_lint)
 
-/-! ## C.5 — Convolution-sub `L^p` bound -/
-
 omit [NeZero d] in
 /-- For a non-negative compactly-supported continuous `η : E → ℝ` integrating
 to one, and `u : E → ℝ` measurable and locally integrable, the `L^pr`-norm of
@@ -220,7 +212,6 @@ theorem lintegral_rpow_convolution_sub_le_supTrans
         (∫⁻ x, (‖u (x - s) - u x‖ₑ : ℝ≥0∞) ^ pr ∂volume) ∂volume := by
   classical
   have hpr_pos : 0 < pr := lt_of_lt_of_le zero_lt_one hpr_ge_one
-  -- Probability measure ν := η · volume.
   set ρ : E → ℝ≥0∞ := fun y => ENNReal.ofReal (η y) with hρ_def
   set ν : Measure E := volume.withDensity ρ with hν_def
   have hη_int : Integrable η volume :=
@@ -234,19 +225,16 @@ theorem lintegral_rpow_convolution_sub_le_supTrans
     rw [← MeasureTheory.ofReal_integral_eq_lintegral_ofReal hη_int
       (Filter.Eventually.of_forall hη_nonneg), hη_int_eq_one]
     simp
-  -- Pointwise: ‖f x‖_e ≤ ∫⁻ s, ρ(s) * ‖u(x-s) - u(x)‖_e ds.
   have hPt_e : ∀ x : E,
       (‖(η ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] u) x - u x‖ₑ : ℝ≥0∞) ≤
         ∫⁻ s, ρ s * (‖u (x - s) - u x‖ₑ : ℝ≥0∞) ∂volume :=
     fun x =>
       enorm_convolution_sub_le_lintegral (d := d) hη_cont hη_compact hη_nonneg
         hη_int_eq_one hu_loc x
-  -- Pointwise pr-th power: ‖f x‖_e^pr ≤ (∫⁻ s, ρ(s) * ‖u(x-s) - u(x)‖_e)^pr.
   have hPt_e_pow : ∀ x : E,
       (‖(η ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] u) x - u x‖ₑ : ℝ≥0∞) ^ pr ≤
         (∫⁻ s, ρ s * (‖u (x - s) - u x‖ₑ : ℝ≥0∞) ∂volume) ^ pr := fun x =>
     ENNReal.rpow_le_rpow (hPt_e x) hpr_pos.le
-  -- Translate to ν: ∫⁻ s, ρ(s)*F(s) = ∫⁻ s, F(s) dν. Then apply Jensen.
   have hG_meas : ∀ x : E,
       AEMeasurable (fun s : E => (‖u (x - s) - u x‖ₑ : ℝ≥0∞)) ν := by
     intro x
@@ -258,16 +246,13 @@ theorem lintegral_rpow_convolution_sub_le_supTrans
         ∫⁻ s, (‖u (x - s) - u x‖ₑ : ℝ≥0∞) ∂ν := by
     intro x
     rw [hν_def]
-    -- ∫⁻ s, ρ(s) * F(s) ∂volume = ∫⁻ s, F(s) ∂(volume.withDensity ρ)
     rw [lintegral_withDensity_eq_lintegral_mul_non_measurable volume hρ_meas hρ_lt_top]
     rfl
-  -- Jensen at ν: (∫⁻ G dν)^pr ≤ ∫⁻ G^pr dν
   have hJensen_ν : ∀ x : E,
       (∫⁻ s, (‖u (x - s) - u x‖ₑ : ℝ≥0∞) ∂ν) ^ pr ≤
         ∫⁻ s, ((‖u (x - s) - u x‖ₑ : ℝ≥0∞) ^ pr) ∂ν :=
     fun x =>
       lintegral_pow_le_pow_lintegral_prob (ν := ν) hpr_ge_one (hG_meas x)
-  -- Translate back: ∫⁻ s, F^pr dν = ∫⁻ s, ρ(s) * F^pr ds.
   have hPt_ν_to_vol : ∀ x : E,
       ∫⁻ s, ((‖u (x - s) - u x‖ₑ : ℝ≥0∞) ^ pr) ∂ν =
         ∫⁻ s, ρ s * ((‖u (x - s) - u x‖ₑ : ℝ≥0∞) ^ pr) ∂volume := by
@@ -275,7 +260,6 @@ theorem lintegral_rpow_convolution_sub_le_supTrans
     rw [hν_def]
     rw [lintegral_withDensity_eq_lintegral_mul_non_measurable volume hρ_meas hρ_lt_top]
     rfl
-  -- Combine: ∫⁻ x, ‖f x‖^pr ≤ ∫⁻ x, ∫⁻ s, ρ(s)*‖u(x-s)-u(x)‖^pr ds dx
   have hOverall_pt : ∀ x : E,
       (‖(η ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] u) x - u x‖ₑ : ℝ≥0∞) ^ pr ≤
         ∫⁻ s, ρ s * ((‖u (x - s) - u x‖ₑ : ℝ≥0∞) ^ pr) ∂volume := by
@@ -284,14 +268,12 @@ theorem lintegral_rpow_convolution_sub_le_supTrans
     rw [hPt_to_ν x]
     refine (hJensen_ν x).trans ?_
     rw [hPt_ν_to_vol x]
-  -- Integrate over x.
   have h_le_int : ∫⁻ x, (‖(η ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] u) x - u x‖ₑ : ℝ≥0∞) ^
         pr ∂volume ≤
       ∫⁻ x, ∫⁻ s, ρ s * ((‖u (x - s) - u x‖ₑ : ℝ≥0∞) ^ pr) ∂volume ∂volume := by
     refine lintegral_mono_ae ?_
     filter_upwards with x using hOverall_pt x
   refine h_le_int.trans ?_
-  -- Apply Tonelli (lintegral_lintegral_swap) to swap integration order.
   have hMeas_pair :
       Measurable (Function.uncurry fun (x : E) (s : E) =>
         ρ s * ((‖u (x - s) - u x‖ₑ : ℝ≥0∞) ^ pr)) := by
@@ -319,8 +301,6 @@ theorem lintegral_rpow_convolution_sub_le_supTrans
   refine lintegral_mono_ae ?_
   filter_upwards with s
   rw [lintegral_const_mul' _ _ ENNReal.ofReal_ne_top]
-
-/-! ## C.5 — Convolution-sub `L^p` bound, `eLpNorm` form -/
 
 omit [NeZero d] in
 /-- `eLpNorm` of `(η ⋆ u) - u` is bounded by the supremum of translation
@@ -361,8 +341,6 @@ theorem eLpNorm_convolution_sub_le_supTrans_meas
   have hpr_toReal : (ENNReal.ofReal pr).toReal = pr :=
     ENNReal.toReal_ofReal hpr_pos.le
   have hpr_inv_nn : 0 ≤ 1 / pr := by positivity
-  -- Let f := convolution-sub.
-  -- eLpNorm f p volume = (∫⁻ x, ‖f x‖_e^pr)^{1/pr}.
   have hLHS_eq :
       eLpNorm (fun x =>
           (η ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] u) x - u x)
@@ -372,10 +350,8 @@ theorem eLpNorm_convolution_sub_le_supTrans_meas
     rw [hp_eq, eLpNorm_eq_lintegral_rpow_enorm_toReal hp0_pr hp_top_pr]
     simp [hpr_toReal]
   rw [hLHS_eq]
-  -- Bound the inner lintegral.
   have hcore := lintegral_rpow_convolution_sub_le_supTrans hpr_ge_one
       hη_cont hη_compact hη_nonneg hη_int_eq_one hu_meas hu_loc
-  -- Each translation L^pr-norm-pow is bounded by T^pr (where η ≠ 0).
   have hT_pow : ∀ᵐ s ∂(volume : Measure E),
       η s ≠ 0 →
         ∫⁻ x, (‖u (x - s) - u x‖ₑ : ℝ≥0∞) ^ pr ∂volume ≤ T ^ pr := by
@@ -387,14 +363,12 @@ theorem eLpNorm_convolution_sub_le_supTrans_meas
       rw [hp_eq, eLpNorm_eq_lintegral_rpow_enorm_toReal hp0_pr hp_top_pr]
       simp [hpr_toReal]
     rw [h_eq] at h
-    -- (∫⁻ ‖.‖^pr)^{1/pr} ≤ T → ∫⁻ ‖.‖^pr ≤ T^pr.
     have hraise : ((∫⁻ x, (‖u (x - s) - u x‖ₑ : ℝ≥0∞) ^ pr ∂volume) ^ (1 / pr)) ^ pr ≤
         T ^ pr :=
       ENNReal.rpow_le_rpow h hpr_pos.le
     rw [← ENNReal.rpow_mul] at hraise
     rw [show (1 / pr) * pr = 1 by field_simp, ENNReal.rpow_one] at hraise
     exact hraise
-  -- Bound the supTrans bound: ∫⁻ s, η(s) * ∫⁻_x ‖τ_s u - u‖^pr dx ≤ ∫⁻ s, η(s) * T^pr ds.
   have hOuter :
       ∫⁻ s, ENNReal.ofReal (η s) *
         (∫⁻ x, (‖u (x - s) - u x‖ₑ : ℝ≥0∞) ^ pr ∂volume) ∂volume ≤
@@ -416,7 +390,6 @@ theorem eLpNorm_convolution_sub_le_supTrans_meas
       · ring
       · exact hη_cont.measurable.ennreal_ofReal.aemeasurable
     exact h1.trans (le_of_eq hpull)
-  -- ∫⁻ s, η(s) ds = 1 (in ENNReal, since ∫ η = 1 and η ≥ 0).
   have hη_int_lint : ∫⁻ s, ENNReal.ofReal (η s) ∂volume = 1 := by
     have hη_int : Integrable η volume :=
       hη_cont.integrable_of_hasCompactSupport hη_compact
@@ -425,12 +398,10 @@ theorem eLpNorm_convolution_sub_le_supTrans_meas
     rw [hη_int_eq_one]
     simp
   rw [hη_int_lint, mul_one] at hOuter
-  -- Combine: ∫⁻_x ‖f x‖^pr ≤ T^pr.
   have h_inner_bound :
       ∫⁻ x, (‖(η ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] u) x - u x‖ₑ : ℝ≥0∞) ^ pr
         ∂volume ≤ T ^ pr :=
     hcore.trans hOuter
-  -- Take 1/pr-power.
   have hraise :
       (∫⁻ x, (‖(η ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] u) x - u x‖ₑ : ℝ≥0∞) ^ pr
         ∂volume) ^ (1 / pr) ≤ (T ^ pr) ^ (1 / pr) :=
@@ -438,9 +409,6 @@ theorem eLpNorm_convolution_sub_le_supTrans_meas
   refine hraise.trans ?_
   rw [← ENNReal.rpow_mul]
   rw [show pr * (1 / pr) = 1 by field_simp, ENNReal.rpow_one]
-
-/-! ## C.7 — Uniform convergence on a compact set with bounded support implies
-`L^p` convergence on the whole space. -/
 
 omit [NeZero d] in
 /-- A continuous function `g : E → ℝ` supported in a compact set `K` has
@@ -480,38 +448,28 @@ theorem tendsto_lp_of_tendstoUniformlyOn_compact
     Filter.Tendsto
       (fun k => eLpNorm (fun x => g k x - g_lim x) p volume) Filter.atTop (𝓝 0) := by
   classical
-  -- Setup constants and basic lemmas.
   have hp_ne : p ≠ 0 := by
     intro h0
     rw [h0] at hp_one
     exact absurd hp_one (by norm_num : ¬ (1 : ℝ≥0∞) ≤ 0)
   have hK_meas : MeasurableSet K := hK_compact.isClosed.measurableSet
-  -- Volume of K is finite.
   have hK_vol_lt_top : (volume : Measure E) K < ∞ :=
     volume_lt_top_of_compact (d := d) hK_compact
   set vK : ℝ≥0∞ := (volume : Measure E) K with hvK_def
-  -- vK ^ (1/p.toReal)
   have hp_toReal_pos : 0 < p.toReal := ENNReal.toReal_pos hp_ne hp_top
-  -- Difference is supported in K.
   have h_diff_supp : ∀ k, ∀ x, x ∉ K → (g k x - g_lim x) = 0 := by
     intro k x hx
     rw [hg_supp k x hx, hg_lim_supp x hx, sub_zero]
-  -- Difference is continuous.
   have h_diff_cont : ∀ k, Continuous (fun x => g k x - g_lim x) := fun k =>
     (hg_cont k).sub hg_lim_cont
-  -- For each k, we have an L^p bound.
-  -- The metric form of uniform convergence.
   have hg_unif_metric :
       ∀ ε > 0, ∀ᶠ k in atTop, ∀ x ∈ K, dist (g_lim x) (g k x) < ε :=
     Metric.tendstoUniformlyOn_iff.mp hg_unif
-  -- For each ε > 0, eventually we have eLpNorm < something close to (vK^{1/p}) * ε.
-  -- Provide the unfolded ε form. We bound via ε (sup-norm) bound.
   have h_eLp_le : ∀ k, ∀ ε : ℝ, 0 < ε →
       (∀ x, ‖g k x - g_lim x‖ ≤ ε) →
         eLpNorm (fun x => g k x - g_lim x) p volume ≤
           vK ^ (p.toReal⁻¹) * ENNReal.ofReal ε := by
     intro k ε hε hbnd
-    -- Step 1: identify (g k - g_lim) with K.indicator of itself.
     have hindicator :
         (fun x => g k x - g_lim x) = K.indicator (fun x => g k x - g_lim x) := by
       funext x
@@ -520,23 +478,16 @@ theorem tendsto_lp_of_tendstoUniformlyOn_compact
       · simp [hx, h_diff_supp k x hx]
     rw [hindicator]
     rw [eLpNorm_indicator_eq_eLpNorm_restrict hK_meas]
-    -- Step 2: Apply eLpNorm_le_of_ae_bound on restrict K.
     have hbnd_ae : ∀ᵐ x ∂(volume.restrict K), ‖g k x - g_lim x‖ ≤ ε :=
       Filter.Eventually.of_forall hbnd
     have h_le := eLpNorm_le_of_ae_bound (μ := volume.restrict K)
       (p := p) hbnd_ae
-    -- (volume.restrict K).univ = volume K.
     have h_univ : (volume.restrict K) Set.univ = vK := by
       rw [hvK_def, Measure.restrict_apply MeasurableSet.univ, Set.univ_inter]
     rw [h_univ] at h_le
-    -- h_le : eLpNorm ... ≤ vK ^ (p.toReal⁻¹) * ENNReal.ofReal ε
     exact h_le
-  -- Now let M = vK ^ (1/p.toReal). It is finite (since K compact).
-  -- We have: For any ε > 0, eventually ‖g k - g_lim‖_∞ ≤ ε on E.
-  -- Also outside K both are 0. So sup-norm is at most ε.
   have hsup : ∀ ε > 0, ∀ᶠ k in atTop, ∀ x, ‖g k x - g_lim x‖ ≤ ε := by
     intro ε hε
-    -- Use the uniform convergence on K, and the support outside K.
     have hev := hg_unif_metric ε hε
     filter_upwards [hev] with k hk x
     by_cases hx : x ∈ K
@@ -551,58 +502,40 @@ theorem tendsto_lp_of_tendstoUniformlyOn_compact
       exact this.le
     · rw [h_diff_supp k x hx]
       simpa using hε.le
-  -- M := vK ^ (1/p.toReal). It is finite since K is compact.
   set M : ℝ≥0∞ := vK ^ (p.toReal⁻¹) with hM_def
   have hM_lt_top : M < ∞ := by
     rw [hM_def]
     have hp_inv_nn : 0 ≤ p.toReal⁻¹ := inv_nonneg.mpr hp_toReal_pos.le
     exact ENNReal.rpow_lt_top_of_nonneg hp_inv_nn hK_vol_lt_top.ne
-  -- For each k and any sup-norm bound ε on `g k - g_lim`, we have an L^p bound.
-  -- The plan: bound eLpNorm by M * ofReal(sup-norm), and let sup-norm → 0.
-  -- We squeeze eLpNorm via 0 ≤ eLpNorm ≤ M * ofReal(ε), with ε → 0.
-  -- Use the squeeze theorem in ℝ≥0∞.
-  -- Step 1: show that for any (real) ε > 0, eventually
-  --         eLpNorm (g k - g_lim) p volume ≤ M * ENNReal.ofReal ε.
   have h_main_bnd : ∀ ε : ℝ, 0 < ε → ∀ᶠ k in atTop,
       eLpNorm (fun x => g k x - g_lim x) p volume ≤ M * ENNReal.ofReal ε := by
     intro ε hε
     filter_upwards [hsup ε hε] with k hbnd
     exact h_eLp_le k ε hε hbnd
-  -- Step 2: deduce tendsto.
-  -- Convert h_main_bnd into an `∃ N, ∀ n ≥ N` form via `eventually_atTop`.
-  -- For any ε_top > 0, find ε_real > 0 with M * ofReal(ε_real) ≤ ε_top, then use h_main_bnd.
   rw [ENNReal.tendsto_atTop_zero]
   intro ε_top hε_top
-  -- Case A: M = 0.
   by_cases hM_zero : M = 0
-  · -- For any k, the L^p norm is bounded by M * ofReal(1) = 0.
-    have h := h_main_bnd 1 (by norm_num)
+  · have h := h_main_bnd 1 (by norm_num)
     rcases (Filter.eventually_atTop).mp h with ⟨N, hN⟩
     refine ⟨N, fun n hn => ?_⟩
     have := hN n hn
     rw [hM_zero, zero_mul] at this
     exact this.trans (zero_le _)
-  · -- M > 0. Pick ε := (ε_top / M).toReal.
-    have hM_pos : 0 < M := pos_iff_ne_zero.mpr hM_zero
-    -- ε_e := ε_top / M.
+  · have hM_pos : 0 < M := pos_iff_ne_zero.mpr hM_zero
     set ε_e : ℝ≥0∞ := ε_top / M with hε_e_def
     have hε_e_pos : 0 < ε_e := by
       rw [hε_e_def]
       exact ENNReal.div_pos hε_top.ne' hM_lt_top.ne
-    -- Two sub-cases on whether ε_e = ∞.
     by_cases hε_e_top : ε_e = ∞
-    · -- ε_e = ∞ implies ε_top = ∞ since M > 0 and M < ∞.
-      have hε_top_top : ε_top = ∞ := by
+    · have hε_top_top : ε_top = ∞ := by
         by_contra hne
         have : ε_e < ∞ := by
           rw [hε_e_def]
           exact ENNReal.div_lt_top hne hM_zero
         exact this.ne hε_e_top
-      -- The bound `eLpNorm ≤ ∞` is trivial.
       refine ⟨0, fun n _ => ?_⟩
       rw [hε_top_top]; exact le_top
-    · -- ε_e < ∞.
-      set ε_real : ℝ := ε_e.toReal with hε_real_def
+    · set ε_real : ℝ := ε_e.toReal with hε_real_def
       have hε_real_pos : 0 < ε_real := ENNReal.toReal_pos hε_e_pos.ne' hε_e_top
       have h_M_eps : M * ENNReal.ofReal ε_real = ε_top := by
         rw [hε_real_def]
@@ -615,8 +548,6 @@ theorem tendsto_lp_of_tendstoUniformlyOn_compact
       have := hN n hn
       rw [← h_M_eps]
       exact this
-
-/-! ## C.8 — Diagonal extraction & Fréchet–Kolmogorov compactness criterion. -/
 
 omit [NeZero d] in
 /-- Hölder bound: an `L^p` function supported on a compact set has finite
@@ -652,7 +583,6 @@ private lemma convolution_support_subset_cthickening
     · simp [hut]
     by_cases hη_xmt : η (x - t) = 0
     · simp [hη_xmt]
-    -- Both are nonzero, derive contradiction with hx ∉ cthickening.
     exfalso
     have ht_K : t ∈ K := by
       by_contra h
@@ -663,13 +593,10 @@ private lemma convolution_support_subset_cthickening
       have hmem : (x - t) ∈ Metric.closedBall (0 : E) ε := h_ht
       rw [Metric.mem_closedBall, dist_zero_right] at hmem
       rwa [dist_eq_norm]
-    -- x ∈ cthickening ε K because t ∈ K and dist x t ≤ ε.
     have h_in_cthickening : x ∈ Metric.cthickening ε K :=
       Metric.mem_cthickening_of_dist_le x t ε K ht_K h_dist
     exact hx h_in_cthickening
   simp [h_zero_integrand]
-
-/-! ## Helper: uniform Cauchy on a compact set + bounded support → L^p Cauchy on the whole space. -/
 
 omit [NeZero d] in
 /-- If a sequence of continuous functions all supported in a compact set `K`
@@ -697,7 +624,6 @@ private lemma cauchy_lp_of_uniformly_cauchy_on_compact_supp
   have hp_inv_nn : 0 ≤ p.toReal⁻¹ := inv_nonneg.mpr hp_toReal_pos.le
   set M : ℝ≥0∞ := vK ^ (p.toReal⁻¹) with hM_def
   have hM_lt_top : M < ∞ := ENNReal.rpow_lt_top_of_nonneg hp_inv_nn hK_vol_lt_top.ne
-  -- Step: for each k, l with sup-norm bound η on K, eLpNorm ≤ M * ofReal η.
   have h_eLp_le : ∀ j l, ∀ η : ℝ, 0 < η →
       (∀ x, ‖g j x - g l x‖ ≤ η) →
         eLpNorm (fun x => g j x - g l x) p volume ≤ M * ENNReal.ofReal η := by
@@ -719,12 +645,9 @@ private lemma cauchy_lp_of_uniformly_cauchy_on_compact_supp
       rw [hvK_def, Measure.restrict_apply MeasurableSet.univ, Set.univ_inter]
     rw [h_univ] at h_le
     exact h_le
-  -- Now express the bound for any ε > 0: choose η so M * ofReal η ≤ ofReal ε.
-  -- η := ε / max(M.toReal, 1) suffices.
   intro ε hε
   by_cases hM_zero : M = 0
-  · -- M = 0: use any η > 0; the bound is 0.
-    rcases hg_uCauchy 1 (by norm_num) with ⟨J, hJ⟩
+  · rcases hg_uCauchy 1 (by norm_num) with ⟨J, hJ⟩
     refine ⟨J, fun j hj l hl => ?_⟩
     have hbnd : ∀ x, ‖g j x - g l x‖ ≤ 1 := by
       intro x
@@ -763,8 +686,6 @@ private lemma cauchy_lp_of_uniformly_cauchy_on_compact_supp
     have h := h_eLp_le j l η_real hη_real_pos hbnd
     rw [h_M_eta] at h
     exact h
-
-/-! ## C.8 — Main theorem: subseq from translation-uniform `L^p`-bounded family. -/
 
 omit [NeZero d] in
 /-- A nonneg compactly-supported continuous `η` integrating to one is
@@ -806,20 +727,13 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
           (fun k => eLpNorm (fun x => u (φ k) x - u_lim x) p volume)
           Filter.atTop (𝓝 0) := by
   classical
-  -- Step 0: Replace u n with a genuinely Measurable representative.
-  -- This is needed because C.5 requires `Measurable u`. We use
-  -- `K.indicator (mk (u n))`, which is Measurable, supported in K pointwise,
-  -- and agrees with u n almost everywhere.
-  -- Step 1: Setup — `K'` := closed thickening of K by 1.
   set K' : Set E := Metric.cthickening 1 K with hK'_def
   have hK_meas : MeasurableSet K := hK_compact.isClosed.measurableSet
   have hK'_compact : IsCompact K' := hK_compact.cthickening
   have hK'_meas : MeasurableSet K' := hK'_compact.isClosed.measurableSet
-  -- volume(K) is finite.
   have hK_vol_lt_top : (volume : Measure E) K < ∞ :=
     volume_lt_top_of_compact (d := d) hK_compact
   have hK_vol_ne_top : (volume : Measure E) K ≠ ∞ := hK_vol_lt_top.ne
-  -- Define the Measurable representative.
   set vFn : ℕ → E → ℝ := fun n =>
     K.indicator ((hu_mem n).aestronglyMeasurable.mk (u n)) with hvFn_def
   have hv_meas : ∀ n, Measurable (vFn n) := by
@@ -829,12 +743,10 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
   have hv_supp : ∀ n, ∀ x, x ∉ K → vFn n x = 0 := by
     intro n x hx
     simp [vFn, hx]
-  -- vFn n =ᵐ u n.
   have hv_aeEq_u : ∀ n, vFn n =ᵐ[volume] u n := by
     intro n
     have h1 : (hu_mem n).aestronglyMeasurable.mk (u n) =ᵐ[volume] u n :=
       ((hu_mem n).aestronglyMeasurable.ae_eq_mk).symm
-    -- vFn n = K.indicator (mk (u n)) = K.indicator (u n) (AE) = u n (since u n is K-supported).
     have h3 : (K.indicator (u n) : E → ℝ) = u n := by
       funext x
       by_cases hxK : x ∈ K
@@ -849,7 +761,6 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
       · rfl
     calc vFn n =ᵐ[volume] K.indicator (u n) := h2
       _ = u n := h3
-  -- vFn n MemLp p, with the same eLpNorm.
   have hv_eLpNorm : ∀ n, eLpNorm (vFn n) p volume = eLpNorm (u n) p volume := fun n =>
     eLpNorm_congr_ae (hv_aeEq_u n)
   have hv_bdd : ∀ n, eLpNorm (vFn n) p volume ≤ ENNReal.ofReal R := fun n =>
@@ -857,8 +768,6 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
   have hv_memLp : ∀ n, MemLp (vFn n) p volume := fun n =>
     ⟨(hv_meas n).aestronglyMeasurable, by
       rw [hv_eLpNorm n]; exact (hu_mem n).2⟩
-  -- Translation continuity: vFn n inherits hu_translation.
-  -- Key step: vFn n (· - h) =ᵐ u n (· - h) (translation preserves AE-equality).
   have hv_translate_aeEq : ∀ n h,
       (fun x => vFn n (x - h)) =ᵐ[volume] (fun x => u n (x - h)) := by
     intro n h
@@ -869,9 +778,7 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
         funext x; rw [sub_eq_add_neg]
       rw [hEq]
       exact hMP_neg
-    -- (vFn n ∘ (· - h)) =ᵐ[volume] (u n ∘ (· - h)) via QMP.
     have := hMP.quasiMeasurePreserving.ae_eq_comp (hv_aeEq_u n)
-    -- this : vFn n ∘ (· - h) =ᵐ u n ∘ (· - h).
     exact this
   have hv_translation : ∀ ε > 0, ∃ δ > 0, ∀ n, ∀ h : E,
       ‖h‖ < δ →
@@ -887,12 +794,10 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
       rw [hx1, hx2]
     rw [eLpNorm_congr_ae hEq]
     exact hδ_bnd n h hh
-  -- vFn n is integrable.
   have hv_int : ∀ n, Integrable (vFn n) volume := fun n =>
     integrable_of_memLp_compactSupp (d := d) hp_one hK_compact (hv_memLp n) (hv_supp n)
   have hv_loc : ∀ n, LocallyIntegrable (vFn n) volume := fun n =>
     (hv_int n).locallyIntegrable
-  -- Step 4: Mollifiers η_k with support in closed ε_k-ball, ε_k = 1/(k+1).
   set εFn : ℕ → ℝ := fun k => (1 : ℝ) / ((k : ℝ) + 1) with hεFn_def
   have hε_pos : ∀ k, 0 < εFn k := fun k => by
     rw [hεFn_def]
@@ -925,19 +830,12 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
     intro k
     refine (hη_supp_subset_eps_ball k).trans ?_
     exact Metric.closedBall_subset_closedBall (hε_le_one k)
-  -- Convolution fConv k n := ηFn k ⋆ vFn n. (Order chosen to match C.5.)
   set fConv : ℕ → ℕ → E → ℝ := fun k n =>
     ((ηFn k) ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] (vFn n)) with hfConv_def
-  -- Continuity of fConv k n: η has compact support, so f * η has compact support
-  -- via the swapped form. Equivalently, η compact-support * vFn locally integrable
-  -- → continuous.
   have hfConv_cont : ∀ k n, Continuous (fConv k n) := fun k n => by
-    -- Use that ηFn has compact support (left convolution arg).
     refine HasCompactSupport.continuous_convolution_left
       (L := ContinuousLinearMap.lsmul ℝ ℝ) (hη_compact k) ?_ (hv_loc n)
     exact hη_cont k
-  -- Convolution support: ‖x - t‖ ≤ ε for some t ∈ supp η, t ∈ supp vFn = K.
-  -- Need: x ∈ cthickening 1 K. Use convolution_flip to bring it to vFn ⋆ η form.
   have hfConv_alt : ∀ k n,
       fConv k n = (vFn n) ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] (ηFn k) := by
     intro k n
@@ -945,23 +843,14 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
     change (ηFn k ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] vFn n) x =
       (vFn n ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] ηFn k) x
     rw [convolution_def, convolution_def]
-    -- ∫ t, η(t) * v(x-t) dt = ∫ t, η(x-t) * v(t) dt = (∫ t, v(t) * η(x-t) dt).
-    -- Apply integral_sub_left_eq_self with f s := η(s) * v(x-s).
     have h_translate :
         ∫ t : E, (ContinuousLinearMap.lsmul ℝ ℝ) (ηFn k t) (vFn n (x - t)) ∂volume =
         ∫ t : E, (ContinuousLinearMap.lsmul ℝ ℝ) (ηFn k (x - t)) (vFn n (x - (x - t))) ∂volume := by
-      -- f s := lsmul (η s) (v (x - s)).
       let f : E → ℝ := fun s =>
         (ContinuousLinearMap.lsmul ℝ ℝ) (ηFn k s) (vFn n (x - s))
       have h := integral_sub_left_eq_self f (volume : Measure E) x
-      -- h : ∫ t, f (x - t) ∂vol = ∫ t, f t ∂vol.
-      -- f t = lsmul (η t) (v (x - t)).
-      -- f (x - t) = lsmul (η (x - t)) (v (x - (x - t))).
       simpa [f] using h.symm
     rw [h_translate]
-    -- Now: ∫ t, lsmul (η (x-t)) (v (x-(x-t))) ∂vol = ∫ t, lsmul (v t) (η (x-t)) ∂vol.
-    -- Note x - (x - t) = t.
-    -- Use lsmul_apply (= mul) and mul_comm.
     have h_eqfn :
         (fun t : E =>
           (ContinuousLinearMap.lsmul ℝ ℝ) (ηFn k (x - t)) (vFn n (x - (x - t)))) =
@@ -975,8 +864,6 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
     rw [hfConv_alt k n]
     refine convolution_support_subset_cthickening (d := d) (zero_le_one) (hv_supp n)
       (hη_supp_subset_one_ball k) x hx
-  -- Step 6: C.5 bound. From hu_translation (now hv_translation),
-  -- for any ε > 0, large k implies eLpNorm (fConv k n - vFn n) ≤ ε for all n.
   have hConvSub_bnd : ∀ ε : ℝ, 0 < ε → ∃ K0 : ℕ, ∀ k ≥ K0, ∀ n,
       eLpNorm (fun x => (fConv k n) x - vFn n x) p volume ≤
         ENNReal.ofReal ε := by
@@ -991,13 +878,10 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
       have habs : εFn k = |εFn k| := (abs_of_pos (hε_pos k)).symm
       rw [habs]
       exact hd
-    -- Apply C.5.
     refine eLpNorm_convolution_sub_le_supTrans_meas
       hp_one hp_top (hη_cont k) (hη_compact k) (hη_nonneg k) (hη_int_eq_one k)
       (hv_meas n) (hv_loc n) ?_
-    -- Show: ∀ᵐ s, ηFn k s ≠ 0 → eLpNorm (vFn n (· - s) - vFn n) ≤ ofReal ε.
     filter_upwards with s hs
-    -- s ∈ supp ηFn k ⊆ closedBall 0 (εFn k), so ‖s‖ ≤ εFn k < δ.
     have hs_supp : s ∈ Function.support (ηFn k) := Function.mem_support.mpr hs
     have hs_in_ball : s ∈ Metric.closedBall (0 : E) (εFn k) :=
       hη_supp_subset_eps_ball k hs_supp
@@ -1006,34 +890,12 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
       exact hs_in_ball
     have hs_norm_lt : ‖s‖ < δ := lt_of_le_of_lt hs_norm_le hεk_lt
     exact hδ_bnd n s hs_norm_lt
-  -- Step 7: Sup-norm and Lipschitz bounds for fConv k n, uniform in n.
-  -- ‖fConv k n‖_∞ ≤ M_k * S where M_k = sup |ηFn k| and S = ∫ |vFn n| (uniform in n).
-  -- For S we use: from `hv_bdd` and Hölder, ‖vFn n‖_{L^1} ≤ ofReal R * vol(K)^{1-1/p}.
-  -- We will instead derive a simpler form: just use that S_n := ∫ ‖vFn n‖ ≤ S_0 := ofReal R * (vol K)^{...}
-  -- The key point is uniform in n.
-  -- For each k, fix M_k := sup |ηFn k| and L_k := Lipschitz constant of ηFn k.
-  -- Then sup |fConv k n| ≤ M_k * (∫ ‖vFn n‖) ≤ M_k * S_uniform.
-  -- For each k, define a uniform sup-norm bound and Lipschitz bound:
   have h_supnorm_bound : ∀ k, ∃ M_k : ℝ, 0 ≤ M_k ∧ ∀ y, ‖ηFn k y‖ ≤ M_k :=
     fun k => exists_norm_bound_of_continuous_compactSupport (hη_cont k) (hη_compact k)
   have h_lip_bound : ∀ k, ∃ L_k : ℝ, 0 ≤ L_k ∧ ∀ x y, ‖ηFn k x - ηFn k y‖ ≤ L_k * ‖x - y‖ :=
     fun k => lipschitz_of_contDiff_compactSupport
       ((hη_smooth k).of_le (by norm_cast)) (hη_compact k)
-  -- Bound: for each n, ‖vFn n‖_{L^1(volume)} ≤ S where S := some uniform bound.
-  -- We have eLpNorm vFn n p volume ≤ ofReal R, supported in K of finite volume, p ≥ 1.
-  -- Hence eLpNorm vFn n 1 volume ≤ ofReal R * (vol K)^{1-1/p}.
-  -- And eLpNorm vFn n 1 volume = ENNReal.ofReal (∫ ‖vFn n‖).
-  -- So ∫ ‖vFn n‖ ≤ R * (vol K)^{1-1/p}.
-  -- We'll just compute it as a bound on ∫ ‖vFn n‖ via its eLpNorm 1 form.
-  -- For practical use, we just need each `S_n := ∫ ‖vFn n‖` to be finite, plus an upper bound.
-  -- Use `Integrable.norm_le_lintegral_lift_eLpNorm` or similar — actually, let's just use
-  -- the existing `hv_int n` and bound ∫ ‖vFn n‖ ≤ (eLpNorm vFn 1 vol).toReal.
-  -- We package as a uniform `S` independent of n.
-  -- Concretely: ∫ ‖vFn n‖ = (eLpNorm vFn n 1 vol).toReal.
-  -- eLpNorm vFn n 1 ≤ eLpNorm vFn n p * vol(K)^{1-1/p} ≤ ofReal R * vol(K)^{1-1/p}.
-  -- Define:
   set vK : ℝ≥0∞ := (volume : Measure E) K with hvK_def
-  -- Skip explicit computation; just use Hölder and toReal.
   have h_int_norm_bound : ∀ n,
       ∫ t, ‖vFn n t‖ ∂(volume : Measure E) ≤
         (ENNReal.ofReal R * vK ^ ((1 : ℝ) - p.toReal⁻¹)).toReal := by
@@ -1043,11 +905,6 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
       rw [h0] at hp_one
       exact absurd hp_one (by norm_num : ¬ (1 : ℝ≥0∞) ≤ 0)
     have hp_pos : 0 < p.toReal := ENNReal.toReal_pos hp_ne hp_top
-    -- eLpNorm vFn n 1 vol ≤ eLpNorm vFn n p vol * vol(univ)^{1 - 1/p}.
-    -- But vol(univ) = ∞, so this won't work. We need to use the support.
-    -- Actually, eLpNorm vFn n 1 vol = eLpNorm vFn n 1 (vol.restrict K), since vFn n is K-supported.
-    -- Indeed, ∫ ‖vFn n‖ over E = ∫ ‖vFn n‖ over K (since outside K it's 0).
-    -- Then on volume.restrict K, vol(univ) = vK.
     have h_indicator : (fun x => ‖vFn n x‖) = K.indicator (fun x => ‖vFn n x‖) := by
       funext x
       by_cases hxK : x ∈ K
@@ -1073,23 +930,17 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
       conv_lhs => rw [h_ind_eq]
       exact MeasureTheory.eLpNorm_indicator_eq_eLpNorm_restrict (μ := volume)
         (s := K) (p := p) (f := vFn n) hK_meas
-    -- Now apply Hölder on volume.restrict K.
     haveI : IsFiniteMeasure (volume.restrict K) := by
       refine ⟨?_⟩
       rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter]
       exact hK_vol_lt_top
-    -- eLpNorm vFn n 1 (vol.restrict K) ≤ eLpNorm vFn n p (vol.restrict K) * (vol.restrict K)(univ)^{1 - 1/p}
     have h_holder := MeasureTheory.eLpNorm_le_eLpNorm_mul_rpow_measure_univ
       (p := 1) (q := p) (μ := volume.restrict K) hp_one
       (hv_meas n).aestronglyMeasurable
-    -- (vol.restrict K)(univ) = vK.
     have h_restrict_univ : (volume.restrict K) Set.univ = vK := by
       rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter]
     rw [h_restrict_univ] at h_holder
-    -- h_holder : eLpNorm vFn n 1 (vol.restrict K) ≤ eLpNorm vFn n p (vol.restrict K) * vK^{1/1 - 1/p.toReal}
-    -- Combine with eLpNorm vFn n p (vol.restrict K) = eLpNorm vFn n p vol ≤ ofReal R.
     rw [← h_eLp1_eq, ← h_eLpp_eq] at h_holder
-    -- Now: eLpNorm vFn n 1 vol ≤ ofReal R * vK^{1 - 1/p.toReal}.
     have h_combine : eLpNorm (vFn n) 1 volume ≤ ENNReal.ofReal R *
         vK ^ ((1 : ℝ) - p.toReal⁻¹) := by
       refine h_holder.trans ?_
@@ -1100,21 +951,16 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
         rw [h3, one_div]
       rw [h2, h4]
       exact mul_le_mul' h1 le_rfl
-    -- Convert eLpNorm vFn n 1 vol = ∫ ‖vFn n‖ for nonneg case.
     have h_lp1_int : eLpNorm (vFn n) 1 volume = ∫⁻ t, ‖vFn n t‖ₑ ∂volume := by
       have := eLpNorm_one_eq_lintegral_enorm (μ := volume) (f := vFn n)
       exact this
     rw [h_lp1_int] at h_combine
-    -- ∫ ‖vFn n‖ = (∫⁻ ‖vFn n‖ₑ).toReal (if integrable). Use:
     have h_int_eq :
         ∫ t, ‖vFn n t‖ ∂(volume : Measure E) =
           (∫⁻ t, ‖vFn n t‖ₑ ∂(volume : Measure E)).toReal := by
       rw [MeasureTheory.integral_norm_eq_lintegral_enorm (hv_meas n).aestronglyMeasurable]
     rw [h_int_eq]
-    -- Apply toReal-mono.
     refine ENNReal.toReal_mono ?_ h_combine
-    -- ofReal R * vK^{1 - 1/p.toReal} ≠ ∞ if R ≥ 0 (or convert to allow negative).
-    -- vK is finite. Power is finite. Product is finite.
     refine ENNReal.mul_ne_top ENNReal.ofReal_ne_top ?_
     refine ENNReal.rpow_ne_top_of_nonneg ?_ hK_vol_ne_top
     have hpinv : p.toReal⁻¹ ≤ 1 := by
@@ -1125,45 +971,34 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
         simpa using this
       exact this
     linarith
-  -- Setup the uniform L^1 bound:
   set Sbound : ℝ := (ENNReal.ofReal R * vK ^ ((1 : ℝ) - p.toReal⁻¹)).toReal with hSbound_def
   have hSbound_nn : 0 ≤ Sbound := ENNReal.toReal_nonneg
-  -- Uniform sup-norm bound on fConv k n.
-  -- For each k, fConv k n satisfies ‖fConv k n x‖ ≤ M_k * ∫ ‖vFn n‖ ≤ M_k * Sbound.
   have h_fConv_supnorm_unif : ∀ k, ∃ C_k : ℝ, 0 < C_k ∧
       ∀ n, ∀ x, |fConv k n x| ≤ C_k := by
     intro k
     rcases h_supnorm_bound k with ⟨M_k, hM_k_nn, hM_k⟩
-    -- C_k := M_k * Sbound + 1 (to ensure strict positivity).
     refine ⟨M_k * Sbound + 1, by linarith [mul_nonneg hM_k_nn hSbound_nn], ?_⟩
     intro n x
-    -- fConv k n = vFn n ⋆ ηFn k (via hfConv_alt).
     rw [show fConv k n = vFn n ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] ηFn k from
       hfConv_alt k n]
     have hbnd := convolution_sup_le_holder (d := d)
       (hv_int n) (hη_cont k).aestronglyMeasurable hM_k x
-    -- hbnd : ‖(vFn n ⋆ ηFn k) x‖ ≤ M_k * ∫ ‖vFn n‖
     have hbnd2 := hbnd.trans (mul_le_mul_of_nonneg_left (h_int_norm_bound n) hM_k_nn)
-    -- hbnd2 : ‖(vFn n ⋆ ηFn k) x‖ ≤ M_k * Sbound
     have h_norm_eq_abs : ‖(vFn n ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] ηFn k) x‖ =
         |(vFn n ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] ηFn k) x| := Real.norm_eq_abs _
     rw [← h_norm_eq_abs]
     linarith
-  -- Uniform Lipschitz bound on fConv k n.
   have h_fConv_lip_unif : ∀ k, ∃ L_k : ℝ, ∃ hL_k_nn : 0 ≤ L_k,
       ∀ n, LipschitzWith ⟨L_k, hL_k_nn⟩ (fConv k n) := by
     intro k
     rcases h_lip_bound k with ⟨L_eta_k, hL_eta_k_nn, hL_eta_k⟩
-    -- L_k := L_eta_k * Sbound (Lipschitz constant of u_n ⋆ η_k).
     refine ⟨L_eta_k * Sbound, mul_nonneg hL_eta_k_nn hSbound_nn, ?_⟩
     intro n
-    -- Use fConv k n = vFn n ⋆ ηFn k.
     have hConvAlt := hfConv_alt k n
     rw [hConvAlt]
     refine LipschitzWith.of_dist_le_mul fun x y => ?_
     have h := convolution_lipschitz_with (d := d) (hv_int n) (hη_cont k)
       (hη_compact k) hL_eta_k x y
-    -- h : ‖(vFn n ⋆ ηFn k) x - (vFn n ⋆ ηFn k) y‖ ≤ L_eta_k * ∫ ‖vFn n‖ * ‖x - y‖
     have hbnd_int : L_eta_k * (∫ t, ‖vFn n t‖ ∂volume) ≤ L_eta_k * Sbound :=
       mul_le_mul_of_nonneg_left (h_int_norm_bound n) hL_eta_k_nn
     have hh :
@@ -1174,10 +1009,6 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
       gcongr
     rw [dist_eq_norm, dist_eq_norm]
     exact hh
-  -- Step 7: Helper for applying C.6.
-  -- For each k and any strict-monotone subsequence σ of indices, we can extract a further
-  -- strict-monotone subsequence τ along which (fConv k (σ (τ j)))_j converges uniformly on K'
-  -- to some continuous limit.
   have hExtract : ∀ (k : ℕ) (σ : ℕ → ℕ) (_hσ : StrictMono σ),
       ∃ τ : ℕ → ℕ, StrictMono τ ∧ ∃ v_k : E → ℝ,
         Continuous v_k ∧
@@ -1191,12 +1022,7 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
       (fun j x => hC_k_bd (σ j) x) hL_k_nn (fun j => hL_k_lip (σ j)) with
       ⟨τ, hτ_mono, v_k, hv_k_cont, hv_k_unif⟩
     exact ⟨τ, hτ_mono, v_k, hv_k_cont, hv_k_unif⟩
-  -- Step 8: Recursively build nested subsequences.
-  -- σ : ℕ → (ℕ → ℕ), each σ k is StrictMono, with σ 0 = id and σ (k+1) = σ k ∘ τ_k
-  -- where τ_k is the extraction at level k+1 applied to σ_k.
-  -- We package each σ k together with its StrictMono certificate.
   let StateType := { σ : ℕ → ℕ // StrictMono σ }
-  -- Recursive construction: state(0) = id; state(k+1) = state(k) ∘ τ_k.
   let stateRec : ℕ → StateType := fun k => Nat.rec
     (motive := fun _ => StateType)
     ⟨id, strictMono_id⟩
@@ -1205,19 +1031,9 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
         StrictMono.comp prev.property
           (Classical.choose_spec (hExtract (k_prev + 1) prev.val prev.property)).1⟩)
     k
-  -- Each state(k) is a StrictMono subseq.
-  -- The diagonal is φ(j) := state(j).val(j).
   let φAux : ℕ → ℕ := fun j => (stateRec j).val j
-  -- Show φAux is StrictMono: state(k+1) = state(k) ∘ τ_k. So
-  -- φAux (k+1) = state(k+1)(k+1) = state(k)(τ_k(k+1)).
-  -- φAux k = state(k)(k).
-  -- Since τ_k(k+1) > τ_k(k) ≥ k (StrictMono τ_k from ℕ → ℕ implies τ_k(k) ≥ k),
-  -- we get state(k)(τ_k(k+1)) > state(k)(τ_k(k)) ≥ state(k)(k) = φAux k.
-  -- Hmm: we want state(k)(τ_k(k+1)) > state(k)(k). Since τ_k(k+1) ≥ k+1 > k, and state(k) StrictMono, OK.
   have hφAux_mono : StrictMono φAux := by
     intro a b hab
-    -- Suffices: φAux a < φAux (a+1) for all a (monotonicity is the chained version).
-    -- We'll use induction on b - a to handle arbitrary a < b.
     have hStep : ∀ k, φAux k < φAux (k + 1) := by
       intro k
       have hSt_val_eq : (stateRec (k + 1)).val =
@@ -1225,17 +1041,13 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
             Classical.choose (hExtract (k + 1) (stateRec k).val (stateRec k).property) := rfl
       have hτ_mono :=
         (Classical.choose_spec (hExtract (k + 1) (stateRec k).val (stateRec k).property)).1
-      -- φAux k = state k (k).
-      -- φAux (k+1) = state (k+1) (k+1) = state k (τ (k+1)).
       have h1 : φAux (k + 1) = (stateRec k).val
           (Classical.choose (hExtract (k + 1) (stateRec k).val (stateRec k).property) (k + 1)) := by
         change (stateRec (k + 1)).val (k + 1) = _
         rw [hSt_val_eq]; rfl
       have h2 : φAux k = (stateRec k).val k := rfl
       rw [h1, h2]
-      -- Show state k (τ (k+1)) > state k (k). Use state k StrictMono and τ (k+1) > k.
       apply (stateRec k).property
-      -- τ is StrictMono ℕ → ℕ, so τ (k+1) ≥ k + 1 > k.
       have hge := hτ_mono.id_le
       have h_at : (id (k + 1) : ℕ) ≤
         Classical.choose (hExtract (k + 1) (stateRec k).val (stateRec k).property) (k + 1) :=
@@ -1243,15 +1055,6 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
       simp only [id_eq] at h_at
       omega
     exact (strictMono_nat_of_lt_succ hStep) hab
-  -- Step 9: For each level k, the diagonal is eventually a subsequence of the k-th subseq.
-  -- Specifically, for j ≥ k, φAux j = (stateRec k).val (tail j k j)
-  -- where tail j k : ℕ → ℕ is StrictMono.
-  --
-  -- More cleanly: we will show that (fConv k (φAux j))_{j ≥ k} converges uniformly on K' to
-  -- some `wSeq k : E → ℝ`.
-  --
-  -- We extract this from the construction.
-  -- The key lemma:
   have hTail : ∀ k, ∀ m ≥ k, ∃ τ : ℕ → ℕ, StrictMono τ ∧
       (stateRec m).val = (stateRec k).val ∘ τ := by
     intro k m hkm
@@ -1260,7 +1063,6 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
       exact ⟨id, strictMono_id, by simp⟩
     | succ m hkm IH =>
       rcases IH with ⟨τ', hτ'_mono, hτ'_eq⟩
-      -- (stateRec (m+1)).val = (stateRec m).val ∘ τStep m = (stateRec k).val ∘ τ' ∘ τStep m
       let τStep_m := Classical.choose (hExtract (m + 1) (stateRec m).val (stateRec m).property)
       have hτStep_m_mono : StrictMono τStep_m :=
         (Classical.choose_spec (hExtract (m + 1) (stateRec m).val (stateRec m).property)).1
@@ -1269,38 +1071,19 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
       rw [h_succ_eq, hτ'_eq]
       ext n
       simp [Function.comp]
-  -- For each k, (fConv k ((stateRec k).val n))_n converges uniformly on K' to some `wSeq k`.
-  -- This is exactly the property of (stateRec k).val for k ≥ 1. For k = 0, we just take a
-  -- constant zero limit (we won't use it).
-  -- Actually, for k = 0 we just have (stateRec 0).val = id, so (fConv 0 n)_n is the unmodified
-  -- sequence; we don't have a convergence guarantee at k = 0. But we don't need it.
-  -- For k ≥ 1, we have the convergence.
-  -- Alternatively: at each level k, we apply hExtract to get a `τ_k` and a limit `v_k`.
-  -- The next-level subseq is built using `τ_k`.
-  -- After construction, `(stateRec k).val = (stateRec (k-1)).val ∘ τ_{k-1}`, and
-  -- `(fConv k ((stateRec k).val n))_n = (fConv k ((stateRec (k-1)).val (τ_{k-1} n)))_n` is
-  -- the subseq from C.6 → converges uniformly on K' to some `wSeq k`.
-  --
-  -- The relevant fact: `(fConv k ((stateRec k).val n))_n` converges uniformly on K' for k ≥ 1.
   have hLimSeq : ∀ k, ∃ wSeq_k : E → ℝ, Continuous wSeq_k ∧
       TendstoUniformlyOn (fun j => fConv (k + 1) ((stateRec (k + 1)).val j)) wSeq_k atTop K' := by
     intro k
-    -- (stateRec (k+1)).val = (stateRec k).val ∘ τStep_k where τStep_k from hExtract.
     let τStep_k := Classical.choose (hExtract (k + 1) (stateRec k).val (stateRec k).property)
     have hτStep_k_spec :=
       Classical.choose_spec (hExtract (k + 1) (stateRec k).val (stateRec k).property)
     obtain ⟨_, v_k, hv_k_cont, hv_k_unif⟩ := hτStep_k_spec
-    -- So (fConv (k+1) ((stateRec k).val (τStep_k j)))_j converges to v_k uniformly on K'.
-    -- And (stateRec (k+1)).val = (stateRec k).val ∘ τStep_k.
     have h_eq : (stateRec (k + 1)).val = (stateRec k).val ∘ τStep_k := rfl
     refine ⟨v_k, hv_k_cont, ?_⟩
     rw [show (fun j => fConv (k + 1) ((stateRec (k + 1)).val j)) =
       (fun j => fConv (k + 1) ((stateRec k).val (τStep_k j))) from by
         funext j; rw [h_eq]; rfl]
     exact hv_k_unif
-  -- Now φAux j = (stateRec j).val j. For j ≥ k+1, φAux j = (stateRec (k+1)).val (tail j (k+1) j)
-  -- where tail StrictMono. So `(fConv (k+1) (φAux j))_{j ≥ k+1}` is a subsequence of the
-  -- convergent sequence `(fConv (k+1) ((stateRec (k+1)).val n))_n`.
   have hDiagCv : ∀ k, ∃ wSeq_k : E → ℝ, Continuous wSeq_k ∧
       ∀ ε > 0, ∃ J : ℕ, ∀ j ≥ J, ∀ x ∈ K',
         dist (wSeq_k x) (fConv (k + 1) (φAux j) x) < ε := by
@@ -1308,17 +1091,10 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
     rcases hLimSeq k with ⟨wSeq_k, hwSeq_k_cont, hwSeq_k_unif⟩
     refine ⟨wSeq_k, hwSeq_k_cont, ?_⟩
     intro ε hε
-    -- For j ≥ k+1, φAux j = (stateRec (k+1)).val (tail j (k+1) j).
-    -- Let ψ : ℕ → ℕ defined for j ≥ k+1 as ψ_j := tail j (k+1) j; for j < k+1, doesn't matter.
     rw [Metric.tendstoUniformlyOn_iff] at hwSeq_k_unif
     have hJ_ev := hwSeq_k_unif ε hε
     rw [Filter.eventually_atTop] at hJ_ev
     rcases hJ_ev with ⟨J0, hJ0⟩
-    -- For all n ≥ J0, ‖wSeq_k - fConv (k+1) ((stateRec (k+1)).val n)‖ < ε on K'.
-    -- We want: for j ≥ some J', ‖wSeq_k - fConv (k+1) (φAux j)‖ < ε on K'.
-    -- Key: for j ≥ k+1, we have hTail (k+1) j (le_of_lt_succ ...) giving a τ.
-    -- And (stateRec j).val j = (stateRec (k+1)).val (τ j). Need τ j ≥ J0.
-    -- We use the fact that τ : ℕ → ℕ, StrictMono, so τ j ≥ j. So choose J' := max (k+1) J0.
     refine ⟨max (k + 1) J0, fun j hj x hxK' => ?_⟩
     have hjk : k + 1 ≤ j := le_of_max_le_left hj
     have hjJ0 : J0 ≤ j := le_of_max_le_right hj
@@ -1327,11 +1103,8 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
       change (stateRec j).val j = _
       rw [hτ_eq]; rfl
     rw [hφAux_eq]
-    -- Need τ j ≥ J0. τ : ℕ → ℕ, StrictMono → τ j ≥ j.
     have hτ_ge : J0 ≤ τ j := le_trans hjJ0 (hτ_mono.id_le j)
     exact hJ0 (τ j) hτ_ge x hxK'
-  -- Step 10: For each k, the diagonal (fConv (k+1) (φAux j))_j is uniformly Cauchy on K'.
-  -- Combined with the support being in K', this gives L^p-Cauchy via the helper.
   have hUnifCauchy : ∀ k, ∀ ε : ℝ, 0 < ε → ∃ J : ℕ, ∀ j ≥ J, ∀ l ≥ J, ∀ x ∈ K',
       dist (fConv (k + 1) (φAux j) x) (fConv (k + 1) (φAux l) x) < ε := by
     intro k ε hε
@@ -1340,10 +1113,6 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
     refine ⟨J, fun j hj l hl x hxK' => ?_⟩
     have hjJ := hJ j hj x hxK'
     have hlJ := hJ l hl x hxK'
-    -- hjJ : dist (wSeq_k x) (fConv (k+1) (φAux j) x) < ε/2
-    -- hlJ : dist (wSeq_k x) (fConv (k+1) (φAux l) x) < ε/2
-    -- Triangle: dist (fConv ... j) (fConv ... l) ≤ dist (... j) (wSeq_k) + dist (wSeq_k) (... l)
-    --    < ε/2 + ε/2 = ε.
     have hTri := dist_triangle (fConv (k + 1) (φAux j) x) (wSeq_k x)
       (fConv (k + 1) (φAux l) x)
     have h2 : dist (fConv (k + 1) (φAux j) x) (wSeq_k x) < ε / 2 := by
@@ -1362,10 +1131,6 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
         (fun j x hx => hfConv_supp (k + 1) (φAux j) x hx)
         (hUnifCauchy k)
     exact h_helper ε hε
-  -- Step 11: Build the L^p Cauchy property for vFn ∘ φAux.
-  -- For any ε > 0, find K0 such that ‖vFn n - fConv (K0+1) n‖_p ≤ ε/3 for all n.
-  -- Then find J such that ‖fConv (K0+1) (φAux j) - fConv (K0+1) (φAux l)‖_p ≤ ε/3 for j, l ≥ J.
-  -- Triangle: ‖vFn (φAux j) - vFn (φAux l)‖_p ≤ ε.
   have hVfnCauchy : ∀ ε : ℝ, 0 < ε → ∃ J : ℕ, ∀ j ≥ J, ∀ l ≥ J,
       eLpNorm (fun x => vFn (φAux j) x - vFn (φAux l) x) p volume ≤
         ENNReal.ofReal ε := by
@@ -1373,17 +1138,10 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
     set ε' : ℝ := ε / 3 with hε'_def
     have hε'_pos : 0 < ε' := by rw [hε'_def]; linarith
     rcases hConvSub_bnd ε' hε'_pos with ⟨K0, hK0⟩
-    -- For all k ≥ K0, ∀ n, eLpNorm (fConv k n - vFn n) ≤ ε'.
-    -- We use k = K0+1 (so we can use hLp_cauchy_at_level which is indexed by k+1).
-    -- Actually hConvSub_bnd is indexed by k ≥ K0, so let's set our k := K0 directly,
-    -- but then the level we use is K0 (not K0+1). Let me adjust.
-    -- The fConv_alt and hLp_cauchy_at_level are indexed by k+1; so we use k := K0.
     rcases hLp_cauchy_at_level K0 ε' hε'_pos with ⟨J, hJ⟩
     refine ⟨J, fun j hj l hl => ?_⟩
-    -- Triangle.
     have hT1 : eLpNorm (fun x => vFn (φAux j) x - fConv (K0 + 1) (φAux j) x) p volume ≤
         ENNReal.ofReal ε' := by
-      -- = eLpNorm (-(fConv ... - vFn ...)) = eLpNorm (fConv ... - vFn ...) (using neg).
       rw [show (fun x => vFn (φAux j) x - fConv (K0 + 1) (φAux j) x) =
         -(fun x => fConv (K0 + 1) (φAux j) x - vFn (φAux j) x) from by
           funext x; simp [neg_sub]]
@@ -1394,7 +1152,6 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
         ENNReal.ofReal ε' := hJ j hj l hl
     have hT3 : eLpNorm (fun x => fConv (K0 + 1) (φAux l) x - vFn (φAux l) x) p volume ≤
         ENNReal.ofReal ε' := hK0 (K0 + 1) (Nat.le_succ K0) (φAux l)
-    -- Putting them together.
     have hAesm1 : AEStronglyMeasurable
         (fun x => vFn (φAux j) x - fConv (K0 + 1) (φAux j) x) volume :=
       ((hv_meas (φAux j)).sub (hfConv_cont (K0 + 1) (φAux j)).measurable).aestronglyMeasurable
@@ -1427,10 +1184,6 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
     refine h_step1.trans ?_
     refine add_le_add hT1 (h_step2.trans ?_)
     exact add_le_add hT2 hT3
-  -- Step 12: Apply L^p completeness via cauchy_complete_eLpNorm.
-  -- Choose a fast subseq ψ : ℕ → ℕ of φAux indices with ‖vFn (φAux (ψ k)) - vFn (φAux (ψ l))‖_p < 2^{-N}
-  -- for k, l ≥ N.
-  -- Define ψ recursively such that ψ N corresponds to the "J" for ε := 2^{-N-1}.
   have hVfnCauchy_nat : ∀ N : ℕ, ∃ J : ℕ, ∀ j ≥ J, ∀ l ≥ J,
       eLpNorm (fun x => vFn (φAux j) x - vFn (φAux l) x) p volume <
         ENNReal.ofReal ((1 : ℝ) / (2 : ℝ) ^ (N + 1)) := by
@@ -1440,8 +1193,6 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
     rcases hVfnCauchy ((1 : ℝ) / (2 : ℝ) ^ (N + 2)) (by positivity) with ⟨J, hJ⟩
     refine ⟨J, fun j hj l hl => ?_⟩
     have h := hJ j hj l hl
-    -- Need: eLpNorm < ofReal (1 / 2^(N+1)). We have eLpNorm ≤ ofReal (1/2^(N+2)).
-    -- And 1/2^(N+2) < 1/2^(N+1).
     refine h.trans_lt ?_
     refine ENNReal.ofReal_lt_ofReal_iff (by positivity) |>.mpr ?_
     have h2 : (1 : ℝ) / (2 : ℝ) ^ (N + 2) < (1 : ℝ) / (2 : ℝ) ^ (N + 1) := by
@@ -1449,16 +1200,11 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
       apply pow_lt_pow_right₀ one_lt_two
       omega
     exact h2
-  -- ψ : ℕ → ℕ defined recursively s.t. for k, l ≥ ψ N, eLpNorm (vFn (φAux ...)) < 2^{-N-1}.
-  -- And ψ is StrictMono.
-  -- Use Nat.recAux: ψ 0 := J_0; ψ (N+1) := max (J_{N+1}, ψ N + 1).
   let JFn : ℕ → ℕ := fun N => Classical.choose (hVfnCauchy_nat N)
   have hJFn_spec : ∀ N : ℕ, ∀ j ≥ JFn N, ∀ l ≥ JFn N,
       eLpNorm (fun x => vFn (φAux j) x - vFn (φAux l) x) p volume <
         ENNReal.ofReal ((1 : ℝ) / (2 : ℝ) ^ (N + 1)) := fun N =>
     Classical.choose_spec (hVfnCauchy_nat N)
-  -- ψ N := some natural number ≥ JFn N, with ψ StrictMono.
-  -- ψ 0 := JFn 0; ψ (N+1) := max (JFn (N+1)) (ψ N + 1).
   let ψ : ℕ → ℕ := fun N => Nat.rec
     (motive := fun _ => ℕ)
     (JFn 0)
@@ -1476,13 +1222,8 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
     change ψ N < max (JFn (N + 1)) (ψ N + 1)
     have : ψ N + 1 > ψ N := by omega
     exact lt_of_lt_of_le this (le_max_right _ _)
-  -- Define final_φ := φAux ∘ ψ.
   let final_φ : ℕ → ℕ := φAux ∘ ψ
   have hfinal_φ_mono : StrictMono final_φ := hφAux_mono.comp hψ_mono
-  -- Cauchy property: for any N, j, l ≥ N → eLpNorm (vFn (final_φ j) - vFn (final_φ l)) < 2^{-N-1}.
-  -- Since ψ is increasing and ψ N ≥ JFn N, for j ≥ N we have ψ j ≥ ψ N ≥ JFn N.
-  -- So eLpNorm (vFn (φAux (ψ j)) - vFn (φAux (ψ l))) < ofReal (1/2^(N+1)).
-  -- This is the standard "summable bound" for cauchy_complete_eLpNorm.
   have hCauchyBnd : ∀ N j m, N ≤ j → N ≤ m →
       eLpNorm (fun x => vFn (final_φ j) x - vFn (final_φ m) x) p volume <
         ENNReal.ofReal ((1 : ℝ) / (2 : ℝ) ^ (N + 1)) := by
@@ -1490,14 +1231,12 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
     have hψj : ψ j ≥ JFn N := le_trans (hψ_ge_J N) (hψ_mono.le_iff_le.mpr hNj)
     have hψm : ψ m ≥ JFn N := le_trans (hψ_ge_J N) (hψ_mono.le_iff_le.mpr hNm)
     exact hJFn_spec N (ψ j) hψj (ψ m) hψm
-  -- Apply cauchy_complete_eLpNorm.
   have hVfn_memLp : ∀ k, MemLp (vFn (final_φ k)) p volume := fun k =>
     hv_memLp (final_φ k)
   set Bbnd : ℕ → ℝ≥0∞ := fun N => ENNReal.ofReal ((1 : ℝ) / (2 : ℝ) ^ (N + 1))
     with hBbnd_def
   have hBbnd_summable : ∑' i, Bbnd i ≠ ∞ := by
     rw [hBbnd_def]
-    -- ∑ ofReal (1/2^(i+1)) = ofReal (∑ 1/2^(i+1)) = ofReal 1 ≠ ∞.
     have h_sum_real : Summable (fun i : ℕ => (1 : ℝ) / (2 : ℝ) ^ (i + 1)) := by
       have h1 : Summable (fun i : ℕ => (1 : ℝ) * ((1 / 2 : ℝ) ^ (i + 1))) := by
         have h_geom : Summable (fun i : ℕ => ((1 / 2 : ℝ)) ^ i) :=
@@ -1530,14 +1269,10 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
   rcases MeasureTheory.Lp.cauchy_complete_eLpNorm hp_one hVfn_memLp hBbnd_summable hCauchyBnd with
     ⟨u_lim_v, hu_lim_v_memLp, h_lim_tendsto⟩
   refine ⟨final_φ, hfinal_φ_mono, u_lim_v, hu_lim_v_memLp, ?_⟩
-  -- h_lim_tendsto : Tendsto (fun n => eLpNorm (vFn (final_φ n) - u_lim_v) p volume) atTop (𝓝 0)
-  -- We need: Tendsto (fun n => eLpNorm (u (final_φ n) - u_lim_v) p volume) atTop (𝓝 0).
-  -- Since u (final_φ n) =ᵐ vFn (final_φ n), the eLpNorm is the same.
   have h_aeEq : ∀ n, (fun x => u (final_φ n) x - u_lim_v x) =ᵐ[volume]
       (fun x => vFn (final_φ n) x - u_lim_v x) := by
     intro n
     have h := hv_aeEq_u (final_φ n)
-    -- h : vFn (final_φ n) =ᵐ u (final_φ n)
     filter_upwards [h] with x hx
     rw [hx]
   have h_eLpEq : ∀ n,

@@ -1,4 +1,5 @@
 -- Modified 2026-04-28: updated internal import paths for project namespace
+-- Modified 2026-05-16: style-warning cleanup
 import DifferentialGeometry.External.DeGiorgi.BallExtension
 import DifferentialGeometry.External.DeGiorgi.LpFunctionToolkit
 
@@ -703,7 +704,7 @@ theorem exists_smooth_global_approx_of_unitBallExtension
       have hF_lim_eq : F_lim = eLpNorm u (ENNReal.ofReal p) μB ^ p := by
         rw [← lintegral_rpow_norm_eq_eLpNorm_pow hp0]; congr 1
       have hFn_tendsto : Tendsto Fn atTop (nhds F_lim) := by
-        show Tendsto (fun n => Fn n) atTop (nhds F_lim)
+        change Tendsto (fun n => Fn n) atTop (nhds F_lim)
         simp_rw [hFn_eq, hF_lim_eq]
         exact heLpNorm_fun.ennrpow_const p
       -- Component-level: eLpNorm(fderiv(ψ n)(eⱼ) - weakGrad · j) → 0 for each j.

@@ -1,8 +1,8 @@
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifold
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.MultiplyQuant
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuant
 import DifferentialGeometry.Analysis.Sobolev.Tools.StrictStrongSupport
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
-import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseHelpers
+import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseLemmas
 
 /-!
 # Chart-based Sobolev algebra at first order, super-critical exponent
@@ -49,7 +49,7 @@ The fully bilinear estimate
 requires a manifold-level `C^{0,α}` Hölder Morrey embedding (or equivalent
 `C^1` Sobolev embedding for `p > n`), so that the gradient of `u` in chart
 coordinates can be bounded by `wkpNormChart u`. The current
-`morrey_chart_C0_embedding` gives only the `C^0` bound. Extending to the
+`morrey_C0_embedding_of_compact` gives only the `C^0` bound. Extending to the
 bilinear estimate is intentionally outside the scope of this development.
 -/
 
@@ -68,16 +68,12 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Smooth manifold-side cutoff with `b_α ≡ 1` on `tsupport ρ_α` -/
 
 /-- For each chart point `α : M` on a closed manifold there exists a smooth
 manifold-side cutoff `b_α : M → ℝ` taking values in `[0,1]`, equal to `1` on
@@ -97,12 +93,6 @@ private lemma exists_chart_cutoff
       h_tsupp_in_int_K
   refine ⟨η, hη_smooth, hη_range, hη_one_on_tsupp, ?_⟩
   exact hη_tsupport_in_K.trans hK_chart
-
-/-! ## Chart-α smooth extension to `EuclideanSpace`
-
-For a smooth `f : M → ℝ` with `tsupport f ⊆ (chartAt H α).source`, the chart
-pull-back extends to a globally smooth, compactly supported function on
-`EuclideanSpace ℝ (Fin n)`. We re-introduce the construction here. -/
 
 /-- The smooth global extension of `f : M → ℝ` to `EuclN`, equal to
 `f ((extChartAt I α).symm (toEuclidean.symm y))` on the chart-target image and
@@ -153,8 +143,6 @@ private lemma smoothExtension_apply_of_notMem_chartTargetEuclid
   apply smoothExtension_apply_of_notMem_target
   rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
   exact hy
-
-/-! ## Smoothness of the extension for compactly supported smooth `f` -/
 
 /-- If `f : M → ℝ` is smooth, the formula
 `y ↦ f ((extChartAt I α).symm (toEuclidean.symm y))` is smooth on
@@ -291,8 +279,6 @@ private lemma hasCompactSupport_smoothExtension
   exact smoothExtension_eq_zero_off_image_tsupport
     (I := I) (M := M) α (f := f) hf_supp hyK
 
-/-! ## Sup-norm bounds for the smooth extension and its derivatives -/
-
 /-- For a smooth function `ψ : EuclN → ℝ` with compact support, the iterated
 derivative at any point is bounded by its sup over the support. -/
 private lemma iteratedFDeriv_bound_of_compactSupport
@@ -333,8 +319,6 @@ private lemma smoothExtension_first_order_bound
   · exact (hM0 y).trans (le_max_left _ _)
   · exact (hM1 y).trans (le_max_right _ _)
 
-/-! ## The factorization identity on the chart target -/
-
 /-- For each chart `α` and any choice of cutoff `b_α` with `b_α ≡ 1` on
 `tsupport ρ_α`, the chart-pushed product
 `chartPushed ρ α (u · v)` equals `smoothExtension α (b_α · u) · chartPushed ρ α v`
@@ -353,25 +337,21 @@ private lemma chartPushed_mul_eq_smoothExtension_mul_chartPushed
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α v y := by
   classical
   set x : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hx_def
-  -- LHS unfolds to ρ_α(x) · u(x) · v(x).
   have hLHS :
       chartPushed (I := I) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
         (fun x => u x * v x) y =
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) x * (u x * v x) := rfl
-  -- First RHS factor.
   have hRHS1 : smoothExtension (I := I) (M := M) α (fun x => b x * u x) y =
       b x * u x := by
     rw [smoothExtension_apply_of_mem_chartTargetEuclid (I := I) (M := M) α
       (fun x => b x * u x) hy]
-  -- Second RHS factor.
   have hRHS2 : chartPushed (I := I) (M := M)
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α v y =
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) x * v x := rfl
   rw [hLHS, hRHS1, hRHS2]
-  -- Reduce to: ρ_α(x) · u(x) · v(x) = b(x) · u(x) · (ρ_α(x) · v(x)).
   by_cases hρ : (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
     : C^∞⟮I, M; ℝ⟯) x = 0
   · rw [hρ]; ring
@@ -380,8 +360,6 @@ private lemma chartPushed_mul_eq_smoothExtension_mul_chartPushed
       subset_tsupport _ (Function.mem_support.mpr hρ)
     have hb_x : b x = 1 := hb_one x hx_supp
     rw [hb_x]; ring
-
-/-! ## Per-chart bound -/
 
 /-- Per-chart sub-multiplicative bound. For each chart `α : M`, smooth
 `u : M → ℝ`, and any `1 ≤ p < ∞`, there is a finite constant `K_α(u) ≥ 0` such
@@ -409,31 +387,23 @@ private lemma per_chart_mul_smooth_bound
                 (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α v)
               (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- Step 1: get the smooth manifold-side cutoff b ≡ 1 on tsupport ρ_α.
   obtain ⟨b, hb_smooth, _, hb_one_on_tsupp, hb_supp⟩ :=
     exists_chart_cutoff (I := I) (M := M) α
-  -- Step 2: smoothness of b · u.
   have hbu_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun x : M => b x * u x) := hb_smooth.mul hu
-  -- Step 3: tsupport (b · u) ⊆ tsupport b ⊆ chart α source.
   have hbu_supp : tsupport (fun x : M => b x * u x) ⊆ (chartAt H α).source := by
     have h_eq : (fun x : M => b x * u x) = (fun x : M => b x • u x) := by funext x; rfl
     rw [h_eq]
     refine (tsupport_smul_subset_left (f := b) (g := u)).trans hb_supp
-  -- Step 4: get the C^1 bound on smoothExtension α (b · u).
   obtain ⟨Cα, hCα_nn, hCα_bound⟩ :=
     smoothExtension_first_order_bound (I := I) (M := M) α hbu_smooth hbu_supp
-  -- Step 5: smoothness of η := smoothExtension α (b · u).
   set η : EuclN → ℝ := smoothExtension (I := I) (M := M) α (fun x : M => b x * u x)
     with hη_def
   have hη_smooth : ContDiff ℝ ∞ η := by
     rw [hη_def]
     exact contDiff_smoothExtension (I := I) (M := M) α hbu_smooth hbu_supp
   have hη_smooth_top : ContDiff ℝ (⊤ : ℕ∞) η := hη_smooth
-  -- Step 6: apply the existing Euclidean quantitative bound at k = 1.
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- The Euclidean bound. The hypothesis hCα_bound gives ‖iteratedFDeriv ℝ j η y‖ ≤ Cα for
-  -- all y, which is in particular true on Ω.
   have hCα_on_Ω : ∀ j ≤ 1, ∀ y ∈ Ω, ‖iteratedFDeriv ℝ j η y‖ ≤ Cα := fun j hj y _ =>
     hCα_bound j hj y
   obtain ⟨K, hK_pos, hK_bound⟩ :=
@@ -442,7 +412,6 @@ private lemma per_chart_mul_smooth_bound
       hη_smooth_top hCα_nn hCα_on_Ω
   refine ⟨K, hK_pos.le, ?_⟩
   intro v hv
-  -- Step 7: use the factorization identity to rewrite chartPushed ρ α (u · v).
   have h_factorize :
       (fun y : EuclN => chartPushed (I := I) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
@@ -457,7 +426,6 @@ private lemma per_chart_mul_smooth_bound
     rw [hη_def]
     exact chartPushed_mul_eq_smoothExtension_mul_chartPushed
       (I := I) (M := M) α (b := b) (u := u) (v := v) hb_one_on_tsupp hy
-  -- Step 8: chartPushed ρ α v ∈ MemWkp 1 p Ω (because v is smooth).
   have hv_chartPushed_mem :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) 1 p
@@ -466,17 +434,13 @@ private lemma per_chart_mul_smooth_bound
     have h := DifferentialGeometry.Analysis.Sobolev.Equivalence.MemWkpChart_of_contMDiff
       (I := I) (M := M) g hp_one hv
     exact h α
-  -- Step 9: apply the Euclidean bound to chartPushed ρ α v.
   have h_eucl_bound :=
     hK_bound (u := chartPushed (I := I) (M := M)
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α v)
       hv_chartPushed_mem
-  -- Step 10: rewrite the LHS using the a.e.-factorization.
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_congr_ae
     (d := Module.finrank ℝ E) hp_one hΩ_open h_factorize]
   exact h_eucl_bound
-
-/-! ## Headline theorem -/
 
 /-- **Smooth-input chart-Sobolev algebra at first order.** For a closed
 Riemannian manifold of dimension `n ≥ 1` and an exponent `p > n`, the
@@ -509,7 +473,6 @@ theorem mul_smooth_chart_bound_C1
   letI : MeasurableSpace M := borel M
   haveI : BorelSpace M := ⟨rfl⟩
   intro u hu
-  -- Bounds on the exponent.
   have hp_pos : 0 < p := lt_of_le_of_lt (Nat.cast_nonneg _) hp
   have hp_one : (1 : ℝ) ≤ p := by
     have hd_one_le : (1 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := by
@@ -520,11 +483,8 @@ theorem mul_smooth_chart_bound_C1
     rw [show (1 : ℝ≥0∞) = ENNReal.ofReal 1 from by simp]
     exact ENNReal.ofReal_le_ofReal hp_one
   have hp_enn_top : ENNReal.ofReal p ≠ (⊤ : ℝ≥0∞) := ENNReal.ofReal_ne_top
-  -- Per-chart constants.
   set S : Finset M := DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset
     (I := I) (M := M) with hS_def
-  -- For each α ∈ S, get K_α from per_chart_mul_smooth_bound.
-  -- We need a function S → ℝ with the right property.
   have h_per_α : ∀ α ∈ S, ∃ K_α : ℝ, 0 ≤ K_α ∧
       ∀ {v : M → ℝ}, ContMDiff I 𝓘(ℝ, ℝ) ∞ v →
         DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
@@ -540,7 +500,6 @@ theorem mul_smooth_chart_bound_C1
                 (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α v)
               (chartTargetEuclid (I := I) (M := M) α) := fun α _ =>
     per_chart_mul_smooth_bound (I := I) (M := M) g hp_enn_one hp_enn_top α hu
-  -- Use Classical.choose to pick K_α for each α.
   set Kfun : M → ℝ := fun α =>
     if hα : α ∈ S then Classical.choose (h_per_α α hα) else 0 with hKfun_def
   have hKfun_eq_of_mem : ∀ α (hα : α ∈ S), Kfun α = Classical.choose (h_per_α α hα) := by
@@ -569,19 +528,12 @@ theorem mul_smooth_chart_bound_C1
     have hbnd := (Classical.choose_spec (h_per_α α hα)).2 hv
     rw [hKfun_eq_of_mem α hα]
     exact hbnd
-  -- The total constant Cu.
   refine ⟨∑ α ∈ S, Kfun α, ?_, ?_⟩
   · exact Finset.sum_nonneg (fun α hα => hKfun_nn α hα)
-  -- Now the actual bound.
   intro v hv
-  -- Express both sides as sums over S.
   rw [wkpNormChart_eq_finset_sum (I := I) (M := M) g 1 hp_enn_one (fun x => u x * v x),
     wkpNormChart_eq_finset_sum (I := I) (M := M) g 1 hp_enn_one v]
-  -- We need: ∑ α ∈ S, [...] ≤ ofReal (∑ α ∈ S, Kfun α) * ∑ α ∈ S, [v-term]
-  -- Bound each summand of the LHS by Kfun α * [v-term α], then sum.
   refine (Finset.sum_le_sum (fun α hα => hKfun_bound α hα hv)).trans ?_
-  -- ∑ α, ofReal (Kfun α) * X α ≤ ofReal (∑ α, Kfun α) * ∑ α, X α.
-  -- We bound each ofReal (Kfun α) * X α ≤ ofReal (∑ Kfun) * X α and sum.
   set sumK : ℝ := ∑ α ∈ S, Kfun α with hsumK_def
   have hKfun_sum_le : ∀ α ∈ S, ENNReal.ofReal (Kfun α) ≤ ENNReal.ofReal sumK := by
     intro α hα
@@ -607,28 +559,6 @@ theorem mul_smooth_chart_bound_C1
   refine h_step1.trans ?_
   rw [← Finset.mul_sum]
 
-/-! ## Fully bilinear chart-Sobolev algebra estimate
-
-Beyond the smooth-input `C^1`-style bound `mul_smooth_chart_bound_C1`, the
-chart-based Sobolev space admits a fully bilinear inequality
-
-  `wkpNormChart g 1 p (u · v) ≤ C · wkpNormChart g 1 p u · wkpNormChart g 1 p v`,
-
-for all smooth `u v : M → ℝ`. The constant `C ≥ 0` depends on `g`, `p`, and the
-manifold geometry, but not on `u` or `v`.
-
-The proof combines per-chart Leibniz expansions with the manifold Morrey
-embedding `morrey_chart_C0_embedding` (delivered via the smooth-input variant
-`smooth_manifold_morrey_sup_bound_uniform`).
--/
-
-/-! ## Pointwise factorization at the chart-target
-
-For each chart `α`, the chart-pushed product `chartPushed ρ α (u · v)` factors
-pointwise as `chartPushed ρ α u · v_lifted`, where `v_lifted` is the
-chart-Euclidean pull-back of `v` (no partition-of-unity weight).
--/
-
 /-- The unweighted chart-Euclidean pull-back of `v : M → ℝ`. On
 `chartTargetEuclid α`, this equals `v ((extChartAt I α).symm (toEuclidean.symm y))`.
 Outside `chartTargetEuclid α`, the value involves the partial inverse and is
@@ -647,8 +577,6 @@ private lemma chartPushed_mul_eq_chartPushed_mul_chartLifted
   unfold chartPushed chartLifted
   ring
 
-/-! ## Sup bound for `chartLifted v` on the chart target -/
-
 /-- For any `y : EuclN`, `chartLifted α v y = v(...)` for some manifold point.
 Combined with a manifold sup bound on `v`, this gives a uniform sup bound on
 `chartLifted α v`. -/
@@ -657,8 +585,6 @@ private lemma chartLifted_apply_norm_le
     ‖chartLifted (I := I) (M := M) α v y‖ ≤ Cv := by
   unfold chartLifted
   exact hCv _
-
-/-! ## Bound `‖chartPushed ρ α u‖_∞ ≤ ‖u‖_∞` (because `|ρ_α| ≤ 1`) -/
 
 /-- For each `y : EuclN`, `‖chartPushed (chartAtlasPOU I M) α u y‖ ≤ ‖u‖_∞^M`
 provided `Cu : ℝ` is a uniform sup bound for `u`. The bound exploits
@@ -699,28 +625,6 @@ private lemma chartPushed_norm_le_sup
     _ = ‖u x‖ := one_mul _
     _ ≤ Cu := hCu x
 
-/-! ## Per-chart bilinear bound: smooth `u, v` factorization with explicit
-constants tracked
-
-The key identity: `chartPushed ρ α (u · v) =
-smoothExtension α (b_α · u) · chartPushed ρ α v` (almost everywhere on
-`chartTargetEuclid α`). Apply `wkpNorm_smul_smooth_bounded_le_one` with
-`η := smoothExtension α (b_α · u)`.
-
-For the bilinear (Variant A) bound, we need to control the constant `K_α(u)`
-appearing in the bound by `C · ‖u‖_∞`-type quantities, ultimately
-controlled by `wkpNormChart u` via the manifold Morrey embedding.
-
-The core observation: `‖smoothExtension α (b_α · u)‖_∞ ≤ ‖u‖_∞` (since
-`|b_α| ≤ 1`). So the L^0 part of `K_α` is controllable.
-
-For the L^1 part, `‖∇(smoothExtension α (b_α · u))‖_∞` is NOT controllable by
-`‖u‖_{W^{1,p}}` alone (requires C^1 Morrey or stronger). So we use a different
-factorization for the gradient term: apply Leibniz to the product `Eu · Pv`
-and rewrite the cross-term using the symmetric factorization
-`Eu · Pv = Pu · Ev`.
--/
-
 /-- The "left" smooth factor `Eu_α := smoothExtension α (b_α · u)`. Smooth and
 compactly supported on `EuclN`. Agrees with `u_lifted` on `chart_image of
 tsupport ρ_α` (where `b_α = 1`). -/
@@ -754,8 +658,6 @@ private lemma leftSmoothFactor_norm_le
     rw [norm_zero]
     exact mul_nonneg hCb_nn hCu_nn
 
-/-! ## Smooth manifold-side cutoff with `Set.range b ⊆ Set.Icc 0 1` -/
-
 /-- For each chart point `α`, there is a smooth manifold cutoff `b_α : M → ℝ`
 in `[0, 1]`, equal to `1` on `tsupport ρ_α`, with `tsupport b_α ⊆ chart_source`. -/
 private lemma exists_chart_cutoff_with_data
@@ -770,25 +672,6 @@ private lemma exists_chart_cutoff_with_data
   refine ⟨b, hb_smooth, ?_, hb_one_on_tsupp, hb_supp⟩
   intro x
   exact hb_range ⟨x, rfl⟩
-
-/-! ## Per-chart smooth bilinear bound
-
-For each chart `α`, smooth `u, v : M → ℝ`, and any sup bounds `Cu ≥ 0`, `Cv ≥ 0`
-on `‖u‖`, `‖v‖`, the chart-pushed product satisfies a *bilinear-ish* bound:
-
-  `wkpNorm 1 p (chartPushed ρ α (u · v)) Ω ≤ Kα · (Cu + Cv + Cu · Cv) ·
-    (wkpNorm 1 p (chartPushed ρ α u) Ω + wkpNorm 1 p (chartPushed ρ α v) Ω + 1)`
-
-After summing over the canonical POU finset and applying Morrey, this collapses
-into `C · wkpNormChart u · wkpNormChart v`.
-
-The key technical step is to use the C^1 proof's per-chart bound applied with
-the `b_α u`-cutoff factor as the smooth multiplier, then bound the resulting
-constant using the structural bounds: `‖smoothExtension α (b_α · u)‖_∞ ≤ Cu`
-and `‖∇ smoothExtension α (b_α · u)‖_∞ ≤ Kα` for a *u-independent geometric
-constant Kα*. The latter is impossible in general, but **it is possible if we
-use a specific version of the C^1 bound that exposes the structure**.
--/
 
 /-- Auxiliary form of `wkpNorm_smul_smooth_bounded_le_one` returning a constant
 that splits into an `‖η‖_∞` part and an `‖∇η‖_∞` part. Specialized to `k = 1`. -/
@@ -811,9 +694,7 @@ private lemma wkpNorm_eta_target_le_split
         DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
           (d := Module.finrank ℝ E) 1 p u Ω := by
   classical
-  -- Decompose wkpNorm 1 p (η · u) into L^p part + gradient sum part.
   letI : NeZero (1 : ℕ) := ⟨one_ne_zero⟩
-  -- Unfold wkpNorm 1 p.
   have hLHS_unfold : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
       (d := Module.finrank ℝ E) 1 p (fun x => η x * u x) Ω =
         eLpNorm (fun x => η x * u x) p (volume.restrict Ω) +
@@ -858,7 +739,6 @@ private lemma wkpNorm_eta_target_le_split
                 (d := Module.finrank ℝ E) p 0 α' u Ω) p
               (volume.restrict Ω))]
     simp [DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial_zero]
-  -- Reduce iterWeakPartial p 1 α' to chosenWeakPartial' p (α' 0).
   have hIter1_eta_u : ∀ α' : Fin 1 → Fin (Module.finrank ℝ E),
       DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial
           (d := Module.finrank ℝ E) p 1 α' (fun x => η x * u x) Ω =
@@ -873,7 +753,6 @@ private lemma wkpNorm_eta_target_le_split
           (d := Module.finrank ℝ E) p (α' 0) u Ω := by
     intro α'
     rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial_succ]; rfl
-  -- Replace iterWeakPartial in unfolds.
   have hLHS_unfold' : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
       (d := Module.finrank ℝ E) 1 p (fun x => η x * u x) Ω =
         eLpNorm (fun x => η x * u x) p (volume.restrict Ω) +
@@ -898,7 +777,6 @@ private lemma wkpNorm_eta_target_le_split
     refine congrArg (eLpNorm u p (volume.restrict Ω) + ·) ?_
     refine Finset.sum_congr rfl (fun α' _ => ?_)
     rw [hIter1_u α']
-  -- The L^p part of the LHS is bounded by C0 * eLpNorm u.
   have hLp_bound : eLpNorm (fun x => η x * u x) p (volume.restrict Ω) ≤
       ENNReal.ofReal C0 * eLpNorm u p (volume.restrict Ω) := by
     refine eLpNorm_le_mul_eLpNorm_of_ae_le_mul (g := u) (c := C0) ?_ p
@@ -907,10 +785,7 @@ private lemma wkpNorm_eta_target_le_split
     calc
       ‖η x * u x‖ = ‖η x‖ * ‖u x‖ := norm_mul _ _
       _ ≤ C0 * ‖u x‖ := by gcongr; exact hη0 x hx
-  -- For the gradient sum: each term is bounded. We use the structural bound
-  -- (chosen weak partial of η · u =ᵐ η · ∂ᵢu + ∂ᵢη · u) and triangle.
   have hu_W1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) p u Ω := hu.memW1p
-  -- Auxiliary single-C bound (using max C0 C1).
   set Cmax : ℝ := max C0 C1 with hCmax_def
   have hCmax_nn : 0 ≤ Cmax := le_max_of_le_left hC0_nn
   have hη0_max : ∀ x ∈ Ω, ‖η x‖ ≤ Cmax := fun x hx =>
@@ -929,12 +804,8 @@ private lemma wkpNorm_eta_target_le_split
         ENNReal.ofReal C1 * eLpNorm u p (volume.restrict Ω) := by
     intro i
     classical
-    -- The chosen weak partial of η · u is a.e. equal to η · (∂ᵢu) + (∂ᵢη) · u.
-    -- We use the bound with max C0 C1, then split using the actual constants.
     have hae := DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_smul_smooth_bounded_ae
       (d := Module.finrank ℝ E) hp_one hΩ_open hη_smooth hη0_max hη1_max hu_W1p i
-    -- Cast hη0/hη1 hypotheses for the auxiliary lemmas using max C0 C1.
-    -- AE strong measurability of the two summands.
     have hηcwp_meas : AEStronglyMeasurable
         (fun x => η x * DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
           (d := Module.finrank ℝ E) p i u Ω x)
@@ -950,7 +821,6 @@ private lemma wkpNorm_eta_target_le_split
         (fun x => (fderiv ℝ η x) (EuclideanSpace.single i (1 : ℝ)) * u x)
         (volume.restrict Ω) :=
       hderiv_cont.aestronglyMeasurable.mul hu.memLp.aestronglyMeasurable
-    -- Replace the chosen partial by the explicit a.e.-equal sum.
     rw [eLpNorm_congr_ae hae]
     have hSumEq :
         (fun x => η x * DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
@@ -992,9 +862,7 @@ private lemma wkpNorm_eta_target_le_split
       DifferentialGeometry.Analysis.Sobolev.Euclidean.eLpNorm_partial_eta_mul_le
         (d := Module.finrank ℝ E) hΩ_open hη1 i u
     exact add_le_add hbnd1 hbnd2
-  -- Combine.
   rw [hLHS_unfold', hRHS_unfold']
-  -- Gradient sum LHS bound: each term ≤ C0 * (gradient term in u) + C1 * eLpNorm u.
   have hGrad_LHS_bnd :
       ∑ α' : Fin 1 → Fin (Module.finrank ℝ E),
         eLpNorm
@@ -1009,7 +877,6 @@ private lemma wkpNorm_eta_target_le_split
         ENNReal.ofReal C1 * eLpNorm u p (volume.restrict Ω)) :=
     Finset.sum_le_sum (fun α' _ => h_chosen_bnd (α' 0))
   refine (add_le_add hLp_bound hGrad_LHS_bnd).trans ?_
-  -- Distribute the gradient sum.
   have hSum_split :
       ∑ α' : Fin 1 → Fin (Module.finrank ℝ E),
         (ENNReal.ofReal C0 *
@@ -1025,7 +892,6 @@ private lemma wkpNorm_eta_target_le_split
         ∑ _α' : Fin 1 → Fin (Module.finrank ℝ E),
           ENNReal.ofReal C1 * eLpNorm u p (volume.restrict Ω) := Finset.sum_add_distrib
   rw [hSum_split]
-  -- The constant sum: |Fin 1 → Fin d| = d (interpreted via Finset.sum_const).
   have hCard : (Finset.univ : Finset (Fin 1 → Fin (Module.finrank ℝ E))).card =
       Module.finrank ℝ E := by
     rw [Finset.card_univ]; simp
@@ -1036,7 +902,6 @@ private lemma wkpNorm_eta_target_le_split
           (ENNReal.ofReal C1 * eLpNorm u p (volume.restrict Ω)) := by
     rw [Finset.sum_const, hCard, nsmul_eq_mul]
   rw [hSum_const]
-  -- Σ ofReal C0 * X = ofReal C0 * Σ X.
   have hSum_factor :
       ∑ α' : Fin 1 → Fin (Module.finrank ℝ E),
         ENNReal.ofReal C0 *
@@ -1049,9 +914,6 @@ private lemma wkpNorm_eta_target_le_split
             (d := Module.finrank ℝ E) p (α' 0) u Ω) p (volume.restrict Ω) := by
     rw [Finset.mul_sum]
   rw [hSum_factor]
-  -- Now we need: ofReal C0 * eLpNorm u + (ofReal C0 * Σ Bu + d * (ofReal C1 * eLpNorm u))
-  --           ≤ ofReal C0 * (eLpNorm u + Σ Bu) + d * ofReal C1 * (eLpNorm u + Σ Bu).
-  -- where Bu = chosenWeakPartial' values.
   set Au : ℝ≥0∞ := eLpNorm u p (volume.restrict Ω) with hAu_def
   set SBu : ℝ≥0∞ := ∑ α' : Fin 1 → Fin (Module.finrank ℝ E),
     eLpNorm
@@ -1063,36 +925,13 @@ private lemma wkpNorm_eta_target_le_split
   change OC0 * Au + (OC0 * SBu + Nat_d * (OC1 * Au)) ≤
     OC0 * (Au + SBu) + Nat_d * OC1 * (Au + SBu)
   rw [mul_add OC0 Au SBu, mul_add (Nat_d * OC1) Au SBu]
-  -- Now goal: OC0 * Au + (OC0 * SBu + Nat_d * (OC1 * Au)) ≤
-  --   (OC0 * Au + OC0 * SBu) + (Nat_d * OC1 * Au + Nat_d * OC1 * SBu).
-  -- Move terms: equivalently OC0 * Au + OC0 * SBu + Nat_d * (OC1 * Au)
-  --   ≤ OC0 * Au + OC0 * SBu + (Nat_d * OC1 * Au + Nat_d * OC1 * SBu).
-  -- This needs Nat_d * (OC1 * Au) ≤ Nat_d * OC1 * Au + Nat_d * OC1 * SBu.
-  -- Which is: Nat_d * OC1 * Au ≤ Nat_d * OC1 * Au + (extra), trivially true.
   have hAssoc : Nat_d * (OC1 * Au) = Nat_d * OC1 * Au := by ring
   rw [hAssoc]
-  -- Goal: OC0 * Au + (OC0 * SBu + Nat_d * OC1 * Au) ≤
-  --   OC0 * Au + OC0 * SBu + (Nat_d * OC1 * Au + Nat_d * OC1 * SBu).
   have hRearrange : OC0 * Au + (OC0 * SBu + Nat_d * OC1 * Au) =
       OC0 * Au + OC0 * SBu + Nat_d * OC1 * Au := by ring
   rw [hRearrange]
-  -- Goal: OC0 * Au + OC0 * SBu + Nat_d * OC1 * Au ≤
-  --   OC0 * Au + OC0 * SBu + (Nat_d * OC1 * Au + Nat_d * OC1 * SBu).
   refine add_le_add (le_refl _) ?_
   exact le_self_add
-
-/-! ## Per-chart bilinear structural identity
-
-For each chart `α`, set:
-- `R_α := smoothExtension α (ρ_α : M → ℝ)`,
-- `Eu_α := smoothExtension α (b_α · u)`,
-- `Ev_α := smoothExtension α (b_α · v)`,
-- `Pu_α := smoothExtension α (ρ_α · u)` (equals `chartPushed ρ α u` pointwise everywhere on chart_target),
-- `Pv_α := smoothExtension α (ρ_α · v)` (equals `chartPushed ρ α v` pointwise everywhere on chart_target),
-- `Puv_α := smoothExtension α (ρ_α · u · v)` (equals `chartPushed ρ α (uv)` on chart_target).
-
-The identity `Puv_α = R_α · Eu_α · Ev_α = Pu_α · Ev_α = Pv_α · Eu_α` holds pointwise everywhere on `EuclN`.
--/
 
 /-- For smooth manifold functions `f, g` with `tsupport f ⊆ (chartAt H α).source`,
 the chart-target product `smoothExtension α f · smoothExtension α g` equals
@@ -1133,10 +972,6 @@ private lemma smoothExtension_three_factor
     (fun x => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
       : C^∞⟮I, M; ℝ⟯) x * u x)
     (fun x => b x * v x)]
-  -- Goal: smoothExtension (ρ_α · u · v) = smoothExtension (ρ_α · u · (b · v))
-  -- after pulling apart the multiplication.
-  -- Need pointwise: (ρ_α u v) = (ρ_α u (b v)) i.e., ρ_α · u · v = ρ_α · u · b · v on M.
-  -- Since b = 1 on tsupport ρ_α and ρ_α = 0 off it, ρ_α · b = ρ_α.
   congr 1
   funext x
   by_cases hρ : (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -1197,16 +1032,6 @@ private lemma smoothExtension_eq_chartPushed_uv
   unfold chartPushed
   ring
 
-/-! ## Public-version of "classical partial = chosen weak partial" for smooth+compact functions
-
-For a smooth+compactly-supported function on `EuclN` with `tsupport ⊆ Ω`
-(open), the classical Euclidean partial is the chosen weak partial almost
-everywhere on `Ω`. This is just the local lemma `classical_partial_ae_eq_chosenWeakPartial_local`
-from `MorreyManifold.lean`, repackaged here for direct use.
--/
-
-/-! ## Pu = chartSmoothExt α (ρ_α · u) is `chartPushed ρ α u` on chart_target -/
-
 private lemma chartSmoothExt_pou_mul_eq_chartPushed
     [T2Space M] [SigmaCompactSpace M]
     (α : M) (u : M → ℝ) (y : EuclN)
@@ -1234,14 +1059,12 @@ private lemma chosenWeakPartial_eq_classical_ae
       DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
         (d := Module.finrank ℝ E) p i f Ω := by
   classical
-  -- f is in MemWkp on Ω.
   have hf_mem : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 1 p f Ω :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_of_smooth_compactSupport_pub
       (d := Module.finrank ℝ E) hΩ_open hf_smooth hf_compact hf_supp hp_one 1
   have hf_W1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) p f Ω :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p.mp hf_mem
-  -- The classical partial is a weak partial.
   have h_classical_isWeak :
       DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
         (fun z : EuclN => (fderiv ℝ f z) (EuclideanSpace.single i (1 : ℝ))) f Ω :=
@@ -1267,24 +1090,6 @@ private lemma chosenWeakPartial_eq_classical_ae
       hf_W1p i).locallyIntegrable hp_one
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq (Ω := Ω) hΩ_open
     h_classical_isWeak h_chosen_isWeak h_classical_loc h_chosen_loc
-
-/-! ## Bilinear chart-Sobolev algebra estimate
-
-The headline bilinear estimate for `p > n = dim ℝ E`:
-
-  `wkpNormChart g 1 p (u · v) ≤ C · wkpNormChart g 1 p u · wkpNormChart g 1 p v`
-
-for smooth `u, v : M → ℝ`. The proof uses a per-chart Leibniz expansion at the
-level of the chosen weak partial, exploiting:
-
-  `R · ∂ᵢE_v = ∂ᵢ(R · E_v) - (∂ᵢR) · E_v`
-
-where `R = liftedPou α` (chart-`α` lifted POU weight) and `E_v = leftSmoothFactor α b v`
-(smooth extension of cutoff `b · v`). Combined with the manifold Morrey embedding
-(`smooth_manifold_morrey_sup_bound_uniform`), this yields the bilinear inequality.
--/
-
-/-! ### Setup for the bilinear estimate -/
 
 /-- Helper: tsupport of `smoothExtension α f` is in the toEuclidean image of
 `(extChartAt α) '' (tsupport f)`, which is a compact subset of chart-target. -/
@@ -1374,8 +1179,6 @@ private lemma tsupport_liftedPou_subset_chartCarrierLocal
   unfold liftedPou chartCarrierLocal
   exact tsupport_smoothExtension_subset_image (I := I) (M := M) α
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α)
-
-/-! ### Smoothness and compact-support properties -/
 
 private lemma liftedPou_smooth
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
@@ -1489,8 +1292,6 @@ private lemma tsupport_smoothPushed_subset_chartTarget
       (I := I) (M := M) α u
   exact tsupport_smoothExtension_subset_chartTarget (I := I) (M := M) α hpou_u_supp
 
-/-! ### MemW1p of `leftSmoothFactor α b u` and `smoothPushed α u` on Ω -/
-
 private lemma leftSmoothFactor_memW1p
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
@@ -1534,8 +1335,6 @@ private lemma smoothPushed_memW1p
     tsupport_smoothPushed_subset_chartTarget (I := I) (M := M) α u
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_of_smooth_compactSupport_pub
     (d := Module.finrank ℝ E) hΩ_open hSmooth hCompact h_tsupp hp_one 1).memW1p
-
-/-! ### Sup-bounds -/
 
 /-- `liftedPou α` takes values in `[0, 1]`. -/
 private lemma liftedPou_apply_in_unit_interval
@@ -1658,8 +1457,6 @@ private lemma leftSmoothFactor_norm_le_of_bound
     rw [if_neg hy, norm_zero]
     exact huMax_nn
 
-/-! ### Pointwise factorisations: `R · Ev = Pv` and `Pu · Ev = Puv` -/
-
 /-- For any cutoff `b` with `b ≡ 1` on `tsupport ρ_α`,
 `liftedPou α · leftSmoothFactor α b v = smoothPushed α v` pointwise on `EuclN`. -/
 private lemma liftedPou_mul_leftSmoothFactor_eq_smoothPushed
@@ -1702,8 +1499,6 @@ private lemma smoothPushed_mul_leftSmoothFactor_eq_smoothExtension_uv
   classical
   unfold smoothPushed leftSmoothFactor
   exact (smoothExtension_three_factor (I := I) (M := M) α hb_one).symm
-
-/-! ### Indicator-based bound for compactly-supported integrand -/
 
 /-- If `f : EuclN → ℝ` has support in a measurable set `K` and `‖f‖ ≤ C`
 pointwise, then `eLpNorm f p (volume.restrict Ω) ≤ ENNReal.ofReal C *
@@ -1767,7 +1562,6 @@ private lemma eLpNorm_Eu_dR_Ev_bound
   have hK_meas : MeasurableSet K_α := hK_compact.isClosed.measurableSet
   have hC_nn : 0 ≤ uMax * vMax * C_R :=
     mul_nonneg (mul_nonneg huMax_nn hvMax_nn) hC_R_nn
-  -- The integrand vanishes outside K_α: liftedPou α has tsupport ⊆ K_α.
   have h_R_supp_in_K : tsupport (liftedPou (I := I) (M := M) α) ⊆ K_α :=
     tsupport_liftedPou_subset_chartCarrierLocal (I := I) (M := M) α
   have h_supp : ∀ y : EuclN, y ∉ K_α →
@@ -1775,7 +1569,6 @@ private lemma eLpNorm_Eu_dR_Ev_bound
         (fderiv ℝ (liftedPou (I := I) (M := M) α) y) (EuclideanSpace.single i (1 : ℝ)) *
         leftSmoothFactor (I := I) (M := M) α b v y = 0 := by
     intro y hy_off
-    -- Show (fderiv R y) (single i 1) = 0.
     have h_R_zero_nhd : ∀ᶠ z in nhds y, liftedPou (I := I) (M := M) α z = 0 := by
       have h_compl_open : IsOpen (tsupport (liftedPou (I := I) (M := M) α))ᶜ :=
         (isClosed_tsupport _).isOpen_compl
@@ -1823,8 +1616,6 @@ private lemma eLpNorm_Eu_dR_Ev_bound
       _ = uMax * vMax * C_R := by ring
   exact eLpNorm_restrict_le_ofReal_mul_volume_pow hK_meas hC_nn h_supp h_bound
 
-/-! ### Per-chart bilinear bound -/
-
 /-- Per-chart bilinear bound. For each chart `α : M`, smooth `u, v : M → ℝ`
 with sup-bounds `uMax, vMax`, there is a chart-`α` geometric constant
 `Bα ≥ 0` (independent of `u, v`) such that
@@ -1861,7 +1652,6 @@ private lemma per_chart_bilinear_bound
                 (chartTargetEuclid (I := I) (M := M) α) +
             ENNReal.ofReal (Bα * uMax * vMax) := by
   classical
-  -- Cutoff and chart-α geometric constants.
   obtain ⟨b, hb_smooth, hb_range, hb_one_on_tsupp, hb_supp⟩ :=
     exists_chart_cutoff_with_data (I := I) (M := M) α
   have hb_le_one : ∀ x : M, 0 ≤ b x ∧ b x ≤ 1 := hb_range
@@ -1873,7 +1663,6 @@ private lemma per_chart_bilinear_bound
     chartCarrierLocal_isCompact (I := I) (M := M) α
   have hvolK_finite : vol_K < ⊤ := hK_compact.measure_lt_top
   have hvolK_ne_top : vol_K ≠ ⊤ := hvolK_finite.ne
-  -- vol_K_pow = vol_K.toReal ^ (1 / p.toReal), as a real number.
   set vol_K_pow : ℝ := (vol_K.toReal) ^ (1 / p.toReal) with hvolK_pow_def
   have hvolK_pow_nn : 0 ≤ vol_K_pow := Real.rpow_nonneg ENNReal.toReal_nonneg _
   set Bα : ℝ := (d : ℝ) * C_R * vol_K_pow with hBα_def
@@ -1889,7 +1678,6 @@ private lemma per_chart_bilinear_bound
   set Eu := leftSmoothFactor (I := I) (M := M) α b u
   set Ev := leftSmoothFactor (I := I) (M := M) α b v
   set R := liftedPou (I := I) (M := M) α
-  -- Step 1: replace chartPushed (uv) by Pu · Ev a.e. on Ω.
   have h_chartPushed_uv_eq : (fun y : EuclN => chartPushed (I := I) (M := M)
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
       (fun x => u x * v x) y) =ᵐ[volume.restrict Ω]
@@ -1916,7 +1704,6 @@ private lemma per_chart_bilinear_bound
       simp only at hh
       exact hh.symm
     exact h1.trans h2'
-  -- Step 2: replace chartPushed u and chartPushed v by Pu and Pv a.e. on Ω.
   have h_chartPushed_u_eq_Pu : (fun y : EuclN => chartPushed (I := I) (M := M)
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u y) =ᵐ[volume.restrict Ω]
       fun y => Pu y := by
@@ -1951,7 +1738,6 @@ private lemma per_chart_bilinear_bound
       (d := d) hp_one hΩ_open h_chartPushed_u_eq_Pu,
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_congr_ae
       (d := d) hp_one hΩ_open h_chartPushed_v_eq_Pv]
-  -- Step 3: unfold wkpNorm 1 p.
   letI : NeZero (1 : ℕ) := ⟨one_ne_zero⟩
   rw [DifferentialGeometry.Analysis.Sobolev.Chart.EuclideanIterated.wkpNorm_succ_eq
         (d := d) 0 p (fun y => Pu y * Ev y) Ω,
@@ -1961,7 +1747,6 @@ private lemma per_chart_bilinear_bound
         (d := d) 0 p Pv Ω]
   simp_rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_zero
     (d := d) p _ Ω]
-  -- Define abbreviations.
   set ePu : ℝ≥0∞ := eLpNorm Pu p (volume.restrict Ω) with hePu_def
   set ePv : ℝ≥0∞ := eLpNorm Pv p (volume.restrict Ω) with hePv_def
   set gPu : Fin d → ℝ≥0∞ := fun i => eLpNorm
@@ -1972,7 +1757,6 @@ private lemma per_chart_bilinear_bound
       (d := d) p i Pv Ω) p (volume.restrict Ω) with hgPv_def
   set vMax_e : ℝ≥0∞ := ENNReal.ofReal vMax with hvMax_e_def
   set uMax_e : ℝ≥0∞ := ENNReal.ofReal uMax with huMax_e_def
-  -- Sup-bounds.
   have h_Pu_bound : ∀ y, ‖Pu y‖ ≤ uMax := smoothPushed_norm_le_of_bound
     (I := I) (M := M) α hu_bound huMax_nn
   have h_Pv_bound : ∀ y, ‖Pv y‖ ≤ vMax := smoothPushed_norm_le_of_bound
@@ -1981,7 +1765,6 @@ private lemma per_chart_bilinear_bound
     leftSmoothFactor_norm_le_of_bound (I := I) (M := M) α hb_le_one hu_bound huMax_nn
   have h_Ev_bound : ∀ y, ‖Ev y‖ ≤ vMax :=
     leftSmoothFactor_norm_le_of_bound (I := I) (M := M) α hb_le_one hv_bound hvMax_nn
-  -- Step 4: L^p bound.
   have h_Lp_bound : eLpNorm (fun y => Pu y * Ev y) p (volume.restrict Ω) ≤
       vMax_e * ePu := by
     refine eLpNorm_le_mul_eLpNorm_of_ae_le_mul (g := Pu) (c := vMax) ?_ p
@@ -1990,7 +1773,6 @@ private lemma per_chart_bilinear_bound
     calc
       ‖Pu y * Ev y‖ = ‖Ev y‖ * ‖Pu y‖ := by rw [norm_mul, mul_comm]
       _ ≤ vMax * ‖Pu y‖ := by gcongr; exact h_Ev_bound y
-  -- Step 5: gradient bound.
   have h_grad_bound : ∀ i : Fin d,
       eLpNorm
           (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
@@ -1998,7 +1780,6 @@ private lemma per_chart_bilinear_bound
         vMax_e * gPu i + uMax_e * gPv i +
           ENNReal.ofReal (uMax * vMax * C_R) * vol_K ^ (1 / p.toReal) := by
     intro i
-    -- Apply chosenWeakPartial'_smul_smooth_bounded_ae with η = Pu, u = Ev.
     have hPu_smooth : ContDiff ℝ (⊤ : ℕ∞) Pu := smoothPushed_smooth (I := I) (M := M) α hu
     obtain ⟨Cu0, hCu0_nn, hCu0_bd⟩ := iteratedFDeriv_bound_of_compactSupport
       hPu_smooth (smoothPushed_hasCompactSupport (I := I) (M := M) α u) 0
@@ -2016,7 +1797,6 @@ private lemma per_chart_bilinear_bound
       leftSmoothFactor_memW1p (I := I) (M := M) α hb_smooth hv hb_supp hp_one
     have h_PuEv_ae := DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_smul_smooth_bounded_ae
       (d := d) hp_one hΩ_open hPu_smooth hPu_bd_C hPu_grad_bd_C hEv_mem i
-    -- Apply same lemma with η = R, u = Ev.
     have hR_smooth : ContDiff ℝ (⊤ : ℕ∞) R := liftedPou_smooth (I := I) (M := M) α
     have hR_bd : ∀ y ∈ Ω, ‖R y‖ ≤ max 1 C_R := fun y _ =>
       (liftedPou_norm_le_one (I := I) (M := M) α y).trans (le_max_left _ _)
@@ -2024,7 +1804,6 @@ private lemma per_chart_bilinear_bound
       (hC_R_bound y).trans (le_max_right _ _)
     have h_REv_ae := DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_smul_smooth_bounded_ae
       (d := d) hp_one hΩ_open hR_smooth hR_bd hR_grad_bd hEv_mem i
-    -- R · Ev = Pv (pointwise).
     have h_R_Ev_eq_Pv : (fun y : EuclN => R y * Ev y) = Pv :=
       liftedPou_mul_leftSmoothFactor_eq_smoothPushed (I := I) (M := M)
         α (b := b) (v := v) hb_one_on_tsupp
@@ -2041,11 +1820,9 @@ private lemma per_chart_bilinear_bound
         (fderiv ℝ R y) (EuclideanSpace.single i (1 : ℝ)) * Ev y) := by
       rw [h_chosen_Pv_eq]
       exact h_REv_ae
-    -- Pu = R · Eu (pointwise).
     have h_Pu_eq_R_Eu : (fun y : EuclN => R y * Eu y) = Pu :=
       liftedPou_mul_leftSmoothFactor_eq_smoothPushed (I := I) (M := M)
         α (b := b) (v := u) hb_one_on_tsupp
-    -- Combined identity.
     have h_combined : DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
         (d := d) p i (fun y => Pu y * Ev y) Ω
       =ᵐ[volume.restrict Ω]
@@ -2072,7 +1849,6 @@ private lemma per_chart_bilinear_bound
               (d := d) p i Ev Ω y) := by ring
       rw [h_factor, h_eq_R_Ev]
       ring
-    -- eLpNorm bound on each piece.
     rw [eLpNorm_congr_ae h_combined]
     set f1 : EuclN → ℝ := fun y => Eu y * DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
       (d := d) p i Pv Ω y with hf1_def
@@ -2080,7 +1856,6 @@ private lemma per_chart_bilinear_bound
       with hf2_def
     set f3 : EuclN → ℝ := fun y => (fderiv ℝ Pu y) (EuclideanSpace.single i (1 : ℝ)) * Ev y
       with hf3_def
-    -- AESMs.
     have h_Eu_cont : Continuous Eu :=
       (leftSmoothFactor_smooth (I := I) (M := M) α hb_smooth hu hb_supp).continuous
     have h_Ev_cont : Continuous Ev :=
@@ -2107,7 +1882,6 @@ private lemma per_chart_bilinear_bound
       (h_Eu_cont.mul h_dR_cont).aestronglyMeasurable.mul h_Ev_cont.aestronglyMeasurable
     have h_AESM_f3 : AEStronglyMeasurable f3 (volume.restrict Ω) :=
       h_dPu_cont.aestronglyMeasurable.mul h_Ev_cont.aestronglyMeasurable
-    -- Triangle inequality.
     have h_eq_pointwise :
         (fun y => Eu y * DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
             (d := d) p i Pv Ω y -
@@ -2138,7 +1912,6 @@ private lemma per_chart_bilinear_bound
       have h := eLpNorm_add_le h_AESM_f1 h_AESM_f2.neg hp_one
       rwa [eLpNorm_neg] at h
     refine (add_le_add h_tri_2 (le_refl (eLpNorm f3 p (volume.restrict Ω)))).trans ?_
-    -- Bound each piece.
     have h_f1_bd : eLpNorm f1 p (volume.restrict Ω) ≤ uMax_e * gPv i := by
       refine eLpNorm_le_mul_eLpNorm_of_ae_le_mul
         (g := DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
@@ -2204,7 +1977,6 @@ private lemma per_chart_bilinear_bound
           vMax_e * gPu i := by gcongr
       _ = vMax_e * gPu i + uMax_e * gPv i +
           ENNReal.ofReal (uMax * vMax * C_R) * vol_K ^ (1 / p.toReal) := by ring
-  -- Step 6: combine and finish.
   refine (add_le_add h_Lp_bound (Finset.sum_le_sum (fun i _ => h_grad_bound i))).trans ?_
   have h_sum_split :
       ∑ i : Fin d, (vMax_e * gPu i + uMax_e * gPv i +
@@ -2221,7 +1993,6 @@ private lemma per_chart_bilinear_bound
         (d : ℝ≥0∞) * (ENNReal.ofReal (uMax * vMax * C_R) * vol_K ^ (1 / p.toReal)) from by
     rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]]
   rw [mul_add vMax_e ePu (∑ i, gPu i), mul_add uMax_e ePv (∑ i, gPv i)]
-  -- Show: d · (ofReal (uMax · vMax · C_R) · vol_K^{1/p}) ≤ ofReal (Bα · uMax · vMax).
   have h_const_bound : (d : ℝ≥0∞) *
       (ENNReal.ofReal (uMax * vMax * C_R) * vol_K ^ (1 / p.toReal)) ≤
       ENNReal.ofReal (Bα * uMax * vMax) := by
@@ -2263,8 +2034,6 @@ private lemma per_chart_bilinear_bound
           ENNReal.ofReal (Bα * uMax * vMax) := by
         gcongr
         exact le_add_self
-
-/-! ### Manifold-level explicit bilinear bound -/
 
 /-- Explicit bilinear bound (sup-bounds form): for smooth `u, v` with sup-bounds
 `uMax, vMax`,
@@ -2372,7 +2141,6 @@ private lemma mul_smooth_chart_bound_explicit_form
     rw [hBfun_eq_of_mem α hα]
     exact (Classical.choose_spec (h_per_α α hα)).2 hu hv huMax_nn hvMax_nn hu_bound hv_bound
   refine (Finset.sum_le_sum (fun α hα => hBfun_bound α hα)).trans ?_
-  -- Sum of (a_α + b_α + c_α) ≤ Σ a_α + Σ b_α + Σ c_α (with appropriate splitting).
   rw [Finset.sum_add_distrib, Finset.sum_add_distrib]
   set X : M → ℝ≥0∞ := fun α => DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
     (d := Module.finrank ℝ E) 1 (ENNReal.ofReal p)
@@ -2402,8 +2170,6 @@ private lemma mul_smooth_chart_bound_explicit_form
       ← Finset.sum_mul]
     ring
   rw [h_factor]
-
-/-! ### Headline bilinear bound -/
 
 /-- **Bilinear chart-Sobolev algebra estimate at first order, super-critical
 exponent.** For a closed Riemannian manifold of dimension `n ≥ 1` and an
@@ -2444,7 +2210,6 @@ theorem mul_smooth_chart_bound
     linarith
   refine ⟨C, hC_nn, ?_⟩
   intro u v hu hv
-  -- For smooth u, v: wkpNormChart u, v are finite (by wkpNormChart_lt_top_of_memWkpChart).
   have hp_pos : 0 < p := lt_of_le_of_lt (Nat.cast_nonneg _) hp
   have hp_one : (1 : ℝ) ≤ p := by
     have hd_one_le : (1 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := by
@@ -2472,10 +2237,6 @@ theorem mul_smooth_chart_bound
   have hv_bound : ∀ x : M, ‖v x‖ ≤ vMax := fun x => hM_M_bound hv x
   have h_explicit := hB_bound hu hv huMax_nn hvMax_nn hu_bound hv_bound
   refine h_explicit.trans ?_
-  -- ofReal vMax · NU + ofReal uMax · NV + ofReal (B · uMax · vMax) ≤ ofReal C · NU · NV.
-  -- vMax = M_M · NV.toReal; ofReal vMax · NU = ofReal M_M · NV · NU (using NV.toReal arithmetic).
-  -- We'll convert ofReal vMax to ofReal M_M * NV via ENNReal arithmetic.
-  -- ofReal vMax = ofReal (M_M · NV.toReal) = ofReal M_M · ofReal NV.toReal = ofReal M_M · NV (since NV ≠ ⊤).
   have h_ofReal_vMax : ENNReal.ofReal vMax = ENNReal.ofReal M_M * NV := by
     rw [hvMax_def]
     rw [ENNReal.ofReal_mul hM_M_nn, ENNReal.ofReal_toReal hNV_ne_top]
@@ -2494,10 +2255,6 @@ theorem mul_smooth_chart_bound
     rw [ENNReal.ofReal_mul h_BM2_NU_nn, ENNReal.ofReal_mul h_BM2_nn,
       ENNReal.ofReal_toReal hNU_ne_top, ENNReal.ofReal_toReal hNV_ne_top]
   rw [h_ofReal_vMax, h_ofReal_uMax, h_ofReal_B_uMax_vMax]
-  -- Goal: ofReal M_M · NV · NU + ofReal M_M · NU · NV + ofReal (B · M_M^2) · NU · NV ≤
-  --       ofReal C · NU · NV.
-  -- = (ofReal M_M + ofReal M_M + ofReal (B · M_M^2)) · NU · NV
-  -- We need: ofReal M_M + ofReal M_M + ofReal (B · M_M^2) ≤ ofReal C.
   have h_sum_le : ENNReal.ofReal M_M + ENNReal.ofReal M_M + ENNReal.ofReal (B * M_M ^ 2) ≤
       ENNReal.ofReal C := by
     rw [show (ENNReal.ofReal M_M + ENNReal.ofReal M_M : ℝ≥0∞) =
@@ -2507,16 +2264,13 @@ theorem mul_smooth_chart_bound
         ENNReal.ofReal ((M_M + M_M) + (B * M_M ^ 2)) from
       (ENNReal.ofReal_add (by linarith) (mul_nonneg hB_nn (sq_nonneg _))).symm]
     refine ENNReal.ofReal_le_ofReal ?_
-    -- (M_M + M_M) + B · M_M^2 ≤ C = 2 · M_M + B · M_M^2.
     rw [hC_def]
     linarith
-  -- Rewrite RHS as ofReal C · NU · NV; rewrite LHS via algebra.
   have h_LHS_eq : ENNReal.ofReal M_M * NV * NU + ENNReal.ofReal M_M * NU * NV +
       ENNReal.ofReal (B * M_M ^ 2) * NU * NV =
     (ENNReal.ofReal M_M + ENNReal.ofReal M_M + ENNReal.ofReal (B * M_M ^ 2)) * NU * NV := by
     ring
   rw [h_LHS_eq]
-  -- Goal: (ofReal M_M + ofReal M_M + ofReal (B · M_M^2)) · NU · NV ≤ ofReal C · NU · NV.
   exact mul_le_mul' (mul_le_mul' h_sum_le (le_refl _)) (le_refl _)
 
 end Chart

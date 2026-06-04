@@ -96,8 +96,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Pointwise identification of the partial of `mollifyEps` -/
-
 omit [NeZero d] in
 /-- The mollified value `mollifyEps hε u x` equals the convolution
 `(u ⋆ mollifierEps hε) x` (in the `lsmul ℝ ℝ` form). The two are
@@ -127,15 +125,12 @@ theorem mollifyEps_partial_eq_mollifyEps_weakPartial
         (EuclideanSpace.single j 1) =
       mollifyEps (d := d) hε g x := by
   classical
-  -- Mollifier facts.
   have hη_smooth : ContDiff ℝ (⊤ : ℕ∞) (mollifierEps (d := d) hε) :=
     mollifierEps_smooth hε
   have hη_C1 : ContDiff ℝ 1 (mollifierEps (d := d) hε) :=
     hη_smooth.of_le (by norm_cast)
   have hη_compact : HasCompactSupport (mollifierEps (d := d) hε) :=
     mollifierEps_compactSupport hε
-  -- The differential of the convolution `u ⋆ η` (here `η := mollifierEps`).
-  -- Using `HasCompactSupport.hasFDerivAt_convolution_right`.
   have hderiv : HasFDerivAt
       (u ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)]
         mollifierEps (d := d) hε)
@@ -143,7 +138,6 @@ theorem mollifyEps_partial_eq_mollifyEps_weakPartial
         (volume : Measure E)] fderiv ℝ (mollifierEps (d := d) hε)) x) x :=
     hη_compact.hasFDerivAt_convolution_right
       (L := ContinuousLinearMap.lsmul ℝ ℝ) hu_loc hη_C1 x
-  -- Apply at `e_j` to obtain a convolution of `u` with `∂_j η`.
   have hpartial_uη :
       (fderiv ℝ (u ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)]
         mollifierEps (d := d) hε) x) (EuclideanSpace.single j 1) =
@@ -156,11 +150,6 @@ theorem mollifyEps_partial_eq_mollifyEps_weakPartial
       hu_loc (hη_compact.fderiv ℝ)
       (hη_smooth.continuous_fderiv (by simp)) x
         (EuclideanSpace.single j 1)
-  -- Step: convert `(fderiv ℝ ...) e_j` of `mollifyEps hε u`
-  -- to the LHS of `convolution_fderiv_eq_convolution_weakPartial_univ`.
-  -- `mollifyEps hε u = mollifierEps hε ⋆ u`, but the IBP formulation
-  -- prefers `u ⋆ mollifierEps hε`. They are equal pointwise.
-  -- Reduce to the `u ⋆ η` form via `mollifyEps_eq_convolution_swap`.
   have hcomm : mollifyEps (d := d) hε u =
       (u ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)]
         mollifierEps (d := d) hε) := by
@@ -168,7 +157,6 @@ theorem mollifyEps_partial_eq_mollifyEps_weakPartial
     exact mollifyEps_eq_convolution_swap hε u y
   rw [hcomm]
   rw [hpartial_uη]
-  -- Apply convolution-IBP: `(∂_j η ⋆ u) = (η ⋆ g)`.
   have h_swap_conv : ∀ y : E,
       (u ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)]
         (fun z => (fderiv ℝ (mollifierEps (d := d) hε) z)
@@ -182,18 +170,13 @@ theorem mollifyEps_partial_eq_mollifyEps_weakPartial
     filter_upwards with t
     rw [smul_eq_mul, smul_eq_mul, mul_comm]
   rw [h_swap_conv x]
-  -- Use `convolution_fderiv_eq_convolution_weakPartial_univ` to identify
-  -- with `(η ⋆ g) x`.
   have hη_smooth' : ContDiff ℝ (⊤ : ℕ∞) (mollifierEps (d := d) hε) :=
     mollifierEps_smooth hε
   have h_ibp :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.convolution_fderiv_eq_convolution_weakPartial_univ
       (d := d) (i := j) (g := g) (u := u) hweak hη_smooth' hη_compact x
   rw [h_ibp]
-  -- Now `(η ⋆ g) x = mollifyEps hε g x` by definition.
   rfl
-
-/-! ## Young's inequality: `L²` bound on `mollifyEps` -/
 
 /-- For `u ∈ L²(E)`, the mollified function satisfies
 `‖mollifyEps hε u‖_{L²} ≤ ‖u‖_{L²}`. This is the standard Young
@@ -205,48 +188,25 @@ theorem eLpNorm_mollifyEps_le
     eLpNorm (mollifyEps (d := d) hε u) 2 (volume : Measure E) ≤
       eLpNorm u 2 (volume : Measure E) := by
   classical
-  -- `mollifyEps hε u = mollifierBumpEps.normed volume ⋆ u` (in `lsmul`-form).
   have hmem_p : MemLp u (ENNReal.ofReal 2) (volume : Measure E) := by
     have h_eq : (ENNReal.ofReal 2 : ℝ≥0∞) = (2 : ℝ≥0∞) := by
       rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) from by norm_cast]
       rw [show (2 : ℝ≥0∞) = ((2 : ℕ) : ℝ≥0∞) from by norm_cast]
       exact ENNReal.ofReal_natCast 2
     rw [h_eq]; exact hu
-  -- Direct application of `eLpNorm_normedConvolution_le` (private in DeGiorgi
-  -- file). We re-derive using the approach in `convolution_sup_le_holder`:
-  -- the key facts are `‖φ_ε‖_{L¹} = 1` and the Hölder/Young-type bound.
-  -- We use Mathlib's `eLpNorm_convolution_le_of_norm_le_mul`.
-  -- Easier: we apply the existing `eLpNorm_normedConvolution_le` analogue
-  -- through the explicit Mathlib statement.
-  -- Strategy: `mollifyEps hε u = (mollifierBumpEps hε).normed volume ⋆ u`.
   set ψ : E → ℝ := mollifierEps (d := d) hε with hψ_def
   have hψ_int : ∫ y, ψ y ∂(volume : Measure E) = 1 := mollifierEps_integral_eq_one hε
   have hψ_nn : ∀ y, 0 ≤ ψ y := mollifierEps_nonneg hε
   have hψ_integrable : Integrable ψ (volume : Measure E) := mollifierEps_integrable hε
   have hψ_cont : Continuous ψ := mollifierEps_continuous hε
   have hψ_compact : HasCompactSupport ψ := mollifierEps_compactSupport hε
-  -- Use the result `eLpNorm_normedConvolution_le` analogue:
-  -- For our purposes, we recompute using Jensen + L²-mass conservation.
-  -- The structure is: ‖ψ ⋆ u‖²_{L²} ≤ ∫ |u(x-t)|² dt where ψ has mass 1.
-  -- We use the existing private lemma in DeGiorgi/SobolevSpace/Approximation.lean
-  -- by referencing it through a wrapper.
-  -- Since `eLpNorm_normedConvolution_le` is private, we re-prove via Jensen.
-  -- The key: pointwise bound by Jensen, then integrate.
   set C : ℝ≥0∞ := eLpNorm u 2 (volume : Measure E) with hC_def
-  -- Strategy via Mathlib's `eLpNorm_convolution_le_of_norm_le_mul`:
   have hu_aestrong : AEStronglyMeasurable u (volume : Measure E) := hu.aestronglyMeasurable
-  -- We pose the following self-contained proof via Jensen.
-  -- The proof: pointwise (ψ ⋆ u)(x)² ≤ (ψ ⋆ u²)(x), then integrate.
-  -- Step 1: Pointwise Jensen bound.
   have h_pt_jensen : ∀ x : E,
       ‖(ψ ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] u) x‖ ^ (2 : ℝ) ≤
       ((fun y => ‖u y‖ ^ (2 : ℝ))
           ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] ψ) x := by
     intro x
-    -- Convolution at x: (ψ ⋆ u)(x) = ∫ ψ(t) u(x - t) dt.
-    -- (h ⋆ ψ)(x) = ∫ h(x - t) ψ(t) dt where h(y) = ‖u y‖².
-    -- We prove via Cauchy-Schwarz on probability measure ν := volume.withDensity ofReal(ψ).
-    -- Reuse the structure from `eLpNorm_normedConvolution_le`.
     set h_norm_sq : E → ℝ := fun y => ‖u y‖ ^ (2 : ℝ) with hh_norm_sq_def
     set ρ : E → ℝ≥0∞ := fun y => ENNReal.ofReal (ψ y) with hρ_def
     set ν : Measure E := (volume : Measure E).withDensity ρ with hν_def
@@ -264,12 +224,10 @@ theorem eLpNorm_mollifyEps_le
       simp
     have hu_loc : LocallyIntegrable u (volume : Measure E) :=
       hu.locallyIntegrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
-    -- Existence of the convolution.
     have hce_u : ConvolutionExistsAt ψ u x
         (ContinuousLinearMap.lsmul ℝ ℝ) (volume : Measure E) :=
       hψ_compact.convolutionExists_left
         (L := ContinuousLinearMap.lsmul ℝ ℝ) hψ_cont hu_loc x
-    -- Express convolution via `ν`.
     have hconv_ν :
         ((ψ ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] u) x) =
           ∫ y, u (x - y) ∂ν := by
@@ -279,7 +237,6 @@ theorem eLpNorm_mollifyEps_le
       refine integral_congr_ae ?_
       filter_upwards with y
       simp [ρ, ψ, ContinuousLinearMap.lsmul_apply, smul_eq_mul, hψ_nn y]
-    -- Apply Cauchy-Schwarz / Jensen for the convex function `t² ` on `[0, ∞)`.
     have h_norm_sq_int_vol : Integrable (fun y => (ρ y).toReal * ‖u (x - y)‖) (volume : Measure E) := by
       refine hce_u.integrable.norm.congr ?_
       filter_upwards with y
@@ -332,9 +289,6 @@ theorem eLpNorm_mollifyEps_le
             simp [ρ, ψ, hψ_nn y]
       _ = ((fun y => ‖u y‖ ^ (2 : ℝ))
             ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] ψ) x := by
-            -- Goal: ∫ y, ψ y * ‖u (x - y)‖² = ((‖u‖²) ⋆ ψ) x.
-            -- The convolution unfolds to ∫ t, ‖u t‖² * ψ (x - t).
-            -- We use a measure-preserving substitution y ↔ x - y.
             have hMP : MeasurePreserving (fun y : E => x - y) (volume : Measure E)
                 (volume : Measure E) := by
               have h_neg : MeasurePreserving (fun t : E => -t) (volume : Measure E)
@@ -346,13 +300,10 @@ theorem eLpNorm_mollifyEps_le
               have heq : (fun y : E => x - y) = (fun y : E => x + (-y)) := by
                 funext y; rw [sub_eq_add_neg]
               rw [heq]; exact h_addL.comp h_neg
-            -- ∫ y, ψ y * ‖u (x - y)‖² ∂volume = ∫ t, ψ (x - t) * ‖u t‖² ∂volume
-            -- by substitution y = x - t (which is its own inverse).
             have h_subst : ∫ y, ψ y * ‖u (x - y)‖ ^ (2 : ℝ) ∂(volume : Measure E) =
                 ∫ t, ψ (x - t) * ‖u (x - (x - t))‖ ^ (2 : ℝ) ∂(volume : Measure E) :=
               (hMP.integral_comp (Homeomorph.subLeft x).measurableEmbedding
                 (fun y : E => ψ y * ‖u (x - y)‖ ^ (2 : ℝ))).symm
-            -- Simplify (x - (x - t)) = t and rearrange the product.
             rw [h_subst]
             have h_rearr : ∀ t : E,
                 ψ (x - t) * ‖u (x - (x - t))‖ ^ (2 : ℝ) =
@@ -361,14 +312,11 @@ theorem eLpNorm_mollifyEps_le
               have h_simp : x - (x - t) = t := by abel
               rw [h_simp]
               ring
-            -- Express the convolution `((‖u‖²) ⋆ ψ) x` as integral.
             rw [convolution_def]
             refine integral_congr_ae ?_
             filter_upwards with t
             rw [ContinuousLinearMap.lsmul_apply, smul_eq_mul]
             exact h_rearr t
-  -- Step 2: Integrate the pointwise bound.
-  -- Set up.
   have hu_loc : LocallyIntegrable u (volume : Measure E) :=
     hu.locallyIntegrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
   have hu_sq_int : Integrable (fun y => ‖u y‖ ^ (2 : ℝ)) (volume : Measure E) := by
@@ -415,26 +363,18 @@ theorem eLpNorm_mollifyEps_le
     have h := MeasureTheory.integral_convolution
       (L := ContinuousLinearMap.lsmul ℝ ℝ) (μ := (volume : Measure E))
       (ν := (volume : Measure E)) hu_sq_int hψ_integrable
-    -- h: ∫ x, ((‖u‖²) ⋆ ψ) x = (lsmul ℝ ℝ) (∫ x, ‖u x‖² dx) (∫ x, ψ x dx)
-    -- Specialise: (lsmul ℝ ℝ) a b = a • b = a * b.
     rw [h]
     simp [ContinuousLinearMap.lsmul_apply, smul_eq_mul, hψ_int]
-  -- Now translate to `eLpNorm`.
-  -- Use `MemLp.eLpNorm_eq_integral_rpow_norm`-style lemma.
   have hconv_memLp : MemLp (ψ ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] u : E → ℝ)
       2 (volume : Measure E) := by
     refine ⟨hconv_cont.aestronglyMeasurable, ?_⟩
-    -- eLpNorm in finite form via integral.
     rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (μ := (volume : Measure E))
       (f := (ψ ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] u : E → ℝ))
       (by norm_num : (2 : ℝ≥0∞) ≠ 0) (by norm_num : (2 : ℝ≥0∞) ≠ ∞)]
     have h_2_toReal : ((2 : ℝ≥0∞).toReal) = (2 : ℝ) := by norm_num
     rw [h_2_toReal]
-    -- Goal: (∫⁻ ‖·‖²)^(1/2) < ∞.
-    -- Sufficient: ∫⁻ ‖·‖² < ∞.
     have h_lint_finite : ∫⁻ x, ‖((ψ ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] u) x)‖ₑ
         ^ (2 : ℝ) ∂(volume : Measure E) < ∞ := by
-      -- Bound by hh_conv_int.lintegral_norm_rpow.
       have h_pt_lint : ∀ x : E,
           ‖((ψ ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] u) x)‖ₑ
             ^ (2 : ℝ) =
@@ -458,7 +398,6 @@ theorem eLpNorm_mollifyEps_le
     norm_num
   have h_2_ne_zero : (2 : ℝ≥0∞) ≠ 0 := by norm_num
   have h_2_ne_top : (2 : ℝ≥0∞) ≠ ∞ := by norm_num
-  -- Express both eLpNorms as `(integral of ‖·‖²)^(1/2)`.
   have h_eLp_lhs :
       eLpNorm (ψ ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] u : E → ℝ)
         2 (volume : Measure E) =
@@ -476,14 +415,12 @@ theorem eLpNorm_mollifyEps_le
     have h_2_toReal : ((2 : ℝ≥0∞).toReal) = (2 : ℝ) := by norm_num
     rw [h_2_toReal] at h
     exact h
-  -- Rewrite mollifyEps to the convolution.
   have hcomm : mollifyEps (d := d) hε u =
       (u ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)]
         mollifierEps (d := d) hε) := by
     funext y
     exact mollifyEps_eq_convolution_swap hε u y
   rw [hcomm]
-  -- Use commutativity of convolution: u ⋆ ψ = ψ ⋆ u (for `lsmul ℝ ℝ`).
   have hcomm_conv : ∀ y : E,
       (u ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)]
         mollifierEps (d := d) hε) y =
@@ -501,14 +438,11 @@ theorem eLpNorm_mollifyEps_le
         ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] u) := by
     funext y; exact hcomm_conv y
   rw [hfun_eq]
-  -- Replace ψ with mollifierEps (definitionally equal).
   change eLpNorm (mollifierEps (d := d) hε
         ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] u) 2
       (volume : Measure E) ≤ eLpNorm u 2 (volume : Measure E)
   rw [h_eLp_lhs, h_eLp_rhs]
   refine ENNReal.ofReal_le_ofReal ?_
-  -- Show: (∫ ‖ψ ⋆ u‖²)^(1/2) ≤ (∫ ‖u‖²)^(1/2).
-  -- That is, (∫ ‖ψ ⋆ u‖²) ≤ (∫ ‖u‖²) — true by combining `h_int_le` and `h_conv_eq`.
   have h_int_combined :
       ∫ x, ‖((ψ ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] u) x)‖ ^ (2 : ℝ)
         ∂(volume : Measure E) ≤
@@ -543,8 +477,6 @@ theorem eLpNorm_partial_mollifyEps_le_of_weakPartial_univ
     exact mollifyEps_partial_eq_mollifyEps_weakPartial hε hu_loc hweak x
   rw [h_pointwise]
   exact eLpNorm_mollifyEps_le hε hg
-
-/-! ## The hypothesis-bearing existence theorem -/
 
 /-- Hypothesis bundle for the construction below: a non-smooth `H¹`
 weak solution of `B(u, ·) = ⟨f, ·⟩` on `Ω`, plus a uniform `L²(E)`
@@ -586,16 +518,12 @@ structure H1WeakSolutionData
       (mollifyEps (d := d) (show (0 : ℝ) < 1 / ((n : ℝ) + 2) by positivity) u))
       2 (volume : Measure E) ≤ ENNReal.ofReal fseq_l2_bound
 
-/-! ## Auxiliary: smoothness of the mollified function -/
-
 /-- Smoothness of `mollifyEps hε u` for `u ∈ L²(E)`. -/
 private lemma contDiff_mollifyEps_of_memLp_two
     {ε : ℝ} (hε : 0 < ε) {u : E → ℝ}
     (hu : MemLp u 2 (volume : Measure E)) :
     ContDiff ℝ (⊤ : ℕ∞) (mollifyEps (d := d) hε u) :=
   mollifyEps_contDiff hε (hu.locallyIntegrable (by norm_num : (1 : ℝ≥0∞) ≤ 2))
-
-/-! ## Auxiliary: each `(u_n, f_n)` is a smooth weak solution -/
 
 /-- Each pair `(u_n, f_n)` with `u_n := mollifyEps hε u` and
 `f_n := classicalApply B u_n` is a smooth weak solution of the same
@@ -610,8 +538,6 @@ private lemma is_smooth_weak_sol_mollifyEps
       (B.classicalApply (mollifyEps (d := d) hε u)) :=
   SmoothEllipticBilinearForm.mollifyEps_isSmoothWeakSolution_classicalApply
     (d := d) hΩ B (hu.locallyIntegrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)) hε
-
-/-! ## Auxiliary: `L²(E)` bounds on the mollified data restricted to a set -/
 
 omit [NeZero d] in
 /-- Restriction of an `L²(E)` bound to a set. -/
@@ -629,8 +555,6 @@ private lemma integral_sq_le_eLpNorm_sq
     ∫ x in S, (f x) ^ 2 ∂(volume : Measure E) ≤
       ((eLpNorm f 2 (volume : Measure E)).toReal) ^ 2 := by
   classical
-  -- Strategy: relate ∫ f² (over S) ≤ ∫ f² (over E) = ‖f‖²_{L²}.
-  -- Use that ∫ ‖f‖² = (eLpNorm f 2)² in `ℝ≥0∞`.
   have hf_sq_int : Integrable (fun x => (f x) ^ 2) (volume : Measure E) := by
     have h_norm_eq : ∀ x : E, (f x) ^ 2 = ‖f x‖ ^ (2 : ℝ) := by
       intro x
@@ -641,17 +565,13 @@ private lemma integral_sq_le_eLpNorm_sq
     have := hf.integrable_norm_rpow (p := 2) (by norm_num : (2 : ℝ≥0∞) ≠ 0)
       (by norm_num : (2 : ℝ≥0∞) ≠ ∞)
     simpa using this
-  -- ∫_S f² ≤ ∫_E f².
   have h_int_le_E :
       ∫ x in S, (f x) ^ 2 ∂(volume : Measure E) ≤
       ∫ x, (f x) ^ 2 ∂(volume : Measure E) := by
     refine integral_mono_measure Measure.restrict_le_self
       (Filter.Eventually.of_forall (fun x => sq_nonneg _)) hf_sq_int
-  -- ∫_E f² = ‖f‖²_{L²}.
   have h_int_E : ∫ x, (f x) ^ 2 ∂(volume : Measure E) =
       ((eLpNorm f 2 (volume : Measure E)).toReal) ^ 2 := by
-    -- We use `MemLp.integral_norm_rpow_toReal_eq_eLpNorm_pow`-like reasoning:
-    -- ∫ ‖f‖^p = (‖f‖_{Lp})^p.
     have h_norm_eq : ∀ x : E, (f x) ^ 2 = ‖f x‖ ^ (2 : ℝ) := by
       intro x
       rw [Real.norm_eq_abs, ← sq_abs, ← Real.rpow_natCast, Nat.cast_ofNat]
@@ -660,13 +580,11 @@ private lemma integral_sq_le_eLpNorm_sq
       refine integral_congr_ae ?_
       filter_upwards with x using h_norm_eq x
     rw [h_funeq_int]
-    -- ∫ ‖f‖^p = (eLpNorm)^p.toReal.
     have h_2_ne_zero : (2 : ℝ≥0∞) ≠ 0 := by norm_num
     have h_2_ne_top : (2 : ℝ≥0∞) ≠ ∞ := by norm_num
     have h_eLp := hf.eLpNorm_eq_integral_rpow_norm h_2_ne_zero h_2_ne_top
     have h_2_toReal : ((2 : ℝ≥0∞).toReal) = (2 : ℝ) := by norm_num
     rw [h_2_toReal] at h_eLp
-    -- h_eLp: eLpNorm f 2 = ENNReal.ofReal ((∫ ‖f‖²)^(1/2))
     have h_int_nn : 0 ≤ ∫ x, ‖f x‖ ^ (2 : ℝ) ∂(volume : Measure E) :=
       integral_nonneg fun _ => Real.rpow_nonneg (norm_nonneg _) _
     have h_pow_nn : 0 ≤ (∫ x, ‖f x‖ ^ (2 : ℝ) ∂(volume : Measure E)) ^ ((2 : ℝ)⁻¹) :=
@@ -675,15 +593,12 @@ private lemma integral_sq_le_eLpNorm_sq
         (∫ x, ‖f x‖ ^ (2 : ℝ) ∂(volume : Measure E)) ^ ((2 : ℝ)⁻¹) := by
       rw [h_eLp]
       exact ENNReal.toReal_ofReal h_pow_nn
-    -- Square both sides.
     rw [hh]
     rw [← Real.rpow_two]
     rw [← Real.rpow_mul h_int_nn]
     norm_num
   rw [h_int_E] at h_int_le_E
   exact h_int_le_E
-
-/-! ## The construction theorem -/
 
 /-- **Construction of `SmoothApproximation` from a non-smooth `H¹`
 weak solution.**
@@ -715,41 +630,31 @@ theorem exists_smoothApproximation_of_h1WeakSolutionData
     (D : H1WeakSolutionData B u f) :
     Nonempty (SmoothApproximation B u f) := by
   classical
-  -- Mollification radii: ε_n := 1 / (n + 2). Always strictly positive.
   set εFun : ℕ → ℝ := fun n => 1 / ((n : ℝ) + 2) with hεFun_def
   have hε_pos : ∀ n, 0 < εFun n := fun n => by
     rw [hεFun_def]
     positivity
-  -- The smooth approximating sequence and its data.
   set uSeq : ℕ → E → ℝ := fun n => mollifyEps (d := d) (hε_pos n) u with huSeq_def
   set fSeq : ℕ → E → ℝ := fun n => B.classicalApply (uSeq n) with hfSeq_def
-  -- `uSeq n` is smooth.
   have huSeq_smooth : ∀ n, ContDiff ℝ (⊤ : ℕ∞) (uSeq n) := fun n =>
     contDiff_mollifyEps_of_memLp_two (hε_pos n) D.hu_l2
-  -- Continuous (smooth) ⟹ continuous.
   have huSeq_cont : ∀ n, Continuous (uSeq n) := fun n => (huSeq_smooth n).continuous
-  -- `fSeq n` is smooth (and hence continuous).
   have hfSeq_smooth : ∀ n, ContDiff ℝ (⊤ : ℕ∞) (fSeq n) := fun n =>
     SmoothEllipticBilinearForm.contDiff_classicalApply (d := d) B (huSeq_smooth n)
   have hfSeq_cont : ∀ n, Continuous (fSeq n) := fun n => (hfSeq_smooth n).continuous
-  -- `(uSeq n, fSeq n)` is a smooth weak solution.
   have h_smooth_weak : ∀ n, B.IsSmoothWeakSolution (uSeq n) (fSeq n) := fun n =>
     is_smooth_weak_sol_mollifyEps hΩ B D.hu_l2 (hε_pos n)
-  -- Each gradient component is continuous.
   have hgrad_cont : ∀ n, ∀ j : Fin d,
       Continuous (fun x : E => (fderiv ℝ (uSeq n) x)
         (EuclideanSpace.single j 1)) := fun n j =>
     ((huSeq_smooth n).continuous_fderiv (by simp)).clm_apply continuous_const
-  -- `uSeq n` is in `L²(E)`.
   have huSeq_l2 : ∀ n, MemLp (uSeq n) 2 (volume : Measure E) := fun n => by
-    -- `‖uSeq n‖_{L²} ≤ ‖u‖_{L²}`.
     have h_eLp : eLpNorm (uSeq n) 2 (volume : Measure E) ≤
         eLpNorm u 2 (volume : Measure E) :=
       eLpNorm_mollifyEps_le (hε_pos n) D.hu_l2
     refine ⟨?_, ?_⟩
     · exact (huSeq_cont n).aestronglyMeasurable
     · exact lt_of_le_of_lt h_eLp D.hu_l2.eLpNorm_lt_top
-  -- `∂_j uSeq n` is in `L²(E)` for each `j`.
   have hgrad_l2 : ∀ n, ∀ j : Fin d, MemLp
       (fun x : E => (fderiv ℝ (uSeq n) x) (EuclideanSpace.single j 1))
       2 (volume : Measure E) := fun n j => by
@@ -763,15 +668,12 @@ theorem exists_smoothApproximation_of_h1WeakSolutionData
     refine ⟨?_, ?_⟩
     · exact (hgrad_cont n j).aestronglyMeasurable
     · exact lt_of_le_of_lt h_eLp (D.weakPartial_l2 j).eLpNorm_lt_top
-  -- `fSeq n` is in `L²(E)` for each `n`.
   have hfSeq_l2 : ∀ n, MemLp (fSeq n) 2 (volume : Measure E) := fun n => by
     refine ⟨?_, ?_⟩
     · exact (hfSeq_cont n).aestronglyMeasurable
-    · -- Use the hypothesis bound.
-      have h_bound := D.fseq_l2_bounded n
+    · have h_bound := D.fseq_l2_bounded n
       have hM_top : ENNReal.ofReal D.fseq_l2_bound ≠ ∞ := ENNReal.ofReal_ne_top
       exact lt_of_le_of_lt h_bound (lt_of_le_of_ne le_top hM_top)
-  -- The master `data_bound`: combine global L²(E) bounds.
   set DB : ℝ :=
     ((eLpNorm u 2 (volume : Measure E)).toReal) ^ 2 +
       ∑ j : Fin d, ((eLpNorm (D.weakPartial j) 2 (volume : Measure E)).toReal) ^ 2 +
@@ -781,7 +683,6 @@ theorem exists_smoothApproximation_of_h1WeakSolutionData
     refine add_nonneg (add_nonneg (add_nonneg (sq_nonneg _) ?_) (sq_nonneg _))
       (sq_nonneg _)
     exact Finset.sum_nonneg (fun j _ => sq_nonneg _)
-  -- L²-loc condition for the data.
   have hf_seq_l2_loc : ∀ n, ∀ {S : Set E}, IsCompact (closure S) →
       MemLp (fSeq n) 2 (volume.restrict S) := fun n {S} _ =>
     memLp_two_restrict_of_memLp_two (hfSeq_l2 n) S
@@ -793,7 +694,6 @@ theorem exists_smoothApproximation_of_h1WeakSolutionData
         (fun y : E => (fderiv ℝ (uSeq n) y) (EuclideanSpace.single j 1))
         2 (volume.restrict S) := fun n {S} _ j =>
     memLp_two_restrict_of_memLp_two (hgrad_l2 n j) S
-  -- Build the structure.
   refine ⟨{
     u_seq := uSeq
     f_seq := fSeq
@@ -806,21 +706,15 @@ theorem exists_smoothApproximation_of_h1WeakSolutionData
     data_bound_nn := hDB_nn
     data_integrated_bound := ?_
   }⟩
-  -- Integrated energy bound on a precompact open `Ω'`.
   intro Ω' hΩ'_open _hΩ'_cc
-  -- Each integrand is bounded by its global L²(E) version.
   refine ⟨1, by norm_num, fun n => ?_⟩
-  -- The bound: ENERGY(Ω', n) ≤ DB.
-  -- `∑_j ∫_Ω' (∂_j u_n)² ≤ ∑_j ‖∂_j u_n‖²_{L²(E)} ≤ ∑_j ‖weakPartial j‖²_{L²(E)}`
   have h_grad_each : ∀ j : Fin d,
       ∫ y in Ω', ((fderiv ℝ (uSeq n) y) (EuclideanSpace.single j 1)) ^ 2
         ∂(volume : Measure E) ≤
       ((eLpNorm (D.weakPartial j) 2 (volume : Measure E)).toReal) ^ 2 := by
     intro j
     have h_partial_bound := integral_sq_le_eLpNorm_sq (hgrad_l2 n j) hΩ'_open
-    -- h_partial_bound: ∫_Ω' (∂_j u_n)² ≤ ‖∂_j u_n‖²_{L²(E)}.
     refine h_partial_bound.trans ?_
-    -- ‖∂_j u_n‖_{L²} ≤ ‖weakPartial j‖_{L²}.
     have h_eLp_bound :
         eLpNorm (fun x : E => (fderiv ℝ (uSeq n) x)
             (EuclideanSpace.single j 1)) 2 (volume : Measure E) ≤
@@ -828,7 +722,6 @@ theorem exists_smoothApproximation_of_h1WeakSolutionData
       eLpNorm_partial_mollifyEps_le_of_weakPartial_univ (hε_pos n)
         (D.hu_l2.locallyIntegrable (by norm_num : (1 : ℝ≥0∞) ≤ 2))
         (D.weakPartial_l2 j) (D.weakPartial_isWeak j)
-    -- toReal monotone (both sides finite).
     have h_lhs_top : eLpNorm (fun x : E => (fderiv ℝ (uSeq n) x)
         (EuclideanSpace.single j 1)) 2 (volume : Measure E) ≠ ∞ :=
       (hgrad_l2 n j).eLpNorm_ne_top
@@ -841,7 +734,6 @@ theorem exists_smoothApproximation_of_h1WeakSolutionData
     have h_rhs_nn : 0 ≤ (eLpNorm (D.weakPartial j) 2 (volume : Measure E)).toReal :=
       ENNReal.toReal_nonneg
     exact pow_le_pow_left₀ h_lhs_nn h_toReal_le 2
-  -- `∫_Ω' u_n² ≤ ‖u_n‖²_{L²(E)} ≤ ‖u‖²_{L²(E)}`.
   have h_u_bound :
       ∫ y in Ω', (uSeq n y) ^ 2 ∂(volume : Measure E) ≤
       ((eLpNorm u 2 (volume : Measure E)).toReal) ^ 2 := by
@@ -857,7 +749,6 @@ theorem exists_smoothApproximation_of_h1WeakSolutionData
     have h_lhs_nn : 0 ≤ (eLpNorm (uSeq n) 2 (volume : Measure E)).toReal :=
       ENNReal.toReal_nonneg
     exact pow_le_pow_left₀ h_lhs_nn h_toReal_le 2
-  -- `∫_Ω' f_n² ≤ ‖f_n‖²_{L²(E)} ≤ fseq_l2_bound²`.
   have h_f_bound :
       ∫ y in Ω', (fSeq n y) ^ 2 ∂(volume : Measure E) ≤
       D.fseq_l2_bound ^ 2 := by
@@ -875,7 +766,6 @@ theorem exists_smoothApproximation_of_h1WeakSolutionData
     have h_lhs_nn : 0 ≤ (eLpNorm (fSeq n) 2 (volume : Measure E)).toReal :=
       ENNReal.toReal_nonneg
     exact pow_le_pow_left₀ h_lhs_nn h_toReal_le 2
-  -- Sum over j: integrating-over-finite-sum.
   have h_grad_sum_int :
       ∫ y in Ω', ∑ j : Fin d,
           ((fderiv ℝ (uSeq n) y) (EuclideanSpace.single j 1)) ^ 2
@@ -911,7 +801,6 @@ theorem exists_smoothApproximation_of_h1WeakSolutionData
         ∂(volume : Measure E) ≤
       ∑ j : Fin d, ((eLpNorm (D.weakPartial j) 2 (volume : Measure E)).toReal) ^ 2 :=
     Finset.sum_le_sum (fun j _ => h_grad_each j)
-  -- Combine.
   have h_combined :
       (∑ j : Fin d, ∫ y in Ω',
           ((fderiv ℝ (uSeq n) y) (EuclideanSpace.single j 1)) ^ 2
@@ -922,14 +811,9 @@ theorem exists_smoothApproximation_of_h1WeakSolutionData
       ((eLpNorm u 2 (volume : Measure E)).toReal) ^ 2 +
       D.fseq_l2_bound ^ 2 := by
     linarith
-  -- The total is bounded by `DB` (the master scalar).
   refine h_combined.trans ?_
   rw [hDB_def]
-  -- DB = (‖u‖²) + ∑ ‖weakPartial‖² + ‖f‖² + bound²
-  -- Goal: ∑ ‖weakPartial‖² + ‖u‖² + bound² ≤ 1 * (∑ + ‖u‖² + ‖f‖² + bound²)
-  -- I.e., we need: ∑ ‖weakPartial‖² + ‖u‖² + bound² ≤ DB · 1.
   rw [one_mul]
-  -- Goal: (∑ ‖wp‖²) + ‖u‖² + bound² ≤ ‖u‖² + ∑ ‖wp‖² + ‖f‖² + bound²
   have h_f_nn : 0 ≤ ((eLpNorm f 2 (volume : Measure E)).toReal) ^ 2 := sq_nonneg _
   linarith
 
@@ -968,14 +852,12 @@ theorem exists_smoothApproximation_of_h1_weak_solution
         2 (volume : Measure E) ≤ ENNReal.ofReal M_F) :
     Nonempty (SmoothApproximation B u f) := by
   classical
-  -- Extract weak partials via Classical.choose.
   set wp : Fin d → (E → ℝ) := fun j => Classical.choose (hu_grad_l2 j) with hwp_def
   have hwp_l2 : ∀ j, MemLp (wp j) 2 (volume : Measure E) := fun j =>
     (Classical.choose_spec (hu_grad_l2 j)).1
   have hwp_isWeak : ∀ j,
       DeGiorgi.HasWeakPartialDeriv (d := d) j (wp j) u Set.univ := fun j =>
     (Classical.choose_spec (hu_grad_l2 j)).2
-  -- Bundle into the H1WeakSolutionData structure.
   let D : H1WeakSolutionData B u f :=
     { hu_l2 := hu_l2
       hf_l2 := hf_l2

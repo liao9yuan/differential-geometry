@@ -40,7 +40,7 @@ eigenfunction.
 ## Main results
 
 * `exists_continuous_representative_of_memWkpChart_isRegular` — the
-  faithful wrapper around `iterated_sobolev_embedding_chart_C0_H_k`,
+  faithful wrapper around `sobolev_embedding_chart_C0_Hk`,
   retaining the technical regularity hypothesis
   `RegularExponent.IsRegular (Module.finrank ℝ E : ℝ) 2 k` (i.e., for the
   Hilbert exponent `p = 2`, the iteration ladder
@@ -69,28 +69,12 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 open DifferentialGeometry.Integral.Measure
-
-/-! ## A.e.-continuous representative for the Hilbert exponent
-
-`p = 2`. We deliver two variants: with and without the regularity ladder
-hypothesis. In each, the conclusion is phrased against the canonical
-Riemannian volume measure `riemannianVolumeMeasure I M g`, which is the
-same as `riemannianMeasure (I := I) g (chartAtlasPOU I M)` by definition.
-
-Note. The `C^0` conclusion (continuity, no constants exposed) is the
-bare-bones existence statement. Quantitative `‖ũ‖_∞`-control is available
-from `iterated_sobolev_embedding_chart_C0_H_k` itself; it is suppressed
-here because the standard downstream applications (eigenfunction
-regularity) only require the existence of the continuous representative.
--/
 
 /-- **Continuous representative of a chart-`H^k` function (regularity
 ladder hypothesis kept).**
@@ -102,7 +86,7 @@ condition `RegularExponent.IsRegular n 2 k` admits a continuous function
 `ũ : M → ℝ` with `ũ =ᵐ[μ_g] u`, where
 `μ_g = riemannianVolumeMeasure I M g`.
 
-Faithful wrapper for `iterated_sobolev_embedding_chart_C0_H_k`. -/
+Faithful wrapper for `sobolev_embedding_chart_C0_Hk`. -/
 theorem exists_continuous_representative_of_memWkpChart_isRegular
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     [NeZero (Module.finrank ℝ E)]
@@ -114,11 +98,9 @@ theorem exists_continuous_representative_of_memWkpChart_isRegular
     ∃ ũ : M → ℝ, Continuous ũ ∧
       ũ =ᵐ[riemannianVolumeMeasure I M g] u := by
   obtain ⟨ũ, _C, hũ_cont, _hC_nn, hũ_ae, _hũ_bound⟩ :=
-    iterated_sobolev_embedding_chart_C0_H_k (I := I) (M := M) g hk hreg
+    sobolev_embedding_chart_C0_Hk (I := I) (M := M) g hk hreg
       hu_meas hu
   refine ⟨ũ, hũ_cont, ?_⟩
-  -- Convert the chart-POU measure form into the canonical
-  -- Riemannian volume measure form via `riemannianVolumeMeasure_def`.
   have hμ_eq :
       riemannianMeasure (I := I) g (chartAtlasPOU I M) =
         riemannianVolumeMeasure I M g :=
@@ -149,20 +131,11 @@ theorem exists_continuous_representative_of_memWkpChart
     (hu : MemWkpChart (I := I) (M := M) g k 2 u) :
     ∃ ũ : M → ℝ, Continuous ũ ∧
       ũ =ᵐ[riemannianVolumeMeasure I M g] u := by
-  -- Reduce to `iterated_sobolev_embedding_chart_C0_unconditional` at `p = 2`.
-  -- Build the hypothesis set:
-  --   * `1 ≤ k` from `2k > n ≥ 1` (using `NeZero`).
-  --   * `1 ≤ (2 : ℝ)` is `by norm_num`.
-  --   * `(n : ℝ) < (k : ℝ) * 2` is the real-cast of `n < 2k`.
-  --   * Side condition `2 ≤ n ∨ 1 < (2 : ℝ)` is satisfied by `1 < 2`.
-  --   * Translate `MemWkpChart g k 2` (literal `2 : ℝ≥0∞`) to
-  --     `MemWkpChart g k (ENNReal.ofReal 2)` via `ENNReal.ofReal_natCast`.
   have hd_pos : 0 < Module.finrank ℝ E := NeZero.pos _
   have hk_pos : 1 ≤ k := by
     by_contra h_not
     have hk_zero : k = 0 := by omega
     rw [hk_zero] at hk
-    -- `2 * 0 = 0`, hence `n < 0`, contradicting `0 < n`.
     omega
   have hp_one : (1 : ℝ) ≤ 2 := by norm_num
   have hkp_real : (Module.finrank ℝ E : ℝ) < (k : ℝ) * 2 := by
@@ -171,7 +144,6 @@ theorem exists_continuous_representative_of_memWkpChart
     rw [h2k] at h_real
     exact h_real
   have h_side : 2 ≤ Module.finrank ℝ E ∨ (1 : ℝ) < 2 := Or.inr (by norm_num)
-  -- Convert the literal `(2 : ℝ≥0∞)` in `hu` to `ENNReal.ofReal 2`.
   have h_two_eq : (2 : ℝ≥0∞) = ENNReal.ofReal 2 := by
     rw [show (2 : ℝ) = (2 : ℕ) from by norm_num]
     rw [ENNReal.ofReal_natCast]

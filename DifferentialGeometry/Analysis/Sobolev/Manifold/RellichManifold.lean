@@ -1,9 +1,9 @@
 import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.Rellich
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.Rellich
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
-import DifferentialGeometry.Analysis.Sobolev.Chart.Atlas
-import DifferentialGeometry.Integral.Measure.Glue
+import DifferentialGeometry.Analysis.Sobolev.Chart.AtlasNorm.Atlas
+import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace.Approximation
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
@@ -41,14 +41,10 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Connecting `chartPushed` and `chartPushedRaw` on the chart target -/
 
 /-- On the chart-target image of `α`, the partition-of-unity-weighted chart-push
 agrees with the raw chart-push of `(ρ α) · u`. -/
@@ -90,8 +86,6 @@ lemma chartPushed_eq_chartPushedRaw_pou_ae
   exact chartPushed_eq_chartPushedRaw_pou_mul_on_target
     (I := I) (M := M) ρ α u hy
 
-/-! ## Compact set in chart target containing `tsupport (ρ α)` -/
-
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 
 /-- The image of `tsupport ρ_α` under `extChartAt I α` is compact and contained
@@ -105,7 +99,6 @@ private lemma extChartAt_image_tsupport_pou_compact
       (tsupport ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
         : M → ℝ)) ⊆
       (extChartAt I α).target := by
-  -- tsupport ρ_α ⊆ chart α source, so we apply the existing lemma.
   have hsubord :
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M).IsSubordinate
         (fun α : M => (chartAt H α).source) :=
@@ -136,8 +129,6 @@ private lemma toEuclidean_image_tsupport_pou_compact_subset_target
   refine ⟨hcomp.image (toEuclidean (E := E)).continuous, ?_⟩
   rintro y ⟨z, hz, rfl⟩
   exact ⟨z, hsub hz, rfl⟩
-
-/-! ## Extracting a bounded open neighborhood of the support inside the chart target -/
 
 /-- The compact carrier set in the chart-target Euclidean image: the toEuclidean
 image of `(extChartAt I α) '' (tsupport ρ_α)`. -/
@@ -201,8 +192,6 @@ private lemma chartCompact_subset_chartNbhd (α : M) :
     (chartThickeningRadius_pos (I := I) (M := M) α)
     (chartCompact (I := I) (M := M) α)
 
-/-! ## Compact support of `chartPushedRaw α (ρ_α · u)` inside `chartCompact α` -/
-
 /-- The raw chart-push of `ρ_α · u` is zero off `chartCompact α`. -/
 lemma chartPushedRaw_pou_mul_eq_zero_off_chartCompact
     (α : M) (u : M → ℝ)
@@ -213,8 +202,7 @@ lemma chartPushedRaw_pou_mul_eq_zero_off_chartCompact
         : C^∞⟮I, M; ℝ⟯) x * u x) y = 0 := by
   classical
   by_cases hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α
-  · -- y ∈ chartTargetEuclid α \ chartCompact α
-    have hsmul :
+  · have hsmul :
         tsupport (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) x * u x) ⊆
           tsupport ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -237,23 +225,16 @@ lemma chartPushedRaw_pou_mul_eq_zero_off_chartCompact
             (fun α : M => (chartAt H α).source) :=
         DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate (I := I) (M := M)
       exact hsmul.trans (hsubord α)
-    -- y ∉ chartCompact α means y ∉ toEuclidean '' ((extChartAt I α) '' tsupport ρ_α).
-    -- We need to show the raw chart-push of ρ_α · u is zero at y.
     apply chartPushedRaw_eq_zero_off_image_tsupport
       (I := I) (M := M)
       (u := fun x : M => ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) : M → ℝ) x * u x)
       (α := α) hy_target
-    -- Show y ∉ toEuclidean '' ((extChartAt I α) '' tsupport (ρ α · u))
     intro hcontra
     apply hy
-    -- y ∈ chartCompact α := toEuclidean '' ((extChartAt I α) '' tsupport ρ_α)
-    -- We have y ∈ toEuclidean '' ((extChartAt I α) '' tsupport (ρ α · u)).
-    -- Since tsupport (ρ α · u) ⊆ tsupport ρ_α, the inclusion follows.
     obtain ⟨z, hz_chart_image, hzy⟩ := hcontra
     obtain ⟨x, hx_supp, hxz⟩ := hz_chart_image
     refine ⟨z, ⟨x, ?_, hxz⟩, hzy⟩
-    -- Need: x ∈ tsupport ρ_α
     have h_t_sub : tsupport (fun y : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU
         I M α : C^∞⟮I, M; ℝ⟯) y * u y) ⊆ tsupport
         ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
@@ -278,7 +259,6 @@ lemma chartPushedRaw_pou_mul_tsupport_subset_chartNbhd
       (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) x * u x)) ⊆
       chartNbhd (I := I) (M := M) α := by
-  -- The support is in chartCompact α (closed!), and chartCompact α ⊆ chartNbhd α.
   have h_supp_sub_compact :
       Function.support (chartPushedRaw (I := I) (M := M) α
         (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -288,8 +268,6 @@ lemma chartPushedRaw_pou_mul_tsupport_subset_chartNbhd
     by_contra hcontra
     apply hy
     exact chartPushedRaw_pou_mul_eq_zero_off_chartCompact (I := I) (M := M) α u hcontra
-  -- tsupport = closure (support).
-  -- closure (support) ⊆ closure (chartCompact α) = chartCompact α (closed).
   have h_compact_closed : IsClosed (chartCompact (I := I) (M := M) α) :=
     (chartCompact_isCompact (I := I) (M := M) α).isClosed
   have h_tsupp_sub_compact :
@@ -307,7 +285,6 @@ lemma chartPushedRaw_pou_mul_hasCompactSupport
     HasCompactSupport (chartPushedRaw (I := I) (M := M) α
       (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) x * u x)) := by
-  -- The tsupport is contained in chartCompact α, which is compact.
   have h_tsupp_sub :
       tsupport (chartPushedRaw (I := I) (M := M) α
         (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -315,7 +292,6 @@ lemma chartPushedRaw_pou_mul_hasCompactSupport
         chartCompact (I := I) (M := M) α := by
     intro y hy
     by_contra hcontra
-    -- y ∉ chartCompact α and chartCompact is closed, so y ∉ closure(support) → y ∉ support → 0
     have h_supp_sub_compact :
         Function.support (chartPushedRaw (I := I) (M := M) α
           (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -338,8 +314,6 @@ lemma chartPushedRaw_pou_mul_hasCompactSupport
   exact (chartCompact_isCompact (I := I) (M := M) α).of_isClosed_subset
     isClosed_closure h_tsupp_sub
 
-/-! ## Linearity of `chartPushedRaw` -/
-
 omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless] in
 /-- `chartPushedRaw` is linear in the function argument: subtraction. -/
 lemma chartPushedRaw_sub
@@ -353,8 +327,6 @@ lemma chartPushedRaw_sub
   by_cases hy : y ∈ chartTargetEuclid (I := I) (M := M) α
   · simp [hy]
   · simp [hy]
-
-/-! ## `chartPushedRaw` of `pullbackToM α w` equals `w` on the chart target -/
 
 omit [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless] in
 /-- For any `w : EuclideanSpace ℝ (Fin d) → ℝ`, the raw chart-push of
@@ -371,10 +343,8 @@ lemma chartPushedRaw_pullbackToM_apply
   by_cases hy : y ∈ chartTargetEuclid (I := I) (M := M) α
   · rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy]
     rw [Set.indicator_of_mem hy]
-    -- Need: pullbackToM I α w ((extChartAt I α).symm ((toEuclidean : E ≃L[ℝ] _).symm y)) = w y
     rw [pullbackToM_apply_of_mem (M := M) (I := I) α w
       (symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy)]
-    -- Need: w (toEuclidean (extChartAt I α ((extChartAt I α).symm (toEuclidean.symm y)))) = w y
     obtain ⟨z, hz_target, hzy⟩ := hy
     have hz_eq : (extChartAt I α) ((extChartAt I α).symm z) = z :=
       (extChartAt I α).right_inv hz_target
@@ -394,8 +364,6 @@ lemma chartPushedRaw_pullbackToM_eq_indicator
   funext y
   exact chartPushedRaw_pullbackToM_apply (I := I) (M := M) α w y
 
-/-! ## Pullback `tsupport` is contained in a compact preimage when the source has compact tsupport -/
-
 /-- If the input `w` has tsupport contained in `chartCompact α`, then the pullback
 `pullbackToM α w` has tsupport contained in `(extChartAt I α).symm ∘ toEuclidean.symm ''
 chartCompact α`, which is a compact subset of `(chartAt H α).source`. -/
@@ -405,7 +373,6 @@ lemma pullbackToM_tsupport_subset_of_supp_in_chartCompact
     (hw_supp : tsupport w ⊆ chartCompact (I := I) (M := M) α) :
     tsupport (pullbackToM (M := M) I α w) ⊆ (chartAt H α).source := by
   classical
-  -- The preimage compact set in chart α source.
   set P : Set M :=
     (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
       (extChartAt I α).symm ((toEuclidean : E ≃L[ℝ] _).symm y)) ''
@@ -419,26 +386,21 @@ lemma pullbackToM_tsupport_subset_of_supp_in_chartCompact
     have hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α :=
       chartCompact_subset_chartTargetEuclid (I := I) (M := M) α hy_compact
     exact symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy_target
-  -- Function.support (pullbackToM α w) ⊆ P
   have h_supp_sub : Function.support (pullbackToM (M := M) I α w) ⊆ P := by
     intro x hx
-    -- pullbackToM α w x ≠ 0
     by_cases hxsource : x ∈ (chartAt H α).source
-    · -- Inside source: pullbackToM α w x = w (toEuclidean (extChartAt I α x))
-      have hpb : pullbackToM (M := M) I α w x =
+    · have hpb : pullbackToM (M := M) I α w x =
           w (toEuclidean (extChartAt I α x)) :=
         pullbackToM_apply_of_mem (M := M) (I := I) α w hxsource
       have hwy_ne : w (toEuclidean (extChartAt I α x)) ≠ 0 := by
         intro h
         apply hx
         rw [hpb, h]
-      -- Hence (toEuclidean (extChartAt I α x)) ∈ Function.support w ⊆ tsupport w ⊆ chartCompact α
       have hy_chartCompact :
           (toEuclidean : E ≃L[ℝ] _) (extChartAt I α x) ∈
             chartCompact (I := I) (M := M) α := by
         apply hw_supp
         exact subset_tsupport _ (Function.mem_support.mpr hwy_ne)
-      -- Show x ∈ P, i.e., x = (extChartAt I α).symm (toEuclidean.symm (toEuclidean (extChartAt I α x)))
       refine ⟨(toEuclidean : E ≃L[ℝ] _) (extChartAt I α x), hy_chartCompact, ?_⟩
       change (extChartAt I α).symm
         ((toEuclidean : E ≃L[ℝ] _).symm
@@ -453,11 +415,9 @@ lemma pullbackToM_tsupport_subset_of_supp_in_chartCompact
           (I := I) (M := M)]
         exact hxsource
       exact (extChartAt I α).left_inv hsource
-    · -- Outside source: pullbackToM α w x = 0, contradicts hx.
-      exfalso
+    · exfalso
       apply hx
       exact pullbackToM_apply_of_notMem (M := M) (I := I) α w hxsource
-  -- tsupport is closure of support; closure of subset of P (compact, hence closed) is in P.
   have h_P_closed : IsClosed P := hP_compact.isClosed
   have h_tsupp_sub_P : tsupport (pullbackToM (M := M) I α w) ⊆ P := by
     rw [tsupport]
@@ -471,8 +431,6 @@ lemma pullbackToM_eq_zero_off_chart_source
     (hx : x ∉ (chartAt H α).source) :
     pullbackToM (M := M) I α w x = 0 :=
   pullbackToM_apply_of_notMem (M := M) (I := I) α w hx
-
-/-! ## `MemW1p` of `chartPushedRaw α (ρ_α · u)` from `MemWkpChart 1 p u` -/
 
 /-- For a chart-Sobolev function `u` (in `MemWkpChart g 1 p`), the
 chart-pushed-raw of `ρ_α · u` is `MemW1p p` of `chartTargetEuclid α`. -/
@@ -488,17 +446,14 @@ lemma memW1p_chartPushedRaw_pou_mul_of_memWkpChart
           : C^∞⟮I, M; ℝ⟯) x * u x))
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- chartPushed = chartPushedRaw of (ρ_α · u) on chartTargetEuclid α (a.e.)
   have h_ae := chartPushed_eq_chartPushedRaw_pou_ae
     (I := I) (M := M)
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u
-  -- MemWkp 1 p (chartPushed ...) (chartTargetEuclid α)
   have h_chart_pushed : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 1 p
       (chartPushed (I := I) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
       (chartTargetEuclid (I := I) (M := M) α) := hu α
-  -- Convert MemWkp 1 to MemW1p.
   have h_chart_pushed_w1p :
       DeGiorgi.MemW1p (d := Module.finrank ℝ E) p
         (chartPushed (I := I) (M := M)
@@ -506,7 +461,6 @@ lemma memW1p_chartPushedRaw_pou_mul_of_memWkpChart
         (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p.mp
       h_chart_pushed
-  -- Apply MemW1p_congr_ae to transfer to chartPushedRaw.
   have hopen := chartTargetEuclid_isOpen (I := I) (M := M) α
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemW1p_congr_ae
     (d := Module.finrank ℝ E) (p := p) hopen h_ae).mp h_chart_pushed_w1p
@@ -527,7 +481,6 @@ lemma memW1p_chartPushedRaw_pou_mul_chartNbhd
   classical
   have h_target := memW1p_chartPushedRaw_pou_mul_of_memWkpChart
     (I := I) (M := M) g hu α
-  -- Use MemW1pWitness.restrict to restrict to the smaller open chartNbhd α.
   set hwT : DeGiorgi.MemW1pWitness (d := Module.finrank ℝ E) p
       (chartPushedRaw (I := I) (M := M) α
         (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -563,8 +516,6 @@ lemma memW01p_chartPushedRaw_pou_mul_chartNbhd
   have h_compact := chartPushedRaw_pou_mul_hasCompactSupport (I := I) (M := M) α u
   exact DeGiorgi.memW01p_of_memW1p_of_tsupport_subset
     (chartNbhd_isOpen (I := I) (M := M) α) hp_one h_w1p h_compact h_supp
-
-/-! ## Bound for the chart-target `eLpNorm` of `chartPushedRaw α (ρ_α · u)` -/
 
 /-- The `eLpNorm` of `chartPushedRaw α (ρ_α · u)` on `chartTargetEuclid α` agrees
 with that of `chartPushed g α u`. -/
@@ -604,8 +555,6 @@ lemma eLpNorm_chartPushedRaw_pou_mul_chartNbhd_le
   exact MeasureTheory.Measure.restrict_mono_set _
     (chartNbhd_subset_chartTargetEuclid (I := I) (M := M) α)
 
-/-! ## Bound for the gradient `eLpNorm` of the Rellich witness on `chartNbhd α` -/
-
 /-- The witness's `weakGrad x i` on `chartNbhd α` is a weak `i`-partial of
 `chartPushedRaw α (ρ_α · u)`. -/
 lemma rellich_witness_weakGrad_isWeakPartial
@@ -624,7 +573,6 @@ lemma rellich_witness_weakGrad_isWeakPartial
           : C^∞⟮I, M; ℝ⟯) x * u x))
       (chartNbhd (I := I) (M := M) α) := by
   intro h_mem
-  -- The witness's isWeakGrad gives the i-th component as a weak partial.
   exact (Classical.choose h_mem.2).isWeakGrad i
 
 /-- For a function in `MemW01p` on `chartNbhd α`, the witness's `weakGrad x i`
@@ -643,8 +591,6 @@ lemma rellich_witness_weakGrad_memLp
         (chartNbhd (I := I) (M := M) α)) := by
   intro h_mem
   exact (Classical.choose h_mem.2).weakGrad_component_memLp i
-
-/-! ## A.e.-equality between the Rellich witness gradient and `chosenWeakPartial'` -/
 
 /-- The Rellich witness's `weakGrad x i` on `chartNbhd α` agrees a.e. with the
 chosen weak partial of `chartPushed g α u` on `chartTargetEuclid α`, when both
@@ -668,9 +614,6 @@ lemma rellich_witness_weakGrad_ae_eq_chosenWeakPartial'
         (chartTargetEuclid (I := I) (M := M) α) := by
   classical
   intro h_mem
-  -- Strategy: both functions are weak `i`-partials of
-  -- chartPushedRaw α (ρ_α · u) on chartNbhd α (the second after a.e.-rewriting).
-  -- By HasWeakPartialDeriv.ae_eq, they're a.e. equal on chartNbhd α.
   have hp_le : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p := by
     simpa using (ENNReal.ofReal_le_ofReal hp_one.le :
       ENNReal.ofReal (1 : ℝ) ≤ ENNReal.ofReal p)
@@ -693,7 +636,6 @@ lemma rellich_witness_weakGrad_ae_eq_chosenWeakPartial'
         (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_isWeakPartial_of_mem
       hChart_w1p i
-  -- This restricts to a weak partial on chartNbhd α.
   have hChart_w1p_chosenWeakPartial_chartNbhd :
       DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
         (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
@@ -707,7 +649,6 @@ lemma rellich_witness_weakGrad_ae_eq_chosenWeakPartial'
     DeGiorgi.HasWeakPartialDeriv.restrict (chartNbhd_isOpen (I := I) (M := M) α)
       (chartNbhd_subset_chartTargetEuclid (I := I) (M := M) α)
       hChart_w1p_chosenWeakPartial
-  -- Transfer via a.e.-equality of chartPushed = chartPushedRaw α (ρ_α · u).
   have h_ae_chartNbhd :
       chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u
@@ -718,7 +659,6 @@ lemma rellich_witness_weakGrad_ae_eq_chosenWeakPartial'
             : C^∞⟮I, M; ℝ⟯) x * u x) := by
     have h_full := chartPushed_eq_chartPushedRaw_pou_ae (I := I) (M := M)
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u
-    -- This is on vol.restrict (chartTargetEuclid α). Restrict to chartNbhd α.
     have h_restrict : (volume :
         Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict
         (chartNbhd (I := I) (M := M) α) ≤
@@ -741,9 +681,7 @@ lemma rellich_witness_weakGrad_ae_eq_chosenWeakPartial'
     DifferentialGeometry.Analysis.Sobolev.Euclidean.hasWeakPartialDeriv_congr_ae
       (chartNbhd_isOpen (I := I) (M := M) α) i h_ae_chartNbhd
       hChart_w1p_chosenWeakPartial_chartNbhd
-  -- The Rellich witness's weakGrad component is a weak partial too.
   have hWit_isWeak := (Classical.choose h_mem.2).isWeakGrad i
-  -- Both are weak partials of chartPushedRaw on chartNbhd α. By ae_eq, they're a.e. equal.
   have hWit_loc :=
     ((Classical.choose h_mem.2).weakGrad_component_memLp i).locallyIntegrable hp_le
   have hChosen_memLp :
@@ -774,8 +712,6 @@ lemma rellich_witness_weakGrad_ae_eq_chosenWeakPartial'
     (chartNbhd_isOpen (I := I) (M := M) α) hWit_isWeak
     hChart_w1p_chosenWeakPartial_raw hWit_loc hChosen_loc
 
-/-! ## Bounds derived from `wkpNormChart` -/
-
 /-- The `eLpNorm` of the chart-pushed function at `α` is bounded by the
 chart-Sobolev norm `wkpNormChart g 1 p u`. -/
 lemma eLpNorm_chartPushed_le_wkpNormChart
@@ -788,13 +724,6 @@ lemma eLpNorm_chartPushed_le_wkpNormChart
           (chartTargetEuclid (I := I) (M := M) α)) ≤
       wkpNormChart (I := I) (M := M) g 1 p u := by
   classical
-  -- wkpNorm 0 = eLpNorm.
-  -- wkpNorm 1 ≥ wkpNorm 0 ≥ eLpNorm.
-  -- wkpNormChart = tsum α', wkpNorm 1 (chartPushed _ α') (chartTargetEuclid α').
-  -- Single term ≤ tsum.
-  -- Need: eLpNorm (chartPushed _ α u) p (vol.restrict chartTargetEuclid α)
-  --     ≤ wkpNorm 1 p (chartPushed _ α u) (chartTargetEuclid α).
-  -- Then tsum.
   have hbound1 :
       eLpNorm (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u) p
@@ -805,17 +734,10 @@ lemma eLpNorm_chartPushed_le_wkpNormChart
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
           (chartTargetEuclid (I := I) (M := M) α) := by
-    -- wkpNorm 1 = eLpNorm + Σ_i eLpNorm (chosenWeakPartial' ...).
     unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
-    -- ∑ j ∈ {0, 1}, ...
     rw [Finset.sum_range_succ]
-    -- Now have a sum: term for j=0 + term for j=1.
-    -- Term for j=0 ≥ eLpNorm.
     refine le_trans ?_ le_self_add
-    -- Term for j=0 = eLpNorm.
     rw [Finset.sum_range_one]
-    -- Σ α : Fin 0 → Fin _, eLpNorm (iterWeakPartial 0 α u Ω) p _.
-    -- Fin 0 → Fin _ is unique.
     have hUniq : ∀ α : Fin 0 → Fin (Module.finrank ℝ E), α = (fun i : Fin 0 => i.elim0) :=
       fun α => by funext i; exact i.elim0
     haveI : Unique (Fin 0 → Fin (Module.finrank ℝ E)) :=
@@ -851,11 +773,9 @@ lemma eLpNorm_rellich_witness_weakGrad_le_wkpNormChart
       wkpNormChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u := by
   classical
   intro h_mem
-  -- Step 1: replace witness gradient with chosenWeakPartial' on chartTargetEuclid α (a.e.).
   have h_ae := rellich_witness_weakGrad_ae_eq_chosenWeakPartial'
     (I := I) (M := M) g hp_one hu α i
   rw [eLpNorm_congr_ae h_ae]
-  -- Step 2: bound by eLpNorm on chartTargetEuclid α (larger domain).
   have h_subset_le :
       eLpNorm
           (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
@@ -877,7 +797,6 @@ lemma eLpNorm_rellich_witness_weakGrad_le_wkpNormChart
       (MeasureTheory.Measure.restrict_mono_set _
         (chartNbhd_subset_chartTargetEuclid (I := I) (M := M) α))
   refine h_subset_le.trans ?_
-  -- Step 3: this term is part of wkpNorm 1.
   have h_in_wkpNorm :
       eLpNorm
           (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
@@ -892,17 +811,9 @@ lemma eLpNorm_rellich_witness_weakGrad_le_wkpNormChart
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
           (chartTargetEuclid (I := I) (M := M) α) := by
-    -- wkpNorm 1 = j=0 term + j=1 sum. The chosenWeakPartial' is part of j=1.
-    -- iterWeakPartial 1 (singleton i) u Ω = chosenWeakPartial' p (singleton i 0) u Ω
-    --                                     = chosenWeakPartial' p i u Ω.
     unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
     rw [Finset.sum_range_succ, Finset.sum_range_one]
-    -- After this, we have sum_j=0 (which is eLpNorm of the function) + sum_j=1.
     refine le_trans ?_ le_add_self
-    -- Now goal: eLpNorm (chosenWeakPartial' ... i ...) ≤ ∑ α' : Fin 1 → Fin d, eLpNorm (...).
-    -- This sum is over multi-indices α' : Fin 1 → Fin d, indexed by the value α' 0.
-    -- For α' the multi-index pointing at i, iterWeakPartial 1 = chosenWeakPartial'.
-    -- We use Finset.single_le_sum.
     set f : (Fin 1 → Fin (Module.finrank ℝ E)) → ℝ≥0∞ := fun α' =>
       eLpNorm
         (DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial
@@ -946,12 +857,9 @@ lemma eLpNorm_rellich_witness_weakGrad_le_wkpNormChart
             (chartTargetEuclid (I := I) (M := M) α)) = _
       rw [h_iter_eq]
     rw [← hf_α_i]
-    -- Goal: f α_i ≤ ∑ α' : Fin 1 → Fin d, f α'
     exact Finset.single_le_sum (f := f)
       (fun α' _ => zero_le _) (Finset.mem_univ α_i)
   exact h_in_wkpNorm.trans (ENNReal.le_tsum α)
-
-/-! ## Per-chart Rellich extraction lemma -/
 
 /-- For each `α : M` and current subsequence `ψ : ℕ → ℕ`, we extract a further
 subsequence `σ` such that the chart-pushed-raw of `ρ_α · u (ψ (σ k))` converges
@@ -981,26 +889,19 @@ private lemma exists_chart_rellich_subseq_aux
                 (chartNbhd (I := I) (M := M) α)))
           Filter.atTop (𝓝 0) := by
   classical
-  -- Define the chart-side sequence v_n := chartPushedRaw α (ρ_α · u (ψ n)).
   set v : ℕ → EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ := fun n =>
     chartPushedRaw (I := I) (M := M) α
       (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) x * u (ψ n) x) with hv_def
-  -- v n is in MemW01p p _ (chartNbhd α).
   have hv_mem : ∀ n, DeGiorgi.MemW01p (d := Module.finrank ℝ E) (ENNReal.ofReal p)
       (v n) (chartNbhd (I := I) (M := M) α) := by
     intro n
     exact memW01p_chartPushedRaw_pou_mul_chartNbhd
       (I := I) (M := M) g hp_one (hu_mem (ψ n)) α
-  -- eLpNorm bound: ‖v n‖ ≤ ENNReal.ofReal R.
   have hv_bdd_fun : ∀ n, eLpNorm (v n) (ENNReal.ofReal p)
       ((volume : Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict
         (chartNbhd (I := I) (M := M) α)) ≤ ENNReal.ofReal R := by
     intro n
-    -- v n = chartPushedRaw α (ρ_α · u (ψ n)).
-    -- eLpNorm (v n) p (vol.restrict chartNbhd α) ≤ eLpNorm (v n) p (vol.restrict chartTargetEuclid α)
-    --                                            = eLpNorm (chartPushed g α u(ψ n)) p (vol.restrict chartTargetEuclid α)
-    --                                            ≤ wkpNormChart g 1 p u (ψ n) ≤ R.
     have h_step1 : eLpNorm (v n) (ENNReal.ofReal p)
         ((volume : Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict
           (chartNbhd (I := I) (M := M) α)) ≤
@@ -1025,13 +926,6 @@ private lemma exists_chart_rellich_subseq_aux
     refine h_step1.trans ?_
     exact (eLpNorm_chartPushed_le_wkpNormChart (I := I) (M := M) g (u (ψ n)) α).trans
       (hu_bdd (ψ n))
-  -- Gradient bound: Σ_i eLpNorm ((Classical.choose ...).weakGrad x i) p _ ≤ ENNReal.ofReal R.
-  -- Actually we need this bound to be sums, but R might not bound the sum (only bounds wkpNormChart, which is the sum).
-  -- So we sum d copies of R? Actually no — the gradient sum part of wkpNorm is Σ_i, so it's already bounded by wkpNormChart.
-  -- Let's compute: wkpNormChart g 1 p u = Σ' β, wkpNorm 1 p (chartPushed _ β u) (chartTargetEuclid β).
-  -- Each β-term: eLpNorm (chartPushed) + Σ_i eLpNorm (chosenWeakPartial' i (chartPushed)).
-  -- So: Σ_i eLpNorm (chosenWeakPartial' i (chartPushed g α u_n)) (chartTargetEuclid α) ≤ wkpNorm 1 p ≤ wkpNormChart ≤ R.
-  -- And bound: Σ_i eLpNorm (witness_weakGrad i) (chartNbhd α) ≤ Σ_i eLpNorm (chosenWeakPartial' i ...) (chartTargetEuclid α) ≤ R.
   have hv_bdd_grad : ∀ n,
       ∑ i : Fin (Module.finrank ℝ E),
         eLpNorm (fun x => (Classical.choose (hv_mem n).2).weakGrad x i)
@@ -1039,16 +933,7 @@ private lemma exists_chart_rellich_subseq_aux
           ((volume : Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict
             (chartNbhd (I := I) (M := M) α)) ≤ ENNReal.ofReal R := by
     intro n
-    -- Each term ≤ wkpNormChart ≤ R, but the sum is over d terms.
-    -- Hmm: Σ_i eLpNorm (witness_grad i) ≤ ?
-    -- We have: each term ≤ wkpNorm 1 (chartPushed) (chartTargetEuclid α) ≤ wkpNormChart.
-    -- But we need the sum to be ≤ R. The wkpNorm 1 is the sum (over j ∈ {0, 1}, multi-index α'),
-    -- which includes both j=0 (eLpNorm) and j=1 (Σ_i eLpNorm (chosenWeakPartial' i ...)).
-    -- So Σ_i eLpNorm (chosenWeakPartial' i (chartPushed)) ≤ wkpNorm 1 (chartPushed) (chartTargetEuclid α) ≤ wkpNormChart.
-    -- Hence Σ_i eLpNorm (witness_grad i) (chartNbhd α) ≤ Σ_i eLpNorm (chosenWeakPartial' i) (chartTargetEuclid α)
-    --   ≤ wkpNormChart ≤ R.
     refine le_trans ?_ (hu_bdd (ψ n))
-    -- Step 1: replace witness gradient with chosenWeakPartial' on chartTargetEuclid α (a.e. on chartNbhd α).
     have h_term_bound : ∀ i : Fin (Module.finrank ℝ E),
         eLpNorm (fun x => (Classical.choose (hv_mem n).2).weakGrad x i)
             (ENNReal.ofReal p)
@@ -1069,10 +954,7 @@ private lemma exists_chart_rellich_subseq_aux
       exact eLpNorm_mono_measure _
         (MeasureTheory.Measure.restrict_mono_set _
           (chartNbhd_subset_chartTargetEuclid (I := I) (M := M) α))
-    -- Step 2: Sum the bounds. The sum on the right is part of wkpNorm 1 (chartPushed).
     refine le_trans (Finset.sum_le_sum (fun i _ => h_term_bound i)) ?_
-    -- Σ_i eLpNorm (chosenWeakPartial' i (chartPushed)) ≤ wkpNorm 1 (chartPushed) (chartTargetEuclid α).
-    -- This is the j=1 sum in wkpNorm.
     have h_grad_sum_le_wkpNorm :
         ∑ i : Fin (Module.finrank ℝ E),
           eLpNorm
@@ -1091,9 +973,6 @@ private lemma exists_chart_rellich_subseq_aux
       unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
       rw [Finset.sum_range_succ, Finset.sum_range_one]
       refine le_trans ?_ le_add_self
-      -- The j=1 sum: Σ α' : Fin 1 → Fin d, eLpNorm (iterWeakPartial 1 α' u Ω).
-      -- This equals Σ_i eLpNorm (chosenWeakPartial' p i u Ω) via reindexing.
-      -- Use Equiv.sum_equiv with the equiv Fin 1 → Fin d ≃ Fin d.
       let hEquiv : (Fin 1 → Fin (Module.finrank ℝ E)) ≃ Fin (Module.finrank ℝ E) := {
         toFun := fun f => f 0
         invFun := fun i _ => i
@@ -1143,11 +1022,8 @@ private lemma exists_chart_rellich_subseq_aux
             rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial_zero]
           rw [h_iter, hEquiv_app α']
       rw [← h_sum_eq]
-    -- Then: wkpNorm 1 (chartPushed) (chartTargetEuclid α) ≤ wkpNormChart g 1 p u (ψ n).
     refine h_grad_sum_le_wkpNorm.trans ?_
-    -- This is just ENNReal.le_tsum.
     exact ENNReal.le_tsum α
-  -- chartNbhd α is open and bounded.
   have h_nbhd_open := chartNbhd_isOpen (I := I) (M := M) α
   have h_nbhd_bdd := chartNbhd_isBounded (I := I) (M := M) α
   have hp_le : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p := by
@@ -1159,8 +1035,6 @@ private lemma exists_chart_rellich_subseq_aux
     hv_bdd_fun hv_bdd_grad with ⟨σ, hσ_mono, w_α, hw_α_memLp, h_tendsto⟩
   exact ⟨σ, hσ_mono, w_α, hw_α_memLp, h_tendsto⟩
 
-/-! ## Pullback of `chartCompact α.indicator w` -/
-
 /-- The pull-back via `pullbackToM α` of `chartCompact α.indicator w` has tsupport
 contained in chart α source. -/
 lemma pullbackToM_chartCompact_indicator_tsupport_subset_chart_source
@@ -1170,8 +1044,6 @@ lemma pullbackToM_chartCompact_indicator_tsupport_subset_chart_source
         ((chartCompact (I := I) (M := M) α).indicator w)) ⊆
       (chartAt H α).source := by
   classical
-  -- support of indicator ⊆ chartCompact α (closed).
-  -- tsupport ⊆ chartCompact α (closure of subset of closed = subset).
   have h_supp_indic : Function.support
       ((chartCompact (I := I) (M := M) α).indicator w) ⊆
       chartCompact (I := I) (M := M) α := by
@@ -1196,7 +1068,6 @@ lemma pullbackToM_chartCompact_indicator_hasCompactSupport
     (w : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) :
     HasCompactSupport (pullbackToM (M := M) I α
         ((chartCompact (I := I) (M := M) α).indicator w)) := by
-  -- M is compact so any function has compact support.
   exact HasCompactSupport.of_compactSpace _
 
 /-- The chart-pushed-raw of `pullbackToM α (chartCompact α.indicator w)` equals
@@ -1214,12 +1085,9 @@ lemma chartPushedRaw_pullbackToM_chartCompact_indicator
   by_cases hy : y ∈ chartTargetEuclid (I := I) (M := M) α
   · rw [Set.indicator_of_mem hy]
   · rw [Set.indicator_of_notMem hy]
-    -- y ∉ chartTargetEuclid α implies y ∉ chartCompact α (since chartCompact ⊆ chartTargetEuclid).
     rw [Set.indicator_of_notMem]
     intro hy_compact
     exact hy (chartCompact_subset_chartTargetEuclid (I := I) (M := M) α hy_compact)
-
-/-! ## Diagonal extraction over the finite POU support set -/
 
 /-- Diagonal extraction: given a finite set `S` and a per-element rellich-style
 extraction (each takes a current subsequence and produces a further subsequence
@@ -1257,30 +1125,23 @@ private lemma exists_diagonal_chart_extraction
       exact absurd hα (Finset.notMem_empty α)
   | insert a S' ha_notin ih =>
       rcases ih with ⟨φ_S', hφ_S'_mono, hP_S'⟩
-      -- Use exists_chart_rellich_subseq_aux to extract a further subseq for `a`.
       rcases exists_chart_rellich_subseq_aux (I := I) (M := M) g hp_one
         hu_mem hu_bdd a φ_S' with
         ⟨σ_a, hσ_a_mono, w_a, hw_a_memLp, h_tendsto_a⟩
       refine ⟨φ_S' ∘ σ_a, hφ_S'_mono.comp hσ_a_mono, ?_⟩
       intro α hα
       rcases Finset.mem_insert.mp hα with rfl | hα_S'
-      · -- α = a; use w_a.
-        refine ⟨w_a, hw_a_memLp, ?_⟩
+      · refine ⟨w_a, hw_a_memLp, ?_⟩
         exact h_tendsto_a
-      · -- α ∈ S'; use the limit from ih and observe the extracted-subseq is a sub-sub-seq.
-        rcases hP_S' α hα_S' with ⟨w_α, hw_α_memLp, h_tendsto_α⟩
+      · rcases hP_S' α hα_S' with ⟨w_α, hw_α_memLp, h_tendsto_α⟩
         refine ⟨w_α, hw_α_memLp, ?_⟩
-        -- The convergence under φ_S' implies convergence under φ_S' ∘ σ_a (sub-sub-sequence).
         exact h_tendsto_α.comp (Filter.tendsto_atTop_atTop_of_monotone hσ_a_mono.monotone
           (fun n => ⟨n, hσ_a_mono.id_le n⟩))
-
 
 end Chart
 end Sobolev
 end Analysis
 end DifferentialGeometry
-
-/-! ## Headline assembly: closed manifold Rellich-Kondrachov sequence -/
 
 noncomputable section
 
@@ -1297,14 +1158,10 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ### File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ### Measurability helpers for the partition of unity -/
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 
@@ -1338,8 +1195,6 @@ private lemma pou_mul_sub_measurable (α : M) {u v : M → ℝ}
   ((chartAtlasPOU_measurable (I := I) (M := M) α).mul hu).sub
     ((chartAtlasPOU_measurable (I := I) (M := M) α).mul hv)
 
-/-! ### `tsupport` containment lemmas for `ρ_α · u` -/
-
 omit [I.Boundaryless] in
 /-- The tsupport of `ρ_α · u` is contained in the tsupport of `ρ_α`. -/
 private lemma tsupport_pou_mul_subset_tsupport_pou
@@ -1372,7 +1227,6 @@ private lemma tsupport_pou_mul_sub_subset_tsupport_pou
       tsupport ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) : M → ℝ) := by
   classical
-  -- Function support of difference ⊆ support of (ρ_α · u) ∪ support of (ρ_α · v).
   have h_supp : Function.support (fun x : M =>
       ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) x * u x) -
@@ -1402,7 +1256,6 @@ private lemma tsupport_pou_mul_sub_subset_tsupport_pou
         ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) x * v x) = 0
     rw [hu_eq, hv_eq, sub_zero]
-  -- closure of subset of (closed) tsupport ρ_α ⊆ tsupport ρ_α.
   have h_tsupp_closed : IsClosed
       (tsupport ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) : M → ℝ)) := isClosed_tsupport _
@@ -1438,8 +1291,6 @@ private lemma tsupport_pou_mul_sub_subset_chart_source
   (tsupport_pou_mul_sub_subset_tsupport_pou (I := I) (M := M) α u v).trans
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate
       (I := I) (M := M) α)
-
-/-! ### Compact set `K_α := (extChartAt I α) '' (tsupport ρ_α)` for the K-uniform bridge -/
 
 /-- The compact carrier of `ρ_α` in the chart-target Euclidean coordinate
 space (un-`toEuclidean`-ised). -/
@@ -1488,8 +1339,6 @@ private lemma image_extChartAt_tsupport_pou_mul_sub_subset_kPouCompact
   rintro y ⟨x, hx, rfl⟩
   exact ⟨x, tsupport_pou_mul_sub_subset_tsupport_pou
     (I := I) (M := M) α u v hx, rfl⟩
-
-/-! ### `chartPushedRaw` of the difference is supported in `chartCompact α` -/
 
 /-- The raw chart-push of `ρ_α · u - ρ_α · v` is zero off `chartCompact α`. -/
 private lemma chartPushedRaw_pou_mul_sub_eq_zero_off_chartCompact
@@ -1554,8 +1403,6 @@ private lemma tsupport_chartPushedRaw_pou_mul_sub_subset_chartCompact
   rw [tsupport]
   exact h_chartCompact_closed.closure_subset_iff.mpr h_supp_sub
 
-/-! ### `MemLp` of `ρ_α · u` from a chart-Sobolev `u` -/
-
 /-- A measurable, chart-Sobolev `u : M → ℝ` has `ρ_α · u` in `MemLp` on
 `μ_g`. -/
 private lemma memLp_pou_mul_riemannianMeasure
@@ -1575,7 +1422,6 @@ private lemma memLp_pou_mul_riemannianMeasure
     simpa using (ENNReal.ofReal_le_ofReal hp_one.le :
       ENNReal.ofReal (1 : ℝ) ≤ ENNReal.ofReal p)
   have hp_top : ENNReal.ofReal p ≠ ⊤ := ENNReal.ofReal_ne_top
-  -- chartPushedRaw α (ρ_α · u) is in MemLp p (vol.restrict chartTargetEuclid α).
   have h_raw_w1p :
       DeGiorgi.MemW1p (d := Module.finrank ℝ E) (ENNReal.ofReal p)
         (chartPushedRaw (I := I) (M := M) α
@@ -1595,8 +1441,7 @@ private lemma memLp_pou_mul_riemannianMeasure
   by_cases hPouNE : (Function.support
       ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) : M → ℝ)).Nonempty
-  · -- K := kPouCompact α nonempty.
-    have hK_compact := kPouCompact_isCompact (I := I) (M := M) α
+  · have hK_compact := kPouCompact_isCompact (I := I) (M := M) α
     have hK_sub := kPouCompact_subset_target (I := I) (M := M) α
     have hK_ne := kPouCompact_nonempty_of_pouNonempty (I := I) (M := M) hPouNE
     obtain ⟨C_K, _hC_K_pos, hC_K_bnd⟩ :=
@@ -1610,8 +1455,7 @@ private lemma memLp_pou_mul_riemannianMeasure
     refine lt_of_le_of_lt h_bnd ?_
     apply ENNReal.mul_lt_top ENNReal.ofReal_lt_top
     exact h_raw_memLp.2
-  · -- Empty support: ρ_α = 0, so ρ_α · u = 0.
-    have hρ_zero : ∀ x : M,
+  · have hρ_zero : ∀ x : M,
         ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
             : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 0 := by
       intro x
@@ -1630,8 +1474,6 @@ private lemma memLp_pou_mul_riemannianMeasure
     rw [h_zero_fn]
     exact MemLp.zero
 
-/-! ### `MemLp` of `u` itself from chart-Sobolev membership -/
-
 /-- A measurable, chart-Sobolev `u : M → ℝ` is `MemLp` on `μ_g`. -/
 private lemma memLp_riemannianMeasure_of_memWkpChart
     [NeZero (Module.finrank ℝ E)]
@@ -1643,7 +1485,6 @@ private lemma memLp_riemannianMeasure_of_memWkpChart
         (DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)) := by
   classical
-  -- u = Σ_{α ∈ S} ρ_α u where S is the POU finset.
   set S : Finset M :=
     DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset (I := I) (M := M)
     with hS_def

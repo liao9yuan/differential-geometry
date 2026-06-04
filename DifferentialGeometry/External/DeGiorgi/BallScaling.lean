@@ -1,4 +1,5 @@
 -- Modified 2026-04-28: updated internal import paths for project namespace
+-- Modified 2026-05-16: style-warning cleanup
 import DifferentialGeometry.External.DeGiorgi.UnitBallApproximation
 import DifferentialGeometry.External.DeGiorgi.WeakFormulation
 
@@ -135,10 +136,9 @@ noncomputable def rescaleCoeffToUnitBall
               volume.restrict (Metric.ball x₀ R)), P x) ↔
             ∀ᵐ x ∂ volume.restrict (Metric.ball x₀ R), P x :=
         by
-          simp [ae_iff]
-          intro hbad
-          exfalso
-          exact (not_le_of_gt (pow_pos (abs_pos.mpr hR.ne') d)) hbad
+          have hc_ne : ENNReal.ofReal (|R ^ Module.finrank ℝ E|⁻¹) ≠ 0 :=
+            (ENNReal.ofReal_pos.mpr hscale_pos).ne'
+          exact Measure.ae_ennreal_smul_measure_iff hc_ne
       exact hsmul.2 A.coercive
     have hpull :
         ∀ᵐ z ∂ volume.restrict (Metric.ball (0 : E) 1), P (T z) :=
@@ -165,10 +165,9 @@ noncomputable def rescaleCoeffToUnitBall
               volume.restrict (Metric.ball x₀ R)), P x) ↔
             ∀ᵐ x ∂ volume.restrict (Metric.ball x₀ R), P x :=
         by
-          simp [ae_iff]
-          intro hbad
-          exfalso
-          exact (not_le_of_gt (pow_pos (abs_pos.mpr hR.ne') d)) hbad
+          have hc_ne : ENNReal.ofReal (|R ^ Module.finrank ℝ E|⁻¹) ≠ 0 :=
+            (ENNReal.ofReal_pos.mpr hscale_pos).ne'
+          exact Measure.ae_ennreal_smul_measure_iff hc_ne
       exact hsmul.2 A.coercive_inv
     have hpull :
         ∀ᵐ z ∂ volume.restrict (Metric.ball (0 : E) 1), P (T z) :=
@@ -506,8 +505,7 @@ private theorem MemW01p.transportFromUnitBall
     have hx' := hφ_sub n ((tsupport_comp_subset_preimage _ hcont) hx)
     have : x ∈ (fun x : E => R⁻¹ • (x - x₀)) ⁻¹' Metric.ball (0 : E) 1 := hx'
     simpa [inverse_affine_preimage_unitBall (d := d) (x₀ := x₀) hR] using this
-  ·
-    let C : ENNReal := ENNReal.ofReal (R ^ (d / (2 : ENNReal).toReal))
+  · let C : ENNReal := ENNReal.ofReal (R ^ (d / (2 : ENNReal).toReal))
     have hEq :
         (fun n =>
           eLpNorm (fun x => ψ n x -
@@ -611,10 +609,11 @@ private lemma bilinForm_rescaleToUnitBall
       simp [matMulE_apply, Matrix.mulVec_smul, Pi.smul_apply]
     have hgrad :
         hφ.weakGrad z = R • hφB.weakGrad (x₀ + R • z) := by
-      ext i
-      simp [hφB, MemW1pWitness.transportFromUnitBall, smul_eq_mul, sub_eq_add_neg,
-        smul_smul, inv_mul_cancel₀ hR.ne']
-      rw [mul_inv_cancel₀ hR.ne', one_mul]
+      have hcancel : R⁻¹ • (x₀ + R • z - x₀) = z := by
+        rw [add_sub_cancel_left, inv_smul_smul₀ hR.ne']
+      have hB : hφB.weakGrad (x₀ + R • z) =
+          R⁻¹ • hφ.weakGrad (R⁻¹ • (x₀ + R • z - x₀)) := rfl
+      rw [hB, hcancel, smul_smul, mul_inv_cancel₀ hR.ne', one_smul]
     calc
       bilinFormIntegrandOfCoeff
           (rescaleCoeffToUnitBall (d := d) (x₀ := x₀) (R := R) hR A) huR hφ z

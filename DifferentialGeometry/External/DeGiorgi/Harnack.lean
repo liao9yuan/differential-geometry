@@ -1,4 +1,5 @@
 -- Modified 2026-04-28: updated internal import paths for project namespace
+-- Modified 2026-05-16: style-warning cleanup
 import DifferentialGeometry.External.DeGiorgi.DeGiorgiIteration
 import DifferentialGeometry.External.DeGiorgi.Localization
 import DifferentialGeometry.External.DeGiorgi.WeakHarnack
@@ -31,8 +32,6 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => AmbientSpace d
 local notation "μ1" => volume.restrict (Metric.ball (0 : E) 1)
 local notation "μhalf" => volume.restrict (Metric.ball (0 : E) (1 / 2 : ℝ))
-
-set_option maxHeartbeats 5000000
 
 set_option maxHeartbeats 5000000 in
 omit [NeZero d] in

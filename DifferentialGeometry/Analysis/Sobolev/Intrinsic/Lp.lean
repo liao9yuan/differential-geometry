@@ -1,14 +1,14 @@
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.Defs
-import DifferentialGeometry.Geometry.Gradient
-import DifferentialGeometry.Integral.DivergenceTheorem.IntegrationByParts
-import DifferentialGeometry.Integral.DivergenceTheorem.LocalFormula
-import DifferentialGeometry.Integral.DivergenceTheorem.POUReduction
-import DifferentialGeometry.Integral.DivergenceTheorem.TangentAction
-import DifferentialGeometry.Integral.L2.CompactSupport
-import DifferentialGeometry.Integral.Measure.Properties
-import DifferentialGeometry.Integral.Measure.Glue
-import DifferentialGeometry.Integral.Measure.Invariance
-import DifferentialGeometry.Tensor.RSTensor.TangentRiemannian
+import DifferentialGeometry.Geometry.Operator.Gradient
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.IntegrationByParts
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.POUReduction
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction
+import DifferentialGeometry.Analysis.Integration.L2.CompactSupport
+import DifferentialGeometry.Analysis.Integration.Measure.Properties
+import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
+import DifferentialGeometry.Analysis.Integration.Measure.Invariance
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentRiemannian
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
 import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 import Mathlib.MeasureTheory.Function.LpSeminorm.SMul
@@ -101,18 +101,10 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Intrinsic
 
-/-! ## File-local Borel-space instances
-
-We install the canonical Borel σ-algebra on `E` and on `M`, matching the
-existing `Intrinsic.lean` and `Measure/*` files. Declared `private local` to
-avoid leaking into the public typeclass database. -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Pointwise bilinearity and Cauchy–Schwarz for `g.inner` -/
 
 private lemma g_inner_add_left
     (g : SmoothRiemannianMetric I M) (x : M) (v w y : TangentSpace I x) :
@@ -287,8 +279,6 @@ private lemma g_norm_neg
   rw [g_inner_neg_left g x v (-v), g_inner_neg_right g x v v]
   simp
 
-/-! ## Continuity infrastructure for the metric pairing on smooth sections -/
-
 /-- Continuity of `b ↦ g.inner b (G b) (X b)` for two smooth tangent
 sections `G, X`. Re-exports the project-level theorem. -/
 private lemma continuous_g_inner_smooth_sections
@@ -363,8 +353,6 @@ private lemma integrable_g_inner_smooth_sections
   continuous_integrable_of_compactSpace g
     (continuous_g_inner_smooth_sections g G X)
 
-/-! ## The weak Riemannian gradient predicate (`L^p` form) -/
-
 /-- A function `G : M → E` (interpreted as a tangent section via the canonical
 `TangentSpace I x = E` definitional equality) is a **weak Riemannian gradient**
 of `u : M → ℝ` if:
@@ -413,8 +401,6 @@ lemma pairing_aestronglyMeasurable
 
 end HasWeakRiemannianGradLp
 
-/-! ## Definition of `MemW1pIntrinsicLp` -/
-
 /-- `MemW1pIntrinsicLp g p u` means:
 
 * `u : M → ℝ` is in `L^p` against the Riemannian volume measure;
@@ -436,9 +422,6 @@ lemma MemW1pIntrinsicLp.memLp_self
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} {u : M → ℝ}
     (h : MemW1pIntrinsicLp (I := I) (M := M) g p u) :
     MemLp u p (riemannianVolumeMeasure I M g) := h.1
-
-/-! ## Bridge from smooth-section weak gradients to measurable `L^p`
-weak gradients -/
 
 /-- A smooth-section weak Riemannian gradient yields an `L^p` weak Riemannian
 gradient. -/
@@ -475,8 +458,6 @@ theorem MemW1pIntrinsicLp_of_contMDiff
     MemW1pIntrinsicLp (I := I) (M := M) g p u :=
   MemW1pIntrinsicLp_of_MemW1pIntrinsic (I := I) (M := M)
     (Intrinsic.MemW1pIntrinsic_of_contMDiff (I := I) (M := M) g p hu)
-
-/-! ## Algebraic closure: zero -/
 
 /-- The zero `M → E` map is a weak `L^p` Riemannian gradient of the zero
 function. -/
@@ -527,13 +508,6 @@ theorem MemW1pIntrinsicLp.zero
   rw [hcongr]
   exact MemLp.zero
 
-/-! ## Algebraic closure: addition (at the IBP-identity level)
-
-Adding two `L^p` weak Riemannian gradients yields an `L^p` weak Riemannian
-gradient of the pointwise sum. The proof carries over linearity through the
-integral pairing identity. Integrability of the relevant integrals follows
-from Cauchy–Schwarz against the smooth compactly-supported test field. -/
-
 /-- Sum of two `L^p` weak Riemannian gradients. -/
 theorem HasWeakRiemannianGradLp.add
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
@@ -554,7 +528,6 @@ theorem HasWeakRiemannianGradLp.add
       (I := I) (M := M) g
   refine ⟨?_, ?_⟩
   · intro Y
-    -- `g.inner x ((G+G') x) (Y x) = g.inner x (G x) (Y x) + g.inner x (G' x) (Y x)`.
     have hcongr : (fun x : M =>
         g.inner x ((fun y : M => G y + G' y) x) (Y x)) =
         (fun x : M => g.inner x (G x) (Y x) +
@@ -564,14 +537,12 @@ theorem HasWeakRiemannianGradLp.add
     rw [hcongr]
     exact (h₁.1 Y).add (h₂.1 Y)
   · intro X hX
-    -- Reduce to the pairing identity for each gradient summand.
     have hpt : ∀ x : M,
         g.inner x ((fun y : M => G y + G' y) x) (X x) =
           g.inner x (G x) (X x) + g.inner x (G' x) (X x) := by
       intro x
       exact g_inner_add_left g x (G x) (G' x) (X x)
     rw [integral_congr_ae (Filter.Eventually.of_forall hpt)]
-    -- Integrability of the two summands, via Cauchy–Schwarz with smooth bounded X.
     have hX_norm_cont : Continuous (fun x : M =>
         Real.sqrt (g.inner x (X x) (X x))) :=
       continuous_g_norm_smooth_section g X
@@ -624,7 +595,6 @@ theorem HasWeakRiemannianGradLp.add
         exact h_bound_aux G' x
     rw [integral_add h_int_G h_int_G']
     rw [h₁.pairing_eq X hX, h₂.pairing_eq X hX]
-    -- RHS: `(-A) + (-B) = -(A + B)`.
     have h_div_cont : Continuous (divergence_g (I := I) g X) :=
       (divergence_g_contMDiff (I := I) g X).continuous
     have h_int_uX : Integrable (fun x : M => u x * divergence_g (I := I) g X x)
@@ -693,8 +663,7 @@ theorem MemW1pIntrinsicLp.add_of_aestronglyMeasurable_norm
   refine ⟨hu_p.add hv_p, (fun x : M => G x + G' x), ?_, ?_⟩
   · exact HasWeakRiemannianGradLp.add (I := I) (M := M) hp hG_weak hG'_weak
       hu_p hv_p hG_p hG'_p
-  · -- Use the bound `√(g(G+G', G+G')) ≤ √(g(G,G)) + √(g(G',G'))` AE.
-    refine MemLp.of_le (g := fun x : M =>
+  · refine MemLp.of_le (g := fun x : M =>
         Real.sqrt (g.inner x (G x) (G x)) +
           Real.sqrt (g.inner x (G' x) (G' x)))
       (hG_p.add hG'_p) ?_ ?_
@@ -711,8 +680,6 @@ theorem MemW1pIntrinsicLp.add_of_aestronglyMeasurable_norm
         abs_of_nonneg hLHS_nn, abs_of_nonneg hRHS_nn]
       exact htri
 
-/-! ## Algebraic closure: scalar multiplication -/
-
 /-- A constant scalar multiple of a weak Riemannian gradient. -/
 theorem HasWeakRiemannianGradLp.const_smul
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
@@ -727,7 +694,6 @@ theorem HasWeakRiemannianGradLp.const_smul
       (I := I) (M := M) g
   refine ⟨?_, ?_⟩
   · intro Y
-    -- `g.inner x ((c • G x) (Y x) = c * g.inner x (G x) (Y x)`
     have hcongr : (fun x : M =>
         g.inner x ((fun y : M => c • G y) x) (Y x)) =
         (fun x : M => c * g.inner x (G x) (Y x)) := by
@@ -774,18 +740,14 @@ theorem MemW1pIntrinsicLp.const_smul
   obtain ⟨hu_p, G, hG_weak, hG_p⟩ := hu
   refine ⟨hu_p.const_mul c, (fun x : M => c • G x), ?_, ?_⟩
   · exact HasWeakRiemannianGradLp.const_smul (I := I) (M := M) hp c hG_weak hu_p
-  · -- `√(g(c•G, c•G)) = |c| · √(g(G,G))`. Use scalar homogeneity.
-    have hcongr : (fun x : M => Real.sqrt
+  · have hcongr : (fun x : M => Real.sqrt
         (g.inner x ((fun y : M => c • G y) x)
           ((fun y : M => c • G y) x))) =
         (fun x : M => |c| * Real.sqrt (g.inner x (G x) (G x))) := by
       funext x
       exact g_norm_const_smul g x c (G x)
     rw [hcongr]
-    -- `|c| • (something MemLp p)` is in MemLp p.
     exact hG_p.const_mul (|c|)
-
-/-! ## Algebraic closure: negation -/
 
 /-- The negation of a weak Riemannian gradient is a weak gradient of the
 negated function. -/
@@ -797,7 +759,6 @@ theorem HasWeakRiemannianGradLp.neg
     (hu : MemLp u p (riemannianVolumeMeasure I M g)) :
     HasWeakRiemannianGradLp (I := I) (M := M) g (fun x => -u x)
       (fun x : M => -G x) := by
-  -- `-G = (-1) • G` and `-u = (-1) * u`. Apply `const_smul`.
   have h1 : HasWeakRiemannianGradLp (I := I) (M := M) g (fun x => (-1 : ℝ) * u x)
       (fun x : M => (-1 : ℝ) • G x) :=
     HasWeakRiemannianGradLp.const_smul (I := I) (M := M) hp (-1) h hu
@@ -816,14 +777,11 @@ theorem MemW1pIntrinsicLp.neg
     {u : M → ℝ}
     (hu : MemW1pIntrinsicLp (I := I) (M := M) g p u) :
     MemW1pIntrinsicLp (I := I) (M := M) g p (fun x => -u x) := by
-  -- `-u = (-1) * u`. Apply `MemW1pIntrinsicLp.const_smul`.
   have h := MemW1pIntrinsicLp.const_smul (I := I) (M := M) hp (-1) hu
   have h_eq : (fun x : M => (-1 : ℝ) * u x) = (fun x => -u x) := by
     funext x; ring
   rw [h_eq] at h
   exact h
-
-/-! ## Algebraic closure: subtraction -/
 
 /-- Closure of `MemW1pIntrinsicLp` under subtraction, given a measurability
 hypothesis on the difference's `g`-norm. -/
@@ -844,15 +802,12 @@ theorem MemW1pIntrinsicLp.sub_of_aestronglyMeasurable_norm
               ((fun y : M => G y + -G' y) x)))
           (riemannianVolumeMeasure I M g)) :
     MemW1pIntrinsicLp (I := I) (M := M) g p (fun x => u x - v x) := by
-  -- `u - v = u + (-v)`.
   obtain ⟨hu_p, G, hG_weak, hG_p⟩ := hu
   obtain ⟨hv_p, G', hG'_weak, hG'_p⟩ := hv
-  -- `(-v)` has weak gradient `-G'`.
   have h_neg_v : MemW1pIntrinsicLp (I := I) (M := M) g p (fun x => -v x) := by
     refine ⟨hv_p.neg, (fun x : M => -G' x), ?_, ?_⟩
     · exact HasWeakRiemannianGradLp.neg (I := I) (M := M) hp hG'_weak hv_p
-    · -- `√(g(-G', -G')) = √(g(G', G'))`.
-      have hcongr : (fun x : M =>
+    · have hcongr : (fun x : M =>
           Real.sqrt (g.inner x ((fun y : M => -G' y) x)
             ((fun y : M => -G' y) x))) =
           (fun x : M => Real.sqrt (g.inner x (G' x) (G' x))) := by
@@ -860,22 +815,17 @@ theorem MemW1pIntrinsicLp.sub_of_aestronglyMeasurable_norm
         exact g_norm_neg g x (G' x)
       rw [hcongr]
       exact hG'_p
-  -- Now apply the sum closure with the witnesses G, -G'.
   have h_neg_v_unfold : ∃ G'' : M → E,
       HasWeakRiemannianGradLp (I := I) (M := M) g (fun x => -v x) G'' ∧
       MemLp (fun x : M => Real.sqrt (g.inner x (G'' x) (G'' x))) p
         (riemannianVolumeMeasure I M g) := h_neg_v.2
   obtain ⟨G_neg, hG_neg_weak, hG_neg_p⟩ := h_neg_v_unfold
-  -- We want to use `G_neg = -G'` directly. The constructed witness is `-G'`,
-  -- so we adapt the hypothesis.
   refine ⟨?_, (fun x : M => G x + -G' x), ?_, ?_⟩
-  · -- `MemLp (u - v)`.
-    have : (fun x : M => u x - v x) = (fun x => u x + -v x) := by
+  · have : (fun x : M => u x - v x) = (fun x => u x + -v x) := by
       funext x; ring
     rw [this]
     exact hu_p.add hv_p.neg
-  · -- `HasWeakRiemannianGradLp` for `u - v` with witness `G + (-G')`.
-    have h_neg_G' : HasWeakRiemannianGradLp (I := I) (M := M) g (fun x => -v x)
+  · have h_neg_G' : HasWeakRiemannianGradLp (I := I) (M := M) g (fun x => -v x)
         (fun x : M => -G' x) :=
       HasWeakRiemannianGradLp.neg (I := I) (M := M) hp hG'_weak hv_p
     have h_add : HasWeakRiemannianGradLp (I := I) (M := M) g
@@ -898,8 +848,7 @@ theorem MemW1pIntrinsicLp.sub_of_aestronglyMeasurable_norm
       funext x; ring
     rw [h_eq]
     exact h_add
-  · -- L^p control on `√(g(G + (-G'), G + (-G')))`.
-    have h_neg_G' : HasWeakRiemannianGradLp (I := I) (M := M) g (fun x => -v x)
+  · have h_neg_G' : HasWeakRiemannianGradLp (I := I) (M := M) g (fun x => -v x)
         (fun x : M => -G' x) :=
       HasWeakRiemannianGradLp.neg (I := I) (M := M) hp hG'_weak hv_p
     have h_aem := hSub_aem G G' hG_weak h_neg_G'
@@ -909,7 +858,6 @@ theorem MemW1pIntrinsicLp.sub_of_aestronglyMeasurable_norm
       (hG_p.add hG'_p) ?_ ?_
     · exact h_aem
     · refine Filter.Eventually.of_forall (fun x => ?_)
-      -- `√(g(G + -G', G + -G')) ≤ √(g(G,G)) + √(g(-G',-G')) = √(g(G,G)) + √(g(G',G'))`.
       have htri := g_norm_triangle g x (G x) (-G' x)
       have h_neg_norm : Real.sqrt (g.inner x (-G' x) (-G' x)) =
           Real.sqrt (g.inner x (G' x) (G' x)) := g_norm_neg g x (G' x)
@@ -923,8 +871,6 @@ theorem MemW1pIntrinsicLp.sub_of_aestronglyMeasurable_norm
         Real.norm_eq_abs (Real.sqrt _ + Real.sqrt _),
         abs_of_nonneg hLHS_nn, abs_of_nonneg hRHS_nn]
       exact htri
-
-/-! ## Norm `w1pNormIntrinsicLp` -/
 
 /-- The `W^{1,p}_{int,Lp}` norm of `u`. -/
 def w1pNormIntrinsicLp
@@ -960,8 +906,7 @@ theorem w1pNormIntrinsicLp_zero
       eLpNorm_zero]
   rw [zero_add]
   apply le_antisymm
-  · -- Take G = 0 as a witness. Show the infimum is at most 0.
-    have hzero_grad : HasWeakRiemannianGradLp (I := I) (M := M) g
+  · have hzero_grad : HasWeakRiemannianGradLp (I := I) (M := M) g
         (fun _ : M => (0 : ℝ)) (fun _ : M => (0 : E)) :=
       HasWeakRiemannianGradLp.zero (I := I) (M := M) g
     have h_zero_norm :
@@ -980,12 +925,9 @@ theorem w1pNormIntrinsicLp_zero
       rw [hcongr]
       exact eLpNorm_zero
     refine le_trans ?_ (le_of_eq h_zero_norm)
-    -- The infimum is bounded above by any specific witness.
     unfold gradInfimumLp
     exact iInf_le_of_le (fun _ : M => (0 : E)) (iInf_le _ hzero_grad)
   · exact zero_le _
-
-/-! ## Two weak `L^p` Riemannian gradients pair identically -/
 
 /-- Two weak `L^p` Riemannian gradients of the same function pair identically
 against every smooth compactly-supported tangent test field. -/
@@ -1020,8 +962,6 @@ theorem HasWeakRiemannianGradLp.pairing_inner_diff_eq_zero
   haveI : IsFiniteMeasure (riemannianVolumeMeasure I M g) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
       (I := I) (M := M) g
-  -- Integrability of each summand: bound by Cauchy-Schwarz with the smooth
-  -- test field X (continuous, hence bounded on compact M).
   have hX_norm_cont : Continuous (fun x : M =>
       Real.sqrt (g.inner x (X x) (X x))) :=
     continuous_g_norm_smooth_section g X
@@ -1075,16 +1015,6 @@ theorem HasWeakRiemannianGradLp.pairing_inner_diff_eq_zero
   rw [integral_sub h_int_G h_int_G']
   rw [HasWeakRiemannianGradLp.pairing_inner_eq h₁ h₂ X hX, sub_self]
 
-/-! ## Scalar uniqueness via smooth tangent section testing
-
-For two weak `L^p` Riemannian gradients `G, G'` of the same function, and any
-smooth tangent section `σ`, the scalar pairing `g.inner x (G x - G' x) (σ x)`
-is `=ᵐ[μ_g] 0`. This is the natural "test against smooth sections gives
-zero" form of the uniqueness statement, derived from the integral identity
-`∫ φ · (g.inner x (G x) (σ x) - g.inner x (G' x) (σ x)) dμ_g = 0` for all
-smooth compactly-supported scalar `φ`, via Mathlib's
-`ae_eq_zero_of_integral_contMDiff_smul_eq_zero`. -/
-
 /-- The scalar function `x ↦ g.inner x (G x) (σ x) - g.inner x (G' x) (σ x)`
 vanishes almost everywhere when `G, G'` are two weak `L^p` Riemannian
 gradients of the same function and `σ` is any smooth tangent section. -/
@@ -1104,21 +1034,10 @@ theorem HasWeakRiemannianGradLp.pairing_diff_smooth_aeEq_zero
   haveI : IsFiniteMeasure (riemannianVolumeMeasure I M g) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
       (I := I) (M := M) g
-  -- Define `f(x) = g.inner x (G x) (σ x) - g.inner x (G' x) (σ x)`. We want
-  -- `f =ᵐ[μ_g] 0`.
-  -- Strategy: for every smooth compactly supported scalar `φ : M → ℝ`,
-  -- consider the smooth tangent test field `φ • σ` (which is smooth; its
-  -- compact support is automatic on closed M). Then:
-  --   `∫ g.inner x (G - G') (φ • σ) dμ = 0`  (by linearity of the
-  --     integral pairing identity h₁ - h₂).
-  -- Equivalently: `∫ φ · f dμ = 0` for all smooth compactly supported φ.
-  -- By Mathlib's `ae_eq_zero_of_integral_contMDiff_smul_eq_zero` (applied to
-  -- the scalar function `f : M → ℝ`), this gives `f =ᵐ[μ_g] 0`.
   have hf_aem : AEStronglyMeasurable
       (fun x : M => g.inner x (G x) (σ x) - g.inner x (G' x) (σ x))
       (riemannianVolumeMeasure I M g) :=
     (h₁.1 σ).sub (h₂.1 σ)
-  -- Integrability of f via Cauchy–Schwarz with smooth bounded σ.
   have hσ_norm_cont : Continuous (fun x : M =>
       Real.sqrt (g.inner x (σ x) (σ x))) :=
     continuous_g_norm_smooth_section g σ
@@ -1161,17 +1080,12 @@ theorem HasWeakRiemannianGradLp.pairing_diff_smooth_aeEq_zero
       (fun x : M => g.inner x (G x) (σ x) - g.inner x (G' x) (σ x))
       (riemannianVolumeMeasure I M g) :=
     h_int_G.sub h_int_G'
-  -- Apply `ae_eq_zero_of_integral_contMDiff_smul_eq_zero`.
   refine ae_eq_zero_of_integral_contMDiff_smul_eq_zero (I := I)
     hf_int.locallyIntegrable ?_
   intro φ hφ_smooth hφ_supp
-  -- `φ • σ` is a smooth tangent section with compact support inherited from φ.
   set φσ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     smoothSmul (I := I) φ hφ_smooth σ with hφσ_def
-  -- Compact support of `φσ` (as a function `M → E`).
   have hφσ_supp : HasCompactSupport (fun x : M => (φσ x : E)) := by
-    -- `φσ x = φ x • σ x`. The support of this as a function `M → E` is
-    -- contained in the support of `φ` which is compact.
     have hsupp_sub : Function.support (fun x : M => (φσ x : E)) ⊆
         Function.support φ := by
       intro x hx
@@ -1183,8 +1097,6 @@ theorem HasWeakRiemannianGradLp.pairing_diff_smooth_aeEq_zero
     refine HasCompactSupport.of_support_subset_isCompact (K := tsupport φ)
       hφ_supp ?_
     exact hsupp_sub.trans (subset_tsupport _)
-  -- `φσ` has compact support.
-  -- Apply IBP for both `h₁` and `h₂` with `X = φσ`.
   have h_pair_G : ∫ x, g.inner x (G x) (φσ x)
         ∂(riemannianVolumeMeasure I M g) =
       -∫ x, u x * divergence_g (I := I) g φσ x
@@ -1197,8 +1109,6 @@ theorem HasWeakRiemannianGradLp.pairing_diff_smooth_aeEq_zero
         ∂(riemannianVolumeMeasure I M g) = 0 := by
     have h_int_G_φσ : Integrable (fun x : M => g.inner x (G x) (φσ x))
         (riemannianVolumeMeasure I M g) := by
-      -- Bound: `|g.inner x (G x) (φσ x)| ≤ C_φσ * √(g(G,G))` for some
-      -- bound on `‖φσ‖_g` (continuous on compact M).
       have hφσ_norm_cont : Continuous (fun x : M =>
           Real.sqrt (g.inner x (φσ x) (φσ x))) :=
         continuous_g_norm_smooth_section g φσ
@@ -1248,11 +1158,6 @@ theorem HasWeakRiemannianGradLp.pairing_diff_smooth_aeEq_zero
           _ = C_φσ * Real.sqrt (g.inner x (G' x) (G' x)) := by ring
     rw [integral_sub h_int_G_φσ h_int_G'_φσ]
     rw [h_pair_G, h_pair_G', sub_self]
-  -- Now relate `∫ g.inner x (G - G') (φσ x)` to `∫ φ x • f x`.
-  -- We have `g.inner x (G x) (φσ x) = g.inner x (G x) (φ x • σ x) =
-  --   φ x * g.inner x (G x) (σ x)` and similarly for G'.
-  -- Hence `g.inner x (G x) (φσ x) - g.inner x (G' x) (φσ x) =
-  --   φ x * (g.inner x (G x) (σ x) - g.inner x (G' x) (σ x)) = φ x • f x`.
   have hpt_eq : ∀ x : M,
       g.inner x (G x) (φσ x) - g.inner x (G' x) (φσ x) =
         φ x • (g.inner x (G x) (σ x) - g.inner x (G' x) (σ x)) := by

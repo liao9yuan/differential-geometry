@@ -1,10 +1,10 @@
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.Rellich
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.Rellich
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
-import DifferentialGeometry.Analysis.Sobolev.Chart.Atlas
-import DifferentialGeometry.Integral.Measure.Glue
-import DifferentialGeometry.Integral.Measure.Family
-import DifferentialGeometry.Integral.Measure.Properties
-import DifferentialGeometry.Integral.Measure.Invariance
+import DifferentialGeometry.Analysis.Sobolev.Chart.AtlasNorm.Atlas
+import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
+import DifferentialGeometry.Analysis.Integration.Measure.Family
+import DifferentialGeometry.Analysis.Integration.Measure.Properties
+import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace
 import DifferentialGeometry.External.DeGiorgi.LpFunctionToolkit
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace.Approximation
@@ -48,18 +48,10 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Lemma: POU sum equals 1 on the global support finset
-
-On compact `M`, the chart-atlas POU `(ρ_α)` has only finitely many indices
-`α` with non-empty support, gathered in the `Finset` `chartAtlasPOU_finset`.
-Summing the POU values over this finset yields `1` at every point `x ∈ M`. -/
 
 lemma chartAtlasPOU_finset_sum_eq_one
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -67,29 +59,15 @@ lemma chartAtlasPOU_finset_sum_eq_one
     ∑ α ∈ DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset (I := I) (M := M),
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : M → ℝ) x = 1 := by
   classical
-  -- The finsupport at `x` is a subset of the global support set.
   have hsubset :
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M).finsupport x ⊆
         DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset (I := I) (M := M) := by
     intro α hα
     rw [DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset_mem]
-    -- α ∈ finsupport x means ρ_α x ≠ 0, so x ∈ Function.support ρ_α, so the support is non-empty.
     rw [SmoothPartitionOfUnity.mem_finsupport] at hα
     exact ⟨x, hα⟩
-  -- Apply ρ.sum_finsupport' which gives sum over finsupport = 1.
   exact (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M).sum_finsupport' x
     (Set.mem_univ x) hsubset
-
-/-! ## Lemma: integral of a chart-α-supported function via μ_g equals via chartLocalMeasure g α
-
-This is the key reduction: for any nonneg measurable function `F : M → ℝ≥0∞`
-supported in the chart-α source (i.e., zero outside `(chartAt H α).source`),
-its `μ_g`-integral equals its `chartLocalMeasure g α`-integral.
-
-Mathematically, this works because `μ_g = Σ_β ρ_β · chartLocalMeasure g β`,
-and on the support of `F` (which is in `chart α source`), each
-`chartLocalMeasure g β` agrees with `chartLocalMeasure g α`
-(`chartLocalMeasure_restrict_overlap_eq`), and the POU values sum to one. -/
 
 theorem riemannianMeasure_lintegral_eq_chartLocalMeasure_of_supportIn
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -101,12 +79,8 @@ theorem riemannianMeasure_lintegral_eq_chartLocalMeasure_of_supportIn
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)) =
       ∫⁻ x, F x ∂(DifferentialGeometry.Integral.Measure.chartLocalMeasure (I := I) g α) := by
   classical
-  -- Step 1: expand μ_g via riemannianMeasure_lintegral_eq.
   rw [DifferentialGeometry.Integral.Measure.riemannianMeasure_lintegral_eq
     (I := I) g (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) hF]
-  -- We have: ∫⁻ F dμ_g = Σ' β, ∫⁻ ρ_β · F d(chartLocalMeasure g β)
-  -- We want: this = ∫⁻ F d(chartLocalMeasure g α).
-  -- Step 2: For β not in chartAtlasPOU_finset, ρ_β = 0 → integrand is 0.
   set S : Finset M :=
     DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset (I := I) (M := M) with hS_def
   have htsum_eq_finsum :
@@ -120,7 +94,6 @@ theorem riemannianMeasure_lintegral_eq_chartLocalMeasure_of_supportIn
             ∂(DifferentialGeometry.Integral.Measure.chartLocalMeasure (I := I) g β) := by
     rw [tsum_eq_sum]
     intro β hβ
-    -- β ∉ S means ρ_β = 0 everywhere, so integrand is 0.
     have hρ_zero : ∀ x : M,
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M β : M → ℝ) x = 0 := fun x =>
       DifferentialGeometry.Integral.Measure.chartAtlasPOU_weight_zero_of_notMem
@@ -138,8 +111,6 @@ theorem riemannianMeasure_lintegral_eq_chartLocalMeasure_of_supportIn
     rw [hintegrand]
     simp
   rw [htsum_eq_finsum]
-  -- Step 3: For each β ∈ S, transfer the integral on `chartLocalMeasure g β` to
-  -- `chartLocalMeasure g α` using the support-in-chart-α-source hypothesis on F.
   have h_each_eq : ∀ β ∈ S,
       ∫⁻ x, ENNReal.ofReal
             ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M β : M → ℝ) x) * F x
@@ -153,15 +124,12 @@ theorem riemannianMeasure_lintegral_eq_chartLocalMeasure_of_supportIn
     · exact ((DifferentialGeometry.Integral.Measure.measurable_ofReal_pou_weight
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) β)).mul hF
     · intro x hx_not_overlap
-      -- x ∉ (chart β source) ∩ (chart α source)
       simp only [Set.mem_inter_iff, not_and] at hx_not_overlap
       by_cases hxβ : x ∈ (chartAt H β).source
-      · -- x ∈ chart β source but x ∉ chart α source
-        have hxα : x ∉ (chartAt H α).source := hx_not_overlap hxβ
+      · have hxα : x ∉ (chartAt H α).source := hx_not_overlap hxβ
         rw [hF_supp x hxα]
         simp
-      · -- x ∉ chart β source means x ∉ tsupport ρ_β, so ρ_β x = 0.
-        have hρβ_zero :
+      · have hρβ_zero :
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M β : M → ℝ) x = 0 := by
           have hsub :=
             DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate (I := I) (M := M) β
@@ -172,18 +140,13 @@ theorem riemannianMeasure_lintegral_eq_chartLocalMeasure_of_supportIn
           exact image_eq_zero_of_notMem_tsupport hxnotsupp
         rw [hρβ_zero]
         simp
-  -- Step 4: rewrite each integral using h_each_eq, then sum.
   rw [Finset.sum_congr rfl h_each_eq]
-  -- Now: Σ β ∈ S, ∫⁻ ofReal(ρ_β) · F d(chartLocalMeasure g α) = ∫⁻ F d(chartLocalMeasure g α).
-  -- Pull out the sum: Σ_β ofReal(ρ_β) · F = ofReal(Σ_β ρ_β) · F = ofReal(1) · F = F.
-  -- We need to be careful about the ENNReal sum.
   have hF_eq : ∀ x : M,
       ENNReal.ofReal
           (∑ β ∈ S, (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M β : M → ℝ) x) * F x =
         ∑ β ∈ S, ENNReal.ofReal
           ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M β : M → ℝ) x) * F x := by
     intro x
-    -- ENNReal.ofReal is a Finset-sum-additive when the summands are nonneg.
     have hnonneg : ∀ β ∈ S,
         0 ≤ (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M β : M → ℝ) x := fun β _ =>
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M).nonneg β x
@@ -203,12 +166,10 @@ theorem riemannianMeasure_lintegral_eq_chartLocalMeasure_of_supportIn
             Finset.sum_nonneg fun β _ =>
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M).nonneg β x
           rw [ENNReal.ofReal_add hnonneg' hsum_nn]
-          -- Recursively apply ih.
           have hih : ENNReal.ofReal
               (∑ β ∈ s, (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M β : M → ℝ) x) =
             ∑ β ∈ s, ENNReal.ofReal
               ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M β : M → ℝ) x) := by
-            -- We need ih applied to s. ih takes a hypothesis about s; here we have it.
             apply ih
           rw [hih]
     rw [hsum_eq, Finset.sum_mul]
@@ -219,27 +180,12 @@ theorem riemannianMeasure_lintegral_eq_chartLocalMeasure_of_supportIn
     intro x
     rw [chartAtlasPOU_finset_sum_eq_one (I := I) (M := M) x]
     simp
-  -- Now compute:
-  -- Σ β ∈ S, ∫⁻ ofReal(ρ_β) · F d(chartLocalMeasure g α)
-  -- = ∫⁻ Σ β ∈ S, ofReal(ρ_β) · F d(chartLocalMeasure g α)
-  -- = ∫⁻ F · 1 d(chartLocalMeasure g α) [using hsum_one]
-  -- = ∫⁻ F d(chartLocalMeasure g α).
   rw [← MeasureTheory.lintegral_finset_sum]
   · refine MeasureTheory.lintegral_congr (fun x => ?_)
     rw [← hF_eq x, hsum_one x, one_mul]
   · intro β _
     exact ((DifferentialGeometry.Integral.Measure.measurable_ofReal_pou_weight
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) β)).mul hF
-
-/-! ## Pull-back of an `EuclideanSpace`-valued function to `M`
-
-Given a function `w : EuclideanSpace ℝ (Fin n) → ℝ` and a chart point `α : M`,
-the pull-back `pullbackToM g α w : M → ℝ` is defined as `w ∘ (toEuclidean ∘ extChartAt I α)`
-on `(chartAt H α).source` and zero outside that set.
-
-This is the inverse operation of `chartPushed`: if `u : M → ℝ` is given and we
-chart-push by `α`, the resulting Euclidean function pulled back equals
-`(ρ_α : C^∞⟮I, M; ℝ⟯) · u` (when ρ is the POU). -/
 
 /-- Pull-back of an `EuclideanSpace`-valued function `w` to `M` via the chart at `α`.
 Set to zero outside the chart source. -/
@@ -323,13 +269,8 @@ lemma pullbackToM_chartPushed
   classical
   funext x
   by_cases hx : x ∈ (chartAt H α).source
-  · -- For x in chart source, compute via pullbackToM_apply_of_mem.
-    rw [pullbackToM_apply_of_mem (M := M) (I := I) α _ hx]
-    -- Apply chartPushed definition: it's ρ α (chart^{-1}(toEuclidean.symm y)) · u (chart^{-1}(toEuclidean.symm y))
+  · rw [pullbackToM_apply_of_mem (M := M) (I := I) α _ hx]
     unfold chartPushed
-    -- Need: ρ α ((extChartAt I α).symm (toEuclidean.symm (toEuclidean (extChartAt I α x))))
-    --     * u ((extChartAt I α).symm (toEuclidean.symm (toEuclidean (extChartAt I α x))))
-    --   = ρ α x * u x
     have htoeucl : toEuclidean.symm (toEuclidean (extChartAt I α x)) = extChartAt I α x := by
       simp
     rw [htoeucl]
@@ -339,9 +280,7 @@ lemma pullbackToM_chartPushed
         (I := I) (M := M)]
       exact hx
     rw [hsymm]
-  · -- For x outside chart source, both sides should be zero.
-    rw [pullbackToM_apply_of_notMem (M := M) (I := I) α _ hx]
-    -- Need: 0 = ρ α x · u x. Since ρ is subordinate, x ∉ tsupport ρ_α (else x ∈ chart α source by hρ).
+  · rw [pullbackToM_apply_of_notMem (M := M) (I := I) α _ hx]
     have hxnotsupp : x ∉ tsupport ((ρ α : C^∞⟮I, M; ℝ⟯) : M → ℝ) := by
       intro hcontra
       exact hx (hρ α hcontra)

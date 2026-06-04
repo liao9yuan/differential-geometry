@@ -1,4 +1,5 @@
 -- Modified 2026-04-28: updated internal import paths for project namespace
+-- Modified 2026-05-16: style-warning cleanup
 import DifferentialGeometry.External.DeGiorgi.BallExtension.RoughInput
 
 /-!
@@ -188,8 +189,7 @@ lemma smoothUnitBallExtensionApprox_eq_of_mem_innerCore {ε : ℝ}
   · unfold smoothUnitBallExtensionApprox
     rw [sphereOneBlend_eq_zero_of_mem_ball (d := d) hε hx]
     ring
-  ·
-    rw [Metric.mem_ball, dist_zero_right] at hx ⊢
+  · rw [Metric.mem_ball, dist_zero_right] at hx ⊢
     linarith
 
 omit [NeZero d] in
