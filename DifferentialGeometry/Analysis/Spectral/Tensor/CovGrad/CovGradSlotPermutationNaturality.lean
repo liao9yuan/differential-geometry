@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLine
 import DifferentialGeometry.Geometry.Metric.PointwiseInner.SlotPermutation
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweringParallel
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
+import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.Tensor0SRSCovariantDerivativeAgreement
 import Mathlib.GroupTheory.Perm.Fin
 
 /-!
@@ -105,7 +106,359 @@ private def covDerivUnitModel (g : SmoothRiemannianMetric I M) (s : ℕ)
       tensorCovDerivAt (I := I) (M := M) g 0 s W x v)
       (unitTensor (I := I) (M := M) x))
 
-/-- **Slot-permutation naturality of the covariant derivative (posited core).**
+/-- The unit-evaluated `(0, s)`-tensor section `y ↦ (W.toSection y) (unit)`, an abstract
+`(0, s)`-tensor section whose `toModel` is the `unitModel`. -/
+private def unitEvalSection (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (W : SmoothCcTensor g 0 s) : Π y : M, Tensor0SSpace s I y :=
+  fun y =>
+    (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from W.toSection y)
+      (unitTensor (I := I) (M := M) y)
+
+/-- **Step 1 — the directional cov-deriv at the unit reduces to the bundled `(0, s)`-cov-deriv
+of the unit-evaluated section.**  `covDerivUnitModel W x v` is `toModel` of the bundled
+`tensor0SCovariantDerivative` of `unitEvalSection W` at `x`, evaluated along `v`.  The unit
+`(0, 0)`-tensor is `∇`-parallel, so the product rule `tensorRSCovariantDerivative_zeroS_unit_eval`
+has no correction term. -/
+private lemma covDerivUnitModel_eq_tensor0SCovariantDerivative
+    (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (W : SmoothCcTensor g 0 s) (x : M) (v : TangentSpace I x) :
+    covDerivUnitModel (I := I) (M := M) g s W x v =
+      Tensor0SSpace.toModel
+        (Tensor0SNabla.tensor0SCovariantDerivative I M s
+          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+          (unitEvalSection (I := I) (M := M) g s W) x v) := by
+  rw [covDerivUnitModel, tensorCovDerivAt_def]
+  congr 1
+  exact tensorRSCovariantDerivative_zeroS_unit_eval
+    (I := I) (M := M) g s W.toSection x v
+
+/-- **Forward chart-trivialisation formula (on the base set).**  The chart-`α` trivialised
+representation of `(0, s)`-tensor section `T` at `b ∈ baseSet`, evaluated on a model tuple `v`,
+precomposes each slot of `T b` with the tangent-bundle trivialisation inverse `symmL b`. -/
+private lemma tensor0SChartE_section_repr_apply_tuple
+    (s : ℕ) (α : M) (T : Π b : M, Tensor0SSpace s I b) (b : M)
+    (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
+    (v : Fin s → E) :
+    DifferentialGeometry.Integral.Connection.tensor0SChartE_section_repr (I := I) s α T b v =
+      (show ContinuousMultilinearMap ℝ (fun _ : Fin s => TangentSpace I b) ℝ from T b)
+        (fun i => (trivializationAt E (TangentSpace I) α).symmL ℝ b (v i)) := by
+  classical
+  rw [DifferentialGeometry.Integral.Connection.tensor0SChartE_section_repr_apply]
+  set e := trivializationAt (Tensor0SModel s ℝ E)
+    (fun y : M => Tensor0SSpace s I y) α with he
+  have hbE : b ∈ e.baseSet := hb
+  rw [e.continuousLinearMapAt_apply ℝ, e.coe_linearMapAt_of_mem hbE]
+  rfl
+
+/-- **The chart-trivialised representation commutes with a constant slot reindexing.**  The
+chart-`α` trivialisation of the `(0, s)`-tensor bundle precomposes each slot with the *same*
+tangent-bundle trivialisation map, so it commutes with the slot permutation `domDomCongr σ`.
+This holds globally: on the trivialisation base set by the slot-uniform formula, and off it
+because both sides vanish. -/
+private lemma tensor0SChartE_section_repr_domDomCongr
+    (s : ℕ) (σ : Equiv.Perm (Fin s)) (α : M)
+    (T : Π b : M, Tensor0SSpace s I b) (b : M) :
+    DifferentialGeometry.Integral.Connection.tensor0SChartE_section_repr (I := I) s α
+        (fun y => ContinuousMultilinearMap.domDomCongr σ
+          (show ContinuousMultilinearMap ℝ (fun _ : Fin s => TangentSpace I y) ℝ from T y)) b =
+      ContinuousMultilinearMap.domDomCongr σ
+        (DifferentialGeometry.Integral.Connection.tensor0SChartE_section_repr (I := I) s α T b) := by
+  classical
+  apply ContinuousMultilinearMap.ext
+  intro v
+  by_cases hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet
+  · rw [tensor0SChartE_section_repr_apply_tuple (I := I) s α _ b hb v,
+      ContinuousMultilinearMap.domDomCongr_apply,
+      ContinuousMultilinearMap.domDomCongr_apply,
+      tensor0SChartE_section_repr_apply_tuple (I := I) s α T b hb (fun i => v (σ i))]
+  · -- Off the base set: both representations vanish.
+    set e := trivializationAt (Tensor0SModel s ℝ E)
+      (fun y : M => Tensor0SSpace s I y) α with he
+    have hbE : b ∉ e.baseSet := hb
+    rw [DifferentialGeometry.Integral.Connection.tensor0SChartE_section_repr_apply,
+      e.continuousLinearMapAt_apply ℝ, e.linearMapAt_def_of_notMem hbE]
+    rw [ContinuousMultilinearMap.domDomCongr_apply,
+      DifferentialGeometry.Integral.Connection.tensor0SChartE_section_repr_apply,
+      e.continuousLinearMapAt_apply ℝ, e.linearMapAt_def_of_notMem hbE]
+    simp
+
+/-- **Pointwise inverse chart-trivialisation formula (on the base set).**  The inverse
+chart-`α` trivialisation `tensor0SChartFiberFromModel` of a model form `M0`, evaluated on a
+tangent tuple `v`, precomposes each slot with the tangent-bundle trivialisation `continuousLinearMapAt`. -/
+private lemma tensor0SChartFiberFromModel_apply_tuple
+    (s : ℕ) (α : M) (b : M)
+    (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
+    (M0 : Tensor0SModel s ℝ E) (v : Fin s → TangentSpace I b) :
+    (show ContinuousMultilinearMap ℝ (fun _ : Fin s => TangentSpace I b) ℝ from
+        DifferentialGeometry.Integral.Connection.tensor0SChartFiberFromModel (I := I) s α b M0) v =
+      M0 (fun i => (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b (v i)) := by
+  classical
+  have h := Bundle.continuousMultilinearMap.triv_symmL_eq_compContinuousLinearMap (𝕜 := ℝ)
+    (F := E) (E := TangentSpace I) (s := s) α b hb M0
+  have h2 := DFunLike.congr_fun h v
+  rw [ContinuousMultilinearMap.compContinuousLinearMap_apply] at h2
+  exact h2
+
+/-- **The fibre-from-model map commutes with a constant slot reindexing (on the base set).**
+The inverse chart-`α` trivialisation `tensor0SChartFiberFromModel` precomposes each slot with
+the *same* tangent-bundle trivialisation map, so it commutes with the slot reindexing
+`domDomCongr σ`. -/
+private lemma tensor0SChartFiberFromModel_domDomCongr
+    (s : ℕ) (σ : Equiv.Perm (Fin s)) (α : M) (b : M)
+    (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
+    (M0 : Tensor0SModel s ℝ E) :
+    DifferentialGeometry.Integral.Connection.tensor0SChartFiberFromModel (I := I) s α b
+        (ContinuousMultilinearMap.domDomCongr σ M0) =
+      ContinuousMultilinearMap.domDomCongr σ
+        (DifferentialGeometry.Integral.Connection.tensor0SChartFiberFromModel (I := I) s α b M0) := by
+  classical
+  apply ContinuousMultilinearMap.ext
+  intro v
+  rw [tensor0SChartFiberFromModel_apply_tuple (I := I) s α b hb (ContinuousMultilinearMap.domDomCongr σ M0) v]
+  rw [ContinuousMultilinearMap.domDomCongr_apply]
+  rw [ContinuousMultilinearMap.domDomCongr_apply]
+  rw [tensor0SChartFiberFromModel_apply_tuple (I := I) s α b hb M0 (fun i => v (σ i))]
+
+/-- **The intrinsic chart-Fréchet piece commutes with a constant slot reindexing (on the base
+set).**  The intrinsic chart-`α` Fréchet-derivative CLM `tensor0SIntrinsicChartCLM` differentiates
+the chart-trivialised model-valued representation; reindexing the slots by `σ` is post-composition
+with the constant fibre isometry `domDomCongr σ`, which `fderiv` (`ContinuousLinearEquiv.comp_fderiv`)
+and the inverse trivialisation both commute with. -/
+private lemma tensor0SIntrinsicChartCLM_domDomCongr
+    (s : ℕ) (σ : Equiv.Perm (Fin s)) (α : M)
+    (T : Π b : M, Tensor0SSpace s I b) (b : M)
+    (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
+    (v : TangentSpace I b) :
+    DifferentialGeometry.Integral.Connection.tensor0SIntrinsicChartCLM (I := I) s α
+        (fun y => ContinuousMultilinearMap.domDomCongr σ
+          (show ContinuousMultilinearMap ℝ (fun _ : Fin s => TangentSpace I y) ℝ from T y)) b v =
+      ContinuousMultilinearMap.domDomCongr σ
+        (DifferentialGeometry.Integral.Connection.tensor0SIntrinsicChartCLM (I := I) s α T b v) := by
+  classical
+  rw [DifferentialGeometry.Integral.Connection.tensor0SIntrinsicChartCLM_apply,
+    DifferentialGeometry.Integral.Connection.tensor0SIntrinsicChartCLM_apply]
+  -- The reindexed section's chart pullback is the constant fibre isometry post-composed with
+  -- the original chart pullback.
+  set L : Tensor0SModel s ℝ E ≃L[ℝ] Tensor0SModel s ℝ E :=
+    (ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ σ).toContinuousLinearEquiv with hL
+  have hpull :
+      (DifferentialGeometry.Integral.Connection.tensor0SChartE_section_repr (I := I) s α
+          (fun y => ContinuousMultilinearMap.domDomCongr σ
+            (show ContinuousMultilinearMap ℝ (fun _ : Fin s => TangentSpace I y) ℝ from T y)) ∘
+        (extChartAt I α).symm) =
+      (⇑L) ∘
+        (DifferentialGeometry.Integral.Connection.tensor0SChartE_section_repr (I := I) s α T ∘
+          (extChartAt I α).symm) := by
+    funext z
+    simp only [Function.comp_apply]
+    rw [tensor0SChartE_section_repr_domDomCongr (I := I) s σ α T ((extChartAt I α).symm z)]
+    rw [hL, LinearIsometryEquiv.coe_toContinuousLinearEquiv]
+    rfl
+  rw [hpull]
+  rw [L.comp_fderiv]
+  rw [ContinuousLinearMap.comp_apply]
+  rw [hL, ContinuousLinearEquiv.coe_coe, LinearIsometryEquiv.coe_toContinuousLinearEquiv]
+  -- The linear isometry `domDomCongrₗᵢ` is the slot reindexing `domDomCongr σ`.
+  rw [show (ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ σ)
+        ((fderiv ℝ (DifferentialGeometry.Integral.Connection.tensor0SChartE_section_repr
+            (I := I) s α T ∘ (extChartAt I α).symm) (extChartAt I α b))
+          (DifferentialGeometry.Integral.Connection.trivToE (I := I) α b v)) =
+      ContinuousMultilinearMap.domDomCongr σ
+        ((fderiv ℝ (DifferentialGeometry.Integral.Connection.tensor0SChartE_section_repr
+            (I := I) s α T ∘ (extChartAt I α).symm) (extChartAt I α b))
+          (DifferentialGeometry.Integral.Connection.trivToE (I := I) α b v)) from rfl]
+  -- Now the fibre-from-model map commutes with `domDomCongr σ`.
+  rw [tensor0SChartFiberFromModel_domDomCongr (I := I) s σ α b hb]
+
+/-- **The slot-`k` substitution CLM is `σ`-reindexed by relocating the active slot.**  The slot
+substitution `localSlotCLM s k Φ` puts `Φ` at slot `k` and the identity elsewhere; precomposing
+the slot index with `σ` relocates the active slot to `σ.symm k`. -/
+private lemma localSlotCLM_comp_perm
+    (s : ℕ) (σ : Equiv.Perm (Fin s)) {b : M} (k : Fin s)
+    (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) (i : Fin s) :
+    DifferentialGeometry.Integral.Connection.localSlotCLM s k Φ (σ i) =
+      DifferentialGeometry.Integral.Connection.localSlotCLM s (σ.symm k) Φ i := by
+  by_cases hi : i = σ.symm k
+  · subst hi
+    rw [Equiv.apply_symm_apply,
+      DifferentialGeometry.Integral.Connection.localSlotCLM_self,
+      DifferentialGeometry.Integral.Connection.localSlotCLM_self]
+  · rw [DifferentialGeometry.Integral.Connection.localSlotCLM_other s k Φ
+        (by intro h; exact hi (by rw [← Equiv.symm_apply_apply σ i, h])),
+      DifferentialGeometry.Integral.Connection.localSlotCLM_other s (σ.symm k) Φ hi]
+
+/-- **The slot-correction sum commutes with a constant slot reindexing.**  Reindexing the slots
+of the tensor by `σ` and summing the Christoffel slot corrections over all slots agree with the
+slot reindexing applied to the original slot-correction sum, because the per-slot active index is
+relocated bijectively by `σ`. -/
+private lemma chartTensor0SSlotCorrection_sum_domDomCongr
+    (s : ℕ) (g : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin s)) (α : M)
+    (T : Π b : M, Tensor0SSpace s I b) (X : Π b : M, TangentSpace I b) (b : M) :
+    ∑ k : Fin s, DifferentialGeometry.Integral.Connection.chartTensor0SSlotCorrection (I := I) s g α
+        (fun y => ContinuousMultilinearMap.domDomCongr σ
+          (show ContinuousMultilinearMap ℝ (fun _ : Fin s => TangentSpace I y) ℝ from T y)) X b k =
+      ContinuousMultilinearMap.domDomCongr σ
+        (∑ k : Fin s, DifferentialGeometry.Integral.Connection.chartTensor0SSlotCorrection (I := I) s g α
+          T X b k) := by
+  classical
+  apply ContinuousMultilinearMap.ext
+  intro m
+  rw [ContinuousMultilinearMap.domDomCongr_apply]
+  rw [ContinuousMultilinearMap.sum_apply, ContinuousMultilinearMap.sum_apply]
+  -- Reindex the left sum by `k ↦ σ.symm k`.
+  rw [← Equiv.sum_comp σ.symm (fun k => DifferentialGeometry.Integral.Connection.chartTensor0SSlotCorrection
+    (I := I) s g α T X b k (fun i => m (σ i)))]
+  refine Finset.sum_congr rfl (fun k _ => ?_)
+  rw [DifferentialGeometry.Integral.Connection.chartTensor0SSlotCorrection_apply_localSlotCLM,
+    DifferentialGeometry.Integral.Connection.chartTensor0SSlotCorrection_apply_localSlotCLM]
+  -- LHS: `(domDomCongr σ (T b)) (fun i => localSlotCLM k Φ i (m i))`.
+  rw [ContinuousMultilinearMap.domDomCongr_apply]
+  refine congrArg _ ?_
+  funext i
+  rw [localSlotCLM_comp_perm (I := I) s σ k]
+
+/-- **A constant slot reindexing respects subtraction.** -/
+private lemma domDomCongr_sub
+    {n : ℕ} {A : Type*} [NormedAddCommGroup A] [NormedSpace ℝ A]
+    (σ : Equiv.Perm (Fin n)) (a b : ContinuousMultilinearMap ℝ (fun _ : Fin n => A) ℝ) :
+    ContinuousMultilinearMap.domDomCongr σ (a - b) =
+      ContinuousMultilinearMap.domDomCongr σ a - ContinuousMultilinearMap.domDomCongr σ b := by
+  apply ContinuousMultilinearMap.ext
+  intro v
+  rw [ContinuousMultilinearMap.domDomCongr_apply, ContinuousMultilinearMap.sub_apply,
+    ContinuousMultilinearMap.sub_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    ContinuousMultilinearMap.domDomCongr_apply]
+
+/-- **Chart-frame σ-naturality (succ, on the good set).**  At a base point `b` in the chart-`α`
+good set, the chart-frame covariant derivative of the slot-reindexed `(0, s + 1)`-tensor section
+`fun y => domDomCongr σ (T y)` along `X` equals the slot reindexing `domDomCongr σ` of the
+chart-frame covariant derivative of `T`.  Assembled from the intrinsic-piece naturality
+`tensor0SIntrinsicChartCLM_domDomCongr` and the slot-correction-sum naturality
+`chartTensor0SSlotCorrection_sum_domDomCongr` through the explicit succ decomposition. -/
+private lemma chartTensor0SCovariantDerivative_succ_domDomCongr
+    (s : ℕ) (g : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin (s + 1))) (α : M)
+    (T : Π b : M, Tensor0SSpace (s + 1) I b) (X : Π b : M, TangentSpace I b) {b : M}
+    (hb : b ∈ DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet (I := I) α) :
+    DifferentialGeometry.Integral.Connection.chartTensor0SCovariantDerivative (I := I) (s + 1) g α
+        (fun y => ContinuousMultilinearMap.domDomCongr σ
+          (show ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => TangentSpace I y) ℝ from T y)) X b =
+      ContinuousMultilinearMap.domDomCongr σ
+        (DifferentialGeometry.Integral.Connection.chartTensor0SCovariantDerivative (I := I) (s + 1) g α
+          T X b) := by
+  classical
+  have hbE : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet_mem_baseSet hb
+  rw [DifferentialGeometry.Integral.Connection.chartTensor0SCovariantDerivative_succ (I := I) s g α
+      (fun y => ContinuousMultilinearMap.domDomCongr σ
+        (show ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => TangentSpace I y) ℝ from T y)) X b,
+    DifferentialGeometry.Integral.Connection.chartTensor0SCovariantDerivative_succ (I := I) s g α T X b]
+  rw [domDomCongr_sub σ
+    (DifferentialGeometry.Integral.Connection.tensor0SIntrinsicChartCLM (I := I) (s + 1) α T b (X b))
+    (∑ k : Fin (s + 1), DifferentialGeometry.Integral.Connection.chartTensor0SSlotCorrection
+      (I := I) (s + 1) g α T X b k)]
+  rw [tensor0SIntrinsicChartCLM_domDomCongr (I := I) (s + 1) σ α T b hbE (X b)]
+  rw [chartTensor0SSlotCorrection_sum_domDomCongr (I := I) (s + 1) g σ α T X b]
+
+/-- **Smoothness of the unit-evaluated section.**  The unit-evaluated `(0, s)`-tensor section
+`unitEvalSection g s W = fun y => (W.toSection y) (unit)` is `MDifferentiableAt` (in total-space
+form) at every point: it is the smooth Hom-bundle section `W.toSection` applied to the smooth
+constant unit `(0, 0)`-section. -/
+private lemma unitEvalSection_tensorSectionMDiffAt
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (W : SmoothCcTensor g 0 s) (x : M) :
+    DifferentialGeometry.Integral.Connection.TensorSectionMDiffAt (I := I) s
+      (unitEvalSection (I := I) (M := M) g s W) x := by
+  classical
+  have hHom : MDifferentiableAt I (I.prod 𝓘(ℝ, Tensor0SModel 0 ℝ E →L[ℝ] Tensor0SModel s ℝ E))
+      (fun z : M => TotalSpace.mk' (Tensor0SModel 0 ℝ E →L[ℝ] Tensor0SModel s ℝ E)
+        (E := fun w : M => Tensor0SSpace 0 I w →L[ℝ] Tensor0SSpace s I w) z
+        (show Tensor0SSpace 0 I z →L[ℝ] Tensor0SSpace s I z from W.toSection z)) x :=
+    (W.toSection.contMDiff.contMDiffAt).mdifferentiableAt (by simp)
+  have hv : MDifferentiableAt I (I.prod 𝓘(ℝ, Tensor0SModel 0 ℝ E))
+      (fun z : M => TotalSpace.mk' (Tensor0SModel 0 ℝ E)
+        (E := fun w : M => Tensor0SSpace 0 I w) z (unitTensor (I := I) (M := M) z)) x :=
+    (DifferentialGeometry.Integral.Connection.contMDiff_unitZeroSection
+      (I := I) (M := M)).contMDiffAt.mdifferentiableAt (by simp)
+  exact MDifferentiableAt.clm_bundle_apply (b := id) hHom hv
+
+/-- A constant slot reindexing commutes with a finite `•`-combination. -/
+private lemma domDomCongr_finsum_smul
+    {n d : ℕ} {A : Type*} [NormedAddCommGroup A] [NormedSpace ℝ A]
+    (σ : Equiv.Perm (Fin n)) (c : Fin d → ℝ)
+    (a : Fin d → ContinuousMultilinearMap ℝ (fun _ : Fin n => A) ℝ) :
+    ContinuousMultilinearMap.domDomCongr σ (∑ i, c i • a i) =
+      ∑ i, c i • ContinuousMultilinearMap.domDomCongr σ (a i) := by
+  apply ContinuousMultilinearMap.ext
+  intro v
+  rw [ContinuousMultilinearMap.domDomCongr_apply, ContinuousMultilinearMap.sum_apply,
+    ContinuousMultilinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.smul_apply,
+    ContinuousMultilinearMap.domDomCongr_apply]
+
+/-- **Abstract `(0, s + 1)`-covariant-derivative σ-naturality.**  For two smooth `(0, s + 1)`
+sections `ŝ, ŝ'` related fibrewise by the constant slot reindexing `σ` (i.e. `ŝ' y = domDomCongr σ
+(ŝ y)`), the directional bundled covariant derivatives are related by the same reindexing.  Proven
+on each chart-frame vector through the agreement `chartTensor0SCovariantDerivative_eq_abstract_succ_aux`
+(at `α = x`) and the chart-frame σ-naturality, then extended to an arbitrary direction by the
+frame decomposition and linearity. -/
+private lemma tensor0SCovariantDerivative_succ_domDomCongr
+    (s : ℕ) (g : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin (s + 1)))
+    (ŝ ŝ' : Π y : M, Tensor0SSpace (s + 1) I y) (x : M) (v : TangentSpace I x)
+    (hŝ : DifferentialGeometry.Integral.Connection.TensorSectionMDiffAt (I := I) (s + 1) ŝ x)
+    (hŝ' : DifferentialGeometry.Integral.Connection.TensorSectionMDiffAt (I := I) (s + 1) ŝ' x)
+    (hrel : ∀ y : M, ŝ' y = ContinuousMultilinearMap.domDomCongr σ
+      (show ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => TangentSpace I y) ℝ from ŝ y)) :
+    (show Tensor0SSpace (s + 1) I x from
+        Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1)
+          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) ŝ' x v) =
+      ContinuousMultilinearMap.domDomCongr σ
+        (show Tensor0SSpace (s + 1) I x from
+          Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1)
+            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) ŝ x v) := by
+  classical
+  have hx_good : x ∈ DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet (I := I) x :=
+    DifferentialGeometry.Integral.Connection.self_mem_chartLeviCivitaGoodSet x
+  have hxE : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
+    DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet_mem_baseSet hx_good
+  -- Per-frame-vector naturality.
+  have hframe : ∀ i : Fin (Module.finrank ℝ E),
+      (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1)
+          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) ŝ' x)
+          (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x i x) =
+        ContinuousMultilinearMap.domDomCongr σ
+          ((Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1)
+            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) ŝ x)
+            (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x i x)) := by
+    intro i
+    have hXi_at := DifferentialGeometry.Integral.Connection.chartBasisVec_alpha_mdifferentiableAt
+        (I := I) x i hx_good
+    rw [← DifferentialGeometry.Integral.Connection.chartTensor0SCovariantDerivative_eq_abstract_succ_aux
+      (I := I) (M := M) g x s ŝ' (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x i)
+      hx_good hŝ' hXi_at]
+    rw [show ŝ' = (fun y => ContinuousMultilinearMap.domDomCongr σ
+        (show ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => TangentSpace I y) ℝ from ŝ y))
+        from funext hrel]
+    rw [chartTensor0SCovariantDerivative_succ_domDomCongr (I := I) s g σ x ŝ
+      (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x i) hx_good]
+    rw [DifferentialGeometry.Integral.Connection.chartTensor0SCovariantDerivative_eq_abstract_succ_aux
+      (I := I) (M := M) g x s ŝ (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x i)
+      hx_good hŝ hXi_at]
+  -- Extend to an arbitrary direction via the frame decomposition.
+  conv_lhs => rw [DifferentialGeometry.Integral.Connection.chartBasisVecFiber_recompose
+    (I := I) x hxE v, map_sum]
+  conv_rhs => rw [DifferentialGeometry.Integral.Connection.chartBasisVecFiber_recompose
+    (I := I) x hxE v, map_sum]
+  simp_rw [map_smul]
+  rw [domDomCongr_finsum_smul σ
+    (fun i => ((DifferentialGeometry.Integral.Measure.chartModelBasis E).repr
+        ((trivializationAt E (TangentSpace I) x).continuousLinearMapAt ℝ x v)) i)
+    (fun i => (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1)
+      (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) ŝ x)
+      (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x i x))]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [hframe i]
+
+/-- **Slot-permutation naturality of the covariant derivative.**
 
 Let `σ : Equiv.Perm (Fin s)` and let `S, S'` be smooth compactly-supported `(0, s)`-tensor
 sections whose unit-evaluated model forms are related fibrewise by the constant slot reindexing
@@ -128,10 +481,13 @@ the conclusion (the hypothesis is about the raw section values; the conclusion a
 covariant derivatives), and it is non-vacuous (e.g. `S = T`, `S' = flipCcTensor g T`, `σ = swap
 0 1` is a witnessing instance).
 
-This is the genuine `∇`-naturality content the metric-realization jet calculus rests on; it is a
-precise TRUE posited primitive of the bundle covariant-derivative calculus (in the spirit of
-`loweredCovDerivAt_eval_eq_partialEval_sub_lowerFormCorrection`), and consumers transitively
-depend on `sorryAx`.  Its body is `sorry`. -/
+The proof reduces the directional covariant derivative read at the unit `(0, 0)`-tensor to the
+bundled `(0, s)`-covariant derivative of the unit-evaluated section (the unit is `∇`-parallel,
+`tensorRSCovariantDerivative_zeroS_unit_eval`), and then proves the bundled σ-naturality through
+the chart-frame Christoffel decomposition: the intrinsic chart-Fréchet piece commutes with the
+constant fibre isometry `domDomCongr σ` (slot-uniformity of the chart trivialisation +
+`ContinuousLinearEquiv.comp_fderiv`), and the per-slot Christoffel-correction sum is `σ`-symmetric
+under the bijective slot reindex `k ↦ σ.symm k`. -/
 theorem tensorCovDerivAt_unit_toModel_domDomCongr_of_section
     (g : SmoothRiemannianMetric I M) (s : ℕ) (σ : Equiv.Perm (Fin s))
     (S S' : SmoothCcTensor g 0 s)
@@ -141,7 +497,44 @@ theorem tensorCovDerivAt_unit_toModel_domDomCongr_of_section
     covDerivUnitModel (I := I) (M := M) g s S' x v =
       ContinuousMultilinearMap.domDomCongr σ
         (covDerivUnitModel (I := I) (M := M) g s S x v) := by
-  sorry
+  classical
+  -- Step 1: reduce both directional cov-derivs to the bundled `(0, s)`-cov-deriv of the
+  -- unit-evaluated section.
+  rw [covDerivUnitModel_eq_tensor0SCovariantDerivative (I := I) (M := M) g s S' x v,
+    covDerivUnitModel_eq_tensor0SCovariantDerivative (I := I) (M := M) g s S x v]
+  -- The hypothesis, read at the level of the unit-evaluated sections (`toModel` is the identity).
+  have hrel : ∀ y : M, unitEvalSection (I := I) (M := M) g s S' y =
+      ContinuousMultilinearMap.domDomCongr σ
+        (show ContinuousMultilinearMap ℝ (fun _ : Fin s => TangentSpace I y) ℝ from
+          unitEvalSection (I := I) (M := M) g s S y) := by
+    intro y
+    have h := hSS' y
+    rw [unitModel, unitModel] at h
+    exact h
+  rcases s with _ | s
+  · -- `s = 0`: a permutation of `Fin 0` is the identity, so the reindexing is trivial.
+    have hsec : unitEvalSection (I := I) (M := M) g 0 S' = unitEvalSection (I := I) (M := M) g 0 S := by
+      funext y
+      have := hrel y
+      rw [Subsingleton.elim σ (1 : Equiv.Perm (Fin 0))] at this
+      apply ContinuousMultilinearMap.ext
+      intro m
+      rw [this, ContinuousMultilinearMap.domDomCongr_apply]
+      exact congrArg _ (Subsingleton.elim _ _)
+    rw [hsec]
+    symm
+    apply ContinuousMultilinearMap.ext
+    intro m
+    rw [ContinuousMultilinearMap.domDomCongr_apply]
+    exact congrArg _ (Subsingleton.elim _ _)
+  · -- `s = s' + 1`: the chart-frame Christoffel σ-naturality.
+    refine congrArg Tensor0SSpace.toModel ?_
+    exact tensor0SCovariantDerivative_succ_domDomCongr (I := I) (M := M) s g σ
+      (unitEvalSection (I := I) (M := M) g (s + 1) S)
+      (unitEvalSection (I := I) (M := M) g (s + 1) S') x v
+      (unitEvalSection_tensorSectionMDiffAt (I := I) (M := M) g (s + 1) S x)
+      (unitEvalSection_tensorSectionMDiffAt (I := I) (M := M) g (s + 1) S' x)
+      hrel
 
 /-- **Unit-evaluated covariant gradient, one order.**  The unit-evaluated model `(0, s + 1)`-form
 of `covGrad g 0 s W`, evaluated on a `Fin (s + 1)`-tuple `v`, reads the leftmost (gradient) slot:

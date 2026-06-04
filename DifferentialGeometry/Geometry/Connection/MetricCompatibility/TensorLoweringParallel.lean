@@ -269,6 +269,25 @@ lemma toModel_tensorRS_apply
   rw [hD]
   rfl
 
+/-- Model coercion of a composed mixed tensor: precomposing a `(r + 1, s)`-tensor `A` with a
+fibre map `B : Tensor0SSpace r →L Tensor0SSpace (r + 1)` and reading the model `(r, s)`-tensor
+at a model `(0, r)`-form `D` equals applying `A` (in model form) to the model coercion of
+`B (ofModel D)`. -/
+lemma toModel_tensorRS_comp_apply
+    (r s : ℕ) (x : M)
+    (A : Tensor0SSpace (r + 1) I x →L[ℝ] Tensor0SSpace s I x)
+    (B : Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (r + 1) I x)
+    (D : Tensor0SModel r ℝ E) :
+    TensorRSSpace.toModel
+        (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from A.comp B) D =
+      TensorRSSpace.toModel (show Tensor0SSpace (r + 1) I x →L[ℝ] Tensor0SSpace s I x from A)
+        (Tensor0SSpace.toModel (B (Tensor0SSpace.ofModel D))) := by
+  have h1 := toModel_tensorRS_apply (I := I) (M := M) (r + 1) s x A (B (Tensor0SSpace.ofModel D))
+  have h2 := toModel_tensorRS_apply (I := I) (M := M) r s x
+    (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from A.comp B) (Tensor0SSpace.ofModel D)
+  rw [Tensor0SSpace.toModel_ofModel] at h2
+  rw [← h2, ContinuousLinearMap.comp_apply, h1]
+
 /-- **Rank-`0` lowering is evaluation at the unit `(0, 0)`-tensor.** At rank
 `r = 0` (here `s = 2`) the metric-lowered `(0, 0 + 2)`-tensor section value
 `liftedTensorSection g 0 2 S y` is exactly `S y` evaluated at the constant unit
@@ -863,6 +882,415 @@ private lemma toModel_cast_transport
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   rfl
 
+/-- Pointwise differentiability is preserved under a natural-number type-transport of the
+`(0, n)`-tensor section. -/
+private lemma tensorSectionMDiffAt_cast_transport
+    {a b : ℕ} (h : a = b) (W : Π y : M, Tensor0SSpace b I y) {x : M}
+    (hW : TensorSectionMDiffAt (I := I) b W x) :
+    TensorSectionMDiffAt (I := I) a
+      (fun y : M => cast (congrArg (fun n => Tensor0SSpace n I y) h.symm) (W y)) x := by
+  cases h; exact hW
+
+/-- Pointwise differentiability of the partial evaluation `y ↦ (curriedSection W) y (Y y)` of
+a `(0, s + 1)`-tensor section `W` differentiable at `x` against a smooth vector field `Y`
+(local re-derivation of the private `tensorSectionMDiffAt_curriedSection_apply`). -/
+private lemma tensorSectionMDiffAt_curriedSection_applyVF
+    (s : ℕ) (W : Π y : M, Tensor0SSpace (s + 1) I y) {x : M}
+    (hW : TensorSectionMDiffAt (I := I) (s + 1) W x)
+    (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
+    TensorSectionMDiffAt (I := I) s
+      (fun y : M => curriedSection I M W y (Y y)) x := by
+  classical
+  unfold TensorSectionMDiffAt
+  have hCurried := mdifferentiableAt_curriedSection_of_section (I := I) (M := M) s W hW
+  have hY : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun y => TotalSpace.mk' E (E := TangentSpace I) y (Y y)) x :=
+    Y.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
+  exact MDifferentiableAt.clm_bundle_apply (𝕜 := ℝ)
+    (F₁ := E) (F₂ := Tensor0SModel s ℝ E)
+    (E₁ := fun x : M => TangentSpace I x)
+    (E₂ := fun x : M => Tensor0SSpace s I x)
+    (IM := I) (IB := I)
+    (b := id) (ϕ := fun y : M => curriedSection I M W y)
+    (v := fun y : M => Y y) hCurried hY
+
+/-- **Leading-slot rank reduction of the lifted tensor.** Contracting the leading slot of the
+metric-lift of `T : Π y, TensorRSSpace (r + 1) s I y` against a vector field `X` (after the
+`(r + 1) + s = (r + s) + 1` re-identification) reduces, as a `(0, r + s)`-tensor section, to
+the metric-lift of the rank-`r` tensor `y ↦ (T y).comp (prependMetricCLM g r X y)`: the metric
+factor `g.inner · (X ·)` produced on the leading slot is exactly the slot prepended by
+`prependMetricCLM`. -/
+private lemma curriedSection_castLift_succ_eq_rawLiftFun_comp
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : Π y : M, TensorRSSpace (r + 1) s I y)
+    (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
+    (fun y : M => curriedSection I M
+        (fun z : M => cast (congrArg (fun n => Tensor0SSpace n I z)
+            ((Nat.succ_add r s).symm : (r + s) + 1 = (r + 1) + s).symm)
+          (rawLiftFun (I := I) (M := M) g (r + 1) s T z)) y (X y)) =
+      rawLiftFun (I := I) (M := M) g r s
+        (fun y : M => (show Tensor0SSpace (r + 1) I y →L[ℝ] Tensor0SSpace s I y from T y).comp
+          (prependMetricCLM (I := I) (M := M) g r X y)) := by
+  set h : (r + s) + 1 = (r + 1) + s := (Nat.succ_add r s).symm with hh
+  funext y
+  refine Tensor0SSpace.toModel_injective ?_
+  refine ContinuousMultilinearMap.ext (fun z => ?_)
+  -- Compute the LHS value at `z` as `TensorRSSpace.toModel (T y)` applied to a `(0, r + 1)`-form
+  -- and an `s`-slot tuple, both read through the `finCongr` reindexing of `Fin.cons (X y) z`.
+  have hLHS : Tensor0SSpace.toModel
+        (curriedSection I M
+          (fun w : M => cast (congrArg (fun n => Tensor0SSpace n I w) h.symm)
+            (rawLiftFun (I := I) (M := M) g (r + 1) s T w)) y (X y)) z =
+      TensorRSSpace.toModel (T y)
+          (separableFormAt (I := I) (M := M) g y (r + 1)
+            (fun k : Fin (r + 1) =>
+            (Fin.cons (X y) z : Fin (r + s + 1) → E) ((finCongr h.symm) (Fin.castAdd s k))))
+          (fun j : Fin s =>
+            (Fin.cons (X y) z : Fin (r + s + 1) → E) ((finCongr h.symm) (Fin.natAdd (r + 1) j))) := by
+    rw [curriedSection_apply, TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+      (T := cast (congrArg (fun n => Tensor0SSpace n I y) h.symm)
+        (rawLiftFun (I := I) (M := M) g (r + 1) s T y)) (v0 := X y) (vs := z)]
+    rw [toModel_cast_transport h (rawLiftFun (I := I) (M := M) g (r + 1) s T y)]
+    rw [ContinuousMultilinearMap.domDomCongr_apply]
+    rw [toModel_rawLiftFun, lowerAllUpperIndices_apply]
+  -- Compute the RHS value at `z`, bridging the composed CLM to `TensorRSSpace.toModel (T y)`
+  -- applied to the prepend-image of the rank-`r` separable form via `toModel_tensorRS_apply`.
+  have hRHS : Tensor0SSpace.toModel
+        (rawLiftFun (I := I) (M := M) g r s
+          (fun w : M => (show Tensor0SSpace (r + 1) I w →L[ℝ] Tensor0SSpace s I w from T w).comp
+            (prependMetricCLM (I := I) (M := M) g r X w)) y) z =
+      TensorRSSpace.toModel (T y)
+          (Tensor0SSpace.toModel
+            (prependMetricCLM (I := I) (M := M) g r X y
+              (Tensor0SSpace.ofModel
+                (separableFormAt (I := I) (M := M) g y r
+                  (fun i : Fin r => z (Fin.castAdd s i))))))
+          (fun j : Fin s => z (Fin.natAdd r j)) := by
+    rw [toModel_rawLiftFun, lowerAllUpperIndices_apply]
+    rw [toModel_tensorRS_comp_apply (I := I) (M := M) r s y (T y)
+      (prependMetricCLM (I := I) (M := M) g r X y)
+      (separableFormAt (I := I) (M := M) g y r (fun i : Fin r => z (Fin.castAdd s i)))]
+  -- The `finCongr`-reindexed `Fin.cons (X y) z` tuple splits cleanly: the leading `r + 1`
+  -- slots are `Fin.cons (X y) (z ∘ castAdd s)` and the last `s` slots are `z ∘ natAdd r`.
+  have hlo : (fun k : Fin (r + 1) =>
+        (Fin.cons (X y) z : Fin (r + s + 1) → E) ((finCongr h.symm) (Fin.castAdd s k))) =
+      Fin.cons (X y) (fun i : Fin r => z (Fin.castAdd s i)) := by
+    funext k
+    refine Fin.cases ?_ (fun i => ?_) k
+    · rw [Fin.cons_zero]
+      have : (finCongr h.symm) (Fin.castAdd s (0 : Fin (r + 1))) = (0 : Fin (r + s + 1)) :=
+        Fin.ext (by simp)
+      rw [this, Fin.cons_zero]
+    · rw [Fin.cons_succ]
+      have : (finCongr h.symm) (Fin.castAdd s i.succ) =
+          Fin.succ ((Fin.castAdd s i : Fin (r + s))) := Fin.ext (by simp [Fin.succ])
+      rw [this, Fin.cons_succ]
+  have hhi : (fun j : Fin s =>
+        (Fin.cons (X y) z : Fin (r + s + 1) → E) ((finCongr h.symm) (Fin.natAdd (r + 1) j))) =
+      (fun j : Fin s => z (Fin.natAdd r j)) := by
+    funext j
+    have : (finCongr h.symm) (Fin.natAdd (r + 1) j) =
+        Fin.succ ((Fin.natAdd r j : Fin (r + s))) := Fin.ext (by simp [Fin.succ, Nat.add_right_comm])
+    rw [this, Fin.cons_succ]
+  rw [hLHS, hRHS, hlo, hhi]
+  -- The two `(0, r + 1)`-forms fed to `TensorRSSpace.toModel (T y)` agree (the metric factor on
+  -- the leading slot is exactly the slot prepended by `prependMetricCLM`).
+  have hform : separableFormAt (I := I) (M := M) g y (r + 1)
+        (Fin.cons (X y) (fun i : Fin r => z (Fin.castAdd s i))) =
+      Tensor0SSpace.toModel
+        (prependMetricCLM (I := I) (M := M) g r X y
+          (Tensor0SSpace.ofModel
+            (separableFormAt (I := I) (M := M) g y r (fun i : Fin r => z (Fin.castAdd s i))))) := by
+    refine ContinuousMultilinearMap.ext (fun u => ?_)
+    rw [toModel_prependMetricCLM, Tensor0SSpace.toModel_ofModel, separableFormAt_succ_cons_apply,
+      Fin.cons_zero]
+    refine congrArg (g.inner y (X y) (u 0) * ·) ?_
+    simp only [Fin.cons_succ]
+  rw [hform]
+
+/-- **The metric-form peel, inductive form (lift-differentiability hypothesis).** Identical to
+`loweredCovDeriv_metricForm_eval` but with the more primitive hypothesis that the metric-lift
+`rawLiftFun g r s T` is everywhere manifold-differentiable (which is what propagates through the
+`r`-fold leading-slot peel: at each step the peeled `(0, r + s)`-section is itself a metric-lift,
+differentiable by `tensorSectionMDiffAt_curriedSection_applyVF`). -/
+private lemma loweredCovDeriv_metricForm_eval_aux (g : SmoothRiemannianMetric I M) :
+    ∀ (r s : ℕ) (T : Π y : M, TensorRSSpace r s I y)
+      (_hLiftDiff : ∀ z : M, TensorSectionMDiffAt (I := I) (r + s)
+        (rawLiftFun (I := I) (M := M) g r s T) z)
+      (Y : Fin r → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+      (x : M) (v : TangentSpace I x) (m : Fin s → E),
+      Tensor0SSpace.toModel
+          (tensor0SCovariantDerivative I M (r + s) (LeviCivita (I := I) g)
+            (rawLiftFun (I := I) (M := M) g r s T) x v)
+          (Fin.append (fun i : Fin r => Y i x) m) =
+        Tensor0SSpace.toModel
+            (tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)
+              (fun y : M =>
+                (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from T y)
+                  (metricFormSection (I := I) (M := M) g r Y y)) x v) m
+          - Tensor0SSpace.toModel
+              ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from T x)
+                (tensor0SCovariantDerivative I M r (LeviCivita (I := I) g)
+                  (fun y : M => metricFormSection (I := I) (M := M) g r Y y) x v)) m := by
+  intro r
+  induction r with
+  | zero =>
+    intro s T _hLiftDiff Y x v m
+    -- Correction term vanishes: ∇^{(0,0)} of the unit metric form is zero.
+    have hcorr0 : tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g)
+        (fun y : M => metricFormSection (I := I) (M := M) g 0 Y y) x v = 0 := by
+      refine Tensor0SSpace.toModel_injective ?_
+      beta_reduce
+      rw [show (fun y : M => metricFormSection (I := I) (M := M) g 0 Y y) =
+          metricFormFun (I := I) (M := M) g 0 Y from rfl]
+      rw [toModel_covDeriv_metricFormSection g 0 Y x v, Tensor0SSpace.toModel_zero]
+      simp
+    rw [hcorr0, map_zero, Tensor0SSpace.toModel_zero, ContinuousMultilinearMap.zero_apply,
+      sub_zero]
+    -- The lift at rank 0 is the `0 + s = s` reindexing of `T · (metric form)`.
+    have hunit : ∀ y : M, metricFormSection (I := I) (M := M) g 0 Y y =
+        Tensor0SSpace.ofModel
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ)) := by
+      intro y
+      refine Tensor0SSpace.toModel_injective ?_
+      beta_reduce
+      rw [show metricFormSection (I := I) (M := M) g 0 Y y =
+          metricFormFun (I := I) (M := M) g 0 Y y from rfl]
+      rw [toModel_metricFormFun, Tensor0SSpace.toModel_ofModel]
+      exact separableFormAt_zero (I := I) (M := M) g y _
+    have hliftEq : rawLiftFun (I := I) (M := M) g 0 s T =
+        fun y : M => cast (congrArg (fun n => Tensor0SSpace n I y) (Nat.zero_add s).symm)
+          ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from T y)
+            (metricFormSection (I := I) (M := M) g 0 Y y)) := by
+      funext y
+      refine Tensor0SSpace.toModel_injective ?_
+      beta_reduce
+      rw [toModel_rawLiftFun, toModel_cast_transport (Nat.zero_add s)
+        ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from T y)
+          (metricFormSection (I := I) (M := M) g 0 Y y))]
+      rw [toModel_tensorRS_apply (I := I) (M := M) 0 s y (T y)
+        (metricFormSection (I := I) (M := M) g 0 Y y)]
+      rw [show metricFormSection (I := I) (M := M) g 0 Y y =
+          metricFormFun (I := I) (M := M) g 0 Y y from rfl, toModel_metricFormFun]
+      refine ContinuousMultilinearMap.ext (fun u => ?_)
+      rw [lowerAllUpperIndices_apply, ContinuousMultilinearMap.domDomCongr_apply,
+        separableFormAt_zero]
+      congr 1
+      funext j
+      congr 1
+      exact (Fin.ext (by simp)).symm
+    rw [hliftEq]
+    rw [tensor0SCovDeriv_cast_transport g (Nat.zero_add s)
+      (fun y : M => (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from T y)
+        (metricFormSection (I := I) (M := M) g 0 Y y)) x v]
+    rw [toModel_cast_transport (Nat.zero_add s)]
+    rw [ContinuousMultilinearMap.domDomCongr_apply]
+    congr 1
+    funext j
+    rw [show (fun i : Fin 0 => Y i x) = (Fin.elim0 : Fin 0 → E) from by funext i; exact i.elim0]
+    rw [Fin.elim0_append]
+    rfl
+  | succ r ih =>
+    intro s T hLiftDiff Y x v m
+    classical
+    set h : (r + s) + 1 = (r + 1) + s := (Nat.succ_add r s).symm with hh
+    -- The cast-lift, a `(0, (r + s) + 1)`-tensor section.
+    set castLift : Π z : M, Tensor0SSpace ((r + s) + 1) I z :=
+      fun z : M => cast (congrArg (fun n => Tensor0SSpace n I z) h.symm)
+        (rawLiftFun (I := I) (M := M) g (r + 1) s T z) with hcastLift
+    -- Differentiability of the cast-lift everywhere.
+    have hcastLiftDiff : ∀ z : M, TensorSectionMDiffAt (I := I) ((r + s) + 1) castLift z := by
+      intro z
+      exact tensorSectionMDiffAt_cast_transport h
+        (rawLiftFun (I := I) (M := M) g (r + 1) s T) (hLiftDiff z)
+    -- The reduced raw tensor (rank `r`) obtained by prepending the leading metric slot.
+    set T' : Π y : M, TensorRSSpace r s I y :=
+      fun y : M => (show Tensor0SSpace (r + 1) I y →L[ℝ] Tensor0SSpace s I y from T y).comp
+        (prependMetricCLM (I := I) (M := M) g r (Y 0) y) with hT'
+    -- The peeled `(0, r + s)`-section is the metric-lift of `T'`.
+    have hpeelEq : (fun y : M => curriedSection I M castLift y (Y 0 y)) =
+        rawLiftFun (I := I) (M := M) g r s T' := by
+      rw [hcastLift, hT']
+      exact curriedSection_castLift_succ_eq_rawLiftFun_comp (I := I) (M := M) g r s T (Y 0)
+    -- Differentiability of the lift of `T'` (from the cast-lift, via currying).
+    have hLiftDiff' : ∀ z : M, TensorSectionMDiffAt (I := I) (r + s)
+        (rawLiftFun (I := I) (M := M) g r s T') z := by
+      intro z
+      rw [← hpeelEq]
+      exact tensorSectionMDiffAt_curriedSection_applyVF (I := I) (M := M) (r + s)
+        castLift (hcastLiftDiff z) (Y 0)
+    -- The append tuple of `Y · x` and `m`, reindexed through `finCongr h`, is the cons tuple.
+    have hYcons : (fun k : Fin (r + 1) => Y k x) =
+        Fin.cons (Y 0 x) (fun k : Fin r => Y k.succ x) := by
+      funext k
+      refine Fin.cases ?_ (fun j => ?_) k
+      · rw [Fin.cons_zero]
+      · rw [Fin.cons_succ]
+    have htuple : (fun i : Fin ((r + s) + 1) =>
+          (Fin.append (fun k : Fin (r + 1) => Y k x) m) ((finCongr h) i)) =
+        Fin.cons (Y 0 x) (Fin.append (fun k : Fin r => Y k.succ x) m) := by
+      funext i
+      rw [hYcons, Fin.append_cons, Function.comp_apply]
+      have hidx : (Fin.cast (Nat.add_right_comm r 1 s)) ((finCongr h) i) = i :=
+        Fin.ext (by simp [finCongr])
+      rw [hidx]
+    -- Rewrite the left-hand side as the rank-`(r + s) + 1` cast-lift covariant derivative,
+    -- evaluated on the cons tuple.
+    have hLHSeq : Tensor0SSpace.toModel
+          (tensor0SCovariantDerivative I M ((r + 1) + s) (LeviCivita (I := I) g)
+            (rawLiftFun (I := I) (M := M) g (r + 1) s T) x v)
+          (Fin.append (fun k : Fin (r + 1) => Y k x) m) =
+        Tensor0SSpace.toModel
+          (tensor0SCovariantDerivative I M ((r + s) + 1) (LeviCivita (I := I) g) castLift x v)
+          (Fin.cons (Y 0 x) (Fin.append (fun k : Fin r => Y k.succ x) m)) := by
+      have hrawCast : rawLiftFun (I := I) (M := M) g (r + 1) s T =
+          fun z : M => cast (congrArg (fun n => Tensor0SSpace n I z) h) (castLift z) := by
+        funext z
+        rw [hcastLift]
+        simp
+      rw [hrawCast]
+      rw [tensor0SCovDeriv_cast_transport g h.symm castLift x v]
+      rw [toModel_cast_transport h.symm
+        (tensor0SCovariantDerivative I M ((r + s) + 1) (LeviCivita (I := I) g) castLift x v)]
+      rw [ContinuousMultilinearMap.domDomCongr_apply]
+      rw [← htuple]
+    rw [hLHSeq]
+    -- Peel the leading slot.
+    rw [tensor0SCovariantDerivative_succ_consEval_peel (I := I) (M := M) g (r + s)
+      (W := castLift) (hcastLiftDiff x) (Y 0) v
+      (Fin.append (fun k : Fin r => Y k.succ x) m)]
+    rw [hpeelEq]
+    -- Apply the induction hypothesis to the peeled lift of `T'`.
+    rw [ih s T' hLiftDiff' (fun k : Fin r => Y k.succ) x v m]
+    -- Identify the first IH term with the goal's first term (the partial evaluations agree).
+    have hpartialEq : (fun y : M => (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from T' y)
+          (metricFormSection (I := I) (M := M) g r (fun k : Fin r => Y k.succ) y)) =
+        (fun y : M => (show Tensor0SSpace (r + 1) I y →L[ℝ] Tensor0SSpace s I y from T y)
+          (metricFormSection (I := I) (M := M) g (r + 1) Y y)) := by
+      funext y
+      rw [hT']
+      change (show Tensor0SSpace (r + 1) I y →L[ℝ] Tensor0SSpace s I y from T y)
+          (prependMetricCLM (I := I) (M := M) g r (Y 0) y
+            (metricFormSection (I := I) (M := M) g r (fun k : Fin r => Y k.succ) y)) = _
+      congr 1
+      refine Tensor0SSpace.toModel_injective ?_
+      refine ContinuousMultilinearMap.ext (fun u => ?_)
+      beta_reduce
+      rw [toModel_prependMetricCLM, toModel_metricFormSection]
+      rw [show metricFormSection (I := I) (M := M) g (r + 1) Y y =
+          metricFormFun (I := I) (M := M) g (r + 1) Y y from rfl, toModel_metricFormFun,
+        separableFormAt_succ_cons_apply]
+    rw [hpartialEq]
+    -- The reassembly of the two correction terms into `T x (∇^{(0,r+1)} metricForm)`.
+    rw [sub_sub]
+    congr 1
+    -- Goal: `T' x (∇^{(0,r)} metricForm_r) (m) + castLift x (cons (∇Y0) (append ...)) (m)
+    --        = T x (∇^{(0,r+1)} metricForm_{r+1}) (m)`.
+    -- Abbreviate the connection differential of the `k`-th vector field along `v` and the
+    -- common `k`-th goal-correction summand.
+    set nablaY : Fin (r + 1) → E :=
+      fun k => (LeviCivita (I := I) g).toFun (fun y => Y k y) x v with hnablaY
+    set RHSk : Fin (r + 1) → ℝ := fun k => TensorRSSpace.toModel (T x)
+      (separableFormAt (I := I) (M := M) g x (r + 1)
+        (Function.update (fun l : Fin (r + 1) => Y l x) k (nablaY k))) m with hRHSk
+    -- The goal-correction is the full sum of the `RHSk`.
+    have hgoalCorr : Tensor0SSpace.toModel
+          ((show Tensor0SSpace (r + 1) I x →L[ℝ] Tensor0SSpace s I x from T x)
+            (tensor0SCovariantDerivative I M (r + 1) (LeviCivita (I := I) g)
+              (fun y : M => metricFormSection (I := I) (M := M) g (r + 1) Y y) x v)) m =
+        ∑ k : Fin (r + 1), RHSk k := by
+      rw [show (fun y : M => metricFormSection (I := I) (M := M) g (r + 1) Y y) =
+          metricFormFun (I := I) (M := M) g (r + 1) Y from rfl]
+      rw [toModel_tensorRS_apply (I := I) (M := M) (r + 1) s x (T x)
+        (tensor0SCovariantDerivative I M (r + 1) (LeviCivita (I := I) g)
+          (metricFormFun (I := I) (M := M) g (r + 1) Y) x v)]
+      rw [toModel_covDeriv_metricFormSection g (r + 1) Y x v]
+      rw [map_sum, ContinuousMultilinearMap.sum_apply]
+    -- The leading-slot summand `RHSk 0` equals the second peel term.
+    have hk0 : Tensor0SSpace.toModel (castLift x)
+          (Fin.cons (nablaY 0) (Fin.append (fun k : Fin r => Y k.succ x) m)) = RHSk 0 := by
+      rw [hRHSk]
+      change Tensor0SSpace.toModel (castLift x)
+          (Fin.cons (nablaY 0) (Fin.append (fun k : Fin r => Y k.succ x) m)) =
+        TensorRSSpace.toModel (T x)
+          (separableFormAt (I := I) (M := M) g x (r + 1)
+            (Function.update (fun l : Fin (r + 1) => Y l x) 0 (nablaY 0))) m
+      rw [hcastLift]
+      rw [toModel_cast_transport h (rawLiftFun (I := I) (M := M) g (r + 1) s T x)]
+      rw [ContinuousMultilinearMap.domDomCongr_apply, toModel_rawLiftFun,
+        lowerAllUpperIndices_apply]
+      have hform : separableFormAt (I := I) (M := M) g x (r + 1)
+            (fun k : Fin (r + 1) => (Fin.cons (nablaY 0)
+              (Fin.append (fun l : Fin r => Y l.succ x) m) : Fin (r + s + 1) → E)
+              ((finCongr h.symm) (Fin.castAdd s k))) =
+          separableFormAt (I := I) (M := M) g x (r + 1)
+            (Function.update (fun l : Fin (r + 1) => Y l x) 0 (nablaY 0)) := by
+        congr 1
+        funext k
+        refine Fin.cases ?_ (fun j => ?_) k
+        · rw [Function.update_self]
+          have : (finCongr h.symm) (Fin.castAdd s (0 : Fin (r + 1))) =
+              (0 : Fin ((r + s) + 1)) := Fin.ext (by simp)
+          rw [this, Fin.cons_zero]
+        · rw [Function.update_of_ne (Fin.succ_ne_zero j)]
+          have : (finCongr h.symm) (Fin.castAdd s j.succ) =
+              Fin.succ ((Fin.castAdd s j : Fin (r + s))) := Fin.ext (by simp [Fin.succ])
+          rw [this, Fin.cons_succ, Fin.append_left]
+      have htail : (fun j : Fin s => (Fin.cons (nablaY 0)
+            (Fin.append (fun l : Fin r => Y l.succ x) m) : Fin (r + s + 1) → E)
+              ((finCongr h.symm) (Fin.natAdd (r + 1) j))) = m := by
+        funext j
+        have : (finCongr h.symm) (Fin.natAdd (r + 1) j) =
+            Fin.succ ((Fin.natAdd r j : Fin (r + s))) :=
+          Fin.ext (by simp [Fin.succ, Nat.add_right_comm])
+        rw [this, Fin.cons_succ, Fin.append_right]
+      rw [hform, htail]
+    -- Each tail summand `RHSk j.succ` equals the corresponding IH-correction summand.
+    have hksucc : ∀ j : Fin r, RHSk j.succ = TensorRSSpace.toModel (T x)
+          (Tensor0SSpace.toModel
+            (prependMetricCLM (I := I) (M := M) g r (Y 0) x
+              (Tensor0SSpace.ofModel
+                (separableFormAt (I := I) (M := M) g x r
+                  (Function.update (fun l : Fin r => Y l.succ x) j (nablaY j.succ)))))) m := by
+      intro j
+      rw [hRHSk]
+      change TensorRSSpace.toModel (T x)
+          (separableFormAt (I := I) (M := M) g x (r + 1)
+            (Function.update (fun l : Fin (r + 1) => Y l x) j.succ (nablaY j.succ))) m = _
+      congr 2
+      refine ContinuousMultilinearMap.ext (fun u => ?_)
+      rw [toModel_prependMetricCLM, Tensor0SSpace.toModel_ofModel,
+        separableFormAt_succ_cons_apply, separableFormAt_apply, separableFormAt_apply]
+      rw [Function.update_of_ne (Fin.succ_ne_zero j).symm]
+      refine congrArg (g.inner x (Y 0 x) (u 0) * ·) ?_
+      refine Finset.prod_congr rfl (fun i _ => ?_)
+      rw [Function.update_apply, Function.update_apply]
+      by_cases hij : i = j
+      · subst hij; simp
+      · rw [if_neg hij, if_neg (fun hcontra => hij (Fin.succ_injective r hcontra))]
+    -- The IH-correction term is the sum of the tail summands `RHSk j.succ`.
+    have hIHcorr : Tensor0SSpace.toModel
+          ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from T' x)
+            (tensor0SCovariantDerivative I M r (LeviCivita (I := I) g)
+              (fun y : M => metricFormSection (I := I) (M := M) g r (fun k : Fin r => Y k.succ) y)
+              x v)) m =
+        ∑ j : Fin r, RHSk j.succ := by
+      rw [show (fun y : M => metricFormSection (I := I) (M := M) g r (fun k : Fin r => Y k.succ) y) =
+          metricFormFun (I := I) (M := M) g r (fun k : Fin r => Y k.succ) from rfl]
+      rw [toModel_tensorRS_apply (I := I) (M := M) r s x (T' x)
+        (tensor0SCovariantDerivative I M r (LeviCivita (I := I) g)
+          (metricFormFun (I := I) (M := M) g r (fun k : Fin r => Y k.succ)) x v)]
+      rw [toModel_covDeriv_metricFormSection g r (fun k : Fin r => Y k.succ) x v]
+      rw [map_sum, ContinuousMultilinearMap.sum_apply]
+      refine Finset.sum_congr rfl (fun j _ => ?_)
+      rw [hksucc j, hT']
+      rw [toModel_tensorRS_comp_apply (I := I) (M := M) r s x (T x)
+        (prependMetricCLM (I := I) (M := M) g r (Y 0) x)
+        (separableFormAt (I := I) (M := M) g x r
+          (Function.update (fun l : Fin r => Y l.succ x) j (nablaY j.succ)))]
+    -- Assemble: IH-correction (tail sum) + second peel term (leading) = full goal-correction sum.
+    rw [hgoalCorr, hIHcorr, hk0, add_comm, ← Fin.sum_univ_succ]
+
 /-- **The metric-form peel of the lowered covariant derivative.** For a smooth raw
 `(r, s)`-tensor function `T` (with smooth `(0, r + s)`-lift) and smooth vector fields `Y`,
 the `(0, r + s)`-covariant derivative of the lift, read on the tuple whose first `r` slots are
@@ -874,19 +1302,10 @@ toModel (∇^{(0,r+s)}_v lift)(append (Y·x) m)
   − toModel (T x (∇^{(0,r)}_v (metricFormSection g r Y)))(m).
 ```
 The metric is `∇`-parallel, so the metric form contributes only the correction term, which is
-`T x` applied to `∇^{(0,r)}_v` of the metric form (computed by the `∇g = 0` Leibniz).
-
-Its body is `sorry`: it is the precise TRUE `r`-fold leading-slot peel of the lift.  The base
-`r = 0` is the `(0 + s = s)`-reindexed rank-`0` intertwiner (the metric form is the unit and
-`∇^{(0,0)}` of it vanishes); the inductive step peels the leading slot with the committed
-`tensor0SCovariantDerivative_succ_consEval_peel`, recognises the peeled `(0, r + s)`-section as
-`rawLiftFun g r s (fun y => (T y).comp (prependMetricCLM g r (Y 0) y))` (rank reduced by the
-fibre prepend CLM `prependMetricCLM`), applies the induction hypothesis, and reassembles the
-accumulated `∇^{TM}_v (Y k)` corrections into `T x (∇^{(0,r+1)}_v (metricFormSection g (r+1) Y))`
-via the `∇g = 0` Leibniz `toModel_covDeriv_metricFormSection`.  All ingredients
-(`prependMetricCLM`, `toModel_covDeriv_metricFormSection`, the cast transports
-`tensor0SCovDeriv_cast_transport`/`toModel_cast_transport`, the committed peel) are proved above;
-only this `r`-fold reassembly induction remains.  Consumers transitively depend on `sorryAx`. -/
+`T x` applied to `∇^{(0,r)}_v` of the metric form (computed by the `∇g = 0` Leibniz).  The proof
+is the `r`-fold leading-slot peel `loweredCovDeriv_metricForm_eval_aux`: the smoothness
+hypothesis `_hT` supplies the everywhere-differentiability of the metric-lift
+`rawLiftFun g r s T` (`contMDiff_lifted_section`) that the peel induction consumes. -/
 lemma loweredCovDeriv_metricForm_eval (g : SmoothRiemannianMetric I M) :
     ∀ (r s : ℕ) (T : Π y : M, TensorRSSpace r s I y)
       (_hT : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -907,7 +1326,10 @@ lemma loweredCovDeriv_metricForm_eval (g : SmoothRiemannianMetric I M) :
               ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from T x)
                 (tensor0SCovariantDerivative I M r (LeviCivita (I := I) g)
                   (fun y : M => metricFormSection (I := I) (M := M) g r Y y) x v)) m := by
-  sorry
+  intro r s T hT Y x v m
+  refine loweredCovDeriv_metricForm_eval_aux (I := I) (M := M) g r s T ?_ Y x v m
+  intro z
+  exact (contMDiff_lifted_section (I := I) (M := M) g r s ⟨T, hT⟩ z).mdifferentiableAt (by simp)
 
 /-- **Leibniz product rule for the metric-lowered section (`∇g`-content), via a smooth
 local lowering form.**  Fix a point `x`, a direction `v` and an evaluation tuple

@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorBochner
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.IntegratedOrder2WeitzenbockCurvature
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformCurvatureSup
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovariantIntegrationByParts
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameWeitzenbockRemainder
 
 /-!
 # The genuine moving-frame third-order Weitzenböck field decomposition (order-separated form)
@@ -141,7 +142,19 @@ theorem exists_pointwiseTensorCurv_movingFrameField_orderSeparated_divergenceNul
           tensorL2Inner (I := I) (M := M) g 0 (s + 1)
               (pointwiseTensorCurv (I := I) (M := M) g s S - Gcurv - GcurvDeriv).toFun
               (covGrad (I := I) (M := M) g 0 s S).toFun = 0 := by
-  sorry
+  classical
+  obtain ⟨Cper, hCper_nn, hfields⟩ :=
+    pointwiseTensorCurv_movingFrameWeitzenbock_namedRemainder (I := I) (M := M) g
+  refine ⟨Cper, hCper_nn, fun s S => ?_⟩
+  obtain ⟨Gcurv, GcurvDeriv, Grem, hsplit, hcurv, hcurvDeriv, hrem, hnull⟩ := hfields s S
+  have hGrem_eq :
+      Grem = pointwiseTensorCurv (I := I) (M := M) g s S - Gcurv - GcurvDeriv := by
+    rw [hsplit]; abel
+  refine ⟨Gcurv, GcurvDeriv, hcurv, hcurvDeriv, ?_, ?_⟩
+  · intro x
+    have hx := hrem x
+    rwa [hGrem_eq] at hx
+  · rw [← hGrem_eq]; exact hnull
 
 end Connection
 end Integral
