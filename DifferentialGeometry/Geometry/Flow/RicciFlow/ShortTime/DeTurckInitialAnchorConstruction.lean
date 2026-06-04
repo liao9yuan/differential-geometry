@@ -196,16 +196,54 @@ theorem deTurck_g0_realize_data
       ccTensorBilinSymm (I := I) g₀ (Nsec u) x v w =
         ccTensorBilinSymm (I := I) g₀ (repr u) x v w := fun _ _ _ _ => rfl
   have hNsec_geom_univ := deTurckRemainderRealize_geomMatch (I := I) (M := M) g₀ g_bg a
-  -- The **genuine, un-gated** continuous DeTurck nonlinearity `N_cont`, its engine-shaped
-  -- local Lipschitz `hLipBall`, and the *carrier-only* coordinate tie to the gauge
-  -- (`hcoeff`).  The engine's Lipschitz is *not* routed through the gated gauge.
-  obtain ⟨N_cont, K, R, hR, hN_cont, hLipBall, hcoeff⟩ :=
-    deTurck_g0_genuine_nonlinearity (I := I) g₀ g_bg a ha
-  -- The first-order operator-loss of the gauge-cancelled geometric nonlinearity (posited
-  -- analytic leaf `deTurckGenuineN_firstOrder_operatorLoss`), pinned to the geometric gauge
-  -- by the continuity `hN_cont` and the gate-coordinate tie `hcoeff`.
+  -- The **genuine, un-gated** continuous DeTurck nonlinearity `N_cont`, obtained *concretely*
+  -- as the coordinate-spectral synthesis `u ↦ deTurckG0SpectralN g₀ a (deTurckRealizeRemainderOf
+  -- g₀ g_bg (P u))` of the perturbation synthesis `P`, so that its all-order first-order
+  -- operator-loss leaf is pinned to the named geometric operator rather than to a free
+  -- function.  The supercritical `H^{a+2}` chart-jet control `hctrl` of `P` and the bridge to
+  -- the coordinate-spectral nonlinearity supply the engine-shaped ball-continuity `hN_cont`
+  -- and local Lipschitz `hLipBall`; `hcarrier` is the gate-realizable agreement of `P`'s
+  -- realized remainder with the honest gate gauge `deTurckRemainderRealizeSection g₀ g_bg`.
+  obtain ⟨P, K, R, hR, hctrl, hcarrier⟩ :=
+    exists_deTurckRemainderG0_synthesis_chartJet2Control (I := I) g₀ g_bg a ha
+  obtain ⟨K', hN_cont, hLipBall⟩ :=
+    deTurckG0SpectralN_continuous_lipschitz_of_chartJet2Control
+      (I := I) g₀ g_bg a ha P K hR hctrl
+  set N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+      tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) :=
+    fun u => deTurckG0SpectralN (I := I) g₀ a (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
+    with hN_cont_def
+  -- The all-order concrete-synthesis pin of `N_cont`: every coordinate of every input is the
+  -- `L²` coordinate of the concrete realized DeTurck remainder of `P` (definitional via
+  -- `deTurckG0SpectralN_coeff`).  This pins `N_cont` to the named geometric operator and
+  -- discharges the strengthened hypothesis of the first-order operator-loss leaf.
+  have hsynth : ∀ (v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
+      ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+        (N_cont v).coeff i =
+          tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (Integral.L2.SmoothCcTensor.toL2
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))) i := by
+    intro v i
+    simp only [hN_cont_def, deTurckG0SpectralN_coeff]
+  -- The gate-realizable coordinate tie to the honest gauge: on `realizableAtGate g₀ u` the
+  -- `L²` class of `deTurckRealizeRemainderOf g₀ g_bg (P u)` equals that of the honest gauge
+  -- `deTurckRemainderRealizeSection g₀ g_bg u` (`hcarrier`), so their `tensorL2Coeff`s agree.
+  have hcoeff : ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
+      realizableAtGate (I := I) g₀ u →
+        ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+          (N_cont u).coeff i =
+            tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (Integral.L2.SmoothCcTensor.toL2
+                (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) i := by
+    intro u hu i
+    rw [hsynth u i, hcarrier u hu]
+  -- The first-order operator-loss of the concrete gauge-cancelled geometric nonlinearity
+  -- (posited analytic leaf `deTurckGenuineN_firstOrder_operatorLoss`), pinned to the named
+  -- geometric operator by the all-order concrete-synthesis identity `hsynth`.
   have hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont :=
-    deTurckGenuineN_firstOrder_operatorLoss (I := I) g₀ g_bg a N_cont hN_cont hcoeff
+    deTurckGenuineN_firstOrder_operatorLoss (I := I) g₀ g_bg a N_cont P hsynth
   obtain ⟨T, g_DT, u₂, T_s, hT, h0, hreal, hcont, hreg, hsmall, hsmoothrepr, hcanon, hHk⟩ :=
     deTurck_g0_carrier_realize_transport (I := I) g₀ a ha ha2 N_cont hR hN_cont hLipBall hloss
   -- Discharge the honest `realizableAtGate` membership of the carrier inclusion on the

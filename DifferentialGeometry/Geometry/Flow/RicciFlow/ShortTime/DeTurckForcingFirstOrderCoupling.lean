@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTi
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ParabolicInteriorSmoothing
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionSpace
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckRemainderRealizeGauge
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckG0GenuineNonlinearity
 
 /-! # First-order coupling of the DeTurck continuous-nonlinearity forcing
 
@@ -276,59 +277,58 @@ theorem tensorTimeL2_weighted_pointwise_mass_integral
           (sq_nonneg _)))]
   exact ⟨hΦ_int, hae_summable, hΦ_integral⟩
 
-/-- **The geometric gauge-cancelled DeTurck nonlinearity has the full-series spatial
-first-order operator-loss (the genuine elliptic / first-order operator estimate — posited
-geometric leaf).**
+/-- **The concrete gauge-cancelled DeTurck-remainder spectral synthesis has the full-series
+spatial first-order operator-loss (the genuine elliptic / first-order operator estimate —
+posited geometric leaf about a concrete operator).**
 
-For the genuine continuous DeTurck nonlinearity `N_cont : H^{a+1} → H^a` of the
-`g₀`-anchored construction — pinned to the geometric gauge-cancelled remainder by its
-continuity `hN_cont` and the gate-coordinate tie `hcoeff` (on the realizable gate its
-eigenbasis coordinates are the `L²` coordinates of the gauge
-`deTurckRemainderRealizeSection g₀ g_bg`, the honest DeTurck remainder
-`deTurckRicciRHS g_bg (realize) − Δ_∇(realize)`) — there is a finite constant `C ≥ 0` such
-that, at *every* spatial Sobolev order `d` and for every spatial perturbation `v : H^{a+1}`
-whose order-`(d + 1)` spectral mass is summable, the **entire** order-`d` output-mass series
-is itself summable (so `N_cont v ∈ H^d`) and its total is bounded by `C` times the total
-order-`(d + 1)` input mass:
+The nonlinearity `N_cont : H^{a+1} → H^a` is pinned, **at every eigen-coordinate and for
+every input** `v` (`hsynth`), to the *concrete* gauge-cancelled DeTurck-remainder spectral
+synthesis `v ↦ deTurckG0SpectralN g₀ a (deTurckRealizeRemainderOf g₀ g_bg (P v))`: its
+eigenbasis coordinates are the `L²` coordinates of the un-gated realized DeTurck remainder
+`deTurckRealizeRemainderOf g₀ g_bg (P v) =
+deTurckRHSSection g_bg (realize (P v)) − Δ_∇(P v)` of the perturbation synthesis `P v`.
+For this concrete operator there is a finite constant `C ≥ 0` such that, at *every* spatial
+Sobolev order `d` and for every `v : H^{a+1}` whose order-`(d + 1)` spectral mass is summable,
+the **entire** order-`d` output-mass series is itself summable (so `N_cont v ∈ H^d`) and its
+total is bounded by `C` times the total order-`(d + 1)` input mass:
 
   `∑' i, (1 + λᵢ)ᵈ · ((N_cont v).coeff i)² ≤ C · ∑' i, (1 + λᵢ)^{d+1} · (v.coeff i)²`.
 
 This is the genuine **operator first-order-loss** `‖N_cont v‖_{H^d}² ≤ C · ‖v‖_{H^{d+1}}²`
 of the gauge-cancelled geometric DeTurck remainder — the boundedness of the first-order
 differential operator `H^{d+1} → H^d` left over once the second-order principal part of
-`deTurckRicciRHS` cancels against the linear `Δ_∇`.  It is the higher-order operator-norm
-extension of `N_cont` to every pair `H^{d+1} → H^d`: *additional* structure of the geometric
-DeTurck remainder, **not** deducible from the fixed-order datum `N_cont : H^{a+1} → H^a`
-together with its gate-only coordinate tie (the off-gate output of `N_cont` is otherwise
-unconstrained — this is why the full operator-loss is posited as the genuine analytic leaf,
-encoding that the actual `N_cont` is the coordinate-spectral synthesis of an everywhere
-first-order geometric section).  The input summability hypothesis is *load-bearing for
-truth*: without it the Lean `tsum` on the right collapses to `0` for `v ∉ H^{d+1}`,
-falsifying the bound; with it the right-hand side is the genuine order-`(d + 1)` spatial mass
-of `v`.  The hypotheses `hN_cont`/`hcoeff` genuinely pin `N_cont` to the geometric gauge
-object (a generic function does *not* satisfy the coordinate tie against
-`deTurckRemainderRealizeSection g₀ g_bg`), so the statement is *not* the false bare-function
-claim; the conclusion (the summable operator-loss) is structurally distinct from those
-hypotheses; no packaging.  The body is `sorry` (the single genuine analytic geometric leaf).
-Consumers transitively depend on `sorryAx`. -/
+`deTurckRicciRHS` cancels against the linear `Δ_∇` in
+`deTurckRealizeRemainderOf g₀ g_bg (P v)`.  It is *additional* analytic structure of the
+concrete realized DeTurck remainder, encoding that the section
+`deTurckRealizeRemainderOf g₀ g_bg (P v)` is the value of an everywhere first-order geometric
+operator on `v` (so it loses at most one order); this is **not** deducible from the bare type
+`N_cont : H^{a+1} → H^a`, which is why it is posited as the genuine analytic leaf.
+
+The synthesis-pin `hsynth` is a *concrete equality* tying every coordinate of `N_cont v` to
+the named geometric operator `deTurckG0SpectralN g₀ a (deTurckRealizeRemainderOf g₀ g_bg (P
+·))`; it is **not** an assertion of the loss bound (the conclusion is structurally a Sobolev
+inequality, distinct from the coordinate equality), so there is no packaging — the loss is to
+be *proved* from the first-order nature of the concrete `deTurckRealizeRemainderOf`, not
+assumed.  A generic continuous function agreeing with the geometric `N_cont` only on the dense
+realizable gate at the fixed order `a` does **not** satisfy `hsynth` (which pins all
+coordinates of all inputs to the concrete synthesis), so the all-order conclusion is not
+under-hypothesised.  The input summability hypothesis is *load-bearing for truth*: without it
+the Lean `tsum` on the right collapses to `0` for `v ∉ H^{d+1}`, falsifying the bound; with it
+the right-hand side is the genuine order-`(d + 1)` spatial mass of `v`.  The body is `sorry`
+(the single genuine analytic geometric leaf).  Consumers transitively depend on `sorryAx`. -/
 theorem deTurckGenuineN_firstOrder_operatorTsumLoss
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
-    {R : ℝ}
-    (hN_cont : ContinuousOn N_cont
-      (Metric.closedBall
-        (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
-          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R))
-    (hcoeff : ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
-        realizableAtGate (I := I) g₀ u →
-          ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
-            (N_cont u).coeff i =
-              tensorL2Coeff (I := I) (M := M)
-                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                (Integral.L2.SmoothCcTensor.toL2
-                  (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) i) :
+    (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+        Integral.L2.SmoothCcTensor g₀ 0 2)
+    (hsynth : ∀ (v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
+        ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+          (N_cont v).coeff i =
+            tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (Integral.L2.SmoothCcTensor.toL2
+                (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))) i) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) (d : ℝ),
       Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (d + 1) *
           ((v.coeff i)) ^ 2) →
@@ -339,15 +339,16 @@ theorem deTurckGenuineN_firstOrder_operatorTsumLoss
             C * ∑' i, tensorSobolevWeight (I := I) (M := M) i (d + 1) *
               ((v.coeff i)) ^ 2 := sorry
 
-/-- **The geometric gauge-cancelled DeTurck nonlinearity has the *spatial* first-order
-operator-loss (the finite-partial-sum restriction of the full operator-loss).**
+/-- **The concrete gauge-cancelled DeTurck-remainder spectral synthesis has the *spatial*
+first-order operator-loss (the finite-partial-sum restriction of the full operator-loss).**
 
-For the genuine continuous DeTurck nonlinearity `N_cont : H^{a+1} → H^a` of the
-`g₀`-anchored construction — pinned to the geometric gauge-cancelled remainder by its
-continuity `hN_cont` and the gate-coordinate tie `hcoeff` — there is a finite constant
-`C ≥ 0` such that, at *every* spatial Sobolev order `d` and for every spatial perturbation
-`v : H^{a+1}` whose order-`(d + 1)` spectral mass is summable, every finite partial sum of
-the order-`d` output masses is bounded by `C` times the total order-`(d + 1)` input mass:
+For the nonlinearity `N_cont : H^{a+1} → H^a` pinned at every coordinate of every input to the
+concrete gauge-cancelled DeTurck-remainder spectral synthesis
+`v ↦ deTurckG0SpectralN g₀ a (deTurckRealizeRemainderOf g₀ g_bg (P v))` (`hsynth`), there is a
+finite constant `C ≥ 0` such that, at *every* spatial Sobolev order `d` and for every spatial
+perturbation `v : H^{a+1}` whose order-`(d + 1)` spectral mass is summable, every finite
+partial sum of the order-`d` output masses is bounded by `C` times the total order-`(d + 1)`
+input mass:
 
   `∑_{i ∈ F} (1 + λᵢ)ᵈ · ((N_cont v).coeff i)² ≤ C · ∑' i, (1 + λᵢ)^{d+1} · (v.coeff i)²`.
 
@@ -362,20 +363,15 @@ theorem deTurckGenuineN_firstOrder_spatialOperatorLoss
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
-    {R : ℝ}
-    (hN_cont : ContinuousOn N_cont
-      (Metric.closedBall
-        (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
-          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R))
-    (hcoeff : ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
-        realizableAtGate (I := I) g₀ u →
-          ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
-            (N_cont u).coeff i =
-              tensorL2Coeff (I := I) (M := M)
-                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                (Integral.L2.SmoothCcTensor.toL2
-                  (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) i) :
+    (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+        Integral.L2.SmoothCcTensor g₀ 0 2)
+    (hsynth : ∀ (v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
+        ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+          (N_cont v).coeff i =
+            tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (Integral.L2.SmoothCcTensor.toL2
+                (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))) i) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) (d : ℝ),
       Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (d + 1) *
           ((v.coeff i)) ^ 2) →
@@ -385,57 +381,52 @@ theorem deTurckGenuineN_firstOrder_spatialOperatorLoss
             C * ∑' i, tensorSobolevWeight (I := I) (M := M) i (d + 1) *
               ((v.coeff i)) ^ 2 := by
   obtain ⟨C, hC0, hP⟩ :=
-    deTurckGenuineN_firstOrder_operatorTsumLoss (I := I) g₀ g_bg a N_cont hN_cont hcoeff
+    deTurckGenuineN_firstOrder_operatorTsumLoss (I := I) g₀ g_bg a N_cont P hsynth
   refine ⟨C, hC0, fun v d hsum F => ?_⟩
   obtain ⟨hsumm, hle⟩ := hP v d hsum
   refine le_trans (Summable.sum_le_tsum F (fun i _ => ?_) hsumm) hle
   exact mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i d) (sq_nonneg _)
 
-/-- **The geometric gauge-cancelled DeTurck nonlinearity has the first-order operator-loss
-(genuine elliptic / first-order operator estimate — posited child).**
+/-- **The concrete gauge-cancelled DeTurck-remainder spectral synthesis has the first-order
+operator-loss (genuine elliptic / first-order operator estimate — posited child).**
 
-For the genuine continuous DeTurck nonlinearity `N_cont : H^{a+1} → H^a` of the `g₀`-anchored
-construction — pinned to the geometric gauge-cancelled remainder by its continuity `hN_cont`
-and the gate-coordinate tie `hcoeff` (on the realizable gate its eigenbasis coordinates are
-the `L²` coordinates of the gauge `deTurckRemainderRealizeSection g₀ g_bg`, the honest DeTurck
-remainder `deTurckRicciRHS g_bg (realize) − Δ_∇(realize)`) — the first-order operator-loss
-`FirstOrderOperatorLoss g₀ a T N_cont` holds.
+For the nonlinearity `N_cont : H^{a+1} → H^a` pinned at every coordinate of every input to the
+concrete gauge-cancelled DeTurck-remainder spectral synthesis
+`v ↦ deTurckG0SpectralN g₀ a (deTurckRealizeRemainderOf g₀ g_bg (P v))` (`hsynth`), the
+first-order operator-loss `FirstOrderOperatorLoss g₀ a N_cont` holds.
 
 This is the genuine quantitative first-order operator-loss of the gauge-cancelled geometric
-DeTurck remainder, whose second-order principal part cancels against the linear `Δ_∇`,
-leaving a genuine first-order differential operator.  It is the higher-order operator-norm
-extension of `N_cont` to every pair `H^{d+1} → H^d` — *additional* structure of the DeTurck
-remainder, not deducible from the fixed-order datum `N_cont : H^{a+1} → H^a` alone (this is
-why it is posited).  The hypotheses `hN_cont`/`hcoeff` genuinely pin `N_cont` to the geometric
-gauge object (a generic function does *not* satisfy the coordinate tie against
-`deTurckRemainderRealizeSection g₀ g_bg`), so the statement is *not* the false bare-function
-claim; the conclusion (the operator-loss) is structurally distinct from those hypotheses; no
-packaging.  The body is `sorry` (the single genuine analytic leaf — the operator
-first-order-loss estimate of the geometric remainder).  Consumers transitively depend on
+DeTurck remainder, whose second-order principal part cancels against the linear `Δ_∇` inside
+`deTurckRealizeRemainderOf g₀ g_bg (P v)`, leaving a genuine first-order differential
+operator.  It is the higher-order operator-norm extension to every pair `H^{d+1} → H^d` —
+*additional* structure of the concrete realized DeTurck remainder, not deducible from the
+bare type `N_cont : H^{a+1} → H^a` alone (this is why it is posited).  The synthesis-pin
+`hsynth` genuinely fixes `N_cont` to the named concrete geometric operator at all coordinates
+of all inputs (a generic function — even one agreeing with the geometric `N_cont` on the dense
+realizable gate at the fixed order `a` — does *not* satisfy it), so the statement is *not* the
+false bare-function claim; the conclusion (the operator-loss) is structurally distinct from
+the coordinate equality `hsynth`; no packaging.  The body delegates to the single genuine
+analytic leaf `deTurckGenuineN_firstOrder_operatorTsumLoss` (the operator first-order-loss
+estimate of the concrete geometric remainder).  Consumers transitively depend on
 `sorryAx`. -/
 theorem deTurckGenuineN_firstOrder_operatorLoss
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
-    {R : ℝ}
-    (hN_cont : ContinuousOn N_cont
-      (Metric.closedBall
-        (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
-          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R))
-    (hcoeff : ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
-        realizableAtGate (I := I) g₀ u →
-          ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
-            (N_cont u).coeff i =
-              tensorL2Coeff (I := I) (M := M)
-                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                (Integral.L2.SmoothCcTensor.toL2
-                  (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) i) :
+    (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+        Integral.L2.SmoothCcTensor g₀ 0 2)
+    (hsynth : ∀ (v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
+        ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+          (N_cont v).coeff i =
+            tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (Integral.L2.SmoothCcTensor.toL2
+                (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))) i) :
     FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont := by
   classical
   -- The genuine **spatial** first-order operator-loss of the gauge-cancelled remainder.
   obtain ⟨C, hC0, hP⟩ :=
-    deTurckGenuineN_firstOrder_spatialOperatorLoss (I := I) g₀ g_bg a N_cont hN_cont hcoeff
+    deTurckGenuineN_firstOrder_spatialOperatorLoss (I := I) g₀ g_bg a N_cont P hsynth
   refine ⟨C, hC0, fun T d w Nw hNw hsum F => ?_⟩
   -- The order-`(d + 1)` time-Plancherel/Tonelli package for the input field `w`.
   obtain ⟨hPmass_int, hPmass_ae_summable, hPmass_integral⟩ :=

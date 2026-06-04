@@ -8,6 +8,7 @@ import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNormReverseOrde
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.DenseSubset
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.TensorSectionL2BoundByComponents
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridgeUniform
+import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.TensorChartComponentSobolevBound
 
 /-! # Order-dropping completion-norm bounds for the rough tensor connection Laplacian
 
@@ -35,10 +36,12 @@ completion-norm forms `exists_rawConnLapSmooth_toHs_le_toHs_succ` and the iterat
 per-chart order-drop is itself assembled — Tonelli for finite sums plus a monotone `lintegral` of a
 pointwise integrand bound — from the pointwise second-order rough-Laplacian chart-component
 operator-norm primitive `exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsContent`,
-which is the single remaining `sorry`: the genuine atomic 2nd-order elliptic-boundedness content of
-the chart-coordinate formula `tensorChartComponentRaw_rawTensorConnLap_eq_chart_α_coord_formula`
-(principal mixed-second-partial part) together with the chart-frame trace lower-order expansion
-`covDerivComponentEuclid_S_k_ext_eq_iteratedFDeriv_T₀_add_lowerOrder`.
+which is proved here (Leibniz on each chart block + compact-kernel coefficient sup-bounds + finite
+active-set assembly) on top of the open-good-set `T₀`-linear chart-coordinate formula
+`rawTensorConnLap_chartα_raw_eq_T₀_linear_formula_on_goodSet` — the single remaining `sorry` of this
+chart-port: the open-good-set strengthening (dropping the inessential partition-of-unity-tsupport
+restriction) of the on-disk `rawTensorConnLap_chartα_raw_eq_T₀_linear_formula`, true because the
+connection Laplacian is the metric trace of the second covariant derivative at every good-set point.
 
 The companion primitive `exists_l2Norm_le_toHs_zero` records the reverse of the on-disk
 `tensorPouSobolevHsNorm_zero_le_tensorL2Norm`: the global metric `L²` norm of a smooth
@@ -181,8 +184,806 @@ private lemma rawConnLapPull_iteratedFDeriv_norm_sq_le_rhsContent
     (fun q' _ => Finset.sum_nonneg (fun l' _ => hbasisSum_nn q' l'))
     (Finset.mem_univ q)
 
+/-- `euclidPartial l u` is, as a function, the direction-`l` evaluation of the Fréchet derivative
+of `u`. -/
+private lemma euclidPartial_eq_fderiv_apply (l : Fin (Module.finrank ℝ E)) (u : EuclN → ℝ) :
+    euclidPartial (E := E) l u = fun z => fderiv ℝ u z (EuclideanSpace.single l 1) := rfl
+
+/-- If `u` is `C^∞` at `y`, then so is `euclidPartial l u`. -/
+private lemma euclidPartial_contDiffAt
+    (l : Fin (Module.finrank ℝ E)) {u : EuclN → ℝ} {y : EuclN}
+    (hu : ContDiffAt ℝ ∞ u y) :
+    ContDiffAt ℝ ∞ (euclidPartial (E := E) l u) y := by
+  have h_fderiv_cdAt : ContDiffAt ℝ (∞ : WithTop ℕ∞) (fun z => fderiv ℝ u z) y := by
+    have hle : (∞ : WithTop ℕ∞) + 1 ≤ (∞ : WithTop ℕ∞) := by
+      rw [show (∞ : WithTop ℕ∞) + 1 = (∞ : WithTop ℕ∞) from rfl]
+    simpa using hu.fderiv_right (m := (∞ : WithTop ℕ∞)) hle
+  rw [euclidPartial_eq_fderiv_apply (E := E) l u]
+  exact (ContinuousLinearMap.apply ℝ ℝ
+    (EuclideanSpace.single l (1 : ℝ))).contDiff.contDiffAt.comp y h_fderiv_cdAt
+
+/-- One `euclidPartial` costs exactly one Fréchet order in operator norm: if `u` is `C^∞` at `y`,
+then `‖D^m (euclidPartial l u) y‖ ≤ ‖D^{m + 1} u y‖`. -/
+private lemma euclidPartial_iteratedFDeriv_norm_le
+    (l : Fin (Module.finrank ℝ E)) {u : EuclN → ℝ} {y : EuclN}
+    (hu : ContDiffAt ℝ ∞ u y) (m : ℕ) :
+    ‖iteratedFDeriv ℝ m (euclidPartial (E := E) l u) y‖ ≤
+      ‖iteratedFDeriv ℝ (m + 1) u y‖ := by
+  have h_fderiv_cdAt : ContDiffAt ℝ (∞ : WithTop ℕ∞) (fun z => fderiv ℝ u z) y := by
+    have hle : (∞ : WithTop ℕ∞) + 1 ≤ (∞ : WithTop ℕ∞) := by
+      rw [show (∞ : WithTop ℕ∞) + 1 = (∞ : WithTop ℕ∞) from rfl]
+    simpa using hu.fderiv_right (m := (∞ : WithTop ℕ∞)) hle
+  rw [euclidPartial_eq_fderiv_apply (E := E) l u]
+  have h_clm := norm_iteratedFDeriv_clm_apply_const
+    (𝕜 := ℝ) (f := fun z => fderiv ℝ u z) (c := EuclideanSpace.single l 1)
+    (x := y) (n := m) h_fderiv_cdAt (by exact_mod_cast le_top)
+  have h_single_norm : ‖(EuclideanSpace.single l (1 : ℝ))‖ = 1 := by
+    rw [PiLp.norm_single]; simp
+  have h_fderiv_iter : ‖iteratedFDeriv ℝ m (fun z => fderiv ℝ u z) y‖ =
+      ‖iteratedFDeriv ℝ (m + 1) u y‖ := norm_iteratedFDeriv_fderiv
+  calc ‖iteratedFDeriv ℝ m (fun z => (fderiv ℝ u z) (EuclideanSpace.single l 1)) y‖
+      ≤ ‖(EuclideanSpace.single l (1 : ℝ))‖ *
+          ‖iteratedFDeriv ℝ m (fun z => fderiv ℝ u z) y‖ := h_clm
+    _ = ‖iteratedFDeriv ℝ (m + 1) u y‖ := by rw [h_single_norm, one_mul, h_fderiv_iter]
+
+/-- A `C^∞` (on the chart target) coefficient family is `C^∞` at every interior point. -/
+private lemma contDiffAt_of_contDiffOn_chartTarget (α : M)
+    {C : EuclN → ℝ} (hC : ContDiffOn ℝ ∞ C (chartTargetEuclid (I := I) (M := M) α))
+    {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
+    ContDiffAt ℝ ∞ C y :=
+  hC.contDiffAt ((chartTargetEuclid_isOpen (I := I) (M := M) α).mem_nhds hy)
+
+/-- **The product-summand Leibniz operator-norm bound.** For a `T`-independent `C^∞` coefficient
+`C`, a component pair `q`, an interior point `y`, and a derivative-loss `a ∈ {0, 1, 2}` encoded as
+the `a`-fold `euclidPartial` iterate of the chart pull-back `F = rawConnLapPull g r s T α q`, the
+order-`j` Fréchet derivative of `C · (euclidPartial^a F)` is dominated, by the Leibniz product rule,
+by the sum over split orders `i ≤ j` of `C(j, i) · ‖D^i C y‖ · ‖D^{(j - i) + a} F y‖`.  The
+`euclidPartial` iterate costs exactly `a` Fréchet orders. -/
+private lemma rawConnLapProductSummand_iteratedFDeriv_norm_le
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
+    (α : M) (C : EuclN → ℝ) (hC : ContDiffOn ℝ ∞ C (chartTargetEuclid (I := I) (M := M) α))
+    (q : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    (Fa : EuclN → ℝ) (a : ℕ)
+    (hFa_cd : ∀ z : EuclN, z ∈ chartTargetEuclid (I := I) (M := M) α →
+        ContDiffAt ℝ ∞ Fa z)
+    (hFa_bd : ∀ (m : ℕ) (z : EuclN), z ∈ chartTargetEuclid (I := I) (M := M) α →
+        ‖iteratedFDeriv ℝ m Fa z‖ ≤
+          ‖iteratedFDeriv ℝ (m + a)
+            (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) z‖)
+    (j : ℕ) {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
+    ‖iteratedFDeriv ℝ j (fun z => C z * Fa z) y‖ ≤
+      ∑ i ∈ Finset.range (j + 1),
+        (j.choose i : ℝ) * ‖iteratedFDeriv ℝ i C y‖ *
+          ‖iteratedFDeriv ℝ ((j - i) + a)
+            (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) y‖ := by
+  classical
+  set s_set : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hs_set
+  have h_open : IsOpen s_set := chartTargetEuclid_isOpen (I := I) (M := M) α
+  have h_uniq : UniqueDiffOn ℝ s_set := h_open.uniqueDiffOn
+  have hC_cdon : ContDiffOn ℝ (j : WithTop ℕ∞) C s_set := hC.of_le (by exact_mod_cast le_top)
+  have hFa_cdon : ContDiffOn ℝ (j : WithTop ℕ∞) Fa s_set := by
+    intro z hz
+    exact (hFa_cd z hz).of_le (by exact_mod_cast le_top) |>.contDiffWithinAt
+  rw [← iteratedFDerivWithin_of_isOpen (𝕜 := ℝ) (f := fun z => C z * Fa z) j h_open hy]
+  have hmul := norm_iteratedFDerivWithin_mul_le hC_cdon hFa_cdon h_uniq hy
+    (le_refl (j : WithTop ℕ∞))
+  refine le_trans hmul ?_
+  refine Finset.sum_le_sum (fun i hi => ?_)
+  have hi_le : i ≤ j := by have := Finset.mem_range.mp hi; omega
+  rw [iteratedFDerivWithin_of_isOpen (𝕜 := ℝ) (f := C) i h_open hy,
+      iteratedFDerivWithin_of_isOpen (𝕜 := ℝ) (f := Fa) (j - i) h_open hy]
+  have hFa_le := hFa_bd (j - i) y hy
+  have h_coeff_nn : 0 ≤ (j.choose i : ℝ) * ‖iteratedFDeriv ℝ i C y‖ := by positivity
+  calc (j.choose i : ℝ) * ‖iteratedFDeriv ℝ i C y‖ * ‖iteratedFDeriv ℝ (j - i) Fa y‖
+      ≤ (j.choose i : ℝ) * ‖iteratedFDeriv ℝ i C y‖ *
+          ‖iteratedFDeriv ℝ ((j - i) + a)
+            (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) y‖ :=
+        mul_le_mul_of_nonneg_left hFa_le h_coeff_nn
+
+/-- Near an interior point of the chart target, the chart-pushed raw `q`-component of `T` agrees
+with the plain `rawConnLapPull` of that component, so their iterated Fréchet derivatives coincide
+there. -/
+private lemma chartPushedRaw_eventuallyEq_rawConnLapPull
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
+    (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
+    (chartPushedRaw I α
+        (tensorChartComponentRaw (I := I) (M := M) g r s T α q.1 q.2)) =ᶠ[nhds y]
+      rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2 := by
+  have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
+    chartTargetEuclid_isOpen (I := I) (M := M) α
+  filter_upwards [h_open.mem_nhds hy] with z hz
+  rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hz]
+  rfl
+
+/-- `rawConnLapPull g r s T α q` is `C^∞` at every interior point of the chart target. -/
+private lemma rawConnLapPull_contDiffAt'
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
+    (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
+    ContDiffAt ℝ ∞ (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) y :=
+  rawConnLapPull_contDiffAt (I := I) (M := M) g r s T α q.1 q.2 hy
+
+/-- `euclidPartial^a (chartPushedRaw raw_q T)` agrees, near an interior point, with
+`euclidPartial^a (rawConnLapPull T α q)`; combined with the one-order `euclidPartial` cost this
+yields the operator-norm bound `‖D^m (euclidPartial^a (chartPushedRaw raw_q T)) z‖ ≤
+‖D^{m + a} (rawConnLapPull T α q) z‖` for `a = 0, 1, 2`. -/
+private lemma euclidPartialIter_chartPushedRaw_norm_le_zero
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
+    (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    (m : ℕ) {z : EuclN} (hz : z ∈ chartTargetEuclid (I := I) (M := M) α) :
+    ‖iteratedFDeriv ℝ m
+        (chartPushedRaw I α
+          (tensorChartComponentRaw (I := I) (M := M) g r s T α q.1 q.2)) z‖ ≤
+      ‖iteratedFDeriv ℝ (m + 0)
+        (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) z‖ := by
+  rw [Nat.add_zero,
+    (chartPushedRaw_eventuallyEq_rawConnLapPull (I := I) (M := M) g r s T α q hz).iteratedFDeriv
+      ℝ m |>.self_of_nhds]
+
+private lemma euclidPartialIter_chartPushedRaw_norm_le_one
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
+    (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    (k : Fin (Module.finrank ℝ E))
+    (m : ℕ) {z : EuclN} (hz : z ∈ chartTargetEuclid (I := I) (M := M) α) :
+    ‖iteratedFDeriv ℝ m
+        (euclidPartial (E := E) k
+          (chartPushedRaw I α
+            (tensorChartComponentRaw (I := I) (M := M) g r s T α q.1 q.2))) z‖ ≤
+      ‖iteratedFDeriv ℝ (m + 1)
+        (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) z‖ := by
+  have hev : euclidPartial (E := E) k
+        (chartPushedRaw I α
+          (tensorChartComponentRaw (I := I) (M := M) g r s T α q.1 q.2)) =ᶠ[nhds z]
+      euclidPartial (E := E) k (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) := by
+    have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
+      chartTargetEuclid_isOpen (I := I) (M := M) α
+    have h_fderiv_ev :
+        (fun w => fderiv ℝ
+            (chartPushedRaw I α
+              (tensorChartComponentRaw (I := I) (M := M) g r s T α q.1 q.2)) w) =ᶠ[nhds z]
+          (fun w => fderiv ℝ (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) w) := by
+      filter_upwards [h_open.mem_nhds hz] with w hw
+      exact Filter.EventuallyEq.fderiv_eq
+        (chartPushedRaw_eventuallyEq_rawConnLapPull (I := I) (M := M) g r s T α q hw)
+    filter_upwards [h_fderiv_ev] with w hw
+    simp only [euclidPartial_def, hw]
+  rw [(hev.iteratedFDeriv ℝ m).self_of_nhds]
+  exact euclidPartial_iteratedFDeriv_norm_le (E := E) k
+    (rawConnLapPull_contDiffAt' (I := I) (M := M) g r s T α q hz) m
+
+private lemma euclidPartialIter_chartPushedRaw_norm_le_two
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
+    (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    (k l : Fin (Module.finrank ℝ E))
+    (m : ℕ) {z : EuclN} (hz : z ∈ chartTargetEuclid (I := I) (M := M) α) :
+    ‖iteratedFDeriv ℝ m
+        (euclidPartial (E := E) l
+          (euclidPartial (E := E) k
+            (chartPushedRaw I α
+              (tensorChartComponentRaw (I := I) (M := M) g r s T α q.1 q.2)))) z‖ ≤
+      ‖iteratedFDeriv ℝ (m + 2)
+        (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) z‖ := by
+  set u : EuclN → ℝ := rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2 with hu_def
+  have hu_cdAt : ∀ {w : EuclN}, w ∈ chartTargetEuclid (I := I) (M := M) α →
+      ContDiffAt ℝ ∞ u w := fun hw =>
+    rawConnLapPull_contDiffAt' (I := I) (M := M) g r s T α q hw
+  have hev_inner : euclidPartial (E := E) k
+        (chartPushedRaw I α
+          (tensorChartComponentRaw (I := I) (M := M) g r s T α q.1 q.2)) =ᶠ[nhds z]
+      euclidPartial (E := E) k u := by
+    have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
+      chartTargetEuclid_isOpen (I := I) (M := M) α
+    have h_fderiv_ev :
+        (fun w => fderiv ℝ
+            (chartPushedRaw I α
+              (tensorChartComponentRaw (I := I) (M := M) g r s T α q.1 q.2)) w) =ᶠ[nhds z]
+          (fun w => fderiv ℝ u w) := by
+      filter_upwards [h_open.mem_nhds hz] with w hw
+      exact Filter.EventuallyEq.fderiv_eq
+        (chartPushedRaw_eventuallyEq_rawConnLapPull (I := I) (M := M) g r s T α q hw)
+    filter_upwards [h_fderiv_ev] with w hw
+    simp only [euclidPartial_def, hw]
+  have hev_outer : euclidPartial (E := E) l
+        (euclidPartial (E := E) k
+          (chartPushedRaw I α
+            (tensorChartComponentRaw (I := I) (M := M) g r s T α q.1 q.2))) =ᶠ[nhds z]
+      euclidPartial (E := E) l (euclidPartial (E := E) k u) := by
+    have h_fderiv_ev :
+        (fun w => fderiv ℝ
+            (euclidPartial (E := E) k
+              (chartPushedRaw I α
+                (tensorChartComponentRaw (I := I) (M := M) g r s T α q.1 q.2))) w) =ᶠ[nhds z]
+          (fun w => fderiv ℝ (euclidPartial (E := E) k u) w) :=
+      hev_inner.fderiv
+    filter_upwards [h_fderiv_ev] with w hw
+    simp only [euclidPartial_def, hw]
+  rw [(hev_outer.iteratedFDeriv ℝ m).self_of_nhds]
+  calc ‖iteratedFDeriv ℝ m (euclidPartial (E := E) l (euclidPartial (E := E) k u)) z‖
+      ≤ ‖iteratedFDeriv ℝ (m + 1) (euclidPartial (E := E) k u) z‖ :=
+        euclidPartial_iteratedFDeriv_norm_le (E := E) l
+          (euclidPartial_contDiffAt (E := E) k (hu_cdAt hz)) m
+    _ ≤ ‖iteratedFDeriv ℝ (m + 1 + 1) u z‖ :=
+        euclidPartial_iteratedFDeriv_norm_le (E := E) k (hu_cdAt hz) (m + 1)
+    _ = ‖iteratedFDeriv ℝ (m + 2) u z‖ := by ring_nf
+
+/-- `chartPushedRaw (raw_q T)` is `C^∞` at interior points of the chart target. -/
+private lemma chartPushedRaw_raw_contDiffAt
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
+    (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    {z : EuclN} (hz : z ∈ chartTargetEuclid (I := I) (M := M) α) :
+    ContDiffAt ℝ ∞
+      (chartPushedRaw I α
+        (tensorChartComponentRaw (I := I) (M := M) g r s T α q.1 q.2)) z :=
+  (chartPushedRaw_tensorChartComponentRaw_contDiffOn (I := I) (M := M) g r s T α q.1 q.2).contDiffAt
+    ((chartTargetEuclid_isOpen (I := I) (M := M) α).mem_nhds hz)
+
+/-- The `a`-fold `euclidPartial` iterate of `chartPushedRaw (raw_q T)` is `C^∞` at interior points
+of the chart target (`a = 0, 1, 2`). -/
+private lemma euclidPartialIter1_chartPushedRaw_contDiffAt
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
+    (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E))) (k : Fin (Module.finrank ℝ E))
+    {z : EuclN} (hz : z ∈ chartTargetEuclid (I := I) (M := M) α) :
+    ContDiffAt ℝ ∞
+      (euclidPartial (E := E) k
+        (chartPushedRaw I α
+          (tensorChartComponentRaw (I := I) (M := M) g r s T α q.1 q.2))) z :=
+  euclidPartial_contDiffAt (E := E) k
+    (chartPushedRaw_raw_contDiffAt (I := I) (M := M) g r s T α q hz)
+
+private lemma euclidPartialIter2_chartPushedRaw_contDiffAt
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
+    (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E))) (k l : Fin (Module.finrank ℝ E))
+    {z : EuclN} (hz : z ∈ chartTargetEuclid (I := I) (M := M) α) :
+    ContDiffAt ℝ ∞
+      (euclidPartial (E := E) l
+        (euclidPartial (E := E) k
+          (chartPushedRaw I α
+            (tensorChartComponentRaw (I := I) (M := M) g r s T α q.1 q.2)))) z :=
+  euclidPartial_contDiffAt (E := E) l
+    (euclidPartialIter1_chartPushedRaw_contDiffAt (I := I) (M := M) g r s T α q k hz)
+
+/-- **The open-good-set `T₀`-linear chart-coordinate formula for the connection-Laplacian raw
+component (a genuine differential-geometric prerequisite).**
+
+There exist `T₀`-independent `C^∞` coefficient families `C_2`, `C_1`, `C_0` on the Euclidean chart
+target such that for *every* smooth compactly-supported section `T₀` and *every* base point `b` in
+the chart-`α` Levi-Civita good set (the open chart source on a boundaryless manifold), the chart-`α`
+`(Idx, Jdx)` raw scalar component of `Δ_∇ T₀ = rawTensorConnLapSmooth g r s T₀` equals the explicit
+mixed-second-partial principal block plus a first-partial block plus a zeroth-order block:
+```
+raw_{IJ}(Δ_∇ T₀)(b)
+  = Σ_{k, l} C_2 k l · ∂_l ∂_k (chartPushedRaw raw_{IJ}(T₀))
+  + Σ_{I', J', m} C_1 I' J' m · ∂_m (chartPushedRaw raw_{I'J'}(T₀))
+  + Σ_{I', J'} C_0 I' J' · chartPushedRaw raw_{I'J'}(T₀)    (at toEuclidean (chart b)).
+```
+
+This is the open-good-set strengthening of the tsupport-restricted on-disk formula
+`rawTensorConnLap_chartα_raw_eq_T₀_linear_formula`: the connection Laplacian is the metric trace of
+the second covariant derivative — a pointwise identity at *every* point of the good set,
+`Δ_∇ T₀ = Σ_{k, l} g^{kl} (∇² T₀)(∂_k, ∂_l)` — and each chart-projected `(∇² T₀)(∂_k, ∂_l)` expands,
+by the open-good-set second-covariant-derivative chart expansion
+`secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn`, into the principal mixed-second partial plus
+`T₀`-independent-coefficient first- and zeroth-order chart blocks.  The tsupport restriction in the
+on-disk version is inessential to the trace identity (it is inherited from the global orthonormal
+frame's support-localised orthonormality, removable by using the chart inverse-Gram contraction in
+place of that frame).  Posited here as the genuine remaining DG prerequisite; the pointwise
+operator-norm bound below is proved sorry-free on top of it. -/
+theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula_on_goodSet
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
+    ∃ (C_2 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → EuclN → ℝ),
+    ∃ (C_1 : (Fin r → Fin (Module.finrank ℝ E)) →
+              (Fin s → Fin (Module.finrank ℝ E)) →
+              Fin (Module.finrank ℝ E) → EuclN → ℝ),
+    ∃ (C_0 : (Fin r → Fin (Module.finrank ℝ E)) →
+              (Fin s → Fin (Module.finrank ℝ E)) → EuclN → ℝ),
+      (∀ k l, ContDiffOn ℝ ∞ (C_2 k l) (chartTargetEuclid (I := I) (M := M) α)) ∧
+      (∀ I' J' m, ContDiffOn ℝ ∞ (C_1 I' J' m) (chartTargetEuclid (I := I) (M := M) α)) ∧
+      (∀ I' J', ContDiffOn ℝ ∞ (C_0 I' J') (chartTargetEuclid (I := I) (M := M) α)) ∧
+      ∀ (T₀ : Integral.L2.SmoothCcTensor g r s),
+        ∀ {b : M}, b ∈ chartLeviCivitaGoodSet (I := I) α →
+          tensorChartComponentRaw (I := I) (M := M) g r s
+            (rawTensorConnLapSmooth (I := I) g r s T₀) α Idx Jdx b =
+            (∑ k, ∑ l,
+              C_2 k l ((toEuclidean (E := E)) ((extChartAt I α) b)) *
+                euclidPartial (E := E) l
+                  (euclidPartial (E := E) k
+                    (chartPushedRaw I α
+                      (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx)))
+                  ((toEuclidean (E := E)) ((extChartAt I α) b))) +
+            (∑ I' : Fin r → Fin (Module.finrank ℝ E),
+              ∑ J' : Fin s → Fin (Module.finrank ℝ E),
+              ∑ m,
+              C_1 I' J' m ((toEuclidean (E := E)) ((extChartAt I α) b)) *
+                euclidPartial (E := E) m
+                  (chartPushedRaw I α
+                    (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J'))
+                  ((toEuclidean (E := E)) ((extChartAt I α) b))) +
+            (∑ I' : Fin r → Fin (Module.finrank ℝ E),
+              ∑ J' : Fin s → Fin (Module.finrank ℝ E),
+              C_0 I' J' ((toEuclidean (E := E)) ((extChartAt I α) b)) *
+                chartPushedRaw I α
+                  (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J')
+                  ((toEuclidean (E := E)) ((extChartAt I α) b))) :=
+  sorry
+
+/-- A `C^∞` function on an open set has, on any compact subset, a uniform bound on all its iterated
+Fréchet derivative norms up to a fixed order `N`. -/
+private lemma exists_iteratedFDeriv_norm_bound_on_compact
+    {f : EuclN → ℝ} {sset : Set EuclN} (hf : ContDiffOn ℝ ∞ f sset) (hs : IsOpen sset)
+    {K : Set EuclN} (hK : IsCompact K) (hKs : K ⊆ sset) (N : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ l ≤ N, ∀ y ∈ K, ‖iteratedFDeriv ℝ l f y‖ ≤ C := by
+  classical
+  have h_uniq : UniqueDiffOn ℝ sset := hs.uniqueDiffOn
+  have h_per_order : ∀ l : ℕ, ∃ Cl : ℝ, 0 ≤ Cl ∧ ∀ y ∈ K,
+      ‖iteratedFDeriv ℝ l f y‖ ≤ Cl := by
+    intro l
+    by_cases hKne : K.Nonempty
+    · have h_iter_contOn : ContinuousOn (fun y => iteratedFDerivWithin ℝ l f sset y) sset :=
+        hf.continuousOn_iteratedFDerivWithin (by exact_mod_cast le_top) h_uniq
+      have h_iter_K : ContinuousOn (iteratedFDerivWithin ℝ l f sset) K :=
+        h_iter_contOn.mono hKs
+      have h_norm_K : ContinuousOn (fun y => ‖iteratedFDerivWithin ℝ l f sset y‖) K :=
+        continuous_norm.comp_continuousOn h_iter_K
+      obtain ⟨y₀, _, hy₀_max⟩ := hK.exists_isMaxOn hKne h_norm_K
+      refine ⟨‖iteratedFDerivWithin ℝ l f sset y₀‖, norm_nonneg _, fun y hy => ?_⟩
+      have h₁ : ‖iteratedFDerivWithin ℝ l f sset y‖ ≤
+          ‖iteratedFDerivWithin ℝ l f sset y₀‖ := hy₀_max hy
+      rwa [iteratedFDerivWithin_of_isOpen (𝕜 := ℝ) (f := f) l hs (hKs hy)] at h₁
+    · exact ⟨0, le_refl _, fun y hy => absurd ⟨y, hy⟩ hKne⟩
+  choose Cl hCl_nn hCl using h_per_order
+  refine ⟨(Finset.range (N + 1)).sup' ⟨0, Finset.mem_range.mpr (Nat.succ_pos N)⟩ Cl, ?_, ?_⟩
+  · exact le_trans (hCl_nn 0)
+      (Finset.le_sup' Cl (Finset.mem_range.mpr (Nat.succ_pos N)))
+  · intro l hl y hy
+    exact (hCl l y hy).trans
+      (Finset.le_sup' Cl (Finset.mem_range.mpr (by omega)))
+
+/-- For `y` in the chart target, the preimage base point
+`(extChartAt I α).symm (toEuclidean.symm y)` lies in the chart-`α` Levi-Civita good set (the chart
+source, on a boundaryless manifold), and its chart image recovers `y`. -/
+private lemma chartTargetEuclid_preimage_mem_goodSet
+    (α : M) {y : EuclN} (hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α) :
+    (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈ chartLeviCivitaGoodSet (I := I) α ∧
+      (toEuclidean (E := E)) ((extChartAt I α)
+        ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) = y := by
+  have hy_pre : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
+    rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy_target
+    exact hy_target
+  set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
+  have hb_src : b ∈ (extChartAt I α).source := (extChartAt I α).map_target hy_pre
+  have hb_good : b ∈ chartLeviCivitaGoodSet (I := I) α := by
+    rw [chartLeviCivitaGoodSet_eq_extChartAt_source (I := I)]; exact hb_src
+  refine ⟨hb_good, ?_⟩
+  have h_round : (extChartAt I α) b = (toEuclidean (E := E)).symm y :=
+    (extChartAt I α).right_inv hy_pre
+  rw [h_round]; simp
+
+/-- A finite sum of product summands `C_ι · Fa_ι`, each with order-`j` Fréchet derivative
+operator-norm bounded by `Mb` at an interior point `y`, has total order-`j` Fréchet derivative
+operator norm at `y` bounded by `(card ι) · Mb`. -/
+private lemma block_iteratedFDeriv_norm_le
+    {ι : Type*} [Fintype ι] (α : M) (Cf Faf : ι → EuclN → ℝ) {y : EuclN}
+    (hCf_cd : ∀ i : ι, ContDiffOn ℝ ∞ (Cf i) (chartTargetEuclid (I := I) (M := M) α))
+    (hFaf_cd : ∀ i : ι, ContDiffAt ℝ ∞ (Faf i) y)
+    (Mb : ℝ) (j : ℕ)
+    (hy : y ∈ chartTargetEuclid (I := I) (M := M) α)
+    (hsummand : ∀ i : ι,
+        ‖iteratedFDeriv ℝ j (fun z => Cf i z * Faf i z) y‖ ≤ Mb) :
+    ‖iteratedFDeriv ℝ j (fun z => ∑ i : ι, Cf i z * Faf i z) y‖ ≤
+      (Fintype.card ι : ℝ) * Mb := by
+  classical
+  set s_set : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hs_set
+  have h_open : IsOpen s_set := chartTargetEuclid_isOpen (I := I) (M := M) α
+  have h_uniq : UniqueDiffOn ℝ s_set := h_open.uniqueDiffOn
+  have h_prod_cdwa : ∀ i : ι,
+      ContDiffWithinAt ℝ j (fun z => Cf i z * Faf i z) s_set y := by
+    intro i
+    have hC : ContDiffWithinAt ℝ j (Cf i) s_set y :=
+      ((hCf_cd i).of_le (by exact_mod_cast le_top)) y hy
+    have hF : ContDiffWithinAt ℝ j (Faf i) s_set y :=
+      ((hFaf_cd i).of_le (by exact_mod_cast le_top)).contDiffWithinAt
+    exact hC.mul hF
+  rw [← iteratedFDerivWithin_of_isOpen (𝕜 := ℝ)
+      (f := fun z => ∑ i : ι, Cf i z * Faf i z) j h_open hy]
+  rw [iteratedFDerivWithin_fun_sum_apply h_uniq hy (fun i _ => h_prod_cdwa i)]
+  refine le_trans (norm_sum_le _ _) ?_
+  have hsummand' : ∀ i ∈ (Finset.univ : Finset ι),
+      ‖iteratedFDerivWithin ℝ j (fun z => Cf i z * Faf i z) s_set y‖ ≤ Mb := by
+    intro i _
+    rw [iteratedFDerivWithin_of_isOpen (𝕜 := ℝ) (f := fun z => Cf i z * Faf i z) j h_open hy]
+    exact hsummand i
+  refine le_trans (Finset.sum_le_sum hsummand') ?_
+  rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
+
+/-- **The per-chart pointwise second-order rough-Laplacian chart-component operator-norm bound.**
+
+The chart-`α`-localised form of the headline pointwise bound: for each fixed chart base point `α`,
+there is a non-negative constant `B_α` such that on the compact kernel `chartImagePOUTsupport α`,
+every order-`j` (`j ≤ 2k`) Fréchet derivative operator norm of the chart-pulled raw `(Idx, Jdx)`
+component of `Δ_∇ T` is square-bounded by `B_α` times the order-`(k + 1)` Hilbert-Schmidt content of
+`T`.  Proved sorry-free on top of the open-good-set `T₀`-linear formula
+`rawTensorConnLap_chartα_raw_eq_T₀_linear_formula_on_goodSet`: the chart pull-back agrees on the open
+chart target with the explicit principal-`∂²` plus first-`∂` plus zeroth blocks; an order-`j` Fréchet
+derivative of each block is dominated, by the Leibniz product rule, by uniformly-bounded coefficient
+derivatives times order-`≤ j + 2 ≤ 2(k + 1)` derivatives of the raw components of `T`, the latter
+controlled by the Hilbert-Schmidt content; the coefficients are uniformly bounded on the compact
+kernel.  The atlas-uniform constant is assembled from this per-chart form over the finite active set
+of the partition of unity. -/
+private lemma exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsContent_perAlpha
+    (g : SmoothRiemannianMetric I M) (r s k : ℕ) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
+    ∃ Bα : ℝ, 0 ≤ Bα ∧
+      ∀ (T : Integral.L2.SmoothCcTensor g r s) (j : ℕ), j ≤ 2 * k →
+        ∀ y ∈ chartImagePOUTsupport (I := I) (M := M) α,
+          ‖iteratedFDeriv ℝ j
+              (rawConnLapPull (I := I) (M := M) g r s
+                (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx) y‖ ^ 2 ≤
+            Bα * rawConnLapRhsHsContent (I := I) (M := M) g r s k T α y := by
+  classical
+  obtain ⟨C_2, C_1, C_0, hC2cd, hC1cd, hC0cd, hform⟩ :=
+    rawTensorConnLap_chartα_raw_eq_T₀_linear_formula_on_goodSet (I := I) (M := M) g r s α Idx Jdx
+  let n : ℕ := Module.finrank ℝ E
+  set K : Set EuclN := chartImagePOUTsupport (I := I) (M := M) α with hK_def
+  have hK_compact : IsCompact K := chartImagePOUTsupport_isCompact (I := I) (M := M) α
+  have hK_sub : K ⊆ chartTargetEuclid (I := I) (M := M) α :=
+    chartImagePOUTsupport_subset_target (I := I) (M := M) α
+  have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
+    chartTargetEuclid_isOpen (I := I) (M := M) α
+  -- Uniform coefficient sup-bounds on the compact kernel, up to order `2k`.
+  obtain ⟨B2, hB2_nn, hB2⟩ : ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (k' l' : Fin n), ∀ i ≤ 2 * k, ∀ y ∈ K,
+        ‖iteratedFDeriv ℝ i (C_2 k' l') y‖ ≤ C := by
+    have h_each : ∀ p : Fin n × Fin n, ∃ C : ℝ, 0 ≤ C ∧ ∀ i ≤ 2 * k, ∀ y ∈ K,
+        ‖iteratedFDeriv ℝ i (C_2 p.1 p.2) y‖ ≤ C := fun p =>
+      exists_iteratedFDeriv_norm_bound_on_compact (hC2cd p.1 p.2) h_open hK_compact hK_sub (2 * k)
+    choose Cf hCf_nn hCf using h_each
+    refine ⟨(Finset.univ : Finset (Fin n × Fin n)).sup' Finset.univ_nonempty Cf, ?_, ?_⟩
+    · obtain ⟨p₀, _⟩ := Finset.univ_nonempty (α := Fin n × Fin n)
+      exact (hCf_nn p₀).trans (Finset.le_sup'_of_le Cf (Finset.mem_univ p₀) le_rfl)
+    · intro k' l' i hi y hy
+      exact (hCf ⟨k', l'⟩ i hi y hy).trans
+        (Finset.le_sup'_of_le Cf (Finset.mem_univ (⟨k', l'⟩ : Fin n × Fin n)) le_rfl)
+  obtain ⟨B1, hB1_nn, hB1⟩ : ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (I' : Fin r → Fin n) (J' : Fin s → Fin n) (m : Fin n), ∀ i ≤ 2 * k, ∀ y ∈ K,
+        ‖iteratedFDeriv ℝ i (C_1 I' J' m) y‖ ≤ C := by
+    have h_each : ∀ p : (Fin r → Fin n) × (Fin s → Fin n) × Fin n,
+        ∃ C : ℝ, 0 ≤ C ∧ ∀ i ≤ 2 * k, ∀ y ∈ K,
+          ‖iteratedFDeriv ℝ i (C_1 p.1 p.2.1 p.2.2) y‖ ≤ C := fun p =>
+      exists_iteratedFDeriv_norm_bound_on_compact (hC1cd p.1 p.2.1 p.2.2)
+        h_open hK_compact hK_sub (2 * k)
+    choose Cf hCf_nn hCf using h_each
+    refine ⟨(Finset.univ : Finset ((Fin r → Fin n) × (Fin s → Fin n) × Fin n)).sup'
+        Finset.univ_nonempty Cf, ?_, ?_⟩
+    · obtain ⟨p₀, _⟩ := Finset.univ_nonempty (α := (Fin r → Fin n) × (Fin s → Fin n) × Fin n)
+      exact (hCf_nn p₀).trans (Finset.le_sup'_of_le Cf (Finset.mem_univ p₀) le_rfl)
+    · intro I' J' m i hi y hy
+      exact (hCf ⟨I', J', m⟩ i hi y hy).trans
+        (Finset.le_sup'_of_le Cf (Finset.mem_univ
+          (⟨I', J', m⟩ : (Fin r → Fin n) × (Fin s → Fin n) × Fin n)) le_rfl)
+  obtain ⟨B0, hB0_nn, hB0⟩ : ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (I' : Fin r → Fin n) (J' : Fin s → Fin n), ∀ i ≤ 2 * k, ∀ y ∈ K,
+        ‖iteratedFDeriv ℝ i (C_0 I' J') y‖ ≤ C := by
+    have h_each : ∀ p : (Fin r → Fin n) × (Fin s → Fin n),
+        ∃ C : ℝ, 0 ≤ C ∧ ∀ i ≤ 2 * k, ∀ y ∈ K,
+          ‖iteratedFDeriv ℝ i (C_0 p.1 p.2) y‖ ≤ C := fun p =>
+      exists_iteratedFDeriv_norm_bound_on_compact (hC0cd p.1 p.2) h_open hK_compact hK_sub (2 * k)
+    choose Cf hCf_nn hCf using h_each
+    refine ⟨(Finset.univ : Finset ((Fin r → Fin n) × (Fin s → Fin n))).sup'
+        Finset.univ_nonempty Cf, ?_, ?_⟩
+    · obtain ⟨p₀, _⟩ := Finset.univ_nonempty (α := (Fin r → Fin n) × (Fin s → Fin n))
+      exact (hCf_nn p₀).trans (Finset.le_sup'_of_le Cf (Finset.mem_univ p₀) le_rfl)
+    · intro I' J' i hi y hy
+      exact (hCf ⟨I', J'⟩ i hi y hy).trans
+        (Finset.le_sup'_of_le Cf (Finset.mem_univ
+          (⟨I', J'⟩ : (Fin r → Fin n) × (Fin s → Fin n))) le_rfl)
+  -- Uniform coefficient bound and combinatorial cardinalities.
+  set Bmax : ℝ := max B2 (max B1 B0) with hBmax_def
+  have hBmax_nn : 0 ≤ Bmax := le_trans hB2_nn (le_max_left _ _)
+  have hB2_le : B2 ≤ Bmax := le_max_left _ _
+  have hB1_le : B1 ≤ Bmax := le_trans (le_max_left _ _) (le_max_right _ _)
+  have hB0_le : B0 ≤ Bmax := le_trans (le_max_right _ _) (le_max_right _ _)
+  set NP : ℕ := Fintype.card ((Fin r → Fin n) × (Fin s → Fin n)) with hNP_def
+  set Ntot : ℕ := n * n + NP * n + NP with hNtot_def
+  set Ktot : ℝ := (Ntot : ℝ) * (2 : ℝ) ^ (2 * k) * Bmax with hKtot_def
+  have hKtot_nn : 0 ≤ Ktot := by rw [hKtot_def]; positivity
+  refine ⟨Ktot ^ 2, by positivity, ?_⟩
+  intro T j hj y hyK
+  set R : ℝ := rawConnLapRhsHsContent (I := I) (M := M) g r s k T α y with hR_def
+  have hR_nn : 0 ≤ R := rawConnLapRhsHsContent_nonneg (I := I) (M := M) g r s k T α y
+  have hsqrtR_nn : 0 ≤ Real.sqrt R := Real.sqrt_nonneg _
+  have hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α := hK_sub hyK
+  -- The chart pull-back of `Δ_∇ T`, as a function near `y`, equals the explicit three-block sum.
+  set Δpull : EuclN → ℝ := rawConnLapPull (I := I) (M := M) g r s
+    (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx with hΔpull_def
+  set RHSfun : EuclN → ℝ := fun z =>
+    (∑ k', ∑ l',
+      C_2 k' l' z *
+        euclidPartial (E := E) l'
+          (euclidPartial (E := E) k'
+            (chartPushedRaw I α
+              (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx))) z) +
+    (∑ I' : Fin r → Fin n, ∑ J' : Fin s → Fin n, ∑ m,
+      C_1 I' J' m z *
+        euclidPartial (E := E) m
+          (chartPushedRaw I α
+            (tensorChartComponentRaw (I := I) (M := M) g r s T α I' J')) z) +
+    (∑ I' : Fin r → Fin n, ∑ J' : Fin s → Fin n,
+      C_0 I' J' z *
+        chartPushedRaw I α
+          (tensorChartComponentRaw (I := I) (M := M) g r s T α I' J') z) with hRHSfun_def
+  have h_evEq : Δpull =ᶠ[nhds y] RHSfun := by
+    filter_upwards [h_open.mem_nhds hy_target] with z hz
+    obtain ⟨hb_good, hb_round⟩ := chartTargetEuclid_preimage_mem_goodSet (I := I) (M := M) α hz
+    have hform_z := hform T hb_good
+    rw [hΔpull_def]
+    change tensorChartComponentRaw (I := I) (M := M) g r s
+        (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx
+        ((extChartAt I α).symm ((toEuclidean (E := E)).symm z)) = RHSfun z
+    rw [hform_z, hb_round, hRHSfun_def]
+  rw [(h_evEq.iteratedFDeriv ℝ j).self_of_nhds]
+  -- A single summand operator-norm bound, after Leibniz: ≤ 2^{2k} · Bmax · √R.
+  have hraw_sqrt : ∀ (q : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E))) (m : ℕ), m ≤ 2 * (k + 1) →
+      ‖iteratedFDeriv ℝ m (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) y‖ ≤
+        Real.sqrt R := by
+    intro q m hm
+    have hsq := rawConnLapPull_iteratedFDeriv_norm_sq_le_rhsContent (I := I) (M := M)
+      g r s k T α q m hm y
+    calc ‖iteratedFDeriv ℝ m (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) y‖
+        = Real.sqrt (‖iteratedFDeriv ℝ m
+            (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) y‖ ^ 2) := by
+          rw [Real.sqrt_sq (norm_nonneg _)]
+      _ ≤ Real.sqrt R := Real.sqrt_le_sqrt hsq
+  have h_summand : ∀ (C : EuclN → ℝ)
+      (hC : ContDiffOn ℝ ∞ C (chartTargetEuclid (I := I) (M := M) α))
+      (hCbd : ∀ i ≤ 2 * k, ∀ z ∈ K, ‖iteratedFDeriv ℝ i C z‖ ≤ Bmax)
+      (q : (Fin r → Fin (Module.finrank ℝ E)) ×
+          (Fin s → Fin (Module.finrank ℝ E)))
+      (Fa : EuclN → ℝ) (a : ℕ) (ha : a ≤ 2)
+      (hFa_cd : ∀ z : EuclN, z ∈ chartTargetEuclid (I := I) (M := M) α →
+          ContDiffAt ℝ ∞ Fa z)
+      (hFa_bd : ∀ (m : ℕ) (z : EuclN), z ∈ chartTargetEuclid (I := I) (M := M) α →
+          ‖iteratedFDeriv ℝ m Fa z‖ ≤
+            ‖iteratedFDeriv ℝ (m + a)
+              (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) z‖),
+      ‖iteratedFDeriv ℝ j (fun z => C z * Fa z) y‖ ≤ (2 : ℝ) ^ (2 * k) * Bmax * Real.sqrt R := by
+    intro C hC hCbd q Fa a ha hFa_cd hFa_bd
+    have hbound := rawConnLapProductSummand_iteratedFDeriv_norm_le (I := I) (M := M)
+      g r s T α C hC q Fa a hFa_cd hFa_bd j hy_target
+    refine le_trans hbound ?_
+    have h_per : ∀ i ∈ Finset.range (j + 1),
+        (j.choose i : ℝ) * ‖iteratedFDeriv ℝ i C y‖ *
+          ‖iteratedFDeriv ℝ ((j - i) + a)
+            (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) y‖ ≤
+        (j.choose i : ℝ) * (Bmax * Real.sqrt R) := by
+      intro i hi
+      have hi_le : i ≤ 2 * k := by have := Finset.mem_range.mp hi; omega
+      have hC_le : ‖iteratedFDeriv ℝ i C y‖ ≤ Bmax := hCbd i hi_le y hyK
+      have hord : (j - i) + a ≤ 2 * (k + 1) := by omega
+      have hraw_le := hraw_sqrt q ((j - i) + a) hord
+      have h1 : (j.choose i : ℝ) * ‖iteratedFDeriv ℝ i C y‖ *
+            ‖iteratedFDeriv ℝ ((j - i) + a)
+              (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) y‖ ≤
+          (j.choose i : ℝ) * Bmax * Real.sqrt R := by
+        apply mul_le_mul (mul_le_mul_of_nonneg_left hC_le (by positivity)) hraw_le
+          (norm_nonneg _) (by positivity)
+      calc (j.choose i : ℝ) * ‖iteratedFDeriv ℝ i C y‖ *
+            ‖iteratedFDeriv ℝ ((j - i) + a)
+              (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) y‖
+          ≤ (j.choose i : ℝ) * Bmax * Real.sqrt R := h1
+        _ = (j.choose i : ℝ) * (Bmax * Real.sqrt R) := by ring
+    refine le_trans (Finset.sum_le_sum h_per) ?_
+    rw [← Finset.sum_mul]
+    have hsum_choose : (∑ i ∈ Finset.range (j + 1), (j.choose i : ℝ)) = (2 : ℝ) ^ j := by
+      rw [← Nat.cast_sum, Nat.sum_range_choose]; push_cast; ring
+    rw [hsum_choose]
+    have h2j_le : (2 : ℝ) ^ j ≤ (2 : ℝ) ^ (2 * k) := pow_le_pow_right₀ (by norm_num) hj
+    calc (2 : ℝ) ^ j * (Bmax * Real.sqrt R)
+        ≤ (2 : ℝ) ^ (2 * k) * (Bmax * Real.sqrt R) :=
+          mul_le_mul_of_nonneg_right h2j_le (by positivity)
+      _ = (2 : ℝ) ^ (2 * k) * Bmax * Real.sqrt R := by ring
+  -- Bound `‖D^j RHSfun y‖` by `Ktot · √R` via the three blocks.
+  have h_block2_le :
+      ‖iteratedFDeriv ℝ j (fun z =>
+        ∑ p : Fin n × Fin n,
+          C_2 p.1 p.2 z *
+            euclidPartial (E := E) p.2
+              (euclidPartial (E := E) p.1
+                (chartPushedRaw I α
+                  (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx))) z) y‖ ≤
+        (n * n : ℝ) * ((2 : ℝ) ^ (2 * k) * Bmax * Real.sqrt R) := by
+    have hcardN : (Fintype.card (Fin n × Fin n) : ℝ) = (n * n : ℝ) := by
+      have : Fintype.card (Fin n × Fin n) = n * n := by
+        simp [Fintype.card_prod, Fintype.card_fin]
+      rw [this]; push_cast; ring
+    rw [show (n * n : ℝ) * ((2 : ℝ) ^ (2 * k) * Bmax * Real.sqrt R) =
+        (Fintype.card (Fin n × Fin n) : ℝ) * ((2 : ℝ) ^ (2 * k) * Bmax * Real.sqrt R) by
+      rw [hcardN]]
+    refine block_iteratedFDeriv_norm_le (I := I) (M := M) α
+      (fun p : Fin n × Fin n => C_2 p.1 p.2)
+      (fun p : Fin n × Fin n =>
+        euclidPartial (E := E) p.2
+          (euclidPartial (E := E) p.1
+            (chartPushedRaw I α
+              (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx))))
+      (fun p => hC2cd p.1 p.2)
+      (fun p => euclidPartialIter2_chartPushedRaw_contDiffAt (I := I) (M := M)
+        g r s T α ⟨Idx, Jdx⟩ p.1 p.2 hy_target)
+      _ j hy_target (fun p => ?_)
+    exact h_summand (C_2 p.1 p.2) (hC2cd p.1 p.2)
+      (fun i hi z hz => le_trans (hB2 p.1 p.2 i hi z hz) hB2_le)
+      ⟨Idx, Jdx⟩ _ 2 le_rfl
+      (fun z hz => euclidPartialIter2_chartPushedRaw_contDiffAt (I := I) (M := M)
+        g r s T α ⟨Idx, Jdx⟩ p.1 p.2 hz)
+      (fun m z hz => euclidPartialIter_chartPushedRaw_norm_le_two (I := I) (M := M)
+        g r s T α ⟨Idx, Jdx⟩ p.1 p.2 m hz)
+  have h_block1_le :
+      ‖iteratedFDeriv ℝ j (fun z =>
+        ∑ p : ((Fin r → Fin n) × (Fin s → Fin n)) × Fin n,
+          C_1 p.1.1 p.1.2 p.2 z *
+            euclidPartial (E := E) p.2
+              (chartPushedRaw I α
+                (tensorChartComponentRaw (I := I) (M := M) g r s T α p.1.1 p.1.2)) z) y‖ ≤
+        ((NP : ℝ) * n) * ((2 : ℝ) ^ (2 * k) * Bmax * Real.sqrt R) := by
+    have hcardN : (Fintype.card (((Fin r → Fin n) × (Fin s → Fin n)) × Fin n) : ℝ) =
+        ((NP : ℝ) * n) := by
+      rw [Fintype.card_prod, hNP_def]
+      simp [Fintype.card_fin]
+    rw [show ((NP : ℝ) * n) * ((2 : ℝ) ^ (2 * k) * Bmax * Real.sqrt R) =
+        (Fintype.card (((Fin r → Fin n) × (Fin s → Fin n)) × Fin n) : ℝ) *
+          ((2 : ℝ) ^ (2 * k) * Bmax * Real.sqrt R) by rw [hcardN]]
+    refine block_iteratedFDeriv_norm_le (I := I) (M := M) α
+      (fun p : ((Fin r → Fin n) × (Fin s → Fin n)) × Fin n => C_1 p.1.1 p.1.2 p.2)
+      (fun p : ((Fin r → Fin n) × (Fin s → Fin n)) × Fin n =>
+        euclidPartial (E := E) p.2
+          (chartPushedRaw I α
+            (tensorChartComponentRaw (I := I) (M := M) g r s T α p.1.1 p.1.2)))
+      (fun p => hC1cd p.1.1 p.1.2 p.2)
+      (fun p => euclidPartialIter1_chartPushedRaw_contDiffAt (I := I) (M := M)
+        g r s T α p.1 p.2 hy_target)
+      _ j hy_target (fun p => ?_)
+    exact h_summand (C_1 p.1.1 p.1.2 p.2) (hC1cd p.1.1 p.1.2 p.2)
+      (fun i hi z hz => le_trans (hB1 p.1.1 p.1.2 p.2 i hi z hz) hB1_le)
+      p.1 _ 1 (by norm_num)
+      (fun z hz => euclidPartialIter1_chartPushedRaw_contDiffAt (I := I) (M := M)
+        g r s T α p.1 p.2 hz)
+      (fun m z hz => euclidPartialIter_chartPushedRaw_norm_le_one (I := I) (M := M)
+        g r s T α p.1 p.2 m hz)
+  have h_block0_le :
+      ‖iteratedFDeriv ℝ j (fun z =>
+        ∑ p : (Fin r → Fin n) × (Fin s → Fin n),
+          C_0 p.1 p.2 z *
+            chartPushedRaw I α
+              (tensorChartComponentRaw (I := I) (M := M) g r s T α p.1 p.2) z) y‖ ≤
+        (NP : ℝ) * ((2 : ℝ) ^ (2 * k) * Bmax * Real.sqrt R) := by
+    rw [show (NP : ℝ) * ((2 : ℝ) ^ (2 * k) * Bmax * Real.sqrt R) =
+        (Fintype.card ((Fin r → Fin n) × (Fin s → Fin n)) : ℝ) *
+          ((2 : ℝ) ^ (2 * k) * Bmax * Real.sqrt R) by rw [← hNP_def]]
+    refine block_iteratedFDeriv_norm_le (I := I) (M := M) α
+      (fun p : (Fin r → Fin n) × (Fin s → Fin n) => C_0 p.1 p.2)
+      (fun p : (Fin r → Fin n) × (Fin s → Fin n) =>
+        chartPushedRaw I α
+          (tensorChartComponentRaw (I := I) (M := M) g r s T α p.1 p.2))
+      (fun p => hC0cd p.1 p.2)
+      (fun p => chartPushedRaw_raw_contDiffAt (I := I) (M := M) g r s T α p hy_target)
+      _ j hy_target (fun p => ?_)
+    exact h_summand (C_0 p.1 p.2) (hC0cd p.1 p.2)
+      (fun i hi z hz => le_trans (hB0 p.1 p.2 i hi z hz) hB0_le)
+      p _ 0 (by norm_num)
+      (fun z hz => chartPushedRaw_raw_contDiffAt (I := I) (M := M) g r s T α p hz)
+      (fun m z hz => euclidPartialIter_chartPushedRaw_norm_le_zero (I := I) (M := M)
+        g r s T α p m hz)
+  -- Assemble: ‖D^j RHSfun‖ ≤ Ktot · √R, then square.
+  have h_norm_le : ‖iteratedFDeriv ℝ j RHSfun y‖ ≤ Ktot * Real.sqrt R := by
+    set b2fn : EuclN → ℝ := fun z =>
+      ∑ p : Fin n × Fin n,
+        C_2 p.1 p.2 z *
+          euclidPartial (E := E) p.2
+            (euclidPartial (E := E) p.1
+              (chartPushedRaw I α
+                (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx))) z with hb2fn_def
+    set b1fn : EuclN → ℝ := fun z =>
+      ∑ p : ((Fin r → Fin n) × (Fin s → Fin n)) × Fin n,
+        C_1 p.1.1 p.1.2 p.2 z *
+          euclidPartial (E := E) p.2
+            (chartPushedRaw I α
+              (tensorChartComponentRaw (I := I) (M := M) g r s T α p.1.1 p.1.2)) z with hb1fn_def
+    set b0fn : EuclN → ℝ := fun z =>
+      ∑ p : (Fin r → Fin n) × (Fin s → Fin n),
+        C_0 p.1 p.2 z *
+          chartPushedRaw I α
+            (tensorChartComponentRaw (I := I) (M := M) g r s T α p.1 p.2) z with hb0fn_def
+    have hb2_cd : ContDiffAt ℝ (j : WithTop ℕ∞) b2fn y := by
+      rw [hb2fn_def]
+      refine ContDiffAt.sum (fun p _ => ?_)
+      exact ((contDiffAt_of_contDiffOn_chartTarget (I := I) (M := M) α
+        (hC2cd p.1 p.2) hy_target).mul
+        (euclidPartialIter2_chartPushedRaw_contDiffAt (I := I) (M := M)
+          g r s T α ⟨Idx, Jdx⟩ p.1 p.2 hy_target)).of_le (by exact_mod_cast le_top)
+    have hb1_cd : ContDiffAt ℝ (j : WithTop ℕ∞) b1fn y := by
+      rw [hb1fn_def]
+      refine ContDiffAt.sum (fun p _ => ?_)
+      exact ((contDiffAt_of_contDiffOn_chartTarget (I := I) (M := M) α
+        (hC1cd p.1.1 p.1.2 p.2) hy_target).mul
+        (euclidPartialIter1_chartPushedRaw_contDiffAt (I := I) (M := M)
+          g r s T α p.1 p.2 hy_target)).of_le (by exact_mod_cast le_top)
+    have hb0_cd : ContDiffAt ℝ (j : WithTop ℕ∞) b0fn y := by
+      rw [hb0fn_def]
+      refine ContDiffAt.sum (fun p _ => ?_)
+      exact ((contDiffAt_of_contDiffOn_chartTarget (I := I) (M := M) α
+        (hC0cd p.1 p.2) hy_target).mul
+        (chartPushedRaw_raw_contDiffAt (I := I) (M := M) g r s T α p hy_target)).of_le
+        (by exact_mod_cast le_top)
+    have he2 : ∀ z, b2fn z =
+        ∑ k', ∑ l',
+          C_2 k' l' z *
+            euclidPartial (E := E) l'
+              (euclidPartial (E := E) k'
+                (chartPushedRaw I α
+                  (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx))) z := by
+      intro z; rw [hb2fn_def]; dsimp only; rw [Fintype.sum_prod_type]
+    have he1 : ∀ z, b1fn z =
+        ∑ I' : Fin r → Fin n, ∑ J' : Fin s → Fin n, ∑ m,
+          C_1 I' J' m z *
+            euclidPartial (E := E) m
+              (chartPushedRaw I α
+                (tensorChartComponentRaw (I := I) (M := M) g r s T α I' J')) z := by
+      intro z
+      rw [hb1fn_def]
+      dsimp only
+      rw [Fintype.sum_prod_type, Fintype.sum_prod_type]
+    have he0 : ∀ z, b0fn z =
+        ∑ I' : Fin r → Fin n, ∑ J' : Fin s → Fin n,
+          C_0 I' J' z *
+            chartPushedRaw I α
+              (tensorChartComponentRaw (I := I) (M := M) g r s T α I' J') z := by
+      intro z; rw [hb0fn_def]; dsimp only; rw [Fintype.sum_prod_type]
+    have hRHS_eq : RHSfun = fun z => (b2fn z + b1fn z) + b0fn z := by
+      funext z
+      rw [he2 z, he1 z, he0 z, hRHSfun_def]
+    have hadd : iteratedFDeriv ℝ j RHSfun y =
+        iteratedFDeriv ℝ j b2fn y + (iteratedFDeriv ℝ j b1fn y + iteratedFDeriv ℝ j b0fn y) := by
+      rw [hRHS_eq,
+        fun_iteratedFDeriv_add_apply (hb2_cd.add hb1_cd) hb0_cd,
+        fun_iteratedFDeriv_add_apply hb2_cd hb1_cd]
+      exact add_assoc _ _ _
+    rw [hadd]
+    have hsplit : ‖iteratedFDeriv ℝ j b2fn y +
+          (iteratedFDeriv ℝ j b1fn y + iteratedFDeriv ℝ j b0fn y)‖ ≤
+        ‖iteratedFDeriv ℝ j b2fn y‖ +
+          (‖iteratedFDeriv ℝ j b1fn y‖ + ‖iteratedFDeriv ℝ j b0fn y‖) := by
+      refine le_trans (norm_add_le _ _) ?_
+      gcongr
+      exact norm_add_le _ _
+    refine le_trans hsplit ?_
+    have h3 := add_le_add h_block2_le (add_le_add h_block1_le h_block0_le)
+    refine le_trans h3 ?_
+    rw [hKtot_def]
+    have : ((Ntot : ℝ) * (2 : ℝ) ^ (2 * k) * Bmax) * Real.sqrt R =
+        (n * n : ℝ) * ((2 : ℝ) ^ (2 * k) * Bmax * Real.sqrt R) +
+        (((NP : ℝ) * n) * ((2 : ℝ) ^ (2 * k) * Bmax * Real.sqrt R) +
+          (NP : ℝ) * ((2 : ℝ) ^ (2 * k) * Bmax * Real.sqrt R)) := by
+      rw [hNtot_def]; push_cast; ring
+    rw [this]
+  calc ‖iteratedFDeriv ℝ j RHSfun y‖ ^ 2
+      ≤ (Ktot * Real.sqrt R) ^ 2 := pow_le_pow_left₀ (norm_nonneg _) h_norm_le 2
+    _ = Ktot ^ 2 * R := by rw [mul_pow, Real.sq_sqrt hR_nn]
+
 /-- **The pointwise second-order rough-Laplacian chart-component operator-norm bound (the genuine
-atomic 2nd-order elliptic-boundedness primitive — the only remaining `sorry` of this chart-port).**
+atomic 2nd-order elliptic-boundedness primitive).**
 
 For a closed Riemannian manifold and ranks `(r, s)`, there is a non-negative constant `B`, uniform
 in the tensor `T` and the chart base point `α`, such that on the compact chart image of the
@@ -195,21 +996,20 @@ content of the raw components of `T`:
   ≤ B · rawConnLapRhsHsContent g r s k T α y      (y ∈ chartImagePOUTsupport α,  j ≤ 2k).
 ```
 
-This is the genuine analytic single-step (`+1` `toHs`-order) rough-Laplacian content.  The rough
-Laplacian is the frame trace of the second covariant derivative
-(`rawTensorConnLap_eq_frame_trace_secondCovDeriv`); in chart-Euclidean coordinates its raw
-`(Idx, Jdx)`-component is, by `tensorChartComponentRaw_rawTensorConnLap_eq_chart_α_coord_formula`, a
-finite linear combination of the *mixed second* Euclidean partials of the chart-pushed raw component
-of `T` with smooth volume-weighted inverse-Gram coefficients plus a `ContDiffOn`-smooth lower-order
-correction, the latter being (by the chart-frame trace expansion
-`covDerivComponentEuclid_S_k_ext_eq_iteratedFDeriv_T₀_add_lowerOrder`) a finite linear combination of
-`≤ 1`-order Euclidean partials of the raw components of `T` with `C^∞` coefficients.  An order-`j`
-(`j ≤ 2k`) Fréchet derivative of the principal part is dominated, by the Leibniz product rule, by the
-order-`(j + 2) ≤ 2(k + 1)` Fréchet derivatives of the raw components of `T`; the lower-order part, by
-order `(j + 1) ≤ 2(k + 1)`.  The smooth coefficients are uniformly bounded on the compact chart image
-of the partition-of-unity support (`chartImagePOUTsupport_isCompact`); a single uniform constant `B`
-is the resulting finite combinatorial/coefficient maximum.  It carries no spectral nonlinearity and
-no Weyl dependence. -/
+This is the genuine analytic single-step (`+1` `toHs`-order) rough-Laplacian content.  It is proved
+on top of the open-good-set `T₀`-linear chart-coordinate formula
+`rawTensorConnLap_chartα_raw_eq_T₀_linear_formula_on_goodSet`: on the open chart target the chart
+pull-back of `Δ_∇ T` agrees (eventually, by `chartTargetEuclid_preimage_mem_goodSet`) with the
+explicit sum of a principal mixed-second-partial block `Σ C_2 · ∂²(chartPushedRaw raw)`, a
+first-partial block `Σ C_1 · ∂(chartPushedRaw raw)`, and a zeroth block `Σ C_0 · chartPushedRaw raw`,
+with `T`-independent `C^∞` coefficients.  An order-`j` (`j ≤ 2k`) Fréchet derivative of each block is
+dominated, by the Leibniz product rule (`norm_iteratedFDerivWithin_mul_le`) and the one-order
+`euclidPartial` cost, by uniformly-bounded (on the compact kernel) coefficient derivatives times
+order-`(j - i) + a ≤ 2(k + 1)` Fréchet derivatives of the raw components of `T` (with block arity
+`a ∈ {2, 1, 0}`), the latter controlled by the order-`(k + 1)` Hilbert-Schmidt content.  The
+atlas-uniform constant `B` is assembled from the per-chart constant over the finite active set of the
+partition of unity (`chartAtlasPOU_activeFinset`), the kernel being empty off it.  It carries no
+spectral nonlinearity and no Weyl dependence. -/
 theorem exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsContent
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     ∃ B : ℝ, 0 ≤ B ∧
@@ -220,8 +1020,69 @@ theorem exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsContent
           ‖iteratedFDeriv ℝ j
               (rawConnLapPull (I := I) (M := M) g r s
                 (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx) y‖ ^ 2 ≤
-            B * rawConnLapRhsHsContent (I := I) (M := M) g r s k T α y :=
-  sorry
+            B * rawConnLapRhsHsContent (I := I) (M := M) g r s k T α y := by
+  classical
+  -- Per-chart constants, assembled into an atlas-uniform `B` over the finite active set.
+  have hperα : ∀ w : M × (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)), ∃ Bα : ℝ, 0 ≤ Bα ∧
+      ∀ (T : Integral.L2.SmoothCcTensor g r s) (j : ℕ), j ≤ 2 * k →
+        ∀ y ∈ chartImagePOUTsupport (I := I) (M := M) w.1,
+          ‖iteratedFDeriv ℝ j
+              (rawConnLapPull (I := I) (M := M) g r s
+                (rawTensorConnLapSmooth (I := I) g r s T) w.1 w.2.1 w.2.2) y‖ ^ 2 ≤
+            Bα * rawConnLapRhsHsContent (I := I) (M := M) g r s k T w.1 y := fun w =>
+    exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsContent_perAlpha
+      (I := I) (M := M) g r s k w.1 w.2.1 w.2.2
+  choose Bfun hBfun_nn hBfun using hperα
+  set actF : Finset M := chartAtlasPOU_activeFinset I M with hactF_def
+  refine ⟨∑ α ∈ actF, ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
+      ∑ Jdx : Fin s → Fin (Module.finrank ℝ E), Bfun ⟨α, Idx, Jdx⟩,
+    Finset.sum_nonneg (fun α _ => Finset.sum_nonneg (fun Idx _ =>
+      Finset.sum_nonneg (fun Jdx _ => hBfun_nn ⟨α, Idx, Jdx⟩))), ?_⟩
+  intro T α Idx Jdx j hj y hyK
+  by_cases hα : α ∈ actF
+  · -- Active chart: dominate `Bfun ⟨α, Idx, Jdx⟩` by the finite nonnegative sum.
+    have hBle : Bfun ⟨α, Idx, Jdx⟩ ≤
+        ∑ α' ∈ actF, ∑ Idx' : Fin r → Fin (Module.finrank ℝ E),
+          ∑ Jdx' : Fin s → Fin (Module.finrank ℝ E), Bfun ⟨α', Idx', Jdx'⟩ := by
+      have h_inner : Bfun ⟨α, Idx, Jdx⟩ ≤
+          ∑ Jdx' : Fin s → Fin (Module.finrank ℝ E), Bfun ⟨α, Idx, Jdx'⟩ :=
+        Finset.single_le_sum (f := fun Jdx' => Bfun ⟨α, Idx, Jdx'⟩)
+          (fun Jdx' _ => hBfun_nn ⟨α, Idx, Jdx'⟩) (Finset.mem_univ Jdx)
+      have h_mid : (∑ Jdx' : Fin s → Fin (Module.finrank ℝ E), Bfun ⟨α, Idx, Jdx'⟩) ≤
+          ∑ Idx' : Fin r → Fin (Module.finrank ℝ E),
+            ∑ Jdx' : Fin s → Fin (Module.finrank ℝ E), Bfun ⟨α, Idx', Jdx'⟩ :=
+        Finset.single_le_sum
+          (f := fun Idx' => ∑ Jdx' : Fin s → Fin (Module.finrank ℝ E), Bfun ⟨α, Idx', Jdx'⟩)
+          (fun Idx' _ => Finset.sum_nonneg (fun Jdx' _ => hBfun_nn ⟨α, Idx', Jdx'⟩))
+          (Finset.mem_univ Idx)
+      have h_outer : (∑ Idx' : Fin r → Fin (Module.finrank ℝ E),
+            ∑ Jdx' : Fin s → Fin (Module.finrank ℝ E), Bfun ⟨α, Idx', Jdx'⟩) ≤
+          ∑ α' ∈ actF, ∑ Idx' : Fin r → Fin (Module.finrank ℝ E),
+            ∑ Jdx' : Fin s → Fin (Module.finrank ℝ E), Bfun ⟨α', Idx', Jdx'⟩ :=
+        Finset.single_le_sum
+          (f := fun α' => ∑ Idx' : Fin r → Fin (Module.finrank ℝ E),
+            ∑ Jdx' : Fin s → Fin (Module.finrank ℝ E), Bfun ⟨α', Idx', Jdx'⟩)
+          (fun α' _ => Finset.sum_nonneg (fun Idx' _ =>
+            Finset.sum_nonneg (fun Jdx' _ => hBfun_nn ⟨α', Idx', Jdx'⟩))) hα
+      exact le_trans h_inner (le_trans h_mid h_outer)
+    have hpt := hBfun ⟨α, Idx, Jdx⟩ T j hj y hyK
+    refine le_trans hpt ?_
+    exact mul_le_mul_of_nonneg_right hBle
+      (rawConnLapRhsHsContent_nonneg (I := I) (M := M) g r s k T α y)
+  · -- Inactive chart: the kernel is empty, so the bound is vacuous at `y`.
+    exfalso
+    have hρ0 : ∀ x : M, ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 0 :=
+      chartAtlasPOU_eq_zero_of_notMem_activeFinset (I := I) (M := M) hα
+    have h_tsupp_empty : tsupport (fun x : M =>
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) = ∅ := by
+      rw [tsupport, Function.support]
+      simp only [hρ0, ne_eq, not_true_eq_false, Set.setOf_false, closure_empty]
+    have hyK' : y ∈ chartImagePOUTsupport (I := I) (M := M) α := hyK
+    rw [chartImagePOUTsupport] at hyK'
+    obtain ⟨z, ⟨x, hx_supp, _⟩, _⟩ := hyK'
+    rw [h_tsupp_empty] at hx_supp
+    exact hx_supp
 
 /-- The pushed partition-of-unity weight `ρ_α` (read at the chart-source preimage of a target point
 `y`) vanishes when `y` lies in the chart target but outside the compact kernel

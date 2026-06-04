@@ -421,32 +421,91 @@ theorem deturck_g0_carrier_Hk_continuousOn_upto_zero
         _ = ε := by field_simp
   exact hmain
 
-/-- **Orthonormal-basis multilinear operator-norm bound (posited finite-dim real-analysis atom).**
+/-- **Reverse model-basis multilinear operator-norm bound (finite-dim real-analysis atom).**
 
 For any continuous `k`-multilinear real form `f` on the finite-dimensional model space `E`, the
-operator norm `‖f‖` is bounded by the sum, over all `k`-multi-indices `idx : Fin k → Fin (dim E)`,
-of the magnitudes of the evaluations `f` on the corresponding tuples of the fixed model basis
-`chartModelBasis E`:
+operator norm `‖f‖` is bounded by the explicit dimensional constant
+`‖(chartModelBasis E).equivFunL‖ ^ k` times the sum, over all `k`-multi-indices
+`idx : Fin k → Fin (dim E)`, of the magnitudes of the evaluations `f` on the corresponding tuples
+of the fixed model basis `chartModelBasis E`:
 
-  `‖f‖ ≤ ∑_{idx : Fin k → Fin (dim E)} ‖f (fun p => chartModelBasis E (idx p))‖`.
+  `‖f‖ ≤ ‖(chartModelBasis E).equivFunL‖ ^ k · ∑_{idx} ‖f (fun p => chartModelBasis E (idx p))‖`.
 
-This is the standard reverse multilinear-norm estimate over an **orthonormal** basis: `chartModelBasis
-E` is the image of `EuclideanSpace.basisFun` under the linear isometry `toEuclidean.symm`, hence
-orthonormal, so every unit input decomposes in the basis with coordinates of absolute value `≤ 1`
-(Cauchy–Schwarz against unit basis vectors), and multilinear expansion (`map_sum`) of `f m` over the
-basis coordinates of `m` dominates `‖f m‖` by `(∑_idx ‖f(basis tuple)‖) · ∏‖m i‖`; `opNorm_le_bound`
-then yields the claim.  It is the genuinely-missing finite-dim atom underpinning the reverse
-Fréchet↔chart-`2`-jet bound (the multilinear dual of the forward coordinate-partial estimate
+This is the reverse multilinear-norm estimate over a general (not necessarily orthonormal) basis.
+`chartModelBasis E` is the image of `EuclideanSpace.basisFun` under `toEuclidean.symm`, and
+`toEuclidean := ContinuousLinearEquiv.ofFinrankEq …` is an *arbitrary* continuous-linear
+equivalence of equal-`finrank` spaces — **not** a linear isometry — so the basis is in general not
+orthonormal and the coordinate map `(chartModelBasis E).equivFunL : E ≃L (Fin n → ℝ)` has operator
+norm that need not be `1`.  Hence the bound genuinely carries the factor
+`Ce^k := ‖equivFunL‖^k`: every input `m i` decomposes as `∑_j (B.repr (m i) j) • (B j)` with
+coordinate magnitude `|B.repr (m i) j| ≤ Ce · ‖m i‖` (the continuous-coordinate bound
+`norm_le_pi_norm` against the operator norm of `equivFunL`), and the multilinear expansion
+(`MultilinearMap.map_sum` + `map_smul_univ`) of `f m` dominates `‖f m‖` by
+`(Ce^k · ∑_idx ‖f(basis tuple)‖) · ∏‖m i‖`; `ContinuousMultilinearMap.opNorm_le_bound` then yields
+the claim.  It is the genuine reverse-direction atom underpinning the reverse Fréchet↔chart-`2`-jet
+bound (the multilinear dual of the forward coordinate-partial estimate
 `euclidPartial_sq_le_iteratedFDeriv_two_sq`).
 
 The conclusion is a pure operator-norm bound on an arbitrary continuous multilinear map, structurally
-distinct from any geometric datum; no packaging.  The body is `sorry`; consumers transitively depend
-on `sorryAx`. -/
+distinct from any geometric datum; no packaging.  Proven sorry-free. -/
 theorem chartModelBasis_contMultilinear_opNorm_le_sum {k : ℕ}
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin k => E) ℝ) :
-    ‖f‖ ≤ ∑ idx : Fin k → Fin (Module.finrank ℝ E),
-      ‖f (fun p => (Integral.Measure.chartModelBasis E) (idx p))‖ :=
-  sorry
+    ‖f‖ ≤ ‖((Integral.Measure.chartModelBasis E).equivFunL.toContinuousLinearMap :
+          E →L[ℝ] (Fin (Module.finrank ℝ E) → ℝ))‖ ^ k *
+        ∑ idx : Fin k → Fin (Module.finrank ℝ E),
+      ‖f (fun p => (Integral.Measure.chartModelBasis E) (idx p))‖ := by
+  classical
+  set B := Integral.Measure.chartModelBasis E with hB
+  set φ : E →L[ℝ] (Fin (Module.finrank ℝ E) → ℝ) := B.equivFunL.toContinuousLinearMap with hφ
+  set Ce : ℝ := ‖φ‖ with hCe
+  have hCe0 : 0 ≤ Ce := norm_nonneg _
+  apply ContinuousMultilinearMap.opNorm_le_bound
+  · positivity
+  intro m
+  have hcoord : ∀ (i : Fin k) (j : Fin (Module.finrank ℝ E)),
+      |B.repr (m i) j| ≤ Ce * ‖m i‖ := by
+    intro i j
+    have h1 : B.repr (m i) j = φ (m i) j := rfl
+    rw [h1]
+    calc |φ (m i) j| = ‖φ (m i) j‖ := (Real.norm_eq_abs _).symm
+      _ ≤ ‖φ (m i)‖ := norm_le_pi_norm _ j
+      _ ≤ Ce * ‖m i‖ := by rw [hCe]; exact φ.le_opNorm (m i)
+  have hexp : (f fun i => m i) = ∑ idx : Fin k → Fin (Module.finrank ℝ E),
+      (∏ i, B.repr (m i) (idx i)) * f (fun i => B (idx i)) := by
+    have hstep : (f fun i => m i) = ∑ idx : Fin k → Fin (Module.finrank ℝ E),
+        f (fun i => B.repr (m i) (idx i) • B (idx i)) := by
+      conv_lhs =>
+        rw [show (fun i => m i) = (fun i => ∑ j, B.repr (m i) j • B j) from
+          funext fun i => (B.sum_repr (m i)).symm]
+      rw [← ContinuousMultilinearMap.coe_coe f]
+      exact f.toMultilinearMap.map_sum (fun i j => B.repr (m i) j • B j)
+    rw [hstep]
+    refine Finset.sum_congr rfl (fun idx _ => ?_)
+    rw [← ContinuousMultilinearMap.coe_coe f,
+      f.toMultilinearMap.map_smul_univ (fun i => B.repr (m i) (idx i)) (fun i => B (idx i))]
+    simp [smul_eq_mul]
+  rw [hexp]
+  have hkey : ∀ idx : Fin k → Fin (Module.finrank ℝ E),
+      ‖(∏ i, B.repr (m i) (idx i)) * f (fun i => B (idx i))‖ ≤
+        ‖f (fun i => B (idx i))‖ * (Ce ^ k * ∏ i, ‖m i‖) := by
+    intro idx
+    rw [norm_mul, Real.norm_eq_abs, mul_comm]
+    refine mul_le_mul_of_nonneg_left ?_ (norm_nonneg _)
+    calc |∏ i, B.repr (m i) (idx i)| = ∏ i, |B.repr (m i) (idx i)| := by rw [Finset.abs_prod]
+      _ ≤ ∏ i : Fin k, (Ce * ‖m i‖) :=
+          Finset.prod_le_prod (fun i _ => abs_nonneg _) (fun i _ => hcoord i (idx i))
+      _ = Ce ^ k * ∏ i, ‖m i‖ := by
+          rw [Finset.prod_mul_distrib, Finset.prod_const, Finset.card_univ, Fintype.card_fin]
+  calc ‖∑ idx : Fin k → Fin (Module.finrank ℝ E),
+          (∏ i, B.repr (m i) (idx i)) * f (fun i => B (idx i))‖
+      ≤ ∑ idx : Fin k → Fin (Module.finrank ℝ E),
+          ‖(∏ i, B.repr (m i) (idx i)) * f (fun i => B (idx i))‖ := norm_sum_le _ _
+    _ ≤ ∑ idx : Fin k → Fin (Module.finrank ℝ E),
+          ‖f (fun i => B (idx i))‖ * (Ce ^ k * ∏ i, ‖m i‖) :=
+        Finset.sum_le_sum (fun idx _ => hkey idx)
+    _ = Ce ^ k * (∑ idx : Fin k → Fin (Module.finrank ℝ E),
+          ‖f (fun i => B (idx i))‖) * ∏ i, ‖m i‖ := by
+        rw [← Finset.sum_mul]; ring
 
 /-- **Reverse finite-dimensional Fréchet↔chart-`2`-jet bound (assembled over the orthonormal-basis
 multilinear-norm atom).**
@@ -490,9 +549,15 @@ theorem chartGramDiff_iteratedFDeriv_norm_le_chartMetricJet2DiffSup (α : M)
               Integral.DivergenceTheorem.chartGramOnE (I := I) g₂ α i j z) y‖ ≤
           C * DeTurckCoefficients.chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y := by
   classical
-  -- The single dimensional constant `1 + n + n²` dominates the multi-index count `n^k` for every
-  -- order `k ≤ 2`, and each multi-index summand is dominated by the chart-`2`-jet seminorm.
-  refine ⟨1 + ((Module.finrank ℝ E : ℕ) : ℝ) + ((Module.finrank ℝ E : ℕ) : ℝ) ^ 2,
+  -- The dimensional constant `(1 + Ce + Ce²) · (1 + n + n²)` dominates `Ce^k · n^k` for every
+  -- order `k ≤ 2`, where `Ce := ‖(chartModelBasis E).equivFunL‖` is the model-basis coordinate
+  -- operator norm carried by the (general, non-orthonormal) reverse multilinear-norm atom; each
+  -- multi-index summand is dominated by the chart-`2`-jet seminorm.
+  set Ce : ℝ := ‖((Integral.Measure.chartModelBasis E).equivFunL.toContinuousLinearMap :
+      E →L[ℝ] (Fin (Module.finrank ℝ E) → ℝ))‖ with hCe_def
+  have hCe0 : 0 ≤ Ce := norm_nonneg _
+  refine ⟨(1 + Ce + Ce ^ 2) *
+      (1 + ((Module.finrank ℝ E : ℕ) : ℝ) + ((Module.finrank ℝ E : ℕ) : ℝ) ^ 2),
     by positivity, fun g₁ g₂ k hk y hy => ?_⟩
   set F : E → ℝ := fun z => Integral.DivergenceTheorem.chartGramOnE (I := I) g₁ α i j z -
     Integral.DivergenceTheorem.chartGramOnE (I := I) g₂ α i j z with hF_def
@@ -642,28 +707,51 @@ theorem chartGramDiff_iteratedFDeriv_norm_le_chartMetricJet2DiffSup (α : M)
         (DeTurckCoefficients.partialDeriv2_chartGramOnE_sub_abs_le_partial2DiffSup
           (I := I) (M := M) g₁ g₂ α y (idx 0) (idx 1) i j).trans ?_
       exact DeTurckCoefficients.chartGramPartial2DiffSup_le_jet2 (I := I) (M := M) g₁ g₂ α y
-  -- Apply the posited orthonormal-basis multilinear-norm atom and sum the per-term bounds.
+  -- Apply the reverse model-basis multilinear-norm atom (constant `Ce^k`) and sum the per-term
+  -- bounds; dominate `Ce^k · n^k` by `(1 + Ce + Ce²) · (1 + n + n²)` for `k ≤ 2`.
   change ‖iteratedFDeriv ℝ k F y‖ ≤
-    (1 + ((Module.finrank ℝ E : ℕ) : ℝ) + ((Module.finrank ℝ E : ℕ) : ℝ) ^ 2) * J
-  refine (chartModelBasis_contMultilinear_opNorm_le_sum (E := E) (iteratedFDeriv ℝ k F y)).trans ?_
-  calc ∑ idx : Fin k → Fin (Module.finrank ℝ E),
+    (1 + Ce + Ce ^ 2) *
+      (1 + ((Module.finrank ℝ E : ℕ) : ℝ) + ((Module.finrank ℝ E : ℕ) : ℝ) ^ 2) * J
+  have hatom := chartModelBasis_contMultilinear_opNorm_le_sum (E := E) (iteratedFDeriv ℝ k F y)
+  rw [← hCe_def] at hatom
+  refine hatom.trans ?_
+  have hsum_le : ∑ idx : Fin k → Fin (Module.finrank ℝ E),
+        ‖iteratedFDeriv ℝ k F y (fun p => (Integral.Measure.chartModelBasis E) (idx p))‖ ≤
+      ((Module.finrank ℝ E : ℕ) : ℝ) ^ k * J := by
+    calc ∑ idx : Fin k → Fin (Module.finrank ℝ E),
+            ‖iteratedFDeriv ℝ k F y (fun p => (Integral.Measure.chartModelBasis E) (idx p))‖
+        ≤ ∑ _idx : Fin k → Fin (Module.finrank ℝ E), J :=
+          Finset.sum_le_sum (fun idx _ => hterm idx)
+      _ = ((Module.finrank ℝ E : ℕ) : ℝ) ^ k * J := by
+          rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ, Fintype.card_fun,
+            Fintype.card_fin, Fintype.card_fin]
+          push_cast
+          ring
+  calc Ce ^ k * ∑ idx : Fin k → Fin (Module.finrank ℝ E),
           ‖iteratedFDeriv ℝ k F y (fun p => (Integral.Measure.chartModelBasis E) (idx p))‖
-      ≤ ∑ _idx : Fin k → Fin (Module.finrank ℝ E), J :=
-        Finset.sum_le_sum (fun idx _ => hterm idx)
-    _ = ((Module.finrank ℝ E : ℕ) : ℝ) ^ k * J := by
-        rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ, Fintype.card_fun,
-          Fintype.card_fin, Fintype.card_fin]
-        push_cast
-        ring
-    _ ≤ (1 + ((Module.finrank ℝ E : ℕ) : ℝ) + ((Module.finrank ℝ E : ℕ) : ℝ) ^ 2) * J := by
-        refine mul_le_mul_of_nonneg_right ?_ hJ_nn
+      ≤ Ce ^ k * (((Module.finrank ℝ E : ℕ) : ℝ) ^ k * J) :=
+        mul_le_mul_of_nonneg_left hsum_le (by positivity)
+    _ ≤ (1 + Ce + Ce ^ 2) *
+          (1 + ((Module.finrank ℝ E : ℕ) : ℝ) + ((Module.finrank ℝ E : ℕ) : ℝ) ^ 2) * J := by
         have hn1 : (1 : ℝ) ≤ ((Module.finrank ℝ E : ℕ) : ℝ) := by
           have := Nat.one_le_iff_ne_zero.mpr (NeZero.ne (Module.finrank ℝ E))
           exact_mod_cast this
-        interval_cases k
-        · nlinarith [hn1]
-        · nlinarith [hn1]
-        · nlinarith [hn1]
+        have hCek : Ce ^ k ≤ 1 + Ce + Ce ^ 2 := by
+          interval_cases k <;> nlinarith [hCe0, sq_nonneg Ce]
+        have hnk : ((Module.finrank ℝ E : ℕ) : ℝ) ^ k ≤
+            1 + ((Module.finrank ℝ E : ℕ) : ℝ) + ((Module.finrank ℝ E : ℕ) : ℝ) ^ 2 := by
+          interval_cases k <;> nlinarith [hn1]
+        have hnk_nn : (0 : ℝ) ≤ ((Module.finrank ℝ E : ℕ) : ℝ) ^ k := by positivity
+        have hbig_nn : (0 : ℝ) ≤ 1 + Ce + Ce ^ 2 := by positivity
+        calc Ce ^ k * (((Module.finrank ℝ E : ℕ) : ℝ) ^ k * J)
+            = (Ce ^ k * ((Module.finrank ℝ E : ℕ) : ℝ) ^ k) * J := by ring
+          _ ≤ ((1 + Ce + Ce ^ 2) *
+                (1 + ((Module.finrank ℝ E : ℕ) : ℝ) + ((Module.finrank ℝ E : ℕ) : ℝ) ^ 2)) * J := by
+              refine mul_le_mul_of_nonneg_right ?_ hJ_nn
+              exact mul_le_mul hCek hnk hnk_nn hbig_nn
+          _ = (1 + Ce + Ce ^ 2) *
+                (1 + ((Module.finrank ℝ E : ℕ) : ℝ) + ((Module.finrank ℝ E : ℕ) : ℝ) ^ 2) * J := by
+              ring
 
 /-- **Carrier-direct chart-`2`-jet seminorm bound by the intrinsic covariant-gradient jet sum
 (posited carrier-side reading of the realize covariant-gradient reduction).**

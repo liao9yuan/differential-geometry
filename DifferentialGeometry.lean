@@ -584,6 +584,7 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichManifold
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichOnM
 import DifferentialGeometry.Analysis.Sobolev.Manifold.SobolevAlgebra
+import DifferentialGeometry.Analysis.Sobolev.MoserTameProduct
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.ChartBilinearDischarge.SubstitutionChartBilinear
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.ChartBilinearDischarge.SubstitutionGradTendsto
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.ChartBilinearDischarge.SubstitutionIBP
