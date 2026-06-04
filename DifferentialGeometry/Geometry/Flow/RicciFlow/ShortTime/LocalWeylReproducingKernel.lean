@@ -9,6 +9,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Realiz
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.SpectralDiagonalCounting
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.TensorRSContRiemannianBundle
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorDirichletCurrentGreenIdentityRS
 
 /-! # The pointwise reproducing-kernel bound underlying the local Weyl law
 
@@ -307,14 +308,12 @@ Laplacian.  At purely-covariant rank `(0, s)` it is the in-library
 `tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_gen`, proved unconditionally from the
 metric-lowering intertwiner `loweringIntertwiner_gen` feeding the per-section divergence
 identity `divergence_dirichletVFGen_eq` into the compact-support divergence theorem
-`integral_divergence_eq_zero_of_hasCompactSupport`.  The lowering construction
-(`lowerAllUpperIndices` / `dirichletVFSectionGen`) lowers *all* upper indices and is therefore
-specific to `(0, s)`-tensors; the genuinely general-rank `(r, s)` Dirichlet-current divergence
-identity (the same integration by parts, metric compatibility of `∇` against `g`) is absent
-from the library, so the resulting Green identity is posited here.  The conclusion is an `L²`
-integration-by-parts identity, structurally distinct from every coordinate-scaling/summability
-statement it powers (no packaging); the body is `sorry` and consumers transitively depend on
-`sorryAx`. -/
+`integral_divergence_eq_zero_of_hasCompactSupport`.  At general bidegree `(r, s)` it is the
+in-library `tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawTensorConnLapSmooth_rs`, proved by
+the same divergence-theorem chain over the general-rank Dirichlet-current divergence identity
+`divergence_dirichletVFRS_eq` (which discharges the metric-lowering intertwiner
+`LoweringIntertwinerRS` via `loweringIntertwinerRS_holds`).  This is a one-line transit of that
+in-library general-rank Green identity. -/
 private theorem tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLapRS
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T v : Integral.L2.SmoothCcTensor g r s) :
@@ -323,7 +322,8 @@ private theorem tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLapRS
         (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s v).toFun =
       - Integral.L2.tensorL2Inner (I := I) (M := M) g r s
           (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s T).toFun v.toFun :=
-  sorry
+  Integral.Connection.tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawTensorConnLapSmooth_rs
+    (I := I) (M := M) g r s T v
 
 /-- **The general-rank Green / `H¹`-pairing bridge for `(1 - Δ_∇)`.** For smooth
 compactly-supported `(r, s)`-tensors `T, v`, the `L²` pairing of `(1 - Δ_∇) T` with `v` equals
@@ -1413,18 +1413,99 @@ private def CurvatureCrossTermBoundRS
             Integral.L2.tensorL2Norm (I := I) (M := M) g r (s + 1)
               (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S).toFun)
 
-/-- **The general-rank integrated order-`2` Weitzenböck identity (posited general-rank curvature
-child).** For a smooth compactly-supported `(r, s)`-tensor `S`,
-`‖∇²S‖²_{L²} = ‖Δ_∇ S‖²_{L²} − ⟨Curv, ∇S⟩_{L²}`, where `Curv := Δ_∇(∇S) − ∇(Δ_∇ S)`.
+/-- **The general-rank diagonal Green identity at rank `s + 1`.** For a smooth compactly-supported
+`(r, s)`-tensor `S`, writing `∇S := covGrad g r s S` for its `(r, s + 1)` covariant gradient, the
+diagonal `L²` self-pairing of `∇²S = ∇(∇S)` equals minus the `L²` pairing of the rough Laplacian
+`Δ_∇(∇S)` with `∇S`.  The diagonal specialisation (at `v := T := ∇S`) of the general-rank
+connection-Laplacian Green identity `tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLapRS`; the
+bidegree-`(r, s)` analogue of `covGrad_l2Inner_self_eq_neg_rawConnLap_inner_gen`. -/
+private lemma covGradRS_l2Inner_self_eq_neg_rawConnLap_inner
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : Integral.L2.SmoothCcTensor g r s) :
+    Integral.L2.tensorL2Inner (I := I) (M := M) g r (s + 1 + 1)
+        (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + 1)
+          (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S)).toFun
+        (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + 1)
+          (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S)).toFun =
+      - Integral.L2.tensorL2Inner (I := I) (M := M) g r (s + 1)
+          (Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + 1)
+            (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S)).toFun
+          (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S).toFun :=
+  tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLapRS (I := I) (M := M) g r (s + 1)
+    (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S)
+    (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S)
 
-This is the bidegree-`(r, s)` analogue of `weitzenbock_integrated_covGrad_l2_normSq`.  At purely
-covariant rank `(0, s)` the identity is proved in the library from the integration-by-parts of the
-moving-frame `∇²S`-order bracket against `∇S`; the lowering construction it goes through is specific
-to `(0, s)`-tensors, so the genuinely general-rank `(r, s)` identity (the same Weitzenböck integration
-by parts at contravariant rank `r`) is absent and posited here.  The conclusion is an `L²` identity
-equating the squared second-gradient norm to the rough-Laplacian norm minus the curvature cross-pairing,
-structurally distinct from every summability/Gårding inequality it powers (no packaging).  The body is
-`sorry` and consumers transitively depend on `sorryAx`. -/
+/-- **The general-rank Laplacian-gradient collapse at rank `s`.** For a smooth compactly-supported
+`(r, s)`-tensor `S`, the `L²` inner product of the covariant gradient of `Δ_∇ S` with the covariant
+gradient of `S` equals minus the squared `L²` norm of `Δ_∇ S`.  The rank-`(r, s)` Green identity at
+the pair `(S, Δ_∇ S)` with the symmetry of the global `L²` pairing; the bidegree-`(r, s)` analogue of
+`covGrad_rawConnLap_l2Inner_covGrad_eq_neg_normSq_gen`. -/
+private lemma covGradRS_rawConnLap_l2Inner_covGrad_eq_neg_normSq
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : Integral.L2.SmoothCcTensor g r s) :
+    Integral.L2.tensorL2Inner (I := I) (M := M) g r (s + 1)
+        (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s
+          (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s S)).toFun
+        (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S).toFun =
+      - Integral.L2.tensorL2Norm (I := I) (M := M) g r s
+          (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s S).toFun ^ 2 := by
+  set ΔS : Integral.L2.SmoothCcTensor g r s :=
+    Integral.Connection.rawTensorConnLapSmooth (I := I) g r s S with hΔS_def
+  rw [Integral.L2.tensorL2Inner_symm (I := I) (M := M) g r (s + 1)
+    (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s ΔS).toFun
+    (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S).toFun]
+  rw [tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLapRS (I := I) (M := M) g r s S ΔS]
+  rw [hΔS_def]
+  rw [Integral.Connection.tensorL2Norm_sq_toFun (I := I) (M := M) g r s
+    (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s S)]
+
+/-- **The general-rank cross-pairing split.** Writing `Curv := Δ_∇(∇S) − ∇(Δ_∇ S)` for the
+rough-Laplacian / covariant-gradient commutator defect (a `(r, s + 1)`-tensor field), the `L²` pairing
+of `Δ_∇(∇S)` with `∇S` splits as minus the squared `L²` norm of `Δ_∇ S` plus the curvature cross term.
+The bidegree-`(r, s)` analogue of `rawConnLap_l2Inner_covGrad_split_gen`. -/
+private lemma rawConnLapRS_l2Inner_covGrad_split
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : Integral.L2.SmoothCcTensor g r s) :
+    Integral.L2.tensorL2Inner (I := I) (M := M) g r (s + 1)
+        (Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + 1)
+          (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S)).toFun
+        (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S).toFun =
+      - Integral.L2.tensorL2Norm (I := I) (M := M) g r s
+            (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s S).toFun ^ 2 +
+        Integral.L2.tensorL2Inner (I := I) (M := M) g r (s + 1)
+          (Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + 1)
+              (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S) -
+            Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s
+              (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s S)).toFun
+          (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S).toFun := by
+  classical
+  set GS : Integral.L2.SmoothCcTensor g r (s + 1) :=
+    Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S with hGS_def
+  set ΔGS : Integral.L2.SmoothCcTensor g r (s + 1) :=
+    Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + 1) GS with hΔGS_def
+  set GΔ : Integral.L2.SmoothCcTensor g r (s + 1) :=
+    Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s
+      (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s S) with hGΔ_def
+  have hcomm : ΔGS = GΔ + (ΔGS - GΔ) := by abel
+  nth_rewrite 1 [hcomm]
+  rw [Integral.L2.SmoothCcTensor.toFun_add]
+  rw [Integral.L2.tensorL2Inner_add_left (I := I) (M := M) g r (s + 1)
+    GΔ.toFun (ΔGS - GΔ).toFun GS.toFun
+    (Integral.L2.SmoothCcTensor.integrable_inner_cross (I := I) (M := M) GΔ GS)
+    (Integral.L2.SmoothCcTensor.integrable_inner_cross (I := I) (M := M) (ΔGS - GΔ) GS)]
+  rw [hGΔ_def, hGS_def]
+  rw [covGradRS_rawConnLap_l2Inner_covGrad_eq_neg_normSq (I := I) (M := M) g r s S]
+
+/-- **The general-rank integrated order-`2` Weitzenböck identity.** For a smooth compactly-supported
+`(r, s)`-tensor `S`, `‖∇²S‖²_{L²} = ‖Δ_∇ S‖²_{L²} − ⟨Curv, ∇S⟩_{L²}`, where `Curv := Δ_∇(∇S) − ∇(Δ_∇ S)`.
+
+This is the bidegree-`(r, s)` analogue of `weitzenbock_integrated_covGrad_l2_normSq`, *proved* here by
+the verbatim port of that rank-`0` proof: the derivation is purely the two diagonal Green identities
+(the general-rank `covGradRS_l2Inner_self_eq_neg_rawConnLap_inner` at rank `s + 1` and the collapse
+`covGradRS_rawConnLap_l2Inner_covGrad_eq_neg_normSq` at rank `s`, both feeding the now-in-library
+general-rank connection-Laplacian Green identity `…_rs` via the in-file transit
+`tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLapRS`) chained through the cross-pairing split
+`rawConnLapRS_l2Inner_covGrad_split` and closed by `ring`.  The curvature content is packaged into the
+single defect field `Curv` and never differentiated, exactly as in the `(0, s)` proof; with the
+general-rank Green identity in the library no rank restriction remains.  Consumers transitively depend
+on `sorryAx` only through that Green identity. -/
 private theorem weitzenbockRS_integrated_covGrad_l2_normSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : Integral.L2.SmoothCcTensor g r s) :
     Integral.L2.tensorL2Norm (I := I) (M := M) g r (s + 1 + 1)
@@ -1437,8 +1518,13 @@ private theorem weitzenbockRS_integrated_covGrad_l2_normSq
               (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S) -
             Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s
               (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s S)).toFun
-          (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S).toFun :=
-  sorry
+          (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S).toFun := by
+  rw [Integral.Connection.tensorL2Norm_sq_toFun (I := I) (M := M) g r (s + 1 + 1)
+    (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + 1)
+      (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S))]
+  rw [covGradRS_l2Inner_self_eq_neg_rawConnLap_inner (I := I) (M := M) g r s S]
+  rw [rawConnLapRS_l2Inner_covGrad_split (I := I) (M := M) g r s S]
+  ring
 
 /-- **The general-rank order-`2` Gårding estimate from a cross-term bound.** Bidegree-`(r, s)`
 analogue of `secondCovGrad_l2NormSq_le_of_cross_bound`, *proved* here by the verbatim port of the
@@ -1547,23 +1633,85 @@ private theorem order2GardingFamilyRS_of_curvatureCrossTermBoundRS
   exact secondCovGradRS_l2NormSq_le_of_cross_bound (I := I) (M := M) g r s S (Ccross s)
     (hCcross s) (hcrossS s S)
 
-/-- **The general-rank atomic curvature cross-term bound (posited general-rank curvature child).**
-At fixed contravariant rank `r` there is a valence-dependent nonnegative `Ccross : ℕ → ℝ` with
-`CurvatureCrossTermBoundRS g r Ccross`.
+/-- **The general-rank integrated bracket-free curvature representation (posited general-rank
+curvature child).** At fixed contravariant rank `r` there is a valence-dependent nonnegative
+`K : ℕ → ℝ` such that, at every covariant rank `s` and for every smooth compactly-supported
+`(r, s)`-tensor `S`, the rough-Laplacian / covariant-gradient commutator defect
+`Curv := Δ_∇(∇S) − ∇(Δ_∇ S)` admits a *bracket-free* curvature contraction field `G` (a
+`(r, s + 1)`-tensor) with the same `L²` pairing against `∇S`, `⟨Curv, ∇S⟩_{L²} = ⟨G, ∇S⟩_{L²}`,
+and `‖G‖ ≤ K s · (‖∇S‖ + ‖S‖)`.
 
-This is the bidegree-`(r, ·)` analogue of the `(0, ·)` atomic cross-term `curvatureCrossTermBound_holds`
-(itself resting on the `(0, ·)`-restricted posited curvature input `exists_abs_curvCrossTerm_l2_bound`):
-fibrewise `Curv` is a Riemann-curvature contraction of `∇S`, so once the moving-frame `∇²S`-order
-bracket is integrated away against `∇S` the cross-pairing is controlled, at each fixed valence `s`, by
-the curvature sup `‖R‖_∞` over the compact manifold (which on the `(r, s)`-tensor bundle grows like
-`(r + s + 1)·‖R‖_∞`, hence the per-valence constant).  The genuinely general-rank `(r, s)` integrated
-curvature estimate is absent from the library, so it is posited here.  The constant is per-valence
-(`ℕ → ℝ`), not a single scalar (the curvature endomorphism of the `(r, s)`-bundle is an `(r+s)`-slot
-derivation), so this is NOT the unsatisfiable single-const-∀s shape.  The body is `sorry` and consumers
-transitively depend on `sorryAx`. -/
-private theorem curvatureCrossTermBoundRS_holds (g : SmoothRiemannianMetric I M) (r : ℕ) :
-    ∃ Ccross : ℕ → ℝ, CurvatureCrossTermBoundRS (I := I) (M := M) g r Ccross :=
+This is the bidegree-`(r, ·)` analogue of the `(0, ·)` atomic curvature input
+`exists_pointwiseTensorCurv_l2_bracketFree_repr`
+(`Geometry/Curvature/CovGradRoughLap/PointwiseTensorCurvL2Bound.lean`, body `sorry`).  Fibrewise
+`Curv` is, by the Ricci identity on the gradient field, a Riemann-curvature contraction of `∇S`
+plus a moving-frame `∇²S`-order bracket (the false slot-`0` frame-trace matching on a normal
+manifold); only the `L²` pairing against `∇S` integrates the bracket away, leaving the bracket-free
+field `G` whose fibre norm is a genuine curvature contraction of `∇S`, controlled at each fixed
+valence `s` by the curvature sup `‖R‖_∞` over the compact manifold (which on the `(r, s)`-tensor
+bundle grows like `(r + s + 1)·‖R‖_∞`, hence the per-valence constant).  The genuinely general-rank
+`(r, s)` curvature contraction is absent from the library (the rank-`0` field `pointwiseTensorCurv`
+and its bounds are stated only at contravariant rank `0`), so it is posited here.  The constant is
+per-valence (`ℕ → ℝ`), not a single scalar (the curvature endomorphism of the `(r, s)`-bundle is an
+`(r + s)`-slot derivation), so this is NOT the unsatisfiable single-const-∀s shape.  The conclusion
+is a representation-plus-norm-bound for a curvature field, structurally distinct from the one-sided
+pairing bound it powers (and strictly stronger: it produces the representing field `G`); the body is
+`sorry` and consumers transitively depend on `sorryAx`. -/
+private theorem exists_curvCrossTermRS_l2_bracketFree_repr
+    (g : SmoothRiemannianMetric I M) (r : ℕ) :
+    ∃ K : ℕ → ℝ, (∀ s, 0 ≤ K s) ∧ ∀ (s : ℕ) (S : Integral.L2.SmoothCcTensor g r s),
+      ∃ G : Integral.L2.SmoothCcTensor g r (s + 1),
+        Integral.L2.tensorL2Inner (I := I) (M := M) g r (s + 1)
+              (Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + 1)
+                  (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S) -
+                Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s
+                  (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s S)).toFun
+              (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S).toFun =
+            Integral.L2.tensorL2Inner (I := I) (M := M) g r (s + 1) G.toFun
+              (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S).toFun ∧
+          ‖G‖ ≤ K s *
+            (‖Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S‖ + ‖S‖) :=
   sorry
+
+/-- **The general-rank atomic curvature cross-term bound.** At fixed contravariant rank `r` there is
+a valence-dependent nonnegative `Ccross : ℕ → ℝ` with `CurvatureCrossTermBoundRS g r Ccross`.
+
+This is the bidegree-`(r, ·)` analogue of the `(0, ·)` atomic cross-term `curvatureCrossTermBound_holds`,
+*proved* here by the verbatim port of that reduction: the general-rank integrated bracket-free curvature
+representation `exists_curvCrossTermRS_l2_bracketFree_repr` supplies, at each valence `s`, the bracket-free
+field `G` with `⟨Curv, ∇S⟩_{L²} = ⟨G, ∇S⟩_{L²}` and `‖G‖ ≤ Ccross s · (‖∇S‖ + ‖S‖)`; the inner-product
+Cauchy–Schwarz `|⟨G, ∇S⟩| ≤ ‖G‖·‖∇S‖` (`abs_real_inner_le_norm`, via `SmoothCcTensor.inner_def`) and
+`neg_le_abs` then bound the one-sided pairing by `Ccross s · (‖∇S‖² + ‖S‖·‖∇S‖)`.  Consumers transitively
+depend on `sorryAx` through the posited bracket-free representation. -/
+private theorem curvatureCrossTermBoundRS_holds (g : SmoothRiemannianMetric I M) (r : ℕ) :
+    ∃ Ccross : ℕ → ℝ, CurvatureCrossTermBoundRS (I := I) (M := M) g r Ccross := by
+  classical
+  obtain ⟨K, hK_nn, hrepr⟩ := exists_curvCrossTermRS_l2_bracketFree_repr (I := I) (M := M) g r
+  refine ⟨K, hK_nn, fun s S => ?_⟩
+  obtain ⟨G, hident, hGbound⟩ := hrepr s S
+  set GS : Integral.L2.SmoothCcTensor g r (s + 1) :=
+    Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S with hGS_def
+  rw [hident]
+  set nGrad : ℝ := Integral.L2.tensorL2Norm (I := I) (M := M) g r (s + 1) GS.toFun with hnGrad_def
+  set nS : ℝ := Integral.L2.tensorL2Norm (I := I) (M := M) g r s S.toFun with hnS_def
+  have hnGrad_eq : ‖GS‖ = nGrad := Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M) GS
+  have hnS_eq : ‖S‖ = nS := Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M) S
+  have hnGrad_nn : 0 ≤ nGrad := Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g r (s + 1) _
+  have hcs : |Integral.L2.tensorL2Inner (I := I) (M := M) g r (s + 1) G.toFun GS.toFun| ≤
+      ‖G‖ * ‖GS‖ := by
+    have h := abs_real_inner_le_norm G GS
+    rwa [Integral.L2.SmoothCcTensor.inner_def (I := I) (M := M) G GS] at h
+  have hGbound' : ‖G‖ ≤ K s * (nGrad + nS) := by rw [hnGrad_eq, hnS_eq] at hGbound; exact hGbound
+  have hpair_le :
+      |Integral.L2.tensorL2Inner (I := I) (M := M) g r (s + 1) G.toFun GS.toFun| ≤
+        K s * (nGrad ^ 2 + nS * nGrad) :=
+    calc |Integral.L2.tensorL2Inner (I := I) (M := M) g r (s + 1) G.toFun GS.toFun|
+        ≤ ‖G‖ * ‖GS‖ := hcs
+      _ = ‖G‖ * nGrad := by rw [hnGrad_eq]
+      _ ≤ K s * (nGrad + nS) * nGrad := mul_le_mul_of_nonneg_right hGbound' hnGrad_nn
+      _ = K s * (nGrad ^ 2 + nS * nGrad) := by ring
+  rw [hnGrad_def, hnS_def] at hpair_le ⊢
+  exact le_trans (neg_le_abs _) hpair_le
 
 /-- **The general-rank order-`2` Gårding family.** At fixed contravariant rank `r` there is a
 valence-dependent `Cg : ℕ → ℝ` with `Order2GardingFamilyRS g r Cg`:
@@ -1580,23 +1728,84 @@ private theorem order2GardingFamilyRS_holds (g : SmoothRiemannianMetric I M) (r 
   exact ⟨fun s => 2 + 2 * Ccross s,
     order2GardingFamilyRS_of_curvatureCrossTermBoundRS (I := I) (M := M) g r Ccross hcross⟩
 
-/-- **The general-rank order-`(p+1)` commutator-defect bound (posited general-rank curvature child).**
-At fixed bidegree `(r, s)` there is an order-dependent nonnegative `Cc : ℕ → ℝ` such that, for every
-smooth compactly-supported `(r, s)`-tensor base `U` and every gradient order `p`, the
-rough-Laplacian / iterated-gradient commutator defect at order `p + 1` is `L²`-controlled by the lower
-gradients:
+/-- **The general-rank single-step curvature-defect `L²` bound (posited general-rank curvature
+child).** At fixed contravariant rank `r` there is a valence-dependent nonnegative `Ccurv : ℕ → ℝ`
+such that, at every covariant rank `s'` and for every smooth compactly-supported `(r, s')`-tensor
+`W`, the single-step rough-Laplacian / covariant-gradient commutator defect
+`Curv W := Δ_∇(∇W) − ∇(Δ_∇ W)` is `L²`-bounded by `Ccurv s' · (‖W‖ + ‖∇W‖ + ‖∇²W‖)`.
+
+This is the bidegree-`(r, ·)` analogue of the `(0, ·)` atomic single-step defect bound
+`exists_pointwiseTensorCurv_l2_bound`
+(`Geometry/Curvature/CovGradRoughLap/PointwiseTensorCurvL2Bound.lean`, body `sorry`).  Fibrewise
+`Curv W` is, by the Ricci identity on the gradient field, a Riemann-curvature contraction of
+`∇W` (plus a frame bracket), a zeroth/first-order operator in `∇W` whose fibre norm is bounded
+at each fixed valence `s'` by the curvature sup `‖R‖_∞` over the compact manifold (which on the
+`(r, s')`-tensor bundle grows like `(r + s' + 1)·‖R‖_∞`, hence the per-valence constant).  The
+genuinely general-rank `(r, s')` curvature contraction is absent from the library (the rank-`0`
+field `pointwiseTensorCurv` and its bound are stated only at contravariant rank `0`), so it is
+posited here.  The constant is per-valence (`ℕ → ℝ`), not a single scalar, so this is NOT the
+unsatisfiable single-const-∀s shape.  The conclusion is a single-step `L²` defect bound,
+structurally distinct from the summability/Gårding statements it powers (no packaging); the body
+is `sorry` and consumers transitively depend on `sorryAx`. -/
+private theorem exists_singleStepCurvDefectRS_l2_bound
+    (g : SmoothRiemannianMetric I M) (r : ℕ) :
+    ∃ Ccurv : ℕ → ℝ, (∀ s, 0 ≤ Ccurv s) ∧
+      ∀ (s' : ℕ) (W : Integral.L2.SmoothCcTensor g r s'),
+        ‖Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s' + 1)
+              (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s' W) -
+            Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s'
+              (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s' W)‖ ≤
+          Ccurv s' *
+            (‖W‖ + ‖Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s' W‖ +
+              ‖Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s' + 1)
+                  (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s' W)‖) :=
+  sorry
+
+/-- **The general-rank gradient-of-defect `L²` bound (posited general-rank curvature child).** At
+fixed bidegree `(r, s)` there is an order-dependent nonnegative `Dc : ℕ → ℝ` such that, for every
+smooth compactly-supported `(r, s)`-tensor base `U` and every gradient order `p`, the covariant
+gradient of the order-`p` rough-Laplacian / iterated-gradient commutator defect is `L²`-controlled
+by the lower gradients:
+`‖∇(Δ_∇(∇^p U) − ∇^p(Δ_∇ U))‖ ≤ Dc p · ∑_{i ≤ p+2} ‖∇^i U‖`.
+
+This is the bidegree-`(r, s)` analogue of the `(0, 2)`-restricted atomic input
+`exists_covGrad_commutatorDefect_l2_bound`
+(`Geometry/Curvature/CovGradRoughLap/PointwiseTensorCurvL2Bound.lean`, body `sorry`).  Differentiating
+the order-`p` defect produces, via the Ricci identity, a contraction of `∇^{≤ p}Rm` against
+`∇^{≤ p+1}U`, a lower-order operator whose curvature-derivative coefficients are bounded by compactness
+at each fixed order `p`.  The genuinely general-rank `(r, s)` iterated curvature-commutator content is
+absent from the library, so it is posited here.  The constant is per-order (`ℕ → ℝ`) — the number of
+curvature-derivative terms grows with `p` — NOT a single scalar.  The conclusion is a gradient-of-defect
+`L²` bound, structurally distinct from the statements it powers (no packaging); the body is `sorry` and
+consumers transitively depend on `sorryAx`. -/
+private theorem exists_covGrad_commutatorDefectRS_l2_bound
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    ∃ Dc : ℕ → ℝ, (∀ p, 0 ≤ Dc p) ∧
+      ∀ (U : Integral.L2.SmoothCcTensor g r s) (p : ℕ),
+        ‖Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + p)
+              (Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + p)
+                  (PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s p U) -
+                PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s p
+                  (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s U))‖ ≤
+          Dc p * ∑ i ∈ Finset.range (p + 1 + 2),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i U‖ :=
+  sorry
+
+/-- **The general-rank order-`(p+1)` commutator-defect bound.** At fixed bidegree `(r, s)` there is an
+order-dependent nonnegative `Cc : ℕ → ℝ` such that, for every smooth compactly-supported `(r, s)`-tensor
+base `U` and every gradient order `p`, the rough-Laplacian / iterated-gradient commutator defect at
+order `p + 1` is `L²`-controlled by the lower gradients:
 `‖Δ_∇(∇^{p+1} U) − ∇^{p+1}(Δ_∇ U)‖ ≤ Cc (p+1) · ∑_{i ≤ p+2} ‖∇^i U‖`.
 
-This is the bidegree-`(r, s)` analogue of the `(0, 2)`-restricted `exists_commutatorDefect_l2_bound_succ`
-(whose `(0, 2)` proof rests on the iterated Ricci identity built from the `(0, ·)` single-step defect
-`pointwiseTensorCurv`): on a closed manifold the iterated commutator `[Δ_∇, ∇^{p+1}]` expands, via the
-Ricci identity, into a finite sum of contractions of `∇^{≤ p}Rm` against `∇^{≤ p+1}U`, a lower-order
-operator with curvature-derivative coefficients bounded by compactness.  The genuinely general-rank
-`(r, s)` iterated curvature-commutator content is absent from the library, so it is posited here.  The
-constant is per-order (`ℕ → ℝ`) — the number of curvature-derivative terms grows with `p` — NOT a single
-scalar.  The conclusion is a lower-order `L²` commutator bound, structurally distinct from the
-summability/Gårding statements it powers (no packaging).  The body is `sorry` and consumers transitively
-depend on `sorryAx`. -/
+This is the bidegree-`(r, s)` analogue of the `(0, 2)`-restricted `exists_commutatorDefect_l2_bound_succ`,
+*proved* here by the verbatim port of that reduction: the iterated Ricci-identity recursion
+`Defect (p + 1) = ∇(Defect p) + Curv (∇^p U)` (established from `covGrad`-additivity and
+`iteratedCovGrad_succ`, both bidegree-generic), the triangle inequality `‖a + b‖ ≤ ‖a‖ + ‖b‖`, and the
+two posited general-rank atomic curvature inputs — the single-step defect bound
+`exists_singleStepCurvDefectRS_l2_bound` (applied at `∇^p U`, with its three gradient terms `‖∇^p U‖`,
+`‖∇^{p+1} U‖`, `‖∇^{p+2} U‖` bounded by the full sum) and the gradient-of-defect bound
+`exists_covGrad_commutatorDefectRS_l2_bound`.  Consumers transitively depend on `sorryAx` through those
+posited inputs.  The per-order constant is `Cc (p + 1) = Dc p + Ccurv (s + p)`. -/
 private theorem exists_commutatorDefectRS_l2_bound_succ
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ Cc : ℕ → ℝ, (∀ p, 0 ≤ Cc p) ∧
@@ -1606,8 +1815,105 @@ private theorem exists_commutatorDefectRS_l2_bound_succ
             PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s (p + 1)
               (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s U)‖ ≤
           Cc (p + 1) * ∑ i ∈ Finset.range ((p + 1) + 2),
-            ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i U‖ :=
-  sorry
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i U‖ := by
+  classical
+  obtain ⟨Ccurv, hCcurv_nn, hcurv⟩ := exists_singleStepCurvDefectRS_l2_bound (I := I) (M := M) g r
+  obtain ⟨Dc, hDc_nn, hdc⟩ := exists_covGrad_commutatorDefectRS_l2_bound (I := I) (M := M) g r s
+  refine ⟨fun n => match n with | 0 => 0 | (p + 1) => Dc p + Ccurv (s + p), fun n => ?_,
+    fun U p => ?_⟩
+  · match n with
+    | 0 => exact le_refl 0
+    | (p + 1) => exact add_nonneg (hDc_nn p) (hCcurv_nn (s + p))
+  · set GpU : Integral.L2.SmoothCcTensor g r (s + p) :=
+      PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s p U with hGpU_def
+    set Defp : Integral.L2.SmoothCcTensor g r (s + p) :=
+      Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + p) GpU -
+        PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s p
+          (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s U) with hDefp_def
+    set Sum : ℝ := ∑ i ∈ Finset.range (p + 1 + 2),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i U‖ with hSum_def
+    have hcovsub : ∀ (s' : ℕ) (w₁ w₂ : Integral.L2.SmoothCcTensor g r s'),
+        Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s' (w₁ - w₂) =
+          Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s' w₁ -
+            Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s' w₂ := by
+      intro s' w₁ w₂
+      rw [sub_eq_add_neg, sub_eq_add_neg, Analysis.Parabolic.TensorSpectral.covGrad_add,
+        ← neg_one_smul ℝ w₂, Analysis.Parabolic.TensorSpectral.covGrad_smul, neg_one_smul]
+    have hrecur :
+        (Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + (p + 1))
+            (PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s (p + 1) U) -
+          PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s (p + 1)
+            (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s U)) =
+          Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + p) Defp +
+            (Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + p + 1)
+                (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + p) GpU) -
+              Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + p)
+                (Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + p) GpU)) := by
+      rw [hDefp_def, hGpU_def, PDE.RicciFlow.iteratedCovGrad_succ,
+        PDE.RicciFlow.iteratedCovGrad_succ, hcovsub]
+      change (Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + p + 1)
+              (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + p)
+                (PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s p U)) -
+            Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + p)
+              (PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s p
+                (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s U))) = _
+      abel
+    rw [hrecur]
+    refine le_trans (norm_add_le _ _) ?_
+    change ‖Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + p) Defp‖ +
+        ‖Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + p + 1)
+            (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + p) GpU) -
+          Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + p)
+            (Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + p) GpU)‖ ≤
+          (Dc p + Ccurv (s + p)) * Sum
+    rw [add_mul]
+    refine add_le_add ?_ ?_
+    · have h := hdc U p
+      rw [← hGpU_def, ← hDefp_def] at h
+      exact h
+    · refine le_trans (hcurv (s + p) GpU) ?_
+      have h3 :
+          ‖GpU‖ + ‖Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + p) GpU‖ +
+              ‖Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + p + 1)
+                (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + p) GpU)‖ ≤
+            Sum := by
+        have e1 : Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + p) GpU =
+            PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s (p + 1) U := by
+          rw [PDE.RicciFlow.iteratedCovGrad_succ, hGpU_def]
+        have e2 : Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + p + 1)
+              (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + p) GpU) =
+            PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s (p + 2) U := by
+          rw [e1]
+          exact (PDE.RicciFlow.iteratedCovGrad_succ g r s (p + 1) U).symm
+        rw [e2, e1, hGpU_def, hSum_def]
+        have hsub : ({p, p + 1, p + 2} : Finset ℕ) ⊆ Finset.range (p + 1 + 2) := by
+          intro i hi
+          simp only [Finset.mem_insert, Finset.mem_singleton] at hi
+          simp only [Finset.mem_range]
+          omega
+        have hsum3 :
+            ∑ i ∈ ({p, p + 1, p + 2} : Finset ℕ),
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i U‖ ≤
+              ∑ i ∈ Finset.range (p + 1 + 2),
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i U‖ :=
+          Finset.sum_le_sum_of_subset_of_nonneg hsub (fun i _ _ => norm_nonneg _)
+        have hsum3_eq :
+            ∑ i ∈ ({p, p + 1, p + 2} : Finset ℕ),
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i U‖ =
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s p U‖ +
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s (p + 1) U‖ +
+                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s (p + 2) U‖ := by
+          rw [Finset.sum_insert (by simp only [Finset.mem_insert, Finset.mem_singleton]; omega),
+            Finset.sum_insert (by simp only [Finset.mem_singleton]; omega),
+            Finset.sum_singleton]
+          ring
+        rw [hsum3_eq] at hsum3
+        linarith [hsum3]
+      calc Ccurv (s + p) *
+            (‖GpU‖ + ‖Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + p) GpU‖ +
+              ‖Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + p + 1)
+                (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + p) GpU)‖)
+          ≤ Ccurv (s + p) * Sum := mul_le_mul_of_nonneg_left h3 (hCcurv_nn (s + p))
 
 /-- **The general-rank commutator-defect family.** At fixed bidegree `(r, s)` there is an
 order-dependent nonnegative `Cc : ℕ → ℝ` with `CommutatorDefectBoundRS g r s Cc`.

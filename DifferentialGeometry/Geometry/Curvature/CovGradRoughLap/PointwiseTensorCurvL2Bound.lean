@@ -25,31 +25,34 @@ Riemann tensor and finitely many of its covariant derivatives against the `≤ 2
 gradients of `S`; each coefficient (a covariant derivative of curvature) is continuous on the
 compact manifold, hence sup-bounded. The three consumer-shaped `L²` statements below, the two
 intermediate pointwise fibre-norm bounds, the genuine-field IBP-null divergence split, the
-integrated genuine-field forms, the order-separated three-term section-field split, the
-genuine/bracket section-level divergence decomposition, and the per-order iterated-Ricci
-component-field decomposition are all *proved* by fibre subadditivity / inner-product bridges / the
-covariant Green identity / order-induction over exactly **two** deepest general-valence curvature
-primitives whose bodies are `sorry` (the genuine remaining moving-frame curvature-endomorphism
-content): the genuine moving-frame third-order Weitzenböck field decomposition with proportional
-fibre bounds and bracket-free `L²` pairing
-(`exists_pointwiseTensorCurv_genuineFields_proportional_bracketFreePairing`) — the explicit genuine
+integrated genuine-field forms, the order-separated three-term section-field split, and the
+genuine/bracket section-level divergence decomposition are all *proved* by fibre subadditivity /
+inner-product bridges / the covariant Green identity / order-induction over exactly **two** deepest
+general-valence curvature primitives whose bodies are `sorry` (the genuine remaining moving-frame
+curvature-endomorphism content): the genuine moving-frame third-order Weitzenböck field decomposition
+with proportional fibre bounds and the concrete spectral pairing
+(`exists_pointwiseTensorCurv_genuineFields_proportional_spectralPairing`) — the explicit genuine
 `R(∇S)` and `(∇R) S` fields, their `rfns(∇S)` / `rfns(S)`-order fibre bounds, the moving-frame
-remainder's `∇²S`-order fibre bound, and the integrated bracket-free pairing
-`⟨Gcurv + GcurvDeriv, ∇S⟩_{L²} = ⟨Curv S, ∇S⟩_{L²}` (the IBP-vanishing of the bracket against `∇S`) —
-and the single inductive step of the iterated-Ricci component expansion
-(`exists_covGrad_commutatorDefect_iteratedRicci_stepLift`), the *conditional* lift carrying the
-order-`p` expansion of `∇(Defect p)` to the order-`(p + 1)` expansion of `∇(Defect (p + 1))`; the
-precise shape is recorded in each docstring. The named-remainder third-order field decomposition
-(`exists_pointwiseTensorCurv_genuineCurvature_namedRemainderField`) is *proved* from the first by
-naming `Grem := Curv S − Gcurv − GcurvDeriv` and deriving its integrated nullity from the
-bracket-free pairing; the positive-order and full-order iterated-Ricci component expansions
-(`exists_covGrad_commutatorDefect_iteratedRicci_componentExpansion_succ` and its full-order companion)
-are *proved* from the second by induction on the order, the base case `∇(Defect 0) = ∇ 0 = 0` being
-*proved outright*. The genuine-field / IBP-null-remainder divergence split
-(`exists_pointwiseTensorCurv_genuineField_divergenceSplit`) is itself *proved* from the bracket-free
-representation — its remainder `Drem := Curv S − G` is `IBP`-null against `∇S` by the left additivity
-of the `L²` pairing. Consumers transitively depend on `sorryAx` through the two deepest curvature
-primitives named above.
+remainder's `∇²S`-order fibre bound, and the integrated spectral pairing
+`⟨Gcurv + GcurvDeriv, ∇S⟩_{L²} = ‖Δ_∇S‖²_{L²} − ‖∇²S‖²_{L²}` (the genuine fields carry exactly the
+Weitzenböck curvature integral) — and the **covariant-product** primitive
+(`exists_iteratedCovGrad_pointwiseTensorCurv_l2_bound`), the iterated-gradient `L²` bound on the
+single-step commutator defect `‖∇^m(Curv T)‖ ≤ Cic s m · ∑_{i ≤ m + 2} ‖∇^i T‖`. The bracket-free
+pairing form (`exists_pointwiseTensorCurv_genuineFields_proportional_bracketFreePairing`,
+`⟨Gcurv + GcurvDeriv, ∇S⟩_{L²} = ⟨Curv S, ∇S⟩_{L²}`) is *proved* from the spectral-pairing form by
+rewriting the concrete spectral scalar back through the already-proved integrated order-`2`
+Weitzenböck identity `weitzenbock_integrated_covGrad_l2_normSq`; the named-remainder, order-separated,
+and genuine/bracket forms are *proved* from it by naming `Grem := Curv S − Gcurv − GcurvDeriv`,
+transferring the fibre bounds, and deriving its integrated nullity by left additivity of the `L²`
+pairing. The gradient-of-commutator-defect bound `exists_covGrad_commutatorDefect_l2_bound` is
+*proved* from the **general iterated-gradient commutator-defect bound**
+`exists_iteratedCovGrad_commutatorDefect_l2_bound` (`‖∇^m(Defect p)‖ ≤ Dc p m · ∑_{i ≤ p + m + 1}
+‖∇^i U‖`), which is itself *proved* by induction on `p` (the inductive hypothesis used at `m + 1`)
+from the defect recursion `Defect (p + 1) = ∇(Defect p) + Curv (∇^p U)` and the covariant-product
+primitive — each covariant gradient through the iterated structure handled by the gradient-commuting
+`norm_iteratedCovGrad_covGrad_comm` and gradient-composition `norm_iteratedCovGrad_iteratedCovGrad`
+lemmas, the base case being the outright vanishing `Defect 0 = 0`. Consumers transitively depend on
+`sorryAx` through the two deepest curvature primitives named above.
 
 ## Main statements (posited curvature inputs)
 
@@ -1034,414 +1037,300 @@ theorem exists_pointwiseTensorCurv_l2_bracketFree_repr (g : SmoothRiemannianMetr
   exact tensorL2Norm_le_of_pointwise_fiberNormSq_bound_two (I := I) (M := M) g
     (covGrad (I := I) (M := M) g 0 s S) S G (K s) (hK_nn s) hGpt
 
-/-- **Posited iterated-Ricci primitive (the strictly-more-primitive structural core): the
-single inductive step lifting the order-`p` curvature-derivative component expansion to order
-`p + 1`.** For a closed smooth Riemannian manifold `(M, g)` there is an *order-dependent*
-nonnegative constant `Dc : ℕ → ℝ` such that, for every smooth compactly-supported `(0, 2)`-tensor
-base `U` and every gradient order `p`, *given* an order-`p` per-order curvature-derivative
-expansion of `∇(Defect p)` — a family `Hp i : SmoothCcTensor g 0 (2 + p + 1)` (`i ∈ Fin (p + 1 + 2)`)
-with `∇(Defect p) = ∑ᵢ Hp i` and `rfns(Hp i)(x) ≤ (Dc p)² · rfns(∇^i U)(x)` — there is an
-order-`(p + 1)` expansion of `∇(Defect (p + 1))`: a family `H i : SmoothCcTensor g 0 (2 + (p + 1) + 1)`
-(`i ∈ Fin ((p + 1) + 1 + 2)`) with
-```
-∇(Defect (p + 1)) = ∑_{i < p + 4} H i,   rfns(H i)(x) ≤ (Dc (p + 1))² · rfns(∇^i U)(x).
-```
-This is the genuinely-missing **single inductive step of the iterated Ricci identity** — strictly
-more primitive than the closed positive-order expansion `…_succ`, because it *consumes* the
-order-`p` expansion and only has to supply the *one* additional curvature-derivative layer. Its
-construction is the defect recursion `Defect (p + 1) = ∇(Defect p) + Curv (∇^p U)`
-(`pointwiseTensorCurv_commutator_eq` and `covGrad`-additivity): applying `∇` gives
-`∇(Defect (p + 1)) = ∇(∑ᵢ Hp i) + ∇(Curv (∇^p U)) = ∑ᵢ ∇(Hp i) + ∇(Curv (∇^p U))`, where each
-`∇(Hp i)` is the once-differentiated order-`p` component (carrying one more curvature-derivative
-contraction, of order `i + 1`) and `∇(Curv (∇^p U))` is the once-differentiated single-step defect
-(a finite sum of curvature-derivative contractions of `∇^p U` of orders `≤ p + 3`); regrouping by
-total order `i ≤ p + 3` and bounding each curvature-derivative coefficient by its continuous sup on
-the compact `M` gives the order-`(p + 1)` family. This is a *conditional* lift (it transforms an
-expansion, it does not assert one), so it does not depend on the full-order theorem; the
-degenerate witness is rejected because the per-component `rfns(∇^i U)`-bounds constrain each `H i`
-to the genuine order-`i` iterated-Ricci contraction (`H 0 = ∇(Defect (p + 1))`, rest `0` makes
-`rfns(H 0) ≤ (Dc (p + 1))² · rfns(U)` *false*, since `∇(Defect (p + 1))` carries all orders
-`≤ p + 3`).
+/-- **`∇^m` is additive.** The iterated covariant gradient `∇^m = iteratedCovGrad g r s m`
+distributes over addition of smooth compactly-supported tensors. Proved by induction on `m`
+through `covGrad_add`. -/
+theorem iteratedCovGrad_add (g : SmoothRiemannianMetric I M) (r s m : ℕ)
+    (A B : SmoothCcTensor g r s) :
+    iteratedCovGrad g r s m (A + B) =
+      iteratedCovGrad g r s m A + iteratedCovGrad g r s m B := by
+  induction m with
+  | zero => simp only [iteratedCovGrad_zero]
+  | succ k ih =>
+      rw [iteratedCovGrad_succ, iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_add]
 
-The positive-order expansion `…_succ` and the full-order theorem
-`exists_covGrad_commutatorDefect_iteratedRicci_componentExpansion` are *proved* on top of this step
-lift by induction on the order, the base case being the outright vanishing `∇(Defect 0) = ∇ 0 = 0`.
--/
-theorem exists_covGrad_commutatorDefect_iteratedRicci_stepLift
-    (g : SmoothRiemannianMetric I M) :
-    ∃ Dc : ℕ → ℝ, (∀ p, 0 ≤ Dc p) ∧
-      ∀ (U : SmoothCcTensor g 0 2) (p : ℕ),
-        (∃ Hp : Fin (p + 1 + 2) → SmoothCcTensor g 0 (2 + p + 1),
-            covGrad g 0 (2 + p)
-                (rawTensorConnLapSmooth (I := I) g 0 (2 + p) (iteratedCovGrad g 0 2 p U) -
-                  iteratedCovGrad g 0 2 p
-                    (rawTensorConnLapSmooth (I := I) g 0 2 U)) =
-              ∑ i : Fin (p + 1 + 2), Hp i ∧
-            ∀ (i : Fin (p + 1 + 2)) (x : M),
-              riemannianFiberNormSq (I := I) (M := M) g 0 (2 + p + 1) x ((Hp i).toSection x) ≤
-                Dc p ^ 2 *
-                  riemannianFiberNormSq (I := I) (M := M) g 0 (2 + (i : ℕ)) x
-                    ((iteratedCovGrad g 0 2 (i : ℕ) U).toSection x)) →
-        ∃ H : Fin ((p + 1) + 1 + 2) → SmoothCcTensor g 0 (2 + (p + 1) + 1),
-          covGrad g 0 (2 + (p + 1))
-              (rawTensorConnLapSmooth (I := I) g 0 (2 + (p + 1)) (iteratedCovGrad g 0 2 (p + 1) U) -
-                iteratedCovGrad g 0 2 (p + 1)
-                  (rawTensorConnLapSmooth (I := I) g 0 2 U)) =
-            ∑ i : Fin ((p + 1) + 1 + 2), H i ∧
-          ∀ (i : Fin ((p + 1) + 1 + 2)) (x : M),
-            riemannianFiberNormSq (I := I) (M := M) g 0 (2 + (p + 1) + 1) x ((H i).toSection x) ≤
-              Dc (p + 1) ^ 2 *
-                riemannianFiberNormSq (I := I) (M := M) g 0 (2 + (i : ℕ)) x
-                  ((iteratedCovGrad g 0 2 (i : ℕ) U).toSection x) := by
+/-- **`∇^m` annihilates the zero tensor.** -/
+theorem iteratedCovGrad_zero_tensor (g : SmoothRiemannianMetric I M) (r s m : ℕ) :
+    iteratedCovGrad g r s m (0 : SmoothCcTensor g r s) = 0 := by
+  induction m with
+  | zero => simp only [iteratedCovGrad_zero]
+  | succ k ih => rw [iteratedCovGrad_succ, ih, covGrad_zero]
+
+/-- **Heterogeneous rank-congruence for `covGrad`.** If two ranks agree (`h : a = b`), then the
+once-differentiated tensors `covGrad g r a Y` and `covGrad g r b Z` are heterogeneously equal
+whenever `Y` and `Z` are (`hYZ : HEq Y Z`). Proved by `subst` on the rank variable `b` and the
+section. The canonical naturality of `covGrad` under a rank reassociation. -/
+theorem covGrad_heq_congr (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ} (h : a = b)
+    {Y : SmoothCcTensor g r a} {Z : SmoothCcTensor g r b} (hYZ : HEq Y Z) :
+    HEq (covGrad g r a Y) (covGrad g r b Z) := by
+  subst h
+  rw [eq_of_heq hYZ]
+
+/-- **The seminorm is invariant under a `SmoothCcTensor` rank-cast.** Heterogeneously equal smooth
+compactly-supported tensors over agreeing ranks have equal `L²` seminorms. Proved by `subst` on the
+rank variable. -/
+theorem norm_heq_congr (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ} (h : a = b)
+    {Y : SmoothCcTensor g r a} {Z : SmoothCcTensor g r b} (hYZ : HEq Y Z) :
+    ‖Y‖ = ‖Z‖ := by
+  subst h
+  rw [eq_of_heq hYZ]
+
+/-- **Heterogeneous commuting of one covariant gradient through the iterated gradient.** Applying
+`m` covariant gradients to `covGrad g r s X` (the once-differentiated `(r, s + 1)`-tensor) is
+heterogeneously equal to the `(m + 1)`-fold iterated gradient of `X`, the two living in the ranks
+`(s + 1) + m` and `s + (m + 1)`, which agree as natural numbers. The covariant gradient at the
+innermost slot equals it at the outermost slot. Proved by induction on `m` through the
+`covGrad` rank-congruence `covGrad_heq_congr`. -/
+theorem iteratedCovGrad_covGrad_comm_heq (g : SmoothRiemannianMetric I M) (r s m : ℕ)
+    (X : SmoothCcTensor g r s) :
+    HEq (iteratedCovGrad g r (s + 1) m (covGrad g r s X))
+      (iteratedCovGrad g r s (m + 1) X) := by
+  induction m with
+  | zero =>
+      rw [iteratedCovGrad_zero, iteratedCovGrad_succ, iteratedCovGrad_zero]
+      exact HEq.rfl
+  | succ k ih =>
+      rw [iteratedCovGrad_succ (g := g) (r := r) (s := s + 1) (j := k) (covGrad g r s X)]
+      rw [iteratedCovGrad_succ (g := g) (r := r) (s := s) (j := k + 1) X]
+      exact covGrad_heq_congr g r (by omega : (s + 1) + k = s + (k + 1)) ih
+
+/-- **Commuting one covariant gradient through the iterated gradient (norm form).** Applying `m`
+covariant gradients to `covGrad g r s X` has the same `L²` norm as the `(m + 1)`-fold iterated
+gradient of `X`: the rank reassociation `(s + 1) + m = s + (m + 1)` is invisible to the seminorm.
+Proved from the heterogeneous commuting `iteratedCovGrad_covGrad_comm_heq` through the
+seminorm rank-cast `norm_heq_congr`. -/
+theorem norm_iteratedCovGrad_covGrad_comm (g : SmoothRiemannianMetric I M) (r s m : ℕ)
+    (X : SmoothCcTensor g r s) :
+    ‖iteratedCovGrad g r (s + 1) m (covGrad g r s X)‖ =
+      ‖iteratedCovGrad g r s (m + 1) X‖ :=
+  norm_heq_congr g r (by omega : (s + 1) + m = s + (m + 1))
+    (iteratedCovGrad_covGrad_comm_heq (g := g) (r := r) (s := s) (m := m) X)
+
+/-- **Heterogeneous composition of iterated covariant gradients.** The `b`-fold iterated gradient
+of the `a`-fold iterated gradient of `X` is the `(a + b)`-fold iterated gradient of `X`, the two
+living in the ranks `(s + a) + b` and `s + (a + b)`, which agree as natural numbers. Proved by
+induction on `b` through the `covGrad` rank-congruence `covGrad_heq_congr`. -/
+theorem iteratedCovGrad_iteratedCovGrad_heq (g : SmoothRiemannianMetric I M) (r s a b : ℕ)
+    (X : SmoothCcTensor g r s) :
+    HEq (iteratedCovGrad g r (s + a) b (iteratedCovGrad g r s a X))
+      (iteratedCovGrad g r s (a + b) X) := by
+  induction b with
+  | zero =>
+      rw [iteratedCovGrad_zero]
+      exact HEq.rfl
+  | succ k ih =>
+      rw [iteratedCovGrad_succ (g := g) (r := r) (s := s + a) (j := k)
+        (iteratedCovGrad g r s a X)]
+      rw [show a + (k + 1) = (a + k) + 1 from by omega,
+        iteratedCovGrad_succ (g := g) (r := r) (s := s) (j := a + k) X]
+      exact covGrad_heq_congr g r (by omega : (s + a) + k = s + (a + k)) ih
+
+/-- **Composition of iterated covariant gradients (norm form).** The `L²` norm of `∇^b(∇^a X)`
+equals that of `∇^{a + b} X`: the rank reassociation `(s + a) + b = s + (a + b)` is invisible to the
+seminorm. Proved from `iteratedCovGrad_iteratedCovGrad_heq` through `norm_heq_congr`. -/
+theorem norm_iteratedCovGrad_iteratedCovGrad (g : SmoothRiemannianMetric I M) (r s a b : ℕ)
+    (X : SmoothCcTensor g r s) :
+    ‖iteratedCovGrad g r (s + a) b (iteratedCovGrad g r s a X)‖ =
+      ‖iteratedCovGrad g r s (a + b) X‖ :=
+  norm_heq_congr g r (by omega : (s + a) + b = s + (a + b))
+    (iteratedCovGrad_iteratedCovGrad_heq (g := g) (r := r) (s := s) (a := a) (b := b) X)
+
+/-- **Posited covariant-product curvature primitive: the iterated covariant gradient of the
+single-step commutator defect is `L²`-controlled by the lower iterated gradients of its argument.**
+For a closed smooth Riemannian manifold `(M, g)` there is a *valence/order-dependent* nonnegative
+constant `Cic : ℕ → ℕ → ℝ` such that, at every covariant rank `s`, every gradient order `m`, and for
+every smooth compactly-supported `(0, s)`-tensor `T`, the `m`-fold iterated covariant gradient of the
+order-`2` single-step commutator defect `Curv T := pointwiseTensorCurv g s T = Δ_∇(∇T) − ∇(Δ_∇ T)`
+satisfies
+
+```
+‖∇^m(Curv T)‖_{L²} ≤ Cic s m · ∑_{i ≤ m + 2} ‖∇^i T‖_{L²}.
+```
+
+This is the genuine **covariant-product (Sobolev) content** isolating the single curvature
+contraction's iterated-gradient tower: `Curv T` is a second-order curvature(-derivative) operator in
+`T` (a Riemann contraction of `∇T` plus a differentiated-curvature contraction of `T`, with the
+moving-frame `∇²T`-order discrepancy that survives at the *norm* level — `tensor3rdCurvBracket`, the
+false slot-`0` frame-trace matching on a normal manifold); each further covariant gradient produces
+one more contraction of a covariant derivative of curvature against one-higher gradient of `T`, all
+sup-bounded on the compact manifold, so the `m`-fold iterated gradient is `L²`-controlled by the
+`≤ m + 2`-order gradients of `T`. The constant is valence/order-dependent because the tensor-bundle
+curvature endomorphism is an `O(s + m)`-slot derivation and the curvature-derivative term count grows
+with `m` (a single scalar uniform over all `s, m` is unsatisfiable on a non-flat closed manifold).
+It is strictly more primitive than the iterated commutator `‖∇(Defect p)‖` bound it feeds: it
+concerns a *single* curvature contraction `Curv T`, not the `p`-fold iterated rough-Laplacian
+commutator, which is recovered by summing this over the telescoping
+`Defect p = ∑_{j < p} ∇^{p - 1 - j}(Curv (∇^j U))`. The degenerate witness is rejected because at
+`m = 0` the bound is `‖Curv T‖ ≤ Cic s 0 · (‖T‖ + ‖∇T‖ + ‖∇²T‖)`, the genuine single-step defect
+norm bound (`exists_pointwiseTensorCurv_l2_bound`), which is *false* with `Cic s 0 = 0` on a non-flat
+manifold (the defect carries the genuine curvature contraction of `T`). -/
+theorem exists_iteratedCovGrad_pointwiseTensorCurv_l2_bound (g : SmoothRiemannianMetric I M) :
+    ∃ Cic : ℕ → ℕ → ℝ, (∀ s m, 0 ≤ Cic s m) ∧
+      ∀ (s m : ℕ) (T : SmoothCcTensor g 0 s),
+        ‖iteratedCovGrad g 0 (s + 1) m (pointwiseTensorCurv (I := I) (M := M) g s T)‖ ≤
+          Cic s m * ∑ i ∈ Finset.range (m + 3), ‖iteratedCovGrad g 0 s i T‖ := by
   sorry
 
-/-- **The per-order curvature-derivative component expansion of `∇(Defect (p + 1))` (positive-order
-regime), proved by induction from the iterated-Ricci step lift.** For a closed smooth Riemannian
-manifold `(M, g)` there is an *order-dependent* nonnegative constant `Dc : ℕ → ℝ` such that, for
-every smooth compactly-supported `(0, 2)`-tensor base `U` and every *positive* gradient order
-`p + 1`, there is a family of `(0, 2 + (p + 1) + 1)`-tensor global fields
-`H i : SmoothCcTensor g 0 (2 + (p + 1) + 1)` (`i ∈ Fin ((p + 1) + 1 + 2)`) whose sum is the field
-`∇(Defect (p + 1)) = ∇(Δ_∇(∇^{p+1} U) − ∇^{p+1}(Δ_∇ U))`, with each component fibre-norm-bounded at
-**every** `x` by `(Dc (p + 1))²` times the intrinsic fibre norm of the `i`-th iterated gradient
-`∇^i U = iteratedCovGrad g 0 2 i U`:
+/-- **The iterated-gradient commutator-defect `L²` bound (general gradient order, proved from the
+covariant-product curvature input by induction).** For a closed smooth Riemannian manifold `(M, g)`
+there is a *order/gradient-dependent* nonnegative constant `Dc : ℕ → ℕ → ℝ` such that, for every
+smooth compactly-supported `(0, 2)`-tensor base `U`, every iterated commutator order `p`, and every
+extra gradient order `m`, the `m`-fold covariant gradient of the order-`p` rough-Laplacian /
+iterated-gradient commutator defect `Defect p := Δ_∇(∇^p U) − ∇^p(Δ_∇ U)` satisfies
+
 ```
-∇(Defect (p + 1)) = ∑_{i < p + 4} H i,   rfns(H i)(x) ≤ (Dc (p + 1))² · rfns(∇^i U)(x).
+‖∇^m(Defect p)‖_{L²} ≤ Dc p m · ∑_{i ≤ p + m + 1} ‖∇^i U‖_{L²}.
 ```
-This is **proved** from the iterated-Ricci step lift
-`exists_covGrad_commutatorDefect_iteratedRicci_stepLift` by induction on the order: the base case
-`p = 0` is the outright vanishing `∇(Defect 0) = ∇(Δ_∇ U − Δ_∇ U) = ∇ 0 = 0` (all `p + 2` components
-the zero field, the sum identity `0 = ∑ 0` and each bound `0 ≤ (Dc 0)² · rfns(∇^i U)` immediate from
-`riemannianFiberNormSq_zero` and nonnegativity), and the inductive step forwards the order-`q`
-expansion through the step lift to the order-`(q + 1)` expansion. Its only `sorry`-dependence is
-through that posited iterated-Ricci step input. -/
-theorem exists_covGrad_commutatorDefect_iteratedRicci_componentExpansion_succ
-    (g : SmoothRiemannianMetric I M) :
-    ∃ Dc : ℕ → ℝ, (∀ p, 0 ≤ Dc p) ∧
-      ∀ (U : SmoothCcTensor g 0 2) (p : ℕ),
-        ∃ H : Fin ((p + 1) + 1 + 2) → SmoothCcTensor g 0 (2 + (p + 1) + 1),
-          covGrad g 0 (2 + (p + 1))
-              (rawTensorConnLapSmooth (I := I) g 0 (2 + (p + 1)) (iteratedCovGrad g 0 2 (p + 1) U) -
-                iteratedCovGrad g 0 2 (p + 1)
-                  (rawTensorConnLapSmooth (I := I) g 0 2 U)) =
-            ∑ i : Fin ((p + 1) + 1 + 2), H i ∧
-          ∀ (i : Fin ((p + 1) + 1 + 2)) (x : M),
-            riemannianFiberNormSq (I := I) (M := M) g 0 (2 + (p + 1) + 1) x ((H i).toSection x) ≤
-              Dc (p + 1) ^ 2 *
-                riemannianFiberNormSq (I := I) (M := M) g 0 (2 + (i : ℕ)) x
-                  ((iteratedCovGrad g 0 2 (i : ℕ) U).toSection x) := by
+
+This is the genuine **iterated Ricci identity at the `L²` level**: each covariant gradient applied to
+the iterated commutator defect produces one further curvature-derivative contraction, all sup-bounded
+on the compact manifold, so the `m`-fold gradient is `L²`-controlled by the `≤ p + m + 1`-order
+gradients of `U`. It is **proved** by induction on `p` (with `m` universally quantified, so the
+inductive hypothesis is used at `m + 1`): the base case `p = 0` is the outright vanishing
+`Defect 0 = Δ_∇ U − Δ_∇ U = 0`, so `∇^m(Defect 0) = 0`; the inductive step uses the defect recursion
+`Defect (p + 1) = ∇(Defect p) + Curv (∇^p U)` (`pointwiseTensorCurv_commutator_eq` and
+`covGrad`-additivity) — applying `∇^m` and the triangle inequality bounds `‖∇^m(Defect (p + 1))‖` by
+`‖∇^{m + 1}(Defect p)‖` (the inductive hypothesis at `m + 1`, via the gradient-commuting
+`norm_iteratedCovGrad_covGrad_comm`) plus `‖∇^m(Curv (∇^p U))‖` (the posited covariant-product input
+`exists_iteratedCovGrad_pointwiseTensorCurv_l2_bound`, re-indexed through the gradient-composition
+`norm_iteratedCovGrad_iteratedCovGrad`), both within the `≤ (p + 1) + m + 1`-order budget. Its only
+`sorry`-dependence is through that posited covariant-product curvature input. -/
+theorem exists_iteratedCovGrad_commutatorDefect_l2_bound (g : SmoothRiemannianMetric I M) :
+    ∃ Dc : ℕ → ℕ → ℝ, (∀ p m, 0 ≤ Dc p m) ∧
+      ∀ (U : SmoothCcTensor g 0 2) (p m : ℕ),
+        ‖iteratedCovGrad g 0 (2 + p) m
+            (rawTensorConnLapSmooth (I := I) g 0 (2 + p) (iteratedCovGrad g 0 2 p U) -
+              iteratedCovGrad g 0 2 p (rawTensorConnLapSmooth (I := I) g 0 2 U))‖ ≤
+          Dc p m * ∑ i ∈ Finset.range (p + m + 2), ‖iteratedCovGrad g 0 2 i U‖ := by
   classical
-  obtain ⟨Dc, hDc_nn, hstep⟩ :=
-    exists_covGrad_commutatorDefect_iteratedRicci_stepLift (I := I) (M := M) g
-  refine ⟨Dc, hDc_nn, fun U p => ?_⟩
-  -- The order-`q` expansion proposition.
-  set P : ℕ → Prop := fun q =>
-    ∃ Hp : Fin (q + 1 + 2) → SmoothCcTensor g 0 (2 + q + 1),
-      covGrad g 0 (2 + q)
-          (rawTensorConnLapSmooth (I := I) g 0 (2 + q) (iteratedCovGrad g 0 2 q U) -
-            iteratedCovGrad g 0 2 q
-              (rawTensorConnLapSmooth (I := I) g 0 2 U)) =
-        ∑ i : Fin (q + 1 + 2), Hp i ∧
-      ∀ (i : Fin (q + 1 + 2)) (x : M),
-        riemannianFiberNormSq (I := I) (M := M) g 0 (2 + q + 1) x ((Hp i).toSection x) ≤
-          Dc q ^ 2 *
-            riemannianFiberNormSq (I := I) (M := M) g 0 (2 + (i : ℕ)) x
-              ((iteratedCovGrad g 0 2 (i : ℕ) U).toSection x) with hP_def
-  -- Base case `P 0`: `∇(Defect 0) = ∇(Δ_∇ U − Δ_∇ U) = ∇ 0 = 0`.
-  have hbase : P 0 := by
-    rw [hP_def]
-    refine ⟨fun _ => 0, ?_, ?_⟩
-    · have hzero : (rawTensorConnLapSmooth (I := I) g 0 (2 + 0)
-            (iteratedCovGrad g 0 2 0 U) -
-          iteratedCovGrad g 0 2 0 (rawTensorConnLapSmooth (I := I) g 0 2 U)) = 0 := by
-        rw [iteratedCovGrad_zero, iteratedCovGrad_zero]; abel
-      rw [hzero, covGrad_zero, Finset.sum_const, smul_zero]
-    · intro i x
-      rw [SmoothCcTensor.toSection_zero]
-      simp only [ContMDiffSection.coe_zero, Pi.zero_apply]
-      rw [riemannianFiberNormSq_zero]
-      exact mul_nonneg (sq_nonneg (Dc 0))
-        (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (2 + (i : ℕ)) x _)
-  -- Inductive step `P q → P (q + 1)` is the posited step lift.
-  have hstepP : ∀ q : ℕ, P q → P (q + 1) := fun q hq => by
-    rw [hP_def] at hq ⊢; exact hstep U q hq
-  -- `∇(Defect (p + 1)) = P (p + 1)`.
-  have hPp1 : P (p + 1) := by
+  obtain ⟨Cic, hCic_nn, hcic⟩ :=
+    exists_iteratedCovGrad_pointwiseTensorCurv_l2_bound (I := I) (M := M) g
+  -- Per-order existence of a gradient-indexed constant, proved by induction on `p` (with `m`
+  -- universal so the inductive hypothesis applies at `m + 1`); the final `Dc` is its choice.
+  have hkey : ∀ p : ℕ, ∃ c : ℕ → ℝ, (∀ m, 0 ≤ c m) ∧
+      ∀ (U : SmoothCcTensor g 0 2) (m : ℕ),
+        ‖iteratedCovGrad g 0 (2 + p) m
+            (rawTensorConnLapSmooth (I := I) g 0 (2 + p) (iteratedCovGrad g 0 2 p U) -
+              iteratedCovGrad g 0 2 p (rawTensorConnLapSmooth (I := I) g 0 2 U))‖ ≤
+          c m * ∑ i ∈ Finset.range (p + m + 2), ‖iteratedCovGrad g 0 2 i U‖ := by
+    intro p
     induction p with
-    | zero => exact hstepP 0 hbase
-    | succ q ih => exact hstepP (q + 1) ih
-  rw [hP_def] at hPp1
-  exact hPp1
-
-/-- **Posited iterated-Ricci primitive: the per-order curvature-derivative component expansion of
-`∇(Defect p)` (section-level field form).** For a closed smooth Riemannian manifold `(M, g)` there
-is an *order-dependent* nonnegative constant `Dc : ℕ → ℝ` such that, for every smooth
-compactly-supported `(0, 2)`-tensor base `U` and every gradient order `p`, there is a family of
-`(0, 2 + p + 1)`-tensor *global fields* `H i : SmoothCcTensor g 0 (2 + p + 1)` (`i ∈ Fin (p + 1 + 2)`)
-whose sum is the field `∇(Defect p) = ∇(Δ_∇(∇^p U) − ∇^p(Δ_∇ U))`, with each component
-fibre-norm-bounded at **every** `x` by `(Dc p)²` times the intrinsic fibre norm of the `i`-th
-iterated gradient `∇^i U = iteratedCovGrad g 0 2 i U`:
-```
-∇(Defect p) = ∑_{i < p + 3} H i,   rfns(H i)(x) ≤ (Dc p)² · rfns(∇^i U)(x).
-```
-This is the genuinely-missing **iterated Ricci identity** content. Its construction iterates the
-single-step Ricci commutator `[Δ_∇, ∇] = curvature-contraction` (the rank-generic single-step defect
-`pointwiseTensorCurv`, whose commutator equation is `pointwiseTensorCurv_commutator_eq`) `p` times
-along the defect recursion `Defect (p + 1) = ∇(Defect p) + Curv (∇^p U)`: each covariant gradient
-applied to the defect produces one further contraction of a covariant derivative of curvature; the
-top-order `∇^{p+3} U` terms cancel by the single-step Ricci identity, leaving the finite
-curvature-derivative sum over orders `i ≤ p + 2`, with all curvature-derivative coefficients up to
-order `p + 1` continuous on the compact `M`, hence sup-bounded. The base case `p = 0` is genuinely
-`∇(Defect 0) = ∇(Δ_∇ U − Δ_∇ U) = ∇ 0 = 0` (all three components vanish); the order-dependence of
-`Dc` reflects the growth of the term count and the slot count of the tensor-bundle curvature
-endomorphism with `p`. The components `H i` are *constrained* to the genuine iterated-Ricci
-contractions by the per-component `rfns(∇^i U)`-bounds — a degenerate witness (e.g. `H 0 =
-∇(Defect p)`, rest `0`) is rejected because then `rfns(H 0) ≤ (Dc p)² · rfns(U)` would be *false*
-(`∇(Defect p)` carries all orders `≤ p + 2`, not just `rfns(U)`).
-
-This is **proved** by case analysis on the order `p`. The base case `p = 0` is genuinely
-`∇(Defect 0) = ∇(Δ_∇ U − Δ_∇ U) = ∇ 0 = 0` (all `3` components taken to be the zero field, the sum
-identity `0 = ∑ 0` and each bound `0 ≤ (Dc 0)² · rfns(∇^i U)` immediate from
-`riemannianFiberNormSq_zero` and the nonnegativity of the right-hand side); the positive-order regime
-`p + 1` is forwarded to the posited iterated-Ricci primitive
-`exists_covGrad_commutatorDefect_iteratedRicci_componentExpansion_succ`. The order-dependence of `Dc`
-reflects the growth of the term count and the slot count of the tensor-bundle curvature endomorphism
-with `p`. The components `H i` are *constrained* to the genuine iterated-Ricci contractions by the
-per-component `rfns(∇^i U)`-bounds — a degenerate witness (e.g. `H 0 = ∇(Defect p)`, rest `0`) is
-rejected because then `rfns(H 0) ≤ (Dc p)² · rfns(U)` would be *false* (`∇(Defect p)` carries all
-orders `≤ p + 2`, not just `rfns(U)`).
-
-The per-order section component theorem `exists_covGrad_commutatorDefect_component_field` is *proved*
-on top of it by forwarding the component family, the sum identity, and the per-component bounds; the
-per-point component form `exists_covGrad_commutatorDefect_component_fiberNormSq_bound` is in turn
-*proved* from that by reading the section identity off pointwise through the additivity of
-`toSection`. -/
-theorem exists_covGrad_commutatorDefect_iteratedRicci_componentExpansion
-    (g : SmoothRiemannianMetric I M) :
-    ∃ Dc : ℕ → ℝ, (∀ p, 0 ≤ Dc p) ∧
-      ∀ (U : SmoothCcTensor g 0 2) (p : ℕ),
-        ∃ H : Fin (p + 1 + 2) → SmoothCcTensor g 0 (2 + p + 1),
-          covGrad g 0 (2 + p)
-              (rawTensorConnLapSmooth (I := I) g 0 (2 + p) (iteratedCovGrad g 0 2 p U) -
-                iteratedCovGrad g 0 2 p
-                  (rawTensorConnLapSmooth (I := I) g 0 2 U)) =
-            ∑ i : Fin (p + 1 + 2), H i ∧
-          ∀ (i : Fin (p + 1 + 2)) (x : M),
-            riemannianFiberNormSq (I := I) (M := M) g 0 (2 + p + 1) x ((H i).toSection x) ≤
-              Dc p ^ 2 *
-                riemannianFiberNormSq (I := I) (M := M) g 0 (2 + (i : ℕ)) x
-                  ((iteratedCovGrad g 0 2 (i : ℕ) U).toSection x) := by
-  classical
-  obtain ⟨Dc, hDc_nn, hsucc⟩ :=
-    exists_covGrad_commutatorDefect_iteratedRicci_componentExpansion_succ (I := I) (M := M) g
-  refine ⟨Dc, hDc_nn, fun U p => ?_⟩
-  match p with
-  | 0 =>
-      -- Base case: `Defect 0 = Δ_∇ U − Δ_∇ U = 0`, so `∇(Defect 0) = ∇ 0 = 0`.
-      refine ⟨fun _ => 0, ?_, ?_⟩
-      · have hzero : (rawTensorConnLapSmooth (I := I) g 0 (2 + 0)
-              (iteratedCovGrad g 0 2 0 U) -
-            iteratedCovGrad g 0 2 0 (rawTensorConnLapSmooth (I := I) g 0 2 U)) = 0 := by
-          rw [iteratedCovGrad_zero, iteratedCovGrad_zero]
+    | zero =>
+        -- `Defect 0 = Δ_∇ U − Δ_∇ U = 0`, hence `∇^m(Defect 0) = 0`.
+        refine ⟨fun _ => 0, fun _ => le_refl 0, fun U m => ?_⟩
+        have hzero :
+            (rawTensorConnLapSmooth (I := I) g 0 (2 + 0) (iteratedCovGrad g 0 2 0 U) -
+              iteratedCovGrad g 0 2 0 (rawTensorConnLapSmooth (I := I) g 0 2 U)) = 0 := by
+          rw [iteratedCovGrad_zero, iteratedCovGrad_zero]; abel
+        rw [hzero, iteratedCovGrad_zero_tensor, norm_zero, zero_mul]
+    | succ p' ih =>
+        obtain ⟨c', hc'_nn, hc'⟩ := ih
+        refine ⟨fun m => c' (m + 1) + Cic (2 + p') m,
+          fun m => add_nonneg (hc'_nn (m + 1)) (hCic_nn (2 + p') m), fun U m => ?_⟩
+        set GpU : SmoothCcTensor g 0 (2 + p') := iteratedCovGrad g 0 2 p' U with hGpU
+        set Defp : SmoothCcTensor g 0 (2 + p') :=
+          rawTensorConnLapSmooth (I := I) g 0 (2 + p') GpU -
+            iteratedCovGrad g 0 2 p' (rawTensorConnLapSmooth (I := I) g 0 2 U) with hDefp
+        -- The defect recursion `Defect (p'+1) = ∇(Defect p') + Curv (∇^{p'} U)`.
+        have hcovsub : ∀ (r s : ℕ) (w₁ w₂ : SmoothCcTensor g r s),
+            covGrad (I := I) (M := M) g r s (w₁ - w₂) =
+              covGrad (I := I) (M := M) g r s w₁ - covGrad (I := I) (M := M) g r s w₂ := by
+          intro r s w₁ w₂
+          rw [sub_eq_add_neg, sub_eq_add_neg, covGrad_add, ← neg_one_smul ℝ w₂,
+            covGrad_smul, neg_one_smul]
+        have hrecur :
+            (rawTensorConnLapSmooth (I := I) g 0 (2 + (p' + 1)) (iteratedCovGrad g 0 2 (p' + 1) U) -
+                iteratedCovGrad g 0 2 (p' + 1) (rawTensorConnLapSmooth (I := I) g 0 2 U)) =
+              covGrad (I := I) (M := M) g 0 (2 + p') Defp +
+                pointwiseTensorCurv (I := I) (M := M) g (2 + p') GpU := by
+          rw [hDefp, hGpU, iteratedCovGrad_succ, iteratedCovGrad_succ,
+            pointwiseTensorCurv, hcovsub]
+          change (rawTensorConnLapSmooth (I := I) g 0 (2 + p' + 1)
+                  (covGrad (I := I) (M := M) g 0 (2 + p') (iteratedCovGrad g 0 2 p' U)) -
+                covGrad (I := I) (M := M) g 0 (2 + p')
+                  (iteratedCovGrad g 0 2 p' (rawTensorConnLapSmooth (I := I) g 0 2 U))) = _
           abel
-        rw [hzero, covGrad_zero, Finset.sum_const, smul_zero]
-      · intro i x
-        rw [SmoothCcTensor.toSection_zero]
-        simp only [ContMDiffSection.coe_zero, Pi.zero_apply]
-        rw [riemannianFiberNormSq_zero]
-        exact mul_nonneg (sq_nonneg (Dc 0))
-          (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (2 + (i : ℕ)) x _)
-  | (q + 1) =>
-      exact hsucc U q
+        rw [hrecur, iteratedCovGrad_add]
+        -- Triangle inequality on the two summands.
+        refine le_trans (norm_add_le _ _) ?_
+        -- The gradient-of-defect summand: `∇^m(∇(Defect p')) = ∇^{m+1}(Defect p')` (norm).
+        have hcomm :
+            ‖iteratedCovGrad g 0 (2 + (p' + 1)) m
+                (covGrad (I := I) (M := M) g 0 (2 + p') Defp)‖ =
+              ‖iteratedCovGrad g 0 (2 + p') (m + 1) Defp‖ :=
+          norm_iteratedCovGrad_covGrad_comm (I := I) (M := M) g 0 (2 + p') m Defp
+        rw [hcomm]
+        -- The inductive hypothesis at `m + 1`.
+        have hih := hc' U (m + 1)
+        rw [← hGpU, ← hDefp] at hih
+        -- The curvature summand: `∇^m(Curv (∇^{p'} U))` via the posited input + composition.
+        have hcurv :
+            ‖iteratedCovGrad g 0 (2 + (p' + 1)) m
+                (pointwiseTensorCurv (I := I) (M := M) g (2 + p') GpU)‖ ≤
+              Cic (2 + p') m *
+                ∑ i ∈ Finset.range (m + 3),
+                  ‖iteratedCovGrad g 0 2 (p' + i) U‖ := by
+          refine le_trans (hcic (2 + p') m GpU) ?_
+          refine mul_le_mul_of_nonneg_left ?_ (hCic_nn (2 + p') m)
+          refine le_of_eq (Finset.sum_congr rfl (fun i _ => ?_))
+          rw [hGpU, norm_iteratedCovGrad_iteratedCovGrad (I := I) (M := M) g 0 2 p' i U]
+        -- Combine both summands; reindex the curvature sum into `range ((p'+1)+m+2)`.
+        set FullSum : ℝ := ∑ i ∈ Finset.range (p' + 1 + m + 2), ‖iteratedCovGrad g 0 2 i U‖
+          with hFullSum
+        have hFullSum_nn : 0 ≤ FullSum := Finset.sum_nonneg (fun i _ => norm_nonneg _)
+        have hc'_nn' : 0 ≤ c' (m + 1) := hc'_nn (m + 1)
+        have hCic_nn' : 0 ≤ Cic (2 + p') m := hCic_nn (2 + p') m
+        -- `range (p' + (m+1) + 2) = range ((p'+1)+m+2)`.
+        have hsum1 :
+            ∑ i ∈ Finset.range (p' + (m + 1) + 2), ‖iteratedCovGrad g 0 2 i U‖ = FullSum := by
+          rw [hFullSum, show p' + (m + 1) + 2 = p' + 1 + m + 2 from by omega]
+        -- The curvature sum `∑_{i<m+3} ‖∇^{p'+i}U‖` embeds (shifted) into `range ((p'+1)+m+2)`.
+        have hsum2 :
+            ∑ i ∈ Finset.range (m + 3), ‖iteratedCovGrad g 0 2 (p' + i) U‖ ≤ FullSum := by
+          rw [hFullSum]
+          have hmap :
+              ∑ i ∈ Finset.range (m + 3), ‖iteratedCovGrad g 0 2 (p' + i) U‖ =
+                ∑ j ∈ (Finset.range (m + 3)).image (fun i => p' + i),
+                  ‖iteratedCovGrad g 0 2 j U‖ := by
+            rw [Finset.sum_image (by intro a _ b _ hab; simpa using hab)]
+          rw [hmap]
+          refine Finset.sum_le_sum_of_subset_of_nonneg ?_ (fun i _ _ => norm_nonneg _)
+          intro j hj
+          simp only [Finset.mem_image, Finset.mem_range] at hj
+          obtain ⟨i, hi, rfl⟩ := hj
+          simp only [Finset.mem_range]; omega
+        calc ‖iteratedCovGrad g 0 (2 + p') (m + 1) Defp‖ +
+              ‖iteratedCovGrad g 0 (2 + (p' + 1)) m
+                (pointwiseTensorCurv (I := I) (M := M) g (2 + p') GpU)‖
+            ≤ c' (m + 1) * ∑ i ∈ Finset.range (p' + (m + 1) + 2), ‖iteratedCovGrad g 0 2 i U‖ +
+                Cic (2 + p') m * ∑ i ∈ Finset.range (m + 3),
+                  ‖iteratedCovGrad g 0 2 (p' + i) U‖ := add_le_add hih hcurv
+          _ ≤ c' (m + 1) * FullSum + Cic (2 + p') m * FullSum :=
+              add_le_add (le_of_eq (by rw [hsum1]))
+                (mul_le_mul_of_nonneg_left hsum2 hCic_nn')
+          _ = (c' (m + 1) + Cic (2 + p') m) * FullSum := by ring
+  -- Extract the constant by choice and assemble.
+  refine ⟨fun p => (hkey p).choose, fun p m => ((hkey p).choose_spec.1) m, fun U p m => ?_⟩
+  exact (hkey p).choose_spec.2 U m
 
-/-- **Posited deepest curvature child for the gradient-of-commutator-defect bound (per-order,
-per-component, *section-level field* form).** The genuine one-higher-derivative iterated
-curvature-coefficient expansion of the commutator defect, isolated *per curvature-derivative
-component* as smooth compactly-supported *global fields*. By the iterated Ricci identity, the
-covariant gradient of the order-`p` commutator defect `∇(Defect p) = ∇(Δ_∇(∇^p U) − ∇^p(Δ_∇ U))`
-expands as a finite sum over orders `i ≤ p + 2` of curvature-derivative contractions of the `i`-th
-iterated gradient `∇^i U` (the top-order term cancelling by the single-step Ricci identity
-`pointwiseTensorCurv_commutator_eq` applied `p` times), with all curvature-derivative coefficients
-up to order `p + 1` continuous on the compact manifold, hence sup-bounded.
-
-This says: there is an *order-dependent* nonnegative constant `Dc : ℕ → ℝ` such that, for every
-`(0, 2)`-tensor base `U` and every gradient order `p`, there is a family of `(0, 2 + p + 1)`-tensor
-*global fields* `H i : SmoothCcTensor g 0 (2 + p + 1)` (`i ∈ Fin (p + 1 + 2)`, the per-order
-curvature-derivative components) whose sum is the field `∇(Defect p)`, with each component
-fibre-norm-bounded at every `x` by `(Dc p)²` times the intrinsic fibre norm of `∇^i U`:
-```
-∇(Defect p) = ∑_{i < p + 3} H i,   rfns(H i)(x) ≤ (Dc p)² · rfns(∇^i U)(x).
-```
-Each curvature-derivative coefficient is the genuine iterated-Ricci contraction; the constant is
-order-dependent because the number of terms and the slot count of the tensor-bundle curvature
-endomorphism grow with `p`. This is **proved** from the iterated-Ricci component-expansion primitive
-`exists_covGrad_commutatorDefect_iteratedRicci_componentExpansion` by forwarding the component
-family, the sum identity, and the per-component bounds; the per-point component form
-`exists_covGrad_commutatorDefect_component_fiberNormSq_bound` is in turn *proved* from this by
-reading the section identity off pointwise through the additivity of `toSection`. -/
-theorem exists_covGrad_commutatorDefect_component_field
-    (g : SmoothRiemannianMetric I M) :
-    ∃ Dc : ℕ → ℝ, (∀ p, 0 ≤ Dc p) ∧
-      ∀ (U : SmoothCcTensor g 0 2) (p : ℕ),
-        ∃ H : Fin (p + 1 + 2) → SmoothCcTensor g 0 (2 + p + 1),
-          covGrad g 0 (2 + p)
-              (rawTensorConnLapSmooth (I := I) g 0 (2 + p) (iteratedCovGrad g 0 2 p U) -
-                iteratedCovGrad g 0 2 p
-                  (rawTensorConnLapSmooth (I := I) g 0 2 U)) =
-            ∑ i : Fin (p + 1 + 2), H i ∧
-          ∀ (i : Fin (p + 1 + 2)) (x : M),
-            riemannianFiberNormSq (I := I) (M := M) g 0 (2 + p + 1) x ((H i).toSection x) ≤
-              Dc p ^ 2 *
-                riemannianFiberNormSq (I := I) (M := M) g 0 (2 + (i : ℕ)) x
-                  ((iteratedCovGrad g 0 2 (i : ℕ) U).toSection x) := by
-  classical
-  obtain ⟨Dc, hDc_nn, hexp⟩ :=
-    exists_covGrad_commutatorDefect_iteratedRicci_componentExpansion (I := I) (M := M) g
-  refine ⟨Dc, hDc_nn, fun U p => ?_⟩
-  obtain ⟨H, hsum, hbound⟩ := hexp U p
-  exact ⟨H, hsum, hbound⟩
-
-/-- **The per-component iterated curvature-derivative fibre-norm bound (proved from the
-section-level field decomposition, per-order).** For a closed smooth Riemannian manifold `(M, g)`
-there is an *order-dependent* nonnegative constant `Dc : ℕ → ℝ` such that, for every smooth
-compactly-supported `(0, 2)`-tensor base `U`, every gradient order `p`, and *every point* `x`, the
-fibre value of the covariant gradient of the order-`p` commutator defect
-`Defect p := Δ_∇(∇^p U) − ∇^p(Δ_∇ U)` is a finite sum of `p + 3` curvature-derivative components
-`H i`, each fibre-bounded by `(Dc p)²` times `rfns(∇^i U)`. This is **proved** from the section-level
-field decomposition `exists_covGrad_commutatorDefect_component_field` (which supplies global
-component fields `H i` with `∇(Defect p) = ∑ i, H i` and the per-point fibre bounds) by reading the
-section identity off at `x` through the additivity of `toSection` (`SmoothCcTensor.toSection_add`,
-`SmoothCcTensor.toSection_zero`, `ContMDiffSection.coe_add`). Its only `sorry`-dependence is through
-that posited curvature input; the aggregate bound
-`exists_covGrad_commutatorDefect_pointwise_fiberNormSq_bound` is in turn *proved* from this by the
-finite-sum subadditivity `riemannianFiberNormSq_sum_le_card_mul`. -/
-theorem exists_covGrad_commutatorDefect_component_fiberNormSq_bound
-    (g : SmoothRiemannianMetric I M) :
-    ∃ Dc : ℕ → ℝ, (∀ p, 0 ≤ Dc p) ∧
-      ∀ (U : SmoothCcTensor g 0 2) (p : ℕ) (x : M),
-        ∃ H : Fin (p + 1 + 2) → TensorRSSpace 0 (2 + p + 1) I x,
-          (covGrad g 0 (2 + p)
-              (rawTensorConnLapSmooth (I := I) g 0 (2 + p) (iteratedCovGrad g 0 2 p U) -
-                iteratedCovGrad g 0 2 p
-                  (rawTensorConnLapSmooth (I := I) g 0 2 U))).toSection x =
-            ∑ i : Fin (p + 1 + 2), H i ∧
-          ∀ i : Fin (p + 1 + 2),
-            riemannianFiberNormSq (I := I) (M := M) g 0 (2 + p + 1) x (H i) ≤
-              Dc p ^ 2 *
-                riemannianFiberNormSq (I := I) (M := M) g 0 (2 + (i : ℕ)) x
-                  ((iteratedCovGrad g 0 2 (i : ℕ) U).toSection x) := by
-  classical
-  obtain ⟨Dc, hDc_nn, hfield⟩ :=
-    exists_covGrad_commutatorDefect_component_field (I := I) (M := M) g
-  refine ⟨Dc, hDc_nn, fun U p x => ?_⟩
-  obtain ⟨H, hsum, hbound⟩ := hfield U p
-  refine ⟨fun i => (H i).toSection x, ?_, fun i => hbound i x⟩
-  have hread : ∀ (s : Finset (Fin (p + 1 + 2))),
-      (∑ i ∈ s, H i).toSection x = ∑ i ∈ s, (H i).toSection x := by
-    intro s
-    induction s using Finset.induction with
-    | empty =>
-        rw [Finset.sum_empty, Finset.sum_empty, SmoothCcTensor.toSection_zero]
-        simp only [ContMDiffSection.coe_zero, Pi.zero_apply]
-    | insert i₀ s'' hi₀ ih =>
-        rw [Finset.sum_insert hi₀, Finset.sum_insert hi₀, SmoothCcTensor.toSection_add]
-        simp only [ContMDiffSection.coe_add, Pi.add_apply]
-        rw [ih]
-  rw [hsum]
-  exact hread Finset.univ
-
-/-- **The pointwise gradient-of-commutator-defect fibre-norm bound (proved from the per-component
-input, per-order).** For a closed smooth Riemannian manifold `(M, g)` there is an *order-dependent*
-nonnegative constant `Dc : ℕ → ℝ` such that, for every smooth compactly-supported `(0, 2)`-tensor
-base `U`, every gradient order `p`, and *every point* `x`, the intrinsic fibre norm of the covariant
-gradient of the order-`p` commutator defect `Defect p := Δ_∇(∇^p U) − ∇^p(Δ_∇ U)` is bounded by
-`(Dc p)²` times the sum of the intrinsic fibre norms of the `≤ p + 2`-order gradients of `U`:
-```
-rfns(∇(Defect p))(x) ≤ (Dc p)² · ∑_{i ≤ p + 2} rfns(∇^i U)(x).
-```
-This is **proved** from the per-component iterated curvature-derivative input
-`exists_covGrad_commutatorDefect_component_fiberNormSq_bound` (which exhibits `∇(Defect p)(x)` as a
-finite sum of `p + 3` curvature-derivative components, each fibre-bounded by `rfns(∇^i U)`) through
-the finite-sum subadditivity `riemannianFiberNormSq_sum_le_card_mul`. Its only `sorry`-dependence is
-through that posited curvature input. -/
-theorem exists_covGrad_commutatorDefect_pointwise_fiberNormSq_bound
-    (g : SmoothRiemannianMetric I M) :
-    ∃ Dc : ℕ → ℝ, (∀ p, 0 ≤ Dc p) ∧
-      ∀ (U : SmoothCcTensor g 0 2) (p : ℕ) (x : M),
-        riemannianFiberNormSq (I := I) (M := M) g 0 (2 + p + 1) x
-            ((covGrad g 0 (2 + p)
-              (rawTensorConnLapSmooth (I := I) g 0 (2 + p) (iteratedCovGrad g 0 2 p U) -
-                iteratedCovGrad g 0 2 p
-                  (rawTensorConnLapSmooth (I := I) g 0 2 U))).toSection x) ≤
-          Dc p ^ 2 * ∑ i ∈ Finset.range (p + 1 + 2),
-            riemannianFiberNormSq (I := I) (M := M) g 0 (2 + i) x
-              ((iteratedCovGrad g 0 2 i U).toSection x) := by
-  classical
-  obtain ⟨Dc, hDc_nn, hcomp⟩ :=
-    exists_covGrad_commutatorDefect_component_fiberNormSq_bound (I := I) (M := M) g
-  refine ⟨fun p => (p + 1 + 2 : ℕ) * Dc p, fun p => ?_, fun U p x => ?_⟩
-  · exact mul_nonneg (Nat.cast_nonneg _) (hDc_nn p)
-  · obtain ⟨H, hsum, hHbound⟩ := hcomp U p x
-    set rhs : ℝ := ∑ i ∈ Finset.range (p + 1 + 2),
-      riemannianFiberNormSq (I := I) (M := M) g 0 (2 + i) x
-        ((iteratedCovGrad g 0 2 i U).toSection x) with hrhs
-    have hrhs_nn : 0 ≤ rhs :=
-      Finset.sum_nonneg (fun i _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (2 + i) x _)
-    have hcard := riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g 0 (2 + p + 1) x
-      (Finset.univ : Finset (Fin (p + 1 + 2))) H
-    rw [Finset.card_univ, Fintype.card_fin] at hcard
-    have hcomp_sum :
-        ∑ i : Fin (p + 1 + 2),
-            riemannianFiberNormSq (I := I) (M := M) g 0 (2 + p + 1) x (H i) ≤
-          Dc p ^ 2 * rhs := by
-      have hstep :
-          ∑ i : Fin (p + 1 + 2),
-              riemannianFiberNormSq (I := I) (M := M) g 0 (2 + p + 1) x (H i) ≤
-            ∑ i : Fin (p + 1 + 2), Dc p ^ 2 *
-              riemannianFiberNormSq (I := I) (M := M) g 0 (2 + (i : ℕ)) x
-                ((iteratedCovGrad g 0 2 (i : ℕ) U).toSection x) :=
-        Finset.sum_le_sum (fun i _ => hHbound i)
-      refine le_trans hstep ?_
-      rw [← Finset.mul_sum]
-      refine mul_le_mul_of_nonneg_left ?_ (sq_nonneg (Dc p))
-      rw [hrhs, ← Fin.sum_univ_eq_sum_range
-        (fun i => riemannianFiberNormSq (I := I) (M := M) g 0 (2 + i) x
-          ((iteratedCovGrad g 0 2 i U).toSection x)) (p + 1 + 2)]
-    have hN_nn : (0 : ℝ) ≤ ((p + 1 + 2 : ℕ) : ℝ) := Nat.cast_nonneg _
-    have hN_le_sq : ((p + 1 + 2 : ℕ) : ℝ) ≤ ((p + 1 + 2 : ℕ) : ℝ) ^ 2 := by
-      have h1 : (1 : ℝ) ≤ ((p + 1 + 2 : ℕ) : ℝ) := by
-        exact_mod_cast Nat.le_add_left 1 (p + 2)
-      nlinarith [hN_nn, h1]
-    rw [hsum]
-    calc riemannianFiberNormSq (I := I) (M := M) g 0 (2 + p + 1) x (∑ i : Fin (p + 1 + 2), H i)
-        ≤ ((p + 1 + 2 : ℕ) : ℝ) *
-            ∑ i : Fin (p + 1 + 2),
-              riemannianFiberNormSq (I := I) (M := M) g 0 (2 + p + 1) x (H i) := hcard
-      _ ≤ ((p + 1 + 2 : ℕ) : ℝ) * (Dc p ^ 2 * rhs) :=
-          mul_le_mul_of_nonneg_left hcomp_sum hN_nn
-      _ ≤ ((p + 1 + 2 : ℕ) : ℝ) ^ 2 * (Dc p ^ 2 * rhs) :=
-          mul_le_mul_of_nonneg_right hN_le_sq
-            (mul_nonneg (sq_nonneg (Dc p)) hrhs_nn)
-      _ = (((p + 1 + 2 : ℕ) : ℝ) * Dc p) ^ 2 * rhs := by ring
-
-set_option linter.unusedSectionVars false in
-/-- **The gradient-of-commutator-defect `L²` bound (proved from the pointwise curvature input).**
-For a closed smooth Riemannian manifold `(M, g)` there is an *order-dependent* nonnegative constant
-`Dc : ℕ → ℝ` such that, for every smooth compactly-supported `(0, 2)`-tensor base `U` and every
-gradient order `p`, the covariant gradient of the order-`p` rough-Laplacian / iterated-gradient
-commutator defect `Defect p := Δ_∇(∇^p U) − ∇^p(Δ_∇ U)` satisfies
+/-- **The gradient-of-commutator-defect `L²` bound (proved from the iterated-gradient
+commutator-defect bound).** For a closed smooth Riemannian manifold `(M, g)` there is an
+*order-dependent* nonnegative constant `Dc : ℕ → ℝ` such that, for every smooth compactly-supported
+`(0, 2)`-tensor base `U` and every gradient order `p`, the covariant gradient of the order-`p`
+rough-Laplacian / iterated-gradient commutator defect `Defect p := Δ_∇(∇^p U) − ∇^p(Δ_∇ U)` satisfies
 
 ```
 ‖∇(Defect p)‖_{L²} ≤ Dc p · ∑_{i ≤ p + 2} ‖∇^i U‖_{L²}.
 ```
 
-This is **proved** from the pointwise iterated curvature-derivative fibre-norm bound
-`exists_covGrad_commutatorDefect_pointwise_fiberNormSq_bound`
-(`rfns(∇(Defect p))(x) ≤ (Dc p)²·∑_{i ≤ p+2} rfns(∇^i U)(x)`) through the purely analytic finite-sum
-pointwise-to-`L²` packaging `tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum` (with per-index
-valence `v i = 2 + i`, `N = p + 1 + 2`). Combined with the single-step defect bound
-`exists_pointwiseTensorCurv_l2_bound` it closes the all-order commutator-defect recursion
-`Defect (p + 1) = ∇(Defect p) + Curv (∇^p U)`. Its only `sorry`-dependence is through that posited
-pointwise curvature input. -/
+This is **proved** from the general iterated-gradient commutator-defect bound
+`exists_iteratedCovGrad_commutatorDefect_l2_bound` specialised to one extra gradient (`m = 1`):
+`covGrad g 0 (2 + p) (Defect p) = ∇^1(Defect p)` by `iteratedCovGrad_succ` and `iteratedCovGrad_zero`,
+and the sum `range (p + 1 + 2)` is the `m = 1` instance of `range (p + m + 2)`. Combined with the
+single-step defect bound `exists_pointwiseTensorCurv_l2_bound` it closes the all-order
+commutator-defect recursion `Defect (p + 1) = ∇(Defect p) + Curv (∇^p U)`. Its only `sorry`-dependence
+is through the posited covariant-product curvature input
+`exists_iteratedCovGrad_pointwiseTensorCurv_l2_bound`. -/
 theorem exists_covGrad_commutatorDefect_l2_bound (g : SmoothRiemannianMetric I M) :
     ∃ Dc : ℕ → ℝ, (∀ p, 0 ≤ Dc p) ∧
       ∀ (U : SmoothCcTensor g 0 2) (p : ℕ),
@@ -1450,15 +1339,13 @@ theorem exists_covGrad_commutatorDefect_l2_bound (g : SmoothRiemannianMetric I M
               iteratedCovGrad g 0 2 p (rawTensorConnLapSmooth (I := I) g 0 2 U))‖ ≤
           Dc p * ∑ i ∈ Finset.range (p + 1 + 2), ‖iteratedCovGrad g 0 2 i U‖ := by
   classical
-  obtain ⟨Dc, hDc_nn, hpt⟩ :=
-    exists_covGrad_commutatorDefect_pointwise_fiberNormSq_bound (I := I) (M := M) g
-  refine ⟨Dc, hDc_nn, fun U p => ?_⟩
-  exact tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum (I := I) (M := M) g
-    (p + 1 + 2) (fun i => 2 + i) (fun i => iteratedCovGrad g 0 2 i U)
-    (covGrad g 0 (2 + p)
-      (rawTensorConnLapSmooth (I := I) g 0 (2 + p) (iteratedCovGrad g 0 2 p U) -
-        iteratedCovGrad g 0 2 p (rawTensorConnLapSmooth (I := I) g 0 2 U)))
-    (Dc p) (hDc_nn p) (hpt U p)
+  obtain ⟨Dc, hDc_nn, hbound⟩ :=
+    exists_iteratedCovGrad_commutatorDefect_l2_bound (I := I) (M := M) g
+  refine ⟨fun p => Dc p 1, fun p => hDc_nn p 1, fun U p => ?_⟩
+  -- `covGrad (Defect p) = ∇^1 (Defect p)`; apply the iterated bound at `m = 1`.
+  have hb := hbound U p 1
+  rw [iteratedCovGrad_succ, iteratedCovGrad_zero] at hb
+  exact hb
 
 end Connection
 end Integral

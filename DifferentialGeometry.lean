@@ -732,6 +732,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradL2
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradMetricBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantLeibniz
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.Defs
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.AbstractChartPull
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.AbstractChartPullCutoff
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.ChartTransition.ChartTransitionTransportCLM

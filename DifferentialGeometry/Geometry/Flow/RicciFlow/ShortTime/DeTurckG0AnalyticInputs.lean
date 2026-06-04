@@ -75,9 +75,13 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
+open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
+open DifferentialGeometry.Analysis.Sobolev.Chart
 
 variable
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -88,6 +92,7 @@ variable
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
@@ -753,36 +758,729 @@ theorem chartGramDiff_iteratedFDeriv_norm_le_chartMetricJet2DiffSup (α : M)
                 (1 + ((Module.finrank ℝ E : ℕ) : ℝ) + ((Module.finrank ℝ E : ℕ) : ℝ) ^ 2) * J := by
               ring
 
-/-- **Carrier-direct chart-`2`-jet seminorm bound by the intrinsic covariant-gradient jet sum
-(posited carrier-side reading of the realize covariant-gradient reduction).**
+/-- The chart-`α` `(l, b)` frame component of a fixed `(0,2)`-tensor section `S`, as a function
+on the chart target `E` (the carrier-side, realize-witness-free analogue of `reprDiffChartCompOnE`).
+At a chart point `y` it reads off `ccTensorBilinSymm g₀ S` on the chart frame at the chart preimage. -/
+private noncomputable def carrierChartCompOnE (g₀ : SmoothRiemannianMetric I M)
+    (S : Integral.L2.SmoothCcTensor g₀ 0 2) (α : M) (l b : Fin (Module.finrank ℝ E)) : E → ℝ :=
+  fun y =>
+    ccTensorBilinSymm (I := I) g₀ S ((extChartAt I α).symm y)
+      (Integral.Measure.chartBasisVecFiber (I := I) α l ((extChartAt I α).symm y))
+      (Integral.Measure.chartBasisVecFiber (I := I) α b ((extChartAt I α).symm y))
+
+/-- The carrier chart-frame component is the symmetrized raw chart-frame component of `S`
+(carrier-side analogue of `reprDiffChartCompOnE_eq_symm_tensorChartComponentRaw`). -/
+private theorem carrierChartCompOnE_eq_symm_tensorChartComponentRaw
+    (g₀ : SmoothRiemannianMetric I M) (S : Integral.L2.SmoothCcTensor g₀ 0 2)
+    (α : M) (l b : Fin (Module.finrank ℝ E)) {y : E}
+    (hy : (extChartAt I α).symm y ∈ (chartAt H α).source) :
+    carrierChartCompOnE (I := I) g₀ S α l b y =
+      (1 / 2 : ℝ) *
+        (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S α
+            (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b]
+            ((extChartAt I α).symm y) +
+          tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S α
+            (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l]
+            ((extChartAt I α).symm y)) := by
+  classical
+  rw [carrierChartCompOnE, ccTensorBilinSymm_apply]
+  rw [MetricRealization.ccTensorBilin_chartBasisVecFiber_eq_tensorChartComponentRaw
+      (I := I) g₀ S α hy l b,
+    MetricRealization.ccTensorBilin_chartBasisVecFiber_eq_tensorChartComponentRaw
+      (I := I) g₀ S α hy b l]
+
+/-- On the Euclidean chart target, the `toEuclidean.symm`-pull of the carrier chart-frame
+component equals the symmetrized chart-push of the raw chart components of `S` (carrier-side
+analogue of `reprDiffChartCompOnE_comp_toEuclidean_symm_eqOn`). -/
+private theorem carrierChartCompOnE_comp_toEuclidean_symm_eqOn
+    (g₀ : SmoothRiemannianMetric I M) (S : Integral.L2.SmoothCcTensor g₀ 0 2)
+    (α : M) (l b : Fin (Module.finrank ℝ E)) :
+    Set.EqOn
+      (carrierChartCompOnE (I := I) g₀ S α l b ∘ (toEuclidean (E := E)).symm)
+      (fun y' => (1 / 2 : ℝ) *
+        (chartPushedRaw I α
+            (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S α
+              (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b]) y'
+          + chartPushedRaw I α
+            (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S α
+              (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l]) y'))
+      (chartTargetEuclid (I := I) (M := M) α) := by
+  classical
+  intro y' hy'
+  have hsrc : (extChartAt I α).symm ((toEuclidean (E := E)).symm y') ∈ (chartAt H α).source :=
+    symm_toEuclidean_symm_mem_chartAtSource
+      (I := I) (M := M) α hy'
+  rw [Function.comp_apply,
+    carrierChartCompOnE_eq_symm_tensorChartComponentRaw (I := I) g₀ S α l b hsrc]
+  congr 1
+  rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy',
+    chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy']
+
+/-- The first chart partial of the carrier chart-frame component, as covariant-gradient
+components minus Christoffel corrections (carrier-side analogue of
+`partialDeriv_reprDiffChartCompOnE_eq_covGrad_sub_lowerOrder`). -/
+private theorem partialDeriv_carrierChartCompOnE_eq_covGrad_sub_lowerOrder
+    (g₀ : SmoothRiemannianMetric I M) (S : Integral.L2.SmoothCcTensor g₀ 0 2)
+    (α : M) (a l b : Fin (Module.finrank ℝ E)) {y : E}
+    (hy : y ∈ interior ((extChartAt I α).target : Set E)) :
+    Integral.DivergenceTheorem.partialDeriv (E := E) a
+        (carrierChartCompOnE (I := I) g₀ S α l b) y =
+      (1 / 2 : ℝ) *
+        ((tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 1)
+              (covGrad (I := I) (M := M) g₀ 0 2 S) α
+              (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![a, l, b]
+              ((extChartAt I α).symm y)
+            - covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 2 S α a
+                (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b]
+                (toEuclidean (E := E) y))
+          + (tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 1)
+              (covGrad (I := I) (M := M) g₀ 0 2 S) α
+              (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![a, b, l]
+              ((extChartAt I α).symm y)
+            - covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 2 S α a
+                (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l]
+                (toEuclidean (E := E) y))) := by
+  classical
+  set ys : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) := toEuclidean (E := E) y with hys_def
+  have hys_mem : ys ∈ chartTargetEuclid (I := I) (M := M) α :=
+    MetricRealization.toEuclidean_mem_chartTargetEuclid_of_mem_interior (I := I) (M := M) α hy
+  have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
+    chartTargetEuclid_isOpen (I := I) (M := M) α
+  set Flb : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
+    chartPushedRaw I α
+      (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S α
+        (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b]) with hFlb_def
+  set Fbl : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
+    chartPushedRaw I α
+      (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S α
+        (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l]) with hFbl_def
+  rw [MetricRealization.partialDeriv_eq_euclidPartial_comp_toEuclidean (E := E) a
+    (carrierChartCompOnE (I := I) g₀ S α l b) y]
+  rw [← hys_def]
+  have hevt : (carrierChartCompOnE (I := I) g₀ S α l b ∘ (toEuclidean (E := E)).symm)
+      =ᶠ[nhds ys] (fun y' => (1 / 2 : ℝ) * (Flb y' + Fbl y')) := by
+    refine Filter.eventuallyEq_iff_exists_mem.mpr
+      ⟨chartTargetEuclid (I := I) (M := M) α,
+        hopen.mem_nhds hys_mem, ?_⟩
+    intro z hz
+    have h := carrierChartCompOnE_comp_toEuclidean_symm_eqOn (I := I) g₀ S α l b hz
+    rw [hFlb_def, hFbl_def]
+    exact h
+  rw [euclidPartial_def, hevt.fderiv_eq]
+  have hdiff_lb : DifferentiableAt ℝ Flb ys :=
+    MetricRealization.chartPushedRaw_tensorChartComponentRaw_differentiableAt
+      (I := I) g₀ 2 S α ![l, b] hys_mem
+  have hdiff_bl : DifferentiableAt ℝ Fbl ys :=
+    MetricRealization.chartPushedRaw_tensorChartComponentRaw_differentiableAt
+      (I := I) g₀ 2 S α ![b, l] hys_mem
+  rw [show (fun y' => (1 / 2 : ℝ) * (Flb y' + Fbl y')) =
+      (1 / 2 : ℝ) • (Flb + Fbl) from by
+        funext y'; simp only [Pi.smul_apply, Pi.add_apply, smul_eq_mul]]
+  rw [fderiv_const_smul (hdiff_lb.add hdiff_bl), fderiv_add hdiff_lb hdiff_bl]
+  simp only [ContinuousLinearMap.smul_apply, ContinuousLinearMap.add_apply, smul_eq_mul]
+  rw [show fderiv ℝ Flb ys (EuclideanSpace.single a 1) =
+        euclidPartial (E := E) a Flb ys from rfl,
+    show fderiv ℝ Fbl ys (EuclideanSpace.single a 1) =
+        euclidPartial (E := E) a Fbl ys from rfl]
+  rw [hFlb_def, hFbl_def, hys_def,
+    MetricRealization.euclidPartial_chartPushedRaw_eq_covGrad_sub_lowerOrder
+      (I := I) g₀ S α a l b (by rw [← hys_def]; exact hys_mem),
+    MetricRealization.euclidPartial_chartPushedRaw_eq_covGrad_sub_lowerOrder
+      (I := I) g₀ S α a b l (by rw [← hys_def]; exact hys_mem)]
+  rw [show (toEuclidean (E := E)).symm ys = y from by rw [hys_def]; simp]
+
+set_option synthInstance.maxHeartbeats 1600000 in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **Carrier-side `0`-jet bound.**  On a compact `K ⊆ interior (extChartAt I α).target`, there
+is a single constant `C ≥ 0` (uniform over the tensor) bounding the carrier chart-frame component
+by `C · ‖S.toSection (symm y)‖`.  Mirror of `reprDiffChartCompOnE_abs_le_riemannianFibreNorm`. -/
+private theorem carrierChartCompOnE_abs_le_riemannianFibreNorm
+    (g₀ : SmoothRiemannianMetric I M) (α : M) {K : Set E} (hK : IsCompact K)
+    (hKsub : K ⊆ interior ((extChartAt I α).target : Set E)) :
+    letI : Bundle.RiemannianBundle (fun b : M => Tensor0SBundle.TensorRSSpace 0 2 I b) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 2
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (S : Integral.L2.SmoothCcTensor g₀ 0 2), ∀ y ∈ K,
+      ∀ l b : Fin (Module.finrank ℝ E),
+        |carrierChartCompOnE (I := I) g₀ S α l b y| ≤
+          C * ‖S.toSection ((extChartAt I α).symm y)‖ := by
+  classical
+  letI : Bundle.RiemannianBundle (fun b : M => Tensor0SBundle.TensorRSSpace 0 2 I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 2
+  obtain ⟨hImg_cpt, hImg_sub⟩ :=
+    MetricRealization.extChartAt_symm_image_isCompact_subset_chartSource (I := I) (M := M) α hK hKsub
+  obtain ⟨Craw, hCraw_nn, hCraw_bd⟩ :=
+    MetricRealization.tensorChartComponentRaw_abs_le_riemannianFibreNorm (I := I) g₀ 2 α
+      hImg_cpt hImg_sub
+  refine ⟨Craw, hCraw_nn, ?_⟩
+  intro S y hy l b
+  set b₀ : M := (extChartAt I α).symm y with hb₀_def
+  have hb₀_src : b₀ ∈ (chartAt H α).source := hImg_sub ⟨y, hy, rfl⟩
+  have hb₀_img : b₀ ∈ (extChartAt I α).symm '' K := ⟨y, hy, rfl⟩
+  rw [carrierChartCompOnE_eq_symm_tensorChartComponentRaw (I := I) g₀ S α l b hb₀_src]
+  set N : ℝ := ‖S.toSection b₀‖ with hN_def
+  have h_lb : |tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S α
+      (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b] b₀| ≤ Craw * N :=
+    hCraw_bd S b₀ hb₀_img ![l, b]
+  have h_bl : |tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S α
+      (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l] b₀| ≤ Craw * N :=
+    hCraw_bd S b₀ hb₀_img ![b, l]
+  calc |(1 / 2 : ℝ) *
+          (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S α
+              (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b] b₀ +
+            tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S α
+              (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l] b₀)|
+      = (1 / 2 : ℝ) *
+          |tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S α
+              (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b] b₀ +
+            tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S α
+              (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l] b₀| := by
+        rw [abs_mul]; norm_num
+    _ ≤ (1 / 2 : ℝ) * (Craw * N + Craw * N) := by
+        apply mul_le_mul_of_nonneg_left _ (by norm_num)
+        exact (abs_add_le _ _).trans (add_le_add h_lb h_bl)
+    _ = Craw * N := by ring
+
+set_option synthInstance.maxHeartbeats 1600000 in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **Carrier-side `1`-jet bound.**  On a compact `K`, the first chart partial of the carrier
+chart-frame component is bounded by `C` times the iterated covariant-gradient jet sum at the chart
+preimage (constant uniform over the tensor).  Mirror of `partialDeriv_reprDiffChartCompOnE_abs_le`. -/
+private theorem partialDeriv_carrierChartCompOnE_abs_le
+    (g₀ : SmoothRiemannianMetric I M) (α : M) {K : Set E} (hK : IsCompact K)
+    (hKsub : K ⊆ interior ((extChartAt I α).target : Set E)) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (S : Integral.L2.SmoothCcTensor g₀ 0 2), ∀ y ∈ K,
+      ∀ l b a : Fin (Module.finrank ℝ E),
+        |Integral.DivergenceTheorem.partialDeriv (E := E) a
+            (carrierChartCompOnE (I := I) g₀ S α l b) y| ≤
+          C * MetricRealization.iteratedCovGradJetSum (I := I) g₀ S ((extChartAt I α).symm y) := by
+  classical
+  obtain ⟨hImg_cpt, hImg_sub⟩ :=
+    MetricRealization.extChartAt_symm_image_isCompact_subset_chartSource (I := I) (M := M) α hK hKsub
+  obtain ⟨Craw1, hCraw1_nn, hCraw1_bd⟩ :=
+    MetricRealization.tensorChartComponentRaw_abs_le_riemannianFibreNorm (I := I) g₀ 3 α
+      hImg_cpt hImg_sub
+  have hKe_cpt : IsCompact (toEuclidean (E := E) '' K) := hK.image toEuclidean.continuous
+  have hKe_sub : toEuclidean (E := E) '' K ⊆
+      chartTargetEuclid (I := I) (M := M) α := by
+    intro z hz
+    obtain ⟨y, hy_mem, hy_eq⟩ := hz
+    rw [← hy_eq]
+    exact MetricRealization.toEuclidean_mem_chartTargetEuclid_of_mem_interior
+      (I := I) (M := M) α (hKsub hy_mem)
+  obtain ⟨CLO, hCLO_nn, hCLO_bd⟩ :=
+    MetricRealization.covDerivLowerOrderTerm_abs_le_riemannianFibreNorm (I := I) g₀ 2 α
+      hKe_cpt hKe_sub
+  refine ⟨Craw1 + CLO, by positivity, ?_⟩
+  intro S y hy l b a
+  letI inst3 : Bundle.RiemannianBundle (fun bb : M => Tensor0SBundle.TensorRSSpace 0 (2 + 1) I bb) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + 1)
+  letI inst2 : Bundle.RiemannianBundle (fun bb : M => Tensor0SBundle.TensorRSSpace 0 2 I bb) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 2
+  set b₀ : M := (extChartAt I α).symm y with hb₀_def
+  have hb₀_img : b₀ ∈ (extChartAt I α).symm '' K := ⟨y, hy, rfl⟩
+  set N1 : ℝ := ‖(covGrad (I := I) (M := M) g₀ 0 2 S).toSection b₀‖ with hN1_def
+  set N0 : ℝ := ‖S.toSection b₀‖ with hN0_def
+  have hN1_nn : 0 ≤ N1 := norm_nonneg _
+  have hN0_nn : 0 ≤ N0 := norm_nonneg _
+  set R : ℝ := MetricRealization.iteratedCovGradJetSum (I := I) g₀ S b₀ with hR_def
+  have hR_nn : 0 ≤ R := MetricRealization.iteratedCovGradJetSum_nonneg (I := I) g₀ S b₀
+  have hN0_le : N0 ≤ R := by
+    rw [hN0_def, hR_def]
+    exact MetricRealization.iteratedCovGrad_norm_le_jetSum (I := I) g₀ S b₀ 0 (by norm_num)
+  have hN1_le : N1 ≤ R := by
+    rw [hN1_def, hR_def]
+    exact MetricRealization.iteratedCovGrad_norm_le_jetSum (I := I) g₀ S b₀ 1 (by norm_num)
+  rw [partialDeriv_carrierChartCompOnE_eq_covGrad_sub_lowerOrder (I := I) g₀ S α a l b (hKsub hy)]
+  have h_raw_alb : |tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 1)
+      (covGrad (I := I) (M := M) g₀ 0 2 S) α
+      (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![a, l, b] b₀| ≤ Craw1 * N1 :=
+    hCraw1_bd (covGrad (I := I) (M := M) g₀ 0 2 S) b₀ hb₀_img ![a, l, b]
+  have h_raw_abl : |tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 1)
+      (covGrad (I := I) (M := M) g₀ 0 2 S) α
+      (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![a, b, l] b₀| ≤ Craw1 * N1 :=
+    hCraw1_bd (covGrad (I := I) (M := M) g₀ 0 2 S) b₀ hb₀_img ![a, b, l]
+  have hbase_eq : (extChartAt I α).symm ((toEuclidean (E := E)).symm (toEuclidean (E := E) y)) =
+      b₀ := by rw [hb₀_def]; simp
+  have h_lo_lb : |covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 2 S α a
+      (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b] (toEuclidean (E := E) y)| ≤
+      CLO * N0 := by
+    have := hCLO_bd S a ![l, b] (toEuclidean (E := E) y) ⟨y, hy, rfl⟩
+    rwa [hbase_eq] at this
+  have h_lo_bl : |covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 2 S α a
+      (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l] (toEuclidean (E := E) y)| ≤
+      CLO * N0 := by
+    have := hCLO_bd S a ![b, l] (toEuclidean (E := E) y) ⟨y, hy, rfl⟩
+    rwa [hbase_eq] at this
+  rw [abs_mul]
+  have h12 : |(1 / 2 : ℝ)| = (1 / 2 : ℝ) := by norm_num
+  rw [h12]
+  have h_sum : |(tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 1)
+              (covGrad (I := I) (M := M) g₀ 0 2 S) α
+              (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![a, l, b] b₀
+            - covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 2 S α a
+                (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b]
+                (toEuclidean (E := E) y))
+          + (tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 1)
+              (covGrad (I := I) (M := M) g₀ 0 2 S) α
+              (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![a, b, l] b₀
+            - covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 2 S α a
+                (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l]
+                (toEuclidean (E := E) y))| ≤
+        2 * (Craw1 * N1) + 2 * (CLO * N0) := by
+    refine (abs_add_le _ _).trans ?_
+    have hb1 := (abs_sub _ _).trans (add_le_add h_raw_alb h_lo_lb)
+    have hb2 := (abs_sub _ _).trans (add_le_add h_raw_abl h_lo_bl)
+    calc _ ≤ (Craw1 * N1 + CLO * N0) + (Craw1 * N1 + CLO * N0) := add_le_add hb1 hb2
+      _ = 2 * (Craw1 * N1) + 2 * (CLO * N0) := by ring
+  calc (1 / 2 : ℝ) * |_|
+      ≤ (1 / 2 : ℝ) * (2 * (Craw1 * N1) + 2 * (CLO * N0)) :=
+        mul_le_mul_of_nonneg_left h_sum (by norm_num)
+    _ = Craw1 * N1 + CLO * N0 := by ring
+    _ ≤ (Craw1 + CLO) * R := by
+        nlinarith [hCraw1_nn, hCLO_nn, hN1_nn, hN0_nn, hN1_le, hN0_le, hR_nn]
+
+set_option maxHeartbeats 1600000 in
+/-- **Carrier-side `2`-jet bound.**  On a compact `K`, the iterated chart partial of the carrier
+chart-frame component is bounded by `C` times the iterated covariant-gradient jet sum at the chart
+preimage (constant uniform over the tensor).  Mirror of `partialDeriv2_reprDiffChartCompOnE_abs_le`. -/
+private theorem partialDeriv2_carrierChartCompOnE_abs_le
+    (g₀ : SmoothRiemannianMetric I M) (α : M) {K : Set E} (hK : IsCompact K)
+    (hKsub : K ⊆ interior ((extChartAt I α).target : Set E)) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (S : Integral.L2.SmoothCcTensor g₀ 0 2), ∀ y ∈ K,
+      ∀ l b c a : Fin (Module.finrank ℝ E),
+        |Integral.DivergenceTheorem.partialDeriv (E := E) c
+            (Integral.DivergenceTheorem.partialDeriv (E := E) a
+              (carrierChartCompOnE (I := I) g₀ S α l b)) y| ≤
+          C * MetricRealization.iteratedCovGradJetSum (I := I) g₀ S ((extChartAt I α).symm y) := by
+  classical
+  have hKe_cpt : IsCompact (toEuclidean (E := E) '' K) := hK.image toEuclidean.continuous
+  have hKe_sub : toEuclidean (E := E) '' K ⊆
+      chartTargetEuclid (I := I) (M := M) α := by
+    intro z hz
+    obtain ⟨y, hy_mem, hy_eq⟩ := hz
+    rw [← hy_eq]
+    exact MetricRealization.toEuclidean_mem_chartTargetEuclid_of_mem_interior
+      (I := I) (M := M) α (hKsub hy_mem)
+  obtain ⟨C2, hC2_nn, hC2_bd⟩ :=
+    MetricRealization.euclidPartial2_chartPushedRaw_abs_le_jetSum (I := I) g₀ α hKe_cpt hKe_sub
+  have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
+    chartTargetEuclid_isOpen (I := I) (M := M) α
+  refine ⟨C2, hC2_nn, ?_⟩
+  intro S y hy l b c a
+  set ys : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) := toEuclidean (E := E) y with hys_def
+  have hys_mem : ys ∈ chartTargetEuclid (I := I) (M := M) α :=
+    MetricRealization.toEuclidean_mem_chartTargetEuclid_of_mem_interior (I := I) (M := M) α (hKsub hy)
+  have hys_imK : ys ∈ toEuclidean (E := E) '' K := ⟨y, hy, rfl⟩
+  set Flb : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
+    chartPushedRaw I α
+      (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S α
+        (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b]) with hFlb_def
+  set Fbl : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
+    chartPushedRaw I α
+      (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S α
+        (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l]) with hFbl_def
+  rw [MetricRealization.partialDeriv2_eq_euclidPartial2_comp_toEuclidean (E := E) c a
+    (carrierChartCompOnE (I := I) g₀ S α l b) y, ← hys_def]
+  have heqOn : Set.EqOn
+      (carrierChartCompOnE (I := I) g₀ S α l b ∘ (toEuclidean (E := E)).symm)
+      (fun z => (1 / 2 : ℝ) * (Flb z + Fbl z))
+      (chartTargetEuclid (I := I) (M := M) α) := by
+    rw [hFlb_def, hFbl_def]
+    exact carrierChartCompOnE_comp_toEuclidean_symm_eqOn (I := I) g₀ S α l b
+  have hinner : Set.EqOn
+      (euclidPartial (E := E) a
+        (carrierChartCompOnE (I := I) g₀ S α l b ∘ (toEuclidean (E := E)).symm))
+      (euclidPartial (E := E) a (fun z => (1 / 2 : ℝ) * (Flb z + Fbl z)))
+      (chartTargetEuclid (I := I) (M := M) α) :=
+    MetricRealization.euclidPartial_congr_of_eqOn_isOpen (E := E) a hopen heqOn
+  rw [(MetricRealization.euclidPartial_congr_of_eqOn_isOpen (E := E) c hopen hinner) hys_mem]
+  have hinner_eq : Set.EqOn
+      (euclidPartial (E := E) a (fun z => (1 / 2 : ℝ) * (Flb z + Fbl z)))
+      (fun z => (1 / 2 : ℝ) * (euclidPartial (E := E) a Flb z + euclidPartial (E := E) a Fbl z))
+      (chartTargetEuclid (I := I) (M := M) α) := by
+    intro z hz
+    have hdz_lb : DifferentiableAt ℝ Flb z :=
+      MetricRealization.chartPushedRaw_tensorChartComponentRaw_differentiableAt
+        (I := I) g₀ 2 S α ![l, b] hz
+    have hdz_bl : DifferentiableAt ℝ Fbl z :=
+      MetricRealization.chartPushedRaw_tensorChartComponentRaw_differentiableAt
+        (I := I) g₀ 2 S α ![b, l] hz
+    rw [euclidPartial_def]
+    rw [show (fun z => (1 / 2 : ℝ) * (Flb z + Fbl z)) = (1 / 2 : ℝ) • (Flb + Fbl) from by
+      funext z; simp only [Pi.smul_apply, Pi.add_apply, smul_eq_mul]]
+    rw [fderiv_const_smul (hdz_lb.add hdz_bl), fderiv_add hdz_lb hdz_bl]
+    simp only [ContinuousLinearMap.smul_apply, ContinuousLinearMap.add_apply, smul_eq_mul]
+    rw [show fderiv ℝ Flb z (EuclideanSpace.single a 1) = euclidPartial (E := E) a Flb z from rfl,
+      show fderiv ℝ Fbl z (EuclideanSpace.single a 1) = euclidPartial (E := E) a Fbl z from rfl]
+  rw [(MetricRealization.euclidPartial_congr_of_eqOn_isOpen (E := E) c hopen hinner_eq) hys_mem]
+  have hda_lb : DifferentiableAt ℝ (euclidPartial (E := E) a Flb) ys := by
+    have hcd : ContDiffOn ℝ ∞ (euclidPartial (E := E) a Flb)
+        (chartTargetEuclid (I := I) (M := M) α) := by
+      rw [hFlb_def]
+      exact euclidPartial_chartPushedRaw_contDiffOn
+        (I := I) (M := M) g₀ 0 2 S α a
+        (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b]
+    exact (hcd.contDiffAt (hopen.mem_nhds hys_mem)).differentiableAt (by simp)
+  have hda_bl : DifferentiableAt ℝ (euclidPartial (E := E) a Fbl) ys := by
+    have hcd : ContDiffOn ℝ ∞ (euclidPartial (E := E) a Fbl)
+        (chartTargetEuclid (I := I) (M := M) α) := by
+      rw [hFbl_def]
+      exact euclidPartial_chartPushedRaw_contDiffOn
+        (I := I) (M := M) g₀ 0 2 S α a
+        (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l]
+    exact (hcd.contDiffAt (hopen.mem_nhds hys_mem)).differentiableAt (by simp)
+  rw [euclidPartial_def]
+  rw [show (fun z => (1 / 2 : ℝ) *
+        (euclidPartial (E := E) a Flb z + euclidPartial (E := E) a Fbl z)) =
+      (1 / 2 : ℝ) • (euclidPartial (E := E) a Flb + euclidPartial (E := E) a Fbl) from by
+    funext z; simp only [Pi.smul_apply, Pi.add_apply, smul_eq_mul]]
+  rw [fderiv_const_smul (hda_lb.add hda_bl), fderiv_add hda_lb hda_bl]
+  simp only [ContinuousLinearMap.smul_apply, ContinuousLinearMap.add_apply, smul_eq_mul]
+  rw [show fderiv ℝ (euclidPartial (E := E) a Flb) ys (EuclideanSpace.single c 1) =
+      euclidPartial (E := E) c (euclidPartial (E := E) a Flb) ys from rfl,
+    show fderiv ℝ (euclidPartial (E := E) a Fbl) ys (EuclideanSpace.single c 1) =
+      euclidPartial (E := E) c (euclidPartial (E := E) a Fbl) ys from rfl]
+  set R : ℝ := MetricRealization.iteratedCovGradJetSum (I := I) g₀ S
+    ((extChartAt I α).symm ((toEuclidean (E := E)).symm ys)) with hR_def
+  have hbase : (extChartAt I α).symm ((toEuclidean (E := E)).symm ys) = (extChartAt I α).symm y := by
+    rw [hys_def]; simp
+  have h_lb : |euclidPartial (E := E) c (euclidPartial (E := E) a Flb) ys| ≤ C2 * R := by
+    rw [hFlb_def]; exact hC2_bd S c a ![l, b] ys hys_imK
+  have h_bl : |euclidPartial (E := E) c (euclidPartial (E := E) a Fbl) ys| ≤ C2 * R := by
+    rw [hFbl_def]; exact hC2_bd S c a ![b, l] ys hys_imK
+  rw [abs_mul, show |(1 / 2 : ℝ)| = (1 / 2 : ℝ) from by norm_num]
+  rw [← hbase]
+  calc (1 / 2 : ℝ) * |euclidPartial (E := E) c (euclidPartial (E := E) a Flb) ys +
+          euclidPartial (E := E) c (euclidPartial (E := E) a Fbl) ys|
+      ≤ (1 / 2 : ℝ) * (C2 * R + C2 * R) :=
+        mul_le_mul_of_nonneg_left ((abs_add_le _ _).trans (add_le_add h_lb h_bl)) (by norm_num)
+    _ = C2 * R := by ring
+
+set_option linter.unusedSectionVars false in
+/-- The chart-Gram-on-`E` difference of two metrics whose inner products differ by
+`ccTensorBilinSymm g₀ S` equals the carrier chart-frame component of `S`. -/
+private theorem chartGramOnE_sub_eq_carrierChartCompOnE
+    (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (S : Integral.L2.SmoothCcTensor g₀ 0 2)
+    (hgram : ∀ (x : M) (v w : TangentSpace I x),
+      g₁.inner x v w - g₂.inner x v w = ccTensorBilinSymm (I := I) g₀ S x v w)
+    (α : M) (l b : Fin (Module.finrank ℝ E)) (y : E) :
+    Integral.DivergenceTheorem.chartGramOnE (I := I) g₁ α l b y -
+        Integral.DivergenceTheorem.chartGramOnE (I := I) g₂ α l b y =
+      carrierChartCompOnE (I := I) g₀ S α l b y := by
+  rw [Integral.DivergenceTheorem.chartGramOnE_def, Integral.DivergenceTheorem.chartGramOnE_def,
+    Integral.Measure.chartGramMatrix_apply, Integral.Measure.chartGramMatrix_apply,
+    carrierChartCompOnE]
+  exact hgram _ _ _
+
+/-- The chart-Gram-on-`E` difference function of `g₁, g₂` equals the carrier chart-frame
+component function (function-level `funext` upgrade), hence all their iterated chart partials
+agree. -/
+private theorem chartGramOnE_sub_funext_carrierChartCompOnE
+    (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (S : Integral.L2.SmoothCcTensor g₀ 0 2)
+    (hgram : ∀ (x : M) (v w : TangentSpace I x),
+      g₁.inner x v w - g₂.inner x v w = ccTensorBilinSymm (I := I) g₀ S x v w)
+    (α : M) (l b : Fin (Module.finrank ℝ E)) :
+    (fun y : E => Integral.DivergenceTheorem.chartGramOnE (I := I) g₁ α l b y -
+        Integral.DivergenceTheorem.chartGramOnE (I := I) g₂ α l b y) =
+      carrierChartCompOnE (I := I) g₀ S α l b := by
+  funext y
+  exact chartGramOnE_sub_eq_carrierChartCompOnE (I := I) g₀ g₁ g₂ S hgram α l b y
+
+set_option linter.unusedSectionVars false in
+/-- The chart Gram entry on `E` of a metric is differentiable at a chart-interior point. -/
+private theorem chartGramOnE_diffAt_interior_loc
+    (g : SmoothRiemannianMetric I M) (α : M) (l b : Fin (Module.finrank ℝ E))
+    {y : E} (hy : y ∈ interior ((extChartAt I α).target : Set E)) :
+    DifferentiableAt ℝ (Integral.DivergenceTheorem.chartGramOnE (I := I) g α l b) y :=
+  (((Integral.DivergenceTheorem.chartGramOnE_contDiffOn (I := I) g α l b).mono
+    interior_subset).contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
+
+/-- The first chart partial of the chart-Gram difference of `g₁, g₂` (whose inner products differ
+by `ccTensorBilinSymm g₀ S`) equals the first chart partial of the carrier chart-frame component.
+Mirror of `partialDeriv_chartGramOnE_realizeMetricAt_sub_eq`. -/
+private theorem partialDeriv_chartGramOnE_sub_eq_carrier
+    (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (S : Integral.L2.SmoothCcTensor g₀ 0 2)
+    (hgram : ∀ (x : M) (v w : TangentSpace I x),
+      g₁.inner x v w - g₂.inner x v w = ccTensorBilinSymm (I := I) g₀ S x v w)
+    (α : M) (a l b : Fin (Module.finrank ℝ E)) {y : E}
+    (hy : y ∈ interior ((extChartAt I α).target : Set E)) :
+    Integral.DivergenceTheorem.partialDeriv (E := E) a
+        (Integral.DivergenceTheorem.chartGramOnE (I := I) g₁ α l b) y -
+      Integral.DivergenceTheorem.partialDeriv (E := E) a
+        (Integral.DivergenceTheorem.chartGramOnE (I := I) g₂ α l b) y =
+      Integral.DivergenceTheorem.partialDeriv (E := E) a
+        (carrierChartCompOnE (I := I) g₀ S α l b) y := by
+  rw [← chartGramOnE_sub_funext_carrierChartCompOnE (I := I) g₀ g₁ g₂ S hgram α l b]
+  rw [Integral.DivergenceTheorem.partialDeriv, Integral.DivergenceTheorem.partialDeriv,
+    Integral.DivergenceTheorem.partialDeriv, ← ContinuousLinearMap.sub_apply]
+  congr 1
+  exact (fderiv_fun_sub (chartGramOnE_diffAt_interior_loc (I := I) g₁ α l b hy)
+    (chartGramOnE_diffAt_interior_loc (I := I) g₂ α l b hy)).symm
+
+/-- On the chart-target interior, the first chart partial of the chart-Gram difference equals the
+first chart partial of the carrier chart-frame component (as functions, via `EqOn`). -/
+private theorem partialDeriv_chartGramOnE_sub_eqOn_carrier
+    (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (S : Integral.L2.SmoothCcTensor g₀ 0 2)
+    (hgram : ∀ (x : M) (v w : TangentSpace I x),
+      g₁.inner x v w - g₂.inner x v w = ccTensorBilinSymm (I := I) g₀ S x v w)
+    (α : M) (a l b : Fin (Module.finrank ℝ E)) :
+    Set.EqOn
+      (fun z => Integral.DivergenceTheorem.partialDeriv (E := E) a
+          (Integral.DivergenceTheorem.chartGramOnE (I := I) g₁ α l b) z -
+        Integral.DivergenceTheorem.partialDeriv (E := E) a
+          (Integral.DivergenceTheorem.chartGramOnE (I := I) g₂ α l b) z)
+      (Integral.DivergenceTheorem.partialDeriv (E := E) a
+        (carrierChartCompOnE (I := I) g₀ S α l b))
+      (interior ((extChartAt I α).target : Set E)) :=
+  fun _z hz => partialDeriv_chartGramOnE_sub_eq_carrier (I := I) g₀ g₁ g₂ S hgram α a l b hz
+
+set_option linter.unusedSectionVars false in
+/-- The first chart partial of the chart-Gram difference of a metric is differentiable at a
+chart-interior point. -/
+private theorem partialDeriv_chartGramOnE_diffAt_interior_loc
+    (g : SmoothRiemannianMetric I M) (α : M) (a l b : Fin (Module.finrank ℝ E))
+    {y : E} (hy : y ∈ interior ((extChartAt I α).target : Set E)) :
+    DifferentiableAt ℝ
+      (Integral.DivergenceTheorem.partialDeriv (E := E) a
+        (Integral.DivergenceTheorem.chartGramOnE (I := I) g α l b)) y := by
+  have hcd_int : ContDiffOn ℝ ∞ (Integral.DivergenceTheorem.chartGramOnE (I := I) g α l b)
+      (interior ((extChartAt I α).target : Set E)) :=
+    (Integral.DivergenceTheorem.chartGramOnE_contDiffOn (I := I) g α l b).mono interior_subset
+  have hfderiv : ContDiffOn ℝ ∞
+      (fderiv ℝ (Integral.DivergenceTheorem.chartGramOnE (I := I) g α l b))
+      (interior ((extChartAt I α).target : Set E)) :=
+    hcd_int.fderiv_of_isOpen isOpen_interior (by rw [ENat.coe_top_add_one])
+  have hrw : (Integral.DivergenceTheorem.partialDeriv (E := E) a
+        (Integral.DivergenceTheorem.chartGramOnE (I := I) g α l b)) =
+      fun z => fderiv ℝ (Integral.DivergenceTheorem.chartGramOnE (I := I) g α l b) z
+        ((Integral.Measure.chartModelBasis E) a) := rfl
+  rw [hrw]
+  exact ((hfderiv.clm_apply contDiffOn_const).contDiffAt
+    (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
+
+/-- The iterated (second) chart partial of the chart-Gram difference of `g₁, g₂` equals the
+iterated chart partial of the carrier chart-frame component.  Mirror of
+`partialDeriv2_chartGramOnE_realizeMetricAt_sub_eq`. -/
+private theorem partialDeriv2_chartGramOnE_sub_eq_carrier
+    (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (S : Integral.L2.SmoothCcTensor g₀ 0 2)
+    (hgram : ∀ (x : M) (v w : TangentSpace I x),
+      g₁.inner x v w - g₂.inner x v w = ccTensorBilinSymm (I := I) g₀ S x v w)
+    (α : M) (c a l b : Fin (Module.finrank ℝ E)) {y : E}
+    (hy : y ∈ interior ((extChartAt I α).target : Set E)) :
+    Integral.DivergenceTheorem.partialDeriv (E := E) c
+        (Integral.DivergenceTheorem.partialDeriv (E := E) a
+          (Integral.DivergenceTheorem.chartGramOnE (I := I) g₁ α l b)) y -
+      Integral.DivergenceTheorem.partialDeriv (E := E) c
+        (Integral.DivergenceTheorem.partialDeriv (E := E) a
+          (Integral.DivergenceTheorem.chartGramOnE (I := I) g₂ α l b)) y =
+      Integral.DivergenceTheorem.partialDeriv (E := E) c
+        (Integral.DivergenceTheorem.partialDeriv (E := E) a
+          (carrierChartCompOnE (I := I) g₀ S α l b)) y := by
+  have hop : IsOpen (interior ((extChartAt I α).target : Set E)) := isOpen_interior
+  rw [Integral.DivergenceTheorem.partialDeriv, Integral.DivergenceTheorem.partialDeriv,
+    Integral.DivergenceTheorem.partialDeriv, ← ContinuousLinearMap.sub_apply]
+  have hfd_sub :
+      fderiv ℝ (Integral.DivergenceTheorem.partialDeriv (E := E) a
+          (Integral.DivergenceTheorem.chartGramOnE (I := I) g₁ α l b)) y -
+        fderiv ℝ (Integral.DivergenceTheorem.partialDeriv (E := E) a
+          (Integral.DivergenceTheorem.chartGramOnE (I := I) g₂ α l b)) y =
+      fderiv ℝ (fun z => Integral.DivergenceTheorem.partialDeriv (E := E) a
+            (Integral.DivergenceTheorem.chartGramOnE (I := I) g₁ α l b) z -
+          Integral.DivergenceTheorem.partialDeriv (E := E) a
+            (Integral.DivergenceTheorem.chartGramOnE (I := I) g₂ α l b) z) y :=
+    (fderiv_sub
+      (partialDeriv_chartGramOnE_diffAt_interior_loc (I := I) g₁ α a l b hy)
+      (partialDeriv_chartGramOnE_diffAt_interior_loc (I := I) g₂ α a l b hy)).symm
+  rw [hfd_sub]
+  have hev : (fun z => Integral.DivergenceTheorem.partialDeriv (E := E) a
+          (Integral.DivergenceTheorem.chartGramOnE (I := I) g₁ α l b) z -
+        Integral.DivergenceTheorem.partialDeriv (E := E) a
+          (Integral.DivergenceTheorem.chartGramOnE (I := I) g₂ α l b) z)
+      =ᶠ[nhds y]
+      Integral.DivergenceTheorem.partialDeriv (E := E) a (carrierChartCompOnE (I := I) g₀ S α l b) :=
+    Filter.eventuallyEq_iff_exists_mem.mpr
+      ⟨interior ((extChartAt I α).target : Set E), hop.mem_nhds hy,
+        partialDeriv_chartGramOnE_sub_eqOn_carrier (I := I) g₀ g₁ g₂ S hgram α a l b⟩
+  rw [hev.fderiv_eq]
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **Carrier-side chart-`2`-jet seminorm bound by the intrinsic covariant-gradient jet sum,
+compact-`K` form (assembled witness-free over the raw-tensor compact-`K` chart-component bounds).**
+
+For two smooth metrics `g₁, g₂` whose inner products differ by `ccTensorBilinSymm g₀ S` for a fixed
+`(0,2)`-tensor `S`, a chart base point `α`, and a **compact** piece `K ⊆ interior (extChartAt
+I α).target`, the chart-`2`-jet seminorm of the metric pair is bounded, uniformly on `K`, by a single
+constant `C ≥ 0` times the iterated covariant-gradient jet sum of `S` at the chart preimage.
+
+`C` is quantified ahead of `S` and the metric pair: it is the per-summand discharge constant times the
+chart-jet index count `n² + n³ + n⁴`, depending only on `K, α, g₀`.  This is the carrier-side,
+realize-witness-free analogue of `chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum`
+(`RealizedJet2CovGradBound.lean`): the chart-Gram difference of `g₁, g₂` equals the carrier chart-frame
+component of `S` (`chartGramOnE_sub_funext_carrierChartCompOnE`, from `hgram` and bilinearity), and each
+`chartMetricJet2DiffSup` summand — a chart `∂^j` (`j ≤ 2`) of that component — is dominated by `‖∇^j S‖`
+via the raw-tensor compact-`K` chart-component bounds (`carrierChartCompOnE_abs_le_riemannianFibreNorm`,
+`partialDeriv_carrierChartCompOnE_abs_le`, `partialDeriv2_carrierChartCompOnE_abs_le`).
+
+The conclusion is structurally distinct from `hgram` (a metric inner-product identity); no packaging. -/
+private theorem carrier_chartMetricJet2DiffSup_le_iteratedCovGradJetSum
+    (g₀ : SmoothRiemannianMetric I M) (α : M) {K : Set E} (hK : IsCompact K)
+    (hKsub : K ⊆ interior ((extChartAt I α).target : Set E)) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ g₂ : SmoothRiemannianMetric I M)
+      (S : Integral.L2.SmoothCcTensor g₀ 0 2),
+      (∀ (x : M) (v w : TangentSpace I x),
+        g₁.inner x v w - g₂.inner x v w = ccTensorBilinSymm (I := I) g₀ S x v w) →
+      ∀ y ∈ K,
+        DeTurckCoefficients.chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y ≤
+          C * MetricRealization.iteratedCovGradJetSum (I := I) g₀ S ((extChartAt I α).symm y) := by
+  classical
+  letI : Bundle.RiemannianBundle (fun bb : M => Tensor0SBundle.TensorRSSpace 0 2 I bb) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 2
+  set n : ℕ := Module.finrank ℝ E
+  obtain ⟨C0, hC0_nn, hC0_bd⟩ :=
+    carrierChartCompOnE_abs_le_riemannianFibreNorm (I := I) g₀ α hK hKsub
+  obtain ⟨C1, hC1_nn, hC1_bd⟩ :=
+    partialDeriv_carrierChartCompOnE_abs_le (I := I) g₀ α hK hKsub
+  obtain ⟨C2, hC2_nn, hC2_bd⟩ :=
+    partialDeriv2_carrierChartCompOnE_abs_le (I := I) g₀ α hK hKsub
+  set Cmax : ℝ := max C0 (max C1 C2) with hCmax_def
+  have hCmax_nn : 0 ≤ Cmax := le_trans hC0_nn (le_max_left _ _)
+  set Ncard : ℝ := (Fintype.card ((Fin n) × (Fin n)) : ℝ)
+    + (Fintype.card ((Fin n) × (Fin n) × (Fin n)) : ℝ)
+    + (Fintype.card ((Fin n) × (Fin n) × (Fin n) × (Fin n)) : ℝ) with hNcard_def
+  have hNcard_nn : 0 ≤ Ncard := by rw [hNcard_def]; positivity
+  refine ⟨Cmax * Ncard, mul_nonneg hCmax_nn hNcard_nn, ?_⟩
+  intro g₁ g₂ S hgram y hy
+  set R : ℝ := MetricRealization.iteratedCovGradJetSum (I := I) g₀ S ((extChartAt I α).symm y)
+    with hR_def
+  have hR_nn : 0 ≤ R := MetricRealization.iteratedCovGradJetSum_nonneg (I := I) g₀ S _
+  -- The `0`-jet term: each entry of the Gram difference at the chart preimage equals the carrier
+  -- chart-frame component (`0`-jet), bounded by `‖S.toSection‖ ≤ R`.
+  have h0_jet : ‖S.toSection ((extChartAt I α).symm y)‖ ≤ R := by
+    rw [hR_def]
+    exact MetricRealization.iteratedCovGrad_norm_le_jetSum (I := I) g₀ S
+      ((extChartAt I α).symm y) 0 (by norm_num)
+  have hfunext : ∀ l b : Fin (Module.finrank ℝ E),
+      (fun z : E => Integral.DivergenceTheorem.chartGramOnE (I := I) g₁ α l b z -
+          Integral.DivergenceTheorem.chartGramOnE (I := I) g₂ α l b z) =
+        carrierChartCompOnE (I := I) g₀ S α l b :=
+    fun l b => chartGramOnE_sub_funext_carrierChartCompOnE (I := I) g₀ g₁ g₂ S hgram α l b
+  have h0 : DeTurckCoefficients.chartGramDiffSup (I := I) (M := M) g₁ g₂ α
+        ((extChartAt I α).symm y) ≤
+      (Fintype.card ((Fin n) × (Fin n)) : ℝ) * (Cmax * R) := by
+    rw [DeTurckCoefficients.chartGramDiffSup, DeTurckCoefficients.matrixEntryL1]
+    calc ∑ pq : (Fin n) × (Fin n),
+            |(Integral.Measure.chartGramMatrix (I := I) g₁ α ((extChartAt I α).symm y) -
+                Integral.Measure.chartGramMatrix (I := I) g₂ α ((extChartAt I α).symm y)) pq.1 pq.2|
+        = ∑ pq : (Fin n) × (Fin n),
+            |carrierChartCompOnE (I := I) g₀ S α pq.1 pq.2 y| := by
+          refine Finset.sum_congr rfl (fun pq _ => ?_)
+          rw [Matrix.sub_apply, Integral.Measure.chartGramMatrix_apply,
+            Integral.Measure.chartGramMatrix_apply]
+          rw [show g₁.inner ((extChartAt I α).symm y)
+                  (Integral.Measure.chartBasisVecFiber (I := I) α pq.1 ((extChartAt I α).symm y))
+                  (Integral.Measure.chartBasisVecFiber (I := I) α pq.2 ((extChartAt I α).symm y)) -
+                g₂.inner ((extChartAt I α).symm y)
+                  (Integral.Measure.chartBasisVecFiber (I := I) α pq.1 ((extChartAt I α).symm y))
+                  (Integral.Measure.chartBasisVecFiber (I := I) α pq.2 ((extChartAt I α).symm y)) =
+              carrierChartCompOnE (I := I) g₀ S α pq.1 pq.2 y from by
+            rw [carrierChartCompOnE]; exact hgram _ _ _]
+      _ ≤ ∑ _pq : (Fin n) × (Fin n), Cmax * R := by
+          refine Finset.sum_le_sum (fun pq _ => ?_)
+          calc |carrierChartCompOnE (I := I) g₀ S α pq.1 pq.2 y|
+              ≤ C0 * ‖S.toSection ((extChartAt I α).symm y)‖ := hC0_bd S y hy pq.1 pq.2
+            _ ≤ C0 * R := mul_le_mul_of_nonneg_left h0_jet hC0_nn
+            _ ≤ Cmax * R := mul_le_mul_of_nonneg_right (le_max_left _ _) hR_nn
+      _ = (Fintype.card ((Fin n) × (Fin n)) : ℝ) * (Cmax * R) := by
+          rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ]
+  have h1 : DeTurckCoefficients.chartGramPartialDiffSup (I := I) (M := M) g₁ g₂ α y ≤
+      (Fintype.card ((Fin n) × (Fin n) × (Fin n)) : ℝ) * (Cmax * R) := by
+    rw [DeTurckCoefficients.chartGramPartialDiffSup]
+    calc ∑ p : (Fin n) × (Fin n) × (Fin n),
+            DeTurckCoefficients.gramPartialDiffEntry (I := I) (M := M) g₁ g₂ α y p
+        = ∑ p : (Fin n) × (Fin n) × (Fin n),
+            |Integral.DivergenceTheorem.partialDeriv (E := E) p.2.1
+              (carrierChartCompOnE (I := I) g₀ S α p.1 p.2.2) y| := by
+          refine Finset.sum_congr rfl (fun p _ => ?_)
+          rw [DeTurckCoefficients.gramPartialDiffEntry]
+          congr 1
+          exact partialDeriv_chartGramOnE_sub_eq_carrier (I := I) g₀ g₁ g₂ S hgram
+            α p.2.1 p.1 p.2.2 (hKsub hy)
+      _ ≤ ∑ _p : (Fin n) × (Fin n) × (Fin n), Cmax * R := by
+          refine Finset.sum_le_sum (fun p _ => ?_)
+          calc |Integral.DivergenceTheorem.partialDeriv (E := E) p.2.1
+                  (carrierChartCompOnE (I := I) g₀ S α p.1 p.2.2) y|
+              ≤ C1 * R := hC1_bd S y hy p.1 p.2.2 p.2.1
+            _ ≤ Cmax * R :=
+                mul_le_mul_of_nonneg_right ((le_max_left _ _).trans (le_max_right _ _)) hR_nn
+      _ = (Fintype.card ((Fin n) × (Fin n) × (Fin n)) : ℝ) * (Cmax * R) := by
+          rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ]
+  have h2 : DeTurckCoefficients.chartGramPartial2DiffSup (I := I) (M := M) g₁ g₂ α y ≤
+      (Fintype.card ((Fin n) × (Fin n) × (Fin n) × (Fin n)) : ℝ) * (Cmax * R) := by
+    rw [DeTurckCoefficients.chartGramPartial2DiffSup]
+    calc ∑ p : (Fin n) × (Fin n) × (Fin n) × (Fin n),
+            DeTurckCoefficients.gramPartial2DiffEntry (I := I) (M := M) g₁ g₂ α y p
+        = ∑ p : (Fin n) × (Fin n) × (Fin n) × (Fin n),
+            |Integral.DivergenceTheorem.partialDeriv (E := E) p.1
+              (Integral.DivergenceTheorem.partialDeriv (E := E) p.2.1
+                (carrierChartCompOnE (I := I) g₀ S α p.2.2.1 p.2.2.2)) y| := by
+          refine Finset.sum_congr rfl (fun p _ => ?_)
+          rw [DeTurckCoefficients.gramPartial2DiffEntry]
+          congr 1
+          exact partialDeriv2_chartGramOnE_sub_eq_carrier (I := I) g₀ g₁ g₂ S hgram
+            α p.1 p.2.1 p.2.2.1 p.2.2.2 (hKsub hy)
+      _ ≤ ∑ _p : (Fin n) × (Fin n) × (Fin n) × (Fin n), Cmax * R := by
+          refine Finset.sum_le_sum (fun p _ => ?_)
+          calc |Integral.DivergenceTheorem.partialDeriv (E := E) p.1
+                  (Integral.DivergenceTheorem.partialDeriv (E := E) p.2.1
+                    (carrierChartCompOnE (I := I) g₀ S α p.2.2.1 p.2.2.2)) y|
+              ≤ C2 * R := hC2_bd S y hy p.2.2.1 p.2.2.2 p.1 p.2.1
+            _ ≤ Cmax * R :=
+                mul_le_mul_of_nonneg_right ((le_max_right _ _).trans (le_max_right _ _)) hR_nn
+      _ = (Fintype.card ((Fin n) × (Fin n) × (Fin n) × (Fin n)) : ℝ) * (Cmax * R) := by
+          rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ]
+  rw [DeTurckCoefficients.chartMetricJet2DiffSup, DeTurckCoefficients.chartMetricJet1DiffSup]
+  calc DeTurckCoefficients.chartGramDiffSup (I := I) (M := M) g₁ g₂ α ((extChartAt I α).symm y)
+        + DeTurckCoefficients.chartGramPartialDiffSup (I := I) (M := M) g₁ g₂ α y
+        + DeTurckCoefficients.chartGramPartial2DiffSup (I := I) (M := M) g₁ g₂ α y
+      ≤ (Fintype.card ((Fin n) × (Fin n)) : ℝ) * (Cmax * R)
+          + (Fintype.card ((Fin n) × (Fin n) × (Fin n)) : ℝ) * (Cmax * R)
+          + (Fintype.card ((Fin n) × (Fin n) × (Fin n) × (Fin n)) : ℝ) * (Cmax * R) := by
+        gcongr
+    _ = Cmax * Ncard * R := by rw [hNcard_def]; ring
+
+set_option linter.unusedVariables false in
+/-- **Carrier-direct chart-`2`-jet seminorm bound by the intrinsic covariant-gradient jet sum,
+compact-`K` form (assembled witness-free over the raw-tensor compact-`K` chart-component bounds).**
 
 For the realized `g₀`-anchored flow `g_DT` (the linear realize `hreal` off `g₀` via the carrier
-`T_s`), there is a finite constant `C ≥ 0` such that, for all times `t, t' ∈ [0, T]` and every
-good point `x`, the chart-`2`-jet seminorm of the metric pair `(g_DT t, g_DT t')` at the chart
-image is controlled by `C` times the iterated covariant-gradient jet sum
-`∑_{j ≤ 2} ‖(∇^j (T_s t − T_s t'))(x)‖_{g₀}` of the carrier difference at `x`:
+`T_s`), a chart base point `α`, and a **compact** piece `K ⊆ interior (extChartAt I α).target`,
+there is a finite constant `C ≥ 0` such that, for all times `t, t' ∈ [0, T]` and every `y ∈ K`, the
+chart-`2`-jet seminorm of the metric pair `(g_DT t, g_DT t')` at `y` is controlled by `C` times the
+iterated covariant-gradient jet sum `∑_{j ≤ 2} ‖(∇^j (T_s t − T_s t'))(symm y)‖_{g₀}` of the carrier
+difference at the chart preimage:
 
-  `chartMetricJet2DiffSup (g_DT t) (g_DT t') α (chart x) ≤ C · iteratedCovGradJetSum g₀ (T_s t − T_s t') x`.
+  `chartMetricJet2DiffSup (g_DT t) (g_DT t') α y ≤ C · iteratedCovGradJetSum g₀ (T_s t − T_s t') (symm y)`.
 
-This is the **carrier-direct analogue of the on-disk realize covariant-gradient reduction**
-`chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum` (`RealizedJet2CovGradBound.lean`):
-there the chart `2`-jet seminorm of the realized-metric difference is reduced, summand by summand,
-to chart partials `∂^j` (`j = 0, 1, 2`) of the chart-frame components of the single fixed tensor
-`S = realizableRepr u₁ − realizableRepr u₂`, each bounded by the iterated covariant-gradient fibre
-norms `‖∇^j S‖` (the pointwise inversion of `∇T = ∂T + Γ·T`, iterated twice).  Here the metric pair
-is supplied abstractly through `hreal` (`(g_DT s).inner = g₀.inner + ccTensorBilinSymm g₀ (T_s s)`),
-so the same algebraic identity holds with `S := T_s t − T_s t'`: the chart-Gram difference
-`chartGramOnE (g_DT t) − chartGramOnE (g_DT t')` equals, by bilinearity of `ccTensorBilinSymm` and
-the cancellation of the `g₀` baselines, the chart-frame component of `ccTensorBilinSymm g₀
-(T_s t − T_s t')`, hence each `chartMetricJet2DiffSup` summand is a chart `∂^j` of a chart-frame
-component of the single carrier difference, controlled pointwise by `‖∇^j (T_s t − T_s t')‖`.  It is
-the genuine covariant-gradient reduction content (the carrier-side reading of the realize bound),
-recorded here as a clean, realize-witness-free statement so the assembling Sobolev cap does not have
-to manufacture a realizability witness for the arbitrary carrier `T_s`.
+This is the **carrier-direct, compact-`K` analogue of the on-disk realize covariant-gradient reduction**
+`chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum` (`RealizedJet2CovGradBound.lean`),
+and shares its exact shape (compact `K`, bound at the chart preimage `(extChartAt I α).symm y`).  It is
+restated over a compact `K` because the chart-frame fibre norms `‖e_i^α‖²_{g₀} = G_{ii}(g₀)` are
+*unbounded* over the full open good set (the `chartJ` operator-norm blow-up), so the single uniform
+constant `C` only exists on a compact piece.  Here the metric pair is supplied abstractly through
+`hreal` (`(g_DT s).inner = g₀.inner + ccTensorBilinSymm g₀ (T_s s)`), so with `S := T_s t − T_s t'`
+the chart-Gram difference `chartGramOnE (g_DT t) − chartGramOnE (g_DT t')` equals the chart-frame
+component of `ccTensorBilinSymm g₀ S` (bilinearity + `g₀`-baseline cancellation); each
+`chartMetricJet2DiffSup` summand is then a chart `∂^j` of that component, dominated pointwise by
+`‖∇^j S‖` through the raw-tensor compact-`K` chart-component bounds.  It is *assembled by real proof*,
+witness-free; consumers do not transitively depend on `sorryAx` through this node.
 
 The conclusion (chart-`2`-jet seminorm bounded by the covariant-gradient jet sum) is structurally
-distinct from `hreal` and from the `‖toHs‖`-form consumer; no packaging.  The body is `sorry`;
-consumers transitively depend on `sorryAx`. -/
+distinct from `hreal`; no packaging. -/
 theorem deturck_g0_carrierDiff_chartMetricJet2DiffSup_le_iteratedCovGradJetSum
     (g₀ : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
     (g_DT : ℝ → SmoothRiemannianMetric I M)
@@ -790,13 +1488,28 @@ theorem deturck_g0_carrierDiff_chartMetricJet2DiffSup_le_iteratedCovGradJetSum
     (hreal : ∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
       (g_DT s).inner x v w
         = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w)
-    (α : M) :
+    (α : M) {K : Set E} (hK : IsCompact K)
+    (hKsub : K ⊆ interior ((extChartAt I α).target : Set E)) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ t' ∈ Set.Icc (0 : ℝ) T,
-      ∀ x ∈ chartLeviCivitaGoodSet (I := I) α,
+      ∀ y ∈ K,
         DeTurckCoefficients.chartMetricJet2DiffSup (I := I) (M := M)
-            (g_DT t) (g_DT t') α (extChartAt I α x) ≤
-          C * MetricRealization.iteratedCovGradJetSum (I := I) g₀ (T_s t - T_s t') x :=
-  sorry
+            (g_DT t) (g_DT t') α y ≤
+          C * MetricRealization.iteratedCovGradJetSum (I := I) g₀ (T_s t - T_s t')
+            ((extChartAt I α).symm y) := by
+  classical
+  obtain ⟨C, hC_nn, hC⟩ :=
+    carrier_chartMetricJet2DiffSup_le_iteratedCovGradJetSum (I := I) g₀ α hK hKsub
+  refine ⟨C, hC_nn, fun t ht t' ht' y hy => ?_⟩
+  -- The metric pair `(g_DT t, g_DT t')` differs by `ccTensorBilinSymm g₀ (T_s t − T_s t')` (the
+  -- `g₀` baselines cancel and `ccTensorBilinSymm` is subtractive).
+  have hgram : ∀ (x : M) (v w : TangentSpace I x),
+      (g_DT t).inner x v w - (g_DT t').inner x v w
+        = ccTensorBilinSymm (I := I) g₀ (T_s t - T_s t') x v w := by
+    intro x v w
+    rw [hreal t ht x v w, hreal t' ht' x v w,
+      MetricRealization.ccTensorBilinSymm_sub (I := I) g₀ (T_s t) (T_s t') x v w]
+    ring
+  exact hC (g_DT t) (g_DT t') (T_s t - T_s t') hgram y hy
 
 /-- **Forward chart-`2`-jet seminorm bound for the realize carrier difference (assembled over the
 carrier-direct covariant-gradient reduction and the unconditional `C²` Sobolev embedding).**
@@ -809,23 +1522,24 @@ carrier difference `T_s t − T_s t'`:
 
   `chartMetricJet2DiffSup (g_DT t) (g_DT t') α (chart x) ≤ C · ‖(T_s t − T_s t').toHs (2(dim M+3))‖`.
 
-This is the carrier-direct analogue of the on-disk realize bound
+This is the carrier-direct, compact-`K` analogue of the on-disk realize bound
 `chartMetricJet2DiffSup_realizeMetricAt_le_toHs_unconditional` (`RealizedCovGradJetInput.lean`),
-which controls `chartMetricJet2DiffSup (realizeMetricAt g₀ u₁) (realizeMetricAt g₀ u₂)` by the
-`H^{2k}` norm of `realizableRepr u₁ − realizableRepr u₂`.  Here the metric pair is supplied
+which controls `chartMetricJet2DiffSup (realizeMetricAt g₀ u₁) (realizeMetricAt g₀ u₂)` on a compact
+`K` by the `H^{2k}` norm of `realizableRepr u₁ − realizableRepr u₂`.  Here the metric pair is supplied
 abstractly through `hreal`, so the chart-Gram difference depends, by bilinearity of
 `ccTensorBilinSymm`, only on the carrier difference `T_s t − T_s t'`.  This is *assembled by real
 proof* exactly as the on-disk unconditional bound is: the **carrier-direct covariant-gradient
-reduction** `deturck_g0_carrierDiff_chartMetricJet2DiffSup_le_iteratedCovGradJetSum` bounds the
-chart `2`-jet seminorm by `C₁ · iteratedCovGradJetSum g₀ (T_s t − T_s t') x`, and the **unconditional
-`C²` Sobolev embedding** `iteratedCovGradJetSum_le_toHs` (`2(dim M + 3) > dim M + 4`) bounds that by
-`C₂ · ‖(T_s t − T_s t').toHs (2(dim M+3))‖`, uniformly over good chart points (the embedding constant
-is independent of the tensor and the base point).  The chart preimage of the good point's chart image
-is the point itself (`PartialEquiv.left_inv` on the good set), so the two jet sums match.
+reduction** `deturck_g0_carrierDiff_chartMetricJet2DiffSup_le_iteratedCovGradJetSum` (compact-`K`)
+bounds the chart `2`-jet seminorm by `C₁ · iteratedCovGradJetSum g₀ (T_s t − T_s t') (symm y)`, and the
+**unconditional `C²` Sobolev embedding** `iteratedCovGradJetSum_le_toHs` (`2(dim M + 3) > dim M + 4`)
+bounds that by `C₂ · ‖(T_s t − T_s t').toHs (2(dim M+3))‖`, uniformly over the compact `K` (the
+embedding constant is independent of the tensor and the base point).  The compact-`K` quantifier
+replaces the open-good-set one because the chart-frame fibre norms are unbounded over the full good
+set; the modulus chain (`_timeUniformModulus`, `_jointContinuous`) localises to a compact chart-image
+neighbourhood when it needs the bound.
 
 The conclusion is a uniform chart-`2`-jet bound by the carrier-`H` norm, structurally distinct from
-`hreal`; no packaging.  Consumers transitively depend on `sorryAx` through the posited
-covariant-gradient reduction. -/
+`hreal`; no packaging.  It is *assembled by real proof*, witness-free. -/
 theorem deturck_g0_carrierDiff_chartMetricJet2DiffSup_le_toHs
     (g₀ : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
     (g_DT : ℝ → SmoothRiemannianMetric I M)
@@ -833,36 +1547,33 @@ theorem deturck_g0_carrierDiff_chartMetricJet2DiffSup_le_toHs
     (hreal : ∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
       (g_DT s).inner x v w
         = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w)
-    (α : M) :
+    (α : M) {K : Set E} (hK : IsCompact K)
+    (hKsub : K ⊆ interior ((extChartAt I α).target : Set E)) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ t' ∈ Set.Icc (0 : ℝ) T,
-      ∀ x ∈ chartLeviCivitaGoodSet (I := I) α,
+      ∀ y ∈ K,
         DeTurckCoefficients.chartMetricJet2DiffSup (I := I) (M := M)
-            (g_DT t) (g_DT t') α (extChartAt I α x) ≤
+            (g_DT t) (g_DT t') α y ≤
           C * ‖SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * (Module.finrank ℝ E + 3))
             (T_s t - T_s t')‖ := by
   classical
-  -- The carrier-direct covariant-gradient reduction (constant `C₁`, uniform over `(t, t')`).
+  -- The carrier-direct covariant-gradient reduction (constant `C₁`, uniform over `(t, t')`), compact-`K`.
   obtain ⟨C₁, hC₁0, hred⟩ :=
     deturck_g0_carrierDiff_chartMetricJet2DiffSup_le_iteratedCovGradJetSum (I := I) (M := M)
-      g₀ hT g_DT T_s hreal α
+      g₀ hT g_DT T_s hreal α hK hKsub
   -- The unconditional `C²` Sobolev embedding at the supercritical order `2(dim M + 3)`.
   have hsuper : 2 * (Module.finrank ℝ E + 3) > Module.finrank ℝ E + 4 := by omega
   obtain ⟨C₂, hC₂pos, hC₂⟩ :=
     MetricRealization.iteratedCovGradJetSum_le_toHs (I := I) (M := M) g₀
       (Module.finrank ℝ E + 3) hsuper
-  refine ⟨C₁ * C₂, mul_nonneg hC₁0 hC₂pos.le, fun t ht t' ht' x hx => ?_⟩
-  -- The chart preimage of the good point's chart image is the point itself.
-  have hsymm : (extChartAt I α).symm (extChartAt I α x) = x :=
-    (extChartAt I α).left_inv (chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hx)
-  have hjetsum_nn : 0 ≤ MetricRealization.iteratedCovGradJetSum (I := I) g₀ (T_s t - T_s t') x :=
-    MetricRealization.iteratedCovGradJetSum_nonneg (I := I) g₀ (T_s t - T_s t') x
+  refine ⟨C₁ * C₂, mul_nonneg hC₁0 hC₂pos.le, fun t ht t' ht' y hy => ?_⟩
   calc DeTurckCoefficients.chartMetricJet2DiffSup (I := I) (M := M)
-          (g_DT t) (g_DT t') α (extChartAt I α x)
-      ≤ C₁ * MetricRealization.iteratedCovGradJetSum (I := I) g₀ (T_s t - T_s t') x :=
-        hred t ht t' ht' x hx
+          (g_DT t) (g_DT t') α y
+      ≤ C₁ * MetricRealization.iteratedCovGradJetSum (I := I) g₀ (T_s t - T_s t')
+          ((extChartAt I α).symm y) :=
+        hred t ht t' ht' y hy
     _ ≤ C₁ * (C₂ * ‖SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
           (2 * (Module.finrank ℝ E + 3)) (T_s t - T_s t')‖) :=
-        mul_le_mul_of_nonneg_left (hC₂ (T_s t - T_s t') x) hC₁0
+        mul_le_mul_of_nonneg_left (hC₂ (T_s t - T_s t') ((extChartAt I α).symm y)) hC₁0
     _ = (C₁ * C₂) * ‖SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
           (2 * (Module.finrank ℝ E + 3)) (T_s t - T_s t')‖ := by ring
 
@@ -911,35 +1622,37 @@ theorem deturck_g0_chartGramDiff_iteratedFDeriv_timeUniformModulus
     (hreal : ∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
       (g_DT s).inner x v w
         = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w)
-    (α : M) (i j : Fin (Module.finrank ℝ E)) (k : ℕ) (hk : k ≤ 2) :
+    (α : M) (i j : Fin (Module.finrank ℝ E)) (k : ℕ) (hk : k ≤ 2)
+    {K : Set E} (hK : IsCompact K)
+    (hKsub : K ⊆ interior ((extChartAt I α).target : Set E)) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ t' ∈ Set.Icc (0 : ℝ) T,
-      ∀ x ∈ chartLeviCivitaGoodSet (I := I) α,
+      ∀ y ∈ K,
         ‖iteratedFDeriv ℝ k
-              (fun y => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j y -
-                Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j y)
-              (extChartAt I α x) -
+              (fun z => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j z -
+                Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j z)
+              y -
             iteratedFDeriv ℝ k
-              (fun y => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j y -
-                Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j y)
-              (extChartAt I α x)‖ ≤
+              (fun z => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j z -
+                Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j z)
+              y‖ ≤
           C * ‖SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * (Module.finrank ℝ E + 3))
             (T_s t - T_s t')‖ := by
   classical
   -- The dimensional reverse-bound constant `C₁` (uniform over the metric pair), and the forward
-  -- carrier-jet constant `C₂` (uniform over `(t, t')`).
+  -- carrier-jet constant `C₂` (uniform over `(t, t')`), both on the compact `K`.
   obtain ⟨C₂, hC₂0, hC₂⟩ :=
-    deturck_g0_carrierDiff_chartMetricJet2DiffSup_le_toHs (I := I) (M := M) g₀ hT g_DT T_s hreal α
+    deturck_g0_carrierDiff_chartMetricJet2DiffSup_le_toHs (I := I) (M := M) g₀ hT g_DT T_s hreal
+      α hK hKsub
   obtain ⟨C₁, hC₁0, hrev⟩ :=
     chartGramDiff_iteratedFDeriv_norm_le_chartMetricJet2DiffSup (I := I) (M := M) α i j
-  refine ⟨C₁ * C₂, mul_nonneg hC₁0 hC₂0, fun t ht t' ht' x hx => ?_⟩
-  -- The chart image of a good point lies in the open chart-target interior.
-  have hyInt : (extChartAt I α x) ∈ interior ((extChartAt I α).target : Set E) :=
-    chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx
-  have htarget_mem : (extChartAt I α).target ∈ nhds (extChartAt I α x) :=
+  refine ⟨C₁ * C₂, mul_nonneg hC₁0 hC₂0, fun t ht t' ht' y hy => ?_⟩
+  -- The point `y ∈ K` lies in the open chart-target interior.
+  have hyInt : y ∈ interior ((extChartAt I α).target : Set E) := hKsub hy
+  have htarget_mem : (extChartAt I α).target ∈ nhds y :=
     Filter.mem_of_superset (isOpen_interior.mem_nhds hyInt) interior_subset
-  -- The four chart-Gram entries involved are each `C^∞` at the chart image of `x`.
+  -- The four chart-Gram entries involved are each `C^∞` at `y`.
   have hcd : ∀ g : SmoothRiemannianMetric I M, ContDiffAt ℝ (k : WithTop ℕ∞)
-      (Integral.DivergenceTheorem.chartGramOnE (I := I) g α i j) (extChartAt I α x) := by
+      (Integral.DivergenceTheorem.chartGramOnE (I := I) g α i j) y := by
     intro g
     exact ((Integral.DivergenceTheorem.chartGramOnE_contDiffOn (I := I) g α i j).contDiffAt
       htarget_mem).of_le (by exact_mod_cast le_top)
@@ -947,72 +1660,72 @@ theorem deturck_g0_chartGramDiff_iteratedFDeriv_timeUniformModulus
   -- single difference function `chartGramOnE (g_DT t) − chartGramOnE (g_DT t')`.
   have hsubt : iteratedFDeriv ℝ k
         (fun y => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j y -
-          Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j y) (extChartAt I α x) =
+          Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j y) y =
       iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j)
-          (extChartAt I α x) -
+          y -
         iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j)
-          (extChartAt I α x) :=
+          y :=
     iteratedFDeriv_sub_apply (hcd (g_DT t)) (hcd g₀)
   have hsubt' : iteratedFDeriv ℝ k
         (fun y => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j y -
-          Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j y) (extChartAt I α x) =
+          Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j y) y =
       iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j)
-          (extChartAt I α x) -
+          y -
         iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j)
-          (extChartAt I α x) :=
+          y :=
     iteratedFDeriv_sub_apply (hcd (g_DT t')) (hcd g₀)
   have hmerge : iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j)
-          (extChartAt I α x) -
+          y -
         iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j)
-          (extChartAt I α x) =
+          y =
       iteratedFDeriv ℝ k
         (fun z => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j z -
-          Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j z) (extChartAt I α x) :=
+          Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j z) y :=
     (iteratedFDeriv_sub_apply (hcd (g_DT t)) (hcd (g_DT t'))).symm
   have hjet_eq : iteratedFDeriv ℝ k
         (fun y => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j y -
-          Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j y) (extChartAt I α x) -
+          Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j y) y -
       iteratedFDeriv ℝ k
         (fun y => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j y -
-          Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j y) (extChartAt I α x) =
+          Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j y) y =
       iteratedFDeriv ℝ k
         (fun z => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j z -
           Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j z)
-        (extChartAt I α x) := by
+        y := by
     rw [hsubt, hsubt']
     rw [show (iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j)
-          (extChartAt I α x) -
+          y -
         iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j)
-          (extChartAt I α x)) -
+          y) -
         (iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j)
-          (extChartAt I α x) -
+          y -
         iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j)
-          (extChartAt I α x)) =
+          y) =
       iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j)
-          (extChartAt I α x) -
+          y -
         iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j)
-          (extChartAt I α x) by abel]
+          y by abel]
     exact hmerge
   rw [hjet_eq]
   -- The reverse bound (uniform `C₁`) at the running pair `(g_DT t, g_DT t')`, then the forward
   -- carrier bound (`C₂`), both at this `(t, t', x)`.
   have hbound1 : ‖iteratedFDeriv ℝ k
         (fun z => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j z -
-          Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j z) (extChartAt I α x)‖ ≤
+          Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j z) y‖ ≤
       C₁ * DeTurckCoefficients.chartMetricJet2DiffSup (I := I) (M := M)
-          (g_DT t) (g_DT t') α (extChartAt I α x) :=
-    hrev (g_DT t) (g_DT t') k hk (extChartAt I α x) hyInt
+          (g_DT t) (g_DT t') α y :=
+    hrev (g_DT t) (g_DT t') k hk y hyInt
   have hbound2 : DeTurckCoefficients.chartMetricJet2DiffSup (I := I) (M := M)
-        (g_DT t) (g_DT t') α (extChartAt I α x) ≤
+        (g_DT t) (g_DT t') α y ≤
       C₂ * ‖SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * (Module.finrank ℝ E + 3))
         (T_s t - T_s t')‖ :=
-    hC₂ t ht t' ht' x hx
+    hC₂ t ht t' ht' y hy
   calc ‖iteratedFDeriv ℝ k
             (fun z => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j z -
               Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t') α i j z)
-            (extChartAt I α x)‖
+            y‖
       ≤ C₁ * DeTurckCoefficients.chartMetricJet2DiffSup (I := I) (M := M)
-          (g_DT t) (g_DT t') α (extChartAt I α x) := hbound1
+          (g_DT t) (g_DT t') α y := hbound1
     _ ≤ C₁ * (C₂ * ‖SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
           (2 * (Module.finrank ℝ E + 3)) (T_s t - T_s t')‖) :=
         mul_le_mul_of_nonneg_left hbound2 hC₁0
@@ -1075,10 +1788,6 @@ theorem deturck_g0_chartGramDiff_iteratedFDeriv_jointContinuous
   -- The supercritical reference chart order `k₀` for the `H^{2k₀}` modulus.
   set k₀ : ℕ := Module.finrank ℝ E + 3 with hk₀_def
   have hk₀_super : 2 * k₀ > Module.finrank ℝ E + 4 := by rw [hk₀_def]; omega
-  -- The deep Fréchet-jet time-uniform modulus.
-  obtain ⟨C, hC0, hmod⟩ :=
-    deturck_g0_chartGramDiff_iteratedFDeriv_timeUniformModulus (I := I) (M := M) g₀ a ha hT
-      g_DT T_s hreal α i j k hk
   -- Per-time spatial continuity of the perturbation jet on the open good-set image.
   have hG₀_cd : ContDiffOn ℝ ∞
       (Integral.DivergenceTheorem.chartGramOnE (I := I) g₀ α i j) (extChartAt I α).target :=
@@ -1087,6 +1796,12 @@ theorem deturck_g0_chartGramDiff_iteratedFDeriv_jointContinuous
     fun x hx => chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hx
   have hopen : IsOpen (↑(extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) :=
     chartLeviCivitaGoodSet_image_isOpen (I := I) α
+  -- The open good-set image lies in the interior of the chart target (each good point's chart
+  -- image is interior), so a compact neighbourhood inside it is a valid compact `K` for the modulus.
+  have hgoodImg_int : (↑(extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) ⊆
+      interior ((extChartAt I α).target : Set E) := by
+    rintro z ⟨x, hx, rfl⟩
+    exact chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx
   have himgsub : (↑(extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) ⊆
       (extChartAt I α).target := by
     rw [chartLeviCivitaGoodSet_image_eq_target (I := I) α]
@@ -1118,6 +1833,16 @@ theorem deturck_g0_chartGramDiff_iteratedFDeriv_jointContinuous
   -- through the product neighbourhood filter, using the metric codomain only.
   intro q₀ hq₀
   obtain ⟨ht₀, hx₀⟩ := hq₀
+  -- Localise: pick a compact neighbourhood `K₀ ⊆ good-set image ⊆ interior target` of the chart
+  -- image of `x₀`, and run the compact-`K` modulus on `K₀`.
+  have hx₀img : (extChartAt I α q₀.2) ∈ ↑(extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α :=
+    ⟨q₀.2, hx₀, rfl⟩
+  obtain ⟨K₀, hK₀cpt, hK₀mem, hK₀sub⟩ := exists_compact_subset hopen hx₀img
+  have hK₀int : K₀ ⊆ interior ((extChartAt I α).target : Set E) := hK₀sub.trans hgoodImg_int
+  -- The deep Fréchet-jet time-uniform modulus on the compact `K₀`.
+  obtain ⟨C, hC0, hmod⟩ :=
+    deturck_g0_chartGramDiff_iteratedFDeriv_timeUniformModulus (I := I) (M := M) g₀ a ha hT
+      g_DT T_s hreal α i j k hk hK₀cpt hK₀int
   rw [ContinuousWithinAt, hD_def, nhdsWithin_prod_eq]
   refine Metric.tendsto_nhds.mpr (fun ε hε => ?_)
   -- Time-factor eventual: `C · ‖(T_s t − T_s t₀).toHs (2k₀)‖ < ε/2` for `t` near `t₀` in
@@ -1142,23 +1867,33 @@ theorem deturck_g0_chartGramDiff_iteratedFDeriv_jointContinuous
             apply mul_lt_mul_of_pos_left (by simpa [hk₀_def] using ht) hCpos
         _ = ε / 2 := by field_simp
   -- Space-factor eventual: the spatial jet at fixed time `t₀` is within `ε/2` of its value
-  -- at `x₀`, for `x` near `x₀` in `goodSet`, together with `x ∈ goodSet`.
+  -- at `x₀`, for `x` near `x₀` in `goodSet`, together with `x ∈ goodSet` and the chart image of
+  -- `x` lying in the compact neighbourhood `K₀` (so the compact-`K` modulus applies there).
   have hspace_ev : ∀ᶠ x in nhdsWithin q₀.2 (chartLeviCivitaGoodSet (I := I) α),
-      x ∈ chartLeviCivitaGoodSet (I := I) α ∧
+      (x ∈ chartLeviCivitaGoodSet (I := I) α ∧ extChartAt I α x ∈ K₀) ∧
       dist (iteratedFDeriv ℝ k (Diff q₀.1) (extChartAt I α x))
         (iteratedFDeriv ℝ k (Diff q₀.1) (extChartAt I α q₀.2)) < ε / 2 := by
-    refine eventually_mem_nhdsWithin.and ?_
-    have hspatial_at := hspatial q₀.1 q₀.2 hx₀
-    rw [ContinuousWithinAt, Metric.tendsto_nhds] at hspatial_at
-    exact hspatial_at (ε / 2) (by positivity)
+    refine (eventually_mem_nhdsWithin.and ?_).and ?_
+    · -- `extChartAt α x ∈ K₀` for `x` near `x₀`: pull `interior K₀` (a nhd of `extChartAt α x₀`)
+      -- back through the continuity of the chart evaluation on `goodSet`.
+      have hev_cont : ContinuousWithinAt (fun x : M => extChartAt I α x)
+          (chartLeviCivitaGoodSet (I := I) α) q₀.2 :=
+        ((continuousOn_extChartAt (I := I) α).mono hgoodsub) q₀.2 hx₀
+      have hpre := hev_cont (isOpen_interior.mem_nhds hK₀mem)
+      filter_upwards [hpre] with x hx
+      exact interior_subset hx
+    · have hspatial_at := hspatial q₀.1 q₀.2 hx₀
+      rw [ContinuousWithinAt, Metric.tendsto_nhds] at hspatial_at
+      exact hspatial_at (ε / 2) (by positivity)
   -- Combine the two factor-eventuals on the product filter and apply the triangle estimate.
   filter_upwards [htime_ev.prod_mk hspace_ev] with q hq
-  obtain ⟨⟨htmem, htbd⟩, ⟨hxmem, hxbd⟩⟩ := hq
+  obtain ⟨⟨htmem, htbd⟩, ⟨⟨hxmem, hxK₀⟩, hxbd⟩⟩ := hq
   -- `dist (f q) (f q₀) ≤ dist (f q) (f (t₀, x_q)) + dist (f (t₀, x_q)) (f q₀)`.
   have htime : dist (iteratedFDeriv ℝ k (Diff q.1) (extChartAt I α q.2))
       (iteratedFDeriv ℝ k (Diff q₀.1) (extChartAt I α q.2)) < ε / 2 := by
     rw [dist_eq_norm]
-    exact lt_of_le_of_lt (by simpa [hk₀_def] using hmod q.1 htmem q₀.1 ht₀ q.2 hxmem) htbd
+    exact lt_of_le_of_lt
+      (by simpa [hk₀_def] using hmod q.1 htmem q₀.1 ht₀ (extChartAt I α q.2) hxK₀) htbd
   calc dist (iteratedFDeriv ℝ k (Diff q.1) (extChartAt I α q.2))
           (iteratedFDeriv ℝ k (Diff q₀.1) (extChartAt I α q₀.2))
       ≤ dist (iteratedFDeriv ℝ k (Diff q.1) (extChartAt I α q.2))

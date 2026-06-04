@@ -12,6 +12,11 @@ import DifferentialGeometry.Analysis.Integration.L2.Hilbert.DenseSubset
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.TensorSectionL2BoundByComponents
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridgeUniform
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.TensorChartComponentSobolevBound
+import DifferentialGeometry.Geometry.Connection.ChartFrameNormGlobalSmoothCoordBasisExpansion
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.CovApplyFrameToCoordExpansion
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ComponentFormula
+import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivativeAgreement
+import DifferentialGeometry.Tensor.RSTensor.Defs
 
 /-! # Order-dropping completion-norm bounds for the rough tensor connection Laplacian
 
@@ -559,6 +564,882 @@ private lemma naiveSCD_GlobalCorr0_contDiffOn
       (Classical.choose_spec
         (secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
           (I := I) (M := M) g r s α Idx Jdx k l))).2.1 I' J'
+
+section CentredFrameCoordExpansion
+
+set_option linter.style.setOption false
+set_option backward.isDefEq.respectTransparency false
+set_option synthInstance.maxHeartbeats 400000
+set_option maxHeartbeats 800000
+
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.DivergenceTheorem
+
+/-- The chart-`α` coordinate matrix of the **centred** smooth orthonormal frame
+`smoothOrthoFrame g c i` (centred at `c`), expressing it in the chart-`α` coordinate basis
+`chartBasisVecFiber α k`. The `(i, k)`-th entry is the `k`-th coordinate of
+`smoothOrthoFrame g c i b` against the chart-`α` basis `chartBasisFamily α hb` at a base-set
+point; off the chart-`α` base set it is the junk value `0`. This is the centred-frame analogue of
+`chartFrameNormGlobalSmoothCoordMatrix`, used with `c = b` so that the frame is `g_b`-orthonormal
+at `b` unconditionally (`smoothOrthoFrame_orthonormal_center`). -/
+private noncomputable def centredOrthoFrameCoordMatrix
+    (g : SmoothRiemannianMetric I M) (α c : M)
+    (i k : Fin (Module.finrank ℝ E)) (b : M) : ℝ := by
+  classical
+  exact
+    if h : b ∈ (trivializationAt E (TangentSpace I) α).baseSet then
+      (chartBasisFamily (I := I) α h).repr
+        (smoothOrthoFrame (I := I) g c i b) k
+    else 0
+
+/-- On the chart-`α` base set, the centred-frame coordinate matrix unfolds as the `Basis.repr`
+of the frame vector in the chart-`α` basis. -/
+private lemma centredOrthoFrameCoordMatrix_of_mem
+    (g : SmoothRiemannianMetric I M) (α c : M)
+    (i k : Fin (Module.finrank ℝ E)) {b : M}
+    (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
+    centredOrthoFrameCoordMatrix (I := I) (M := M) g α c i k b =
+      (chartBasisFamily (I := I) α hb).repr
+        (smoothOrthoFrame (I := I) g c i b) k := by
+  classical
+  unfold centredOrthoFrameCoordMatrix
+  rw [dif_pos hb]
+
+/-- **Coordinate-basis expansion of the centred orthonormal frame.** At a chart-`α` base-set
+point, the centred smooth orthonormal frame vector `smoothOrthoFrame g c i b` is the chart-`α`
+coordinate-matrix-weighted sum of the chart-`α` coordinate basis vectors. -/
+private lemma smoothOrthoFrame_eq_centredCoordMatrix_sum
+    (g : SmoothRiemannianMetric I M) (α c : M)
+    (i : Fin (Module.finrank ℝ E)) {b : M}
+    (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
+    smoothOrthoFrame (I := I) g c i b =
+      ∑ k : Fin (Module.finrank ℝ E),
+        centredOrthoFrameCoordMatrix (I := I) (M := M) g α c i k b •
+          chartBasisVecFiber (I := I) α k b := by
+  classical
+  have hsum := (chartBasisFamily (I := I) α hb).sum_repr
+      (smoothOrthoFrame (I := I) g c i b)
+  rw [← hsum]
+  refine Finset.sum_congr rfl ?_
+  intro k _
+  rw [centredOrthoFrameCoordMatrix_of_mem (I := I) (M := M) g α c i k hb]
+  rw [chartBasisFamily_apply (I := I) α hb k]
+
+/-- **Gram form of the centred-frame bilinear expansion.** At a chart-`α` base-set point, the
+`g_b`-inner product of two centred-frame vectors expands as the double sum of coordinate-matrix
+entries weighted by the chart-`α` Gram matrix. -/
+private lemma centredFrame_gram_expand
+    (g : SmoothRiemannianMetric I M) (α c : M)
+    {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
+    (i j : Fin (Module.finrank ℝ E)) :
+    g.inner b (smoothOrthoFrame (I := I) g c i b) (smoothOrthoFrame (I := I) g c j b) =
+      ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+        centredOrthoFrameCoordMatrix (I := I) (M := M) g α c i k b *
+          centredOrthoFrameCoordMatrix (I := I) (M := M) g α c j l b *
+            chartGramMatrix (I := I) g α b k l := by
+  classical
+  rw [smoothOrthoFrame_eq_centredCoordMatrix_sum (I := I) (M := M) g α c i hb]
+  rw [smoothOrthoFrame_eq_centredCoordMatrix_sum (I := I) (M := M) g α c j hb]
+  set v : Fin (Module.finrank ℝ E) → TangentSpace I b :=
+    fun k => chartBasisVecFiber (I := I) α k b with hv_def
+  set a : Fin (Module.finrank ℝ E) → ℝ :=
+    fun k => centredOrthoFrameCoordMatrix (I := I) (M := M) g α c i k b with ha_def
+  set d : Fin (Module.finrank ℝ E) → ℝ :=
+    fun l => centredOrthoFrameCoordMatrix (I := I) (M := M) g α c j l b with hd_def
+  have hL : g.inner b (∑ k, a k • v k) = ∑ k, a k • g.inner b (v k) := by
+    rw [map_sum]
+    refine Finset.sum_congr rfl ?_
+    intro k _
+    rw [map_smul]
+  rw [hL, ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl ?_
+  intro k _
+  rw [ContinuousLinearMap.smul_apply, smul_eq_mul]
+  have hR : g.inner b (v k) (∑ l, d l • v l) = ∑ l, d l * g.inner b (v k) (v l) := by
+    rw [map_sum]
+    refine Finset.sum_congr rfl ?_
+    intro l _
+    rw [map_smul]; rfl
+  rw [hR, Finset.mul_sum]
+  refine Finset.sum_congr rfl ?_
+  intro l _
+  rw [chartGramMatrix_apply]
+  ring
+
+/-- The centred-frame coordinate matrix at a base-set point, packaged as a `Matrix`. -/
+private noncomputable def centredCoordMatrix
+    (g : SmoothRiemannianMetric I M) (α c : M) (b : M) :
+    Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
+  Matrix.of (fun i k => centredOrthoFrameCoordMatrix (I := I) (M := M) g α c i k b)
+
+/-- **Matrix orthonormality form for the centred frame.** At a chart-`α` base-set point, with the
+frame centred at `b` itself (so `smoothOrthoFrame_orthonormal_center` applies), the centred
+coordinate matrix `C(b)` satisfies `C(b) · G(b) · C(b)ᵀ = 1`, `G(b) = chartGramMatrix g α b`. -/
+private lemma centredCoordMatrix_orthonormal_form
+    (g : SmoothRiemannianMetric I M) (α : M) {b : M}
+    (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
+    centredCoordMatrix (I := I) (M := M) g α b b *
+        chartGramMatrix (I := I) g α b *
+          (centredCoordMatrix (I := I) (M := M) g α b b).transpose =
+      (1 : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ) := by
+  classical
+  ext i j
+  have horth : g.inner b (smoothOrthoFrame (I := I) g b i b)
+      (smoothOrthoFrame (I := I) g b j b) = if i = j then (1 : ℝ) else 0 :=
+    smoothOrthoFrame_orthonormal_center (I := I) g b i j
+  have hexp := centredFrame_gram_expand (I := I) (M := M) g α b hb i j
+  rw [horth] at hexp
+  rw [Matrix.mul_apply]
+  have h_inner : ∀ k₀ : Fin (Module.finrank ℝ E),
+      (centredCoordMatrix (I := I) (M := M) g α b b *
+          chartGramMatrix (I := I) g α b) i k₀ *
+        (centredCoordMatrix (I := I) (M := M) g α b b).transpose k₀ j =
+      ∑ l₀ : Fin (Module.finrank ℝ E),
+        centredCoordMatrix (I := I) (M := M) g α b b i l₀ *
+          chartGramMatrix (I := I) g α b l₀ k₀ *
+          centredCoordMatrix (I := I) (M := M) g α b b j k₀ := by
+    intro k₀
+    rw [Matrix.mul_apply, Matrix.transpose_apply, Finset.sum_mul]
+  rw [show (∑ k₀, (centredCoordMatrix (I := I) (M := M) g α b b *
+            chartGramMatrix (I := I) g α b) i k₀ *
+        (centredCoordMatrix (I := I) (M := M) g α b b).transpose k₀ j) =
+      ∑ k₀, ∑ l₀,
+        centredCoordMatrix (I := I) (M := M) g α b b i l₀ *
+          chartGramMatrix (I := I) g α b l₀ k₀ *
+          centredCoordMatrix (I := I) (M := M) g α b b j k₀ from
+    Finset.sum_congr rfl (fun k₀ _ => h_inner k₀)]
+  rw [show (1 : Matrix (Fin (Module.finrank ℝ E))
+      (Fin (Module.finrank ℝ E)) ℝ) i j =
+      (if i = j then (1 : ℝ) else 0) from by rw [Matrix.one_apply]]
+  rw [hexp]
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl ?_
+  intro l₀ _
+  refine Finset.sum_congr rfl ?_
+  intro k₀ _
+  simp only [centredCoordMatrix, Matrix.of_apply]
+  ring
+
+/-- **The centred-frame orthonormality contraction.** At a chart-`α` Levi-Civita good-set point,
+the centred-frame coordinate matrix `C(b)` of the `g_b`-orthonormal frame `smoothOrthoFrame g b`
+satisfies `Σ_i C(b)^k_i · C(b)^l_i = g^{kl}(b)` with `g^{kl}(b) = chartInvGramMatrix g α b k l`.
+This is the inverse-Gram identity that carries the orthonormal-frame trace to the chart-coordinate
+metric trace; it holds on the **whole** good set (no partition-of-unity tsupport restriction),
+because the centred frame is orthonormal at its centre `b` unconditionally. -/
+private lemma centredOrthoFrameCoordMatrix_orthonormality
+    (g : SmoothRiemannianMetric I M) (α : M) {b : M}
+    (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
+    (k l : Fin (Module.finrank ℝ E)) :
+    (∑ i : Fin (Module.finrank ℝ E),
+        centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i k b *
+          centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i l b) =
+      chartInvGramMatrix (I := I) g α b k l := by
+  classical
+  have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
+  have hAGA := centredCoordMatrix_orthonormal_form (I := I) (M := M) g α (b := b) hb_base
+  set A : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
+    centredCoordMatrix (I := I) (M := M) g α b b with hA_def
+  set G : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
+    chartGramMatrix (I := I) g α b with hG_def
+  have hAGA_right : A * (G * A.transpose) = 1 := by rw [← Matrix.mul_assoc]; exact hAGA
+  have hA_left_inv : (G * A.transpose) * A = 1 := mul_eq_one_comm.mp hAGA_right
+  rw [Matrix.mul_assoc] at hA_left_inv
+  have hAt_eq_Ginv : A.transpose * A = G⁻¹ :=
+    (Matrix.inv_eq_right_inv hA_left_inv).symm
+  have heval : (A.transpose * A) k l = chartInvGramMatrix (I := I) g α b k l := by
+    rw [hAt_eq_Ginv]; rfl
+  rw [Matrix.mul_apply] at heval
+  rw [show (∑ i, A.transpose k i * A i l) =
+      ∑ i, A i k * A i l from
+    Finset.sum_congr rfl (fun i _ => by rw [Matrix.transpose_apply])] at heval
+  rw [← heval]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  simp only [hA_def, centredCoordMatrix, Matrix.of_apply]
+
+/-- The linear functional `v ↦ ((chartModelBasis E).repr v) k`, packaged as a continuous linear
+map `E →L[ℝ] ℝ`. -/
+private noncomputable def modelBasisProj (k : Fin (Module.finrank ℝ E)) : E →L[ℝ] ℝ :=
+  LinearMap.toContinuousLinearMap
+    (((LinearMap.proj k).comp ((chartModelBasis E).equivFun.toLinearMap)) : E →ₗ[ℝ] ℝ)
+
+@[simp] private lemma modelBasisProj_apply (k : Fin (Module.finrank ℝ E)) (v : E) :
+    modelBasisProj (E := E) k v = ((chartModelBasis E).repr v) k := by
+  classical
+  unfold modelBasisProj
+  change ((LinearMap.proj k).comp ((chartModelBasis E).equivFun.toLinearMap)) v = _
+  rw [LinearMap.comp_apply]
+  simp [Module.Basis.equivFun]
+
+/-- On the chart-`α` base set, the centred-frame coordinate matrix equals
+`modelBasisProj k ((triv α).clmAt b (smoothOrthoFrame g c i b))`. -/
+private lemma centredOrthoFrameCoordMatrix_eq_clmAt_proj
+    (g : SmoothRiemannianMetric I M) (α c : M)
+    (i k : Fin (Module.finrank ℝ E)) {b : M}
+    (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
+    centredOrthoFrameCoordMatrix (I := I) (M := M) g α c i k b =
+      modelBasisProj (E := E) k
+        ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b
+          (smoothOrthoFrame (I := I) g c i b)) := by
+  classical
+  unfold centredOrthoFrameCoordMatrix
+  rw [dif_pos hb]
+  unfold chartBasisFamily
+  rw [Module.Basis.map_repr]
+  simp only [LinearEquiv.trans_apply]
+  rw [modelBasisProj_apply]
+  congr 2
+  have h := Trivialization.coe_continuousLinearEquivAt_eq (R := ℝ)
+    (e := trivializationAt E (TangentSpace I) α) (b := b) hb
+  exact congrArg (fun (f : TangentSpace I b → E) => f
+      (smoothOrthoFrame (I := I) g c i b)) h
+
+/-- The centred-frame coordinate matrix `b ↦ C^k_i(b)` (centre `c` fixed) is `ContMDiffOn` on the
+chart-`α` trivialization base set. -/
+private lemma centredOrthoFrameCoordMatrix_contMDiffOn
+    (g : SmoothRiemannianMetric I M) (α c : M)
+    (i k : Fin (Module.finrank ℝ E)) :
+    ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+      (fun b : M => centredOrthoFrameCoordMatrix (I := I) (M := M) g α c i k b)
+      (trivializationAt E (TangentSpace I) α).baseSet := by
+  classical
+  have hB_smooth :
+      ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+        (fun b : M => TotalSpace.mk' E (E := TangentSpace I) b
+          (smoothOrthoFrame (I := I) g c i b)) :=
+    smoothOrthoFrame_smooth (I := I) g c i
+  have h_triv :
+      ContMDiffOn I 𝓘(ℝ, E) ∞
+        (fun b : M => ((trivializationAt E (TangentSpace I) α)
+            ⟨b, smoothOrthoFrame (I := I) g c i b⟩).2)
+        (trivializationAt E (TangentSpace I) α).baseSet := by
+    have hiff := (trivializationAt E (TangentSpace I) α).contMDiffOn_section_baseSet_iff
+      (IB := I) (n := ∞)
+      (s := fun b : M => smoothOrthoFrame (I := I) g c i b)
+    exact hiff.mp hB_smooth.contMDiffOn
+  have h_eq_baseSet :
+      Set.EqOn (fun b : M => ((trivializationAt E (TangentSpace I) α)
+            ⟨b, smoothOrthoFrame (I := I) g c i b⟩).2)
+        (fun b : M => (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b
+          (smoothOrthoFrame (I := I) g c i b))
+        (trivializationAt E (TangentSpace I) α).baseSet := by
+    intro b hb
+    change ((trivializationAt E (TangentSpace I) α) ⟨b,
+        smoothOrthoFrame (I := I) g c i b⟩).2 =
+      (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b
+        (smoothOrthoFrame (I := I) g c i b)
+    have h₁ : ((trivializationAt E (TangentSpace I) α) ⟨b,
+        smoothOrthoFrame (I := I) g c i b⟩).2 =
+        ((trivializationAt E (TangentSpace I) α).continuousLinearEquivAt ℝ b hb)
+          (smoothOrthoFrame (I := I) g c i b) := by
+      have hp := Trivialization.apply_eq_prod_continuousLinearEquivAt
+        (R := ℝ) (e := trivializationAt E (TangentSpace I) α) (b := b) hb
+        (smoothOrthoFrame (I := I) g c i b)
+      have hsnd := congrArg Prod.snd hp
+      simp only at hsnd
+      exact hsnd
+    rw [h₁]
+    have hclm := Trivialization.coe_continuousLinearEquivAt_eq (R := ℝ)
+      (e := trivializationAt E (TangentSpace I) α) (b := b) hb
+    exact congrArg (fun (f : TangentSpace I b → E) => f
+      (smoothOrthoFrame (I := I) g c i b)) hclm
+  have h_triv' :
+      ContMDiffOn I 𝓘(ℝ, E) ∞
+        (fun b : M => (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b
+          (smoothOrthoFrame (I := I) g c i b))
+        (trivializationAt E (TangentSpace I) α).baseSet := by
+    refine h_triv.congr ?_
+    intro y hy
+    exact (h_eq_baseSet hy).symm
+  have h_clm_smooth : ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, ℝ) ∞
+      (modelBasisProj (E := E) k : E → ℝ) :=
+    (modelBasisProj (E := E) k).contMDiff
+  have h_comp :
+      ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+        ((modelBasisProj (E := E) k : E → ℝ) ∘
+          (fun b : M => (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b
+            (smoothOrthoFrame (I := I) g c i b)))
+        (trivializationAt E (TangentSpace I) α).baseSet :=
+    h_clm_smooth.contMDiffOn.comp (t := Set.univ) h_triv' (Set.subset_preimage_univ)
+  refine h_comp.congr ?_
+  intro b hb
+  exact centredOrthoFrameCoordMatrix_eq_clmAt_proj (I := I) (M := M) g α c i k hb
+
+/-- The centred-frame coordinate matrix `b ↦ C^k_i(b)` is `MDifferentiableAt` at any chart-`α`
+Levi-Civita good-set point. -/
+private lemma centredOrthoFrameCoordMatrix_mdiffAt
+    (g : SmoothRiemannianMetric I M) (α c : M)
+    (i k : Fin (Module.finrank ℝ E)) {b : M}
+    (hb : b ∈ chartLeviCivitaGoodSet (I := I) α) :
+    MDifferentiableAt I 𝓘(ℝ, ℝ)
+      (fun b : M => centredOrthoFrameCoordMatrix (I := I) (M := M) g α c i k b) b := by
+  classical
+  have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
+  have h_open : IsOpen (trivializationAt E (TangentSpace I) α).baseSet :=
+    (trivializationAt E (TangentSpace I) α).open_baseSet
+  have h_contMDiffOn :=
+    centredOrthoFrameCoordMatrix_contMDiffOn (I := I) (M := M) g α c i k
+  have h_contMDiffAt : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
+      (fun b : M => centredOrthoFrameCoordMatrix (I := I) (M := M) g α c i k b) b :=
+    (h_contMDiffOn b hb_base).contMDiffAt (h_open.mem_nhds hb_base)
+  exact h_contMDiffAt.mdifferentiableAt (by simp)
+
+/-- `MDifferentiableAt`-witness for the chart-`α` coordinate vector field `chartBasisVecFiber α k`
+viewed as a tangent-bundle section, at any chart-`α` base-set point. -/
+private lemma centred_chartBasisVecFiber_mdiffAt
+    (α : M) (k : Fin (Module.finrank ℝ E)) {b : M}
+    (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
+    MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun z : M => TotalSpace.mk' E (E := TangentSpace I) z
+        (chartBasisVecFiber (I := I) α k z)) b := by
+  classical
+  have h_contMDiffOn := chartBasisVec_contMDiffOn (I := I) α k
+  have h_open : IsOpen (trivializationAt E (TangentSpace I) α).baseSet :=
+    (trivializationAt E (TangentSpace I) α).open_baseSet
+  have h_contMDiffAt : ContMDiffAt I (I.prod 𝓘(ℝ, E)) ∞
+      (chartBasisVec (I := I) α k) b :=
+    (h_contMDiffOn b hb).contMDiffAt (h_open.mem_nhds hb)
+  exact h_contMDiffAt.mdifferentiableAt (by simp)
+
+/-- `MDifferentiableAt`-witness for the bundle section
+`covApply cov_RS (chartBasisVecFiber α k) T₀.toSection` at any chart-`α` base-set point. -/
+private lemma centred_covApply_chartBasisVecFiber_T₀_mdiffAt
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
+    (T₀ : Integral.L2.SmoothCcTensor g r s)
+    (k : Fin (Module.finrank ℝ E)) {b : M}
+    (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
+    MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+      (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun w : M => TensorRSSpace r s I w) z
+        (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+          (LeviCivita (I := I) g))
+          (fun w : M => chartBasisVecFiber (I := I) α k w)
+          (fun w : M => T₀.toSection w) z)) b := by
+  classical
+  have hcov_RS_smooth :
+      CovariantDerivative.ContMDiffCovariantDerivative
+        (TensorRSNabla.tensorRSCovariantDerivative I M r s
+          (LeviCivita (I := I) g)) ∞ := inferInstance
+  have hT₀_smooth :
+      ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+        (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+          (E := fun w : M => TensorRSSpace r s I w) z (T₀.toSection z)) :=
+    T₀.toSection.contMDiff
+  have hX_at : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun z : M => TotalSpace.mk' E (E := TangentSpace I) z
+        (chartBasisVecFiber (I := I) α k z)) b :=
+    centred_chartBasisVecFiber_mdiffAt (I := I) (M := M) α k (b := b) hb
+  have hHomSec_on :
+      ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] TensorRSModel r s ℝ E)) ∞
+        (fun z : M => TotalSpace.mk' (E →L[ℝ] TensorRSModel r s ℝ E)
+          (E := fun w : M => TangentSpace I w →L[ℝ] TensorRSSpace r s I w) z
+          ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+              (LeviCivita (I := I) g)).toFun (fun w : M => T₀.toSection w) z))
+        Set.univ :=
+    hcov_RS_smooth.contMDiff.contMDiff hT₀_smooth.contMDiffOn
+  have hHomSec_at :
+      MDifferentiableAt I (I.prod 𝓘(ℝ, E →L[ℝ] TensorRSModel r s ℝ E))
+        (fun z : M => TotalSpace.mk' (E →L[ℝ] TensorRSModel r s ℝ E)
+          (E := fun w : M => TangentSpace I w →L[ℝ] TensorRSSpace r s I w) z
+          ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+              (LeviCivita (I := I) g)).toFun (fun w : M => T₀.toSection w) z)) b :=
+    ((hHomSec_on.contMDiffAt (Filter.univ_mem))).mdifferentiableAt (by simp)
+  exact MDifferentiableAt.clm_bundle_apply (b := id) hHomSec_at hX_at
+
+/-- **Coordinate-sum expansion of `covApply cov_RS (smoothOrthoFrame g c i) T₀` on the good set.**
+The bundle covariant derivative `covApply cov_RS (smoothOrthoFrame g c i) T₀` at `y` is the
+chart-`α` coordinate-matrix-weighted sum (over `k`) of `covApply cov_RS ∂_k T₀`, by `C^∞`-linearity
+of `covApply` in its vector-field slot and the coordinate-basis expansion of the frame vector. -/
+private lemma centred_covApply_frameVec_eq_coord_sum
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α c : M)
+    (T₀ : Integral.L2.SmoothCcTensor g r s)
+    (i : Fin (Module.finrank ℝ E)) {y : M}
+    (hy : y ∈ chartLeviCivitaGoodSet (I := I) α) :
+    covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+        (LeviCivita (I := I) g))
+        (smoothOrthoFrame (I := I) g c i)
+        (fun z : M => T₀.toSection z) y =
+      ∑ k : Fin (Module.finrank ℝ E),
+        centredOrthoFrameCoordMatrix (I := I) (M := M) g α c i k y •
+          covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+            (LeviCivita (I := I) g))
+            (fun z : M => chartBasisVecFiber (I := I) α k z)
+            (fun z : M => T₀.toSection z) y := by
+  classical
+  have hy_base : y ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    chartLeviCivitaGoodSet_mem_baseSet (I := I) hy
+  change (TensorRSNabla.tensorRSCovariantDerivative I M r s
+        (LeviCivita (I := I) g)).toFun (fun z : M => T₀.toSection z) y
+      (smoothOrthoFrame (I := I) g c i y) =
+    ∑ k : Fin (Module.finrank ℝ E),
+      centredOrthoFrameCoordMatrix (I := I) (M := M) g α c i k y •
+        (TensorRSNabla.tensorRSCovariantDerivative I M r s
+          (LeviCivita (I := I) g)).toFun (fun z : M => T₀.toSection z) y
+            (chartBasisVecFiber (I := I) α k y)
+  rw [smoothOrthoFrame_eq_centredCoordMatrix_sum (I := I) (M := M) g α c i hy_base]
+  set L : TangentSpace I y →L[ℝ] TensorRSSpace r s I y :=
+    (TensorRSNabla.tensorRSCovariantDerivative I M r s
+        (LeviCivita (I := I) g)).toFun (fun z : M => T₀.toSection z) y
+  rw [map_sum]
+  refine Finset.sum_congr rfl ?_
+  intro k _
+  rw [L.map_smul]
+
+/-- Generic differentiability of a finite `Σ fᵢ • σᵢ` bundle section (frame-agnostic helper). -/
+private lemma centred_finsum_smul_section_mdiffAt
+    {ι : Type*} (s_finset : Finset ι)
+    (r s : ℕ) (f : ι → M → ℝ)
+    (σ : ι → Π z : M, TensorRSSpace r s I z) {b : M}
+    (hf : ∀ i ∈ s_finset, MDifferentiableAt I 𝓘(ℝ, ℝ) (f i) b)
+    (hσ : ∀ i ∈ s_finset, MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+      (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun w : M => TensorRSSpace r s I w) z (σ i z)) b) :
+    MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+      (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun w : M => TensorRSSpace r s I w) z
+        (∑ i ∈ s_finset, f i z • σ i z)) b := by
+  classical
+  induction s_finset using Finset.induction_on with
+  | empty =>
+    have h0 : (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun w : M => TensorRSSpace r s I w) z
+        (∑ i ∈ (∅ : Finset ι), f i z • σ i z)) =
+      (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun w : M => TensorRSSpace r s I w) z (0 : TensorRSSpace r s I z)) := by
+      funext z; simp
+    rw [h0]
+    exact mdifferentiableAt_zeroSection (𝕜 := ℝ)
+      (E := fun z : M => TensorRSSpace r s I z) (F := TensorRSModel r s ℝ E)
+  | @insert k₀ t hk₀t ih =>
+    have hf_k₀ : MDifferentiableAt I 𝓘(ℝ, ℝ) (f k₀) b :=
+      hf k₀ (Finset.mem_insert_self k₀ t)
+    have hσ_k₀ : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+        (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+          (E := fun w : M => TensorRSSpace r s I w) z (σ k₀ z)) b :=
+      hσ k₀ (Finset.mem_insert_self k₀ t)
+    have hf_rest : ∀ i ∈ t, MDifferentiableAt I 𝓘(ℝ, ℝ) (f i) b := fun i hi =>
+      hf i (Finset.mem_insert_of_mem hi)
+    have hσ_rest : ∀ i ∈ t, MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+        (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+          (E := fun w : M => TensorRSSpace r s I w) z (σ i z)) b :=
+      fun i hi => hσ i (Finset.mem_insert_of_mem hi)
+    have hrest := ih hf_rest hσ_rest
+    have hsplit : (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun w : M => TensorRSSpace r s I w) z
+        (∑ i ∈ insert k₀ t, f i z • σ i z)) =
+      (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun w : M => TensorRSSpace r s I w) z
+        ((fun w : M => f k₀ w • σ k₀ w) z + (fun w : M => ∑ i ∈ t, f i w • σ i w) z)) := by
+      funext z
+      congr 1
+      rw [Finset.sum_insert hk₀t]
+    rw [hsplit]
+    have hf_k₀_σ : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+        (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+          (E := fun w : M => TensorRSSpace r s I w) z
+          ((fun w : M => f k₀ w • σ k₀ w) z)) b := by
+      have := MDifferentiableAt.smul_section (𝕜 := ℝ)
+        (E := fun z : M => TensorRSSpace r s I z) (F := TensorRSModel r s ℝ E)
+        (f := f k₀) (s := σ k₀) (x₀ := b) hf_k₀ hσ_k₀
+      exact this
+    exact mdifferentiableAt_add_section hf_k₀_σ hrest
+
+/-- Generic finite-sum section-Leibniz expansion of `cov_RS (Σ fᵢ • σᵢ)` applied to `v`
+(frame-agnostic helper). -/
+private lemma centred_cov_RS_finsum_smul_section_leibniz_apply
+    {ι : Type*} (s_finset : Finset ι)
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (f : ι → M → ℝ) (σ : ι → Π z : M, TensorRSSpace r s I z) {b : M}
+    (hf : ∀ i ∈ s_finset, MDifferentiableAt I 𝓘(ℝ, ℝ) (f i) b)
+    (hσ : ∀ i ∈ s_finset, MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+      (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun w : M => TensorRSSpace r s I w) z (σ i z)) b)
+    (v : TangentSpace I b) :
+    (TensorRSNabla.tensorRSCovariantDerivative I M r s
+        (LeviCivita (I := I) g)).toFun
+        (fun z : M => ∑ i ∈ s_finset, f i z • σ i z) b v =
+      ∑ i ∈ s_finset,
+        (f i b • (TensorRSNabla.tensorRSCovariantDerivative I M r s
+            (LeviCivita (I := I) g)).toFun (σ i) b v +
+          extDerivFun (f i) b v • σ i b) := by
+  classical
+  induction s_finset using Finset.induction_on with
+  | empty =>
+    have h0 : (fun z : M => (∑ i ∈ (∅ : Finset ι), f i z • σ i z :
+        TensorRSSpace r s I z)) = (fun _ : M => 0) := by
+      funext z; simp
+    rw [h0]
+    have hZero : (TensorRSNabla.tensorRSCovariantDerivative I M r s
+        (LeviCivita (I := I) g)).toFun
+        (fun _ : M => (0 : TensorRSSpace r s I _)) b = 0 :=
+      (TensorRSNabla.tensorRSCovariantDerivative I M r s
+        (LeviCivita (I := I) g)).isCovariantDerivativeOn.zero (hx := Set.mem_univ b)
+    rw [hZero]
+    simp
+  | @insert k t hkt ih =>
+    have hf_k : MDifferentiableAt I 𝓘(ℝ, ℝ) (f k) b :=
+      hf k (Finset.mem_insert_self k t)
+    have hσ_k : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+        (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+          (E := fun w : M => TensorRSSpace r s I w) z (σ k z)) b :=
+      hσ k (Finset.mem_insert_self k t)
+    have hf_rest : ∀ i ∈ t, MDifferentiableAt I 𝓘(ℝ, ℝ) (f i) b := fun i hi =>
+      hf i (Finset.mem_insert_of_mem hi)
+    have hσ_rest : ∀ i ∈ t, MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+        (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+          (E := fun w : M => TensorRSSpace r s I w) z (σ i z)) b :=
+      fun i hi => hσ i (Finset.mem_insert_of_mem hi)
+    have hsum_apply : ∀ z : M, (∑ i ∈ insert k t, f i z • σ i z :
+        TensorRSSpace r s I z) =
+        f k z • σ k z + ∑ i ∈ t, f i z • σ i z := by
+      intro z; rw [Finset.sum_insert hkt]
+    have h_fkσk_mdiff : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+        (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+          (E := fun w : M => TensorRSSpace r s I w) z (f k z • σ k z)) b :=
+      MDifferentiableAt.smul_section (𝕜 := ℝ)
+        (E := fun z : M => TensorRSSpace r s I z) (F := TensorRSModel r s ℝ E)
+        (f := f k) (s := σ k) (x₀ := b) hf_k hσ_k
+    have h_sum_mdiff : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+        (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+          (E := fun w : M => TensorRSSpace r s I w) z (∑ i ∈ t, f i z • σ i z)) b :=
+      centred_finsum_smul_section_mdiffAt (I := I) (M := M)
+        (s_finset := t) r s f σ (b := b) hf_rest hσ_rest
+    have hfun_eq :
+        (fun z : M => ∑ i ∈ insert k t, f i z • σ i z) =
+        ((fun z : M => f k z • σ k z) + (fun z : M => ∑ i ∈ t, f i z • σ i z)) := by
+      funext z
+      change ∑ i ∈ insert k t, f i z • σ i z =
+        (fun z : M => f k z • σ k z) z + (fun z : M => ∑ i ∈ t, f i z • σ i z) z
+      rw [hsum_apply z]
+    rw [hfun_eq]
+    rw [(TensorRSNabla.tensorRSCovariantDerivative I M r s
+        (LeviCivita (I := I) g)).isCovariantDerivativeOn.add
+      (σ := fun z : M => f k z • σ k z)
+      (σ' := fun z : M => ∑ i ∈ t, f i z • σ i z)
+      (x := b) h_fkσk_mdiff h_sum_mdiff]
+    have h_leib_k := (TensorRSNabla.tensorRSCovariantDerivative I M r s
+        (LeviCivita (I := I) g)).isCovariantDerivativeOn.leibniz
+      (σ := σ k) (g := f k) (x := b) hσ_k hf_k
+    have h_smul_form : (fun z : M => f k z • σ k z) = (f k • σ k :
+        Π z : M, TensorRSSpace r s I z) := rfl
+    rw [h_smul_form]
+    rw [h_leib_k]
+    have h_ih := ih hf_rest hσ_rest
+    rw [ContinuousLinearMap.add_apply]
+    rw [h_ih]
+    rw [Finset.sum_insert hkt]
+    rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
+        ContinuousLinearMap.smulRight_apply]
+
+/-- **Inner-Leibniz coordinate expansion for the centred orthonormal frame.** For
+`b ∈ chartLeviCivitaGoodSet α`, the value `cov_RS (covApply cov_RS (smoothOrthoFrame g c i) T₀) b`
+applied to `∂_l b` decomposes into the chart-coordinate principal sum plus the
+derivative-of-coordinate-matrix cross term:
+```
+Σ_k C^k_i(b) · cov_RS (covApply cov_RS ∂_k T₀) b (∂_l b)
+  + Σ_k (∂_l C^k_i)(b) · (covApply cov_RS ∂_k T₀) b.
+```
+This is the centred-frame counterpart of the on-disk
+`cov_RS_covApply_frameVec_eq_coord_expansion`, with `smoothOrthoFrame g c i` (a globally smooth
+section) in place of the chart-`α` bumped frame; it is good-set-wide. -/
+private lemma centred_cov_RS_covApply_frameVec_eq_coord_expansion
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α c : M)
+    (T₀ : Integral.L2.SmoothCcTensor g r s)
+    (i : Fin (Module.finrank ℝ E)) {b : M}
+    (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
+    (l : Fin (Module.finrank ℝ E)) :
+    (TensorRSNabla.tensorRSCovariantDerivative I M r s
+        (LeviCivita (I := I) g)).toFun
+        (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+          (LeviCivita (I := I) g))
+          (smoothOrthoFrame (I := I) g c i)
+          (fun z : M => T₀.toSection z)) b
+        (chartBasisVecFiber (I := I) α l b) =
+      (∑ k : Fin (Module.finrank ℝ E),
+        centredOrthoFrameCoordMatrix (I := I) (M := M) g α c i k b •
+          (TensorRSNabla.tensorRSCovariantDerivative I M r s
+              (LeviCivita (I := I) g)).toFun
+              (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+                (LeviCivita (I := I) g))
+                (fun z : M => chartBasisVecFiber (I := I) α k z)
+                (fun z : M => T₀.toSection z)) b
+              (chartBasisVecFiber (I := I) α l b)) +
+      (∑ k : Fin (Module.finrank ℝ E),
+        extDerivFun (fun z : M =>
+            centredOrthoFrameCoordMatrix (I := I) (M := M) g α c i k z)
+            b (chartBasisVecFiber (I := I) α l b) •
+          covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+            (LeviCivita (I := I) g))
+            (fun z : M => chartBasisVecFiber (I := I) α k z)
+            (fun z : M => T₀.toSection z) b) := by
+  classical
+  have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
+  have hC_mdiff : ∀ k : Fin (Module.finrank ℝ E),
+      MDifferentiableAt I 𝓘(ℝ, ℝ)
+        (fun z : M => centredOrthoFrameCoordMatrix (I := I) (M := M) g α c i k z) b :=
+    fun k => centredOrthoFrameCoordMatrix_mdiffAt (I := I) (M := M) g α c i k (b := b) hb
+  have hσ_mdiff : ∀ k : Fin (Module.finrank ℝ E),
+      MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+        (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+          (E := fun w : M => TensorRSSpace r s I w) z
+          (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+            (LeviCivita (I := I) g))
+            (fun w : M => chartBasisVecFiber (I := I) α k w)
+            (fun w : M => T₀.toSection w) z)) b := fun k =>
+    centred_covApply_chartBasisVecFiber_T₀_mdiffAt
+      (I := I) (M := M) g r s α T₀ k (b := b) hb_base
+  have hOrig_mdiff : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+      (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun w : M => TensorRSSpace r s I w) z
+        (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+          (LeviCivita (I := I) g))
+          (smoothOrthoFrame (I := I) g c i)
+          (fun w : M => T₀.toSection w) z)) b := by
+    have hcov_RS_smooth :
+        CovariantDerivative.ContMDiffCovariantDerivative
+          (TensorRSNabla.tensorRSCovariantDerivative I M r s
+            (LeviCivita (I := I) g)) ∞ := inferInstance
+    have hT₀_smooth :
+        ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+          (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+            (E := fun w : M => TensorRSSpace r s I w) z (T₀.toSection z)) :=
+      T₀.toSection.contMDiff
+    have hHomSec_on :
+        ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] TensorRSModel r s ℝ E)) ∞
+          (fun z : M => TotalSpace.mk' (E →L[ℝ] TensorRSModel r s ℝ E)
+            (E := fun w : M => TangentSpace I w →L[ℝ] TensorRSSpace r s I w) z
+            ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+                (LeviCivita (I := I) g)).toFun (fun w : M => T₀.toSection w) z))
+          Set.univ :=
+      hcov_RS_smooth.contMDiff.contMDiff hT₀_smooth.contMDiffOn
+    have hHomSec_at :
+        MDifferentiableAt I (I.prod 𝓘(ℝ, E →L[ℝ] TensorRSModel r s ℝ E))
+          (fun z : M => TotalSpace.mk' (E →L[ℝ] TensorRSModel r s ℝ E)
+            (E := fun w : M => TangentSpace I w →L[ℝ] TensorRSSpace r s I w) z
+            ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+                (LeviCivita (I := I) g)).toFun (fun w : M => T₀.toSection w) z)) b :=
+      ((hHomSec_on.contMDiffAt (Filter.univ_mem))).mdifferentiableAt (by simp)
+    have hB_at :
+        MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+          (fun z : M => TotalSpace.mk' E (E := TangentSpace I) z
+            (smoothOrthoFrame (I := I) g c i z)) b :=
+      ((smoothOrthoFrame_smooth (I := I) g c i).contMDiffAt).mdifferentiableAt (by simp)
+    exact MDifferentiableAt.clm_bundle_apply (b := id) hHomSec_at hB_at
+  have hSum_mdiff : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+      (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun w : M => TensorRSSpace r s I w) z
+        (∑ k : Fin (Module.finrank ℝ E),
+          centredOrthoFrameCoordMatrix (I := I) (M := M) g α c i k z •
+            covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+              (LeviCivita (I := I) g))
+              (fun w : M => chartBasisVecFiber (I := I) α k w)
+              (fun w : M => T₀.toSection w) z)) b :=
+    centred_finsum_smul_section_mdiffAt (I := I) (M := M)
+      (s_finset := Finset.univ) r s
+      (fun k => fun z => centredOrthoFrameCoordMatrix (I := I) (M := M) g α c i k z)
+      (fun k => fun z =>
+        covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+          (LeviCivita (I := I) g))
+          (fun w : M => chartBasisVecFiber (I := I) α k w)
+          (fun w : M => T₀.toSection w) z)
+      (b := b) (fun k _ => hC_mdiff k) (fun k _ => hσ_mdiff k)
+  have hGoodOpen : IsOpen (chartLeviCivitaGoodSet (I := I) α) :=
+    chartLeviCivitaGoodSet_isOpen (I := I) α
+  have hGood_nhds : chartLeviCivitaGoodSet (I := I) α ∈ 𝓝 b :=
+    hGoodOpen.mem_nhds hb
+  have hEvent :
+      ∀ᶠ z in 𝓝 b,
+        covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+          (LeviCivita (I := I) g))
+          (smoothOrthoFrame (I := I) g c i)
+          (fun w : M => T₀.toSection w) z =
+        (∑ k : Fin (Module.finrank ℝ E),
+          centredOrthoFrameCoordMatrix (I := I) (M := M) g α c i k z •
+            covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+              (LeviCivita (I := I) g))
+              (fun w : M => chartBasisVecFiber (I := I) α k w)
+              (fun w : M => T₀.toSection w) z) := by
+    filter_upwards [hGood_nhds] with z hz
+    exact centred_covApply_frameVec_eq_coord_sum
+      (I := I) (M := M) g r s α c T₀ i (y := z) hz
+  set cov_RS := TensorRSNabla.tensorRSCovariantDerivative I M r s
+    (LeviCivita (I := I) g) with hcov_RS_def
+  have hCovRSReplace :
+      cov_RS.toFun
+          (fun z : M =>
+            covApply cov_RS (smoothOrthoFrame (I := I) g c i)
+              (fun w : M => T₀.toSection w) z) b =
+      cov_RS.toFun
+          (fun z : M => ∑ k : Fin (Module.finrank ℝ E),
+            centredOrthoFrameCoordMatrix (I := I) (M := M) g α c i k z •
+              covApply cov_RS (fun w : M => chartBasisVecFiber (I := I) α k w)
+                (fun w : M => T₀.toSection w) z) b :=
+    cov_RS.isCovariantDerivativeOnUniv.congr_of_eventuallyEq
+      hOrig_mdiff hSum_mdiff (Filter.univ_mem) hEvent
+  have hLeibniz := centred_cov_RS_finsum_smul_section_leibniz_apply
+    (ι := Fin (Module.finrank ℝ E))
+    (s_finset := Finset.univ) (g := g) (r := r) (s := s)
+    (f := fun k : Fin (Module.finrank ℝ E) => fun z : M =>
+      centredOrthoFrameCoordMatrix (I := I) (M := M) g α c i k z)
+    (σ := fun k : Fin (Module.finrank ℝ E) => fun z : M =>
+      covApply cov_RS (fun w : M => chartBasisVecFiber (I := I) α k w)
+        (fun w : M => T₀.toSection w) z)
+    (b := b) (hf := fun k _ => hC_mdiff k) (hσ := fun k _ => hσ_mdiff k)
+    (v := chartBasisVecFiber (I := I) α l b)
+  change cov_RS.toFun
+        (covApply cov_RS (smoothOrthoFrame (I := I) g c i)
+          (fun z : M => T₀.toSection z)) b
+        (chartBasisVecFiber (I := I) α l b) = _
+  have hLHS_replace :
+      cov_RS.toFun
+          (covApply cov_RS (smoothOrthoFrame (I := I) g c i)
+            (fun z : M => T₀.toSection z)) b
+          (chartBasisVecFiber (I := I) α l b) =
+      cov_RS.toFun
+          (fun z : M => ∑ k : Fin (Module.finrank ℝ E),
+            centredOrthoFrameCoordMatrix (I := I) (M := M) g α c i k z •
+              covApply cov_RS (fun w : M => chartBasisVecFiber (I := I) α k w)
+                (fun w : M => T₀.toSection w) z) b
+          (chartBasisVecFiber (I := I) α l b) :=
+    congrArg (fun (T : TangentSpace I b →L[ℝ] TensorRSSpace r s I b) =>
+      T (chartBasisVecFiber (I := I) α l b)) hCovRSReplace
+  rw [hLHS_replace]
+  rw [hLeibniz]
+  rw [Finset.sum_add_distrib]
+
+/-- Abbreviation for the chart-`α` `(Idx, Jdx)` scalar-component continuous linear functional on
+the tensor fibre at `b`: `tensorChartComponentProjection ∘ (triv α).clmAt b`. -/
+private noncomputable def chartProjCLM (r s : ℕ) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) (b : M) :
+    TensorRSSpace r s I b →L[ℝ] ℝ :=
+  (tensorChartComponentProjection (E := E) r s Idx Jdx).comp
+    ((trivializationAt (TensorRSModel r s ℝ E)
+        (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b)
+
+@[simp] private lemma chartProjCLM_apply (r s : ℕ) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) (b : M)
+    (w : TensorRSSpace r s I b) :
+    chartProjCLM (I := I) (M := M) r s α Idx Jdx b w =
+      tensorChartComponentProjection (E := E) r s Idx Jdx
+        ((trivializationAt (TensorRSModel r s ℝ E)
+            (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b w) := rfl
+
+/-- The chart-`α` `(Idx, Jdx)` raw scalar component of `Δ_∇ T₀` at `b` is the projection CLM
+applied to `rawTensorConnLap`. -/
+private lemma tensorChartComponentRaw_rawConnLap_eq_chartProjCLM
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T₀ : Integral.L2.SmoothCcTensor g r s) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) (b : M) :
+    tensorChartComponentRaw (I := I) (M := M) g r s
+        (rawTensorConnLapSmooth (I := I) g r s T₀) α Idx Jdx b =
+      chartProjCLM (I := I) (M := M) r s α Idx Jdx b
+        (rawTensorConnLap (I := I) g r s (fun z : M => T₀.toSection z) b) := by
+  unfold tensorChartComponentRaw tensorTrivProj chartProjCLM
+  rw [rawTensorConnLapSmooth_toSection_apply (I := I) g r s T₀ b]
+  rfl
+
+/-- **Frame-trace expansion of the chart-`α` raw component of `Δ_∇ T₀` via the centred orthonormal
+frame, valid on the whole good set.** For `b ∈ chartLeviCivitaGoodSet α`, the chart-`α`
+`(Idx, Jdx)` raw scalar component of `Δ_∇ T₀` equals the finite sum, over the centred frame index
+`i`, of the projection of the `i`-th fixed-frame summand built from the centred orthonormal frame
+`B_i := smoothOrthoFrame g b i`.  This is the unconditional (good-set-wide) counterpart of the
+tsupport-restricted on-disk
+`tensorChartComponentRaw_rawTensorConnLap_eq_chart_frame_trace_sum`: the centred frame is
+`g_b`-orthonormal at its centre `b` unconditionally (`smoothOrthoFrame_orthonormal_center`) and is a
+globally smooth section (`smoothOrthoFrame_smooth`), so the fixed-frame trace identity
+`rawTensorConnLap_eq_fixedFrame_of_orthonormal` applies with no partition-of-unity restriction. -/
+private lemma rawConnLap_chartα_proj_eq_centredFrame_trace_sum
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T₀ : Integral.L2.SmoothCcTensor g r s) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) (b : M) :
+    tensorChartComponentRaw (I := I) (M := M) g r s
+        (rawTensorConnLapSmooth (I := I) g r s T₀) α Idx Jdx b =
+      ∑ i : Fin (Module.finrank ℝ E),
+        chartProjCLM (I := I) (M := M) r s α Idx Jdx b
+          ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+                (LeviCivita (I := I) g)).toFun
+              (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+                (LeviCivita (I := I) g))
+                (smoothOrthoFrame (I := I) g b i)
+                (fun z : M => T₀.toSection z)) b
+              (smoothOrthoFrame (I := I) g b i b) -
+            (TensorRSNabla.tensorRSCovariantDerivative I M r s
+                (LeviCivita (I := I) g)).toFun
+              (fun z : M => T₀.toSection z) b
+              ((LeviCivita (I := I) g).toFun
+                (smoothOrthoFrame (I := I) g b i) b
+                (smoothOrthoFrame (I := I) g b i b))) := by
+  classical
+  rw [tensorChartComponentRaw_rawConnLap_eq_chartProjCLM (I := I) (M := M) g r s T₀ α Idx Jdx b]
+  rw [← rawTensorConnLap_fixedFrame_smoothOrthoFrame (I := I) g r s
+    (fun z : M => T₀.toSection z) b]
+  rw [rawTensorConnLap_fixedFrame_def (I := I) g r s
+    (smoothOrthoFrame (I := I) g b) (fun z : M => T₀.toSection z) b]
+  rw [map_sum]
+
+/-- **First-covariant-derivative chart expansion (good-set form).** For `b ∈ goodSet α`, the
+chart-`α` `(Idx, Jdx)` scalar projection of the first covariant derivative `covApply cov_RS ∂_m T₀`
+at `b` equals the `m`-th chart-Euclidean partial of the chart-pushed raw `(Idx, Jdx)` component plus
+a `T₀`-linear zeroth-order `covDerivLowerOrderTerm`.  This bridges the abstract first covariant
+derivative `covApply cov_RS ∂_m T₀` (which is `cov_RS T₀.toSection b (∂_m b)`) to the chart-local
+covariant derivative `chartTensorRSCovariantDerivative` (`tensorCovDerivAt_def` +
+`tensorCovDerivAt_eq_chartTensorRSCovariantDerivative`), then applies the component formula
+`covDerivComponent_eq_euclidPartial_add_lowerOrder`. -/
+private lemma chartProjCLM_covApply_chartBasis_eq_euclidPartial_add_lowerOrder
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T₀ : Integral.L2.SmoothCcTensor g r s) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) (m : Fin (Module.finrank ℝ E))
+    {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α) :
+    chartProjCLM (I := I) (M := M) r s α Idx Jdx b
+        (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+          (LeviCivita (I := I) g))
+          (fun z : M => chartBasisVecFiber (I := I) α m z)
+          (fun z : M => T₀.toSection z) b) =
+      euclidPartial (E := E) m
+          (chartPushedRaw I α
+            (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx))
+          ((toEuclidean (E := E)) ((extChartAt I α) b)) +
+        DifferentialGeometry.Analysis.Laplacian.TensorRegularity.covDerivLowerOrderTerm
+          (I := I) (M := M) g r s T₀ α m Idx Jdx
+          ((toEuclidean (E := E)) ((extChartAt I α) b)) := by
+  classical
+  have hb_src : b ∈ (chartAt H α).source :=
+    chartLeviCivitaGoodSet_mem_chartAt_source (I := I) hb
+  have hb_ext : b ∈ (extChartAt I α).source :=
+    chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hb
+  set y : EuclN := (toEuclidean (E := E)) ((extChartAt I α) b) with hy_def
+  have hy_mem : y ∈ chartTargetEuclid (I := I) (M := M) α := by
+    rw [hy_def, chartTargetEuclid]
+    exact Set.mem_image_of_mem _ ((extChartAt I α).map_source hb_ext)
+  have hroundtrip : (extChartAt I α).symm ((toEuclidean (E := E)).symm y) = b := by
+    rw [hy_def, (toEuclidean (E := E)).symm_apply_apply, (extChartAt I α).left_inv hb_ext]
+  have hAbstract :
+      covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+          (LeviCivita (I := I) g))
+          (fun z : M => chartBasisVecFiber (I := I) α m z)
+          (fun z : M => T₀.toSection z) b =
+        chartTensorRSCovariantDerivative (I := I) r s g α (fun z : M => T₀.toSection z)
+          (fun z : M => chartBasisVecFiber (I := I) α m z) b := by
+    rw [covApply_apply]
+    rw [← tensorCovDerivAt_def (I := I) (M := M) g r s T₀ b
+      (chartBasisVecFiber (I := I) α m b)]
+    exact tensorCovDerivAt_eq_chartTensorRSCovariantDerivative
+      (I := I) (M := M) g r s T₀ α m (b := b) hb
+  rw [hAbstract]
+  have hComp := DifferentialGeometry.Analysis.Laplacian.TensorRegularity.covDerivComponent_eq_euclidPartial_add_lowerOrder
+    (I := I) (M := M) g r s T₀ α m Idx Jdx (y := y) hy_mem
+  rw [chartProjCLM_apply]
+  rw [hroundtrip] at hComp
+  rw [hComp]
+
+end CentredFrameCoordExpansion
 
 /-- **The open-good-set projected inverse-Gram principal-sum metric-trace identity for the
 connection-Laplacian raw component (the genuine remaining differential-geometric content).**

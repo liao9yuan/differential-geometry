@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseToL2Packaging
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.IntegratedOrder2Garding
 
 /-! # The intrinsic Moser tame product and Gagliardo–Nirenberg interpolation
 
@@ -447,6 +448,43 @@ private theorem hlp_real (a : ℕ → ℝ) (ha : ∀ i, 0 ≤ a i) (M : ℝ) (hM
 
 end DiscreteLogConvex
 
+/-- **The rough-Laplacian-to-second-covariant-gradient `L²` trace bound (uniform in valence).**
+
+There is a single multiplier `K ≥ 1` (depending only on `g` and the manifold, valence-uniform)
+such that for every valence `s'` and every smooth compactly-supported `(0, s')`-tensor `S`, the
+metric `L²` norm of the rough (connection) Laplacian `Δ_∇ S := rawTensorConnLapSmooth g 0 s' S`
+is controlled by the metric `L²` norm of the second iterated covariant gradient
+`∇²S := covGrad g 0 (s'+1) (covGrad g 0 s' S)`:
+```
+‖Δ_∇ S‖_{L²} ≤ K · ‖∇²S‖_{L²}.
+```
+
+This is the elementary metric-trace half of the closed-manifold Bochner package, the
+companion of the on-disk integration-by-parts half
+`covGrad_l2NormSq_le_rawConnLap_mul_self_gen`.  Pointwise the rough Laplacian is the diagonal
+`g`-trace of the Hessian, `Δ_∇ S (x) = ∑ᵢ ∇²_{Bᵢ,Bᵢ} S (x)` over a `g_x`-orthonormal frame
+`Bᵢ` (`rawTensorConnLap_eq_frame_trace_secondCovDeriv`), so the fibre norm of the trace is
+dominated by `dim` times the fibre norm of the full second covariant gradient (the metric trace
+of a bilinear form is bounded by `dim` times its sup-eigenvalue), and integrating this pointwise
+bound over the compact manifold gives the displayed `L²` inequality with `K := dim`.  Both sides
+are intrinsic metric `L²` norms; the statement is a valence-uniform real-valued `L²` inequality.
+
+Its body is `sorry`: it isolates the genuine general-valence pointwise trace inequality
+`‖∇²_{Bᵢ,Bᵢ} S (x)‖_{fibre} ≤ ‖∇²S (x)‖_{fibre}` together with its orthonormal-frame fibre-norm
+component comparison and the two-step covariant-gradient evaluation currying — the
+general-valence analogue of the on-disk valence-`2` currying tower, which exists only at fixed
+low valence.  Consumers transitively depend on this `sorryAx`. -/
+private theorem exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm
+    (g : SmoothRiemannianMetric I M) :
+    ∃ K : ℝ, 1 ≤ K ∧
+      ∀ (s' : ℕ) (S : Integral.L2.SmoothCcTensor g 0 s'),
+        Integral.L2.tensorL2Norm (I := I) g 0 s'
+            (rawTensorConnLapSmooth (I := I) g 0 s' S).toFun ≤
+          K * Integral.L2.tensorL2Norm (I := I) g 0 (s' + 1 + 1)
+            (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) g 0 (s' + 1)
+              (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) g 0 s' S)).toFun :=
+  sorry
+
 /-- **The covariant `L²`-jets of a smooth compactly-supported tensor are log-convex on a
 closed manifold (the covariant Green identity).**
 
@@ -459,22 +497,19 @@ iterated covariant gradients satisfy the discrete log-convexity
 ```
 
 This is the covariant integration-by-parts / Green identity on the iterated bundle
-connection Laplacian on a closed manifold: the diagonal Green identity gives
-`‖∇(∇^i u)‖_{L²}^2 = ⟨∇(∇^i u), ∇(∇^i u)⟩_{L²} = -⟨Δ_∇(∇^i u), ∇^i u⟩_{L²} ≤
-‖Δ_∇(∇^i u)‖_{L²} · ‖∇^i u‖_{L²}` (Cauchy–Schwarz), and the rough Laplacian `Δ_∇` is the
-pointwise `g⁻¹`-trace contraction of the second covariant gradient, whence
-`‖Δ_∇(∇^i u)‖_{L²} ≤ K · ‖∇^{i+2} u‖_{L²}` with `K` controlled by the (compact-manifold-bounded)
-inverse-Gram operator norm. Both ingredients are intrinsic and metric; the conclusion is a
-real-valued `L²`-jet inequality, structurally unrelated to any Nemytskii conclusion.
+connection Laplacian on a closed manifold: setting `S := ∇^i u` (an `(0, s+i)`-tensor), the
+diagonal Green identity gives
+`‖∇^{i+1} u‖_{L²}^2 = ‖∇ S‖_{L²}^2 = ⟨∇ S, ∇ S⟩_{L²} = -⟨Δ_∇ S, S⟩_{L²} ≤
+‖Δ_∇ S‖_{L²} · ‖S‖_{L²} = ‖Δ_∇ S‖_{L²} · ‖∇^i u‖_{L²}` (the on-disk integration-by-parts half
+`covGrad_l2NormSq_le_rawConnLap_mul_self_gen`), and the rough Laplacian `Δ_∇` is the pointwise
+`g`-trace contraction of the second covariant gradient, whence
+`‖Δ_∇ S‖_{L²} ≤ K · ‖∇² S‖_{L²} = K · ‖∇^{i+2} u‖_{L²}` (the valence-uniform trace bound
+`exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm`). Multiplying gives the claim. Both ingredients
+are intrinsic and metric; the conclusion is a real-valued `L²`-jet inequality, structurally
+unrelated to any Nemytskii conclusion.
 
-Its body is `sorry`: this is the genuine closed-manifold covariant Green/IBP analytic input.
-The integration-by-parts half is in fact available on disk as
-`Integral.Connection.covGrad_l2NormSq_le_rawConnLap_mul_self_gen`
-(`‖∇S‖_{L²}^2 ≤ ‖Δ_∇ S‖_{L²} · ‖S‖_{L²}`, proven from the closed-manifold Green identity);
-the only missing companion is the rough-Laplacian-to-second-covariant-gradient `L²`
-trace bound `‖Δ_∇ S‖_{L²} ≤ K · ‖∇²S‖_{L²}` (a `Geometry/Connection`-layer fact, the `g⁻¹`-trace
-of the Hessian), uniform over the valence range. Consumers transitively depend on this
-`sorryAx`. -/
+It is proven outright from the two `L²` Bochner halves; it carries no `sorry` of its own, but
+depends transitively on the `sorryAx` of the valence-uniform trace bound. -/
 private theorem l2jet_logConvex_iteratedCovGrad
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ∃ K : ℝ, 1 ≤ K ∧
@@ -484,8 +519,46 @@ private theorem l2jet_logConvex_iteratedCovGrad
           K * Integral.L2.tensorL2Norm (I := I) g 0 (s + i)
                 (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s i u).toFun *
             Integral.L2.tensorL2Norm (I := I) g 0 (s + (i + 2))
-              (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s (i + 2) u).toFun :=
-  sorry
+              (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s (i + 2) u).toFun := by
+  classical
+  obtain ⟨K, hK1, htrace⟩ := exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm (I := I) (M := M) g
+  refine ⟨K, hK1, ?_⟩
+  intro u i
+  -- Unfold the `(i+1)`- and `(i+2)`-jets one covariant gradient at a time.  These rewrites
+  -- carry the iterated-gradient sections into the `covGrad ∘ covGrad` form on which the two
+  -- `L²` Bochner halves are stated; the residual `Nat` index defeqs are absorbed by `exact`.
+  simp only [PDE.RicciFlow.iteratedCovGrad_succ (I := I) g 0 s (i + 1) u,
+    PDE.RicciFlow.iteratedCovGrad_succ (I := I) g 0 s i u]
+  -- `S := ∇^i u`, the `(0, s+i)`-tensor whose covariant gradients are the successive jets.
+  set S : Integral.L2.SmoothCcTensor g 0 (s + i) :=
+    PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s i u with hS_def
+  -- The three `L²` jet norms appearing in the (rewritten) goal.
+  set aGrad : ℝ := Integral.L2.tensorL2Norm (I := I) g 0 (s + (i + 1))
+    (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) g 0 (s + i) S).toFun
+    with haGrad_def
+  set aS : ℝ := Integral.L2.tensorL2Norm (I := I) g 0 (s + i) S.toFun with haS_def
+  set aHess : ℝ := Integral.L2.tensorL2Norm (I := I) g 0 (s + (i + 2))
+    (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) g 0 (s + (i + 1))
+      (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) g 0 (s + i) S)).toFun
+    with haHess_def
+  have haS_nn : 0 ≤ aS := Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 (s + i) _
+  -- Integration-by-parts half: `‖∇S‖² ≤ ‖Δ_∇ S‖ · ‖S‖` (the on-disk diagonal Green identity).
+  have hibp : aGrad ^ 2 ≤
+      Integral.L2.tensorL2Norm (I := I) g 0 (s + i)
+          (rawTensorConnLapSmooth (I := I) g 0 (s + i) S).toFun * aS := by
+    rw [haGrad_def, haS_def]
+    exact covGrad_l2NormSq_le_rawConnLap_mul_self_gen (I := I) (M := M) g (s + i) S
+  -- Trace half: `‖Δ_∇ S‖ ≤ K · ‖∇²S‖` (the valence-uniform posited trace bound).
+  have htr : Integral.L2.tensorL2Norm (I := I) g 0 (s + i)
+        (rawTensorConnLapSmooth (I := I) g 0 (s + i) S).toFun ≤ K * aHess := by
+    rw [haHess_def]
+    exact htrace (s + i) S
+  -- Chain: `aGrad² ≤ ‖Δ_∇ S‖ · aS ≤ (K · aHess) · aS = K · aS · aHess`.
+  calc aGrad ^ 2
+      ≤ Integral.L2.tensorL2Norm (I := I) g 0 (s + i)
+          (rawTensorConnLapSmooth (I := I) g 0 (s + i) S).toFun * aS := hibp
+    _ ≤ (K * aHess) * aS := mul_le_mul_of_nonneg_right htr haS_nn
+    _ = K * aS * aHess := by ring
 
 /-- **The `L^∞`-to-`L²` endpoint.** For a smooth compactly-supported `(0, s)`-tensor `u`
 with pointwise fibre bound `‖u(x)‖² ≤ Λ₀²`, the metric `L²` norm of `u` is at most
